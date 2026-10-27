@@ -15,7 +15,7 @@ extern int DAT_8009c934;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern short DAT_80115268[][2];
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001e560(int, int);
 extern short playerRopeGetSwingSpeed(void);
@@ -231,7 +231,7 @@ void playerStepRopeSwing(TObj *o)
         o->h->p.whole = FUN_8001fe3c(0xc0, o->wb4) + o->d30;
         o->y.p.whole = FUN_8001fe0c(0xc0, o->wb4) + o->d34;
         playerRopeAdjustLength(o);
-        if (DAT_1f8001fc & 0xa0) {
+        if (JOYPAD_STATE & 0xa0) {
             o->wb2 = 1;
             o->state = 1;
         }

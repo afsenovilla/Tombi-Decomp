@@ -1,6 +1,6 @@
 // FUNC 80040ea8 208 MAIN0
 // MATCHING 80040ea8 208
-extern unsigned short *D_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 static __inline__ short inrange(short m, char lo, int w)
 {
     if (m < lo) return 0;
@@ -11,9 +11,9 @@ int testCollisionSegmentWall(int x, short y)
 {
     unsigned short a, b, c;
     int lo, w, e;
-    a = *D_1f800278++;
-    b = *D_1f800278++;
-    c = *D_1f800278++;
+    a = *COLLISION_SEG_PTR++;
+    b = *COLLISION_SEG_PTR++;
+    c = *COLLISION_SEG_PTR++;
     lo = c & 0xf;
     w = (c >> 4) & 0xf;
     e = b + a;

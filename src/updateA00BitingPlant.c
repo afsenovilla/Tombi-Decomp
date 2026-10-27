@@ -9,7 +9,7 @@ typedef struct {
 
 extern void *BITING_PLANT_ANIMS[];
 extern unsigned short BITING_PLANT_BOXES[];
-extern unsigned char D_800A6047;
+extern unsigned char PLAYER_DRAW_DEPTH;
 extern unsigned char PLAYER;
 extern void spawnA00L5Type0CObject(Pos8012ED60 *);
 extern int ObjCullRegister(TObj *);
@@ -99,7 +99,7 @@ void updateA00BitingPlant(TObj *o)
         }
         break;
     case 1:
-        o->b0f = D_800A6047 + *(unsigned char *)&o->w7a;
+        o->b0f = PLAYER_DRAW_DEPTH + *(unsigned char *)&o->w7a;
         if (ObjCullRegister(o)) {
             if (o->step == 0) {
                 if (o->b0c == 1 && nearObj(o, (*(TObj **)&GVARS.p48))) {

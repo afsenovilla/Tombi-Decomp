@@ -8,7 +8,7 @@
 extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
 extern unsigned char *GRABBED_OBJECT;
-extern unsigned short D_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -82,12 +82,12 @@ void playerStepGrabbedStruggle(TObj *o)
         o->wb6 = 0;
         AnimAdvance(o);
         if (--(*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) != 0) {
-            if (D_1f8001fc) {
-                if (D_1f8001fc & 0x80)
+            if (JOYPAD_STATE) {
+                if (JOYPAD_STATE & 0x80)
                     o->animFrame = 1;
-                if (D_1f8001fc & 0x20)
+                if (JOYPAD_STATE & 0x20)
                     o->animFrame = 0;
-                if (D_1f8001fc & 0xf0)
+                if (JOYPAD_STATE & 0xf0)
                     PLAYER_EXT->b0a++;
                 if (PLAYER_EXT->b0a > 10) {
                     o->b9c = 2;

@@ -11,15 +11,15 @@ extern char D_80011790[];
 typedef struct { unsigned short a, b; } Pair7A;
 extern Pair7A D_8007A024[];
 extern TObj *PLAYER_EXT;
-extern unsigned char D_8009C970;
+extern unsigned char GAME_PLAYER_HEALTH;
 typedef struct { unsigned char c; } C970S; typedef struct { int v; } SPV;
-extern unsigned short D_8009C982[];
+extern unsigned short GAME_SELECTED_SPAWN_POINT[];
 extern unsigned char D_8009C990[];
 extern unsigned char D_8009CEAB;
 extern unsigned char D_8009CF06;
 extern unsigned char D_8009D006;
 extern signed char GAME_PLAYER_MODE;
-extern unsigned char D_8009D2B3[];
+extern unsigned char GAME_EQUIPPED_PANTS[];
 extern unsigned short D_800A6040[];
 extern unsigned char D_800A60A3;
 extern unsigned char D_800A60FA[];
@@ -40,9 +40,9 @@ void overheadPlayerInit(TObj *o)
         }
         S16(p, 0x14) = 0;
         o->w1e = 0;
-        D_800A60FA[0] = D_8009D2B3[0];
+        D_800A60FA[0] = GAME_EQUIPPED_PANTS[0];
         D_800A6040[0] = D_8007A024[D_8009C990[0]].a;
-        D_800A60FC[0] = D_8007A024[D_8009D2B3[0]].b;
+        D_800A60FC[0] = D_8007A024[GAME_EQUIPPED_PANTS[0]].b;
         U16(PLAYER_EXT, 0x28) = 0xFFFF;
         U16(PLAYER_EXT, 0x2A) = 0xFFFF;
         PLAYER_EXT->animFrame = 0xFFFF;
@@ -56,7 +56,7 @@ void overheadPlayerInit(TObj *o)
         o->wb2 = 0;
         o->b6b = 1;
         o->b9d = 0;
-        if (D_8009C982[0] != 0 && D_8009C982[0] != 2) {
+        if (GAME_SELECTED_SPAWN_POINT[0] != 0 && GAME_SELECTED_SPAWN_POINT[0] != 2) {
             o->animFrame = 4;
         }
         if (D_8009CF06 != 0) {
@@ -65,8 +65,8 @@ void overheadPlayerInit(TObj *o)
         if (D_8009D006 != 0) {
             o->subtype = 2;
         }
-        S16(o, 0x9A) = D_8009C970;
-        o->w98 = ((C970S *)&D_8009C970)->c;
+        S16(o, 0x9A) = GAME_PLAYER_HEALTH;
+        o->w98 = ((C970S *)&GAME_PLAYER_HEALTH)->c;
         *(signed char *)&o->b0f = -8;
         an = D_800106B4;
         o->d3c = ((SPV *)0x1F8002F0)->v;

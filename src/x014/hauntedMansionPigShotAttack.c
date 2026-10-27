@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern TObj *ObjAlloc(void);
 extern int func_800202B4(TObj *);
 extern void playSFX(int);
@@ -58,7 +58,7 @@ void hauntedMansionPigShotAttack(TObj *o)
             break;
         case 3:
             o->d88 = (o->d88 + 0x80) & 0xfff;
-            if (D_1F8001F8 & 1) o->visible = 1;
+            if (TICK_COUNT & 1) o->visible = 1;
             else o->visible = 0;
             if (--o->timer == 0) {
                 if (GAME.selectedSection == 7) {
@@ -73,7 +73,7 @@ void hauntedMansionPigShotAttack(TObj *o)
             o->subtype = 1;
             o->visible = 1;
             o->da0 = 0;
-            if (D_1F8001F8 & 1) loadEvilPigRoomClutRow(o->wac, 0);
+            if (TICK_COUNT & 1) loadEvilPigRoomClutRow(o->wac, 0);
             else loadEvilPigRoomClutRow(o->wac, 1);
             if (--o->timer == 0) o->state++;
             break;

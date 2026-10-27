@@ -6,7 +6,7 @@ extern unsigned short BREAK_PIECE_DEFS[];
 extern void *MOVE_TABLE_0;
 extern void **TREASURE_CHEST_A3S9_ANIM_SETS[];
 extern void **TREASURE_CHEST_ANIM_SETS[];
-extern unsigned short D_1f8001f8;
+extern unsigned short TICK_COUNT;
 extern int D_1f800198;
 extern void FUN_8001fe6c(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
@@ -47,7 +47,7 @@ void updateBreakPiece(TObj *o)
         else
             o->d8c = (o->d8c - 8) & 0xff;
         applyAnimVelocityX(o, (unsigned short)o->w22);
-        if (o->timer >= 0x1e || ((D_1f8001f8 + D_1f800198) & 1))
+        if (o->timer >= 0x1e || ((TICK_COUNT + D_1f800198) & 1))
             FUN_800202b4(o);
         if (--o->timer == -1)
             o->b04 = 2;

@@ -9,7 +9,7 @@ extern short D_800F713C[];
 extern int D_800F714C[2];
 extern int D_800F7154, D_800F7158;
 extern short D_800F70F0, D_800F70F4, D_800F70F8;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern int memCardProbe(Card *c, int n);
 extern int memCardFileListStep(Menu *m, Card *c);
 extern int memCardFormatStep(Menu *m, Card *c);
@@ -59,10 +59,10 @@ int memCardScreenStep(void)
         }
         if (D_800F714C[0]) {
             if (D_800F714C[1]) {
-                if ((D_1F8001FC & 0x80) && D_800F7154 == 2) {
+                if ((JOYPAD_STATE & 0x80) && D_800F7154 == 2) {
                     D_800F7154 = 1;
                     playSFX(8);
-                } else if ((D_1F8001FC & 0x20) && D_800F7154 == 1) {
+                } else if ((JOYPAD_STATE & 0x20) && D_800F7154 == 1) {
                     D_800F7154 = 2;
                     playSFX(8);
                 }
@@ -74,7 +74,7 @@ int memCardScreenStep(void)
         } else {
             D_800F7154 = 0;
         }
-        if ((D_1F8001FC & 0x4000) && D_800F7154) {
+        if ((JOYPAD_STATE & 0x4000) && D_800F7154) {
             m->card = D_800F7154 - 1;
             SfxPlay2(10, 10);
             m->x1A = 1;
@@ -83,7 +83,7 @@ int memCardScreenStep(void)
             m->sub++;
             break;
         }
-        if (D_1F8001FC & 0x2000) {
+        if (JOYPAD_STATE & 0x2000) {
             SfxPlay2(0x1B, 0x1C);
             return -1;
         }
@@ -117,7 +117,7 @@ int memCardScreenStep(void)
                 if (memCardFormatStep(m, c) == -1) m->sub--;
             } else {
                 m->x1A = 3;
-                if (D_1F8001FC & 0x2000) m->sub--;
+                if (JOYPAD_STATE & 0x2000) m->sub--;
             }
             break;
         case -1:
@@ -127,7 +127,7 @@ int memCardScreenStep(void)
             break;
         case -2:
             m->x1A = 0;
-            if (D_1F8001FC & 0x2000) {
+            if (JOYPAD_STATE & 0x2000) {
                 c->prev = 0;
                 m->timer = 1;
                 m->sub--;

@@ -26,8 +26,8 @@ typedef struct { unsigned char u, v, w, h, flag; } Glyph;
 typedef struct { short x, y, w; unsigned short attr; int img, pC; unsigned short *str; Glyph *font; } Text;
 extern Text D_800F70D8;
 extern short D_1F8003D4, D_1F8003D6;
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern DRAWENV *GetDrawEnv(DRAWENV *env);
 extern void AddDrawMode(int tpage, int pri);
 
@@ -105,10 +105,10 @@ void memCardDrawString(int pri, int mode)
             s->w = g.w;
             s->h = g.h;
             s->clut = D_800F70D8.attr;
-            p = D_1F800164;
+            p = NEXT_PRIM;
             *p = *s;
-            addPrim(D_1F8001E0 + pri, p);
-            D_1F800164++;
+            addPrim(CURRENT_OT + pri, p);
+            NEXT_PRIM++;
             break;
         }
     }

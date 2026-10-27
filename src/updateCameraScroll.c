@@ -22,7 +22,7 @@ typedef struct {
 extern G PLAYER;
 extern unsigned char D_800A60D8;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short D_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern short D_1f8001c8;
 extern int handleLookScrollInput(S *);
 extern void cameraScrollInputStep(S *, int);
@@ -108,14 +108,14 @@ void updateCameraScroll(S *o)
             c = g->a0.b[0];
             if (c & 0x12) {
                 if (PAD_PRESSED[0] & 0xc00) {
-                    if ((D_1f8001fc & 0x10) && D_800A60D8 != 4) {
+                    if ((JOYPAD_STATE & 0x10) && D_800A60D8 != 4) {
                         if (o->b6e != 1) {
                             o->b6c = 7;
                             o->b6e = 1;
                             o->b6d = 0;
                             o->b6f = -10;
                         }
-                    } else if ((D_1f8001fc & 0x40) && o->b6e != 2) {
+                    } else if ((JOYPAD_STATE & 0x40) && o->b6e != 2) {
                         o->b6c = 7;
                         o->b6d = 1;
                         o->b6e = 2;
@@ -126,7 +126,7 @@ void updateCameraScroll(S *o)
                     if (handleLookScrollInput(o) == 0) break;
                     decay();
                 } else if (c & 0x10) {
-                    if ((D_1f8001fc & 0x10) && D_800A60D8 != 4) {
+                    if ((JOYPAD_STATE & 0x10) && D_800A60D8 != 4) {
                         f = 0;
                         if (o->b6e == 0) goto t2;
                         o->b6c = 7;
@@ -134,7 +134,7 @@ void updateCameraScroll(S *o)
                         o->b6e = 0;
                         o->b6f = 0;
                     } else {
-                        if (!(D_1f8001fc & 0x40)) goto t2;
+                        if (!(JOYPAD_STATE & 0x40)) goto t2;
                         if (o->b6e == 2) goto t2;
                         if (o->b6e == 0) {
                             o->b6c = 7;
@@ -156,7 +156,7 @@ void updateCameraScroll(S *o)
                     if (f) decay();
                 } else if (c & 2) {
                     if (c & 1) break;
-                    if ((D_1f8001fc & 0x10) && D_800A60D8 != 4) {
+                    if ((JOYPAD_STATE & 0x10) && D_800A60D8 != 4) {
                         if (o->b6e == 1) goto t1;
                         {
                             if (o->b6e == 0) {
@@ -174,7 +174,7 @@ void updateCameraScroll(S *o)
                         }
                     } else {
                         f = 1;
-                        if (D_1f8001fc & 0x40) {
+                        if (JOYPAD_STATE & 0x40) {
                             f = 0;
                             if (o->b6e != 0) {
                                 o->b6c = 7;

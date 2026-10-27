@@ -11,7 +11,7 @@ extern MATRIX B;
 extern short SV[3];
 extern short SV2[3];
 extern void f0(void *), RotMatrix(void *, void *), MulMatrix0(void *, void *, void *), SetRotMatrix(void *), ApplyRotMatrix(void *, void *), SetTransMatrix(void *), f1(int, int, char *);
-extern char *frame;
+extern char *CURRENT_OT;
 void FUN_800579a8(char *o)
 {
     f0(&A);
@@ -30,7 +30,7 @@ void FUN_800579a8(char *o)
     M.t[2] += 0x220;
     SetRotMatrix(&M);
     SetTransMatrix(&M);
-    f1(S32(o, 0xa0), (int)(frame + ((S8(o, 0xf) << 2) + 0x10)), o);
+    f1(S32(o, 0xa0), (int)(CURRENT_OT + ((S8(o, 0xf) << 2) + 0x10)), o);
 }
 #else
 #include "raw7.h"
@@ -41,7 +41,7 @@ extern MATRIX B;
 extern short SV[3];
 extern short SV2[3];
 extern void f0(void *), RotMatrix(void *, void *), MulMatrix0(void *, void *, void *), SetRotMatrix(void *), ApplyRotMatrix(void *, void *), SetTransMatrix(void *), f1(int, int, char *);
-extern char *frame;
+extern char *CURRENT_OT;
 void drawObjectModelCameraFixed(char *o)
 {
     f0(&A);
@@ -60,6 +60,6 @@ void drawObjectModelCameraFixed(char *o)
     M.t[2] += 0x220;
     SetRotMatrix(&M);
     SetTransMatrix(&M);
-    f1(S32(o, 0xa0), (int)(frame + ((S8(o, 0xf) << 2) + 0x10)), o);
+    f1(S32(o, 0xa0), (int)(CURRENT_OT + ((S8(o, 0xf) << 2) + 0x10)), o);
 }
 #endif

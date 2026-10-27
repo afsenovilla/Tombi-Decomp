@@ -17,8 +17,8 @@ typedef struct {
     unsigned char u3, v3; unsigned short pad3;
 } PolyFT4;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
-extern PolyFT4 *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern PolyFT4 *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
 extern char D_1F8000C0b[];
@@ -54,7 +54,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - (int)DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - (int)CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned long v = *(unsigned long *)d;
         *(unsigned long *)d = (unsigned long)a;
@@ -119,7 +119,7 @@ void drawPlayerSpriteDefault(TObj *o)
     do {
         A = (signed char)f[3];
         B = (signed char)f[4];
-        p = DAT_1f800164;
+        p = NEXT_PRIM;
         p->code = 0x2d;
         SetSemiTrans(p, 0);
         p->tpage = o->w1e;
@@ -168,8 +168,8 @@ void drawPlayerSpriteDefault(TObj *o)
             unsigned long e;
             do { } while (0); /* loop notes end the sched block after the c load (debt, as drawObjectSpriteQuad) */
             e = 0x9000000;
-            if (!otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, c, o->b0f, e))
-                DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+            if (!otadd((unsigned long *)p, CURRENT_OT + 0x10, c, o->b0f, e))
+                NEXT_PRIM = (PolyFT4 *)((char *)NEXT_PRIM + 0x28);
         }
         q += 0x10;
         f += 0x10;

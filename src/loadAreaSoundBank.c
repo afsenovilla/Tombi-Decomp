@@ -4,13 +4,13 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80039338 (loadAreaSoundBank.c): only the demo's areas 0-2 (no D_8009F838 offset); area 0 uses bank 0.
 extern unsigned short GAME, GAME_SELECTED_SECTION, AREA_VARIANT;
-extern int DAT_8009d69c;
+extern int AREA_SOUND_BANK_LOADED;
 extern unsigned char DAT_8009cdb1, DAT_8009cdb8, DAT_8009cdb9, DAT_8009cedd;
 extern void loadWssFile(int, int);
 
 void loadAreaSoundBank(void)
 {
-    DAT_8009d69c = 0;
+    AREA_SOUND_BANK_LOADED = 0;
     switch (GAME) {
     case 0:
         switch (GAME_SELECTED_SECTION) {
@@ -18,7 +18,7 @@ void loadAreaSoundBank(void)
         case 1:
         case 2:
             loadWssFile(15, 0);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         }
         break;
@@ -28,29 +28,29 @@ void loadAreaSoundBank(void)
         case 1:
             if (DAT_8009cdb1 != 0xff) {
                 loadWssFile(15, 0);
-                DAT_8009d69c = 1;
+                AREA_SOUND_BANK_LOADED = 1;
             }
             if (DAT_8009cdb8 == 0xff) {
                 if (DAT_8009cdb9 == 0) {
                     loadWssFile(15, 0);
-                    DAT_8009d69c = 1;
+                    AREA_SOUND_BANK_LOADED = 1;
                 } else if (DAT_8009cedd == 2) {
                     loadWssFile(15, 0);
-                    DAT_8009d69c = 1;
+                    AREA_SOUND_BANK_LOADED = 1;
                 }
             }
             break;
         case 2:
             loadWssFile(15, 5);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         case 3:
             loadWssFile(15, 4);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         case 4:
             loadWssFile(15, 3);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         }
         break;
@@ -61,15 +61,15 @@ void loadAreaSoundBank(void)
                 loadWssFile(15, 8);
             else
                 loadWssFile(15, 1);
-            DAT_8009d69c = 2;
+            AREA_SOUND_BANK_LOADED = 2;
             break;
         case 1:
             loadWssFile(15, 2);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         case 2:
             loadWssFile(15, 7);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         }
         break;
@@ -77,13 +77,13 @@ void loadAreaSoundBank(void)
 }
 #else
 extern unsigned short GAME, GAME_SELECTED_SECTION, AREA_VARIANT;
-extern int DAT_8009d69c;
+extern int AREA_SOUND_BANK_LOADED;
 extern unsigned char DAT_8009cdb1, DAT_8009cdb8, DAT_8009cdb9, DAT_8009cedd;
 extern void loadWssFile(int, int);
 
 void loadAreaSoundBank(void)
 {
-    DAT_8009d69c = 0;
+    AREA_SOUND_BANK_LOADED = 0;
     switch (GAME + AREA_VARIANT) {
     case 0:
         switch (GAME_SELECTED_SECTION) {
@@ -91,7 +91,7 @@ void loadAreaSoundBank(void)
         case 1:
         case 2:
             loadWssFile(15, 6);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         }
         break;
@@ -102,29 +102,29 @@ void loadAreaSoundBank(void)
         case 1:
             if (DAT_8009cdb1 != 0xff) {
                 loadWssFile(15, 0);
-                DAT_8009d69c = 1;
+                AREA_SOUND_BANK_LOADED = 1;
             }
             if (DAT_8009cdb8 == 0xff) {
                 if (DAT_8009cdb9 == 0) {
                     loadWssFile(15, 0);
-                    DAT_8009d69c = 1;
+                    AREA_SOUND_BANK_LOADED = 1;
                 } else if (DAT_8009cedd == 2) {
                     loadWssFile(15, 0);
-                    DAT_8009d69c = 1;
+                    AREA_SOUND_BANK_LOADED = 1;
                 }
             }
             break;
         case 2:
             loadWssFile(15, 5);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         case 3:
             loadWssFile(15, 4);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         case 4:
             loadWssFile(15, 3);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         }
         break;
@@ -135,15 +135,15 @@ void loadAreaSoundBank(void)
                 loadWssFile(15, 8);
             else
                 loadWssFile(15, 1);
-            DAT_8009d69c = 2;
+            AREA_SOUND_BANK_LOADED = 2;
             break;
         case 1:
             loadWssFile(15, 2);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         case 2:
             loadWssFile(15, 7);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         }
         break;
@@ -154,11 +154,11 @@ void loadAreaSoundBank(void)
                 loadWssFile(15, 8);
             else
                 loadWssFile(15, 1);
-            DAT_8009d69c = 2;
+            AREA_SOUND_BANK_LOADED = 2;
             break;
         case 1:
             loadWssFile(15, 2);
-            DAT_8009d69c = 1;
+            AREA_SOUND_BANK_LOADED = 1;
             break;
         }
         break;

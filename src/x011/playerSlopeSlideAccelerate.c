@@ -1,6 +1,6 @@
 // FUNC 801102b4 1196 X011
 // MATCHING 801102b4 1196
-extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
+extern unsigned char GAME_EQUIPPED_PANTS, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
 typedef struct {
     short f0, f2, f4, f6;
@@ -108,7 +108,7 @@ void playerSlopeSlideAccelerate(unsigned char *p)
     int u;
     int c;
     c = p[0xc1];
-    u = DAT_8009d2b3 + c * 4;
+    u = GAME_EQUIPPED_PANTS + c * 4;
     if ((DAT_8009c990 & 3) != 0)
         u = (unsigned char)c << 2 | 3;
     if (DAT_8009cf06 != 0)

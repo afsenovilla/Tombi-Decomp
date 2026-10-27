@@ -14,9 +14,9 @@ typedef struct {
     unsigned char *base;
     short **tbl;
 } SPR;
-extern unsigned char DAT_8009c971;
-extern SPRT *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern unsigned char GAME_PLAYER_MAX_HEALTH;
+extern SPRT *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern unsigned short *PTR_DAT_800120a8[];
 extern void SetSprt(SPRT *p);
 extern void SetSemiTrans(SPRT *p, int abe);
@@ -32,9 +32,9 @@ void drawHudVitality(SPR *s, short x, short y, unsigned short n)
     SprFrag *e;
     int cy;
 
-    for (; i < DAT_8009c971; i++) {
+    for (; i < GAME_PLAYER_MAX_HEALTH; i++) {
         {
-            p = DAT_1f800164;
+            p = NEXT_PRIM;
             e = (SprFrag *)(s->base + *(short *)(*(unsigned char *volatile *)&s->base + (*s->tbl[i] << 2) + 2));
             SetSprt(p);
             p->code |= 1;
@@ -57,8 +57,8 @@ void drawHudVitality(SPR *s, short x, short y, unsigned short n)
             } else {
                 p->clut = GetClut(0x170, 0x1f8);
             }
-            AddPrim(DAT_1f8001e0 + 4, p);
-            DAT_1f800164 = DAT_1f800164 + 1;
+            AddPrim(CURRENT_OT + 4, p);
+            NEXT_PRIM = NEXT_PRIM + 1;
         }
     }
     drawSpriteFrameParts(s, (short)x, (short)y, *PTR_DAT_800120a8[(short)n]);

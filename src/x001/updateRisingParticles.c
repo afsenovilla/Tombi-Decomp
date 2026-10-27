@@ -2,7 +2,7 @@
 // MATCHING 801193e4 764
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern int D_1F800198;
 extern TObj *ObjAlloc(void);
 extern void ObjFree(TObj *);
@@ -18,7 +18,7 @@ void updateRisingParticles(TObj *o)
     case 0:
         switch (o->subtype) {
         case 0:
-            if (!((D_1F8001F8 + D_1F800198) & 7)) break;
+            if (!((TICK_COUNT + D_1F800198) & 7)) break;
             if (--o->timer == -1) {
                 o->b04 = 3;
                 break;
@@ -28,7 +28,7 @@ void updateRisingParticles(TObj *o)
                 e->wac = o->timer & 1;
                 e->subtype = 1;
                 e->timer = 0x3c;
-                e->b0c = (*(unsigned char *)&D_1F8001F8 + D_1F800198) & 3;
+                e->b0c = (*(unsigned char *)&TICK_COUNT + D_1F800198) & 3;
                 e->h->raw = o->h->raw + 0x100000;
                 e->y.raw = o->y.raw - 0x180000;
                 e->d->raw = o->d->raw;
@@ -38,7 +38,7 @@ void updateRisingParticles(TObj *o)
         case 1:
             o->b04 = 1;
             initRisingParticle(o);
-            o->animFrame = (D_1F8001F8 + D_1F800198) & 1;
+            o->animFrame = (TICK_COUNT + D_1F800198) & 1;
             o->a.p.whole += (Rand() & 3) << 3;
             o->y.p.whole += (Rand() & 3) * 12;
             switch (o->b0c) {

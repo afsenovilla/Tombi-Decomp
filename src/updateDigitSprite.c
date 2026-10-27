@@ -6,7 +6,7 @@ extern void FUN_8001fe6c(TObj *o);
 extern void FUN_800187e4(TObj *o);
 extern void *TBL_80012150[];
 extern int D_1f8002d8[];
-extern unsigned short D_1f8001f8;
+extern unsigned short TICK_COUNT;
 
 void updateDigitSprite(TObj *o)
 {
@@ -31,7 +31,7 @@ void updateDigitSprite(TObj *o)
             o->step++;
             break;
         case 1:
-            if ((D_1f8001f8 >> 2) & 1)
+            if ((TICK_COUNT >> 2) & 1)
                 FUN_800202b4(o);
             if (--o->timer == -1)
                 o->b04 = 3;

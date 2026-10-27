@@ -10,7 +10,7 @@ extern int FUN_8003facc(TObj *);
 extern void FUN_8001e560(int, int);
 extern int probeFlaggedSegmentA(short, short, short);
 extern TObj *PLAYER_EXT;
-extern unsigned short DAT_1f8001f8;
+extern unsigned short TICK_COUNT;
 
 void playerStepRiseToCeiling(TObj *o)
 {
@@ -45,7 +45,7 @@ void playerStepRiseToCeiling(TObj *o)
     case 2:
         if (FUN_8003facc(o) == 0) o->y.raw -= 0x18000;
         FUN_8001fec0(o);
-        if ((DAT_1f8001f8 & 0xf) == 0) FUN_8001e560(0x1d, 0);
+        if ((TICK_COUNT & 0xf) == 0) FUN_8001e560(0x1d, 0);
         v = o->y.p.whole - 8;
         hx = o->h->p.whole + 8;
         a = (short)(o->d->p.whole / 90) * 90;

@@ -20,8 +20,8 @@ typedef struct {
     unsigned short uv3, pad3;
 } PolyFT4;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
-extern PolyFT4 *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern PolyFT4 *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
 extern int D_1F800078;
@@ -63,7 +63,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - (int)DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - (int)CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned long v = *(unsigned long *)d;
         *(unsigned long *)d = (unsigned long)a;
@@ -131,7 +131,7 @@ void drawObjectSpriteRotScaled(TObj *o)
         B = ((signed char)fp[3] * s - 0x1800) >> 12;
         C = (fp[-2] * s + 0x1800) >> 12;
         D = (fp[-1] * s + 0x1800) >> 12;
-        f = DAT_1f800164;
+        f = NEXT_PRIM;
         if (o->animFrame & 1) {
             u = A;
             w = B;
@@ -166,11 +166,11 @@ void drawObjectSpriteRotScaled(TObj *o)
             if (o->b0d & 1)
                 f->clut = o->w08;
             if (o->b0b) {
-                if (otadd((unsigned long *)f, DAT_1f8001e0 + 0x10, 0, o->b0f, 0x9000000)) goto next;
+                if (otadd((unsigned long *)f, CURRENT_OT + 0x10, 0, o->b0f, 0x9000000)) goto next;
             } else {
-                if (otadd((unsigned long *)f, DAT_1f8001e0 + 0x10, SPAD.i74, o->b0f, 0x9000000)) goto next;
+                if (otadd((unsigned long *)f, CURRENT_OT + 0x10, SPAD.i74, o->b0f, 0x9000000)) goto next;
             }
-            DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+            NEXT_PRIM = (PolyFT4 *)((char *)NEXT_PRIM + 0x28);
         }
     next:
         fp += 16;

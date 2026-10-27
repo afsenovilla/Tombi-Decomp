@@ -4,7 +4,7 @@ typedef struct O { char p0[0x14]; int y; char p1[0x2c-0x18]; short h2c; short h2
   char p3[0x3c-0x38]; unsigned char b3c; char p4[0x44-0x3d]; unsigned short h44; char p5[0x58-0x46]; unsigned short w58; } O;
 typedef struct G { char p0[0x9c]; unsigned char f9c; } G;
 extern G PLAYER;
-extern unsigned short DAT_800a6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern unsigned char DAT_800a60d4, DAT_800a60d6;
 extern int DAT_800a6068;
 extern int *PLAYER_H;
@@ -15,7 +15,7 @@ void cameraFollowPlayerX(O *o)
     int base, t, d;
     unsigned char neg;
     G *g;
-    u = DAT_800a6066 & 1;
+    u = PLAYER_ANIM_FRAME & 1;
     base = *o->d34 - 0x100000;
     g = &PLAYER;
     if (DAT_800a60d4)

@@ -14,7 +14,7 @@ extern unsigned char DAT_8009ce3d;
 extern unsigned char DAT_8009cffb;
 extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern unsigned short PAD_PRESSED;
-extern unsigned short D_1f8001fc, D_1f8003c4, D_1f8003c6;
+extern unsigned short JOYPAD_STATE, D_1f8003c4, D_1f8003c6;
 extern void playerSwimDirFromPadB(TObj *);
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
@@ -99,7 +99,7 @@ void playerStepSwim(TObj *o)
         o->wb2 += 8;
     else
         o->wb2 -= 8;
-    if (D_1f8001fc & D_1f8003c4) {
+    if (JOYPAD_STATE & D_1f8003c4) {
         PLAYER_EXT->w2c = 0x43;
         if (PLAYER_EXT->w2e != 0x43) {
             FUN_800eeb5c(o, 0x43);
@@ -126,7 +126,7 @@ void playerStepSwim(TObj *o)
             o->y.p.whole = w + 0x10;
         }
     }
-    if (D_1f8001fc & D_1f8003c6) {
+    if (JOYPAD_STATE & D_1f8003c6) {
         U8(o, 0xca) = 0;
         flag = 0;
         if ((*(volatile unsigned short *)&PAD_PRESSED & 0x10) && GAME == 10

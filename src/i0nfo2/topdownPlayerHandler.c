@@ -10,7 +10,7 @@ extern void topdownPlayerMainStep(TObj *o);
 extern void topdownPlayerEventStep(TObj *o);
 extern unsigned short D_8007A034, D_8007A036;
 extern signed char GAME_PLAYER_MODE[];
-extern unsigned short D_8009D610;
+extern unsigned short PAD_INFO;
 extern unsigned short PAD_PRESSED[];
 extern unsigned char D_8009F7F0;
 extern unsigned short D_800A6040, D_800A60FC;
@@ -37,7 +37,7 @@ void topdownPlayerHandler(TObj *o)
     clr:
         *m = 0;
     }
-    if (D_8009F7F0 == 0 && D_8009D610 == 7) func_80025D90(m);
+    if (D_8009F7F0 == 0 && PAD_INFO == 7) func_80025D90(m);
     switch (o->b04) {
     case 0:
         topdownPlayerInit(o);

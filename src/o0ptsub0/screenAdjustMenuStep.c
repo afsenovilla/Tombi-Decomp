@@ -2,7 +2,7 @@
 // MATCHING 800e8700 788
 typedef struct S { char p[0x48]; short w48; unsigned short w4a; unsigned short w4c; unsigned short w4e; } S;
 extern S *TASK_C;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern short D_8009D4FC, D_8009D4FE;
 extern volatile unsigned short PAD_PRESSED;
 extern unsigned short D_8009F7F2;
@@ -44,9 +44,9 @@ int screenAdjustMenuStep(void)
             D_800EB488 = 0x10;
         } else if (--D_800EB488 == 0) {
             D_800EB488 = 6;
-            DAT_1f8001fc |= held;
+            JOYPAD_STATE |= held;
         }
-        b = DAT_1f8001fc;
+        b = JOYPAD_STATE;
         if (b & 0x10) {
             if (D_8009D4FE >= 5) {
                 D_8009D4FE--;

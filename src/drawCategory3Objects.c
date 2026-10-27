@@ -5,7 +5,7 @@
 extern short DAT_1f8001c6;
 extern short DAT_1f800252, DAT_1f80024a;
 extern TObj **DAT_1f800220, **DAT_1f800264;
-extern unsigned char DAT_800a603a;
+extern unsigned char PLAYER_TYPE;
 
 int getObjectRenderKind(TObj *o);
 void drawObjectSprite(TObj *o);
@@ -57,7 +57,7 @@ void drawCategory3Objects(void)
             case 3: case 11: drawObjectSpriteRotScaled(o); break;
             case 12: drawMessageBoxFrame(o); break;
             case 13:
-                switch (DAT_800a603a) {
+                switch (PLAYER_TYPE) {
                 case 0: drawObjectSprtTinted(o); break;
                 case 1: FUN_800eab58(o); break;
                 case 2: FUN_800ec148(o); break;
@@ -93,7 +93,7 @@ void drawCategory3Objects(void)
                 case 3: case 11: drawObjectSpriteRotScaled(o); break;
                 case 12: drawMessageBoxFrame(o); break;
                 case 13:
-                    switch (DAT_800a603a) {
+                    switch (PLAYER_TYPE) {
                     case 0: drawObjectSprtTinted(o); break;
                     case 1: FUN_800eab58(o); break;
                     case 2: FUN_800ec148(o); break;

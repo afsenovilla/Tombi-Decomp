@@ -2,7 +2,7 @@
 // MATCHING 800f1478 2252
 #include "TOBJ.H"
 #include "raw7.h"
-extern unsigned char *DAT_800a611c;
+extern unsigned char *PLAYER_HELD_OBJECT;
 extern unsigned char *BITTEN_OBJECT;
 extern unsigned char *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
@@ -16,7 +16,7 @@ extern unsigned char DAT_8009d004;
 extern int GAME_AREA00_EVENT_CONTROL;
 extern short DAT_8009c944;
 extern short DAT_8009c946[];
-extern unsigned short DAT_1f8001fc, DAT_1f8003c4, DAT_1f8003c6, DAT_1f8003c8, DAT_1f8001c8;
+extern unsigned short JOYPAD_STATE, DAT_1f8003c4, DAT_1f8003c6, DAT_1f8003c8, DAT_1f8001c8;
 extern char D_8001080c[];
 extern char D_800113cc[];
 extern void FUN_8001fe6c(TObj *);
@@ -57,8 +57,8 @@ void playerStepIdle(TObj *o)
     (*(unsigned char*)((char*)&o->da0 + 2)) = 0;
     (*(unsigned char*)((char*)&o->da0 + 3)) = 0;
     if ((*(unsigned char*)&o->wac) >= 2) {
-        BITTEN_OBJECT = DAT_800a611c;
-        DAT_800a611c[4] = 2;
+        BITTEN_OBJECT = PLAYER_HELD_OBJECT;
+        PLAYER_HELD_OBJECT[4] = 2;
         BITTEN_OBJECT[5] = 2;
         BITTEN_OBJECT[6] = 0;
     }
@@ -135,7 +135,7 @@ void playerStepIdle(TObj *o)
                 o->substep = 0;
             }
             YADJ(o);
-            if (!(DAT_1f8001fc & (DAT_1f8003c6 | DAT_1f8003c8))) {
+            if (!(JOYPAD_STATE & (DAT_1f8003c6 | DAT_1f8003c8))) {
                 setObjectSpeedPolar2(o, o->wb6, o->wb2);
                 o->h->raw += DAT_8009c944 << 8;
                 o->y.raw += DAT_8009c946[0] << 8;
@@ -147,7 +147,7 @@ void playerStepIdle(TObj *o)
 
     switch (c) {
     case 4:
-        if (DAT_1f8001fc & DAT_1f8003c4) {
+        if (JOYPAD_STATE & DAT_1f8003c4) {
             o->b04 = 5;
             o->step = 0x61;
             o->state = 0;
@@ -163,7 +163,7 @@ void playerStepIdle(TObj *o)
         }
         break;
     case 9:
-        if (DAT_1f8001fc & DAT_1f8003c8) {
+        if (JOYPAD_STATE & DAT_1f8003c8) {
             o->b04 = 1;
             o->step = 0x3b;
             o->state = 0;
@@ -171,7 +171,7 @@ void playerStepIdle(TObj *o)
         }
         break;
     case 10:
-        if (DAT_1f8001fc & DAT_1f8003c8) {
+        if (JOYPAD_STATE & DAT_1f8003c8) {
             o->b04 = 1;
             o->step = 0x3c;
             o->state = 0;
@@ -179,7 +179,7 @@ void playerStepIdle(TObj *o)
         }
         break;
     case 12:
-        if (DAT_1f8001fc & DAT_1f8003c8) {
+        if (JOYPAD_STATE & DAT_1f8003c8) {
             o->b04 = 5;
             o->step = 0xb;
             o->state = 6;
@@ -192,7 +192,7 @@ void playerStepIdle(TObj *o)
         break;
     }
 
-    if (DAT_1f8001fc & DAT_1f8003c6) {
+    if (JOYPAD_STATE & DAT_1f8003c6) {
         o->ba4 = 0;
         PLAYER_EXT[0x1e] = 0;
         PLAYER_EXT[0x1f] = 0;

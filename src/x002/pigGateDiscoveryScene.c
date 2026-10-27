@@ -21,7 +21,7 @@ typedef struct {
 
 extern TObj PLAYER;
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern short D_1F8001C6;
 extern TObj *ObjAlloc(void);
 extern int MulCos(short, short);
@@ -51,8 +51,8 @@ extern void sevenFriendsSetAnim(TObj *, int, int);
         p->a.p.whole = x; \
         p->y.p.whole = y; \
         p->b.p.whole = z; \
-        p->h->p.whole += t[D_1F8001F8 & 7][0]; \
-        p->y.p.whole += t[D_1F8001F8 & 7][1]; \
+        p->h->p.whole += t[TICK_COUNT & 7][0]; \
+        p->y.p.whole += t[TICK_COUNT & 7][1]; \
     } \
 }
 

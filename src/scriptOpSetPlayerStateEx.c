@@ -1,10 +1,10 @@
 // FUNC 8003a89c 416 MAIN0
 // MATCHING 8003a89c 416
 extern unsigned char DAT_8009c93a, DAT_8009c93e, DAT_8009c93f;
-extern int DAT_8009d69c;
+extern int AREA_SOUND_BANK_LOADED;
 extern unsigned char *SCRIPT_CTX;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, PLAYER, DAT_800a60d6;
-extern short DAT_800a60ea, DAT_800a6066, DAT_800a6058;
+extern short DAT_800a60ea, PLAYER_ANIM_FRAME, DAT_800a6058;
 extern unsigned short GAME;
 extern short DAT_800a6118;
 
@@ -14,7 +14,7 @@ void scriptOpSetPlayerStateEx(void)
     int a, b;
     if (DAT_8009c93a == 0)
         return;
-    if (DAT_8009d69c & 2) {
+    if (AREA_SOUND_BANK_LOADED & 2) {
         PLAYER_STATE = *(int *)(o + 0x1190);
         b = *(int *)(o + 0x1194);
         PLAYER_STEP = 0;
@@ -30,7 +30,7 @@ void scriptOpSetPlayerStateEx(void)
             case 2:
                 DAT_800a60ea = *(int *)(o + 0x11a0);
             case 1:
-                DAT_800a6066 = *(int *)(o + 0x1198);
+                PLAYER_ANIM_FRAME = *(int *)(o + 0x1198);
                 DAT_800a6058 = *(int *)(o + 0x119c);
             }
             DAT_8009c93f = 1;

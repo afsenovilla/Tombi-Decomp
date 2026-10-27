@@ -3,7 +3,7 @@
 #include "plx.h"
 #include "TOBJ.H"
 typedef struct { int a, y, b; } P3;
-extern P3 D_800A6048;
+extern P3 PLAYER_POS;
 extern unsigned char PLAYER;
 extern TObj *ObjAlloc(void);
 extern void spawnPlayerPowerAura(int a, int b, int c);
@@ -16,9 +16,9 @@ static __inline__ void spawn(short sub, int idx)
         o->type = 0x4e;
         o->subtype = sub;
         o->b0c = idx;
-        o->a.raw = D_800A6048.a;
-        o->y.raw = D_800A6048.y;
-        o->b.raw = D_800A6048.b;
+        o->a.raw = PLAYER_POS.a;
+        o->y.raw = PLAYER_POS.y;
+        o->b.raw = PLAYER_POS.b;
         o->step = 0;
     }
 }

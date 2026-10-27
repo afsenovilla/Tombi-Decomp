@@ -29,8 +29,8 @@ extern unsigned short D_80100B76;
 extern unsigned short *D_80100B78;
 extern char *D_1F8002EC;
 #define BANK (*(char * volatile *)&D_1F8002EC)
-extern POLY_FT4 *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern POLY_FT4 *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 
 void subScreenDrawSpriteFT4(int pri)
 {
@@ -72,12 +72,12 @@ void subScreenDrawSpriteFT4(int pri)
         s->tpage = D_80100B70.w;
         if (D_80100B70.attr & 0x7F) s->clut = D_80100B70.attr;
         else s->clut = t->clut;
-        p = D_1F800164;
+        p = NEXT_PRIM;
         *p = *s;
-        if (*cnt == 1) addPrim(D_1F8001E0 + pri + 3, p);
-        else addPrim(D_1F8001E0 + pri + 4, p);
+        if (*cnt == 1) addPrim(CURRENT_OT + pri + 3, p);
+        else addPrim(CURRENT_OT + pri + 4, p);
         t++;
         u += 0x10;
-        D_1F800164++;
+        NEXT_PRIM++;
     } while (--*cnt);
 }

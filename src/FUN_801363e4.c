@@ -9,14 +9,14 @@ extern unsigned char DAT_8009c93f;
 extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE, PLAYER_STEP;
 extern S801363E4 *PLAYER_H;
 extern unsigned char DAT_800a60a1[], DAT_800a60a2[], DAT_800a60a3[], DAT_800a60d4;
-extern short DAT_800a6066, DAT_800a60b4, DAT_800a60b6, DAT_800a60b8, DAT_800a60ba, DAT_800a60ea;
+extern short PLAYER_ANIM_FRAME, DAT_800a60b4, PLAYER_VEL_Y, DAT_800a60b8, DAT_800a60ba, DAT_800a60ea;
 extern P801363E4 *PLAYER_EXT;
 extern TObj *DAT_800a60c8;
 extern unsigned char DAT_8009cebf[];
 extern int GAME_AREA00_EVENT_CONTROL;
 extern short PLAYER_X, PLAYER_Y, DAT_800a6052;
 extern int DAT_800a60c4;
-extern unsigned short *DAT_800a605c;
+extern unsigned short *PLAYER_ANIM;
 extern unsigned char DAT_8009d009;
 extern void *D_8013B140[];
 extern void *A00_VARIANT0_SCENE_PART_ANIMS, *D_8013B134, *D_8013B138, *D_8013B13C,  *D_8013B148;
@@ -43,7 +43,7 @@ void FUN_801363e4(TObj *o)
         if (PLAYER_H->s2 > 0x130) PLAYER_H->s2 = 0x130;
         DAT_800a60a3[0] = 1;
         o->w08 = 100;
-        DAT_800a6066 = 0;
+        PLAYER_ANIM_FRAME = 0;
         PLAYER_STATE[0] = 5;
         PLAYER_SUBSTATE = 0;
         PLAYER_STEP = 0;
@@ -52,7 +52,7 @@ void FUN_801363e4(TObj *o)
     case 1:
         if (DAT_800a60a1[0] == 0) return;
         if (--o->w08 != 0) return;
-        DAT_800a6066 = 0;
+        PLAYER_ANIM_FRAME = 0;
         PLAYER_EXT->b9 = 5;
         DAT_800a60d4 = 1;
         DAT_800a60a1[0] = 0;
@@ -61,7 +61,7 @@ void FUN_801363e4(TObj *o)
         DAT_800a60ea = 0;
         DAT_800a60b8 = 0;
         DAT_800a60ba = 0;
-        DAT_800a60b6 = 0;
+        PLAYER_VEL_Y = 0;
         PLAYER_SUBSTATE = 4;
         PLAYER_STEP = 0;
         o->step++;
@@ -124,7 +124,7 @@ void FUN_801363e4(TObj *o)
                 o->state++;
                 break;
             case 3:
-                if (*DAT_800a605c == 0x3d) startPadVibration(0, 0, 0xff, 4);
+                if (*PLAYER_ANIM == 0x3d) startPadVibration(0, 0, 0xff, 4);
                 if (--o->w08 != 0) return;
                 DAT_800a60c8->b04 = 3;
                 DAT_8009cebf[0]++;

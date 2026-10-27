@@ -184,10 +184,45 @@ address,name,size,source
 8007a7f0,REWARD_HANDLER_BY_SUBTYPE,,usage: u8 index into REWARD_HANDLERS per item subtype (updateItemObject / updateL5Type09Item / updateL5Type0AItem / updateA00BitingPlantBait) refs=12
 80079d58,PLAYER_EFFECT_4E_ANIM_TABLE,,usage: per-subtype animation pointer sets of the player effect 4E object (playerEffect4EStepC / StepE) refs=9
 8009d600,WEAPON_BEND_PARAMS,0x6,usage: short a b c passed to weaponCalcBentOffset by weapon0Swing / weapon8to9Swing (= GV6.s00..s04) refs=15
-8009c10b,PAUSE_MENU_CURSOR,0x1,usage: pause menu entry selected (0..3 open a sub screen 4..7 of MENU_STATE.unk16 4 = close) refs=16
-8009b6a8,DEBUG_SCREEN_CURSOR_ROW,0x1,usage: displayDebugScreen cursor row 0/1 (game.h comment SELECTED ROW) refs=6
+8009cda3,GAME_INVENTORY_SCREEN,0x1,usage: GAME.inventoryScreen reached by its own symbol (updatePauseMenu: 0..3 open a sub screen 4..7 of MENU_STATE.unk16, 4 = close; US alias D_8009C10B) refs=16
+8009c340,DEBUG_SCREEN_CURSOR_ROW,0x1,usage: displayDebugScreen cursor row 0/1 (game.h comment SELECTED ROW; US alias D_8009B6A8) refs=6
 800e3e28,MODEL_PRIM_BUFFERS,,usage: model primitive work buffers of 0x1600 bytes per slot (copyModelPrimGroups in l4Type1BDeformModel / FUN_800ed258 / FUN_800ed750) refs=11
 8009bd70,TILE_COL_COUNT,0x2,usage: tileCollideColumnAt scratch: entries left in the column list refs=5
 8009bd74,TILE_COL_TOP,0x2,usage: tileCollideColumnAt scratch: entry top y refs=6
 8009bd78,TILE_COL_HEIGHT,0x2,usage: tileCollideColumnAt scratch: entry height (0 = plain) refs=6
 8009bd7c,TILE_COL_FLAGS,0x2,usage: tileCollideColumnAt scratch: entry flags (0x10 skip 0x1 solid 0xE00 kind) refs=6
+1f800164,NEXT_PRIM,0x4,scratchpad.nextprim (psx_tomba): next free primitive address of the frame's prim buffer (game.h macro of the same name for the absolute casts) refs=223
+1f8001e0,CURRENT_OT,0x4,scratchpad.ot (psx_tomba): the ordering table being filled (game.h macro of the same name) refs=108
+1f8001f4,FRAME_BUFFER_INDEX,0x2,scratchpad.frameBufferIndex (psx_tomba; game.h macro of the same name) refs=22
+1f8001f6,FRAME_COUNT,0x2,scratchpad.frameCount (psx_tomba) refs=2
+1f8001f8,TICK_COUNT,0x2,usage: scratchpad +0x1F8 incremented by gameplayTick / areaMode5Tick (animation phase & 3) refs=40
+1f8001fc,JOYPAD_STATE,0x2,scratchpad.joypad_state (psx_tomba): current pad buttons (game.h macro of the same name) refs=64
+1f800208,FREE_OBJECTS,0x4,scratchpad.freeObjects (psx_tomba): free-object stack pointer of the main layer (ObjAlloc / ObjFree; +0x204 / +0x20C / +0x214 are the other layers') refs=17
+1f800238,FREE_OBJECT_COUNT,0x2,scratchpad.freeObjectCount (psx_tomba; +0x236 / +0x23A / +0x23C the other layers') refs=29
+1f8001cc,MOVIE_PLAY_STATE,0x1,scratchpad.moviePlayState (psx_tomba; game.h macro of the same name) refs=17
+1f8001cd,MOVIE_ID,0x1,scratchpad.movieId (psx_tomba; game.h macro of the same name) refs=9
+1f8001d3,MOVIE_SKIP_REQUEST,0x1,scratchpad.movieSkipRequest (psx_tomba; game.h macro of the same name) refs=6
+1f80008c,MODEL_VERTEX_PTR,0x4,usage: current model vertex pointer of the drawModel family (drawModel / drawModelUnlit / ...) refs=29
+1f800278,COLLISION_SEG_PTR,0x4,usage: pointer to the collision plane segments being walked (= getCollisionPlaneAt() in probeCollisionAtDepthB/C; cursor of probeFlaggedSegmentA) refs=103
+800a6039,PLAYER_VISIBLE,0x1,usage: PLAYER.obj.visible (+0x01) copied to the player effects refs=13
+800a603a,PLAYER_TYPE,0x1,usage: PLAYER.obj.type (+0x02; drawCategory2/3/7Objects switch on it) refs=7
+800a6047,PLAYER_DRAW_DEPTH,0x1,usage: PLAYER.obj.b0f (+0x0F) the OT depth the weapon / effects draw relative to (otadd z = b0f - 5) refs=27
+800a6048,PLAYER_POS,0xC,usage: PLAYER.obj.a / y / b (+0x10 the three Fix16 copied as a V3 by spawnPlayerPowerEffect / a00TornadoStep) refs=7
+800a604c,PLAYER_Y_FIX,0x4,usage: PLAYER.obj.y (+0x14 Fix16; PLAYER_Y is its whole part) refs=16
+800a605c,PLAYER_ANIM,0x4,usage: PLAYER.obj.anim (+0x24) refs=19
+800a6066,PLAYER_ANIM_FRAME,0x2,usage: PLAYER.obj.animFrame (+0x2E) refs=28
+800a60b6,PLAYER_VEL_Y,0x2,usage: PLAYER.obj.velY (+0x7E) refs=10
+800a611c,PLAYER_HELD_OBJECT,0x4,usage: PLX.p611c (+0xE4) TObj * of the object the player bit / holds (BITTEN_OBJECT is set from it) refs=13
+8009c982,GAME_SELECTED_SPAWN_POINT,0x2,usage: GAME.selectedSpawnPoint reached by its own symbol (row of the section spawn table; US alias D_8009BCEA) refs=18
+8009d2b3,GAME_EQUIPPED_PANTS,0x1,usage: GAME.playerEquips.pants reached by its own symbol (speed class of playerDecelerateSpeed*) refs=12
+8009d2b1,GAME_BITTEN_JUMP_KIND,0x1,usage: GAME +0x951 (unk951 -> bittenJumpKind): subtype of the bitten object (playerBittenJumpType03) refs=11
+8009c967,GAME_KEEP_BGM,0x1,usage: GAME.keepBgm reached by its own symbol (areaTransitionHandler 1/2; area modes start the BGM unless 1; US alias D_8009BCCF) refs=9
+8009c970,GAME_PLAYER_HEALTH,0x1,usage: GAME.playerHealth reached by its own symbol (updateHud / increaseMaxHealth / playerInitMode) refs=7
+8009c971,GAME_PLAYER_MAX_HEALTH,0x1,usage: GAME +0x11 (US playerHealthDisplayed -> playerMaxHealth): increaseMaxHealth raises it (cap 8 / 16) and drawHudVitality / opcode a9 cap the health with it refs=6
+8009c968,GAME_TOTAL_TIME_PLAYED,0x4,usage: GAME.totalTimePlayed reached by its own symbol (area mode handlers ++) refs=6
+8009c976,GAME_FADE_SCREEN_AMOUNT,0x1,usage: GAME.fadeScreenAmount reached by its own symbol (drawGameplayScene / scriptOpSetFadeEffect; US alias D_8009BCDE) refs=6
+8009c96c,GAME_PLAYER_AP,0x4,usage: GAME.playerAP reached by its own symbol (updateHud / AP boxes) refs=5
+8009cda2,GAME_DISABLE_SELECT_MENU,0x1,usage: GAME.disableSelectMenu reached by its own symbol (US alias D_8009C10A) refs=5
+8009d69c,AREA_SOUND_BANK_LOADED,0x4,usage: set 1 by loadAreaSoundBank, initAreaScripts waits for it refs=27
+8009d540,DEBUG_NEXT_PRIM,0x4,usage: primitive cursor of drawDebugText / drawLoadingSprites (bounded by D_800A2C90 + FRAME_BUFFER_INDEX * 0x780; US alias D_8009C8A8) refs=12
+8009d610,PAD_INFO,,usage: PadInfo per port (readPadPort &PAD_INFO[port]; playerDecodePadInput) refs=8

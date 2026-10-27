@@ -22,8 +22,8 @@ extern short D_80111142;
 extern unsigned short *D_80111144;
 extern char *D_1F8002EC;
 #define BANK (*(char * volatile *)&D_1F8002EC)
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern short D_1F800018;
 extern void AddDrawMode(int, int);
 
@@ -57,11 +57,11 @@ void subScreenDrawSprite(int pri)
         if (D_8011113C.attr & 0x7FFF) s->clut = D_8011113C.attr;
         else s->clut = t->clut;
         t++;
-        p = D_1F800164;
+        p = NEXT_PRIM;
         u += 0x10;
         *p = *s;
-        addPrim(D_1F8001E0 + pri + 4, p);
-        D_1F800164++;
+        addPrim(CURRENT_OT + pri + 4, p);
+        NEXT_PRIM++;
     } while (--*cnt);
     AddDrawMode(D_80111140, pri + 4);
 }

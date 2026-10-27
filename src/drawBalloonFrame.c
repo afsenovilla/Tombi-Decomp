@@ -29,8 +29,8 @@ typedef struct { short u, v; unsigned char w, pw; short h; } UVT;
 typedef struct { unsigned char u, v; } UV2;
 typedef struct { unsigned char u0, v0, u1, v1, u2, v2, u3, v3; } UV8;
 
-extern char *DAT_1f800164;
-extern int DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern int CURRENT_OT;
 extern UVT BALLOON_TAIL_SPRITES[];
 extern UV2 D_800801f0[];
 extern UV8 BALLOON_FRAME_UVS[];
@@ -126,10 +126,10 @@ void drawBalloonFrame(R *o_, short c, short tp)
         ft->u3 = ft->u1; }
         ft->clut = GetClut(0x160, c + 0x1e3);
         ft->tpage = tp;
-        { void *p = DAT_1f800164;
+        { void *p = NEXT_PRIM;
         *(POLY_FT4 *)p = *ft;
-        AddPrim((void *)(DAT_1f8001e0 + 8), p); }
-        DAT_1f800164 += 0x28;
+        AddPrim((void *)(CURRENT_OT + 8), p); }
+        NEXT_PRIM += 0x28;
     }
 skip:
     pos[0][0] = o->x;
@@ -152,10 +152,10 @@ skip:
         sp->w = 8;
         sp->h = 8;
         sp->clut = GetClut(0x160, c + 0x1e3);
-        { void *p = DAT_1f800164;
+        { void *p = NEXT_PRIM;
         *(SPRT *)p = *sp;
-        AddPrim((void *)(DAT_1f8001e0 + 8), p); }
-        DAT_1f800164 += 0x14;
+        AddPrim((void *)(CURRENT_OT + 8), p); }
+        NEXT_PRIM += 0x14;
     }
     pos[0][0] = o->x + 8;
     pos[0][1] = o->y;
@@ -213,10 +213,10 @@ skip:
         ft->v3 = BALLOON_FRAME_UVS[i].v3;
         ft->clut = GetClut(0x160, c + 0x1e3);
         ft->tpage = tp;
-        { void *p = DAT_1f800164;
+        { void *p = NEXT_PRIM;
         *(POLY_FT4 *)p = *ft;
-        AddPrim((void *)(DAT_1f8001e0 + 8), p); }
-        DAT_1f800164 += 0x28;
+        AddPrim((void *)(CURRENT_OT + 8), p); }
+        NEXT_PRIM += 0x28;
     }
     setlen(ti, 3);
     ti->code = 0x60;
@@ -233,11 +233,11 @@ skip:
     ti->y0 = o->y + 8;
     ti->w = o->w - 16;
     ti->h = o->h - 16;
-    { void *p = DAT_1f800164;
+    { void *p = NEXT_PRIM;
     *(TILE *)p = *ti;
-    AddPrim((void *)(DAT_1f8001e0 + 8), p); }
-    p = DAT_1f800164 = DAT_1f800164 + 0x10;
+    AddPrim((void *)(CURRENT_OT + 8), p); }
+    p = NEXT_PRIM = NEXT_PRIM + 0x10;
     SetDrawMode(p, 0, 0, tp, 0);
-    AddPrim((void *)(DAT_1f8001e0 + 8), p);
-    DAT_1f800164 += 0xc;
+    AddPrim((void *)(CURRENT_OT + 8), p);
+    NEXT_PRIM += 0xc;
 }

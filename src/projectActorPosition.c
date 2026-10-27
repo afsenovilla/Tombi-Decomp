@@ -10,7 +10,7 @@ typedef struct { short m[3][3]; int t[3]; } MATRIX;
 #define gte_stszotz(r0) __asm__ volatile ("mfc2 $12, $19;nop;sra $12, $12, 2;sw $12, 0( %0 )" : : "r"(r0) : "$12", "memory")
 
 extern SVECTOR DAT_1f800060;
-extern int DAT_1f80008c;
+extern int MODEL_VERTEX_PTR;
 extern MATRIX DAT_1f8000c0;
 extern char *TASK_C;
 extern int GAME;
@@ -29,8 +29,8 @@ int projectActorPosition(char *p, long *sxy, long *z)
     SetTransMatrix(&DAT_1f8000c0);
     gte_ldv0(&DAT_1f800060);
     gte_rtps();
-    gte_stflg(&DAT_1f80008c);
-    if (DAT_1f80008c < 0) return 1;
+    gte_stflg(&MODEL_VERTEX_PTR);
+    if (MODEL_VERTEX_PTR < 0) return 1;
     gte_stsxy(sxy);
     gte_stszotz(z);
     return 0;

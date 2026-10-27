@@ -1,10 +1,10 @@
 // FUNC 800fd524 356 I0NFO2
 // MATCHING 800fd524 356
 #include "TOBJ.H"
-extern signed char D_8009C93F, D_8009C942, D_800A6039, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
+extern signed char D_8009C93F, D_8009C942, PLAYER_VISIBLE, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern short PLAYER_X[];
 extern unsigned short PLAYER_Y[];
-extern short D_800A6066;
+extern short PLAYER_ANIM_FRAME;
 
 void func_800FD524(TObj *o)
 {
@@ -14,8 +14,8 @@ void func_800FD524(TObj *o)
         D_8009C942 = 1;
         PLAYER_X[0] = 0x120;
         PLAYER_Y[0] = 0x110;
-        D_800A6066 = 6;
-        D_800A6039 = 0;
+        PLAYER_ANIM_FRAME = 6;
+        PLAYER_VISIBLE = 0;
         PLAYER_STATE = 4;
         PLAYER_SUBSTATE = 0;
         PLAYER_STEP = 0;
@@ -26,11 +26,11 @@ void func_800FD524(TObj *o)
         if (--o->w08 >= 0) {
             if ((o->w08 & 1) && PLAYER_X[0] < 0x12E) PLAYER_X[0]++;
             PLAYER_Y[0]++;
-            if (o->w08 >= 0xB) D_800A6039 = 0;
+            if (o->w08 >= 0xB) PLAYER_VISIBLE = 0;
         } else {
             D_8009C93F = 0;
             D_8009C942 = 0;
-            D_800A6039 = 1;
+            PLAYER_VISIBLE = 1;
             PLAYER_STATE = 1;
             PLAYER_SUBSTATE = 0;
             PLAYER_STEP = 0;

@@ -45,8 +45,8 @@ typedef struct {
     char *tab;
 } O;
 
-extern PolyFT4 *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern PolyFT4 *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern void SetSemiTrans(PolyFT4 *, int);
 
 static __inline__ int onscreen(PolyFT4 *p)
@@ -62,7 +62,7 @@ static __inline__ int addprim(unsigned e, unsigned *a, char *b, int c, int d)
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - (int)DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - (int)CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned v = *(unsigned *)d;
         *(unsigned *)d = (unsigned)a;
@@ -88,7 +88,7 @@ void drawObjectSpriteParts(O *o)
     n = h[0];
     e = (Ent *)(*(char * volatile *)&o->tab + h[1]);
     do {
-        p = DAT_1f800164;
+        p = NEXT_PRIM;
         if (o->animFrame & 1) {
             p->x0 = o->x + e->dx;
             p->y0 = o->y + e->dy;
@@ -118,8 +118,8 @@ void drawObjectSpriteParts(O *o)
             }
             z = o->z;
             do {} while (0);
-            if (addprim(0x9000000, (unsigned *)p, DAT_1f8001e0 + 0x10, z, o->b0f) == 0) {
-                DAT_1f800164 = DAT_1f800164 + 1;
+            if (addprim(0x9000000, (unsigned *)p, CURRENT_OT + 0x10, z, o->b0f) == 0) {
+                NEXT_PRIM = NEXT_PRIM + 1;
             }
         }
         e++;

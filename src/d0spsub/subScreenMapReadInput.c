@@ -3,7 +3,7 @@
 // FLAGS -O2 -G0 -fno-schedule-insns
 extern unsigned short D_8009F7F2;
 extern short D_801110F8, D_80111100;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 
 int subScreenMapReadInput(void)
 {
@@ -26,10 +26,10 @@ int subScreenMapReadInput(void)
             return -1;
         }
     } else {
-        if (D_1F8001FC & 0x80) return 4;
-        if (D_1F8001FC & 0x20) return 0;
-        if (D_1F8001FC & 0x10) return 2;
-        if (D_1F8001FC & 0x40) return 6;
+        if (JOYPAD_STATE & 0x80) return 4;
+        if (JOYPAD_STATE & 0x20) return 0;
+        if (JOYPAD_STATE & 0x10) return 2;
+        if (JOYPAD_STATE & 0x40) return 6;
     }
     return -1;
 }

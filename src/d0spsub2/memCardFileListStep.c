@@ -7,11 +7,11 @@ typedef struct { short x6; char r[0x12]; } Info;
 typedef struct { char d[0x988]; } BGame;
 typedef struct { char p0[0x10]; unsigned char f10, f11; char p12[0x5BC - 0x12]; unsigned char f5bc; char p5bd[0x988 - 0x5BD]; } GS;
 extern GS D_8009C960g;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern short D_1F8003D8;
 extern unsigned char D_8009C977[];
 extern char GAME[];
-extern unsigned char D_8009C970, D_8009C971;
+extern unsigned char GAME_PLAYER_HEALTH, GAME_PLAYER_MAX_HEALTH;
 extern unsigned char D_8009CF1C;
 extern unsigned short BUTTON_CONFIG_INDEX;
 extern char D_800E1E28[];
@@ -124,7 +124,7 @@ int memCardFileListStep(Menu *m, Card *c)
         if (c->n144 == 15) {
             if (c->w158 == 0) {
                 m->msg = 5;
-                if (D_1F8001FC & 0x2000) {
+                if (JOYPAD_STATE & 0x2000) {
                     SfxPlay2(0x1B, 0x1C);
                     return -1;
                 }
@@ -135,12 +135,12 @@ int memCardFileListStep(Menu *m, Card *c)
         } else {
             m->msg = 3;
             if (m->x1C == 0 && c->w158 == 0) {
-                if (!(D_1F8001FC & 0x2000)) return 0;
+                if (!(JOYPAD_STATE & 0x2000)) return 0;
                 SfxPlay2(0x1B, 0x1C);
                 return -1;
             }
         }
-        btn = D_1F8001FC;
+        btn = JOYPAD_STATE;
         if (btn & 0x10) {
             if (m->cursor > 0) {
                 m->cursor--;
@@ -181,29 +181,29 @@ int memCardFileListStep(Menu *m, Card *c)
         break;
     case 5:
         if (D_800F7148 == 0) {
-            if (D_1F8001FC & 0x20) {
+            if (JOYPAD_STATE & 0x20) {
                 D_800F7148 = 1;
                 playSFX(8);
                 return 0;
             }
-            if (D_1F8001FC & 0x2000) {
+            if (JOYPAD_STATE & 0x2000) {
                 SfxPlay2(0x1B, 0x1C);
                 m->sub = 2;
                 break;
             }
-            if (D_1F8001FC & 0x4000) {
+            if (JOYPAD_STATE & 0x4000) {
                 SfxPlay2(0xA, 0xA);
                 m->msg = 6;
                 m->sub++;
             }
             break;
         }
-        if (D_1F8001FC & 0x80) {
+        if (JOYPAD_STATE & 0x80) {
             D_800F7148 = 0;
             playSFX(8);
             return 0;
         }
-        if (D_1F8001FC & 0x6000) {
+        if (JOYPAD_STATE & 0x6000) {
             SfxPlay2(0x1B, 0x1C);
             m->sub = 2;
         }
@@ -270,7 +270,7 @@ int memCardFileListStep(Menu *m, Card *c)
         m->sub = 11;
         break;
     case 11:
-        if (D_1F8001FC & 0x6000) {
+        if (JOYPAD_STATE & 0x6000) {
             SfxPlay2(0x1B, 0x1C);
             c->w146 = 0;
             m->sub = 1;
@@ -279,17 +279,17 @@ int memCardFileListStep(Menu *m, Card *c)
         break;
     case 13:
         if (D_800F7148 == 0) {
-            if (D_1F8001FC & 0x20) {
+            if (JOYPAD_STATE & 0x20) {
                 D_800F7148 = 1;
                 playSFX(8);
                 return 0;
             }
-            if (D_1F8001FC & 0x2000) {
+            if (JOYPAD_STATE & 0x2000) {
                 SfxPlay2(0x1B, 0x1C);
                 m->sub = 2;
                 break;
             }
-            if (D_1F8001FC & 0x4000) {
+            if (JOYPAD_STATE & 0x4000) {
                 m->msg = 10;
                 m->timer = 4;
                 SfxPlay2(0xA, 0xA);
@@ -297,12 +297,12 @@ int memCardFileListStep(Menu *m, Card *c)
             }
             break;
         }
-        if (D_1F8001FC & 0x80) {
+        if (JOYPAD_STATE & 0x80) {
             D_800F7148 = 0;
             playSFX(8);
             return 0;
         }
-        if (D_1F8001FC & 0x6000) {
+        if (JOYPAD_STATE & 0x6000) {
             SfxPlay2(0x1B, 0x1C);
             m->sub = 2;
         }
@@ -314,17 +314,17 @@ int memCardFileListStep(Menu *m, Card *c)
         break;
     case 15:
         if (D_800F7148 == 0) {
-            if (D_1F8001FC & 0x20) {
+            if (JOYPAD_STATE & 0x20) {
                 D_800F7148 = 1;
                 playSFX(8);
                 return 0;
             }
-            if (D_1F8001FC & 0x2000) {
+            if (JOYPAD_STATE & 0x2000) {
                 SfxPlay2(0x1B, 0x1C);
                 m->sub = 2;
                 break;
             }
-            if (D_1F8001FC & 0x4000) {
+            if (JOYPAD_STATE & 0x4000) {
                 sprintf(D_800F70B8, D_800E810C, (unsigned char)c->slot[D_800F70FC[m->card][m->cursor]]);
                 m->msg = 6;
                 m->timer = 4;
@@ -334,12 +334,12 @@ int memCardFileListStep(Menu *m, Card *c)
             }
             return 0;
         }
-        if (D_1F8001FC & 0x80) {
+        if (JOYPAD_STATE & 0x80) {
             D_800F7148 = 0;
             playSFX(8);
             break;
         }
-        if (D_1F8001FC & 0x6000) {
+        if (JOYPAD_STATE & 0x6000) {
             SfxPlay2(0x1B, 0x1C);
             m->sub = 2;
         }

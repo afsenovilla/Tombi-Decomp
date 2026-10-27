@@ -7,7 +7,7 @@
 #include "gamestate.h"
 extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
-extern unsigned short D_1f8001fc, D_1f8003c6;
+extern unsigned short JOYPAD_STATE, D_1f8003c6;
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -70,21 +70,21 @@ void playerStepPerchIdle(TObj *o)
     case 1:
         AnimAdvance(o);
         if ((*(int*)&GAME.selectedArea) == 0x30000) break;
-        if (D_1f8001fc & D_1f8003c6) {
+        if (JOYPAD_STATE & D_1f8003c6) {
             (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             setanim(o, 9);
             o->b04 = 1;
             o->step = 0xb;
             o->state = 0;
         }
-        if (D_1f8001fc & 0x10) {
+        if (JOYPAD_STATE & 0x10) {
             (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             setanim(o, 9);
             o->b04 = 1;
             o->step = 0xb;
             o->state = 0;
         }
-        if (D_1f8001fc & 0x40) {
+        if (JOYPAD_STATE & 0x40) {
             (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             o->y.p.whole += 9;
             o->h->p.whole += (o->animFrame & 1) ? -4 : 4;

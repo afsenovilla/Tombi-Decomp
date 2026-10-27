@@ -5,7 +5,7 @@
 typedef struct { short w0; short w2; } P;
 typedef struct { void **tab; int a; int b; } AT;
 extern AT PLAYER_EFFECT_4E_ANIM_TABLE[];
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern TObj PLAYER;
 extern P *D_800A6078, *D_800A607C;
 extern void AnimLoadDuration(TObj *);
@@ -51,7 +51,7 @@ void playerEffect4EStepC(TObj *o)
         o->timer = 0xb4;
         o->state++;
     case 1:
-        if (o->b0c == 0 && (D_1F8001F8 & 3) == 0)
+        if (o->b0c == 0 && (TICK_COUNT & 3) == 0)
             startPadVibration(0, 0, 0xff, 2);
         o->timer--;
         o->visible = PLAYER.visible;

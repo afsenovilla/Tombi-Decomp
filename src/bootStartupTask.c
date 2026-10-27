@@ -12,7 +12,7 @@ typedef struct {
 extern T80019244 *TASK_C;
 #define P TASK_C
 extern unsigned char D_1F8001D1, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
-extern short D_1F8001F4, D_1F8001F6;
+extern short FRAME_BUFFER_INDEX, FRAME_COUNT;
 
 extern unsigned char D_8009E375, D_8009E376, D_8009E377;
 extern unsigned char D_8009F085, D_8009F086, D_8009F087;
@@ -80,7 +80,7 @@ void bootStartupTask(void)
             P->w48++;
             break;
         case 3:
-            (*(int*)&SPAD.p164) = (int)(LOAD_BUFFER_ALT + D_1F8001F4 * 0xc000) & 0xffffff;
+            (*(int*)&SPAD.p164) = (int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
             p = P;
             if (--p->w58 == -1)
                 p->w48++;
@@ -110,7 +110,7 @@ void bootStartupTask(void)
             }
             break;
         case 11:
-            (*(int*)&SPAD.p164) = (int)(LOAD_BUFFER_ALT + D_1F8001F4 * 0xc000) & 0xffffff;
+            (*(int*)&SPAD.p164) = (int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
             p = P;
             switch (p->w4a) {
             case 0:
@@ -134,7 +134,7 @@ void bootStartupTask(void)
                     SetDispMask(0);
                     initDisplay(0, 0, 0);
                     D_1F8001D1 = 0;
-                    D_1F8001F6 = 0;
+                    FRAME_COUNT = 0;
                     P->w48 = 0;
                     P->w4a = 0;
                 }

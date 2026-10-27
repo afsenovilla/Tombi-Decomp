@@ -20,8 +20,8 @@ typedef struct { short x, y, tp, pad; short *str; Glyph *font; unsigned char *pa
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern char *D_1F800164;
-extern unsigned long *DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, void *tw);
 
 void titleDrawString(MenuItem *m, int pri, int wrap, int pal)
@@ -102,16 +102,16 @@ void titleDrawString(MenuItem *m, int pri, int wrap, int pal)
                 sp->clut = 0x7855;
                 break;
             }
-            p = (SPRT *)D_1F800164;
+            p = (SPRT *)NEXT_PRIM;
             *p = *sp;
-            addPrim(DAT_1f8001e0 + pri, p);
-            D_1F800164 += sizeof(SPRT);
+            addPrim(CURRENT_OT + pri, p);
+            NEXT_PRIM += sizeof(SPRT);
             break;
         }
         c = *s;
     }
-    dm = (DR_MODE *)D_1F800164;
+    dm = (DR_MODE *)NEXT_PRIM;
     SetDrawMode(dm, 0, 0, m->tp, 0);
-    addPrim(DAT_1f8001e0 + pri, dm);
-    D_1F800164 += sizeof(DR_MODE);
+    addPrim(CURRENT_OT + pri, dm);
+    NEXT_PRIM += sizeof(DR_MODE);
 }

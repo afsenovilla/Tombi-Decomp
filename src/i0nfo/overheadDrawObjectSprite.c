@@ -16,10 +16,10 @@ typedef struct {
 } PolyFT4;
 typedef struct { short vx, vy, vz, pad; } SVec;
 extern long D_1F8000C0[];
-extern char *D_1F800164;
+extern char *NEXT_PRIM;
 typedef struct { char pad[0x10]; unsigned long ot[1]; } OTS;
 typedef struct { unsigned long v; } UL;
-extern OTS *D_1F8001E0;
+extern OTS *CURRENT_OT;
 
 #define gte_SetRotMatrix(r0) __asm__ volatile ("lw $12, 0( %0 );lw $13, 4( %0 );ctc2 $12, $0;ctc2 $13, $1;lw $12, 8( %0 );lw $13, 12( %0 );lw $14, 16( %0 );ctc2 $12, $2;ctc2 $13, $3;ctc2 $14, $4" : : "r"(r0) : "$12", "$13", "$14")
 #define gte_SetTransMatrix(r0) __asm__ volatile ("lw $12, 20( %0 );lw $13, 24( %0 );ctc2 $12, $5;lw $14, 28( %0 );ctc2 $13, $6;ctc2 $14, $7" : : "r"(r0) : "$12", "$13", "$14")
@@ -116,14 +116,14 @@ void overheadDrawObjectSprite(TObj *o)
         }
         if ((p->y0 < 0x101 || p->y1 < 0x101 || p->y2 < 0x101 || p->y3 < 0x101)
             && (p->x0 < 0x141 || p->x1 < 0x141 || p->x2 < 0x141 || p->x3 < 0x141)) {
-            q = (PolyFT4 *)D_1F800164;
+            q = (PolyFT4 *)NEXT_PRIM;
             *q = *p;
-            slot = (unsigned long *)((*otz << 2) + (int)&D_1F8001E0->ot[(signed char)o->b0f]);
+            slot = (unsigned long *)((*otz << 2) + (int)&CURRENT_OT->ot[(signed char)o->b0f]);
             tmp->v = *slot;
             *slot = (unsigned long)q;
             tmp->v |= *code;
             q->tag = tmp->v;
-            D_1F800164 += 0x28;
+            NEXT_PRIM += 0x28;
         }
         f += 0x10;
         e += 0x10;

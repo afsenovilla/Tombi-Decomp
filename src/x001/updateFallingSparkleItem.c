@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 
 extern int D_1F80018C;
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern unsigned char D_800A4553;
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
 extern void (*REWARD_HANDLERS[])(TObj *);
@@ -54,7 +54,7 @@ void func_80123B30(TObj *o)
             n->h->raw = o->h->raw;
             n->y.raw = o->y.raw;
             n->d->raw = o->d->raw;
-            if (D_1F8001F8 & 1)
+            if (TICK_COUNT & 1)
                 n->h->raw += (Rand() & 0xf) << 16;
             else
                 n->h->raw -= (Rand() & 0xf) << 16;

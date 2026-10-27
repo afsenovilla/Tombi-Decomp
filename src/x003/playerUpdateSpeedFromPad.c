@@ -11,9 +11,9 @@ typedef struct {
     char r[0x74 - 0x24];
 } T74;
 extern T74 PLAYER_DECEL_PARAMS[];
-extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
+extern unsigned char GAME_EQUIPPED_PANTS, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
-extern unsigned short DAT_8009d610;
+extern unsigned short PAD_INFO;
 extern unsigned char DAT_8009d618;
 typedef struct {
     char p0[0x2e]; unsigned short animFrame;
@@ -142,7 +142,7 @@ static __inline__ void dec(P *o, short u, int g)
 
 static __inline__ void mid(P *o, short u)
 {
-    if (DAT_8009d610 == 7) {
+    if (PAD_INFO == 7) {
         unsigned char b = DAT_8009d618;
         switch (o->animFrame) {
         case 0: case 4: case 8:
@@ -180,7 +180,7 @@ void playerUpdateSpeedFromPad(P *o)
     int u;
     int c;
     c = o->bc1;
-    u = DAT_8009d2b3 + c * 4;
+    u = GAME_EQUIPPED_PANTS + c * 4;
     if ((DAT_8009c990 & 3) != 0)
         u = (unsigned char)c << 2 | 3;
     if (DAT_8009cf06 != 0)

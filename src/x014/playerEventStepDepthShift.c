@@ -4,7 +4,7 @@
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern TObj *PLAYER_EXT;
 extern int GAME[];
-extern unsigned char DAT_8009cda2, DAT_8009c93a;
+extern unsigned char GAME_DISABLE_SELECT_MENU, DAT_8009c93a;
 extern void FUN_800eeb5c(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 
@@ -34,7 +34,7 @@ void playerEventStepDepthShift(TObj *o)
         o->state++;
     case 1:
         FUN_8001fec0(o);
-        if (DAT_8009cda2 == 0)
+        if (GAME_DISABLE_SELECT_MENU == 0)
             o->state++;
         break;
     case 2:

@@ -6,7 +6,7 @@
 #include "gamestate.h"
 extern TObj PLAYER;
 #define P PLAYER
-extern unsigned short D_800A6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern TObj *D_800A60C8;
 extern TObj *PLAYER_EXT;
 extern unsigned char D_800A60F8;
@@ -72,7 +72,7 @@ void lostSeedKidTalk(TObj *o)
             break;
         case 1:
             p->b04 = 3;
-            D_800A6066 = 0;
+            PLAYER_ANIM_FRAME = 0;
             PLAYER_STATE = 1;
             PLAYER_SUBSTATE = 0;
             PLAYER_STEP = 0;

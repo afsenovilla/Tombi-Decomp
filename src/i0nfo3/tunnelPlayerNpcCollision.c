@@ -7,7 +7,7 @@ extern short D_1F80019E, D_1F800246;
 extern void tunnelResolveNpcContact(unsigned char *s, TObj *o);
 extern unsigned char D_8009C93A, D_8009C942[];
 extern unsigned char PLAYER[];
-extern TObj *D_800A605C;
+extern TObj *PLAYER_ANIM;
 extern signed char D_800A60A1;
 extern unsigned short D_800A60A4[], D_800A60A6[], D_800A60A8[], D_800A60AA[];
 extern unsigned short D_800EECC0[][4];
@@ -19,7 +19,7 @@ void tunnelPlayerNpcCollision(void)
     TObj *o;
     unsigned char *s;
     if (D_1F8001A5 == 0) {
-        p = D_800EECC0[*(short *)&D_800A605C->type];
+        p = D_800EECC0[*(short *)&PLAYER_ANIM->type];
         D_800A60A4[0] = *p++;
         D_800A60A6[0] = *p++;
         D_800A60A8[0] = *p;

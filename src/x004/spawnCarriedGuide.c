@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
-extern int D_800A604C[], D_800A6050[];
+extern int PLAYER_Y_FIX[], D_800A6050[];
 extern void *D_80134CE0;
 extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
@@ -16,7 +16,7 @@ void spawnCarriedGuide(void)
         e->active = 1;
         e->type = 0x33;
         e->a.raw = ((int*)&PLAYER.obj.a.raw)[0];
-        e->y.raw = D_800A604C[0];
+        e->y.raw = PLAYER_Y_FIX[0];
         e->b.raw = D_800A6050[0];
         e->animFrame = ((unsigned short*)&PLAYER.obj.animFrame)[0] & 1;
         e->w1e = 6;

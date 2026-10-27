@@ -9,8 +9,8 @@ typedef struct {
     unsigned short clut;
     unsigned short w, h;
 } SPRT;
-extern SPRT *DAT_1f800164;
-extern int DAT_1f8001e0;
+extern SPRT *NEXT_PRIM;
+extern int CURRENT_OT;
 extern void SetSprt(void *);
 extern void SetSemiTrans(void *, int);
 extern void AddPrim(void *, void *);
@@ -23,7 +23,7 @@ void drawSpriteFrame(int obj, short x, short y, unsigned short idx)
     int tb;
     int i;
     i = idx * 4;
-    p = DAT_1f800164;
+    p = NEXT_PRIM;
     s = (SprFrag *)(*(volatile int *)(obj + 0x18) + *(short *)(*(volatile int *)(obj + 0x18) + i + 2));
     SetSprt(p);
     p->code = p->code | 1;
@@ -32,10 +32,10 @@ void drawSpriteFrame(int obj, short x, short y, unsigned short idx)
     p->y0 = y + s->dy;
     p->u0 = s->u;
     p->v0 = s->v;
-    t = DAT_1f8001e0;
+    t = CURRENT_OT;
     p->w = s->w;
     p->h = s->h;
     p->clut = s->clut;
     AddPrim((void *)(t + 4), p);
-    DAT_1f800164 = DAT_1f800164 + 1;
+    NEXT_PRIM = NEXT_PRIM + 1;
 }

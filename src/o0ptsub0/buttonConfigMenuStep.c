@@ -2,7 +2,7 @@
 // MATCHING 800e8618 232
 typedef struct S { char p[0x48]; short w48; unsigned short w4a; unsigned short w4c; unsigned short w4e; } S;
 extern S *TASK_C;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern short BUTTON_CONFIG_INDEX;
 extern void loadButtonConfig(void);
 extern void playSFX(int id);
@@ -18,7 +18,7 @@ int buttonConfigMenuStep(void)
         TASK_C->w4e++;
         break;
     case 1:
-        b = DAT_1f8001fc;
+        b = JOYPAD_STATE;
         if (b & 0x2000) {
             playSFXAndSetNote(10, 10);
             TASK_C->w4e = 0;

@@ -4,7 +4,7 @@
 
 extern void *D_80131CC8[];
 extern unsigned short D_8012F378[];
-extern unsigned char D_800A6047;
+extern unsigned char PLAYER_DRAW_DEPTH;
 extern unsigned char PLAYER;
 extern int ObjCullRegister(TObj *);
 extern void bitingPlantSway(TObj *);
@@ -65,7 +65,7 @@ void updateA10BitingPlant(TObj *o)
         }
         break;
     case 1:
-        o->b0f = D_800A6047 + *(unsigned char *)&o->w7a;
+        o->b0f = PLAYER_DRAW_DEPTH + *(unsigned char *)&o->w7a;
         ObjCullRegister(o);
         if (o->step == 0) {
             r = nearCam(o);

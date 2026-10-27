@@ -10,7 +10,7 @@ extern void FUN_80057edc(void), FUN_800597bc(void), FUN_8011bc34(void), drawHudI
 extern void FUN_80059d44(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
-extern unsigned char GAME_FADE_SCREEN_CONTROL, DAT_8009c976;
+extern unsigned char GAME_FADE_SCREEN_CONTROL, GAME_FADE_SCREEN_AMOUNT;
 extern int GAME;
 
 extern signed char D_8009B160;
@@ -36,11 +36,11 @@ void drawGameplayScene(void)
         break;
     case 2:
         u = 0xff;
-        u -= DAT_8009c976;
+        u -= GAME_FADE_SCREEN_AMOUNT;
         break;
     case 3:
     case 0x10:
-        u = DAT_8009c976;
+        u = GAME_FADE_SCREEN_AMOUNT;
         break;
     default:
         goto end;
@@ -57,7 +57,7 @@ extern void drawCategory7Objects(void), drawPauseMenu(void), FUN_8011bc34(void),
 extern void drawScreenFade(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
-extern unsigned char GAME_FADE_SCREEN_CONTROL, DAT_8009c976;
+extern unsigned char GAME_FADE_SCREEN_CONTROL, GAME_FADE_SCREEN_AMOUNT;
 extern int GAME;
 
 void drawGameplayScene(void)
@@ -82,11 +82,11 @@ void drawGameplayScene(void)
         break;
     case 2:
         u = 0xff;
-        u -= DAT_8009c976;
+        u -= GAME_FADE_SCREEN_AMOUNT;
         break;
     case 3:
     case 0x10:
-        u = DAT_8009c976;
+        u = GAME_FADE_SCREEN_AMOUNT;
         break;
     default:
         goto end;

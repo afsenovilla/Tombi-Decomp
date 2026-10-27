@@ -26,8 +26,8 @@ typedef struct { short vx, vy, vz, pad; } SVec;
 extern SVec D_1F800060;
 extern long LZ_FILE_CTRL;
 extern char D_1F8000C0b[];
-extern PolyFT4 *DAT_1f800164;
-extern int DAT_1f8001e0;
+extern PolyFT4 *NEXT_PRIM;
+extern int CURRENT_OT;
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
 extern void SetSemiTrans(PolyFT4 *, int);
@@ -51,7 +51,7 @@ static __inline__ int addprim(unsigned *a, char *b, int c, int d, unsigned e)
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned v = *(unsigned *)d;
         *(unsigned *)d = (unsigned)a;
@@ -85,7 +85,7 @@ void drawObjectSpriteScaled3D(TObj *o)
     hh = (short *)(o->d3c + *a * 4);
     xy = LZ_FILE_CTRL;
     s = (SprFrag *)(*(volatile int *)&o->d3c + hh[1]);
-    p = DAT_1f800164;
+    p = NEXT_PRIM;
     p->code = 0x2c;
     p->r0 = o->wb4;
     p->g0 = o->wb4;
@@ -106,6 +106,6 @@ void drawObjectSpriteScaled3D(TObj *o)
     p->y3 = p->y2;
     z = SPAD.i74;
     p->clut = o->w08;
-    if (addprim((unsigned *)p, (char *)(DAT_1f8001e0 + 0x10), z, o->b0f, 0x9000000) == 0)
-        DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+    if (addprim((unsigned *)p, (char *)(CURRENT_OT + 0x10), z, o->b0f, 0x9000000) == 0)
+        NEXT_PRIM = (PolyFT4 *)((char *)NEXT_PRIM + 0x28);
 }

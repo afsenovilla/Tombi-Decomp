@@ -9,7 +9,7 @@ typedef struct V { char c[12]; } V;
 extern TObj *SCRIPT_OBJECTS;
 extern TObj PLAYER;
 extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
-extern unsigned short D_800A6066[];
+extern unsigned short PLAYER_ANIM_FRAME[];
 extern Fix16 *PLAYER_H;
 extern short D_800A60EA[];
 extern TObj *showMessageBoxDirect(int, int, V *);
@@ -224,7 +224,7 @@ void aspiringActorGuardTalk(TObj *o)
         o->state = 0;
         break;
     case 21:
-        D_800A6066[0] = p->h->p.whole < PLAYER_H->p.whole;
+        PLAYER_ANIM_FRAME[0] = p->h->p.whole < PLAYER_H->p.whole;
         if (p->visible == 0) {
             PLAYER_STATE[0] = 1;
             ((unsigned char*)&GVARS.b3f)[0] = 0;

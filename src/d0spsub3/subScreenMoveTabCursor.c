@@ -1,7 +1,7 @@
 // FUNC 800ec3f0 308 D0SPSUB3
 // MATCHING 800ec3f0 308
 typedef struct { char p[0x16]; short cursor; } Menu;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern void playSFX(int id);
 
 static inline int skipRow3(Menu *m)
@@ -20,7 +20,7 @@ int subScreenMoveTabCursor(Menu *m)
 {
     short n = m->cursor;
     if (n < 4) {
-        unsigned short pad = D_1F8001FC;
+        unsigned short pad = JOYPAD_STATE;
         if (pad & 0x10) {
             playSFX(8);
             if (--m->cursor < 0) m->cursor = 8;
@@ -36,7 +36,7 @@ int subScreenMoveTabCursor(Menu *m)
         }
         return 0;
     }
-    if (!(D_1F8001FC & 0x40)) return 0;
+    if (!(JOYPAD_STATE & 0x40)) return 0;
     m->cursor = 0;
     playSFX(8);
     return 1;

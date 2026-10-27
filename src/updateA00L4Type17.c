@@ -4,7 +4,7 @@
 extern void cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
 extern unsigned char PLAYER_SUBSTATE;
-extern unsigned char DAT_800a6047[];
+extern unsigned char PLAYER_DRAW_DEPTH[];
 extern short *PLAYER_D[];
 
 void updateA00L4Type17(TObj *o)
@@ -17,7 +17,7 @@ void updateA00L4Type17(TObj *o)
             o->box2 = 4;
             o->box3 = 8;
             o->b0a = 0x11;
-            o->b0f = DAT_800a6047[0] + 1;
+            o->b0f = PLAYER_DRAW_DEPTH[0] + 1;
             o->d84 = 0;
             o->d88 = 0;
             o->d8c = 0;

@@ -14,7 +14,7 @@ extern unsigned char D_8009CE55;
 extern unsigned char D_8009CE57;
 extern unsigned char D_8009CF13;
 extern unsigned char GAME_PLAYER_MODE[];
-extern unsigned char D_8009D2B1;
+extern unsigned char GAME_BITTEN_JUMP_KIND;
 extern unsigned char D_8009CDCF, D_8009CE4B, D_8009CEED, D_8009CFC6, D_8009CFC7, D_8009CFD7;
 #include "gamestate.h"
 
@@ -61,7 +61,7 @@ void tunnelPlayerItemUseStep(TObj *o)
             D_8009C940 = 0;
             break;
         case 9:
-            D_8009D2B1 = 0;
+            GAME_BITTEN_JUMP_KIND = 0;
             D_8009C940 = 0;
             break;
         case 0x9A:

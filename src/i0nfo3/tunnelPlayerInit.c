@@ -16,14 +16,14 @@ extern unsigned char D_8009CEF7[];
 extern unsigned char D_8009CF06[];
 extern unsigned char D_8009D006[];
 extern signed char GAME_PLAYER_MODE[];
-extern unsigned char D_8009D2B3[];
+extern unsigned char GAME_EQUIPPED_PANTS[];
 extern unsigned short D_800A6040[];
 extern unsigned char D_800A60A3[];
 extern unsigned char D_800A60FA[];
 extern unsigned short D_800A60FC[];
 extern unsigned char D_800EECE8[];
-extern unsigned short D_8009C982;
-extern unsigned char D_8009C970;
+extern unsigned short GAME_SELECTED_SPAWN_POINT;
+extern unsigned char GAME_PLAYER_HEALTH;
 
 void tunnelPlayerInit(TObj *o)
 {
@@ -34,9 +34,9 @@ void tunnelPlayerInit(TObj *o)
         func_8001FE6C(o);
         PLAYER_EXT->w14 = (func_8005EFE4() == 1 || func_8005EFE4() == 2) ? 0 : 0;
         o->w1e = 0;
-        D_800A60FA[0] = D_8009D2B3[0];
+        D_800A60FA[0] = GAME_EQUIPPED_PANTS[0];
         D_800A6040[0] = D_8007A024[D_8009C990[0]][0];
-        D_800A60FC[0] = D_8007A024[D_8009D2B3[0]][1];
+        D_800A60FC[0] = D_8007A024[GAME_EQUIPPED_PANTS[0]][1];
         PLAYER_EXT->w28 = 0xFFFF;
         PLAYER_EXT->w2a = 0xFFFF;
         PLAYER_EXT->w2e = 0xFFFF;
@@ -54,9 +54,9 @@ void tunnelPlayerInit(TObj *o)
         D_8009CEF7[0] = 0;
         if (D_8009CF06[0] != 0) o->subtype = 1;
         if (D_8009D006[0] != 0) o->subtype = 2;
-        o->animFrame = D_800EECE8[D_8009C982];
+        o->animFrame = D_800EECE8[GAME_SELECTED_SPAWN_POINT];
         if (GAME.selectedSpawnPoint != 0) o->animFrame = 4;
-        o->w9a = D_8009C970;
+        o->w9a = GAME_PLAYER_HEALTH;
         o->w98 = GAME.playerHealth;
         *(signed char *)&o->b0f = -8;
         o->d3c = SPAD.i2f0;

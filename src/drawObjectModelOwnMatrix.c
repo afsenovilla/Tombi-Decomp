@@ -11,7 +11,7 @@ typedef struct { short m[3][3]; int t[3]; } MATR;
 extern MATR DAT_1f800000;
 extern MATR DAT_1f8000c0;
 extern SVEC DAT_1f800060;
-extern int *DAT_1f8001e0;
+extern int *CURRENT_OT;
 extern void MulMatrix0(MATR *, MATR *, MATR *);
 extern void ApplyRotMatrix(SVEC *, int *);
 extern void SetRotMatrix(MATR *);
@@ -30,6 +30,6 @@ void drawObjectModelOwnMatrix(TObj *o)
     DAT_1f800000.t[2] += DAT_1f8000c0.t[2];
     SetRotMatrix(&DAT_1f800000);
     SetTransMatrix(&DAT_1f800000);
-    drawModel(o->da0, &DAT_1f8001e0[*(signed char *)&o->b0f + 4], o, o->ba4);
+    drawModel(o->da0, &CURRENT_OT[*(signed char *)&o->b0f + 4], o, o->ba4);
 }
 #endif

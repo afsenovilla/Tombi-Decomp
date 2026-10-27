@@ -23,9 +23,9 @@ typedef struct { char p[0x48]; unsigned short w48; char p2[0x1e]; unsigned char 
 typedef struct { char d[8]; } E8;
 extern M MOVIE_DEC_ENV;
 extern volatile int D_8009BCDC;
-extern unsigned char D_1F8001D3;
+extern unsigned char MOVIE_SKIP_REQUEST;
 extern T *TASK_C;
-extern short D_1F8001F4;
+extern short FRAME_BUFFER_INDEX;
 extern char D_80077F0C[];
 extern unsigned char D_80077F3C[];
 extern E8 FILE_LINKS[];
@@ -52,7 +52,7 @@ void moviePlayerTask(void)
     TASK_C->w48 = 0;
     TASK_C->b68 = 0;
     for (;;) {
-        if (D_1F8001D3 == 1) {
+        if (MOVIE_SKIP_REQUEST == 1) {
             TASK_C->w48 = 3;
             CdMix(D_80077F0C);
         }
@@ -68,7 +68,7 @@ void moviePlayerTask(void)
             TASK_C->w48 = 2;
         case 2:
             DecDCTin(MOVIE_DEC_ENV.in[MOVIE_DEC_ENV.idx], 2);
-            k = D_1F8001F4;
+            k = FRAME_BUFFER_INDEX;
             MOVIE_DEC_ENV.f28 = k;
             MOVIE_DEC_ENV.w2c = MOVIE_DEC_ENV.ent[k].w;
             MOVIE_DEC_ENV.w2e = MOVIE_DEC_ENV.ent[k].h;
@@ -81,9 +81,9 @@ void moviePlayerTask(void)
                     cnt--;
                     if (cnt == 0) {
                         *(volatile int *)&MOVIE_DEC_ENV.f34 = 1;
-                        MOVIE_DEC_ENV.f28 = D_1F8001F4;
-                        MOVIE_DEC_ENV.w2c = MOVIE_DEC_ENV.ent[D_1F8001F4].w;
-                        MOVIE_DEC_ENV.w2e = MOVIE_DEC_ENV.ent[D_1F8001F4].h;
+                        MOVIE_DEC_ENV.f28 = FRAME_BUFFER_INDEX;
+                        MOVIE_DEC_ENV.w2c = MOVIE_DEC_ENV.ent[FRAME_BUFFER_INDEX].w;
+                        MOVIE_DEC_ENV.w2e = MOVIE_DEC_ENV.ent[FRAME_BUFFER_INDEX].h;
                     }
                 } while (D_8009BCDC == 0);
             }
@@ -100,7 +100,7 @@ void moviePlayerTask(void)
             while (CdControlB(9, 0, 0) == 0)
                 ;
             SPAD.b1cc = 0;
-            D_1F8001D3 = 0;
+            MOVIE_SKIP_REQUEST = 0;
             exitTask();
             break;
         }

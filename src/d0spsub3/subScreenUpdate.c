@@ -15,7 +15,7 @@ typedef struct {
 extern Menu MENU_STATE;
 extern char D_800EEA00[], D_800EF600[], D_800F5408[], D_800F543C[], D_800F5448[], D_800F54AC[], D_800F54D8[], D_800F57D8[], D_800F5434[], D_800F5400[];
 extern void *D_1F8003A0;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern unsigned short PAD_PRESSED;
 extern short D_80100918;
 extern int D_80100A88, D_80100A8C;
@@ -64,7 +64,7 @@ int subScreenUpdate(int arg)
             D_80100A8C = 0x20;
         } else if (--D_80100A8C == 0) {
             D_80100A8C = 4;
-            D_1F8001FC |= k;
+            JOYPAD_STATE |= k;
         }
         arg = func_800EC89C(m);
     }

@@ -8,7 +8,7 @@ typedef struct {
 } G;
 extern G *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern int AnimAdvance(TObj *o);
 extern void playerReleaseBittenAndClearFlags(TObj *o);
 extern void SfxPlay3(int, int);
@@ -46,21 +46,21 @@ void playerStep26Area9(TObj *o)
         o->state++;
     case 1:
         AnimAdvance(o);
-        if (D_1F8001FC & SPAD.s3c6) {
+        if (JOYPAD_STATE & SPAD.s3c6) {
             PLAYER_EXT->b9 = 0;
             o->b04 = 1;
             o->step = 0x27;
             o->state = 0;
             o->y.p.whole += 0x10;
         }
-        if (D_1F8001FC & 0x10) {
+        if (JOYPAD_STATE & 0x10) {
             PLAYER_EXT->b9 = 0;
             o->b04 = 1;
             o->step = 0x27;
             o->state = 0;
             o->y.p.whole += 0x10;
         }
-        if (D_1F8001FC & 0x40) {
+        if (JOYPAD_STATE & 0x40) {
             PLAYER_EXT->b9 = 0;
             o->b9e = 6;
             o->step = 0x25;

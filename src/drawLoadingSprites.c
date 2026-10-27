@@ -8,8 +8,8 @@ typedef struct {
     PTAG tag;
     int code[2];
 } DRM;
-extern DRM *DAT_8009d540;
-extern PTAG *DAT_1f8001e0;
+extern DRM *DEBUG_NEXT_PRIM;
+extern PTAG *CURRENT_OT;
 extern int GetGraphType(void);
 extern void FUN_80021478(int a, int b, int c, int d, int e);
 extern void drawUiSprite(short x, short y, short c);
@@ -31,10 +31,10 @@ void drawLoadingSprites(int c, short s)
                 drawUiSprite(i * 0x30, j * 0x30, c);
         }
     }
-    p = DAT_8009d540;
+    p = DEBUG_NEXT_PRIM;
     SetDrawMode(p, 0, 0, 0, 0);
-    ot = DAT_1f8001e0;
+    ot = CURRENT_OT;
     p->tag.addr = ot->addr;
     ot->addr = (unsigned)p;
-    DAT_8009d540++;
+    DEBUG_NEXT_PRIM++;
 }

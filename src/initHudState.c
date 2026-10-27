@@ -11,7 +11,7 @@ extern short D145c, D145a, D1462, D1460, D1464;
 extern int D1428;
 extern void *D142c;
 extern int S2d8;
-extern unsigned char D3690;
+extern unsigned char GAME_PLAYER_HEALTH;
 extern unsigned char D2f81;
 extern char A2048[], A2068[], A20ec[], A2100[], A2150[], A22a0[], A24f8[], A2678[];
 
@@ -28,9 +28,9 @@ void initHudState(void)
     D145e = 1;
     D145a = 0;
     D1428 = S2d8;
-    D1462 = D3690;
-    D1460 = D3690;
-    D1464 = D3690;
+    D1462 = GAME_PLAYER_HEALTH;
+    D1460 = GAME_PLAYER_HEALTH;
+    D1464 = GAME_PLAYER_HEALTH;
     if (D2f81 < 9)
         D142c = A2048;
     else
@@ -58,7 +58,7 @@ extern short D145c, D145a, D1462, D1460, D1464;
 extern int D1428;
 extern void *D142c;
 extern int S2d8;
-extern unsigned char D3690;
+extern unsigned char GAME_PLAYER_HEALTH;
 extern unsigned char D2f81;
 extern char A2048[], A2068[], A20ec[], A2100[], A2150[], A22a0[], A24f8[], A2678[];
 
@@ -73,9 +73,9 @@ void initHudState(void)
     D145c = 600;
     D145a = 0;
     D1428 = S2d8;
-    D1462 = D3690;
-    D1460 = D3690;
-    D1464 = D3690;
+    D1462 = GAME_PLAYER_HEALTH;
+    D1460 = GAME_PLAYER_HEALTH;
+    D1464 = GAME_PLAYER_HEALTH;
     if (D2f81 == 0)
         D142c = A2048;
     else

@@ -9,7 +9,7 @@ typedef struct {
     char p18[6];
     short w1e;
 } Menu;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern int subScreenMoveTabCursor(Menu *m, int n);
 extern void SfxPlay2(int a, int b);
 extern void playSFXAndSetNote(int a, int b);
@@ -22,11 +22,11 @@ int subScreenMainStep(Menu *m)
         m->state++;
     case 1:
         if (subScreenMoveTabCursor(m, 1)) return 0;
-        if (D_1F8001FC & 0x2000) {
+        if (JOYPAD_STATE & 0x2000) {
             SfxPlay2(0x1B, 0x1C);
             return 1;
         }
-        if (!(D_1F8001FC & 0x4008)) return 0;
+        if (!(JOYPAD_STATE & 0x4008)) return 0;
         switch (m->cursor) {
         case 0:
             break;

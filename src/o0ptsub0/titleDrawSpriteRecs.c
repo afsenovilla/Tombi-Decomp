@@ -19,8 +19,8 @@ typedef struct { short x, y; unsigned char u, v; short w, h, tp, cx, cy; } SprRe
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern char *D_1F800164;
-extern unsigned long *DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern unsigned short GetClut(int x, int y);
 extern void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, void *tw);
 
@@ -43,13 +43,13 @@ void titleDrawSpriteRecs(SprRec *r, int x, short y, int dfe)
         SP->w = r->w;
         SP->h = r->h;
         SP->clut = GetClut(r->cx, r->cy);
-        p = (SPRT *)D_1F800164;
+        p = (SPRT *)NEXT_PRIM;
         *p = *SP;
-        addPrim(DAT_1f8001e0 + 1, p);
-        m = (DR_MODE *)(D_1F800164 += sizeof(SPRT));
+        addPrim(CURRENT_OT + 1, p);
+        m = (DR_MODE *)(NEXT_PRIM += sizeof(SPRT));
         SetDrawMode(m, dfe, 0, r->tp, 0);
-        addPrim(DAT_1f8001e0 + 1, m);
-        D_1F800164 += sizeof(DR_MODE);
+        addPrim(CURRENT_OT + 1, m);
+        NEXT_PRIM += sizeof(DR_MODE);
         r++;
     }
 }

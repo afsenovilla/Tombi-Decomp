@@ -8,7 +8,7 @@ typedef struct { TObj o; char pad[0x14]; } GObj; /* 0xD4 bytes */
 extern GObj D_800A6610[];
 extern MATRIX D_1F800000, D_1F800020;
 extern SVECTOR D_1F800060, D_1F800068;
-extern char *DAT_1f8001e0;
+extern char *CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 extern MATRIX *MulMatrix0(MATRIX *, MATRIX *, MATRIX *);
@@ -45,7 +45,7 @@ void gameOverDrawLetters(void)
         D_1F800000.t[2] += VIEW_CAMERA.m.t[2];
         SetRotMatrix(&D_1F800000);
         SetTransMatrix(&D_1F800000);
-        ot = DAT_1f8001e0 + 0x10;
+        ot = CURRENT_OT + 0x10;
         m = func_80022ABC((char *)o->da0 + 0x10, (char *)o->da0 + 0x14, ot);
         m = func_80022C80(m, m + 4, ot);
         m = func_80022EA8(m, m + 4, ot);

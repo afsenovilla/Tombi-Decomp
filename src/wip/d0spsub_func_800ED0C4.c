@@ -17,7 +17,7 @@ typedef struct { unsigned char b0, state, sub, p3; char p4[0xE]; short mode; sho
 typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
 typedef struct { unsigned char b0, b1, b2, b3; } Obj;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern Inv D_8009D1A4;
 extern unsigned short D_8009D2A4;
 extern unsigned char D_8009D0A4[];
@@ -70,20 +70,20 @@ int func_800ED0C4(Menu *m)
     case 1:
         if (subScreenMoveTabCursor(m, 1)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
-        if (D_1F8001FC & 0x400) {
+        if (JOYPAD_STATE & 0x400) {
             if (m->page > 0) {
                 playSFX(8);
                 m->page--;
             }
-        } else if (D_1F8001FC & 0x800) {
+        } else if (JOYPAD_STATE & 0x800) {
             if (m->page < pages - 1) {
                 playSFX(8);
                 m->page++;
             }
-        } else if (D_1F8001FC & 0x2000) {
+        } else if (JOYPAD_STATE & 0x2000) {
             SfxPlay2(0x1B, 0x1C);
             return 1;
-        } else if (D_1F8001FC & 0x4008) {
+        } else if (JOYPAD_STATE & 0x4008) {
             switch (m->cursor) {
             case 0:
                 if (D_8009D1A4.count) {
@@ -167,24 +167,24 @@ int func_800ED0C4(Menu *m)
     case 2:
         if (subScreenMoveGridCursor(m)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
-        if (D_1F8001FC & 0x400) {
+        if (JOYPAD_STATE & 0x400) {
             if (m->page > 0) {
                 m->page--;
                 m->sel -= 10;
                 playSFX(8);
             }
-        } else if (D_1F8001FC & 0x800) {
+        } else if (JOYPAD_STATE & 0x800) {
             if (m->page < pages - 1) {
                 m->page++;
                 m->sel += 10;
                 if (m->sel >= D_8009D1A4.count) m->sel = D_8009D1A4.count - 1;
                 playSFX(8);
             }
-        } else if (D_1F8001FC & 0x2000) {
+        } else if (JOYPAD_STATE & 0x2000) {
             m->sel = -1;
             SfxPlay2(0x1B, 0x1C);
             m->state = 1;
-        } else if ((D_1F8001FC & 0x4008) && m->cursor == 0) {
+        } else if ((JOYPAD_STATE & 0x4008) && m->cursor == 0) {
             Cond *c, *base;
             int r;
             D_80111128 = D_8010A0C8[m->sel];
@@ -280,21 +280,21 @@ int func_800ED0C4(Menu *m)
             D_8010A060 = -1;
             m->sub++;
         case 1:
-            if (D_1F8001FC & 0x10) {
+            if (JOYPAD_STATE & 0x10) {
                 if (D_8010A058 > 0) {
                     D_8010A058--;
                     playSFX(8);
                 }
-            } else if (D_1F8001FC & 0x40) {
+            } else if (JOYPAD_STATE & 0x40) {
                 if (D_8010A058 < D_8010A05C - 1) {
                     D_8010A058++;
                     playSFX(8);
                 }
-            } else if (D_1F8001FC & 0x2000) {
+            } else if (JOYPAD_STATE & 0x2000) {
                 D_8010A058 = -1;
                 SfxPlay2(0x1B, 0x1C);
                 m->state--;
-            } else if (D_1F8001FC & 0x4008) {
+            } else if (JOYPAD_STATE & 0x4008) {
                 unsigned short bits;
                 z = 0;
                 bits = D_8009D2C4[D_8010A068[D_8010A058]];
@@ -309,21 +309,21 @@ int func_800ED0C4(Menu *m)
             }
             break;
         case 2:
-            if (D_1F8001FC & 0x10) {
+            if (JOYPAD_STATE & 0x10) {
                 if (D_8010A060 > 0) {
                     D_8010A060--;
                     playSFX(8);
                 }
-            } else if (D_1F8001FC & 0x40) {
+            } else if (JOYPAD_STATE & 0x40) {
                 if (D_8010A060 < D_8010A064 - 1) {
                     D_8010A060++;
                     playSFX(8);
                 }
-            } else if (D_1F8001FC & 0x2000) {
+            } else if (JOYPAD_STATE & 0x2000) {
                 D_8010A060 = -1;
                 SfxPlay2(0x1B, 0x1C);
                 m->sub--;
-            } else if (D_1F8001FC & 0x4008) {
+            } else if (JOYPAD_STATE & 0x4008) {
                 unsigned char *t;
                 int n;
                 int i1 = D_8010A068[D_8010A058], i2 = D_8010A088[D_8010A060];
@@ -367,24 +367,24 @@ int func_800ED0C4(Menu *m)
     case 4:
         if (subScreenMoveGridCursorN(m, D_8009D1A4.count)) return 0;
         pages = (D_8009D1A4.count + 9) / 10;
-        if (D_1F8001FC & 0x400) {
+        if (JOYPAD_STATE & 0x400) {
             if (m->page > 0) {
                 m->page--;
                 m->sel -= 10;
                 playSFX(8);
             }
-        } else if (D_1F8001FC & 0x800) {
+        } else if (JOYPAD_STATE & 0x800) {
             if (m->page < pages - 1) {
                 m->page++;
                 m->sel += 10;
                 if (m->sel >= D_8009D1A4.count) m->sel = D_8009D1A4.count - 1;
                 playSFX(8);
             }
-        } else if (D_1F8001FC & 0x2000) {
+        } else if (JOYPAD_STATE & 0x2000) {
             m->sel = -1;
             SfxPlay2(0x1B, 0x1C);
             m->state = 1;
-        } else if (D_1F8001FC & 0x4008) {
+        } else if (JOYPAD_STATE & 0x4008) {
             subScreenOpenMessage(1, D_8010A0C8[m->sel], 2);
             D_8010A204 = 0;
             SfxPlay2(10, 10);

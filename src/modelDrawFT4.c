@@ -28,11 +28,11 @@ typedef struct {
     unsigned short uv3;
 } Face;
 
-extern PolyFT4 *DAT_1f800164;
+extern PolyFT4 *NEXT_PRIM;
 extern long LZ_FILE_CTRL;
-extern char *DAT_1f80008c;
-extern unsigned long *DAT_1f8001e0;
-extern unsigned long *D_1E0[]; /* same global as DAT_1f8001e0 (second name keeps the load after the stores) */
+extern char *MODEL_VERTEX_PTR;
+extern unsigned long *CURRENT_OT;
+extern unsigned long *D_1E0[]; /* same global as CURRENT_OT (second name keeps the load after the stores) */
 
 #define gte_ldv3c(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 );lwc2 $2, 8( %0 );lwc2 $3, 12( %0 );lwc2 $4, 16( %0 );lwc2 $5, 20( %0 )" : : "r"(r0))
 #define gte_rtpt() __asm__ volatile ("nop;nop;.word 0x4a280030")
@@ -67,7 +67,7 @@ char *modelDrawFT4(TObj *o, long *f, char *vtx, unsigned long *ot)
                 gte_nclip();
                 gte_stopz(&LZ_FILE_CTRL);
                 if (LZ_FILE_CTRL > 0) {
-                    p = DAT_1f800164;
+                    p = NEXT_PRIM;
                     gte_stsxy3_ft4(p);
                     gte_ldv0(vtx + 0x20);
                     gte_rtps();
@@ -89,7 +89,7 @@ char *modelDrawFT4(TObj *o, long *f, char *vtx, unsigned long *ot)
                                 otz = (long)D_1E0[0] + 0xc;
                             } else {
                                 otz = (otz << 2) + (long)ot;
-                                if ((unsigned long)(otz - (long)DAT_1f8001e0) >= 0xca0) goto next;
+                                if ((unsigned long)(otz - (long)CURRENT_OT) >= 0xca0) goto next;
                                 p->uv0 = ((Face *)f)->uv0;
                                 p->uv1 = ((Face *)f)->uv1;
                                 p->uv2 = ((Face *)f)->uv2;
@@ -98,7 +98,7 @@ char *modelDrawFT4(TObj *o, long *f, char *vtx, unsigned long *ot)
                             t = *(unsigned long *)otz;
                             *(unsigned long *)otz = (unsigned long)p;
                             p->tag = t | len;
-                            DAT_1f800164 = DAT_1f800164 + 1;
+                            NEXT_PRIM = NEXT_PRIM + 1;
                         }
                     }
                 }
@@ -108,6 +108,6 @@ char *modelDrawFT4(TObj *o, long *f, char *vtx, unsigned long *ot)
             vtx += 0x28;
         } while (--n != 0);
     }
-    DAT_1f80008c = vtx;
+    MODEL_VERTEX_PTR = vtx;
     return (char *)f;
 }

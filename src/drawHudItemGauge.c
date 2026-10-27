@@ -11,8 +11,8 @@ typedef struct {
 } Sprt;
 typedef struct { unsigned char a, pa, b, pb, c, pc; } Col6;
 
-extern Sprt *D_1f800164;
-extern int D_1f8001e0;
+extern Sprt *NEXT_PRIM;
+extern int CURRENT_OT;
 extern unsigned char DAT_8009cd98[];
 extern unsigned char DAT_8009cd9c[];
 extern unsigned char DAT_8009cd9f;
@@ -37,7 +37,7 @@ void drawHudItemGauge(TObj *o, int idx, short x, short y, short flag)
 
     if (flag)
         drawSpriteFrame(o, (short)(x + 8), y, *(unsigned short *)((void **)o->movetab)[DAT_8009cd98[idx] + 1]);
-    p = D_1f800164;
+    p = NEXT_PRIM;
     s = (unsigned char *)o->b.raw + *(short *)(*(volatile int *)&o->b.raw + (*(unsigned short *)o->d34 << 2) + 2);
     FUN_8005e74c(p);
     p->code |= 1;
@@ -49,8 +49,8 @@ void drawHudItemGauge(TObj *o, int idx, short x, short y, short flag)
     p->h = s[11];
     c = *((unsigned char *)o + idx + 0x64) + 0x1e4;
     p->clut = FUN_8005e420(0x150, idx * 4 + c);
-    FUN_8005e580(D_1f8001e0 + 4, p);
-    D_1f800164++;
+    FUN_8005e580(CURRENT_OT + 4, p);
+    NEXT_PRIM++;
     FUN_80059464(0x14, 1);
     r[0] = x + 0x13;
     r[1] = y + 2;

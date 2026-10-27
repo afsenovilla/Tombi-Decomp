@@ -5,14 +5,14 @@
 // Demo version of PAL main0 8001B49C (areaMode4Handler.c): func_80018254 calls, no pad reset, exits to mode 7 (PAL 8).
 typedef struct G { char pad[0x4c]; unsigned short w4c, w4e; } G;
 extern G *TASK_C;
-extern int DAT_8009c968[];
+extern int GAME_TOTAL_TIME_PLAYED[];
 extern unsigned char DAT_1f8001c2;
 extern volatile unsigned short PAD_PRESSED[];
 extern volatile unsigned short DAT_8009d674;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern unsigned char DAT_800b1410;
 extern unsigned char DAT_1f8001cf;
-extern unsigned char DAT_8009c967;
+extern unsigned char GAME_KEEP_BGM;
 extern unsigned char DAT_8009e375, DAT_8009e376, DAT_8009e377;
 extern unsigned char DAT_8009f085, DAT_8009f086, DAT_8009f087;
 extern void FUN_800175f0(void);
@@ -42,7 +42,7 @@ void areaMode4Handler(void)
         DAT_800b1410 = 0;
         func_80018254(D_800A2A18);
         DAT_1f8001cf = 1;
-        if (DAT_8009c967 != 1)
+        if (GAME_KEEP_BGM != 1)
             startAreaBgm();
         TASK_C->w4e++;
         q = allocObjectLayer7();
@@ -56,7 +56,7 @@ void areaMode4Handler(void)
         }
         break;
     case 1:
-        DAT_8009c968[0]++;
+        GAME_TOTAL_TIME_PLAYED[0]++;
         areaMode4Tick();
         if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 0x800) && (PAD_PRESSED[0] & 8))
             TASK_C->w4e = 3;
@@ -78,14 +78,14 @@ void areaMode4Handler(void)
 #else
 typedef struct G { char pad[0x4c]; unsigned short w4c, w4e; } G;
 extern G *TASK_C;
-extern int DAT_8009c968[];
+extern int GAME_TOTAL_TIME_PLAYED[];
 extern unsigned char DAT_1f8001c2;
 extern volatile unsigned short PAD_PRESSED[];
 extern volatile unsigned short DAT_8009d674;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern unsigned char DAT_800b1410;
 extern unsigned char DAT_1f8001cf;
-extern unsigned char DAT_8009c967;
+extern unsigned char GAME_KEEP_BGM;
 extern unsigned char DAT_8009e375, DAT_8009e376, DAT_8009e377;
 extern unsigned char DAT_8009f085, DAT_8009f086, DAT_8009f087;
 extern void FUN_800175f0(void);
@@ -112,7 +112,7 @@ void areaMode4Handler(void)
         initHudState();
         DAT_800b1410 = 0;
         DAT_1f8001cf = 1;
-        if (DAT_8009c967 != 1)
+        if (GAME_KEEP_BGM != 1)
             startAreaBgm();
         TASK_C->w4e++;
         q = allocObjectLayer7();
@@ -125,11 +125,11 @@ void areaMode4Handler(void)
             *(short *)(q + 0x1a) = 0;
         }
         DAT_8009d674 = 0;
-        DAT_1f8001fc = 0;
+        JOYPAD_STATE = 0;
         PAD_PRESSED[0] = DAT_8009d674;
         break;
     case 1:
-        DAT_8009c968[0]++;
+        GAME_TOTAL_TIME_PLAYED[0]++;
         areaMode4Tick();
         if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 8) && (PAD_PRESSED[0] & 0x800))
             TASK_C->w4e = 3;

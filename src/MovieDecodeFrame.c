@@ -30,7 +30,7 @@ extern u_long StFreeRing(u_long *base);
 extern void DecDCTvlc(u_long *bs, u_long *buf);
 extern void CdMix(void *vol);
 extern void startBgmTrack(int);
-extern unsigned char DAT_1f8001cd;
+extern unsigned char MOVIE_ID;
 static short DAT_80077f10[22] = {
     0x586, 0x16e, 0x13c, 0x1d3, 0x6e, 0x98, 0xb5, 0xb5,
     0xb6, 0xe3, 0xe6, 0xe3, 0x9d, 0xe7, 0xe8, 0xe8,
@@ -47,11 +47,11 @@ static __inline__ u_long *strNext(DECENV *dec)
     while (StGetNext(&addr, (u_long **)&sector)) {
         if (--cnt == 0) return 0;
     }
-    if (sector->frameCount >= DAT_80077f10[DAT_1f8001cd] - 3) {
+    if (sector->frameCount >= DAT_80077f10[MOVIE_ID] - 3) {
         TASK_C->state0 = 3;
         CdMix(DAT_80077f0c);
     }
-    if (DAT_1f8001cd == 0x15 && TASK_C->loadGameSelected == 0 && sector->frameCount > 14) {
+    if (MOVIE_ID == 0x15 && TASK_C->loadGameSelected == 0 && sector->frameCount > 14) {
         startBgmTrack(0);
         TASK_C->loadGameSelected = 1;
     }

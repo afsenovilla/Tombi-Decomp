@@ -13,8 +13,8 @@ typedef struct {
     char p28[0x14];
     unsigned char num[8];
 } Obj;
-extern SPRT *D_1F800164;
-extern int D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern int CURRENT_OT;
 extern void SetSprt(SPRT *);
 extern void SetSemiTrans(SPRT *, int);
 extern void AddPrim(void *, SPRT *);
@@ -48,7 +48,7 @@ void subScreenDrawDigitsSprite(Obj *o, short x, short y)
     t = (T *)(s + 2);
     n = *e;
     do {
-        p = D_1F800164;
+        p = NEXT_PRIM;
         SetSprt(p);
         p->code |= 1;
         SetSemiTrans(p, 1);
@@ -61,8 +61,8 @@ void subScreenDrawDigitsSprite(Obj *o, short x, short y)
         s += 0x10;
         p->h = t->h;
         p->clut = t->clut;
-        AddPrim((void *)(D_1F8001E0 + 4), p);
-        D_1F800164 = D_1F800164 + 1;
+        AddPrim((void *)(CURRENT_OT + 4), p);
+        NEXT_PRIM = NEXT_PRIM + 1;
         t++;
     } while (n != 0);
     AddDrawMode(0x15, 1);

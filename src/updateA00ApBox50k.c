@@ -1,7 +1,7 @@
 // FUNC 80121870 492 X000
 // MATCHING 80121870 492
 #include "TOBJ.H"
-extern unsigned int DAT_8009c96c;
+extern unsigned int GAME_PLAYER_AP;
 extern int FUN_800202b4(TObj *);
 extern void a00ApBox50kShowRequiredAp(TObj *);
 extern void setEventStarted(int, int, int);
@@ -46,7 +46,7 @@ void updateA00ApBox50k(TObj *o)
                     o->step++;
                 break;
             case 1:
-                if (DAT_8009c96c <= 0xc34f) {
+                if (GAME_PLAYER_AP <= 0xc34f) {
                     setEventStarted(0x10, 0, 0);
                     o->step--;
                 } else {

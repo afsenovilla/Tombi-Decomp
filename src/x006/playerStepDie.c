@@ -1,7 +1,7 @@
 // FUNC 800fe75c 304 X006
 // MATCHING 800fe75c 304
 #include "TOBJ.H"
-extern unsigned char DAT_8009d2b1, DAT_8009cf06, DAT_8009c938, DAT_8009c942;
+extern unsigned char GAME_BITTEN_JUMP_KIND, DAT_8009cf06, DAT_8009c938, DAT_8009c942;
 extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern unsigned char *GRABBED_OBJECT;
 extern void FUN_8001f110(int);
@@ -27,7 +27,7 @@ void playerStepDie(TObj *o)
         break;
     case 1:
         if (--o->timer == 0) {
-            DAT_8009d2b1 = 0;
+            GAME_BITTEN_JUMP_KIND = 0;
             DAT_8009cf06 = 0;
             if (GAME != 10 || GAME_SELECTED_SECTION != 0)
                 DAT_8009c938 = 2;

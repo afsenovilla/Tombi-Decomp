@@ -4,7 +4,7 @@
 extern TObj *func_8002DC50(int a, int b, int x, int y);
 extern signed char D_8009C93F, D_8009C942, GAME_PLAYER_MODE;
 extern signed char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
-extern unsigned short D_800A6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern unsigned char D_800A60A1, D_800A60A3;
 extern signed char D_800A60F8;
 
@@ -17,7 +17,7 @@ void overheadTalkSpotStep(TObj *o)
         r = 0;
         if (o->b68 != 0) {
             int a = D_800A60A1;
-            if (a == 2 && (D_800A6066 & 7) == a) {
+            if (a == 2 && (PLAYER_ANIM_FRAME & 7) == a) {
                 *(int *)((char *)o + 0x90) = (int)func_8002DC50(1, 1, 0xA0, 0x8C);
                 GAME_PLAYER_MODE = 2;
                 D_8009C942 = 1;

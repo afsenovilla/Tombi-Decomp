@@ -12,8 +12,8 @@ typedef struct {
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 #define S ((TILE *)0x1F800000)
-extern TILE *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern TILE *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 
 void memCardDrawCursorTile(short x, short y)
 {
@@ -28,8 +28,8 @@ void memCardDrawCursorTile(short x, short y)
     S->code &= ~2;
     S->y0 = y;
     S->h = 0x10;
-    p = D_1F800164;
+    p = NEXT_PRIM;
     *p = *S;
-    addPrim(D_1F8001E0 + 1, p);
-    D_1F800164++;
+    addPrim(CURRENT_OT + 1, p);
+    NEXT_PRIM++;
 }

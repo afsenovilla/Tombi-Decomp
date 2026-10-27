@@ -4,13 +4,13 @@
 /* matched: case 2 builds lim on the s & 0xf temp (as case 1) and stores D90 last; s priority bump in case 1. */
 #include "TOBJ.H"
 
-extern unsigned short *D_1F800278;
+extern unsigned short *COLLISION_SEG_PTR;
 extern unsigned short D_1F800280, D_1F800282, D_1F800284;
 extern unsigned short D_8009BD68;
 extern short D_8009BD6C, TILE_COL_COUNT, TILE_COL_TOP, TILE_COL_HEIGHT, TILE_COL_FLAGS, D_8009BD80;
 extern unsigned short D_8009BD84;
 extern short D_8009BD88, D_8009BD8C, D_8009BD90;
-#define D D_1F800278
+#define D COLLISION_SEG_PTR
 
 int tileCollideColumnAt(TObj *o_, unsigned short x_, short y)
 {

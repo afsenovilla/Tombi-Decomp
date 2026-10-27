@@ -27,7 +27,7 @@ void scriptOpSetPlayerState(void)
         case 2:
             D_800A544A = *(s32*)((u8*)p + 0x11A0);
         case 1:
-            D_800A53C6 = *(s32*)((u8*)p + 0x1198);
+            PLAYER_ANIM_FRAME = *(s32*)((u8*)p + 0x1198);
             D_800A53B8 = *(s32*)((u8*)p + 0x119C);
             break;
         }

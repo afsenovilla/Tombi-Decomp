@@ -13,7 +13,7 @@ typedef struct {
 typedef struct { unsigned short uv0, p0, uv1, p1, uv2; unsigned char w, h; unsigned short uv3; signed char dx, dy; } Spr;
 extern long LZ_FILE_CTRL;
 extern int D_1F800074_v;
-extern int D_1F8001E0;
+extern int CURRENT_OT;
 int projectActorPosition(TObj *o, void *a, void *b);
 void insertPrimWithBias(PFT4 *p, int a, int b, int c, int d);
 void drawObjectProjectedSpriteB(TObj *o)
@@ -46,6 +46,6 @@ void drawObjectProjectedSpriteB(TObj *o)
     p->y2 = p->y0 + s->h + (unsigned short)o->wba * 2 - 1;
     p->x3 = p->x1;
     p->y3 = p->y2;
-    insertPrimWithBias(p, D_1F8001E0 + 0x10, D_1F800074_v, (signed char)o->b0f, 0x9000000);
+    insertPrimWithBias(p, CURRENT_OT + 0x10, D_1F800074_v, (signed char)o->b0f, 0x9000000);
     (*(PFT4 **)&SPAD.p164) = (PFT4 *)((char *)(*(PFT4 **)&SPAD.p164) + 0x28);
 }

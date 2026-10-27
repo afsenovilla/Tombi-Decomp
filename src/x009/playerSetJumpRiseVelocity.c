@@ -1,7 +1,7 @@
 // FUNC 8010f328 216 X009
 // MATCHING 8010f328 216
 #include "TOBJ.H"
-extern unsigned char DAT_8009d2b3;
+extern unsigned char GAME_EQUIPPED_PANTS;
 extern unsigned char DAT_8009c990;
 extern unsigned char DAT_8009cf06;
 extern unsigned char DAT_8009d006;
@@ -11,7 +11,7 @@ extern unsigned short DAT_80115468[][10];
 void playerSetJumpRiseVelocity(TObj *o)
 {
     int b = ((unsigned char *)o)[0xc1];
-    int u = DAT_8009d2b3 + b * 4;
+    int u = GAME_EQUIPPED_PANTS + b * 4;
     if ((DAT_8009c990 & 3) != 0)
         u = (unsigned char)b << 2 | 3;
     if (DAT_8009cf06 != 0)

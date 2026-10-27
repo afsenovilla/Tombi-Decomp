@@ -11,7 +11,7 @@ typedef struct { long vx, vy, vz, pad; } VECTOR;
 extern MATRIX DAT_1f800000, DAT_1f800020, DAT_1f8000c0;
 extern SVECTOR DAT_1f800060, DAT_1f800068;
 extern unsigned short DAT_1f8001c8;
-extern int DAT_1f8001e0;
+extern int CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 extern MATRIX *MulMatrix0(MATRIX *, MATRIX *, MATRIX *);
@@ -47,7 +47,7 @@ void FUN_80057470(TObj *o)
     DAT_1f800000.t[2] += DAT_1f8000c0.t[2];
     SetRotMatrix(&DAT_1f800000);
     SetTransMatrix(&DAT_1f800000);
-    FUN_80023b04(o->da0, (int)&((struct { char pad[0x10]; int a[1]; } *)DAT_1f8001e0)->a[(signed char)o->b0f], o, o->ba4);
+    FUN_80023b04(o->da0, (int)&((struct { char pad[0x10]; int a[1]; } *)CURRENT_OT)->a[(signed char)o->b0f], o, o->ba4);
     func_8003F160(o, 0);
 }
 #elif defined(VERSION_SLPS_01144)
@@ -61,7 +61,7 @@ typedef struct { long vx, vy, vz, pad; } VECTOR;
 extern MATRIX DAT_1f800000, DAT_1f800020, DAT_1f8000c0;
 extern SVECTOR DAT_1f800060, DAT_1f800068;
 extern unsigned short DAT_1f8001c8;
-extern int DAT_1f8001e0;
+extern int CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 extern MATRIX *MulMatrix0(MATRIX *, MATRIX *, MATRIX *);
@@ -96,6 +96,6 @@ void drawObjectModelRotated(TObj *o)
     DAT_1f800000.t[2] += DAT_1f8000c0.t[2];
     SetRotMatrix(&DAT_1f800000);
     SetTransMatrix(&DAT_1f800000);
-    drawModel(o->da0, (int)&((struct { char pad[0x10]; int a[1]; } *)DAT_1f8001e0)->a[(signed char)o->b0f], o, o->ba4);
+    drawModel(o->da0, (int)&((struct { char pad[0x10]; int a[1]; } *)CURRENT_OT)->a[(signed char)o->b0f], o, o->ba4);
 }
 #endif

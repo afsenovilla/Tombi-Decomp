@@ -58,7 +58,7 @@ void gameplayMainHandler(void)
                 temp_a0->step.value = 5U;
                 GAME.selectedSpawnPoint = 0;
                 GAME.nextSpawnPoint = 0;
-                GAME.playerHealth = GAME.playerHealthDisplayed;
+                GAME.playerHealth = GAME.playerMaxHealth;
             }
             GAME.displayExpBar = 0;
             D_800B07CD = 0;

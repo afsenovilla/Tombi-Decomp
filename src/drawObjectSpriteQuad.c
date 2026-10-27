@@ -27,8 +27,8 @@ typedef struct {
 extern MATRIX D_1F800000;
 extern SVECTOR D_1F800060;
 extern long LZ_FILE_CTRL;
-extern PolyFT4 *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern PolyFT4 *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern void SetRotMatrix(MATRIX *);
 extern void ApplyRotMatrix(SVECTOR *, long *);
@@ -58,7 +58,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - (int)DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - (int)CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned long v = *(unsigned long *)d;
         *(unsigned long *)d = (unsigned long)a;
@@ -87,7 +87,7 @@ void drawObjectSpriteQuad(TObj *o)
     v1 = (char *)o + 0xbc;
     v2 = (char *)o + 0xc4;
     v3 = (char *)o + 0xcc;
-    p = DAT_1f800164;
+    p = NEXT_PRIM;
     gte_ldv3(v0, v1, v2);
     gte_rtpt();
     gte_stsxy3_ft4(p);
@@ -112,8 +112,8 @@ void drawObjectSpriteQuad(TObj *o)
             unsigned long e;
             do { } while (0); /* loop notes end the sched block after the c load (debt) */
             e = 0x9000000;
-            if (!otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, c, o->b0f, e))
-                DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+            if (!otadd((unsigned long *)p, CURRENT_OT + 0x10, c, o->b0f, e))
+                NEXT_PRIM = (PolyFT4 *)((char *)NEXT_PRIM + 0x28);
         }
     }
 }
@@ -143,8 +143,8 @@ typedef struct {
 extern MATRIX D_1F800000;
 extern SVECTOR D_1F800060;
 extern long LZ_FILE_CTRL;
-extern PolyFT4 *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern PolyFT4 *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern void SetRotMatrix(MATRIX *);
 extern void ApplyRotMatrix(SVECTOR *, long *);
@@ -174,7 +174,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - (int)DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - (int)CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned long v = *(unsigned long *)d;
         *(unsigned long *)d = (unsigned long)a;
@@ -203,7 +203,7 @@ void drawObjectSpriteQuad(TObj *o)
     v1 = (char *)o + 0xbc;
     v2 = (char *)o + 0xc4;
     v3 = (char *)o + 0xcc;
-    p = DAT_1f800164;
+    p = NEXT_PRIM;
     gte_ldv3(v0, v1, v2);
     gte_rtpt();
     gte_stsxy3_ft4(p);
@@ -228,8 +228,8 @@ void drawObjectSpriteQuad(TObj *o)
             unsigned long e;
             do { } while (0); /* loop notes end the sched block after the c load (debt) */
             e = 0x9000000;
-            if (!otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, c, o->b0f, e))
-                DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+            if (!otadd((unsigned long *)p, CURRENT_OT + 0x10, c, o->b0f, e))
+                NEXT_PRIM = (PolyFT4 *)((char *)NEXT_PRIM + 0x28);
         }
     }
 }

@@ -7,10 +7,10 @@ typedef struct {
     char p5a[0x68 - 0x5a]; unsigned char b68, b69, b6a, b6b;
 } G;
 extern G *TASK_C;
-extern unsigned char D_1f8001cc;
-extern short D_1f8001f4;
-extern unsigned short D_1f8001fc, D_1f8001f8;
-extern int D_1f800164;
+extern unsigned char MOVIE_PLAY_STATE;
+extern short FRAME_BUFFER_INDEX;
+extern unsigned short JOYPAD_STATE, TICK_COUNT;
+extern int NEXT_PRIM;
 extern unsigned short D_8007DE98[];
 extern void gameMainTask();
 extern void SetDispMask(int);
@@ -34,7 +34,7 @@ void loopTitleScreen(int *p)
         TASK_C->w4c = 0;
         TASK_C->w4a++;
     case 1:
-        if (D_1f8001cc == 0) {
+        if (MOVIE_PLAY_STATE == 0) {
             initDisplay(0, 0, 0);
             TASK_C->w4a++;
         }
@@ -43,7 +43,7 @@ void loopTitleScreen(int *p)
         func_800E8A5C();
         SetDispMask(1);
         startBgmTrack(0);
-        D_1f800164 = (int)(LOAD_BUFFER_ALT + D_1f8001f4 * 0xc000) & 0xffffff;
+        NEXT_PRIM = (int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
         func_800E972C(0x30, 0xd0, 1);
         TASK_C->b69 = 0;
         TASK_C->b6a = D_8007DE98[TASK_C->b69];
@@ -52,7 +52,7 @@ void loopTitleScreen(int *p)
         TASK_C->w4a++;
         break;
     case 3:
-        D_1f800164 = (int)(LOAD_BUFFER_ALT + D_1f8001f4 * 0xc000) & 0xffffff;
+        NEXT_PRIM = (int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
         if (--TASK_C->w58 <= 0) {
             TASK_C->w4a++;
         }
@@ -62,19 +62,19 @@ void loopTitleScreen(int *p)
         }
         switch (TASK_C->w4c) {
         case 0:
-            if ((D_1f8001fc & 0x80) && TASK_C->b69 != 0) {
+            if ((JOYPAD_STATE & 0x80) && TASK_C->b69 != 0) {
                 TASK_C->b69--;
                 TASK_C->b6b = D_8007DE98[TASK_C->b69];
                 TASK_C->w4c++;
                 playSFX(8);
             }
-            if ((D_1f8001fc & 0x20) && TASK_C->b69 < 2) {
+            if ((JOYPAD_STATE & 0x20) && TASK_C->b69 < 2) {
                 TASK_C->b69++;
                 TASK_C->b6b = D_8007DE98[TASK_C->b69];
                 TASK_C->w4c++;
                 playSFX(8);
             }
-            if (D_1f8001fc & 0x4008) {
+            if (JOYPAD_STATE & 0x4008) {
                 stopBgm(0);
                 switch (TASK_C->b69) {
                 case 0:
@@ -107,7 +107,7 @@ void loopTitleScreen(int *p)
             break;
         }
         func_800E972C(0x30, 0xd0, 1);
-        if (D_1f8001f8 & 0x20) {
+        if (TICK_COUNT & 0x20) {
             func_800E972C(0x38, 0xa0, 0);
         }
         func_800E9D08(TASK_C->b6a, TASK_C->b69);

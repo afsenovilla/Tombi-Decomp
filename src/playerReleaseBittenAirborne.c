@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 800FC02C (FUN_800fc02c.c): sets active 2, clears +0x9c, no DAT_8009c934 reset, flag at
 // +0xcf (PAL +0xe3).
-extern unsigned char *DAT_800a611c;
+extern unsigned char *PLAYER_HELD_OBJECT;
 extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned char *PLAYER_EXT;
@@ -16,8 +16,8 @@ void FUN_800fc02c(unsigned char *o)
     o[0] = 2;
     o[0x9c] = 0;
     if (o[0xac] >= 2) {
-        BITTEN_OBJECT = DAT_800a611c;
-        DAT_800a611c[4] = 2;
+        BITTEN_OBJECT = PLAYER_HELD_OBJECT;
+        PLAYER_HELD_OBJECT[4] = 2;
         BITTEN_OBJECT[5] = 2;
         BITTEN_OBJECT[6] = 0;
     }
@@ -43,7 +43,7 @@ void FUN_800fc02c(unsigned char *o)
     o[6]++;
 }
 #else
-extern unsigned char *DAT_800a611c;
+extern unsigned char *PLAYER_HELD_OBJECT;
 extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned char *PLAYER_EXT;
@@ -54,8 +54,8 @@ void playerReleaseBittenAirborne(unsigned char *o)
     unsigned char *p;
     o[0x9c] = 1;
     if (o[0xac] >= 2) {
-        BITTEN_OBJECT = DAT_800a611c;
-        DAT_800a611c[4] = 2;
+        BITTEN_OBJECT = PLAYER_HELD_OBJECT;
+        PLAYER_HELD_OBJECT[4] = 2;
         BITTEN_OBJECT[5] = 2;
         BITTEN_OBJECT[6] = 0;
     }

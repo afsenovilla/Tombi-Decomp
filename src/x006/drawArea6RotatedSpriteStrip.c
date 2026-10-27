@@ -22,7 +22,7 @@ typedef struct {
 
 extern long LZ_FILE_CTRL;
 extern int D_1F800078;
-extern char *D_1F800164;
+extern char *NEXT_PRIM;
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
 extern int projectActorPosition(void *o, long *sxy, long *z);
@@ -90,7 +90,7 @@ void drawArea6RotatedSpriteStrip(TObj *o)
     do {
         A = ((signed char *)q)[2];
         B = ((signed char *)q)[3];
-        p = (PFT4 *)D_1F800164;
+        p = (PFT4 *)NEXT_PRIM;
         C = q[-2];
         D = q[-1];
         if (o->animFrame & 1) {
@@ -127,7 +127,7 @@ void drawArea6RotatedSpriteStrip(TObj *o)
             if (o->b0d & 1) p->clut = o->w08;
             if (o->b0b) r = otA((unsigned *)p, (char *)SPAD.i1e0 + 0x10, 0, (signed char)o->b0f, 0x9000000);
             else r = otB((unsigned *)p, (char *)SPAD.i1e0 + 0x10, SPAD.i74, (signed char)o->b0f, 0x9000000);
-            if (r == 0) D_1F800164 += 0x28;
+            if (r == 0) NEXT_PRIM += 0x28;
         }
         q += 0x10;
         base += 0x10;

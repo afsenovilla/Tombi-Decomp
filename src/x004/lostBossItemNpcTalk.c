@@ -5,7 +5,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned short D_800A6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern short D_1F80016E;
 extern void *D_8013577C[], *D_80135784[];
 extern short COS_TABLE[];
@@ -49,7 +49,7 @@ void lostBossItemNpcTalk(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 1;
         o->d90 = showMessageBoxDirect(3, 0, &o->a);
         o->wac = 2;
-        o->animFrame = ~D_800A6066 & 1;
+        o->animFrame = ~PLAYER_ANIM_FRAME & 1;
         o->anim = D_80135784[0];
         AnimLoadDuration(o);
         break;
@@ -126,7 +126,7 @@ void lostBossItemNpcTalk(TObj *o)
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wac = 2;
-        o->animFrame = ~D_800A6066 & 1;
+        o->animFrame = ~PLAYER_ANIM_FRAME & 1;
         o->anim = D_80135784[0];
         AnimLoadDuration(o);
         break;

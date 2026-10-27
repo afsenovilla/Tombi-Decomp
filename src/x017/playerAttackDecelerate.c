@@ -1,6 +1,6 @@
 // FUNC 80110fdc 400 X017
 // MATCHING 80110fdc 400
-extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
+extern unsigned char GAME_EQUIPPED_PANTS, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
 extern unsigned char PLAYER_DECEL_PARAMS[];
 #define TS(i, o) (*(short *)(PLAYER_DECEL_PARAMS + (i) + (o)))
@@ -12,7 +12,7 @@ void playerAttackDecelerate(unsigned char *p)
     int i, n, c;
     unsigned char *q = p;
     c = p[0xc1];
-    u = DAT_8009d2b3 + c * 4; if ((DAT_8009c990 & 3) != 0) u = (unsigned char)c << 2 | 3;
+    u = GAME_EQUIPPED_PANTS + c * 4; if ((DAT_8009c990 & 3) != 0) u = (unsigned char)c << 2 | 3;
     if (DAT_8009cf06 != 0)
         u = 8;
     if (DAT_8009d006 != 0)

@@ -14,8 +14,8 @@ typedef struct { unsigned long tag; unsigned long code[2]; } DR_MODE;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern unsigned short D_800F6D34[], D_800F6D36[], D_800F6D38[], D_800F6D3A[];
 extern unsigned short GetClut(int x, int y);
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
@@ -47,13 +47,13 @@ void memCardDrawNumber2(int n, short x, short y, int force)
         S->h = D_800F6D3A[*q * 8];
         k++;
         S->clut = GetClut(0x130, 0x1F0);
-        p = D_1F800164;
+        p = NEXT_PRIM;
         *p = *S;
-        addPrim(D_1F8001E0 + 6, p);
-        D_1F800164++;
+        addPrim(CURRENT_OT + 6, p);
+        NEXT_PRIM++;
     }
-    d = (DR_MODE *)D_1F800164;
+    d = (DR_MODE *)NEXT_PRIM;
     SetDrawMode(d, 0, 0, GetTPage(0, 0, 0x40, 0), 0);
-    addPrim(D_1F8001E0 + 6, d);
-    D_1F800164 = (SPRT *)((DR_MODE *)D_1F800164 + 1);
+    addPrim(CURRENT_OT + 6, d);
+    NEXT_PRIM = (SPRT *)((DR_MODE *)NEXT_PRIM + 1);
 }

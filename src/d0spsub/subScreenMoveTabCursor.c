@@ -1,7 +1,7 @@
 // FUNC 800ec504 1316 D0SPSUB
 // MATCHING 800ec504 1316
 typedef struct { char p[0x12]; short mode; short page; short cursor; } Menu;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern void playSFX(int id);
 
 static inline int fixCursor(Menu *m, short c)
@@ -38,7 +38,7 @@ int subScreenMoveTabCursor(Menu *m, int sound)
 {
     short c = m->cursor;
     if (m->cursor < 4) {
-        if (D_1F8001FC & 0x10) {
+        if (JOYPAD_STATE & 0x10) {
             if (sound) playSFX(8);
             c = --m->cursor;
             if (c < 0) {
@@ -61,7 +61,7 @@ int subScreenMoveTabCursor(Menu *m, int sound)
             }
             return 1;
         }
-        if (D_1F8001FC & 0x40) {
+        if (JOYPAD_STATE & 0x40) {
             if ((c >= 0 && c < 3) || (c >= 4 && c < 7)) {
                 m->cursor = c + 1;
                 if (fixCursor(m, m->cursor)) return 1;
@@ -70,7 +70,7 @@ int subScreenMoveTabCursor(Menu *m, int sound)
             }
             return 1;
         }
-        if (D_1F8001FC & 0x80) {
+        if (JOYPAD_STATE & 0x80) {
             switch (m->mode) {
             case 0:
                 m->cursor = 5;
@@ -89,7 +89,7 @@ int subScreenMoveTabCursor(Menu *m, int sound)
             playSFX(8);
             return 1;
         }
-        if (D_1F8001FC & 0x20) {
+        if (JOYPAD_STATE & 0x20) {
             switch (m->mode) {
             case 0:
                 m->cursor = 7;
@@ -110,7 +110,7 @@ int subScreenMoveTabCursor(Menu *m, int sound)
     }
     if (c < 8) {
         short v;
-        if (D_1F8001FC & 0x80) {
+        if (JOYPAD_STATE & 0x80) {
             if (c >= 5 && c < 8) {
                 v = c - 1;
             set:
@@ -119,18 +119,18 @@ int subScreenMoveTabCursor(Menu *m, int sound)
             }
             return 1;
         }
-        if (D_1F8001FC & 0x20) {
+        if (JOYPAD_STATE & 0x20) {
             if (c >= 4 && c < 7) {
                 v = c + 1;
                 goto set;
             }
             return 1;
         }
-        if (D_1F8001FC & 0x10) {
+        if (JOYPAD_STATE & 0x10) {
             v = 8;
             goto set;
         }
-        if (D_1F8001FC & 0x40) {
+        if (JOYPAD_STATE & 0x40) {
             if ((unsigned short)(m->mode - 1) < 2) {
                 m->cursor = 0;
                 if (sound) playSFX(8);
@@ -139,7 +139,7 @@ int subScreenMoveTabCursor(Menu *m, int sound)
         }
         return 0;
     }
-    if (D_1F8001FC & 0x40) {
+    if (JOYPAD_STATE & 0x40) {
         switch (m->mode) {
         case 1:
             m->cursor = 4;

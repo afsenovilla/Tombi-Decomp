@@ -1,12 +1,12 @@
 // FUNC 800ec6ec 432 D0SPSUB3
 // MATCHING 800ec6ec 432
 typedef struct { char p[0x14]; short row; char p16[8]; short sel; } Menu;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern void playSFX(int id);
 
 int subScreenMoveGridCursorN(Menu *m, int n)
 {
-    unsigned short pad = D_1F8001FC;
+    unsigned short pad = JOYPAD_STATE;
     if (pad & 0x10) {
         if ((short)(m->sel % 10) > 0) {
             m->sel--;

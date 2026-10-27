@@ -22,12 +22,12 @@ extern char D_800E1E28[];
 extern char D_800E1E29, D_800E1E2A, D_800E1E2B;
 extern char D_800E2028[];
 extern char GAME[];
-extern int D_8009D2B4[], D_800A6048[];
-extern short D_8009C982[];
+extern int D_8009D2B4[], PLAYER_POS[];
+extern short GAME_SELECTED_SPAWN_POINT[];
 extern char D_8009C972[], D_8009D2E4[], D_8009D2E5[], D_8009D2E6[], D_8009C992[];
 extern unsigned short BUTTON_CONFIG_INDEX, D_8009D612;
 extern unsigned char D_8009D67C, D_8009F0E8;
-extern unsigned int D_8009C968;
+extern unsigned int GAME_TOTAL_TIME_PLAYED;
 extern unsigned char D_8009C980, D_8009C973;
 extern B64 *D_800F6A34[];
 extern B32 *D_800F6A2C[];
@@ -42,8 +42,8 @@ void func_800E999C(int slot)
     char *h = D_800E1E28;
     unsigned char dg[5];
     memset(h, 0, 0x2000);
-    *(B12 *)D_8009D2B4 = *(B12 *)D_800A6048;
-    D_8009C982[0] = 0;
+    *(B12 *)D_8009D2B4 = *(B12 *)PLAYER_POS;
+    GAME_SELECTED_SPAWN_POINT[0] = 0;
     D_8009C972[0] = 1;
     h[0] = 'S';
     h[1] = 'C';
@@ -64,9 +64,9 @@ void func_800E999C(int slot)
         }
     }
     {
-        unsigned int hh = D_8009C968 / 180000;
+        unsigned int hh = GAME_TOTAL_TIME_PLAYED / 180000;
         int h1 = hh % 1000;
-        int m = D_8009C968 / 3000 - hh * 60;
+        int m = GAME_TOTAL_TIME_PLAYED / 3000 - hh * 60;
         {
             int m10, h100, h10; unsigned char d4, d1, d2;
             h100 = h1 / 100; h10 = h1 / 10; m10 = m / 10;

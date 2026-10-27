@@ -2,7 +2,7 @@
 // MATCHING 8011ba34 660
 #include "TOBJ.H"
 
-extern unsigned char PLAYER[], D_800A6039[], PLAYER_STATE[], PLAYER_SUBSTATE[];
+extern unsigned char PLAYER[], PLAYER_VISIBLE[], PLAYER_STATE[], PLAYER_SUBSTATE[];
 extern void *D_8013986C[];
 extern short D_8007A1F0[], COS_TABLE[];
 extern void AnimLoadDuration(TObj *);
@@ -35,7 +35,7 @@ void playerLauncherGrab(TObj *o)
             PLAYER[0] = 5;
             PLAYER_STATE[0] = 5;
             PLAYER_SUBSTATE[0] = 0x40;
-            D_800A6039[0] = 0;
+            PLAYER_VISIBLE[0] = 0;
             o->wac = 2;
             o->anim = D_8013986C[0];
             AnimLoadDuration(o);

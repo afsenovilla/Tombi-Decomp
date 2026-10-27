@@ -46,8 +46,8 @@ void freeObjectByLayer(s32* self)
         ((u8*)self)[0x1C] = 0;
         ((u8*)self)[0x9C] = 0;
         ((u8*)self)[0x9D] = 0;
-        D_1F800238++;
-        *--D_1F800208 = (s32)self;
+        FREE_OBJECT_COUNT++;
+        *--FREE_OBJECTS = (s32)self;
         break;
     case OBJECT_LAYER_3:
         self[0] = 0;
@@ -58,8 +58,8 @@ void freeObjectByLayer(s32* self)
         ((u8*)self)[0x1C] = 0;
         ((u8*)self)[0x9C] = 0;
         ((u8*)self)[0x9D] = 0;
-        D_1F800238++;
-        *--D_1F800208 = (s32)self;
+        FREE_OBJECT_COUNT++;
+        *--FREE_OBJECTS = (s32)self;
         break;
     case OBJECT_LAYER_4:
         self[0] = 0;
@@ -70,8 +70,8 @@ void freeObjectByLayer(s32* self)
         ((u8*)self)[0x1C] = 0;
         ((u8*)self)[0x9C] = 0;
         ((u8*)self)[0x9D] = 0;
-        D_1F800238++;
-        *--D_1F800208 = (s32)self;
+        FREE_OBJECT_COUNT++;
+        *--FREE_OBJECTS = (s32)self;
         break;
     case OBJECT_LAYER_5:
         self[0] = 0;
@@ -82,8 +82,8 @@ void freeObjectByLayer(s32* self)
         ((u8*)self)[0x1C] = 0;
         ((u8*)self)[0x9C] = 0;
         ((u8*)self)[0x9D] = 0;
-        D_1F800238++;
-        *--D_1F800208 = (s32)self;
+        FREE_OBJECT_COUNT++;
+        *--FREE_OBJECTS = (s32)self;
         break;
     case OBJECT_LAYER_7:
         ((u8*)self)[0x1C] &= 0x7F;
@@ -153,8 +153,8 @@ void freeObjectByLayer(s32* self)
         ((u8*)self)[0x9D] = 0;
         ((u8*)self)[0x9E] = 0;
         ((u8*)self)[0x9F] = 0;
-        D_1F800238++;
-        *--D_1F800208 = (s32)self;
+        FREE_OBJECT_COUNT++;
+        *--FREE_OBJECTS = (s32)self;
         break;
     case OBJECT_LAYER_3:
         self[0] = 0;
@@ -167,8 +167,8 @@ void freeObjectByLayer(s32* self)
         ((u8*)self)[0x9D] = 0;
         ((u8*)self)[0x9E] = 0;
         ((u8*)self)[0x9F] = 0;
-        D_1F800238++;
-        *--D_1F800208 = (s32)self;
+        FREE_OBJECT_COUNT++;
+        *--FREE_OBJECTS = (s32)self;
         break;
     case OBJECT_LAYER_4:
         self[0] = 0;
@@ -181,8 +181,8 @@ void freeObjectByLayer(s32* self)
         ((u8*)self)[0x9D] = 0;
         ((u8*)self)[0x9E] = 0;
         ((u8*)self)[0x9F] = 0;
-        D_1F800238++;
-        *--D_1F800208 = (s32)self;
+        FREE_OBJECT_COUNT++;
+        *--FREE_OBJECTS = (s32)self;
         break;
     case OBJECT_LAYER_5:
         self[0] = 0;
@@ -195,8 +195,8 @@ void freeObjectByLayer(s32* self)
         ((u8*)self)[0x9D] = 0;
         ((u8*)self)[0x9E] = 0;
         ((u8*)self)[0x9F] = 0;
-        D_1F800238++;
-        *--D_1F800208 = (s32)self;
+        FREE_OBJECT_COUNT++;
+        *--FREE_OBJECTS = (s32)self;
         break;
     case OBJECT_LAYER_7:
         ((u8*)self)[0x1C] &= 0x7F;

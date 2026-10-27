@@ -11,7 +11,7 @@ extern unsigned char *DAT_8007b14c[];
 extern unsigned short D_1f8001c8;
 extern Fix16 *PLAYER_H[];
 extern unsigned char D_8006DDEF[];
-extern Fix16 DAT_800a604c[];
+extern Fix16 PLAYER_Y_FIX[];
 extern Fix16 *PLAYER_D[];
 
 void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
@@ -41,7 +41,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
             d = (PLAYER_H[0]->p.whole - pos[0].p.whole) << 8;
             d /= 60;
             o->velH = d;
-            d = (DAT_800a604c[0].p.whole - pos[1].p.whole) << 8;
+            d = (PLAYER_Y_FIX[0].p.whole - pos[1].p.whole) << 8;
             d /= 60;
             o->velV = d;
             o->d30 = pos[0].p.whole << 16;
@@ -51,7 +51,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
             d = (PLAYER_H[0]->p.whole - pos[2].p.whole) << 8;
             d /= 60;
             o->velH = d;
-            d = (DAT_800a604c[0].p.whole - pos[1].p.whole) << 8;
+            d = (PLAYER_Y_FIX[0].p.whole - pos[1].p.whole) << 8;
             d /= 60;
             o->velV = d;
             o->d38 = pos[0].p.whole << 16;
@@ -64,21 +64,21 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
             d = (pos[0].p.whole - PLAYER_H[0]->p.whole) << 8;
             d /= 60;
             o->velH = d;
-            d = (pos[1].p.whole - DAT_800a604c[0].p.whole) << 8;
+            d = (pos[1].p.whole - PLAYER_Y_FIX[0].p.whole) << 8;
             d /= 60;
             o->velV = d;
             o->d30 = PLAYER_H[0]->raw;
-            o->d34 = DAT_800a604c[0].raw;
+            o->d34 = PLAYER_Y_FIX[0].raw;
             o->d38 = PLAYER_D[0]->raw;
         } else {
             d = (pos[2].p.whole - PLAYER_H[0]->p.whole) << 8;
             d /= 60;
             o->velH = d;
-            d = (pos[1].p.whole - DAT_800a604c[0].p.whole) << 8;
+            d = (pos[1].p.whole - PLAYER_Y_FIX[0].p.whole) << 8;
             d /= 60;
             o->velV = d;
             o->d38 = PLAYER_H[0]->raw;
-            o->d34 = DAT_800a604c[0].raw;
+            o->d34 = PLAYER_Y_FIX[0].raw;
             o->d30 = PLAYER_D[0]->raw;
         }
         break;
@@ -92,7 +92,7 @@ extern unsigned char DAT_8007b084[];
 extern unsigned char *DAT_8007b14c[];
 extern unsigned short D_1f8001c8;
 extern Fix16 *PLAYER_H[];
-extern Fix16 DAT_800a604c[];
+extern Fix16 PLAYER_Y_FIX[];
 extern Fix16 *PLAYER_D[];
 
 void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
@@ -122,7 +122,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
             d = (PLAYER_H[0]->p.whole - pos[0].p.whole) << 8;
             d /= 60;
             o->velH = d;
-            d = (DAT_800a604c[0].p.whole - pos[1].p.whole) << 8;
+            d = (PLAYER_Y_FIX[0].p.whole - pos[1].p.whole) << 8;
             d /= 60;
             o->velV = d;
             o->d30 = pos[0].p.whole << 16;
@@ -132,7 +132,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
             d = (PLAYER_H[0]->p.whole - pos[2].p.whole) << 8;
             d /= 60;
             o->velH = d;
-            d = (DAT_800a604c[0].p.whole - pos[1].p.whole) << 8;
+            d = (PLAYER_Y_FIX[0].p.whole - pos[1].p.whole) << 8;
             d /= 60;
             o->velV = d;
             o->d38 = pos[0].p.whole << 16;
@@ -145,21 +145,21 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
             d = (pos[0].p.whole - PLAYER_H[0]->p.whole) << 8;
             d /= 60;
             o->velH = d;
-            d = (pos[1].p.whole - DAT_800a604c[0].p.whole) << 8;
+            d = (pos[1].p.whole - PLAYER_Y_FIX[0].p.whole) << 8;
             d /= 60;
             o->velV = d;
             o->d30 = PLAYER_H[0]->raw;
-            o->d34 = DAT_800a604c[0].raw;
+            o->d34 = PLAYER_Y_FIX[0].raw;
             o->d38 = PLAYER_D[0]->raw;
         } else {
             d = (pos[2].p.whole - PLAYER_H[0]->p.whole) << 8;
             d /= 60;
             o->velH = d;
-            d = (pos[1].p.whole - DAT_800a604c[0].p.whole) << 8;
+            d = (pos[1].p.whole - PLAYER_Y_FIX[0].p.whole) << 8;
             d /= 60;
             o->velV = d;
             o->d38 = PLAYER_H[0]->raw;
-            o->d34 = DAT_800a604c[0].raw;
+            o->d34 = PLAYER_Y_FIX[0].raw;
             o->d30 = PLAYER_D[0]->raw;
         }
         break;

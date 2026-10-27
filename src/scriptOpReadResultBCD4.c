@@ -8,6 +8,6 @@
 
 void scriptOpReadResultBCD4(void)
 {
-    *(s32*)((u8*)SCRIPT_CTX + 0x1190) = D_8009BCD4;
+    *(s32*)((u8*)SCRIPT_CTX + 0x1190) = GAME_PLAYER_AP;
     SCRIPT_CTX->pc++;
 }

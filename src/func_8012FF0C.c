@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char D_800A6066[];
-extern short D_800A6066s;
+extern short PLAYER_ANIM_FRAME;
 extern void *BITING_PLANT_ANIMS;
 
 void func_8012FF0C(TObj *o)
@@ -81,7 +81,7 @@ chk:
         }
         if (o->subtype == 1) {
             ((unsigned char*)&PLAYER.obj.state)[0]++;
-            D_800A6066s = 1 - o->b6b;
+            PLAYER_ANIM_FRAME = 1 - o->b6b;
         }
         goto next;
     case 4:

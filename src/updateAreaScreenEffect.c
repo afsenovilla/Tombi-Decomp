@@ -2,7 +2,7 @@
 // MATCHING 800310d0 388
 typedef struct S { unsigned char a, p, b; } S;
 extern S PLAYER;
-extern unsigned char DAT_603a;
+extern unsigned char PLAYER_TYPE;
 extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern unsigned char DAT_36c2;
 extern void dispatchScreenEffect(void);
@@ -12,12 +12,12 @@ void updateAreaScreenEffect(void)
 {
     unsigned char v;
     S *p = &PLAYER;
-    DAT_603a = 0;
+    PLAYER_TYPE = 0;
     switch (GAME) {
     case 2:
         switch (GAME_SELECTED_SECTION) {
-        case 0: DAT_603a = 1; break;
-        case 3: DAT_603a = 3; break;
+        case 0: PLAYER_TYPE = 1; break;
+        case 3: PLAYER_TYPE = 3; break;
         }
         break;
     case 5:
@@ -27,8 +27,8 @@ void updateAreaScreenEffect(void)
         break;
     case 0x13:
         switch (GAME_SELECTED_SECTION) {
-        case 0: DAT_603a = 1; break;
-        case 2: DAT_603a = 2; break;
+        case 0: PLAYER_TYPE = 1; break;
+        case 2: PLAYER_TYPE = 2; break;
         }
         break;
     }

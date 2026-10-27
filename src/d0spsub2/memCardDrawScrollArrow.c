@@ -15,8 +15,8 @@ typedef struct { unsigned short u, v; } UV;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern UV D_800F7040[], D_800F7042[];
 extern unsigned short GetClut(int x, int y);
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
@@ -41,12 +41,12 @@ void memCardDrawScrollArrow(int n, short x, short y)
     S->w = 0x10;
     S->h = 0x10;
     S->clut = GetClut(0x130, 0x1F0);
-    p = D_1F800164;
+    p = NEXT_PRIM;
     *p = *S;
-    addPrim(D_1F8001E0 + 2, p);
-    D_1F800164++;
-    d = (DR_MODE *)D_1F800164;
+    addPrim(CURRENT_OT + 2, p);
+    NEXT_PRIM++;
+    d = (DR_MODE *)NEXT_PRIM;
     SetDrawMode(d, 0, 0, GetTPage(0, 0, 0x40, 0), 0);
-    addPrim(D_1F8001E0 + 2, d);
-    D_1F800164 = (SPRT *)((DR_MODE *)D_1F800164 + 1);
+    addPrim(CURRENT_OT + 2, d);
+    NEXT_PRIM = (SPRT *)((DR_MODE *)NEXT_PRIM + 1);
 }

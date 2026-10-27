@@ -3,7 +3,7 @@
 // FLAGS -O2 -G0 -fno-strength-reduce
 #include "spad.h"
 /* Rotated FT4 sprite strip without scale (MAIN0 twin of drawObjectSpriteRotScaled / X000 drawObjectSpriteRotatedFT4): same macro loop body
-   with A/B/C/D read straight from the frame (short C/D: D spills as sh/lhu) and f = DAT_1f800164 read before C/D so
+   with A/B/C/D read straight from the frame (short C/D: D spills as sh/lhu) and f = NEXT_PRIM read before C/D so
    the lw s0 schedules above their lbu. */
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -20,8 +20,8 @@ typedef struct {
     unsigned short uv3, pad3;
 } PolyFT4;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
-extern PolyFT4 *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern PolyFT4 *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
 extern int D_1F800078;
@@ -63,7 +63,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - (int)DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - (int)CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned long v = *(unsigned long *)d;
         *(unsigned long *)d = (unsigned long)a;
@@ -116,7 +116,7 @@ void drawObjectSpriteRotated(TObj *o)
     do {
         A = (signed char)fp[2];
         B = (signed char)fp[3];
-        f = DAT_1f800164;
+        f = NEXT_PRIM;
         C = fp[-2];
         D = fp[-1];
         if (o->animFrame & 1) {
@@ -153,11 +153,11 @@ void drawObjectSpriteRotated(TObj *o)
             if (o->b0d & 1)
                 f->clut = o->w08;
             if (o->b0b) {
-                if (otadd((unsigned long *)f, DAT_1f8001e0 + 0x10, 0, o->b0f, 0x9000000)) goto next;
+                if (otadd((unsigned long *)f, CURRENT_OT + 0x10, 0, o->b0f, 0x9000000)) goto next;
             } else {
-                if (otadd((unsigned long *)f, DAT_1f8001e0 + 0x10, SPAD.i74, o->b0f, 0x9000000)) goto next;
+                if (otadd((unsigned long *)f, CURRENT_OT + 0x10, SPAD.i74, o->b0f, 0x9000000)) goto next;
             }
-            DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+            NEXT_PRIM = (PolyFT4 *)((char *)NEXT_PRIM + 0x28);
         }
     next:
         fp += 16;

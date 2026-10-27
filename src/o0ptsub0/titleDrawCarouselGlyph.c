@@ -23,8 +23,8 @@ typedef struct { unsigned char u, v, w, h, big; } Glyph;
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 extern Glyph D_800EA1D8[];
-extern POLY_FT4 *D_1F800164;
-extern unsigned long *DAT_1f8001e0;
+extern POLY_FT4 *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern int MulNegSin(int a, int b);
 extern int MulCosDup(int a, int b);
 extern int GetGraphType(void);
@@ -51,7 +51,7 @@ void titleDrawCarouselGlyph(short c, int ang, int off, int pal)
         a = -MulNegSin((ang + off) & 0xFF, 0x5A);
     }
     MulCosDup(an & 0xFF, 0xFF);
-    p = D_1F800164;
+    p = NEXT_PRIM;
     p->len = 9;
     p->code = 0x2C;
     p->r0 = 0x80;
@@ -76,6 +76,6 @@ void titleDrawCarouselGlyph(short c, int ang, int off, int pal)
     p->u3 = p->u1;
     p->v3 = p->v2;
     p->tpage = (GetGraphType() == 1 || GetGraphType() == 2) ? 0x86 : 0x26;
-    addPrim(DAT_1f8001e0, p);
-    D_1F800164++;
+    addPrim(CURRENT_OT, p);
+    NEXT_PRIM++;
 }

@@ -1,6 +1,6 @@
 // FUNC 800fc02c 216 X005
 // MATCHING 800fc02c 216
-extern unsigned char *DAT_800a611c;
+extern unsigned char *PLAYER_HELD_OBJECT;
 extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned char *PLAYER_EXT;
@@ -11,8 +11,8 @@ void playerReleaseBittenAirborne(unsigned char *o)
     unsigned char *p;
     o[0x9c] = 1;
     if (o[0xac] >= 2) {
-        BITTEN_OBJECT = DAT_800a611c;
-        DAT_800a611c[4] = 2;
+        BITTEN_OBJECT = PLAYER_HELD_OBJECT;
+        PLAYER_HELD_OBJECT[4] = 2;
         BITTEN_OBJECT[5] = 2;
         BITTEN_OBJECT[6] = 0;
     }

@@ -8,14 +8,14 @@
 
 void* allocObjectLayer(u8 arg0)
 {
-    s16  n = D_1F800238;
+    s16  n = FREE_OBJECT_COUNT;
     s32* p;
     ObjectAxisView* obj;
 
     if (n > 0) {
-        p = D_1F800208;
-        D_1F800238 = n - 1;
-        D_1F800208 = p + 1;
+        p = FREE_OBJECTS;
+        FREE_OBJECT_COUNT = n - 1;
+        FREE_OBJECTS = p + 1;
         obj = (ObjectAxisView*)*p;
         obj->layer = arg0;
         if ((D_1F8001C8 & 1) == 0) {

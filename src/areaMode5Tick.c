@@ -1,10 +1,10 @@
 // FUNC 8001b9b0 324 MAIN0
 // MATCHING 8001b9b0 324
 #include "globals.h"
-extern short DAT_1f8001f4;
+extern short FRAME_BUFFER_INDEX;
 extern short DAT_1f8001c6;
-extern unsigned short DAT_1f8001f8;
-extern unsigned int DAT_1f800164;
+extern unsigned short TICK_COUNT;
+extern unsigned int NEXT_PRIM;
 extern void FUN_8001ca58(void);
 extern void updateAreaScreenEffect(void);
 extern void FUN_8001d36c(void);
@@ -20,10 +20,10 @@ extern void SoundUpdate(void);
 
 void areaMode5Tick(void)
 {
-    DAT_1f800164 = (unsigned int)(LOAD_BUFFER_ALT + DAT_1f8001f4 * 0xc000) & 0xffffff;
+    NEXT_PRIM = (unsigned int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
     FUN_8001ca58();
     if (DAT_1f8001c6 == 0) {
-        DAT_1f8001f8 = DAT_1f8001f8 + 1;
+        TICK_COUNT = TICK_COUNT + 1;
         updateAreaScreenEffect();
         if (DAT_1f8001c6 == 0) {
             FUN_8001d36c();

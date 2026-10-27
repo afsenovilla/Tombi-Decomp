@@ -1,6 +1,6 @@
 // FUNC 80040bfc 308 MAIN0
 // MATCHING 80040bfc 308
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 
 int testCollisionSegmentSlopeB(int u, int a)
 {
@@ -9,9 +9,9 @@ int testCollisionSegmentSlopeB(int u, int a)
     int sx, sa;
     short lo, hi; short s;
     short k; short t2; short u2, lo2, hi2;
-    x = *DAT_1f800278++;
-    w = *DAT_1f800278++;
-    m = *DAT_1f800278++;
+    x = *COLLISION_SEG_PTR++;
+    w = *COLLISION_SEG_PTR++;
+    m = *COLLISION_SEG_PTR++;
     lo = m & 0xf;
     hi = (m >> 4) & 0xf;
     sw = w;

@@ -5,7 +5,7 @@
 extern TObj *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
 extern int GAME_AREA00_EVENT_CONTROL[];
-extern unsigned short DAT_1f8001fc, DAT_1f8003c4, DAT_1f8003c6;
+extern unsigned short JOYPAD_STATE, DAT_1f8003c4, DAT_1f8003c6;
 extern char D_80010748[];
 extern void FUN_8001e4f0(int);
 extern void startPadVibration(int, int, int, int);
@@ -56,10 +56,10 @@ void playerStepContactStop(TObj *o)
         o->state++;
     case 4:
         setFacingAndUpDownFromPad(o);
-        if (DAT_1f8001fc & 0xa0) {
+        if (JOYPAD_STATE & 0xa0) {
             FUN_8001e4f0(0x3e);
         }
-        if (DAT_1f8001fc & DAT_1f8003c6) {
+        if (JOYPAD_STATE & DAT_1f8003c6) {
             GV2.bb0 = 0;
             FUN_8001e4f0(0x3e);
             spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);

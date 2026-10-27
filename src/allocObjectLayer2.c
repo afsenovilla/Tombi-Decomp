@@ -1,7 +1,7 @@
 // FUNC 800183b8 144 MAIN0
 // MATCHING 800183b8 144
-extern short g238;
-extern int *g208;
+extern short FREE_OBJECT_COUNT;
+extern int *FREE_OBJECTS;
 extern unsigned short g1c8;
 int allocObjectLayer2(void)
 {
@@ -9,11 +9,11 @@ int allocObjectLayer2(void)
     short n;
     char c;
     char pad;
-    n = g238;
+    n = FREE_OBJECT_COUNT;
     c = 2;
     if (n > 0) {
-        g238 = n - 1;
-        o = *g208++;
+        FREE_OBJECT_COUNT = n - 1;
+        o = *FREE_OBJECTS++;
         *(char *)(o + 0x1c) = c;
         if ((g1c8 & 1) == 0) {
             *(int *)(o + 0x40) = o + 0x10;

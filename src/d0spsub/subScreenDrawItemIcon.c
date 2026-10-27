@@ -26,8 +26,8 @@ extern Text D_8011113C;
 extern unsigned short *D_80111144;
 extern char *D_1F8002D8;
 #define BANK (*(char * volatile *)&D_1F8002D8)
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern unsigned char D_80109C88[];
 extern unsigned char D_800FECE8[];
 extern Cond *D_800FFAF8[];
@@ -55,10 +55,10 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
     S->u0 = n % 15 * 16 + 8;
     S->v0 = n / 15 * 16 + 8;
     S->clut = ((D_80109C88[n] + 0x1E0) << 6) | 0x13;
-    p = D_1F800164;
+    p = NEXT_PRIM;
     *p = *S;
-    addPrim(D_1F8001E0 + 5, p);
-    D_1F800164++;
+    addPrim(CURRENT_OT + 5, p);
+    NEXT_PRIM++;
     AddDrawMode(D_8011113C.w, 5);
     if (flag) {
         unsigned char *e;
@@ -82,10 +82,10 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
         S->w = e[0xA];
         S->h = e[0xB];
         S->clut = 0x78D7;
-        p = D_1F800164;
+        p = NEXT_PRIM;
         *p = *S;
-        addPrim(D_1F8001E0 + 5, p);
-        D_1F800164++;
+        addPrim(CURRENT_OT + 5, p);
+        NEXT_PRIM++;
         D_8011113C.w = 0x15;
         AddDrawMode(0x15, 5);
     }
@@ -116,9 +116,9 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
         T->code |= 2;
         T->x0 = D_8011113C.x - 1;
         T->y0 = D_8011113C.y - 1;
-        q = (TILE *)D_1F800164;
+        q = (TILE *)NEXT_PRIM;
         *q = *T;
-        addPrim(D_1F8001E0 + 6, q);
-        D_1F800164 = (SPRT *)((TILE *)D_1F800164 + 1);
+        addPrim(CURRENT_OT + 6, q);
+        NEXT_PRIM = (SPRT *)((TILE *)NEXT_PRIM + 1);
     }
 }

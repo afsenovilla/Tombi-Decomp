@@ -7,14 +7,14 @@ typedef struct S {
     char pad2[0x9c - 0x1d];
     char f, g, h, i;
 } S;
-extern unsigned short DAT_1f800238;
-extern int *DAT_1f800208;
+extern unsigned short FREE_OBJECT_COUNT;
+extern int *FREE_OBJECTS;
 
 void freeObjectLayer5(volatile S *o)
 {
     o->a = 0; o->b = 0; o->c = 0; o->d = 0;
     o->e = 0; o->f = 0; o->g = 0; o->h = 0; o->i = 0;
-    DAT_1f800238 = DAT_1f800238 + 1;
-    DAT_1f800208 = DAT_1f800208 - 1;
-    *DAT_1f800208 = (int)o;
+    FREE_OBJECT_COUNT = FREE_OBJECT_COUNT + 1;
+    FREE_OBJECTS = FREE_OBJECTS - 1;
+    *FREE_OBJECTS = (int)o;
 }

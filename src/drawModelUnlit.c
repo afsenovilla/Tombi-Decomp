@@ -17,10 +17,10 @@ typedef struct {
     unsigned short x2, y2;
 } PolyFT3;
 
-extern char *D_1F800164[];
+extern char *NEXT_PRIM[];
 extern long LZ_FILE_CTRL;
-extern char *DAT_1f80008c;
-extern unsigned long *DAT_1f8001e0;
+extern char *MODEL_VERTEX_PTR;
+extern unsigned long *CURRENT_OT;
 extern char *modelDrawFT3(char *f, char *vtx, unsigned long *ot);
 extern char *modelDrawFT4(void *o, char *f, char *vtx, unsigned long *ot);
 extern char *modelDrawGT3(char *f, char *vtx, unsigned long *ot);
@@ -50,7 +50,7 @@ static __inline__ char *drawF3(long *f, char *vtx, unsigned long *ot)
     if (n != 0) {
         len = 0x4000000;
         do {
-            p = (void *)D_1F800164[0];
+            p = (void *)NEXT_PRIM[0];
             gte_ldv3c(vtx + 4);
             gte_rtpt();
             gte_stflg(&LZ_FILE_CTRL);
@@ -64,12 +64,12 @@ static __inline__ char *drawF3(long *f, char *vtx, unsigned long *ot)
                         gte_avsz3();
                         gte_stotz(&otz);
                         otz = (otz << 2) + (long)ot;
-                        if ((unsigned long)(otz - (long)DAT_1f8001e0) < 0xca0) {
+                        if ((unsigned long)(otz - (long)CURRENT_OT) < 0xca0) {
                             t = *(unsigned long *)otz;
                             *(unsigned long *)otz = (unsigned long)p;
                             p->tag = t | len;
                             p->c0 = f[0];
-                            D_1F800164[0] = D_1F800164[0] + sizeof(PolyF3);
+                            NEXT_PRIM[0] = NEXT_PRIM[0] + sizeof(PolyF3);
                         }
                     }
                 }
@@ -78,7 +78,7 @@ static __inline__ char *drawF3(long *f, char *vtx, unsigned long *ot)
             vtx += 0x28;
         } while (--n != 0);
     }
-    DAT_1f80008c = vtx;
+    MODEL_VERTEX_PTR = vtx;
     return (char *)f;
 }
 
@@ -94,7 +94,7 @@ static __inline__ char *drawFT3(long *f, char *vtx, unsigned long *ot)
     if (n != 0) {
         len = 0x6000000;
         do {
-            p = (void *)D_1F800164[0];
+            p = (void *)NEXT_PRIM[0];
             gte_ldv3c(vtx + 0xc);
             gte_rtpt();
             gte_stflg(&LZ_FILE_CTRL);
@@ -108,14 +108,14 @@ static __inline__ char *drawFT3(long *f, char *vtx, unsigned long *ot)
                         gte_avsz3();
                         gte_stotz(&otz);
                         otz = (otz << 2) + (long)ot;
-                        if ((unsigned long)(otz - (long)DAT_1f8001e0) < 0xca0) {
+                        if ((unsigned long)(otz - (long)CURRENT_OT) < 0xca0) {
                             t = *(unsigned long *)otz;
                             *(unsigned long *)otz = (unsigned long)p;
                             p->tag = t | len;
                             p->c0 = f[0];
                             p->w0c = f[1];
                             p->w14 = f[2];
-                            D_1F800164[0] = D_1F800164[0] + 0x1c;
+                            NEXT_PRIM[0] = NEXT_PRIM[0] + 0x1c;
                         }
                     }
                 }
@@ -124,7 +124,7 @@ static __inline__ char *drawFT3(long *f, char *vtx, unsigned long *ot)
             vtx += 0x40;
         } while (--n != 0);
     }
-    DAT_1f80008c = vtx;
+    MODEL_VERTEX_PTR = vtx;
     return (char *)f;
 }
 

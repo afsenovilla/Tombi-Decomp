@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { short s[6]; } Pos6;
 extern int func_8002DCC8(int a, int b, Pos6 *p);
-extern unsigned int D_8009C96C;
+extern unsigned int GAME_PLAYER_AP;
 extern unsigned char D_8009CE21;
 extern unsigned char D_8009CE35;
 extern unsigned char D_8009CE36;
@@ -54,7 +54,7 @@ short tunnelActorOpenDialogue(TObj *arg)
             o->state = 4;
             goto inc;
         }
-        if (D_8009C96C > 0x7A120) {
+        if (GAME_PLAYER_AP > 0x7A120) {
             o->d90 = func_8002DCC8(5, 2, &p);
             o->state = 5;
             goto inc;

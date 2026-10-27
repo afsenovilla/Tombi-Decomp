@@ -10,8 +10,8 @@ typedef struct { char pad[8]; unsigned char b8; char pad2[0x23]; unsigned short 
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *PLAYER_EXT;
 extern AnimTbl PLAYER_ANIM_TABLE;
-extern unsigned char D_8009C970A[];
-#define D_8009C970 D_8009C970A[0]
+extern unsigned char GAME_PLAYER_HEALTH[];
+#define D_8009C970 GAME_PLAYER_HEALTH[0]
 extern void playerUpdateWaterLevel(TObj *);
 extern short getHazardDamage();
 extern void decreaseObjectTimer(TObj *, unsigned char);

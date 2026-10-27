@@ -1,6 +1,6 @@
 // FUNC 8011133c 128 X016
 // MATCHING 8011133c 128
-extern unsigned short DAT_8009d610, PAD_PRESSED;
+extern unsigned short PAD_INFO, PAD_PRESSED;
 extern unsigned char DAT_8009d618;
 
 void setVelXFromPadLR(char *o)
@@ -10,7 +10,7 @@ void setVelXFromPadLR(char *o)
     volatile unsigned short *k;
     p = o;
     s = 0x200;
-    if (DAT_8009d610 == 7)
+    if (PAD_INFO == 7)
         s >>= 3 - DAT_8009d618;
     k = &PAD_PRESSED;
     if (*k & 0x80)

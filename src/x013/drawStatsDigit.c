@@ -12,14 +12,14 @@ typedef struct { u16 u, v; } UV;
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 #define setlen(p, _len) (((P_TAG *)(p))->len = (u8)(_len))
 #define setcode(p, _code) (((P_TAG *)(p))->code = (u8)(_code))
-extern SPRT *D_1F800164;
+extern SPRT *NEXT_PRIM;
 extern UV D_80118104[];
 
 void drawStatsDigit(int i, short x, short y)
 {
     SPRT *p;
 
-    p = D_1F800164;
+    p = NEXT_PRIM;
     setlen(p, 4);
     setcode(p, 0x65);
     p->r0 = 0x80;
@@ -34,5 +34,5 @@ void drawStatsDigit(int i, short x, short y)
     p->h = 0x10;
     p->clut = 0x7812;
     addPrim((*(u_long*)&SPAD.i1e0) + 0x14, p);
-    D_1F800164 = (SPRT *)((char *)D_1F800164 + 0x14);
+    NEXT_PRIM = (SPRT *)((char *)NEXT_PRIM + 0x14);
 }

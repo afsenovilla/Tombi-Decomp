@@ -13,8 +13,8 @@ typedef struct { unsigned long tag; unsigned long code[2]; } DR_MODE;
 typedef struct { short x, y, w, h; } RECT;
 typedef struct { short mode, x, y; unsigned char u, v; short w, h, cx, cy, abe; } ENT;
 extern ENT *PTR_DAT_80080258[];
-extern char *DAT_1f800164;
-extern int DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern int CURRENT_OT;
 extern void SetSprt(SPRT *);
 extern void SetSemiTrans(void *, int);
 extern unsigned short GetClut(int, int);
@@ -30,7 +30,7 @@ void drawLetterboxOverlay(TObj *o)
     DR_MODE *dm;
     RECT r;
     for (e = PTR_DAT_80080258[o->subtype]; e->mode != 0x7fff; e++) {
-        p = (SPRT *)DAT_1f800164;
+        p = (SPRT *)NEXT_PRIM;
         SetSprt(p);
         SetSemiTrans(p, e->abe);
         p->r0 = 0x80;
@@ -44,12 +44,12 @@ void drawLetterboxOverlay(TObj *o)
         p->u0 = e->u;
         p->v0 = e->v;
         p->clut = GetClut(e->cx, e->cy);
-        AddPrim(&((OTB *)DAT_1f8001e0)->a[(signed char)o->b0f], p);
-        DAT_1f800164 += sizeof(SPRT);
-        dm = (DR_MODE *)DAT_1f800164;
+        AddPrim(&((OTB *)CURRENT_OT)->a[(signed char)o->b0f], p);
+        NEXT_PRIM += sizeof(SPRT);
+        dm = (DR_MODE *)NEXT_PRIM;
         SetDrawMode(dm, 0, 0, e->mode, 0);
-        AddPrim(&((OTB *)DAT_1f8001e0)->a[(signed char)o->b0f], dm);
-        DAT_1f800164 += sizeof(DR_MODE);
+        AddPrim(&((OTB *)CURRENT_OT)->a[(signed char)o->b0f], dm);
+        NEXT_PRIM += sizeof(DR_MODE);
     }
     r.x = 0;
     r.y = 0;

@@ -1,8 +1,8 @@
 // FUNC 800f16f8 32 D0SPSUB
 // MATCHING 800f16f8 32
-extern unsigned char D_8009C970, D_8009C971;
+extern unsigned char GAME_PLAYER_HEALTH, GAME_PLAYER_MAX_HEALTH;
 
 int subScreenCondHealthSettled(void)
 {
-    return D_8009C970 == D_8009C971;
+    return GAME_PLAYER_HEALTH == GAME_PLAYER_MAX_HEALTH;
 }

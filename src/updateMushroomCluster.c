@@ -1,7 +1,7 @@
 // FUNC 80126fec 552 X000
 // MATCHING 80126fec 552
 #include "TOBJ.H"
-extern unsigned char DAT_800a6047[];
+extern unsigned char PLAYER_DRAW_DEPTH[];
 extern short DAT_800a60ea[];
 extern void *MUSHROOM_CLUSTER_ANIMS, *PTR_DAT_8013b1d0;
 extern int DAT_1f8002d4[];
@@ -24,7 +24,7 @@ void updateMushroomCluster(TObj *o)
         o->box2 = 0xc;
         o->step = 0;
         o->box3 = 0x1c;
-        c = DAT_800a6047[0];
+        c = PLAYER_DRAW_DEPTH[0];
         o->timer = 0;
         o->b6a = 0;
         o->b69 = 0;

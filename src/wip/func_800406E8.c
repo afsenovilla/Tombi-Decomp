@@ -3,7 +3,7 @@
 /* score 98 with maspsx --expand-div (ncheck lacks it: game div has break 7/6 checks). Left: prologue (P load before addiu sp),
    game copies a2->t6, a1->v1 at entry and uses raw y in d = h - y */
 typedef struct S { char p[0x14]; short w14; unsigned short w16; } S;
-extern unsigned short *D_1F800278;
+extern unsigned short *COLLISION_SEG_PTR;
 extern short D_1F80027E;
 extern short D_1F800280;
 int func_800406E8(S *o, short x, short y)
@@ -14,21 +14,21 @@ int func_800406E8(S *o, short x, short y)
     int a;
     short b;
     int lo, len, h, d;
-    n = *D_1F800278++;
+    n = *COLLISION_SEG_PTR++;
     if (n == 0)
         return 0;
     do {
-        fl = *D_1F800278++;
+        fl = *COLLISION_SEG_PTR++;
         n--;
         if (!(fl & 2)) goto skip;
         if (fl & 0x10) {
         skip:
-            D_1F800278 += 3;
+            COLLISION_SEG_PTR += 3;
             continue;
         }
-        a = *D_1F800278++;
-        b = *D_1F800278++;
-        w = *D_1F800278++;
+        a = *COLLISION_SEG_PTR++;
+        b = *COLLISION_SEG_PTR++;
+        w = *COLLISION_SEG_PTR++;
         lo = w & 0xf;
         len = (w >> 4) & 0xf;
         if (len == 0) continue;

@@ -21,7 +21,7 @@ extern short DAT_8007a072[];
 extern unsigned char GAME_EQUIPPED_WEAPON[];
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c8;
-extern unsigned short DAT_1f8001f8;
+extern unsigned short TICK_COUNT;
 extern unsigned char PLAYER_STATE, DAT_800a60dc, DAT_800a60e4, DAT_800a60fe, DAT_800a60ff;
 extern unsigned char DAT_8009c93f, DAT_8009c990;
 extern short MulCos(int, int);
@@ -326,7 +326,7 @@ void weapon5to7Swing(TObj *o)
         o->animFrame = PLAYER.animFrame;
         weaponSetPlayerAnimA(o);
         AnimJump(&PLAYER, 0);
-        if ((DAT_1f8001f8 & 0xf) == 0) {
+        if ((TICK_COUNT & 0xf) == 0) {
             startPadVibration(0, 0, 0xc0, 2);
             SfxPlay(3);
         }
@@ -366,7 +366,7 @@ void weapon5to7Swing(TObj *o)
         o->animFrame = PLAYER.animFrame;
         weaponSetPlayerAnimA(o);
         AnimJump(&PLAYER, 0);
-        if ((DAT_1f8001f8 & 0xf) == 0) {
+        if ((TICK_COUNT & 0xf) == 0) {
             startPadVibration(0, 0, 0xff, 2);
             SfxPlay2(3, 6);
         }

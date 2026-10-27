@@ -8,7 +8,7 @@ INCLUDE_ASM_V("x09/nonmatchings/x09", func_8011E3A8_slps01144);
 #include "spad.h"
 /* Rotated FT4 sprite strip (family of drawObjectSpriteRotatedFT4). All element reads go through the one pointer q: loop.c then
    combines the 7 address givs into a reduced reg based on the LAST one (q+12 = uv3), which is the game's s2;
-   a separate f = q+12 pointer gets reduced to q+8 instead. p = D_1F800164 is read between the A/B and C/D bytes. */
+   a separate f = q+12 pointer gets reduced to q+8 instead. p = NEXT_PRIM is read between the A/B and C/D bytes. */
 #include "TOBJ.H"
 
 typedef struct {
@@ -23,7 +23,7 @@ typedef struct {
 extern long LZ_FILE_CTRL;
 extern int D_1F800074i;
 extern int D_1F800078;
-extern PFT4 *D_1F800164;
+extern PFT4 *NEXT_PRIM;
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -66,7 +66,7 @@ void drawRotatedSpriteKind8(TObj *o)
     do {
         A = (signed char)q[14];
         B = (signed char)q[15];
-        p = D_1F800164;
+        p = NEXT_PRIM;
         C = q[10];
         D = q[11];
         if (o->animFrame & 1) {
@@ -111,7 +111,7 @@ void drawRotatedSpriteKind8(TObj *o)
             else
                 r = insertPrimWithBias(p, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             if (!r)
-                D_1F800164 = (PFT4 *)((char *)D_1F800164 + 0x28);
+                NEXT_PRIM = (PFT4 *)((char *)NEXT_PRIM + 0x28);
         }
         q += 16;
     } while (--D_1F800078);

@@ -21,11 +21,11 @@ typedef void (*Fn)(O *);
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6; } PL;
 
 extern PL PLAYER;
-extern unsigned char D_800A6039[];
+extern unsigned char PLAYER_VISIBLE[];
 extern Fn D_80079A98[];
 extern unsigned char D_800A60DA, D_800A60E0, D_800A60D8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern signed char GAME_PLAYER_MODE;
-extern unsigned short D_800A6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern S2 *D_800A6078x[];
 #define D_800A6078 D_800A6078x[0]
 extern short D_1F80016A, D_1F80016E, D_1F800172;
@@ -182,7 +182,7 @@ void updateAreaScroll(O *o)
                         if (D_1F800172 >= 0x8d1) {
                             o->step = 8;
                             PLAYER_STATE = 5;
-                            D_800A6039[0] = 0;
+                            PLAYER_VISIBLE[0] = 0;
                             PLAYER_SUBSTATE = 0x41;
                             PLAYER_STEP = 0;
                             break;
@@ -229,7 +229,7 @@ void updateAreaScroll(O *o)
             PLAYER_STATE = 5;
             PLAYER_SUBSTATE = 0x41;
             *f = 0;
-            D_800A6066 = 1;
+            PLAYER_ANIM_FRAME = 1;
             if (GCD.bcdbc == 0xff) {
                 o->step = 6;
                 o->w4a = 0;
@@ -268,7 +268,7 @@ void updateAreaScroll(O *o)
         break;
     }
     case 7:
-        D_800A6039[0] = 0;
+        PLAYER_VISIBLE[0] = 0;
         if (--o->w4a == -1) {
             tryStartItemInteraction(o, 1, 3);
             o->step = 3;

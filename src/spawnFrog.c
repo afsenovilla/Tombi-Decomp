@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *allocObjectLayer2(void);
 extern void FUN_8001fe6c(TObj *);
-extern unsigned short DAT_800a6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern int DAT_1f8002d4[];
 extern void *PTR_DAT_8013b184[];
 
@@ -14,7 +14,7 @@ void spawnFrog(int x, int y, int z)
         unsigned short u;
         o->active = 1;
         o->type = 0x12;
-        u = DAT_800a6066;
+        u = PLAYER_ANIM_FRAME;
         o->a.raw = x << 16;
         o->y.raw = y << 16;
         o->b.raw = z << 16;

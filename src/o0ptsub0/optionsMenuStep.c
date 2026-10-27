@@ -3,8 +3,8 @@
 typedef struct S { char p[0x48]; short w48; unsigned short w4a; unsigned short w4c; unsigned short w4e; } S;
 typedef struct { char p[2]; unsigned short mode; char p4[6]; unsigned char vib; } PadCfg;
 extern S *TASK_C;
-extern unsigned short DAT_1f8001fc;
-extern PadCfg D_8009D610;
+extern unsigned short JOYPAD_STATE;
+extern PadCfg PAD_INFO;
 extern unsigned char D_8009D67C, D_8009F0E8;
 extern short D_800EB480;
 extern int PadGetState(int port);
@@ -23,7 +23,7 @@ int optionsMenuStep(void)
     int s;
     int w;
     unsigned char c;
-    PadCfg *cfg = &D_8009D610;
+    PadCfg *cfg = &PAD_INFO;
 
     switch (TASK_C->w4e) {
     case 0:
@@ -36,7 +36,7 @@ int optionsMenuStep(void)
         }
         break;
     case 1:
-        b = DAT_1f8001fc;
+        b = JOYPAD_STATE;
         if (b & 0x40) {
             playSFX(8);
             TASK_C->w4e++;
@@ -49,7 +49,7 @@ int optionsMenuStep(void)
         }
         break;
     case 2:
-        b = DAT_1f8001fc;
+        b = JOYPAD_STATE;
         if (b & 0x10) {
             playSFX(8);
             TASK_C->w4e--;
@@ -68,7 +68,7 @@ int optionsMenuStep(void)
         }
         break;
     case 3:
-        b = DAT_1f8001fc;
+        b = JOYPAD_STATE;
         if (b & 0x10) {
             playSFX(8);
             TASK_C->w4e--;
@@ -80,11 +80,11 @@ int optionsMenuStep(void)
             return 1;
         } else if (b & 0x4000) {
             playSFX(8);
-            D_8009D610.mode ^= 1;
+            PAD_INFO.mode ^= 1;
         }
         break;
     case 4:
-        b = DAT_1f8001fc;
+        b = JOYPAD_STATE;
         if (b & 0x10) {
             playSFX(8);
             if (D_800EB480 == 0) TASK_C->w4e = 2;
@@ -102,7 +102,7 @@ int optionsMenuStep(void)
         }
         break;
     case 5:
-        b = DAT_1f8001fc;
+        b = JOYPAD_STATE;
         if (b & 0x10) {
             playSFX(8);
             TASK_C->w4e--;

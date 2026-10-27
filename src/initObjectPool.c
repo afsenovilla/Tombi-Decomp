@@ -3,8 +3,8 @@
 extern char DAT_800a6610[];
 extern char DAT_800b0adc[];
 extern char DAT_800a49a8[];
-extern char *DAT_1f800208;
-extern short DAT_1f800238;
+extern char *FREE_OBJECTS;
+extern short FREE_OBJECT_COUNT;
 extern void memset(void *, int, int);
 
 void initObjectPool(void)
@@ -21,15 +21,15 @@ void initObjectPool(void)
         p += 0xd4;
     } while (i < 200);
     r = DAT_800b0adc;
-    DAT_1f800208 = DAT_800a49a8;
+    FREE_OBJECTS = DAT_800a49a8;
     i = 0;
     do {
         r[0x1c] = 0;
         i++;
-        q = (char **)(DAT_1f800208 - 4);
-        DAT_1f800208 = DAT_1f800208 - 4;
+        q = (char **)(FREE_OBJECTS - 4);
+        FREE_OBJECTS = FREE_OBJECTS - 4;
         *q = r;
         r -= 0xd4;
     } while (i < 200);
-    DAT_1f800238 = 200;
+    FREE_OBJECT_COUNT = 200;
 }

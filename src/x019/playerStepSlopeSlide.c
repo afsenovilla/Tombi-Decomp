@@ -7,7 +7,7 @@
 extern unsigned char *PLAYER_EXT;
 extern char MOVE_TABLE_2[];
 extern unsigned char GAME_PLAYER_MODE[];
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void playerSlopeSlideUpdateAnim(TObj *);
 extern void playerSlopeSlideAccelerate(TObj *);
@@ -96,8 +96,8 @@ void playerStepSlopeSlide(TObj *o)
             o->d8c = (-o->wb0 << 2) & 0xff;
         }
         if (o->ba4) {
-            if ((D_1F8001F8 & 3) == 0) startPadVibration(0, 0, 0xff, 2);
-            if ((D_1F8001F8 & 0xf) == 0) spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
+            if ((TICK_COUNT & 3) == 0) startPadVibration(0, 0, 0xff, 2);
+            if ((TICK_COUNT & 0xf) == 0) spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
         }
         break;
     case 2:

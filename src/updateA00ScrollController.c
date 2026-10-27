@@ -3,18 +3,18 @@
 #include "TOBJ.H"
 typedef void (*Fn)(TObj *);
 typedef struct { short s0, s2; } S2;
-extern unsigned char DAT_8009cda2[];
+extern unsigned char GAME_DISABLE_SELECT_MENU[];
 extern unsigned char GAME_AREA00_INTRO_PHASE, DAT_8009cda6, DAT_8009c93a, DAT_8009cdc0, DAT_8009ce0b, DAT_800a60da;
 extern unsigned char DAT_8009cfed, DAT_8009c938, DAT_8009cda8, DAT_8009c93f, GAME_FADE_SCREEN_CONTROL, DAT_8009c93c;
 extern unsigned char DAT_8009d13f, DAT_8009c93e, DAT_8009c942;
 extern signed char GAME_PLAYER_MODE;
 extern unsigned short GAME_SELECTED_SECTION;
-extern unsigned short DAT_8009c982[];
+extern unsigned short GAME_SELECTED_SPAWN_POINT[];
 extern unsigned char A00_SCROLL_CONTROLLER_MODE_BY_SECTION[];
 extern Fn A00_SCROLL_CONTROLLER_HANDLERS[];
 extern short DAT_1f80016a, DAT_1f80016e, DAT_1f800172;
 extern short DAT_1f8001c6;
-extern unsigned char DAT_1f8001cc, DAT_1f8001cd;
+extern unsigned char MOVIE_PLAY_STATE, MOVIE_ID;
 extern int DAT_800a609c;
 extern S2 *PLAYER_H;
 extern char DAT_8001d6a4[];
@@ -52,8 +52,8 @@ void updateA00ScrollController(TObj *o)
         ((unsigned short *)&o->h)[0] = t;
         o->step++;
     case 1:
-        if (DAT_8009cda2[0] != 0) {
-            if (stepScrollReturnY(o) & stepScrollClearX(o)) DAT_8009cda2[0] = 0;
+        if (GAME_DISABLE_SELECT_MENU[0] != 0) {
+            if (stepScrollReturnY(o) & stepScrollClearX(o)) GAME_DISABLE_SELECT_MENU[0] = 0;
             break;
         }
         o->subtype = 1;
@@ -81,7 +81,7 @@ void updateA00ScrollController(TObj *o)
         break;
     case 4:
         A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
-        switch (DAT_8009c982[0]) {
+        switch (GAME_SELECTED_SPAWN_POINT[0]) {
         case 0:
         case 1:
             if (DAT_8009ce0b != 0 && DAT_800a60da == 2 && (unsigned)(*(unsigned short *)&DAT_1f80016a - 0x400) < 0x18) {
@@ -108,15 +108,15 @@ void updateA00ScrollController(TObj *o)
             break;
         case 2:
             if (DAT_8009cdc0 == 1) setEventComplete(0x1c, 0);
-            DAT_8009c982[0] = 0;
+            GAME_SELECTED_SPAWN_POINT[0] = 0;
             break;
         default:
-            DAT_8009c982[0] = 0;
+            GAME_SELECTED_SPAWN_POINT[0] = 0;
             break;
         }
         break;
     case 5:
-        DAT_8009c982[0] = 0;
+        GAME_SELECTED_SPAWN_POINT[0] = 0;
         A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
         if (DAT_1f80016a < 0x4ec) {
             o->state = 0;
@@ -148,7 +148,7 @@ void updateA00ScrollController(TObj *o)
     case 6:
         updateCameraFollow(o);
         if (DAT_1f80016e < -0x2ed) {
-            DAT_8009c982[0] = 2;
+            GAME_SELECTED_SPAWN_POINT[0] = 2;
             o->step++;
             break;
         }
@@ -166,7 +166,7 @@ void updateA00ScrollController(TObj *o)
             break;
         }
         if (DAT_1f80016e < -0x2ed) break;
-        DAT_8009c982[0] = 0;
+        GAME_SELECTED_SPAWN_POINT[0] = 0;
         o->step--;
         break;
     case 8:
@@ -221,12 +221,12 @@ void updateA00ScrollController(TObj *o)
         DAT_1f8001c6 = 2;
         FUN_8001f4bc();
         o->step++;
-        DAT_1f8001cc = 1;
-        DAT_1f8001cd = 4;
+        MOVIE_PLAY_STATE = 1;
+        MOVIE_ID = 4;
         FUN_800171b8(1, DAT_8001d6a4);
         break;
     case 12:
-        if (DAT_1f8001cc != 0) break;
+        if (MOVIE_PLAY_STATE != 0) break;
         DAT_1f8001c6 = 0;
         GAME_FADE_SCREEN_CONTROL = 4;
         startAreaBgm();

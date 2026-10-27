@@ -11,11 +11,11 @@ static char *PTR_80079d58[7] = {
     (char *)D_80012228, (char *)19, (char *)4, (char *)D_80012240,
     (char *)19, (char *)4, (char *)D_80012260,
 };
-extern unsigned short DAT_1f8001f8;
-extern unsigned char DAT_800a6039, DAT_800a6047;
+extern unsigned short TICK_COUNT;
+extern unsigned char PLAYER_VISIBLE, PLAYER_DRAW_DEPTH;
 extern char PLAYER, DAT_800a6104;
 extern short DAT_800a6118;
-extern unsigned short DAT_800a6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern short *PLAYER_H;
 extern short *PLAYER_D;
 extern short PLAYER_Y;
@@ -38,11 +38,11 @@ void playerEffect4EStepA(TObj *o)
     default:
         return;
     }
-    if (o->b0c == 0 && (DAT_1f8001f8 & 3) == 0)
+    if (o->b0c == 0 && (TICK_COUNT & 3) == 0)
         startPadVibration(0, 0, 0xff, 2);
     AnimAdvance(o);
     o->timer = o->timer - 1;
-    o->visible = DAT_800a6039;
+    o->visible = PLAYER_VISIBLE;
     if (o->timer >= 0x3d) {
         if (o->b6b < 0x7f)
             b = o->b6b + 8;
@@ -68,7 +68,7 @@ void playerEffect4EStepA(TObj *o)
 L:
     s = PLAYER_H[1];
     f = o->h;
-    if (DAT_800a6066 & 1)
+    if (PLAYER_ANIM_FRAME & 1)
         f->p.whole = s + 4;
     else
         f->p.whole = s - 4;
@@ -76,10 +76,10 @@ L:
     o->d->p.whole = PLAYER_D[1];
     switch (o->b0c) {
     case 0:
-        b = DAT_800a6047 + 1;
+        b = PLAYER_DRAW_DEPTH + 1;
         break;
     case 1:
-        b = DAT_800a6047 - 1;
+        b = PLAYER_DRAW_DEPTH - 1;
         break;
     default:
         return;

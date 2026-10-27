@@ -18,7 +18,7 @@ extern unsigned char D_8009CDD9;
 extern unsigned char D_8009CE4B;
 extern unsigned char D_8009CEF0;
 extern unsigned char D_8009CEF4;
-extern unsigned short D_8009C982;
+extern unsigned short GAME_SELECTED_SPAWN_POINT;
 extern TObj *SCRIPT_OBJECTS[];
 extern TObj *D_8009F328;
 extern TObj PLAYER;
@@ -162,7 +162,7 @@ void spawnNpcSet07(TObj *parent0)
                     n->y.p.whole = 0x1B6;
                     n->animFrame = 3;
                 } else {
-                    if (D_8009CEF4 == 1 && D_8009C982 == 2) {
+                    if (D_8009CEF4 == 1 && GAME_SELECTED_SPAWN_POINT == 2) {
                         PLAYER.h->p.whole = n->h->p.whole + 0x10;
                         PLAYER.y.p.whole = n->y.p.whole;
                     }

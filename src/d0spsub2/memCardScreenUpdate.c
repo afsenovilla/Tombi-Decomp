@@ -8,7 +8,7 @@ typedef struct {
     short w1c;
 } Menu;
 extern Menu MENU_STATE;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern unsigned short PAD_PRESSED;
 extern int D_800F7140, D_800F7144;
 extern int memCardScreenStep(int pad, Menu *m);
@@ -30,7 +30,7 @@ int memCardScreenUpdate(int a0, int a1, int ret)
             D_800F7144 = 0x20;
         } else if (--D_800F7144 == 0) {
             D_800F7144 = 4;
-            D_1F8001FC |= k;
+            JOYPAD_STATE |= k;
         }
         switch (m->w12) {
         case 4:

@@ -14,7 +14,7 @@ extern TObj *allocObjectLayer1(void);
 extern void *EGG_ANIM;
 extern int DAT_1f8002d4;
 extern unsigned char DAT_8009d2ae[];
-extern int DAT_800a6048, DAT_800a604c, DAT_800a6050;
+extern int PLAYER_POS, DAT_800a604c, DAT_800a6050;
 
 typedef struct { int a, b, c; } V3;
 
@@ -123,7 +123,7 @@ extern TObj *allocObjectLayer1(void);
 extern void *EGG_ANIM;
 extern int DAT_1f8002d4;
 extern unsigned char DAT_8009d2ae[];
-extern int DAT_800a6048, DAT_800a604c, DAT_800a6050;
+extern int PLAYER_POS, DAT_800a604c, DAT_800a6050;
 
 typedef struct { int a, b, c; } V3;
 
@@ -204,7 +204,7 @@ void updateEgg(TObj *o)
                     n->active = 1;
                     n->type = 2;
                     n->animFrame = (o->animFrame & 1) | 2;
-                    *(V3 *)&n->a = *(V3 *)&DAT_800a6048;
+                    *(V3 *)&n->a = *(V3 *)&PLAYER_POS;
                     n->subtype = o->subtype;
                     n->b0c = o->b0c;
                     n->b6b = o->b6b;

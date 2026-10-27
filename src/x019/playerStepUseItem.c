@@ -24,12 +24,12 @@ typedef struct {
 #define X(o) ((X800FFEC4 *)(o))
 
 extern P800FFEC4 *PLAYER_EXT;
-extern unsigned char *DAT_800a611c;
+extern unsigned char *PLAYER_HELD_OBJECT;
 extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern int GAME[];
 extern unsigned char GVARS[], DAT_8009c93e, DAT_8009c93f, DAT_8009c940[], DAT_8009c941, DAT_8009c942;
-extern unsigned char GAME_PLAYER_MODE, DAT_8009d2b1, DAT_8009d2c3;
+extern unsigned char GAME_PLAYER_MODE, GAME_BITTEN_JUMP_KIND, DAT_8009d2c3;
 extern unsigned char DAT_8009ce55, DAT_8009ce56, DAT_8009ce57, DAT_8009cee2, DAT_8009cf03, DAT_8009cdcc;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern char DAT_80010748[];
@@ -61,8 +61,8 @@ static __inline__ void sub(TObj *o)
 static __inline__ void reset(TObj *o)
 {
     if (*(unsigned char *)&o->wac >= 2) {
-        BITTEN_OBJECT = DAT_800a611c;
-        DAT_800a611c[4] = 2;
+        BITTEN_OBJECT = PLAYER_HELD_OBJECT;
+        PLAYER_HELD_OBJECT[4] = 2;
         BITTEN_OBJECT[5] = 2;
         BITTEN_OBJECT[6] = 0;
     }
@@ -165,7 +165,7 @@ void playerStepUseItem(TObj *o)
             break;
         case 9:
             DAT_8009c940[0] = 0;
-            DAT_8009d2b1 = 0;
+            GAME_BITTEN_JUMP_KIND = 0;
             FUN_80026e0c(DAT_8009c941, 1);
             break;
         case 10:
@@ -215,7 +215,7 @@ void playerStepUseItem(TObj *o)
             break;
         case 0x82:
             *((unsigned char *)&o->waa + 1) |= 0x80;
-            switch (DAT_8009d2b1) {
+            switch (GAME_BITTEN_JUMP_KIND) {
             case 1: o->step = 0x2a; break;
             case 2: o->step = 0x2b; break;
             }

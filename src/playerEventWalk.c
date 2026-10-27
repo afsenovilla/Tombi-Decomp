@@ -9,7 +9,7 @@ typedef struct {
 } O;
 extern P *PLAYER_EXT;
 extern Q *DAT_8009c330q;
-extern unsigned short G1f8;
+extern unsigned short TICK_COUNT;
 extern char A0de0[], A0e2c[];
 extern void FUN_8001fec0(O *), playerSetAngleFromSlope(O *), playerSelectGroundAnim(O *), playerMoveByAngleSpeed(O *), playerStickToGround(O *), FUN_8001e4f0(int);
 
@@ -32,8 +32,8 @@ void playerEventWalk(O *o)
         playerSelectGroundAnim(o);
         playerMoveByAngleSpeed(o);
         playerStickToGround(o);
-        if ((G1f8 & 7) == 0) {
-            if ((G1f8 & 0xf) == 0)
+        if ((TICK_COUNT & 7) == 0) {
+            if ((TICK_COUNT & 0xf) == 0)
                 FUN_8001e4f0(0);
             else
                 FUN_8001e4f0(1);

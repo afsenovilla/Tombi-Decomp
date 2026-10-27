@@ -6,7 +6,7 @@ extern short DAT_1f80025a;
 extern TObj **DAT_1f800270;
 extern short DAT_1f800240;
 extern TObj **DAT_1f80022c;
-extern unsigned char DAT_800a603a;
+extern unsigned char PLAYER_TYPE;
 extern unsigned short GAME[];
 extern void drawObjectSprtWithMode(TObj *);
 extern void drawScreenSpriteObject(TObj *);
@@ -39,7 +39,7 @@ void drawCategory7Objects(void)
                 drawLetterboxOverlay(o);
                 break;
             case 3:
-                if (DAT_800a603a & 2)
+                if (PLAYER_TYPE & 2)
                     spawnWeaponTrailObjects(o);
                 else
                     FUN_800eb044(o);
@@ -69,7 +69,7 @@ void drawCategory7Objects(void)
                 drawLetterboxOverlay(o);
                 break;
             case 3:
-                if (DAT_800a603a & 2)
+                if (PLAYER_TYPE & 2)
                     spawnWeaponTrailObjects(o);
                 else
                     FUN_800eb044(o);

@@ -12,9 +12,9 @@
 typedef struct { signed char anim, z, ang, rad; } E4;
 typedef struct { char c[12]; } V12;
 extern TObj PLAYER;
-extern unsigned char D_800A6039, D_800A6047, PLAYER_STATE, PLAYER_SUBSTATE, D_800A60DA;
-extern unsigned short D_800A6066;
-extern unsigned short *D_800A605C[];
+extern unsigned char PLAYER_VISIBLE, PLAYER_DRAW_DEPTH, PLAYER_STATE, PLAYER_SUBSTATE, D_800A60DA;
+extern unsigned short PLAYER_ANIM_FRAME;
+extern unsigned short *PLAYER_ANIM[];
 extern Fix16 *PLAYER_H;
 extern int D_800A609C;
 extern Fix16 *PLAYER_D[];
@@ -141,11 +141,11 @@ void updateFrog(TObj *o)
             unsigned int t;
             unsigned short u;
             int ang;
-            o->visible = D_800A6039;
+            o->visible = PLAYER_VISIBLE;
             o->active = 2;
-            o->animFrame = D_800A6066 & 1;
+            o->animFrame = PLAYER_ANIM_FRAME & 1;
             o->category |= 0x80;
-            e = &D_80011DAC[D_80011EB4[*D_800A605C[0]]];
+            e = &D_80011DAC[D_80011EB4[*PLAYER_ANIM[0]]];
             o->anim = FROG_ANIMS[e->anim];
             if (o->animFrame & 1) {
                 u = D_800A60C4a[0] + 0x80 - e->ang;
@@ -159,7 +159,7 @@ void updateFrog(TObj *o)
             o->y.p.whole = PLAYER.y.p.whole + MulNegSinScaled(ang, e->rad);
             o->d->p.whole = PLAYER_D[0]->p.whole;
             o->d8c = D_800A60C4a[0];
-            o->b0f = D_800A6047 + (unsigned char)e->z;
+            o->b0f = PLAYER_DRAW_DEPTH + (unsigned char)e->z;
             if (PLAYER_STATE == 2) {
                 D_8009C984 &= ~2;
                 o->b04 = 2;

@@ -1,14 +1,14 @@
 // FUNC 800ecd94 500 D0SPSUB
 // MATCHING 800ecd94 500
 typedef struct { char p[0x14]; short row; char p16[8]; short sel; } Menu;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern void playSFX(int id);
 extern int subScreenCountEvents(void);
 
 int subScreenMoveEventCursor(Menu *m)
 {
     int n = (subScreenCountEvents() + 9) / 10 * 10;
-    unsigned short pad = D_1F8001FC;
+    unsigned short pad = JOYPAD_STATE;
     if (pad & 0x10) {
         if ((short)(m->sel % 10) > 0) {
             m->sel--;

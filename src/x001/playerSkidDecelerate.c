@@ -2,7 +2,7 @@
 // MATCHING 8010fe70 1092
 typedef struct { short a[3]; char pad[0x24 - 6]; unsigned short g[10]; char pad2[0x74 - 0x38]; } T74;
 extern T74 PLAYER_DECEL_PARAMS[];
-extern unsigned char DAT_8009d2b3, DAT_8009c990, DAT_8009cf06, DAT_8009d006;
+extern unsigned char GAME_EQUIPPED_PANTS, DAT_8009c990, DAT_8009cf06, DAT_8009d006;
 typedef struct { char pad[0x2e]; unsigned short animFrame; char p1[0xb2 - 0x30]; short wb2; char pad2[0xc1 - 0xb4]; unsigned char bc1; } P;
 
 static __inline__ void decel(P *o, int u)
@@ -83,7 +83,7 @@ static __inline__ void step(P *o, int u)
 static __inline__ void body(P *o)
 {
     int b = o->bc1;
-    int u = DAT_8009d2b3 + b * 4;
+    int u = GAME_EQUIPPED_PANTS + b * 4;
     if ((DAT_8009c990 & 3) != 0)
         u = (unsigned char)b << 2 | 3;
     if (DAT_8009cf06 != 0)

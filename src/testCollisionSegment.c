@@ -1,6 +1,6 @@
 // FUNC 8004094c 372 MAIN0
 // MATCHING 8004094c 372
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 
 int testCollisionSegment(int x, int y)
 {
@@ -9,17 +9,17 @@ int testCollisionSegment(int x, int y)
     unsigned short v;
     int r; short n, lo;
 
-    base = *DAT_1f800278++;
+    base = *COLLISION_SEG_PTR++;
     if ((unsigned short)(y - base + 16) > 32) {
-        DAT_1f800278 += 2;
+        COLLISION_SEG_PTR += 2;
         return 0;
     }
-    amp = *DAT_1f800278++;
+    amp = *COLLISION_SEG_PTR++;
     if (amp == 0) {
-        DAT_1f800278++;
+        COLLISION_SEG_PTR++;
         x = base;
     } else {
-        v = *DAT_1f800278++;
+        v = *COLLISION_SEG_PTR++;
         lo = v & 0xf;
         n = (v >> 4) & 0xf;
         if (n == 0) return 0;

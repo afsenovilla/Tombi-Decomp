@@ -5,7 +5,7 @@ extern unsigned char DAT_800a603c[];
 extern unsigned char PLAYER_SUBSTATE, PLAYER_STEP, DAT_8009c93f, DAT_800a60a1;
 extern unsigned char DAT_8009cdae;
 extern unsigned char PLAYER_STATE;
-extern short DAT_800a6066, PLAYER_Y;
+extern short PLAYER_ANIM_FRAME, PLAYER_Y;
 
 void a00BackdropSpritesStep4(TObj *o)
 {
@@ -21,7 +21,7 @@ void a00BackdropSpritesStep4(TObj *o)
                 o->step = 2;
                 o->state = 0;
                 if (DAT_800a603c[0] != 1) {
-                    DAT_800a6066 = 0;
+                    PLAYER_ANIM_FRAME = 0;
                     DAT_800a603c[0] = 1;
                     PLAYER_SUBSTATE = 0;
                     PLAYER_STEP = 0;

@@ -20,8 +20,8 @@ typedef struct { short x, y, u, v, w, h, cx, cy; } SprDef;
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 extern SPRT D_1F800000;
-extern char *D_1F800164;
-extern unsigned long *DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern unsigned short GetClut(int x, int y);
 extern void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, void *tw);
 
@@ -42,11 +42,11 @@ void titleDrawSprite(SprDef *d, short tpage, unsigned char pri)
     D_1F800000.w = d->w;
     D_1F800000.h = d->h;
     D_1F800000.clut = GetClut(d->cx, d->cy);
-    p = (SPRT *)D_1F800164;
+    p = (SPRT *)NEXT_PRIM;
     *p = *(SPRT *)0x1F800000;
-    addPrim(DAT_1f8001e0 + 4 + pri, p);
-    m = (DR_MODE *)(D_1F800164 += sizeof(SPRT));
+    addPrim(CURRENT_OT + 4 + pri, p);
+    m = (DR_MODE *)(NEXT_PRIM += sizeof(SPRT));
     SetDrawMode(m, 0, 0, tpage, 0);
-    addPrim(DAT_1f8001e0 + 4 + pri, m);
-    D_1F800164 += sizeof(DR_MODE);
+    addPrim(CURRENT_OT + 4 + pri, m);
+    NEXT_PRIM += sizeof(DR_MODE);
 }

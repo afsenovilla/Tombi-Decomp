@@ -30,9 +30,9 @@ typedef struct {
     unsigned short uv3;
 } Face;
 
-extern PolyGT4 *DAT_1f800164;
+extern PolyGT4 *NEXT_PRIM;
 extern long LZ_FILE_CTRL;
-extern unsigned long *DAT_1f8001e0;
+extern unsigned long *CURRENT_OT;
 
 #define gte_ldv3c(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 );lwc2 $2, 8( %0 );lwc2 $3, 12( %0 );lwc2 $4, 16( %0 );lwc2 $5, 20( %0 )" : : "r"(r0))
 #define gte_ldv0(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 )" : : "r"(r0))
@@ -65,7 +65,7 @@ long *drawArea9ModelGT4(long *f, unsigned long *ot)
                 gte_nclip();
                 gte_stopz(&LZ_FILE_CTRL);
                 if (LZ_FILE_CTRL > 0) {
-                    p = DAT_1f800164;
+                    p = NEXT_PRIM;
                     gte_stsxy3_gt4(p);
                     gte_ldv0((char *)f + 0x2c);
                     gte_rtps();
@@ -88,14 +88,14 @@ long *drawArea9ModelGT4(long *f, unsigned long *ot)
                             *(unsigned short *)((char *)p + 0x30) = ((Face *)f)->uv3;
                             *((unsigned char *)p + 7) = 0x3c;
                             otz = (otz << 2) + (long)ot;
-                            if ((unsigned long)(otz - (long)DAT_1f8001e0) < 4)
-                                otz = (long)DAT_1f8001e0 + 16;
-                            else if ((unsigned long)(otz - (long)DAT_1f8001e0) >= 0xca0)
+                            if ((unsigned long)(otz - (long)CURRENT_OT) < 4)
+                                otz = (long)CURRENT_OT + 16;
+                            else if ((unsigned long)(otz - (long)CURRENT_OT) >= 0xca0)
                                 goto next;
                             t = *(unsigned long *)otz;
                             *(unsigned long *)otz = (unsigned long)p;
                             p->tag = t | len;
-                            DAT_1f800164 = DAT_1f800164 + 1;
+                            NEXT_PRIM = NEXT_PRIM + 1;
                         }
                     }
                 }

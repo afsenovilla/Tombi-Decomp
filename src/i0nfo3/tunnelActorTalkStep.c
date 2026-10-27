@@ -18,7 +18,7 @@ extern unsigned char D_8009CFEC[];
 extern unsigned char PLAYER_STATE[];
 extern unsigned char PLAYER_SUBSTATE[];
 extern unsigned char PLAYER_STEP[];
-extern unsigned short D_800A6066[];
+extern unsigned short PLAYER_ANIM_FRAME[];
 extern unsigned char D_800A60E4[];
 extern void **D_800EED64[][3];
 
@@ -34,7 +34,7 @@ void tunnelActorTalkStep(TObj *o)
         PLAYER_SUBSTATE[0] = 2;
         PLAYER_STEP[0] = 0;
         D_800A60E4[0] = 3;
-        D_800A6066[0] |= 8;
+        PLAYER_ANIM_FRAME[0] |= 8;
         o->wb0 = o->animFrame;
         f = o->b69 + 3;
         o->animFrame = o->b69 - 1;

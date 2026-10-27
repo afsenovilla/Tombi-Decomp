@@ -12,7 +12,7 @@ typedef struct {
     short w24;
 } O;
 extern unsigned char PLAYER, PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
-extern short D_800A6066;
+extern short PLAYER_ANIM_FRAME;
 extern unsigned char D_800A60A1;
 extern unsigned short PLAYER_Y;
 extern unsigned char D_800A60D6, D_800A60E2, D_800A60DA, D_800A60F8;
@@ -37,7 +37,7 @@ void raceResult(O *o)
         if ((unsigned short)(PLAYER_Y + 0x6d6) >= 6) break;
         if (((unsigned char*)&GCD.bcedf)[0] == 0) {
             PLAYER = 1;
-            D_800A6066 = 1;
+            PLAYER_ANIM_FRAME = 1;
             PLAYER_STATE[0] = 5;
             PLAYER_SUBSTATE[0] = 0;
             PLAYER_STEP[0] = 0;
@@ -53,7 +53,7 @@ void raceResult(O *o)
             o->step++;
         } else if (((unsigned char*)&GCD.bcedf)[0] == 0xfe) {
             PLAYER = 1;
-            D_800A6066 = 1;
+            PLAYER_ANIM_FRAME = 1;
             PLAYER_STATE[0] = 5;
             PLAYER_SUBSTATE[0] = 0;
             PLAYER_STEP[0] = 0;

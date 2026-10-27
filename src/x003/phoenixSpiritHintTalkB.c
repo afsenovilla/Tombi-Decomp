@@ -7,7 +7,7 @@ typedef struct { short v[6]; } V6;
 
 extern TObj *D_8009F2E0;
 extern unsigned char PLAYER;
-extern short D_800A6066, D_800A60EA;
+extern short PLAYER_ANIM_FRAME, D_800A60EA;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
@@ -35,7 +35,7 @@ void phoenixSpiritHintTalkB(TObj *o)
         GVARS.b3f = 1;
         GVARS.b42 = 1;
         PLAYER = 1;
-        D_800A6066 = 0;
+        PLAYER_ANIM_FRAME = 0;
         PLAYER_STATE = 5;
         PLAYER_SUBSTATE = 0;
         PLAYER_STEP = 0;

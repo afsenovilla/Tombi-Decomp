@@ -12,7 +12,7 @@ static void **D_80115A08[4] = {
     (void **)D_8012E084, (void **)D_8012E0BC, (void **)D_8012E0A0, (void **)D_8012E0D8,
 };
 extern void **TREASURE_CHEST_ANIM_SETS[];
-extern unsigned short DAT_1f8001f8;
+extern unsigned short TICK_COUNT;
 extern void ObjCullRegister(TObj *);
 extern void printInfoMessage(int, int);
 extern void spawnItemDropsFromTable(TObj *);
@@ -90,7 +90,7 @@ void treasureChestOpenLockedStatic(TObj *o)
     case 5:
         if (--o->timer == -1)
             o->step++;
-        o->y.p.whole = o->d34 + (DAT_1f8001f8 & 1);
+        o->y.p.whole = o->d34 + (TICK_COUNT & 1);
         o->h->p.whole = (short)(o->d30 - 2) + (Rand() & 3);
         break;
     case 6:

@@ -8,7 +8,7 @@ typedef struct { short s0, s2; } S2;
 extern TObj PLAYER;
 extern S2 *PLAYER_H;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, D_800A60D6;
-extern short D_800A6066;
+extern short PLAYER_ANIM_FRAME;
 extern short func_80040278(TObj *, short, short);
 
 void flowerForestPigShotSlide(TObj *o)
@@ -42,7 +42,7 @@ void flowerForestPigShotSlide(TObj *o)
                     PLAYER_STATE = 2;
                     PLAYER_SUBSTATE = 0;
                     PLAYER_STEP = 0;
-                    D_800A6066 = o->h->p.whole > PLAYER_H->s2;
+                    PLAYER_ANIM_FRAME = o->h->p.whole > PLAYER_H->s2;
                 }
             }
             o->step++;
@@ -87,7 +87,7 @@ void flowerForestPigShotSlide(TObj *o)
                     PLAYER_STATE = 2;
                     PLAYER_SUBSTATE = 0;
                     PLAYER_STEP = 0;
-                    D_800A6066 = o->h->p.whole > PLAYER_H->s2;
+                    PLAYER_ANIM_FRAME = o->h->p.whole > PLAYER_H->s2;
                 }
             }
             o->step++;

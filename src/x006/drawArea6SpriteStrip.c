@@ -20,7 +20,7 @@ typedef struct {
 } PFT4;
 
 extern long LZ_FILE_CTRL;
-extern char *D_1F800164;
+extern char *NEXT_PRIM;
 extern int projectActorPosition(void *o, long *sxy, long *z);
 extern int isQuadOnScreen(void *p);
 extern void SetSemiTrans(void *p, int abe);
@@ -71,7 +71,7 @@ void drawArea6SpriteStrip(TObj *o)
     base = (unsigned char *)(o->d3c + t[1]);
     q = base + 0xc;
     do {
-        p = (PFT4 *)D_1F800164;
+        p = (PFT4 *)NEXT_PRIM;
         if (o->animFrame & 1) {
             p->x0 = LZ_FILE_CTRL + ((unsigned)(((signed char *)q)[2] * s) >> 8);
             p->y0 = (LZ_FILE_CTRL >> 16) + ((unsigned)(((signed char *)q)[3] * s) >> 8);
@@ -102,7 +102,7 @@ void drawArea6SpriteStrip(TObj *o)
             if (o->b0d & 1) p->clut = o->w08;
             if (o->b0b) r = otA((unsigned *)p, (char *)SPAD.i1e0 + 0x10, 0, (signed char)o->b0f, 0x9000000);
             else r = otB((unsigned *)p, (char *)SPAD.i1e0 + 0x10, SPAD.i74, (signed char)o->b0f, 0x9000000);
-            if (r == 0) D_1F800164 += 0x28;
+            if (r == 0) NEXT_PRIM += 0x28;
         }
         q += 0x10;
         base += 0x10;

@@ -4,7 +4,7 @@ typedef struct { short x0, y0, x1, y1, a, b; } Zone;
 extern signed char GAME_PLAYER_MODE;
 extern unsigned short PLAYER_Y;
 extern short *PLAYER_H;
-extern short D_800A60B4[], D_800A60B6[];
+extern short D_800A60B4[], PLAYER_VEL_Y[];
 extern unsigned short D_800A6126[], D_800A612A[];
 extern Zone D_800EEDB0[];
 
@@ -31,7 +31,7 @@ short tunnelCheckSlideZone(void)
         D_800A6126[0] = z->a;
         D_800A612A[0] = z->b;
         r = PLAYER_H[1];
-        D_800A60B6[0] = (short)D_800A612A[0] < (short)PLAYER_Y;
+        PLAYER_VEL_Y[0] = (short)D_800A612A[0] < (short)PLAYER_Y;
         D_800A60B4[0] = (short)D_800A6126[0] < r;
         return 1;
     }

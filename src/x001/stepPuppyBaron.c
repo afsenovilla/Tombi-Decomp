@@ -1,19 +1,19 @@
 // FUNC 80136b4c 1744 X001
 // MATCHING 80136b4c 1744
 #include "gvars.h"
-/* case 3: D_800A6039 read into a $3-pinned local before the stores; asm("") before r keeps the
-   D_800A605C load from being scheduled up into the head. */
+/* case 3: PLAYER_VISIBLE read into a $3-pinned local before the stores; asm("") before r keeps the
+   PLAYER_ANIM load from being scheduled up into the head. */
 #include "TOBJ.H"
 
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } R4;
 extern TObj PLAYER;
-extern unsigned char D_800A6039[];
-extern unsigned short D_800A6066[];
-extern unsigned short *D_800A605C;
+extern unsigned char PLAYER_VISIBLE[];
+extern unsigned short PLAYER_ANIM_FRAME[];
+extern unsigned short *PLAYER_ANIM;
 extern int D_800A60C4[];
 extern Fix16 *PLAYER_H[], *PLAYER_D[];
 extern unsigned short PLAYER_Y[];
-extern unsigned char D_800A6047[];
+extern unsigned char PLAYER_DRAW_DEPTH[];
 extern int D_800A609C[];
 extern R4 D_80011E04[];
 extern signed char D_80011EB4[];
@@ -49,15 +49,15 @@ void stepPuppyBaron(TObj *o)
         o->state = 0;
         break;
     case 3:
-        {register unsigned char v asm("$3") = D_800A6039[0];
+        {register unsigned char v asm("$3") = PLAYER_VISIBLE[0];
         D_8009CEAB[0] = 3;
         o->active = 2;
         o->visible = v;
-        o->animFrame = D_800A6066[0] & 1;
+        o->animFrame = PLAYER_ANIM_FRAME[0] & 1;
         o->category |= 0x80;
         *(signed char *)&o->b0f = -7;}
         asm("");
-        r = &D_80011E04[D_80011EB4[*D_800A605C]];
+        r = &D_80011E04[D_80011EB4[*PLAYER_ANIM]];
         o->anim = D_8013E568[r->a];
         if (r->a == 6) {
             o->animFrame ^= 1;
@@ -76,7 +76,7 @@ void stepPuppyBaron(TObj *o)
         o->y.p.whole = PLAYER_Y[0] + dy;
         o->d->p.whole = PLAYER_D[0]->p.whole;
         o->d8c = D_800A60C4[0];
-        o->b0f = D_800A6047[0] + r->b;
+        o->b0f = PLAYER_DRAW_DEPTH[0] + r->b;
         if (D_800A609C[0]) {
             GVARS.b42 = 1;
             GVARS.b3f = 1;

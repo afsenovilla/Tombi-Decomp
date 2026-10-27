@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern signed char GAME_PLAYER_MODE;
 extern TObj PLAYER;
-extern signed char D_800A6047;
+extern signed char PLAYER_DRAW_DEPTH;
 #define LI(n) (*(TObj **)((char *)list + ((n) << 2)))
 #define PI_TOTAL asm("t0")
 #define PI_I 
@@ -129,6 +129,6 @@ void topdownSortDrawOrder(void)
     }
     }
     if (GAME_PLAYER_MODE == 3) {
-        D_800A6047 = -0xC;
+        PLAYER_DRAW_DEPTH = -0xC;
     }
 }

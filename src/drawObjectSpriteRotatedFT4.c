@@ -21,7 +21,7 @@ typedef struct {
 
 extern long LZ_FILE_CTRL;
 extern int D_1F800074i;
-extern PFT4_80123FD0 *D_1F800164;
+extern PFT4_80123FD0 *NEXT_PRIM;
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -75,7 +75,7 @@ void drawObjectSpriteRotatedFT4(TObj *o)
         B = ((signed char)q[15] * s - 0x1800) >> 12;
         C = (q[10] * s + 0x1800) >> 12;
         D = (q[11] * s + 0x1800) >> 12;
-        f = D_1F800164;
+        f = NEXT_PRIM;
         if (o->animFrame & 1) {
             u = A;
             w = B;
@@ -116,7 +116,7 @@ void drawObjectSpriteRotatedFT4(TObj *o)
                 insertPrim(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             else
                 insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
-            D_1F800164 = (PFT4_80123FD0 *)((char *)D_1F800164 + 0x28);
+            NEXT_PRIM = (PFT4_80123FD0 *)((char *)NEXT_PRIM + 0x28);
         }
         q += 16;
     } while (--n);
@@ -141,7 +141,7 @@ typedef struct {
 
 extern long LZ_FILE_CTRL;
 extern int D_1F800074i;
-extern PFT4_80123FD0 *D_1F800164;
+extern PFT4_80123FD0 *NEXT_PRIM;
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -194,7 +194,7 @@ void drawObjectSpriteRotatedFT4(TObj *o)
         B = ((signed char)q[15] * s - 0x1800) >> 12;
         C = (q[10] * s + 0x1800) >> 12;
         D = (q[11] * s + 0x1800) >> 12;
-        f = D_1F800164;
+        f = NEXT_PRIM;
         if (o->animFrame & 1) {
             u = A;
             w = B;
@@ -235,7 +235,7 @@ void drawObjectSpriteRotatedFT4(TObj *o)
                 insertPrim(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
             else
                 insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000);
-            D_1F800164 = (PFT4_80123FD0 *)((char *)D_1F800164 + 0x28);
+            NEXT_PRIM = (PFT4_80123FD0 *)((char *)NEXT_PRIM + 0x28);
         }
         q += 16;
     } while (--n);

@@ -4,7 +4,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern unsigned short D_800A6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern TObj *D_800A60C8;
 extern unsigned char D_800A60F8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern char D_80010748[];
@@ -25,7 +25,7 @@ void raceStartRematch(TObj *o)
         PLAYER.anim = D_80010748;
         AnimLoadDuration(&PLAYER);
         e->animFrame = 0;
-        D_800A6066 = 0;
+        PLAYER_ANIM_FRAME = 0;
         D_800A60C8 = showMessageBox(2, 0x19, 0x80, 0x6c);
         playerSetAnimIfChangedAt(&PLAYER, 0, 0);
         o->step++;

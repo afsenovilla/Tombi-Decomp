@@ -17,8 +17,8 @@ typedef struct {
 typedef struct { short vx, vy, vz, pad; } SVec;
 typedef struct { unsigned char p0[0x18]; short w18, w1a; unsigned char p1c[0x28 - 0x1c]; unsigned short w28[1]; } P9C330;
 extern long D_1F8000C0[];
-extern char *D_1F800164;
-extern int D_1F8001E0;
+extern char *NEXT_PRIM;
+extern int CURRENT_OT;
 extern P9C330 *PLAYER_EXT;
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
@@ -131,10 +131,10 @@ void overheadDrawRotatedSprite(TObj *o)
             P->x3 = *x + (((*u + C) * SN(*a0)) >> 12) + (((*w + D) * SN((*a0 + 0xc0) & 0xff)) >> 12);
             P->y3 = *y + (((*u + C) * CS(*a0)) >> 12) + (((*w + D) * CS((*a0 + 0xc0) & 0xff)) >> 12);
         }
-        q = (PolyFT4 *)D_1F800164;
+        q = (PolyFT4 *)NEXT_PRIM;
         *q = *P;
-        func_8004FD6C(q, D_1F8001E0 + 0x10, otz, (signed char)o->b0f, 0x09000000);
+        func_8004FD6C(q, CURRENT_OT + 0x10, otz, (signed char)o->b0f, 0x09000000);
         e += 0x10;
-        D_1F800164 += 0x28;
+        NEXT_PRIM += 0x28;
     } while (--*n);
 }

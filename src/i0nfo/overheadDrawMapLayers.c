@@ -11,8 +11,8 @@ typedef struct { u_long tag; u_long code[2]; } DR_MODE;
 #define getaddr(p) (u_long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 typedef struct { char pad[0xc90]; u_long a[1]; } OTB;
-extern char *D_1F800164;
-extern OTB *D_1F8001E0;
+extern char *NEXT_PRIM;
+extern OTB *CURRENT_OT;
 extern void SetDrawMode(DR_MODE *, int, int, int, void *);
 typedef struct {
     unsigned short tp0, clut0, tp1, clut1, tp2, clut2;
@@ -34,13 +34,13 @@ void overheadDrawMapLayers(TObj *o)
     y = o->y.p.whole;
     if (y > 0) y -= 0x20;
     if (o->b6b != 0) {
-        dm = (DR_MODE *)D_1F800164;
+        dm = (DR_MODE *)NEXT_PRIM;
         SetDrawMode(dm, 0, 0, 0, 0);
-        addPrim(&D_1F8001E0->a[(signed char)o->b0f], dm);
-        D_1F800164 += 0xC;
+        addPrim(&CURRENT_OT->a[(signed char)o->b0f], dm);
+        NEXT_PRIM += 0xC;
         i = 0;
         do {
-            p = (SPRT *)D_1F800164;
+            p = (SPRT *)NEXT_PRIM;
             *((u8 *)p + 3) = 4;
             p->code = 0x65;
             e = &D_800EE8D0[i];
@@ -48,7 +48,7 @@ void overheadDrawMapLayers(TObj *o)
             p->y0 = e->y + y;
             p->u0 = e->u;
             p->v0 = e->v;
-            dm = (DR_MODE *)(D_1F800164 += 0x14);
+            dm = (DR_MODE *)(NEXT_PRIM += 0x14);
             p->w = e->w;
             p->h = e->h;
             switch (i) {
@@ -69,10 +69,10 @@ void overheadDrawMapLayers(TObj *o)
             p->r0 = c;
             p->g0 = c;
             p->b0 = c;
-            addPrim(&D_1F8001E0->a[(signed char)o->b0f], p);
+            addPrim(&CURRENT_OT->a[(signed char)o->b0f], p);
             i++;
-            addPrim(&D_1F8001E0->a[(signed char)o->b0f], dm);
-            D_1F800164 += 0xC;
+            addPrim(&CURRENT_OT->a[(signed char)o->b0f], dm);
+            NEXT_PRIM += 0xC;
         } while (i < 5);
     }
 }

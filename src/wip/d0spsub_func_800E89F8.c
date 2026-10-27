@@ -97,7 +97,7 @@ extern short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern unsigned char D_8009CDBA;
 extern unsigned char D_8009CF13;
 extern unsigned short D_8009C960;
-extern int D_8009C96C, D_8009C98C;
+extern int GAME_PLAYER_AP, D_8009C98C;
 extern unsigned char D_8009CEFA, D_8009C93F, D_8009CF07, D_8009CF08, D_8009CF09;
 extern char *D_1F800334;
 #define P334 (*(char * volatile *)&D_1F800334)
@@ -550,7 +550,7 @@ int func_800E89F8(int item)
         removeItemFromInventory(item, 1);
         return 1;
     case 0x3F:
-        D_8009C98C = D_8009C96C + 100000;
+        D_8009C98C = GAME_PLAYER_AP + 100000;
         setEventComplete(0xF, 1);
         removeItemFromInventory(0x3F, 1);
         D_8009CEFA = 1;

@@ -12,7 +12,7 @@ typedef struct G { char p0[0x14]; int d14; char p1[0x9c-0x18]; unsigned char f9c
 extern G PLAYER;
 extern signed char GAME_PLAYER_MODE;
 extern int D_1F8000F0;
-extern int DAT_800a604c;
+extern int PLAYER_Y_FIX;
 extern int F0a[], F0b[];
 extern short D_1F8000F2;
 
@@ -30,7 +30,7 @@ void cameraFollowPlayerY(O *o)
     flag = 0;
     k = 0x400000;
     m = 0x340000;
-    v = DAT_800a604c - 0x800000;
+    v = PLAYER_Y_FIX - 0x800000;
     v -= D_1F8000F0;
     v += k;
     if (v < 0) {

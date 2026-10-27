@@ -22,8 +22,8 @@ typedef struct {
 extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short D_1f8001f8, D_1f8003c4;
-extern short D_1f800238;
+extern unsigned short TICK_COUNT, D_1f8003c4;
+extern short FREE_OBJECT_COUNT;
 extern XY PLAYER_FOOT_OFFSET_BY_DIR[];
 extern char D_80010DE0[], D_80010E2C[];
 extern void FUN_800efc04(TObj *);
@@ -58,11 +58,11 @@ static __inline__ void dust(TObj *o)
     x = o->a.p.whole;
     y = o->y.p.whole;
     z = o->b.p.whole;
-    if (spawnPlayerFootstepEffect() == 0 && D_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
+    if (spawnPlayerFootstepEffect() == 0 && FREE_OBJECT_COUNT >= 6 && (q = FUN_80018448()) != 0) {
         q->active = 1;
         q->type = 0x31;
         q->subtype = 1;
-        t = &PLAYER_FOOT_OFFSET_BY_DIR[D_1f8001f8 & 7];
+        t = &PLAYER_FOOT_OFFSET_BY_DIR[TICK_COUNT & 7];
         q->a.p.whole = x;
         q->y.p.whole = y;
         q->b.p.whole = z;
@@ -73,7 +73,7 @@ static __inline__ void dust(TObj *o)
 
 static __inline__ short odd(void)
 {
-    if (D_1f8001f8 & 0xf) return 1;
+    if (TICK_COUNT & 0xf) return 1;
     return 0;
 }
 
@@ -158,7 +158,7 @@ void playerStepWalk(TObj *o)
                 o->wb2 = 0;
                 break;
             default:
-                if ((D_1f8001f8 & 7) == 0) FUN_8001e4f0(odd());
+                if ((TICK_COUNT & 7) == 0) FUN_8001e4f0(odd());
                 break;
             }
             if (GV6.s10 == 7) {

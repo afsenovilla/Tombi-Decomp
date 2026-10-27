@@ -46,20 +46,20 @@ extern unsigned char GAME_EQUIPPED_WEAPON[];
 extern unsigned char DAT_8009cff8;
 extern unsigned char DAT_8009d006[];
 extern unsigned char DAT_8009cf06;
-extern unsigned char DAT_8009d2b3;
+extern unsigned char GAME_EQUIPPED_PANTS;
 extern unsigned char DAT_8009c990;
 extern unsigned char DAT_800a60fa[];
 extern T2 DAT_8007a024[];
 extern unsigned short DAT_800a6040[];
 extern unsigned short DAT_800a60fc[];
-extern unsigned char DAT_8009c970, DAT_8009c970b[];
+extern unsigned char GAME_PLAYER_HEALTH, DAT_8009c970b[];
 extern int SPR_DATA[];
 extern char DAT_80010748[];
 extern unsigned char DAT_8009cef8;
 extern unsigned short GAME;
 extern unsigned int DAT_8009c960i;
 extern unsigned short GAME_SELECTED_SECTION;
-extern unsigned short DAT_8009c982;
+extern unsigned short GAME_SELECTED_SPAWN_POINT;
 extern signed char GAME_PLAYER_MODE;
 extern char D_80114FC4[];
 extern char D_80114FDC[];
@@ -88,7 +88,7 @@ static E **DAT_80115190[20] = {
 extern unsigned char DAT_8009c93a, DAT_8009c93aA[];
 extern unsigned char DAT_8009ce41;
 
-#define LOADP() p = (unsigned char *)DAT_80115190[GAME]; p = ((unsigned char **)p)[GAME_SELECTED_SECTION]; p += DAT_8009c982 * 4
+#define LOADP() p = (unsigned char *)DAT_80115190[GAME]; p = ((unsigned char **)p)[GAME_SELECTED_SECTION]; p += GAME_SELECTED_SPAWN_POINT * 4
 
 void playerInitMode(TObj *o)
 {
@@ -135,11 +135,11 @@ void playerInitMode(TObj *o)
         DAT_8009cff8 = 0;
         if (DAT_8009d006[0]) o->subtype = 2;
         if (DAT_8009cf06) o->subtype = 1;
-        else DAT_8009d2b3 &= 3;
-        DAT_800a60fa[0] = DAT_8009d2b3;
+        else GAME_EQUIPPED_PANTS &= 3;
+        DAT_800a60fa[0] = GAME_EQUIPPED_PANTS;
         DAT_800a6040[0] = DAT_8007a024[DAT_8009c990].a;
-        DAT_800a60fc[0] = DAT_8007a024[DAT_8009d2b3].b;
-        o->w9a = DAT_8009c970;
+        DAT_800a60fc[0] = DAT_8007a024[GAME_EQUIPPED_PANTS].b;
+        o->w9a = GAME_PLAYER_HEALTH;
         o->w98 = DAT_8009c970b[0];
         o->d3c = SPR_DATA[0];
         o->anim = DAT_80010748;

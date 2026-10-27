@@ -42,7 +42,7 @@ typedef struct {
 extern Sprite D_8010A2D4[];
 extern Sprite D_80110F50[];
 extern Save D_8010A1C8, D_1F8000C0;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern volatile int D_1F8002EC;
 extern char *D_1F800344;
 extern unsigned char D_8010A44C;
@@ -155,12 +155,12 @@ int subScreenMapStep(Menu *m)
         break;
     case 1:
         if (subScreenMoveTabCursor(m, 1)) return 0;
-        if (D_1F8001FC & 0x2000) {
+        if (JOYPAD_STATE & 0x2000) {
             D_1F8000C0 = D_8010A1C8;
             SfxPlay2(0x1B, 0x1C);
             return 1;
         }
-        if (!(D_1F8001FC & 0x4008)) break;
+        if (!(JOYPAD_STATE & 0x4008)) break;
         switch (m->cursor) {
         case 0:
             break;
@@ -209,7 +209,7 @@ int subScreenMapStep(Menu *m)
         break;
     case 2:
         m->w1e = 0;
-        if (D_1F8001FC & 0x2000) goto cancel;
+        if (JOYPAD_STATE & 0x2000) goto cancel;
         if (GAME.room == 14) break;
         l = &D_800FDAB4[D_80111124];
         r = subScreenMapReadInput();
@@ -246,7 +246,7 @@ int subScreenMapStep(Menu *m)
         break;
     case 4:
         m->w1e = 1;
-        if (D_1F8001FC & 0x2000) {
+        if (JOYPAD_STATE & 0x2000) {
         cancel:
             SfxPlay2(0x1B, 0x1C);
             m->cursor = 7;

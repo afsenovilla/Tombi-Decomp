@@ -1,8 +1,8 @@
 // FUNC 80018448 144 MAIN0
 // MATCHING 80018448 144
 // FLAGS -O2 -G0 -fno-schedule-insns2
-extern short DAT_1f800238;
-extern int **DAT_1f800208;
+extern short FREE_OBJECT_COUNT;
+extern int **FREE_OBJECTS;
 extern unsigned short DAT_1f8001c8;
 
 int *ObjAlloc(void)
@@ -10,12 +10,12 @@ int *ObjAlloc(void)
     char pad;
     int *o;
     int **q;
-    short n = DAT_1f800238;
+    short n = FREE_OBJECT_COUNT;
     char c = 3;
     if (n > 0) {
-        q = DAT_1f800208;
-        DAT_1f800238 = n - 1;
-        DAT_1f800208 = q + 1;
+        q = FREE_OBJECTS;
+        FREE_OBJECT_COUNT = n - 1;
+        FREE_OBJECTS = q + 1;
         o = *q;
         *((char *)o + 0x1c) = c;
         if ((DAT_1f8001c8 & 1) == 0) {

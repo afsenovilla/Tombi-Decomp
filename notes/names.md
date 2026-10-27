@@ -2045,3 +2045,23 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   (8009BD70..7C, tileCollideColumnAt scratch). Not named: the libgpu sys.c globals every libgpu source declares but none uses
   (D_80090Cxx / D_8009B1xx), the libcd D_80095F64 Setloc table, the libetc Intr block, libgs OpenTMD offsets, the remaining libpress
   ring indices, and D_8009C8B0 / D_800B3188 / D_800A3348 / D_8009C658, whose only references are commented-out code.
+- MAIN0 data round 2, batch 2 (Oct 27 2026): 35 rows + 2 corrections. The references were re-counted by REAL address (the relocations of
+  the full-build objects, as tools/rename_data.py resolves them), which is what matters: many sources spell the US address of a PAL
+  global (e.g. updatePauseMenu's D_8009C10B is 8009CDA3 = GAME.inventoryScreen, not 8009C10B; displayDebugScreen's D_8009B6A8 is
+  8009C340), so the batch-1 rows for PAUSE_MENU_CURSOR (-> GAME_INVENTORY_SCREEN at 8009CDA3) and DEBUG_SCREEN_CURSOR_ROW (-> 8009C340)
+  were corrected. Scratchpad fields after the psx_tomba `struct scratchpad` names, standalone symbols next to the game.h macros of the
+  same name (the macros stay for the sources that cast the absolute address, acquireSpriteSlot keeps the D_1F800164 / D_1F8001E0
+  aliases game.h declares for it): NEXT_PRIM (1F800164), CURRENT_OT (1F8001E0), FRAME_BUFFER_INDEX, FRAME_COUNT, TICK_COUNT (1F8001F8,
+  the per-tick counter gameplayTick increments), JOYPAD_STATE, FREE_OBJECTS / FREE_OBJECT_COUNT (1F800208 / 238, one layer's stack),
+  MOVIE_PLAY_STATE / MOVIE_ID / MOVIE_SKIP_REQUEST, plus MODEL_VERTEX_PTR (1F80008C) and COLLISION_SEG_PTR (1F800278). PLAYER fields:
+  PLAYER_VISIBLE / PLAYER_TYPE / PLAYER_DRAW_DEPTH (b0f, the OT depth otadd draws relative to) / PLAYER_POS (the a/y/b Fix16 triple) /
+  PLAYER_Y_FIX / PLAYER_ANIM / PLAYER_ANIM_FRAME / PLAYER_VEL_Y / PLAYER_HELD_OBJECT (PLX.p611c). GAME fields: GAME_SELECTED_SPAWN_POINT,
+  GAME_EQUIPPED_PANTS, GAME_BITTEN_JUMP_KIND (unk951 -> bittenJumpKind), GAME_KEEP_BGM, GAME_PLAYER_HEALTH, GAME_PLAYER_MAX_HEALTH
+  (8009C971: increaseMaxHealth raises it with a cap of 8 / 16 and the health is clamped with it, so game.h / gamestate.h
+  playerHealthDisplayed -> playerMaxHealth, the 10 sources that spell the field followed), GAME_TOTAL_TIME_PLAYED,
+  GAME_FADE_SCREEN_AMOUNT, GAME_PLAYER_AP, GAME_DISABLE_SELECT_MENU. Others: AREA_SOUND_BANK_LOADED (8009D69C), DEBUG_NEXT_PRIM (8009D540),
+  PAD_INFO (8009D610). Not named: the camera scratch (1F8000E6 / F0 / 16A / 16E: which is x / y / scroll is not certain), the collision loop
+  counter 1F80019E, the matrix / vector scratch (1F800000 / 20 / 60 / 68 / C0), SPR_DATA[3] (1F8002D4), 1F8001C6 / 1F8001C8, the button masks
+  1F8003C4.., GVARS bytes reached by their own symbol (8009C93F 55 refs, 8009C942, 8009C93E, 8009C940, 8009C93A: meaning unknown),
+  PLAYER b6b / b9e / d90 / +0x9A, GAME +0x30 (US displayExpBar, but read as `& 3` by the speed code), GV6.s74 (8009D674, the pad halfword
+  next to PAD_PRESSED), and the GCD bytes 8009CEBD.. / 8009CF06 / 8009D006.

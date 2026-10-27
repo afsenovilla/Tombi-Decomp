@@ -14,15 +14,15 @@ typedef struct { short x, y, u, v, w, h, cx, cy; } Part;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern unsigned short GetClut(int x, int y);
 
 void memCardDrawParts(Part *s, short x, short y)
 {
     SPRT *p;
     do {
-        p = D_1F800164;
+        p = NEXT_PRIM;
         p->code = 0x64;
         p->len = 4;
         p->r0 = 0x80;
@@ -37,7 +37,7 @@ void memCardDrawParts(Part *s, short x, short y)
         p->h = s->h;
         p->clut = GetClut(s->cx, s->cy);
         s++;
-        addPrim(D_1F8001E0 + 1, p);
-        D_1F800164++;
+        addPrim(CURRENT_OT + 1, p);
+        NEXT_PRIM++;
     } while (s->x != -1);
 }

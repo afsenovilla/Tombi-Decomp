@@ -21,7 +21,7 @@ typedef struct {
     unsigned short cx, cy;
 } Msg;
 extern unsigned short PAD_PRESSED;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 typedef struct { short n, pad, x, y; } Hdr;
 typedef struct { unsigned short f, clut, x, y; } Ent;
 extern Hdr MESSAGE_SLOTS[], D_800A464C[], D_800A464E[];
@@ -147,7 +147,7 @@ void func_800ED7BC(Msg *o, int bank)
         done:
             break;
         case 1:
-            if (D_1F8001FC & 0x6008) o->wait = 0;
+            if (JOYPAD_STATE & 0x6008) o->wait = 0;
             break;
         } } while (0);
         D_800A464C[o->slot].n = o->x;

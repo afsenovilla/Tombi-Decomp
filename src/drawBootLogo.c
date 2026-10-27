@@ -24,8 +24,8 @@ typedef struct {
     short cx, cy;
 } ENT;
 extern ENT DAT_800778f8[];
-extern void *DAT_1f800164;
-extern PTAG *DAT_1f8001e0;
+extern void *NEXT_PRIM;
+extern PTAG *CURRENT_OT;
 extern unsigned short GetClut(int x, int y);
 extern void SetDrawMode(DRM *p, int dfe, int dtd, int tpage, void *tw);
 
@@ -51,14 +51,14 @@ void drawBootLogo(unsigned char c, int dfe)
         s->w = e->w;
         s->h = e->h;
         s->clut = GetClut(e->cx, e->cy);
-        p = (SPRT *)DAT_1f800164;
+        p = (SPRT *)NEXT_PRIM;
         *p = *s;
-        q = (SPRT *)DAT_1f800164;
+        q = (SPRT *)NEXT_PRIM;
         d = (DRM *)(q + 1);
-        DAT_1f800164 = d;
-        addPrim(DAT_1f8001e0 + 1, p);
+        NEXT_PRIM = d;
+        addPrim(CURRENT_OT + 1, p);
         SetDrawMode(d, dfe, 0, e->tpage, 0);
-        addPrim(DAT_1f8001e0 + 1, (DRM *)(q + 1));
-        DAT_1f800164 = (DRM *)DAT_1f800164 + 1;
+        addPrim(CURRENT_OT + 1, (DRM *)(q + 1));
+        NEXT_PRIM = (DRM *)NEXT_PRIM + 1;
     }
 }

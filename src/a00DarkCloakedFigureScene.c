@@ -2,7 +2,7 @@
 // MATCHING 80136ce0 1676
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern unsigned short DAT_800a6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern TObj *DAT_800a60c8;
 extern unsigned char DAT_800a60f8;
 extern unsigned char DAT_8009cebe;
@@ -180,7 +180,7 @@ void a00DarkCloakedFigureScene(TObj *o)
         PLAYER.active = 3;
         PLAYER.b04 = 5;
         PLAYER.animFrame = 0;
-        DAT_800a6066 = 0;
+        PLAYER_ANIM_FRAME = 0;
         PLAYER.step = 1;
         PLAYER.state = 0;
         PLAYER.substep = 0;

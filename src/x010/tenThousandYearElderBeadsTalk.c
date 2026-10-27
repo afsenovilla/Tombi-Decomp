@@ -11,7 +11,7 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3C4[];
-extern unsigned char D_8009C970, D_8009C971;
+extern unsigned char GAME_PLAYER_HEALTH, GAME_PLAYER_MAX_HEALTH;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern int smb2(int, int, V6 *) asm("showMessageBoxDirect");
@@ -118,8 +118,8 @@ void tenThousandYearElderBeadsTalk(TObj *o)
         TObj *p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        c = &D_8009C970;
-        {unsigned char t = D_8009C971; if (*c < t) { unsigned short u = t; PLX.s6108 = u; PLX.s610a = u; *c = u;
+        c = &GAME_PLAYER_HEALTH;
+        {unsigned char t = GAME_PLAYER_MAX_HEALTH; if (*c < t) { unsigned short u = t; PLX.s6108 = u; PLX.s610a = u; *c = u;
             FUN_8001e4f0(10);
         }}
         setanim(o, 0);

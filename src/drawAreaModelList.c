@@ -7,7 +7,7 @@ INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8004B140_slps01144);
 #else
 extern char DAT_1f8000c0[];
 extern int GAME;
-extern int DAT_1f8001e0;
+extern int CURRENT_OT;
 extern unsigned char DAT_800b0d98[];
 extern void SetRotMatrix(void *);
 extern void SetTransMatrix(void *);
@@ -28,7 +28,7 @@ void drawAreaModelList(void)
         if (i < DAT_800b0d98[3]) {
             p = (int *)base;
             do {
-                FUN_80120280(p[1], DAT_1f8001e0 + 0x10);
+                FUN_80120280(p[1], CURRENT_OT + 0x10);
                 p++;
                 i++;
             } while (i < base[3]);
@@ -38,7 +38,7 @@ void drawAreaModelList(void)
         if (i < DAT_800b0d98[3]) {
             p = (int *)base;
             do {
-                drawModelUnlit(p[1], DAT_1f8001e0 + 0x10);
+                drawModelUnlit(p[1], CURRENT_OT + 0x10);
                 p++;
                 i++;
             } while (i < base[3]);

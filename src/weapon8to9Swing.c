@@ -32,7 +32,7 @@ extern short WEAPON_BEND_PARAMS[], D_8009D602[], D_8009D604[];
 extern short D_8007A072[];
 extern short WEAPON_HEAD_OFFSETS[];
 extern unsigned char GAME_EQUIPPED_WEAPON;
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern short MulCos(int, short);
 extern short MulNegSinScaled(int, short);
 extern void SfxPlay2(int, int);
@@ -322,7 +322,7 @@ void weapon8to9Swing(TObj *o)
         o->animFrame = G.animFrame;
         weaponSetPlayerAnimA(o);
         AnimJump(&G, 0);
-        if ((D_1F8001F8 & 0xf) == 0) {
+        if ((TICK_COUNT & 0xf) == 0) {
             startPadVibration(0, 0, 0xc0, 2);
             playSFX(3);
         }
@@ -372,7 +372,7 @@ void weapon8to9Swing(TObj *o)
         o->animFrame = G.animFrame;
         weaponSetPlayerAnimA(o);
         AnimJump(&G, 0);
-        if ((D_1F8001F8 & 0xf) == 0) {
+        if ((TICK_COUNT & 0xf) == 0) {
             startPadVibration(0, 0, 0xff, 2);
             SfxPlay2(3, 6);
         }

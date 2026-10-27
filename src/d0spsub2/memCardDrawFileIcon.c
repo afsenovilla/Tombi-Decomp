@@ -15,8 +15,8 @@ typedef struct { short x, y; } Pos;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern Part D_800F6C58[], D_800F6CA8[];
 extern Pos D_800F70D8;
 extern short D_800F70DA, D_800F70DE;
@@ -72,10 +72,10 @@ void memCardDrawFileIcon(int big, int pri, int pal, int lit)
         if (s >= D_800F6CA8) S->clut = GetClut(0x140, pal + 0x1F0);
         else S->clut = GetClut(s->cx, s->cy);
         s++;
-        p = D_1F800164;
+        p = NEXT_PRIM;
         *p = *S;
-        addPrim(D_1F8001E0 + pri + 4, p);
-        D_1F800164++;
+        addPrim(CURRENT_OT + pri + 4, p);
+        NEXT_PRIM++;
     } while (s->x != -1);
     D_800F70DC[0] = 1;
     AddDrawMode(1, pri + 4);

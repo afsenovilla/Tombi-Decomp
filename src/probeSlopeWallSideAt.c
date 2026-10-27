@@ -1,7 +1,7 @@
 // FUNC 80041240 576 MAIN0
 // MATCHING 80041240 576
 /* debt: volatile read of c keeps lhu (stops combine turning cs = (short)c into lh). */
-extern unsigned short *D_1F800278;
+extern unsigned short *COLLISION_SEG_PTR;
 extern unsigned short D_1F800284;
 extern short *getCollisionPlaneAt(int, int);
 
@@ -26,24 +26,24 @@ int probeSlopeWallSideAt(O *o, short x, short y)
     int ys;
 
     p = getCollisionPlaneAt((short)x, o->h[1]);
-    D_1F800278 = (unsigned short *)(p + 1);
+    COLLISION_SEG_PTR = (unsigned short *)(p + 1);
     n = *p;
     if (n == 0) return 0;
     cnt = 0;
     ys = (short)y;
     xm = x & 7;
     while (n != 0) {
-        a = *D_1F800278++;
+        a = *COLLISION_SEG_PTR++;
         n--;
         if ((a & 0xc) == 0) {
-            D_1F800278 += 3;
+            COLLISION_SEG_PTR += 3;
             cnt++;
             continue;
         }
-        b = *D_1F800278++;
-        c = *(volatile unsigned short *)D_1F800278++;
+        b = *COLLISION_SEG_PTR++;
+        c = *(volatile unsigned short *)COLLISION_SEG_PTR++;
         cs = (short)c;
-        d = *D_1F800278++;
+        d = *COLLISION_SEG_PTR++;
         if (cs == 0) continue;
         lo = d & 0xf;
         hi = (d >> 4) & 0xf;

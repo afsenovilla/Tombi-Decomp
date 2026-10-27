@@ -10,7 +10,7 @@ typedef struct {
 extern void FUN_8001fe6c(TObj *);
 extern char DAT_80010de0[];
 extern PL *PLAYER_EXT;
-extern unsigned char DAT_8009d2b1;
+extern unsigned char GAME_BITTEN_JUMP_KIND;
 extern unsigned short GAME;
 extern unsigned char DAT_8009ce0b;
 extern unsigned char DAT_8009d0da;
@@ -26,7 +26,7 @@ int playerIdlePickFidgetAnim(TObj *o)
     switch (*(unsigned char *)&o->wa8) {
     case 1:
         r = 0xff;
-        if (DAT_8009d2b1 == 1) {
+        if (GAME_BITTEN_JUMP_KIND == 1) {
             r = 10;
             if (GAME == 3) {
                 r = 0xc;
@@ -36,7 +36,7 @@ int playerIdlePickFidgetAnim(TObj *o)
         break;
     case 2:
         r = 0xff;
-        if (DAT_8009d2b1 == 2) r = 9;
+        if (GAME_BITTEN_JUMP_KIND == 2) r = 9;
         break;
     case 3:
         r = 0xff;

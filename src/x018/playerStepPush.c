@@ -2,7 +2,7 @@
 // MATCHING 801097ec 308
 #include "TOBJ.H"
 
-extern unsigned short DAT_1f8001f8;
+extern unsigned short TICK_COUNT;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001e560(int, int);
@@ -17,7 +17,7 @@ void playerStepPush(TObj *o)
 {
     short s;
     if (PAD_PRESSED[0] & 0xa0) {
-        if ((DAT_1f8001f8 & 0xf) == 0)
+        if ((TICK_COUNT & 0xf) == 0)
             FUN_8001e560(0x24, 0x24);
         switch (o->state) {
         case 0:

@@ -13,7 +13,7 @@ typedef struct {
 } S;
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } P;
 extern unsigned short DAT_1f8003c8;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern short D_8007A038[];
 extern P *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
@@ -26,7 +26,7 @@ void playerTryAttack(S *s, short mode)
     P *q;
     short v, t;
 
-    if ((DAT_1f8001fc & DAT_1f8003c8) == 0) return;
+    if ((JOYPAD_STATE & DAT_1f8003c8) == 0) return;
     GV2.bb0 = 0;
     s->bcd = 0;
     s->bce = 0;

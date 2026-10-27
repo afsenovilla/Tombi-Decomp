@@ -23,9 +23,9 @@ typedef struct {
     unsigned short uv2;
 } Face;
 
-extern PolyFT3 *DAT_1f800164;
+extern PolyFT3 *NEXT_PRIM;
 extern long LZ_FILE_CTRL;
-extern unsigned long *DAT_1f8001e0;
+extern unsigned long *CURRENT_OT;
 
 #define gte_ldv3c(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 );lwc2 $2, 8( %0 );lwc2 $3, 12( %0 );lwc2 $4, 16( %0 );lwc2 $5, 20( %0 )" : : "r"(r0))
 #define gte_rtpt() __asm__ volatile ("nop;nop;.word 0x4a280030")
@@ -57,7 +57,7 @@ long *drawArea9ModelFT3(long *f, unsigned long *ot)
                 if (LZ_FILE_CTRL > 0) {
                     gte_avsz3();
                     gte_stotz(&otz);
-                    p = DAT_1f800164;
+                    p = NEXT_PRIM;
                     gte_stsxy3_gt3(p);
                     if ((p->y0 < 0xf1 || p->y1 < 0xf1 || p->y2 < 0xf1) &&
                         (p->x0 < 0x141 || p->x1 < 0x141 || p->x2 < 0x141)) {
@@ -68,11 +68,11 @@ long *drawArea9ModelFT3(long *f, unsigned long *ot)
                         p->uv1 = ((Face *)f)->uv1;
                         *(unsigned short *)((char *)p + 0x1c) = ((Face *)f)->uv2;
                         otz = (otz << 2) + (long)ot;
-                        if ((unsigned long)(otz - (long)DAT_1f8001e0) < 0xca0) {
+                        if ((unsigned long)(otz - (long)CURRENT_OT) < 0xca0) {
                             t = *(unsigned long *)otz;
                             *(unsigned long *)otz = (unsigned long)p;
                             p->tag = t | len;
-                            DAT_1f800164 = DAT_1f800164 + 1;
+                            NEXT_PRIM = NEXT_PRIM + 1;
                         }
                     }
                 }

@@ -7,7 +7,7 @@ typedef struct { short v[6]; } V6;
 
 extern TObj *SCRIPT_OBJECTS;
 extern unsigned char PLAYER;
-extern short D_800A6066, D_800A60EA;
+extern short PLAYER_ANIM_FRAME, D_800A60EA;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
@@ -27,7 +27,7 @@ void flameBlockedNpcTalk(TObj *o)
         if (GCD.bce50) break;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
         ((unsigned char*)&GVARS.b42)[0] = 1;
-        D_800A6066 = 0;
+        PLAYER_ANIM_FRAME = 0;
         PLAYER_STATE = 5;
         PLAYER_SUBSTATE = 0;
         PLAYER_STEP = 0;
@@ -44,7 +44,7 @@ void flameBlockedNpcTalk(TObj *o)
         ((unsigned char*)&GVARS.b3f)[0] = 1;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         PLAYER = 1;
-        D_800A6066 = 0;
+        PLAYER_ANIM_FRAME = 0;
         PLAYER_STATE = 5;
         PLAYER_SUBSTATE = 0;
         PLAYER_STEP = 0;

@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 extern short *getCollisionPlaneAt(int, int);
 extern int angleFromDelta(int, int);
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 extern short DAT_1f80027c;
 
 int func_80041D20(TObj *o, short a, int b)
@@ -22,23 +22,23 @@ int func_80041D20(TObj *o, short a, int b)
     unsigned short t3;
     if (a < 0) return 0;
     p = getCollisionPlaneAt(a, o->d->p.whole);
-    DAT_1f800278 = (unsigned short *)(p + 1);
+    COLLISION_SEG_PTR = (unsigned short *)(p + 1);
     n = cnt = *p;
     goto test;
 top:
-    q = DAT_1f800278;
-    DAT_1f800278 = q + 1;
+    q = COLLISION_SEG_PTR;
+    COLLISION_SEG_PTR = q + 1;
     f = *q;
     cnt--;
     if (f & 0x4000) {
         if (!(f & 0x10)) goto hit;
     }
-    DAT_1f800278 = q + 4;
+    COLLISION_SEG_PTR = q + 4;
     goto next;
 hit:
-    x = *DAT_1f800278++;
-    w = *DAT_1f800278++;
-    DAT_1f800278++;
+    x = *COLLISION_SEG_PTR++;
+    w = *COLLISION_SEG_PTR++;
+    COLLISION_SEG_PTR++;
     ws = w;
     t3 = *(unsigned short *)((char *)q + 6);
     if (ws == 0) goto next;
@@ -68,7 +68,7 @@ test:
 #include "TOBJ.H"
 extern short *getCollisionPlaneAt(int, int);
 extern int angleFromDelta(int, int);
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 extern short DAT_1f80027c;
 
 int probeSlopeAngleAt(TObj *o, short a, int b)
@@ -83,23 +83,23 @@ int probeSlopeAngleAt(TObj *o, short a, int b)
     short ws;
     unsigned short t3;
     p = getCollisionPlaneAt(a, o->d->p.whole);
-    DAT_1f800278 = (unsigned short *)(p + 1);
+    COLLISION_SEG_PTR = (unsigned short *)(p + 1);
     n = cnt = *p;
     goto test;
 top:
-    q = DAT_1f800278;
-    DAT_1f800278 = q + 1;
+    q = COLLISION_SEG_PTR;
+    COLLISION_SEG_PTR = q + 1;
     f = *q;
     cnt--;
     if (f & 0x4000) {
         if (!(f & 0x10)) goto hit;
     }
-    DAT_1f800278 = q + 4;
+    COLLISION_SEG_PTR = q + 4;
     goto next;
 hit:
-    x = *DAT_1f800278++;
-    w = *DAT_1f800278++;
-    DAT_1f800278++;
+    x = *COLLISION_SEG_PTR++;
+    w = *COLLISION_SEG_PTR++;
+    COLLISION_SEG_PTR++;
     ws = w;
     t3 = *(unsigned short *)((char *)q + 6);
     if (ws == 0) goto next;

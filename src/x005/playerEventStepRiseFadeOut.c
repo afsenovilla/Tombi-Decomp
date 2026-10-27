@@ -13,7 +13,7 @@ extern unsigned char DAT_8009c942;
 extern unsigned char GAME_PLAYER_MODE;
 extern unsigned char GAME_FADE_SCREEN_CONTROL[];
 extern unsigned char DAT_8009c93c[];
-extern unsigned short DAT_1f8001f8;
+extern unsigned short TICK_COUNT;
 
 void playerEventStepRiseFadeOut(TObj *o)
 {
@@ -42,7 +42,7 @@ void playerEventStepRiseFadeOut(TObj *o)
         o->state++;
         break;
     case 1:
-        if (o->substep != 0 && (DAT_1f8001f8 & 3) == 0) FUN_8001e4f0(0x16);
+        if (o->substep != 0 && (TICK_COUNT & 3) == 0) FUN_8001e4f0(0x16);
         FUN_8001fec0(o);
         playerAirSpinToFall(o);
         o->y.raw += o->velY << 8;

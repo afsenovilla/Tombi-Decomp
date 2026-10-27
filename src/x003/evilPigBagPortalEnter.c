@@ -7,7 +7,7 @@
 #include "gamestate.h"
 #include "gametask.h"
 extern unsigned char PLAYER[];
-extern unsigned char D_800A6039[];
+extern unsigned char PLAYER_VISIBLE[];
 extern unsigned char PLAYER_STATE[];
 extern unsigned char PLAYER_SUBSTATE[];
 extern unsigned char D_800A4553[];
@@ -39,7 +39,7 @@ void evilPigBagPortalEnter(TObj *o)
             PLAYER[0] = 5;
             PLAYER_STATE[0] = 5;
             ((unsigned char*)&GVARS.b3e)[0] = 0;
-            D_800A6039[0] = 0;
+            PLAYER_VISIBLE[0] = 0;
             PLAYER_SUBSTATE[0] = 0x40;
             o->timer = 0x14;
             o->state++;

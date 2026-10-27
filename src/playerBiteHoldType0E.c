@@ -28,7 +28,7 @@ typedef struct O {
 extern O *BITTEN_OBJECT;
 extern O *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
-extern unsigned short D_1f8003c6, D_1f8001fc;
+extern unsigned short D_1f8003c6, JOYPAD_STATE;
 extern void FUN_8010eaf8(O *);
 extern void FUN_8001fd94(O *);
 extern void playerSetAnim(O *, int, int);
@@ -88,7 +88,7 @@ void FUN_80103d40(O *o)
         pad = &PAD_PRESSED;
         if (*pad & 0x8000) o->w2e = 1;
         if (*pad & 0x2000) o->w2e = 0;
-        if (D_1f8001fc & 0x40) {
+        if (JOYPAD_STATE & 0x40) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;
@@ -110,7 +110,7 @@ typedef struct O {
 extern O *BITTEN_OBJECT;
 extern O *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
-extern unsigned short D_1f8003c6, D_1f8001fc;
+extern unsigned short D_1f8003c6, JOYPAD_STATE;
 extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_800eeb5c(O *, int);
@@ -177,7 +177,7 @@ void playerBiteHoldType0E(O *o)
         p = BITTEN_OBJECT;
         o->h->s2 = p->h->s2;
         o->y16 = p->y16 - p->s70;
-        if (D_1f8001fc & D_1f8003c6) {
+        if (JOYPAD_STATE & D_1f8003c6) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

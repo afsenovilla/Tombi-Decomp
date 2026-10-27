@@ -11,11 +11,11 @@ typedef struct { short x, y; unsigned char *s; } ENT;
 typedef struct { unsigned char u, v; } UV;
 typedef struct { short x, y; } XY;
 
-extern char *DAT_1f800164;
-extern int DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern int CURRENT_OT;
 extern char *DAT_1f8002d8;
 extern unsigned char DAT_1f8003cd;
-extern unsigned char DAT_8009cda3[];
+extern unsigned char GAME_INVENTORY_SCREEN[];
 extern ENT D_8008037c[], D_8008039c[], D_800803bc[], D_800803dc[];
 extern UV D_80080300[];
 extern XY D_80080404[];
@@ -71,7 +71,7 @@ void drawPauseMenu(void)
         e = D_800803bc;
         break;
     }
-    t = (TILE *)DAT_1f800164;
+    t = (TILE *)NEXT_PRIM;
     t->w = 0x140;
     t->h = 0x100;
     ((unsigned char *)t)[3] = 3;
@@ -82,11 +82,11 @@ void drawPauseMenu(void)
     t->r0 = 0x20;
     t->g0 = 0x20;
     t->b0 = 0x20;
-    AddPrim((void *)(DAT_1f8001e0 + 0x10), t);
-    r = DAT_1f800164 = DAT_1f800164 + 0x10;
+    AddPrim((void *)(CURRENT_OT + 0x10), t);
+    r = NEXT_PRIM = NEXT_PRIM + 0x10;
     SetDrawMode(r, 0, 0, 0, 0);
-    AddPrim((void *)(DAT_1f8001e0 + 0x10), r);
-    DAT_1f800164 = DAT_1f800164 + 0xc;
+    AddPrim((void *)(CURRENT_OT + 0x10), r);
+    NEXT_PRIM = NEXT_PRIM + 0xc;
     for (; e->x != -1; e++) {
         x = e->x;
         y = e->y;
@@ -94,7 +94,7 @@ void drawPauseMenu(void)
         while ((c = *s) != 0xff) {
             s++;
             if (c) {
-                sp = (SPRT *)DAT_1f800164;
+                sp = (SPRT *)NEXT_PRIM;
                 ((unsigned char *)sp)[3] = 4;
                 sp->code = 0x65;
                 SetSemiTrans(sp, 0);
@@ -105,13 +105,13 @@ void drawPauseMenu(void)
                 sp->w = 8;
                 sp->h = 0x10;
                 sp->clut = GetClut(0x160, 0x1e3);
-                AddPrim((void *)(DAT_1f8001e0 + 4), sp);
-                DAT_1f800164 = DAT_1f800164 + 0x14;
+                AddPrim((void *)(CURRENT_OT + 4), sp);
+                NEXT_PRIM = NEXT_PRIM + 0x14;
             }
             x += 8;
         }
     }
-    r = DAT_1f800164;
+    r = NEXT_PRIM;
     if (GetGraphType() == 1)
         tp = 0x24;
     else if (GetGraphType() == 2)
@@ -119,12 +119,12 @@ void drawPauseMenu(void)
     else
         tp = 0x14;
     SetDrawMode(r, 0, 0, tp, 0);
-    AddPrim((void *)(DAT_1f8001e0 + 4), r);
-    t = (TILE *)(DAT_1f800164 = DAT_1f800164 + 0xc);
+    AddPrim((void *)(CURRENT_OT + 4), r);
+    t = (TILE *)(NEXT_PRIM = NEXT_PRIM + 0xc);
     switch (mode) {
     case 0:
         t->x0 = 0x74;
-        k = DAT_8009cda3[0];
+        k = GAME_INVENTORY_SCREEN[0];
         t->w = 0x50;
         t->h = 0x10;
         k <<= 4; k += 0x58;
@@ -132,7 +132,7 @@ void drawPauseMenu(void)
         break;
     case 1:
         t->x0 = 0x84;
-        k = DAT_8009cda3[0];
+        k = GAME_INVENTORY_SCREEN[0];
         t->w = 0x38;
         t->h = 0x10;
         k <<= 4; k += 0x58;
@@ -140,7 +140,7 @@ void drawPauseMenu(void)
         break;
     case 3:
         t->x0 = 0x74;
-        k = DAT_8009cda3[0];
+        k = GAME_INVENTORY_SCREEN[0];
         t->w = 0x58;
         t->h = 0x10;
         k <<= 4; k += 0x58;
@@ -148,7 +148,7 @@ void drawPauseMenu(void)
         break;
     case 2:
     case 4:
-        k = DAT_8009cda3[0];
+        k = GAME_INVENTORY_SCREEN[0];
         t->y0 = 0x78;
         t->w = 0x28;
         t->h = 0x10;
@@ -161,13 +161,13 @@ void drawPauseMenu(void)
     t->r0 = 0xff;
     t->g0 = 0xff;
     t->b0 = 0;
-    AddPrim((void *)(DAT_1f8001e0 + 4), t);
-    DAT_1f800164 = DAT_1f800164 + 0x10;
+    AddPrim((void *)(CURRENT_OT + 4), t);
+    NEXT_PRIM = NEXT_PRIM + 0x10;
     h = (short *)(DAT_1f8002d8 + *D_80012284[mode] * 4);
     n = h[0];
     pt = (PT *)(DAT_1f8002d8 + h[1]);
     do {
-        p = (FT4 *)DAT_1f800164;
+        p = (FT4 *)NEXT_PRIM;
         ((unsigned char *)p)[3] = 9;
         p->code = 0x2d;
         SetSemiTrans(p, 1);
@@ -187,8 +187,8 @@ void drawPauseMenu(void)
         p->y3 = p->y2;
         p->clut = GetClut(0x160, 0x1e5);
         pt++;
-        AddPrim((void *)(DAT_1f8001e0 + 4), p);
+        AddPrim((void *)(CURRENT_OT + 4), p);
         n--;
-        DAT_1f800164 = DAT_1f800164 + 0x28;
+        NEXT_PRIM = NEXT_PRIM + 0x28;
     } while (n != 0);
 }

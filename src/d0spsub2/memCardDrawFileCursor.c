@@ -14,8 +14,8 @@ typedef struct { short x, y, u, v, w, h, p[2]; } Part;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern short D_800F70DC;
 extern Part D_800F6CE8[];
 extern unsigned short GetClut(int x, int y);
@@ -41,10 +41,10 @@ void memCardDrawFileCursor(int pri, short x, short y)
         S->h = s->h;
         s++;
         S->clut = GetClut(0x130, 0x1F2);
-        p = D_1F800164;
+        p = NEXT_PRIM;
         *p = *S;
-        addPrim(D_1F8001E0 + pri, p);
-        D_1F800164++;
+        addPrim(CURRENT_OT + pri, p);
+        NEXT_PRIM++;
     } while (s->x != -1);
     AddDrawMode(D_800F70DC, pri);
 }

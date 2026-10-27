@@ -6,7 +6,7 @@ extern TObj PLAYER;
 extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
-extern short D_800A6066;
+extern short PLAYER_ANIM_FRAME;
 extern unsigned char D_800A60E4;
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
@@ -24,13 +24,13 @@ void func_800FC9E4(TObj *o)
         U8(o, 6)++;
         switch (U16(o, 0x24) & 3) {
         case 0:
-            D_800A6066 = 0;
+            PLAYER_ANIM_FRAME = 0;
             break;
         case 1:
-            D_800A6066 = 6;
+            PLAYER_ANIM_FRAME = 6;
             break;
         case 2:
-            D_800A6066 = 4;
+            PLAYER_ANIM_FRAME = 4;
             break;
         }
         PLAYER_STATE = 4;
@@ -54,15 +54,15 @@ void func_800FC9E4(TObj *o)
         case 0:
             switch (U16(o, 0x24) & 3) {
             case 0:
-                D_800A6066 = 0;
+                PLAYER_ANIM_FRAME = 0;
                 U16(o, 0x26) = 0xE;
                 break;
             case 1:
-                D_800A6066 = 6;
+                PLAYER_ANIM_FRAME = 6;
                 U16(o, 0x26) = 0xA;
                 break;
             case 2:
-                D_800A6066 = 4;
+                PLAYER_ANIM_FRAME = 4;
                 U16(o, 0x26) = 0xE;
                 break;
             }
@@ -118,15 +118,15 @@ void func_800FC9E4(TObj *o)
         case 0:
             switch (D_8009CF9F[k] & 3) {
             case 0:
-                D_800A6066 = 4;
+                PLAYER_ANIM_FRAME = 4;
                 U16(o, 0x26) = 0x1E;
                 break;
             case 1:
-                D_800A6066 = 2;
+                PLAYER_ANIM_FRAME = 2;
                 U16(o, 0x26) = 0x12;
                 break;
             case 2:
-                D_800A6066 = 0;
+                PLAYER_ANIM_FRAME = 0;
                 U16(o, 0x26) = 0x1E;
                 break;
             }
@@ -156,13 +156,13 @@ void func_800FC9E4(TObj *o)
     case 7:
         switch (D_8009CF9F[k] & 3) {
         case 0:
-            D_800A6066 = 4;
+            PLAYER_ANIM_FRAME = 4;
             break;
         case 1:
-            D_800A6066 = 2;
+            PLAYER_ANIM_FRAME = 2;
             break;
         case 2:
-            D_800A6066 = 0;
+            PLAYER_ANIM_FRAME = 0;
             break;
         }
         PLAYER_SUBSTATE = 1;

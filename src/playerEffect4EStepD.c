@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 typedef struct { void **p; int a, b; } E12;
 extern E12 PLAYER_EFFECT_4E_ANIM_TABLE[];
-extern unsigned short DAT_1f8001f8;
-extern unsigned char DAT_800a6039, DAT_800a6047[], DAT_800a60a1[], DAT_800a6104[];
+extern unsigned short TICK_COUNT;
+extern unsigned char PLAYER_VISIBLE, PLAYER_DRAW_DEPTH[], DAT_800a60a1[], DAT_800a6104[];
 extern Fix16 *PLAYER_H, *PLAYER_D;
 extern unsigned short PLAYER_Y;
 extern void FUN_8001fe6c(TObj *);
@@ -31,10 +31,10 @@ void playerEffect4EStepD(TObj *o)
         o->d88 = 0;
         break;
     case 1:
-        if (o->b0c == 0 && !(DAT_1f8001f8 & 3))
+        if (o->b0c == 0 && !(TICK_COUNT & 3))
             startPadVibration(0, 0, 0xff, 2);
         FUN_8001fec0(o);
-        o->visible = DAT_800a6039;
+        o->visible = PLAYER_VISIBLE;
         o->h->p.whole = PLAYER_H->p.whole + FUN_8001fddc((short)o->d84, (short)o->d88);
         if (o->b0c)
         {
@@ -49,7 +49,7 @@ void playerEffect4EStepD(TObj *o)
         o->d->p.whole = PLAYER_D->p.whole + FUN_8001fdac((short)o->d84, (short)o->d88);
         o->d84 = (o->d84 + 0x10) & 0xff;
         o->d88 += o->d88 < 0xc;
-        o->b0f = DAT_800a6047[0];
+        o->b0f = PLAYER_DRAW_DEPTH[0];
         if (DAT_800a60a1[0])
             o->timer = 0;
         if (--o->timer <= 0) {

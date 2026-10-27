@@ -6,7 +6,7 @@
 
 extern TObj PLAYER;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
-extern unsigned short D_800A6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern Fix16 *PLAYER_H;
 extern char D_80010748[];
 extern TObj *D_800A60C8;
@@ -44,7 +44,7 @@ void puppyRumorTalk(TObj *o)
         GVARS.b3f = 1;
         GVARS.b42 = 1;
         GVARS.b3e = 1;
-        D_800A6066 = t;
+        PLAYER_ANIM_FRAME = t;
         o->step++;
         break;
     case 1:

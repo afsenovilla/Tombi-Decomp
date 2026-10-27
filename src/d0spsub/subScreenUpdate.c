@@ -9,7 +9,7 @@ extern void *D_800A4620, *D_800A4624, *D_800A4628, *D_800A462C, *D_800A4630, *D_
 extern short D_8010A058;
 extern int D_8011112C, D_80111130;
 extern unsigned short PAD_PRESSED;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern void *D_1F8003A0, *D_1F8003A4;
 extern char D_800F18E0[], D_800F24E0[], D_800F7B78[];
 extern char D_800FE8D0[], D_800FE8E0[]; /* aliases of D_800FE8D8, D_800FE8E4 (no CSE) */
@@ -59,7 +59,7 @@ int subScreenUpdate(void)
             D_80111130 = 0x20;
         } else if (--D_80111130 == 0) {
             D_80111130 = 4;
-            D_1F8001FC |= pad;
+            JOYPAD_STATE |= pad;
         }
         switch (m->mode) {
         case 0:

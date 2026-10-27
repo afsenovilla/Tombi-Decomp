@@ -6,8 +6,8 @@ typedef struct { char p[0x4e]; unsigned short w4e; } Task;
 extern GObj D_800A6610[];
 extern char LOAD_BUFFER_ALT[];
 extern Task *TASK_C;
-extern short DAT_1f8001f4;
-extern int DAT_1f800164;
+extern short FRAME_BUFFER_INDEX;
+extern int NEXT_PRIM;
 extern char *DAT_1f800334;
 extern void gameOverSetupCamera(void);
 extern void gameOverSetupLighting(void);
@@ -46,7 +46,7 @@ void gameOverScreenTask(void)
                 k++;
             } while (k < 8);
         }
-        DAT_1f800164 = (DAT_1f8001f4 * 0xc000 + (int)LOAD_BUFFER_ALT) & 0xffffff;
+        NEXT_PRIM = (FRAME_BUFFER_INDEX * 0xc000 + (int)LOAD_BUFFER_ALT) & 0xffffff;
         gameOverDrawLetters();
         break;
     }

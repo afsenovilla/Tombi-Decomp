@@ -1,19 +1,19 @@
 // FUNC 8001bcd8 324 MAIN0
 // MATCHING 8001bcd8 324
 #include "globals.h"
-extern short G1f4, G1c6;
-extern unsigned short G1f8;
-extern unsigned int G164;
+extern short FRAME_BUFFER_INDEX, G1c6;
+extern unsigned short TICK_COUNT;
+extern unsigned int NEXT_PRIM;
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec26c(void);
 extern void updateInventoryOverlay(void), callAreaModelLinkHook(void), updateObjectsLayer8(void), updateObjectsLayer7(void);
 extern void resetDrawLists(void), drawGameplayScene(void), FUN_8001dbdc(void);
 
 void areaMode6Tick(void)
 {
-    G164 = (unsigned int)(LOAD_BUFFER_ALT + G1f4 * 0xc000) & 0xffffff;
+    NEXT_PRIM = (unsigned int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
     FUN_8001ca58();
     if (G1c6 == 0) {
-        G1f8 = G1f8 + 1;
+        TICK_COUNT = TICK_COUNT + 1;
         updateAreaScreenEffect();
         if (G1c6 == 0) {
             FUN_8001d36c();

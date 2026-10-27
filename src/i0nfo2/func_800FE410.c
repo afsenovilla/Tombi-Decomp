@@ -18,7 +18,7 @@ extern TObj *D_8009F2FC;
 extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
-extern unsigned short D_800A6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 
 void func_800FE410(TObj *o)
 {
@@ -32,7 +32,7 @@ void func_800FE410(TObj *o)
         if (D_8009C93A != 0) {
             D_8009C93F = 1;
             D_8009C942 = 1;
-            D_800A6066 = 6;
+            PLAYER_ANIM_FRAME = 6;
             PLAYER_STATE = 4;
             PLAYER_SUBSTATE = 3;
             PLAYER_STEP = 0;
@@ -75,7 +75,7 @@ void func_800FE410(TObj *o)
         a->y.p.whole += 2;
         if (--o->w08 <= 0) {
             a->b04 = 3;
-            D_800A6066 = 2;
+            PLAYER_ANIM_FRAME = 2;
             PLAYER_STATE = 4;
             PLAYER_SUBSTATE = 3;
             PLAYER_STEP = 0;
@@ -133,7 +133,7 @@ void func_800FE410(TObj *o)
         break;
     case 11:
         if (--o->w08 <= 0) {
-            D_800A6066 = 2;
+            PLAYER_ANIM_FRAME = 2;
             D_8009C93C = 0;
             D_8009C93F = 0;
             D_8009C942 = 0;

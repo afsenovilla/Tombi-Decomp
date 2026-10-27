@@ -8,12 +8,12 @@ typedef struct {
     short w, h;
 } TILE;
 extern TILE D_1F800000;
-extern TILE *D_1F800164;
-extern unsigned long *DAT_1f8001e0;
+extern TILE *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 
 void buttonConfigDrawCursor(void)
 {
-    TILE *p = D_1F800164;
+    TILE *p = NEXT_PRIM;
     D_1F800000.len = 3;
     D_1F800000.code = 0x60;
     D_1F800000.g0 = 0xFF;
@@ -25,7 +25,7 @@ void buttonConfigDrawCursor(void)
     D_1F800000.b0 = 0;
     D_1F800000.h = 0x18;
     *p = *(TILE *)0x1F800000;
-    p->addr = DAT_1f8001e0[6];
-    D_1F800164++;
-    DAT_1f8001e0[6] = (DAT_1f8001e0[6] & 0xFF000000) | ((unsigned long)p & 0xFFFFFF);
+    p->addr = CURRENT_OT[6];
+    NEXT_PRIM++;
+    CURRENT_OT[6] = (CURRENT_OT[6] & 0xFF000000) | ((unsigned long)p & 0xFFFFFF);
 }

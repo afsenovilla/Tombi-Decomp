@@ -37,7 +37,7 @@ static short *D_80131370[6] = {
     (short *)D_801312CC, (short *)D_8013133C,
 };
 extern Fix16 *PLAYER_H;
-extern unsigned short D_1F8003C4, D_1F8001FC;
+extern unsigned short D_1F8003C4, JOYPAD_STATE;
 extern TObj PLAYER;
 extern unsigned char D_800A603E_[];
 #define D_800A603E D_800A603E_[0]
@@ -87,7 +87,7 @@ void updateSceneSequence(TObj *o)
         if (GCD.bcefb >= 0x17) {
             if (GCD.bcddd != 0xff) o->wb4 = 4;
             else if (GCD.bd0c8 == 0) o->wb4 = 2;
-            else if (D_8009C970 < GAME.playerHealthDisplayed) o->wb4 = 5;
+            else if (D_8009C970 < GAME.playerMaxHealth) o->wb4 = 5;
             else o->wb4 = 3;
         } else if (GCD.bcddd == 0) o->wb4 = 0;
         else o->wb4 = 1;
@@ -141,7 +141,7 @@ void updateSceneSequence(TObj *o)
                 if (PLAYER_H->p.whole >= 0x6d) PLAYER_H->p.whole = 0x6c;
                 if (D_8009D2B0 == 3) break;
                 if (PLAYER_H->p.whole < 0x69) break;
-                if (!(D_1F8001FC & D_1F8003C4)) break;
+                if (!(JOYPAD_STATE & D_1F8003C4)) break;
                 PLAYER_H->p.whole = 0x68;
                 o->step = 0;
                 o->wb6++;
@@ -162,7 +162,7 @@ void updateSceneSequence(TObj *o)
                 if (PLAYER_H->p.whole >= 0x95) PLAYER_H->p.whole = 0x94;
                 if (D_8009D2B0 == 3) break;
                 if (PLAYER_H->p.whole < 0x91) break;
-                if (!(D_1F8001FC & D_1F8003C4)) break;
+                if (!(JOYPAD_STATE & D_1F8003C4)) break;
                 PLAYER_H->p.whole = 0x90;
                 o->step = 0;
                 o->wb6++;
@@ -182,7 +182,7 @@ void updateSceneSequence(TObj *o)
                 applyAnimVelocityX(o, o->animFrame);
                 if (D_8009D2B0 == 3) break;
                 if ((unsigned short)(PLAYER_H->p.whole - o->a.p.whole + 0x20) >= 0x40) break;
-                if (!(D_1F8001FC & D_1F8003C4)) break;
+                if (!(JOYPAD_STATE & D_1F8003C4)) break;
                 o->step = 0;
                 o->wb6++;
                 break;
@@ -347,7 +347,7 @@ void updateSceneSequence(TObj *o)
             break;
         case 23:
             {
-                int v = GAME.playerHealthDisplayed;
+                int v = GAME.playerMaxHealth;
                 D_800A60D0 = v;
                 D_800A60D2 = v;
                 D_8009C970 = v;

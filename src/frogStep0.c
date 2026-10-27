@@ -2,7 +2,7 @@
 // MATCHING 80133254 544
 #include "TOBJ.H"
 extern unsigned short GAME_SELECTED_SECTION;
-extern unsigned short DAT_800a6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern void *FROG_ANIMS;
 extern void *DAT_8013b184[];
 extern void *DAT_8013b188[];
@@ -50,7 +50,7 @@ void frogStep0(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x20;
         if (FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x20))) {
-            o->animFrame = DAT_800a6066 ^ 1;
+            o->animFrame = PLAYER_ANIM_FRAME ^ 1;
             o->anim = DAT_8013b188[0];
             FUN_8001fe6c(o);
             o->state = 3;

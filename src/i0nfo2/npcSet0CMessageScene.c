@@ -7,9 +7,9 @@ extern TObj PLAYER;
 extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
-extern B12 D_800A6048;
+extern B12 PLAYER_POS;
 extern short PLAYER_Y;
-extern short D_800A6066;
+extern short PLAYER_ANIM_FRAME;
 extern Fix16 *PLAYER_H;
 extern TObj *D_800A60C8;
 extern TObj *SCRIPT_OBJECTS;
@@ -45,7 +45,7 @@ void npcSet0CMessageScene(TObj *o)
                 o->state = 3;
             } else {
                 PLAYER_SUBSTATE = 4;
-                D_800A6066 = 6;
+                PLAYER_ANIM_FRAME = 6;
                 PLAYER_STEP = 0;
                 D_8009C93F = 1;
                 D_8009C942 = 1;
@@ -57,7 +57,7 @@ void npcSet0CMessageScene(TObj *o)
     case 1:
         if (--o->w08 <= 0) {
             a->animFrame = 1;
-            v = D_800A6048;
+            v = PLAYER_POS;
             D_800A60C8 = showMessageBoxDirect(2, 0, &v);
             o->state++;
         }
@@ -89,7 +89,7 @@ void npcSet0CMessageScene(TObj *o)
         break;
     case 3:
         if (a->b68 != 0) {
-            v = D_800A6048;
+            v = PLAYER_POS;
             PLAYER_SUBSTATE = 4;
             D_8009C93F = 1;
             D_8009C942 = 1;
@@ -102,7 +102,7 @@ void npcSet0CMessageScene(TObj *o)
                 o->state = 6;
             }
         } else if (b->b68 != 0) {
-            v = D_800A6048;
+            v = PLAYER_POS;
             PLAYER_SUBSTATE = 4;
             D_8009C93F = 1;
             D_8009C942 = 1;
@@ -120,7 +120,7 @@ void npcSet0CMessageScene(TObj *o)
             }
             o->state = 4;
         } else if (c->b68 != 0) {
-            v = D_800A6048;
+            v = PLAYER_POS;
             PLAYER_SUBSTATE = 4;
             D_8009C93F = 1;
             D_8009C942 = 1;

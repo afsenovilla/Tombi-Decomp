@@ -6,8 +6,8 @@
 #include "gamestate.h"
 typedef struct { char pad[0x4c]; short w4c; short w4e; } C4C;
 typedef struct { short p0, x, p4, y, p8, z; } Pos;
-extern unsigned char D_8009C970_[];
-#define D_8009C970 D_8009C970_[0]
+extern unsigned char GAME_PLAYER_HEALTH[];
+#define D_8009C970 GAME_PLAYER_HEALTH[0]
 extern unsigned char D_8009C93F_[];
 #define D_8009C93F D_8009C93F_[0]
 extern unsigned char D_8009C93B_[];
@@ -39,7 +39,7 @@ static short *D_801396A0[9] = {
     (short *)D_8013955C, (short *)D_8013957C, (short *)D_80139614, (short *)D_8013963C,
     (short *)D_80139678,
 };
-extern unsigned short D_1F8003C4, D_1F8001FC;
+extern unsigned short D_1F8003C4, JOYPAD_STATE;
 extern unsigned char PLAYER_STEP[];
 #define D_800A603E PLAYER_STEP[0]
 extern unsigned char PLAYER_SUBSTATE[];
@@ -48,16 +48,16 @@ extern unsigned char PLAYER_STATE[];
 #define D_800A603C PLAYER_STATE[0]
 extern int GAME_AREA00_EVENT_CONTROL[];
 #define D_8009C984 GAME_AREA00_EVENT_CONTROL[0]
-extern unsigned char D_1F8001CD_[];
-#define D_1F8001CD D_1F8001CD_[0]
-extern unsigned char D_1F8001CC_[];
-#define D_1F8001CC D_1F8001CC_[0]
+extern unsigned char MOVIE_ID[];
+#define D_1F8001CD MOVIE_ID[0]
+extern unsigned char MOVIE_PLAY_STATE[];
+#define D_1F8001CC MOVIE_PLAY_STATE[0]
 extern short D_1F8001C6_[];
 #define D_1F8001C6 D_1F8001C6_[0]
 extern short D_800A60EA_[];
 #define D_800A60EA D_800A60EA_[0]
-extern short D_800A6066_[];
-#define D_800A6066 D_800A6066_[0]
+extern short PLAYER_ANIM_FRAME[];
+#define D_800A6066 PLAYER_ANIM_FRAME[0]
 extern C4C *TASK_C;
 extern short D_8009CD94_[];
 #define D_8009CD94 D_8009CD94_[0]
@@ -120,7 +120,7 @@ void updateHoodedOldMan(TObj *o)
                 o->wb4 = 5;
                 break;
             }
-        } else if (D_8009C970 < GAME.playerHealthDisplayed) {
+        } else if (D_8009C970 < GAME.playerMaxHealth) {
             o->wb4 = 7;
         } else {
             o->wb4 = 6;
@@ -170,7 +170,7 @@ void updateHoodedOldMan(TObj *o)
             case 1:
                 if (D_8009D2B0 == 3) break;
                 if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 32) >= 64) break;
-                if (!(D_1F8001FC & D_1F8003C4)) break;
+                if (!(JOYPAD_STATE & D_1F8003C4)) break;
                 if (PLAYER.obj.b69 == 0) break;
                 if (D_800A603C != 1) break;
                 if ((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole > 0) o->animFrame = 0;
@@ -193,7 +193,7 @@ void updateHoodedOldMan(TObj *o)
         case 3:
             if (D_8009D2B0 == 3) break;
             if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 32) >= 64) break;
-            if (!(D_1F8001FC & D_1F8003C4)) break;
+            if (!(JOYPAD_STATE & D_1F8003C4)) break;
             if (PLAYER.obj.b69 == 0) break;
             if (D_800A603C != 1) break;
             if ((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole > 0) o->animFrame = 0;
@@ -426,7 +426,7 @@ void updateHoodedOldMan(TObj *o)
             break;
         case 26:
             {
-                int v = GAME.playerHealthDisplayed;
+                int v = GAME.playerMaxHealth;
                 D_800A60D0 = v;
                 D_800A60D2 = v;
                 D_8009C970 = v;

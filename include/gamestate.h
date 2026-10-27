@@ -14,7 +14,7 @@ typedef struct GameState {
     int totalTimePlayed; /* +0x8 */
     unsigned long playerAP; /* +0xC */
     unsigned char playerHealth; /* +0x10 */
-    unsigned char playerHealthDisplayed; /* +0x11 */
+    unsigned char playerMaxHealth; /* +0x11 */
     char unk12; /* +0x12 */
     char unk13; /* +0x13 */
     unsigned char areaTransition; /* +0x14 */

@@ -12,7 +12,7 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 #define W3A(o) ((o)->d38 >> 16)
 
 extern char D_1F800000[];
-extern unsigned short GAME_SELECTED_SECTION, D_8009C982;
+extern unsigned short GAME_SELECTED_SECTION, GAME_SELECTED_SPAWN_POINT;
 extern unsigned short D_8009C962_b[] asm("GAME_SELECTED_SECTION");
 extern void *D_801229A4[];
 extern TObj *ObjAlloc(void);
@@ -171,7 +171,7 @@ void updateMotocrossBike(TObj *o_)
                 e2 = (TObj *)o->d90;
                 switch (t) {
                 case 0:
-                    if (D_8009C962_b[0] == 1 && D_8009C982) {
+                    if (D_8009C962_b[0] == 1 && GAME_SELECTED_SPAWN_POINT) {
                         o->wac = 3;
                         func_8011AF84(o);
                         o->step = 3;

@@ -10,7 +10,7 @@ void scriptOpSetPlayerFacing(void)
 {
     ScriptContext* q = SCRIPT_CTX;
 
-    D_800A53C6 = *(s32*)((u8*)q + 0x1190);
+    PLAYER_ANIM_FRAME = *(s32*)((u8*)q + 0x1190);
     asm("");
     q->pc++;
 }

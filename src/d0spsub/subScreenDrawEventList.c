@@ -22,8 +22,8 @@ extern unsigned char SCRIPT_FLAGS[];
 extern int D_801093C4[];
 extern int D_801096D0;
 extern char D_800FFD98[];
-extern TILE *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern TILE *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern void subScreenDrawString(int a, int b);
 
 void subScreenDrawEventList(Menu *m)
@@ -56,10 +56,10 @@ void subScreenDrawEventList(Menu *m)
             S->code |= 2;
             S->x0 = D_8011113C.x - 0x20;
             S->y0 = D_8011113C.y - 1;
-            p = D_1F800164;
+            p = NEXT_PRIM;
             *p = *S;
-            addPrim(D_1F8001E0 + 6, p);
-            D_1F800164++;
+            addPrim(CURRENT_OT + 6, p);
+            NEXT_PRIM++;
         }
     }
 }

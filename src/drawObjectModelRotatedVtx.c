@@ -14,7 +14,7 @@ typedef struct {
 extern MATRIX D_1f800000, D_1f800020, D_1f8000c0;
 extern SVECTOR D_1f800060, D_1f800068;
 extern unsigned short D_1f8001c8;
-extern int *D_1f8001e0;
+extern int *CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern void FUN_8006424c(SVECTOR *, MATRIX *);
 extern void FUN_8006395c(MATRIX *, MATRIX *, MATRIX *);
@@ -49,6 +49,6 @@ void drawObjectModelRotatedVtx(O *o)
     D_1f800000.t[2] += D_1f8000c0.t[2];
     FUN_80063ddc(&D_1f800000);
     FUN_80063e6c(&D_1f800000);
-    drawModelVtx(o->aa0, &D_1f8001e0[o->f + 4], o, o->aa8, o->ba4);
+    drawModelVtx(o->aa0, &CURRENT_OT[o->f + 4], o, o->aa8, o->ba4);
 }
 #endif

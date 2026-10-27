@@ -15,8 +15,8 @@ typedef struct O { char p0[0x1e]; short v1e; char p20[2]; short v22; char p24[0x
     unsigned short a, b, c, d; char pc6[4]; unsigned short idx; } O;
 typedef struct L { short x0, x1, x2, x3; short a, b, c, d; short m; short pad[7]; } L;
 
-extern void *D_1f800164;
-extern int D_1f8001e0;
+extern void *NEXT_PRIM;
+extern int CURRENT_OT;
 extern Hdr MESSAGE_SLOTS[];
 extern Ent MESSAGE_GLYPHS[][128];
 extern Img DAT_800a5de4[];
@@ -38,10 +38,10 @@ void drawMessageBox(O *o)
     Sprt *s;
 
     FUN_8005f990(env);
-    r = D_1f800164;
+    r = NEXT_PRIM;
     FUN_80060008(r, 0, 0, *(unsigned short *)(env + 0x14), 0);
-    FUN_8005e580(D_1f8001e0 + 8, r);
-    D_1f800164 = (char *)D_1f800164 + 0xc;
+    FUN_8005e580(CURRENT_OT + 8, r);
+    NEXT_PRIM = (char *)NEXT_PRIM + 0xc;
     s = (Sprt *)0x1f800000;
     for (i = 0, j = 0; i < MESSAGE_SLOTS[o->idx].n; j++, i++) {
         f = MESSAGE_GLYPHS[o->idx][j].f;
@@ -65,23 +65,23 @@ void drawMessageBox(O *o)
             s->h = DAT_800a5de4[(short)f].h;
             s->clut = MESSAGE_GLYPHS[o->idx][j].clut;
             {
-                Sprt *q = D_1f800164;
+                Sprt *q = NEXT_PRIM;
                 *q = *s;
-                FUN_8005e580(D_1f8001e0 + 8, q);
+                FUN_8005e580(CURRENT_OT + 8, q);
             }
-            D_1f800164 = (char *)D_1f800164 + 0x14;
+            NEXT_PRIM = (char *)NEXT_PRIM + 0x14;
         }
     }
     if (FUN_8005efe4() != 1)
         FUN_8005efe4();
-    r = D_1f800164;
+    r = NEXT_PRIM;
     FUN_80060008(r, 0, 0, 0, 0);
-    FUN_8005e580(D_1f8001e0 + 8, r);
+    FUN_8005e580(CURRENT_OT + 8, r);
     l.m = o->m;
     l.a = o->a;
     l.b = o->b;
     l.c = o->c;
     l.d = o->d;
-    D_1f800164 = (char *)D_1f800164 + 0xc;
+    NEXT_PRIM = (char *)NEXT_PRIM + 0xc;
     drawBalloonFrame(&l, 0, o->v1e);
 }

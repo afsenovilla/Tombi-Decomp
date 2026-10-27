@@ -1,8 +1,8 @@
 // FUNC 80018838 84 MAIN0
 // MATCHING 80018838 84
 // FLAGS -O2 -G0
-extern int *DAT_1f800208;
-extern unsigned short DAT_1f800238;
+extern int *FREE_OBJECTS;
+extern unsigned short FREE_OBJECT_COUNT;
 
 void ObjFreeDup(volatile int *o)
 {
@@ -16,8 +16,8 @@ void ObjFreeDup(volatile int *o)
     ((volatile char *)o)[0x9d] = 0;
     ((volatile char *)o)[0x9e] = 0;
     ((volatile char *)o)[0x9f] = 0;
-    DAT_1f800238 = DAT_1f800238 + 1;
-    p = DAT_1f800208;
-    DAT_1f800208 = p - 1;
+    FREE_OBJECT_COUNT = FREE_OBJECT_COUNT + 1;
+    p = FREE_OBJECTS;
+    FREE_OBJECTS = p - 1;
     p[-1] = (int)o;
 }

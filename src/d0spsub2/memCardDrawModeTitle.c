@@ -14,8 +14,8 @@ typedef struct {
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 #define S ((SPRT *)0x1F800000)
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern short D_800F70DC[];
 extern unsigned short GetClut(int x, int y);
 extern void AddDrawMode(int a, int b);
@@ -43,9 +43,9 @@ void memCardDrawModeTitle(int no, int pri, short x, short y)
     s->w = 0x28;
     s->h = 0x10;
     s->clut = GetClut(0x130, 0x1F3);
-    p = D_1F800164;
+    p = NEXT_PRIM;
     *p = *s;
-    addPrim(D_1F8001E0 + pri, p);
-    D_1F800164++;
+    addPrim(CURRENT_OT + pri, p);
+    NEXT_PRIM++;
     AddDrawMode(D_800F70DC[0], pri);
 }

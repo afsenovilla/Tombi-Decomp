@@ -6,8 +6,8 @@
 #include "gamestate.h"
 #include "gametask.h"
 extern TObj PLAYER;
-extern unsigned short D_800A6066;
-extern unsigned short D_800A6066x[]; /* second name for D_800A6066: forces the reloads after the store */
+extern unsigned short PLAYER_ANIM_FRAME;
+extern unsigned short D_800A6066x[]; /* second name for PLAYER_ANIM_FRAME: forces the reloads after the store */
 extern TObj *D_800A60C8[];
 extern Fix16 *PLAYER_H;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
@@ -28,7 +28,7 @@ void raceOfferRematch(TObj *o)
         GVARS.b42 = 1;
         PLAYER.anim = D_80010748;
         AnimLoadDuration(&PLAYER);
-        D_800A6066 = 0;
+        PLAYER_ANIM_FRAME = 0;
         e->b04 = 1;
         e->step = 0;
         e->state = 0;

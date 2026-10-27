@@ -7,7 +7,7 @@
 #include "gamestate.h"
 
 extern unsigned char D_8009C941, D_8009D094;
-extern unsigned char D_1F8003D0, D_1F8001CC, D_1F8001CD;
+extern unsigned char D_1F8003D0, MOVIE_PLAY_STATE, MOVIE_ID;
 extern short D_1F8001C6;
 extern TObj *TASK_C;
 extern char D_8001D6A4[];
@@ -74,8 +74,8 @@ void updateMasterOfTheSkiesEvent(TObj *o)
                     } else {
                         D_1F8003D0 = 1;
                     }
-                    D_1F8001CC = 1;
-                    D_1F8001CD = 7;
+                    MOVIE_PLAY_STATE = 1;
+                    MOVIE_ID = 7;
                     D_1F8001C6 = 2;
                     stopBgm(0);
                     ThreadCreate(1, D_8001D6A4);

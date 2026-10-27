@@ -17,7 +17,7 @@ typedef struct {
 } P;
 extern P *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern TObj *DAT_800a611c;
+extern TObj *PLAYER_HELD_OBJECT;
 extern TObj *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned short PAD_PRESSED;
@@ -65,7 +65,7 @@ void playerStepFlipOntoObject(TObj *o)
     switch (o->state) {
     case 0:
         if ((*(unsigned char*)&o->wac) >= 2) {
-            BITTEN_OBJECT = DAT_800a611c;
+            BITTEN_OBJECT = PLAYER_HELD_OBJECT;
             BITTEN_OBJECT->b04 = 2;
             BITTEN_OBJECT->step = 2;
             BITTEN_OBJECT->state = 0;

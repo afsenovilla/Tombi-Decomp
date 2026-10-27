@@ -10,8 +10,8 @@ extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
 extern short B0e2, B0e6, B0ea, B0ee, B0f2, B0f6;
 extern char C0c0[], C118[];
-extern short G1f4;
-extern void *G1e0;
+extern short FRAME_BUFFER_INDEX;
+extern void *CURRENT_OT;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
 extern void initDisplay(int, int, int), FUN_8005f290(R *, int, int, int), FUN_8005f604(char *, int);
 
@@ -48,8 +48,8 @@ void initGraphics(void)
     FUN_8005f290(&r, 0, 0, 0);
     FUN_8005f604(OT_FRAMEBUFFER, 0x328);
     FUN_8005f604(OT_FRAMEBUFFER + 0xd10, 0x328);
-    G1f4 = 0;
-    G1e0 = OT_FRAMEBUFFER;
+    FRAME_BUFFER_INDEX = 0;
+    CURRENT_OT = OT_FRAMEBUFFER;
 }
 #elif defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80016B50 (initGraphics.c): geometry offset y 0x70 and 0x808-entry ordering tables (PAL
@@ -60,8 +60,8 @@ extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
 extern short B0e2, B0e6, B0ea, B0ee, B0f2, B0f6;
 extern char C0c0[], C118[];
-extern short G1f4;
-extern void *G1e0;
+extern short FRAME_BUFFER_INDEX;
+extern void *CURRENT_OT;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
 extern void initDisplay(int, int, int), FUN_8005f290(R *, int, int, int), FUN_8005f604(char *, int);
 
@@ -98,8 +98,8 @@ void initGraphics(void)
     FUN_8005f290(&r, 0, 0, 0);
     FUN_8005f604(OT_FRAMEBUFFER, 0x808);
     FUN_8005f604(OT_FRAMEBUFFER + 0x2090, 0x808);
-    G1f4 = 0;
-    G1e0 = OT_FRAMEBUFFER;
+    FRAME_BUFFER_INDEX = 0;
+    CURRENT_OT = OT_FRAMEBUFFER;
 }
 #else
 #include "globals.h"
@@ -108,8 +108,8 @@ extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
 extern short B0e2, B0e6, B0ea, B0ee, B0f2, B0f6;
 extern char C0c0[], C118[];
-extern short G1f4;
-extern void *G1e0;
+extern short FRAME_BUFFER_INDEX;
+extern void *CURRENT_OT;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
 extern void initDisplay(int, int, int), FUN_8005f290(R *, int, int, int), FUN_8005f604(char *, int);
 
@@ -146,7 +146,7 @@ void initGraphics(void)
     FUN_8005f290(&r, 0, 0, 0);
     FUN_8005f604(OT_FRAMEBUFFER, 0x328);
     FUN_8005f604(OT_FRAMEBUFFER + 0xd10, 0x328);
-    G1f4 = 0;
-    G1e0 = OT_FRAMEBUFFER;
+    FRAME_BUFFER_INDEX = 0;
+    CURRENT_OT = OT_FRAMEBUFFER;
 }
 #endif

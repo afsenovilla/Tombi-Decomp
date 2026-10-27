@@ -2,7 +2,7 @@
 // MATCHING 800e90d4 564
 typedef struct { char p0[2]; unsigned char state; char p3; short w4, timer; char p8[0x10]; short slot, msg; } Menu;
 typedef struct { char p[0x146]; short w146; } Card;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern int D_800F7148;
 extern char *D_800F6A3C[];
 extern void playSFX(int id);
@@ -20,25 +20,25 @@ int memCardFormatStep(Menu *m, Card *c)
         break;
     case 1:
         if (D_800F7148 == 0) {
-            if (D_1F8001FC & 0x20) {
+            if (JOYPAD_STATE & 0x20) {
                 D_800F7148 = 1;
                 goto snd;
             }
-            if (D_1F8001FC & 0x2000) goto cancel;
-            if (D_1F8001FC & 0x4000) {
+            if (JOYPAD_STATE & 0x2000) goto cancel;
+            if (JOYPAD_STATE & 0x4000) {
                 m->msg = 0xB;
                 m->timer = 4;
                 SfxPlay2(0xA, 0xA);
                 m->state++;
             }
         } else {
-            if (D_1F8001FC & 0x80) {
+            if (JOYPAD_STATE & 0x80) {
                 D_800F7148 = 0;
             snd:
                 playSFX(8);
                 return 0;
             }
-            if (D_1F8001FC & 0x6000) {
+            if (JOYPAD_STATE & 0x6000) {
             cancel:
                 SfxPlay2(0x1B, 0x1C);
                 return -1;
@@ -61,7 +61,7 @@ int memCardFormatStep(Menu *m, Card *c)
         } while (--i > 0);
         break;
     case 4:
-        if (D_1F8001FC & 0x6000) {
+        if (JOYPAD_STATE & 0x6000) {
             c->w146 = 0;
             m->state = 0;
             m->w4 = 1;
@@ -69,7 +69,7 @@ int memCardFormatStep(Menu *m, Card *c)
         }
         break;
     case 5:
-        if (D_1F8001FC & 0x6000) return -1;
+        if (JOYPAD_STATE & 0x6000) return -1;
         break;
     }
     return 0;

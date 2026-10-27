@@ -4,7 +4,7 @@
 extern TObj *BITTEN_OBJECT;
 extern unsigned short PAD_PRESSED;
 extern unsigned char GAME_PLAYER_MODE;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern unsigned short DAT_1f8003c6;
 extern void FUN_800ee680(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
@@ -70,7 +70,7 @@ void playerBiteHoldType03(TObj *o)
             o->animFrame = 0;
         o->h->p.whole = BITTEN_OBJECT->h->p.whole;
         BITTEN_OBJECT->y.p.whole = o->y.p.whole + o->wba;
-        if (DAT_1f8001fc & DAT_1f8003c6) {
+        if (JOYPAD_STATE & DAT_1f8003c6) {
             GAME_PLAYER_MODE = 0;
             o->b9c = 1;
             o->b69 = 0;

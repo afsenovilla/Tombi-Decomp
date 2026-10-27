@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern signed char A00_AP_BOX_SPARKLE_OFFSETS[];
 extern int DAT_1f800198;
-extern unsigned char DAT_1f8001f8;
+extern unsigned char TICK_COUNT;
 extern void FUN_8012127c(TObj *);
 extern TObj *FUN_80018448(void);
 
@@ -26,7 +26,7 @@ void a00ApBox50kSparkle(TObj *o)
         n->type = 0x31;
         n->subtype = 1;
         hp = n->h;
-        n->b0c = (DAT_1f8001f8 + (char)DAT_1f800198) & 3;
+        n->b0c = (TICK_COUNT + (char)DAT_1f800198) & 3;
         i = ((unsigned int)o->d88 >> 8) & 0x1fe;
         hp->raw = o->h->raw + A00_AP_BOX_SPARKLE_OFFSETS[i] * 0x10000;
         n->y.raw = o->y.raw + A00_AP_BOX_SPARKLE_OFFSETS[i + 1] * 0x10000;

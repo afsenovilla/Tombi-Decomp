@@ -12,7 +12,7 @@ extern unsigned char D_8009CE55;
 extern unsigned char D_8009CE57;
 extern unsigned char D_8009CF13;
 extern unsigned char GAME_PLAYER_MODE[];
-extern unsigned char D_8009D2B1;
+extern unsigned char GAME_BITTEN_JUMP_KIND;
 
 void overheadPlayerItemUseStep(TObj *o)
 {
@@ -55,7 +55,7 @@ void overheadPlayerItemUseStep(TObj *o)
             D_8009C940[0] = 0;
             break;
         case 9:
-            D_8009D2B1 = 0;
+            GAME_BITTEN_JUMP_KIND = 0;
             goto clear;
         case 5:
         case 0x7C:

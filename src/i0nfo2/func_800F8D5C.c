@@ -15,7 +15,7 @@ extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
 extern unsigned short PLAYER_Y;
-extern short D_800A6066;
+extern short PLAYER_ANIM_FRAME;
 extern void *PLAYER_H;
 
 void func_800F8D5C(TObj *o)
@@ -36,7 +36,7 @@ void func_800F8D5C(TObj *o)
             PLAYER_SUBSTATE = 4;
             D_8009C93F = 1;
             D_8009C942 = 1;
-            D_800A6066 = 4;
+            PLAYER_ANIM_FRAME = 4;
             PLAYER_STEP = 0;
             o->state = 0x12;
         }

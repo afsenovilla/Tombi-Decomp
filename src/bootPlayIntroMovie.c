@@ -3,7 +3,7 @@
 typedef struct Th { char pad[0x48]; short a; unsigned short c; } Th;
 typedef struct { short x, y, w, h; } RECT;
 extern Th *TASK_C;
-extern char DAT_1f8001cc, DAT_1f8001cd;
+extern char MOVIE_PLAY_STATE, MOVIE_ID;
 extern void SetDispMask(int);
 extern void initDisplay(int, int, int);
 extern void ClearImage(RECT *, int, int, int);
@@ -30,14 +30,14 @@ void bootPlayIntroMovie(void)
         ClearImage(&r, 0, 0, 0);
         break;
     case 1:
-        DAT_1f8001cc = 1;
-        DAT_1f8001cd = 0;
+        MOVIE_PLAY_STATE = 1;
+        MOVIE_ID = 0;
         ThreadCreate(1, LAB_8001d6a4);
         u = TASK_C;
         u->c = u->c + 1;
         break;
     case 2:
-        if (DAT_1f8001cc == 0) t->c = c + 1;
+        if (MOVIE_PLAY_STATE == 0) t->c = c + 1;
         break;
     case 3:
         MusicStopOrFadeIn(0);

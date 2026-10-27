@@ -2,9 +2,9 @@
 // MATCHING 8001b328 372
 #include "globals.h"
 typedef struct { char p[0x4e]; unsigned short w; } O;
-extern unsigned short G1f8;
-extern short G1f4, D45ea;
-extern unsigned int G164;
+extern unsigned short TICK_COUNT;
+extern short FRAME_BUFFER_INDEX, D45ea;
+extern unsigned int NEXT_PRIM;
 extern O *TASK_C;
 extern int FUN_800efaa4(void), FUN_800e9888(void), FUN_800edd28(void);
 extern void FUN_800efd6c(void), FUN_800ea37c(void), FUN_800edf08(void), FUN_8005f060(int), FUN_8001dbdc(void);
@@ -12,8 +12,8 @@ extern void FUN_800efd6c(void), FUN_800ea37c(void), FUN_800edf08(void), FUN_8005
 void inventoryScreenTick(void)
 {
     int r;
-    G1f8 = G1f8 + 1;
-    G164 = (unsigned int)(LOAD_BUFFER_ALT + G1f4 * 0xc000) & 0xffffff;
+    TICK_COUNT = TICK_COUNT + 1;
+    NEXT_PRIM = (unsigned int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
     switch (D45ea) {
     case 0: case 1: case 2: case 3: case 6:
         r = FUN_800efaa4();

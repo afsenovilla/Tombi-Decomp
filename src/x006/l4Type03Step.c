@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short FUN_8001fddc(int, int);
 extern short FUN_8001fdac(int, int);
-extern unsigned short DAT_800a6066[];
+extern unsigned short PLAYER_ANIM_FRAME[];
 extern unsigned short DAT_800a60ee;
 extern unsigned char DAT_800a60d6[];
 extern short DAT_800a60ea;
@@ -22,7 +22,7 @@ void l4Type03Step(TObj *o)
         o->w76 = o->d88;
         o->d84 = 0;
         o->d88 = 0;
-        if (DAT_800a6066[0] & 1) o->state = 2;
+        if (PLAYER_ANIM_FRAME[0] & 1) o->state = 2;
         else o->state = 1;
         break;
     case 1:

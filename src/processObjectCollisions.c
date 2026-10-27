@@ -11,7 +11,7 @@ typedef struct {
 } TO;
 typedef struct { char p[0x4c]; unsigned short s4c; } C;
 extern unsigned short D_8009C960_h;
-extern short *D_800A605C;
+extern short *PLAYER_ANIM;
 extern unsigned short D_80115320[];
 extern unsigned short D_800A60A4, D_800A60A6, D_800A60A8, D_800A60AA;
 extern TO PLAYER;
@@ -46,7 +46,7 @@ void processObjectCollisions(void)
         func_8011E514();
         return;
     }
-    t = &D_80115320[D_800A605C[1] * 4];
+    t = &D_80115320[PLAYER_ANIM[1] * 4];
     D_800A60A4 = *t++;
     D_800A60A6 = *t++;
     D_800A60A8 = *t++;

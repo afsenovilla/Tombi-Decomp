@@ -17,7 +17,7 @@ extern Fix16 *PLAYER_H;
 extern unsigned short PLAYER_Y;
 extern unsigned char PLAYER[];
 extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[], DAT_800a603f;
-extern short DAT_800a6066, DAT_800a60b6;
+extern short PLAYER_ANIM_FRAME, PLAYER_VEL_Y;
 extern void *DAT_8013ad70[];
 extern void *DAT_8013ad38[];
 extern void *DAT_8013ad78[];
@@ -179,8 +179,8 @@ void redBirdStep1B(TObj *o)
         } else if (--o->w22 == 0) {
             o->b6a = 0;
             *q = 2;
-            DAT_800a6066 = 2;
-            DAT_800a60b6 = 0;
+            PLAYER_ANIM_FRAME = 2;
+            PLAYER_VEL_Y = 0;
             PLAYER_STATE[0] = 2;
             PLAYER_SUBSTATE[0] = 0;
             PLAYER_STEP[0] = 1;

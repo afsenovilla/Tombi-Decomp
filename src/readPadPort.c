@@ -8,14 +8,14 @@ typedef struct {
     char pad2[2];
 } PadInfo;
 
-extern PadInfo DAT_8009d610[];
+extern PadInfo PAD_INFO[];
 extern unsigned char DAT_8009f7f0[];
 extern unsigned char DAT_8009f812[];
 extern void PadInfoMode(int, int, int);
 
 short readPadPort(short port)
 {
-    PadInfo *p = &DAT_8009d610[port];
+    PadInfo *p = &PAD_INFO[port];
     unsigned short btn;
     unsigned short ty;
     unsigned short a, b, m;

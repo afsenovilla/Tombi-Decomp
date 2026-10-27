@@ -13,8 +13,8 @@ typedef struct { short x0, x1, x2, x3; short a, b, c, d; short m; } L;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern TILE *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern TILE *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern R D_800F65D4[];
 extern R D_800F6684[], D_800F6694[], D_800F66A4[];
 extern int D_800F7148;
@@ -70,10 +70,10 @@ void memCardDrawMessage(int n)
             T->h = D_800F66A4[D_800F7148].h;
             break;
         }
-        p = D_1F800164;
+        p = NEXT_PRIM;
         *p = *T;
-        addPrim(D_1F8001E0 + 1, p);
-        D_1F800164++;
+        addPrim(CURRENT_OT + 1, p);
+        NEXT_PRIM++;
     }
     l.m = -1;
     l.a = x;

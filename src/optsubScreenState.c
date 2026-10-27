@@ -3,8 +3,8 @@
 #include "globals.h"
 typedef struct S { char p[0x48]; short w48; unsigned short w4a; unsigned short w4c; short w4e; } S;
 extern S *TASK_C;
-extern short DAT_1f8001f4;
-extern int DAT_1f800164;
+extern short FRAME_BUFFER_INDEX;
+extern int NEXT_PRIM;
 extern unsigned char LOAD_COMPLETE_SYM;
 extern void FUN_8001f110(int);
 extern void FUN_8005f060(int);
@@ -19,7 +19,7 @@ extern void FUN_800e8700(void);
 void optsubScreenState(void)
 {
     S *g;
-    DAT_1f800164 = (DAT_1f8001f4 * 0xc000 + (int)LOAD_BUFFER_ALT) & 0xffffff;
+    NEXT_PRIM = (FRAME_BUFFER_INDEX * 0xc000 + (int)LOAD_BUFFER_ALT) & 0xffffff;
     switch (TASK_C->w4a) {
     case 0:
         FUN_8001f110(0);

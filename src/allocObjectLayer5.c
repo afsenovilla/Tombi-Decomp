@@ -1,17 +1,17 @@
 // FUNC 80018568 144 MAIN0
 // MATCHING 80018568 144
-extern short DAT_1f800238;
-extern char **DAT_1f800208;
+extern short FREE_OBJECT_COUNT;
+extern char **FREE_OBJECTS;
 extern unsigned short DAT_1f8001c8;
 
 char *allocObjectLayer5(void)
 {
     char *p;
     char c = 5;
-    short n = DAT_1f800238;
+    short n = FREE_OBJECT_COUNT;
     if (n > 0) {
-        DAT_1f800238 = n - 1;
-        p = *DAT_1f800208++;
+        FREE_OBJECT_COUNT = n - 1;
+        p = *FREE_OBJECTS++;
         p[0x1c] = c;
         if ((DAT_1f8001c8 & 1) == 0) {
             *(char **)(p + 0x40) = p + 0x10;

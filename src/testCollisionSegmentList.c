@@ -1,10 +1,10 @@
 // FUNC 80040f78 596 MAIN0
 // MATCHING 80040f78 596
-/* Debt: r is pinned to $4 with register asm (global-alloc gives the DAT_1f800278 pointer pseudo a0 first:
+/* Debt: r is pinned to $4 with register asm (global-alloc gives the COLLISION_SEG_PTR pointer pseudo a0 first:
    20 refs/23 insns beats r's 22/41). r doubles as the second word b, r = 0 goes before if (w & 0x10)
    (beqz delay slot), int inline in the a/y-passed branch.
    Tried without asm: separate b local (score 76, r then lands in a2), short/ushort r, r = 0 in the else, while loop, int w/n: pointer pseudo always outranks r. */
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 extern unsigned short DAT_1f800282, DAT_1f800284;
 extern int testCollisionSegment(int, int);
 extern int testCollisionSegmentStep(int, int);
@@ -23,22 +23,22 @@ int testCollisionSegmentList(void *o, int x, int y)
     unsigned short w, a, c;
     int lo, hi;
     unsigned short s;
-    n = *(short *)DAT_1f800278++;
+    n = *(short *)COLLISION_SEG_PTR++;
     if (n == 0)
         return 0;
     do {
-        w = *DAT_1f800278++;
+        w = *COLLISION_SEG_PTR++;
         n--;
         if ((w & 0x1f) == 0) {
-            DAT_1f800278 += 3;
+            COLLISION_SEG_PTR += 3;
             continue;
         }
         r = 0;
         if (w & 0x10) {
             DAT_1f800284 = (w & 0xe00) >> 9;
-            a = *DAT_1f800278++;
-            r = *DAT_1f800278++;
-            c = *DAT_1f800278++;
+            a = *COLLISION_SEG_PTR++;
+            r = *COLLISION_SEG_PTR++;
+            c = *COLLISION_SEG_PTR++;
             lo = c & 0xf;
             hi = (c >> 4) & 0xf;
             s = a + r;

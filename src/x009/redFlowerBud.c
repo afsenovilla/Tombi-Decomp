@@ -3,7 +3,7 @@
 #include "camera.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern int D_1F800198;
 extern void *D_8012EA38[];
 extern void *D_8012EA3C[];
@@ -45,7 +45,7 @@ void redFlowerBud(TObj *o)
         }
         break;
     case 1:
-        if ((D_1F8001F8 + D_1F800198) & 3) {
+        if ((TICK_COUNT + D_1F800198) & 3) {
             ObjCullRegister(o);
         }
         AnimAdvance(o);
@@ -64,7 +64,7 @@ void redFlowerBud(TObj *o)
             o->anim = D_8012EA3C[0];
             AnimLoadDuration(o);
         }
-        if (((D_1F8001F8 + D_1F800198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0xa0 < o->y.p.whole) {
+        if (((TICK_COUNT + D_1F800198) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0xa0 < o->y.p.whole) {
             o->b04 = 3;
             o->step = 0;
             o->state = 0;
@@ -79,7 +79,7 @@ void redFlowerBud(TObj *o)
             o->anim = D_8012E9F8[0];
             AnimLoadDuration(o);
         }
-        if ((D_1F8001F8 + D_1F800198) & 3) {
+        if ((TICK_COUNT + D_1F800198) & 3) {
             ObjCullRegister(o);
         }
         break;

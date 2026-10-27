@@ -1,9 +1,9 @@
 // FUNC 800ee028 852 D0SPSUB
 // MATCHING 800ee028 852
 typedef struct { unsigned char state, sub; char p2[0x10]; short mode; short page; short cursor; char p18[6]; short sel; } Menu;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern unsigned char D_801086F0[];
-extern unsigned char D_8009CDA3[];
+extern unsigned char GAME_INVENTORY_SCREEN[];
 extern unsigned char D_8010A200[];
 extern unsigned char D_8010A204;
 extern int subScreenMoveTabCursor(Menu *m, int a);
@@ -26,12 +26,12 @@ int subScreenEventListStep(Menu *m)
     case 1:
         if (subScreenMoveTabCursor(m, 1)) return 0;
         pages = (subScreenCountEvents() + 9) / 10;
-        if (D_1F8001FC & 0x400) goto left;
-        if (D_1F8001FC & 0x800) goto right;
-        if (D_1F8001FC & 0x2000) {
+        if (JOYPAD_STATE & 0x400) goto left;
+        if (JOYPAD_STATE & 0x800) goto right;
+        if (JOYPAD_STATE & 0x2000) {
             SfxPlay2(0x1B, 0x1C);
             return 1;
-        } else if (D_1F8001FC & 0x4008) {
+        } else if (JOYPAD_STATE & 0x4008) {
             switch (m->cursor) {
             case 0:
                 m->sel = m->page * 10;
@@ -71,14 +71,14 @@ int subScreenEventListStep(Menu *m)
     case 2:
         if (subScreenMoveEventCursor(m)) return 0;
         pages = (subScreenCountEvents() + 9) / 10;
-        if (D_1F8001FC & 0x400) {
+        if (JOYPAD_STATE & 0x400) {
         left:
             if (m->page > 0) {
                 playSFX(8);
                 m->page--;
                 m->sel -= 10;
             }
-        } else if (D_1F8001FC & 0x800) {
+        } else if (JOYPAD_STATE & 0x800) {
         right:
             if (m->page < pages - 1) {
                 playSFX(8);
@@ -86,13 +86,13 @@ int subScreenEventListStep(Menu *m)
                 m->sel += 10;
                 if (m->sel >= pages * 10) m->sel = pages * 10;
             }
-        } else if (D_1F8001FC & 0x2000) {
+        } else if (JOYPAD_STATE & 0x2000) {
             m->sel = -1;
             SfxPlay2(0x1B, 0x1C);
             m->sub = 1;
-        } else if (D_1F8001FC & 0x4008) {
+        } else if (JOYPAD_STATE & 0x4008) {
             int k = D_801086F0[m->sel];
-            if (D_8009CDA3[k]) {
+            if (GAME_INVENTORY_SCREEN[k]) {
                 subScreenOpenMessage(0, k - 1, 3);
                 D_8010A204 = 0;
                 SfxPlay2(10, 10);

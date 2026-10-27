@@ -13,8 +13,8 @@ typedef struct { short x, y, w, attr; int img, pC, str; void *p14; } Text;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern TILE *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern TILE *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern Text D_8011113C;
 extern short D_8010A058, D_8010A05C, D_8010A060, D_8010A064;
 extern short D_8010A068[];
@@ -43,7 +43,7 @@ void subScreenDrawPopupMenu(void)
         subScreenDrawString(1, 1);
     }
     lp = &l;
-    p = D_1F800164;
+    p = NEXT_PRIM;
     T->len = 3;
     T->code = 0x60;
     T->g0 = 0xFF;
@@ -55,8 +55,8 @@ void subScreenDrawPopupMenu(void)
     T->code &= ~2;
     T->y0 = (short)(D_8010A058 * 16 + 0x78) - D_8010A05C * 8 + 6;
     *p = *T;
-    addPrim(D_1F8001E0 + 2, p);
-    D_1F800164++;
+    addPrim(CURRENT_OT + 2, p);
+    NEXT_PRIM++;
     l.m = -1;
     l.a = 8;
     l.b = 0x78 - D_8010A05C * 8;
@@ -73,7 +73,7 @@ void subScreenDrawPopupMenu(void)
             D_8011113C.p14 = D_800FFD98;
             subScreenDrawString(1, 1);
         }
-        p = D_1F800164;
+        p = NEXT_PRIM;
         T->len = 3;
         T->code = 0x60;
         T->g0 = 0xFF;
@@ -85,8 +85,8 @@ void subScreenDrawPopupMenu(void)
         T->code &= ~2;
         T->y0 = (short)(D_8010A060 * 16 + 0x78) - D_8010A064 * 8 + 6;
         *p = *T;
-        addPrim(D_1F8001E0 + 2, p);
-        D_1F800164++;
+        addPrim(CURRENT_OT + 2, p);
+        NEXT_PRIM++;
         lp->m = -1;
         lp->a = 0xA0;
         lp->b = 0x78 - D_8010A064 * 8;

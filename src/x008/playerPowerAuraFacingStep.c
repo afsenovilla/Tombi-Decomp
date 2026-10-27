@@ -7,8 +7,8 @@ typedef struct O { unsigned char b0, b1, b2, b3, b4, b5, state, b7; char p0[4]; 
 extern void FUN_8001fe6c(O *);
 extern void FUN_8001fec0(O *);
 extern T DAT_8011592c[];
-extern unsigned char DAT_800a6039, DAT_800a6047[];
-extern unsigned short DAT_800a6066, PLAYER_Y[];
+extern unsigned char PLAYER_VISIBLE, PLAYER_DRAW_DEPTH[];
+extern unsigned short PLAYER_ANIM_FRAME, PLAYER_Y[];
 extern short *PLAYER_H;
 extern unsigned short *PLAYER_D[];
 
@@ -27,7 +27,7 @@ void playerPowerAuraFacingStep(O *o)
     case 1:
         FUN_8001fec0(o);
         o->timer--;
-        o->b1 = DAT_800a6039;
+        o->b1 = PLAYER_VISIBLE;
         if (o->timer >= 0x3d) {
             c = o->b6b;
             if (c < 0x7f)
@@ -51,11 +51,11 @@ void playerPowerAuraFacingStep(O *o)
             short *h = o->h;
             int w;
             w = PLAYER_H[1];
-            if (DAT_800a6066 & 1) h[1] = w + 2;
+            if (PLAYER_ANIM_FRAME & 1) h[1] = w + 2;
             else h[1] = w - 2;
         }
         o->y = PLAYER_Y[0] - 8;
         o->d[1] = PLAYER_D[0][1];
-        o->bf = DAT_800a6047[0] + 1;
+        o->bf = PLAYER_DRAW_DEPTH[0] + 1;
     }
 }

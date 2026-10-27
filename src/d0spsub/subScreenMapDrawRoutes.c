@@ -24,8 +24,8 @@ extern unsigned short D_8009D2C4[];
 extern Ent *D_800FDA70[];
 extern short D_800FD418[][4], D_800FD41A[][4], D_800FD41C[][4];
 extern Quad D_800FE0B4[];
-extern POLY_F4 *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern POLY_F4 *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern void subScreenMapDrawNode(int pos, int pri);
 
 void subScreenMapDrawRoutes(void)
@@ -72,7 +72,7 @@ void subScreenMapDrawRoutes(void)
                 gte_ldv0(&v);
                 gte_rtps();
                 gte_stsxy(&sxy0);
-                p = D_1F800164;
+                p = NEXT_PRIM;
                 p->len = 5;
                 p->code = 0x28;
                 p->r0 = 0xFF;
@@ -86,8 +86,8 @@ void subScreenMapDrawRoutes(void)
                 p->y2 = q->y[2] + (sxy1 >> 16);
                 p->x3 = q->x[3] + sxy0;
                 p->y3 = q->y[3] + (sxy0 >> 16);
-                addPrim(D_1F8001E0 + otz, p);
-                D_1F800164++;
+                addPrim(CURRENT_OT + otz, p);
+                NEXT_PRIM++;
                 break;
             }
             }

@@ -2,7 +2,7 @@
 // MATCHING 80026544 1228
 #include "TOBJ.H"
 #include "raw7.h"
-extern Fix16 *DAT_8009c96c;
+extern Fix16 *GAME_PLAYER_AP;
 extern unsigned char DAT_8009c970, DAT_8009c971;
 extern unsigned char DAT_8009c990[];
 extern unsigned char DAT_800b1468[];
@@ -10,7 +10,7 @@ extern unsigned char DAT_8009d0a4[];
 extern short DAT_8007977c[];
 extern short DAT_80079784[];
 extern unsigned char DAT_800a6104[];
-extern unsigned char DAT_8009c970_[], DAT_8009c971_[];
+extern unsigned char GAME_PLAYER_HEALTH[], GAME_PLAYER_MAX_HEALTH[];
 
 void updateHud(TObj *o)
 {
@@ -25,8 +25,8 @@ void updateHud(TObj *o)
     case 1:
     if (o->w08 != 0)
         o->w08--;
-    if (DAT_8009c96c != o->d)
-        o->d = DAT_8009c96c;
+    if (GAME_PLAYER_AP != o->d)
+        o->d = GAME_PLAYER_AP;
     if (DAT_8009c970 != o->w50) {
         o->w50 = DAT_8009c970;
         o->w4e = 6;
@@ -38,7 +38,7 @@ void updateHud(TObj *o)
     case 0:
         if (--o->w4c <= 0) {
             o->w4c = 0;
-            if (DAT_8009c971_[0] - 1 < DAT_8009c970_[0])
+            if (GAME_PLAYER_MAX_HEALTH[0] - 1 < GAME_PLAYER_HEALTH[0])
                 o->w48 = 0;
         }
         break;

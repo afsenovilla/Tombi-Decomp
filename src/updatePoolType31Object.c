@@ -4,7 +4,7 @@
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
 extern void *D_80012204;
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern int D_1F800198;
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
@@ -40,7 +40,7 @@ void updatePoolType31Object(TObj *o)
     case 0:
         switch (o->subtype) {
         case 0:
-            if ((D_1F8001F8 + D_1F800198) & 1) {
+            if ((TICK_COUNT + D_1F800198) & 1) {
                 if (--o->timer == -1) {
                     o->b04 = 3;
                     break;

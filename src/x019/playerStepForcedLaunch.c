@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { char p[8]; unsigned char b8; unsigned char b9; char q[0x20 - 0xa]; unsigned short w20; char r[0x2c - 0x22]; short w2c; short w2e; } G;
 extern G *PLAYER_EXT;
-extern TObj *D_800A611C[];
+extern TObj *PLAYER_HELD_OBJECT[];
 extern char D_80010748[];
 extern unsigned char SLOPE_TILT_TABLE[];
 void playerReleaseBittenAndClearFlags(TObj *o);
@@ -32,7 +32,7 @@ void playerStepForcedLaunch(TObj *o)
         o->wb6 = 0;
         PLAYER_EXT->b8 = 0;
         PLAYER_EXT->w20 = 0;
-        switch (D_800A611C[0]->type) {
+        switch (PLAYER_HELD_OBJECT[0]->type) {
         case 0x15:
         case 0x18:
         case 0x4e:

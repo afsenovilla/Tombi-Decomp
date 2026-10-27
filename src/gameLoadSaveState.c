@@ -5,11 +5,11 @@ typedef struct { char pad[0x48]; unsigned short w48, w4a, w4c, w4e; } S1d4;
 extern S1d4 *TASK_C;
 extern unsigned char LOAD_COMPLETE_SYM;
 extern unsigned char DAT_1f8001d0;
-extern short DAT_1f8001f4;
-extern int DAT_1f800164;
+extern short FRAME_BUFFER_INDEX;
+extern int NEXT_PRIM;
 extern short DAT_800a45ea;
 extern unsigned char DAT_8009c974;
-extern unsigned char DAT_8009c967;
+extern unsigned char GAME_KEEP_BGM;
 extern void FUN_8004dd8c(void);
 extern void FUN_8005f060(int);
 extern void stopPadVibration(void);
@@ -45,7 +45,7 @@ void gameLoadSaveState(void)
         TASK_C->w4a++;
         break;
     case 2:
-        DAT_1f800164 = (int)(LOAD_BUFFER_ALT + DAT_1f8001f4 * 0xc000) & 0xffffff;
+        NEXT_PRIM = (int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
         r = FUN_800e9888();
         if (r == 1)
             TASK_C->w4a++;
@@ -56,7 +56,7 @@ void gameLoadSaveState(void)
         break;
     case 3:
         DAT_8009c974 = 0;
-        DAT_8009c967 = 0;
+        GAME_KEEP_BGM = 0;
         FUN_8001f110(0);
         TASK_C->w48 = 1;
         TASK_C->w4a = 1;

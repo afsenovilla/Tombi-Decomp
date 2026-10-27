@@ -6,7 +6,7 @@ extern void func_800202B4(TObj *o);
 extern void func_800187E4(TObj *o);
 extern signed char GAME_PLAYER_MODE[];
 extern int SPR_DATA[];
-extern unsigned char D_800A6039;
+extern unsigned char PLAYER_VISIBLE;
 typedef struct { unsigned short w; short idx; char *p; int pad; } Ent94AC;
 extern Ent94AC D_800FEBD4[];
 
@@ -34,7 +34,7 @@ void topdownShadowHandler(TObj *o)
             }
             o->b.raw = p->b.raw;
             if (p->category == 0) {
-                o->visible = D_800A6039;
+                o->visible = PLAYER_VISIBLE;
             } else {
                 o->visible = p->visible;
             }

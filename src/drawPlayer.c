@@ -1,7 +1,7 @@
 // FUNC 80050544 172 MAIN0
 // MATCHING 80050544 172
-extern unsigned char DAT_800a6039[];
-extern unsigned char DAT_800a603a[];
+extern unsigned char PLAYER_VISIBLE[];
+extern unsigned char PLAYER_TYPE[];
 extern unsigned char PLAYER[];
 extern void FUN_800ea124(void *);
 extern void drawPlayerSpriteDefault(void *);
@@ -10,8 +10,8 @@ extern void FUN_800ead48(void *);
 void drawPlayer(void)
 {
     unsigned char *p = PLAYER;
-    if (DAT_800a6039[0] != 0) {
-        switch (DAT_800a603a[0]) {
+    if (PLAYER_VISIBLE[0] != 0) {
+        switch (PLAYER_TYPE[0]) {
         case 0:
             drawPlayerSpriteDefault(p);
             break;

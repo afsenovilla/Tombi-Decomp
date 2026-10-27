@@ -43,17 +43,17 @@ void rewardGoldenBowl(GameObject* arg0)
     u_char health;
 
     if (D_8009BCA0 == 0) {
-        health = GAME.playerHealthDisplayed;
+        health = GAME.playerMaxHealth;
         if (health < 16) {
             health += GAME.bonusHealth;
-            GAME.playerHealthDisplayed = health;
+            GAME.playerMaxHealth = health;
             if ((u_long) ((byte)health & 0xFF) >= 17) {
-                GAME.playerHealthDisplayed = 16;
+                GAME.playerMaxHealth = 16;
             }
             playSFX(10);
-            PLAYER_HEALTH = (u_short*)(*(char*)&GAME.playerHealthDisplayed);
-            D_800A5432 = *(char*)&GAME.playerHealthDisplayed;
-            *(char*)&GAME.playerHealth = *(char*)&GAME.playerHealthDisplayed;
+            PLAYER_HEALTH = (u_short*)(*(char*)&GAME.playerMaxHealth);
+            D_800A5432 = *(char*)&GAME.playerMaxHealth;
+            *(char*)&GAME.playerHealth = *(char*)&GAME.playerMaxHealth;
         }
         GAME.goldenBowlState = 1;
         D_800B078C = &D_800121C8;

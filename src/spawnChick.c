@@ -4,7 +4,7 @@
 extern TObj *allocObjectLayer2(void);
 extern unsigned short FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *o);
-extern unsigned char DAT_800a6047[];
+extern unsigned char PLAYER_DRAW_DEPTH[];
 extern int D_1f8002d4;
 extern void *CHICK_ANIM;
 
@@ -27,7 +27,7 @@ void spawnChick(int x, int y, int z)
         o->b0d = 0;
         o->b69 = 0;
         o->w7a = 1;
-        o->b0f = DAT_800a6047[0] - 1;
+        o->b0f = PLAYER_DRAW_DEPTH[0] - 1;
         o->d3c = D_1f8002d4;
         o->anim = CHICK_ANIM;
         o->b0a = 2;

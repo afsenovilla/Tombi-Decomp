@@ -45,7 +45,7 @@ void updateHealingSpot(TObj *o)
             if (++o->timer >= 0x3c) {
                 o->timer = 0;
                 p = ((short*)&PLAYER.obj.w98);
-                if (*p < GAME.playerHealthDisplayed) {
+                if (*p < GAME.playerMaxHealth) {
                     playSFX(9);
                     GAME.playerHealth = PLAYER.obj.w9a = ++*p;
                 }

@@ -1,7 +1,7 @@
 // FUNC 80121e50 400 X000
 // MATCHING 80121e50 400
 #include "TOBJ.H"
-extern unsigned DAT_8009c96c;
+extern unsigned GAME_PLAYER_AP;
 extern unsigned char DAT_8009cdb4;
 extern unsigned char DAT_800a60da;
 extern unsigned char DAT_8009c93e;
@@ -18,7 +18,7 @@ void a00ApBox100kCheckAp(TObj *o)
             o->step = o->step + 1;
         break;
     case 1:
-        if (DAT_8009c96c < 100000) {
+        if (GAME_PLAYER_AP < 100000) {
             if (DAT_8009cdb4 == 0) {
                 setEventStarted(0x10, 0, 0);
                 goto L;

@@ -1,7 +1,7 @@
 // FUNC 800ebc64 220 X003
 // MATCHING 800ebc64 220
 #include "TOBJ.H"
-extern unsigned short DAT_800a6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern int SPR_DATA[];
 extern char WEAPON_TRAIL_DEFS[];
 static char DAT_80114c24[52] = {
@@ -19,7 +19,7 @@ void initWeaponTrailSprite(TObj *o)
     o->d3c = SPR_DATA[*(short *)(WEAPON_TRAIL_DEFS + o->subtype * 12)];
     o->anim = *(void **)(*(int *)(DAT_80114c24 + o->subtype * 12) + o->b0c * 4);
     FUN_8001fe6c(o);
-    u = DAT_800a6066;
+    u = PLAYER_ANIM_FRAME;
     o->b0a = 2;
     o->b0d = 0x80;
     *(signed char *)&o->b0f = -7;

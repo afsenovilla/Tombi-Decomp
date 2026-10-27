@@ -10,11 +10,11 @@ typedef struct {
     unsigned short x2, y2;
 } PolyG3;
 
-extern PolyG3 *DAT_1f800164;
+extern PolyG3 *NEXT_PRIM;
 
 extern long LZ_FILE_CTRL;
-extern char *DAT_1f80008c;
-extern unsigned long *DAT_1f8001e0;
+extern char *MODEL_VERTEX_PTR;
+extern unsigned long *CURRENT_OT;
 
 #define gte_ldv3c(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 );lwc2 $2, 8( %0 );lwc2 $3, 12( %0 );lwc2 $4, 16( %0 );lwc2 $5, 20( %0 )" : : "r"(r0))
 #define gte_rtpt() __asm__ volatile ("nop;nop;.word 0x4a280030")
@@ -43,7 +43,7 @@ char *modelDrawG3(long *f, char *vtx, unsigned long *ot)
     if (n != 0) {
         len = 0x6000000;
         do {
-            p = DAT_1f800164;
+            p = NEXT_PRIM;
             gte_ldv3c(vtx + 0xc);
             gte_rtpt();
             gte_stflg(&LZ_FILE_CTRL);
@@ -57,14 +57,14 @@ char *modelDrawG3(long *f, char *vtx, unsigned long *ot)
                         gte_avsz3();
                         gte_stotz(&otz);
                         otz = (otz << 2) + (long)ot;
-                        if ((unsigned long)(otz - (long)DAT_1f8001e0) < 0xca0) {
+                        if ((unsigned long)(otz - (long)CURRENT_OT) < 0xca0) {
                             t = *(unsigned long *)otz;
                             *(unsigned long *)otz = (unsigned long)p;
                             p->tag = t | len;
                             p->c0 = f[0];
                             p->c1 = f[1];
                             *(unsigned long *)((char *)p + 0x14) = f[2];
-                            DAT_1f800164 = DAT_1f800164 + 1;
+                            NEXT_PRIM = NEXT_PRIM + 1;
                         }
                     }
                 }
@@ -73,6 +73,6 @@ char *modelDrawG3(long *f, char *vtx, unsigned long *ot)
             vtx += 0x40;
         } while (--n != 0);
     }
-    DAT_1f80008c = vtx;
+    MODEL_VERTEX_PTR = vtx;
     return (char *)f;
 }

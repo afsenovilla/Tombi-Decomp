@@ -1,7 +1,7 @@
 // FUNC 80021340 312 MAIN0
 // MATCHING 80021340 312
-extern unsigned int *DAT_8009d540;
-extern unsigned int *DAT_1f8001e0;
+extern unsigned int *DEBUG_NEXT_PRIM;
+extern unsigned int *CURRENT_OT;
 extern char DAT_800787f0[];
 extern char DAT_800787f2[];
 extern char DAT_800787f4[];
@@ -16,7 +16,7 @@ void drawUiSprite(short x, short y, short n)
     unsigned int *p;
     unsigned int *q;
     int o;
-    p = DAT_8009d540;
+    p = DEBUG_NEXT_PRIM;
     ((unsigned char *)p)[3] = 4;
     ((unsigned char *)p)[7] = 0x65;
     ((unsigned char *)p)[4] = 0x80;
@@ -31,8 +31,8 @@ void drawUiSprite(short x, short y, short n)
     ((short *)p)[8] = *(short *)(DAT_800787f4 + o);
     ((short *)p)[9] = *(short *)(DAT_800787f6 + o);
     ((unsigned short *)p)[7] = GetClut(*(short *)(DAT_800787f8 + o), *(short *)(DAT_800787fa + o));
-    q = DAT_1f8001e0;
+    q = CURRENT_OT;
     ((Tag *)p)->addr = ((Tag *)q)->addr;
     ((Tag *)q)->addr = (unsigned int)p;
-    DAT_8009d540 = DAT_8009d540 + 5;
+    DEBUG_NEXT_PRIM = DEBUG_NEXT_PRIM + 5;
 }

@@ -21,7 +21,7 @@ void areaTransitionHandler(void)
     case 2:
         CURRENT_TASK->step.value++;
         asm("");
-        D_8009BCCF = 1;
+        GAME_KEEP_BGM = 1;
         D_8009BCE9 = 1;
         break;
     case 3:
@@ -39,7 +39,7 @@ void areaTransitionHandler(void)
             task->step.value = 4;
 
             if (areaChanged) {
-                D_8009BCCF = 2;
+                GAME_KEEP_BGM = 2;
                 func_80020FAC();
                 (*(Task**)(&SCRATCHPAD + 0x1D4))->step.value = 5;
                 asm("");
@@ -73,13 +73,13 @@ void areaTransitionHandler(void)
         *(short*)0x1F8001DE = 0;
         D_8009C610 = GAME_A;
         D_8009C612 = GAME_SELECTED_SECTION;
-        D_8009C614 = D_8009BCEA;
+        D_8009C614 = GAME_SELECTED_SPAWN_POINT;
         *(short*)0x1F8001DC = val;
 
         func_80021C24(GAME_A + (u16)AREA_VARIANT);
 
         if (func_8001DE24(areaChanged) != -1) {
-            D_8009BCCF = 2;
+            GAME_KEEP_BGM = 2;
         }
 
         func_80021CC8(GAME_B + (u16)AREA_VARIANT, GAME_SELECTED_SECTION, variant | areaChanged);

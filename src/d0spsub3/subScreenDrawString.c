@@ -27,8 +27,8 @@ extern short D_80100B70, D_80100B72, D_80100B74;
 extern unsigned short D_80100B76;
 extern unsigned short *D_80100B80;
 extern Glyph *D_80100B84;
-extern SPRT *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern DRAWENV *GetDrawEnv(DRAWENV *env);
 extern void AddDrawMode(int tpage, int pri);
 
@@ -92,10 +92,10 @@ void subScreenDrawString(int pri, int multiline)
             s->w = g.w;
             s->h = g.h;
             s->clut = D_80100B76;
-            p = D_1F800164;
+            p = NEXT_PRIM;
             *p = *s;
-            addPrim(D_1F8001E0 + pri, p);
-            D_1F800164++;
+            addPrim(CURRENT_OT + pri, p);
+            NEXT_PRIM++;
             break;
         }
     }

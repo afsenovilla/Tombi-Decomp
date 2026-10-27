@@ -16,8 +16,8 @@
 #define ANIMS(o) (*(void ***)((char *)(o) + 0xa8))
 
 extern TObj PLAYER;
-extern unsigned short *D_800A605C;
-extern unsigned short D_800A6066;
+extern unsigned short *PLAYER_ANIM;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern short PLAYER_X[];
 extern short PLAYER_Y[];
 extern unsigned char PLAYER_STATE;
@@ -73,7 +73,7 @@ void swimTeacherIntroTalk(TObj *o)
         }
         break;
     case 2:
-        if (*D_800A605C == 0x3d) startPadVibration(0, 0, 0xff, 4);
+        if (*PLAYER_ANIM == 0x3d) startPadVibration(0, 0, 0xff, 4);
         if (--o->timer == -1) {
             hv = D_1F800168A[0];
             o->velH = (hv - o->h->raw) >> 15;
@@ -184,7 +184,7 @@ void swimTeacherIntroTalk(TObj *o)
                 o->state++;
                 SETANIM(9);
                 o->timer = 10;
-                D_800A6066 = 0;
+                PLAYER_ANIM_FRAME = 0;
                 PLAYER_STATE = 5;
                 PLAYER_SUBSTATE = 0;
                 PLAYER_STEP = 0;

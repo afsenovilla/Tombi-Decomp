@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct T12 { void **p; int a, b; } T12;
 extern T12 DAT_80114c24[];
-extern unsigned char DAT_800a6039;
+extern unsigned char PLAYER_VISIBLE;
 extern unsigned char DAT_800a6047a[];
 #define DAT_800a6047 DAT_800a6047a[0]
 extern void FUN_8001fe6c(TObj *);
@@ -30,7 +30,7 @@ void weaponTrailOrbitStep(TObj *o)
     case 0:
         o->anim = *DAT_80114c24[o->subtype].p;
         FUN_8001fe6c(o);
-        o->visible = DAT_800a6039;
+        o->visible = PLAYER_VISIBLE;
         o->b0f = DAT_800a6047 - 1;
         {
             short t = 8;
@@ -107,7 +107,7 @@ void weaponTrailOrbitStep(TObj *o)
         case 7:
         case 8:
             c = (o->w76 + 0x10) & 0xff;
-            o->visible = DAT_800a6039;
+            o->visible = PLAYER_VISIBLE;
             o->b0f = DAT_800a6047 - 1;
             o->w76 = c;
             if (o->b0c & 1) {

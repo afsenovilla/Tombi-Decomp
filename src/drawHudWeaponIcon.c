@@ -3,8 +3,8 @@
 #include "anim.h"
 typedef struct SPRT { unsigned int tag; unsigned char r0, g0, b0, code; short x0, y0; unsigned char u0, v0; unsigned short clut; short w, h; } SPRT;
 extern unsigned char GAME_EQUIPPED_WEAPON;
-extern SPRT *DAT_1f800164;
-extern int DAT_1f8001e0;
+extern SPRT *NEXT_PRIM;
+extern int CURRENT_OT;
 extern unsigned short *PTR_DAT_800121b8, *PTR_DAT_800121cc, *PTR_DAT_800121d0, *PTR_DAT_800121d4, *PTR_DAT_800121b0, *PTR_DAT_800121b4;
 extern void drawSpriteFrameParts(int, short, short, unsigned short);
 extern void FUN_80059464(int, int);
@@ -41,7 +41,7 @@ void drawHudWeaponIcon(int o, short x, short y)
         FUN_80059464(0x14, 1);
         break;
     case 9:
-        p = DAT_1f800164;
+        p = NEXT_PRIM;
         f = (SprFrag *)(*(volatile int *)(o + 0x18) + *(short *)(*(volatile int *)(o + 0x18) + (*PTR_DAT_800121b4 << 2) + 2));
         SetSprt(p);
         p->code |= 1;
@@ -50,13 +50,13 @@ void drawHudWeaponIcon(int o, short x, short y)
         p->y0 = y + f->dy;
         p->u0 = f->u;
         p->v0 = f->v;
-        ot = (void *)(DAT_1f8001e0 + 4);
+        ot = (void *)(CURRENT_OT + 4);
         p->w = f->w;
         c = f->h;
         p->clut = 0x7e14;
         p->h = c;
         AddPrim(ot, p);
-        DAT_1f800164++;
+        NEXT_PRIM++;
         FUN_80059464(0x14, 1);
         break;
     }

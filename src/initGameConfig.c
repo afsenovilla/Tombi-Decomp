@@ -76,7 +76,7 @@ void initGameConfig(void)
     GCD.bceaf = 1;
     SCRIPT_FLAGS = 1;
     D_8009C972 = 9;
-    GAME.playerHealthDisplayed = 4;
+    GAME.playerMaxHealth = 4;
     GAME.playerHealth = 4;
     GCD.scfd0 = 1498;
     GCD.scfd2 = 1593;

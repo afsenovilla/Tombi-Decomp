@@ -14,7 +14,7 @@ void scriptOpSetFadeEffect(void)
 
     GAME_FADE_SCREEN_CONTROL = 0x10;
     D_8009BCA4 = a;
-    D_8009BCDE = b;
+    GAME_FADE_SCREEN_AMOUNT = b;
     asm("");
     p->pc++;
 }

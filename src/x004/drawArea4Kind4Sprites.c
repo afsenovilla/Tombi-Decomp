@@ -20,8 +20,8 @@ typedef struct { u_long tag; u_long code[2]; } DR_MODE;
 #define setSemiTrans(p, abe) ((abe) ? setcode(p, getcode(p) | 0x02) : setcode(p, getcode(p) & ~0x02))
 #define setSprt(p) setlen(p, 4), setcode(p, 0x64)
 typedef struct { char pad[0xc90]; u_long a[1]; } OTB;
-extern char *D_1F800164;
-extern OTB *D_1F8001E0;
+extern char *NEXT_PRIM;
+extern OTB *CURRENT_OT;
 extern void SetDrawMode(DR_MODE *, int, int, int, void *);
 
 void func_8011E778(TObj *o)
@@ -42,7 +42,7 @@ void func_8011E778(TObj *o)
         b = (u8 *)q + 0xf;
         tp = *(u16 *)(q + 6);
         do {
-            p = (SPRT *)D_1F800164;
+            p = (SPRT *)NEXT_PRIM;
             p->w = b[-5];
             p->h = b[-4];
             p->x0 = o->a.p.whole + (signed char)b[-1];
@@ -55,18 +55,18 @@ void func_8011E778(TObj *o)
                 p->code |= 1;
                 *(int *)&p->u0 = *(int *)q;
                 if (o->b0d & 1) p->clut = o->w08;
-                addPrim(&D_1F8001E0->a[(signed char)o->b0f], p);
-                D_1F800164 += 0x14;
+                addPrim(&CURRENT_OT->a[(signed char)o->b0f], p);
+                NEXT_PRIM += 0x14;
             }
             b += 0x10;
             n--;
             q += 0x10;
         } while (n != 0);
     }
-    dm = (DR_MODE *)D_1F800164;
+    dm = (DR_MODE *)NEXT_PRIM;
     SetDrawMode(dm, 0, 0, o->w1e + (short)tp, 0);
-    addPrim(&D_1F8001E0->a[(signed char)o->b0f], dm);
-    D_1F800164 += 0xc;
+    addPrim(&CURRENT_OT->a[(signed char)o->b0f], dm);
+    NEXT_PRIM += 0xc;
 }
 #else
 #include "TOBJ.H"
@@ -85,8 +85,8 @@ typedef struct { u_long tag; u_long code[2]; } DR_MODE;
 #define setSemiTrans(p, abe) ((abe) ? setcode(p, getcode(p) | 0x02) : setcode(p, getcode(p) & ~0x02))
 #define setSprt(p) setlen(p, 4), setcode(p, 0x64)
 typedef struct { char pad[0xc90]; u_long a[1]; } OTB;
-extern char *D_1F800164;
-extern OTB *D_1F8001E0;
+extern char *NEXT_PRIM;
+extern OTB *CURRENT_OT;
 extern void SetDrawMode(DR_MODE *, int, int, int, void *);
 
 void drawArea4Kind4Sprites(TObj *o)
@@ -107,7 +107,7 @@ void drawArea4Kind4Sprites(TObj *o)
         b = (u8 *)q + 0xf;
         tp = *(u16 *)(q + 6);
         do {
-            p = (SPRT *)D_1F800164;
+            p = (SPRT *)NEXT_PRIM;
             p->w = b[-5];
             p->h = b[-4];
             p->x0 = o->a.p.whole + (signed char)b[-1];
@@ -120,17 +120,17 @@ void drawArea4Kind4Sprites(TObj *o)
                 p->code |= 1;
                 *(int *)&p->u0 = *(int *)q;
                 if (o->b0d & 1) p->clut = o->w08;
-                addPrim(&D_1F8001E0->a[(signed char)o->b0f], p);
-                D_1F800164 += 0x14;
+                addPrim(&CURRENT_OT->a[(signed char)o->b0f], p);
+                NEXT_PRIM += 0x14;
             }
             b += 0x10;
             n--;
             q += 0x10;
         } while (n != 0);
     }
-    dm = (DR_MODE *)D_1F800164;
+    dm = (DR_MODE *)NEXT_PRIM;
     SetDrawMode(dm, 0, 0, o->w1e + (short)tp, 0);
-    addPrim(&D_1F8001E0->a[(signed char)o->b0f], dm);
-    D_1F800164 += 0xc;
+    addPrim(&CURRENT_OT->a[(signed char)o->b0f], dm);
+    NEXT_PRIM += 0xc;
 }
 #endif

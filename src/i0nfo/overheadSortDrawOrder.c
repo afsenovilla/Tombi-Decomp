@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern signed char GAME_PLAYER_MODE;
 extern TObj PLAYER;
-extern signed char D_800A6047;
+extern signed char PLAYER_DRAW_DEPTH;
 
 #define LST(i) (*(TObj **)((int)list + ((i) << 2)))
 void overheadSortDrawOrder(void)
@@ -60,5 +60,5 @@ void overheadSortDrawOrder(void)
         o->b0f = i - 10;
         if (((TObj *)o->d94) != 0) ((TObj *)o->d94)->b0f = i - 9;
     }
-    if (GAME_PLAYER_MODE == 3) D_800A6047 = -0xC;
+    if (GAME_PLAYER_MODE == 3) PLAYER_DRAW_DEPTH = -0xC;
 }

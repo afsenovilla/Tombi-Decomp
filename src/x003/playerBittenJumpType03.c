@@ -10,7 +10,7 @@
 extern TObj *BITTEN_OBJECT;
 extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern unsigned char D_8009D2B1;
+extern unsigned char GAME_BITTEN_JUMP_KIND;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void playerAirAccelerateX(TObj *o);
 extern void setFacingFromPad(TObj *o);
@@ -42,7 +42,7 @@ extern void playerTryAttack(TObj *, int);
     o->wb2 = 0; \
     o->velY = 0; \
     if (BITTEN_OBJECT->type == 0x1c) { \
-        switch (D_8009D2B1) { \
+        switch (GAME_BITTEN_JUMP_KIND) { \
         case 1: \
             (*(unsigned char*)&o->wac) = 0; \
             o->step = 0x2a; \
@@ -67,7 +67,7 @@ extern void playerTryAttack(TObj *, int);
     (*(unsigned char*)((char*)&o->wac + 1)) = 0; \
     o->wb2 = 0; \
     PLAYER_EXT->timer = 0xe; \
-    if (BITTEN_OBJECT->type == 0x1c && (t = D_8009D2B1) < 3 && t != 0) \
+    if (BITTEN_OBJECT->type == 0x1c && (t = GAME_BITTEN_JUMP_KIND) < 3 && t != 0) \
         (*(unsigned char*)((char*)&o->waa + 1)) |= 0x80; \
     if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4)) \
         o->ba7 = 1; \
@@ -168,7 +168,7 @@ void playerBittenJumpType03(TObj *o)
             (*(unsigned char*)((char*)&o->waa + 1)) = 0;
             switch (BITTEN_OBJECT->subtype) {
             case 0 ... 2:
-                D_8009D2B1 = BITTEN_OBJECT->subtype;
+                GAME_BITTEN_JUMP_KIND = BITTEN_OBJECT->subtype;
                 break;
             case 4:
                 GCD.bcf06 = 1;

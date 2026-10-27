@@ -2,7 +2,7 @@
 // MATCHING 800ea67c 1936
 #include "TOBJ.H"
 extern unsigned short GAME;
-extern unsigned short D_1f8001f8;
+extern unsigned short TICK_COUNT;
 extern int D_1f800198;
 extern int DAT_1f8002d4[];
 extern char D_8013B700[];
@@ -38,7 +38,7 @@ void updateGroundDebris(TObj *o)
                     c->active = 1;
                     c->type = 0xc;
                     c->subtype = 1;
-                    c->wac = (D_1f8001f8 + D_1f800198) & 1;
+                    c->wac = (TICK_COUNT + D_1f800198) & 1;
                     c->b0c = FUN_8001f9e0() & 7;
                     *c->h = *o->h;
                     c->h->p.whole += o->timer * 2 - 8;
@@ -54,7 +54,7 @@ void updateGroundDebris(TObj *o)
             break;
         case 1:
             o->b04++;
-            if ((D_1f8001f8 + D_1f800198) & 1) o->timer = 0x32; else o->timer = 0x1e;
+            if ((TICK_COUNT + D_1f800198) & 1) o->timer = 0x32; else o->timer = 0x1e;
             o->b0d = 0;
             *(signed char *)&o->b0f = -12;
             if (GAME == 0) {
@@ -116,7 +116,7 @@ void updateGroundDebris(TObj *o)
                 c->active = 1;
                 c->type = 0xc;
                 c->subtype = 3;
-                c->wac = (D_1f8001f8 + D_1f800198) & 1;
+                c->wac = (TICK_COUNT + D_1f800198) & 1;
                 c->b0c = o->timer + 7;
                 *c->h = *o->h;
                 c->y = o->y;

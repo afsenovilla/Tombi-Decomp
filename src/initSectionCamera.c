@@ -11,7 +11,7 @@ typedef struct { char p[0x4c]; unsigned short w4c; } O;
 #include "camera.h"
 extern unsigned short GAME[];
 extern unsigned short GAME_SELECTED_SECTION;
-extern unsigned short D_8009C982;
+extern unsigned short GAME_SELECTED_SPAWN_POINT;
 extern S4 *D_80078B7C[];
 extern char D_800792BC[];
 extern char D_800792D4[];
@@ -77,7 +77,7 @@ void initSectionCamera(void)
         ((int*)&SPAD.ie0)[2] = 0xFDE00000;
     q = D_80079474[GAME[0]][GAME_SELECTED_SECTION];
     w = TASK_C->w4c;
-    q += D_8009C982 * 4;
+    q += GAME_SELECTED_SPAWN_POINT * 4;
     switch (w) {
     case 1: case 2:
         off = -0x38;

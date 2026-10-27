@@ -3,7 +3,7 @@
 typedef struct Th { char pad[0x48]; short a, b; unsigned short c; short d; char pad2[0x5c - 0x50]; short e; } Th;
 extern Th *TASK_C;
 extern char LOAD_COMPLETE_SYM, DAT_1f8001d0;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern void stopPadVibration(void);
 extern void MusicStopOrFadeIn(int);
 extern void SoundStopAll(void);
@@ -44,7 +44,7 @@ void gameOverScreenState(void)
         w->e = s;
         if (s == -1) {
             w->c = w->c + 1;
-        } else if (s < 200 && (DAT_1f8001fc & 0x6008) != 0) {
+        } else if (s < 200 && (JOYPAD_STATE & 0x6008) != 0) {
             w->e = 0;
         }
         break;

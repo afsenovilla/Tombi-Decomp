@@ -1,6 +1,6 @@
 // FUNC 80018f68 284 MAIN0
 // MATCHING 80018f68 284
-extern int DAT_8009d69c;
+extern int AREA_SOUND_BANK_LOADED;
 extern unsigned short GAME;
 extern unsigned short GAME_SELECTED_SECTION;
 extern int DAT_1f8002b8;
@@ -15,7 +15,7 @@ void initAreaScripts(void)
     int a;
     char *p;
 
-    if (DAT_8009d69c == 0)
+    if (AREA_SOUND_BANK_LOADED == 0)
         return;
     p = AREA_SCRIPT_CTX;
     scriptReset(p);

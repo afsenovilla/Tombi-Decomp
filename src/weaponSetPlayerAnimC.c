@@ -7,7 +7,7 @@ static char DAT_80010f98[36] = {
     -0x57, 0, 0xb, 0, 0, 0, 4, 0, -0x56, 0, 0xb, 0, 0, 0, 4, 0,
     -0x55, 0, 0xb,
 };
-extern char *DAT_800a605c;
+extern char *PLAYER_ANIM;
 
 void weaponSetPlayerAnimC(unsigned char *o)
 {
@@ -17,25 +17,25 @@ void weaponSetPlayerAnimC(unsigned char *o)
     case 0:
         switch (*(unsigned short *)(o + 0x2e)) {
         case 0: case 1: case 2: case 3:
-            DAT_800a605c = DAT_80010ef8;
+            PLAYER_ANIM = DAT_80010ef8;
             break;
         case 4: case 5:
-            DAT_800a605c = DAT_80010f00;
+            PLAYER_ANIM = DAT_80010f00;
             break;
         case 6: case 7:
-            DAT_800a605c = DAT_80010f08;
+            PLAYER_ANIM = DAT_80010f08;
         }
         break;
     case 1:
         switch (*(unsigned short *)(o + 0x2e)) {
         case 0: case 1: case 2: case 3:
-            DAT_800a605c = DAT_80010f88;
+            PLAYER_ANIM = DAT_80010f88;
             break;
         case 4: case 5:
-            DAT_800a605c = DAT_80010f90;
+            PLAYER_ANIM = DAT_80010f90;
             break;
         case 6: case 7:
-            DAT_800a605c = DAT_80010f98;
+            PLAYER_ANIM = DAT_80010f98;
         }
         break;
     }

@@ -27,7 +27,7 @@ static void *D_801229A8[9] = {
 extern void *D_8011F2DC, *D_8011F2F0, *D_8011F2CC[], *D_8011F2E0[];
 extern unsigned char PLAYER[];
 extern short D_800A60A4[], D_800A60A6[], D_800A60A8[], D_800A60AA[];
-extern int D_800A6048[], D_800A604C[], D_800A6050[];
+extern int PLAYER_POS[], PLAYER_Y_FIX[], D_800A6050[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -85,8 +85,8 @@ void updateL3Type3BObject(TObj *o)
         D_800A60A6[0] = 0x30;
         D_800A60A8[0] = 0x18;
         D_800A60AA[0] = 0x30;
-        D_800A6048[0] = o->a.raw;
-        D_800A604C[0] = o->y.raw;
+        PLAYER_POS[0] = o->a.raw;
+        PLAYER_Y_FIX[0] = o->y.raw;
         D_800A6050[0] = o->b.raw;
         D_1F800168[0] = o->a.raw;
         D_1F80016C[0] = o->y.raw;

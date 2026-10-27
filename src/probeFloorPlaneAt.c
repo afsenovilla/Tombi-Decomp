@@ -7,7 +7,7 @@
 #include "spad.h"
 typedef struct O { char p[0x44]; short *q; } O;
 extern unsigned short *getCollisionPlaneAt(int, int);
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 int func_80041EBC(O *o, short a, short b)
 {
     short n;
@@ -18,31 +18,31 @@ int func_80041EBC(O *o, short a, short b)
     int x;
     char pad[8];
     if (a < 0) return 0;
-    DAT_1f800278 = getCollisionPlaneAt(a, o->q[1]);
-    n = *(short *)DAT_1f800278++;
+    COLLISION_SEG_PTR = getCollisionPlaneAt(a, o->q[1]);
+    n = *(short *)COLLISION_SEG_PTR++;
     if (n == 0) return 0;
     cnt = 0;
     do {
-        flags = *DAT_1f800278++;
+        flags = *COLLISION_SEG_PTR++;
         n--;
         if (flags & 0x10) {
-            DAT_1f800278 += 3;
+            COLLISION_SEG_PTR += 3;
             continue;
         }
         if (!(flags & 1)) {
-            DAT_1f800278 += 3;
+            COLLISION_SEG_PTR += 3;
             cnt++;
             continue;
         }
-        h = *DAT_1f800278++;
+        h = *COLLISION_SEG_PTR++;
         if (cnt != 0 && (short)h + 0x10 < (short)b) return 0;
-        k = *(short *)DAT_1f800278++;
+        k = *(short *)COLLISION_SEG_PTR++;
         cnt++;
         if (k == 0) {
             x = h;
-            DAT_1f800278++;
+            COLLISION_SEG_PTR++;
         } else {
-            w = *DAT_1f800278++;
+            w = *COLLISION_SEG_PTR++;
             lo = w & 0xf;
             nn = (w >> 4) & 0xf;
             if (nn == 0) continue;
@@ -65,7 +65,7 @@ int func_80041EBC(O *o, short a, short b)
 #include "spad.h"
 typedef struct O { char p[0x44]; short *q; } O;
 extern unsigned short *getCollisionPlaneAt(int, int);
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 int probeFloorPlaneAt(O *o, short a, short b)
 {
     short n;
@@ -75,31 +75,31 @@ int probeFloorPlaneAt(O *o, short a, short b)
     short k, lo, nn, m;
     int x;
     char pad[8];
-    DAT_1f800278 = getCollisionPlaneAt(a, o->q[1]);
-    n = *(short *)DAT_1f800278++;
+    COLLISION_SEG_PTR = getCollisionPlaneAt(a, o->q[1]);
+    n = *(short *)COLLISION_SEG_PTR++;
     if (n == 0) return 0;
     cnt = 0;
     do {
-        flags = *DAT_1f800278++;
+        flags = *COLLISION_SEG_PTR++;
         n--;
         if (flags & 0x10) {
-            DAT_1f800278 += 3;
+            COLLISION_SEG_PTR += 3;
             continue;
         }
         if (!(flags & 1)) {
-            DAT_1f800278 += 3;
+            COLLISION_SEG_PTR += 3;
             cnt++;
             continue;
         }
-        h = *DAT_1f800278++;
+        h = *COLLISION_SEG_PTR++;
         if (cnt != 0 && (short)h + 0x10 < (short)b) return 0;
-        k = *(short *)DAT_1f800278++;
+        k = *(short *)COLLISION_SEG_PTR++;
         cnt++;
         if (k == 0) {
             x = h;
-            DAT_1f800278++;
+            COLLISION_SEG_PTR++;
         } else {
-            w = *DAT_1f800278++;
+            w = *COLLISION_SEG_PTR++;
             lo = w & 0xf;
             nn = (w >> 4) & 0xf;
             if (nn == 0) continue;

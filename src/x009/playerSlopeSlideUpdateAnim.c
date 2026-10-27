@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct P { char pad0[8]; unsigned char b08; char pad1[0x2c - 9]; unsigned short w2c, w2e; } P;
 extern P *PLAYER_EXT;
-extern unsigned short DAT_1f8001f8;
+extern unsigned short TICK_COUNT;
 extern unsigned short GAME;
 extern unsigned short GAME_SELECTED_SECTION;
 extern void FUN_800efc04();
@@ -39,7 +39,7 @@ void playerSlopeSlideUpdateAnim(TObj *o)
         else
             d = b >> 2;
         o->d8c = d;
-        if ((DAT_1f8001f8 & 0x1f) == 0) {
+        if ((TICK_COUNT & 0x1f) == 0) {
             switch (GAME) {
             case 0:
                 a = 0x37;

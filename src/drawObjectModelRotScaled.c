@@ -16,7 +16,7 @@ extern SVECTOR DAT_1f800060;
 extern SVECTOR DAT_1f800068;
 extern MATRIX DAT_1f8000c0;
 extern unsigned short DAT_1f8001c8;
-extern char *DAT_1f8001e0;
+extern char *CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern void FUN_8006481c(long, MATRIX *);
 extern void FUN_800644dc(long, MATRIX *);
@@ -60,6 +60,6 @@ void drawObjectModelRotScaled(TObj *o)
     FUN_80063cac(&DAT_1f800000, &DAT_1f800040);
     FUN_80063ddc(&DAT_1f800000);
     FUN_80063e6c(&DAT_1f800000);
-    drawModel(o->da0, DAT_1f8001e0 + ((signed char)o->b0f * 4 + 0x10), o, o->ba4);
+    drawModel(o->da0, CURRENT_OT + ((signed char)o->b0f * 4 + 0x10), o, o->ba4);
 }
 #endif

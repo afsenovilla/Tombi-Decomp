@@ -2,7 +2,7 @@
 // MATCHING 8011116c 464
 typedef struct { short a[3]; char pad[0x6c - 6]; unsigned short b[4]; } T74;
 extern T74 PLAYER_DECEL_PARAMS[];
-extern unsigned char DAT_8009d2b3, DAT_8009c990, DAT_8009cf06, DAT_8009d006;
+extern unsigned char GAME_EQUIPPED_PANTS, DAT_8009c990, DAT_8009cf06, DAT_8009d006;
 typedef struct { char pad[0xb2]; unsigned short wb2; char pad2[0xc1 - 0xb4]; unsigned char bc1; } P;
 
 static __inline__ void body(P *o)
@@ -10,7 +10,7 @@ static __inline__ void body(P *o)
     short i;
     unsigned short w;
     short s;
-    i = DAT_8009d2b3 + o->bc1 * 4;
+    i = GAME_EQUIPPED_PANTS + o->bc1 * 4;
     if (DAT_8009c990 & 3)
         i = (o->bc1 << 2) | 3;
     if (DAT_8009cf06)

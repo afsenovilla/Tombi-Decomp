@@ -3,10 +3,10 @@
 #include "TOBJ.H"
 typedef struct T12 { void **p; int a, b; } T12;
 extern T12 DAT_80114c24[];
-extern unsigned char DAT_800a6039[];
-extern unsigned char DAT_800a6047;
+extern unsigned char PLAYER_VISIBLE[];
+extern unsigned char PLAYER_DRAW_DEPTH;
 extern volatile unsigned short DAT_800a6066[];
-extern unsigned short DAT_800a6066s;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern Fix16 *PLAYER_H;
 extern Fix16 *PLAYER_D;
 extern unsigned short PLAYER_Y[];
@@ -24,12 +24,12 @@ void weaponTrailFollowStep(TObj *o)
     case 0:
         o->anim = *DAT_80114c24[o->subtype].p;
         FUN_8001fe6c(o);
-        o->visible = DAT_800a6039[0];
-        o->b0f = DAT_800a6047 - 1;
+        o->visible = PLAYER_VISIBLE[0];
+        o->b0f = PLAYER_DRAW_DEPTH - 1;
         o->state++;
     case 1:
         q = (TObj *)o->d90;
-        switch (DAT_800a6066s) {
+        switch (PLAYER_ANIM_FRAME) {
         case 0:
         case 1:
         case 2:

@@ -18,7 +18,7 @@ extern void queueSfxKeyOff(int);
 extern int FUN_8001f9e0(void);
 extern void spawnA00Tornado(int, int, int, int);
 extern struct V3 D_1F800168;
-extern struct V3 D_800A6048;
+extern struct V3 PLAYER_POS;
 extern Fix16 *PLAYER_D;
 extern unsigned char D_8009C939A[];
 #define D_8009C939 D_8009C939A[0]
@@ -98,7 +98,7 @@ void a00TornadoStep(TObjE *e)
                 o->step++;
             }
         common:
-            D_800A6048 = *(struct V3 *)&o->a;
+            PLAYER_POS = *(struct V3 *)&o->a;
             if ((SPAD.s1f8 & 7) == 0)
                 startPadVibration(0, 0, 0xd0, 4);
             break;

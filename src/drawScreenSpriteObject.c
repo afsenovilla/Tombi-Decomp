@@ -13,8 +13,8 @@ typedef struct {
     unsigned short clut;
     unsigned short w, h;
 } SP;
-extern char *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern void SetDrawMode(void *, int, int, int, void *);
 extern void AddPrim(void *, void *);
 extern void SetSprt(void *);
@@ -34,17 +34,17 @@ void FUN_80058168(TObj *o)
         pri = *(unsigned short *)&o->_pad0e;
     else
         pri = (signed char)o->b0f;
-    s = (SP *)DAT_1f800164;
+    s = (SP *)NEXT_PRIM;
     SetDrawMode(s, 0, 0, 0, 0);
-    AddPrim(DAT_1f8001e0 + (pri * 4 + 0xc90), s);
-    DAT_1f800164 += 0xc;
+    AddPrim(CURRENT_OT + (pri * 4 + 0xc90), s);
+    NEXT_PRIM += 0xc;
     e = (short *)(o->d3c + *(unsigned short *)o->anim * 4);
     n = e[0];
     q = (char *)(*(volatile int *)&o->d3c + e[1]);
     p = (unsigned char *)q + 0xf;
     tp = *(unsigned short *)(q + 6);
     do {
-        s = (SP *)DAT_1f800164;
+        s = (SP *)NEXT_PRIM;
         s->w = p[-5];
         s->h = p[-4];
         s->x0 = o->a.p.whole + (signed char)p[-1];
@@ -57,17 +57,17 @@ void FUN_80058168(TObj *o)
             *(int *)&s->u0 = *(int *)q;
             if (o->b0d & 1)
                 s->clut = o->w08;
-            AddPrim(DAT_1f8001e0 + (pri * 4 + 0xc90), s);
-            DAT_1f800164 += 0x14;
+            AddPrim(CURRENT_OT + (pri * 4 + 0xc90), s);
+            NEXT_PRIM += 0x14;
         }
         p += 0x10;
         n--;
         q += 0x10;
     } while (n != 0);
-    s = (SP *)DAT_1f800164;
+    s = (SP *)NEXT_PRIM;
     SetDrawMode(s, 0, 0, o->w1e + (short)tp, 0);
-    AddPrim(DAT_1f8001e0 + (pri * 4 + 0xc90), s);
-    DAT_1f800164 += 0xc;
+    AddPrim(CURRENT_OT + (pri * 4 + 0xc90), s);
+    NEXT_PRIM += 0xc;
 }
 #else
 #include "TOBJ.H"
@@ -79,8 +79,8 @@ typedef struct {
     unsigned short clut;
     unsigned short w, h;
 } SP;
-extern char *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern void SetDrawMode(void *, int, int, int, void *);
 extern void AddPrim(void *, void *);
 extern void SetSprt(void *);
@@ -100,17 +100,17 @@ void drawScreenSpriteObject(TObj *o)
         pri = *(unsigned short *)&o->_pad0e;
     else
         pri = (signed char)o->b0f;
-    s = (SP *)DAT_1f800164;
+    s = (SP *)NEXT_PRIM;
     SetDrawMode(s, 0, 0, 0, 0);
-    AddPrim(DAT_1f8001e0 + (pri * 4 + 0xc90), s);
-    DAT_1f800164 += 0xc;
+    AddPrim(CURRENT_OT + (pri * 4 + 0xc90), s);
+    NEXT_PRIM += 0xc;
     e = (short *)(o->d3c + *(unsigned short *)o->anim * 4);
     n = e[0];
     q = (char *)(*(volatile int *)&o->d3c + e[1]);
     p = (unsigned char *)q + 0xf;
     tp = *(unsigned short *)(q + 6);
     do {
-        s = (SP *)DAT_1f800164;
+        s = (SP *)NEXT_PRIM;
         s->w = p[-5];
         s->h = p[-4];
         s->x0 = o->a.p.whole + (signed char)p[-1];
@@ -123,16 +123,16 @@ void drawScreenSpriteObject(TObj *o)
             *(int *)&s->u0 = *(int *)q;
             if (o->b0d & 1)
                 s->clut = o->w08;
-            AddPrim(DAT_1f8001e0 + (pri * 4 + 0xc90), s);
-            DAT_1f800164 += 0x14;
+            AddPrim(CURRENT_OT + (pri * 4 + 0xc90), s);
+            NEXT_PRIM += 0x14;
         }
         p += 0x10;
         n--;
         q += 0x10;
     } while (n != 0);
-    s = (SP *)DAT_1f800164;
+    s = (SP *)NEXT_PRIM;
     SetDrawMode(s, 0, 0, o->w1e + (short)tp, 0);
-    AddPrim(DAT_1f8001e0 + (pri * 4 + 0xc90), s);
-    DAT_1f800164 += 0xc;
+    AddPrim(CURRENT_OT + (pri * 4 + 0xc90), s);
+    NEXT_PRIM += 0xc;
 }
 #endif

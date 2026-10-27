@@ -18,8 +18,8 @@ typedef struct {
     char pad28[0x14];
     unsigned char d3c[8];
 } O58;
-extern SPRT *DAT_1f800164;
-extern unsigned long *DAT_1f8001e0;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern void drawSpriteFrame(O58 *, int, int, int);
 extern void SetSprt(SPRT *);
 extern void SetSemiTrans(SPRT *, int);
@@ -56,7 +56,7 @@ void drawHudAP(O58 *o, int x0, int y0)
     q = o->b18 + s[1];
     r = (unsigned short *)(q + 2);
     do {
-        p = DAT_1f800164;
+        p = NEXT_PRIM;
         SetSprt(p);
         p->code |= 1;
         SetSemiTrans(p, 1);
@@ -68,9 +68,9 @@ void drawHudAP(O58 *o, int x0, int y0)
         p->w = ((unsigned char *)r)[8];
         p->h = ((unsigned char *)r)[9];
         p->clut = *r;
-        AddPrim(DAT_1f8001e0 + 1, p);
+        AddPrim(CURRENT_OT + 1, p);
         q += 16;
-        DAT_1f800164++;
+        NEXT_PRIM++;
         r += 8;
     } while (cnt != 0);
     FUN_80059464(0x15, 1);

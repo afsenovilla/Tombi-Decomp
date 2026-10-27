@@ -23,7 +23,7 @@ extern TObj *GRABBED_OBJECT;
 extern unsigned short PAD_PRESSED;
 extern int GAME;
 extern unsigned char GAME_PLAYER_MODE;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern unsigned short DAT_1f8003c6;
 extern char DAT_80011148[];
 extern void FUN_8001fe94(TObj *, int);
@@ -95,9 +95,9 @@ void playerStepClimbObject(TObj *o)
         if (GAME == 0x30000)
             break;
         if (o->animFrame & 1)
-            t = DAT_1f8001fc & 0x80;
+            t = JOYPAD_STATE & 0x80;
         else
-            t = DAT_1f8001fc & 0x20;
+            t = JOYPAD_STATE & 0x20;
         if (t) {
             FUN_8001e560(0x1e, 8);
             PLAYER_EXT->w2e = 0xff;
@@ -124,7 +124,7 @@ void playerStepClimbObject(TObj *o)
     default:
         return;
     }
-    if (DAT_1f8001fc & DAT_1f8003c6) {
+    if (JOYPAD_STATE & DAT_1f8003c6) {
         GAME_PLAYER_MODE = 0;
         playerClimbJumpOff(o);
     }

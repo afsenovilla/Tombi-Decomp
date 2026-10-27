@@ -22,7 +22,7 @@ typedef struct {
 extern long LZ_FILE_CTRL;
 extern int D_1F800074i;
 extern int D_1F800078;
-extern PFT4_8011C00C *D_1F800164;
+extern PFT4_8011C00C *NEXT_PRIM;
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
 int projectActorPosition(void *o, long *sxy, long *z);
@@ -65,7 +65,7 @@ void drawRotatedSpriteKind10(TObj *o)
     D_1F800078 = e[0];
     ang = o->d8c;
     do {
-        f = D_1F800164;
+        f = NEXT_PRIM;
         c = (signed char)o->ba5;
         sc = (signed char)c;
         if (sc != 0) {
@@ -134,7 +134,7 @@ void drawRotatedSpriteKind10(TObj *o)
             } else {
                 if (insertPrimWithBias(f, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->b0f, 0x9000000) != 0) goto next;
             }
-            D_1F800164 = (PFT4_8011C00C *)((char *)D_1F800164 + 0x28);
+            NEXT_PRIM = (PFT4_8011C00C *)((char *)NEXT_PRIM + 0x28);
         }
     next:
         q += 16;

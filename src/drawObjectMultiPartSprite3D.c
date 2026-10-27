@@ -23,8 +23,8 @@ typedef struct {
 typedef struct { short n, p2, x0, y0, x1, y1; char pad[8]; } ENT;
 typedef struct { ENT e[7]; } ROW;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
-extern PolyFT4 *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern PolyFT4 *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern unsigned long LZ_FILE_CTRL;
 extern char D_1F8000C0b[];
@@ -59,7 +59,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, int d, unsigned lo
     d = ((signed char)d + c) << 2;
     if (d < 0) d = 0;
     d += (int)b;
-    if ((unsigned)(d - (int)DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(d - (int)CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned long v = *(unsigned long *)d;
         *(unsigned long *)d = (unsigned long)a;
@@ -101,7 +101,7 @@ void drawObjectMultiPartSprite3D(TObj *o)
         if ((&tbl[WC6(o)].e[i])->n > 0) {
             d = o->d3c;
             d += *D_800a4468[((unsigned short *)&o->wb4)[i]] * 4;
-            p = DAT_1f800164;
+            p = NEXT_PRIM;
             q = (unsigned char *)(o->d3c + ((short *)d)[1]);
             p->code = 0x2d;
             SetSemiTrans(p, 0);
@@ -128,13 +128,13 @@ void drawObjectMultiPartSprite3D(TObj *o)
             p->y3 = p->y2;
             p->tpage = o->w1e;
             p->clut = *(unsigned short *)(q + 2);
-            if (!otadd((unsigned long *)p, DAT_1f8001e0, 0, o->b0f, 0x9000000))
-                DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+            if (!otadd((unsigned long *)p, CURRENT_OT, 0, o->b0f, 0x9000000))
+                NEXT_PRIM = (PolyFT4 *)((char *)NEXT_PRIM + 0x28);
         }
     }
     d = o->d3c;
     d += *D_800b0bb0 * 4;
-    p = DAT_1f800164;
+    p = NEXT_PRIM;
     q = (unsigned char *)(o->d3c + ((short *)d)[1]);
     p->code = 0x2d;
     SetSemiTrans(p, 0);
@@ -161,6 +161,6 @@ void drawObjectMultiPartSprite3D(TObj *o)
     p->y3 = p->y2;
     p->tpage = o->w1e;
     p->clut = *(unsigned short *)(q + 2);
-    if (!otadd((unsigned long *)p, DAT_1f8001e0, 0, o->b0f, 0x9000000))
-        DAT_1f800164 = (PolyFT4 *)((char *)DAT_1f800164 + 0x28);
+    if (!otadd((unsigned long *)p, CURRENT_OT, 0, o->b0f, 0x9000000))
+        NEXT_PRIM = (PolyFT4 *)((char *)NEXT_PRIM + 0x28);
 }

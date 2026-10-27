@@ -5,8 +5,8 @@ typedef struct { unsigned short w; short idx; void **ptrs; int pad; } E;
 extern E FLASH_EFFECT_DEFS_BY_AREA[];
 extern unsigned short GAME[];
 extern int SPR_DATA[];
-extern unsigned char DAT_800a6047;
-extern char *DAT_800a611c;
+extern unsigned char PLAYER_DRAW_DEPTH;
+extern char *PLAYER_HELD_OBJECT;
 extern char *FUN_80018448(void);
 extern void FUN_8001fe6c(char *);
 
@@ -30,7 +30,7 @@ void spawnFlashEffect(short a, int x, int y, int z)
         n[0xa] = 2;
         n[0x68] = 0;
         n[0x1c] |= 0x80;
-        n[0xf] = DAT_800a6047 - 1;
-        if (a == 0) DAT_800a611c = n;
+        n[0xf] = PLAYER_DRAW_DEPTH - 1;
+        if (a == 0) PLAYER_HELD_OBJECT = n;
     }
 }

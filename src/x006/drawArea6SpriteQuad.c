@@ -27,7 +27,7 @@ typedef struct {
 } EL;
 
 extern int LZ_FILE_CTRL;
-extern FT4 *D_1F800164;
+extern FT4 *NEXT_PRIM;
 extern int projectActorPosition(void *, int *, int *);
 extern int isQuadOnScreen(void *);
 extern void SetSemiTrans(void *, int);
@@ -60,7 +60,7 @@ void drawArea6SpriteQuad(TObj *o)
     n = f[0];
     e = (EL *)(*(volatile int *)&o->d3c + f[1]);
     do {
-        p = D_1F800164;
+        p = NEXT_PRIM;
         if (o->animFrame & 1) {
             p->x0 = e->dx + LZ_FILE_CTRL;
             p->y0 = e->dy + (LZ_FILE_CTRL >> 16);
@@ -91,7 +91,7 @@ void drawArea6SpriteQuad(TObj *o)
             if (o->b0d & 1) p->clut = o->w08;
             if (o->b0b) r = ot((unsigned *)p, SPAD.i1e0 + 0x10, 0, (signed char)o->b0f, 0x9000000);
             else { int c = SPAD.i74; r = ot((unsigned *)p, SPAD.i1e0 + 0x10, c, (signed char)o->b0f, 0x9000000); }
-            if (!r) D_1F800164 = (FT4 *)((char *)D_1F800164 + 0x28);
+            if (!r) NEXT_PRIM = (FT4 *)((char *)NEXT_PRIM + 0x28);
         }
         e++;
     } while (--n);

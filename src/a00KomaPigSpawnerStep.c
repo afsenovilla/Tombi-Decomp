@@ -4,7 +4,7 @@
 extern void FUN_8001fec0(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern TObj *allocObjectLayer2(void);
-extern unsigned short DAT_1f8001f8;
+extern unsigned short TICK_COUNT;
 extern unsigned short DAT_1f800172;
 extern unsigned short DAT_1f80016a;
 extern char D_8013BA48[];
@@ -22,7 +22,7 @@ void a00KomaPigSpawnerStep(TObj *o)
 
     switch (o->step) {
     case 0:
-        if (o->w9a == 0 && (DAT_1f8001f8 & 3) == 0) {
+        if (o->w9a == 0 && (TICK_COUNT & 3) == 0) {
             if ((unsigned short)(o->d->p.whole - DAT_1f800172 + 0x2d) >= 0x5b) {
                 ok = 0;
             } else {

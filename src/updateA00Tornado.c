@@ -11,7 +11,7 @@ extern int DAT_1f8002d4;
 extern unsigned char DAT_8009c930;
 extern unsigned char D_800A57B8, D_800A57BC, D_800A57BD, D_800A57BE, D_8009A7EF, D_8009A7E0;
 extern short func_8001E3D8(int);
-extern unsigned char DAT_800a6047;
+extern unsigned char PLAYER_DRAW_DEPTH;
 extern void FUN_8001fe6c(TObj *);
 extern void a00TornadoStep(TObj *);
 extern void a00TornadoOrbitStep(TObj *);
@@ -88,12 +88,12 @@ void FUN_801195f4(TObj *o)
         if (o->subtype != 4) {
             a00TornadoStep(o);
             if (o->subtype == 1)
-                o->b0f = DAT_800a6047 + 10;
+                o->b0f = PLAYER_DRAW_DEPTH + 10;
             else
-                o->b0f = DAT_800a6047 - 2;
+                o->b0f = PLAYER_DRAW_DEPTH - 2;
         } else {
             a00TornadoOrbitStep(o);
-            o->b0f = DAT_800a6047;
+            o->b0f = PLAYER_DRAW_DEPTH;
         }
         FUN_8001fec0(o);
         if (((TObj *)o->d90)->step != 5)
@@ -120,7 +120,7 @@ void FUN_801195f4(TObj *o)
 #define I(o, n) (*(int *)((char *)(o) + (n)))
 extern int DAT_1f8002d4;
 extern unsigned char DAT_8009c930;
-extern unsigned char DAT_800a6047;
+extern unsigned char PLAYER_DRAW_DEPTH;
 extern void FUN_8001fe6c(TObj *);
 extern void a00TornadoStep(TObj *);
 extern void a00TornadoOrbitStep(TObj *);
@@ -190,12 +190,12 @@ void updateA00Tornado(TObj *o)
         if (o->subtype != 4) {
             a00TornadoStep(o);
             if (o->subtype == 1)
-                o->b0f = DAT_800a6047 + 10;
+                o->b0f = PLAYER_DRAW_DEPTH + 10;
             else
-                o->b0f = DAT_800a6047 - 2;
+                o->b0f = PLAYER_DRAW_DEPTH - 2;
         } else {
             a00TornadoOrbitStep(o);
-            o->b0f = DAT_800a6047;
+            o->b0f = PLAYER_DRAW_DEPTH;
         }
         FUN_8001fec0(o);
         if (((TObj *)o->d90)->step != 5)

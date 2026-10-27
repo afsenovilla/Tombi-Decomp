@@ -22,12 +22,12 @@ typedef struct { short x, y; } DVECTOR;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern char *D_1F800164;
-extern unsigned long *D_1F8001E0;
+extern char *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 
 void subScreenMapDrawNode(int pos, int pri)
 {
-    POLY_FT4 *p = (POLY_FT4 *)D_1F800164;
+    POLY_FT4 *p = (POLY_FT4 *)NEXT_PRIM;
     p->len = 9;
     p->code = 0x2C;
     p->x0 = pos - 4;
@@ -51,6 +51,6 @@ void subScreenMapDrawNode(int pos, int pri)
     p->v3 = p->v2;
     p->tpage = 0x85;
     p->clut = 0x7FC8;
-    addPrim(D_1F8001E0 - 5 + pri, p);
-    D_1F800164 += sizeof(POLY_FT4);
+    addPrim(CURRENT_OT - 5 + pri, p);
+    NEXT_PRIM += sizeof(POLY_FT4);
 }

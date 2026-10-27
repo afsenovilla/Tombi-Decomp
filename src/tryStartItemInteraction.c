@@ -1,15 +1,15 @@
 // FUNC 800270a0 132 MAIN0
 // MATCHING 800270a0 132
 typedef struct O { char pad[3]; char a; char pad2; unsigned char c; } O;
-extern char DAT_a;
+extern char GAME_DISABLE_SELECT_MENU;
 extern unsigned char DAT_b;
 extern signed char GAME_PLAYER_MODE;
 extern unsigned char GAME_FADE_SCREEN_CONTROL;
-extern short DAT_e;
+extern short GAME_SELECTED_SPAWN_POINT;
 
 int tryStartItemInteraction(O *o, char x, unsigned char y)
 {
-    char *p = &DAT_a;
+    char *p = &GAME_DISABLE_SELECT_MENU;
     *p = 0;
     if (DAT_b != 0)
         return 0;
@@ -20,7 +20,7 @@ int tryStartItemInteraction(O *o, char x, unsigned char y)
     GAME_PLAYER_MODE = 0;
     o->c++;
     o->a = x;
-    DAT_e = y;
+    GAME_SELECTED_SPAWN_POINT = y;
     *p = 1;
     return 1;
 }

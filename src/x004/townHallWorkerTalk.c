@@ -9,7 +9,7 @@ typedef struct { void **anims; int a; int b; } AT;
 extern AT D_801311D0[];
 extern unsigned char PLAYER[];
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
-extern short D_800A6066;
+extern short PLAYER_ANIM_FRAME;
 extern Fix16 *PLAYER_H[];
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -56,7 +56,7 @@ void townHallWorkerTalk(TObj *o)
             PLAYER_SUBSTATE = 0x64;
             PLAYER_STEP = 0;
             playerSetAnim(PLAYER, 2, 0);
-            D_800A6066 = 1;
+            PLAYER_ANIM_FRAME = 1;
             o->state++;
             break;
         }

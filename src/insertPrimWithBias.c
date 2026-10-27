@@ -1,6 +1,6 @@
 // FUNC 8004fd6c 92 MAIN0
 // MATCHING 8004fd6c 92
-extern int DAT_1f8001e0;
+extern int CURRENT_OT;
 int insertPrimWithBias(unsigned *a, int b, int c, int d, unsigned e)
 {
     unsigned t;
@@ -8,7 +8,7 @@ int insertPrimWithBias(unsigned *a, int b, int c, int d, unsigned e)
     if (c < 0)
         c = 0;
     c += b;
-    if ((unsigned)(c - DAT_1f8001e0) >= 0xca0)
+    if ((unsigned)(c - CURRENT_OT) >= 0xca0)
         return 1;
     t = *(unsigned *)c;
     *(unsigned *)c = (unsigned)a;

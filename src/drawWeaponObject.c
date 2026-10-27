@@ -38,12 +38,12 @@ typedef struct { short x, y; } P;
 typedef struct { char pad[7]; signed char b7; char pad8[0x18 - 8]; unsigned short w18, w1a; } PL;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
 
-extern FT4 *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern FT4 *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
 extern long D_1F800074;
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern char D_1F8000C0b[];
 extern SH *WEAPON_STATE;
 extern PL *PLAYER_EXT;
@@ -83,7 +83,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, short d, unsigned 
     k += d * 4;
     if (k < 0) k = 0;
     k += (int)b;
-    if ((unsigned)(k - (int)DAT_1f8001e0) >= 0xca0) return 1;
+    if ((unsigned)(k - (int)CURRENT_OT) >= 0xca0) return 1;
     {
         unsigned long v = *(unsigned long *)k;
         *(unsigned long *)k = (unsigned long)a;
@@ -96,7 +96,7 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, short d, unsigned 
 #define SIN(i) NEG_SIN_TABLE[i]
 
 #define SHADOW(q) { \
-    p = DAT_1f800164; \
+    p = NEXT_PRIM; \
     weaponBuildChainBoxes(o, WEAPON_STATE->x, WEAPON_STATE->y); \
     p->code = 0x2c; \
     SetSemiTrans(p, 1); \
@@ -121,8 +121,8 @@ static __inline__ int otadd(unsigned long *a, char *b, int c, short d, unsigned 
     p->r0 = 0x40; \
     p->g0 = 0x40; \
     p->b0 = 0x40; \
-    if (otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, D_1F800074, (signed char)o->b0f - 5, 0x9000000) == 0) \
-        DAT_1f800164 = DAT_1f800164 + 1; \
+    if (otadd((unsigned long *)p, CURRENT_OT + 0x10, D_1F800074, (signed char)o->b0f - 5, 0x9000000) == 0) \
+        NEXT_PRIM = NEXT_PRIM + 1; \
 }
 
 static __inline__ void quadA(FT4 *p, short x, short y, short a0, short a1)
@@ -233,7 +233,7 @@ void drawWeaponObject(TObj *o)
             SHADOW(WEAPON_STATE->q1);
         if (WEAPON_STATE->w50 > 0)
             SHADOW(WEAPON_STATE->q2);
-        p = DAT_1f800164;
+        p = NEXT_PRIM;
         p->code = 0x2d;
         SetSemiTrans(p, 0);
         p->tpage = WEAPON_STATE->w4;
@@ -294,17 +294,17 @@ void drawWeaponObject(TObj *o)
             p->x3 = s.x + MulCos(b2, 8);
             p->y3 = s.y + MulNegSinScaled(b2, 8);
         }
-        if (otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, D_1F800074, (signed char)o->b0f - 3, 0x9000000) == 0)
-            DAT_1f800164 = DAT_1f800164 + 1;
+        if (otadd((unsigned long *)p, CURRENT_OT + 0x10, D_1F800074, (signed char)o->b0f - 3, 0x9000000) == 0)
+            NEXT_PRIM = NEXT_PRIM + 1;
     }
-    p = DAT_1f800164;
+    p = NEXT_PRIM;
     p->code = 0x2d;
     SetSemiTrans(p, o->b0d >> 7);
     {
     unsigned short cl;
     p->tpage = WEAPON_STATE->w4;
     cl = WEAPON_STATE->w6;
-    k = (D_1F8001F8 & 3) * D_800801E8;
+    k = (TICK_COUNT & 3) * D_800801E8;
     p->u0 = k - 0x80;
     p->v0 = 0;
     p->u1 = p->u0 + (unsigned char)D_800801E8 - 1;
@@ -328,6 +328,6 @@ void drawWeaponObject(TObj *o)
         quadA(p, x, y, a0, a1);
     else
         quadB(p, x, y, a0, a1);
-    if (otadd((unsigned long *)p, DAT_1f8001e0 + 0x10, D_1F800074, (signed char)o->b0f - 4, 0x9000000) == 0)
-        DAT_1f800164 = DAT_1f800164 + 1;
+    if (otadd((unsigned long *)p, CURRENT_OT + 0x10, D_1F800074, (signed char)o->b0f - 4, 0x9000000) == 0)
+        NEXT_PRIM = NEXT_PRIM + 1;
 }

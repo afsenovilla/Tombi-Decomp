@@ -1,7 +1,7 @@
 // FUNC 80110cac 576 X000
 // MATCHING 80110cac 576
-// probably: player speed friction: index from DAT_8009d2b3 / flags, steps wb2 toward 0 by the D_80115510 table rows and clamps to f6; unreferenced
-extern unsigned char DAT_8009d2b3, DAT_8009cf06, DAT_8009d006;
+// probably: player speed friction: index from GAME_EQUIPPED_PANTS / flags, steps wb2 toward 0 by the D_80115510 table rows and clamps to f6; unreferenced
+extern unsigned char GAME_EQUIPPED_PANTS, DAT_8009cf06, DAT_8009d006;
 extern unsigned char DAT_8009c990;
 extern unsigned char PLAYER_DECEL_PARAMS_BYTES[];
 typedef struct { short f0, f2, f4, f6; char r[0x74 - 8]; } T74;
@@ -57,7 +57,7 @@ void func_80110CAC(unsigned char *p)
     int u;
     int c;
     c = p[0xc1];
-    u = DAT_8009d2b3 + c * 4;
+    u = GAME_EQUIPPED_PANTS + c * 4;
     if ((DAT_8009c990 & 3) != 0)
         u = (unsigned char)c << 2 | 3;
     if (DAT_8009cf06 != 0)

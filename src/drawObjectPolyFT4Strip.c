@@ -27,7 +27,7 @@ typedef struct {
 } PF4;
 
 extern long LZ_FILE_CTRL;
-extern char *D_1F800164;
+extern char *NEXT_PRIM;
 extern int D_1F800074i;
 int projectActorPosition(void *o, long *sxy, long *z);
 int isQuadOnScreen(void *p);
@@ -37,7 +37,7 @@ int insertPrimWithBias(void *a, int b, int c, int d, unsigned e);
 
 void drawObjectPolyFT4Strip(Ext *o)
 {
-    PFT4 *p = (PFT4 *)D_1F800164;
+    PFT4 *p = (PFT4 *)NEXT_PRIM;
     int xy;
     short x, y;
     PF4 *f;
@@ -63,9 +63,9 @@ void drawObjectPolyFT4Strip(Ext *o)
         insertPrim(p, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
     else
         insertPrimWithBias(p, SPAD.i1e0 + 0x10, D_1F800074i, (signed char)o->t.b0f, 0x9000000);
-    q = D_1F800164;
+    q = NEXT_PRIM;
     f = (PF4 *)(q + 0x28);
-    D_1F800164 = (char *)f;
+    NEXT_PRIM = (char *)f;
     if (o->t._pad0e[0] != 1)
         return;
     f->code = 0x29;
@@ -84,7 +84,7 @@ void drawObjectPolyFT4Strip(Ext *o)
         insertPrim(f, SPAD.i1e0 + 0x10, LZ_FILE_CTRL, (signed char)o->t.b0f, 0x5000000);
     else
         insertPrimWithBias(f, SPAD.i1e0 + 0x10, LZ_FILE_CTRL, (signed char)o->t.b0f, 0x5000000);
-    D_1F800164 += 0x18;
+    NEXT_PRIM += 0x18;
 }
 
 void func_80124A20(TObj *o, TObj *p)

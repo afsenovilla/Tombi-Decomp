@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned short D_800A6066;
-extern short D_800A60B6;
+extern unsigned short PLAYER_ANIM_FRAME;
+extern short PLAYER_VEL_Y;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern void *D_8013FC88[], *D_8013FC8C[], *D_8013FCCC[];
 extern unsigned char D_8013C7C8[];
@@ -54,14 +54,14 @@ void purpleCrawlerCarryPlayer(TObj *o)
         TObj *p = &PLAYER;
         *(signed char *)&o->b0f = -9;
         o->b6a = 0;
-        D_800A6066 = 2;
-        D_800A60B6 = 0;
+        PLAYER_ANIM_FRAME = 2;
+        PLAYER_VEL_Y = 0;
         p->active = 2;
         PLAYER_STATE = 2;
         PLAYER_SUBSTATE = 0;
         PLAYER_STEP = 1;
         decreaseObjectTimer(p, 1);
-        D_800A60B6 = 0x200;
+        PLAYER_VEL_Y = 0x200;
         o->wac = 7;
         o->state++;
         o->anim = D_8013FC8C[0];

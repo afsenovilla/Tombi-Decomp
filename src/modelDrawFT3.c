@@ -23,10 +23,10 @@ typedef struct {
     unsigned short uv2;
 } Face;
 
-extern PolyFT3 *DAT_1f800164;
+extern PolyFT3 *NEXT_PRIM;
 extern long LZ_FILE_CTRL;
-extern char *DAT_1f80008c;
-extern unsigned long *DAT_1f8001e0;
+extern char *MODEL_VERTEX_PTR;
+extern unsigned long *CURRENT_OT;
 
 #define gte_ldv3c(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 );lwc2 $2, 8( %0 );lwc2 $3, 12( %0 );lwc2 $4, 16( %0 );lwc2 $5, 20( %0 )" : : "r"(r0))
 #define gte_rtpt() __asm__ volatile ("nop;nop;.word 0x4a280030")
@@ -58,14 +58,14 @@ char *modelDrawFT3(long *f, char *vtx, unsigned long *ot)
                 gte_nclip();
                 gte_stopz(&LZ_FILE_CTRL);
                 if (LZ_FILE_CTRL > 0) {
-                    p = DAT_1f800164;
+                    p = NEXT_PRIM;
                     gte_stsxy3_gt3(p);
                     if ((p->y0 < 0x100 || p->y1 < 0x100 || p->y2 < 0x100) &&
                         (p->x0 < 0x140 || p->x1 < 0x140 || p->x2 < 0x140)) {
                         gte_avsz3();
                         gte_stotz(&otz);
                         otz = (otz << 2) + (long)ot;
-                        if ((unsigned long)(otz - (long)DAT_1f8001e0) < 0xca0) {
+                        if ((unsigned long)(otz - (long)CURRENT_OT) < 0xca0) {
                             t = *(unsigned long *)otz;
                             *(unsigned long *)otz = (unsigned long)p;
                             p->tag = t | len;
@@ -75,7 +75,7 @@ char *modelDrawFT3(long *f, char *vtx, unsigned long *ot)
                             p->uv0 = ((Face *)f)->uv0;
                             p->uv1 = ((Face *)f)->uv1;
                             *(unsigned short *)((char *)p + 0x1c) = ((Face *)f)->uv2;
-                            DAT_1f800164 = DAT_1f800164 + 1;
+                            NEXT_PRIM = NEXT_PRIM + 1;
                         }
                     }
                 }
@@ -84,6 +84,6 @@ char *modelDrawFT3(long *f, char *vtx, unsigned long *ot)
             vtx += 0x20;
         } while (--n != 0);
     }
-    DAT_1f80008c = vtx;
+    MODEL_VERTEX_PTR = vtx;
     return (char *)f;
 }

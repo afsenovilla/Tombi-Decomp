@@ -410,13 +410,13 @@ void rewardHeart(GameObject* arg0)
         }
         if (!(arg0->unkC & 0x7F)) {
             *(short*)&PLAYER_HEALTH+=1;
-            if ((short)GAME.playerHealthDisplayed < *(short*)&PLAYER_HEALTH ) {
-                *(short*)&PLAYER_HEALTH = GAME.playerHealthDisplayed;
+            if ((short)GAME.playerMaxHealth < *(short*)&PLAYER_HEALTH ) {
+                *(short*)&PLAYER_HEALTH = GAME.playerMaxHealth;
             }
         } else {
             *(short*)&PLAYER_HEALTH+=2;
-            if ((short)GAME.playerHealthDisplayed < *(short*)&PLAYER_HEALTH ) {
-                *(short*)&PLAYER_HEALTH = GAME.playerHealthDisplayed;
+            if ((short)GAME.playerMaxHealth < *(short*)&PLAYER_HEALTH ) {
+                *(short*)&PLAYER_HEALTH = GAME.playerMaxHealth;
             }
         }
         D_800A5432 = PLAYER_HEALTH;
@@ -472,13 +472,13 @@ void rewardHeart(GameObject* arg0)
         }
         if (!(arg0->unkC & 0x7F)) {
             *(short*)&PLAYER_HEALTH+=1;
-            if ((short)GAME.playerHealthDisplayed < *(short*)&PLAYER_HEALTH ) {
-                *(short*)&PLAYER_HEALTH = GAME.playerHealthDisplayed;
+            if ((short)GAME.playerMaxHealth < *(short*)&PLAYER_HEALTH ) {
+                *(short*)&PLAYER_HEALTH = GAME.playerMaxHealth;
             }
         } else {
             *(short*)&PLAYER_HEALTH+=2;
-            if ((short)GAME.playerHealthDisplayed < *(short*)&PLAYER_HEALTH ) {
-                *(short*)&PLAYER_HEALTH = GAME.playerHealthDisplayed;
+            if ((short)GAME.playerMaxHealth < *(short*)&PLAYER_HEALTH ) {
+                *(short*)&PLAYER_HEALTH = GAME.playerMaxHealth;
             }
         }
         D_800A5432 = PLAYER_HEALTH;

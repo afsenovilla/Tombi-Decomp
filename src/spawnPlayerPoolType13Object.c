@@ -5,7 +5,7 @@ extern TObj *alloc();
 typedef struct { int x, y, z; } V3;
 extern unsigned short GetClut(int, int);
 extern int g2cc, g2d8[];
-extern unsigned char g47[];
+extern unsigned char PLAYER_DRAW_DEPTH[];
 void spawnPlayerPoolType13Object(TObj *a, short b, char c)
 {
     TObj *o = alloc();
@@ -33,7 +33,7 @@ void spawnPlayerPoolType13Object(TObj *a, short b, char c)
             o->b0a = 2;
             o->subtype = b;
             o->b0c = c;
-            o->b0f = g47[0] - 1;
+            o->b0f = PLAYER_DRAW_DEPTH[0] - 1;
             o->category |= 0x80;
             o->b1d = 0x4d;
             *(TObj **)&o->d90 = a;

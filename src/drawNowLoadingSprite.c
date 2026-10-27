@@ -40,7 +40,7 @@ void drawNowLoadingSprite(int x, int y, short sprt_id, short tpage, short arg4)
         pad = ((scale << 6) >> 16) + 4;
     }
 
-    poly = D_8009C8A8;
+    poly = DEBUG_NEXT_PRIM;
     setlen(poly, 9);
     setcode(poly, 0x2C);
     setRGB0(poly, 128, 128, 128);
@@ -68,5 +68,5 @@ void drawNowLoadingSprite(int x, int y, short sprt_id, short tpage, short arg4)
     setClut(poly, UI_SPRITE_DEFS[sprt_id].clutX, UI_SPRITE_DEFS[sprt_id].clutY);
     poly->tpage = tpage;
     addPrim(CURRENT_OT, poly);
-    D_8009C8A8 += sizeof(POLY_FT4);
+    DEBUG_NEXT_PRIM += sizeof(POLY_FT4);
 }

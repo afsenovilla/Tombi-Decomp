@@ -39,10 +39,10 @@ void initPlayerAtSpawn(void)
     if ((CURRENT_TASK)->loadGameSelected != 0) {
         GAME_PLAYER_MODE = 4;
         if (*(u_long*)&GAME.selectedArea == 0x20000) {
-            D_8009BCEA = 2;
+            GAME_SELECTED_SPAWN_POINT = 2;
         }
     }
-    row = (s16*)((u8*)SPAWN_TABLES[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
+    row = (s16*)((u8*)SPAWN_TABLES[GAME.selectedArea][GAME.selectedSection] + (u16)GAME_SELECTED_SPAWN_POINT * 8);
     *(int*)(p + 0x10) = *row++ << 16;
     *(int*)(p + 0x14) = *row++ << 16;
     *(int*)(p + 0x18) = *row << 16;
@@ -109,10 +109,10 @@ void initPlayerAtSpawn(void)
     if ((CURRENT_TASK)->loadGameSelected != 0) {
         GAME_PLAYER_MODE = 4;
         if (*(u_long*)&GAME.selectedArea == 0x20000) {
-            D_8009BCEA = 2;
+            GAME_SELECTED_SPAWN_POINT = 2;
         }
     }
-    row = (s16*)((u8*)SPAWN_TABLES[GAME.selectedArea][GAME.selectedSection] + (u16)D_8009BCEA * 8);
+    row = (s16*)((u8*)SPAWN_TABLES[GAME.selectedArea][GAME.selectedSection] + (u16)GAME_SELECTED_SPAWN_POINT * 8);
     *(int*)(p + 0x10) = *row++ << 16;
     *(int*)(p + 0x14) = *row++ << 16;
     *(int*)(p + 0x18) = *row << 16;

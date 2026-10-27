@@ -8,7 +8,7 @@
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *BITTEN_OBJECT;
 extern unsigned short DAT_1f8003c6;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern void func_8010EAF8(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -74,7 +74,7 @@ void func_801040D0(TObj *o)
             o->animFrame = 0;
         BITTEN_OBJECT->h->p.whole = o->h->p.whole;
         BITTEN_OBJECT->y.p.whole = o->y.p.whole + BITTEN_OBJECT->box2;
-        if (DAT_1f8001fc & DAT_1f8003c6) {
+        if (JOYPAD_STATE & DAT_1f8003c6) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;
@@ -91,7 +91,7 @@ void func_801040D0(TObj *o)
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *BITTEN_OBJECT;
 extern unsigned short DAT_1f8003c6;
-extern unsigned short DAT_1f8001fc;
+extern unsigned short JOYPAD_STATE;
 extern void playerAirAccelerateX(TObj *);
 extern void ObjAddVelY7E(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
@@ -157,7 +157,7 @@ void playerBiteHoldType04(TObj *o)
             o->animFrame = 0;
         BITTEN_OBJECT->h->p.whole = o->h->p.whole;
         BITTEN_OBJECT->y.p.whole = o->y.p.whole + BITTEN_OBJECT->box2;
-        if (DAT_1f8001fc & DAT_1f8003c6) {
+        if (JOYPAD_STATE & DAT_1f8003c6) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

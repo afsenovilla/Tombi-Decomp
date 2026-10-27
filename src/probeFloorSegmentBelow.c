@@ -10,7 +10,7 @@
    canonical (move t0,v0 before addiu v0,v0,-16); `unsigned int v` with in-place `v >>= 4`; frame via pad[0x18]. */
 #include "TOBJ.H"
 extern short *getCollisionPlaneAt(int a, int b);
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 
 static __inline__ int check(TObj *o, short a, short b)
 {
@@ -27,29 +27,29 @@ static __inline__ int check(TObj *o, short a, short b)
 
     if (a < 0) return 0;
     q = getCollisionPlaneAt(a, o->d->p.whole);
-    DAT_1f800278 = (unsigned short *)(q + 1);
+    COLLISION_SEG_PTR = (unsigned short *)(q + 1);
     nn = *q;
     n = nn;
     if (nn == 0) return 0;
     do {
-        t = *DAT_1f800278++;
+        t = *COLLISION_SEG_PTR++;
         n--;
         if (t & 2) {
             if (!(t & 0x10)) goto take;
         }
-        DAT_1f800278 += 3;
+        COLLISION_SEG_PTR += 3;
         continue;
 take:
-        ys = (short)*DAT_1f800278++;
+        ys = (short)*COLLISION_SEG_PTR++;
         y0 = ys;
         ys -= 16;
         if (b < ys) return 0;
-        h = *DAT_1f800278++;
+        h = *COLLISION_SEG_PTR++;
         if (h == 0) {
-            DAT_1f800278++;
+            COLLISION_SEG_PTR++;
             t = y0;
         } else {
-            v = *DAT_1f800278++;
+            v = *COLLISION_SEG_PTR++;
             lo = v & 0xf;
             v >>= 4;
             t = v & 0xf;
@@ -78,7 +78,7 @@ int probeFloorSegmentBelow(TObj *o, short a, int b)
    canonical (move t0,v0 before addiu v0,v0,-16); `unsigned int v` with in-place `v >>= 4`; frame via pad[0x18]. */
 #include "TOBJ.H"
 extern short *getCollisionPlaneAt(int a, int b);
-extern unsigned short *DAT_1f800278;
+extern unsigned short *COLLISION_SEG_PTR;
 
 static __inline__ int check(TObj *o, short a, short b)
 {
@@ -94,29 +94,29 @@ static __inline__ int check(TObj *o, short a, short b)
     int ys;
 
     q = getCollisionPlaneAt(a, o->d->p.whole);
-    DAT_1f800278 = (unsigned short *)(q + 1);
+    COLLISION_SEG_PTR = (unsigned short *)(q + 1);
     nn = *q;
     n = nn;
     if (nn == 0) return 0;
     do {
-        t = *DAT_1f800278++;
+        t = *COLLISION_SEG_PTR++;
         n--;
         if (t & 2) {
             if (!(t & 0x10)) goto take;
         }
-        DAT_1f800278 += 3;
+        COLLISION_SEG_PTR += 3;
         continue;
 take:
-        ys = (short)*DAT_1f800278++;
+        ys = (short)*COLLISION_SEG_PTR++;
         y0 = ys;
         ys -= 16;
         if (b < ys) return 0;
-        h = *DAT_1f800278++;
+        h = *COLLISION_SEG_PTR++;
         if (h == 0) {
-            DAT_1f800278++;
+            COLLISION_SEG_PTR++;
             t = y0;
         } else {
-            v = *DAT_1f800278++;
+            v = *COLLISION_SEG_PTR++;
             lo = v & 0xf;
             v >>= 4;
             t = v & 0xf;

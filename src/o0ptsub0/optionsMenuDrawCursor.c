@@ -13,8 +13,8 @@ typedef struct { short x, y, w, h; } RECT;
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 extern TILE D_1F800000;
-extern char *D_1F800164;
-extern unsigned long *DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
 extern RECT D_800EAFD4[];
 extern RECT D_800EB004[];
 extern short D_800EB480;
@@ -40,8 +40,8 @@ void optionsMenuDrawCursor(int sel)
         sp->w = D_800EAFD4[sel].w;
         sp->h = D_800EAFD4[sel].h;
     }
-    p = (TILE *)D_1F800164;
+    p = (TILE *)NEXT_PRIM;
     *p = *sp;
-    addPrim(DAT_1f8001e0 + 6, p);
-    D_1F800164 += sizeof(TILE);
+    addPrim(CURRENT_OT + 6, p);
+    NEXT_PRIM += sizeof(TILE);
 }

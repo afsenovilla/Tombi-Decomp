@@ -11,7 +11,7 @@ extern MATRIX M;
 extern MATRIX R;
 extern short SV[3];
 extern void f0(void *), SetRotMatrix(void *), ApplyRotMatrix(void *, void *), SetTransMatrix(void *), f1(int, int, void *, int);
-extern char *frame;
+extern char *CURRENT_OT;
 extern void func_8003F160(char *, int);
 void FUN_80057368(char *o)
 {
@@ -25,7 +25,7 @@ void FUN_80057368(char *o)
     M.t[1] += R.t[1];
     M.t[2] += R.t[2];
     SetTransMatrix(&M);
-    f1(S32(o, 0xa0), (int)(frame + ((S8(o, 0xf) << 2) + 0x10)), o, U8(o, 0xa4));
+    f1(S32(o, 0xa0), (int)(CURRENT_OT + ((S8(o, 0xf) << 2) + 0x10)), o, U8(o, 0xa4));
     func_8003F160(o, 0);
 }
 #elif defined(VERSION_SLPS_01144)
@@ -39,7 +39,7 @@ extern MATRIX M;
 extern MATRIX R;
 extern short SV[3];
 extern void f0(void *), SetRotMatrix(void *), ApplyRotMatrix(void *, void *), SetTransMatrix(void *), f1(int, int, void *, int);
-extern char *frame;
+extern char *CURRENT_OT;
 void drawObjectModelNoRot(char *o)
 {
     f0(&M);
@@ -52,6 +52,6 @@ void drawObjectModelNoRot(char *o)
     M.t[1] += R.t[1];
     M.t[2] += R.t[2];
     SetTransMatrix(&M);
-    f1(S32(o, 0xa0), (int)(frame + ((S8(o, 0xf) << 2) + 0x10)), o, U8(o, 0xa4));
+    f1(S32(o, 0xa0), (int)(CURRENT_OT + ((S8(o, 0xf) << 2) + 0x10)), o, U8(o, 0xa4));
 }
 #endif

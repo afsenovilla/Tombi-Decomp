@@ -8,7 +8,7 @@
 
 typedef struct { short v[2][8][2]; } T;
 extern T D_80115FF4;
-#define D_1F8001F8 (*(unsigned short *)0x1F8001F8)
+#define TICK_COUNT (*(unsigned short *)0x1F8001F8)
 extern TObj *ObjAlloc(void);
 
 void func_80119F40(int k, int x, int y, int z)
@@ -23,7 +23,7 @@ void func_80119F40(int k, int x, int y, int z)
         o->active = 1;
         o->type = 0x31;
         o->subtype = 1;
-        p = t.v[(short)k][D_1F8001F8 & 7];
+        p = t.v[(short)k][TICK_COUNT & 7];
         o->a.p.whole = x;
         o->y.p.whole = y;
         o->b.p.whole = z;
@@ -36,7 +36,7 @@ void func_80119F40(int k, int x, int y, int z)
 
 typedef struct { short v[2][8][2]; } T;
 extern T D_80115FF4;
-extern unsigned short D_1F8001F8;
+extern unsigned short TICK_COUNT;
 extern TObj *ObjAlloc(void);
 
 void spawnSparkleNear(int k, int x, int y, int z)
@@ -51,7 +51,7 @@ void spawnSparkleNear(int k, int x, int y, int z)
         o->active = 1;
         o->type = 0x31;
         o->subtype = 1;
-        p = t.v[k & 1][D_1F8001F8 & 7];
+        p = t.v[k & 1][TICK_COUNT & 7];
         o->a.p.whole = x;
         o->y.p.whole = y;
         o->b.p.whole = z;

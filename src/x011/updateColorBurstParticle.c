@@ -10,7 +10,7 @@ extern unsigned short DAT_1f80016e;
 extern unsigned short DAT_1f800172;
 extern short NEG_SIN_TABLE[];
 extern short COS_TABLE[];
-extern unsigned char DAT_800a6047;
+extern unsigned char PLAYER_DRAW_DEPTH;
 extern void FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
 
@@ -53,7 +53,7 @@ void updateColorBurstParticle(TObj *o)
         }
         o->h->p.whole = DAT_1f80016a + (COS_TABLE[(unsigned char)o->animFrame] * BA5(o) >> 12);
         o->d->p.whole = DAT_1f800172 + (NEG_SIN_TABLE[(unsigned char)o->animFrame] * BA5(o) >> 12);
-        o->b0f = DAT_800a6047 - 1;
+        o->b0f = PLAYER_DRAW_DEPTH - 1;
         t = o->timer;
         if (t >= 0x32) {
             if (t % 7 == 0)

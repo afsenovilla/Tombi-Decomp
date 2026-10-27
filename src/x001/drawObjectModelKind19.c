@@ -8,7 +8,7 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 extern MATRIX D_1f800000, D_1f800020;
 extern SVECTOR D_1f800068;
 extern long LZ_FILE_CTRL;
-extern char *D_1F800164;
+extern char *NEXT_PRIM;
 extern void getBaseMatrix(MATRIX *);
 extern void FUN_8006481c(int, MATRIX *);
 extern void FUN_800644dc(int, MATRIX *);
@@ -55,7 +55,7 @@ void drawObjectModelKind19(TObj *o)
     D_1f800000.t[2] += VIEW_CAMERA.m.t[2];
     FUN_80063ddc(&D_1f800000);
     FUN_80063e6c(&D_1f800000);
-    p = (unsigned char *)D_1F800164;
+    p = (unsigned char *)NEXT_PRIM;
     p[7] = 0x3b;
     p[4] = 0;
     p[5] = 0;
@@ -79,12 +79,12 @@ void drawObjectModelKind19(TObj *o)
     gte_stotz(&LZ_FILE_CTRL);
     gte_stsxy(p + 0x20);
     insertPrimWithBias(p, SPAD.i1e0 + 0x10, LZ_FILE_CTRL, (signed char)o->b0f, 0x8000000);
-    D_1F800164 += 0x24;
-    q = (unsigned char *)D_1F800164;
+    NEXT_PRIM += 0x24;
+    q = (unsigned char *)NEXT_PRIM;
     if (GetGraphType() == 1) m = 0x80;
     else if (GetGraphType() == 2) m = 0x80;
     else m = 0x20;
     SetDrawMode(q, 0, 0, m, 0);
     AddPrim((int *)SPAD.i1e0 + (LZ_FILE_CTRL + 4) + (signed char)o->b0f, q);
-    D_1F800164 += 0xc;
+    NEXT_PRIM += 0xc;
 }

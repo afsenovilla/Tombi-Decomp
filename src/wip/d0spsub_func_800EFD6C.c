@@ -6,7 +6,7 @@
 // and font at +0x14 inside loop 1: `sh v0,(s2); sw v0,0xe(s2)` is cse's related-value rewrite of font from the attr
 // address); y, w, img, D_8011114C are separate externs (D_8011113E, D_80111140, D_80111144, D_8011114C), otherwise
 // gcc keeps the struct base in an extra s-reg (s5) for the loops; (2) every loop's `Slot *s` is block-scoped (the
-// game uses s1/s2/s0 per loop), the function-scope `s` is only for the non-loop `&D_80109208[D_8009D2B1]` use.
+// game uses s1/s2/s0 per loop), the function-scope `s` is only for the non-loop `&D_80109208[GAME_BITTEN_JUMP_KIND]` use.
 // Left: inside the loops the game's RTL order differs (loop 1: the x store precedes the y load, the attr store sits
 // between the w loads and the w store: try x/y/w/attr orders and the plain-vs-volatile attr form, 786-792 so far),
 // then the usual per-loop register names. The hoisted -1 (`end`) goes to s2 in the game's loops 2+ (not in loop 1).
@@ -39,7 +39,7 @@ extern int D_80111144;
 extern int D_8011114C;
 extern void * D_80111150;
 extern Hud D_800B1410;
-extern unsigned char D_8009C970, D_8009D2B1;
+extern unsigned char GAME_PLAYER_HEALTH, GAME_BITTEN_JUMP_KIND;
 extern unsigned short GAME, GAME_SELECTED_SECTION, D_8009D2A4;
 extern short D_8010A058;
 extern Slot D_8010922C[], D_80109208[], D_801091D0[], D_80109C70[], D_80109BF8[], D_80109C58[];
@@ -49,7 +49,7 @@ extern int D_80108BC8[], D_80108B78[];
 extern int *D_80108E5C[];
 extern int D_800FE89C[];
 extern char D_800FFD98[];
-extern unsigned char D_801086F0[], D_8009CDA3[];
+extern unsigned char D_801086F0[], GAME_INVENTORY_SCREEN[];
 extern unsigned short D_8010A38A, D_8010A38C, D_8010A38E;
 extern MATRIX D_1F8000C0;
 extern SVECTOR D_1F800060, D_1F800068;
@@ -97,7 +97,7 @@ void func_800EFD6C(void)
     case 0:
         D_800B1410.w48 = 1;
         subScreenDrawTabs(m);
-        drawHudVitality(&D_800B1410, 0xC0, 0x70, D_8009C970);
+        drawHudVitality(&D_800B1410, 0xC0, 0x70, GAME_PLAYER_HEALTH);
         D_800B1410.b74 = 0;
         D_800B1410.b75 = 0;
         D_800B1410.b76 = 0;
@@ -122,10 +122,10 @@ void func_800EFD6C(void)
         }
         D_8011113C.x = 0xE8;
         D_8011113E = 0x66;
-        s = &D_80109208[D_8009D2B1];
+        s = &D_80109208[GAME_BITTEN_JUMP_KIND];
         D_80111142 = 0x7892;
         D_80111140 = m->w10 + s->dw;
-        D_80111144 = m->p54[D_80109228[D_8009D2B1]];
+        D_80111144 = m->p54[D_80109228[GAME_BITTEN_JUMP_KIND]];
         subScreenDrawSprite(1);
         D_8011113Cx = s->x;
         D_8011113E = s->y;
@@ -219,7 +219,7 @@ void func_800EFD6C(void)
         int j;
         last = 0;
         for (j = 0; j < 0x100; j++) {
-            if (D_801086F0[j] != 0xFF && D_8009CDA3[D_801086F0[j]] != 0) last = j;
+            if (D_801086F0[j] != 0xFF && GAME_INVENTORY_SCREEN[D_801086F0[j]] != 0) last = j;
         }
         }
         pages = (last + 10) / 10;

@@ -7,7 +7,7 @@
 void scriptOpHealPlayer(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
-    unsigned char m = GAME.playerHealthDisplayed;
+    unsigned char m = GAME.playerMaxHealth;
     short v = ((short*)&PLAYER.obj.w98)[0];
     int a = g->arg[0];
     if (v < m) {

@@ -11,8 +11,8 @@ typedef struct {
     unsigned short clut;
 } SPRT_8;
 
-extern char *D_1F800164;
-extern int D_1F8001E0;
+extern char *NEXT_PRIM;
+extern int CURRENT_OT;
 extern void SetSprt8(SPRT_8 *);
 extern void SetSemiTrans(void *, int);
 extern unsigned short GetClut(int, int);
@@ -29,10 +29,10 @@ static __inline__ void spr(SPRT_8 *p, short x, short y, unsigned char u, unsigne
     p->u0 = u;
     p->v0 = v;
     p->clut = GetClut(0x170, 0x1f0);
-    AddPrim((char *)D_1F8001E0 + 4, p);
+    AddPrim((char *)CURRENT_OT + 4, p);
 }
 #define SPR(p, x, y, u, v) spr(p, x, y, u, v)
-#define SPRN(x, y, u, v) { SPRT_8 *q = (SPRT_8 *)D_1F800164 + 1; D_1F800164 = (char *)q; spr(q, x, y, u, v); }
+#define SPRN(x, y, u, v) { SPRT_8 *q = (SPRT_8 *)NEXT_PRIM + 1; NEXT_PRIM = (char *)q; spr(q, x, y, u, v); }
 
 static __inline__ void digit(short x, short y, short d)
 {
@@ -51,7 +51,7 @@ void drawRaceHudBestTime(int unused, int x, short y)
     short n;
     short a;
 
-    SPR((SPRT_8 *)D_1F800164, x, y, 0x20, 0x28);
+    SPR((SPRT_8 *)NEXT_PRIM, x, y, 0x20, 0x28);
     SPRN(x + 8, y, 0x48, 0x20);
     SPRN(x + 0x10, y, 0x68, 0x20);
     SPRN(x + 0x18, y, 0x28, 0x20);
@@ -69,6 +69,6 @@ void drawRaceHudBestTime(int unused, int x, short y)
     a = (short)(n * 100 / 60);
     digit2(x + 0x50, x + 0x58, y, (short)(a / 10) % 10, a % 10);
 
-    D_1F800164 += 0x10;
+    NEXT_PRIM += 0x10;
     AddDrawMode(0x15, 1);
 }

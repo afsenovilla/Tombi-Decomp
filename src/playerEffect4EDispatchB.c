@@ -10,10 +10,10 @@ extern void playerEffect4EStepC(TObj *);
 extern void playerEffect4EStepD(TObj *);
 extern void playerEffect4EStepB(TObj *);
 extern int *PLAYER_EFFECT_4E_ANIM_TABLE[];
-extern unsigned char DAT_800a6039;
-extern unsigned char DAT_800a6047;
+extern unsigned char PLAYER_VISIBLE;
+extern unsigned char PLAYER_DRAW_DEPTH;
 extern unsigned char DAT_8009c990;
-extern unsigned short DAT_1f8001f8;
+extern unsigned short TICK_COUNT;
 
 void playerEffect4EDispatchB(TObj *o)
 {
@@ -35,7 +35,7 @@ void playerEffect4EDispatchB(TObj *o)
             playerEffect4EStepB(o);
             break;
         }
-        if (o->subtype != 9 && (DAT_1f8001f8 & 3) == 0)
+        if (o->subtype != 9 && (TICK_COUNT & 3) == 0)
             SfxPlay2(3, 12);
         break;
     case 1:
@@ -43,8 +43,8 @@ void playerEffect4EDispatchB(TObj *o)
         case 0:
             o->anim = (void *)PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype * 3][o->b0c];
             AnimLoadDuration(o);
-            o->visible = DAT_800a6039;
-            c = DAT_800a6047;
+            o->visible = PLAYER_VISIBLE;
+            c = PLAYER_DRAW_DEPTH;
             o->b6b = 0x7f;
             o->b0f = c - 1;
             if (DAT_8009c990 == 3)

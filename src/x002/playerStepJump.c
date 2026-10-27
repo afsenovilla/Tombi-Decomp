@@ -26,13 +26,13 @@ typedef struct {
 typedef struct { void *p[90]; } T800F2B98;
 
 extern P800F2B98 *PLAYER_EXT;
-extern unsigned char *DAT_800a611c;
+extern unsigned char *PLAYER_HELD_OBJECT;
 extern unsigned char *BITTEN_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short DAT_1f8003c6, DAT_1f8001fc, DAT_1f8001f8;
-extern short DAT_1f800238;
+extern unsigned short DAT_1f8003c6, JOYPAD_STATE, TICK_COUNT;
+extern short FREE_OBJECT_COUNT;
 extern short DAT_8009c944, DAT_8009c946[];
-extern unsigned char GAME_PLAYER_MODE, DAT_8009d2b1[], DAT_8009c990;
+extern unsigned char GAME_PLAYER_MODE, GAME_BITTEN_JUMP_KIND[], DAT_8009c990;
 extern int GRABBED_OBJECT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern short PLAYER_FOOT_OFFSET_BY_DIR[];
@@ -91,8 +91,8 @@ void playerStepJump(TObj *o)
         PLAYER_EXT->w20 = 0;
         PLAYER_EXT->b5 = 0;
         if (*(unsigned char *)&o->wac >= 2) {
-            BITTEN_OBJECT = DAT_800a611c;
-            DAT_800a611c[4] = 2;
+            BITTEN_OBJECT = PLAYER_HELD_OBJECT;
+            PLAYER_HELD_OBJECT[4] = 2;
             BITTEN_OBJECT[5] = 2;
             BITTEN_OBJECT[6] = 0;
         }
@@ -132,7 +132,7 @@ void playerStepJump(TObj *o)
         if (o->ba7 != 0) {
             short a = o->a.p.whole, y = o->y.p.whole, b = o->b.p.whole;
             TObj *q;
-            if (spawnPlayerFootstepEffect() == 0 && DAT_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
+            if (spawnPlayerFootstepEffect() == 0 && FREE_OBJECT_COUNT >= 6 && (q = FUN_80018448()) != 0) {
                 short *t;
                 q->active = 1;
                 q->type = 0x31;
@@ -140,7 +140,7 @@ void playerStepJump(TObj *o)
                 q->a.p.whole = a;
                 q->y.p.whole = y;
                 q->b.p.whole = b;
-                t = &PLAYER_FOOT_OFFSET_BY_DIR[(DAT_1f8001f8 & 7) * 2];
+                t = &PLAYER_FOOT_OFFSET_BY_DIR[(TICK_COUNT & 7) * 2];
                 q->h->p.whole += t[0];
                 q->y.p.whole += t[1];
             }
@@ -206,7 +206,7 @@ void playerStepJump(TObj *o)
             playerLandFromJump(o);
             if (*((unsigned char *)&o->waa + 1) & 0x80) {
                 o->ba4 = 0;
-                switch (DAT_8009d2b1[0]) {
+                switch (GAME_BITTEN_JUMP_KIND[0]) {
                 case 1: o->step = 0x2a; o->state = 0; break;
                 case 2: o->step = 0x2b; o->state = 0; break;
                 default: o->state = 0; break;
@@ -223,7 +223,7 @@ void playerStepJump(TObj *o)
                 o->d8c = SLOPE_TILT_TABLE[o->wb0];
                 o->step = 1;
                 o->state = 0;
-                if (DAT_1f8001fc & DAT_1f8003c6) {
+                if (JOYPAD_STATE & DAT_1f8003c6) {
                     GAME_PLAYER_MODE = 0;
                     o->step = 2;
                     o->state = 0;
@@ -235,7 +235,7 @@ void playerStepJump(TObj *o)
                 o->ba4 = 0;
                 o->ba5 = 0;
                 PLAYER_EXT->w20 = 0;
-                switch (DAT_8009d2b1[0]) {
+                switch (GAME_BITTEN_JUMP_KIND[0]) {
                 case 1: o->step = 0x2a; o->state = 0; break;
                 case 2: o->step = 0x2b; o->state = 0; break;
                 default: o->state = 0; break;
@@ -284,14 +284,14 @@ void playerStepJump(TObj *o)
                 PLAYER_EXT->w2a = 0xffff;
                 o->step = 1;
                 o->state = 0;
-                if (DAT_1f8001fc & DAT_1f8003c6) {
+                if (JOYPAD_STATE & DAT_1f8003c6) {
                     GAME_PLAYER_MODE = 0;
                     o->step = 2;
                     o->state = 0;
                 }
             }
         } else {
-            if (DAT_8009c990 == 3 && (DAT_1f8001fc & DAT_1f8003c6)) {
+            if (DAT_8009c990 == 3 && (JOYPAD_STATE & DAT_1f8003c6)) {
                 GAME_PLAYER_MODE = 0;
                 if (X(o)->cc == 1) {
                     *(unsigned char *)&o->wac = 0;

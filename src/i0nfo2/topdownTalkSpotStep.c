@@ -9,7 +9,7 @@ extern unsigned char GAME_PLAYER_MODE;
 extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
-extern unsigned short D_800A6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 extern unsigned char D_800A60A1;
 extern unsigned char D_800A60A3;
 extern unsigned char D_800A60F8;
@@ -26,7 +26,7 @@ void topdownTalkSpotStep(TObj *o)
         r = 0;
         if (o->b68 != 0) {
             int a = D_800A60A1;
-            if (a == 2 && (D_800A6066 & 7) == a) {
+            if (a == 2 && (PLAYER_ANIM_FRAME & 7) == a) {
                 S32(o, 0x90) = func_8002DC50(D_800FED54[o->subtype][0], D_800FED54[o->subtype][1], 0xA0, 0x8C);
                 GAME_PLAYER_MODE = 2;
                 D_8009C942 = 1;

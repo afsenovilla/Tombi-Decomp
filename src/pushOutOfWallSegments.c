@@ -4,10 +4,10 @@
 #include "TOBJ.H"
 
 extern unsigned short *getCollisionPlaneAt(int, int);
-extern unsigned short *D_1F800278;
+extern unsigned short *COLLISION_SEG_PTR;
 extern unsigned short D_1F800282;
 extern unsigned char *D_8007B5AC;
-#define D D_1F800278
+#define D COLLISION_SEG_PTR
 
 int pushOutOfWallSegments(TObj *o, int x_, int y_, int fl_)
 {

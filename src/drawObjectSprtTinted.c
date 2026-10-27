@@ -14,8 +14,8 @@ typedef struct {
     unsigned short w, h;
 } SP;
 typedef struct { char pad[0x4c]; unsigned short w4c; } C4C;
-extern char *DAT_1f800164;
-extern char *DAT_1f8001e0;
+extern char *NEXT_PRIM;
+extern char *CURRENT_OT;
 extern C4C *TASK_C;
 extern long LZ_FILE_CTRL;
 extern void SetRotMatrix(void *);
@@ -63,16 +63,16 @@ void drawObjectSprtTinted(TObj *o)
     if (proj()) return;
     e = (short *)o->d3c;
     e += *(unsigned short *)o->anim * 2;
-    s = (SP *)DAT_1f800164;
+    s = (SP *)NEXT_PRIM;
     n = e[0];
     q = (char *)(o->d3c + e[1]);
     p = (unsigned char *)q + 0xf;
     tp = *(unsigned short *)(q + 6);
     SetDrawMode(s, 0, 0, 0, 0);
-    AddPrim(DAT_1f8001e0 + SPAD.i74 * 4 + ((signed char)o->b0f * 4 + 0x10), s);
-    DAT_1f800164 += 0xc;
+    AddPrim(CURRENT_OT + SPAD.i74 * 4 + ((signed char)o->b0f * 4 + 0x10), s);
+    NEXT_PRIM += 0xc;
     do {
-        s = (SP *)DAT_1f800164;
+        s = (SP *)NEXT_PRIM;
         s->w = p[-5];
         s->h = p[-4];
         s->x0 = (signed char)p[-1] + LZ_FILE_CTRL;
@@ -89,15 +89,15 @@ void drawObjectSprtTinted(TObj *o)
             s->r0 = o->b6b;
             s->g0 = o->b6b;
             s->b0 = o->b6b;
-            AddPrim(DAT_1f8001e0 + SPAD.i74 * 4 + ((signed char)o->b0f * 4 + 0x10), s);
-            DAT_1f800164 += 0x14;
+            AddPrim(CURRENT_OT + SPAD.i74 * 4 + ((signed char)o->b0f * 4 + 0x10), s);
+            NEXT_PRIM += 0x14;
         }
         p += 0x10;
         n--;
         q += 0x10;
     } while (n != 0);
-    s = (SP *)DAT_1f800164;
+    s = (SP *)NEXT_PRIM;
     SetDrawMode(s, 0, 0, o->w1e + (short)tp, 0);
-    AddPrim(DAT_1f8001e0 + SPAD.i74 * 4 + ((signed char)o->b0f * 4 + 0x10), s);
-    DAT_1f800164 += 0xc;
+    AddPrim(CURRENT_OT + SPAD.i74 * 4 + ((signed char)o->b0f * 4 + 0x10), s);
+    NEXT_PRIM += 0xc;
 }

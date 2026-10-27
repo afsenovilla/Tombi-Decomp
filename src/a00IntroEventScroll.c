@@ -10,7 +10,7 @@ typedef struct { char pad[0x12]; short w12; char p14[2]; short w16; char p18[0x2
 extern G6038 PLAYER;
 extern unsigned char GAME_AREA00_INTRO_PHASE, D_8009C933;
 extern short D_1F8001C6;
-extern unsigned char D_1F8001CC, D_1F8001CD;
+extern unsigned char MOVIE_PLAY_STATE, MOVIE_ID;
 extern void updateCameraFollow(TObj *);
 extern void updateCameraScroll(TObj *);
 extern void setEventStarted(int, int, int);
@@ -138,13 +138,13 @@ void a00IntroEventScroll(TObj *o)
             D_1F8001C6 = 2;
             FUN_8001f4bc();
             o->state++;
-            D_1F8001CC = 1;
-            D_1F8001CD = 2;
+            MOVIE_PLAY_STATE = 1;
+            MOVIE_ID = 2;
             FUN_800171b8(1, FUN_8001d6a4);
         }
         break;
     case 5:
-        if (D_1F8001CC == 0) {
+        if (MOVIE_PLAY_STATE == 0) {
             o->animFrame = 0x52e;
             D_1F8001C6 = 0;
             *(int *)o->d34 = 0x52e0000;

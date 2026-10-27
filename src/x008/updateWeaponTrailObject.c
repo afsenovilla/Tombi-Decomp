@@ -4,7 +4,7 @@
 typedef struct { short k; short pad; void **anims; int pad2; } T12;
 extern T12 WEAPON_TRAIL_DEFS[];
 extern int SPR_DATA[];
-extern unsigned short DAT_800a6066;
+extern unsigned short PLAYER_ANIM_FRAME;
 typedef struct G { char p0; unsigned char b1; char p1[0xf - 2]; unsigned char b0f; } G;
 extern G PLAYER;
 extern void FUN_8001fe6c(TObj *);
@@ -26,7 +26,7 @@ void updateWeaponTrailObject(TObj *o)
         o->d3c = SPR_DATA[WEAPON_TRAIL_DEFS[o->subtype].k];
         o->anim = WEAPON_TRAIL_DEFS[o->subtype].anims[o->b0c];
         FUN_8001fe6c(o);
-        v = DAT_800a6066;
+        v = PLAYER_ANIM_FRAME;
         o->b0a = 2;
         o->b0d = 0x80;
         *(signed char *)&o->b0f = -7;

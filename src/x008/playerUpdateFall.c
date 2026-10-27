@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 typedef struct { short x, y; } XY;
 extern TObj *PLAYER_EXT;
-extern short DAT_1f800238;
-extern unsigned short DAT_1f8001f8;
+extern short FREE_OBJECT_COUNT;
+extern unsigned short TICK_COUNT;
 extern XY PLAYER_FOOT_OFFSET_BY_DIR[];
 extern void FUN_800efc04(TObj *, TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -32,11 +32,11 @@ void playerUpdateFall(TObj *o)
         x = o->a.p.whole;
         y = o->y.p.whole;
         z = o->b.p.whole;
-        if (spawnPlayerFootstepEffect() == 0 && DAT_1f800238 >= 6 && (q = FUN_80018448()) != 0) {
+        if (spawnPlayerFootstepEffect() == 0 && FREE_OBJECT_COUNT >= 6 && (q = FUN_80018448()) != 0) {
             q->active = 1;
             q->type = 0x31;
             q->subtype = 1;
-            t = &PLAYER_FOOT_OFFSET_BY_DIR[DAT_1f8001f8 & 7];
+            t = &PLAYER_FOOT_OFFSET_BY_DIR[TICK_COUNT & 7];
             q->a.p.whole = x;
             q->y.p.whole = y;
             q->b.p.whole = z;

@@ -5,7 +5,7 @@
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char PLAYER;
-extern unsigned char D_800A6039;
+extern unsigned char PLAYER_VISIBLE;
 extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
@@ -13,7 +13,7 @@ extern unsigned short PLAYER_Y;
 extern TObj D_800A6038_o;
 #define X6078 D_800A6038_o.h->p.whole
 extern short D_800A60B4;
-extern short D_800A60B6;
+extern short PLAYER_VEL_Y;
 extern unsigned char D_800A60E4;
 extern short D_800A6126;
 extern short D_800A612A;
@@ -45,14 +45,14 @@ void tunnelSlidePlayerStep(TObj *o)
         PLAYER_SUBSTATE = 2;
         PLAYER = 4;
         PLAYER_STEP = 0;
-        D_800A6039 = 0;
+        PLAYER_VISIBLE = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         o->state++;
         break;
     case 1:
         r = stepX();
-        if (D_800A60B6 != 0) {
+        if (PLAYER_VEL_Y != 0) {
             PLAYER_Y--;
             if ((short)PLAYER_Y < D_800A612A) {
                 PLAYER_Y = D_800A612A;
@@ -75,10 +75,10 @@ void tunnelSlidePlayerStep(TObj *o)
         D_8009C93F = 0;
         PLAYER = 1;
         D_800A60B4 = 0;
-        D_800A60B6 = 0;
+        PLAYER_VEL_Y = 0;
         D_800A6126 = 0;
         D_800A612A = 0;
-        D_800A6039 = 1;
+        PLAYER_VISIBLE = 1;
         D_800A60E4 = 0;
         PLAYER_STATE = 1;
         PLAYER_SUBSTATE = 0;

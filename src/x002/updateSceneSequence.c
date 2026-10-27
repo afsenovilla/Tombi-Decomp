@@ -22,7 +22,7 @@ extern void *D_1F8002D4_[];
 extern char MOVE_TABLE_0[];
 extern short *D_8011C8E8[];
 extern Fix16 *PLAYER_H;
-extern unsigned short D_1F8003C4, D_1F8001FC;
+extern unsigned short D_1F8003C4, JOYPAD_STATE;
 extern TObj PLAYER;
 extern unsigned char D_800A603E_[];
 #define D_800A603E D_800A603E_[0]
@@ -75,7 +75,7 @@ void updateSceneSequence(TObj *o)
             break;
         }
         if (GCD.bce34 == 0) o->wb4 = 0;
-        else if (D_8009C970 < GAME.playerHealthDisplayed) o->wb4 = 2;
+        else if (D_8009C970 < GAME.playerMaxHealth) o->wb4 = 2;
         else o->wb4 = 1;
         o->active = 2;
         o->wb6 = 0;
@@ -153,7 +153,7 @@ void updateSceneSequence(TObj *o)
                 applyAnimVelocityX(o, o->animFrame);
                 if (D_8009D2B0 == 3) break;
                 if (o->h->p.whole - q->h->p.whole >= 40) break;
-                if (!(D_1F8001FC & D_1F8003C4)) break;
+                if (!(JOYPAD_STATE & D_1F8003C4)) break;
                 o->step = 0;
                 o->wb6++;
                 break;
@@ -298,7 +298,7 @@ void updateSceneSequence(TObj *o)
             break;
         case 21:
             {
-                int v = GAME.playerHealthDisplayed;
+                int v = GAME.playerMaxHealth;
                 D_800A60D0 = v;
                 D_800A60D2 = v;
                 D_8009C970 = v;
