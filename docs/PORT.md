@@ -1767,6 +1767,17 @@ stall is host I/O or presentation on that machine, still open.
   `CdlModeSpeed`), i.e. the console's 7.4 s. The 1050 vblanks of the Windows log were not reproduced; a movie
   that cannot be skipped (`gameplayTick` lets Start skip ids 5, 7, 8 only) looks like a hang when its frames
   are not shown, so the next thing to check on that machine is the 24-bit display path of the GL backend.
+- **Movie 4 is the game's own cutscene, checked against the retail code.** `A00_SCROLL_CONTROLLER_MODE_BY_SECTION[4]` = 9:
+  in AREA00 section 4 (the inside of the stone tower; section 0's exit at x>=0x4A2 past the purple bushes and the egg at
+  (1023,-160) leads there, Tombi appears at (168,-60)) case 9 starts the movie as soon as Tombi stands at x 0xF0..0x12B,
+  y >= -0x40 (the tower's east wall, 72 px to the right of the entry) while event flag 4 (`SCRIPT_FLAGS[4]`, 0x8009CDA8)
+  is 0; case 11 sets the flag to 0xFF itself (nothing else in X000 or MAIN0 writes flag 4), so it plays once per game.
+  The movie: a broken fence, a pan up the cliff, the river-valley panorama (the view from the lookout). The retail MIPS
+  code in `tools/psxemu` (room (0,4) from the debug select, Right held: `MOVIE_ID`=4, `DAT_1f8001c6`=2, flag 4 = 0xFF at
+  x=240, then the fades 3/1/4/0) does exactly what the port does in `--lang 0` and `--lang 5` (stream at lba 134604, 107
+  frames in 358 vblanks, the room comes back with the fade and the BGM; Right at x=240 is the wall on both, Left walks
+  back). The Windows "stall after the chicks / the egg" is this cutscene, which that build drew black (fixed in 652d9dc);
+  the 1050 vblanks of that log are its only open part (the `StUnSetRing` pace line now says whether the ring was fed).
 - **Event-title letters** (`l8Type01MoveStep`, case 3: a vertical bob of `MulNegSinScaled(wb4, 4)` (under 3 px)
   and a tilt of `MulNegSinScaled(wb8, 0x80)` (8 degrees) at random phase steps 3..6 / 3..10 per frame; cases 8/9:
   the scatter with random spins): the port's `Rand`, `MulNegSinScaled` and `negsintab` (`0x8007A1F0`) are the
