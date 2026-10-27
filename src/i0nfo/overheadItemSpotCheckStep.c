@@ -7,22 +7,22 @@ extern void func_8004D620(int a, int b);
 extern unsigned char D_8009D064[];
 extern unsigned char D_8009D0AA, D_8009D0C8, D_8009D0D0, D_8009D0D1;
 extern signed char PLAYER_SUBSTATE[], PLAYER_STEP[], D_800A60E4[];
-extern short D_800EE994[];
-extern void *D_800F53C0;
+extern short OVERHEAD_ITEM_SPOT_KINDS[];
+extern void *OVERHEAD_ITEM_SPOT_ANIM;
 
 void overheadItemSpotCheckStep(TObj *o)
 {
     int got;
     switch (o->state) {
     case 0:
-        o->anim = D_800F53C0;
+        o->anim = OVERHEAD_ITEM_SPOT_ANIM;
         func_8001FE6C(o);
         o->b68 = 0;
         o->state++;
         break;
     case 1:
         if (o->b68 != 0) {
-            switch (D_800EE994[o->b0c]) {
+            switch (OVERHEAD_ITEM_SPOT_KINDS[o->b0c]) {
             case 0:
                 got = D_8009D0AA != 0;
                 break;

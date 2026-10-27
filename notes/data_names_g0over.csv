@@ -1,0 +1,5 @@
+address,name,size,source
+800e8c94,GAMEOVER_LETTER_TARGET_X,0x10,usage: short[8]: x of the final slot of each 'GAME OVER' letter (gameOverLetterFlyIn flies to it over 24 frames) refs=2
+800e8ca4,GAMEOVER_LETTER_TARGET_Y,0x10,usage: short[8]: y of the final slot of each letter refs=2
+800e8cb4,GAMEOVER_LETTER_START_X,0x10,usage: short[8]: x the letter starts from (gameOverLetterStep state 0) refs=2
+800e8cc4,GAMEOVER_LETTER_START_Y,0x10,usage: short[8]: y the letter starts from refs=2

@@ -6,7 +6,7 @@ extern unsigned short PLAYER_Y;
 extern short *PLAYER_H;
 extern short D_800A60B4[], PLAYER_VEL_Y[];
 extern unsigned short D_800A6126[], D_800A612A[];
-extern Zone D_800EEDB0[];
+extern Zone TUNNEL_SLIDE_ZONES[];
 
 short tunnelCheckSlideZone(void)
 {
@@ -26,7 +26,7 @@ short tunnelCheckSlideZone(void)
             if ((short)x < 0x398) k = 2;
         }
     }
-    z = &D_800EEDB0[k];
+    z = &TUNNEL_SLIDE_ZONES[k];
     if ((short)x > z->x0 && (short)x < z->x1 && z->y0 < (short)y && (short)y < z->y1) {
         D_800A6126[0] = z->a;
         D_800A612A[0] = z->b;

@@ -6,11 +6,11 @@ extern TObj *func_800183B8(void);
 extern unsigned char D_8009CE34;
 extern TObj *SCRIPT_OBJECTS[];
 typedef struct { short s[14]; } EntE260;
-extern EntE260 *D_800EEF30;
+extern EntE260 *TUNNEL_ACTOR_SPAWN_RECORDS;
 
 void tunnelSpawnActors(TObj *o)
 {
-    register EntE260 *base asm("s3") = D_800EEF30;
+    register EntE260 *base asm("s3") = TUNNEL_ACTOR_SPAWN_RECORDS;
     short *e;
     short i;
     TObj *n;

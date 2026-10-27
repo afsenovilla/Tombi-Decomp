@@ -19,7 +19,7 @@ typedef struct {
 } TexInfo;
 extern TexInfo D_800A4668;
 typedef struct { u16 x, y, u, v, w, h; } Ent8D0;
-extern Ent8D0 D_800EE8D0[];
+extern Ent8D0 OVERHEAD_MAP_LAYER_RECTS[];
 
 void overheadDrawMapLayers(TObj *o)
 {
@@ -43,7 +43,7 @@ void overheadDrawMapLayers(TObj *o)
             p = (SPRT *)NEXT_PRIM;
             *((u8 *)p + 3) = 4;
             p->code = 0x65;
-            e = &D_800EE8D0[i];
+            e = &OVERHEAD_MAP_LAYER_RECTS[i];
             p->x0 = e->x + x;
             p->y0 = e->y + y;
             p->u0 = e->u;

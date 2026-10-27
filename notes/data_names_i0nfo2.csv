@@ -44,3 +44,4 @@ address,name,size,source
 801008d8,NPC_SET_10_RECORDS,0x4,usage: SpawnA *: the spawn record list of unlayered variant 0x10 refs=1
 80100b00,NPC_SET_11_RECORDS,0x4,usage: SpawnA *: the spawn record list of unlayered variant 0x11 refs=1
 801008dc,NPC_SET_11_EXTRA_RECORDS,,usage: SpawnB[] (type 0xFF end) the second list of spawnNpcSet11 refs=1
+800fec9c,TOPDOWN_TRIGGER_RECT_LISTS,0x14,usage: short (*[5])[4]: per area (5 / 0xB / 0x10 / 0x11 / 0x13) the {x0 y0 x1 y1} list (0xFF end) topdownPlayerMainStep tests the player against on a trigger tile (b6b = 1 + index) refs=1

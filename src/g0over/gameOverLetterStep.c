@@ -2,8 +2,8 @@
 // MATCHING 800e8404 924
 #include "TOBJ.H"
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
-extern short D_800E8CB4[];
-extern short D_800E8CC4[];
+extern short GAMEOVER_LETTER_START_X[];
+extern short GAMEOVER_LETTER_START_Y[];
 typedef struct {
     MATRIX m;       /* 0x00 */
     MATRIX cm;      /* 0x20 */
@@ -28,8 +28,8 @@ void gameOverLetterStep(TObj *o, int hold)
         break;
     case 0:
         o->b04 = s + 1;
-        o->a.p.whole = D_800E8CB4[o->type];
-        o->y.p.whole = D_800E8CC4[o->type];
+        o->a.p.whole = GAMEOVER_LETTER_START_X[o->type];
+        o->y.p.whole = GAMEOVER_LETTER_START_Y[o->type];
         o->b.p.whole = 0;
         o->d84 = 0;
         o->d88 = 0;

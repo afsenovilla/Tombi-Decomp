@@ -2183,3 +2183,14 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   (0E: two by D_8009CFA8 == 4, *_ALT). Left: 800FEC9C (per area a rect list topdownPlayerMainStep tests the player against,
   purpose not pinned down), 80100788 (7 points of func_800FCFA8), the field aliases 800FEBD8 / 800FED58, and the MAIN0-range
   800106B4.. words the top-down sections read (MAIN0 csv territory).
+- SYSTEM data, batch 5: I0NFO + I0NFO3 + G0OVER (Oct 27 2026): 11 rows in notes/data_names_i0nfo.csv, 11 in
+  notes/data_names_i0nfo3.csv, 4 in notes/data_names_g0over.csv, plus TOPDOWN_TRIGGER_RECT_LISTS (800FEC9C) in the I0NFO2 csv.
+  Overhead (I0NFO): OVERHEAD_MAP_TILES / MAP_STRIP_BUFFER / MAP_LAYER_RECTS (800EE8C8 / CC / D0), OVERHEAD_NPC_DEFS (800EE89C,
+  800EE8A4 its anims column), OVERHEAD_PLAYER_CONTACT_BOXES, OVERHEAD_ACTOR_DEFS / ANIMS (800EE90C / 914),
+  OVERHEAD_ITEM_SPOT_RECTS / KINDS / ANIM / TAKEN_ANIM. Tunnel (I0NFO3): TUNNEL_MAP_TILES (800EECF8, the copy at 80124000),
+  TUNNEL_PLAYER_CONTACT_BOXES, TUNNEL_TRIGGER_RECTS (800EECC8: b6b = 1 + the rect index on a trigger tile; the I0NFO2 twin is
+  TOPDOWN_TRIGGER_RECT_LISTS, one list per area), TUNNEL_SPAWN_POINT_DIRS, TUNNEL_ITEM_SPOT_ITEMS / ANIMS, TUNNEL_ACTOR_DEFS /
+  ANIMS, TUNNEL_TALK_SPOT_DEFS, TUNNEL_SLIDE_ZONES (800EEDB0, the four zones of tunnelCheckSlideZone),
+  TUNNEL_ACTOR_SPAWN_RECORDS (800EEF30). Game over: GAMEOVER_LETTER_TARGET_X / Y and START_X / Y (800E8C94 / CA4 / CB4 / CC4, the
+  per-letter slots of gameOverLetterFlyIn / LetterStep). With this every overlay-range symbol of I0NFO, I0NFO3 and G0OVER with
+  a clear role is named; what remains there are the field aliases (800EE8A4, 800EED84).

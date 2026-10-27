@@ -1,0 +1,12 @@
+address,name,size,source
+800eecf8,TUNNEL_MAP_TILES,0x4,usage: u8 *: the tile map copy at 80124000 tunnelMapObjHandler fills (tunnelCollideMapTile / CheckTileTrigger) refs=8
+800eecc0,TUNNEL_PLAYER_CONTACT_BOXES,,usage: u16[anim type][4] copied into D_800A60A4.. by tunnelPlayerNpcCollision refs=2
+800eecc8,TUNNEL_TRIGGER_RECTS,,usage: short[][4] {x0 y0 x1 y1} (0xFF end): on a trigger tile tunnelPlayerMainStep sets b6b = 1 + the index of the rect holding the player refs=3
+800eece8,TUNNEL_SPAWN_POINT_DIRS,,usage: u8[spawn point]: the player's initial facing (animFrame) in tunnelPlayerInit refs=2
+800eecfc,TUNNEL_ITEM_SPOT_ITEMS,,usage: u8[subtype][2]: the item id / count addItemToInventory gives in tunnelItemSpotCheckStep refs=3
+800f13d0,TUNNEL_ITEM_SPOT_ANIMS,,usage: void *[b0c][8]: [0] the idle anim [4] the taken anim of an item spot refs=6
+800eed5c,TUNNEL_ACTOR_DEFS,,usage: {u8 box0..3; u16 w1e; short spad; void **anims}[subtype] of tunnelActorInit refs=8
+800eed64,TUNNEL_ACTOR_ANIMS,,usage: void **[subtype][3] anim sets of tunnelActorSetAnim / SetDirAnim (the anims column of TUNNEL_ACTOR_DEFS) refs=16
+800eed80,TUNNEL_TALK_SPOT_DEFS,,usage: short[subtype][4]: [0] [1] the message args of func_8002DC50 in tunnelTalkSpotStep [2] the anim index of tunnelTalkSpotHandler (800EED84) refs=3
+800eedb0,TUNNEL_SLIDE_ZONES,0x30,usage: {short x0 y0 x1 y1 a b}[4]: the slide zones of tunnelCheckSlideZone (a / b = the slide target D_800A6126 / 612A) refs=2
+800eef30,TUNNEL_ACTOR_SPAWN_RECORDS,0x4,usage: {short s[14]} * : the rows (position facing zone patrol kind bounds subtype; 0xFF end) tunnelSpawnActors allocates a type 0x45 actor from refs=2

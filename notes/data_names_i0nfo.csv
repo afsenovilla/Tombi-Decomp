@@ -1,0 +1,12 @@
+address,name,size,source
+800ee8c8,OVERHEAD_MAP_TILES,0x4,usage: u8 *: the 0x4000-byte tile map copy overheadLoadMapTiles fills (overheadCollideMapTile / CheckTileTrigger) refs=7
+800ee8cc,OVERHEAD_MAP_STRIP_BUFFER,0x4,usage: void *: the buffer overheadRefreshMap builds each map strip into before the VRAM load refs=2
+800ee8d0,OVERHEAD_MAP_LAYER_RECTS,,usage: {u16 x y u v w h}[] of the map layer sprites overheadDrawMapLayers draws refs=2
+800ee89c,OVERHEAD_NPC_DEFS,,usage: {u16 w1e; u16 w08; short spad; pad; void **anims}[subtype] of overheadNpcHandler (800EE8A4 is the anims column) refs=5
+800ee8c0,OVERHEAD_PLAYER_CONTACT_BOXES,,usage: u16[anim type][4] copied into D_800A60A4.. by overheadPlayerNpcCollision refs=2
+800ee90c,OVERHEAD_ACTOR_DEFS,,usage: ObjInit[subtype] box / tpage / bank / anim of the overhead actors refs=16
+800ee914,OVERHEAD_ACTOR_ANIMS,,usage: void **[subtype][3] anim sets of overheadActorSetAnim / SetDirAnim refs=11
+800ee93c,OVERHEAD_ITEM_SPOT_RECTS,,usage: {short on; u16 x y; short w h pad}[b0c]: the rect the player must stand in for the item spot to show (overheadItemSpotUpdate) refs=2
+800ee994,OVERHEAD_ITEM_SPOT_KINDS,,usage: short[b0c]: required item kind of overheadItemSpotCheckStep refs=2
+800f53c0,OVERHEAD_ITEM_SPOT_ANIM,0x4,usage: anim of an item spot before it is taken refs=4
+800f53d0,OVERHEAD_ITEM_SPOT_TAKEN_ANIM,0x4,usage: anim of an item spot once collected refs=5

@@ -10,12 +10,12 @@ extern void tunnelActorPatrolDiagStepA(TObj *o);
 extern void tunnelActorPatrolDiagStepB(TObj *o);
 extern void tunnelActorTalkStep(TObj *o);
 extern unsigned char D_800A60A3;
-extern void **D_800EED64[][3];
+extern void **TUNNEL_ACTOR_ANIMS[][3];
 
 static inline void setAnim(TObj *o, int i, short n)
 {
     short f = o->animFrame + i;
-    o->anim = D_800EED64[o->subtype][0][f];
+    o->anim = TUNNEL_ACTOR_ANIMS[o->subtype][0][f];
     func_8001FE94(o, n);
     S16(o, 0xD2) = f;
 }

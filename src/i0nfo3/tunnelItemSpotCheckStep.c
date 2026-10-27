@@ -14,8 +14,8 @@ extern unsigned char D_8009D0D1;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
 extern unsigned char D_800A60E4;
-extern unsigned char D_800EECFC[][2];
-extern void *D_800F13D0[][8];
+extern unsigned char TUNNEL_ITEM_SPOT_ITEMS[][2];
+extern void *TUNNEL_ITEM_SPOT_ANIMS[][8];
 
 void tunnelItemSpotCheckStep(TObj *o)
 {
@@ -25,7 +25,7 @@ void tunnelItemSpotCheckStep(TObj *o)
     case 0:
         o->state = s + 1;
         o->b68 = 0;
-        o->anim = D_800F13D0[o->b0c][0];
+        o->anim = TUNNEL_ITEM_SPOT_ANIMS[o->b0c][0];
         func_8001FE6C(o);
         break;
     case 1:
@@ -54,7 +54,7 @@ void tunnelItemSpotCheckStep(TObj *o)
                     func_80026A10(0x493E0);
                     func_8005A9A4(0xA1, 1);
                 } else {
-                    func_80026C50(D_800EECFC[o->subtype][0], D_800EECFC[o->subtype][1], 1);
+                    func_80026C50(TUNNEL_ITEM_SPOT_ITEMS[o->subtype][0], TUNNEL_ITEM_SPOT_ITEMS[o->subtype][1], 1);
                 }
                 func_80020AEC(o->b6b);
                 o->step = 2;

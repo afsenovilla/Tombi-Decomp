@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern void func_8001FE94(TObj *o, int n);
 extern void func_8001FEC0(TObj *o);
-extern void **D_800EED64[][3];
+extern void **TUNNEL_ACTOR_ANIMS[][3];
 
 void tunnelActorIdleStep(TObj *o)
 {
@@ -12,7 +12,7 @@ void tunnelActorIdleStep(TObj *o)
     switch (o->state) {
     case 0:
         f = o->animFrame;
-        o->anim = D_800EED64[o->subtype][0][f];
+        o->anim = TUNNEL_ACTOR_ANIMS[o->subtype][0][f];
         func_8001FE94(o, 0);
         S16(o, 0xD2) = f;
         o->state++;

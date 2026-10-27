@@ -7,8 +7,8 @@ extern void func_8001FE6C(TObj *o);
 extern void overheadItemSpotUpdate(TObj *o);
 extern void func_80018790(TObj *o);
 extern unsigned char D_8009D064[];
-extern void *D_800F53C0;
-extern void *D_800F53D0;
+extern void *OVERHEAD_ITEM_SPOT_ANIM;
+extern void *OVERHEAD_ITEM_SPOT_TAKEN_ANIM;
 
 void overheadItemSpotHandler(TObj *o)
 {
@@ -24,7 +24,7 @@ void overheadItemSpotHandler(TObj *o)
         S16(o, 0x72) = 0x1D;
         o->b0f = 0;
         S32(o, 0x3C) = t;
-        o->anim = D_800F53C0;
+        o->anim = OVERHEAD_ITEM_SPOT_ANIM;
         func_8001FE6C(o);
         o->b04 = 1;
         o->step = D_8009D064[o->b0c];
@@ -36,7 +36,7 @@ void overheadItemSpotHandler(TObj *o)
         break;
     case 2:
         if (o->state == 0) {
-            o->anim = D_800F53D0;
+            o->anim = OVERHEAD_ITEM_SPOT_TAKEN_ANIM;
             func_8001FE6C(o);
             o->state++;
         }

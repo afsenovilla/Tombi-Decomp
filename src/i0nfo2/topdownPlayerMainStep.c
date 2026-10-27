@@ -14,7 +14,7 @@ extern unsigned char TALK_POSE;
 extern unsigned char GAME_PLAYER_MODE[];
 extern volatile unsigned short PAD_PRESSED[];
 extern void topdownCheckTileTrigger(TObj *o, short x, short y);
-extern short (*D_800FEC9C[])[4];
+extern short (*TOPDOWN_TRIGGER_RECT_LISTS[])[4];
 #include "gamestate.h"
 extern TObj PLAYER;
 
@@ -125,7 +125,7 @@ void topdownPlayerMainStep(TObj *o)
         case 0x13: k = 4; break;
         }
         i = 0;
-        e = D_800FEC9C[k][0];
+        e = TOPDOWN_TRIGGER_RECT_LISTS[k][0];
         if (e[0] != 0xFF) {
             py = &PLAYER.y.p.whole;
             px = PLAYER.h->p.whole;

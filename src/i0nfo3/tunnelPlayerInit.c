@@ -21,7 +21,7 @@ extern unsigned short D_800A6040[];
 extern unsigned char D_800A60A3[];
 extern unsigned char D_800A60FA[];
 extern unsigned short D_800A60FC[];
-extern unsigned char D_800EECE8[];
+extern unsigned char TUNNEL_SPAWN_POINT_DIRS[];
 extern unsigned short GAME_SELECTED_SPAWN_POINT;
 extern unsigned char GAME_PLAYER_HEALTH;
 
@@ -54,7 +54,7 @@ void tunnelPlayerInit(TObj *o)
         D_8009CEF7[0] = 0;
         if (D_8009CF06[0] != 0) o->subtype = 1;
         if (D_8009D006[0] != 0) o->subtype = 2;
-        o->animFrame = D_800EECE8[GAME_SELECTED_SPAWN_POINT];
+        o->animFrame = TUNNEL_SPAWN_POINT_DIRS[GAME_SELECTED_SPAWN_POINT];
         if (GAME.selectedSpawnPoint != 0) o->animFrame = 4;
         o->w9a = GAME_PLAYER_HEALTH;
         o->w98 = GAME.playerHealth;

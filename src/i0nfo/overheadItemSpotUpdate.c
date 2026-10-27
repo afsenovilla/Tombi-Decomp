@@ -11,8 +11,8 @@ extern unsigned short PLAYER_Y;
 extern void *PLAYER_H;
 extern unsigned char D_800A60A3;
 typedef struct { short on; unsigned short x, y; short w, h, pad; } Area93C;
-extern Area93C D_800EE93C[];
-extern void *D_800F53D0;
+extern Area93C OVERHEAD_ITEM_SPOT_RECTS[];
+extern void *OVERHEAD_ITEM_SPOT_TAKEN_ANIM;
 
 void overheadItemSpotUpdate(TObj *o)
 {
@@ -21,7 +21,7 @@ void overheadItemSpotUpdate(TObj *o)
     func_800202B4(o);
     o->visible = 0;
     o->b6b = 0;
-    a = &D_800EE93C[o->b0c];
+    a = &OVERHEAD_ITEM_SPOT_RECTS[o->b0c];
     if (a->on != 0) {
         unsigned short *hp = (unsigned short *)PLAYER_H; int d;
         do { } while (0);
@@ -43,7 +43,7 @@ void overheadItemSpotUpdate(TObj *o)
         case 0:
             o->state = s + 1;
         case 1:
-            o->anim = D_800F53D0;
+            o->anim = OVERHEAD_ITEM_SPOT_TAKEN_ANIM;
             func_8001FE6C(o);
             o->b68 = 0;
             o->state++;
@@ -58,7 +58,7 @@ void overheadItemSpotUpdate(TObj *o)
         break;
     case 2:
         if (o->state == 0) {
-            o->anim = D_800F53D0;
+            o->anim = OVERHEAD_ITEM_SPOT_TAKEN_ANIM;
             func_8001FE6C(o);
             o->state++;
         }

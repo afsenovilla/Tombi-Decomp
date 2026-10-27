@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void tunnelResolveCornerTile(TObj *o, int x, int y, int f);
 extern unsigned short D_800A4670[];
-extern unsigned char *D_800EECF8;
+extern unsigned char *TUNNEL_MAP_TILES;
 
 int tunnelCollideMapTile(TObj *o, short x, short y, short f)
 {
@@ -11,13 +11,13 @@ int tunnelCollideMapTile(TObj *o, short x, short y, short f)
     short k;
     int ix;
     if (o->active & 4) return;
-    c = D_800EECF8[(unsigned short)(ix = (x >> 3) + ((y + 0x540) >> 3) * D_800A4670[0])]; c &= 0x7F;
+    c = TUNNEL_MAP_TILES[(unsigned short)(ix = (x >> 3) + ((y + 0x540) >> 3) * D_800A4670[0])]; c &= 0x7F;
     if (c == 0) return 0;
     if (c == 9) {
         tunnelResolveCornerTile(o, x, y, f);
         x = *(int *)0x1F800070;
         y = *(int *)0x1F800074;
-        if ((c = D_800EECF8[(unsigned short)(ix = (x >> 3) + ((y + 0x540) >> 3) * D_800A4670[0])] & 0x7F) == 0) return 0;
+        if ((c = TUNNEL_MAP_TILES[(unsigned short)(ix = (x >> 3) + ((y + 0x540) >> 3) * D_800A4670[0])] & 0x7F) == 0) return 0;
     }
     x &= 7;
     y &= 7;

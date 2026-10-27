@@ -14,7 +14,7 @@ extern unsigned char TALK_POSE;
 extern unsigned char GAME_PLAYER_MODE[];
 extern volatile unsigned short PAD_PRESSED[];
 extern void tunnelCheckTileTrigger(TObj *o, short x, short y);
-extern short D_800EECC8[][4];
+extern short TUNNEL_TRIGGER_RECTS[][4];
 extern TObj PLAYER;
 
 #define setDir(o) { \
@@ -127,14 +127,14 @@ short *e; int d; unsigned short w;
     tunnelCheckTileTrigger(o, o->h->p.whole, o->y.p.whole);
     if (o->b68 != 0) {
         i = 0;
-        e = D_800EECC8[0];
+        e = TUNNEL_TRIGGER_RECTS[0];
         if (e[0] != 0xFF) do {
             if ((d = (unsigned short)PLAYER.h->p.whole - (unsigned short)e[0], w = e[2] - e[0], (unsigned short)d <= (short)w)
                 && (d = (unsigned short)PLAYER.y.p.whole - (unsigned short)e[1], w = e[3] - e[1], (unsigned short)d <= (short)w)) {
                 o->b6b = i + 1;
                 return;
             }
-            e = D_800EECC8[++i];
+            e = TUNNEL_TRIGGER_RECTS[++i];
         } while (e[0] != 0xFF);
     } else {
         o->b6b = 0;

@@ -9,11 +9,11 @@ extern void overheadBuildVisibleTileList(TObj *o);
 extern short SCREEN_ORIGIN_X[];
 extern short D_1F80017A[];
 extern unsigned char D_800A60A3;
-extern void *D_800EE8CC;
+extern void *OVERHEAD_MAP_STRIP_BUFFER;
 
 static __inline__ void ld(int n, int x, int y, int w, int h)
 {
-    void *p = D_800EE8CC;
+    void *p = OVERHEAD_MAP_STRIP_BUFFER;
     overheadBuildMapStrip(n, p);
     func_800174C0(p, x, y, w, h);
 }

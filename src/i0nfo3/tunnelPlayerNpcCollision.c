@@ -10,7 +10,7 @@ extern unsigned char PLAYER[];
 extern TObj *PLAYER_ANIM;
 extern signed char D_800A60A1;
 extern unsigned short D_800A60A4[], D_800A60A6[], D_800A60A8[], D_800A60AA[];
-extern unsigned short D_800EECC0[][4];
+extern unsigned short TUNNEL_PLAYER_CONTACT_BOXES[][4];
 
 void tunnelPlayerNpcCollision(void)
 {
@@ -19,7 +19,7 @@ void tunnelPlayerNpcCollision(void)
     TObj *o;
     unsigned char *s;
     if (D_1F8001A5 == 0) {
-        p = D_800EECC0[*(short *)&PLAYER_ANIM->type];
+        p = TUNNEL_PLAYER_CONTACT_BOXES[*(short *)&PLAYER_ANIM->type];
         D_800A60A4[0] = *p++;
         D_800A60A6[0] = *p++;
         D_800A60A8[0] = *p;

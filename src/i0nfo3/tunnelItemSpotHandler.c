@@ -8,7 +8,7 @@ extern void func_800202B4(TObj *o);
 extern void func_80018790(TObj *o);
 extern void tunnelItemSpotCheckStep(TObj *o);
 extern unsigned char D_800A60A3;
-extern void *D_800F13D0[][8];
+extern void *TUNNEL_ITEM_SPOT_ANIMS[][8];
 
 void tunnelItemSpotHandler(TObj *o)
 {
@@ -27,7 +27,7 @@ void tunnelItemSpotHandler(TObj *o)
         o->b0d = 0;
         S8(o, 0xF) = -0xA;
         S32(o, 0x3C) = v;
-        o->anim = D_800F13D0[o->b0c][0];
+        o->anim = TUNNEL_ITEM_SPOT_ANIMS[o->b0c][0];
         func_8001FE6C(o);
         break;
     }
@@ -41,7 +41,7 @@ void tunnelItemSpotHandler(TObj *o)
             t = o->state;
             if (t == 0) {
                 o->state = t + 1;
-                o->anim = D_800F13D0[o->b0c][4];
+                o->anim = TUNNEL_ITEM_SPOT_ANIMS[o->b0c][4];
                 func_8001FE6C(o);
             }
             break;
@@ -54,7 +54,7 @@ void tunnelItemSpotHandler(TObj *o)
         break;
     case 2:
         if (o->state == 0) {
-            o->anim = D_800F13D0[o->b0c][0];
+            o->anim = TUNNEL_ITEM_SPOT_ANIMS[o->b0c][0];
             func_8001FE6C(o);
             o->state++;
         }

@@ -9,7 +9,7 @@ extern short D_800A4668, D_800A466A, D_800A466C, D_800A466E, D_800A4670, D_800A4
 extern unsigned short D_800A4674[], D_800A4676[];
 extern short D_800A4678[], D_800A467A[];
 extern int D_800A467C[2];
-extern unsigned char *D_800EE8C8;
+extern unsigned char *OVERHEAD_MAP_TILES;
 
 void overheadLoadMapTiles(void)
 {
@@ -22,7 +22,7 @@ void overheadLoadMapTiles(void)
     D_800A467A[0] = map[1] >> 2;
     src = (unsigned char *)(map + 2);
     for (i = 0; i < 0x4000; i++) {
-        D_800EE8C8[i] = *src++;
+        OVERHEAD_MAP_TILES[i] = *src++;
     }
     D_800A467C[0] = *(int *)0x1F800394;
     D_800A467C[1] = D_800A467C[0] + 0x220;
