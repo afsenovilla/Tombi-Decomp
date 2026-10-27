@@ -1,5 +1,14 @@
 // FUNC 800ed0c4 3488 D0SPSUB
-// wip: score 20 (was 30), case-3 confirm block only. Fixed: `int x = D_80111128_v` (second extern name declared
+// MATCHING 800ed0c4 3488
+// Matching debt: v1 holds the table pointer / later value 3, a1 holds the second
+// byte, and a single empty asm input keeps the pointer live through that load.
+// The v0-bound object code is materialized before the null check so 0x54 fills
+// its delay slot, with message 14 loaded only after the optional object stores.
+// The item-handler result 2 returns 1 here: the retail jump-table entry at
+// 0x800E8658 targets 0x800ED80C, not the return-0 path of the earlier WIP draft.
+// Code and all three switch tables were checked after linking, without masking.
+// Historical WIP diagnosis below records the pre-match allocator differences.
+// Historical WIP: score 20 (was 30), case-3 confirm block only. Fixed: `int x = D_80111128_v` (second extern name declared
 // volatile int; a plain scalar sinks to its first use) loads D_80111128 into a0 before the t lbus, and
 // `a = t[0]; D_80111134 = a; b = t[1];` keeps the first store between the two lbus. The `li 3` position: the 3 is
 // the SAME pseudo as t (`t = (unsigned char *)3; GAME_PLAYER_MODE = (int)t; PLAYER = (int)t;`): a 2-set pseudo is not a
@@ -230,7 +239,7 @@ int func_800ED0C4(Menu *m)
                         }
                         return 1;
                     case 2:
-                        break;
+                        return 1;
                     case 3:
                         printInfoMessage(0x1E, 2);
                         return 1;
@@ -324,15 +333,18 @@ int func_800ED0C4(Menu *m)
                 SfxPlay2(0x1B, 0x1C);
                 m->sub--;
             } else if (JOYPAD_STATE & 0x4008) {
-                unsigned char *t;
+                unsigned char *tp;
                 int n;
                 int i1 = D_8010A068[D_8010A058], i2 = D_8010A088[D_8010A060];
                 int x = D_80111128_v;
-                t = D_800FFC3C[i1] + i2 * 2;
+                tp = D_800FFC3C[i1] + i2 * 2;
                 {
-                int a = t[0], b;
+                register unsigned char *t __asm__("$3") = tp;
+                int a = t[0];
+                register int b __asm__("$5");
                 D_80111134 = a;
                 b = t[1];
+                __asm__("" : : "r"(t));
                 D_8009CD94 = a;
                 PLAYER_SUBSTATE = 0x30;
                 D_8009CDA0 = 0;
@@ -348,9 +360,10 @@ int func_800ED0C4(Menu *m)
                 }
                 if (x == 14) {
                     Obj *o = allocObjectLayer2();
+                    register int code __asm__("$2") = 0x54;
                     if (o) {
                         o->b0 = 1;
-                        o->b2 = 0x54;
+                        o->b2 = code;
                         o->b3 = 1;
                     }
                     printInfoMessage(14, 1);
