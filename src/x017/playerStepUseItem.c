@@ -28,7 +28,7 @@ extern unsigned char *PLAYER_HELD_OBJECT;
 extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern int GAME[];
-extern unsigned char GVARS[], DAT_8009c93e, DAT_8009c93f, DAT_8009c940[], DAT_8009c941, DAT_8009c942;
+extern unsigned char GVARS[], DAT_8009c93e, DAT_8009c93f, GVARS_USE_ITEM_PENDING[], GVARS_USE_ITEM_ID, DAT_8009c942;
 extern unsigned char GAME_PLAYER_MODE, GAME_BITTEN_JUMP_KIND, DAT_8009d2c3;
 extern unsigned char DAT_8009ce55, DAT_8009ce56, DAT_8009ce57, DAT_8009cee2, DAT_8009cf03, DAT_8009cdcc;
 extern unsigned char SLOPE_TILT_TABLE[];
@@ -137,11 +137,11 @@ void playerStepUseItem(TObj *o)
             }
         }
         *((unsigned char *)&o->da0 + 1) = 0;
-        if (DAT_8009c940[0] == 0) return;
-        X(o)->e2 = DAT_8009c941;
-        switch (DAT_8009c941) {
+        if (GVARS_USE_ITEM_PENDING[0] == 0) return;
+        X(o)->e2 = GVARS_USE_ITEM_ID;
+        switch (GVARS_USE_ITEM_ID) {
         case 4:
-            DAT_8009c940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             GVARS[0] = 3;
             SETANIM_IF(0);
             DAT_8009c93f = 1;
@@ -149,12 +149,12 @@ void playerStepUseItem(TObj *o)
             DAT_8009c93e = 1;
             break;
         case 0x7d:
-            FUN_80026e0c(DAT_8009c941, 1);
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
             break;
         case 0x75:
             DAT_8009c93f = 1;
             DAT_8009c942 = 1;
-            FUN_80026e0c(DAT_8009c941, 1);
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
             break;
         case 3:
             if (*(unsigned short *)GAME != 0) break;
@@ -164,18 +164,18 @@ void playerStepUseItem(TObj *o)
             DAT_8009c93e = 1;
             break;
         case 9:
-            DAT_8009c940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             GAME_BITTEN_JUMP_KIND = 0;
-            FUN_80026e0c(DAT_8009c941, 1);
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
             break;
         case 10:
-            DAT_8009c940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             if (GAME[0] == 0x30001 && DAT_8009ce55 < 3) {
                 FUN_80030b9c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             }
             break;
         case 0x12:
-            DAT_8009c940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             if (GAME[0] != 1) break;
             if (DAT_8009ce55 >= 2) break;
             if ((unsigned short)(o->h->p.whole - 0x74b) >= 0xf0) break;
@@ -202,11 +202,11 @@ void playerStepUseItem(TObj *o)
             o->step = 5;
             o->state = 0;
             o->substep = 0;
-            FUN_80026e0c(DAT_8009c941, 1);
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
             o->d64 = 1;
             break;
         case 0x10:
-            DAT_8009c940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             if (DAT_8009ce56 != 0xff) {
                 DAT_8009c942 = 1;
                 DAT_8009c93f = 1;
@@ -226,17 +226,17 @@ void playerStepUseItem(TObj *o)
             break;
         case 0x11:
             DAT_8009ce57 = 4;
-            FUN_80026e0c(DAT_8009c941, 1);
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
         case 0x3f: case 0x9a:
         c3f:
-            DAT_8009c940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             break;
         case 0x14:
             spawnPlayerPoolType12Object();
             goto c3f;
         case 0x8d:
-            DAT_8009c940[0] = 0;
-            FUN_80026e0c(DAT_8009c941, 1);
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
             DAT_8009cf03 = 3;
             break;
         case 0xd: case 0x8a:
@@ -250,7 +250,7 @@ void playerStepUseItem(TObj *o)
             DAT_8009c942 = 1;
             break;
         case 0xc:
-            DAT_8009c940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             if (GAME[0] == 9 && DAT_8009cdcc != 0xff) {
                 FUN_80030b9c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
             }

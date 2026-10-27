@@ -7,7 +7,7 @@ extern void g4(void *a, int b);
 extern void g5(int a, int b, int c, int d, int e);
 extern int g6(int a, int b, int c);
 extern int g7(int a);
-extern char F2[], F3[], F4[];
+extern char F2[], F3[], SPRITE_UNPACK_BUFFER[];
 
 void startMovieStream(int a)
 {
@@ -15,7 +15,7 @@ void startMovieStream(int a)
     g1(0);
     g2(F2);
     g3(F3);
-    g4(F4, 0x20);
+    g4(SPRITE_UNPACK_BUFFER, 0x20);
     g5(0, 1, -1, 0, 0);
     do {
         while (!g6(2, a, 0)) ;

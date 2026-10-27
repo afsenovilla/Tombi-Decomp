@@ -1,8 +1,8 @@
 // FUNC 80020078 308 MAIN0
 // MATCHING 80020078 308
 #include "TOBJ.H"
-extern unsigned short DAT_1f800176;
-extern unsigned short DAT_1f800186;
+extern unsigned short SCREEN_ORIGIN_X;
+extern unsigned short SCREEN_ORIGIN_Y;
 void ObjListPush_1F800218(TObj *o);
 void ObjListPush_1F80021C(TObj *o);
 void ObjListPush_1F800220(TObj *o);
@@ -15,8 +15,8 @@ int cullObjectToDrawList(TObj *o, int x)
 {
     if (o->active == 0) return 0;
     o->visible = 0;
-    if ((unsigned short)(o->h->p.whole - DAT_1f800176 + x) > (short)x * 2 + 0x140) return 0;
-    if ((unsigned short)(DAT_1f800186 - o->y.p.whole + x) > (short)x * 2 + 0xf0) return 0;
+    if ((unsigned short)(o->h->p.whole - SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140) return 0;
+    if ((unsigned short)(SCREEN_ORIGIN_Y - o->y.p.whole + x) > (short)x * 2 + 0xf0) return 0;
     o->visible = 1;
     switch (o->category & 0x7f) {
     case 1: ObjListPush_1F800218(o); return 1;

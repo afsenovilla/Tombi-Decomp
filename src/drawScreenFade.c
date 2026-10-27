@@ -3,7 +3,7 @@
 typedef struct { char p0[0xc]; unsigned char b0c, b0d, b0e, b0f, b10, b11, b12, b13; short s14, s16, s18, s1a; } P;
 extern P *NEXT_PRIM;
 extern int CURRENT_OT;
-extern unsigned char G3d1, D36c4;
+extern unsigned char G3d1, GVARS_FADE_EFFECT;
 extern void FUN_80060008(void *, int, int, int, int), FUN_8005e580(int, void *), FUN_8005e634(void *, int);
 extern int FUN_8005efe4(void);
 
@@ -24,7 +24,7 @@ void drawScreenFade(unsigned char a)
     p->s16 = 0;
     p->b13 = 0x60;
     FUN_8005e634(r, 1);
-    if (D36c4 == 2) {
+    if (GVARS_FADE_EFFECT == 2) {
         p->b10 = 0;
         p->b11 = 0;
     } else {
@@ -34,7 +34,7 @@ void drawScreenFade(unsigned char a)
     p->b12 = a;
     FUN_8005e580(CURRENT_OT + 0x10, r);
     r = NEXT_PRIM = (P *)((char *)NEXT_PRIM + 0x10);
-    if (G3d1 == 1 || (unsigned)(D36c4 - 1) < 2) {
+    if (G3d1 == 1 || (unsigned)(GVARS_FADE_EFFECT - 1) < 2) {
         if (FUN_8005efe4() == 1) m = 0x80;
         else if (FUN_8005efe4() == 2) m = 0x80;
         else m = 0x20;

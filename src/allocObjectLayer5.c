@@ -2,7 +2,7 @@
 // MATCHING 80018568 144
 extern short FREE_OBJECT_COUNT;
 extern char **FREE_OBJECTS;
-extern unsigned short DAT_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 
 char *allocObjectLayer5(void)
 {
@@ -13,7 +13,7 @@ char *allocObjectLayer5(void)
         FREE_OBJECT_COUNT = n - 1;
         p = *FREE_OBJECTS++;
         p[0x1c] = c;
-        if ((DAT_1f8001c8 & 1) == 0) {
+        if ((SPAWN_AXIS_SWAP & 1) == 0) {
             *(char **)(p + 0x40) = p + 0x10;
             *(char **)(p + 0x44) = p + 0x18;
         } else {

@@ -29,8 +29,8 @@ void tearJarHeld(TObj *o)
     switch (o->state) {
     case 0:
         t = 0;
-        if (GVARS.b40 != 0) {
-            switch (GVARS.b41) {
+        if (GVARS.useItemPending != 0) {
+            switch (GVARS.useItemId) {
             case 5:
             case 7:
             case 0xe:

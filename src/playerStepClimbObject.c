@@ -24,7 +24,7 @@ extern unsigned short PAD_PRESSED;
 extern int GAME;
 extern unsigned char GAME_PLAYER_MODE;
 extern unsigned short JOYPAD_STATE;
-extern unsigned short DAT_1f8003c6;
+extern unsigned short BUTTON_MASK_B;
 extern char DAT_80011148[];
 extern void FUN_8001fe94(TObj *, int);
 extern void playerClimbFollowObject(TObj *);
@@ -124,7 +124,7 @@ void playerStepClimbObject(TObj *o)
     default:
         return;
     }
-    if (JOYPAD_STATE & DAT_1f8003c6) {
+    if (JOYPAD_STATE & BUTTON_MASK_B) {
         GAME_PLAYER_MODE = 0;
         playerClimbJumpOff(o);
     }

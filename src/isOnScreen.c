@@ -8,8 +8,8 @@
 
 s32 isOnScreen(s16 x, s16 y)
 {
-    if ((u16)(x - D_1F800176 + 0x40) < 0x1C1) {
-        return (u16)(D_1F800186 - y + 0x40) < 0x171;
+    if ((u16)(x - SCREEN_ORIGIN_X + 0x40) < 0x1C1) {
+        return (u16)(SCREEN_ORIGIN_Y - y + 0x40) < 0x171;
     }
     return 0;
 }

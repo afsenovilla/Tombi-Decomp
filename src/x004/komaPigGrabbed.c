@@ -9,8 +9,8 @@ extern char MOVE_TABLE_1[];
 extern B D_80130FD4[];
 extern A *D_80133B5C[];
 extern unsigned char D_800A60E4[];
-extern short D_1F80027E;
-extern unsigned short D_1F800282;
+extern short COLLISION_HIT_HEIGHT;
+extern unsigned short COLLISION_HIT_FLAGS;
 extern void spawnItemNotification(int, int);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
@@ -101,16 +101,16 @@ void komaPigGrabbed(TObj *o)
         probeWallAt(o, o->h->p.whole + 8, o->y.p.whole + 8, 0);
         probeWallAt(o, o->h->p.whole - 8, o->y.p.whole + 8, 1);
         if (komaPigCheckLanded(o)) {
-            v = D_1F80027E;
+            v = COLLISION_HIT_HEIGHT;
             if (v < 0) v = -v;
             if (v > 8) v = 8;
-            if (D_1F80027E < 0) v = -v;
+            if (COLLISION_HIT_HEIGHT < 0) v = -v;
             o->wb2 = v;
             o->d8c = -v & 0xff;
             o->wb6 = (-v << 2) & 0xff;
             o->wae = (*(unsigned short*)&SPAD.s284);
             o->b9c = 0;
-            if ((short)((D_1F800282 >> 5) & 0xf) >= 0xd) o->w98 = 0;
+            if ((short)((COLLISION_HIT_FLAGS >> 5) & 0xf) >= 0xd) o->w98 = 0;
         }
         if (--o->timer == -1) {
             D_800A60E4[0] = 3;

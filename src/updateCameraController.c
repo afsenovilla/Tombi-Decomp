@@ -18,8 +18,8 @@ typedef struct {
 } S;
 extern short DAT_1f800286;
 extern unsigned short D_8009C960_u;
-extern unsigned char D_8009E375, D_8009E376, D_8009E377;
-extern unsigned char D_8009F085, D_8009F086, D_8009F087;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 extern void (*D_80079AEC[])(S *);
 extern int DAT_1f800174[];
 extern int DAT_1f800178[];
@@ -62,12 +62,12 @@ void updateCameraController(S *o)
             SetGeomScreen(0x220);
         } else if ((*(int*)&GAME.selectedArea) == 0x60009) {
             o->b4 = 2;
-            D_8009E375 = 0;
-            D_8009E376 = 0;
-            D_8009E377 = 0;
-            D_8009F085 = 0;
-            D_8009F086 = 0;
-            D_8009F087 = 0;
+            DISPLAY_BUFFER_0_BG_R = 0;
+            DISPLAY_BUFFER_0_BG_G = 0;
+            DISPLAY_BUFFER_0_BG_B = 0;
+            DISPLAY_BUFFER_1_BG_R = 0;
+            DISPLAY_BUFFER_1_BG_G = 0;
+            DISPLAY_BUFFER_1_BG_B = 0;
         } else {
             SetGeomScreen(0x220);
         }

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj *PLAYER_EXT;
-extern unsigned short D_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void AnimAdvance(TObj *);
 void playerStepDepthShift(TObj *o)
@@ -37,7 +37,7 @@ void playerStepDepthShift(TObj *o)
         break;
     case 2:
         AnimAdvance(o);
-        if (D_1f8001c8 & 1) {
+        if (SPAWN_AXIS_SWAP & 1) {
             o->d->p.whole = o->d->p.whole - 5;
         } else {
             o->d->p.whole = o->d->p.whole + 5;

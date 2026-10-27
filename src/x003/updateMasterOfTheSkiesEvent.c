@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_8009C941, D_8009D094;
+extern unsigned char GVARS_USE_ITEM_ID, D_8009D094;
 extern unsigned char D_1F8003D0, MOVIE_PLAY_STATE, MOVIE_ID;
 extern short D_1F8001C6;
 extern TObj *TASK_C;
@@ -22,7 +22,7 @@ extern void masterOfTheSkiesScene(TObj *o);
 
 static __inline__ int chk(void)
 {
-    return GVARS.b40 == 1 && D_8009C941 == 0x42;
+    return GVARS.useItemPending == 1 && GVARS_USE_ITEM_ID == 0x42;
 }
 
 void updateMasterOfTheSkiesEvent(TObj *o)

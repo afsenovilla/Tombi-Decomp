@@ -1,7 +1,7 @@
 // FUNC 80112918 184 X016
 // MATCHING 80112918 184
 #include "TOBJ.H"
-extern short DAT_1f80027e;
+extern short COLLISION_HIT_HEIGHT;
 extern short FUN_80040278(TObj *, int, int);
 extern void FUN_800202b4(TObj *);
 
@@ -13,7 +13,7 @@ void treasureChestSettleOnGround(TObj *o)
         yy = o->y.p.whole;
         o->y.p.whole = yy + 4;
         if (FUN_80040278(o, o->h->p.whole, (short)(yy + 0x14))) {
-            o->d8c = (-DAT_1f80027e << 2) & 0xff;
+            o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
             o->step++;
         }
         o->d30 = o->h->p.whole;

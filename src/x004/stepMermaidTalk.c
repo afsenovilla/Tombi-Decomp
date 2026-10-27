@@ -15,7 +15,7 @@ void stepMermaidTalk(TObj *o)
     switch (o->step) {
     case 0:
         if (GCD.bce22 == 0) break;
-        if (GVARS.b40 != 0 && GVARS.b41 == 0x94) {
+        if (GVARS.useItemPending != 0 && GVARS.useItemId == 0x94) {
             o->step = 2;
             o->state = 0;
         }

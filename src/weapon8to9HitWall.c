@@ -9,7 +9,7 @@ extern short probeFloorPlaneAt(void *, short, short);
 extern void weapon8to9AttachAnchor(TObj *);
 extern unsigned char DAT_800a60d6;
 extern unsigned short DAT_1f800282;
-extern unsigned short DAT_1f800282b;
+extern unsigned short COLLISION_HIT_FLAGS;
 extern TObj *PLAYER_EXT;
 extern char PLAYER[];
 extern short *PLAYER_H;
@@ -30,8 +30,8 @@ int weapon8to9HitWall(TObj *o)
                 if (DAT_1f800282 & 2) o->b69 = 1;
             }
         }
-        k = (DAT_1f800282b >> 5) & 0xf;
-        if (!(DAT_1f800282b & 0x3000)) {
+        k = (COLLISION_HIT_FLAGS >> 5) & 0xf;
+        if (!(COLLISION_HIT_FLAGS & 0x3000)) {
             switch (k) {
             case 1:
             case 2:

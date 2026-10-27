@@ -85,7 +85,7 @@ void updateSectionClearController(TObj *o)
         break;
     case 6:
         GAME.fadeScreenControl = 3;
-        GVARS.b3c = 0;
+        GVARS.fadeEffect = 0;
         o->step++;
     case 7:
         if (GAME.fadeScreenControl == 1) {
@@ -112,7 +112,7 @@ void updateSectionClearController(TObj *o)
         if (GAME.purifiedAreas == 0x7f) {
             o->step++;
             GAME.fadeScreenControl = 4;
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             break;
         }
         o->subtype = 1;
@@ -150,8 +150,8 @@ void updateSectionClearController(TObj *o)
     case 13:
         if (--o->w48 == -1) {
             o->step++;
-            GVARS.b41 = 0xe;
-            GVARS.b40 = 1;
+            GVARS.useItemId = 0xe;
+            GVARS.useItemPending = 1;
             pl->b0 = 5;
             pl->b4 = 1;
             pl->b5 = 0x30;

@@ -12,7 +12,7 @@ typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 
 extern TObj PLAYER;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
-extern short D_1F80016E;
+extern short PLAYER_Y_WHOLE;
 extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -35,7 +35,7 @@ void swimTeacherFloatTalk(TObj *o)
         o->state++;
         VIEW_CAMERA.pos[1].p.hi = -300;
     case 1:
-        if (D_1F80016E < -0xe9) break;
+        if (PLAYER_Y_WHOLE < -0xe9) break;
         GVARS.b42 = 1;
         PLAYER.active = 5;
         PLAYER_STATE = 5;
@@ -143,7 +143,7 @@ void swimTeacherFloatTalk(TObj *o)
             (*(short*)&GAME.nextSpawnPoint) = 3;
             (*(short*)&GAME.nextSection) = 0;
             GAME.fadeScreenControl = 3;
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             o->state++;
         }
         break;

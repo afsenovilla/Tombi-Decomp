@@ -4,10 +4,10 @@
 #include "spad.h"
 #include "gcd.h"
 /* Spans splat entries 801176D8+80117928 (jtbl 80115EF8). Each branch computes lo = x / 80 and
-   hi = lo + N itself so the shared tail is cross-jumped; x pinned to v1 ($2 for the D_1F800176u load). */
+   hi = lo + N itself so the shared tail is cross-jumped; x pinned to v1 ($2 for the SCREEN_ORIGIN_X load). */
 typedef struct { char pad[3]; unsigned char n; unsigned char *p[1]; } L;
 extern unsigned short GAME_SELECTED_SECTION;
-extern unsigned short D_1F800176u;
+extern unsigned short SCREEN_ORIGIN_X;
 extern int getScrollOffsetX(void);
 
 void a00LinkAreaModelBlocks(L *o, unsigned char *base)
@@ -86,7 +86,7 @@ void a00LinkAreaModelBlocks(L *o, unsigned char *base)
             }
         } else {
             if (CAMERA_SCROLL.rotY == 0)
-                { x2 = (short)D_1F800176u; lo = x2 / 80; hi = lo + 8; }
+                { x2 = (short)SCREEN_ORIGIN_X; lo = x2 / 80; hi = lo + 8; }
             else
                 { x = (*(short*)((char*)&SPAD.i174 + 2)) + getScrollOffsetX(); lo = x / 80; hi = lo + 8; }
         }

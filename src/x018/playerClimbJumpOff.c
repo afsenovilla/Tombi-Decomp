@@ -5,7 +5,7 @@ extern unsigned char *GRABBED_OBJECT;
 extern int GAME;
 extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned short PAD_PRESSED;
-extern unsigned short DAT_1f8003c4;
+extern unsigned short BUTTON_MASK_A;
 
 static __inline__ void turn(TObj *o)
 {
@@ -39,7 +39,7 @@ void playerClimbJumpOff(TObj *o)
             turn(o);
         }
     }
-    if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4))
+    if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & BUTTON_MASK_A))
         o->ba7 = 1;
     o->step = 2;
     o->state = 0;

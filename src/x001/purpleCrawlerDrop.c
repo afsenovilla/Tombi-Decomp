@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void *D_8013FC88[];
-extern short D_1F80027E, D_1F800284;
+extern short COLLISION_HIT_HEIGHT, D_1F800284;
 extern void AnimLoadDuration(TObj *o);
 extern int AnimAdvance(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
@@ -41,7 +41,7 @@ void purpleCrawlerDrop(TObj *o)
             r = 1;
             o->b69 = 0;
             o->wba = 0;
-            t = D_1F80027E;
+            t = COLLISION_HIT_HEIGHT;
             o->wb2 = t;
             o->wae = D_1F800284;
             o->d8c = -(t << 2) & 0xff;

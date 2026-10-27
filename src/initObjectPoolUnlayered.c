@@ -4,7 +4,7 @@ extern unsigned char DAT_800a6268[];
 extern unsigned char DAT_800a6484[];
 extern unsigned char DAT_800b11b8[];
 extern unsigned char **DAT_1f800210;
-extern short DAT_1f80023e;
+extern short FREE_OBJECT_COUNT_UNLAYERED;
 extern void *memset(void *, int, int);
 
 void initObjectPoolUnlayered(void)
@@ -27,5 +27,5 @@ void initObjectPoolUnlayered(void)
         *--DAT_1f800210 = q;
         q -= 0x3c;
     } while (i < 10);
-    DAT_1f80023e = 10;
+    FREE_OBJECT_COUNT_UNLAYERED = 10;
 }

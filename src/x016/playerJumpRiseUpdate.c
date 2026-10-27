@@ -2,7 +2,7 @@
 // MATCHING 800f262c 248
 extern unsigned char *PLAYER_EXT;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short DAT_1f8003c6;
+extern unsigned short BUTTON_MASK_B;
 extern void playerSetJumpRiseVelocity(void);
 
 void playerJumpRiseUpdate(unsigned char *o)
@@ -13,7 +13,7 @@ void playerJumpRiseUpdate(unsigned char *o)
         PLAYER_EXT[8] = 1;
         o[6] = 2;
     }
-    if ((PAD_PRESSED[0] & DAT_1f8003c6) != 0) {
+    if ((PAD_PRESSED[0] & BUTTON_MASK_B) != 0) {
         if (PLAYER_EXT[8] != 0)
             return;
         u = *(short *)(PLAYER_EXT + 0x20) + 1;

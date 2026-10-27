@@ -9,7 +9,7 @@ extern void spawnImpactEffect(int, int, int, int);
 extern void spawnWeaponHitDebris(int, int, int, int);
 extern void SfxPlay(int);
 extern void playerSelectGroundAnim(TObj *);
-extern unsigned short DAT_1f800282;
+extern unsigned short COLLISION_HIT_FLAGS;
 extern int DAT_800a60c4[];
 extern unsigned char DAT_800a60d5[];
 extern unsigned char *PLAYER_EXT;
@@ -40,7 +40,7 @@ int weapon5to7HitWall(TObj *o)
     ObjApplyVelocity(o);
     if (o->active == 1 && probeCollisionAtDepthB(o, o->h->p.whole, o->y.p.whole) != 0) {
         spawnImpactEffect(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
-        u = DAT_1f800282;
+        u = COLLISION_HIT_FLAGS;
         m = u >> 5 & 0xf;
         if ((u & 0x3000) == 0 && m < 4 && m != 0)
             spawnWeaponHitDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, (unsigned char)o->animFrame);

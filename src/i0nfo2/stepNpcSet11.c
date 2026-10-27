@@ -8,8 +8,8 @@ extern void func_8005A9A4(int a, int b);
 extern void topdownA19ActorSetDirAnim(TObj *o, int a, int b, int c);
 extern void func_800FE410(TObj *o);
 extern unsigned char D_8009C93F;
-extern unsigned char D_8009C940;
-extern unsigned char D_8009C941;
+extern unsigned char GVARS_USE_ITEM_PENDING;
+extern unsigned char GVARS_USE_ITEM_ID;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009CDF6;
 extern unsigned char D_8009CE56;
@@ -20,7 +20,7 @@ extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
 extern TObj PLAYER;
-extern TObj *D_800A60C8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern unsigned char D_800A60E4;
 
 void stepNpcSet11(TObj *o)
@@ -31,11 +31,11 @@ void stepNpcSet11(TObj *o)
     switch (o->step) {
     case 0:
         if (D_8009CFD7 != 0) {
-            if (D_8009C941 >= 0x1E && D_8009C941 < 0x20 && D_8009CDF6 != 0xFF) {
+            if (GVARS_USE_ITEM_ID >= 0x1E && GVARS_USE_ITEM_ID < 0x20 && D_8009CDF6 != 0xFF) {
                 o->step = 1;
             }
             D_8009CFD7 = 0;
-            D_8009C940 = 0;
+            GVARS_USE_ITEM_PENDING = 0;
         } else if (D_8009CE56 != 0xFF && D_8009CFCF != 0) {
             o->step = 4;
         }
@@ -53,12 +53,12 @@ void stepNpcSet11(TObj *o)
         if (PLAYER.y.p.whole < n->y.p.whole) d = 1;
         n->animFrame = d;
         topdownA19ActorSetDirAnim(n, 8, 0, d);
-        D_800A60C8 = func_8002DCC8(3, 1, &p);
+        PLAYER_MESSAGE_BOX = func_8002DCC8(3, 1, &p);
         o->step++;
         break;
     case 2:
-        if (D_800A60C8->b04 == 2) {
-            D_800A60C8->b04 = 3;
+        if (PLAYER_MESSAGE_BOX->b04 == 2) {
+            PLAYER_MESSAGE_BOX->b04 = 3;
             func_8005A9A4(0x52, 1);
             func_80026C50(0x37, 1, 1);
             func_80026C50(0x37, 1, 1);
@@ -72,7 +72,7 @@ void stepNpcSet11(TObj *o)
             if (PLAYER.y.p.whole < n->y.p.whole) d = 1;
             n->animFrame = d;
             topdownA19ActorSetDirAnim(n, 0, 0, d);
-            D_8009C940 = 0;
+            GVARS_USE_ITEM_PENDING = 0;
             D_8009C942 = 0;
             D_8009C93F = 0;
             D_800A60E4 = 0;

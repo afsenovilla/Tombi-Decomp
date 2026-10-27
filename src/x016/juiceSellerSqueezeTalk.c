@@ -80,7 +80,7 @@ void juiceSellerSqueezeTalk(TObj *o)
     case 9:
         SPAD.s1c6 = 0;
         GVARS.b42 = 0;
-        GVARS.b40 = 0;
+        GVARS.useItemPending = 0;
         PLAYER.obj.wb2 = 0;
         o->anim = D_80118D34[o->subtype].anims[0];
         AnimJump(o, 0);

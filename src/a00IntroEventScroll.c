@@ -130,7 +130,7 @@ void a00IntroEventScroll(TObj *o)
             if (--o->w48 < 80) slide(o);
             if (o->w48 == 60) {
                 ((unsigned char*)&GAME.fadeScreenControl)[0] = 3;
-                ((unsigned char*)&GVARS.b3c)[0] = 1;
+                ((unsigned char*)&GVARS.fadeEffect)[0] = 1;
             }
         } else {
             GAME_AREA00_INTRO_PHASE = 3;
@@ -150,7 +150,7 @@ void a00IntroEventScroll(TObj *o)
             *(int *)o->d34 = 0x52e0000;
             o->y.raw = 0;
             ((unsigned char*)&GAME.fadeScreenControl)[0] = 4;
-            ((unsigned char*)&GVARS.b3c)[0] = 0;
+            ((unsigned char*)&GVARS.fadeEffect)[0] = 0;
             o->state = 2;
             o->animTimer = 0x4c0;
             o->y.raw = -0x10000;

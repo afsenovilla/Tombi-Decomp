@@ -24,7 +24,7 @@ extern PL PLAYER;
 extern Fn D_80079A98[];
 extern Fn D_80079AB4[];
 extern unsigned char D_800A60DA;
-extern short D_1F80016A, D_1F80016E, D_1F800172;
+extern short PLAYER_H_WHOLE, PLAYER_Y_WHOLE, PLAYER_D_WHOLE;
 extern void cameraModeHandler6(O *);
 extern void stepPlayerXToward(int);
 extern int tryStartItemInteraction(O *, int, unsigned char);
@@ -49,16 +49,16 @@ void updateAreaScrollB(O *o)
         case 1:
             switch (GAME.selectedSpawnPoint) {
             case 0:
-                if (D_1F80016A >= 0x4b1 && D_1F80016E >= -0x59) {
+                if (PLAYER_H_WHOLE >= 0x4b1 && PLAYER_Y_WHOLE >= -0x59) {
                     o->state = 0;
                     tryStartItemInteraction(o, 1, 0);
                     break;
                 }
                 switch (o->state) {
                 case 0:
-                    if (D_1F80016A < 0x348) {
+                    if (PLAYER_H_WHOLE < 0x348) {
                         o->state++;
-                        GVARS.b3c = 0;
+                        GVARS.fadeEffect = 0;
                         GAME.fadeScreenControl = 3;
                     }
                     if (o->p34->s2 < 0x3bc) o->p34->s2 = 0x3bc;
@@ -68,15 +68,15 @@ void updateAreaScrollB(O *o)
                     if (GAME.fadeScreenControl == 1) o->state++;
                     break;
                 case 2:
-                    if (D_1F80016A < 0x276) {
+                    if (PLAYER_H_WHOLE < 0x276) {
                         o->state++;
-                        GVARS.b3c = 0;
+                        GVARS.fadeEffect = 0;
                         GAME.fadeScreenControl = 4;
                     }
                     if (o->p34->s2 > 0x1e0) o->p34->s2 = 0x1e0;
                     break;
                 case 3:
-                    if (D_1F80016A < 0xc8) {
+                    if (PLAYER_H_WHOLE < 0xc8) {
                         if (GCD.bcdc0 == 0) {
                             pl->b4 = 5;
                             pl->b5 = 0;
@@ -126,41 +126,41 @@ void updateAreaScrollB(O *o)
             case 1:
             case 2:
                 if (D_800A60DA == 2) {
-                    if (D_1F80016A >= 0x71) {
+                    if (PLAYER_H_WHOLE >= 0x71) {
                         stepPlayerXToward(0x90);
                         GAME.selectedSpawnPoint = 1;
                     } else {
                         stepPlayerXToward(0x48);
                         GAME.selectedSpawnPoint = 2;
                     }
-                    if (D_1F800172 >= 0x3d) tryStartItemInteraction(o, 1, GAME.selectedSpawnPoint);
+                    if (PLAYER_D_WHOLE >= 0x3d) tryStartItemInteraction(o, 1, GAME.selectedSpawnPoint);
                 }
                 if (o->p34->s2 > 0x1e0) o->p34->s2 = 0x1e0;
                 break;
             }
             break;
         case 2:
-            if (D_1F80016A >= 0x1c9 && D_1F80016E >= -0x39) tryStartItemInteraction(o, 1, 0);
+            if (PLAYER_H_WHOLE >= 0x1c9 && PLAYER_Y_WHOLE >= -0x39) tryStartItemInteraction(o, 1, 0);
             break;
         case 3:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x47) {
+            if (PLAYER_H_WHOLE < 0x14 && PLAYER_Y_WHOLE >= -0x47) {
                 tryStartItemInteraction(o, 1, 0);
-            } else if (D_1F80016A >= 0x129 && D_1F80016E >= -0x47) {
+            } else if (PLAYER_H_WHOLE >= 0x129 && PLAYER_Y_WHOLE >= -0x47) {
                 o->subtype = 1;
                 tryStartItemInteraction(o, 1, 1);
             }
             break;
         case 4:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0xdb) {
+            if (PLAYER_H_WHOLE < 0x14 && PLAYER_Y_WHOLE >= -0xdb) {
                 tryStartItemInteraction(o, 1, 0);
-            } else if (D_1F80016A >= 0x12a && D_1F80016E >= -0x21) {
+            } else if (PLAYER_H_WHOLE >= 0x12a && PLAYER_Y_WHOLE >= -0x21) {
                 tryStartItemInteraction(o, 1, 1);
             }
             break;
         case 5:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x31) {
+            if (PLAYER_H_WHOLE < 0x14 && PLAYER_Y_WHOLE >= -0x31) {
                 tryStartItemInteraction(o, 1, 0);
-            } else if (D_1F80016A >= 0x12d && D_1F80016E >= -0xd3) {
+            } else if (PLAYER_H_WHOLE >= 0x12d && PLAYER_Y_WHOLE >= -0xd3) {
                 tryStartItemInteraction(o, 1, 1);
             }
             break;

@@ -6,7 +6,7 @@
 extern TObj *BITTEN_OBJECT;
 extern TObj *PLAYER_EXT;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short JOYPAD_STATE, D_1F8003C6;
+extern unsigned short JOYPAD_STATE, BUTTON_MASK_B;
 extern void playerBiteHoldAttach(TObj *);
 extern void playerResetSlopeState(TObj *);
 extern void FUN_8003facc(TObj *);
@@ -76,7 +76,7 @@ void playerStep48Area14(TObj *o)
             p->h->p.whole = o->h->p.whole;
             p->y.p.whole = o->y.p.whole + p->box2;
         }
-        if (JOYPAD_STATE & D_1F8003C6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             o->b69 = 0;
             o->wb2 = 0;
             o->velX = 0;

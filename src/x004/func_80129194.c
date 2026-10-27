@@ -10,7 +10,7 @@
 void func_80129194(TObj *o)
 {
     if (GCD.bce22 == 0) return;
-    if (GVARS.b40 && GVARS.b41 == 0x94) {
+    if (GVARS.useItemPending && GVARS.useItemId == 0x94) {
         o->step = 2;
         o->state = 0;
     }

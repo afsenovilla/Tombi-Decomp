@@ -14,8 +14,8 @@ extern T80019244 *TASK_C;
 extern unsigned char D_1F8001D1, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
 extern short FRAME_BUFFER_INDEX, FRAME_COUNT;
 
-extern unsigned char D_8009E375, D_8009E376, D_8009E377;
-extern unsigned char D_8009F085, D_8009F086, D_8009F087;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 extern short BUTTON_CONFIG_INDEX;
 extern unsigned char D_8009D67C;
 extern unsigned char D_8009F0E8;
@@ -40,12 +40,12 @@ void bootStartupTask(void)
 {
     T80019244 *p;
 
-    D_8009E375 = 0;
-    D_8009E376 = 0;
-    D_8009E377 = 0;
-    D_8009F085 = 0;
-    D_8009F086 = 0;
-    D_8009F087 = 0;
+    DISPLAY_BUFFER_0_BG_R = 0;
+    DISPLAY_BUFFER_0_BG_G = 0;
+    DISPLAY_BUFFER_0_BG_B = 0;
+    DISPLAY_BUFFER_1_BG_R = 0;
+    DISPLAY_BUFFER_1_BG_G = 0;
+    DISPLAY_BUFFER_1_BG_B = 0;
     D_1F8001D1 = 0;
     SPAD.b1d0 = 0;
     BUTTON_CONFIG_INDEX = 0;

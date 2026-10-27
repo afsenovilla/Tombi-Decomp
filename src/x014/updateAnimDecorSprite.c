@@ -29,7 +29,7 @@ void updateAnimDecorSprite(TObj *o)
         switch (o->step) {
         case 0:
             if (GAME.fadeScreenControl != 0) break;
-            GVARS.b3c = 2;
+            GVARS.fadeEffect = 2;
             o->animFrame = 0x60;
             drawScreenFade(0x60);
             o->step++;

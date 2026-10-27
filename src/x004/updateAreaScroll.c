@@ -75,7 +75,7 @@ extern signed char D_8009D2B0x[];
 #define D_8009D2B0 D_8009D2B0x[0]
 extern unsigned char D_8009C982b;
 extern short D_1F80016Ax[], D_1F80016Ex[];
-#define D_1F80016A D_1F80016Ax[0]
+#define PLAYER_H_WHOLE D_1F80016Ax[0]
 #define D_1F80016E D_1F80016Ex[0]
 extern short D_1F8000F2x[];
 #define D_1F8000F2 D_1F8000F2x[0]
@@ -133,7 +133,7 @@ static __inline__ short blocked(void)
 {
     if (PLAYER.bac >= 2) return 1;
     if (PLAYER.b69 == 0) return 1;
-    if (PLAYER.b9c | PLAYER.b9e | PLAYER.baa | GVARS.b40) return 1;
+    if (PLAYER.b9c | PLAYER.b9e | PLAYER.baa | GVARS.useItemPending) return 1;
     if (SPAD.s1fc & 0x10) return 0;
     return 1;
 }
@@ -245,7 +245,7 @@ void updateAreaScroll(O *o)
                 checkScrollItemDoorB(o);
                 break;
             }
-            if (D_1F80016A >= 0x653 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x4ec && D_1F80016E >= -0x225
+            if (PLAYER_H_WHOLE >= 0x653 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x4ec && D_1F80016E >= -0x225
                 && tryStartItemInteraction(o, 1, 5)) {
                 D_8009D2B0 = 0;
                 GVARS.b3f = 1;
@@ -259,7 +259,7 @@ void updateAreaScroll(O *o)
                 if ((*(short*)((char*)&SPAD.i170 + 2)) >= 0x519) break;
                 T1(1);
             }
-            if (D_1F80016A < 0x78 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x546) {
+            if (PLAYER_H_WHOLE < 0x78 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x546) {
                 T1(0);
             }
             if (blocked()) break;
@@ -355,11 +355,11 @@ void updateAreaScroll(O *o)
                 }
                 break;
             }
-            if (D_1F80016A >= 0x6d0 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x168) {
+            if (PLAYER_H_WHOLE >= 0x6d0 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x168) {
                 T1(7);
             }
             if (blocked()) break;
-            if (D_1F80016A < 0x28a && (*(short*)((char*)&SPAD.i170 + 2)) == 0x21c) {
+            if (PLAYER_H_WHOLE < 0x28a && (*(short*)((char*)&SPAD.i170 + 2)) == 0x21c) {
                 T1(8);
             }
             if ((unsigned)(XU - 0x580) < 0x40) {
@@ -418,22 +418,22 @@ void updateAreaScroll(O *o)
             }
             break;
         case 6:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x7b) {
+            if (PLAYER_H_WHOLE < 0x14 && D_1F80016E >= -0x7b) {
                 T1(0);
             }
             break;
         case 7:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x59) {
+            if (PLAYER_H_WHOLE < 0x14 && D_1F80016E >= -0x59) {
                 T1(0);
             }
             break;
         case 8:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x163) {
+            if (PLAYER_H_WHOLE < 0x14 && D_1F80016E >= -0x163) {
                 T1(0);
             }
             break;
         case 9:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x6b) {
+            if (PLAYER_H_WHOLE < 0x14 && D_1F80016E >= -0x6b) {
                 T1(0);
             }
             break;
@@ -441,10 +441,10 @@ void updateAreaScroll(O *o)
             signed char *q;
             if (D_1F80016E < -0x1f4) {
                 o->w30 = o->w32 = -0x3ac;
-                if (D_1F80016A < 0x14 && D_1F80016E >= -0x36f) {
+                if (PLAYER_H_WHOLE < 0x14 && D_1F80016E >= -0x36f) {
                     T1(0);
                 }
-                if (D_1F80016A < 0x11f) break;
+                if (PLAYER_H_WHOLE < 0x11f) break;
                 if (D_1F80016E < -0x36f) break;
                 q = &D_8009D2B0;
                 if (*q == 3) break;
@@ -453,10 +453,10 @@ void updateAreaScroll(O *o)
                 goto tail11;
             }
             o->w30 = o->w32 = -100;
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x27) {
+            if (PLAYER_H_WHOLE < 0x14 && D_1F80016E >= -0x27) {
                 T1(1);
             }
-            if (D_1F80016A < 0x11f) break;
+            if (PLAYER_H_WHOLE < 0x11f) break;
             if (D_1F80016E < -0x27) break;
             q = &D_8009D2B0;
             if (*q == 3) break;
@@ -470,10 +470,10 @@ void updateAreaScroll(O *o)
             break;
         }
         case 13:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x16d) {
+            if (PLAYER_H_WHOLE < 0x14 && D_1F80016E >= -0x16d) {
                 T1(0);
             }
-            if (D_1F80016A < 0x26d) break;
+            if (PLAYER_H_WHOLE < 0x26d) break;
             if (D_1F80016E < -0x3d) break;
             T1(1);
         case 10:
@@ -494,7 +494,7 @@ void updateAreaScroll(O *o)
         case 16:
         case 17:
         case 18:
-            if (D_1F80016A < 0x14 && D_1F80016E >= -0x45) {
+            if (PLAYER_H_WHOLE < 0x14 && D_1F80016E >= -0x45) {
                 T1(0);
             }
             break;

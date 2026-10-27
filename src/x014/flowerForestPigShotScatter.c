@@ -24,7 +24,7 @@ static void *D_80129FCC[9] = {
 extern short D_801265C4[];
 extern short COS_TABLE[], D_8007A1F0[];
 extern unsigned short TICK_COUNT;
-extern int D_1F800198;
+extern int UPDATE_OBJECT_INDEX;
 
 void flowerForestPigShotScatter(TObj *o)
 {
@@ -80,7 +80,7 @@ void flowerForestPigShotScatter(TObj *o)
         dy = o->velH * D_8007A1F0[o->d38] >> 12;
         o->h->raw += dx << 8;
         o->y.raw += dy << 8;
-        if ((TICK_COUNT + D_1F800198) & 1) ObjCullRegister(o);
+        if ((TICK_COUNT + UPDATE_OBJECT_INDEX) & 1) ObjCullRegister(o);
         if (--o->timer == -1) {
             o->step = 0;
             o->b04++;

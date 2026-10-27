@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
-extern short D_1F80016A;
+extern short PLAYER_H_WHOLE;
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -47,9 +47,9 @@ void swimTeacherNoBananasTalk(TObj *o)
             setAnim(o, ANIMS(o)[5]);
             break;
         }
-        k = ((unsigned char*)&GVARS.b40);
+        k = ((unsigned char*)&GVARS.useItemPending);
         if (*k == 0) break;
-        if (GVARS.b41 == 3) {
+        if (GVARS.useItemId == 3) {
             *k = 0;
             o->state++;
             GVARS.b3f = 1;
@@ -61,7 +61,7 @@ void swimTeacherNoBananasTalk(TObj *o)
             (*(short*)&PLAYER.obj.animFrame) = 1 - o->animFrame;
             o->d90 = showMessageBoxDirect(2, 0x16, &o->a);
             setAnim(o, ANIMS(o)[5]);
-        } else if (GVARS.b41 == 0x8b) {
+        } else if (GVARS.useItemId == 0x8b) {
             *k = 0;
             FUN_80026e0c(0x8b, 1);
             GVARS.b3f = 1;
@@ -84,5 +84,5 @@ void swimTeacherNoBananasTalk(TObj *o)
         o->state = 0;
         break;
     }
-    if (D_1F80016A >= 0xc8b) PLAYER.obj.a.p.whole = 0xc8a;
+    if (PLAYER_H_WHOLE >= 0xc8b) PLAYER.obj.a.p.whole = 0xc8a;
 }

@@ -5,7 +5,7 @@
 // Demo version of PAL x000 800F6C34 (playerSwingHandlePad.c): d-pad bits 0x1000-0x8000 (PAL 0x10-0x80). fixed pad bit 0x40; letting go keeps the timer and spin.
 #include "TOBJ.H"
 extern unsigned short PAD_PRESSED[];
-extern unsigned short DAT_1f8003c6;
+extern unsigned short BUTTON_MASK_B;
 extern unsigned char GAME_PLAYER_MODE;
 extern unsigned char *PLAYER_EXT;
 extern unsigned char *GRABBED_OBJECT;
@@ -57,7 +57,7 @@ void playerSwingHandlePad(TObj *o)
 #else
 #include "TOBJ.H"
 extern unsigned short PAD_PRESSED[];
-extern unsigned short DAT_1f8003c6;
+extern unsigned short BUTTON_MASK_B;
 extern unsigned char GAME_PLAYER_MODE;
 extern unsigned char *PLAYER_EXT;
 extern unsigned char *GRABBED_OBJECT;
@@ -69,7 +69,7 @@ void playerSwingHandlePad(TObj *o)
     int s1;
     unsigned short u;
     Fix16 *h;
-    if (PAD_PRESSED[0] & DAT_1f8003c6) {
+    if (PAD_PRESSED[0] & BUTTON_MASK_B) {
         GAME_PLAYER_MODE = 0;
         PLAYER_EXT[9] = 0;
         o->step = 0xb;

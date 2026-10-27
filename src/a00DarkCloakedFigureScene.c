@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern unsigned short PLAYER_ANIM_FRAME;
-extern TObj *DAT_800a60c8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern unsigned char DAT_800a60f8;
 extern unsigned char DAT_8009cebe;
 extern unsigned char DAT_8009cebeA[];
@@ -45,24 +45,24 @@ void a00DarkCloakedFigureScene(TObj *o)
         DAT_8009cebeA[0] = 0;
         if (DAT_8009c984 & 0x80)
             { if (DAT_8009c984 & 8) { if (DAT_8009c984 & 0x10) DAT_8009cebeA[0] = 6; else DAT_8009cebeA[0] = 4; } else DAT_8009cebeA[0] = 5; }
-        DAT_800a60c8 = showMessageBox(6, DAT_8009cebeR, 0xe0, 0x6c);
+        PLAYER_MESSAGE_BOX = showMessageBox(6, DAT_8009cebeR, 0xe0, 0x6c);
         DAT_8009c984 |= 0x80;
         o->step++;
         break;
     case 2:
-        if (DAT_800a60c8->b04 != 2)
+        if (PLAYER_MESSAGE_BOX->b04 != 2)
             break;
         W1C(o) = 0;
         switch (DAT_8009cebe) {
         case 0:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             DAT_8009cebe = 1;
             o->w08 = 1;
             o->step = 4;
             W1C(o) = 1;
             break;
         case 1:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             DAT_8009cebe = 2;
             setEventStarted(5, 0, 0);
             W1C(o) = 1;
@@ -70,10 +70,10 @@ void a00DarkCloakedFigureScene(TObj *o)
             o->step = 4;
             break;
         case 2:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             if (DAT_8009c984 & 0x18) {
                 DAT_8009cebe = 3;
-                DAT_800a60c8 = showMessageBox(6, 3, 0xe0, 0x6c);
+                PLAYER_MESSAGE_BOX = showMessageBox(6, 3, 0xe0, 0x6c);
                 o->step = 2;
                 W1C(o) = 1;
             } else {
@@ -83,17 +83,17 @@ void a00DarkCloakedFigureScene(TObj *o)
             }
             break;
         case 3:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             { if (DAT_8009c984 & 8) { if (DAT_8009c984 & 0x10) DAT_8009cebe = 7; else DAT_8009cebe = 4; } else DAT_8009cebe = 5; }
-            DAT_800a60c8 = showMessageBox(6, DAT_8009cebeR, 0xe0, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(6, DAT_8009cebeR, 0xe0, 0x6c);
             W1C(o) = 1;
             o->step = 2;
             break;
         case 4:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             if (DAT_8009c984 & 0x10) {
                 DAT_8009cebe = 3;
-                DAT_800a60c8 = showMessageBox(6, 3, 0xe0, 0x6c);
+                PLAYER_MESSAGE_BOX = showMessageBox(6, 3, 0xe0, 0x6c);
                 o->step = 2;
                 W1C(o) = 1;
             } else {
@@ -111,10 +111,10 @@ void a00DarkCloakedFigureScene(TObj *o)
             }
             break;
         case 5:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             if (DAT_8009c984 & 8) {
                 DAT_8009cebe = 3;
-                DAT_800a60c8 = showMessageBox(6, 3, 0xe0, 0x6c);
+                PLAYER_MESSAGE_BOX = showMessageBox(6, 3, 0xe0, 0x6c);
                 o->step = 2;
                 W1C(o) = 1;
             } else {
@@ -132,14 +132,14 @@ void a00DarkCloakedFigureScene(TObj *o)
             }
             break;
         case 6:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             DAT_8009cebe = 7;
-            DAT_800a60c8 = showMessageBox(6, 7, 0xe0, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(6, 7, 0xe0, 0x6c);
             W1C(o) = 1;
             o->step = 2;
             break;
         case 7:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             setEventComplete(5, 0);
             DAT_8009cebe = 8;
             o->w08 = 0x168;
@@ -147,14 +147,14 @@ void a00DarkCloakedFigureScene(TObj *o)
             W1C(o) = 1;
             break;
         case 8:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             DAT_8009cebe = 9;
-            DAT_800a60c8 = showMessageBox(6, 9, 0xe0, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(6, 9, 0xe0, 0x6c);
             W1C(o) = 1;
             o->step = 2;
             break;
         case 9:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             DAT_8009cebe = 0xb;
             PLAYER.b04 = 1;
             PLAYER.step = 0;
@@ -196,7 +196,7 @@ void a00DarkCloakedFigureScene(TObj *o)
     case 4:
         if (--o->w08 != 0)
             break;
-        DAT_800a60c8 = showMessageBox(6, DAT_8009cebe, 0xe0, 0x6c);
+        PLAYER_MESSAGE_BOX = showMessageBox(6, DAT_8009cebe, 0xe0, 0x6c);
         o->step = 2;
         W1C(o) = 1;
         break;

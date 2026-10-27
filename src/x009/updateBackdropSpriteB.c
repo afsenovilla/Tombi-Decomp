@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { unsigned char b0f; char p; unsigned short w1e; unsigned short cx, cy; void **anims; } E12;
 extern E12 D_8012ABBC[];
-extern short D_1F800186[];
+extern short SCREEN_ORIGIN_Y[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void ObjFree(TObj *);
@@ -35,7 +35,7 @@ void updateBackdropSpriteB(TObj *o)
     case 1:
         o->visible = 1;
         o->a.p.whole = o->d30 - ((short*)((char*)&SPAD.i174 + 2))[0];
-        o->y.p.whole = o->d34 - D_1F800186[0];
+        o->y.p.whole = o->d34 - SCREEN_ORIGIN_Y[0];
         ObjListPush_1F800220(o);
         AnimAdvance(o);
         break;

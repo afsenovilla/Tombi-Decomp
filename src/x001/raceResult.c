@@ -16,7 +16,7 @@ extern short PLAYER_ANIM_FRAME;
 extern unsigned char D_800A60A1;
 extern unsigned short PLAYER_Y;
 extern unsigned char D_800A60D6, D_800A60E2, D_800A60DA, D_800A60F8;
-extern TObj *D_800A60C8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_80026c50(int, int, int);
 extern void setEventComplete(int, int);
@@ -71,11 +71,11 @@ void raceResult(O *o)
     case 2:
         switch (((unsigned char*)&GCD.bcedf)[0]) {
         case 0xfe:
-            D_800A60C8 = showMessageBox(2, 0x1c, 0x80, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(2, 0x1c, 0x80, 0x6c);
             o->step++;
             break;
         case 0xff:
-            D_800A60C8 = showMessageBox(2, 0x1a, 0x80, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(2, 0x1a, 0x80, 0x6c);
             o->step++;
             break;
         }
@@ -83,23 +83,23 @@ void raceResult(O *o)
     case 3:
         switch (((unsigned char*)&GCD.bcedf)[0]) {
         case 0xfe:
-            t = D_800A60C8;
+            t = PLAYER_MESSAGE_BOX;
             if (t->b04 != 2) break;
             t->b04 = 3;
-            D_800A60C8 = showMessageBox(2, 0x1d, 0x80, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(2, 0x1d, 0x80, 0x6c);
             o->step++;
             break;
         case 0xff:
-            t = D_800A60C8;
+            t = PLAYER_MESSAGE_BOX;
             if (t->b04 != 2) break;
             t->b04 = 3;
-            D_800A60C8 = showMessageBox(2, 0x1b, 0x80, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(2, 0x1b, 0x80, 0x6c);
             o->step++;
             break;
         }
         break;
     case 4: {
-        TObj *q = D_800A60C8;
+        TObj *q = PLAYER_MESSAGE_BOX;
         if (q->b04 != 2) break;
         q->b04 = 3;
         p->subtype = 0;

@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 80112918 (treasureChestSettleOnGround.c): does not store the position at +0x30/+0x34.
 #include "TOBJ.H"
-extern short DAT_1f80027e;
+extern short COLLISION_HIT_HEIGHT;
 extern short FUN_80040278(TObj *, int, int);
 extern void FUN_800202b4(TObj *);
 
@@ -16,7 +16,7 @@ void treasureChestSettleOnGround(TObj *o)
         yy = o->y.p.whole;
         o->y.p.whole = yy + 4;
         if (FUN_80040278(o, o->h->p.whole, (short)(yy + 0x14))) {
-            o->d8c = (-DAT_1f80027e << 2) & 0xff;
+            o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
             o->step++;
         }
     case 1:
@@ -25,7 +25,7 @@ void treasureChestSettleOnGround(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern short DAT_1f80027e;
+extern short COLLISION_HIT_HEIGHT;
 extern short FUN_80040278(TObj *, int, int);
 extern void FUN_800202b4(TObj *);
 
@@ -37,7 +37,7 @@ void treasureChestSettleOnGround(TObj *o)
         yy = o->y.p.whole;
         o->y.p.whole = yy + 4;
         if (FUN_80040278(o, o->h->p.whole, (short)(yy + 0x14))) {
-            o->d8c = (-DAT_1f80027e << 2) & 0xff;
+            o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
             o->step++;
         }
         o->d30 = o->h->p.whole;

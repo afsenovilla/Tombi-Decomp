@@ -1,6 +1,6 @@
 // FUNC 801208f8 256 X003
 // MATCHING 801208f8 256
-extern unsigned short DAT_1f800172, DAT_1f80016e, DAT_1f80016a;
+extern unsigned short PLAYER_D_WHOLE, PLAYER_Y_WHOLE, PLAYER_H_WHOLE;
 extern unsigned char *PTR_80135c50[];
 extern unsigned FUN_8001f9e0(void);
 
@@ -11,9 +11,9 @@ unsigned char enemyPickActionByPlayerDistance(int a)
     short u;
     int v;
     unsigned char *t;
-    if ((unsigned short)(*(unsigned short *)(*(int *)(a + 0x44) + 2) - DAT_1f800172 + 0x2d) >= 0x5b) return 0xff;
-    if ((unsigned short)(*(unsigned short *)(a + 0x16) - DAT_1f80016e + 0x46) >= 0x6f) return 0xff;
-    d = *(unsigned short *)(*(int *)(a + 0x40) + 2) - DAT_1f80016a;
+    if ((unsigned short)(*(unsigned short *)(*(int *)(a + 0x44) + 2) - PLAYER_D_WHOLE + 0x2d) >= 0x5b) return 0xff;
+    if ((unsigned short)(*(unsigned short *)(a + 0x16) - PLAYER_Y_WHOLE + 0x46) >= 0x6f) return 0xff;
+    d = *(unsigned short *)(*(int *)(a + 0x40) + 2) - PLAYER_H_WHOLE;
     if ((unsigned short)(d + 0x80) >= 0x101) return 0xff;
                 s = d;
                 if ((short)d < 0)

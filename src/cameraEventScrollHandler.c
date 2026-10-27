@@ -87,7 +87,7 @@ void cameraEventScrollHandler(TObj *o)
         if (c == 2) {
             GAME.disableSelectMenu = 0;
             o->state = 3;
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             GAME.fadeScreenControl = 3;
         } else if (c == 3) {
             GAME.disableSelectMenu = 0;

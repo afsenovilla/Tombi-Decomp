@@ -4,10 +4,10 @@
 typedef struct { short vx, vy, vz, pad; } SVec;
 #define SV(o, i) (((SVec *)((char *)(o) + 0xb4))[i])
 #define BA5(o) (*(signed char *)&(o)->ba5)
-extern unsigned short DAT_1f8001c8;
-extern unsigned short DAT_1f80016a;
-extern unsigned short DAT_1f80016e;
-extern unsigned short DAT_1f800172;
+extern unsigned short SPAWN_AXIS_SWAP;
+extern unsigned short PLAYER_H_WHOLE;
+extern unsigned short PLAYER_Y_WHOLE;
+extern unsigned short PLAYER_D_WHOLE;
 extern short NEG_SIN_TABLE[];
 extern short COS_TABLE[];
 extern unsigned char PLAYER_DRAW_DEPTH;
@@ -37,22 +37,22 @@ void updateColorBurstParticle(TObj *o)
         SV(o, 3).vz = 0;
         break;
     case 1:
-        switch (DAT_1f8001c8 & 1) {
+        switch (SPAWN_AXIS_SWAP & 1) {
         case 0:
             o->animFrame = (o->animFrame + 3) & 0xff;
             o->d88 = ((o->animFrame - 0x40) & 0xff) << 4;
             k = (NEG_SIN_TABLE[(unsigned char)o->animFrame] * 3 >> 11) - 0x10;
-            o->y.p.whole = DAT_1f80016e - k;
+            o->y.p.whole = PLAYER_Y_WHOLE - k;
             break;
         case 1:
             o->animFrame = (o->animFrame - 3) & 0xff;
             o->d88 = ((o->animFrame - 0x80) & 0xff) << 4;
             k = (NEG_SIN_TABLE[(unsigned char)o->animFrame] * 3 >> 11) + 0x10;
-            o->y.p.whole = DAT_1f80016e + k;
+            o->y.p.whole = PLAYER_Y_WHOLE + k;
             break;
         }
-        o->h->p.whole = DAT_1f80016a + (COS_TABLE[(unsigned char)o->animFrame] * BA5(o) >> 12);
-        o->d->p.whole = DAT_1f800172 + (NEG_SIN_TABLE[(unsigned char)o->animFrame] * BA5(o) >> 12);
+        o->h->p.whole = PLAYER_H_WHOLE + (COS_TABLE[(unsigned char)o->animFrame] * BA5(o) >> 12);
+        o->d->p.whole = PLAYER_D_WHOLE + (NEG_SIN_TABLE[(unsigned char)o->animFrame] * BA5(o) >> 12);
         o->b0f = PLAYER_DRAW_DEPTH - 1;
         t = o->timer;
         if (t >= 0x32) {

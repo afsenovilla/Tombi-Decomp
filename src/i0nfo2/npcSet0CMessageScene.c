@@ -11,7 +11,7 @@ extern B12 PLAYER_POS;
 extern short PLAYER_Y;
 extern short PLAYER_ANIM_FRAME;
 extern Fix16 *PLAYER_H;
-extern TObj *D_800A60C8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2E0;
 extern TObj *D_8009F2E4;
@@ -58,13 +58,13 @@ void npcSet0CMessageScene(TObj *o)
         if (--o->w08 <= 0) {
             a->animFrame = 1;
             v = PLAYER_POS;
-            D_800A60C8 = showMessageBoxDirect(2, 0, &v);
+            PLAYER_MESSAGE_BOX = showMessageBoxDirect(2, 0, &v);
             o->state++;
         }
         break;
     case 2:
-        if (D_800A60C8->b04 == 2) {
-            D_800A60C8->b04 = 3;
+        if (PLAYER_MESSAGE_BOX->b04 == 2) {
+            PLAYER_MESSAGE_BOX->b04 = 3;
             setEventComplete(0x32, 0);
             o->w08 = 2;
             a->b68 = 0;
@@ -95,10 +95,10 @@ void npcSet0CMessageScene(TObj *o)
             D_8009C942 = 1;
             PLAYER_STEP = 0;
             if (D_8009CF00 != 0 && D_8009CF04 != 0) {
-                D_800A60C8 = showMessageBoxDirect(2, 2, &v);
+                PLAYER_MESSAGE_BOX = showMessageBoxDirect(2, 2, &v);
                 o->state = 10;
             } else {
-                D_800A60C8 = showMessageBoxDirect(2, 1, &v);
+                PLAYER_MESSAGE_BOX = showMessageBoxDirect(2, 1, &v);
                 o->state = 6;
             }
         } else if (b->b68 != 0) {
@@ -108,15 +108,15 @@ void npcSet0CMessageScene(TObj *o)
             D_8009C942 = 1;
             PLAYER_STEP = 0;
             if (D_8009CF00 != 0 && D_8009CF04 != 0) {
-                D_800A60C8 = showMessageBoxDirect(0, 0xCD, &v);
+                PLAYER_MESSAGE_BOX = showMessageBoxDirect(0, 0xCD, &v);
             } else if (D_8009CF01 != 0) {
-                D_800A60C8 = showMessageBoxDirect(0, 0xCA, &v);
+                PLAYER_MESSAGE_BOX = showMessageBoxDirect(0, 0xCA, &v);
                 removeItemFromInventory(0x40, 1);
                 if (D_8009CF00 == 0) {
                     D_8009CF00++;
                 }
             } else {
-                D_800A60C8 = showMessageBoxDirect(0, 0xC9, &v);
+                PLAYER_MESSAGE_BOX = showMessageBoxDirect(0, 0xC9, &v);
             }
             o->state = 4;
         } else if (c->b68 != 0) {
@@ -126,22 +126,22 @@ void npcSet0CMessageScene(TObj *o)
             D_8009C942 = 1;
             PLAYER_STEP = 0;
             if (D_8009CF00 != 0 && D_8009CF04 != 0) {
-                D_800A60C8 = showMessageBoxDirect(0, 0xCD, &v);
+                PLAYER_MESSAGE_BOX = showMessageBoxDirect(0, 0xCD, &v);
             } else if (D_8009CF02[0] != 0) {
-                D_800A60C8 = showMessageBoxDirect(0, 0xCC, &v);
+                PLAYER_MESSAGE_BOX = showMessageBoxDirect(0, 0xCC, &v);
                 if (D_8009CF04 == 0) {
                     D_8009CF04++;
                 }
             } else {
-                D_800A60C8 = showMessageBoxDirect(0, 0xCB, &v);
+                PLAYER_MESSAGE_BOX = showMessageBoxDirect(0, 0xCB, &v);
                 D_8009CF02[0]++;
             }
             o->state = 5;
         }
         break;
     case 4:
-        if (D_800A60C8->b04 == 2) {
-            D_800A60C8->b04 = 3;
+        if (PLAYER_MESSAGE_BOX->b04 == 2) {
+            PLAYER_MESSAGE_BOX->b04 = 3;
             b->b68 = 0;
             o->w08 = 2;
             o->state = 9;
@@ -156,8 +156,8 @@ void npcSet0CMessageScene(TObj *o)
         }
         break;
     case 5:
-        if (D_800A60C8->b04 == 2) {
-            D_800A60C8->b04 = 3;
+        if (PLAYER_MESSAGE_BOX->b04 == 2) {
+            PLAYER_MESSAGE_BOX->b04 = 3;
             o->w08 = 2;
             c->b68 = 0;
             D_8009C93F = 0;
@@ -170,8 +170,8 @@ void npcSet0CMessageScene(TObj *o)
         }
         break;
     case 6:
-        if (D_800A60C8->b04 == 2) {
-            D_800A60C8->b04 = 3;
+        if (PLAYER_MESSAGE_BOX->b04 == 2) {
+            PLAYER_MESSAGE_BOX->b04 = 3;
             a->b68 = 0;
             o->state = 9;
         }
@@ -188,8 +188,8 @@ void npcSet0CMessageScene(TObj *o)
         o->state = 3;
         break;
     case 10:
-        if (D_800A60C8->b04 == 2) {
-            D_800A60C8->b04 = 3;
+        if (PLAYER_MESSAGE_BOX->b04 == 2) {
+            PLAYER_MESSAGE_BOX->b04 = 3;
             S16(PTR(a, 0x40), 2) = S16(PLAYER_H, 2);
             a->y.p.whole = PLAYER_Y - 4;
             o->w08 = 0x3C;

@@ -5,7 +5,7 @@ extern char MOVE_TABLE_1[];
 extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[];
 extern unsigned short *KOMA_PIG_ANIMS[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
-extern unsigned short DAT_1f80016a, DAT_1f800172;
+extern unsigned short PLAYER_H_WHOLE, PLAYER_D_WHOLE;
 extern void FUN_80127214(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int enemyProbeGround(TObj *);
@@ -40,8 +40,8 @@ void komaPigSubtype06Step(TObj *o)
         break;
     case 2:
         FUN_80127214(o);
-        dx = (unsigned short)o->h->p.whole - DAT_1f80016a + 0x60;
-        if ((unsigned short)(o->d->p.whole - DAT_1f800172 + 0x2d) >= 0x5b || (unsigned short)dx >= 0xc1) {
+        dx = (unsigned short)o->h->p.whole - PLAYER_H_WHOLE + 0x60;
+        if ((unsigned short)(o->d->p.whole - PLAYER_D_WHOLE + 0x2d) >= 0x5b || (unsigned short)dx >= 0xc1) {
             o->timer = 0;
         } else if (o->timer++ >= 0x46) {
             o->timer = 10;

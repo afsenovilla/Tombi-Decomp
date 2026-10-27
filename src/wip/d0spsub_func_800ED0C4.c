@@ -39,7 +39,7 @@ extern int D_80111128;
 extern volatile int D_80111128_v;
 extern char D_80111134, D_80111138;
 extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
-extern volatile unsigned char GAME_PLAYER_MODE, PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, D_8009C940, D_8009C941;
+extern volatile unsigned char GAME_PLAYER_MODE, PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID;
 extern int subScreenMoveTabCursor(Menu *m, int n);
 extern int subScreenMoveGridCursor(Menu *m);
 extern int subScreenMoveGridCursorN(Menu *m, int n);
@@ -341,8 +341,8 @@ int func_800ED0C4(Menu *m)
                 PLAYER_STATE = 1;
                 PLAYER_STEP = 0;
                 PLAYER = (int)t;
-                D_8009C940 = 1;
-                D_8009C941 = x;
+                GVARS_USE_ITEM_PENDING = 1;
+                GVARS_USE_ITEM_ID = x;
                 D_80111138 = b;
                 D_8009CD96 = b;
                 }

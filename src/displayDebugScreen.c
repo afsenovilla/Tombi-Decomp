@@ -122,6 +122,6 @@ void displayDebugScreen(void)
     func_8001CE80(var_a0);
 
     temp_v1_3 = (*(Task**)(&PSX_SCRATCH[0x1D4]))->step.value;
-    *(u_long*)&D_8009EB4C = 0;
+    *(u_long*)&LOADING_SCREEN_STATE = 0;
     (*(Task**)(&PSX_SCRATCH[0x1D4]))->step.value=temp_v1_3+1;
 }

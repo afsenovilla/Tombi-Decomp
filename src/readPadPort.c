@@ -9,7 +9,7 @@ typedef struct {
 } PadInfo;
 
 extern PadInfo PAD_INFO[];
-extern unsigned char DAT_8009f7f0[];
+extern unsigned char PAD_BUFFERS[];
 extern unsigned char DAT_8009f812[];
 extern void PadInfoMode(int, int, int);
 
@@ -22,11 +22,11 @@ short readPadPort(short port)
 
     switch (port) {
     case 0:
-        if (DAT_8009f7f0[0] != 0)
+        if (PAD_BUFFERS[0] != 0)
             return 0;
         PadInfoMode(0, 2, 0);
-        btn = ~*(unsigned short *)&DAT_8009f7f0[2];
-        ty = (DAT_8009f7f0[1] >> 4) & 7;
+        btn = ~*(unsigned short *)&PAD_BUFFERS[2];
+        ty = (PAD_BUFFERS[1] >> 4) & 7;
         break;
     case 1:
         if (DAT_8009f812[0] != 0)
@@ -46,8 +46,8 @@ short readPadPort(short port)
         break;
     case 7:
         if (port == 0) {
-            p->x = DAT_8009f7f0[6];
-            p->y = DAT_8009f7f0[7];
+            p->x = PAD_BUFFERS[6];
+            p->y = PAD_BUFFERS[7];
             if ((btn & 0xf0) == 0) {
                 m = btn & 0xff0f;
                 a = (p->x == 0) << 7;

@@ -7,7 +7,7 @@ extern void FUN_8005f290(short *, int, int, int);
 extern void unpackSpriteFrame(int, int, char *, int);
 extern void loadTIM(char *, int, int, int, int);
 extern int DAT_1f800350;
-extern char DAT_800d7e28[];
+extern char SPRITE_UNPACK_BUFFER[];
 void uploadThrownObjectFrame(int a, int b)
 {
     short r[4];
@@ -16,15 +16,15 @@ void uploadThrownObjectFrame(int a, int b)
     r[2] = 0x20;
     r[3] = 0x60;
     FUN_8005f290(r, 0, 0, 0);
-    unpackSpriteFrame(*(int *)0x1f800350, (short)a, DAT_800d7e28, 0x10000c0);
-    loadTIM(DAT_800d7e28, (short)(b * 0x20 + 0xc1), 0x100, 0xe0, 0x1f0);
+    unpackSpriteFrame(*(int *)0x1f800350, (short)a, SPRITE_UNPACK_BUFFER, 0x10000c0);
+    loadTIM(SPRITE_UNPACK_BUFFER, (short)(b * 0x20 + 0xc1), 0x100, 0xe0, 0x1f0);
 }
 #else
 extern void FUN_8005f290(short *, int, int, int);
 extern void unpackSpriteFrame(int, int, char *, int);
 extern void loadTIM(char *, int, int, int, int);
 extern int DAT_1f800350;
-extern char DAT_800d7e28[];
+extern char SPRITE_UNPACK_BUFFER[];
 void uploadThrownObjectFrame(int a, int b)
 {
     short r[4];
@@ -33,7 +33,7 @@ void uploadThrownObjectFrame(int a, int b)
     r[2] = 0x20;
     r[3] = 0x60;
     FUN_8005f290(r, 0, 0, 0);
-    unpackSpriteFrame(DAT_1f800350, (short)a, DAT_800d7e28, 0xa001c0);
-    loadTIM(DAT_800d7e28, (short)(b * 0x20 + 0x1c1), 0xa0, 0xe0, 0x1f0);
+    unpackSpriteFrame(DAT_1f800350, (short)a, SPRITE_UNPACK_BUFFER, 0xa001c0);
+    loadTIM(SPRITE_UNPACK_BUFFER, (short)(b * 0x20 + 0x1c1), 0xa0, 0xe0, 0x1f0);
 }
 #endif

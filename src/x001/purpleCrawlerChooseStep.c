@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short D_1F80016A[];
+extern unsigned short PLAYER_H_WHOLE[];
 extern unsigned char D_8013C7E0[], D_8013C7F0[];
 extern int Rand(void);
 
@@ -33,12 +33,12 @@ void purpleCrawlerChooseStep(TObj *o)
         o->w22 = 0;
         o->step = 0;
         h = o->h;
-        if ((unsigned short)(D_1F80016A[0] - h->p.whole + 0xf0) < 0x1e1
+        if ((unsigned short)(PLAYER_H_WHOLE[0] - h->p.whole + 0xf0) < 0x1e1
             && (unsigned short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0xa0) < 0x141) {
             if (o->ba7) o->step = D_8013C7E0[Rand() & 0xf];
             else o->step = D_8013C7F0[Rand() & 0xf];
             if (o->step == 0) o->step++;
-            o->animFrame = (short)D_1F80016A[0] < o->h->p.whole;
+            o->animFrame = (short)PLAYER_H_WHOLE[0] < o->h->p.whole;
         }
     }
 }

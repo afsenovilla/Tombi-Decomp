@@ -7,7 +7,7 @@
 
 extern signed char GAME_PLAYER_MODE;
 extern unsigned short JOYPAD_STATE;
-extern unsigned short D_1F8003C4;
+extern unsigned short BUTTON_MASK_A;
 extern unsigned char D_800A60F8;
 
 int checkPuppyRumorNpcTalk(TObj *o)
@@ -18,7 +18,7 @@ int checkPuppyRumorNpcTalk(TObj *o)
         && (unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - 0xaad) < 0x40 && PLAYER.obj.y.p.whole >= -0x10f) {
         if (o->animTimer != 0) {
             r = 1;
-        } else if (GAME_PLAYER_MODE == 1 && (JOYPAD_STATE & D_1F8003C4)) {
+        } else if (GAME_PLAYER_MODE == 1 && (JOYPAD_STATE & BUTTON_MASK_A)) {
             r = 1;
             GVARS.b42 = 1;
             D_800A60F8 = 1;

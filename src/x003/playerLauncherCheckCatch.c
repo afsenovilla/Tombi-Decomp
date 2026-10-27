@@ -17,7 +17,7 @@ int playerLauncherCheckCatch(TObj *o)
     if (SPAD.b1a4 != 0) goto ret0;
     if (PLAYER != 1) return 0;
     if (D_800A60E4 == 2) return 0;
-    if (GVARS.b40 != 0) return 0;
+    if (GVARS.useItemPending != 0) return 0;
     dx = (*(short*)((char*)&SPAD.i170 + 2)) - o->d->p.whole + 0x2d;
     if ((unsigned short)dx >= 0x5b) return 0;
     dx = (*(short*)((char*)&SPAD.i168 + 2)) - o->h->p.whole;

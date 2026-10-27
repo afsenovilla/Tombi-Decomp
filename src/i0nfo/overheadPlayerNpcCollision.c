@@ -2,8 +2,8 @@
 // MATCHING 800ec5e8 372
 #include "TOBJ.H"
 extern unsigned char D_1F8001A5;
-extern TObj **D_1F80021C;
-extern short D_1F80019E, D_1F800246;
+extern TObj **CAT2_OBJECT_LIST;
+extern short D_1F80019E, CAT2_OBJECT_COUNT;
 extern void overheadResolveNpcContact(unsigned char *s, TObj *o);
 extern unsigned char D_8009C93A, D_8009C942[];
 extern unsigned char PLAYER[];
@@ -29,9 +29,9 @@ void overheadPlayerNpcCollision(void)
         switch (*s) {
         case 1: case 2: case 3:
         if (D_8009C93A != 0) {
-            list = D_1F80021C;
+            list = CAT2_OBJECT_LIST;
             D_800A60A1 = 0;
-            for (D_1F80019E = D_1F800246; D_1F80019E != 0; ) {
+            for (D_1F80019E = CAT2_OBJECT_COUNT; D_1F80019E != 0; ) {
                 o = *list;
                 D_1F80019E--;
                 list++;

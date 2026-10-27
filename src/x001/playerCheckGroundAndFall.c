@@ -6,7 +6,7 @@ extern int playerGetWallContactKind(TObj *);
 extern void FUN_8003fd78(TObj *, int, int);
 extern TObj *PLAYER_EXT;
 extern int GAME_AREA00_EVENT_CONTROL;
-extern unsigned short DAT_1f8003c4;
+extern unsigned short BUTTON_MASK_A;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned char GAME_PLAYER_MODE[];
 
@@ -20,7 +20,7 @@ void playerCheckGroundAndFall(TObj *o)
         case 1:
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
-            if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (PAD_PRESSED[0] & DAT_1f8003c4)) o->ba7 = 1;
+            if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (PAD_PRESSED[0] & BUTTON_MASK_A)) o->ba7 = 1;
             B(PLAYER_EXT, 8) = o->animFrame & 1;
             o->step = 0x10;
             o->state = 0;
@@ -43,7 +43,7 @@ void playerCheckGroundAndFall(TObj *o)
             B(o, 0xcd) = 0;
             B(o, 0xce) = 0;
             B(PLAYER_EXT, 8) = o->animFrame & 1;
-            if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (PAD_PRESSED[0] & DAT_1f8003c4)) o->ba7 = 1;
+            if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (PAD_PRESSED[0] & BUTTON_MASK_A)) o->ba7 = 1;
             o->step = 0x1e;
             o->state = 0;
             break;

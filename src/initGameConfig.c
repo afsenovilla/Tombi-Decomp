@@ -24,7 +24,7 @@ extern short DAT_1f8000f6;
 extern unsigned char DAT_1f8003d3;
 extern unsigned char D_8009C972;
 extern unsigned char DAT_1f8003ce;
-extern short DAT_1f8001c8;
+extern short SPAWN_AXIS_SWAP;
 extern unsigned char DAT_1f8003d1;
 extern unsigned short AREA_VARIANT;
 extern unsigned char D_8009C973;
@@ -67,7 +67,7 @@ void initGameConfig(void)
     GCD.bd090 = 255;
     GCD.bcf1c = BUTTON_CONFIG_INDEX;
     DAT_1f8003ce = 0;
-    DAT_1f8001c8 = 0;
+    SPAWN_AXIS_SWAP = 0;
     DAT_1f8003d1 = 0;
     AREA_VARIANT = 0;
     (*(short*)&GAME.selectedSection) = 0;

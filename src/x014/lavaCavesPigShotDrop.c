@@ -22,7 +22,7 @@ static void *D_80129FA8[9] = {
     D_8012A33C,
 };
 extern unsigned short D_801266E0[];
-extern unsigned short D_1F800172[], D_1F80016E[];
+extern unsigned short PLAYER_D_WHOLE[], PLAYER_Y_WHOLE[];
 extern short COS_TABLE[], D_8007A1F0[];
 extern short D_800A457C, D_800A457E, D_800A4582;
 extern short D_800A4580[]; /* debt: second name for D_800A4582 keeps the game's reload */
@@ -76,8 +76,8 @@ void lavaCavesPigShotDrop(TObj *o)
         o->velH = 0x480;
         o->h->p.whole = (*(unsigned short*)((char*)&SPAD.i174 + 2)) + D_801266E0[FUN_8001f9e0() & 7];
         o->y.p.whole = ((unsigned short*)&SPAD.s17a)[0] - 0xf0;
-        o->d->p.whole = D_1F800172[0];
-        o->d38 = angleFromDelta(((unsigned short*)((char*)&SPAD.i168 + 2))[0] - o->h->p.whole, D_1F80016E[0] - o->y.p.whole);
+        o->d->p.whole = PLAYER_D_WHOLE[0];
+        o->d38 = angleFromDelta(((unsigned short*)((char*)&SPAD.i168 + 2))[0] - o->h->p.whole, PLAYER_Y_WHOLE[0] - o->y.p.whole);
         o->d8c = (unsigned char)(o->d38 + 0x40);
         o->d38 = *(unsigned char *)&o->d38;
         n = allocObjectLayer2();

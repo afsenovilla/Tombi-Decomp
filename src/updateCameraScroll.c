@@ -23,7 +23,7 @@ extern G PLAYER;
 extern unsigned char D_800A60D8;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short JOYPAD_STATE;
-extern short D_1f8001c8;
+extern short SPAWN_AXIS_SWAP;
 extern int handleLookScrollInput(S *);
 extern void cameraScrollInputStep(S *, int);
 extern void loadSectionHeight(S *);
@@ -293,7 +293,7 @@ void updateCameraScroll(S *o)
         break;
     case 10:
         if (GVARS.b3f != 0) break;
-        if (D_1f8001c8 == 0) {
+        if (SPAWN_AXIS_SWAP == 0) {
             if (GAME.selectedPlane <= GAME.area00_fogControl) {
                 o->b6c = 0;
                 break;

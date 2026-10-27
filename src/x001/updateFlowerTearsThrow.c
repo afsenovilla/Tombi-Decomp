@@ -10,10 +10,10 @@ INCLUDE_ASM_V("x01/nonmatchings/x01", func_80118BCC_slps01144);
 #include "gvars.h"
 #include "TOBJ.H"
 extern void *D_8013E540[];
-extern unsigned short D_1F80016E[];
-extern unsigned short D_1F800172[];
+extern unsigned short PLAYER_Y_WHOLE[];
+extern unsigned short PLAYER_D_WHOLE[];
 typedef struct { short x; } SX;
-extern SX D_1F80016A;
+extern SX PLAYER_H_WHOLE;
 extern short COS_TABLE[];
 extern int FUN_800202b4(TObj *);
 extern void FUN_800187e4(TObj *);
@@ -40,10 +40,10 @@ void updateFlowerTearsThrow(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            if (GVARS.b40 && GVARS.b41 == 0xd) {
-                o->h->p.whole = D_1F80016A.x;
-                o->y.p.whole = D_1F80016E[0] - 0x20;
-                o->d->p.whole = D_1F800172[0];
+            if (GVARS.useItemPending && GVARS.useItemId == 0xd) {
+                o->h->p.whole = PLAYER_H_WHOLE.x;
+                o->y.p.whole = PLAYER_Y_WHOLE[0] - 0x20;
+                o->d->p.whole = PLAYER_D_WHOLE[0];
                 o->step++;
             }
             break;
@@ -52,8 +52,8 @@ void updateFlowerTearsThrow(TObj *o)
             o->timer = 0x3c;
             o->velV = 0x180;
             o->step++;
-            o->velH = ((0xb5e - D_1F80016A.x) << 8) / 32;
-            if (D_1F80016A.x < 0xb5e)
+            o->velH = ((0xb5e - PLAYER_H_WHOLE.x) << 8) / 32;
+            if (PLAYER_H_WHOLE.x < 0xb5e)
                 o->animFrame = 0;
             else
                 o->animFrame = 1;

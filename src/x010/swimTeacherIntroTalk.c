@@ -23,8 +23,8 @@ extern short PLAYER_Y[];
 extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
-extern short D_1F80016A[];
-extern short D_1F80016E[];
+extern short PLAYER_H_WHOLE[];
+extern short PLAYER_Y_WHOLE[];
 extern int D_1F800168;
 extern int D_1F80016C;
 extern int D_1F800168A[];
@@ -56,7 +56,7 @@ void swimTeacherIntroTalk(TObj *o)
         SETANIM(0);
         o->state++;
     case 1:
-        if (D_1F80016A[0] >= 0xc81 && D_1F80016E[0] >= -0x27) {
+        if (PLAYER_H_WHOLE[0] >= 0xc81 && PLAYER_Y_WHOLE[0] >= -0x27) {
             *(signed char *)&o->b0f = -7;
             GVARS.b3f = 1;
             GVARS.b42 = 1;
@@ -117,8 +117,8 @@ void swimTeacherIntroTalk(TObj *o)
         }
         if (o->timer <= 0) {
             o->state++;
-            o->a.p.whole = D_1F80016A[0] + 8;
-            o->y.p.whole = D_1F80016E[0];
+            o->a.p.whole = PLAYER_H_WHOLE[0] + 8;
+            o->y.p.whole = PLAYER_Y_WHOLE[0];
             o->timer = 8;
         } else {
             o->timer--;

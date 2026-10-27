@@ -3,7 +3,7 @@
 // FLAGS -O2 -G0 -fno-schedule-insns
 extern short DAT_1f8001c6, DAT_1f800256;
 extern unsigned *DAT_1f80026c;
-extern short DAT_1f800248; extern unsigned *DAT_1f800228;
+extern short CAT5_OBJECT_COUNT; extern unsigned *CAT5_OBJECT_LIST;
 extern void drawObject(unsigned);
 
 void drawCategory5Objects(void)
@@ -21,12 +21,12 @@ void drawCategory5Objects(void)
             }
         }
     } else {
-        DAT_1f800256 = DAT_1f800248;
-        DAT_1f80026c = DAT_1f800228;
-        if (DAT_1f800248 != 0) {
+        DAT_1f800256 = CAT5_OBJECT_COUNT;
+        DAT_1f80026c = CAT5_OBJECT_LIST;
+        if (CAT5_OBJECT_COUNT != 0) {
             do {
-                q = DAT_1f800228; DAT_1f800228 = q + 1; s = DAT_1f800248; x = *q; DAT_1f800248 = s - 1; drawObject(x);
-            } while (DAT_1f800248 != 0);
+                q = CAT5_OBJECT_LIST; CAT5_OBJECT_LIST = q + 1; s = CAT5_OBJECT_COUNT; x = *q; CAT5_OBJECT_COUNT = s - 1; drawObject(x);
+            } while (CAT5_OBJECT_COUNT != 0);
         }
     }
 }

@@ -21,7 +21,7 @@ void func_80117870(TObj *o)
         if (GCD.bce05 == 0xff) break;
         if ((unsigned short)((*(S2 **)&PLAYER.obj.h)->s2 - 0x82) >= 0x28) break;
         if (PLAYER.obj.y.p.whole != -0x3d) break;
-        if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {
+        if (GVARS.useItemPending != 0 && GVARS.useItemId == 0x3e) {
             o->step = 2;
             o->state = 0;
         } else if ((*(volatile unsigned short *)&GV6.s70 & 0x1000) && (SPAD.s1fc & 0x20)) {
@@ -57,7 +57,7 @@ void stepBrokenStoneGearsTalk(TObj *o)
         if (GCD.bce05 == 0xff) break;
         if ((unsigned short)((*(S2 **)&PLAYER.obj.h)->s2 - 0x82) >= 0x28) break;
         if (PLAYER.obj.y.p.whole != -0x3d) break;
-        if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {
+        if (GVARS.useItemPending != 0 && GVARS.useItemId == 0x3e) {
             o->step = 2;
             o->state = 0;
         } else if ((*(volatile unsigned short *)&GV6.s70 & 0x10) && (SPAD.s1fc & 0x2000)) {

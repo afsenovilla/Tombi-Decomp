@@ -108,7 +108,7 @@ void pigGateDiscoveryScene(Ctl *o)
     case 5:
         RING(o);
         if (!GAME.fadeScreenControl) {
-            GVARS.b3c = 1;
+            GVARS.fadeEffect = 1;
             sevenFriendsMemberSetAnim(d, 0, 0);
             o->w0a = 200;
             o->state++;
@@ -163,7 +163,7 @@ void pigGateDiscoveryScene(Ctl *o)
         break;
     case 11:
         if (--o->w08 <= 0 && !GAME.fadeScreenControl) {
-            GVARS.b3c = 1;
+            GVARS.fadeEffect = 1;
             o->w08 = 0x80;
             o->state++;
         }

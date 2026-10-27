@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 extern unsigned short PLAYER_ANIM_FRAME;
-extern short D_1F80016E;
+extern short PLAYER_Y_WHOLE;
 extern void *D_8013577C[], *D_80135784[];
 extern short COS_TABLE[];
 extern void AnimLoadDuration(TObj *);
@@ -40,8 +40,8 @@ void lostBossItemNpcTalk(TObj *o)
         }
         break;
     case 1:
-        if (GVARS.b40 != 0 && GVARS.b41 != 0x90) break;
-        y = D_1F80016E;
+        if (GVARS.useItemPending != 0 && GVARS.useItemId != 0x90) break;
+        y = PLAYER_Y_WHOLE;
         if (!((y < -0x40b && ((*(unsigned char*)&PLAYER.obj.waa) || PLAYER.obj.b9e)) || y == -0x450)) break;
         o->state++;
         ((unsigned char*)&GCD.bd086)[0] = 1;
@@ -81,7 +81,7 @@ void lostBossItemNpcTalk(TObj *o)
         o->state = 0;
         break;
     case 4:
-        if (GVARS.b40 != 0 && GVARS.b41 == 0x90) {
+        if (GVARS.useItemPending != 0 && GVARS.useItemId == 0x90) {
             o->state = 6;
             break;
         }
@@ -117,7 +117,7 @@ void lostBossItemNpcTalk(TObj *o)
         }
     case 6:
         o->state++;
-        GVARS.b40 = 0;
+        GVARS.useItemPending = 0;
         FUN_80026e0c(0x90, 1);
         o->d90 = showMessageBoxDirect(3, 1, &o->a);
         ((unsigned char*)&GVARS.b3f)[0] = 1;

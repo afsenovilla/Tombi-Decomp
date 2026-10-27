@@ -13,7 +13,7 @@ void scriptOpSetFadeEffect(void)
     s32 b = *(s32*)((u8*)p + 0x1194);
 
     GAME_FADE_SCREEN_CONTROL = 0x10;
-    D_8009BCA4 = a;
+    GVARS_FADE_EFFECT = a;
     GAME_FADE_SCREEN_AMOUNT = b;
     asm("");
     p->pc++;

@@ -2065,3 +2065,29 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   1F8003C4.., GVARS bytes reached by their own symbol (8009C93F 55 refs, 8009C942, 8009C93E, 8009C940, 8009C93A: meaning unknown),
   PLAYER b6b / b9e / d90 / +0x9A, GAME +0x30 (US displayExpBar, but read as `& 3` by the speed code), GV6.s74 (8009D674, the pad halfword
   next to PAD_PRESSED), and the GCD bytes 8009CEBD.. / 8009CF06 / 8009D006.
+- MAIN0 data round 2, batch 3 (Oct 27 2026): 43 rows, chosen by real references. Display: DISPLAY_BUFFERS (8009E348, the two 0xD10
+  DISPENV / DRAWENV records of initWideDisplayEnv / initDisplay) and the bytes 12 sources reach by their own symbol, DISPLAY_BUFFER_0_BG_R /
+  G / B (8009E375.. = [0].draw.r0/g0/b0, the DRAWENV clear colour initDisplay / updateSectionFadeController set) and DISPLAY_BUFFER_1_BG_R /
+  G / B (8009F085..). Objects: SPAWN_RECORD_OBJECT / SPAWN_RECORD_PREV_OBJECT (8009BD98 / 9C, spawnObjectFromRecord's chain), OBJECT_POOL
+  (800A6610, 200 x 0xD4) and OBJECT_POOL_LAYER7 (800A49A8, 10 x 0x6C), FREE_OBJECTS_LAYER7 / FREE_OBJECT_COUNT_LAYER7 (1F800214 / 23C),
+  FREE_OBJECT_COUNT_LAYER1 (1F800236) / FREE_OBJECT_COUNT_UNLAYERED (1F80023E), the per-frame category stacks CAT2_OBJECT_LIST / COUNT
+  (1F80021C / 246), CAT5_OBJECT_LIST / COUNT (1F800228 / 248), CAT4_OBJECT_COUNT (1F80024C), CAT8_OBJECT_COUNT (1F800242),
+  UPDATE_OBJECT_INDEX (1F800198, the loop index updateObjectsLayer8 / updateObjectsUnlayered count and the sprites add to TICK_COUNT as a
+  phase), SPAWN_AXIS_SWAP (1F8001C8: bit 0 of the spawn row flags; every allocator swaps the h / d axis pointers when set). Player /
+  camera scratch: PLAYER_H_WHOLE / PLAYER_Y_WHOLE / PLAYER_D_WHOLE (1F80016A / 16E / 172, the whole parts updatePlayer copies every tick),
+  SCREEN_ORIGIN_X / SCREEN_ORIGIN_Y (1F800176 / 186, the world h / y the culling tests subtract: isOnScreen x - X + 0x40 < 0x1C1, Y - y +
+  0x40 < 0x171; whole parts of the ints 1F800174 / 184 updateCameraController sets), PLAYER_MESSAGE_BOX (800A60C8 = PLAYER.obj.d90, the
+  showMessageBox result of the scene code). Collision: COLLISION_HIT_FLAGS / COLLISION_HIT_HEIGHT (1F800282 / 27E, the TILE_COL_FLAGS /
+  TILE_COL_HEIGHT of the last hit). Input: BUTTON_MASK_A..D (1F8003C4..CA, BUTTON_CONFIGS[].a..d of loadButtonConfig; the default config
+  is Square / X / Circle / Triangle), PAD_BUFFERS (8009F7F0, the two 0x22-byte libpad buffers of joypadInit / readPadPort), PAD_INTR
+  (8009820C, the libpad I_STAT / I_MASK pointer, like PAD_SIO). HUD: HUD_ITEM_GAUGE_TIMERS (800B1468, u8[4][4]). Misc: AREA_MODEL_DRAW_LIST
+  (800B0D98, filled by the area model link hook, drawn by drawAreaModelList, cleared by clearOtBuffer), SPRITE_UNPACK_BUFFER (800D7E28),
+  LOADING_SCREEN_STATE (8009F7E4). GVARS fields reached by their own symbol: GVARS_USE_ITEM_PENDING / GVARS_USE_ITEM_ID (8009C940 / 41:
+  x014 updateSectionClearController sets id + pending, playerStepUseItem / l4Type1BInitModel consume them; gvars.h b40 / b41 ->
+  useItemPending / useItemId) and GVARS_FADE_EFFECT (8009C93C, scriptOpSetFadeEffect's first argument; b3c -> fadeEffect). The
+  header-declared US aliases (D_8009D6DD.., D_8009E3ED.., D_8009EB4C, D_8009EB58, D_800A5970, D_8009BCA4, D_1F8003C4..CA, D_1F800246 / 248,
+  D_1F80016A, D_1F800198, D_1F8001C8, D_1F800176 / 186, D_1F800214 / 236 / 23C) renamed by hand in game.h. Not named: the matrix / vector
+  scratch 1F800000 / 20 / 60 / 68 (GTE pipeline temporaries), the libgpu / libetc / libcd / libpress internals (80091930, 8009813C,
+  800970B4, 80096F4C, 8009BF58.., 8009BF70, 800A2264.., 8009F7E0, 80097094: no matched source), 8009D614 / 616 / 618 (inside PAD_INFO:
+  +2 / +4 / +6 are the vibration bytes, +8 the stick x), 800B1410 (HUD show state tickHud reads as .on / .cnt), the PLAYER bytes b69 /
+  b6b / b9c / b9e / w9a / da0 / wb2 / wb4 and PLX.b60f8 / b60fe / b6104 / b611b (meaning unknown), 1F8001C6 / 1F8001CF / 1F8001DC.

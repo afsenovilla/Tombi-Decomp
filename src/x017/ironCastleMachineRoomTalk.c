@@ -34,12 +34,12 @@ void ironCastleMachineRoomTalk(TObj *o)
             FUN_8001fe94(o, 0);
             o->d90 = showMessageBoxDirect(2, 0x2c, &b);
             o->state++;
-        } else if (GVARS.b40) {
-            if (GVARS.b41 == 0x3c && ((unsigned char*)&GCD.bce0a)[0] == 1) {
+        } else if (GVARS.useItemPending) {
+            if (GVARS.useItemId == 0x3c && ((unsigned char*)&GCD.bce0a)[0] == 1) {
                 o->step = 3;
                 o->state = 0;
             }
-            GVARS.b40 = 0;
+            GVARS.useItemPending = 0;
         }
         break;
     case 1:

@@ -88,7 +88,7 @@ extern unsigned char D_800A610B;
 extern unsigned char D_8009CF06;
 extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned char D_8009D090;
-extern unsigned char D_8009C940, D_8009C941;
+extern unsigned char GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID;
 extern unsigned char D_8009D089, D_8009D08A, D_8009D08B, D_8009D08C, D_8009D08D, D_8009D08E, D_8009D08F;
 extern unsigned char D_8009CD98, D_8009CD99, D_8009CD9A, D_8009CD9C, D_8009CD9D, D_8009CD9E, D_8009CD9F;
 extern int GAME_AREA00_EVENT_CONTROL, D_8009C984_a[];
@@ -122,8 +122,8 @@ int func_800E89F8(int item)
             PLAYER_SUBSTATE = 0x30;
             PLAYER_STEP = 0;
         }
-        D_8009C940 = 1;
-        D_8009C941 = item;
+        GVARS_USE_ITEM_PENDING = 1;
+        GVARS_USE_ITEM_ID = item;
         return 2;
     case 0xC:
         if (GCD.bcff8) GCD.bcff8 = 0;
@@ -134,8 +134,8 @@ int func_800E89F8(int item)
             PLAYER_SUBSTATE = 0x30;
             PLAYER_STEP = 0;
         }
-        D_8009C940 = 1;
-        D_8009C941 = item;
+        GVARS_USE_ITEM_PENDING = 1;
+        GVARS_USE_ITEM_ID = item;
         return 2;
     case 0x14:
         playSFX(0x19);
@@ -144,8 +144,8 @@ int func_800E89F8(int item)
             PLAYER_SUBSTATE = 0x30;
             PLAYER_STEP = 0;
         }
-        D_8009C940 = 1;
-        D_8009C941 = item;
+        GVARS_USE_ITEM_PENDING = 1;
+        GVARS_USE_ITEM_ID = item;
         if (GCD.bcef8) {
             GCD.bcef8 = 0;
             D_800A6101 = 0;
@@ -460,8 +460,8 @@ int func_800E89F8(int item)
         PLAYER_SUBSTATE = 0x30;
         PLAYER_STEP = 0;
         D_800A6038 = 3;
-        D_8009C940 = 1;
-        D_8009C941 = item;
+        GVARS_USE_ITEM_PENDING = 1;
+        GVARS_USE_ITEM_ID = item;
         return 1;
     case 0x7C:
         D_8009CD94 = 4;
@@ -472,8 +472,8 @@ int func_800E89F8(int item)
         PLAYER_SUBSTATE = 0x30;
         PLAYER_STEP = 0;
         D_800A6038 = 3;
-        D_8009C940 = 1;
-        D_8009C941 = item;
+        GVARS_USE_ITEM_PENDING = 1;
+        GVARS_USE_ITEM_ID = item;
         return 1;
     case 0x97:
         D_8009CD94 = 0xA;
@@ -484,8 +484,8 @@ int func_800E89F8(int item)
         PLAYER_SUBSTATE = 0x30;
         PLAYER_STEP = 0;
         D_800A6038 = 3;
-        D_8009C940 = 1;
-        D_8009C941 = item;
+        GVARS_USE_ITEM_PENDING = 1;
+        GVARS_USE_ITEM_ID = item;
         return 1;
     case 0x98:
         D_8009CD94 = 2;
@@ -496,8 +496,8 @@ int func_800E89F8(int item)
         PLAYER_SUBSTATE = 0x30;
         PLAYER_STEP = 0;
         D_800A6038 = 3;
-        D_8009C940 = 1;
-        D_8009C941 = item;
+        GVARS_USE_ITEM_PENDING = 1;
+        GVARS_USE_ITEM_ID = item;
         return 1;
     case 0xB:
         o = allocObjectLayer4();
@@ -584,7 +584,7 @@ int func_800E89F8(int item)
         PLAYER_SUBSTATE = 0x30;
         PLAYER_STEP = 0;
     }
-    D_8009C940 = 1;
-    D_8009C941 = item;
+    GVARS_USE_ITEM_PENDING = 1;
+    GVARS_USE_ITEM_ID = item;
     return 1;
 }

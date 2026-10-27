@@ -2,8 +2,8 @@
 // MATCHING 8011e1b0 348
 // probably: updateAreaMechanisms entry: swings +0x88 open (to 0xA00) when the player is within 0x18 x / 0x60 y and the event bytes allow, closes again (states 1/3)
 typedef struct { char p0[6]; unsigned char st; char p1[0x16 - 7]; unsigned short w16; char p2[0x88 - 0x18]; int d88; } O;
-extern unsigned short G16a, G16e;
-extern short G172;
+extern unsigned short PLAYER_H_WHOLE, PLAYER_Y_WHOLE;
+extern short PLAYER_D_WHOLE;
 extern unsigned char D60da, C36c6;
 extern signed char GAME_PLAYER_MODE;
 
@@ -13,8 +13,8 @@ void FUN_8011e1b0(O *o)
     unsigned char c;
     switch (o->st) {
     case 0:
-        if ((unsigned short)(G16a - 0x400) >= 0x18) break;
-        if ((unsigned short)(o->w16 - G16e + 0x30) > 0x60) break;
+        if ((unsigned short)(PLAYER_H_WHOLE - 0x400) >= 0x18) break;
+        if ((unsigned short)(o->w16 - PLAYER_Y_WHOLE + 0x30) > 0x60) break;
         if (D60da == 1) break;
         if (D60da == 2) {
             c = o->st;
@@ -23,7 +23,7 @@ void FUN_8011e1b0(O *o)
         }
         if (C36c6 != 0) break;
         if (GAME_PLAYER_MODE >= 3) break;
-        if (G172 <= 0) break;
+        if (PLAYER_D_WHOLE <= 0) break;
         o->st = 3;
         o->d88 = 0xa00;
         break;

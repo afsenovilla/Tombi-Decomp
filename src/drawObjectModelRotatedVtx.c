@@ -13,7 +13,7 @@ typedef struct {
 } O;
 extern MATRIX D_1f800000, D_1f800020, D_1f8000c0;
 extern SVECTOR D_1f800060, D_1f800068;
-extern unsigned short D_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern int *CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern void FUN_8006424c(SVECTOR *, MATRIX *);
@@ -26,7 +26,7 @@ extern void drawModelVtx(int, int *, O *, int, int);
 void drawObjectModelRotatedVtx(O *o)
 {
     getBaseMatrix(&D_1f800020);
-    switch (D_1f8001c8 & 1) {
+    switch (SPAWN_AXIS_SWAP & 1) {
     case 0:
         D_1f800060.vx = o->a84;
         D_1f800060.vy = o->a88;

@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 extern signed char GAME_PLAYER_MODE;
 extern short D_1f80019e;
-extern unsigned short D_1f800248;
-extern unsigned char **D_1f800228;
+extern unsigned short CAT5_OBJECT_COUNT;
+extern unsigned char **CAT5_OBJECT_LIST;
 extern void collidePlayerWithCat5Object(TObj *o, unsigned char *p);
 void collidePlayerWithCat5Objects(TObj *o)
 {
@@ -13,8 +13,8 @@ void collidePlayerWithCat5Objects(TObj *o)
     unsigned char *p;
     if (GVARS.b38 != 0) return;
     if (GAME_PLAYER_MODE == 3) return;
-    pp = D_1f800228;
-    D_1f80019e = D_1f800248;
+    pp = CAT5_OBJECT_LIST;
+    D_1f80019e = CAT5_OBJECT_COUNT;
     while (D_1f80019e != 0) {
         p = *pp++;
         D_1f80019e -= 1;

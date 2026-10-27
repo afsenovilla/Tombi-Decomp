@@ -22,11 +22,11 @@ void goGoCarFuelTalk(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (((unsigned char*)&GVARS.b40)[0]) {
-            if (GVARS.b41 == 0x41) {
+        if (((unsigned char*)&GVARS.useItemPending)[0]) {
+            if (GVARS.useItemId == 0x41) {
                 o->step = 3;
                 o->state = 0;
-                ((unsigned char*)&GVARS.b40)[0] = 0;
+                ((unsigned char*)&GVARS.useItemPending)[0] = 0;
             }
             break;
         }

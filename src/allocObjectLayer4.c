@@ -3,7 +3,7 @@
 // Best attempt: only differs in prologue order (game: addiu sp first, ours puts it after the first lh).
 extern short FREE_OBJECT_COUNT;
 extern char **FREE_OBJECTS;
-extern unsigned short DAT_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 
 char *allocObjectLayer4(void)
 {
@@ -16,7 +16,7 @@ char *allocObjectLayer4(void)
         FREE_OBJECTS = p + 1;
         r = *p;
         r[0x1c] = four;
-        if ((DAT_1f8001c8 & 1) == 0) {
+        if ((SPAWN_AXIS_SWAP & 1) == 0) {
             *(char **)(r + 0x40) = r + 0x10;
             *(char **)(r + 0x44) = r + 0x18;
         } else {

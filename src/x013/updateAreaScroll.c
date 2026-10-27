@@ -62,7 +62,7 @@ void func_80115FB4(TObj *o)
             (*(short*)&GAME.nextArea) = 1;
             (*(short*)&GAME.nextSection) = 4;
             (*(short*)&GAME.nextSpawnPoint) = 4;
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
         }
@@ -140,7 +140,7 @@ void updateAreaScroll(TObj *o)
             (*(short*)&GAME.nextArea) = 1;
             (*(short*)&GAME.nextSection) = 4;
             (*(short*)&GAME.nextSpawnPoint) = 4;
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
         }

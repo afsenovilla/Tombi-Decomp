@@ -8,7 +8,7 @@ typedef struct { short vx, vy, vz, pad; } SV;
 typedef struct { char p[0xb4]; SV v[4]; } OX;
 
 extern short D_8013589C[];
-extern short D_1F800176[];
+extern short SCREEN_ORIGIN_X[];
 extern unsigned int FUN_8001f9e0(void);
 
 #define V(o) (((OX *)(o))->v)
@@ -25,7 +25,7 @@ void translucentSpriteDriftB(TObj *o)
         o->velX = 0x100;
         o->timer = 0x168;
         INITV(o);
-        o->a.raw = (D_1F800176[0] + o->subtype * 52) << 16;
+        o->a.raw = (SCREEN_ORIGIN_X[0] + o->subtype * 52) << 16;
         k = 0x60;
         if (((unsigned short*)&GAME.selectedSection)[0] == 3)
             o->y.raw = (-0x272 - (FUN_8001f9e0() & 0xf) * 42) << 16;
@@ -38,7 +38,7 @@ void translucentSpriteDriftB(TObj *o)
         o->velX = 0x100;
         o->timer = 0x168;
         INITV(o);
-        o->a.raw = (D_1F800176[0] - 0xa0) << 16;
+        o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0) << 16;
         k = 0x18;
         if (((unsigned short*)&GAME.selectedSection)[0] == 3)
             o->y.raw = (-0x272 - (FUN_8001f9e0() & 0xf) * 42) << 16;
@@ -54,7 +54,7 @@ void translucentSpriteDriftB(TObj *o)
             V(o)[1].vx += o->velX >> 8;
             o->timer--;
         }
-        if (o->h->p.whole + V(o)[2].vx > D_1F800176[0] + 0x26c)
+        if (o->h->p.whole + V(o)[2].vx > SCREEN_ORIGIN_X[0] + 0x26c)
             o->step = 1;
         break;
     }

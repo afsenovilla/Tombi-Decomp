@@ -3,19 +3,19 @@
 typedef struct Th { char pad[0x4a]; short a; short b; } Th;
 extern Th *TASK_C;
 extern char DAT_1f8001cf;
-extern char DAT_8009e375, DAT_8009e376, DAT_8009e377;
-extern char DAT_8009f085, DAT_8009f086, DAT_8009f087;
+extern char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 
 void transitionToGameOver(void)
 {
     int t = (int)TASK_C;
     DAT_1f8001cf = 1;
-    DAT_8009e375 = 0;
-    DAT_8009e376 = 0;
-    DAT_8009e377 = 0;
-    DAT_8009f085 = 0;
-    DAT_8009f086 = 0;
-    DAT_8009f087 = 0;
+    DISPLAY_BUFFER_0_BG_R = 0;
+    DISPLAY_BUFFER_0_BG_G = 0;
+    DISPLAY_BUFFER_0_BG_B = 0;
+    DISPLAY_BUFFER_1_BG_R = 0;
+    DISPLAY_BUFFER_1_BG_G = 0;
+    DISPLAY_BUFFER_1_BG_B = 0;
     *(short *)(t + 0x4a) = 3;
     *(short *)(t + 0x4c) = 0;
 }

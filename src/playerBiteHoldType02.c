@@ -19,7 +19,7 @@ extern void func_80020554(void *);
     }                                                                 \
 }
 extern TObj *BITTEN_OBJECT;
-extern unsigned short D_1F8003C6, JOYPAD_STATE;
+extern unsigned short BUTTON_MASK_B, JOYPAD_STATE;
 extern unsigned char GAME_PLAYER_MODE;
 extern void ObjMotionStep(TObj *);
 extern void FUN_8001f96c(int, int, int, int);
@@ -125,7 +125,7 @@ void func_80102AC0(TObj *o)
 #include "gv6.h"
 #include "TOBJ.H"
 extern TObj *BITTEN_OBJECT;
-extern unsigned short D_1F8003C6, JOYPAD_STATE;
+extern unsigned short BUTTON_MASK_B, JOYPAD_STATE;
 extern unsigned char GAME_PLAYER_MODE;
 extern void ObjMotionStep(TObj *);
 extern void spawnImpactEffect(int, int, int, int);
@@ -209,7 +209,7 @@ void playerBiteHoldType02(TObj *o)
         o->h->p.whole = BITTEN_OBJECT->h->p.whole;
         o->y.p.whole = BITTEN_OBJECT->y.p.whole - BITTEN_OBJECT->box2;
         o->d8c = BITTEN_OBJECT->d8c;
-        if (JOYPAD_STATE & D_1F8003C6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             GAME_PLAYER_MODE = 0;
             o->b9c = 1;
             o->b69 = 0;

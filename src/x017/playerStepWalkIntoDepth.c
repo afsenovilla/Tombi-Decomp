@@ -4,7 +4,7 @@
 #include "gamestate.h"
 #define B(o, n) (((unsigned char *)(o))[n])
 extern TObj *PLAYER_EXT;
-extern unsigned short DAT_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
 
@@ -42,7 +42,7 @@ void playerStepWalkIntoDepth(TObj *o)
         PlayerSetAnimIfChanged(o, 0x2c);
     case 1:
         AnimAdvance(o);
-        if (DAT_1f8001c8 & 1)
+        if (SPAWN_AXIS_SWAP & 1)
             o->d->p.whole += 2;
         else
             o->d->p.whole -= 2;

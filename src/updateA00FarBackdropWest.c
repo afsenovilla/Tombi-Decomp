@@ -6,9 +6,9 @@
 // Demo version of PAL x000 8012236C (FUN_8012236c.c): reads 0x1F80017A (PAL 0x1F800186).
 /* size 340: splat fragment 80122410 is the tail of case 0. */
 #include "TOBJ.H"
-extern short DAT_1f800176;
+extern short SCREEN_ORIGIN_X;
 extern unsigned short D_1F80017A[];
-#define DAT_1f800186 D_1F80017A
+#define SCREEN_ORIGIN_Y D_1F80017A
 extern int DAT_800a4570[];
 extern int DAT_1f8002d4[];
 extern void *A00_FAR_BACKDROP_WEST_ANIMS[];
@@ -33,11 +33,11 @@ void FUN_8012236c(TObj *o)
         o->b04++;
         break;
     case 1:
-        r = DAT_1f800176;
+        r = SCREEN_ORIGIN_X;
         k = r;
         if (r < 0x71a) {
             x = o->d30;
-            j = DAT_1f800186[0];
+            j = SCREEN_ORIGIN_Y[0];
             o->b.p.whole = 0;
             o->a.p.whole = (short)(x - k) >> 3;
             o->y.p.whole = (short)(o->d34 - j) >> 1;
@@ -61,8 +61,8 @@ INCLUDE_ASM_V("x00/nonmatchings/x00", func_8012135C_slps01144);
 #else
 /* size 340: splat fragment 80122410 is the tail of case 0. */
 #include "TOBJ.H"
-extern short DAT_1f800176;
-extern unsigned short DAT_1f800186[];
+extern short SCREEN_ORIGIN_X;
+extern unsigned short SCREEN_ORIGIN_Y[];
 extern int DAT_800a4570[];
 extern int DAT_1f8002d4[];
 extern void *A00_FAR_BACKDROP_WEST_ANIMS[];
@@ -87,11 +87,11 @@ void updateA00FarBackdropWest(TObj *o)
         o->b04++;
         break;
     case 1:
-        r = DAT_1f800176;
+        r = SCREEN_ORIGIN_X;
         k = r;
         if (r < 0x71a) {
             x = o->d30;
-            j = DAT_1f800186[0];
+            j = SCREEN_ORIGIN_Y[0];
             o->b.p.whole = 0;
             o->a.p.whole = (short)(x - k) >> 3;
             o->y.p.whole = (short)(o->d34 - j) >> 1;

@@ -5,14 +5,14 @@ typedef void (*Fn)(TObj *);
 typedef struct { short s0, s2; } S2;
 extern unsigned char GAME_DISABLE_SELECT_MENU[];
 extern unsigned char GAME_AREA00_INTRO_PHASE, DAT_8009cda6, DAT_8009c93a, DAT_8009cdc0, DAT_8009ce0b, DAT_800a60da;
-extern unsigned char DAT_8009cfed, DAT_8009c938, DAT_8009cda8, DAT_8009c93f, GAME_FADE_SCREEN_CONTROL, DAT_8009c93c;
+extern unsigned char DAT_8009cfed, DAT_8009c938, DAT_8009cda8, DAT_8009c93f, GAME_FADE_SCREEN_CONTROL, GVARS_FADE_EFFECT;
 extern unsigned char DAT_8009d13f, DAT_8009c93e, DAT_8009c942;
 extern signed char GAME_PLAYER_MODE;
 extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short GAME_SELECTED_SPAWN_POINT[];
 extern unsigned char A00_SCROLL_CONTROLLER_MODE_BY_SECTION[];
 extern Fn A00_SCROLL_CONTROLLER_HANDLERS[];
-extern short DAT_1f80016a, DAT_1f80016e, DAT_1f800172;
+extern short PLAYER_H_WHOLE, PLAYER_Y_WHOLE, PLAYER_D_WHOLE;
 extern short DAT_1f8001c6;
 extern unsigned char MOVIE_PLAY_STATE, MOVIE_ID;
 extern int DAT_800a609c;
@@ -84,23 +84,23 @@ void updateA00ScrollController(TObj *o)
         switch (GAME_SELECTED_SPAWN_POINT[0]) {
         case 0:
         case 1:
-            if (DAT_8009ce0b != 0 && DAT_800a60da == 2 && (unsigned)(*(unsigned short *)&DAT_1f80016a - 0x400) < 0x18) {
+            if (DAT_8009ce0b != 0 && DAT_800a60da == 2 && (unsigned)(*(unsigned short *)&PLAYER_H_WHOLE - 0x400) < 0x18) {
                 stepPlayerXToward(0x40c);
-                if (DAT_1f800172 >= 0x2e) {
+                if (PLAYER_D_WHOLE >= 0x2e) {
                     if (!tryStartItemInteraction(o, 2, 2)) break;
                     DAT_800a609c = 1;
                     o->step = 8;
                     break;
                 }
             }
-            if (DAT_1f80016a >= 0x4a2 && DAT_1f80016e >= -0x3c) {
+            if (PLAYER_H_WHOLE >= 0x4a2 && PLAYER_Y_WHOLE >= -0x3c) {
                 if (!tryStartItemInteraction(o, 2, 0)) break;
                 DAT_800a609c = 1;
                 goto s8;
             }
             if (o->subtype == 1) break;
-            if (DAT_1f80016a < 0x4ed) break;
-            if (DAT_1f80016e >= -0x95) break;
+            if (PLAYER_H_WHOLE < 0x4ed) break;
+            if (PLAYER_Y_WHOLE >= -0x95) break;
             GAME_SELECTED_SECTION = 1;
             markSectionVisited();
             o->state = 0;
@@ -118,18 +118,18 @@ void updateA00ScrollController(TObj *o)
     case 5:
         GAME_SELECTED_SPAWN_POINT[0] = 0;
         A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
-        if (DAT_1f80016a < 0x4ec) {
+        if (PLAYER_H_WHOLE < 0x4ec) {
             o->state = 0;
             o->step--;
             GAME_SELECTED_SECTION = 0;
             markSectionVisited();
             break;
         }
-        if (DAT_1f80016a >= 0xa46 && DAT_1f80016e >= -0x122) {
+        if (PLAYER_H_WHOLE >= 0xa46 && PLAYER_Y_WHOLE >= -0x122) {
             if (tryStartItemInteraction(o, 2, 0)) o->step = 8;
             break;
         }
-        if (DAT_1f80016a >= 0x9dd && DAT_1f80016e < -0x18f) {
+        if (PLAYER_H_WHOLE >= 0x9dd && PLAYER_Y_WHOLE < -0x18f) {
             GAME_SELECTED_SECTION = 2;
             o->step++;
             break;
@@ -137,8 +137,8 @@ void updateA00ScrollController(TObj *o)
         {
         int k = DAT_8009cfed;
         if (k != 1) break;
-        if (DAT_1f80016a < 0x938) break;
-        if (DAT_1f80016e < -0x64) break;
+        if (PLAYER_H_WHOLE < 0x938) break;
+        if (PLAYER_Y_WHOLE < -0x64) break;
         if (tryStartItemInteraction(o, 2, 1)) {
             DAT_800a609c = k;
             o->step = 8;
@@ -147,25 +147,25 @@ void updateA00ScrollController(TObj *o)
         break;
     case 6:
         updateCameraFollow(o);
-        if (DAT_1f80016e < -0x2ed) {
+        if (PLAYER_Y_WHOLE < -0x2ed) {
             GAME_SELECTED_SPAWN_POINT[0] = 2;
             o->step++;
             break;
         }
-        if (DAT_1f80016a >= 0x9dc) break;
+        if (PLAYER_H_WHOLE >= 0x9dc) break;
         GAME_SELECTED_SECTION = 1;
         markSectionVisited();
         o->step--;
         break;
     case 7:
         updateCameraFollow(o);
-        if (DAT_1f80016e < -0x559 && DAT_1f800172 == 0x1c2 && DAT_1f80016a < 0x88c) {
+        if (PLAYER_Y_WHOLE < -0x559 && PLAYER_D_WHOLE == 0x1c2 && PLAYER_H_WHOLE < 0x88c) {
             if (!tryStartItemInteraction(o, 2, 1)) break;
             o->step = 8;
             o->state = 0;
             break;
         }
-        if (DAT_1f80016e < -0x2ed) break;
+        if (PLAYER_Y_WHOLE < -0x2ed) break;
         GAME_SELECTED_SPAWN_POINT[0] = 0;
         o->step--;
         break;
@@ -176,19 +176,19 @@ void updateA00ScrollController(TObj *o)
         A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
         if (DAT_8009c938 != 0) break;
         {
-        short k = DAT_1f80016a;
+        short k = PLAYER_H_WHOLE;
         unsigned short u = k;
         if (k < 0x78) {
             if (tryStartItemInteraction(o, 2, 0)) o->step = 8;
             break;
         }
         if ((unsigned short)(u - 0xf0) < 0x3c) {
-            if (DAT_1f80016e < -0x40) break;
+            if (PLAYER_Y_WHOLE < -0x40) break;
             if (DAT_8009cda8 != 0) break;
             DAT_8009c93f = 1;
             FUN_8001f110(1);
             GAME_FADE_SCREEN_CONTROL = 3;
-            DAT_8009c93c = 0;
+            GVARS_FADE_EFFECT = 0;
             o->step = 0xb;
             break;
         }
@@ -198,7 +198,7 @@ void updateA00ScrollController(TObj *o)
         break;
     case 10:
         A00_SCROLL_CONTROLLER_HANDLERS[o->subtype](o);
-        if (DAT_1f80016a < 0x29 && DAT_1f80016e >= -0x126) {
+        if (PLAYER_H_WHOLE < 0x29 && PLAYER_Y_WHOLE >= -0x126) {
             if (!tryStartItemInteraction(o, 2, 0)) break;
         s8:
             o->step = 8;
@@ -206,13 +206,13 @@ void updateA00ScrollController(TObj *o)
             break;
         }
         if (DAT_8009d13f != 0) {
-            if (DAT_1f80016a < 0x374) break;
-            if (DAT_1f80016e < -0x167) break;
+            if (PLAYER_H_WHOLE < 0x374) break;
+            if (PLAYER_Y_WHOLE < -0x167) break;
             if (tryStartItemInteraction(o, 2, 1)) o->step = 8;
             break;
         }
         if (GAME_PLAYER_MODE == 3) break;
-        if (DAT_1f80016a < 0x373) break;
+        if (PLAYER_H_WHOLE < 0x373) break;
         PLAYER_H->s2 = 0x373;
         break;
     case 11:

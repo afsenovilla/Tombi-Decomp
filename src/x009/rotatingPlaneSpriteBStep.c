@@ -68,7 +68,7 @@ void rotatingPlaneSpriteBStep(TObj *o)
             o->anim = D_8012E9C8;
             AnimLoadDuration(o);
             rotatingPlaneSpriteSetQuad(o);
-            GVARS.b40 = 0;
+            GVARS.useItemPending = 0;
             GVARS.b3f = 0;
             GVARS.b42 = 0;
             GVARS.b3e = 0;

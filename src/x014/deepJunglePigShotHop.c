@@ -7,7 +7,7 @@
 static short D_80126718[8] = {
     0x100, -0x380, 0x180, -0x580, 0x200, -0x480, 0x80, -0x300,
 };
-extern short D_1F80027E;
+extern short COLLISION_HIT_HEIGHT;
 extern int deepJunglePigShotCheckWall(TObj *o);
 extern int deepJunglePigShotPickHop(TObj *o);
 extern short TileCollideAt(TObj *o, short x, short y);
@@ -17,7 +17,7 @@ static __inline__ int land(TObj *o)
 {
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 10)) {
         o->wae = SPAD.s284;
-        o->wb2 = D_1F80027E;
+        o->wb2 = COLLISION_HIT_HEIGHT;
         return 1;
     }
     if (probeWallAt(o, o->h->p.whole - 8, o->y.p.whole, 1)) return 0;

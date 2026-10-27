@@ -11,8 +11,8 @@ typedef struct O {
     char p7[0xb2 - 0xb0]; short wb2;
     char p8[0xb6 - 0xb4]; short wb6;
 } O;
-extern short DAT_1f80027e;
-extern unsigned short DAT_1f800282, DAT_1f800284;
+extern short COLLISION_HIT_HEIGHT;
+extern unsigned short COLLISION_HIT_FLAGS, DAT_1f800284;
 extern short FUN_80040278(O *, int, int);
 
 int enemyProbeGround(O *o)
@@ -32,15 +32,15 @@ int enemyProbeGround(O *o)
         s = FUN_80040278(o, o->t[1], (short)(o->y + 0x10));
         if (s != 0) {
             o->b69 = 0;
-            v = DAT_1f80027e;
+            v = COLLISION_HIT_HEIGHT;
             if (v < 0) v = -v;
             if (v > 8) v = 8;
-            if (DAT_1f80027e < 0) v = -v;
+            if (COLLISION_HIT_HEIGHT < 0) v = -v;
             o->d8c = (-v) & 0xff;
             s = DAT_1f800284;
             o->wb2 = v;
             o->b9c = 0;
-            u = DAT_1f800282;
+            u = COLLISION_HIT_FLAGS;
             o->wb6 = ((-v) << 2) & 0xff;
             o->wae = s;
             if ((u >> 5) & 8)

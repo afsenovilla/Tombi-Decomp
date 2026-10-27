@@ -9,7 +9,7 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_8012F3B8[];
-extern unsigned char D_8009C940;
+extern unsigned char GVARS_USE_ITEM_PENDING;
 extern unsigned char D_8009CDF2a[];
 extern unsigned char D_8009D143;
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -52,14 +52,14 @@ void lostHatManTalk(TObj *o)
         if (k == 0xff) break;
         {
         int r = 0; int t;
-        if (D_8009C940 == 1) r = GVARS.b41 == 0x9f;
+        if (GVARS_USE_ITEM_PENDING == 1) r = GVARS.useItemId == 0x9f;
         t = 0;
         if (r) t = GCD.bcdf2 != 0xff;
         if (t) {
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 3, &v);
             FUN_80026e0c(0x9f, 1);
-            D_8009C940 = 0;
+            GVARS_USE_ITEM_PENDING = 0;
             o->state = 0x5a;
             NEXT(o) = 0x46;
             break;

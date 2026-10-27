@@ -51,7 +51,7 @@ void witchMizunoCandyRecipeTalk(TObj *o)
         o->animFrame = P.h->p.whole < o->h->p.whole;
         setanim(o, 4);
         v = *(V6 *)&o->a;
-        switch (GVARS.b41) {
+        switch (GVARS.useItemId) {
         case 8:
             ((unsigned char*)&GCD.bcff0)[0] = 1;
             break;
@@ -71,20 +71,20 @@ void witchMizunoCandyRecipeTalk(TObj *o)
             GCD.bcff5 = 1;
             break;
         }
-        FUN_80026e0c(GVARS.b41, 1);
+        FUN_80026e0c(GVARS.useItemId, 1);
         for (i = 0; i < 6; i++)
             ;
         for (i = 0; i < 6; i++)
             if (((unsigned char*)&GCD.bcff0)[i] == 0) break;
         if (i == 6) {
-            if (GVARS.b41 != 8) {
+            if (GVARS.useItemId != 8) {
                 o->state = 0x60;
                 break;
             }
             o->timer = 0x12c;
             o->state = 0x65;
             setEventComplete(0xa9, 0);
-        } else if (GVARS.b41 == 8) {
+        } else if (GVARS.useItemId == 8) {
             o->timer = 0x12c;
             o->state = 0x64;
             setEventComplete(0xa9, 0);
@@ -176,7 +176,7 @@ void witchMizunoCandyRecipeTalk(TObj *o)
         break;
     case 0x63:
         setanim(o, 0);
-        ((unsigned char*)&GVARS.b40)[0] = 0;
+        ((unsigned char*)&GVARS.useItemPending)[0] = 0;
         ((unsigned char*)&GVARS.b3e)[0] = 0;
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((unsigned char*)&GVARS.b42)[0] = 0;

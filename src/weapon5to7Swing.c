@@ -20,7 +20,7 @@ extern unsigned short WEAPON_SWING_TABLE[];
 extern short DAT_8007a072[];
 extern unsigned char GAME_EQUIPPED_WEAPON[];
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short DAT_1f8003c8;
+extern unsigned short BUTTON_MASK_C;
 extern unsigned short TICK_COUNT;
 extern unsigned char PLAYER_STATE, DAT_800a60dc, DAT_800a60e4, DAT_800a60fe, DAT_800a60ff;
 extern unsigned char DAT_8009c93f, DAT_8009c990;
@@ -308,7 +308,7 @@ void weapon5to7Swing(TObj *o)
                 *(unsigned char *)o->d94 = o->w74;
                 o->b6b = 0;
             }
-            if ((PAD_PRESSED[0] & DAT_1f8003c8) == 0 || PLAYER_STATE != 1 || DAT_800a60dc != 0 ||
+            if ((PAD_PRESSED[0] & BUTTON_MASK_C) == 0 || PLAYER_STATE != 1 || DAT_800a60dc != 0 ||
                 DAT_800a60e4 >= 2 || DAT_800a60fe != 0 || DAT_8009c93f != 0 || m >= 4 ||
                 (unsigned char)(DAT_8009c990 - 1) < 2 || DAT_800a60ff != 0) {
                 o->b04 = 2;
@@ -346,7 +346,7 @@ void weapon5to7Swing(TObj *o)
         weaponCalcBentOffset(&WEAPON_BEND_PARAMS, o->waa, &a, &r);
         o->h->p.whole = o->velX + a;
         o->y.p.whole = o->velY + r;
-        if ((PAD_PRESSED[0] & DAT_1f8003c8) == 0 || PLAYER_STATE != 1 || DAT_800a60dc != 0 || DAT_8009c93f != 0) {
+        if ((PAD_PRESSED[0] & BUTTON_MASK_C) == 0 || PLAYER_STATE != 1 || DAT_800a60dc != 0 || DAT_8009c93f != 0) {
             DAT_800a60fe = 0;
             PLAYER_EXT->b0 = 2;
             PLAYER_EXT->w22 = 0;
@@ -387,7 +387,7 @@ void weapon5to7Swing(TObj *o)
         weaponCalcBentOffset(&WEAPON_BEND_PARAMS, o->waa, &a, &r);
         o->h->p.whole = o->velX + a;
         o->y.p.whole = o->velY + r;
-        if ((PAD_PRESSED[0] & DAT_1f8003c8) == 0 || PLAYER_STATE != 1 || DAT_800a60dc != 0 || DAT_8009c93f != 0) {
+        if ((PAD_PRESSED[0] & BUTTON_MASK_C) == 0 || PLAYER_STATE != 1 || DAT_800a60dc != 0 || DAT_8009c93f != 0) {
             DAT_800a60fe = 0;
             PLAYER_EXT->b0 = 1;
             PLAYER_EXT->w22 = 0;

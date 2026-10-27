@@ -2,7 +2,7 @@
 // MATCHING 80125c50 348
 #include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char D_8009C941;
+extern unsigned char GVARS_USE_ITEM_ID;
 extern void initLostHatMan(TObj *);
 extern void lostHatManTalk(TObj *);
 extern int FUN_800202b4(TObj *);
@@ -11,7 +11,7 @@ extern void freeObjectLayer2(TObj *);
 
 static __inline__ int chk(void)
 {
-    return GVARS.b40 == 1 && D_8009C941 == 0x9f;
+    return GVARS.useItemPending == 1 && GVARS_USE_ITEM_ID == 0x9f;
 }
 
 void updateLostHatMan(TObj *o)

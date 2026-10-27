@@ -64,7 +64,7 @@ void updateRotatingPlane(TObj *o)
             v.vy = o->d88;
             v.vz = o->d8c;
             RotMatrix(&v, &o->w48);
-            if (!o->subtype && GVARS.b40 && GVARS.b41 == 0x8a) GCD.bd07e = 1;
+            if (!o->subtype && GVARS.useItemPending && GVARS.useItemId == 0x8a) GCD.bd07e = 1;
         }
         break;
     case 2:

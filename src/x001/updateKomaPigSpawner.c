@@ -12,7 +12,7 @@ typedef struct {
 } O;
 
 extern unsigned short D_8013CA00[];
-extern short D_1F80016E[];
+extern short PLAYER_Y_WHOLE[];
 extern int Rand(void);
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(O *);
@@ -52,7 +52,7 @@ void updateKomaPigSpawner(O *o)
                 e->subtype = 8;
                 e->b0c = 0;
                 e->a.p.whole = 0;
-                e->y.p.whole = D_1F80016E[0];
+                e->y.p.whole = PLAYER_Y_WHOLE[0];
                 e->b.p.whole = 0;
                 o->w1c++;
                 e->d94 = (int)p;

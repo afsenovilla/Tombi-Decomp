@@ -9,7 +9,7 @@ extern unsigned char GAME_KEEP_BGM;
 extern int GAME;
 extern volatile unsigned short PAD_PRESSED[], DAT_8009d674;
 extern char DAT_800b1410;
-extern char DAT_8009e375, DAT_8009e376, DAT_8009e377, DAT_8009f085, DAT_8009f086, DAT_8009f087;
+extern char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B, DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 extern void InitSubsystems(void);
 extern void FUN_80017b44(void);
 extern void FUN_80021858(void);
@@ -48,12 +48,12 @@ void areaMode2Handler(void)
             TASK_C->c = 2;
         break;
     case 2:
-        DAT_8009e375 = 0;
-        DAT_8009e376 = 0;
-        DAT_8009e377 = 0;
-        DAT_8009f085 = 0;
-        DAT_8009f086 = 0;
-        DAT_8009f087 = 0;
+        DISPLAY_BUFFER_0_BG_R = 0;
+        DISPLAY_BUFFER_0_BG_G = 0;
+        DISPLAY_BUFFER_0_BG_B = 0;
+        DISPLAY_BUFFER_1_BG_R = 0;
+        DISPLAY_BUFFER_1_BG_G = 0;
+        DISPLAY_BUFFER_1_BG_B = 0;
         t->b = 8;
         t->c = 0;
         break;

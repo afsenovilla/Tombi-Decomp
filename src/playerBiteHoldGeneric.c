@@ -13,7 +13,7 @@ typedef struct O {
 } O;
 extern O *BITTEN_OBJECT;
 extern unsigned short PAD_PRESSED;
-extern unsigned short D_1f8003c6, JOYPAD_STATE;
+extern unsigned short BUTTON_MASK_B, JOYPAD_STATE;
 extern void FUN_8010eaf8(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_80103628(O *);
@@ -96,7 +96,7 @@ void FUN_801037d8(O *o)
             }
             break;
         }
-        if (JOYPAD_STATE & D_1f8003c6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;
@@ -136,7 +136,7 @@ typedef struct O {
 } O;
 extern O *BITTEN_OBJECT;
 extern unsigned short PAD_PRESSED;
-extern unsigned short D_1f8003c6, JOYPAD_STATE;
+extern unsigned short BUTTON_MASK_B, JOYPAD_STATE;
 extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
 extern void playerBiteHoldAttach(O *);
@@ -219,7 +219,7 @@ void playerBiteHoldGeneric(O *o)
             }
             break;
         }
-        if (JOYPAD_STATE & D_1f8003c6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

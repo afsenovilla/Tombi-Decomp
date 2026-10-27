@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern short D_1F80016A[];
+extern short PLAYER_H_WHOLE[];
 extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *o);
@@ -17,7 +17,7 @@ static __inline__ int turn(TObj *o)
     int c, a;
     unsigned char d;
 
-    a = angleFromDelta(D_1F80016A[0] - o->h->p.whole, (*(short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole);
+    a = angleFromDelta(PLAYER_H_WHOLE[0] - o->h->p.whole, (*(short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole);
     c = o->d38;
     a -= c;
     d = a;

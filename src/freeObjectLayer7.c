@@ -1,7 +1,7 @@
 // FUNC 80018934 76 MAIN0
 // MATCHING 80018934 76
-extern int *DAT_1f800214;
-extern unsigned short DAT_1f80023c;
+extern int *FREE_OBJECTS_LAYER7;
+extern unsigned short FREE_OBJECT_COUNT_LAYER7;
 
 void freeObjectLayer7(volatile int *o)
 {
@@ -12,8 +12,8 @@ void freeObjectLayer7(volatile int *o)
     o[2] = 0;
     o[3] = 0;
     ((volatile char *)o)[0x1c] = c & 0x7f;
-    DAT_1f80023c = DAT_1f80023c + 1;
-    p = DAT_1f800214;
-    DAT_1f800214 = p - 1;
+    FREE_OBJECT_COUNT_LAYER7 = FREE_OBJECT_COUNT_LAYER7 + 1;
+    p = FREE_OBJECTS_LAYER7;
+    FREE_OBJECTS_LAYER7 = p - 1;
     p[-1] = (int)o;
 }

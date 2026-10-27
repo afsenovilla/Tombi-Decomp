@@ -8,7 +8,7 @@ extern unsigned char D_8013C7D8[];
 extern char D_80077CE8[];
 extern char MOVE_TABLE_1[];
 extern void *D_8013FC74[];
-extern short D_1F80027E;
+extern short COLLISION_HIT_HEIGHT;
 extern short D_1F800284;
 extern short COS_TABLE[];
 extern short D_8007A1F0[];
@@ -53,9 +53,9 @@ static __inline__ int land(TObj *o)
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
         o->b69 = 0;
         o->wba = 0;
-        o->wb2 = D_1F80027E;
+        o->wb2 = COLLISION_HIT_HEIGHT;
         o->wae = D_1F800284;
-        o->d8c = (-D_1F80027E << 2) & 0xff;
+        o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
         return 1;
     }
     return 0;

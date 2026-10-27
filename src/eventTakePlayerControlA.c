@@ -92,7 +92,7 @@ void eventTakePlayerControlA(TObj *o)
     case 8:
         if (--o->timer == -1) {
             o->state++;
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             GAME.fadeScreenControl = 3;
         }
         o->velV += 0x20;

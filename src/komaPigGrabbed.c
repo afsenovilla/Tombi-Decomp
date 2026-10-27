@@ -17,7 +17,7 @@ extern int enemyProbeGround(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern TObj *ObjAlloc();
-extern short DAT_1f80027e;
+extern short COLLISION_HIT_HEIGHT;
 
 #define SETBOX(o) \
     { \
@@ -116,7 +116,7 @@ void komaPigGrabbed(TObj *o)
             a = SPAD.s27e;
             if (a < 0) a = -a;
             if (a > 8) a = 8;
-            if (DAT_1f80027e < 0) a = -a;
+            if (COLLISION_HIT_HEIGHT < 0) a = -a;
             o->d8c = -a & 0xff;
             o->wb2 = a;
             o->wb6 = (-a << 2) & 0xff;

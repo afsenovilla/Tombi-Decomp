@@ -5,7 +5,7 @@
 
 extern unsigned short *getCollisionPlaneAt(int, int);
 extern unsigned short *COLLISION_SEG_PTR;
-extern unsigned short D_1F800282;
+extern unsigned short COLLISION_HIT_FLAGS;
 extern unsigned char *D_8007B5AC;
 #define D COLLISION_SEG_PTR
 
@@ -38,7 +38,7 @@ int pushOutOfWallSegments(TObj *o, int x_, int y_, int fl_)
     if (0) {
     hit:
         (*(unsigned short*)&SPAD.s284) = (f & 0xe00) >> 9;
-        D_1F800282 = f;
+        COLLISION_HIT_FLAGS = f;
         o->h->p.whole -= r;
         return k;
     }

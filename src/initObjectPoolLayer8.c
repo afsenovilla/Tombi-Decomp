@@ -9,7 +9,7 @@ extern char *DAT_1f800230;
 extern char *DAT_1f800274;
 extern short DAT_1f80023a;
 extern short DAT_1f800258;
-extern short DAT_1f800242;
+extern short CAT8_OBJECT_COUNT;
 extern void memset(char *, int, int);
 extern void initSpriteSlots8(void);
 
@@ -42,6 +42,6 @@ void initObjectPoolLayer8(void)
     DAT_1f800230 = DAT_800b3e24;
     DAT_1f800274 = DAT_800b3e24;
     DAT_1f800258 = 0;
-    DAT_1f800242 = 0;
+    CAT8_OBJECT_COUNT = 0;
     initSpriteSlots8();
 }

@@ -1,17 +1,17 @@
 // FUNC 800182ac 128 MAIN0
 // MATCHING 800182ac 128
-extern short DAT_1f800236;
+extern short FREE_OBJECT_COUNT_LAYER1;
 extern int **DAT_1f800204;
-extern unsigned short DAT_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 
 int *allocObjectLayer1(void)
 {
     int *o;
-    short n = DAT_1f800236;
+    short n = FREE_OBJECT_COUNT_LAYER1;
     if (n > 0) {
-        DAT_1f800236 = n - 1;
+        FREE_OBJECT_COUNT_LAYER1 = n - 1;
         o = *DAT_1f800204++;
-        if ((DAT_1f8001c8 & 1) == 0) {
+        if ((SPAWN_AXIS_SWAP & 1) == 0) {
             o[0x10] = (int)(o + 4);
             o[0x11] = (int)(o + 6);
         } else {

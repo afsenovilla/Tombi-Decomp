@@ -11,7 +11,7 @@
 
 extern int D_1F80018C;
 extern void *D_8013FC90[], *D_8013FC94[], *D_8013FCB0[];
-extern short D_1F80027E;
+extern short COLLISION_HIT_HEIGHT;
 extern short D_1F800284;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -50,9 +50,9 @@ static __inline__ int land(TObj *o)
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
         o->b69 = 0;
         o->wba = 0;
-        o->wb2 = D_1F80027E;
+        o->wb2 = COLLISION_HIT_HEIGHT;
         o->wae = D_1F800284;
-        o->d8c = (-D_1F80027E << 2) & 0xff;
+        o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
         return 1;
     }
     return 0;
@@ -294,7 +294,7 @@ void updatePurpleCrawler(BX *b)
 
 extern int D_1F80018C;
 extern void *D_8013FC90[], *D_8013FC94[], *D_8013FCB0[];
-extern short D_1F80027E;
+extern short COLLISION_HIT_HEIGHT;
 extern short D_1F800284;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -333,9 +333,9 @@ static __inline__ int land(TObj *o)
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
         o->b69 = 0;
         o->wba = 0;
-        o->wb2 = D_1F80027E;
+        o->wb2 = COLLISION_HIT_HEIGHT;
         o->wae = D_1F800284;
-        o->d8c = (-D_1F80027E << 2) & 0xff;
+        o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
         return 1;
     }
     return 0;

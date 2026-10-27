@@ -11,7 +11,7 @@ extern int DAT_800a606c;
 extern unsigned short F2u;
 extern short F2;
 extern struct { short v; } F2s;
-extern unsigned short DAT_1f80016e;
+extern unsigned short PLAYER_Y_WHOLE;
 extern short E[];
 extern short E2;
 
@@ -22,7 +22,7 @@ static __inline__ int calc(void)
         t = F2u - 0x14;
         return t - DAT_800a606c;
     }
-    return F2u - DAT_1f80016e;
+    return F2u - PLAYER_Y_WHOLE;
 }
 
 void cameraScrollToPlayerYB(TObj *o)

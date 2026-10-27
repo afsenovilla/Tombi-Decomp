@@ -28,7 +28,7 @@ void func_801179A4(TObj *o)
             if (GCD.bce05 == 0xff) break;
             if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - 0x82) >= 0x28) break;
             if (PLAYER.obj.y.p.whole != -0x3d) break;
-            if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {
+            if (GVARS.useItemPending != 0 && GVARS.useItemId == 0x3e) {
                 o->step = 2;
                 o->state = 0;
                 break;
@@ -81,7 +81,7 @@ void updateBrokenStoneGearsNpc(TObj *o)
             if (GCD.bce05 == 0xff) break;
             if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - 0x82) >= 0x28) break;
             if (PLAYER.obj.y.p.whole != -0x3d) break;
-            if (GVARS.b40 != 0 && GVARS.b41 == 0x3e) {
+            if (GVARS.useItemPending != 0 && GVARS.useItemId == 0x3e) {
                 o->step = 2;
                 o->state = 0;
                 break;

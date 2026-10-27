@@ -15,7 +15,7 @@ extern VECTOR DAT_1f800040;
 extern SVECTOR DAT_1f800060;
 extern SVECTOR DAT_1f800068;
 extern MATRIX DAT_1f8000c0;
-extern unsigned short DAT_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern char *CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern void FUN_8006481c(long, MATRIX *);
@@ -31,7 +31,7 @@ extern void drawModel(int, char *, TObj *, int);
 void drawObjectModelRotScaled(TObj *o)
 {
     getBaseMatrix(&DAT_1f800020);
-    switch (DAT_1f8001c8 & 1) {
+    switch (SPAWN_AXIS_SWAP & 1) {
     case 0:
         DAT_1f800060.vx = o->d84;
         DAT_1f800060.vy = o->d88;

@@ -29,7 +29,7 @@ extern P800F2B98 *PLAYER_EXT;
 extern unsigned char *PLAYER_HELD_OBJECT;
 extern unsigned char *BITTEN_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short DAT_1f8003c6, JOYPAD_STATE, TICK_COUNT;
+extern unsigned short BUTTON_MASK_B, JOYPAD_STATE, TICK_COUNT;
 extern short FREE_OBJECT_COUNT;
 extern short DAT_8009c944, DAT_8009c946[];
 extern unsigned char GAME_PLAYER_MODE, GAME_BITTEN_JUMP_KIND[], DAT_8009c990;
@@ -109,7 +109,7 @@ void playerStepJump(TObj *o)
             PLAYER_EXT->b8 = 1;
             o->state = 2;
         }
-        if (PAD_PRESSED[0] & DAT_1f8003c6) {
+        if (PAD_PRESSED[0] & BUTTON_MASK_B) {
             if (PLAYER_EXT->b8 != 0) goto common;
             if (++PLAYER_EXT->w20 >= 0xe) {
                 PLAYER_EXT->b8 = 1;
@@ -223,7 +223,7 @@ void playerStepJump(TObj *o)
                 o->d8c = SLOPE_TILT_TABLE[o->wb0];
                 o->step = 1;
                 o->state = 0;
-                if (JOYPAD_STATE & DAT_1f8003c6) {
+                if (JOYPAD_STATE & BUTTON_MASK_B) {
                     GAME_PLAYER_MODE = 0;
                     o->step = 2;
                     o->state = 0;
@@ -284,14 +284,14 @@ void playerStepJump(TObj *o)
                 PLAYER_EXT->w2a = 0xffff;
                 o->step = 1;
                 o->state = 0;
-                if (JOYPAD_STATE & DAT_1f8003c6) {
+                if (JOYPAD_STATE & BUTTON_MASK_B) {
                     GAME_PLAYER_MODE = 0;
                     o->step = 2;
                     o->state = 0;
                 }
             }
         } else {
-            if (DAT_8009c990 == 3 && (JOYPAD_STATE & DAT_1f8003c6)) {
+            if (DAT_8009c990 == 3 && (JOYPAD_STATE & BUTTON_MASK_B)) {
                 GAME_PLAYER_MODE = 0;
                 if (X(o)->cc == 1) {
                     *(unsigned char *)&o->wac = 0;

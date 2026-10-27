@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 extern int FUN_800202b4(TObj *);
 extern void treasureChestTossMove(TObj *);
-extern short DAT_1f80016a;
+extern short PLAYER_H_WHOLE;
 extern short DAT_1f80016ab[];
 extern short DAT_8007a1f0[];
 extern short COS_TABLE[];
@@ -31,12 +31,12 @@ void treasureChestFollowCarrier(TObj *o)
     case 1:
         o->h->p.whole = p->h->p.whole + 0x18;
         o->y.p.whole = p->y.p.whole - 0x10;
-        if (DAT_1f80016a > o->h->p.whole) o->step++;
+        if (PLAYER_H_WHOLE > o->h->p.whole) o->step++;
         break;
     case 2:
         o->h->p.whole = p->h->p.whole + 0x18;
         o->y.p.whole = p->y.p.whole - 0x10;
-        if (DAT_1f80016a < o->h->p.whole + 0x18 && p->d8c > 0x150) break;
+        if (PLAYER_H_WHOLE < o->h->p.whole + 0x18 && p->d8c > 0x150) break;
         o->velY = 0x100;
         o->b69 = 0;
         o->velX = 0x80;
@@ -69,7 +69,7 @@ void treasureChestFollowCarrier(TObj *o)
 #include "TOBJ.H"
 extern int FUN_800202b4(TObj *);
 extern void treasureChestTossMove(TObj *);
-extern short DAT_1f80016a;
+extern short PLAYER_H_WHOLE;
 extern short DAT_1f80016ab[];
 extern short DAT_8007a1f0[];
 extern short COS_TABLE[];
@@ -93,12 +93,12 @@ void treasureChestFollowCarrier(TObj *o)
     case 1:
         o->h->p.whole = p->h->p.whole + 0x18;
         o->y.p.whole = p->y.p.whole - 0x10;
-        if (DAT_1f80016a > o->h->p.whole) o->step++;
+        if (PLAYER_H_WHOLE > o->h->p.whole) o->step++;
         break;
     case 2:
         o->h->p.whole = p->h->p.whole + 0x18;
         o->y.p.whole = p->y.p.whole - 0x10;
-        if (DAT_1f80016a < o->h->p.whole + 0x18 && p->d8c > 0x150) break;
+        if (PLAYER_H_WHOLE < o->h->p.whole + 0x18 && p->d8c > 0x150) break;
         o->velY = 0x100;
         o->b69 = 0;
         o->velX = 0x80;
@@ -130,7 +130,7 @@ void treasureChestFollowCarrier(TObj *o)
 #include "TOBJ.H"
 extern int FUN_800202b4(TObj *);
 extern void treasureChestTossMove(TObj *);
-extern short DAT_1f80016a;
+extern short PLAYER_H_WHOLE;
 extern short DAT_1f80016ab[];
 extern short DAT_8007a1f0[];
 extern short COS_TABLE[];
@@ -154,12 +154,12 @@ void treasureChestFollowCarrier(TObj *o)
     case 1:
         o->h->p.whole = p->h->p.whole + 0x18;
         o->y.p.whole = p->y.p.whole - 0x10;
-        if (DAT_1f80016a > o->h->p.whole) o->step++;
+        if (PLAYER_H_WHOLE > o->h->p.whole) o->step++;
         break;
     case 2:
         o->h->p.whole = p->h->p.whole + 0x18;
         o->y.p.whole = p->y.p.whole - 0x10;
-        if (DAT_1f80016a < o->h->p.whole + 0x18 && p->d8c > 0x150) break;
+        if (PLAYER_H_WHOLE < o->h->p.whole + 0x18 && p->d8c > 0x150) break;
         o->velY = 0x100;
         o->b69 = 0;
         o->velX = 0x80;

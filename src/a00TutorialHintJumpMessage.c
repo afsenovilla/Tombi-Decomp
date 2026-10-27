@@ -1,7 +1,7 @@
 // FUNC 8011b5dc 260 X000
 // MATCHING 8011b5dc 260
 #include "TOBJ.H"
-extern short DAT_1f80016a, DAT_1f800176, DAT_1f80016e, DAT_1f80017a;
+extern short PLAYER_H_WHOLE, SCREEN_ORIGIN_X, PLAYER_Y_WHOLE, DAT_1f80017a;
 extern short A00_TUTORIAL_JUMP_MESSAGE_IDS[];
 extern short BUTTON_CONFIG_INDEX;
 extern char DAT_8009c93f, DAT_8009c93e;
@@ -14,11 +14,11 @@ void a00TutorialHintJumpMessage(TObj *o)
     switch (t) {
     case 0:
         o->step = t + 1;
-        if (DAT_1f800176 + 0xa0 >= DAT_1f80016a)
+        if (SCREEN_ORIGIN_X + 0xa0 >= PLAYER_H_WHOLE)
             o->a.p.whole = 0xf0;
         else
             o->a.p.whole = 0x50;
-        if (DAT_1f80017a - 0x78 >= DAT_1f80016e)
+        if (DAT_1f80017a - 0x78 >= PLAYER_Y_WHOLE)
             o->y.p.whole = 0xd8;
         else
             o->y.p.whole = 0x78;

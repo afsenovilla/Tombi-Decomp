@@ -4,9 +4,9 @@
 #include "gametask.h"
 extern unsigned char PLAYER[];
 extern unsigned char DAT_8009cff9;
-extern unsigned char DAT_8009c93c;
+extern unsigned char GVARS_FADE_EFFECT;
 extern unsigned char GAME_FADE_SCREEN_CONTROL;
-extern short DAT_1f800176;
+extern short SCREEN_ORIGIN_X;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_800e8a98(void *, int, int);
@@ -54,8 +54,8 @@ void eventTakePlayerControlC(TObj *o)
         break;
     case 2:
         o->h->p.whole++;
-        if (o->h->p.whole > DAT_1f800176 + 0x136)
-            o->h->p.whole = DAT_1f800176 + 0x136;
+        if (o->h->p.whole > SCREEN_ORIGIN_X + 0x136)
+            o->h->p.whole = SCREEN_ORIGIN_X + 0x136;
         AnimAdvance(o);
         if (--o->timer == -1) {
             o->timer = 0x28;
@@ -98,7 +98,7 @@ void eventTakePlayerControlC(TObj *o)
     case 8:
         if (--o->timer == -1) {
             o->state++;
-            DAT_8009c93c = 0;
+            GVARS_FADE_EFFECT = 0;
             GAME_FADE_SCREEN_CONTROL = 3;
         }
         if ((o->velV += 0x20) > 0x600)

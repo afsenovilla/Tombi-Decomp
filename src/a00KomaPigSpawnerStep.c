@@ -5,8 +5,8 @@ extern void FUN_8001fec0(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern TObj *allocObjectLayer2(void);
 extern unsigned short TICK_COUNT;
-extern unsigned short DAT_1f800172;
-extern unsigned short DAT_1f80016a;
+extern unsigned short PLAYER_D_WHOLE;
+extern unsigned short PLAYER_H_WHOLE;
 extern char D_8013BA48[];
 extern char D_8013BA80[];
 extern char D_8013BA88[];
@@ -23,10 +23,10 @@ void a00KomaPigSpawnerStep(TObj *o)
     switch (o->step) {
     case 0:
         if (o->w9a == 0 && (TICK_COUNT & 3) == 0) {
-            if ((unsigned short)(o->d->p.whole - DAT_1f800172 + 0x2d) >= 0x5b) {
+            if ((unsigned short)(o->d->p.whole - PLAYER_D_WHOLE + 0x2d) >= 0x5b) {
                 ok = 0;
             } else {
-                ok = (unsigned short)(o->h->p.whole - DAT_1f80016a + 0x60) < 0xc1;
+                ok = (unsigned short)(o->h->p.whole - PLAYER_H_WHOLE + 0x60) < 0xc1;
             }
             if (ok) {
                 o->timer = 0x29;

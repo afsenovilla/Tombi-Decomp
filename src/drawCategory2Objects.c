@@ -5,8 +5,8 @@ extern short DAT_1f8001c6;
 extern short DAT_1f800250;
 extern TObj **DAT_1f800260;
 extern unsigned short DAT_1f800246;
-extern short DAT_1f800246s;
-extern TObj **DAT_1f80021c;
+extern short CAT2_OBJECT_COUNT;
+extern TObj **CAT2_OBJECT_LIST;
 extern unsigned char PLAYER_TYPE;
 extern void drawObjectSprtTinted(TObj *);
 extern void FUN_800eab58(TObj *);
@@ -38,11 +38,11 @@ void drawCategory2Objects(void)
         }
     } else {
         DAT_1f800250 = DAT_1f800246;
-        DAT_1f800260 = DAT_1f80021c;
+        DAT_1f800260 = CAT2_OBJECT_LIST;
         if (DAT_1f800246 == 0)
             return;
         do {
-            o = *DAT_1f80021c++;
+            o = *CAT2_OBJECT_LIST++;
             DAT_1f800246--;
             if (o->visible) {
                 if (o->b0a == 0xd) {
@@ -56,6 +56,6 @@ void drawCategory2Objects(void)
                     drawObject(o);
                 }
             }
-        } while (DAT_1f800246s != 0);
+        } while (CAT2_OBJECT_COUNT != 0);
     }
 }

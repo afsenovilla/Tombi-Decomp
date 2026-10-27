@@ -39,7 +39,7 @@ static short *D_801396A0[9] = {
     (short *)D_8013955C, (short *)D_8013957C, (short *)D_80139614, (short *)D_8013963C,
     (short *)D_80139678,
 };
-extern unsigned short D_1F8003C4, JOYPAD_STATE;
+extern unsigned short BUTTON_MASK_A, JOYPAD_STATE;
 extern unsigned char PLAYER_STEP[];
 #define D_800A603E PLAYER_STEP[0]
 extern unsigned char PLAYER_SUBSTATE[];
@@ -170,7 +170,7 @@ void updateHoodedOldMan(TObj *o)
             case 1:
                 if (D_8009D2B0 == 3) break;
                 if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 32) >= 64) break;
-                if (!(JOYPAD_STATE & D_1F8003C4)) break;
+                if (!(JOYPAD_STATE & BUTTON_MASK_A)) break;
                 if (PLAYER.obj.b69 == 0) break;
                 if (D_800A603C != 1) break;
                 if ((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole > 0) o->animFrame = 0;
@@ -193,7 +193,7 @@ void updateHoodedOldMan(TObj *o)
         case 3:
             if (D_8009D2B0 == 3) break;
             if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 32) >= 64) break;
-            if (!(JOYPAD_STATE & D_1F8003C4)) break;
+            if (!(JOYPAD_STATE & BUTTON_MASK_A)) break;
             if (PLAYER.obj.b69 == 0) break;
             if (D_800A603C != 1) break;
             if ((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole > 0) o->animFrame = 0;

@@ -22,7 +22,7 @@ typedef struct {
 extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short TICK_COUNT, D_1f8003c4;
+extern unsigned short TICK_COUNT, BUTTON_MASK_A;
 extern short FREE_OBJECT_COUNT;
 extern XY PLAYER_FOOT_OFFSET_BY_DIR[];
 extern char D_80010DE0[], D_80010E2C[];
@@ -195,7 +195,7 @@ void playerStepWalk(TObj *o)
         lim = 0x200;
         if ((*(unsigned int*)&GAME.area00_eventControl) & 0x40) {
             lim = 0x360;
-            if (!(PAD_PRESSED[0] & D_1f8003c4) && (unsigned)(o->subtype - 1) >= 2) lim = 0x200;
+            if (!(PAD_PRESSED[0] & BUTTON_MASK_A) && (unsigned)(o->subtype - 1) >= 2) lim = 0x200;
         }
         if (mode != 0) {
             if ((unsigned short)(o->wb2 + lim) >= lim * 2) {
@@ -225,7 +225,7 @@ void playerStepWalk(TObj *o)
             }
         }
     done:
-        if (((*(unsigned int*)&GAME.area00_eventControl) & 0x40) && (PAD_PRESSED[0] & D_1f8003c4)) {
+        if (((*(unsigned int*)&GAME.area00_eventControl) & 0x40) && (PAD_PRESSED[0] & BUTTON_MASK_A)) {
             dust(o);
         }
         if (o->subtype != 0) {

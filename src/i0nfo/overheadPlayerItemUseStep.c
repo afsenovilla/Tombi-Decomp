@@ -6,7 +6,7 @@ extern void overheadPlayerSetMoveAnim(TObj *o);
 extern void func_80026E0C(int item, int n);
 extern TObj *PLAYER_EXT;
 extern unsigned char D_8009C93F[];
-extern unsigned char D_8009C940[];
+extern unsigned char GVARS_USE_ITEM_PENDING[];
 extern unsigned char D_8009C942[];
 extern unsigned char D_8009CE55;
 extern unsigned char D_8009CE57;
@@ -37,22 +37,22 @@ void overheadPlayerItemUseStep(TObj *o)
         o->b04 = 1;
         o->step = 0;
         o->state = 0;
-        if (D_8009C940[0] == 0) break;
-        U8(o, 0xE2) = D_8009C940[1];
-        switch (D_8009C940[1]) {
+        if (GVARS_USE_ITEM_PENDING[0] == 0) break;
+        U8(o, 0xE2) = GVARS_USE_ITEM_PENDING[1];
+        switch (GVARS_USE_ITEM_PENDING[1]) {
         case 0xF:
             D_8009CE55 = 5;
-            func_80026E0C(D_8009C940[1], 1);
-            D_8009C940[0] = 0;
+            func_80026E0C(GVARS_USE_ITEM_PENDING[1], 1);
+            GVARS_USE_ITEM_PENDING[0] = 0;
             break;
         case 0x11:
             D_8009CE57 = 4;
-            func_80026E0C(D_8009C940[1], 1);
-            D_8009C940[0] = 0;
+            func_80026E0C(GVARS_USE_ITEM_PENDING[1], 1);
+            GVARS_USE_ITEM_PENDING[0] = 0;
             break;
         case 0x9A:
             D_8009CF13 = 0;
-            D_8009C940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             break;
         case 9:
             GAME_BITTEN_JUMP_KIND = 0;
@@ -61,7 +61,7 @@ void overheadPlayerItemUseStep(TObj *o)
         case 0x7C:
         case 0x97:
         case 0x98:
-            D_8009C940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             o->b04 = 4;
             o->step = 4;
             o->state = 0;
@@ -71,7 +71,7 @@ void overheadPlayerItemUseStep(TObj *o)
             GAME_PLAYER_MODE[0] = 3;
             break;
         case 7:
-            D_8009C940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             o->b04 = 4;
             o->step = 4;
             o->state = 0;
@@ -79,7 +79,7 @@ void overheadPlayerItemUseStep(TObj *o)
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
             GAME_PLAYER_MODE[0] = 3;
-            func_80026E0C(D_8009C940[1], 1);
+            func_80026E0C(GVARS_USE_ITEM_PENDING[1], 1);
             break;
         case 0xE:
             o->active = 4;
@@ -112,7 +112,7 @@ void overheadPlayerItemUseStep(TObj *o)
         case 0x12:
         default:
         clear:
-            D_8009C940[0] = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
             break;
         }
         break;

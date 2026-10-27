@@ -4,7 +4,7 @@
 typedef struct { TObj o; unsigned char bc0; } BigObj;
 extern BigObj PLAYER;
 #define X PLAYER.o
-extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c940, DAT_8009c941, DAT_8009c942;
+extern unsigned char DAT_8009c93e, DAT_8009c93f, GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID, DAT_8009c942;
 extern unsigned char DAT_8009cebd, DAT_8009d0a7, GAME_PLAYER_MODE, DAT_8009ce4a, DAT_8009d00d, BUTTON_CONFIG_INDEX;
 extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned char DAT_8009d00dA[];
@@ -33,8 +33,8 @@ extern void FUN_8001e4f0(int);
 static __inline__ short chk(void)
 {
     short r = 0;
-    if (DAT_8009d0a7 != 0 && DAT_8009c940 != 0)
-        r = DAT_8009c941 == 3;
+    if (DAT_8009d0a7 != 0 && GVARS_USE_ITEM_PENDING != 0)
+        r = GVARS_USE_ITEM_ID == 3;
     return r;
 }
 static __inline__ int chk2(void)
@@ -42,8 +42,8 @@ static __inline__ int chk2(void)
     int r = 0;
     if (DAT_8009d0a7 != 0) {
         r = 0;
-        if (DAT_8009c940 != 0)
-            r = DAT_8009c941 == 3;
+        if (GVARS_USE_ITEM_PENDING != 0)
+            r = GVARS_USE_ITEM_ID == 3;
     }
     return r;
 }
@@ -222,7 +222,7 @@ void updateCharlesTalkScene(TObj *o)
         DAT_8009c93f = 0;
         { unsigned char *c = &DAT_8009cebd; *c = *c + 1; }
         o->b04 = 2;
-        DAT_8009c940 = 0;
+        GVARS_USE_ITEM_PENDING = 0;
         GAME_AREA00_EVENT_CONTROL |= 0x40;
         break;
     case 6:

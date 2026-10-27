@@ -8,7 +8,7 @@
 
 extern unsigned char D_800A60F8;
 extern signed char GAME_PLAYER_MODE;
-extern unsigned short JOYPAD_STATE, D_1F8003C4;
+extern unsigned short JOYPAD_STATE, BUTTON_MASK_A;
 
 int checkLostSeedKidTalk(TObj *o)
 {
@@ -21,7 +21,7 @@ int checkLostSeedKidTalk(TObj *o)
         (unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - p->h->p.whole + 0x30) < 0x60) {
         if (*(unsigned short *)&o->anim) {
             r = 1;
-        } else if (GAME_PLAYER_MODE == PLAYER.obj.b04 && (JOYPAD_STATE & D_1F8003C4)) {
+        } else if (GAME_PLAYER_MODE == PLAYER.obj.b04 && (JOYPAD_STATE & BUTTON_MASK_A)) {
             r = 1;
             *(unsigned short *)&o->anim = 1;
             GVARS.b42 = 1;

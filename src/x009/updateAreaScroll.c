@@ -20,7 +20,7 @@ typedef struct O {
 typedef void (*Fn)(O *);
 
 extern Fn D_80079A98[];
-extern short D_1F800172;
+extern short PLAYER_D_WHOLE;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
 extern void cameraFollowPlayerX(O *);
@@ -56,18 +56,18 @@ void updateAreaScroll(O *o)
         D_80079A98[o->subtype](o);
         if (GCD.bcfee == 1 && (*(unsigned char*)((char*)&PLAYER.obj.da0 + 2)) == 2 && (unsigned)(XU - 0xb44) < 0x60) {
             stepPlayerXToward(0xb74);
-            if (D_1F800172 >= 0xbb9) {
+            if (PLAYER_D_WHOLE >= 0xbb9) {
                 tryStartItemInteraction(o, 1, 3);
                 break;
             }
         }
         if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x4b0 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x2cf)
             tryStartItemInteraction(o, 1, 0);
-        else if (D_1F800172 == 0xb40 && (*(short*)((char*)&SPAD.i168 + 2)) >= 0x11d5 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x1d5)
+        else if (PLAYER_D_WHOLE == 0xb40 && (*(short*)((char*)&SPAD.i168 + 2)) >= 0x11d5 && (*(short*)((char*)&SPAD.i16c + 2)) >= -0x1d5)
             tryStartItemInteraction(o, 1, 2);
-        else if ((unsigned)(XU - 0x1050) < 0x20 && D_1F800172 < 0xaf0)
+        else if ((unsigned)(XU - 0x1050) < 0x20 && PLAYER_D_WHOLE < 0xaf0)
             tryStartItemInteraction(o, 1, 1);
-        if (D_1F800172 < 0xb36) {
+        if (PLAYER_D_WHOLE < 0xb36) {
             short *k = &(*(short*)((char*)&SPAD.if0 + 2));
             *k += 2;
             if (o->w32 < *k)

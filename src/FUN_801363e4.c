@@ -11,7 +11,7 @@ extern S801363E4 *PLAYER_H;
 extern unsigned char DAT_800a60a1[], DAT_800a60a2[], DAT_800a60a3[], DAT_800a60d4;
 extern short PLAYER_ANIM_FRAME, DAT_800a60b4, PLAYER_VEL_Y, DAT_800a60b8, DAT_800a60ba, DAT_800a60ea;
 extern P801363E4 *PLAYER_EXT;
-extern TObj *DAT_800a60c8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern unsigned char DAT_8009cebf[];
 extern int GAME_AREA00_EVENT_CONTROL;
 extern short PLAYER_X, PLAYER_Y, DAT_800a6052;
@@ -80,7 +80,7 @@ void FUN_801363e4(TObj *o)
             if (DAT_800a60a1[0] == 0) return;
             q->anim = D_8013B148;
             FUN_8001fe6c(q);
-            DAT_800a60c8 = showMessageBox(7, DAT_8009cebf[0], 0xd0, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(7, DAT_8009cebf[0], 0xd0, 0x6c);
             q->anim = D_8013B134;
             FUN_8001fe6c(q);
             o->w08 = 0x30;
@@ -91,7 +91,7 @@ void FUN_801363e4(TObj *o)
         break;
     case 3:
         FUN_8001fec0(q);
-        if (DAT_800a60c8->b04 != 2) return;
+        if (PLAYER_MESSAGE_BOX->b04 != 2) return;
         switch (DAT_8009cebf[0]) {
         case 0:
             switch (o->state) {
@@ -126,9 +126,9 @@ void FUN_801363e4(TObj *o)
             case 3:
                 if (*PLAYER_ANIM == 0x3d) startPadVibration(0, 0, 0xff, 4);
                 if (--o->w08 != 0) return;
-                DAT_800a60c8->b04 = 3;
+                PLAYER_MESSAGE_BOX->b04 = 3;
                 DAT_8009cebf[0]++;
-                DAT_800a60c8 = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
+                PLAYER_MESSAGE_BOX = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
                 q->anim = D_8013B138;
                 FUN_8001fe6c(q);
                 o->state = 0;
@@ -136,7 +136,7 @@ void FUN_801363e4(TObj *o)
             }
             break;
         case 1:
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             DAT_800a60a2[0] = 0;
             DAT_8009cebf[0]++;
             o->w08 = 0x78;
@@ -150,7 +150,7 @@ void FUN_801363e4(TObj *o)
             break;
         case 2:
             GAME_AREA00_EVENT_CONTROL |= 0x28;
-            DAT_800a60c8->b04 = 3;
+            PLAYER_MESSAGE_BOX->b04 = 3;
             o->w08 = 2;
             q->anim = A00_VARIANT0_SCENE_PART_ANIMS;
             FUN_8001fe6c(q);
@@ -163,7 +163,7 @@ void FUN_801363e4(TObj *o)
         FUN_8001fec0(q);
         if (--o->w08 != 0) return;
         DAT_8009cebf[0]++;
-        DAT_800a60c8 = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
+        PLAYER_MESSAGE_BOX = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
         q->anim = D_8013B138;
         FUN_8001fe6c(q);
         o->step = 3;
@@ -176,7 +176,7 @@ void FUN_801363e4(TObj *o)
             FUN_80026c50(3, 1, 1);
         }
         if (--o->w08 != 0) return;
-        DAT_800a60c8 = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
+        PLAYER_MESSAGE_BOX = showMessageBox(7, DAT_8009cebf[0], 0x120, 0x6c);
         q->anim = D_8013B138;
         FUN_8001fe6c(q);
         o->step = 3;

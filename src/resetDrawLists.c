@@ -1,13 +1,13 @@
 // FUNC 80017678 288 MAIN0
 // MATCHING 80017678 288
-extern char DAT_800a64f8, DAT_800a6610, DAT_800b1110, DAT_800b1190, DAT_800b11c8, DAT_800b1320, DAT_800b3e24;
+extern char DAT_800a64f8, OBJECT_POOL, DAT_800b1110, DAT_800b1190, DAT_800b11c8, DAT_800b1320, DAT_800b3e24;
 
 void resetDrawLists(void)
 {
     *(void **)0x1f800218 = &DAT_800b11c8;
     *(void **)0x1f80025c = &DAT_800b11c8;
-    *(void **)0x1f80021c = &DAT_800a6610;
-    *(void **)0x1f800260 = &DAT_800a6610;
+    *(void **)0x1f80021c = &OBJECT_POOL;
+    *(void **)0x1f800260 = &OBJECT_POOL;
     *(void **)0x1f800220 = &DAT_800b1320;
     *(void **)0x1f800264 = &DAT_800b1320;
     *(void **)0x1f800224 = &DAT_800b1110;

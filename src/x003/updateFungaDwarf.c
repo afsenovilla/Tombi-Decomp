@@ -3,7 +3,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8009C941;
+extern unsigned char GVARS_USE_ITEM_ID;
 extern unsigned char D_8009D003;
 extern void initFungaDwarf(TObj *);
 extern void fungaDwarfTalk(TObj *);
@@ -13,7 +13,7 @@ extern void freeObjectLayer2(TObj *);
 
 static __inline__ int check(void)
 {
-    return GVARS.b40 == 1 && D_8009C941 == 0x7d;
+    return GVARS.useItemPending == 1 && GVARS_USE_ITEM_ID == 0x7d;
 }
 
 void updateFungaDwarf(TObj *o)
@@ -30,7 +30,7 @@ void updateFungaDwarf(TObj *o)
                 if (o->b68) {
                     o->step++;
                 } else if (check()) {
-                    GVARS.b40 = 0;
+                    GVARS.useItemPending = 0;
                     if (D_8009D003 == 0) D_8009D003 = 1;
                     o->step++;
                 }

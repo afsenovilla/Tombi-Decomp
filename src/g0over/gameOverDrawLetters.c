@@ -5,7 +5,7 @@
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { TObj o; char pad[0x14]; } GObj; /* 0xD4 bytes */
-extern GObj D_800A6610[];
+extern GObj OBJECT_POOL[];
 extern MATRIX D_1F800000, D_1F800020;
 extern SVECTOR D_1F800060, D_1F800068;
 extern char *CURRENT_OT;
@@ -29,7 +29,7 @@ void gameOverDrawLetters(void)
 
     i = 0;
     do {
-        o = &D_800A6610[i].o;
+        o = &OBJECT_POOL[i].o;
         getBaseMatrix(&D_1F800020);
         D_1F800060.vx = o->d84;
         D_1F800060.vy = o->d88;

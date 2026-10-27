@@ -13,8 +13,8 @@ extern unsigned short JOYPAD_STATE;
 extern unsigned char DAT_800b1410;
 extern unsigned char DAT_1f8001cf;
 extern unsigned char GAME_KEEP_BGM;
-extern unsigned char DAT_8009e375, DAT_8009e376, DAT_8009e377;
-extern unsigned char DAT_8009f085, DAT_8009f086, DAT_8009f087;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 extern void FUN_800175f0(void);
 extern void FUN_80017b44(void);
 extern void FUN_80021858(void);
@@ -64,12 +64,12 @@ void areaMode4Handler(void)
     case 2:
     case 3:
         func_80018254(D_800A2A18);
-        DAT_8009e375 = 0;
-        DAT_8009e376 = 0;
-        DAT_8009e377 = 0;
-        DAT_8009f085 = 0;
-        DAT_8009f086 = 0;
-        DAT_8009f087 = 0;
+        DISPLAY_BUFFER_0_BG_R = 0;
+        DISPLAY_BUFFER_0_BG_G = 0;
+        DISPLAY_BUFFER_0_BG_B = 0;
+        DISPLAY_BUFFER_1_BG_R = 0;
+        DISPLAY_BUFFER_1_BG_G = 0;
+        DISPLAY_BUFFER_1_BG_B = 0;
         TASK_C->w4c = 7;
         TASK_C->w4e = 0;
         break;
@@ -86,8 +86,8 @@ extern unsigned short JOYPAD_STATE;
 extern unsigned char DAT_800b1410;
 extern unsigned char DAT_1f8001cf;
 extern unsigned char GAME_KEEP_BGM;
-extern unsigned char DAT_8009e375, DAT_8009e376, DAT_8009e377;
-extern unsigned char DAT_8009f085, DAT_8009f086, DAT_8009f087;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 extern void FUN_800175f0(void);
 extern void FUN_80017b44(void);
 extern void FUN_80021858(void);
@@ -136,12 +136,12 @@ void areaMode4Handler(void)
         break;
     case 2:
     case 3:
-        DAT_8009e375 = 0;
-        DAT_8009e376 = 0;
-        DAT_8009e377 = 0;
-        DAT_8009f085 = 0;
-        DAT_8009f086 = 0;
-        DAT_8009f087 = 0;
+        DISPLAY_BUFFER_0_BG_R = 0;
+        DISPLAY_BUFFER_0_BG_G = 0;
+        DISPLAY_BUFFER_0_BG_B = 0;
+        DISPLAY_BUFFER_1_BG_R = 0;
+        DISPLAY_BUFFER_1_BG_G = 0;
+        DISPLAY_BUFFER_1_BG_B = 0;
         TASK_C->w4c = 8;
         TASK_C->w4e = 0;
         break;

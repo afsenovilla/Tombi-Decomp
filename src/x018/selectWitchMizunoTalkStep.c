@@ -39,9 +39,9 @@ void selectWitchMizunoTalkStep(TObj *o)
             o->state = 0;
         }
     } else {
-        p = &GVARS.b40;
+        p = &GVARS.useItemPending;
         if (*p == 0) return;
-        k = GVARS.b41;
+        k = GVARS.useItemId;
         *p = 0;
         switch (k) {
         case 0x99:

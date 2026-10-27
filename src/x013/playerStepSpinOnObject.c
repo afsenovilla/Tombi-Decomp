@@ -8,7 +8,7 @@ typedef struct { unsigned char b0; unsigned char b1; short w2; char p4[8]; short
 extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short JOYPAD_STATE, D_1f8003c6;
+extern unsigned short JOYPAD_STATE, BUTTON_MASK_B;
 extern unsigned char PLAYER_SWING_ANIM_PAIRS[][2];
 extern unsigned char PLAYER_SPIN_JUMP_ANIMS[];
 extern char D_80011108[];
@@ -181,7 +181,7 @@ void playerStepSpinOnObject(TObj *o)
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
         QBLK(o);
         playerSpinPlaceAndAccelerate(o, i, a);
-        if (JOYPAD_STATE & D_1f8003c6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             GV2.bb0 = 0;
             o->b9c = 1;
             (*(unsigned char*)&o->wac) = 0;
@@ -242,7 +242,7 @@ void playerStepSpinOnObject(TObj *o)
         PLAYER_EXT->visible = 0x20;
         QBLK(o);
         playerSpinPlaceAndAccelerate(o, i, a);
-        if (JOYPAD_STATE & D_1f8003c6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             GV2.bb0 = 0;
             playerSpinAimDir8B(o);
             if (o->wb6 > o->d88) (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 1;
@@ -326,14 +326,14 @@ void playerStepSpinOnObject(TObj *o)
                 if (PAD_PRESSED[0] & 0x20) INC1(o, 9);
                 if (PAD_PRESSED[0] & 0x80) DEC(o);
             }
-            if ((JOYPAD_STATE & D_1f8003c6) && o->wb2 < 4) o->wb2 = 4;
+            if ((JOYPAD_STATE & BUTTON_MASK_B) && o->wb2 < 4) o->wb2 = 4;
             SETTBL(o);
         }
         a = (short)o->wb6 >> 4;
         i = ((unsigned short)((short)o->wb6 >> 4) >> 2) & 0x3f;
         QBLK(o);
         swing(o, i, a);
-        if (JOYPAD_STATE & D_1f8003c6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             playerSpinAimDir8A(o);
             if (o->wb6 > o->d88) (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 1;
             else (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;

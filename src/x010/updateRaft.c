@@ -32,8 +32,8 @@ void updateRaft(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            if (GVARS.b40 == 0) break;
-            if (GVARS.b41 != 0x5c) break;
+            if (GVARS.useItemPending == 0) break;
+            if (GVARS.useItemId != 0x5c) break;
             o->timer = 0x3c;
             o->step++;
             ObjCullRegister(o);
@@ -64,7 +64,7 @@ void updateRaft(TObj *o)
                 (*(short*)&GAME.nextArea) = 4;
                 (*(short*)&GAME.nextSpawnPoint) = 0xb;
                 (*(short*)&GAME.nextSection) = 0;
-                GVARS.b3c = 0;
+                GVARS.fadeEffect = 0;
                 GAME.fadeScreenControl = 3;
             }
             ObjCullRegister(o);

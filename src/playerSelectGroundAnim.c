@@ -8,7 +8,7 @@ typedef struct { char pad[0x2c]; unsigned short cur; unsigned short prev; } Cam2
 extern Cam2c *PLAYER_EXT;
 extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned short PAD_PRESSED;
-extern unsigned short DAT_1f8003c4;
+extern unsigned short BUTTON_MASK_A;
 extern void FUN_800ef760(TObj *o, int v);
 
 void playerSelectGroundAnim(TObj *o)
@@ -46,7 +46,7 @@ typedef struct { char pad[0x2c]; unsigned short cur; unsigned short prev; } Cam2
 extern Cam2c *PLAYER_EXT;
 extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned short PAD_PRESSED;
-extern unsigned short DAT_1f8003c4;
+extern unsigned short BUTTON_MASK_A;
 extern void playerGroundAnimTransition(TObj *o, int v);
 
 void playerSelectGroundAnim(TObj *o)
@@ -55,7 +55,7 @@ void playerSelectGroundAnim(TObj *o)
     if (o->wb2 == 0) {
         PLAYER_EXT->cur = 0;
     } else {
-        if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4) && o->b04 == 1) {
+        if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & BUTTON_MASK_A) && o->b04 == 1) {
             PLAYER_EXT->cur = 0x21;
         } else {
             v = o->wb2;

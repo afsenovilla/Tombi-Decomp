@@ -4,7 +4,7 @@
 #include "raw7.h"
 #include "gamestate.h"
 extern TObj *PLAYER_EXT;
-extern unsigned short D_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern void playerSetFallLean(TObj *);
@@ -39,7 +39,7 @@ void playerStepLaneShiftFall(TObj *o)
         }
     case 1:
         AnimAdvance(o);
-        if (D_1f8001c8 & 1) {
+        if (SPAWN_AXIS_SWAP & 1) {
             o->d->p.whole = o->d->p.whole - 5;
         } else {
             o->d->p.whole = o->d->p.whole + 5;
@@ -66,11 +66,11 @@ void playerStepLaneShiftFall(TObj *o)
             o->state = 3;
         } else {
             r = probeFlaggedSegmentB(o->h->p.whole, o->y.p.whole,
-                             (short)(o->d->p.whole + ((D_1f8001c8 & 1) ? -5 : 5)));
+                             (short)(o->d->p.whole + ((SPAWN_AXIS_SWAP & 1) ? -5 : 5)));
             if (r != 0) {
                 (*(unsigned char*)&o->waa) = 1;
                 if (r == 1) {
-                    o->d->p.whole += (D_1f8001c8 & 1) ? -5 : 5;
+                    o->d->p.whole += (SPAWN_AXIS_SWAP & 1) ? -5 : 5;
                     o->d->p.whole = (short)(o->d->p.whole / 90) * 90;
                     (*(unsigned char*)((char*)&o->da0 + 2)) = 3;
                     o->wb2 = 0;
@@ -82,7 +82,7 @@ void playerStepLaneShiftFall(TObj *o)
         break;
     case 2:
         AnimAdvance(o);
-        if (D_1f8001c8 & 1) {
+        if (SPAWN_AXIS_SWAP & 1) {
             o->d->p.whole = o->d->p.whole - 5;
         } else {
             o->d->p.whole = o->d->p.whole + 5;

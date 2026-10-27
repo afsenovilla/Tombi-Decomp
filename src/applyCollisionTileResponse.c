@@ -1,9 +1,9 @@
 // FUNC 8003fb90 488 MAIN0
 // MATCHING 8003fb90 488
 #include "TOBJ.H"
-extern short DAT_1f80027e;
+extern short COLLISION_HIT_HEIGHT;
 extern unsigned char DAT_1f8001d2;
-extern unsigned short DAT_1f800284[], DAT_1f800282[];
+extern unsigned short DAT_1f800284[], COLLISION_HIT_FLAGS[];
 typedef struct { char pad[0xa0]; unsigned char ba0; } XA0;
 #define BA0(o) (((XA0 *)(o))->ba0)
 
@@ -16,19 +16,19 @@ void applyCollisionTileResponse(TObj *o)
     short e;
     short n;
     short m;
-    a = DAT_1f80027e;
+    a = COLLISION_HIT_HEIGHT;
     if (a < 0)
         a = -a;
     if (a > 8)
         a = 8;
-    if (DAT_1f80027e < 0)
+    if (COLLISION_HIT_HEIGHT < 0)
         a = -a;
     o->b69 = 1;
     e = DAT_1f800284[0];
     DAT_1f8001d2 = 1;
     BA0(o) = 0;
     o->bbe = 0;
-    w = DAT_1f800282[0];
+    w = COLLISION_HIT_FLAGS[0];
     o->wb0 = a;
     hi = w >> 15;
     o->wae = e;
@@ -52,7 +52,7 @@ void applyCollisionTileResponse(TObj *o)
         case 2: BA0(o) = 3; break;
         }
     }
-    if (DAT_1f800282[0] & 0x1000) {
+    if (COLLISION_HIT_FLAGS[0] & 0x1000) {
         switch (m & 3) {
         case 0: BA0(o) |= 0x10; break;
         case 1: BA0(o) |= 0x20; break;

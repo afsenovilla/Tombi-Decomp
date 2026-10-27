@@ -20,12 +20,12 @@ void updateJuiceSeller(TObj *o)
         FUN_800202b4(o);
         switch (o->step) {
         case 0:
-            if (GVARS.b40 != 0) {
-                if (GVARS.b41 == 3 && D_8009D12F == 0) {
+            if (GVARS.useItemPending != 0) {
+                if (GVARS.useItemId == 3 && D_8009D12F == 0) {
                     o->step = 2;
                     o->state = 0;
                 }
-                GVARS.b40 = 0;
+                GVARS.useItemPending = 0;
             } else if (o->b68 != 0) {
                 o->step = 1;
                 o->state = 0;

@@ -10,8 +10,8 @@
 #include "TOBJ.H"
 extern void *A00_FAR_BACKDROP_EAST_ANIMS[];
 extern int DAT_1f8002d4[];
-extern short DAT_1f800176;
-extern unsigned short DAT_1f800186;
+extern short SCREEN_ORIGIN_X;
+extern unsigned short SCREEN_ORIGIN_Y;
 extern void FUN_80018da4(TObj *, int);
 extern void freeObjectLayer7(TObj *);
 
@@ -32,7 +32,7 @@ void func_80122724(TObj *o)
         o->b04++;
         break;
     case 1:
-        r = DAT_1f800176;
+        r = SCREEN_ORIGIN_X;
         v = r;
         if (r >= 0x719) {
             if (o->b0c) {
@@ -47,7 +47,7 @@ void func_80122724(TObj *o)
                     break;
             }
             o->a.p.whole = v;
-            o->y.p.whole = ((unsigned)(o->d34 - DAT_1f800186) & 0xfff) >> 4;
+            o->y.p.whole = ((unsigned)(o->d34 - SCREEN_ORIGIN_Y) & 0xfff) >> 4;
             *(volatile short *)&o->b.p.whole = 0;
             { int one = 1; *(volatile unsigned char *)&o->visible = one; FUN_80018da4(o, one); }
         }
@@ -64,8 +64,8 @@ void func_80122724(TObj *o)
 #include "TOBJ.H"
 extern void *A00_FAR_BACKDROP_EAST_ANIMS[];
 extern int DAT_1f8002d4[];
-extern short DAT_1f800176;
-extern unsigned short DAT_1f800186;
+extern short SCREEN_ORIGIN_X;
+extern unsigned short SCREEN_ORIGIN_Y;
 extern void FUN_80018da4(TObj *, int);
 extern void freeObjectLayer7(TObj *);
 
@@ -87,7 +87,7 @@ void updateA00FarBackdropEast(TObj *o)
         o->b04++;
         break;
     case 1:
-        r = DAT_1f800176;
+        r = SCREEN_ORIGIN_X;
         v = r;
         if (r >= 0x719) {
             if (o->b0c) {
@@ -102,7 +102,7 @@ void updateA00FarBackdropEast(TObj *o)
                     break;
             }
             o->a.p.whole = v;
-            o->y.p.whole = ((unsigned)(o->d34 - DAT_1f800186) & 0xfff) >> 4;
+            o->y.p.whole = ((unsigned)(o->d34 - SCREEN_ORIGIN_Y) & 0xfff) >> 4;
             *(volatile short *)&o->b.p.whole = 0;
             { int one = 1; *(volatile unsigned char *)&o->visible = one; FUN_80018da4(o, one); }
         }

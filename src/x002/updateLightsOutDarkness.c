@@ -5,8 +5,8 @@
 #include "gamestate.h"
 
 extern unsigned char *D_8007C178[];
-extern unsigned char D_8009E375, D_8009E376, D_8009E377;
-extern unsigned char D_8009F085, D_8009F086, D_8009F087;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 
 void updateLightsOutDarkness(TObj *o)
 {
@@ -23,12 +23,12 @@ void updateLightsOutDarkness(TObj *o)
         b = p[1];
         GAME.fadeScreenControl = 1;
         GAME.fadeScreenAmount = 0;
-        D_8009E375 = r;
-        D_8009E376 = g;
-        D_8009E377 = b;
-        D_8009F085 = r;
-        D_8009F086 = g;
-        D_8009F087 = b;
+        DISPLAY_BUFFER_0_BG_R = r;
+        DISPLAY_BUFFER_0_BG_G = g;
+        DISPLAY_BUFFER_0_BG_B = b;
+        DISPLAY_BUFFER_1_BG_R = r;
+        DISPLAY_BUFFER_1_BG_G = g;
+        DISPLAY_BUFFER_1_BG_B = b;
         o->b04++;
         switch (GCD.bce57) {
         case 1: case 2: case 3:
@@ -65,12 +65,12 @@ void updateLightsOutDarkness(TObj *o)
         if (n == 0) {
             *k = 1;
             o->b04++;
-            D_8009E375 = 0;
-            D_8009E376 = 0;
-            D_8009E377 = 0;
-            D_8009F085 = 0;
-            D_8009F086 = 0;
-            D_8009F087 = 0;
+            DISPLAY_BUFFER_0_BG_R = 0;
+            DISPLAY_BUFFER_0_BG_G = 0;
+            DISPLAY_BUFFER_0_BG_B = 0;
+            DISPLAY_BUFFER_1_BG_R = 0;
+            DISPLAY_BUFFER_1_BG_G = 0;
+            DISPLAY_BUFFER_1_BG_B = 0;
         }
         break;
     case 4:

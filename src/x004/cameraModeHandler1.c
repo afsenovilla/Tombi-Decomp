@@ -15,7 +15,7 @@ typedef struct O {
     int d7c;
 } O;
 
-extern short D_1F8001C8;
+extern short SPAWN_AXIS_SWAP;
 extern void updateCameraFollow(O *);
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int FUN_80028a80(O *);
@@ -44,10 +44,10 @@ void cameraModeHandler1(O *o)
         break;
     case 3:
         GAME.disableSelectMenu = 0;
-        if (o->b3f == 0) D_1F8001C8 = (D_1F8001C8 + 1) & 1;
-        else D_1F8001C8 = (D_1F8001C8 - 1) & 1;
+        if (o->b3f == 0) SPAWN_AXIS_SWAP = (SPAWN_AXIS_SWAP + 1) & 1;
+        else SPAWN_AXIS_SWAP = (SPAWN_AXIS_SWAP - 1) & 1;
         setPlayerAxisPointers();
-        o->d7c = D_1F8001C8 * 0x5a00;
+        o->d7c = SPAWN_AXIS_SWAP * 0x5a00;
         o->anim = 0;
         o->subtype = 0;
         o->state = 0;

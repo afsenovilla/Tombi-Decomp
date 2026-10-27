@@ -34,8 +34,8 @@ void updateBluePowderSprinkle(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            if (GVARS.b40 == 0) break;
-            if (GVARS.b41 != 0x75) break;
+            if (GVARS.useItemPending == 0) break;
+            if (GVARS.useItemId != 0x75) break;
             if (bluePowderFindRedFlower(o)) {
                 o->timer = 0x1e;
                 o->step++;
@@ -63,7 +63,7 @@ void updateBluePowderSprinkle(TObj *o)
                 o->step = 0;
                 GVARS.b42 = 0;
                 GVARS.b3f = 0;
-                GVARS.b40 = 0;
+                GVARS.useItemPending = 0;
             }
             ObjCullRegister(o);
             break;

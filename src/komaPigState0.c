@@ -8,9 +8,9 @@ extern unsigned char D_80138FC8[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *KOMA_PIG_ANIMS_B[]; /* same table as KOMA_PIG_ANIMS: a second name keeps case 3 from being cross-jumped into case 4 */
 extern unsigned short *KOMA_PIG_ANIMS[], *D_8013A178[], *D_8013A17C[], *D_8013A188[], *D_8013A200[];
-extern unsigned short DAT_1f80016a;
-extern short DAT_1f80016e;
-extern unsigned short DAT_1f800172;
+extern unsigned short PLAYER_H_WHOLE;
+extern short PLAYER_Y_WHOLE;
+extern unsigned short PLAYER_D_WHOLE;
 extern unsigned short D_1F800172[];
 extern int FUN_8001f9e0(void);
 extern void applyFrameVelocityY(TObj *);
@@ -70,9 +70,9 @@ void komaPigState0(TObj *o)
                 break;
             }
             o->substep = 8;
-            if ((unsigned short)(o->d->p.whole - DAT_1f800172 + 0x2d) > 0x5a) break;
-            if ((unsigned short)(o->h->p.whole - DAT_1f80016a + 0x60) > 0xc0) break;
-            if (DAT_1f80016e < o->y.p.whole + 0x10) break;
+            if ((unsigned short)(o->d->p.whole - PLAYER_D_WHOLE + 0x2d) > 0x5a) break;
+            if ((unsigned short)(o->h->p.whole - PLAYER_H_WHOLE + 0x60) > 0xc0) break;
+            if (PLAYER_Y_WHOLE < o->y.p.whole + 0x10) break;
             o->substep = 13;
             o->timer = 0x50;
             o->wac = 0x28;
@@ -211,8 +211,8 @@ void komaPigState0(TObj *o)
         o->animFrame = 0;
         o->substep = 0;
         if ((unsigned short)(o->d->p.whole - D_1F800172[0] + 0x2d) > 0x5a) break;
-        if ((unsigned short)(o->h->p.whole - DAT_1f80016a + 0x40) > 0x80) break;
-        if (DAT_1f80016e < o->y.p.whole + 0x10) break;
+        if ((unsigned short)(o->h->p.whole - PLAYER_H_WHOLE + 0x40) > 0x80) break;
+        if (PLAYER_Y_WHOLE < o->y.p.whole + 0x10) break;
         o->animFrame = 1;
         x->b0a = 1;
         x->b0b = 2;

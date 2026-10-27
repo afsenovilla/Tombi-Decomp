@@ -2,8 +2,8 @@
 // MATCHING 801206f0 284
 #include "spad.h"
 #include "TOBJ.H"
-extern short D_1F80027E;
-extern unsigned short D_1F800282;
+extern short COLLISION_HIT_HEIGHT;
+extern unsigned short COLLISION_HIT_FLAGS;
 extern short FUN_80040278(TObj *, int, int);
 
 int komaPigCheckLanded(TObj *o)
@@ -21,19 +21,19 @@ int komaPigCheckLanded(TObj *o)
     if (FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x10)) == 0)
         return 0;
     o->b69 = 0;
-    v = D_1F80027E;
+    v = COLLISION_HIT_HEIGHT;
     if (v < 0)
         v = -v;
     if (v > 8)
         v = 8;
-    if (D_1F80027E < 0)
+    if (COLLISION_HIT_HEIGHT < 0)
         v = -v;
     o->wb2 = v;
     o->d8c = -v & 0xff;
     o->wb6 = (-v << 2) & 0xff;
     o->wae = (*(unsigned short*)&SPAD.s284);
     o->b9c = 0;
-    if ((short)((D_1F800282 >> 5) & 0xf) >= 0xe)
+    if ((short)((COLLISION_HIT_FLAGS >> 5) & 0xf) >= 0xe)
         o->w98 = 0;
     return 1;
 }

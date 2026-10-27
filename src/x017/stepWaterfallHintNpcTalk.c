@@ -15,12 +15,12 @@ void stepWaterfallHintNpcTalk(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (GVARS.b40 != 0) {
-            if (GVARS.b41 == 0x3c && GCD.bce0a == 1) {
+        if (GVARS.useItemPending != 0) {
+            if (GVARS.useItemId == 0x3c && GCD.bce0a == 1) {
                 o->step = 3;
                 o->state = 0;
             }
-            GVARS.b40 = 0;
+            GVARS.useItemPending = 0;
         } else {
             if (o->b68 != 0 && (unsigned short)o->wba == 1) {
                 o->step = 5;

@@ -13,8 +13,8 @@ extern unsigned char PLAYER_SUBSTATE[];
 extern unsigned char D_800A4553[];
 extern int D_1F800190;
 extern int D_1F80018C;
-extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
-extern unsigned char D_8009F085[], D_8009F086[], D_8009F087[];
+extern unsigned char DISPLAY_BUFFER_0_BG_R[], DISPLAY_BUFFER_0_BG_G[], DISPLAY_BUFFER_0_BG_B[];
+extern unsigned char DISPLAY_BUFFER_1_BG_R[], DISPLAY_BUFFER_1_BG_G[], DISPLAY_BUFFER_1_BG_B[];
 extern int evilPigBagPortalCheckPlayer(TObj *);
 
 void evilPigBagPortalEnter(TObj *o)
@@ -51,7 +51,7 @@ void evilPigBagPortalEnter(TObj *o)
     case 2:
         if (o->timer == 0) {
             ((unsigned char*)&GAME.fadeScreenControl)[0] = 3;
-            GVARS.b3c = 1;
+            GVARS.fadeEffect = 1;
             SPAD.b3d1 = 1;
             o->state++;
         } else {
@@ -75,12 +75,12 @@ void evilPigBagPortalEnter(TObj *o)
         if (((unsigned char*)&GAME.fadeScreenControl)[0] == 1) {
             TASK_C->mode = 7;
             TASK_C->step = 0;
-            D_8009E375[0] = 0xff;
-            D_8009E376[0] = 0xff;
-            D_8009E377[0] = 0xff;
-            D_8009F085[0] = 0xff;
-            D_8009F086[0] = 0xff;
-            D_8009F087[0] = 0xff;
+            DISPLAY_BUFFER_0_BG_R[0] = 0xff;
+            DISPLAY_BUFFER_0_BG_G[0] = 0xff;
+            DISPLAY_BUFFER_0_BG_B[0] = 0xff;
+            DISPLAY_BUFFER_1_BG_R[0] = 0xff;
+            DISPLAY_BUFFER_1_BG_G[0] = 0xff;
+            DISPLAY_BUFFER_1_BG_B[0] = 0xff;
         }
         break;
     }

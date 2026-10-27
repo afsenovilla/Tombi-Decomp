@@ -4,7 +4,7 @@
 extern unsigned char DAT_8009d005;
 extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_8009c93e;
-extern short DAT_1f80016a, DAT_1f800176, DAT_1f80016e, DAT_1f80017a;
+extern short PLAYER_H_WHOLE, SCREEN_ORIGIN_X, PLAYER_Y_WHOLE, DAT_1f80017a;
 extern TObj *showMessageBox(int a, int b, int c, int d);
 extern void FUN_800187e4(TObj *o);
 extern void a00TutorialHintJumpMessage(TObj *o);
@@ -15,9 +15,9 @@ void updateA00TutorialHint(TObj *o)
         switch (o->step) {
         case 0:
             o->step++;
-            if (DAT_1f80016a <= DAT_1f800176 + 0xa0) o->a.p.whole = 0xf0;
+            if (PLAYER_H_WHOLE <= SCREEN_ORIGIN_X + 0xa0) o->a.p.whole = 0xf0;
             else o->a.p.whole = 0x50;
-            if (DAT_1f80016e <= DAT_1f80017a - 0x78) o->y.p.whole = 0xd8;
+            if (PLAYER_Y_WHOLE <= DAT_1f80017a - 0x78) o->y.p.whole = 0xd8;
             else o->y.p.whole = 0x78;
             o->d90 = (int)showMessageBox(9, 0, o->a.p.whole, o->y.p.whole);
             break;

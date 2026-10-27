@@ -10,7 +10,7 @@ typedef struct O {
 } O;
 extern O *BITTEN_OBJECT;
 extern unsigned short PAD_PRESSED;
-extern unsigned short D_1f8003c6, JOYPAD_STATE;
+extern unsigned short BUTTON_MASK_B, JOYPAD_STATE;
 extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
 extern void FUN_80103cbc(O *);
@@ -61,7 +61,7 @@ void playerStep48Area10(O *o)
         p = BITTEN_OBJECT;
         o->h->s2 = p->h->s2;
         o->y16 = p->y16 - p->s70;
-        if (JOYPAD_STATE & D_1f8003c6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             o->b9c = 0;
             o->b69 = 0;
             o->bac = 0;

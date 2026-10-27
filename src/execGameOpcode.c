@@ -12,7 +12,7 @@ extern short PLAYER_Y_FIX[];
 extern unsigned char SCRIPT_FLAGS[];
 extern signed char GAME_PLAYER_MODE;
 extern unsigned char D_800A60A0, D_800A60A3, D_800A60D6, D_800A60A1;
-extern unsigned char GAME_FADE_SCREEN_CONTROL, D_8009C93C, GAME_FADE_SCREEN_AMOUNT;
+extern unsigned char GAME_FADE_SCREEN_CONTROL, GVARS_FADE_EFFECT, GAME_FADE_SCREEN_AMOUNT;
 extern short PLAYER_ANIM_FRAME;
 extern int GAME_PLAYER_AP;
 extern char PLAYER[];
@@ -374,7 +374,7 @@ static __inline__ int opa0(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     GAME_FADE_SCREEN_CONTROL = 0x10;
-    D_8009C93C = g->arg[0];
+    GVARS_FADE_EFFECT = g->arg[0];
     GAME_FADE_SCREEN_AMOUNT = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;

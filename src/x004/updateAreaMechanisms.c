@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned short D_1F8001C8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern void ObjListPush_1F800224(TObj *);
 extern void ObjFreeDup(TObj *);
 extern void playSFX(int);
@@ -50,7 +50,7 @@ void updateAreaMechanisms(TObj *o)
         ObjListPush_1F800224(o);
         switch (o->subtype) {
         case 4:
-            if (D_1F8001C8 & 1) break;
+            if (SPAWN_AXIS_SWAP & 1) break;
             r = stepAreaSwitch(o);
             if (GCD.bd0da) {
                 if (r == 2 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x384) {
@@ -92,7 +92,7 @@ void updateAreaMechanisms(TObj *o)
             stepAreaRotatingPart(o);
             break;
         case 0:
-            if (D_1F8001C8 & 1) break;
+            if (SPAWN_AXIS_SWAP & 1) break;
             p = &(*(short*)((char*)&SPAD.i170 + 2));
             if (*p >= 0x384) break;
             r = stepAreaSwitchB(o);
@@ -111,7 +111,7 @@ void updateAreaMechanisms(TObj *o)
             if (r == 2) playSFX(0x80);
             break;
         case 10:
-            if (!(D_1F8001C8 & 1)) break;
+            if (!(SPAWN_AXIS_SWAP & 1)) break;
             r = stepAreaSwitchB(o);
             if (r == 1 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x546) {
                 if ((*(unsigned char*)((char*)&PLAYER.obj.waa + 1)) == 2) {
@@ -128,7 +128,7 @@ void updateAreaMechanisms(TObj *o)
             if (r == 2) playSFX(0x81);
             break;
         case 8:
-            if (D_1F8001C8 & 1) break;
+            if (SPAWN_AXIS_SWAP & 1) break;
             r = stepAreaSwitchB(o);
             if (GCD.bd0d9) {
                 if (r == 2 && (*(short*)((char*)&SPAD.i170 + 2)) == 0x1c2) {
@@ -151,7 +151,7 @@ void updateAreaMechanisms(TObj *o)
             if (r == 2 && o->b6b == 1) playSFX(0x7f);
             break;
         case 12:
-            if (D_1F8001C8 & 1) break;
+            if (SPAWN_AXIS_SWAP & 1) break;
             if (stepAreaSwitchB(o) == 2) playSFX(0x7f);
             break;
         case 1:

@@ -12,7 +12,7 @@ static __inline__ short Blocked(void)
 {
     if ((*(unsigned char*)&PLAYER.obj.wac) >= 2) return 1;
     if (!PLAYER.obj.b69) return 1;
-    if (GVARS.b40 | ((*(unsigned char*)&PLAYER.obj.waa) | (PLAYER.obj.b9c | PLAYER.obj.b9e))) return 1;
+    if (GVARS.useItemPending | ((*(unsigned char*)&PLAYER.obj.waa) | (PLAYER.obj.b9c | PLAYER.obj.b9e))) return 1;
     if (SPAD.s1fc & 0x10) return 0;
     return 1;
 }

@@ -8,7 +8,7 @@
 extern short DAT_1f80019e;
 extern unsigned short DAT_1f800244;
 extern short DAT_1f80024c;
-extern unsigned short DAT_1f80024cu;
+extern unsigned short CAT4_OBJECT_COUNT;
 extern TObj **DAT_1f800218;
 extern TObj **DAT_1f800224;
 extern int weaponOnHitGetResult(TObj *, TObj *);
@@ -125,7 +125,7 @@ void collideWeaponsWithCat4Objects(void)
         if (!(a->active & 1) || a->ba5 == 0)
             continue;
         qq = DAT_1f800224;
-        for (DAT_1f80019e = DAT_1f80024cu; DAT_1f80019e != 0;) {
+        for (DAT_1f80019e = CAT4_OBJECT_COUNT; DAT_1f80019e != 0;) {
             b = *qq++;
             DAT_1f80019e--;
             if (!(b->active & 1))

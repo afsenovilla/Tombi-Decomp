@@ -13,7 +13,7 @@ typedef struct {
     char pcc[0xd2 - 0xcc];
     short wd2;
 } S;
-extern unsigned short D_1F8001C8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern void *D_80134608[], *D_80134610[], *D_80134614[];
 extern char D_801348F8[];
 extern char D_8013490C[];
@@ -72,7 +72,7 @@ void updateBlackCrow(TObj *o)
         X(o)->wca = 0;
         o->d64 = 0x1000;
         {
-            unsigned short c8 = D_1F8001C8;
+            unsigned short c8 = SPAWN_AXIS_SWAP;
             X(o)->wc4 = o->a.p.whole;
             X(o)->wc6 = o->y.p.whole;
             X(o)->wc8 = o->b.p.whole;
@@ -111,7 +111,7 @@ void updateBlackCrow(TObj *o)
         }
         if (!((*(Fix16 **)&PLAYER.obj.d)->p.whole < o->d->p.whole)) o->w08 = FUN_8005e420(0xe0, 0x1f0);
         else o->w08 = FUN_8005e420(0xe0, 0x1f2);
-        X(o)->wc0 = D_1F8001C8;
+        X(o)->wc0 = SPAWN_AXIS_SWAP;
         break;
     case 2:
         if (GVARS.b42) {

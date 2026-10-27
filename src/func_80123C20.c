@@ -1,10 +1,10 @@
-/* v reused for D_8009C941 and the constant 8 puts 8 in v1 (game); store order found by permutation. */
+/* v reused for GVARS_USE_ITEM_ID and the constant 8 puts 8 in v1 (game); store order found by permutation. */
 // MATCHING 80123c20 484
 // FUNC 80123c20 484 X000
-// probably: dispatchAreaItemDraw area 0: an object that activates when DAT_8009c940 is set and D_8009C941 == 0x7E (anim PTR_8013b0d8)
+// probably: dispatchAreaItemDraw area 0: an object that activates when GVARS_USE_ITEM_PENDING is set and GVARS_USE_ITEM_ID == 0x7E (anim PTR_8013b0d8)
 #include "TOBJ.H"
-extern unsigned char DAT_8009c940[];
-extern void *PTR_8013b0d8; extern unsigned char D_8009C941;
+extern unsigned char GVARS_USE_ITEM_PENDING[];
+extern void *PTR_8013b0d8; extern unsigned char GVARS_USE_ITEM_ID;
 extern int DAT_1f8002d4[];
 extern unsigned char DAT_8009cd98, DAT_8009cd9c, DAT_800b146c, DAT_800b1474, DAT_800b1470;
 extern void FUN_8001fe6c(TObj *);
@@ -20,9 +20,9 @@ void func_80123C20(TObj *o)
     int v;
     switch (o->b04) {
     case 0:
-        if (DAT_8009c940[0] != 0) {
-            if ((v = D_8009C941) == 0x7e) {
-                DAT_8009c940[0] = 0;
+        if (GVARS_USE_ITEM_PENDING[0] != 0) {
+            if ((v = GVARS_USE_ITEM_ID) == 0x7e) {
+                GVARS_USE_ITEM_PENDING[0] = 0;
                 v = 8;
                 o->box0 = v;
                 o->box2 = v;

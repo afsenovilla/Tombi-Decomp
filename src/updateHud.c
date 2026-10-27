@@ -5,7 +5,7 @@
 extern Fix16 *GAME_PLAYER_AP;
 extern unsigned char DAT_8009c970, DAT_8009c971;
 extern unsigned char DAT_8009c990[];
-extern unsigned char DAT_800b1468[];
+extern unsigned char HUD_ITEM_GAUGE_TIMERS[];
 extern unsigned char DAT_8009d0a4[];
 extern short DAT_8007977c[];
 extern short DAT_80079784[];
@@ -72,56 +72,56 @@ void updateHud(TObj *o)
         if (DAT_8009d0a4[DAT_8007977c[i]] != 0 && DAT_8009c990[0] == DAT_80079784[i]) {
             switch (DAT_800a6104[0]) {
             case 0:
-                if (--DAT_800b1468[4 + i] == 0) {
-                    DAT_800b1468[4 + i] = 3;
+                if (--HUD_ITEM_GAUGE_TIMERS[4 + i] == 0) {
+                    HUD_ITEM_GAUGE_TIMERS[4 + i] = 3;
                     if (++DAT_8009c990[0x40f] >= 0x3c) {
                         DAT_800a6104[0] = 1;
                         DAT_8009c990[0x40f] = 0x3c;
-                        DAT_800b1468[4 + i] = 0;
-                        DAT_800b1468[12 + i] = 1;
-                        DAT_800b1468[8 + i] = 6;
+                        HUD_ITEM_GAUGE_TIMERS[4 + i] = 0;
+                        HUD_ITEM_GAUGE_TIMERS[12 + i] = 1;
+                        HUD_ITEM_GAUGE_TIMERS[8 + i] = 6;
                     }
                 }
                 break;
             case 1:
                 break;
             case 2:
-                DAT_800b1468[4 + i] = 0x78;
-                DAT_800b1468[8 + i] = 0;
-                DAT_800b1468[12 + i] = 0;
+                HUD_ITEM_GAUGE_TIMERS[4 + i] = 0x78;
+                HUD_ITEM_GAUGE_TIMERS[8 + i] = 0;
+                HUD_ITEM_GAUGE_TIMERS[12 + i] = 0;
                 DAT_8009c990[0x40f] = 0;
                 break;
             case 3:
-                DAT_800b1468[8 + i] = 0;
-                if (--DAT_800b1468[4 + i] == 0) {
+                HUD_ITEM_GAUGE_TIMERS[8 + i] = 0;
+                if (--HUD_ITEM_GAUGE_TIMERS[4 + i] == 0) {
                     DAT_800a6104[0] = 0;
-                    DAT_800b1468[4 + i] = 1;
+                    HUD_ITEM_GAUGE_TIMERS[4 + i] = 1;
                 }
                 break;
             }
-            if (DAT_800b1468[8 + i] != 0 && --DAT_800b1468[8 + i] == 0) {
-                if (++DAT_800b1468[12 + i] >= 4)
-                    DAT_800b1468[12 + i] = 0;
-                DAT_800b1468[8 + i] = 6;
+            if (HUD_ITEM_GAUGE_TIMERS[8 + i] != 0 && --HUD_ITEM_GAUGE_TIMERS[8 + i] == 0) {
+                if (++HUD_ITEM_GAUGE_TIMERS[12 + i] >= 4)
+                    HUD_ITEM_GAUGE_TIMERS[12 + i] = 0;
+                HUD_ITEM_GAUGE_TIMERS[8 + i] = 6;
             }
         } else {
-            if (DAT_800b1468[4 + i] != 0) {
-                DAT_800b1468[i] = 0x78;
-                DAT_800b1468[4 + i]--;
+            if (HUD_ITEM_GAUGE_TIMERS[4 + i] != 0) {
+                HUD_ITEM_GAUGE_TIMERS[i] = 0x78;
+                HUD_ITEM_GAUGE_TIMERS[4 + i]--;
                 if (++DAT_8009c990[0x40c + i] >= 0x3c) {
                     if (DAT_8009c990[0x408 + i] == 9) {
                         DAT_8009c990[0x40c + i] = 0x3c;
-                        DAT_800b1468[4 + i] = 0;
+                        HUD_ITEM_GAUGE_TIMERS[4 + i] = 0;
                     } else {
                         DAT_8009c990[0x408 + i]++;
                         DAT_8009c990[0x40c + i] -= 0x3c;
-                        DAT_800b1468[12 + i] = 1;
-                        DAT_800b1468[8 + i] = 6;
+                        HUD_ITEM_GAUGE_TIMERS[12 + i] = 1;
+                        HUD_ITEM_GAUGE_TIMERS[8 + i] = 6;
                     }
                 }
             }
-            if (DAT_800b1468[i] != 0)
-                DAT_800b1468[i]--;
+            if (HUD_ITEM_GAUGE_TIMERS[i] != 0)
+                HUD_ITEM_GAUGE_TIMERS[i]--;
             p = (unsigned char *)o + i;
             if (p[0x64] != 0 && --p[0x60] == 0) {
                 if (++p[0x64] >= 4)

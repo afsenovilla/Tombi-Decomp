@@ -19,7 +19,7 @@ void updatePauseMenu(void) {
         }
 
         pad = *(u16*)0x1F8001FC;
-        if ((pad & 8) || D_8009EB58 != 0) {
+        if ((pad & 8) || PAD_BUFFERS != 0) {
             *(s16*)(&SCRATCHPAD + 0x1C6) = 1;
             GAME_INVENTORY_SCREEN = 0;
             *(&SCRATCHPAD + 0x3CD) = 1;

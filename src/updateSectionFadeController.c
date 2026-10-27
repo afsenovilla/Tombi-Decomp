@@ -9,8 +9,8 @@ extern G GAME;
 extern unsigned char *D_8007C178[];
 extern unsigned char *D_8007C1A8;
 extern unsigned char D_1F8003D1;
-extern unsigned char D_8009E375, D_8009E376, D_8009E377;
-extern unsigned char D_8009F085, D_8009F086, D_8009F087;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 void updateSectionFadeController(TObj *o)
 {
     unsigned char *p;
@@ -30,12 +30,12 @@ void updateSectionFadeController(TObj *o)
             g = 0x97;
             b = 0xff;
         }
-        D_8009E375 = r;
-        D_8009E376 = g;
-        D_8009E377 = b;
-        D_8009F085 = r;
-        D_8009F086 = g;
-        D_8009F087 = b;
+        DISPLAY_BUFFER_0_BG_R = r;
+        DISPLAY_BUFFER_0_BG_G = g;
+        DISPLAY_BUFFER_0_BG_B = b;
+        DISPLAY_BUFFER_1_BG_R = r;
+        DISPLAY_BUFFER_1_BG_G = g;
+        DISPLAY_BUFFER_1_BG_B = b;
         o->b04++;
         break;
     case 1:
@@ -55,12 +55,12 @@ void updateSectionFadeController(TObj *o)
         if (GAME.c976 != 0) break;
         GAME.c975 = 1;
         o->b04++;
-        D_8009E375 = 0;
-        D_8009E376 = 0;
-        D_8009E377 = 0;
-        D_8009F085 = 0;
-        D_8009F086 = 0;
-        D_8009F087 = 0;
+        DISPLAY_BUFFER_0_BG_R = 0;
+        DISPLAY_BUFFER_0_BG_G = 0;
+        DISPLAY_BUFFER_0_BG_B = 0;
+        DISPLAY_BUFFER_1_BG_R = 0;
+        DISPLAY_BUFFER_1_BG_G = 0;
+        DISPLAY_BUFFER_1_BG_B = 0;
         break;
     case 4:
         if (GAME.c975 == 4) o->b04 = 0;

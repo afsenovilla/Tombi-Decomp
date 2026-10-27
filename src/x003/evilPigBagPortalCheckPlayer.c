@@ -11,7 +11,7 @@ extern short D_800A60A4, D_800A60A6, D_800A60A8, D_800A60AA;
 int evilPigBagPortalCheckPlayer(TObj *o)
 {
     if (GVARS.b3a == 0) goto ret0;
-    if (GVARS.b3f | GVARS.b40) return 0;
+    if (GVARS.b3f | GVARS.useItemPending) return 0;
     if (PLAYER == 2) return 0;
     if ((unsigned short)(PLAYER_D->p.whole - o->d->p.whole + 0x2d) >= 0x5b) return 0;
     if ((unsigned short)(PLAYER_H->p.whole - o->h->p.whole + (o->box0 + D_800A60A4)) > o->box1 + D_800A60A6) {

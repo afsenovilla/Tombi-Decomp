@@ -8,7 +8,7 @@ extern TObj *allocObjectLayer5(void);
 extern unsigned char DAT_8007b368[];
 extern unsigned char DAT_8007b084[];
 extern unsigned char *DAT_8007b14c[];
-extern unsigned short D_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern Fix16 *PLAYER_H[];
 extern unsigned char D_8006DDEF[];
 extern Fix16 PLAYER_Y_FIX[];
@@ -37,7 +37,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
     o->velV = vy;
     switch (type) {
     case 5:
-        if (!(D_1f8001c8 & 1)) {
+        if (!(SPAWN_AXIS_SWAP & 1)) {
             d = (PLAYER_H[0]->p.whole - pos[0].p.whole) << 8;
             d /= 60;
             o->velH = d;
@@ -60,7 +60,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
         }
         break;
     case 8:
-        if (!(D_1f8001c8 & 1)) {
+        if (!(SPAWN_AXIS_SWAP & 1)) {
             d = (pos[0].p.whole - PLAYER_H[0]->p.whole) << 8;
             d /= 60;
             o->velH = d;
@@ -90,7 +90,7 @@ extern TObj *allocObjectLayer5(void);
 extern unsigned char DAT_8007b368[];
 extern unsigned char DAT_8007b084[];
 extern unsigned char *DAT_8007b14c[];
-extern unsigned short D_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern Fix16 *PLAYER_H[];
 extern Fix16 PLAYER_Y_FIX[];
 extern Fix16 *PLAYER_D[];
@@ -118,7 +118,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
     o->velV = vy;
     switch (type) {
     case 5:
-        if (!(D_1f8001c8 & 1)) {
+        if (!(SPAWN_AXIS_SWAP & 1)) {
             d = (PLAYER_H[0]->p.whole - pos[0].p.whole) << 8;
             d /= 60;
             o->velH = d;
@@ -141,7 +141,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
         }
         break;
     case 8:
-        if (!(D_1f8001c8 & 1)) {
+        if (!(SPAWN_AXIS_SWAP & 1)) {
             d = (pos[0].p.whole - PLAYER_H[0]->p.whole) << 8;
             d /= 60;
             o->velH = d;

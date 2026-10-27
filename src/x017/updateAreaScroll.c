@@ -133,7 +133,7 @@ void updateAreaScroll(O *o)
             (*(short*)&GAME.nextArea) = 0x11;
             (*(short*)&GAME.nextSection) = 2;
             (*(short*)&GAME.nextSpawnPoint) = 0;
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
         }

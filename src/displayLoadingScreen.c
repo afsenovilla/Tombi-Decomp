@@ -1,7 +1,7 @@
 // FUNC 8001be1c 208 MAIN0
 // MATCHING 8001be1c 208
 extern short *TASK_C;
-extern int DAT_8009f7e4;
+extern int LOADING_SCREEN_STATE;
 extern void drawLoadingSprites(int, int);
 
 void displayLoadingScreen(void)
@@ -9,8 +9,8 @@ void displayLoadingScreen(void)
     short *o;
     short *p;
     short *q;
-    if (DAT_8009f7e4 != 0) {
-        if (DAT_8009f7e4 != 1)
+    if (LOADING_SCREEN_STATE != 0) {
+        if (LOADING_SCREEN_STATE != 1)
             return;
     } else {
         o = TASK_C;
@@ -18,7 +18,7 @@ void displayLoadingScreen(void)
         o[0x30] = 0xf;
         o[0x32] = 0;
         drawLoadingSprites(o[0x31], 0);
-        DAT_8009f7e4 = DAT_8009f7e4 + 1;
+        LOADING_SCREEN_STATE = LOADING_SCREEN_STATE + 1;
     }
     p = TASK_C;
     p[0x30] = p[0x30] - 1;

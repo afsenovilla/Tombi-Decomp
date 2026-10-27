@@ -39,8 +39,8 @@ void bucketFillWithWater(TObj *o)
     switch (o->state) {
     case 0:
         c = D_8009C985 & 1;
-        if (GVARS.b40) {
-            switch (GVARS.b41) {
+        if (GVARS.useItemPending) {
+            switch (GVARS.useItemId) {
             case 5:
             case 7:
             case 0xe:

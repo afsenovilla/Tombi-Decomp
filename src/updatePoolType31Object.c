@@ -5,7 +5,7 @@ extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
 extern void *D_80012204;
 extern unsigned short TICK_COUNT;
-extern int D_1F800198;
+extern int UPDATE_OBJECT_INDEX;
 extern TObj *ObjAlloc(void);
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
@@ -40,7 +40,7 @@ void updatePoolType31Object(TObj *o)
     case 0:
         switch (o->subtype) {
         case 0:
-            if ((TICK_COUNT + D_1F800198) & 1) {
+            if ((TICK_COUNT + UPDATE_OBJECT_INDEX) & 1) {
                 if (--o->timer == -1) {
                     o->b04 = 3;
                     break;

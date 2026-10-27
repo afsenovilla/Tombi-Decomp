@@ -4,7 +4,7 @@
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
-extern unsigned char DAT_8009c940, DAT_8009c941;
+extern unsigned char GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID;
 extern unsigned char DAT_8009c942[];
 extern unsigned char GAME_PLAYER_MODE;
 extern short D_1F8001C6;
@@ -19,9 +19,9 @@ void factoryBossNoBombHereTalk(TObj *o)
 
     switch (o->state) {
     case 0:
-        c = &DAT_8009c940;
+        c = &GVARS_USE_ITEM_PENDING;
         if (*c != 0) {
-            if (DAT_8009c941 != 0x3c)
+            if (GVARS_USE_ITEM_ID != 0x3c)
                 break;
             o->step = 5;
             o->state = 0;

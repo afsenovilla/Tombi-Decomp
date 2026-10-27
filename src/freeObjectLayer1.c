@@ -1,7 +1,7 @@
 // FUNC 80018744 76 MAIN0
 // MATCHING 80018744 76
 extern int *g204;
-extern unsigned short g236;
+extern unsigned short FREE_OBJECT_COUNT_LAYER1;
 void freeObjectLayer1(int *o)
 {
     unsigned char c = ((unsigned char *)o)[0x1c];
@@ -10,7 +10,7 @@ void freeObjectLayer1(int *o)
     o[2] = 0;
     o[3] = 0;
     ((unsigned char *)o)[0x1c] = c & 0x7f;
-    g236++;
+    FREE_OBJECT_COUNT_LAYER1++;
     g204 -= 1;
     g204[0] = (int)o;
 }

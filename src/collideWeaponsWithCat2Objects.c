@@ -7,9 +7,9 @@
 extern short DAT_1f80019e;
 extern unsigned short DAT_1f800244;
 extern short DAT_1f800246;
-extern unsigned short DAT_1f800246u;
+extern unsigned short CAT2_OBJECT_COUNT;
 extern TObj **DAT_1f800218;
-extern TObj **DAT_1f80021c;
+extern TObj **CAT2_OBJECT_LIST;
 extern int weaponOnHitGetResult(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_8001e4f0(int);
@@ -120,8 +120,8 @@ void collideWeaponsWithCat2Objects(void)
         n--;
         if (!(a->active & 1) || a->ba5 == 0)
             continue;
-        qq = DAT_1f80021c;
-        for (DAT_1f80019e = DAT_1f800246u; DAT_1f80019e != 0;) {
+        qq = CAT2_OBJECT_LIST;
+        for (DAT_1f80019e = CAT2_OBJECT_COUNT; DAT_1f80019e != 0;) {
             b = *qq++;
             DAT_1f80019e--;
             if (!(b->active & 1))

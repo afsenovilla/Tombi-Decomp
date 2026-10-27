@@ -8,8 +8,8 @@ extern unsigned short *D_8013A268[];
 extern unsigned short *D_8013A254[];
 extern unsigned short *D_8013A18C[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
-extern unsigned short DAT_1f80016a;
-extern unsigned short DAT_1f800172;
+extern unsigned short PLAYER_H_WHOLE;
+extern unsigned short PLAYER_D_WHOLE;
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int enemyProbeGround(TObj *);
@@ -49,8 +49,8 @@ void komaPigSubtype03Step(TObj *o)
         break;
     case 2:
         AnimAdvanceWithBox(o);
-        dx = o->h->p.whole - DAT_1f80016a + 0xa0;
-        dz = o->d->p.whole - DAT_1f800172 + 0x2d;
+        dx = o->h->p.whole - PLAYER_H_WHOLE + 0xa0;
+        dz = o->d->p.whole - PLAYER_D_WHOLE + 0x2d;
         if (dx > 0x140) {
             o->timer = 0;
             break;

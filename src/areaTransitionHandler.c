@@ -85,7 +85,7 @@ void areaTransitionHandler(void)
         func_80021CC8(GAME_B + (u16)AREA_VARIANT, GAME_SELECTED_SECTION, variant | areaChanged);
         func_8003C78C();
         startSoundTask();
-        D_8009EB4C = 0;
+        LOADING_SCREEN_STATE = 0;
         break;
     }
     case 5:

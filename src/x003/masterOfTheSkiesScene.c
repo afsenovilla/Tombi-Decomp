@@ -260,7 +260,7 @@ void masterOfTheSkiesScene(TObj *o)
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((unsigned char*)&GVARS.b3e)[0] = 0;
-        ((unsigned char*)&GVARS.b40)[0] = 0;
+        ((unsigned char*)&GVARS.useItemPending)[0] = 0;
         D_800A60D4[0] = 0;
         D_800A60EA[0] = 0;
         P.step = 0x65;

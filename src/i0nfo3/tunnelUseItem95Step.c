@@ -5,20 +5,20 @@ typedef struct { short a, x, b, y, c, d; } BoxXY;
 extern int func_8002DCC8(int a, int b, BoxXY *p);
 extern void func_8005A9A4(int e, int a);
 extern unsigned char D_8009C93F;
-extern unsigned char D_8009C940[];
-extern unsigned char D_8009C941;
+extern unsigned char GVARS_USE_ITEM_PENDING[];
+extern unsigned char GVARS_USE_ITEM_ID;
 extern unsigned char D_8009C942;
 extern unsigned char PLAYER_STATE;
 extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char PLAYER_STEP;
-extern TObj *D_800A60C8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern unsigned char D_800A60E4;
 
 static __inline__ short usingItem(unsigned char *p)
 {
     short r = 0;
     if (p[0] != 0) {
-        r = D_8009C941 == 0x95;
+        r = GVARS_USE_ITEM_ID == 0x95;
     }
     return r;
 }
@@ -30,7 +30,7 @@ void tunnelUseItem95Step(TObj *o)
     unsigned char *v;
     switch (o->state) {
     case 0:
-        u = D_8009C940;
+        u = GVARS_USE_ITEM_PENDING;
         v = u;
         if (usingItem(v)) {
             b.x = 0x90;
@@ -41,14 +41,14 @@ void tunnelUseItem95Step(TObj *o)
             u[0] = 1;
             D_8009C942 = 1;
             u[1] = 0;
-            D_800A60C8 = (TObj *)func_8002DCC8(6, 0, &b);
+            PLAYER_MESSAGE_BOX = (TObj *)func_8002DCC8(6, 0, &b);
             o->state++;
             break;
         }
         goto done;
     case 1:
-        if (D_800A60C8->b04 == 2) {
-            D_800A60C8->b04 = 3;
+        if (PLAYER_MESSAGE_BOX->b04 == 2) {
+            PLAYER_MESSAGE_BOX->b04 = 3;
             func_8005A9A4(0x7D, 0);
             o->w08 = 0xC8;
             o->state = 9;

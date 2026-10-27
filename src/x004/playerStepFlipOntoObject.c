@@ -21,7 +21,7 @@ extern TObj *PLAYER_HELD_OBJECT;
 extern TObj *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern unsigned short PAD_PRESSED;
-extern unsigned short DAT_1f8003c6;
+extern unsigned short BUTTON_MASK_B;
 extern unsigned char PLAYER_SWING_ANIM_PAIRS[];
 extern char D_80011108[];
 extern void FUN_8001e5f4(int, int);
@@ -32,7 +32,7 @@ extern int FUN_8001fe0c(unsigned char, int);
 extern void playerFlipOntoObjectPlace(TObj *, int, int);
 
 #define BUTTONS(o) \
-    if (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c6) { \
+    if (*(volatile unsigned short *)&PAD_PRESSED & BUTTON_MASK_B) { \
         PLAYER_EXT->b09 = 0; \
         (o)->step = 0xb; \
         (o)->state = 0; \

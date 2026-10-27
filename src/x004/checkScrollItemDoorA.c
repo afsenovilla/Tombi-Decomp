@@ -13,7 +13,7 @@ static __inline__ short busy(void)
 {
     if (U8(&PLAYER, 0xac) >= 2) return 1;
     if (PLAYER.b69 == 0) return 1;
-    if (PLAYER.b9c | PLAYER.b9e | U8(&PLAYER, 0xaa) | GVARS.b40) return 1;
+    if (PLAYER.b9c | PLAYER.b9e | U8(&PLAYER, 0xaa) | GVARS.useItemPending) return 1;
     if (SPAD.s1fc & 0x10) return 0;
     return 1;
 }

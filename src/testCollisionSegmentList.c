@@ -5,7 +5,7 @@
    (beqz delay slot), int inline in the a/y-passed branch.
    Tried without asm: separate b local (score 76, r then lands in a2), short/ushort r, r = 0 in the else, while loop, int w/n: pointer pseudo always outranks r. */
 extern unsigned short *COLLISION_SEG_PTR;
-extern unsigned short DAT_1f800282, DAT_1f800284;
+extern unsigned short COLLISION_HIT_FLAGS, DAT_1f800284;
 extern int testCollisionSegment(int, int);
 extern int testCollisionSegmentStep(int, int);
 extern int testCollisionSegmentSlopeA(int, int);
@@ -56,7 +56,7 @@ int testCollisionSegmentList(void *o, int x, int y)
             }
         }
         if (r) {
-            DAT_1f800282 = w;
+            COLLISION_HIT_FLAGS = w;
             return 1;
         }
     } while (n);

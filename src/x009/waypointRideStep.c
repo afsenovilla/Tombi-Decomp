@@ -123,7 +123,7 @@ void waypointRideStep(TObj *o)
             o->step++;
             GAME.fadeScreenControl = 3;
             (*(short*)&GAME.nextArea) = 9;
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             (*(short*)&GAME.nextSection) = 0;
             (*(short*)&GAME.nextSpawnPoint) = 2;
         }

@@ -20,7 +20,7 @@ void mermaidDivingOfferTalk(TObj *o)
 
     switch (o->state) {
     case 0:
-        GVARS.b40 = 0;
+        GVARS.useItemPending = 0;
         removeItemFromInventory(0x94, D_8009D138);
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;

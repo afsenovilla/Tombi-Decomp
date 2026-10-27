@@ -19,7 +19,7 @@ typedef struct {
 extern G *TASK_C;
 extern unsigned char LOAD_COMPLETE_SYM;
 extern unsigned short D_1F8003BA;
-extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[], D_8009F085[], D_8009F086[], D_8009F087[];
+extern unsigned char DISPLAY_BUFFER_0_BG_R[], DISPLAY_BUFFER_0_BG_G[], DISPLAY_BUFFER_0_BG_B[], DISPLAY_BUFFER_1_BG_R[], DISPLAY_BUFFER_1_BG_G[], DISPLAY_BUFFER_1_BG_B[];
 extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
 extern short D_800A45EA;
 extern unsigned short D_800A45EAu;
@@ -86,15 +86,15 @@ void inventoryScreenHandler(void)
         r.h = 1;
         StoreImage(&r, (unsigned long *)0x801FBBA0);
         GetDrawEnv(&env);
-        D_8009E375[0] = 0xf8;
-        D_8009E376[0] = 200;
-        D_8009E377[0] = 0xc0;
-        D_8009F087[0] = 0xc0;
-        D_8009F086[0] = 200;
+        DISPLAY_BUFFER_0_BG_R[0] = 0xf8;
+        DISPLAY_BUFFER_0_BG_G[0] = 200;
+        DISPLAY_BUFFER_0_BG_B[0] = 0xc0;
+        DISPLAY_BUFFER_1_BG_B[0] = 0xc0;
+        DISPLAY_BUFFER_1_BG_G[0] = 200;
         D_8009BC98 = env.r0;
         D_8009BC9C = env.g0;
         D_8009BCA0 = env.b0;
-        D_8009F085[0] = 0xf8;
+        DISPLAY_BUFFER_1_BG_R[0] = 0xf8;
         TASK_C->w4e++;
         break;
     case 1:
@@ -141,12 +141,12 @@ void inventoryScreenHandler(void)
         r.h = 1;
         LoadImage(&r, (unsigned long *)0x801FBBA0);
         LOAD_COMPLETE_SYM = 0;
-        D_8009E375[0] = D_8009BC98;
-        D_8009F085[0] = D_8009BC98;
-        D_8009E376[0] = D_8009BC9C;
-        D_8009E377[0] = D_8009BCA0;
-        D_8009F086[0] = D_8009BC9C;
-        D_8009F087[0] = D_8009BCA0;
+        DISPLAY_BUFFER_0_BG_R[0] = D_8009BC98;
+        DISPLAY_BUFFER_1_BG_R[0] = D_8009BC98;
+        DISPLAY_BUFFER_0_BG_G[0] = D_8009BC9C;
+        DISPLAY_BUFFER_0_BG_B[0] = D_8009BCA0;
+        DISPLAY_BUFFER_1_BG_G[0] = D_8009BC9C;
+        DISPLAY_BUFFER_1_BG_B[0] = D_8009BCA0;
         n = D_80077A8C[GAME.selectedArea + AREA_VARIANT][GAME.selectedSection];
     play:
         queueSystemLoadList(n, 1);
@@ -172,12 +172,12 @@ void inventoryScreenHandler(void)
         GAME.areaTransition = 0;
         GAME.keepBgm = 0;
         stopBgm(0);
-        D_8009E375[0] = 0;
-        D_8009E376[0] = 0;
-        D_8009E377[0] = 0;
-        D_8009F085[0] = 0;
-        D_8009F086[0] = 0;
-        D_8009F087[0] = 0;
+        DISPLAY_BUFFER_0_BG_R[0] = 0;
+        DISPLAY_BUFFER_0_BG_G[0] = 0;
+        DISPLAY_BUFFER_0_BG_B[0] = 0;
+        DISPLAY_BUFFER_1_BG_R[0] = 0;
+        DISPLAY_BUFFER_1_BG_G[0] = 0;
+        DISPLAY_BUFFER_1_BG_B[0] = 0;
         TASK_C->b68 = 1;
         TASK_C->w48 = 1;
         TASK_C->w4a = 1;

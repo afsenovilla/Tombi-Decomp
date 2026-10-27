@@ -5,7 +5,7 @@ extern unsigned char DAT_800b173c[];
 extern unsigned char CAMERA_SCROLL[];
 extern unsigned char DAT_800b11c8[];
 extern unsigned char **DAT_1f800204;
-extern short DAT_1f800236;
+extern short FREE_OBJECT_COUNT_LAYER1;
 extern unsigned char *DAT_1f800218;
 extern unsigned char *DAT_1f80025c;
 extern short DAT_1f80024e;
@@ -33,7 +33,7 @@ void initObjectPoolLayer1(void)
         *--DAT_1f800204 = q;
         q -= 0xec;
     } while (i < 4);
-    DAT_1f800236 = 4;
+    FREE_OBJECT_COUNT_LAYER1 = 4;
     DAT_1f800218 = DAT_800b11c8;
     DAT_1f80025c = DAT_800b11c8;
     DAT_1f80024e = 0;

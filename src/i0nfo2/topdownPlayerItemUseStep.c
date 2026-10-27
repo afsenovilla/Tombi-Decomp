@@ -6,7 +6,7 @@ extern void topdownPlayerSetMoveAnim(TObj *o);
 extern void func_80026E0C(int item, int n);
 extern TObj *PLAYER_EXT;
 extern unsigned char D_8009C93F[];
-extern unsigned char D_8009C940, D_8009C941;
+extern unsigned char GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID;
 extern unsigned char D_8009C942[];
 extern unsigned char D_8009CE55;
 extern unsigned char D_8009CE57;
@@ -47,33 +47,33 @@ void topdownPlayerItemUseStep(TObj *o)
         o->b04 = 1;
         o->step = 0;
         o->state = 0;
-        if (D_8009C940 == 0) break;
-        switch (D_8009C941) {
+        if (GVARS_USE_ITEM_PENDING == 0) break;
+        switch (GVARS_USE_ITEM_ID) {
         case 0xF:
             D_8009CE55 = 5;
-            func_80026E0C(D_8009C941, 1);
-            D_8009C940 = 0;
+            func_80026E0C(GVARS_USE_ITEM_ID, 1);
+            GVARS_USE_ITEM_PENDING = 0;
             break;
         case 0x9A:
             D_8009CF13 = 0;
-            D_8009C940 = 0;
+            GVARS_USE_ITEM_PENDING = 0;
             break;
         case 0x11:
             D_8009CE57 = 4;
-            func_80026E0C(D_8009C941, 1);
-            D_8009C940 = 0;
+            func_80026E0C(GVARS_USE_ITEM_ID, 1);
+            GVARS_USE_ITEM_PENDING = 0;
             break;
         case 9:
             if (!CHK9(o)) GAME_BITTEN_JUMP_KIND = 0;
-            func_80026E0C(D_8009C941, 1);
-            D_8009C940 = 0;
+            func_80026E0C(GVARS_USE_ITEM_ID, 1);
+            GVARS_USE_ITEM_PENDING = 0;
             break;
         case 0x1E:
         case 0x1F:
             if (*(int *)&GAME.selectedArea == 0x20013 && o->h->p.whole >= 6 && o->h->p.whole < 0x36
                 && o->y.p.whole >= 0xE9 && o->y.p.whole < 0x149) {
                 D_8009CFD7 = 1;
-                D_8009C940 = 0;
+                GVARS_USE_ITEM_PENDING = 0;
             }
             break;
         case 0x23:
@@ -81,14 +81,14 @@ void topdownPlayerItemUseStep(TObj *o)
                 && o->h->p.whole >= 0x90 && o->h->p.whole < 0xC0 && o->y.p.whole >= 0xB6 && o->y.p.whole < 0xCA) {
                 D_8009CFC7 = 1;
             }
-            func_80026E0C(D_8009C941, 1);
-            D_8009C940 = 0;
+            func_80026E0C(GVARS_USE_ITEM_ID, 1);
+            GVARS_USE_ITEM_PENDING = 0;
             break;
         case 5:
         case 0x7C:
         case 0x97:
         case 0x98:
-            D_8009C940 = 0;
+            GVARS_USE_ITEM_PENDING = 0;
             o->b04 = 4;
             o->step = 4;
             o->state = 0;
@@ -98,7 +98,7 @@ void topdownPlayerItemUseStep(TObj *o)
             GAME_PLAYER_MODE[0] = 3;
             break;
         case 7:
-            D_8009C940 = 0;
+            GVARS_USE_ITEM_PENDING = 0;
             o->b04 = 4;
             o->step = 4;
             o->state = 0;
@@ -106,7 +106,7 @@ void topdownPlayerItemUseStep(TObj *o)
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
             GAME_PLAYER_MODE[0] = 3;
-            func_80026E0C(D_8009C941, 1);
+            func_80026E0C(GVARS_USE_ITEM_ID, 1);
             break;
         case 0xE:
             o->active = 4;
@@ -137,7 +137,7 @@ void topdownPlayerItemUseStep(TObj *o)
         case 0x10:
         case 0x12:
         default:
-            D_8009C940 = 0;
+            GVARS_USE_ITEM_PENDING = 0;
             break;
         }
         break;

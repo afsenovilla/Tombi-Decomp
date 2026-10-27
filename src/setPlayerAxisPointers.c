@@ -10,27 +10,27 @@ INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_800217A0_slps01144);
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0xec - 0x48]; } S1;
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0xd4 - 0x48]; } S2;
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0x6c - 0x48]; } S3;
-extern unsigned short D_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern short D_1f80019c;
 extern char PLAYER[];
 extern void *PLAYER_H, *PLAYER_D;
 extern S1 D_800B1478[];
-extern S2 D_800A6610[];
-extern S3 D_800A49A8[];
+extern S2 OBJECT_POOL[];
+extern S3 OBJECT_POOL_LAYER7[];
 void setPlayerAxisPointers(void)
 {
     S2 *e2;
     S3 *e3;
     S1 *e1;
     char *b = PLAYER;
-    if (!(D_1f8001c8 & 1)) {
+    if (!(SPAWN_AXIS_SWAP & 1)) {
         PLAYER_H = b + 0x10;
         PLAYER_D = b + 0x18;
     } else {
         PLAYER_D = b + 0x10;
         PLAYER_H = b + 0x18;
     }
-    if (!(D_1f8001c8 & 1)) {
+    if (!(SPAWN_AXIS_SWAP & 1)) {
         CAMERA_SCROLL.targetX = ((char*)&SPAD.iec);
         CAMERA_SCROLL.targetZ = ((char*)&SPAD.iec) + 8;
     } else {
@@ -40,7 +40,7 @@ void setPlayerAxisPointers(void)
     e1 = D_800B1478;
     for (D_1f80019c = 0; D_1f80019c < 4; D_1f80019c++, e1++) {
         if (e1->act) {
-            if (!(D_1f8001c8 & 1)) {
+            if (!(SPAWN_AXIS_SWAP & 1)) {
                 e1->p40 = e1->a10;
                 e1->p44 = e1->a18;
             } else {
@@ -49,10 +49,10 @@ void setPlayerAxisPointers(void)
             }
         }
     }
-    e2 = D_800A6610;
+    e2 = OBJECT_POOL;
     for (D_1f80019c = 0; D_1f80019c < 200; D_1f80019c++, e2++) {
         if (e2->act) {
-            if (!(D_1f8001c8 & 1)) {
+            if (!(SPAWN_AXIS_SWAP & 1)) {
                 e2->p40 = e2->a10;
                 e2->p44 = e2->a18;
             } else {
@@ -61,10 +61,10 @@ void setPlayerAxisPointers(void)
             }
         }
     }
-    e3 = D_800A49A8;
+    e3 = OBJECT_POOL_LAYER7;
     for (D_1f80019c = 0; D_1f80019c < 10; D_1f80019c++, e3++) {
         if (e3->act) {
-            if (!(D_1f8001c8 & 1)) {
+            if (!(SPAWN_AXIS_SWAP & 1)) {
                 e3->p40 = e3->a10;
                 e3->p44 = e3->a18;
             } else {

@@ -19,9 +19,9 @@ void updateMightyFishFood(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        if (((unsigned char*)&GVARS.b40)[0] != 0) {
-            if (GVARS.b41 != 0x7e) break;
-            ((unsigned char*)&GVARS.b40)[0] = 0;
+        if (((unsigned char*)&GVARS.useItemPending)[0] != 0) {
+            if (GVARS.useItemId != 0x7e) break;
+            ((unsigned char*)&GVARS.useItemPending)[0] = 0;
             o->box0 = 8;
             o->box1 = 0x10;
             o->box3 = 0x10;

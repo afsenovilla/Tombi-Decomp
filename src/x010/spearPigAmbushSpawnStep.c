@@ -5,8 +5,8 @@
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } P4;
 
-extern short D_1F80016A_S; /* second name for D_1F80016A: keeps the reload in the loop (debt) */
-extern short D_1F80016A[], D_1F800172[];
+extern short D_1F80016A_S; /* second name for PLAYER_H_WHOLE: keeps the reload in the loop (debt) */
+extern short PLAYER_H_WHOLE[], PLAYER_D_WHOLE[];
 extern P4 D_8012F4AC[];
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
@@ -39,9 +39,9 @@ void spearPigAmbushSpawnStep(TObj *o)
                     e->subtype = 3;
                     e->b0a = 2;
                     e->d8c = 0;
-                    e->a.p.whole = D_1F80016A[0] + p->x;
+                    e->a.p.whole = PLAYER_H_WHOLE[0] + p->x;
                     e->y.p.whole = ((short*)((char*)&SPAD.i16c + 2))[0] + p->y;
-                    e->b.p.whole = D_1F800172[0] + p->z;
+                    e->b.p.whole = PLAYER_D_WHOLE[0] + p->z;
                     e->w74 = D_1F80016A_S + p->x / 2;
                     p++;
                 }

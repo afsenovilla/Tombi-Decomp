@@ -8,7 +8,7 @@ extern void func_80059D44(int a);
 extern void func_8005A9A4(int a, int b);
 extern void topdownA19ActorSetDirAnim();
 extern unsigned char D_8009C93A;
-extern unsigned char D_8009C93C;
+extern unsigned char GVARS_FADE_EFFECT;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char GAME_FADE_SCREEN_CONTROL;
@@ -84,7 +84,7 @@ void func_800FE410(TObj *o)
         break;
     case 5:
         if (GAME_FADE_SCREEN_CONTROL == 0) {
-            D_8009C93C = 1;
+            GVARS_FADE_EFFECT = 1;
             o->w08 = 0x80;
             o->state++;
         }
@@ -134,7 +134,7 @@ void func_800FE410(TObj *o)
     case 11:
         if (--o->w08 <= 0) {
             PLAYER_ANIM_FRAME = 2;
-            D_8009C93C = 0;
+            GVARS_FADE_EFFECT = 0;
             D_8009C93F = 0;
             D_8009C942 = 0;
             PLAYER_STATE = 1;

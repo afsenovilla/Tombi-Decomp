@@ -7,7 +7,7 @@ typedef struct { short x, y, z, pad; } V3S;
 
 extern void *D_80134D44[];
 extern void *D_80134D38[];
-extern unsigned short D_1F8001C8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern void playSFX(int);
 
 static __inline__ int nearCam(TObj *o)
@@ -35,7 +35,7 @@ void area4Type07StepA(TObj *o)
         o->velY = 0x80;
         o->timer = 0;
         o->w22 = 0;
-        if (D_1F8001C8 & 1) {
+        if (SPAWN_AXIS_SWAP & 1) {
             a->z = -4;
             a->y = 0;
             a->x = 0;
@@ -128,7 +128,7 @@ void area4Type07StepA(TObj *o)
                 o->velV = -0x700;
                 o->velY = 0x80;
                 o->state = 1;
-                if (D_1F8001C8 & 1) {
+                if (SPAWN_AXIS_SWAP & 1) {
                     a->z = -4;
                     a->y = 0;
                     a->x = 0;

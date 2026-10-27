@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern unsigned short PLAYER_ANIM_FRAME;
-extern TObj *D_800A60C8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern unsigned char D_800A60F8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern char D_80010748[];
 extern void AnimLoadDuration(TObj *);
@@ -26,12 +26,12 @@ void raceStartRematch(TObj *o)
         AnimLoadDuration(&PLAYER);
         e->animFrame = 0;
         PLAYER_ANIM_FRAME = 0;
-        D_800A60C8 = showMessageBox(2, 0x19, 0x80, 0x6c);
+        PLAYER_MESSAGE_BOX = showMessageBox(2, 0x19, 0x80, 0x6c);
         playerSetAnimIfChangedAt(&PLAYER, 0, 0);
         o->step++;
         break;
     case 1:
-        p = D_800A60C8;
+        p = PLAYER_MESSAGE_BOX;
         if (p->b04 == 2) {
             p->b04 = 3;
             GVARS.b3f = 0;

@@ -11,7 +11,7 @@ extern void drawHudItemGauge(char *, int, int, int, int);
 extern Pt DAT_800802c8[];
 extern short DAT_800802d4[];
 extern unsigned char DAT_8009c990;
-extern char DAT_800b1468[];
+extern char HUD_ITEM_GAUGE_TIMERS[];
 
 void drawHud(char *o)
 {
@@ -26,7 +26,7 @@ void drawHud(char *o)
     for (i = 0; i < 3; i++) {
         if (DAT_8009c990 == DAT_800802d4[i]) {
             drawHudItemGauge(o, i, DAT_800802c8[i].x, DAT_800802c8[i].y, 0);
-        } else if (DAT_800b1468[i] != 0) {
+        } else if (HUD_ITEM_GAUGE_TIMERS[i] != 0) {
             drawHudItemGauge(o, i, DAT_800802c8[i].x, DAT_800802c8[i].y, 1);
         }
     }

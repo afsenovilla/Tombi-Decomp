@@ -16,7 +16,7 @@ extern unsigned char DAT_8009d004;
 extern int GAME_AREA00_EVENT_CONTROL;
 extern short DAT_8009c944;
 extern short DAT_8009c946[];
-extern unsigned short JOYPAD_STATE, DAT_1f8003c4, DAT_1f8003c6, DAT_1f8003c8, DAT_1f8001c8;
+extern unsigned short JOYPAD_STATE, BUTTON_MASK_A, BUTTON_MASK_B, BUTTON_MASK_C, SPAWN_AXIS_SWAP;
 extern char D_8001080c[];
 extern char D_800113cc[];
 extern void FUN_8001fe6c(TObj *);
@@ -135,7 +135,7 @@ void playerStepIdle(TObj *o)
                 o->substep = 0;
             }
             YADJ(o);
-            if (!(JOYPAD_STATE & (DAT_1f8003c6 | DAT_1f8003c8))) {
+            if (!(JOYPAD_STATE & (BUTTON_MASK_B | BUTTON_MASK_C))) {
                 setObjectSpeedPolar2(o, o->wb6, o->wb2);
                 o->h->raw += DAT_8009c944 << 8;
                 o->y.raw += DAT_8009c946[0] << 8;
@@ -147,7 +147,7 @@ void playerStepIdle(TObj *o)
 
     switch (c) {
     case 4:
-        if (JOYPAD_STATE & DAT_1f8003c4) {
+        if (JOYPAD_STATE & BUTTON_MASK_A) {
             o->b04 = 5;
             o->step = 0x61;
             o->state = 0;
@@ -163,7 +163,7 @@ void playerStepIdle(TObj *o)
         }
         break;
     case 9:
-        if (JOYPAD_STATE & DAT_1f8003c8) {
+        if (JOYPAD_STATE & BUTTON_MASK_C) {
             o->b04 = 1;
             o->step = 0x3b;
             o->state = 0;
@@ -171,7 +171,7 @@ void playerStepIdle(TObj *o)
         }
         break;
     case 10:
-        if (JOYPAD_STATE & DAT_1f8003c8) {
+        if (JOYPAD_STATE & BUTTON_MASK_C) {
             o->b04 = 1;
             o->step = 0x3c;
             o->state = 0;
@@ -179,7 +179,7 @@ void playerStepIdle(TObj *o)
         }
         break;
     case 12:
-        if (JOYPAD_STATE & DAT_1f8003c8) {
+        if (JOYPAD_STATE & BUTTON_MASK_C) {
             o->b04 = 5;
             o->step = 0xb;
             o->state = 6;
@@ -192,7 +192,7 @@ void playerStepIdle(TObj *o)
         break;
     }
 
-    if (JOYPAD_STATE & DAT_1f8003c6) {
+    if (JOYPAD_STATE & BUTTON_MASK_B) {
         o->ba4 = 0;
         PLAYER_EXT[0x1e] = 0;
         PLAYER_EXT[0x1f] = 0;
@@ -201,7 +201,7 @@ void playerStepIdle(TObj *o)
         switch (c) {
         case 0:
             o->b9c = 1;
-            if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4))
+            if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & BUTTON_MASK_A))
                 o->ba7 = 1;
             o->b04 = 1;
             o->step = 2;
@@ -214,7 +214,7 @@ void playerStepIdle(TObj *o)
             break;
         case 2: {
             unsigned short hx = o->h->p.whole;
-            unsigned short k = DAT_1f8001c8;
+            unsigned short k = SPAWN_AXIS_SWAP;
             U16(o, 0xf2) = o->y.p.whole;
             U16(o, 0xee) = hx;
             if (k & 1)

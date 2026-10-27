@@ -5,7 +5,7 @@ extern short DAT_1f800258;
 extern int *DAT_1f800274;
 extern int *DAT_1f800230;
 extern int * volatile DAT_1f800230_v;
-extern volatile unsigned short DAT_1f800242_v;
+extern volatile unsigned short CAT8_OBJECT_COUNT;
 extern unsigned short DAT_1f800242;
 extern short DAT_1f800242_s[];
 extern void drawObject(int);
@@ -31,7 +31,7 @@ void drawCategory8Objects(void)
                 q = DAT_1f800230_v;
                 DAT_1f800230_v = q + 1;
                 x = *q;
-                DAT_1f800242_v = DAT_1f800242_v - 1;
+                CAT8_OBJECT_COUNT = CAT8_OBJECT_COUNT - 1;
                 drawObject(x);
             } while (DAT_1f800242_s[0] != 0);
         }

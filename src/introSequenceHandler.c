@@ -8,7 +8,7 @@ typedef struct P { char p0[0x4a]; unsigned short w4a; unsigned short w4c; unsign
 extern char *TASK_C;
 extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
 extern unsigned short JOYPAD_STATE;
-extern int DAT_8009f7e4;
+extern int LOADING_SCREEN_STATE;
 extern unsigned char DAT_8009c974;
 extern unsigned short GAME, GAME_SELECTED_SECTION, GAME_SELECTED_SPAWN_POINT;
 extern unsigned short DAT_8009d2a8, DAT_8009d2aa, DAT_8009d2ac;
@@ -28,7 +28,7 @@ void introSequenceHandler(void)
         func_80018254(D_800A2A18);
         if (DAT_1f8001b4 != 0)
             goto L7;
-        DAT_8009f7e4 = 0;
+        LOADING_SCREEN_STATE = 0;
         LOAD_COMPLETE_SYM = 0;
         loadCurrentArea(1);
         goto inc;
@@ -81,7 +81,7 @@ typedef struct P { char p0[0x4a]; unsigned short w4a; unsigned short w4c; unsign
 extern char *TASK_C;
 extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
 extern unsigned short JOYPAD_STATE;
-extern int DAT_8009f7e4;
+extern int LOADING_SCREEN_STATE;
 extern unsigned char DAT_8009c974;
 extern unsigned short GAME, GAME_SELECTED_SECTION, GAME_SELECTED_SPAWN_POINT;
 extern unsigned short DAT_8009d2a8, DAT_8009d2aa, DAT_8009d2ac;
@@ -105,7 +105,7 @@ void introSequenceHandler(void)
     case 2:
         if (DAT_1f8001b4 != 0)
             goto L7;
-        DAT_8009f7e4 = 0;
+        LOADING_SCREEN_STATE = 0;
         LOAD_COMPLETE_SYM = 0;
         loadCurrentArea(1);
         goto inc;

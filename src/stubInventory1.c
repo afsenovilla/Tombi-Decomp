@@ -450,7 +450,7 @@ typedef struct {
     char p38[0x44 - 0x38];
     u16 f44;
 } S_2CC20;
-extern u16 D_1F80016E;
+extern u16 PLAYER_Y_WHOLE;
 
 void func_8002CC20(S_2CC20 *o);
 

@@ -1,9 +1,9 @@
 // FUNC 800198b4 340 MAIN0
 // MATCHING 800198b4 340
 #include "spad.h"
-extern unsigned char D_8009E375, D_8009E376, D_8009E377;
-extern unsigned char D_8009F085, D_8009F086, D_8009F087;
-extern int D_8009F7E4;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
+extern int LOADING_SCREEN_STATE;
 extern unsigned short AREA_VARIANT;
 void initLighting(void *p);
 void updatePadInput(void);
@@ -21,15 +21,15 @@ void gameMainTask(void)
     *(short *)(p + 0x4c) = 0;
     *(short *)(p + 0x4e) = 0;
     p[0x6a] = 0;
-    D_8009E375 = 0;
-    D_8009E376 = 0;
-    D_8009E377 = 0;
-    D_8009F085 = 0;
-    D_8009F086 = 0;
-    D_8009F087 = 0;
+    DISPLAY_BUFFER_0_BG_R = 0;
+    DISPLAY_BUFFER_0_BG_G = 0;
+    DISPLAY_BUFFER_0_BG_B = 0;
+    DISPLAY_BUFFER_1_BG_R = 0;
+    DISPLAY_BUFFER_1_BG_G = 0;
+    DISPLAY_BUFFER_1_BG_B = 0;
     *(short *)0x1F8001DC = -1;
     *(short *)0x1F8001DE = 0;
-    D_8009F7E4 = 0;
+    LOADING_SCREEN_STATE = 0;
     *(unsigned char *)0x1F8001CE = 0;
     AREA_VARIANT = 0;
     initLighting(((unsigned char*)&SPAD.b118));

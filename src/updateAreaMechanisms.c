@@ -5,7 +5,7 @@
 #include "gvars.h"
 #include "TOBJ.H"
 #include "player.h"
-extern unsigned short D_1F80016Eu;
+extern unsigned short PLAYER_Y_WHOLE;
 extern unsigned char D_8009D13F;
 extern unsigned char PLAYER_STATE;
 int func_800202B4(TObj *o);
@@ -64,7 +64,7 @@ void updateAreaMechanisms(TObj *o)
                     switch (o->state) {
                     case 0:
                         if ((unsigned short)(o->h->p.whole - (*(unsigned short*)((char*)&SPAD.i168 + 2)) + 0x20) < 0x41 &&
-                            (unsigned short)(o->y.p.whole - D_1F80016Eu + 0x30) < 0x61) o->state++;
+                            (unsigned short)(o->y.p.whole - PLAYER_Y_WHOLE + 0x30) < 0x61) o->state++;
                         break;
                     case 1:
                         o->d88 = (o->d88 + 0x10) & 0xfff;

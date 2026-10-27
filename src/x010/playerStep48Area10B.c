@@ -7,7 +7,7 @@ extern TObj *BITTEN_OBJECT;
 extern TObj *PLAYER_EXT;
 
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short JOYPAD_STATE, D_1F8003C6;
+extern unsigned short JOYPAD_STATE, BUTTON_MASK_B;
 extern int ObjCheckHeadCollision(TObj *);
 extern void ObjSetAnimFromTable(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -70,7 +70,7 @@ void playerStep48Area10B(TObj *o)
         p->animFrame = o->animFrame & 1;
         p->h->p.whole = o->h->p.whole;
         p->y.p.whole = o->y.p.whole + p->box2;
-        if (JOYPAD_STATE & D_1F8003C6) {
+        if (JOYPAD_STATE & BUTTON_MASK_B) {
             o->b69 = 0;
             o->wb2 = 0;
             o->velX = 0;

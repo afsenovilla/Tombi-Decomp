@@ -1,10 +1,10 @@
 // FUNC 80045d98 360 MAIN0
 // MATCHING 80045d98 360
 typedef struct { unsigned char act, p1, type; char p[0xa2]; unsigned char ba5; } O;
-extern short G244, G248, G19e;
+extern short G244, CAT5_OBJECT_COUNT, G19e;
 extern unsigned short G19eu;
 extern O **G218;
-extern unsigned char **G228;
+extern unsigned char **CAT5_OBJECT_LIST;
 extern void weaponHitCat5Object(O *, unsigned char *);
 
 void collideWeaponsWithCat5Objects(void)
@@ -16,14 +16,14 @@ void collideWeaponsWithCat5Objects(void)
     unsigned char *b;
     int s2;
     unsigned short v;
-    if (G248 != 0 && n != 0) {
+    if (CAT5_OBJECT_COUNT != 0 && n != 0) {
         do {
             o = *pp++;
             n--;
             if ((o->act & 1) && o->ba5 != 0) {
-                q = G228;
+                q = CAT5_OBJECT_LIST;
                 s2 = (unsigned char)(o->type - 5) < 3;
-                v = G248;
+                v = CAT5_OBJECT_COUNT;
                 G19e = v;
                 if (v != 0) do {
                     b = *q;

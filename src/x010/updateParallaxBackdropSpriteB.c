@@ -4,7 +4,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern void *D_80131C88;
-extern unsigned short D_1F800176[];
+extern unsigned short SCREEN_ORIGIN_X[];
 extern void FUN_80018da4(TObj *);
 extern void freeObjectLayer7(TObj *);
 
@@ -26,7 +26,7 @@ void updateParallaxBackdropSpriteB(TObj *o)
         unsigned short cx, cy;
         int sc;
         short ax; int ay;
-        cx = D_1F800176[0];
+        cx = SCREEN_ORIGIN_X[0];
         cy = ((unsigned short*)&SPAD.s186)[0];
         sc = CAMERA_SCROLL.rotX;
         o->b.p.whole = 0;

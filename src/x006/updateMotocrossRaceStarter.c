@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern char *TASK_C;
-extern unsigned char D_8009E375, D_8009E376, D_8009E377, D_8009F085, D_8009F086, D_8009F087;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B, DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 extern void *D_80122FB0, *D_80122FB4[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -189,7 +189,7 @@ void updateMotocrossRaceStarter(TObj *o)
                 (*(short*)&GAME.nextSection) = 4;
                 (*(short*)&GAME.nextSpawnPoint) = 1;
                 (*(short*)&GAME.nextArea) = 0;
-                GVARS.b3c = 0;
+                GVARS.fadeEffect = 0;
                 GAME.fadeScreenControl = 3;
             }
             break;
@@ -202,7 +202,7 @@ void updateMotocrossRaceStarter(TObj *o)
             break;
         case 6:
             FUN_8001f110(1);
-            GVARS.b3c = 0;
+            GVARS.fadeEffect = 0;
             GAME.fadeScreenControl = 3;
             o->step++;
             break;
@@ -218,12 +218,12 @@ void updateMotocrossRaceStarter(TObj *o)
             (*(short*)&GAME.nextSpawnPoint) = 0;
             (*(short*)&GAME.currentSpawnPoint) = 0;
             GAME.keepBgm = 0;
-            D_8009E375 = 0;
-            D_8009E376 = 0;
-            D_8009E377 = 0;
-            D_8009F085 = 0;
-            D_8009F086 = 0;
-            D_8009F087 = 0;
+            DISPLAY_BUFFER_0_BG_R = 0;
+            DISPLAY_BUFFER_0_BG_G = 0;
+            DISPLAY_BUFFER_0_BG_B = 0;
+            DISPLAY_BUFFER_1_BG_R = 0;
+            DISPLAY_BUFFER_1_BG_G = 0;
+            DISPLAY_BUFFER_1_BG_B = 0;
             (*(short*)&GAME.currentArea) = a;
             (*(short*)&GAME.currentSection) = b;
             break;

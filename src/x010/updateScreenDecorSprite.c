@@ -30,7 +30,7 @@ static void *D_80132C54[12] = {
     D_80132CE4, D_80132CEC, D_80132CF4, D_80132D18,
     D_80132D3C, D_80132D60, D_80132D84, D_80132DA8,
 };
-extern unsigned short D_1F800186;
+extern unsigned short SCREEN_ORIGIN_Y;
 extern unsigned short GetClut(int, int);
 extern int Rand(void);
 extern short MulNegSin(int, int);
@@ -81,7 +81,7 @@ void updateScreenDecorSprite(TObj *o)
             v = MulNegSin(o->w22, 2);
             o->a.p.whole = v + (o->d30 - (*(unsigned short*)((char*)&SPAD.i174 + 2)));
             o->w22 = (o->w22 + o->timer) & 0xff;
-            o->y.p.whole = o->d34 - D_1F800186;
+            o->y.p.whole = o->d34 - SCREEN_ORIGIN_Y;
             if (v < 0) {
                 o->animFrame = 0;
             } else {
@@ -89,7 +89,7 @@ void updateScreenDecorSprite(TObj *o)
             }
         } else {
             *(short *)((char *)o + 0x12) = o->d30 - (*(unsigned short*)((char*)&SPAD.i174 + 2));
-            o->y.p.whole = o->d34 - D_1F800186;
+            o->y.p.whole = o->d34 - SCREEN_ORIGIN_Y;
         }
         o->visible = 1;
         ObjListPush_1F800220(o);

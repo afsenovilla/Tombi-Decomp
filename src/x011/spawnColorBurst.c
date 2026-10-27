@@ -2,7 +2,7 @@
 // MATCHING 800ec84c 372
 #include "TOBJ.H"
 #include "raw7.h"
-extern unsigned short D_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern TObj *FUN_80018448(void);
 
 void spawnColorBurst(int type)
@@ -41,7 +41,7 @@ void spawnColorBurst(int type)
             o->ba5 = 0xc;
             o->animFrame = i << 5;
             o->d84 = 0xb0;
-            switch (D_1f8001c8 & 1) {
+            switch (SPAWN_AXIS_SWAP & 1) {
             case 0:
                 o->d88 = ((o->animFrame - 0x40) & 0xff) << 4;
                 break;

@@ -18,7 +18,7 @@ void* allocObjectLayer(u8 arg0)
         FREE_OBJECTS = p + 1;
         obj = (ObjectAxisView*)*p;
         obj->layer = arg0;
-        if ((D_1F8001C8 & 1) == 0) {
+        if ((SPAWN_AXIS_SWAP & 1) == 0) {
             obj->drawBufA = &obj->data[0x10];
             obj->drawBufB = &obj->data[0x18];
         } else {

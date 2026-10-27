@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned char DAT_8009c93a;
-extern short DAT_1f80016e, DAT_1f80016a;
+extern short PLAYER_Y_WHOLE, PLAYER_H_WHOLE;
 extern void updateA00ScrollController(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
 extern void cameraModeHandler6(TObj *);
@@ -18,8 +18,8 @@ void a00CameraController(TObj *o)
             cameraModeHandler6(o);
             break;
         case 1:
-            if (DAT_1f80016e < -0xdb && DAT_1f80016a >= 0x12b) tryStartItemInteraction(o, 2, 1);
-            else if (DAT_1f80016a >= 0x157 && DAT_1f80016e >= -0x38) tryStartItemInteraction(o, 2, 0);
+            if (PLAYER_Y_WHOLE < -0xdb && PLAYER_H_WHOLE >= 0x12b) tryStartItemInteraction(o, 2, 1);
+            else if (PLAYER_H_WHOLE >= 0x157 && PLAYER_Y_WHOLE >= -0x38) tryStartItemInteraction(o, 2, 0);
             cameraModeHandler6(o);
             break;
         case 2:

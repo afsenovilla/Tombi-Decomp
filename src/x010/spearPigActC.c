@@ -5,7 +5,7 @@
 
 extern unsigned char D_8012F3D4[];
 extern void *D_80132310[];
-extern int D_1F800198;
+extern int UPDATE_OBJECT_INDEX;
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001fe6c(TObj *);
 extern int AnimAdvance(TObj *);
@@ -58,7 +58,7 @@ void spearPigActC(TObj *o)
         o->velX = (((int*)&SPAD.i170)[0] - o->d->raw) >> 15;
         o->velY = -0x600;
         if (o->d->p.whole == (*(short*)((char*)&SPAD.i170 + 2))) {
-            if (D_1F800198 & 1) {
+            if (UPDATE_OBJECT_INDEX & 1) {
                 SETBOX(o, 0xb);
             } else {
                 SETBOX(o, 0x11);
@@ -72,7 +72,7 @@ void spearPigActC(TObj *o)
         if (AnimAdvance(o)) {
             o->timer = 0x70;
             o->state++;
-            if (o->visible && (D_1F800198 & 3)) playSFX(0xa4);
+            if (o->visible && (UPDATE_OBJECT_INDEX & 3)) playSFX(0xa4);
         }
         break;
     case 2:
@@ -106,7 +106,7 @@ void spearPigActC(TObj *o)
         o->state++;
         o->d34 = o->y.p.whole;
         o->velV = -0x400;
-        switch (D_1F800198 & 3) {
+        switch (UPDATE_OBJECT_INDEX & 3) {
         case 0:
             o->wac = 0x13;
             break;
@@ -140,7 +140,7 @@ void spearPigActC(TObj *o)
                 SETBOX(o, 0x26);
             }
         }
-        if (((SPAD.s1f8 + D_1F800198) & 0x1f) == 0) {
+        if (((SPAD.s1f8 + UPDATE_OBJECT_INDEX) & 0x1f) == 0) {
             switch (o->b0c & 3) {
             case 0:
                 playSFX(0xa8);

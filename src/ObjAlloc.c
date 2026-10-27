@@ -3,7 +3,7 @@
 // FLAGS -O2 -G0 -fno-schedule-insns2
 extern short FREE_OBJECT_COUNT;
 extern int **FREE_OBJECTS;
-extern unsigned short DAT_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 
 int *ObjAlloc(void)
 {
@@ -18,7 +18,7 @@ int *ObjAlloc(void)
         FREE_OBJECTS = q + 1;
         o = *q;
         *((char *)o + 0x1c) = c;
-        if ((DAT_1f8001c8 & 1) == 0) {
+        if ((SPAWN_AXIS_SWAP & 1) == 0) {
             o[16] = (int)(o + 4);
             o[17] = (int)((char *)o + 0x18);
         } else {

@@ -12,7 +12,7 @@ extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_8009c942;
 extern unsigned char GAME_PLAYER_MODE;
 extern unsigned char GAME_FADE_SCREEN_CONTROL[];
-extern unsigned char DAT_8009c93c[];
+extern unsigned char GVARS_FADE_EFFECT[];
 extern unsigned short TICK_COUNT;
 
 void playerEventStepRiseFadeOut(TObj *o)
@@ -51,7 +51,7 @@ void playerEventStepRiseFadeOut(TObj *o)
         if (--o->timer <= 0) {
             o->timer = 0x3c;
             GAME_FADE_SCREEN_CONTROL[0] = 3;
-            DAT_8009c93c[0] = 0;
+            GVARS_FADE_EFFECT[0] = 0;
             o->state++;
         }
         break;

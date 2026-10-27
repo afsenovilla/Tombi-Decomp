@@ -27,9 +27,9 @@ void updateMightyFishFood(TObj *o)
 
     switch (o->b04) {
     case 0:
-        p = &GVARS.b40;
+        p = &GVARS.useItemPending;
         if (*p != 0) {
-            if (GVARS.b41 != 0x7e) break;
+            if (GVARS.useItemId != 0x7e) break;
             *p = 0;
             setbox(o, 8, 0x10, 8, 0x10);
             o->active = 1;

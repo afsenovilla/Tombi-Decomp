@@ -19,8 +19,8 @@ void bigKeyPaintingCheckPiece(TObj *o)
         E *p;
         TObj *n;
 
-        if (GVARS.b40 == 0) break;
-        c = GVARS.b41;
+        if (GVARS.useItemPending == 0) break;
+        c = GVARS.useItemId;
         i = c - 0x2e;
         if (((unsigned char*)&GCD.bcf24)[i]) break;
         c &= 0xff;

@@ -5,16 +5,16 @@
 // Demo version of PAL main0 8004C418 (FUN_8004c418.c): only sets the step, not the active byte.
 typedef struct E { char a; char pad[3]; char b; char pad2[0x1c-5]; char f; signed char g; char pad3[0xd4-0x1e]; } E;
 typedef struct E3 { char a; char pad[3]; char b; char pad2[0x1c-5]; char f; signed char g; char pad3[0x6c-0x1e]; } E3;
-extern E DAT_800a6610[];
+extern E OBJECT_POOL[];
 extern E DAT_800b1828[];
-extern E3 DAT_800a49a8[];
+extern E3 OBJECT_POOL_LAYER7[];
 
 void FUN_8004c418(signed char *o)
 {
     E *e;
     E3 *e3;
     int i;
-    e = DAT_800a6610;
+    e = OBJECT_POOL;
     i = 0;
     do {
         if (e->a != 0 && (e->f & 0x80) == 0 && o[0xe] + o[0xf] + e->g != 0) {
@@ -33,7 +33,7 @@ void FUN_8004c418(signed char *o)
     } while (i < 0x2d);
     i = 0;
     do {
-        e3 = &DAT_800a49a8[i];
+        e3 = &OBJECT_POOL_LAYER7[i];
         if (e3->a != 0 && (e3->f & 0x80) == 0 && o[0xe] + o[0xf] + e3->g != 0) {
             e3->b = 3;
         }
@@ -43,16 +43,16 @@ void FUN_8004c418(signed char *o)
 #else
 typedef struct E { char a; char pad[3]; char b; char pad2[0x1c-5]; char f; signed char g; char pad3[0xd4-0x1e]; } E;
 typedef struct E3 { char a; char pad[3]; char b; char pad2[0x1c-5]; char f; signed char g; char pad3[0x6c-0x1e]; } E3;
-extern E DAT_800a6610[];
+extern E OBJECT_POOL[];
 extern E DAT_800b1828[];
-extern E3 DAT_800a49a8[];
+extern E3 OBJECT_POOL_LAYER7[];
 
 void despawnOtherSectionObjects(signed char *o)
 {
     E *e;
     E3 *e3;
     int i;
-    e = DAT_800a6610;
+    e = OBJECT_POOL;
     i = 0;
     do {
         if (e->a != 0 && (e->f & 0x80) == 0 && o[0xe] + o[0xf] + e->g != 0) {
@@ -73,7 +73,7 @@ void despawnOtherSectionObjects(signed char *o)
     } while (i < 0x2d);
     i = 0;
     do {
-        e3 = &DAT_800a49a8[i];
+        e3 = &OBJECT_POOL_LAYER7[i];
         if (e3->a != 0 && (e3->f & 0x80) == 0 && o[0xe] + o[0xf] + e3->g != 0) {
             e3->a = 2;
             e3->b = 3;

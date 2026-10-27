@@ -61,7 +61,7 @@ void debugSelectHandler(void)
                     }
                     func_8001CE80(var_a0);
                 }
-                D_8009EB4C = 0;
+                LOADING_SCREEN_STATE = 0;
                 (CURRENT_TASK)->step.value++;
             }
             break;

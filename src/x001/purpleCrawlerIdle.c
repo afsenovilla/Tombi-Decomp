@@ -6,7 +6,7 @@
 extern unsigned char D_8013C7B8[], D_8013C7C8[];
 extern char D_80077CE8[];
 extern void *D_8013FCB0[], *D_8013FCB8[];
-extern short D_1F80027E, D_1F800284;
+extern short COLLISION_HIT_HEIGHT, D_1F800284;
 extern unsigned int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -46,7 +46,7 @@ void purpleCrawlerIdle(TObj *o)
             } else if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
                 o->b69 = 0;
                 o->wba = 0;
-                t = D_1F80027E;
+                t = COLLISION_HIT_HEIGHT;
                 o->wb2 = t;
                 o->wae = D_1F800284;
                 o->d8c = -(t << 2) & 0xff;

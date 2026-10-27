@@ -9,7 +9,7 @@ extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
 extern char D_80011108[];
 extern unsigned char PLAYER_PERCH_ANIM_PAIRS[][2];
-extern unsigned short D_1f8003c6;
+extern unsigned short BUTTON_MASK_B;
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -132,7 +132,7 @@ void playerStepFlipOntoPerch(TObj *o)
             o->state++;
         } else if ((*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) != 0) {
             playerFlipPlaceAndAccelerate(o, 0, 0);
-            if (((volatile unsigned short*)&GV6.s70)[0] & D_1f8003c6) {
+            if (((volatile unsigned short*)&GV6.s70)[0] & BUTTON_MASK_B) {
                 (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
                 o->step = 0xb;
                 o->state = 0;
@@ -151,7 +151,7 @@ void playerStepFlipOntoPerch(TObj *o)
         break;
     case 3:
         FUN_8001fec0(o);
-        if (((volatile unsigned short*)&GV6.s70)[0] & D_1f8003c6) {
+        if (((volatile unsigned short*)&GV6.s70)[0] & BUTTON_MASK_B) {
             (*(unsigned char*)((char*)&PLAYER_EXT->w08 + 1)) = 0;
             o->step = 0xb;
             o->state = 0;

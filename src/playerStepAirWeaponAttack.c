@@ -24,7 +24,7 @@ typedef struct { short x, y; } SXY;
 extern short D_8009C944;
 extern short D_8009C946;
 extern volatile unsigned short PAD_PRESSED[];
-extern unsigned short D_1f8003c6;
+extern unsigned short BUTTON_MASK_B;
 extern unsigned char GAME_EQUIPPED_WEAPON;
 extern short D_8007A038[];
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
@@ -126,7 +126,7 @@ void playerStepAirWeaponAttack(TObj *o)
             PLAYER_EXT->b8 = 1;
             o->state = 2;
         }
-        if (PAD_PRESSED[0] & D_1f8003c6) {
+        if (PAD_PRESSED[0] & BUTTON_MASK_B) {
             if (PLAYER_EXT->b8 == 0) {
                 if (++PLAYER_EXT->w20 >= 0xe) {
                     PLAYER_EXT->b8 = 1;

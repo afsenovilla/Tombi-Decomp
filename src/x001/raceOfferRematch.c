@@ -8,7 +8,7 @@
 extern TObj PLAYER;
 extern unsigned short PLAYER_ANIM_FRAME;
 extern unsigned short D_800A6066x[]; /* second name for PLAYER_ANIM_FRAME: forces the reloads after the store */
-extern TObj *D_800A60C8[];
+extern TObj *PLAYER_MESSAGE_BOX[];
 extern Fix16 *PLAYER_H;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern char D_80010748[];
@@ -35,12 +35,12 @@ void raceOfferRematch(TObj *o)
         PLAYER_STATE = 5;
         PLAYER_SUBSTATE = 0;
         PLAYER_STEP = 0;
-        D_800A60C8[0] = showMessageBox(2, 0x1e, 0x80, 0x6c);
+        PLAYER_MESSAGE_BOX[0] = showMessageBox(2, 0x1e, 0x80, 0x6c);
         D_800A6066x[0] = PLAYER_H->p.whole > e->h->p.whole;
         e->animFrame = PLAYER_H->p.whole < e->h->p.whole;
         o->step++;
     case 1:
-        p = D_800A60C8[0];
+        p = PLAYER_MESSAGE_BOX[0];
         if (p->b04 == 2) {
             p->b04 = 3;
             GAME.fadeScreenControl = 3;

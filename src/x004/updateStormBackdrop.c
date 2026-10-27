@@ -78,7 +78,7 @@ void updateStormBackdrop(TObj *o)
             switch (o->step) {
             case 0:
                 if (GAME.fadeScreenControl == 0) {
-                    GVARS.b3c = 1;
+                    GVARS.fadeEffect = 1;
                     o->animTimer = 0x17c;
                     o->animFrame = 0x80;
                     o->step++;

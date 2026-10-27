@@ -11,12 +11,12 @@ typedef struct GVars {
     unsigned char b39;          /* 0x09 */
     unsigned char b3a;          /* 0x0A */
     unsigned char b3b;          /* 0x0B */
-    unsigned char b3c;          /* 0x0C */
+    unsigned char fadeEffect; /* 0x0C 0x8009C93C GVARS_FADE_EFFECT: scriptOpSetFadeEffect arg 0 */
     unsigned char b3d;          /* 0x0D */
     unsigned char b3e;          /* 0x0E */
     unsigned char b3f;          /* 0x0F */
-    unsigned char b40;          /* 0x10 */
-    unsigned char b41;          /* 0x11 */
+    unsigned char useItemPending; /* 0x10 0x8009C940 GVARS_USE_ITEM_PENDING: an item use waits for playerStepUseItem */
+    unsigned char useItemId; /* 0x11 0x8009C941 GVARS_USE_ITEM_ID: the item being used */
     unsigned char b42;          /* 0x12 */
     unsigned char b43;          /* 0x13 */
     short s44;                  /* 0x14 */

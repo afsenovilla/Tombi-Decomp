@@ -12,7 +12,7 @@ extern unsigned char DAT_8009c942;
 extern Fix16 *PLAYER_D;
 extern int DAT_1f8002dc;
 extern int DAT_1f800350;
-extern char DAT_800d7e28[];
+extern char SPRITE_UNPACK_BUFFER[];
 extern char MOVE_TABLE_0[];
 extern char DAT_80077d90[];
 extern void *PTR_8013ad38[];
@@ -46,8 +46,8 @@ static __inline__ void draw(int a, int b)
     r[2] = 0x20;
     r[3] = 0x60;
     FUN_8005f290(r, 0, 0, 0);
-    unpackSpriteFrame(DAT_1f800350, (short)a, DAT_800d7e28, 0xa001c0);
-    loadTIM(DAT_800d7e28, (short)(b * 0x20 + 0x1c1), 0xa0, 0xe0, 0x1f0);
+    unpackSpriteFrame(DAT_1f800350, (short)a, SPRITE_UNPACK_BUFFER, 0xa001c0);
+    loadTIM(SPRITE_UNPACK_BUFFER, (short)(b * 0x20 + 0x1c1), 0xa0, 0xe0, 0x1f0);
 }
 
 void updateRedBird(TObj *o)

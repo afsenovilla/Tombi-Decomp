@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *allocObjectLayer2(void);
 extern int angleFromDelta(int, int);
-extern unsigned short D_1F80016A[], D_1F80016E[];
+extern unsigned short PLAYER_H_WHOLE[], PLAYER_Y_WHOLE[];
 
 int spawnFlowerForestPigShot(TObj *p, int sub)
 {
@@ -18,8 +18,8 @@ int spawnFlowerForestPigShot(TObj *p, int sub)
         else o->a.raw = (p->a.p.whole + 0x20) << 16;
         o->y.raw = (p->y.p.whole - 4) << 16;
         o->b.raw = p->b.p.whole << 16;
-        dx = D_1F80016A[0] - o->a.p.whole;
-        dy = D_1F80016E[0] - o->y.p.whole;
+        dx = PLAYER_H_WHOLE[0] - o->a.p.whole;
+        dy = PLAYER_Y_WHOLE[0] - o->y.p.whole;
         return o->d38 = (unsigned char)angleFromDelta(dx, dy);
     }
 }

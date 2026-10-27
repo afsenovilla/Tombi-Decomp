@@ -7,10 +7,10 @@
 
 void updateMainObjects(void)
 {
-    u8* s0 = (u8*)&D_800A5970;
+    u8* s0 = (u8*)&OBJECT_POOL;
     u8* s1 = s0 + 2;
 
-    *(s32*)&D_1F800198 = 0;
+    *(s32*)&UPDATE_OBJECT_INDEX = 0;
 
     do {
         if (*s0 != 0) {
@@ -31,5 +31,5 @@ void updateMainObjects(void)
         }
         s1 += 0xD4;
         s0 += 0xD4;
-    } while (++(*(s32*)&D_1F800198) < 0xC8);
+    } while (++(*(s32*)&UPDATE_OBJECT_INDEX) < 0xC8);
 }

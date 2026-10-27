@@ -37,7 +37,7 @@ static __inline__ int body(S *s)
         if (s->w4a != 90) {
             s->w4a++;
             if (s->w4a == 26) {
-                GVARS.b3c = 0;
+                GVARS.fadeEffect = 0;
                 GAME.fadeScreenControl = 3;
             }
             D_1F8000EE[0] = s->w52 + s->w4c * s->w4a / 90;

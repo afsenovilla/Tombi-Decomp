@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern TObj *PLAYER_EXT;
 extern unsigned char DAT_8009c93a;
-extern unsigned short D_1f8001c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -31,7 +31,7 @@ void playerEventStepWalkIntoDepth(TObj *o)
         PlayerSetAnimIfChanged(o, 0x2c);
     case 1:
         FUN_8001fec0(o);
-        if (D_1f8001c8 & 1)
+        if (SPAWN_AXIS_SWAP & 1)
             o->d->p.whole += 2;
         else
             o->d->p.whole -= 2;

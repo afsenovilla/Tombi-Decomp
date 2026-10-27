@@ -12,8 +12,8 @@ typedef struct { char pad[0x2c]; unsigned short w2c; } G330;
 typedef struct { void *p[90]; } AnimTbl;
 extern G330 *PLAYER_EXT;
 extern AnimTbl PLAYER_ANIM_TABLE;
-extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
-extern unsigned char D_8009F7F0;
+extern short PLAYER_H_WHOLE[], PLAYER_Y_WHOLE[], PLAYER_D_WHOLE[];
+extern unsigned char PAD_BUFFERS;
 extern unsigned short D_8007A034, D_8007A036;
 extern signed char GAME_PLAYER_MODE;
 extern void *memcpy(void *, void *, int);
@@ -65,7 +65,7 @@ void updatePlayer(TObj *o)
         o->visible = 1;
         return;
     }
-    if (D_8009F7F0 == 0 && GV6.s10 == 7) {
+    if (PAD_BUFFERS == 0 && GV6.s10 == 7) {
         unsigned char a, b, c;
         playerDecodePadInput();
         a = U8(o, 0xd6);
@@ -233,9 +233,9 @@ void updatePlayer(TObj *o)
         if (o->b9e == 0) objCollideSideWalls(o);
         break;
     }
-    D_1F80016A[0] = o->h->p.whole;
-    D_1F80016E[0] = o->y.p.whole;
-    D_1F800172[0] = o->d->p.whole;
+    PLAYER_H_WHOLE[0] = o->h->p.whole;
+    PLAYER_Y_WHOLE[0] = o->y.p.whole;
+    PLAYER_D_WHOLE[0] = o->d->p.whole;
     GAME.selectedPlane = o->d->p.whole / 90;
     memcpy(&GV6.s70, pad, 8);
     SPAD.s1fc = b0;

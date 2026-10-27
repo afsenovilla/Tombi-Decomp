@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern int FUN_800202b4(TObj *);
 extern void FUN_80018838(TObj *);
-extern short DAT_1f8001c8;
+extern short SPAWN_AXIS_SWAP;
 extern unsigned int DAT_8009c978[];
 extern void (*VILLAGER_NPC_STEP_TABLE[])(TObj *);
 
@@ -22,7 +22,7 @@ void updateL4Type00Object(TObj *o)
         o->box2 = 0x36;
         o->box3 = 0x36;
         o->w1e = o->b6b;
-        switch (DAT_1f8001c8) {
+        switch (SPAWN_AXIS_SWAP) {
         case 0:
             o->ba7 = 0x10;
             o->d84 = 0;

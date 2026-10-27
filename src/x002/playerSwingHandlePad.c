@@ -2,7 +2,7 @@
 // MATCHING 800f6c34 332
 #include "TOBJ.H"
 extern unsigned short PAD_PRESSED[];
-extern unsigned short DAT_1f8003c6;
+extern unsigned short BUTTON_MASK_B;
 extern unsigned char GAME_PLAYER_MODE;
 extern unsigned char *PLAYER_EXT;
 extern unsigned char *GRABBED_OBJECT;
@@ -14,7 +14,7 @@ void playerSwingHandlePad(TObj *o)
     int s1;
     unsigned short u;
     Fix16 *h;
-    if (PAD_PRESSED[0] & DAT_1f8003c6) {
+    if (PAD_PRESSED[0] & BUTTON_MASK_B) {
         GAME_PLAYER_MODE = 0;
         PLAYER_EXT[9] = 0;
         o->step = 0xb;

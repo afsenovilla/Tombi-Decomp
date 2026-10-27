@@ -11,7 +11,7 @@ extern void *D_8013FC74[];
 extern void *D_8013FC78[];
 extern void *D_8013FCC4[];
 extern void *D_8013FCC8[];
-extern short D_1F80027E;
+extern short COLLISION_HIT_HEIGHT;
 extern short D_1F800284;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -65,9 +65,9 @@ static __inline__ int land(TObj *o)
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
         o->b69 = 0;
         o->wba = 0;
-        o->wb2 = D_1F80027E;
+        o->wb2 = COLLISION_HIT_HEIGHT;
         o->wae = D_1F800284;
-        o->d8c = (-D_1F80027E << 2) & 0xff;
+        o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
         return 1;
     }
     return 0;
@@ -221,7 +221,7 @@ void purpleCrawlerClimb(TObj *o)
             if (AnimAdvance(o)) {
                 o->state = 0;
                 if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
-                    o->d8c = ((-D_1F80027E << 2) + 0x80) & 0xff;
+                    o->d8c = ((-COLLISION_HIT_HEIGHT << 2) + 0x80) & 0xff;
                     p->w6 = 0;
                     o->step = 8;
                     o->wac = 1;
@@ -240,8 +240,8 @@ void purpleCrawlerClimb(TObj *o)
             if (AnimAdvance(o)) {
                 o->state = 0;
                 if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-                    o->wb2 = D_1F80027E;
-                    o->d8c = (-D_1F80027E << 2) & 0xff;
+                    o->wb2 = COLLISION_HIT_HEIGHT;
+                    o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
                     o->wae = D_1F800284;
                     p->w6 = 0;
                     o->step = 1;
@@ -329,7 +329,7 @@ void purpleCrawlerClimb(TObj *o)
             o->state = 0;
             o->y.p.whole -= 4;
             if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
-                o->d8c = ((-D_1F80027E << 2) + 0x80) & 0xff;
+                o->d8c = ((-COLLISION_HIT_HEIGHT << 2) + 0x80) & 0xff;
                 p->w6 = 0;
                 o->step = 8;
             } else {
@@ -353,7 +353,7 @@ void purpleCrawlerClimb(TObj *o)
             o->step = 8;
         } else if (probeCollisionAtDepthA(o, o->h->p.whole, o->y.p.whole - 0x10)) {
             o->b69 = 0;
-            o->d8c = ((-D_1F80027E << 2) + 0x80) & 0xff;
+            o->d8c = ((-COLLISION_HIT_HEIGHT << 2) + 0x80) & 0xff;
             p->w6 = 0;
             o->step = 8;
         } else {

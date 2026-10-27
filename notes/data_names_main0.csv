@@ -226,3 +226,47 @@ address,name,size,source
 8009d69c,AREA_SOUND_BANK_LOADED,0x4,usage: set 1 by loadAreaSoundBank, initAreaScripts waits for it refs=27
 8009d540,DEBUG_NEXT_PRIM,0x4,usage: primitive cursor of drawDebugText / drawLoadingSprites (bounded by D_800A2C90 + FRAME_BUFFER_INDEX * 0x780; US alias D_8009C8A8) refs=12
 8009d610,PAD_INFO,,usage: PadInfo per port (readPadPort &PAD_INFO[port]; playerDecodePadInput) refs=8
+8009e348,DISPLAY_BUFFERS,0x1a20,usage: the two DISPENV/DRAWENV double-buffer records (0xD10 each; initWideDisplayEnv / initDisplay set them) refs=26
+8009e375,DISPLAY_BUFFER_0_BG_R,0x1,usage: DISPLAY_BUFFERS[0].draw.r0 reached by its own symbol (initDisplay / updateSectionFadeController / inventoryScreenHandler; US alias D_8009D6DD) refs=17
+8009e376,DISPLAY_BUFFER_0_BG_G,0x1,usage: DISPLAY_BUFFERS[0].draw.g0 reached by its own symbol (US alias D_8009D6DE) refs=17
+8009e377,DISPLAY_BUFFER_0_BG_B,0x1,usage: DISPLAY_BUFFERS[0].draw.b0 reached by its own symbol (US alias D_8009D6DF) refs=17
+8009f085,DISPLAY_BUFFER_1_BG_R,0x1,usage: DISPLAY_BUFFERS[1].draw.r0 reached by its own symbol (US alias D_8009E3ED) refs=17
+8009f086,DISPLAY_BUFFER_1_BG_G,0x1,usage: DISPLAY_BUFFERS[1].draw.g0 reached by its own symbol (US alias D_8009E3EE) refs=17
+8009f087,DISPLAY_BUFFER_1_BG_B,0x1,usage: DISPLAY_BUFFERS[1].draw.b0 reached by its own symbol (US alias D_8009E3EF) refs=17
+8009bd98,SPAWN_RECORD_OBJECT,0x4,usage: TObj* being filled by spawnObjectFromRecord (d90/d94 chain the record's objects) refs=49
+8009bd9c,SPAWN_RECORD_PREV_OBJECT,0x4,usage: TObj* of the previous record object spawnObjectFromRecord offsets the next one from refs=11
+8009f7f0,PAD_BUFFERS,0x44,usage: the two 0x22-byte libpad receive buffers (joypadInit PadInitDirect; readPadPort: [0] status [1] type [2..3] buttons [6..7] stick; US alias D_8009EB58) refs=10
+8009820c,PAD_INTR,0x4,usage: libpad padIntr* (I_STAT / I_MASK at 0x1F801070; _padChkSioIrq / _padClrIntSio0 / _padInitSioMode) refs=13
+800b1468,HUD_ITEM_GAUGE_TIMERS,0x10,usage: u8[4][4] of the 3 HUD item gauges: [0..3] show timer [4..7] countdown [8..11] blink timer [12..15] blink frame (updateHud / drawHud) refs=25
+1f80016a,PLAYER_H_WHOLE,0x2,usage: whole part of PLAYER.obj.h copied by updatePlayer every tick (distance tests of the enemies / camera) refs=35
+1f80016e,PLAYER_Y_WHOLE,0x2,usage: whole part of PLAYER.obj.y copied by updatePlayer every tick refs=28
+1f800172,PLAYER_D_WHOLE,0x2,usage: whole part of PLAYER.obj.d copied by updatePlayer every tick refs=13
+1f800176,SCREEN_ORIGIN_X,0x2,usage: world h of the screen origin the culling tests subtract (isOnScreen / ObjCullRegister / cullObjectToDrawList: x - it + 0x40 < 0x1C1); whole part of the int 1F800174 updateCameraController sets refs=14
+1f800186,SCREEN_ORIGIN_Y,0x2,usage: world y of the screen origin the culling tests subtract (isOnScreen / ObjCullRegister: it - y + 0x40 < 0x171); whole part of the int 1F800184 updateCameraController sets refs=7
+1f8003c4,BUTTON_MASK_A,0x2,usage: BUTTON_CONFIGS[BUTTON_CONFIG_INDEX].a (loadButtonConfig; default Square 0x8000: talk / action checks) refs=13
+1f8003c6,BUTTON_MASK_B,0x2,usage: BUTTON_CONFIGS[BUTTON_CONFIG_INDEX].b (loadButtonConfig; default X 0x4000: jump / bite-hold checks) refs=26
+1f8003c8,BUTTON_MASK_C,0x2,usage: BUTTON_CONFIGS[BUTTON_CONFIG_INDEX].c (loadButtonConfig; default Circle 0x2000: playerCheckJumpPressed) refs=8
+1f8003ca,BUTTON_MASK_D,0x2,usage: BUTTON_CONFIGS[BUTTON_CONFIG_INDEX].d (loadButtonConfig; default Triangle 0x1000: updatePauseMenu) refs=1
+1f8001c8,SPAWN_AXIS_SWAP,0x2,usage: bit 0 of the spawn row flags (initPlayerAtSpawn): the object allocators swap the h / d axis pointers (+0x40 / +0x44 = a / b) when set refs=33
+1f800282,COLLISION_HIT_FLAGS,0x2,usage: TILE_COL_FLAGS word of the last collision hit (tileCollideColumnAt / pushOutOfWallSegments store it; applyCollisionTileResponse decodes it) refs=13
+1f80027e,COLLISION_HIT_HEIGHT,0x2,usage: TILE_COL_HEIGHT of the last collision hit (tileCollideColumnAt; applyCollisionTileResponse / enemyProbeGround read it) refs=8
+1f800198,UPDATE_OBJECT_INDEX,0x4,usage: index of the object in the running update loop (updateObjectsLayer8 / updateObjectsUnlayered count it; added to TICK_COUNT as a per-object phase) refs=15
+1f80021c,CAT2_OBJECT_LIST,0x4,usage: TObj* stack of the category-2 objects of the frame (ObjListPush_1F80021C pushes; drawCategory2Objects / collideWeaponsWithCat2Objects pop) refs=5
+1f800246,CAT2_OBJECT_COUNT,0x2,usage: entries in CAT2_OBJECT_LIST refs=9
+1f800228,CAT5_OBJECT_LIST,0x4,usage: TObj* stack of the category-5 objects of the frame (ObjListPush_1F800228 pushes; drawCategory5Objects / collidePlayerWithCat5Objects pop) refs=9
+1f800248,CAT5_OBJECT_COUNT,0x2,usage: entries in CAT5_OBJECT_LIST refs=11
+1f80024c,CAT4_OBJECT_COUNT,0x2,usage: entries in the category-4 object list (drawCategory4Objects / collideWeaponsWithCat4Objects) refs=5
+1f800242,CAT8_OBJECT_COUNT,0x2,usage: entries in the category-8 object list (drawCategory8Objects; initObjectPoolLayer8 clears it) refs=5
+1f800214,FREE_OBJECTS_LAYER7,0x4,usage: free stack of the layer-7 object pool (allocObjectLayer7 / freeObjectLayer7; initObjectPoolLayer7 fills it from 800A4468) refs=5
+1f80023c,FREE_OBJECT_COUNT_LAYER7,0x2,usage: entries in FREE_OBJECTS_LAYER7 (10 after initObjectPoolLayer7) refs=8
+1f800236,FREE_OBJECT_COUNT_LAYER1,0x2,usage: free entries of the layer-1 object pool (allocObjectLayer1; initObjectPoolLayer1 sets 4) refs=5
+1f80023e,FREE_OBJECT_COUNT_UNLAYERED,0x2,usage: free entries of the unlayered object pool (allocObjectUnlayered / PoolFree_1F800210; initObjectPoolUnlayered sets 10) refs=5
+800a6610,OBJECT_POOL,0xa600,usage: the 200 x 0xD4 main object pool (initObjectPool clears it; setPlayerAxisPointers / despawnOtherSectionObjects walk it; US alias D_800A5970) refs=7
+800a49a8,OBJECT_POOL_LAYER7,0x438,usage: the 10 x 0x6C layer-7 object pool (initObjectPoolLayer7; FREE_OBJECTS of initObjectPool grows down from it) refs=5
+800b0d98,AREA_MODEL_DRAW_LIST,0x16c,usage: list the area model link hook fills (callAreaModelLinkHook) and drawAreaModelList draws ([3] = count); clearOtBuffer clears it refs=6
+800d7e28,SPRITE_UNPACK_BUFFER,,usage: destination of unpackSpriteFrame then source of loadTIM (uploadThrownObjectFrame / updateRedBird) refs=6
+8009f7e4,LOADING_SCREEN_STATE,0x4,usage: displayLoadingScreen: 0 = init the sprites then 1 = animate, >1 = stopped; areaTransitionHandler / debugSelectHandler reset it (US alias D_8009EB4C) refs=9
+800a60c8,PLAYER_MESSAGE_BOX,0x4,usage: PLAYER.obj.d90 reached by its own symbol: the message box showMessageBox returned to the scene code (FUN_801363e4 / a00DarkCloakedFigureScene) refs=27
+8009c940,GVARS_USE_ITEM_PENDING,0x1,usage: GVARS.b40 -> useItemPending: set with the item id by the inventory (x014 updateSectionClearController), consumed by playerStepUseItem / l4Type1BInitModel (US alias D_8009BCA8) refs=18
+8009c941,GVARS_USE_ITEM_ID,0x1,usage: GVARS.b41 -> useItemId: the item id being used (playerStepUseItem copies it to the player ext and switches on it; US alias D_8009BCA9) refs=12
+8009c93c,GVARS_FADE_EFFECT,0x1,usage: GVARS.b3c -> fadeEffect: first argument of scriptOpSetFadeEffect / execGameOpcode 377 with GAME_FADE_SCREEN_CONTROL = 0x10 (US alias D_8009BCA4) refs=5

@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern void *D_8012A01C[];
-extern unsigned short D_1F800176[];
+extern unsigned short SCREEN_ORIGIN_X[];
 extern void FUN_80018da4(TObj *);
 extern void freeObjectLayer7(TObj *);
 
@@ -23,7 +23,7 @@ void updateParallaxBackdropSprite(TObj *o)
         break;
     case 1: {
         unsigned short cx, cy; short ax, ay;
-        cx = D_1F800176[0];
+        cx = SCREEN_ORIGIN_X[0];
         cy = ((unsigned short*)&SPAD.s186)[0];
         o->b.p.whole = 0;
         o->visible = 1;

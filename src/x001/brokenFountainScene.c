@@ -100,7 +100,7 @@ void brokenFountainScene(TObj *o)
     case 7:
         if (o->b0c == 2) {
             GCD.bd081 = 6;
-            GVARS.b40 = 0;
+            GVARS.useItemPending = 0;
             GVARS.b3f = 0;
             GVARS.b42 = 0;
             GVARS.b3e = 0;

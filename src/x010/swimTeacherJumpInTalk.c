@@ -47,9 +47,9 @@ void swimTeacherJumpInTalk(TObj *o)
             GCD.bd078 = 3;
             break;
         }
-        k = ((unsigned char*)&GVARS.b40);
+        k = ((unsigned char*)&GVARS.useItemPending);
         if (*k == 0) break;
-        if (GVARS.b41 != 3) break;
+        if (GVARS.useItemId != 3) break;
         *k = 0;
         o->state++;
         GVARS.b3f = 1;

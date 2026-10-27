@@ -7,7 +7,7 @@
 extern TObj PLAYER;
 #define P PLAYER
 extern unsigned short PLAYER_ANIM_FRAME;
-extern TObj *D_800A60C8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern TObj *PLAYER_EXT;
 extern unsigned char D_800A60F8;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
@@ -38,17 +38,17 @@ void lostSeedKidTalk(TObj *o)
         e->state = 0;
         switch (GCD.bcebc) {
         case 0:
-            D_800A60C8 = showMessageBox(2, 10, 0x80, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(2, 10, 0x80, 0x6c);
             o->step++;
             break;
         case 1:
-            D_800A60C8 = showMessageBox(2, 11, 0x80, 0x6c);
+            PLAYER_MESSAGE_BOX = showMessageBox(2, 11, 0x80, 0x6c);
             o->step++;
             break;
         }
         break;
     case 1:
-        p = D_800A60C8;
+        p = PLAYER_MESSAGE_BOX;
         if (p->b04 != 2) break;
         f = &GCD.bcebc;
         switch (*f) {

@@ -2251,24 +2251,24 @@ extern u_char D_1F8000F8[];
 extern u_char D_1F800118[];
 extern u_char D_1F8001A0[0x24];
 extern int D_1F8002C8[];
-extern u16  D_1F8001C8;
+extern u16  SPAWN_AXIS_SWAP;           /* 0x1F8001C8 bit 0 of the spawn row flags: the allocators swap the h / d axis pointers */
 extern s32* D_1F800204;
-extern u16  D_1F800236;
+extern u16  FREE_OBJECT_COUNT_LAYER1;  /* 0x1F800236 free entries of the layer-1 object pool */
 extern s32* FREE_OBJECTS;              /* 0x1F800208 scratchpad.freeObjects */
 extern u16  FREE_OBJECT_COUNT;         /* 0x1F800238 scratchpad.freeObjectCount */
 extern s32* D_1F80020C;
 extern u16  D_1F80023A;
 extern s32* D_1F800210;
 extern u16  D_1F80023E;
-extern s32* D_1F800214;
-extern u16  D_1F80023C;
-extern s16  D_1F80016A;
+extern s32* FREE_OBJECTS_LAYER7;       /* 0x1F800214 free stack of the layer-7 object pool */
+extern u16  FREE_OBJECT_COUNT_LAYER7;  /* 0x1F80023C entries in FREE_OBJECTS_LAYER7 */
+extern s16  PLAYER_H_WHOLE;            /* 0x1F80016A whole part of PLAYER.obj.h (updatePlayer copies it every tick) */
 extern s32  D_1F80029C;
 extern s32  D_1F800200;
 extern s32  D_1F800298;
 extern s32  D_1F8002AC;
-extern u16  D_1F800176;
-extern u16  D_1F800186;
+extern u16  SCREEN_ORIGIN_X;           /* 0x1F800176 world h of the screen origin the culling tests subtract */
+extern u16  SCREEN_ORIGIN_Y;           /* 0x1F800186 world y of the screen origin the culling tests subtract */
 extern s32* D_1F800220;
 extern s16  D_1F80024A;
 extern u8*  D_1F800354;
@@ -2284,8 +2284,8 @@ extern s32* D_1F800230;
 extern u16  D_1F800240;
 extern u16  D_1F800242;
 extern u16  D_1F800244;
-extern u16  D_1F800246;
-extern u16  D_1F800248;
+extern u16  CAT2_OBJECT_COUNT;         /* 0x1F800246 entries in CAT2_OBJECT_LIST (1F80021C) */
+extern u16  CAT5_OBJECT_COUNT;         /* 0x1F800248 entries in CAT5_OBJECT_LIST (1F800228) */
 extern u16  D_1F80024C;
 extern s16  D_1F8003A8[];
 extern short D_1F8003B6;
@@ -2372,12 +2372,12 @@ extern short D_8009C9DE;
 extern char D_8009C9E4;
 extern int D_8009CA04;
 extern DRAWENV* DRAW_ENV_1;
-extern char D_8009D6DD;
-extern char D_8009D6DE;
-extern char D_8009D6DF;
-extern char D_8009E3ED;
-extern char D_8009E3EE;
-extern char D_8009E3EF;
+extern char DISPLAY_BUFFER_0_BG_R;     /* 0x8009E375 DISPLAY_BUFFERS[0].draw.r0 (US alias D_8009D6DD) */
+extern char DISPLAY_BUFFER_0_BG_G;     /* 0x8009E376 DISPLAY_BUFFERS[0].draw.g0 */
+extern char DISPLAY_BUFFER_0_BG_B;     /* 0x8009E377 DISPLAY_BUFFERS[0].draw.b0 */
+extern char DISPLAY_BUFFER_1_BG_R;     /* 0x8009F085 DISPLAY_BUFFERS[1].draw.r0 (US alias D_8009E3ED) */
+extern char DISPLAY_BUFFER_1_BG_G;     /* 0x8009F086 DISPLAY_BUFFERS[1].draw.g0 */
+extern char DISPLAY_BUFFER_1_BG_B;     /* 0x8009F087 DISPLAY_BUFFERS[1].draw.b0 */
 extern char D_8009E450;
 extern void (*D_8007C68C[])(u8* self);
 extern void (*D_8007D6A4[])(u8* self);
@@ -2403,7 +2403,7 @@ extern u16  D_8009C0FC;
 extern u16  D_8009C0FE;
 extern u8*  D_8007EB44;
 extern u8   GAME_FADE_SCREEN_CONTROL;  /* 0x8009C975 = GAME.fadeScreenControl */
-extern u8   D_8009BCA4;
+extern u8   GVARS_FADE_EFFECT;         /* 0x8009C93C = GVARS.fadeEffect (US alias D_8009BCA4) */
 extern u8   GAME_FADE_SCREEN_AMOUNT;   /* 0x8009C976 = GAME.fadeScreenAmount */
 extern u8*  D_8007C110[];
 extern u8*  D_80077084[];
@@ -2422,7 +2422,7 @@ extern u8   D_800A547A;
 extern s32  GAME_PLAYER_AP;            /* 0x8009C96C = GAME.playerAP */
 extern u_short D_8009E744;
 extern int  D_8009E748[];
-extern int D_8009EB4C;
+extern int LOADING_SCREEN_STATE;       /* 0x8009F7E4 displayLoadingScreen 0 init / 1 animate (US alias D_8009EB4C) */
 extern short D_8009EB52;
 extern u_short D_8009EB5A;
 extern u_short D_8009EB7C;
@@ -2452,10 +2452,10 @@ extern s32  D_8009BCBC;
 extern s8   GAME_PLAYER_MODE;          /* 0x8009D2B0 = GAME.playerMode */
 extern u8   D_800A5403;
 extern s16  D_1F8000E6;
-extern s16  D_1F8003C4;
-extern s16  D_1F8003C6;
-extern s16  D_1F8003C8;
-extern s16  D_1F8003CA;
+extern s16  BUTTON_MASK_A;             /* 0x1F8003C4 BUTTON_CONFIGS[].a (loadButtonConfig; default Square) */
+extern s16  BUTTON_MASK_B;             /* 0x1F8003C6 BUTTON_CONFIGS[].b (default X) */
+extern s16  BUTTON_MASK_C;             /* 0x1F8003C8 BUTTON_CONFIGS[].c (default Circle) */
+extern s16  BUTTON_MASK_D;             /* 0x1F8003CA BUTTON_CONFIGS[].d (default Triangle) */
 extern u16  D_8007B2C4[];
 extern u16  D_8007B2C6[];
 extern u16  D_8007B2C8[];
@@ -2471,7 +2471,7 @@ extern u8   D_8009C97E;
 extern u8   D_8009C97F;
 extern u8   D_8009C982;
 extern u8   D_8009C983;
-extern u8   D_8009EB58;
+extern u8   PAD_BUFFERS;               /* 0x8009F7F0 the two 0x22-byte libpad receive buffers (US alias D_8009EB58) */
 extern s16  D_1F8000F2;
 extern s32  D_80012368[];
 extern void* D_1F8002D8;
@@ -2479,7 +2479,7 @@ extern s32  D_1F800278;
 extern u16  D_800A544A;
 extern u16  D_800A53B8;
 extern s32  D_8009BCFC;
-extern s32  D_1F800198;
+extern s32  UPDATE_OBJECT_INDEX;       /* 0x1F800198 index of the object in the running update loop */
 extern u8   D_800B0B88;
 extern u8   D_800A5438;
 extern u8   D_800A55C8;
@@ -2508,7 +2508,7 @@ extern u_short PLAYER_HEALTH;          /* 0x800A60D0 = PLAYER +0x98, copied to G
 extern u_short D_800A5432;
 extern u8   D_800A5462;
 extern int D_800A5858;
-extern int D_800A5970;
+extern int OBJECT_POOL;                /* 0x800A6610 the 200 x 0xD4 main object pool (US alias D_800A5970) */
 
 /* --- RAM / ROM data 0x800B____ --- */
 extern u_char D_800B00F8[0x16C];

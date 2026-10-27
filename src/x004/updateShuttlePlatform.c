@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { short x, y; } P;
 extern P D_80130CCC[];
-extern short D_1F80016A[];
+extern short PLAYER_H_WHOLE[];
 extern int ObjCullRegister(TObj *);
 extern unsigned char FUN_8001e4f0(int);
 extern void queueSfxKeyOff(int);
@@ -29,7 +29,7 @@ void updateShuttlePlatform(TObj *o)
         o->box3 = 0x10;
         o->b69 = 0;
         o->b6a = 0;
-        if (D_1F80016A[0] > o->a.p.whole) {
+        if (PLAYER_H_WHOLE[0] > o->a.p.whole) {
             o->animFrame = 1;
             o->a.raw = D_80130CCC[1].x << 16;
             o->y.raw = D_80130CCC[o->animFrame].y << 16;
@@ -84,7 +84,7 @@ void updateShuttlePlatform(TObj *o)
                 FUN_8001fce4(o);
                 break;
             case 1:
-                if (o->a.p.whole + o->box0 + 0x10 < D_1F80016A[0]) o->step = 0;
+                if (o->a.p.whole + o->box0 + 0x10 < PLAYER_H_WHOLE[0]) o->step = 0;
                 break;
             }
             break;
@@ -108,7 +108,7 @@ void updateShuttlePlatform(TObj *o)
                 FUN_8001fce4(o);
                 break;
             case 1:
-                { int k = 0x10; if (D_1F80016A[0] < o->a.p.whole - k - o->box0) o->step = 0; }
+                { int k = 0x10; if (PLAYER_H_WHOLE[0] < o->a.p.whole - k - o->box0) o->step = 0; }
                 break;
             }
             break;

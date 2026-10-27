@@ -8,7 +8,7 @@ extern char MOVE_TABLE_1[];
 extern B D_8013C800[];
 extern A *D_8013DAE8[];
 extern unsigned char D_800A60E4[];
-extern short D_1F80027E;
+extern short COLLISION_HIT_HEIGHT;
 extern short D_1F800284;
 extern void spawnItemNotification(int, int);
 extern void applyFrameVelocityY(TObj *);
@@ -31,10 +31,10 @@ static __inline__ int land(TObj *o)
         return 1;
     }
     if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
-        t = D_1F80027E;
+        t = COLLISION_HIT_HEIGHT;
         if (t < 0) t = -t;
         if (t >= 9) t = 8;
-        if (D_1F80027E < 0) t = -t;
+        if (COLLISION_HIT_HEIGHT < 0) t = -t;
         o->d8c = -t & 0xff;
         o->wb2 = t;
         w = D_1F800284;
@@ -130,10 +130,10 @@ void komaPigGrabbed(TObj *o)
         probeWallAt(o, o->h->p.whole + 0x10, o->y.p.whole + 8, 0);
         probeWallAt(o, o->h->p.whole - 0x10, o->y.p.whole + 8, 1);
         if (land(o)) {
-            v = D_1F80027E;
+            v = COLLISION_HIT_HEIGHT;
             if (v < 0) v = -v;
             if (v > 8) v = 8;
-            if (D_1F80027E < 0) v = -v;
+            if (COLLISION_HIT_HEIGHT < 0) v = -v;
             o->wb2 = v;
             o->d8c = -v & 0xff;
             o->wb6 = (-v << 2) & 0xff;

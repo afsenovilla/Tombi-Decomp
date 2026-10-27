@@ -4,7 +4,7 @@
 #include "gcd.h"
 #include "player.h"
 #include "TOBJ.H"
-extern short D_1F800186[];
+extern short SCREEN_ORIGIN_Y[];
 extern void *D_8011A8D8, *D_8011A8DC, *D_8011A8E0[], *D_8011A8EC, *D_8011A8F0, *D_8011A8F4[], *D_8011A8F8;
 extern void *D_8011A8FC, *D_8011A904, *D_8011A924, *D_8011A92C, *D_8011A934, *D_8011A93C, *D_8011A944, *D_8011A94C;
 extern void AnimLoadDuration(TObj *);
@@ -114,7 +114,7 @@ void updateBackdropSpriteSet(TObj *o)
         if (*f == 0xff) break;
         o->visible = 1;
         o->a.p.whole = o->d30 - ((short*)((char*)&SPAD.i174 + 2))[0];
-        o->y.p.whole = o->d34 - D_1F800186[0];
+        o->y.p.whole = o->d34 - SCREEN_ORIGIN_Y[0];
         ObjListPush_1F800220(o);
         k = *f & 0xf;
         switch (o->subtype) {

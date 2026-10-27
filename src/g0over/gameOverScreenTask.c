@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { TObj o; char pad[0x14]; } GObj; /* 0xD4 bytes */
 typedef struct { char p[0x4e]; unsigned short w4e; } Task;
-extern GObj D_800A6610[];
+extern GObj OBJECT_POOL[];
 extern char LOAD_BUFFER_ALT[];
 extern Task *TASK_C;
 extern short FRAME_BUFFER_INDEX;
@@ -29,7 +29,7 @@ void gameOverScreenTask(void)
             i = 0;
             tbl++;
             do {
-                o = &D_800A6610[i].o;
+                o = &OBJECT_POOL[i].o;
                 o->type = i;
                 *(int *)&o->b04 = 0;
                 o->da0 = (int)(DAT_1f800334 + tbl[i]);
@@ -42,7 +42,7 @@ void gameOverScreenTask(void)
         {
             short k = 0;
             do {
-                gameOverLetterStep(&D_800A6610[k].o, 0);
+                gameOverLetterStep(&OBJECT_POOL[k].o, 0);
                 k++;
             } while (k < 8);
         }

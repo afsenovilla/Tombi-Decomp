@@ -86,7 +86,7 @@ void lostBossItemNpcTalk(TObj *o)
         o->state++;
         break;
     case 8:
-        if (GVARS.b40 && GVARS.b41 == 0x8f) {
+        if (GVARS.useItemPending && GVARS.useItemId == 0x8f) {
             o->state = 10;
             break;
         }
@@ -99,7 +99,7 @@ void lostBossItemNpcTalk(TObj *o)
     case 10:
         o->state++;
         GCD.bd087 = 2;
-        GVARS.b40 = 0;
+        GVARS.useItemPending = 0;
         FUN_80026e0c(0x8f, 1);
         m = 8;
         n = 3;

@@ -5,8 +5,8 @@
 extern unsigned char D_800B1410;
 extern volatile unsigned short D_8009D674;
 
-extern unsigned char D_8009E375, D_8009E376, D_8009E377;
-extern unsigned char D_8009F085, D_8009F086, D_8009F087;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 void InitSubsystems(void);
 void initHud(void);
 void initPlayerAtSpawn(void);
@@ -60,12 +60,12 @@ void cutsceneAreaHandler(void)
         break;
     case 2:
     case 3:
-        D_8009E375 = 0;
-        D_8009E376 = 0;
-        D_8009E377 = 0;
-        D_8009F085 = 0;
-        D_8009F086 = 0;
-        D_8009F087 = 0;
+        DISPLAY_BUFFER_0_BG_R = 0;
+        DISPLAY_BUFFER_0_BG_G = 0;
+        DISPLAY_BUFFER_0_BG_B = 0;
+        DISPLAY_BUFFER_1_BG_R = 0;
+        DISPLAY_BUFFER_1_BG_G = 0;
+        DISPLAY_BUFFER_1_BG_B = 0;
         *(unsigned short *)(G + 0x4c) = 8;
         *(unsigned short *)(G + 0x4e) = 0;
         break;

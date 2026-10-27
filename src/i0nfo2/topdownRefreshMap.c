@@ -9,13 +9,13 @@ extern void topdownUploadMapStrip(int, int);
 extern void topdownBuildVisibleTileList(TObj *);
 extern unsigned char D_800A60A3;
 extern int D_800FECB4;
-extern short D_1F800176[];
+extern short SCREEN_ORIGIN_X[];
 
 void topdownRefreshMap(TObj *o)
 {
-    o->d30 = D_1F800176[0] + 0xA1;
+    o->d30 = SCREEN_ORIGIN_X[0] + 0xA1;
     o->d34 = (short)SPADP->s17a - 0xEF;
-    S16(o->h, 2) = 0x1F - (((unsigned short)D_1F800176[0] + 0xA0) & 0x1F);
+    S16(o->h, 2) = 0x1F - (((unsigned short)SCREEN_ORIGIN_X[0] + 0xA0) & 0x1F);
     o->y.p.whole = 0x1F - ((SPADP->s17a - 0xF0) & 0x1F);
     topdownBuildVisibleTileList(o);
     topdownUploadMapStrip(0, D_800FECB4);

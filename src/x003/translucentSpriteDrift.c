@@ -9,7 +9,7 @@ typedef struct {
 } E;
 
 extern short D_8013589C[];
-extern short D_1F800176[];
+extern short SCREEN_ORIGIN_X[];
 extern int Rand(void);
 
 void translucentSpriteDrift(TObj *o)
@@ -37,7 +37,7 @@ void translucentSpriteDrift(TObj *o)
         e->cc = D_8013589C[6];
         e->ce = D_8013589C[7];
         e->d0 = 0;
-        o->a.raw = (D_1F800176[0] - 0xa0) << 16;
+        o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0) << 16;
         { short r = (Rand() & 7) * 24 + 0x10; o->y.raw = ((*(short*)&SPAD.s186) - r) << 16; }
         o->velH = o->subtype << 7;
         break;
@@ -49,7 +49,7 @@ void translucentSpriteDrift(TObj *o)
             o->timer--;
             e->bc += o->velX >> 8;
         }
-        if (o->h->p.whole + e->c4 > D_1F800176[0] + 0x168) o->step = 1;
+        if (o->h->p.whole + e->c4 > SCREEN_ORIGIN_X[0] + 0x168) o->step = 1;
         break;
     }
 }

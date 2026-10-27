@@ -2,7 +2,7 @@
 // MATCHING 800183b8 144
 extern short FREE_OBJECT_COUNT;
 extern int *FREE_OBJECTS;
-extern unsigned short g1c8;
+extern unsigned short SPAWN_AXIS_SWAP;
 int allocObjectLayer2(void)
 {
     int o;
@@ -15,7 +15,7 @@ int allocObjectLayer2(void)
         FREE_OBJECT_COUNT = n - 1;
         o = *FREE_OBJECTS++;
         *(char *)(o + 0x1c) = c;
-        if ((g1c8 & 1) == 0) {
+        if ((SPAWN_AXIS_SWAP & 1) == 0) {
             *(int *)(o + 0x40) = o + 0x10;
             *(int *)(o + 0x44) = o + 0x18;
         } else {

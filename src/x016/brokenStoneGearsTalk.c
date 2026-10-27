@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { char c[12]; } B12;
 extern TObj PLAYER;
-extern TObj *DAT_800a60c8;
+extern TObj *PLAYER_MESSAGE_BOX;
 extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c942;
 extern unsigned char DAT_8009ce06;
 extern TObj *showMessageBoxDirect(int, int, B12 *);
@@ -28,13 +28,13 @@ void brokenStoneGearsTalk(TObj *o)
         break;
     case 2:
         v = *(B12 *)&PLAYER.a;
-        DAT_800a60c8 = showMessageBoxDirect(4, 0, &v);
+        PLAYER_MESSAGE_BOX = showMessageBoxDirect(4, 0, &v);
         o->state++;
         break;
     case 3:
-        if (DAT_800a60c8->b04 != 2)
+        if (PLAYER_MESSAGE_BOX->b04 != 2)
             break;
-        DAT_800a60c8->b04 = 3;
+        PLAYER_MESSAGE_BOX->b04 = 3;
         if (DAT_8009ce06 == 0) {
             setEventStarted(0x62, 0, 0);
             o->w08 = 200;

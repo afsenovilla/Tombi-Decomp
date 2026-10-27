@@ -5,7 +5,7 @@ extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned char DAT_800b0d9b;
 extern unsigned char DAT_800b0d99;
 extern unsigned char GAME_DISABLE_SELECT_MENU;
-extern char DAT_800b0d98[];
+extern char AREA_MODEL_DRAW_LIST[];
 extern int WMD_DATA;
 extern void (*PTR_DAT_80079b3c[])(char *, int);
 
@@ -40,6 +40,6 @@ void callAreaModelLinkHook(void)
     case 5: case 8: case 0xb: case 0x10: case 0x11: case 0x13:
         return;
     }
-    PTR_DAT_80079b3c[GAME](DAT_800b0d98, WMD_DATA);
+    PTR_DAT_80079b3c[GAME](AREA_MODEL_DRAW_LIST, WMD_DATA);
     DAT_800b0d99 = GAME_DISABLE_SELECT_MENU;
 }
