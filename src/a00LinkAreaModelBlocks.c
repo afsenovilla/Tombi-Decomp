@@ -6,7 +6,7 @@
 /* Spans splat entries 801176D8+80117928 (jtbl 80115EF8). Each branch computes lo = x / 80 and
    hi = lo + N itself so the shared tail is cross-jumped; x pinned to v1 ($2 for the D_1F800176u load). */
 typedef struct { char pad[3]; unsigned char n; unsigned char *p[1]; } L;
-extern unsigned short D_8009C962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short D_1F800176u;
 extern int getScrollOffsetX(void);
 
@@ -19,7 +19,7 @@ void a00LinkAreaModelBlocks(L *o, unsigned char *base)
     register int x asm("$3");
     register int x2 asm("$2");
 
-    switch (D_8009C962) {
+    switch (GAME_SELECTED_SECTION) {
     case 0:
         if (GCD.bcda2)
             { x = (*(short*)((char*)&SPAD.i174 + 2)) + 0x8c; lo = x / 80; hi = lo + 8; }

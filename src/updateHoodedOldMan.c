@@ -14,13 +14,13 @@ extern unsigned char D_8009C93B_[];
 #define D_8009C93B D_8009C93B_[0]
 extern unsigned char D_8009C93A_[];
 #define D_8009C93A D_8009C93A_[0]
-extern unsigned char D_8009C975_[];
-#define D_8009C975 D_8009C975_[0]
-extern signed char D_8009D2B0_[];
-#define D_8009D2B0 D_8009D2B0_[0]
+extern unsigned char GAME_FADE_SCREEN_CONTROL[];
+#define D_8009C975 GAME_FADE_SCREEN_CONTROL[0]
+extern signed char GAME_PLAYER_MODE[];
+#define D_8009D2B0 GAME_PLAYER_MODE[0]
 extern void *HOODED_OLD_MAN_ANIMS[], *D_8013B2D0[], *D_8013B2D4[], *D_8013B2D8[], *D_8013B2DC[], *D_8013B2E0[], *D_8013B2EC[];
 extern void *D_1F8002D4;
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern char D_801393EC[];
 extern char D_80139434[];
 extern char D_8013947C[];
@@ -40,14 +40,14 @@ static short *D_801396A0[9] = {
     (short *)D_80139678,
 };
 extern unsigned short D_1F8003C4, D_1F8001FC;
-extern unsigned char D_800A603E_[];
-#define D_800A603E D_800A603E_[0]
-extern unsigned char D_800A603D_[];
-#define D_800A603D D_800A603D_[0]
-extern unsigned char D_800A603C_[];
-#define D_800A603C D_800A603C_[0]
-extern int D_8009C984_[];
-#define D_8009C984 D_8009C984_[0]
+extern unsigned char PLAYER_STEP[];
+#define D_800A603E PLAYER_STEP[0]
+extern unsigned char PLAYER_SUBSTATE[];
+#define D_800A603D PLAYER_SUBSTATE[0]
+extern unsigned char PLAYER_STATE[];
+#define D_800A603C PLAYER_STATE[0]
+extern int GAME_AREA00_EVENT_CONTROL[];
+#define D_8009C984 GAME_AREA00_EVENT_CONTROL[0]
 extern unsigned char D_1F8001CD_[];
 #define D_1F8001CD D_1F8001CD_[0]
 extern unsigned char D_1F8001CC_[];
@@ -67,8 +67,8 @@ extern short D_8009CD96_[];
 #define D_8009CD96 D_8009CD96_[0]
 extern short D_800A60D2_[];
 #define D_800A60D2 D_800A60D2_[0]
-extern short D_800A60D0_[];
-#define D_800A60D0 D_800A60D0_[0]
+extern short PLAYER_HEALTH[];
+#define D_800A60D0 PLAYER_HEALTH[0]
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -140,7 +140,7 @@ void updateHoodedOldMan(TObj *o)
         o->b0a = 0;
         o->b0f = 0;
         o->animFrame = 0;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->timer = 0;
         o->step = 0;
         o->b04++;
@@ -363,7 +363,7 @@ void updateHoodedOldMan(TObj *o)
                 o->animFrame = 1;
                 o->anim = D_8013B2D0[0];
                 FUN_8001fe6c(o);
-                o->movetab = D_80077CDC;
+                o->movetab = MOVE_TABLE_0;
                 o->step++;
             case 1:
                 applyAnimVelocityY(o, 0);

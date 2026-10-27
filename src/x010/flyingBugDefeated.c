@@ -1,7 +1,7 @@
 // FUNC 80124f0c 308 X010
 // MATCHING 80124f0c 308
 #include "TOBJ.H"
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void AnimLoadDuration(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 #define DA8(o) (*(void ***)((char *)(o) + 0xa8))
@@ -14,7 +14,7 @@ void flyingBugDefeated(TObj *o)
         o->b0b = 1;
         o->b0f = 4;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 4;
         o->d8c = 0;
         o->animFrame &= 1;

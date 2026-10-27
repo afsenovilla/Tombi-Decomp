@@ -6,7 +6,7 @@ extern void func_80026C50(int a, int b, int c);
 extern void func_8004D620(int a, int b);
 extern unsigned char D_8009D064[];
 extern unsigned char D_8009D0AA, D_8009D0C8, D_8009D0D0, D_8009D0D1;
-extern signed char D_800A603D[], D_800A603E[], D_800A60E4[];
+extern signed char PLAYER_SUBSTATE[], PLAYER_STEP[], D_800A60E4[];
 extern short D_800EE994[];
 extern void *D_800F53C0;
 
@@ -47,8 +47,8 @@ void overheadItemSpotCheckStep(TObj *o)
                 o->state = 0;
             }
             D_800A60E4[0] = 0;
-            D_800A603D[0] = 0;
-            D_800A603E[0] = 0;
+            PLAYER_SUBSTATE[0] = 0;
+            PLAYER_STEP[0] = 0;
         }
         o->b68 = 0;
         break;

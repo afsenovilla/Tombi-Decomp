@@ -2,7 +2,7 @@
 // MATCHING 8013649c 704
 #include "TOBJ.H"
 
-extern unsigned short GAME[], D_8009C962[];
+extern unsigned short GAME[], GAME_SELECTED_SECTION[];
 extern int DAT_1f8002d0[], DAT_1f8002e4[];
 extern void *D_8013DE3C[], *D_8013DDE4[];
 extern void FUN_8001fe6c(TObj *);
@@ -26,7 +26,7 @@ void updateForestDwarf(TObj *o)
         o->box2 = 8;
         o->w1e = 1;
         o->b0d = 0;
-        if (GAME[0] == 1 && D_8009C962[0] < 2) {
+        if (GAME[0] == 1 && GAME_SELECTED_SECTION[0] < 2) {
             o->d3c = DAT_1f8002d0[0];
             o->anim = D_8013DE3C[0];
         } else {

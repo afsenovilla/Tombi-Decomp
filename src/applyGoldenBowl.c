@@ -18,7 +18,7 @@ u8 applyGoldenBowl(void)
         }
         printInfoMessage(ITEM_GOLDENBOWL, MSG_TYPE_ITEM);
         playSFX(10);
-        (u16*)D_800A5430 = GAME.playerHealthDisplayed;
+        (u16*)PLAYER_HEALTH = GAME.playerHealthDisplayed;
         D_800A5432 = GAME.playerHealthDisplayed;
         GAME.playerHealth = GAME.playerHealthDisplayed;
     }

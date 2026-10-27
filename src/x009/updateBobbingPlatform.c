@@ -5,11 +5,11 @@
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } P3;
 extern TObj PLAYER;
-extern short D_800A604A;
+extern short PLAYER_X;
 extern short D_800A604Ax[];
 extern unsigned char *PLAYER_EXT;
-extern signed char D_8009D2B0;
-extern short *D_800A6078[];
+extern signed char GAME_PLAYER_MODE;
+extern short *PLAYER_H[];
 extern P3 D_8012B26C[];
 extern char D_8012DD84[];
 extern char D_8012DD8C[];
@@ -36,12 +36,12 @@ void updateBobbingPlatform(TObj *o)
             o->b04 = 3;
             break;
         }
-        if (D_800A604A < 0x280) {
+        if (PLAYER_X < 0x280) {
             o->b04 = 2;
             break;
         }
         o->animFrame = 1;
-        if (D_800A6078[0][1] > 0x2d0) {
+        if (PLAYER_H[0][1] > 0x2d0) {
             i = 1;
             o->step = 0;
             o->b04++;
@@ -139,7 +139,7 @@ void updateBobbingPlatform(TObj *o)
             }
             break;
         case 5:
-            if (D_8009D2B0 != 3) {
+            if (GAME_PLAYER_MODE != 3) {
                 if (pl->a.p.whole > 0x17e) pl->a.p.whole = 0x17e;
             }
             if (pl->a.p.whole < 0xee) o->b04++;
@@ -147,8 +147,8 @@ void updateBobbingPlatform(TObj *o)
         }
         break;
     case 2:
-        if (D_8009D2B0 != 3) {
-            if (D_800A604A > 0x17e) D_800A604A = 0x17e;
+        if (GAME_PLAYER_MODE != 3) {
+            if (PLAYER_X > 0x17e) PLAYER_X = 0x17e;
         }
         break;
     case 3:

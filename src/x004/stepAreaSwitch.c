@@ -8,7 +8,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 
 int stepAreaSwitch(TObj *o)
 {
@@ -23,7 +23,7 @@ int stepAreaSwitch(TObj *o)
             return 2;
         }
         if (GVARS.b3a) return 0;
-        if (D_8009D2B0 >= 3) break;
+        if (GAME_PLAYER_MODE >= 3) break;
         o->state = 3;
         o->velY = 0xa00;
         o->d88 += 0xa00;
@@ -55,7 +55,7 @@ int stepAreaSwitch(TObj *o)
 #include "player.h"
 #include "TOBJ.H"
 
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 
 int stepAreaSwitch(TObj *o)
 {
@@ -70,7 +70,7 @@ int stepAreaSwitch(TObj *o)
             return 2;
         }
         if (GVARS.b3a) return 0;
-        if (D_8009D2B0 >= 3) break;
+        if (GAME_PLAYER_MODE >= 3) break;
         o->state = 3;
         o->velY = 0xa00;
         o->d88 += 0xa00;

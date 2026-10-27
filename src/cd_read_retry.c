@@ -24,7 +24,7 @@ typedef struct {
 } ReadAttr_t;
 
 extern CdlCB D_80096300;
-extern volatile ReadAttr_t D_80096FA0;
+extern volatile ReadAttr_t CD_READ_ATTR;
 
 void cb_read(u_char arg0, u_char* arg1);
 
@@ -38,33 +38,33 @@ int cd_read_retry(int retry) {
             puts("CdRead: Shell open...\n");
         }
         CdControlF(CdlNop, NULL);
-        D_80096FA0.vb_start = VSync(-1);
-        D_80096FA0.status = -1;
-        return D_80096FA0.status;
+        CD_READ_ATTR.vb_start = VSync(-1);
+        CD_READ_ATTR.status = -1;
+        return CD_READ_ATTR.status;
     }
     if (retry) {
         puts("CdRead: retry...\n");
         CdControl(CdlPause, NULL, NULL);
         if (!CdControl(CdlSetloc, CdLastPos(), NULL)) {
-            return D_80096FA0.status = -1;
+            return CD_READ_ATTR.status = -1;
         }
     }
     CdFlush();
-    mode2 = D_80096FA0.mode;
+    mode2 = CD_READ_ATTR.mode;
     mode = mode2; // FAKE
     if ((char)mode2 != CdMode() || retry) {
         if (!CdControl(CdlSetmode, &mode, NULL)) {
-            D_80096FA0.status = -1;
-            return D_80096FA0.status;
+            CD_READ_ATTR.status = -1;
+            return CD_READ_ATTR.status;
         }
     }
-    D_80096FA0.pos = CdPosToInt(CdLastPos());
+    CD_READ_ATTR.pos = CdPosToInt(CdLastPos());
     CdReadyCallback(&cb_read);
-    D_80096FA0.buf_cur = D_80096FA0.buf_start;
+    CD_READ_ATTR.buf_cur = CD_READ_ATTR.buf_start;
     CdControlF(CdlReadN, NULL);
-    D_80096FA0.status = D_80096FA0.nsectors;
-    D_80096FA0.vb_attempt_start = VSync(-1);
-    return D_80096FA0.status;
+    CD_READ_ATTR.status = CD_READ_ATTR.nsectors;
+    CD_READ_ATTR.vb_attempt_start = VSync(-1);
+    return CD_READ_ATTR.status;
 }
 
 void CdReadBreak(void);

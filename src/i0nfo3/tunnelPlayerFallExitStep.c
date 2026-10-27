@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern void func_8001FEC0(TObj *o);
 extern TObj *PLAYER_EXT;
-extern signed char D_8009C975[];
+extern signed char GAME_FADE_SCREEN_CONTROL[];
 
 void tunnelPlayerFallExitStep(TObj *o)
 {
@@ -30,7 +30,7 @@ void tunnelPlayerFallExitStep(TObj *o)
         s = --o->timer;
         if (s <= 0) {
             o->timer = 0x3C;
-            D_8009C975[0] = 3;
+            GAME_FADE_SCREEN_CONTROL[0] = 3;
             o->state++;
         }
         break;

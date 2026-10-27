@@ -2,7 +2,7 @@
 // wip: score 20 (was 30), case-3 confirm block only. Fixed: `int x = D_80111128_v` (second extern name declared
 // volatile int; a plain scalar sinks to its first use) loads D_80111128 into a0 before the t lbus, and
 // `a = t[0]; D_80111134 = a; b = t[1];` keeps the first store between the two lbus. The `li 3` position: the 3 is
-// the SAME pseudo as t (`t = (unsigned char *)3; D_8009D2B0 = (int)t; PLAYER = (int)t;`): a 2-set pseudo is not a
+// the SAME pseudo as t (`t = (unsigned char *)3; GAME_PLAYER_MODE = (int)t; PLAYER = (int)t;`): a 2-set pseudo is not a
 // "birthing" insn for sched1 (sched.c birthing_insn_p needs REG_N_SETS == 1), so `li 3` sinks to the earliest free
 // cycle = right after `lbu b,1(t)` (anti-dependence on t), exactly the game's spot, and the whole schedule now matches.
 // Left (score 20 = registers only): t/3 "dies in 2 places" -> global alloc, so local-alloc sees v1 free and gives
@@ -39,7 +39,7 @@ extern int D_80111128;
 extern volatile int D_80111128_v;
 extern char D_80111134, D_80111138;
 extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
-extern volatile unsigned char D_8009D2B0, PLAYER, D_800A603C, D_800A603D, D_800A603E, D_8009C940, D_8009C941;
+extern volatile unsigned char GAME_PLAYER_MODE, PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, D_8009C940, D_8009C941;
 extern int subScreenMoveTabCursor(Menu *m, int n);
 extern int subScreenMoveGridCursor(Menu *m);
 extern int subScreenMoveGridCursorN(Menu *m, int n);
@@ -334,12 +334,12 @@ int func_800ED0C4(Menu *m)
                 D_80111134 = a;
                 b = t[1];
                 D_8009CD94 = a;
-                D_800A603D = 0x30;
+                PLAYER_SUBSTATE = 0x30;
                 D_8009CDA0 = 0;
                 t = (unsigned char *)3;
-                D_8009D2B0 = (int)t;
-                D_800A603C = 1;
-                D_800A603E = 0;
+                GAME_PLAYER_MODE = (int)t;
+                PLAYER_STATE = 1;
+                PLAYER_STEP = 0;
                 PLAYER = (int)t;
                 D_8009C940 = 1;
                 D_8009C941 = x;

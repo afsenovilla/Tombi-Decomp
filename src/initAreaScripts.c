@@ -2,7 +2,7 @@
 // MATCHING 80018f68 284
 extern int DAT_8009d69c;
 extern unsigned short GAME;
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern int DAT_1f8002b8;
 extern int DAT_1f8002bc;
 extern char AREA_SCRIPT_CTX[];
@@ -21,21 +21,21 @@ void initAreaScripts(void)
     scriptReset(p);
     switch (GAME) {
     case 0:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0: case 1: case 2:
             a = DAT_1f8002b8;
             goto L;
         }
         return;
     case 1:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0: case 1: case 2: case 3: case 4:
             a = DAT_1f8002b8;
             goto L;
         }
         return;
     case 2:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
             a = DAT_1f8002bc;
             goto L;

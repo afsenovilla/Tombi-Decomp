@@ -7,7 +7,7 @@
 #include "player.h"
 extern unsigned short D_1F80016Eu;
 extern unsigned char D_8009D13F;
-extern unsigned char D_800A603Cb;
+extern unsigned char PLAYER_STATE;
 int func_800202B4(TObj *o);
 void func_8011E1B0(TObj *o);
 void func_80018838(TObj *o);
@@ -90,7 +90,7 @@ void updateAreaMechanisms(TObj *o)
                     break;
                 case 2:
                     o->state++;
-                    D_800A603Cb = 5;
+                    PLAYER_STATE = 5;
                     PLAYER.obj.step = 2;
                     PLAYER.obj.state = 0;
                     PLAYER.obj.substep = 0;

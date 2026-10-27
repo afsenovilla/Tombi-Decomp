@@ -5,7 +5,7 @@
 extern unsigned char D_8012F460, D_8012F461, D_8012F462, D_8012F463;
 extern int D_1F8002D0;
 extern void *D_8013239C[];
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void applyFrameVelocityX(TObj *o);
@@ -36,7 +36,7 @@ void updateSpearPigDroppedSpear(TObj *o)
                 o->b0b = 1;
                 o->b0f = 4;
                 o->velV = -0x400;
-                o->movetab = D_80077D0C;
+                o->movetab = MOVE_TABLE_2;
                 o->step++;
                 break;
             case 1:

@@ -16,7 +16,7 @@ static char DAT_80114c7c[148] = {
     -0x80, 1, 0, 0, 3, 1, -0x80, 2, 0, 0, 3, 1, -0x80, 3, 0, 0,
     1, -1, 0x41, 0x3c,
 };
-extern char D_800E3E28[];
+extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, char *);
 extern void FUN_80024ea0(char *, int, int);
 extern void applyItemEffect(void *d, void *arg, short x, short y, int flag);
@@ -56,7 +56,7 @@ void FUN_800ed750(TObj *o)
         for (i = 0; i < e->n; i++) {
             e->tab[i] = (int)*pp + p[i];
         }
-        e->b8 = D_800E3E28 + o->b0c * 0x1600;
+        e->b8 = MODEL_PRIM_BUFFERS + o->b0c * 0x1600;
         *(char **)&o->wa8 = e->b8;
         copyModelPrimGroups(o->da0, e->b8);
         o->state = 1;

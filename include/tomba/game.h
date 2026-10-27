@@ -1205,7 +1205,7 @@ typedef struct gameConfig {
     u_short selectedSection;
     byte selectedPlane;
     byte area00_fogControl;
-    byte unk6;
+    byte area00_introPhase;      /* 0x8009C966 GAME_AREA00_INTRO_PHASE: 1/2/3 set by a00IntroEventScroll, == 3 tested by the camera handlers */
     u_char keepBgm;
     int totalTimePlayed;
     u_long playerAP;
@@ -2175,7 +2175,7 @@ typedef struct gameConfig {
     u_short currentSpawnPoint;
     u_char inventoryButton;
     u_char playerState;
-    byte unk950;                 /* 0x8009D2B0: area-0 dark cloaked figure scene flag */
+    byte playerMode;             /* 0x8009D2B0 GAME_PLAYER_MODE: 1 idle/walk (talk allowed), 2 message box, 3 scripted scene (collisions off); updatePlayer clears it unless 3..4 */
     byte unk951;                 /* 0x8009D2B1: bitten-jump kind (playerBittenJumpType03) */
     struct equips playerEquips;  /* 0x8009D2B2 weapon (drawHudWeaponIcon / spawnWeaponObject), 0x8009D2B3 pants (speed class) */
     byte unk954;
@@ -2345,7 +2345,7 @@ extern int MOVIE_DEC_VLCID;
 extern int MOVIE_DEC_RECT_Y;
 extern int D_8009B03C;
 extern SpuCommonAttr D_8009B048; // SPU_ATTR
-extern byte D_8009B6A8; // SELECTED ROW
+extern byte DEBUG_SCREEN_CURSOR_ROW; /* 0x8009B6A8 displayDebugScreen cursor row */
 #include "gvars.h"   /* GVARS 0x8009C930 (was the u_char D_8009BC98[0x2C] alias) */
 extern u_char D_8009BCA0;
 extern u8   D_8009BCA2;
@@ -2386,14 +2386,14 @@ extern void (*D_8007D57C[])(u8* self);
 extern void (*D_8007F988[])(void);
 extern void (*D_8007C848[])(void);
 extern u8*  D_8007B680[];
-extern u16  D_8009BCCA;
+extern u16  GAME_SELECTED_SECTION;     /* 0x8009C962 = GAME.selectedSection */
 extern u8   D_80014C94;
 extern u8   D_80014C8C;
 extern int  D_8009E74C[];
 extern u8   D_800778E4[];
 extern u8   D_800778E5[];
 extern s32  D_80078EB0[];
-extern u8   D_8009C61A;
+extern u8   GAME_EQUIPPED_WEAPON;      /* 0x8009D2B2 = GAME.playerEquips.weapon */
 extern short D_8009C610;
 extern short D_8009C612;
 extern short D_8009C614;
@@ -2402,18 +2402,18 @@ extern u8   D_8009BCE9;
 extern u16  D_8009C0FC;
 extern u16  D_8009C0FE;
 extern u8*  D_8007EB44;
-extern u8   D_8009BCDD;
+extern u8   GAME_FADE_SCREEN_CONTROL;  /* 0x8009C975 = GAME.fadeScreenControl */
 extern u8   D_8009BCA4;
 extern u8   D_8009BCDE;
 extern u8*  D_8007C110[];
 extern u8*  D_80077084[];
 extern u8   D_800B07CC[];
 extern s32  D_800A38DC;
-extern s16* D_800A53D8;
-extern s16* D_800A53DC;
-extern s16  D_800A53AE;
+extern s16* PLAYER_H;                  /* 0x800A6078 = PLAYER.obj.h (Fix16 *) */
+extern s16* PLAYER_D;                  /* 0x800A607C = PLAYER.obj.d (Fix16 *) */
+extern s16  PLAYER_Y;                  /* 0x800A604E = whole part of PLAYER.obj.y */
 extern u8   D_8009C10A;
-extern u8   D_8009C10B;
+extern u8   PAUSE_MENU_CURSOR;         /* 0x8009C10B pause menu entry selected (updatePauseMenu) */
 extern u8   D_800A5401;
 extern u8   D_800A5436;
 extern u8   D_8009C619;
@@ -2449,7 +2449,7 @@ extern u8*  D_1F8001D4;
 extern s16  D_1F8003B8;
 extern s16  D_1F8003BA;
 extern s32  D_8009BCBC;
-extern s8   D_8009C618;
+extern s8   GAME_PLAYER_MODE;          /* 0x8009D2B0 = GAME.playerMode */
 extern u8   D_800A5403;
 extern s16  D_1F8000E6;
 extern s16  D_1F8003C4;
@@ -2499,12 +2499,12 @@ extern short D_800A3954;
 extern short D_800A3956;
 extern unkstruct_800A39B0 D_800A39B0[];
 extern SpriteSlot D_800A5140[];
-extern char D_800A539C;
-extern char D_800A539D;
-extern char D_800A539E;
+extern char PLAYER_STATE;              /* 0x800A603C = PLAYER.state (PlayerState) */
+extern char PLAYER_SUBSTATE;           /* 0x800A603D = PLAYER.subState */
+extern char PLAYER_STEP;               /* 0x800A603E = PLAYER.step */
 extern char D_800A539F;
 extern u_short D_800A53C6;
-extern u_short D_800A5430;
+extern u_short PLAYER_HEALTH;          /* 0x800A60D0 = PLAYER +0x98, copied to GAME.playerHealth */
 extern u_short D_800A5432;
 extern u8   D_800A5462;
 extern int D_800A5858;

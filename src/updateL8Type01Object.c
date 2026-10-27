@@ -11,7 +11,7 @@ typedef struct S {
 extern char SPRITE_SLOTS[];
 extern char D_800B0BBA[];
 extern unsigned char D_800B0BBC[], D_800B0BBD[], D_800B0BBE[], D_800B0BBF[];
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern unsigned char D_8009C933;
 extern unsigned short acquireSpriteSlot(int);
 extern void l8Type01MoveStep(S *);
@@ -61,7 +61,7 @@ void updateL8Type01Object(S *o)
             if (--*(short *)(D_800B0BBA + off2) == 0)
                 *(short *)(SPRITE_SLOTS + o->wbe * 10) = -1;
         }
-        if (D_8009D2B0 != 3) {
+        if (GAME_PLAYER_MODE != 3) {
             if (o->wce & 0x7fff) {
                 if (o->wd2)
                     setEventStarted(o->wd2, 0, 3);

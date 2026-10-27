@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 typedef struct { unsigned short w0, w2, w4, w6, w8, wa, wc; } E;
 extern E D_8013145C[];
-extern unsigned short D_800A604E[];
+extern unsigned short PLAYER_Y[];
 extern TObj *allocObjectLayer2(void);
 extern void FUN_80026e0c(int, int);
 
@@ -38,7 +38,7 @@ void bigKeyPaintingCheckPiece(TObj *o)
             n->velX = p->w6;
             n->velY = p->w8;
             n->h->p.whole = (*(unsigned short **)&PLAYER.obj.h)[1];
-            n->y.p.whole = D_800A604E[0];
+            n->y.p.whole = PLAYER_Y[0];
             n->b.p.whole = p->wa;
             n->velV = 3;
             n->velH = 3;

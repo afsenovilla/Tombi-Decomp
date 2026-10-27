@@ -6,7 +6,7 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119C48[];
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -21,7 +21,7 @@ void bonsugeeResearcherRepeatTalk(TObj *o)
         if (o->b68 == 0) break;
         v = *(V6 *)&o->a;
         ((unsigned char*)&GVARS.b42)[0] = 1;
-        D_8009D2B0 = 2;
+        GAME_PLAYER_MODE = 2;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

@@ -19,7 +19,7 @@ extern int FUN_8001f9e0(void);
 extern void spawnA00Tornado(int, int, int, int);
 extern struct V3 D_1F800168;
 extern struct V3 D_800A6048;
-extern Fix16 *D_800A607C;
+extern Fix16 *PLAYER_D;
 extern unsigned char D_8009C939A[];
 #define D_8009C939 D_8009C939A[0]
 extern unsigned char D_8009C942A[];
@@ -28,11 +28,11 @@ extern unsigned char D_8009C93FA[];
 #define D_8009C93F D_8009C93FA[0]
 extern unsigned char PLAYER[];
 #define D_800A6038 PLAYER[0]
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603DA[];
-#define D_800A603D D_800A603DA[0]
-extern unsigned char D_800A603EA[];
-#define D_800A603E D_800A603EA[0]
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE[];
+#define D_800A603D PLAYER_SUBSTATE[0]
+extern unsigned char PLAYER_STEP[];
+#define D_800A603E PLAYER_STEP[0]
 
 #define o (&e->o)
 void a00TornadoStep(TObjE *e)
@@ -103,16 +103,16 @@ void a00TornadoStep(TObjE *e)
                 startPadVibration(0, 0, 0xd0, 4);
             break;
         case 4:
-            if (D_800A607C->p.whole > 0) {
+            if (PLAYER_D->p.whole > 0) {
                 startPadVibration(0, 1, 0xff, 0x14);
-                D_800A607C->p.whole -= 4;
+                PLAYER_D->p.whole -= 4;
             } else {
                 if (o->subtype == 0)
                     FUN_80026c50(4, 1, 1);
                 SPAD.s1c6 = 0;
-                *(int *)D_800A607C = 0;
+                *(int *)PLAYER_D = 0;
                 D_800A6038 = 1;
-                D_800A603C = 1;
+                PLAYER_STATE = 1;
                 GVARS.b30 = 2;
                 D_800A603D = 0;
                 D_800A603E = 0;
@@ -164,7 +164,7 @@ void a00TornadoStep(TObjE *e)
                 o->wba = k;
                 *(short *)&o->bbe = k;
                 D_800A6038 = 4;
-                D_800A603C = 5;
+                PLAYER_STATE = 5;
                 D_800A603D = 0;
                 D_800A603E = 0;
                 D_8009C93F = 1;

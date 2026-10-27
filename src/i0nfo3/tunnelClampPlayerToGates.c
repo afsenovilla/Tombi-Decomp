@@ -4,7 +4,7 @@
 extern unsigned char D_8009CE21;
 extern unsigned char D_8009CE24;
 extern unsigned char D_8009CE34;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 
 #define X o->a.p.whole
 #define Y o->y.p.whole
@@ -15,7 +15,7 @@ void tunnelClampPlayerToGates(TObj *o)
   short t;
   short n;
   unsigned short xx, yy;
-  if (D_8009D2B0 != 3)
+  if (GAME_PLAYER_MODE != 3)
   {
     if (((D_8009CE21 != 0xFF) && (o->a.p.whole >= 0x3B6)) && (o->a.p.whole < 0x3E9))
     {

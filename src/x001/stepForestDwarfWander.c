@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern void *D_8013DDF0[], *D_8013DDF4[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -18,7 +18,7 @@ void stepForestDwarfWander(TObj *o)
         switch (o->state) {
         case 0:
             o->timer = 0x3c;
-            o->movetab = D_80077CDC;
+            o->movetab = MOVE_TABLE_0;
             o->anim = D_8013DDF0[0];
             AnimLoadDuration(o);
             o->state++;

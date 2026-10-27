@@ -18,7 +18,7 @@ static void *D_80122C1C[7] = {
     D_80122D30, D_80122D44, D_80122D58, D_80122D6C,
     D_80122D7C, D_80122D94, D_80122D9C,
 };
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern short *D_8012037C[];
 extern int func_8011E364(void);
 extern short FUN_8005e420(int, int);
@@ -77,7 +77,7 @@ void updateSceneSequence(TObj *o)
         o->b0a = 0;
         o->b0f = 0;
         o->animFrame = 0;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->timer = 0;
         o->step = 0;
         o->b04++;

@@ -5,10 +5,10 @@
 extern int func_8002DC50(int a, int b, int x, int y);
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
-extern unsigned char D_8009D2B0;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char GAME_PLAYER_MODE;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern unsigned short D_800A6066;
 extern unsigned char D_800A60A1;
 extern unsigned char D_800A60A3;
@@ -28,14 +28,14 @@ void tunnelTalkSpotStep(TObj *o)
             int a = D_800A60A1;
             if (a == 2 && (D_800A6066 & 7) == a) {
                 S32(o, 0x90) = func_8002DC50(D_800EED80[o->subtype][0], D_800EED80[o->subtype][1], 0xA0, 0x8C);
-                D_8009D2B0 = 2;
+                GAME_PLAYER_MODE = 2;
                 D_8009C942 = 1;
                 D_8009C93F = 1;
-                D_800A603C = 4;
+                PLAYER_STATE = 4;
                 *(short *)0x1F8001C6 = 0;
                 D_800A60F8 = 0;
-                D_800A603D = 6;
-                D_800A603E = 0;
+                PLAYER_SUBSTATE = 6;
+                PLAYER_STEP = 0;
                 o->state++;
                 r = 1;
             }
@@ -58,9 +58,9 @@ void tunnelTalkSpotStep(TObj *o)
         D_8009C93F = 0;
         o->b68 = 0;
         o->b69 = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         *(short *)0x1F8001C6 = 0;
         D_800A60F8 = 0;
         o->state = 0;

@@ -6,7 +6,7 @@ extern G338 *WEAPON_STATE;
 extern unsigned char *PLAYER_EXT;
 extern int DAT_800a6068[];
 extern int DAT_800a60c0;
-extern unsigned char DAT_800a603d, DAT_800a60d5, DAT_800a60fe;
+extern unsigned char PLAYER_SUBSTATE, DAT_800a60d5, DAT_800a60fe;
 extern int DAT_8009c934;
 
 void weapon8to9FollowTarget(TObj *o)
@@ -50,7 +50,7 @@ void weapon8to9FollowTarget(TObj *o)
         o->d8c = DAT_800a60c0;
         break;
     }
-    if (DAT_800a603d != 0x32) {
+    if (PLAYER_SUBSTATE != 0x32) {
         g = WEAPON_STATE;
         g->bc = 0;
         g->w32 = 0;

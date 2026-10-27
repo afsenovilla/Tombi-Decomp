@@ -8,9 +8,9 @@ extern void FUN_8001fe6c(O *);
 extern void FUN_8001fec0(O *);
 extern T DAT_8011592c[];
 extern unsigned char DAT_800a6039, DAT_800a6047[];
-extern unsigned short DAT_800a6066, DAT_800a604e[];
-extern short *DAT_800a6078;
-extern unsigned short *DAT_800a607c[];
+extern unsigned short DAT_800a6066, PLAYER_Y[];
+extern short *PLAYER_H;
+extern unsigned short *PLAYER_D[];
 
 void playerPowerAuraFacingStep(O *o)
 {
@@ -50,12 +50,12 @@ void playerPowerAuraFacingStep(O *o)
         {
             short *h = o->h;
             int w;
-            w = DAT_800a6078[1];
+            w = PLAYER_H[1];
             if (DAT_800a6066 & 1) h[1] = w + 2;
             else h[1] = w - 2;
         }
-        o->y = DAT_800a604e[0] - 8;
-        o->d[1] = DAT_800a607c[0][1];
+        o->y = PLAYER_Y[0] - 8;
+        o->d[1] = PLAYER_D[0][1];
         o->bf = DAT_800a6047[0] + 1;
     }
 }

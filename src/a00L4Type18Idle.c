@@ -4,7 +4,7 @@
 #define SUB(o) ((TObj *)(o)->d90)
 extern void *A00_L4_TYPE18_ANIMS;
 extern void *DAT_8013b150;
-extern unsigned short DAT_800a603c;
+extern unsigned short PLAYER_STATE;
 extern unsigned char DAT_800a60a1;
 extern unsigned char DAT_800a60a3;
 extern void FUN_8001fe6c(TObj *);
@@ -31,7 +31,7 @@ void a00L4Type18Idle(TObj *o)
         o->y.p.whole = o->velX + FUN_8001fdac((unsigned char)o->d88, 4);
         FUN_8001fec0(SUB(o));
         FUN_8001fec0(o);
-        if (DAT_800a603c == 5 && DAT_800a60a1 && DAT_800a60a3) {
+        if (PLAYER_STATE == 5 && DAT_800a60a1 && DAT_800a60a3) {
             o->state = 2;
             o->timer = 0x28;
         }

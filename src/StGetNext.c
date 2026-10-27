@@ -6,22 +6,22 @@
 #include "psyq/libcd.h"
 
 extern s32 D_800A2524;
-extern s32 D_800A3CC4;
-extern StHEADER* D_800A3F04;
-extern volatile s32 D_800A3FD8;
+extern s32 ST_END_FRAME;
+extern StHEADER* ST_RING_ADDR;
+extern volatile s32 ST_RING_SIZE;
 
 u_long StGetNext(u_long** addr, u_long** header) {
-    volatile StHEADER* ptr = &D_800A3F04[D_800A2524];
+    volatile StHEADER* ptr = &ST_RING_ADDR[D_800A2524];
     if (ptr->id == 1) {
         D_800A2524 = 0;
-        if (D_800A3CC4 != 0) {
+        if (ST_END_FRAME != 0) {
             ptr->id = 0;
         }
-        ptr = &D_800A3F04[D_800A2524];
+        ptr = &ST_RING_ADDR[D_800A2524];
     }
     if (ptr->id == 2) {
         ptr->id = 4;
-        *addr = &D_800A3F04[D_800A3FD8] + (D_800A2524 * 0x3F);
+        *addr = &ST_RING_ADDR[ST_RING_SIZE] + (D_800A2524 * 0x3F);
         *header = ptr;
         return 0;
     } else {

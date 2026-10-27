@@ -19,7 +19,7 @@ extern int DAT_1f80016c;
 extern unsigned short DAT_1f80016e;
 extern int DAT_1f80018c;
 extern int DAT_1f800190;
-extern unsigned char D_8009C966;
+extern unsigned char GAME_AREA00_INTRO_PHASE;
 void cameraFollowTargetY(S8002A258 *o);
 void cameraFollowTargetYB(S8002A258 *o);
 
@@ -44,7 +44,7 @@ void cameraModeHandler5(S8002A258 *o)
     if ((unsigned short)(o->p34[1] - DAT_1f80016a + 0x40) < 0x80 || (o->w44 & 3)) {
         if ((unsigned short)(DAT_1f8000f2 - DAT_1f80016e + 0x5a) < 0xb4 || (o->w44 & 0xc)) {
             o->b3 = 1;
-            if (D_8009C966 == 3 || GCD.bcda6 == 0xff) o->b3 = 0;
+            if (GAME_AREA00_INTRO_PHASE == 3 || GCD.bcda6 == 0xff) o->b3 = 0;
             GVARS.b3f = 0;
             GVARS.b3e = 0;
             GVARS.b42 = 0;

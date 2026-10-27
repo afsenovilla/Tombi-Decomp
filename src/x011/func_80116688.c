@@ -20,7 +20,7 @@ typedef struct {
     short wcc;
 } S;
 typedef struct { int d0; int b8; int bc; } E;
-extern char D_800E3E28[];
+extern char MODEL_PRIM_BUFFERS[];
 extern int P_1F800334[], P_1F800318[], P_1F800314[], P_1F800310[];
 extern void copyModelPrimGroups(int, int);
 extern void FUN_80024ea0(int, int, int);
@@ -65,7 +65,7 @@ int func_80116688(S *o)
         d = ((int*)&SPAD.i310)[0];
         common:
         o->dbc = d + p[1];
-        o->db8 = (int)D_800E3E28;
+        o->db8 = (int)MODEL_PRIM_BUFFERS;
         o->da8 = o->db8;
         copyModelPrimGroups(a, o->db8);
         return 0;

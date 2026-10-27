@@ -1,12 +1,12 @@
 // FUNC 800ee244 260 D0SPSUB3
 // MATCHING 800ee244 260
-extern short D_800A604E;
+extern short PLAYER_Y;
 
 int subScreenCondPlayerY(int op, short val)
 {
     short v;
     op &= 0xFF;
-    v = D_800A604E;
+    v = PLAYER_Y;
     switch (op) {
     case 0: if (v == val) return 1; break;
     case 1: if (v != val) return 1; break;

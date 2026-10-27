@@ -8,7 +8,7 @@ typedef struct { unsigned char x, f, z; } E3;
 
 extern MAT D_1F8000C0;
 typedef struct { unsigned short g; char pad[0x43e]; unsigned char f; } GS;
-extern GS D_8009C962;
+extern GS GAME_SELECTED_SECTION;
 extern E3 D_8013062C[];
 extern E3 D_801308FC[];
 extern void SetRotMatrix(MAT *);
@@ -20,7 +20,7 @@ extern int area4ScriptOpPointInside(int *);
 
 void area4ScriptOp(L *o, unsigned char *a)
 {
-    GS *gs = &D_8009C962;
+    GS *gs = &GAME_SELECTED_SECTION;
     unsigned char cnt = a[0];
     int *tab = (int *)(a + 4);
     short i, k, m, d;
@@ -55,16 +55,16 @@ void area4ScriptOp(L *o, unsigned char *a)
         m = -0xb4;
         break;
     }
-    if (D_8009C962.f) i = 0x21c;
+    if (GAME_SELECTED_SECTION.f) i = 0x21c;
     area4ScriptOpSetQuad(m, 0);
     area4ScriptOpSetQuad(i, 1);
     for (i = 0; i < cnt; i++) {
         if (o->n >= 0x58) return;
-        switch (D_8009C962.g) {
+        switch (GAME_SELECTED_SECTION.g) {
         case 0:
             k = i;
             if (D_8013062C[i].f & 8) continue;
-            if (D_8009C962.f == 0 && (D_8013062C[i].f & 1)) continue;
+            if (GAME_SELECTED_SECTION.f == 0 && (D_8013062C[i].f & 1)) continue;
             x = D_8013062C[i].x * 0x5a + 0x1c2;
             y = (*(unsigned short*)((char*)&SPAD.if0 + 2));
             z = D_8013062C[i].z * 0x5a + 0x5a;
@@ -72,7 +72,7 @@ void area4ScriptOp(L *o, unsigned char *a)
         case 1:
             k = cnt - 1 - i;
             if (D_8013062C[k].f & 8) continue;
-            if (D_8009C962.f == 0 && (D_8013062C[k].f & 2)) continue;
+            if (GAME_SELECTED_SECTION.f == 0 && (D_8013062C[k].f & 2)) continue;
             x = D_8013062C[k].x * 0x5a + 0x1c2;
             y = (*(unsigned short*)((char*)&SPAD.if0 + 2));
             z = D_8013062C[k].z * 0x5a + 0x14;
@@ -80,7 +80,7 @@ void area4ScriptOp(L *o, unsigned char *a)
         case 2:
             k = i;
             if (D_801308FC[i].f & 8) continue;
-            if (D_8009C962.f == 0 && (D_801308FC[i].f & 1)) continue;
+            if (GAME_SELECTED_SECTION.f == 0 && (D_801308FC[i].f & 1)) continue;
             x = D_801308FC[i].x * 0x5a + 0x21c;
             y = (*(unsigned short*)((char*)&SPAD.if0 + 2));
             z = D_801308FC[i].z * 0x5a + 0x108;
@@ -88,7 +88,7 @@ void area4ScriptOp(L *o, unsigned char *a)
         case 3:
             k = cnt - 1 - i;
             if (D_801308FC[k].f & 8) continue;
-            if (D_8009C962.f == 0 && (D_801308FC[k].f & 2)) continue;
+            if (GAME_SELECTED_SECTION.f == 0 && (D_801308FC[k].f & 2)) continue;
             x = D_801308FC[k].x * 0x5a + 0x21c;
             y = (*(unsigned short*)((char*)&SPAD.if0 + 2));
             z = D_801308FC[k].z * 0x5a + 0xdb;

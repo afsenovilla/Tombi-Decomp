@@ -12,7 +12,7 @@ typedef struct {
 extern G330 *PLAYER_EXT;
 extern unsigned char DAT_8009ce3d;
 extern unsigned char DAT_8009cffb;
-extern unsigned short GAME, DAT_8009c962;
+extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern unsigned short PAD_PRESSED;
 extern unsigned short D_1f8001fc, D_1f8003c4, D_1f8003c6;
 extern void playerSwimDirFromPadB(TObj *);
@@ -113,7 +113,7 @@ void playerStepSwim(TObj *o)
     if (w + 0x10 < o->y.p.whole) {
         if (DAT_8009ce3d == 0xff || DAT_8009cffb) {
             flag = 0;
-            if (GAME == 10 && (DAT_8009c962 == 1 || DAT_8009c962 == 5)) {
+            if (GAME == 10 && (GAME_SELECTED_SECTION == 1 || GAME_SELECTED_SECTION == 5)) {
                 o->y.p.whole = w + 0x10;
                 flag = 1;
             }
@@ -130,7 +130,7 @@ void playerStepSwim(TObj *o)
         U8(o, 0xca) = 0;
         flag = 0;
         if ((*(volatile unsigned short *)&PAD_PRESSED & 0x10) && GAME == 10
-            && (DAT_8009c962 == 1 || DAT_8009c962 == 5) && o->d->p.whole == 0 && o->y.p.whole < -0xe3) {
+            && (GAME_SELECTED_SECTION == 1 || GAME_SELECTED_SECTION == 5) && o->d->p.whole == 0 && o->y.p.whole < -0xe3) {
             h = o->h->p.whole;
             if ((unsigned short)(h - 0x1cd) < 0x20)
                 flag = 1;

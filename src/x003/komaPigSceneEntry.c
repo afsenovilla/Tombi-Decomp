@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
 extern unsigned char D_80135C5C[];
@@ -43,7 +43,7 @@ void komaPigSceneEntry(TObj *o)
         break;
     case 2:
         o->b9c = 1;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->velV = -0x200;
         o->b69 = 0;
         o->wac = 0x11;

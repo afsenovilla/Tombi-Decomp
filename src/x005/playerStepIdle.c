@@ -9,11 +9,11 @@ extern unsigned short PAD_PRESSED;
 extern unsigned char TALK_POSE;
 extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_1f8003ce;
-extern unsigned char DAT_8009d2b0[];
+extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned char DAT_8009c942;
 extern unsigned char DAT_800a60f8;
 extern unsigned char DAT_8009d004;
-extern int DAT_8009c984;
+extern int GAME_AREA00_EVENT_CONTROL;
 extern short DAT_8009c944;
 extern short DAT_8009c946[];
 extern unsigned short DAT_1f8001fc, DAT_1f8003c4, DAT_1f8003c6, DAT_1f8003c8, DAT_1f8001c8;
@@ -129,7 +129,7 @@ void playerStepIdle(TObj *o)
                     t = 0xf0;
                 o->d88 = t;
                 o->d8c = 0;
-                DAT_8009d2b0[0] = 0;
+                GAME_PLAYER_MODE[0] = 0;
                 o->step = 2;
                 o->state = 3;
                 o->substep = 0;
@@ -154,7 +154,7 @@ void playerStepIdle(TObj *o)
             o->substep = 0;
             o->wb2 = 0;
             DAT_8009c93f = 1;
-            DAT_8009d2b0[0] = 2;
+            GAME_PLAYER_MODE[0] = 2;
             DAT_8009c942 = 1;
             o->visible = 1;
             PLAYER_EXT[0x1e] = 0;
@@ -196,12 +196,12 @@ void playerStepIdle(TObj *o)
         o->ba4 = 0;
         PLAYER_EXT[0x1e] = 0;
         PLAYER_EXT[0x1f] = 0;
-        DAT_8009d2b0[0] = 0;
+        GAME_PLAYER_MODE[0] = 0;
         o->substep = 0;
         switch (c) {
         case 0:
             o->b9c = 1;
-            if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4))
+            if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4))
                 o->ba7 = 1;
             o->b04 = 1;
             o->step = 2;

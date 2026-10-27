@@ -1,7 +1,7 @@
 // FUNC 8002af10 264 MAIN0
 // MATCHING 8002af10 264
 extern unsigned short GAME;
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned char DAT_800b0d9b;
 extern unsigned char DAT_800b0d99;
 extern unsigned char DAT_8009cda2;
@@ -17,22 +17,22 @@ void callAreaModelLinkHook(void)
     case 0:
         break;
     case 0xd:
-        if (DAT_8009c962 != 0) return;
+        if (GAME_SELECTED_SECTION != 0) return;
         break;
     case 2:
-        x = DAT_8009c962;
+        x = GAME_SELECTED_SECTION;
         v = 3;
         goto cmp;
     case 6:
-        if (DAT_8009c962 > 1) return;
+        if (GAME_SELECTED_SECTION > 1) return;
         break;
     case 9:
-        x = DAT_8009c962;
+        x = GAME_SELECTED_SECTION;
         if (x == 0) break;
         v = 6;
         goto cmp;
     case 0x12:
-        x = DAT_8009c962;
+        x = GAME_SELECTED_SECTION;
         v = 1;
     cmp:
         if (x != v) return;

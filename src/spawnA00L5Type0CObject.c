@@ -19,7 +19,7 @@ typedef struct Q {
 extern Q *allocObjectLayer5(void);
 extern unsigned char DAT_8007b09a;
 extern unsigned char *DAT_8007b14c[];
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 
 void spawnA00L5Type0CObject(short *o)
 {
@@ -34,6 +34,6 @@ void spawnA00L5Type0CObject(short *o)
         *q->p40 = o[1] << 16;
         q->w14 = o[3] << 16;
         *q->p44 = o[5] << 16;
-        q->b1d = DAT_8009c962;
+        q->b1d = GAME_SELECTED_SECTION;
     }
 }

@@ -152,3 +152,42 @@ address,name,size,source
 8009c930,GVARS,0x30,usage: misc section state block before GAME cleared by initHud (0x2C bytes); the name the sources already use refs=242
 800a0a20,GPU_QITEM,,psx_tomba (US) name already used by the libgpu sources
 800a2260,VBLANK_MINUS,0x4,psx_tomba (US) name already used by the libgpu sources
+800a603c,PLAYER_STATE,0x1,usage: PLAYER.state (+0x04; PlayerState) reached by its own symbol refs=28
+800a603d,PLAYER_SUBSTATE,0x1,usage: PLAYER.subState (+0x05; PlayerSubState / PlayerHurtType) refs=21
+800a603e,PLAYER_STEP,0x1,usage: PLAYER.step (+0x06) refs=18
+800a604a,PLAYER_X,0x2,usage: whole part of PLAYER.obj.a (+0x12; x) refs=4
+800a604e,PLAYER_Y,0x2,usage: whole part of PLAYER.obj.y (+0x16) refs=15
+800a6078,PLAYER_H,0x4,usage: PLAYER.obj.h (+0x40; Fix16 * horizontal axis) refs=77
+800a607c,PLAYER_D,0x4,usage: PLAYER.obj.d (+0x44; Fix16 * depth axis) refs=23
+800a60d0,PLAYER_HEALTH,0x2,usage: PLAYER +0x98: script opcode a9 heals it up to GAME.playerHealthDisplayed and copies it to +0x9A and GAME.playerHealth refs=9
+8009c962,GAME_SELECTED_SECTION,0x2,usage: GAME.selectedSection reached by its own symbol refs=22
+8009c966,GAME_AREA00_INTRO_PHASE,0x1,usage: GAME +0x06: 1/2/3 set by a00IntroEventScroll; camera handlers test == 3 refs=10
+8009c975,GAME_FADE_SCREEN_CONTROL,0x1,usage: GAME.fadeScreenControl reached by its own symbol (updateHoodedOldMan / execGameOpcode) refs=7
+8009c984,GAME_AREA00_EVENT_CONTROL,0x4,usage: GAME.area00_eventControl reached by its own symbol (updateFrog) refs=17
+8009d2b0,GAME_PLAYER_MODE,0x1,usage: GAME +0x950: 1 idle/walk (talk allowed), 2 message box, 3 scripted scene (collisions off); updatePlayer clears < 3 or >= 5 refs=47
+8009d2b2,GAME_EQUIPPED_WEAPON,0x1,usage: GAME.playerEquips.weapon reached by its own symbol (weapon attack steps / weapon0Swing) refs=11
+800a3f04,ST_RING_ADDR,0x4,libpress: ring_addr of StSetRing (StHEADER *) refs=19
+800a3fd8,ST_RING_SIZE,0x4,libpress: ring_size of StSetRing refs=11
+800a3cf8,ST_MASK,0x4,libpress: mask of StSetMask refs=7
+8009d5f8,ST_START_FRAME,0x4,libpress: start of StSetMask (start_frame of StSetStream) refs=5
+800a3cc4,ST_END_FRAME,0x4,libpress: end of StSetMask (end_frame of StSetStream) refs=8
+8009d4f4,ST_FUNC1,0x4,libpress: func1 of StSetStream refs=5
+8009d4f8,ST_FUNC2,0x4,libpress: func2 of StSetStream (called by StCdInterrupt) refs=7
+8009c910,ST_MODE,0x4,libpress: mode & 1 of StSetStream refs=5
+80096fa0,CD_READ_ATTR,,libcd: the CdRead attribute block (ReadAttr_t of cdread.c) refs=37
+80098210,PAD_SIO,0x4,libpad: pointer to the SIO0 register block (padSio of padlocal.h) refs=37
+80077cdc,MOVE_TABLE_0,0x18,usage: o->movetab rows (vx vy -vx vy 0 0) x2 speeds 128/192 x 768 (chick / koma pig) refs=28
+80077cf4,MOVE_TABLE_1,0x18,usage: o->movetab rows speeds 256/304 x 768 (frog hop / koma pig) refs=24
+80077d0c,MOVE_TABLE_2,0x18,usage: o->movetab rows speeds 384/448 x 1024 (koma pig / player slide) refs=17
+80077d24,MOVE_TABLE_3,0x18,usage: o->movetab rows speeds 512/640 x 1280 refs=6
+8007a890,REWARD_HANDLERS,0x60,usage: 24 reward handlers (rewardNone rewardItem rewardHeart ...) called as REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[subtype]] refs=12
+8007a7f0,REWARD_HANDLER_BY_SUBTYPE,,usage: u8 index into REWARD_HANDLERS per item subtype (updateItemObject / updateL5Type09Item / updateL5Type0AItem / updateA00BitingPlantBait) refs=12
+80079d58,PLAYER_EFFECT_4E_ANIM_TABLE,,usage: per-subtype animation pointer sets of the player effect 4E object (playerEffect4EStepC / StepE) refs=9
+8009d600,WEAPON_BEND_PARAMS,0x6,usage: short a b c passed to weaponCalcBentOffset by weapon0Swing / weapon8to9Swing (= GV6.s00..s04) refs=15
+8009c10b,PAUSE_MENU_CURSOR,0x1,usage: pause menu entry selected (0..3 open a sub screen 4..7 of MENU_STATE.unk16 4 = close) refs=16
+8009b6a8,DEBUG_SCREEN_CURSOR_ROW,0x1,usage: displayDebugScreen cursor row 0/1 (game.h comment SELECTED ROW) refs=6
+800e3e28,MODEL_PRIM_BUFFERS,,usage: model primitive work buffers of 0x1600 bytes per slot (copyModelPrimGroups in l4Type1BDeformModel / FUN_800ed258 / FUN_800ed750) refs=11
+8009bd70,TILE_COL_COUNT,0x2,usage: tileCollideColumnAt scratch: entries left in the column list refs=5
+8009bd74,TILE_COL_TOP,0x2,usage: tileCollideColumnAt scratch: entry top y refs=6
+8009bd78,TILE_COL_HEIGHT,0x2,usage: tileCollideColumnAt scratch: entry height (0 = plain) refs=6
+8009bd7c,TILE_COL_FLAGS,0x2,usage: tileCollideColumnAt scratch: entry flags (0x10 skip 0x1 solid 0xE00 kind) refs=6

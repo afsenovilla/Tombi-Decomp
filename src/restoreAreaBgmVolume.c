@@ -3,7 +3,7 @@
 #include "globals.h"
 extern unsigned short DAT_8009c960;
 extern unsigned short GAME;
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern void SsSeqSetVol(short, short, short);
 
 void restoreAreaBgmVolume(void)
@@ -21,7 +21,7 @@ void restoreAreaBgmVolume(void)
         v = v + 5;
         break;
     case 6:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
             v = v - 5;
             break;
@@ -34,7 +34,7 @@ void restoreAreaBgmVolume(void)
         }
         break;
     case 9:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
             v = v - 11;
             break;

@@ -8,15 +8,15 @@
 typedef struct { unsigned char p0[9]; unsigned char b9; } P8011F9E0;
 
 extern P8011F9E0 *PLAYER_EXT;
-extern Fix16 *D_800A6078_[];
-#define D_800A6078 D_800A6078_[0]
+extern Fix16 *PLAYER_H[];
+#define D_800A6078 PLAYER_H[0]
 extern void *A00_L4_TYPE18_ANIMS;
 extern void *D_8013B150;
 extern void *D_8013B154;
-extern unsigned char D_800A603C_[], D_800A603D_[], D_800A603E_[];
-#define D_800A603C D_800A603C_[0]
-#define D_800A603D D_800A603D_[0]
-#define D_800A603E D_800A603E_[0]
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
+#define D_800A603C PLAYER_STATE[0]
+#define D_800A603D PLAYER_SUBSTATE[0]
+#define D_800A603E PLAYER_STEP[0]
 extern unsigned char D_800A60A1_[];
 #define D_800A60A1 D_800A60A1_[0]
 extern unsigned char D_8009CEBF;

@@ -3,7 +3,7 @@
 #include "player.h"
 #include "TOBJ.H"
 extern void *D_8013B18C, *D_8013B180, *FROG_ANIMS;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern int Rand(void);
 extern void AnimJump(TObj *, int);
 extern void AnimLoadDuration(TObj *);
@@ -27,7 +27,7 @@ void frogHop(TObj *o)
         if (Rand() & 1) {
             o->anim = D_8013B18C;
             AnimJump(o, 1);
-            o->movetab = D_80077CF4;
+            o->movetab = MOVE_TABLE_1;
             o->velY = -0x200;
             o->state = 2;
         } else {

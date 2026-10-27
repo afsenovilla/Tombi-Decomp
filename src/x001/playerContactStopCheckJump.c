@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 typedef struct { TObj o; char pc0[6]; unsigned char bc6; } PL;
 extern TObj *PLAYER_EXT;
-extern unsigned int D_8009C984[];
+extern unsigned int GAME_AREA00_EVENT_CONTROL[];
 extern volatile unsigned short PAD_PRESSED[];
 extern void playerSelectGroundAnim(PL *);
 extern void playSFX(int);
@@ -32,7 +32,7 @@ void playerContactStopCheckJump(PL *o)
         o->o.b9c = 1;
         o->o.b04 = 1;
         o->o.y.p.whole -= 8;
-        if ((D_8009C984[0] & 0x40) && (PAD_PRESSED[0] & SPAD.s3c4)) o->o.ba7 = 1;
+        if ((GAME_AREA00_EVENT_CONTROL[0] & 0x40) && (PAD_PRESSED[0] & SPAD.s3c4)) o->o.ba7 = 1;
         o->o.step = 2;
         o->o.state = 0;
     }

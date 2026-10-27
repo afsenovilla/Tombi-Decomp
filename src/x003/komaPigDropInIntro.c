@@ -11,7 +11,7 @@ typedef struct { short w0, w2, w4, w6, w8, wa, wc; } X;
 extern unsigned char D_800A4553[];
 extern int D_1F80018C;
 extern int D_1F800190;
-extern char D_80077CF4[], D_80077CDC[];
+extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern B D_80135B30[];
 extern char D_80138A0C[];
 extern char D_80138A8C[];
@@ -71,7 +71,7 @@ void komaPigDropInIntro(TObj *o)
         o->state++;
         x->wc = 0x100;
         o->b9c = 2;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b69 = 0;
         o->velV = 0;
         o->wac = 0x17;
@@ -94,7 +94,7 @@ void komaPigDropInIntro(TObj *o)
             DUST();
             o->b69 = 0;
             x->wc = 0x100;
-            o->movetab = D_80077CDC;
+            o->movetab = MOVE_TABLE_0;
             o->timer = 2;
             o->wac = 0x16;
             o->state++;

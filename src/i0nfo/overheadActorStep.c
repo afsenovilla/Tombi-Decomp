@@ -11,15 +11,15 @@ extern void overheadActorWalkStep(TObj *o);
 extern void overheadActorWalkStepB(TObj *o);
 extern unsigned char D_8009C93F[];
 extern unsigned char D_8009C942[];
-extern signed char D_8009D2B0;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern signed char GAME_PLAYER_MODE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern unsigned char D_800A60A3;
 extern unsigned char D_800A60E4[];
 
 static __inline__ void upd(TObj *o)
 {
-    if (D_8009D2B0 == 3) {
+    if (GAME_PLAYER_MODE == 3) {
         if (o->b6b != 0) {
             func_80018C68(o);
             o->visible = 1;
@@ -102,8 +102,8 @@ void overheadActorStep(TObj *o)
                     D_8009C93F[0] = 0;
                     D_800A60E4[0] = 0;
                     if (!(o->w74 & 0x80)) {
-                        D_800A603D = 0;
-                        D_800A603E = 0;
+                        PLAYER_SUBSTATE = 0;
+                        PLAYER_STEP = 0;
                     }
                     o->b68 = 0;
                     o->b6a = 0;
@@ -115,7 +115,7 @@ void overheadActorStep(TObj *o)
         }
         break;
     case 5:
-        if (D_8009D2B0 == 3 && o->b6b != 0) {
+        if (GAME_PLAYER_MODE == 3 && o->b6b != 0) {
             func_80018C68(o);
             o->visible = 1;
         }
@@ -123,7 +123,7 @@ void overheadActorStep(TObj *o)
         break;
     case 6:
         o->visible = 0;
-        if (D_8009D2B0 == 3 && D_800A60A3 != 1 && o->b6b != 0) {
+        if (GAME_PLAYER_MODE == 3 && D_800A60A3 != 1 && o->b6b != 0) {
             func_80018C68(o);
             o->visible = 1;
         }

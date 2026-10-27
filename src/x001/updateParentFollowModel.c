@@ -15,8 +15,8 @@ typedef struct {
     char pad[0x28 - 0x18];
 } P40;
 
-extern char D_80077CDC[];
-extern P40 D_800E3E28[];
+extern char MOVE_TABLE_0[];
+extern P40 MODEL_PRIM_BUFFERS[];
 extern void FUN_80018d2c(TObj *);
 extern void copyModelPrimGroups(int, P40 *);
 extern int FUN_800202b4(TObj *);
@@ -31,7 +31,7 @@ void updateParentFollowModel(TObj *o)
     switch (o->b04) {
     case 0:
         p = (TObj *)o->d90;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->b04++;
         o->a.p.whole = p->a.p.whole;
         o->y.p.whole = p->y.p.whole;
@@ -55,14 +55,14 @@ void updateParentFollowModel(TObj *o)
         case 0:
             o->b0a = 0x12;
             o->d8c = 0;
-            *(P40 **)&o->wa8 = D_800E3E28;
+            *(P40 **)&o->wa8 = MODEL_PRIM_BUFFERS;
             o->velV = -0x400;
-            copyModelPrimGroups(o->da0, D_800E3E28);
+            copyModelPrimGroups(o->da0, MODEL_PRIM_BUFFERS);
             o->timer = 60;
             o->step++;
         case 1:
             k = 0;
-            e = D_800E3E28;
+            e = MODEL_PRIM_BUFFERS;
             {
                 register int *dp asm("$4"); /* debt: game keeps the o->da0 pointer in a0 */
                 dp = (int *)o->da0;

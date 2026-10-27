@@ -18,7 +18,7 @@ extern unsigned char D_8009C990[];
 extern unsigned char D_8009CEAB;
 extern unsigned char D_8009CF06;
 extern unsigned char D_8009D006;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern unsigned char D_8009D2B3[];
 extern unsigned short D_800A6040[];
 extern unsigned char D_800A60A3;
@@ -80,7 +80,7 @@ void overheadPlayerInit(TObj *o)
         o->b04 = 1;
         o->step = 0x63;
         o->state = 0;
-        switch (D_8009D2B0) {
+        switch (GAME_PLAYER_MODE) {
         case 4:
             o->h->p.whole += 8;
             o->y.p.whole += 8;

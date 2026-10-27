@@ -12,7 +12,7 @@ extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
 extern unsigned char DAT_801152e8[];
 extern volatile unsigned short PAD_PRESSED[];
-extern int D_8009C984;
+extern int GAME_AREA00_EVENT_CONTROL;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern void SfxPlay2(int, int);
@@ -252,7 +252,7 @@ void playerStepRideSeesaw(TObj *o)
         a = o->h->p.whole;
         if (o->animFrame & 1) o->h->p.whole = a + 0x10;
         else o->h->p.whole = a - 0x10;
-        if (D_8009C984 & 0x40) {
+        if (GAME_AREA00_EVENT_CONTROL & 0x40) {
             if (PAD_PRESSED[0] & SPAD.s3c4) o->ba7 = 1;
         }
         o->step = 2;

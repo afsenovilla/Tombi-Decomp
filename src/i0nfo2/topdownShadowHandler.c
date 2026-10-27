@@ -4,7 +4,7 @@
 extern void func_8001FE6C(TObj *o);
 extern void func_800202B4(TObj *o);
 extern void func_800187E4(TObj *o);
-extern signed char D_8009D2B0[];
+extern signed char GAME_PLAYER_MODE[];
 extern int SPR_DATA[];
 extern unsigned char D_800A6039;
 typedef struct { unsigned short w; short idx; char *p; int pad; } Ent94AC;
@@ -29,7 +29,7 @@ void topdownShadowHandler(TObj *o)
             func_800202B4(o);
             p = (TObj *)o->d90;
             o->a.raw = p->a.raw;
-            if (D_8009D2B0[0] != 3) {
+            if (GAME_PLAYER_MODE[0] != 3) {
                 o->y.raw = p->y.raw;
             }
             o->b.raw = p->b.raw;

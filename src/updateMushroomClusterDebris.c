@@ -8,7 +8,7 @@ typedef struct {
     union { int i; HL s; } y; char p3[0x24 - 0x18]; int a24; char *a28; char p4[2]; unsigned short w2e;
     char p5[0x40 - 0x30]; H *h; char p6[0x82 - 0x44]; short vel;
 } O;
-extern char D_80077cf4[], D_80077cdc[];
+extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern E MUSHROOM_CLUSTER_DEBRIS_PARAMS[];
 extern int MUSHROOM_CLUSTER_DEBRIS_ANIMS[];
 extern void FUN_8001fe6c(O *), applyFrameVelocityX(O *), FUN_8001fec0(O *), FUN_800187e4(O *);
@@ -22,7 +22,7 @@ void updateMushroomClusterDebris(O *o)
     case 0:
         o->state++;
         o->vel = -0x400;
-        o->a28 = (o->b3 & 1) ? D_80077cdc : D_80077cf4;
+        o->a28 = (o->b3 & 1) ? MOVE_TABLE_0 : MOVE_TABLE_1;
         t = &MUSHROOM_CLUSTER_DEBRIS_PARAMS[o->b3];
         o->w2e = t->a;
         o->b0c = t->b;

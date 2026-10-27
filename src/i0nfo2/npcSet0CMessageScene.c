@@ -4,13 +4,13 @@
 #include "raw7.h"
 typedef struct { char c[12]; } B12;
 extern TObj PLAYER;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern B12 D_800A6048;
-extern short D_800A604E;
+extern short PLAYER_Y;
 extern short D_800A6066;
-extern Fix16 *D_800A6078;
+extern Fix16 *PLAYER_H;
 extern TObj *D_800A60C8;
 extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2E0;
@@ -44,9 +44,9 @@ void npcSet0CMessageScene(TObj *o)
             if (D_8009CDD6 == 0xFF) {
                 o->state = 3;
             } else {
-                D_800A603D = 4;
+                PLAYER_SUBSTATE = 4;
                 D_800A6066 = 6;
-                D_800A603E = 0;
+                PLAYER_STEP = 0;
                 D_8009C93F = 1;
                 D_8009C942 = 1;
                 o->w08 = 1;
@@ -82,18 +82,18 @@ void npcSet0CMessageScene(TObj *o)
             D_8009C93F = 0;
             D_8009C93E = 0;
             D_8009C942 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
             o->state++;
         }
         break;
     case 3:
         if (a->b68 != 0) {
             v = D_800A6048;
-            D_800A603D = 4;
+            PLAYER_SUBSTATE = 4;
             D_8009C93F = 1;
             D_8009C942 = 1;
-            D_800A603E = 0;
+            PLAYER_STEP = 0;
             if (D_8009CF00 != 0 && D_8009CF04 != 0) {
                 D_800A60C8 = showMessageBoxDirect(2, 2, &v);
                 o->state = 10;
@@ -103,10 +103,10 @@ void npcSet0CMessageScene(TObj *o)
             }
         } else if (b->b68 != 0) {
             v = D_800A6048;
-            D_800A603D = 4;
+            PLAYER_SUBSTATE = 4;
             D_8009C93F = 1;
             D_8009C942 = 1;
-            D_800A603E = 0;
+            PLAYER_STEP = 0;
             if (D_8009CF00 != 0 && D_8009CF04 != 0) {
                 D_800A60C8 = showMessageBoxDirect(0, 0xCD, &v);
             } else if (D_8009CF01 != 0) {
@@ -121,10 +121,10 @@ void npcSet0CMessageScene(TObj *o)
             o->state = 4;
         } else if (c->b68 != 0) {
             v = D_800A6048;
-            D_800A603D = 4;
+            PLAYER_SUBSTATE = 4;
             D_8009C93F = 1;
             D_8009C942 = 1;
-            D_800A603E = 0;
+            PLAYER_STEP = 0;
             if (D_8009CF00 != 0 && D_8009CF04 != 0) {
                 D_800A60C8 = showMessageBoxDirect(0, 0xCD, &v);
             } else if (D_8009CF02[0] != 0) {
@@ -149,8 +149,8 @@ void npcSet0CMessageScene(TObj *o)
             D_8009C93F = 0;
             D_8009C93E = 0;
             D_8009C942 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
             o->w08 = 2;
             o->state = 3;
         }
@@ -163,8 +163,8 @@ void npcSet0CMessageScene(TObj *o)
             D_8009C93F = 0;
             D_8009C93E = 0;
             D_8009C942 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
             o->w08 = 2;
             o->state = 3;
         }
@@ -180,18 +180,18 @@ void npcSet0CMessageScene(TObj *o)
         a->b68 = 0;
         b->b68 = 0;
         c->b68 = 0;
-        D_800A603C = 1;
+        PLAYER_STATE = 1;
         D_8009C93F = 0;
         D_8009C93E = 0;
         D_8009C942 = 0;
-        D_800A603D = 0;
+        PLAYER_SUBSTATE = 0;
         o->state = 3;
         break;
     case 10:
         if (D_800A60C8->b04 == 2) {
             D_800A60C8->b04 = 3;
-            S16(PTR(a, 0x40), 2) = S16(D_800A6078, 2);
-            a->y.p.whole = D_800A604E - 4;
+            S16(PTR(a, 0x40), 2) = S16(PLAYER_H, 2);
+            a->y.p.whole = PLAYER_Y - 4;
             o->w08 = 0x3C;
             o->state++;
         }
@@ -206,8 +206,8 @@ void npcSet0CMessageScene(TObj *o)
     case 12:
         AnimAdvance(&PLAYER);
         PLAYER.y.p.whole += 2;
-        S16(PTR(a, 0x40), 2) = S16(D_800A6078, 2);
-        a->y.p.whole = D_800A604E - 4;
+        S16(PTR(a, 0x40), 2) = S16(PLAYER_H, 2);
+        a->y.p.whole = PLAYER_Y - 4;
         break;
     }
 }

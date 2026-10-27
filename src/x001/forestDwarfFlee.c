@@ -4,8 +4,8 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned short GAME[], D_8009C962[];
-extern char D_80077CDC[];
+extern unsigned short GAME[], GAME_SELECTED_SECTION[];
+extern char MOVE_TABLE_0[];
 extern void *D_8013DE0C, *D_8013DDB0, *D_8013DE2C, *D_8013DDC8;
 extern void AnimLoadDuration(TObj *);
 extern void forestDwarfCountCatch(TObj *);
@@ -27,8 +27,8 @@ void forestDwarfFlee(TObj *o)
         }
         forestDwarfCountCatch(o);
         o->active = 4;
-        o->movetab = D_80077CDC;
-        if (GAME[0] == 1 && D_8009C962[0] < 2) o->anim = D_8013DE0C;
+        o->movetab = MOVE_TABLE_0;
+        if (GAME[0] == 1 && GAME_SELECTED_SECTION[0] < 2) o->anim = D_8013DE0C;
         else o->anim = D_8013DDB0;
         AnimLoadDuration(o);
         {
@@ -58,7 +58,7 @@ void forestDwarfFlee(TObj *o)
         o->velY += 0x20;
         if (o->velY > 0x500) o->velY = 0x500;
         if (o->b69 | TileCollideAt(o, o->h->p.whole, o->y.p.whole + (o->box3 - o->box2))) {
-            if (GAME[0] == 1 && D_8009C962[0] < 2) o->anim = D_8013DE2C;
+            if (GAME[0] == 1 && GAME_SELECTED_SECTION[0] < 2) o->anim = D_8013DE2C;
             else o->anim = D_8013DDC8;
             AnimLoadDuration(o);
             { int t = (*(Fix16 **)&PLAYER.obj.h)->p.whole < o->h->p.whole;
@@ -71,10 +71,10 @@ void forestDwarfFlee(TObj *o)
         break;
     case 5:
         o->active = 4;
-        if (GAME[0] == 1 && D_8009C962[0] < 2) o->anim = D_8013DE0C;
+        if (GAME[0] == 1 && GAME_SELECTED_SECTION[0] < 2) o->anim = D_8013DE0C;
         else o->anim = D_8013DDB0;
         AnimLoadDuration(o);
-        switch (D_8009C962[0]) {
+        switch (GAME_SELECTED_SECTION[0]) {
         case 0:
         case 1:
         case 4:

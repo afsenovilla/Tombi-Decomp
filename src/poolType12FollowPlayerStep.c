@@ -5,7 +5,7 @@
 // Japanese version of PAL main0 8002C238 (poolType12FollowPlayerStep.c): 71 -> 85.
 #include "TOBJ.H"
 extern unsigned char DAT_800a6039;
-extern unsigned char DAT_800a603d;
+extern unsigned char PLAYER_SUBSTATE;
 extern short DAT_800a60b6;
 extern unsigned char DAT_800a60d4;
 extern void *DAT_8001473c;
@@ -13,9 +13,9 @@ extern void *DAT_80014740;
 extern unsigned short *DAT_800a605c[];
 extern int DAT_800a60c4;
 extern unsigned short DAT_800a6066;
-extern Fix16 *DAT_800a6078[];
-extern Fix16 *DAT_800a607c[];
-extern unsigned short DAT_800a604e[];
+extern Fix16 *PLAYER_H[];
+extern Fix16 *PLAYER_D[];
+extern unsigned short PLAYER_Y[];
 extern unsigned char DAT_800a6047[];
 extern unsigned char DAT_800a6047b[];
 extern signed char DAT_80011eb4[];
@@ -28,12 +28,12 @@ void poolType12FollowPlayerStep(TObj *o)
     int d;
     o->d8c = 0;
     o->visible = DAT_800a6039;
-    if (DAT_800a603d == 2 && DAT_800a60b6 >= -0xc7 && DAT_800a60d4 != 0) {
+    if (PLAYER_SUBSTATE == 2 && DAT_800a60b6 >= -0xc7 && DAT_800a60d4 != 0) {
         o->anim = DAT_8001473c;
         FUN_8001fe6c(o);
         if (DAT_800a60b6 > 0 && *DAT_800a605c[0] == 0x55)
             o->d8c = DAT_800a60c4;
-    } else if (DAT_800a603d == 4 && DAT_800a60b6 >= -0xc7) {
+    } else if (PLAYER_SUBSTATE == 4 && DAT_800a60b6 >= -0xc7) {
         o->anim = DAT_8001473c;
         FUN_8001fe6c(o);
         if (DAT_800a60b6 > 0)
@@ -44,9 +44,9 @@ void poolType12FollowPlayerStep(TObj *o)
         d = DAT_800a60c4;
         o->d8c = (unsigned char)((DAT_800a6066 & 1) ? d - 0x20 : d + 0x20);
     }
-    o->h->p.whole = DAT_800a6078[0]->p.whole;
-    o->y.p.whole = DAT_800a604e[0] + 4;
-    o->d->p.whole = DAT_800a607c[0]->p.whole;
+    o->h->p.whole = PLAYER_H[0]->p.whole;
+    o->y.p.whole = PLAYER_Y[0] + 4;
+    o->d->p.whole = PLAYER_D[0]->p.whole;
     o->b0f = DAT_800a6047[0] + 1;
     o->b0f = DAT_800a6047b[0] + DAT_80011dad[DAT_80011eb4[*DAT_800a605c[0]] * 4];
     if (DAT_800a6101[0] == 0)
@@ -55,7 +55,7 @@ void poolType12FollowPlayerStep(TObj *o)
 #else
 #include "TOBJ.H"
 extern unsigned char DAT_800a6039;
-extern unsigned char DAT_800a603d;
+extern unsigned char PLAYER_SUBSTATE;
 extern short DAT_800a60b6;
 extern unsigned char DAT_800a60d4;
 extern void *DAT_8001473c;
@@ -63,9 +63,9 @@ extern void *DAT_80014740;
 extern unsigned short *DAT_800a605c[];
 extern int DAT_800a60c4;
 extern unsigned short DAT_800a6066;
-extern Fix16 *DAT_800a6078[];
-extern Fix16 *DAT_800a607c[];
-extern unsigned short DAT_800a604e[];
+extern Fix16 *PLAYER_H[];
+extern Fix16 *PLAYER_D[];
+extern unsigned short PLAYER_Y[];
 extern unsigned char DAT_800a6047[];
 extern unsigned char DAT_800a6047b[];
 extern signed char DAT_80011eb4[];
@@ -78,12 +78,12 @@ void poolType12FollowPlayerStep(TObj *o)
     int d;
     o->d8c = 0;
     o->visible = DAT_800a6039;
-    if (DAT_800a603d == 2 && DAT_800a60b6 >= -0xc7 && DAT_800a60d4 != 0) {
+    if (PLAYER_SUBSTATE == 2 && DAT_800a60b6 >= -0xc7 && DAT_800a60d4 != 0) {
         o->anim = DAT_8001473c;
         FUN_8001fe6c(o);
         if (DAT_800a60b6 > 0 && *DAT_800a605c[0] == 0x47)
             o->d8c = DAT_800a60c4;
-    } else if (DAT_800a603d == 4 && DAT_800a60b6 >= -0xc7) {
+    } else if (PLAYER_SUBSTATE == 4 && DAT_800a60b6 >= -0xc7) {
         o->anim = DAT_8001473c;
         FUN_8001fe6c(o);
         if (DAT_800a60b6 > 0)
@@ -94,9 +94,9 @@ void poolType12FollowPlayerStep(TObj *o)
         d = DAT_800a60c4;
         o->d8c = (unsigned char)((DAT_800a6066 & 1) ? d - 0x20 : d + 0x20);
     }
-    o->h->p.whole = DAT_800a6078[0]->p.whole;
-    o->y.p.whole = DAT_800a604e[0] + 4;
-    o->d->p.whole = DAT_800a607c[0]->p.whole;
+    o->h->p.whole = PLAYER_H[0]->p.whole;
+    o->y.p.whole = PLAYER_Y[0] + 4;
+    o->d->p.whole = PLAYER_D[0]->p.whole;
     o->b0f = DAT_800a6047[0] + 1;
     o->b0f = DAT_800a6047b[0] + DAT_80011dad[DAT_80011eb4[*DAT_800a605c[0]] * 4];
     if (DAT_800a6101[0] == 0)

@@ -8,7 +8,7 @@
 typedef struct { short x, y, w, h; } RECT;
 typedef struct { char p[3]; unsigned char n; int e[0x58]; unsigned char b164; } Q;
 
-extern unsigned short D_8009C962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned char D_8009C964;
 extern unsigned long D_8012A858[];
 extern int getScrollOffsetX(void);
@@ -27,7 +27,7 @@ void animateArea9Palettes(Q *q, unsigned char *base)
     unsigned char cnt = base[0];
     int *off = (int *)(base + 4);
 
-    switch (D_8009C962) {
+    switch (GAME_SELECTED_SECTION) {
     case 0:
         if ((GV2.bc3 & 1) && q->b164 == 0) {
             r.x = 0xb0;

@@ -6,7 +6,7 @@ extern void FUN_8001fe6c(TObj *o);
 extern unsigned FUN_8001f9e0(void);
 extern short FUN_80040278(TObj *o, int x, int y);
 extern void *CHICK_ANIM;
-extern char D_80077cdc[];
+extern char MOVE_TABLE_0[];
 
 void chickDropToGround(TObj *o)
 {
@@ -15,7 +15,7 @@ void chickDropToGround(TObj *o)
     switch (o->state) {
     case 0:
         o->active = 2;
-        o->movetab = D_80077cdc;
+        o->movetab = MOVE_TABLE_0;
         o->animFrame = FUN_8001f9e0() & 1;
         o->wac = 0;
         o->anim = CHICK_ANIM;

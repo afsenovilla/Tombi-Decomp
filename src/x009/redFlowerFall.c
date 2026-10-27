@@ -2,7 +2,7 @@
 // MATCHING 80123294 348
 #include "TOBJ.H"
 
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern void *D_8012EA40[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -28,7 +28,7 @@ void redFlowerFall(TObj *o)
     case 0:
         o->wb4 = 3;
         o->b6a = 1;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->wac = 0x12;
         o->state++;
         o->anim = D_8012EA40[0];

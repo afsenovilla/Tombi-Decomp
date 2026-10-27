@@ -10,7 +10,7 @@ typedef struct { short a, b, c, d; } S4;
 typedef struct { char p[0x4c]; unsigned short w4c; } O;
 #include "camera.h"
 extern unsigned short GAME[];
-extern unsigned short D_8009C962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short D_8009C982;
 extern S4 *D_80078B7C[];
 extern char D_800792BC[];
@@ -57,7 +57,7 @@ void initSectionCamera(void)
     char pad[0x10];
     c = &CAMERA_SCROLL;
     c->active = 1;
-    p = (short *)&D_80078B7C[GAME[0]][D_8009C962];
+    p = (short *)&D_80078B7C[GAME[0]][GAME_SELECTED_SECTION];
     D_800A457C = *p++;
     D_800A457E = *p++;
     D_800A4580 = *p++;
@@ -71,11 +71,11 @@ void initSectionCamera(void)
     }
     ((int*)&SPAD.ie0)[0] = 0;
     ((int*)&SPAD.ie0)[1] = 0;
-    if ((GAME[0] == 4 && D_8009C962 < 4) || *(int *)GAME == 0x50000)
+    if ((GAME[0] == 4 && GAME_SELECTED_SECTION < 4) || *(int *)GAME == 0x50000)
         ((int*)&SPAD.ie0)[2] = 0xFDC00000;
     else
         ((int*)&SPAD.ie0)[2] = 0xFDE00000;
-    q = D_80079474[GAME[0]][D_8009C962];
+    q = D_80079474[GAME[0]][GAME_SELECTED_SECTION];
     w = TASK_C->w4c;
     q += D_8009C982 * 4;
     switch (w) {

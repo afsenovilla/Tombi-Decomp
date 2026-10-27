@@ -19,7 +19,7 @@ typedef struct {
 
 #define WC6(o) (*(unsigned short *)((char *)(o) + 0xc6))
 
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern unsigned char D_80125CA8[];
 extern unsigned char D_80125CB8[];
 extern unsigned char D_80125CC8[];
@@ -90,7 +90,7 @@ void realEvilPigChooseAttack(TObj *o)
             s->j = 0;
         }
     case 1:
-        if (D_8009D2B0 == 3) break;
+        if (GAME_PLAYER_MODE == 3) break;
         D_80125CD8[s->b](o);
         if (s->b == 7) break;
         if (o->wac != 0x12) break;

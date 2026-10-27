@@ -4,7 +4,7 @@
 
 extern int DAT_1f8002dc[];
 extern void *D_80139514[];
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -33,7 +33,7 @@ void updateL3Type2FObject(TObj *o)
                 o->b0b = 1;
                 o->b0f = 4;
                 o->velV = -0x400;
-                o->movetab = D_80077D0C;
+                o->movetab = MOVE_TABLE_2;
                 o->wac = 5;
                 o->step++;
                 o->anim = D_80139514[0];

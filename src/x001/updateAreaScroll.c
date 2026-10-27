@@ -23,8 +23,8 @@ typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6; } PL;
 extern PL PLAYER;
 extern unsigned char D_800A6039[];
 extern Fn D_80079A98[];
-extern unsigned char D_800A60DA, D_800A60E0, D_800A60D8, D_800A603C, D_800A603D, D_800A603E;
-extern signed char D_8009D2B0;
+extern unsigned char D_800A60DA, D_800A60E0, D_800A60D8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
+extern signed char GAME_PLAYER_MODE;
 extern unsigned short D_800A6066;
 extern S2 *D_800A6078x[];
 #define D_800A6078 D_800A6078x[0]
@@ -138,11 +138,11 @@ void updateAreaScroll(O *o)
                     GVARS.b3f = 1;
                     GVARS.b42 = 1;
                     GCD.bcef7 = 0;
-                    D_8009D2B0 = 0;
+                    GAME_PLAYER_MODE = 0;
                     PLAYER.b0 = 5;
-                    D_800A603C = 5;
-                    D_800A603D = 0;
-                    D_800A603E = 0;
+                    PLAYER_STATE = 5;
+                    PLAYER_SUBSTATE = 0;
+                    PLAYER_STEP = 0;
                     break;
                 }
                 if (D_1F80016A < 0x17e && D_1F80016E >= -0x18f) goto t10;
@@ -181,10 +181,10 @@ void updateAreaScroll(O *o)
                         stepPlayerXToward(0xb6c);
                         if (D_1F800172 >= 0x8d1) {
                             o->step = 8;
-                            D_800A603C = 5;
+                            PLAYER_STATE = 5;
                             D_800A6039[0] = 0;
-                            D_800A603D = 0x41;
-                            D_800A603E = 0;
+                            PLAYER_SUBSTATE = 0x41;
+                            PLAYER_STEP = 0;
                             break;
                         }
                     }
@@ -226,8 +226,8 @@ void updateAreaScroll(O *o)
         unsigned char *f = &PLAYER.b6;
         if (*f == 2) {
             playerSetAnim(&PLAYER, 1, 0);
-            D_800A603C = 5;
-            D_800A603D = 0x41;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 0x41;
             *f = 0;
             D_800A6066 = 1;
             if (GCD.bcdbc == 0xff) {

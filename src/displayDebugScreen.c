@@ -20,14 +20,14 @@ void displayDebugScreen(void)
     if ((temp_v1->loadGameSelected == 0) && (scratch->debug_mode_enabled != 0)) {
         // If button UP is pressed decrease selected row
         if (scratch->joypad_state & JOY_UP) {
-            D_8009B6A8 = (D_8009B6A8 - 1) & 1;
+            DEBUG_SCREEN_CURSOR_ROW = (DEBUG_SCREEN_CURSOR_ROW - 1) & 1;
         }
         // If button DOWN is pressed increase selected row
         if (scratch->joypad_state & JOY_DOWN) {
-            D_8009B6A8 = (D_8009B6A8 + 1) & 1;
+            DEBUG_SCREEN_CURSOR_ROW = (DEBUG_SCREEN_CURSOR_ROW + 1) & 1;
         }
         // If selected row is the second one "SELECTED SECTION"
-        if (D_8009B6A8 != 0) {
+        if (DEBUG_SCREEN_CURSOR_ROW != 0) {
             // If button LEFT is pressed decrease selected section
             if (scratch->joypad_state & JOY_LEFT) {
                 var_v1 = &GAME.selectedSection;
@@ -76,7 +76,7 @@ void displayDebugScreen(void)
         fontDebugPrintf(32, 104, 0U, &SPRINTF_BUFFER_MSG);
         // Print asterisk cursor on the selected row
         sprintf(&SPRINTF_BUFFER_MSG, "*");
-        fontDebugPrintf(24, ((short) D_8009B6A8 + 0xC) * 8, (u_long) (*(u_short*)&PSX_SCRATCH[0x1F6] & 0xC) >> 2, &SPRINTF_BUFFER_MSG);
+        fontDebugPrintf(24, ((short) DEBUG_SCREEN_CURSOR_ROW + 0xC) * 8, (u_long) (*(u_short*)&PSX_SCRATCH[0x1F6] & 0xC) >> 2, &SPRINTF_BUFFER_MSG);
         // Set next area, section and spawn point to the selected ones
         GAME.nextArea = GAME.selectedArea;
         GAME.nextSection = GAME.selectedSection;

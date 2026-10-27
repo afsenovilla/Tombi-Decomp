@@ -11,8 +11,8 @@ extern unsigned char D_8009D0AA;
 extern unsigned char D_8009D0C8;
 extern unsigned char D_8009D0D0;
 extern unsigned char D_8009D0D1;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern unsigned char D_800A60E4;
 extern unsigned char D_800EECFC[][2];
 extern void *D_800F13D0[][8];
@@ -61,8 +61,8 @@ void tunnelItemSpotCheckStep(TObj *o)
                 o->state = 0;
             }
             D_800A60E4 = 0;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
         }
         o->b68 = 0;
         break;

@@ -12,10 +12,10 @@ extern unsigned char D_8009C942;
 extern unsigned char D_8009CDD5;
 extern unsigned char D_8009CEF0[];
 extern TObj *D_8009F2E8;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
-extern short D_800A604E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
+extern short PLAYER_Y;
 
 static inline void startWalk(TObj *n)
 {
@@ -43,8 +43,8 @@ void func_800F91D8(TObj *o)
     switch (o->state) {
     case 0:
         startWalk(n);
-        D_800A603D = 4;
-        D_800A603E = 0;
+        PLAYER_SUBSTATE = 4;
+        PLAYER_STEP = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         o->state++;
@@ -62,7 +62,7 @@ void func_800F91D8(TObj *o)
         b = (TObj *)S32(n, 0x90);
         if (b->b04 == 2) {
             b->b04 = 3;
-            if (D_800A604E > n->y.p.whole) {
+            if (PLAYER_Y > n->y.p.whole) {
                 topdownActorSetAnim(n, 6, 0);
                 o->state++;
             } else if (D_8009CEF0[0] == 1) {
@@ -94,8 +94,8 @@ void func_800F91D8(TObj *o)
         D_8009C93F = 0;
         D_8009C93E = 0;
         D_8009C942 = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
         o->step = 0;
         o->state = 0;
         break;

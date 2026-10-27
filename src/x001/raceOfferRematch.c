@@ -9,8 +9,8 @@ extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern unsigned short D_800A6066x[]; /* second name for D_800A6066: forces the reloads after the store */
 extern TObj *D_800A60C8[];
-extern Fix16 *D_800A6078;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern Fix16 *PLAYER_H;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern char D_80010748[];
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 extern void AnimLoadDuration(TObj *);
@@ -32,12 +32,12 @@ void raceOfferRematch(TObj *o)
         e->b04 = 1;
         e->step = 0;
         e->state = 0;
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 5;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         D_800A60C8[0] = showMessageBox(2, 0x1e, 0x80, 0x6c);
-        D_800A6066x[0] = D_800A6078->p.whole > e->h->p.whole;
-        e->animFrame = D_800A6078->p.whole < e->h->p.whole;
+        D_800A6066x[0] = PLAYER_H->p.whole > e->h->p.whole;
+        e->animFrame = PLAYER_H->p.whole < e->h->p.whole;
         o->step++;
     case 1:
         p = D_800A60C8[0];

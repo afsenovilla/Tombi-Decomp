@@ -9,7 +9,7 @@ INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80035FC4_slps01144);
 #include "TOBJ.H"
 extern volatile int DAT_1f800340[];
 extern unsigned char DAT_800a6047;
-extern unsigned short DAT_800a604a, DAT_800a604e, DAT_800a6052;
+extern unsigned short PLAYER_X, PLAYER_Y, DAT_800a6052;
 void weapon5to7Init(TObj *o, int n)
 {
     volatile int *p;
@@ -26,8 +26,8 @@ void weapon5to7Init(TObj *o, int n)
     c = DAT_800a6047;
     o->b0a = 0x11;
     o->b0f = c - 2;
-    o->a.p.whole = DAT_800a604a;
-    o->y.p.whole = DAT_800a604e;
+    o->a.p.whole = PLAYER_X;
+    o->y.p.whole = PLAYER_Y;
     s = DAT_800a6052;
     o->d84 = 0;
     o->d88 = 0;

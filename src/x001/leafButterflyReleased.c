@@ -4,7 +4,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern signed char D_8009D2B0[];
+extern signed char GAME_PLAYER_MODE[];
 extern int Rand(void);
 extern int AnimAdvance(TObj *o);
 extern void FUN_80026e0c(int, int);
@@ -53,7 +53,7 @@ void leafButterflyReleased(TObj *o)
         if (o->y.p.whole < (short)t) {
             {
                 unsigned char *q = &GVARS.b42;
-                D_8009D2B0[0] = 0;
+                GAME_PLAYER_MODE[0] = 0;
                 *q = 0;
                 ((unsigned char*)&GVARS.b3f)[0] = 0;
                 *q = 0;

@@ -1,10 +1,10 @@
 // FUNC 8006a200 40 MAIN0
 // MATCHING 8006a200 40
-extern char *D_80098210;
+extern char *PAD_SIO;
 
 void sioWaitRxReady(void)
 {
-    char *p = D_80098210;
+    char *p = PAD_SIO;
     __asm__ volatile ("nop");
     while ((*(volatile unsigned short *)(p + 4) & 2) == 0) {
     }

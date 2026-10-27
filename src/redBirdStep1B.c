@@ -13,10 +13,10 @@ extern void decreaseObjectTimer(void *, int);
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
 extern short probeCollisionAtDepthB(TObj *, short, short);
-extern Fix16 *DAT_800a6078;
-extern unsigned short DAT_800a604e;
+extern Fix16 *PLAYER_H;
+extern unsigned short PLAYER_Y;
 extern unsigned char PLAYER[];
-extern unsigned char DAT_800a603c[], DAT_800a603d[], DAT_800a603e[], DAT_800a603f;
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[], DAT_800a603f;
 extern short DAT_800a6066, DAT_800a60b6;
 extern void *DAT_8013ad70[];
 extern void *DAT_8013ad38[];
@@ -50,7 +50,7 @@ void redBirdStep1B(TObj *o)
 
     switch (o->substep) {
     case 0:
-        if (o->h->p.whole >= DAT_800a6078->p.whole)
+        if (o->h->p.whole >= PLAYER_H->p.whole)
             o->animFrame = 1;
         else
             o->animFrame = 0;
@@ -86,8 +86,8 @@ void redBirdStep1B(TObj *o)
         if (--o->w22 == 0) {
             a.x = o->h->p.whole;
             a.y = o->y.p.whole;
-            b.x = DAT_800a6078->p.whole;
-            b.y = DAT_800a604e;
+            b.x = PLAYER_H->p.whole;
+            b.y = PLAYER_Y;
             U16(o, 0xcc) = angleBetweenPoints(a, b) + 0x100;
             o->w22 = 0x78;
             o->wb6 = 0;
@@ -98,8 +98,8 @@ void redBirdStep1B(TObj *o)
     case 4:
         a.x = o->h->p.whole;
         a.y = o->y.p.whole;
-        b.x = DAT_800a6078->p.whole;
-        b.y = DAT_800a604e;
+        b.x = PLAYER_H->p.whole;
+        b.y = PLAYER_Y;
         d = angleBetweenPoints(a, b) + 0x100;
         U16(o, 0xcc) = d;
         o->h->raw += (short)FUN_8001fddc(d & 0xf8, o->wb6) << 8;
@@ -150,7 +150,7 @@ void redBirdStep1B(TObj *o)
             o->velX = 0;
             o->substep = 6;
         } else {
-            p = DAT_800a6078;
+            p = PLAYER_H;
             d = o->h->p.whole - p->p.whole;
             v = p->p.whole;
             if (d != 0) {
@@ -164,14 +164,14 @@ void redBirdStep1B(TObj *o)
     case 6:
         applyObjectAltSpeedXY(o);
         q = PLAYER;
-        DAT_800a6078->p.whole = o->h->p.whole;
-        DAT_800a604e = o->y.p.whole + 0x28;
+        PLAYER_H->p.whole = o->h->p.whole;
+        PLAYER_Y = o->y.p.whole + 0x28;
         if (DAT_800a603f == 1) {
             o->b6a = 0;
             *q = 1;
-            DAT_800a603c[0] = 1;
-            DAT_800a603d[0] = 0;
-            DAT_800a603e[0] = 0;
+            PLAYER_STATE[0] = 1;
+            PLAYER_SUBSTATE[0] = 0;
+            PLAYER_STEP[0] = 0;
             o->wac = 0x13;
             o->anim = DAT_8013ad7c[0];
             FUN_8001fe6c(o);
@@ -181,9 +181,9 @@ void redBirdStep1B(TObj *o)
             *q = 2;
             DAT_800a6066 = 2;
             DAT_800a60b6 = 0;
-            DAT_800a603c[0] = 2;
-            DAT_800a603d[0] = 0;
-            DAT_800a603e[0] = 1;
+            PLAYER_STATE[0] = 2;
+            PLAYER_SUBSTATE[0] = 0;
+            PLAYER_STEP[0] = 1;
             decreaseObjectTimer(q, 1);
             o->wac = 0x13;
             o->anim = DAT_8013ad7c[0];

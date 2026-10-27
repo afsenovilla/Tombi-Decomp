@@ -11,7 +11,7 @@ extern TObj *D_8009F2DC;
 extern void *D_8009F328;
 extern void *D_8009F32C;
 extern TObj PLAYER;
-extern short D_800A604E[];
+extern short PLAYER_Y[];
 extern short D_1F8001C6;
 extern int AnimAdvance(TObj *);
 extern TObj *showMessageBoxDirect(int, int, V6 *);
@@ -69,7 +69,7 @@ void pigGateSevenFriendsScene(TObj *o)
         }
         b->animFrame = 1;
         b->h->p.whole = PLAYER.h->p.whole;
-        b->y.p.whole = D_800A604E[0];
+        b->y.p.whole = PLAYER_Y[0];
         {
             int x = b->h->p.whole;
             int y;

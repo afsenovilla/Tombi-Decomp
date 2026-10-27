@@ -4,9 +4,9 @@
 #include "raw7.h"
 typedef struct { char c[12]; } B12;
 typedef struct { int **anims; int p4; int p8; } AnimSet;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern TObj PLAYER;
 extern unsigned char D_800A60E4;
 extern unsigned char D_8009C93F[];
@@ -32,9 +32,9 @@ void topdownActorTalkStep(TObj *o)
 
     switch (U8(o, 0x6)) {
     case 0:
-        D_800A603C = 1;
-        D_800A603D = 2;
-        D_800A603E = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 2;
+        PLAYER_STEP = 0;
         D_800A60E4 = 3;
         D_8009C93F[0] = 1;
         U16(&PLAYER, 0x2E) |= 8;
@@ -52,9 +52,9 @@ void topdownActorTalkStep(TObj *o)
             D_8009C942 = 0;
             D_8009C93F[0] = 0;
             D_800A60E4 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             U8(o, 0x4) = 1;
             U8(o, 0x5) = 0;
             U8(o, 0x6) = 0;
@@ -67,9 +67,9 @@ void topdownActorTalkStep(TObj *o)
             D_8009C942 = 0;
             D_8009C93F[0] = 0;
             D_800A60E4 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             U8(o, 0x68) = 0;
             U8(o, 0x6A) = 0;
             U8(o, 0x5) = 0;
@@ -97,9 +97,9 @@ void topdownActorTalkStep(TObj *o)
         if (--S16(o, 0x20) <= 0) {
             D_8009C942 = 0;
             D_800A60E4 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             D_8009C93F[0] = 0;
             U8(o, 0x68) = 0;
             U8(o, 0x6A) = 0;

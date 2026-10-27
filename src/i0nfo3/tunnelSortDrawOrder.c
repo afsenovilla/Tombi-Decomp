@@ -1,7 +1,7 @@
 // FUNC 800ebc5c 624 I0NFO3
 // MATCHING 800ebc5c 624
 #include "TOBJ.H"
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern TObj PLAYER;
 
 #define LST(i) (*(TObj **)((int)list + ((i) << 2)))
@@ -45,7 +45,7 @@ void tunnelSortDrawOrder(void)
             LST(i++) = o;
         } while (k != 0);
     }
-    if (D_8009D2B0 != 3) {
+    if (GAME_PLAYER_MODE != 3) {
         cnt++;
         LST(i) = &PLAYER;
     }
@@ -68,5 +68,5 @@ void tunnelSortDrawOrder(void)
         *(signed char *)&o->b0f = i - 10;
         if (q != 0) *(signed char *)&q->b0f = i - 9;
     }
-    if (D_8009D2B0 == 3) *(signed char *)&PLAYER.b0f = -0xC;
+    if (GAME_PLAYER_MODE == 3) *(signed char *)&PLAYER.b0f = -0xC;
 }

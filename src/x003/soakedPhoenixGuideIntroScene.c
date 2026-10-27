@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern short *D_800A6078;
+extern short *PLAYER_H;
 extern int SCRIPT_OBJECTS;
 extern int D_8009F2DC;
 void npcSetAnim(int a, int b, int c);
@@ -18,12 +18,12 @@ void soakedPhoenixGuideIntroScene(TObj *o)
 
     switch (o->state) {
     case 0:
-        if (GVARS.b3a != 0 && D_800A6078[1] >= 0x1b9) {
+        if (GVARS.b3a != 0 && PLAYER_H[1] >= 0x1b9) {
             GVARS.b3f = 1;
             GVARS.b42 = 1;
             PLAYER.active = 1;
             ((unsigned char*)&GV2.bb0)[0] = 0;
-            D_800A6078[1] = 0x1b8;
+            PLAYER_H[1] = 0x1b8;
             PLAYER.animFrame = 0;
             PLAYER.b04 = 5;
             PLAYER.step = 0;

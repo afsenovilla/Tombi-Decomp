@@ -20,7 +20,7 @@ extern signed char D_8009D2B0_[];
 extern void *D_80134DB4[], *D_80134DB8[], *D_80134DBC[], *D_80134DC0[];
 extern void *D_1F8002D4_[];
 #define D_1F8002D4 D_1F8002D4_[0]
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern char D_801311E0[];
 extern char D_80131230[];
 extern char D_8013124C[];
@@ -36,7 +36,7 @@ static short *D_80131370[6] = {
     (short *)D_801311E0, (short *)D_80131230, (short *)D_8013124C, (short *)D_801312B4,
     (short *)D_801312CC, (short *)D_8013133C,
 };
-extern Fix16 *D_800A6078;
+extern Fix16 *PLAYER_H;
 extern unsigned short D_1F8003C4, D_1F8001FC;
 extern TObj PLAYER;
 extern unsigned char D_800A603E_[];
@@ -105,7 +105,7 @@ void updateSceneSequence(TObj *o)
         o->b0a = 0;
         o->b0f = 0;
         o->animFrame = 0;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->timer = 0;
         o->step = 0;
         o->b04++;
@@ -138,11 +138,11 @@ void updateSceneSequence(TObj *o)
                 if (o->h->p.whole < 0xe0) o->animFrame = 0;
                 if (o->h->p.whole >= 0x121) o->animFrame = 1;
                 applyAnimVelocityX(o, o->animFrame);
-                if (D_800A6078->p.whole >= 0x6d) D_800A6078->p.whole = 0x6c;
+                if (PLAYER_H->p.whole >= 0x6d) PLAYER_H->p.whole = 0x6c;
                 if (D_8009D2B0 == 3) break;
-                if (D_800A6078->p.whole < 0x69) break;
+                if (PLAYER_H->p.whole < 0x69) break;
                 if (!(D_1F8001FC & D_1F8003C4)) break;
-                D_800A6078->p.whole = 0x68;
+                PLAYER_H->p.whole = 0x68;
                 o->step = 0;
                 o->wb6++;
                 break;
@@ -159,11 +159,11 @@ void updateSceneSequence(TObj *o)
                 if (o->h->p.whole < 0xc4) o->animFrame = 0;
                 if (o->h->p.whole >= 0xf5) o->animFrame = 1;
                 applyAnimVelocityX(o, o->animFrame);
-                if (D_800A6078->p.whole >= 0x95) D_800A6078->p.whole = 0x94;
+                if (PLAYER_H->p.whole >= 0x95) PLAYER_H->p.whole = 0x94;
                 if (D_8009D2B0 == 3) break;
-                if (D_800A6078->p.whole < 0x91) break;
+                if (PLAYER_H->p.whole < 0x91) break;
                 if (!(D_1F8001FC & D_1F8003C4)) break;
-                D_800A6078->p.whole = 0x90;
+                PLAYER_H->p.whole = 0x90;
                 o->step = 0;
                 o->wb6++;
                 break;
@@ -181,7 +181,7 @@ void updateSceneSequence(TObj *o)
                 if (o->h->p.whole >= 0xf5) o->animFrame = 1;
                 applyAnimVelocityX(o, o->animFrame);
                 if (D_8009D2B0 == 3) break;
-                if ((unsigned short)(D_800A6078->p.whole - o->a.p.whole + 0x20) >= 0x40) break;
+                if ((unsigned short)(PLAYER_H->p.whole - o->a.p.whole + 0x20) >= 0x40) break;
                 if (!(D_1F8001FC & D_1F8003C4)) break;
                 o->step = 0;
                 o->wb6++;
@@ -280,7 +280,7 @@ void updateSceneSequence(TObj *o)
             o->wb6++;
             break;
         case 19:
-            if (D_800A6078->p.whole > 104) D_800A6078->p.whole = 104;
+            if (PLAYER_H->p.whole > 104) PLAYER_H->p.whole = 104;
             o->wb6++;
             break;
         case 20:
@@ -289,7 +289,7 @@ void updateSceneSequence(TObj *o)
                 o->animFrame = 0;
                 o->anim = D_80134DB8[0];
                 FUN_8001fe6c(o);
-                o->movetab = D_80077CDC;
+                o->movetab = MOVE_TABLE_0;
                 o->step++;
             case 1:
                 applyAnimVelocityX(o, 0);
@@ -320,7 +320,7 @@ void updateSceneSequence(TObj *o)
                 o->animFrame = 1;
                 o->anim = D_80134DB8[0];
                 FUN_8001fe6c(o);
-                o->movetab = D_80077CDC;
+                o->movetab = MOVE_TABLE_0;
                 o->wb8 = 1;
                 o->step++;
             case 1:

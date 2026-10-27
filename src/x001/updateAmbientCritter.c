@@ -10,7 +10,7 @@ extern void *D_8013E528[];
 extern void *D_8013E530;
 extern void *D_8013E538;
 extern short NEG_SIN_TABLE[];
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void ObjCullRegister(TObj *);
@@ -71,7 +71,7 @@ void updateAmbientCritter(TObj *o)
             case 0:
                 o->state++;
                 o->animFrame = Rand() & 1;
-                o->movetab = D_80077CDC;
+                o->movetab = MOVE_TABLE_0;
                 o->velV = 0x80;
                 o->d88 = Rand() & 0xf0;
                 o->timer = 4;

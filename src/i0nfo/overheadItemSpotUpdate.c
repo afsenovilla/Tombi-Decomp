@@ -6,9 +6,9 @@ extern void func_8001FE6C(TObj *o);
 extern void func_800202B4(TObj *o);
 extern void overheadItemSpotCheckStep(TObj *o);
 extern unsigned char D_8009D064[];
-extern signed char D_8009D2B0;
-extern unsigned short D_800A604E;
-extern void *D_800A6078;
+extern signed char GAME_PLAYER_MODE;
+extern unsigned short PLAYER_Y;
+extern void *PLAYER_H;
 extern unsigned char D_800A60A3;
 typedef struct { short on; unsigned short x, y; short w, h, pad; } Area93C;
 extern Area93C D_800EE93C[];
@@ -23,10 +23,10 @@ void overheadItemSpotUpdate(TObj *o)
     o->b6b = 0;
     a = &D_800EE93C[o->b0c];
     if (a->on != 0) {
-        unsigned short *hp = (unsigned short *)D_800A6078; int d;
+        unsigned short *hp = (unsigned short *)PLAYER_H; int d;
         do { } while (0);
         if ((unsigned short)(d = hp[1] - a->x) < a->w
-            && (unsigned short)(d = D_800A604E - a->y) < a->h) {
+            && (unsigned short)(d = PLAYER_Y - a->y) < a->h) {
             o->b6b = 1;
             o->visible = 1;
         }
@@ -64,8 +64,8 @@ void overheadItemSpotUpdate(TObj *o)
         }
         break;
     }
-    if (D_8009D2B0 == 3) {
-        if (D_800A60A3 != 1 && S16(D_800A6078, 2) >= 0x29) {
+    if (GAME_PLAYER_MODE == 3) {
+        if (D_800A60A3 != 1 && S16(PLAYER_H, 2) >= 0x29) {
             o->b6b = 0x80;
             o->visible = 1;
         } else {

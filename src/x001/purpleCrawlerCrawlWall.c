@@ -6,7 +6,7 @@ typedef struct { short w0, w2, w4, w6, w8; } X;
 
 extern short COS_TABLE[], D_8007A1F0[];
 extern unsigned char D_8013C7C8[], D_8013C7D8[];
-extern char D_80077CE8[], D_80077CF4[];
+extern char D_80077CE8[], MOVE_TABLE_1[];
 extern void *D_8013FC74[];
 extern char D_8013FE68[];
 extern char D_8013FE94[];
@@ -114,7 +114,7 @@ void purpleCrawlerCrawlWall(TObj *o)
         o->state = 0;
         if (o->step == 1) {
             if (D_8013C7C8[Rand() & 0xf]) o->movetab = D_80077CE8;
-            else o->movetab = D_80077CF4;
+            else o->movetab = MOVE_TABLE_1;
             if (D_8013C7D8[Rand() & 7]) {
                 o->timer = 300;
                 o->ba7 = 0;

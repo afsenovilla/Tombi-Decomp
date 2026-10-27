@@ -22,7 +22,7 @@ extern char D_801349AC[];
 static void *D_801345F4[4] = {
     D_801348F8, D_8013490C, D_80134950, D_801349AC,
 };
-extern char D_80077CDC[], D_80077D90[];
+extern char MOVE_TABLE_0[], D_80077D90[];
 extern short FUN_8005e420(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -61,7 +61,7 @@ void updateBlackCrow(TObj *o)
         o->anim = D_80134608[0];
         AnimLoadDuration(o);
         o->d3c = SPAD.i2dc;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         *(signed char *)&o->b0f = -9;
         o->step = 0;
         o->state = 0;
@@ -186,7 +186,7 @@ void updateBlackCrow(TObj *o)
                 o->b0b = 1;
                 o->b0f = 4;
                 o->velV = -0x400;
-                o->movetab = D_80077CDC;
+                o->movetab = MOVE_TABLE_0;
                 o->wac = 0x18;
                 o->state++;
                 o->anim = D_80134614[0];

@@ -17,17 +17,17 @@ extern void applyAnimVelocityY(TObj *, int);
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
 extern short probeCollisionAtDepthB(TObj *, short, short);
-extern Fix16 *DAT_800a6078;
-extern Fix16 *DAT_800a607c;
-extern unsigned short DAT_800a604e;
+extern Fix16 *PLAYER_H;
+extern Fix16 *PLAYER_D;
+extern unsigned short PLAYER_Y;
 extern void *DAT_8013ad38[];
 extern void *DAT_8013ad5c[];
 extern void *DAT_8013ad6c[];
 extern short DAT_80139260[];
 extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
 extern short *RED_BIRD_SUBTYPE_PARAMS[];
-extern char D_80077cdc[];
-extern char D_80077d0c[];
+extern char MOVE_TABLE_0[];
+extern char MOVE_TABLE_2[];
 extern char D_80077d84[];
 
 #define WBC (*(unsigned short*)&o->wbc)
@@ -55,17 +55,17 @@ static __inline__ int check(TObj *o)
     short r;
     unsigned short d;
     int x;
-    if (o->d->p.whole != DAT_800a607c->p.whole) {
+    if (o->d->p.whole != PLAYER_D->p.whole) {
         x = 0;
     } else {
         r = 0;
-        if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (FUN_8001f9e0() & 0xf) < 12) {
+        if ((unsigned short)(PLAYER_H->p.whole - o->h->p.whole + 0x40) < 0x80 && (FUN_8001f9e0() & 0xf) < 12) {
             r = 1;
-        } else if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (FUN_8001f9e0() & 0xf) < 6) {
+        } else if ((unsigned short)(PLAYER_H->p.whole - o->h->p.whole + 0x80) < 0x100 && (FUN_8001f9e0() & 0xf) < 6) {
             r = 1;
         }
         x = 0;
-        d = DAT_800a604e - o->y.p.whole + 0x30;
+        d = PLAYER_Y - o->y.p.whole + 0x30;
         if (r == 1)
             x = d < 0xf8;
         else
@@ -100,7 +100,7 @@ void redBirdStep3(TObj *o)
             o->wac = 2;
             o->anim = DAT_8013ad38[0];
             FUN_8001fe6c(o);
-            o->movetab = D_80077cdc;
+            o->movetab = MOVE_TABLE_0;
             o->substep++;
         }
         break;
@@ -172,7 +172,7 @@ void redBirdStep3(TObj *o)
             }
             o->wba = ((FUN_8001f9e0() & 1) << 5) + 0x20;
             WBC = 0x38;
-            o->movetab = D_80077d0c;
+            o->movetab = MOVE_TABLE_2;
             o->wac = 0xb;
             o->anim = DAT_8013ad5c[0];
             FUN_8001fe6c(o);
@@ -227,7 +227,7 @@ void redBirdStep3(TObj *o)
                 o->state = 0;
                 o->substep = 0;
             } else {
-                o->movetab = D_80077d0c;
+                o->movetab = MOVE_TABLE_2;
                 o->wac = 0xb;
                 o->animFrame ^= 1;
                 o->anim = DAT_8013ad5c[0];
@@ -291,9 +291,9 @@ void redBirdStep3(TObj *o)
             o->wb4 = 0;
             o->state = RED_BIRD_RAND_STATE_TABLE[FUN_8001f9e0() & 0xf];
             o->substep = 0;
-            if (o->d->p.whole == DAT_800a607c->p.whole) {
-                unsigned short d = DAT_800a604e - o->y.p.whole + 0x30;
-                if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x80) < 0x100 && d < 0xf8) {
+            if (o->d->p.whole == PLAYER_D->p.whole) {
+                unsigned short d = PLAYER_Y - o->y.p.whole + 0x30;
+                if ((unsigned short)(PLAYER_H->p.whole - o->h->p.whole + 0x80) < 0x100 && d < 0xf8) {
                     o->state = 4;
                     o->substep = 0;
                 }
@@ -323,9 +323,9 @@ extern void applyAnimVelocityY(TObj *, int);
 extern int FUN_8001fddc(int, int);
 extern int FUN_8001fdac(int, int);
 extern short probeCollisionAtDepthB(TObj *, short, short);
-extern Fix16 *DAT_800a6078;
-extern Fix16 *DAT_800a607c;
-extern unsigned short DAT_800a604e;
+extern Fix16 *PLAYER_H;
+extern Fix16 *PLAYER_D;
+extern unsigned short PLAYER_Y;
 extern void *DAT_8013ad38[];
 extern void *DAT_8013ad5c[];
 extern void *DAT_8013ad6c[];
@@ -335,8 +335,8 @@ static short DAT_80139260[16] = {
 };
 extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
 extern short *RED_BIRD_SUBTYPE_PARAMS[];
-extern char D_80077cdc[];
-extern char D_80077d0c[];
+extern char MOVE_TABLE_0[];
+extern char MOVE_TABLE_2[];
 extern char D_80077d84[];
 
 #define WBC (*(unsigned short*)&o->wbc)
@@ -364,17 +364,17 @@ static __inline__ int check(TObj *o)
     short r;
     unsigned short d;
     int x;
-    if (o->d->p.whole != DAT_800a607c->p.whole) {
+    if (o->d->p.whole != PLAYER_D->p.whole) {
         x = 0;
     } else {
         r = 0;
-        if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x40) < 0x80 && (FUN_8001f9e0() & 0xf) < 12) {
+        if ((unsigned short)(PLAYER_H->p.whole - o->h->p.whole + 0x40) < 0x80 && (FUN_8001f9e0() & 0xf) < 12) {
             r = 1;
-        } else if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x80) < 0x100 && (FUN_8001f9e0() & 0xf) < 6) {
+        } else if ((unsigned short)(PLAYER_H->p.whole - o->h->p.whole + 0x80) < 0x100 && (FUN_8001f9e0() & 0xf) < 6) {
             r = 1;
         }
         x = 0;
-        d = DAT_800a604e - o->y.p.whole + 0x30;
+        d = PLAYER_Y - o->y.p.whole + 0x30;
         if (r == 1)
             x = d < 0xf8;
         else
@@ -409,7 +409,7 @@ void redBirdStep3(TObj *o)
             o->wac = 2;
             o->anim = DAT_8013ad38[0];
             FUN_8001fe6c(o);
-            o->movetab = D_80077cdc;
+            o->movetab = MOVE_TABLE_0;
             o->substep++;
         }
         break;
@@ -481,7 +481,7 @@ void redBirdStep3(TObj *o)
             }
             o->wba = ((FUN_8001f9e0() & 1) << 5) + 0x20;
             WBC = 0x38;
-            o->movetab = D_80077d0c;
+            o->movetab = MOVE_TABLE_2;
             o->wac = 0xb;
             o->anim = DAT_8013ad5c[0];
             FUN_8001fe6c(o);
@@ -536,7 +536,7 @@ void redBirdStep3(TObj *o)
                 o->state = 0;
                 o->substep = 0;
             } else {
-                o->movetab = D_80077d0c;
+                o->movetab = MOVE_TABLE_2;
                 o->wac = 0xb;
                 o->animFrame ^= 1;
                 o->anim = DAT_8013ad5c[0];
@@ -600,9 +600,9 @@ void redBirdStep3(TObj *o)
             o->wb4 = 0;
             o->state = RED_BIRD_RAND_STATE_TABLE[FUN_8001f9e0() & 0xf];
             o->substep = 0;
-            if (o->d->p.whole == DAT_800a607c->p.whole) {
-                unsigned short d = DAT_800a604e - o->y.p.whole + 0x30;
-                if ((unsigned short)(DAT_800a6078->p.whole - o->h->p.whole + 0x80) < 0x100 && d < 0xf8) {
+            if (o->d->p.whole == PLAYER_D->p.whole) {
+                unsigned short d = PLAYER_Y - o->y.p.whole + 0x30;
+                if ((unsigned short)(PLAYER_H->p.whole - o->h->p.whole + 0x80) < 0x100 && d < 0xf8) {
                     o->state = 4;
                     o->substep = 0;
                 }

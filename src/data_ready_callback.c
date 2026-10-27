@@ -10,25 +10,25 @@ extern volatile s8* D_80096340;
 extern volatile s8* D_8009634C;
 extern CdlLOC D_8009BF68;
 extern int D_8009BF6C;
-extern void (*D_8009D4F4)(void);
+extern void (*ST_FUNC1)(void);
 extern int D_8009BC7C;
 extern int D_800A2264;
 extern int D_800A2268;
-extern StHEADER* D_800A3F04;
+extern StHEADER* ST_RING_ADDR;
 
 void StUnSetRing(void);
 
 void data_ready_callback(void)
 {
-    StHEADER* ptr = &D_800A3F04[D_800A2268];
+    StHEADER* ptr = &ST_RING_ADDR[D_800A2268];
     do {
         ptr->id = 2;
     } while(0);
     D_8009BF68 = ptr->loc;
     D_8009BF6C = ptr->frameCount;
     D_800A2268 = D_800A2264;
-    if (D_8009D4F4 != NULL) {
-        D_8009D4F4();
+    if (ST_FUNC1 != NULL) {
+        ST_FUNC1();
     }
     GV6.ia0 = 0;
 }

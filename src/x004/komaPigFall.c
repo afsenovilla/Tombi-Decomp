@@ -7,7 +7,7 @@ extern void komaPigCheckWall(TObj *);
 extern int komaPigCheckLanded(TObj *);
 extern void func_8011FB1C(TObj *);
 extern TObj *FUN_80018448(void);
-extern char D_80077CF4[], D_80077CDC[];
+extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern unsigned char D_80130FD4[];
 extern unsigned short *D_80133BD4[], *D_80133BD0[], *D_80133BD8[], *D_80133BB8[];
 
@@ -49,7 +49,7 @@ void komaPigFall(TObj *o)
         o->substep++;
         o->b69 = 0;
         o->velV = 0;
-        if (o->movetab == 0) o->movetab = D_80077CF4;
+        if (o->movetab == 0) o->movetab = MOVE_TABLE_1;
         break;
     case 1:
         FALL(0x20)
@@ -69,7 +69,7 @@ void komaPigFall(TObj *o)
         SPAWN()
         o->b69 = 0;
         x->wc = 0x100;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->timer = 2;
         o->wac = 0x1d;
         o->substep++;

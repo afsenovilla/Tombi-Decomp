@@ -1,7 +1,7 @@
 // FUNC 8011899c 548 X000
 // MATCHING 8011899c 548
 #include "TOBJ.H"
-extern unsigned char DAT_8009c966;
+extern unsigned char GAME_AREA00_INTRO_PHASE;
 extern unsigned char DAT_8009cda6;
 extern void a00FogCloudWobble(TObj *);
 extern void FUN_80018ca4(TObj *);
@@ -10,7 +10,7 @@ void a00FogCloudClearStep(TObj *o)
 {
     switch (o->step) {
     case 0:
-        if (DAT_8009c966 == 3 || DAT_8009cda6 == 0xff) {
+        if (GAME_AREA00_INTRO_PHASE == 3 || DAT_8009cda6 == 0xff) {
             o->b04 = 3;
             break;
         }
@@ -21,7 +21,7 @@ void a00FogCloudClearStep(TObj *o)
         o->d34 = o->y.raw;
         o->step++;
     case 1:
-        switch (DAT_8009c966) {
+        switch (GAME_AREA00_INTRO_PHASE) {
         case 0:
             break;
         case 1:
@@ -41,7 +41,7 @@ void a00FogCloudClearStep(TObj *o)
         a00FogCloudWobble(o);
         o->visible = 1;
         FUN_80018ca4(o);
-        switch (DAT_8009c966) {
+        switch (GAME_AREA00_INTRO_PHASE) {
         case 0:
             break;
         case 2:
@@ -59,7 +59,7 @@ void a00FogCloudClearStep(TObj *o)
             o->y.raw = o->d34;
             break;
         }
-        switch (DAT_8009c966) {
+        switch (GAME_AREA00_INTRO_PHASE) {
         case 0:
             break;
         case 1:

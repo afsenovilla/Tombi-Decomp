@@ -10,8 +10,8 @@ extern void FUN_800eeb5c(TObj *, int);
 extern TObj *PLAYER_EXT;
 extern unsigned char DAT_8009c93f;
 extern unsigned char DAT_8009c942;
-extern unsigned char DAT_8009d2b0;
-extern unsigned char DAT_8009c975[];
+extern unsigned char GAME_PLAYER_MODE;
+extern unsigned char GAME_FADE_SCREEN_CONTROL[];
 extern unsigned char DAT_8009c93c[];
 extern unsigned short DAT_1f8001f8;
 
@@ -37,7 +37,7 @@ void playerEventStepRiseFadeOut(TObj *o)
         playerReleaseBittenAndClearFlags(o);
         DAT_8009c93f = 1;
         DAT_8009c942 = 1;
-        DAT_8009d2b0 = 3;
+        GAME_PLAYER_MODE = 3;
         o->d8c = 0;
         o->state++;
         break;
@@ -50,7 +50,7 @@ void playerEventStepRiseFadeOut(TObj *o)
         FUN_800eeb5c(o, 4);
         if (--o->timer <= 0) {
             o->timer = 0x3c;
-            DAT_8009c975[0] = 3;
+            GAME_FADE_SCREEN_CONTROL[0] = 3;
             DAT_8009c93c[0] = 0;
             o->state++;
         }

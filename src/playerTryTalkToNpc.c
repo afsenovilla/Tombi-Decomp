@@ -15,8 +15,8 @@ typedef struct S {
 } S;
 extern unsigned short D_1F80019E;
 extern short D_1F80019Es;
-extern P *D_800A607C;
-extern P *D_800A6078;
+extern P *PLAYER_D;
+extern P *PLAYER_H;
 int func_8010E114(void)
 {
     S **list = (*(S ***)&SPAD.p260);
@@ -39,7 +39,7 @@ int func_8010E114(void)
         case 0x18:
             if (p->b68 != 0)
                 break;
-            if (((unsigned char*)&GVARS.b3a)[0] == 0 || ((unsigned char*)&GVARS.b3a)[8] != 0 || p->pos2->y != D_800A607C->y) {
+            if (((unsigned char*)&GVARS.b3a)[0] == 0 || ((unsigned char*)&GVARS.b3a)[8] != 0 || p->pos2->y != PLAYER_D->y) {
                 p->b68 = r;
                 r = p->b68; /* extra refs raise r's global-alloc priority over d */
                 break;
@@ -48,7 +48,7 @@ int func_8010E114(void)
             c = (unsigned short)(h + (((unsigned short*)&PLAYER.obj.y.p.whole)[0] - p->w16)) < (short)h * 2;
             w = p->w6e + 10;
             if (c) {
-                d = w + (D_800A6078->y - p->pos->y);
+                d = w + (PLAYER_H->y - p->pos->y);
                 if (d < (short)w * 2) {
                     f = ((unsigned short*)&PLAYER.obj.y.p.whole)[12] & 1;
                     if ((short)w < (short)d) {
@@ -88,8 +88,8 @@ typedef struct S {
 } S;
 extern unsigned short D_1F80019E;
 extern short D_1F80019Es;
-extern P *D_800A607C;
-extern P *D_800A6078;
+extern P *PLAYER_D;
+extern P *PLAYER_H;
 int playerTryTalkToNpc(void)
 {
     S **list = (*(S ***)&SPAD.p260);
@@ -112,7 +112,7 @@ int playerTryTalkToNpc(void)
         case 0x18: case 0x23: case 0x32: case 0x37: case 0x4d: case 0x55: case 0x58: case 0x59: case 0x5a:
             if (p->b68 != 0)
                 break;
-            if (((unsigned char*)&GVARS.b3a)[0] == 0 || ((unsigned char*)&GVARS.b3a)[8] != 0 || p->pos2->y != D_800A607C->y) {
+            if (((unsigned char*)&GVARS.b3a)[0] == 0 || ((unsigned char*)&GVARS.b3a)[8] != 0 || p->pos2->y != PLAYER_D->y) {
                 p->b68 = r;
                 r = p->b68; /* extra refs raise r's global-alloc priority over d */
                 break;
@@ -121,7 +121,7 @@ int playerTryTalkToNpc(void)
             c = (unsigned short)(h + (((unsigned short*)&PLAYER.obj.y.p.whole)[0] - p->w16)) < (short)h * 2;
             w = p->w6e + 10;
             if (c) {
-                d = w + (D_800A6078->y - p->pos->y);
+                d = w + (PLAYER_H->y - p->pos->y);
                 if (d < (short)w * 2) {
                     f = ((unsigned short*)&PLAYER.obj.y.p.whole)[12] & 1;
                     if ((short)w < (short)d) {

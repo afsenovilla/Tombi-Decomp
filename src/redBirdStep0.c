@@ -6,9 +6,9 @@ extern void FUN_8001fec0(TObj *o);
 extern unsigned FUN_8001f9e0(void);
 extern void *RED_BIRD_ANIMS[];
 extern unsigned short RED_BIRD_RAND_STATE_TABLE[];
-extern Fix16 *DAT_800a607c;
-extern Fix16 *DAT_800a6078;
-extern unsigned short DAT_800a604e;
+extern Fix16 *PLAYER_D;
+extern Fix16 *PLAYER_H;
+extern unsigned short PLAYER_Y;
 
 void redBirdStep0(TObj *o)
 {
@@ -24,9 +24,9 @@ void redBirdStep0(TObj *o)
         if (--o->timer == 0) {
             o->state = RED_BIRD_RAND_STATE_TABLE[FUN_8001f9e0() & 0xf];
             o->substep = 0;
-            if (o->d->p.whole == DAT_800a607c->p.whole) {
-                int dy = DAT_800a604e - (unsigned short)o->y.p.whole + 0x30;
-                int dx = (unsigned short)DAT_800a6078->p.whole - (unsigned short)o->h->p.whole + 0x80;
+            if (o->d->p.whole == PLAYER_D->p.whole) {
+                int dy = PLAYER_Y - (unsigned short)o->y.p.whole + 0x30;
+                int dx = (unsigned short)PLAYER_H->p.whole - (unsigned short)o->h->p.whole + 0x80;
                 if ((unsigned short)dx < 0x100 && (unsigned short)dy < 0xf8) {
                     o->state = 4;
                     o->substep = 0;

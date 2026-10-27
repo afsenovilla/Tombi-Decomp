@@ -5,7 +5,7 @@ extern int DAT_1f8002d0;
 extern unsigned short GAME;
 extern unsigned char KOMA_PIG_DUST_PUFF_VARIANT_BY_AREA[], KOMA_PIG_DUST_PUFF_VARIANT_B_BY_AREA[];
 extern void **KOMA_PIG_DUST_PUFF_ANIMS_BY_AREA[];
-extern char DAT_80077cdc[];
+extern char MOVE_TABLE_0[];
 extern void FUN_8001e4f0(int);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_800187e4(TObj *);
@@ -23,7 +23,7 @@ void updateKomaPigDustPuff(TObj *o)
         o->w1e = 1;
         *(signed char *)&o->b0f = -30;
         o->b0a = 0;
-        o->movetab = DAT_80077cdc;
+        o->movetab = MOVE_TABLE_0;
         o->d3c = v;
         if (o->subtype == 0) {
             a = 0x10;

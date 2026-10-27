@@ -7,8 +7,8 @@ extern void func_8001F110(int a);
 extern void func_8001FEC0(TObj *o);
 extern void overheadPlayerSetMoveAnim(TObj *o);
 extern TObj *PLAYER_EXT;
-extern signed char D_8009C975[];
-extern signed char D_8009D2B0;
+extern signed char GAME_FADE_SCREEN_CONTROL[];
+extern signed char GAME_PLAYER_MODE;
 
 void overheadPlayerDropExitStep(TObj *o)
 {
@@ -27,7 +27,7 @@ void overheadPlayerDropExitStep(TObj *o)
         o->d8c = 0;
         o->velX = 0;
         o->velY = 0;
-        D_8009D2B0 = 3;
+        GAME_PLAYER_MODE = 3;
         o->d8c = 0;
         func_8001F110(1);
         o->state++;
@@ -40,7 +40,7 @@ void overheadPlayerDropExitStep(TObj *o)
         s = --o->timer;
         if (s <= 0) {
             o->timer = 0x3C;
-            D_8009C975[0] = 3;
+            GAME_FADE_SCREEN_CONTROL[0] = 3;
             o->state++;
         }
         break;

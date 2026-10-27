@@ -5,9 +5,9 @@
 // Demo version of PAL x000 801288B8 (func_801288B8.c): 60-frame timers (PAL 30), sets active in step 5.
 #include "TOBJ.H"
 typedef struct P { unsigned char b0; unsigned char b1; unsigned short w2; short w4; } P;
-extern char D_80077D0C[];
-extern char D_80077CF4[];
-extern char D_80077CDC[];
+extern char MOVE_TABLE_2[];
+extern char MOVE_TABLE_1[];
+extern char MOVE_TABLE_0[];
 extern void *D_8013A1E0[];
 extern void *D_8013A1E4[];
 extern void *D_8013A1E8[];
@@ -62,7 +62,7 @@ void func_801288B8(TObj *o)
         FUN_8001e4f0(7);
         o->timer = 4;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 0x20;
         o->substep++;
         SETBOX(o, D_8013A1E0[0]);
@@ -95,7 +95,7 @@ void func_801288B8(TObj *o)
                 o->b9c = 1;
                 o->velV = -0x280;
                 o->d8c = 0;
-                o->movetab = D_80077CF4;
+                o->movetab = MOVE_TABLE_1;
                 o->substep++;
                 p->b1 = 1;
                 o->wac = 0x21;
@@ -127,7 +127,7 @@ void func_801288B8(TObj *o)
                 } else if (t = p->b1, p->b1 = t + 0xff, t != 0) {
                     o->velV = ~(o->velV - 0x80) + 1;
                     if (o->velV < 0) o->b9c = 1;
-                    o->movetab = D_80077CDC;
+                    o->movetab = MOVE_TABLE_0;
                 } else {
                     o->d8c = p->w2;
                     o->timer = 0x3c;
@@ -186,9 +186,9 @@ void func_801288B8(TObj *o)
 #else
 #include "TOBJ.H"
 typedef struct P { unsigned char b0; unsigned char b1; unsigned short w2; short w4; } P;
-extern char D_80077D0C[];
-extern char D_80077CF4[];
-extern char D_80077CDC[];
+extern char MOVE_TABLE_2[];
+extern char MOVE_TABLE_1[];
+extern char MOVE_TABLE_0[];
 extern void *D_8013A1E0[];
 extern void *D_8013A1E4[];
 extern void *D_8013A1E8[];
@@ -243,7 +243,7 @@ void updateA00L2Type2C(TObj *o)
         FUN_8001e4f0(7);
         o->timer = 4;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 0x20;
         o->substep++;
         SETBOX(o, D_8013A1E0[0]);
@@ -276,7 +276,7 @@ void updateA00L2Type2C(TObj *o)
                 o->b9c = 1;
                 o->velV = -0x280;
                 o->d8c = 0;
-                o->movetab = D_80077CF4;
+                o->movetab = MOVE_TABLE_1;
                 o->substep++;
                 p->b1 = 1;
                 o->wac = 0x21;
@@ -308,7 +308,7 @@ void updateA00L2Type2C(TObj *o)
                 } else if (t = p->b1, p->b1 = t + 0xff, t != 0) {
                     o->velV = ~(o->velV - 0x80) + 1;
                     if (o->velV < 0) o->b9c = 1;
-                    o->movetab = D_80077CDC;
+                    o->movetab = MOVE_TABLE_0;
                 } else {
                     o->d8c = p->w2;
                     o->timer = 0x1e;

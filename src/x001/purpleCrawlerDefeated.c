@@ -1,7 +1,7 @@
 // FUNC 8012b184 336 X001
 // MATCHING 8012b184 336
 #include "TOBJ.H"
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void *D_8013FC94[];
 extern void FUN_8001fe6c(TObj *);
 extern void applyFrameVelocityX(TObj *);
@@ -15,7 +15,7 @@ void purpleCrawlerDefeated(TObj *o)
         o->b0b = 1;
         o->b0f = 4;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 9;
         o->animFrame &= 1;
         o->state++;

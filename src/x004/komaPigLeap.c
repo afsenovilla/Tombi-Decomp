@@ -4,7 +4,7 @@
 typedef struct { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 extern unsigned char D_80130FD4[];
 extern A *D_80133BDC[], *D_80133BE0[], *D_80133BE4[], *D_80133C04[], *D_80133C08[], *D_80133C0C[];
-extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
+extern char MOVE_TABLE_2[], MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
@@ -47,7 +47,7 @@ void komaPigLeap(TObj *o)
         FUN_8001e4f0(7);
         o->timer = 4;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 0x20;
         o->substep++;
         setanimbox(o, D_80133BDC[0]);
@@ -79,7 +79,7 @@ void komaPigLeap(TObj *o)
             o->b9c = 1;
             o->velV = -0x280;
             o->d8c = 0;
-            o->movetab = D_80077CF4;
+            o->movetab = MOVE_TABLE_1;
             o->substep++;
             q[1] = 1;
             o->wac = 0x21;
@@ -111,7 +111,7 @@ void komaPigLeap(TObj *o)
             if (c) {
                 o->velV = ~(o->velV - 0x80) + 1;
                 if (o->velV < 0) o->b9c = 1;
-                o->movetab = D_80077CDC;
+                o->movetab = MOVE_TABLE_0;
                 return;
             }
             w = *(unsigned short *)(q + 2);

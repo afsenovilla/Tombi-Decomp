@@ -8,9 +8,9 @@ extern unsigned char D_8009C93F;
 extern unsigned char D_8009C940[];
 extern unsigned char D_8009C941;
 extern unsigned char D_8009C942;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern TObj *D_800A60C8;
 extern unsigned char D_800A60E4;
 
@@ -35,8 +35,8 @@ void tunnelUseItem95Step(TObj *o)
         if (usingItem(v)) {
             b.x = 0x90;
             b.y = 0x40;
-            D_800A603D = 2;
-            D_800A603E = 0;
+            PLAYER_SUBSTATE = 2;
+            PLAYER_STEP = 0;
             u--;
             u[0] = 1;
             D_8009C942 = 1;
@@ -59,9 +59,9 @@ void tunnelUseItem95Step(TObj *o)
             D_8009C942 = 0;
             D_8009C93F = 0;
             D_800A60E4 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
         done:
             o->step = 0;
             o->state = 0;

@@ -2,7 +2,7 @@
 // MATCHING 801072fc 196
 #include "TOBJ.H"
 extern unsigned char *PLAYER_EXT;
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 void func_801072FC(TObj *o)
 {
     ((unsigned char *)o)[0xc7] = 1;
@@ -10,7 +10,7 @@ void func_801072FC(TObj *o)
     ((unsigned char *)o)[0xc6] = 0;
     ((unsigned char *)o)[0xe3] = 0;
     PLAYER_EXT[0] = 0;
-    o->movetab = D_80077D0C;
+    o->movetab = MOVE_TABLE_2;
     *(unsigned char *)&o->wac = 0;
     o->b6b = 0;
     o->ba4 = 0;

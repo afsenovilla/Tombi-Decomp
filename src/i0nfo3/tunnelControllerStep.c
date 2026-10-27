@@ -10,9 +10,9 @@ extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009CDF3;
 extern unsigned char D_8009CE21;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern unsigned char D_800A60E4;
 
 void tunnelControllerStep(TObj *o)
@@ -37,10 +37,10 @@ void tunnelControllerStep(TObj *o)
         switch (o->state) {
         case 0:
             if (D_8009C93A != 0) {
-                D_800A603D = 2;
+                PLAYER_SUBSTATE = 2;
                 D_8009C93F = 1;
                 D_8009C942 = 1;
-                D_800A603E = 0;
+                PLAYER_STEP = 0;
                 o->w08 = 0xC8;
                 func_8005A9A4(0x4F, 0);
                 o->state++;
@@ -51,9 +51,9 @@ void tunnelControllerStep(TObj *o)
                 D_8009C942 = 0;
                 D_8009C93F = 0;
                 D_800A60E4 = 0;
-                D_800A603C = 1;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER_STATE = 1;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 o->step = 0;
                 o->state = 0;
             }

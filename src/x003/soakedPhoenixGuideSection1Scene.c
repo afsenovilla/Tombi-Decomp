@@ -7,7 +7,7 @@
 extern TObj PLAYER;
 #define P PLAYER
 extern TObj *D_8009F3D4;
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
 extern void playerSetAnimIfChangedAt(TObj *, int, int);
 
 void soakedPhoenixGuideSection1Scene(TObj *o)
@@ -23,9 +23,9 @@ void soakedPhoenixGuideSection1Scene(TObj *o)
             ((unsigned char*)&GVARS.b42)[0] = 1;
             P.animFrame = 0;
             r = e->h->p.whole < P.h->p.whole;
-            D_800A603C[0] = 5;
-            D_800A603D[0] = 0x64;
-            D_800A603E[0] = 0;
+            PLAYER_STATE[0] = 5;
+            PLAYER_SUBSTATE[0] = 0x64;
+            PLAYER_STEP[0] = 0;
             *f = 2;
             P.animFrame = r;
             o->state++;

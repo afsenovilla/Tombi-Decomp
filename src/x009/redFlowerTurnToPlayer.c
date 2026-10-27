@@ -14,7 +14,7 @@ extern void *D_8012E9F8[];
 extern void *D_8012EA00[];
 extern void *D_8012EA40[];
 extern unsigned char D_8012B2CC[];
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 
 static __inline__ short ground(TObj *o)
 {
@@ -36,7 +36,7 @@ void redFlowerTurnToPlayer(TObj *o)
 
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         if (*p != 3) {
             o->b6a = 1;
             o->state++;

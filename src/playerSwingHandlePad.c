@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 extern unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c6;
-extern unsigned char DAT_8009d2b0;
+extern unsigned char GAME_PLAYER_MODE;
 extern unsigned char *PLAYER_EXT;
 extern unsigned char *GRABBED_OBJECT;
 
@@ -58,7 +58,7 @@ void playerSwingHandlePad(TObj *o)
 #include "TOBJ.H"
 extern unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c6;
-extern unsigned char DAT_8009d2b0;
+extern unsigned char GAME_PLAYER_MODE;
 extern unsigned char *PLAYER_EXT;
 extern unsigned char *GRABBED_OBJECT;
 
@@ -70,7 +70,7 @@ void playerSwingHandlePad(TObj *o)
     unsigned short u;
     Fix16 *h;
     if (PAD_PRESSED[0] & DAT_1f8003c6) {
-        DAT_8009d2b0 = 0;
+        GAME_PLAYER_MODE = 0;
         PLAYER_EXT[9] = 0;
         o->step = 0xb;
         o->state = 0;

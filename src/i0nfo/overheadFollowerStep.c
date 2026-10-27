@@ -7,7 +7,7 @@ extern void **D_800EE914[][3];
 extern TObj PLAYER;
 extern unsigned char D_8009CEAB;
 extern unsigned char D_8009CEDB;
-extern signed char D_8009D2B0[];
+extern signed char GAME_PLAYER_MODE[];
 
 void overheadFollowerStep(TObj *o)
 {
@@ -74,7 +74,7 @@ void overheadFollowerStep(TObj *o)
     func_8001FE6C(o);
     o->b.raw = PLAYER.b.raw;
     o->_pad0e[0] = 3;
-    if (D_8009D2B0[0] == 3) {
+    if (GAME_PLAYER_MODE[0] == 3) {
         o->b04 = 3;
         o->step = 0;
         o->state = 0;

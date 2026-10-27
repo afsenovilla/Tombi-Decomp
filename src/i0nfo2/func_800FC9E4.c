@@ -3,9 +3,9 @@
 #include "TOBJ.H"
 #include "raw7.h"
 extern TObj PLAYER;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern short D_800A6066;
 extern unsigned char D_800A60E4;
 extern unsigned char D_8009C93E;
@@ -33,13 +33,13 @@ void func_800FC9E4(TObj *o)
             D_800A6066 = 4;
             break;
         }
-        D_800A603C = 4;
-        D_800A603D = 2;
-        D_800A603E = 0;
+        PLAYER_STATE = 4;
+        PLAYER_SUBSTATE = 2;
+        PLAYER_STEP = 0;
         break;
     case 1:
-        D_800A603D = 1;
-        D_800A603E = 0;
+        PLAYER_SUBSTATE = 1;
+        PLAYER_STEP = 0;
         D_8009CFA2[k] = U8(o, 0x24) & 3;
         U8(o, 7) = 0;
         U8(o, 6)++;
@@ -66,8 +66,8 @@ void func_800FC9E4(TObj *o)
                 U16(o, 0x26) = 0xE;
                 break;
             }
-            D_800A603D = 2;
-            D_800A603E = 0;
+            PLAYER_SUBSTATE = 2;
+            PLAYER_STEP = 0;
             U8(o, 7)++;
             break;
         case 1:
@@ -90,8 +90,8 @@ void func_800FC9E4(TObj *o)
         }
         break;
     case 4:
-        D_800A603D = 1;
-        D_800A603E = 0;
+        PLAYER_SUBSTATE = 1;
+        PLAYER_STEP = 0;
         switch (U16(o, 0x24) & 3) {
         case 1:
             D_8009CFA2[k] = ((D_8009CF9F[k] & 0x80) == 0) * 2;
@@ -130,8 +130,8 @@ void func_800FC9E4(TObj *o)
                 U16(o, 0x26) = 0x1E;
                 break;
             }
-            D_800A603D = 2;
-            D_800A603E = 0;
+            PLAYER_SUBSTATE = 2;
+            PLAYER_STEP = 0;
             U8(o, 7)++;
             break;
         case 1:
@@ -165,8 +165,8 @@ void func_800FC9E4(TObj *o)
             D_800A6066 = 0;
             break;
         }
-        D_800A603D = 1;
-        D_800A603E = 0;
+        PLAYER_SUBSTATE = 1;
+        PLAYER_STEP = 0;
         U8(o, 6)++;
         break;
     case 8:
@@ -175,9 +175,9 @@ void func_800FC9E4(TObj *o)
         D_8009C93F = 0;
         D_8009C93E = 0;
         D_800A60E4 = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         U8(o, 5) = 0;
         break;
     }

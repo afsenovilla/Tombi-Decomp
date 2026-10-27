@@ -6,7 +6,7 @@
 extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern TObj *D_800A60C8;
-extern unsigned char D_800A60F8, D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char D_800A60F8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern char D_80010748[];
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
@@ -40,9 +40,9 @@ void raceStartRematch(TObj *o)
             GCD.bce59 = 1;
             GCD.bcede = 1;
             D_800A60F8 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             e->subtype = 1;
             e->step = 1;
             e->state = 0;

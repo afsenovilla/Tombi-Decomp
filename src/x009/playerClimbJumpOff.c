@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char *GRABBED_OBJECT;
 extern int GAME;
-extern int DAT_8009c984;
+extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c4;
 
@@ -39,7 +39,7 @@ void playerClimbJumpOff(TObj *o)
             turn(o);
         }
     }
-    if ((DAT_8009c984 & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4))
+    if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4))
         o->ba7 = 1;
     o->step = 2;
     o->state = 0;

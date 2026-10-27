@@ -12,7 +12,7 @@ typedef struct {
 
 extern P8011B170 *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern char D_80077D24[];
+extern char MOVE_TABLE_3[];
 extern void playerReleaseBittenAndClearFlags(TObj *);
 extern void updatePlayerHealth(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
@@ -46,7 +46,7 @@ void playerStepVortexLaunch(TObj *o)
         o->ba4 = 0;
         o->b69 = 0;
         o->velV = 0;
-        o->movetab = D_80077D24;
+        o->movetab = MOVE_TABLE_3;
         FUN_800eeb5c(o, 0x39);
         o->y.raw += o->velY << 8;
         FUN_8001e560(0x23, 0x24);

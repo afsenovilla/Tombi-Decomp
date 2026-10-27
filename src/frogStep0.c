@@ -1,7 +1,7 @@
 // FUNC 80133254 544 X000
 // MATCHING 80133254 544
 #include "TOBJ.H"
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short DAT_800a6066;
 extern void *FROG_ANIMS;
 extern void *DAT_8013b184[];
@@ -28,7 +28,7 @@ void frogStep0(TObj *o)
         o->anim = DAT_8013b184[0];
         FUN_8001fe6c(o);
         {
-            unsigned short c = DAT_8009c962;
+            unsigned short c = GAME_SELECTED_SECTION;
             unsigned char s = o->state;
             o->w78 = 1;
             o->b68 = c;

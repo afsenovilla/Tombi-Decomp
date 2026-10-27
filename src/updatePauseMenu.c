@@ -14,14 +14,14 @@ void updatePauseMenu(void) {
     case 0: {
         u16 pad;
 
-        if (D_8009BCDD != 0 && D_8009BCDD != 0x10) {
+        if (GAME_FADE_SCREEN_CONTROL != 0 && GAME_FADE_SCREEN_CONTROL != 0x10) {
             return;
         }
 
         pad = *(u16*)0x1F8001FC;
         if ((pad & 8) || D_8009EB58 != 0) {
             *(s16*)(&SCRATCHPAD + 0x1C6) = 1;
-            D_8009C10B = 0;
+            PAUSE_MENU_CURSOR = 0;
             *(&SCRATCHPAD + 0x3CD) = 1;
             keyOffSfxAll(0);
             playSFX(0x29);
@@ -34,25 +34,25 @@ void updatePauseMenu(void) {
         if (D_8009BCA2 == 0) {
             return;
         }
-        if (D_8009C618 != 1) {
+        if (GAME_PLAYER_MODE != 1) {
             return;
         }
         if (D_8009BCA7 != 0) {
             return;
         }
 
-        if (D_800A5462 != D_8009C618) {
-            if (D_800A539C != D_8009C618) {
+        if (D_800A5462 != GAME_PLAYER_MODE) {
+            if (PLAYER_STATE != GAME_PLAYER_MODE) {
                 return;
             }
-            if (D_800A539D >= 0x20) {
+            if (PLAYER_SUBSTATE >= 0x20) {
                 return;
             }
         }
 
         if (pad & 1) {
             *(s16*)(&SCRATCHPAD + 0x1C6) = 1;
-            D_8009C10B = 0;
+            PAUSE_MENU_CURSOR = 0;
             *(&SCRATCHPAD + 0x3CD) = 0;
             keyOffSfxAll(0);
             playSFX(0x29);
@@ -67,7 +67,7 @@ void updatePauseMenu(void) {
         }
 
         *(s16*)(&SCRATCHPAD + 0x1C6) = 1;
-        D_8009C10B = 4;
+        PAUSE_MENU_CURSOR = 4;
         *(&SCRATCHPAD + 0x3CD) = 0;
         keyOffSfxAll(0);
 
@@ -110,7 +110,7 @@ void updatePauseMenu(void) {
             if (*(u16*)0x1F8001FC & buttons) {
                 *(u16*)(&SCRATCHPAD + 0x1FC) = 0;
                 *(s16*)(&SCRATCHPAD + 0x1C6) = 0;
-                D_8009C10B = 0;
+                PAUSE_MENU_CURSOR = 0;
                 return;
             }
         }
@@ -121,7 +121,7 @@ void updatePauseMenu(void) {
 
             if (pad & 8) {
                 *(s16*)(&SCRATCHPAD + 0x1C6) = 1;
-                D_8009C10B = 0;
+                PAUSE_MENU_CURSOR = 0;
                 *(&SCRATCHPAD + 0x3CD) = 1;
                 playSFX(0x29);
                 return;
@@ -136,7 +136,7 @@ void updatePauseMenu(void) {
                 *(u16*)0x1F8003B8 = s2;
                 *(u16*)0x1F8003BA = un;
 
-                c10b = D_8009C10B;
+                c10b = PAUSE_MENU_CURSOR;
                 switch (c10b) {
                 case 0:
                     MENU_STATE.unk16 = 4;
@@ -179,7 +179,7 @@ void updatePauseMenu(void) {
             }
 
             if (pad & 0x10) {
-                u8 *p = &D_8009C10B;
+                u8 *p = &PAUSE_MENU_CURSOR;
                 u8 val = *p;
                 if (val != 0) {
                     *p = val - 1;
@@ -189,7 +189,7 @@ void updatePauseMenu(void) {
             }
 
             if (*(u16*)0x1F8001FC & 0x40) {
-                u8 *p = &D_8009C10B;
+                u8 *p = &PAUSE_MENU_CURSOR;
                 u8 val = *p;
                 if (val < 3) {
                     *p = val + 1;
@@ -204,7 +204,7 @@ void updatePauseMenu(void) {
             u16 pad = *(u16*)0x1F8001FC;
 
             if (pad & 0x4008) {
-                u8* s0 = &D_8009C10B;
+                u8* s0 = &PAUSE_MENU_CURSOR;
                 u8 c10b = *s0;
 
                 switch (c10b) {
@@ -229,7 +229,7 @@ void updatePauseMenu(void) {
             }
 
             if (pad & 0x10) {
-                u8 *p = &D_8009C10B;
+                u8 *p = &PAUSE_MENU_CURSOR;
                 u8 val = *p;
                 if (val != 0) {
                     *p = val - 1;
@@ -239,7 +239,7 @@ void updatePauseMenu(void) {
             }
 
             if (*(u16*)0x1F8001FC & 0x40) {
-                u8 *p = &D_8009C10B;
+                u8 *p = &PAUSE_MENU_CURSOR;
                 u8 val = *p;
                 if (val < 2) {
                     *p = val + 1;
@@ -253,7 +253,7 @@ void updatePauseMenu(void) {
         case 2:
         case 3:
             if (*(u16*)0x1F8001FC & 0x4008) {
-                u8 c10b = D_8009C10B;
+                u8 c10b = PAUSE_MENU_CURSOR;
 
                 if (c10b == 0) {
                     if (*(u8*)0x1F8003CD == 2) {
@@ -291,16 +291,16 @@ void updatePauseMenu(void) {
             if (*(u16*)0x1F8001FC & 0x2000) {
             cd_check:
                 if (*(u8*)0x1F8003CD == 2) {
-                    D_8009C10B = 1;
+                    PAUSE_MENU_CURSOR = 1;
                 } else {
-                    D_8009C10B = 2;
+                    PAUSE_MENU_CURSOR = 2;
                 }
                 *(&SCRATCHPAD + 0x3CD) = 1;
                 return;
             }
 
             if (*(u16*)0x1F8001FC & 0x20) {
-                u8 *p = &D_8009C10B;
+                u8 *p = &PAUSE_MENU_CURSOR;
                 u8 val = *p;
                 if (val == 0) {
                     *p = val + 1;
@@ -310,7 +310,7 @@ void updatePauseMenu(void) {
             }
 
             if (*(u16*)0x1F8001FC & 0x80) {
-                u8 *p = &D_8009C10B;
+                u8 *p = &PAUSE_MENU_CURSOR;
                 u8 val = *p;
                 if (val == 1) {
                     *p = val - 1;

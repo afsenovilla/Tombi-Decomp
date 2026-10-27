@@ -2,7 +2,7 @@
 // MATCHING 80121d2c 304
 /* covers csv piece 80121D6C too. */
 #include "TOBJ.H"
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern void *D_8012E9F8;
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -27,7 +27,7 @@ void redFlowerLand(TObj *o)
 {
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->active = 1;
         o->b6a = 1;
         o->timer = 60;

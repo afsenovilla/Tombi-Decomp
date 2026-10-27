@@ -10,7 +10,7 @@ typedef struct {
 } BX;
 typedef struct { short x, y; } P2;
 
-extern short *D_800A6078;
+extern short *PLAYER_H;
 extern void *D_801345B8[], *D_801345E8[], *D_801345EC[], *D_80134604[];
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
@@ -33,7 +33,7 @@ void blackCrowSwoop(BX *b)
 
     switch (o->substep) {
     case 0:
-        if (o->h->p.whole >= D_800A6078[1]) o->animFrame = 1;
+        if (o->h->p.whole >= PLAYER_H[1]) o->animFrame = 1;
         else o->animFrame = 0;
         o->w22 = 0x38;
         o->wac = 0x14;
@@ -70,10 +70,10 @@ void blackCrowSwoop(BX *b)
         AnimLoadDuration(o);
         p.x = o->h->p.whole;
         p.y = o->y.p.whole;
-        q.x = D_800A6078[1];
+        q.x = PLAYER_H[1];
         q.y = PLAYER.obj.y.p.whole;
         *(short *)&o->bbe = angleBetweenPoints(p, q) + 0x100;
-        if (o->h->p.whole >= D_800A6078[1]) o->animFrame = 1;
+        if (o->h->p.whole >= PLAYER_H[1]) o->animFrame = 1;
         else o->animFrame = 0;
         o->substep++;
         break;

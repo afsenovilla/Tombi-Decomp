@@ -2,13 +2,13 @@
 // MATCHING 80136bc0 288
 // VERSION SLPM_80165 x00 8012AE1C 260
 #if defined(VERSION_SLPM_80165)
-// Demo version of PAL x000 80136BC0 (a00DarkCloakedFigureTalkCheck.c): fixed pad bit 0x20, no D_8009D2B0 test.
+// Demo version of PAL x000 80136BC0 (a00DarkCloakedFigureTalkCheck.c): fixed pad bit 0x20, no GAME_PLAYER_MODE test.
 #include "spad.h"
 #include "player.h"
 typedef struct Q { char p0[0x16]; short y; } Q;
 typedef struct R { char p0[2]; unsigned short w2; } R;
 typedef struct O { char p0[0x1c]; unsigned short w1c; char p1[2]; Q *q; } O;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern char D_800A60F8;
 
 int a00DarkCloakedFigureTalkCheck(O *o)
@@ -50,7 +50,7 @@ end2:
 typedef struct Q { char p0[0x16]; short y; } Q;
 typedef struct R { char p0[2]; unsigned short w2; } R;
 typedef struct O { char p0[0x1c]; unsigned short w1c; char p1[2]; Q *q; } O;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern char D_800A60F8;
 
 int a00DarkCloakedFigureTalkCheck(O *o)
@@ -76,7 +76,7 @@ int a00DarkCloakedFigureTalkCheck(O *o)
             goto end;
         }
     }
-    if (D_8009D2B0 == 1 && (SPAD.s1fc & SPAD.s3c4)) {
+    if (GAME_PLAYER_MODE == 1 && (SPAD.s1fc & SPAD.s3c4)) {
         r = 1;
         D_800A60F8 = 0;
         o->w1c = 1;

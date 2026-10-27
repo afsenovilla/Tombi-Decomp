@@ -58,9 +58,9 @@ void rewardBitingPlantFlower(GameObject* arg0)
             asm("");
             D_8009BCA7 = 1;
             D_8009BCAA = 1;
-            D_800A539C = 5;
-            D_800A539D = 0;
-            D_800A539E = 0;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             D_800A539F = 0;
             arg0->subState++;
             return;
@@ -70,9 +70,9 @@ void rewardBitingPlantFlower(GameObject* arg0)
             if ((temp_v0 << 0x10) == 0) {
                 D_8009BCA7 = 0;
                 D_8009BCAA = 0;
-                D_800A539C = 1;
-                D_800A539D = 0;
-                D_800A539E = 0;
+                PLAYER_STATE = 1;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 D_800A539F = 0;
                 arg0->state++;
             }

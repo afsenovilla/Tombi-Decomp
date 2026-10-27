@@ -2027,3 +2027,21 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - game.h playerEquips moved from offset 0x950 to 0x952 of gameConfig (two bytes unk950 / unk951 before it): the code reads the
   weapon at 8009D2B2 (drawHudWeaponIcon, spawnWeaponObject) and the pants at 8009D2B3 (func_80110CAC speed class); 8009D2B0 is the
   dark cloaked figure scene flag and 8009D2B1 the bitten-jump kind. No source used GAME.playerEquips, so the build is unchanged.
+- MAIN0 data round 2, batch 1 (Oct 27 2026): 39 rows. The PLAYER / GAME fields the sources reach by their own symbol keep a standalone
+  symbol with a field-style name (no struct access, codegen unchanged): PLAYER_STATE / PLAYER_SUBSTATE / PLAYER_STEP (800A603C..3E),
+  PLAYER_X / PLAYER_Y (800A604A / 4E, the whole parts of obj.a / obj.y), PLAYER_H / PLAYER_D (800A6078 / 7C, obj.h / obj.d), PLAYER_HEALTH
+  (800A60D0: script opcode a9 heals it and copies it to +0x9A and GAME.playerHealth), GAME_SELECTED_SECTION (8009C962),
+  GAME_AREA00_INTRO_PHASE (8009C966, game.h unk6 -> area00_introPhase), GAME_FADE_SCREEN_CONTROL (8009C975), GAME_AREA00_EVENT_CONTROL
+  (8009C984), GAME_PLAYER_MODE (8009D2B0, unk950 -> playerMode: 1 idle/walk, 2 message box, 3 scripted scene) and GAME_EQUIPPED_WEAPON
+  (8009D2B2). The tool resolved the US-spelled aliases of the tomba24-era sources to the same PAL addresses (D_800A539C.. = PLAYER +4..,
+  D_800A53D8 = PLAYER_H, D_800A5430 = PLAYER_HEALTH, D_8009BCCA = GAME_SELECTED_SECTION, D_8009C618 = GAME_PLAYER_MODE, D_8009BCDD =
+  GAME_FADE_SCREEN_CONTROL, D_8009C61A = GAME_EQUIPPED_WEAPON), so those game.h aliases carry the new names too; the sources built with
+  the tomba24 headers (`// HEADERS tomba24`: spawnEventTitle, startAreaBgmWithReverb, stubInventory1..3) keep the US spellings.
+  Library: ST_RING_ADDR / ST_RING_SIZE / ST_MASK / ST_START_FRAME / ST_END_FRAME / ST_FUNC1 / ST_FUNC2 / ST_MODE (libpress, the
+  parameters StSetRing / StSetMask / StSetStream store), CD_READ_ATTR (cdread.c ReadAttr_t), PAD_SIO (padlocal.h padSio *).
+  Game data: MOVE_TABLE_0..3 (80077CDC.. the o->movetab rows of increasing hop speed), REWARD_HANDLERS / REWARD_HANDLER_BY_SUBTYPE
+  (8007A890 / 8007A7F0), PLAYER_EFFECT_4E_ANIM_TABLE (80079D58), WEAPON_BEND_PARAMS (8009D600 = GV6.s00..s04), PAUSE_MENU_CURSOR
+  (8009C10B), DEBUG_SCREEN_CURSOR_ROW (8009B6A8), MODEL_PRIM_BUFFERS (800E3E28, 0x1600 per slot), TILE_COL_COUNT / TOP / HEIGHT / FLAGS
+  (8009BD70..7C, tileCollideColumnAt scratch). Not named: the libgpu sys.c globals every libgpu source declares but none uses
+  (D_80090Cxx / D_8009B1xx), the libcd D_80095F64 Setloc table, the libetc Intr block, libgs OpenTMD offsets, the remaining libpress
+  ring indices, and D_8009C8B0 / D_800B3188 / D_800A3348 / D_8009C658, whose only references are commented-out code.

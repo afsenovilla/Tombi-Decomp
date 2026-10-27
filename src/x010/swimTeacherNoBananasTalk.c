@@ -5,7 +5,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern short D_1F80016A;
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
@@ -39,9 +39,9 @@ void swimTeacherNoBananasTalk(TObj *o)
             o->state = ++t;
             GVARS.b3f = 1;
             GVARS.b42 = 1;
-            D_800A603C = 5;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             o->d90 = showMessageBoxDirect(2, 0x14, &o->a);
             o->animFrame = o->b68 & 1;
             setAnim(o, ANIMS(o)[5]);
@@ -55,9 +55,9 @@ void swimTeacherNoBananasTalk(TObj *o)
             GVARS.b3f = 1;
             GVARS.b42 = 1;
             FUN_8001f8e4(o);
-            D_800A603C = 5;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             (*(short*)&PLAYER.obj.animFrame) = 1 - o->animFrame;
             o->d90 = showMessageBoxDirect(2, 0x16, &o->a);
             setAnim(o, ANIMS(o)[5]);
@@ -78,9 +78,9 @@ void swimTeacherNoBananasTalk(TObj *o)
         p->b04 = 3;
         GVARS.b3f = 0;
         GVARS.b42 = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         o->state = 0;
         break;
     }

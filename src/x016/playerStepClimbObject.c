@@ -22,7 +22,7 @@ extern G330 *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
 extern unsigned short PAD_PRESSED;
 extern int GAME;
-extern unsigned char DAT_8009d2b0;
+extern unsigned char GAME_PLAYER_MODE;
 extern unsigned short DAT_1f8001fc;
 extern unsigned short DAT_1f8003c6;
 extern char DAT_80011148[];
@@ -125,7 +125,7 @@ void playerStepClimbObject(TObj *o)
         return;
     }
     if (DAT_1f8001fc & DAT_1f8003c6) {
-        DAT_8009d2b0 = 0;
+        GAME_PLAYER_MODE = 0;
         playerClimbJumpOff(o);
     }
 }

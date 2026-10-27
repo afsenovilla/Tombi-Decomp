@@ -40,7 +40,7 @@ extern int D_8011114C;
 extern void * D_80111150;
 extern Hud D_800B1410;
 extern unsigned char D_8009C970, D_8009D2B1;
-extern unsigned short GAME, D_8009C962, D_8009D2A4;
+extern unsigned short GAME, GAME_SELECTED_SECTION, D_8009D2A4;
 extern short D_8010A058;
 extern Slot D_8010922C[], D_80109208[], D_801091D0[], D_80109C70[], D_80109BF8[], D_80109C58[];
 extern int D_801091C4[];
@@ -139,7 +139,7 @@ void func_800EFD6C(void)
         D_8011113E = 0xC8;
         D_80111140 = m->w10 + 1;
         D_80111142 = 0x7C15;
-        if (GAME == 9) D_8011114C = D_80108BC8[D_8009C962];
+        if (GAME == 9) D_8011114C = D_80108BC8[GAME_SELECTED_SECTION];
         else D_8011114C = D_80108B78[GAME];
         D_8011113C.font = D_800FFD98;
         subScreenDrawString(5, 0);
@@ -148,7 +148,7 @@ void func_800EFD6C(void)
         D_8011113C.attr = 0x7C15;
         D_80111140 = m->w10 + 1;
         D_80111150 = D_800FFD98;
-        D_8011114C = D_80108E5C[GAME][D_8009C962];
+        D_8011114C = D_80108E5C[GAME][GAME_SELECTED_SECTION];
         subScreenDrawString(5, 0);
         {
         Slot *s;

@@ -8,8 +8,8 @@ typedef struct { unsigned char a, b, c; signed char d; } P4;
 extern signed char D_80011EB4[];
 extern P4 D_80011E5C[];
 extern void *D_8012E024;
-extern Fix16 *D_800A6078[0], *D_800A607C[];
-extern unsigned short D_800A604E[];
+extern Fix16 *PLAYER_H[0], *PLAYER_D[];
+extern unsigned short PLAYER_Y[];
 extern short FUN_8001fddc(short, int);
 extern short FUN_8001fdac(short, int);
 extern void FUN_8001fe6c(TObj *);
@@ -63,9 +63,9 @@ void tearJarHeld(TObj *o)
         dy = FUN_8001fdac(a, p->d);
         o->visible = PLAYER.obj.visible;
         o->animFrame = PLAYER.obj.animFrame & 1;
-        o->h->p.whole = D_800A6078[0]->p.whole + dx;
-        o->y.p.whole = D_800A604E[0] + dy;
-        o->d->p.whole = D_800A607C[0]->p.whole;
+        o->h->p.whole = PLAYER_H[0]->p.whole + dx;
+        o->y.p.whole = PLAYER_Y[0] + dy;
+        o->d->p.whole = PLAYER_D[0]->p.whole;
         o->d8c = ((int*)&PLAYER.obj.d8c)[0];
         o->b0f = ((unsigned char*)&PLAYER.obj.b0f)[0] + p->b;
         o->category |= 0x80;
@@ -81,9 +81,9 @@ void tearJarHeld(TObj *o)
             t = u; t &= 0xff;
         }
         a = (short)t;
-        o->h->p.whole = D_800A6078[0]->p.whole + FUN_8001fddc(a, p->d);
-        o->y.p.whole = D_800A604E[0] + FUN_8001fdac(a, p->d);
-        o->d->p.whole = D_800A607C[0]->p.whole;
+        o->h->p.whole = PLAYER_H[0]->p.whole + FUN_8001fddc(a, p->d);
+        o->y.p.whole = PLAYER_Y[0] + FUN_8001fdac(a, p->d);
+        o->d->p.whole = PLAYER_D[0]->p.whole;
         o->d8c = ((int*)&PLAYER.obj.d8c)[0];
         o->b0f = ((unsigned char*)&PLAYER.obj.b0f)[0] + p->b;
         FUN_8001e4f0(9);

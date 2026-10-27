@@ -5,7 +5,7 @@
 // Demo version of PAL main0 8003BE14 (updateItemPickupAnim.c): no subtype 13 exception.
 #include "TOBJ.H"
 extern unsigned char DAT_8007a138[];
-extern char DAT_80077d0c[], DAT_80077cdc[];
+extern char MOVE_TABLE_2[], MOVE_TABLE_0[];
 extern void SfxPlay(int);
 extern void awardAPByArea(int, int, int, int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -22,9 +22,9 @@ void updateItemPickupAnim(TObj *o)
         o->b0f = 4;
         o->velV = -0x400;
         o->ba5 = 0;
-        o->movetab = DAT_80077d0c;
+        o->movetab = MOVE_TABLE_2;
         if (o->animFrame & 2)
-            o->movetab = DAT_80077cdc;
+            o->movetab = MOVE_TABLE_0;
         o->state = o->state + 1;
         break;
     case 1:
@@ -48,7 +48,7 @@ void updateItemPickupAnim(TObj *o)
 #else
 #include "TOBJ.H"
 extern unsigned char DAT_8007a138[];
-extern char DAT_80077d0c[], DAT_80077cdc[];
+extern char MOVE_TABLE_2[], MOVE_TABLE_0[];
 extern void SfxPlay(int);
 extern void awardAPByArea(int, int, int, int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -67,9 +67,9 @@ void updateItemPickupAnim(TObj *o)
             o->b0f = 4;
         }
         o->velV = -0x400;
-        o->movetab = DAT_80077d0c;
+        o->movetab = MOVE_TABLE_2;
         if (o->animFrame & 2)
-            o->movetab = DAT_80077cdc;
+            o->movetab = MOVE_TABLE_0;
         o->state = o->state + 1;
         break;
     case 1:

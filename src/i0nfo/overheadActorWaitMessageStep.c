@@ -4,8 +4,8 @@
 extern void func_8001FEC0(TObj *o);
 extern signed char D_8009C93F[];
 extern signed char D_8009C942[];
-extern signed char D_800A603D;
-extern signed char D_800A603E;
+extern signed char PLAYER_SUBSTATE;
+extern signed char PLAYER_STEP;
 extern signed char D_800A60E4[];
 
 void overheadActorWaitMessageStep(TObj *o)
@@ -24,8 +24,8 @@ void overheadActorWaitMessageStep(TObj *o)
             D_8009C93F[0] = 0;
             D_800A60E4[0] = 0;
             if (!(o->w74 & 0x80)) {
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
             }
             o->b68 = 0;
             o->b6a = 0;

@@ -38,7 +38,7 @@ extern int *DAT_1f800310pA[];
 #define DAT_1f800310p DAT_1f800310pA[0]
 extern int DAT_1f800310A[];
 #define DAT_1f800310 DAT_1f800310A[0]
-extern char D_800E3E28[];
+extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
 
@@ -76,8 +76,8 @@ int func_80116924(S *o)
         q = DAT_1f800318;
     tail:
         q += p[1];
-        o->db8 = (int)D_800E3E28;
-        o->da8 = (int)D_800E3E28;
+        o->db8 = (int)MODEL_PRIM_BUFFERS;
+        o->da8 = (int)MODEL_PRIM_BUFFERS;
         o->dbc = q;
         copyModelPrimGroups(a, o->db8);
         return 0;

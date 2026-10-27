@@ -10,8 +10,8 @@ typedef struct {
     unsigned char b3c; unsigned char b3d; char p2[0x1a]; unsigned short w58;
 } O;
 extern S PLAYER;
-extern P *D_800A6078;
-extern P *D_800A607C;
+extern P *PLAYER_H;
+extern P *PLAYER_D;
 extern unsigned short D_8009C960h;
 extern unsigned char D_800A60D6;
 extern void cameraFollowPlayerX(O *);
@@ -27,12 +27,12 @@ static __inline__ void Clamp(O *o)
         unsigned short x = o->d34->w2;
         short t;
         t = x - 0x90;
-        if (D_800A6078->w2 < t) {
-            D_800A6078->w2 = t;
+        if (PLAYER_H->w2 < t) {
+            PLAYER_H->w2 = t;
         } else {
             t = x + 0x90;
-            if (t < D_800A6078->w2)
-                D_800A6078->w2 = t;
+            if (t < PLAYER_H->w2)
+                PLAYER_H->w2 = t;
         }
         if ((*(int*)&GAME.selectedArea) == 0x2000E) {
             if (s->w16 < o->w30 - 0x5c)
@@ -94,7 +94,7 @@ void updateCameraFollow(O *o)
                 cameraFollowPlayerY(o);
             break;
         }
-        o->d38->w2 = D_800A607C->w2;
+        o->d38->w2 = PLAYER_D->w2;
     }
     cameraFollowRampStep(o);
     updateCameraScroll(o);

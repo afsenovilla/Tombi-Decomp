@@ -14,7 +14,7 @@ extern unsigned char D_8009C93A;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009CFF9;
-extern unsigned char D_8009D2B0;
+extern unsigned char GAME_PLAYER_MODE;
 
 void topdownPlayerLandStep(TObj *o)
 {
@@ -90,7 +90,7 @@ void topdownPlayerLandStep(TObj *o)
         o->step = 0;
         o->state = 0;
         D_8009C93A = 1;
-        D_8009D2B0 = 0;
+        GAME_PLAYER_MODE = 0;
         D_8009C942 = 0;
         D_8009C93F = 0;
         break;

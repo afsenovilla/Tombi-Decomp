@@ -6,8 +6,8 @@ extern void func_80027810(TObj *o);
 extern void func_8002A4D0(TObj *o);
 extern void (*D_80079AD0[])(TObj *o);
 extern unsigned char D_8009C93A;
-extern short D_800A604A;
-extern unsigned short D_800A604E;
+extern short PLAYER_X;
+extern unsigned short PLAYER_Y;
 
 void topdownSectionStepD(TObj *o)
 {
@@ -17,12 +17,12 @@ void topdownSectionStepD(TObj *o)
         func_80027810(o);
         break;
     case 1:
-        if (D_800A604A < -0x74) {
-            if ((unsigned)(D_800A604E - 0x208) < 0xA) func_800270A0(o, 1, 0);
-        } else if (D_800A604A > 0x93) {
-            if ((short)D_800A604E < 0x4A) func_800270A0(o, 1, 2);
-        } else if ((unsigned short)(D_800A604A - 0x6B) < 8) {
-            if ((unsigned)(D_800A604E - 0x13F) < 2) func_800270A0(o, 1, 1);
+        if (PLAYER_X < -0x74) {
+            if ((unsigned)(PLAYER_Y - 0x208) < 0xA) func_800270A0(o, 1, 0);
+        } else if (PLAYER_X > 0x93) {
+            if ((short)PLAYER_Y < 0x4A) func_800270A0(o, 1, 2);
+        } else if ((unsigned short)(PLAYER_X - 0x6B) < 8) {
+            if ((unsigned)(PLAYER_Y - 0x13F) < 2) func_800270A0(o, 1, 1);
         }
         D_80079AD0[o->subtype](o);
         break;

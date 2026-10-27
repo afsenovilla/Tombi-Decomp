@@ -15,7 +15,7 @@ typedef struct {
     unsigned char b0e;
     signed char b0f;
 } S;
-extern unsigned short D_8009C962s;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short D_80078792;
 extern int APD_DATA[];
 extern void FUN_8004c570(S *);
@@ -34,7 +34,7 @@ void func_8004C1EC(S *o)
         o->b0e = ((unsigned short*)&GAME.selectedSection)[0];
         o->b4++;
         o->b5 = 0;
-        if (((unsigned short*)&GAME.selectedArea)[0] == 1 && GCD.bcdb5 == 0 && D_8009C962s < 2) {
+        if (((unsigned short*)&GAME.selectedArea)[0] == 1 && GCD.bcdb5 == 0 && GAME_SELECTED_SECTION < 2) {
             APD_DATA[0] = SPAD.i370;
             SPAD.i35c = SPAD.i374;
             APD_DATA[D_80078792] = SPAD.i378;
@@ -88,7 +88,7 @@ typedef struct {
     unsigned char b0e;
     signed char b0f;
 } S;
-extern unsigned short D_8009C962s;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short D_80078792;
 extern int APD_DATA[];
 extern void spawnSectionObjects(S *);
@@ -107,7 +107,7 @@ void updateSectionSpawnManager(S *o)
         o->b0e = ((unsigned short*)&GAME.selectedSection)[0];
         o->b4++;
         o->b5 = 0;
-        if (((unsigned short*)&GAME.selectedArea)[0] == 1 && !(GAME.purifiedAreas & 1) && GCD.bcdb5 == 0 && D_8009C962s < 2) {
+        if (((unsigned short*)&GAME.selectedArea)[0] == 1 && !(GAME.purifiedAreas & 1) && GCD.bcdb5 == 0 && GAME_SELECTED_SECTION < 2) {
             APD_DATA[0] = SPAD.i370;
             SPAD.i35c = SPAD.i374;
             APD_DATA[D_80078792] = SPAD.i378;

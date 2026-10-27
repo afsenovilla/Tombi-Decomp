@@ -4,9 +4,9 @@
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 typedef struct { unsigned char b0, b1; unsigned short w2; short w4; } X;
-extern char D_80077CDC[];
-extern char D_80077CF4[];
-extern char D_80077D0C[];
+extern char MOVE_TABLE_0[];
+extern char MOVE_TABLE_1[];
+extern char MOVE_TABLE_2[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
 extern void playSFX(int);
@@ -55,7 +55,7 @@ void komaPigLeap(TObj *o)
         playSFX(7);
         o->timer = 4;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 0x19;
         o->substep++;
         SETANIM(0x19);
@@ -87,7 +87,7 @@ void komaPigLeap(TObj *o)
         o->b9c = 1;
         o->velV = -0x280;
         o->d8c = 0;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->substep++;
         x2->b1 = 1;
         o->wac = 0x1a;
@@ -115,7 +115,7 @@ void komaPigLeap(TObj *o)
             if (o->velV < 0) {
                 o->b9c = 1;
             }
-            o->movetab = D_80077CDC;
+            o->movetab = MOVE_TABLE_0;
             break;
         }
         o->d8c = x2->w2;

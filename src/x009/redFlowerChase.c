@@ -16,7 +16,7 @@ extern void playSFX(int);
 extern int Rand(void);
 extern void *D_8012EA04[];
 extern unsigned char PLAYER;
-extern char D_80077D24[], D_80077D30[];
+extern char MOVE_TABLE_3[], D_80077D30[];
 
 static __inline__ short blocked(TObj *o)
 {
@@ -45,7 +45,7 @@ void redFlowerChase(TObj *o)
     case 0:
         ObjSetFacingToPlayer(o);
         o->w22 = 200;
-        o->movetab = D_80077D24;
+        o->movetab = MOVE_TABLE_3;
         o->wac = 3;
         o->state++;
         o->anim = D_8012EA04[0];

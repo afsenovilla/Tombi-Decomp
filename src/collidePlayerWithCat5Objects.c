@@ -2,7 +2,7 @@
 // MATCHING 80047a3c 180
 #include "gvars.h"
 #include "TOBJ.H"
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern short D_1f80019e;
 extern unsigned short D_1f800248;
 extern unsigned char **D_1f800228;
@@ -12,7 +12,7 @@ void collidePlayerWithCat5Objects(TObj *o)
     unsigned char **pp;
     unsigned char *p;
     if (GVARS.b38 != 0) return;
-    if (D_8009D2B0 == 3) return;
+    if (GAME_PLAYER_MODE == 3) return;
     pp = D_1f800228;
     D_1f80019e = D_1f800248;
     while (D_1f80019e != 0) {

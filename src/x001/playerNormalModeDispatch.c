@@ -9,7 +9,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
-extern unsigned char D_8009D2B0[];  /* [0]: keeps the store before the animFrame accesses */
+extern unsigned char GAME_PLAYER_MODE[];  /* [0]: keeps the store before the animFrame accesses */
 extern unsigned char *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void playerStepIdle(TObj *);
@@ -170,7 +170,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
 
     switch (o->step) {
     case 0:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         dirA(o);
         dirF(o);
         playerStepIdle(o);
@@ -178,12 +178,12 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerCheckGroundAndFall(o);
         break;
     case 1:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         dirA(o);
         dirF(o);
         FUN_800f1d44(o);
         if (SPAD.s1fc & SPAD.s3c6) {
-            D_8009D2B0[0] = 0;
+            GAME_PLAYER_MODE[0] = 0;
             o->b9c = 1;
             o->ba4 = 0;
             U8(o, 0xcd) = 0;
@@ -259,7 +259,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerStepLaneJump(o);
         break;
     case 19:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         playerStepSkidStop(o);
         turn(o);
         break;
@@ -277,12 +277,12 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerStepSlideSteer(o);
         break;
     case 0x1c:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         dirA(o);
         dirF(o);
         playerStepPush(o);
         if (SPAD.s1fc & SPAD.s3c6) {
-            D_8009D2B0[0] = 0;
+            GAME_PLAYER_MODE[0] = 0;
             o->b9c = 1;
             U8(o, 0xc3) = 0;
             o->step = 2;
@@ -299,7 +299,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerStepSlopeSlideB(o);
         break;
     case 0x1f:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         playerStepContactStop(o);
         playerTryAttack(o, 0);
         break;
@@ -382,11 +382,11 @@ void playerNormalModeDispatch(TObj *o, int p2)
         playerStep3CByArea(o);
         break;
     case 0x3d:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         playerStepSwim(o);
         break;
     case 0x3e:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         playerSwimDirFromPad(o);
         playerStepSwimUnderwater(o);
         break;
@@ -437,7 +437,7 @@ void playerNormalModeDispatch(TObj *o, int p2)
                 o->state = 0;
                 o->substep = 0;
                 o->active = 1;
-                D_8009D2B0[0] = 0;
+                GAME_PLAYER_MODE[0] = 0;
                 GVARS.b3a = 1;
             }
             break;

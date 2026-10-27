@@ -80,7 +80,7 @@ void updateL1Type02Reward(u8* self)
             if (GAME.selectedArea == 4) {
                 D_8009CEFB++;
                 func_80126760(self[3]);
-                if (D_8009BCCA < 4) {
+                if (GAME_SELECTED_SECTION < 4) {
                     sfx = 0xF7;
                 } else {
                     sfx = 0xF9;

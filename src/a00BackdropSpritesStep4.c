@@ -2,10 +2,10 @@
 // MATCHING 8011ac58 320
 #include "TOBJ.H"
 extern unsigned char DAT_800a603c[];
-extern unsigned char DAT_800a603d, DAT_800a603e, DAT_8009c93f, DAT_800a60a1;
+extern unsigned char PLAYER_SUBSTATE, PLAYER_STEP, DAT_8009c93f, DAT_800a60a1;
 extern unsigned char DAT_8009cdae;
-extern unsigned char DAT_800a603c_b;
-extern short DAT_800a6066, DAT_800a604e;
+extern unsigned char PLAYER_STATE;
+extern short DAT_800a6066, PLAYER_Y;
 
 void a00BackdropSpritesStep4(TObj *o)
 {
@@ -23,15 +23,15 @@ void a00BackdropSpritesStep4(TObj *o)
                 if (DAT_800a603c[0] != 1) {
                     DAT_800a6066 = 0;
                     DAT_800a603c[0] = 1;
-                    DAT_800a603d = 0;
-                    DAT_800a603e = 0;
+                    PLAYER_SUBSTATE = 0;
+                    PLAYER_STEP = 0;
                     DAT_8009c93f = 0;
                 }
             }
         }
         break;
     case 5:
-        if (DAT_8009cdae == 0xff && DAT_800a604e > -200 && DAT_800a60a1 != 0 && DAT_800a603c_b != 1) {
+        if (DAT_8009cdae == 0xff && PLAYER_Y > -200 && DAT_800a60a1 != 0 && PLAYER_STATE != 1) {
             o->step = 1;
             o->state = 0;
         }

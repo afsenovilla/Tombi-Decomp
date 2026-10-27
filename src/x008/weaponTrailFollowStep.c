@@ -7,9 +7,9 @@ extern unsigned char DAT_800a6039[];
 extern unsigned char DAT_800a6047;
 extern volatile unsigned short DAT_800a6066[];
 extern unsigned short DAT_800a6066s;
-extern Fix16 *DAT_800a6078;
-extern Fix16 *DAT_800a607c;
-extern unsigned short DAT_800a604e[];
+extern Fix16 *PLAYER_H;
+extern Fix16 *PLAYER_D;
+extern unsigned short PLAYER_Y[];
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
 
@@ -50,11 +50,11 @@ void weaponTrailFollowStep(TObj *o)
         }
         FUN_8001fec0(o);
         o->animFrame = DAT_800a6066[0] & 1;
-        w = DAT_800a6078->p.whole;
+        w = PLAYER_H->p.whole;
         hp = o->h;
         if (DAT_800a6066[0] & 1) hp->p.whole = w - (dx << 16 >> 16); else hp->p.whole = w + (dx << 16 >> 16);
-        o->y.p.whole = DAT_800a604e[0] + dy;
-        o->d->p.whole = DAT_800a607c->p.whole;
+        o->y.p.whole = PLAYER_Y[0] + dy;
+        o->d->p.whole = PLAYER_D->p.whole;
         switch (o->subtype) {
         case 0:
             if (q->state == 7)

@@ -6,7 +6,7 @@ extern void applyFrameVelocityX(TObj *);
 extern void func_80120438(TObj *);
 extern int komaPigCheckLanded(TObj *);
 extern TObj *FUN_80018448(void);
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern unsigned char D_80135B30[];
 extern unsigned short *D_80138734[];
 extern unsigned short *D_80138738[];
@@ -25,7 +25,7 @@ void komaPigJump(TObj *o)
     case 1:
         x->wc = o->d8c;
         x->we = 0;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->velV = -0x280;
         o->b9c = 1;
         o->b69 = 0;

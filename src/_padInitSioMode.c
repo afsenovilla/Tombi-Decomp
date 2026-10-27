@@ -7,7 +7,7 @@
 
 int _padInitSioMode(padPort* port)
 {
-    padSio* sio = D_80098210;
+    padSio* sio = PAD_SIO;
     sio->ctrl = 0x40;
     sio->ctrl = 0;
     sio->mode = 0xD;
@@ -16,7 +16,7 @@ int _padInitSioMode(padPort* port)
     {
         int index = D_800981EC;
         {
-            register padSio* regs = D_80098210;
+            register padSio* regs = PAD_SIO;
             register int control = 0x1003;
             if (index) {
                 control = 0x3003;
@@ -57,47 +57,47 @@ int _padInitSioMode(padPort* port)
             }
         }
     }
-    if (D_80098210->stat & 0x200) {
+    if (PAD_SIO->stat & 0x200) {
         {
-            register int control = D_80098210->ctrl;
-            D_80098210->ctrl = control | 0x10;
+            register int control = PAD_SIO->ctrl;
+            PAD_SIO->ctrl = control | 0x10;
         }
-        if (D_80098210->stat & 0x200) {
+        if (PAD_SIO->stat & 0x200) {
             while (chkRC2wait() == 0) {
             }
-            D_80098210->data = 1;
+            PAD_SIO->data = 1;
             setRC2wait(100);
             if (_padClrIntSio0() == 0) {
                 return 0;
             }
             sioWaitRxReady();
-            (void)D_80098210->data;
+            (void)PAD_SIO->data;
             setRC2wait(0x1ae);
             while (!(D_8009820C->stat & 0x80)) {
                 if (chkRC2wait()) {
                     return 0;
                 }
             }
-            D_80098210->data = 0x42;
+            PAD_SIO->data = 0x42;
             setRC2wait(0x3c);
             if (_padClrIntSio0() == 0) {
                 return 0;
             }
             sioWaitRxReady();
-            (void)D_80098210->data;
+            (void)PAD_SIO->data;
             setRC2wait(0x1ae);
             while (!(D_8009820C->stat & 0x80)) {
                 if (chkRC2wait()) {
                     return 0;
                 }
             }
-            D_80098210->data = 1;
+            PAD_SIO->data = 1;
             setRC2wait(0x3c);
             if (_padClrIntSio0() == 0) {
                 return 0;
             }
             sioWaitRxReady();
-            (void)D_80098210->data;
+            (void)PAD_SIO->data;
             return 0;
         }
         D_8009820C->stat = ~0x80;

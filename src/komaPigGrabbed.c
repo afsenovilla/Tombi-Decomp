@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern unsigned char D_800A60E4[];
 extern void *D_8013A1EC[];
 extern void *D_8013A1F0[];
@@ -47,7 +47,7 @@ void komaPigGrabbed(TObj *o)
             setAreaFlagBit(o->b6b);
         }
         spawnItemNotification(0, 6);
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         *(signed char *)&o->b0f = -7;
         o->b68 = 0;
         o->d8c = 0;

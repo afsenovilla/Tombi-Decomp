@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { short w0; unsigned short w2; } SB;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern unsigned short *D_8013878C[], *D_80138790[];
 extern char D_80138E10[];
 extern char D_801389CC[];
@@ -25,7 +25,7 @@ void komaPigWaitForPlayer(TObj *o)
 
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b69 = 0;
         o->wac = 0x25;
         o->state++;

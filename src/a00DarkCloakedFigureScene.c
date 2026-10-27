@@ -9,9 +9,9 @@ extern unsigned char DAT_8009cebe;
 extern unsigned char DAT_8009cebeA[];
 extern unsigned char DAT_8009cebeR;
 extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c942;
-extern unsigned char DAT_8009d2b0;
+extern unsigned char GAME_PLAYER_MODE;
 extern int DAT_8009c984;
-extern int DAT_8009c984a[];
+extern int GAME_AREA00_EVENT_CONTROL[];
 extern char DAT_80010748[];
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
@@ -34,7 +34,7 @@ void a00DarkCloakedFigureScene(TObj *o)
         DAT_8009c942 = 1;
         PLAYER.step = 0;
         PLAYER.state = 0;
-        DAT_8009d2b0 = 0;
+        GAME_PLAYER_MODE = 0;
         PLAYER.anim = DAT_80010748;
         AnimLoadDuration(&PLAYER);
         o->step++;
@@ -191,7 +191,7 @@ void a00DarkCloakedFigureScene(TObj *o)
         DAT_8009c93e = 0;
         DAT_8009c93f = 0;
         DAT_8009c942 = 0;
-        DAT_8009c984a[0] |= 0x80;
+        GAME_AREA00_EVENT_CONTROL[0] |= 0x80;
         break;
     case 4:
         if (--o->w08 != 0)

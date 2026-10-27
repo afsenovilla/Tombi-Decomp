@@ -2,7 +2,7 @@
 // MATCHING 8011ed24 640
 #include "spad.h"
 #include "TOBJ.H"
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void *D_80122FB8[];
 extern void *D_80122FBC;
 extern char D_8012302C[];
@@ -62,7 +62,7 @@ void updatePitchforkPig(TObj *o)
             o->b0f = 4;
             o->active = 2;
             o->velV = -0x400;
-            o->movetab = D_80077D0C;
+            o->movetab = MOVE_TABLE_2;
             o->step++;
             o->anim = D_80122FC4[0];
             FUN_8001fe6c(o);

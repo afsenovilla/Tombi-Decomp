@@ -11,7 +11,7 @@ typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
 extern TObj PLAYER;
 extern unsigned char D_800A4553[];
 extern int D_1F800190, D_1F80018C;
-extern unsigned char D_800A603C[], D_800A603D[];
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[];
 extern unsigned char D_8009E375[], D_8009E376[], D_8009E377[];
 extern unsigned char D_8009F085[], D_8009F086[], D_8009F087[];
 extern int evilPigBagPortalCheckPlayer(TObj *);
@@ -38,10 +38,10 @@ void evilPigBagPortalEnter(TObj *o)
     case 1:
         if (--o->timer == -1) {
             PLAYER.active = 5;
-            D_800A603C[0] = 5;
+            PLAYER_STATE[0] = 5;
             ((unsigned char*)&GVARS.b3e)[0] = 0;
             PLAYER.visible = 0;
-            D_800A603D[0] = 0x40;
+            PLAYER_SUBSTATE[0] = 0x40;
             o->timer = 0x14;
             o->state++;
             ((short*)&GAME.nextArea)[0] = 0xe;

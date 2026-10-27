@@ -11,12 +11,12 @@ extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned char D_8009CDD5;
 extern TObj *D_8009F304;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
-extern unsigned short D_800A604E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
+extern unsigned short PLAYER_Y;
 extern short D_800A6066;
-extern void *D_800A6078;
+extern void *PLAYER_H;
 
 void func_800F8D5C(TObj *o)
 {
@@ -25,19 +25,19 @@ void func_800F8D5C(TObj *o)
     TObj *b;
     switch (o->state) {
     case 0:
-        S16(D_800A6078, 2) = n->h->p.whole + 0x20;
-        D_800A604E = n->y.p.whole;
+        S16(PLAYER_H, 2) = n->h->p.whole + 0x20;
+        PLAYER_Y = n->y.p.whole;
         o->state++;
     case 1:
         if (D_8009C93A != 0) {
             topdownActorSetAnim(n, 8, 0);
             n->step = 2;
             n->state = 0;
-            D_800A603D = 4;
+            PLAYER_SUBSTATE = 4;
             D_8009C93F = 1;
             D_8009C942 = 1;
             D_800A6066 = 4;
-            D_800A603E = 0;
+            PLAYER_STEP = 0;
             o->state = 0x12;
         }
         break;
@@ -49,8 +49,8 @@ void func_800F8D5C(TObj *o)
         D_8009C93F = 0;
         D_8009C93E = 0;
         D_8009C942 = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
         o->step = 0;
         o->state = 0;
         break;

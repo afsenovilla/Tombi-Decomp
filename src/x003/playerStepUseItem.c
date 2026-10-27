@@ -29,7 +29,7 @@ extern unsigned char *BITTEN_OBJECT;
 extern int DAT_8009c934;
 extern int GAME[];
 extern unsigned char GVARS[], DAT_8009c93e, DAT_8009c93f, DAT_8009c940[], DAT_8009c941, DAT_8009c942;
-extern unsigned char DAT_8009d2b0, DAT_8009d2b1, DAT_8009d2c3;
+extern unsigned char GAME_PLAYER_MODE, DAT_8009d2b1, DAT_8009d2c3;
 extern unsigned char DAT_8009ce55, DAT_8009ce56, DAT_8009ce57, DAT_8009cee2, DAT_8009cf03, DAT_8009cdcc;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern char DAT_80010748[];
@@ -187,7 +187,7 @@ void playerStepUseItem(TObj *o)
         case 5: case 0x7c: case 0x97: case 0x98:
             DAT_8009c93f = 1;
             DAT_8009c942 = 1;
-            DAT_8009d2b0 = 3;
+            GAME_PLAYER_MODE = 3;
             o->b04 = 5;
             o->step = 5;
             o->state = 0;
@@ -197,7 +197,7 @@ void playerStepUseItem(TObj *o)
         case 7:
             DAT_8009c93f = 1;
             DAT_8009c942 = 1;
-            DAT_8009d2b0 = 3;
+            GAME_PLAYER_MODE = 3;
             o->b04 = 5;
             o->step = 5;
             o->state = 0;
@@ -271,7 +271,7 @@ void playerStepUseItem(TObj *o)
             o->timer = 0x1e;
             o->w22 = 0;
             reset(o);
-            DAT_8009d2b0 = 3;
+            GAME_PLAYER_MODE = 3;
             DAT_8009c93f = 1;
             DAT_8009c942 = 1;
             o->step = 0x30;

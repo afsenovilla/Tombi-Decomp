@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern TObj *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
-extern int DAT_8009c984[];
+extern int GAME_AREA00_EVENT_CONTROL[];
 extern unsigned short DAT_1f8001fc, DAT_1f8003c4, DAT_1f8003c6;
 extern char D_80010748[];
 extern void FUN_8001e4f0(int);
@@ -66,7 +66,7 @@ void playerStepContactStop(TObj *o)
             o->b9c = 1;
             o->b04 = 1;
             o->y.p.whole -= 8;
-            if ((DAT_8009c984[0] & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4)) {
+            if ((GAME_AREA00_EVENT_CONTROL[0] & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & DAT_1f8003c4)) {
                 o->ba7 = 1;
             }
             o->step = 2;

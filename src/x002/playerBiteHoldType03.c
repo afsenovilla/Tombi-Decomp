@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *BITTEN_OBJECT;
 extern unsigned short PAD_PRESSED;
-extern unsigned char DAT_8009d2b0;
+extern unsigned char GAME_PLAYER_MODE;
 extern unsigned short DAT_1f8001fc;
 extern unsigned short DAT_1f8003c6;
 extern void FUN_800ee680(TObj *);
@@ -71,7 +71,7 @@ void playerBiteHoldType03(TObj *o)
         o->h->p.whole = BITTEN_OBJECT->h->p.whole;
         BITTEN_OBJECT->y.p.whole = o->y.p.whole + o->wba;
         if (DAT_1f8001fc & DAT_1f8003c6) {
-            DAT_8009d2b0 = 0;
+            GAME_PLAYER_MODE = 0;
             o->b9c = 1;
             o->b69 = 0;
             o->wb2 = 0;

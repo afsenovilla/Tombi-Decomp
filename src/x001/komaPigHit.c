@@ -21,7 +21,7 @@ static AH *D_8013DB1C[5] = {
     (AH *)D_8013DD18,
 };
 extern unsigned char D_8013C800[];
-extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
+extern char MOVE_TABLE_2[], MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
@@ -90,7 +90,7 @@ void komaPigHit(TObj *o)
         o->b69 = 0;
         o->d8c = 0;
         o->animFrame = 1 - o->w7a;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 10;
         o->state++;
         SETANIM(D_8013DB10);
@@ -120,7 +120,7 @@ void komaPigHit(TObj *o)
         o->active = 3;
         o->velV = -0x280;
         o->d8c = 0;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->state++;
         t->a1 = 1;
         o->b69 = 0;
@@ -146,7 +146,7 @@ void komaPigHit(TObj *o)
         }
         c = t->a1--;
         if (c) {
-            o->movetab = D_80077CDC;
+            o->movetab = MOVE_TABLE_0;
             o->velV = ~(o->velV - 0x80) + 1;
             break;
         }

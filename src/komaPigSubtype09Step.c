@@ -4,7 +4,7 @@
 extern unsigned short *animp[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern void adv(void *), g(void *);
-extern char mt[];
+extern char MOVE_TABLE_0[];
 void komaPigSubtype09Step(TObj *o)
 {
     unsigned char *q;
@@ -12,7 +12,7 @@ void komaPigSubtype09Step(TObj *o)
     switch (o->state) {
     case 0:
         o->b69 = 1;
-        o->movetab = mt;
+        o->movetab = MOVE_TABLE_0;
         o->wac = 0x3a;
         o->state++;
         o->anim = a = animp[0];

@@ -9,11 +9,11 @@ INCLUDE_ASM_V("x00/nonmatchings/x00", func_80130E14_slps01144);
 typedef struct { TObj o; unsigned short c0, c2, c4, c6, c8, ca, cc, ce, d0; short d2; } E;
 #define EX(o) ((E *)(o))
 extern unsigned char DAT_8009c942;
-extern Fix16 *DAT_800a607c;
+extern Fix16 *PLAYER_D;
 extern int DAT_1f8002dc;
 extern int DAT_1f800350;
 extern char DAT_800d7e28[];
-extern char DAT_80077cdc[];
+extern char MOVE_TABLE_0[];
 extern char DAT_80077d90[];
 extern void *PTR_8013ad38[];
 extern void *PTR_8013ad3c[];
@@ -72,7 +72,7 @@ void updateRedBird(TObj *o)
         o->anim = PTR_8013ad38[0];
         FUN_8001fe6c(o);
         o->d3c = DAT_1f8002dc;
-        o->movetab = DAT_80077cdc;
+        o->movetab = MOVE_TABLE_0;
         o->timer = 1;
         *(signed char *)&o->b0f = -9;
         EX(o)->c4 = 0xffff;
@@ -134,7 +134,7 @@ void updateRedBird(TObj *o)
             EX(o)->ca = 1;
         else
             EX(o)->ca = 0;
-        if (DAT_800a607c->p.whole >= o->d->p.whole)
+        if (PLAYER_D->p.whole >= o->d->p.whole)
             o->w08 = FUN_8005e420(0xe0, 0x1f0);
         else
             o->w08 = FUN_8005e420(0xe0, 0x1f1);
@@ -212,7 +212,7 @@ void updateRedBird(TObj *o)
                 o->b0b = 1;
                 o->b0f = 4;
                 o->velV = -0x400;
-                o->movetab = DAT_80077cdc;
+                o->movetab = MOVE_TABLE_0;
                 o->wac = 5;
                 o->state++;
                 o->anim = PTR_8013ad44[0];

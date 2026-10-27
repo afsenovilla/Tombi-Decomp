@@ -5,12 +5,12 @@
 #include "common.h"
 #include "psyq/libcd.h"
 
-extern StHEADER* D_800A3F04;
-extern u32 D_800A3FD8;
+extern StHEADER* ST_RING_ADDR;
+extern u32 ST_RING_SIZE;
 
 void StSetRing(u_long* ring_addr, u_long ring_size)
 {
-    D_800A3F04 = (StHEADER*)ring_addr;
-    D_800A3FD8 = ring_size;
+    ST_RING_ADDR = (StHEADER*)ring_addr;
+    ST_RING_SIZE = ring_size;
     StClearRing();
 }

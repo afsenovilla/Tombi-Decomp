@@ -2,7 +2,7 @@
 // MATCHING 8012eba0 312
 #include "gvars.h"
 #include "TOBJ.H"
-extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern void setEventStarted(int, int, int);
 
 void underwaterPigBagEventStart(TObj *o)
@@ -13,9 +13,9 @@ void underwaterPigBagEventStart(TObj *o)
         break;
     case 1:
         if (GVARS.b3a == 0) break;
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 5;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         GVARS.b3f = 1;
         GVARS.b42 = 1;
         o->state++;
@@ -33,9 +33,9 @@ void underwaterPigBagEventStart(TObj *o)
         GVARS.b42 = 0;
         GVARS.b3e = 0;
         PLAYER = 1;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         o->step = 0;
         o->state = 0;
         break;

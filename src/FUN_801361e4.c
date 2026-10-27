@@ -1,7 +1,7 @@
 // FUNC 801361e4 480 X000
 // MATCHING 801361e4 480
-// probably: variant-0 scene init: allocates an unlayered type 0x17 at 0xA28/-0x140, a layer 4 type 0x18 at 0xA46/-0x10C and a layer 4 type 0x17 model at 0x9EA/-0x121 (flag 8 of DAT_8009c984)
-extern unsigned DAT_8009c984;
+// probably: variant-0 scene init: allocates an unlayered type 0x17 at 0xA28/-0x140, a layer 4 type 0x18 at 0xA46/-0x10C and a layer 4 type 0x17 model at 0x9EA/-0x121 (flag 8 of GAME_AREA00_EVENT_CONTROL)
+extern unsigned GAME_AREA00_EVENT_CONTROL;
 extern unsigned char DAT_8009cdac, DAT_8009cebf, DAT_800a60a3, DAT_800a60a2;
 extern int DAT_1f800334;
 extern unsigned char *FUN_80018448(void);
@@ -11,7 +11,7 @@ void FUN_801361e4(unsigned char *o)
 {
     unsigned char *a, *b, *c;
     int n;
-    unsigned *fl = &DAT_8009c984;
+    unsigned *fl = &GAME_AREA00_EVENT_CONTROL;
     *fl |= 8;
     if (DAT_8009cdac == 0xff) {
         o[4] = 3;

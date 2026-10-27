@@ -1,10 +1,10 @@
 // FUNC 8002f384 348 MAIN0
 // MATCHING 8002f384 348
 #include "TOBJ.H"
-extern void **PTR_80079d58;
+extern void **PLAYER_EFFECT_4E_ANIM_TABLE;
 extern unsigned char DAT_800a6039, DAT_800a6047[];
-extern unsigned short DAT_800a6066, DAT_800a604e[];
-extern short *DAT_800a6078, *DAT_800a607c[];
+extern unsigned short DAT_800a6066, PLAYER_Y[];
+extern short *PLAYER_H, *PLAYER_D[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 
@@ -13,7 +13,7 @@ void playerEffect4EStepB(TObj *o)
     unsigned char t;
     switch (o->state) {
     case 0:
-        o->anim = *PTR_80079d58;
+        o->anim = *PLAYER_EFFECT_4E_ANIM_TABLE;
         AnimLoadDuration(o);
         o->timer = 0x3c;
         o->state++;
@@ -38,10 +38,10 @@ void playerEffect4EStepB(TObj *o)
         o->b6b = t;
     }
     {
-        int x = DAT_800a6078[1];
+        int x = PLAYER_H[1];
         o->h->p.whole = (DAT_800a6066 & 1) ? x + 4 : x - 4;
     }
-    o->y.p.whole = DAT_800a604e[0] - 8;
-    o->d->p.whole = DAT_800a607c[0][1];
+    o->y.p.whole = PLAYER_Y[0] - 8;
+    o->d->p.whole = PLAYER_D[0][1];
     o->b0f = DAT_800a6047[0] - 1;
 }

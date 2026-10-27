@@ -18,11 +18,11 @@
 extern TObj PLAYER;
 extern unsigned short *D_800A605C;
 extern unsigned short D_800A6066;
-extern short D_800A604A[];
-extern short D_800A604E[];
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern short PLAYER_X[];
+extern short PLAYER_Y[];
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern short D_1F80016A[];
 extern short D_1F80016E[];
 extern int D_1F800168;
@@ -61,11 +61,11 @@ void swimTeacherIntroTalk(TObj *o)
             GVARS.b3f = 1;
             GVARS.b42 = 1;
             PLAYER.active = 5;
-            D_800A603C = 5;
-            D_800A603D = 100;
-            D_800A603E = 0;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 100;
+            PLAYER_STEP = 0;
             playerSetAnim(&PLAYER, 0x1e, 0);
-            D_800A604E[0] = -0x1e;
+            PLAYER_Y[0] = -0x1e;
             o->d34 = -0x1e0000;
             o->timer = 0x3c;
             o->state++;
@@ -154,8 +154,8 @@ void swimTeacherIntroTalk(TObj *o)
         o->y.raw += o->velV << 8;
         o->velY += 0x18;
         o->y.raw += (short)o->velY << 8;
-        D_800A604A[0] = o->a.p.whole - 8;
-        D_800A604E[0] = o->y.p.whole;
+        PLAYER_X[0] = o->a.p.whole - 8;
+        PLAYER_Y[0] = o->y.p.whole;
         if (o->velY > 0) {
             o->state++;
             SETANIM(8);
@@ -168,8 +168,8 @@ void swimTeacherIntroTalk(TObj *o)
         o->y.raw += o->velV << 8;
         o->velY += 0x18;
         o->y.raw += (short)o->velY << 8;
-        D_800A604A[0] = o->a.p.whole - 8;
-        D_800A604E[0] = o->y.p.whole;
+        PLAYER_X[0] = o->a.p.whole - 8;
+        PLAYER_Y[0] = o->y.p.whole;
         if (o->velY > 0x400) { o->state++; break; }
         break;
     case 8:
@@ -177,24 +177,24 @@ void swimTeacherIntroTalk(TObj *o)
         o->h->raw += o->velH << 8;
         o->y.raw += o->velY << 8;
         {
-            short *k = D_800A604A;
+            short *k = PLAYER_X;
             *k = o->a.p.whole - 8;
-            D_800A604E[0] = o->y.p.whole;
+            PLAYER_Y[0] = o->y.p.whole;
             if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x10)) {
                 o->state++;
                 SETANIM(9);
                 o->timer = 10;
                 D_800A6066 = 0;
-                D_800A603C = 5;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER_STATE = 5;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 *k -= 4;
             }
         }
         break;
     case 9:
         if (--o->timer == -1) {
-            short *k = D_800A604A;
+            short *k = PLAYER_X;
             *k -= 4;
             o->state++;
             ObjSetFacingToPlayer(o);
@@ -203,7 +203,7 @@ void swimTeacherIntroTalk(TObj *o)
         break;
     case 10:
         if (AnimAdvance(o)) {
-            short *k = D_800A604A;
+            short *k = PLAYER_X;
             *k -= 2;
             *(signed char *)&o->b0f = -7;
             o->state++;
@@ -213,7 +213,7 @@ void swimTeacherIntroTalk(TObj *o)
     case 11:
         SETANIM(5);
         {
-            short *k = D_800A604A;
+            short *k = PLAYER_X;
             *k -= 2;
         }
         ObjSetFacingToPlayer(o);
@@ -259,9 +259,9 @@ void swimTeacherIntroTalk(TObj *o)
         GVARS.b3f = 0;
         GVARS.b42 = 0;
         PLAYER.active = 1;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         o->state = 0;
         o->step++;
         break;

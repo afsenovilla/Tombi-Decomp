@@ -6,7 +6,7 @@
 typedef struct { short w0, w2; } X;
 #define XS(o) ((X *)((char *)(o) + 0xb4))
 
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern unsigned char D_80135CB0[];
 extern void *D_80139520[];
 extern int AnimAdvance(TObj *);
@@ -101,7 +101,7 @@ void spikyLizardHit(TObj *o)
             break;
         }
         o->velV = -0x400;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->d8c = 0;
         o->b9c = 1;
         o->state++;
@@ -153,7 +153,7 @@ void spikyLizardHit(TObj *o)
             SETANIM8(o);
             SPAWN(o);
             o->velV = -0x400;
-            o->movetab = D_80077CF4;
+            o->movetab = MOVE_TABLE_1;
             o->d8c = 0;
             o->state++;
             o->b9c = 1;

@@ -2,7 +2,7 @@
 // MATCHING 801344fc 376
 #include "gvars.h"
 #include "TOBJ.H"
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void *D_8013F1FC;
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
@@ -14,7 +14,7 @@ void segmentedCrawlerDefeated(TObj *o)
     case 0:
         p = (TObj *)o->d90;
         o->state++;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->velV = -0x400;
         o->animFrame &= 1;
         o->anim = D_8013F1FC;

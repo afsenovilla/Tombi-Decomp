@@ -2,7 +2,7 @@
 // MATCHING 8012078c 752
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1; char p2[8]; unsigned char b0a, b0b; short w0c; short w0e; } X;
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern unsigned char D_80130FD4[];
 extern unsigned short *D_80133BB4[];
 extern char D_801344F8[];
@@ -41,7 +41,7 @@ void komaPigJump(TObj *o)
     case 1:
         x->w0c = o->d8c;
         x->w0e = 0;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->velV = -0x280;
         o->b9c = 1;
         o->b69 = 0;

@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 
 extern unsigned char D_8009D119;
-extern unsigned char D_8007A7F0[];
-extern void (*D_8007A890[])(TObj *);
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
+extern void (*REWARD_HANDLERS[])(TObj *);
 extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern int AnimAdvance(TObj *);
@@ -28,7 +28,7 @@ void updateItemPickup(TObj *o)
             AnimAdvance(o);
         break;
     case 2:
-        D_8007A890[D_8007A7F0[o->subtype]](o);
+        REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype]](o);
         break;
     case 3:
         freeObjectLayer5(o);

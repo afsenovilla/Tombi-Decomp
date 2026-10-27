@@ -16,7 +16,7 @@ extern unsigned char D_8009C990[];
 extern unsigned char D_8009CEF7[];
 extern unsigned char D_8009CF06[];
 extern unsigned char D_8009D006[];
-extern signed char D_8009D2B0[];
+extern signed char GAME_PLAYER_MODE[];
 extern unsigned char D_8009D2B3[];
 extern unsigned short D_800A6040[];
 extern unsigned char D_800A60A3[];
@@ -87,7 +87,7 @@ void topdownPlayerInit(TObj *o)
         o->step = 0x63;
         o->state = 0;
         o->animFrame = 6;
-        if (D_8009D2B0[0] == 3) {
+        if (GAME_PLAYER_MODE[0] == 3) {
             o->b04 = 4;
             o->step = 5;
             o->state = 0;

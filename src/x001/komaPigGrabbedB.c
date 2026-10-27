@@ -16,7 +16,7 @@ typedef struct {
 extern AH *D_8013DB00[], *D_8013DB04[], *D_8013DB08[], *D_8013DB0C[];
 extern unsigned char D_8013C800[];
 extern unsigned short D_8013C8E8[];
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern void spawnItemNotification(int, int);
 extern short probeWallAt(TObj *, short, short, short);
 extern TObj *FUN_80018448(void);
@@ -168,7 +168,7 @@ void komaPigGrabbedB(TObj *o)
         }
         break;
     case 6:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->wac = 6;
         o->anim = D_8013DB00[0];
         p2 = &D_8013C800[((AH *)o->anim)->w2 * 4];

@@ -15,50 +15,50 @@ int getObjectRenderKind(u8* self)
 
     switch (GAME.selectedArea) {
     case 0:
-        if (D_8009BCCA == 3) {
+        if (GAME_SELECTED_SECTION == 3) {
             return self[0xA];
         }
         break;
     case 2:
-        if (D_8009BCCA == 0) {
+        if (GAME_SELECTED_SECTION == 0) {
             break;
         }
-        if (D_8009BCCA == 3) {
+        if (GAME_SELECTED_SECTION == 3) {
             break;
         }
         return self[0xA];
     case 6:
-        if ((u_int)(D_8009BCCA - 1) >= 2) {
+        if ((u_int)(GAME_SELECTED_SECTION - 1) >= 2) {
             break;
         }
         return self[0xA];
     case 5:
     case 8:
-        if (D_8009BCCA == 1 || D_8009BCCA == 3) {
+        if (GAME_SELECTED_SECTION == 1 || GAME_SELECTED_SECTION == 3) {
             return self[0xA];
         }
         break;
     case 9:
-        if (D_8009BCCA == 0) {
+        if (GAME_SELECTED_SECTION == 0) {
             break;
         }
-        if (D_8009BCCA == 6) {
+        if (GAME_SELECTED_SECTION == 6) {
             break;
         }
         return self[0xA];
     case 10:
-        if (D_8009BCCA == 8) {
+        if (GAME_SELECTED_SECTION == 8) {
             return self[0xA];
         }
         break;
     case 13:
     case 19:
-        if (D_8009BCCA == 1) {
+        if (GAME_SELECTED_SECTION == 1) {
             return self[0xA];
         }
         break;
     case 18:
-        if (D_8009BCCA == 2) {
+        if (GAME_SELECTED_SECTION == 2) {
             return self[0xA];
         }
         break;

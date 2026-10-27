@@ -2,7 +2,7 @@
 // MATCHING 800ed4d0 796
 #include "TOBJ.H"
 #include "raw7.h"
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern TObj PLAYER;
 extern signed char D_800A6047;
 #define LI(n) (*(TObj **)((char *)list + ((n) << 2)))
@@ -96,7 +96,7 @@ void topdownSortDrawOrder(void)
         LI(i++) = o;
     } while (k != 0);
     }
-    if (D_8009D2B0 != 3) {
+    if (GAME_PLAYER_MODE != 3) {
         total++;
         LI(i) = &PLAYER;
     }
@@ -128,7 +128,7 @@ void topdownSortDrawOrder(void)
         }
     }
     }
-    if (D_8009D2B0 == 3) {
+    if (GAME_PLAYER_MODE == 3) {
         D_800A6047 = -0xC;
     }
 }

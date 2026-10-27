@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 extern int D_1F80018C, D_1F800190;
 extern unsigned char D_800A4553[];
-extern char D_80077D6C[], D_80077D0C[];
+extern char D_80077D6C[], MOVE_TABLE_2[];
 extern void AnimLoadDuration(TObj *);
 extern void applyFrameVelocityX(TObj *);
 extern int evilPigBossCheckLanded(TObj *);
@@ -77,7 +77,7 @@ void evilPigBossDefeated(TObj *o)
         o->velV = -0x400;
         o->b9c = 1;
         o->b6a = 0;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->state++;
     case 3:
         if (o->w7a) o->d8c = (unsigned char)(o->d8c + 0x14);

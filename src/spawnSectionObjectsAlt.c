@@ -8,7 +8,7 @@ typedef struct {
     unsigned char f;
 } E4d;
 extern E4d ***DAT_8007b908[];
-extern unsigned short GAME, DAT_8009c962;
+extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern short AREA_SECTION_COUNTS[];
 extern void spawnObjectFromRecord(E4d *e, int k);
 extern int testAreaFlagBit(int k);
@@ -19,7 +19,7 @@ void spawnSectionObjectsAlt(void)
     E4d *e;
     short n;
     int k;
-    for (e = *t[DAT_8009c962 & 7]; e->type < 0xff; e++)
+    for (e = *t[GAME_SELECTED_SECTION & 7]; e->type < 0xff; e++)
         spawnObjectFromRecord(e, -1);
     n = AREA_SECTION_COUNTS[GAME];
     if (n >= 16)
@@ -27,7 +27,7 @@ void spawnSectionObjectsAlt(void)
     for (e = *t[n]; e->type < 0xff; e++) {
         k = e->f >> 2;
         if (testAreaFlagBit(k) == 0) {
-            if (e->a == DAT_8009c962 || e->a == ~DAT_8009c962)
+            if (e->a == GAME_SELECTED_SECTION || e->a == ~GAME_SELECTED_SECTION)
                 spawnObjectFromRecord(e, k);
         }
     }

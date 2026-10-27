@@ -2,7 +2,7 @@
 // MATCHING 8012a6a4 380
 #include "TOBJ.H"
 extern void applyAnimVelocityX(TObj *, unsigned short);
-extern char DAT_80077d0c[];
+extern char MOVE_TABLE_2[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *PTR_DAT_8013a1f8[];
 
@@ -18,7 +18,7 @@ void komaPigDefeated(TObj *o)
         o->b0f = 4;
         o->active = 2;
         o->velV = -0x400;
-        o->movetab = DAT_80077d0c;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 0x26;
         o->category |= 0x80;
         o->state++;

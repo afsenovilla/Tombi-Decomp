@@ -5,7 +5,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -38,9 +38,9 @@ void swimTeacherJumpInTalk(TObj *o)
             GVARS.b3f = 1;
             GVARS.b42 = 1;
             FUN_8001f8e4(o);
-            D_800A603C = 5;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             (*(short*)&PLAYER.obj.animFrame) = 1 - o->animFrame;
             o->d90 = showMessageBoxDirect(2, 0x18, &o->a);
             setAnim(o, ANIMS(o)[5]);
@@ -65,9 +65,9 @@ void swimTeacherJumpInTalk(TObj *o)
         p->b04 = 3;
         GVARS.b3f = 0;
         GVARS.b42 = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         o->state = 0;
         break;
     case 3:
@@ -76,9 +76,9 @@ void swimTeacherJumpInTalk(TObj *o)
         m = 2;
         n = 0x17;
     talk:
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 5;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         (*(short*)&PLAYER.obj.animFrame) = 1 - o->animFrame;
         o->d90 = showMessageBoxDirect(m, n, &o->a);
         setAnim(o, ANIMS(o)[5]);

@@ -6,7 +6,7 @@
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
-extern unsigned char DAT_8009c942[], DAT_8009d2b0;
+extern unsigned char DAT_8009c942[], GAME_PLAYER_MODE;
 extern unsigned char D_8009D12F;
 extern AT3 D_80118D34[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
@@ -23,7 +23,7 @@ void juiceSellerTalk(TObj *o)
         if (o->b68 == 0)
             break;
         v = *(B12 *)&o->a;
-        DAT_8009d2b0 = 2;
+        GAME_PLAYER_MODE = 2;
         DAT_8009c942[0] = 1;
         PLAYER.b04 = 5;
         PLAYER.step = 0;

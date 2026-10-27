@@ -5,7 +5,7 @@ extern unsigned char DAT_8009c990;
 extern unsigned short D_1f8001f8;
 extern short D_1f800238;
 extern TObj *FUN_80018448(void);
-extern unsigned short D_800a604a[];
+extern unsigned short PLAYER_X[];
 extern unsigned short PLAYER_FOOT_OFFSET_BY_DIR[];
 
 short spawnPlayerFootstepEffect(void)
@@ -33,9 +33,9 @@ short spawnPlayerFootstepEffect(void)
             o->type = 0x4e;
             o->subtype = DAT_8009c990 - 1;
             o->b0c = s;
-            o->a.p.whole = D_800a604a[0];
-            o->y.p.whole = D_800a604a[2];
-            o->b.p.whole = D_800a604a[4];
+            o->a.p.whole = PLAYER_X[0];
+            o->y.p.whole = PLAYER_X[2];
+            o->b.p.whole = PLAYER_X[4];
             t = PLAYER_FOOT_OFFSET_BY_DIR + ((D_1f8001f8 + 2) & 7) * 2;
             h->p.whole += t[0];
             o->y.p.whole += t[1];

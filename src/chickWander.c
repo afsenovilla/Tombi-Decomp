@@ -2,7 +2,7 @@
 // MATCHING 8012d9fc 768
 #include "spad.h"
 #include "TOBJ.H"
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern void *CHICK_ANIM;
 extern unsigned char CHICK_WANDER_RAND_TABLE[];
 extern int Rand(void);
@@ -17,7 +17,7 @@ void chickWander(TObj *o)
     short t;
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->animFrame = Rand() & 1;
         o->anim = CHICK_ANIM;
         AnimLoadDuration(o);

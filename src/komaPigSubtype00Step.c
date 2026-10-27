@@ -5,7 +5,7 @@
 // Demo version of PAL x000 8012B5D0 (komaPigSubtype00Step.c): State 6 asks FUN_80127720 instead of the inline range test.
 #include "spad.h"
 #include "TOBJ.H"
-extern char D_80077CF4[], D_80077CDC[];
+extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[], KOMA_PIG_WAIT_ANIM_BY_SUBTYPE[];
 extern unsigned short *KOMA_PIG_ANIMS[];
 extern unsigned short *D_8013A21C, *D_8013A220, *D_8013A268;
@@ -44,7 +44,7 @@ void komaPigSubtype00Step(TObj *o)
     unsigned short dy;
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b69 = 0;
         o->state++;
         o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
@@ -100,7 +100,7 @@ void komaPigSubtype00Step(TObj *o)
                 o->timer = 0x78;
                 o->state++;
                 ObjSetFacingToPlayer(o);
-                *(char **)((char *)o + 0x28) = D_80077CDC;
+                *(char **)((char *)o + 0x28) = MOVE_TABLE_0;
                 *(short *)((char *)o + 0xac) = 0x2f;
                 o->anim = D_8013A21C;
                 SetBox(o);
@@ -153,7 +153,7 @@ void komaPigSubtype00Step(TObj *o)
 #else
 #include "spad.h"
 #include "TOBJ.H"
-extern char D_80077CF4[], D_80077CDC[];
+extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[], KOMA_PIG_WAIT_ANIM_BY_SUBTYPE[];
 extern unsigned short *KOMA_PIG_ANIMS[];
 extern unsigned short *D_8013A21C, *D_8013A220, *D_8013A268;
@@ -192,7 +192,7 @@ void komaPigSubtype00Step(TObj *o)
     unsigned short dy;
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b69 = 0;
         o->state++;
         o->wac = KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[o->subtype];
@@ -248,7 +248,7 @@ void komaPigSubtype00Step(TObj *o)
                 o->timer = 0x78;
                 o->state++;
                 ObjSetFacingToPlayer(o);
-                *(char **)((char *)o + 0x28) = D_80077CDC;
+                *(char **)((char *)o + 0x28) = MOVE_TABLE_0;
                 *(short *)((char *)o + 0xac) = 0x2f;
                 o->anim = D_8013A21C;
                 SetBox(o);

@@ -8,8 +8,8 @@
 #include "gametask.h"
 extern unsigned char PLAYER[];
 extern unsigned char D_800A6039[];
-extern unsigned char D_800A603C[];
-extern unsigned char D_800A603D[];
+extern unsigned char PLAYER_STATE[];
+extern unsigned char PLAYER_SUBSTATE[];
 extern unsigned char D_800A4553[];
 extern int D_1F800190;
 extern int D_1F80018C;
@@ -37,10 +37,10 @@ void evilPigBagPortalEnter(TObj *o)
     case 1:
         if (--o->timer == -1) {
             PLAYER[0] = 5;
-            D_800A603C[0] = 5;
+            PLAYER_STATE[0] = 5;
             ((unsigned char*)&GVARS.b3e)[0] = 0;
             D_800A6039[0] = 0;
-            D_800A603D[0] = 0x40;
+            PLAYER_SUBSTATE[0] = 0x40;
             o->timer = 0x14;
             o->state++;
             (*(short*)&GAME.nextArea) = 0xe;

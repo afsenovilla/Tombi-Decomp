@@ -6,7 +6,7 @@
 #include "gamestate.h"
 typedef struct { unsigned short a; unsigned short pad[0x118]; unsigned short bits[2]; } S;
 extern unsigned short AREA_SECTION_COUNTS[];
-extern S D_8009C962;
+extern S GAME_SELECTED_SECTION;
 
 int testSectionFlagBit(int n)
 {
@@ -14,16 +14,16 @@ int testSectionFlagBit(int n)
     int s = 0;
     int m;
     for (i = 0; i < GAME.selectedArea; i++) s += AREA_SECTION_COUNTS[i] * 2;
-    s += D_8009C962.a;
+    s += GAME_SELECTED_SECTION.a;
     if (n >= 32) s++;
     m = n % 32;
-    return *(int *)&D_8009C962.bits[s * 2] & (1 << m);
+    return *(int *)&GAME_SELECTED_SECTION.bits[s * 2] & (1 << m);
 }
 #else
 #include "gamestate.h"
 typedef struct { unsigned short a; unsigned short pad[0x118]; unsigned short bits[2]; } S;
 extern unsigned short AREA_SECTION_COUNTS[];
-extern S D_8009C962;
+extern S GAME_SELECTED_SECTION;
 
 int testSectionFlagBit(int n)
 {
@@ -31,9 +31,9 @@ int testSectionFlagBit(int n)
     int s = 0;
     int m;
     for (i = 0; i < GAME.selectedArea; i++) s += AREA_SECTION_COUNTS[i];
-    s += D_8009C962.a;
+    s += GAME_SELECTED_SECTION.a;
     if (n >= 32) s++;
     m = n % 32;
-    return *(int *)&D_8009C962.bits[s * 2] & (1 << m);
+    return *(int *)&GAME_SELECTED_SECTION.bits[s * 2] & (1 << m);
 }
 #endif

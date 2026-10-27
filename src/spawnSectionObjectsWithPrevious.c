@@ -1,7 +1,7 @@
 // FUNC 8004c848 696 MAIN0
 // MATCHING 8004c848 696
 typedef struct { signed char f0; char p1; unsigned char f2; char p3[0xc]; unsigned char ff; } R;
-extern unsigned short GAME, DAT_8009c962;
+extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern char D_8007B720[];
 extern char D_8007B73C[];
 extern char D_8007B754[];
@@ -41,13 +41,13 @@ void spawnSectionObjectsWithPrevious(signed char *o)
     short i;
     int s;
     tbl = DAT_8007b908[GAME];
-    for (r = *tbl[DAT_8009c962 & 7]; r->f2 < 0xff; r++)
+    for (r = *tbl[GAME_SELECTED_SECTION & 7]; r->f2 < 0xff; r++)
         if (r->f0 >= 0) spawnObjectFromRecord(r, -1);
     i = AREA_SECTION_COUNTS[GAME];
     if (AREA_SECTION_COUNTS[GAME] >= 16) i = 15;
     for (r = *tbl[i]; r->f2 < 0xff; r++) {
         s = r->ff >> 2;
-        if (!testAreaFlagBit(s) && r->f0 == DAT_8009c962) spawnObjectFromRecord(r, s);
+        if (!testAreaFlagBit(s) && r->f0 == GAME_SELECTED_SECTION) spawnObjectFromRecord(r, s);
     }
     if (o[0xe] > 0) {
         R ***tbl;
@@ -55,13 +55,13 @@ void spawnSectionObjectsWithPrevious(signed char *o)
         short i;
         int s;
         tbl = DAT_8007b908[GAME];
-        for (r = *tbl[(DAT_8009c962 - 1) & 7]; r->f2 < 0xff; r++)
+        for (r = *tbl[(GAME_SELECTED_SECTION - 1) & 7]; r->f2 < 0xff; r++)
             if (r->f0 < 0) spawnObjectFromRecord(r, -1);
         i = AREA_SECTION_COUNTS[GAME];
         if (AREA_SECTION_COUNTS[GAME] >= 16) i = 15;
         for (r = *tbl[i]; r->f2 < 0xff; r++) {
             s = r->ff >> 2;
-            if (!testAreaFlagBit(s) && r->f0 == -DAT_8009c962) spawnObjectFromRecord(r, s);
+            if (!testAreaFlagBit(s) && r->f0 == -GAME_SELECTED_SECTION) spawnObjectFromRecord(r, s);
         }
     }
 }

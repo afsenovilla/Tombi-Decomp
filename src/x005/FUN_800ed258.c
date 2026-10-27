@@ -30,13 +30,13 @@ typedef struct {
 typedef struct { int d0; int b8; int bc; char p0c[0xc]; short wcc; } E;
 extern unsigned char DAT_8009c93e;
 extern unsigned char DAT_800a60d4;
-extern short DAT_800a604e;
+extern short PLAYER_Y;
 extern int DAT_8009c978;
 extern int DAT_8009c97c;
 extern int DAT_8009c978A[];
 extern unsigned char DAT_8009d079;
 extern int *VILLAGER_NPC_WALK_PATHS[];
-extern char D_800E3E28[];
+extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, int);
 extern void FUN_80024ea0(int, int, int);
 extern short FUN_8001e4f0(int);
@@ -66,7 +66,7 @@ void FUN_800ed258(S *o)
         p = VILLAGER_NPC_WALK_PATHS[o->b0c];
         p = (int *)(*p + ((int *)*(int *volatile *)p)[1]);
         e->bc = (int)p;
-        e->b8 = (int)(D_800E3E28 + o->b0c * 0x1600);
+        e->b8 = (int)(MODEL_PRIM_BUFFERS + o->b0c * 0x1600);
         o->da8 = e->b8;
         copyModelPrimGroups(o->da0, e->b8);
         o->state = 1;
@@ -89,7 +89,7 @@ void FUN_800ed258(S *o)
             }
             t = (e->wcc * 9 >> 10) - 0x36;
             if ((o->b69 & 1) && DAT_800a60d4 == 0)
-                DAT_800a604e += t + o->box2;
+                PLAYER_Y += t + o->box2;
             o->box2 = -t;
             o->box3 = -t;
             FUN_80024ea0(e->b8, e->bc, e->wcc);

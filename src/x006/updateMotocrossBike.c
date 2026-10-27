@@ -12,8 +12,8 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 #define W3A(o) ((o)->d38 >> 16)
 
 extern char D_1F800000[];
-extern unsigned short D_8009C962, D_8009C982;
-extern unsigned short D_8009C962_b[] asm("D_8009C962");
+extern unsigned short GAME_SELECTED_SECTION, D_8009C982;
+extern unsigned short D_8009C962_b[] asm("GAME_SELECTED_SECTION");
 extern void *D_801229A4[];
 extern TObj *ObjAlloc(void);
 extern int ObjCullRegister(TObj *);
@@ -85,7 +85,7 @@ void updateMotocrossBike(TObj *o_)
             v.vy = o->d88;
             v.vz = o->d8c;
             RotMatrix(&v, m);
-            if (D_8009C962 == 0) {
+            if (GAME_SELECTED_SECTION == 0) {
                 TObj *f = ObjAlloc();
                 if (f) {
                     f->active = 1;
@@ -130,7 +130,7 @@ void updateMotocrossBike(TObj *o_)
         ObjCullRegister(o);
         switch (o->b0c) {
         case 0:
-            if (D_8009C962 == 0) {
+            if (GAME_SELECTED_SECTION == 0) {
                 motocrossBikeRide(o);
             } else {
                 unsigned char t = o->step;
@@ -164,7 +164,7 @@ void updateMotocrossBike(TObj *o_)
             RotMatrix(&v, m);
             break;
         case 1:
-            if (D_8009C962 == 0) {
+            if (GAME_SELECTED_SECTION == 0) {
                 motocrossBikeBob(o);
             } else {
                 unsigned char t = o->step;

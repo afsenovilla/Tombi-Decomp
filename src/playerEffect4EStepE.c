@@ -4,7 +4,7 @@
 #include "gamestate.h"
 #include "player.h"
 typedef struct { void **a; int p[2]; } A12;
-extern A12 D_80079D58[];
+extern A12 PLAYER_EFFECT_4E_ANIM_TABLE[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 
@@ -12,7 +12,7 @@ void playerEffect4EStepE(TObj *o)
 {
     switch (o->state) {
     case 0:
-        o->anim = D_80079D58[o->subtype].a[o->b0c];
+        o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].a[o->b0c];
         AnimLoadDuration(o);
         o->visible = PLAYER.obj.visible;
         o->b0f = PLAYER.obj.b0f - 1;

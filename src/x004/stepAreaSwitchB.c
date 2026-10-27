@@ -5,7 +5,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 
 int stepAreaSwitchB(TObj *o)
 {
@@ -25,7 +25,7 @@ int stepAreaSwitchB(TObj *o)
             return 2;
         }
         if (GVARS.b3a) return 0;
-        if (D_8009D2B0 >= 3) break;
+        if (GAME_PLAYER_MODE >= 3) break;
         o->state = 3;
         o->d30 = 0;
         o->h->p.whole -= 0x20;

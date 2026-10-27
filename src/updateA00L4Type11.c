@@ -15,7 +15,7 @@ INCLUDE_ASM_V("x00/nonmatchings/x00", func_80117F48_slpm80165);
 #include "player.h"
 extern void *D_8013B2BC[];
 extern int D_1F8002D4[];
-extern Fix16 *D_800A607C[];
+extern Fix16 *PLAYER_D[];
 extern void AnimLoadDuration(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void AnimAdvance(TObj *o);
@@ -104,7 +104,7 @@ void func_8011F500(TObj *o)
         o->d84 = 0;
         o->d88 = 0;
         o->d8c = 0;
-        o->d->p.whole = D_800A607C[0]->p.whole;
+        o->d->p.whole = PLAYER_D[0]->p.whole;
         o->b04++;
     }
 }

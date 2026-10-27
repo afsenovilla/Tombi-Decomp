@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { short w0; short w2; } P;
 typedef struct { void **tab; int a; int b; } AT;
-extern AT D_80079D58[];
+extern AT PLAYER_EFFECT_4E_ANIM_TABLE[];
 extern unsigned short D_1F8001F8;
 extern TObj PLAYER;
 extern P *D_800A6078, *D_800A607C;
@@ -23,27 +23,27 @@ void playerEffect4EStepC(TObj *o)
         switch (o->b0c) {
         case 5:
             o->d84 = 0;
-            o->anim = D_80079D58[o->subtype].tab[5];
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[5];
             break;
         case 6:
             o->d84 = 0x56;
-            o->anim = D_80079D58[o->subtype].tab[6];
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[6];
             break;
         case 7:
             o->d84 = 0xab;
-            o->anim = D_80079D58[o->subtype].tab[7];
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[7];
             break;
         case 8:
             o->d84 = 0x2c;
-            o->anim = D_80079D58[o->subtype].tab[5];
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[5];
             break;
         case 9:
             o->d84 = 0x7f;
-            o->anim = D_80079D58[o->subtype].tab[6];
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[6];
             break;
         case 10:
             o->d84 = 0xd4;
-            o->anim = D_80079D58[o->subtype].tab[7];
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[7];
             break;
         }
         AnimLoadDuration(o);

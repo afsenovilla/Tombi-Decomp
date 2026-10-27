@@ -5,7 +5,7 @@
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { void **p; int x, y; } AT;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern AT D_80119990[];
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -17,7 +17,7 @@ void func_80117864(TObj *o)
     case 0:
         GVARS.b42 = 1;
         GVARS.b3f = 1;
-        D_8009D2B0 = 2;
+        GAME_PLAYER_MODE = 2;
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;

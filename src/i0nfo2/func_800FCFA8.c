@@ -2,14 +2,14 @@
 // MATCHING 800fcfa8 320
 #include "TOBJ.H"
 #include "raw7.h"
-extern short D_800A604A, D_800A604E;
+extern short PLAYER_X, PLAYER_Y;
 extern short D_80100788[];
 
 void func_800FCFA8(TObj *o)
 {
     int i;
     short *p, *q, *b;
-    short px = D_800A604A, py = D_800A604E;
+    short px = PLAYER_X, py = PLAYER_Y;
     int pad[1];
     i = 0;
     b = D_80100788;

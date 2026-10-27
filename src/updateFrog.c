@@ -12,15 +12,15 @@
 typedef struct { signed char anim, z, ang, rad; } E4;
 typedef struct { char c[12]; } V12;
 extern TObj PLAYER;
-extern unsigned char D_800A6039, D_800A6047, D_800A603C, D_800A603D, D_800A60DA;
+extern unsigned char D_800A6039, D_800A6047, PLAYER_STATE, PLAYER_SUBSTATE, D_800A60DA;
 extern unsigned short D_800A6066;
 extern unsigned short *D_800A605C[];
-extern Fix16 *D_800A6078;
+extern Fix16 *PLAYER_H;
 extern int D_800A609C;
-extern Fix16 *D_800A607Ca[];
+extern Fix16 *PLAYER_D[];
 extern int D_800A60C4a[];
-extern int D_8009C984A[];
-#define D_8009C984 D_8009C984A[0]
+extern int GAME_AREA00_EVENT_CONTROL[];
+#define D_8009C984 GAME_AREA00_EVENT_CONTROL[0]
 extern int D_8009C984s;
 extern int D_1F8002D4[];
 extern void *FROG_ANIMS[];
@@ -155,20 +155,20 @@ void updateFrog(TObj *o)
                 t = u; t &= 0xff;
             }
             ang = (short)t;
-            o->h->p.whole = D_800A6078->p.whole + MulCos(ang, e->rad);
+            o->h->p.whole = PLAYER_H->p.whole + MulCos(ang, e->rad);
             o->y.p.whole = PLAYER.y.p.whole + MulNegSinScaled(ang, e->rad);
-            o->d->p.whole = D_800A607Ca[0]->p.whole;
+            o->d->p.whole = PLAYER_D[0]->p.whole;
             o->d8c = D_800A60C4a[0];
             o->b0f = D_800A6047 + (unsigned char)e->z;
-            if (D_800A603C == 2) {
+            if (PLAYER_STATE == 2) {
                 D_8009C984 &= ~2;
                 o->b04 = 2;
                 o->step = 5;
                 o->state = 0;
             }
             if (GAME.selectedArea != 0) break;
-            if (GAME.selectedSection == 0 && D_800A603D == 0x20 && D_800A607Ca[0]->p.whole > 0 &&
-                PLAYER.y.p.whole >= -0x2f && (unsigned short)(D_800A6078->p.whole - 0x400) < 0x18) {
+            if (GAME.selectedSection == 0 && PLAYER_SUBSTATE == 0x20 && PLAYER_D[0]->p.whole > 0 &&
+                PLAYER.y.p.whole >= -0x2f && (unsigned short)(PLAYER_H->p.whole - 0x400) < 0x18) {
                 D_8009C984s &= ~2;
                 o->b04 = 2;
                 o->step = 5;
@@ -184,10 +184,10 @@ void updateFrog(TObj *o)
             }
             switch (GAME.selectedSection) {
             case 2:
-                if (D_800A6078->p.whole >= 0xa61) o->step = 6;
+                if (PLAYER_H->p.whole >= 0xa61) o->step = 6;
                 break;
             case 5:
-                if (D_800A6078->p.whole >= 0xbd && D_800A60DA == 0) {
+                if (PLAYER_H->p.whole >= 0xbd && D_800A60DA == 0) {
                     o->step = 4;
                     GVARS.b42 = 1;
                     GVARS.b3f = 1;

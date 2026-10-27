@@ -5,7 +5,7 @@
 /* vsync handler of the pad driver (US func_80069058, libpad/padmain.c): polls both ports. Library code: assembled with GNU as, see padlocal.h. */
 typedef struct { unsigned char pad[0xf0]; } E;
 typedef struct { unsigned char pad[0xa]; unsigned short a; unsigned short c; unsigned short e; } H;
-extern H *D_80098210;
+extern H *PAD_SIO;
 extern int D_80098214;
 extern int D_800981FC;
 extern int D_80098200;
@@ -22,8 +22,8 @@ void padCommandStep(E *e);
 int _padVsyncHandler(void)
 {
     int t;
-    if (D_80098210->a & 2) {
-        D_80098210->a = 0;
+    if (PAD_SIO->a & 2) {
+        PAD_SIO->a = 0;
         return 0;
     }
     t = D_800981FC;
@@ -38,7 +38,7 @@ int _padVsyncHandler(void)
         while (D_800981EC <= D_80098200) {
             padCommandStep(&D_800981E0[D_800981EC]);
         }
-        D_80098210->e = 0x88;
+        PAD_SIO->e = 0x88;
     }
     return 0;
 }

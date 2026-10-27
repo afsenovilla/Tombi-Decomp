@@ -37,7 +37,7 @@ void initPlayerAtSpawn(void)
 
     p[0] = 3;
     if ((CURRENT_TASK)->loadGameSelected != 0) {
-        D_8009C618 = 4;
+        GAME_PLAYER_MODE = 4;
         if (*(u_long*)&GAME.selectedArea == 0x20000) {
             D_8009BCEA = 2;
         }
@@ -65,7 +65,7 @@ void initPlayerAtSpawn(void)
 
         *dst |= 1 << r[1];
     }
-    if (D_8009C618 == 3 || GAME.playerState == 0) {
+    if (GAME_PLAYER_MODE == 3 || GAME.playerState == 0) {
         loadSpawnPosition(p);
         *(s16*)(p + 0x12) = *(u16*)(p + 0xDE);
         *(s16*)(p + 0x16) -= 0x104;
@@ -107,7 +107,7 @@ void initPlayerAtSpawn(void)
 
     p[0] = 3;
     if ((CURRENT_TASK)->loadGameSelected != 0) {
-        D_8009C618 = 4;
+        GAME_PLAYER_MODE = 4;
         if (*(u_long*)&GAME.selectedArea == 0x20000) {
             D_8009BCEA = 2;
         }
@@ -135,7 +135,7 @@ void initPlayerAtSpawn(void)
 
         *dst |= 1 << r[1];
     }
-    if (D_8009C618 == 3 || GAME.playerState == 0) {
+    if (GAME_PLAYER_MODE == 3 || GAME.playerState == 0) {
         loadSpawnPosition(p);
         *(s16*)(p + 0x12) = *(u16*)(p + 0xEE);
         *(s16*)(p + 0x16) -= 0x104;

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void *D_8012EE84[], *D_8012EE94[], *D_8012EE80[];
-extern char D_80077D0C[], D_80077D00[];
+extern char MOVE_TABLE_2[], D_80077D00[];
 extern short COS_TABLE[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -41,7 +41,7 @@ void jellyfishSwimB(TObj *o)
 
     switch (o->state) {
     case 0:
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->velV = 0x180;
         o->velY = -0x18;
         o->wac = 0;

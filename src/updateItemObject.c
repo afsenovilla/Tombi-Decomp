@@ -36,8 +36,8 @@ typedef struct O {
 typedef struct V { unsigned short h, v; } V;
 
 extern V D_8007B35C[];
-extern unsigned char D_8007A7F0[];
-extern void (*D_8007A890[])(O *);
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
+extern void (*REWARD_HANDLERS[])(O *);
 extern unsigned char D_8009CDAC;
 extern unsigned char D_8009CDCA;
 extern unsigned char D_8009CDFB;
@@ -177,7 +177,7 @@ void updateItemObject(O *o)
         if (ObjCullRegister(o)) AnimAdvance(o);
         break;
     case 2:
-        D_8007A890[D_8007A7F0[o->subtype]](o);
+        REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype]](o);
         break;
     case 3:
         freeObjectLayer5(o);

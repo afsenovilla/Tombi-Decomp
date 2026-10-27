@@ -23,7 +23,7 @@ typedef struct {
 
 extern P800F44B0 *PLAYER_EXT;
 extern TObj *BITTEN_OBJECT;
-extern unsigned char D_8009D2B2;
+extern unsigned char GAME_EQUIPPED_WEAPON;
 extern short D_8007A038[];
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
 extern unsigned char SLOPE_TILT_TABLE[];
@@ -158,12 +158,12 @@ void playerStepWeaponAttack(TObj *o)
         FUN_8001fe94(o, 0);
         o->state = 1;
         c = S8(o, 0xe3);
-        if (c < D_8007A038[D_8009D2B2]) {
+        if (c < D_8007A038[GAME_EQUIPPED_WEAPON]) {
             S8(o, 0xe3) = c + 1;
             q = allocObjectLayer1();
             if (q != 0) {
                 q->active = 1;
-                b = D_8009D2B2;
+                b = GAME_EQUIPPED_WEAPON;
                 q->step = 0;
                 q->state = 0;
                 q->type = b;

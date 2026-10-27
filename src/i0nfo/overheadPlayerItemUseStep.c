@@ -11,7 +11,7 @@ extern unsigned char D_8009C942[];
 extern unsigned char D_8009CE55;
 extern unsigned char D_8009CE57;
 extern unsigned char D_8009CF13;
-extern unsigned char D_8009D2B0[];
+extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned char D_8009D2B1;
 
 void overheadPlayerItemUseStep(TObj *o)
@@ -68,7 +68,7 @@ void overheadPlayerItemUseStep(TObj *o)
             o->substep = 1;
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
-            D_8009D2B0[0] = 3;
+            GAME_PLAYER_MODE[0] = 3;
             break;
         case 7:
             D_8009C940[0] = 0;
@@ -78,7 +78,7 @@ void overheadPlayerItemUseStep(TObj *o)
             o->substep = 0;
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
-            D_8009D2B0[0] = 3;
+            GAME_PLAYER_MODE[0] = 3;
             func_80026E0C(D_8009C940[1], 1);
             break;
         case 0xE:
@@ -96,7 +96,7 @@ void overheadPlayerItemUseStep(TObj *o)
             o->timer = 0x1E;
             o->d8c = 0;
             o->w22 = 0;
-            D_8009D2B0[0] = 3;
+            GAME_PLAYER_MODE[0] = 3;
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
             o->step = 0x30;

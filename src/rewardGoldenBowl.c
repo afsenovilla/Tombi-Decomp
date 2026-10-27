@@ -51,7 +51,7 @@ void rewardGoldenBowl(GameObject* arg0)
                 GAME.playerHealthDisplayed = 16;
             }
             playSFX(10);
-            D_800A5430 = (u_short*)(*(char*)&GAME.playerHealthDisplayed);
+            PLAYER_HEALTH = (u_short*)(*(char*)&GAME.playerHealthDisplayed);
             D_800A5432 = *(char*)&GAME.playerHealthDisplayed;
             *(char*)&GAME.playerHealth = *(char*)&GAME.playerHealthDisplayed;
         }

@@ -13,7 +13,7 @@ static char D_8013C94A[50] = {
     0, 0x13, 0, 0, 1, 1, 0, 0x14, 0, 0, 1, 1, 0, 0x15, 0, 0,
     -0x7d,
 };
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
 extern int rcos(int);
@@ -108,7 +108,7 @@ void updateChainSegmentEnemy(TObj *o)
             switch (o->state) {
             case 0:
                 o->velV = -0x400;
-                o->movetab = D_80077D0C;
+                o->movetab = MOVE_TABLE_2;
                 o->animFrame &= 1;
                 o->state++;
                 break;

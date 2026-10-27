@@ -56,7 +56,7 @@ void areaTransitionHandler(void)
                 }
             } else {
                 if (gp->selectedArea == 2) {
-                    if (D_8009BCCA + D_8009C0FE == 1) {
+                    if (GAME_SELECTED_SECTION + D_8009C0FE == 1) {
                         task->step.value = 5;
                     }
                 }
@@ -69,10 +69,10 @@ void areaTransitionHandler(void)
 
         variant = resolveAreaVariant() & 0xFF;
 
-        val = D_80077084[GAME_A + (u16)AREA_VARIANT][D_8009BCCA];
+        val = D_80077084[GAME_A + (u16)AREA_VARIANT][GAME_SELECTED_SECTION];
         *(short*)0x1F8001DE = 0;
         D_8009C610 = GAME_A;
-        D_8009C612 = D_8009BCCA;
+        D_8009C612 = GAME_SELECTED_SECTION;
         D_8009C614 = D_8009BCEA;
         *(short*)0x1F8001DC = val;
 
@@ -82,7 +82,7 @@ void areaTransitionHandler(void)
             D_8009BCCF = 2;
         }
 
-        func_80021CC8(GAME_B + (u16)AREA_VARIANT, D_8009BCCA, variant | areaChanged);
+        func_80021CC8(GAME_B + (u16)AREA_VARIANT, GAME_SELECTED_SECTION, variant | areaChanged);
         func_8003C78C();
         startSoundTask();
         D_8009EB4C = 0;

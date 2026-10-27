@@ -10,6 +10,6 @@ void weapon5to7InitIfNew(u8* self)
 {
     if (self[6] == 0) {
         *(s16*)(self + 0x22) = 0;
-        func_800384F0(self, D_8009C61A - 5);
+        func_800384F0(self, GAME_EQUIPPED_WEAPON - 5);
     }
 }

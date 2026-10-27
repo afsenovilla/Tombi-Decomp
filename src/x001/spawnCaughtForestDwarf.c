@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short GAME[], D_8009C962;
+extern unsigned short GAME[], GAME_SELECTED_SECTION;
 extern void *D_8013DDE4[];
 extern char D_8013E004[];
 extern char D_8013E00C[];
@@ -29,7 +29,7 @@ void spawnCaughtForestDwarf(short x, short y, short z)
         o->w1e = 1;
         o->d8c = 0;
         if (GAME[0] == 1
- && D_8009C962 < 2) {
+ && GAME_SELECTED_SECTION < 2) {
             o->d3c = ((int*)&SPAD.i2d0)[0];
             o->anim = D_8013DE3C[0];
         } else {

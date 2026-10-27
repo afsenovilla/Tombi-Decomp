@@ -2,19 +2,19 @@
 // MATCHING 8012e918 188
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern unsigned char D_800A603D, D_800A603E;
-extern short D_800A604E, D_800A60B0;
+extern unsigned char PLAYER_SUBSTATE, PLAYER_STEP;
+extern short PLAYER_Y, D_800A60B0;
 
 void func_8012E918(TObj *o)
 {
     TObj *p = &PLAYER;
 
-    switch (D_800A603D) {
+    switch (PLAYER_SUBSTATE) {
     case 0x3e:
-        if (D_800A604E < o->y.raw) {
-            D_800A604E = o->y.raw;
-            D_800A603D = 0x3d;
-            D_800A603E = 0;
+        if (PLAYER_Y < o->y.raw) {
+            PLAYER_Y = o->y.raw;
+            PLAYER_SUBSTATE = 0x3d;
+            PLAYER_STEP = 0;
             D_800A60B0 = o->y.raw;
         }
         break;

@@ -6,15 +6,15 @@ typedef struct { char p0[9]; unsigned char b9; } P801363E4;
 typedef struct { short s0, s2; } S801363E4;
 
 extern unsigned char DAT_8009c93f;
-extern unsigned char DAT_800a603c[], DAT_800a603d, DAT_800a603e;
-extern S801363E4 *DAT_800a6078;
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE, PLAYER_STEP;
+extern S801363E4 *PLAYER_H;
 extern unsigned char DAT_800a60a1[], DAT_800a60a2[], DAT_800a60a3[], DAT_800a60d4;
 extern short DAT_800a6066, DAT_800a60b4, DAT_800a60b6, DAT_800a60b8, DAT_800a60ba, DAT_800a60ea;
 extern P801363E4 *PLAYER_EXT;
 extern TObj *DAT_800a60c8;
 extern unsigned char DAT_8009cebf[];
-extern int DAT_8009c984;
-extern short DAT_800a604a, DAT_800a604e, DAT_800a6052;
+extern int GAME_AREA00_EVENT_CONTROL;
+extern short PLAYER_X, PLAYER_Y, DAT_800a6052;
 extern int DAT_800a60c4;
 extern unsigned short *DAT_800a605c;
 extern unsigned char DAT_8009d009;
@@ -39,14 +39,14 @@ void FUN_801363e4(TObj *o)
     switch (o->step) {
     case 0:
         DAT_8009c93f = 1;
-        if (DAT_800a603c[0] == 5) return;
-        if (DAT_800a6078->s2 > 0x130) DAT_800a6078->s2 = 0x130;
+        if (PLAYER_STATE[0] == 5) return;
+        if (PLAYER_H->s2 > 0x130) PLAYER_H->s2 = 0x130;
         DAT_800a60a3[0] = 1;
         o->w08 = 100;
         DAT_800a6066 = 0;
-        DAT_800a603c[0] = 5;
-        DAT_800a603d = 0;
-        DAT_800a603e = 0;
+        PLAYER_STATE[0] = 5;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         o->step++;
         break;
     case 1:
@@ -57,26 +57,26 @@ void FUN_801363e4(TObj *o)
         DAT_800a60d4 = 1;
         DAT_800a60a1[0] = 0;
         DAT_800a60b4 = 0x220;
-        DAT_800a603c[0] = 6;
+        PLAYER_STATE[0] = 6;
         DAT_800a60ea = 0;
         DAT_800a60b8 = 0;
         DAT_800a60ba = 0;
         DAT_800a60b6 = 0;
-        DAT_800a603d = 4;
-        DAT_800a603e = 0;
+        PLAYER_SUBSTATE = 4;
+        PLAYER_STEP = 0;
         o->step++;
         break;
     case 2:
         switch (o->state) {
         case 0:
             if (DAT_800a60a1[0] == 0) return;
-            DAT_800a603c[0] = 5;
-            DAT_800a603d = 0;
-            DAT_800a603e = 0;
+            PLAYER_STATE[0] = 5;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             o->state++;
             break;
         case 1:
-            if (DAT_800a6078->s2 < 0x259) return;
+            if (PLAYER_H->s2 < 0x259) return;
             if (DAT_800a60a1[0] == 0) return;
             q->anim = D_8013B148;
             FUN_8001fe6c(q);
@@ -104,9 +104,9 @@ void FUN_801363e4(TObj *o)
             case 1:
                 q->h->p.whole++;
                 if (--o->w08 != 0) return;
-                DAT_800a603c[0] = 6;
-                DAT_800a603d = 5;
-                DAT_800a603e = 0;
+                PLAYER_STATE[0] = 6;
+                PLAYER_SUBSTATE = 5;
+                PLAYER_STEP = 0;
                 PLAYER_EXT->b9 = 10;
                 DAT_800a60b4 = -0x128;
                 DAT_800a60a1[0] = 0;
@@ -114,11 +114,11 @@ void FUN_801363e4(TObj *o)
                 break;
             case 2:
                 if (DAT_800a60a1[0] == 0) return;
-                DAT_800a603c[0] = 6;
-                DAT_800a603d = 3;
-                DAT_800a603e = 0;
-                spawnFlashEffect(0, DAT_800a604a, (short)(DAT_800a604e - 8), DAT_800a6052);
-                spawnFlashEffect(2, DAT_800a604a, (short)(DAT_800a604e - 8), DAT_800a6052);
+                PLAYER_STATE[0] = 6;
+                PLAYER_SUBSTATE = 3;
+                PLAYER_STEP = 0;
+                spawnFlashEffect(0, PLAYER_X, (short)(PLAYER_Y - 8), DAT_800a6052);
+                spawnFlashEffect(2, PLAYER_X, (short)(PLAYER_Y - 8), DAT_800a6052);
                 DAT_800a60c4 = 0;
                 o->w08 = 400;
                 o->state++;
@@ -149,7 +149,7 @@ void FUN_801363e4(TObj *o)
             o->step = 5;
             break;
         case 2:
-            DAT_8009c984 |= 0x28;
+            GAME_AREA00_EVENT_CONTROL |= 0x28;
             DAT_800a60c8->b04 = 3;
             o->w08 = 2;
             q->anim = A00_VARIANT0_SCENE_PART_ANIMS;

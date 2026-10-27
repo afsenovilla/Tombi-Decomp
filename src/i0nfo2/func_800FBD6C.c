@@ -10,8 +10,8 @@ extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern TObj *D_8009F2F8;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern unsigned char D_800A60E4;
 
 void func_800FBD6C(TObj *o)
@@ -24,8 +24,8 @@ void func_800FBD6C(TObj *o)
     case 0:
         n->step = 2;
         n->state = 0;
-        D_800A603D = 2;
-        D_800A603E = 0;
+        PLAYER_SUBSTATE = 2;
+        PLAYER_STEP = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         S32(n, 0x90) = func_8002DCC8(2, 1, &p);
@@ -56,8 +56,8 @@ void func_800FBD6C(TObj *o)
         D_8009C93E = 0;
         D_8009C942 = 0;
         D_800A60E4 = 0;
-        D_800A603D = 1;
-        D_800A603E = 0;
+        PLAYER_SUBSTATE = 1;
+        PLAYER_STEP = 0;
         o->step = 0;
         o->state = 0;
         break;

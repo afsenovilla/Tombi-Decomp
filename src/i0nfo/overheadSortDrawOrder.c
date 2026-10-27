@@ -2,7 +2,7 @@
 // MATCHING 800ebc30 684
 #include "TOBJ.H"
 #include "raw7.h"
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern TObj PLAYER;
 extern signed char D_800A6047;
 
@@ -38,7 +38,7 @@ void overheadSortDrawOrder(void)
         if (o->_pad0e[0] != 0) { cnt--; continue; }
         LST(i++) = o;
     }
-    if (D_8009D2B0 != 3) {
+    if (GAME_PLAYER_MODE != 3) {
         cnt++;
         LST(i) = &PLAYER;
     }
@@ -60,5 +60,5 @@ void overheadSortDrawOrder(void)
         o->b0f = i - 10;
         if (((TObj *)o->d94) != 0) ((TObj *)o->d94)->b0f = i - 9;
     }
-    if (D_8009D2B0 == 3) D_800A6047 = -0xC;
+    if (GAME_PLAYER_MODE == 3) D_800A6047 = -0xC;
 }

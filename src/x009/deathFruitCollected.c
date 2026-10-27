@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void *D_8012E04C;
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 void AnimLoadDuration(TObj *o);
 void printInfoMessage(int a, int b);
 void applyAnimVelocityX(TObj *o, unsigned short v);
@@ -18,7 +18,7 @@ void deathFruitCollected(TObj *o)
         o->b0f = 4;
         o->velV = -0x400;
         o->d8c = 0;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->state++;
         o->animFrame &= 1;
         o->anim = D_8012E04C;

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *allocObjectLayer2(void);
 extern unsigned char DAT_8009cda9;
-extern unsigned DAT_8009c984[];
+extern unsigned GAME_AREA00_EVENT_CONTROL[];
 
 void spawnA00DarkCloakedFigure(TObj *o)
 {
@@ -38,7 +38,7 @@ void spawnA00DarkCloakedFigure(TObj *o)
             n->animFrame = 0;
             n->subtype = 0;
             n->b.p.whole = -0x28;
-            f = DAT_8009c984[0];
+            f = GAME_AREA00_EVENT_CONTROL[0];
             if (f & 8) if (f & 0x10) {
                 n->a.p.whole = 0xc29;
                 n->y.p.whole = -0x2e3;

@@ -16,9 +16,9 @@ extern unsigned char DAT_800a6039, DAT_800a6047;
 extern char PLAYER, DAT_800a6104;
 extern short DAT_800a6118;
 extern unsigned short DAT_800a6066;
-extern short *DAT_800a6078;
-extern short *DAT_800a607c;
-extern short DAT_800a604e;
+extern short *PLAYER_H;
+extern short *PLAYER_D;
+extern short PLAYER_Y;
 
 void playerEffect4EStepA(TObj *o)
 {
@@ -66,14 +66,14 @@ void playerEffect4EStepA(TObj *o)
     }
     o->b6b = b;
 L:
-    s = DAT_800a6078[1];
+    s = PLAYER_H[1];
     f = o->h;
     if (DAT_800a6066 & 1)
         f->p.whole = s + 4;
     else
         f->p.whole = s - 4;
-    o->y.p.whole = DAT_800a604e - 8;
-    o->d->p.whole = DAT_800a607c[1];
+    o->y.p.whole = PLAYER_Y - 8;
+    o->d->p.whole = PLAYER_D[1];
     switch (o->b0c) {
     case 0:
         b = DAT_800a6047 + 1;

@@ -7,8 +7,8 @@
 #include "player.h"
 #include "TOBJ.H"
 extern char D_80014764[];
-extern unsigned short D_800A603C[];
-extern Fix16 *D_800A6078[];
+extern unsigned short PLAYER_STATE[];
+extern Fix16 *PLAYER_H[];
 extern void AnimLoadDuration(TObj *o);
 extern void ObjCullRegister(TObj *o);
 extern void ObjFree(TObj *o);
@@ -22,9 +22,9 @@ void updatePoolType66Object(TObj *o)
         o->anim = D_80014764;
         AnimLoadDuration(o);
         o->a.p.whole = (*(unsigned short*)&PLAYER.obj.a.p.whole);
-        if (D_800A603C[0] == 0x405) {
+        if (PLAYER_STATE[0] == 0x405) {
             o->y.p.whole = -0x24;
-        } else if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
+        } else if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && PLAYER_H[0]->p.whole >= 0xf3) {
             o->y.p.whole = -0xf0;
         } else {
             o->y.p.whole = -0x24;
@@ -40,8 +40,8 @@ void updatePoolType66Object(TObj *o)
         case 0:
             o->step++;
         case 1:
-            o->h->p.whole = D_800A6078[0]->p.whole;
-            if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
+            o->h->p.whole = PLAYER_H[0]->p.whole;
+            if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && PLAYER_H[0]->p.whole >= 0xf3) {
                 o->y.p.whole = -0xf0;
             } else {
                 o->y.p.whole = -0x24;
@@ -65,8 +65,8 @@ void updatePoolType66Object(TObj *o)
 #include "player.h"
 #include "TOBJ.H"
 extern char D_80014764[];
-extern unsigned short D_800A603C[];
-extern Fix16 *D_800A6078[];
+extern unsigned short PLAYER_STATE[];
+extern Fix16 *PLAYER_H[];
 extern void AnimLoadDuration(TObj *o);
 extern void ObjCullRegister(TObj *o);
 extern void ObjFree(TObj *o);
@@ -81,7 +81,7 @@ void func_8002C73C(TObj *o)
         o->anim = D_80014764;
         AnimLoadDuration(o);
         o->a.p.whole = (*(unsigned short*)&PLAYER.obj.a.p.whole);
-        if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
+        if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && PLAYER_H[0]->p.whole >= 0xf3) {
             o->y.p.whole = -0xf0;
         } else {
             o->y.p.whole = -0x24;
@@ -97,9 +97,9 @@ void func_8002C73C(TObj *o)
         case 0:
             o->step++;
         case 1:
-            o->h->p.whole = D_800A6078[0]->p.whole;
+            o->h->p.whole = PLAYER_H[0]->p.whole;
             if (D_800893C8[4] != 0) D_800893C8[4] = 0;
-            if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
+            if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && PLAYER_H[0]->p.whole >= 0xf3) {
                 o->y.p.whole = -0xf0;
             } else {
                 o->y.p.whole = -0x24;
@@ -121,8 +121,8 @@ void func_8002C73C(TObj *o)
 #include "player.h"
 #include "TOBJ.H"
 extern char D_80014764[];
-extern unsigned short D_800A603C[];
-extern Fix16 *D_800A6078[];
+extern unsigned short PLAYER_STATE[];
+extern Fix16 *PLAYER_H[];
 extern void AnimLoadDuration(TObj *o);
 extern void ObjCullRegister(TObj *o);
 extern void ObjFree(TObj *o);
@@ -136,9 +136,9 @@ void updatePoolType66Object(TObj *o)
         o->anim = D_80014764;
         AnimLoadDuration(o);
         o->a.p.whole = (*(unsigned short*)&PLAYER.obj.a.p.whole);
-        if (D_800A603C[0] == 0x405) {
+        if (PLAYER_STATE[0] == 0x405) {
             o->y.p.whole = -0x24;
-        } else if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
+        } else if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && PLAYER_H[0]->p.whole >= 0xf3) {
             o->y.p.whole = -0xf0;
         } else {
             o->y.p.whole = -0x28;
@@ -154,8 +154,8 @@ void updatePoolType66Object(TObj *o)
         case 0:
             o->step++;
         case 1:
-            o->h->p.whole = D_800A6078[0]->p.whole;
-            if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && D_800A6078[0]->p.whole >= 0xf3) {
+            o->h->p.whole = PLAYER_H[0]->p.whole;
+            if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && PLAYER_H[0]->p.whole >= 0xf3) {
                 o->y.p.whole = -0xf0;
             } else {
                 o->y.p.whole = -0x28;

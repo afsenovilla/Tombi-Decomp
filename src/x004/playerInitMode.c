@@ -42,7 +42,7 @@ extern void FUN_8011dc4c(TObj *);
 extern void playerInitAreaHook(TObj *);
 extern void FUN_8011d334(TObj *);
 extern PL *PLAYER_EXT;
-extern unsigned char DAT_8009d2b2[];
+extern unsigned char GAME_EQUIPPED_WEAPON[];
 extern unsigned char DAT_8009cff8;
 extern unsigned char DAT_8009d006[];
 extern unsigned char DAT_8009cf06;
@@ -58,9 +58,9 @@ extern char DAT_80010748[];
 extern unsigned char DAT_8009cef8;
 extern unsigned short GAME;
 extern unsigned int DAT_8009c960i;
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short DAT_8009c982;
-extern signed char DAT_8009d2b0;
+extern signed char GAME_PLAYER_MODE;
 extern char D_80114FC4[];
 extern char D_80114FDC[];
 extern char D_80114FF0[];
@@ -88,7 +88,7 @@ static E **DAT_80115190[20] = {
 extern unsigned char DAT_8009c93a, DAT_8009c93aA[];
 extern unsigned char DAT_8009ce41;
 
-#define LOADP() p = (unsigned char *)DAT_80115190[GAME]; p = ((unsigned char **)p)[DAT_8009c962]; p += DAT_8009c982 * 4
+#define LOADP() p = (unsigned char *)DAT_80115190[GAME]; p = ((unsigned char **)p)[GAME_SELECTED_SECTION]; p += DAT_8009c982 * 4
 
 void playerInitMode(TObj *o)
 {
@@ -107,7 +107,7 @@ void playerInitMode(TObj *o)
         if (FUN_8005efe4() != 1) FUN_8005efe4();
         pl->w14 = 0;
         o->w1e = 0;
-        switch (DAT_8009d2b2[0]) {
+        switch (GAME_EQUIPPED_WEAPON[0]) {
         case 8: a = 1; break;
         case 9: a = 2; break;
         case 7: a = 0; break;
@@ -156,7 +156,7 @@ void playerInitMode(TObj *o)
         case 4: case 12: playerInitAreaHook(o); break;
         case 9: FUN_8011d334(o); break;
         }
-        switch (DAT_8009d2b0) {
+        switch (GAME_PLAYER_MODE) {
         case 3:
             LOADP();
             { unsigned char t3 = p[2];

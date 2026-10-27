@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 
 extern unsigned short GAME[];
-extern unsigned short D_8009C962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern char *PLAYER_EXT;
 void playerAirSpinToFall(TObj *o);
 void AnimAdvance(TObj *o);
@@ -22,7 +22,7 @@ void playerEventStepJumpIn(TObj *o)
         o->active = 4;
         o->velH = 0;
         o->velV = 0;
-        if ((GAME[0] == 2 || GAME[0] == 0x13) && D_8009C962 == 1) {
+        if ((GAME[0] == 2 || GAME[0] == 0x13) && GAME_SELECTED_SECTION == 1) {
             short v = 0x100;
             if (o->animFrame & 1)
                 v = -0x100;

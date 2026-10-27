@@ -7,7 +7,7 @@ extern G PLAYER;
 extern unsigned short DAT_800a6066;
 extern unsigned char DAT_800a60d4, DAT_800a60d6;
 extern int DAT_800a6068;
-extern int *DAT_800a6078;
+extern int *PLAYER_H;
 
 void cameraFollowPlayerX(O *o)
 {
@@ -26,7 +26,7 @@ void cameraFollowPlayerX(O *o)
     if (DAT_800a60d6 == 3)
         t = DAT_800a6068 << 16;
     else
-        t = *DAT_800a6078;
+        t = *PLAYER_H;
     d = t - base;
     neg = d < 0;
     if (d > 0x20000) {

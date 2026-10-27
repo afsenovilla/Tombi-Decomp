@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } S;
 
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern char D_80077CE8[];
 extern void *D_8013FC70[];
 extern void *D_8013FC74[];
@@ -86,7 +86,7 @@ void purpleCrawlerClimb(TObj *o)
             if (o->wb0 == 0) {
                 if (o->animFrame & 1) o->d8c = 0x40;
                 else o->d8c = 0xc0;
-                o->movetab = D_80077CDC;
+                o->movetab = MOVE_TABLE_0;
                 if (p->w6) o->state = 10;
                 else o->state = 7;
                 o->wac = 0x16;
@@ -102,7 +102,7 @@ void purpleCrawlerClimb(TObj *o)
             } else {
                 if (o->animFrame & 1) o->d8c = 0x40;
                 else o->d8c = 0xc0;
-                o->movetab = D_80077CDC;
+                o->movetab = MOVE_TABLE_0;
                 o->animFrame = 1 - o->animFrame;
                 if (p->w6) o->state = 10;
                 else o->state = 7;

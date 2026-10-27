@@ -1,12 +1,12 @@
 // FUNC 800fcfa8 320 I0NFO2
 #include "TOBJ.H"
-extern short D_800A604A, D_800A604E;
+extern short PLAYER_X, PLAYER_Y;
 extern short D_80100788[][2];
 
 void func_800FCFA8(TObj *o)
 {
     int i;
-    short x = D_800A604A, y = D_800A604E;
+    short x = PLAYER_X, y = PLAYER_Y;
     short *px, *py;
     i = 0;
     px = D_80100788[0];

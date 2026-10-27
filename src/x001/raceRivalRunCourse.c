@@ -6,7 +6,7 @@
    the `lw 0x40(s0)` instead of filling its delay slot. */
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } S;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern char D_80077CE8[];
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
@@ -126,7 +126,7 @@ void raceRivalRunCourse(TObj *o)
         }
         break;
     case 3:
-        FUN_8001fb84(o, D_80077CF4);
+        FUN_8001fb84(o, MOVE_TABLE_1);
         o->y.raw += -0xc000;
         if (o->animFrame & 1)
             o->d8c += 2;
@@ -161,7 +161,7 @@ void raceRivalRunCourse(TObj *o)
                 o->state = 0;
             }
         } else {
-            FUN_8001fb84(o, D_80077CF4);
+            FUN_8001fb84(o, MOVE_TABLE_1);
             o->y.raw += 0xc000;
             land(o);
             if (o->animFrame & 1) {
@@ -186,11 +186,11 @@ void raceRivalRunCourse(TObj *o)
             o->d8c -= 2;
         o->d8c = *(unsigned char *)&o->d8c;
         if (p->w2) {
-            o->movetab = D_80077CF4;
+            o->movetab = MOVE_TABLE_1;
             applyAnimVelocityX(o, (unsigned short)(1 - o->animFrame));
             o->y.p.whole--;
         } else {
-            FUN_8001fb84(o, D_80077CF4);
+            FUN_8001fb84(o, MOVE_TABLE_1);
             o->y.p.whole++;
         }
         if (side(o)) {

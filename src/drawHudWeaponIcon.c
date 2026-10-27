@@ -2,7 +2,7 @@
 // MATCHING 80058f98 552
 #include "anim.h"
 typedef struct SPRT { unsigned int tag; unsigned char r0, g0, b0, code; short x0, y0; unsigned char u0, v0; unsigned short clut; short w, h; } SPRT;
-extern unsigned char DAT_8009d2b2;
+extern unsigned char GAME_EQUIPPED_WEAPON;
 extern SPRT *DAT_1f800164;
 extern int DAT_1f8001e0;
 extern unsigned short *PTR_DAT_800121b8, *PTR_DAT_800121cc, *PTR_DAT_800121d0, *PTR_DAT_800121d4, *PTR_DAT_800121b0, *PTR_DAT_800121b4;
@@ -19,7 +19,7 @@ void drawHudWeaponIcon(int o, short x, short y)
     int m;
     void *ot;
     unsigned char c;
-    switch (DAT_8009d2b2) {
+    switch (GAME_EQUIPPED_WEAPON) {
     case 0:
         drawSpriteFrameParts(o, x, y, *PTR_DAT_800121b8);
         FUN_80059464(0x14, 1);

@@ -4,7 +4,7 @@
 /* PLAYER+0: a separate symbol on purpose (sharing PLAYER's lui changes the register allocation) */
 extern unsigned char DAT_800a6038;
 extern unsigned char PLAYER[];
-extern short *DAT_800a6078;
+extern short *PLAYER_H;
 extern int GAME;
 extern void cameraFollowPlayerX(TObj *);
 extern void cameraFollowPlayerY(TObj *);
@@ -18,8 +18,8 @@ void cameraModeHandler6(TObj *o)
     g = PLAYER;
     if (DAT_800a6038 < 4 || DAT_800a6038 == 7) {
         b = *(short *)(o->d34 + 2);
-        if (DAT_800a6078[1] < (a = b - 0x90)) DAT_800a6078[1] = a;
-        else if ((a = b + 0x90) < DAT_800a6078[1]) DAT_800a6078[1] = a;
+        if (PLAYER_H[1] < (a = b - 0x90)) PLAYER_H[1] = a;
+        else if ((a = b + 0x90) < PLAYER_H[1]) PLAYER_H[1] = a;
         if (GAME == 0x2000e) {
             lim((short *)(g + 0x16), *(short *)&o->d30, 0x5c);
         } else {

@@ -5,7 +5,7 @@
 extern TObj PLAYER;
 extern unsigned short D_800A6066;
 extern short D_800A60B6;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern void *D_8013FC88[], *D_8013FC8C[], *D_8013FCCC[];
 extern unsigned char D_8013C7C8[];
 extern int AnimAdvance(TObj *);
@@ -57,9 +57,9 @@ void purpleCrawlerCarryPlayer(TObj *o)
         D_800A6066 = 2;
         D_800A60B6 = 0;
         p->active = 2;
-        D_800A603C = 2;
-        D_800A603D = 0;
-        D_800A603E = 1;
+        PLAYER_STATE = 2;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 1;
         decreaseObjectTimer(p, 1);
         D_800A60B6 = 0x200;
         o->wac = 7;

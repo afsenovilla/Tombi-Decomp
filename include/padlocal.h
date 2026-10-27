@@ -175,7 +175,7 @@ extern int D_800981FC;                          /* port 1 absent */
 extern int D_80098200;                          /* last port index */
 extern int D_80098204[];                        /* channel counts */
 extern padIntr* D_8009820C;
-extern padSio* D_80098210;
+extern padSio* PAD_SIO;
 extern int D_80098214;                          /* vsync callback pending */
 extern int D_80098224;
 extern volatile u8* D_80098228;

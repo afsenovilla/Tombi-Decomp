@@ -2,7 +2,7 @@
 // MATCHING 800e9a08 516
 typedef struct { char p[0x10]; short w10; } Menu;
 typedef struct { short x, y, w; unsigned short attr; int img, pC, str; void *p14; } Text;
-extern int D_8009C984;
+extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned char D_8009CDAC, D_8009CDB1, D_8009CE3D;
 extern char D_800F68FC[];
 extern int D_800FFD08[];
@@ -13,7 +13,7 @@ extern void subScreenDrawString(int a, int b);
 void subScreenDrawStatusNotes(Menu *m)
 {
     int n;
-    if (D_8009C984 & 0x40) {
+    if (GAME_AREA00_EVENT_CONTROL & 0x40) {
         D_80100B70.x = 0x60;
         D_80100B70.y = 0x98;
         D_80100B70.w = m->w10 + 1;

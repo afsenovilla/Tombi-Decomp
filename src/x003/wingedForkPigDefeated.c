@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void AnimLoadDuration(TObj *);
-extern char DAT_80077d0c[];
+extern char MOVE_TABLE_2[];
 extern void *D_8013A698[];
 
 void wingedForkPigDefeated(TObj *o)
@@ -19,7 +19,7 @@ void wingedForkPigDefeated(TObj *o)
         o->animFrame = o->w7a & 1;
         if (o->step == 0) o->velV = 0;
         else o->velV = -0x400;
-        o->movetab = DAT_80077d0c;
+        o->movetab = MOVE_TABLE_2;
         o->state++;
         if (o->subtype == 0) o->wac = 0x1c;
         else o->wac = 0xb;

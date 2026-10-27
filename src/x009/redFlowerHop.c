@@ -7,7 +7,7 @@ extern int AnimAdvance(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int FUN_8001f9e0(void);
 extern short TileCollideAt(TObj *, short, short);
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern void *D_8012EA40[];
 extern unsigned char D_8012B2CC[];
 
@@ -28,7 +28,7 @@ void redFlowerHop(TObj *o)
 {
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b6a = 1;
         if (o->wb4 != 3) {
             o->wb4 = 3;

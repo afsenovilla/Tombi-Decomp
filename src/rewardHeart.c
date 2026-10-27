@@ -409,18 +409,18 @@ void rewardHeart(GameObject* arg0)
             func_8002367C(arg0->objectIndex);
         }
         if (!(arg0->unkC & 0x7F)) {
-            *(short*)&D_800A5430+=1;
-            if ((short)GAME.playerHealthDisplayed < *(short*)&D_800A5430 ) {
-                *(short*)&D_800A5430 = GAME.playerHealthDisplayed;
+            *(short*)&PLAYER_HEALTH+=1;
+            if ((short)GAME.playerHealthDisplayed < *(short*)&PLAYER_HEALTH ) {
+                *(short*)&PLAYER_HEALTH = GAME.playerHealthDisplayed;
             }
         } else {
-            *(short*)&D_800A5430+=2;
-            if ((short)GAME.playerHealthDisplayed < *(short*)&D_800A5430 ) {
-                *(short*)&D_800A5430 = GAME.playerHealthDisplayed;
+            *(short*)&PLAYER_HEALTH+=2;
+            if ((short)GAME.playerHealthDisplayed < *(short*)&PLAYER_HEALTH ) {
+                *(short*)&PLAYER_HEALTH = GAME.playerHealthDisplayed;
             }
         }
-        D_800A5432 = D_800A5430;
-        GAME.playerHealth = (u_char) D_800A5430;
+        D_800A5432 = PLAYER_HEALTH;
+        GAME.playerHealth = (u_char) PLAYER_HEALTH;
         arg0->state++;
     }
 }
@@ -471,18 +471,18 @@ void rewardHeart(GameObject* arg0)
             func_8002367C(arg0->objectIndex);
         }
         if (!(arg0->unkC & 0x7F)) {
-            *(short*)&D_800A5430+=1;
-            if ((short)GAME.playerHealthDisplayed < *(short*)&D_800A5430 ) {
-                *(short*)&D_800A5430 = GAME.playerHealthDisplayed;
+            *(short*)&PLAYER_HEALTH+=1;
+            if ((short)GAME.playerHealthDisplayed < *(short*)&PLAYER_HEALTH ) {
+                *(short*)&PLAYER_HEALTH = GAME.playerHealthDisplayed;
             }
         } else {
-            *(short*)&D_800A5430+=2;
-            if ((short)GAME.playerHealthDisplayed < *(short*)&D_800A5430 ) {
-                *(short*)&D_800A5430 = GAME.playerHealthDisplayed;
+            *(short*)&PLAYER_HEALTH+=2;
+            if ((short)GAME.playerHealthDisplayed < *(short*)&PLAYER_HEALTH ) {
+                *(short*)&PLAYER_HEALTH = GAME.playerHealthDisplayed;
             }
         }
-        D_800A5432 = D_800A5430;
-        GAME.playerHealth = (u_char) D_800A5430;
+        D_800A5432 = PLAYER_HEALTH;
+        GAME.playerHealth = (u_char) PLAYER_HEALTH;
         arg0->state++;
     }
 }

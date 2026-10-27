@@ -25,7 +25,7 @@ extern unsigned short *DAT_80138d60[];
 extern unsigned short *DAT_80138d54[];
 extern unsigned short DAT_80138d0c[];
 extern int DAT_8009c984;
-extern int DAT_8009c984a[];
+extern int GAME_AREA00_EVENT_CONTROL[];
 extern int DAT_8009c984b[];
 extern unsigned char DAT_8009c938a[];
 extern unsigned char DAT_8009c938;
@@ -70,7 +70,7 @@ void updateA00L4Type0A(S *o)
                     q->box3 = 100;
                     q->wc0 = 0;
                     q->b0f = 0;
-                    if (!(DAT_8009c984a[0] & 1))
+                    if (!(GAME_AREA00_EVENT_CONTROL[0] & 1))
                         spawnA00Tornado(q->a.p.whole, q->y.p.whole, q->b.p.whole, 0);
                     break;
                 case 0:
@@ -101,9 +101,9 @@ void updateA00L4Type0A(S *o)
             for (q = o; ; q = q->next) {
                 if (q->b0c == 1) {
                     flag = 0;
-                    if (!(DAT_8009c984a[0] & 1) && (FUN_8001f9e0() & 0x3f) == 0) {
+                    if (!(GAME_AREA00_EVENT_CONTROL[0] & 1) && (FUN_8001f9e0() & 0x3f) == 0) {
                         o->wb4 = 2;
-                        flag = 0; if (!(DAT_8009c984a[0] & 1)) flag = 1;
+                        flag = 0; if (!(GAME_AREA00_EVENT_CONTROL[0] & 1)) flag = 1;
                     }
                     if (q->b69 == 1 && o->wb6 == 0) {
                         o->wb4 = 1;
@@ -122,8 +122,8 @@ void updateA00L4Type0A(S *o)
                     q->b69 = 0;
                     q->b68 = 0;
                     o->animFrame = q->animFrame;
-                    if (DAT_8009c938a[0] == 0 && q->wc0 != 0 && --q->wc0 == 0 && !(DAT_8009c984a[0] & 1)) {
-                        DAT_8009c984a[0] |= 1;
+                    if (DAT_8009c938a[0] == 0 && q->wc0 != 0 && --q->wc0 == 0 && !(GAME_AREA00_EVENT_CONTROL[0] & 1)) {
+                        GAME_AREA00_EVENT_CONTROL[0] |= 1;
                         setEventStarted(2, 0, 0);
                         FUN_8001e4f0(0x35);
                     }

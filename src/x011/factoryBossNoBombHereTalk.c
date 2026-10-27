@@ -6,7 +6,7 @@ typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c940, DAT_8009c941;
 extern unsigned char DAT_8009c942[];
-extern unsigned char DAT_8009d2b0;
+extern unsigned char GAME_PLAYER_MODE;
 extern short D_1F8001C6;
 extern AT3 D_80119C48[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
@@ -31,7 +31,7 @@ void factoryBossNoBombHereTalk(TObj *o)
         if (o->b68 == 0)
             break;
         DAT_8009c942[0] = 1;
-        DAT_8009d2b0 = 2;
+        GAME_PLAYER_MODE = 2;
         PLAYER.b04 = 5;
         PLAYER.step = 0;
         PLAYER.state = 0;

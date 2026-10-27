@@ -3,9 +3,9 @@
 #include "TOBJ.H"
 extern void cullObjectToDrawList(TObj *, int);
 extern void FUN_80018838(TObj *);
-extern unsigned char DAT_800a603d;
+extern unsigned char PLAYER_SUBSTATE;
 extern unsigned char DAT_800a6047[];
-extern short *DAT_800a607c[];
+extern short *PLAYER_D[];
 
 void updateA00L4Type17(TObj *o)
 {
@@ -21,7 +21,7 @@ void updateA00L4Type17(TObj *o)
             o->d84 = 0;
             o->d88 = 0;
             o->d8c = 0;
-            o->d->p.whole = DAT_800a607c[0][1];
+            o->d->p.whole = PLAYER_D[0][1];
             o->b04++;
         }
         break;
@@ -29,7 +29,7 @@ void updateA00L4Type17(TObj *o)
         cullObjectToDrawList(o, 0x5a);
         switch (o->step) {
         case 0:
-            if (DAT_800a603d == 5) {
+            if (PLAYER_SUBSTATE == 5) {
                 o->timer = 0x80;
                 o->step++;
             }

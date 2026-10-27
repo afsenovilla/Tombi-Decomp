@@ -2,7 +2,7 @@
 // MATCHING 8012ab64 1568
 #include "TOBJ.H"
 
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void *D_8013FC70[];
 extern void *D_8013FCBC[];
 extern void *D_8013FCC0[];
@@ -73,7 +73,7 @@ void purpleCrawlerHit(TObj *o)
         o->b9c = 1;
         o->d8c = 0;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->animFrame = 1 - o->w7a;
         o->state++;
         if (o->wac == 0xd || o->wac == 0x13) o->wac = 0xf;

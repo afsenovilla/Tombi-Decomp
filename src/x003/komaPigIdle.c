@@ -4,7 +4,7 @@
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 typedef struct { unsigned char b0, b1; char p2[0xa - 2]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern unsigned char D_80135B10[];
 extern unsigned char D_80135B20[];
 extern B D_80135B30[];
@@ -50,7 +50,7 @@ void komaPigIdle(TObj *o)
         o->animFrame = 1 - o->animFrame;
         o->substep = 0;
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         x->b1 = 0;
         o->substep++;
     case 1:
@@ -137,7 +137,7 @@ void komaPigIdle(TObj *o)
         break;
     case 6:
         o->timer = 0x5a;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b9d = 0;
         o->b9c = 0;
         o->wac = 9;

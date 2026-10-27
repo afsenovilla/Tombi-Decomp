@@ -10,7 +10,7 @@ void initSectionSpawnerAlt(u8* self)
 {
     if (self[4] == 0) {
         *(s16*)(self + 0xC) = GAME.selectedArea;
-        self[0xE] = D_8009BCCA;
+        self[0xE] = GAME_SELECTED_SECTION;
         self[4] = self[4] + 1;
         func_8005B1F8(self);
     }

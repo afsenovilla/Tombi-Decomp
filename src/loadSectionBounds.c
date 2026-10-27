@@ -27,7 +27,7 @@ void applyLighting(u8* self);
 
 void loadSectionBounds(u8* self)
 {
-    u16* row = (u16*)(D_8007B680[GAME.selectedArea] + D_8009BCCA * 8);
+    u16* row = (u16*)(D_8007B680[GAME.selectedArea] + GAME_SELECTED_SECTION * 8);
 
     *(u16*)(self + 0x2C) = *row++;
     *(u16*)(self + 0x2E) = *row++;

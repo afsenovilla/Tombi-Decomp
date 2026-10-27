@@ -25,7 +25,7 @@ extern short D_8009C944;
 extern short D_8009C946;
 extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short D_1f8003c6;
-extern unsigned char D_8009D2B2;
+extern unsigned char GAME_EQUIPPED_WEAPON;
 extern short D_8007A038[];
 extern char D_80010E80[], D_80010EA0[], D_80010EC0[];
 extern unsigned char SLOPE_TILT_TABLE[];
@@ -105,12 +105,12 @@ void playerStepAirWeaponAttack(TObj *o)
         }
         (*(unsigned char*)&o->wac) = 0;
         c = S8(o, 0xe3);
-        if (c < D_8007A038[D_8009D2B2]) {
+        if (c < D_8007A038[GAME_EQUIPPED_WEAPON]) {
             S8(o, 0xe3) = c + 1;
             q = allocObjectLayer1();
             if (q != 0) {
                 q->active = 1;
-                q->type = D_8009D2B2;
+                q->type = GAME_EQUIPPED_WEAPON;
                 q->step = 0;
                 q->state = 0;
             }

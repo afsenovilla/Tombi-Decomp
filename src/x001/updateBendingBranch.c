@@ -3,7 +3,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern Fix16 *D_800A607C[];
+extern Fix16 *PLAYER_D[];
 extern int cullObjectToDrawListMargin(TObj *, int);
 extern void playSFX(int);
 extern short MulCosDup(int, int);
@@ -38,7 +38,7 @@ void updateBendingBranch(TObj *o)
                 }
                 { int t = MulCosDup(((o->d8c >> 4) + 0x40) & 0xff, 0x19a) + 0x10; o->d30 = o->h->p.whole + t; }
                 o->d34 = o->y.p.whole + MulNegSin(((o->d8c >> 4) + 0x40) & 0xff, 0x19a);
-                o->d38 = D_800A607C[0]->p.whole;
+                o->d38 = PLAYER_D[0]->p.whole;
             }
             if ((*(Fix16 **)&PLAYER.obj.h)->p.whole < 0x53c) o->step++;
             break;

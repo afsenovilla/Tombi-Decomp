@@ -15,7 +15,7 @@ static void *D_8013E6E4[7] = {
     D_8013EB48, D_8013EB50, D_8013EB58, D_8013EB60,
     D_8013EB68, D_8013EB70, D_8013EB78,
 };
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern void AnimLoadDuration(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern int FUN_800202b4(TObj *);
@@ -32,7 +32,7 @@ void updateBarrelDebrisPiece(TObj *o)
         *(signed char *)&o->b0f = -20;
         o->b0a = 2;
         o->timer = 0x3c;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->d8c = 0;
         o->b0d = 0;
         o->animFrame = 0;

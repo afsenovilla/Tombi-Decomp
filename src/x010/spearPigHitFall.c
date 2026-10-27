@@ -2,7 +2,7 @@
 // MATCHING 8012a664 1152
 #include "TOBJ.H"
 typedef struct B { unsigned char c[4]; } B;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern B D_8012F3D4[];
 extern void *D_80132310[];
 extern void playSFX(int);
@@ -57,7 +57,7 @@ void spearPigHitFall(TObj *o)
         }
         playSFX(0xa6);
         o->velV = -0x400;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b68 = 0;
         o->d8c = 0;
         o->b9c = 1;

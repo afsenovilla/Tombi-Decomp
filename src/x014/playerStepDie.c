@@ -2,7 +2,7 @@
 // MATCHING 800fe75c 304
 #include "TOBJ.H"
 extern unsigned char DAT_8009d2b1, DAT_8009cf06, DAT_8009c938, DAT_8009c942;
-extern unsigned short GAME, DAT_8009c962;
+extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern unsigned char *GRABBED_OBJECT;
 extern void FUN_8001f110(int);
 extern void playJingle(int);
@@ -29,7 +29,7 @@ void playerStepDie(TObj *o)
         if (--o->timer == 0) {
             DAT_8009d2b1 = 0;
             DAT_8009cf06 = 0;
-            if (GAME != 10 || DAT_8009c962 != 0)
+            if (GAME != 10 || GAME_SELECTED_SECTION != 0)
                 DAT_8009c938 = 2;
             o->state++;
         }

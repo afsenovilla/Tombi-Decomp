@@ -1,7 +1,7 @@
 // FUNC 8011e76c 924 X014
 // MATCHING 8011e76c 924
 #include "TOBJ.H"
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -32,7 +32,7 @@ void evilPigBossHit(TObj *o)
     switch (o->state) {
     case 0:
         o->velV = -0x400;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b68 = 0;
         o->d8c = 0;
         o->b9c = 1;

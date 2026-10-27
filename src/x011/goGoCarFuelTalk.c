@@ -8,8 +8,8 @@ typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
 extern E12 D_80119C48[];
 extern TObj PLAYER;
-extern signed char D_8009D2B0[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
+extern signed char GAME_PLAYER_MODE[];
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
 extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern TObj *showMessageBoxDirect(int, int, V *);
@@ -30,7 +30,7 @@ void goGoCarFuelTalk(TObj *o)
             }
             break;
         }
-        if (D_8009D2B0[0] == 3)
+        if (GAME_PLAYER_MODE[0] == 3)
             break;
         if ((unsigned short)(PLAYER.a.p.whole - 0x40) >= 0x20)
             break;
@@ -40,10 +40,10 @@ void goGoCarFuelTalk(TObj *o)
             break;
         v = *(V *)&o->a;
         ((unsigned char*)&GVARS.b42)[0] = 1;
-        D_8009D2B0[0] = 0;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        GAME_PLAYER_MODE[0] = 0;
+        PLAYER_STATE[0] = 5;
+        PLAYER_SUBSTATE[0] = 0;
+        PLAYER_STEP[0] = 0;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         o->anim = D_80119C48[o->subtype].p[2];
@@ -65,9 +65,9 @@ void goGoCarFuelTalk(TObj *o)
         D_800A60EA[0] = 0;
         D_1F8001C6 = 0;
         o->animFrame = o->wbc;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        PLAYER_STATE[0] = 1;
+        PLAYER_SUBSTATE[0] = 0;
+        PLAYER_STEP[0] = 0;
         o->b68 = 0;
         o->step = 0;
         o->state = 0;

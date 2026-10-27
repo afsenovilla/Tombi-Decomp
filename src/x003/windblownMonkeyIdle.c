@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern void *D_801399D8[], *D_801399D4[];
 extern int AnimAdvance(TObj *o);
 extern void AnimLoadDuration(TObj *o);
@@ -43,9 +43,9 @@ void windblownMonkeyIdle(TObj *o)
             o->state++;
             o->anim = D_801399D8[0];
             AnimLoadDuration(o);
-            D_800A603C = 5;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             GVARS.b3f = k;
             GVARS.b42 = k;
         }

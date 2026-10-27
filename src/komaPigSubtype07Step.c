@@ -4,7 +4,7 @@
 #include "raw7.h"
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *DAT_8013a214;
-extern char DAT_80077cdc[];
+extern char MOVE_TABLE_0[];
 extern void FUN_80127214(TObj *);
 
 void komaPigSubtype07Step(TObj *o)
@@ -13,7 +13,7 @@ void komaPigSubtype07Step(TObj *o)
     TObj *q;
     switch (o->state) {
     case 0:
-        PTR(o, 0x28) = DAT_80077cdc;
+        PTR(o, 0x28) = MOVE_TABLE_0;
         o->b69 = 0;
         S16(o, 0xac) = 0x2d;
         o->state = o->state + 1;

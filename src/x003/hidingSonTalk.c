@@ -9,8 +9,8 @@ extern T12 D_80136148[];
 extern TObj PLAYER;
 #define P PLAYER
 extern unsigned char D_8009D13E;
-extern signed char D_8009D2B0[];
-extern unsigned char D_800A603C, D_800A603D;
+extern signed char GAME_PLAYER_MODE[];
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE;
 extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern void AnimLoadDuration(TObj *);
@@ -32,12 +32,12 @@ void hidingSonTalk(TObj *o)
         if (P.d->p.whole != 0x5a) break;
         if ((unsigned short)(P.h->p.whole - 0xc58) >= 0x14) break;
         if ((unsigned short)(P.y.p.whole + 0x6f4) >= 0xa) break;
-        if (D_800A603C != 5) break;
-        if (D_800A603D != 0xb) break;
+        if (PLAYER_STATE != 5) break;
+        if (PLAYER_SUBSTATE != 0xb) break;
         v = *(V6 *)&o->a;
         ((unsigned char*)&GVARS.b42)[0] = 1;
         ((unsigned char*)&GVARS.b3e)[0] = 1;
-        D_8009D2B0[0] = 2;
+        GAME_PLAYER_MODE[0] = 2;
         ((unsigned char*)&GCD.bcfcd)[0] = 1;
         o->wbc = o->animFrame;
         o->animFrame = 1;

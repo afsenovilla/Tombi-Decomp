@@ -32,7 +32,7 @@ extern volatile unsigned short PAD_PRESSED[];
 extern unsigned short DAT_1f8003c6, DAT_1f8001fc, DAT_1f8001f8;
 extern short DAT_1f800238;
 extern short DAT_8009c944, DAT_8009c946[];
-extern unsigned char DAT_8009d2b0, DAT_8009d2b1[], DAT_8009c990;
+extern unsigned char GAME_PLAYER_MODE, DAT_8009d2b1[], DAT_8009c990;
 extern int GRABBED_OBJECT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern short PLAYER_FOOT_OFFSET_BY_DIR[];
@@ -224,7 +224,7 @@ void playerStepJump(TObj *o)
                 o->step = 1;
                 o->state = 0;
                 if (DAT_1f8001fc & DAT_1f8003c6) {
-                    DAT_8009d2b0 = 0;
+                    GAME_PLAYER_MODE = 0;
                     o->step = 2;
                     o->state = 0;
                 }
@@ -285,14 +285,14 @@ void playerStepJump(TObj *o)
                 o->step = 1;
                 o->state = 0;
                 if (DAT_1f8001fc & DAT_1f8003c6) {
-                    DAT_8009d2b0 = 0;
+                    GAME_PLAYER_MODE = 0;
                     o->step = 2;
                     o->state = 0;
                 }
             }
         } else {
             if (DAT_8009c990 == 3 && (DAT_1f8001fc & DAT_1f8003c6)) {
-                DAT_8009d2b0 = 0;
+                GAME_PLAYER_MODE = 0;
                 if (X(o)->cc == 1) {
                     *(unsigned char *)&o->wac = 0;
                     PLAYER_EXT->b4 = 0;

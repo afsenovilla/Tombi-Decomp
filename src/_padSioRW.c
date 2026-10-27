@@ -17,20 +17,20 @@ int _padSioRW(padPort *inObj, int inByte)
     register int result asm("$2");
 
     if (outgoing < 0) {
-        received = D_80098210->data;
+        received = PAD_SIO->data;
         asm("" : "=r"(received) : "0"(received));
         port->response_index = 0xFF;
         port->payload_index = 1;
         *port->statusBuffer = ~outgoing;
         replyByte = received & 0xFF;
-        if (!(D_80098210->stat & 1)) {
+        if (!(PAD_SIO->stat & 1)) {
             do {
-            } while (!(D_80098210->stat & 1));
+            } while (!(PAD_SIO->stat & 1));
         }
         do {
         } while (chkRC2wait() == 0);
         result = ~outgoing;
-        D_80098210->data = result;
+        PAD_SIO->data = result;
         result = replyByte;
         goto done;
     }
@@ -49,7 +49,7 @@ int _padSioRW(padPort *inObj, int inByte)
         }
     }
     {
-        register padSio *registers = D_80098210;
+        register padSio *registers = PAD_SIO;
         register u32 timer = *(volatile u16 *)0x1F801120;
         register u32 ready = registers->stat;
         register padSio *cursor;
@@ -63,7 +63,7 @@ int _padSioRW(padPort *inObj, int inByte)
             cursor = registers;
     }
     {
-        register padSio *sio = D_80098210;
+        register padSio *sio = PAD_SIO;
         register padIntr *irq = D_8009820C;
         asm("" : "=r"(sio), "=r"(irq) : "0"(sio), "1"(irq));
         received = sio->data;
@@ -82,10 +82,10 @@ int _padSioRW(padPort *inObj, int inByte)
             goto waitAcknowledge;
         } else {
         writeByte:
-            D_80098210->data = (u8)outgoing;
+            PAD_SIO->data = (u8)outgoing;
             if (baud == 0x22) {
                 D_8009820C->stat = ~0x80;
-                D_80098210->ctrl |= 0x10;
+                PAD_SIO->ctrl |= 0x10;
             }
             port->payload_index += 1;
             port->response_3c[port->response_index] = replyByte;

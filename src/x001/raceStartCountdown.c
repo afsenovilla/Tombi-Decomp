@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 extern TObj PLAYER;
 extern TObj *D_800A60C8;
-extern unsigned char D_800A60F8, D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char D_800A60F8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern TObj *showMessageBox(int, int, int, int);
 extern void playerSetAnimIfChangedAt(TObj *, int, int);
 extern void FUN_8003fd78(TObj *, int, int);
@@ -46,9 +46,9 @@ void raceStartCountdown(TObj *o)
             GVARS.b42 = 0;
             GCD.bcede = 1;
             D_800A60F8 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             e->subtype = 1;
             o->step = 0;
             o->state = 0;

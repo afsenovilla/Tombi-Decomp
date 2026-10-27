@@ -2,7 +2,7 @@
 // MATCHING 8012ba94 2100
 #include "spad.h"
 #include "TOBJ.H"
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern unsigned char KOMA_PIG_IDLE_ANIM_BY_SUBTYPE[];
 extern unsigned short *KOMA_PIG_ANIMS[];
 extern unsigned short *D_8013A1D8[];
@@ -54,7 +54,7 @@ void komaPigSubtype02Step(TObj *o)
     switch (o->state) {
     case 0:
         o->active = 5;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->timer = 0;
         o->w22 = 0;
         o->b69 = 0;

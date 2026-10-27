@@ -9,8 +9,8 @@
 typedef struct { short x, y; } P;
 
 extern TObj PLAYER;
-extern Fix16 *D_800A6078, *D_800A607C;
-extern short D_800A604E;
+extern Fix16 *PLAYER_H, *D_800A607C;
+extern short PLAYER_Y;
 extern TObj *BITTEN_OBJECT;
 typedef struct {
     unsigned char b0, p1[5], b6, b7, b8, p9[0x22 - 9];
@@ -28,10 +28,10 @@ typedef struct {
 extern S330 *PLAYER_EXT;
 extern S338 *WEAPON_STATE;
 extern unsigned char *GRABBED_OBJECT;
-extern short D_8009D600[], D_8009D602[], D_8009D604[];
+extern short WEAPON_BEND_PARAMS[], D_8009D602[], D_8009D604[];
 extern short D_8007A072[];
 extern short WEAPON_HEAD_OFFSETS[];
-extern unsigned char D_8009D2B2;
+extern unsigned char GAME_EQUIPPED_WEAPON;
 extern unsigned short D_1F8001F8;
 extern short MulCos(int, short);
 extern short MulNegSinScaled(int, short);
@@ -103,12 +103,12 @@ void weapon8to9Swing(TObj *o)
         else va = WEAPON_HEAD_OFFSETS[i] - 0x20;
         vb = WEAPON_HEAD_OFFSETS[i + 1];
         if (o->animFrame >= 6) {
-            x = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
+            x = PLAYER_H->p.whole + MulCos((unsigned char)va, vb);
             o->velX = (o->animFrame & 1) ? x - 4 : x + 4;
-            o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
+            o->velY = PLAYER_Y + MulNegSinScaled((unsigned char)va, vb);
         } else {
-            o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
-            o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
+            o->velX = PLAYER_H->p.whole + MulCos((unsigned char)va, vb);
+            o->velY = PLAYER_Y + MulNegSinScaled((unsigned char)va, vb);
         }
         o->h->p.whole = o->velX + MulCos(((unsigned short)o->waa + 0x80) & 0xff, 0x10);
         o->y.p.whole = o->velY + MulNegSinScaled(((unsigned short)o->waa + 0x80) & 0xff, 0x10);
@@ -167,12 +167,12 @@ void weapon8to9Swing(TObj *o)
         else va = WEAPON_HEAD_OFFSETS[i] - 0x20;
         vb = WEAPON_HEAD_OFFSETS[i + 1];
         if (o->animFrame >= 6) {
-            x = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
+            x = PLAYER_H->p.whole + MulCos((unsigned char)va, vb);
             o->velX = (o->animFrame & 1) ? x - 4 : x + 4;
-            o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
+            o->velY = PLAYER_Y + MulNegSinScaled((unsigned char)va, vb);
         } else {
-            o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
-            o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
+            o->velX = PLAYER_H->p.whole + MulCos((unsigned char)va, vb);
+            o->velY = PLAYER_Y + MulNegSinScaled((unsigned char)va, vb);
         }
         o->h->p.whole = o->velX + MulCos((unsigned char)o->waa, 0x10);
         o->y.p.whole = o->velY + MulNegSinScaled((unsigned char)o->waa, 0x10);
@@ -273,9 +273,9 @@ void weapon8to9Swing(TObj *o)
             if (WEAPON_STATE->w30 > 0x60 - PLAYER_EXT->b0 * 16) WEAPON_STATE->w30 = 0x60 - (PLAYER_EXT->b0 << 4);
             WEAPON_STATE->w32 -= o->wa8 >> 8;
             if (WEAPON_STATE->w32 < 0) WEAPON_STATE->w32 = 0;
-            if (o->animFrame & 1) o->velX = D_800A6078->p.whole + 0x10;
-            else o->velX = D_800A6078->p.whole - 0x10;
-            o->velY = D_800A604E - 0x10;
+            if (o->animFrame & 1) o->velX = PLAYER_H->p.whole + 0x10;
+            else o->velX = PLAYER_H->p.whole - 0x10;
+            o->velY = PLAYER_Y - 0x10;
             t.x = o->velX + MulCos(WEAPON_STATE->we, 0xc);
             t.y = o->velY + MulNegSinScaled(WEAPON_STATE->we, 0xc);
             s.x = o->h->p.whole;
@@ -290,13 +290,13 @@ void weapon8to9Swing(TObj *o)
                 if (G.b9e == 4 || G.b9e == 7) *(unsigned char *)o->d94 = PLAYER_EXT->b6;
                 o->waa = TB(2) + 0x80;
                 if (o->animFrame & 1) {
-                    o->velX = D_800A6078->p.whole + 0x10;
+                    o->velX = PLAYER_H->p.whole + 0x10;
                     o->waa = (o->waa + 0x40) & 0xff;
                 } else {
-                    o->velX = D_800A6078->p.whole - 0x10;
+                    o->velX = PLAYER_H->p.whole - 0x10;
                     o->waa = (o->waa - 0x40) & 0xff;
                 }
-                o->velY = D_800A604E - 0x10;
+                o->velY = PLAYER_Y - 0x10;
                 o->h->p.whole = o->velX + MulCos(o->waa, 0xc);
                 o->y.p.whole = o->velY + MulNegSinScaled(o->waa, 0xc);
                 WEAPON_STATE->w32 = 0;
@@ -311,7 +311,7 @@ void weapon8to9Swing(TObj *o)
                     o->state = 0;
                     GVARS.i34 = 0;
                 } else {
-                    spawnWeaponTrailObjects(D_8009D2B2, o);
+                    spawnWeaponTrailObjects(GAME_EQUIPPED_WEAPON, o);
                     o->waa += (o->animFrame & 1) ? -0x40 : 0x40;
                     o->state = 6;
                 }
@@ -328,7 +328,7 @@ void weapon8to9Swing(TObj *o)
         }
         AnimJump(&G, (PLAYER_EXT->w22 >> 2) & 3);
         k = o->animFrame + o->animFrame * 2;
-        D_8009D600[0] = 10;
+        WEAPON_BEND_PARAMS[0] = 10;
         D_8009D602[0] = 2;
         D_8009D604[0] = TK(0);
         o->waa += TK(1);
@@ -350,9 +350,9 @@ void weapon8to9Swing(TObj *o)
         if (o->animFrame & 1) va = 0x80 - WEAPON_HEAD_OFFSETS[i];
         else va = WEAPON_HEAD_OFFSETS[i];
         vb = WEAPON_HEAD_OFFSETS[i + 1];
-        o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
-        o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
-        weaponCalcBentOffset(D_8009D600, o->waa, &va, &vb);
+        o->velX = PLAYER_H->p.whole + MulCos((unsigned char)va, vb);
+        o->velY = PLAYER_Y + MulNegSinScaled((unsigned char)va, vb);
+        weaponCalcBentOffset(WEAPON_BEND_PARAMS, o->waa, &va, &vb);
         o->h->p.whole = o->velX + va;
         o->y.p.whole = o->velY + vb;
         if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || GVARS.b3f) {
@@ -379,7 +379,7 @@ void weapon8to9Swing(TObj *o)
         AnimJump(&G, (PLAYER_EXT->w22 / 3) & 3);
         o->animFrame = G.animFrame;
         k = o->animFrame + o->animFrame * 2;
-        D_8009D600[0] = 0x10;
+        WEAPON_BEND_PARAMS[0] = 0x10;
         D_8009D602[0] = 4;
         D_8009D604[0] = TK(0);
         o->waa += TK(1);
@@ -401,9 +401,9 @@ void weapon8to9Swing(TObj *o)
         if (o->animFrame & 1) va = 0x80 - WEAPON_HEAD_OFFSETS[i];
         else va = WEAPON_HEAD_OFFSETS[i];
         vb = WEAPON_HEAD_OFFSETS[i + 1];
-        o->velX = D_800A6078->p.whole + MulCos((unsigned char)va, vb);
-        o->velY = D_800A604E + MulNegSinScaled((unsigned char)va, vb);
-        weaponCalcBentOffset(D_8009D600, o->waa, &va, &vb);
+        o->velX = PLAYER_H->p.whole + MulCos((unsigned char)va, vb);
+        o->velY = PLAYER_Y + MulNegSinScaled((unsigned char)va, vb);
+        weaponCalcBentOffset(WEAPON_BEND_PARAMS, o->waa, &va, &vb);
         o->h->p.whole = o->velX + va;
         o->y.p.whole = o->velY + vb;
         if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || G.b04 != 1 || G.ba4 || GVARS.b3f) {

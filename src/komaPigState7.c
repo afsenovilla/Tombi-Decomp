@@ -6,8 +6,8 @@ extern void applyFrameVelocityX(TObj *);
 extern void FUN_80127214(TObj *);
 extern int enemyProbeGround(TObj *);
 extern TObj *FUN_80018448(void);
-extern char DAT_80077cdc[];
-extern char DAT_80077cf4[];
+extern char MOVE_TABLE_0[];
+extern char MOVE_TABLE_1[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *PTR_DAT_8013a1bc[];
 extern unsigned short *PTR_DAT_8013a1d4[];
@@ -33,7 +33,7 @@ void komaPigState7(TObj *o)
         o->b69 = 0;
         o->velV = 0;
         o->substep++;
-        if (o->movetab == 0) o->movetab = DAT_80077cf4;
+        if (o->movetab == 0) o->movetab = MOVE_TABLE_1;
         break;
     case 1:
         applyFrameVelocityX(o);
@@ -71,7 +71,7 @@ void komaPigState7(TObj *o)
             }
             o->b69 = 0;
             x->wc = 0x100;
-            o->movetab = DAT_80077cdc;
+            o->movetab = MOVE_TABLE_0;
             o->timer = 2;
             o->wac = 0x1d;
             o->substep++;

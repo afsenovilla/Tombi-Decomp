@@ -3,9 +3,9 @@
 extern int FUN_8005efe4(void);
 extern unsigned short FUN_8005e420(int, int);
 extern short *WEAPON_STATE;
-extern short DAT_8009d600[];
-extern unsigned short *DAT_800a6078, *DAT_800a607c;
-extern unsigned short DAT_800a604e[];
+extern short WEAPON_BEND_PARAMS[];
+extern unsigned short *PLAYER_H, *PLAYER_D;
+extern unsigned short PLAYER_Y[];
 
 static __inline__ short getm(void)
 {
@@ -26,14 +26,14 @@ void weapon8to9Init(unsigned char *o)
         p[4] = getm();
         WEAPON_STATE[3] = FUN_8005e420(0x80, 0x1ef);
         WEAPON_STATE[5] = FUN_8005e420(0x80, 0x1f0);
-        DAT_8009d600[0] = 0xf;
-        DAT_8009d600[1] = 8;
-        DAT_8009d600[2] = 0x5a;
+        WEAPON_BEND_PARAMS[0] = 0xf;
+        WEAPON_BEND_PARAMS[1] = 8;
+        WEAPON_BEND_PARAMS[2] = 0x5a;
         *(signed char *)(o + 0xf) = -9;
         o[0xa] = 0;
-        (*(unsigned short **)(o + 0x40))[1] = DAT_800a6078[1];
-        *(unsigned short *)(o + 0x16) = DAT_800a604e[0] - 0x10;
-        (*(unsigned short **)(o + 0x44))[1] = DAT_800a607c[1];
+        (*(unsigned short **)(o + 0x40))[1] = PLAYER_H[1];
+        *(unsigned short *)(o + 0x16) = PLAYER_Y[0] - 0x10;
+        (*(unsigned short **)(o + 0x44))[1] = PLAYER_D[1];
         *(short *)(o + 0x80) = 0;
         *(short *)(o + 0x82) = 0;
         *(short *)(o + 0x2e) = 0;

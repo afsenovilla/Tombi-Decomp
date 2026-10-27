@@ -10,7 +10,7 @@ s16 isPlayerStateRestricted(void)
 {
     s16 r = 0;
 
-    switch (D_800A539D) {
+    switch (PLAYER_SUBSTATE) {
     case 5:
     case 6:
     case 7:

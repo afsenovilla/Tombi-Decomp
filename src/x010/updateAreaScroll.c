@@ -16,7 +16,7 @@ typedef void (*Fn)(O *);
 
 extern PL PLAYER;
 extern Fn D_80079A98[];
-extern FP *D_800A6078;
+extern FP *PLAYER_H;
 extern short D_1F80016A, D_1F80016E, D_1F800172;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);
@@ -91,7 +91,7 @@ void updateAreaScroll(O *o)
                 break;
             }
             if (D_1F80016A < 0x44d) break;
-            D_800A6078->whole = 0x44c;
+            PLAYER_H->whole = 0x44c;
             break;
         case 2:
         case 6:

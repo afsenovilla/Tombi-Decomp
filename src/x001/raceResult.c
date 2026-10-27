@@ -11,10 +11,10 @@ typedef struct {
     char p20[0x24 - 0x20];
     short w24;
 } O;
-extern unsigned char PLAYER, D_800A603C[], D_800A603D[], D_800A603E[];
+extern unsigned char PLAYER, PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
 extern short D_800A6066;
 extern unsigned char D_800A60A1;
-extern unsigned short D_800A604E;
+extern unsigned short PLAYER_Y;
 extern unsigned char D_800A60D6, D_800A60E2, D_800A60DA, D_800A60F8;
 extern TObj *D_800A60C8;
 extern TObj *showMessageBox(int, int, int, int);
@@ -32,15 +32,15 @@ void raceResult(O *o)
         o->step++;
         break;
     case 1:
-        if (D_800A603C[0] != 1) break;
+        if (PLAYER_STATE[0] != 1) break;
         if (!D_800A60A1) break;
-        if ((unsigned short)(D_800A604E + 0x6d6) >= 6) break;
+        if ((unsigned short)(PLAYER_Y + 0x6d6) >= 6) break;
         if (((unsigned char*)&GCD.bcedf)[0] == 0) {
             PLAYER = 1;
             D_800A6066 = 1;
-            D_800A603C[0] = 5;
-            D_800A603D[0] = 0;
-            D_800A603E[0] = 0;
+            PLAYER_STATE[0] = 5;
+            PLAYER_SUBSTATE[0] = 0;
+            PLAYER_STEP[0] = 0;
             D_800A60D6 = 0;
             D_800A60E2 = 0;
             D_800A60DA = 0;
@@ -54,9 +54,9 @@ void raceResult(O *o)
         } else if (((unsigned char*)&GCD.bcedf)[0] == 0xfe) {
             PLAYER = 1;
             D_800A6066 = 1;
-            D_800A603C[0] = 5;
-            D_800A603D[0] = 0;
-            D_800A603E[0] = 0;
+            PLAYER_STATE[0] = 5;
+            PLAYER_SUBSTATE[0] = 0;
+            PLAYER_STEP[0] = 0;
             D_800A60D6 = 0;
             D_800A60E2 = 0;
             D_800A60DA = 0;
@@ -133,9 +133,9 @@ void raceResult(O *o)
         ((unsigned char*)&GVARS.b3e)[0] = 0;
         ((unsigned char*)&GVARS.b42)[0] = 0;
         D_800A60F8 = 0;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        PLAYER_STATE[0] = 1;
+        PLAYER_SUBSTATE[0] = 0;
+        PLAYER_STEP[0] = 0;
         o->w24 = 0;
         switch (((unsigned char*)&GCD.bcedf)[0]) {
         case 0xfe:

@@ -5,10 +5,10 @@
 // Demo version of PAL main0 80031664 (FUN_80031664.c):  Inline GetClut, CLUT rows 0x1e8/0x1e9 (PAL 0x1ef/0x1f0).
 #include "TOBJ.H"
 extern short *WEAPON_STATE;
-extern short DAT_8009d600[], DAT_8009d602[], DAT_8009d604[];
-extern Fix16 *DAT_800a6078;
-extern Fix16 *DAT_800a607c;
-extern unsigned short DAT_800a604e[];
+extern short WEAPON_BEND_PARAMS[], DAT_8009d602[], DAT_8009d604[];
+extern Fix16 *PLAYER_H;
+extern Fix16 *PLAYER_D;
+extern unsigned short PLAYER_Y[];
 extern int GetGraphType(void);
 extern unsigned short GetClut(int, int);
 
@@ -25,14 +25,14 @@ void FUN_80031664(TObj *o)
         p[4] = v;
         WEAPON_STATE[3] = ((0x1e8 << 6) | (0x80 >> 4));
         WEAPON_STATE[5] = ((0x1e9 << 6) | (0x80 >> 4));
-        DAT_8009d600[0] = 0xf;
+        WEAPON_BEND_PARAMS[0] = 0xf;
         DAT_8009d602[0] = 8;
         DAT_8009d604[0] = 0x5a;
         *(signed char *)&o->b0f = -9;
         o->b0a = 0;
-        o->h->p.whole = DAT_800a6078->p.whole;
-        o->y.p.whole = DAT_800a604e[0] - 0x10;
-        o->d->p.whole = DAT_800a607c->p.whole;
+        o->h->p.whole = PLAYER_H->p.whole;
+        o->y.p.whole = PLAYER_Y[0] - 0x10;
+        o->d->p.whole = PLAYER_D->p.whole;
         o->velH = 0;
         o->velV = 0;
         o->animFrame = 0;
@@ -43,10 +43,10 @@ void FUN_80031664(TObj *o)
 #else
 #include "TOBJ.H"
 extern short *WEAPON_STATE;
-extern short DAT_8009d600[], DAT_8009d602[], DAT_8009d604[];
-extern Fix16 *DAT_800a6078;
-extern Fix16 *DAT_800a607c;
-extern unsigned short DAT_800a604e[];
+extern short WEAPON_BEND_PARAMS[], DAT_8009d602[], DAT_8009d604[];
+extern Fix16 *PLAYER_H;
+extern Fix16 *PLAYER_D;
+extern unsigned short PLAYER_Y[];
 extern int GetGraphType(void);
 extern unsigned short GetClut(int, int);
 
@@ -63,14 +63,14 @@ void weapon0Init(TObj *o)
         p[4] = v;
         WEAPON_STATE[3] = GetClut(0x80, 0x1ef);
         WEAPON_STATE[5] = GetClut(0x80, 0x1f0);
-        DAT_8009d600[0] = 0xf;
+        WEAPON_BEND_PARAMS[0] = 0xf;
         DAT_8009d602[0] = 8;
         DAT_8009d604[0] = 0x5a;
         *(signed char *)&o->b0f = -9;
         o->b0a = 0;
-        o->h->p.whole = DAT_800a6078->p.whole;
-        o->y.p.whole = DAT_800a604e[0] - 0x10;
-        o->d->p.whole = DAT_800a607c->p.whole;
+        o->h->p.whole = PLAYER_H->p.whole;
+        o->y.p.whole = PLAYER_Y[0] - 0x10;
+        o->d->p.whole = PLAYER_D->p.whole;
         o->velH = 0;
         o->velV = 0;
         o->animFrame = 0;

@@ -29,7 +29,7 @@ extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
 typedef struct { unsigned char p0[7]; signed char b7; unsigned char p8[0x18 - 8]; short w18, w1a; unsigned char p1c[0x28 - 0x1c]; unsigned short w28[1]; } P800505F0;
 extern P800505F0 *PLAYER_EXT;
-extern unsigned short D_8009C960h, D_8009C962h;
+extern unsigned short D_8009C960h, GAME_SELECTED_SECTION;
 extern void uploadSpriteFrameToVram(TObj *);
 
 #define gte_ldv0(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 )" : : "r"(r0))
@@ -105,7 +105,7 @@ void drawPlayerSpriteDefault(TObj *o)
     y = (unsigned)xy >> 16;
     if (PLAYER_EXT->w28[SPAD.s1f4] != s) {
         if (D_8009C960h == 6) {
-            switch (D_8009C962h) {
+            switch (GAME_SELECTED_SECTION) {
             case 0: case 1: break;
             default: uploadSpriteFrameToVram(o);
             }

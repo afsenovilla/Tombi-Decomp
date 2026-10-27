@@ -8,7 +8,7 @@
 extern void *D_80012034[];
 extern void *D_80012268;
 extern unsigned char D_80079D3C[];
-extern unsigned short D_800A604E[];
+extern unsigned short PLAYER_Y[];
 extern int DAT_1f8002d8[];
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
@@ -45,7 +45,7 @@ void func_8002BE80(TObj *o)
             ObjListPush_1F800220(o);
             if (PLAYER.obj.animFrame & 1) d = -14; else d = 14;
             o->h->p.whole = (*(Fix16 **)&PLAYER.obj.h)->p.whole + d;
-            o->y.p.whole = D_800A604E[0];
+            o->y.p.whole = PLAYER_Y[0];
             if (AnimAdvance(o)) {
                 o->b04++;
             }
@@ -77,7 +77,7 @@ static void *D_80012034[5] = {
 };
 extern void *D_80012268;
 extern unsigned char D_80079D3C[];
-extern unsigned short D_800A604E[];
+extern unsigned short PLAYER_Y[];
 extern int DAT_1f8002d8[];
 extern void AnimLoadDuration(TObj *);
 extern void playSFX(int);
@@ -117,7 +117,7 @@ void updateImpactEffect(TObj *o)
             ObjListPush_1F800220(o);
             if (PLAYER.obj.animFrame & 1) d = -14; else d = 14;
             o->h->p.whole = (*(Fix16 **)&PLAYER.obj.h)->p.whole + d;
-            o->y.p.whole = D_800A604E[0] - 14;
+            o->y.p.whole = PLAYER_Y[0] - 14;
             if (AnimAdvance(o)) {
                 o->b04++;
             }

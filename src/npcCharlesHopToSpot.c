@@ -5,7 +5,7 @@
 #include "player.h"
 #include "TOBJ.H"
 extern void *NPC_CHARLES_ANIMS, *D_8013AC44, *D_8013AC2C;
-extern Fix16 *D_800A607C[];
+extern Fix16 *PLAYER_D[];
 void AnimLoadDuration(TObj *o);
 int AnimAdvance(TObj *o);
 void npcCharlesHopToSpot(TObj *o)
@@ -15,7 +15,7 @@ void npcCharlesHopToSpot(TObj *o)
         o->anim = NPC_CHARLES_ANIMS;
         AnimLoadDuration(o);
         o->animFrame = 1;
-        if (D_800A607C[0]->p.whole != 0) break;
+        if (PLAYER_D[0]->p.whole != 0) break;
         if ((unsigned short)((*(Fix16 **)&PLAYER.obj.h)->p.whole - o->h->p.whole + 0x50) < 0xa0) {
             ((unsigned char*)&GVARS.b3f)[0] = 1;
             ((unsigned char*)&GVARS.b42)[0] = 1;

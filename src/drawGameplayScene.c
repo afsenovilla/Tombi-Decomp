@@ -10,7 +10,7 @@ extern void FUN_80057edc(void), FUN_800597bc(void), FUN_8011bc34(void), drawHudI
 extern void FUN_80059d44(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
-extern unsigned char DAT_8009c975, DAT_8009c976;
+extern unsigned char GAME_FADE_SCREEN_CONTROL, DAT_8009c976;
 extern int GAME;
 
 extern signed char D_8009B160;
@@ -29,7 +29,7 @@ void drawGameplayScene(void)
     FUN_80057edc();
     if (DAT_1f8001c6 == 1 && D_8009B160 == 1)
         FUN_800597bc();
-    switch (DAT_8009c975) {
+    switch (GAME_FADE_SCREEN_CONTROL) {
     case 1:
     case 4:
         u = 0xff;
@@ -57,7 +57,7 @@ extern void drawCategory7Objects(void), drawPauseMenu(void), FUN_8011bc34(void),
 extern void drawScreenFade(int);
 extern char DAT_1f800118[];
 extern short DAT_1f8001c6;
-extern unsigned char DAT_8009c975, DAT_8009c976;
+extern unsigned char GAME_FADE_SCREEN_CONTROL, DAT_8009c976;
 extern int GAME;
 
 void drawGameplayScene(void)
@@ -75,7 +75,7 @@ void drawGameplayScene(void)
     drawCategory7Objects();
     if (DAT_1f8001c6 == 1)
         drawPauseMenu();
-    switch (DAT_8009c975) {
+    switch (GAME_FADE_SCREEN_CONTROL) {
     case 1:
     case 4:
         u = 0xff;

@@ -9,16 +9,16 @@ extern void tunnelPlayerItemUseStep(TObj *o);
 typedef struct { char p[0x2C]; unsigned short w2c; } P330;
 extern P330 *PLAYER_EXT;
 extern unsigned char D_8009C93A;
-extern unsigned char D_8009C975;
+extern unsigned char GAME_FADE_SCREEN_CONTROL;
 extern unsigned char TALK_POSE;
-extern unsigned char D_8009D2B0[];
+extern unsigned char GAME_PLAYER_MODE[];
 extern volatile unsigned short PAD_PRESSED[];
 extern void tunnelCheckTileTrigger(TObj *o, short x, short y);
 extern short D_800EECC8[][4];
 extern TObj PLAYER;
 
 #define setDir(o) { \
-    D_8009D2B0[0] = 1; \
+    GAME_PLAYER_MODE[0] = 1; \
     o->animFrame &= 7; \
     if (PAD_PRESSED[0] & 0x10) { \
         if (PAD_PRESSED[0] & 0x20) o->animFrame = 1; \
@@ -115,7 +115,7 @@ short *e; int d; unsigned short w;
             }
             break;
         }
-        if (D_8009C975 == 0) {
+        if (GAME_FADE_SCREEN_CONTROL == 0) {
             o->b04 = 1;
             o->step = 0;
             o->state = 0;

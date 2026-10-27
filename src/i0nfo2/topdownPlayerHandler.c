@@ -9,7 +9,7 @@ extern void topdownPlayerInit(TObj *o);
 extern void topdownPlayerMainStep(TObj *o);
 extern void topdownPlayerEventStep(TObj *o);
 extern unsigned short D_8007A034, D_8007A036;
-extern signed char D_8009D2B0[];
+extern signed char GAME_PLAYER_MODE[];
 extern unsigned short D_8009D610;
 extern unsigned short PAD_PRESSED[];
 extern unsigned char D_8009F7F0;
@@ -31,7 +31,7 @@ void topdownPlayerHandler(TObj *o)
         D_800A6040 = D_8007A034;
         D_800A60FC = D_8007A036;
     }
-    m = D_8009D2B0;
+    m = GAME_PLAYER_MODE;
     if (*m >= 5) goto clr;
     if (*m < 3) {
     clr:

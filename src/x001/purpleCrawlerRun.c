@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern unsigned char D_8013C7C8[];
-extern char D_80077D00[], D_80077CF4[], D_80077CDC[];
+extern char D_80077D00[], MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern void *D_8013FC74[];
 extern unsigned int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
@@ -31,7 +31,7 @@ void purpleCrawlerRun(TObj *o)
             o->timer = 500;
         } else {
             if (D_8013C7C8[FUN_8001f9e0() & 0xf])
-                o->movetab = D_80077CF4;
+                o->movetab = MOVE_TABLE_1;
             else
                 o->movetab = D_80077D00;
             if (D_8013C7C8[FUN_8001f9e0() & 0xf])
@@ -128,7 +128,7 @@ void purpleCrawlerRun(TObj *o)
                 o->wb0 = 0;
             else
                 o->wb0 = 1;
-            o->movetab = D_80077CDC;
+            o->movetab = MOVE_TABLE_0;
             o->wac = 1;
             o->anim = D_8013FC74[0];
             FUN_8001fe6c(o);
@@ -146,7 +146,7 @@ void purpleCrawlerRun(TObj *o)
             else
                 o->wb0 = 1;
             q[4] = 0;
-            o->movetab = D_80077CDC;
+            o->movetab = MOVE_TABLE_0;
             o->wac = 1;
             o->anim = D_8013FC74[0];
             FUN_8001fe6c(o);

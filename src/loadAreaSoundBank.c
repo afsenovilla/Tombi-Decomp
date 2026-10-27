@@ -3,7 +3,7 @@
 // VERSION SLPM_80165 slpm80165 80037394 524
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80039338 (loadAreaSoundBank.c): only the demo's areas 0-2 (no D_8009F838 offset); area 0 uses bank 0.
-extern unsigned short GAME, DAT_8009c962, AREA_VARIANT;
+extern unsigned short GAME, GAME_SELECTED_SECTION, AREA_VARIANT;
 extern int DAT_8009d69c;
 extern unsigned char DAT_8009cdb1, DAT_8009cdb8, DAT_8009cdb9, DAT_8009cedd;
 extern void loadWssFile(int, int);
@@ -13,7 +13,7 @@ void loadAreaSoundBank(void)
     DAT_8009d69c = 0;
     switch (GAME) {
     case 0:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
         case 1:
         case 2:
@@ -23,7 +23,7 @@ void loadAreaSoundBank(void)
         }
         break;
     case 1:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
         case 1:
             if (DAT_8009cdb1 != 0xff) {
@@ -55,7 +55,7 @@ void loadAreaSoundBank(void)
         }
         break;
     case 2:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
             if (DAT_8009cdb8 == 1)
                 loadWssFile(15, 8);
@@ -76,7 +76,7 @@ void loadAreaSoundBank(void)
     }
 }
 #else
-extern unsigned short GAME, DAT_8009c962, AREA_VARIANT;
+extern unsigned short GAME, GAME_SELECTED_SECTION, AREA_VARIANT;
 extern int DAT_8009d69c;
 extern unsigned char DAT_8009cdb1, DAT_8009cdb8, DAT_8009cdb9, DAT_8009cedd;
 extern void loadWssFile(int, int);
@@ -86,7 +86,7 @@ void loadAreaSoundBank(void)
     DAT_8009d69c = 0;
     switch (GAME + AREA_VARIANT) {
     case 0:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
         case 1:
         case 2:
@@ -97,7 +97,7 @@ void loadAreaSoundBank(void)
         break;
     case 1:
     case 7:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
         case 1:
             if (DAT_8009cdb1 != 0xff) {
@@ -129,7 +129,7 @@ void loadAreaSoundBank(void)
         }
         break;
     case 2:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
             if (DAT_8009cdb8 == 1)
                 loadWssFile(15, 8);
@@ -148,7 +148,7 @@ void loadAreaSoundBank(void)
         }
         break;
     case 19:
-        switch (DAT_8009c962) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
             if (DAT_8009cdb8 == 1)
                 loadWssFile(15, 8);

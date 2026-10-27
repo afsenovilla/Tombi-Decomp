@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3, b4; } SP;
 extern unsigned short GAME;
-extern unsigned short D_8009C962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short AREA_SECTION_COUNTS[];
 extern unsigned int D_8009CB94[];
 extern TObj *allocObjectLayer2(void);
@@ -18,7 +18,7 @@ TObj *spawnLayer2ObjectUnlessFlagged(SP *p)
     for (i = 0; i < GAME; i++) {
         n += AREA_SECTION_COUNTS[i];
     }
-    n += D_8009C962;
+    n += GAME_SELECTED_SECTION;
     if (k >= 32) n++;
     { int s = k % 32; if (D_8009CB94[n] & (1 << s)) return 0; }
     if (p->b4 != 2) return 0;

@@ -69,7 +69,7 @@ inline s32 adjustAreaBgmVolume(s32 id)
         id += 5;
         break;
     case 6:
-        switch (D_8009BCCA) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
             id -= 5;
             break;
@@ -82,7 +82,7 @@ inline s32 adjustAreaBgmVolume(s32 id)
         }
         break;
     case 9:
-        switch (D_8009BCCA) {
+        switch (GAME_SELECTED_SECTION) {
         case 0:
             id -= 0xB;
             break;

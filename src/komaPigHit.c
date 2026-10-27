@@ -2,9 +2,9 @@
 // MATCHING 8012ae1c 1972
 #include "TOBJ.H"
 typedef struct P { unsigned char b0; unsigned char b1; unsigned short w2; short w4; } P;
-extern char D_80077D0C[];
-extern char D_80077CF4[];
-extern char D_80077CDC[];
+extern char MOVE_TABLE_2[];
+extern char MOVE_TABLE_1[];
+extern char MOVE_TABLE_0[];
 extern unsigned short *D_8013A204[];
 extern unsigned short *D_8013A1E4[];
 extern unsigned short *D_8013A1E8[];
@@ -73,7 +73,7 @@ void komaPigHit(TObj *o)
         o->category |= 0x80;
         FUN_8001e4f0(0xf);
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->b9c = 1;
         o->wac = 0x29;
         o->b69 = 0;
@@ -104,7 +104,7 @@ void komaPigHit(TObj *o)
                 o->active = 3;
                 o->velV = -0x280;
                 o->d8c = 0;
-                o->movetab = D_80077CF4;
+                o->movetab = MOVE_TABLE_1;
                 o->state++;
                 p->b1 = 1;
                 o->b69 = 0;
@@ -132,7 +132,7 @@ void komaPigHit(TObj *o)
                 } else if (t = p->b1, p->b1 = t + 0xff, t != 0) {
                     o->velV = ~(o->velV - 0x80) + 1;
                     if (o->velV < 0) o->b9c = 1;
-                    o->movetab = D_80077CDC;
+                    o->movetab = MOVE_TABLE_0;
                 } else {
                     o->d8c = p->w2;
                     o->timer = 0x168;

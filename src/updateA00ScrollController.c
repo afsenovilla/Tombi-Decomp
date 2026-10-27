@@ -4,11 +4,11 @@
 typedef void (*Fn)(TObj *);
 typedef struct { short s0, s2; } S2;
 extern unsigned char DAT_8009cda2[];
-extern unsigned char DAT_8009c966, DAT_8009cda6, DAT_8009c93a, DAT_8009cdc0, DAT_8009ce0b, DAT_800a60da;
-extern unsigned char DAT_8009cfed, DAT_8009c938, DAT_8009cda8, DAT_8009c93f, DAT_8009c975, DAT_8009c93c;
+extern unsigned char GAME_AREA00_INTRO_PHASE, DAT_8009cda6, DAT_8009c93a, DAT_8009cdc0, DAT_8009ce0b, DAT_800a60da;
+extern unsigned char DAT_8009cfed, DAT_8009c938, DAT_8009cda8, DAT_8009c93f, GAME_FADE_SCREEN_CONTROL, DAT_8009c93c;
 extern unsigned char DAT_8009d13f, DAT_8009c93e, DAT_8009c942;
-extern signed char DAT_8009d2b0;
-extern unsigned short DAT_8009c962;
+extern signed char GAME_PLAYER_MODE;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short DAT_8009c982[];
 extern unsigned char A00_SCROLL_CONTROLLER_MODE_BY_SECTION[];
 extern Fn A00_SCROLL_CONTROLLER_HANDLERS[];
@@ -16,7 +16,7 @@ extern short DAT_1f80016a, DAT_1f80016e, DAT_1f800172;
 extern short DAT_1f8001c6;
 extern unsigned char DAT_1f8001cc, DAT_1f8001cd;
 extern int DAT_800a609c;
-extern S2 *DAT_800a6078;
+extern S2 *PLAYER_H;
 extern char DAT_8001d6a4[];
 extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
@@ -58,12 +58,12 @@ void updateA00ScrollController(TObj *o)
         }
         o->subtype = 1;
         o->step++;
-        if (DAT_8009c966 == 3 || DAT_8009cda6 == 0xff) {
+        if (GAME_AREA00_INTRO_PHASE == 3 || DAT_8009cda6 == 0xff) {
             o->subtype = 0;
             o->animFrame = ((unsigned short *)&o->h)[1];
             break;
         }
-        if (DAT_8009c966 == 1) DAT_8009c966 = 2;
+        if (GAME_AREA00_INTRO_PHASE == 1) GAME_AREA00_INTRO_PHASE = 2;
         break;
     case 2:
         if (DAT_8009c93a != 0) o->step++;
@@ -74,7 +74,7 @@ void updateA00ScrollController(TObj *o)
         break;
     case 3:
         {
-            unsigned char v = A00_SCROLL_CONTROLLER_MODE_BY_SECTION[DAT_8009c962];
+            unsigned char v = A00_SCROLL_CONTROLLER_MODE_BY_SECTION[GAME_SELECTED_SECTION];
             o->state = 0;
             o->step = v;
         }
@@ -101,7 +101,7 @@ void updateA00ScrollController(TObj *o)
             if (o->subtype == 1) break;
             if (DAT_1f80016a < 0x4ed) break;
             if (DAT_1f80016e >= -0x95) break;
-            DAT_8009c962 = 1;
+            GAME_SELECTED_SECTION = 1;
             markSectionVisited();
             o->state = 0;
             o->step++;
@@ -121,7 +121,7 @@ void updateA00ScrollController(TObj *o)
         if (DAT_1f80016a < 0x4ec) {
             o->state = 0;
             o->step--;
-            DAT_8009c962 = 0;
+            GAME_SELECTED_SECTION = 0;
             markSectionVisited();
             break;
         }
@@ -130,7 +130,7 @@ void updateA00ScrollController(TObj *o)
             break;
         }
         if (DAT_1f80016a >= 0x9dd && DAT_1f80016e < -0x18f) {
-            DAT_8009c962 = 2;
+            GAME_SELECTED_SECTION = 2;
             o->step++;
             break;
         }
@@ -153,7 +153,7 @@ void updateA00ScrollController(TObj *o)
             break;
         }
         if (DAT_1f80016a >= 0x9dc) break;
-        DAT_8009c962 = 1;
+        GAME_SELECTED_SECTION = 1;
         markSectionVisited();
         o->step--;
         break;
@@ -187,7 +187,7 @@ void updateA00ScrollController(TObj *o)
             if (DAT_8009cda8 != 0) break;
             DAT_8009c93f = 1;
             FUN_8001f110(1);
-            DAT_8009c975 = 3;
+            GAME_FADE_SCREEN_CONTROL = 3;
             DAT_8009c93c = 0;
             o->step = 0xb;
             break;
@@ -211,12 +211,12 @@ void updateA00ScrollController(TObj *o)
             if (tryStartItemInteraction(o, 2, 1)) o->step = 8;
             break;
         }
-        if (DAT_8009d2b0 == 3) break;
+        if (GAME_PLAYER_MODE == 3) break;
         if (DAT_1f80016a < 0x373) break;
-        DAT_800a6078->s2 = 0x373;
+        PLAYER_H->s2 = 0x373;
         break;
     case 11:
-        if (DAT_8009c975 != 1) break;
+        if (GAME_FADE_SCREEN_CONTROL != 1) break;
         DAT_8009cda8 = 0xff;
         DAT_1f8001c6 = 2;
         FUN_8001f4bc();
@@ -228,12 +228,12 @@ void updateA00ScrollController(TObj *o)
     case 12:
         if (DAT_1f8001cc != 0) break;
         DAT_1f8001c6 = 0;
-        DAT_8009c975 = 4;
+        GAME_FADE_SCREEN_CONTROL = 4;
         startAreaBgm();
         o->step++;
         break;
     case 13:
-        if (DAT_8009c975 != 0) break;
+        if (GAME_FADE_SCREEN_CONTROL != 0) break;
         DAT_8009c93f = 0;
         DAT_8009c93e = 0;
         DAT_8009c942 = 0;

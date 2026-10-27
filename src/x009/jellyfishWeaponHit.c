@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultC(TObj *, TObj *);
 
@@ -22,9 +22,9 @@ void jellyfishWeaponHit(TObj *o, TObj *e)
         }
         if (e->b6a == 2) {
             PLAYER = 1;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
         }
         e->b6a = 0;
     }

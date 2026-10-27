@@ -9,9 +9,9 @@ extern void topdownPlayerItemUseStep(TObj *o);
 typedef struct { char p[0x2C]; unsigned short w2c; } P330;
 extern P330 *PLAYER_EXT;
 extern unsigned char D_8009C93A;
-extern unsigned char D_8009C975;
+extern unsigned char GAME_FADE_SCREEN_CONTROL;
 extern unsigned char TALK_POSE;
-extern unsigned char D_8009D2B0[];
+extern unsigned char GAME_PLAYER_MODE[];
 extern volatile unsigned short PAD_PRESSED[];
 extern void topdownCheckTileTrigger(TObj *o, short x, short y);
 extern short (*D_800FEC9C[])[4];
@@ -33,7 +33,7 @@ void topdownPlayerMainStep(TObj *o)
     *((unsigned char *)o + 0xE2) = 0;
     switch (o->step) {
     case 0:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         topdownPlayerReadDpadDir(o);
         if (D_8009C93A != 0) {
             *(unsigned char *)&o->wac = 0;
@@ -67,7 +67,7 @@ void topdownPlayerMainStep(TObj *o)
         }
         break;
     case 1:
-        D_8009D2B0[0] = 1;
+        GAME_PLAYER_MODE[0] = 1;
         topdownPlayerReadDpadDir(o);
         topdownPlayerWalkStep(o);
         break;
@@ -106,7 +106,7 @@ void topdownPlayerMainStep(TObj *o)
             }
             break;
         }
-        if (D_8009C975 == 0) {
+        if (GAME_FADE_SCREEN_CONTROL == 0) {
             o->b04 = 1;
             o->step = 0;
             o->state = 0;

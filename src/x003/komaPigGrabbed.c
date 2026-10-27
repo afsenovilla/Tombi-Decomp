@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
 extern unsigned char D_800A60E4[];
@@ -43,7 +43,7 @@ void komaPigGrabbed(TObj *o)
     case 0:
         o->b9c = 0;
         spawnItemNotification(0, 6);
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         *(signed char *)&o->b0f = -7;
         o->b68 = 0;
         o->d8c = 0;

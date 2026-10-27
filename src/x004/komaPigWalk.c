@@ -2,7 +2,7 @@
 // MATCHING 801216b4 1680
 #include "TOBJ.H"
 typedef struct { char p0; unsigned char b01; char p2[2]; short w04; char p6[4]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern unsigned char D_80130FD4[];
 extern unsigned char D_80130FA4[];
 extern unsigned short *D_80133B98[], *D_80133B9C[];
@@ -49,7 +49,7 @@ void komaPigWalk(TObj *o)
         o->timer = 0x3c;
         o->substep++;
         ObjSetFacingToPlayer(o);
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->wac = 0xf;
         SETANIM(o, D_80133B98);
     case 1:

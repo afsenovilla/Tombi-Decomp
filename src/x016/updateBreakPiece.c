@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned short GAME;
 extern unsigned short BREAK_PIECE_DEFS[];
-extern void *DAT_80077cdc;
+extern void *MOVE_TABLE_0;
 extern void **TREASURE_CHEST_A3S9_ANIM_SETS[];
 extern void **TREASURE_CHEST_ANIM_SETS[];
 extern unsigned short D_1f8001f8;
@@ -22,7 +22,7 @@ void updateBreakPiece(TObj *o)
     case 0:
         o->b04++;
         o->timer = 0x3c;
-        o->movetab = &DAT_80077cdc;
+        o->movetab = &MOVE_TABLE_0;
         p = &BREAK_PIECE_DEFS[o->subtype * 4];
         o->d8c = 0;
         o->b0d = 0;

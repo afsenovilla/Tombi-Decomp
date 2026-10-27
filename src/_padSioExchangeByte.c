@@ -17,7 +17,7 @@ typedef struct {
     unsigned char e8;
 } S;
 extern volatile int *D_8009820C;
-extern volatile unsigned short *D_80098210;
+extern volatile unsigned short *PAD_SIO;
 extern int D_800981F0;
 extern unsigned int D_8009C33C;
 extern unsigned int D_800A0A18;
@@ -35,13 +35,13 @@ int _padSioExchangeByte(S *s, int c)
     k = *s->buf;
     if ((k >> 4) == 8 && s->n > 8) v = 0x22;
     else v = 0x88;
-    q = D_80098210;
+    q = PAD_SIO;
     __asm__ volatile("nop");
     do {} while (!(q[2] & 2));
     setRC2wait(400);
-    r = *(volatile unsigned char *)D_80098210;
-    if (s->n != 0 || (r >> 4) != 8) D_80098210[7] = v;
-    else D_80098210[7] = 0x22;
+    r = *(volatile unsigned char *)PAD_SIO;
+    if (s->n != 0 || (r >> 4) != 8) PAD_SIO[7] = v;
+    else PAD_SIO[7] = 0x22;
     while (!(*D_8009820C & 0x80)) {
         t = *(volatile unsigned short *)0x1f801120;
         if (t < D_8009C33C) {
@@ -58,10 +58,10 @@ int _padSioExchangeByte(S *s, int c)
         setRC2wait(60);
         while (chkRC2wait() == 0);
     }
-    *(volatile unsigned char *)D_80098210 = c;
+    *(volatile unsigned char *)PAD_SIO = c;
     if (D_800981F0 == 3 && r == 0x80) {
         volatile int *is = D_8009820C;
-        volatile unsigned short *j = D_80098210;
+        volatile unsigned short *j = PAD_SIO;
         *is = -129;
         j[5] |= 0x10;
     }

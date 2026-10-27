@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern unsigned char DAT_8009d2b2;
+extern unsigned char GAME_EQUIPPED_WEAPON;
 
 void playerReleaseClingObject(TObj *o)
 {
@@ -24,7 +24,7 @@ void playerReleaseClingObject(TObj *o)
         GRABBED_OBJECT->ba7 = 0;
         break;
     }
-    if (DAT_8009d2b2 - 5 >= 4) {
+    if (GAME_EQUIPPED_WEAPON - 5 >= 4) {
         GRABBED_OBJECT->active = PLAYER_EXT->state;
     } else {
         switch (GRABBED_OBJECT->type) {

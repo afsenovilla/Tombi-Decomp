@@ -3,7 +3,7 @@
 // VERSION SLPM_80165 slpm80165 8003854C 88
 // Ported from psx_tomba (scriptop.c, scriptOpSetPlayerField6B); MIT licence of the original project.
 #if defined(VERSION_SLPM_80165)
-// Demo version of PAL main0 8003A648 (scriptOpSetPlayerField6B.c): no D_8009C618 == 3 guard.
+// Demo version of PAL main0 8003A648 (scriptOpSetPlayerField6B.c): no GAME_PLAYER_MODE == 3 guard.
 // Ported from psx_tomba (scriptop.c, scriptOpSetPlayerField6B); MIT licence of the original project.
 #define SKIP_ASM
 #include "common.h"
@@ -39,7 +39,7 @@ void scriptOpSetPlayerField6B(void)
 {
     ScriptContext* p = SCRIPT_CTX;
 
-    if (D_8009C618 != 3) {
+    if (GAME_PLAYER_MODE != 3) {
         switch (*(s32*)((u8*)p + 0x1190)) {
         case 0:
             D_800A5403 = 0;

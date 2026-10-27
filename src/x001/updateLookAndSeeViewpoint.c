@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern char D_8001D6A4[];
 extern int ObjCullRegister(TObj *);
 extern void FUN_8001f110(int);
@@ -46,7 +46,7 @@ void updateLookAndSeeViewpoint(TObj *o)
         ObjCullRegister(o);
         switch (o->step) {
         case 0:
-            if (D_8009D2B0 == 1 && o->b69 && (SPAD.s1fc & 0x10)) {
+            if (GAME_PLAYER_MODE == 1 && o->b69 && (SPAD.s1fc & 0x10)) {
                 o->step++;
                 o->state = 0;
                 o->b69 = 0;

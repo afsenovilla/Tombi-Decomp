@@ -10,7 +10,7 @@ extern unsigned short D_800A6066;
 extern TObj *D_800A60C8;
 extern TObj *PLAYER_EXT;
 extern unsigned char D_800A60F8;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 
 /* halfword view of o->anim (+0x24): an in-struct store, so it does not depend on the raw PLAYER_EXT store */
 typedef struct { char pad[0x24]; unsigned short a; } AnimH;
@@ -57,9 +57,9 @@ void lostSeedKidTalk(TObj *o)
             *f = 1;
             o->step = 0;
             o->state = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             e->step = 0;
             e->state = 1;
             e->animFrame = e->b6b;
@@ -73,9 +73,9 @@ void lostSeedKidTalk(TObj *o)
         case 1:
             p->b04 = 3;
             D_800A6066 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             o->step = 2;
             o->state = 0;
             PLAYER_EXT->animFrame = 0xffff;
@@ -103,10 +103,10 @@ void lostSeedKidTalk(TObj *o)
             e->velY += 0x30;
             if (e->velY > 0) o->state = 2;
             if (--o->w08 == 0) {
-                D_800A603C = 1;
+                PLAYER_STATE = 1;
                 PLAYER_EXT->animFrame = 0xffff;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 e->b69 = 0;
                 e->velH = 0;
                 e->velV = 0;
@@ -132,10 +132,10 @@ void lostSeedKidTalk(TObj *o)
             e->y.raw += e->velY << 8;
             e->velY += 0x30;
             if (--o->w08 == 0) {
-                D_800A603C = 1;
+                PLAYER_STATE = 1;
                 PLAYER_EXT->animFrame = 0xffff;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 e->b69 = 0;
                 e->velH = 0;
                 e->velV = 0;

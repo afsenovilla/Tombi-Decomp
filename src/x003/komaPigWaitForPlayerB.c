@@ -2,7 +2,7 @@
 // MATCHING 801241c0 504
 #include "spad.h"
 #include "TOBJ.H"
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern unsigned short *D_80138794[];
 extern unsigned char D_80135B30[];
 extern int AnimAdvanceWithBox(TObj *);
@@ -16,7 +16,7 @@ void komaPigWaitForPlayerB(TObj *o)
 
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b69 = 0;
         o->wac = 0x27;
         o->state++;

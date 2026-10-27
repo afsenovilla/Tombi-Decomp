@@ -9,8 +9,8 @@ typedef struct { char p[0xd2]; unsigned short wd2; } E;
 extern T12 D_8011A564[];
 extern TObj PLAYER;
 #define P PLAYER
-extern signed char D_8009D2B0[];
-extern unsigned char D_800A603C[], D_800A603D[], D_800A603E[];
+extern signed char GAME_PLAYER_MODE[];
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
 extern short D_800A60EA[];
 extern short D_1F8001C6;
 extern int AnimAdvance(TObj *);
@@ -41,12 +41,12 @@ void witchMizunoCandyRecipeTalk(TObj *o)
     case 0:
         v = *(V6 *)&o->a;
         ((unsigned char*)&GVARS.b42)[0] = 1;
-        D_8009D2B0[0] = 2;
+        GAME_PLAYER_MODE[0] = 2;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
         ((unsigned char*)&GVARS.b3e)[0] = 1;
-        D_800A603C[0] = 5;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        PLAYER_STATE[0] = 5;
+        PLAYER_SUBSTATE[0] = 0;
+        PLAYER_STEP[0] = 0;
         o->wbc = o->animFrame;
         o->animFrame = P.h->p.whole < o->h->p.whole;
         setanim(o, 4);
@@ -183,9 +183,9 @@ void witchMizunoCandyRecipeTalk(TObj *o)
         D_800A60EA[0] = 0;
         o->animFrame = o->wbc;
         D_1F8001C6 = 0;
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 0;
-        D_800A603E[0] = 0;
+        PLAYER_STATE[0] = 1;
+        PLAYER_SUBSTATE[0] = 0;
+        PLAYER_STEP[0] = 0;
         o->b68 = 0;
         o->step = 0;
         o->state = 0;

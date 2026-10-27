@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 typedef struct { short s0, s2; } S2;
 extern TObj PLAYER;
-extern S2 *D_800A6078;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E, D_800A60D6;
+extern S2 *PLAYER_H;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, D_800A60D6;
 extern short D_800A6066;
 extern short func_80040278(TObj *, short, short);
 
@@ -39,10 +39,10 @@ void flowerForestPigShotSlide(TObj *o)
                 pl = &PLAYER;
                 if (D_800A60D6 == 3) {
                     pl->active = 2;
-                    D_800A603C = 2;
-                    D_800A603D = 0;
-                    D_800A603E = 0;
-                    D_800A6066 = o->h->p.whole > D_800A6078->s2;
+                    PLAYER_STATE = 2;
+                    PLAYER_SUBSTATE = 0;
+                    PLAYER_STEP = 0;
+                    D_800A6066 = o->h->p.whole > PLAYER_H->s2;
                 }
             }
             o->step++;
@@ -84,10 +84,10 @@ void flowerForestPigShotSlide(TObj *o)
                 pl = &PLAYER;
                 if (D_800A60D6 == 3) {
                     pl->active = 2;
-                    D_800A603C = 2;
-                    D_800A603D = 0;
-                    D_800A603E = 0;
-                    D_800A6066 = o->h->p.whole > D_800A6078->s2;
+                    PLAYER_STATE = 2;
+                    PLAYER_SUBSTATE = 0;
+                    PLAYER_STEP = 0;
+                    D_800A6066 = o->h->p.whole > PLAYER_H->s2;
                 }
             }
             o->step++;

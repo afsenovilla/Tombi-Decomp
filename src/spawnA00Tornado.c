@@ -26,7 +26,7 @@ typedef struct {
 } OX;
 extern OX *FUN_80018448(void);
 extern void spawnA00TornadoOrbiters(OX *, int);
-extern unsigned char DAT_8009c966;
+extern unsigned char GAME_AREA00_INTRO_PHASE;
 extern void *PTR_DAT_8013b1b8[];
 extern void *A00_TORNADO_ANIMS;
 
@@ -36,7 +36,7 @@ void spawnA00Tornado(int x, int y, int z, unsigned char sub)
     OX *p;
     void *a;
 
-    if (DAT_8009c966 < 3) {
+    if (GAME_AREA00_INTRO_PHASE < 3) {
         o = FUN_80018448();
         if (o != 0) {
             o->active = 1;

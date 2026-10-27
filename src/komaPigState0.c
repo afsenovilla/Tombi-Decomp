@@ -2,7 +2,7 @@
 // MATCHING 80129fb4 1776
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1; char p2[8]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern unsigned char KOMA_PIG_RAND_TABLE[];
 extern unsigned char D_80138FC8[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
@@ -39,7 +39,7 @@ void komaPigState0(TObj *o)
         o->substep = 0;
         o->animFrame = 1 - o->animFrame;
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         x->b1 = 0;
         o->substep++;
     case 1:

@@ -7,7 +7,7 @@ extern void applyFrameVelocityX(TObj *);
 extern void FUN_80127214(TObj *);
 extern int FUN_801274cc(TObj *);
 extern TObj *FUN_80018448(void);
-extern char DAT_80077cdc[];
+extern char MOVE_TABLE_0[];
 extern unsigned char DAT_80138fd8[];
 extern unsigned short *PTR_DAT_8013a1b8[];
 extern unsigned short *PTR_DAT_8013a1bc[];
@@ -26,7 +26,7 @@ void komaPigState6(TObj *o)
     case 1:
         x->wc = o->d8c;
         x->we = 0;
-        o->movetab = DAT_80077cdc;
+        o->movetab = MOVE_TABLE_0;
         o->velV = -0x280;
         o->b9c = 1;
         o->b69 = 0;

@@ -10,7 +10,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 extern TObj *SCRIPT_OBJECTS[];
-extern unsigned char D_800A60E4x[], D_8009D2B0x[], D_8009C93Fx[];
+extern unsigned char D_800A60E4x[], GAME_PLAYER_MODE[], D_8009C93Fx[];
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void func_80113754(TObj *);
 extern void func_800ECBBC(TObj *);
@@ -138,7 +138,7 @@ void scriptOpShowMessageBox(void)
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 extern TObj *SCRIPT_OBJECTS[];
-extern unsigned char D_800A60E4x[], D_8009D2B0x[], D_8009C93Fx[];
+extern unsigned char D_800A60E4x[], GAME_PLAYER_MODE[], D_8009C93Fx[];
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void objSetAnimFromSubtypeTable(TObj *);
 extern void func_800ECBBC(TObj *);
@@ -199,7 +199,7 @@ void scriptOpShowMessageBox(void)
             case 0x19:
                 o->b68 = 2;
                 D_800A60E4x[0] = 3;
-                D_8009D2B0x[0] = 2;
+                GAME_PLAYER_MODE[0] = 2;
                 D_8009C93Fx[0] = 1;
                 if (s->arg[4] & 0x80) {
                     o->w74 = o->animFrame + (s->arg[4] & 0x7f);

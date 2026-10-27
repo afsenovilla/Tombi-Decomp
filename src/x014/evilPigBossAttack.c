@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern unsigned char D_80125CA8[];
 extern unsigned char D_80125CB8[];
 extern unsigned char D_80125CC8[];
@@ -21,7 +21,7 @@ void evilPigBossAttack(TObj *o)
     unsigned char *t;
     int x;
 
-    if (GVARS.b38 != 0 || D_8009D2B0 == 3) {
+    if (GVARS.b38 != 0 || GAME_PLAYER_MODE == 3) {
         o->state = 0;
         o->step++;
     } else if (((unsigned short*)&GAME.selectedSection)[0] == 7) {
@@ -49,7 +49,7 @@ void evilPigBossAttack(TObj *o)
         o->animFrame = ~((x - 4) >> 3) & 1;
         o->state++;
     case 1:
-        if (D_8009D2B0 != 3) {
+        if (GAME_PLAYER_MODE != 3) {
             D_80125CD8[((unsigned short*)&GAME.selectedSection)[0]](o);
         }
         break;

@@ -4,7 +4,7 @@
 #include "gv2.h"
 #include "TOBJ.H"
 
-extern unsigned short GAME[], D_8009C962;
+extern unsigned short GAME[], GAME_SELECTED_SECTION;
 extern void *D_8013DE08, *D_8013DD50;
 extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
@@ -30,7 +30,7 @@ TObj *spawnForestDwarfAt(short k, short d, short n, short x, short y, short z)
     o->d8c = 0;
     o->b0d = 0;
     o->b0a = 2;
-    if (GAME[0] == 1 && D_8009C962 < 2) {
+    if (GAME[0] == 1 && GAME_SELECTED_SECTION < 2) {
         o->d3c = SPAD.i2d0;
         o->anim = D_8013DE08;
     } else {

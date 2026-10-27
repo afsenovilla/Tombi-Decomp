@@ -6,8 +6,8 @@
 #include "gamestate.h"
 
 extern TObj *PLAYER_EXT;
-extern char D_80077CF4[];
-extern unsigned char D_8009D2B0[];
+extern char MOVE_TABLE_1[];
+extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned short D_1F8001F8;
 extern void func_801072FC(TObj *);
 extern void playerSlopeSlideUpdateAnim(TObj *);
@@ -61,7 +61,7 @@ void playerStepSlopeSlideB(TObj *o)
         }
         playerCheckGroundAndFall(o);
         if (SPAD.s1fc & SPAD.s3c6) {
-            D_8009D2B0[0] = 0;
+            GAME_PLAYER_MODE[0] = 0;
             if (o->wb2 > 0x200) {
                 o->wb2 = 0x200;
             }
@@ -101,7 +101,7 @@ void playerStepSlopeSlideB(TObj *o)
             o->state = 0;
         }
         if (o->bbe) {
-            o->movetab = D_80077CF4;
+            o->movetab = MOVE_TABLE_1;
             o->step = 0x1e;
             *(unsigned char *)&o->wac = 0;
             o->d84 = 0;

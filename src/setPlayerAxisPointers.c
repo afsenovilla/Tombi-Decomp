@@ -13,7 +13,7 @@ typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; 
 extern unsigned short D_1f8001c8;
 extern short D_1f80019c;
 extern char PLAYER[];
-extern void *D_800A6078, *D_800A607C;
+extern void *PLAYER_H, *PLAYER_D;
 extern S1 D_800B1478[];
 extern S2 D_800A6610[];
 extern S3 D_800A49A8[];
@@ -24,11 +24,11 @@ void setPlayerAxisPointers(void)
     S1 *e1;
     char *b = PLAYER;
     if (!(D_1f8001c8 & 1)) {
-        D_800A6078 = b + 0x10;
-        D_800A607C = b + 0x18;
+        PLAYER_H = b + 0x10;
+        PLAYER_D = b + 0x18;
     } else {
-        D_800A607C = b + 0x10;
-        D_800A6078 = b + 0x18;
+        PLAYER_D = b + 0x10;
+        PLAYER_H = b + 0x18;
     }
     if (!(D_1f8001c8 & 1)) {
         CAMERA_SCROLL.targetX = ((char*)&SPAD.iec);

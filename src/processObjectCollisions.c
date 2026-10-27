@@ -15,7 +15,7 @@ extern short *D_800A605C;
 extern unsigned short D_80115320[];
 extern unsigned short D_800A60A4, D_800A60A6, D_800A60A8, D_800A60AA;
 extern TO PLAYER;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern C *TASK_C;
 extern void func_8011E514(void), collideCat2Type7WithCat5Type0B(void), collideCat2ObjectsPairwise(void), collideCat2WithCat4Objects(void);
 extern void collidePlayerWithCat4Objects(TO *), collidePlayerWithCat5Object(TO *, unsigned char *), collidePlayerWithCat2Objects(TO *), collideArea0Section2Slope(TO *);
@@ -25,7 +25,7 @@ static __inline__ void collide(TO *p)
 {
     unsigned char **q;
     unsigned char *e;
-    if (GVARS.b38 == 0 && D_8009D2B0 != 3) {
+    if (GVARS.b38 == 0 && GAME_PLAYER_MODE != 3) {
         q = (*(unsigned char ***)&SPAD.p228);
         for (SPAD.s19e = SPAD.s248; SPAD.s19e != 0;) {
             e = *q;
@@ -73,7 +73,7 @@ void processObjectCollisions(void)
         if (GVARS.b42 | GVARS.b3f) goto tail;
         break;
     }
-    if (SPAD.b1a4 == 0 && TASK_C->s4c == 1 && D_8009D2B0 != 3 && CAMERA_SCROLL.maxY + 0xa0 < p->s16) {
+    if (SPAD.b1a4 == 0 && TASK_C->s4c == 1 && GAME_PLAYER_MODE != 3 && CAMERA_SCROLL.maxY + 0xa0 < p->s16) {
         p->b0 = 5;
         p->b4 = 2;
         p->b5 = 3;

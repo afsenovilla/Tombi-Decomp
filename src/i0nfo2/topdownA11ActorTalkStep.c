@@ -8,9 +8,9 @@ extern short topdownA11ActorOpenDialogue(TObj *o);
 extern void func_8005A8A8(int e, int a, int b);
 extern unsigned char D_8009C942[];
 extern unsigned char SCRIPT_FLAGS[];
-extern unsigned char D_800A603C[];
-extern unsigned char D_800A603D[];
-extern unsigned char D_800A603E[];
+extern unsigned char PLAYER_STATE[];
+extern unsigned char PLAYER_SUBSTATE[];
+extern unsigned char PLAYER_STEP[];
 extern unsigned short D_800A6066[];
 extern unsigned char D_800A60E4[];
 extern void **D_800FEEC0[][3];
@@ -21,9 +21,9 @@ void topdownA11ActorTalkStep(TObj *o)
     short b;
     switch (o->state) {
     case 0:
-        D_800A603C[0] = 1;
-        D_800A603D[0] = 2;
-        D_800A603E[0] = 0;
+        PLAYER_STATE[0] = 1;
+        PLAYER_SUBSTATE[0] = 2;
+        PLAYER_STEP[0] = 0;
         D_800A60E4[0] = 3;
         D_800A6066[0] |= 8;
         o->wb0 = o->animFrame;
@@ -65,9 +65,9 @@ void topdownA11ActorTalkStep(TObj *o)
         done:
             D_8009C942[0] = 0;
             D_800A60E4[0] = 0;
-            D_800A603C[0] = 1;
-            D_800A603D[0] = 0;
-            D_800A603E[0] = 0;
+            PLAYER_STATE[0] = 1;
+            PLAYER_SUBSTATE[0] = 0;
+            PLAYER_STEP[0] = 0;
             o->b68 = 0;
             o->b6a = 0;
             o->step = 0;

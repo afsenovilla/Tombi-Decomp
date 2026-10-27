@@ -7,8 +7,8 @@
 extern void f0(TObj *), f2(TObj *), f3(TObj *);
 extern int f1(TObj *);
 extern unsigned char c4553;
-extern unsigned char sel[];
-extern void (*fn[])(TObj *);
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
+extern void (*REWARD_HANDLERS[])(TObj *);
 void FUN_80123a1c(TObj *o)
 {
     int s;
@@ -34,7 +34,7 @@ done:
         f2(o);
         break;
     case 2:
-        fn[sel[o->subtype * 20]](o);
+        REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype * 20]](o);
         break;
     case 3:
         f3(o);
@@ -46,8 +46,8 @@ done:
 extern void f0(TObj *), f2(TObj *), f3(TObj *);
 extern int f1(TObj *);
 extern unsigned char c4553;
-extern unsigned char sel[];
-extern void (*fn[])(TObj *);
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
+extern void (*REWARD_HANDLERS[])(TObj *);
 void updateA00L5Type0C(TObj *o)
 {
     int s;
@@ -73,7 +73,7 @@ done:
         f2(o);
         break;
     case 2:
-        fn[sel[o->subtype]](o);
+        REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype]](o);
         break;
     case 3:
         f3(o);

@@ -11,7 +11,7 @@ extern int enemyProbeGround(TObj *);
 extern int enemyCheckWallAhead(TObj *);
 extern unsigned char enemyPickActionByPlayerDistance(TObj *);
 extern void spawnGroundDebris(short, short, short, unsigned char);
-extern char DAT_80077cdc[];
+extern char MOVE_TABLE_0[];
 extern char DAT_80077d30[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *PTR_DAT_8013a184[];
@@ -49,7 +49,7 @@ void komaPigState5(TObj *o)
         o->substep++;
         FUN_8001f8e4(o);
         o->timer = 0x28;
-        o->movetab = DAT_80077cdc;
+        o->movetab = MOVE_TABLE_0;
         o->wac = 9;
         a = PTR_DAT_8013a184[0];
         SETBOX(a);

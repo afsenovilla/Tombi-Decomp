@@ -1,7 +1,7 @@
 // FUNC 8012c2c8 720 X000
 // MATCHING 8012c2c8 720
 #include "TOBJ.H"
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern unsigned short *D_8013A214[];
 extern unsigned short *D_8013A220[];
 extern unsigned short *D_8013A268[];
@@ -31,7 +31,7 @@ void komaPigSubtype03Step(TObj *o)
     unsigned short dx, dz;
     switch (o->state) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->b69 = 0;
         o->wac = 0x2d;
         o->state++;

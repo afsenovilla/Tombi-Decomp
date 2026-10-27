@@ -1,8 +1,8 @@
 // FUNC 8011a840 508 X004
 // MATCHING 8011a840 508
 #include "TOBJ.H"
-extern char D_80077CDC[];
-extern char D_80077CF4[];
+extern char MOVE_TABLE_0[];
+extern char MOVE_TABLE_1[];
 extern void *D_80134D1C[];
 extern void *D_80134D20[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -13,7 +13,7 @@ void smokePuffRise(TObj *o)
 
     switch (o->step) {
     case 0:
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->velV = 0x100;
         o->velY = 4;
         o->d64 = 0x1000;
@@ -38,7 +38,7 @@ void smokePuffRise(TObj *o)
         if (--o->timer == -1) o->step++;
         break;
     case 4:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->step++;
         o->anim = D_80134D20[0];
         o->d64 = 0x1000;

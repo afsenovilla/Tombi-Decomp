@@ -52,17 +52,17 @@ extern unsigned char GVARS;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
 extern unsigned short GAME[];
-extern int D_8009C984;
+extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned char D_8009CDAC;
 extern unsigned char D_8009CDD2;
 extern unsigned char D_8009CDD5;
 extern unsigned char D_8009CDD6;
 extern unsigned char D_8009CEED;
 extern short BUTTON_CONFIG_INDEX;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
-extern short D_800A604A[];
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
+extern short PLAYER_X[];
 extern unsigned char D_800A60F8;
 extern short D_1F8001C6;
 extern int D_1F8002D4;
@@ -92,7 +92,7 @@ void updateL4Type1AObject(O *o)
             o->b04 = 3;
             return;
         case 0x22:
-            if (D_8009CDAC != 0 || D_800A604A[0] < 0x280) {
+            if (D_8009CDAC != 0 || PLAYER_X[0] < 0x280) {
                 o->b04 = 3;
                 return;
             }
@@ -192,9 +192,9 @@ void updateL4Type1AObject(O *o)
                 m->b04++;
                 D_8009C942 = 0;
                 D_8009C93F = 0;
-                D_800A603C = 1;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER_STATE = 1;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 D_1F8001C6 = 0;
                 D_800A60F8 = 0;
                 o->step = 0;
@@ -204,7 +204,7 @@ void updateL4Type1AObject(O *o)
                     D_8009CEED = 1;
                 }
                 if (o->subtype == 0x14 && D_8009CDD5 == 0) setEventStarted(0x31, 0, 0);
-            } else if (o->subtype == 1 && (D_8009C984 & 1) && GVARS == o->subtype) {
+            } else if (o->subtype == 1 && (GAME_AREA00_EVENT_CONTROL & 1) && GVARS == o->subtype) {
                 o->step++;
             }
             break;
@@ -227,7 +227,7 @@ void updateL4Type1AObject(O *o)
             if (GVARS >= 2) o->step = 0;
             break;
         }
-        if (o->subtype == 0x22 && D_800A604A[0] < 0x3e8) D_800A604A[0] = 0x3e8;
+        if (o->subtype == 0x22 && PLAYER_X[0] < 0x3e8) PLAYER_X[0] = 0x3e8;
         break;
     case 2:
         break;

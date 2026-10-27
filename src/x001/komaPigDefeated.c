@@ -5,7 +5,7 @@ typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned shor
 typedef struct B { unsigned char c[4]; } B;
 extern B D_8013C800[];
 extern A *D_8013DAE8[];
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
 #define SETANIM(k) \
@@ -25,7 +25,7 @@ void komaPigDefeated(TObj *o)
         o->b0f = 4;
         o->active = 2;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 9;
         o->state++;
         SETANIM(9);

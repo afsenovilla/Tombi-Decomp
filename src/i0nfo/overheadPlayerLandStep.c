@@ -19,7 +19,7 @@ extern void overheadPlayerSetMoveAnim(TObj *o);
 extern Cam *PLAYER_EXT;
 extern signed char D_8009C93A, D_8009C93F, D_8009C942;
 extern unsigned char D_8009CFF9;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 
 void overheadPlayerLandStep(TObj *o)
 {
@@ -91,7 +91,7 @@ void overheadPlayerLandStep(TObj *o)
         o->step = 0;
         o->state = 0;
         D_8009C93A = 1;
-        D_8009D2B0 = 0;
+        GAME_PLAYER_MODE = 0;
         D_8009C942 = 0;
         D_8009C93F = 0;
         break;

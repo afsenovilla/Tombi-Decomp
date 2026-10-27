@@ -1,13 +1,13 @@
 // FUNC 801072fc 196 X000
 // MATCHING 801072fc 196
-// probably: player slide entry: movetab D_80077D0C, speed wb2 clamped to +-0x144 by facing, state 1; unreferenced
+// probably: player slide entry: movetab MOVE_TABLE_2, speed wb2 clamped to +-0x144 by facing, state 1; unreferenced
 // VERSION SLPS_01144 x00 80107020 196
 // VERSION SLPM_80165 x00 80100B84 196
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x000 801072FC (func_801072FC.c): 227 -> 211.
 #include "TOBJ.H"
 extern unsigned char *PLAYER_EXT;
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 void func_801072FC(TObj *o)
 {
     ((unsigned char *)o)[0xc7] = 1;
@@ -15,7 +15,7 @@ void func_801072FC(TObj *o)
     ((unsigned char *)o)[0xc6] = 0;
     ((unsigned char *)o)[0xd3] = 0;
     PLAYER_EXT[0] = 0;
-    o->movetab = D_80077D0C;
+    o->movetab = MOVE_TABLE_2;
     *(unsigned char *)&o->wac = 0;
     o->b6b = 0;
     o->ba4 = 0;
@@ -35,7 +35,7 @@ void func_801072FC(TObj *o)
 // Demo version of PAL x000 801072FC (func_801072FC.c): flag at +0xcf (PAL +0xe3).
 #include "TOBJ.H"
 extern unsigned char *PLAYER_EXT;
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 void func_801072FC(TObj *o)
 {
     ((unsigned char *)o)[0xc7] = 1;
@@ -43,7 +43,7 @@ void func_801072FC(TObj *o)
     ((unsigned char *)o)[0xc6] = 0;
     ((unsigned char *)o)[0xcf] = 0;
     PLAYER_EXT[0] = 0;
-    o->movetab = D_80077D0C;
+    o->movetab = MOVE_TABLE_2;
     *(unsigned char *)&o->wac = 0;
     o->b6b = 0;
     o->ba4 = 0;
@@ -62,7 +62,7 @@ void func_801072FC(TObj *o)
 #else
 #include "TOBJ.H"
 extern unsigned char *PLAYER_EXT;
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 void func_801072FC(TObj *o)
 {
     ((unsigned char *)o)[0xc7] = 1;
@@ -70,7 +70,7 @@ void func_801072FC(TObj *o)
     ((unsigned char *)o)[0xc6] = 0;
     ((unsigned char *)o)[0xe3] = 0;
     PLAYER_EXT[0] = 0;
-    o->movetab = D_80077D0C;
+    o->movetab = MOVE_TABLE_2;
     *(unsigned char *)&o->wac = 0;
     o->b6b = 0;
     o->ba4 = 0;

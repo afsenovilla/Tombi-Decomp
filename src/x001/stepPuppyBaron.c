@@ -11,8 +11,8 @@ extern unsigned char D_800A6039[];
 extern unsigned short D_800A6066[];
 extern unsigned short *D_800A605C;
 extern int D_800A60C4[];
-extern Fix16 *D_800A6078[], *D_800A607C[];
-extern unsigned short D_800A604E[];
+extern Fix16 *PLAYER_H[], *PLAYER_D[];
+extern unsigned short PLAYER_Y[];
 extern unsigned char D_800A6047[];
 extern int D_800A609C[];
 extern R4 D_80011E04[];
@@ -72,9 +72,9 @@ void stepPuppyBaron(TObj *o)
         a = t; asm("");
         dx = MulCos(a, r->d);
         dy = MulNegSinScaled(a, r->d);
-        o->h->p.whole = D_800A6078[0]->p.whole + dx;
-        o->y.p.whole = D_800A604E[0] + dy;
-        o->d->p.whole = D_800A607C[0]->p.whole;
+        o->h->p.whole = PLAYER_H[0]->p.whole + dx;
+        o->y.p.whole = PLAYER_Y[0] + dy;
+        o->d->p.whole = PLAYER_D[0]->p.whole;
         o->d8c = D_800A60C4[0];
         o->b0f = D_800A6047[0] + r->b;
         if (D_800A609C[0]) {
@@ -89,7 +89,7 @@ void stepPuppyBaron(TObj *o)
             o->state = 0;
             break;
         }
-        if (D_800A6078[0]->p.whole < 0x371) {
+        if (PLAYER_H[0]->p.whole < 0x371) {
             GVARS.b42 = 1;
             GVARS.b3f = 1;
             GVARS.b3e = 1;
@@ -100,7 +100,7 @@ void stepPuppyBaron(TObj *o)
             o->step = 5;
             o->state = 0;
         }
-        if ((unsigned short)(D_800A6078[0]->p.whole - 0xb6f) < 0x50 && (short)D_800A604E[0] >= -0x118) {
+        if ((unsigned short)(PLAYER_H[0]->p.whole - 0xb6f) < 0x50 && (short)PLAYER_Y[0] >= -0x118) {
             o->animFrame = 1;
             GVARS.b42 = 1;
             GVARS.b3f = 1;
@@ -111,7 +111,7 @@ void stepPuppyBaron(TObj *o)
             o->step = 5;
             o->state = 0;
         }
-        if (D_800A607C[0]->p.whole > 0) {
+        if (PLAYER_D[0]->p.whole > 0) {
             GVARS.b42 = 1;
             GVARS.b3f = 1;
             GVARS.b3e = 1;

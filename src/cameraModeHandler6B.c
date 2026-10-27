@@ -13,9 +13,9 @@ typedef struct {
     Fix16 *f34;
 } S;
 typedef struct { char p[0x14]; int d14; } G;
-extern Fix16 *D_800A6078[];
+extern Fix16 *PLAYER_H[];
 extern G PLAYER;
-extern signed char D_8009D2B0[];
+extern signed char GAME_PLAYER_MODE[];
 extern Fix16 D_1F8000F0;
 
 void cameraModeHandler6B(S *o)
@@ -26,21 +26,21 @@ void cameraModeHandler6B(S *o)
     int v;
 
     if (GVARS.b39 != 0) return;
-    o->f34->raw = D_800A6078[0]->raw;
+    o->f34->raw = PLAYER_H[0]->raw;
     f = o->f34;
     g = &PLAYER;
     if (o->s2e < f->p.whole) {
         f->raw = o->s2e << 16;
-        if (D_8009D2B0[0] != 3) {
-            if (o->s2e + 150 < D_800A6078[0]->p.whole) D_800A6078[0]->p.whole = o->s2e + 150;
+        if (GAME_PLAYER_MODE[0] != 3) {
+            if (o->s2e + 150 < PLAYER_H[0]->p.whole) PLAYER_H[0]->p.whole = o->s2e + 150;
         }
     } else if (f->p.whole < o->s2c) {
         f->raw = o->s2c << 16;
-        if (D_8009D2B0[0] != 3) {
-            if (D_800A6078[0]->p.whole < o->s2c - 150) D_800A6078[0]->p.whole = o->s2c - 150;
+        if (GAME_PLAYER_MODE[0] != 3) {
+            if (PLAYER_H[0]->p.whole < o->s2c - 150) PLAYER_H[0]->p.whole = o->s2c - 150;
         }
     }
-    if (D_8009D2B0[0] < 3) {
+    if (GAME_PLAYER_MODE[0] < 3) {
         c = &D_1F8000F0;
         c->raw = g->d14;
         if (D_1F8000F0.p.whole > o->s32) {

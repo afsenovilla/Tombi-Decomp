@@ -1,11 +1,11 @@
 // FUNC 800ee348 264 D0SPSUB3
 // MATCHING 800ee348 264
 typedef struct { short x, y; } Pos;
-extern Pos *D_800A607C;
+extern Pos *PLAYER_D;
 
 int subScreenCondPlayerD(unsigned char op, short val)
 {
-    short v = D_800A607C->y;
+    short v = PLAYER_D->y;
     switch (op) {
     case 0: if (v == val) return 1; break;
     case 1: if (v != val) return 1; break;

@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
-extern char D_80077D24[];
+extern char MOVE_TABLE_3[];
 extern void *D_8012EA44[0];
 extern void *D_8012EA24[0];
 extern void FUN_8001fe6c(TObj *);
@@ -43,7 +43,7 @@ void redFlowerGrabbed(TObj *o)
             o->timer = 5;
             o->velV = -0x200;
             o->b9c = 1;
-            o->movetab = D_80077D24;
+            o->movetab = MOVE_TABLE_3;
             o->b69 = 0;
             o->wac = 0x13;
             o->anim = D_8012EA44[0];

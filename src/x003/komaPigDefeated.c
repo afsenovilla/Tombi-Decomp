@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern B D_80135B30[];
 extern A *D_80138774[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -16,7 +16,7 @@ void komaPigDefeated(TObj *o)
         o->b0f = 4;
         o->active = 2;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->wac = 0x1f;
         o->state++;
         o->anim = D_80138774[0];

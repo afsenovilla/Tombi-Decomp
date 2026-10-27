@@ -4,7 +4,7 @@
 extern char *PLAYER_EXT;
 extern char *BITTEN_OBJECT;
 extern unsigned char DAT_8009d2b1;
-extern unsigned int DAT_8009c984;
+extern unsigned int GAME_AREA00_EVENT_CONTROL;
 extern volatile unsigned short PAD_PRESSED;
 extern unsigned short DAT_1f8003c4;
 extern void playerSetFallLean(TObj *o);
@@ -22,7 +22,7 @@ void playerBittenJumpReleaseFall(TObj *o)
     *(short *)(p + 0x20) = 0xe;
     if (q[2] == 0x1c && (t = DAT_8009d2b1) < 3 && t != 0)
         *((unsigned char *)o + 0xab) |= 0x80;
-    if ((DAT_8009c984 & 0x40) && (*(r = &PAD_PRESSED) & DAT_1f8003c4))
+    if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(r = &PAD_PRESSED) & DAT_1f8003c4))
         *((unsigned char *)o + 0xa7) = 1;
     playerSetFallLean(o);
     o->step = 2;

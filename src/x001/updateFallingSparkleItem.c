@@ -9,8 +9,8 @@
 extern int D_1F80018C;
 extern unsigned short D_1F8001F8;
 extern unsigned char D_800A4553;
-extern unsigned char D_8007A7F0[];
-extern void (*D_8007A890[])(TObj *);
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
+extern void (*REWARD_HANDLERS[])(TObj *);
 extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -75,7 +75,7 @@ void func_80123B30(TObj *o)
         break;
     case 2:
         setSectionFlagBit(o->b6b);
-        D_8007A890[D_8007A7F0[o->subtype * 20]](o);
+        REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype * 20]](o);
         break;
     case 3:
         freeObjectLayer5(o);
@@ -89,8 +89,8 @@ void func_80123B30(TObj *o)
 extern int D_1F80018C;
 extern unsigned short D_1F8001F8_h;
 extern unsigned char D_800A4553;
-extern unsigned char D_8007A7F0[];
-extern void (*D_8007A890[])(TObj *);
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
+extern void (*REWARD_HANDLERS[])(TObj *);
 extern void initItemObject(TObj *);
 extern int ObjCullRegister(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -155,7 +155,7 @@ void updateFallingSparkleItem(TObj *o)
         break;
     case 2:
         setSectionFlagBit(o->b6b);
-        D_8007A890[D_8007A7F0[o->subtype]](o);
+        REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype]](o);
         break;
     case 3:
         freeObjectLayer5(o);

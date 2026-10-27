@@ -2,7 +2,7 @@
 // MATCHING 80112204 796
 #include "player.h"
 #include "TOBJ.H"
-extern short *D_800A6078;
+extern short *PLAYER_H;
 static char D_80115AFA[314] = {
     3, 1, -0x7f, 0x21, 0, 0, 3, 0x1f, 0, 0, 0, 0, 3, 0x1f, 0, 0,
     0, 0, 3, 0x2b, 0, 0, 0, 0, 3, 0x16, 0, 0, 0, 0, -2, 0,
@@ -51,7 +51,7 @@ void treasureChestOpenCarried(TObj *o)
     ObjCullRegister(o);
     switch (o->step) {
     case 0:
-        D_800A6078[1] += dx;
+        PLAYER_H[1] += dx;
         ((unsigned short*)&PLAYER.obj.y.p.whole)[0] += dy;
         break;
     case 1:

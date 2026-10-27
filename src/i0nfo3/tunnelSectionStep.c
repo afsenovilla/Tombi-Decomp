@@ -9,8 +9,8 @@ extern void (*D_80079AD0[])(TObj *o);
 extern unsigned char D_8009C93A;
 extern unsigned char D_8009CFED;
 extern TObj PLAYER;
-extern short D_800A604A;
-extern short D_800A604E;
+extern short PLAYER_X;
+extern short PLAYER_Y;
 
 void tunnelSectionStep(TObj *o)
 {
@@ -25,7 +25,7 @@ void tunnelSectionStep(TObj *o)
     case 1:
         tunnelClampPlayerToGates(p);
         D_80079AD0[o->subtype](o);
-        if (D_800A604A >= 0x448 && D_800A604A < 0x478 && D_800A604E >= -0x474 && D_800A604E < -0x460) {
+        if (PLAYER_X >= 0x448 && PLAYER_X < 0x478 && PLAYER_Y >= -0x474 && PLAYER_Y < -0x460) {
             func_800270A0(o, 1, 0);
         } else if (p->a.p.whole < 0x99 && p->y.p.whole >= -0x4FE && p->y.p.whole < -0x47E) {
             func_800270A0(o, 1, 1);

@@ -12,8 +12,8 @@ extern unsigned short DAT_1f800282;
 extern unsigned short DAT_1f800282b;
 extern TObj *PLAYER_EXT;
 extern char PLAYER[];
-extern short *DAT_800a6078;
-extern unsigned short DAT_800a604e;
+extern short *PLAYER_H;
+extern unsigned short PLAYER_Y;
 extern unsigned short DAT_800a60a8;
 
 int weapon8to9HitWall(TObj *o)
@@ -49,14 +49,14 @@ int weapon8to9HitWall(TObj *o)
     switch ((signed char)PLAYER_EXT->substep) {
     case 0:
     case 2:
-        if (probeFloorPlaneAt(PLAYER, DAT_800a6078[1] + 0x10, DAT_800a604e + DAT_800a60a8)) {
+        if (probeFloorPlaneAt(PLAYER, PLAYER_H[1] + 0x10, PLAYER_Y + DAT_800a60a8)) {
             o->b69 = 0;
             n++;
         }
         break;
     case 1:
     case 3:
-        if (probeFloorPlaneAt(PLAYER, DAT_800a6078[1] - 0x10, DAT_800a604e + DAT_800a60a8)) {
+        if (probeFloorPlaneAt(PLAYER, PLAYER_H[1] - 0x10, PLAYER_Y + DAT_800a60a8)) {
             o->b69 = 0;
             n++;
         }

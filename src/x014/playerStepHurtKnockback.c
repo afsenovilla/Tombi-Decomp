@@ -32,7 +32,7 @@ extern short FUN_8003fd78(TObj *, int, int);
 extern short playerHurtCheckFastFall(TObj *);
 extern void playerHurtLandRecover(TObj *);
 
-extern char D_80077D24[];
+extern char MOVE_TABLE_3[];
 extern void spawnPlayerEffect4E(int, int, int);
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, int);
@@ -107,7 +107,7 @@ void playerStepHurtKnockback(TObj *o)
         PLAYER_EXT->b8 = GVARS.b38;
         o->ba4 = 0;
         o->b69 = 0;
-        o->movetab = D_80077D24;
+        o->movetab = MOVE_TABLE_3;
         o->velV = 0;
         o->timer = 0;
         PLAYER_EXT->w2e = 0xff;

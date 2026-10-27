@@ -10,9 +10,9 @@ extern void func_8005A9A4(int e, int a);
 extern unsigned char D_8009C93E;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern unsigned char D_800A60E4;
 
 void func_800FD688(TObj *o)
@@ -26,8 +26,8 @@ void func_800FD688(TObj *o)
         S32(n, 0x90) = func_8002DCC8(2, 7, &p);
         topdownA17ActorSetDirAnim(n, 8, 0);
         o->state++;
-        D_800A603D = 2;
-        D_800A603E = 0;
+        PLAYER_SUBSTATE = 2;
+        PLAYER_STEP = 0;
         D_8009C93F = 1;
         D_8009C942 = 1;
         break;
@@ -64,9 +64,9 @@ void func_800FD688(TObj *o)
         D_8009C93E = 0;
         D_8009C942 = 0;
         D_800A60E4 = 0;
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         o->step = 0;
         o->state = 0;
         break;

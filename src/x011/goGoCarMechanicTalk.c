@@ -11,7 +11,7 @@ extern int showMessageBoxDirect(int, int, void *);
 extern void FUN_8001fe6c(TObj *);
 extern TObj *allocObjectLayer5(void);
 extern void setEventStarted(int, int, int);
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern short D_1F8001C6;
 extern AT D_80119C48[];
 
@@ -23,7 +23,7 @@ void goGoCarMechanicTalk(TObj *o)
 
     switch (o->state) {
     case 0:
-        p = &D_8009D2B0;
+        p = &GAME_PLAYER_MODE;
         if (*p == 3) break;
         if ((unsigned short)((*(unsigned short*)&PLAYER.obj.a.p.whole) - 0x40) >= 0x20) break;
         if ((*(Fix16 **)&PLAYER.obj.d)->p.whole != 0) break;

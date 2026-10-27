@@ -12,10 +12,10 @@ void scriptOpSetPlayerState(void)
     s32 a = *(s32*)((u8*)p + 0x1190);
     s32 b;
 
-    D_800A539C = a;
+    PLAYER_STATE = a;
     b = *(s32*)((u8*)p + 0x1194);
-    D_800A539E = 0;
-    D_800A539D = b;
+    PLAYER_STEP = 0;
+    PLAYER_SUBSTATE = b;
     switch ((u8)a) {
     case 1:
         D_8009BCA7 = 0;

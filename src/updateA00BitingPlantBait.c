@@ -20,8 +20,8 @@ extern TObj *BAIT_OBJECT[];
 extern short BITING_PLANT_BAIT_VEL_BY_FRAME[];
 extern short D_80138F8E[];
 extern unsigned char D_800A4553[];
-extern unsigned char D_8007A7F0[];
-extern void (*D_8007A890[])(TObj *);
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
+extern void (*REWARD_HANDLERS[])(TObj *);
 
 void func_801236F0(TObj *o)
 {
@@ -82,7 +82,7 @@ void func_801236F0(TObj *o)
         switch (o->step) {
         case 0:
             BAIT_OBJECT[0] = 0;
-            D_8007A890[D_8007A7F0[o->subtype * 20]](o);
+            REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype * 20]](o);
             break;
         case 1:
             ObjCullRegister(o);
@@ -115,8 +115,8 @@ static short D_80138F8E[13] = {
     0, 0x100, 0x200, 1, 2,
 };
 extern unsigned char D_800A4553[];
-extern unsigned char D_8007A7F0[];
-extern void (*D_8007A890[])(TObj *);
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
+extern void (*REWARD_HANDLERS[])(TObj *);
 
 void updateA00BitingPlantBait(TObj *o)
 {
@@ -177,7 +177,7 @@ void updateA00BitingPlantBait(TObj *o)
         switch (o->step) {
         case 0:
             BAIT_OBJECT[0] = 0;
-            D_8007A890[D_8007A7F0[o->subtype]](o);
+            REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype]](o);
             break;
         case 1:
             ObjCullRegister(o);

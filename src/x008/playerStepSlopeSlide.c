@@ -5,8 +5,8 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char *PLAYER_EXT;
-extern char D_80077D0C[];
-extern unsigned char D_8009D2B0[];
+extern char MOVE_TABLE_2[];
+extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned short D_1F8001F8;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void playerSlopeSlideUpdateAnim(TObj *);
@@ -32,7 +32,7 @@ void playerStepSlopeSlide(TObj *o)
         ((unsigned char *)o)[0xc6] = 0;
         ((unsigned char *)o)[0xe3] = 0;
         PLAYER_EXT[0] = 0;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         *(unsigned char *)&o->wac = 0;
         o->b6b = 0;
         o->ba4 = 0;
@@ -79,7 +79,7 @@ void playerStepSlopeSlide(TObj *o)
         }
         playerCheckGroundAndFall(o);
         if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
-            D_8009D2B0[0] = 0;
+            GAME_PLAYER_MODE[0] = 0;
             if (o->wb2 > 0x200) o->wb2 = 0x200;
             if (o->wb2 < -0x200) o->wb2 = -0x200;
             o->ba4 = 0;
@@ -142,7 +142,7 @@ void playerStepSlopeSlide(TObj *o)
                 o->state = 0;
             }
             if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
-                D_8009D2B0[0] = 0;
+                GAME_PLAYER_MODE[0] = 0;
                 if (o->wb2 > 0x200) o->wb2 = 0x200;
                 if (o->wb2 < -0x200) o->wb2 = -0x200;
                 o->b9c = 1;

@@ -4,7 +4,7 @@
 #include "gamestate.h"
 typedef struct { short h; short v; } VT;
 extern VT D_8007B374[];
-extern unsigned char D_8007A7F0[];
+extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
 extern void rewardNone();
 extern void rewardItem();
 extern void rewardHeart();
@@ -29,7 +29,7 @@ extern void rewardJewel();
 extern void rewardSafeMushroom();
 extern void rewardAnimalDash();
 extern void rewardPants();
-static void (*D_8007A890[24])(TObj *) = {
+static void (*REWARD_HANDLERS[24])(TObj *) = {
     rewardNone, rewardItem, rewardHeart, rewardEffectOnly,
     rewardBakedYam, rewardDirtyMirror, rewardVitalityMaxUp, rewardWoodBoomerang,
     rewardStoneBoomerang, rewardIronBoomerang, rewardOneUp, rewardGoldenBowl,
@@ -112,7 +112,7 @@ void updateL5Type09Item(TObj *o)
             setSectionFlagBit(o->b6b);
             o->b0c &= 0x7f;
         }
-        D_8007A890[D_8007A7F0[o->subtype]](o);
+        REWARD_HANDLERS[REWARD_HANDLER_BY_SUBTYPE[o->subtype]](o);
         break;
     case 3:
         freeObjectLayer5(o);

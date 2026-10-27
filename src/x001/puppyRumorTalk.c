@@ -5,9 +5,9 @@
 #include "TOBJ.H"
 
 extern TObj PLAYER;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern unsigned short D_800A6066;
-extern Fix16 *D_800A6078;
+extern Fix16 *PLAYER_H;
 extern char D_80010748[];
 extern TObj *D_800A60C8;
 extern unsigned char D_800A60F8;
@@ -37,10 +37,10 @@ void puppyRumorTalk(TObj *o)
         default:
             return;
         }
-        t = *(short *)((char *)D_800A6078 + 2) > *(short *)((char *)p->h + 2);
-        D_800A603C = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        t = *(short *)((char *)PLAYER_H + 2) > *(short *)((char *)p->h + 2);
+        PLAYER_STATE = 1;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         GVARS.b3f = 1;
         GVARS.b42 = 1;
         GVARS.b3e = 1;
@@ -54,10 +54,10 @@ void puppyRumorTalk(TObj *o)
                 D_800A60C8->b04 = 3;
                 o->step = 0;
                 o->state = 0;
-                t = *(short *)((char *)D_800A6078 + 2) > *(short *)((char *)p->h + 2);
-        D_800A603C = 1;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                t = *(short *)((char *)PLAYER_H + 2) > *(short *)((char *)p->h + 2);
+        PLAYER_STATE = 1;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 o->animTimer = 0;
                 GVARS.b3f = 0;
                 GVARS.b3e = 0;

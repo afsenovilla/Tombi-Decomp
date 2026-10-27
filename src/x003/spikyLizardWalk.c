@@ -13,7 +13,7 @@ extern void *D_80139500[];
 extern unsigned char D_80135CB0[];
 extern unsigned char D_80135D54[], D_80135D4C[];
 extern unsigned short D_80135D2C[];
-extern char D_80077D24[], D_80077CE8[];
+extern char MOVE_TABLE_3[], D_80077CE8[];
 
 #define SET() \
     { unsigned char *p; \
@@ -62,7 +62,7 @@ void spikyLizardWalk(TObj *o)
         if (isObjectBelowGround(o) != o->animFrame) {
             o->substep = 3;
             if (*w) {
-                o->movetab = D_80077D24;
+                o->movetab = MOVE_TABLE_3;
                 o->wac = 0xf;
             } else {
                 o->wac = 0x1e;
@@ -77,7 +77,7 @@ void spikyLizardWalk(TObj *o)
         o->substep++;
         if (*w) {
             t = D_80135D54[Rand() & 7];
-            o->movetab = D_80077D24;
+            o->movetab = MOVE_TABLE_3;
             o->wac = 8;
         } else {
             t = D_80135D4C[Rand() & 7];
@@ -98,7 +98,7 @@ void spikyLizardWalk(TObj *o)
             if (*w) {
                 t = D_80135D4C[Rand() & 7];
                 o->wac = 7;
-                o->movetab = D_80077D24;
+                o->movetab = MOVE_TABLE_3;
                 goto t1;
             } else {
                 t = D_80135D2C[Rand() & 7];

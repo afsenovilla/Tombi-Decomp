@@ -7,8 +7,8 @@ extern void tunnelPlayerSetMoveAnim(TObj *o);
 extern void func_8001E4F0(int s);
 extern void func_8001F110(int a);
 extern TObj *PLAYER_EXT;
-extern unsigned char D_8009C975[];
-extern unsigned char D_8009D2B0;
+extern unsigned char GAME_FADE_SCREEN_CONTROL[];
+extern unsigned char GAME_PLAYER_MODE;
 
 void tunnelPlayerDropExitStep(TObj *o)
 {
@@ -25,7 +25,7 @@ void tunnelPlayerDropExitStep(TObj *o)
         o->d8c = 0;
         o->velX = 0;
         o->velY = 0;
-        D_8009D2B0 = 3;
+        GAME_PLAYER_MODE = 3;
         o->d8c = 0;
         func_8001F110(1);
         o->state++;
@@ -39,7 +39,7 @@ void tunnelPlayerDropExitStep(TObj *o)
         o->velY -= 0x30;
         if (--o->timer <= 0) {
             o->timer = 0x3C;
-            D_8009C975[0] = 3;
+            GAME_FADE_SCREEN_CONTROL[0] = 3;
             o->state++;
         }
         break;

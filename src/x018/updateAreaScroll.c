@@ -11,7 +11,7 @@ typedef void (*Fn)(TObj *);
 extern TObj PLAYER;
 extern Fn D_80079AD0[];
 extern unsigned char D_800A60E0;
-extern short D_800A604A, D_800A604E;
+extern short PLAYER_X, PLAYER_Y;
 extern void cameraModeHandler6B(TObj *);
 extern void tryStartItemInteraction(TObj *, int, int);
 extern void stepPlayerXToward(int);
@@ -31,7 +31,7 @@ void updateAreaScroll(TObj *o)
         D_80079AD0[o->subtype](o);
         switch (GAME.selectedSection) {
         case 1:
-            if (D_800A604A < 0x14 && D_800A604E >= -0x3b) {
+            if (PLAYER_X < 0x14 && PLAYER_Y >= -0x3b) {
                 if (GCD.bcded == 0) goto set3;
                 tryStartItemInteraction(o, 1, 0);
             } else if (pl->a.p.whole >= 0x12d && pl->y.p.whole >= -0x3b) {
@@ -53,7 +53,7 @@ void updateAreaScroll(TObj *o)
             }
             break;
         case 2:
-            if (D_800A604A < 0x14 && D_800A604E >= -0x3b) tryStartItemInteraction(o, 1, 0);
+            if (PLAYER_X < 0x14 && PLAYER_Y >= -0x3b) tryStartItemInteraction(o, 1, 0);
             break;
         }
         break;

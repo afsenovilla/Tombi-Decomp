@@ -11,7 +11,7 @@
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 
 extern TObj PLAYER;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern short D_1F80016E;
 extern short D_8012F3C8[];
 extern void AnimLoadDuration(TObj *);
@@ -38,9 +38,9 @@ void swimTeacherFloatTalk(TObj *o)
         if (D_1F80016E < -0xe9) break;
         GVARS.b42 = 1;
         PLAYER.active = 5;
-        D_800A603C = 5;
-        D_800A603D = 0x64;
-        D_800A603E = 0;
+        PLAYER_STATE = 5;
+        PLAYER_SUBSTATE = 0x64;
+        PLAYER_STEP = 0;
         playerSetAnim(&PLAYER, 0x1e, 0);
         PLAYER.y.p.whole = -0xd2;
         o->d34 = 0xff2e0000;

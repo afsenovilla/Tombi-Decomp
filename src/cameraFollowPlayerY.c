@@ -10,7 +10,7 @@ typedef struct O { char p0[0x18]; int b; char p1[0x30-0x1c]; short h30; short h3
 typedef struct G { char p0[0x14]; int d14; char p1[0x9c-0x18]; unsigned char f9c; char p2; unsigned char f9e;
   char p3[0xa9-0x9f]; unsigned char fa9; } G;
 extern G PLAYER;
-extern signed char DAT_8009d2b0;
+extern signed char GAME_PLAYER_MODE;
 extern int D_1F8000F0;
 extern int DAT_800a604c;
 extern int F0a[], F0b[];
@@ -25,7 +25,7 @@ void cameraFollowPlayerY(O *o)
     int m;   /* 0x340000 as an early local: sched2 leaves its lui last, reorg puts it in the bgez slot instead of flag=0 */
 
     g = &PLAYER;
-    if (DAT_8009d2b0 >= 3)
+    if (GAME_PLAYER_MODE >= 3)
         return;
     flag = 0;
     k = 0x400000;

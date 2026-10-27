@@ -6,7 +6,7 @@
 
 extern TObj PLAYER;
 extern unsigned char D_800A60F8;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern unsigned short D_1F8001FC, D_1F8003C4;
 
 #define W24(o) (((unsigned short *)(o))[0x12])
@@ -42,7 +42,7 @@ int checkRaceEventTrigger(TObj *o)
             r = 1;
             break;
         }
-        if (D_8009D2B0 == 1 && (D_1F8001FC & D_1F8003C4)) {
+        if (GAME_PLAYER_MODE == 1 && (D_1F8001FC & D_1F8003C4)) {
             GVARS.b42 = 1;
             D_800A60F8 = 1;
             r = 1;
@@ -62,7 +62,7 @@ int checkRaceEventTrigger(TObj *o)
             r = 1;
             break;
         }
-        if (D_8009D2B0 == 1 && (D_1F8001FC & D_1F8003C4)) {
+        if (GAME_PLAYER_MODE == 1 && (D_1F8001FC & D_1F8003C4)) {
             r = 1;
             GVARS.b42 = 1;
             D_800A60F8 = 1;

@@ -12,13 +12,13 @@ typedef struct Q {
 } Q;
 extern Q *FUN_80018448(void);
 extern unsigned short GAME;
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned char DAT_8009d2c3;
 
 void spawnWeaponHitDebris(int a, int b, int c)
 {
     Q *q;
-    if (GAME == 1 && DAT_8009c962 < 2 && (DAT_8009d2c3 & 1) == 0 && (q = FUN_80018448()) != 0) {
+    if (GAME == 1 && GAME_SELECTED_SECTION < 2 && (DAT_8009d2c3 & 1) == 0 && (q = FUN_80018448()) != 0) {
         q->b0 = 1;
         q->b2 = 0xc;
         q->b3 = 2;

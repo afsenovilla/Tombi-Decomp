@@ -2,7 +2,7 @@
 // MATCHING 800eda48 140
 #include "TOBJ.H"
 extern void func_800202B4(TObj *o);
-extern signed char D_8009D2B0[];
+extern signed char GAME_PLAYER_MODE[];
 
 void overheadShadowFollowOwner(TObj *o)
 {
@@ -11,7 +11,7 @@ void overheadShadowFollowOwner(TObj *o)
     func_800202B4(o);
     p = (TObj *)o->d90;
     o->a.raw = p->a.raw;
-    if (D_8009D2B0[0] != 3) {
+    if (GAME_PLAYER_MODE[0] != 3) {
         o->y.raw = p->y.raw;
     }
     o->b.raw = p->b.raw;

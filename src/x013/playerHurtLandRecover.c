@@ -20,7 +20,7 @@ typedef struct {
 extern P800FC414 *PLAYER_EXT;
 extern unsigned char D_8009C960b[];
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern char D_80010748[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -116,7 +116,7 @@ void playerHurtLandRecover(TObj *o)
 
     switch (o->substep) {
     case 0:
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->timer = 0x19;
         o->d8c = 0;
         o->velX = 0;

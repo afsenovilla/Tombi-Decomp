@@ -27,7 +27,7 @@ extern int *DAT_1f800314p;
 extern int DAT_1f800314;
 extern int *DAT_1f800310p;
 extern int DAT_1f800310;
-extern char D_800E3E28[];
+extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
 
@@ -97,8 +97,8 @@ int func_8011B560(S *o)
         q = DAT_1f800310;
     tail:
         q += p[1];
-        o->dc4 = (int)D_800E3E28;
-        o->da8 = (int)D_800E3E28;
+        o->dc4 = (int)MODEL_PRIM_BUFFERS;
+        o->da8 = (int)MODEL_PRIM_BUFFERS;
         o->dc8 = q;
         copyModelPrimGroups(a, o->dc4);
         return 0;

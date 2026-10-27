@@ -13,7 +13,7 @@ extern unsigned char D_8009C942[];
 extern unsigned char D_8009CE55;
 extern unsigned char D_8009CE57;
 extern unsigned char D_8009CF13;
-extern unsigned char D_8009D2B0[];
+extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned char D_8009D2B1;
 extern unsigned char D_8009CDCF, D_8009CE4B, D_8009CEED, D_8009CFC6, D_8009CFC7, D_8009CFD7;
 #include "gamestate.h"
@@ -79,7 +79,7 @@ void tunnelPlayerItemUseStep(TObj *o)
             o->substep = 1;
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
-            D_8009D2B0[0] = 3;
+            GAME_PLAYER_MODE[0] = 3;
             break;
         case 7:
             D_8009C940 = 0;
@@ -89,7 +89,7 @@ void tunnelPlayerItemUseStep(TObj *o)
             o->substep = 0;
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
-            D_8009D2B0[0] = 3;
+            GAME_PLAYER_MODE[0] = 3;
             func_80026E0C(D_8009C941, 1);
             break;
         case 0x95:
@@ -113,7 +113,7 @@ void tunnelPlayerItemUseStep(TObj *o)
             o->timer = 0x1E;
             o->d8c = 0;
             o->w22 = 0;
-            D_8009D2B0[0] = 3;
+            GAME_PLAYER_MODE[0] = 3;
             D_8009C93F[0] = 1;
             D_8009C942[0] = 1;
             o->step = 0x30;

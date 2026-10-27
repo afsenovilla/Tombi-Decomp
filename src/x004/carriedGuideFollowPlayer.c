@@ -9,7 +9,7 @@
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } E4;
 extern TObj PLAYER;
 extern unsigned char D_800A60DA;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern E4 D_80011DD8[];
 extern signed char D_80011EB4[];
 extern void *D_80134CE0;
@@ -22,7 +22,7 @@ extern int showMessageBox(int, int, int, int);
     if (o->animFrame & 1) { short c = (signed char)e->c; int k = 0x80; ang = (PLAYER.d8c + k - c) & 0xff; } else { short c = (signed char)e->c; ang = (c + PLAYER.d8c) & 0xff; }
 
 #define TRIG() \
-    { GVARS.b42 = 1; D_800A603C = 5; D_800A603D = 0; D_800A603E = 0; o->state = 1; }
+    { GVARS.b42 = 1; PLAYER_STATE = 5; PLAYER_SUBSTATE = 0; PLAYER_STEP = 0; o->state = 1; }
 
 void func_8012AA10(TObj *o)
 {
@@ -57,42 +57,42 @@ void func_8012AA10(TObj *o)
             x = p->p.whole;
             if (x < 0x2ac) {
                 p->p.whole = 0x2ac;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
                 break;
             }
             u = x;
             if (D_800A60DA == 0) break;
             if (x >= 0x5dc) break;
             if ((unsigned short)(u - 0x2b0) < 0x41) break;
-            if (D_800A603C == 1) TRIG();
+            if (PLAYER_STATE == 1) TRIG();
         } else if (PLAYER.d->p.whole == 0x1c2) {
             if (PLAYER.h->p.whole < 0x2ac) {
                 PLAYER.h->p.whole = 0x2ac;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
             }
             if (PLAYER.h->p.whole > 0x2f0) {
                 PLAYER.h->p.whole = 0x2f0;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
             }
         } else if (PLAYER.d->p.whole == 0x21c) {
-            if (D_800A60DA == 1 && D_800A603D != 0x16) {
-                if (D_800A603C == 1) TRIG();
+            if (D_800A60DA == 1 && PLAYER_SUBSTATE != 0x16) {
+                if (PLAYER_STATE == 1) TRIG();
                 break;
             }
-            if ((unsigned char)(D_800A603D - 0xc) < 2 || D_800A603D == 0x1d) {
+            if ((unsigned char)(PLAYER_SUBSTATE - 0xc) < 2 || PLAYER_SUBSTATE == 0x1d) {
                 PLAYER.h->p.whole = 0x2f0;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
                 break;
             }
             if (PLAYER.h->p.whole > 0x2f0) {
                 PLAYER.h->p.whole = 0x2f0;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
             }
         } else if (PLAYER.d->p.whole == 0x4ec) {
             if (PLAYER.h->p.whole > 0x448) PLAYER.h->p.whole = 0x448;
-            if (D_800A60DA == 1 && D_800A603D != 0x16 && D_800A603C == 1) TRIG();
+            if (D_800A60DA == 1 && PLAYER_SUBSTATE != 0x16 && PLAYER_STATE == 1) TRIG();
         } else if (PLAYER.d->p.whole == 0x546) {
-            if (D_800A60DA == 1 && (unsigned short)(PLAYER.h->p.whole - 0x230) < 0xc8 && D_800A603C == 1) TRIG();
+            if (D_800A60DA == 1 && (unsigned short)(PLAYER.h->p.whole - 0x230) < 0xc8 && PLAYER_STATE == 1) TRIG();
         }
         break;
     case 1:
@@ -148,9 +148,9 @@ void func_8012AA10(TObj *o)
                 GVARS.b42 = 0;
                 GVARS.b3e = 0;
                 GVARS.b3f = 0;
-                D_800A603C = 1;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER_STATE = 1;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 o->state = 0;
             }
         }
@@ -164,7 +164,7 @@ void func_8012AA10(TObj *o)
 typedef struct { signed char a; unsigned char b; unsigned char c; signed char d; } E4;
 extern TObj PLAYER;
 extern unsigned char D_800A60DA;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern E4 D_80011DD8[];
 extern signed char D_80011EB4[];
 extern void *D_80134CE0;
@@ -177,7 +177,7 @@ extern int showMessageBox(int, int, int, int);
     if (o->animFrame & 1) { short c = (signed char)e->c; int k = 0x80; ang = (PLAYER.d8c + k - c) & 0xff; } else { short c = (signed char)e->c; ang = (c + PLAYER.d8c) & 0xff; }
 
 #define TRIG() \
-    { GVARS.b42 = 1; D_800A603C = 5; D_800A603D = 0; D_800A603E = 0; o->state = 1; }
+    { GVARS.b42 = 1; PLAYER_STATE = 5; PLAYER_SUBSTATE = 0; PLAYER_STEP = 0; o->state = 1; }
 
 void carriedGuideFollowPlayer(TObj *o)
 {
@@ -212,42 +212,42 @@ void carriedGuideFollowPlayer(TObj *o)
             x = p->p.whole;
             if (x < 0x2ac) {
                 p->p.whole = 0x2ac;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
                 break;
             }
             u = x;
             if (D_800A60DA == 0) break;
             if (x >= 0x5dc) break;
             if ((unsigned short)(u - 0x2b0) < 0x41) break;
-            if (D_800A603C == 1) TRIG();
+            if (PLAYER_STATE == 1) TRIG();
         } else if (PLAYER.d->p.whole == 0x1c2) {
             if (PLAYER.h->p.whole < 0x2ac) {
                 PLAYER.h->p.whole = 0x2ac;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
             }
             if (PLAYER.h->p.whole > 0x2f0) {
                 PLAYER.h->p.whole = 0x2f0;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
             }
         } else if (PLAYER.d->p.whole == 0x21c) {
-            if (D_800A60DA == 1 && D_800A603D != 0x16) {
-                if (D_800A603C == 1) TRIG();
+            if (D_800A60DA == 1 && PLAYER_SUBSTATE != 0x16) {
+                if (PLAYER_STATE == 1) TRIG();
                 break;
             }
-            if ((unsigned char)(D_800A603D - 0xc) < 2 || D_800A603D == 0x1d) {
+            if ((unsigned char)(PLAYER_SUBSTATE - 0xc) < 2 || PLAYER_SUBSTATE == 0x1d) {
                 PLAYER.h->p.whole = 0x2f0;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
                 break;
             }
             if (PLAYER.h->p.whole > 0x2f0) {
                 PLAYER.h->p.whole = 0x2f0;
-                if (D_800A603C == 1) TRIG();
+                if (PLAYER_STATE == 1) TRIG();
             }
         } else if (PLAYER.d->p.whole == 0x4ec) {
             if (PLAYER.h->p.whole > 0x448) PLAYER.h->p.whole = 0x448;
-            if (D_800A60DA == 1 && D_800A603D != 0x16 && D_800A603C == 1) TRIG();
+            if (D_800A60DA == 1 && PLAYER_SUBSTATE != 0x16 && PLAYER_STATE == 1) TRIG();
         } else if (PLAYER.d->p.whole == 0x546) {
-            if (D_800A60DA == 1 && (unsigned short)(PLAYER.h->p.whole - 0x230) < 0xc8 && D_800A603C == 1) TRIG();
+            if (D_800A60DA == 1 && (unsigned short)(PLAYER.h->p.whole - 0x230) < 0xc8 && PLAYER_STATE == 1) TRIG();
         }
         break;
     case 1:
@@ -303,9 +303,9 @@ void carriedGuideFollowPlayer(TObj *o)
                 GVARS.b42 = 0;
                 GVARS.b3e = 0;
                 GVARS.b3f = 0;
-                D_800A603C = 1;
-                D_800A603D = 0;
-                D_800A603E = 0;
+                PLAYER_STATE = 1;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
                 o->state = 0;
             }
         }

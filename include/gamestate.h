@@ -9,7 +9,7 @@ typedef struct GameState {
     unsigned short selectedSection; /* +0x2 */
     unsigned char selectedPlane; /* +0x4 */
     unsigned char area00_fogControl; /* +0x5 */
-    unsigned char unk6; /* +0x6 */
+    unsigned char area00_introPhase; /* +0x6 (GAME_AREA00_INTRO_PHASE) */
     unsigned char keepBgm; /* +0x7 */
     int totalTimePlayed; /* +0x8 */
     unsigned long playerAP; /* +0xC */

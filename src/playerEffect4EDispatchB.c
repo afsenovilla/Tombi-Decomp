@@ -9,7 +9,7 @@ extern void playerEffect4EStepA(TObj *);
 extern void playerEffect4EStepC(TObj *);
 extern void playerEffect4EStepD(TObj *);
 extern void playerEffect4EStepB(TObj *);
-extern int *DAT_80079d58[];
+extern int *PLAYER_EFFECT_4E_ANIM_TABLE[];
 extern unsigned char DAT_800a6039;
 extern unsigned char DAT_800a6047;
 extern unsigned char DAT_8009c990;
@@ -41,7 +41,7 @@ void playerEffect4EDispatchB(TObj *o)
     case 1:
         switch (o->state) {
         case 0:
-            o->anim = (void *)DAT_80079d58[o->subtype * 3][o->b0c];
+            o->anim = (void *)PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype * 3][o->b0c];
             AnimLoadDuration(o);
             o->visible = DAT_800a6039;
             c = DAT_800a6047;

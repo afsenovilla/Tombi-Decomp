@@ -1,7 +1,7 @@
 // FUNC 8012aae4 356 X010
 // MATCHING 8012aae4 356
 #include "TOBJ.H"
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern unsigned char D_8012F3E4, D_8012F3E5, D_8012F3E6, D_8012F3E7;
 extern void *D_80132320[];
 extern void AnimLoadDuration(TObj *);
@@ -15,7 +15,7 @@ void spearPigDefeated(TObj *o)
         o->b0b = 1;
         o->b0f = 4;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->d8c = 0;
         o->wac = 4;
         o->state++;

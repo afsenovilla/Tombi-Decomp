@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 typedef struct { short w0; } X;
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern void *D_8012E9F8[];
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -49,7 +49,7 @@ void redFlowerHit(TObj *o)
             break;
         }
         o->velV = -0x400;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->animFrame = 1 - o->w7a;
         o->d8c = 0;
         o->b9c = 1;

@@ -5,7 +5,7 @@ typedef struct { char p0[6]; unsigned char st; char p1[0x16 - 7]; unsigned short
 extern unsigned short G16a, G16e;
 extern short G172;
 extern unsigned char D60da, C36c6;
-extern signed char D2d50;
+extern signed char GAME_PLAYER_MODE;
 
 void FUN_8011e1b0(O *o)
 {
@@ -22,7 +22,7 @@ void FUN_8011e1b0(O *o)
             goto inc2;
         }
         if (C36c6 != 0) break;
-        if (D2d50 >= 3) break;
+        if (GAME_PLAYER_MODE >= 3) break;
         if (G172 <= 0) break;
         o->st = 3;
         o->d88 = 0xa00;

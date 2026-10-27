@@ -5,7 +5,7 @@ typedef struct {
     unsigned char n;
     char *p[22];
 } PtrList;
-extern unsigned short D_8009C962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned char D_800A60A3;
 
 void tunnelSelectBackdropPieces(PtrList *l, int *base)
@@ -15,7 +15,7 @@ void tunnelSelectBackdropPieces(PtrList *l, int *base)
     char *b;
     register int off asm("$2");
     b = (char *)base;
-    if (D_8009C962 == 3) {
+    if (GAME_SELECTED_SECTION == 3) {
         tbl = base + 1;
         if (D_800A60A3 != 0) {
             int v = D_800A60A3;

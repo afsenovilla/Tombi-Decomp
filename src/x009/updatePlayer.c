@@ -15,7 +15,7 @@ extern AnimTbl PLAYER_ANIM_TABLE;
 extern short D_1F80016A[], D_1F80016E[], D_1F800172[];
 extern unsigned char D_8009F7F0;
 extern unsigned short D_8007A034, D_8007A036;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern void *memcpy(void *, void *, int);
 extern void playerDecodePadInput(void);
 extern void playerInitMode(TObj *);
@@ -107,7 +107,7 @@ void updatePlayer(TObj *o)
         break;
     }
     {
-        signed char *k = &D_8009D2B0;
+        signed char *k = &GAME_PLAYER_MODE;
         if (*k >= 5) goto z;
         if (*k < 3) {
         z:

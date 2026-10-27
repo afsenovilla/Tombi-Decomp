@@ -28,7 +28,7 @@ typedef struct {
 #define X(o) ((TX *)(o))
 #define U16(f) (*(unsigned short *)&(f))
 extern void *D_801345B8, *D_8013460C, *D_80134610, *D_801345CC, *D_801345D0;
-extern char D_80077CDC[], D_80077D0C[], D_80077D84[];
+extern char MOVE_TABLE_0[], MOVE_TABLE_2[], D_80077D84[];
 static short D_80131148[16] = {
     0, 0, 0, 0, 0, 1, 1, 1,
     1, 1, 2, 2, 2, 2, 2, 2,
@@ -83,7 +83,7 @@ void blackCrowFlyAround(TObj *o)
             o->wac = 0x16;
             SETANIM(D_8013460C)
             asm("" ::: "memory");
-            o->movetab = D_80077CDC;
+            o->movetab = MOVE_TABLE_0;
             o->substep++;
         }
         break;
@@ -158,7 +158,7 @@ void blackCrowFlyAround(TObj *o)
             o->animFrame = 1;
             o->wba = ((Rand() & 1) << 5) + 0x20;
             o->wbc = 0x38;
-            o->movetab = D_80077D0C;
+            o->movetab = MOVE_TABLE_2;
             o->wac = 6;
             SETANIM(D_801345CC)
             asm("" ::: "memory");
@@ -168,7 +168,7 @@ void blackCrowFlyAround(TObj *o)
             o->animFrame = 0;
             o->wba = ((Rand() & 1) << 5) + 0x20;
             o->wbc = 0x38;
-            o->movetab = D_80077D0C;
+            o->movetab = MOVE_TABLE_2;
             o->wac = 6;
             SETANIM(D_801345CC)
             asm("" ::: "memory");
@@ -214,7 +214,7 @@ void blackCrowFlyAround(TObj *o)
                 o->state = 0;
                 o->substep = 0;
             } else {
-                o->movetab = D_80077D0C;
+                o->movetab = MOVE_TABLE_2;
                 o->wac = 6;
                 o->animFrame ^= 1;
                 SETANIM(D_801345CC)

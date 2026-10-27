@@ -5,7 +5,7 @@ typedef struct P { char pad0[8]; unsigned char b08; char pad1[0x2c - 9]; unsigne
 extern P *PLAYER_EXT;
 extern unsigned short DAT_1f8001f8;
 extern unsigned short GAME;
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern void FUN_800efc04();
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -45,7 +45,7 @@ void playerSlopeSlideUpdateAnim(TObj *o)
                 a = 0x37;
                 break;
             case 1:
-                switch (DAT_8009c962) {
+                switch (GAME_SELECTED_SECTION) {
                 case 0:
                 case 1:
                     a = 0x3f;

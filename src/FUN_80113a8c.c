@@ -15,7 +15,7 @@ typedef struct O {
     char pad3[0x90 - 0x6b];
     char *d90;
 } O;
-extern char DAT_800a603c, DAT_800a603d, DAT_800a603e, DAT_8009c942, DAT_8009c93f;
+extern char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, DAT_8009c942, DAT_8009c93f;
 extern short DAT_1f8001c6, DAT_800a60ea;
 extern int DAT_800a6094;
 extern void FUN_8001fec0();
@@ -41,9 +41,9 @@ void FUN_80113a8c(O *o)
             DAT_8009c942 = 0;
             DAT_800a60ea = 0;
             if (f == 0) {
-                DAT_800a603c = 1;
-                DAT_800a603d = 0;
-                DAT_800a603e = 0;
+                PLAYER_STATE = 1;
+                PLAYER_SUBSTATE = 0;
+                PLAYER_STEP = 0;
             }
         }
         o->b68 = 0;
@@ -64,7 +64,7 @@ typedef struct O {
     char pad3[0x90 - 0x6b];
     char *d90;
 } O;
-extern char DAT_800a603c, DAT_800a603d, DAT_800a603e, DAT_8009c942, DAT_8009c93f;
+extern char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, DAT_8009c942, DAT_8009c93f;
 extern short DAT_1f8001c6, DAT_800a60ea;
 extern int DAT_800a6094;
 extern void FUN_8001fec0();
@@ -84,12 +84,12 @@ void FUN_80113a8c(O *o)
     FUN_8001fec0(o);
     if (o->d90[4] == 2) {
         o->d90[4] = 3;
-        DAT_800a603c = 1;
+        PLAYER_STATE = 1;
         DAT_1f8001c6 = 0;
         DAT_8009c942 = 0;
         DAT_800a60ea = 0;
-        DAT_800a603d = 0;
-        DAT_800a603e = 0;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         if (DAT_800a6094 == 1) {
             DAT_8009c93f = 0;
             DAT_800a6094 = 0;

@@ -3,7 +3,7 @@
 // VERSION SLPM_80165 slpm80165 800212A8 176
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80020C04 (setSectionFlagBit.c): section sizes count double (PAL single).
-extern unsigned short GAME, n2;
+extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern unsigned short AREA_SECTION_COUNTS[];
 void setSectionFlagBit(int p)
 {
@@ -13,7 +13,7 @@ void setSectionFlagBit(int p)
     int *b;
     for (i = 0; i < (int)GAME; i++)
         s += AREA_SECTION_COUNTS[i] * 2;
-    q = &n2;
+    q = &GAME_SELECTED_SECTION;
     s += *q;
     if (p >= 0x20) s++;
     r = p % 32;
@@ -21,7 +21,7 @@ void setSectionFlagBit(int p)
     b[s] |= 1 << r;
 }
 #else
-extern unsigned short GAME, n2;
+extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern unsigned short AREA_SECTION_COUNTS[];
 void setSectionFlagBit(int p)
 {
@@ -31,7 +31,7 @@ void setSectionFlagBit(int p)
     int *b;
     for (i = 0; i < (int)GAME; i++)
         s += AREA_SECTION_COUNTS[i];
-    q = &n2;
+    q = &GAME_SELECTED_SECTION;
     s += *q;
     if (p >= 0x20) s++;
     r = p % 32;

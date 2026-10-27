@@ -1,11 +1,11 @@
 // FUNC 8002715c 92 MAIN0
 // MATCHING 8002715c 92
 typedef struct S { short pad; unsigned short v; } S;
-extern S *DAT_800a6078;
+extern S *PLAYER_H;
 
 int stepPlayerXToward(int t)
 {
-    S *s = DAT_800a6078;
+    S *s = PLAYER_H;
     unsigned short cur = s->v;
     unsigned short d = cur - t + 3;
     if (d >= 7) {

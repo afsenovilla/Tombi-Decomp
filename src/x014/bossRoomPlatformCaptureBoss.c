@@ -6,7 +6,7 @@
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } S8;
-extern unsigned short D_8009C962[];
+extern unsigned short GAME_SELECTED_SECTION[];
 static short D_80125C40[8] = {
     0xc8, 0xcd, 0xd2, 0xd8, 0xdd, 0xe2, 0xe7, 0xe7,
 };
@@ -77,7 +77,7 @@ void bossRoomPlatformCaptureBoss(TObj *o)
     switch (o->state) {
     case 0:
         if (!bossCaptureBossInReach(o, s)) break;
-        FUN_8001e4f0(D_80125C40[D_8009C962[0]]);
+        FUN_8001e4f0(D_80125C40[GAME_SELECTED_SECTION[0]]);
         o->velH = 0x500;
         o->state++;
         s->b0 = 2;
@@ -162,7 +162,7 @@ void bossRoomPlatformCaptureBoss(TObj *o)
                 v -= w;
                 o->velV = v >> 15;
             }
-            cdSeekStream(D_80125684[D_8009C962[0]]);
+            cdSeekStream(D_80125684[GAME_SELECTED_SECTION[0]]);
         }
         break;
     case 6:
@@ -194,7 +194,7 @@ void bossRoomPlatformCaptureBoss(TObj *o)
         turn(o, *(unsigned char *)&o->wb0);
         FUN_8001fec0(o);
         if (--o->timer == 0) {
-            FUN_8001e4f0(D_80125C50[D_8009C962[0]]);
+            FUN_8001e4f0(D_80125C50[GAME_SELECTED_SECTION[0]]);
             o->timer = 0x3c;
             o->state++;
             setAnim(o, D_80129F80[0]);
@@ -213,12 +213,12 @@ void bossRoomPlatformCaptureBoss(TObj *o)
             o->anim = 0;
             FUN_8001f110(1);
             {
-                int n = D_80125C68[D_8009C962[0]];
+                int n = D_80125C68[GAME_SELECTED_SECTION[0]];
                 p = &GV2.bc3;
                 D_800A4555 = 4;
                 *p |= 1 << n;
             }
-            FUN_80026e0c(D_80125C60[D_8009C962[0]], 1);
+            FUN_80026e0c(D_80125C60[GAME_SELECTED_SECTION[0]], 1);
         }
         break;
     case 9:

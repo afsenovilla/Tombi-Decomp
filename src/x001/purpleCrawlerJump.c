@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } S;
 extern unsigned char D_8013C7C8[];
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern void *D_8013FC84;
 extern void *D_8013FC7C;
 extern void *D_8013FCA0;
@@ -64,7 +64,7 @@ void purpleCrawlerJump(TObj *o)
         o->wac = 3;
         SET_ANIM(o, D_8013FC7C);
         t = o->d8c - 0x21;
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         if ((unsigned int)t < 0xc0) {
             o->velH = 0x300;
             o->state = 7;

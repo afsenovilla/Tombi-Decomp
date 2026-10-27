@@ -4,8 +4,8 @@
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 typedef struct { short w0, w2, w4, w6, w8; unsigned char bA, bB; short wC, wE; } X;
-extern char D_80077CDC[];
-extern char D_80077CF4[];
+extern char MOVE_TABLE_0[];
+extern char MOVE_TABLE_1[];
 extern B D_80135B30[];
 extern A *D_801386F8[];
 extern void applyFrameVelocityX(TObj *);
@@ -50,7 +50,7 @@ void komaPigFall(TObj *o)
         o->substep++;
         o->b69 = 0;
         o->velV = 0;
-        if (o->movetab == 0) o->movetab = D_80077CF4;
+        if (o->movetab == 0) o->movetab = MOVE_TABLE_1;
         break;
     case 1:
         applyFrameVelocityX(o);
@@ -78,7 +78,7 @@ void komaPigFall(TObj *o)
         if (!(o->b69 & 8)) SPAWN();
         o->b69 = 0;
         x->wC = 0x100;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->timer = 2;
         o->wac = 0x16;
         o->substep++;

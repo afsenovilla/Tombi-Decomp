@@ -6,7 +6,7 @@ typedef struct { short w0, w2, w4, w6, w8; } S;
 extern unsigned char D_8013C7C8[];
 extern unsigned char D_8013C7D8[];
 extern char D_80077CE8[];
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern void *D_8013FC74[];
 extern short D_1F80027E;
 extern short D_1F800284;
@@ -71,7 +71,7 @@ void purpleCrawlerWalk(TObj *o)
         if (D_8013C7C8[Rand() & 0xf])
             o->movetab = D_80077CE8;
         else
-            o->movetab = D_80077CF4;
+            o->movetab = MOVE_TABLE_1;
         if (D_8013C7D8[Rand() & 7]) {
             o->timer = 300;
             o->ba7 = 0;

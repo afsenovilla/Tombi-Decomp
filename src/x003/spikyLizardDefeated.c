@@ -2,7 +2,7 @@
 // MATCHING 80128060 412
 #include "TOBJ.H"
 typedef struct B { unsigned char c[4]; } B;
-extern char D_80077D0C[];
+extern char MOVE_TABLE_2[];
 extern B D_80135CB0[];
 extern void *D_80139500[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -17,7 +17,7 @@ void spikyLizardDefeated(TObj *o)
         o->b0f = 4;
         o->b0a = 2;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->d8c = 0;
         o->d88 = 0;
         o->d84 = 0;

@@ -7,9 +7,9 @@
 extern int D_1F800190;
 extern int D_1F80018C;
 extern unsigned char D_800A4553;
-extern char D_80077D24[];
-extern char D_80077CDC[];
-extern char D_80077CF4[];
+extern char MOVE_TABLE_3[];
+extern char MOVE_TABLE_0[];
+extern char MOVE_TABLE_1[];
 extern void *PINK_PIGLET_ANIMS[];
 extern void *D_8013ABBC[];
 extern void *D_8013ABC0[];
@@ -67,7 +67,7 @@ void updateA00PinkPiglet(TObj *o)
                     o->velV = 0x400;
                 if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8)) {
                     o->state = 3;
-                    o->movetab = D_80077D24;
+                    o->movetab = MOVE_TABLE_3;
                     o->timer = 0x1e;
                     o->step++;
                     D_800A4553 = 6;
@@ -84,7 +84,7 @@ void updateA00PinkPiglet(TObj *o)
                 switch (Rand() & 3) {
                 case 0:
                     o->state = 2;
-                    o->movetab = D_80077D24;
+                    o->movetab = MOVE_TABLE_3;
                     o->timer = 0x78;
                     o->wac = 1;
                     o->anim = D_8013ABBC[0];
@@ -93,7 +93,7 @@ void updateA00PinkPiglet(TObj *o)
                     break;
                 case 1:
                     o->state = 1;
-                    o->movetab = D_80077CDC;
+                    o->movetab = MOVE_TABLE_0;
                     o->timer = 100;
                     o->wac = 1;
                     o->anim = D_8013ABBC[0];
@@ -101,7 +101,7 @@ void updateA00PinkPiglet(TObj *o)
                     break;
                 case 2:
                     o->state = 2;
-                    o->movetab = D_80077CF4;
+                    o->movetab = MOVE_TABLE_1;
                     o->timer = 0x32;
                     o->wac = 1;
                     o->anim = D_8013ABBC[0];
@@ -110,7 +110,7 @@ void updateA00PinkPiglet(TObj *o)
                     break;
                 case 3:
                     o->state = 3;
-                    o->movetab = D_80077D24;
+                    o->movetab = MOVE_TABLE_3;
                     o->timer = 0x96;
                     o->wac = 2;
                     o->anim = D_8013ABC0[0];
@@ -122,7 +122,7 @@ void updateA00PinkPiglet(TObj *o)
                 AnimAdvance(o);
                 if (o->timer == 1) {
                     o->state = 1;
-                    o->movetab = D_80077CDC;
+                    o->movetab = MOVE_TABLE_0;
                     o->timer = 0x28;
                 }
             case 1:

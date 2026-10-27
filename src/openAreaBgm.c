@@ -11,7 +11,7 @@ extern unsigned short VAB_IDS[];
 extern unsigned short BGM_VAB_ID;
 extern void *SEQ_DATA[];
 extern unsigned short GAME;
-extern unsigned short D_8009C962;
+extern unsigned short GAME_SELECTED_SECTION;
 void SsSeqStop(short a);
 void SsSeqClose(short a);
 short SsSeqOpen(void *p, short v);
@@ -51,14 +51,14 @@ int openAreaBgm(int arg)
             BGM_FADE_ACTIVE = 1;
             goto done;
         case 6:
-            switch (D_8009C962) {
+            switch (GAME_SELECTED_SECTION) {
             case 0: w -= 5; BGM_FADE_TARGET = w; BGM_FADE_ACTIVE = 1; goto done;
             case 1: w += 12; BGM_FADE_TARGET = w; BGM_FADE_ACTIVE = 1; goto done;
             case 2: w += 12; BGM_FADE_TARGET = w; BGM_FADE_ACTIVE = 1; goto done;
             }
             break;
         case 9:
-            switch (D_8009C962) {
+            switch (GAME_SELECTED_SECTION) {
             case 0: w -= 11; BGM_FADE_TARGET = w; BGM_FADE_ACTIVE = 1; goto done;
             case 1: case 2: case 3: case 4: case 5: case 6: w += 10; BGM_FADE_TARGET = w; BGM_FADE_ACTIVE = 1; goto done;
             }
@@ -75,14 +75,14 @@ int openAreaBgm(int arg)
             v += 5;
             break;
         case 6:
-            switch (D_8009C962) {
+            switch (GAME_SELECTED_SECTION) {
             case 0: v -= 5; break;
             case 1: v += 12; break;
             case 2: v += 12; break;
             }
             break;
         case 9:
-            switch (D_8009C962) {
+            switch (GAME_SELECTED_SECTION) {
             case 0: v -= 11; break;
             case 1: case 2: case 3: case 4: case 5: case 6: v += 10; break;
             }
@@ -96,7 +96,7 @@ int openAreaBgm(int arg)
     b = (short)arg;
     if (b < 0) {
         unsigned char *t = AREA_REVERB_DEPTH[GAME];
-        setReverbMode(AREA_REVERB_MODE[GAME], (short)(t[D_8009C962] << 8));
+        setReverbMode(AREA_REVERB_MODE[GAME], (short)(t[GAME_SELECTED_SECTION] << 8));
     } else {
         setReverbMode(1, b);
     }

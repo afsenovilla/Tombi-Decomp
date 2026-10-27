@@ -21,7 +21,7 @@ typedef struct {
     short wcc;
 } O;
 extern H *D_1F80031C[];
-extern char D_800E3E28[];
+extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
 
@@ -43,8 +43,8 @@ int func_8011AFB4(O *o)
             register int t asm("$3") = (int)D_1F80031C[0];
             o->dc8 = t + D_1F80031C[0]->d4;
         }
-        o->dc4 = (int)D_800E3E28;
-        o->da8 = (int)D_800E3E28;
+        o->dc4 = (int)MODEL_PRIM_BUFFERS;
+        o->da8 = (int)MODEL_PRIM_BUFFERS;
         copyModelPrimGroups(o->da0, o->dc4);
         return 0;
     case 1:

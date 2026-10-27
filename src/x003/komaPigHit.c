@@ -5,7 +5,7 @@
 
 typedef struct { unsigned char b4, b5; unsigned short b6; short b8; } Q;
 
-extern char D_80077D0C[], D_80077CF4[], D_80077CDC[];
+extern char MOVE_TABLE_2[], MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern unsigned short *D_8013877C[], *D_80138764[], *D_80138760[], *D_80138780[], *D_80138784[], *D_80138788[];
 extern unsigned char D_80135B30[];
 extern void FUN_8001e4f0(int);
@@ -59,7 +59,7 @@ void komaPigHit(TObj *o)
         o->state++;
         o->d8c = 0;
         o->velV = -0x400;
-        o->movetab = D_80077D0C;
+        o->movetab = MOVE_TABLE_2;
         o->b9c = 1;
         o->wac = 0x21;
         SETANIM(o, D_8013877C);
@@ -88,7 +88,7 @@ void komaPigHit(TObj *o)
                 o->b9c = one;
                 o->velV = -0x280;
                 o->d8c = 0;
-                o->movetab = D_80077CF4;
+                o->movetab = MOVE_TABLE_1;
                 o->state++;
                 q->b5 = one;
                 o->b69 = 0;
@@ -122,7 +122,7 @@ void komaPigHit(TObj *o)
                             o->b9c = 1;
                         if (o->velV < -0x300)
                             o->velV = -0x300;
-                        o->movetab = D_80077CDC;
+                        o->movetab = MOVE_TABLE_0;
                     } else {
                         o->d8c = q->b6;
                         o->timer = 0x168;

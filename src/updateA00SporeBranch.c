@@ -43,7 +43,7 @@ typedef struct E {
     unsigned short c8, ca, cc, ce, d0, d2;
 } E;
 
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern signed char A00_SPORE_BRANCH_SUBTYPE_OFS[];
 extern signed char D_80138830[];
 extern signed char D_80138838[];
@@ -89,7 +89,7 @@ void func_8011BF68(E *o)
             o->d0 = 0;
             for (;;) {
                 e->animTimer = i;
-                e->movetab = D_80077CDC;
+                e->movetab = MOVE_TABLE_0;
                 e->b68 = 0;
                 e->b69 = 0;
                 e->wb4 = 0;
@@ -326,7 +326,7 @@ typedef struct E {
     unsigned short c8, ca, cc, ce, d0, d2;
 } E;
 
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 extern signed char A00_SPORE_BRANCH_SUBTYPE_OFS[];
 extern signed char D_80138830[];
 extern signed char D_80138838[];
@@ -372,7 +372,7 @@ void updateA00SporeBranch(E *o)
             o->d0 = 0;
             for (;;) {
                 e->animTimer = i;
-                e->movetab = D_80077CDC;
+                e->movetab = MOVE_TABLE_0;
                 e->b68 = 0;
                 e->b69 = 0;
                 e->wb4 = 0;

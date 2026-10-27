@@ -21,8 +21,8 @@ typedef struct {
 } G330;
 extern G330 *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern unsigned char DAT_8009d2b0;
-extern int DAT_8009c984;
+extern unsigned char GAME_PLAYER_MODE;
+extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned short PAD_PRESSED;
 extern void FUN_80010d68();
 extern void FUN_80010dac();
@@ -42,9 +42,9 @@ static __inline__ short chk(TObj *o)
     short r = 0;
 
     if (*(unsigned short *)0x1F8001FC & *(unsigned short *)0x1F8003C6) {
-        DAT_8009d2b0 = 0;
+        GAME_PLAYER_MODE = 0;
         playerReleaseClingObject(o);
-        if (DAT_8009c984 & 0x40) {
+        if (GAME_AREA00_EVENT_CONTROL & 0x40) {
             if (*(volatile unsigned short *)&PAD_PRESSED & *(unsigned short *)0x1F8003C4) {
                 o->ba7 = 1;
             }

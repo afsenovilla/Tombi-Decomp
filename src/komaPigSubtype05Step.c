@@ -1,7 +1,7 @@
 // FUNC 8012c8ec 504 X000
 // MATCHING 8012c8ec 504
 #include "TOBJ.H"
-extern char DAT_80077cf4[];
+extern char MOVE_TABLE_1[];
 extern unsigned short *DAT_8013a1c0[];
 extern unsigned short *DAT_8013a1c4[];
 extern unsigned char KOMA_PIG_ANIM_BOXES[];
@@ -24,7 +24,7 @@ void komaPigSubtype05Step(TObj *o)
     unsigned char *p;
     switch (o->state) {
     case 0:
-        o->movetab = DAT_80077cf4;
+        o->movetab = MOVE_TABLE_1;
         o->velV = -0x200;
         o->b69 = 0;
         o->wac = 0x18;

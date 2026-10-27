@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern unsigned char D_8009CE4A;
-extern short *D_800A6078s;
-extern signed char D_8009D2B0;
+extern short *PLAYER_H;
+extern signed char GAME_PLAYER_MODE;
 extern unsigned short D_1F8003C4;
 extern unsigned short D_1F8001FC;
 extern unsigned char D_800A60F8;
@@ -24,7 +24,7 @@ short charlesTalkCheck(TObj *o)
     if (GAME.selectedSection == 0) {
         if (D_8009CE4A != 0xff) {
             if (PLAYER.obj.y.p.whole < -0x122 && PLAYER.obj.b69 != 0 && (unsigned short)((*(unsigned short **)&PLAYER.obj.h)[1] - 0x148) < 0x10 &&
-                D_8009D2B0 == 1 && (D_1F8001FC & D_1F8003C4) != 0 && GVARS.b40 == 0) {
+                GAME_PLAYER_MODE == 1 && (D_1F8001FC & D_1F8003C4) != 0 && GVARS.b40 == 0) {
                 D_800A60F8 = 1;
                 ((unsigned char*)&GVARS.b42)[0] = 0;
                 *(short *)&o->anim = 1;
@@ -45,7 +45,7 @@ short charlesTalkCheck(TObj *o)
                         }
                     }
                 } else {
-                    if (PLAYER.obj.y.p.whole < -0x110 && D_800A6078s[1] < 0x17c && PLAYER.obj.b69 != 0) {
+                    if (PLAYER.obj.y.p.whole < -0x110 && PLAYER_H[1] < 0x17c && PLAYER.obj.b69 != 0) {
                         ((unsigned char*)&GVARS.b42)[0] = 0;
                         D_800A60F8 = 0;
                         *(short *)&o->anim = 0;
@@ -70,7 +70,7 @@ short charlesTalkCheck(TObj *o)
                         }
                     }
                 } else {
-                    if (PLAYER.obj.y.p.whole < -0x110 && D_800A6078s[1] < 0x17c && PLAYER.obj.b69 != 0) {
+                    if (PLAYER.obj.y.p.whole < -0x110 && PLAYER_H[1] < 0x17c && PLAYER.obj.b69 != 0) {
                         n++;
                         ((unsigned char*)&GVARS.b42)[0] = 0;
                         D_800A60F8 = 0;

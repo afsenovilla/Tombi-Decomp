@@ -18,8 +18,8 @@ static void *D_8013DE4C[4] = {
     D_8013E054, D_8013E05C, D_8013E064, D_8013E06C,
 };
 extern void *D_8013DDF8[];
-extern unsigned short GAME, D_8009C962;
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned short GAME, GAME_SELECTED_SECTION;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern int FUN_8001f9e0(void);
 extern short FUN_8001fddc(int, int);
 extern short FUN_8001fdac(int, int);
@@ -33,7 +33,7 @@ static __inline__ void follow1(TObj *o, E4 *e)
     unsigned short u;
     register unsigned int t asm("$2");
 
-    if (GAME == 1 && D_8009C962 < 2)
+    if (GAME == 1 && GAME_SELECTED_SECTION < 2)
         o->anim = D_8013DE4C[e->a];
     else
         o->anim = D_8013DDF8[e->a];
@@ -63,7 +63,7 @@ static __inline__ void follow0(TObj *o, E4 *e)
     unsigned short u;
     register unsigned int t asm("$2");
 
-    if (GAME == 1 && D_8009C962 < 2)
+    if (GAME == 1 && GAME_SELECTED_SECTION < 2)
         o->anim = D_8013DE4C[e->a];
     else
         o->anim = D_8013DDF8[e->a];
@@ -98,7 +98,7 @@ void wrongWayHintTalk(TObj *o)
         e = &D_80011DD8[D_80011EB4[*(unsigned short *)PLAYER.anim]];
         follow1(o, e);
         if (GVARS.b38) break;
-        switch (D_8009C962) {
+        switch (GAME_SELECTED_SECTION) {
         case 1:
             if (PLAYER.h->p.whole >= 0x1000) break;
             PLAYER.h->p.whole = 0x1000;
@@ -112,9 +112,9 @@ void wrongWayHintTalk(TObj *o)
                 PLAYER.h->p.whole = 0xad2;
             }
         set:
-            D_800A603C = 5;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             o->state = 1;
             break;
         }
@@ -139,9 +139,9 @@ void wrongWayHintTalk(TObj *o)
             GVARS.b42 = 0;
             GVARS.b3e = 0;
             GVARS.b3f = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             o->state = 0;
         }
         break;

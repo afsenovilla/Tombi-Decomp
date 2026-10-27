@@ -1,7 +1,7 @@
 // FUNC 8011b4b0 300 X000
 // MATCHING 8011b4b0 300
 #include "TOBJ.H"
-extern unsigned char DAT_a, DAT_b, DAT_c, DAT_d, DAT_e;
+extern unsigned char DAT_a, DAT_b, DAT_c, GAME_PLAYER_MODE, DAT_e;
 extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_80018980(TObj *);
 
@@ -19,7 +19,7 @@ void a00UnlayeredType0DShowMessage(TObj *o)
         if (DAT_a == 0) {
             DAT_b = 1;
             DAT_c = 1;
-            DAT_d = 0;
+            GAME_PLAYER_MODE = 0;
             o->step++;
         }
         break;

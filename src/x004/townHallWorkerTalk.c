@@ -8,9 +8,9 @@ typedef struct { Fix16 a, y, b; } V3;
 typedef struct { void **anims; int a; int b; } AT;
 extern AT D_801311D0[];
 extern unsigned char PLAYER[];
-extern unsigned char D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern short D_800A6066;
-extern Fix16 *D_800A6078[];
+extern Fix16 *PLAYER_H[];
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void playerSetAnim(void *, int, int);
@@ -23,9 +23,9 @@ void townHallWorkerTalk(TObj *o)
 
     switch (o->state) {
     case 0:
-        D_800A603C = 5;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_STATE = 5;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         o->animFrame = o->b68 & 1;
         ((unsigned char*)&GVARS.b3f)[0] = 1;
         o->state++;
@@ -53,8 +53,8 @@ void townHallWorkerTalk(TObj *o)
         if (o->visible == 0) {
             GVARS.b3e = 0;
             PLAYER[4] = 5;
-            D_800A603D = 0x64;
-            D_800A603E = 0;
+            PLAYER_SUBSTATE = 0x64;
+            PLAYER_STEP = 0;
             playerSetAnim(PLAYER, 2, 0);
             D_800A6066 = 1;
             o->state++;
@@ -68,13 +68,13 @@ void townHallWorkerTalk(TObj *o)
         }
         break;
     case 4:
-        D_800A6078[0]->p.whole--;
-        if (D_800A6078[0]->p.whole < 0xa0) {
-            D_800A6078[0]->p.whole = 0xa0;
+        PLAYER_H[0]->p.whole--;
+        if (PLAYER_H[0]->p.whole < 0xa0) {
+            PLAYER_H[0]->p.whole = 0xa0;
             playerSetAnim(PLAYER, 0, 0);
-            D_800A603C = 5;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 5;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             v.a.p.whole = 0xa0;
             v.y.p.whole = -0x44;
             v.b.p.whole = 0;
@@ -88,10 +88,10 @@ void townHallWorkerTalk(TObj *o)
         o->state = 15;
         break;
     case 15:
-        D_800A603C = 1;
+        PLAYER_STATE = 1;
         GCD.bcf2d = 1;
-        D_800A603D = 0;
-        D_800A603E = 0;
+        PLAYER_SUBSTATE = 0;
+        PLAYER_STEP = 0;
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         GVARS.b3e = 0;
         o->b04 = 2;

@@ -12,7 +12,7 @@ typedef struct {
     short wf2;
 } PL;
 extern PL PLAYER;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern int FUN_800202b4(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 extern void playerSetAnim(TObj *, short, short);
@@ -83,7 +83,7 @@ void func_80116398(TObj *o)
     case 6:
         if (--o->timer != -1) break;
         o->state++;
-        D_8009D2B0 = 0;
+        GAME_PLAYER_MODE = 0;
         p->t.b04 = 5;
         p->t.step = 0x65;
         p->t.state = 0;
@@ -103,7 +103,7 @@ typedef struct {
     short wf2;
 } PL;
 extern PL PLAYER;
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern int FUN_800202b4(TObj *);
 extern short FUN_80040278(TObj *, short, short);
 extern void playerSetAnim(TObj *, short, short);
@@ -174,7 +174,7 @@ void func_80116398(TObj *o)
     case 6:
         if (--o->timer != -1) break;
         o->state++;
-        D_8009D2B0 = 0;
+        GAME_PLAYER_MODE = 0;
         p->t.b04 = 5;
         p->t.step = 0x65;
         p->t.state = 0;

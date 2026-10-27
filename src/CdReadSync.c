@@ -24,7 +24,7 @@ typedef struct {
 } ReadAttr_t;
 
 extern CdlCB D_80096300;
-extern volatile ReadAttr_t D_80096FA0;
+extern volatile ReadAttr_t CD_READ_ATTR;
 
 void cb_read(u_char arg0, u_char* arg1);
 
@@ -39,12 +39,12 @@ int CdReadSync(int mode, u_char* result) {
 
     while (true) {
         var_s0 = -1;
-        if (VSync(-1) <= D_80096FA0.vb_start + 1200) {
-            if (D_80096FA0.status < 0 || VSync(-1) > D_80096FA0.vb_attempt_start + 60) {
+        if (VSync(-1) <= CD_READ_ATTR.vb_start + 1200) {
+            if (CD_READ_ATTR.status < 0 || VSync(-1) > CD_READ_ATTR.vb_attempt_start + 60) {
                 cd_read_retry(true);
-                var_s0 = D_80096FA0.nsectors;
+                var_s0 = CD_READ_ATTR.nsectors;
             } else {
-                var_s0 = D_80096FA0.status;
+                var_s0 = CD_READ_ATTR.status;
             }
         }
         if (mode != 0 || var_s0 <= 0) {

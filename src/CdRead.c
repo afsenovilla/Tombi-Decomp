@@ -24,7 +24,7 @@ typedef struct {
 } ReadAttr_t;
 
 extern CdlCB D_80096300;
-extern volatile ReadAttr_t D_80096FA0;
+extern volatile ReadAttr_t CD_READ_ATTR;
 
 void cb_read(u_char arg0, u_char* arg1);
 
@@ -33,24 +33,24 @@ int cd_read_retry(int retry);
 void CdReadBreak(void);
 
 int CdRead(int sectors, u_long* buf, int mode) {
-    D_80096FA0.mode = mode;
-    switch (D_80096FA0.mode & (CdlModeSize0 | CdlModeSize1)) {
+    CD_READ_ATTR.mode = mode;
+    switch (CD_READ_ATTR.mode & (CdlModeSize0 | CdlModeSize1)) {
     case 0:
-        D_80096FA0.secsize = 0x200;
+        CD_READ_ATTR.secsize = 0x200;
         break;
     case CdlModeSize1:
-        D_80096FA0.secsize = 0x249;
+        CD_READ_ATTR.secsize = 0x249;
         break;
     default:
-        D_80096FA0.secsize = 0x246;
+        CD_READ_ATTR.secsize = 0x246;
         break;
     }
-    D_80096FA0.mode |= CdlModeSize1;
-    D_80096FA0.buf_start = buf;
-    D_80096FA0.nsectors = sectors;
-    D_80096FA0.cbsync = CdSyncCallback(NULL);
-    D_80096FA0.cbready = CdReadyCallback(NULL);
-    D_80096FA0.vb_start = VSync(-1);
+    CD_READ_ATTR.mode |= CdlModeSize1;
+    CD_READ_ATTR.buf_start = buf;
+    CD_READ_ATTR.nsectors = sectors;
+    CD_READ_ATTR.cbsync = CdSyncCallback(NULL);
+    CD_READ_ATTR.cbready = CdReadyCallback(NULL);
+    CD_READ_ATTR.vb_start = VSync(-1);
     if (CdStatus() & (CdlStatPlay | CdlStatSeek | CdlStatRead)) {
         CdControlB(CdlPause, NULL, NULL);
     }

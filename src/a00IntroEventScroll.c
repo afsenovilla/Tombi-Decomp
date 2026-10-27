@@ -8,7 +8,7 @@
 #include "gamestate.h"
 typedef struct { char pad[0x12]; short w12; char p14[2]; short w16; char p18[0x2e - 0x18]; short w2e; } G6038;
 extern G6038 PLAYER;
-extern unsigned char D_8009C966, D_8009C933;
+extern unsigned char GAME_AREA00_INTRO_PHASE, D_8009C933;
 extern short D_1F8001C6;
 extern unsigned char D_1F8001CC, D_1F8001CD;
 extern void updateCameraFollow(TObj *);
@@ -59,7 +59,7 @@ void a00IntroEventScroll(TObj *o)
         if (GVARS.b38 != 0) break;
         if (g->w12 < 0x49e) break;
         if (g->w16 >= -0xe7) break;
-        D_8009C966 = 1;
+        GAME_AREA00_INTRO_PHASE = 1;
         o->state++;
         setEventStarted(2, 0, 1);
         if (GCD.bd095 != 0) break;
@@ -94,7 +94,7 @@ void a00IntroEventScroll(TObj *o)
             cdSeekStream(2);
             o->state++;
         } else if (g->w12 < 0x49e) {
-            D_8009C966 = 2;
+            GAME_AREA00_INTRO_PHASE = 2;
             o->state--;
         }
         break;
@@ -133,7 +133,7 @@ void a00IntroEventScroll(TObj *o)
                 ((unsigned char*)&GVARS.b3c)[0] = 1;
             }
         } else {
-            D_8009C966 = 3;
+            GAME_AREA00_INTRO_PHASE = 3;
             GVARS.b30 = 0;
             D_1F8001C6 = 2;
             FUN_8001f4bc();

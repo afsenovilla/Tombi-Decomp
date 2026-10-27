@@ -11,13 +11,13 @@ extern unsigned char D_8009C93A;
 extern unsigned char D_8009C93C;
 extern unsigned char D_8009C93F;
 extern unsigned char D_8009C942;
-extern unsigned char D_8009C975;
+extern unsigned char GAME_FADE_SCREEN_CONTROL;
 extern TObj *D_8009F2F4;
 extern TObj *D_8009F2F8;
 extern TObj *D_8009F2FC;
-extern unsigned char D_800A603C;
-extern unsigned char D_800A603D;
-extern unsigned char D_800A603E;
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE;
+extern unsigned char PLAYER_STEP;
 extern unsigned short D_800A6066;
 
 void func_800FE410(TObj *o)
@@ -33,9 +33,9 @@ void func_800FE410(TObj *o)
             D_8009C93F = 1;
             D_8009C942 = 1;
             D_800A6066 = 6;
-            D_800A603C = 4;
-            D_800A603D = 3;
-            D_800A603E = 0;
+            PLAYER_STATE = 4;
+            PLAYER_SUBSTATE = 3;
+            PLAYER_STEP = 0;
             a->step = 2;
             a->state = 0;
             c->step = 2;
@@ -76,14 +76,14 @@ void func_800FE410(TObj *o)
         if (--o->w08 <= 0) {
             a->b04 = 3;
             D_800A6066 = 2;
-            D_800A603C = 4;
-            D_800A603D = 3;
-            D_800A603E = 0;
+            PLAYER_STATE = 4;
+            PLAYER_SUBSTATE = 3;
+            PLAYER_STEP = 0;
             o->state++;
         }
         break;
     case 5:
-        if (D_8009C975 == 0) {
+        if (GAME_FADE_SCREEN_CONTROL == 0) {
             D_8009C93C = 1;
             o->w08 = 0x80;
             o->state++;
@@ -137,9 +137,9 @@ void func_800FE410(TObj *o)
             D_8009C93C = 0;
             D_8009C93F = 0;
             D_8009C942 = 0;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
             o->b04 = 1;
             o->step = 0;
             o->state = 0;

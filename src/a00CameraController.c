@@ -1,7 +1,7 @@
 // FUNC 801175a4 308 X000
 // MATCHING 801175a4 308
 #include "TOBJ.H"
-extern unsigned short DAT_8009c962;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned char DAT_8009c93a;
 extern short DAT_1f80016e, DAT_1f80016a;
 extern void updateA00ScrollController(TObj *);
@@ -11,7 +11,7 @@ extern void cameraEventScrollHandler(TObj *);
 
 void a00CameraController(TObj *o)
 {
-    if (DAT_8009c962 == 3) {
+    if (GAME_SELECTED_SECTION == 3) {
         switch (o->step) {
         case 0:
             if (DAT_8009c93a != 0) o->step++;

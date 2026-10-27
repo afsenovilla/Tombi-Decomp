@@ -7,7 +7,7 @@
 extern unsigned short *D_1F800278;
 extern unsigned short D_1F800280, D_1F800282, D_1F800284;
 extern unsigned short D_8009BD68;
-extern short D_8009BD6C, D_8009BD70, D_8009BD74, D_8009BD78, D_8009BD7C, D_8009BD80;
+extern short D_8009BD6C, TILE_COL_COUNT, TILE_COL_TOP, TILE_COL_HEIGHT, TILE_COL_FLAGS, D_8009BD80;
 extern unsigned short D_8009BD84;
 extern short D_8009BD88, D_8009BD8C, D_8009BD90;
 #define D D_1F800278
@@ -27,38 +27,38 @@ int tileCollideColumnAt(TObj *o_, unsigned short x_, short y)
     short b;
     unsigned short r;
 
-    D_8009BD70 = *D++;
-    if (D_8009BD70 == 0)
+    TILE_COL_COUNT = *D++;
+    if (TILE_COL_COUNT == 0)
         return 0;
 asm("" : "=r"(o) : "0"(o));
     k = 0;
     do {
-        D_8009BD70--;
-        D_8009BD7C = *D++;
-        if (D_8009BD7C & 0x10) {
+        TILE_COL_COUNT--;
+        TILE_COL_FLAGS = *D++;
+        if (TILE_COL_FLAGS & 0x10) {
             D += 3;
             continue;
         }
-        if (!(D_8009BD7C & 1)) {
+        if (!(TILE_COL_FLAGS & 1)) {
             D += 3;
             k++;
             continue;
         }
-        D_8009BD74 = *D++;
-        D_8009BD78 = *D++;
+        TILE_COL_TOP = *D++;
+        TILE_COL_HEIGHT = *D++;
         D_8009BD84 = *D++;
         if (k != 0) {
-            if (D_8009BD78 > 0) {
-                if (D_8009BD74 + D_8009BD78 + 0x20 < y)
+            if (TILE_COL_HEIGHT > 0) {
+                if (TILE_COL_TOP + TILE_COL_HEIGHT + 0x20 < y)
                     return 0;
             } else {
-                if (D_8009BD74 + 0x20 < y)
+                if (TILE_COL_TOP + 0x20 < y)
                     return 0;
             }
         }
         k++;
-        a = D_8009BD74;
-        b = D_8009BD78;
+        a = TILE_COL_TOP;
+        b = TILE_COL_HEIGHT;
         if (b == 0)
             goto plain;
 asm("" : "=r"(a) : "0"(a));
@@ -104,14 +104,14 @@ asm("" : "=r"(s) : "0"(s));
             hit:
                 o->y.p.frac = 0;
                 o->y.p.whole += d;
-                (*(unsigned short*)&SPAD.s27e) = D_8009BD78;
-                D_1F800280 = D_8009BD74;
-                D_1F800282 = D_8009BD7C;
-                D_1F800284 = (D_8009BD7C & 0xe00) >> 9;
+                (*(unsigned short*)&SPAD.s27e) = TILE_COL_HEIGHT;
+                D_1F800280 = TILE_COL_TOP;
+                D_1F800282 = TILE_COL_FLAGS;
+                D_1F800284 = (TILE_COL_FLAGS & 0xe00) >> 9;
                 return 1;
             }
         } else if ((short)d <= 0)
             goto hit;
-    } while (D_8009BD70 != 0);
+    } while (TILE_COL_COUNT != 0);
     return 0;
 }

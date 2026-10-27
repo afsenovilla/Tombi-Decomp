@@ -5,8 +5,8 @@
 
 extern void *D_80139864[];
 extern unsigned short D_8007A1F0[];
-extern unsigned char PLAYER[], D_800A603C[], D_800A603D[], D_800A603E[];
-extern signed char D_8009D2B0[];
+extern unsigned char PLAYER[], PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
+extern signed char GAME_PLAYER_MODE[];
 extern void AnimLoadDuration(TObj *);
 extern void playerLauncherTurnToward(TObj *, int, int);
 extern int playerLauncherCheckCatch(TObj *);
@@ -41,11 +41,11 @@ void playerLauncherAim(TObj *o)
         if (playerLauncherCheckCatch(o)) {
             o->b0a = 2;
             o->velH = 0x80;
-            D_800A603C[0] = 1;
-            D_8009D2B0[0] = 0;
+            PLAYER_STATE[0] = 1;
+            GAME_PLAYER_MODE[0] = 0;
             PLAYER[0] = 2;
-            D_800A603D[0] = 0x36;
-            D_800A603E[0] = 0;
+            PLAYER_SUBSTATE[0] = 0x36;
+            PLAYER_STEP[0] = 0;
             o->state = 0;
             o->step++;
         } else if (!near(o)) {

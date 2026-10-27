@@ -13,7 +13,7 @@ extern void *D_80139500[];
 extern unsigned char D_80135CB0[];
 extern unsigned char D_80135D54[], D_80135D4C[];
 extern unsigned short D_80135D2C[];
-extern char D_80077CF4[], D_80077CDC[];
+extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
 
 static __inline__ void set(TObj *o)
 {
@@ -103,7 +103,7 @@ void spikyLizardRun(TObj *o)
         break;
     case 3:
         if (AnimAdvance(o)) {
-            o->movetab = D_80077CF4;
+            o->movetab = MOVE_TABLE_1;
             o->timer = D_80135D4C[Rand() & 7];
             if (isObjectBelowGround(o) != o->animFrame) {
                 o->w22 = 0x1e;
@@ -148,7 +148,7 @@ void spikyLizardRun(TObj *o)
         if (AnimAdvance(o)) {
             o->timer = D_80135D2C[Rand() & 7];
             w[1] = 1;
-            o->movetab = D_80077CDC;
+            o->movetab = MOVE_TABLE_0;
             o->wac = 0xc;
             SET();
             if (isObjectBelowGround(o) != o->animFrame) {

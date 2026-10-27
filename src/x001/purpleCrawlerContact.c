@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char PLAYER, D_800A603C, D_800A603D, D_800A603E;
+extern unsigned char PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern short purpleCrawlerOverlapTest(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void decreaseObjectTimer(TObj *, int);
@@ -65,9 +65,9 @@ void purpleCrawlerContact(TObj *o, TObj *p)
         p->active = 3;
         if (p->b6a == 2) {
             PLAYER = 1;
-            D_800A603C = 1;
-            D_800A603D = 0;
-            D_800A603E = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
         }
         p->b6a = 0;
         p->b04 = 2;

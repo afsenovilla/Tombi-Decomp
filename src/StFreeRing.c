@@ -6,8 +6,8 @@
 #include "psyq/libcd.h"
 
 extern int D_800A2524;
-extern StHEADER* D_800A3F04;
-extern int D_800A3FD8;
+extern StHEADER* ST_RING_ADDR;
+extern int ST_RING_SIZE;
 
 u_long StFreeRing(u_long *base)
 {
@@ -17,14 +17,14 @@ u_long StFreeRing(u_long *base)
     StHEADER* temp_v0;
     StHEADER* temp_v0_2;
 
-    temp_a1 = (base - (u_long*)&D_800A3F04[D_800A3FD8]) / 504;
-    temp_v0 = &D_800A3F04[temp_a1];
-    nSectors = D_800A3F04[temp_a1].nSectors;
+    temp_a1 = (base - (u_long*)&ST_RING_ADDR[ST_RING_SIZE]) / 504;
+    temp_v0 = &ST_RING_ADDR[temp_a1];
+    nSectors = ST_RING_ADDR[temp_a1].nSectors;
     if ((short)temp_v0->id != 4) {
         return 1;
     }
     for (i = 0; i < nSectors; i++) {
-        temp_v0_2 = &D_800A3F04[i+temp_a1];
+        temp_v0_2 = &ST_RING_ADDR[i+temp_a1];
         *(short*)temp_v0_2 = 0;
     }
     D_800A2524 = i+temp_a1;

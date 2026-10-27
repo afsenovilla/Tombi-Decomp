@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 extern void *D_80139878[];
-extern unsigned short D_800A604E;
+extern unsigned short PLAYER_Y;
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void playerLauncherWait(TObj *);
@@ -49,7 +49,7 @@ void stepPlayerLauncher(TObj *o)
                 o->timer--;
             } else if (AnimAdvance(o)) {
                 o->state++;
-                D_800A604E++;
+                PLAYER_Y++;
             }
             break;
         case 2:

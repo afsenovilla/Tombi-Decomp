@@ -5,7 +5,7 @@
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 typedef struct { unsigned char b0, b1; char p2[2]; short w04; char p6[4]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
-extern char D_80077CF4[];
+extern char MOVE_TABLE_1[];
 extern B D_80135B30[];
 extern unsigned char D_80135B00[];
 extern A *D_801386F8[];
@@ -54,7 +54,7 @@ void komaPigWalk(TObj *o)
         o->timer = 0x3c;
         o->substep++;
         FUN_8001f8e4(o);
-        o->movetab = D_80077CF4;
+        o->movetab = MOVE_TABLE_1;
         o->wac = 10;
         SETANIM(10);
     case 1:

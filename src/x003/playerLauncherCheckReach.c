@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 
 extern short D_8007A1F0[], COS_TABLE[];
-extern int *D_800A6078;
+extern int *PLAYER_H;
 extern int SquareRoot0(int);
 extern int angleFromDelta(int, int);
 
@@ -23,7 +23,7 @@ int playerLauncherCheckReach(TObj *o)
     a &= 0xff;
     dy = (o->velH * D_8007A1F0[a]) >> 12;
     dx = (o->velH * COS_TABLE[a]) >> 12;
-    *D_800A6078 += dx << 8;
+    *PLAYER_H += dx << 8;
     ((int*)&PLAYER.obj.y.raw)[0] += dy << 8;
     o->velH += 0x80;
     if (o->velH > 0x800) o->velH = 0x800;

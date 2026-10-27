@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; int lim; } SB;
 typedef struct { Fix16 x, y, z; } V3;
-extern char D_80077CDC[];
+extern char MOVE_TABLE_0[];
 static short D_8013C984[16] = {
     0x20, 0x18, 0x10, 0x10, 0x10, 8, 8, 4,
     0, -4, -8, -8, -0x10, -0x10, -0x10, -0x18,
@@ -36,7 +36,7 @@ void updateRollingBarrel(TObj *o)
         o->box0 = 0x10;
         o->box1 = 0x20;
         o->box3 = 0x20;
-        o->movetab = D_80077CDC;
+        o->movetab = MOVE_TABLE_0;
         o->velY = 0x200;
         o->w98 = 3;
         o->w9a = 3;

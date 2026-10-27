@@ -5,7 +5,7 @@
 extern unsigned char PLAYER[];
 extern unsigned char DAT_8009cff9;
 extern unsigned char DAT_8009c93c;
-extern unsigned char DAT_8009c975;
+extern unsigned char GAME_FADE_SCREEN_CONTROL;
 extern short DAT_1f800176;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -99,7 +99,7 @@ void eventTakePlayerControlC(TObj *o)
         if (--o->timer == -1) {
             o->state++;
             DAT_8009c93c = 0;
-            DAT_8009c975 = 3;
+            GAME_FADE_SCREEN_CONTROL = 3;
         }
         if ((o->velV += 0x20) > 0x600)
             o->velV = 0x600;
@@ -111,7 +111,7 @@ void eventTakePlayerControlC(TObj *o)
             o->velV = 0x600;
         o->y.raw -= o->velV << 8;
         p->y.raw -= o->velV << 8;
-        if (DAT_8009c975 == 1) {
+        if (GAME_FADE_SCREEN_CONTROL == 1) {
             DAT_8009cff9 = 1;
             TASK_C->mode = 7;
             TASK_C->step = 0;

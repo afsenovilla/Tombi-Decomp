@@ -7,16 +7,16 @@
 #include "scriptctx.h"
 typedef struct { short s0, s2; } S2;
 extern TObj *SCRIPT_OBJECTS[];
-extern S2 *D_800A6078, *D_800A607C[];
+extern S2 *PLAYER_H, *PLAYER_D[];
 extern short D_800A604C[];
 extern unsigned char SCRIPT_FLAGS[];
-extern signed char D_8009D2B0;
+extern signed char GAME_PLAYER_MODE;
 extern unsigned char D_800A60A0, D_800A60A3, D_800A60D6, D_800A60A1;
-extern unsigned char D_8009C975, D_8009C93C, D_8009C976;
+extern unsigned char GAME_FADE_SCREEN_CONTROL, D_8009C93C, D_8009C976;
 extern short D_800A6066;
 extern int D_8009C96C;
 extern char PLAYER[];
-extern short D_800A60D0[];
+extern short PLAYER_HEALTH[];
 extern unsigned char D_8009C971;
 extern short D_800A60D2[];
 extern unsigned char D_8009C970[];
@@ -81,9 +81,9 @@ static __inline__ int op82(void)
 static __inline__ int op83(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
-    D_800A6078->s2 = g->arg[0];
+    PLAYER_H->s2 = g->arg[0];
     D_800A604C[1] = g->arg[1];
-    D_800A607C[0]->s2 = g->arg[2];
+    PLAYER_D[0]->s2 = g->arg[2];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
@@ -92,9 +92,9 @@ static __inline__ int op84(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     int v;
-    g->arg[0] = D_800A6078->s2;
+    g->arg[0] = PLAYER_H->s2;
     g->arg[1] = D_800A604C[1];
-    v = D_800A607C[0]->s2;
+    v = PLAYER_D[0]->s2;
     (*(short *)((char *)g + 0x8a))++;
     g->arg[2] = v;
     return 1;
@@ -238,7 +238,7 @@ static __inline__ int op92(void)
 static __inline__ int op93(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
-    if (D_8009D2B0 != 3) FUN_800ecb40(PLAYER, D_800A6078->s2, D_800A604C[1]);
+    if (GAME_PLAYER_MODE != 3) FUN_800ecb40(PLAYER, PLAYER_H->s2, D_800A604C[1]);
     g->arg[0] = D_800A60A0;
     (*(short *)((char *)g + 0x8a))++;
     return 1;
@@ -248,7 +248,7 @@ static __inline__ int op94(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     TObj *o = SCRIPT_OBJECTS[g->arg[0]];
-    if ((D_8009D2B0 != 3 || D_800A60A3 == 1) && o != 0) o->b6b = g->arg[1];
+    if ((GAME_PLAYER_MODE != 3 || D_800A60A3 == 1) && o != 0) o->b6b = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
     return 1;
 }
@@ -282,7 +282,7 @@ static __inline__ int op95(void)
 static __inline__ int op96(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
-    if (D_8009D2B0 != 3) {
+    if (GAME_PLAYER_MODE != 3) {
         switch (g->arg[0]) {
         case 0: D_800A60A3 = 0; break;
         case 1: D_800A60A3 = 1; break;
@@ -373,7 +373,7 @@ static __inline__ int op9f(void)
 static __inline__ int opa0(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
-    D_8009C975 = 0x10;
+    GAME_FADE_SCREEN_CONTROL = 0x10;
     D_8009C93C = g->arg[0];
     D_8009C976 = g->arg[1];
     (*(short *)((char *)g + 0x8a))++;
@@ -454,13 +454,13 @@ static __inline__ int opa9(void)
 {
     ScriptCtx *g = SCRIPT_CTX;
     unsigned char m = D_8009C971;
-    short v = D_800A60D0[0];
+    short v = PLAYER_HEALTH[0];
     int a = g->arg[0];
     if (v < m) {
-        D_800A60D0[0] = v + a;
-        if (D_800A60D0[0] > m) D_800A60D0[0] = m;
-        D_800A60D2[0] = D_800A60D0[0];
-        D_8009C970[0] = D_800A60D0[0];
+        PLAYER_HEALTH[0] = v + a;
+        if (PLAYER_HEALTH[0] > m) PLAYER_HEALTH[0] = m;
+        D_800A60D2[0] = PLAYER_HEALTH[0];
+        D_8009C970[0] = PLAYER_HEALTH[0];
         g->arg[0] = 0;
     } else {
         g->arg[0] = 1;
