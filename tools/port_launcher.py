@@ -3,7 +3,9 @@
 player picks their own disc image (.bin/.cue/.iso of Tombi! PAL SCES-01331), a save folder, the window options and
 the mods, and a Play button that runs tombi2.exe --window with those options.  Same Tk toolkit and tools/i18n.py
 catalogs as tombi-gfx / tombi-text.  No game data is bundled: the disc is checked (MAIN0.EXE extracted next to
-tombi-port.json, the saved settings, and compared by sha1) before the first run.
+tombi-port.json, the saved settings, and compared by sha1) before the first run, and the disc is then extracted
+once into data/ next to the launcher (tools/extract_data.py): the game runs with --data and no longer needs the
+image (the disc field is optional while data/ is valid for the same MAIN0.EXE).
 
   python3 tools/port_launcher.py             # from a checkout: uses build/port2-win/tombi2.exe (Windows) or build/port2/tombi2 (Linux)
   pyinstaller --onefile --windowed --name tombi-port ... tools/port_launcher.py   (.github/workflows/port2-exe.yml)
@@ -15,6 +17,7 @@ from tkinter import ttk, filedialog, messagebox
 import i18n
 from i18n import tr
 import port_mods as M
+import extract_data as X
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 (.github/workflows/report.yml)
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,12 +25,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 i18n.add({
     "es": {
         "title": "Tombi! - port nativo", "tab.play": "Jugar", "tab.mods": "Mods", "tab.controls": "Controles",
-        "l.disc": "Imagen del disco (.bin / .cue / .iso):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
+        "l.disc": "Imagen del disco (.bin / .cue / .iso; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
         "b.play": "Jugar", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco correcto: MAIN0.EXE verificado (sha1).",
+        "s.extracting": "Extrayendo el disco a {0}... {1}% ({2})", "s.dataok": "Datos del juego listos en {0} ({1} archivos): la imagen del disco ya no hace falta.",
+        "s.extractfail": "No se pudo extraer el disco: {0}", "s.nodata": "Elige tu imagen del disco: se extrae una vez a la carpeta data/ y el juego ya no la necesita.",
         "s.badsha": "Aviso: MAIN0.EXE no coincide con SCES-01331 (sha1 {0}); el port puede no funcionar.",
         "s.noexe": "No se encuentra EXE/MAIN0.EXE en la imagen: no es un disco de Tombi! PAL.", "s.notiso": "No es una imagen ISO9660: {0}",
         "s.running": "Jugando... (cerrar la ventana del juego termina)", "s.ended": "El juego terminó (código {0}). Registro: {1}",
@@ -37,12 +42,14 @@ i18n.add({
     },
     "en": {
         "title": "Tombi! - native port", "tab.play": "Play", "tab.mods": "Mods", "tab.controls": "Controls",
-        "l.disc": "Disc image (.bin / .cue / .iso):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
+        "l.disc": "Disc image (.bin / .cue / .iso; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
         "b.play": "Play", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Disc OK: MAIN0.EXE verified (sha1).",
+        "s.extracting": "Extracting the disc into {0}... {1}% ({2})", "s.dataok": "Game data ready in {0} ({1} files): the disc image is no longer needed.",
+        "s.extractfail": "Could not extract the disc: {0}", "s.nodata": "Pick your disc image: it is extracted once into the data/ folder and the game no longer needs it.",
         "s.badsha": "Warning: MAIN0.EXE does not match SCES-01331 (sha1 {0}); the port may not work.",
         "s.noexe": "EXE/MAIN0.EXE not found in the image: not a Tombi! PAL disc.", "s.notiso": "Not an ISO9660 image: {0}",
         "s.running": "Playing... (closing the game window ends it)", "s.ended": "The game ended (code {0}). Log: {1}",
@@ -51,13 +58,21 @@ i18n.add({
         "l.key": "Key", "b.defaults": "Defaults", "l.cmd": "Command:",
     },
     "fr": {"title": "Tombi! - port natif", "tab.play": "Jouer", "tab.mods": "Mods", "tab.controls": "Commandes", "b.play": "Jouer",
-           "l.disc": "Image du disque (.bin / .cue / .iso) :", "b.browse": "Parcourir...", "l.savedir": "Dossier des sauvegardes :"},
+           "l.disc": "Image du disque (.bin / .cue / .iso ; extraite une fois dans le dossier data/) :", "b.browse": "Parcourir...", "l.savedir": "Dossier des sauvegardes :",
+           "s.extracting": "Extraction du disque vers {0}... {1} % ({2})", "s.dataok": "Données du jeu prêtes dans {0} ({1} fichiers) : l'image du disque n'est plus nécessaire.",
+           "s.extractfail": "Impossible d'extraire le disque : {0}", "s.nodata": "Choisissez votre image du disque : elle est extraite une fois dans le dossier data/ et le jeu n'en a plus besoin."},
     "de": {"title": "Tombi! - nativer Port", "tab.play": "Spielen", "tab.mods": "Mods", "tab.controls": "Steuerung", "b.play": "Spielen",
-           "l.disc": "Disc-Image (.bin / .cue / .iso):", "b.browse": "Durchsuchen...", "l.savedir": "Speicherordner:"},
+           "l.disc": "Disc-Image (.bin / .cue / .iso; wird einmal in den Ordner data/ entpackt):", "b.browse": "Durchsuchen...", "l.savedir": "Speicherordner:",
+           "s.extracting": "Disc wird nach {0} entpackt... {1} % ({2})", "s.dataok": "Spieldaten bereit in {0} ({1} Dateien): das Disc-Image wird nicht mehr gebraucht.",
+           "s.extractfail": "Die Disc konnte nicht entpackt werden: {0}", "s.nodata": "Wähle dein Disc-Image: es wird einmal in den Ordner data/ entpackt, danach braucht das Spiel es nicht mehr."},
     "it": {"title": "Tombi! - port nativo", "tab.play": "Gioca", "tab.mods": "Mod", "tab.controls": "Controlli", "b.play": "Gioca",
-           "l.disc": "Immagine del disco (.bin / .cue / .iso):", "b.browse": "Sfoglia...", "l.savedir": "Cartella dei salvataggi:"},
+           "l.disc": "Immagine del disco (.bin / .cue / .iso; estratta una volta nella cartella data/):", "b.browse": "Sfoglia...", "l.savedir": "Cartella dei salvataggi:",
+           "s.extracting": "Estrazione del disco in {0}... {1}% ({2})", "s.dataok": "Dati del gioco pronti in {0} ({1} file): l'immagine del disco non serve più.",
+           "s.extractfail": "Impossibile estrarre il disco: {0}", "s.nodata": "Scegli l'immagine del disco: viene estratta una volta nella cartella data/ e il gioco non ne ha più bisogno."},
     "pt": {"title": "Tombi! - port nativo", "tab.play": "Jogar", "tab.mods": "Mods", "tab.controls": "Controlos", "b.play": "Jogar",
-           "l.disc": "Imagem do disco (.bin / .cue / .iso):", "b.browse": "Procurar...", "l.savedir": "Pasta dos jogos guardados:"},
+           "l.disc": "Imagem do disco (.bin / .cue / .iso; extraída uma vez para a pasta data/):", "b.browse": "Procurar...", "l.savedir": "Pasta dos jogos guardados:",
+           "s.extracting": "A extrair o disco para {0}... {1}% ({2})", "s.dataok": "Dados do jogo prontos em {0} ({1} ficheiros): a imagem do disco já não é necessária.",
+           "s.extractfail": "Não foi possível extrair o disco: {0}", "s.nodata": "Escolhe a imagem do disco: é extraída uma vez para a pasta data/ e o jogo deixa de precisar dela."},
 })
 
 
@@ -86,6 +101,16 @@ def game_binary():
 
 def settings_file():
     return os.path.join(app_dir(), "tombi-port.json")
+
+
+def data_dir():
+    """Where the disc is extracted once (tools/extract_data.py): data/ next to the launcher, which tombi2 reads with --data."""
+    return os.path.join(app_dir(), "data")
+
+
+def data_ready():
+    """sha1 of MAIN0.EXE of a complete extraction in data_dir(), else None."""
+    return X.manifest_sha1(data_dir())
 
 
 def load_settings():
@@ -238,10 +263,13 @@ class App:
         self._build_play(self.play_tab)
         self._build_mods(self.mods_tab)
         self._build_controls(self.ctrl_tab)
-        self.status = tk.StringVar(value=tr("s.nodisc"))
+        self.status = tk.StringVar(value=tr("s.nodata"))
         ttk.Label(r, textvariable=self.status, anchor="w", padding=4).pack(fill="x")
         if self.s.get("disc"):
             self.root.after(200, self.check_disc)
+        elif data_ready():
+            man = X.read_manifest(data_dir())
+            self.status.set(tr("s.dataok", data_dir(), len(man["files"]) if man else 0))
 
     def var(self, key, kind=tk.StringVar, default=""):
         v = self.vars.get(key)
@@ -379,15 +407,33 @@ class App:
                 sha = extract_main0(image, os.path.join(app_dir(), "MAIN0.EXE"))
                 msg = tr("s.ok") if sha == MAIN0_SHA1 else tr("s.badsha", sha[:8])
             except (OSError, ValueError, struct.error) as e:
-                msg = str(e)
+                self.root.after(0, self.status.set, str(e))
+                return
             self.root.after(0, self.status.set, msg)
+            # the one-time extraction into data/ (again when data/ was made from another disc: a different MAIN0)
+            if data_ready() != sha:
+                self.root.after(0, self.play_btn.state, ["disabled"])
+                last = [-1]
+
+                def progress(done, total, path):
+                    pct = done * 100 // max(1, total)
+                    if pct != last[0]:
+                        last[0] = pct
+                        self.root.after(0, self.status.set, tr("s.extracting", data_dir(), pct, path))
+                try:
+                    man = X.extract(image, data_dir(), progress)
+                    self.root.after(0, self.status.set, tr("s.dataok", data_dir(), len(man["files"])))
+                except (OSError, ValueError, struct.error) as e:
+                    self.root.after(0, self.status.set, tr("s.extractfail", e))
+                self.root.after(0, self.play_btn.state, ["!disabled"])
         threading.Thread(target=work, daemon=True).start()
 
     def command(self):
         self.collect()
         s = self.s
         exe = game_binary()
-        cmd = [exe, "--disc", bin_of_cue(s["disc"]), "--window", "--scale", str(s.get("scale", 2)),
+        source = ["--data", data_dir()] if data_ready() else ["--disc", bin_of_cue(s["disc"])]
+        cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
                "--show-fps", "2",     # the measured vblank rate and its histogram in the log
                "--renderer", "soft" if s.get("renderer") == "soft" else "gl"]
         if s.get("savedir"):
@@ -404,9 +450,10 @@ class App:
         if not os.path.isfile(cmd[0]):
             messagebox.showerror(tr("title"), tr("s.nobin", cmd[0]))
             return
-        if not os.path.isfile(cmd[2]) or not os.path.isfile(os.path.join(app_dir(), "MAIN0.EXE")):
-            self.check_disc()
-            messagebox.showerror(tr("title"), tr("s.nodisc"))
+        if cmd[1] == "--disc" and (not os.path.isfile(cmd[2]) or not os.path.isfile(os.path.join(app_dir(), "MAIN0.EXE"))):
+            if os.path.isfile(cmd[2]):
+                self.check_disc()      # extracts data/ as well; Play again when it says the data is ready
+            messagebox.showerror(tr("title"), tr("s.nodata"))
             return
         if self.proc and self.proc.poll() is None:
             return

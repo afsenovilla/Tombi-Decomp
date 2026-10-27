@@ -17,6 +17,7 @@ on:
       - port/cmake/build_id.cmake
       - tools/port_launcher.py
       - tools/port_mods.py
+      - tools/extract_data.py
       - tools/prompt_glyphs.py
       - tools/i18n.py
       - tools/icons/**
@@ -87,6 +88,24 @@ jobs:
           echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
+      - name: Extract data/ from the disc (the runtime's data path, tools/extract_data.py)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          # The same extraction the launcher runs once on the player's disc: every file plus manifest.txt.  Checked
+          # against the manifest (sizes, every sector covered) and against the ISO dump above; the exe is run from it
+          # on the Windows job (tombi2 is a Windows build here, so the headless run with --data is a smoke test only).
+          python3 -I tools/extract_data.py "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/data" --quiet
+          python3 -I tools/extract_data.py --check "$RUNNER_TEMP/data"
+          grep -q "^main0_sha1 bec8dc5f4116f5e497f2337eef8c523ff6dee8fc$" "$RUNNER_TEMP/data/manifest.txt"
+          cmp "$RUNNER_TEMP/data/EXE/MAIN0.EXE" game/MAIN0.EXE
+          cmp "$RUNNER_TEMP/data/AREA00/X000.BIN" game/AREA00/X000.BIN
+          mkdir -p build/data-sample/EXE build/data-sample/_disc
+          # a tiny data/ for the Windows smoke test: the manifest plus MAIN0 and the PVD blob (no game data is uploaded
+          # beyond the two files the exe is built from and the ISO descriptor sectors; the artifact is never published)
+          cp "$RUNNER_TEMP/data/manifest.txt" build/data-sample/
+          cp "$RUNNER_TEMP/data/EXE/MAIN0.EXE" build/data-sample/EXE/
+          cp "$RUNNER_TEMP/data/_disc/000000.raw" build/data-sample/_disc/
+
       - name: Matching build (retail addresses for the generator)
         if: steps.fetch.outputs.ok == 'true'
         run: python3 tools/build_full.py -j 4
@@ -100,6 +119,7 @@ jobs:
           cat build/port2-win/gen/report.txt | head -12
           mkdir -p build/win-bin
           cp build/port2-win/tombi2.exe "$RUNNER_TEMP/sdl/SDL2-${SDL2_VERSION}/i686-w64-mingw32/bin/SDL2.dll" build/win-bin/
+          cp -r build/data-sample build/win-bin/data-sample
           cp "$RUNNER_TEMP/sdl/SDL2-${SDL2_VERSION}/i686-w64-mingw32/share/licenses/SDL2/LICENSE.txt" build/win-bin/SDL2-LICENSE.txt || true
           ls -l build/win-bin
 
@@ -130,6 +150,11 @@ jobs:
         run: |
           build/win-bin/tombi2.exe --headless --test-null
           build/win-bin/tombi2.exe --headless --frames 200 --disc nonexistent.bin 2>&1 | head -5 || true
+          # the data/ path: a manifest with MAIN0 and the PVD blob only (every other read is zeros, logged), and a
+          # missing folder (must say so and exit, not crash)
+          build/win-bin/tombi2.exe --headless --frames 200 --data build/win-bin/data-sample 2>&1 | grep -i 'data:\|warning\|violation' | head -5 || true
+          build/win-bin/tombi2.exe --headless --frames 10 --data nonexistent 2>&1 | grep -i 'FATAL' || true
+          rm -rf build/win-bin/data-sample
           # the OpenGL renderer on the runner's desktop (no GPU driver: the GDI OpenGL 1.1 cannot make the context,
           # which must fall back to the software rasteriser, not fail)
           build/win-bin/tombi2.exe --headless --renderer gl --frames 100 --disc nonexistent.bin 2>&1 | grep -i 'renderer\|opengl' || true
@@ -140,7 +165,7 @@ jobs:
           python -m pip install pyinstaller pillow
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import port_mods --hidden-import prompt_glyphs --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --paths tools \
+            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import prompt_glyphs --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --paths tools \
             --icon tools/icons/gfx.ico --add-data "tools/icons/gfx.ico;icons" --add-data "tools/icons/gfx.png;icons" --add-data "build_id.txt;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
             --add-binary "build/win-bin/tombi2.exe;." --add-binary "build/win-bin/SDL2.dll;." \

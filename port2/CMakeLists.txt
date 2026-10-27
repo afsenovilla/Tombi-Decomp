@@ -3,7 +3,8 @@
 #
 #   python3 tools/build_full.py -j 4                 # once: the generator takes retail addresses from it
 #   cmake -S port2 -B build/port2 -G Ninja && cmake --build build/port2 -j 8
-#   build/port2/tombi2                                # SDL2 window, paced at 50 Hz, OpenGL renderer (--renderer soft: software)
+#   python3 tools/extract_data.py game/disc/Tombi.bin data   # once: the game files the exe reads (docs/PORT.md "Running without the disc image")
+#   build/port2/tombi2                                # SDL2 window, paced at 50 Hz, OpenGL renderer (--renderer soft: software); reads data/ (--data DIR, or --disc IMAGE)
 #   build/port2/tombi2 --headless --frames 1500 --dump-frames out --pad-script 1000:start
 #   cat build/port2/gen/report.txt
 # Windows (cross-compiled with mingw-w64, docs/PORT.md "M3 phase 3"):

@@ -1047,6 +1047,7 @@ through the SDL callback, keyboard / game controller on pad 1; `--headless` runs
 and reaches the title screen and AREA00 gameplay with the same inputs as `port/`:
 
 ```
+python3 tools/extract_data.py game/disc/Tombi.bin data        # once: the game files the exe reads ("Running without the disc image" below; --disc IMAGE reads the image instead)
 build/port2/tombi2 --headless --frames 1500 --dump-frames out --pad-script 1000:start      # title (frame 1000), AREA00 (1490)
 build/port2/tombi2 --headless --frames 4000 --dump-frames out --pad-script 1000:start,1300:cross:3x45/30,3200:right:400
 build/port2/tombi2 --window                                                                  # the same in a window
@@ -1181,9 +1182,11 @@ What the cross build needed (`port2/CMakeLists.txt` `if(WIN32)`, `port2/cmake/mi
 
 **Launcher** (`tools/port_launcher.py`, same window as before: disc `.bin/.cue/.iso`, save folder, scale,
 fullscreen, 50/60 Hz, *Mods* and *Controls* tabs from `tools/port_mods.py`, *Copy log*, build id in the title):
-it runs `tombi2.exe --disc <bin> --window --scale N [--fullscreen] --show-fps 2 [--save-dir DIR]` plus the
+it runs `tombi2.exe --data <dir> --window --scale N [--fullscreen] --show-fps 2 [--save-dir DIR]` plus the
 mods' options (`--keys` directly now: there is no viewer process). The disc check (MAIN0.EXE extracted and
-sha1-compared) still runs before the first Play: it is how the launcher tells a wrong image apart.
+sha1-compared) still runs before the first Play: it is how the launcher tells a wrong image apart; it is
+followed by the one-time extraction of the disc into `data/` next to the launcher ("Running without the disc
+image" below), after which the image is no longer needed.
 
 **CI** `.github/workflows/port2-exe.yml`: job `game` (ubuntu, `gcc-mingw-w64-i686`) fetches the owner's disc
 image like `report.yml`, runs `tools/build_full.py` (the generator takes the retail addresses from the
@@ -1195,14 +1198,14 @@ it to `tombi-tools.zip`. No game data is in any artifact (the MAIN0/X000 bytes c
 from the owner's own disc, as the retail addresses of the matching build do).
 
 **Running on Windows.** Download `tombi-port.exe` (or the `tombi-port-windows` artifact), start it, pick the
-disc image (`.bin` or `.cue` of Tombi! PAL SCES-01331), *Play*. `tombi-port.log` next to the exe (also *Copy
-log*) should begin with:
+disc image (`.bin` or `.cue` of Tombi! PAL SCES-01331; it is extracted once into `data/` next to the exe,
+then no longer needed), *Play*. `tombi-port.log` next to the exe (also *Copy log*) should begin with:
 
 ```
 [launcher] build <sha>
 [port2] build <sha> <date>
 [port2] native pointers, 32-bit: data image 0055a000..00685f78, scratch 00547000, layout ok (below 16 MB)
-[port] disc image C:\...\Tombi.bin: 492370032 bytes, raw 2352 sectors (209341), sync pattern found
+[port] data: C:\...\data (2315 files, from manifest; 209341 sectors, MAIN0 sha1 bec8dc5f)
 [port2] window 640x512 (scale 2), audio 44.1 kHz
 [port2] game main: init done, entering the main loop
 [port] frame 100: ...
@@ -1214,7 +1217,7 @@ with its stack (the first native-code bug on Windows: the symbol and frame numbe
 stub: <name>` lines beyond the 13 Psy-Q ones hit at boot, `[port] fps:` lines far from 50.00 (pacing), and
 `emulated accesses to the BIOS kernel area` with a site count in the hundreds (a null-pointer path the
 Linux runs never took). Without a window/audio device the log says so (`no audio device: ...`). To run the
-game directly: `tombi2.exe --disc Tombi.bin --window` from a folder holding `SDL2.dll`; `tombi2.exe --headless
+game directly: `tombi2.exe --data data --window` (or `--disc Tombi.bin`) from a folder holding `SDL2.dll`; `tombi2.exe --headless
 --test-null` checks the fault handlers alone (from the main thread and from a coroutine stack: a task's null
 read, byte and dword writes, and a division by zero; exit code 0 when all pass).
 
@@ -1474,6 +1477,78 @@ port supplies is the two Psy-Q layers under it:
 Building `port2` needs a fresh `build/full` (`python3 tools/build_full.py`; `gen_port.provides()` refuses a stale one,
 Open points 7). `moviePlayerTask` is one of the 13 functions of that fix: without its `notes/names_main0.csv` row it
 counted as library code and the movies were never even started.
+
+### Running without the disc image: `data/` (`tools/extract_data.py`, `--data`)
+
+**Why.** The port read everything (overlays, areas, sprites, music, the STR movies) by LBA straight from the
+disc image: `CdRead` and the `St*` ring call `port_cd_read_sectors(lba, ...)`, which seeks in the `.bin`. The
+game never reads the ISO9660 directory (it seeks to the `(LBA, size)` pairs of its own file table,
+`tools/cdfiles.py`, `notes/cdfiles.md`), so the image had to be present at every run. Like other native PSX
+ports, the player now extracts their own disc **once** into a `data/` folder and the executable reads files
+from it; the image is only needed for that extraction (and `--disc` keeps working for tests).
+
+**Extraction.** `python3 tools/extract_data.py <disc.bin|.cue|.iso> <data_dir>` (7 s for the PAL disc on
+Linux; importable: `extract(image, out_dir, progress)`, `manifest_sha1(out_dir)`, `read_manifest`, and
+`--check <data_dir>` verifies a folder) walks the ISO9660 directory of a raw (2352) or cooked (2048) image and
+writes:
+
+- every file at `data/<path>` (`AREA00/X000.BIN`, `EXE/MAIN0.EXE`, `SYSTEM/O0PTSUB0.BIN`, ...): Form 1 files
+  as plain 2048-byte user data with their exact size (the tail padding of the last sector is zeros on the disc,
+  checked for every file; the runtime zero-fills past the end), so `data/` is the same dump `tools/isoext.py`
+  makes except for the movies;
+- the files holding Mode 2 Form 2 sectors, `MOVIE/*.STR` (interleaved MDEC video and XA audio: 585 audio
+  sectors in 4680 for the 100_x logos), as **raw 2352-byte sectors**, detected by the submode of every sector
+  (and by the `.STR`/`.XA` extension), so the subheaders the ring skips audio by and the audio itself survive;
+- the 256 sectors no directory entry covers (the system area and PVD at 0..22, the path tables and directories
+  between files, the gap after `ZZZ/DUMMY.DAT`) as raw blobs `data/_disc/<lba>.raw`, so every one of the
+  209341 sectors has an answer;
+- `data/manifest.txt`: `tombi-data 1`, `sectors <n>`, `main0_sha1 <sha1 of EXE/MAIN0.EXE>`, `source <image>`,
+  then one `file <lba> <sectors> <stored sector bytes 2048|2352> <file bytes> <path>` line per entry, sorted by
+  LBA (2315 entries: 2287 files + 28 blobs).
+
+The standard 3600-frame run traced with `--trace-cd` reads 2699 sectors, all inside directory entries except
+the port's own PVD self-check (sector 16, in the first blob); the 1119 entries of MAIN0's file table all lie
+inside files too, so no further "extra range" was needed beyond the gaps. `data/` is 443 MB (the image is
+470 MB) and is gitignored.
+
+**Runtime** (`shims/psyq.c`, "the data/ folder"). `port_cd_open_data(dir)` parses the manifest into an array
+of ranges `{lba, sectors, stored, bytes, path}` and logs `[port] data: <dir> (<n> files, from manifest; <sectors>
+sectors, MAIN0 sha1 <8 hex>)` (plus a note when the sha1 is not SCES-01331's). `port_cd_read_sectors(lba, count,
+dst, bytes)` then maps every sector through a binary search over the ranges and reads the file at the
+sector's offset: a 2352-stored range at `+24` for a 2048-byte read and `+12` for a 2340-byte raw read, exactly
+as the image path does; a 2048-stored range at `sector * 2048`, and a raw read of such a sector is synthesised
+(zero header and subheader, the data at `+12`, zeros after), which the ring takes as a Form 1 video sector as it
+would from the disc. A sector past the end of its file or outside every range reads as zeros, with one log
+line per request. `cd_raw` is set in data mode, so the `St*` ring asks for raw sectors and skips XA audio by
+submode as with a raw image. Up to 8 files stay open (the game alternates between an area, the load lists and
+a movie); the same code path serves `CdRead` and the ring. `cd_sector_count` comes from the manifest, so the
+Setloc-outside-the-disc check is unchanged.
+
+**Options.** `--data DIR` selects the folder (a missing `manifest.txt` is fatal with the hint to run
+`extract_data.py`); `--disc IMAGE` reads the image as before. With neither, the port tries `data/manifest.txt`
+in the current folder, then `data/` next to the executable (from `argv[0]`), then the old default
+`game/disc/Tombi.bin`. The memory cards go next to the data folder (its parent: the exe's folder or the cwd)
+when there is no `--save-dir` and no disc. Usage line: `tombi2 [--data DIR | --disc Tombi.bin|.cue|.iso] ...`.
+
+**Verification.** Extracted from `game/disc/Tombi.bin`, the standard test
+`--headless --frames 3600 --pad-script 1000:start,1300:cross:3x45/30,3200:right:400 --dump-frames DIR` run with
+`--data data` and no `--disc` reaches the title, plays both movies, and walks in AREA00; its 360 dumped frames
+are byte-identical to the `--disc` run's, and so are the 360 of the `--skip-movies` runs. The data run takes
+the same 29 s as the disc run (headless).
+
+**Launcher.** When the player picks a disc, the sha1 check of MAIN0.EXE runs as before and then, when
+`data/` next to the launcher has no complete extraction for that MAIN0 (`manifest_sha1(data_dir) != sha`: none,
+interrupted, or made from another disc), the extraction runs in the background with the status line showing
+`Extracting the disc into <dir>... NN% (<file>)` (Play is disabled meanwhile). Play then runs
+`tombi2.exe --data <dir> ...`; the disc field is optional once `data/` is valid (the status says so at start),
+and `--disc` is used only while it is not. Strings in es/en/fr/de/it/pt. An interrupted extraction resumes
+(files already present with the right size are not rewritten; each file is written to `.part` and renamed).
+
+**CI.** `port2-exe.yml` extracts `data/` from the owner's disc on the Linux job (`extract_data.py`, then
+`--check`, the manifest's sha1 and a `cmp` of MAIN0 and X000 against the ISO dump) and hands the Windows
+smoke test a sample folder (manifest, MAIN0.EXE, the PVD blob: nothing beyond what the exe already embeds and
+the ISO descriptors) to run `tombi2.exe --headless --data` on, plus `--data nonexistent` for the fatal
+message. The full data path is exercised by the Linux test above, not in CI (the CI binary is a Windows build).
 
 ### Open points / next
 

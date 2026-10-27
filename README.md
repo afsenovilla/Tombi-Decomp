@@ -310,7 +310,7 @@ identical WFM; `gam.py --check` reports how many of the 816 GAM files the re-com
 765 with its second variant, 816 when the original bytes are kept for unchanged data); `mkdisc.py --check` rebuilds
 the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.md](notes/assets_tombatools.md).
 
-**Windows exes** (built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them):
+**Windows exes** (built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them; the native port extracts it once into a `data/` folder and runs from that, see [docs/PORT.md](docs/PORT.md) "Running without the disc image"):
 - `dist/windows/tombi-assets.exe`: sprite/sound/video extractor (window with checkboxes).
 - `dist/windows/tombi-text.exe`: text editor. Open `Tombi.bin` (or the extracted folder), pick an area/file/dialogue in the tree (search box on top),
   edit the text in the middle; the preview below redraws as you type with the game font at x1/x2/x3 and warns in red when a line is wider than the

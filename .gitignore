@@ -1,6 +1,8 @@
 # Material con copyright: aporta tu propia copia, no se sube al repo
 game/*
 !game/.gitkeep
+# the disc extracted by tools/extract_data.py for the native port (port2/)
+data/
 game_jp/
 game_jp
 game_jpdemo
