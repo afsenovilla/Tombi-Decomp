@@ -1320,6 +1320,113 @@ exception handler or in a lock cannot hold the report back. Self-tests: `--headl
 --stall 100:4000` (both stall lines), `--headless --realtime --frames 400 --poke-every 1:1F8001F0:8000:2` (no
 progress), `--headless --test-null` (prints the `lowmem:` field as the fps line would show it).
 
+### The OpenGL renderer (`--renderer gl|soft`)
+
+The real-Windows run above spent 30-40 ms of every frame in `draw` (the software rasteriser of `shims/gpu.c`,
+~600 packets per AREA00 frame), where the same scene costs 10-13 ms on the Linux machine; either way the
+rasteriser was the biggest part of the frame. The GPU is now drawn by the host's GPU: `shims/gpu.c` keeps the
+VRAM, the GP0 state and the decoder and hands every primitive to a **backend** (`shims/gpu_backend.h`): the
+software rasteriser (`port_gpu_soft`, the code that was there, unchanged in its output) or OpenGL
+(`port_gpu_gl`, `shims/gpu_gl.c`). `--renderer gl` is the default with a window; `--headless` stays on the
+software backend unless `--renderer gl` is given (then a hidden SDL window carries the context, which is how the
+frame dumps below were made under Xvfb). The launcher has a *Renderer: OpenGL / Software* row that passes
+`--renderer`. When no GL context can be made (no driver, GL below 2.1, an incomplete framebuffer, a shader that
+does not compile), the log says `[gpu] OpenGL renderer unavailable: using the software rasteriser` and the game
+runs as before; the first lines name the driver (`[gpu] OpenGL: <renderer>, <version>, GLSL <v>`).
+
+**VRAM / texture model.** VRAM is one 1024x512 RGBA8 texture that is also the colour attachment of a
+framebuffer object, so the primitives are drawn *into VRAM* (the 5-bit channels of a PS1 word are the texture's
+8-bit channels, k -> k*255/31 on upload and back by rounding on read-back; bit 15, the mask bit, is the alpha).
+The fragment shader samples the 4/8-bit texture pages and their CLUTs, or the 15-bit pages, from that same
+texture with PS1 semantics: the word is rebuilt from the four channels, the nibble / byte picked with
+floor/mod arithmetic (exact on floats below 2^24), the texture window applied bit by bit, 0x0000 is transparent,
+modulation is `(texel * colour) >> 7` clamped, flat / gouraud colours are quantised to 5 bits before they are
+written, so VRAM keeps the 15-bit look and `StoreImage` reads back what the PS1 would. Rendering to a texture
+that is also sampled is undefined in GL, so the backend tracks the rectangle drawn since the last
+`glTextureBarrier` (ARB/NV_texture_barrier, present on every desktop driver) and issues one only when a batch
+samples a page or CLUT inside it (a few per second in AREA00: 623 in the 3600-frame run; a batch's sampled
+rectangles are kept as a short list, because the union of pages at y 0 and CLUTs at y ~500 would always cover
+the frame buffers at x >= 384). The CPU mirror `vram[]` of gpu.c stays coherent through two hooks: a rectangle
+the host writes (`LoadImage`, CLUTs, the texture patches, the GP0 A0 upload) is uploaded with
+`glTexSubImage2D` at once; one the host reads (`StoreImage`, the frame readout of the PNG dumps, `--dump-vram`)
+is read back with `glReadPixels` first. `MoveImage` and the GP0 80 copy are `glCopyTexSubImage2D`, fills (GP0
+02, `ClearImage`, the DRAWENV `isbg` clear) are scissored clears. The two frame buffers of the game sit at
+(384,256) and (704,256), the texture pages and CLUTs left of them and above, so the scheme never has to copy
+VRAM around.
+
+**Batching.** A `DrawOTag` builds one vertex array (28 bytes per vertex: position, colour, texel, CLUT x/y,
+page x + depth, page y) and a list of operations; consecutive primitives with the same *state* (blend mode or
+none, textured / raw / untextured, texture window, drawing area, mask bits, triangles or lines) share one
+`glDrawArrays`; the page and CLUT are vertex attributes, so changing them does not break a batch. The list is
+submitted at the end of the ordering table (one `glBufferData`, then the draw calls in order; fills and copies
+are entries of the same list, so the order is the PS1's). The AREA00 scene is 32 draw calls per frame for ~600
+packets. Semi-transparency: the four modes are GL blend states (mode 0: constant colour 0.5 on both factors;
+1: ONE/ONE; 2: ONE/ONE with `GL_FUNC_REVERSE_SUBTRACT`; 3: constant 0.25 on the source), the alpha channel is
+always written unblended (the mask bit of the new pixel); a textured semi-transparent batch is drawn twice,
+first the texels with bit 15 clear (opaque, discard the others), then the ones with it set (blended), which is
+the PS1 rule per texel. The mask check (`check_mask`) on opaque primitives is exact through destination alpha
+(`ONE_MINUS_DST_ALPHA / DST_ALPHA`).
+
+**Rasterisation.** The PS1 samples at the integer pixel positions, GL at pixel centres: polygon vertices are
+moved by +0.5 and by -1/64 on both axes, so a centre exactly on an edge follows the PS1's top-left rule whatever
+the driver's own tie rule is; sprites and rectangles are exact quads with the texel at the pixel centre; lines
+are `GL_LINES` from the first to the last pixel centre (extended by half a pixel so the last pixel is drawn).
+Texel coordinates of polygons round to nearest like the software rasteriser.
+
+**Present.** With a window the backend blits the display area (`PutDispEnv` rectangle) from the VRAM texture
+onto the window with a textured quad: the logical frame is 320 pixels wide for every mode (a 512-wide mode shows
+at the same size, as the SDL path did), scaled to the largest integer multiple that fits the window and centred
+(a smaller window gets the fit); then `SDL_GL_SwapWindow`. Vsync is `SDL_GL_SetSwapInterval(1)`: the swap blocks
+until the display's refresh, and since the pacing of `shims/psyq.c` is an absolute schedule its sleep shrinks by
+what the swap took, so there is no double wait; the fps line shows the swap under `present` and the remainder
+under `wait`. On a 60 Hz display a 50 Hz game sees a present of up to one refresh and the sum of `present` +
+`wait` stays ~16-19 ms; a line far from 50 vblank/s with `present` at 20+ ms means the swap is blocking longer
+than a refresh (a compositor, or a driver that waits two frames: try the software renderer, which keeps the
+SDL_Renderer path, or run windowed). The 24-bit display mode (MDEC movies, which the port skips) goes through
+the RGB24 readout and `port_window_frame` as before.
+
+**Measured (Linux, Mesa llvmpipe under Xvfb: the GL "GPU" is itself software here, so the gain on a real GPU is
+larger; the same 3600-frame script as above, `--show-fps`, paced at 50 Hz, the tree of the last port commit
+since the HEAD tree does not reach the title, see Open points):**
+
+| scene | before (software) | after (OpenGL) |
+|---|---|---|
+| title screen (frame ~1000) | `game 0.2 draw 1.2 present 2.6 wait 15.8` | `game 0.1 draw 0.5 present 2.2 wait 16.9` |
+| AREA00, standing (frame ~1600) | `game 0.5 draw 12.1 present 2.9 wait 4.4` | `game 0.3 draw 2.7 present 2.4 wait 14.4` |
+| AREA00, walking (frame ~3000) | `game 0.5 draw 13.2 present 2.8 wait 3.2` | `game 0.7 draw 1.6 present 2.2 wait 15.3` |
+
+`draw` is now the decode + batching + the GL calls (and, under llvmpipe, part of the rasterisation);
+`--renderer soft` on the same binary gives the old numbers (`draw 10-13`). Frame dumps (`--headless
+--dump-frames`, every 10th frame of the 3600): the software backend is byte-identical to the build before the
+split (360 of 360 frames); OpenGL against software is identical through the boot screens and the title (frames
+100-1200: 0 pixels), and in AREA00 ~2 % of the pixels differ per frame (1609 of 81920 at frame 1490, 2059 at
+3400; 1.08 % over the whole run): single pixels along polygon edges and texture seams where the PS1 integer
+rasteriser and the GL one resolve a tie differently (a texel coordinate exactly on .5, a diagonal edge through
+a pixel centre, the half-pixel line ends), never areas; the channel values differ by up to 255 there because they
+are different texels, not rounding. To check a scene: `--headless --dump-frames A --pad-script ...` and the same
+with `--renderer gl` under `xvfb-run`, then compare the PNGs.
+
+**What is approximated** (the software backend has none of these): blending happens on the 8-bit texture values,
+so a semi-transparent result can be one 5-bit step off the PS1's 5-bit arithmetic; the mask check on
+semi-transparent primitives is not emulated (logged once); dithering is not emulated (neither was it in
+software); lines are GL lines rather than the PS1's DDA (end pixels, odd slopes); the two passes of a textured
+semi-transparent batch keep the per-texel rule but draw all the opaque texels of the batch before its
+semi-transparent ones (two overlapping sprites in one batch that mix both kinds could blend in the other order;
+a batch is broken by any state change); a texture page or CLUT that wraps round the VRAM edge is sampled with
+`mod` but its barrier rectangle is clamped; a `LoadImage` that wraps is clipped. Requirements: OpenGL 2.1 with
+`GL_ARB_framebuffer_object` (or the EXT one: both names are tried), GLSL 1.10; everything is loaded through
+`SDL_GL_GetProcAddress` (no GLEW; Windows links `opengl32` only for SDL's sake). The shader is written for GLSL
+1.10 / ES 1.00 (float arithmetic only, `highp` on ES), but ES contexts are untested and would need the
+`UNSIGNED_SHORT_1_5_5_5_REV` upload replaced by a CPU swizzle.
+
+**Windows.** The cross build links `-lopengl32`; the context is SDL's (`SDL_WINDOW_OPENGL`, double buffer, no
+depth); on a machine without a GL driver (the CI runner's desktop: GDI's OpenGL 1.1) the context or the shaders
+fail and the software path takes over, which `.github/workflows/port2-exe.yml` exercises with `--headless
+--renderer gl` after the fault-handler test. What the first real-Windows log should show: `[gpu] OpenGL:
+<vendor's renderer>, <version>` then `[gpu] renderer: OpenGL`, and fps lines with `draw` at 1-3 ms and
+`present` below one refresh; if `draw` stays high the time is in the decode (the `game` and `lowmem` fields say
+whether the fault emulation is back), if `present` is 30+ ms the swap waits for more than a refresh (see above).
+
 ### Open points / next
 
 1. The 2698 image words and the "code labels kept" of a loaded overlay (2318 for X000) point inside coarse
@@ -1342,3 +1449,13 @@ progress), `--headless --test-null` (prints the `lowmem:` field as the fps line 
    single-consumer (no index shared for writing between the game thread and the audio callback). The next
    Windows log says where the game thread is when it stops.
 5. Movies (MDEC) are skipped as in `port/`; save states of `port/` (`--save/--load`) are not carried over.
+7. **The HEAD tree does not reach the title.** With the matching build refreshed for the data-naming commits
+   after ac40ab5, `port2` compiles only with two port-only rules in `port/fixes.txt` (`NEG_SIN_TABLE` declared
+   `unsigned short[]` in seven X001/X003 files against `globals.h`'s `short[]`; the local macro `g` of the eight
+   `updatePointsBalloon.c` against the MAIN0 function now named `g`), and the binary then stays on a black
+   screen: `report.txt` lists **268 overlay-target stubs** (ac40ab5: 2) and `titleSequenceTask` never leaves
+   step 0.3 (the watchdog's "no game progress" line, the same ordering table every frame). Names of
+   overlay-region functions have moved or changed in the notes/CSVs faster than gen2's thunk aliasing follows
+   them; the OpenGL work was therefore measured on the ac40ab5 tree with the same `port2/` files (they are
+   identical between the two commits apart from this round). Diagnose with `cat build/port2/gen/report.txt`
+   (the stub list) before the next port change.
