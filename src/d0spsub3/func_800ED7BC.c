@@ -28,7 +28,7 @@ extern Hdr MESSAGE_SLOTS[], D_800A464C[], D_800A464E[];
 extern Ent MESSAGE_GLYPHS[][128], D_800A4DE2[][128], D_800A4DE4[][128], D_800A4DE6[][128];
 typedef struct { unsigned char u, v, w, h, p4, flag, p6, p7, p8, p9; } Img;
 extern Img D_800A5DE4[];
-extern char D_80100A90[];
+extern char SUBSCREEN_MESSAGE_BOX[];
 extern void freeMessageGlyphs(int slot);
 extern int loadMessageGlyph(int slot, int id, int bank);
 extern void drawMessageBox(void *o);
@@ -152,7 +152,7 @@ void func_800ED7BC(Msg *o, int bank)
         } } while (0);
         D_800A464C[o->slot].n = o->x;
         D_800A464E[o->slot].n = o->y;
-        if (MESSAGE_SLOTS[o->slot].n != -1) drawMessageBox(D_80100A90);
+        if (MESSAGE_SLOTS[o->slot].n != -1) drawMessageBox(SUBSCREEN_MESSAGE_BOX);
         break;
     case 2:
         break;

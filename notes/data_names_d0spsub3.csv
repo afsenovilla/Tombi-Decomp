@@ -36,3 +36,9 @@ address,name,size,source
 80100b78,SUBSCREEN_DRAW_FRAME,,twin of D0SPSUB 80111144
 80100b80,SUBSCREEN_DRAW_STR,,twin of D0SPSUB 8011114c
 80100b84,SUBSCREEN_DRAW_FONT,,twin of D0SPSUB 80111150
+80100a88,SUBSCREEN_PAD_LAST,0x4,usage: int: last d-pad state of the D0SPSUB3 subScreenUpdate auto-repeat refs=3
+80100a8c,SUBSCREEN_PAD_REPEAT_TIMER,0x4,usage: int: auto-repeat countdown (0x20 then 4) refs=4
+80100a90,SUBSCREEN_MESSAGE_BOX,0xd4,usage: the message box object subScreenOpenMessage allocates and func_800ED7BC steps / drawMessageBox draws refs=4
+800f5408,SUBSCREEN_TAB_FRAMES,,usage: menu p48: frame pointers of the tab sprites by tab id (D0SPSUB3 subScreenUpdate) refs=4
+800f54ac,SUBSCREEN_DIGIT_FRAMES,,usage: menu p5c: frame pointers 0..9 of the digit sprites refs=4
+8010075c,SUBSCREEN_PAGE_ARROW_SLOTS,,usage: Slot[] (-1 end) of the page arrows idx 0x16 (hidden on page 0) / 0x17 (hidden on the last page) of subScreenDrawItemPage refs=1

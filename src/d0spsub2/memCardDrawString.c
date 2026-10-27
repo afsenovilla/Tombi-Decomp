@@ -24,7 +24,7 @@ typedef struct { unsigned char u, v, w, h, flag; } Glyph;
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 typedef struct { short x, y, w; unsigned short attr; int img, pC; unsigned short *str; Glyph *font; } Text;
-extern Text D_800F70D8;
+extern Text MEMCARD_DRAW_PARAMS;
 extern short D_1F8003D4, D_1F8003D6;
 extern SPRT *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
@@ -47,17 +47,17 @@ void memCardDrawString(int pri, int mode)
     GetDrawEnv(&env);
     AddDrawMode(env.tpage, pri);
     w = 0;
-    str = D_800F70D8.str;
-    x = D_800F70D8.x;
-    y = D_800F70D8.y;
-    font = D_800F70D8.font;
+    str = MEMCARD_DRAW_PARAMS.str;
+    x = MEMCARD_DRAW_PARAMS.x;
+    y = MEMCARD_DRAW_PARAMS.y;
+    font = MEMCARD_DRAW_PARAMS.font;
     D_1F8003D4 = 0;
     D_1F8003D6 = 0;
     while ((short)(c = *str++) != -1) {
         if (mode == 2 && (short)c == 0xA8) {
-            x = D_800F70D8.x = 0x50;
-            D_800F70D8.y += 0x10;
-            y = D_800F70D8.y;
+            x = MEMCARD_DRAW_PARAMS.x = 0x50;
+            MEMCARD_DRAW_PARAMS.y += 0x10;
+            y = MEMCARD_DRAW_PARAMS.y;
         }
         switch ((short)c) {
         case -7:
@@ -70,7 +70,7 @@ void memCardDrawString(int pri, int mode)
         case -3:
             if (mode) {
                 D_1F8003D6 += 8;
-                x = D_800F70D8.x;
+                x = MEMCARD_DRAW_PARAMS.x;
                 y += 9;
                 if (D_1F8003D4 < w) D_1F8003D4 = w;
                 w = 0;
@@ -104,7 +104,7 @@ void memCardDrawString(int pri, int mode)
             }
             s->w = g.w;
             s->h = g.h;
-            s->clut = D_800F70D8.attr;
+            s->clut = MEMCARD_DRAW_PARAMS.attr;
             p = NEXT_PRIM;
             *p = *s;
             addPrim(CURRENT_OT + pri, p);
@@ -113,5 +113,5 @@ void memCardDrawString(int pri, int mode)
         }
     }
     if (w > D_1F8003D4) D_1F8003D4 = w;
-    AddDrawMode(D_800F70D8.w, pri);
+    AddDrawMode(MEMCARD_DRAW_PARAMS.w, pri);
 }

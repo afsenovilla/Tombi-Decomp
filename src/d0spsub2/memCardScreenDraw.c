@@ -8,15 +8,15 @@ typedef struct { short x, y; } Pos;
 extern Menu MENU_STATE;
 extern unsigned char D_800A45D9;
 extern short D_800A45F4;
-extern Card D_800F7200[];
-extern short D_800F713C[];
-extern short D_800F70FC[][16];
-extern Info D_800F74B8[][15];
-extern Pos D_800F6A44[];
-extern Text D_800F70D8;
-extern short D_800F70F4, D_800F70F8;
-extern int D_800EDC18;
-extern int D_800F714C, D_800F7150, D_800F7154, D_800F7158;
+extern Card MEMCARD_CARDS[];
+extern short MEMCARD_FILE_COUNT[];
+extern short MEMCARD_FILE_ORDER[][16];
+extern Info MEMCARD_FILE_INFOS[][15];
+extern Pos MEMCARD_FILE_ROW_POSITIONS[];
+extern Text MEMCARD_DRAW_PARAMS;
+extern short MEMCARD_CURSOR_Y, MEMCARD_LIST_SCROLL;
+extern int MEMCARD_FILE_ICON_FRAME;
+extern int MEMCARD_SLOT_PRESENT, D_800F7150, MEMCARD_SELECTED_SLOT, MEMCARD_PROBED;
 extern void memCardDrawBackground(Menu *m, int a);
 extern void memCardDrawModeTitle(int no, int pri, short x, short y);
 extern void memCardDrawMessage(int n);
@@ -36,23 +36,23 @@ void memCardScreenDraw(void)
     Info *f;
     int k, n, sel;
     memCardDrawBackground(m, 0);
-    D_800F70D8.w = 1;
+    MEMCARD_DRAW_PARAMS.w = 1;
     memCardDrawModeTitle(D_800A45F4, 2, 0x10, 0x20);
     m = &MENU_STATE;
     switch (D_800A45D9) {
     case 0:
         break;
     case 1:
-        if (D_800F7158 == 0) n = 1;
-        else if (D_800F7154 == 0) n = 2;
+        if (MEMCARD_PROBED == 0) n = 1;
+        else if (MEMCARD_SELECTED_SLOT == 0) n = 2;
         else n = 0x11;
         memCardDrawMessage(n);
-        memCardDrawSlotSelect(D_800F714C, D_800F7150, D_800F7154);
+        memCardDrawSlotSelect(MEMCARD_SLOT_PRESENT, D_800F7150, MEMCARD_SELECTED_SLOT);
         break;
     case 2:
     case 3:
     case 4:
-        c = &D_800F7200[m->card];
+        c = &MEMCARD_CARDS[m->card];
         switch (m->x1A) {
         case 0:
             if (m->x1C == 0) memCardDrawMessage(0);
@@ -116,37 +116,37 @@ void memCardScreenDraw(void)
             break;
         case 0:
             if (c->type != 2) break;
-            if (D_800F713C[m->card]) {
-                D_800F70D8.w = 1;
-                memCardDrawFileCursor(2, D_800F6A44[m->cursor].x, D_800F70F4 - (short)(D_800F70F8 - 0x58));
+            if (MEMCARD_FILE_COUNT[m->card]) {
+                MEMCARD_DRAW_PARAMS.w = 1;
+                memCardDrawFileCursor(2, MEMCARD_FILE_ROW_POSITIONS[m->cursor].x, MEMCARD_CURSOR_Y - (short)(MEMCARD_LIST_SCROLL - 0x58));
             }
-            for (k = 0; k < D_800F713C[m->card]; k++) {
-                f = &D_800F74B8[m->card][D_800F70FC[m->card][k]];
+            for (k = 0; k < MEMCARD_FILE_COUNT[m->card]; k++) {
+                f = &MEMCARD_FILE_INFOS[m->card][MEMCARD_FILE_ORDER[m->card][k]];
                 if (f->a == -1) {
                     if (m->x1C) {
-                        D_800F70D8.x = D_800F6A44[k].x;
-                        D_800F70D8.y = D_800F6A44[k].y - (short)(D_800F70F8 - 0x58);
-                        D_800F70D8.w = 1;
-                        D_800F70D8.img = D_800EDC18;
+                        MEMCARD_DRAW_PARAMS.x = MEMCARD_FILE_ROW_POSITIONS[k].x;
+                        MEMCARD_DRAW_PARAMS.y = MEMCARD_FILE_ROW_POSITIONS[k].y - (short)(MEMCARD_LIST_SCROLL - 0x58);
+                        MEMCARD_DRAW_PARAMS.w = 1;
+                        MEMCARD_DRAW_PARAMS.img = MEMCARD_FILE_ICON_FRAME;
                         memCardDrawFileIcon(1, 3, f->icon, k == m->cursor);
                     }
                 } else {
-                    D_800F70D8.x = D_800F6A44[k].x;
-                    D_800F70D8.y = D_800F6A44[k].y - (short)(D_800F70F8 - 0x58);
-                    D_800F70D8.w = 1;
-                    D_800F70D8.img = D_800EDC18;
+                    MEMCARD_DRAW_PARAMS.x = MEMCARD_FILE_ROW_POSITIONS[k].x;
+                    MEMCARD_DRAW_PARAMS.y = MEMCARD_FILE_ROW_POSITIONS[k].y - (short)(MEMCARD_LIST_SCROLL - 0x58);
+                    MEMCARD_DRAW_PARAMS.w = 1;
+                    MEMCARD_DRAW_PARAMS.img = MEMCARD_FILE_ICON_FRAME;
                     sel = k == m->cursor;
                     memCardDrawFileIcon(0, 3, f->icon, sel);
-                    func_800EB948(f->d, D_800F70D8.x + 0xC0, D_800F70D8.y + 3, sel);
-                    func_800EBE6C(f->e, D_800F70D8.x + 0x7C, D_800F70D8.y + 3, sel);
-                    memCardDrawNumber2(f->c, D_800F70D8.x + 0x38, D_800F70D8.y + 2, 0);
-                    memCardDrawNumber2(f->icon, D_800F70D8.x + 0xA, D_800F70D8.y + 6, 1);
-                    memCardDrawNumber2(f->f, D_800F70D8.x + 0x68, D_800F70D8.y + 2, 0);
-                    memCardDrawFileLocation(f->a, f->b, D_800F70D8.x + 0x20, D_800F70D8.y + 0x14);
+                    func_800EB948(f->d, MEMCARD_DRAW_PARAMS.x + 0xC0, MEMCARD_DRAW_PARAMS.y + 3, sel);
+                    func_800EBE6C(f->e, MEMCARD_DRAW_PARAMS.x + 0x7C, MEMCARD_DRAW_PARAMS.y + 3, sel);
+                    memCardDrawNumber2(f->c, MEMCARD_DRAW_PARAMS.x + 0x38, MEMCARD_DRAW_PARAMS.y + 2, 0);
+                    memCardDrawNumber2(f->icon, MEMCARD_DRAW_PARAMS.x + 0xA, MEMCARD_DRAW_PARAMS.y + 6, 1);
+                    memCardDrawNumber2(f->f, MEMCARD_DRAW_PARAMS.x + 0x68, MEMCARD_DRAW_PARAMS.y + 2, 0);
+                    memCardDrawFileLocation(f->a, f->b, MEMCARD_DRAW_PARAMS.x + 0x20, MEMCARD_DRAW_PARAMS.y + 0x14);
                 }
             }
-            if (D_800F70F8 > 0) memCardDrawScrollArrow(0, 8, 0x48);
-            if (D_800F70F8 < (D_800F713C[m->card] - 3) * 40) memCardDrawScrollArrow(1, 8, 0xC8);
+            if (MEMCARD_LIST_SCROLL > 0) memCardDrawScrollArrow(0, 8, 0x48);
+            if (MEMCARD_LIST_SCROLL < (MEMCARD_FILE_COUNT[m->card] - 3) * 40) memCardDrawScrollArrow(1, 8, 0xC8);
             break;
         }
         break;

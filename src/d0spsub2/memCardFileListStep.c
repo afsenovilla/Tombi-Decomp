@@ -15,15 +15,15 @@ extern unsigned char GAME_PLAYER_HEALTH, GAME_PLAYER_MAX_HEALTH;
 extern unsigned char D_8009CF1C;
 extern unsigned short BUTTON_CONFIG_INDEX;
 extern char D_800E1E28[];
-extern char D_800E810C[];
-extern char *D_800F6A1C[];
-extern char *D_800F6A3C[];
-extern char D_800F7098[];
-extern char D_800F70B8[];
-extern short D_800F70F0, D_800F70F4, D_800F70F8;
-extern short D_800F70FC[2][16];
-extern short D_800F713C[];
-extern int D_800F7148;
+extern char MEMCARD_FILE_SUFFIX_FORMAT[];
+extern char *MEMCARD_SAVE_PREFIXES_2[];
+extern char *MEMCARD_PORT_PREFIXES_2[];
+extern char MEMCARD_FILE_PATH[];
+extern char MEMCARD_FILE_SUFFIX[];
+extern short MEMCARD_CURSOR_Y_TARGET, MEMCARD_CURSOR_Y, MEMCARD_LIST_SCROLL;
+extern short MEMCARD_FILE_ORDER[2][16];
+extern short MEMCARD_FILE_COUNT[];
+extern int MEMCARD_YESNO_CURSOR;
 extern Info D_800F74BA[2][15];
 extern void SfxPlay2(int a, int b);
 extern void playSFX(int id);
@@ -56,12 +56,12 @@ int memCardFileListStep(Menu *m, Card *c)
             m->sub++;
             break;
         }
-        if (m->cursor >= D_800F713C[m->card]) m->cursor = D_800F713C[m->card] - 1;
-        D_800F70F0 = m->cursor * 0x28;
-        D_800F70F4 = D_800F70F0;
-        D_800F70F8 = D_800F70F0 - 0x28;
-        if (D_800F70F8 < 0) D_800F70F8 = 0;
-        D_8009C977[0] = c->slot[D_800F70FC[m->card][m->cursor]];
+        if (m->cursor >= MEMCARD_FILE_COUNT[m->card]) m->cursor = MEMCARD_FILE_COUNT[m->card] - 1;
+        MEMCARD_CURSOR_Y_TARGET = m->cursor * 0x28;
+        MEMCARD_CURSOR_Y = MEMCARD_CURSOR_Y_TARGET;
+        MEMCARD_LIST_SCROLL = MEMCARD_CURSOR_Y_TARGET - 0x28;
+        if (MEMCARD_LIST_SCROLL < 0) MEMCARD_LIST_SCROLL = 0;
+        D_8009C977[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
         m->sub = 2;
         break;
     case 1:
@@ -72,31 +72,31 @@ int memCardFileListStep(Menu *m, Card *c)
         if (m->x1C) {
             for (i = 0; i < 15; i++) {
                 if (c->slot[i] >= 0) {
-                    D_800F70FC[m->card][n++] = i;
+                    MEMCARD_FILE_ORDER[m->card][n++] = i;
                 }
             }
         } else {
             for (i = 0; i < 15; i++) {
                 if (c->slot[i] >= 0 && D_800F74BA[m->card][i].x6 != -1) {
-                    D_800F70FC[m->card][n++] = i;
+                    MEMCARD_FILE_ORDER[m->card][n++] = i;
                 }
             }
         }
-        D_800F713C[m->card] = n;
-        for (i = 0; i < D_800F713C[m->card] - 1; i++) {
-            for (j = i + 1; j < D_800F713C[m->card]; j++) {
-                if ((unsigned char)c->slot[D_800F70FC[m->card][i]] > (unsigned char)c->slot[D_800F70FC[m->card][j]]) {
-                    t = D_800F70FC[m->card][i];
-                    D_800F70FC[m->card][i] = D_800F70FC[m->card][j];
-                    D_800F70FC[m->card][j] = t;
+        MEMCARD_FILE_COUNT[m->card] = n;
+        for (i = 0; i < MEMCARD_FILE_COUNT[m->card] - 1; i++) {
+            for (j = i + 1; j < MEMCARD_FILE_COUNT[m->card]; j++) {
+                if ((unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][i]] > (unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][j]]) {
+                    t = MEMCARD_FILE_ORDER[m->card][i];
+                    MEMCARD_FILE_ORDER[m->card][i] = MEMCARD_FILE_ORDER[m->card][j];
+                    MEMCARD_FILE_ORDER[m->card][j] = t;
                 }
             }
         }
         if (D_8009C977[0] == 0xFF) {
             if (m->x1C) {
                 m->cursor = 0;
-                for (i = 0; i < D_800F713C[m->card]; i++) {
-                    if (D_800F74BA[m->card][D_800F70FC[m->card][i]].x6 == -1) {
+                for (i = 0; i < MEMCARD_FILE_COUNT[m->card]; i++) {
+                    if (D_800F74BA[m->card][MEMCARD_FILE_ORDER[m->card][i]].x6 == -1) {
                         m->cursor = i;
                         break;
                     }
@@ -106,18 +106,18 @@ int memCardFileListStep(Menu *m, Card *c)
             }
         } else {
             m->cursor = 0;
-            for (i = 0; i < D_800F713C[m->card]; i++) {
-                if ((unsigned char)c->slot[D_800F70FC[m->card][i]] == D_8009C977[0]) {
+            for (i = 0; i < MEMCARD_FILE_COUNT[m->card]; i++) {
+                if ((unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][i]] == D_8009C977[0]) {
                     m->cursor = i;
                     break;
                 }
             }
         }
-        D_800F70F0 = m->cursor * 0x28;
-        D_800F70F4 = D_800F70F0;
-        D_800F70F8 = D_800F70F0 - 0x28;
-        if (D_800F70F8 < 0) D_800F70F8 = 0;
-        D_8009C977[0] = c->slot[D_800F70FC[m->card][m->cursor]];
+        MEMCARD_CURSOR_Y_TARGET = m->cursor * 0x28;
+        MEMCARD_CURSOR_Y = MEMCARD_CURSOR_Y_TARGET;
+        MEMCARD_LIST_SCROLL = MEMCARD_CURSOR_Y_TARGET - 0x28;
+        if (MEMCARD_LIST_SCROLL < 0) MEMCARD_LIST_SCROLL = 0;
+        D_8009C977[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
         m->sub++;
         break;
     case 2:
@@ -144,31 +144,31 @@ int memCardFileListStep(Menu *m, Card *c)
         if (btn & 0x10) {
             if (m->cursor > 0) {
                 m->cursor--;
-                D_800F70F0 -= 0x28;
+                MEMCARD_CURSOR_Y_TARGET -= 0x28;
                 playSFX(8);
                 m->b1++;
             }
             break;
         }
         if (btn & 0x40) {
-            if (m->cursor < D_800F713C[m->card] - 1) {
+            if (m->cursor < MEMCARD_FILE_COUNT[m->card] - 1) {
                 m->cursor++;
-                D_800F70F0 += 0x28;
+                MEMCARD_CURSOR_Y_TARGET += 0x28;
                 playSFX(8);
                 m->b1++;
             }
             break;
         }
-        D_8009C977[0] = c->slot[D_800F70FC[m->card][m->cursor]];
+        D_8009C977[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
         if (btn & 0x2000) {
             SfxPlay2(0x1B, 0x1C);
             return -1;
         }
         if (btn & 0x4000) {
             SfxPlay2(0xA, 0xA);
-            D_800F7148 = 1;
+            MEMCARD_YESNO_CURSOR = 1;
             if (m->x1C) {
-                if (D_800F74BA[m->card][D_800F70FC[m->card][m->cursor]].x6 >= 0) m->sub = 4;
+                if (D_800F74BA[m->card][MEMCARD_FILE_ORDER[m->card][m->cursor]].x6 >= 0) m->sub = 4;
                 else m->sub = 14;
             } else {
                 m->sub = 12;
@@ -180,9 +180,9 @@ int memCardFileListStep(Menu *m, Card *c)
         m->sub++;
         break;
     case 5:
-        if (D_800F7148 == 0) {
+        if (MEMCARD_YESNO_CURSOR == 0) {
             if (JOYPAD_STATE & 0x20) {
-                D_800F7148 = 1;
+                MEMCARD_YESNO_CURSOR = 1;
                 playSFX(8);
                 return 0;
             }
@@ -199,7 +199,7 @@ int memCardFileListStep(Menu *m, Card *c)
             break;
         }
         if (JOYPAD_STATE & 0x80) {
-            D_800F7148 = 0;
+            MEMCARD_YESNO_CURSOR = 0;
             playSFX(8);
             return 0;
         }
@@ -209,10 +209,10 @@ int memCardFileListStep(Menu *m, Card *c)
         }
         break;
     case 6:
-        strcpy(D_800F7098, D_800F6A3C[m->card]);
-        strncat(D_800F7098, c->e[D_800F70FC[m->card][m->cursor]].name, 0x14);
-        strncpy(D_800F70B8, c->e[D_800F70FC[m->card][m->cursor]].name + 0xC, 8);
-        if (erase(D_800F7098)) {
+        strcpy(MEMCARD_FILE_PATH, MEMCARD_PORT_PREFIXES_2[m->card]);
+        strncat(MEMCARD_FILE_PATH, c->e[MEMCARD_FILE_ORDER[m->card][m->cursor]].name, 0x14);
+        strncpy(MEMCARD_FILE_SUFFIX, c->e[MEMCARD_FILE_ORDER[m->card][m->cursor]].name + 0xC, 8);
+        if (erase(MEMCARD_FILE_PATH)) {
             m->timer = 1;
             m->sub++;
             break;
@@ -226,10 +226,10 @@ int memCardFileListStep(Menu *m, Card *c)
         m->sub++;
         break;
     case 8:
-        func_800E999C((unsigned char)c->slot[D_800F70FC[m->card][m->cursor]]);
-        strcpy(D_800F7098, D_800F6A3C[m->card]);
-        strncat(D_800F7098, D_800F6A1C[D_1F8003D8], 0xC);
-        strncat(D_800F7098, D_800F70B8, 8);
+        func_800E999C((unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]]);
+        strcpy(MEMCARD_FILE_PATH, MEMCARD_PORT_PREFIXES_2[m->card]);
+        strncat(MEMCARD_FILE_PATH, MEMCARD_SAVE_PREFIXES_2[D_1F8003D8], 0xC);
+        strncat(MEMCARD_FILE_PATH, MEMCARD_FILE_SUFFIX, 8);
         if (memCardProbe(c, m->card)) {
             c->w146 = 0;
             m->sub = 0;
@@ -237,7 +237,7 @@ int memCardFileListStep(Menu *m, Card *c)
             m->timer = 1;
             break;
         }
-        if (memCardWriteFile(D_800F7098, D_800E1E28, 0xC00, 1)) {
+        if (memCardWriteFile(MEMCARD_FILE_PATH, D_800E1E28, 0xC00, 1)) {
             m->msg = 0;
             m->sub = 11;
             break;
@@ -252,11 +252,11 @@ int memCardFileListStep(Menu *m, Card *c)
         m->sub++;
         break;
     case 10:
-        strcpy(D_800F7098, D_800F6A3C[m->card]);
+        strcpy(MEMCARD_FILE_PATH, MEMCARD_PORT_PREFIXES_2[m->card]);
         tries = 3;
-        strncat(D_800F7098, c->e[D_800F70FC[m->card][m->cursor]].name, 0x14);
+        strncat(MEMCARD_FILE_PATH, c->e[MEMCARD_FILE_ORDER[m->card][m->cursor]].name, 0x14);
         do {
-            if (memCardReadFile(D_800F7098, D_800E1E28, 0, 0xC00) == 0 && (memCardVerifyChecksum(D_800E1E28 + 0x200, 0xA00) & 0xFF)) {
+            if (memCardReadFile(MEMCARD_FILE_PATH, D_800E1E28, 0, 0xC00) == 0 && (memCardVerifyChecksum(D_800E1E28 + 0x200, 0xA00) & 0xFF)) {
                 D_8009C960g = *(GS *)(D_800E1E28 + 0x200);
                 D_8009C960g.f5bc = BUTTON_CONFIG_INDEX;
                 D_8009C960g.f10 = D_8009C960g.f11;
@@ -278,9 +278,9 @@ int memCardFileListStep(Menu *m, Card *c)
         }
         break;
     case 13:
-        if (D_800F7148 == 0) {
+        if (MEMCARD_YESNO_CURSOR == 0) {
             if (JOYPAD_STATE & 0x20) {
-                D_800F7148 = 1;
+                MEMCARD_YESNO_CURSOR = 1;
                 playSFX(8);
                 return 0;
             }
@@ -298,7 +298,7 @@ int memCardFileListStep(Menu *m, Card *c)
             break;
         }
         if (JOYPAD_STATE & 0x80) {
-            D_800F7148 = 0;
+            MEMCARD_YESNO_CURSOR = 0;
             playSFX(8);
             return 0;
         }
@@ -313,9 +313,9 @@ int memCardFileListStep(Menu *m, Card *c)
         m->sub++;
         break;
     case 15:
-        if (D_800F7148 == 0) {
+        if (MEMCARD_YESNO_CURSOR == 0) {
             if (JOYPAD_STATE & 0x20) {
-                D_800F7148 = 1;
+                MEMCARD_YESNO_CURSOR = 1;
                 playSFX(8);
                 return 0;
             }
@@ -325,7 +325,7 @@ int memCardFileListStep(Menu *m, Card *c)
                 break;
             }
             if (JOYPAD_STATE & 0x4000) {
-                sprintf(D_800F70B8, D_800E810C, (unsigned char)c->slot[D_800F70FC[m->card][m->cursor]]);
+                sprintf(MEMCARD_FILE_SUFFIX, MEMCARD_FILE_SUFFIX_FORMAT, (unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]]);
                 m->msg = 6;
                 m->timer = 4;
                 SfxPlay2(0xA, 0xA);
@@ -335,7 +335,7 @@ int memCardFileListStep(Menu *m, Card *c)
             return 0;
         }
         if (JOYPAD_STATE & 0x80) {
-            D_800F7148 = 0;
+            MEMCARD_YESNO_CURSOR = 0;
             playSFX(8);
             break;
         }

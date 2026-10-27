@@ -1,6 +1,6 @@
 // FUNC 800eb948 1316 D0SPSUB2
 // MATCHING 800eb948 1316
-// Memory card screen: draws a sign (two sprites from D_800F6D18) and an 8-digit number without leading zeros.
+// Memory card screen: draws a sign (two sprites from MEMCARD_SIGN_UVS) and an 8-digit number without leading zeros.
 // Idioms: the digits are block-scoped temporaries (q7..q1 quotients, d1..d7 unsigned char) stored in the order
 // dg[1..5], dg[7], dg[6], then `q7 %= 10; dg[0] = q7` (the 10^7 and 10^6 divisions share one mult); `q1 = n / 10`
 // is written before `q2 = n / 100` so the 0x66666667 constant is loaded first; `q = dg` is set before the digit
@@ -22,7 +22,7 @@ typedef struct { unsigned short u, v; } UV;
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 extern SPRT *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
-extern UV D_800F6D18[];
+extern UV MEMCARD_SIGN_UVS[];
 extern unsigned short GetClut(int x, int y);
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
 extern void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, void *tw);
@@ -50,8 +50,8 @@ void func_800EB948(int n, short x, short y, int bright)
         S->x0 = x + (i - 2) * 8;
         S->code &= ~2;
         S->y0 = y;
-        S->u0 = D_800F6D18[i].u;
-        S->v0 = D_800F6D18[i].v;
+        S->u0 = MEMCARD_SIGN_UVS[i].u;
+        S->v0 = MEMCARD_SIGN_UVS[i].v;
         S->w = 8;
         S->h = 8;
         S->clut = GetClut(0x170, 0x1F0);

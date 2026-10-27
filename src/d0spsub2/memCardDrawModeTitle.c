@@ -16,7 +16,7 @@ typedef struct {
 #define S ((SPRT *)0x1F800000)
 extern SPRT *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
-extern short D_800F70DC[];
+extern short MEMCARD_DRAW_TPAGE[];
 extern unsigned short GetClut(int x, int y);
 extern void AddDrawMode(int a, int b);
 
@@ -47,5 +47,5 @@ void memCardDrawModeTitle(int no, int pri, short x, short y)
     *p = *s;
     addPrim(CURRENT_OT + pri, p);
     NEXT_PRIM++;
-    AddDrawMode(D_800F70DC[0], pri);
+    AddDrawMode(MEMCARD_DRAW_TPAGE[0], pri);
 }

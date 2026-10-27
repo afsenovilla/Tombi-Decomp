@@ -3,8 +3,8 @@
 typedef struct { char p0[2]; unsigned char state; char p3; short w4, timer; char p8[0x10]; short slot, msg; } Menu;
 typedef struct { char p[0x146]; short w146; } Card;
 extern unsigned short JOYPAD_STATE;
-extern int D_800F7148;
-extern char *D_800F6A3C[];
+extern int MEMCARD_YESNO_CURSOR;
+extern char *MEMCARD_PORT_PREFIXES_2[];
 extern void playSFX(int id);
 extern void SfxPlay2(int a, int b);
 extern int format(char *fs);
@@ -14,14 +14,14 @@ int memCardFormatStep(Menu *m, Card *c)
     int i;
     switch (m->state) {
     case 0:
-        D_800F7148 = 1;
+        MEMCARD_YESNO_CURSOR = 1;
         m->msg = 0xD;
         m->state++;
         break;
     case 1:
-        if (D_800F7148 == 0) {
+        if (MEMCARD_YESNO_CURSOR == 0) {
             if (JOYPAD_STATE & 0x20) {
-                D_800F7148 = 1;
+                MEMCARD_YESNO_CURSOR = 1;
                 goto snd;
             }
             if (JOYPAD_STATE & 0x2000) goto cancel;
@@ -33,7 +33,7 @@ int memCardFormatStep(Menu *m, Card *c)
             }
         } else {
             if (JOYPAD_STATE & 0x80) {
-                D_800F7148 = 0;
+                MEMCARD_YESNO_CURSOR = 0;
             snd:
                 playSFX(8);
                 return 0;
@@ -53,7 +53,7 @@ int memCardFormatStep(Menu *m, Card *c)
         m->msg = 8;
         m->state = 5;
         do {
-            if (format(D_800F6A3C[m->slot]) == 1) {
+            if (format(MEMCARD_PORT_PREFIXES_2[m->slot]) == 1) {
                 m->msg = 0xC;
                 m->state = 4;
                 i = 0;

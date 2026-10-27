@@ -1,7 +1,7 @@
 // FUNC 800ed5fc 448 D0SPSUB3
 // MATCHING 800ed5fc 448
 typedef struct { short p0[4]; unsigned short off8; short pa[3]; unsigned short ids[1]; } Bank;
-extern unsigned char D_80100A90;
+extern unsigned char SUBSCREEN_MESSAGE_BOX;
 extern unsigned char D_80100A92, D_80100A9A, D_80100A9C, D_80100A9F;
 extern int D_80100AA0, D_80100AA4, D_80100AA8;
 extern short D_80100AAE, D_80100AB0, D_80100AB2, D_80100ABC;
@@ -18,7 +18,7 @@ unsigned char *subScreenOpenMessage(int kind, int add, int bank)
     int off;
     unsigned char *o;
     Bank **tb;
-    do { i = 0; o = &D_80100A90; } while (0);
+    do { i = 0; o = &SUBSCREEN_MESSAGE_BOX; } while (0);
     for (; i < 4; i++) {
         if (MESSAGE_SLOTS[i][0] == -1) {
             char *b;

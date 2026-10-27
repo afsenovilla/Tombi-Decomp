@@ -17,7 +17,7 @@ typedef struct { short x, y, u, v, w, h, pri, pad; } Part;
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 extern char *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
-extern Part D_800F6AD8[];
+extern Part MEMCARD_BACKGROUND_PARTS[];
 extern unsigned short GetClut(int x, int y);
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
 extern void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, void *tw);
@@ -27,7 +27,7 @@ void memCardDrawBackground(void)
     SPRT *S = (SPRT *)0x1F800000;
     SPRT *p;
     DR_MODE *m;
-    Part *s = D_800F6AD8;
+    Part *s = MEMCARD_BACKGROUND_PARTS;
     do {
         S->len = 4;
         S->code = 0x65;

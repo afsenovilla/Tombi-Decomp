@@ -16,7 +16,7 @@ typedef struct { unsigned long tag; unsigned long code[2]; } DR_MODE;
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 extern SPRT *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
-extern unsigned short D_800F6D34[], D_800F6D36[], D_800F6D38[], D_800F6D3A[];
+extern unsigned short MEMCARD_DIGIT_SPRITES[], D_800F6D36[], D_800F6D38[], D_800F6D3A[];
 extern unsigned short GetClut(int x, int y);
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
 extern void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, void *tw);
@@ -41,7 +41,7 @@ void memCardDrawNumber2(int n, short x, short y, int force)
         S->b0 = 0x80;
         S->x0 = x + k * 8;
         S->y0 = y;
-        S->u0 = D_800F6D34[*q * 8];
+        S->u0 = MEMCARD_DIGIT_SPRITES[*q * 8];
         S->v0 = D_800F6D36[*q * 8];
         S->w = D_800F6D38[*q * 8];
         S->h = D_800F6D3A[*q * 8];

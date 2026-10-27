@@ -13,12 +13,12 @@ typedef struct {
     void *p48, *p4c, *p50, *p54, *p58, *p5c, *p60, *p64;
 } Menu;
 extern Menu MENU_STATE;
-extern char D_800EEA00[], D_800EF600[], D_800F5408[], D_800F543C[], D_800F5448[], D_800F54AC[], D_800F54D8[], D_800F57D8[], D_800F5434[], D_800F5400[];
+extern char D_800EEA00[], D_800EF600[], SUBSCREEN_TAB_FRAMES[], D_800F543C[], D_800F5448[], SUBSCREEN_DIGIT_FRAMES[], D_800F54D8[], D_800F57D8[], SUBSCREEN_TAB_EXTRA_FRAMES[], D_800F5400[];
 extern void *D_1F8003A0;
 extern unsigned short JOYPAD_STATE;
 extern unsigned short PAD_PRESSED;
-extern short D_80100918;
-extern int D_80100A88, D_80100A8C;
+extern short SUBSCREEN_POPUP_CURSOR;
+extern int SUBSCREEN_PAD_LAST, SUBSCREEN_PAD_REPEAT_TIMER;
 extern void LoadImage(RECT *r, void *p);
 extern int func_800EC89C(Menu *m);
 
@@ -31,12 +31,12 @@ static inline void menuInit(Menu *m)
     r.h = 0x1F;
     LoadImage(&r, D_800EEA00);
     D_1F8003A0 = D_800EF600;
-    m->p48 = D_800F5408;
+    m->p48 = SUBSCREEN_TAB_FRAMES;
     m->p4c = D_800F5448;
     m->p50 = D_800F543C;
-    m->p54 = D_800F5434 + 8;
+    m->p54 = SUBSCREEN_TAB_EXTRA_FRAMES + 8;
     m->p58 = D_800F5400 + 0x48;
-    m->p5c = D_800F54AC;
+    m->p5c = SUBSCREEN_DIGIT_FRAMES;
     m->p60 = D_800F57D8;
     m->p64 = D_800F54D8;
     m->w10 = 1;
@@ -50,7 +50,7 @@ int subScreenUpdate(int arg)
     switch (m->state) {
     case 0:
         menuInit(m);
-        D_80100918 = -1;
+        SUBSCREEN_POPUP_CURSOR = -1;
         m->cursor = 0;
         m->sel = -1;
         m->b1 = 0;
@@ -59,11 +59,11 @@ int subScreenUpdate(int arg)
         m->state++;
     case 1:
         k = *(volatile unsigned short *)&PAD_PRESSED & 0xF0;
-        if (k != D_80100A88) {
-            D_80100A88 = k;
-            D_80100A8C = 0x20;
-        } else if (--D_80100A8C == 0) {
-            D_80100A8C = 4;
+        if (k != SUBSCREEN_PAD_LAST) {
+            SUBSCREEN_PAD_LAST = k;
+            SUBSCREEN_PAD_REPEAT_TIMER = 0x20;
+        } else if (--SUBSCREEN_PAD_REPEAT_TIMER == 0) {
+            SUBSCREEN_PAD_REPEAT_TIMER = 4;
             JOYPAD_STATE |= k;
         }
         arg = func_800EC89C(m);

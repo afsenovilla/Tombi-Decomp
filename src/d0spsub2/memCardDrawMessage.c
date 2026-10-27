@@ -15,14 +15,14 @@ typedef struct { short x0, x1, x2, x3; short a, b, c, d; short m; } L;
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
 extern TILE *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
-extern R D_800F65D4[];
-extern R D_800F6684[], D_800F6694[], D_800F66A4[];
-extern int D_800F7148;
-extern int D_800F6A80[];
-extern int D_800F6AC8;
+extern R MEMCARD_MESSAGE_FRAMES[];
+extern R MEMCARD_YESNO_TILE_RECTS[], MEMCARD_YESNO_TILE_RECTS_2[], MEMCARD_YESNO_TILE_RECTS_3[];
+extern int MEMCARD_YESNO_CURSOR;
+extern int MEMCARD_MESSAGE_STRINGS[];
+extern int MEMCARD_FOOTER_STRING;
 typedef struct { short x, y, w, attr; int img, pC, str; void *p14; } Text;
-extern Text D_800F70D8;
-extern char D_800EDC7C[];
+extern Text MEMCARD_DRAW_PARAMS;
+extern char MEMCARD_FONT[];
 extern unsigned short GetClut(int x, int y);
 extern void memCardDrawString(int a, int b);
 extern void drawBalloonFrame(L *l, int c, int tp);
@@ -32,16 +32,16 @@ void memCardDrawMessage(int n)
     TILE *T = (TILE *)0x1F800000;
     TILE *p;
     L l;
-    R *e = &D_800F65D4[n];
+    R *e = &MEMCARD_MESSAGE_FRAMES[n];
     short x, y;
     x = 0x40;
     y = e->y - (short)(e->h / 2 - 0x80);
-    D_800F70D8.x = 0x48;
-    D_800F70D8.w = 4;
-    D_800F70D8.y = y + 8;
-    D_800F70D8.attr = GetClut(0x150, 0x1F0);
-    D_800F70D8.str = D_800F6A80[n];
-    D_800F70D8.p14 = D_800EDC7C;
+    MEMCARD_DRAW_PARAMS.x = 0x48;
+    MEMCARD_DRAW_PARAMS.w = 4;
+    MEMCARD_DRAW_PARAMS.y = y + 8;
+    MEMCARD_DRAW_PARAMS.attr = GetClut(0x150, 0x1F0);
+    MEMCARD_DRAW_PARAMS.str = MEMCARD_MESSAGE_STRINGS[n];
+    MEMCARD_DRAW_PARAMS.p14 = MEMCARD_FONT;
     memCardDrawString(1, 1);
     if (n == 7 || n == 12 || n == 16) {
         T->len = 3;
@@ -52,22 +52,22 @@ void memCardDrawMessage(int n)
         T->code &= ~2;
         switch (n) {
         case 7:
-            T->x0 = x + D_800F6684[D_800F7148].x;
-            T->y0 = y + D_800F6684[D_800F7148].y;
-            T->w = D_800F6684[D_800F7148].w;
-            T->h = D_800F6684[D_800F7148].h;
+            T->x0 = x + MEMCARD_YESNO_TILE_RECTS[MEMCARD_YESNO_CURSOR].x;
+            T->y0 = y + MEMCARD_YESNO_TILE_RECTS[MEMCARD_YESNO_CURSOR].y;
+            T->w = MEMCARD_YESNO_TILE_RECTS[MEMCARD_YESNO_CURSOR].w;
+            T->h = MEMCARD_YESNO_TILE_RECTS[MEMCARD_YESNO_CURSOR].h;
             break;
         case 12:
-            T->x0 = x + D_800F6694[D_800F7148].x;
-            T->y0 = y + D_800F6694[D_800F7148].y;
-            T->w = D_800F6694[D_800F7148].w;
-            T->h = D_800F6694[D_800F7148].h;
+            T->x0 = x + MEMCARD_YESNO_TILE_RECTS_2[MEMCARD_YESNO_CURSOR].x;
+            T->y0 = y + MEMCARD_YESNO_TILE_RECTS_2[MEMCARD_YESNO_CURSOR].y;
+            T->w = MEMCARD_YESNO_TILE_RECTS_2[MEMCARD_YESNO_CURSOR].w;
+            T->h = MEMCARD_YESNO_TILE_RECTS_2[MEMCARD_YESNO_CURSOR].h;
             break;
         case 16:
-            T->x0 = x + D_800F66A4[D_800F7148].x;
-            T->y0 = y + D_800F66A4[D_800F7148].y;
-            T->w = D_800F66A4[D_800F7148].w;
-            T->h = D_800F66A4[D_800F7148].h;
+            T->x0 = x + MEMCARD_YESNO_TILE_RECTS_3[MEMCARD_YESNO_CURSOR].x;
+            T->y0 = y + MEMCARD_YESNO_TILE_RECTS_3[MEMCARD_YESNO_CURSOR].y;
+            T->w = MEMCARD_YESNO_TILE_RECTS_3[MEMCARD_YESNO_CURSOR].w;
+            T->h = MEMCARD_YESNO_TILE_RECTS_3[MEMCARD_YESNO_CURSOR].h;
             break;
         }
         p = NEXT_PRIM;
@@ -81,11 +81,11 @@ void memCardDrawMessage(int n)
     l.c = *(unsigned short *)0x1F8003D4 + 0x10;
     l.d = *(unsigned short *)0x1F8003D6 + 0x10;
     drawBalloonFrame(&l, 0, 0x14);
-    D_800F70D8.x = 0x50;
-    D_800F70D8.y = 0xD4;
-    D_800F70D8.w = 4;
-    D_800F70D8.attr = GetClut(0x150, 0x1F0);
-    D_800F70D8.p14 = D_800EDC7C;
-    D_800F70D8.str = D_800F6AC8;
+    MEMCARD_DRAW_PARAMS.x = 0x50;
+    MEMCARD_DRAW_PARAMS.y = 0xD4;
+    MEMCARD_DRAW_PARAMS.w = 4;
+    MEMCARD_DRAW_PARAMS.attr = GetClut(0x150, 0x1F0);
+    MEMCARD_DRAW_PARAMS.p14 = MEMCARD_FONT;
+    MEMCARD_DRAW_PARAMS.str = MEMCARD_FOOTER_STRING;
     memCardDrawString(1, 2);
 }

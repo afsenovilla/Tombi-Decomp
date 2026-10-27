@@ -10,7 +10,7 @@ typedef struct {
 extern Menu MENU_STATE;
 extern unsigned short JOYPAD_STATE;
 extern unsigned short PAD_PRESSED;
-extern int D_800F7140, D_800F7144;
+extern int MEMCARD_PAD_LAST, MEMCARD_PAD_REPEAT_TIMER;
 extern int memCardScreenStep(int pad, Menu *m);
 
 int memCardScreenUpdate(int a0, int a1, int ret)
@@ -25,11 +25,11 @@ int memCardScreenUpdate(int a0, int a1, int ret)
         m->b3 = 0;
     case 1:
         k = *(volatile unsigned short *)&PAD_PRESSED & 0xF0;
-        if (k != D_800F7140) {
-            D_800F7140 = k;
-            D_800F7144 = 0x20;
-        } else if (--D_800F7144 == 0) {
-            D_800F7144 = 4;
+        if (k != MEMCARD_PAD_LAST) {
+            MEMCARD_PAD_LAST = k;
+            MEMCARD_PAD_REPEAT_TIMER = 0x20;
+        } else if (--MEMCARD_PAD_REPEAT_TIMER == 0) {
+            MEMCARD_PAD_REPEAT_TIMER = 4;
             JOYPAD_STATE |= k;
         }
         switch (m->w12) {

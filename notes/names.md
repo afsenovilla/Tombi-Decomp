@@ -2146,3 +2146,18 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   externs, renamed by hand. Left: the per-field externs inside SUBSCREEN_MAP_OBJECTS[1..2] and SUBSCREEN_MESSAGE_BOX
   (object fields of unknown meaning), the menu sprite tables p4c / p50 / p60 / p64 (800FE8E4 / 8D8 / EC74 / 974), the map
   view words 801110FC / 104 / 108 / 10C / 110 / 114, 800FDE50 (per-node link neighbours, shape unclear), the image 800F18E0.
+- SYSTEM data, batch 2: D0SPSUB2 + D0SPSUB3 own data (Oct 27 2026): 50 rows in notes/data_names_d0spsub2.csv and 6 own rows in
+  notes/data_names_d0spsub3.csv (besides the 38 twin rows of batch 1). Memory card screen: MEMCARD_DRAW_PARAMS (800F70D8, the
+  same {x, y, tpage, clut, frame, +C, str, font} block as SUBSCREEN_DRAW_PARAMS) with DRAW_Y / TPAGE / CLUT / STR / FONT and
+  MEMCARD_FONT (800EDC7C); the list state MEMCARD_CURSOR_Y_TARGET / CURSOR_Y / LIST_SCROLL, MEMCARD_FILE_ORDER / FILE_COUNT
+  (per card), MEMCARD_SLOT_PRESENT / SELECTED_SLOT / PROBED, MEMCARD_YESNO_CURSOR, MEMCARD_PAD_LAST / PAD_REPEAT_TIMER; the
+  records MEMCARD_CARDS (800F7200, Card[2]), MEMCARD_FILE_INFOS (800F74B8, Info[2][15]), MEMCARD_SAVE_HEADER (800F7180); the
+  path buffers MEMCARD_DIR_PATH / FILE_PATH / FILE_SUFFIX with MEMCARD_FILE_SUFFIX_FORMAT ('TOMBA-%02d'), MEMCARD_DIR_WILDCARD,
+  MEMCARD_PORT_PREFIXES (+_2: the second 'bu00:' / 'bu10:' pair), MEMCARD_SAVE_PREFIXES (+_2, 'BESCES-01330' / '-01331' by
+  1F8003D8), MEMCARD_SLOT_SUFFIXES ('A-00'..); the draw tables MEMCARD_FILE_ROW_POSITIONS, MESSAGE_STRINGS / MESSAGE_FRAMES,
+  YESNO_TILE_RECTS (+_2 / _3 for messages 12 / 16), FOOTER_STRING, EMPTY_SLOT_STRING, BACKGROUND / FILE_ICON / EMPTY_SLOT /
+  FILE_CURSOR_PARTS, SLOT_PROMPT / SLOT1_LABEL / SLOT2_LABEL_STRING, SIGN_UVS, DIGIT_SPRITES, SCROLL_ARROW_UVS,
+  LOCATION_STRINGS, FILE_ICON_FRAME. D0SPSUB3's own files: SUBSCREEN_PAD_LAST / PAD_REPEAT_TIMER (80100A88 / 8C),
+  SUBSCREEN_MESSAGE_BOX (80100A90), SUBSCREEN_TAB_FRAMES / DIGIT_FRAMES (800F5408 / 54AC), SUBSCREEN_PAGE_ARROW_SLOTS
+  (8010075C). Left in D0SPSUB2: the field aliases 800F74BA / 6D36.. / 7042, the Card fields; in D0SPSUB3 the message box
+  fields of subScreenOpenMessage and the other sprite tables of subScreenUpdate (800EEA00 image, 800EF600 bank, 800F5400..).
