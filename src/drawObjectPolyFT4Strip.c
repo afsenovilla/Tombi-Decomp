@@ -87,7 +87,7 @@ void drawObjectPolyFT4Strip(Ext *o)
     NEXT_PRIM += 0x18;
 }
 
-void func_80124A20(TObj *o, TObj *p)
+void func_801249E0(TObj *o, TObj *p)
 {
     if (p->subtype == 1
         && (unsigned short)(o->d->p.whole - p->d->p.whole + 0x3c) < 0x79

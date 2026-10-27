@@ -339,6 +339,17 @@ ASM_ALIASES = {}
 OVL_BASE, OVL_END = 0x800E8028, 0x80140000
 
 
+def symbol_addrs(prog):
+    """{name: address} of config/symbol_addrs_<prog>.txt (a function the matching build defines from C has no
+    PROVIDE line of its own: func_801249E0 of drawObjectPolyFT4Strip.c)."""
+    out = {}
+    p = os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % prog.lower())
+    for l in (open(p) if os.path.exists(p) else ()):
+        m = re.match(r"\s*(\w+)\s*=\s*0x([0-9a-fA-F]+)", l)
+        if m: out[m.group(1)] = int(m.group(2), 16)
+    return out
+
+
 def area_syms(prog):
     """{name: address} of an area overlay X0nn, as tools/ncheck.py resolves the names of src/x0nn/*.c: MAIN0's
     symbol files plus the overlay's own (config/symbol_addrs_x0nn.txt, notes/names_x0nn.csv, the names of
@@ -529,8 +540,17 @@ def sources(outdir, progs, ovls=(), areas=()):
         (files24 if hm else files).append(dst)
         if ovl:
             if name not in dropped: ovlmap.append((prog, u.addr, prog + "_" + name))
-        elif area or u.addr in x000_native: pass
-        elif name not in dropped: fmap.append((u.addr, name))
+        elif area: pass
+        elif name not in dropped:
+            # the other global functions the file defines (func_8011DE84.c: func_8011DF5C/E028/E0EC) have retail
+            # addresses of their own (the matching build's symbols): an overlay table that holds one gets a native
+            # function (the relocator's address map), not a jump to a retail address.  Of a varying X000 unit the
+            # unit itself dispatches per area; its other functions are X000's code (no area has C of its own for
+            # them: a differing area has the whole unit as asm)
+            if u.addr not in x000_native: fmap.append((u.addr, name))
+            syms = dict(symbol_addrs(prog)); syms.update(prov.get(prog, {}))
+            fmap.extend((syms[n], n) for n in _global_defs({u.file: txt})
+                        if n != name and n not in dropped and n in syms and u.addr < syms[n] < u.addr + u.size)
         if area: area_texts.setdefault(prog, {})[dst] = txt
         else: out_texts[dst] = txt
     # arity of the area functions by address: a call from shared code (MAIN0, X000) to an address whose code differs
