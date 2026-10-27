@@ -1,7 +1,7 @@
 // FUNC 800e950c 408 O0PTSUB0
 // MATCHING 800e950c 408
 typedef struct { short x, y, u, v, w, h, cx, cy; } SprDef;
-extern SprDef D_800EB3BC[];
+extern SprDef SCREEN_ADJUST_SPRITES[];
 extern short SCREEN_OFFSET_X, SCREEN_OFFSET_Y;
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
 extern void titleDrawSprite(SprDef *d, short tpage, unsigned char pri);
@@ -15,7 +15,7 @@ void screenAdjustDrawText(int dir)
     SprDef *d;
     short tp;
     tp = GetTPage(0, 0, 0x200, 0);
-    d = D_800EB3BC;
+    d = SCREEN_ADJUST_SPRITES;
     while (d->x != -1) {
         titleDrawSprite(d++, tp, 0);
     }

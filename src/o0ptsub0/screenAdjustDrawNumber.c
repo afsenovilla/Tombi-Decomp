@@ -1,9 +1,9 @@
 // FUNC 800e98b4 328 O0PTSUB0
 // MATCHING 800e98b4 328
 typedef struct { short x, y, n, pad; int a; void *b; void *c; } MenuItem;
-extern char D_800EA634[];
-extern int D_800EB0F4[];
-extern int D_800EB11C, D_800EB120;
+extern char OPTIONS_FONT[];
+extern int OPTIONS_DIGIT_STRINGS[];
+extern int OPTIONS_PLUS_STRING, OPTIONS_MINUS_STRING;
 extern void titleDrawString(MenuItem *m, int a, int b, int c);
 
 void screenAdjustDrawNumber(short x, short y, int n)
@@ -12,24 +12,24 @@ void screenAdjustDrawNumber(short x, short y, int n)
     m.n = 9;
     m.x = x;
     m.y = y;
-    m.b = D_800EA634;
+    m.b = OPTIONS_FONT;
     if (n > 0) {
-        m.a = D_800EB11C;
+        m.a = OPTIONS_PLUS_STRING;
         titleDrawString(&m, 0, 1, 0);
     } else if (n < 0) {
         n = -n;
-        m.a = D_800EB120;
+        m.a = OPTIONS_MINUS_STRING;
         titleDrawString(&m, 0, 1, 0);
     }
     m.x += 8;
     if (n >= 10) {
-        m.a = D_800EB0F4[n / 10];
-        m.b = D_800EA634;
+        m.a = OPTIONS_DIGIT_STRINGS[n / 10];
+        m.b = OPTIONS_FONT;
         titleDrawString(&m, 0, 1, 0);
         n %= 10;
         m.x += 8;
     }
-    m.a = D_800EB0F4[n];
-    m.b = D_800EA634;
+    m.a = OPTIONS_DIGIT_STRINGS[n];
+    m.b = OPTIONS_FONT;
     titleDrawString(&m, 0, 1, 0);
 }

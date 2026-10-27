@@ -6,7 +6,7 @@ extern S *TASK_C;
 extern unsigned short JOYPAD_STATE;
 extern PadCfg PAD_INFO;
 extern unsigned char D_8009D67C, D_8009F0E8;
-extern short D_800EB480;
+extern short OPTIONS_PAD_HAS_ACTUATOR;
 extern int PadGetState(int port);
 extern unsigned char PadInfoAct(int port, int act, int term);
 extern void SsSetMono(void);
@@ -31,7 +31,7 @@ int optionsMenuStep(void)
         if (s == 6 || s == 2) {
             c = PadInfoAct(0, -1, 0);
             cfg->vib = c;
-            D_800EB480 = c != 0;
+            OPTIONS_PAD_HAS_ACTUATOR = c != 0;
             TASK_C->w4e++;
         }
         break;
@@ -55,7 +55,7 @@ int optionsMenuStep(void)
             TASK_C->w4e--;
         } else if (b & 0x40) {
             playSFX(8);
-            if (D_800EB480 == 0) TASK_C->w4e = 4;
+            if (OPTIONS_PAD_HAS_ACTUATOR == 0) TASK_C->w4e = 4;
             else TASK_C->w4e++;
         } else if (b & 0x2000) {
             playSFXAndSetNote(10, 10);
@@ -87,7 +87,7 @@ int optionsMenuStep(void)
         b = JOYPAD_STATE;
         if (b & 0x10) {
             playSFX(8);
-            if (D_800EB480 == 0) TASK_C->w4e = 2;
+            if (OPTIONS_PAD_HAS_ACTUATOR == 0) TASK_C->w4e = 2;
             else TASK_C->w4e--;
         } else if (b & 0x40) {
             playSFX(8);

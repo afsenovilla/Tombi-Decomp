@@ -1,0 +1,34 @@
+address,name,size,source
+800ea1d8,TITLE_FONT,,usage: 5-byte {u v w h flag} glyph table of the title screen texts (titleDrawText / MenuCarousel / CarouselGlyph) refs=9
+800ea634,OPTIONS_FONT,,usage: 5-byte glyph table of the options texts (optionsDrawLabel* / screenAdjustDrawNumber) refs=10
+800eb480,OPTIONS_PAD_HAS_ACTUATOR,0x2,usage: short: PadInfoAct(0) != 0 at optionsMenuStep w4e 0; without it the vibration row is skipped and the cursor uses OPTIONS_CURSOR_RECTS_NO_ACTUATOR refs=8
+800eb478,TITLE_LOGO_BOUNCE_AMPLITUDE,0x2,usage: short: 0x1000 at titleLogoInitBounce decaying by 0x20 per frame refs=6
+800eb47c,TITLE_LOGO_BOUNCE_PHASE,0x2,usage: u16: sine phase of the logo bounce (0x40 at init += 2 per frame) refs=4
+800eb470,TITLE_LOGO_BOUNCE_OFFSET,0x2,usage: short: |MulNegSin(phase amplitude) >> 4| the logo sprites are raised by refs=6
+800eb484,SCREEN_ADJUST_PAD_LAST,0x4,usage: int: last held direction of screenAdjustMenuStep's auto-repeat refs=4
+800eb488,SCREEN_ADJUST_PAD_REPEAT_TIMER,0x4,usage: int: auto-repeat countdown of screenAdjustMenuStep (0x10 then 6) refs=5
+800eb48c,SCREEN_ADJUST_SAVED_X,0x2,usage: short: SCREEN_OFFSET_X on entering the screen adjust menu restored by circle refs=3
+800eb490,SCREEN_ADJUST_SAVED_Y,0x2,usage: short: SCREEN_OFFSET_Y on entering the screen adjust menu refs=3
+800eb070,OPTIONS_STRINGS,,usage: string pointer table of the options texts (title 0 rows 1..5 sound modes 6.. vibration 9.. config names 0xF.. action labels 0x19..) refs=6
+800eb040,TITLE_STRINGS,,usage: string pointer table of the title screen texts (titleDrawText i) refs=2
+800eb05c,TITLE_STRING_PALETTES,,usage: per TITLE_STRINGS entry the per-glyph palette list refs=2
+800eb124,OPTIONS_PAL2_GLYPH_PALETTES,,usage: per-glyph palette list of optionsDrawLabelPal2 (clut 0x7C15) refs=2
+800eafd4,OPTIONS_CURSOR_RECTS,,usage: {short x y w h}[row] of the green cursor tile of the options menu refs=5
+800eb004,OPTIONS_CURSOR_RECTS_NO_ACTUATOR,,usage: the cursor tile rects of rows >= 4 when the pad has no actuator refs=5
+800eb0f4,OPTIONS_DIGIT_STRINGS,0x28,usage: int[10]: digit glyph strings of screenAdjustDrawNumber refs=3
+800eb11c,OPTIONS_PLUS_STRING,0x4,usage: the '+' glyph string before a positive screen offset refs=2
+800eb120,OPTIONS_MINUS_STRING,0x4,usage: the '-' glyph string before a negative screen offset refs=2
+800ea5d0,TITLE_MENU_GLYPHS,,usage: short[] (-3 end 0 = gap) glyph ids of the rotating title menu carousel refs=2
+800eb064,TITLE_MENU_GLYPH_PALETTES,0x4,usage: u8 * : per carousel glyph the palette refs=3
+800eb050,TITLE_ARROW_RIGHT_STRING,0x4,usage: the right arrow string of the title menu (x 0xCC / 0xD0) refs=3
+800eb04c,TITLE_ARROW_LEFT_STRING,0x4,usage: the left arrow string of the title menu (x 0x64 / 0x70) refs=3
+800eb06c,TITLE_ARROW_RIGHT_PALETTE,0x4,usage: glyph palette list of TITLE_ARROW_RIGHT_STRING refs=3
+800eb068,TITLE_ARROW_LEFT_PALETTE,0x4,usage: glyph palette list of TITLE_ARROW_LEFT_STRING refs=3
+800eb13c,BOOT_LOGO_SPRITE_RECS,,usage: -1 terminated SprRec list of the boot logo (bootLogoDraw) refs=2
+800eb17c,TITLE_LOGO_SPRITE_RECS,,usage: SprRec list of the bouncing title logo (titleLogoDraw with -TITLE_LOGO_BOUNCE_OFFSET) refs=2
+800eb1ac,TITLE_LOGO_STATIC_SPRITE_RECS,,usage: SprRec list of the title logo parts that do not bounce refs=2
+800eb1dc,OPTIONS_MENU_SPRITES,,usage: SprDef list of the options menu (optionsMenuDrawText) refs=2
+800eb20c,BUTTON_CONFIG_SPRITES,,usage: SprDef list of the button config screen (buttonConfigDrawText) refs=2
+800eb3bc,SCREEN_ADJUST_SPRITES,,usage: SprDef list of the screen adjust frame (screenAdjustDrawText) refs=2
+800eb3ec,OPTIONS_FRAME_SPRITES,,usage: SprDef list (tpage 1 0 0x180) of the frame shared by the three option screens (optionsDrawFrame) refs=2
+800eb014,BOOT_LOGO_SPRITE_DATA,,usage: the sprite data bootLogoSetSpriteBase stores into SEQ_DATA (8009D630) before the boot logo refs=2

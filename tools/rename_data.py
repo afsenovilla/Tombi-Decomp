@@ -148,6 +148,8 @@ for dp, fn in walk():
         for ident, a in sorted(idmap.items(), key=lambda x: -len(x[0])):
             nm = names.get(a)
             if not nm or not inrange(a) or nm == ident: continue
+            ma = re.match(r"((?:D|DAT|PTR)_[0-9a-fA-F]{8})(_\w+)$", ident)   # alias `D_xxx_a` of a D_xxx at the same address
+            if ma and idmap.get(ma.group(1)) == a: nm += ma.group(2)
             local = re.search(r"\bextern\b[^;{}]*\b%s\b" % re.escape(ident), txt)
             if not local:
                 if ident in H: print("HDR ", path, ident, nm)   # declared by a header: rename it there by hand

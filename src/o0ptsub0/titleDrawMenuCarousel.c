@@ -4,10 +4,10 @@
 typedef struct S { char p[0x48]; short w48; unsigned short w4a; unsigned short w4c; unsigned short w4e; } S;
 typedef struct { short x, y, tp, pad; void *str; void *font; void *pal; } MenuItem;
 extern S *TASK_C;
-extern short D_800EA5D0[];
-extern char D_800EA1D8[];
-extern unsigned char *D_800EB064;
-extern void *D_800EB04C, *D_800EB050, *D_800EB068, *D_800EB06C;
+extern short TITLE_MENU_GLYPHS[];
+extern char TITLE_FONT[];
+extern unsigned char *TITLE_MENU_GLYPH_PALETTES;
+extern void *TITLE_ARROW_LEFT_STRING, *TITLE_ARROW_RIGHT_STRING, *TITLE_ARROW_LEFT_PALETTE, *TITLE_ARROW_RIGHT_PALETTE;
 extern void titleDrawString(MenuItem *m, int pri, int wrap, int pal);
 extern void titleDrawCarouselGlyph(int c, int ang, int off, unsigned char pal);
 
@@ -19,9 +19,9 @@ void titleDrawMenuCarousel(int angle, int sel)
     unsigned char *pal;
     int ang;
 
-    s = D_800EA5D0;
+    s = TITLE_MENU_GLYPHS;
     idx = -1;
-    pal = D_800EB064;
+    pal = TITLE_MENU_GLYPH_PALETTES;
     ang = angle;
     while (*s != -3) {
         if ((((short)ang + 0x20) & 0xFF) < 0x40 && idx == -1) idx = 0;
@@ -39,34 +39,34 @@ void titleDrawMenuCarousel(int angle, int sel)
             m.x = 0xCC;
             m.y = 0xB8;
             m.tp = 6;
-            m.font = D_800EA1D8;
-            m.str = D_800EB050;
-            m.pal = D_800EB06C;
+            m.font = TITLE_FONT;
+            m.str = TITLE_ARROW_RIGHT_STRING;
+            m.pal = TITLE_ARROW_RIGHT_PALETTE;
             titleDrawString(&m, 0, 1, 1);
             break;
         case 1:
             m.x = 0x64;
             m.y = 0xB8;
             m.tp = 6;
-            m.font = D_800EA1D8;
-            m.str = D_800EB04C;
-            m.pal = D_800EB068;
+            m.font = TITLE_FONT;
+            m.str = TITLE_ARROW_LEFT_STRING;
+            m.pal = TITLE_ARROW_LEFT_PALETTE;
             titleDrawString(&m, 0, 1, 1);
             m.x = 0xD0;
             m.y = 0xB8;
             m.tp = 6;
-            m.font = D_800EA1D8;
-            m.str = D_800EB050;
-            m.pal = D_800EB06C;
+            m.font = TITLE_FONT;
+            m.str = TITLE_ARROW_RIGHT_STRING;
+            m.pal = TITLE_ARROW_RIGHT_PALETTE;
             titleDrawString(&m, 0, 1, 1);
             break;
         case 2:
             m.x = 0x70;
             m.y = 0xB8;
             m.tp = 6;
-            m.font = D_800EA1D8;
-            m.str = D_800EB04C;
-            m.pal = D_800EB068;
+            m.font = TITLE_FONT;
+            m.str = TITLE_ARROW_LEFT_STRING;
+            m.pal = TITLE_ARROW_LEFT_PALETTE;
             titleDrawString(&m, 0, 1, 1);
             break;
         }

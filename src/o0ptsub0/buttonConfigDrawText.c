@@ -1,7 +1,7 @@
 // FUNC 800e9254 696 O0PTSUB0
 // MATCHING 800e9254 696
 typedef struct { short x, y, u, v, w, h, cx, cy; } SprDef;
-extern SprDef D_800EB20C[];
+extern SprDef BUTTON_CONFIG_SPRITES[];
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
 extern void titleDrawSprite(SprDef *d, short tpage, unsigned char pri);
 extern void optionsDrawLabel(short x, short y, int i);
@@ -56,7 +56,7 @@ void buttonConfigDrawText(unsigned int sel)
         break;
     }
     tp = GetTPage(0, 0, 0x200, 0);
-    d = D_800EB20C;
+    d = BUTTON_CONFIG_SPRITES;
     while (d->x != -1) {
         titleDrawSprite(d++, tp, 0);
     }

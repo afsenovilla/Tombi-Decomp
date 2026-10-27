@@ -15,9 +15,9 @@ typedef struct { short x, y, w, h; } RECT;
 extern TILE D_1F800000;
 extern char *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
-extern RECT D_800EAFD4[];
-extern RECT D_800EB004[];
-extern short D_800EB480;
+extern RECT OPTIONS_CURSOR_RECTS[];
+extern RECT OPTIONS_CURSOR_RECTS_NO_ACTUATOR[];
+extern short OPTIONS_PAD_HAS_ACTUATOR;
 
 void optionsMenuDrawCursor(int sel)
 {
@@ -29,16 +29,16 @@ void optionsMenuDrawCursor(int sel)
     D_1F800000.code |= 2;
     D_1F800000.r0 = 0;
     D_1F800000.b0 = 0;
-    if (sel >= 4 && D_800EB480 == 0) {
-        D_1F800000.x0 = D_800EB004[sel - 4].x;
-        D_1F800000.y0 = D_800EB004[sel - 4].y;
-        D_1F800000.w = D_800EB004[sel - 4].w;
-        D_1F800000.h = D_800EB004[sel - 4].h;
+    if (sel >= 4 && OPTIONS_PAD_HAS_ACTUATOR == 0) {
+        D_1F800000.x0 = OPTIONS_CURSOR_RECTS_NO_ACTUATOR[sel - 4].x;
+        D_1F800000.y0 = OPTIONS_CURSOR_RECTS_NO_ACTUATOR[sel - 4].y;
+        D_1F800000.w = OPTIONS_CURSOR_RECTS_NO_ACTUATOR[sel - 4].w;
+        D_1F800000.h = OPTIONS_CURSOR_RECTS_NO_ACTUATOR[sel - 4].h;
     } else {
-        sp->x0 = D_800EAFD4[sel].x;
-        sp->y0 = D_800EAFD4[sel].y;
-        sp->w = D_800EAFD4[sel].w;
-        sp->h = D_800EAFD4[sel].h;
+        sp->x0 = OPTIONS_CURSOR_RECTS[sel].x;
+        sp->y0 = OPTIONS_CURSOR_RECTS[sel].y;
+        sp->w = OPTIONS_CURSOR_RECTS[sel].w;
+        sp->h = OPTIONS_CURSOR_RECTS[sel].h;
     }
     p = (TILE *)NEXT_PRIM;
     *p = *sp;

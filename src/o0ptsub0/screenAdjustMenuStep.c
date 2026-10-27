@@ -8,8 +8,8 @@ extern volatile unsigned short PAD_PRESSED;
 extern unsigned short D_8009F7F2;
 extern short D_8009E350, D_8009E352, D_8009E354, D_8009E356;
 extern short D_8009F060, D_8009F062, D_8009F064, D_8009F066;
-extern int D_800EB484, D_800EB488;
-extern short D_800EB48C, D_800EB490;
+extern int SCREEN_ADJUST_PAD_LAST, SCREEN_ADJUST_PAD_REPEAT_TIMER;
+extern short SCREEN_ADJUST_SAVED_X, SCREEN_ADJUST_SAVED_Y;
 extern void playSFX(int id);
 extern void playSFXAndSetNote(int a, int b);
 extern void updateSound(void);
@@ -23,10 +23,10 @@ int screenAdjustMenuStep(void)
 
     switch (TASK_C->w4e) {
     case 0:
-        D_800EB484 = 0;
-        D_800EB488 = 0;
-        D_800EB48C = SCREEN_OFFSET_X;
-        D_800EB490 = SCREEN_OFFSET_Y;
+        SCREEN_ADJUST_PAD_LAST = 0;
+        SCREEN_ADJUST_PAD_REPEAT_TIMER = 0;
+        SCREEN_ADJUST_SAVED_X = SCREEN_OFFSET_X;
+        SCREEN_ADJUST_SAVED_Y = SCREEN_OFFSET_Y;
         TASK_C->w4e++;
         break;
     case 1:
@@ -39,11 +39,11 @@ int screenAdjustMenuStep(void)
             else if (*pad & 0x20) dir = 4;
         }
         held = ~D_8009F7F2 & 0xF0;
-        if (held != D_800EB484) {
-            D_800EB484 = held;
-            D_800EB488 = 0x10;
-        } else if (--D_800EB488 == 0) {
-            D_800EB488 = 6;
+        if (held != SCREEN_ADJUST_PAD_LAST) {
+            SCREEN_ADJUST_PAD_LAST = held;
+            SCREEN_ADJUST_PAD_REPEAT_TIMER = 0x10;
+        } else if (--SCREEN_ADJUST_PAD_REPEAT_TIMER == 0) {
+            SCREEN_ADJUST_PAD_REPEAT_TIMER = 6;
             JOYPAD_STATE |= held;
         }
         b = JOYPAD_STATE;
@@ -72,8 +72,8 @@ int screenAdjustMenuStep(void)
             TASK_C->w4e = 0;
             TASK_C->w4c = 1;
         } else if (b & 0x2000) {
-            SCREEN_OFFSET_X = D_800EB48C;
-            SCREEN_OFFSET_Y = D_800EB490;
+            SCREEN_OFFSET_X = SCREEN_ADJUST_SAVED_X;
+            SCREEN_OFFSET_Y = SCREEN_ADJUST_SAVED_Y;
             playSFXAndSetNote(0x1B, 0x1C);
             TASK_C->w4e = 0;
             TASK_C->w4c = 1;

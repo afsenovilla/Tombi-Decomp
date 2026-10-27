@@ -2161,3 +2161,14 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   SUBSCREEN_MESSAGE_BOX (80100A90), SUBSCREEN_TAB_FRAMES / DIGIT_FRAMES (800F5408 / 54AC), SUBSCREEN_PAGE_ARROW_SLOTS
   (8010075C). Left in D0SPSUB2: the field aliases 800F74BA / 6D36.. / 7042, the Card fields; in D0SPSUB3 the message box
   fields of subScreenOpenMessage and the other sprite tables of subScreenUpdate (800EEA00 image, 800EF600 bank, 800F5400..).
+- SYSTEM data, batch 3: O0PTSUB0 (Oct 27 2026): 33 rows in notes/data_names_o0ptsub0.csv. The fonts TITLE_FONT (800EA1D8) /
+  OPTIONS_FONT (800EA634), OPTIONS_PAD_HAS_ACTUATOR (800EB480, PadInfoAct != 0: hides the vibration row), the logo bounce
+  TITLE_LOGO_BOUNCE_AMPLITUDE / PHASE / OFFSET (800EB478 / 47C / 470), SCREEN_ADJUST_PAD_LAST / PAD_REPEAT_TIMER / SAVED_X /
+  SAVED_Y, the string tables OPTIONS_STRINGS / TITLE_STRINGS / TITLE_STRING_PALETTES / OPTIONS_PAL2_GLYPH_PALETTES /
+  OPTIONS_DIGIT_STRINGS / OPTIONS_PLUS_STRING / OPTIONS_MINUS_STRING, the cursor rects OPTIONS_CURSOR_RECTS (+_NO_ACTUATOR),
+  the carousel TITLE_MENU_GLYPHS / TITLE_MENU_GLYPH_PALETTES and the arrows TITLE_ARROW_LEFT / RIGHT_STRING (+_PALETTE; left at
+  x 0x64 / 0x70, right at 0xCC / 0xD0), the sprite lists BOOT_LOGO_SPRITE_RECS, TITLE_LOGO_SPRITE_RECS (+_STATIC),
+  OPTIONS_MENU_SPRITES, BUTTON_CONFIG_SPRITES, SCREEN_ADJUST_SPRITES, OPTIONS_FRAME_SPRITES, BOOT_LOGO_SPRITE_DATA (800EB014,
+  stored into SEQ_DATA by bootLogoSetSpriteBase). tools/rename_data.py now names an alias extern `D_xxx_a` of a named address
+  `<name>_a` (titleLogoDraw's D_800EB47C_w halfword view, the `_a` views of func_800EA5E8) instead of skipping the bare one.
+  Left: 800EB46C / 474 (zeroed by titleLogoInitBounce, never read in the matched sources).

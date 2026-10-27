@@ -22,7 +22,7 @@ typedef struct { unsigned char u, v, w, h, big; } Glyph;
 #define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
 #define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
 #define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
-extern Glyph D_800EA1D8[];
+extern Glyph TITLE_FONT[];
 extern POLY_FT4 *NEXT_PRIM;
 extern unsigned long *CURRENT_OT;
 extern int MulNegSin(int a, int b);
@@ -38,7 +38,7 @@ void titleDrawCarouselGlyph(short c, int ang, int off, int pal)
     unsigned char pl = pal;
     int a;
     if (((ang + off) & 0xFF) > 0x40 && ((ang + off) & 0xFF) < 0xC0) return;
-    tbl = D_800EA1D8;
+    tbl = TITLE_FONT;
     if ((short)off == -1) {
         int r = MulNegSin(0xE0, 0x5A);
         int s = (short)ang;
