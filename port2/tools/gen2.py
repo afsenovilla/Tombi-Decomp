@@ -495,13 +495,28 @@ def emit_data(outdir, amap, needed):
         data = open(path, "rb").read()[foff:foff + (e - s)]
         data += b"\0" * (n * 4 - len(data))
         words = []
+        # A MAIN0 word into the overlay region is a thunk when some overlay starts a function there, else a data
+        # pointer; a table of data pointers can hold both kinds (PTR_DAT_80080258, the letterbox sprite lists: the
+        # entry of AREA06 is a function start of X003, and the game read the thunk's code as sprites and drew over
+        # the overlay region).  A run of consecutive region words with one that no overlay starts a function at is
+        # such a table: every word of it is data.  (A handler table holds function starts only; an X000 function
+        # every area shares is a function start too.)
+        data_runs = set()
+        run = []
+        for i in range(n + 1):
+            w = int.from_bytes(data[4 * i:4 * i + 4], "little") if i < n else 0
+            a = s + 4 * i
+            if i < n and not amap.is_code(a) and GP.OVL_BASE <= w < GP.OVL_END and not (w & 3) and (w & 0xFFFF):
+                run.append((a, w)); continue
+            if run and any(w not in amap.ovl_starts for _, w in run): data_runs.update(a for a, _ in run)
+            run = []
         for i in range(n):
             w = int.from_bytes(data[4 * i:4 * i + 4], "little")
             a = s + 4 * i
             if amap.is_code(a) or w < 0x80010000 and not (0x1F800000 <= w < 0x1F800400) or w >= 0x80200000 \
                     or (w & 3) and not (0x1F800000 <= w < 0x1F800400) or (w & 0xFFFF) == 0:   # (round values: flags, not pointers)
                 words.append("0x%X" % w); continue
-            th = amap.thunk(w)
+            th = amap.thunk(w) if a not in data_runs else None
             if th:
                 thunks_used.add(th); nthunk += 1
                 words.append("(unsigned int)(unsigned long)&%s" % th); continue
@@ -617,7 +632,11 @@ def link(outdir, nm, objlist):
         # defines as code (full_symbol_kinds) and no overlay's function list names at that address; an
         # address-named function (FUN_/func_: MAIN0 calling into a coarse unit) stays a function.
         base = n.split("__")[0]
-        renamed_fn = "__" in n and a in all_starts and base not in data_csv_names
+        # The same holds for a bare short alias at a function start of some overlay that the data-naming rounds
+        # never named as data (`fb` = 0x80123D18, X010's updateLeafButterfly, called by the X000 function
+        # updateLeafButterflyByArea: PROVIDEd as data by x000.full.ld, it was aliased into the data image and
+        # AREA10 called the retail bytes)
+        renamed_fn = a in all_starts and base not in data_csv_names and n not in data_csv_names
         is_data_name = re.match(r"(?:D|DAT|PTR|PTR_DAT|jtbl|P)_[0-9A-Fa-f]{8}", n) or (
             a is not None and (base in elf_data or n in elf_data) and base not in elf_funcs and base not in unit_names.get(a, ())
             and not ovl_re.match(n) and not re.match(r"(?:FUN|func|thunk_FUN)_[0-9A-Fa-f]{8}", base) and not renamed_fn)

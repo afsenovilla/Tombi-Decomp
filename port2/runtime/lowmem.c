@@ -131,6 +131,27 @@ static int div_len(const unsigned char *p) {
     return len;
 }
 
+/* A call through a data pointer into the overlay region (a MAIN0 table word relocated as data because its table
+   holds data pointers too, or an overlay word at no function start of its own) lands in port_ram, which is not
+   executable: the fault at eip == the fault address is turned into the dispatch the thunk would have done (the
+   return address and the arguments are on the stack as for any call).  Slow (a fault per call), so emit_data and
+   the relocator keep giving thunks to what they can tell is a function. */
+static int exec_calls; static unsigned long exec_addr[16]; static int exec_n;
+void *port_exec_from_ram(unsigned long eip, unsigned long fault) {
+    if (eip != fault || !port_is_ram_ptr((void *)eip)) return 0;
+    u32p retail = 0x80000000u + (u32p)(eip - (unsigned long)port_ram);
+    if (retail < PORT_OVL_BASE || retail >= PORT_OVL_END) return 0;
+    void *fn = port_resolve_call(retail);
+    if (!fn || port_is_missing(fn)) return 0;
+    exec_calls++;
+    int seen = 0;
+    for (int i = 0; i < exec_n; i++) if (exec_addr[i] == retail) seen = 1;
+    if (!seen && exec_n < 16) { exec_addr[exec_n++] = retail;
+        port_printf("[port2] call into RAM at %08x (frame %d): dispatched to %s through the fault handler\n", retail, port_frame, port_sym_near(fn, 0)); }
+    return fn;
+}
+int port_exec_from_ram_calls(void) { return exec_calls; }
+
 #ifdef _WIN32
 extern char __ImageBase[];
 void port_dump_stack(unsigned long esp) {
@@ -155,6 +176,7 @@ static LONG WINAPI on_exception(EXCEPTION_POINTERS *ep) {
     }
     if (rec->ExceptionCode != EXCEPTION_ACCESS_VIOLATION) return EXCEPTION_CONTINUE_SEARCH;
     unsigned long fault = (unsigned long)rec->ExceptionInformation[1];
+    { void *fn = port_exec_from_ram(eip, fault); if (fn) { c->Eip = (DWORD)(unsigned long)fn; return EXCEPTION_CONTINUE_EXECUTION; } }
     if (eip != fault && fault < 0x10000ul && low_scratch) {
         unsigned long neweip;
         int r = port_low_emulate(eip, fault, low_scratch, &neweip);
@@ -196,6 +218,7 @@ void port_dump_stack(unsigned long esp) {
 static void on_segv(int sig, siginfo_t *info, void *ucv) {
     ucontext_t *uc = ucv;
     unsigned long eip = uc->uc_mcontext.gregs[REG_EIP], fault = (unsigned long)info->si_addr;
+    { void *fn = port_exec_from_ram(eip, fault); if (fn) { uc->uc_mcontext.gregs[REG_EIP] = (long)fn; return; } }
     if (eip != fault && fault < 0x10000ul && low_scratch) {
         unsigned long neweip;
         int r = port_low_emulate(eip, fault, low_scratch, &neweip);

@@ -62,6 +62,7 @@ void port_stub_report(void) {
     port_printf("[port2] %d stub calls (%d distinct), %d calls into the overlay region without native code:", stub_count, stub_n, port_missing_calls());
     for (int i = 0; i < stub_n; i++) port_printf(" %s=%d", stub_names[i], stub_hits[i]);
     port_printf("\n");
+    if (port_exec_from_ram_calls()) port_printf("[port2] %d calls into RAM dispatched through the fault handler\n", port_exec_from_ram_calls());
 }
 void port_flush_log(void) { fflush(stderr); }
 void port_quit(int code) {

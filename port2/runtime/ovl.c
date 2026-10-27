@@ -12,6 +12,7 @@
  * holds a RAM address into the native pointer: a MAIN0/X000 function, a thunk, or the byte of the data image. */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "port_runtime.h"
 
 void *port_ram_ptr(u32p a) {
@@ -77,6 +78,26 @@ static void *ovlmap_find(u32p id, u32p addr) {
     }
     return 0;
 }
+/* -v: a copy of the overlay region taken at every vblank, so a miss can say which words changed since the
+   frame began (the region was overwritten by a task or a buffer, not swapped by a CD read) */
+static unsigned char *ovl_snap;
+static int ovl_diff(void);
+void port_ovl_snapshot(void) {
+    if (!port_verbose) return;
+    if (!ovl_snap) ovl_snap = malloc(PORT_OVL_END - PORT_OVL_BASE);
+    else if (port_verbose > 1) { int c = ovl_diff(); if (c) port_printf("[port2]   (frame %d, %s resident)\n", port_frame, port_resident_overlay()); }
+    memcpy(ovl_snap, port_ram_ptr(PORT_OVL_BASE), PORT_OVL_END - PORT_OVL_BASE);
+}
+static int ovl_diff(void) {
+    if (!ovl_snap) return 0;
+    const u32p *now = port_ram_ptr(PORT_OVL_BASE), *old = (const u32p *)ovl_snap;
+    int n = (PORT_OVL_END - PORT_OVL_BASE) / 4, first = -1, last = -1, cnt = 0;
+    for (int i = 0; i < n; i++) if (now[i] != old[i]) { if (first < 0) first = i; last = i; cnt++; }
+    if (first < 0) { port_printf("[port2]   the overlay region is unchanged since the vblank\n"); return 0; }
+    port_printf("[port2]   %d words of the overlay region changed since the vblank: %08x..%08x, first %08x->%08x, last %08x->%08x\n",
+                cnt, PORT_OVL_BASE + 4 * first, PORT_OVL_BASE + 4 * last, old[first], now[first], old[last], now[last]);
+    return cnt;
+}
 static int missing_calls;
 static u32p missing_addr[64]; static int missing_n;
 static int port_missing(void) { return 0; }
@@ -85,8 +106,21 @@ static void note_missing(u32p addr, const char *who) {
     for (int i = 0; i < missing_n; i++) if (missing_addr[i] == addr) return;
     if (missing_n < 64) missing_addr[missing_n++] = addr;
     port_printf("[port2] call to %08x: no native code in %s (frame %d)\n", addr, who, port_frame);
+    if (port_verbose) {
+        /* which signature words differ from the resident image (a task or a buffer that overwrote the region) */
+        port_printf("[port2]   region id word %08x; signatures:", port_x000_image[0]);
+        for (int i = 0; i < port_areas_count; i++) {
+            const PortArea *a = &port_areas[i];
+            u32p w0 = *(u32p *)port_ram_ptr(a->sig[0][0]), w1 = *(u32p *)port_ram_ptr(a->sig[1][0]);
+            if (w0 == a->sig[0][1] || w1 == a->sig[1][1])
+                port_printf(" %s[%08x=%08x/%08x %08x=%08x/%08x]", a->name, a->sig[0][0], w0, a->sig[0][1], a->sig[1][0], w1, a->sig[1][1]);
+        }
+        port_printf("\n");
+        ovl_diff();
+    }
 }
 int port_missing_calls(void) { return missing_calls; }
+int port_is_missing(void *fn) { return fn == (void *)port_missing; }
 
 #define CACHE 1024
 static struct { u32p addr, key; void *fn; } cache[CACHE];
@@ -169,6 +203,12 @@ void port_relocate_overlay(void *dst, int bytes) {
         if (c && in_ranges(c, a)) continue;
         if (0x1F800000u <= v && v < 0x1F800400u) { w[i] = (u32p)port_ram_ptr(v); nd++; continue; }
         if (v < PORT_MAIN0_LOAD || v >= 0x80200000u || (v & 3)) continue;
+        /* a round word 0x80NN0000 of an overlay is a constant, as emit_data keeps it for MAIN0's data: the last
+           entry of an animation script is {index, 0, 0x8000 | duration}, whose second word reads as a RAM address
+           when the duration is below 0x20 (0x80050000); relocated, the end flag went and the chest of AREA09 ran
+           its anim into the pointer words that follow, drawObjectSprite drew 10000 packets from garbage and the
+           primitive buffer overran the overlay region (the "(none)" lead of docs/PORT.md) */
+        if (c && (v & 0xFFFFu) == 0) continue;
         if (xlate) { void *nat; u32p v0 = v; int sp = port_lang_xlate_word(&v, &nat);
                      if (port_verbose > 1) port_printf("[port2]   list word +%04x: %08x -> %08x%s\n", 4 * i, v0, v, sp ? " (spill)" : "");
                      if (sp) { w[i] = (u32p)nat; nd++; continue; } }

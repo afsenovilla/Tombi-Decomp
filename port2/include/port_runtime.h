@@ -42,6 +42,9 @@ extern unsigned int port_bios[], port_main0_image[], port_main0_bss[], port_x000
 /* native pointer for a retail RAM / scratchpad address (runtime and debugging aids only; the game never does this) */
 void *port_ram_ptr(u32p addr);
 int port_is_ram_ptr(const void *p);
+int port_is_missing(void *fn);                    /* fn is the dispatcher's "no native code" placeholder */
+void *port_exec_from_ram(unsigned long eip, unsigned long fault);   /* lowmem.c: a call into RAM, dispatched */
+int port_exec_from_ram_calls(void);
 #define PORT_M0(a) ((unsigned char *)port_main0_image + ((a) - PORT_MAIN0_LOAD))
 #define PORT_SPAD(a) ((unsigned char *)port_scratch + (a))
 #define SPAD8(a) (*(volatile unsigned char *)PORT_SPAD(a))
