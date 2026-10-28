@@ -23,6 +23,7 @@ typedef struct {
     int x1, y1, x2, y2;             /* drawing area, inclusive, inside VRAM */
     int ox, oy;                     /* drawing offset */
     int set_mask, check_mask;
+    int wide;                       /* --widescreen: this primitive goes to the wide plane (gpu.c ws_begin), its x/clip in wide columns */
 } GpuState;
 extern GpuState port_gs;            /* the current GP0 E1..E6 state (gpu.c); the backends read it per primitive */
 
@@ -42,6 +43,12 @@ typedef struct {
     void (*list_end)(void);                             /* end of DrawOTag / DrawPrim: submit the batched work */
     int (*present)(int dx, int dy, int dw, int dh, int masked);   /* show the display area in the window; 0 = not handled */
     int (*present_rgb)(const gpu_u8 *rgb, int w, int h);          /* show an RGB8 frame (the 24-bit display mode); 0 = not handled, may be null */
+    /* --widescreen wide plane (2048x512, gpu.c "widescreen"); null on the software backend, which uses gpu.c's wvram[] */
+    void (*ws_fill)(int x, int y, int w, int h, gpu_u16 c);                      /* wide-plane rectangle */
+    void (*ws_copy_down)(int wx, int wy, int vx, int vy, int w, int h);         /* wide plane -> VRAM */
+    void (*ws_upload)(int wx, int wy, int w, int h, const gpu_u16 *src, int stride);
+    void (*ws_read)(int wx, int wy, int w, int h, gpu_u16 *dst, int stride);
+    int (*ws_present)(int wx, int wy, int w, int h);                            /* show a wide frame; 0 = not handled */
 } GpuBackend;
 
 extern const GpuBackend port_gpu_soft, port_gpu_gl;
