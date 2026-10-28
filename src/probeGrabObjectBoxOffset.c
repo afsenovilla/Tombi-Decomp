@@ -2,8 +2,40 @@
 // MATCHING 8004b454 296
 // VERSION SLPS_01144 slps01144 80056504 296
 #if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80056504_slps01144);
+#include "spad.h"
+#include "TOBJ.H"
+typedef struct { TObj t; char c0[0x18]; short we8; short wea; } PO;
+typedef struct E { unsigned short a, b; } E;
+extern E DAT_8007b5e4[];
+
+void probeGrabObjectBoxOffset(PO *o, TObj *e)
+{
+    short d, ad, t;
+    unsigned short ox, oy;
+    char pad[8];
+    if ((unsigned short)(o->t.d->p.whole - e->d->p.whole + 45) > 90)
+        return;
+    d = o->we8 - o->t.h->p.whole;
+    ox = DAT_8007b5e4[e->b0c].a;
+    oy = DAT_8007b5e4[e->b0c].b;
+    ad = d;
+    if (d < 0) ad = -d;
+    d = o->we8 - (e->h->p.whole + ox);
+    if (o->t.animFrame & 1) t = e->box0 + ad + d;
+    else t = e->box0 + d;
+    if ((unsigned short)t > e->box1 + ad)
+        return;
+    ad = e->box2 + (o->wea - (e->y.p.whole + oy));
+    if ((unsigned short)ad > e->box3)
+        return;
+    o->t.b9e = 3;
+    o->t.velY = 0;
+    o->t.wb8 = ox;
+    o->t.wba = 0;
+    e->b69 = 2;
+    SPAD.s19e = 0;
+    (*(TObj **)&SPAD.p3c0) = e;
+}
 #else
 #include "spad.h"
 #include "TOBJ.H"
