@@ -84,6 +84,7 @@ static inline u16 blend(u16 bg, u16 fg, int mode) {
 /* --widescreen (docs/PORT.md "Widescreen"): primitives drawn into a 320-wide display buffer go to wvram instead,
    a side plane where that buffer is ws_pad columns wider on each side (the drawing offset shifted by ws_pad), so
    whatever the game draws past the 4:3 edges is kept.  plot() writes through tgt/tgt_stride: vram when off. */
+int port_ws_cull;                    /* the game's screen-X culls widened by this (port_prelude.h PORT_WSX), = port_widescreen */
 int port_widescreen;                 /* extra columns on each side of a 320-wide frame; 0 = off (53 = 16:9, 120 = 21:9) */
 #define WS_STRIDE 2048
 static u16 wvram[512][WS_STRIDE];

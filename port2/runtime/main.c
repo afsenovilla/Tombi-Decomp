@@ -312,7 +312,8 @@ int main(int argc, char **argv) {
         else return usage(argv[0]);
     }
     if (headless) port_window = 0;
-    { extern int port_widescreen, port_renderer;
+    { extern int port_widescreen, port_renderer, port_ws_cull;
+      port_ws_cull = port_widescreen;
       if (port_widescreen && port_renderer != 0) {     /* the wide frame is a software-rasteriser feature for now */
           if (port_renderer == 1) port_printf("[port2] --widescreen: using the software renderer\n");
           port_renderer = 0;

@@ -15,4 +15,7 @@ void *port_bios_tcb_table(void);
 /* register-carried arguments (gen_port.py forward_short_calls): the caller's incoming argument i, i.e. what
    $a0-$a3 held on entry to the caller */
 #define PORT_ARG(i) (((int *)__builtin_frame_address(0))[2 + (i)])
+#define port_ws_cull 0                   /* (port2 --widescreen only) */
+#define PORT_WSX(v) ((unsigned short)((v) + port_ws_cull))
+#define PORT_WSW(c) ((c) + 2 * port_ws_cull)
 #endif
