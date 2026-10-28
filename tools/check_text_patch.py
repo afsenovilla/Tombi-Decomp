@@ -2,8 +2,9 @@
 """Validate a text patch (*.tombipatch.json) against the original disc with the text editor's own checks.
 
 For every edited dialogue:
-  - the text encodes (known tags, glyphs that exist in the PAL fonts): Project.validate; stricter than the editor, a
-    character the file's own font lacks (':', '%', 'ü', ...) is an error instead of being borrowed from another file
+  - the text encodes (known tags, glyphs that exist in the PAL fonts): Project.validate; a character the file's own
+    font lacks is added from another file's font of the same height, like the editor does (listed as a note; with
+    --strict-glyphs it is an error); a character no font of the disc has (':' at 16 px, '%', ...) is always an error
   - the preview checks of the editor (text_preview): no line wider than the box, no page with more lines than the box
     height allows, no page over 128 glyphs (a problem the original already had is tolerated, a new one is not)
   - event titles: no more letters than the layout list (Project.title_problem)
@@ -28,6 +29,8 @@ import wfm_py as W
 
 MAX_W = 312
 ONE_LINE_W = 256
+STRICT_GLYPHS = False  # --strict-glyphs: a character the file's own font lacks is an error
+NOTES = []
 VERB_FIRST = False   # set from the patch: the executable patch (verb_order.py) then follows the verb box widths
 TAG = re.compile(r"\{[^}]*\}")
 
@@ -67,7 +70,10 @@ def check_entry(proj, path, idx, text):
         return ["encode: %s" % e]
     if len(wc.glyphs) > len(proj.wfm(path).glyphs):
         miss = sorted({g.char or "?" for g in wc.glyphs[len(proj.wfm(path).glyphs):]})
-        errs.append("characters missing from this file's font (would be borrowed from another file): %s" % " ".join(miss))
+        if STRICT_GLYPHS:
+            errs.append("characters missing from this file's font (would be borrowed from another file): %s" % " ".join(miss))
+        else:
+            NOTES.append("%s #%d: glyphs added from another file's font of the same size: %s" % (path, idx, " ".join(miss)))
     tp = proj.title_problem(path, idx, text)
     if tp:
         errs.append("title: %s" % tp)
@@ -101,9 +107,11 @@ def check_entry(proj, path, idx, text):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("disc"); ap.add_argument("patch"); ap.add_argument("-v", "--verbose", action="store_true")
+    ap.add_argument("--strict-glyphs", action="store_true", help="do not accept glyphs borrowed from other files")
     a = ap.parse_args()
     patch = TP.load(a.patch)
-    global VERB_FIRST
+    global VERB_FIRST, STRICT_GLYPHS
+    STRICT_GLYPHS = a.strict_glyphs
     VERB_FIRST = bool(patch.get("verbFirst"))
     bad = 0
     try:
@@ -131,6 +139,8 @@ def main():
                 print("%s #%d: %s" % (path, i, "; ".join(errs)))
             elif a.verbose:
                 print("%s #%d: ok" % (path, i))
+    for note in NOTES:
+        print("note:", note)
     print("%d entries checked, %d with problems" % (n, bad))
     return 1 if bad else 0
 
