@@ -1827,6 +1827,29 @@ stall is host I/O or presentation on that machine, still open.
   game's own C and data, headless the letters fly in, hold with the bob and scatter; nothing wraps at 16 bits in
   the 32-bit build (`wb4`/`wb8` are masked to a byte by the game itself).
 
+#### Third real-Windows round (d6aae42): the two null-pointer bursts
+
+- **`X000+0xe8` / `+0xf6` writes to 0x14 / 0x10 are the retail game's own.** The offsets are inside
+  `func_8011DE84`'s native code: its second function `func_8011DF5C` (retail `0x8011DF60`, `T7468[0]`), the
+  placement handler of the **tail** part (`b0c` 0) of a subtype-2 `updateA00L4Type06` chain (AREA00 section 2,
+  parts at x 2998..3103, y ~-710). The tail's `d94` (next part) is 0 by construction (gdb: every chain of sections
+  0/1/2 ends in `d94=0`); subtypes 0 and 1 use `func_8011E028` / `func_8011E0EC` for the tail, which do not touch
+  `d94`, but subtype 2's table holds DF60, and the retail MIPS (`build/full/x000.elf` 0x8011DFB8 `sw v0,20(a0)`,
+  0x8011DFD4 `sw v0,16(a0)` with `a0 = lw 148(a2)`) stores through the null pointer too, into the BIOS garbage words
+  at 0x10/0x14, and reads them back (`d34 = lh 22(a0)`, `d30 = lh 18(a0)`). The port's page-0 emulation gives the
+  same values; the burst is "on screen" time (`FUN_800202b4`), not a reload fault. `port_sym_near` now names an
+  area variant `X000:ADDR` (the PSX address of the variant the offset counts from) instead of the bare `X000`.
+- **`X001+0x2a` reads of 2 (and AREA01 section 2's `+0x18`/`+0x1f`, 400 000 a run) were a port fault: the second
+  object of the cat-2 x cat-4 collision dispatch.** `collideCat2WithCat4Objects` (and `collideCat5...` through it,
+  `collideCat2ObjectsPairwise` likewise) call the area handlers as `f(o)`; the R3000 code has the other object in
+  `$a1` (`lw a1,0(s1)` before the jump table), and the handlers take `(o, e)`. gen_port forwarded `PORT_ARG(1)`
+  (stack garbage: the callers have no parameters) or nothing (`ropeChainsEnemyCollision(void)` forwards its own
+  slots to `landOnSlopedBox(a, b)`): `b` was NULL, `collideEnemyWithTiltedBar` (seesaw planks) /
+  `landOnSlopedBox` (rope chains) read `b->d` at page 0, and the collisions of enemies with seesaws, rope chains,
+  breakable blocks etc. never happened (in AREA01 section 2 from the debug select Tombi stood at x -1 for the whole
+  run; now he walks the room). `port/fixes.txt` passes `e` / `q` to all 15 such calls (MAIN0 was fixed for the
+  first five already). The standard test stays byte-identical (36 frames).
+
 #### AREA01 in Spanish: the twin that is one sector too big (`not composed`)
 
 Build c522181 on real Windows crashed in AREA01 (`drawObjectSpriteRotScaled+0xf0`, fault address `803c0000`,

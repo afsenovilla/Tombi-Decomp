@@ -289,10 +289,17 @@ const char *port_sym_near(void *fn, unsigned long *off) {
         unsigned long f = (unsigned long)port_ovlmap[i].fn;
         if (f <= a && f > best) { best = f; name = port_ovlmap[i].name; }
     }
+    int ai = -1;
     for (int i = 0; i < port_areamap_count; i++) {
         unsigned long f = (unsigned long)port_areamap[i].fn;
-        if (f <= a && f > best) { best = f; name = port_areas[port_areamap[i].area].name; }
+        if (f <= a && f > best) { best = f; ai = i; }
     }
     if (off) *off = a - best;
+    if (ai >= 0) {                      /* an area variant: name the area and the PSX address of the variant */
+        static char buf[4][32]; static int k;
+        char *b = buf[k++ & 3];
+        snprintf(b, sizeof buf[0], "%s:%08x", port_areas[port_areamap[ai].area].name, (unsigned)port_areamap[ai].addr);
+        return b;
+    }
     return name ? name : "?";
 }

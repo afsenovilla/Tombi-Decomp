@@ -32,6 +32,40 @@ src/collideCat2WithCat4Objects.c | pushObjectOutOfCat4Type06(o); | pushObjectOut
 src/collideCat2WithCat4Objects.c | void pushObjectOutOfCat4Type06(TObj *o); | void pushObjectOutOfCat4Type06();
 src/collideCat2WithCat4Objects.c | pushCat2ObjectOutOfCat4Type0A(o); | pushCat2ObjectOutOfCat4Type0A(o, e);
 src/collideCat2WithCat4Objects.c | void pushCat2ObjectOutOfCat4Type0A(TObj *o); | void pushCat2ObjectOutOfCat4Type0A();
+# The R3000 call sites below leave the second object in $a1 (e / q: `lw a1,0(s1)` before the jump table); the C
+# passes only o. gen_port forwarded PORT_ARG(1) (stack garbage: these callers take no parameters) or nothing
+# (ropeChainsEnemyCollision forwards its own (a, b) to landOnSlopedBox: b NULL, AREA01 null reads at
+# landOnSlopedBox+0x18/+0x1f, seesaw/collideEnemyWithTiltedBar+0x2a)
+src/collideCat2WithCat4Objects.c | func_8012032C(o); | func_8012032C(o, e);
+src/collideCat2WithCat4Objects.c | void func_8012032C(TObj *o); | void func_8012032C();
+src/collideCat2WithCat4Objects.c | func_801280DC(o); | func_801280DC(o, e);
+src/collideCat2WithCat4Objects.c | void func_801280DC(TObj *o); | void func_801280DC();
+src/collideCat2WithCat4Objects.c | func_80127FDC(o); | func_80127FDC(o, e);
+src/collideCat2WithCat4Objects.c | void func_80127FDC(TObj *o); | void func_80127FDC();
+src/collideCat2WithCat4Objects.c | func_801216A0(o); | func_801216A0(o, e);
+src/collideCat2WithCat4Objects.c | void func_801216A0(TObj *o); | void func_801216A0();
+src/collideCat2WithCat4Objects.c | func_8011FAE8(o); | func_8011FAE8(o, e);
+src/collideCat2WithCat4Objects.c | void func_8011FAE8(TObj *o); | void func_8011FAE8();
+src/collideCat2WithCat4Objects.c | func_8011FA74(o); | func_8011FA74(o, e);
+src/collideCat2WithCat4Objects.c | void func_8011FA74(TObj *o); | void func_8011FA74();
+src/collideCat2WithCat4Objects.c | func_80128054(o); | func_80128054(o, e);
+src/collideCat2WithCat4Objects.c | void func_80128054(TObj *o); | void func_80128054();
+src/collideCat2WithCat4Objects.c | func_801203D0(o); | func_801203D0(o, e);
+src/collideCat2WithCat4Objects.c | void func_801203D0(TObj *o); | void func_801203D0();
+src/collideCat2WithCat4Objects.c | func_8012788C(o); | func_8012788C(o, e);
+src/collideCat2WithCat4Objects.c | void func_8012788C(TObj *o); | void func_8012788C();
+src/collideCat2WithCat4Objects.c | func_801210B4(o); | func_801210B4(o, e);
+src/collideCat2WithCat4Objects.c | void func_801210B4(TObj *o); | void func_801210B4();
+src/collideCat2WithCat4Objects.c | func_80121A40(o); | func_80121A40(o, e);
+src/collideCat2WithCat4Objects.c | void func_80121A40(TObj *o); | void func_80121A40();
+src/collideCat2WithCat4Objects.c | func_80121994(o); | func_80121994(o, e);
+src/collideCat2WithCat4Objects.c | void func_80121994(TObj *o); | void func_80121994();
+src/collideCat2WithCat4Objects.c | func_8011D4FC(o); | func_8011D4FC(o, e);
+src/collideCat2WithCat4Objects.c | void func_8011D4FC(TObj *o); | void func_8011D4FC();
+src/collideCat2ObjectsPairwise.c | func_80121934(o); | func_80121934(o, q);
+src/collideCat2ObjectsPairwise.c | extern void func_80121934(void *); | extern void func_80121934();
+src/collideCat2ObjectsPairwise.c | func_801217F8(o); | func_801217F8(o, q);
+src/collideCat2ObjectsPairwise.c | extern void func_801217F8(void *); | extern void func_801217F8();
 # a NULL animation pointer reads BIOS RAM at address 6 on the PS1 (X003 initFungaDwarf calls this before setting
 # o->anim; AnimJump then sets the duration again): read 0 instead
 src/AnimLoadDuration.c | o->dur = o->a->v & 0x3fff; | o->dur = o->a ? o->a->v & 0x3fff : 0;
