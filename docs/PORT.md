@@ -1861,6 +1861,22 @@ stall is host I/O or presentation on that machine, still open.
   breakable blocks etc. never happened (in AREA01 section 2 from the debug select Tombi stood at x -1 for the whole
   run; now he walks the room). `port/fixes.txt` passes `e` / `q` to all 15 such calls (MAIN0 was fixed for the
   first five already). The standard test stays byte-identical (36 frames).
+- **The other `PORT_ARG(i)` past the caller's own parameters (188 call lines on a53d993), checked against the R3000
+  code** (register dataflow at each `jal` in `build/full/*.elf`, and whether the retail callee reads that register on
+  any path): 161 are safe: pure pass-throughs of the caller's own incoming registers (the area/section dispatchers,
+  the collision thunks, whose callers do pass `(o, e)`), callees that never read the register (`sevenFriendsGoodLuckTalk`,
+  `lostHatManTalk`, `a00L4Type18Active`, `blackCrowPerched`, `playerNormalModeDispatch`'s `p2` (no step function reads
+  it), `drawCategory7Objects` -> 0x800EC710 = I0NFO2 `topdownDrawMapLayers(o)`, `removeItemFromInventory`, the boot logo
+  `bootLogoSetSpriteBase`), `queueLoadList`'s `base` (the first record carries its address, a slot >= 0x80 or type
+  0xF8; checked with gdb in AREA00/04 boots) and the SLPM demo branch of x009 `func_80120280`. 17 are fixed in
+  `port/fixes.txt`: `weaponOnHitGetResult(o, p, r)` returns `r` for weapon types it does not handle (cat-3 type 3,
+  AREA04's thrown breakable): after `boxesOverlapSigned`/`FUN_8004461c`/`boxesOverlapFlipAware` `$a2` is `lhu 22` of
+  the second object (11 overlay handlers), after the inline box test the 32-bit `h` difference (`weaponHitCat2Type0E`,
+  `weaponHitCat4Type00`, `weaponHitCat2Type07`); `memCardScreenUpdate`/`subScreenUpdate` return their argument on an
+  unhandled menu state, the callers leave leftovers there, the port passes 0. Left as they were (10, all only for
+  that thrown breakable): `resolveHitResultA/B/C/F/G`, `weaponHitCat2Type02/4Type39/5Object` and the inline `col()`
+  of `collideWeaponsWith*`, whose `$a2` is whatever the previous handler of the loop or the overlay caller left
+  (`boxesOverlapSide` leaves its first argument, a pointer). Standard test and area runs 0/1/3/4/9/10/14 unchanged.
 
 #### AREA01 in Spanish: the twin that is one sector too big (`not composed`)
 

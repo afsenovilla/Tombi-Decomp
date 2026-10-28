@@ -108,3 +108,44 @@ src/drawPauseMenu.c | e = D_800803bc; | e = (ENT *)port_lang_item(D_800803bc);
 src/drawPauseMenu.c | e = D_800803dc; | e = (ENT *)port_lang_item(D_800803dc);
 src/drawPauseMenu.c | sp->u0 = D_80080300[c].u; | sp->u0 = ((UV *)port_lang_item(D_80080300))[c].u;
 src/drawPauseMenu.c | sp->v0 = D_80080300[c].v; | sp->v0 = ((UV *)port_lang_item(D_80080300))[c].v;
+#
+# weaponOnHitGetResult(o, p, r) returns its third argument r for weapon types it does not handle (2, 3, > 10: in
+# practice cat-3 type 3, AREA04's thrown breakable, updateThrownBreakable sets ba5). The C passes (o, p); the R3000
+# callers leave in $a2 whatever came before the call, which gen_port forwarded as PORT_ARG(2) (stack garbage).
+# - after boxesOverlapSigned / FUN_8004461c / boxesOverlapFlipAware (overlap found) $a2 = lhu 22(second object):
+src/weaponHitCat2Type08.c | extern int resolveHitResultD(TObj *, TObj *); | extern int resolveHitResultD(TObj *, TObj *, int);
+src/weaponHitCat2Type08.c | resolveHitResultD(a, o) | resolveHitResultD(a, o, *(unsigned short *)((char *)o + 0x16))
+src/x001/segmentedCrawlerWeaponHit.c | extern int resolveHitResultE(TObj *, TObj *); | extern int resolveHitResultE(TObj *, TObj *, int);
+src/x001/segmentedCrawlerWeaponHit.c | extern int resolveHitResultD(TObj *, TObj *); | extern int resolveHitResultD(TObj *, TObj *, int);
+src/x001/segmentedCrawlerWeaponHit.c | resolveHitResultE(o, e) | resolveHitResultE(o, e, *(unsigned short *)((char *)e + 0x16))
+src/x001/segmentedCrawlerWeaponHit.c | resolveHitResultD(o, e) | resolveHitResultD(o, e, *(unsigned short *)((char *)e + 0x16))
+src/x003/spikyLizardWeaponHit.c | extern int resolveHitResultD(TObj *, TObj *); | extern int resolveHitResultD(TObj *, TObj *, int);
+src/x003/spikyLizardWeaponHit.c | resolveHitResultD(o, p) | resolveHitResultD(o, p, *(unsigned short *)((char *)p + 0x16))
+src/x003/wingedForkPigWeaponHit.c | extern int func_80042B98(TObj *, TObj *); | extern int func_80042B98(TObj *, TObj *, int);
+src/x003/wingedForkPigWeaponHit.c | func_80042B98(p, o) | func_80042B98(p, o, *(unsigned short *)((char *)o + 0x16))
+src/x004/blackCrowWeaponHit.c | extern short resolveHitResultD(TObj *, TObj *); | extern short resolveHitResultD(TObj *, TObj *, int);
+src/x004/blackCrowWeaponHit.c | resolveHitResultD(a, o) | resolveHitResultD(a, o, *(unsigned short *)((char *)o + 0x16))
+src/x009/redFlowerWeaponHit.c | extern int resolveHitResultD(TObj *, TObj *); | extern int resolveHitResultD(TObj *, TObj *, int);
+src/x009/redFlowerWeaponHit.c | resolveHitResultD(o, p) | resolveHitResultD(o, p, *(unsigned short *)((char *)p + 0x16))
+src/x010/flyingBugWeaponHit.c | extern int resolveHitResultD(TObj *, TObj *); | extern int resolveHitResultD(TObj *, TObj *, int);
+src/x010/flyingBugWeaponHit.c | resolveHitResultD(o, p) | resolveHitResultD(o, p, *(unsigned short *)((char *)p + 0x16))
+src/x010/spearPigWeaponHit.c | extern int resolveHitResultD(TObj *, TObj *); | extern int resolveHitResultD(TObj *, TObj *, int);
+src/x010/spearPigWeaponHit.c | resolveHitResultD(o, p) | resolveHitResultD(o, p, *(unsigned short *)((char *)p + 0x16))
+src/x014/flowerForestPigShotWeaponHit.c | extern int resolveHitResultD(TObj *, TObj *); | extern int resolveHitResultD(TObj *, TObj *, int);
+src/x014/flowerForestPigShotWeaponHit.c | resolveHitResultD(o, e) | resolveHitResultD(o, e, *(unsigned short *)((char *)e + 0x16))
+# - after the inline hit()/side() box test $a2 = the 32-bit difference lhu(a->h+2) - lhu(b->h+2) (subu a2,a1,a0):
+src/weaponHitCat2Type0E.c | extern int weaponOnHitGetResult(O *, O *); | extern int weaponOnHitGetResult(O *, O *, int);
+src/weaponHitCat2Type0E.c | weaponOnHitGetResult(a, b)) | weaponOnHitGetResult(a, b, (unsigned short)a->h->whole - (unsigned short)b->h->whole))
+src/weaponHitCat4Type00.c | extern int weaponOnHitGetResult(TObj *, TObj *); | extern int weaponOnHitGetResult(TObj *, TObj *, int);
+src/weaponHitCat4Type00.c | weaponOnHitGetResult(a, b)) | weaponOnHitGetResult(a, b, U16(a->h, 2) - U16(b->h, 2)))
+src/weaponHitCat2Type07.c | extern int weaponOnHitGetResult(TObj *a, TObj *b); | extern int weaponOnHitGetResult(TObj *a, TObj *b, int r);
+src/weaponHitCat2Type07.c | weaponOnHitGetResult(o, p)) | weaponOnHitGetResult(o, p, (unsigned short)o->h->p.whole - (unsigned short)p->h->p.whole))
+#
+# memCardScreenUpdate (D0SPSUB2 0x800E9888) returns its third argument and subScreenUpdate (D0SPSUB3 0x800EDD28) its
+# first when the menu state is not one they handle; the R3000 callers (frame tasks) leave unrelated words there
+# (updatePadInput's / the previous call's leftovers). 0 = "still running", the neutral result for both callers.
+src/inventoryScreenTick.c | r = FUN_800e9888(); | r = FUN_800e9888(0, 0, 0);
+src/inventoryScreenTick.c | r = FUN_800edd28(); | r = FUN_800edd28(0);
+src/inventoryScreenTick.c | extern int FUN_800efaa4(void), FUN_800e9888(void), FUN_800edd28(void); | extern int FUN_800efaa4(void), FUN_800e9888(), FUN_800edd28();
+src/gameLoadSaveState.c | extern int FUN_800e9888(void); | extern int FUN_800e9888();
+src/gameLoadSaveState.c | r = FUN_800e9888(); | r = FUN_800e9888(0, 0, 0);
