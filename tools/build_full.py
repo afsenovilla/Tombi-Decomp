@@ -30,7 +30,8 @@ How it works (all output under build/full/, ignored by git):
   5. ld + objcopy produce build/full/MAIN0.EXE (with the PS-X EXE header) and build/full/X000.BIN,
      copied to build/MAIN0.EXE and build/X000.BIN, and compared with the retail files.
 
-Also links the SYSTEM code overlays of tools/sysovl.py (src/<prog>/*.c + splat), each checked by its sha1.
+Also links the area overlays AREAnn/X0nn.BIN (src/x0nn/*.c + splat) and the SYSTEM code overlays of tools/sysovl.py
+(src/<prog>/*.c + splat), each checked by its sha1 (the overlays are skipped when their retail file is missing).
 
 Usage: python3 tools/build_full.py [--no-split] [-j N] [--asm-only] [--keep-going] [--only prog,prog]
   --no-split   reuse the previous splat output in build/full/asm
@@ -59,6 +60,14 @@ for _p, (_path, _sha, _code) in _SO.SYSOVL.items():
     _f = os.path.join(ROOT, "game", _path)
     PROGS[_p.lower()] = dict(name=_p, game="game/" + _path, vram=_SO.BASE, size=os.path.getsize(_f) if os.path.exists(_f) else 0,
                              header=0, sha1=_sha, out=_p + ".BIN", src="src/" + _p.lower())
+# area overlays (AREAnn/X0nn.BIN), linked from src/x0nn/*.c + splat like the SYSTEM overlays; skipped when missing
+for _n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19):
+    _p = "x%03d" % _n
+    _f = os.path.join(ROOT, "game", "AREA%02d" % _n, _p.upper() + ".BIN")
+    _sha = re.search(r"^sha1: (\w+)", open(os.path.join(ROOT, "config", _p + ".yaml")).read(), re.M).group(1)
+    PROGS[_p] = dict(name=_p.upper(), game="game/AREA%02d/%s.BIN" % (_n, _p.upper()), vram=0x800E8028,
+                     size=os.path.getsize(_f) if os.path.exists(_f) else 0, header=0, sha1=_sha,
+                     out=_p.upper() + ".BIN", src="src/" + _p)
 if "--only" in ARGS:  # --only g0over,i0nfo: build just these programs (quick iteration)
     _keep = ARGS[ARGS.index("--only") + 1].lower().split(",")
     PROGS = {k: v for k, v in PROGS.items() if k in _keep}

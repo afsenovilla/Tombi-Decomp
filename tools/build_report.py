@@ -43,7 +43,7 @@ PROGS_VRAM = {"MAIN0": 0x80010000}  # first byte after the file header (U.BINS g
 import sysovl as _SO
 SYSOVL = [p.lower() for p, (path, sha, code) in _SO.SYSOVL.items() if os.path.exists(os.path.join(ROOT, "game", path))]
 PROGS.update({p: p.upper() for p in SYSOVL})
-LINKED = LINKED + tuple(SYSOVL)
+LINKED = LINKED + tuple(SYSOVL) + tuple(OVERLAYS)  # area overlays: linked from src/x0nn/ by build_full too
 AS = ["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-G0",
       "-I" + os.path.join(ROOT, "include", "tomba")]
 
@@ -478,7 +478,7 @@ def main():
     gen = lambda: subprocess.run([OBJDIFF, "report", "generate", "-p", ".", "-o", "build/report.json"], check=True)
     gen()
     # "complete" (decomp.dev "fully linked"): a unit counts only when its object is really linked into the executable
-    # by tools/build_full.py (src file of MAIN0 / X000 / the SYSTEM overlays; the area overlays are not linked from source yet) and matches
+    # by tools/build_full.py (src file of MAIN0 / X000 / the area overlays / the SYSTEM overlays) and matches
     # 100 % of its code and of the data sections it claims (tools/report_data.py: the ones build_full places at their
     # retail address; data the C does not define still comes from splat and stays in <prog>/data). Needs the first pass.
     rep = {u["name"]: u for u in json.load(open("build/report.json"))["units"]}

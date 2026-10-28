@@ -11,7 +11,8 @@
   exist for GameShark / emulator pokes. Verified in tools/psxemu: 1B4 (area select PNG), 1AB. Still open: whether event 32 (title #52
   "MiniatureMakingTrumpets", in D_800806B4 but no layout list) is ever awarded; titles 90 and 126 are not referenced by the title table;
   overlay pad code not audited for sequences.
-- **"Fully linked" on decomp.dev.** (Done: MAIN0/X000 matched units are marked complete by tools/build_report.py; remaining: link the overlays from source and) split each object's
+- **"Fully linked" on decomp.dev.** (Done: matched units of MAIN0/X000, the area overlays and the SYSTEM overlays are linked from source by
+  tools/build_full.py and marked complete by tools/build_report.py; remaining:) split each object's
   `.data`/`.rodata` out of the retail binary (roadmap step 4, segment split), keeping the linked
   executables byte-identical. Long, mechanical background task; start after the struct/type work.
 - **Free-form event titles (code mod).** Change `spawnEventTitle` (src/spawnEventTitle.c) so it lays out the
