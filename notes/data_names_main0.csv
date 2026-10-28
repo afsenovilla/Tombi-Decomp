@@ -186,7 +186,7 @@ address,name,size,source
 8009d600,WEAPON_BEND_PARAMS,0x6,usage: short a b c passed to weaponCalcBentOffset by weapon0Swing / weapon8to9Swing (= GV6.s00..s04) refs=15
 8009cda3,GAME_INVENTORY_SCREEN,0x1,usage: GAME.inventoryScreen reached by its own symbol (updatePauseMenu: 0..3 open a sub screen 4..7 of MENU_STATE.unk16, 4 = close; US alias D_8009C10B) refs=16
 8009c340,DEBUG_SCREEN_CURSOR_ROW,0x1,usage: displayDebugScreen cursor row 0/1 (game.h comment SELECTED ROW; US alias D_8009B6A8) refs=6
-800e3e28,MODEL_PRIM_BUFFERS,,usage: model primitive work buffers of 0x1600 bytes per slot (copyModelPrimGroups in l4Type1BDeformModel / FUN_800ed258 / FUN_800ed750) refs=11
+800e3e28,MODEL_PRIM_BUFFERS,,usage: model primitive work buffers of 0x1600 bytes per slot (copyModelPrimGroups in l4Type1BDeformModel / villagerNpcWalkPath / villagerNpcSpringMotion) refs=11
 8009bd70,TILE_COL_COUNT,0x2,usage: tileCollideColumnAt scratch: entries left in the column list refs=5
 8009bd74,TILE_COL_TOP,0x2,usage: tileCollideColumnAt scratch: entry top y refs=6
 8009bd78,TILE_COL_HEIGHT,0x2,usage: tileCollideColumnAt scratch: entry height (0 = plain) refs=6
@@ -266,7 +266,7 @@ address,name,size,source
 800b0d98,AREA_MODEL_DRAW_LIST,0x16c,usage: list the area model link hook fills (callAreaModelLinkHook) and drawAreaModelList draws ([3] = count); clearOtBuffer clears it refs=6
 800d7e28,SPRITE_UNPACK_BUFFER,,usage: destination of unpackSpriteFrame then source of loadTIM (uploadThrownObjectFrame / updateRedBird) refs=6
 8009f7e4,LOADING_SCREEN_STATE,0x4,usage: displayLoadingScreen: 0 = init the sprites then 1 = animate, >1 = stopped; areaTransitionHandler / debugSelectHandler reset it (US alias D_8009EB4C) refs=9
-800a60c8,PLAYER_MESSAGE_BOX,0x4,usage: PLAYER.obj.d90 reached by its own symbol: the message box showMessageBox returned to the scene code (FUN_801363e4 / a00DarkCloakedFigureScene) refs=27
+800a60c8,PLAYER_MESSAGE_BOX,0x4,usage: PLAYER.obj.d90 reached by its own symbol: the message box showMessageBox returned to the scene code (a00Variant0EventScene / a00DarkCloakedFigureScene) refs=27
 8009c940,GVARS_USE_ITEM_PENDING,0x1,usage: GVARS.b40 -> useItemPending: set with the item id by the inventory (x014 updateSectionClearController), consumed by playerStepUseItem / l4Type1BInitModel (US alias D_8009BCA8) refs=18
 8009c941,GVARS_USE_ITEM_ID,0x1,usage: GVARS.b41 -> useItemId: the item id being used (playerStepUseItem copies it to the player ext and switches on it; US alias D_8009BCA9) refs=12
 8009c93c,GVARS_FADE_EFFECT,0x1,usage: GVARS.b3c -> fadeEffect: first argument of scriptOpSetFadeEffect / execGameOpcode 377 with GAME_FADE_SCREEN_CONTROL = 0x10 (US alias D_8009BCA4) refs=5

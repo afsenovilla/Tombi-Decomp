@@ -24,10 +24,10 @@ int PadInitDirect(u8 *output0, u8 *output1) {
     _padInitDirSeq();
 
     obj = &D_8009C038[0];
-    D_800981AC = func_8006B62C;
+    D_800981AC = padDirNextPort;
     D_800981B0 = padResetPortState;
     D_800981B4 = padGetSendByte;
-    D_800981B8 = func_8006B7EC;
+    D_800981B8 = padBuildActuatorMap;
     D_800981BC = padGetPortId;
     D_800981C0 = padGetPortBuffer;
     swapCommand = _padLatchId;

@@ -78,7 +78,7 @@ void func_80132DD0(void *o)
     wooden_branch_step(o, 0);
 }
 
-/* func_8011DF5C (the second global function of func_8011DE84.c, a chained-object placement handler of
+/* func_8011DF5C (the second global function of chainedPartPlaceChild.c, a chained-object placement handler of
  * updateA00L4Type06: T7468[0] = data_80138B98[0] = 0x8011DF60) lives at 0x8011DF60: its C name is 4 bytes short and
  * the matching build PROVIDEs it only as func_8011DF5C__8011DF60.  gen_port.py reads that renamed PROVIDE, but a
  * build whose build/full lacks it (the real-Windows build of 652d9dc still printed "32 function ... 2308 code

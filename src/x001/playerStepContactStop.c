@@ -10,7 +10,7 @@ extern char D_80010748[];
 extern void FUN_8001e4f0(int);
 extern void startPadVibration(int, int, int, int);
 extern void spawnGroundDebris(int, short, int, int);
-extern void func_80110CAC(TObj *);
+extern void playerApplySpeedFriction(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
 extern void playerCheckGroundAndFall(TObj *);
 extern void playerContactStopCheckJump(TObj *);
@@ -33,7 +33,7 @@ void playerStepContactStop(TObj *o)
         o->wb6 = 0;
         o->state++;
     case 2:
-        func_80110CAC(o);
+        playerApplySpeedFriction(o);
         playerMoveByAngleSpeed(o);
         playerCheckGroundAndFall(o);
         playerContactStopCheckJump(o);

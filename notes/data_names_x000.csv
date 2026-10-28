@@ -4,8 +4,8 @@ address,name,size,source
 80114ae4,FLASH_EFFECT_DEFS_BY_AREA,,usage: {u16 w1e; short spriteIdx; void **anims; pad} per area (GAME[0]) read by spawnFlashEffect refs=3
 80114bdc,BREAK_PIECE_DEFS,,usage: 4 u16 per subtype (w22 timer / anim set index / vertical speed) read by updateBreakPiece refs=3
 80114c20,WEAPON_TRAIL_DEFS,,usage: {short spriteIdx; pad; void **anims; pad} per subtype (initWeaponTrailSprite / updateWeaponTrailObject / follow / orbit steps) refs=5
-80114c58,VILLAGER_NPC_STEP_TABLE,0x24,usage: step handlers of updateL4Type00Object (the villager NPC; its steps FUN_800ed258 / FUN_800ed750 say so) indexed by o->step refs=3
-80114c64,VILLAGER_NPC_WALK_PATHS,,usage: per-subtype walk path pointer the villager step FUN_800ed258 follows (p = tab[b0c]) refs=4
+80114c58,VILLAGER_NPC_STEP_TABLE,0x24,usage: step handlers of updateL4Type00Object (the villager NPC; its steps villagerNpcWalkPath / villagerNpcSpringMotion say so) indexed by o->step refs=3
+80114c64,VILLAGER_NPC_WALK_PATHS,,usage: per-subtype walk path pointer the villager step villagerNpcWalkPath follows (p = tab[b0c]) refs=4
 801151e0,PLAYER_FOOT_OFFSET_BY_DIR,0x20,usage: {short dx; short dy}[8] by facing direction (D_1f8001f8 & 7) for the player's foot position (footstep effect / jump / walk / fall) refs=4
 801152e8,SLOPE_TILT_TABLE,0x24,usage: u8 tilt value per slope index (+0xb0) stored at the player's +0x8c by playerSetSlopeTilt (flag 0) and the step entries refs=74
 80115220,PLAYER_PERCH_ANIM_PAIRS,,usage: u8 pairs per wb2 count loaded into PLAYER_EXT +0xe/+2 by playerSetAnimPairA / playerStepFlipOntoPerch refs=3
@@ -14,7 +14,7 @@ address,name,size,source
 80115388,PLAYER_SPIN_JUMP_ANIMS,,usage: u8 animation ids passed to AnimJump per spin phase i by playerStepSpinOnObject refs=4
 801153c0,PLAYER_SPIN_RELEASE_SPEEDS,,usage: short rows of 7 per weapon (PLAYER_EXT b0b * 7): launch velX by spin count and velY at [10] (playerStepSpinRelease) refs=5
 8011545c,PLAYER_MOVE_PARAMS,0xb4,usage: 9 rows of 0x14 by speed class (GV2 b3 + weapon*4 / 8 when slowed): air accel f0..f8 (playerAirAccelerateX); +0xa gravity cap/step (ObjGravityStep D_80115466); +0xc jump rise speeds (playerSetJumpRiseVelocity D_80115468) refs=9
-80115510,PLAYER_DECEL_PARAMS,0x414,usage: 9 rows of 0x74 by the same speed class: speed thresholds f0/f2/f4 and cap f6 then the per-kind decrement sets (playerDecelerateSpeed / B / skid / attack / slope slide / updateSpeedFromPad / func_80110CAC) refs=66
+80115510,PLAYER_DECEL_PARAMS,0x414,usage: 9 rows of 0x74 by the same speed class: speed thresholds f0/f2/f4 and cap f6 then the per-kind decrement sets (playerDecelerateSpeed / B / skid / attack / slope slide / updateSpeedFromPad / playerApplySpeedFriction) refs=66
 80115924,PLAYER_POWER_AURA_DEFS,0x24,usage: {u16 w1e; pad; short spriteIdx; pad; int *anims} per subtype (playerPowerAuraInit / HiddenStep) refs=4
 80115948,TREASURE_CHEST_ANIM_SETS,0xc0,usage: pointer to the {closed; open} anim pair per area*4 + chest variant (b0c & 0x7f) used by every treasureChestOpen* step and updateBreakPiece refs=10
 80115a08,TREASURE_CHEST_A3S9_ANIM_SETS,0x10,usage: the anim pairs used instead when GAME is area 3 section 9 (0x30009) refs=8
@@ -28,7 +28,7 @@ address,name,size,source
 801386a8,A00_TUTORIAL_JUMP_MESSAGE_IDS,,usage: message id per BUTTON_CONFIG_INDEX shown by a00TutorialHintJumpMessage refs=1
 8013882c,A00_SPORE_BRANCH_SUBTYPE_OFS,,usage: signed char per subtype added to the D_80138830/38/40 table pointers of updateA00SporeBranch refs=17
 80138d6c,A00_AP_BOX_50K_ITEM_ENTRY,0x6,usage: the item entry a00ApBox50kReward spawns twice refs=2
-80138d74,A00_AP_BOX_SPARKLE_TABLE,0x180,usage: u8[4][8][12] particle init bytes by group / phase for the 50k AP box sparkle (func_8012127C) refs=24
+80138d74,A00_AP_BOX_SPARKLE_TABLE,0x180,usage: u8[4][8][12] particle init bytes by group / phase for the 50k AP box sparkle (a00ApBox50kSparkleParticles) refs=24
 80138ef4,A00_AP_BOX_SPARKLE_OFFSETS,,usage: signed char {dx;dy} pairs per sparkle (a00ApBox50kSparkle) refs=2
 80138f0c,A00_ITEM_OBJ_PATH_START,,usage: u16 first path node per item slot (updateA00ItemObj) refs=2
 80138f14,A00_ITEM_OBJ_PATH_NODES,,usage: {short t; u16 x; u16 y; u16 z} path nodes (t -1 restart / -2 back) walked by updateA00ItemObj refs=4
@@ -51,21 +51,21 @@ address,name,size,source
 80114ab8,KOMA_PIG_DUST_PUFF_VARIANT_BY_AREA,0x8,usage: u8 variant b0c per area GAME (updateKomaPigDustPuff) refs=1
 80114ac0,KOMA_PIG_DUST_PUFF_VARIANT_B_BY_AREA,0x8,usage: the second u8 variant per area (updateKomaPigDustPuff) refs=1
 80114ac8,KOMA_PIG_DUST_PUFF_ANIMS_BY_AREA,,usage: void **[area] anim list indexed by the variant (updateKomaPigDustPuff) refs=1
-80114c70,VILLAGER_NPC_SPRING_PARAMS,,usage: int ** per variant b0c read by the villager step FUN_800ed750 (spring motion / item effect) refs=3
+80114c70,VILLAGER_NPC_SPRING_PARAMS,,usage: int ** per variant b0c read by the villager step villagerNpcSpringMotion (spring motion / item effect) refs=3
 80115248,PLAYER_ROPE_JUMP_OFF_SPEEDS,,usage: short {velX; velY} pairs by direction i (playerStepRopeJumpOff) refs=2
 80134cf4,EGG_SHELL_PIECE_ANIMS,,usage: anim pointer per subtype (updateEggShellPiece) refs=2
 80138664,MUSHROOM_CLUSTER_DEBRIS_PARAMS,,usage: entries per b3 read by updateMushroomClusterDebris refs=1
 80138690,A00_POOL_TYPE24_CLUT_X,0x8,usage: clut x per subtype (GetClut(x[subtype], y[subtype] + b0c)) in updateA00PoolType24 refs=1
 80138698,A00_POOL_TYPE24_CLUT_Y,0x8,usage: clut y per subtype (0: none) in updateA00PoolType24 refs=2
 801384c0,A00_SCROLL_CONTROLLER_MODE_BY_SECTION,,usage: u8 per section (GAME.selectedSection) read by updateA00ScrollController refs=1
-80138988,A00_INIT_OBJECT_ANGLE_OFFSETS,,usage: 3 shorts per subtype added to the placed object's angle (func_8011C804 e->d84/d88 and the vz sum) refs=9
+80138988,A00_INIT_OBJECT_ANGLE_OFFSETS,,usage: 3 shorts per subtype added to the placed object's angle (a00BuildPlacedObjectList e->d84/d88 and the vz sum) refs=9
 80138f04,A00_AP_BOX_100K_ITEM_ENTRY,0x6,usage: the item entry updateA00ApBox100k spawns refs=1
 80138f8c,BITING_PLANT_BAIT_VEL_BY_FRAME,,usage: short velH per animFrame*2 (updateA00BitingPlantBait) refs=3
 80139134,A00_L2_TYPE06_PHASE_LIMITS,,usage: short per subtype: phase count wb4 is compared against (updateA00L2Type06) refs=2
 8013913c,A00_L2_TYPE06_PHASE_WAITS,,usage: short [subtype][phase] base wait plus Rand & 0x1f (updateA00L2Type06) refs=1
 801391e4,A00_L2_TYPE06_BOXES,,usage: per-subtype pointer to 4-byte boxes by phase (updateA00L2Type06 BOX) refs=1
 80139208,BITING_PLANT_BOXES,,usage: 4 u8 box per subtype (updateA00BitingPlant) refs=1
-801396c4,A00_VARIANT0_SCENE_ITEM_ENTRY,0x6,usage: item entry applied by applyItemEffect in the variant-0 scene FUN_801363e4 refs=1
+801396c4,A00_VARIANT0_SCENE_ITEM_ENTRY,0x6,usage: item entry applied by applyItemEffect in the variant-0 scene a00Variant0EventScene refs=1
 8013abb8,PINK_PIGLET_ANIMS,0xc,usage: 3 anim pointers of updateA00PinkPiglet (D_8013ABBC / D_8013ABC0 are [1] / [2]) refs=2
 8013ac14,NPC_CHARLES_ANIMS,,usage: anim pointers of Charles (updateNpcCharles / updateCharlesTalkScene / npcCharlesHop*; PTR_8013ac18..D_8013AC44 are its elements) refs=3
 8013ad30,RED_BIRD_ANIMS,0x58,usage: 22 anim pointers of the red bird (redBirdStep0 [0]; DAT_8013ad38..DAT_8013ad7c are its elements) refs=1
@@ -74,7 +74,7 @@ address,name,size,source
 8013b110,POOL_TYPE04_ANIMS,0x8,usage: anim per subtype (initPoolType04Sprite) refs=1
 8013b118,A00_POOL_TYPE11_ANIM,0x4,usage: the anim pointer of updateA00PoolType11 refs=2
 8013b11c,A00_POOL_TYPE16_ANIMS,,usage: anim list [0] of updateA00PoolType16 refs=1
-8013b130,A00_VARIANT0_SCENE_PART_ANIMS,0x1c,usage: the 7 part anims D_8013B130..D_8013B148 of the variant-0 scene FUN_801363e4 (updateA00PoolType17 reads [0]) refs=3
+8013b130,A00_VARIANT0_SCENE_PART_ANIMS,0x1c,usage: the 7 part anims D_8013B130..D_8013B148 of the variant-0 scene a00Variant0EventScene (updateA00PoolType17 reads [0]) refs=3
 8013b14c,A00_L4_TYPE18_ANIMS,0xc,usage: the 3 anims of updateA00L4Type18 / a00L4Type18Idle / Active (D_8013B150 / D_8013B154 are [1] / [2]) refs=3
 8013b17c,FROG_ANIMS,0x28,usage: 10 anim pointers of the frog (updateFrog [e->anim]; D_8013B180..D_8013B18C are its elements) refs=5
 8013b19c,A00_ROAMING_FLYER_BOB_ANIMS,0x8,usage: the two anims of a00RoamingFlyerBob (D_8013B1A0 is [1]) refs=3
@@ -89,7 +89,7 @@ address,name,size,source
 8013b224,BITING_PLANT_ANIMS,0x28,usage: anim per subtype (updateA00BitingPlant / lunge / eat bait; D_8013B230 is [3]) refs=5
 8013b23c,A00_FOG_CLOUD_ANIMS,0x10,usage: anim per subtype (updateA00FogCloud) refs=3
 8013b26c,CHICK_ANIM,0x4,usage: the chick's one anim (spawnChick / updateChick / chickWander / chickDropToGround) refs=5
-8013b270,A00_DARK_CLOAKED_FIGURE_ANIMS,0x8,usage: idle [0] and the second anim [1] (PTR_DAT_8013b274) of updateA00DarkCloakedFigure / a00DarkCloakedFigureIdle / FUN_80134308 refs=11
+8013b270,A00_DARK_CLOAKED_FIGURE_ANIMS,0x8,usage: idle [0] and the second anim [1] (PTR_DAT_8013b274) of updateA00DarkCloakedFigure / a00DarkCloakedFigureIdle / a00DarkCloakedFigureLeapOff refs=11
 8013b2a4,A00_BACKDROP_SPRITE_ANIMS,0x28,usage: the anims updateA00BackdropSprites picks by case (D_8013B2A8..D_8013B2C8 are its elements; [6] D_8013B2BC also updateA00L4Type11) refs=1
 8013b2cc,HOODED_OLD_MAN_ANIMS,0x24,usage: the 9 anims of updateHoodedOldMan (D_8013B2D0..D_8013B2EC are its elements) refs=2
 800e989c,PLAYER_SPIN_AIM_ANGLES_A,0x12,usage: 9 shorts: the aim angle (+0x88) per 8-direction pad index (8 = none) read by playerSpinAimDir8A refs=3

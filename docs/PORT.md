@@ -742,7 +742,7 @@ Pending:
   `asm("" : "=r"(out) : "0"(in))` with two different names is a move (the old gcc's `move`), and I0NFO/I0NFO2/I0NFO3
   `func_800EAD48` (the overlay's player draw, `drawPlayer` type 1..3) computed its slice table pointer from the
   uninitialised output. Tied outputs are now emitted as `out = in;` (`tied_asm_moves`); it also gives
-  `func_8006B62C` (control/index) and one `clearObj = obj` their values. Checked: port frame 1800 of
+  `padDirNextPort` (control/index) and one `clearObj = obj` their values. Checked: port frame 1800 of
   `--poke 900:1F8001B4:1 --poke 1250:8009C960:2:2 --poke 1250:8009C962:3:2 --pad-script 1000:start,1300:circle:3`
   against the emulator (`capture.base_state`, area 2 section 3, +140 vblanks): Tombi drawn at the same place; the
   jumpcheck trace in AREA00 is unchanged.
@@ -1767,8 +1767,8 @@ stall is host I/O or presentation on that machine, still open.
 
 - **`access violation: eip=8011df60 (execute)`** (frame 14319, under `updateMainObjects` from an X000 area
   function): not a reload or `--lang` fault but a table word the relocator never knew as a function.
-  `data_80138B98` (`src/data/x000/D_80138908.c`, the chained-object placement handlers of `func_8011C804`) holds
-  the literal `0x8011DF60`: the second global function of `func_8011DE84.c`, `func_8011DF5C`, whose code the
+  `data_80138B98` (`src/data/x000/D_80138908.c`, the chained-object placement handlers of `a00BuildPlacedObjectList`) holds
+  the literal `0x8011DF60`: the second global function of `chainedPartPlaceChild.c`, `func_8011DF5C`, whose code the
   matching build places at `0x8011DF60` and PROVIDEs only under its renamed form `func_8011DF5C__8011DF60`.
   `gen_port` listed a unit's other global functions in the function map only when their bare name had an
   address, so this one was missing from `port_funcmap` / `port_addrmap`: the word stayed a label inside a code
@@ -1835,11 +1835,11 @@ stall is host I/O or presentation on that machine, still open.
 - **Register-carried arguments of a dispatcher took the arity of the wrong version.** `gen_port`'s
   `forward_short_calls` read a callee's parameter count from the first definition in its file; files with a demo
   (`VERSION_SLPM_80165`) or Japanese variant first gave the variant's count. `dispatchAreaItemUpdate(void)` (called
-  by `updateHoodedOldMan` with `(o, &pos, 0)`) forwarded only `PORT_ARG(0), PORT_ARG(1)` to `FUN_80123648(p, q, c)`,
+  by `updateHoodedOldMan` with `(o, &pos, 0)`) forwarded only `PORT_ARG(0), PORT_ARG(1)` to `a00SpawnL5Type7Child(p, q, c)`,
   whose demo form has two parameters: the layer-5 type-7 object the hooded old man spawns got a stack-garbage
   subtype `c` (the handler index of the chained-part tables at 0x80138B88/B98), harmless by luck on Linux,
   anything on Windows. `_blank_versions` now hides the `#if defined(VERSION_...)` / `#elif defined(VERSION_...)`
-  branches before the definitions are scanned; one forwarded call changed (`FUN_80123648(PORT_ARG(0), PORT_ARG(1),
+  branches before the definitions are scanned; one forwarded call changed (`a00SpawnL5Type7Child(PORT_ARG(0), PORT_ARG(1),
   PORT_ARG(2))`), 278 as before, the standard test stays byte-identical (36 frames). The `-v -v -v` player line
   now also prints `g=` (GRABBED_OBJECT) and `9e=` (the cling state).
 - **Event-title letters** (`l8Type01MoveStep`, case 3: a vertical bob of `MulNegSinScaled(wb4, 4)` (under 3 px)
@@ -1851,7 +1851,7 @@ stall is host I/O or presentation on that machine, still open.
 #### Third real-Windows round (d6aae42): the two null-pointer bursts
 
 - **`X000+0xe8` / `+0xf6` writes to 0x14 / 0x10 are the retail game's own.** The offsets are inside
-  `func_8011DE84`'s native code: its second function `func_8011DF5C` (retail `0x8011DF60`, `T7468[0]`), the
+  `chainedPartPlaceChild`'s native code: its second function `func_8011DF5C` (retail `0x8011DF60`, `T7468[0]`), the
   placement handler of the **tail** part (`b0c` 0) of a subtype-2 `updateA00L4Type06` chain (AREA00 section 2,
   parts at x 2998..3103, y ~-710). The tail's `d94` (next part) is 0 by construction (gdb: every chain of sections
   0/1/2 ends in `d94=0`); subtypes 0 and 1 use `func_8011E028` / `func_8011E0EC` for the tail, which do not touch
@@ -1905,7 +1905,7 @@ AREA06 631, AREA09 730, AREA11 1042, 6..10 chunks each, no fault) and X001 under
 no room of theirs: the sweep's numbering, not a language fault).
 
 The null writes of that run (`X000+0xe8` / `+0xf6` to addresses `0x14` / `0x10`, 428 each, one per frame for
-8.5 s) are a chained-object placement handler (`FUN_8011dd30` / `func_8011DE84` family: `q = o->d94; q->y = ...;
+8.5 s) are a chained-object placement handler (`updateChainedPartsObj` / `chainedPartPlaceChild` family: `q = o->d94; q->y = ...;
 q->a = ...`, y at +0x14 before a at +0x10) whose child `d94` is NULL; "X000+off" names an area-variant function
 (`port_sym_near` reports areamap entries by the area's name). See the gdb notes in the commit for what the
 headless probes found.
@@ -2037,7 +2037,7 @@ colour in the top corners in AREA00), and any screen-space cull not matching the
    the room's entry: what it does not reach (doors, dialogue, item use, the rooms of `DOOR_ROOMS`) is untested;
    the `round` rule of the relocator keeps a genuine `0x80NN0000` pointer of an overlay unrelocated (none is
    known; a fault at such an address in the report would be one). A function the game jumps to without a csv
-   row (`func_8011E028` was one: the other global function of `func_8011DE84.c`) is split out in
+   row (`func_8011E028` was one: the other global function of `chainedPartPlaceChild.c`) is split out in
    `notes/functions_x*.csv` or registered as `x000_handwritten.c` does (`func_80132BB8`, `func_80132DD0`).
 2. Assets are never relocated; a data file that carries absolute pointers (beyond the load lists) would show up
    as a bad pointer at use. The null-pointer emulation covers reads/writes of page 0 only; a fault elsewhere is

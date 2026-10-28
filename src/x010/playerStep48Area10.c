@@ -13,7 +13,7 @@ extern unsigned short PAD_PRESSED;
 extern unsigned short BUTTON_MASK_B, JOYPAD_STATE;
 extern void playerAirAccelerateX(O *);
 extern void FUN_8001fd94(O *);
-extern void FUN_80103cbc(O *);
+extern void playerBiteEntryCopyPos(O *);
 extern void PlayerSetAnimIfChanged(O *, int);
 extern short FUN_8003fd78(O *, int, int);
 
@@ -53,7 +53,7 @@ void playerStep48Area10(O *o)
             }
         }
         if (o->b69 != 0 || FUN_8003fd78(o, (short)(BITTEN_OBJECT->y16 - o->y16 - o->s70), 1) || o->s20 > 10) {
-            FUN_80103cbc(o);
+            playerBiteEntryCopyPos(o);
         }
         return;
     case 2:

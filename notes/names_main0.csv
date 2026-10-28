@@ -279,6 +279,7 @@ address,name,confidence,comment
 800288c4,cameraScrollInputStep,alta,names batch (see notes/names.md)
 80028a80,stepScrollAndAngle,alta,psx_tomba #21 (por bytes)
 80028b40,stepScrollClearX,alta,psx_tomba (por bytes)
+80028b84,clampCameraYOffsetToObjBounds,media,clamps the camera y offset so camera+offset stays in o->h30..h32
 80028be0,cameraFollowRampStep,alta,names batch (see notes/names.md)
 80028f94,handleLookScrollInput,alta,psx_tomba #21 (por bytes)
 80029078,updateCameraScroll,alta,names batch (see notes/names.md)
@@ -1067,11 +1068,16 @@ address,name,confidence,comment
 8006ae1c,padSetCmdQueryComb,alta,"libpad: queues controller command 0x47 (query actuator combination) with a one-byte index"
 8006ae3c,padSetCmd4B,media,"libpad: queues controller command 0x4b with no parameters (command role unknown)"
 8006ae54,_padIfSioRW,alta,behaviour name (see notes/names.md)
+8006ae9c,padDirSendCommand,media,libpad padif.c direct table 80098234: optional callbacks; sends command byte (0x42 default)
+8006af74,padDirReadBlockCount,media,libpad padif.c direct table 80098238: exchanges the mode byte and stores the block count D_80098224
 8006b020,_padSendCmdByte,alta,behaviour name (see notes/names.md)
+8006b0ac,padDirSioTransfer,media,libpad padif.c direct table 80098240: the SIO byte loop (PAL revision)
 8006b464,PadInitDirect,alta,names batch (see notes/names.md)
 8006b5c4,padResetPortState,alta,"libpad, called from PadInitDirect: when the port is flagged (+0x49) clears its state, counters and pointers an"
+8006b62c,padDirNextPort,media,libpad padportd.c: records the port result and starts _padInitSioMode on the next port
 8006b720,_padLatchId,alta,behaviour name (see notes/names.md)
 8006b730,padGetSendByte,alta,"libpad: returns the payload byte to transmit for the current command at payload_index-3 (actuator slots for co"
+8006b7ec,padBuildActuatorMap,media,libpad padportd.c: builds actuatorEnabled from the actuator map and payload
 8006ba68,padGetPortId,alta,"returns 0x10/0x20 for the two port objects in D_8009C038 (stride 0xf0), 0xff otherwise"
 8006baa0,padGetPortBuffer,alta,"inverse of padGetPortId: returns D_8009C038 or D_8009C038+0xf0 depending on the port id bits 0xf0"
 8006bac4,_padInitDirSeq,alta,behaviour name (see notes/names.md)

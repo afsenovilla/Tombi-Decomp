@@ -9,7 +9,7 @@
 void dispatchAreaItemDraw(void)
 {
     if (GAME.selectedArea == AREA00_VILLAGEOFALLBEGINNINGS) {
-        func_80123C20();
+        a00UseItem7EObj();
     } else if (GAME.selectedArea == AREA04_HAUNTEDMANSION) {
         func_8011E594();
     } else if (GAME.selectedArea == AREA10_DEEPJUNGLE) {

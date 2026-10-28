@@ -67,7 +67,7 @@ the bytes of the function in the game. Verification: `tools/matchcheck.py` (mask
   `notes/todo_match4.csv` lists the pending game functions with splat's boundaries (better than Ghidra's).
 - **splat boundaries can also be wrong**: it cuts at jump tables (read the table from the binary: for X000 the file offset
   is `addr - 0x800E8028`) and sometimes merges several small functions. If the next entry is the rest of the same
-  function, match the whole range (func_80122C10 = 172 + 600 B; func_8011D9D8 = 856 B).
+  function, match the whole range (playerStepThrownOffBite = 172 + 600 B; chainedPartsBendSub0 = 856 B).
 - **Brute force scheduling differences**: when only instruction order differs, a small script that tries scalar `X`
   vs array `X[]` per global plus permutations of the statements involved, scored with `ncheck --score`, usually
   finds the match in seconds (func_8002AC68, func_8004C1EC).
@@ -220,7 +220,7 @@ Functions that match only thanks to a compiler hint rather than plain C; keep th
 - Second extern name for the same global: func_8002A0FC, func_8002A258 (and others, see the source comments).
 - `__asm__ volatile("")` barrier: func_80112C24. Jump-table data as `__asm__(".word")` (avoid: the full build links that data from the owner's .rodata; a00SectionScrollAdjust had it, now FUNC starts after the tables).
   `volatile` accesses to force order: func_801236F0. Second extern names also in func_800425C4, func_80047AF0,
-  func_8002235C, func_80101938, func_8011AD98, charlesTalkCheck. Files holding several small functions merged by splat: func_8011D204 (6),
+  func_8002235C, func_80101938, func_8011AD98, charlesTalkCheck. Files holding several small functions merged by splat: chainedPartFrameTo80 (6),
   func_8011F288 (wip, 3).
   `volatile` stores pinning a sunk store (then permute the rest): func_80122724, func_8010E628.
 

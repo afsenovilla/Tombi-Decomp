@@ -9,7 +9,7 @@ extern TObj *PLAYER_EXT;
 extern char MOVE_TABLE_1[];
 extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned short TICK_COUNT;
-extern void func_801072FC(TObj *);
+extern void playerSlideEntry(TObj *);
 extern void playerSlopeSlideUpdateAnim(TObj *);
 extern void playerDecelerateSpeedB(TObj *);
 extern void playerMoveByAngleSpeed(TObj *);
@@ -25,7 +25,7 @@ void playerStepSlopeSlideB(TObj *o)
 {
     switch (o->state) {
     case 0:
-        func_801072FC(o);
+        playerSlideEntry(o);
     case 1:
         playerSlopeSlideUpdateAnim(o);
         playerDecelerateSpeedB(o);

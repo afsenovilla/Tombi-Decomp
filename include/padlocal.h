@@ -140,10 +140,10 @@ void padQueueMainModeCmd(padPort*);
 int _padChkMainModeDone(padPort*);
 void _padSetVsyncParam(void);                        /* _padSetVsyncParam */
 void _padInitDirSeq(void);                        /* _padInitDirSeq */
-int func_8006B62C(int);                         /* completion (D_800981AC) */
+int padDirNextPort(int);                         /* completion (D_800981AC) */
 void padResetPortState(padPort*);                   /* reset object (D_800981B0) */
 int padGetSendByte(padPort*, int);               /* payload byte (D_800981B4) */
-void func_8006B7EC(padPort*);                   /* actuator map (D_800981B8) */
+void padBuildActuatorMap(padPort*);                   /* actuator map (D_800981B8) */
 int padGetPortId(padPort*);                    /* channel of object (D_800981BC) */
 padPort* padGetPortBuffer(int);                    /* object of channel (D_800981C0) */
 void _padLatchId(padPort*);                    /* swap command (D_800981D0) */

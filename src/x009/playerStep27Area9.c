@@ -14,7 +14,7 @@ extern void AnimLoadDuration(TObj *);
 extern void AnimJump(TObj *, int);
 extern void SfxPlay3(int, int);
 extern void playerSetFallLean(TObj *);
-extern void FUN_800ee560(TObj *);
+extern void playerStepEntrySfxAnim4State5(TObj *);
 extern short func_801215C0(TObj *, short, short, int);
 
 void playerStep27Area9(TObj *o)
@@ -95,7 +95,7 @@ void playerStep27Area9(TObj *o)
         dy = o->y.p.whole - (GRABBED_OBJECT->y.p.whole + (GRABBED_OBJECT->box3 - GRABBED_OBJECT->box2));
         if (dx < GRABBED_OBJECT->box1) {
             if (o->b69 || func_801215C0(o, dx, dy, GRABBED_OBJECT->subtype))
-                FUN_800ee560(o);
+                playerStepEntrySfxAnim4State5(o);
         }
         break;
     case 4:

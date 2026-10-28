@@ -1,6 +1,6 @@
 // VERSION SLPM_80165 x00 800F4970 96
 #if defined(VERSION_SLPM_80165)
-// Demo version of PAL x000 800EE560 (FUN_800ee560.c): animation jump 1 (PAL 4), keeps +0x30/+0x34.
+// Demo version of PAL x000 800EE560 (playerStepEntrySfxAnim4State5.c): animation jump 1 (PAL 4), keeps +0x30/+0x34.
 typedef struct O {
     char pad0[6];
     unsigned char state;
@@ -21,7 +21,7 @@ extern char DAT_80010c50[];
 extern void FUN_8001e5f4();
 extern void FUN_8001fe94();
 
-void FUN_800ee560(O *o)
+void playerStepEntrySfxAnim4State5(O *o)
 {
     FUN_8001e5f4(0x1c, 0x7f);
     o->b9c = 0;

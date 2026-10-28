@@ -1507,7 +1507,7 @@ twin of the same function at another address of an overlay keeps its generic nam
   anims, CLUT 0x90/0x1E6): box 0x20 x 0x40, subtype step table D_801392E0, per-b0c vectors D_801392EC (uncertain role).
 - `800eb394 updateFlashEffect` / `800eb50c spawnFlashEffect` (were updatePoolType1BEffect / spawnPoolType1BEffect; capture P/1B:1: a large
   white jagged flash): pool 0x1B with the per-area sprite table D_80114AE4; subtype 1 sfx (0xE, 4), subtype 2 sfx (0xE, 0), subtype 0 is
-  remembered in D_800A611C; made by updateFrog (event 3) and the area-0 scene code FUN_801363e4.
+  remembered in D_800A611C; made by updateFrog (event 3) and the area-0 scene code a00Variant0EventScene.
 - Captures with nothing new: P/44:0:5 draws the digit "5" (updateDigitSprite confirmed), 2/0E:0 a golden treasure chest, P/0A:0 / P/0A:1 one
   screen-sized black quad, L4/0A part 3 (record 00040a02..) a small pink two-lobed shape and part 1 a vertical brown pole: not identified,
   L4/0A stays generic; 4/06:1 one brown wooden plank model (the segments of updateA00L4Type06, role unknown).
@@ -1569,14 +1569,14 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   objects (anims D_8013B0E0 / D_80134DC4).
 - `80127380 komaPigAnimAdvance` (was func_80127380; komaPigState0): AnimAdvance variant that loads the box from D_80138FD8[frame].
 - Left generic with a `// probably:` line in the source (purpose readable but owner unknown, mostly unreferenced player step entry
-  code): FUN_80028b84, FUN_8006ae9c, FUN_8006af74, FUN_8006b0ac, func_8006B62C, func_8006B7EC (libpad, no US names), FUN_800eb29c,
-  FUN_800ed258, FUN_800ed750 (villager step table D_80114C58[1]/[2]), FUN_800ee560, FUN_800ee7e0, FUN_800f35e0, FUN_800f5014,
-  FUN_800f7a38, FUN_800f802c, FUN_800f809c, FUN_800f8660, FUN_80102a5c, FUN_80102eb4, FUN_801031fc, FUN_80103cbc, FUN_80104040,
-  FUN_801043f4, FUN_80108f60, FUN_8010afc4, FUN_8010b3b8, FUN_8010bf70, FUN_80113a8c, FUN_801137bc, FUN_801139b4, FUN_8011dd30,
-  func_8011DE84, func_8011D204 (chained three-part object, table 80138B80), FUN_8011e1b0 (a mechanism of updateAreaMechanisms),
-  FUN_80123648, func_80123C20, func_8011C804 (area-0 item dispatch targets), FUN_80134308, FUN_80137378, FUN_80137f54 / FUN_801361e4 /
-  FUN_801363e4 (unlayered variant 0 scene), FUN_80132bb0, FUN_80136a8c, FUN_8013736c, FUN_80137f48 (stubs), func_80105A34,
-  func_801072FC, func_80110CAC, func_8012127C, func_80122C10 (player step 0x35), func_8012FF0C (bitingPlantStep3).
+  code): clampCameraYOffsetToObjBounds, padDirSendCommand, padDirReadBlockCount, padDirSioTransfer, padDirNextPort, padBuildActuatorMap (libpad, no US names), eventObjAnimStep800EB29C,
+  villagerNpcWalkPath, villagerNpcSpringMotion (villager step table D_80114C58[1]/[2]), playerStepEntrySfxAnim4State5, playerAirControlTimed, playerStepEntryLandDebris, copyGrabbedObjB0cToPlayerExt,
+  playerStepEntrySfxAnim4Tilt, playerStepEntrySfxAnim1State5, playerStepEntryAnim1ShiftY, playerStepEntryAnim80010CA0, playerBiteEntryImpactMark, playerBiteEntryAlign, playerBiteEntryImpactBoxY, playerBiteEntryCopyPos, playerBiteEntryPullObject,
+  playerStepEntryImpactSfx9, playerStepEntryAnim80010E34, playerStepEntryResetAnimNext, playerStepEntryResetAnimState4, playerGrabSpinEntry, playerEventWaitMessageClose, playerEventSinkStep, playerEventTimedMessageStep, updateChainedPartsObj,
+  chainedPartPlaceChild, chainedPartFrameTo80 (chained three-part object, table 80138B80), a00SwingGateMechanism (a mechanism of updateAreaMechanisms),
+  a00SpawnL5Type7Child, a00UseItem7EObj, a00BuildPlacedObjectList (area-0 item dispatch targets), a00DarkCloakedFigureLeapOff, spawnCharlesNpcAlt, updateA00Variant0Event / a00Variant0EventSpawn /
+  a00Variant0EventScene (unlayered variant 0 scene), stubNop80132BB0, stubFreeObj80136A8C, stubFreeObj8013736C, stubFreeObj80137F48 (stubs), playerDismountBitten,
+  playerSlideEntry, playerApplySpeedFriction, a00ApBox50kSparkleParticles, playerStepThrownOffBite (player step 0x35), bitingPlantBiteCarry (bitingPlantStep3).
 
 # User names (names_user.json, tools/apply_names.py)
 
@@ -2010,7 +2010,7 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   YELLOW_CHICK_CLUT_Y, the A00_* tables (SCROLL_CONTROLLER_HANDLERS, FOG_CLOUD_QUADS, SPORE_BRANCH_SUBTYPE_OFS, WOODEN_BRANCH_HANDLERS /
   _PARAMS, L2_TYPE06_ANIMS, ITEM_OBJ_PATH_START / _NODES, AP_BOX_SPARKLE_TABLE / _OFFSETS, AP_BOX_50K_ITEM_ENTRY, TUTORIAL_JUMP_MESSAGE_IDS).
   The src/x0NN twins get the same identifier rename (the tool's twin pass); overlay-only sources (e.g. src/x004/playerStepDizzy.c)
-  that spell D_801152E8 themselves are not touched: their address is their own overlay's. func_80110CAC / playerDecelerateSpeedB keep a
+  that spell D_801152E8 themselves are not touched: their address is their own overlay's. playerApplySpeedFriction / playerDecelerateSpeedB keep a
   byte view PLAYER_DECEL_PARAMS_BYTES next to the row view; komaPigState0 keeps KOMA_PIG_ANIMS_B (second extern, anti cross-jump).
 - X000 data batch 2 (Oct 26 2026): 49 more rows, mostly the per-object animation pointer tables of the area-0 .data
   (RED_BIRD_ANIMS, FROG_ANIMS, NPC_CHARLES_ANIMS, PINK_PIGLET_ANIMS, HOODED_OLD_MAN_ANIMS, BITING_PLANT_ANIMS, CHICK_ANIM, EGG_ANIM,
@@ -2025,7 +2025,7 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   bytes at 80074b6c (vs_vh.c), so 8006eef8 needs byte verification against libsnd (SsStart2 / SsStart / SpuInitHot neighbours 8006eb00 /
   8006eed8 disagree with psx_tomba too, see above) before either name is applied to the source. Left as is.
 - game.h playerEquips moved from offset 0x950 to 0x952 of gameConfig (two bytes unk950 / unk951 before it): the code reads the
-  weapon at 8009D2B2 (drawHudWeaponIcon, spawnWeaponObject) and the pants at 8009D2B3 (func_80110CAC speed class); 8009D2B0 is the
+  weapon at 8009D2B2 (drawHudWeaponIcon, spawnWeaponObject) and the pants at 8009D2B3 (playerApplySpeedFriction speed class); 8009D2B0 is the
   dark cloaked figure scene flag and 8009D2B1 the bitten-jump kind. No source used GAME.playerEquips, so the build is unchanged.
 - MAIN0 data round 2, batch 1 (Oct 27 2026): 39 rows. The PLAYER / GAME fields the sources reach by their own symbol keep a standalone
   symbol with a field-style name (no struct access, codegen unchanged): PLAYER_STATE / PLAYER_SUBSTATE / PLAYER_STEP (800A603C..3E),
@@ -2206,7 +2206,7 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   overlay symbols still spelled by address are the animation scripts themselves (char D_xxx[] byte data), the elements of the named
   animation pointer tables (KOMA_PIG_ANIMS, NPC_CHARLES_ANIMS, RED_BIRD_ANIMS, A00_L4_TYPE18_ANIMS, ...) whose code picks an index
   without a state name to pin it, and the untyped tables of updateA00L4Type01 / updateA00L4Type0A / updateA00SporeBranch /
-  func_8011C804, whose meaning the code does not make clear.
+  a00BuildPlacedObjectList, whose meaning the code does not make clear.
 - MAIN0 leftovers of the SYSTEM round + X000 round 2 batch 2 (Oct 27 2026): 16 rows in notes/data_names_main0.csv.
   SAVE_DATA_BUFFER (800E1E28, 0xC00: the save file image memCardFileListStep writes / reads back; the checksummed game state at
   +0x200..0xC00 is copied to GAME; the wip D0SPSUB2 save builder spells it too). MAP_PLAYER_IDLE_ANIM_D2 / D13 / D04 / D57 / D6,
@@ -2217,3 +2217,58 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   alias (DAT_1f800242_s in drawCategory8Objects). X000: A00_ROAMING_FLYER_BOB_ANIM (8013B1A0, the one anim a00RoamingFlyerBob sets).
   Data naming by usage is now closed for MAIN0, X000 and the eight SYSTEM overlays: what is left spelled by address are animation
   scripts, elements of named pointer tables, field aliases and the library (libgpu / libcd / libetc / libpress) internals listed above.
+- `80028b84 clampCameraYOffsetToObjBounds` (was FUN_80028b84; MAIN0) - clamps the camera y offset so camera+offset stays in o->h30..h32
+- `8006ae9c padDirSendCommand` (was FUN_8006ae9c; MAIN0) - libpad padif.c direct table 80098234: optional callbacks, sends command byte (0x42 default)
+- `8006af74 padDirReadBlockCount` (was FUN_8006af74; MAIN0) - libpad padif.c direct table 80098238: exchanges the mode byte and stores the block count D_80098224
+- `8006b0ac padDirSioTransfer` (was FUN_8006b0ac; MAIN0) - libpad padif.c direct table 80098240: the SIO byte loop (PAL revision)
+- `8006b62c padDirNextPort` (was func_8006B62C; MAIN0) - libpad padportd.c: records the port result and starts _padInitSioMode on the next port
+- `8006b7ec padBuildActuatorMap` (was func_8006B7EC; MAIN0) - libpad padportd.c: builds actuatorEnabled from the actuator map and payload
+- `800eb29c eventObjAnimStep800EB29C` (was FUN_800eb29c; X000) - three sub-states calling h(0xe,4)/h(0xe,0) then anim advance; unreferenced
+- `800ed258 villagerNpcWalkPath` (was FUN_800ed258; X000) - updateVillagerNpc step 1: walk along the per-subtype path
+- `800ed750 villagerNpcSpringMotion` (was FUN_800ed750; X000) - updateVillagerNpc step 2: two-axis spring motion with per-subtype item effect
+- `800ee560 playerStepEntrySfxAnim4State5` (was FUN_800ee560; X000) - dead player step entry: sfx, anim 80010c50 sub 4, clears motion, state 5
+- `800ee7e0 playerAirControlTimed` (was FUN_800ee7e0; X000) - player air control: drift, setVelXFromPadLR, timer then adjustVelYFromPadDown
+- `800f35e0 playerStepEntryLandDebris` (was FUN_800f35e0; X000) - dead player step entry: step 3 state 1, slope tilt, ground debris when bbe&0x20
+- `800f5014 copyGrabbedObjB0cToPlayerExt` (was FUN_800f5014; X000) - g(0,0,0xff,2); h(3,a); PLAYER_EXT->b0a = GRABBED_OBJECT->b0c
+- `800f7a38 playerStepEntrySfxAnim4Tilt` (was FUN_800f7a38; X000) - dead player step entry: sfx, anim sub 4, slope tilt, state++
+- `800f802c playerStepEntrySfxAnim1State5` (was FUN_800f802c; X000) - dead player step entry: sfx, anim 80010c50 sub 1, state 5, slope tilt
+- `800f809c playerStepEntryAnim1ShiftY` (was FUN_800f809c; X000) - dead player step entry: anim sub 1, y shifted +-12 by facing, slope tilt
+- `800f8660 playerStepEntryAnim80010CA0` (was FUN_800f8660; X000) - dead player step entry: anim 80010ca0 sub 4, b0f -8, state++
+- `80102a5c playerBiteEntryImpactMark` (was FUN_80102a5c; X000) - dead bite entry: anim 0xD, impact effect 2, marks bitten type-2 object
+- `80102eb4 playerBiteEntryAlign` (was FUN_80102eb4; X000) - dead bite entry: anim 0x23, aligns to the bitten object, state 2
+- `801031fc playerBiteEntryImpactBoxY` (was FUN_801031fc; X000) - dead bite entry: anim 0xD, impact 2, y from the bitten object's box, state 2
+- `80103cbc playerBiteEntryCopyPos` (was FUN_80103cbc; X000) - dead bite entry: anim 0xD, x/y/+0x8c from the bitten object, state 2
+- `80104040 playerBiteEntryPullObject` (was FUN_80104040; X000) - dead bite entry: anim 0xD, impact 2, moves the bitten object to the player
+- `801043f4 playerStepEntryImpactSfx9` (was FUN_801043f4; X000) - dead player step entry: sfx 9, anim 0xD, impact effect 2, state++
+- `80105a34 playerDismountBitten` (was func_80105A34; X000) - clears motion; bitten type 0x1C goes to step 0x2A/0x2B by GV2.bb1, else step 0
+- `801072fc playerSlideEntry` (was func_801072FC; X000) - slide entry: MOVE_TABLE_2, speed clamped to +-0x144 by facing, state 1
+- `80108f60 playerStepEntryAnim80010E34` (was FUN_80108f60; X000) - dead player step entry: sfx, ba3 1, anim 80010e34 sub 2, state 3
+- `8010afc4 playerStepEntryResetAnimNext` (was FUN_8010afc4; X000) - dead player step entry: clears anim state/motion, anim 80010748, state++
+- `8010b3b8 playerStepEntryResetAnimState4` (was FUN_8010b3b8; X000) - dead player step entry: clears anim state/motion, anim 80010748, state 4
+- `8010bf70 playerGrabSpinEntry` (was FUN_8010bf70; X000) - marks the grabbed object (+0x69 = 4), sfx, spin speed from its box
+- `80110cac playerApplySpeedFriction` (was func_80110CAC; X000) - steps wb2 toward 0 by the D_80115510 rows and clamps to f6
+- `801137bc playerEventSinkStep` (was FUN_801137bc; X000) - player event step: sinks 4 px/frame with the floor probe for timer frames
+- `801139b4 playerEventTimedMessageStep` (was FUN_801139b4; X000) - player event step: showMessageBoxDirectTimed(13,2) then waits timer frames
+- `80113a8c playerEventWaitMessageClose` (was FUN_80113a8c; X000) - player event step: waits for message box d90 to close, resets the event bytes
+- `8011c804 a00BuildPlacedObjectList` (was func_8011C804; X000) - dispatchAreaInitA area 0: links the section's placed-object records into a list
+- `8011d204 chainedPartFrameTo80` (was func_8011D204; X000) - steps animFrame toward 0x80 (and siblings toward 0x8F/0x87/0x83)
+- `8011d300 chainedPartsBendSub2` (was func_8011D300; X000) - subtype 2 of the chained three-part object: bends the chain by the parts' b69
+- `8011d670 chainedPartsBendSub1` (was func_8011D670; X000) - subtype 1 of the chained three-part object
+- `8011d9d8 chainedPartsBendSub0` (was func_8011D9D8; X000) - subtype 0 of the chained three-part object
+- `8011dd30 updateChainedPartsObj` (was FUN_8011dd30; X000) - places child d94 on angle animFrame at radius ba5, runs the subtype bend
+- `8011de84 chainedPartPlaceChild` (was func_8011DE84; X000) - chained-object part placement (DE84/DF5C/E028/E0EC)
+- `8011e1b0 a00SwingGateMechanism` (was FUN_8011e1b0; X000) - updateAreaMechanisms entry: swings +0x88 open when the player is near
+- `8012127c a00ApBox50kSparkleParticles` (was func_8012127C; X000) - drives the sparkle particle entries of the 50k AP box
+- `80122c10 playerStepThrownOffBite` (was func_80122C10; X000) - player step 0x35: thrown off after a bite, lands and skids
+- `80123648 a00SpawnL5Type7Child` (was FUN_80123648; X000) - dispatchAreaItemUpdate area 0: layer 5 type 7 object with parent p
+- `80123c20 a00UseItem7EObj` (was func_80123C20; X000) - object activating when item 0x7E is used
+- `8012ff0c bitingPlantBiteCarry` (was func_8012FF0C; X000) - bitingPlantStep3: jaw offsets, subtype 1 carries the player
+- `80132bb0 stubNop80132BB0` (was FUN_80132bb0; X000) - empty function (table 801392E0)
+- `80134308 a00DarkCloakedFigureLeapOff` (was FUN_80134308; X000) - leap-off step with the dark cloaked figure anims until off screen
+- `801361e4 a00Variant0EventSpawn` (was FUN_801361e4; X000) - unlayered variant 0: spawns the three scene parts (types 0x17/0x18)
+- `801363e4 a00Variant0EventScene` (was FUN_801363e4; X000) - unlayered variant 0: locked-player message box 7 scene
+- `80136a8c stubFreeObj80136A8C` (was FUN_80136a8c; X000) - b04 = 3
+- `8013736c stubFreeObj8013736C` (was FUN_8013736c; X000) - b04 = 3
+- `80137378 spawnCharlesNpcAlt` (was FUN_80137378; X000) - spawns the type 0x15 Charles npc unless DAT_8009cebd >= 6; unreferenced
+- `80137f48 stubFreeObj80137F48` (was FUN_80137f48; X000) - b04 = 3
+- `80137f54 updateA00Variant0Event` (was FUN_80137f54; X000) - unlayered variant 0: spawn, scene when player x > 0xD8, free

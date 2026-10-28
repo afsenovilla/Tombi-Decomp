@@ -760,7 +760,7 @@ def link(outdir, nm, objlist):
                     o = u.addr - GP.OVL_BASE
                     if o + u.size <= len(blob(p)) and blob("X000")[o:o + u.size] == blob(p)[o:o + u.size]: own.append(u)
             starts = set(u.addr for u in own)
-            # the other global functions of a multi-function unit have native code too (func_8011DE84.c's
+            # the other global functions of a multi-function unit have native code too (chainedPartPlaceChild.c's
             # func_8011E028: an X000 handler table holds its address, and as a non-start it was left a data word
             # since the per-overlay starts: the game jumped to 8011e028 in AREA00 sections 1, 2 and 4)
             import bisect

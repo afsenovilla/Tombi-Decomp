@@ -9,7 +9,7 @@
 void dispatchAreaInitA(void)
 {
     if (GAME.selectedArea == AREA00_VILLAGEOFALLBEGINNINGS) {
-            func_8011C804();
+            a00BuildPlacedObjectList();
     } else if (GAME.selectedArea == AREA03_PHOENIXMOUNTAIN) {
             func_8011a544();
     }

@@ -3,8 +3,8 @@
 // with the macros of include/tomba/anim.h, pointers as symbols, strings as strings, the rest as words.
 #include "anim.h"
 
-extern void FUN_8011dd30();
-extern void func_8011DE84();
+extern void updateChainedPartsObj();
+extern void chainedPartPlaceChild();
 extern void func_8011E028();
 extern void func_8011E0EC();
 extern unsigned int data_80138908[];
@@ -118,18 +118,18 @@ void *ptrs_80138B70[3] = {
 
 void *ptrs_80138B7C[3] = {
     func_8011E028,
-    func_8011DE84,
-    FUN_8011dd30,
+    chainedPartPlaceChild,
+    updateChainedPartsObj,
 };
 
 void *ptrs_80138B88[4] = {
     func_8011E0EC,
-    func_8011DE84,
-    func_8011DE84,
-    FUN_8011dd30,
+    chainedPartPlaceChild,
+    chainedPartPlaceChild,
+    updateChainedPartsObj,
 };
 
 unsigned int data_80138B98[5] = {
-    0x8011DF60, (unsigned int)func_8011DE84, (unsigned int)func_8011DE84, (unsigned int)func_8011DE84,
-    (unsigned int)FUN_8011dd30,
+    0x8011DF60, (unsigned int)chainedPartPlaceChild, (unsigned int)chainedPartPlaceChild, (unsigned int)chainedPartPlaceChild,
+    (unsigned int)updateChainedPartsObj,
 };

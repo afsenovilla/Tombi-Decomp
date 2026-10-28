@@ -10,6 +10,7 @@ address,name,confidence,comment
 800eae0c,spawnGroundDebris,alta,names batch (see notes/names.md)
 800eaffc,spawnWeaponHitDebris,alta,names batch (see notes/names.md)
 800eb0c8,updateKomaPigDustPuff,alta,names batch (see notes/names.md)
+800eb29c,eventObjAnimStep800EB29C,media,three sub-states calling h(0xe;4)/h(0xe;0) then anim advance; unreferenced
 800eb394,updateFlashEffect,alta,names batch (see notes/names.md)
 800eb50c,spawnFlashEffect,alta,names batch (see notes/names.md)
 800eb6ac,updateBreakPiece,alta,names batch (see notes/names.md)
@@ -27,6 +28,8 @@ address,name,confidence,comment
 800ec9c0,updateColorBurstParticle,alta,names batch (see notes/names.md)
 800ecd88,drawObjectModelKind19,alta,names batch (see notes/names.md)
 800ed024,updateL4Type00Object,alta,names batch (see notes/names.md)
+800ed258,villagerNpcWalkPath,media,updateVillagerNpc step 1: walk along the per-subtype path
+800ed750,villagerNpcSpringMotion,media,updateVillagerNpc step 2: two-axis spring motion with per-subtype item effect
 800edc0c,stubNop800EDC0C,alta,names batch (see notes/names.md)
 800edc14,l4Type03Step,alta,names batch (see notes/names.md)
 800eddfc,l4Type03StepB,alta,names batch (see notes/names.md)
@@ -39,9 +42,11 @@ address,name,confidence,comment
 800ee454,playerTiltTowardSlope,alta,names batch (see notes/names.md)
 800ee4e0,playerSetSlopeTilt,alta,names batch (see notes/names.md)
 800ee51c,playerTiltTowardSlopeSlow,alta,names batch (see notes/names.md)
+800ee560,playerStepEntrySfxAnim4State5,media,dead player step entry: sfx; anim 80010c50 sub 4; clears motion; state 5
 800ee5c8,playerAdvanceSpinAngle,alta,names batch (see notes/names.md)
 800ee680,ObjMotionStep,media,llama a las rutinas de fisica, suma velX a la posicion horizontal y aplica ObjAddVelY7E
 800ee6d0,playerFloatDirFromPad,alta,names batch (see notes/names.md)
+800ee7e0,playerAirControlTimed,media,player air control: drift; setVelXFromPadLR; timer then adjustVelYFromPadDown
 800ee88c,playerStickToGround,alta,names batch (see notes/names.md)
 800ee920,playerShiftDown7C,alta,names batch (see notes/names.md)
 800ee948,spawnWeaponObject,alta,names batch (see notes/names.md)
@@ -86,6 +91,7 @@ address,name,confidence,comment
 800f29dc,playerEnterRecoilA,alta,names batch (see notes/names.md)
 800f2a30,playerLandFromJump,alta,names batch (see notes/names.md)
 800f2b98,playerStepJump,alta,names batch (see notes/names.md)
+800f35e0,playerStepEntryLandDebris,media,dead player step entry: step 3 state 1; slope tilt; ground debris when bbe&0x20
 800f369c,playerEnterRecoilB,alta,names batch (see notes/names.md)
 800f36e0,playerStepAirWeaponAttack,alta,names batch (see notes/names.md)
 800f3eec,playerEnterRecoilStep4,alta,names batch (see notes/names.md)
@@ -96,6 +102,7 @@ address,name,confidence,comment
 800f4e68,playerSetAnimPairA,alta,names batch (see notes/names.md)
 800f4e9c,playerSetAnimPairB,alta,names batch (see notes/names.md)
 800f4ed0,playerSpinPlaceAndAccelerate,alta,names batch (see notes/names.md)
+800f5014,copyGrabbedObjB0cToPlayerExt,media,g(0;0;0xff;2); h(3;a); PLAYER_EXT->b0a = GRABBED_OBJECT->b0c
 800f5078,playerStepSpinOnObject,alta,names batch (see notes/names.md)
 800f66e4,playerSetFallAnimLoop,alta,names batch (see notes/names.md)
 800f67bc,playerStepSpinRelease,alta,names batch (see notes/names.md)
@@ -104,8 +111,12 @@ address,name,confidence,comment
 800f6e28,playerSwingUpdatePivot,alta,names batch (see notes/names.md)
 800f6f38,playerSwingPlaceOnCircle,alta,names batch (see notes/names.md)
 800f705c,playerStepSwingFromObject,alta,names batch (see notes/names.md)
+800f7a38,playerStepEntrySfxAnim4Tilt,media,dead player step entry: sfx; anim sub 4; slope tilt; state++
 800f7aac,playerStepPerchLeap,media,names batch (see notes/names.md)
+800f802c,playerStepEntrySfxAnim1State5,media,dead player step entry: sfx; anim 80010c50 sub 1; state 5; slope tilt
+800f809c,playerStepEntryAnim1ShiftY,media,dead player step entry: anim sub 1; y shifted +-12 by facing; slope tilt
 800f8130,playerStepTossed,alta,names batch (see notes/names.md)
+800f8660,playerStepEntryAnim80010CA0,media,dead player step entry: anim 80010ca0 sub 4; b0f -8; state++
 800f86e8,playerStepVerticalJump,alta,names batch (see notes/names.md)
 800f8b7c,playerFlipOntoObjectPlace,alta,names batch (see notes/names.md)
 800f8d2c,playerStepFlipOntoObject,media,names batch (see notes/names.md)
@@ -149,14 +160,20 @@ address,name,confidence,comment
 80102110,playerForcedModeDispatch,alta,names batch (see notes/names.md)
 80102214,updatePlayer,alta,names batch (see notes/names.md)
 80102a08,playerStep2EByArea,alta,names batch (see notes/names.md)
+80102a5c,playerBiteEntryImpactMark,media,dead bite entry: anim 0xD; impact effect 2; marks bitten type-2 object
 80102ac0,playerBiteHoldType02,alta,names batch (see notes/names.md)
+80102eb4,playerBiteEntryAlign,media,dead bite entry: anim 0x23; aligns to the bitten object; state 2
 80102f40,playerBiteHoldType03,alta,names batch (see notes/names.md)
+801031fc,playerBiteEntryImpactBoxY,media,dead bite entry: anim 0xD; impact 2; y from the bitten object's box; state 2
 80103290,playerBiteHoldType0B,alta,names batch (see notes/names.md)
 80103628,playerBiteHoldAttach,alta,names batch (see notes/names.md)
 80103774,playerResetSlopeState,alta,names batch (see notes/names.md)
 801037d8,playerBiteHoldGeneric,alta,names batch (see notes/names.md)
+80103cbc,playerBiteEntryCopyPos,media,dead bite entry: anim 0xD; x/y/+0x8c from the bitten object; state 2
 80103d40,playerBiteHoldType0E,alta,names batch (see notes/names.md)
+80104040,playerBiteEntryPullObject,media,dead bite entry: anim 0xD; impact 2; moves the bitten object to the player
 801040d0,playerBiteHoldType04,alta,names batch (see notes/names.md)
+801043f4,playerStepEntryImpactSfx9,media,dead player step entry: sfx 9; anim 0xD; impact effect 2; state++
 80104454,playerBiteHoldType18,alta,names batch (see notes/names.md)
 80104698,playerStepBitten,alta,names batch (see notes/names.md)
 801049c0,playerResetToStep0,alta,names batch (see notes/names.md)
@@ -167,6 +184,7 @@ address,name,confidence,comment
 80104f2c,playerCheckJumpPressedB,alta,names batch (see notes/names.md)
 80104f88,playerBittenJumpGeneric,alta,names batch (see notes/names.md)
 80105694,playerBittenJumpType04,alta,names batch (see notes/names.md)
+80105a34,playerDismountBitten,media,clears motion; bitten type 0x1C goes to step 0x2A/0x2B by GV2.bb1; else step 0
 80105ae4,playerBittenJumpReleaseFall,alta,names batch (see notes/names.md)
 80105bcc,playerBittenJumpType03,alta,names batch (see notes/names.md)
 801064d0,playerBittenJumpType0E,alta,names batch (see notes/names.md)
@@ -176,6 +194,7 @@ address,name,confidence,comment
 80106db0,playerStepItemReactionB,alta,names batch (see notes/names.md)
 80106f98,playerStep3CByArea,alta,names batch (see notes/names.md)
 80106fec,playerStepSkidStop,alta,names batch (see notes/names.md)
+801072fc,playerSlideEntry,media,slide entry: MOVE_TABLE_2; speed clamped to +-0x144 by facing; state 1
 801073c0,playerSlopeSlideUpdateAnim,media,names batch (see notes/names.md)
 80107590,playerEnterStep10Fall,alta,names batch (see notes/names.md)
 801075d8,playerStepSlopeSlide,media,names batch (see notes/names.md)
@@ -186,6 +205,7 @@ address,name,confidence,comment
 80108708,playerStepLaneShiftFall,alta,names batch (see notes/names.md)
 80108ad0,playerStepWalkIntoDepth,alta,names batch (see notes/names.md)
 80108dbc,playerEventStepWalkIntoDepth,alta,names batch (see notes/names.md)
+80108f60,playerStepEntryAnim80010E34,media,dead player step entry: sfx; ba3 1; anim 80010e34 sub 2; state 3
 80108fe0,playerResetAfterEvent,alta,names batch (see notes/names.md)
 80109038,playerStepLaneJump,alta,names batch (see notes/names.md)
 80109494,playerEventStepLaneJumpBack,alta,names batch (see notes/names.md)
@@ -198,12 +218,15 @@ address,name,confidence,comment
 8010a9f4,playerEventStepDropIn,alta,names batch (see notes/names.md)
 8010ac90,playerEventStepRiseFadeOut,alta,names batch (see notes/names.md)
 8010ae94,playerEventStepRiseUp,alta,names batch (see notes/names.md)
+8010afc4,playerStepEntryResetAnimNext,media,dead player step entry: clears anim state/motion; anim 80010748; state++
 8010b050,playerStepForcedLaunch,alta,names batch (see notes/names.md)
+8010b3b8,playerStepEntryResetAnimState4,media,dead player step entry: clears anim state/motion; anim 80010748; state 4
 8010b444,playerStepForcedJump,alta,names batch (see notes/names.md)
 8010b784,playerRestoreClingObjectActive,alta,names batch (see notes/names.md)
 8010b880,playerStepClingWeaponAttack,alta,names batch (see notes/names.md)
 8010bd08,playerReleaseClingObject,alta,names batch (see notes/names.md)
 8010beb8,playerTryStartJump,alta,names batch (see notes/names.md)
+8010bf70,playerGrabSpinEntry,media,marks the grabbed object (+0x69 = 4); sfx; spin speed from its box
 8010c034,playerStepClingToObject,alta,names batch (see notes/names.md)
 8010c7b0,playerClimbFollowObject,alta,names batch (see notes/names.md)
 8010c8d4,playerClimbJumpOff,alta,names batch (see notes/names.md)
@@ -234,6 +257,7 @@ address,name,confidence,comment
 8010fe70,playerSkidDecelerate,alta,names batch (see notes/names.md)
 801102b4,playerSlopeSlideAccelerate,media,names batch (see notes/names.md)
 80110760,playerDecelerateSpeedB,alta,names batch (see notes/names.md)
+80110cac,playerApplySpeedFriction,media,steps wb2 toward 0 by the D_80115510 rows and clamps to f6
 80110eec,playerAccelerateDownhill,media,names batch (see notes/names.md)
 80110fdc,playerAttackDecelerate,alta,names batch (see notes/names.md)
 8011116c,playerDecelerateSpeed,alta,names batch (see notes/names.md)
@@ -266,7 +290,10 @@ address,name,confidence,comment
 80113484,updateTreasureChest,alta,names batch (see notes/names.md)
 80113754,objSetAnimFromSubtypeTable,alta,names batch (see notes/names.md)
 8011379c,animAdvanceThunk,alta,names batch (see notes/names.md)
+801137bc,playerEventSinkStep,media,player event step: sinks 4 px/frame with the floor probe for timer frames
 80113888,scriptActorWalk,alta,names batch (see notes/names.md)
+801139b4,playerEventTimedMessageStep,media,player event step: showMessageBoxDirectTimed(13;2) then waits timer frames
+80113a8c,playerEventWaitMessageClose,media,player event step: waits for message box d90 to close; resets the event bytes
 80113b6c,scriptActorJump,alta,names batch (see notes/names.md)
 80113cc0,stubNop80113CC0,alta,names batch (see notes/names.md)
 80113cc8,scriptActorLaneJump,alta,names batch (see notes/names.md)
@@ -319,7 +346,15 @@ address,name,confidence,comment
 8011b7f0,updateA00FlagGatedSprite,alta,names batch (see notes/names.md)
 8011b8c0,updateA00L4Type01,alta,names batch (see notes/names.md)
 8011bf68,updateA00SporeBranch,alta,names batch (see notes/names.md)
+8011c804,a00BuildPlacedObjectList,media,dispatchAreaInitA area 0: links the section's placed-object records into a list
 8011d010,updateA00L4Type06,alta,names batch (see notes/names.md)
+8011d204,chainedPartFrameTo80,media,steps animFrame toward 0x80 (and siblings toward 0x8F/0x87/0x83)
+8011d300,chainedPartsBendSub2,media,subtype 2 of the chained three-part object: bends the chain by the parts' b69
+8011d670,chainedPartsBendSub1,media,subtype 1 of the chained three-part object
+8011d9d8,chainedPartsBendSub0,media,subtype 0 of the chained three-part object
+8011dd30,updateChainedPartsObj,media,places child d94 on angle animFrame at radius ba5; runs the subtype bend
+8011de84,chainedPartPlaceChild,media,chained-object part placement (DE84/DF5C/E028/E0EC)
+8011e1b0,a00SwingGateMechanism,media,updateAreaMechanisms entry: swings +0x88 open when the player is near
 8011e30c,updateAreaMechanisms,alta,names batch (see notes/names.md)
 8011e838,updateA00L4Type09,alta,names batch (see notes/names.md)
 8011ec68,updateA00L4Type0A,alta,names batch (see notes/names.md)
@@ -336,6 +371,7 @@ address,name,confidence,comment
 80120bcc,l4Type1BProbe,alta,names batch (see notes/names.md)
 80120d04,l4Type1BArea0Update,alta,names batch (see notes/names.md)
 80121124,a00ApBox50kShowRequiredAp,alta,names batch (see notes/names.md)
+8012127c,a00ApBox50kSparkleParticles,media,drives the sparkle particle entries of the 50k AP box
 8012160c,a00ApBox50kSparkle,alta,names batch (see notes/names.md)
 8012171c,a00ApBox50kReward,alta,names batch (see notes/names.md)
 80121870,updateA00ApBox50k,alta,names batch (see notes/names.md)
@@ -352,12 +388,15 @@ address,name,confidence,comment
 80122990,playerSetSpawnTimerArea0Sec3,alta,names batch (see notes/names.md)
 801229d8,playerHitAnimWithImpact,alta,names batch (see notes/names.md)
 80122a18,playerBiteHoldType15,alta,names batch (see notes/names.md)
+80122c10,playerStepThrownOffBite,media,player step 0x35: thrown off after a bite; lands and skids
 80122f14,playerStepSlideDownSurface,alta,names batch (see notes/names.md)
 801231f4,playerEventStepSpawnChicks,alta,names batch (see notes/names.md)
 80123344,updateA00ItemObj,alta,names batch (see notes/names.md)
+80123648,a00SpawnL5Type7Child,media,dispatchAreaItemUpdate area 0: layer 5 type 7 object with parent p
 801236f0,updateA00BitingPlantBait,alta,names batch (see notes/names.md)
 80123a1c,updateA00L5Type0C,alta,names batch (see notes/names.md)
 80123b64,spawnA00L5Type0CObject,alta,names batch (see notes/names.md)
+80123c20,a00UseItem7EObj,media,object activating when item 0x7E is used
 80123e04,drawObjectProjectedSpriteB,alta,names batch (see notes/names.md)
 80123fd0,drawObjectSpriteRotatedFT4,alta,names batch (see notes/names.md)
 80124780,drawObjectPolyFT4Strip,alta,names batch (see notes/names.md)
@@ -445,6 +484,7 @@ address,name,confidence,comment
 8012fbb0,bitingPlantHitWobbleStep,alta,names batch (see notes/names.md)
 8012fe84,bitingPlantHitCopyParent,alta,names batch (see notes/names.md)
 8012fe98,bitingPlantStep3,alta,names batch (see notes/names.md)
+8012ff0c,bitingPlantBiteCarry,media,bitingPlantStep3: jaw offsets; subtype 1 carries the player
 801302a0,bitingPlantEatBait,alta,names batch (see notes/names.md)
 80130314,bitingPlantEatBaitStep,alta,names batch (see notes/names.md)
 801306f0,uploadThrownObjectFrame,alta,names batch (see notes/names.md)
@@ -457,11 +497,13 @@ address,name,confidence,comment
 801320a8,redBirdStep1C,alta,names batch (see notes/names.md)
 80132174,updateRedBird,alta,names batch (see notes/names.md)
 801328b4,updateA00WoodenBranch,alta,names batch (see notes/names.md)
+80132bb0,stubNop80132BB0,media,empty function (table 801392E0)
 80132f80,frogHop,alta,names batch (see notes/names.md)
 80133254,frogStep0,alta,names batch (see notes/names.md)
 80133474,updateFrog,alta,names batch (see notes/names.md)
 801340c4,spawnFrog,alta,names batch (see notes/names.md)
 80134190,a00DarkCloakedFigureIdle,alta,names batch (see notes/names.md)
+80134308,a00DarkCloakedFigureLeapOff,media,leap-off step with the dark cloaked figure anims until off screen
 80134404,updateA00DarkCloakedFigure,alta,names batch (see notes/names.md)
 801346c0,npcCharlesHopAway,alta,names batch (see notes/names.md)
 80134980,npcCharlesHopToSpot,alta,names batch (see notes/names.md)
@@ -470,12 +512,19 @@ address,name,confidence,comment
 80135b0c,a00RoamingFlyerSteer,alta,names batch (see notes/names.md)
 80135db0,a00RoamingFlyerBob,alta,names batch (see notes/names.md)
 80136090,updateA00RoamingFlyer,alta,names batch (see notes/names.md)
+801361e4,a00Variant0EventSpawn,media,unlayered variant 0: spawns the three scene parts (types 0x17/0x18)
 801363c4,isPlayerPastX0D8,alta,names batch (see notes/names.md)
+801363e4,a00Variant0EventScene,media,unlayered variant 0: locked-player message box 7 scene
+80136a8c,stubFreeObj80136A8C,media,b04 = 3
 80136a98,spawnA00DarkCloakedFigure,alta,names batch (see notes/names.md)
 80136bc0,a00DarkCloakedFigureTalkCheck,alta,names batch (see notes/names.md)
 80136ce0,a00DarkCloakedFigureScene,alta,names batch (see notes/names.md)
+8013736c,stubFreeObj8013736C,media,b04 = 3
+80137378,spawnCharlesNpcAlt,media,spawns the type 0x15 Charles npc unless DAT_8009cebd >= 6; unreferenced
 80137458,charlesTalkCheck,alta,names batch (see notes/names.md)
 801377b8,updateCharlesTalkScene,alta,psx_tomba (address-aligned with US src)
+80137f48,stubFreeObj80137F48,media,b04 = 3
+80137f54,updateA00Variant0Event,media,unlayered variant 0: spawn; scene when player x > 0xD8; free
 80138008,updateDarkCloakedFigureEvent,alta,names batch (see notes/names.md)
 801380b8,updateCharlesEventObj,alta,names batch (see notes/names.md)
 80138218,updateA00UnlayeredType0D,alta,names batch (see notes/names.md)

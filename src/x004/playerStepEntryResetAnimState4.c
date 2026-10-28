@@ -1,0 +1,27 @@
+// FUNC 8010b3b8 140 X004
+// MATCHING 8010b3b8 140
+#include "TOBJ.H"
+extern TObj *PLAYER_EXT[];
+extern unsigned char SLOPE_TILT_TABLE[];
+extern void FUN_8001fe6c(TObj *o);
+extern char LAB_80010748[];
+
+void playerStepEntryResetAnimState4(TObj *o)
+{
+    TObj *p;
+    *(char *)&PLAYER_EXT[0]->w08 = 0;
+    o->ba5 = 0;
+    o->b9c = 0;
+    *(char *)&o->wac = 0;
+    p = PLAYER_EXT[0];
+    o->wb2 = 0;
+    o->velX = 0;
+    o->velY = 0;
+    p->animFrame = 0xffff;
+    p->timer = 0;
+    p->animTimer = 0;
+    o->anim = LAB_80010748;
+    FUN_8001fe6c(o);
+    o->d8c = SLOPE_TILT_TABLE[o->wb0];
+    o->state = 4;
+}
