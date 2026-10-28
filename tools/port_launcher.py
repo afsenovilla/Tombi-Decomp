@@ -68,7 +68,7 @@ i18n.add({
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco compatible: {0}, MAIN0.EXE verificado (sha1).",
         "s.extracting": "Extrayendo el disco a {0}... {1}% ({2})", "s.dataok": "Datos del juego listos en {0} ({1} archivos): la imagen del disco ya no hace falta.",
         "s.extractfail": "No se pudo extraer el disco: {0}", "s.nodata": "Elige tu imagen del disco: se extrae una vez a la carpeta data/ y el juego ya no la necesita.",
-        "s.badsha": "Disco NO compatible: {0} (sha1 de MAIN0.EXE {1}). El port solo funciona con Tombi! PAL SCES-01331; puede fallar.",
+        "s.badsha": "Disco NO compatible: {0} (sha1 de MAIN0.EXE {1}). El port solo funciona con Tombi! PAL SCES-01331 Rev 1 (si es SCES-01331, será la Rev 0); puede fallar.",
         "s.noexe": "No se encuentra EXE/MAIN0.EXE en la imagen: no es un disco de Tombi! PAL.", "s.notiso": "No es una imagen ISO9660: {0}",
         "s.running": "Jugando... (cerrar la ventana del juego termina)", "s.ended": "El juego terminó (código {0}). Registro: {1}",
         "s.nobin": "No se encuentra el binario del port ({0}). Compílalo (docs/PORT.md) o usa el exe distribuido.",
@@ -86,7 +86,7 @@ i18n.add({
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Compatible disc: {0}, MAIN0.EXE verified (sha1).",
         "s.extracting": "Extracting the disc into {0}... {1}% ({2})", "s.dataok": "Game data ready in {0} ({1} files): the disc image is no longer needed.",
         "s.extractfail": "Could not extract the disc: {0}", "s.nodata": "Pick your disc image: it is extracted once into the data/ folder and the game no longer needs it.",
-        "s.badsha": "NOT a compatible disc: {0} (MAIN0.EXE sha1 {1}). The port only runs Tombi! PAL SCES-01331; it may fail.",
+        "s.badsha": "NOT a compatible disc: {0} (MAIN0.EXE sha1 {1}). The port only runs Tombi! PAL SCES-01331 Rev 1 (an SCES-01331 here is Rev 0); it may fail.",
         "s.noexe": "EXE/MAIN0.EXE not found in the image: not a Tombi! PAL disc.", "s.notiso": "Not an ISO9660 image: {0}",
         "s.running": "Playing... (closing the game window ends it)", "s.ended": "The game ended (code {0}). Log: {1}",
         "s.nobin": "Port binary not found ({0}). Build it (docs/PORT.md) or use the distributed exe.",
@@ -239,7 +239,8 @@ def extract_main0(image, out):
 
 
 # serials of the other Tomba! releases (the port runs only SCES-01331)
-KNOWN_DISCS = {"SCES-01331": "Tombi! (PAL, Europa)", "SCES-01330": "Tombi! (PAL)", "SCUS-94236": "Tomba! (USA)",
+KNOWN_DISCS = {"SCES-01331": "Tombi! (PAL, Europa)",  # Rev 1 is the one the port is built from; Rev 0 has another MAIN0.EXE
+               "SCES-01330": "Tombi! (PAL)", "SCUS-94236": "Tomba! (USA)",
                "SLPS-01144": "Ore no Tomba (Japón)", "SCUS-94454": "Tomba! 2 (USA)", "SCES-02005": "Tombi! 2 (PAL)"}
 
 
