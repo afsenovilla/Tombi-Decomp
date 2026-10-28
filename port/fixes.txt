@@ -284,3 +284,14 @@ src/drawHud.c | drawHudLives(o, 0x18, 0xf0); | drawHudLives(o, 0x18 - port_ws_cu
 src/drawHud.c | drawHudAP(o, 0x12c, 0x10); | drawHudAP(o, 0x12c + port_ws_cull, 0x10);
 src/drawHud.c | drawHudVitality(o, 0x24, 0x1c, | drawHudVitality(o, 0x24 - port_ws_cull, 0x1c,
 src/drawHud.c | drawHudWeaponIcon(o, 0x48, 0x10); | drawHudWeaponIcon(o, 0x48 - port_ws_cull, 0x10);
+#
+# --skip-intro (port_skip_movies == 2): straight to the title screen. The SCE logo jumps to its fade-out end,
+# the Whoopee Camp movie/still is never started (bootLogoState goes from its load to the title loads), and the
+# opening movie is skipped as if START were pressed (titleSequenceTask's own skip path)
+src/bootStartupTask.c | void bootStartupTask(void) | extern int port_skip_movies; void bootStartupTask(void)
+src/bootStartupTask.c | switch (p->w4a) { | if (port_skip_movies == 2 && p->w4a < 3) { p->w5a = 1; p->w4a = 3; setAnalogPadMode(); } switch (p->w4a) {
+src/bootLogoState.c | void bootLogoState(void) | extern int port_skip_movies; void bootLogoState(void)
+src/bootLogoState.c | case 2: | case 2: if (port_skip_movies == 2) { TASK_C->w58 = 1; TASK_C->w4a = 5; goto skip_intro; }
+src/bootLogoState.c | case 5: | case 5: skip_intro:
+src/titleSequenceTask.c | void titleSequenceTask(void) | extern int port_skip_movies; void titleSequenceTask(void)
+src/titleSequenceTask.c | (JOYPAD_STATE & (JOY_CROSS | (port_skip_movies == 2 ? 1 : JOYPAD_STATE & (JOY_CROSS

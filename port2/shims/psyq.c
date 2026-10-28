@@ -951,7 +951,7 @@ int CdRead2(int mode) {
     st_full = 0; st_handed = 0; st_start_vblank = port_frame; st_start_lba = cd_pos;
     port_sound_xa_reset();
     if (port_verbose) port_printf("[port] st: stream started at lba %d, mode %03x, ring %d sectors (frame %d)%s\n", st_lba, mode, st_ring_n, port_frame,
-                                  port_skip_movies ? ", skipped (--skip-movies)" : "");
+                                  (port_skip_movies == 1 || (port_skip_movies == 2 && !port_in_game)) ? ", skipped (--skip-movies/--skip-intro)" : "");
     return 1;
 }
 /* StUnSetRing / the end of a movie: one line with the pace, so a log from another machine says whether a slow movie
