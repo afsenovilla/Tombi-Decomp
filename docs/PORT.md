@@ -1788,6 +1788,36 @@ stall is host I/O or presentation on that machine, still open.
   frames in 358 vblanks, the room comes back with the fade and the BGM; Right at x=240 is the wall on both, Left walks
   back). The Windows "stall after the chicks / the egg" is this cutscene, which that build drew black (fixed in 652d9dc);
   the 1050 vblanks of that log are its only open part (the `StUnSetRing` pace line now says whether the ring was fed).
+- **"Tombi freezes in the air for ~3 s" at the village start (third Windows round, the chick / egg reports).**
+  Reproduced headless and on the retail MIPS code (`tools/psxemu`, AREA00 section 0 from the debug select, a
+  state saved at the first tree): a running jump from x~168 onto the tree crown (Right held, Cross 30 frames) lands
+  at x 238/239, y -106. Landing at **x 239** (sub-pixel 239.97) retail walks up onto the crown (241,-110) and
+  stands still 100 vblanks; landing at **x 238** (238.a3, the port's run) the walk step's tile response puts Tombi
+  at (227,-96), the trunk's left edge, 1.1.1 with velY 547, where he hangs **103 vblanks** and then falls to the
+  ground (227,-49). The retail code does exactly the same when the port's sub-pixel position is poked in one
+  frame before touchdown (`psxchk/grab.py`: `w32:800A6048:00EC0300`, hang +87..+188, lands +207), so it is the
+  game's own canopy-edge behaviour, not a port divergence; frame by frame (x, y, mode.step.state, ac, velY) the
+  port and retail agree over the whole jump. The `playerCheckPerchLanding+0xae -> 3` kernel reads that fill the
+  Windows log at those moments are `GRABBED_OBJECT->type` with the pointer holding 1 (a wall cling result of
+  `playerProbeGrab`), read every frame from the perch / climb steps: the console's word at address 0 is
+  `00000003h` (psx-spx, the "garbage area" the kernel leaves at 0..0Fh: `3C1A0000h` smashed to `00000003h`,
+  `275A0C80h`, `03400008h`, 0), so the byte at 3 is 0 there too and the `== 0x14` compare fails on both.
+- **The 1045-vblank movie of the Windows logs is movie 2, not movie 4.** `[port] st: ... 313 frames handed out in
+  1045 vblanks (3135 sectors read)` is reproduced headless by `--movie 3300:2`: MOVIE_ID 2 is the cutscene
+  `a00IntroEventScroll` state 4 starts when the fog event completes (`DAT_80077f10[2]` = 0x13C = 316 frames, the
+  stream ends at frame 313 = 316 - 3 as `strNext` wants, 3.34 vblanks per frame = the 150 sectors/s pace). The
+  title attract movie's count varies with when Start is pressed (245 or 531 frames: it is skipped), the LOGO is
+  always 91/305. The end of a stream is the game's own frame count, deterministic on every host.
+- **Register-carried arguments of a dispatcher took the arity of the wrong version.** `gen_port`'s
+  `forward_short_calls` read a callee's parameter count from the first definition in its file; files with a demo
+  (`VERSION_SLPM_80165`) or Japanese variant first gave the variant's count. `dispatchAreaItemUpdate(void)` (called
+  by `updateHoodedOldMan` with `(o, &pos, 0)`) forwarded only `PORT_ARG(0), PORT_ARG(1)` to `FUN_80123648(p, q, c)`,
+  whose demo form has two parameters: the layer-5 type-7 object the hooded old man spawns got a stack-garbage
+  subtype `c` (the handler index of the chained-part tables at 0x80138B88/B98), harmless by luck on Linux,
+  anything on Windows. `_blank_versions` now hides the `#if defined(VERSION_...)` / `#elif defined(VERSION_...)`
+  branches before the definitions are scanned; one forwarded call changed (`FUN_80123648(PORT_ARG(0), PORT_ARG(1),
+  PORT_ARG(2))`), 278 as before, the standard test stays byte-identical (36 frames). The `-v -v -v` player line
+  now also prints `g=` (GRABBED_OBJECT) and `9e=` (the cling state).
 - **Event-title letters** (`l8Type01MoveStep`, case 3: a vertical bob of `MulNegSinScaled(wb4, 4)` (under 3 px)
   and a tilt of `MulNegSinScaled(wb8, 0x80)` (8 degrees) at random phase steps 3..6 / 3..10 per frame; cases 8/9:
   the scatter with random spins): the port's `Rand`, `MulNegSinScaled` and `negsintab` (`0x8007A1F0`) are the

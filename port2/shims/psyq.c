@@ -242,7 +242,8 @@ void port_vblank(void) {
         if (port_verbose >= 3) {   /* -v -v -v: mode.step.state, air state (ac), velY, and the held/bitten object */
             u8 *pl = PORT_M0(0x800A6038u);
             u8 *held = *(u8 **)(pl + 0xE4);
-            port_printf(" %d.%d.%d ac=%d vy=%d", pl[4], pl[5], pl[6], pl[0xAC], *(s16 *)(pl + 0x7E));
+            port_printf(" %d.%d.%d ac=%d vy=%d g=%x 9e=%d", pl[4], pl[5], pl[6], pl[0xAC], *(s16 *)(pl + 0x7E),
+                        port_is_ram_ptr(*(u8 **)PORT_M0(0x8009F0ECu)) ? 0x80000000u + (u32)(*(u8 **)PORT_M0(0x8009F0ECu) - (u8 *)port_ram) : *(u32 *)PORT_M0(0x8009F0ECu), pl[0x9E]);
             if (pl[0xAC] == 2 && port_is_ram_ptr(held)) {
                 u8 *hh = *(u8 **)(held + 0x40);
                 port_printf(" held=%02x@%d,%d", *(u8 *)(held + 2), port_is_ram_ptr(hh) ? *(s16 *)(hh + 2) : -1, *(s16 *)(held + 0x16));

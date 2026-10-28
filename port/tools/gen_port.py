@@ -798,6 +798,29 @@ def _blank(s):
     return re.sub(r"'(?:[^'\\\n]|\\.)*'", lambda m: "'" + " " * (len(m.group(0)) - 2) + "'", s)
 
 
+def _blank_versions(s):
+    """the other versions' definitions (`#if defined(VERSION_SLPM_80165)` ... `#elif defined(VERSION_...)` branches,
+    the demo / Japanese variants with their own parameter lists) replaced by blank lines, so the arity of a
+    function is that of the PAL definition (the `#else` branch, or an unconditional one)"""
+    out, depth, skip = [], [], False
+    for line in s.split("\n"):
+        d = line.strip()
+        if d.startswith("#if"):
+            depth.append(bool(re.match(r"#\s*if\s+defined\s*\(\s*VERSION_", d)))
+            skip = any(depth)
+        elif d.startswith("#elif") and depth:
+            depth[-1] = bool(re.match(r"#\s*elif\s+defined\s*\(\s*VERSION_", d))
+            skip = any(depth)
+        elif d.startswith("#else") and depth:
+            depth[-1] = False
+            skip = any(depth)
+        elif d.startswith("#endif") and depth:
+            depth.pop()
+            skip = any(depth)
+        out.append("" if skip else line)
+    return "\n".join(out)
+
+
 def _nparams(p):
     p = p.strip()
     if p in ("", "void"): return 0
@@ -830,9 +853,10 @@ def forward_short_calls(texts, base_defs=None, fallback=None, prefix=None):
     slot exists even when the caller declares fewer parameters: it is what *its* caller pushed, so pass-through
     chains of dispatchers keep working).  The file's prototypes of the callee become unprototyped `f()`."""
     blank = {f: _blank(t) for f, t in texts.items()}
+    vblank = {f: _blank_versions(t) for f, t in blank.items()}
     gdefs, ldefs = {}, {}
     own = {}
-    for f, t in blank.items():
+    for f, t in vblank.items():
         ldefs[f] = {}
         for m in re.finditer(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\(([^;{)]*(?:\([^)]*\)[^;{)]*)*)\)\s*\{", t, re.M):
             if m.group(1) in ("if", "while", "for", "switch", "return"): continue
