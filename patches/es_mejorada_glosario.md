@@ -47,7 +47,7 @@ personales que valen para cualquier objeto:
 | #0 objeto usado | `Usado(a) Rana` | `Usas Rana` |
 | #1 objeto equipado | `Equipada Rana` | `Equipas Rana` |
 | #2 objeto obtenido | `Rana Ganada` | `Obtienes Rana` |
-| CFNT999S #0, cartel de evento completado | `¡DESPEJADA!` | `¡SUPERADO!` |
+| CFNT999S #0, cartel de evento completado | `¡DESPEJADA!` | `¡ESTUPENDO!` |
 
 La `O` mayúscula no existe en la fuente de 16 px de los MFNT: se añade al banco de glifos de cada archivo copiándola de
 la fuente del mismo tamaño de otro archivo (igual que hace el editor). En general, si a un archivo le falta un glifo se
@@ -55,3 +55,6 @@ añade así en vez de cambiar la frase; `check_text_patch.py` lo lista como nota
 `¡COMPLETADO!` (12 letras) no cabe: el cartel lo dibuja EXE/MAINn.EXE con una tabla de K glifos y K posiciones seguidas
 de otros datos (title_layout.banner_find); K = 11 en español, que ya es el más largo del disco (inglés 6 `CLEAR!`,
 alemán 10 `GESCHAFFT!`, francés 8, italiano 9...). Ampliarla exigiría mover datos y código del ejecutable.
+
+El cartel necesita exactamente 11 letras: con `¡SUPERADO!` (10) el port nativo se quedaba en la pantalla de carga al
+entrar en AREA00; `check_text_patch.py` ahora exige el número exacto de letras de la tabla de MAIN5.EXE.
