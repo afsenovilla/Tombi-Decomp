@@ -222,7 +222,7 @@ def read_auto_syms(p):
 NC = {}
 
 
-DATA_HDR = re.compile(r"^//\s*DATA\s+([0-9a-fA-F]+)\s+(\d+)[ \t]+(MAIN0|X0\d\d)\s*$", re.M)
+DATA_HDR = re.compile(r"^//\s*DATA\s+([0-9a-fA-F]+)\s+(\d+)[ \t]+(MAIN0|X0\d\d|%s)\s*$" % _SO.PROG_RE, re.M)
 
 
 def data_header(path):
