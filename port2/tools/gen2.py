@@ -486,26 +486,40 @@ def emit_data(outdir, amap, needed):
     # boundary (LD0SYS.BIN lands across the end of MAIN0's .data into its .bss) stays contiguous; the region names
     # are aliases into it (syms.ld).  The scratchpad and the I/O page are their own arrays.
     blobs, ram_parts = [], []
-    # The end entry of an animation script is {index, b, 0x8000 | duration}: with a short duration and b != 0
-    # its second word reads as a MAIN0 address (player anim 0xF, the egg smash/chick store, ends with 0x800100D0).
-    # Relocated, the end flag went: AnimAdvance ran on through the next scripts and Tombi hung in mid-air for 119
-    # frames instead of 16.  Walk the scripts of PLAYER_ANIM_TABLE and keep their end words as they are.
+    # The end entry of an animation script (AnimAdvance: 8-byte entries {index, b, flags | duration}) is
+    # {index, b, 0x8000 | duration}: with a short duration and b != 0 its second word reads as a RAM address
+    # (player anim 0xF, the egg smash/chick store, ends with 0x800100D0).  Relocated, the end flag went:
+    # AnimAdvance ran on through the next scripts and Tombi hung in mid-air for 119 frames instead of 16.
+    # Every script start a data word or a data symbol points at is walked; the end words are kept as they are.
     anim_ends = set()
+    mem = {}
+    for _n, rs, re_, rp, rf in amap.regs:
+        if rp and 0x80000000 <= rs < 0x80200000:
+            with open(rp, "rb") as fh: fh.seek(rf); mem[rs] = (re_, fh.read(re_ - rs))
     def _rd(addr):
-        for _n, rs, re_, rp, rf in amap.regs:
-            if rs <= addr < re_ - 3 and rp:
-                with open(rp, "rb") as fh: fh.seek(rf + addr - rs); return int.from_bytes(fh.read(4), "little")
-        return 0
-    if "PLAYER_ANIM_TABLE" in amap.syms:
-        t = amap.syms["PLAYER_ANIM_TABLE"]
-        for k in range(90):
-            ent = _rd(t + 4 * k)
-            for _ in range(256):
-                if not (0x80010000 <= ent < 0x80200000): break
-                v = _rd(ent + 4) >> 16
-                if v & 0x4000: break
-                if v & 0x8000: anim_ends.add(ent + 4); break
-                ent += 8
+        for rs, (re_, d) in mem.items():
+            if rs <= addr < re_ - 3: o = addr - rs; return int.from_bytes(d[o:o + 4], "little")
+        return None
+    def _walk(ent):
+        for k in range(64):
+            i0, w1 = _rd(ent), _rd(ent + 4)
+            if i0 is None or w1 is None or i0 >= 0x400 or amap.is_code(ent): return
+            v = w1 >> 16
+            if v & 0x8000:
+                if not (v & 0x4000) and (v & 0x3FFF) and 0x80000000 <= w1 < 0x80200000 and (w1 & 0xFFFF) and k >= 2: anim_ends.add(ent + 4)
+                return
+            if v & 0x4000 or not (v & 0x3FFF): return
+            ent += 8
+    starts = set(a for a in amap.syms.values() if 0x80010000 <= a < 0x80200000 and not (a & 3))
+    for rs, (re_, d) in mem.items():
+        for o in range(0, len(d) - 3, 4):
+            w = int.from_bytes(d[o:o + 4], "little")
+            if 0x80010000 <= w < 0x80200000 and not (w & 3) and not amap.is_code(rs + o): starts.add(w)
+    for st in sorted(starts):
+        if not amap.is_code(st): _walk(st)
+    print("gen2: %d animation end words kept unrelocated" % len(anim_ends))
+    with open(os.path.join(outdir, "anim_ends.txt"), "w") as fh:
+        fh.write("".join("%08X %08X\n" % (x, _rd(x)) for x in sorted(anim_ends)))
     for name, s, e, path, foff in amap.regs:
         n = (e - s + 3) // 4
         in_ram = 0x80000000 <= s < 0x80200000
