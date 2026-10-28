@@ -279,3 +279,8 @@ src/cullObjectToDrawListMargin.c | SCREEN_ORIGIN_X + x) > (short)x * 2 + 0x140 |
 src/ObjCullRegister.c | SCREEN_ORIGIN_X + 0x40) >= 0x1c1 | SCREEN_ORIGIN_X + 0x40 + port_ws_cull) >= 0x1c1 + 2 * port_ws_cull
 src/x004/cullObjectPerspective.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + port_ws_cull) > h * 2 + 0x1c0 + 2 * port_ws_cull
 src/x004/cullObjectPerspectiveWide.c | + 0x40 + h) > h * 2 + 0x1c0 | + 0x40 + h + port_ws_cull) > h * 2 + 0x1c0 + 2 * port_ws_cull
+# --widescreen: the gameplay HUD anchored to the wide frame's edges (lives, vitality, weapon left; AP right)
+src/drawHud.c | drawHudLives(o, 0x18, 0xf0); | drawHudLives(o, 0x18 - port_ws_cull, 0xf0);
+src/drawHud.c | drawHudAP(o, 0x12c, 0x10); | drawHudAP(o, 0x12c + port_ws_cull, 0x10);
+src/drawHud.c | drawHudVitality(o, 0x24, 0x1c, | drawHudVitality(o, 0x24 - port_ws_cull, 0x1c,
+src/drawHud.c | drawHudWeaponIcon(o, 0x48, 0x10); | drawHudWeaponIcon(o, 0x48 - port_ws_cull, 0x10);
