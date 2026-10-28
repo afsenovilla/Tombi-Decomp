@@ -13,7 +13,7 @@
  "verbFirst": true,
  "edits": {
   "AREA00/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -188,7 +188,7 @@
    "117": "{BOX 216 42}\n{MOVE 0 0}La bruja volverá a casa{NL}\ncuando oiga cierto rumor.{WAIT}{CLEAR}\n"
   },
   "AREA01/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -387,7 +387,7 @@
    "344": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}¿Qué?{NL}\n¿Te has comido toda la comida{NL}\nque me hizo mi padre?{C057}{WAIT}{CLEAR}\nBah, no te preocupes.{NL}\nEs difícil resistirse.{NL}\nMi padre cocina de maravilla.{C057}{WAIT}{CLEAR}\nBueno, me voy. ¡Hasta luego!{NL}\n¿Esto es de mi padre?{C057}{WAIT}{CLEAR}\nMmm... estará preocupado.{NL}\nLlevo mucho tiempo escondido{NL}\ny nadie me ha visto.{C057}{WAIT}{CLEAR}\nBueno, no lo necesito, así{NL}\nque ¿por qué no te lo comes?{C057}{WAIT}{CLEAR}\n¡Esto tampoco lo necesito,{NL}\nasí que también es para ti!{WAIT}{CLEAR}\n"
   },
   "AREA02/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -640,7 +640,7 @@
    "459": "{BOX 240 55}\n{MOVE 0 0}¡Ja, ja, ja!{NL}\n¡Nunca abrirás esa puerta!{NL}\n¡Ríndete! ¡Ja, ja, jaaa!{WAIT}{CLEAR}\n"
   },
   "AREA03/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -766,7 +766,7 @@
    "258": "{BOX 240 55}\n{VOICE 6 0}{MOVE 0 0}Buf, gracias a ti mi jefe{NL}\nno se enfadará conmigo.{NL}\nYa puedo volver.{WAIT}{CLEAR}\n"
   },
   "AREA04/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -896,7 +896,7 @@
    "257": "{BOX 152 42}\n{VOICE 6 0}{MOVE 0 0}Por fin...{C06B}{WAIT}{CLEAR}\nToma, esto es por{NL}\nayudarnos.{WAIT}{CLEAR}\n"
   },
   "AREA05/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -1069,7 +1069,7 @@
    "317": "{BOX 144 42}\n{VOICE 6 0}{MOVE 0 0}...¡Hasta luego!{C052}{WAIT}{CLEAR}\nVuelve a vernos{NL}\ncuando quieras.{WAIT}{CLEAR}\n"
   },
   "AREA06/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -1165,7 +1165,7 @@
    "218": "{BOX 152 68}\n{VOICE 6 0}{MOVE 0 0}¡Los récords son!{NL}\n1º....24,96 seg.{NL}\n2º....26,55 seg.{NL}\n3º....28,16 seg.{WAIT}{CLEAR}\n"
   },
   "AREA07/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -1364,7 +1364,7 @@
    "344": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}¿Qué?{NL}\n¿Te has comido toda la comida{NL}\nque me hizo mi padre?{C057}{WAIT}{CLEAR}\nBah, no te preocupes.{NL}\nEs difícil resistirse.{NL}\nMi padre cocina de maravilla.{C057}{WAIT}{CLEAR}\nBueno, me voy. ¡Hasta luego!{NL}\n¿Esto es de mi padre?{C057}{WAIT}{CLEAR}\nMmm... estará preocupado.{NL}\nLlevo mucho tiempo escondido{NL}\ny nadie me ha visto.{C057}{WAIT}{CLEAR}\nBueno, no lo necesito, así{NL}\nque ¿por qué no te lo comes?{C057}{WAIT}{CLEAR}\n¡Esto tampoco lo necesito,{NL}\nasí que también es para ti!{WAIT}{CLEAR}\n"
   },
   "AREA08/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -1456,7 +1456,7 @@
    "211": "{BOX 240 42}\n{VOICE 6 0}{MOVE 0 0}Parece que ha funcionado.{NL}\nVolvamos...{WAIT}{CLEAR}\n"
   },
   "AREA09/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -1553,7 +1553,7 @@
    "222": "{BOX 248 42}\n{VOICE 6 0}{MOVE 0 0}¡Hola! ¡Ja, ja, ja!{NL}\nVolvemos a vernos.{C053}{WAIT}{CLEAR}\n¿Quieres dar una vuelta en{NL}\nmi barco?{C053}{WAIT}{CLEAR}\nVale, pero voy muy liado,{NL}\nasí que solo te llevo de ida.{WAIT}{CLEAR}\n"
   },
   "AREA10/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -1696,7 +1696,7 @@
    "274": "{BOX 288 42}\n{VOICE 6 0}{MOVE 0 0}¿Y esa cara de cansado?{NL}\n¡Parece que te hace falta energía!{WAIT}{CLEAR}\n"
   },
   "AREA11/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -1816,7 +1816,7 @@
    "248": "{BOX 240 55}\n{VOICE 6 0}{MOVE 0 0}Vaya...{NL}\nHas hecho mucho por mí...{NL}\n¡Yo también quiero ayudarte!{WAIT}{CLEAR}\n"
   },
   "AREA12/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -1946,7 +1946,7 @@
    "257": "{BOX 152 42}\n{VOICE 6 0}{MOVE 0 0}Por fin...{C06B}{WAIT}{CLEAR}\nToma, esto es por{NL}\nayudarnos.{WAIT}{CLEAR}\n"
   },
   "AREA13/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -2079,7 +2079,7 @@
    "206": "{BOX 168 29}\nHas usado un objeto{NL}\n"
   },
   "AREA14/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -2185,7 +2185,7 @@
    "226": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}¡Tombi, te presento a Barón!{NL}\nEste perro se hizo daño{NL}\nen el Bosque enano.{C04B}{WAIT}{CLEAR}\nYa tiene las heridas curadas{NL}\ny creo que te será{NL}\nmuy útil.{C04B}{WAIT}{CLEAR}\nTrátalo como a un amigo{NL}\ny cuídalo bien.{NL}\nBarón tiene poderes especiales.{C04B}{WAIT}{CLEAR}\nUsa a Barón en la pantalla de{NL}\nobjetos para conseguir el mismo{NL}\nefecto que las Alas de caridad.{C04B}{WAIT}{CLEAR}\n¡Hala, en marcha!{WAIT}{CLEAR}\n"
   },
   "AREA16/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -2290,7 +2290,7 @@
    "248": "{BOX 232 42}\n{VOICE 6 0}{MOVE 0 0}Los engranajes de piedra{NL}\nestán rotos...{WAIT}{CLEAR}\n"
   },
   "AREA17/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -2395,7 +2395,7 @@
    "269": "{BOX 240 55}\n{VOICE 6 0}{MOVE 0 0}Me has vuelto a encontrar,{NL}\n¿eh? ¿Hay algo que tú{NL}\nno encuentres?{WAIT}{CLEAR}\n"
   },
   "AREA18/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
@@ -2500,7 +2500,7 @@
    "246": "{BOX 288 42}\n{VOICE 6 0}{MOVE 0 0}Escucha... acabo de volver{NL}\nde la Ciudad de todo principio.{C056}{WAIT}{CLEAR}\nY allí la vi... ¡a la{NL}\nbruja!{C056}{WAIT}{CLEAR}\nSe llama Mizuno y... bueno...{NL}\n¡es monísima!{C056}{WAIT}{CLEAR}\n¡Ay, ojalá pudiera volver a verla!{WAIT}{CLEAR}\n"
   },
   "AREA19/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+   "0": "¡ESTUPENDO!",
    "3": "El sabio{NL}\ncentenario",
    "12": "En los huevos{NL}\nKokka",
    "15": "Enano para{NL}\nnovatos",
