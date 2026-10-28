@@ -100,6 +100,10 @@ src/x017/updatePointsBalloon.c | g-> | gq->
 # --lang: a C-named table whose language version changed size (the port's data names are MAIN0 offsets; lang.c)
 src/o0ptsub0/titleDrawMenuCarousel.c | extern short TITLE_MENU_GLYPHS[]; | extern short TITLE_MENU_GLYPHS[]; extern void *port_lang_item(void *);
 src/o0ptsub0/titleDrawMenuCarousel.c | s = TITLE_MENU_GLYPHS; | s = (short *)port_lang_item(TITLE_MENU_GLYPHS);
+# --lang 5: MAIN5's title glyph list ends OPCIONES with an S the retail menu showed as OPCIONE, one more glyph than its
+# palette array: the last glyph takes the palette of the letter before it instead of the byte past the array
+src/o0ptsub0/titleDrawMenuCarousel.c | titleDrawCarouselGlyph(*s, idx, -1, *pal++); | { extern int port_lang; titleDrawCarouselGlyph(*s, idx, -1, port_lang == 5 && s[1] == -3 ? pal[-1] : *pal++); }
+src/o0ptsub0/titleDrawMenuCarousel.c | titleDrawCarouselGlyph(*s, (short)ang, 4, *pal++); | { extern int port_lang; titleDrawCarouselGlyph(*s, (short)ang, 4, port_lang == 5 && s[1] == -3 ? pal[-1] : *pal++); }
 # drawPauseMenu: its entry lists and glyph UV table (MAIN0 0x80080300..0x800803fc) changed size in MAINn (lang.c finds them through the code)
 src/drawPauseMenu.c | extern XY D_80080404[]; | extern XY D_80080404[]; extern void *port_lang_item(void *);
 src/drawPauseMenu.c | e = D_8008037c; | e = (ENT *)port_lang_item(D_8008037c);
