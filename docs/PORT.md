@@ -1715,6 +1715,18 @@ cannot move:
   table reached by pointer is whole. The overlay map ring is keyed by file id: a reload of the same overlay
   reuses its map, spill and `Bn`, so pointers the game kept from the first load stay valid.
 
+**The pause menu** (`drawPauseMenu`, Start in gameplay) read MAIN0's entry lists (`D_8008037c` .. `D_800803dc`,
+`{x, y, glyph string}`, 0xFF-ended strings, -1-ended lists) and MAINn's glyph UV table (`D_80080300`, copied in
+place as a same-size chunk) over MAINn's font page: `--lang 5` showed `MSmja` / `Aodl CSea` / `GiSU CSea` (English
+glyph indices drawn with the Spanish UVs). The lists sit in a gap that changed size (148 bytes in MAIN0, 172 in
+MAIN5) and move by different amounts inside it, so `port_lang_item`'s "same offset from the gap's head" picked
+the wrong bytes. `port_lang_item` now first asks the code (`code_xref`): a `lui` + `addiu`/load pair of MAIN0
+that forms the item's address, at instructions inside matched chunks, read back at the same instructions of
+MAINn, gives the language's address of the item (Bn); the old rule stays the fallback. `port/fixes.txt` routes
+the four lists and the UV table through it. `PAUSA / SALIR / CARGAR` (5), `PAUSA / SAIR / CARREGAR` (6),
+`PAUS / AVBRYT / HäMTA` (7), `PAUSE / AFSLUT / INDLÆS` (8). Sweep (lui pairs into every changed-size gap of
+MAIN0 and the AREA00 overlays): only these lists and the event-title tables (already `port_title_*`).
+
 **Regression scripts** (headless, `--data`; three items are poked into the inventory, Triangle opens the item
 sub-screen, Cross on the first item shows its message, Triangle closes it, then again):
 ```
