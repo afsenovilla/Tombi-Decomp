@@ -77,3 +77,16 @@ void func_80132DD0(void *o)
 {
     wooden_branch_step(o, 0);
 }
+
+/* func_8011DF5C (the second global function of func_8011DE84.c, a chained-object placement handler of
+ * updateA00L4Type06: T7468[0] = data_80138B98[0] = 0x8011DF60) lives at 0x8011DF60: its C name is 4 bytes short and
+ * the matching build PROVIDEs it only as func_8011DF5C__8011DF60.  gen_port.py reads that renamed PROVIDE, but a
+ * build whose build/full lacks it (the real-Windows build of 652d9dc still printed "32 function ... 2308 code
+ * labels kept" and jumped to the retail address) needs a definition named by the address: gen2's AddrMap takes
+ * every func_XXXXXXXX of port2/runtime as the native code of that address, so the word is relocated here whatever
+ * the PROVIDE names say. */
+void func_8011DF60(void *o)
+{
+    extern void func_8011DF5C(void *);
+    func_8011DF5C(o);
+}

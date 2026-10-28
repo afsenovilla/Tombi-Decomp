@@ -263,6 +263,11 @@ void port_relocate_overlay(void *dst, int bytes) {
         if (e) { w[i] = (u32p)e->fn; nfn++; continue; }
         e = addr_find(port_thunkmap, port_thunkmap_count, v);
         if (e) { w[i] = (u32p)e->fn; nth++; continue; }
+        if (c && c->kind == 0) {                            /* a native X000 function the address tables missed (funcmap.c is written at configure time, addrmap.c at link time) */
+            const PortFunc *f = funcmap_find(v);
+            if (f) { port_printf("[port2] frame %d: %s +%04x: %08x is %s in the function map but not in the address map (stale gen tables?): relocated\n", port_frame, c->name, 4 * i, v, f->name);
+                     w[i] = (u32p)f->fn; nfn++; continue; }
+        }
         if (c && in_ranges(c, v)) { nraw++; continue; }   /* a label inside a function of this overlay: left as is */
         w[i] = (u32p)port_ram_ptr(v); nd++;
     }

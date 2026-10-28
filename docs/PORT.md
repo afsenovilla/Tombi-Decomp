@@ -1751,6 +1751,16 @@ stall is host I/O or presentation on that machine, still open.
   range ("code labels kept") in every language and every load, and the first chained object of that variant
   jumped to the retail address. `gen_port.py` now also takes the `name__ADDR` PROVIDEs of the program for a
   unit's other definitions; `port_addrmap` has `0x8011DF60 -> func_8011DF5C` (the audit's `label` column loses it).
+  The real-Windows build of 652d9dc still printed `X000 loaded ... 32 function ... 2308 code labels kept` and
+  crashed the same way (Linux builds of the same tree print `33 function ... 2307`: the extra one is this word),
+  so that build's tables did not carry the entry. Two guards make the word independent of the PROVIDE names
+  and of the build's tables agreeing: `x000_handwritten.c` defines `func_8011DF60` (a call of `func_8011DF5C`),
+  which gen2's `AddrMap` takes as the native code of that address whatever `build/full` says, and
+  `port_relocate_overlay` resolves a word of an area overlay through `port_funcmap` when `port_addrmap` misses
+  it (`funcmap.c` is written at configure time, `addrmap.c` at link time), with a "stale gen tables?" line.
+  The object is a chained three-part object of `updateA00L4Type06` (`T7468[b0c]`, subtype 2 variant 0: AREA00
+  section 2 spawns one; sections 0, 1, 4 only subtypes 0 and 1); checked under gdb: after the X000 load the word
+  holds the native `func_8011DF5C` and a call through it on that object returns.
 - **The title carousel in Spanish** drew `...AR JUEGO    OPCIONES` with no arrow and OPCIONES off centre:
   `loopTitleScreen`'s target angles `D_8007DE98` are `{E4, AC, 74}` in MAIN0 and `{E4, 9C, 5C}` in MAIN5, and
   `0x5C - 0x74 = -0x18` is exactly MAIN5's relink delta, so `port_lang_init`'s "a partial reference moved by the
