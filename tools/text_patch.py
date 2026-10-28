@@ -75,6 +75,30 @@ _S = {
            "tp.noedits": "O patch não contém alterações.",
            "tp.conflict": "Conflito: {0} #{1} difere entre dois patches (vence o último)."},
 }
+# editor (tools/text_editor.py) strings; fr/de/it/pt fall back to English for the longer messages
+_S["es"].update({"tp.make": "Generar parche", "tp.applybtn": "Aplicar parche",
+    "tp.savedlg": "Guardar parche (texto .json o binario .ppf)", "tp.opendlg": "Abrir parche",
+    "tp.ftext": "Parche de textos", "tp.fppf": "Parche PPF",
+    "tp.made": "Parche de textos guardado: {0} ({1} diálogos). No contiene datos del juego; se aplica con «Aplicar parche» o tools/text_patch.py.",
+    "tp.ppfmade": "Parche PPF guardado: {0} ({1} registros). Solo vale para la imagen original exacta.",
+    "tp.making": "Generando el parche PPF (reconstruye el disco)…",
+    "tp.mismatch": "El disco abierto no es el original del parche:\n{0}\n\n¿Aplicarlo igualmente?",
+    "tp.loaded": "Parche aplicado al editor: revisa los textos y usa «Generar ISO».",
+    "tp.ppforig": "Imagen original (.bin) a la que aplicar el PPF", "tp.ppfout": "Guardar la imagen parcheada como",
+    "tp.ppfdone": "Imagen parcheada: {0} ({1} registros)."})
+_S["en"].update({"tp.make": "Make patch", "tp.applybtn": "Apply patch",
+    "tp.savedlg": "Save patch (text .json or binary .ppf)", "tp.opendlg": "Open patch",
+    "tp.ftext": "Text patch", "tp.fppf": "PPF patch",
+    "tp.made": "Text patch saved: {0} ({1} dialogues). It contains no game data; apply it with \"Apply patch\" or tools/text_patch.py.",
+    "tp.ppfmade": "PPF patch saved: {0} ({1} records). It only applies to the exact original image.",
+    "tp.making": "Making the PPF patch (rebuilds the disc)…",
+    "tp.mismatch": "The opened disc is not the patch's original:\n{0}\n\nApply anyway?",
+    "tp.loaded": "Patch applied to the editor: review the texts and use \"Generate ISO\".",
+    "tp.ppforig": "Original image (.bin) to apply the PPF to", "tp.ppfout": "Save the patched image as",
+    "tp.ppfdone": "Patched image: {0} ({1} records)."})
+for _l, (_m, _a) in {"fr": ("Créer un patch", "Appliquer un patch"), "de": ("Patch erstellen", "Patch anwenden"),
+                     "it": ("Crea patch", "Applica patch"), "pt": ("Gerar patch", "Aplicar patch")}.items():
+    _S[_l].update({"tp.make": _m, "tp.applybtn": _a})
 i18n.add(_S)
 
 

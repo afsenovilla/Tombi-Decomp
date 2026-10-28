@@ -11,6 +11,7 @@ on:
       - tools/i18n.py
       - tools/text_strings.py
       - tools/text_core.py
+      - tools/text_patch.py
       - tools/text_preview.py
       - tools/wfm_py.py
       - tools/title_layout.py
@@ -51,7 +52,7 @@ jobs:
         run: |
           python -m pip install pyinstaller pillow
           pyinstaller --onefile --windowed --name tombi-text --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import text_core --hidden-import text_preview --hidden-import mkdisc --hidden-import cdfiles --hidden-import verb_order --paths tools \
+            --hidden-import i18n --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import text_core --hidden-import text_patch --hidden-import text_preview --hidden-import mkdisc --hidden-import cdfiles --hidden-import verb_order --paths tools \
             --icon tools/icons/text.ico --add-data "tools/wfm_charmap.json;." --add-data "tools/icons/text.ico;icons" --add-data "tools/icons/text.png;icons" \
             --add-binary "build/mk/mkpsxiso.exe;." --add-binary "build/mk/dumpsxiso.exe;." tools/text_editor.py
           mkdir -p dist/windows

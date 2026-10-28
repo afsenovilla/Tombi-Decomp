@@ -11,6 +11,7 @@ import i18n
 from i18n import tr
 import text_strings
 import text_core as C
+import text_patch as TP
 import wfm_py as W
 
 try:
@@ -73,7 +74,8 @@ class App:
                           (tr("te.saveproj"), self.save_project), (tr("te.loadproj"), self.load_project), None,
                           (tr("te.exportall"), self.export_all), (tr("te.import"), self.import_any), None,
                           (tr("te.replace"), self.replace_dialog), None,
-                          (tr("te.iso"), self.generate), (tr("te.help"), lambda: messagebox.showinfo(tr("te.help"), tr("te.helptext")))):
+                          (tr("te.iso"), self.generate), (tr("tp.make"), self.make_patch), (tr("tp.applybtn"), self.apply_patch),
+                          (tr("te.help"), lambda: messagebox.showinfo(tr("te.help"), tr("te.helptext")))):
             if item is None:
                 ttk.Separator(bar, orient="vertical").pack(side="left", fill="y", padx=6)
                 continue
@@ -655,6 +657,88 @@ class App:
             else:
                 self.say(tr("te.isodone", res["out"]))
                 messagebox.showinfo(tr("te.done"), tr("te.isook", res["out"], ", ".join(res["files"]), work, res["size"], len(res["files"])))
+        threading.Thread(target=job, daemon=True).start()
+
+    # ---- patches (tools/text_patch.py)
+    def make_patch(self):
+        if not self.need_proj():
+            return
+        if not self.proj.n_edits() and not self.proj.verb_first:
+            messagebox.showinfo(tr("te.nochanges"), tr("te.nodialogues"))
+            return
+        files, errors = self.proj.encode_edited()
+        if errors:
+            messagebox.showerror(tr("te.cantgen"), tr("te.fixtexts") + "\n\n" + "\n".join(errors[:15]))
+            return
+        out = filedialog.asksaveasfilename(title=tr("tp.savedlg"), defaultextension=".json", initialfile="Tombi-ES.tombipatch.json",
+                                           filetypes=[(tr("tp.ftext"), "*.json"), (tr("tp.fppf"), "*.ppf")])
+        if not out:
+            return
+        if not out.lower().endswith(".ppf"):
+            try:
+                p = TP.make(self.proj)
+                TP.save(p, out)
+            except Exception as e:
+                messagebox.showerror(tr("error"), str(e))
+                return
+            msg = tr("tp.made", out, sum(len(d) for d in p["edits"].values()))
+            self.say(msg)
+            messagebox.showinfo(tr("te.done"), msg)
+            return
+        self.run_job(tr("tp.making"), lambda: tr("tp.ppfmade", out, TP.make_ppf(self.proj, out)))
+
+    def apply_patch(self):
+        p = filedialog.askopenfilename(title=tr("tp.opendlg"), filetypes=[(tr("tp.ftext"), "*.json"), (tr("tp.fppf"), "*.ppf"), (tr("te.all"), "*.*")])
+        if not p:
+            return
+        if p.lower().endswith(".ppf"):
+            src = self.proj.src.image if self.proj and self.proj.src.image else \
+                filedialog.askopenfilename(title=tr("tp.ppforig"), filetypes=[(tr("te.discimg"), "*.bin")])
+            if not src:
+                return
+            out = filedialog.asksaveasfilename(title=tr("tp.ppfout"), defaultextension=".bin", initialfile="Tombi-patched.bin",
+                                               filetypes=[(tr("te.discimg"), "*.bin")])
+            if not out:
+                return
+
+            def job():
+                TP.ppf_check(p, src)
+                return tr("tp.ppfdone", out, TP.ppf_apply(src, p, out))
+            self.run_job(tr("te.generating"), job)
+            return
+        if not self.need_proj():
+            return
+        try:
+            patch = TP.load(p)
+            want = (patch.get("disc") or {}).get("sha1")
+            if want and self.proj.src.image and TP.sha1_file(self.proj.src.image) != want:
+                if not messagebox.askyesno(tr("te.warnings"), tr("tp.mismatch", want)):
+                    return
+        except Exception as e:
+            messagebox.showerror(tr("error"), str(e))
+            return
+        self.apply_data(lambda: TP.apply_to_project(self.proj, patch), tr("tp.loaded"))
+
+    def run_job(self, status, fn):
+        self.lock(True)
+        self.say(status)
+        res = {}
+
+        def job():
+            try:
+                res["msg"] = fn()
+            except Exception as e:
+                res["err"] = str(e) if isinstance(e, (C.CoreError, W.WfmError)) else traceback.format_exc()
+            self.root.after(0, done)
+
+        def done():
+            self.lock(False)
+            if "err" in res:
+                self.say(tr("error"))
+                messagebox.showerror(tr("error"), res["err"])
+            else:
+                self.say(res["msg"])
+                messagebox.showinfo(tr("te.done"), res["msg"])
         threading.Thread(target=job, daemon=True).start()
 
 
