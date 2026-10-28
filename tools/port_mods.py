@@ -42,7 +42,6 @@ i18n.add({
         "mod.events": "Desbloquear todos los eventos",
         "mod.events.d": "Marca los %d eventos como completados al empezar (los objetos ligados a eventos desaparecen; útil para explorar)." % EVENT_COUNT,
         "mod.keys": "Teclas personalizadas", "mod.keys.d": "Teclas del visor para cada botón de PS1 (nombres de tecla SDL: X, Return, Space, Left...).",
-        "mod.prompts": "Iconos de botones", "mod.prompts.d": "Los iconos de botones de los tutoriales y menús: PlayStation (originales), Xbox (A/B/X/Y, LB/RB/LT/RT) o Teclado (las teclas configuradas). Dibujados por el port (tools/prompt_glyphs.py) y aplicados sobre la textura al cargarla; solo los iconos localizados en port/assets/prompts/manifest.json cambian.",
     },
     "en": {
         "mod.skipintro": "Skip intro logos and movies",
@@ -59,7 +58,6 @@ i18n.add({
         "mod.events": "Unlock all events",
         "mod.events.d": "Marks all %d events as completed at the start (objects tied to events are gone; for exploring)." % EVENT_COUNT,
         "mod.keys": "Custom keys", "mod.keys.d": "Viewer keys for each PS1 button (SDL key names: X, Return, Space, Left...).",
-        "mod.prompts": "Button prompts", "mod.prompts.d": "The button icons of tutorials and menus: PlayStation (original), Xbox (A/B/X/Y, LB/RB/LT/RT) or Keyboard (the configured keys). Drawn by the port (tools/prompt_glyphs.py) and applied over the texture when the game loads it; only the icons located in port/assets/prompts/manifest.json change.",
     },
 })
 
@@ -86,12 +84,12 @@ def args_areasel(s):
 
 def args_ap(s):
     v = int(s.get("ap", 0))
-    return ["--poke", "%d:8009C96C:%X:4" % (F_NEWGAME, v)] if s.get("ap_on") and v > 0 else []
+    return ["--poke", "g1:8009C96C:%X:4" % v] if s.get("ap_on") and v > 0 else []
 
 
 def args_lives(s):
     v = int(s.get("lives", 3))
-    return ["--poke", "%d:8009C980:%X:1" % (F_NEWGAME, v)] if s.get("lives_on") else []
+    return ["--poke", "g1:8009C980:%X:1" % v] if s.get("lives_on") else []
 
 
 def args_inflives(s):
@@ -103,7 +101,7 @@ def args_infhealth(s):
 
 
 def args_events(s):
-    return ["--poke", "%d:8009CDA4:FF:1x%d" % (F_NEWGAME, EVENT_COUNT)] if s.get("events") else []
+    return ["--poke", "g1:8009CDA4:FF:1x%d" % EVENT_COUNT] if s.get("events") else []
 
 
 PROMPT_SETS = ["playstation", "xbox", "keyboard"]
@@ -153,7 +151,6 @@ def mod_args(settings, out_dir=None):
     out = []
     for _id, _l, _d, _k, fn in MODS:
         out += fn(settings)
-    out += args_prompts(settings, out_dir)
     if "--pad-script" not in out and settings.get("autostart", False):
         out += ["--pad-script", "%d:start" % F_START]
     return out

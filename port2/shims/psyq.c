@@ -71,8 +71,11 @@ static void call_psx(void *fn) { ((void (*)(void))fn)(); }
 /* --poke FRAME:ADDR:VALUE[:SIZE]: write RAM at the start of vblank FRAME (test setups, e.g. the debug area select
    flag 0x1F8001B4); ADDR and VALUE in hex, SIZE 1, 2 or 4 bytes (default 1).
    --poke-every INTERVAL:ADDR:VALUE[:SIZE]: the same every INTERVAL vblanks (mods: infinite lives / vitality);
-   stored as a negative frame. */
-static struct { int frame, size, count; u32 addr, value; } pokes[32];
+   stored as a negative frame.  A FRAME of gN counts from the first vblank of gameplay (the first area overlay load,
+   after the new game's initGameConfig): the launcher's start-of-game mods, whenever the player starts. */
+static struct { int frame, size, count, ingame; u32 addr, value; } pokes[32];
+static int game_start_frame = -1;
+extern int port_in_game;
 static int n_pokes;
 static u32 hexval(const char **p) {
     u32 v = 0; const char *h = *p;
@@ -84,6 +87,8 @@ static u32 hexval(const char **p) {
 void port_poke_add_every(const char *s, int every) {
     if (n_pokes == 32) return;
     int f = 0;
+    pokes[n_pokes].ingame = !every && *s == 'g';
+    if (pokes[n_pokes].ingame) s++;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
     pokes[n_pokes].frame = every ? -(f > 0 ? f : 1) : f;
@@ -204,8 +209,9 @@ void port_vblank(void) {
         }
     }
     port_frame++;
+    if (port_in_game && game_start_frame < 0) game_start_frame = port_frame;
     for (int i = 0; i < n_pokes; i++)
-        if (pokes[i].frame == port_frame || (pokes[i].frame < 0 && port_frame % -pokes[i].frame == 0)) {
+        if (pokes[i].ingame ? game_start_frame >= 0 && port_frame == game_start_frame + pokes[i].frame : pokes[i].frame == port_frame || (pokes[i].frame < 0 && port_frame % -pokes[i].frame == 0)) {
             u32 a = pokes[i].addr, v = pokes[i].value;
             for (int k = 0; k < pokes[i].count; k++, a += pokes[i].size)   /* SIZExCOUNT: consecutive values */
                 { void *p = port_ram_ptr(a); if (!p) continue;
