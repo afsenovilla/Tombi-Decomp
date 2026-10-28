@@ -953,6 +953,15 @@ hints `updateA00TutorialHint` / `a00TutorialHintJumpMessage` (x000, "press X to 
 button-config screen of the SYSTEM overlays, the HUD/font pages of `tools/ui_cluts.py` and the `UiSpriteDef` table —
 and filling in `rect` (x, y, w words, h rows) and `idx` (which CLUT entries are dark/light) per button is what is
 left; `tools/gfx_editor.py` can show the pages. Until then the option changes nothing (pack returns 0 glyphs).
+*Finding (why a fixed rect cannot work for the dialog icons):* message-box text, the tutorial hints included
+(`updateA00TutorialHint` opens `showMessageBox(9, ...)`), draws every glyph through `drawMessageGlyph` ->
+`loadMessageGlyph` (`FUN_8002df70`), which copies the glyph bitmap from the WFM3 font bank (`WFM3_DATA[bank]`, entry
+`id`) into a free slot of a 60-entry LRU `GLYPH_CACHE` (slots of 4 words x 16 rows, laid out by `initSpriteSlots`) with
+a `DR_LOAD` GP0 copy, not `LoadImage`. A button icon therefore lands in whichever slot is free and moves between
+messages, and `--patch-tex` (hooked on `LoadImage`) never sees it. The workable route is to replace the glyph at its
+source: either patch the WFM3 entries of the button glyphs in RAM after the font bank loads, or match the `DR_LOAD`
+payload in `gpu.c` against the original glyph bitmaps and substitute ours. Both need the WFM3 ids of the button
+glyphs (the message strings embed them as glyph codes), which are not identified yet.
 
 Checked on Linux: the pokes of a new game (AP 5000, 9 lives, both `--poke-every`, the 130 event bytes) run 400 vblanks
 without a fault; a 1500-frame run with the title's Start stalls at vblank ~443 in this checkout (`sleepTask` loop after
