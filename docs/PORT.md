@@ -1727,8 +1727,11 @@ here.` (frames 3900..4100), X000 is reloaded on the close, the second open draws
 `no native code`, no fault. The title menu (a save in `--save-dir`, Start at 2000, Right twice): `--lang 5` shows
 `OPCIONES` whole. `--title FRAME:ID` (debug, `port_title_add` in `shims/psyq.c`; `--movie FRAME:ID` likewise starts an FMV) spawns the event-title banner
 of event ID of the current area at that vblank: `--lang 5 --title 3000:2` in AREA00 flies in `Despejar la
-niebla` as `--lang 0` does `Clear the FOG` (the letters scatter and reassemble: that is the animation, not a
-layout fault). The standard test stays byte-identical (36 frames).
+niebla` as `--lang 0` does `Clear the FOG`. The letters fly in, bob and tilt gently in place, then slide off.  They used to
+swing all over the screen (every letter but one): libgte `MulMatrix0` loads its first matrix into the GTE
+rotation register and `drawObjectModelCameraFixed` relies on that for the `ApplyRotMatrix` that follows; the
+shim was pure C, so each letter's position was rotated by the previous letter's tilt.  `MulMatrix0` now runs
+on the GTE and `ApplyMatrix`/`ApplyMatrixSV`/`ApplyMatrixLV` load RT as the retail code does. The standard test stays byte-identical (36 frames).
 
 **Checked and not a port fault.** The white egg-shaped objects on the fences of the lake room (AREA00 section 1)
 are what the retail renderer draws too (`tools/psxemu/capture.py rooms --area 00 --section 1`). The

@@ -436,11 +436,20 @@ MATRIX *RotMatrix(SVECTOR *r, MATRIX *m) {
     m->m[2][2] = (cx * cy) >> 12;
     return m;
 }
+/* libgte MulMatrix0 (MAIN0 0x8006395C) runs on the GTE: it loads a into the rotation matrix (RT) and leaves it
+   there, then MVMVAs each column of b (results read back from IR1-3).  Callers rely on that side effect:
+   drawObjectModelCameraFixed (the event-title letters) does MulMatrix0(&base, &rot, &M) and then
+   ApplyRotMatrix(pos) before SetRotMatrix(&M), so the position is rotated by the base matrix; a pure-C product
+   left the previous letter's tilted matrix in RT and every letter but the first drawn swung around */
 MATRIX *MulMatrix0(MATRIX *a, MATRIX *b, MATRIX *c) {
-    MATRIX t;
-    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
-        t.m[i][j] = (a->m[i][0] * b->m[0][j] + a->m[i][1] * b->m[1][j] + a->m[i][2] * b->m[2][j]) >> 12;
-    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) c->m[i][j] = t.m[i][j];
+    s16 t[3][3];
+    load_matrix(0, a);
+    for (int j = 0; j < 3; j++) {
+        port_gte_mtc2(0, PK(b->m[0][j], b->m[1][j])); port_gte_mtc2(1, (u16)b->m[2][j]);
+        port_gte_op(0x00486012);   /* MVMVA sf=1 mx=RT v=V0 cv=none */
+        for (int i = 0; i < 3; i++) t[i][j] = (s16)port_gte_mfc2(9 + i);
+    }
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) c->m[i][j] = t[i][j];
     return c;
 }
 /* libgte ScaleMatrix (MAIN0 0x80063CAC, called as FUN_80063cac by drawObjectModelRotScaled): column j of the
@@ -452,7 +461,10 @@ MATRIX *ScaleMatrix(MATRIX *m, VECTOR *v) {
         m->m[i][j] = (s16)((s32)((u32)m->m[i][j] * (u32)sc[j]) >> 12);
     return m;
 }
+/* libgte ApplyMatrix/ApplyMatrixSV/ApplyMatrixLV load m into the GTE rotation matrix like MulMatrix0 (the
+   retail code starts with ctc2 0-4) and leave it there: keep that side effect */
 VECTOR *ApplyMatrix(MATRIX *m, SVECTOR *v, VECTOR *r) {
+    load_matrix(0, m);
     s32 x = v->vx, y = v->vy, z = v->vz;
     r->vx = (m->m[0][0] * x + m->m[0][1] * y + m->m[0][2] * z) >> 12;
     r->vy = (m->m[1][0] * x + m->m[1][1] * y + m->m[1][2] * z) >> 12;
@@ -463,6 +475,7 @@ SVECTOR *ApplyMatrixSV(MATRIX *m, SVECTOR *v, SVECTOR *r) {
     VECTOR t; ApplyMatrix(m, v, &t); r->vx = t.vx; r->vy = t.vy; r->vz = t.vz; return r;
 }
 VECTOR *ApplyMatrixLV(MATRIX *m, VECTOR *v, VECTOR *r) {
+    load_matrix(0, m);
     long long x = v->vx, y = v->vy, z = v->vz;
     r->vx = (s32)((m->m[0][0] * x + m->m[0][1] * y + m->m[0][2] * z) >> 12);
     r->vy = (s32)((m->m[1][0] * x + m->m[1][1] * y + m->m[1][2] * z) >> 12);
