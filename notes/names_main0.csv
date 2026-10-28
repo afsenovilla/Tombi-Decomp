@@ -1,5 +1,4 @@
 address,name,confidence,comment
-800163f4,main,alta,"main() del juego: Ghidra lo nombro como libreria; sigue en asm (docs/PORT.md)"
 80016984,FlipFrame,alta,doble buffer: PutDispEnv/PutDrawEnv/DrawOTag/ClearOTagR
 80016a44,GsSetOrign,alta,Psy-Q (sugerido por Ghidra)
 80016a5c,initGlobalState,alta,names batch (see notes/names.md)
