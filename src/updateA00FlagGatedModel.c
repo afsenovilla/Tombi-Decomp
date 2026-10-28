@@ -1,10 +1,5 @@
 // FUNC 8011f1d0 184 X000
 // MATCHING 8011f1d0 184
-// VERSION SLPS_01144 x00 8011E244 184
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x00/nonmatchings/x00", func_8011E244_slps01144);
-#else
 #include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
@@ -33,4 +28,3 @@ void updateA00FlagGatedModel(TObj *o)
         break;
     }
 }
-#endif

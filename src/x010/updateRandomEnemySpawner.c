@@ -1,10 +1,5 @@
 // FUNC 8012d200 440 X010
 // MATCHING 8012d200 440
-// VERSION SLPS_01144 x10 8012B824 440
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x10/nonmatchings/x10", func_8012B824_slps01144);
-#else
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
@@ -46,4 +41,3 @@ void updateRandomEnemySpawner(TObj *o)
         break;
     }
 }
-#endif

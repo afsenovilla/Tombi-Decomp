@@ -1,10 +1,5 @@
 // FUNC 801215b0 444 X014
 // MATCHING 801215b0 444
-// VERSION SLPS_01144 x14 8011E8B8 444
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x14/nonmatchings/x14", func_8011E8B8_slps01144);
-#else
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -66,4 +61,3 @@ void updateBaccusVillagePigShot(TObj *o)
         break;
     }
 }
-#endif

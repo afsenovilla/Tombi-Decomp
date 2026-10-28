@@ -1,10 +1,5 @@
 // FUNC 80118a80 376 X009
 // MATCHING 80118a80 376
-// VERSION SLPS_01144 x09 80117D30 376
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x09/nonmatchings/x09", func_80117D30_slps01144);
-#else
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { char p[0xe]; unsigned char b0e; char q[0x5c - 0xf]; int d5c; } X;
@@ -64,4 +59,3 @@ void initRotatingPlaneSprite(TObj *o)
     e->anim = D_8012E9BC[0];
     rotatingPlaneSpriteSetQuad(e);
 }
-#endif

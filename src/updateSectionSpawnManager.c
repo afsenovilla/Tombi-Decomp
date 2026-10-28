@@ -1,7 +1,6 @@
 // FUNC 8004c1ec 556 MAIN0
 // MATCHING 8004c1ec 556
 // VERSION SLPM_80165 slpm80165 8004EAEC 532
-// VERSION SLPS_01144 slps01144 80057260 556
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 8004C1EC (func_8004C1EC.c): no purified-area test.
 #include "spad.h"
@@ -73,9 +72,6 @@ void func_8004C1EC(S *o)
         break;
     }
 }
-#elif defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80057260_slps01144);
 #else
 #include "spad.h"
 #include "gcd.h"

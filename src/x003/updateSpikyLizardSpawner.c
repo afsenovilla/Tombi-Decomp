@@ -1,10 +1,5 @@
 // FUNC 8013123c 884 X003
 // MATCHING 8013123c 884
-// VERSION SLPS_01144 x03 8013045C 884
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x03/nonmatchings/x03", func_8013045C_slps01144);
-#else
 #include "spad.h"
 #include "TOBJ.H"
 
@@ -140,4 +135,3 @@ void updateSpikyLizardSpawner(TObj *o)
         break;
     }
 }
-#endif

@@ -289,8 +289,11 @@ def jpdemo_main(ver="slpm80165"):
             out = "%s/target/%s/%s.o" % (out_dir, prog, name)
             os.makedirs(os.path.dirname(out), exist_ok=True)
             with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
-                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n'
-                        + open(os.path.join(fdir, fn)).read())
+                src_s = open(os.path.join(fdir, fn)).read()
+                # scratchpad addresses are fixed: assemble them as constants, like _jpdemo_spad_set does on the C side
+                # (splat names some of them D_1F80xxxx in the Japanese retail target)
+                spad = "".join("\t.set\t%s,0x%s\n" % (n, n[2:]) for n in sorted(set(re.findall(r"\bD_1F80[0-9A-F]{4}\b", src_s))))
+                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n' + spad + '.section .text\n' + src_s)
             try:
                 run(AS + [t.name, "-o", out])
             except subprocess.CalledProcessError as e:

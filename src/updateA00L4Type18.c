@@ -1,10 +1,5 @@
 // FUNC 801202a4 496 X000
 // MATCHING 801202a4 496
-// VERSION SLPS_01144 x00 8011F318 496
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x00/nonmatchings/x00", func_8011F318_slps01144);
-#else
 typedef struct O {
     unsigned char active, vis, type, b3, state, step, b6, b7;
     char p0[2]; unsigned char b0a; char p1[2]; unsigned char b0d; char p2; signed char b0f;
@@ -78,4 +73,3 @@ void updateA00L4Type18(O *o)
         break;
     }
 }
-#endif

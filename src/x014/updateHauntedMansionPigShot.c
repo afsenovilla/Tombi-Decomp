@@ -1,10 +1,5 @@
 // FUNC 80122de8 304 X014
 // MATCHING 80122de8 304
-// VERSION SLPS_01144 x14 801200C0 304
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x14/nonmatchings/x14", func_801200C0_slps01144);
-#else
 #include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -52,4 +47,3 @@ void updateHauntedMansionPigShot(TObj *o)
         break;
     }
 }
-#endif

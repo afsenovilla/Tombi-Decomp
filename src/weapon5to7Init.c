@@ -1,11 +1,6 @@
 // FUNC 8003509c 128 MAIN0
 // MATCHING 8003509c 128
-// VERSION SLPS_01144 slps01144 80035FC4 128
 // FLAGS -O1 -G0
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80035FC4_slps01144);
-#else
 #include "TOBJ.H"
 extern volatile int DAT_1f800340[];
 extern unsigned char PLAYER_DRAW_DEPTH;
@@ -34,4 +29,3 @@ void weapon5to7Init(TObj *o, int n)
     o->d8c = 0;
     o->b.p.whole = s;
 }
-#endif
