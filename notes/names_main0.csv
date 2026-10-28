@@ -1192,6 +1192,7 @@ address,name,confidence,comment
 80072edc,vmNoiseOff,alta,"Psy-Q (psx_tomba, por bytes)"
 80072f20,_SsVmKeyOffNow,alta,"Psy-Q (psx_tomba, por bytes)"
 80072ff0,_SsVmKeyOnNow,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800734d4,_SsVmPBVoice,alta,"Psy-Q (a mano, tras eternal-silver-sssc-decomp)"
 800736d4,_SsVmPitchBend,alta,"Psy-Q (sotn-decomp, por bytes)"
 800737c4,_SsVmSetSeqVol,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80073d04,_SsVmGetSeqVol,alta,"Psy-Q (sotn-decomp, por bytes)"
