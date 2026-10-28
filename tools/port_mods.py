@@ -29,7 +29,7 @@ DEFAULT_KEYS = {"up": "Up", "down": "Down", "left": "Left", "right": "Right", "c
 i18n.add({
     "es": {
         "mod.skipintro": "Saltar logos y vídeos de introducción",
-        "mod.skipintro.d": "Arranca en la pantalla de título sin los logos ni el vídeo de apertura (--play-movies los reproduce).",
+        "mod.skipintro.d": "Arranca en la pantalla de título sin los logos ni el vídeo de apertura (los vídeos de la historia sí se reproducen).",
         "mod.hz60": "60 Hz (velocidad NTSC)",
         "mod.hz60.d": "El juego PAL corre a 50 Hz; con esta opción el port lo sincroniza a 60 vblanks por segundo (más rápido, música incluida).",
         "mod.areasel": "Selección de área (debug select)",
@@ -46,7 +46,7 @@ i18n.add({
     },
     "en": {
         "mod.skipintro": "Skip intro logos and movies",
-        "mod.skipintro.d": "Boots to the title screen without the logos and the opening movie (--play-movies plays them).",
+        "mod.skipintro.d": "Boots to the title screen without the logos and the opening movie (story movies still play).",
         "mod.hz60": "60 Hz (NTSC speed)",
         "mod.hz60.d": "The PAL game runs at 50 Hz; this paces the port at 60 vblanks per second (faster, music included).",
         "mod.areasel": "Area select (debug select)",
@@ -69,7 +69,7 @@ F_START, F_NEWGAME, F_SELECT, F_CIRCLE = 1000, 1100, 1250, 1300
 
 
 def args_skipintro(s):
-    return [] if s.get("skipintro", True) else ["--play-movies"]
+    return ["--skip-intro"] if s.get("skipintro", True) else []
 
 
 def args_hz60(s):

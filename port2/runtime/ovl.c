@@ -271,6 +271,8 @@ void port_relocate_overlay(void *dst, int bytes) {
         if (c && in_ranges(c, v)) { nraw++; continue; }   /* a label inside a function of this overlay: left as is */
         w[i] = (u32p)port_ram_ptr(v); nd++;
     }
+    { extern int port_in_game;                          /* --skip-intro: the first area overlay (X0nn) loaded = gameplay has started */
+      if (c && c->name[0] == 'X' && c->name[1] == '0') port_in_game = 1; }
     if (port_verbose || ovl)
         port_printf("[port2] frame %d: %s loaded (%d bytes at %08x): %d function, %d thunk, %d data pointers relocated, %d code labels kept\n",
                     port_frame, c ? c->name : "a file below the heap", bytes, base, nfn, nth, nd, nraw);
