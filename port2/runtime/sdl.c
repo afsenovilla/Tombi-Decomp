@@ -166,11 +166,11 @@ static void pump(void) {
 /* where the logical frame (320 wide whatever the mode, h lines) goes in a W x H output: 4:3 as a PAL TV shows
    256 lines (square pixels with port_window_square), the largest integer vertical scale that fits, centred;
    a smaller output gets the fit */
-static int fit_wide;             /* the frame being shown is a --widescreen one (320 + 2 * pad wide) */
+int port_window_fit_wide;        /* the frame being shown is a --widescreen one (320 + 2 * pad wide) */
 void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
     extern int port_widescreen;
     int lw = port_window_square ? 320 : h * 4 / 3;
-    if (fit_wide) lw = port_window_square ? 320 + 2 * port_widescreen : h * 4 * (320 + 2 * port_widescreen) / (3 * 320);
+    if (port_window_fit_wide) lw = port_window_square ? 320 + 2 * port_widescreen : h * 4 * (320 + 2 * port_widescreen) / (3 * 320);
     int k = W / lw < H / h ? W / lw : H / h;
     float ow, oh;
     if (k >= 1) { ow = (float)(lw * k); oh = (float)(h * k); }
@@ -198,7 +198,7 @@ void port_window_frame(const unsigned char *rgb, int w, int h) {
     SDL_UpdateTexture(tex, NULL, rgb, w * 3);
     SDL_RenderClear(ren);
     { int W, H; SDL_GetRendererOutputSize(ren, &W, &H);
-      extern int port_widescreen; fit_wide = port_widescreen && w == 320 + 2 * port_widescreen;
+      extern int port_widescreen; port_window_fit_wide = port_widescreen && w == 320 + 2 * port_widescreen;
       SDL_Rect dst; port_window_fit(W, H, h, &dst.x, &dst.y, &dst.w, &dst.h);
       SDL_RenderCopy(ren, tex, NULL, &dst); }  /* 512-wide modes show at the same size */
     SDL_RenderPresent(ren);

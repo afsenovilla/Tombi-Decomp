@@ -26,4 +26,7 @@ void *port_bios_tcb_table(void);
 #define port_otaddr(p) ((unsigned long)(p) & 0xFFFFFFul)
 #define port_otlink(p) port_otaddr(p)
 #include "port2_syms.h"
+extern int port_ws_cull;          /* --widescreen: extra screen columns each side the culls keep (shims/gpu.c); 0 = off */
+#define PORT_WSX(v) ((unsigned short)((v) + port_ws_cull))
+#define PORT_WSW(c) ((c) + 2 * port_ws_cull)
 #endif

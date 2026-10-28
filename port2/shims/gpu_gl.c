@@ -131,10 +131,11 @@ static int gl_load(void) {
    a_col: 8-bit colour; a_uv: texels (polygons: rounded to nearest, rects: already centred); a_tex: CLUT x/y,
    texture page x + depth * 1024, texture page y */
 static const char vs_src[] =
+    "uniform float u_hw;\n"
     "attribute vec2 a_pos; attribute vec4 a_col; attribute vec2 a_uv; attribute vec4 a_tex;\n"
     "varying vec4 v_col; varying vec2 v_uv; varying vec4 v_tex;\n"
     "void main() {\n"
-    "  gl_Position = vec4(a_pos.x / 512.0 - 1.0, a_pos.y / 256.0 - 1.0, 0.0, 1.0);\n"
+    "  gl_Position = vec4(a_pos.x / u_hw - 1.0, a_pos.y / 256.0 - 1.0, 0.0, 1.0);\n"
     "  v_col = a_col; v_uv = a_uv; v_tex = a_tex;\n"
     "}\n";
 /* u_tex: 0 flat/gouraud, 1 textured + modulated, 2 textured raw; u_pass: 0 all texels, 1 only the opaque ones
@@ -216,7 +217,7 @@ static GLuint link(const char *vs, const char *fs, const char *what) {
 
 /* ------------------------------------------------------------------ the command list */
 typedef struct { float x, y; u8 r, g, b, a; float u, v; u16 cx, cy, tx, ty; } GVtx;     /* 28 bytes */
-typedef struct { int semi, abr, tex, raw, twmx, twmy, twox, twoy, x1, y1, x2, y2, set_mask, check_mask, prim; } Key;
+typedef struct { int semi, abr, tex, raw, twmx, twmy, twox, twoy, x1, y1, x2, y2, set_mask, check_mask, prim, wide; } Key;
 enum { OP_DRAW, OP_FILL, OP_COPY };
 #define MAX_SAMPLED 12
 typedef struct { int kind; Key key; int first, count; int r[6]; u16 col; int ns; short sr[MAX_SAMPLED][4]; } Op;   /* sr: VRAM rectangles the batch samples */
@@ -227,7 +228,10 @@ static GVtx vtx[MAX_VTX];
 static Op ops[MAX_OPS];
 static int n_vtx, n_ops;
 static GLuint vram_tex, fbo, vbo, prog, bprog;
-static GLint u_tex, u_pass, u_tw, u_setmask, bu_vram;
+static GLint u_tex, u_pass, u_tw, u_setmask, bu_vram, u_hw;
+/* --widescreen: the wide plane (gpu.c "widescreen"), 2048x512 RGBA8 with its own framebuffer; drawn into, never sampled */
+static GLuint wide_tex, wide_fbo;
+static int bound_wide = -1;
 static int gl_ready, check_mask_semi_warned;
 /* the VRAM rectangle drawn since the last texture barrier: a batch that samples inside it needs one first (the GL
    leaves sampling a texture that is also the render target undefined; the PS1 reads what was drawn before) */
@@ -279,7 +283,7 @@ static void make_key(Key *k, int semi, int tex, int raw, int prim) {
     k->semi = semi ? 1 : 0; k->abr = semi ? gs->abr : 0; k->tex = tex; k->raw = tex ? (raw ? 1 : 0) : 0;
     if (tex) { k->twmx = gs->twmx; k->twmy = gs->twmy; k->twox = gs->twox; k->twoy = gs->twoy; }
     k->x1 = gs->x1; k->y1 = gs->y1; k->x2 = gs->x2; k->y2 = gs->y2;
-    k->set_mask = gs->set_mask; k->check_mask = gs->check_mask; k->prim = prim;
+    k->set_mask = gs->set_mask; k->check_mask = gs->check_mask; k->prim = prim; k->wide = gs->wide && wide_fbo;
 }
 static void submit(void);
 static GVtx *alloc_vtx(int n, const Key *k, const GpuTex *t) {
@@ -340,7 +344,12 @@ static void gl_line(int x0, int y0, u32 c0, int x1, int y1, u32 c1, int shade, i
 static void gl_fill(int x, int y, int w, int h, u16 c) {
     if (!gl_ready) return;
     if (n_ops >= MAX_OPS) submit();
-    Op *op = &ops[n_ops++]; op->kind = OP_FILL; op->r[0] = x; op->r[1] = y; op->r[2] = w; op->r[3] = h; op->col = c;
+    Op *op = &ops[n_ops++]; op->kind = OP_FILL; op->r[0] = x; op->r[1] = y; op->r[2] = w; op->r[3] = h; op->col = c; op->r[4] = 0;
+}
+static void gl_ws_fill(int x, int y, int w, int h, u16 c) {
+    if (!gl_ready || !wide_fbo) return;
+    if (n_ops >= MAX_OPS) submit();
+    Op *op = &ops[n_ops++]; op->kind = OP_FILL; op->r[0] = x; op->r[1] = y; op->r[2] = w; op->r[3] = h; op->col = c; op->r[4] = 1;
 }
 static void gl_copy(int sx, int sy, int dx, int dy, int w, int h) {
     if (!gl_ready) return;
@@ -349,10 +358,15 @@ static void gl_copy(int sx, int sy, int dx, int dy, int w, int h) {
 }
 
 /* ------------------------------------------------------------------ submitting the list */
-static void bind_vram_fbo(void) {
-    p_glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    p_glViewport(0, 0, 1024, 512);
+static void bind_target(int wide) {
+    if (bound_wide == wide) return;
+    bound_wide = wide;
+    p_glBindFramebuffer(GL_FRAMEBUFFER, wide ? wide_fbo : fbo);
+    p_glViewport(0, 0, wide ? 2048 : 1024, 512);
+    p_glUseProgram(prog);
+    p_glUniform1f(u_hw, wide ? 1024.0f : 512.0f);
 }
+static void bind_vram_fbo(void) { bound_wide = -1; bind_target(0); }
 static void set_blend(const Key *k, int pass) {
     if (k->semi && pass != 1) {
         p_glEnable(GL_BLEND);
@@ -374,6 +388,7 @@ static void draw_op(const Op *op, int pass) {
     const Key *k = &op->key;
     int w = k->x2 - k->x1 + 1, h = k->y2 - k->y1 + 1;
     if (w <= 0 || h <= 0) return;
+    bind_target(k->wide);
     p_glScissor(k->x1, k->y1, w, h);
     set_blend(k, pass);
     p_glUniform1i(u_tex, k->tex);
@@ -382,7 +397,7 @@ static void draw_op(const Op *op, int pass) {
     p_glUniform1f(u_setmask, k->set_mask ? 1.0f : 0.0f);
     for (int i = 0; i < op->ns && dirty_any; i++) barrier_if(op->sr[i][0], op->sr[i][1], op->sr[i][2], op->sr[i][3]);
     p_glDrawArrays(k->prim, op->first, op->count);
-    dirty_add(k->x1, k->y1, k->x2, k->y2);
+    if (!k->wide) dirty_add(k->x1, k->y1, k->x2, k->y2);
     stat_draws++;
 }
 static void submit(void) {
@@ -402,10 +417,11 @@ static void submit(void) {
         stat_ops++;
         if (op->kind == OP_FILL) {
             u16 c = op->col;
+            bind_target(op->r[4]);
             p_glScissor(op->r[0], op->r[1], op->r[2], op->r[3]);
             p_glClearColor((c & 31) / 31.0f, ((c >> 5) & 31) / 31.0f, ((c >> 10) & 31) / 31.0f, (c >> 15) ? 1.0f : 0.0f);
             p_glClear(GL_COLOR_BUFFER_BIT);
-            dirty_add(op->r[0], op->r[1], op->r[0] + op->r[2] - 1, op->r[1] + op->r[3] - 1);
+            if (!op->r[4]) dirty_add(op->r[0], op->r[1], op->r[0] + op->r[2] - 1, op->r[1] + op->r[3] - 1);
         } else if (op->kind == OP_COPY) {
             int sx = op->r[0], sy = op->r[1], dx = op->r[2], dy = op->r[3], w = op->r[4], h = op->r[5];
             if (sx + w > 1024) w = 1024 - sx;
@@ -413,6 +429,7 @@ static void submit(void) {
             if (sy + h > 512) h = 512 - sy;
             if (dy + h > 512) h = 512 - dy;
             if (w > 0 && h > 0) {
+                bind_target(0);
                 barrier_if(sx, sy, sx + w - 1, sy + h - 1);
                 p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, dx, dy, sx, sy, w, h);
                 dirty_add(dx, dy, dx + w - 1, dy + h - 1);
@@ -421,6 +438,7 @@ static void submit(void) {
         else draw_op(op, 0);
     }
     p_glDisable(GL_BLEND);
+    bind_vram_fbo();
     n_vtx = n_ops = 0;
 }
 static void gl_list_end(void) { submit(); p_glFlush(); }
@@ -457,6 +475,39 @@ static void gl_vram_read(int x, int y, int w, int h) {
             d[i] = (u16)(((s[0] * 31 + 127) / 255) | (((s[1] * 31 + 127) / 255) << 5) | (((s[2] * 31 + 127) / 255) << 10) | (s[3] >= 128 ? 0x8000 : 0));
     }
 }
+
+/* ------------------------------------------------------------------ the --widescreen plane */
+static void gl_ws_copy_down(int wx, int wy, int vx, int vy, int w, int h) {
+    if (!gl_ready || !wide_fbo) return;
+    submit();
+    p_glBindFramebuffer(GL_FRAMEBUFFER, wide_fbo);
+    p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+    p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, vx, vy, wx, wy, w, h);
+    bind_vram_fbo();
+}
+static void gl_ws_upload(int wx, int wy, int w, int h, const u16 *src, int stride) {
+    if (!gl_ready || !wide_fbo || w <= 0 || h <= 0) return;
+    submit();
+    for (int j = 0; j < h; j++) memcpy(stage + j * w, src + j * stride, (size_t)w * 2);
+    p_glBindTexture(GL_TEXTURE_2D, wide_tex);
+    p_glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+    p_glTexSubImage2D(GL_TEXTURE_2D, 0, wx, wy, w, h, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, stage);
+    p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+}
+static void gl_ws_read(int wx, int wy, int w, int h, u16 *dst, int stride) {
+    if (!gl_ready || !wide_fbo || w <= 0 || h <= 0) return;
+    submit();
+    bind_target(1);
+    p_glPixelStorei(GL_PACK_ALIGNMENT, 4);
+    p_glReadPixels(wx, wy, w, h, GL_RGBA, GL_UNSIGNED_BYTE, stage8);
+    for (int j = 0; j < h; j++) {
+        const u8 *s = stage8 + (size_t)j * w * 4; u16 *d = dst + j * stride;
+        for (int i = 0; i < w; i++, s += 4)
+            d[i] = (u16)(((s[0] * 31 + 127) / 255) | (((s[1] * 31 + 127) / 255) << 5) | (((s[2] * 31 + 127) / 255) << 10) | (s[3] >= 128 ? 0x8000 : 0));
+    }
+    bind_vram_fbo();
+}
+static int gl_ws_present(int wx, int wy, int w, int h);
 
 /* ------------------------------------------------------------------ the window */
 /* the display area (a rectangle of the VRAM texture, or the whole 24-bit frame texture) onto the window: the
@@ -504,6 +555,17 @@ static int gl_present(int dx, int dy, int dw, int dh, int masked) {
     port_window_gl_swap();
     return 1;
 }
+static int gl_ws_present(int wx, int wy, int w, int h) {
+    extern int port_window_fit_wide;
+    int W, H;
+    if (!wide_fbo || !present_begin(&W, &H)) return 0;
+    port_window_fit_wide = 1;
+    if (W > 0 && H > 0) blit(wide_tex, wx / 2048.0f, wy / 512.0f, (wx + w) / 2048.0f, (wy + h) / 512.0f, h, W, H);
+    port_window_fit_wide = 0;
+    port_window_gl_swap();
+    bound_wide = -1;
+    return 1;
+}
 /* the 24-bit display mode (the MDEC movies): the frame gpu.c read out of VRAM as RGB8 goes to its own texture and
    is blitted the same way.  The software path hands it to an SDL_Renderer instead (port_window_frame); here that
    renderer would be a second device on the window that already has the GL context (on Windows a Direct3D one),
@@ -547,6 +609,7 @@ static int gl_start(void) {
     p_glUniform1i(p_glGetUniformLocation(prog, "u_vram"), 0);
     u_tex = p_glGetUniformLocation(prog, "u_tex"); u_pass = p_glGetUniformLocation(prog, "u_pass");
     u_tw = p_glGetUniformLocation(prog, "u_tw"); u_setmask = p_glGetUniformLocation(prog, "u_setmask");
+    u_hw = p_glGetUniformLocation(prog, "u_hw"); p_glUniform1f(u_hw, 512.0f);
     p_glUseProgram(bprog);
     bu_vram = p_glGetUniformLocation(bprog, "u_vram"); p_glUniform1i(bu_vram, 0);
     /* VRAM: RGBA8, nearest, uploaded from the mirror (whatever LoadImage wrote before the backend started) */
@@ -563,6 +626,28 @@ static int gl_start(void) {
     p_glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, vram_tex, 0);
     GLenum st = p_glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (st != GL_FRAMEBUFFER_COMPLETE) { port_printf("[gpu] OpenGL: VRAM framebuffer incomplete (0x%x)\n", (unsigned)st); return -1; }
+    {   extern int port_widescreen;
+        if (port_widescreen) {
+            static const u16 zero[2048];
+            p_glGenTextures(1, &wide_tex);
+            p_glBindTexture(GL_TEXTURE_2D, wide_tex);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 2048, 512, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, 0);
+            for (int y = 0; y < 512; y++) p_glTexSubImage2D(GL_TEXTURE_2D, 0, 0, y, 2048, 1, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, zero);
+            p_glGenFramebuffers(1, &wide_fbo);
+            p_glBindFramebuffer(GL_FRAMEBUFFER, wide_fbo);
+            p_glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, wide_tex, 0);
+            if (p_glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+                port_printf("[gpu] OpenGL: widescreen framebuffer incomplete: 4:3 only\n");
+                wide_fbo = 0; port_widescreen = 0;
+            }
+            p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+            p_glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        }
+    }
     p_glGenBuffers(1, &vbo);
     p_glEnableVertexAttribArray(0); p_glEnableVertexAttribArray(1); p_glEnableVertexAttribArray(2); p_glEnableVertexAttribArray(3);
     p_glDisable(GL_DEPTH_TEST); p_glDisable(GL_CULL_FACE); p_glDisable(GL_DITHER);
@@ -579,4 +664,5 @@ static void gl_stop(void) {
 }
 
 const GpuBackend port_gpu_gl = { "OpenGL", gl_start, gl_stop, gl_tri, gl_rect, gl_line, gl_fill, gl_copy,
-                                 gl_vram_written, gl_vram_read, gl_list_end, gl_present, gl_present_rgb };
+                                 gl_vram_written, gl_vram_read, gl_list_end, gl_present, gl_present_rgb,
+                                 gl_ws_fill, gl_ws_copy_down, gl_ws_upload, gl_ws_read, gl_ws_present };
