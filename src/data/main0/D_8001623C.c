@@ -1,0 +1,16 @@
+// DATA 8001623c 152 MAIN0
+// Data of MAIN0 that no C function defines (yet): one array per unclaimed range,
+// as words (bytes where the range is not word aligned). Psy-Q library data (rodata strings, .data) that no ported library C defines.
+
+unsigned int data_8001623C[38] = {
+    0x3A644924, 0x746E6920, 0x2C632E72, 0x2E312076,
+    0x31203437, 0x2F363939, 0x302F3231, 0x37302034,
+    0x3A30333A, 0x6D203631, 0x746F6B61, 0x7845206F,
+    0x242070, 0x78656E75, 0x74636570, 0x69206465,
+    0x7265746E, 0x74707572, 0x34302528, 0xA2978,
+    0x72746E69, 0x6D697420, 0x74756F65, 0x34302528,
+    0x30253A78, 0xA297834, 0x0, 0x20414D44,
+    0x20737562, 0x6F727265, 0x63203A72, 0x3D65646F,
+    0x78383025, 0xA, 0x5244414D, 0x5D64255B,
+    0x3830253D, 0xA78,
+};
