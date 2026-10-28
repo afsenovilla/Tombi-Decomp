@@ -64,14 +64,7 @@ def check_entry(proj, path, idx, text):
     except W.WfmError as e:
         return ["encode: %s" % e]
     if len(wc.glyphs) > len(proj.wfm(path).glyphs):
-        base = proj.wfm(path)
-        font = base.dialogues[idx].font
-        miss = []
-        for ch in sorted(set(TAG.sub("", text)) - {"\n", "\r"}):
-            try:
-                W.text_to_words(C.clone(base), ch, font)
-            except W.WfmError:
-                miss.append(ch)
+        miss = sorted({g.char or "?" for g in wc.glyphs[len(proj.wfm(path).glyphs):]})
         errs.append("characters missing from this file's font (would be borrowed from another file): %s" % " ".join(miss))
     tp = proj.title_problem(path, idx, text)
     if tp:
