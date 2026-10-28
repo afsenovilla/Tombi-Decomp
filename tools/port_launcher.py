@@ -10,7 +10,7 @@ image (the disc field is optional while data/ is valid for the same MAIN0.EXE).
   python3 tools/port_launcher.py             # from a checkout: uses build/port2-win/tombi2.exe (Windows) or build/port2/tombi2 (Linux)
   pyinstaller --onefile --windowed --name tombi-port ... tools/port_launcher.py   (.github/workflows/port2-exe.yml)
 """
-import hashlib, json, os, struct, subprocess, sys, threading
+import hashlib, re, json, os, struct, subprocess, sys, threading
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
@@ -65,10 +65,10 @@ i18n.add({
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
         "b.play": "Jugar", "b.extracting": "Extrayendo... {0}%", "l.extracting": "Extrayendo los archivos del disco (solo la primera vez). Espera a que termine para jugar.", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
-        "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco correcto: MAIN0.EXE verificado (sha1).",
+        "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco compatible: {0}, MAIN0.EXE verificado (sha1).",
         "s.extracting": "Extrayendo el disco a {0}... {1}% ({2})", "s.dataok": "Datos del juego listos en {0} ({1} archivos): la imagen del disco ya no hace falta.",
         "s.extractfail": "No se pudo extraer el disco: {0}", "s.nodata": "Elige tu imagen del disco: se extrae una vez a la carpeta data/ y el juego ya no la necesita.",
-        "s.badsha": "Aviso: MAIN0.EXE no coincide con SCES-01331 (sha1 {0}); el port puede no funcionar.",
+        "s.badsha": "Disco NO compatible: {0} (sha1 de MAIN0.EXE {1}). El port solo funciona con Tombi! PAL SCES-01331; puede fallar.",
         "s.noexe": "No se encuentra EXE/MAIN0.EXE en la imagen: no es un disco de Tombi! PAL.", "s.notiso": "No es una imagen ISO9660: {0}",
         "s.running": "Jugando... (cerrar la ventana del juego termina)", "s.ended": "El juego terminó (código {0}). Registro: {1}",
         "s.nobin": "No se encuentra el binario del port ({0}). Compílalo (docs/PORT.md) o usa el exe distribuido.",
@@ -83,10 +83,10 @@ i18n.add({
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
         "b.play": "Play", "b.extracting": "Extracting... {0}%", "l.extracting": "Extracting the disc files (first time only). Wait for it to finish to play.", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
-        "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Disc OK: MAIN0.EXE verified (sha1).",
+        "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Compatible disc: {0}, MAIN0.EXE verified (sha1).",
         "s.extracting": "Extracting the disc into {0}... {1}% ({2})", "s.dataok": "Game data ready in {0} ({1} files): the disc image is no longer needed.",
         "s.extractfail": "Could not extract the disc: {0}", "s.nodata": "Pick your disc image: it is extracted once into the data/ folder and the game no longer needs it.",
-        "s.badsha": "Warning: MAIN0.EXE does not match SCES-01331 (sha1 {0}); the port may not work.",
+        "s.badsha": "NOT a compatible disc: {0} (MAIN0.EXE sha1 {1}). The port only runs Tombi! PAL SCES-01331; it may fail.",
         "s.noexe": "EXE/MAIN0.EXE not found in the image: not a Tombi! PAL disc.", "s.notiso": "Not an ISO9660 image: {0}",
         "s.running": "Playing... (closing the game window ends it)", "s.ended": "The game ended (code {0}). Log: {1}",
         "s.nobin": "Port binary not found ({0}). Build it (docs/PORT.md) or use the distributed exe.",
@@ -224,12 +224,23 @@ def extract_main0(image, out):
     if "EXE/MAIN0.EXE" not in found:
         f.close()
         raise ValueError(tr("s.noexe"))
+    serial = None                   # the boot file named by SYSTEM.CNF: BOOT = cdrom:\\SCES_013.31;1 -> SCES-01331
+    if "SYSTEM.CNF" in found:
+        lba, size = found["SYSTEM.CNF"]
+        m = re.search(r"([A-Z]{4})[_-](\d{3})\.?(\d{2})", sec(lba)[:size].decode("latin-1").upper())
+        if m:
+            serial = "%s-%s%s" % m.groups()
     lba, size = found["EXE/MAIN0.EXE"]
     data = sec(lba, (size + 2047) // 2048)[:size]
     f.close()
     with open(out, "wb") as o:
         o.write(data)
-    return hashlib.sha1(data).hexdigest()
+    return hashlib.sha1(data).hexdigest(), serial
+
+
+# serials of the other Tomba! releases (the port runs only SCES-01331)
+KNOWN_DISCS = {"SCES-01331": "Tombi! (PAL, Europa)", "SCES-01330": "Tombi! (PAL)", "SCUS-94236": "Tomba! (USA)",
+               "SLPS-01144": "Ore no Tomba (Japón)", "SCUS-94454": "Tomba! 2 (USA)", "SCES-02005": "Tombi! 2 (PAL)"}
 
 
 def build_id():
@@ -451,8 +462,9 @@ class App:
 
         def work():
             try:
-                sha = extract_main0(image, os.path.join(app_dir(), "MAIN0.EXE"))
-                msg = tr("s.ok") if sha == MAIN0_SHA1 else tr("s.badsha", sha[:8])
+                sha, serial = extract_main0(image, os.path.join(app_dir(), "MAIN0.EXE"))
+                name = "%s %s" % (serial or "?", KNOWN_DISCS.get(serial, ""))
+                msg = tr("s.ok", name.strip()) if sha == MAIN0_SHA1 else tr("s.badsha", name.strip(), sha[:8])
             except (OSError, ValueError, struct.error) as e:
                 self.root.after(0, self.status.set, str(e))
                 return
