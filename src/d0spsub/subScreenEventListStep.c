@@ -10,7 +10,7 @@ extern int subScreenMoveTabCursor(Menu *m, int a);
 extern int subScreenMoveEventCursor(Menu *m);
 extern int subScreenCountEvents(void);
 extern void subScreenOpenMessage(int kind, int add, int bank);
-extern void func_800EF538(void *o, int a);
+extern void subScreenMessageStep(void *o, int a);
 extern void playSFX(int id);
 extern void playSFXAndSetNote(int a, int b);
 extern void SfxPlay2(int a, int b);
@@ -101,7 +101,7 @@ int subScreenEventListStep(Menu *m)
         }
         return 0;
     case 3:
-        func_800EF538(SUBSCREEN_MESSAGE_BOX, 3);
+        subScreenMessageStep(SUBSCREEN_MESSAGE_BOX, 3);
         if (SUBSCREEN_MESSAGE_STATE == 2) m->sub = 2;
         return 0;
     }

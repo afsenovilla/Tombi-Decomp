@@ -1643,7 +1643,7 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800ee6b4 subScreenMapReadInput` (was func_800EE6B4; D0SPSUB) - L1/R1 held: d-pad scrolls the map view D_801110F8/D_80111100 by 2 (returns -1); else the pressed direction as 4 (up) 0 (down) 2 (left) 6 (right), -1 none
 - `800ee7b8 subScreenMapScrollToMarker` (was func_800EE7B8; D0SPSUB) - projects the marker and scrolls the view by 2 px when it leaves the 0x30..0x110 x 0x50..0xB0 window, clamped to the bounds D_800FCED0 of the last discovered area
 - `800ee9ac subScreenMapStep` (was func_800EE9AC; D0SPSUB) - sub-screen mode 3 (map): saves the camera 1F8000C0, places the cursor / marker / area sprites / two icons D_80110F50, tab row; tab 7 walks the marker along the map links (D_800FDAB4, D_800FDE50) in 4-frame moves by the pressed direction
-- `800efaa4 subScreenUpdate` (was func_800EFAA4; D0SPSUB) - the sub-screen entry: state 0 loads the image and sprite tables into the menu D_800A45D8, state 1 d-pad auto-repeat then the mode step (subScreenMainStep / func_800ED0C4 / subScreenEventListStep / subScreenMapStep); returns its result
+- `800efaa4 subScreenUpdate` (was func_800EFAA4; D0SPSUB) - the sub-screen entry: state 0 loads the image and sprite tables into the menu D_800A45D8, state 1 d-pad auto-repeat then the mode step (subScreenMainStep / subScreenItemListStep / subScreenEventListStep / subScreenMapStep); returns its result
 - `800efd10 subScreenCountEvents` (was func_800EFD10; D0SPSUB) - index+1 of the last entry of the event list D_801086F0 whose flag D_8009CDA3[id] is set
 - `800f0930 subScreenMapDrawNode` (was func_800F0930; D0SPSUB) - an 8x8 textured dot (u 0x70 v 0x90, tpage 0x85) centred at the packed screen position into OT+pri-5
 - `800f0a5c subScreenMapDrawRoutes` (was func_800F0A5C; D0SPSUB) - for every area with D_8009D2C4[i] set the entries of D_800FDA70[i]: type 0 a node dot at the projected node, type 1 a white F4 strip (shape D_800FE0B4[c]) between two projected nodes
@@ -1717,7 +1717,7 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800ec524 subScreenMoveGridCursor` (was func_800EC524; D0SPSUB3) - same code as D0SPSUB subScreenMoveGridCursor
 - `800ec6ec subScreenMoveGridCursorN` (was func_800EC6EC; D0SPSUB3) - same code as D0SPSUB subScreenMoveGridCursorN
 - `800ed5fc subScreenOpenMessage` (was func_800ED5FC; D0SPSUB3) - same code as D0SPSUB subScreenOpenMessage (message box D_80100A90)
-- `800edd28 subScreenUpdate` (was func_800EDD28; D0SPSUB3) - the D0SPSUB3 entry: state 0 inits the menu D_800A45D8 (inline subScreenInitMenu, D_80100918 = -1), state 1 d-pad auto-repeat then the item page step func_800EC89C; returns its result
+- `800edd28 subScreenUpdate` (was func_800EDD28; D0SPSUB3) - the D0SPSUB3 entry: state 0 inits the menu D_800A45D8 (inline subScreenInitMenu, D_80100918 = -1), state 1 d-pad auto-repeat then the item page step subScreenItemListStep; returns its result
 - `800edf08 subScreenDrawItemPage` (was func_800EDF08; D0SPSUB3) - draws the item sub-screen: tabs, popup menu when D_80100918 >= 0, item grid and names, page number with the L/R page arrows (icons 0x16/0x17) when there are 2+ pages, and the footer sprites D_801007BC
 - `800ee12c subScreenCondFalse` (was func_800EE12C; D0SPSUB3) - same code as D0SPSUB subScreenCondFalse
 - `800ee134 subScreenCondTrue` (was func_800EE134; D0SPSUB3) - same code as D0SPSUB subScreenCondTrue
@@ -2142,7 +2142,7 @@ Names from code reading only (no captures), table slots from pointer scans of MA
   SUBSCREEN_TAB_SLOTS_MAIN / MAP / MODE7 / SLOT_MINUS2 / TAB_IDS / TAB_FRAMES / TAB_EXTRA_FRAMES, SUBSCREEN_DIGIT_FRAMES, and the
   map graph MAP_NODES / LINKS / ROOM_LINK / AREA_ROUTES / ROUTE_STRIP_SHAPES / AREA_BOUNDS / AREA_VIEW_ORIGIN / ROOM_POSITIONS /
   AREA_SPRITE_ANIMS / ICON_ANIMS / MARKER_ANIM / AREA_SPAWN_LISTS and the name tables MAP_AREA_NAMES / AREA14_AREA_NAMES /
-  ROOM_NAMES / AREA14_ROOM_NAMES. func_800EA5E8 and its D0SPSUB3 twin func_800EA540 (different stem) keep their `_a` alias
+  ROOM_NAMES / AREA14_ROOM_NAMES. subScreenDrawEventCounters and its D0SPSUB3 twin subScreenDrawEventCounters (different stem) keep their `_a` alias
   externs, renamed by hand. Left: the per-field externs inside SUBSCREEN_MAP_OBJECTS[1..2] and SUBSCREEN_MESSAGE_BOX
   (object fields of unknown meaning), the menu sprite tables p4c / p50 / p60 / p64 (800FE8E4 / 8D8 / EC74 / 974), the map
   view words 801110FC / 104 / 108 / 10C / 110 / 114, 800FDE50 (per-node link neighbours, shape unclear), the image 800F18E0.
@@ -2272,3 +2272,62 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `80137378 spawnCharlesNpcAlt` (was FUN_80137378; X000) - spawns the type 0x15 Charles npc unless DAT_8009cebd >= 6; unreferenced
 - `80137f48 stubFreeObj80137F48` (was FUN_80137f48; X000) - b04 = 3
 - `80137f54 updateA00Variant0Event` (was FUN_80137f54; X000) - unlayered variant 0: spawn, scene when player x > 0xD8, free
+- `800e827c stubNop800E827C` (was func_800E827C; O0PTSUB0) - empty stub of the entry table
+- `800ea5e8 subScreenDrawEventCounters` (was func_800EA5E8; D0SPSUB) - two 3-digit counters of the event list (flags == 0xFF and != 0)
+- `800ed0c4 subScreenItemListStep` (was func_800ED0C4; D0SPSUB) - subScreenUpdate mode 1: the item list pages / selection
+- `800ef538 subScreenMessageStep` (was func_800EF538; D0SPSUB) - message box state machine (script control codes, glyphs, placement)
+- `800eb948 memCardDrawSignedNumber` (was func_800EB948; D0SPSUB2) - sign sprites and an 8-digit number without leading zeros
+- `800ebe6c memCardDrawPlayTime` (was func_800EBE6C; D0SPSUB2) - play time as MMM:SS
+- `800ea540 subScreenDrawEventCounters` (was func_800EA540; D0SPSUB3) - as D0SPSUB subScreenDrawEventCounters
+- `800ec89c subScreenItemListStep` (was func_800EC89C; D0SPSUB3) - as D0SPSUB subScreenItemListStep
+- `800ed7bc subScreenMessageStep` (was func_800ED7BC; D0SPSUB3) - as D0SPSUB subScreenMessageStep
+- `800ef67c stubNop800EF67C` (was func_800EF67C; I0NFO2) - empty
+- `800ef684 stubNop800EF684` (was func_800EF684; I0NFO2) - empty
+- `800f1bac topdownA11ActorDialogueBank2` (was func_800F1BAC; I0NFO2) - unreferenced: opens message (2,4)/(2,5) by event flags
+- `800f2984 stubNop800F2984` (was func_800F2984; I0NFO2) - empty
+- `800f298c stubNop800F298C` (was func_800F298C; I0NFO2) - empty
+- `800f2dc4 topdownA16ActorDialogueBank2` (was func_800F2DC4; I0NFO2) - unreferenced: opens message (2,0)/(2,2) by event flags
+- `800f3ea0 topdownA17ActorDialogueBank2` (was func_800F3EA0; I0NFO2) - unreferenced: opens message bank 2 (5/6/9/10) by event flags
+- `800f3f80 topdownA17ActorDialogueBank3` (was func_800F3F80; I0NFO2) - topdownA17ActorOpenDialogue helper: message bank 3 by event flags
+- `800f4d2c stubNop800F4D2C` (was func_800F4D2C; I0NFO2) - empty
+- `800f4d34 stubNop800F4D34` (was func_800F4D34; I0NFO2) - empty
+- `800f5fd0 stubNop800F5FD0` (was func_800F5FD0; I0NFO2) - empty
+- `800f5fd8 stubNop800F5FD8` (was func_800F5FD8; I0NFO2) - empty
+- `800f7600 npcSet07SceneStep1` (was func_800F7600; I0NFO2) - stepNpcSet07 step 1
+- `800f80d8 npcSet07SceneStep2` (was func_800F80D8; I0NFO2) - stepNpcSet07 step 2
+- `800f88a0 npcSet07SceneStep3` (was func_800F88A0; I0NFO2) - stepNpcSet07 step 3
+- `800f8d5c npcSet07SceneStep6` (was func_800F8D5C; I0NFO2) - stepNpcSet07 step 6
+- `800f8f30 npcSet07SceneStep4` (was func_800F8F30; I0NFO2) - stepNpcSet07 step 4
+- `800f91d8 npcSet07SceneStep5` (was func_800F91D8; I0NFO2) - stepNpcSet07 step 5
+- `800f9480 npcSet07SceneStep11` (was func_800F9480; I0NFO2) - stepNpcSet07 step 11
+- `800f969c npcSet07SceneStep12` (was func_800F969C; I0NFO2) - stepNpcSet07 step 12
+- `800f9974 npcSet07SceneStep0` (was func_800F9974; I0NFO2) - stepNpcSet07 step 0
+- `800f9bdc npcSet07SceneStep8` (was func_800F9BDC; I0NFO2) - stepNpcSet07 step 8
+- `800fa1e4 npcSet07StartSoundStep` (was func_800FA1E4; I0NFO2) - unreferenced copy of stepNpcSet07 step 9: setEventStarted(0x35) on landing
+- `800fa278 npcSet07SceneStep10` (was func_800FA278; I0NFO2) - stepNpcSet07 step 10
+- `800fa5bc stubFreeObj800FA5BC` (was func_800FA5BC; I0NFO2) - b04 = 3
+- `800fafa0 stubFreeObj800FAFA0` (was func_800FAFA0; I0NFO2) - b04 = 3
+- `800fb310 stubNop800FB310` (was func_800FB310; I0NFO2) - empty
+- `800fb318 stubNop800FB318` (was func_800FB318; I0NFO2) - empty
+- `800fb320 stubFreeObj800FB320` (was func_800FB320; I0NFO2) - b04 = 3
+- `800fb758 npcSet0ESceneStep1` (was func_800FB758; I0NFO2) - stepNpcSet0E step 1
+- `800fbc34 npcSet0ESceneStep2` (was func_800FBC34; I0NFO2) - stepNpcSet0E step 2
+- `800fbd6c npcSet0ESceneStep3` (was func_800FBD6C; I0NFO2) - stepNpcSet0E step 3
+- `800fc044 stubFreeObj800FC044` (was func_800FC044; I0NFO2) - b04 = 3
+- `800fc468 npcSet0FSceneStep1` (was func_800FC468; I0NFO2) - stepNpcSet0F step 1
+- `800fc844 npcSet0FSceneStep2` (was func_800FC844; I0NFO2) - stepNpcSet0F step 2
+- `800fc9e4 npcSet0FSceneStep3` (was func_800FC9E4; I0NFO2) - stepNpcSet0F step 3
+- `800fcfa8 npcSet0FCheckTriggerSpots` (was func_800FCFA8; I0NFO2) - player position spots select steps 3/8/9/10/11
+- `800fd0e8 npcSet0FSceneStep8` (was func_800FD0E8; I0NFO2) - stepNpcSet0F step 8
+- `800fd294 npcSet0FSceneStep9` (was func_800FD294; I0NFO2) - stepNpcSet0F step 9
+- `800fd3c0 npcSet0FSceneStep10` (was func_800FD3C0; I0NFO2) - stepNpcSet0F step 10
+- `800fd524 npcSet0FSceneStep11` (was func_800FD524; I0NFO2) - stepNpcSet0F step 11
+- `800fd688 npcSet0FSceneStep4` (was func_800FD688; I0NFO2) - stepNpcSet0F step 4
+- `800fd8b0 npcSet0FPickStep` (was func_800FD8B0; I0NFO2) - stepNpcSet0F step 0 (npcSet0FCheckTriggerSpots)
+- `800fd9ec resetStepAtState0_800FD9EC` (was func_800FD9EC; I0NFO2) - state 0: step = state = 0
+- `800fda0c resetStepAtState0_800FDA0C` (was func_800FDA0C; I0NFO2) - state 0: step = state = 0
+- `800fda2c resetStepAtState0_800FDA2C` (was func_800FDA2C; I0NFO2) - state 0: step = state = 0
+- `800fde30 npcSet10AnimStep` (was FUN_800fde30; I0NFO2) - AnimAdvance at step 0
+- `800fde60 stubFreeObj800FDE60` (was func_800FDE60; I0NFO2) - b04 = 3
+- `800fe410 npcSet11SceneStep4` (was func_800FE410; I0NFO2) - stepNpcSet11 step 4
+- `800feb1c stubFreeObj800FEB1C` (was func_800FEB1C; I0NFO2) - b04 = 3

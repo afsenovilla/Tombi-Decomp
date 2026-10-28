@@ -16,7 +16,7 @@ extern char SUBSCREEN_TAB_EXTRA_FRAMES[], D_800FE8E0[]; /* aliases of D_800FE8D8
 extern char SUBSCREEN_TAB_FRAMES[], D_800FE8E4[], D_800FE8D8[], SUBSCREEN_DIGIT_FRAMES[], D_800FEC74[], D_800FE974[];
 extern void LoadImage(RECT *r, void *p);
 extern int subScreenMainStep(Menu *m);
-extern int func_800ED0C4(Menu *m);
+extern int subScreenItemListStep(Menu *m);
 extern int subScreenEventListStep(Menu *m);
 extern int subScreenMapStep(Menu *m);
 
@@ -66,7 +66,7 @@ int subScreenUpdate(void)
             ret = subScreenMainStep(m);
             break;
         case 1:
-            ret = func_800ED0C4(m);
+            ret = subScreenItemListStep(m);
             break;
         case 2:
             ret = subScreenEventListStep(m);

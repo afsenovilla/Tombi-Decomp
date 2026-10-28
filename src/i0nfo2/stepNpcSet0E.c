@@ -1,9 +1,9 @@
 // FUNC 800fbf5c 232 I0NFO2
 // MATCHING 800fbf5c 232
 #include "TOBJ.H"
-extern void func_800FB758(TObj *o);
-extern void func_800FBC34(TObj *o);
-extern void func_800FBD6C(TObj *o);
+extern void npcSet0ESceneStep1(TObj *o);
+extern void npcSet0ESceneStep2(TObj *o);
+extern void npcSet0ESceneStep3(TObj *o);
 extern unsigned char D_8009CFA7, D_8009CFA8, D_8009CFAA;
 
 void stepNpcSet0E(TObj *o)
@@ -24,13 +24,13 @@ void stepNpcSet0E(TObj *o)
         }
         break;
     case 1:
-        func_800FB758(o);
+        npcSet0ESceneStep1(o);
         break;
     case 2:
-        func_800FBC34(o);
+        npcSet0ESceneStep2(o);
         break;
     case 3:
-        func_800FBD6C(o);
+        npcSet0ESceneStep3(o);
         break;
     }
 }

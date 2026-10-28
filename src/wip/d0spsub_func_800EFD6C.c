@@ -73,7 +73,7 @@ extern void subScreenDrawItemNames(Menu *m);
 extern void subScreenDrawPageNumber(Menu *m, int n);
 extern void subScreenDrawEventIcons(Menu *m, int n, int c);
 extern void subScreenDrawEventList(Menu *m);
-extern void func_800EA5E8(Menu *m);
+extern void subScreenDrawEventCounters(Menu *m);
 extern void subScreenMapDrawAreaName(Menu *m, int a, int b);
 extern void subScreenMapDrawRoomName(Menu *m, int a, int b);
 extern void getBaseMatrix(MATRIX *m);
@@ -225,7 +225,7 @@ void func_800EFD6C(void)
         pages = (last + 10) / 10;
         subScreenDrawEventIcons(m, last, 0xFF);
         subScreenDrawEventList(m);
-        func_800EA5E8(m);
+        subScreenDrawEventCounters(m);
         if (pages >= 2) {
             subScreenDrawPageNumber(m, pages);
             {

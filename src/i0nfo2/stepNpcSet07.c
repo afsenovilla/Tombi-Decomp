@@ -2,17 +2,17 @@
 // MATCHING 800fa424 408
 #include "TOBJ.H"
 extern void func_8005A8A8(int a, int b, int c);
-extern void func_800F7600(TObj *o);
-extern void func_800F80D8(TObj *o);
-extern void func_800F88A0(TObj *o);
-extern void func_800F8D5C(TObj *o);
-extern void func_800F8F30(TObj *o);
-extern void func_800F91D8(TObj *o);
-extern void func_800F9480(TObj *o);
-extern void func_800F969C(TObj *o);
-extern void func_800F9974(TObj *o);
-extern void func_800F9BDC(TObj *o);
-extern void func_800FA278(TObj *o);
+extern void npcSet07SceneStep1(TObj *o);
+extern void npcSet07SceneStep2(TObj *o);
+extern void npcSet07SceneStep3(TObj *o);
+extern void npcSet07SceneStep6(TObj *o);
+extern void npcSet07SceneStep4(TObj *o);
+extern void npcSet07SceneStep5(TObj *o);
+extern void npcSet07SceneStep11(TObj *o);
+extern void npcSet07SceneStep12(TObj *o);
+extern void npcSet07SceneStep0(TObj *o);
+extern void npcSet07SceneStep8(TObj *o);
+extern void npcSet07SceneStep10(TObj *o);
 extern unsigned char GVARS_PLAYER_LANDED;
 extern unsigned char D_8009CDD9;
 extern unsigned char D_8009CF2A[];
@@ -22,14 +22,14 @@ void stepNpcSet07(TObj *o)
 {
     if (D_800A60A3 != 1 && D_8009CF2A[0] == 1) D_8009CF2A[0] = 2;
     switch (o->step) {
-    case 0: func_800F9974(o); break;
-    case 1: func_800F7600(o); break;
-    case 2: func_800F80D8(o); break;
-    case 3: func_800F88A0(o); break;
-    case 4: func_800F8F30(o); break;
-    case 5: func_800F91D8(o); break;
-    case 6: func_800F8D5C(o); break;
-    case 8: func_800F9BDC(o); break;
+    case 0: npcSet07SceneStep0(o); break;
+    case 1: npcSet07SceneStep1(o); break;
+    case 2: npcSet07SceneStep2(o); break;
+    case 3: npcSet07SceneStep3(o); break;
+    case 4: npcSet07SceneStep4(o); break;
+    case 5: npcSet07SceneStep5(o); break;
+    case 6: npcSet07SceneStep6(o); break;
+    case 8: npcSet07SceneStep8(o); break;
     case 9:
         switch (o->state) {
         case 0:
@@ -44,8 +44,8 @@ void stepNpcSet07(TObj *o)
             break;
         }
         break;
-    case 10: func_800FA278(o); break;
-    case 11: func_800F9480(o); break;
-    case 12: func_800F969C(o); break;
+    case 10: npcSet07SceneStep10(o); break;
+    case 11: npcSet07SceneStep11(o); break;
+    case 12: npcSet07SceneStep12(o); break;
     }
 }

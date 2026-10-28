@@ -1263,7 +1263,7 @@ file sits in `gen/portonly/<prog>/<name>.c` and `units()` is patched so gen_port
   instruction words), so no compiler and no notes are needed; a name reached through a field offset takes the
   shift of the nearest mapped address. D0SPSUB3's E8950 / EA540 / ED7BC are such copies of D0SPSUB's E89F8 /
   EA5E8 / EF538.
-- `func_800EC89C` is a structural variant of D0SPSUB `func_800ED0C4` (3424 vs 3488 bytes): the relocated draft
+- `func_800EC89C` is a structural variant of D0SPSUB `subScreenItemListStep` (3424 vs 3488 bytes): the relocated draft
   with the three differences read from the disassembly (state 1 calls `func_800EC3F0(m)`, the confirm mask is
   0x5008, the cursor switch has no mode cases 4..7). It is committed as `src/wip/d0spsub3_func_800EC89C.c`.
 

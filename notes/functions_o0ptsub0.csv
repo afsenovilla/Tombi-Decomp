@@ -1,6 +1,6 @@
 address,size,name,twin
 800e8078,516,titleDrawSpriteRecs,
-800e827c,8,func_800E827C,
+800e827c,8,stubNop800E827C,
 800e8284,916,optionsMenuStep,
 800e8618,232,buttonConfigMenuStep,
 800e8700,788,screenAdjustMenuStep,

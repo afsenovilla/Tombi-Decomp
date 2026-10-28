@@ -3,15 +3,15 @@
 #include "TOBJ.H"
 extern void func_80018980(TObj *o);
 extern void spawnNpcSet0F(TObj *o);
-extern void func_800FC468(TObj *o);
-extern void func_800FC844(TObj *o);
-extern void func_800FC9E4(TObj *o);
-extern void func_800FD0E8(TObj *o);
-extern void func_800FD294(TObj *o);
-extern void func_800FD3C0(TObj *o);
-extern void func_800FD524(TObj *o);
-extern void func_800FD688(TObj *o);
-extern void func_800FD8B0(TObj *o);
+extern void npcSet0FSceneStep1(TObj *o);
+extern void npcSet0FSceneStep2(TObj *o);
+extern void npcSet0FSceneStep3(TObj *o);
+extern void npcSet0FSceneStep8(TObj *o);
+extern void npcSet0FSceneStep9(TObj *o);
+extern void npcSet0FSceneStep10(TObj *o);
+extern void npcSet0FSceneStep11(TObj *o);
+extern void npcSet0FSceneStep4(TObj *o);
+extern void npcSet0FPickStep(TObj *o);
 
 void updateNpcSet0F(TObj *o)
 {
@@ -23,19 +23,19 @@ void updateNpcSet0F(TObj *o)
     case 1:
         switch (o->step) {
         case 0:
-            func_800FD8B0(o);
+            npcSet0FPickStep(o);
             break;
         case 1:
-            func_800FC468(o);
+            npcSet0FSceneStep1(o);
             break;
         case 2:
-            func_800FC844(o);
+            npcSet0FSceneStep2(o);
             break;
         case 3:
-            func_800FC9E4(o);
+            npcSet0FSceneStep3(o);
             break;
         case 4:
-            func_800FD688(o);
+            npcSet0FSceneStep4(o);
             break;
         case 5:
         case 6:
@@ -46,16 +46,16 @@ void updateNpcSet0F(TObj *o)
             }
             break;
         case 8:
-            func_800FD0E8(o);
+            npcSet0FSceneStep8(o);
             break;
         case 9:
-            func_800FD294(o);
+            npcSet0FSceneStep9(o);
             break;
         case 10:
-            func_800FD3C0(o);
+            npcSet0FSceneStep10(o);
             break;
         case 11:
-            func_800FD524(o);
+            npcSet0FSceneStep11(o);
             break;
         }
         break;

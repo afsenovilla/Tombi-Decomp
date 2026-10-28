@@ -6,7 +6,7 @@ extern void func_80026C50(int a, int b, int c);
 extern TObj *func_8002DCC8(int a, int b, Pos6 *p);
 extern void func_8005A9A4(int a, int b);
 extern void topdownA19ActorSetDirAnim(TObj *o, int a, int b, int c);
-extern void func_800FE410(TObj *o);
+extern void npcSet11SceneStep4(TObj *o);
 extern unsigned char D_8009C93F;
 extern unsigned char GVARS_USE_ITEM_PENDING;
 extern unsigned char GVARS_USE_ITEM_ID;
@@ -86,7 +86,7 @@ void stepNpcSet11(TObj *o)
         }
         break;
     case 4:
-        func_800FE410(o);
+        npcSet11SceneStep4(o);
         break;
     }
 }

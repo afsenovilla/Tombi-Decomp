@@ -20,7 +20,7 @@ extern unsigned short PAD_PRESSED;
 extern short SUBSCREEN_POPUP_CURSOR;
 extern int SUBSCREEN_PAD_LAST, SUBSCREEN_PAD_REPEAT_TIMER;
 extern void LoadImage(RECT *r, void *p);
-extern int func_800EC89C(Menu *m);
+extern int subScreenItemListStep(Menu *m);
 
 static inline void menuInit(Menu *m)
 {
@@ -66,7 +66,7 @@ int subScreenUpdate(int arg)
             SUBSCREEN_PAD_REPEAT_TIMER = 4;
             JOYPAD_STATE |= k;
         }
-        arg = func_800EC89C(m);
+        arg = subScreenItemListStep(m);
     }
     return arg;
 }

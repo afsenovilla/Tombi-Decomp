@@ -1,5 +1,0 @@
-// FUNC 800f4d34 8 I0NFO2
-// MATCHING 800f4d34 8
-void func_800F4D34(void)
-{
-}

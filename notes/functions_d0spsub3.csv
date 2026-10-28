@@ -7,7 +7,7 @@ address,size,name,twin
 800e9df8,712,subScreenDrawTabs,D0SPSUB:800e9ea0
 800ea0c0,520,subScreenDrawEventIcons,D0SPSUB:800ea168
 800ea2c8,632,subScreenDrawEventList,D0SPSUB:800ea370
-800ea540,780,func_800EA540,D0SPSUB:800ea5e8
+800ea540,780,subScreenDrawEventCounters,D0SPSUB:800ea5e8
 800ea84c,936,subScreenDrawItemGrid,D0SPSUB:800ea8f4
 800eabf4,652,subScreenDrawItemNames,D0SPSUB:800eac9c
 800eae80,544,subScreenDrawPageNumber,D0SPSUB:800eaf28
@@ -22,9 +22,9 @@ address,size,name,twin
 800ec3f0,308,subScreenMoveTabCursor,
 800ec524,456,subScreenMoveGridCursor,D0SPSUB:800eca28
 800ec6ec,432,subScreenMoveGridCursorN,
-800ec89c,3424,func_800EC89C,
+800ec89c,3424,subScreenItemListStep,
 800ed5fc,448,subScreenOpenMessage,
-800ed7bc,1388,func_800ED7BC,D0SPSUB:800ef538
+800ed7bc,1388,subScreenMessageStep,D0SPSUB:800ef538
 800edd28,480,subScreenUpdate,
 800edf08,548,subScreenDrawItemPage,
 800ee12c,8,subScreenCondFalse,

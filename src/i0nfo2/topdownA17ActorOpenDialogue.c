@@ -4,7 +4,7 @@
 #include "raw7.h"
 typedef struct { short s[6]; } Pos6;
 extern int func_8002DCC8(int a, int b, Pos6 *p);
-extern int func_800F3F80(TObj *o);
+extern int topdownA17ActorDialogueBank3(TObj *o);
 extern unsigned char D_8009CE05[], D_8009CE06, D_8009CE07;
 extern unsigned char D_8009CFA5;
 
@@ -44,7 +44,7 @@ short topdownA17ActorOpenDialogue(TObj *arg)
     case 0: CALL(2, 0xA); break;
     case 1: CALL(2, 7); break;
     case 2: r = inl_800F3EA0(o); break;
-    case 3: r = func_800F3F80(o); break;
+    case 3: r = topdownA17ActorDialogueBank3(o); break;
     case 5: CALL(5, 0); break;
     case 6:
         CALL(5, D_8009CFA5 == 2 ? 0xF : 1)

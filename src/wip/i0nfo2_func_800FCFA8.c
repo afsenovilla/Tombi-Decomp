@@ -3,7 +3,7 @@
 extern short PLAYER_X, PLAYER_Y;
 extern short D_80100788[][2];
 
-void func_800FCFA8(TObj *o)
+void npcSet0FCheckTriggerSpots(TObj *o)
 {
     int i;
     short x = PLAYER_X, y = PLAYER_Y;

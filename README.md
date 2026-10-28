@@ -61,9 +61,9 @@ The table above is regenerated with `python3 tools/progress.py`.
 in the memory card overlays (D0SPSUB `func_800E89F8`, `func_800EFD6C`, D0SPSUB2 `func_800E999C`, plus the D0SPSUB3 twin
 of the first); each has functionally equivalent C in `src/wip/` whose header documents the remaining difference (register
 allocation and scheduler order, the structure matches), see [notes/remaining.md](notes/remaining.md). The D0SPSUB menu
-dispatcher `func_800ED0C4` was matched by [michaelm-afk](https://github.com/michaelm-afk) (PR #1) and its D0SPSUB3 twin
-`func_800EC89C` followed from the same idioms. Function naming is essentially complete: 111 functions keep a
-generic name (`notes/unnamed.json`: empty stubs, unreferenced code, event scenes). Data naming is done by usage for
+dispatcher `func_800ED0C4` (now `subScreenItemListStep`) was matched by [michaelm-afk](https://github.com/michaelm-afk) (PR #1) and its D0SPSUB3 twin
+`func_800EC89C` followed from the same idioms. Function naming is complete for MAIN0, X000 and the SYSTEM overlays: 0
+functions keep a generic name (`notes/unnamed.json`; empty stubs are named `stubNop<addr>` / `stubFreeObj<addr>`). Data naming is done by usage for
 MAIN0 (342 globals, `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM overlays (266 in their
 `notes/data_names_<overlay>.csv`), applied with `tools/rename_data.py`; what is still spelled by address is animation
 scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release (50.5 %) and demo

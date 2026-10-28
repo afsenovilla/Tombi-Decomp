@@ -84,8 +84,8 @@ figure in the summary counts each function once.
 ## Where things stand (October 2026)
 
 - Code: the whole-game figure of the summary above (2950 of 2955 functions). What does not match is five functions of the
-  memory card / sub-screen overlays (D0SPSUB func_800E89F8, func_800ED0C4, func_800EFD6C; D0SPSUB2 func_800E999C;
-  D0SPSUB3 func_800EC89C, plus the D0SPSUB3 twin of func_800E89F8). Each has functionally equivalent C in `src/wip/`
+  memory card / sub-screen overlays (D0SPSUB func_800E89F8, subScreenItemListStep, func_800EFD6C; D0SPSUB2 func_800E999C;
+  D0SPSUB3 subScreenItemListStep, plus the D0SPSUB3 twin of func_800E89F8). Each has functionally equivalent C in `src/wip/`
   whose header documents the remaining difference (register allocation and scheduler order only, the structure matches);
   [notes/remaining.md](../notes/remaining.md) lists them.
 - Function names: essentially complete; 111 functions keep a generic name (`notes/unnamed.json`: empty stubs, unreferenced

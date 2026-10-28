@@ -20,9 +20,9 @@ it follows automatically once the D0SPSUB function matches, the same way the x0N
 All three are register allocation and scheduler order problems with the structure already right; the drafts in `src/wip`
 record the GCC 2.7.2 observations (sched1 stalls, `birthing_insn_p`, local vs global alloc ranking) that moved the
 scores, so the next attempt starts from them, not from scratch. Two of the original five were closed on October 27 2026:
-D0SPSUB func_800ED0C4 (score 20 -> match, PR #1 by michaelm-afk: register pins on the confirm block, an empty asm input
+D0SPSUB subScreenItemListStep (score 20 -> match, PR #1 by michaelm-afk: register pins on the confirm block, an empty asm input
 keeping the table pointer live, the object code materialised before the allocator's null check, and the item-handler
-result 2 returning 1 as the retail jump table does) and its D0SPSUB3 twin func_800EC89C (score 743 -> match: the same
+result 2 returning 1 as the retail jump table does) and its D0SPSUB3 twin subScreenItemListStep (score 743 -> match: the same
 idioms plus two more retail differences, the `playSFX(8)` order of states 1 and 4, see the file header). The earlier triage of this file (64 unmatched functions,
 the DATA reclassifications of x000 80116258 / 801162B8, x001 8011658C, x003 80116D50, x005 / x013 801188FC, x005 / x008
 80117CAC, x016 8011B170, x018 8011C758 and x002 8011E688, with the proofs that their jals cannot run while the overlay is
