@@ -100,3 +100,11 @@ src/x017/updatePointsBalloon.c | g-> | gq->
 # --lang: a C-named table whose language version changed size (the port's data names are MAIN0 offsets; lang.c)
 src/o0ptsub0/titleDrawMenuCarousel.c | extern short TITLE_MENU_GLYPHS[]; | extern short TITLE_MENU_GLYPHS[]; extern void *port_lang_item(void *);
 src/o0ptsub0/titleDrawMenuCarousel.c | s = TITLE_MENU_GLYPHS; | s = (short *)port_lang_item(TITLE_MENU_GLYPHS);
+# drawPauseMenu: its entry lists and glyph UV table (MAIN0 0x80080300..0x800803fc) changed size in MAINn (lang.c finds them through the code)
+src/drawPauseMenu.c | extern XY D_80080404[]; | extern XY D_80080404[]; extern void *port_lang_item(void *);
+src/drawPauseMenu.c | e = D_8008037c; | e = (ENT *)port_lang_item(D_8008037c);
+src/drawPauseMenu.c | e = D_8008039c; | e = (ENT *)port_lang_item(D_8008039c);
+src/drawPauseMenu.c | e = D_800803bc; | e = (ENT *)port_lang_item(D_800803bc);
+src/drawPauseMenu.c | e = D_800803dc; | e = (ENT *)port_lang_item(D_800803dc);
+src/drawPauseMenu.c | sp->u0 = D_80080300[c].u; | sp->u0 = ((UV *)port_lang_item(D_80080300))[c].u;
+src/drawPauseMenu.c | sp->v0 = D_80080300[c].v; | sp->v0 = ((UV *)port_lang_item(D_80080300))[c].v;

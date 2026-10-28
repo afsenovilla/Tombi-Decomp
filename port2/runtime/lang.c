@@ -451,6 +451,37 @@ static int named_blobs(const Map *m, unsigned char *img, unsigned size0, unsigne
    for the language's copy with port_lang_item(name) (port/fixes.txt adds the call: O0PTSUB0's TITLE_MENU_GLYPHS,
    the -3-ended glyph list of the title carousel, 80 bytes in MAIN0 and 96 in MAIN5, truncated in place).  The
    language's item is whole in Bn; an item that did not change stays where it is. */
+/* Where the language's code takes the address of the item the MAIN0 code takes at A offset oa: a lui/addiu (or
+   lui + load/store) pair of A whose sum is the item's address, at an instruction pair that lies in matched chunks,
+   read back at the same instructions of B.  An item inside a gap that changed size does not sit at a fixed offset
+   from the gap's head (drawPauseMenu's four -1-ended entry lists and its glyph UV table move by different amounts
+   in MAIN5), but the code that names it still does.  -1: no such pair. */
+static long code_xref(const Map *m, unsigned oa) {
+    static struct { const Map *m; unsigned oa; long ob; } cache[32]; static int nc;
+    if (m == &main_map) for (int k = 0; k < nc; k++) if (cache[k].m == m && cache[k].oa == oa) return cache[k].ob;
+    u32p t = m->base_a + oa; long res = -1;
+    for (unsigned i = 0; i + 4 <= m->na && res < 0; i += 4) {
+        unsigned w = W(m->A, i);
+        if ((w >> 26) != 0x0F || (w >> 21 & 31) != 0) continue;           /* lui rt, hi */
+        unsigned rt = w >> 16 & 31; int lo = (int)(t - ((w & 0xFFFF) << 16));
+        if (lo < -0x8000 || lo > 0x7FFF || !rt) continue;
+        for (unsigned j = i + 4; j < i + 4 * 16 && j + 4 <= m->na; j += 4) {
+            unsigned x = W(m->A, j), op = x >> 26;
+            if (op == 0x0F && (x >> 16 & 31) == rt) break;                   /* rt loaded again */
+            if ((op != 0x09 && !(op >= 0x20 && op <= 0x2E)) || (x >> 21 & 31) != rt || (short)(x & 0xFFFF) != lo) continue;
+            long ib = a2b(m, i), jb = a2b(m, j);
+            if (ib < 0 || jb < 0 || !in_chunk(m, i) || !in_chunk(m, j)) break;
+            unsigned y = W(m->B, ib), z = W(m->B, jb);
+            if ((y >> 16) != (w >> 16) || (z >> 16) != (x >> 16)) break;   /* the same instructions */
+            long ob = (long)(((y & 0xFFFF) << 16) + (short)(z & 0xFFFF)) - (long)m->base_b;
+            if (ob >= 0 && ob < (long)m->nb) res = ob;
+            break;
+        }
+    }
+    if (m == &main_map && nc < 32) { cache[nc].m = m; cache[nc].oa = oa; cache[nc].ob = res; nc++; }
+    return res;
+}
+
 void *port_lang_item(void *p) {
     if (!port_lang) return p;
     const unsigned char *b = p; Map *m; unsigned oa;
@@ -460,7 +491,11 @@ void *port_lang_item(void *p) {
     } else return p;
     for (int k = 0; k < m->ng; k++) {
         const Gap *g = &m->g[k];
-        if (oa >= g->a && oa < g->a + g->alen && g->alen != g->blen) return oa - g->a < g->blen ? bn_get(m) + g->b + (oa - g->a) : p;
+        if (oa >= g->a && oa < g->a + g->alen && g->alen != g->blen) {
+            long ob = code_xref(m, oa);
+            if (ob >= 0) return bn_get(m) + ob;
+            return oa - g->a < g->blen ? bn_get(m) + g->b + (oa - g->a) : p;
+        }
     }
     long ob = a2b(m, oa);
     if (ob >= 0 && item_spills(m, (unsigned)ob, oa)) return bn_get(m) + ob;
