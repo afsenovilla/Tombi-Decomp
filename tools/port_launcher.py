@@ -64,7 +64,7 @@ i18n.add({
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
-        "b.play": "Jugar", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
+        "b.play": "Jugar", "b.extracting": "Extrayendo... {0}%", "l.extracting": "Extrayendo los archivos del disco (solo la primera vez). Espera a que termine para jugar.", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco correcto: MAIN0.EXE verificado (sha1).",
         "s.extracting": "Extrayendo el disco a {0}... {1}% ({2})", "s.dataok": "Datos del juego listos en {0} ({1} archivos): la imagen del disco ya no hace falta.",
         "s.extractfail": "No se pudo extraer el disco: {0}", "s.nodata": "Elige tu imagen del disco: se extrae una vez a la carpeta data/ y el juego ya no la necesita.",
@@ -82,7 +82,7 @@ i18n.add({
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
-        "b.play": "Play", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
+        "b.play": "Play", "b.extracting": "Extracting... {0}%", "l.extracting": "Extracting the disc files (first time only). Wait for it to finish to play.", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Disc OK: MAIN0.EXE verified (sha1).",
         "s.extracting": "Extracting the disc into {0}... {1}% ({2})", "s.dataok": "Game data ready in {0} ({1} files): the disc image is no longer needed.",
         "s.extractfail": "Could not extract the disc: {0}", "s.nodata": "Pick your disc image: it is extracted once into the data/ folder and the game no longer needs it.",
@@ -357,6 +357,12 @@ class App:
         self.play_btn.pack(side="left")
         ttk.Button(btns, text=tr("b.stop"), command=self.stop).pack(side="left", padx=8)
         ttk.Button(btns, text=tr("b.copylog"), command=self.copy_log).pack(side="left", padx=8)
+        # shown only while the disc is extracted into data/ (check_disc): a bar and a plain message next to Play
+        self.ext_box = ttk.Frame(f)
+        self.ext_box.grid(row=10, column=0, sticky="e", padx=8)
+        self.ext_label = ttk.Label(self.ext_box, text=tr("l.extracting"), foreground="#b00000", wraplength=320, justify="left")
+        self.ext_bar = ttk.Progressbar(self.ext_box, length=260, mode="determinate", maximum=100)
+        self.ext_box.grid_remove()
         ttk.Label(f, text=tr("l.cmd")).grid(row=11, column=0, sticky="w")
         self.cmd_text = tk.Text(f, height=3, wrap="word")
         self.cmd_text.grid(row=12, column=0, sticky="ew")
@@ -460,7 +466,7 @@ class App:
             self.root.after(0, self.status.set, msg)
             # the one-time extraction into data/ (again when data/ was made from another disc: a different MAIN0)
             if data_ready() != sha:
-                self.root.after(0, self.play_btn.state, ["disabled"])
+                self.root.after(0, self._extracting, 0)
                 last = [-1]
 
                 def progress(done, total, path):
@@ -468,13 +474,29 @@ class App:
                     if pct != last[0]:
                         last[0] = pct
                         self.root.after(0, self.status.set, tr("s.extracting", data_dir(), pct, path))
+                        self.root.after(0, self._extracting, pct)
                 try:
                     man = X.extract(image, data_dir(), progress)
                     self.root.after(0, self.status.set, tr("s.dataok", data_dir(), len(man["files"])))
                 except (OSError, ValueError, struct.error) as e:
                     self.root.after(0, self.status.set, tr("s.extractfail", e))
-                self.root.after(0, self.play_btn.state, ["!disabled"])
+                self.root.after(0, self._extracting, None)
         threading.Thread(target=work, daemon=True).start()
+
+    def _extracting(self, pct):
+        """pct 0..100 while data/ is being extracted (Play disabled, bar and message shown); None when it ends."""
+        if pct is None:
+            self.ext_box.grid_remove()
+            self.play_btn.configure(text=tr("b.play"))
+            self.play_btn.state(["!disabled"])
+            return
+        if not self.ext_box.winfo_ismapped():
+            self.ext_label.pack(anchor="w")
+            self.ext_bar.pack(anchor="w", pady=(4, 0))
+            self.ext_box.grid()
+        self.play_btn.state(["disabled"])
+        self.play_btn.configure(text=tr("b.extracting", pct))
+        self.ext_bar["value"] = pct
 
     def command(self):
         self.collect()
