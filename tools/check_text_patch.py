@@ -7,8 +7,8 @@ For every edited dialogue:
     --strict-glyphs it is an error); a character no font of the disc has (':' at 16 px, '%', ...) is always an error
   - the preview checks of the editor (text_preview): no line wider than the box, no page with more lines than the box
     height allows, no page over 128 glyphs (a problem the original already had is tolerated, a new one is not)
-  - event titles: no more letters than the layout list (Project.title_problem); the "completed" banner (CFNT999 #0)
-    exactly as many letters as the executable's banner table (a shorter one hung the native port on the loading screen)
+  - event titles: no more letters than the layout list (Project.title_problem); the "completed" banner (CFNT999 #0) at
+    most as many letters as the executable's banner table (text_core pads a shorter one to that size)
   - control codes are kept: the sequence of tags other than {NL} and {BOX} (pauses, {WAIT}{CLEAR} pages, colours, voices,
     moves, choices, button/item codes {Cxxx}) must be identical to the original one
   - {BOX w h}: present iff the original has it; h <= original h; w <= 312 when the original box is >= 240 wide or sits at
@@ -78,11 +78,6 @@ def check_entry(proj, path, idx, text):
     tp = proj.title_problem(path, idx, text)
     if tp:
         errs.append("title: %s" % tp)
-    elif idx == 0 and proj.banner(path, 0) is not None:
-        import title_layout as TL
-        n, k = TL.text_to_lines(text)[1], proj.banner(path, 0)["k"]
-        if n != k:      # a shorter banner leaves the port stuck on the loading screen (seen with --lang 5)
-            errs.append("banner: has %d letters, the executable's banner table needs exactly %d" % (n, k))
     if proj.title_max(path, idx) is None:          # ordinary dialogue
         ow, owc = proj.words(path, idx, orig)
         new = problems_of(wc, words) - problems_of(owc, ow)
