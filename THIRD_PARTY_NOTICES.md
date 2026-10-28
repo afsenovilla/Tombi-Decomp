@@ -25,7 +25,7 @@ The repository as a whole is AGPL-3.0; the files of its PSY-Q library decompilat
 the line `SPDX-License-Identifier: MIT`, and only those files are used here (the same reading psyz and
 eternal-silver-sssc-decomp apply). sotn-decomp gives no copyright line of its own for them; psyz's `decomp/LICENSE`
 names the same contributors.
-- Used: `cb_read`, `memmove`, `ratan2`, `rcos`, `rsin`, `setIntr` (prototype form), `startIntrDMA`, `_card_clear`,
+- Used: `cb_read`, `memmove`, `sprintf`, `ratan2`, `rcos`, `rsin`, `setIntr` (prototype form), `startIntrDMA`, `_card_clear`,
   `_spu_setInTransfer`, `vmNoiseOn` (with its static helpers), `_SsVmPitchBend`, `_SsVmSeKeyOn`, `_SsVmSeKeyOff`,
   `_SsVmGetSeqVol`/`LVol`/`RVol` (their `SpuVm*` names mapped to libsnd's `_SsVm*`).
 - MIT License. Copyright (c) github.com/xeeynamo/sotn-decomp contributors.
