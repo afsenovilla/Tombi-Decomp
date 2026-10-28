@@ -81,8 +81,18 @@ static inline u16 blend(u16 bg, u16 fg, int mode) {
     return (u16)(r | (g << 5) | (b << 10) | (fg & 0x8000));
 }
 /* write one pixel; semi = the primitive is semi-transparent (for textured pixels: only if texel bit 15) */
+/* --widescreen (docs/PORT.md "Widescreen"): primitives drawn into a 320-wide display buffer go to wvram instead,
+   a side plane where that buffer is ws_pad columns wider on each side (the drawing offset shifted by ws_pad), so
+   whatever the game draws past the 4:3 edges is kept.  plot() writes through tgt/tgt_stride: vram when off. */
+int port_widescreen;                 /* extra columns on each side of a 320-wide frame; 0 = off (53 = 16:9, 120 = 21:9) */
+#define WS_STRIDE 2048
+static u16 wvram[512][WS_STRIDE];
+static u16 *tgt = &vram[0][0];
+static int tgt_stride = 1024;
+static void ws_fill(int x, int y, int w, int h, u16 c);
+static void ws_mirror_write(int x, int y, int w, int h);
 static inline void plot(int x, int y, u16 c, int semi) {
-    u16 *d = &vram[y][x];
+    u16 *d = tgt + y * tgt_stride + x;
     if (gs.check_mask && (*d & 0x8000)) return;
     if (semi) c = blend(*d, c, gs.abr);
     *d = c | (gs.set_mask ? 0x8000 : 0);
@@ -232,7 +242,7 @@ const GpuBackend port_gpu_soft = { "software", soft_start, soft_nop, soft_tri, s
 /* ================================================================== the decoder (shared by the backends) */
 static void fill(u32 col, u32 xy, u32 wh) {
     int x = xy & 0x3F0, y = (xy >> 16) & 0x1FF, w = ((wh & 0x3FF) + 15) & ~15, h = (wh >> 16) & 0x1FF;
-    if (w && h) be->fill(x, y, w, h, rgb24to15(col));
+    if (w && h) { be->fill(x, y, w, h, rgb24to15(col)); ws_fill(x, y, w, h, rgb24to15(col)); }
 }
 static void copy(u32 s, u32 d, u32 wh) {
     int sx = s & 1023, sy = (s >> 16) & 511, dx = d & 1023, dy = (d >> 16) & 511;
@@ -252,11 +262,71 @@ static int too_big(const Vtx *v, int n) {
 static void vram_write_rect(int x, int y, int w, int h, const u16 *s) {
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) & 511][(x + i) & 1023] = *s++;
     be->vram_written(x, y, w, h);
+    ws_mirror_write(x, y, w, h);
 }
 
 /* ------------------------------------------------------------------ GP0 decoder */
 static inline int sx11(u32 v) { return ((s32)(v << 21)) >> 21; }
-static void vertex(Vtx *o, u32 w) { o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; }
+
+/* widescreen redirection: active while the drawing area is a 320-wide, >= 200-line buffer at (ax, ay) at the displayed x;
+   its wide copy sits in wvram at columns 2*ax .. 2*ax + 320 + 2*pad - 1 (so buffers side by side never meet) */
+static int ws_on, ws_drew, ws_dx, ws_ax, ws_ay, ws_ah, ws_saved[4];
+static u8 cur_drawenv[0x5C], cur_dispenv[0x14];
+static int ws_dispx[4], ws_ndispx;          /* every x a DISPENV has shown (Tombi flips between x 384 and 704) */
+static struct { int x, y, h; } ws_areas[8]; static int ws_nareas;   /* the buffers that have a wide copy */
+static void ws_note_disp(int x) {
+    for (int i = 0; i < ws_ndispx; i++) if (ws_dispx[i] == x) return;
+    if (ws_ndispx < 4) ws_dispx[ws_ndispx++] = x;
+}
+static int ws_area(void) {                 /* (only at a displayed x: a 320-wide off-screen target is a texture) */
+    int shown = 0;
+    if (!port_widescreen) return 0;
+    for (int i = 0; i < ws_ndispx; i++) if (ws_dispx[i] == gs.x1) shown = 1;
+    return shown && gs.x2 - gs.x1 + 1 == 320 && gs.y2 - gs.y1 + 1 >= 200 && be == &port_gpu_soft;
+}
+static void ws_begin(void) {
+    ws_on = ws_area();
+    if (!ws_on) return;
+    ws_ax = gs.x1; ws_ay = gs.y1; ws_ah = gs.y2 - gs.y1 + 1;
+    {   int i; for (i = 0; i < ws_nareas; i++) if (ws_areas[i].x == ws_ax && ws_areas[i].y == ws_ay) break;
+        if (i == ws_nareas && i < 8) { ws_areas[i].x = ws_ax; ws_areas[i].y = ws_ay; ws_areas[i].h = ws_ah; ws_nareas++; } }
+    ws_dx = gs.x1 + port_widescreen; ws_drew = 1;
+    ws_saved[0] = gs.x1; ws_saved[1] = gs.x2;
+    gs.x1 = 2 * ws_ax; gs.x2 = 2 * ws_ax + 320 + 2 * port_widescreen - 1;
+    tgt = &wvram[0][0]; tgt_stride = WS_STRIDE;
+}
+static void ws_end(void) {
+    if (!ws_on) return;
+    if (gs.x1 == 2 * ws_ax) gs.x1 = ws_saved[0];           /* (an E3/E4 inside the packet keeps its new value) */
+    if (gs.x2 == 2 * ws_ax + 320 + 2 * port_widescreen - 1) gs.x2 = ws_saved[1];
+    tgt = &vram[0][0]; tgt_stride = 1024;
+    ws_on = 0;
+}
+/* the 4:3 middle of a wide buffer back into vram (after each ordering table: StoreImage, VRAM copies and textures
+   made from the frame read vram), and host writes into a display buffer forward into the wide one */
+static void ws_sync_down(void) {
+    if (!ws_drew) return;
+    ws_drew = 0;
+    for (int j = 0; j < ws_ah; j++)
+        memcpy(&vram[(ws_ay + j) & 511][ws_ax], &wvram[(ws_ay + j) & 511][2 * ws_ax + port_widescreen], 320 * 2);
+}
+static void ws_mirror_write(int x, int y, int w, int h) {
+    for (int k = 0; k < ws_nareas; k++) {
+        int ax = ws_areas[k].x, ay = ws_areas[k].y, ah = ws_areas[k].h;
+        for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
+            int vx = x + i, vy = (y + j) & 511;
+            if (vx < ax || vx >= ax + 320 || vy < ay || vy >= ay + ah) continue;
+            wvram[vy][2 * ax + port_widescreen + vx - ax] = vram[vy][vx & 1023];
+        }
+    }
+}
+/* a GP0 02 / isbg / ClearImage fill that covers a whole display buffer clears the wide copy too */
+static void ws_fill(int x, int y, int w, int h, u16 c) {
+    if (!port_widescreen || be != &port_gpu_soft || w < 320 || h < 200) return;
+    for (int ax = x; ax + 320 <= x + w && ax + 320 <= 1024; ax += 320)
+        for (int j = 0; j < h; j++) for (int i = 0; i < 320 + 2 * port_widescreen; i++) wvram[(y + j) & 511][2 * ax + i] = c;
+}
+static void vertex(Vtx *o, u32 w) { o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; }
 static void color(Vtx *o, u32 c) { o->r = c & 255; o->g = (c >> 8) & 255; o->b = (c >> 16) & 255; }
 
 static int unknown_cmds;
@@ -349,7 +419,9 @@ static int gp0(const u32 *p, int n) {
 
 static void packet(const u32 *p, int n) {
     while (n > 0) {
+        ws_begin();
         int used = gp0(p, n);
+        ws_end();
         if (used <= 0) break;
         p += used; n -= used;
     }
@@ -365,8 +437,7 @@ void SetDispMask(int m) { disp_mask = m; }
 int DrawSync(int mode) { port_trace("DrawSync", mode); return 0; }
 void *DrawSyncCallback(void *f) { return 0; }
 
-/* DRAWENV: RECT clip; s16 ofs[2]; RECT tw; u16 tpage; u8 dtd, dfe, isbg, r0, g0, b0; DR_ENV dr_env */
-static u8 cur_drawenv[0x5C], cur_dispenv[0x14];
+/* DRAWENV: RECT clip; s16 ofs[2]; RECT tw; u16 tpage; u8 dtd, dfe, isbg, r0, g0, b0; DR_ENV dr_env (cur_drawenv above) */
 void *PutDrawEnv(void *env) {
     u8 *e = env; RECT *clip = (RECT *)e, *tw = (RECT *)(e + 12); s16 *ofs = (s16 *)(e + 8);
     memcpy(cur_drawenv, env, sizeof cur_drawenv);
@@ -378,11 +449,13 @@ void *PutDrawEnv(void *env) {
     if (!tw->w) gs.twmx = 0; if (!tw->h) gs.twmy = 0;
     set_drawmode((*(u16 *)(e + 20) & 0x9FF) | (e[22] ? 0x200 : 0) | (e[23] ? 0x400 : 0));
     if (e[24] && gs.x2 >= gs.x1 && gs.y2 >= gs.y1)      /* isbg: clear the drawing area */
-        be->fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, rgb24to15((u32)e[25] | ((u32)e[26] << 8) | ((u32)e[27] << 16)));
+    {   u16 bg = rgb24to15((u32)e[25] | ((u32)e[26] << 8) | ((u32)e[27] << 16));
+        be->fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg);
+        ws_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg); }
     return env;
 }
 void *GetDrawEnv(void *env) { memcpy(env, cur_drawenv, sizeof cur_drawenv); return env; }
-void *PutDispEnv(void *env) { memcpy(cur_dispenv, env, sizeof cur_dispenv); return env; }
+void *PutDispEnv(void *env) { memcpy(cur_dispenv, env, sizeof cur_dispenv); if (port_widescreen) ws_note_disp(((RECT *)env)->x & 1023); return env; }
 void *GetDispEnv(void *env) { memcpy(env, cur_dispenv, sizeof cur_dispenv); return env; }
 
 /* --patch-tex FILE (mods: button prompts, docs/PORT.md "Mods"): VRAM rects re-applied after every LoadImage that
@@ -455,6 +528,7 @@ int ClearImage(RECT *r, u8 R, u8 G, u8 B) {
     u16 c = (R >> 3) | ((G >> 3) << 5) | ((B >> 3) << 10);
     if (r->w <= 0 || r->h <= 0) return 0;
     be->fill(r->x & 1023, r->y & 511, r->w, r->h, c);
+    ws_fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     return 0;
 }
 int ClearImage2(RECT *r, u8 R, u8 G, u8 B) { return ClearImage(r, R, G, B); }
@@ -492,6 +566,7 @@ void DrawOTag(u32 *ot) {
         p = (u32 *)next;                     /* a native pointer: the whole data image sits below 16 MB */
     }
     gpu_prims += n;
+    ws_sync_down();
     port_ot_signature = h * 31u + (unsigned)n;
     be->list_end();
     port_prof_draw_us += port_time_us() - t0;
@@ -575,6 +650,21 @@ int port_gpu_frame(u8 *rgb, int *w, int *h) {
     int rgb24 = cur_dispenv[0x11];
     int W = d->w > 0 ? d->w : 320, H = d->h > 0 ? d->h : 240;
     if (W > 1024) W = 1024; if (H > 512) H = 512;
+    int wsk = -1;
+    if (port_widescreen && W == 320 && !rgb24)
+        for (int k = 0; k < ws_nareas; k++)
+            if (ws_areas[k].x == (d->x & 1023) && ws_areas[k].y <= (d->y & 511) && (d->y & 511) < ws_areas[k].y + ws_areas[k].h) wsk = k;
+    if (wsk >= 0) {
+        int bx = 2 * (d->x & 1023), WW = 320 + 2 * port_widescreen;
+        for (int y = 0; y < H; y++) for (int x = 0; x < WW; x++) {
+            u8 *o = rgb + (y * WW + x) * 3;
+            u16 c = disp_mask ? wvram[(d->y + y) & 511][bx + x] : 0;
+            o[0] = (c & 31) << 3 | (c & 31) >> 2; o[1] = ((c >> 5) & 31) << 3 | ((c >> 5) & 31) >> 2;
+            o[2] = ((c >> 10) & 31) << 3 | ((c >> 10) & 31) >> 2;
+        }
+        *w = WW; *h = H;
+        return 0;
+    }
     if (disp_mask) be->vram_read(d->x & 1023, d->y & 511, rgb24 ? W * 3 / 2 : W, H);
     for (int y = 0; y < H; y++) for (int x = 0; x < W; x++) {
         u8 *o = rgb + (y * W + x) * 3;

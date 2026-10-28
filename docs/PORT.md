@@ -1998,6 +1998,27 @@ area signature words still match, and (`-v -v`, from a copy of the overlay regio
 many words of the region changed since the vblank and the first/last of them: the difference between a swapped
 overlay (a CD read, logged) and a buffer overrun (the two causes above).
 
+### Widescreen (experimental): `--widescreen [16:9|21:9]`, `--aspect 16:9|21:9`
+
+Off by default (the standard regression stays byte-identical with it off).  Done in the GPU shim, not the GTE: the
+projection keeps its scale, so nothing is stretched; the frame just gets wider.  `shims/gpu.c`: while the drawing
+area is a 320-wide, >= 200-line buffer at an x some DISPENV has shown (Tombi draws at x 384 and 704, y 256, and flips
+the display between them; a 320-wide target at any other x is treated as a texture and left alone), every primitive
+goes to a side plane `wvram` (2048 columns; the copy of a buffer at x sits at columns 2x .. 2x + 320 + 2*pad - 1)
+with its X shifted by `pad` (53 for 16:9 = 426 columns, 120 for 21:9 = 560) and the clip widened to match.  3D, the
+2D sprites and the HUD all share that shift, so world sprites keep the world's scale and the HUD stays at its 4:3
+place, centred.  After every DrawOTag the 4:3 middle is copied back into `vram` (StoreImage / VRAM copies / frame
+textures read it); LoadImage into a wide buffer is mirrored forward; full-buffer fills (GP0 02, DRAWENV isbg,
+ClearImage) clear the wide copy.  The frame read-out (dumps, window) then shows the wide copy; the window is sized for
+the wider aspect (`runtime/sdl.c`, `port_window_fit` scales the 4:3 width by (320 + 2*pad) / 320 for wide frames only:
+24-bit movies and 512-wide modes keep 4:3).  Launcher: Play tab, "Imagen" 16:9 / 21:9.
+
+Limitations: software rasteriser only (`--widescreen` forces `--renderer soft`); the game's own culling is untouched,
+so the 3D level geometry and the far trees end near the 4:3 edges and the side columns show the clear colour (sky
+blue) past them, and objects may pop in at the old 4:3 edge (some sprites outside it are already drawn: they were not
+culled by the game).  Widening the camera's tile/object ranges in the game code is the next step.
+Frames: `--widescreen --dump-frames DIR` writes 426x256 (560x256) PNGs.
+
 ### Open points / next
 
 1. The "code labels kept" of a loaded overlay (2312 for X000, 2298 in the audit's `label-jtbl` column plus 9

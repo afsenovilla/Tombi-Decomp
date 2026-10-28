@@ -240,7 +240,7 @@ static void open_game_data(const char *argv0) {
         port_printf("[port2] warning: no data/ folder (tools/extract_data.py) and no disc image at %s: CD reads will fail\n", port_disc_path);
 }
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
+    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9] [--widescreen [16:9|21:9]] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
                 "       [--renderer gl|soft] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID] [--movie FRAME:ID]\n"
@@ -277,7 +277,15 @@ int main(int argc, char **argv) {
         }
         else if (!strcmp(a, "--realtime")) port_realtime = 1;
         else if (!strcmp(a, "--fullscreen")) port_window_fullscreen = 1;
-        else if (!strcmp(a, "--aspect") && v) port_window_square = !strcmp(argv[++i], "square");
+        else if (!strcmp(a, "--aspect") && v) {
+            extern int port_widescreen; const char *as = argv[++i];
+            port_window_square = !strcmp(as, "square");
+            if (!strcmp(as, "16:9")) port_widescreen = 53; else if (!strcmp(as, "21:9")) port_widescreen = 120;
+        }
+        else if (!strcmp(a, "--widescreen")) {      /* experimental (docs/PORT.md "Widescreen"): 16:9, or 21:9 */
+            extern int port_widescreen; port_widescreen = 53;
+            if (v && (!strcmp(v, "16:9") || !strcmp(v, "21:9"))) { if (!strcmp(argv[++i], "21:9")) port_widescreen = 120; }
+        }
         else if (!strcmp(a, "--keys") && v) port_window_keys(argv[++i]);
         else if (!strcmp(a, "--show-fps")) { port_show_fps = 1; if (v && (*v == '1' || *v == '2') && !v[1]) port_show_fps = atoi(argv[++i]); }
         else if (!strcmp(a, "--patch-tex") && v) { extern const char *port_patch_tex_path; port_patch_tex_path = argv[++i]; }
@@ -304,6 +312,11 @@ int main(int argc, char **argv) {
         else return usage(argv[0]);
     }
     if (headless) port_window = 0;
+    { extern int port_widescreen, port_renderer;
+      if (port_widescreen && port_renderer != 0) {     /* the wide frame is a software-rasteriser feature for now */
+          if (port_renderer == 1) port_printf("[port2] --widescreen: using the software renderer\n");
+          port_renderer = 0;
+      } }
     setvbuf(stderr, NULL, _IONBF, 0);     /* the launcher reads a pipe: every line must leave the process at once */
     { extern const char port_build_id[], port_build_date[]; port_printf("[port2] build %s %s\n", port_build_id, port_build_date); }
     port_printf("[port2] native pointers, %d-bit: data image %p..%p, scratch %p, layout %s\n", (int)(sizeof(void *) * 8),

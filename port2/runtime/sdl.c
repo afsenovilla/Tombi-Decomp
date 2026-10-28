@@ -41,7 +41,9 @@ void port_window_start(void) {
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
     }
+    extern int port_widescreen;
     int ww = (port_window_square ? 320 : 256 * 4 / 3) * port_window_scale;
+    if (port_widescreen) ww = ww * (320 + 2 * port_widescreen) / 320;
     win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
                            256 * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
                            (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
@@ -164,8 +166,11 @@ static void pump(void) {
 /* where the logical frame (320 wide whatever the mode, h lines) goes in a W x H output: 4:3 as a PAL TV shows
    256 lines (square pixels with port_window_square), the largest integer vertical scale that fits, centred;
    a smaller output gets the fit */
+static int fit_wide;             /* the frame being shown is a --widescreen one (320 + 2 * pad wide) */
 void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
+    extern int port_widescreen;
     int lw = port_window_square ? 320 : h * 4 / 3;
+    if (fit_wide) lw = port_window_square ? 320 + 2 * port_widescreen : h * 4 * (320 + 2 * port_widescreen) / (3 * 320);
     int k = W / lw < H / h ? W / lw : H / h;
     float ow, oh;
     if (k >= 1) { ow = (float)(lw * k); oh = (float)(h * k); }
@@ -193,6 +198,7 @@ void port_window_frame(const unsigned char *rgb, int w, int h) {
     SDL_UpdateTexture(tex, NULL, rgb, w * 3);
     SDL_RenderClear(ren);
     { int W, H; SDL_GetRendererOutputSize(ren, &W, &H);
+      extern int port_widescreen; fit_wide = port_widescreen && w == 320 + 2 * port_widescreen;
       SDL_Rect dst; port_window_fit(W, H, h, &dst.x, &dst.y, &dst.w, &dst.h);
       SDL_RenderCopy(ren, tex, NULL, &dst); }  /* 512-wide modes show at the same size */
     SDL_RenderPresent(ren);
