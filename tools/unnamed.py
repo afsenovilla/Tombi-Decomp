@@ -4,8 +4,9 @@ graphics editor shows under "Sin nombre / Unnamed" (tools/names_panel.py) so tha
 toolchain; tools/apply_names.py applies the names the editor exports (names_user.json).
 
 Scope: the matched sources of MAIN0 and X000 (src/<name>.c with a `// FUNC addr size MAIN0|X000` header) and of the SYSTEM code
-overlays of tools/sysovl.py (src/d0spsub*, o0ptsub0, i0nfo*, g0over).  The *_slpm80165 (JP demo) files, src/wip and the area
-overlay twins src/x0NN are skipped (a twin is renamed with its X000 original).
+overlays of tools/sysovl.py (src/d0spsub*, o0ptsub0, i0nfo*, g0over), and the own functions of the area overlays X001..X019
+(src/x0NN/<name>.c whose header names X0NN).  The *_slpm80165 (JP demo) files and src/wip are skipped; the X000 twins in
+src/x0NN are renamed with their X000 original.
 
 Per function: address, program, file, size, the `// probably:` note of the source, its callers (files of the same program that
 use the name), the object table slots that point at it (pointer scan of game/MAIN0.EXE and game/AREA00/X000.BIN: layer / pool /
@@ -29,6 +30,8 @@ import sysovl
 GENERIC = re.compile(r"(?:FUN|func)_[0-9a-fA-F]{8}$")
 HDR = re.compile(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s+(\w+)")
 SYS_DIRS = {p.lower(): p for p in sysovl.PROGS}         # src/d0spsub -> D0SPSUB
+AREA_DIRS = {os.path.basename(d): "X%03d" % int(os.path.basename(d)[1:]) for d in glob.glob(os.path.join(ROOT, "src", "x0[0-9][0-9]"))}  # src/x001 -> X001
+AREA_PROGS = sorted(AREA_DIRS.values())
 MAIN0_BASE, OVL_BASE = 0x80010000, sysovl.BASE
 # MAIN0 handler tables (u32 code pointers indexed by object type), see tools/objects.py and notes/object_layout.md
 TABLES = {"layer 1": 0x8007A10C, "layer 2": 0x80077D9C, "pool": 0x80079BAC, "layer 4": 0x80079D74, "layer 5": 0x8007B310,
@@ -66,23 +69,23 @@ def scan_sources():
         if stem.endswith("_slpm80165") or not GENERIC.match(stem):
             continue
         lines = read_head(f)
-        m = HDR.match(lines[0]) if lines else None
+        m = next((HDR.match(l) for l in lines if HDR.match(l)), None)
         if not m or m.group(3) not in ("MAIN0", "X000"):
             continue
         out.append(dict(address="%08x" % int(m.group(1), 16), name=stem, prog=m.group(3), file=rel(f), size=int(m.group(2)),
                         note=note_of(lines)))
-    for d, prog in sorted(SYS_DIRS.items()):
+    for d, prog in sorted(list(SYS_DIRS.items()) + list(AREA_DIRS.items())):
         for f in sorted(glob.glob(os.path.join(ROOT, "src", d, "*.c"))):
             stem = os.path.basename(f)[:-2]
             if not GENERIC.match(stem):
                 continue
             lines = read_head(f)
-            m = HDR.match(lines[0]) if lines else None
+            m = next((HDR.match(l) for l in lines if HDR.match(l)), None)
             if not m or m.group(3) != prog:
                 continue
             out.append(dict(address="%08x" % int(m.group(1), 16), name=stem, prog=prog, file=rel(f), size=int(m.group(2)),
                             note=note_of(lines)))
-    order = ["MAIN0", "X000"] + sysovl.PROGS
+    order = ["MAIN0", "X000"] + sysovl.PROGS + AREA_PROGS
     out.sort(key=lambda e: (order.index(e["prog"]), int(e["address"], 16)))
     return out
 
@@ -94,6 +97,8 @@ def scope_files(prog):
         fs += glob.glob(os.path.join(ROOT, "src", "data", "**", "*.c"), recursive=True)
         fs += glob.glob(os.path.join(ROOT, "include", "**", "*.h"), recursive=True)
         return sorted(fs)
+    if prog in AREA_PROGS:
+        return sorted(glob.glob(os.path.join(ROOT, "src", prog.lower(), "*.c")) + glob.glob(os.path.join(ROOT, "src", "data", prog.lower(), "*.c")))
     return sorted(glob.glob(os.path.join(ROOT, "src", prog.lower(), "*.c")))
 
 
@@ -141,6 +146,10 @@ def pointer_refs(entries):
             "X000": (_bin(os.path.join(ROOT, "game", "AREA00", "X000.BIN")), OVL_BASE)}
     for prog, (path, _, _) in sysovl.SYSOVL.items():
         bins[prog] = (_bin(os.path.join(ROOT, "game", path)), OVL_BASE)
+    for prog in AREA_PROGS:
+        g = sorted(glob.glob(os.path.join(ROOT, "game", "AREA*", prog + ".BIN")))
+        if g:
+            bins[prog] = (_bin(g[0]), OVL_BASE)
     bounds = sorted(TABLES.values())
     for e in entries:
         a = int(e["address"], 16)
@@ -358,7 +367,7 @@ def main(argv=None):
     else:
         for e in entries:
             e["anim"] = None
-    doc = dict(generated_by="tools/unnamed.py", count=len(entries), progs={p: sum(1 for e in entries if e["prog"] == p) for p in ["MAIN0", "X000"] + sysovl.PROGS},
+    doc = dict(generated_by="tools/unnamed.py", count=len(entries), progs={p: sum(1 for e in entries if e["prog"] == p) for p in ["MAIN0", "X000"] + sysovl.PROGS + AREA_PROGS},
                entries=entries)
     with open(a.out, "w", encoding="utf-8") as f:
         json.dump(doc, f, indent=1, ensure_ascii=False)

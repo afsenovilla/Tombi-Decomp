@@ -10,6 +10,8 @@ names_user.json, a list of {address, prog, old, new, comment}) with the same mec
   - every other mention of the old name in src/ include/ notes/ tools/ port2/ docs/ (MAIN0 / X000 names are unique across those
     trees; a SYSTEM overlay name such as func_800Exxxx may also be an X000 function, so those are replaced only inside src/<prog>/
     (plus src/wip/<prog>_*.c) and in notes/ docs/ lines that mention the overlay, and the remaining mentions are listed).
+  - area overlay functions (prog X001..X019, not X000 twins): src/x0NN/<old>.c, the symbol in src/x0NN/ and src/data/x0NN/,
+    the name column of notes/functions_x0NN.csv, notes/docs lines that mention the overlay; the name must be free in MAIN0 (an X000 name only at the same address, the twin convention);
   - notes/unnamed.json is left alone: regenerate it with tools/unnamed.py after the renames.
 
 Each new name must be a C identifier that is not generic (func_/FUN_/D_) and not already used by another function or symbol of
@@ -35,6 +37,10 @@ HDR = re.compile(r"//\s*FUNC\s+([0-9a-fA-F]+)\s+(\d+)\s+(\w+)")
 TEXT_EXT = (".c", ".h", ".s", ".inc", ".md", ".csv", ".txt", ".py", ".json", ".yaml", ".yml", ".cmake", ".sh", ".ld")
 TREES = ("src", "include", "notes", "tools", "port2", "docs")
 SYS_PROGS = set(sysovl.PROGS)
+# area overlays X001..X019: functions of their own (not X000 twins) live in src/x0NN/, csv notes/functions_x0NN.csv (name column 2);
+# they are handled like a SYSTEM overlay (scope = their folder + src/data/x0NN), and the name must be free in MAIN0 (an X000 name only at the same address, the twin convention)
+AREA_PROGS = set("X%03d" % int(os.path.basename(d)[1:]) for d in glob.glob(os.path.join(ROOT, "src", "x0[0-9][0-9]")))
+OWN_PROGS = SYS_PROGS | AREA_PROGS
 
 
 def rel(p):
@@ -49,7 +55,11 @@ def read(p):
 def func_header(path):
     try:
         with open(path, errors="replace") as f:
-            return HDR.match(f.readline())
+            for _ in range(12):     # the header may follow a VERSION block or a comment
+                m = HDR.match(f.readline())
+                if m:
+                    return m
+            return None
     except OSError:
         return None
 
@@ -125,7 +135,7 @@ def load_rows(path):
 def locate(row):
     """src file of the function: by name and the `// FUNC addr size prog` header."""
     prog, old, addr = row["prog"], row["old"], int(row["address"], 16)
-    d = os.path.join(ROOT, "src", prog.lower()) if prog in SYS_PROGS else os.path.join(ROOT, "src")
+    d = os.path.join(ROOT, "src", prog.lower()) if prog in OWN_PROGS else os.path.join(ROOT, "src")
     cands = [os.path.join(d, old + ".c")] if old else []
     cands += [f for f in glob.glob(os.path.join(d, "*.c")) if not f.endswith("_slpm80165.c")]
     for f in cands:
@@ -139,6 +149,9 @@ def scope_text_files(prog):
     """Files that may legitimately hold the program's identifiers (collision check)."""
     if prog in SYS_PROGS:
         return glob.glob(os.path.join(ROOT, "src", prog.lower(), "*.[ch]"))
+    if prog in AREA_PROGS:
+        return (glob.glob(os.path.join(ROOT, "src", prog.lower(), "*.[ch]")) + glob.glob(os.path.join(ROOT, "src", "data", prog.lower(), "*.[ch]"))
+                + glob.glob(os.path.join(ROOT, "include", "**", "*.h"), recursive=True))
     fs = glob.glob(os.path.join(ROOT, "src", "*.[ch]")) + glob.glob(os.path.join(ROOT, "src", "x0[0-9][0-9]", "*.[ch]"))
     fs += glob.glob(os.path.join(ROOT, "src", "data", "**", "*.[ch]"), recursive=True) + glob.glob(os.path.join(ROOT, "include", "**", "*.h"), recursive=True)
     return fs
@@ -147,7 +160,9 @@ def scope_text_files(prog):
 def csv_names(prog):
     """{name: address} of the program's function csv(s)."""
     out = {}
-    paths = ["functions_main0.csv", "functions_x000.csv"] if prog not in SYS_PROGS else ["functions_%s.csv" % prog.lower()]
+    paths = ["functions_main0.csv", "functions_x000.csv"] if prog not in OWN_PROGS else ["functions_%s.csv" % prog.lower()]
+    if prog in AREA_PROGS:
+        paths += ["functions_main0.csv", "functions_x000.csv"]   # an X000 name is allowed only at the same address (twin)
     for p in paths:
         for l in csv_rows(os.path.join(ROOT, "notes", p)) or []:
             f = l.split(",")
@@ -164,7 +179,7 @@ def validate(rows):
     for r in rows:
         why = None
         new, prog = r["new"], r["prog"]
-        if prog not in ("MAIN0", "X000") and prog not in SYS_PROGS:
+        if prog not in ("MAIN0", "X000") and prog not in OWN_PROGS:
             why = "unknown prog %r" % prog
         elif not IDENT.match(new):
             why = "not a C identifier"
@@ -174,7 +189,7 @@ def validate(rows):
             why = "generic name"
         elif new == r["old"]:
             why = "unchanged"
-        elif (prog in SYS_PROGS and (new, prog) in seen_new) or (prog not in SYS_PROGS and (new, "MAIN0") in seen_new):
+        elif (prog in OWN_PROGS and (new, prog) in seen_new) or (prog not in OWN_PROGS and (new, "MAIN0") in seen_new):
             why = "duplicate in the input"
         else:
             r["path"] = locate(r)
@@ -191,6 +206,8 @@ def validate(rows):
                 why = "src/%s.c exists" % new
             elif other is not None and other != int(r["address"], 16):
                 why = "name used by %08x in the function csv" % other
+            elif prog in AREA_PROGS and re.search(r"\b%s\s*\(" % re.escape(new), read(r["path"])) and not re.search(r"\b%s\b" % re.escape(r["old"]), read(r["path"])):
+                pass    # the file already defines the function under the new name (an X000 twin renamed in place): file + csv only
             else:
                 rx = re.compile(r"\b%s\b" % re.escape(new))
                 for f in scope_text_files(prog):
@@ -203,7 +220,7 @@ def validate(rows):
         if why:
             bad.append((r, why))
         else:
-            seen_new[(new, prog if prog in SYS_PROGS else "MAIN0")] = r
+            seen_new[(new, prog if prog in OWN_PROGS else "MAIN0")] = r
             ok.append(r)
     return ok, bad
 
@@ -224,7 +241,7 @@ def apply_row(r, plan, areas_of):
     addr, prog, old, new = int(r["address"], 16), r["prog"], r["old"], r["new"]
     rx = re.compile(r"\b%s\b" % re.escape(old))
     sub = lambda t: rx.sub(new, t)
-    sysp = prog in SYS_PROGS
+    sysp = prog in OWN_PROGS
     touched = set()
     # 1. the file and its twins
     plan.moves.append((r["path"], os.path.join(os.path.dirname(r["path"]), new + ".c")))
@@ -236,6 +253,8 @@ def apply_row(r, plan, areas_of):
     # 2. symbol replacement
     if sysp:
         files = glob.glob(os.path.join(ROOT, "src", prog.lower(), "*.[ch]")) + glob.glob(os.path.join(ROOT, "src", "wip", prog.lower() + "_*.[ch]"))
+        if prog in AREA_PROGS:
+            files += glob.glob(os.path.join(ROOT, "src", "data", prog.lower(), "*.[ch]"))
     else:
         files = [f for f in text_files() if not any(rel(f).startswith("src/%s/" % s.lower()) for s in SYS_PROGS)
                  and not re.search(r"^notes/(functions|names)_[a-z0-9]+\.csv$", rel(f))
