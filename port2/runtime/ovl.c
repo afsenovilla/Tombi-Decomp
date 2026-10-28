@@ -228,9 +228,29 @@ void port_relocate_overlay(void *dst, int bytes) {
         unsigned len = port_wfm3_len((const unsigned char *)(w + i), (unsigned)(n - i) * 4);
         if (len) { bank_s[nbank] = i; bank_e[nbank] = i + (int)(len / 4); nbank++; i += (int)(len / 4) - 1; }
     }
+    /* the end entry of an animation script ({index, b, 0x8000 | duration}, AnimAdvance) reads as a RAM address
+       when b != 0 and the duration is short (gen2.py anim_ends, player anim 0xF): every script a word of the
+       file points at is walked, and its end word is left as it is */
+    static unsigned char keep[0x80000 / 4]; int nkeep = 0;
+    memset(keep, 0, (size_t)(n < (int)sizeof keep ? n : (int)sizeof keep));
+    for (int i = 0; i < n && n <= (int)sizeof keep; i++) {
+        u32p v = w[i];
+        if (v < base || v >= base + 4u * (u32p)n || (v & 3) || (c && in_ranges(c, base + 4 * i)) || (c && in_ranges(c, v))) continue;
+        int j = (int)((v - base) / 4);
+        for (int k = 0; k < 64 && j + 1 < n; k++, j += 2) {
+            u32p i0 = w[j], w1 = w[j + 1], f = w1 >> 16;
+            if (i0 >= 0x400) break;
+            if (f & 0x8000) {
+                if (!(f & 0x4000) && (f & 0x3FFF) && w1 < 0x80200000u && (w1 & 0xFFFF) && k >= 2) { keep[j + 1] = 1; nkeep++; }
+                break;
+            }
+            if ((f & 0x4000) || !(f & 0x3FFF)) break;
+        }
+    }
     for (int i = 0; i < n; i++) {
         u32p a = base + 4 * i, v = w[i];
         if (c && in_ranges(c, a)) continue;
+        if (n <= (int)sizeof keep && keep[i]) continue;
         { int k; for (k = 0; k < nbank; k++) if (i >= bank_s[k] && i < bank_e[k]) break; if (k < nbank) continue; }
         if (0x1F800000u <= v && v < 0x1F800400u) { w[i] = (u32p)port_ram_ptr(v); nd++; continue; }
         if (v < PORT_MAIN0_LOAD || v >= 0x80200000u || (v & 3)) continue;
@@ -274,8 +294,8 @@ void port_relocate_overlay(void *dst, int bytes) {
     { extern int port_in_game;                          /* --skip-intro: the first area overlay (X0nn) loaded = gameplay has started */
       if (c && c->name[0] == 'X' && c->name[1] == '0') port_in_game = 1; }
     if (port_verbose || ovl)
-        port_printf("[port2] frame %d: %s loaded (%d bytes at %08x): %d function, %d thunk, %d data pointers relocated, %d code labels kept\n",
-                    port_frame, c ? c->name : "a file below the heap", bytes, base, nfn, nth, nd, nraw);
+        port_printf("[port2] frame %d: %s loaded (%d bytes at %08x): %d function, %d thunk, %d data pointers relocated, %d code labels and %d animation end words kept\n",
+                    port_frame, c ? c->name : "a file below the heap", bytes, base, nfn, nth, nd, nraw, nkeep);
 }
 
 /* nearest native function at or below fn (the generated tables) */
