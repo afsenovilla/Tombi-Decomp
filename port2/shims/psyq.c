@@ -638,14 +638,26 @@ static int cd_data_read_sector(int lba, u8 *d, int bytes) {
         long long off = sec * 2352 + (bytes == 2048 ? 24 : 12);
         if (off + bytes > (long long)r->bytes) return -2;
         FILE *f = cd_range_file(r); if (!f) return -1;
-        return port_pread(f, d, bytes, off) == bytes ? 0 : -1;
+        int got = port_pread(f, d, bytes, off);
+        if (got < 0 || (got < bytes && ferror(f))) return -1;
+        clearerr(f);
+        if (got < bytes) memset(d + (got > 0 ? got : 0), 0, bytes - (got > 0 ? got : 0));   /* shrunk file: zero padding */
+        return 0;
     }
     /* stored as 2048-byte user data: the whole last sector exists on the disc as data + zero padding */
     long long off = sec * 2048;
     int avail = off >= (long long)r->bytes ? 0 : (int)((long long)r->bytes - off > 2048 ? 2048 : (long long)r->bytes - off);
     u8 *user = bytes == 2048 ? d : d + 12;
     if (bytes != 2048) memset(d, 0, bytes);
-    if (avail) { FILE *f = cd_range_file(r); if (!f) return -1; if (port_pread(f, user, avail, off) != avail) return -1; }
+    /* the file on disk may be shorter than the manifest says (a patched file that shrank, e.g. a WFM with fewer
+       glyphs): the disc would still deliver whole sectors, so a short read is zero padding, not a failure */
+    if (avail) {
+        FILE *f = cd_range_file(r); if (!f) return -1;
+        int got = port_pread(f, user, avail, off);
+        if (got < 0) { if (ferror(f)) return -1; got = 0; }
+        if (got < avail && ferror(f)) return -1;
+        clearerr(f); avail = got;
+    }
     if (avail < 2048) memset(user + avail, 0, 2048 - avail);
     return 0;
 }
