@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/logo.png" alt="Tombi!" width="380">&nbsp;&nbsp;<img src="docs/logo_jp.png" alt="Ore! Tomba" width="380"></p>
 
-# Tombi! (Tomba!) decomp
+# Tombi! (Tomba!) decomp + native PC port
 
 | Version | Code | Data | Functions |
 |---|---|---|---|
@@ -13,11 +13,19 @@
 [![Compiler](https://img.shields.io/badge/compiler-GCC%20%2B%20maspsx-orange)](#how-matching-works)
 [![License](https://img.shields.io/github/license/afsenovilla/Tombi-Decomp)](LICENSE)
 
-A work-in-progress **matching decompilation** of *Tombi!* (known as *Tomba!* in North America and
-*Ore! Tomba* in Japan) for the original PlayStation. The goal is C source code that compiles, with the
-game's original toolchain, into byte-identical machine code.
+A **matching decompilation and native recompilation** of *Tombi!* (known as *Tomba!* in North America and
+*Ore! Tomba* in Japan) for the original PlayStation:
 
-This repository targets the **European Spanish release** and works function by function: every
+- **Decompilation: finished.** The game's code is C source that compiles, with the game's original toolchain, into
+  byte-identical machine code (99.34 %: every function but three memory-card ones, which have functionally
+  equivalent C, see "Status" below). Work on the decompilation is considered complete; the remaining work is
+  naming and documentation.
+- **Recompilation: the native PC port.** The same C is built as a native Windows/Linux program (`port2/`): OpenGL
+  or software rendering, SDL2 controllers, the original music, voices and movies, saves, every language of the
+  disc, and a launcher with mods (`dist/windows/tombi-port.exe`, see [docs/PORT.md](docs/PORT.md)). The game is
+  fully playable; you supply your own disc image (Tombi! PAL `SCES-01331` Rev 1), which the launcher extracts once.
+
+This repository targets the **European release** (`SCES-01331` Rev 1) and works function by function: every
 function in `src/` is verified to produce exactly the same instructions as the retail executable.
 
 > This repository contains no game data, executables, disc images or Sony SDK files.
@@ -313,7 +321,7 @@ identical WFM; `gam.py --check` reports how many of the 816 GAM files the re-com
 765 with its second variant, 816 when the original bytes are kept for unchanged data); `mkdisc.py --check` rebuilds
 the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.md](notes/assets_tombatools.md).
 
-**Windows exes** (built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them; the native port extracts it once into a `data/` folder and runs from that, see [docs/PORT.md](docs/PORT.md) "Running without the disc image"):
+**Windows exes** (`tombi-port.exe` is the native port with its launcher; built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them; the native port extracts it once into a `data/` folder and runs from that, see [docs/PORT.md](docs/PORT.md) "Running without the disc image"):
 - `dist/windows/tombi-assets.exe`: sprite/sound/video extractor (window with checkboxes).
 - `dist/windows/tombi-text.exe`: text editor. Open `Tombi.bin` (or the extracted folder), pick an area/file/dialogue in the tree (search box on top),
   edit the text in the middle; the preview below redraws as you type with the game font at x1/x2/x3 and warns in red when a line is wider than the
