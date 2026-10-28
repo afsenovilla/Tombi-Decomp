@@ -2,7 +2,6 @@
 // MATCHING 8012da68 580
 #include "TOBJ.H"
 
-extern unsigned short NEG_SIN_TABLE[];
 extern void AnimAdvance(TObj *);
 extern int wingedForkPigCheckWall(TObj *);
 extern TObj *FUN_80018448(void);
@@ -36,7 +35,7 @@ void wingedForkPigFlyAcross(TObj *o)
         if (o->animFrame) o->a.p.whole -= 2;
         else o->a.p.whole += 2;
         o->ba7 += 2;
-        o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
+        o->y.raw += (short)(((unsigned short *)NEG_SIN_TABLE)[o->ba7] << 2);
         AnimAdvance(o);
         if (wingedForkPigCheckWall(o) || past(o)) o->animFrame = 1 - o->animFrame;
         break;

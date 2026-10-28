@@ -2,7 +2,6 @@
 // MATCHING 8012ddd4 1444
 #include "TOBJ.H"
 
-extern unsigned short NEG_SIN_TABLE[];
 extern unsigned short D_80135E68[];
 extern unsigned char D_80135E60[];
 extern void *D_8013A69C[], *D_8013A6A8[], *D_8013A6B0[];
@@ -14,7 +13,7 @@ extern int wingedForkPigCheckWall(TObj *);
 
 #define WOBBLE() \
     o->ba7 += 2; \
-    o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
+    o->y.raw += (short)(((unsigned short *)NEG_SIN_TABLE)[o->ba7] << 2);
 
 static __inline__ short chk2(TObj *o)
 {

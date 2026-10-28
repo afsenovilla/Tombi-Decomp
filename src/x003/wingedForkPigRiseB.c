@@ -1,7 +1,6 @@
 // FUNC 8012dcac 296 X003
 // MATCHING 8012dcac 296
 #include "TOBJ.H"
-extern unsigned short NEG_SIN_TABLE[];
 extern void *D_8013A700[], *D_8013A69C[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -22,7 +21,7 @@ void wingedForkPigRiseB(TObj *o)
         break;
     case 1:
         o->ba7 += 2;
-        o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
+        o->y.raw += (short)(((unsigned short *)NEG_SIN_TABLE)[o->ba7] << 2);
         AnimAdvance(o);
         if (--o->timer == -1) {
             o->active = 1;

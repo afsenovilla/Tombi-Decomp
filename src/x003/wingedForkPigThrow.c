@@ -19,7 +19,6 @@ static void *D_8013A6D4[11] = {
     D_8013A95C, D_8013A964, D_8013A96C,
 };
 extern void *D_8013A698[];
-extern unsigned short NEG_SIN_TABLE[];
 extern int FUN_8001f9e0(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -125,7 +124,7 @@ void wingedForkPigThrow(TObj *o)
     }
     AnimAdvance(o);
     o->ba7 += 2;
-    o->y.raw += (short)(NEG_SIN_TABLE[o->ba7] << 2);
+    o->y.raw += (short)(((unsigned short *)NEG_SIN_TABLE)[o->ba7] << 2);
     o->velH -= 8;
     if (o->velH < 0x40) o->velH = 0x40;
     if (o->animFrame) o->a.raw -= o->velH << 8;
