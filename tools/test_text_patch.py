@@ -76,9 +76,12 @@ class Disc(unittest.TestCase):
             out = os.path.join(tmp, "A.bin")
             res = P.apply(DISC, P.load(pj), out)
             self.assertEqual(C.Project(C.Source(out)).original(n, 0), "¡LOGRADO!")
+            self.assertTrue(os.path.isfile(os.path.join(tmp, "A.cue")))
+            print("rebuilt", os.path.getsize(DISC), "->", os.path.getsize(out))
             # PPF of the same edits reproduces the rebuilt image
             ppf = os.path.join(tmp, "fix.ppf")
             P.make_ppf(proj, ppf)
+            print("ppf bytes", os.path.getsize(ppf))
             self.assertLess(os.path.getsize(ppf), 4 << 20)
             P.ppf_check(ppf, DISC)
             out2 = os.path.join(tmp, "B.bin")
