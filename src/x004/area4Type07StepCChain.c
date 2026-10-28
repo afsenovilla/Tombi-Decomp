@@ -2,8 +2,8 @@
 // MATCHING 80124ad8 116
 typedef struct O { char p0[3]; unsigned char t; char p1[2]; unsigned char s; char p2[0x94 - 7]; struct O *next; } O;
 extern void area4Type07StepC(O *);
-extern void FUN_80124e00(O *);
-void FUN_80124ad8(O *o)
+extern void copyParentB8cToD8c(O *);
+void area4Type07StepCChain(O *o)
 {
     int i;
     O *p;
@@ -11,6 +11,6 @@ void FUN_80124ad8(O *o)
         area4Type07StepC(o);
         i = 1;
         p = o->next;
-        for (i = 1; i < 3; i++) { FUN_80124e00(p); p->s = o->s; p = p->next; }
+        for (i = 1; i < 3; i++) { copyParentB8cToD8c(p); p->s = o->s; p = p->next; }
     }
 }

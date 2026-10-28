@@ -174,11 +174,11 @@ extern void komaPigSubtype1Step();
 extern void komaPigSubtype2Step();
 extern void bitingPlantSway();
 extern void bitingPlantLunge();
-extern void FUN_80124ad8();
-extern void FUN_80124e14();
+extern void area4Type07StepCChain();
+extern void area4Type07StepDChain();
 static Fn D_801310EC[7] = {
     (Fn)komaPigSubtype0Step, (Fn)komaPigSubtype1Step, (Fn)komaPigSubtype2Step, (Fn)bitingPlantSway,
-    (Fn)bitingPlantLunge, (Fn)FUN_80124ad8, (Fn)FUN_80124e14,
+    (Fn)bitingPlantLunge, (Fn)area4Type07StepCChain, (Fn)area4Type07StepDChain,
 };
 extern int isObjectInView(TObj *);
 extern int FUN_800202b4(TObj *);

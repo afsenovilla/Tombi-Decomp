@@ -1,4 +1,4 @@
 // FUNC 80117618 8 X005
 // MATCHING 80117618 8
-void func_80117618(void) {
+void stubNop80117618(void) {
 }

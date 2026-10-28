@@ -4,7 +4,7 @@
 extern void *D_8009F32C[];
 extern void sevenFriendsMemberSetAnim(void *, int, int);
 
-void func_80119088(TObj *o)
+void sevenFriendsMemberFlyUp(TObj *o)
 {
     void *e = D_8009F32C[o->subtype];
 

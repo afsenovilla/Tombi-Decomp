@@ -30,7 +30,7 @@ address,size,name,twin
 800ed024,564,updateL4Type00Object,X000:800ed024
 800ed258,1272,villagerNpcWalkPath,X000:800ed258
 800ed750,1212,villagerNpcSpringMotion,X000:800ed750
-800edc0c,8,func_800EDC0C,
+800edc0c,8,stubNop800EDC0C,
 800edc14,488,l4Type03Step,X000:800edc14
 800eddfc,408,l4Type03StepB,X000:800eddfc
 800edf94,504,updateL4Type03Object,X000:800edf94
@@ -100,7 +100,7 @@ address,size,name,twin
 800f43d0,224,offsetByWeaponAim,X000:800f43d0
 800f44b0,2488,playerStepWeaponAttack,X000:800f44b0
 800f4e68,52,playerSetAnimPairA,X000:800f4e68
-800f4e9c,52,playerSetAnimPairA,X000:800f4e68
+800f4e9c,52,playerSetAnimPairB,X000:800f4e68
 800f4ed0,324,playerSpinPlaceAndAccelerate,X000:800f4ed0
 800f5014,100,copyGrabbedObjB0cToPlayerExt,X000:800f5014
 800f5078,5740,playerStepSpinOnObject,X000:800f5078
@@ -131,7 +131,7 @@ address,size,name,twin
 800fb0c0,448,playerRopeAdjustLength,X000:800fb0c0
 800fb280,240,playerRopeGetSwingSpeed,X000:800fb280
 800fb370,164,playerRopeSetAnim,X000:800fb370
-800fb414,12,func_800FB414,X001:800fb414
+800fb414,12,copyD88ToD8C,X001:800fb414
 800fb420,2252,playerStepRopeSwing,X000:800fb420
 800fbcec,200,setLeapVelocityFromPad,X000:800fbcec
 800fbdb4,632,playerStepRopeJumpOff,X000:800fbdb4
@@ -236,7 +236,7 @@ address,size,name,twin
 8010d048,568,playerSwimDirFromPad,X000:8010d048
 8010d280,272,playerSwimMove,X000:8010d280
 8010d390,1120,playerStepSwim,X000:8010d390
-8010d7f0,152,setAngleSpeedFromDir8B,X000:8010cfb0
+8010d7f0,152,setAngleSpeedFromDir8,X000:8010cfb0
 8010d888,644,playerStepSwimUnderwater,X000:8010d888
 8010db0c,568,playerStepWaterJumpOut,X000:8010db0c
 8010dd44,72,playerEnterStep3E,X000:8010dd44
@@ -279,8 +279,8 @@ address,size,name,twin
 80112864,24,treasureChestInitStatic,X000:80112864
 8011287c,28,treasureChestInitDropped,X000:8011287c
 80112898,88,treasureChestInitCarried,X000:80112898
-801128f0,8,func_801128F0,
-801128f8,32,FUN_801128f8,MAIN0:80068fc4
+801128f0,8,clearObjectB0A,
+801128f8,32,treasureChestIdle,MAIN0:80068fc4
 80112918,184,treasureChestSettleOnGround,X000:80112918
 801129d0,528,treasureChestWaitForFlag,X000:801129d0
 80112be0,68,treasureChestCheckAreaFlag,X000:80112be0
@@ -289,13 +289,13 @@ address,size,name,twin
 801133b8,204,treasureChestOpenAnimOnly,X000:801133b8
 80113484,720,updateTreasureChest,X000:80113484
 80113754,72,objSetAnimFromSubtypeTable,X000:80113754
-8011379c,32,FUN_8011379c,MAIN0:80068fc4
+8011379c,32,animAdvanceThunk,MAIN0:80068fc4
 801137bc,204,playerEventSinkStep,X000:801137bc
 80113888,300,scriptActorWalk,X000:80113888
 801139b4,216,playerEventTimedMessageStep,X000:801139b4
 80113a8c,224,playerEventWaitMessageClose,X000:80113a8c
 80113b6c,340,scriptActorJump,X000:80113b6c
-80113cc0,8,func_80113CC0,
+80113cc0,8,stubNop80113CC0,
 80113cc8,624,scriptActorLaneJump,X000:80113cc8
 80113f38,904,scriptActorRun,X000:80113f38
 801142c0,924,scriptActorLeaveScene,X000:801142c0
@@ -365,7 +365,7 @@ address,size,name,twin
 8011b01c,340,tearJarHeld,
 8011b170,448,func_8011B170,
 8011b330,120,func_8011B330,
-8011b3a8,352,func_8011B3A8,
+8011b3a8,352,spawnPlayerAfterimage,
 8011b47c,140,func_8011B47C,
 8011b508,436,stepTearJar,
 8011b6bc,280,updateTearJar,
@@ -386,7 +386,7 @@ address,size,name,twin
 8011cd84,1016,updateEvilPigBagPortal,
 8011d17c,440,updateParallaxBackdropSprite,
 8011d334,68,playerInitAreaHook,
-8011d378,116,func_8011D378,
+8011d378,116,playerBiteAttachSlope,
 8011d3ec,520,playerBittenJumpType1A,
 8011d5f4,112,func_8011D5F4,
 8011d664,28,FUN_8011b7d4,X000:8011b7d4
@@ -399,7 +399,7 @@ address,size,name,twin
 8011dc4c,252,func_8011DC4C,
 8011dd48,284,func_8011DD48,
 8011de64,512,playerStep26Area9,
-8011e064,116,func_8011E064,
+8011e064,116,playerStepEntrySfxAnim4TiltX09,
 8011e0d8,204,playerStep27Area9,
 8011e1a4,436,func_8011E1A4,
 8011e358,816,func_8011E358,
@@ -431,8 +431,8 @@ address,size,name,twin
 80121434,156,columnPushOutOfWall,
 801214d0,112,columnProbeA,
 80121540,128,columnProbeB,
-801215c0,112,func_801215C0,X009:801214d0
-80121630,112,func_80121630,X009:801214d0
+801215c0,112,tileCollideColumnAtX,X009:801214d0
+80121630,112,testCollisionSegmentsAtX,X009:801214d0
 801216a0,240,flowerPlatformEnemyCollision,
 80121790,104,func_80121790,
 801217f8,316,jellyfishCollideObjects,
@@ -469,7 +469,7 @@ address,size,name,twin
 80123ce8,48,redFlowerDefeated,
 80123d18,268,func_80123D18,
 80123e24,1800,updateRedFlower,
-8012452c,48,func_8012452C,
+8012452c,48,animAdvanceAtState0,
 8012455c,372,deathFruitCollected,
 801246d0,516,updateDeathFruit,
 801248d4,924,updateRedPlusBlueObject,
@@ -497,13 +497,13 @@ address,size,name,twin
 80129344,368,initFlowerTearsSeeker,
 801294b4,168,updateFlowerTearsSeeker,X004:80129524
 8012955c,932,updateBoatman,
-80129900,20,func_80129900,
+80129900,20,resetToB04One,
 80129914,440,stepPlayerWalkInScene,
 80129acc,152,checkPlayerWalkInTrigger,
-80129b64,12,func_80129B64,X001:8013a0cc
+80129b64,12,stubFreeObj80129B64,X001:8013a0cc
 80129b70,296,updatePlayerWalkInTrigger,
 80129c98,608,spawnAspiringActorGuardNpcs,
 80129ef8,2024,aspiringActorGuardTalk,
-8012a6e0,32,FUN_8012a6e0,MAIN0:80068fc4
-8012a700,12,func_8012A700,X001:8013a0cc
+8012a6e0,32,aspiringActorGuardTalkThunk,MAIN0:80068fc4
+8012a700,12,stubFreeObj8012A700,X001:8013a0cc
 8012a70c,168,updateAspiringActorGuard,X002:8011c628

@@ -3,7 +3,7 @@
 #include "player.h"
 #include "TOBJ.H"
 
-void func_80117D34(TObj *o)
+void clampPlayerXAndContact(TObj *o)
 {
     if (o->h->p.whole < (*(Fix16 **)&PLAYER.obj.h)->p.whole) (*(Fix16 **)&PLAYER.obj.h)->p.whole = o->h->p.whole;
     if (o->b68) {

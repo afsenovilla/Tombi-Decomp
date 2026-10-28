@@ -2,7 +2,7 @@
 // MATCHING 8011df1c 32
 extern void pushObjectOutOfObjectBoxC(void);
 
-void FUN_8011df1c(void)
+void pushObjectOutOfObjectBoxCThunk(void)
 {
     pushObjectOutOfObjectBoxC();
 }

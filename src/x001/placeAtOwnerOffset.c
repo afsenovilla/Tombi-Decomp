@@ -2,7 +2,7 @@
 // MATCHING 80117d70 76
 #include "TOBJ.H"
 
-void func_80117D70(TObj *o)
+void placeAtOwnerOffset(TObj *o)
 {
     TObj *p = (TObj *)o->d90;
 

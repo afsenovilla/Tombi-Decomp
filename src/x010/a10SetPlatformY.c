@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-void func_8012E8C8(TObj *o)
+void a10SetPlatformY(TObj *o)
 {
     if (GAME.selectedSection == 1) o->y.raw = -0xea;
     else if (GAME.purifiedAreas & 0x40) o->y.raw = -0x50;

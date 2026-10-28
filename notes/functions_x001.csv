@@ -30,7 +30,7 @@ address,size,name,twin
 800ed024,564,updateL4Type00Object,X000:800ed024
 800ed258,1272,villagerNpcWalkPath,X000:800ed258
 800ed750,1212,villagerNpcSpringMotion,X000:800ed750
-800edc0c,8,func_800EDC0C,
+800edc0c,8,stubNop800EDC0C,
 800edc14,488,l4Type03Step,X000:800edc14
 800eddfc,408,l4Type03StepB,X000:800eddfc
 800edf94,504,updateL4Type03Object,X000:800edf94
@@ -100,7 +100,7 @@ address,size,name,twin
 800f43d0,224,offsetByWeaponAim,X000:800f43d0
 800f44b0,2488,playerStepWeaponAttack,X000:800f44b0
 800f4e68,52,playerSetAnimPairA,X000:800f4e68
-800f4e9c,52,playerSetAnimPairA,X000:800f4e68
+800f4e9c,52,playerSetAnimPairB,X000:800f4e68
 800f4ed0,324,playerSpinPlaceAndAccelerate,X000:800f4ed0
 800f5014,100,copyGrabbedObjB0cToPlayerExt,X000:800f5014
 800f5078,5740,playerStepSpinOnObject,X000:800f5078
@@ -131,7 +131,7 @@ address,size,name,twin
 800fb0c0,448,playerRopeAdjustLength,X000:800fb0c0
 800fb280,240,playerRopeGetSwingSpeed,X000:800fb280
 800fb370,164,playerRopeSetAnim,X000:800fb370
-800fb414,12,func_800FB414,
+800fb414,12,copyD88ToD8C,
 800fb420,2252,playerStepRopeSwing,X000:800fb420
 800fbcec,200,setLeapVelocityFromPad,X000:800fbcec
 800fbdb4,632,playerStepRopeJumpOff,X000:800fbdb4
@@ -236,7 +236,7 @@ address,size,name,twin
 8010d048,568,playerSwimDirFromPad,X000:8010d048
 8010d280,272,playerSwimMove,X000:8010d280
 8010d390,1120,playerStepSwim,X000:8010d390
-8010d7f0,152,setAngleSpeedFromDir8B,X000:8010cfb0
+8010d7f0,152,setAngleSpeedFromDir8,X000:8010cfb0
 8010d888,644,playerStepSwimUnderwater,X000:8010d888
 8010db0c,568,playerStepWaterJumpOut,X000:8010db0c
 8010dd44,72,playerEnterStep3E,X000:8010dd44
@@ -279,8 +279,8 @@ address,size,name,twin
 80112864,24,treasureChestInitStatic,X000:80112864
 8011287c,28,treasureChestInitDropped,X000:8011287c
 80112898,88,treasureChestInitCarried,X000:80112898
-801128f0,8,func_801128F0,
-801128f8,32,FUN_801128f8,MAIN0:80068fc4
+801128f0,8,clearObjectB0A,
+801128f8,32,treasureChestIdle,MAIN0:80068fc4
 80112918,184,treasureChestSettleOnGround,X000:80112918
 801129d0,528,treasureChestWaitForFlag,X000:801129d0
 80112be0,68,treasureChestCheckAreaFlag,X000:80112be0
@@ -289,13 +289,13 @@ address,size,name,twin
 801133b8,204,treasureChestOpenAnimOnly,X000:801133b8
 80113484,720,updateTreasureChest,X000:80113484
 80113754,72,objSetAnimFromSubtypeTable,X000:80113754
-8011379c,32,FUN_8011379c,MAIN0:80068fc4
+8011379c,32,animAdvanceThunk,MAIN0:80068fc4
 801137bc,204,playerEventSinkStep,X000:801137bc
 80113888,300,scriptActorWalk,X000:80113888
 801139b4,216,playerEventTimedMessageStep,X000:801139b4
 80113a8c,224,playerEventWaitMessageClose,X000:80113a8c
 80113b6c,340,scriptActorJump,X000:80113b6c
-80113cc0,8,func_80113CC0,
+80113cc0,8,stubNop80113CC0,
 80113cc8,624,scriptActorLaneJump,X000:80113cc8
 80113f38,904,scriptActorRun,X000:80113f38
 801142c0,924,scriptActorLeaveScene,X000:801142c0
@@ -317,9 +317,9 @@ address,size,name,twin
 80117bd4,216,updateRopeChainLinkModel,
 80117cac,16,func_80117CAC,
 80117cbc,32,func_80117CBC,
-80117cdc,148,func_80117CDC,
-80117d70,76,func_80117D70,
-80117dbc,36,func_80117DBC,
+80117cdc,148,objStepRiseAccel,
+80117d70,76,placeAtOwnerOffset,
+80117dbc,36,setBox33x66,
 80117de0,440,updateL8Type06Object,
 80117f98,916,updatePointsBalloon,X000:80117cac
 8011832c,276,spawnApAwardNumber,
@@ -385,7 +385,7 @@ address,size,name,twin
 8011d7e0,228,func_8011D7E0,
 8011d8c4,224,func_8011D8C4,
 8011d9a4,228,func_8011D9A4,
-8011da88,212,func_8011DA88,
+8011da88,212,initBySubtypeBox76,
 8011dae0,124,func_8011DAE0,
 8011db5c,176,seesawPlankTilt,
 8011dc0c,64,func_8011DC0C,
@@ -402,7 +402,7 @@ address,size,name,twin
 8011e688,40,func_8011E688,
 8011e6b0,1080,func_8011E6B0,
 8011eae8,984,func_8011EAE8,
-8011eec0,744,func_8011EEC0,
+8011eec0,744,l4Type16BendSegments,
 8011f1a8,264,updateClimbPole,
 8011f2b0,1044,bucketFillWithWater,
 8011f6c4,996,bucketThrowWater,
@@ -463,7 +463,7 @@ address,size,name,twin
 801253ac,1212,collideObjectWithTiltedBar,
 80125868,124,seesawPlankObjectCollision,
 801258e4,88,flowerTowerBlockerObjectCollision,
-8012593c,88,func_8012593C,X001:801258e4
+8012593c,88,enemyHitIfSubtype0,X001:801258e4
 80125994,336,swingingRopeObjectCollision,
 80125ae4,164,springVineObjectCollision,
 80125b88,892,segmentedCrawlerWeaponHit,
@@ -475,7 +475,7 @@ address,size,name,twin
 80126564,792,segmentedCrawlerContact,
 8012687c,500,chainSegmentEnemyContact,
 80126a70,300,burningFireContact,
-80126b9c,32,FUN_80126b9c,MAIN0:80068fc4
+80126b9c,32,playerPushOutOfObjectBoxThunkX01,MAIN0:80068fc4
 80126bbc,264,rollingBarrelContact,
 80126cc4,104,rollingBoulderPlayerCollision,
 80126d2c,352,swingingRopeGrabProbe,
@@ -516,7 +516,7 @@ address,size,name,twin
 8012ed60,612,func_8012ED60,
 8012efc4,1156,updateKomaPig,
 8012f448,1312,updateChainSegmentEnemy,
-8012f968,32,FUN_8012f968,MAIN0:80068fc4
+8012f968,32,updateRollingBoulderThunk,MAIN0:80068fc4
 8012f988,1476,updateRollingBoulder,
 8012ff4c,356,raceRivalIdleWander,
 801300b0,100,func_801300B0,
@@ -559,7 +559,7 @@ address,size,name,twin
 801368d4,292,spawnCaughtForestDwarf,
 801369f8,180,initPuppyRumorNpc,
 80136aac,128,playPuppyBarkNearby,
-80136b2c,32,FUN_80136b2c,MAIN0:80068fc4
+80136b2c,32,animAdvanceThunkB,MAIN0:80068fc4
 80136b4c,1744,stepPuppyBaron,
 8013721c,676,updatePuppyBaron,
 801374c0,220,spawnHeldPuppyBaron,
@@ -580,11 +580,11 @@ address,size,name,twin
 80139a80,172,spawnLostSeedKidDwarf,
 80139b2c,292,checkLostSeedKidTalk,
 80139c50,1148,lostSeedKidTalk,
-8013a0cc,12,func_8013A0CC,
+8013a0cc,12,stubFreeObj8013A0CC,
 8013a0d8,284,spawnPuppyRumorNpcs,
 8013a1f4,228,checkPuppyRumorNpcTalk,
 8013a2d8,460,puppyRumorTalk,
-8013a4a4,12,func_8013A4A4,X001:8013a0cc
+8013a4a4,12,stubFreeObj8013A4A4,X001:8013a0cc
 8013a4b0,436,initRaceEventObj,
 8013a664,616,checkRaceEventTrigger,
 8013a8cc,492,raceStartCountdown,
@@ -592,11 +592,11 @@ address,size,name,twin
 8013af10,484,raceOfferRematch,
 8013b0f4,352,raceStartRematch,
 8013b254,228,stepRaceEvent,
-8013b338,12,func_8013B338,X001:8013a0cc
+8013b338,12,stubFreeObj8013B338,X001:8013a0cc
 8013b344,448,spawnLeafButterflySwarm,
 8013b504,24,isLeafButterflyEventOpen,
 8013b51c,1116,stepLeafButterflySwarm,
-8013b978,12,func_8013B978,X001:8013a0cc
+8013b978,12,stubFreeObj8013B978,X001:8013a0cc
 8013b984,300,updateLostSeedKid,
 8013bab0,372,updatePuppyRumorNpc,
 8013bc24,380,updateRaceEventObj,

@@ -14,7 +14,7 @@ extern void SfxPlay2(int, int);
 extern void ObjSetFacingToPlayer(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int AnimAdvanceWithBox(TObj *);
-extern void func_801205A4(TObj *);
+extern void komaPigAnimAdvanceX03(TObj *);
 extern int komaPigCheckLanded(TObj *);
 extern int komaPigCheckWall(TObj *);
 extern unsigned char enemyPickActionByPlayerDistance(TObj *);
@@ -69,7 +69,7 @@ void komaPigIdle(TObj *o)
         if (--o->timer == -1) {
             o->substep++;
         }
-        func_801205A4(o);
+        komaPigAnimAdvanceX03(o);
         o->y.p.whole += 4;
         if (komaPigCheckLanded(o) == 0 && x->w0e++ >= 4) {
             x->b0b = 6;

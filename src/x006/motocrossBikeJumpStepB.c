@@ -26,7 +26,7 @@ extern int rcos(int);
 extern void AnimLoadDuration(TObj *);
 extern void startPadVibration(int, int, int, int);
 extern void motocrossAdvanceAlongPath(TObj *);
-extern void func_8011866C(TObj *);
+extern void motocrossBikePickBump(TObj *);
 
 #define SUB(o) ((Sub *)((char *)(o) + 0xb4))
 
@@ -77,7 +77,7 @@ static __inline__ void pos(TObj *o)
     o->b.p.whole = e->z + o->d38;
 }
 
-void func_80119120(TObj *o)
+void motocrossBikeJumpStepB(TObj *o)
 {
     TObj *p = (*(TObj **)&GVARS.p50);
     Sub *t;
@@ -162,7 +162,7 @@ void func_80119120(TObj *o)
             o->step = 1;
             o->state = 0;
         }
-        func_8011866C(o);
+        motocrossBikePickBump(o);
         if (o->b69) {
             o->velX = t->b >> 1;
         } else {

@@ -6,7 +6,7 @@ extern unsigned char D_800B1413;
 extern short D_800B145C;
 extern short D_800B145A;
 
-void func_8011BBFC(void)
+void hudResetState(void)
 {
     HUD_STATE = 1;
     D_800B1412 = 0;

@@ -36,7 +36,7 @@ typedef struct {
 } E;
 
 extern O PLAYER;
-extern void func_8011EEC0(O *);
+extern void l4Type16BendSegments(O *);
 
 #define DV ((short)o->w82 >> 8)
 
@@ -218,5 +218,5 @@ void l4Type16ObjectStep(O *o, short n)
         o->step = 1;
         break;
     }
-    func_8011EEC0(o);
+    l4Type16BendSegments(o);
 }

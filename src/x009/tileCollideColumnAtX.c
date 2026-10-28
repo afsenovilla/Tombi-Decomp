@@ -6,7 +6,7 @@
 extern char *getCollisionColumnPtr(short, unsigned char);
 extern short tileCollideColumnAt(TObj *, short, short);
 
-short func_801215C0(TObj *o, short x, short y, unsigned char k)
+short tileCollideColumnAtX(TObj *o, short x, short y, unsigned char k)
 {
     (*(char **)&SPAD.p278) = getCollisionColumnPtr(x, k);
     return tileCollideColumnAt(o, x, y);

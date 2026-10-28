@@ -22,7 +22,7 @@ extern void setEventComplete(int, int);
 extern void setEventStarted(int, int, int);
 extern void FUN_80026c50(int, int, int);
 extern TObj *showMessageBoxDirect(int, int, B12 *);
-extern void func_801180BC(TObj *, unsigned short, short);
+extern void a17NpcSetAnimB(TObj *, unsigned short, short);
 
 void waterfallElderHintScene(TObj *o)
 {
@@ -134,8 +134,8 @@ void waterfallElderHintScene(TObj *o)
         break;
     case 15:
         if (--o->w08 > 0) break;
-        func_801180BC(s1, 1, 0);
-        func_801180BC(s2, 1, 0);
+        a17NpcSetAnimB(s1, 1, 0);
+        a17NpcSetAnimB(s2, 1, 0);
         s1->step = 0;
         s2->step = 0;
         {
@@ -148,21 +148,21 @@ void waterfallElderHintScene(TObj *o)
         s1->h->p.whole--;
         s2->h->p.whole--;
         if (--o->w08 > 0) break;
-        func_801180BC(s1, 0, 0);
-        func_801180BC(s2, 0, 0);
+        a17NpcSetAnimB(s1, 0, 0);
+        a17NpcSetAnimB(s2, 0, 0);
         o->w08 = 0x50;
         o->state++;
         break;
     case 17:
         if (--o->w08 > 0) break;
-        func_801180BC(s1, 1, 0);
+        a17NpcSetAnimB(s1, 1, 0);
         o->w08 = 0x10;
         o->state++;
         break;
     case 18:
         s1->h->p.whole--;
         if (--o->w08 > 0) break;
-        func_801180BC(s1, 0, 0);
+        a17NpcSetAnimB(s1, 0, 0);
         o->w08 = 0x1e;
         o->state++;
         break;
@@ -173,7 +173,7 @@ void waterfallElderHintScene(TObj *o)
     case 20:
         v = *(B12 *)&s1->a;
         s1->d90 = (int)showMessageBoxDirect(2, 0x20, &v);
-        func_801180BC(s1, 2, 0);
+        a17NpcSetAnimB(s1, 2, 0);
         o->state++;
         break;
     case 21:
@@ -191,7 +191,7 @@ void waterfallElderHintScene(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         setEventStarted(0x76, 0, 0);
-        func_801180BC(s1, 0, 0);
+        a17NpcSetAnimB(s1, 0, 0);
         o->w08 = 0x12c;
         o->state++;
         break;
@@ -199,7 +199,7 @@ void waterfallElderHintScene(TObj *o)
         if (--o->w08 > 0) break;
         v = *(B12 *)&s2->a;
         s2->d90 = (int)showMessageBoxDirect(2, 0x26, &v);
-        func_801180BC(s2, 2, 0);
+        a17NpcSetAnimB(s2, 2, 0);
         o->state++;
         break;
     case 24:
@@ -207,7 +207,7 @@ void waterfallElderHintScene(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         FUN_80026c50(0x9b, 1, 1);
-        func_801180BC(s2, 0, 0);
+        a17NpcSetAnimB(s2, 0, 0);
         o->w08 = 0x78;
         o->state++;
         break;
@@ -215,7 +215,7 @@ void waterfallElderHintScene(TObj *o)
         if (--o->w08 > 0) break;
         v = *(B12 *)&s2->a;
         s2->d90 = (int)showMessageBoxDirect(2, 0x27, &v);
-        func_801180BC(s2, 2, 0);
+        a17NpcSetAnimB(s2, 2, 0);
         o->state++;
         break;
     case 26:
@@ -223,7 +223,7 @@ void waterfallElderHintScene(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         setEventStarted(0x96, 0, 0);
-        func_801180BC(s2, 0, 0);
+        a17NpcSetAnimB(s2, 0, 0);
         o->w08 = 0x12c;
         o->state = 0x63;
         break;

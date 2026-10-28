@@ -7,7 +7,7 @@
 #include "gamestate.h"
 
 
-void func_80129194(TObj *o)
+void a04ItemTriggerCheck(TObj *o)
 {
     if (GCD.bce22 == 0) return;
     if (GVARS.useItemPending && GVARS.useItemId == 0x94) {

@@ -2,14 +2,14 @@
 // MATCHING 8011e064 116
 // VERSION SLPM_80165 x00 800F82C4 100
 #if defined(VERSION_SLPM_80165)
-// Demo version of PAL x009 8011E064 (func_8011E064.c): +0x8c reset to 0 (PAL table value).
+// Demo version of PAL x009 8011E064 (playerStepEntrySfxAnim4TiltX09.c): +0x8c reset to 0 (PAL table value).
 #include "TOBJ.H"
 extern char D_80010C50[];
 extern unsigned char D_801152E8[];
 extern void SfxPlay3(int, int);
 extern void AnimJump(TObj *, int);
 
-void func_8011E064(TObj *o)
+void playerStepEntrySfxAnim4TiltX09(TObj *o)
 {
     SfxPlay3(0x1c, 0x7f);
     o->b9c = 0;
@@ -27,7 +27,7 @@ extern unsigned char D_801152E8[];
 extern void SfxPlay3(int, int);
 extern void AnimJump(TObj *, int);
 
-void func_8011E064(TObj *o)
+void playerStepEntrySfxAnim4TiltX09(TObj *o)
 {
     SfxPlay3(0x1c, 0x7f);
     o->b9c = 0;

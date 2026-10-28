@@ -17,7 +17,7 @@ typedef struct {
 
 extern short D_8007A570[];
 
-void func_8011EEC0(TObj *o)
+void l4Type16BendSegments(TObj *o)
 {
     int *q;
     Seg *s;

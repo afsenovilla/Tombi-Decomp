@@ -11,8 +11,8 @@ extern void cullObjectPerspective(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void bitingPlantSway(TObj *);
 extern void bitingPlantLunge(TObj *);
-extern void FUN_80124ad8(TObj *);
-extern void FUN_80124e14(TObj *);
+extern void area4Type07StepCChain(TObj *);
+extern void area4Type07StepDChain(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 static __inline__ int nearCam(TObj *o)
@@ -100,11 +100,11 @@ void updateA04BitingPlant(TObj *o)
             bitingPlantLunge(o);
             break;
         case 2:
-            FUN_80124ad8(o);
+            area4Type07StepCChain(o);
             if (o->b0c == 7 && o->subtype == 0) o->visible = 0;
             break;
         case 3:
-            FUN_80124e14(o);
+            area4Type07StepDChain(o);
             break;
         case 4:
             if (o->b0c == 7 && o->subtype == 0) o->visible = 0;

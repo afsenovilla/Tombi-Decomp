@@ -1,5 +1,5 @@
 // FUNC 80116920 8 X002
 // MATCHING 80116920 8
-void func_80116920(void)
+void stubNop80116920(void)
 {
 }

@@ -28,7 +28,7 @@ static __inline__ void init(TObj *p)
     }
 }
 
-void func_80119C4C(TObj *o)
+void attachToParentOffset(TObj *o)
 {
     char pad2[16];
 

@@ -5,7 +5,7 @@ typedef struct { void **anims; int a; int b; } AT;
 extern AT D_80119990[];
 extern void FUN_8001fe94(TObj *, int);
 
-void func_801171D0(TObj *o, unsigned short n, short t)
+void a17NpcSetAnimA(TObj *o, unsigned short n, short t)
 {
     o->anim = D_80119990[o->subtype].anims[n];
     FUN_8001fe94(o, t);

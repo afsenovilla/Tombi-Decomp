@@ -3,7 +3,7 @@
 // VERSION SLPS_01144 x14 8011EE54 444
 #include "camera.h"
 #if defined(VERSION_SLPS_01144)
-// Japanese version of PAL x014 80121B4C (x014/func_80121B4C.c): 128 -> 120.
+// Japanese version of PAL x014 80121B4C (x014/pigShotProbeWallFloor.c): 128 -> 120.
 #include "TOBJ.H"
 
 extern short COS_TABLE[];
@@ -29,7 +29,7 @@ static __inline__ int offScreen(TObj *o)
     return CAMERA_SCROLL.maxY + 0x78 < o->y.p.whole;
 }
 
-void func_80121B4C(TObj *o)
+void pigShotProbeWallFloor(TObj *o)
 {
     short r;
 
@@ -88,7 +88,7 @@ static __inline__ int offScreen(TObj *o)
     return CAMERA_SCROLL.maxY + 0x80 < o->y.p.whole;
 }
 
-void func_80121B4C(TObj *o)
+void pigShotProbeWallFloor(TObj *o)
 {
     short r;
 

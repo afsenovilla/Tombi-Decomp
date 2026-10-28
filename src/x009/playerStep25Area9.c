@@ -15,7 +15,7 @@ extern void FUN_8001e5f4(int, int);
 extern short FUN_8003fd78(TObj *, int, int);
 extern void playerSetFallLean(TObj *);
 extern int columnProbeA(TObj *, short, short, int);
-extern short func_801215C0(TObj *, short, short, int);
+extern short tileCollideColumnAtX(TObj *, short, short, int);
 extern short columnProbeB(TObj *, short, short, int);
 
 void playerStep25Area9(TObj *o)
@@ -94,7 +94,7 @@ void playerStep25Area9(TObj *o)
             dx = x - (p->h->p.whole - p->box0);
             dy = yy - (p->y.p.whole + (p->box3 - p->box2));
             if ((unsigned short)dx < p->box1) {
-                if (o->b69 || func_801215C0(o, dx, dy, p->subtype)) {
+                if (o->b69 || tileCollideColumnAtX(o, dx, dy, p->subtype)) {
                     o->d8c = DAT_801152e8[o->wb0];
                     (*(unsigned char*)&o->waa) = 0;
                     o->b9e = 0;

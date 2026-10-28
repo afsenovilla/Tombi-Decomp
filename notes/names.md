@@ -1402,7 +1402,7 @@ come out as the game shows them, where the init-only strips (tools/objinit.py / 
 # Behaviour names, round 4 (Oct 2026): shared X000 handlers and area-0 objects
 
 Names from code reading (draw captures where noted); the X000 name is applied to every overlay twin row that carried it (a second
-twin of the same function at another address of an overlay keeps its generic name, e.g. x004 FUN_8012f660 = scriptActorLeaveSceneIfIdle).
+twin of the same function at another address of an overlay keeps its generic name, e.g. x004 hauntedPigBagEventStep = scriptActorLeaveSceneIfIdle).
 - `8011468c updateScriptActor` (was updateL2Type18Object; layer 2 type 0x18, allocated only by MAIN0 scriptOpSpawnObject kinds 2 / 10: the
   sprite / model actors of the script cutscenes, SCRIPT_OBJECTS[idx]). Steps: `80113f38 scriptActorRun` (was l2Type18Active: step 0 animate,
   1 walk timed, 3 message box showMessageBoxDirectTimed(0xd..), 4 release the player when the box closes), `80113888 scriptActorWalk`
@@ -2331,3 +2331,285 @@ Names from code reading only (no captures), table slots from pointer scans of MA
 - `800fde60 stubFreeObj800FDE60` (was func_800FDE60; I0NFO2) - b04 = 3
 - `800fe410 npcSet11SceneStep4` (was func_800FE410; I0NFO2) - stepNpcSet11 step 4
 - `800feb1c stubFreeObj800FEB1C` (was func_800FEB1C; I0NFO2) - b04 = 3
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X001) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X001) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X001) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X001) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X001) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X001) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X001) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X001) - same code and address as X000 stubNop80113CC0
+- `8013a0cc stubFreeObj8013A0CC` (was func_8013A0CC; X001) - b04 = 3 (free)
+- `8013a4a4 stubFreeObj8013A4A4` (was func_8013A4A4; X001) - b04 = 3 (free)
+- `8013b338 stubFreeObj8013B338` (was func_8013B338; X001) - b04 = 3 (free)
+- `8013b978 stubFreeObj8013B978` (was func_8013B978; X001) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X002) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X002) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X002) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X002) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X002) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X002) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X002) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X002) - same code and address as X000 stubNop80113CC0
+- `80116920 stubNop80116920` (was func_80116920; X002) - empty
+- `80119908 stubFreeObj80119908` (was func_80119908; X002) - b04 = 3 (free)
+- `8011c61c stubFreeObj8011C61C` (was func_8011C61C; X002) - b04 = 3 (free)
+- `8011c6d0 stubNop8011C6D0` (was func_8011C6D0; X002) - empty
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X003) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X003) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X003) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X003) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X003) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X003) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X003) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X003) - same code and address as X000 stubNop80113CC0
+- `8011dc44 stubNop8011DC44` (was func_8011DC44; X003) - empty
+- `801332c0 stubFreeObj801332C0` (was func_801332C0; X003) - b04 = 3 (free)
+- `80133654 stubNop80133654` (was func_80133654; X003) - empty
+- `8013365c stubFreeObj8013365C` (was func_8013365C; X003) - b04 = 3 (free)
+- `80133700 stubNop80133700` (was func_80133700; X003) - empty
+- `80133a20 stubFreeObj80133A20` (was func_80133A20; X003) - b04 = 3 (free)
+- `80133b94 stubNop80133B94` (was func_80133B94; X003) - empty
+- `80133de8 stubFreeObj80133DE8` (was func_80133DE8; X003) - b04 = 3 (free)
+- `8013406c stubNop8013406C` (was func_8013406C; X003) - empty
+- `80134074 stubFreeObj80134074` (was func_80134074; X003) - b04 = 3 (free)
+- `8013461c stubNop8013461C` (was func_8013461C; X003) - empty
+- `80134624 stubFreeObj80134624` (was func_80134624; X003) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X004) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X004) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X004) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X004) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X004) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X004) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X004) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X004) - same code and address as X000 stubNop80113CC0
+- `8012d9b4 stubNop8012D9B4` (was func_8012D9B4; X004) - empty
+- `8012d9bc stubFreeObj8012D9BC` (was func_8012D9BC; X004) - b04 = 3 (free)
+- `8012dc48 stubNop8012DC48` (was func_8012DC48; X004) - empty
+- `8012dc50 stubFreeObj8012DC50` (was func_8012DC50; X004) - b04 = 3 (free)
+- `8012df00 stubNop8012DF00` (was func_8012DF00; X004) - empty
+- `8012df08 stubFreeObj8012DF08` (was func_8012DF08; X004) - b04 = 3 (free)
+- `8012e6c4 stubFreeObj8012E6C4` (was func_8012E6C4; X004) - b04 = 3 (free)
+- `8012e814 stubNop8012E814` (was func_8012E814; X004) - empty
+- `8012e81c stubFreeObj8012E81C` (was func_8012E81C; X004) - b04 = 3 (free)
+- `8012ea1c stubNop8012EA1C` (was func_8012EA1C; X004) - empty
+- `8012ea24 stubFreeObj8012EA24` (was func_8012EA24; X004) - b04 = 3 (free)
+- `8012f350 stubFreeObj8012F350` (was func_8012F350; X004) - b04 = 3 (free)
+- `8012f690 stubFreeObj8012F690` (was func_8012F690; X004) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X005) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X005) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X005) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X005) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X005) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X005) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X005) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X005) - same code and address as X000 stubNop80113CC0
+- `80117618 stubNop80117618` (was func_80117618; X005) - empty
+- `80117620 stubFreeObj80117620` (was func_80117620; X005) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X006) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X006) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X006) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X006) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X006) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X006) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X006) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X006) - same code and address as X000 stubNop80113CC0
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X008) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X008) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X008) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X008) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X008) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X008) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X008) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X008) - same code and address as X000 stubNop80113CC0
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X009) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X009) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X009) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X009) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X009) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X009) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X009) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X009) - same code and address as X000 stubNop80113CC0
+- `80129b64 stubFreeObj80129B64` (was func_80129B64; X009) - b04 = 3 (free)
+- `8012a700 stubFreeObj8012A700` (was func_8012A700; X009) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X010) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X010) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X010) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X010) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X010) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X010) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X010) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X010) - same code and address as X000 stubNop80113CC0
+- `8011a1d8 stubNop8011A1D8` (was func_8011A1D8; X010) - empty
+- `8012d5c4 stubNop8012D5C4` (was func_8012D5C4; X010) - empty
+- `8012d5cc stubFreeObj8012D5CC` (was func_8012D5CC; X010) - b04 = 3 (free)
+- `8012d670 stubNop8012D670` (was func_8012D670; X010) - empty
+- `8012d84c stubFreeObj8012D84C` (was func_8012D84C; X010) - b04 = 3 (free)
+- `8012e488 stubFreeObj8012E488` (was func_8012E488; X010) - b04 = 3 (free)
+- `8012e9d4 stubFreeObj8012E9D4` (was func_8012E9D4; X010) - b04 = 3 (free)
+- `8012ed38 stubFreeObj8012ED38` (was func_8012ED38; X010) - b04 = 3 (free)
+- `8012eecc stubNop8012EECC` (was func_8012EECC; X010) - empty
+- `8012eed4 stubFreeObj8012EED4` (was func_8012EED4; X010) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X011) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X011) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X011) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X011) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X011) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X011) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X011) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X011) - same code and address as X000 stubNop80113CC0
+- `801199e8 stubNop801199E8` (was func_801199E8; X011) - empty
+- `80119b94 stubNop80119B94` (was func_80119B94; X011) - empty
+- `80119b9c stubFreeObj80119B9C` (was func_80119B9C; X011) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X013) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X013) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X013) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X013) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X013) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X013) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X013) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X013) - same code and address as X000 stubNop80113CC0
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X014) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X014) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X014) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X014) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X014) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X014) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X014) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X014) - same code and address as X000 stubNop80113CC0
+- `80118040 stubNop80118040` (was func_80118040; X014) - empty
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X016) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X016) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X016) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X016) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X016) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X016) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X016) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X016) - same code and address as X000 stubNop80113CC0
+- `80116e58 stubNop80116E58` (was func_80116E58; X016) - empty
+- `80116ef0 stubFreeObj80116EF0` (was func_80116EF0; X016) - b04 = 3 (free)
+- `8011717c stubNop8011717C` (was func_8011717C; X016) - empty
+- `80117184 stubFreeObj80117184` (was func_80117184; X016) - b04 = 3 (free)
+- `801173f4 stubNop801173F4` (was func_801173F4; X016) - empty
+- `801173fc stubFreeObj801173FC` (was func_801173FC; X016) - b04 = 3 (free)
+- `80117998 stubFreeObj80117998` (was func_80117998; X016) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X017) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X017) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X017) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X017) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X017) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X017) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X017) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X017) - same code and address as X000 stubNop80113CC0
+- `80118330 stubNop80118330` (was func_80118330; X017) - empty
+- `801185dc stubNop801185DC` (was func_801185DC; X017) - empty
+- `80118874 stubFreeObj80118874` (was func_80118874; X017) - b04 = 3 (free)
+- `80118b80 stubFreeObj80118B80` (was func_80118B80; X017) - b04 = 3 (free)
+- `80119740 stubFreeObj80119740` (was func_80119740; X017) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X018) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X018) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X018) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X018) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X018) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X018) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X018) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X018) - same code and address as X000 stubNop80113CC0
+- `801173d8 stubNop801173D8` (was func_801173D8; X018) - empty
+- `801173e0 stubFreeObj801173E0` (was func_801173E0; X018) - b04 = 3 (free)
+- `800edc0c stubNop800EDC0C` (was func_800EDC0C; X019) - same code and address as X000 stubNop800EDC0C
+- `800f4e9c playerSetAnimPairB` (was func_800F4E9C; X019) - same code and address as X000 playerSetAnimPairB
+- `800fb414 copyD88ToD8C` (was func_800FB414; X019) - same code and address as X000 copyD88ToD8C
+- `8010d7f0 setAngleSpeedFromDir8` (was func_8010D7F0; X019) - same code and address as X000 setAngleSpeedFromDir8
+- `801128f0 clearObjectB0A` (was func_801128F0; X019) - same code and address as X000 clearObjectB0A
+- `801128f8 treasureChestIdle` (was FUN_801128f8; X019) - same code and address as X000 treasureChestIdle
+- `8011379c animAdvanceThunk` (was FUN_8011379c; X019) - same code and address as X000 animAdvanceThunk
+- `80113cc0 stubNop80113CC0` (was func_80113CC0; X019) - same code and address as X000 stubNop80113CC0
+- `80117cdc objStepRiseAccel` (was func_80117CDC; X001) - step 2 rises with velY accelerating up to -0x780
+- `80117d70 placeAtOwnerOffset` (was func_80117D70; X001) - position = owner d90 - (0x1e, 10, 0x32)
+- `80117dbc setBox33x66` (was func_80117DBC; X001) - box 0x33/0x66/0x1a/0x34
+- `8011da88 initBySubtypeBox76` (was func_8011DA88; X001) - subtype init: box 0x76/0xee, clears motion, b04++
+- `8011eec0 l4Type16BendSegments` (was func_8011EEC0; X001) - bends the segment list da0 around index b6b (D_8007A570 sine)
+- `8012593c enemyHitIfSubtype0` (was func_8012593C; X001) - subtype 0 and boxesOverlapSide -> resolveHitResultA
+- `80126b9c playerPushOutOfObjectBoxThunkX01` (was FUN_80126b9c; X001) - calls playerPushOutOfObjectBox
+- `8012f968 updateRollingBoulderThunk` (was FUN_8012f968; X001) - calls updateRollingBoulder
+- `80136b2c animAdvanceThunkB` (was FUN_80136b2c; X001) - calls FUN_8001fec0
+- `80119088 sevenFriendsMemberFlyUp` (was func_80119088; X002) - waits timer, rises accelerating, member anim 1, freed off screen
+- `80119c4c attachToParentOffset` (was func_80119C4C; X003) - stores offset from parent d90, box when no child
+- `80119ce8 chainInitLinks` (was func_80119CE8; X003) - initialises the linked chain parts (D_80135974 tables)
+- `80119e08 chainSwingStep` (was func_80119E08; X003) - chain step: angle speed velX random / from parent, rotation
+- `80119f90 chainDrawLinks` (was func_80119F90; X003) - culls and draws the chain parts with rotated matrices
+- `8011a544 updateChainObject` (was func_8011A544; X003) - b04 switch: init by section, chainInitLinks / chainSwingStep / chainDrawLinks
+- `801205a4 komaPigAnimAdvanceX03` (was func_801205A4; X003) - AnimAdvance variant loading the box from D_80135B30[frame]
+- `80129818 phoenixSpiritHintStep` (was FUN_80129818; X003) - step 0 anim, step 1 phoenixSpiritHintTalk
+- `8011dae0 playerStepAnim42Timed` (was func_8011DAE0; X004) - player anim 0x42, sfx 0x20, timed states
+- `8011e4ec a04SpawnL5Type7Child` (was FUN_8011e4ec; X004) - layer 5 type 7 object with subtype c at record q, parent p (as X000 a00SpawnL5Type7Child)
+- `8011fc88 komaPigAnimAdvanceX04` (was func_8011FC88; X004) - AnimAdvance variant loading the box from D_80130FD4[frame]
+- `80124ad8 area4Type07StepCChain` (was FUN_80124ad8; X004) - area4Type07StepC on the head, parts copy the angle
+- `80124e00 copyParentB8cToD8c` (was FUN_80124e00; X004) - +0x8c = parent d90 byte +0x8c
+- `80124e14 area4Type07StepDChain` (was FUN_80124e14; X004) - area4Type07StepD on the head and the two parts
+- `80129194 a04ItemTriggerCheck` (was func_80129194; X004) - selects steps by item 0x94 use, player y / exp bar, b68 contact
+- `80129bb8 stepOnContact` (was func_80129BB8; X004) - b68 -> step++
+- `8012a2c0 contactStepIfSpadLow` (was func_8012A2C0; X004) - contact (b68) with GCD.bcf2d clear advances the step when SPAD.s246 < 2
+- `8012dfac clearGcdBcf29` (was func_8012DFAC; X004) - GCD.bcf29 = 0 (table D_801159A4)
+- `8012f4f0 resetStepNextB04` (was func_8012F4F0; X004) - step = state = 0, b04++
+- `8012f660 hauntedPigBagEventStep` (was FUN_8012f660; X004) - step 0 hauntedPigBagEventStart
+- `8012f9d4 unbendingCableTalkThunk` (was FUN_8012f9d4; X004) - calls unbendingCableTalk
+- `801161a8 updateA05AnimDecoration` (was func_801161A8; X005) - appears when GCD.bd081 >= 6: anim D_8011A42C[b0c], cull register
+- `8011610c scrollCameraDepthStep` (was func_8011610C; X006) - moves o->b toward the camera target y difference (clamped steps)
+- `80116254 setupCameraMatrixFromObj` (was func_80116254; X006) - camera matrix from the object angles (RotMatrixY/X) and position
+- `801163b8 a06SectionScrollStep` (was func_801163B8; X006) - section 0 scroll sequence (player landed, x >= 0xB0 ...)
+- `80116764 a06UpdateScroll` (was func_80116764; X006) - section != 0 updateAreaScroll else a06SectionScrollStep
+- `801167a0 a06AddModelsBySection` (was func_801167A0; X006) - adds the bank model pointers to the draw list by GVARS.p48 range
+- `80116d50 spawnLoadedModelObject` (was func_80116D50; X006) - allocates an object for the loaded buffer n (FUN_80026a10)
+- `8011866c motocrossBikePickBump` (was func_8011866C; X006) - picks w74 from w7a and random, by y
+- `80118c6c motocrossBikeJumpStepA` (was func_80118C6C; X006) - jump/trick state machine c8 (pad bit 0x10)
+- `80119120 motocrossBikeJumpStepB` (was func_80119120; X006) - jump/trick state machine c8, variant
+- `801196fc motocrossBikeSlopeSpeed` (was func_801196FC; X006) - speed by the angle to the slope p[3]
+- `8011af84 setModelPtrFromWac` (was func_8011AF84; X006) - da0 = SPAD.i334 bank entry wac
+- `8011afb4 motocrossBikeBobInit` (was func_8011AFB4; X006) - substep model prim setup for the bike bob
+- `8011b238 motocrossBikeModelStepA` (was func_8011B238; X006) - substeps by wac (0/1/2) model setup
+- `8011b560 motocrossBikeModelStepB` (was func_8011B560; X006) - substeps by wac (0/1/2) model setup, variant
+- `8011bb24 addSprt8` (was func_8011BB24; X006) - SPRT_8 at x,y,u,v with clut c
+- `8011bbfc hudResetState` (was func_8011BBFC; X006) - HUD_STATE = 1 and HUD bytes cleared
+- `8011e364 compareScfe2Range` (was func_8011E364; X006) - -1 / 2 / 0 / 1 by GCD.scfe2 against scfd0/scfd2/scfd4
+- `8011e514 collidePlayerCat5Cat2` (was func_8011E514; X006) - collidePlayerWithCat5Objects + Cat2
+- `8011b3a8 spawnPlayerAfterimage` (was func_8011B3A8; X009) - copies the player pose and launches upward
+- `8011d378 playerBiteAttachSlope` (was func_8011D378; X009) - clears motion, slope angle, bitten object angle, state 3
+- `8011e064 playerStepEntrySfxAnim4TiltX09` (was func_8011E064; X009) - sfx, anim 80010c50 sub 4, slope tilt, state++
+- `801215c0 tileCollideColumnAtX` (was func_801215C0; X009) - column pointer then tileCollideColumnAt
+- `80121630 testCollisionSegmentsAtX` (was func_80121630; X009) - column pointer then testCollisionSegmentList
+- `8012452c animAdvanceAtState0` (was func_8012452C; X009) - state 0 AnimAdvance
+- `80129900 resetToB04One` (was func_80129900; X009) - b04 1, step = state = 0
+- `8012a6e0 aspiringActorGuardTalkThunk` (was FUN_8012a6e0; X009) - calls aspiringActorGuardTalk
+- `80116ae8 updateAreaScrollThunk` (was FUN_80116ae8; X010) - calls updateAreaScroll
+- `8011baa0 playerStepFallLean` (was func_8011BAA0; X010) - player fall lean step, PLAYER_EXT reset
+- `8011bcac placeOnGrabbedObjectCircle` (was func_8011BCAC; X010) - position on the grabbed object's circle (angle d8c, radius wba)
+- `8011df1c pushObjectOutOfObjectBoxCThunk` (was FUN_8011df1c; X010) - calls pushObjectOutOfObjectBoxC
+- `8011df3c enemyHitResolveClear19e` (was func_8011DF3C; X010) - boxesOverlapSigned -> resolveHitResultA, SPAD.s19e = 0
+- `8011f5fc playerSetStep41` (was func_8011F5FC; X010) - step 4/0x41 -> 0x41, 10 -> 4 state 3, else 0x3f
+- `80122804 area10Type07SwingChain` (was FUN_80122804; X010) - area10Type07Swing on the head, parts copy the angle
+- `80122b2c copyParentB8cToD8cX10` (was FUN_80122b2c; X010) - +0x8c = parent d90 byte +0x8c
+- `80122b40 area10Type07StepDChain` (was FUN_80122b40; X010) - area10Type07StepDPart on the head and parts
+- `801240b8 probeFloorOrWalls` (was func_801240B8; X010) - 1 when on floor / below camera, wall probes on both sides
+- `8012e8c8 a10SetPlatformY` (was func_8012E8C8; X010) - y by section / purified area, player drift
+- `8012e918 a10ClampPlayerAboveY` (was func_8012E918; X010) - keeps the player above o->y (substates 0x3e / 2 / 0xd)
+- `8012eb64 resetStepNextB04` (was func_8012EB64; X010) - step = state = 0, b04++
+- `80116688 foodForFuelModelStepA` (was func_80116688; X011) - substep model setup (wac 3)
+- `80116924 foodForFuelModelStepB` (was func_80116924; X011) - substep model setup
+- `80116398 a13CarryPlayerStep` (was func_80116398; X013) - carries the player (state 0x30405) along
+- `8011cff0 enemyHitResolveClear19e` (was func_8011CFF0; X014) - boxesOverlapSigned -> resolveHitResultA, SPAD.s19e = 0
+- `80121b4c pigShotProbeWallFloor` (was func_80121B4C; X014) - slope wall / floor probe
+- `80116e60 playerDepthNudgeStep` (was func_80116E60; X016) - state 1/2 moves the player depth -1/+1
+- `80116efc updatePlayerDepthNudge` (was func_80116EFC; X016) - b04 switch around playerDepthNudgeStep
+- `801174a0 resetStepNextB04` (was func_801174A0; X016) - step = state = 0, b04++
+- `80117d34 clampPlayerXAndContact` (was func_80117D34; X016) - keeps player x >= o x, b68 -> step 1
+- `80118074 a16ActorSetAnimIfChanged` (was func_80118074; X016) - anim D_80118D34[subtype].anims[n] when changed
+- `80118824 a16ItemOrContactCheck` (was func_80118824; X016) - item 3 use -> step 2, b68 -> step 1
+- `80116920 spawnLoadedModelObject` (was func_80116920; X017) - allocates an object for the loaded buffer n (FUN_80026a10)
+- `801171d0 a17NpcSetAnimA` (was func_801171D0; X017) - anim D_80119990[subtype].anims[n]
+- `80117864 waterfallHintNpcWalkScene` (was func_80117864; X017) - locks the player, npc walks left with anim
+- `801180bc a17NpcSetAnimB` (was func_801180BC; X017) - anim D_8011999C[subtype].anims[n]
+- `801185e4 a17EntranceEventStep` (was func_801185E4; X017) - spawn point / depth checks start the event pose
+- `80118880 updateA17EntranceEvent` (was func_80118880; X017) - b04 switch around a17EntranceEventStep
+- `80118b30 a17ClearPlayerExtB1e` (was func_80118B30; X017) - clears PLAYER_EXT b1e in an x band
+- `80116f4c juiceManJoinFightStep` (was FUN_80116f4c; X018) - step 0 juiceManJoinFightTalk

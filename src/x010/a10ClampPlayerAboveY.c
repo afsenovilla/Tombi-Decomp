@@ -5,7 +5,7 @@ extern TObj PLAYER;
 extern unsigned char PLAYER_SUBSTATE, PLAYER_STEP;
 extern short PLAYER_Y, D_800A60B0;
 
-void func_8012E918(TObj *o)
+void a10ClampPlayerAboveY(TObj *o)
 {
     TObj *p = &PLAYER;
 

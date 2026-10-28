@@ -46,7 +46,7 @@ extern void cullObjectToDrawListMargin(E *, int);
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 extern VECTOR *ApplyMatrixLV(MATRIX *, VECTOR *, VECTOR *);
 
-void func_80119F90(E *o)
+void chainDrawLinks(E *o)
 {
     E *e;
     int x, y, z;

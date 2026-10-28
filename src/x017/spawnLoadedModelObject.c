@@ -19,7 +19,7 @@ extern void FUN_80026a10(int);
 extern TObj *FUN_80018448(void);
 extern unsigned short GetClut(int, int);
 
-void func_80116920(int n, short x, short y, short z, short t)
+void spawnLoadedModelObject(int n, short x, short y, short z, short t)
 {
     int i;
     TObj *o;

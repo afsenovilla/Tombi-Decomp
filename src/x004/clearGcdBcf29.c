@@ -2,7 +2,7 @@
 // MATCHING 8012dfac 16
 #include "gcd.h"
 
-void func_8012DFAC(void)
+void clearGcdBcf29(void)
 {
     GCD.bcf29 = 0;
 }

@@ -2,7 +2,7 @@
 // MATCHING 80117dbc 36
 #include "TOBJ.H"
 
-void func_80117DBC(TObj *o)
+void setBox33x66(TObj *o)
 {
     o->box0 = 0x33;
     o->box1 = 0x66;

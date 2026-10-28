@@ -4,7 +4,7 @@
 #include "anim.h"
 
 extern void followParentWithOffset();
-extern void func_8011A1D8();
+extern void stubNop8011A1D8();
 extern void wobbleWhenStoodOn();
 extern void ziplineCableInit();
 extern unsigned int data_8012F284[];
@@ -17,7 +17,7 @@ unsigned int data_8012F284[5] = {
 
 void *ptrs_8012F298[4] = {
     wobbleWhenStoodOn,
-    func_8011A1D8,
+    stubNop8011A1D8,
     followParentWithOffset,
     ziplineCableInit,
 };

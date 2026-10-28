@@ -25,7 +25,7 @@ extern int P_1F800334[], P_1F800318[], P_1F800314[], P_1F800310[];
 extern void copyModelPrimGroups(int, int);
 extern void FUN_80024ea0(int, int, int);
 
-int func_80116688(S *o)
+int foodForFuelModelStepA(S *o)
 {
     int *p;
     register int d asm("$3");

@@ -20,7 +20,7 @@ static void *D_80122C1C[7] = {
 };
 extern char MOVE_TABLE_0[];
 extern short *D_8012037C[];
-extern int func_8011E364(void);
+extern int compareScfe2Range(void);
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -43,7 +43,7 @@ void updateSceneSequence(TObj *o)
     switch (o->b04) {
     case 0:
         o->wb4 = 6;
-        switch (func_8011E364()) {
+        switch (compareScfe2Range()) {
         case 0:
             if (GCD.bd0fd) o->wb4 = 5;
             else o->wb4 = 4;

@@ -15,7 +15,7 @@ extern void AnimJump(TObj *, int);
 extern void SfxPlay3(int, int);
 extern void playerSetFallLean(TObj *);
 extern void playerStepEntrySfxAnim4State5(TObj *);
-extern short func_801215C0(TObj *, short, short, int);
+extern short tileCollideColumnAtX(TObj *, short, short, int);
 
 void playerStep27Area9(TObj *o)
 {
@@ -94,7 +94,7 @@ void playerStep27Area9(TObj *o)
         dx = o->h->p.whole - (GRABBED_OBJECT->h->p.whole - GRABBED_OBJECT->box0);
         dy = o->y.p.whole - (GRABBED_OBJECT->y.p.whole + (GRABBED_OBJECT->box3 - GRABBED_OBJECT->box2));
         if (dx < GRABBED_OBJECT->box1) {
-            if (o->b69 || func_801215C0(o, dx, dy, GRABBED_OBJECT->subtype))
+            if (o->b69 || tileCollideColumnAtX(o, dx, dy, GRABBED_OBJECT->subtype))
                 playerStepEntrySfxAnim4State5(o);
         }
         break;
@@ -115,7 +115,7 @@ void playerStep27Area9(TObj *o)
         dx = o->h->p.whole - (p->h->p.whole - p->box0);
         dy = o->y.p.whole - (p->y.p.whole + (p->box3 - p->box2));
         if (dx < p->box1) {
-            if (o->b69 || func_801215C0(o, dx, dy, p->subtype)) {
+            if (o->b69 || tileCollideColumnAtX(o, dx, dy, p->subtype)) {
                 SfxPlay3(0x1c, 0x7f);
                 o->b9c = 0;
                 o->anim = D_80010C50;

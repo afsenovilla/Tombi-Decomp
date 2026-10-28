@@ -27,8 +27,8 @@ extern void MulMatrix0(void *, void *, void *);
 extern void ApplyRotMatrix(SVECTOR *, void *);
 extern void motocrossBikeRide(TObj *);
 extern void motocrossBikeBob(TObj *);
-extern void func_8011AF84(TObj *);
-extern int func_8011B238(TObj *);
+extern void setModelPtrFromWac(TObj *);
+extern int motocrossBikeModelStepA(TObj *);
 extern void spawnRaceMessage(int, int, int);
 
 #define TAIL { \
@@ -173,7 +173,7 @@ void updateMotocrossBike(TObj *o_)
                 case 0:
                     if (D_8009C962_b[0] == 1 && GAME_SELECTED_SPAWN_POINT) {
                         o->wac = 3;
-                        func_8011AF84(o);
+                        setModelPtrFromWac(o);
                         o->step = 3;
                     } else {
                         o->wac = 1;
@@ -184,7 +184,7 @@ void updateMotocrossBike(TObj *o_)
                     if (e2->wb6 == 0) o->step = t + 1;
                     break;
                 case 2:
-                    if (func_8011B238(o) == t) o->step++;
+                    if (motocrossBikeModelStepA(o) == t) o->step++;
                     break;
                 }
             }

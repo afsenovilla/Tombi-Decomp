@@ -2,7 +2,7 @@
 // MATCHING 8011da88 212
 #include "TOBJ.H"
 
-void func_8011DA88(TObj *o)
+void initBySubtypeBox76(TObj *o)
 {
 
     switch (o->subtype) {

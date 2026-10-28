@@ -33,7 +33,7 @@ extern void subtractScaledVertices(int, int, int);
 
 #define RET(w, n) { o->velV = 0x1000; o->wac = w; o->da0 = DAT_1f800334 + DAT_1f800334p[n]; o->b0a = 0x15; o->substep = 0; return 1; }
 #define RET8 { o->velV = 0x1000; *(short *)((char *)o + 0xac) = 0; o->da0 = DAT_1f800334 + DAT_1f800334p[1]; o->b0a = 0x15; o->substep = 0; return 1; }
-int func_8011B560(S *o)
+int motocrossBikeModelStepB(S *o)
 {
     int *p;
     register int q asm("$3");

@@ -5,7 +5,7 @@
 extern unsigned int FUN_8001f9e0(void);
 extern int FUN_8006347c(int);
 
-void func_8011866C(TObj *o)
+void motocrossBikePickBump(TObj *o)
 {
     short y;
     short t;

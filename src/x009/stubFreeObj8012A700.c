@@ -2,7 +2,7 @@
 // MATCHING 8012a700 12
 #include "TOBJ.H"
 
-void func_8012A700(TObj *o)
+void stubFreeObj8012A700(TObj *o)
 {
     o->b04 = 3;
 }

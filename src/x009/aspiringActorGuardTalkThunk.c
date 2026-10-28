@@ -2,7 +2,7 @@
 // MATCHING 8012a6e0 32
 extern void aspiringActorGuardTalk(void);
 
-void FUN_8012a6e0(void)
+void aspiringActorGuardTalkThunk(void)
 {
     aspiringActorGuardTalk();
 }

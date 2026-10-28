@@ -2,7 +2,7 @@
 // MATCHING 80117cdc 148
 #include "TOBJ.H"
 
-void func_80117CDC(TObj *o)
+void objStepRiseAccel(TObj *o)
 {
     switch (o->step) {
     case 0:

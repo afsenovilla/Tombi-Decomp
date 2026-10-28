@@ -2,7 +2,7 @@
 // MATCHING 80116ae8 32
 extern void updateAreaScroll(void);
 
-void FUN_80116ae8(void)
+void updateAreaScrollThunk(void)
 {
     updateAreaScroll();
 }

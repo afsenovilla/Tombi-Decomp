@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern short D_1F80019E;
-extern short func_80121630(TObj *, short, short, unsigned char);
+extern short testCollisionSegmentsAtX(TObj *, short, short, unsigned char);
 
 int deathFruitFindFlowerPlatform(TObj *o)
 {
@@ -32,7 +32,7 @@ loop:
         if ((unsigned short)u >= e->box1)
             goto next;
         {short w = o->y.p.whole - (e->y.p.whole + (e->box3 - e->box2));
-        if (func_80121630(o, u, w, e->subtype))
+        if (testCollisionSegmentsAtX(o, u, w, e->subtype))
             return 1;}
     }
 next:

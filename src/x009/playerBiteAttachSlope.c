@@ -6,7 +6,7 @@
 extern TObj *BITTEN_OBJECT;
 extern void playerSetAngleFromSlope(TObj *);
 
-void func_8011D378(TObj *o)
+void playerBiteAttachSlope(TObj *o)
 {
     o->b69 = 0;
     (*(unsigned char*)&o->wac) = 3;

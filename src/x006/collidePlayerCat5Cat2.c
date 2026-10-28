@@ -5,7 +5,7 @@ extern char PLAYER[];
 extern void collidePlayerWithCat5Objects(void *);
 extern void collidePlayerWithCat2Objects(void *);
 
-void func_8011E514(void)
+void collidePlayerCat5Cat2(void)
 {
     char *p = PLAYER;
 

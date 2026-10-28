@@ -5,7 +5,7 @@
 extern unsigned char D_800A60E0;
 extern TObj PLAYER;
 
-void func_80116E60(TObj *o)
+void playerDepthNudgeStep(TObj *o)
 {
     char pad[16];
 

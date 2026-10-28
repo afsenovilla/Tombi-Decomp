@@ -2,7 +2,7 @@
 // MATCHING 8012f9d4 32
 extern void unbendingCableTalk(void);
 
-void FUN_8012f9d4(void)
+void unbendingCableTalkThunk(void)
 {
     unbendingCableTalk();
 }

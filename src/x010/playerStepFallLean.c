@@ -10,7 +10,7 @@ extern void playerSetFallLean(TObj *);
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern void playerAttackDecelerate(TObj *);
 
-void func_8011BAA0(TObj *o)
+void playerStepFallLean(TObj *o)
 {
     TObj *pl;
     int v;

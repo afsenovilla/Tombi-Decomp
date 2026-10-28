@@ -42,10 +42,10 @@ extern void startPadVibration(int, int, int, int);
 extern void motocrossFindPathSegment(TObj *);
 extern void motocrossAdvanceAlongPath(TObj *);
 extern void motocrossBikeSetSpeed(TObj *);
-extern void func_8011866C(TObj *);
-extern void func_80119120(TObj *);
-extern void func_801196FC(TObj *);
-extern void func_80118C6C(TObj *);
+extern void motocrossBikePickBump(TObj *);
+extern void motocrossBikeJumpStepB(TObj *);
+extern void motocrossBikeSlopeSpeed(TObj *);
+extern void motocrossBikeJumpStepA(TObj *);
 
 #define SUB(o) ((Sub *)((char *)(o) + 0xb4))
 
@@ -191,7 +191,7 @@ void motocrossBikeRide(TObj *o)
         break;
     case 1:
         pos(o);
-        func_8011866C(o);
+        motocrossBikePickBump(o);
         if (o->b69) {
             if (GVARS.b3e == 0 && t->cc == 0 && (SPAD.s1fc & SPAD.s3c6)) {
                 short vv = -0x300;
@@ -269,14 +269,14 @@ void motocrossBikeRide(TObj *o)
             p->anim = D_801229A8[0];
             AnimLoadDuration(p);
             o->b9c = 0;
-            func_801196FC(o);
+            motocrossBikeSlopeSpeed(o);
         }
         break;
     case 4:
-        func_80119120(o);
+        motocrossBikeJumpStepB(o);
         break;
     case 5:
-        func_80118C6C(o);
+        motocrossBikeJumpStepA(o);
         break;
     }
     if (t->ca != 0 && o->animTimer < 0xc1) {

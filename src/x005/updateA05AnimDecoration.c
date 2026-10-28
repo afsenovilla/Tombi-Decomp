@@ -33,7 +33,7 @@ extern void AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer2(TObj *);
 
-void func_801161A8(TObj *o)
+void updateA05AnimDecoration(TObj *o)
 {
     switch (o->b04) {
     case 0:

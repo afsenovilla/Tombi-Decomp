@@ -4,7 +4,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-void func_8012A2C0(TObj *o)
+void contactStepIfSpadLow(TObj *o)
 {
     if (GCD.bcf2d == 0 && o->b68) {
         if (SPAD.s246 < 2) {

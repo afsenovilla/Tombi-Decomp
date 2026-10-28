@@ -54,7 +54,7 @@ extern void subtractScaledVertices(int, int, int);
     q = Q; \
     goto tail;
 
-int func_80116924(S *o)
+int foodForFuelModelStepB(S *o)
 {
     int *p;
     register int q asm("$3");

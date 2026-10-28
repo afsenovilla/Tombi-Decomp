@@ -24,7 +24,7 @@ static __inline__ void calc(TObj *o, short *p)
     }
 }
 
-void func_801196FC(TObj *o)
+void motocrossBikeSlopeSpeed(TObj *o)
 {
     o->step = 5;
     o->velV = 0x200;

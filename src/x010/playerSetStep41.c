@@ -2,7 +2,7 @@
 // MATCHING 8011f5fc 72
 #include "TOBJ.H"
 
-void func_8011F5FC(TObj *o)
+void playerSetStep41(TObj *o)
 {
     if (o->step == 4 || o->step == 0x41) {
         o->step = 0x41;

@@ -6,7 +6,7 @@
 extern char *getCollisionColumnPtr(short, unsigned char);
 extern short testCollisionSegmentList(TObj *, short, short);
 
-short func_80121630(TObj *o, short x, short y, unsigned char k)
+short testCollisionSegmentsAtX(TObj *o, short x, short y, unsigned char k)
 {
     (*(char **)&SPAD.p278) = getCollisionColumnPtr(x, k);
     return testCollisionSegmentList(o, x, y);

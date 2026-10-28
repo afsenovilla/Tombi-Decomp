@@ -4,11 +4,11 @@
 #include "gamestate.h"
 
 extern void ObjFreeDup(TObj *);
-extern void func_80119CE8(TObj *);
-extern void func_80119E08(TObj *);
-extern void func_80119F90(TObj *);
+extern void chainInitLinks(TObj *);
+extern void chainSwingStep(TObj *);
+extern void chainDrawLinks(TObj *);
 
-void func_8011A544(TObj *o)
+void updateChainObject(TObj *o)
 {
     TObj *e;
     int v;
@@ -43,15 +43,15 @@ void func_8011A544(TObj *o)
             }
         } else {
         d0:
-            func_80119CE8(o);
+            chainInitLinks(o);
         }
         o->b04++;
         break;
     case 1:
         v = GAME.selectedSection;
         if (v < 0) goto d1;
-        if (v < 2) func_80119E08(o);
-        else { d1: func_80119F90(o); }
+        if (v < 2) chainSwingStep(o);
+        else { d1: chainDrawLinks(o); }
         break;
     case 2:
         o->b04 = s + 1;

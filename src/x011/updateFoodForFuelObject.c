@@ -5,8 +5,8 @@
 
 extern int ObjCullRegister(TObj *o);
 extern void ObjFreeDup(TObj *o);
-extern int func_80116688(TObj *o);
-extern int func_80116924(TObj *o);
+extern int foodForFuelModelStepA(TObj *o);
+extern int foodForFuelModelStepB(TObj *o);
 
 void updateFoodForFuelObject(TObj *o)
 {
@@ -59,7 +59,7 @@ void updateFoodForFuelObject(TObj *o)
             }
             break;
         case 1:
-            if (func_80116688(o) != 0) {
+            if (foodForFuelModelStepA(o) != 0) {
                 o->timer = 0x1e;
                 o->step++;
                 GCD.bd082 = 1;
@@ -77,7 +77,7 @@ void updateFoodForFuelObject(TObj *o)
             }
             break;
         case 3:
-            if (func_80116924(o) != 0) {
+            if (foodForFuelModelStepB(o) != 0) {
                 GCD.bd082 = 3;
                 o->step = 4;
             }

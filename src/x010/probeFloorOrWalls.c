@@ -3,12 +3,12 @@
 // VERSION SLPS_01144 x10 80122450 212
 #include "camera.h"
 #if defined(VERSION_SLPS_01144)
-// Japanese version of PAL x010 801240B8 (x010/func_801240B8.c): 128 -> 120.
+// Japanese version of PAL x010 801240B8 (x010/probeFloorOrWalls.c): 128 -> 120.
 #include "TOBJ.H"
 extern short TileCollideAt(TObj *, short, short);
 extern short func_8004065C(TObj *, short, short, short);
 
-int func_801240B8(TObj *o)
+int probeFloorOrWalls(TObj *o)
 {
     if (o->b69 == 1) return 1;
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x12)) {
@@ -25,7 +25,7 @@ int func_801240B8(TObj *o)
 extern short TileCollideAt(TObj *, short, short);
 extern short probeWallAt(TObj *, short, short, short);
 
-int func_801240B8(TObj *o)
+int probeFloorOrWalls(TObj *o)
 {
     if (o->b69 == 1) return 1;
     if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x12)) {

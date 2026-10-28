@@ -5,7 +5,7 @@ extern TObj *GRABBED_OBJECT;
 extern int rsin(int);
 extern int rcos(int);
 
-void func_8011BCAC(TObj *o)
+void placeOnGrabbedObjectCircle(TObj *o)
 {
     int a = (GRABBED_OBJECT->d8c + 0x400) & 0xfff;
     int x = rcos(a) * o->wba >> 12;

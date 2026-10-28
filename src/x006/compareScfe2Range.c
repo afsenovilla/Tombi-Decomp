@@ -2,7 +2,7 @@
 // MATCHING 8011e364 80
 #include "gcd.h"
 
-int func_8011E364(void)
+int compareScfe2Range(void)
 {
     short x = GCD.scfe2;
     int r;

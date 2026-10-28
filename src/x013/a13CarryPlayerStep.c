@@ -2,7 +2,7 @@
 // MATCHING 80116398 840
 // VERSION SLPS_01144 x13 80115694 840
 #if defined(VERSION_SLPS_01144)
-// Japanese version of PAL x013 80116398 (x013/func_80116398.c): 242 -> 226.
+// Japanese version of PAL x013 80116398 (x013/a13CarryPlayerStep.c): 242 -> 226.
 #include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -19,7 +19,7 @@ extern void playerSetAnim(TObj *, short, short);
 extern void FUN_80049ca4(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 
-void func_80116398(TObj *o)
+void a13CarryPlayerStep(TObj *o)
 {
     PL *p;
 
@@ -110,7 +110,7 @@ extern void playerSetAnim(TObj *, short, short);
 extern void FUN_80049ca4(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 
-void func_80116398(TObj *o)
+void a13CarryPlayerStep(TObj *o)
 {
     PL *p;
 

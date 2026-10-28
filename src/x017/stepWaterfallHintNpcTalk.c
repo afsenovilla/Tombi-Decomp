@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 extern void ironCastleMachineRoomTalk(TObj *);
 extern void waterfallElderHintTalk(TObj *);
-extern void func_80117864(TObj *);
+extern void waterfallHintNpcWalkScene(TObj *);
 extern void pigGateFavorTalk(TObj *);
 extern void setEventComplete(int, int);
 
@@ -40,7 +40,7 @@ void stepWaterfallHintNpcTalk(TObj *o)
         waterfallElderHintTalk(o);
         break;
     case 3:
-        func_80117864(o);
+        waterfallHintNpcWalkScene(o);
         break;
     case 4:
         switch (o->state) {

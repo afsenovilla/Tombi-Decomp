@@ -3,7 +3,7 @@
 typedef struct O { char p0[3]; unsigned char t; char p1[2]; unsigned char s; char p2[0x94 - 7]; struct O *next; } O;
 extern void area10Type07StepDPart(O *);
 extern void area10Type07StepDPart(O *);
-void FUN_80122b40(O *o)
+void area10Type07StepDChain(O *o)
 {
     int i;
     O *p;

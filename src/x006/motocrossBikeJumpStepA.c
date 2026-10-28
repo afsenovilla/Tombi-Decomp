@@ -142,7 +142,7 @@ static __inline__ void pos(TObj *o)
     o->b.p.whole = e->z + o->d38;
 }
 
-void func_80118C6C(TObj *o)
+void motocrossBikeJumpStepA(TObj *o)
 {
     TObj *p = (*(TObj **)&GVARS.p50);
     Sub *t;

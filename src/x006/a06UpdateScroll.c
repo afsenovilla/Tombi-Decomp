@@ -2,10 +2,10 @@
 // MATCHING 80116764 60
 #include "gamestate.h"
 extern void updateAreaScroll(void);
-extern void func_801163B8(void);
+extern void a06SectionScrollStep(void);
 
-void func_80116764(void)
+void a06UpdateScroll(void)
 {
     if (GAME.selectedSection) updateAreaScroll();
-    else func_801163B8();
+    else a06SectionScrollStep();
 }

@@ -7,8 +7,8 @@ typedef struct {
     TObj t;
 } S;
 extern short NEG_SIN_TABLE[];
-extern int func_8011AFB4(TObj *);
-extern int func_8011B238(TObj *);
+extern int motocrossBikeBobInit(TObj *);
+extern int motocrossBikeModelStepA(TObj *);
 
 void motocrossBikeBob(TObj *o)
 {
@@ -33,17 +33,17 @@ void motocrossBikeBob(TObj *o)
         break;
     case 2:
         if (p->b9c == 0) {
-            func_8011AFB4(o);
+            motocrossBikeBobInit(o);
             o->step++;
         }
         break;
     case 3:
-        if (func_8011AFB4(o) == 1) {
+        if (motocrossBikeBobInit(o) == 1) {
             o->step = 1;
         }
         break;
     case 4:
-        func_8011B238(o);
+        motocrossBikeModelStepA(o);
         break;
     }
     if (GVARS.b42 == 0) {

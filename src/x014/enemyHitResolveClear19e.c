@@ -6,7 +6,7 @@
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern void resolveHitResultA(TObj *, TObj *);
 
-void func_8011CFF0(TObj *o, TObj *e)
+void enemyHitResolveClear19e(TObj *o, TObj *e)
 {
     if (boxesOverlapSigned(o, e) >= 0) {
         resolveHitResultA(o, e);

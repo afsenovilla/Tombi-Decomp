@@ -9,8 +9,8 @@ extern unsigned char PLAYER;
 extern int ObjCullRegister(TObj *);
 extern void bitingPlantSway(TObj *);
 extern void bitingPlantLunge(TObj *);
-extern void FUN_80122804(TObj *);
-extern void FUN_80122b40(TObj *);
+extern void area10Type07SwingChain(TObj *);
+extern void area10Type07StepDChain(TObj *);
 extern void freeObjectLayer2(TObj *);
 
 static __inline__ int nearCam(TObj *o)
@@ -87,10 +87,10 @@ void updateA10BitingPlant(TObj *o)
             bitingPlantLunge(o);
             break;
         case 2:
-            FUN_80122804(o);
+            area10Type07SwingChain(o);
             break;
         case 3:
-            FUN_80122b40(o);
+            area10Type07StepDChain(o);
             break;
         }
         o->b68 = 0;

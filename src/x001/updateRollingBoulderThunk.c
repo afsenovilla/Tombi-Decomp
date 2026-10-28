@@ -2,7 +2,7 @@
 // MATCHING 8012f968 32
 extern void updateRollingBoulder(void);
 
-void FUN_8012f968(void)
+void updateRollingBoulderThunk(void)
 {
     updateRollingBoulder();
 }

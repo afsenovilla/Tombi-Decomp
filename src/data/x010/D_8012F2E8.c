@@ -12,8 +12,8 @@ extern char D_80132A20[];
 extern char D_80132A34[];
 extern void bitingPlantSway();
 extern void bitingPlantLunge();
-extern void FUN_80122804();
-extern void FUN_80122b40();
+extern void area10Type07SwingChain();
+extern void area10Type07StepDChain();
 extern unsigned int data_8012F2E8[];
 extern unsigned int data_8012F2F0[];
 extern unsigned int data_8012F2F8[];
@@ -257,7 +257,7 @@ unsigned int data_8012F2F8[25] = {
 
 unsigned int data_8012F35C[7] = {
     0x1C001C, 0x1C001C, 0x1C001C, (unsigned int)bitingPlantSway,
-    (unsigned int)bitingPlantLunge, (unsigned int)FUN_80122804, (unsigned int)FUN_80122b40,
+    (unsigned int)bitingPlantLunge, (unsigned int)area10Type07SwingChain, (unsigned int)area10Type07StepDChain,
 };
 
 unsigned int data_8012F378[8] = {

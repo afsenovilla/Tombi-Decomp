@@ -8,7 +8,7 @@ INCLUDE_ASM_V("x06/nonmatchings/x06", func_8011A114_slps01144);
 #include "spad.h"
 #include "TOBJ.H"
 
-void func_8011AF84(TObj *o)
+void setModelPtrFromWac(TObj *o)
 {
     int *pp = &SPAD.i334;
     int i;

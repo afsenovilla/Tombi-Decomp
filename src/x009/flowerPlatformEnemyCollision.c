@@ -2,7 +2,7 @@
 // MATCHING 801216a0 344
 #include "spad.h"
 #include "TOBJ.H"
-extern short func_801215C0(TObj *, short, short, unsigned char);
+extern short tileCollideColumnAtX(TObj *, short, short, unsigned char);
 
 void flowerPlatformEnemyCollision(TObj *o, TObj *e)
 {
@@ -15,7 +15,7 @@ void flowerPlatformEnemyCollision(TObj *o, TObj *e)
     if ((unsigned short)(e->box2 + (o->y.p.whole - e->y.p.whole)) >= e->box3) return;
     u = o->h->p.whole - (e->h->p.whole - e->box0);
     t = o->y.p.whole - (e->y.p.whole + (e->box3 - e->box2));
-    if (func_801215C0(o, u, t + o->box3 - o->box2, e->subtype)) {
+    if (tileCollideColumnAtX(o, u, t + o->box3 - o->box2, e->subtype)) {
         o->b69 = 1;
         o->h->p.whole += e->velX;
         { short w = o->y.p.whole + e->velY;

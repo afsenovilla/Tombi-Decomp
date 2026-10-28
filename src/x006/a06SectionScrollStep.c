@@ -6,26 +6,26 @@
 #include "gametask.h"
 typedef struct { char pad[0x2c]; unsigned short w2c; } PL;
 typedef struct { char pad[0x4c]; short w4c; short w4e; } SC;
-extern void func_8011610C(TObj *);
-extern void func_80116254(TObj *);
+extern void scrollCameraDepthStep(TObj *);
+extern void setupCameraMatrixFromObj(TObj *);
 extern void spawnRaceMessage(int, int, int);
 extern void playSFX(int);
 
-void func_801163B8(TObj *o)
+void a06SectionScrollStep(TObj *o)
 {
     PL *p = (*(PL **)&GVARS.p4c);
 
     switch (o->step) {
     case 0:
         o->step++;
-        func_8011610C(o);
+        scrollCameraDepthStep(o);
         break;
     case 1:
         if (GVARS.playerLanded != 0) {
             o->step++;
         }
     call:
-        func_8011610C(o);
+        scrollCameraDepthStep(o);
         break;
     case 2:
         if (p->w2c >= 0xb0) {
@@ -74,5 +74,5 @@ void func_801163B8(TObj *o)
     default:
         return;
     }
-    func_80116254(o);
+    setupCameraMatrixFromObj(o);
 }

@@ -2,7 +2,7 @@
 // MATCHING 801173fc 12
 #include "TOBJ.H"
 
-void func_801173FC(TObj *o)
+void stubFreeObj801173FC(TObj *o)
 {
     o->b04 = 3;
 }

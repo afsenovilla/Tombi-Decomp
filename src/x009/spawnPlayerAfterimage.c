@@ -5,7 +5,7 @@
 extern TObj PLAYER;
 extern void *D_8012E024;
 
-void func_8011B3A8(TObj *o)
+void spawnPlayerAfterimage(TObj *o)
 {
     int vy;
     int vx;

@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern short func_80121630(TObj *, short, short, unsigned char);
+extern short testCollisionSegmentsAtX(TObj *, short, short, unsigned char);
 extern int resolveHitResultA(TObj *, TObj *);
 
 void flowerPlatformObjectCollision(TObj *o, TObj *e)
@@ -17,7 +17,7 @@ void flowerPlatformObjectCollision(TObj *o, TObj *e)
     u = o->h->p.whole - (e->h->p.whole - e->box0);
     if ((unsigned short)u >= e->box1) return;
     t = o->y.p.whole - (e->y.p.whole + (e->box3 - e->box2));
-    if (func_80121630(o, u, t, e->subtype) == 0) return;
+    if (testCollisionSegmentsAtX(o, u, t, e->subtype) == 0) return;
     if (resolveHitResultA(o, e) == 0 || o->type == 9) {
         if (SPAD.s282 & 2) {
             o->b69 = 1;

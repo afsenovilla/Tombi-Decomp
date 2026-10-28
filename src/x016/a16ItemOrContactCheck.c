@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern unsigned char D_8009D12F;
 
-void func_80118824(TObj *o)
+void a16ItemOrContactCheck(TObj *o)
 {
     if (GVARS.useItemPending != 0) {
         if (GVARS.useItemId == 3 && D_8009D12F == 0) {

@@ -25,7 +25,7 @@ typedef struct O {
 extern short D_1F80019E;
 extern short columnPushOutOfWall(O *, short, short, int, unsigned char);
 extern short columnProbeA(O *, short, short, unsigned char);
-extern short func_801215C0(O *, short, short, int);
+extern short tileCollideColumnAtX(O *, short, short, int);
 extern void applyCollisionTileResponse(O *);
 
 void flowerPlatformPlayerCollision(O *o, O *e)
@@ -65,7 +65,7 @@ void flowerPlatformPlayerCollision(O *o, O *e)
         {
             short sx = a;
             if (columnProbeA(o, sx, d - 0xc, e->subtype)) goto hit;
-            if (!func_801215C0(o, sx, d + o->box2, e->subtype)) return;
+            if (!tileCollideColumnAtX(o, sx, d + o->box2, e->subtype)) return;
             goto hit2;
         }
     case 2:
@@ -73,7 +73,7 @@ void flowerPlatformPlayerCollision(O *o, O *e)
         {
             short sx = b;
             if (columnProbeA(o, sx, d - 0xc, e->subtype)) goto hit;
-            if (!func_801215C0(o, sx, d + o->box2, e->subtype)) return;
+            if (!tileCollideColumnAtX(o, sx, d + o->box2, e->subtype)) return;
             goto hit2;
         }
     case 3:
@@ -92,8 +92,8 @@ void flowerPlatformPlayerCollision(O *o, O *e)
                 D_1F80019E = 0;
                 return;
             }
-            if (func_801215C0(o, sx, d + o->box2, e->subtype)) goto hit2;
-            if (func_801215C0(o, b, d + o->box2, e->subtype)) goto hit2;
+            if (tileCollideColumnAtX(o, sx, d + o->box2, e->subtype)) goto hit2;
+            if (tileCollideColumnAtX(o, b, d + o->box2, e->subtype)) goto hit2;
         }
         return;
     default:

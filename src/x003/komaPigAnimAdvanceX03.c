@@ -4,7 +4,7 @@
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 extern B D_80135B30[];
-int func_801205A4(TObj *o)
+int komaPigAnimAdvanceX03(TObj *o)
 {
     A *a;
     unsigned char *p;

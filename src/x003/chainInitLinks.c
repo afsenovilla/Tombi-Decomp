@@ -10,7 +10,7 @@ typedef struct {
 extern char D_80135974[], D_801358AC[];
 extern char D_8013592C[], D_80135934[], D_8013593C[];
 
-void func_80119CE8(TObj *o)
+void chainInitLinks(TObj *o)
 {
     TObj *p, *q;
     int x, y, z;

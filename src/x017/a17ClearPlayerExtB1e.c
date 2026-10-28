@@ -6,7 +6,7 @@ typedef struct { short s0, s2; } S2;
 typedef struct { char p[0x1e]; unsigned char b1e; } PLY;
 extern PLY *PLAYER_EXT;
 
-void func_80118B30(void)
+void a17ClearPlayerExtB1e(void)
 {
     if ((unsigned short)((*(S2 **)&PLAYER.obj.h)->s2 - 0x100) < 0x90 && GCD.bcfd6 == 0) PLAYER_EXT->b1e = 0;
 }

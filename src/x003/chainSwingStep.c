@@ -11,7 +11,7 @@ extern void FUN_8006424c(SVECTOR *, MATRIX *);
 extern void FUN_80063a6c(MATRIX *, VECTOR *, VECTOR *);
 extern void FUN_800202b4(TObj *);
 
-void func_80119E08(TObj *o)
+void chainSwingStep(TObj *o)
 {
     TObj *p;
     VECTOR in;

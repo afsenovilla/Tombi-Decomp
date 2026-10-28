@@ -2,7 +2,7 @@
 // MATCHING 8011e4ec 168
 #include "raw7.h"
 extern char *allocObjectLayer5();
-void FUN_8011e4ec(char *p, char *q, int c)
+void a04SpawnL5Type7Child(char *p, char *q, int c)
 {
     char *o = allocObjectLayer5();
     if (o != 0) {

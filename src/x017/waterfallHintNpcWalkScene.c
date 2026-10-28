@@ -11,7 +11,7 @@ extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_80026e0c(int, int);
 
-void func_80117864(TObj *o)
+void waterfallHintNpcWalkScene(TObj *o)
 {
     switch (o->state) {
     case 0:

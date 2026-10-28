@@ -25,7 +25,7 @@ extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
 
-int func_8011AFB4(O *o)
+int motocrossBikeBobInit(O *o)
 {
     L *p;
     H *h;

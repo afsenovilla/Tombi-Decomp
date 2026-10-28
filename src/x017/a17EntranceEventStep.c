@@ -15,7 +15,7 @@ extern unsigned int FUN_8001f9e0(void);
 extern void playerSetAnim(TObj *, int, int);
 extern void FUN_800eeb5c(TObj *, int);
 
-void func_801185E4(TObj *o)
+void a17EntranceEventStep(TObj *o)
 {
     short *s;
     int k;

@@ -21,7 +21,7 @@ extern void RotMatrixY(long, MAT *);
 extern void RotMatrixX(long, MAT *);
 extern void ApplyMatrixSV(MAT *, SVEC *, SVEC *);
 
-void func_80116254(O *o)
+void setupCameraMatrixFromObj(O *o)
 {
     o->w08 = *o->d34 - 0xa00000;
     o->w0c = CAMP->pos[4].raw + 0x800000;

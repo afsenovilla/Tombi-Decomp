@@ -4,12 +4,12 @@
 #include "anim.h"
 
 extern void updatePointsBalloon();
-extern void func_8012DFAC();
+extern void clearGcdBcf29();
 extern unsigned int data_801159A4[];
 
 unsigned int data_801159A4[15] = {
     (unsigned int)updatePointsBalloon, 0x8013B2F4, 0x8013B310, 0x8013B2F4,
     0x8013B348, 0x8013E600, 0x8013E61C, 0x8013E638,
     0x8013E654, 0x8013B2F4, 0x8013B310, 0x8013B2F4,
-    0x8013B348, 0x8012DF90, (unsigned int)func_8012DFAC,
+    0x8013B348, 0x8012DF90, (unsigned int)clearGcdBcf29,
 };

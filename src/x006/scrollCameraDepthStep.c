@@ -9,7 +9,7 @@ INCLUDE_ASM_V("x06/nonmatchings/x06", func_801153C0_slps01144);
 #include "TOBJ.H"
 extern volatile int CAMERA_TARGET_Y_FIX;
 
-void func_8011610C(TObj *o)
+void scrollCameraDepthStep(TObj *o)
 {
     unsigned char flag = 0;
     int k, c, v;

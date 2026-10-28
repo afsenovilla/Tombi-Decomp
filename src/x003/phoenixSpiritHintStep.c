@@ -4,7 +4,7 @@
 extern void FUN_8001fec0(TObj *);
 extern void phoenixSpiritHintTalk(TObj *);
 
-void FUN_80129818(TObj *o)
+void phoenixSpiritHintStep(TObj *o)
 {
     switch (o->step) {
     case 0:

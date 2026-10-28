@@ -1,7 +1,7 @@
 // FUNC 8011b238 808 X006
 // MATCHING 8011b238 808
 #include "gvars.h"
-/* Sibling of func_8011B560 / X000 l4Type1BDeformModel. Debt: register asm("$3") on q (as in the siblings). */
+/* Sibling of motocrossBikeModelStepB / X000 l4Type1BDeformModel. Debt: register asm("$3") on q (as in the siblings). */
 #include "gamestate.h"
 typedef struct {
     char p0[7];
@@ -42,7 +42,7 @@ typedef struct { char p[0x34]; int d34; } TObj_;
 #define COMMON { o->wcc = o->velV; copyModelPrimGroups(o->da0, o->dc4); subtractScaledVertices(o->dc4, o->dc8, o->wcc); return 0; }
 #define FADE { if (((unsigned short*)&GAME.selectedSection)[0] == 0) { int v; o->w7a += 0x10; v = g->d34 + ((short)o->w7a >> 8); g->d34 = v; if (v > 0) g->d34 = 0; } }
 
-int func_8011B238(S *o)
+int motocrossBikeModelStepA(S *o)
 {
     int *p;
     register int q asm("$3");

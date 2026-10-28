@@ -2,7 +2,7 @@
 // MATCHING 801174a0 24
 #include "TOBJ.H"
 
-void func_801174A0(TObj *o)
+void resetStepNextB04(TObj *o)
 {
     o->step = 0;
     o->state = 0;

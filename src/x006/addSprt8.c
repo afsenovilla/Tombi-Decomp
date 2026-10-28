@@ -14,7 +14,7 @@ extern void SetSemiTrans(SP8 *, int);
 extern unsigned short GetClut(int, int);
 extern void AddPrim(void *, void *);
 
-void func_8011BB24(short x, short y, unsigned char u, unsigned char v, short c)
+void addSprt8(short x, short y, unsigned char u, unsigned char v, short c)
 {
     SP8 *p = NEXT_PRIM;
     SetSprt8(p);

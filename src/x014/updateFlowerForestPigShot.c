@@ -21,7 +21,7 @@ extern void getBaseMatrix(void *);
 extern void RotMatrix(SVECTOR *, void *);
 extern void cullObjectToDrawList(TObj *, int);
 extern void spawnFlowerForestPigShotPair(TObj *, int);
-extern void func_80121B4C(TObj *);
+extern void pigShotProbeWallFloor(TObj *);
 extern void flowerForestPigShotScatter(TObj *);
 extern void flowerForestPigShotSlide(TObj *);
 
@@ -114,7 +114,7 @@ void updateFlowerForestPigShot(TObj *o)
         case 0:
         case 1:
         case 2:
-            func_80121B4C(o);
+            pigShotProbeWallFloor(o);
             ObjCullRegister(o);
             break;
         case 3:

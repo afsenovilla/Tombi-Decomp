@@ -2,7 +2,7 @@
 // MATCHING 80129900 20
 #include "TOBJ.H"
 
-void func_80129900(TObj *o)
+void resetToB04One(TObj *o)
 {
     o->b04 = 1;
     o->step = 0;

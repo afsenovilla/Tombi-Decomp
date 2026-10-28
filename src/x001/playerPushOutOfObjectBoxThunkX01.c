@@ -2,7 +2,7 @@
 // MATCHING 80126b9c 32
 extern void playerPushOutOfObjectBox(void);
 
-void FUN_80126b9c(void)
+void playerPushOutOfObjectBoxThunkX01(void)
 {
     playerPushOutOfObjectBox();
 }
