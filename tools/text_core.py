@@ -193,7 +193,11 @@ class Project:
                 toks = [W.words_to_text(w, [v], d.font) for v in d.words[:nvis]]     # hidden surplus tiles: padding
                 self._orig[key] = TL.lines_to_text(toks, lines)
             else:
-                self._orig[key] = W.words_to_text(w, d.words, d.font)
+                words = d.words
+                b = self.banner(path, idx)
+                if b is not None and 0 < b.get("shown", len(words)) < len(words):
+                    words = words[:b["shown"]]      # a shorter banner is padded to K words; the hidden tiles are not text
+                self._orig[key] = W.words_to_text(w, words, d.font)
         return self._orig[key]
 
     def title_lines(self, path, idx, text):
@@ -494,6 +498,10 @@ class Project:
                     if lay is not None and idx in lay.recs and words and len(words) < len(lay.recs[idx]):
                         # shorter title: the engine reads one glyph per record of the list, so pad (the extra tiles are off screen)
                         words = words + [words[0]] * (len(lay.recs[idx]) - len(words))
+                    if idx == 0 and words and (lay is None or idx not in lay.recs) and self.banner(path, 0) is not None and len(words) < self.banner(path, 0)["k"]:
+                        # shorter "completed" banner: keep dialogue 0 at K glyph words like the original (a shorter dialogue 0
+                        # left the native port on NOW LOADING); _banner_patches only shows the first letters, the rest go off screen
+                        words = words + [words[0]] * (self.banner(path, 0)["k"] - len(words))
                     d.words = words
                 except W.WfmError as ex:
                     errors.append("%s #%d: %s" % (path, idx, ex))
@@ -606,6 +614,7 @@ class Project:
                 continue
             words = W.decode(files[path]).dialogues[0].words        # the words as stored in the encoded file
             gaps = [g for l in self._single_line(text) for g in l]
+            words = words[:len(gaps)]                               # drop the padding words (encode_edited)
             if len(gaps) != len(words):
                 errors.append("%s #0: %s" % (path, tr("tc.titleempty")))
                 continue

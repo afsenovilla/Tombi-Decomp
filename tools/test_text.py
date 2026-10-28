@@ -43,7 +43,9 @@ class BuildRoundTrip(unittest.TestCase):
             import wfm_py as W
             words = W.decode(src.read(names[0])).dialogues[0].words
             self.assertEqual(info["k"], 11)
-            self.assertEqual(info["ids"][:9], [w & 0x7FFF for w in words])
+            self.assertEqual(len(words), 11)            # dialogue 0 keeps K words (padded): a shorter one hung the native port on NOW LOADING
+            self.assertEqual(info["shown"], 9)
+            self.assertEqual(info["ids"][:9], [w & 0x7FFF for w in words[:9]])
             self.assertEqual(info["xs"][:9], [-80 + 20 * i for i in range(9)])
             self.assertEqual(info["xs"][9:], [80, 80])
             # second edit built over the same output (and then with the output as the opened image, in place)

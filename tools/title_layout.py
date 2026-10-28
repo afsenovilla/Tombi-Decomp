@@ -333,7 +333,8 @@ def banner_info(read, lang):
         return None
     t, k, s = f
     return dict(name=name, k=k, ids=list(struct.unpack_from("<%dH" % k, exe, t)),
-                xs=[struct.unpack_from("<h", exe, s + 4 * j)[0] for j in range(k)], addr=0x80010000 + t - HEADER)
+                xs=[struct.unpack_from("<h", exe, s + 4 * j)[0] for j in range(k)],
+                shown=sum(struct.unpack_from("<h", exe, s + 4 * j + 2)[0] != BANNER_HIDDEN_Y for j in range(k)), addr=0x80010000 + t - HEADER)
 
 
 def banner_patch(read, lang, words, gaps):
