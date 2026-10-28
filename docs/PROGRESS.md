@@ -1,33 +1,33 @@
 # Tombi! decompilation progress (PAL Spanish, SCES_013.31)
 
-_Generated with `python tools/progress.py` (2026-10-27). Do not edit by hand._
+_Generated with `python tools/progress.py` (2026-10-28). Do not edit by hand._
 
 ## Summary
 
-**Whole game: 99.40 % of the game's code matches byte for byte** (1520132 of 1529276 bytes).
+**Whole game: 99.25 % of the game's code matches byte for byte** (1520132 of 1531668 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 100.0 % `[########################]` |
-| X000.BIN: AREA00 + object code reused by all areas | 312708 B | 312708 B | 100.0 % `[########################]` |
+| MAIN0.EXE: engine, shared by every area | 288068 B | 286644 B | 99.5 % `[########################]` |
+| X000.BIN: AREA00 + object code reused by all areas | 313676 B | 312708 B | 99.7 % `[########################]` |
 | X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 100.0 % `[########################]` |
 | SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 184340 B | 95.3 % `[#######################.]` |
-| **Whole game** | **1529276 B** | **1520132 B** | **99.40 %** `[########################]` |
+| **Whole game** | **1531668 B** | **1520132 B** | **99.25 %** `[########################]` |
 
-- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 67264 B of it (66.7 %) also matches, from Psy-Q sources ported from psx_tomba, and is tracked apart.
+- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (99480 B) is not counted: 76380 B of it (76.8 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 99.7 %).
-- Also tracked for MAIN0 + X000: 95.7 % of the code named by us, 67.4 % typed with the TObj structure.
+  other; those copies match automatically and are not added again (counting every copy separately gives 99.6 %).
+- Also tracked for MAIN0 + X000: 95.6 % of the code named by us, 67.2 % typed with the TObj structure.
 
 "Game code" = functions inside the code of the analyzed programs, **excluding** those from
-Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 100904 bytes (906 functions).
+Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 99480 bytes (905 functions).
 
 ## Breakdown by program
 
 | Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library | Psy-Q matching |
 |---|---|---|---|---|---|---|
-| MAIN0.EXE (game core) | 286092 B (812 f) | 99.2 % | 45.2 % | 100.0 % (1152 f) | 100864 B | 67224 B (66.6 %) |
-| X000.BIN (AREA00 overlay) | 306628 B (586 f) | 92.4 % | 88.2 % | 100.0 % (529 f) | 40 B | 40 B (100.0 %) |
+| MAIN0.EXE (game core) | 287516 B (813 f) | 99.2 % | 45.0 % | 99.5 % (1205 f) | 99440 B | 76340 B (76.8 %) |
+| X000.BIN (AREA00 overlay) | 307596 B (588 f) | 92.1 % | 87.9 % | 99.7 % (529 f) | 40 B | 40 B (100.0 %) |
 
 ## Area overlays (X001..X019) and SYSTEM overlays
 
@@ -83,12 +83,11 @@ figure in the summary counts each function once.
 
 ## Where things stand (October 2026)
 
-- Code: the whole-game figure of the summary above (2952 of 2955 functions). What does not match is three functions of the
-  memory card overlays (D0SPSUB func_800E89F8, func_800EFD6C; D0SPSUB2 func_800E999C; plus the D0SPSUB3 twin of
-  func_800E89F8). Each has functionally equivalent C in `src/wip/` whose header documents the remaining difference
-  (register allocation and scheduler order only, the structure matches); [notes/remaining.md](../notes/remaining.md)
-  lists them. The D0SPSUB menu dispatcher func_800ED0C4 was matched by michaelm-afk (PR #1, October 27 2026) and its
-  D0SPSUB3 twin func_800EC89C followed from the same idioms.
+- Code: the whole-game figure of the summary above (2950 of 2955 functions). What does not match is five functions of the
+  memory card / sub-screen overlays (D0SPSUB func_800E89F8, func_800ED0C4, func_800EFD6C; D0SPSUB2 func_800E999C;
+  D0SPSUB3 func_800EC89C, plus the D0SPSUB3 twin of func_800E89F8). Each has functionally equivalent C in `src/wip/`
+  whose header documents the remaining difference (register allocation and scheduler order only, the structure matches);
+  [notes/remaining.md](../notes/remaining.md) lists them.
 - Function names: essentially complete; 111 functions keep a generic name (`notes/unnamed.json`: empty stubs, unreferenced
   code and event scenes nothing pins a behaviour to).
 - Data names: done by usage for MAIN0 (342 globals in `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM
@@ -98,7 +97,7 @@ figure in the summary counts each function once.
 
 ## Plan
 
-1. Match every game function byte for byte (this report; three D0SPSUB* functions left, see above).
+1. Match every game function byte for byte (this report; five D0SPSUB* functions left, see above).
 2. All area overlays (done: 16 overlays wired in, see above).
 3. Remove the matching debt (`do{}while(0)`, `register asm`, volatile pins, `// FLAGS`, asm fences).
 4. Readable names and types (names done by usage, see above; structs instead of raw offsets pending); then split
@@ -127,7 +126,7 @@ figure in the summary counts each function once.
 | 640 B | `801180ac` | X000.BIN |
 | 636 B | `8006b7ec` | MAIN0.EXE |
 | 576 B | `80110cac` | X000.BIN |
-| 536 B | `8011c804` | X000.BIN |
+| 536 B | `80132bb8` | X000.BIN |
 
 ## How it is measured
 

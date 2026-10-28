@@ -176,7 +176,7 @@ def write_svgs(res, tot, matching, whole=(0, 1), areas=(0, 1)):
 def covered(items, prog, lib=False):
     """Game-code bytes (non-library items; `lib=True`: library items only) covered by matched ranges of `prog`; a
     matched range can span several Ghidra/splat functions or include library code, so count the overlap, never the
-    raw marker size. Library matches (Psy-Q sources ported from psx_tomba) are reported apart and never enter the
+    raw marker size. Library matches (Psy-Q sources ported from psx_tomba and other decompilations) are reported apart and never enter the
     game-code percentage."""
     ranges = src_ranges().get(prog, [])
     tot = 0
@@ -253,7 +253,7 @@ def summary_lines(res, cov, ovl, tot, matching):
     L += ["",
           "- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev"
           " (`tools/units.py` is the common list); Sony's Psy-Q library (%d B) is not counted: %d B of it (%.1f %%) also"
-          " matches, from Psy-Q sources ported from psx_tomba, and is tracked apart." % (tot["lib"], libm, pct(libm, tot["lib"])),
+          " matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart." % (tot["lib"], libm, pct(libm, tot["lib"])),
           "- Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each",
           "  other; those copies match automatically and are not added again (counting every copy separately gives %.1f %%)." % (
               pct(matching + sum(d["matched"] for d in ovl.values()), tot["game"] + sum(d["game"] for d in ovl.values()))),

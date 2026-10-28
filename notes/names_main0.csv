@@ -1,4 +1,5 @@
 address,name,confidence,comment
+800163f4,main,alta,"main() del juego: Ghidra lo nombro como libreria; sigue en asm (docs/PORT.md)"
 80016984,FlipFrame,alta,doble buffer: PutDispEnv/PutDrawEnv/DrawOTag/ClearOTagR
 80016a44,GsSetOrign,alta,Psy-Q (sugerido por Ghidra)
 80016a5c,initGlobalState,alta,names batch (see notes/names.md)
@@ -765,6 +766,7 @@ address,name,confidence,comment
 8005bfac,strncat,alta,"Psy-Q (psx_tomba, por bytes)"
 8005c020,strncpy,alta,"Psy-Q (psx_tomba, por bytes)"
 8005c098,strstr,alta,"Psy-Q (psx_tomba, por bytes)"
+8005c10c,printf,alta,"Psy-Q (dcb_decomp, por bytes)"
 8005c7d0,toupper,alta,"Psy-Q (psx_tomba, por bytes)"
 8005c800,tolower,alta,"Psy-Q (psx_tomba, por bytes)"
 8005c830,memchr,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -904,6 +906,7 @@ address,name,confidence,comment
 800634b8,sin_1,alta,"Psy-Q (psx_tomba, por bytes)"
 80063548,rcos,alta,"Psy-Q (psx_tomba, por bytes)"
 800635e8,SetFogNear,alta,"Psy-Q (psx_tomba, por bytes)"
+800637a0,csqrt,alta,"Psy-Q (dcb_decomp, por bytes)"
 80063844,InitGeom,alta,Psy-Q libgte msc00.c (psx_tomba; alineado de direcciones)
 80063e6c,SetTransMatrix,alta,"Psy-Q (psx_tomba, por bytes)"
 80063e8c,SetVertex0,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -997,10 +1000,13 @@ address,name,confidence,comment
 80068530,GetIntrMask,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068548,SetIntrMask,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068564,startIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80068640,trapIntr,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+80068828,setIntr,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
 8006897c,stopIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068a28,restartIntr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ab0,memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ae4,_96_remove,alta,name from psx_tomba (US)
+80068bac,startIntrVSync,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
 80068c04,trapIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068c7c,setIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80068ca8,VSync_memclr,alta,"Psy-Q (psx_tomba #21, por bytes)"
@@ -1078,8 +1084,25 @@ address,name,confidence,comment
 8006d320,_SsContRpn1,alta,"Psy-Q (psx_tomba, por bytes)"
 8006d398,_SsContRpn2,alta,"Psy-Q (psx_tomba, por bytes)"
 8006d410,_SsContResetAll,alta,"Psy-Q (psx_tomba, por bytes)"
+8006d4d4,_SsSetNrpnVabAttr0,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006d564,_SsSetNrpnVabAttr1,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006d620,_SsSetNrpnVabAttr2,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006d6b0,_SsSetNrpnVabAttr3,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006d740,_SsSetNrpnVabAttr4,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
 8006d7f4,_SsUtResolveADSR,alta,"Psy-Q (psx_tomba, por bytes)"
 8006d850,_SsUtBuildADSR,alta,"Psy-Q (psx_tomba, por bytes)"
+8006d8dc,_SsSetNrpnVabAttr5,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006d994,_SsSetNrpnVabAttr6,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006da44,_SsSetNrpnVabAttr7,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006daf4,_SsSetNrpnVabAttr8,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006dba8,_SsSetNrpnVabAttr9,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006dc60,_SsSetNrpnVabAttr10,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006dd14,_SsSetNrpnVabAttr11,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006ddbc,_SsSetNrpnVabAttr12,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006de98,_SsSetNrpnVabAttr13,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006df38,_SsSetNrpnVabAttr14,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006dfd8,_SsSetNrpnVabAttr15,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
+8006dffc,_SsSetNrpnVabAttr16,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
 8006e024,_SsSetNrpnVabAttr17,alta,name from psx_tomba (US)
 8006e048,_SsSetNrpnVabAttr18,alta,name from psx_tomba (US)
 8006e06c,_SsSetNrpnVabAttr19,alta,name from psx_tomba (US)
@@ -1093,6 +1116,7 @@ address,name,confidence,comment
 8006eb20,Snd_SetPlayMode,alta,"Psy-Q (psx_tomba, por bytes)"
 8006ec20,SsSetMVol,alta,"Psy-Q (psx_tomba, por bytes)"
 8006ec70,_SsStart,alta,"Psy-Q (psx_tomba, por bytes)"
+8006eed8,SsStart,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes): _SsStart(1); Ghidra la llamo SpuInitHot"
 8006eef8,SsStart2,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8006ef18,_SsTrapIntrVSync,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8006ef58,_SsSeqCalledTbyT_1per2,alta,"Psy-Q (psx_tomba #21, por bytes)"
@@ -1105,6 +1129,7 @@ address,name,confidence,comment
 8006f38c,_SsSndCrescendo,alta,"Psy-Q (psx_tomba, por bytes)"
 8006f66c,_SsSndDecrescendo,alta,"Psy-Q (psx_tomba, por bytes)"
 8006f90c,_SsSndPause,alta,"Psy-Q (psx_tomba, por bytes)"
+8006f9b0,_SsSndPlay,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
 8006f9dc,_SsSeqPlay,alta,"Psy-Q (psx_tomba, por bytes)"
 8006ff94,_SsSndNextSep,alta,"Psy-Q (psx_tomba, por bytes)"
 8007009c,_SsSndReplay,alta,"Psy-Q (psx_tomba, por bytes)"
@@ -1135,13 +1160,19 @@ address,name,confidence,comment
 80071738,_SsVmDamperOff,alta,Psy-Q
 80071748,_SsVmDamperOn,alta,Psy-Q
 8007175c,_SsVmFlush,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800724bc,_SsVmSeKeyOn,alta,"Psy-Q (sotn-decomp, por bytes)"
+800725a8,_SsVmSeKeyOff,alta,"Psy-Q (sotn-decomp, por bytes)"
 800725e4,_SsVmAlloc,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80072850,note2pitch,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80072914,note2pitch2,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80072a10,vmNoiseOn,alta,"Psy-Q (sotn-decomp, por bytes)"
 80072f20,_SsVmKeyOffNow,alta,"Psy-Q (psx_tomba, por bytes)"
 80072ff0,_SsVmKeyOnNow,alta,"Psy-Q (psx_tomba #21, por bytes)"
+800736d4,_SsVmPitchBend,alta,"Psy-Q (sotn-decomp, por bytes)"
 800737c4,_SsVmSetSeqVol,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80073d04,_SsVmGetSeqVol,alta,"Psy-Q (sotn-decomp, por bytes)"
 80073e10,_SsVmSeqKeyOff,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80073eac,_SsVmSelectToneAndVag,alta,"Psy-Q (dcb_decomp, por bytes)"
 800744e4,_SsVmVSetUp,alta,"Psy-Q (psx_tomba, por bytes)"
 800745a8,SsSetAutoKeyOffMode,alta,Psy-Q
 800745b8,SsSetMono,alta,names batch (see notes/names.md)
@@ -1156,6 +1187,7 @@ address,name,confidence,comment
 80074b6c,SpuInit,alta,names batch (see notes/names.md)
 80074b8c,_SpuInit,alta,"Psy-Q (psx_tomba, por bytes)"
 80074c84,SpuStart,alta,"Psy-Q (psx_tomba, por bytes)"
+80074d00,_spu_init,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
 80074f94,_spu_writeByIO,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80075160,_spu_FiDMA,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80075230,_spu_r_,alta,"Psy-Q (psx_tomba #21, por bytes)"
@@ -1165,6 +1197,7 @@ address,name,confidence,comment
 8007566c,_spu_FsetRXX,alta,"Psy-Q (psx_tomba #21, por bytes)"
 800756b4,_spu_FsetRXXa,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80075758,_spu_FgetRXXa,alta,"Psy-Q (psx_tomba #21, por bytes)"
+80075794,_spu_FsetPCR,alta,"Psy-Q (eternal-silver-sssc-decomp, por bytes)"
 800757f4,_spu_FsetDelayW,alta,"Psy-Q (psx_tomba #21, por bytes)"
 80075820,_spu_FsetDelayR,alta,"Psy-Q (psx_tomba #21, por bytes)"
 8007584c,_spu_FwaitFs,alta,"Psy-Q (psx_tomba #21, por bytes)"
