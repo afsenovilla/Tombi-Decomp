@@ -12,7 +12,8 @@ For every edited dialogue:
   - {BOX w h}: present iff the original has it; h <= original h; w <= 312 when the original box is >= 240 wide or sits at
     {MOVE 0 0} (default position), <= 256 for one-line popups without MOVE, else <= original w (boxes placed next to a
     speaker with {MOVE dx dy}); dialogues 0-2 of MFNT files (item popup verbs, width constants in the executable)
-    must not get wider
+    must not get wider (unless the patch sets verbFirst: the executable's box constants then follow
+    the verb widths, Project.verb_deltas)
   - the patch's disc sha1 matches the disc
 
   check_text_patch.py DISC.bin PATCH.tombipatch.json [-v]
@@ -27,6 +28,7 @@ import wfm_py as W
 
 MAX_W = 312
 ONE_LINE_W = 256
+VERB_FIRST = False   # set from the patch: the executable patch (verb_order.py) then follows the verb box widths
 TAG = re.compile(r"\{[^}]*\}")
 
 
@@ -87,7 +89,7 @@ def check_entry(proj, path, idx, text):
                 lim = max(ob[0], ONE_LINE_W)     # one-line system popups (item names, notices) are centred by the code
             else:
                 lim = ob[0]                      # boxes placed next to a speaker
-            if os.path.basename(path).startswith("MFNT") and idx <= 2:
+            if os.path.basename(path).startswith("MFNT") and idx <= 2 and not VERB_FIRST:
                 lim = ob[0]
             if b[0] > lim:
                 errs.append("BOX wider than allowed (%d > %d)" % (b[0], lim))
@@ -101,6 +103,8 @@ def main():
     ap.add_argument("disc"); ap.add_argument("patch"); ap.add_argument("-v", "--verbose", action="store_true")
     a = ap.parse_args()
     patch = TP.load(a.patch)
+    global VERB_FIRST
+    VERB_FIRST = bool(patch.get("verbFirst"))
     bad = 0
     try:
         TP.check_disc(patch, a.disc)

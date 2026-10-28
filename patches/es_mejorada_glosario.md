@@ -35,3 +35,19 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Pig / ol' coot / geezer | vejete, vejestorio | registro coloquial |
 | Ha ha ha | ¡Ja, ja, ja! | con comas |
 | See ya! | ¡Hasta luego! | |
+
+## Mensajes de objeto y evento (sin concordancia de género)
+
+El parche activa `verbFirst` (tools/verb_order.py: el verbo se dibuja antes del nombre del objeto y las constantes de
+anchura de la caja de EXE/MAIN5.EXE siguen a los textos, `Project.verb_deltas`), así que los verbos son formas
+personales que valen para cualquier objeto:
+
+| Diálogo (todos los MFNTxxxS.WFM) | Original | Este parche |
+|---|---|---|
+| #0 objeto usado | `Usado(a) Rana` | `Usas Rana` |
+| #1 objeto equipado | `Equipada Rana` | `Equipas Rana` |
+| #2 objeto obtenido | `Rana Ganada` | `Consigues Rana` |
+| CFNT999S #0, cartel de evento completado | `¡DESPEJADA!` | `¡SUPERADO!` |
+
+`Obtienes` no cabe: la fuente de 16 px de los MFNT no tiene `O` mayúscula; `¡COMPLETADO!` tiene 12 letras y el cartel
+admite 11 (tablas de EXE/MAIN5.EXE).
