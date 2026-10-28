@@ -486,6 +486,26 @@ def emit_data(outdir, amap, needed):
     # boundary (LD0SYS.BIN lands across the end of MAIN0's .data into its .bss) stays contiguous; the region names
     # are aliases into it (syms.ld).  The scratchpad and the I/O page are their own arrays.
     blobs, ram_parts = [], []
+    # The end entry of an animation script is {index, b, 0x8000 | duration}: with a short duration and b != 0
+    # its second word reads as a MAIN0 address (player anim 0xF, the egg smash/chick store, ends with 0x800100D0).
+    # Relocated, the end flag went: AnimAdvance ran on through the next scripts and Tombi hung in mid-air for 119
+    # frames instead of 16.  Walk the scripts of PLAYER_ANIM_TABLE and keep their end words as they are.
+    anim_ends = set()
+    def _rd(addr):
+        for _n, rs, re_, rp, rf in amap.regs:
+            if rs <= addr < re_ - 3 and rp:
+                with open(rp, "rb") as fh: fh.seek(rf + addr - rs); return int.from_bytes(fh.read(4), "little")
+        return 0
+    if "PLAYER_ANIM_TABLE" in amap.syms:
+        t = amap.syms["PLAYER_ANIM_TABLE"]
+        for k in range(90):
+            ent = _rd(t + 4 * k)
+            for _ in range(256):
+                if not (0x80010000 <= ent < 0x80200000): break
+                v = _rd(ent + 4) >> 16
+                if v & 0x4000: break
+                if v & 0x8000: anim_ends.add(ent + 4); break
+                ent += 8
     for name, s, e, path, foff in amap.regs:
         n = (e - s + 3) // 4
         in_ram = 0x80000000 <= s < 0x80200000
@@ -534,6 +554,8 @@ def emit_data(outdir, amap, needed):
             a = s + 4 * i
             if amap.is_code(a) or w < 0x80010000 and not (0x1F800000 <= w < 0x1F800400) or w >= 0x80200000 \
                     or (w & 3) and not (0x1F800000 <= w < 0x1F800400) or (w & 0xFFFF) == 0 and a not in load_ptrs:   # (round values: flags, not pointers)
+                words.append("0x%X" % w); continue
+            if a in anim_ends:
                 words.append("0x%X" % w); continue
             th = amap.thunk(w) if a not in data_runs else None
             if th:
