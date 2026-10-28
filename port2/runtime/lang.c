@@ -573,7 +573,13 @@ int port_lang_overlay_loaded(void *dst, int bytes, int id) {
     int lba0 = link_lba(e0), lban = link_lba(en); unsigned size0 = link_size(e0), sizen = link_size(en);
     if (lba0 == lban) return 0;                          /* the same file in both tables: nothing to do */
     unsigned sect0 = (size0 + 2047) / 2048, bytes0 = sect0 * 2048;
-    if (bytes0 > PORT_OVL_END - PORT_OVL_BASE || sizen > (unsigned)bytes) { port_printf("[port2] frame %d: --lang: file %d: twin %u bytes, read %d: not composed\n", port_frame, id, size0, bytes); return 0; }
+    /* the twin must fit what the game read (the read is clipped to the region: X001's 360316 bytes are 176 sectors,
+       360448, 40 more than the region holds, and the old test on the rounded size refused to compose X501: the
+       language's overlay was then left raw, its pointers translated with the previous overlay's map, and AREA01
+       crashed in drawObjectSpriteRotScaled on a sprite pointer of garbage) */
+    unsigned copy0 = size0 < (unsigned)bytes ? size0 : (unsigned)bytes;
+    if (size0 > (unsigned)bytes + 2048 || sizen > (unsigned)bytes + 2048) { port_printf("[port2] frame %d: --lang: file %d: twin %u bytes, language %u, read %d: not composed (the language's overlay is used raw: expect faults)\n", port_frame, id, size0, sizen, bytes); return 0; }
+    if (sizen > (unsigned)bytes) sizen = (unsigned)bytes;
     /* the map of this file: the one of its last load when the ring still holds it (the same alignment, the same
        spill and Bn: pointers the game kept from that load stay valid), else a new slot */
     int slot = -1;
@@ -602,12 +608,12 @@ int port_lang_overlay_loaded(void *dst, int bytes, int id) {
             ovl_delta = (int)(pn - p0);
         }
     }
-    memcpy(dst, twin, bytes0);
-    if ((unsigned)bytes > bytes0) memset((unsigned char *)dst + bytes0, 0, bytes - bytes0);
+    memcpy(dst, twin, copy0);
+    if ((unsigned)bytes > copy0) memset((unsigned char *)dst + copy0, 0, bytes - copy0);
     const PortOvlCode *code = port_ovl_code_ranges();
     int changed = 0, ptrs = 0, spilled = 0;
     unsigned char *img = dst;
-    for (unsigned oa = 4; oa + 4 <= size0; oa += 4) {
+    for (unsigned oa = 4; oa + 4 <= copy0; oa += 4) {
         if (code && port_ovl_in_ranges(code, PORT_OVL_BASE + oa)) continue;
         long ob = a2b(m, oa);
         if (ob < 0 || (unsigned)ob + 4 > sizen) continue;
@@ -627,7 +633,7 @@ int port_lang_overlay_loaded(void *dst, int bytes, int id) {
     }
     bss_decide(m, "overlay");
     relocate_spill(m);
-    int blobs = named_blobs(m, img, bytes0, 4);
+    int blobs = named_blobs(m, img, copy0, 4);
     port_printf("[port2] frame %d: --lang: file %d composed over its MAIN0 twin (%u vs %u bytes: %d chunks, %d gaps, %u spill bytes, tail %+d%s): "
                 "%d data words from the language (%d pointers, %d into the spill%s%s)\n", port_frame, id, sizen, size0, m->nc, m->ng, m->nspill, m->bss_delta,
                 code ? "" : ", no code ranges known", changed, ptrs, spilled, blobs ? ", a WFM3 bank whole" : "", slot >= 0 && m->relocated && ovl_loads ? "" : "");

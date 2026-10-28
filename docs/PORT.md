@@ -1794,6 +1794,29 @@ stall is host I/O or presentation on that machine, still open.
   game's own C and data, headless the letters fly in, hold with the bob and scatter; nothing wraps at 16 bits in
   the 32-bit build (`wb4`/`wb8` are masked to a byte by the game itself).
 
+#### AREA01 in Spanish: the twin that is one sector too big (`not composed`)
+
+Build c522181 on real Windows crashed in AREA01 (`drawObjectSpriteRotScaled+0xf0`, fault address `803c0000`,
+sprite pointers 0 then garbage) ~300 frames after `--lang: file 375: twin 360316 bytes, read 360408: not
+composed`. `port_lang_overlay_loaded` refused when the twin's whole-sector size (X001: 360316 bytes = 176
+sectors = 360448) exceeded the overlay region (360408 bytes); the language's X501 (360280 bytes) was then
+loaded raw and the relocator translated its words with `port_lang_xlate_word`, i.e. with the *previous*
+overlay's map (`ovl_cur`, X000's), so its own-region pointers became garbage. Headless (`--lang 5`, debug
+select AREA01) the old build dies the same way at frame 1462 (`drawModelUnlit`, `signal 11`). The test is now
+on the twin's real size against what was read (`copy0 = min(size0, bytes)`: the twin is copied up to that,
+the rest zeroed), and the language's size is clipped to the read as well (MAIN1..3's X?01 are 360444..360480
+bytes, more than the region: their tails are bss-sized padding). Every area overlay now composes under
+`--lang 5` (one room per area: AREA00 338, AREA01/02/13 375, AREA03 470, AREA04 524, AREA05/08 601/704,
+AREA06 631, AREA09 730, AREA11 1042, 6..10 chunks each, no fault) and X001 under `--lang 1..4` too. The areas
+10, 14, 16..19 crash in `spawnObjectFromRecord` through the debug select with `--lang 0` as well (section 0 is
+no room of theirs: the sweep's numbering, not a language fault).
+
+The null writes of that run (`X000+0xe8` / `+0xf6` to addresses `0x14` / `0x10`, 428 each, one per frame for
+8.5 s) are a chained-object placement handler (`FUN_8011dd30` / `func_8011DE84` family: `q = o->d94; q->y = ...;
+q->a = ...`, y at +0x14 before a at +0x10) whose child `d94` is NULL; "X000+off" names an area-variant function
+(`port_sym_near` reports areamap entries by the area's name). See the gdb notes in the commit for what the
+headless probes found.
+
 ### Pointer audit and room sweep (`port2/tools/audit_pointers.py`, `port2/tools/sweep_areas.py`)
 
 Two tools check what open point 1 is about: the retail code pointers the game jumps through.
