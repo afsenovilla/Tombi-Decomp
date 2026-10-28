@@ -43,7 +43,9 @@ void port_window_start(void) {
     }
     extern int port_widescreen;
     int ww = (port_window_square ? 320 : 256 * 4 / 3) * port_window_scale;
-    if (port_widescreen) ww = ww * (320 + 2 * port_widescreen) / 320;
+    if (port_widescreen)        /* the same logical width port_window_fit uses, times the scale (scaling the rounded 4:3
+                                   width came out a pixel short of k * lw, so the fit dropped to 1x) */
+        ww = (port_window_square ? 320 + 2 * port_widescreen : 256 * 4 * (320 + 2 * port_widescreen) / (3 * 320)) * port_window_scale;
     win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
                            256 * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
                            (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
