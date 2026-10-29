@@ -14,7 +14,9 @@
 typedef unsigned char gpu_u8; typedef unsigned short gpu_u16; typedef unsigned int gpu_u32;
 
 typedef struct { int x, y, r, g, b, u, v; } GpuVtx;             /* x, y: VRAM pixels (offset applied); r, g, b 0..255 */
-typedef struct { int tx, ty, depth, cx, cy; } GpuTex;           /* texture page base, 0 = 4-bit / 1 = 8-bit / 2 = 15-bit, CLUT x, y */
+/* --texture-pack (texpack.c): a replacement image (GL texture) for the texels (ou .. ou + w - 1, ov .. ov + h - 1) of the page */
+typedef struct PortTexRep { unsigned gltex; int ou, ov, w, h; } PortTexRep;
+typedef struct { int tx, ty, depth, cx, cy; const PortTexRep *rep; } GpuTex;   /* texture page base, 0 = 4-bit / 1 = 8-bit / 2 = 15-bit, CLUT x, y; rep: 0 = none */
 
 typedef struct {
     int abr;                        /* semi-transparency mode 0..3 */
