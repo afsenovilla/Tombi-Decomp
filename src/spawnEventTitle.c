@@ -160,6 +160,11 @@ void FUN_8005aa74(int event_id, int completed, int duration, int state)
         break;
     }
     done = 0;
+#ifdef PORT2
+    /* belt and braces for --lang: a missing table or entry (a composed overlay that lost part of the table)
+       shows no title instead of walking from address 0 */
+    if (tbl == NULL || tbl[event_id] == NULL) return;
+#endif
     p = tbl[event_id];
     D_8009BC9B = 1;
     once = 0;

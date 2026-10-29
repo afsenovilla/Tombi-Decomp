@@ -357,13 +357,18 @@ static unsigned char *bn_get(Map *m) {
     if (!m->Bn) { m->Bn = malloc(m->nb + 4); memcpy(m->Bn, m->B, m->nb); }
     return m->Bn;
 }
-/* a MAINn / language-overlay address -> the MAIN0 / X0 layout (addr), or a native pointer into a spill */
+/* a MAINn / language-overlay address -> the MAIN0 / X0 layout (addr), or a native pointer into a spill.
+   spill_whole: a pointer into a gap that changed size resolves into Bn, not the gap's spill copy: the item it
+   names may run on past the gap's end into a matched chunk (I5NFO's per-event title table, 200 pointers, starts
+   in a gap and its entries from 66 on lie in the next chunk; the spill held only the first 66 and spawnEventTitle
+   read NULL past them).  Bn is the language's whole image with its pointer words made native. */
 static Xlat xlate(u32p v) {
     Xlat x = { v, 0 };
     if (!port_lang) return x;
     if (v >= PORT_MAIN0_LOAD && v < PORT_MAIN0_LOAD + main_map.nb) {
         long a = b2a(&main_map, v - PORT_MAIN0_LOAD, &x.native);
         if (a >= 0) { x.addr = PORT_MAIN0_LOAD + (u32p)a; if (item_spills(&main_map, v - PORT_MAIN0_LOAD, (unsigned)a)) x.native = bn_get(&main_map) + (v - PORT_MAIN0_LOAD); }
+        else if (a == -1) x.native = bn_get(&main_map) + (v - PORT_MAIN0_LOAD);   /* whole item: see spill_whole */
         else if (a == -2) x.addr = v - main_map.bss_adj;
         return x;
     }
@@ -374,6 +379,7 @@ static Xlat xlate(u32p v) {
         if (m && m->nc && v - base_b < m->nb) {
             long a = b2a(m, v - base_b, &x.native);
             if (a >= 0) { x.addr = PORT_OVL_BASE + (u32p)a; if (item_spills(m, v - base_b, (unsigned)a)) x.native = bn_get((Map *)m) + (v - base_b); }
+            else if (a == -1) x.native = bn_get((Map *)m) + (v - base_b);   /* whole item: see spill_whole */
             return x;
         }
         x.addr = v - ovl_delta - (m && m->nc ? m->bss_adj : 0);
