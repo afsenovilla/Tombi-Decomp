@@ -261,6 +261,7 @@ static int usage(const char *argv0) {
    with its sprite page replaced by the surviving Lumberjack page (file 155 = SYSTEM/A06100, as SYS list 61 loads it) and
    its CLUT block by AREA11/CLUT02 (file 839):
    {file id, slot, kind, addr, size, w, h, type}; file ids are global (FILE_LINKS), so they load from any area.
+   AREA08's villager page B000 (file 699, at x 64 in AREA08) is also loaded at VRAM x 512 for the stand-ins (w1e + 7).
    spawnSectionObjectsAlt skips the area-wide APD pass for it (fixes.txt): AREA11 would read slot 5, never loaded here */
 int port_civ_test;
 static const struct { short id; unsigned char slot, kind; unsigned addr, size; short w, h; unsigned type; } port_civ_recs[] = {
@@ -268,7 +269,8 @@ static const struct { short id; unsigned char slot, kind; unsigned addr, size; s
     {702, 128, 0x8e, 0, 0x4008, 0, 0, 4}, {0, 255, 0x8f, 0, 0x3ba20, 0, 0, 0xffffffffu}, {0, 255, 0x62, 0, 0xca3c, 0, 0, 0xffffffffu},
     {703, 255, 0x3a, 0, 0x11dc, 0, 0, 3}, {0, 255, 0x3b, 0, 0x2654, 0, 0, 0xffffffffu}, {0, 255, 0x3c, 0, 0x260, 0, 0, 0xffffffffu},
     {0, 255, 0x3d, 0, 0x190, 0, 0, 0xffffffffu}, {0, 255, 0x3e, 0, 0xc7c, 0, 0, 0xffffffffu}, {0, 255, 0x80, 0, 0x80, 0, 0, 0xffffffffu},
-    {0, 255, 0x84, 0, 0x20, 0, 0, 0xffffffffu}, {704, 255, 0xf0, 0, 0x218dc, 0, 0, 2}, {-1, 0, 0, 0, 0, 0, 0, 0}};
+    {0, 255, 0x84, 0, 0x20, 0, 0, 0xffffffffu},
+    {699, 128, 0x10, 0, 0x200, 192, 256, 1}, {704, 255, 0xf0, 0, 0x218dc, 0, 0, 2}, {-1, 0, 0, 0, 0, 0, 0, 0}};
 static unsigned char port_civ_buf[sizeof port_civ_recs];
 /* --civ-test spawn: AREA08 s0's row, optionally moved with --civ-spawn X,Y (world) to stand next to a resident */
 /* SPR table for AREA11 subtype 0 (frames 0..29 of its scripts: idle 0-2, walk 3-20, talk 21-29), built at runtime from
@@ -294,6 +296,29 @@ int port_civ_spr(void) {
     }
     return (int)(long)port_civ_spr_buf;
 }
+/* Real sprites of AREA16 subtypes 0..2 and AREA17 subtype 0 (docs/CIVILIZATION.md): one standing figure of the
+   surviving page (w1e 1 = VRAM x 64, boxes from tools/civ_sheets.py comps()) with its real CLUT row (VRAM
+   (128 + 16 * (r % 16), 480 + r / 16)): AREA16/CLUT07 rows 21 / 37 / 53, AREA17/CLUT03 row 1. Their tables are lost,
+   so every frame index of the anim scripts (up to 128) points to the same part: the figure stands still. */
+static const struct { unsigned char area, sub, u, v, w, h, row; } port_civ_figs[] = {
+    {16, 0, 67, 48, 36, 45, 21}, {16, 1, 145, 148, 24, 35, 37}, {16, 2, 75, 203, 50, 52, 53}, {17, 0, 25, 3, 22, 45, 1}};
+static unsigned char port_civ_fig_buf[4][128 * 4 + 16];
+int port_civ_fig(int area, int sub) {
+    int i, f;
+    for (i = 0; i < 4; i++) if (port_civ_figs[i].area == area && port_civ_figs[i].sub == sub) break;
+    if (i == 4) return 0;
+    {
+        unsigned char *p = port_civ_fig_buf[i], *e = p + 128 * 4;
+        int u0 = port_civ_figs[i].u, v0 = port_civ_figs[i].v, w = port_civ_figs[i].w, h = port_civ_figs[i].h, r = port_civ_figs[i].row;
+        unsigned clut = ((480u + r / 16) << 6) | ((128u + 16 * (r % 16)) >> 4), off = 128 * 4;
+        for (f = 0; f < 128; f++) { p[4 * f] = 1; p[4 * f + 1] = 0; p[4 * f + 2] = off & 0xFF; p[4 * f + 3] = off >> 8; }
+        e[0] = u0; e[1] = v0; e[2] = clut & 0xFF; e[3] = clut >> 8;
+        e[4] = u0 + w; e[5] = v0; e[6] = 0; e[7] = 0;
+        e[8] = u0; e[9] = v0 + h; e[10] = w; e[11] = h;
+        e[12] = u0 + w; e[13] = v0 + h; e[14] = (unsigned char)(-(w / 2)); e[15] = (unsigned char)(-h);
+        return (int)(long)p;
+    }
+}
 /* --civ-wfm FILE: replaces AREA11's dialogue bank (WFM3_DATA[0] = scratchpad 0x1F800398) before a set-0D resident talks */
 static const char *port_civ_wfm_path;
 int port_civ_line = -1;   /* --civ-line N: bank-4 line shown by every set-0D resident (dev) */
@@ -313,11 +338,12 @@ void port_civ_wfm_swap(void) {
     *(unsigned char **)port_ram_ptr(0x1F800398u) = port_civ_wfm_buf;
 }
 static int port_civ_cur_area(void) { extern void *port_ram_ptr(unsigned); return *(unsigned short *)port_ram_ptr(0x8009C960u); }
-/* which cut town is being tested: AREA11 s0 (default) or AREA17 s0, both with the AREA08 s0 stand-in list */
+/* which cut town is being tested: AREA11, AREA16 or AREA17 s0, all with the AREA08 s0 stand-in list (--civ-town N
+   opens the debug area select on it) */
 int port_civ_on(int area, int sec) {   /* area: GAME.selectedArea (the load list index may add AREA_VARIANT: re-read it) */
     extern void *port_ram_ptr(unsigned);
     area = *(unsigned short *)port_ram_ptr(0x8009C960u);
-    return port_civ_test && sec == 0 && (area == 11 || area == 17);
+    return port_civ_test && sec == 0 && (area == 11 || area == 16 || area == 17);
 }
 /* --civ-maps DIR: DIR/AREAnn/map8E.bin and map8F.tim (tools/civ_rebuild.py) replace APD_DATA[14] / [15] */
 static const char *port_civ_maps_dir;
@@ -352,7 +378,11 @@ static short port_civ_lim[4], port_civ_campos[8];
 static int port_civ_spawn_set, port_civ_spawn_x, port_civ_spawn_y;
 static void port_civ_default_spawn(int *x, int *y) {
     if (port_civ_spawn_set) { *x = port_civ_spawn_x; *y = port_civ_spawn_y; return; }
-    if (port_civ_cur_area() == 17 && port_civ_maps_dir) { *x = 223; *y = 540; return; }   /* above exit 0 (y > 0x23A) */
+    if (port_civ_maps_dir) switch (port_civ_cur_area()) {   /* just inside the exit from Civilization Town (AREA18) */
+    case 17: *x = 223; *y = 540; return;   /* above exit 0 (y > 0x23A) */
+    case 11: *x = 530; *y = 410; return;   /* west of exit 0 (x > 555, y 361..460) */
+    case 16: *x = -95; *y = 524; return;   /* east of exit 0 (x < -116, y 520..529) */
+    }
     *x = 60; *y = 468;                                                                      /* AREA08 s0 spawn 0 */
 }
 short *port_civ_limits(short *row) {
@@ -376,9 +406,14 @@ short *port_civ_row(short *row) {
 }
 int port_civ_list(void) {
     memcpy(port_civ_buf, port_civ_recs, sizeof port_civ_recs);
-    if (port_civ_cur_area() == 17) {   /* Iron Town: AREA08's own sprite page and CLUT block (its villager stands in) */
-        port_civ_buf[0] = 699 & 0xFF; port_civ_buf[1] = 699 >> 8; port_civ_buf[12] = 192; port_civ_buf[13] = 0; port_civ_buf[16] = 1;
-        port_civ_buf[40] = 701 & 0xFF; port_civ_buf[41] = 701 >> 8;
+    /* each town's surviving page (file id, VRAM x 64) and its area CLUT block: Stonetown SYSTEM/A07600 (320 words) +
+       AREA16/CLUT07, Iron Town SYSTEM/A08000 + AREA17/CLUT03 (AREA11: A06100 + AREA11/CLUT02, the table's default) */
+    if (port_civ_cur_area() == 16) {
+        port_civ_buf[0] = 182 & 0xFF; port_civ_buf[1] = 182 >> 8; port_civ_buf[12] = 320 & 0xFF; port_civ_buf[13] = 320 >> 8;
+        port_civ_buf[40] = 1027 & 0xFF; port_civ_buf[41] = 1027 >> 8;
+    } else if (port_civ_cur_area() == 17) {
+        port_civ_buf[0] = 192 & 0xFF; port_civ_buf[1] = 192 >> 8;
+        port_civ_buf[40] = 1046 & 0xFF; port_civ_buf[41] = 1046 >> 8;
     }
     if (port_verbose) port_printf("[port] --civ-test: AREA%02d s0 loads AREA08 s0's map, sprites and I0NFO2\n", port_civ_cur_area());
     return (int)(long)port_civ_buf;
@@ -415,6 +450,15 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
+        else if (!strcmp(a, "--civ-town") && v) {   /* --civ-test + the debug area select opened on AREA N s0 */
+            char b[48]; int n = atoi(argv[++i]);
+            if (n != 11 && n != 16 && n != 17) return usage(argv[0]);
+            port_civ_test = 1;
+            port_poke_add("900:1F8001B4:1");
+            snprintf(b, sizeof b, "1250:8009C960:%X:2", n); port_poke_add(b);
+            port_poke_add("1250:8009C962:0:2");
+            port_pad_script("1000:start,1300:circle:3");
+        }
         else if (!strcmp(a, "--civ-wfm") && v) port_civ_wfm_path = argv[++i];
         else if (!strcmp(a, "--civ-line") && v) port_civ_line = atoi(argv[++i]);
         else if (!strcmp(a, "--civ-maps") && v) port_civ_maps_dir = argv[++i];
