@@ -450,6 +450,13 @@ salida al volver (salida 0 de AREA11 s1 → 18:1 punto 1, etc.).
   Stonetown con sus tejados de tejas verdes, e Iron Town con la puerta redonda de hierro y el cartel «Iron the No.1».
   Le sigue `BUNMEI2.STR`, con la sala de máquinas y los engranajes.
   `python3 tools/str.py frames game/disc/Tombi.bin BUNMEI SALIDA 12 25` saca fotogramas (nunca se suben).
+- **Solo se reproduce BUNMEI2.** El id de película es `MOVIE_ID` (0x1F8001CD); `moviePlayerTask` reproduce el archivo
+  `MOVIE_FILE_IDS[D_80077F3C[id]]`, así que el id 11 es BUNMEI.STR (archivo 323) y el 12 es BUNMEI2.STR (324). Nada
+  guarda 11: en PAL se escriben 0-9, 0x14 y 0x15, y la tabla de fin de sección de x014 `D_80125684` tiene 10 y 13-19.
+  BUNMEI2 es el id 12, que solo pone `waterfallElderHintScene` (x017, `sb` en 0x80119204), la escena del anciano de
+  10.000 años que termina con el evento 0x49. Resto: esa escena llama antes a `cdSeekStream(0xB)` (0x801191A0), una
+  búsqueda previa de BUNMEI, y luego reproduce el 12. JP (SLPS-01144 x17) también usa 12. BUNMEI.STR está en el disco
+  pero no se usa.
 - **Imágenes de referencia de la comunidad.** Un colaborador de TCRF coloreó las páginas de recarga y montó vistas del
   decorado (siete imágenes, más dos «capturas» de Iron Town y Lumberjack Town). Son reconstrucciones hechas con
   fotogramas de BUNMEI.STR y una CLUT deducida a mano, no capturas previas al lanzamiento ni paletas del juego. Las usamos

@@ -432,6 +432,12 @@ The town's spawn points are the `GAME_SELECTED_SPAWN_POINT` values its own exit 
   with its green-tiled roofs, and Iron Town with the round iron gate and the "Iron the No.1" sign. `BUNMEI2.STR` follows
   with the machine room and the gears. `python3 tools/str.py frames game/disc/Tombi.bin BUNMEI OUT 12 25` extracts
   stills (never committed).
+- **Only BUNMEI2 is played.** The movie id is `MOVIE_ID` (0x1F8001CD); `moviePlayerTask` plays file
+  `MOVIE_FILE_IDS[D_80077F3C[id]]`, so id 11 is BUNMEI.STR (file 323) and id 12 is BUNMEI2.STR (324). Nothing stores 11:
+  the PAL writers set 0-9, 0x14, 0x15, and x014's section-clear table `D_80125684` holds 10, 13-19. BUNMEI2 is id 12,
+  set only by `waterfallElderHintScene` (x017, `sb` at 0x80119204), the elder's 10,000-year scene that ends with event
+  0x49. Leftover: that scene first calls `cdSeekStream(0xB)` (0x801191A0), a pre-seek to BUNMEI, then plays 12. JP
+  (SLPS-01144 x17) also uses 12. BUNMEI.STR is on the disc but unused.
 - **Community reference images.** A TCRF contributor coloured the reload pages and assembled scenery views (seven
   images, plus two "screenshots" of Iron Town and Lumberjack Town). They are reconstructions made from BUNMEI.STR frames
   with a custom-derived CLUT, not pre-release screenshots and not in-game palettes. We use them as visual reference
