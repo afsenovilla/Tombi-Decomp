@@ -248,8 +248,9 @@ even though the tables themselves are lost.
     TCRF's "Male Stonetown Resident" (the strongman). With this row the A07600 4 bpp page at (75, 202), 50 x 52, matches TCRF's "Male
     Stonetown Resident" sprite pixel-exact (100 % of the pixels in 5-bit colour, no silhouette mismatch); no other row
     of the file does. **Confirmed.**
-  - AREA16/CLUT07 rows 48 and 54: TCRF's "Female Stonetown Resident" and the other Stone People. Plausible, not
-    confirmed.
+  - AREA16/CLUT07 rows 48 and 54 as TCRF's "Female Stonetown Resident" and the other Stone People: **refuted**. Row 54
+    is the red-shirt resident of the FMV (A08600 figure, see below), and the Female Stonetown Resident uses a custom CLUT
+    taken from TCRF.
   - The TCRF names, and reading AREA11 as TCRF's "Lumberjack Town" (the hard-hat worker belonging to the Factory, the old
     man to the town), are our identification.
   - **AREA11/CLUT02 rows 4, 36 and 68** (the same rows are in AREA17/CLUT03, AREA17/CLUT06 and AREA18/CLUT02):
@@ -269,16 +270,22 @@ even though the tables themselves are lost.
   - **Community FMV crops with palette strips (images 138-140 of the project).** Each strip is a real disc row,
     15/15 colours exact (shown as 5-bit << 3), so these are not FMV-derived palettes:
     - red-shirt, curly-haired Iron Town resident (BUNMEI.STR, frame not identified):
-      `0000 0421 7FFF 56B5 318C 4AFF 3639 2174 21BC 10D6 0010 01B6 0174 0132 6358 4AF0` = **row 3** of AREA16/CLUT06/07,
-      AREA17/CLUT03/06, AREA18/CLUT02 (all discs);
+      `0000 0421 7FFF 56B5 318C 4AFF 3639 2174 21BC 10D6 0010 01B6 0174 0132 6358 4AF0` = **row 54** of AREA16/CLUT06/07 and AREA18/CLUT02,
+      **row 49** of AREA17/CLUT03/06 (all discs; row = 16-entry block of the file);
     - purple-dressed resident (BUNMEI.STR, frame not identified):
-      `0000 2A17 7FFF 4210 318C 2108 52DD 3A59 6593 5571 454F 011B 00B3 006B 0218 0173` = **row 2** of the same files;
+      `0000 2A17 7FFF 4210 318C 2108 52DD 3A59 6593 5571 454F 011B 00B3 006B 0218 0173` = **row 38** of AREA16/CLUT06/07 and AREA18/CLUT02, **row 33** of AREA17/CLUT03/06;
     - bald, brown man inside a building: `0000 0421 4210 294A 6B5A 1E39 012F 1193 56B5 4A52 2D6B 5EF7 35AD 6B5A 0000 7FFF`
       = row 15 of the CLUT files of AREA00, 01, 02 and other areas (a row every area shares, not a Civilization row).
-    Rows 2 and 3 sit next to row 1 (the Iron Men) in the same resident block, and none of the three draws a surviving
-    page (A06100 / A07600 / A08000 4 bpp) correctly. So rows 2 and 3 are most likely the palettes of residents whose
-    drawings are lost (AREA17 subtypes 1-4, AREA16 subtype 3 or AREA11 subtypes 1-4). Which subtype each one is cannot
-    be proven. These FMV crops are the only surviving picture of those residents.
+    - blue-hat, red-cloaked figure seen from behind on the Iron Town lawn (image 143; BUNMEI.STR, frame not identified).
+    These colours fit the **AREA18 figure page `SYSTEM/A08600`** (4 bpp in its first 64 words; tested with every resident row of
+    AREA18/CLUT02, judged by eye; FMV renders are 3D, so this is not a silhouette proof):
+    - 139 = the big curly-haired figure of A08600 (rows y 144-191) with row 54: red hair, red/salmon clothes;
+    - 140 = the same figure with row 38: orange hair, purple dress;
+    - 143 = the wide-hat cloaked figure (y 96-141, which has back views); the closest row is AREA18/CLUT02 row 22 (blue-grey
+      hat, orange trim), but no row gives a red cloak, so this one is unresolved.
+    These residents are drawn only on A08600 (AREA18's page), not on the surviving Iron Town / Stonetown pages. Row 54 of
+    AREA16/CLUT07, the old guess for the Female Stonetown Resident, is therefore the red-shirt resident's palette; the guess
+    was wrong (that subtype now uses the custom CLUT taken from TCRF).
 - Which row each top-down resident uses is not in the surviving code: a resident's CLUT comes from the parts of its
   SPR table (the actor inits clear `b0d`, so `w08` is not used), and those tables are lost. `tools/civ_sheets.py`
   states the file and row it draws each resident group with (`sub_pal`, `PAL_NOTE`).
