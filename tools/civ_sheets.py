@@ -659,7 +659,7 @@ def perspectiva(area,lang,outd):
         title="Perspective diagram — "+t['en']
         sub="Data from the code, seen in perspective. The only invented value is the house height: the code doesn't store it."
         leg=[(B,"%s1–%s%d: house. When Tomba walks in, the roof disappears and the inside shows"%(hl,hl,nh)),((210,30,30),"Red number: resident outdoors (the dot on the ground is where they stand)"),((160,40,190),"Purple number: resident inside a house"),((20,160,40),"Green on the ground: area that resident walks around in"),((245,200,40),"Small yellow cube: object or scenery prop"),((0,0,0),ex)]
-        foot="Sources: houses = TOPDOWN_TRIGGER_RECT_LISTS (I0NFO2 0x800FEC9C); residents, walk areas and props = NPC_SET_%02X (I0NFO2);\nexits = %s. Background picture and collision map are lost from the disc, so there are no streets or walls.\nExits are drawn at the map edge you leave through (the code only gives \"x greater than...\" or \"y less than...\")."%(var,t['src'])
+        foot="Sources: houses = TOPDOWN_TRIGGER_RECT_LISTS (I0NFO2 0x800FEC9C); residents, walk areas and props = NPC_SET_%02X (I0NFO2);\nexits = %s.\nBackground picture and collision map are lost from the disc, so there are no streets or walls.\nExits are drawn at the map edge you leave through (the code only gives \"x greater than...\" or \"y less than...\")."%(var,t['src'].replace('destinos','destinations'))
         lh="Legend"
     d.text((30,20),title,fill='black',font=F(28,True)); d.text((30,62),sub,fill=(60,60,60),font=F(19))
     y=1060; d.text((30,y-42),lh,fill='black',font=F(24,True))
