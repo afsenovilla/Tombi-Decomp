@@ -177,7 +177,7 @@ jobs:
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --paths tools \
-            --icon tools/icons/port.ico --add-data "tools/icons/port.ico;icons" --add-data "tools/icons/port.png;icons" --add-data "build_id.txt;." \
+            --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "build_id.txt;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
             --add-data "tools/wfm_charmap.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" \
             --add-binary "build/win-bin/tombi2.exe;." --add-binary "build/win-bin/SDL2.dll;." \

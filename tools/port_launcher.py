@@ -299,7 +299,7 @@ BUILD_ID = build_id()
 
 def set_icon(root):
     for d in (os.path.join(getattr(sys, "_MEIPASS", ""), "icons"), os.path.join(ROOT, "tools", "icons")):
-        for name in ("port", "gfx"):
+        for name in ("launcher", "port", "gfx"):
             ico, png = os.path.join(d, name + ".ico"), os.path.join(d, name + ".png")
             try:
                 if os.name == "nt" and os.path.isfile(ico):
