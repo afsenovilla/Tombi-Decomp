@@ -604,7 +604,7 @@ OUT/bp/tombi2 --headless --skip-movies --data OUT/civdata --lang 5 --civ-test --
 The pokes open the debug area select on AREA11 s0. `--civ-spawn 100,294` puts Tomba on the patrol line of resident 9,
 and Square talks to him (frame 1740 shows his line). `tools/civ_test_data.py` keeps the translations as text and
 writes them in priority order while the WFM stays under 26540 bytes (`--cap`). Bigger builds showed garbage glyphs, so
-six of the 18 lines fit (`#249 #250 #251 #252 #254 #257`); the script lists the rest.
+six of the 18 lines fit (`#249 #250 #251 #252 #254 #257`) in the disc file. The script also writes `civ_MFNT110S.WFM` with all 18 lines; `--civ-wfm OUT/civdata/civ_MFNT110S.WFM` makes the port load that bank straight into memory before a resident talks, so every line plays (checked: with the retail data and this option, resident 9 says his translated line).
 
 ## Validation (tools/topdown.py)
 

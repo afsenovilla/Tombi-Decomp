@@ -412,3 +412,7 @@ src/i0nfo2/topdownA11SceneryHandler.c | o->visible = 1; | { extern int port_civ_
 # runtime-built SPR table (port_civ_spr: every frame = the front-facing hard-hat worker of the page, CLUT row 4).
 # The other subtypes' pages are lost: they are not drawn (b0a 0xD = the set's actors).
 src/i0nfo2/topdownA11ActorInit.c | o->b0d = 0; | o->b0d = 0; { extern int port_civ_test; extern int port_civ_spr(void); if (port_civ_test && o->subtype == 0) { o->d3c = port_civ_spr(); o->w1e = 1; } }
+# --civ-wfm FILE: AREA11's dialogue bank (WFM3_DATA[0], loaded from AREA11/MFNT110S.WFM) is replaced by FILE before a
+# resident talks, so a bank larger than the file's 13 disc sectors (all the translated lines of tools/civ_test_data.py)
+# can be shown; port only, read once into the heap.
+src/i0nfo2/topdownA11ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); }

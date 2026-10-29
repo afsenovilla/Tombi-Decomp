@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Builds the data folder for the port's --civ-test (the cut top-down town AREA11 s0, docs/CIVILIZATION.md "Port test").
 
-  python3 tools/civ_test_data.py OUT_DIR [--data data] [--lang 5]
+  python3 tools/civ_test_data.py OUT_DIR [--data data] [--cap BYTES]
+Also writes OUT_DIR/civ_MFNT110S.WFM with ALL the lines (no cap) for the port's --civ-wfm side-file load.
 
 OUT_DIR becomes a copy of your extracted data folder (tools/extract_data.py): every file is a symlink to the original,
 except AREA11/MFNT110S.WFM and the language's SYS/LD?AR11.BIN, which are rebuilt with the Spanish lines below written
@@ -86,6 +87,19 @@ def build(data, out, lang=5, cap=None):
                                                             WFM, len(files[WFM]), limit))
 
 
+def build_wfm(data, out_wfm):
+    """All lines, no cap: the whole MFNT110S bank as a side file for the port's --civ-wfm (read straight into memory,
+    not through the disc sectors)."""
+    p = TC.Project(TC.Source(data))
+    for d, t in LINES:
+        p.edits.setdefault(WFM, {})[BASE_K4 + d] = "{BOX 256 42}{VOICE 6 0}{MOVE 0 0}" + t + "{WAIT}{CLEAR}"
+    f, errors = p.encode_edited()
+    if errors:
+        raise SystemExit("\n".join(errors[:10]))
+    open(out_wfm, "wb").write(f[WFM])
+    print("%s: all %d lines, %d bytes (port: --civ-wfm %s)" % (out_wfm, len(LINES), len(f[WFM]), out_wfm))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("out")
@@ -93,6 +107,7 @@ def main():
     ap.add_argument("--cap", type=int, default=26540, help="byte limit for the rebuilt WFM (default 26540: checked in the port; a 26600-byte build with 7 lines showed garbage glyphs, so the 13-sector limit of 26624 is not the real one)")
     a = ap.parse_args()
     build(a.data, a.out, cap=a.cap)
+    build_wfm(a.data, os.path.join(a.out, "civ_MFNT110S.WFM"))
 
 
 if __name__ == "__main__":

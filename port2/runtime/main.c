@@ -281,8 +281,10 @@ short *port_civ_row(short *row) {
 /* SPR table for AREA11 subtype 0 (frames 0..29 of its scripts: idle 0-2, walk 3-20, talk 21-29), built at runtime from
    boxes on the surviving A06100 4 bpp page (page 0 relative, w1e 1 = VRAM x 0x40), CLUT AREA11/CLUT02 row 4 (VRAM
    (192, 480)). Frame f = the f-th figure of the page in reading order (48-pixel rows): the retail top-down tables pack
-   frames that way (docs/CIVILIZATION.md); consistent, not proven. Boxes from tools/civ_sheets.py comps(); no pixels. */
-static const unsigned char port_civ_boxes[30][4] = {{1,0,22,43}, {27,0,17,45}, {49,0,22,44}, {74,0,19,43}, {97,0,21,43}, {121,0,22,43}, {151,0,24,43}, {179,0,17,43}, {203,0,18,43}, {231,0,24,43}, {3,48,17,44}, {27,48,18,44}, {51,48,19,45}, {73,48,22,45}, {97,48,22,43}, {124,48,23,43}, {153,48,21,43}, {177,49,22,42}, {201,48,20,45}, {225,48,24,45}, {1,96,26,45}, {36,96,24,44}, {66,96,21,44}, {89,96,22,45}, {115,111,34,32}, {155,104,28,35}, {187,104,34,37}, {228,107,26,36}, {2,156,28,35}, {34,157,28,34}};
+   frames that way for AREA05/08 (not AREA19, so this is a working assumption). Figures 24..29 of the page are sitting /
+   lying poses, not talk poses, so talk frames 24..29 reuse the standing gesture figures 17..20 / 15..17 (our choice).
+   Boxes from tools/civ_sheets.py comps(); no pixels. */
+static const unsigned char port_civ_boxes[30][4] = {{1,0,22,43}, {27,0,17,45}, {49,0,22,44}, {74,0,19,43}, {97,0,21,43}, {121,0,22,43}, {151,0,24,43}, {179,0,17,43}, {203,0,18,43}, {231,0,24,43}, {3,48,17,44}, {27,48,18,44}, {51,48,19,45}, {73,48,22,45}, {97,48,22,43}, {124,48,23,43}, {153,48,21,43}, {177,49,22,42}, {201,48,20,45}, {225,48,24,45}, {1,96,26,45}, {36,96,24,44}, {66,96,21,44}, {89,96,22,45}, {177,49,22,42}, {201,48,20,45}, {225,48,24,45}, {124,48,23,43}, {153,48,21,43}, {177,49,22,42}};
 static unsigned char port_civ_spr_buf[30 * 4 + 30 * 16];
 int port_civ_spr(void) {
     unsigned char *p = port_civ_spr_buf;
@@ -298,6 +300,23 @@ int port_civ_spr(void) {
         e[12] = u0 + w; e[13] = v0 + h; e[14] = (unsigned char)(-(w / 2)); e[15] = (unsigned char)(-h);
     }
     return (int)(long)port_civ_spr_buf;
+}
+/* --civ-wfm FILE: replaces AREA11's dialogue bank (WFM3_DATA[0] = scratchpad 0x1F800398) before a set-0D resident talks */
+static const char *port_civ_wfm_path;
+static unsigned char *port_civ_wfm_buf;
+void port_civ_wfm_swap(void) {
+    extern void *port_ram_ptr(unsigned);
+    if (!port_civ_test || !port_civ_wfm_path) return;
+    if (!port_civ_wfm_buf) {
+        FILE *f = fopen(port_civ_wfm_path, "rb"); long n;
+        if (!f) { port_printf("[port] --civ-wfm: cannot open %s\n", port_civ_wfm_path); port_civ_wfm_path = 0; return; }
+        fseek(f, 0, SEEK_END); n = ftell(f); fseek(f, 0, SEEK_SET);
+        port_civ_wfm_buf = malloc(n + 16);
+        if (fread(port_civ_wfm_buf, 1, n, f) != (size_t)n) { fclose(f); port_civ_wfm_path = 0; return; }
+        fclose(f);
+        if (port_verbose) port_printf("[port] --civ-wfm: %s (%ld bytes)\n", port_civ_wfm_path, n);
+    }
+    *(unsigned char **)port_ram_ptr(0x1F800398u) = port_civ_wfm_buf;
 }
 int port_civ_list(void) {
     memcpy(port_civ_buf, port_civ_recs, sizeof port_civ_recs);
@@ -336,6 +355,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
+        else if (!strcmp(a, "--civ-wfm") && v) port_civ_wfm_path = argv[++i];
         else if (!strcmp(a, "--civ-spawn") && v) { port_civ_spawn_set = sscanf(argv[++i], "%d,%d", &port_civ_spawn_x, &port_civ_spawn_y) == 2; }
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);

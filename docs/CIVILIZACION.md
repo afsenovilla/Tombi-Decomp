@@ -622,8 +622,10 @@ SALIDA/bp/tombi2 --headless --skip-movies --data SALIDA/civdata --lang 5 --civ-t
 Los pokes abren el selector de áreas de depuración en AREA11 s0. `--civ-spawn 100,294` pone a Tombi en la línea de
 patrulla del vecino 9, y Cuadrado habla con él (el fotograma 1740 muestra su frase). `tools/civ_test_data.py` guarda las
 traducciones como texto y las escribe por orden de prioridad mientras el WFM no pase de 26540 bytes (`--cap`). Con más
-bytes salieron glifos basura, así que caben seis de las 18 frases (`#249 #250 #251 #252 #254 #257`); el script lista las
-demás.
+bytes salieron glifos basura, así que caben seis de las 18 frases (`#249 #250 #251 #252 #254 #257`) en el archivo del disco. El script escribe además
+`civ_MFNT110S.WFM` con las 18 frases; `--civ-wfm SALIDA/civdata/civ_MFNT110S.WFM` hace que el port cargue ese banco
+directamente en memoria antes de que hable un vecino, así se oyen todas (comprobado: con los datos originales y esta
+opción, el vecino 9 dice su frase traducida).
 
 ## Comprobación (tools/topdown.py)
 
