@@ -257,12 +257,14 @@ static int usage(const char *argv0) {
                 "  instead (any integer scale; docs/PORT.md \"Texture packs\")\n", argv0);
     return 2;
 }
-/* --civ-test (dev): stand-in load list for the cut AREA11 section 0, a copy of SYS/LD0AR08.BIN list 1 (AREA08 s0):
+/* --civ-test (dev): stand-in load list for the cut AREA11 section 0, a copy of SYS/LD0AR08.BIN list 1 (AREA08 s0),
+   with its sprite page replaced by the surviving Lumberjack page (file 155 = SYSTEM/A06100, as SYS list 61 loads it) and
+   its CLUT block by AREA11/CLUT02 (file 839):
    {file id, slot, kind, addr, size, w, h, type}; file ids are global (FILE_LINKS), so they load from any area.
    spawnSectionObjectsAlt skips the area-wide APD pass for it (fixes.txt): AREA11 would read slot 5, never loaded here */
 int port_civ_test;
 static const struct { short id; unsigned char slot, kind; unsigned addr, size; short w, h; unsigned type; } port_civ_recs[] = {
-    {699, 128, 0x10, 0, 0x40, 192, 256, 1}, {700, 128, 0x10, 0, 0x3c0, 64, 256, 1}, {701, 128, 0x10, 0, 0x1e00080, 256, 32, 1},
+    {155, 128, 0x10, 0, 0x40, 448, 256, 16}, {700, 128, 0x10, 0, 0x3c0, 64, 256, 1}, {839, 128, 0x10, 0, 0x1e00080, 256, 32, 1},
     {702, 128, 0x8e, 0, 0x4008, 0, 0, 4}, {0, 255, 0x8f, 0, 0x3ba20, 0, 0, 0xffffffffu}, {0, 255, 0x62, 0, 0xca3c, 0, 0, 0xffffffffu},
     {703, 255, 0x3a, 0, 0x11dc, 0, 0, 3}, {0, 255, 0x3b, 0, 0x2654, 0, 0, 0xffffffffu}, {0, 255, 0x3c, 0, 0x260, 0, 0, 0xffffffffu},
     {0, 255, 0x3d, 0, 0x190, 0, 0, 0xffffffffu}, {0, 255, 0x3e, 0, 0xc7c, 0, 0, 0xffffffffu}, {0, 255, 0x80, 0, 0x80, 0, 0, 0xffffffffu},
@@ -275,6 +277,21 @@ short *port_civ_row(short *row) {
     memcpy(port_civ_row_buf, row, sizeof port_civ_row_buf);
     if (port_civ_spawn_set) { port_civ_row_buf[0] = port_civ_spawn_x; port_civ_row_buf[1] = port_civ_spawn_y; }
     return port_civ_row_buf;
+}
+/* SPR table for AREA11 subtype 0 (frames 0..50 of its scripts): every frame is one part, the front-facing hard-hat
+   worker at (1, 0) 22 x 43 of the A06100 4 bpp page (page 0 relative, w1e 1 = VRAM x 0x40), CLUT AREA11/CLUT02 row 4
+   (VRAM (192, 480)), feet on the origin. A test stand-in: the real table (per-frame poses) is lost. */
+static unsigned char port_civ_spr_buf[51 * 4 + 16];
+int port_civ_spr(void) {
+    unsigned char *p = port_civ_spr_buf, *e = p + 51 * 4;
+    int f, u0 = 1, v0 = 0, w = 22, h = 43;
+    unsigned clut = (480u << 6) | (192u >> 4);
+    for (f = 0; f < 51; f++) { p[4 * f] = 1; p[4 * f + 1] = 0; p[4 * f + 2] = (51 * 4) & 0xFF; p[4 * f + 3] = (51 * 4) >> 8; }
+    e[0] = u0; e[1] = v0; e[2] = clut & 0xFF; e[3] = clut >> 8;
+    e[4] = u0 + w; e[5] = v0; e[6] = 0; e[7] = 0;
+    e[8] = u0; e[9] = v0 + h; e[10] = w; e[11] = h;
+    e[12] = u0 + w; e[13] = v0 + h; e[14] = (unsigned char)(-(w / 2)); e[15] = (unsigned char)(-h);
+    return (int)(long)port_civ_spr_buf;
 }
 int port_civ_list(void) {
     memcpy(port_civ_buf, port_civ_recs, sizeof port_civ_recs);

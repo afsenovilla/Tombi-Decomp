@@ -398,12 +398,17 @@ src/initPlayerAtSpawn.c | + (u16)GAME_SELECTED_SPAWN_POINT * 8); | + (u16)GAME_S
 src/spawnSectionObjectsAlt.c | n = AREA_SECTION_COUNTS[GAME]; | { extern int port_civ_test; if (port_civ_test && GAME == 11 && GAME_SELECTED_SECTION == 0) return; } n = AREA_SECTION_COUNTS[GAME];
 # The stand-in sprite tables are AREA08's: an AREA11 anim frame past the end of the table would draw a garbage part count, and the
 # props (layer 3: roofs, signs) index frames of a table that is lost, so they are not drawn at all; the residents (layer 2) are.
-src/i0nfo2/topdownDrawObjectSprite.c | *frm = *(unsigned short *)o->anim; | *frm = *(unsigned short *)o->anim; { extern int port_civ_test; if (port_civ_test && GAME[0] == 11 && ((o->category & 0x7F) == 3 || *frm >= ((unsigned short *)*(volatile int *)&o->d3c)[1] / 4)) return; }
+src/i0nfo2/topdownDrawObjectSprite.c | *frm = *(unsigned short *)o->anim; | *frm = *(unsigned short *)o->anim; { extern int port_civ_test; if (port_civ_test && GAME[0] == 11 && ((o->category & 0x7F) == 3 || ((o->category & 0x7F) == 2 && o->subtype != 0 && o->b0a == 0xD) || *frm >= ((unsigned short *)*(volatile int *)&o->d3c)[1] / 4)) return; }
 # ... and its camera limits / start come from AREA08 s0 too (AREA11 s0's rows describe no picture)
 src/initSectionCamera.c | p = (short *)&D_80078B7C[GAME[0]][GAME_SELECTED_SECTION]; | { extern int port_civ_test; p = (short *)&D_80078B7C[GAME[0]][GAME_SELECTED_SECTION]; if (port_civ_test && GAME[0] == 11 && GAME_SELECTED_SECTION == 0) p = (short *)&D_80078B7C[8][0]; }
 src/initSectionCamera.c | q = D_80079474[GAME[0]][GAME_SELECTED_SECTION]; | { extern int port_civ_test; q = D_80079474[GAME[0]][GAME_SELECTED_SECTION]; if (port_civ_test && GAME[0] == 11 && GAME_SELECTED_SECTION == 0) q = D_80079474[8][0]; }
 # The residents of set 0D wear the AREA08 villager (TOPDOWN_A08_ACTOR_DEFS[0]: its sprite table, page offset and anim
 # scripts are loaded); AREA11's own actor tables are lost, so its defs would index frames that do not exist here.
-src/i0nfo2/topdownA11ActorInit.c | o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0]; | { extern int port_civ_test; extern ObjInit TOPDOWN_A08_ACTOR_DEFS[]; if (port_civ_test) TOPDOWN_A11_ACTOR_DEFS[o->subtype] = TOPDOWN_A08_ACTOR_DEFS[0]; } o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0];
+src/i0nfo2/topdownA11ActorInit.c | o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0]; | { extern int port_civ_test; extern ObjInit TOPDOWN_A08_ACTOR_DEFS[]; if (port_civ_test && o->subtype != 0) TOPDOWN_A11_ACTOR_DEFS[o->subtype] = TOPDOWN_A08_ACTOR_DEFS[0]; } o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0];
 # AREA11's scenery (roofs, signs: TOPDOWN_A11_SCENERY_DEFS) goes through the generic sprite list with a lost table: not drawn.
 src/i0nfo2/topdownA11SceneryHandler.c | o->visible = 1; | { extern int port_civ_test; o->visible = !port_civ_test; }
+# The surviving Lumberjack page SYSTEM/A06100 replaces AREA08's sprite page in the stand-in list, and AREA11/CLUT02
+# replaces AREA08's CLUT block: subtype 0 (w1e 1, the only subtype on that page, docs/CIVILIZATION.md) is drawn with a
+# runtime-built SPR table (port_civ_spr: every frame = the front-facing hard-hat worker of the page, CLUT row 4).
+# The other subtypes' pages are lost: they are not drawn (b0a 0xD = the set's actors).
+src/i0nfo2/topdownA11ActorInit.c | o->b0d = 0; | o->b0d = 0; { extern int port_civ_test; extern int port_civ_spr(void); if (port_civ_test && o->subtype == 0) { o->d3c = port_civ_spr(); o->w1e = 1; } }
