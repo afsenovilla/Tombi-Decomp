@@ -124,10 +124,10 @@ def sub_pal(C, sub):
 PAL_NOTE = {
     'es': {16: 'Subtipos 0-2 dibujados de la página que sobrevive (w1e 1, probado); el orden de fotogramas da tipo 0 = Female Stonetown Resident, 1 = el chico, 2 = Male Stonetown Resident (coherente). Paletas reales de AREA16/CLUT07: fila 53 para el subtipo 2 (píxel a píxel con TCRF), fila 37 para el subtipo 1, el chico (confirmada por los colores de TCRF), y para el subtipo 0 un CLUT propio derivado píxel a píxel de la hoja de TCRF (no está en ningún disco). Subtipo 3 (w1e 0x11): página perdida, cápsula gris',
            11: 'Sólo el subtipo 0 se dibuja de la página que sobrevive (w1e 1, probado): Lumberjack Factory Worker, paleta real AREA11/CLUT02 fila 4 (confirmada por colores de TCRF). Subtipos 1-4 (w1e 0x0A/0x0B/0x10/0x11): página perdida, cápsula gris',
-           17: 'Sólo el subtipo 0 se dibuja de la página que sobrevive (w1e 1, probado), paleta real AREA17/CLUT03 fila 1 (según una captura del juego). Subtipos 1-4 (w1e 0x0A/0x0B/0x10/0x08): página perdida, cápsula gris'},
+           17: 'Sólo el subtipo 0 se dibuja de la página que sobrevive (w1e 1, probado), paleta real AREA17/CLUT03 fila 1 (confirmada: la misma fila que usa el vecino lateral de la Ciudad de hierro del juego final). Subtipos 1-4 (w1e 0x0A/0x0B/0x10/0x08): página perdida, cápsula gris'},
     'en': {16: 'Subtypes 0-2 are drawn from the surviving page (w1e 1, proven); frame order gives 0 = Female Stonetown Resident, 1 = the boy, 2 = Male Stonetown Resident (consistent). Real palettes AREA16/CLUT07: row 53 for subtype 2 (pixel-exact with TCRF), row 37 for subtype 1, the boy (confirmed by TCRF colours), and for subtype 0 a custom CLUT derived pixel-exact from the TCRF sheet (not found on any disc). Subtype 3 (w1e 0x11): page lost, grey capsule',
            11: 'Only subtype 0 is drawn from the surviving page (w1e 1, proven): Lumberjack Factory Worker, real palette AREA11/CLUT02 row 4 (confirmed by TCRF colours). Subtypes 1-4 (w1e 0x0A/0x0B/0x10/0x11): page lost, grey capsule',
-           17: 'Only subtype 0 is drawn from the surviving page (w1e 1, proven), real palette AREA17/CLUT03 row 1 (matched to a retail screenshot). Subtypes 1-4 (w1e 0x0A/0x0B/0x10/0x08): page lost, grey capsule'}}
+           17: 'Only subtype 0 is drawn from the surviving page (w1e 1, proven), real palette AREA17/CLUT03 row 1 (confirmed: same row the retail side-view Iron Town NPC uses). Subtypes 1-4 (w1e 0x0A/0x0B/0x10/0x08): page lost, grey capsule'}}
 
 
 # ------------------------------------------------------------------ per-town data (ES) and the flat plan sheet
@@ -782,7 +782,7 @@ PAL_STATUS = {
     16: ['AREA16/CLUT07 row 53: Male Stonetown Resident (strongman), subtype 2 - pixel-exact match with TCRF\'s sprite',
          'Custom CLUT (CUSTOM_CLUTS woman16): Female Stonetown Resident, subtype 0 - custom CLUT derived pixel-exact from the TCRF sheet; not found on any disc',
          'AREA16/CLUT07 row 37 (also AREA16/CLUT06, AREA17/CLUT03/06, AREA18/CLUT02): Stonetown boy, subtype 1 - confirmed by TCRF colours (all 14)'],
-    17: ['AREA17/CLUT03 row 1 (= AREA17/CLUT06 rows 1/129, AREA18/CLUT02 row 6): subtype 0 - matched to a retail screenshot of an Iron Town NPC (colour set, not pixel-exact)'],
+    17: ['AREA17/CLUT03 row 1 (= AREA17/CLUT06 rows 1/129, AREA18/CLUT02 row 6): subtype 0 - confirmed: same row the retail side-view Iron Town NPC uses (AREA17/D205 frames 94-112, part CLUT word 0x7809; handler not pinned)'],
 }
 
 
