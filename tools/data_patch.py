@@ -11,6 +11,9 @@ The patched WFM files are re-encoded from the pristine files of data/ (text_core
   * manifest.txt gets the new byte size of every patched file (the port reads a file up to the manifest size);
   * a file that still fits its sectors on the disc keeps its LBA; the size entries of the file tables in
     EXE/MAIN1..8.EXE are updated too (the game reads whole sectors, so the old size reads the same sectors);
+  * the area load lists SYS/LDnARxx.BIN hold their own size of each file (the next file is loaded right after it):
+    Project.encode_edited rewrites those entries too (tools/load_lists.py), or a grown WFM got its tail overwritten in memory
+    (garbage "UUUUUU" dialogues and a crash, AREA00);
   * a file that needs more sectors than the disc gave it is moved past the end of the disc (new LBA, manifest entry
     and `sectors` count) and the tables of EXE/MAIN1..8.EXE point there. The port takes MAINn's table from data/ for
     --lang N (runtime/lang.c), but MAIN0's table is compiled into the port: a grown file read through it (--lang 0)

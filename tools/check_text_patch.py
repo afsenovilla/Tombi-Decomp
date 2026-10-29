@@ -17,6 +17,10 @@ For every edited dialogue:
     must not get wider (unless the patch sets verbFirst: the executable's box constants then follow
     the verb widths, Project.verb_deltas)
   - the patch's disc sha1 matches the disc
+  - the whole patch, encoded like the tools do it (Project.encode_edited): every glyph word of every dialogue of the
+    patched files is below the file's glyph count, and every WFM that changed size has its entries in the area load
+    lists (SYS/LDnARxx.BIN) updated (tools/load_lists.py; a stale size let the next file overwrite the WFM's tail in
+    memory: "UUUUUU" boxes and a crash in AREA00)
 
   check_text_patch.py DISC.bin PATCH.tombipatch.json [-v]
 Exit status 1 when anything fails.
@@ -105,6 +109,45 @@ def check_entry(proj, path, idx, text):
     return errs
 
 
+def check_encoded(proj, patch):
+    """Problems of the files the patch produces (glyph indices, load list sizes)."""
+    import load_lists
+    try:
+        TP.apply_to_project(proj, patch)
+        files, errors = proj.encode_edited()
+    except C.CoreError as e:
+        return ["encode: %s" % e]
+    if errors:
+        return errors[:20]
+    out = []
+    for path, data in sorted(files.items()):
+        if not path.upper().endswith(".WFM"):
+            continue
+        w = W.decode(data)
+        for i, d in enumerate(w.dialogues):
+            j, ws = 0, d.words
+            while j < len(ws):
+                x = ws[j]
+                if x in W.CTRL:
+                    j += 1 + W.CTRL[x][1]
+                    continue
+                if 0x8000 <= x < 0xF000 and (x & 0xfff) >= len(w.glyphs):
+                    out.append("%s #%d: glyph %d of %d" % (path, i, x & 0xfff, len(w.glyphs)))
+                    break
+                j += 1
+    read_new = lambda p: files[p] if p in files else proj.src.read_any(p)
+    names = proj.src.all_names()
+    wfms = [p for p in files if p.upper().endswith(".WFM")]
+    sizes = {p: len(files[p]) for p in wfms}
+    pristine = {p: len(proj.src.read_any(p)) for p in wfms}
+    out += load_lists.problems(read_new, names, sizes, pristine)
+    for p in wfms:
+        if sizes[p] != pristine[p] and load_lists.AREA.fullmatch(p) and \
+                not load_lists._matches(read_new, names, {p: sizes[p]}):
+            out.append("%s changed size (%d -> %d) but no load list entry follows it" % (p, pristine[p], sizes[p]))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("disc"); ap.add_argument("patch"); ap.add_argument("-v", "--verbose", action="store_true")
@@ -140,6 +183,9 @@ def main():
                 print("%s #%d: %s" % (path, i, "; ".join(errs)))
             elif a.verbose:
                 print("%s #%d: ok" % (path, i))
+    for msg in check_encoded(proj, patch):
+        print("ENCODED: %s" % msg)
+        bad += 1
     for note in NOTES:
         print("note:", note)
     print("%d entries checked, %d with problems" % (n, bad))

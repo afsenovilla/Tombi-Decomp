@@ -522,6 +522,11 @@ class Project:
         self._banner_patches(files, errors)
         self._verb_patches(files, errors)
         self._menu_patches(files, errors)
+        if not errors:
+            # the area load lists keep their own size of every file: a WFM that changed size without its entry being
+            # updated gets its tail overwritten by the next file in memory (tools/load_lists.py)
+            import load_lists
+            files.update(load_lists.fix(self.src.read_any, self.src.all_names(), files))
         return ({} if errors else files), errors
 
     def _menu_patches(self, files, errors):

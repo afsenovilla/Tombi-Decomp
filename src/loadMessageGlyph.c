@@ -138,6 +138,20 @@ short loadMessageGlyph(int p, int id, int bank)
     u16 b;
     DR_LOAD *load;
 
+#ifdef PORT2
+    /* a glyph id past the bank's glyph count (u16 at +0xE; a broken or overwritten WFM, e.g. a patched file whose load
+       list entry kept the old size) read a wild glyph image and could crash: drawn as nothing (like a full cache) */
+    if (WFM3_DATA[bank] == 0 || (id & 0xfff) >= WFM3_DATA[bank][7]) {
+        static int warned;
+        if (!warned) {
+            extern void port_printf(const char *, ...);
+            warned = 1;
+            port_printf("[port] loadMessageGlyph: glyph %d of bank %d out of range (%d glyphs): skipped\n",
+                    id & 0xfff, bank, WFM3_DATA[bank] ? WFM3_DATA[bank][7] : 0);
+        }
+        return -1;
+    }
+#endif
     freeSlot = -1;
     key = (bank << 12) | (id & 0xfff);
     for (i = 0; i < 0x3c; i++) {
