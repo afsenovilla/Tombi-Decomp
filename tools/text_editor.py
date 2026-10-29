@@ -617,7 +617,7 @@ class App:
     def generate(self):
         if not self.need_proj():
             return
-        if not self.proj.n_edits() and not self.proj.verb_first:
+        if not self.proj.n_edits() and not self.proj.verb_first and not self.proj.menus:
             messagebox.showinfo(tr("te.nochanges"), tr("te.nodialogues"))
             return
         files, errors = self.proj.encode_edited()
@@ -663,7 +663,7 @@ class App:
     def make_patch(self):
         if not self.need_proj():
             return
-        if not self.proj.n_edits() and not self.proj.verb_first:
+        if not self.proj.n_edits() and not self.proj.verb_first and not self.proj.menus:
             messagebox.showinfo(tr("te.nochanges"), tr("te.nodialogues"))
             return
         files, errors = self.proj.encode_edited()
