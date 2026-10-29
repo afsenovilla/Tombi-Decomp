@@ -6,7 +6,7 @@ patch asks for it ("portGfx": "es") and the launcher passes the file with --lang
 the redraws (port/fixes.txt) only switch on when the rect is actually loaded (port_tex_patch_has), so without the file
 the original English sprites stay.
 
-Adding a redraw (e.g. CARGANDO, drawNowLoadingSprite.c, VRAM 0,72): a module with build(raw) -> [(x, y, w_words, h,
+Adding a redraw: a module with build(raw) -> [(x, y, w_words, h,
 words)], an entry in PARTS, and a fixes.txt rule gated on port_tex_patch_has(x, y).
 """
 import os, struct, sys
@@ -31,6 +31,7 @@ def _raw(data_dir, name):
 PARTS = [
     ("VUELVE A INTENTARLO", "tryagain", "SYSTEM/A10003", _gam),
     ("CARGAR / GUARDAR", "cargar_guardar", "SYSTEM/A00400.000", _raw),
+    ("CARGANDO", "cargando", "SYSTEM/A00900.000", _raw),
 ]
 
 
