@@ -65,7 +65,7 @@ i18n.add({
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
-        "l.titlebg": "Fondo de título panorámico (PNG / JPG):", "l.titlebg.d": "Solo se usa con imagen panorámica (16:9, 21:9, 32:9): rellena los lados de la pantalla de título.", "ft.image": "Imágenes",
+        "ft.image": "Imágenes",
         "c.texpack": "Pack de texturas (HD) · experimental", "l.texpack": "Carpeta del pack (déjalo vacío para usar las texturas originales). Solo con OpenGL.",
         "b.dumpall": "Volcar todas las texturas", "b.openfolder": "Abrir carpeta",
         "l.texpack.d": "Pulsa «Volcar todas las texturas» para exportar las texturas del juego a la carpeta texture_dump. Edítalas o reescálalas (2x, 4x…) manteniendo el nombre del archivo y elige esa carpeta como pack.",
@@ -98,7 +98,7 @@ i18n.add({
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
-        "l.titlebg": "Wide title background (PNG / JPG):", "l.titlebg.d": "Only used in widescreen (16:9, 21:9, 32:9): fills the sides of the title screen.", "ft.image": "Images",
+        "ft.image": "Images",
         "c.texpack": "Texture pack (HD) · experimental", "l.texpack": "Pack folder (leave empty for the original textures). OpenGL only.",
         "b.dumpall": "Dump all textures", "b.openfolder": "Open folder",
         "l.texpack.d": "Press “Dump all textures” to export the game's textures to the texture_dump folder. Edit or upscale them (2x, 4x…) keeping the file names, then choose that folder as the pack.",
@@ -393,7 +393,7 @@ i18n.add({
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
 i18n.add({
-    "es": {"l.experimental": "Mostrar funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
+    "es": {"l.experimental": "Funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
            "l.uilang": "Idioma del launcher", "l.starting": "Iniciando el juego...", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
            "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
            "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
@@ -402,7 +402,7 @@ i18n.add({
            "l.iresoff": "Solo con OpenGL: el dibujado por software usa siempre la resolución original.",
            "c.keys": "Teclado", "c.pad": "Mando", "c.mods": "Mods", 
            "c.cmd": "Línea de comandos", "c.log": "Últimas líneas del registro", "c.status": "Estado"},
-    "en": {"l.experimental": "Show experimental features", "l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
+    "en": {"l.experimental": "Experimental features", "l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
            "l.uilang": "Launcher language", "l.starting": "Starting the game...", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
            "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
            "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
@@ -852,9 +852,6 @@ class App:
         o, c = self.card(grid, tr("c.aspect"))
         o.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(12, 0))
         self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9")])
-        ttk.Label(c, text=tr("l.titlebg"), style="Muted.TLabel").pack(anchor="w", pady=(10, 4))   # --title-bg
-        self._browse_row(c, "title_bg", self.pick_title_bg)
-        ttk.Label(c, text=tr("l.titlebg.d"), style="Muted.TLabel", wraplength=300, justify="left").pack(anchor="w", pady=(4, 0))
         o, c = self.card(grid, tr("c.ires"))     # --internal-res: 3D drawn at N x (docs/PORT.md "HD"), OpenGL only
         o.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(12, 0))
         self.ires_btns = self._radios(c, "internal_res", tk.IntVar, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
@@ -1062,11 +1059,6 @@ class App:
         if p:
             self.vars["early_title"].set(p)
 
-    def pick_title_bg(self):
-        p = filedialog.askopenfilename(filetypes=[(tr("ft.image"), "*.png *.jpg *.jpeg *.PNG *.JPG *.JPEG")])
-        if p:
-            self.vars["title_bg"].set(p)
-
     def texture_dump_dir(self):
         return os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")
 
@@ -1198,8 +1190,6 @@ class App:
             cmd += ["--save-dir", s["savedir"]]
         if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft" and s.get("experimental"):
             cmd += ["--texture-pack", s["texpack"]]
-        if s.get("title_bg") and s.get("aspect") in ("16:9", "21:9", "32:9"):
-            cmd += ["--title-bg", s["title_bg"]]
         if s.get("fullscreen"):
             cmd += ["--fullscreen"]
         cmd += M.mod_args(s, app_dir())
