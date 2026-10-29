@@ -341,4 +341,4 @@ src/drawNowLoading.c | g(0x68, 0x60, 1, v, p); | if (port_es_tryagain()) g(0x68,
 src/drawNowLoading.c | g(0xa0, 0x60, 2, v, p); | if (!port_es_tryagain()) g(0xa0, 0x60, 2, v, p);
 # memory card screen title LOAD/SAVE (40x16 at u=168 v=136/120 of the SYSTEM/A00400 page) -> CARGAR (64x16 at u=0 v=160) /
 # GUARDAR (72x16 at u=0 v=176), free 4bpp space of the same page and CLUT; raised 14 px so the wider word sits above the box
-src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; extern int port_tex_patch_has(int x, int y); int es = port_lang == 5 && port_tex_patch_has(64, 160) && port_tex_patch_has(64, 176); if (es) { S->u0 = 0; S->v0 = no ? 0xB0 : 0xA0; S->y0 = y - 0xE; } s->w = es ? (no ? 0x48 : 0x40) : 0x28; }
+src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; extern int port_tex_patch_has(int x, int y); int es = port_lang == 5 && port_tex_patch_has(64, 160) && port_tex_patch_has(64, 176); if (es) { S->u0 = 0; S->v0 = no ? 0xB0 : 0xA0; S->x0 = x - (no ? 10 : 2); } s->w = es ? (no ? 0x48 : 0x40) : 0x28; }

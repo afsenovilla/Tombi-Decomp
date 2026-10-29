@@ -33,6 +33,7 @@ def build(page):
 
     def render(m):
         w = len(m[0]); out = []
+        end = max(x for r in m for x, ch in enumerate(r) if ch in '#+') + 1          # the band stops at the shadow
         ink = lambda a, b: 0 <= b < len(m) and 0 <= a < w and m[b][a] in '#+'
         for r in range(16):
             row = []
@@ -41,7 +42,7 @@ def build(page):
                 if ch == '#': row.append(BAND[r])
                 elif ch == '+': row.append(AA[BAND[r]])
                 elif ink(x-1, r) or (ink(x, r-1) and (ink(x-1, r-1) or r == 14)): row.append(5)     # drop shadow
-                else: row.append(12 if r >= 10 else 0)
+                else: row.append(12 if r >= 10 and x <= end else 0)
             out.append(row)
         return out
 
@@ -49,11 +50,17 @@ def build(page):
     cut = lambda a, b: [r[a:b+1].replace('?', '#') for r in load[4:14]]
     A, D = cut(21, 29), cut(31, 38)
 
-    def word(ls, W):
+    def narrow(L, w=7):                                          # drop repeated interior columns down to w wide
+        while len(L[0]) > w:
+            i = next((i for i in range(2, len(L[0]) - 2) if all(r[i] == r[i+1] for r in L)), len(L[0]) // 2)
+            L = [r[:i] + r[i+1:] for r in L]
+        return L
+
+    def word(ls, W):                                             # 7-wide letters, 1 px gap (the shadow): fits left of the dialog box
         rows = [''] * 10
-        for L in ls:
-            for i in range(10): rows[i] += L[i] + '..'
-        x0 = (W - len(rows[0]) + 1) // 2 + 1
+        for L in map(narrow, ls):
+            for i in range(10): rows[i] += L[i] + '.'
+        x0 = 1                                                  # left edge of the ink at column 1, as in LOAD
         rows = ['.' * x0 + r for r in rows]; rows = [(r + '.' * W)[:W] for r in rows]
         return ['.' * W] * 4 + rows + ['.' * W] * 2
 
