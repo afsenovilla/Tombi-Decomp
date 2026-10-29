@@ -86,7 +86,7 @@ static inline u16 blend(u16 bg, u16 fg, int mode) {
    a side plane where that buffer is ws_pad columns wider on each side (the drawing offset shifted by ws_pad), so
    whatever the game draws past the 4:3 edges is kept.  plot() writes through tgt/tgt_stride: vram when off. */
 int port_ws_cull;                    /* the game's screen-X culls widened by this (port_prelude.h PORT_WSX), = port_widescreen */
-int port_widescreen;                 /* extra columns on each side of a 320-wide frame; 0 = off (53 = 16:9, 120 = 21:9) */
+int port_widescreen;                 /* extra columns on each side of a 320-wide frame; 0 = off (53 = 16:9, 120 = 21:9, 267 = 32:9) */
 #define WS_STRIDE 2048
 static u16 wvram[512][WS_STRIDE];
 static u16 *tgt = &vram[0][0];
@@ -280,6 +280,13 @@ static void ws_note_disp(int x) {
     for (int i = 0; i < ws_ndispx; i++) if (ws_dispx[i] == x) return;
     if (ws_ndispx < 4) ws_dispx[ws_ndispx++] = x;
 }
+/* where a displayed buffer's wide copy starts in wvram: 2*ax while the copies fit side by side (16:9, 21:9);
+   wider (32:9, 854 columns) Tombi's two buffers (x 384 and 704) would overlap, so each gets its own 1024-column half
+   of the 2048-wide plane instead (by x: below 512 the left half) */
+static int ws_base(int ax) {
+    if (2 * port_widescreen <= 320) return 2 * ax;
+    return ax < 512 ? 0 : 1024;
+}
 static int ws_area(void) {                 /* (only at a displayed x: a 320-wide off-screen target is a texture) */
     int shown = 0;
     if (!port_widescreen) return 0;
@@ -292,15 +299,15 @@ static void ws_begin(void) {
     ws_ax = gs.x1; ws_ay = gs.y1; ws_ah = gs.y2 - gs.y1 + 1;
     {   int i; for (i = 0; i < ws_nareas; i++) if (ws_areas[i].x == ws_ax && ws_areas[i].y == ws_ay) break;
         if (i == ws_nareas && i < 8) { ws_areas[i].x = ws_ax; ws_areas[i].y = ws_ay; ws_areas[i].h = ws_ah; ws_nareas++; } }
-    ws_dx = gs.x1 + port_widescreen; ws_drew = 1;
+    ws_dx = ws_base(gs.x1) - gs.x1 + port_widescreen; ws_drew = 1;
     ws_saved[0] = gs.x1; ws_saved[1] = gs.x2;
-    gs.x1 = 2 * ws_ax; gs.x2 = 2 * ws_ax + 320 + 2 * port_widescreen - 1;
+    gs.x1 = ws_base(ws_ax); gs.x2 = ws_base(ws_ax) + 320 + 2 * port_widescreen - 1;
     tgt = &wvram[0][0]; tgt_stride = WS_STRIDE; gs.wide = 1;
 }
 static void ws_end(void) {
     if (!ws_on) return;
-    if (gs.x1 == 2 * ws_ax) gs.x1 = ws_saved[0];           /* (an E3/E4 inside the packet keeps its new value) */
-    if (gs.x2 == 2 * ws_ax + 320 + 2 * port_widescreen - 1) gs.x2 = ws_saved[1];
+    if (gs.x1 == ws_base(ws_ax)) gs.x1 = ws_saved[0];           /* (an E3/E4 inside the packet keeps its new value) */
+    if (gs.x2 == ws_base(ws_ax) + 320 + 2 * port_widescreen - 1) gs.x2 = ws_saved[1];
     tgt = &vram[0][0]; tgt_stride = 1024; gs.wide = 0;
     ws_on = 0;
 }
@@ -309,9 +316,9 @@ static void ws_end(void) {
 static void ws_sync_down(void) {
     if (!ws_drew) return;
     ws_drew = 0;
-    if (be->ws_copy_down) { be->ws_copy_down(2 * ws_ax + port_widescreen, ws_ay, ws_ax, ws_ay, 320, ws_ah); return; }
+    if (be->ws_copy_down) { be->ws_copy_down(ws_base(ws_ax) + port_widescreen, ws_ay, ws_ax, ws_ay, 320, ws_ah); return; }
     for (int j = 0; j < ws_ah; j++)
-        memcpy(&vram[(ws_ay + j) & 511][ws_ax], &wvram[(ws_ay + j) & 511][2 * ws_ax + port_widescreen], 320 * 2);
+        memcpy(&vram[(ws_ay + j) & 511][ws_ax], &wvram[(ws_ay + j) & 511][ws_base(ws_ax) + port_widescreen], 320 * 2);
 }
 static void ws_mirror_write(int x, int y, int w, int h) {
     for (int k = 0; k < ws_nareas; k++) {
@@ -319,12 +326,12 @@ static void ws_mirror_write(int x, int y, int w, int h) {
         for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
             int vx = x + i, vy = (y + j) & 511;
             if (vx < ax || vx >= ax + 320 || vy < ay || vy >= ay + ah) continue;
-            wvram[vy][2 * ax + port_widescreen + vx - ax] = vram[vy][vx & 1023];
+            wvram[vy][ws_base(ax) + port_widescreen + vx - ax] = vram[vy][vx & 1023];
         }
         if (be->ws_upload) {
             int x1 = x > ax ? x : ax, x2 = x + w < ax + 320 ? x + w : ax + 320, y1 = y > ay ? y : ay, y2 = y + h < ay + ah ? y + h : ay + ah;
             if (x1 < x2 && y1 < y2) {
-                int wx = 2 * ax + port_widescreen + x1 - ax;
+                int wx = ws_base(ax) + port_widescreen + x1 - ax;
                 be->ws_upload(wx, y1, x2 - x1, y2 - y1, &wvram[y1][wx], WS_STRIDE);
             }
         }
@@ -334,8 +341,8 @@ static void ws_mirror_write(int x, int y, int w, int h) {
 static void ws_fill(int x, int y, int w, int h, u16 c) {
     if (!port_widescreen || w < 320 || h < 200) return;
     for (int ax = x; ax + 320 <= x + w && ax + 320 <= 1024; ax += 320)
-        if (be->ws_fill) be->ws_fill(2 * ax, y, 320 + 2 * port_widescreen, h, c); else
-        for (int j = 0; j < h; j++) for (int i = 0; i < 320 + 2 * port_widescreen; i++) wvram[(y + j) & 511][2 * ax + i] = c;
+        if (be->ws_fill) be->ws_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c); else
+        for (int j = 0; j < h; j++) for (int i = 0; i < 320 + 2 * port_widescreen; i++) wvram[(y + j) & 511][ws_base(ax) + i] = c;
 }
 static void vertex(Vtx *o, u32 w) { o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; }
 static void color(Vtx *o, u32 c) { o->r = c & 255; o->g = (c >> 8) & 255; o->b = (c >> 16) & 255; }
@@ -524,6 +531,7 @@ static void tex_patch_apply(int x, int y, int w, int h) {
 }
 int LoadImage(RECT *r, u32 *p) {
     if (r->w <= 0 || r->h <= 0) return 0;
+    if (getenv("TEXLOG")) { u32 hh = 2166136261u; const u16 *q = (const u16 *)p; for (int k = 0; k < r->w * r->h; k++) { hh = (hh ^ (q[k] & 255)) * 16777619u; hh = (hh ^ (q[k] >> 8)) * 16777619u; } port_printf("[LI] %d %d %d %d %08x\n", r->x, r->y, r->w, r->h, hh); if (getenv("TEXDUMP")) { char fn[256]; snprintf(fn, sizeof fn, "%s/li_%d_%d_%d_%d_%08x.bin", getenv("TEXDUMP"), r->x, r->y, r->w, r->h, hh); FILE *ff = fopen(fn, "wb"); if (ff) { fwrite(p, 2, r->w * r->h, ff); fclose(ff); } } }
     vram_write_rect(r->x, r->y, r->w, r->h, (const u16 *)p);
     tex_patch_apply(r->x, r->y, r->w, r->h);
     return 0;
@@ -691,7 +699,7 @@ int port_gpu_frame(u8 *rgb, int *w, int *h) {
     int W = d->w > 0 ? d->w : 320, H = d->h > 0 ? d->h : 240;
     if (W > 1024) W = 1024; if (H > 512) H = 512;
     if (ws_frame(d, W, rgb24)) {
-        int bx = 2 * (d->x & 1023), WW = 320 + 2 * port_widescreen;
+        int bx = ws_base(d->x & 1023), WW = 320 + 2 * port_widescreen;
         if (be->ws_read && disp_mask) be->ws_read(bx, d->y & 511, WW, H, &wvram[d->y & 511][bx], WS_STRIDE);
         for (int y = 0; y < H; y++) for (int x = 0; x < WW; x++) {
             u8 *o = rgb + (y * WW + x) * 3;
@@ -720,8 +728,9 @@ int port_gpu_frame(u8 *rgb, int *w, int *h) {
     return 0;
 }
 static void path_for(char *buf, const char *kind) { snprintf(buf, 512, "%s/%s%06d.png", port_dump_dir, kind, port_frame); }
-void port_gpu_vblank(void) {
-    if (port_window) {
+/* the window present of the displayed frame (port_gpu_vblank, and --fps60 when it has no interpolated frame) */
+static void present_window(void) {
+    {
         RECT *d = (RECT *)cur_dispenv;
         int w = d->w > 0 ? d->w : 320, h = d->h > 0 ? d->h : 240;
         if (w > 1024) w = 1024; if (h > 512) h = 512;
@@ -731,12 +740,86 @@ void port_gpu_vblank(void) {
         if (cur_dispenv[0x11]) {
             port_gpu_frame(frame_rgb, &w, &h);
             if (!be->present_rgb || !be->present_rgb(frame_rgb, w, h)) port_window_frame(frame_rgb, w, h);
-        } else if (be->ws_present && disp_mask && ws_frame(d, w, 0) && be->ws_present(2 * (d->x & 1023), d->y & 511, 320 + 2 * port_widescreen, h)) {
+        } else if (be->ws_present && disp_mask && ws_frame(d, w, 0) && be->ws_present(ws_base(d->x & 1023), d->y & 511, 320 + 2 * port_widescreen, h)) {
         } else if (!be->present(d->x & 1023, d->y & 511, w, h, !disp_mask)) {
             port_gpu_frame(frame_rgb, &w, &h);
             port_window_frame(frame_rgb, w, h);
         }
     }
+}
+
+/* --fps60 (experimental, OpenGL): the game still runs one logic step per 50 Hz vblank; the presents happen on their
+   own clock (the monitor's refresh, or 60 Hz) while psyq.c's pacing waits, and show the last displayed frame
+   re-drawn with every primitive's vertices interpolated from where the matching primitive of the frame displayed
+   one vblank earlier was (gpu_gl.c "fps60").  One logic frame of extra display latency; menus, movies and static
+   screens repeat the displayed frame.  Off (the default): nothing below runs. */
+int port_fps60;
+extern int port_gl_fps60_vblank(int x, int y, int w, int h, int wide, int plain);
+extern int port_gl_fps60_render(float alpha);
+extern int port_gl_fps60_show(void);
+extern int port_gl_fps60_read(u8 *rgb, int *w, int *h);
+static void fps60_vblank(void) {
+    RECT *d = (RECT *)cur_dispenv;
+    int w = d->w > 0 ? d->w : 320, h = d->h > 0 ? d->h : 240, rgb24 = cur_dispenv[0x11], wide;
+    if (w > 1024) w = 1024; if (h > 512) h = 512;
+    wide = be->ws_present && ws_frame(d, w, rgb24);
+    if (wide) port_gl_fps60_vblank(ws_base(d->x & 1023), d->y & 511, 320 + 2 * port_widescreen, h, 1, !disp_mask);
+    else port_gl_fps60_vblank(d->x & 1023, d->y & 511, w, h, 0, rgb24 || !disp_mask);
+}
+static void fps60_present(double alpha) {
+    static const char *dump_dir; static int dump_from = -1, dump_to, dump_n;
+    int interp = port_gl_fps60_render((float)alpha);
+    if (port_window && (!interp || !port_gl_fps60_show())) present_window();
+    if (dump_from < 0) {      /* PORT_FPS60_DUMP=DIR:FROM:TO (test hook): every present during vblanks FROM..TO as present_N.png */
+        const char *e = getenv("PORT_FPS60_DUMP"); static char buf[400];
+        dump_from = 0;
+        if (e) { snprintf(buf, sizeof buf, "%s", e); char *c = strchr(buf, ':');
+                 if (c) { *c = 0; dump_dir = buf; sscanf(c + 1, "%d:%d", &dump_from, &dump_to); } }
+    }
+    if (dump_dir && port_frame >= dump_from && port_frame <= dump_to) {
+        char path[512]; int w, h;
+        if (!interp || port_gl_fps60_read(frame_rgb, &w, &h)) port_gpu_frame(frame_rgb, &w, &h);
+#ifdef _WIN32
+        _mkdir(dump_dir);
+#else
+        mkdir(dump_dir, 0777);
+#endif
+        snprintf(path, sizeof path, "%s/present_%06d.png", dump_dir, dump_n++);
+        write_png(path, frame_rgb, w, h);
+        port_printf("[fps60] %s: vblank %d alpha %.3f%s\n", path, port_frame, alpha, interp ? " (interpolated)" : "");
+    }
+}
+/* psyq.c port_vblank, in place of its pacing sleep: the presents due before the vblank at due_us (realtime: wall
+   clock, one per display refresh) or, unpaced (headless), on a virtual clock of 60 presents per 50 vblanks; alpha
+   runs from 0 at the previous vblank to 1 at this one */
+extern int port_window_refresh(void);
+void port_fps60_wait(unsigned long long due_us, unsigned long long period_us, int realtime) {
+    if (be != &port_gpu_gl) { if (realtime && due_us > port_time_us()) port_sleep_until_us(due_us); return; }
+    if (!realtime) {
+        static unsigned long long k, vb;
+        unsigned long long vdue = ++vb * 20000ull;
+        for (; k * 1000000ull / 60 < vdue; k++) fps60_present(1.0 - (double)(vdue - k * 1000000ull / 60) / 20000.0);
+        return;
+    }
+    static unsigned long long p, last;
+    unsigned long long P = 1000000ull / (unsigned)(port_window_refresh() > 0 ? port_window_refresh() : 60), now = port_time_us();
+    int n = 0;
+    if (!p || p + 4 * P < now || p > due_us + 2 * P) p = now;
+    while (p < due_us) {
+        if (p > port_time_us()) port_sleep_until_us(p);
+        double a = 1.0 - (double)(due_us - p) / (double)period_us;
+        fps60_present(a < 0 ? 0 : a);
+        n++; last = port_time_us();
+        p += P;
+        if (last > p + P) p = last;           /* the swap blocked for longer (vsync at a lower rate): follow it */
+    }
+    if (!n && port_time_us() > last + P) { fps60_present(1.0); last = port_time_us(); }
+    if (due_us > port_time_us()) port_sleep_until_us(due_us);
+}
+
+void port_gpu_vblank(void) {
+    if (port_fps60 && be == &port_gpu_gl) fps60_vblank();
+    else if (port_window) present_window();
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;
 #ifdef _WIN32
     _mkdir(port_dump_dir);
@@ -756,7 +839,7 @@ void port_gpu_vblank(void) {
         wide = ws_frame(d, W, cur_dispenv[0x11]);
         if (port_internal_res > 1 && be == &port_gpu_gl && disp_mask && !cur_dispenv[0x11]) {
             static u8 *hd; if (!hd) hd = (u8 *)malloc((size_t)2048 * 512 * 3 * 16);
-            if (hd && !port_gl_frame_hd(hd, wide ? 2 * (d->x & 1023) : d->x & 1023, d->y & 511, wide ? 320 + 2 * port_widescreen : W, H, wide, &ow, &oh)) {
+            if (hd && !port_gl_frame_hd(hd, wide ? ws_base(d->x & 1023) : d->x & 1023, d->y & 511, wide ? 320 + 2 * port_widescreen : W, H, wide, &ow, &oh)) {
                 /* GL rows are bottom-up in memory order = VRAM top-down: already in PNG order */
                 path_for(path, "hd_");
                 write_png(path, hd, ow, oh);

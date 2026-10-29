@@ -64,7 +64,7 @@ void port_pacing_report(void) {
     }
 }
 int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
-int port_hz = 50;                    /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
+int port_hz = 50; extern int port_fps60;                      /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
 
 static void call_psx(void *fn) { ((void (*)(void))fn)(); }
 
@@ -184,7 +184,9 @@ void port_vblank(void) {
         if (!vblank_epoch_us) { vblank_epoch_us = now; vblank_n = 0; }
         vblank_n++;
         unsigned long long due = vblank_epoch_us + (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
-        if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now; }
+        if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now;
+                                  if (port_fps60) { extern void port_fps60_wait(unsigned long long, unsigned long long, int); port_fps60_wait(due, period, 1); } }
+        else if (port_fps60) { extern void port_fps60_wait(unsigned long long, unsigned long long, int); port_fps60_wait(due, period, 1); port_prof_wait_us += port_time_us() - now; }
         else if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; }
         {
             unsigned long long t = port_time_us();
@@ -218,6 +220,7 @@ void port_vblank(void) {
             }
         }
     }
+    else if (port_fps60) { extern void port_fps60_wait(unsigned long long, unsigned long long, int); port_fps60_wait(0, 20000, 0); }
     port_frame++;
     if (port_in_game && game_start_frame < 0) game_start_frame = port_frame;
     for (int i = 0; i < n_pokes; i++)

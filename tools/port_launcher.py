@@ -64,7 +64,7 @@ i18n.add({
         "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
-        "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)",
+        "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
         "b.play": "Jugar", "b.extracting": "Extrayendo... {0}%", "l.extracting": "Extrayendo los archivos del disco (solo la primera vez). Espera a que termine para jugar.", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco compatible: {0}, MAIN0.EXE verificado (sha1).",
@@ -92,7 +92,7 @@ i18n.add({
         "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
-        "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)",
+        "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
         "b.play": "Play", "b.extracting": "Extracting... {0}%", "l.extracting": "Extracting the disc files (first time only). Wait for it to finish to play.", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Compatible disc: {0}, MAIN0.EXE verified (sha1).",
@@ -329,7 +329,7 @@ def set_icon(root):
 # ---------------------------------------------------------------------------------------------- window
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
 i18n.add({
-    "es": {"nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
+    "es": {"l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
            "l.uilang": "Idioma del launcher", "l.starting": "Iniciando el juego...", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
            "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
            "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
@@ -338,7 +338,7 @@ i18n.add({
            "l.iresoff": "Solo con OpenGL: el dibujado por software usa siempre la resolución original.",
            "c.keys": "Teclado", "c.pad": "Mando", "c.mods": "Mods", 
            "c.cmd": "Línea de comandos", "c.log": "Últimas líneas del registro", "c.status": "Estado"},
-    "en": {"nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
+    "en": {"l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
            "l.uilang": "Launcher language", "l.starting": "Starting the game...", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
            "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
            "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
@@ -605,7 +605,7 @@ class App:
             if gl and self.vars["internal_res"].get() in (2, 3, 4):
                 parts.append(tr("sum.ires", self.vars["internal_res"].get()))
             a = self.vars["aspect"].get()
-            parts.append({"square": "1:1 px", "16:9": "16:9", "21:9": "21:9"}.get(a, "4:3"))
+            parts.append({"square": "1:1 px", "16:9": "16:9", "21:9": "21:9", "32:9": "32:9"}.get(a, "4:3"))
             parts.append("60 Hz" if self.vars["hz60"].get() else "50 Hz")
         except tk.TclError:
             return
@@ -770,9 +770,11 @@ class App:
         for n in (1, 2, 3):
             ttk.Radiobutton(seg, text="%dx" % n, variable=sv, value=n, style="Seg.Toolbutton", width=6).pack(side="left")
         ttk.Checkbutton(c, text=tr("l.fullscreen"), variable=self.var("fullscreen", tk.BooleanVar, False)).pack(anchor="w", pady=(10, 0))
+        # --fps60: frames interpolated between the 50 Hz logic steps (OpenGL only)
+        ttk.Checkbutton(c, text=tr("l.fps60"), variable=self.var("fps60", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
         o, c = self.card(grid, tr("c.aspect"))
         o.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(12, 0))
-        self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9")])
+        self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9")])
         o, c = self.card(grid, tr("c.ires"))     # --internal-res: 3D drawn at N x (docs/PORT.md "HD"), OpenGL only
         o.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(12, 0))
         self.ires_btns = self._radios(c, "internal_res", tk.IntVar, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
@@ -1008,9 +1010,11 @@ class App:
         cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
                "--show-fps", "2",     # the measured vblank rate and its histogram in the log
                "--renderer", "soft" if s.get("renderer") == "soft" else "gl",
-               "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9") else "4:3"]
+               "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9") else "4:3"]
         if s.get("renderer") != "soft" and s.get("internal_res", 1) in (2, 3, 4):
             cmd += ["--internal-res", str(s["internal_res"])]
+        if s.get("renderer") != "soft" and s.get("fps60"):
+            cmd += ["--fps60"]
         if s.get("lang"):
             cmd += ["--lang", str(s["lang"])]
             gfx = os.path.join(data_dir(), DP.GFX_TBTX)
