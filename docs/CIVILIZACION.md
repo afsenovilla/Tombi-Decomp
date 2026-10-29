@@ -843,3 +843,58 @@ Los motivos de cada fila están en inglés, igual que en el fichero de layout.
 | H4 | A07600 129,175,151,80 | plausible | H4, the craftsman ('I want to make something'): the room with shelves, jugs and a book, a workshop |
 
 No se sube nada derivado del disco, del FMV ni de los ficheros de la comunidad.
+
+## Notas de Folkin — verificación
+
+Folkin (TCRF) dejó unas notas sobre los pueblos de Civilización. Hemos comprobado cada afirmación con el código
+descompilado y el disco PAL (USA/JP donde se indica). Veredictos: **confirmado**, **refutado**, **en parte** (una
+parte se sostiene y otra no), **no verificable** (los datos no están en el disco, o la afirmación es visual y no se
+puede fijar).
+
+**Nuevo punto de apoyo: la tabla de nombres de sala por sección.** D0SPSUB `0x80108E5C` (20 punteros, uno por área)
+apunta a listas de nombres en inglés (cadenas en el código de fuente de 16 bits de D0SPSUB: `0xED`+n = a..z,
+`0xCD`+n = A..Z, `0xAC` = espacio). Leída por sección da:
+- AREA03: s0/s1 Stormy Mountain, **s2 Lava Caves**, s3 Phoenix's Nest;
+- AREA11: **s0 Lumberjack Town**, s1 Lumberjack Factory, **s2 Dried Wishing Well**, s3 Factory, s4 Dried Wishing Well;
+- AREA16: **s0 Stonestown**, s1..s6 Clock Tower;
+- AREA17: **s0 Iron Town**, s1..s10 Iron Castle.
+
+Así que las secciones recortadas tenían nombre en la versión final: Lumberjack Town, Stonestown e Iron Town.
+
+| # | Afirmación | Veredicto | Pruebas |
+|---|---|---|---|
+| 1a | El FMV de purificación de las Cuevas de Lava es distinto | **confirmado** | `MOVIE/HONOO2.STR` (炎 "llama", 230 fotogramas) muestra nubes de lluvia y la lluvia apagando la lava. HANA, KARAKURI y los demás (BAKKASU, ARASHI, JUNGLE, MANTION: 232 fotogramas) muestran un barrido de destellos. No hay HONOO1 en el disco. |
+| 1b | El vaquero de las Cuevas de Lava dice que la lluvia apagaría las llamas | **confirmado** | `flameBlockedNpcTalk` (X003 0x80132D80) actúa en las secciones >= 2 de AREA03. Muestra (7,0..3) = MFNT030 #249-#253 (inglés: "If we weren't inside a cave, maybe some rain could help put out these flames"). El mismo PNJ inicia el evento **0xAC "The Fire Pig Bag"** (`setEventStarted(0xAC)`). |
+| 1c | La Esencia lluvia solo se puede usar en las Cuevas de Lava | **confirmado** | Comprobación de uso en D0SPSUB `subScreenItemListStep`: `D_800FECE8[objeto]` elige una lista de condiciones de `D_800FFAF8`, evaluada con `D_800FFBB0`. Para el objeto 52 (lista 16, 0x800FF290): `área != 3 → no`, `sección != 2 → no`, si no sí. AREA03 s2 es "Lava Caves" (tabla de arriba). Ningún código de X003 lee `useItemId == 0x34`, así que usarla allí no hace nada. Descripción JP: 雨雲を呼んで雨をふらせる奇跡のアイテム ("llama a las nubes y hace llover"). |
+| 1d | El icono del evento "Fire Pig Bag" es el de las Cuevas de Lava | **refutado** | Los iconos son `ICONS[evento-1]` (D0SPSUB 0x800FE974). El evento 0xAC (Fire Pig Bag, CFNT #54) usa el fotograma 0xA6 (uv 0x98,0x68). El 0x22 (Lava Caves, CFNT #55) usa el 0x82 (uv 0xE0,0x28). Las dos celdas tienen píxeles distintos (A00300 palabras 128..191). |
+| 1e | La Bolsa del Cerdo Verde está en la VRAM de la Serrería, así que se encontraba allí | **en parte** | Hay una bolsa con cara de cerdo en `AREA11/B101` (fábrica s1, VRAM x 904, v 0..24). Pero los mismos píxeles están en páginas de AREA02, 03, 05, 08, 10, 18 y 19 (p. ej. `AREA08/B302`, `AREA19/B003`). Es parte de una tira de objetos común, así que no prueba nada sobre la fábrica. X011 no tiene copia del código del portal de la bolsa (`updateEvilPigBagPortal`: solo X002, X010, X016). Ninguna parte SPR que hayamos encontrado fija su color. |
+| — | En conjunto: el Cerdo de Fuego, y no las Cuevas de Lava, maldijo Civilización | **no verificable** | 1a-1c muestran que la lluvia en las Cuevas de Lava estaba prevista. En la versión final, la Fire Pig Bag ya es la bolsa de las Cuevas de Lava (0xAC se inicia allí). Nada del código la liga a la maldición de Civilización. |
+| 2 | La Rueda de hierro solo se usa en la Torre reloj | **confirmado (versión final)** | Objeto 62 (lista 20, 0x800FF3A0): `área != 16 → no`; `sección 3 o 6 → sí`. AREA16 s1..s6 son "Clock Tower". En X016 la consumen `checkStoneGearsTrigger` / `updateBrokenStoneGearsNpc` (`useItemId == 0x3E`) y `brokenStoneGearsRepair` la retira. Se usa en la versión final, no está recortada. |
+| 3a | A Iron Town se entra por abajo; el camino de arriba lleva al Castillo de hierro | **confirmado** | `topdownSectionStepE`: la salida 0 con y > 0x23A va a AREA18 (el centro); la salida 1 con y < 0x50 va a AREA17 s1, llamada "Iron Castle". El vecino #11: "para salir, ve todo recto hacia abajo". |
+| 3b | Una manivela a la izquierda del cartel "Iron the No.1" | **en parte** | A08000 tiene una rueda de manivela con mango en 6 fotogramas de giro (px de página 817..896, 152..202 = palabras de VRAM 472..512). Su posición junto al cartel necesita el mapa perdido. |
+| 3c | Sprites del cartel cayéndose | **no verificable** | A08000 tiene dos recortes de cartel sobre un poste (px 690..728, 128..143), pero ninguna secuencia de inclinación legible. |
+| 3d | Ascensores de cadena con 4 casetas de manivela, con sprites de interior | **confirmado** | A08000 tiene cuatro interiores, cada uno con un tambor de cadena sobre base hexagonal y la cadena subiendo por la pared (px 128..390). Código: dos plataformas móviles (props `wb8` 0xD/0xE, `TOPDOWN_A17_SCENERY_LIMITS`) y las frases "¿quieres subir? entra en esta caseta", "el ascensor funcionaba con una máquina", "prueba en la caseta del ascensor". Hay cinco casas, cuatro de ellas con caseta. |
+| 4a | Un render distinto (maldito) de la Torre reloj | **no verificable** | No hemos identificado arte de la torre en A07600/A07601. Las páginas de recarga de AREA16 s1..s6 (A077xx/A078xx/A079xx) son idénticas byte a byte a las B300..B600 de la versión final. |
+| 4b | Un sprite del cartel "Stone the No.1" | **en parte** | A07601 tiene una losa de piedra con letras en relieve (px 137..176, 200..240); solo se distingue "...ton...". Es la pareja del cartel de hierro, pero no se lee lo bastante para estar seguros. |
+| 4c | El pozo lleva a la zona "Dried up wishing well" | **confirmado** | La salida 1 de `topdownSectionStepD` es un agujero de 7 x 1 px (x 0x6B..0x72, y 0x13F..0x140), no una puerta, y lleva a AREA11 s2 punto 0. El nombre de AREA11 s2 en la versión final es "Dried Wishing Well". |
+| 4d | Un armario cerrado en la casa de arriba a la derecha | **no verificable** | H3 (219,176)-(299,258) es la casa de arriba a la derecha: un prop de tipo 2 (sala 3), ningún vecino y ningún código de cerradura. A07600 tiene una sala verde azulada con una puerta interior de madera (px 280,154), la que la reconstrucción de arriba usa para H3. |
+| 5a | Lumberjack Town tiene una parte subterránea bajo el suelo | **confirmado (texto)** | Frases JP (4,3) "hay un laberinto bajo el suelo" y (4,4) "a esa choza solo se llega por debajo del suelo" (`topdownA11ActorOpenDialogue` casos 6/7). |
+| 5b | A la fábrica se llega por el camino de arriba | **confirmado** | La salida 1 de `topdownSectionStepC` con y < 0x4F (x 0xC7..0x107) va a AREA11 s1, "Lumberjack Factory". El vecino #10: "la entrada del taller está ahí arriba". |
+| 5c | Una roca en la Serrería | **no verificable** | No hay objeto de roca/voladura en X011 ni en las páginas de la fábrica. |
+| 6 | Dos vecinas de Stonetown (#1, #2), un niño y un hombre; el hombre tiene sprites cenitales y laterales | **en parte** | El conjunto 0E usa cuatro subtipos. **0** = la mujer con capucha (#3, #5, frases femeninas: #241 あたしも). **1** = el niño (#7, #8, frases infantiles, la puerta secreta). **2** = el forzudo (#4; los scripts 16-23 son animaciones de levantar, fotogramas 120-129). **3** = 8 vecinos (#1, #2, #6, #9-#13) en una página perdida (caja 16x32, habla masculina おれ). A07600 tiene un único juego de fotogramas de mujer (30-59). El color de un actor sale de sus partes SPR, así que un subtipo da una paleta: el código tiene sitio para **un** tipo femenino. Una segunda mujer solo puede ser el mismo dibujo con otra paleta (filas 48/54 de AREA16/CLUT07, o la CLUT propia de TCRF, ver imágenes), y ningún código que se conserve la usa. Los fotogramas cenitales del forzudo (frente, espalda, lado) están en A07600; los de vista lateral, en la página B201 de la versión final (AREA10/16/17/18). |
+| 7 | La frase de la puerta secreta («Abrí en secreto la puerta…») es del vecino 8 de AREA16 | **confirmado** | El actor 7 (#8 en las láminas: subtipo 1 niño, b0c 8, patrulla diagonal, aparece tras el primer avance) usa la fila b0c 8 = (3, 0/9/13/13). (3,9) = MFNT160 #239 = bloque JP #216: へへ・・・こっそり、鉄人の町と木人の町のトビラ・・・あけてきちゃった・・・ないしょだよ ("jeje... abrí a escondidas la puerta entre el pueblo de los Hombres de Hierro y el de la Gente de Madera... es un secreto"). En los avances 2/3 pasa a #243 (JP #220): "me han pillado la travesura... pero es un rollo que todos se peleen". |
+
+Además: el objeto 109 (Agua negra) solo pasa la comprobación de uso en AREA18 s2 con la H del jugador entre 128 y 192
+(lista 22, 0x800FF3E8). Ningún código reacciona a ella.
+
+**Imágenes** (no se suben; regenéralas con tu disco). Las páginas de Stonetown e Iron Town son de 8 bpp y no se
+conserva su CLUT, así que se colorean con la CLUT derivada del FMV de `tools/civ_rebuild.py`, que **no es la
+original**. Los sprites de vecinos usan filas CLUT reales donde se conocen:
+- `stone_sign_A07601.png`
+- `crank_huts_A08000.png` (las cuatro casetas de tambor)
+- `cranks_signs_A08000.png` (fotogramas de la manivela, postes, carteles)
+- `rails_A08000.png`
+- `pig_bag_factory_B101.png` (filas de CLUT02 como candidatas; la fila real se desconoce)
+- `stonetown_residents_palettes.png` (A07600 con las filas 48, 54, 37, 53 de AREA16/CLUT07 y la CLUT derivada de TCRF)
+- `icons_lava_vs_firebag.png`
+- `fmv/sheet.png` (HONOO2 frente a HANA y KARAKURI)

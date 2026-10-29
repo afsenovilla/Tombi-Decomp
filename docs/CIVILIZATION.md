@@ -834,3 +834,57 @@ No room-by-room 8F/8E data is written yet.
 | H4 | A07600 129,175,151,80 | plausible | H4, the craftsman ('I want to make something'): the room with shelves, jugs and a book, a workshop |
 
 Nothing derived from the disc, the FMV or the community files is committed. The palettes are rebuilt at every run.
+
+## Folkin's rough notes — verification
+
+Folkin (TCRF) left rough notes on the Civilization towns. Each claim was checked against the decompiled code and the
+PAL disc (USA/JP where noted). Verdicts: **confirmed**, **refuted**, **partly** (part holds, part does not),
+**unverifiable** (the data needed is not on the disc, or the claim is visual and we cannot pin it down).
+
+**New anchor: the per-section room-name table.** D0SPSUB `0x80108E5C` (20 pointers, one per area) points into a list
+of English name pointers (strings in D0SPSUB's 16-bit font code: `0xED`+n = a..z, `0xCD`+n = A..Z, `0xAC` = space).
+Read in section order it gives:
+- AREA03: s0/s1 Stormy Mountain, **s2 Lava Caves**, s3 Phoenix's Nest;
+- AREA11: **s0 Lumberjack Town**, s1 Lumberjack Factory, **s2 Dried Wishing Well**, s3 Factory, s4 Dried Wishing Well;
+- AREA16: **s0 Stonestown**, s1..s6 Clock Tower;
+- AREA17: **s0 Iron Town**, s1..s10 Iron Castle.
+
+So the cut top-down sections had retail names: Lumberjack Town, Stonestown and Iron Town.
+
+| # | Claim | Verdict | Evidence |
+|---|---|---|---|
+| 1a | Lava Caves purification FMV differs | **confirmed** | `MOVIE/HONOO2.STR` (炎 "flame", 230 frames) shows rain clouds and rain putting out the lava. HANA, KARAKURI and the others (BAKKASU, ARASHI, JUNGLE, MANTION: 232 frames) show a sparkle/light sweep. There is no HONOO1 on the disc. |
+| 1b | The cowboy in the Lava Caves says rain could put out the flames | **confirmed** | `flameBlockedNpcTalk` (X003 0x80132D80) runs in AREA03 sections >= 2. It shows (7,0..3) = MFNT030 #249-#253 (English: "If we weren't inside a cave, maybe some rain could help put out these flames"). The same NPC starts event **0xAC "The Fire Pig Bag"** (`setEventStarted(0xAC)`). |
+| 1c | Rain Essence can only be used in the Lava Caves | **confirmed** | Item-use check in D0SPSUB `subScreenItemListStep`: `D_800FECE8[item]` picks a condition list in `D_800FFAF8`, run through `D_800FFBB0`. For item 52 (list 16, 0x800FF290): `area != 3 → no`, `section != 2 → no`, else yes. AREA03 s2 is "Lava Caves" (table above). No X003 code reads `useItemId == 0x34`, so using it there does nothing. JP description: 雨雲を呼んで雨をふらせる奇跡のアイテム ("calls rain clouds and makes it rain"). |
+| 1d | The "Fire Pig Bag" event icon is the Lava Caves icon | **refuted** | Icons are `ICONS[event-1]` (D0SPSUB 0x800FE974). Event 0xAC (Fire Pig Bag, CFNT #54) uses frame 0xA6 (uv 0x98,0x68). Event 0x22 (Lava Caves, CFNT #55) uses frame 0x82 (uv 0xE0,0x28). The two cells have different pixels (A00300 words 128..191). |
+| 1e | The Green Evil Pig Bag is in the Lumberjack Factory VRAM, so it was found there | **partly** | A pig-faced bag is on `AREA11/B101` (factory s1, VRAM x 904, v 0..24). But the same pixels are on pages of AREA02, 03, 05, 08, 10, 18 and 19 (e.g. `AREA08/B302`, `AREA19/B003`). It is part of a shared object strip, so it proves nothing about the factory. X011 has no copy of the pig-bag portal code (`updateEvilPigBagPortal`: only X002, X010, X016). Its colour is not fixed by any SPR part we found. |
+| — | Overall: the Fire Pig, not the Lava Caves, cursed Civilization | **unverifiable** | 1a-1c show that rain at the Lava Caves was planned. In retail, Fire Pig Bag is already the Lava Caves bag (0xAC is started there). Nothing in the code ties it to the Civilization curse. |
+| 2 | Iron Wheel can only be used in the Clock Tower | **confirmed (retail)** | Item 62 (list 20, 0x800FF3A0): `area != 16 → no`; `section 3 or 6 → yes`. AREA16 s1..s6 are "Clock Tower". X016 `checkStoneGearsTrigger` / `updateBrokenStoneGearsNpc` consume it (`useItemId == 0x3E`) and `brokenStoneGearsRepair` removes it. The item is used in retail, not cut. |
+| 3a | Iron Town is entered from the bottom; the top path leads into the Iron Castle | **confirmed** | `topdownSectionStepE`: exit 0 at y > 0x23A goes to AREA18 (the hub); exit 1 at y < 0x50 goes to AREA17 s1, named "Iron Castle". Resident #11: "go straight down to leave". |
+| 3b | A crank left of the "Iron the No.1" sign | **partly** | A08000 holds a crank wheel with a handle in 6 rotation frames (page px 817..896, 152..202 = VRAM words 472..512). Its position next to the sign needs the lost map. |
+| 3c | Sign-falling-over sprites | **unverifiable** | A08000 has two signboard cut-outs on a post (px 690..728, 128..143), but no tilt sequence we can read. |
+| 3d | Chain lifts with 4 crank huts, with interior sprites | **confirmed** | A08000 has four interiors, each with a chain drum on a hexagonal base and the chain running up the wall (px 128..390). Code: two moving platforms (props `wb8` 0xD/0xE, `TOPDOWN_A17_SCENERY_LIMITS`) and the lines "want to go up? go into this hut", "the lift used to run on machinery", "try the lift hut". There are five houses, four of them with a hut room. |
+| 4a | A different (cursed) Clock Tower render | **unverifiable** | No clock-tower art identified on A07600/A07601. AREA16 s1..s6 reload pages (A077xx/A078xx/A079xx) are byte-identical to the retail B300..B600 pages. |
+| 4b | A "Stone the No.1" sign sprite | **partly** | A07601 has a stone slab with raised letters (px 137..176, 200..240); only "...ton..." can be made out. It is the counterpart of the Iron sign, but not legible enough to be sure. |
+| 4c | The well leads to the "Dried up wishing well" area | **confirmed** | `topdownSectionStepD` exit 1 is a 7 x 1 px hole (x 0x6B..0x72, y 0x13F..0x140), not a doorway, and leads to AREA11 s2 spawn 0. AREA11 s2's retail name is "Dried Wishing Well". |
+| 4d | A locked closet in the top-right house | **unverifiable** | H3 (219,176)-(299,258) is the top-right house: one type-2 prop (room 3), no resident and no code for a lock. A07600 has a teal room with a wooden inner door (px 280,154), used for H3 in the reconstruction above. |
+| 5a | Lumberjack Town has an underground section under the floor | **confirmed (text)** | JP lines (4,3) "there's a maze under the floor" and (4,4) "you can only reach that hut from under the floor" (`topdownA11ActorOpenDialogue` cases 6/7). |
+| 5b | The factory is reached by the top road | **confirmed** | `topdownSectionStepC` exit 1 at y < 0x4F (x 0xC7..0x107) goes to AREA11 s1, "Lumberjack Factory". Resident #10: "the workshop entrance is up there". |
+| 5c | A rock in the Lumberjack Factory | **unverifiable** | No rock/blast object found in X011 or the factory pages. |
+| 6 | Two Female Stonetown Residents (#1, #2), a Stonetown Kid, a Male; the Male has top-down and side sprites | **partly** | NPC set 0E uses four subtypes. **0** = the hooded woman (#3, #5, feminine lines: #241 あたしも). **1** = the kid (#7, #8, childish lines, the secret door). **2** = the strongman (#4; scripts 16-23 are lifting anims, frames 120-129). **3** = 8 residents (#1, #2, #6, #9-#13) on a lost page (box 16x32, male speech おれ). A07600 has one woman frame set (frames 30-59). An actor's colour comes from its SPR parts, so one subtype gives one palette: the code has room for **one** female type. A second woman can only be the same drawing in another palette (rows 48/54 of AREA16/CLUT07, or TCRF's own CLUT, see image list), and no surviving code uses it. The strongman's top-down frames (front, back, side) are on A07600; its side-scroller frames are on the retail page B201 (AREA10/16/17/18). |
+| 7 | The secret-door line («Abrí en secreto la puerta…») is resident 8 of AREA16 | **confirmed** | Actor 7 (#8 on the sheets: sub 1 kid, b0c 8, diagonal patrol, spawns after the first step) uses row b0c 8 = (3, 0/9/13/13). (3,9) = MFNT160 #239 = JP block #216: へへ・・・こっそり、鉄人の町と木人の町のトビラ・・・あけてきちゃった・・・ないしょだよ ("hehe... I secretly opened the door between the Iron Men's and the Wood People's towns... it's a secret"). At progress 2/3 it becomes #243 (JP #220): "they found out my prank... but it's no fun when everyone fights". |
+
+Also found: item 109 (Black Water) passes the use-check only in AREA18 s2 with the player's H between 128 and 192
+(list 22, 0x800FF3E8). No code reacts to it.
+
+**Images** (not committed; regenerate from your own disc). The Stonetown and Iron Town pages are 8 bpp with no
+surviving CLUT, so they are coloured with the FMV-derived CLUT of `tools/civ_rebuild.py`, which is **not original**.
+Resident sprites use real CLUT rows where known:
+- `stone_sign_A07601.png`
+- `crank_huts_A08000.png` (the four chain-drum huts)
+- `cranks_signs_A08000.png` (crank wheel frames, posts, signboards)
+- `rails_A08000.png`
+- `pig_bag_factory_B101.png` (CLUT02 rows as candidates; the real row is unknown)
+- `stonetown_residents_palettes.png` (A07600 with AREA16/CLUT07 rows 48, 54, 37, 53 and TCRF's derived CLUT)
+- `icons_lava_vs_firebag.png`
+- `fmv/sheet.png` (HONOO2 vs HANA vs KARAKURI)

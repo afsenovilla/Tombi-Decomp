@@ -85,3 +85,31 @@ The community sheet of icons is the **event list** page, not the inventory. `too
 - **SLPM-80165** (page `SYSTEM/A00012.000`, CLUTs from `DSPCLUT.TIM` column 320): frames 79 puddle (ev 6), 87 axe (ev 18), 110 red-hat dwarf (ev 44), 111 slot machine (ev 45), 112 "II"+bowl (ev 60), 136 pig (ev 167), 144 coin (ev 32), 151 jar (ev 49).
 - **PrePre8** (`SYSTEM/SYS008.000`, sprites in `AREA00/DATA000.GAM`, CLUT `CLUT00.GAM` x=608): 59 puddle (ev 6), 67 axe (ev 18), 72 green-hat dwarf (ev 14).
 - **Retail:** keeps the event ids. Events 6, 18, 32, 45 and 60 got new, unshown art. Events 44, 49, 167 and 14 are used in retail with a different icon.
+
+## Folkin's rough notes — verification (non-Civilization claims)
+
+The Civilization claims are checked in [CIVILIZATION.md](CIVILIZATION.md) ("Folkin's rough notes — verification").
+These are the rest, checked only where it was cheap. **Unverified** means we did not check it.
+
+| Claim | Verdict | Evidence |
+|---|---|---|
+| Green Fortune Teller completely cut | **partly** | Event 89 has its own icon (frame 227, "green fortune teller", see Event icons) but is not in `SUBSCREEN_EVENT_ORDER` and no code starts it. Retail has "The Red Fortune Teller" (CFNT #69) and "The Blue Fortune Teller" (#125). The unused item 90 is a letter "addressed to the three sisters". No sprite checked. |
+| Funga Chief completely cut; punishment, drum and spear events | **partly** | Unused items: Funga Leather / Tree / Sap (119/122/123, JP "drum material"), Small Drum (137) and Chief's Spear (140). Their use-check lists are `subScreenCondFalse` (D0SPSUB `D_800FECE8`) and no code gives them. No chief sprite and no punishment event found. |
+| Old Lumberjack Town Man completely cut | **confirmed** | His top-down frames are on `SYSTEM/A06100` (AREA11 subtype 0 extra frames 30..50, AREA11/CLUT02 row 36). They belong to the cut AREA11 s0 "Lumberjack Town" ([CIVILIZATION.md](CIVILIZATION.md)). |
+| Puffer Fish, Whelk completely cut | unverified | |
+| Masakari language learned by biting | unverified | Events 59-61 (the Masakari chain) are unused, with no code. |
+| Navy Evil Pig Bag from the chief | unverified | |
+| GoGoCar cacti and an extra track piece | **partly** | The cacti are confirmed (see "GoGoCart cacti / sign" above). The track piece was not checked. |
+| Haunted Mansion metal sign model | unverified | |
+| Doodle Rock textures/sprites in the Underground Forest | unverified | |
+| Growing flower sprites, cursed and uncursed | **partly** | AREA02 SPR 0x3B frames 27-32 exist, but the VRAM they point at is empty on PAL (see Lost). |
+| Iron door in the Iron Castle | **partly** | Event 100 "Iron Keyhole" has an icon (frame 209), is not in the menu order, and nothing starts it. No door sprite checked. |
+| Weird plant in the Masakari Jungle VRAM | unverified | |
+| "Thin" / "Fat" status text | **not found** | No such word in the PAL English/Spanish WFM text of AREA03/11/16/17/18 or CFNT999. The sub-screen graphics were not searched. |
+| Mansion clock opening and gem | unverified | |
+| Final Evil Pig door | unverified | |
+| An older Pipe item drawn as a Valve | **confirmed** | Item 64 is "Pipe" (MFNT #67). Its icon (A00300 words 64..127, cell 64: x 72, y 72) is a round handwheel, i.e. a valve. Whether this is "older" art is not provable. |
+| Pure 8 demo: caterpillars in the AREA00 VRAM; "Motocross Course" event starts normally | unverified | That disc is not in our set. PrePre 8's title strip does carry モトクロスコース (see the DIRT MOTOCROSS sign entry). |
+| Pure 9 demo: a 10,000-year-old-man chest where retail has the 1000-year one | unverified | That disc is not in our set. |
+
+Image (not committed): `item_icons_63_64_65_62_52_grey.png` (Flower Seeds, Pipe, Wine, Iron Wheel, Rain Essence).

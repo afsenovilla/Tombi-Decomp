@@ -93,3 +93,32 @@ La bomba (211, ev 106) sí se usa.
 - **SLPM-80165:** fotogramas 79 charco, 87 hacha, 110 enano gorro rojo, 111 tragaperras, 112 "II"+cuenco, 136 cerdo, 144 moneda, 151 tarro.
 - **PrePre8:** 59 charco, 67 hacha, 72 enano gorro verde.
 - **Retail:** conserva los ids de evento, con otros iconos o sin mostrarlos.
+
+## Notas de Folkin — verificación (afirmaciones fuera de Civilización)
+
+Las afirmaciones sobre Civilización se comprueban en [CIVILIZACION.md](CIVILIZACION.md) ("Notas de Folkin —
+verificación"). Estas son las demás, comprobadas solo cuando era barato. **Sin verificar** significa que no lo
+hemos comprobado.
+
+| Afirmación | Veredicto | Pruebas |
+|---|---|---|
+| Adivina verde, recortada del todo | **en parte** | El evento 89 tiene icono propio (fotograma 227, "adivina verde", ver Iconos de evento), pero no está en `SUBSCREEN_EVENT_ORDER` y ningún código lo inicia. La versión final tiene "The Red Fortune Teller" (CFNT #69) y "The Blue Fortune Teller" (#125). El objeto sin usar 90 es una carta "para las tres hermanas". No hemos mirado sprites. |
+| Jefe Funga recortado; eventos de castigo, tambor y lanza | **en parte** | Objetos sin usar: Funga Leather / Tree / Sap (119/122/123, JP "material del tambor"), Small Drum (137) y Chief's Spear (140). Sus listas de comprobación de uso son `subScreenCondFalse` (D0SPSUB `D_800FECE8`) y ningún código los da. No hay sprite del jefe ni evento de castigo. |
+| Anciano de Lumberjack Town, recortado del todo | **confirmado** | Sus fotogramas cenitales están en `SYSTEM/A06100` (fotogramas extra 30..50 del subtipo 0 de AREA11, AREA11/CLUT02 fila 36). Pertenecen a la AREA11 s0 recortada, "Lumberjack Town" ([CIVILIZACION.md](CIVILIZACION.md)). |
+| Pez globo y caracola, recortados del todo | sin verificar | |
+| El idioma Masakari se aprende mordiendo | sin verificar | Los eventos 59-61 (la cadena Masakari) no se usan y no tienen código. |
+| Bolsa del Cerdo Marino que da el jefe | sin verificar | |
+| Cactus del GoGoCar y una pieza de pista extra | **en parte** | Los cactus están confirmados (ver "GoGoCart cacti / sign" arriba). La pieza de pista no se ha comprobado. |
+| Modelo de cartel metálico de la Mansión Encantada | sin verificar | |
+| Texturas/sprites de Doodle Rock en el Bosque Subterráneo | sin verificar | |
+| Sprites de flor creciendo, maldita y sin maldición | **en parte** | Los fotogramas 27-32 del SPR 0x3B de AREA02 existen, pero la VRAM a la que apuntan está vacía en PAL (ver Perdido). |
+| Puerta de hierro en el Castillo de hierro | **en parte** | El evento 100 "Iron Keyhole" tiene icono (fotograma 209), no está en el orden del menú y nada lo inicia. No hemos mirado el sprite de la puerta. |
+| Planta rara en la VRAM de la Jungla Masakari | sin verificar | |
+| Texto de estado "Thin" / "Fat" | **no encontrado** | No aparece en el texto WFM inglés/español PAL de AREA03/11/16/17/18 ni en CFNT999. No hemos buscado en los gráficos del submenú. |
+| Apertura del reloj de la Mansión y gema | sin verificar | |
+| Puerta del Cerdo final | sin verificar | |
+| Un objeto Tubería antiguo dibujado como Válvula | **confirmado** | El objeto 64 es "Pipe" (MFNT #67). Su icono (A00300 palabras 64..127, celda 64: x 72, y 72) es un volante redondo, es decir una válvula. No se puede probar que sea arte "antiguo". |
+| Demo Pure 8: orugas en la VRAM de AREA00; el evento "Motocross Course" empieza normal | sin verificar | Ese disco no está en nuestro conjunto. La tira de títulos de PrePre 8 sí lleva モトクロスコース (ver la entrada del cartel DIRT MOTOCROSS). |
+| Demo Pure 9: un cofre del anciano de 10.000 años donde la versión final tiene el de 1000 | sin verificar | Ese disco no está en nuestro conjunto. |
+
+Imagen (no se sube): `item_icons_63_64_65_62_52_grey.png` (Flower Seeds, Pipe, Wine, Rueda de hierro, Esencia lluvia).
