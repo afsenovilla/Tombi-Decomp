@@ -245,13 +245,19 @@ even though the tables themselves are lost.
   side-scrolling quarters (44..47 and 60..63 are flash/tint variants of the same block), and the same rows colour the
   top-down pages:
   - **AREA16/CLUT07 row 53** (also in AREA16/CLUT06, AREA17/CLUT03, AREA17/CLUT06 and AREA18/CLUT02, same row number):
-    the Stone Town strongman. With this row the A07600 4 bpp page at (75, 202), 50 x 52, matches TCRF's "Male
-    Stonestown Resident" sprite pixel-exact (100 % of the pixels in 5-bit colour, no silhouette mismatch); no other row
+    TCRF's "Male Stonetown Resident" (the strongman). With this row the A07600 4 bpp page at (75, 202), 50 x 52, matches TCRF's "Male
+    Stonetown Resident" sprite pixel-exact (100 % of the pixels in 5-bit colour, no silhouette mismatch); no other row
     of the file does. **Confirmed.**
-  - AREA16/CLUT07 rows 48 and 54: the other Stone People (purple-haired and red-haired villagers). Plausible, not
+  - AREA16/CLUT07 rows 48 and 54: TCRF's "Female Stonetown Resident" and the other Stone People. Plausible, not
     confirmed.
-  - AREA11/CLUT01 row 48: the Wood People (brown hat, white shirt). The only natural row of the block in AREA11's files.
-    A guess.
+  - The TCRF names, and reading AREA11 as TCRF's "Lumberjack Town" (the hard-hat worker belonging to the Factory, the old
+    man to the town), are our identification.
+  - **AREA11/CLUT02 rows 4, 36 and 68** (the same rows are in AREA17/CLUT03, AREA17/CLUT06 and AREA18/CLUT02):
+    row 4 = TCRF's "Lumberjack Factory Worker" (the hard-hat worker of SYSTEM/A06100), row 36 = TCRF's "Male Lumberjack
+    Town Resident" (the old man), row 68 = the same old man "cursed" (darker). **Confirmed by TCRF colours**: all 14
+    colours of each TCRF sprite are in that single row (by colour set; TCRF's frames differ slightly, so not
+    pixel-exact). Rows 32 apart belong to one set of resident palettes; AREA16/CLUT07 shows the same layout (16/48/80,
+    21/53).
   - AREA17/CLUT01 row 48 and AREA17/CLUT03 row 49: the Iron Men. A guess.
 - Which row each top-down resident uses is not in the surviving code: a resident's CLUT comes from the parts of its
   SPR table (the actor inits clear `b0d`, so `w08` is not used), and those tables are lost. `tools/civ_sheets.py`
@@ -442,22 +448,22 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 | # | Where (x, y) | Room | Who / what they say (gloss of the JP line) |
 |---|---|---|---|
-| 1 | (88, 240) | H1 | House 1: "...Now I can make something really interesting..." (PAL text #227) |
-| 2 | (12, 256) | H1 | House 1: no line, sets a flag |
-| 3 | (16, 352) | H2 | House 2: "It doesn't work, but this machine is iron... I could use it" |
-| 4 | (400, 520) | outdoors | Diagonal patrol: "A fortune-teller lives in this hut, but she has a condition" |
-| 5 | (300, 470) | outdoors | Horizontal patrol: "Wood is the best; stone and iron are cold" |
-| 6 | (170, 528) | outdoors | Horizontal patrol: "It doesn't work, but this machine is iron..." |
-| 7 | (172, 424) | outdoors | Neighbour: "There's a maze under the floor; don't wander in carelessly" |
-| 8 | (50, 320) | outdoors | Vertical patrol: "You can only reach that hut from under the floor" |
-| 9 | (62, 294) | outdoors | Horizontal patrol: "A gear? Made of wood it would break" → "I'm thirsty, I'll get a coconut" → "Karakuri Village sank" |
-| 10 | (280, 236) | outdoors | Vertical patrol: "The workshop entrance is up there; go take a look" |
-| 11 | (496, 344) | outdoors | Neighbour: "This sign is old and dangerous" → "You're always so full of energy" |
-| 12 | (432, 448) | H3 | House 3, sitting: probably the raft maker ("Want a raft? Bring me wood from the Wise Old Tree"); the code gives him no dialogue |
+| 1 | (88, 240) | H1 | Lumberjack Factory Worker — House 1: "...Now I can make something really interesting..." (PAL text #227) |
+| 2 | (12, 256) | H1 | Lumberjack Factory Worker — House 1: no line, sets a flag |
+| 3 | (16, 352) | H2 | Lumberjack Factory Worker — House 2: "It doesn't work, but this machine is iron... I could use it" |
+| 4 | (400, 520) | outdoors | Lumberjack Factory Worker — Diagonal patrol: "A fortune-teller lives in this hut, but she has a condition" |
+| 5 | (300, 470) | outdoors | Lumberjack Factory Worker — Horizontal patrol: "Wood is the best; stone and iron are cold" |
+| 6 | (170, 528) | outdoors | Lumberjack Factory Worker — Horizontal patrol: "It doesn't work, but this machine is iron..." |
+| 7 | (172, 424) | outdoors | Male Lumberjack Town Resident — Neighbour: "There's a maze under the floor; don't wander in carelessly" |
+| 8 | (50, 320) | outdoors | Lumberjack Factory Worker — Vertical patrol: "You can only reach that hut from under the floor" |
+| 9 | (62, 294) | outdoors | Lumberjack Factory Worker — Horizontal patrol: "A gear? Made of wood it would break" → "I'm thirsty, I'll get a coconut" → "Karakuri Village sank" |
+| 10 | (280, 236) | outdoors | Lumberjack Factory Worker — Vertical patrol: "The workshop entrance is up there; go take a look" |
+| 11 | (496, 344) | outdoors | Male Lumberjack Town Resident — Neighbour: "This sign is old and dangerous" → "You're always so full of energy" |
+| 12 | (432, 448) | H3 | Lumberjack Factory Worker — House 3, sitting: probably the raft maker ("Want a raft? Bring me wood from the Wise Old Tree"); the code gives him no dialogue |
 
 - **Exits** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s1).
 - **Props**: 14 (I0NFO2 0x800FFE24); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A06100` (SYS reload list 61), drawn with the real palette AREA11/CLUT01 row 48 (a guess for every resident).
+- **Sprites**: `SYSTEM/A06100` (SYS reload list 61), drawn with AREA11/CLUT02 row 4 (Lumberjack Factory Worker, subtypes 0, 1, 4) and row 36 (Male Lumberjack Town Resident, subtypes 2, 3): rows confirmed by TCRF colours, the subtype-to-drawing match is ours.
 - **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 11 --lang all --out build/civ`
 
@@ -468,11 +474,11 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 | # | Where (x, y) | Room | Who / what they say (gloss of the JP line) |
 |---|---|---|---|
-| 1 | (86, 460) | outdoors | Strongman: "Heave... HO!" |
-| 2 | (144, 332) | outdoors | Strongman: "Hup... HAAA!" |
-| 3 | (244, 427) | outdoors | Neighbour by the lift: "This thing on the wall is supposed to be a lift... but it doesn't move" |
-| 4 | (176, 384) | H1 | House 1: "Can't get into the other towns? Don't know, don't care" → later talks about the gear and the generator |
-| 5 | (-72, 362) | outdoors | Vertical patrol: "The folks from the other towns..." → "A gear that won't break? If it were iron..." |
+| 1 | (86, 460) | outdoors | Neighbour lifting something: "Heave... HO!" |
+| 2 | (144, 332) | outdoors | Neighbour lifting something: "Hup... HAAA!" |
+| 3 | (244, 427) | outdoors | Female Stonetown Resident — Neighbour by the lift: "This thing on the wall is supposed to be a lift... but it doesn't move" |
+| 4 | (176, 384) | H1 | Male Stonetown Resident — House 1: "Can't get into the other towns? Don't know, don't care" → later talks about the gear and the generator |
+| 5 | (-72, 362) | outdoors | Female Stonetown Resident — Vertical patrol: "The folks from the other towns..." → "A gear that won't break? If it were iron..." |
 | 6 | (0, 245) | outdoors | Diagonal patrol: "First time in this town?" → "Long ago I tried to go into the river..." |
 | 7 | (86, 315) | outdoors | Neighbour: "Should I go in...?" → "You'll beat the Evil Pig who cursed this land, right?" |
 | 8 | (239, 106) | outdoors | Diagonal patrol (after the first milestone): "I secretly opened the door between the Iron and Wood towns" |
@@ -484,7 +490,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s2), door; AREA16 s1 (also cut).
 - **Props**: 7 (I0NFO2 0x801001D4 / 0x801001D8); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for the strongman (subtype 2, confirmed against TCRF), rows 54 (subtype 0) and 48 (subtypes 1, 3) for the rest (guesses).
+- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for Male Stonetown Resident (subtype 2, confirmed against TCRF), rows 54 (subtype 0) and 48 (subtypes 1, 3) for the rest (guesses).
 - **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 
@@ -541,7 +547,7 @@ The tool rebuilds working sections from disc data alone:
 | Map picture 8F | missing | the hard part. One pre-rendered 8 bpp picture per town, about 640 x 576 (AREA11), 448 x 544 (AREA16) and 704 x 480 (AREA17). It can be painted, or assembled from AREA05/08/19 and the scenery cut-outs in the SYS reload pages |
 | Actor sprites 3B | missing table, pages partly survive | the 4 bpp villager page of A06100 (and the matching parts of A07600/A08000) has the frames. A new SPR table must lay its frames out in the order the I0NFO2 anim scripts expect, or new anim scripts must be supplied |
 | Scenery 3D / roofs | missing table, cut-outs survive in the 8 bpp part of the reload pages | the same work as 3B. The roofs must cover the house rectangles |
-| Palettes | resident rows survive (AREA16/CLUT07 row 53 confirmed; 48/54, AREA11/CLUT01 48, AREA17/CLUT01 48 / CLUT03 49 plausible) | load the area CLUT file whose rows 48..54 hold them; the TIM carries the picture's own palette |
+| Palettes | resident rows survive (AREA16/CLUT07 row 53 confirmed; 48/54, AREA11/CLUT02 4/36/68 confirmed by TCRF colours; AREA16 48/54, AREA17/CLUT01 48 / CLUT03 49 plausible) | load the area CLUT file whose rows 48..54 hold them; the TIM carries the picture's own palette |
 | Text | PAL has "···??", JP has everything | translate the JP lines into the PAL slots (they already sit at the indices the code uses) |
 
 In the port this is a data task, not a code task. The engine already runs AREA05/08/19 s0/s2, and loading I0NFO2 at
