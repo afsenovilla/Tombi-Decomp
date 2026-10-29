@@ -7,7 +7,8 @@ For every edited dialogue:
     --strict-glyphs it is an error); a character no font of the disc has (':' at 16 px, '%', ...) is always an error
   - the preview checks of the editor (text_preview): no line wider than the box, no page with more lines than the box
     height allows, no page over 128 glyphs (a problem the original already had is tolerated, a new one is not)
-  - event titles: no more letters than the layout list (Project.title_problem); the "completed" banner (CFNT999 #0) at
+  - event titles: no more letters than the layout list (Project.title_problem), and every copy of the list (the I?NFO blocks
+    and the per-area copies in X?NN, title_layout.copies) laid out as the text says (words not split, no leftover tiles); the "completed" banner (CFNT999 #0) at
     most as many letters as the executable's banner table (text_core pads a shorter one to that size)
   - control codes are kept: the sequence of tags other than {NL} and {BOX} (pauses, {WAIT}{CLEAR} pages, colours, voices,
     moves, choices, button/item codes {Cxxx}) must be identical to the original one
@@ -137,6 +138,7 @@ def check_encoded(proj, patch):
                 j += 1
     read_new = lambda p: files[p] if p in files else proj.src.read_any(p)
     names = proj.src.all_names()
+    out += title_copies(proj, read_new, names)
     wfms = [p for p in files if p.upper().endswith(".WFM")]
     sizes = {p: len(files[p]) for p in wfms}
     pristine = {p: len(proj.src.read_any(p)) for p in wfms}
@@ -145,6 +147,42 @@ def check_encoded(proj, patch):
         if sizes[p] != pristine[p] and load_lists.AREA.fullmatch(p) and \
                 not load_lists._matches(read_new, names, {p: sizes[p]}):
             out.append("%s changed size (%d -> %d) but no load list entry follows it" % (p, pristine[p], sizes[p]))
+    return out
+
+
+def title_copies(proj, read_new, names):
+    """Every copy of an edited event title's layout list (I?NFO blocks and the per-area copies of X?NN, title_layout.copies) must
+    hold the letters as the text lays them out: a copy left with the original spacing shows the new letters at the old places
+    (AREA01/X501.BIN: "Objetos p / erdidos", "¿Quép / asa?¡")."""
+    import title_layout as TL
+    out, seen = [], set()
+    for path, e in sorted(proj.edits.items()):
+        lay = proj.layout(path) if TL.is_title_file(path) else None
+        if lay is None:
+            continue
+        lang = C.lang_of(path)
+        ref = {}
+        for q in proj.src.names():
+            if TL.is_title_file(q) and C.lang_of(q) == lang and proj.layout(q):
+                ref.update(proj.layout(q).recs)
+        orig = TL.copies(proj.src.read_any, names, proj.wfm(path), lang, ref)
+        for idx, text in sorted(e.items()):
+            if idx not in lay.recs:
+                continue
+            want = proj._effective_lines(lay, idx, text)
+            for name, where in sorted(orig.items()):
+                if idx not in where or (name, idx, text) in seen:
+                    continue
+                seen.add((name, idx, text))
+                got = TL.parse_list(read_new(name), where[idx][0])
+                n = TL.text_to_lines(text)[1]
+                if got is None or len(got) != len(where[idx][1]):
+                    out.append("%s #%d: the copy in %s has %s records, the list %d" % (path, idx, name, len(got or ()), len(where[idx][1])))
+                elif len(where[idx][1]) < n:
+                    out.append("%s #%d: %d letters, the copy in %s holds %d" % (path, idx, n, name, len(where[idx][1])))
+                elif TL.records_to_lines(TL.visible(got)) != want:
+                    out.append("%s #%d: the copy in %s is laid out %s, the text %s" % (path, idx, name,
+                               TL.records_to_lines(TL.visible(got)), want))
     return out
 
 
