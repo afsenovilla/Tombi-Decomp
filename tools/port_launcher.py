@@ -327,6 +327,110 @@ def set_icon(root):
 
 
 # ---------------------------------------------------------------------------------------------- window
+# the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
+i18n.add({
+    "es": {"nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
+           "l.uilang": "Idioma del launcher", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
+           "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
+           "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
+           "p.custom": "Otro archivo...", "sum.window": "{0}x ventana", "sum.full": "pantalla completa",
+           "sum.ires": "{0}x interna", "c.renderer": "Dibujado", "c.window": "Ventana", "c.aspect": "Imagen", "c.ires": "Resolución interna",
+           "l.iresoff": "Solo con OpenGL: el dibujado por software usa siempre la resolución original.",
+           "c.keys": "Teclado", "c.pad": "Mando", "c.mods": "Mods", 
+           "c.cmd": "Línea de comandos", "c.log": "Últimas líneas del registro", "c.status": "Estado"},
+    "en": {"nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
+           "l.uilang": "Launcher language", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
+           "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
+           "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
+           "p.custom": "Other file...", "sum.window": "{0}x window", "sum.full": "fullscreen",
+           "sum.ires": "{0}x internal", "c.renderer": "Renderer", "c.window": "Window", "c.aspect": "Picture", "c.ires": "Internal resolution",
+           "l.iresoff": "OpenGL only: the software renderer always draws at the original resolution.",
+           "c.keys": "Keyboard", "c.pad": "Controller", "c.mods": "Mods", 
+           "c.cmd": "Command line", "c.log": "Last lines of the log", "c.status": "Status"},
+})
+
+# design "A": Windows 11-like light window, grey sidebar, white cards
+C_BG, C_SIDE, C_CARD, C_LINE = "#f3f3f5", "#ebecef", "#ffffff", "#e3e4e8"
+C_TEXT, C_MUTED, C_ACCENT, C_ACCENT_HI = "#1b1b1f", "#5f636b", "#1f5fbf", "#2b6fd6"
+DOT = {"ok": "#1e9e4a", "bad": "#d13438", "busy": "#e08a00", "info": "#8a8f98"}
+PAGES = ["play", "gfx", "controls", "mods", "log"]
+
+
+def ui_font():
+    from tkinter import font
+    fams = set(font.families())
+    for f in ("Segoe UI", "Noto Sans", "DejaVu Sans", "Liberation Sans", "Helvetica"):
+        if f in fams:
+            return f
+    return font.nametofont("TkDefaultFont").actual("family")
+
+
+def setup_style(root):
+    """The clam theme recoloured (clam lets every colour change, vista does not) + the named fonts."""
+    from tkinter import font
+    fam = ui_font()
+    for name, size, weight in (("TkDefaultFont", 10, "normal"), ("TkTextFont", 10, "normal"), ("TkMenuFont", 10, "normal"),
+                               ("TkHeadingFont", 10, "bold")):
+        try:
+            font.nametofont(name).configure(family=fam, size=size, weight=weight)
+        except tk.TclError:
+            pass
+    root.configure(background=C_BG)
+    st = ttk.Style(root)
+    try:
+        st.theme_use("clam")
+    except tk.TclError:
+        pass
+    st.configure(".", background=C_CARD, foreground=C_TEXT, font=(fam, 10), bordercolor=C_LINE, lightcolor=C_CARD,
+                 darkcolor=C_CARD, troughcolor=C_LINE, focuscolor=C_ACCENT, selectbackground=C_ACCENT, fieldbackground=C_CARD)
+    st.configure("TFrame", background=C_CARD)
+    st.configure("Bg.TFrame", background=C_BG)
+    st.configure("Side.TFrame", background=C_SIDE)
+    st.configure("TLabel", background=C_CARD)
+    st.configure("Muted.TLabel", foreground=C_MUTED)
+    st.configure("Head.TLabel", font=(fam, 10, "bold"))
+    st.configure("Title.TLabel", background=C_BG, font=(fam, 18, "bold"))
+    st.configure("Bg.TLabel", background=C_BG, foreground=C_MUTED)
+    st.configure("Side.TLabel", background=C_SIDE, foreground=C_MUTED, font=(fam, 9))
+    st.configure("App.TLabel", background=C_SIDE, font=(fam, 11, "bold"))
+    for w in ("TCheckbutton", "TRadiobutton"):
+        st.configure(w, background=C_CARD, indicatorbackground=C_CARD, indicatorforeground=C_ACCENT, indicatorsize=13, upperbordercolor=C_LINE,
+                     lowerbordercolor=C_LINE)
+        st.map(w, background=[("active", C_CARD)], indicatorbackground=[("disabled", C_BG), ("pressed", C_LINE)])
+    st.configure("TButton", background="#fbfbfc", bordercolor="#d0d2d8", lightcolor="#fbfbfc", darkcolor="#fbfbfc", padding=(10, 4))
+    st.map("TButton", background=[("pressed", "#e8e9ec"), ("active", "#f0f1f4")], lightcolor=[("active", "#f0f1f4")],
+           darkcolor=[("active", "#f0f1f4")])
+    st.configure("Accent.TButton", background=C_ACCENT, foreground="white", bordercolor=C_ACCENT, lightcolor=C_ACCENT,
+                 darkcolor=C_ACCENT, font=(fam, 11, "bold"), padding=(26, 8))
+    st.map("Accent.TButton", background=[("disabled", "#9db4d9"), ("pressed", "#174a96"), ("active", C_ACCENT_HI)],
+           lightcolor=[("disabled", "#9db4d9"), ("active", C_ACCENT_HI)], darkcolor=[("disabled", "#9db4d9"), ("active", C_ACCENT_HI)],
+           bordercolor=[("disabled", "#9db4d9")], foreground=[("disabled", "#eef2f8")])
+    st.configure("Bar.TButton", padding=(14, 8))
+    # sidebar entries: flat on grey, the current one a white pill (Nav.Sel)
+    st.configure("Nav.TButton", background=C_SIDE, bordercolor=C_SIDE, lightcolor=C_SIDE, darkcolor=C_SIDE, anchor="w",
+                 padding=(14, 7), font=(fam, 10))
+    st.map("Nav.TButton", background=[("active", "#e1e2e6")], lightcolor=[("active", "#e1e2e6")], darkcolor=[("active", "#e1e2e6")],
+           bordercolor=[("active", "#e1e2e6")])
+    st.configure("NavSel.TButton", background=C_CARD, bordercolor=C_LINE, lightcolor=C_CARD, darkcolor=C_CARD, anchor="w",
+                 padding=(14, 7), font=(fam, 10, "bold"), foreground=C_ACCENT)
+    st.map("NavSel.TButton", background=[("active", C_CARD)])
+    # segmented control: two toolbuttons, the chosen one in the accent colour
+    st.configure("Seg.Toolbutton", background="#f1f2f4", bordercolor="#d0d2d8", lightcolor="#f1f2f4", darkcolor="#f1f2f4",
+                 padding=(14, 4), anchor="center")
+    st.map("Seg.Toolbutton", background=[("selected", C_ACCENT), ("active", "#e6e7ea")], foreground=[("selected", "white")],
+           lightcolor=[("selected", C_ACCENT)], darkcolor=[("selected", C_ACCENT)], bordercolor=[("selected", C_ACCENT)])
+    st.configure("TEntry", padding=(6, 4), insertcolor=C_TEXT)
+    st.configure("TCombobox", padding=(6, 3), arrowsize=13, background="#fbfbfc")
+    st.map("TCombobox", fieldbackground=[("readonly", C_CARD)], selectbackground=[("readonly", C_CARD)],
+           selectforeground=[("readonly", C_TEXT)])
+    st.configure("TSpinbox", padding=(6, 3), arrowsize=12)
+    st.configure("Horizontal.TProgressbar", background=C_ACCENT, troughcolor="#e8e9ec", bordercolor=C_LINE, lightcolor=C_ACCENT,
+                 darkcolor=C_ACCENT, thickness=6)
+    root.option_add("*TCombobox*Listbox.font", (fam, 10))
+    root.option_add("*TCombobox*Listbox.selectBackground", C_ACCENT)
+    return fam
+
+
 class App:
     def __init__(self, root):
         self.root = root
@@ -334,41 +438,23 @@ class App:
         self.proc = None
         self.log_path = os.path.join(app_dir(), "tombi-port.log")   # the last run's log (Copy log works before a run too)
         self.vars = {}
+        self.page = "play"
+        self._level = "info"
         set_icon(root)
-        root.geometry("760x600")
+        self.fam = setup_style(root)
+        root.geometry("960x660")
+        root.minsize(820, 600)
         root.protocol("WM_DELETE_WINDOW", self.on_close)
         self._build()
 
     def rebuild(self):
         self.collect()
+        msg, lvl = self.status.get(), self._level
         for w in self.root.winfo_children():
             w.destroy()
         self._build()
-
-    def _build(self):
-        r = self.root
-        r.title(tr("title") + "  [build " + BUILD_ID + "]")
-        bar = ttk.Frame(r, padding=4)
-        bar.pack(fill="x")
-        i18n.selector(bar, self.rebuild).pack(side="right")
-        self.nb = ttk.Notebook(r)
-        self.nb.pack(fill="both", expand=True, padx=6, pady=4)
-        self.play_tab = ttk.Frame(self.nb, padding=8)
-        self.mods_tab = ttk.Frame(self.nb, padding=8)
-        self.ctrl_tab = ttk.Frame(self.nb, padding=8)
-        self.nb.add(self.play_tab, text=tr("tab.play"))
-        self.nb.add(self.mods_tab, text=tr("tab.mods"))
-        self.nb.add(self.ctrl_tab, text=tr("tab.controls"))
-        self._build_play(self.play_tab)
-        self._build_mods(self.mods_tab)
-        self._build_controls(self.ctrl_tab)
-        self.status = tk.StringVar(value=tr("s.nodata"))
-        ttk.Label(r, textvariable=self.status, anchor="w", padding=4).pack(fill="x")
-        if self.s.get("disc"):
-            self.root.after(200, self.check_disc)
-        elif data_ready():
-            man = X.read_manifest(data_dir())
-            self.status.set(tr("s.dataok", data_dir(), len(man["files"]) if man else 0))
+        if msg and lvl != "info":
+            self.say(msg, lvl)
 
     def var(self, key, kind=tk.StringVar, default=""):
         v = self.vars.get(key)
@@ -376,97 +462,358 @@ class App:
             v = self.vars[key] = kind(value=self.s.get(key, default))
         return v
 
+    def say(self, msg, level="info"):
+        """The status line (disc card, log page) and its coloured dot: ok green, bad red, busy orange, info grey."""
+        self._level = level
+        self.status.set(msg)
+        try:
+            self.dot.itemconfigure("d", fill=DOT.get(level, DOT["info"]))
+        except tk.TclError:
+            pass
+
+    # ---- layout helpers
+    def card(self, parent, title=None, pad=16):
+        """A white card with a 1 px border; returns the inner (ttk) frame."""
+        outer = tk.Frame(parent, background=C_CARD, highlightthickness=1, highlightbackground=C_LINE, highlightcolor=C_LINE, bd=0)
+        inner = ttk.Frame(outer, padding=pad)
+        inner.pack(fill="both", expand=True)
+        if title:
+            ttk.Label(inner, text=title, style="Head.TLabel").pack(anchor="w", pady=(0, 6))
+        return outer, inner
+
+    def page_frame(self, name, title, scroll=False):
+        """A page: title and a body on the grey background (a scrolled one for the long ones)."""
+        f = ttk.Frame(self.main, style="Bg.TFrame", padding=(24, 18, 24, 8))
+        f.grid(row=0, column=0, sticky="nsew")
+        ttk.Label(f, text=title, style="Title.TLabel").pack(anchor="w", pady=(0, 12))
+        if not scroll:
+            body = ttk.Frame(f, style="Bg.TFrame")
+            body.pack(fill="both", expand=True)
+            self.pages[name] = f
+            return body
+        holder = ttk.Frame(f, style="Bg.TFrame")
+        holder.pack(fill="both", expand=True)
+        cv = tk.Canvas(holder, background=C_BG, highlightthickness=0, bd=0)
+        sb = ttk.Scrollbar(holder, orient="vertical", command=cv.yview)
+        body = ttk.Frame(cv, style="Bg.TFrame")
+        win = cv.create_window(0, 0, window=body, anchor="nw")
+        body.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
+        cv.bind("<Configure>", lambda e: cv.itemconfigure(win, width=e.width))
+        cv.configure(yscrollcommand=sb.set)
+        cv.pack(side="left", fill="both", expand=True)
+        sb.pack(side="right", fill="y")
+
+        def wheel(e):
+            if self.page == name:
+                cv.yview_scroll(-1 if (e.num == 4 or e.delta > 0) else 1, "units")
+        for seq in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
+            self.root.bind_all(seq, wheel, add="+")
+        self.pages[name] = f
+        return body
+
+    def show(self, name):
+        self.page = name
+        self.pages[name].tkraise()
+        for n, b in self.nav.items():
+            b.configure(style="NavSel.TButton" if n == name else "Nav.TButton")
+
+    # ---- window
+    def _build(self):
+        r = self.root
+        r.title(tr("title") + "  [build " + BUILD_ID + "]")
+        self.status = tk.StringVar(value=tr("s.nodata"))
+        r.columnconfigure(1, weight=1)
+        r.rowconfigure(0, weight=1)
+        side = ttk.Frame(r, style="Side.TFrame", padding=(10, 14, 10, 14), width=208)
+        side.grid(row=0, column=0, rowspan=2, sticky="ns")
+        side.grid_propagate(False)
+        side.pack_propagate(False)
+        ttk.Label(side, text="Tombi!", style="App.TLabel").pack(anchor="w", padx=8, pady=(0, 14))
+        self.nav = {}
+        for n in PAGES:
+            b = ttk.Button(side, text=tr("nav." + n), style="Nav.TButton", command=lambda n=n: self.show(n), takefocus=False)
+            b.pack(fill="x", pady=1)
+            self.nav[n] = b
+        ttk.Label(side, text="build " + BUILD_ID, style="Side.TLabel").pack(side="bottom", anchor="w", padx=6, pady=(8, 0))
+        lang = ttk.Frame(side, style="Side.TFrame")
+        lang.pack(side="bottom", fill="x", padx=4)
+        ttk.Label(lang, text=tr("l.uilang"), style="Side.TLabel").pack(anchor="w", pady=(0, 3))
+        names = ["%s (%s)" % (v, k) for k, v in i18n.LANGS.items()]
+        lv = tk.StringVar(value="%s (%s)" % (i18n.LANGS[i18n.current()], i18n.current()))
+        cb = ttk.Combobox(lang, textvariable=lv, values=names, state="readonly")
+        cb.pack(fill="x")
+
+        def chosen(_=None):
+            code = lv.get().rsplit("(", 1)[1].rstrip(")")
+            if code != i18n.current():
+                i18n.set_language(code)
+                self.root.after_idle(self.rebuild)
+        cb.bind("<<ComboboxSelected>>", chosen)
+
+        self.main = ttk.Frame(r, style="Bg.TFrame")
+        self.main.grid(row=0, column=1, sticky="nsew")
+        self.main.columnconfigure(0, weight=1)
+        self.main.rowconfigure(0, weight=1)
+        self.pages = {}
+        self.patch_ui = []
+        self._build_play(self.page_frame("play", tr("nav.play")))
+        self._build_gfx(self.page_frame("gfx", tr("nav.gfx")))
+        self._build_controls(self.page_frame("controls", tr("nav.controls")))
+        self._build_mods(self.page_frame("mods", tr("nav.mods"), scroll=True))
+        self._build_log(self.page_frame("log", tr("nav.log")))
+        self._build_bar(r)
+        self.show(self.page)
+        for k in ("renderer", "scale", "fullscreen", "internal_res", "aspect", "hz60"):
+            self.vars[k].trace_add("write", lambda *_: self._refresh())
+        self._refresh()
+        if self.proc and self.proc.poll() is None:
+            self.play_btn.state(["disabled"])
+            self.stop_btn.pack(side="right", padx=(0, 8), before=self.play_btn)
+        if self.s.get("disc"):
+            self.root.after(200, self.check_disc)
+        elif data_ready():
+            man = X.read_manifest(data_dir())
+            self.say(tr("s.dataok", data_dir(), len(man["files"]) if man else 0), "ok")
+
+    def _build_bar(self, r):
+        """Bottom bar under every page: the options summary, Copy log, Close the game (while running) and Play."""
+        tk.Frame(r, background=C_LINE, height=1).grid(row=1, column=1, sticky="new")
+        bar = ttk.Frame(r, style="Bg.TFrame", padding=(24, 12, 24, 14))
+        bar.grid(row=1, column=1, sticky="ew")
+        self.summary = tk.StringVar()
+        ttk.Label(bar, textvariable=self.summary, style="Bg.TLabel").pack(side="left")
+        self.play_btn = ttk.Button(bar, text=tr("b.play"), command=self.play, style="Accent.TButton", width=16)
+        self.play_btn.pack(side="right")
+        self.stop_btn = ttk.Button(bar, text=tr("b.stop"), command=self.stop, style="Bar.TButton")
+        ttk.Button(bar, text=tr("b.copylog"), command=self.copy_log, style="Bar.TButton").pack(side="right", padx=(0, 8))
+
+    def _refresh(self):
+        """Summary line ("OpenGL · 2x window · 3x internal · 16:9") and the internal resolution enabled for OpenGL only."""
+        try:
+            gl = self.vars["renderer"].get() != "soft"
+            parts = ["OpenGL" if gl else "Software",
+                     tr("sum.full") if self.vars["fullscreen"].get() else tr("sum.window", self.vars["scale"].get())]
+            if gl and self.vars["internal_res"].get() in (2, 3, 4):
+                parts.append(tr("sum.ires", self.vars["internal_res"].get()))
+            a = self.vars["aspect"].get()
+            parts.append({"square": "1:1 px", "16:9": "16:9", "21:9": "21:9"}.get(a, "4:3"))
+            parts.append("60 Hz" if self.vars["hz60"].get() else "50 Hz")
+        except tk.TclError:
+            return
+        self.summary.set("  ·  ".join(parts))
+        for b in getattr(self, "ires_btns", []):
+            b.state(["!disabled"] if gl else ["disabled"])
+        if hasattr(self, "ires_note"):
+            if gl:
+                self.ires_note.pack_forget()
+            else:
+                self.ires_note.pack(anchor="w", pady=(6, 0))
+
+    def _browse_row(self, parent, key, command):
+        row = ttk.Frame(parent)
+        row.pack(fill="x")
+        ttk.Entry(row, textvariable=self.var(key)).pack(side="left", fill="x", expand=True)
+        ttk.Button(row, text=tr("b.browse"), command=command).pack(side="left", padx=(8, 0))
+        return row
+
     def _build_play(self, f):
-        ttk.Label(f, text=tr("l.disc")).grid(row=0, column=0, sticky="w", pady=(0, 2))
-        row = ttk.Frame(f); row.grid(row=1, column=0, sticky="ew", pady=(0, 8))
-        ttk.Entry(row, textvariable=self.var("disc")).pack(side="left", fill="x", expand=True)
-        ttk.Button(row, text=tr("b.browse"), command=self.pick_disc).pack(side="left", padx=4)
-        ttk.Label(f, text=tr("l.savedir")).grid(row=2, column=0, sticky="w", pady=(0, 2))
-        row = ttk.Frame(f); row.grid(row=3, column=0, sticky="ew", pady=(0, 8))
-        ttk.Entry(row, textvariable=self.var("savedir")).pack(side="left", fill="x", expand=True)
-        ttk.Button(row, text=tr("b.browse"), command=self.pick_savedir).pack(side="left", padx=4)
-        opts = ttk.Frame(f); opts.grid(row=4, column=0, sticky="w", pady=4)
-        ttk.Label(opts, text=tr("l.scale")).pack(side="left")
-        sv = self.var("scale", tk.IntVar, 2)
-        for n in (1, 2, 3):
-            ttk.Radiobutton(opts, text="%dx" % n, variable=sv, value=n).pack(side="left", padx=2)
-        ttk.Checkbutton(opts, text=tr("l.fullscreen"), variable=self.var("fullscreen", tk.BooleanVar, False)).pack(side="left", padx=(16, 0))
-        hz = ttk.Frame(f); hz.grid(row=5, column=0, sticky="w", pady=4)
-        ttk.Label(hz, text=tr("l.hz")).pack(side="left")
-        hv = self.var("hz60", tk.BooleanVar, False)
-        ttk.Radiobutton(hz, text="50 Hz (PAL)", variable=hv, value=False).pack(side="left", padx=2)
-        ttk.Radiobutton(hz, text="60 Hz", variable=hv, value=True).pack(side="left", padx=2)
-        ir = ttk.Frame(hz); ir.pack(side="left", padx=(16, 0))      # --internal-res: 3D drawn at N x (docs/PORT.md "HD")
-        ttk.Label(ir, text=tr("l.ires")).pack(side="left")
-        iv = self.var("internal_res", tk.IntVar, 1)
-        for n in (1, 2, 3, 4):
-            ttk.Radiobutton(ir, text=tr("r.ires1") if n == 1 else "%dx" % n, variable=iv, value=n).pack(side="left", padx=2)
-        rd = ttk.Frame(f); rd.grid(row=6, column=0, sticky="w", pady=4)
-        ttk.Label(rd, text=tr("l.renderer")).pack(side="left")
-        rv = self.var("renderer", tk.StringVar, "gl")
-        ttk.Radiobutton(rd, text=tr("r.gl"), variable=rv, value="gl").pack(side="left", padx=2)
-        ttk.Radiobutton(rd, text=tr("r.soft"), variable=rv, value="soft").pack(side="left", padx=2)
-        ar = ttk.Frame(rd); ar.pack(side="left", padx=(16, 0))
-        ttk.Label(ar, text=tr("l.aspect")).pack(side="left")
-        av = self.var("aspect", tk.StringVar, "tv")
-        ttk.Radiobutton(ar, text=tr("a.tv"), variable=av, value="tv").pack(side="left", padx=2)
-        ttk.Radiobutton(ar, text=tr("a.sq"), variable=av, value="square").pack(side="left", padx=2)
-        ttk.Radiobutton(ar, text=tr("a.w16"), variable=av, value="16:9").pack(side="left", padx=2)
-        ttk.Radiobutton(ar, text=tr("a.w21"), variable=av, value="21:9").pack(side="left", padx=2)
-        lg = ttk.Frame(f); lg.grid(row=7, column=0, sticky="w", pady=4)
-        ttk.Label(lg, text=tr("l.lang")).pack(side="left")
+        o, c = self.card(f)
+        o.pack(fill="x")
+        ttk.Label(c, text=tr("c.disc"), style="Head.TLabel").pack(anchor="w")
+        ttk.Label(c, text=tr("l.disc"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
+        self._browse_row(c, "disc", self.pick_disc)
+        st = self.status_row = ttk.Frame(c)
+        st.pack(fill="x", pady=(8, 0))
+        self.dot = tk.Canvas(st, width=10, height=10, background=C_CARD, highlightthickness=0, bd=0)
+        self.dot.create_oval(1, 1, 9, 9, fill=DOT["info"], outline="", tags="d")
+        self.dot.pack(side="left", anchor="n", pady=(5, 0), padx=(0, 8))
+        self.status_lbl = ttk.Label(st, textvariable=self.status, wraplength=640, justify="left")
+        self.status_lbl.pack(side="left", fill="x", expand=True)
+        st.bind("<Configure>", lambda e: self.status_lbl.configure(wraplength=max(200, e.width - 30)))
+        # shown only while the disc is extracted into data/ (check_disc): a message and a bar under the status
+        self.ext_box = ttk.Frame(c)
+        ttk.Label(self.ext_box, text=tr("l.extracting"), foreground=DOT["busy"]).pack(anchor="w")
+        self.ext_bar = ttk.Progressbar(self.ext_box, mode="determinate", maximum=100)
+        self.ext_bar.pack(fill="x", pady=(4, 0))
+        ttk.Label(c, text=tr("c.saves"), style="Head.TLabel").pack(anchor="w", pady=(16, 0))
+        ttk.Label(c, text=tr("l.savedir"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
+        self._browse_row(c, "savedir", self.pick_savedir)
+
+        o, c = self.card(f)
+        o.pack(fill="x", pady=(12, 0))
+        c.columnconfigure(0, weight=1, uniform="g")
+        c.columnconfigure(1, weight=1, uniform="g")
+
+        def cell(row, col, title):
+            box = ttk.Frame(c)
+            box.grid(row=row, column=col, sticky="new", padx=(0 if col == 0 else 12, 12 if col == 0 else 0), pady=(0 if row == 0 else 14, 0))
+            ttk.Label(box, text=title, style="Head.TLabel").pack(anchor="w", pady=(0, 6))
+            return box
+        # game language (the boot menu's MAINn.EXE): a combobox
+        box = cell(0, 0, tr("c.game"))
         default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)     # the launcher's language, English otherwise
         lv = self.var("lang", tk.IntVar, default_lang)
-        self._flags = [flag_image(n) for n, _ in GAME_LANGS]      # kept: Tk drops an image nobody references
-        for (n, name), img in zip(GAME_LANGS, self._flags):
-            ttk.Radiobutton(lg, text=" " + name, image=img, compound="left", variable=lv, value=n).pack(side="left", padx=4)
-        r8 = ttk.Frame(f); r8.grid(row=8, column=0, sticky="ew", pady=4)
-        ttk.Checkbutton(r8, text=tr("l.autostart"), variable=self.var("autostart", tk.BooleanVar, False)).pack(anchor="w")
-        pr = ttk.Frame(r8); pr.pack(fill="x", pady=(6, 0))
-        ttk.Checkbutton(pr, text=tr("l.patch"), variable=self.var("patch_on", tk.BooleanVar, False)).pack(side="left")
-        ttk.Entry(pr, textvariable=self.var("patch")).pack(side="left", fill="x", expand=True, padx=(4, 0))
-        ttk.Button(pr, text=tr("b.browse"), command=self.pick_patch).pack(side="left", padx=4)
+        names = [name for _n, name in GAME_LANGS]
+        ids = [n for n, _name in GAME_LANGS]
+        self.lang_cb = ttk.Combobox(box, values=names, state="readonly")
+        self.lang_cb.current(ids.index(lv.get()) if lv.get() in ids else 0)
+        self.lang_cb.bind("<<ComboboxSelected>>", lambda _e: (lv.set(ids[self.lang_cb.current()]), self._sync_patch_choice()))
+        self.lang_cb.pack(fill="x")
+        # text patch: none / the bundled one / another file (keys patch_on + patch, as before; no path shown unless "other")
+        box = cell(0, 1, tr("c.patch"))
+        self._patch_widget(box)
+        # speed: segmented 50 / 60 Hz (the hz60 mod)
+        box = cell(1, 0, tr("c.speed"))
+        seg = ttk.Frame(box)
+        seg.pack(anchor="w")
+        hv = self.var("hz60", tk.BooleanVar, False)
+        for text, val in (("50 Hz (PAL)", False), ("60 Hz", True)):
+            ttk.Radiobutton(seg, text=text, variable=hv, value=val, style="Seg.Toolbutton", width=12,
+                            command=self._refresh).pack(side="left")
+        box = cell(1, 1, tr("c.quick"))
+        ttk.Checkbutton(box, text=tr("l.skipintro"), variable=self.var("skipintro", tk.BooleanVar, True)).pack(anchor="w")
+        ttk.Checkbutton(box, text=tr("l.autostart2"), variable=self.var("autostart", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
+
+    def _patch_mode(self):
+        """none / bundled / custom from the saved patch_on + patch (an old saved path to the bundled file -> bundled)."""
         bp = bundled_patch()
-        ttk.Label(r8, text=tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), wraplength=700, justify="left",
-                  foreground="#555").pack(anchor="w", padx=24)
-        ttk.Label(f, text=tr("l.pad"), wraplength=700, justify="left").grid(row=9, column=0, sticky="w", pady=8)
-        btns = ttk.Frame(f); btns.grid(row=10, column=0, sticky="w", pady=8)
-        self.play_btn = ttk.Button(btns, text=tr("b.play"), command=self.play, width=16)
-        self.play_btn.pack(side="left")
-        ttk.Button(btns, text=tr("b.stop"), command=self.stop).pack(side="left", padx=8)
-        ttk.Button(btns, text=tr("b.copylog"), command=self.copy_log).pack(side="left", padx=8)
-        # shown only while the disc is extracted into data/ (check_disc): a bar and a plain message next to Play
-        self.ext_box = ttk.Frame(f)
-        self.ext_box.grid(row=10, column=0, sticky="e", padx=8)
-        self.ext_label = ttk.Label(self.ext_box, text=tr("l.extracting"), foreground="#b00000", wraplength=320, justify="left")
-        self.ext_bar = ttk.Progressbar(self.ext_box, length=260, mode="determinate", maximum=100)
-        self.ext_box.grid_remove()
-        ttk.Label(f, text=tr("l.cmd")).grid(row=11, column=0, sticky="w")
-        self.cmd_text = tk.Text(f, height=3, wrap="word")
-        self.cmd_text.grid(row=12, column=0, sticky="ew")
-        ttk.Label(f, text=tr("l.log")).grid(row=13, column=0, sticky="w", pady=(8, 0))
-        self.log_text = tk.Text(f, height=8, wrap="none")
-        self.log_text.grid(row=14, column=0, sticky="nsew")
-        f.columnconfigure(0, weight=1)
-        f.rowconfigure(14, weight=1)
+        cur = (self.vars["patch"].get() or "").strip()
+        if not self.vars["patch_on"].get():
+            return "none"
+        if not cur or (bp and os.path.basename(cur) == os.path.basename(bp) and os.path.dirname(os.path.abspath(cur)).endswith("patches")):
+            return "bundled" if bp else "none"
+        return "custom"
+
+    def _patch_widget(self, parent):
+        """Combobox Ninguno / Traducción mejorada (incluida) / Otro archivo...; the path + Elegir only for "other"."""
+        self.var("patch_on", tk.BooleanVar, False)
+        self.var("patch")
+        if not hasattr(self, "patch_ui"):
+            self.patch_ui = []
+        if self._patch_mode() == "bundled":        # migrate: the bundled file wherever this exe now lives
+            self.vars["patch"].set(bundled_patch())
+        modes = ["none"] + (["bundled"] if bundled_patch() else []) + ["custom"]
+        names = [tr("p." + m) for m in modes]
+        cb = ttk.Combobox(parent, values=names, state="readonly")
+        cb.pack(fill="x")
+        row = ttk.Frame(parent)
+        ttk.Entry(row, textvariable=self.vars["patch"]).pack(side="left", fill="x", expand=True)
+        ttk.Button(row, text=tr("b.browse"), command=self.pick_patch).pack(side="left", padx=(8, 0))
+        hint = ttk.Label(parent, text=tr("l.patchhint"), style="Muted.TLabel", wraplength=300, justify="left")
+
+        def chosen(_e=None):
+            m = modes[cb.current()]
+            if m == "none":
+                self.vars["patch_on"].set(False)
+            elif m == "bundled":
+                self.vars["patch"].set(bundled_patch() or "")
+                self.vars["patch_on"].set(True)
+            else:
+                if self._patch_mode() != "custom":
+                    old = self.vars["patch"].get(), self.vars["patch_on"].get()
+                    self.pick_patch()
+                    if self._patch_mode() != "custom":      # cancelled: back to what it was
+                        self.vars["patch"].set(old[0])
+                        self.vars["patch_on"].set(old[1])
+            self._sync_patch_choice()
+        cb.bind("<<ComboboxSelected>>", chosen)
+        self.patch_ui.append((cb, modes, row, hint))
+        self._sync_patch_choice()
+
+    def _sync_patch_choice(self):
+        """Every patch combobox shown from the patch_on / patch settings."""
+        m = self._patch_mode()
+        spanish = self.vars.get("lang") is not None and self.vars["lang"].get() == 5
+        for cb, modes, row, hint in getattr(self, "patch_ui", []):
+            try:
+                cb.current(modes.index(m) if m in modes else 0)
+                row.pack(fill="x", pady=(6, 0)) if m == "custom" else row.pack_forget()
+                hint.pack(anchor="w", pady=(4, 0)) if (m == "none" and spanish and "bundled" in modes) else hint.pack_forget()
+            except tk.TclError:
+                pass
+
+    def clear_patch(self):
+        self.vars["patch_on"].set(False)
+        self._sync_patch_choice()
+
+    def _radios(self, parent, key, kind, default, items):
+        v = self.var(key, kind, default)
+        out = []
+        for text, val in items:
+            b = ttk.Radiobutton(parent, text=text, variable=v, value=val)
+            b.pack(anchor="w", pady=2)
+            out.append(b)
+        return out
+
+    def _build_gfx(self, f):
+        grid = ttk.Frame(f, style="Bg.TFrame")
+        grid.pack(fill="x")
+        grid.columnconfigure(0, weight=1, uniform="g")
+        grid.columnconfigure(1, weight=1, uniform="g")
+        o, c = self.card(grid, tr("c.renderer"))
+        o.grid(row=0, column=0, sticky="nsew", padx=(0, 6))
+        self._radios(c, "renderer", tk.StringVar, "gl", [(tr("r.gl"), "gl"), (tr("r.soft"), "soft")])
+        o, c = self.card(grid, tr("c.window"))
+        o.grid(row=0, column=1, sticky="nsew", padx=(6, 0))
+        seg = ttk.Frame(c)
+        seg.pack(anchor="w")
+        sv = self.var("scale", tk.IntVar, 2)
+        for n in (1, 2, 3):
+            ttk.Radiobutton(seg, text="%dx" % n, variable=sv, value=n, style="Seg.Toolbutton", width=6).pack(side="left")
+        ttk.Checkbutton(c, text=tr("l.fullscreen"), variable=self.var("fullscreen", tk.BooleanVar, False)).pack(anchor="w", pady=(10, 0))
+        o, c = self.card(grid, tr("c.aspect"))
+        o.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(12, 0))
+        self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9")])
+        o, c = self.card(grid, tr("c.ires"))     # --internal-res: 3D drawn at N x (docs/PORT.md "HD"), OpenGL only
+        o.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(12, 0))
+        self.ires_btns = self._radios(c, "internal_res", tk.IntVar, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
+        self.ires_note = ttk.Label(c, text=tr("l.iresoff"), style="Muted.TLabel", wraplength=300, justify="left")
+
+    def _build_controls(self, f):
+        o, c = self.card(f, tr("c.keys"))
+        o.pack(fill="x")
+        ttk.Checkbutton(c, text=tr("mod.keys"), variable=self.var("keys_on", tk.BooleanVar, False)).pack(anchor="w")
+        ttk.Label(c, text=tr("mod.keys.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", padx=(24, 0), pady=(0, 10))
+        grid = ttk.Frame(c)
+        grid.pack(anchor="w")
+        keys = self.s.get("keys") or dict(M.DEFAULT_KEYS)
+        self.key_vars = {}
+        for i, b in enumerate(M.BUTTONS):
+            ttk.Label(grid, text=b.capitalize(), width=10).grid(row=i % 7, column=(i // 7) * 2, sticky="w", pady=2)
+            v = self.key_vars[b] = tk.StringVar(value=keys.get(b, M.DEFAULT_KEYS[b]))
+            ttk.Entry(grid, textvariable=v, width=14).grid(row=i % 7, column=(i // 7) * 2 + 1, sticky="w", padx=(2, 24))
+        ttk.Button(c, text=tr("b.defaults"), command=lambda: [v.set(M.DEFAULT_KEYS[b]) for b, v in self.key_vars.items()]).pack(anchor="w", pady=(10, 0))
+        o, c = self.card(f, tr("c.pad"))
+        o.pack(fill="x", pady=(12, 0))
+        lbl = ttk.Label(c, text=tr("l.pad"), wraplength=640, justify="left")
+        lbl.pack(anchor="w", fill="x")
+        c.bind("<Configure>", lambda e: lbl.configure(wraplength=max(200, e.width - 40)))
 
     def _build_mods(self, f):
-        ttk.Label(f, text=tr("l.modshelp"), wraplength=700, justify="left").pack(anchor="w", pady=(0, 6))
+        o, c = self.card(f, tr("c.patch"))
+        o.pack(fill="x", padx=(0, 4))
+        self._patch_widget(c)
+        bp = bundled_patch()
+        ttk.Label(c, text=tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), style="Muted.TLabel", wraplength=640,
+                  justify="left").pack(anchor="w", pady=(8, 0))
+        o, c = self.card(f, tr("c.mods"))
+        o.pack(fill="x", pady=(12, 0), padx=(0, 4))
+        ttk.Label(c, text=tr("l.modshelp"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(0, 8))
         for mid, lk, dk, kind, _fn in M.MODS:
-            if mid == "keys_on":
-                continue      # on the Controls tab
-            box = ttk.Frame(f, padding=(0, 2))
+            if mid in ("keys_on", "skipintro", "hz60"):
+                continue      # on the Controls / Play pages
+            box = ttk.Frame(c, padding=(0, 2))
             box.pack(fill="x")
             ttk.Checkbutton(box, text=tr(lk), variable=self.var(mid, tk.BooleanVar, False)).pack(side="left")
             if kind == "check+area":
                 av, sv = self.var("area", tk.IntVar, 0), self.var("section", tk.IntVar, 0)
-                ttk.Label(box, text=tr("mod.area")).pack(side="left", padx=(12, 2))
+                ttk.Label(box, text=tr("mod.area")).pack(side="left", padx=(12, 4))
                 names = ["%02d %s" % (a, M.AREA_NAMES.get(a, "")) for a, _ in M.ROOM_COUNTS]
-                self.area_cb = ttk.Combobox(box, values=names, state="readonly", width=34)
+                self.area_cb = ttk.Combobox(box, values=names, state="readonly", width=20)
                 idx = [a for a, _ in M.ROOM_COUNTS]
                 self.area_cb.current(idx.index(av.get()) if av.get() in idx else 0)
                 self.area_cb.pack(side="left")
-                ttk.Label(box, text=tr("mod.section")).pack(side="left", padx=(12, 2))
+                ttk.Label(box, text=tr("mod.section")).pack(side="left", padx=(12, 4))
                 self.sec_cb = ttk.Combobox(box, state="readonly", width=4)
                 self.sec_cb.pack(side="left")
 
@@ -484,19 +831,27 @@ class App:
                 _, key, lo, hi, step = kind.split(":")
                 iv = self.var(key, tk.IntVar, int(lo))
                 ttk.Spinbox(box, from_=int(lo), to=int(hi), increment=int(step), textvariable=iv, width=10).pack(side="left", padx=12)
-            ttk.Label(f, text=tr(dk), wraplength=680, justify="left", foreground="#555").pack(anchor="w", padx=24, pady=(0, 4))
+            ttk.Label(c, text=tr(dk), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", padx=(24, 0), pady=(0, 6))
 
-    def _build_controls(self, f):
-        ttk.Checkbutton(f, text=tr("mod.keys"), variable=self.var("keys_on", tk.BooleanVar, False)).pack(anchor="w")
-        ttk.Label(f, text=tr("mod.keys.d"), wraplength=680, justify="left", foreground="#555").pack(anchor="w", padx=24, pady=(0, 8))
-        grid = ttk.Frame(f); grid.pack(anchor="w")
-        keys = self.s.get("keys") or dict(M.DEFAULT_KEYS)
-        self.key_vars = {}
-        for i, b in enumerate(M.BUTTONS):
-            ttk.Label(grid, text=b.capitalize(), width=10).grid(row=i % 7, column=(i // 7) * 2, sticky="w", pady=2)
-            v = self.key_vars[b] = tk.StringVar(value=keys.get(b, M.DEFAULT_KEYS[b]))
-            ttk.Entry(grid, textvariable=v, width=14).grid(row=i % 7, column=(i // 7) * 2 + 1, sticky="w", padx=(2, 16))
-        ttk.Button(f, text=tr("b.defaults"), command=lambda: [v.set(M.DEFAULT_KEYS[b]) for b, v in self.key_vars.items()]).pack(anchor="w", pady=8)
+    def _build_log(self, f):
+        o, c = self.card(f, tr("c.status"))
+        o.pack(fill="x")
+        ttk.Label(c, textvariable=self.status, wraplength=640, justify="left").pack(anchor="w")
+        o, c = self.card(f, tr("c.cmd"))
+        o.pack(fill="x", pady=(12, 0))
+        mono = ("Consolas", 9) if os.name == "nt" else ("DejaVu Sans Mono", 9)
+        self.cmd_text = tk.Text(c, height=3, wrap="word", relief="flat", background="#f7f7f9", font=mono, highlightthickness=1,
+                                highlightbackground=C_LINE, padx=6, pady=4)
+        self.cmd_text.pack(fill="x")
+        o, c = self.card(f, tr("c.log"))
+        o.pack(fill="both", expand=True, pady=(12, 0))
+        self.log_text = tk.Text(c, height=8, wrap="none", relief="flat", background="#f7f7f9", font=mono, highlightthickness=1,
+                                highlightbackground=C_LINE, padx=6, pady=4)
+        self.log_text.pack(fill="both", expand=True)
+        try:            # the previous run's log, if any
+            self.show_log_tail(open(self.log_path, encoding="utf-8", errors="replace").read().splitlines())
+        except OSError:
+            pass
 
     # ---- actions
     def collect(self):
@@ -522,6 +877,7 @@ class App:
         if p:
             self.vars["patch"].set(p)
             self.vars["patch_on"].set(True)
+        self._sync_patch_choice()
 
     def disc_hash(self):
         """sha1 of the disc image (.bin / .iso; cached in the settings by path, size and date), None without one or for a .chd
@@ -548,30 +904,30 @@ class App:
             if not want:
                 if st:
                     n = DP.restore(d)
-                    self.status.set(tr("s.patchoff", n))
+                    self.say(tr("s.patchoff", n), "info")
                 return True
             p = want
             if not os.path.isfile(p):
                 messagebox.showerror(tr("title"), tr("s.patchmissing", p))
                 return False
             if st and st.get("sha1") == DP.file_sha1(p) and X.manifest_sha1(d):
-                self.status.set(tr("s.patchon", st.get("title") or os.path.basename(p)))
+                self.say(tr("s.patchon", st.get("title") or os.path.basename(p)), "ok")
                 return True
-            self.status.set(tr("s.patching", os.path.basename(p)))
+            self.say(tr("s.patching", os.path.basename(p)), "busy")
             self.root.update_idletasks()
             h = self.disc_hash()
             r = DP.apply(d, p, disc_hash=h, log=lambda m: None)
             chk = tr("s.patchchk.disc") if h else tr("s.patchchk.main0")
             if r["moved"]:
                 chk += "; " + tr("s.patchmoved", len(r["moved"]))
-            self.status.set(tr("s.patchok", r["title"] or os.path.basename(p), len(r["files"]), chk))
+            self.say(tr("s.patchok", r["title"] or os.path.basename(p), len(r["files"]), chk), "ok")
             return True
         except (DP.PatchError, OSError, ValueError) as e:
             try:
                 DP.restore(d)
             except OSError:
                 pass
-            self.status.set(tr("s.patchfail", e))
+            self.say(tr("s.patchfail", e), "bad")
             messagebox.showerror(tr("title"), tr("s.patchfail", e))
             return False
 
@@ -583,7 +939,7 @@ class App:
     def check_disc(self):
         self.collect()
         image = bin_of_cue(self.s["disc"])
-        self.status.set(tr("s.checking"))
+        self.say(tr("s.checking"), "busy")
 
         def work():
             try:
@@ -591,9 +947,9 @@ class App:
                 name = "%s %s" % (serial or "?", KNOWN_DISCS.get(serial, ""))
                 msg = tr("s.ok", name.strip()) if sha == MAIN0_SHA1 else tr("s.badsha", name.strip(), sha[:8])
             except (OSError, ValueError, struct.error) as e:
-                self.root.after(0, self.status.set, str(e))
+                self.root.after(0, self.say, str(e), "bad")
                 return
-            self.root.after(0, self.status.set, msg)
+            self.root.after(0, self.say, msg, "ok" if sha == MAIN0_SHA1 else "bad")
             # the one-time extraction into data/ (again when data/ was made from another disc: a different MAIN0)
             if data_ready() != sha:
                 self.root.after(0, self._extracting, 0)
@@ -607,27 +963,25 @@ class App:
                     pct = done * 100 // max(1, total)
                     if pct != last[0]:
                         last[0] = pct
-                        self.root.after(0, self.status.set, tr("s.extracting", data_dir(), pct, path))
+                        self.root.after(0, self.say, tr("s.extracting", data_dir(), pct, path), "busy")
                         self.root.after(0, self._extracting, pct)
                 try:
                     man = X.extract(image, data_dir(), progress)
-                    self.root.after(0, self.status.set, tr("s.dataok", data_dir(), len(man["files"])))
+                    self.root.after(0, self.say, tr("s.dataok", data_dir(), len(man["files"])), "ok")
                 except (OSError, ValueError, struct.error) as e:
-                    self.root.after(0, self.status.set, tr("s.extractfail", e))
+                    self.root.after(0, self.say, tr("s.extractfail", e), "bad")
                 self.root.after(0, self._extracting, None)
         threading.Thread(target=work, daemon=True).start()
 
     def _extracting(self, pct):
         """pct 0..100 while data/ is being extracted (Play disabled, bar and message shown); None when it ends."""
         if pct is None:
-            self.ext_box.grid_remove()
+            self.ext_box.pack_forget()
             self.play_btn.configure(text=tr("b.play"))
             self.play_btn.state(["!disabled"])
             return
         if not self.ext_box.winfo_ismapped():
-            self.ext_label.pack(anchor="w")
-            self.ext_bar.pack(anchor="w", pady=(4, 0))
-            self.ext_box.grid()
+            self.ext_box.pack(fill="x", pady=(8, 0), after=self.status_row)
         self.play_btn.state(["disabled"])
         self.play_btn.configure(text=tr("b.extracting", pct))
         self.ext_bar["value"] = pct
@@ -671,15 +1025,16 @@ class App:
             if not self.sync_patch():
                 return
         elif self.s.get("patch_on"):
-            self.status.set(tr("s.patchnodata"))
+            self.say(tr("s.patchnodata"), "busy")
         self.log_path = os.path.join(app_dir(), "tombi-port.log")
         log = open(self.log_path, "w", encoding="utf-8", errors="replace")
         log.write("[launcher] build %s\n" % BUILD_ID)      # the exe then prints its own id: [port2] build <sha> <date>
         log.flush()
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         self.proc = subprocess.Popen(cmd, cwd=app_dir(), stdout=log, stderr=subprocess.STDOUT, creationflags=flags)
-        self.status.set(tr("s.running"))
+        self.say(tr("s.running"), "ok")
         self.play_btn.state(["disabled"])
+        self.stop_btn.pack(side="right", padx=(0, 8), before=self.play_btn)
         self.root.after(1000, self.poll)
 
     def poll(self):
@@ -693,8 +1048,9 @@ class App:
         if rc is None:
             self.root.after(1000, self.poll)
             return
-        self.status.set(tr("s.ended", rc, self.log_path))
+        self.say(tr("s.ended", rc, self.log_path), "info")
         self.play_btn.state(["!disabled"])
+        self.stop_btn.pack_forget()
         self.proc = None
 
     def show_log_tail(self, lines):
@@ -713,7 +1069,7 @@ class App:
             text = self.log_text.get("1.0", "end")
         self.root.clipboard_clear()
         self.root.clipboard_append(text)
-        self.status.set(tr("s.copied", len(text.splitlines())))
+        self.say(tr("s.copied", len(text.splitlines())), "info")
 
     def stop(self):
         if self.proc and self.proc.poll() is None:
@@ -727,10 +1083,6 @@ class App:
 
 def main():
     root = tk.Tk()
-    try:
-        ttk.Style().theme_use("clam" if os.name != "nt" else "vista")
-    except tk.TclError:
-        pass
     App(root)
     root.mainloop()
 
