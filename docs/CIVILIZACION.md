@@ -268,7 +268,10 @@ estas tablas, así que la numeración de fotogramas la fija el código aunque la
     única fila (por conjunto de colores; los fotogramas de TCRF son algo distintos, así que no es píxel a píxel). Las
     filas separadas 32 forman un mismo juego de paletas de vecinos; AREA16/CLUT07 tiene la misma disposición (16/48/80,
     21/53).
-  - AREA17/CLUT01 fila 48 y AREA17/CLUT03 fila 49: los Hombres de hierro. Suposición.
+  - **AREA17/CLUT03 fila 1** (= AREA17/CLUT06 filas 1 y 129, AREA18/CLUT02 fila 6): los Hombres de hierro (traje
+    naranja con remaches, mangas blancas, pantalón verde, pelo negro de punta). Coincide con una captura del juego de
+    un vecino del mismo tipo (un vecino de la Ciudad de hierro de lado, ante la puerta del Castillo de hierro: los 15
+    colores de la fila aparecen en él; por conjunto de colores, no píxel a píxel).
 - Qué fila usa cada vecino de la vista desde arriba no está en el código que sobrevive: la CLUT de un vecino viene de las
   partes de su tabla SPR (las inicializaciones de personaje ponen `b0d` a 0, así que no se usa `w08`), y esas tablas se
   perdieron. `tools/civ_sheets.py` indica con qué archivo y fila dibuja cada grupo de vecinos (`sub_pal`, `PAL_NOTE`).
@@ -538,7 +541,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepE`, I0NFO2 0x800E9040; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); interior de la Ciudad de hierro (AREA17 s1).
 - **Objetos**: 35 (I0NFO2 0x80100368); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A08000` (lista de recarga SYS 80), dibujados con paletas reales: AREA17/CLUT01 fila 48, AREA17/CLUT03 fila 49 para el subtipo 2 (suposiciones).
+- **Muñecos**: `SYSTEM/A08000` (lista de recarga SYS 80), dibujados con la paleta real AREA17/CLUT03 fila 1 (según una captura del juego; que la usen todos es suposición).
 - **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 17 --lang all --out build/civ`
 
@@ -564,7 +567,7 @@ La herramienta reconstruye las secciones que funcionan sólo con datos del disco
 | Dibujo del mapa 8F | falta | la parte difícil. Un dibujo prerrenderizado de 8 bpp por pueblo, de unos 640 x 576 (AREA11), 448 x 544 (AREA16) y 704 x 480 (AREA17). Se puede pintar, o montar con AREA05/08/19 y los recortes de decorado de las páginas de recarga SYS |
 | Sprites de personajes 3B | falta la tabla, las páginas sobreviven en parte | la página de aldeanos de 4 bpp de A06100 (y las partes equivalentes de A07600/A08000) tiene los fotogramas. Una tabla SPR nueva debe ordenar sus fotogramas como esperan los guiones de animación de I0NFO2, o hay que aportar guiones nuevos |
 | Decorado 3D / tejados | falta la tabla, los recortes sobreviven en la parte de 8 bpp de las páginas de recarga | el mismo trabajo que 3B. Los tejados deben cubrir los rectángulos de las casas |
-| Paletas | las filas de los vecinos sobreviven (AREA16/CLUT07 fila 53 confirmada; 48/54, AREA11/CLUT02 4/36/68 confirmadas por los colores de TCRF; AREA16 48/54, AREA17/CLUT01 48 / CLUT03 49 plausibles) | cargar el archivo CLUT del área cuyas filas 48..54 las contienen; el TIM lleva la paleta propia del dibujo |
+| Paletas | las filas de los vecinos sobreviven (AREA16/CLUT07 fila 53 confirmada; 48/54, AREA11/CLUT02 4/36/68 confirmadas por los colores de TCRF; AREA16 48/54, AREA17/CLUT03 1 según una captura del juego) | cargar el archivo CLUT del área cuyas filas 48..54 las contienen; el TIM lleva la paleta propia del dibujo |
 | Texto | PAL tiene "···??", JP lo tiene todo | traducir las frases japonesas a los huecos de PAL (ya están en los índices que usa el código) |
 
 En la versión para PC esto es una tarea de datos, no de código. El motor ya ejecuta AREA05/08/19 s0/s2, y cargar

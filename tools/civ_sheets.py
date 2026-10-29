@@ -70,10 +70,10 @@ def sub_pal(C, sub):
 PAL_NOTE = {
     'es': {16: 'Paletas reales de AREA16/CLUT07: fila 53 = Male Stonetown Resident (el forzudo; coincide píxel a píxel con ese sprite de TCRF); filas 54 y 48 para Female Stonetown Resident y los demás (suposición: el código no lo dice)',
            11: 'Paletas reales de AREA11/CLUT02, confirmadas por los colores de TCRF: fila 4 = Lumberjack Factory Worker (el trabajador del casco), fila 36 = Male Lumberjack Town Resident (el anciano; fila 68 = su variante "maldita", no usada aquí). Nombres de TCRF; qué tipo de vecino del código es cada dibujo es una suposición nuestra',
-           17: 'Paletas reales de AREA17/CLUT01 fila 48 y AREA17/CLUT03 fila 49; qué vecino usa cuál es una suposición'},
+           17: 'Paleta real AREA17/CLUT03 fila 1 (= AREA17/CLUT06 filas 1 y 129, AREA18/CLUT02 fila 6): coincide con una captura del juego de un vecino de hierro del mismo tipo (por conjunto de colores, no píxel a píxel); que todos los vecinos la usen es una suposición'},
     'en': {16: 'Real palettes from AREA16/CLUT07: row 53 = Male Stonetown Resident (the strongman; matches that TCRF sprite pixel-exact); rows 54 and 48 for Female Stonetown Resident and the others (a guess: the code does not say)',
            11: 'Real palettes from AREA11/CLUT02, confirmed by TCRF colours: row 4 = Lumberjack Factory Worker (hard hat), row 36 = Male Lumberjack Town Resident (the old man; row 68 = his "cursed" variant, not used here). TCRF names; which code resident type each drawing is remains our guess',
-           17: 'Real palettes from AREA17/CLUT01 row 48 and AREA17/CLUT03 row 49; which resident uses which is a guess'}}
+           17: 'Real palette AREA17/CLUT03 row 1 (= AREA17/CLUT06 rows 1 and 129, AREA18/CLUT02 row 6): matched to a retail screenshot of the same character type (colour set), not pixel-exact; that every resident uses it is a guess'}}
 
 
 # ------------------------------------------------------------------ per-town data (ES) and the flat plan sheet
@@ -117,7 +117,7 @@ AREAS={
  'Vecino: «Este cartel es viejo y peligroso» → «Siempre tan lleno de energía»',
  'Casa 3, sentado: probablemente el constructor de balsas («¿Quieres una balsa? Tráeme madera del Árbol Sabio»); el código no le da diálogo'],
  ),
-17:dict(atlas='A08000',clut='AREA17/CLUT01',pals={0:48,1:48,2:('AREA17/CLUT03',49),3:48,4:48},sub={0:2,1:0,2:21,3:28,4:38},
+17:dict(atlas='A08000',clut='AREA17/CLUT03',pals={0:1,1:1,2:1,3:1,4:1},sub={0:2,1:0,2:21,3:28,4:38},
  title='AREA17 sección 0 — pueblo recortado de los Hombres de hierro',
  cap='Pueblo recortado de los Hombres de hierro (Ciudad de hierro, AREA17, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((223,575),'D','→ '+CIVI),((223,30),'U','→ interior de la Ciudad de hierro (AREA17 s1)')],
@@ -177,7 +177,7 @@ def explicado_es(area,out):
     ref=Image.new('RGB',(rw,rh)); ref.putdata([clut[v] for v in pix[:rw*rh]])
     ref=ref.resize((int(rw*SC),int(rh*SC)),Image.NEAREST)
     LW=820; M=30; top=150
-    W=M+ref.width+M+TW+M+LW+M; H=top+max(ref.height,TH)+130
+    W=M+ref.width+M+TW+M+LW+M; H=top+max(ref.height,TH)+200
     im=Image.new('RGB',(W,H),(250,247,240)); dr=ImageDraw.Draw(im)
     dr.text((M,25),C['title'],font=F(44,True),fill=(30,30,30))
     dr.text((M,85),C['cap'],font=F(25),fill=(60,60,60))
@@ -224,8 +224,10 @@ def explicado_es(area,out):
         dr.rectangle([tx-6,ty-4,tx+tw+6,ty+32],fill=(255,255,255),outline=(0,90,200),width=2)
         dr.text((tx,ty),lab,font=f,fill=(0,60,160))
     dr.text((ox,top+TH+12),'Plano del pueblo recortado (posiciones del código, AREA%02d)'%area,font=F(24,True),fill=(30,30,30))
-    dr.text((ox,top+TH+44),'Muñecos: sprites de SYSTEM/%s. '%C['atlas']+PAL_NOTE['es'][area],font=F(22),fill=(150,40,40))
-    dr.text((ox,top+TH+72),'Verde = recorrido de patrulla · tejados = casas (al entrar se ve el interior) · cuadros marrones = objetos',font=F(22),fill=(60,60,60))
+    yy=top+TH+44
+    for ln in wrap(dr,'Muñecos: sprites de SYSTEM/%s. '%C['atlas']+PAL_NOTE['es'][area],F(22),W-ox-M):
+        dr.text((ox,yy),ln,font=F(22),fill=(150,40,40)); yy+=28
+    dr.text((ox,yy),'Verde = recorrido de patrulla · tejados = casas (al entrar se ve el interior) · cuadros marrones = objetos',font=F(22),fill=(60,60,60))
     lx=ox+TW+M; y=top
     dr.text((lx,y),'Quién es quién (y qué dice, del texto japonés)',font=F(28,True),fill=(30,30,30)); y+=46
     f=F(21)
@@ -237,7 +239,7 @@ def explicado_es(area,out):
         y+=10
     y+=10
     dr.text((lx,y),'Rojo = en la calle · morado = dentro de una casa',font=F(21,True),fill=(60,60,60))
-    im=im.crop((0,0,W,max(H,y+60)))
+    im=im.crop((0,0,W,max(yy+50,y+60)))
     im.save(out); print(out,im.size)
 
 # ------------------------------------------------------------------ English texts
@@ -305,7 +307,7 @@ def explicado_en(area,out):
     ref=Image.new('RGB',(rw,rh)); ref.putdata([clut[v] for v in pix[:rw*rh]])
     ref=ref.resize((int(rw*SC),int(rh*SC)),Image.NEAREST)
     LW=820; M=30; top=150
-    W=M+ref.width+M+TW+M+LW+M; H=top+max(ref.height,TH)+130
+    W=M+ref.width+M+TW+M+LW+M; H=top+max(ref.height,TH)+200
     im=Image.new('RGB',(W,H),(250,247,240)); dr=ImageDraw.Draw(im)
     dr.text((M,25),C['title'],font=F(44,True),fill=(30,30,30))
     dr.text((M,85),C['cap'],font=F(25),fill=(60,60,60))
@@ -352,8 +354,10 @@ def explicado_en(area,out):
         dr.rectangle([tx-6,ty-4,tx+tw+6,ty+32],fill=(255,255,255),outline=(0,90,200),width=2)
         dr.text((tx,ty),lab,font=f,fill=(0,60,160))
     dr.text((ox,top+TH+12),'Plan of the cut village (positions from the code, AREA%02d)'%area,font=F(24,True),fill=(30,30,30))
-    dr.text((ox,top+TH+44),'Figures: sprites from SYSTEM/%s. '%C['atlas']+PAL_NOTE['en'][area],font=F(22),fill=(150,40,40))
-    dr.text((ox,top+TH+72),'Green = patrol route · roofs = houses (entering shows the inside) · brown squares = props',font=F(22),fill=(60,60,60))
+    yy=top+TH+44
+    for ln in wrap(dr,'Figures: sprites from SYSTEM/%s. '%C['atlas']+PAL_NOTE['en'][area],F(22),W-ox-M):
+        dr.text((ox,yy),ln,font=F(22),fill=(150,40,40)); yy+=28
+    dr.text((ox,yy),'Green = patrol route · roofs = houses (entering shows the inside) · brown squares = props',font=F(22),fill=(60,60,60))
     lx=ox+TW+M; y=top
     dr.text((lx,y),'Who is who (lines from the Japanese text)',font=F(28,True),fill=(30,30,30)); y+=46
     f=F(21)
@@ -365,7 +369,7 @@ def explicado_en(area,out):
         y+=10
     y+=10
     dr.text((lx,y),'Red = outdoors · purple = inside a house',font=F(21,True),fill=(60,60,60))
-    im=im.crop((0,0,W,max(H,y+60)))
+    im=im.crop((0,0,W,max(yy+50,y+60)))
     im.save(out); print(out,im.size)
 
 # TCRF wiki names of the drawings (sprite group of each resident subtype; which code subtype wears which drawing is
