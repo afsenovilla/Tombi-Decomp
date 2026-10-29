@@ -2,7 +2,7 @@
 """One-time extraction of the player's own Tombi! disc into a `data/` folder the native port (port2/, tombi2) reads
 at runtime instead of the disc image (docs/PORT.md "Running without the disc image: data/").
 
-  python3 tools/extract_data.py <disc.bin|.cue|.iso> <data_dir> [--quiet]
+  python3 tools/extract_data.py <disc.bin|.cue|.iso|.chd> <data_dir> [--quiet]
   python3 tools/extract_data.py --check <data_dir>            # verifies the manifest against the files (exit 1 if not)
 
 The game never reads the ISO9660 directory: it seeks to (LBA, size) pairs from its own file table (tools/cdfiles.py),
@@ -27,6 +27,8 @@ Importable: extract(image, out_dir, progress=None) -> manifest dict; manifest_sh
 """
 import hashlib, os, struct, sys
 
+import chd
+
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331
 MANIFEST = "manifest.txt"
 BLOB_DIR = "_disc"
@@ -47,13 +49,18 @@ def bin_of_cue(path):
     return path
 
 
+def open_image(path):
+    """Binary file object of a disc image: .bin/.iso as is, a MAME .chd decompressed on the fly (tools/chd.py)."""
+    return chd.open_image(path)
+
+
 class Image:
     """A raw (2352) or cooked (2048) image: sector access and the ISO9660 directory."""
     SYNC = b"\0" + b"\xff" * 10 + b"\0"
 
     def __init__(self, path):
         self.path = bin_of_cue(path)
-        self.f = open(self.path, "rb")
+        self.f = open_image(self.path)       # a .chd is read through tools/chd.py (track 1 as a raw/cooked stream)
         self.f.seek(0, 2)
         self.size = self.f.tell()
         self.f.seek(0)

@@ -321,7 +321,7 @@ identical WFM; `gam.py --check` reports how many of the 816 GAM files the re-com
 765 with its second variant, 816 when the original bytes are kept for unchanged data); `mkdisc.py --check` rebuilds
 the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.md](notes/assets_tombatools.md).
 
-**Windows exes** (`tombi-port.exe` is the native port with its launcher; built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them; the native port extracts it once into a `data/` folder and runs from that, see [docs/PORT.md](docs/PORT.md) "Running without the disc image"):
+**Windows exes** (`tombi-port.exe` is the native port with its launcher; built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them; the native port extracts it (`.bin`/`.cue`/`.iso`, or a MAME `.chd`: `tools/chd.py`) once into a `data/` folder and runs from that, see [docs/PORT.md](docs/PORT.md) "Running without the disc image"):
 - `dist/windows/tombi-assets.exe`: sprite/sound/video extractor (window with checkboxes).
 - `dist/windows/tombi-text.exe`: text editor. Open `Tombi.bin` (or the extracted folder), pick an area/file/dialogue in the tree (search box on top),
   edit the text in the middle; the preview below redraws as you type with the game font at x1/x2/x3 and warns in red when a line is wider than the
@@ -336,7 +336,10 @@ the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.
   users; valid only for the exact original image, whose SHA-1 is in its description; PPF cannot shrink a file, the rebuilt image only grows).
   `Aplicar parche` loads a text patch into the editor (warns if the disc is not the original) so you can review it and `Generar ISO`, or applies a
   `.ppf` to an original image. Command line: `python tools/text_patch.py make|apply|merge|info` (`apply DISC.bin FIX.tombipatch.json -o OUT.bin`,
-  `--files-out data/` to just write the patched `.WFM` files, e.g. into the native port's extracted `data/` folder).
+  `--files-out DIR` to just write the patched files). For the native port use the launcher's **Text patch** option (or
+  `python tools/data_patch.py apply data FIX.tombipatch.json`): it patches the extracted `data/` reversibly (originals in
+  `data/.orig/`), updates `manifest.txt` and the file tables for files that grew; tombi-port.exe bundles
+  `patches/es_mejorada.tombipatch.json` (docs/PORT.md "Text patches in `data/`").
 - `dist/windows/tombi-gfx.exe`: graphics editor. Open `Tombi.bin`; the tree on the left has Screens, Interface/HUD (the three plausible `UiSpriteDef`
   entries of MAIN0: 0 unused, 1 NOW, 2 LOADING), Pages by load list, Sprites (WPP frames) and Palettes (CLUT). The middle shows the page with the palette
   chosen in the right-hand list (x1..x8, optional sprite rectangles; click one or drag a region). `Export/Import PNG` work on the whole image or the

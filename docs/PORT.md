@@ -909,10 +909,10 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
 
 ### The launcher (tools/port_launcher.py, tombi-port.exe)
 
-Tk window with the same style/i18n as tombi-gfx/tombi-text. *Play* tab: disc image (.bin/.cue/.iso; `EXE/MAIN0.EXE` is
+Tk window with the same style/i18n as tombi-gfx/tombi-text. *Play* tab: disc image (.bin/.cue/.iso/.chd; `EXE/MAIN0.EXE` is
 read from its ISO9660 directory into the launcher's folder and checked against the SCES-01331 sha1
 `bec8dc5f...`), save folder (`--save-dir`), window scale 1x/2x/3x, fullscreen, 50/60 Hz, "start a new game
-automatically", a Play button (runs `tombi.exe --exe MAIN0.EXE --disc ... --window --viewer-arg --scale N ...` with the
+automatically", a *Text patch* (see "Text patches in `data/`"), a Play button (runs `tombi.exe --exe MAIN0.EXE --disc ... --window --viewer-arg --scale N ...` with the
 game's stderr in `tombi-port.log` next to the exe, shown in the window: the last 8 lines, with any earlier `[port]
 warning` / `FATAL` lines kept above them), a *Copy log* button (the whole log file to the clipboard, for a bug
 report) and the exact command line. *Mods* and
@@ -1634,6 +1634,53 @@ and `--disc` is used only while it is not. Strings in es/en/fr/de/it/pt. An inte
 smoke test a sample folder (manifest, MAIN0.EXE, the PVD blob: nothing beyond what the exe already embeds and
 the ISO descriptors) to run `tombi2.exe --headless --data` on, plus `--data nonexistent` for the fatal
 message. The full data path is exercised by the Linux test above, not in CI (the CI binary is a Windows build).
+
+### Text patches in `data/` (`tools/data_patch.py`, launcher *Text patch*)
+
+The launcher's *Play* tab has a *Text patch* checkbox and a `*.tombipatch.json` file (tombi-text "Generar parche",
+`tools/text_patch.py`); the bundled `patches/es_mejorada.tombipatch.json` (improved Spanish, copied next to
+tombi-port.exe on its first run) is the default file, off by default. On Play, with `data/` ready,
+`data_patch.apply` makes `data/` match the setting:
+
+* the originals of every file it touches (the WFMs and overlays the patch re-encodes, `EXE/MAIN1..8.EXE`,
+  `manifest.txt`) are copied to `data/.orig/` first, with `state.json` (patch path, sha1, title); switching the
+  patch off, choosing another one, or a re-extraction puts them back (`restore`). The same patch twice is a no-op;
+* the patch is re-encoded from the pristine `data/` files (`text_core.Project` over the folder, the same code as
+  `text_patch.py apply --files-out`: the WFMs it writes are byte-identical);
+* checks: `data/` must be the PAL disc (MAIN0.EXE sha1 of the manifest), and the sha1 of the patch's original image
+  is compared with the disc image named in the launcher when that is a `.bin`/`.iso` (hashed once, cached in
+  `tombi-port.json`; not for a `.chd`, whose whole track would take minutes: then only MAIN0 is checked, and the
+  status line says which);
+* sizes: `manifest.txt` gets each patched file's new byte size (`cd_data_read_sector` reads a 2048-byte file up to
+  the manifest size and zero-fills the rest of the sector). A file that still fits in its sectors keeps its LBA (the
+  game reads whole sectors); the size entries of the file tables in `EXE/MAIN1..8.EXE` are updated too. A file that
+  needs more sectors than the disc gave it (es_mejorada: `AREA02/MFNT020S.WFM` 32 -> 33, `AREA10/MFNT100S.WFM`,
+  `AREA18/MFNT180S.WFM`, `AREA19/MFNT020S.WFM`) gets a new LBA after the last disc sector (a second manifest entry;
+  `sectors` grows) and the tables of `EXE/MAIN1..8.EXE` point there: `--lang N` takes MAINn's file table from
+  `data/` (`runtime/lang.c`). MAIN0's table is compiled into the port, so a grown file listed in MAIN0's table would
+  still be read with its old sector count (`--lang 0`): that is reported as a warning (none of es_mejorada's are).
+  `MAIN0.EXE` itself is never touched (it is the alignment base of `--lang`).
+
+Command line: `python3 tools/data_patch.py apply data PATCH.tombipatch.json [--disc Tombi.bin]`, `restore data`,
+`status data`. **Verified** on the real disc: apply / re-apply / off / CHD disc in the launcher's `sync_patch` (Tk stubbed),
+`restore` gives a `data/` identical to the extraction (`diff -r`), `extract_data.py --check` passes on the patched
+folder, and the standard test (`--data --lang 5`, 3600 frames) shows the patched AREA00 dialogue; the moved files
+(AREA02/10/18/19) were not reached in a run.
+
+### CHD images (`tools/chd.py`)
+
+The launcher and `extract_data.py` also take a MAME CHD (v5) CD image: `chd.ChdFile` decompresses track 1 on the fly
+as a stream of 2352-byte (or 2048 for MODE1 / MODE2_FORM1 tracks) sectors, so the ISO9660 reader and the extraction
+are unchanged. Codecs: `cdlz` (LZMA + deflate subcode), `cdzl` (deflate), `cdfl` (FLAC, a small pure-Python frame
+decoder), `zlib`/`lzma`/uncompressed hunks, self-referencing hunks; sectors whose ECC chdman dropped get it
+regenerated (Mode 2 Form 1 over a zeroed header); every hunk and the map are CRC-checked. Parent (delta) CHDs and
+pre-v5 files are refused with a message (convert with `chdman copy` / `chdman extractcd`). The port binary itself
+reads only `.bin`/`.iso`: a `.chd` always goes through `data/`. `python3 tools/chd.py info|tobin X.chd [OUT.bin]`.
+**Verified**: chdman 0.264 `createcd` of `game/disc/Tombi.bin` (default codecs: 25937 cdlz + 231 cdzl hunks, no
+cdfl chosen) extracts to a `data/` identical to the `.bin` extraction (same manifest, `diff -r`; 2 min in Python);
+synthetic 1000-sector images (Mode 1 with valid ECC, sine "audio", random, zeros) through chdman with `-c cdzl`,
+`cdlz`, `cdfl` and the default mix convert back byte-identical (`tobin`), which covers the FLAC decoder and the ECC
+regeneration.
 
 ### Languages: `--lang N` (`port2/runtime/lang.c`)
 

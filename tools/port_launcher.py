@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Launcher of the native-pointer port (tombi-port.exe, docs/PORT.md "M3 phase 3" / "Mods"): a window where the
-player picks their own disc image (.bin/.cue/.iso of Tombi! PAL SCES-01331), a save folder, the window options and
+player picks their own disc image (.bin/.cue/.iso/.chd of Tombi! PAL SCES-01331), a save folder, the window options and
 the mods, and a Play button that runs tombi2.exe --window with those options.  Same Tk toolkit and tools/i18n.py
 catalogs as tombi-gfx / tombi-text.  No game data is bundled: the disc is checked (MAIN0.EXE extracted next to
 tombi-port.json, the saved settings, and compared by sha1) before the first run, and the disc is then extracted
@@ -21,6 +21,7 @@ if i18n.load_settings().get("language") not in i18n.LANGS:
     i18n.set_language("en", save=False)
 import port_mods as M
 import extract_data as X
+import data_patch as DP
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 (.github/workflows/report.yml)
 # the languages of the disc's boot menu: EXE/MAINn.EXE (tombi2 --lang N, docs/PORT.md "Languages")
@@ -60,7 +61,7 @@ i18n.add({
     "es": {
         "l.lang": "Idioma del juego:",
         "title": "Tombi! - port nativo", "tab.play": "Jugar", "tab.mods": "Mods", "tab.controls": "Controles",
-        "l.disc": "Imagen del disco (.bin / .cue / .iso; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
+        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
@@ -74,11 +75,20 @@ i18n.add({
         "s.nobin": "No se encuentra el binario del port ({0}). Compílalo (docs/PORT.md) o usa el exe distribuido.",
         "l.log": "Últimas líneas del registro del port:", "l.modshelp": "Cada mod es una opción del port (--poke, --hz...); se guardan en tombi-port.json.",
         "l.key": "Tecla", "b.defaults": "Valores por defecto", "l.cmd": "Comando:",
+        "l.patch": "Parche de texto:", "b.nopatch": "Quitar",
+        "l.patchhelp": "Un parche *.tombipatch.json (tombi-text, «Generar parche») se aplica a la carpeta data/ al pulsar Jugar; los originales se guardan en data/.orig/ y se restauran al quitarlo o cambiarlo. Incluido: {0}.",
+        "l.patchnone": "ninguno", "s.patching": "Aplicando el parche de texto «{0}» a data/...",
+        "s.patchok": "Parche de texto «{0}» aplicado ({1} archivos de data/; {2}).", "s.patchon": "Parche de texto activo: «{0}».",
+        "s.patchoff": "Parche de texto quitado: data/ vuelve a tener los archivos originales ({0}).",
+        "s.patchfail": "No se pudo aplicar el parche de texto: {0}", "s.patchmissing": "No se encuentra el parche de texto: {0}",
+        "s.patchnodata": "El parche de texto se aplica cuando el disco está extraído en data/ (elige la imagen del disco).",
+        "s.patchchk.disc": "sha1 del disco comprobado", "s.patchchk.main0": "comprobado MAIN0.EXE de data/; elige la imagen .bin para comprobar también el sha1 del disco",
+        "s.patchmoved": "{0} archivos crecieron más que su sitio en el disco y se movieron al final (se leen con la tabla de archivos del idioma)",
     },
     "en": {
         "l.lang": "Game language:",
         "title": "Tombi! - native port", "tab.play": "Play", "tab.mods": "Mods", "tab.controls": "Controls",
-        "l.disc": "Disc image (.bin / .cue / .iso; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
+        "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
@@ -92,21 +102,30 @@ i18n.add({
         "s.nobin": "Port binary not found ({0}). Build it (docs/PORT.md) or use the distributed exe.",
         "l.log": "Last lines of the port's log:", "l.modshelp": "Each mod is a port option (--poke, --hz...); they are saved in tombi-port.json.",
         "l.key": "Key", "b.defaults": "Defaults", "l.cmd": "Command:",
+        "l.patch": "Text patch:", "b.nopatch": "Clear",
+        "l.patchhelp": "A *.tombipatch.json patch (tombi-text, \"Make patch\") is applied to the data/ folder when you press Play; the originals are kept in data/.orig/ and put back when it is cleared or changed. Bundled: {0}.",
+        "l.patchnone": "none", "s.patching": "Applying the text patch \"{0}\" to data/...",
+        "s.patchok": "Text patch \"{0}\" applied ({1} files of data/; {2}).", "s.patchon": "Text patch active: \"{0}\".",
+        "s.patchoff": "Text patch removed: data/ has the original files again ({0}).",
+        "s.patchfail": "Could not apply the text patch: {0}", "s.patchmissing": "Text patch not found: {0}",
+        "s.patchnodata": "The text patch is applied once the disc is extracted into data/ (pick the disc image).",
+        "s.patchchk.disc": "disc sha1 checked", "s.patchchk.main0": "MAIN0.EXE of data/ checked; pick the .bin image to check the disc sha1 too",
+        "s.patchmoved": "{0} files grew beyond their place on the disc and were moved to its end (read through the language's own file table)",
     },
     "fr": {"l.lang": "Langue du jeu :", "title": "Tombi! - port natif", "tab.play": "Jouer", "tab.mods": "Mods", "tab.controls": "Commandes", "b.play": "Jouer",
-           "l.disc": "Image du disque (.bin / .cue / .iso ; extraite une fois dans le dossier data/) :", "b.browse": "Parcourir...", "l.savedir": "Dossier des sauvegardes :",
+           "l.disc": "Image du disque (.bin / .cue / .iso / .chd ; extraite une fois dans le dossier data/) :", "b.browse": "Parcourir...", "l.savedir": "Dossier des sauvegardes :",
            "s.extracting": "Extraction du disque vers {0}... {1} % ({2})", "s.dataok": "Données du jeu prêtes dans {0} ({1} fichiers) : l'image du disque n'est plus nécessaire.",
            "s.extractfail": "Impossible d'extraire le disque : {0}", "s.nodata": "Choisissez votre image du disque : elle est extraite une fois dans le dossier data/ et le jeu n'en a plus besoin."},
     "de": {"l.lang": "Spielsprache:", "title": "Tombi! - nativer Port", "tab.play": "Spielen", "tab.mods": "Mods", "tab.controls": "Steuerung", "b.play": "Spielen",
-           "l.disc": "Disc-Image (.bin / .cue / .iso; wird einmal in den Ordner data/ entpackt):", "b.browse": "Durchsuchen...", "l.savedir": "Speicherordner:",
+           "l.disc": "Disc-Image (.bin / .cue / .iso / .chd; wird einmal in den Ordner data/ entpackt):", "b.browse": "Durchsuchen...", "l.savedir": "Speicherordner:",
            "s.extracting": "Disc wird nach {0} entpackt... {1} % ({2})", "s.dataok": "Spieldaten bereit in {0} ({1} Dateien): das Disc-Image wird nicht mehr gebraucht.",
            "s.extractfail": "Die Disc konnte nicht entpackt werden: {0}", "s.nodata": "Wähle dein Disc-Image: es wird einmal in den Ordner data/ entpackt, danach braucht das Spiel es nicht mehr."},
     "it": {"l.lang": "Lingua del gioco:", "title": "Tombi! - port nativo", "tab.play": "Gioca", "tab.mods": "Mod", "tab.controls": "Controlli", "b.play": "Gioca",
-           "l.disc": "Immagine del disco (.bin / .cue / .iso; estratta una volta nella cartella data/):", "b.browse": "Sfoglia...", "l.savedir": "Cartella dei salvataggi:",
+           "l.disc": "Immagine del disco (.bin / .cue / .iso / .chd; estratta una volta nella cartella data/):", "b.browse": "Sfoglia...", "l.savedir": "Cartella dei salvataggi:",
            "s.extracting": "Estrazione del disco in {0}... {1}% ({2})", "s.dataok": "Dati del gioco pronti in {0} ({1} file): l'immagine del disco non serve più.",
            "s.extractfail": "Impossibile estrarre il disco: {0}", "s.nodata": "Scegli l'immagine del disco: viene estratta una volta nella cartella data/ e il gioco non ne ha più bisogno."},
     "pt": {"l.lang": "Idioma do jogo:", "title": "Tombi! - port nativo", "tab.play": "Jogar", "tab.mods": "Mods", "tab.controls": "Controlos", "b.play": "Jogar",
-           "l.disc": "Imagem do disco (.bin / .cue / .iso; extraída uma vez para a pasta data/):", "b.browse": "Procurar...", "l.savedir": "Pasta dos jogos guardados:",
+           "l.disc": "Imagem do disco (.bin / .cue / .iso / .chd; extraída uma vez para a pasta data/):", "b.browse": "Procurar...", "l.savedir": "Pasta dos jogos guardados:",
            "s.extracting": "A extrair o disco para {0}... {1}% ({2})", "s.dataok": "Dados do jogo prontos em {0} ({1} ficheiros): a imagem do disco já não é necessária.",
            "s.extractfail": "Não foi possível extrair o disco: {0}", "s.nodata": "Escolhe a imagem do disco: é extraída uma vez para a pasta data/ e o jogo deixa de precisar dela."},
 })
@@ -149,9 +168,28 @@ def data_ready():
     return X.manifest_sha1(data_dir())
 
 
+def bundled_patch():
+    """patches/es_mejorada.tombipatch.json: bundled in the exe (copied next to it, so the saved path stays valid) or in the checkout."""
+    name = "es_mejorada.tombipatch.json"
+    src = os.path.join(getattr(sys, "_MEIPASS", None) or ROOT, "patches", name)
+    if not os.path.isfile(src):
+        return None
+    if not getattr(sys, "frozen", False):
+        return src
+    dst = os.path.join(app_dir(), "patches", name)
+    try:
+        data = open(src, "rb").read()
+        if not os.path.isfile(dst) or open(dst, "rb").read() != data:
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            open(dst, "wb").write(data)
+        return dst
+    except OSError:
+        return src
+
+
 def load_settings():
     s = M.default_settings()
-    s.update({"disc": "", "savedir": "", "scale": 2, "fullscreen": False, "renderer": "gl"})
+    s.update({"disc": "", "savedir": "", "scale": 2, "fullscreen": False, "renderer": "gl", "patch_on": False, "patch": bundled_patch() or ""})
     try:
         s.update(json.load(open(settings_file(), encoding="utf-8")))
     except (OSError, ValueError):
@@ -182,8 +220,8 @@ def bin_of_cue(path):
 
 
 def extract_main0(image, out):
-    """EXE/MAIN0.EXE from the ISO9660 directory of a raw (2352) or cooked (2048) image -> out; returns its sha1."""
-    f = open(image, "rb")
+    """EXE/MAIN0.EXE from the ISO9660 directory of a raw (2352) or cooked (2048) image (or a .chd) -> out; returns its sha1."""
+    f = X.open_image(image)
     f.seek(16 * 2352 + 25)
     raw = f.read(5) == b"CD001"
     ss, uo = (2352, 24) if raw else (2048, 0)
@@ -364,7 +402,15 @@ class App:
         self._flags = [flag_image(n) for n, _ in GAME_LANGS]      # kept: Tk drops an image nobody references
         for (n, name), img in zip(GAME_LANGS, self._flags):
             ttk.Radiobutton(lg, text=" " + name, image=img, compound="left", variable=lv, value=n).pack(side="left", padx=4)
-        ttk.Checkbutton(f, text=tr("l.autostart"), variable=self.var("autostart", tk.BooleanVar, False)).grid(row=8, column=0, sticky="w", pady=4)
+        r8 = ttk.Frame(f); r8.grid(row=8, column=0, sticky="ew", pady=4)
+        ttk.Checkbutton(r8, text=tr("l.autostart"), variable=self.var("autostart", tk.BooleanVar, False)).pack(anchor="w")
+        pr = ttk.Frame(r8); pr.pack(fill="x", pady=(6, 0))
+        ttk.Checkbutton(pr, text=tr("l.patch"), variable=self.var("patch_on", tk.BooleanVar, False)).pack(side="left")
+        ttk.Entry(pr, textvariable=self.var("patch")).pack(side="left", fill="x", expand=True, padx=(4, 0))
+        ttk.Button(pr, text=tr("b.browse"), command=self.pick_patch).pack(side="left", padx=4)
+        bp = bundled_patch()
+        ttk.Label(r8, text=tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), wraplength=700, justify="left",
+                  foreground="#555").pack(anchor="w", padx=24)
         ttk.Label(f, text=tr("l.pad"), wraplength=700, justify="left").grid(row=9, column=0, sticky="w", pady=8)
         btns = ttk.Frame(f); btns.grid(row=10, column=0, sticky="w", pady=8)
         self.play_btn = ttk.Button(btns, text=tr("b.play"), command=self.play, width=16)
@@ -446,12 +492,70 @@ class App:
         save_settings(self.s)
 
     def pick_disc(self):
-        p = filedialog.askopenfilename(filetypes=[("Disc image", "*.bin *.cue *.iso *.img"), ("All", "*.*")])
+        p = filedialog.askopenfilename(filetypes=[("Disc image", "*.bin *.cue *.iso *.img *.chd"), ("All", "*.*")])
         if p:
             self.vars["disc"].set(p)
             if not self.vars["savedir"].get():
                 self.vars["savedir"].set(os.path.dirname(p))
             self.check_disc()
+
+    def pick_patch(self):
+        p = filedialog.askopenfilename(filetypes=[("Text patch", "*.tombipatch.json"), ("JSON", "*.json"), ("All", "*.*")])
+        if p:
+            self.vars["patch"].set(p)
+            self.vars["patch_on"].set(True)
+
+    def disc_hash(self):
+        """sha1 of the disc image (.bin / .iso; cached in the settings by path, size and date), None without one or for a .chd
+        (hashing its whole track takes minutes: MAIN0.EXE of data/ is checked instead)."""
+        image = bin_of_cue(self.s.get("disc") or "")
+        if not image or not os.path.isfile(image) or X.chd.is_chd(image):
+            return None
+        st = os.stat(image)
+        key = [os.path.abspath(image), st.st_size, int(st.st_mtime)]
+        c = self.s.get("disc_sha1")
+        if isinstance(c, list) and len(c) == 4 and c[:3] == key:
+            return c[3]
+        sha = DP.disc_sha1(image)
+        self.s["disc_sha1"] = key + [sha]
+        save_settings(self.s)
+        return sha
+
+    def sync_patch(self):
+        """Puts data/ in the state the text patch settings ask for (applied / original). False when Play must not go on."""
+        d, s = data_dir(), self.s
+        st = DP.status(d)
+        want = s.get("patch_on") and (s.get("patch") or "").strip()
+        try:
+            if not want:
+                if st:
+                    n = DP.restore(d)
+                    self.status.set(tr("s.patchoff", n))
+                return True
+            p = want
+            if not os.path.isfile(p):
+                messagebox.showerror(tr("title"), tr("s.patchmissing", p))
+                return False
+            if st and st.get("sha1") == DP.file_sha1(p) and X.manifest_sha1(d):
+                self.status.set(tr("s.patchon", st.get("title") or os.path.basename(p)))
+                return True
+            self.status.set(tr("s.patching", os.path.basename(p)))
+            self.root.update_idletasks()
+            h = self.disc_hash()
+            r = DP.apply(d, p, disc_hash=h, log=lambda m: None)
+            chk = tr("s.patchchk.disc") if h else tr("s.patchchk.main0")
+            if r["moved"]:
+                chk += "; " + tr("s.patchmoved", len(r["moved"]))
+            self.status.set(tr("s.patchok", r["title"] or os.path.basename(p), len(r["files"]), chk))
+            return True
+        except (DP.PatchError, OSError, ValueError) as e:
+            try:
+                DP.restore(d)
+            except OSError:
+                pass
+            self.status.set(tr("s.patchfail", e))
+            messagebox.showerror(tr("title"), tr("s.patchfail", e))
+            return False
 
     def pick_savedir(self):
         p = filedialog.askdirectory()
@@ -475,6 +579,10 @@ class App:
             # the one-time extraction into data/ (again when data/ was made from another disc: a different MAIN0)
             if data_ready() != sha:
                 self.root.after(0, self._extracting, 0)
+                try:
+                    DP.restore(data_dir())       # a text patch in an old data/: originals back before (re)extracting
+                except OSError:
+                    pass
                 last = [-1]
 
                 def progress(done, total, path):
@@ -531,13 +639,19 @@ class App:
         if not os.path.isfile(cmd[0]):
             messagebox.showerror(tr("title"), tr("s.nobin", cmd[0]))
             return
-        if cmd[1] == "--disc" and (not os.path.isfile(cmd[2]) or not os.path.isfile(os.path.join(app_dir(), "MAIN0.EXE"))):
+        if cmd[1] == "--disc" and (not os.path.isfile(cmd[2]) or not os.path.isfile(os.path.join(app_dir(), "MAIN0.EXE"))
+                                   or X.chd.is_chd(cmd[2])):     # tombi2 reads .bin/.iso only: a .chd always goes through data/
             if os.path.isfile(cmd[2]):
                 self.check_disc()      # extracts data/ as well; Play again when it says the data is ready
             messagebox.showerror(tr("title"), tr("s.nodata"))
             return
         if self.proc and self.proc.poll() is None:
             return
+        if cmd[1] == "--data":
+            if not self.sync_patch():
+                return
+        elif self.s.get("patch_on"):
+            self.status.set(tr("s.patchnodata"))
         self.log_path = os.path.join(app_dir(), "tombi-port.log")
         log = open(self.log_path, "w", encoding="utf-8", errors="replace")
         log.write("[launcher] build %s\n" % BUILD_ID)      # the exe then prints its own id: [port2] build <sha> <date>

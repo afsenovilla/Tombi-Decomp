@@ -18,6 +18,17 @@ on:
       - tools/port_launcher.py
       - tools/port_mods.py
       - tools/extract_data.py
+      - tools/chd.py
+      - tools/data_patch.py
+      - tools/text_patch.py
+      - tools/text_core.py
+      - tools/wfm_py.py
+      - tools/text_strings.py
+      - tools/title_layout.py
+      - tools/verb_order.py
+      - tools/cdfiles.py
+      - tools/wfm_charmap.json
+      - patches/es_mejorada.tombipatch.json
       - tools/prompt_glyphs.py
       - tools/i18n.py
       - tools/icons/**
@@ -165,9 +176,10 @@ jobs:
           python -m pip install pyinstaller pillow
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import prompt_glyphs --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --paths tools \
+            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --paths tools \
             --icon tools/icons/gfx.ico --add-data "tools/icons/gfx.ico;icons" --add-data "tools/icons/gfx.png;icons" --add-data "build_id.txt;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
+            --add-data "tools/wfm_charmap.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" \
             --add-binary "build/win-bin/tombi2.exe;." --add-binary "build/win-bin/SDL2.dll;." \
             tools/port_launcher.py
           mkdir -p dist/windows build/out
