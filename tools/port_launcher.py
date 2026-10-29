@@ -68,6 +68,8 @@ i18n.add({
         "l.titlebg": "Fondo de título panorámico (PNG / JPG):", "l.titlebg.d": "Solo se usa con imagen panorámica (16:9, 21:9, 32:9): rellena los lados de la pantalla de título.", "ft.image": "Imágenes",
         "c.texpack": "Pack de texturas", "l.texpack": "Carpeta del pack de texturas (vacío = ninguno; solo OpenGL):",
         "l.texdump": "Volcar texturas (a la carpeta texture_dump junto a data/)",
+        "b.dumpall": "Volcar todas las texturas", "l.dumpall.d": "Recorre sin jugar el título, todas las zonas y secciones, menús y objetos (varios minutos) y deja en texture_dump/ un PNG por textura, en carpetas por zona y tipo, con LEEME.txt.",
+        "s.dumpall": "Volcando texturas: %d/%d ejecuciones...", "s.dumpallok": "Volcado completo: %d texturas en %s", "s.dumpallfail": "No se pudo volcar: %s",
         "l.texpack.d": "Las texturas volcadas son PNG con nombres fijos; un pack contiene las mismas, redibujadas a 1x..16x (docs/PORT.md, \"Texture packs\").",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
         "b.play": "Jugar", "b.extracting": "Extrayendo... {0}%", "l.extracting": "Extrayendo los archivos del disco (solo la primera vez). Espera a que termine para jugar.", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
@@ -100,6 +102,8 @@ i18n.add({
         "l.titlebg": "Wide title background (PNG / JPG):", "l.titlebg.d": "Only used in widescreen (16:9, 21:9, 32:9): fills the sides of the title screen.", "ft.image": "Images",
         "c.texpack": "Texture pack", "l.texpack": "Texture pack folder (empty = none; OpenGL only):",
         "l.texdump": "Dump textures (to the texture_dump folder next to data/)",
+        "b.dumpall": "Dump all textures", "l.dumpall.d": "Walks through the title, every area and section, menus and items without playing (several minutes) and leaves one PNG per texture in texture_dump/, in folders per area and kind, with LEEME.txt.",
+        "s.dumpall": "Dumping textures: %d/%d runs...", "s.dumpallok": "Full dump: %d textures in %s", "s.dumpallfail": "Could not dump: %s",
         "l.texpack.d": "Dumped textures are PNGs with stable names; a pack holds the same files redrawn at 1x..16x (docs/PORT.md, \"Texture packs\").",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
         "b.play": "Play", "b.extracting": "Extracting... {0}%", "l.extracting": "Extracting the disc files (first time only). Wait for it to finish to play.", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
@@ -824,6 +828,13 @@ class App:
         self._browse_row(c, "texpack", self.pick_texpack)
         ttk.Checkbutton(c, text=tr("l.texdump"), variable=self.var("texdump", tk.BooleanVar, False)).pack(anchor="w", pady=(6, 0))
         ttk.Label(c, text=tr("l.texpack.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
+        row = ttk.Frame(c)                                     # the full dump without playing (tools/dump_all_textures.py)
+        row.pack(fill="x", pady=(8, 0))
+        self.dumpall_btn = ttk.Button(row, text=tr("b.dumpall"), command=self.dump_all_textures)
+        self.dumpall_btn.pack(side="left")
+        self.dumpall_bar = ttk.Progressbar(row, mode="determinate", maximum=100, length=200)
+        self.dumpall_bar.pack(side="left", padx=(10, 0))
+        ttk.Label(c, text=tr("l.dumpall.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
         o, c = self.card(f, tr("c.mods"))
         o.pack(fill="x", pady=(12, 0), padx=(0, 4))
         ttk.Label(c, text=tr("l.modshelp"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(0, 8))
@@ -970,6 +981,28 @@ class App:
         p = filedialog.askopenfilename(filetypes=[(tr("ft.image"), "*.png *.jpg *.jpeg *.PNG *.JPG *.JPEG")])
         if p:
             self.vars["title_bg"].set(p)
+
+    def dump_all_textures(self):
+        """Runs tools/dump_all_textures.py in a thread: every room / screen headless, into texture_dump/ next to data/."""
+        if not data_ready():
+            messagebox.showerror(tr("title"), tr("s.nodata"))
+            return
+        import dump_all_textures as DT
+        out = os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")
+        self.dumpall_btn.state(["disabled"])
+
+        def progress(i, n):
+            self.root.after(0, self.say, tr("s.dumpall", i, n), "busy")
+            self.root.after(0, self.dumpall_bar.configure, {"value": i * 100 // max(1, n)})
+
+        def work():
+            try:
+                _new, total, _runs = DT.run(game_binary(), out, data_dir(), log=lambda *a: None, progress=progress, organize_data=data_dir())
+                self.root.after(0, self.say, tr("s.dumpallok", total, out), "ok")
+            except Exception as e:
+                self.root.after(0, self.say, tr("s.dumpallfail", e), "bad")
+            self.root.after(0, self.dumpall_btn.state, ["!disabled"])
+        threading.Thread(target=work, daemon=True).start()
 
     def pick_texpack(self):
         p = filedialog.askdirectory()

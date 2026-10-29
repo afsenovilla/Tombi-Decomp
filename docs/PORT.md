@@ -2159,6 +2159,18 @@ state, and the fragment shader maps the texel (u, v) plus its sub-texel position
 boxes, flipped / scaled sprites, texture windows and 4/8/16-bit pages all line up. Texels outside the image fall back to
 VRAM. A palette change (palette animation, flashes) gives a key the pack does not have: the original is drawn.
 
+**Full dump without playing: `tools/dump_all_textures.py`** (launcher: card "Pack de texturas", button "Volcar todas las
+texturas"). Drives the port headless (`--dump-textures` into one temporary folder per run, so the keys are the port's own)
+through the title (with and without the logos), every debug-select room twice (new game, and all event flags set) with
+the walk/jump/attack/pause pad script of `gfx_capture.py`, `--menu 1700:0..9` with paging, `--test-item` for item ids
+0..0x9F and a game over; merges by key into `texture_dump/` next to `data/` and sorts it into readable folders
+(`Zonas/NN Nombre/{Escenario,Objetos y enemigos,Sprites/<file>}`, `Personajes/Tombi`, `Interfaz/..`, `Pantallas/..`,
+`Comun/..`, `Sin identificar/..`) with `LEEME.txt`. The index now carries `upload` (FNV-1a of the upload) and `uprect`;
+the tool hashes every GRPX record of the load lists and every WPP sprite frame of `data/` the same way to name an image
+after its disc resource (`B000_p64-0_256x256_pal..__<key>.png`; `~` = matched by VRAM rectangle only). The loader
+accepts any prefix ending in `__` before the key (`parse_name`). `--raw` keeps the flat layout, `--organize-only` sorts
+an existing dump, `--quick` skips the event pass and item pop-ups.
+
 **Limits.** The software renderer only dumps. Textures the game generates by drawing (render-to-texture effects) and
 MDEC movies are not textures here (the intro landscape is a movie). A replacement with partial alpha is thresholded, not
 blended. Changing a texture's pixels by a sub-upload keeps the larger upload's key for boxes outside the changed part.

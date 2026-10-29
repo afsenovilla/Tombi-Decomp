@@ -367,10 +367,15 @@ static void pk_add(u64 key, const char *path) {
     while (pk[i].path) i = (i + 1) & m;
     pk[i].key = key; pk[i].path = strdup(path); pk[i].state = 0; pk_n++;
 }
-/* "<16 hex>.png" or "sub_<16 hex>.png" (any case); the "sub" keys get bit 0 of a separate space: key ^ SUBMARK */
+/* "<16 hex>.png" or "sub_<16 hex>.png" (any case), also after a descriptive prefix ending in "__"
+   ("tombi_corre__0123456789abcdef.png", tools/dump_all_textures.py); the "sub" keys get a separate space: key ^ SUBMARK */
 #define SUBMARK 0x5355425355425355ull
 static int parse_name(const char *n, u64 *key) {
     int sub = 0; u64 k = 0;
+    for (const char *q = strstr(n, "__"); q; q = strstr(q + 1, "__")) {   /* the last "__" followed by a key */
+        size_t r = strlen(q + 2);
+        if (r == 20 || (r == 24 && (!strncmp(q + 2, "sub_", 4) || !strncmp(q + 2, "SUB_", 4)))) { n = q + 2; break; }
+    }
     if (!strncmp(n, "sub_", 4) || !strncmp(n, "SUB_", 4)) { sub = 1; n += 4; }
     for (int i = 0; i < 16; i++) {
         char c = n[i]; int v = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1;
@@ -418,6 +423,7 @@ static void mkdir1(const char *p) {
 #endif
 }
 static FILE *index_f;
+static const Up *dump_up;            /* the upload of the image being dumped (0 for a sub box): its hash goes to the index */
 static int n_dumped, dump_full_warned;
 static inline void px(u8 *o, u16 c) {
     int r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31;
@@ -461,9 +467,13 @@ static void dump(u64 key, int sub, const u16 *words, int ws, int u0, int w, int 
     }
     if (index_f) {
         fprintf(index_f, "{\"file\": \"%s/%s\", \"kind\": \"%s\", \"depth\": %d, \"size\": [%d, %d], \"vram\": [%d, %d, %d, %d], "
-                "\"page\": [%d, %d], \"origin\": [%d, %d], \"clut\": [%d, %d], \"area\": %d, \"section\": %d, \"frame\": %d}\n",
+                "\"page\": [%d, %d], \"origin\": [%d, %d], \"clut\": [%d, %d], \"area\": %d, \"section\": %d, \"frame\": %d",
                 folder, name, sub ? "sub" : "upload", t->depth == 0 ? 4 : t->depth == 1 ? 8 : 16, w, h, vx, vy, vw, vh,
                 t->tx, t->ty, ou, ov, np ? t->cx : -1, np ? t->cy : -1, area, sect, port_frame);
+        if (dump_up && !sub)              /* the whole upload: tools/dump_all_textures.py names it after the disc resource */
+            fprintf(index_f, ", \"upload\": \"%016llx\", \"uprect\": [%d, %d, %d, %d]", (unsigned long long)dump_up->hash,
+                    dump_up->x, dump_up->y, dump_up->w, dump_up->h);
+        fputs("}\n", index_f);
         fflush(index_f);
     }
 }
@@ -551,6 +561,7 @@ const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int 
             if (dumped_add(key ^ 0x9E3779B97F4A7C15ull)) {   /* (a second set: counts the keys of this upload) */
                 best->nkeys++;
                 if (best->nkeys == 256) port_printf("[texpack] upload %d,%d %dx%d: 256 page/palette pairs, not dumping more of it\n", best->x, best->y, best->w, best->h);
+                dump_up = best;
                 dump(key, 0, best->data + (y1 - best->y) * best->w + (x1 - best->x), best->w, 0, w, h, t, vram, x1, y1, x2 - x1, y2 - y1, ou, ovv);
             }
         }
