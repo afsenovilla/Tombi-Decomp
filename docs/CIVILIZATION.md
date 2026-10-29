@@ -5,7 +5,7 @@
 Section 0 of AREA11, AREA16, AREA17 and AREA18 was meant to be a top-down town. It would use the same engine as the
 Baccus Village and Baccus Lake overviews (`SYSTEM/I0NFO2.BIN`). The code for these towns is on the PAL disc and fully
 matched in `src/i0nfo2/`. The NPC and prop placements are also on the disc, as data inside I0NFO2. The section
-data is missing: the load lists are empty, so there is no picture, cell map, sprite table or palette. This page
+data is missing: the load lists are empty, so there is no picture, cell map or sprite table. The resident palettes, however, survive in the areas' CLUT files (see Palettes). This page
 covers two things:
 
 1. Every data format the top-down engine reads. Each one is checked against a working section with
@@ -240,8 +240,22 @@ even though the tables themselves are lost.
 - The picture brings its own 256-colour CLUT inside the TIM.
 - Sprites use the area CLUT block (`CLUTnn.GAM`, 256 x 32 words at (128, 480)). The SPR part's CLUT word picks a
   row, and `w1e` adds an offset.
-- The cut sections have no CLUT of their own. `CLUT01` of the areas does not match the reload pages below: no row of
-  AREA11 `CLUT01`/`CLUT02` gives a believable image.
+- **The resident palettes survive.** A CLUT row here is 16 u16 entries (file offset row * 32 of `CLUTnn.GAM`; row r
+  sits in VRAM at (128 + (r % 16) * 16, 480 + r / 16)). Rows 48..54 of these files hold the villager palettes of the
+  side-scrolling quarters (44..47 and 60..63 are flash/tint variants of the same block), and the same rows colour the
+  top-down pages:
+  - **AREA16/CLUT07 row 53** (also in AREA16/CLUT06, AREA17/CLUT03, AREA17/CLUT06 and AREA18/CLUT02, same row number):
+    the Stone Town strongman. With this row the A07600 4 bpp page at (75, 202), 50 x 52, matches TCRF's "Male
+    Stonestown Resident" sprite pixel-exact (100 % of the pixels in 5-bit colour, no silhouette mismatch); no other row
+    of the file does. **Confirmed.**
+  - AREA16/CLUT07 rows 48 and 54: the other Stone People (purple-haired and red-haired villagers). Plausible, not
+    confirmed.
+  - AREA11/CLUT01 row 48: the Wood People (brown hat, white shirt). The only natural row of the block in AREA11's files.
+    A guess.
+  - AREA17/CLUT01 row 48 and AREA17/CLUT03 row 49: the Iron Men. A guess.
+- Which row each top-down resident uses is not in the surviving code: a resident's CLUT comes from the parts of its
+  SPR table (the actor inits clear `b0d`, so `w08` is not used), and those tables are lost. `tools/civ_sheets.py`
+  states the file and row it draws each resident group with (`sub_pal`, `PAL_NOTE`).
 
 ### The surviving texture pages (SYS lists 61 / 76 / 80 / 86)
 
@@ -263,7 +277,7 @@ The cut sections still have their entries, so their first pages survived:
 frames, a hammer and a sitting pose, which fits the raft craftsman. The rest is 8 bpp scenery cut-outs: an octagonal
 plaza, house walls and roofs, fences, trees. In other words these are the actor and room/roof sprites the SPR tables
 pointed into. The **map picture is not among them**, because it lives in RAM and is streamed to (0x300..) when
-needed. The **palette is missing** too, so these pages can only be shown in grey or with an inferred palette.
+needed. Their palettes are the CLUT rows listed under Palettes.
 
 ## Step 2: what each cut section expected
 
@@ -411,7 +425,7 @@ python3 tools/civ_sheets.py --area 16 --lang en --sheet esquema --out OUT   # on
 
 | Sheet | File (ES / EN) | What it shows |
 |---|---|---|
-| esquema | `civ_esquema_aNN.png` / `civ_esquema_aNN_en.png` | evidence only. Panel A is the real AREA08 s0 picture with the marks its own code places. Panel B is the cut town at the same scale on grey, with the real resident sprites (borrowed palette), houses, patrol boxes, props and the exits at their code positions. Below: what each mark means, where each exit leads, what each resident says, and where every element comes from |
+| esquema | `civ_esquema_aNN.png` / `civ_esquema_aNN_en.png` | evidence only. Panel A is the real AREA08 s0 picture with the marks its own code places. Panel B is the cut town at the same scale on grey, with the real resident sprites in real in-game palettes, houses, patrol boxes, props and the exits at their code positions. Below: what each mark means, where each exit leads, what each resident says, and where every element comes from |
 | explicado | `civ_explicado_aNN.png` / `civ_explicado_aNN_en.png` | a flat plan with drawn house shapes, sprites, exit arrows and a side legend, next to the AREA08 reference |
 | perspectiva | `civ_perspectiva_aNN.png` / `civ_perspective_aNN_en.png` | the same data in perspective; the only invented value is the house height |
 
@@ -443,8 +457,8 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s1).
 - **Props**: 14 (I0NFO2 0x800FFE24); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A06100` (SYS reload list 61), shown with a borrowed palette (`AREA11/CLUT01`).
-- **Missing**: background picture, cell map (collision), palette, sprite tables.
+- **Sprites**: `SYSTEM/A06100` (SYS reload list 61), drawn with the real palette AREA11/CLUT01 row 48 (a guess for every resident).
+- **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 11 --lang all --out build/civ`
 
 ### AREA16 s0, the Stone People's village
@@ -470,8 +484,8 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s2), door; AREA16 s1 (also cut).
 - **Props**: 7 (I0NFO2 0x801001D4 / 0x801001D8); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), shown with a borrowed palette (`AREA16/CLUT01`).
-- **Missing**: background picture, cell map (collision), palette, sprite tables.
+- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for the strongman (subtype 2, confirmed against TCRF), rows 54 (subtype 0) and 48 (subtypes 1, 3) for the rest (guesses).
+- **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 
 ### AREA17 s0, the Iron Men's village
@@ -500,8 +514,8 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepE`, I0NFO2 0x800E9040; destinations MAIN0 0x80079A48): Civilization Town (AREA18); inside Iron Town (AREA17 s1).
 - **Props**: 35 (I0NFO2 0x80100368); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A08000` (SYS reload list 80), shown with a borrowed palette (`AREA17/CLUT01`).
-- **Missing**: background picture, cell map (collision), palette, sprite tables.
+- **Sprites**: `SYSTEM/A08000` (SYS reload list 80), drawn with real palettes: AREA17/CLUT01 row 48, AREA17/CLUT03 row 49 for subtype 2 (guesses).
+- **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 17 --lang all --out build/civ`
 
 
@@ -527,7 +541,7 @@ The tool rebuilds working sections from disc data alone:
 | Map picture 8F | missing | the hard part. One pre-rendered 8 bpp picture per town, about 640 x 576 (AREA11), 448 x 544 (AREA16) and 704 x 480 (AREA17). It can be painted, or assembled from AREA05/08/19 and the scenery cut-outs in the SYS reload pages |
 | Actor sprites 3B | missing table, pages partly survive | the 4 bpp villager page of A06100 (and the matching parts of A07600/A08000) has the frames. A new SPR table must lay its frames out in the order the I0NFO2 anim scripts expect, or new anim scripts must be supplied |
 | Scenery 3D / roofs | missing table, cut-outs survive in the 8 bpp part of the reload pages | the same work as 3B. The roofs must cover the house rectangles |
-| Palettes | missing | infer them (`tools/palinfer.py`) or repaint. The TIM carries the picture's palette |
+| Palettes | resident rows survive (AREA16/CLUT07 row 53 confirmed; 48/54, AREA11/CLUT01 48, AREA17/CLUT01 48 / CLUT03 49 plausible) | load the area CLUT file whose rows 48..54 hold them; the TIM carries the picture's own palette |
 | Text | PAL has "···??", JP has everything | translate the JP lines into the PAL slots (they already sit at the indices the code uses) |
 
 In the port this is a data task, not a code task. The engine already runs AREA05/08/19 s0/s2, and loading I0NFO2 at

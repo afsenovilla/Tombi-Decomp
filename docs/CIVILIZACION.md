@@ -6,7 +6,7 @@ La sección 0 de AREA11, AREA16, AREA17 y AREA18 iba a ser un pueblo visto desde
 vistas generales de Ciudad Baco y del Lago Baco (`SYSTEM/I0NFO2.BIN`). El código de estos pueblos está en el disco PAL
 y está decompilado al 100 % en `src/i0nfo2/`. Las posiciones de los vecinos y de los objetos también están en el
 disco, como datos dentro de I0NFO2. Lo que falta son los datos de la sección: las listas de carga están vacías, así
-que no hay dibujo de fondo, mapa de celdas, tablas de sprites ni paleta. Esta página trata dos cosas:
+que no hay dibujo de fondo, mapa de celdas ni tablas de sprites. Las paletas de los vecinos, en cambio, sobreviven en los archivos CLUT de las áreas (ver Paletas). Esta página trata dos cosas:
 
 1. Todos los formatos de datos que lee el motor de vista desde arriba. Cada uno está comprobado contra una sección que
    funciona con `tools/topdown.py`.
@@ -249,8 +249,22 @@ estas tablas, así que la numeración de fotogramas la fija el código aunque la
 - El dibujo trae su propia CLUT de 256 colores dentro del TIM.
 - Los sprites usan el bloque de CLUT del área (`CLUTnn.GAM`, 256 x 32 palabras en (128, 480)). La palabra de CLUT de
   cada parte SPR elige una fila, y `w1e` le suma un desplazamiento.
-- Las secciones recortadas no tienen CLUT propia. El `CLUT01` de las áreas no casa con las páginas de recarga de
-  abajo: ninguna fila de `CLUT01`/`CLUT02` de AREA11 da una imagen creíble.
+- **Las paletas de los vecinos sobreviven.** Aquí una fila de CLUT son 16 entradas u16 (desplazamiento fila * 32 en
+  `CLUTnn.GAM`; la fila r está en la VRAM en (128 + (r % 16) * 16, 480 + r / 16)). Las filas 48..54 de estos archivos
+  tienen las paletas de los aldeanos de los barrios de vista lateral (44..47 y 60..63 son variantes de destello o tinte
+  del mismo bloque), y esas mismas filas colorean las páginas de la vista desde arriba:
+  - **AREA16/CLUT07 fila 53** (también en AREA16/CLUT06, AREA17/CLUT03, AREA17/CLUT06 y AREA18/CLUT02, con el mismo
+    número de fila): el forzudo de la Ciudad de Piedra. Con esta fila, la página de 4 bpp de A07600 en (75, 202),
+    50 x 52, coincide píxel a píxel con el sprite "Male Stonestown Resident" de TCRF (el 100 % de los píxeles en color de
+    5 bits, sin diferencias de silueta); ninguna otra fila del archivo lo hace. **Confirmado.**
+  - AREA16/CLUT07 filas 48 y 54: el resto de la gente de piedra (aldeanos de pelo morado y de pelo rojo). Plausible, no
+    confirmado.
+  - AREA11/CLUT01 fila 48: la gente de madera (sombrero marrón, camisa blanca). Es la única fila natural del bloque en
+    los archivos de AREA11. Suposición.
+  - AREA17/CLUT01 fila 48 y AREA17/CLUT03 fila 49: los Hombres de hierro. Suposición.
+- Qué fila usa cada vecino de la vista desde arriba no está en el código que sobrevive: la CLUT de un vecino viene de las
+  partes de su tabla SPR (las inicializaciones de personaje ponen `b0d` a 0, así que no se usa `w08`), y esas tablas se
+  perdieron. `tools/civ_sheets.py` indica con qué archivo y fila dibuja cada grupo de vecinos (`sub_pal`, `PAL_NOTE`).
 
 ### Las páginas de textura que sobreviven (listas SYS 61 / 76 / 80 / 86)
 
@@ -273,8 +287,8 @@ Las secciones recortadas conservan sus entradas, así que sus primeras páginas 
 cuatro orientaciones, fotogramas de andar, un martillo y una postura sentada, que encaja con el constructor de balsas.
 El resto son recortes de decorado de 8 bpp: una plaza octogonal, paredes y tejados de casas, vallas, árboles. Es decir,
 son los sprites de personajes y de habitaciones/tejados a los que apuntaban las tablas SPR. El **dibujo del mapa no
-está entre ellos**, porque vive en la RAM y se pasa a (0x300..) cuando hace falta. **Falta también la paleta**, así
-que estas páginas sólo se pueden mostrar en gris o con una paleta deducida.
+está entre ellos**, porque vive en la RAM y se pasa a (0x300..) cuando hace falta. Sus paletas son las filas de CLUT de
+la sección Paletas.
 
 ## Paso 2: qué esperaba cada sección recortada
 
@@ -427,7 +441,7 @@ python3 tools/civ_sheets.py --area 16 --lang es --sheet esquema --out SALIDA   #
 
 | Lámina | Archivo (ES / EN) | Qué muestra |
 |---|---|---|
-| esquema | `civ_esquema_aNN.png` / `civ_esquema_aNN_en.png` | sólo datos. El panel A es el dibujo real de AREA08 s0 con las marcas que pone su propio código. El panel B es el pueblo recortado a la misma escala sobre gris, con los sprites reales de los vecinos (paleta prestada), las casas, las patrullas, los objetos y las salidas en las posiciones del código. Debajo: qué significa cada marca, adónde lleva cada salida, qué dice cada vecino y de dónde sale cada dato |
+| esquema | `civ_esquema_aNN.png` / `civ_esquema_aNN_en.png` | sólo datos. El panel A es el dibujo real de AREA08 s0 con las marcas que pone su propio código. El panel B es el pueblo recortado a la misma escala sobre gris, con los sprites reales de los vecinos en paletas reales del juego, las casas, las patrullas, los objetos y las salidas en las posiciones del código. Debajo: qué significa cada marca, adónde lleva cada salida, qué dice cada vecino y de dónde sale cada dato |
 | explicado | `civ_explicado_aNN.png` / `civ_explicado_aNN_en.png` | un plano con casas dibujadas, sprites, flechas de salida y una leyenda al lado, junto a la referencia de AREA08 |
 | perspectiva | `civ_perspectiva_aNN.png` / `civ_perspective_aNN_en.png` | los mismos datos en perspectiva; lo único inventado es la altura de las casas |
 
@@ -460,8 +474,8 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); Fábrica (AREA11 s1).
 - **Objetos**: 14 (I0NFO2 0x800FFE24); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A06100` (lista de recarga SYS 61), con paleta prestada (`AREA11/CLUT01`).
-- **Falta**: dibujo de fondo, mapa de celdas (colisión), paleta, tablas de sprites.
+- **Muñecos**: `SYSTEM/A06100` (lista de recarga SYS 61), dibujados con la paleta real AREA11/CLUT01 fila 48 (suposición para todos los vecinos).
+- **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 11 --lang all --out build/civ`
 
 ### AREA16 s0, el pueblo de la gente de piedra
@@ -487,8 +501,8 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); Fábrica (AREA11 s2), puerta; AREA16 s1 (también recortada).
 - **Objetos**: 7 (I0NFO2 0x801001D4 / 0x801001D8); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A07600` (lista de recarga SYS 76), con paleta prestada (`AREA16/CLUT01`).
-- **Falta**: dibujo de fondo, mapa de celdas (colisión), paleta, tablas de sprites.
+- **Muñecos**: `SYSTEM/A07600` (lista de recarga SYS 76), dibujados con paletas reales: AREA16/CLUT07 fila 53 para el forzudo (subtipo 2, confirmada con TCRF), filas 54 (subtipo 0) y 48 (subtipos 1 y 3) para el resto (suposiciones).
+- **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 
 ### AREA17 s0, el pueblo de los Hombres de hierro
@@ -517,8 +531,8 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepE`, I0NFO2 0x800E9040; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); interior de la Ciudad de hierro (AREA17 s1).
 - **Objetos**: 35 (I0NFO2 0x80100368); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A08000` (lista de recarga SYS 80), con paleta prestada (`AREA17/CLUT01`).
-- **Falta**: dibujo de fondo, mapa de celdas (colisión), paleta, tablas de sprites.
+- **Muñecos**: `SYSTEM/A08000` (lista de recarga SYS 80), dibujados con paletas reales: AREA17/CLUT01 fila 48, AREA17/CLUT03 fila 49 para el subtipo 2 (suposiciones).
+- **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 17 --lang all --out build/civ`
 
 ## Comprobación (tools/topdown.py)
@@ -543,7 +557,7 @@ La herramienta reconstruye las secciones que funcionan sólo con datos del disco
 | Dibujo del mapa 8F | falta | la parte difícil. Un dibujo prerrenderizado de 8 bpp por pueblo, de unos 640 x 576 (AREA11), 448 x 544 (AREA16) y 704 x 480 (AREA17). Se puede pintar, o montar con AREA05/08/19 y los recortes de decorado de las páginas de recarga SYS |
 | Sprites de personajes 3B | falta la tabla, las páginas sobreviven en parte | la página de aldeanos de 4 bpp de A06100 (y las partes equivalentes de A07600/A08000) tiene los fotogramas. Una tabla SPR nueva debe ordenar sus fotogramas como esperan los guiones de animación de I0NFO2, o hay que aportar guiones nuevos |
 | Decorado 3D / tejados | falta la tabla, los recortes sobreviven en la parte de 8 bpp de las páginas de recarga | el mismo trabajo que 3B. Los tejados deben cubrir los rectángulos de las casas |
-| Paletas | faltan | deducirlas (`tools/palinfer.py`) o repintar. El TIM lleva la paleta del dibujo |
+| Paletas | las filas de los vecinos sobreviven (AREA16/CLUT07 fila 53 confirmada; 48/54, AREA11/CLUT01 48, AREA17/CLUT01 48 / CLUT03 49 plausibles) | cargar el archivo CLUT del área cuyas filas 48..54 las contienen; el TIM lleva la paleta propia del dibujo |
 | Texto | PAL tiene "···??", JP lo tiene todo | traducir las frases japonesas a los huecos de PAL (ya están en los índices que usa el código) |
 
 En la versión para PC esto es una tarea de datos, no de código. El motor ya ejecuta AREA05/08/19 s0/s2, y cargar
