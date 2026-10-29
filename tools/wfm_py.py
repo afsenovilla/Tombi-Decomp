@@ -386,6 +386,36 @@ class GlyphPool:
         return _glyph_from_pixels(clut, h, wd, dot.hand, out, ":")
 
 
+def shift_glyphs(w, shifts):
+    """shifts: {height (str/int): {char: dx}}. Moves the bitmap of every glyph of w with that character and height dx pixels
+    right (negative: left) inside its cell, where the cell has empty columns to spare (the advance is fixed by the cell width,
+    so this is how a glyph gets more room on one side, e.g. the 16 px ',' that sat on the column of the letter before it).
+    Replaces the Glyph objects (they can be shared with other clones); returns how many glyphs moved."""
+    n = 0
+    for i, g in enumerate(w.glyphs):
+        dx = (shifts.get(str(g.height)) or {}).get(g.char) if g.char and g.width and g.height else None
+        if not dx:
+            continue
+        wd, px = g.width, g.pixels()
+        cols = [c for c in range(wd) if any(px[r * wd + c] for r in range(g.height))]
+        if not cols:
+            continue
+        dx = max(min(dx, wd - 1 - cols[-1]), -cols[0])
+        if not dx:
+            continue
+        out = [0] * (wd * g.height)
+        for r in range(g.height):
+            for c in range(cols[0], cols[-1] + 1):
+                out[r * wd + c + dx] = px[r * wd + c]
+        ng = _glyph_from_pixels(g.clut, g.height, wd, g.hand, out, g.char)
+        w.glyphs[i] = ng
+        if i < len(w.glyph_ptrs):          # an original glyph: encode() copies glyph_blob, so rewrite it there (same size)
+            o = w.glyph_ptrs[i] - (144 + 2 * len(w.glyph_ptrs))
+            w.glyph_blob = w.glyph_blob[:o] + ng.raw() + w.glyph_blob[o + len(ng.raw()):]
+        n += 1
+    return n
+
+
 def _glyph_from_pixels(clut, h, wd, hand, px, ch):
     if len(px) % 2:
         px = px + [0]

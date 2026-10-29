@@ -3451,5 +3451,11 @@
    "422": "{BOX 224 55}\n{VOICE 6 0}{MOVE 0 0}¡Por fin te despiertas!{NL}\nLo he pasado fatal.{C053}{WAIT}{CLEAR}\nPrimero salgo volando{NL}\npor los aires...{C053}{WAIT}{CLEAR}\nY cuando me doy cuenta,{NL}\nmi jaula de insectos está{NL}\nhecha añicos...{C053}{WAIT}{CLEAR}\nY antes de entender qué{NL}\nhabía pasado, me caigo{NL}\naquí...{WAIT}{CLEAR}\n",
    "423": "{BOX 288 55}\n{VOICE 6 0}{MOVE 0 0}¡Me rindo!{NL}\nMe dan igual esas tontas{NL}\nmariposas con alas de hoja.{C053}{WAIT}{CLEAR}\n¿Que dónde están?{C053}{WAIT}{CLEAR}\nLas Mariposas hoja están{NL}\npor ahí, alrededor de{NL}\nuna especie de huevo.{C053}{WAIT}{CLEAR}\nEn fin, yo me largo{NL}\nde aquí...{C053}{WAIT}{CLEAR}\nUn momento...{NL}\n¿Dónde estoy?{WAIT}{CLEAR}\n"
   }
+ },
+ "glyphShift": {
+  "16": {
+   ",": 2,
+   "ú": -1
+  }
  }
 }

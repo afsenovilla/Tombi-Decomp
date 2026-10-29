@@ -126,6 +126,8 @@ def make(proj, author="", title="", notes=""):
     p = {"format": FORMAT, "version": VERSION, "title": title, "author": author, "notes": notes,
          "created": time.strftime("%Y-%m-%d"), "disc": disc_id(proj.src.image) if proj.src.image else None,
          "verbFirst": bool(proj.verb_first), "edits": edits}
+    if proj.glyph_shift:
+        p["glyphShift"] = proj.glyph_shift
     return p
 
 
@@ -155,6 +157,8 @@ def merge(patches):
             out = json.loads(json.dumps(p))
             continue
         out["verbFirst"] = out.get("verbFirst") or p.get("verbFirst")
+        for h, d in (p.get("glyphShift") or {}).items():
+            out.setdefault("glyphShift", {}).setdefault(h, {}).update(d)
         for path, d in p["edits"].items():
             o = out["edits"].setdefault(path, {})
             for k, t in d.items():
@@ -181,6 +185,9 @@ def apply_to_project(proj, patch):
     langs = {C.lang_of(p) for p in patch["edits"]} & set(proj.languages())
     proj.langs |= langs
     proj.verb_first = proj.verb_first or bool(patch.get("verbFirst"))
+    if isinstance(patch.get("glyphShift"), dict):
+        for h, d in patch["glyphShift"].items():
+            proj.glyph_shift.setdefault(str(h), {}).update({c: int(v) for c, v in d.items()})
     return proj.load_edits({"edits": patch["edits"]}, replace=False)
 
 

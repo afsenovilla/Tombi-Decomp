@@ -147,6 +147,7 @@ class Project:
         self.link = True           # editing one entry edits its copies in the other areas
         self.undo_stack = []
         self.langs = {LANG_MAIN}   # languages shown / exported / imported / built (saved in the project file)
+        self.glyph_shift = {}      # {height: {char: dx}}: glyph bitmaps moved inside their cell in the edited files (W.shift_glyphs)
         self.verb_first = False    # item popup order "Obtienes: Rana" (verb_order.py patch of EXE/MAINn.EXE; saved in the project file)
 
     def languages(self):
@@ -390,7 +391,9 @@ class Project:
         base = self.wfm(path)
         font = base.dialogues[idx].font
         wc = clone(base)
-        return W.text_to_words(wc, text, font, self.pool()), wc
+        words = W.text_to_words(wc, text, font, self.pool())
+        W.shift_glyphs(wc, self.glyph_shift)
+        return words, wc
 
     def validate(self, path, idx, text):
         try:
@@ -507,6 +510,7 @@ class Project:
                     errors.append("%s #%d: %s" % (path, idx, ex))
             if not errors:
                 try:
+                    W.shift_glyphs(w, self.glyph_shift)
                     files[path] = W.encode(w)
                 except W.WfmError as ex:
                     errors.append("%s: %s" % (path, ex))
