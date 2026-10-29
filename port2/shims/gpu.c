@@ -27,6 +27,10 @@
 typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef int s32; typedef unsigned int u32;
 typedef struct { s16 x, y, w, h; } RECT;
 
+extern const char *port_drawdump_path;
+void port_drawdump(const u16 *vram, int tx, int ty, int depth, int cx, int cy, int tpage, int clut,
+                   int u0, int v0, int w, int h, int sx, int sy, int sw, int sh, int semi, int kind);
+
 static u16 vram[512][1024];
 static int gpu_prims, gpu_lists;
 int port_gpu_packets(void) { return gpu_prims; }
@@ -372,6 +376,14 @@ static int gp0(const u32 *p, int n) {
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511;
         }
         if (tex && raw) shade = 0;
+        if (tex && port_drawdump_path) {                     /* --dump-draws (drawdump.c) */
+            int u0 = 255, u1 = 0, v0 = 255, v1 = 0, x0 = 1 << 20, x1 = -(1 << 20), y0 = 1 << 20, y1 = -(1 << 20);
+            for (int i = 0; i < nv; i++) {
+                if (v[i].u < u0) u0 = v[i].u; if (v[i].u > u1) u1 = v[i].u; if (v[i].v < v0) v0 = v[i].v; if (v[i].v > v1) v1 = v[i].v;
+                if (v[i].x < x0) x0 = v[i].x; if (v[i].x > x1) x1 = v[i].x; if (v[i].y < y0) y0 = v[i].y; if (v[i].y > y1) y1 = v[i].y;
+            }
+            port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, tpage, clut, u0, v0, u1 - u0 + 1, v1 - v0 + 1, x0, y0, x1 - x0, y1 - y0, semi ? 1 : 0, quad ? 1 : 0);
+        }
         if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
         if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
         return need;
@@ -408,6 +420,8 @@ static int gp0(const u32 *p, int n) {
         if (size == 0) { w = p[k] & 0x3FF; h = (p[k] >> 16) & 0x1FF; k++; }
         else { w = h = size == 1 ? 1 : size == 2 ? 8 : 16; }
         if (w && h) be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
+        if (tex && port_drawdump_path && w && h)            /* --dump-draws (drawdump.c) */
+            port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7, (p[2] >> 16) & 0xFFFF, u, v, w, h, a.x, a.y, w, h, semi ? 1 : 0, 2);
         return need;
     }
     switch (cmd) {

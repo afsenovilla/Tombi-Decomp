@@ -242,7 +242,7 @@ static void open_game_data(const char *argv0) {
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9|32:9] [--widescreen [16:9|21:9|32:9]] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]...\n"
-                "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
+                "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--trace-cd] [--save-dir DIR] [-v]\n"
                 "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk\n"
@@ -300,6 +300,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--dump-frames") && v) port_dump_dir = argv[++i];
         else if (!strcmp(a, "--dump-every") && v) port_dump_every = atoi(argv[++i]);
         else if (!strcmp(a, "--dump-vram")) port_dump_vram = 1;
+        else if (!strcmp(a, "--dump-draws") && v) { extern const char *port_drawdump_path; port_drawdump_path = argv[++i]; }
         else if (!strcmp(a, "--dump-ram") && v) port_dump_ram_add(argv[++i]);
         else if (!strcmp(a, "--dump-audio") && v) port_audio_path = argv[++i];
         else if (!strcmp(a, "--skip-movies")) port_skip_movies = 1;
