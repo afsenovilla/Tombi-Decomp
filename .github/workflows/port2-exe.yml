@@ -175,6 +175,11 @@ jobs:
         if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true' && steps.full.outputs.cache-hit != 'true'
         run: python3 tools/build_full.py -j "$(nproc)"
 
+      # a restored (exact-key) build/full is older than this checkout's files: refresh its mtimes for gen_port's stale check
+      - name: Touch restored matching build
+        if: steps.full.outputs.cache-hit == 'true'
+        run: find build/full build -maxdepth 1 -newer /dev/null -prune -o -print >/dev/null; find build/full -type f -exec touch {} +; touch build/*.EXE build/*.BIN 2>/dev/null || true
+
       - name: Save matching build
         if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true' && steps.full.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -344,6 +349,11 @@ jobs:
       - name: Matching build (retail addresses for the generator)
         if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true' && steps.full.outputs.cache-hit != 'true'
         run: python3 tools/build_full.py -j "$(nproc)"
+
+      # a restored (exact-key) build/full is older than this checkout's files: refresh its mtimes for gen_port's stale check
+      - name: Touch restored matching build
+        if: steps.full.outputs.cache-hit == 'true'
+        run: find build/full build -maxdepth 1 -newer /dev/null -prune -o -print >/dev/null; find build/full -type f -exec touch {} +; touch build/*.EXE build/*.BIN 2>/dev/null || true
 
       - name: Save matching build
         if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true' && steps.full.outputs.cache-hit != 'true'
