@@ -13,9 +13,9 @@ Sheets (file names; *_en.png for English):
 
 Everything is read from YOUR extracted disc (game/disc/fs, or TOMBI_FS) through tools/topdown.py / tools/area000.py:
 the AREA08 s0 picture, the I0NFO2 NPC sets / house rectangles, the SYS reload pages SYSTEM/A06100, A07600, A08000
-(the surviving resident sprites) and a borrowed area CLUT. The PNGs contain disc art: never commit them.
+(the surviving resident sprites) and the real resident palettes (16-colour rows of the areas' CLUTnn.GAM, see PAL_NOTE). The PNGs contain disc art: never commit them.
 The resident lines are short glosses of the Japanese text (the PAL slots hold "···??"); which sprite stands for which
-resident subtype is a guess (SUB tables below). Needs Pillow and the DejaVu fonts.
+resident subtype, and which CLUT row each subtype uses, are guesses except the AREA16 strongman (row 53). Needs Pillow and the DejaVu fonts.
 """
 import argparse, copy, math, os, struct, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -51,26 +51,35 @@ def comps(p):
                 if n>60 and bb[3]-bb[1]>14: out.append(tuple(bb))
     return out
 
-# ------------------------------------------------------------------ borrowed palettes: 16-colour rows of an area CLUT
-def segs(cl):
-    c=A.read_resource(cl); out=[]
-    for row in range(len(c)//512):
-        for s in range(16):
-            cols=[]
-            for i in range(16):
-                v=struct.unpack_from('<H',c,row*512+(s*16+i)*2)[0]
-                cols.append(((v&31)*255//31,(v>>5&31)*255//31,(v>>10&31)*255//31))
-            lum=[sum(x)/3 for x in cols[1:]]
-            if len(set(cols))<10: continue
-            inc=sum(1 for a,b in zip(lum,lum[1:]) if b>=a-8)
-            out.append((inc+len(set(cols))/4,row,s,cols))
-    out.sort(reverse=True); return out
+# ------------------------------------------------------------------ real palettes: 16-colour rows of the areas' CLUT files
+def clut_row(fn, row):
+    """16 RGB colours of row `row` (16 u16 entries, file offset row*32) of an area CLUTnn.GAM: a real in-game palette."""
+    d = A.read_resource(fn)
+    return [((v & 31) * 255 // 31, (v >> 5 & 31) * 255 // 31, (v >> 10 & 31) * 255 // 31) for v in struct.unpack_from('<16H', d, row * 32)]
+
+
+def sub_pal(C, sub):
+    """(file, row) of the CLUT row drawn for resident subtype `sub`. The code does not say it: a resident's CLUT is in
+    the parts of its lost SPR table (the actor inits clear b0d, so w08 is not used). Rows 48..54 of these files are the
+    villager palettes (44..47 and 60..63 are flash/tint variants of the same row block)."""
+    r = C['pals'][sub]
+    return r if isinstance(r, tuple) else (C['clut'], r)
+
+
+PAL_NOTE = {
+    'es': {16: 'Paletas reales de AREA16/CLUT07: fila 53 = el forzudo (coincide píxel a píxel con el sprite "Male Stonestown Resident" de TCRF); filas 48 y 54 para los demás (suposición: el código no lo dice)',
+           11: 'Paleta real de AREA11/CLUT01 fila 48 (la fila de aldeano, como la 48 de piedra); qué vecino usa cuál es una suposición',
+           17: 'Paletas reales de AREA17/CLUT01 fila 48 y AREA17/CLUT03 fila 49; qué vecino usa cuál es una suposición'},
+    'en': {16: 'Real palettes from AREA16/CLUT07: row 53 = the strongman (matches TCRF\'s "Male Stonestown Resident" sprite pixel-exact); rows 48 and 54 for the others (a guess: the code does not say)',
+           11: 'Real palette from AREA11/CLUT01 row 48 (the villager row, like stone row 48); which resident uses which is a guess',
+           17: 'Real palettes from AREA17/CLUT01 row 48 and AREA17/CLUT03 row 49; which resident uses which is a guess'}}
+
 
 # ------------------------------------------------------------------ per-town data (ES) and the flat plan sheet
 SC=1.5
 CIVI='Ciudad de civilización (AREA18)'
 AREAS={
-16:dict(atlas='A07600',clut='AREA16/CLUT01',palidx=4,sub={0:9,1:28,2:34,3:16},
+16:dict(atlas='A07600',clut='AREA16/CLUT07',pals={0:54,1:48,2:53,3:48},sub={0:9,1:28,2:34,3:16},
  title='AREA16 sección 0 — pueblo recortado de la gente de piedra',
  cap='Pueblo recortado de la gente de piedra (Ciudad de Piedra, AREA16, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((-140,520),'L','→ '+CIVI),((110,320),'D','→ Fábrica (AREA11 s2), puerta'),((220,60),'U','→ AREA16 s1 (también recortada)')],
@@ -89,7 +98,7 @@ AREAS={
  'Casa 2: sin diálogo en el código',
  'Al final: el chico que vio a la bruja Mizuno (texto PAL #229), inicia el evento 0x67'],
  ),
-11:dict(atlas='A06100',clut='AREA11/CLUT01',palidx=3,sub={0:0,1:2,2:12,3:21,4:25},
+11:dict(atlas='A06100',clut='AREA11/CLUT01',pals={0:48,1:48,2:48,3:48,4:48},sub={0:0,1:2,2:12,3:21,4:25},
  title='AREA11 sección 0 — pueblo recortado de la gente de madera',
  cap='Pueblo recortado de la gente de madera (junto a la Fábrica, AREA11, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((560,410),'R','→ '+CIVI),((231,70),'U','→ Fábrica (AREA11 s1)')],
@@ -107,7 +116,7 @@ AREAS={
  'Vecino: «Este cartel es viejo y peligroso» → «Siempre tan lleno de energía»',
  'Casa 3, sentado: probablemente el constructor de balsas («¿Quieres una balsa? Tráeme madera del Árbol Sabio»); el código no le da diálogo'],
  ),
-17:dict(atlas='A08000',clut='AREA17/CLUT01',palidx=13,sub={0:2,1:0,2:21,3:28,4:38},
+17:dict(atlas='A08000',clut='AREA17/CLUT01',pals={0:48,1:48,2:('AREA17/CLUT03',49),3:48,4:48},sub={0:2,1:0,2:21,3:28,4:38},
  title='AREA17 sección 0 — pueblo recortado de los Hombres de hierro',
  cap='Pueblo recortado de los Hombres de hierro (Ciudad de hierro, AREA17, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((223,575),'D','→ '+CIVI),((223,30),'U','→ interior de la Ciudad de hierro (AREA17 s1)')],
@@ -147,9 +156,9 @@ def arrow(dr,x,y,d,col):
 def explicado_es(area,out):
     C=AREAS[area]; var=T.CUT[area]
     actors,props=T.npc_set(var); rects=T.trigger_rects(area)
-    p=page(C['atlas']); cs=comps(p); seg=[s for s in segs(C['clut'])][:16]
-    pal=seg[C['palidx']][3]
+    p=page(C['atlas']); cs=comps(p)
     def sprite(sub):
+        pal=clut_row(*sub_pal(C,sub))
         b=cs[C['sub'][sub]]; w,h=b[2]-b[0]+1,b[3]-b[1]+1
         im=Image.new('RGBA',(w,h),(0,0,0,0)); px=im.load()
         for y in range(h):
@@ -214,7 +223,7 @@ def explicado_es(area,out):
         dr.rectangle([tx-6,ty-4,tx+tw+6,ty+32],fill=(255,255,255),outline=(0,90,200),width=2)
         dr.text((tx,ty),lab,font=f,fill=(0,60,160))
     dr.text((ox,top+TH+12),'Plano del pueblo recortado (posiciones del código, AREA%02d)'%area,font=F(24,True),fill=(30,30,30))
-    dr.text((ox,top+TH+44),'Muñecos: sprites reales que sobreviven en SYSTEM/%s; paleta PRESTADA (%s)'%(C['atlas'],C['clut']),font=F(22),fill=(150,40,40))
+    dr.text((ox,top+TH+44),'Muñecos: sprites de SYSTEM/%s. '%C['atlas']+PAL_NOTE['es'][area],font=F(22),fill=(150,40,40))
     dr.text((ox,top+TH+72),'Verde = recorrido de patrulla · tejados = casas (al entrar se ve el interior) · cuadros marrones = objetos',font=F(22),fill=(60,60,60))
     lx=ox+TW+M; y=top
     dr.text((lx,y),'Quién es quién (y qué dice, del texto japonés)',font=F(28,True),fill=(30,30,30)); y+=46
@@ -275,9 +284,9 @@ for _a, _e in EN.items():
 def explicado_en(area,out):
     C=AREAS_EN[area]; var=T.CUT[area]
     actors,props=T.npc_set(var); rects=T.trigger_rects(area)
-    p=page(C['atlas']); cs=comps(p); seg=[s for s in segs(C['clut'])][:16]
-    pal=seg[C['palidx']][3]
+    p=page(C['atlas']); cs=comps(p)
     def sprite(sub):
+        pal=clut_row(*sub_pal(C,sub))
         b=cs[C['sub'][sub]]; w,h=b[2]-b[0]+1,b[3]-b[1]+1
         im=Image.new('RGBA',(w,h),(0,0,0,0)); px=im.load()
         for y in range(h):
@@ -342,7 +351,7 @@ def explicado_en(area,out):
         dr.rectangle([tx-6,ty-4,tx+tw+6,ty+32],fill=(255,255,255),outline=(0,90,200),width=2)
         dr.text((tx,ty),lab,font=f,fill=(0,60,160))
     dr.text((ox,top+TH+12),'Plan of the cut village (positions from the code, AREA%02d)'%area,font=F(24,True),fill=(30,30,30))
-    dr.text((ox,top+TH+44),'Figures: real sprites that survive in SYSTEM/%s; BORROWED palette (%s)'%(C['atlas'],C['clut']),font=F(22),fill=(150,40,40))
+    dr.text((ox,top+TH+44),'Figures: sprites from SYSTEM/%s. '%C['atlas']+PAL_NOTE['en'][area],font=F(22),fill=(150,40,40))
     dr.text((ox,top+TH+72),'Green = patrol route · roofs = houses (entering shows the inside) · brown squares = props',font=F(22),fill=(60,60,60))
     lx=ox+TW+M; y=top
     dr.text((lx,y),'Who is who (lines from the Japanese text)',font=F(28,True),fill=(30,30,30)); y+=46
@@ -408,8 +417,9 @@ def esquema_es(area,out):
     pl=Image.new('RGBA',(W*S,H*S),(226,222,212,255)); d1=ImageDraw.Draw(pl)
     for g in range(0,W*S,64): d1.line([g,0,g,H*S],fill=(210,205,195))
     for g in range(0,H*S,64): d1.line([0,g,W*S,g],fill=(210,205,195))
-    p=page(C['atlas']); cs=comps(p); pal=segs(C['clut'])[C['palidx']][3]
+    p=page(C['atlas']); cs=comps(p)
     def spr(sub):
+        pal=clut_row(*sub_pal(C,sub))
         bb=cs[C['sub'][sub]]; w,h=bb[2]-bb[0]+1,bb[3]-bb[1]+1
         im=Image.new('RGBA',(w,h)); q=im.load()
         for y in range(h):
@@ -434,7 +444,7 @@ def esquema_es(area,out):
     D.text((M,y),'A. Lago Baco (AREA08 s0), fondo real del disco + marcas de su código',font=F(26,True),fill=(20,20,20))
     D.text((M,y+34),'(AREA08 no tiene lista de casas: sólo vecinos y objetos)',font=F(24),fill=(60,60,60))
     D.text((rx,y),'B. AREA%d s0: fondo PERDIDO (gris). Tamaño estimado %d × %d px'%(area,W,H),font=F(26,True),fill=(20,20,20))
-    D.text((rx,y+34),'Muñecos: sprites reales de SYSTEM/%s, paleta PRESTADA (%s)'%(C['atlas'],C['clut']),font=F(24,True),fill=(170,30,30))
+    D.text((rx,y+34),'Muñecos: SYSTEM/%s, paletas reales del juego (ver abajo)'%C['atlas'],font=F(24,True),fill=(170,30,30))
     y+=100; f=F(25)
     def para(t,yy,x=M,w=Wt-2*M,font=f,col=(30,30,30)):
         for ln in wrap(D,t,font,w): D.text((x,yy),ln,font=font,fill=col); yy+=33
@@ -466,7 +476,7 @@ def esquema_es(area,out):
          'Paso mundo → píxel del fondo (x+128, y-40): topdownCollideMapTile 0x800EE18C, comprobado con AREA08/AREA19.',
          'Muñecos: página de texturas SYSTEM/%s (copia de VRAM que recarga el menú, lista SYS %d); qué dibujo es cada tipo de vecino es una suposición.'%(C['atlas'],Q['sys']),
          'Panel A: fondo, cuadrícula y vecinos reales de AREA08 s0 (dibujo TIM del disco + NPC_SET_0C).',
-         'FALTA (perdido en el disco): el dibujo de fondo del pueblo, el mapa de colisiones, la paleta de los muñecos y las tablas de sprites; por eso el panel B es gris y el tamaño del fondo es una estimación.']
+         'Paletas: '+PAL_NOTE['es'][area]+'.', 'FALTA (perdido en el disco): el dibujo de fondo del pueblo, el mapa de colisiones y las tablas de sprites; por eso el panel B es gris y el tamaño del fondo es una estimación.']
     for t in src: y=para('• '+t,y)+4
     im=im.crop((0,0,Wt,y+30)); im.save(out); print(out,im.size)
 def overlay_en(img,dr,var,area,px0,py0,sprites=None):
@@ -511,8 +521,9 @@ def esquema_en(area,out):
     pl=Image.new('RGBA',(W*S,H*S),(226,222,212,255)); d1=ImageDraw.Draw(pl)
     for g in range(0,W*S,64): d1.line([g,0,g,H*S],fill=(210,205,195))
     for g in range(0,H*S,64): d1.line([0,g,W*S,g],fill=(210,205,195))
-    p=page(C['atlas']); cs=comps(p); pal=segs(C['clut'])[C['palidx']][3]
+    p=page(C['atlas']); cs=comps(p)
     def spr(sub):
+        pal=clut_row(*sub_pal(C,sub))
         bb=cs[C['sub'][sub]]; w,h=bb[2]-bb[0]+1,bb[3]-bb[1]+1
         im=Image.new('RGBA',(w,h)); q=im.load()
         for y in range(h):
@@ -537,7 +548,7 @@ def esquema_en(area,out):
     D.text((M,y),'A. Baccus Lake (AREA08 s0): real background + its marks',font=F(26,True),fill=(20,20,20))
     D.text((M,y+34),'(AREA08 has no house list: only residents and props)',font=F(24),fill=(60,60,60))
     D.text((rx,y),'B. AREA%d s0: background LOST (grey). Estimated size %d × %d px'%(area,W,H),font=F(26,True),fill=(20,20,20))
-    D.text((rx,y+34),'Figures: real sprites from SYSTEM/%s, BORROWED palette (%s)'%(C['atlas'],C['clut']),font=F(24,True),fill=(170,30,30))
+    D.text((rx,y+34),'Figures: SYSTEM/%s, real in-game palettes (see below)'%C['atlas'],font=F(24,True),fill=(170,30,30))
     y+=100; f=F(25)
     def para(t,yy,x=M,w=Wt-2*M,font=f,col=(30,30,30)):
         for ln in wrap(D,t,font,w): D.text((x,yy),ln,font=font,fill=col); yy+=33
@@ -569,7 +580,7 @@ def esquema_en(area,out):
          'World → background pixel (x+128, y-40): topdownCollideMapTile 0x800EE18C, checked against AREA08/AREA19.',
          'Figures: texture page SYSTEM/%s (VRAM copy the menu reloads, SYS list %d); which drawing goes with each resident type is a guess.'%(C['atlas'],Q['sys']),
          'Panel A: real background, grid and residents of AREA08 s0 (TIM picture from the disc + NPC_SET_0C).',
-         'MISSING (lost from the disc): the village background picture, the collision map, the figures\' palette and the sprite tables; that is why panel B is grey and the background size is an estimate.']
+         'Palettes: '+PAL_NOTE['en'][area]+'.', 'MISSING (lost from the disc): the village background picture, the collision map and the sprite tables; that is why panel B is grey and the background size is an estimate.']
     for t in src: y=para('• '+t,y)+4
     im=im.crop((0,0,Wt,y+30)); im.save(out); print(out,im.size)
 
