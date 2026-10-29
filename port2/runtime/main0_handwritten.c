@@ -53,6 +53,14 @@ static void msg_notify_close(void) {
     case 3: func_800E940C(D_800A6038, 0, D_800A6066); break;
     }
 }
+/* Port look tweak: extra pixels between the lines of a dialogue box (retail: 13 px per {NL}, glyphs are 16 px tall with ~3
+ * blank rows, so descenders of one line nearly touch the accents of the next). {BOX w h} heights follow the retail rule
+ * h = 16 + 13 * lines, so a box grows by extra * (lines - 1) to keep its bottom margin. 0 = retail. */
+int port_msg_line_extra = 2;
+static u16 msg_box_h(u16 h) {
+    int lines = h >= 16 ? (h - 16 + 6) / 13 : 0;
+    return lines > 1 ? h + port_msg_line_extra * (lines - 1) : h;
+}
 #define PAD_HIT() (SPAD(u16, 0x3C6) & SPAD(u16, 0x1FC))
 
 /* func_8002CF40 (0xD10 bytes): the message box object (pool object update): runs the message script at +0x94
@@ -113,7 +121,7 @@ void func_8002CF40(void *o) {
             case 11:                                    /* 0xFFFD: new line */
                 F16(o, 0xCE) = 8;
                 F16(o, 0x20) = 1;
-                F16(o, 0xD0) += 0xD;
+                F16(o, 0xD0) += 0xD + port_msg_line_extra;
                 break;
             case 3:                                     /* 0xFFF5 */
                 F16(o, 0xB8) = 1;
@@ -135,7 +143,7 @@ void func_8002CF40(void *o) {
                 u16 oldc4 = F16(o, 0xC4);
                 u16 halfw = F16(o, 0xC2) >> 1;
                 F16(o, 0xC2) = p[0];
-                F16(o, 0xC4) = p[1];
+                F16(o, 0xC4) = msg_box_h(p[1]);
                 *(u16 **)((u8 *)o + 0x94) = p + 2;
                 F16(o, 0xCE) = 8;
                 F16(o, 0xD0) = 6;
