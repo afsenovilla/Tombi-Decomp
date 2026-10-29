@@ -1,0 +1,37 @@
+# 1998-02-03 English preview (docs/BETA_980203.md), shared overlay SYSTEM/X00.BIN.
+# Load address 0x800EDAA8 from jal targets on prologues (JP retail: 0x800E9AF8). Whole file, like config/x000.yaml.
+name: X00.BIN
+sha1: 2a1109fb39432f8f6414f4dd85c74a5cff1b6c10
+options:
+  basename: x00
+  target_path: game_beta980203/SYSTEM/X00.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/beta980203/x00
+  src_path: build/beta980203/splat_src/x00
+  build_path: build/beta980203
+  asset_path: build/beta980203/assets
+  ld_script_path: build/beta980203/x00.ld
+  symbol_addrs_path:
+    - config/beta980203/symbol_addrs_x00.txt
+  undefined_funcs_auto_path: build/beta980203/undefined_funcs_auto.x00.txt
+  undefined_syms_auto_path: build/beta980203/undefined_syms_auto.x00.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x00
+    type: code
+    start: 0x0
+    vram: 0x800EDAA8
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x00]
+  - [0x51CB0]

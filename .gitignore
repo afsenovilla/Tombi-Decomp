@@ -50,3 +50,4 @@ include/gte_macros.inc
 !dist/windows/tombi-text.exe
 !dist/windows/tombi-gfx.exe
 gfx_capture.drw.gz*
+game_beta980203

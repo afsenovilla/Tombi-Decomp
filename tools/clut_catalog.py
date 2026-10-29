@@ -6,7 +6,8 @@ Findings: docs/CIVILIZATION.md, "Palette catalog". Reads only; the catalog and r
   python3 -I tools/clut_catalog.py test OUT_DIR --sprite PNG.. --page NAME=REF.png.. [--render DIR]
 
 Default discs: pal=game/disc/fs, usa=/dev/shm/usa/fs, jp=/dev/shm/jp/fs, pp8=/dev/shm/pp8/TOMBA (tools/prepre8.py
-extract), jpdemo=/dev/shm/jpdemo/fs (SLPM-80165, used only when present).
+extract), jpdemo=/dev/shm/jpdemo/fs (SLPM-80165), beta=/dev/shm/beta/fs (the 1998-02-03 English preview CD-R,
+docs/BETA_980203.md); jpdemo and beta are used only when present.
 
 Sources, per file (GAM unpacked):
   clut   AREAnn/CLUTnn (256 x 32 words) and PrePre 8 AREA00/CLUT00 (640 x 32 words at (384,480));
@@ -32,7 +33,7 @@ sys.path.insert(0, HERE)
 import area000 as A  # noqa: E402
 
 DISCS = {"pal": os.path.join(ROOT, "game/disc/fs"), "usa": "/dev/shm/usa/fs", "jp": "/dev/shm/jp/fs",
-         "pp8": "/dev/shm/pp8/TOMBA", "jpdemo": "/dev/shm/jpdemo/fs"}
+         "pp8": "/dev/shm/pp8/TOMBA", "jpdemo": "/dev/shm/jpdemo/fs", "beta": "/dev/shm/beta/fs"}
 SKIP_DIRS = {"MOVIE", "SOUND", "ZZZ"}
 SKIP_EXT = (".VB", ".VH", ".WVD", ".STR", ".RAW", ".XA", ".CNF")
 PP8_SYS = {"SYS001", "SYS002", "SYS004", "SYS006", "SYS007"}

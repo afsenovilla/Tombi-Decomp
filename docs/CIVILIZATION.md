@@ -672,6 +672,10 @@ cut top-down data either.** It is the same build of the assets as PAL, renamed, 
   USA-only data is worse (about 35). The page itself (`A07600` = USA `A00153`) and AREA16/CLUT07 are unchanged, so the rows 48 / 54
   guess stands.
 
+**1998-02-03 English preview CD-R** ([BETA_980203.md](BETA_980203.md)): checked the same way, nothing new either. The
+section-0 lists of AREA11/16/17/18 are empty, there is no new 0x8E/0x8F/0x3B..0x3E block and no new 8 bpp picture, the
+only beta-only CLUT rows are HUD rows, and the town dialogue slots are already "···??".
+
 ## Palette catalog (all discs)
 
 `tools/clut_catalog.py catalog OUT` collects every palette on every disc we have and `tools/clut_catalog.py test OUT ...`

@@ -2,6 +2,11 @@
 
 Versión inglesa: [CUT_CONTENT.md](CUT_CONTENT.md).
 
+Otras versiones revisadas en busca de contenido recortado: [PREPRE8.md](PREPRE8.md) (PrePre Vol. 8, 1997-06),
+[JPDEMO.md](JPDEMO.md) (SLPM-80165) y el CD-R de vista previa en inglés del 1998-02-03,
+[BETA_980203_ES.md](BETA_980203_ES.md) ([English](BETA_980203.md)): guion inglés temprano, un vídeo 100US subtitulado y
+una apertura instrumental, pero ningún dato recortado de Civilización.
+
 Todo lo que el port restaura es **opcional** (`tombi2 --cut-content`, casilla «Activar contenido recortado» del
 lanzador) y **solo del port** (reglas de `port/fixes.txt` o código de `port2/runtime`). La compilación que coincide
 byte a byte no se toca (`tools/build_full.py`, todos los sha1 OK). No se distribuye nada de ningún disco: el texto sale

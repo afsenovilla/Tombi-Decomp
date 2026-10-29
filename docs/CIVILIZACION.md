@@ -694,6 +694,10 @@ los datos cenitales recortados.** Son los mismos recursos que en PAL con otros n
   mejor fila de datos solo USA es peor (unos 35). La página (`A07600` = USA `A00153`) y AREA16/CLUT07 no cambian, así que la
   suposición de las filas 48 / 54 se mantiene.
 
+**CD-R de vista previa en inglés del 1998-02-03** ([BETA_980203_ES.md](BETA_980203_ES.md)): revisado igual, tampoco trae
+nada nuevo. Las listas de la sección 0 de AREA11/16/17/18 están vacías, no hay bloques 0x8E/0x8F/0x3B..0x3E ni imágenes de
+8 bpp nuevas, las únicas filas de CLUT propias de la beta son del HUD y los diálogos de los pueblos ya son «···??».
+
 ## Catálogo de paletas (todos los discos)
 
 `tools/clut_catalog.py catalog OUT` reúne todas las paletas de todos los discos que tenemos y `tools/clut_catalog.py test OUT ...`
