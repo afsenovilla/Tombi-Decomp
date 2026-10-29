@@ -81,5 +81,52 @@ jobs:
           git add -f dist/windows/tombi-gfx.exe
           if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
           git commit -m "dist: rebuild tombi-gfx.exe (${GITHUB_SHA::7})"
-          git pull --no-rebase -q -X theirs origin master
-          git push origin HEAD:master
+          for i in 1 2 3 4 5; do
+            git pull --no-rebase -q -X theirs origin master && git push origin HEAD:master && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
+
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build mkpsxiso (Linux has no release binary)
+        run: |
+          sudo apt-get update && sudo apt-get install -y ninja-build cmake
+          git clone -q --recursive --depth 1 --branch v${MKPSXISO_VERSION} https://github.com/Lameguy64/mkpsxiso build/mksrc
+          cmake -S build/mksrc -B build/mkb -G Ninja -DCMAKE_BUILD_TYPE=Release
+          ninja -C build/mkb
+          mkdir -p build/mk && cp build/mkb/mkpsxiso build/mkb/dumpsxiso build/mk/
+          ls -l build/mk
+
+      - name: Build
+        run: |
+          python -c "import tkinter"
+          python -m pip install pyinstaller pillow numpy PyOpenGL pyopengltk capstone
+          pyinstaller --onefile --windowed --name tombi-gfx --distpath build/exe --workpath build/pyi --specpath . \
+            --hidden-import gfx_core --hidden-import i18n --hidden-import gam_py --hidden-import mod --hidden-import vram --hidden-import sprclut --hidden-import ui_cluts --hidden-import area000 --hidden-import palinfer \
+            --hidden-import screens --hidden-import wpp --hidden-import anim --hidden-import animobj --hidden-import objects --hidden-import capstone --hidden-import labels --hidden-import anim_player --hidden-import names_panel --hidden-import unnamed --hidden-import sysovl --hidden-import PIL.GifImagePlugin --hidden-import mkdisc --hidden-import cdfiles --hidden-import gfx_composed --hidden-import numpy --hidden-import psxemu.capture --hidden-import psxemu.machine --hidden-import psxemu.cpu --hidden-import psxemu.gpu --hidden-import psxemu.gte --hidden-import psxemu.rooms --hidden-import PIL.ImageTk --hidden-import model_view --hidden-import model_viewer --hidden-import room --hidden-import pyopengltk --collect-submodules OpenGL --hidden-import OpenGL.platform.glx --paths tools \
+             --add-data "notes/functions_main0.csv:notes" --add-data "notes/names_main0.csv:notes" --add-data "notes/unnamed.json:notes" --add-data "tools/labels/labels.json:labels" --add-data "tools/icons/gfx.ico:icons" --add-data "tools/icons/gfx.png:icons" \
+            --add-binary "build/mk/mkpsxiso:." --add-binary "build/mk/dumpsxiso:." tools/gfx_editor.py
+          mkdir -p dist/linux
+          cp build/exe/tombi-gfx dist/linux/tombi-gfx
+          chmod +x dist/linux/tombi-gfx
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/linux/tombi-gfx
+          if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
+          git commit -m "dist: rebuild linux tombi-gfx (${GITHUB_SHA::7})"
+          for i in 1 2 3 4 5; do
+            git pull --no-rebase -q -X theirs origin master && git push origin HEAD:master && exit 0
+            sleep $((i * 10))
+          done
+          exit 1

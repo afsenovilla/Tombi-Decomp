@@ -66,5 +66,51 @@ jobs:
           git add -f dist/windows/tombi-text.exe
           if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
           git commit -m "dist: rebuild tombi-text.exe (${GITHUB_SHA::7})"
-          git pull --no-rebase -q -X theirs origin master
-          git push origin HEAD:master
+          for i in 1 2 3 4 5; do
+            git pull --no-rebase -q -X theirs origin master && git push origin HEAD:master && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
+
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build mkpsxiso (Linux has no release binary)
+        run: |
+          sudo apt-get update && sudo apt-get install -y ninja-build cmake
+          git clone -q --recursive --depth 1 --branch v${MKPSXISO_VERSION} https://github.com/Lameguy64/mkpsxiso build/mksrc
+          cmake -S build/mksrc -B build/mkb -G Ninja -DCMAKE_BUILD_TYPE=Release
+          ninja -C build/mkb
+          mkdir -p build/mk && cp build/mkb/mkpsxiso build/mkb/dumpsxiso build/mk/
+          ls -l build/mk
+
+      - name: Build
+        run: |
+          python -c "import tkinter"
+          python -m pip install pyinstaller pillow
+          pyinstaller --onefile --windowed --name tombi-text --distpath build/exe --workpath build/pyi --specpath . \
+            --hidden-import i18n --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import text_core --hidden-import text_patch --hidden-import text_preview --hidden-import mkdisc --hidden-import cdfiles --hidden-import verb_order --paths tools \
+             --add-data "tools/wfm_charmap.json:." --add-data "tools/icons/text.ico:icons" --add-data "tools/icons/text.png:icons" \
+            --add-binary "build/mk/mkpsxiso:." --add-binary "build/mk/dumpsxiso:." tools/text_editor.py
+          mkdir -p dist/linux
+          cp build/exe/tombi-text dist/linux/tombi-text
+          chmod +x dist/linux/tombi-text
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/linux/tombi-text
+          if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
+          git commit -m "dist: rebuild linux tombi-text (${GITHUB_SHA::7})"
+          for i in 1 2 3 4 5; do
+            git pull --no-rebase -q -X theirs origin master && git push origin HEAD:master && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
