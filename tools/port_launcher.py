@@ -66,6 +66,9 @@ i18n.add({
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
         "l.titlebg": "Fondo de título panorámico (PNG / JPG):", "l.titlebg.d": "Solo se usa con imagen panorámica (16:9, 21:9, 32:9): rellena los lados de la pantalla de título.", "ft.image": "Imágenes",
+        "c.texpack": "Pack de texturas", "l.texpack": "Carpeta del pack de texturas (vacío = ninguno; solo OpenGL):",
+        "l.texdump": "Volcar texturas (a la carpeta texture_dump junto a data/)",
+        "l.texpack.d": "Las texturas volcadas son PNG con nombres fijos; un pack contiene las mismas, redibujadas a 1x..16x (docs/PORT.md, \"Texture packs\").",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
         "b.play": "Jugar", "b.extracting": "Extrayendo... {0}%", "l.extracting": "Extrayendo los archivos del disco (solo la primera vez). Espera a que termine para jugar.", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco compatible: {0}, MAIN0.EXE verificado (sha1).",
@@ -95,6 +98,9 @@ i18n.add({
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
         "l.titlebg": "Wide title background (PNG / JPG):", "l.titlebg.d": "Only used in widescreen (16:9, 21:9, 32:9): fills the sides of the title screen.", "ft.image": "Images",
+        "c.texpack": "Texture pack", "l.texpack": "Texture pack folder (empty = none; OpenGL only):",
+        "l.texdump": "Dump textures (to the texture_dump folder next to data/)",
+        "l.texpack.d": "Dumped textures are PNGs with stable names; a pack holds the same files redrawn at 1x..16x (docs/PORT.md, \"Texture packs\").",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
         "b.play": "Play", "b.extracting": "Extracting... {0}%", "l.extracting": "Extracting the disc files (first time only). Wait for it to finish to play.", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Compatible disc: {0}, MAIN0.EXE verified (sha1).",
@@ -812,6 +818,12 @@ class App:
         bp = bundled_patch()
         ttk.Label(c, text=tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), style="Muted.TLabel", wraplength=640,
                   justify="left").pack(anchor="w", pady=(8, 0))
+        o, c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
+        o.pack(fill="x", pady=(12, 0), padx=(0, 4))
+        ttk.Label(c, text=tr("l.texpack"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
+        self._browse_row(c, "texpack", self.pick_texpack)
+        ttk.Checkbutton(c, text=tr("l.texdump"), variable=self.var("texdump", tk.BooleanVar, False)).pack(anchor="w", pady=(6, 0))
+        ttk.Label(c, text=tr("l.texpack.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
         o, c = self.card(f, tr("c.mods"))
         o.pack(fill="x", pady=(12, 0), padx=(0, 4))
         ttk.Label(c, text=tr("l.modshelp"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(0, 8))
@@ -959,6 +971,11 @@ class App:
         if p:
             self.vars["title_bg"].set(p)
 
+    def pick_texpack(self):
+        p = filedialog.askdirectory()
+        if p:
+            self.vars["texpack"].set(p)
+
     def pick_savedir(self):
         p = filedialog.askdirectory()
         if p:
@@ -1041,6 +1058,10 @@ class App:
             self.gfx_note = "yes (%s)" % gfx
         if s.get("savedir"):
             cmd += ["--save-dir", s["savedir"]]
+        if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft":
+            cmd += ["--texture-pack", s["texpack"]]
+        if s.get("texdump"):
+            cmd += ["--dump-textures", os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")]
         if s.get("title_bg") and s.get("aspect") in ("16:9", "21:9", "32:9"):
             cmd += ["--title-bg", s["title_bg"]]
         if s.get("fullscreen"):

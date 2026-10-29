@@ -110,7 +110,8 @@ typedef gpu_u8 u8; typedef gpu_u16 u16; typedef gpu_u32 u32;
     X(void, glUniform4f, (GLint, GLfloat, GLfloat, GLfloat, GLfloat)) \
     X(void, glEnableVertexAttribArray, (GLuint)) \
     X(void, glDisableVertexAttribArray, (GLuint)) \
-    X(void, glVertexAttribPointer, (GLuint, GLint, GLenum, GLboolean, GLsizei, const void *))
+    X(void, glVertexAttribPointer, (GLuint, GLint, GLenum, GLboolean, GLsizei, const void *)) \
+    X(void, glActiveTexture, (GLenum))
 
 #define GLF_DECL(ret, name, args) static ret (APIENTRY *p_##name) args;
 GL_FUNCS(GLF_DECL)
@@ -145,6 +146,7 @@ static const char vs_src[] =
    texels (the offset already masked); u_setmask: the mask bit to write.  All integer arithmetic is on floats
    (exact below 2^24): a VRAM word is rebuilt from the 8-bit channels and taken apart with floor/mod. */
 static const char fs_src[] =
+    "uniform sampler2D u_rep; uniform int u_reps; uniform vec4 u_repr;\n"     /* --texture-pack: the replacement, its texel box in the page */
     "uniform sampler2D u_vram; uniform int u_tex; uniform int u_pass; uniform vec4 u_tw; uniform float u_setmask; uniform float u_half;\n"
     "varying vec4 v_col; varying vec2 v_uv; varying vec4 v_tex;\n"
     "float vword(float x, float y) {\n"
@@ -164,6 +166,20 @@ static const char fs_src[] =
     "  else {\n"
     "    vec4 tp = floor(v_tex + 0.5);\n"
     "    float u = twin(mod(floor(v_uv.x + 0.015625), 256.0), u_tw.x, u_tw.y), v = twin(mod(floor(v_uv.y + 0.015625), 256.0), u_tw.z, u_tw.w);\n"
+    "    if (u_reps > 0) {\n"          /* texel (u, v) of the box, the sub-texel position kept: the replacement is any multiple of it */
+    "      vec2 rp = vec2(u, v) - u_repr.xy + fract(v_uv + 0.015625);\n"
+    "      if (rp.x >= 0.0 && rp.y >= 0.0 && rp.x < u_repr.z && rp.y < u_repr.w) {\n"
+    "        vec4 rc = texture2D(u_rep, rp / u_repr.zw);\n"
+    "        if (rc.a < 0.25) discard;\n"
+    "        float ra = rc.a < 0.75 ? 1.0 : 0.0;\n"
+    "        if (u_pass == 1 && ra > 0.5) discard;\n"
+    "        if (u_pass == 2 && ra < 0.5) discard;\n"
+    "        o = rc.rgb * 31.0;\n"
+    "        if (u_tex == 1) o = min(o * c / 128.0, 31.0);\n"
+    "        gl_FragColor = vec4(o / 31.0, max(a, ra));\n"
+    "        return;\n"
+    "      }\n"
+    "    }\n"
     "    float depth = floor(tp.z / 1024.0), tx = tp.z - depth * 1024.0, ty = tp.w, w;\n"
     "    if (depth < 0.5) {\n"
     "      w = vword(mod(tx + floor(u / 4.0), 1024.0), mod(ty + v, 512.0));\n"
@@ -219,7 +235,8 @@ static GLuint link(const char *vs, const char *fs, const char *what) {
 
 /* ------------------------------------------------------------------ the command list */
 typedef struct { float x, y; u8 r, g, b, a; float u, v; u16 cx, cy, tx, ty; } GVtx;     /* 28 bytes */
-typedef struct { int semi, abr, tex, raw, twmx, twmy, twox, twoy, x1, y1, x2, y2, set_mask, check_mask, prim, wide; } Key;
+typedef struct { int semi, abr, tex, raw, twmx, twmy, twox, twoy, x1, y1, x2, y2, set_mask, check_mask, prim, wide;
+                 unsigned rep; int rou, rov, rw, rh; } Key;     /* rep..: --texture-pack (PortTexRep), 0 = none */
 enum { OP_DRAW, OP_FILL, OP_COPY, OP_UPLOAD, OP_WSDOWN };   /* (the last two only in --fps60 records) */
 #define MAX_SAMPLED 12
 typedef struct { int kind; Key key; int first, count; int r[6]; u16 col; int ns; short sr[MAX_SAMPLED][4]; } Op;   /* sr: VRAM rectangles the batch samples */
@@ -230,7 +247,7 @@ static GVtx vtx[MAX_VTX];
 static Op ops[MAX_OPS];
 static int n_vtx, n_ops;
 static GLuint vram_tex, fbo, vbo, prog, bprog;
-static GLint u_tex, u_pass, u_tw, u_setmask, bu_vram, u_hw;
+static GLint u_tex, u_pass, u_tw, u_setmask, bu_vram, u_hw, u_reps, u_repr;
 /* --internal-res N (docs/PORT.md "HD"): the VRAM and wide targets are N times larger in both axes; primitives are
    rasterised at that resolution (the vertex shader works in normalised coordinates, so only the viewport, scissors
    and copies scale), texels and CLUT entries are read at the centre sub-pixel of each PS1 word (sub-pixel N / 2: the one
@@ -294,6 +311,7 @@ static void make_key(Key *k, int semi, int tex, int raw, int prim) {
     k->x1 = gs->x1; k->y1 = gs->y1; k->x2 = gs->x2; k->y2 = gs->y2;
     k->set_mask = gs->set_mask; k->check_mask = gs->check_mask; k->prim = prim; k->wide = gs->wide && wide_fbo;
 }
+static void key_rep(Key *k, const PortTexRep *r) { k->rep = r->gltex; k->rou = r->ou; k->rov = r->ov; k->rw = r->w; k->rh = r->h; }
 static void submit(void);
 static int rec_on;                  /* --fps60: the decoded primitives of this vblank are recorded (fps60 below) */
 static void rec_prim(const GVtx *v, int n, const Key *k);
@@ -328,6 +346,7 @@ static void gl_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade,
     Key k; (void)shade;
     if (!gl_ready) return;
     make_key(&k, semi, tex ? (raw ? 2 : 1) : 0, raw, GL_TRIANGLES);
+    if (tex && tex->rep) key_rep(&k, tex->rep);
     GVtx *v = alloc_vtx(3, &k, tex);
     set_vtx(v + 0, a->x + POLY_SHIFT, a->y + POLY_SHIFT, a->r, a->g, a->b, (float)a->u, (float)a->v, tex);
     set_vtx(v + 1, b->x + POLY_SHIFT, b->y + POLY_SHIFT, b->r, b->g, b->b, (float)b->u, (float)b->v, tex);
@@ -338,6 +357,7 @@ static void gl_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, int 
     Key k;
     if (!gl_ready) return;
     make_key(&k, semi, tex ? (raw ? 2 : 1) : 0, raw, GL_TRIANGLES);
+    if (tex && tex->rep) key_rep(&k, tex->rep);
     int r = col & 255, g = (col >> 8) & 255, b = (col >> 16) & 255;
     /* texel (u0 + i, v0 + j) for pixel (x + i, y + j): uv runs u0..u0 + w over the pixel span, truncated in the shader */
     float ua = (float)u0, ub = (float)(u0 + w), va = (float)v0, vb = (float)(v0 + h);
@@ -415,6 +435,13 @@ static void draw_op(const Op *op, int pass) {
     p_glUniform1i(u_pass, pass);
     p_glUniform4f(u_tw, (float)(k->twmx * 8), (float)((k->twox & k->twmx) * 8), (float)(k->twmy * 8), (float)((k->twoy & k->twmy) * 8));
     p_glUniform1f(u_setmask, k->set_mask ? 1.0f : 0.0f);
+    if (u_reps >= 0) {
+        p_glUniform1i(u_reps, k->rep ? 1 : 0);
+        if (k->rep) {
+            p_glUniform4f(u_repr, (float)k->rou, (float)k->rov, (float)k->rw, (float)k->rh);
+            p_glActiveTexture(GL_TEXTURE0 + 1); p_glBindTexture(GL_TEXTURE_2D, k->rep); p_glActiveTexture(GL_TEXTURE0);
+        }
+    }
     for (int i = 0; i < op->ns && dirty_any; i++) barrier_if(op->sr[i][0], op->sr[i][1], op->sr[i][2], op->sr[i][3]);
     p_glDrawArrays(k->prim, op->first, op->count);
     if (!k->wide) dirty_add(k->x1, k->y1, k->x2, k->y2);
@@ -512,6 +539,24 @@ static void gl_vram_read(int x, int y, int w, int h) {
     if (w <= 0 || h <= 0) return;
     bind_vram_fbo();
     read_words(x, y, w, h, vram + y * 1024 + x, 1024);
+}
+
+/* --texture-pack (texpack.c): a replacement image as its own texture (nearest: the alpha classes must stay exact) */
+unsigned port_gl_rep_texture(const u8 *rgba, int w, int h) {
+    GLuint t = 0;
+    if (!gl_ready) return 0;
+    submit();
+    p_glGenTextures(1, &t);
+    p_glBindTexture(GL_TEXTURE_2D, t);
+    p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    p_glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+    p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+    if (p_glGetError() != GL_NO_ERROR) port_printf("[gpu] OpenGL: replacement texture %dx%d failed\n", w, h);
+    return t;
 }
 
 /* ------------------------------------------------------------------ the --widescreen plane */
@@ -935,6 +980,8 @@ static int gl_start(void) {
     u_tex = p_glGetUniformLocation(prog, "u_tex"); u_pass = p_glGetUniformLocation(prog, "u_pass");
     u_tw = p_glGetUniformLocation(prog, "u_tw"); u_setmask = p_glGetUniformLocation(prog, "u_setmask");
     u_hw = p_glGetUniformLocation(prog, "u_hw"); p_glUniform1f(u_hw, 512.0f);
+    u_reps = p_glGetUniformLocation(prog, "u_reps"); u_repr = p_glGetUniformLocation(prog, "u_repr");
+    p_glUniform1i(p_glGetUniformLocation(prog, "u_rep"), 1);
     p_glUniform1f(p_glGetUniformLocation(prog, "u_half"), (R / 2 + 0.5f) / R);
     if (R > 1) p_glLineWidth((float)R);
     p_glUseProgram(bprog);

@@ -2119,6 +2119,51 @@ Three phases, all on the OpenGL backend only (the software renderer stays the re
    and the semi-transparency bit must survive.  Packs are derived from the game, so they are not committed: only the
    scripts that build them.
 
+### Texture packs: `--dump-textures DIR`, `--texture-pack DIR` (port only, opt-in)
+
+`port2/shims/texpack.c`. Both off by default: nothing runs and the output is byte-identical (checked with 36 frame
+dumps of the usual 3600-frame pad script). Launcher: "Parches y mods" / "Patches and mods", card "Pack de texturas"
+(pack folder, OpenGL only) and "Volcar texturas" (dumps to `texture_dump/` next to `data/`).
+
+**What a texture is.** Every host write to VRAM (LoadImage, LoadClut, GP0 A0) is remembered as an *upload* with the
+64-bit FNV-1a of its words. A textured primitive samples a box of its page (u/v bounding box after the texture window);
+the smallest live upload holding that box is its texture, cut to the 256-texel page the primitive uses (levels upload
+several pages in one 448-word LoadImage). Key = FNV-1a(upload hash, depth, offset/size of the page part in the upload,
+CLUT words for 4/8-bit). So the same pixels + palette always get the same name, in any area, frame or VRAM position.
+Fallback when no single upload holds the box (a page assembled from several uploads): the box itself, key
+`sub_` + FNV-1a(depth, size, texels, CLUT). Boxes in VRAM the game draws into (drawing areas: frame buffers, render
+targets) are never keyed; parts of an upload overwritten later become holes (boxes over them are not keyed by it).
+
+**Dump layout.**
+```
+DIR/textures.jsonl              one JSON object per image (appended; stable across runs):
+                                file, kind (upload|sub), depth (4|8|16), size [w,h] in texels, vram [x,y,w,h] in words,
+                                page [x,y], origin [u,v] of the image in the page, clut [x,y] (-1 for 16-bit), area, section, frame
+DIR/areaXX/<16 hex>.png         an upload-keyed texture (XX = GAME.currentArea in hex when first seen)
+DIR/areaXX/sub_<16 hex>.png     a sub-box-keyed texture
+```
+PNG = RGBA8, colours k<<3|k>>2. Alpha: 0 = the word 0x0000 (transparent), 128 = STP bit set (semi-transparent when
+the primitive is), 255 = opaque. Each name is written once (also skipped when the file already exists, so several runs
+can fill one folder); at most 256 page/palette images per upload and 20000 per run. Every palette a page is drawn with
+is its own image (a 4-bit level page often has ~20). Character sprites are uploaded per animation frame: one image each.
+
+**Making a pack.** Copy the PNGs you want to change into a folder (any sub-folders; the area folders are only for
+orientation: files are found by name, anywhere up to 8 levels deep) and redraw them at **the same size times an integer
+1..16** (2x/4x/8x for HD; width and height with the same factor). Keep the alpha classes: alpha < 64 transparent,
+64..191 semi-transparent texel (STP), >= 192 opaque; colours are full 8-bit (not reduced to 15 bits). PNG must be 8 bits
+per channel (grey, RGB, RGBA, palette, grey+alpha), not interlaced. Run with `--renderer gl --texture-pack DIR` (best with
+`--internal-res 4` for a 4x pack). Untouched files can be left out: the original texels are drawn.
+
+**How it is drawn (OpenGL).** A replacement is its own GL texture (nearest); primitives using it carry it in their batch
+state, and the fragment shader maps the texel (u, v) plus its sub-texel position into the image by its scale, so partial
+boxes, flipped / scaled sprites, texture windows and 4/8/16-bit pages all line up. Texels outside the image fall back to
+VRAM. A palette change (palette animation, flashes) gives a key the pack does not have: the original is drawn.
+
+**Limits.** The software renderer only dumps. Textures the game generates by drawing (render-to-texture effects) and
+MDEC movies are not textures here (the intro landscape is a movie). A replacement with partial alpha is thresholded, not
+blended. Changing a texture's pixels by a sub-upload keeps the larger upload's key for boxes outside the changed part.
+Debug: `TEXPACK_LOG=1` prints uploads, invalidations and unkeyed boxes.
+
 ### Open points / next
 
 1. The "code labels kept" of a loaded overlay (2312 for X000, 2298 in the audit's `label-jtbl` column plus 9

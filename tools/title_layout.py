@@ -258,9 +258,10 @@ def load_layout(read, names, path, wfm):
     return None
 
 
-def patch_files(read, names, wfm, lang, new):
-    """Writes the new records ({dialogue: [(col, row, flags)]}, same lengths as the original lists) into every overlay of the language
-    that holds the lists. Returns {file name: bytes} of the changed files."""
+def copies(read, names, wfm, lang, ref=None):
+    """{overlay name: {dialogue: (offset, records)}}: every copy of the title lists of a language. An overlay holds the whole run
+    from dialogue FIRST on (I?NFO*, most X?NN: find_blocks) and/or only the titles of its area with their own spacing
+    (AREA01/X501.BIN, AREA00/X500.BIN: subset_lists, needs `ref`, the records known from the I?NFO blocks)."""
     n = LANG_N.index(lang)
     counts = counts_of(wfm)
     out = {}
@@ -269,21 +270,94 @@ def patch_files(read, names, wfm, lang, new):
             data = read(name)
         except (OSError, KeyError):
             continue
-        blocks = find_blocks(data, counts)
-        if not blocks:
-            continue
+        where = {}
+        if ref:
+            where.update(subset_lists(data, counts, ref))
+        for off, _ in find_blocks(data, counts)[:1]:
+            lay = Layout(counts, data, off, name)
+            where.update({k: lay.lists[j] for k, j in lay.at.items()})
+        if where:
+            out[name] = where
+    return out
+
+
+def patch_files(read, names, wfm, lang, new, ref=None):
+    """Writes the new records ({dialogue: [(col, row, flags)]}, same lengths as the original lists) into every copy of the lists
+    of the language (copies()), each copy keeping its own flags. Returns {file name: bytes} of the changed files."""
+    out = {}
+    for name, where in copies(read, names, wfm, lang, ref).items():
+        data = read(name)
         buf = bytearray(data)
-        lay = Layout(counts, data, blocks[0][0], name)
         for k, recs in new.items():
-            j = lay.at.get(k)
-            if j is None or len(lay.lists[j][1]) != len(recs):
+            if k not in where or len(where[k][1]) != len(recs):
                 continue
-            o = lay.lists[j][0]
-            for c, r, f in recs:
+            o = where[k][0]
+            for (c, r, _), (_, _, f) in zip(recs, where[k][1]):     # this copy's own flags (animation order / colour group)
                 buf[o:o + 4] = struct.pack("<Bbbb", 0, c, r, 0)[:3] + bytes([f & 0xFF])
                 o += 4
         if bytes(buf) != data:
             out[name] = bytes(buf)
+    return out
+
+
+def _run_start(data, o):
+    """Offset of the first list of the run of lists that holds the list at o: walks back over the lists that end right before
+    (every start inside the previous list parses up to the same terminator, so its real start is the farthest one)."""
+    while o >= 8 and data[o - 4] == 0xFF:
+        m = 64
+        while m and not (o - 4 * (m + 1) >= 0 and (lambda r: r is not None and len(r) == m)(parse_list(data, o - 4 * (m + 1)))):
+            m -= 1
+        if not m:
+            break
+        o -= 4 * (m + 1)
+    return o
+
+
+def subset_lists(data, counts, ref, min_anchor=2):
+    """{dialogue: (offset, records)} of an overlay that holds only SOME of the lists, with their own spacing (AREA01/X501.BIN:
+    45 titles of the area in dialogue order, most laid out differently from I?NFO's block; the area's code reads these, so an
+    edit written only into I?NFO showed the new letters at the old places, e.g. "Objetos p / erdidos"). The run is found from
+    lists equal to the reference (`ref`: {dialogue: records} known from the I?NFO block) and matched to the dialogues FIRST..
+    (lengths `counts`) in order by length, an equal list weighing
+    far more (weighted longest common subsequence), so equal lengths elsewhere cannot shift it. Not found: {}."""
+    anchors = []
+    for k, recs in ref.items():
+        pat = b"".join(struct.pack("<Bbb", 0, c, r) + bytes([f & 0xFF]) for c, r, f in recs) + b"\xff"
+        o = data.find(pat)
+        while o >= 0:
+            if o % 4 == 0 and (o < 4 or data[o - 4] == 0xFF or data[o - 4] != 0):
+                anchors.append(o)
+            o = data.find(pat, o + 1)
+    out, done = {}, set()
+    keys = list(range(FIRST, FIRST + len(counts)))
+    for a0 in sorted(anchors):
+        if a0 in done:
+            continue
+        start = _run_start(data, a0)
+        run = all_lists(data, start)
+        done.update(o for o, _ in run)
+        if sum(1 for o, _ in run if o in anchors) < min_anchor:
+            continue
+        A, B = len(keys), len(run)
+        def w(i, j):
+            r = run[j][1]
+            return 0 if len(r) != counts[i] else (100 if r == ref.get(keys[i]) else 1)
+        best = [[0] * (B + 1) for _ in range(A + 1)]
+        for i in range(A - 1, -1, -1):
+            for j in range(B - 1, -1, -1):
+                x = w(i, j)
+                best[i][j] = max(best[i + 1][j], best[i][j + 1], best[i + 1][j + 1] + x if x else 0)
+        i = j = 0
+        while i < A and j < B:
+            x = w(i, j)
+            if x and best[i][j] == best[i + 1][j + 1] + x:
+                out[keys[i]] = run[j]
+                i += 1
+                j += 1
+            elif best[i + 1][j] >= best[i][j + 1]:
+                i += 1
+            else:
+                j += 1
     return out
 
 

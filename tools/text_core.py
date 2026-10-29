@@ -567,15 +567,16 @@ class Project:
                     continue                    # same spacing as the original: nothing to write
                 old = lay.recs[idx]
                 recs = TL.pad_records(TL.lines_to_records(lines, [r[2] for r in old]), old)
-                prev = new.setdefault(lang, (self.wfm(path), {}))[1]
+                new.setdefault(lang, (self.wfm(path), {}, {}))[2].update(lay.recs)
+                prev = new[lang][1]
                 if idx in prev and prev[idx] != recs:
                     errors.append("%s #%d: %s" % (path, idx, tr("tc.titleconflict")))
                 prev[idx] = recs
         if errors:
             return
-        for lang, (w, recs) in new.items():
+        for lang, (w, recs, ref) in new.items():
             try:
-                files.update(TL.patch_files(self.src.read_any, self.src.all_names(), w, lang, recs))
+                files.update(TL.patch_files(self.src.read_any, self.src.all_names(), w, lang, recs, ref))
             except (OSError, KeyError) as ex:
                 errors.append("%s: %s" % (lang, ex))
 
