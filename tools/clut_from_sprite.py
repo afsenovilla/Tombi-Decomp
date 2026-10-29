@@ -54,7 +54,8 @@ out=[0]*16; missing=[]
 for i in range(1,16):
     if not votes[i]: missing.append(i); continue
     (r,g,b),k=votes[i].most_common(1)[0]; tot=sum(votes[i].values())
-    out[i]=r*31//255 | (g*31//255)<<5 | (b*31//255)<<10
+    q=lambda c: round(c*31/255)          # nearest 5-bit level (each channel within ~4/255 of the sheet colour)
+    out[i]=q(r) | q(g)<<5 | q(b)<<10
     print(i,(r,g,b),tot,round(k/tot,3))
 print('no data',missing)
 print(' '.join('%04X'%v for v in out))

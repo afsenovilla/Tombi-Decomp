@@ -99,8 +99,8 @@ def comps(p):
 # ------------------------------------------------------------------ real palettes: 16-colour rows of the areas' CLUT files
 # Female Stonetown Resident (AREA16 subtype 0): custom CLUT derived pixel-exact from the TCRF sheet with
 # tools/clut_from_sprite.py (24 frames, 0 silhouette mismatches, 15/15 indices 100 % agreement); not found on any disc.
-CUSTOM_CLUTS = {'woman16': [0x0000, 0x0000, 0x7FFF, 0x3678, 0x21B2, 0x154E, 0x5213, 0x3DAF,
-                            0x2D4D, 0x190B, 0x1677, 0x09B1, 0x054D, 0x194B, 0x10E9, 0x21D1]}
+CUSTOM_CLUTS = {'woman16': [0x0000, 0x0000, 0x7FFF, 0x3A78, 0x25D2, 0x194F, 0x5233, 0x41B0,
+                            0x314D, 0x1D0C, 0x1677, 0x0DD1, 0x096E, 0x1D4C, 0x10EA, 0x21D2]}
 
 
 def clut_row(fn, row):
