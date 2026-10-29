@@ -330,7 +330,7 @@ def set_icon(root):
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
 i18n.add({
     "es": {"nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
-           "l.uilang": "Idioma del launcher", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
+           "l.uilang": "Idioma del launcher", "l.starting": "Iniciando el juego...", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
            "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
            "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
            "p.custom": "Otro archivo...", "sum.window": "{0}x ventana", "sum.full": "pantalla completa",
@@ -339,7 +339,7 @@ i18n.add({
            "c.keys": "Teclado", "c.pad": "Mando", "c.mods": "Mods", 
            "c.cmd": "Línea de comandos", "c.log": "Últimas líneas del registro", "c.status": "Estado"},
     "en": {"nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
-           "l.uilang": "Launcher language", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
+           "l.uilang": "Launcher language", "l.starting": "Starting the game...", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
            "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
            "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
            "p.custom": "Other file...", "sum.window": "{0}x window", "sum.full": "fullscreen",
@@ -439,6 +439,7 @@ class App:
         self.log_path = os.path.join(app_dir(), "tombi-port.log")   # the last run's log (Copy log works before a run too)
         self.vars = {}
         self.page = "play"
+        self.starting = False
         self._level = "info"
         set_icon(root)
         self.fam = setup_style(root)
@@ -568,7 +569,9 @@ class App:
         self._refresh()
         if self.proc and self.proc.poll() is None:
             self.play_btn.state(["disabled"])
-            self.stop_btn.pack(side="right", padx=(0, 8), before=self.play_btn)
+            self.stop_btn.pack(side="right", padx=(0, 8), after=self.play_btn)
+            if self.starting:
+                self._starting(True)
         if self.s.get("disc"):
             self.root.after(200, self.check_disc)
         elif data_ready():
@@ -581,11 +584,17 @@ class App:
         bar = ttk.Frame(r, style="Bg.TFrame", padding=(24, 12, 24, 14))
         bar.grid(row=1, column=1, sticky="ew")
         self.summary = tk.StringVar()
-        ttk.Label(bar, textvariable=self.summary, style="Bg.TLabel").pack(side="left")
-        self.play_btn = ttk.Button(bar, text=tr("b.play"), command=self.play, style="Accent.TButton", width=16)
+        self.summary_lbl = ttk.Label(bar, textvariable=self.summary, style="Bg.TLabel")
+        # shown from Play until the game prints "[port2] window ..." (port2/runtime/sdl.c) or exits
+        self.start_box = ttk.Frame(bar, style="Bg.TFrame")
+        ttk.Label(self.start_box, text=tr("l.starting"), style="Bg.TLabel", foreground=C_ACCENT).pack(side="left", padx=(0, 10))
+        self.start_bar = ttk.Progressbar(self.start_box, mode="indeterminate", length=240)
+        self.start_bar.pack(side="left")
+        self.play_btn = ttk.Button(bar, text=tr("b.play"), command=self.play, style="Accent.TButton", width=14)
         self.play_btn.pack(side="right")
         self.stop_btn = ttk.Button(bar, text=tr("b.stop"), command=self.stop, style="Bar.TButton")
         ttk.Button(bar, text=tr("b.copylog"), command=self.copy_log, style="Bar.TButton").pack(side="right", padx=(0, 8))
+        self.summary_lbl.pack(side="left")      # last: it gives up its width first when the bar is narrow
 
     def _refresh(self):
         """Summary line ("OpenGL · 2x window · 3x internal · 16:9") and the internal resolution enabled for OpenGL only."""
@@ -1034,24 +1043,42 @@ class App:
         self.proc = subprocess.Popen(cmd, cwd=app_dir(), stdout=log, stderr=subprocess.STDOUT, creationflags=flags)
         self.say(tr("s.running"), "ok")
         self.play_btn.state(["disabled"])
-        self.stop_btn.pack(side="right", padx=(0, 8), before=self.play_btn)
-        self.root.after(1000, self.poll)
+        self._starting(True)
+        self.stop_btn.pack(side="right", padx=(0, 8), after=self.play_btn)
+        self.root.after(250, self.poll)
 
     def poll(self):
         if not self.proc:
             return
         try:
-            self.show_log_tail(open(self.log_path, encoding="utf-8", errors="replace").read().splitlines())
+            lines = open(self.log_path, encoding="utf-8", errors="replace").read().splitlines()
+            self.show_log_tail(lines)
+            if self.starting and any(l.startswith("[port2] window ") for l in lines):
+                self._starting(False)
         except OSError:
             pass
         rc = self.proc.poll()
         if rc is None:
-            self.root.after(1000, self.poll)
+            self.root.after(250 if self.starting else 1000, self.poll)
             return
+        self._starting(False)
         self.say(tr("s.ended", rc, self.log_path), "info")
         self.play_btn.state(["!disabled"])
         self.stop_btn.pack_forget()
         self.proc = None
+
+    def _starting(self, on):
+        """The "Starting the game..." notice in the bottom bar (indeterminate bar) above the summary."""
+        self.starting = on
+        try:
+            if on:
+                self.start_box.pack(side="top", fill="x", pady=(0, 10), before=self.play_btn)
+                self.start_bar.start(12)
+            else:
+                self.start_bar.stop()
+                self.start_box.pack_forget()
+        except tk.TclError:
+            pass
 
     def show_log_tail(self, lines):
         """The last 8 lines, preceded by the warning / FATAL / access-violation lines from earlier in the log (a
