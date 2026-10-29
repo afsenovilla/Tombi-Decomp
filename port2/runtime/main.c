@@ -271,13 +271,6 @@ static const struct { short id; unsigned char slot, kind; unsigned addr, size; s
     {0, 255, 0x84, 0, 0x20, 0, 0, 0xffffffffu}, {704, 255, 0xf0, 0, 0x218dc, 0, 0, 2}, {-1, 0, 0, 0, 0, 0, 0, 0}};
 static unsigned char port_civ_buf[sizeof port_civ_recs];
 /* --civ-test spawn: AREA08 s0's row, optionally moved with --civ-spawn X,Y (world) to stand next to a resident */
-static int port_civ_spawn_set, port_civ_spawn_x, port_civ_spawn_y;
-static short port_civ_row_buf[4];
-short *port_civ_row(short *row) {
-    memcpy(port_civ_row_buf, row, sizeof port_civ_row_buf);
-    if (port_civ_spawn_set) { port_civ_row_buf[0] = port_civ_spawn_x; port_civ_row_buf[1] = port_civ_spawn_y; }
-    return port_civ_row_buf;
-}
 /* SPR table for AREA11 subtype 0 (frames 0..29 of its scripts: idle 0-2, walk 3-20, talk 21-29), built at runtime from
    boxes on the surviving A06100 4 bpp page (page 0 relative, w1e 1 = VRAM x 0x40), CLUT AREA11/CLUT02 row 4 (VRAM
    (192, 480)). Frame f = the f-th figure of the page in reading order (48-pixel rows): the retail top-down tables pack
@@ -319,9 +312,75 @@ void port_civ_wfm_swap(void) {
     }
     *(unsigned char **)port_ram_ptr(0x1F800398u) = port_civ_wfm_buf;
 }
+static int port_civ_cur_area(void) { extern void *port_ram_ptr(unsigned); return *(unsigned short *)port_ram_ptr(0x8009C960u); }
+/* which cut town is being tested: AREA11 s0 (default) or AREA17 s0, both with the AREA08 s0 stand-in list */
+int port_civ_on(int area, int sec) {   /* area: GAME.selectedArea (the load list index may add AREA_VARIANT: re-read it) */
+    extern void *port_ram_ptr(unsigned);
+    area = *(unsigned short *)port_ram_ptr(0x8009C960u);
+    return port_civ_test && sec == 0 && (area == 11 || area == 17);
+}
+/* --civ-maps DIR: DIR/AREAnn/map8E.bin and map8F.tim (tools/civ_rebuild.py) replace APD_DATA[14] / [15] */
+static const char *port_civ_maps_dir;
+static int port_civ_map_w, port_civ_map_h;   /* rebuilt picture size in px (0: the stand-in AREA08 one) */
+static void *port_civ_slurp(const char *path) {
+    FILE *f = fopen(path, "rb"); long n; void *b;
+    if (!f) return 0;
+    fseek(f, 0, SEEK_END); n = ftell(f); fseek(f, 0, SEEK_SET);
+    b = malloc(n + 16);
+    if (fread(b, 1, n, f) != (size_t)n) { fclose(f); free(b); return 0; }
+    fclose(f); return b;
+}
+void port_civ_maps(void) {
+    extern void *port_ram_ptr(unsigned);
+    char path[1024]; void *e, *t; int area = *(unsigned short *)port_ram_ptr(0x8009C960u);
+    static void *ce, *ct; static int carea = -1;
+    if (!port_civ_maps_dir || !port_civ_on(area, *(unsigned short *)port_ram_ptr(0x8009C962u))) return;
+    if (carea != area) {
+        snprintf(path, sizeof path, "%s/AREA%02d/map8E.bin", port_civ_maps_dir, area); e = port_civ_slurp(path);
+        snprintf(path, sizeof path, "%s/AREA%02d/map8F.tim", port_civ_maps_dir, area); t = port_civ_slurp(path);
+        if (!e || !t) { port_printf("[port] --civ-maps: no rebuilt map for AREA%02d in %s\n", area, port_civ_maps_dir); return; }
+        ce = e; ct = t; carea = area;
+        port_civ_map_w = ((unsigned short *)ce)[0] * 8; port_civ_map_h = ((unsigned short *)ce)[1] * 8;
+        if (port_verbose) port_printf("[port] --civ-maps: AREA%02d rebuilt map %dx%d px\n", area, port_civ_map_w, port_civ_map_h);
+    }
+    *(void **)port_ram_ptr(0x1F800390u) = ce;
+    *(void **)port_ram_ptr(0x1F800394u) = ct;
+}
+/* camera limits {xmin, xmax, ymin, ymax} and start for the rebuilt picture (AREA08's rows follow xmax = W - 288,
+   ymax = H - 112); spawn at the bottom exit of AREA17 (the way in from Civilization Town) */
+static short port_civ_lim[4], port_civ_campos[8];
+static int port_civ_spawn_set, port_civ_spawn_x, port_civ_spawn_y;
+static void port_civ_default_spawn(int *x, int *y) {
+    if (port_civ_spawn_set) { *x = port_civ_spawn_x; *y = port_civ_spawn_y; return; }
+    if (port_civ_cur_area() == 17 && port_civ_maps_dir) { *x = 223; *y = 540; return; }   /* above exit 0 (y > 0x23A) */
+    *x = 60; *y = 468;                                                                      /* AREA08 s0 spawn 0 */
+}
+short *port_civ_limits(short *row) {
+    memcpy(port_civ_lim, row, sizeof port_civ_lim);
+    port_civ_maps();   /* size of the rebuilt picture (loads the files once) */
+    if (port_civ_map_w) { port_civ_lim[1] = port_civ_map_w - 288; port_civ_lim[3] = port_civ_map_h - 112; }
+    return port_civ_lim;
+}
+short *port_civ_cam(short *row) {
+    int x, y;
+    memcpy(port_civ_campos, row, sizeof port_civ_campos);
+    port_civ_default_spawn(&x, &y); port_civ_campos[0] = x; port_civ_campos[1] = y;
+    return port_civ_campos;
+}
+static short port_civ_row_buf[4];
+short *port_civ_row(short *row) {
+    int x, y;
+    memcpy(port_civ_row_buf, row, sizeof port_civ_row_buf);
+    port_civ_default_spawn(&x, &y); port_civ_row_buf[0] = x; port_civ_row_buf[1] = y;
+    return port_civ_row_buf;
+}
 int port_civ_list(void) {
     memcpy(port_civ_buf, port_civ_recs, sizeof port_civ_recs);
-    if (port_verbose) port_printf("[port] --civ-test: AREA11 s0 loads AREA08 s0's map, sprites and I0NFO2\n");
+    if (port_civ_cur_area() == 17) {   /* Iron Town: AREA08's own sprite page and CLUT block (its villager stands in) */
+        port_civ_buf[0] = 699 & 0xFF; port_civ_buf[1] = 699 >> 8; port_civ_buf[12] = 192; port_civ_buf[13] = 0; port_civ_buf[16] = 1;
+        port_civ_buf[40] = 701 & 0xFF; port_civ_buf[41] = 701 >> 8;
+    }
+    if (port_verbose) port_printf("[port] --civ-test: AREA%02d s0 loads AREA08 s0's map, sprites and I0NFO2\n", port_civ_cur_area());
     return (int)(long)port_civ_buf;
 }
 int port_cut_content;     /* --cut-content: opt-in cut text recovered from the Japanese release (port/fixes.txt) */
@@ -358,6 +417,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
         else if (!strcmp(a, "--civ-wfm") && v) port_civ_wfm_path = argv[++i];
         else if (!strcmp(a, "--civ-line") && v) port_civ_line = atoi(argv[++i]);
+        else if (!strcmp(a, "--civ-maps") && v) port_civ_maps_dir = argv[++i];
         else if (!strcmp(a, "--civ-spawn") && v) { port_civ_spawn_set = sscanf(argv[++i], "%d,%d", &port_civ_spawn_x, &port_civ_spawn_y) == 2; }
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);
