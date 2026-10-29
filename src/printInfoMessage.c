@@ -188,6 +188,10 @@ O *printInfoMessage(int a, int b)
         if (b == 1 || b == 4) {
             callit(o, a);
         }
+#ifdef PORT2
+        /* tools/verb_order.py patch in MAINn: "obtained" draws the verb (dialogue 2) before the name too (port2/runtime/lang.c) */
+        { extern int port_verb_first; if (port_verb_first && (b == 0 || b == 3)) drawInfoMessageText(o, 2); }
+#endif
         base = WFM3_DATA;
         base += *(short *)(base + 8);
         q = (unsigned short *)(base + (unsigned short)FC8 * 2);
@@ -195,6 +199,9 @@ O *printInfoMessage(int a, int b)
         while (1) {
             k = *p++;
             if ((unsigned short)(k + 2) < 2) {
+#ifdef PORT2
+                { extern int port_verb_first; if (port_verb_first) return o; }
+#endif
                 if (b == 0 || b == 3) drawInfoMessageText(o, 2);
                 return o;
             }

@@ -531,8 +531,35 @@ static void title_tables(const unsigned char *B, unsigned nb) {
 }
 extern unsigned char *port_cd_read_named(const char *path, unsigned *size);
 extern unsigned char FILE_LINKS[];
+/* the item popup of the loaded MAINn: tools/verb_order.py's verb-first code patch of printInfoMessage (detected by its bytes, the
+   port does not run MAINn's code) and the box width constants of its switch (moved by text_core's verb deltas), read from the EXE */
+int port_verb_first;
+static unsigned rd32(const unsigned char *e, unsigned o) { return e[o] | e[o + 1] << 8 | e[o + 2] << 16 | (unsigned)e[o + 3] << 24; }
+static void popup_from_exe(const unsigned char *e, unsigned n) {
+    enum { FUNC = 0x3DE20, FLEN = 0x560 };
+    if (!e || n < FUNC + FLEN || memcmp(e + FUNC, "\xd0\xff\xbd\x27\x1c\x00\xb3\xaf", 8)) return;
+    const unsigned char *f = e + FUNC;
+    for (unsigned i = 4; i + 20 <= FLEN; i += 4)        /* verb_order.is_patched: `j ret; move v0,s0; li v0,3; beq s2,v0; move a0,s0; bne s2,zero` */
+        if (rd32(f, i) == 0x02001021 && rd32(f, i + 4) == 0x24020003 && f[i - 1] == 0x08 && f[i + 11] == 0x12
+            && rd32(f, i + 12) == 0x02002021 && f[i + 19] == 0x16) { port_verb_first = 1; break; }
+    for (unsigned i = 0; i + 16 <= FLEN; i += 4) {      /* verb_order._slots: the jump table of switch (b) */
+        if (rd32(f, i) != 0x00121080 || rd32(f, i + 4) != 0x3c018001 || rd32(f, i + 8) != 0x00220821 || f[i + 15] != 0x8C) continue;
+        unsigned jt = (unsigned)(short)(f[i + 12] | f[i + 13] << 8) + 0x800, pad[3]; int ok = 1;
+        static const int cases[3] = { 0, 1, 4 };
+        for (int c = 0; c < 3 && ok; c++) {
+            if (jt + 4 * cases[c] + 4 > n) { ok = 0; break; }
+            unsigned t = rd32(e, jt + 4 * cases[c]) - 0x80010000u + 0x800; ok = 0;
+            for (unsigned k = t; k < t + 40 && k + 4 <= n; k += 4)
+                if (rd32(e, k) >> 16 == 0x2442) { pad[c] = (unsigned)(short)(rd32(e, k) & 0xFFFF); ok = 1; break; }
+        }
+        if (ok) { port_lang_box_pad[0] = pad[0]; port_lang_box_pad[1] = pad[1]; port_lang_box_pad[4] = pad[2]; }
+        break;
+    }
+    if (port_verbose) port_printf("[port2]   item popup: verb %s, box pads %x %x %x\n", port_verb_first ? "first" : "last",
+                                  port_lang_box_pad[0], port_lang_box_pad[1], port_lang_box_pad[4]);
+}
 void port_lang_init(void) {
-    if (!port_lang) return;
+    if (!port_lang) { unsigned n; popup_from_exe(port_cd_read_named("EXE/MAIN0.EXE", &n), n); return; }
     char name[32]; unsigned n0, nn;
     unsigned char *m0 = port_cd_read_named("EXE/MAIN0.EXE", &n0);
     snprintf(name, sizeof name, "EXE/MAIN%d.EXE", port_lang);
@@ -546,6 +573,7 @@ void port_lang_init(void) {
     ovl_delta = (main_map.bss_delta + 7) & ~7;        /* the overlay region starts 8-aligned after MAINn's bss (X?00 entry tables: +0x28 for MAIN5, +0x30 for MAIN6) */
     main0_links = m0 + 0x800 + LINKS_OFF;
     for (int i = 0; i < 5; i++) port_lang_box_pad[i] = i == 2 || i == 3 ? 0x10 : box_pads[port_lang][i == 4 ? 2 : i];
+    popup_from_exe(mn, nn);
     /* MAIN0's data region: every word whose MAINn version differs by more than the relink */
     unsigned char *img = (unsigned char *)port_main0_image;
     int changed = 0, ptrs = 0, spilled = 0, links = 0;

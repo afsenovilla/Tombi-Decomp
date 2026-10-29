@@ -162,7 +162,17 @@ void port_movie_add(const char *s) {
     movie_frame = f; movie_id = 0;
     while (*s >= '0' && *s <= '9') movie_id = movie_id * 10 + *s++ - '0';
 }
-void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; title_frame = 0; movie_frame = 0; }
+/* --test-item FRAME:ID[:B] (debug): the item popup printInfoMessage(ID, B) (B = 0 obtained by default) at that vblank */
+static int item_frame, item_id, item_b;
+void port_test_item_add(const char *s) {
+    int f = 0;
+    while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
+    if (*s++ != ':') return;
+    item_frame = f; item_id = 0; item_b = 0;
+    while (*s >= '0' && *s <= '9') item_id = item_id * 10 + *s++ - '0';
+    if (*s++ == ':') while (*s >= '0' && *s <= '9') item_b = item_b * 10 + *s++ - '0';
+}
+void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; title_frame = 0; movie_frame = 0; item_frame = 0; }
 void port_vblank(void) {
     if (port_stall_frame && port_frame + 1 == port_stall_frame) port_sleep_us((unsigned long long)port_stall_ms * 1000);
     if (port_realtime) {
@@ -221,6 +231,7 @@ void port_vblank(void) {
     { extern void port_ovl_snapshot(void); port_ovl_snapshot(); }
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
     if (menu_frame && port_frame == menu_frame) menu_open();
+    if (item_frame && port_frame == item_frame) { extern void *printInfoMessage(int, int); printInfoMessage(item_id, item_b); port_printf("[port] frame %d: item popup %d/%d\n", port_frame, item_id, item_b); }
     if (title_frame && port_frame == title_frame) { extern void FUN_8005aa74(int, int, int, int); FUN_8005aa74(title_id, 0, 120, 0); port_printf("[port] frame %d: event title %d spawned\n", port_frame, title_id); }
     if (movie_frame && port_frame == movie_frame) {
         extern void FUN_800171b8(int, void *), FUN_8001f4bc(void), moviePlayerTask(void);
