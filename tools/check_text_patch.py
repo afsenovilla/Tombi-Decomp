@@ -22,6 +22,9 @@ For every edited dialogue:
     patched files is below the file's glyph count, and every WFM that changed size has its entries in the area load
     lists (SYS/LDnARxx.BIN) updated (tools/load_lists.py; a stale size let the next file overwrite the WFM's tail in
     memory: "UUUUUU" boxes and a crash in AREA00)
+  - the pause menu's Si/No questions of EXE/MAIN5.EXE ("Cargar juego?", "Salir juego?", 8 px a glyph): the port widens
+    their frame to the text plus a 12-px margin (port/fixes.txt, drawPauseMenu) and reads "Salir del juego?"; that box
+    must still fit on the 320-px screen (pause_boxes)
 
   check_text_patch.py DISC.bin PATCH.tombipatch.json [-v]
 Exit status 1 when anything fails.
@@ -186,6 +189,29 @@ def title_copies(proj, read_new, names):
     return out
 
 
+PAUSE_GLYPH_W, PAUSE_MARGIN, PAUSE_SCREEN_W = 8, 12, 320
+PAUSE_SALIR = (bytes([0x1e, 0x0b, 0x0d, 0x14, 0x11, 0x19, 0x00, 0x13, 0x1c, 0x0f, 0x10, 0x17, 0x1f]),
+               bytes([0x1e, 0x0b, 0x0d, 0x14, 0x11, 0x19, 0x00, 0x0e, 0x0f, 0x14, 0x00, 0x13, 0x1c, 0x0f, 0x10, 0x17, 0x1f]))
+
+
+def pause_boxes(proj, exe="EXE/MAIN5.EXE"):
+    """The pause menu's Si/No questions (drawPauseMenu entry lists: glyph bytes, 0xFF-ended, '¿' 0x1E .. '?' 0x1F)
+    in the Spanish executable, as the port draws them, and the frame width the port gives each: problems."""
+    try:
+        b = proj.src.read_any(exe)
+    except Exception:
+        return []
+    out = []
+    for m in re.finditer(rb"\x1e[\x00-\x1d]{1,40}\x1f\xff", b):
+        q = m.group()[:-1]
+        if q == PAUSE_SALIR[0]:
+            q = PAUSE_SALIR[1]
+        w = len(q.rstrip(b"\x00")) * PAUSE_GLYPH_W + 2 * PAUSE_MARGIN
+        if w > PAUSE_SCREEN_W - 16:
+            out.append("%s @%X: pause question of %d glyphs needs a %d-px box (screen %d)" % (exe, m.start(), len(q), w, PAUSE_SCREEN_W))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("disc"); ap.add_argument("patch"); ap.add_argument("-v", "--verbose", action="store_true")
@@ -223,6 +249,9 @@ def main():
                 print("%s #%d: ok" % (path, i))
     for msg in check_encoded(proj, patch):
         print("ENCODED: %s" % msg)
+        bad += 1
+    for msg in pause_boxes(proj):
+        print("PAUSE: %s" % msg)
         bad += 1
     for note in NOTES:
         print("note:", note)
