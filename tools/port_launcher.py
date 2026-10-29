@@ -66,7 +66,7 @@ i18n.add({
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
         "l.titlebg": "Fondo de título panorámico (PNG / JPG):", "l.titlebg.d": "Solo se usa con imagen panorámica (16:9, 21:9, 32:9): rellena los lados de la pantalla de título.", "ft.image": "Imágenes",
-        "c.texpack": "Pack de texturas (HD)", "l.texpack": "Carpeta del pack (déjalo vacío para usar las texturas originales). Solo con OpenGL.",
+        "c.texpack": "Pack de texturas (HD) · experimental", "l.texpack": "Carpeta del pack (déjalo vacío para usar las texturas originales). Solo con OpenGL.",
         "b.dumpall": "Volcar todas las texturas", "b.openfolder": "Abrir carpeta",
         "l.texpack.d": "Pulsa «Volcar todas las texturas» para exportar las texturas del juego a la carpeta texture_dump. Edítalas o reescálalas (2x, 4x…) manteniendo el nombre del archivo y elige esa carpeta como pack.",
         "s.dumpall": "Volcando texturas… {}%", "s.dumpallok": "Listo: {} texturas en {}", "s.dumpallfail": "No se pudo volcar: {}",
@@ -99,7 +99,7 @@ i18n.add({
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
         "l.titlebg": "Wide title background (PNG / JPG):", "l.titlebg.d": "Only used in widescreen (16:9, 21:9, 32:9): fills the sides of the title screen.", "ft.image": "Images",
-        "c.texpack": "Texture pack (HD)", "l.texpack": "Pack folder (leave empty for the original textures). OpenGL only.",
+        "c.texpack": "Texture pack (HD) · experimental", "l.texpack": "Pack folder (leave empty for the original textures). OpenGL only.",
         "b.dumpall": "Dump all textures", "b.openfolder": "Open folder",
         "l.texpack.d": "Press “Dump all textures” to export the game's textures to the texture_dump folder. Edit or upscale them (2x, 4x…) keeping the file names, then choose that folder as the pack.",
         "s.dumpall": "Dumping textures… {}%", "s.dumpallok": "Done: {} textures in {}", "s.dumpallfail": "Could not dump: {}",
@@ -339,7 +339,7 @@ def set_icon(root):
 # ---------------------------------------------------------------------------------------------- window
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
 i18n.add({
-    "es": {"l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
+    "es": {"l.experimental": "Mostrar funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
            "l.uilang": "Idioma del launcher", "l.starting": "Iniciando el juego...", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
            "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
            "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
@@ -348,7 +348,7 @@ i18n.add({
            "l.iresoff": "Solo con OpenGL: el dibujado por software usa siempre la resolución original.",
            "c.keys": "Teclado", "c.pad": "Mando", "c.mods": "Mods", 
            "c.cmd": "Línea de comandos", "c.log": "Últimas líneas del registro", "c.status": "Estado"},
-    "en": {"l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
+    "en": {"l.experimental": "Show experimental features", "l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
            "l.uilang": "Launcher language", "l.starting": "Starting the game...", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
            "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
            "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
@@ -548,6 +548,14 @@ class App:
         ttk.Label(side, text="build " + BUILD_ID, style="Side.TLabel").pack(side="bottom", anchor="w", padx=6, pady=(8, 0))
         lang = ttk.Frame(side, style="Side.TFrame")
         lang.pack(side="bottom", fill="x", padx=4)
+        # experimental features (texture dump / packs, 60 fps): hidden unless asked for
+        self.experimental = bool(self.s.get("experimental"))
+        ev = tk.BooleanVar(value=self.experimental)
+
+        def toggled():
+            self.s["experimental"] = ev.get()
+            self.root.after_idle(self.rebuild)
+        ttk.Checkbutton(lang, text=tr("l.experimental"), variable=ev, command=toggled, takefocus=False).pack(anchor="w", pady=(0, 8))
         ttk.Label(lang, text=tr("l.uilang"), style="Side.TLabel").pack(anchor="w", pady=(0, 3))
         names = ["%s (%s)" % (v, k) for k, v in i18n.LANGS.items()]
         lv = tk.StringVar(value="%s (%s)" % (i18n.LANGS[i18n.current()], i18n.current()))
@@ -785,7 +793,8 @@ class App:
             ttk.Radiobutton(seg, text="%dx" % n, variable=sv, value=n, style="Seg.Toolbutton", width=6).pack(side="left")
         ttk.Checkbutton(c, text=tr("l.fullscreen"), variable=self.var("fullscreen", tk.BooleanVar, False)).pack(anchor="w", pady=(10, 0))
         # --fps60: frames interpolated between the 50 Hz logic steps (OpenGL only)
-        ttk.Checkbutton(c, text=tr("l.fps60"), variable=self.var("fps60", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
+        if self.experimental:
+            ttk.Checkbutton(c, text=tr("l.fps60"), variable=self.var("fps60", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
         o, c = self.card(grid, tr("c.aspect"))
         o.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(12, 0))
         self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9")])
@@ -824,20 +833,21 @@ class App:
         bp = bundled_patch()
         ttk.Label(c, text=tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), style="Muted.TLabel", wraplength=640,
                   justify="left").pack(anchor="w", pady=(8, 0))
-        o, c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
-        o.pack(fill="x", pady=(12, 0), padx=(0, 4))
-        ttk.Label(c, text=tr("l.texpack"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
-        self._browse_row(c, "texpack", self.pick_texpack)
-        row = ttk.Frame(c)                                     # the full dump from the disc files (tools/dump_all_textures.py)
-        row.pack(fill="x", pady=(8, 0))
-        self.dumpall_btn = ttk.Button(row, text=tr("b.dumpall"), command=self.dump_all_textures)
-        self.dumpall_btn.pack(side="left")
-        self.dumpall_bar = ttk.Progressbar(row, mode="determinate", maximum=100, length=200)
-        self.dumpall_bar.pack(side="left", padx=(10, 0))
-        self.dumpall_open = ttk.Button(row, text=tr("b.openfolder"), command=self.open_texture_dump)
-        self.dumpall_msg = tk.StringVar()
-        ttk.Label(c, textvariable=self.dumpall_msg, wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
-        ttk.Label(c, text=tr("l.texpack.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
+        if self.experimental:
+            o, c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
+            o.pack(fill="x", pady=(12, 0), padx=(0, 4))
+            ttk.Label(c, text=tr("l.texpack"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
+            self._browse_row(c, "texpack", self.pick_texpack)
+            row = ttk.Frame(c)                                     # the full dump from the disc files (tools/dump_all_textures.py)
+            row.pack(fill="x", pady=(8, 0))
+            self.dumpall_btn = ttk.Button(row, text=tr("b.dumpall"), command=self.dump_all_textures)
+            self.dumpall_btn.pack(side="left")
+            self.dumpall_bar = ttk.Progressbar(row, mode="determinate", maximum=100, length=200)
+            self.dumpall_bar.pack(side="left", padx=(10, 0))
+            self.dumpall_open = ttk.Button(row, text=tr("b.openfolder"), command=self.open_texture_dump)
+            self.dumpall_msg = tk.StringVar()
+            ttk.Label(c, textvariable=self.dumpall_msg, wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
+            ttk.Label(c, text=tr("l.texpack.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
         o, c = self.card(f, tr("c.mods"))
         o.pack(fill="x", pady=(12, 0), padx=(0, 4))
         ttk.Label(c, text=tr("l.modshelp"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(0, 8))
@@ -1096,7 +1106,7 @@ class App:
                "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9") else "4:3"]
         if s.get("renderer") != "soft" and s.get("internal_res", 1) in (2, 3, 4):
             cmd += ["--internal-res", str(s["internal_res"])]
-        if s.get("renderer") != "soft" and s.get("fps60"):
+        if s.get("renderer") != "soft" and s.get("fps60") and s.get("experimental"):
             cmd += ["--fps60"]
         if s.get("lang"):
             cmd += ["--lang", str(s["lang"])]
@@ -1112,7 +1122,7 @@ class App:
             self.gfx_note = "yes (%s)" % gfx
         if s.get("savedir"):
             cmd += ["--save-dir", s["savedir"]]
-        if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft":
+        if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft" and s.get("experimental"):
             cmd += ["--texture-pack", s["texpack"]]
         if s.get("title_bg") and s.get("aspect") in ("16:9", "21:9", "32:9"):
             cmd += ["--title-bg", s["title_bg"]]
