@@ -352,7 +352,7 @@ the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.
 
 **Linux binaries** (`dist/linux/`, built by the same workflows on `ubuntu-24.04`, same data policy: nothing of the game inside, except that
 `tombi-port` embeds the MAIN0/X000 bytes exactly like `tombi-port.exe`): `tombi-port` (launcher with the game `tombi-pc` and a bundled
-32-bit `libSDL2-2.0.so.0` found through rpath `$ORIGIN`), `tombi-text`, `tombi-gfx`, `tombi-assets` (PyInstaller one-file; text/gfx bundle
+32-bit `libSDL2-2.0.so.0` found through rpath `$ORIGIN`; Ubuntu's build links ALSA/PulseAudio/X11 directly, so the 32-bit SDL2 package below is still needed), `tombi-text`, `tombi-gfx`, `tombi-assets` (PyInstaller one-file; text/gfx bundle
 mkpsxiso/dumpsxiso built from source). `chmod +x` them after downloading. The game `tombi-pc` is an **i386** program (port2 builds with
 `-m32`), so a 64-bit distro needs the 32-bit runtime: on Debian/Ubuntu `sudo dpkg --add-architecture i386 && sudo apt install libc6:i386
 libsdl2-2.0-0:i386` (the latter pulls the 32-bit X11/Wayland/GL libraries SDL2 loads at run time); Fedora: `glibc.i686 SDL2.i686`.

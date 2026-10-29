@@ -251,7 +251,7 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y libc6:i386
+          sudo apt-get install -y libc6:i386 libsdl2-2.0-0:i386   # (Ubuntu's libSDL2 links ALSA/Pulse/X11 directly: the user needs this too, README)
           chmod +x build/linux-bin/tombi-pc
           build/linux-bin/tombi-pc --headless --test-null
           python -m pip install pyinstaller pillow
