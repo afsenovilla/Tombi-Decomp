@@ -815,7 +815,8 @@ u32 SpuClearReverbWorkArea(int mode) { LOCK(); memset(rev_buf, 0, sizeof rev_buf
 /* initialisation the game's SoundInit runs (libsnd / libspu internals that have nothing to set up here) */
 void _SsInit(void) {}
 void SpuInitHot(void) {}
-void SsStart(void) {}                              /* 8006eed8 (was named SpuInitHot by Ghidra) */
+void SsStart(void) {}
+void SetFogNear(long a, long h) {}  /* 800635e8: depth cueing, which the GTE shim does not model */
 void _SpuInit(int hot) {}
 void SpuQuit(void) {}
 void SsSetTableSize(void *table, short s_max, short t_max) {}
