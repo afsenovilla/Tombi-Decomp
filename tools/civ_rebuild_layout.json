@@ -1335,5 +1335,158 @@
     }
    ]
   }
- }
+ },
+ "interiors": {
+  "17": [
+   {
+    "house": 1,
+    "piece": [
+     "A08000",
+     128,
+     5,
+     75,
+     138
+    ],
+    "conf": "plausible",
+    "why": "H1 is the dome (93x133 px). This is the tall iron room with the copper pipe and round porthole (75x138), the only iron interior as tall as the dome; AREA18's page repeats it (A08600 13). Its resident (#5) has no dialogue"
+   },
+   {
+    "house": 2,
+    "piece": [
+     "A08600",
+     208,
+     13,
+     64,
+     114
+    ],
+    "conf": "guess",
+    "why": "H2 (126x140, 'iron is sturdy' then 'you fixed the generator'): an iron room with a cabinet and stove that exists only on the AREA18 page; no other iron room is left for it"
+   },
+   {
+    "house": 3,
+    "piece": [
+     "A08000",
+     305,
+     82,
+     83,
+     116
+    ],
+    "conf": "plausible",
+    "why": "H3 ('the lift used to run on machinery'): the room whose chain runs up the wall to a pulley with a counterweight, i.e. a lift crank hut (Folkin's notes: Iron Town has crank huts for the lifts)"
+   },
+   {
+    "house": 4,
+    "piece": [
+     "A08000",
+     208,
+     0,
+     98,
+     90
+    ],
+    "conf": "guess",
+    "why": "H4 (143x122, 'good material! wait a moment'): a workroom with a stool, a lamp and a coal basket, fitting a maker"
+   },
+   {
+    "house": 5,
+    "piece": [
+     "A08000",
+     175,
+     177,
+     143,
+     79
+    ],
+    "conf": "plausible",
+    "why": "H5, the smith who gives the iron gear: the widest iron room (143 px vs the 151 px rectangle), with a chain hoist and a hexagonal coal brazier, read as a forge"
+   }
+  ],
+  "11": [
+   {
+    "house": 1,
+    "piece": [
+     "A06100",
+     272,
+     0,
+     110,
+     143
+    ],
+    "conf": "plausible",
+    "why": "H1, the two factory workers ('now I can make something really interesting'): the log workshop with tools, a pot and stacked logs"
+   },
+   {
+    "house": 2,
+    "piece": [
+     "A06100",
+     131,
+     150,
+     124,
+     105
+    ],
+    "conf": "guess",
+    "why": "H2 ('this machine is iron, I could use it'): the remaining wooden room (round table on a green rug); its footprint (124x105) is closest to H2 (111x101)"
+   },
+   {
+    "house": 3,
+    "piece": [
+     "A06100",
+     131,
+     0,
+     140,
+     150
+    ],
+    "conf": "plausible",
+    "why": "H3, by resident #4 who says 'a fortune-teller lives in this hut': the octagonal room with a 'ZZZ' sign and a plant on a table, the most ornate wooden room; its width (140) matches H3's (139). AREA18's page repeats it (A08600 15). The sitting resident #12 is in this house"
+   }
+  ],
+  "16": [
+   {
+    "house": 1,
+    "piece": [
+     "A07600",
+     385,
+     100,
+     188,
+     155
+    ],
+    "conf": "plausible",
+    "why": "H1, the largest house (124x135), where the strongman lives (#4: the gear and the generator): the largest stone room (chair, teal cabinet, stairs)"
+   },
+   {
+    "house": 2,
+    "piece": [
+     "A07600",
+     129,
+     0,
+     166,
+     197
+    ],
+    "conf": "guess",
+    "why": "H2 (75x79, #12 with no dialogue): the remaining stone room (teal stool and table); it is far bigger than the rectangle, so it is drawn cropped"
+   },
+   {
+    "house": 3,
+    "piece": [
+     "A07600",
+     280,
+     154,
+     104,
+     101
+    ],
+    "conf": "plausible",
+    "why": "H3, the top-right house: the teal room with a wooden inner door, matching Folkin's 'locked closet in the top-right house'"
+   },
+   {
+    "house": 4,
+    "piece": [
+     "A07600",
+     129,
+     175,
+     151,
+     80
+    ],
+    "conf": "plausible",
+    "why": "H4, the craftsman ('I want to make something'): the room with shelves, jugs and a book, a workshop"
+   }
+  ]
+ },
+ "_doc_interiors": "interiors: town -> per house (1-based TOPDOWN_TRIGGER_RECT_LISTS index) the page rectangle of the matched room cut-out, a confidence (strong / plausible / guess) and the reasons. All matches are our guesses."
 }

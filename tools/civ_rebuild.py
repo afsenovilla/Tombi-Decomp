@@ -501,7 +501,56 @@ def overlay(area, T_, rgb):
     return im
 
 
-def build(area, L, refs, out, use_fmv=True, preview=None):
+def render_interiors(area, L, refs, T_, rgb, out, cache):
+    """Interior view (each house's roof gone and its matched room drawn centred in the trigger rectangle, clipped to
+    it, as when Tomba is inside; the residents with room n are marked) and a contact sheet (exterior | interior)."""
+    os.makedirs(out, exist_ok=True)
+    view = Image.fromarray(rgb).convert("RGB")
+    sheet_rows = []
+    rects = T.trigger_rects(area)
+    f = font(12)
+    for it in L.get("interiors", {}).get(str(area), []):
+        pn, sx, sy, w, h = it["piece"]
+        pal, _, _ = derive_clut(pn, L, refs, cache)
+        P = page(pn)[sy:sy + h, sx:sx + w]
+        room = Image.fromarray(pal[P]).convert("RGBA")
+        room.putalpha(Image.fromarray(((P > 0) * 255).astype(np.uint8)))
+        x0, y0, x1, y1 = world_rect_px(rects[it["house"] - 1])
+        ext = view.crop((x0 - 16, y0 - 16, x1 + 16, y1 + 16))
+        box = Image.new("RGBA", (x1 - x0 + 1, y1 - y0 + 1), (0, 0, 0, 255))
+        box.alpha_composite(room, ((box.width - w) // 2, (box.height - h) // 2)) if w <= box.width and h <= box.height else \
+            box.alpha_composite(room.crop(((w - box.width) // 2 if w > box.width else 0, (h - box.height) // 2 if h > box.height else 0,
+                                           (w - box.width) // 2 + box.width if w > box.width else w,
+                                           (h - box.height) // 2 + box.height if h > box.height else h)),
+                                (max(0, (box.width - w) // 2), max(0, (box.height - h) // 2)))
+        sheet_rows.append((it, ext, room))
+        view.paste(box.convert("RGB"), (x0, y0))
+    dr = ImageDraw.Draw(view)
+    for i, r in enumerate(rects):
+        x0, y0, x1, y1 = world_rect_px(r)
+        dr.rectangle([x0, y0, x1, y1], outline=(80, 160, 255), width=2)
+        dr.text((max(2, x0 + 3), y0 + 2), "H%d" % (i + 1), fill=(80, 160, 255), font=f, stroke_width=2, stroke_fill=(0, 0, 0))
+    actors, _ = T.npc_set(NPC_VAR[area])
+    for n, a in enumerate(actors, 1):
+        if a["room"]:
+            x, y = T.world_to_px(a["x"], a["y"])
+            dr.ellipse([x - 5, y - 5, x + 5, y + 5], fill=(255, 0, 255), outline=(0, 0, 0))
+            dr.text((x + 7, y - 7), "%d" % n, fill=(255, 255, 255), font=f, stroke_width=2, stroke_fill=(0, 0, 0))
+    view.save(os.path.join(out, "a%02d_interior_view.png" % area))
+    if sheet_rows:
+        W = max(e.width + r.width for _, e, r in sheet_rows) + 60
+        H = sum(max(e.height, r.height) + 70 for _, e, r in sheet_rows)
+        S = Image.new("RGB", (max(W, 700), H), (30, 30, 30)); d = ImageDraw.Draw(S); y = 0
+        for it, e, r in sheet_rows:
+            d.text((8, y + 4), "%s H%d -> %s %s  [%s]  (reconstruction, our guess)" % (T_["name"], it["house"], it["piece"][0],
+                   tuple(it["piece"][1:]), it["conf"]), fill=(255, 255, 255), font=f)
+            d.text((8, y + 22), it["why"][:150], fill=(190, 190, 190), font=font(10))
+            S.paste(e, (8, y + 44)); S.paste(r, (e.width + 40, y + 44), r)
+            y += max(e.height, r.height) + 70
+        S.save(os.path.join(out, "a%02d_interiors_sheet.png" % area))
+
+
+def build(area, L, refs, out, use_fmv=True, preview=None, interiors=None):
     T_ = L["towns"][str(area)]
     cache = os.path.join(out, "fmv")
     pal, psrc, stats = derive_clut(T_["page"], L, refs, cache)
@@ -529,6 +578,8 @@ def build(area, L, refs, out, use_fmv=True, preview=None):
                                                                    (("ground", 1), ("fmv", 2), ("cutout", 3), ("fmv_stamp", 4))},
                warnings=warn, files=["map8F.tim", "map8E.bin", "picture.png", "cells.png", "preview.png", "source.png"])
     json.dump(man, open(os.path.join(d, "manifest.json"), "w"), indent=1)
+    if interiors and use_fmv:
+        render_interiors(area, L, refs, T_, rgb, interiors, cache)
     if preview:
         os.makedirs(preview, exist_ok=True)
         tag = "a%02d%s" % (area, "" if use_fmv else "_nofmv")
@@ -581,6 +632,7 @@ def main():
                     "(125.png = A08000, 127.png = A08600, 128.png = A06100); same as three --ref")
     ap.add_argument("--community-cluts", metavar="DIR", help="the community clutgen folder (GGDdefault.act, CLUT*.png, "
                     "PHOT*.png): its index colours come first ('community FMV-derived CLUT (clutgen)')")
+    ap.add_argument("--interiors", metavar="OUT", help="also render the interior view and the house/interior sheet to OUT")
     ap.add_argument("--pages", metavar="OUT", help="only render the scenery pages with their CLUTs to OUT")
     ap.add_argument("--no-fmv", action="store_true", help="cut-outs and ground only, no FMV mosaic underlay")
     ap.add_argument("--both", action="store_true", help="build with and without the FMV underlay")
@@ -599,7 +651,7 @@ def main():
         return render_pages(L, refs, a.pages, os.path.join(a.out, "fmv"))
     for area in a.area or (17, 11, 16):
         for fmv in ((True, False) if a.both else (not a.no_fmv,)):
-            build(area, L, refs, a.out, fmv, a.preview)
+            build(area, L, refs, a.out, fmv, a.preview, a.interiors)
 
 
 if __name__ == "__main__":
