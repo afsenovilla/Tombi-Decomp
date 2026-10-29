@@ -452,6 +452,8 @@ def setup_style(root):
     st.configure("Side.TFrame", background=C_SIDE)
     st.configure("TLabel", background=C_CARD)
     st.configure("Muted.TLabel", foreground=C_MUTED)
+    st.configure("Help.TLabel", foreground=C_ACCENT, font=(fam, 13, "bold"))     # the small circled-i info icon
+    st.map("Help.TLabel", foreground=[("active", C_ACCENT_HI)])
     st.configure("Head.TLabel", font=(fam, 10, "bold"))
     st.configure("Title.TLabel", background=C_BG, font=(fam, 18, "bold"))
     st.configure("Bg.TLabel", background=C_BG, foreground=C_MUTED)
@@ -887,8 +889,9 @@ class App:
         row = ttk.Frame(c)                                     # --cut-content (port/fixes.txt)
         row.pack(anchor="w", pady=(10, 0))
         ttk.Checkbutton(row, text=tr("l.cutcontent"), variable=self.var("cut_content", tk.BooleanVar, False)).pack(side="left")
-        ttk.Button(row, text="(i)", width=3,
-                   command=lambda: messagebox.showinfo(tr("l.cutcontent"), tr("i.cutcontent"))).pack(side="left", padx=(6, 0))
+        info = ttk.Label(row, text="\u24d8", style="Help.TLabel", cursor="hand2")   # circled i: click for the explanation
+        info.bind("<Button-1>", lambda e: messagebox.showinfo(tr("l.cutcontent"), tr("i.cutcontent")))
+        info.pack(side="left", padx=(6, 0))
         ttk.Label(c, text=tr("l.earlytitle"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(8, 4))
         self._browse_row(c, "early_title", self.pick_early_title)            # --early-title (port2/runtime/titlebg.c)
         if self.experimental:
