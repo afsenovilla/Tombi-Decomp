@@ -63,3 +63,25 @@ logo.
 tombi2 --data data --cut-content [--early-title /path/to/prepre8_extract]
 python3 -I tools/prepre8.py extract PREPRE8.bin /path/to/prepre8_extract   # once, from your own disc
 ```
+
+## Event icons (the community "item icon" sheet)
+
+The community sheet of icons is the **event list** page, not the inventory. `tools/event_icons.py` (list / sheet / compare) reads it from all six discs.
+- **Icon of event k:** SPR frame `*ICONS[k]` (PAL D0SPSUB `D_800FE974`, 192 events), taken from the sub-screen sprite table (kind 0x39: PAL `AREAnn/A1nn.GAM`, 267 frames; USA/JP/beta inside `AREAnn/A003.GAM`). Each icon is one 24x16 part of the 4 bpp page at VRAM (256,0), which is PAL `SYSTEM/A00300.000` words 128..191 (USA/JP/beta `SYSTEM/A00014.000`).
+- **CLUT:** column x=320 of the 48x31 block that D0SPSUB uploads to (288,480) (file +0x98B8). `subScreenDrawEventIcons` forces 8 CLUTs.
+- **Menu order:** the menu shows only the 130 events in `SUBSCREEN_EVENT_ORDER` (value = event+1), and only after they are completed.
+- **Item icons** are a separate page: VRAM (192,0) = A00300 words 64..127, cell `n%15*16+8, n/15*16+8`, CLUT row `ITEM_ICON_CLUTS[n]` (0x80109C88) at x=304. Cells 160-164 are empty.
+
+**PAL/USA/JP/beta have the same 166 icon frames** (JP numbers them 17 lower). On PAL, 40 frames are never shown; the uv/CLUT of each is in `event_icons.py list pal`:
+- **No event points at them (16):** 116 bell+key, 127 pig snout, 129 lightning, 133 flower, 137 stone gate, 140 key+red blob, 156 pink pig, 168 blue orb, 173 chest, 196 Tomba in water, 198 black eyes, 248 necklace. Four of them reuse the pixels of another frame with a new CLUT: 253 (115, CLUT row 495, the grey "rusty steel car"), 255 (139, grey slab), 266 (210, green hourglass), 202/213.
+- **Event not in the menu order:** 107 (ev 6, Big Puddle), 115 (ev 18), 139 (ev 45 AP slot machine), 159 (ev 94), 172 (ev 32 trumpets), 183 (ev 52), 192 (ev 59), 193 (ev 184), 194 (ev 61), 197 (ev 67), 199 (ev 74 electric eel), 200 (ev 75 footprint), 201 (ev 76 Black Water bucket), 203 (ev 186), 205 (ev 143), 209 (ev 100 Iron Keyhole), 210 (ev 98), 213 (ev 96, orange gear), 214 (ev 97), 216 (ev 99), 226 (ev 140, the three sisters), 227 (ev 89 green fortune teller), 230 (ev 95), 249 (ev 122), 253 (ev 83 Rusty Steel Car).
+- **In the order but never awarded:** 202, the grey gear (ev 77 "The Civilization Machine").
+
+**Civilization-related icons:** gears 202 (ev 77) and 213 (ev 96); Iron Keyhole 209 (ev 100); Rusty Steel Car 253 (ev 83); Black Water 201 (ev 76); "Where are the materials?" 216 (ev 99). The bomb icon is used: frame 211 belongs to retail event 106.
+
+**The community "Unused" row (22 icons):** every icon in it is in the 40 frames above, except the first one, the red-jewel ring. That ring is frame 101, the dummy icon, which retail event 0 (Grandpa's Bracelet) uses. **New, not in that row:** 107, 115, 139, 140, 159, 172, 173, 183, 192-194, 197, 199, 202, 203, 205, 210, 213, 214, 216, 230.
+
+**Demo exclusive** (pixel data that is not on the retail page):
+- **SLPM-80165** (page `SYSTEM/A00012.000`, CLUTs from `DSPCLUT.TIM` column 320): frames 79 puddle (ev 6), 87 axe (ev 18), 110 red-hat dwarf (ev 44), 111 slot machine (ev 45), 112 "II"+bowl (ev 60), 136 pig (ev 167), 144 coin (ev 32), 151 jar (ev 49).
+- **PrePre8** (`SYSTEM/SYS008.000`, sprites in `AREA00/DATA000.GAM`, CLUT `CLUT00.GAM` x=608): 59 puddle (ev 6), 67 axe (ev 18), 72 green-hat dwarf (ev 14).
+- **Retail:** keeps the event ids. Events 6, 18, 32, 45 and 60 got new, unshown art. Events 44, 49, 167 and 14 are used in retail with a different icon.

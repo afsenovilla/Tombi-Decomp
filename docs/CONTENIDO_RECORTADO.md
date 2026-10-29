@@ -64,3 +64,32 @@ bajo el logo final.
 tombi2 --data data --cut-content [--early-title /ruta/a/extraccion_prepre8]
 python3 -I tools/prepre8.py extract PREPRE8.bin /ruta/a/extraccion_prepre8   # una vez, desde tu propio disco
 ```
+
+## Iconos de eventos (la hoja comunitaria de "iconos de objetos")
+
+La hoja comunitaria corresponde a la **página de la lista de eventos**, no al inventario. Se analiza con `tools/event_icons.py`; los detalles están en CUT_CONTENT.md.
+- **Página:** VRAM (256,0), que en PAL es `A00300.000`, palabras 128..191.
+- **Icono de cada evento:** `D_800FE974[k]`, que remite a un fotograma de la tabla de sprites kind 0x39.
+- **CLUT:** columna 320 del bloque de D0SPSUB (+0x98B8).
+- **Inventario:** usa otra página, VRAM (192,0), con `ITEM_ICON_CLUTS` en x=304.
+
+**PAL, USA, JP y beta tienen los mismos 166 fotogramas.** En PAL nunca se muestran 40:
+- **Sin evento:** 16 fotogramas.
+- **Evento fuera del orden del menú:** 23.
+- **Nunca otorgado:** el 202, el engranaje del evento 77 "La máquina de la civilización".
+
+**Relacionados con Civilización:**
+- engranajes 202 (ev 77) y 213 (ev 96);
+- cerradura de hierro 209 (ev 100);
+- coche de acero oxidado 253 (ev 83);
+- agua negra 201 (ev 76);
+- materiales 216 (ev 99).
+
+La bomba (211, ev 106) sí se usa.
+
+**La fila "Unused" de la comunidad (22 iconos):** todos están entre esos 40, salvo el primero, el anillo rojo. Ese es el fotograma 101, el icono comodín, que usa el evento 0 (Pulsera del abuelo). **Faltan en esa fila:** 107, 115, 139, 140, 159, 172, 173, 183, 192-194, 197, 199, 202, 203, 205, 210, 213, 214, 216, 230.
+
+**Exclusivos de las demos:**
+- **SLPM-80165:** fotogramas 79 charco, 87 hacha, 110 enano gorro rojo, 111 tragaperras, 112 "II"+cuenco, 136 cerdo, 144 moneda, 151 tarro.
+- **PrePre8:** 59 charco, 67 hacha, 72 enano gorro verde.
+- **Retail:** conserva los ids de evento, con otros iconos o sin mostrarlos.
