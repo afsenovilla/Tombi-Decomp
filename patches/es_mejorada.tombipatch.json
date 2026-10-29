@@ -125,6 +125,7 @@
   },
   "SYSTEM/D5SPSUB2.BIN": {
    "messages": {
+    "7": "   ¿Quieres\n sobrescribir? \n \n    Sí   No\n",
     "11": "Elige un archivo\n",
     "13": "Elige un archivo\n(sobrescribir)\n",
     "14": "No hay partidas guardadas\n",
