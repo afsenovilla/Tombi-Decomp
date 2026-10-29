@@ -220,3 +220,10 @@ int port_window_poll_pad(unsigned short *out) {
     seen_since = 0;
     return 1;
 }
+
+/* --fps60: the display's refresh rate (Hz), 0 = unknown (no window, or the driver does not say) */
+int port_window_refresh(void) {
+    SDL_DisplayMode m;
+    if (!win || win_hidden || SDL_GetWindowDisplayMode(win, &m) < 0) return 0;
+    return m.refresh_rate > 0 && m.refresh_rate <= 360 ? m.refresh_rate : 0;
+}
