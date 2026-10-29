@@ -112,7 +112,10 @@ static void port_fit_box(O *o)
         if (r > right) right = r;
     }
     need = right + 8;
-    if (need <= FC2 || need > 0x130) return;   /* 0x130: never past the 320-pixel screen */
+    /* widen when the text does not fit; with --lang 5 (translated texts, verb-first popups) also shrink to the text,
+       so "Usas Cubo de agua" does not keep the original's spare width */
+    { extern int port_lang;
+      if (need == FC2 || need > 0x130 || (need < FC2 && port_lang != 5)) return; }   /* 0x130: never past the 320-pixel screen */
     for (i = 0; i < n; i++)
         if (MESSAGE_GLYPHS[FCA][i].id & 0x4000) MESSAGE_GLYPHS[FCA][i].x += need - FC2;
     FBE += ((unsigned short)FC2 >> 1) - ((unsigned short)need >> 1);
