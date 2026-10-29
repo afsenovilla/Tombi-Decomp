@@ -89,6 +89,27 @@ nibble into a slot table indexed by the low nibble: 0x2x -> 0x1F800150, 0x3x -> 
 has no room for the PAL 0x3B sprite tables (0x39 itself shares the 0x41 slot, read from the slot arithmetic only).
 No TIM/CLUT page holds a top-down or isometric map: the pages are the village, interior and HUD art listed above.
 
+## Rooms, exits and other leads (2026-10-29)
+
+- **Room table**: `D_800A1AA4[area]` -> six u16 per room (area 0 = 1,1,1,2,1,1; area 1 = 1,1,1,1,1,4), copied to
+  `D_800E2B44` before the loader `func_80023FCC` runs. Area 0 room 3 is the only room flagged 2: the 2D room (the
+  elder's house over `TIM007`, collision `DATA002`). Area 1 room 5 is the only room flagged 4.
+- **Load lists**: `D_800B03D8` holds 7 list pointers: 0 = common (CLUT, TIM000-002, banks, PLAYER.WPP, DATA000),
+  1 = DATA001 + TIM003/004, 2 = DATA001 + TIM005/006, 3 = TIM007-009 + DATA002 (the 2D interior), 4 = DATA003,
+  5 = TIM010 + DATA004, 6 = empty. `func_80023FCC(list, ...)` loads one through `func_800240BC`.
+- **Room entry and exit**: `D_800A273C[area][room]` -> 16-byte entry records indexed by `D_800DE0FA`, read by
+  `func_8002816C` (x, y, mode, ...). Mode 2 means "came through a door"; area 0 room 3's first record is mode 2.
+  The next area/room/entry (`D_800DE20C`/`D_800DE20E`/`D_800DE218`) are set by `func_8002816C` and by
+  `func_80034C34` (object type in the table at 0x800A2760), which hard-codes area 0, room 2, entry 1. That is the
+  elder's-house exit back to the village (from the code only; not checked in an emulator).
+- **Dialogue text**: still not found. The room GAMs carry only models, collision and object tables (kinds 0x70,
+  0x80-0x86), the DATA000 0xB0 chunk is the `pQES` sequence, and no other chunk is text. The demo may have no
+  dialogue beyond the pre-rendered event titles and menu art.
+- **Grey bird**: not identified. The object type table is `D_800A7364` (31 entries, 0x80036FA4 = empty). The only
+  handler that reads the 0x39/0x41 sprite slot (0x1F8001BC) is type 15, `func_8003D40C` (uses sine motion and
+  `isObjectInView`), so it is the best candidate, but this is unconfirmed.
+- **Old event titles**: the code that draws the TIM000 title strip has not been traced.
+
 ## Debug features
 
 - 0x8008299C is NOT a mode dispatcher: it is the unlayered-object spawner. It walks the per-room list
