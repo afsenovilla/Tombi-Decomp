@@ -1979,7 +1979,7 @@
    "219": "{BOX 312 55}\n{VOICE 6 0}{MOVE 0 0}He venido a por Lágrimas de flor.{NL}\nLas necesito para que vuelva{NL}\na funcionar la Fuente de la caridad.{C053}{WAIT}{CLEAR}\nEl problema es que no sé cómo{NL}\nconseguir las {COLOR 1}Lágrimas de flor{COLOR 0}...{WAIT}{CLEAR}\n",
    "220": "{BOX 272 42}\n{VOICE 6 0}{MOVE 0 0}Quizá necesite el Tarro de{NL}\nlágrimas del que todos hablan...{WAIT}{CLEAR}\n",
    "221": "{BOX 296 55}\n{MOVE 0 0}Me voy al Bosque de todo principio,{NL}\nasí que el barco no saldrá{NL}\nhasta dentro de un rato.{WAIT}{CLEAR}\n",
-   "222": "{BOX 248 42}\n{VOICE 6 0}{MOVE 0 0}¡Hola! ¡Ja, ja, ja!{NL}\nVolvemos a vernos.{C053}{WAIT}{CLEAR}\n¿Quieres dar una vuelta en{NL}\nmi barco?{C053}{WAIT}{CLEAR}\nVale, pero voy muy liado,{NL}\nasí que solo te llevo de ida.{WAIT}{CLEAR}\n"
+   "222": "{BOX 248 42}\n{VOICE 6 0}{MOVE 0 0}¡Hola! ¡Ja, ja, ja!{NL}\nVolvemos a vernos.{C053}{WAIT}{CLEAR}\n¿Quieres dar una vuelta en{NL}\nmi barco?{C053}{WAIT}{CLEAR}\nVale, pero estoy muy liado,{NL}\nasí que solo te llevo de ida.{WAIT}{CLEAR}\n"
   },
   "AREA10/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
