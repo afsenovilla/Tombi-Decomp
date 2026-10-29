@@ -129,7 +129,8 @@ static int gl_load(void) {
 
 /* ------------------------------------------------------------------ shaders */
 /* a_pos: VRAM pixels (continuous; polygons are shifted by half a pixel so the GL sample points are the PS1's);
-   a_col: 8-bit colour; a_uv: texels (polygons: rounded to nearest, rects: already centred); a_tex: CLUT x/y,
+   a_col: 8-bit colour; a_uv: texels, truncated like the PS1 does (+1/64 against float error): rounding to nearest made the sub-pixels
+   of the last texel column/row past its middle (internal res > 1) sample the texel beyond the sprite (stray lines); a_tex: CLUT x/y,
    texture page x + depth * 1024, texture page y */
 static const char vs_src[] =
     "uniform float u_hw;\n"
@@ -162,7 +163,7 @@ static const char fs_src[] =
     "  if (u_tex == 0) o = floor(c / 8.0);\n"
     "  else {\n"
     "    vec4 tp = floor(v_tex + 0.5);\n"
-    "    float u = twin(mod(floor(v_uv.x + 0.5), 256.0), u_tw.x, u_tw.y), v = twin(mod(floor(v_uv.y + 0.5), 256.0), u_tw.z, u_tw.w);\n"
+    "    float u = twin(mod(floor(v_uv.x + 0.015625), 256.0), u_tw.x, u_tw.y), v = twin(mod(floor(v_uv.y + 0.015625), 256.0), u_tw.z, u_tw.w);\n"
     "    float depth = floor(tp.z / 1024.0), tx = tp.z - depth * 1024.0, ty = tp.w, w;\n"
     "    if (depth < 0.5) {\n"
     "      w = vword(mod(tx + floor(u / 4.0), 1024.0), mod(ty + v, 512.0));\n"
@@ -329,8 +330,8 @@ static void gl_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, int 
     if (!gl_ready) return;
     make_key(&k, semi, tex ? (raw ? 2 : 1) : 0, raw, GL_TRIANGLES);
     int r = col & 255, g = (col >> 8) & 255, b = (col >> 16) & 255;
-    /* texel (u0 + i, v0 + j) for pixel (x + i, y + j): the uv at the pixel centres are the integers themselves */
-    float ua = u0 - 0.5f, ub = u0 + w - 0.5f, va = v0 - 0.5f, vb = v0 + h - 0.5f;
+    /* texel (u0 + i, v0 + j) for pixel (x + i, y + j): uv runs u0..u0 + w over the pixel span, truncated in the shader */
+    float ua = (float)u0, ub = (float)(u0 + w), va = (float)v0, vb = (float)(v0 + h);
     float xa = (float)x, xb = (float)(x + w), ya = (float)y, yb = (float)(y + h);
     GVtx *v = alloc_vtx(6, &k, tex);
     set_vtx(v + 0, xa, ya, r, g, b, ua, va, tex); set_vtx(v + 1, xb, ya, r, g, b, ub, va, tex); set_vtx(v + 2, xa, yb, r, g, b, ua, vb, tex);

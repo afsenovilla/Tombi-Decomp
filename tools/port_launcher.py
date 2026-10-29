@@ -919,13 +919,18 @@ class App:
             if not os.path.isfile(p):
                 messagebox.showerror(tr("title"), tr("s.patchmissing", p))
                 return False
-            if st and st.get("sha1") == DP.file_sha1(p) and X.manifest_sha1(d):
+            gfx_missing = False      # applied by an older launcher (no redraws yet), or the redraws were skipped then
+            try:
+                gfx_missing = json.load(open(p, encoding="utf-8")).get("portGfx") and not os.path.isfile(os.path.join(d, DP.GFX_TBTX))
+            except (OSError, ValueError):
+                pass
+            if st and st.get("sha1") == DP.file_sha1(p) and X.manifest_sha1(d) and not gfx_missing:
                 self.say(tr("s.patchon", st.get("title") or os.path.basename(p)), "ok")
                 return True
             self.say(tr("s.patching", os.path.basename(p)), "busy")
             self.root.update_idletasks()
             h = self.disc_hash()
-            r = DP.apply(d, p, disc_hash=h, log=lambda m: None)
+            r = DP.apply(d, p, disc_hash=h, log=lambda m: self.say(m, "bad") if "skipped" in m else None)
             chk = tr("s.patchchk.disc") if h else tr("s.patchchk.main0")
             if r["moved"]:
                 chk += "; " + tr("s.patchmoved", len(r["moved"]))
