@@ -259,6 +259,24 @@ static int usage(const char *argv0) {
 }
 int port_cut_content;     /* --cut-content: opt-in cut text recovered from the Japanese release (port/fixes.txt) */
 int port_cc_boatman = 3;  /* AREA00 boatman: extra lines (7,3..5) still to show */
+/* --cut-content berries: objects spawnItemFromEntry made (table drops) that initItemObject has not set up yet */
+static void *port_cc_drops[16];
+static unsigned port_cc_drop_n, port_cc_rng = 0x7a3b1c9u;
+void port_cc_drop_mark(void *o) { if (port_cut_content) port_cc_drops[port_cc_drop_n++ & 15] = o; }
+int port_cc_drop_take(void *o) {
+    int i;
+    for (i = 0; i < 16; i++) if (port_cc_drops[i] == o) { port_cc_drops[i] = 0; return port_cut_content; }
+    return 0;
+}
+/* fruit drop colour: 1/32 gold (b0c 3), 4/32 = 1/8 silver (b0c 2), else plain (0); own LCG, game RNG untouched */
+int port_cc_berry_roll(void) {
+    unsigned r;
+    port_cc_rng = port_cc_rng * 1103515245u + 12345u;
+    r = (port_cc_rng >> 16) & 31;
+    if (r == 0) { if (port_verbose) port_printf("[port] --cut-content: golden berry\n"); return 3; }
+    if (r <= 4) { if (port_verbose) port_printf("[port] --cut-content: silver berry\n"); return 2; }
+    return 0;
+}
 int main(int argc, char **argv) {
     extern void port_pad_script(const char *), port_poke_add(const char *), port_poke_add_every(const char *, int),
         port_menu_add(const char *), port_title_add(const char *), port_dump_ram_add(const char *);

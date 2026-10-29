@@ -376,3 +376,15 @@ src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc
 # (subtype 25, AREA03 sections 0/4, x 440) spawn a sign of subtype 27 (D_80079EBC[27] = (1,1)) 40 px to its left (read with Up there, like the post).
 src/updateL4Type1AObject.c | void updateL4Type1AObject(O *o) | extern char *allocObjectLayer4(void); static void port_cc_letter(O *o) { extern int port_verbose; extern void port_printf(const char *, ...); char *n = allocObjectLayer4(); int i; if (!n) return; for (i = 0; i < 0x20; i++) n[i] = ((char *)o)[i]; n[3] = 27; n[4] = 0; n[0x2e] = ((char *)o)[0x2e]; n[0x6b] = ((char *)o)[0x6b]; *(int *)(n + 0xa0) = *(int *)((char *)o + 0xa0); n[0xa4] = ((char *)o)[0xa4]; *(int *)(n + 0x10) -= 40 << 16; if (port_verbose) port_printf("[port] --cut-content: AREA03 letter sign spawned at x %d\n", *(short *)(n + 0x12)); } void updateL4Type1AObject(O *o)
 src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; if (port_cut_content && o->subtype == 25 && GAME[0] == 3) port_cc_letter(o); } o->box0 = 4;
+# 3) Silver / golden berries: the fruit item (item desc palette mode 1, CLUT 352,501 + (b0c & 0x7f)) has rows 503 silver and
+# 504 gold, and rewardHeart already pays 2 HP for b0c & 0x7f != 0, but no drop table ever uses b0c 2/3. Every table drop
+# (spawnItemDropsFromTable in each overlay, enemies and chests) goes through spawnItemFromEntry: remember the object it
+# made (a small ring, a list drops several), and when initItemObject sets that object up as fruit roll 1/32 gold (b0c 3), 1/8 silver (b0c 2). The 0x80 bit
+# (do not record pickup) is kept; a port-local LCG is used so the game's own RNG sequence is unchanged.
+src/spawnItemFromEntry.c | U8(o, 0xc) = U8(a, 2); | U8(o, 0xc) = U8(a, 2); { extern void port_cc_drop_mark(void *); port_cc_drop_mark(o); }
+src/initItemObject.c | switch (d->b6) { | { extern int port_cc_drop_take(void *), port_cc_berry_roll(void); if (port_cc_drop_take(o) && d->b6 == 1 && d->cx == 0x160 && d->cy == 0x1f5 && (o->b0c & 0x7f) == 0) o->b0c |= port_cc_berry_roll(); } switch (d->b6) {
+# 4) Big "?" bubble: updateItemGetIcon draws D_80079D34[b0c] over Tombi; entry 1 is a big "?" that nothing spawns
+# (spawnItemPickupObject is only ever called with 0, the "!" of a new event). Trigger: in the I0NFO2 top-down actors,
+# the repeat line (2,3) shown when Tombi talks to someone again who has nothing new to say gets the "?" over his head.
+# Purely cosmetic (the icon object only rises, waits and frees itself; it is skipped while another icon is up).
+src/i0nfo2/topdownActorOpenDialogue.c | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); { extern int port_cut_content; extern void spawnItemPickupObject(int); if (port_cut_content) spawnItemPickupObject(1); }

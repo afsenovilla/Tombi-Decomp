@@ -349,6 +349,11 @@ i18n.add({
                            "partida, al principio de la zona; se lee igual que este (arriba y hablar).\n\n"
                            "Mencionan lugares y cosas que no existen en el juego final (el País de la Civilización, esa cerradura, "
                            "la barca).\n\n"
+                           "Además, dos cosas que el juego tiene pero nunca usa:\n"
+                           "• Bayas plateadas y doradas: la fruta que sueltan enemigos y cofres sale a veces plateada (1 de cada 8) "
+                           "o dorada (1 de cada 32); dan 2 de vida en vez de 1 (y 100 AP, como la normal).\n"
+                           "• El bocadillo grande «?»: aparece sobre Tombi cuando vuelves a hablar con alguien que no tiene nada "
+                           "nuevo que decir (personajes que repiten su frase).\n\n"
                            "Los textos están en español con el parche «Traducción mejorada»; en los demás idiomas, o sin el parche, "
                            "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content)."},
     "en": {"l.cutcontent": "Enable cut content",
@@ -361,6 +366,11 @@ i18n.add({
                            "the start of the area, read the same way (Up, then talk).\n\n"
                            "They mention places and things that do not exist in the final game (the Land of Civilization, that lock, "
                            "the boat).\n\n"
+                           "Also two things the game has but never uses:\n"
+                           "• Silver and golden berries: fruit dropped by enemies and chests is sometimes silver (1 in 8) or golden "
+                           "(1 in 32); they restore 2 vitality instead of 1 (and give 100 AP like the normal one).\n"
+                           "• The big '?' bubble: it shows over Tombi when you talk again to someone who has nothing new to say "
+                           "(characters that repeat their line).\n\n"
                            "The texts are in Spanish with the 'Improved translation' patch; in the other languages, or without the "
                            "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied."},
 })
