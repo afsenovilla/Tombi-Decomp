@@ -357,7 +357,13 @@ i18n.add({
                            "La frecuencia de las bayas y el momento del «?» los hemos elegido nosotros: el juego tiene el "
                            "código y los gráficos, pero no dice cuándo debían salir.\n\n"
                            "Los textos están en español con el parche «Traducción mejorada»; en los demás idiomas, o sin el parche, "
-                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content)."},
+                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content).\n\n"
+                           "Opcional, pantalla de título temprana: si indicas la carpeta con los ficheros TOMBA del disco «PrePre Vol. 8» "
+                           "(PCPX-96084, una demo japonesa de junio de 1997; extraídos de tu propio disco con tools/prepre8.py extract), "
+                           "el paisaje del título es el de esa versión (roca-torre y río) en vez del final. Eso es arte real del juego "
+                           "de entonces; el logo, el menú y los textos siguen siendo los finales (el logo «オレっ！トンバ» de esa versión "
+                           "no se usa: no sabemos cómo se montaba). No se incluye nada de ese disco.",
+           "l.earlytitle": "Título temprano (opcional): carpeta TOMBA del disco PrePre Vol. 8 (tools/prepre8.py extract):"},
     "en": {"l.cutcontent": "Enable cut content",
            "i.cutcontent": "Text that was removed from the game and found in the Japanese release (Ore! Tomba). "
                            "Two pieces are enabled:\n\n"
@@ -376,7 +382,13 @@ i18n.add({
                            "How often the berries show up and when the '?' appears are our choice: the game has the code and the "
                            "graphics but never says when they were meant to appear.\n\n"
                            "The texts are in Spanish with the 'Improved translation' patch; in the other languages, or without the "
-                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied."},
+                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied.\n\n"
+                           "Optional early title screen: if you point to the folder with the TOMBA files of the 'PrePre Vol. 8' disc "
+                           "(PCPX-96084, a Japanese demo from June 1997; extracted from your own disc with tools/prepre8.py extract), the "
+                           "title landscape is that build's (rock spire and river) instead of the final one. That is real game art of the "
+                           "time; the logo, menu and text stay the final ones (that build's 'オレっ！トンバ' logo is not used: how it was "
+                           "laid out is unknown). Nothing from that disc is included.",
+           "l.earlytitle": "Early title (optional): TOMBA folder of the PrePre Vol. 8 disc (tools/prepre8.py extract):"},
 })
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
@@ -880,6 +892,8 @@ class App:
         ttk.Checkbutton(row, text=tr("l.cutcontent"), variable=self.var("cut_content", tk.BooleanVar, False)).pack(side="left")
         ttk.Button(row, text="(i)", width=3,
                    command=lambda: messagebox.showinfo(tr("l.cutcontent"), tr("i.cutcontent"))).pack(side="left", padx=(6, 0))
+        ttk.Label(c, text=tr("l.earlytitle"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(8, 4))
+        self._browse_row(c, "early_title", self.pick_early_title)            # --early-title (port2/runtime/titlebg.c)
         if self.experimental:
             o, c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
             o.pack(fill="x", pady=(12, 0), padx=(0, 4))
@@ -1043,6 +1057,11 @@ class App:
             messagebox.showerror(tr("title"), tr("s.patchfail", e))
             return False
 
+    def pick_early_title(self):
+        p = filedialog.askdirectory()
+        if p:
+            self.vars["early_title"].set(p)
+
     def pick_title_bg(self):
         p = filedialog.askopenfilename(filetypes=[(tr("ft.image"), "*.png *.jpg *.jpeg *.PNG *.JPG *.JPEG")])
         if p:
@@ -1163,6 +1182,8 @@ class App:
             cmd += ["--lang", str(s["lang"])]
         if s.get("cut_content"):
             cmd += ["--cut-content"]
+            if s.get("early_title"):
+                cmd += ["--early-title", s["early_title"]]
         gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
         if str(s.get("lang")) != "5":
             self.gfx_note = "no (language is not Spanish)"

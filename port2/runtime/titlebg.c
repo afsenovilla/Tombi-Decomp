@@ -35,7 +35,74 @@ static unsigned char *img; static int iw, ih, tried;
 static unsigned short *cache; static int cw, ch, cpad;
 static void *mark; static int mark_frame;
 
-void port_title_bg_mark(void *node) { if (port_title_bg_path) { mark = node; mark_frame = port_frame; } }
+/* --early-title DIR (port only, with --cut-content): the title-screen landscape of the PrePre Vol. 8 build (PCPX-96084,
+   docs/PREPRE8.md, docs/CUT_CONTENT.md) instead of the retail one.  DIR is the user's own copy of that disc's TOMBA files
+   (`tools/prepre8.py extract DISC OUT`: OUT, OUT/TOMBA or OUT/TOMBA/SYSTEM); nothing of it is shipped.  SYS005.GAM is the
+   GAM (LZ) packed 8 bpp page (768 x 256 px) whose x 0..319, y 0..239 is the landscape, SYS006.000 its 256-colour palette.
+   The retail landscape (SYSTEM A00200) is the same size and depth at VRAM (0,0) with its palette at (128,511) (measured in VRAM), so the
+   early picture is written over it (and its palette over that CLUT row) while the title is up; the retail logo, menu and
+   text are drawn over it unchanged.  Called every title frame from titleLogoDraw (via port_title_bg_mark); re-applied when
+   the title comes back (the game reloads A00200). */
+const char *port_early_title_dir;
+static unsigned char *et_page; static unsigned short et_pal[256]; static int et_tried, et_frame = -100;
+static unsigned char *et_read(const char *dir, const char *sub, const char *name, long *len) {
+    char p[1024]; FILE *f; unsigned char *b;
+    snprintf(p, sizeof p, "%s%s%s", dir, sub, name);
+    if (!(f = fopen(p, "rb"))) return 0;
+    fseek(f, 0, SEEK_END); *len = ftell(f); fseek(f, 0, SEEK_SET);
+    b = malloc(*len > 0 ? *len : 1);
+    if (b && fread(b, 1, *len, f) != (size_t)*len) { free(b); b = 0; }
+    fclose(f);
+    return b;
+}
+static int et_load(void) {
+    static const char *subs[] = {"/", "/SYSTEM/", "/TOMBA/SYSTEM/", "/fs/TOMBA/SYSTEM/"};
+    unsigned char *g = 0, *pal = 0; long gl = 0, pl = 0; unsigned i;
+    if (et_tried) return et_page != 0;
+    et_tried = 1;
+    for (i = 0; i < 4 && !g; i++) if ((g = et_read(port_early_title_dir, subs[i], "SYS005.GAM", &gl))) pal = et_read(port_early_title_dir, subs[i], "SYS006.000", &pl);
+    if (g && pal && gl > 8 && pl >= 512 && !memcmp(g, "GAM", 4)) {
+        unsigned size = g[4] | g[5] << 8 | g[6] << 16 | (unsigned)g[7] << 24, o = 0, flags = 0, left = 0;
+        long q = 8;
+        if (size == 768 * 256 && (et_page = malloc(size))) {
+            while (o < size && q < gl) {                    /* GAM: 16-bit flag words, 1 = (offset, length) copy, 0 = literal */
+                if (!left) { if (q + 2 > gl) break; flags = g[q] | g[q + 1] << 8; q += 2; left = 16; }
+                left--;
+                if (flags & 1) {
+                    unsigned off, ln;
+                    if (q + 2 > gl) break;
+                    off = g[q]; ln = g[q + 1]; q += 2;
+                    if (!off || off > o) break;
+                    while (ln-- && o < size) { et_page[o] = et_page[o - off]; o++; }
+                } else et_page[o++] = g[q++];
+                flags >>= 1;
+            }
+            if (o != size) { free(et_page); et_page = 0; }
+        }
+        for (i = 0; i < 256; i++) et_pal[i] = pal[2 * i] | pal[2 * i + 1] << 8;
+    }
+    free(g); free(pal);
+    port_printf(et_page ? "[port] --early-title: PrePre Vol. 8 title landscape loaded from %s\n"
+                        : "[port] --early-title %s: SYS005.GAM / SYS006.000 of the PrePre Vol. 8 disc not found or unreadable\n", port_early_title_dir);
+    return et_page != 0;
+}
+static void et_apply(void) {
+    typedef struct { short x, y, w, h; } R;
+    extern int LoadImage(void *, unsigned *);
+    static unsigned short px[160 * 2 * 240 / 2];
+    R r = {0, 0, 160, 240}, c = {128, 511, 256, 1};
+    int y;
+    for (y = 0; y < 240; y++) memcpy((unsigned char *)px + y * 320, et_page + y * 768, 320);
+    LoadImage(&r, (unsigned *)px);
+    LoadImage(&c, (unsigned *)et_pal);
+}
+static void port_early_title_frame(void) {
+    extern int port_cut_content;
+    if (!port_early_title_dir || !port_cut_content || !et_load()) return;
+    if (port_frame - et_frame > 2) et_apply();       /* first title frame (again after the game reloaded A00200) */
+    et_frame = port_frame;
+}
+void port_title_bg_mark(void *node) { port_early_title_frame(); if (port_title_bg_path) { mark = node; mark_frame = port_frame; } }
 /* the node marked by the title screen within the last couple of frames (0 = none); consumed by the caller */
 void *port_title_bg_take(void) {
     void *m = mark;
