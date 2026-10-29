@@ -316,11 +316,21 @@ static void submit(void);
 static int rec_on;                  /* --fps60: the decoded primitives of this vblank are recorded (fps60 below) */
 static void rec_prim(const GVtx *v, int n, const Key *k);
 static void rec_hostop(int kind, int a, int b, int c, int d, int e, int f);
-static GVtx *alloc_vtx(int n, const Key *k, const GpuTex *t) {
+/* x0..y1: the primitive's bounding box.  A textured semi-transparent batch is drawn in two passes (all its opaque
+   texels, then all its semi-transparent ones), which reorders overlapping primitives of one batch: a later sprite's
+   opaque texels ended under an earlier sprite's blended ones (the HUD "AP" label, raw semi-transparent glyphs
+   over the semi-transparent box tiles, came out washed out).  Such a batch is ended where a primitive overlaps
+   what it already holds (r[0..3]: the batch's bounding box). */
+static GVtx *alloc_vtx(int n, const Key *k, const GpuTex *t, int x0, int y0, int x1, int y1) {
     if (n_vtx + n > MAX_VTX || n_ops >= MAX_OPS) submit();
     Op *op = n_ops ? &ops[n_ops - 1] : 0;
-    if (!op || op->kind != OP_DRAW || !same_key(&op->key, k)) {
+    if (!op || op->kind != OP_DRAW || !same_key(&op->key, k)
+        || (k->tex && k->semi && x0 < op->r[2] && x1 > op->r[0] && y0 < op->r[3] && y1 > op->r[1])) {
         op = &ops[n_ops++]; op->kind = OP_DRAW; op->key = *k; op->first = n_vtx; op->count = 0; op->ns = 0;
+        op->r[0] = x0; op->r[1] = y0; op->r[2] = x1; op->r[3] = y1;
+    } else {
+        if (x0 < op->r[0]) op->r[0] = x0; if (y0 < op->r[1]) op->r[1] = y0;
+        if (x1 > op->r[2]) op->r[2] = x1; if (y1 > op->r[3]) op->r[3] = y1;
     }
     if (t) op_sample(op, t);
     op->count += n;
@@ -347,7 +357,9 @@ static void gl_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade,
     if (!gl_ready) return;
     make_key(&k, semi, tex ? (raw ? 2 : 1) : 0, raw, GL_TRIANGLES);
     if (tex && tex->rep) key_rep(&k, tex->rep);
-    GVtx *v = alloc_vtx(3, &k, tex);
+    int bx0 = a->x < b->x ? a->x : b->x, bx1 = a->x > b->x ? a->x : b->x, by0 = a->y < b->y ? a->y : b->y, by1 = a->y > b->y ? a->y : b->y;
+    if (c->x < bx0) bx0 = c->x; if (c->x > bx1) bx1 = c->x; if (c->y < by0) by0 = c->y; if (c->y > by1) by1 = c->y;
+    GVtx *v = alloc_vtx(3, &k, tex, bx0, by0, bx1 + 1, by1 + 1);
     set_vtx(v + 0, a->x + POLY_SHIFT, a->y + POLY_SHIFT, a->r, a->g, a->b, (float)a->u, (float)a->v, tex);
     set_vtx(v + 1, b->x + POLY_SHIFT, b->y + POLY_SHIFT, b->r, b->g, b->b, (float)b->u, (float)b->v, tex);
     set_vtx(v + 2, c->x + POLY_SHIFT, c->y + POLY_SHIFT, c->r, c->g, c->b, (float)c->u, (float)c->v, tex);
@@ -362,7 +374,7 @@ static void gl_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, int 
     /* texel (u0 + i, v0 + j) for pixel (x + i, y + j): uv runs u0..u0 + w over the pixel span, truncated in the shader */
     float ua = (float)u0, ub = (float)(u0 + w), va = (float)v0, vb = (float)(v0 + h);
     float xa = (float)x, xb = (float)(x + w), ya = (float)y, yb = (float)(y + h);
-    GVtx *v = alloc_vtx(6, &k, tex);
+    GVtx *v = alloc_vtx(6, &k, tex, x, y, x + w, y + h);
     set_vtx(v + 0, xa, ya, r, g, b, ua, va, tex); set_vtx(v + 1, xb, ya, r, g, b, ub, va, tex); set_vtx(v + 2, xa, yb, r, g, b, ua, vb, tex);
     set_vtx(v + 3, xb, ya, r, g, b, ub, va, tex); set_vtx(v + 4, xb, yb, r, g, b, ub, vb, tex); set_vtx(v + 5, xa, yb, r, g, b, ua, vb, tex);
     if (rec_on) rec_prim(v, 6, &k);
@@ -372,7 +384,7 @@ static void gl_line(int x0, int y0, u32 c0, int x1, int y1, u32 c1, int shade, i
     if (!gl_ready) return;
     if (!shade) c1 = c0;
     make_key(&k, semi, 0, 0, GL_LINES);
-    GVtx *v = alloc_vtx(2, &k, 0);
+    GVtx *v = alloc_vtx(2, &k, 0, 0, 0, 0, 0);
     /* a GL line leaves out its last pixel (diamond exit); the PS1 draws both ends: extend by half a pixel */
     float dx = (float)(x1 - x0), dy = (float)(y1 - y0), len = (float)SDL_sqrt(dx * dx + dy * dy);
     float ex = len > 0 ? dx / len * 0.5f : 0, ey = len > 0 ? dy / len * 0.5f : 0;
