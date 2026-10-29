@@ -378,6 +378,23 @@ static void ws_full_width_quad(Vtx *v) {
         if (v[i].x >= R && v[i].x < R + port_widescreen) v[i].x = R + port_widescreen;
     }
 }
+/* --widescreen: an untextured tile or quad that covers the whole 4:3 width (pause dimming, fades to black/white,
+   screen flashes and wipes) is stretched over the side strips too; anything narrower is left alone */
+static void ws_full_width_rect(int *x, int *w) {
+    int L = ws_ax + ws_dx, R = L + 320;
+    if (*x > L || *x + *w < R) return;
+    if (*x > L - port_widescreen) { *w += *x - (L - port_widescreen); *x = L - port_widescreen; }
+    if (*x + *w < R + port_widescreen) *w = R + port_widescreen - *x;
+}
+static void ws_full_width_quad(Vtx *v) {
+    int L = ws_ax + ws_dx, R = L + 320, i, l = 0, r = 0;
+    for (i = 0; i < 4; i++) { if (v[i].x <= L) l++; else if (v[i].x >= R) r++; else return; }
+    if (l != 2 || r != 2) return;
+    for (i = 0; i < 4; i++) {
+        if (v[i].x <= L && v[i].x > L - port_widescreen) v[i].x = L - port_widescreen;
+        if (v[i].x >= R && v[i].x < R + port_widescreen) v[i].x = R + port_widescreen;
+    }
+}
 static int unknown_cmds;
 /* executes one command; returns the number of words it used (0 = ignore the rest of the packet) */
 static int gp0(const u32 *p, int n) {
@@ -395,6 +412,7 @@ static int gp0(const u32 *p, int n) {
                 u32 uv = p[k++];
                 v[i].u = uv & 255; v[i].v = (uv >> 8) & 255;
                 if (i == 0) clut = uv >> 16;
+        if (ws_on && !tex && quad) ws_full_width_quad(v);
                 if (i == 1) tpage = uv >> 16;
             } else v[i].u = v[i].v = 0;
         }
@@ -432,6 +450,8 @@ static int gp0(const u32 *p, int n) {
                 be->line(a.x, a.y, c0, b.x, b.y, c1, shade, semi);
             a = b; c0 = c1;
             if (!poly) break;
+        if (tex) t.rep = port_texpack_on && w && h ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
+        if (ws_on && !tex && w && h) ws_full_width_rect(&a.x, &w);
         }
         return poly ? n : k;
     }
