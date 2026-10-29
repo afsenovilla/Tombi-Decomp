@@ -29,4 +29,5 @@ void *port_bios_tcb_table(void);
 extern int port_ws_cull;          /* --widescreen: extra screen columns each side the culls keep (shims/gpu.c); 0 = off */
 #define PORT_WSX(v) ((unsigned short)((v) + port_ws_cull))
 #define PORT_WSW(c) ((c) + 2 * port_ws_cull)
+extern int port_ws_backdrop_period(void *, int);   /* --widescreen: repeat a wrapping backdrop column (port2 main0_handwritten.c) */
 #endif
