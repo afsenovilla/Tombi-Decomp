@@ -388,3 +388,22 @@ src/initItemObject.c | switch (d->b6) { | { extern int port_cc_drop_take(void *)
 # the repeat line (2,3) shown when Tombi talks to someone again who has nothing new to say gets the "?" over his head.
 # Purely cosmetic (the icon object only rises, waits and frees itself; it is skipped while another icon is up).
 src/i0nfo2/topdownActorOpenDialogue.c | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); { extern int port_cut_content; extern void spawnItemPickupObject(int); if (port_cut_content) spawnItemPickupObject(1); }
+# 5) --civ-test (dev, port only): the cut top-down town AREA11 section 0 (docs/CIVILIZATION.md) has an empty load list.
+# Queue a stand-in list instead (AREA08 s0's records: its picture, cell map, sprite tables, APD and I0NFO2), so the
+# town's own code (topdownSectionStepC, NPC set 0D, topdownA11Actor*) runs over the Baccus Lake map.
+src/queueAreaSectionLists.c | queueLoadList(p[b + 1]); | { extern int port_civ_test; extern int port_civ_list(void); if (port_civ_test && a == 11 && b == 0) queueLoadList(port_civ_list()); else queueLoadList(p[b + 1]); }
+src/updateAreaScreenEffect.c | PLAYER_TYPE = 0; | PLAYER_TYPE = 0; { extern int port_civ_test; if (port_civ_test && GAME == 11 && GAME_SELECTED_SECTION == 0) { p->b = 2; goto end; } }
+src/loadSpawnPosition.c | + (u16)GAME_SELECTED_SPAWN_POINT * 8); | + (u16)GAME_SELECTED_SPAWN_POINT * 8); { extern int port_civ_test; if (port_civ_test && GAME.selectedArea == 11 && GAME.selectedSection == 0) { extern short *port_civ_row(short *); row = port_civ_row((s16*)SPAWN_TABLES[8][0]); } }
+src/initPlayerAtSpawn.c | + (u16)GAME_SELECTED_SPAWN_POINT * 8); | + (u16)GAME_SELECTED_SPAWN_POINT * 8); { extern int port_civ_test; if (port_civ_test && GAME.selectedArea == 11 && GAME.selectedSection == 0) { extern short *port_civ_row(short *); row = port_civ_row((s16*)SPAWN_TABLES[8][0]); } }
+src/spawnSectionObjectsAlt.c | n = AREA_SECTION_COUNTS[GAME]; | { extern int port_civ_test; if (port_civ_test && GAME == 11 && GAME_SELECTED_SECTION == 0) return; } n = AREA_SECTION_COUNTS[GAME];
+# The stand-in sprite tables are AREA08's: an AREA11 anim frame past the end of the table would draw a garbage part count, and the
+# props (layer 3: roofs, signs) index frames of a table that is lost, so they are not drawn at all; the residents (layer 2) are.
+src/i0nfo2/topdownDrawObjectSprite.c | *frm = *(unsigned short *)o->anim; | *frm = *(unsigned short *)o->anim; { extern int port_civ_test; if (port_civ_test && GAME[0] == 11 && ((o->category & 0x7F) == 3 || *frm >= ((unsigned short *)*(volatile int *)&o->d3c)[1] / 4)) return; }
+# ... and its camera limits / start come from AREA08 s0 too (AREA11 s0's rows describe no picture)
+src/initSectionCamera.c | p = (short *)&D_80078B7C[GAME[0]][GAME_SELECTED_SECTION]; | { extern int port_civ_test; p = (short *)&D_80078B7C[GAME[0]][GAME_SELECTED_SECTION]; if (port_civ_test && GAME[0] == 11 && GAME_SELECTED_SECTION == 0) p = (short *)&D_80078B7C[8][0]; }
+src/initSectionCamera.c | q = D_80079474[GAME[0]][GAME_SELECTED_SECTION]; | { extern int port_civ_test; q = D_80079474[GAME[0]][GAME_SELECTED_SECTION]; if (port_civ_test && GAME[0] == 11 && GAME_SELECTED_SECTION == 0) q = D_80079474[8][0]; }
+# The residents of set 0D wear the AREA08 villager (TOPDOWN_A08_ACTOR_DEFS[0]: its sprite table, page offset and anim
+# scripts are loaded); AREA11's own actor tables are lost, so its defs would index frames that do not exist here.
+src/i0nfo2/topdownA11ActorInit.c | o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0]; | { extern int port_civ_test; extern ObjInit TOPDOWN_A08_ACTOR_DEFS[]; if (port_civ_test) TOPDOWN_A11_ACTOR_DEFS[o->subtype] = TOPDOWN_A08_ACTOR_DEFS[0]; } o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0];
+# AREA11's scenery (roofs, signs: TOPDOWN_A11_SCENERY_DEFS) goes through the generic sprite list with a lost table: not drawn.
+src/i0nfo2/topdownA11SceneryHandler.c | o->visible = 1; | { extern int port_civ_test; o->visible = !port_civ_test; }

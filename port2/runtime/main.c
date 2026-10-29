@@ -257,6 +257,30 @@ static int usage(const char *argv0) {
                 "  instead (any integer scale; docs/PORT.md \"Texture packs\")\n", argv0);
     return 2;
 }
+/* --civ-test (dev): stand-in load list for the cut AREA11 section 0, a copy of SYS/LD0AR08.BIN list 1 (AREA08 s0):
+   {file id, slot, kind, addr, size, w, h, type}; file ids are global (FILE_LINKS), so they load from any area.
+   spawnSectionObjectsAlt skips the area-wide APD pass for it (fixes.txt): AREA11 would read slot 5, never loaded here */
+int port_civ_test;
+static const struct { short id; unsigned char slot, kind; unsigned addr, size; short w, h; unsigned type; } port_civ_recs[] = {
+    {699, 128, 0x10, 0, 0x40, 192, 256, 1}, {700, 128, 0x10, 0, 0x3c0, 64, 256, 1}, {701, 128, 0x10, 0, 0x1e00080, 256, 32, 1},
+    {702, 128, 0x8e, 0, 0x4008, 0, 0, 4}, {0, 255, 0x8f, 0, 0x3ba20, 0, 0, 0xffffffffu}, {0, 255, 0x62, 0, 0xca3c, 0, 0, 0xffffffffu},
+    {703, 255, 0x3a, 0, 0x11dc, 0, 0, 3}, {0, 255, 0x3b, 0, 0x2654, 0, 0, 0xffffffffu}, {0, 255, 0x3c, 0, 0x260, 0, 0, 0xffffffffu},
+    {0, 255, 0x3d, 0, 0x190, 0, 0, 0xffffffffu}, {0, 255, 0x3e, 0, 0xc7c, 0, 0, 0xffffffffu}, {0, 255, 0x80, 0, 0x80, 0, 0, 0xffffffffu},
+    {0, 255, 0x84, 0, 0x20, 0, 0, 0xffffffffu}, {704, 255, 0xf0, 0, 0x218dc, 0, 0, 2}, {-1, 0, 0, 0, 0, 0, 0, 0}};
+static unsigned char port_civ_buf[sizeof port_civ_recs];
+/* --civ-test spawn: AREA08 s0's row, optionally moved with --civ-spawn X,Y (world) to stand next to a resident */
+static int port_civ_spawn_set, port_civ_spawn_x, port_civ_spawn_y;
+static short port_civ_row_buf[4];
+short *port_civ_row(short *row) {
+    memcpy(port_civ_row_buf, row, sizeof port_civ_row_buf);
+    if (port_civ_spawn_set) { port_civ_row_buf[0] = port_civ_spawn_x; port_civ_row_buf[1] = port_civ_spawn_y; }
+    return port_civ_row_buf;
+}
+int port_civ_list(void) {
+    memcpy(port_civ_buf, port_civ_recs, sizeof port_civ_recs);
+    if (port_verbose) port_printf("[port] --civ-test: AREA11 s0 loads AREA08 s0's map, sprites and I0NFO2\n");
+    return (int)(long)port_civ_buf;
+}
 int port_cut_content;     /* --cut-content: opt-in cut text recovered from the Japanese release (port/fixes.txt) */
 int port_cc_boatman = 3;  /* AREA00 boatman: extra lines (7,3..5) still to show */
 /* --cut-content berries: objects spawnItemFromEntry made (table drops) that initItemObject has not set up yet */
@@ -288,6 +312,8 @@ int main(int argc, char **argv) {
         if (!strcmp(a, "--disc") && v) port_disc_path = argv[++i];
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
+        else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
+        else if (!strcmp(a, "--civ-spawn") && v) { port_civ_spawn_set = sscanf(argv[++i], "%d,%d", &port_civ_spawn_x, &port_civ_spawn_y) == 2; }
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);
         else if (!strcmp(a, "--headless")) headless = 1;
