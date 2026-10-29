@@ -20,7 +20,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | 1,000 / 10,000 Year Old Man | Anciano milenario / Anciano de 10.000 años | |
 | Dwarf Elder | Enano Mayor | |
 | Animal Dash | Carrera animal | antes "Huida animal" (error) |
-| Charity Statues / Flower Tower | Estatuas de caridad / Torre de flores | |
+| Charity Statues / Flower Tower | Estatuas de la caridad / Torre de flores | |
 | Ol' Pond | Viejo estanque | |
 | Yan of the Hidden Village | Yan, el de la Ciudad oculta | |
 | Village | Ciudad (nombres propios: Ciudad Baco, Ciudad de Enanos...) | oficial |
