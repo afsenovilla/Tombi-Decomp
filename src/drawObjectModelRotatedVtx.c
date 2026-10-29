@@ -1,10 +1,5 @@
 // FUNC 80057610 424 MAIN0
 // MATCHING 80057610 424
-// VERSION SLPS_01144 slps01144 8004AA4C 424
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8004AA4C_slps01144);
-#else
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct {
@@ -51,4 +46,3 @@ void drawObjectModelRotatedVtx(O *o)
     FUN_80063e6c(&D_1f800000);
     drawModelVtx(o->aa0, &CURRENT_OT[o->f + 4], o, o->aa8, o->ba4);
 }
-#endif

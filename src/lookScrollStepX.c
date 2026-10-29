@@ -1,7 +1,6 @@
 // FUNC 80028250 464 MAIN0
 // MATCHING 80028250 464
 // VERSION SLPM_80165 slpm80165 8002826C 440
-// VERSION SLPS_01144 slps01144 80029060 464
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80028250 (FUN_80028250.c): does not set flag 8 at +0x44.
 extern int VIEW_CAMERA_Y_FIX;
@@ -50,9 +49,6 @@ void FUN_80028250(unsigned char *o)
         break;
     }
 }
-#elif defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80029060_slps01144);
 #else
 extern int VIEW_CAMERA_Y_FIX;
 extern short VIEW_CAMERA_Y;

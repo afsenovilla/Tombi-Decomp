@@ -66,7 +66,7 @@ dispatcher `func_800ED0C4` (now `subScreenItemListStep`) was matched by [michael
 functions keep a generic name (`notes/unnamed.json`; empty stubs are named `stubNop<addr>` / `stubFreeObj<addr>`). Data naming is done by usage for
 MAIN0 (342 globals, `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM overlays (266 in their
 `notes/data_names_<overlay>.csv`), applied with `tools/rename_data.py`; what is still spelled by address is animation
-scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release (50.5 %) and demo
+scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release (53.8 %) and demo
 (39.6 %) are paused.
 
 ## Target
@@ -193,7 +193,7 @@ offsets and the function or splat range that produced them.
 | Version | Serial | Status |
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
-| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, 50.5 % of code (objdiff), paused, see [docs/JP.md](docs/JP.md) |
+| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, 53.8 % of code (objdiff), paused, see [docs/JP.md](docs/JP.md) |
 | Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 39.6 % of code (objdiff), paused, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 
 All versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one

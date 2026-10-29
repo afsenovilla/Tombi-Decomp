@@ -1,10 +1,5 @@
 // FUNC 80119bf4 760 X001
 // MATCHING 80119bf4 760
-// VERSION SLPS_01144 x01 80118BCC 760
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x01/nonmatchings/x01", func_80118BCC_slps01144);
-#else
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
@@ -88,4 +83,3 @@ void updateFlowerTearsThrow(TObj *o)
         break;
     }
 }
-#endif

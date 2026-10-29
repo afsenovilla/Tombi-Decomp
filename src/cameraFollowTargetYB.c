@@ -1,7 +1,6 @@
 // FUNC 8002809c 436 MAIN0
 // MATCHING 8002809c 436
 // VERSION SLPM_80165 slpm80165 800280FC 368
-// VERSION SLPS_01144 slps01144 80028EAC 436
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 8002809C (FUN_8002809c.c): no +0x44 clamp flags.
 typedef struct {
@@ -60,9 +59,6 @@ void FUN_8002809c(O *o)
 {
     inl(o);
 }
-#elif defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80028EAC_slps01144);
 #else
 typedef struct {
     char p0[0x18]; int v; char p1[0x30 - 0x1c]; short s30, s32; char p2[0x44 - 0x34]; unsigned short f44;

@@ -1,11 +1,6 @@
 // FUNC 8011dbf4 1904 X006
 // MATCHING 8011dbf4 1904
-// VERSION SLPS_01144 x06 8011CD74 1904
 // FLAGS -O2 -G0 -fno-strength-reduce
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x06/nonmatchings/x06", func_8011CD74_slps01144);
-#else
 #include "spad.h"
 /* Scaled rotated FT4 sprite strip; whole function incl. csv pieces DC0C/DC4C/DE64/E0D8/E1A4/E358. Sibling of
    drawArea6RotatedSpriteStrip (same code plus the d64>>4 scale); key: `u + C` / `w + D` operand order. */
@@ -135,4 +130,3 @@ void drawArea6ScaledRotatedSpriteStrip(TObj *o)
         base += 0x10;
     } while (--SPRITE_PART_COUNTER);
 }
-#endif

@@ -49,12 +49,28 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 50.5 % of code (785 KB of 1556 KB, 2076 of 3542 functions)**, mostly PAL C reused as is, the rest from
+**Progress: 53.8 % of code (838 KB of 1556 KB, 2183 of 3542 functions)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
-offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants). Common JP differences seen so far: player
-struct fields after about 0xD0 are 16 bytes earlier, some object structs are 8 bytes smaller, and most remaining
-functions differ by whole instructions (edited code), so the next step is manual decompilation of the near-misses
-(`fuzzy_match_percent` 90 % or more in the report).
+offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
+
+Automatic pass (2026-10): for every unmatched JP function paired with a PAL function that has C (symbol table `PAL`
+comments, or the most similar same-size PAL C function at 80 % or more masked words), the PAL C is compiled for JP and
+compared word by word with the target (relocations masked, relocation positions compared); numeric literals of the
+PAL C (struct pad sizes, raw offsets, constants) are then shifted by the deltas seen in differing immediates, greedily,
+until the object is identical, and the result is written as the `VERSION_SLPS_01144` branch. When the unchanged PAL
+C already matches, the INCLUDE_ASM branch is dropped instead. Two tool fixes came with it: the version targets
+assemble `D_1F80xxxx` scratchpad symbols as constants (build_report, like the C side), and
+`config/slpm80165/spad.txt` was regenerated (union with the old table) so the PAL scratchpad names such as
+`VIEW_CAMERA` compile to constants. Gain: 2111 -> 2183 functions (50.7 % -> 53.8 % of code).
+
+What remains, by kind (for the paired functions with PAL C):
+- about 40 that differ in size from their PAL pair (edited code, not just offsets);
+- a few where PAL C uses a literal global address (e.g. task table `0x801FD80C`) and the JP target has a relocated
+  symbol, or the other way round: they need a JP branch that names the symbol;
+- multi-function PAL files (e.g. `chainedPartFrameTo80.c`) whose JP counterpart is split differently;
+- about 145 JP functions are paired with PAL functions that have no C yet, and about 840 have no PAL pair at all
+  (edited or JP-only code, text/font system): manual decompilation of the near-misses (`fuzzy_match_percent` 90 %
+  or more) is the next step.
 
 Not linked yet: like the demo, the JP objects are compared by objdiff only; `tools/build_full.py` has no JP target.
 

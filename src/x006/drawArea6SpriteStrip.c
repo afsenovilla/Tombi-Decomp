@@ -1,11 +1,6 @@
 // FUNC 8011d1bc 804 X006
 // MATCHING 8011d1bc 804
-// VERSION SLPS_01144 x06 8011C33C 804
 // FLAGS -O2 -G0 -fno-strength-reduce
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x06/nonmatchings/x06", func_8011C33C_slps01144);
-#else
 #include "spad.h"
 /* Whole function incl. csv pieces 8011D334/8011D3EC. Debt: -fno-strength-reduce removes an extra giv. */
 #include "TOBJ.H"
@@ -108,4 +103,3 @@ void drawArea6SpriteStrip(TObj *o)
         base += 0x10;
     } while (--n);
 }
-#endif

@@ -1,7 +1,6 @@
 // FUNC 80057470 416 MAIN0
 // MATCHING 80057470 416
 // VERSION SLPM_80165 slpm80165 80046484 428
-// VERSION SLPS_01144 slps01144 8004A8AC 416
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80057470 (FUN_80057470.c): also calls func_8003F160(o, 0) at the end.
 #include "TOBJ.H"
@@ -50,9 +49,6 @@ void FUN_80057470(TObj *o)
     FUN_80023b04(o->da0, (int)&((struct { char pad[0x10]; int a[1]; } *)CURRENT_OT)->a[(signed char)o->b0f], o, o->ba4);
     func_8003F160(o, 0);
 }
-#elif defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_8004A8AC_slps01144);
 #else
 #include "TOBJ.H"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;

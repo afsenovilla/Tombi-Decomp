@@ -1,10 +1,5 @@
 // FUNC 8011c00c 2048 X014
 // MATCHING 8011c00c 2048
-// VERSION SLPS_01144 x14 8011953C 2048
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x14/nonmatchings/x14", func_8011953C_slps01144);
-#else
 #include "spad.h"
 /* Non-semitrans twin of drawRotatedSpriteKind9 (same file, scale doubled `(unsigned char)sc << 1`, code 0x2c, rgb from velX written
    as `f->r = f->g = f->b = ...` to get the b,g,r store order, call result tested per branch). See drawRotatedSpriteKind9.c for the keys. */
@@ -140,4 +135,3 @@ void drawRotatedSpriteKind10(TObj *o)
         q += 16;
     } while (--SPRITE_PART_COUNTER != 0);
 }
-#endif

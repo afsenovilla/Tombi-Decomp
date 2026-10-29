@@ -1,10 +1,5 @@
 // FUNC 8011b830 2012 X014
 // MATCHING 8011b830 2012
-// VERSION SLPS_01144 x14 80118D60 2012
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x14/nonmatchings/x14", func_80118D60_slps01144);
-#else
 #include "spad.h"
 /* Rotated/scaled FT4 sprite strip (X014 twin of drawObjectSpriteRotatedFT4; csv said 1660 B, real function 2012 B).
    Keys: per-axis scale from ba5/ba6 as `c = (signed char)o->ba5; short sc = (signed char)c; if (sc) ... (unsigned char)sc`
@@ -139,4 +134,3 @@ void drawRotatedSpriteKind9(TObj *o)
         q += 16;
     } while (--SPRITE_PART_COUNTER != 0);
 }
-#endif

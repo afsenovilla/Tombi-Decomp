@@ -1,10 +1,5 @@
 // FUNC 8011f240 1836 X009
 // MATCHING 8011f240 1836
-// VERSION SLPS_01144 x09 8011E3A8 1836
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x09/nonmatchings/x09", func_8011E3A8_slps01144);
-#else
 #include "spad.h"
 /* Rotated FT4 sprite strip (family of drawObjectSpriteRotatedFT4). All element reads go through the one pointer q: loop.c then
    combines the 7 address givs into a reduced reg based on the LAST one (q+12 = uv3), which is the game's s2;
@@ -116,4 +111,3 @@ void drawRotatedSpriteKind8(TObj *o)
         q += 16;
     } while (--SPRITE_PART_COUNTER);
 }
-#endif

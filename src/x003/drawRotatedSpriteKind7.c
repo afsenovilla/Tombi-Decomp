@@ -1,10 +1,5 @@
 // FUNC 8011ebc0 1872 X003
 // MATCHING 8011ebc0 1872
-// VERSION SLPS_01144 x03 8011DB98 1872
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x03/nonmatchings/x03", func_8011DB98_slps01144);
-#else
 #include "spad.h"
 /* X003 twin of x014/func_8011C00C (rotated sprite, no semitrans): no anim check, byte scale `s = (unsigned char)sc` (no ba7),
    C/D int (`(C + u)`, `(D + w)` operand order), code 0x2d/0x2f via `sc = 0x2d; f->code = sc;` (li v1), no rgb copy,
@@ -131,4 +126,3 @@ void drawRotatedSpriteKind7(TObj *o)
         q += 16;
     } while (--SPRITE_PART_COUNTER != 0);
 }
-#endif

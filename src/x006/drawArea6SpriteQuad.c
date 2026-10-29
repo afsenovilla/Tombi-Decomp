@@ -1,10 +1,5 @@
 // FUNC 8011cef0 716 X006
 // MATCHING 8011cef0 716
-// VERSION SLPS_01144 x06 8011C070 716
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x06/nonmatchings/x06", func_8011C070_slps01144);
-#else
 #include "spad.h"
 #include "TOBJ.H"
 
@@ -96,4 +91,3 @@ void drawArea6SpriteQuad(TObj *o)
         e++;
     } while (--n);
 }
-#endif

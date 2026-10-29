@@ -1,11 +1,6 @@
 // FUNC 8011d4e0 1812 X006
 // MATCHING 8011d4e0 1812
-// VERSION SLPS_01144 x06 8011C660 1812
 // FLAGS -O2 -G0 -fno-strength-reduce
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x06/nonmatchings/x06", func_8011C660_slps01144);
-#else
 #include "spad.h"
 /* Rotated FT4 sprite strip; whole function incl. csv pieces D5F4/D7E0/D8C4/DAE0. Built from x006 drawArea6SpriteStrip
    (same loop/OT insert, base+q pointers) and x009 func_8011F240 (rotation formulas). */
@@ -133,4 +128,3 @@ void drawArea6RotatedSpriteStrip(TObj *o)
         base += 0x10;
     } while (--SPRITE_PART_COUNTER);
 }
-#endif
