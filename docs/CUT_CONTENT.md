@@ -41,7 +41,7 @@ logo.
 | PrePre8 15 sound samples | JOCHU 1, 5, 11, 12, 19-21, 23-25, 27; S_AREA01 0, 25, 28, 29. | Easy to bank; no evidence of where they played. |
 | PrePre8 OPTION MODE / enemy viewer | 0x800854B4 (`OPTION MODE`, music/sound/CD/memory-card tests), 0x80083D88 (`enemy=%01d`), dead code in that build. | Port-only re-implementation; PAL has no such code. |
 | GoGoCart cacti / sign (AREA06) | VRAM of `A001.GAM` (577,256), (516,256), (581,348); no SPR part nor model polygon; D004.000 has 60 models and `a06AddModelsBySection` uses all 60. | New sprite parts and placement: ours. |
-| AREA17 B201 miner, AREA16 B501 big man (side view) | Texels with no SPR part. | SPR tables would have to be written by hand; animation unknown. |
+| AREA17 B201 miner, AREA16 B501 big man (side view) | Texels with no SPR part. The B201 page renders with a real palette: AREA11/CLUT02 row 36 (same row in AREA17/CLUT03, AREA17/CLUT06, AREA18/CLUT02; the Male Lumberjack Town Resident's row) colours its side-view man with a backpack exactly like TCRF's colour sprite (all 14 colours in that row; silhouette close, not pixel-exact, TCRF's frame differs). Our identification. | SPR tables would have to be written by hand; animation unknown. |
 | Small "?" bubble | SPR 0x34 f49; no script, no pointer. | Graphics only. |
 
 ## Lost

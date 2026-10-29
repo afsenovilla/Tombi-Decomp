@@ -41,7 +41,7 @@ bajo el logo final.
 | 15 sonidos de PrePre8 | JOCHU 1, 5, 11, 12, 19-21, 23-25, 27; S_AREA01 0, 25, 28, 29. | Fácil meterlos en un banco; no hay evidencia de dónde sonaban. |
 | OPTION MODE / visor de enemigos (PrePre8) | 0x800854B4 (`OPTION MODE`, pruebas de música/sonido/CD/tarjeta), 0x80083D88 (`enemy=%01d`), código muerto en esa versión. | Reimplementación solo en el port; PAL no tiene ese código. |
 | Cactus / cartel del GoGoCart (AREA06) | VRAM de `A001.GAM` (577,256), (516,256), (581,348); sin parte SPR ni polígono; D004.000 tiene 60 modelos y `a06AddModelsBySection` usa los 60. | Partes de sprite nuevas y colocación: nuestras. |
-| Minero de AREA17 B201 y grandullón de AREA16 B501 (de lado) | Texeles sin ninguna parte SPR. | Habría que escribir las tablas SPR a mano; animación desconocida. |
+| Minero de AREA17 B201 y grandullón de AREA16 B501 (de lado) | Texeles sin ninguna parte SPR. La página B201 se ve con una paleta real: AREA11/CLUT02 fila 36 (la misma fila en AREA17/CLUT03, AREA17/CLUT06 y AREA18/CLUT02; la fila del «Male Lumberjack Town Resident») colorea a su hombre de lado con mochila igual que el sprite en color de TCRF (los 14 colores están en esa fila; la silueta se parece pero no es píxel a píxel, el fotograma de TCRF es distinto). Identificación nuestra. | Habría que escribir las tablas SPR a mano; animación desconocida. |
 | Bocadillo «?» pequeño | SPR 0x34 f49; sin guion ni puntero. | Solo gráficos. |
 
 ## Perdido
