@@ -3,12 +3,14 @@
 Built from the user's own SYSTEM/A10003.GAM (the 256x256 4bpp page the TRY / AGAIN sprites are cut from, CLUT (352,509)):
 the letters A G A I N T R are cut from the original sprites and recoloured, V U E L O are drawn in the same chunky,
 hand-painted style (thick wobbly strokes supersampled 8x, palette-shaded like the originals). The result is one 116x32
-block (two lines) at VRAM (896,104) = tpage 0x0E u 0 v 104, free while the prompt shows; drawNowLoading draws it as one
-sprite (port/fixes.txt). Needs Pillow.
+block (two lines) at u 92 v 223 of the page itself (VRAM (279,479), tpage 0x14 as the originals), empty space under
+the sprites inside the page's own upload; drawNowLoading draws it as one sprite (port/fixes.txt). Needs Pillow.
 """
 import math, random, struct
 
-VRAM_X, VRAM_Y = 896, 104
+PAGE_X, PAGE_Y = 256, 256        # where the game uploads the page (tpage 0x14)
+U, V = 92, 223                   # empty in the page; row 255 (VRAM 511) is left to the CLUTs the game loads there
+VRAM_X, VRAM_Y = PAGE_X + U // 4, PAGE_Y + V
 HL = {13, 15}
 FAM = {'red': (8, 9), 'yellow': (5, 4), 'orange': (4, 14), 'pink': (1, 10), 'green': (6, 11), 'blue': (7, 12)}
 S = 8
@@ -127,6 +129,12 @@ G = {   # letter skeletons (stroke centres), box ~ w x 10
 def letter(ch, fam, seed, rot, dy, wid=3.7):
     st, w, h = G[ch]; k = 1 if ch == 'E' else .85; st = [[(x, y*k) for x, y in pl] for pl in st]; h = round(10*k)
     return colour(render(st, w, h, rot, seed, wid), fam, seed, dy)
+
+
+def key(page):
+    """the original TRY / AGAIN sprites (u 184..239, v 192..223)"""
+    from gfx_es import page_key
+    return page_key(page, 128, PAGE_X, PAGE_Y, 184, 192, 56, 32)
 
 
 def build(page):

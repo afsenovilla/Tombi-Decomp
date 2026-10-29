@@ -6,8 +6,11 @@ patch asks for it ("portGfx": "es") and the launcher passes the file with --lang
 the redraws (port/fixes.txt) only switch on when the rect is actually loaded (port_tex_patch_has), so without the file
 the original English sprites stay.
 
-Adding a redraw: a module with build(raw) -> [(x, y, w_words, h,
-words)], an entry in PARTS, and a fixes.txt rule gated on port_tex_patch_has(x, y).
+Adding a redraw: a module with build(raw) -> [(x, y, w_words, h, words)] and key(raw) -> (kx, ky, kw, kh, original words):
+a VRAM rect inside the original graphic, as the game uploads it.  The port writes a rect only right after the game uploads
+exactly those texels (the owning page) and turns it off when anything else lands there, so the redraw must lie inside
+that page's own upload (or space only that page's screen uses).  Then an entry in PARTS, and a fixes.txt rule gated on
+port_tex_patch_has(x, y).
 """
 import os, struct, sys
 
@@ -35,6 +38,20 @@ PARTS = [
 ]
 
 
+def fnv1a(data):
+    h = 2166136261
+    for c in data:
+        h = ((h ^ c) * 16777619) & 0xFFFFFFFF
+    return h
+
+
+def page_key(page, stride, vx, vy, u, v, w, h):
+    """key rect of a 4bpp page stored `stride` bytes a row and uploaded at VRAM word (vx, vy): pixels u..u+w-1, v..v+h-1
+    (u, w multiples of 4) -> (kx, ky, kw, kh, words)"""
+    words = [page[r*stride + u//2 + 2*i] | page[r*stride + u//2 + 2*i + 1] << 8 for r in range(v, v + h) for i in range(w // 4)]
+    return (vx + u//4, vy + v, w//4, h, words)
+
+
 def build(data_dir, out, log=print):
     """Writes the TBTX of every part that builds; returns the number of rects (0: nothing written)."""
     import importlib
@@ -42,14 +59,18 @@ def build(data_dir, out, log=print):
     for label, mod, src, read in PARTS:
         try:
             m = importlib.import_module("gfx_es." + mod)
-            rects += m.build(read(data_dir, src))
+            raw = read(data_dir, src)
+            k = m.key(raw)
+            rects += [r + (k,) for r in m.build(raw)]
         except Exception as e:     # Pillow missing, unexpected data...: that redraw is skipped, the port keeps the original
             log("gfx_es: %s skipped (%s)" % (label, e))
     if not rects:
         return 0
-    b = bytearray(b"TBTX" + struct.pack("<I", len(rects)))
-    for x, y, w, h, words in rects:
-        b += struct.pack("<4H", x, y, w, h) + struct.pack("<%dH" % len(words), *words)
+    b = bytearray(b"TBTK" + struct.pack("<I", len(rects)))
+    for x, y, w, h, words, (kx, ky, kw, kh, kwords) in rects:
+        assert len(kwords) == kw * kh
+        b += struct.pack("<8HI", x, y, w, h, kx, ky, kw, kh, fnv1a(struct.pack("<%dH" % len(kwords), *kwords)))
+        b += struct.pack("<%dH" % len(words), *words)
     with open(out + ".part", "wb") as f:
         f.write(b)
     os.replace(out + ".part", out)

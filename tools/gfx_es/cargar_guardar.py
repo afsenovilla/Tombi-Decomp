@@ -14,6 +14,12 @@ R = ["######..", "#######.", "##...###", "##....##", "##...###", "#######.", "##
 U = ["##....##"] * 7 + ["###..###", "########", ".######."]
 
 
+def key(page):
+    """the original SAVE / LOAD sprites (u 168..207, v 120..151) of the page uploaded at VRAM (64,0)"""
+    from gfx_es import page_key
+    return page_key(page, 384, VRAM_X, 0, 168, 120, 40, 32)
+
+
 def build(page):
     """page: SYSTEM/A00400.000 as stored (384 bytes a row). Returns [(vram_x, vram_y, w_words, h, words)]."""
     idx = lambda u, v: (page[v*384+(u >> 1)] >> (4*(u & 1))) & 15

@@ -198,6 +198,12 @@ def image(raw):
     return _render(its[::-1], OUT_W, OUT_H)
 
 
+def key(raw):
+    """the whole NOW LOADING page, uploaded as is at VRAM (0,0) (64 words x 72)"""
+    from gfx_es import page_key
+    return page_key(raw, 128, 0, 0, 0, 0, 256, 72)
+
+
 def build(raw):
     g = image(raw)
     words = []

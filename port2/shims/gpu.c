@@ -30,6 +30,12 @@ typedef struct { s16 x, y, w, h; } RECT;
 extern const char *port_drawdump_path;
 void port_drawdump(const u16 *vram, int tx, int ty, int depth, int cx, int cy, int tpage, int clut,
                    int u0, int v0, int w, int h, int sx, int sy, int sw, int sh, int semi, int kind);
+/* --dump-textures / --texture-pack (texpack.c): only called while one is on */
+extern int port_texpack_on;
+void port_texpack_write(int x, int y, int w, int h, const u16 *src);
+void port_texpack_copy(int sx, int sy, int dx, int dy, int w, int h);
+const PortTexRep *port_texpack_prim(const GpuTex *t, const GpuVtx *v, int n);
+const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int v1);
 
 static u16 vram[512][1024];
 static int gpu_prims, gpu_lists;
@@ -246,13 +252,16 @@ const GpuBackend port_gpu_soft = { "software", soft_start, soft_nop, soft_tri, s
                                    soft_nop_rect, soft_nop_rect, soft_nop, soft_present, 0 };
 
 /* ================================================================== the decoder (shared by the backends) */
+static void tex_patch_pre(int x, int y, int w, int h);
+static void tex_patch_idle(void);
 static void fill(u32 col, u32 xy, u32 wh) {
     int x = xy & 0x3F0, y = (xy >> 16) & 0x1FF, w = ((wh & 0x3FF) + 15) & ~15, h = (wh >> 16) & 0x1FF;
-    if (w && h) { be->fill(x, y, w, h, rgb24to15(col)); ws_fill(x, y, w, h, rgb24to15(col)); }
+    if (w && h) { tex_patch_pre(x, y, w, h); if (port_texpack_on) port_texpack_write(x, y, w, h, 0); be->fill(x, y, w, h, rgb24to15(col)); ws_fill(x, y, w, h, rgb24to15(col)); }
 }
 static void copy(u32 s, u32 d, u32 wh) {
     int sx = s & 1023, sy = (s >> 16) & 511, dx = d & 1023, dy = (d >> 16) & 511;
     int w = ((wh & 0xFFFF) - 1) & 1023, h = (((wh >> 16) - 1) & 511); w++; h++;
+    if (port_texpack_on) port_texpack_copy(sx, sy, dx, dy, w, h);
     be->copy(sx, sy, dx, dy, w, h);
 }
 /* the GPU drops polygons and lines larger than 1023x511 (the distance between any two vertices) */
@@ -266,6 +275,7 @@ static int too_big(const Vtx *v, int n) {
 }
 /* host-side VRAM writes (LoadImage & co.) go through here so the backend can mirror them */
 static void vram_write_rect(int x, int y, int w, int h, const u16 *s) {
+    if (port_texpack_on) port_texpack_write(x, y, w, h, s);
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) & 511][(x + i) & 1023] = *s++;
     be->vram_written(x, y, w, h);
     ws_mirror_write(x, y, w, h);
@@ -374,8 +384,8 @@ static int gp0(const u32 *p, int n) {
         if (tex) {
             set_texpage16(tpage);
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511;
+            t.rep = port_texpack_on ? port_texpack_prim(&t, v, nv) : 0;
         }
-        if (tex && raw) shade = 0;
         if (tex && port_drawdump_path) {                     /* --dump-draws (drawdump.c) */
             int u0 = 255, u1 = 0, v0 = 255, v1 = 0, x0 = 1 << 20, x1 = -(1 << 20), y0 = 1 << 20, y1 = -(1 << 20);
             for (int i = 0; i < nv; i++) {
@@ -384,6 +394,7 @@ static int gp0(const u32 *p, int n) {
             }
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, tpage, clut, u0, v0, u1 - u0 + 1, v1 - v0 + 1, x0, y0, x1 - x0, y1 - y0, semi ? 1 : 0, quad ? 1 : 0);
         }
+        if (tex && raw) shade = 0;
         if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
         if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
         return need;
@@ -419,9 +430,10 @@ static int gp0(const u32 *p, int n) {
         }
         if (size == 0) { w = p[k] & 0x3FF; h = (p[k] >> 16) & 0x1FF; k++; }
         else { w = h = size == 1 ? 1 : size == 2 ? 8 : 16; }
-        if (w && h) be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
         if (tex && port_drawdump_path && w && h)            /* --dump-draws (drawdump.c) */
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7, (p[2] >> 16) & 0xFFFF, u, v, w, h, a.x, a.y, w, h, semi ? 1 : 0, 2);
+        if (tex) t.rep = port_texpack_on && w && h ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
+        if (w && h) be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
         return need;
     }
     switch (cmd) {
@@ -439,7 +451,9 @@ static int gp0(const u32 *p, int n) {
         if (n < 3) return 0;
         int x = p[1] & 1023, y = (p[1] >> 16) & 511, w = p[2] & 0xFFFF, h = p[2] >> 16, i = 0;
         const u16 *s = (const u16 *)(p + 3); int avail = (n - 3) * 2;
+        if (w && h) tex_patch_pre(x, y, w, h);
         for (int j = 0; j < h; j++) for (int q = 0; q < w; q++, i++) if (i < avail) vram[(y + j) & 511][(x + q) & 1023] = s[i];
+        if (w && h && port_texpack_on) port_texpack_write(x, y, w, h, 0);
         if (w && h) be->vram_written(x, y, w, h);
         return n;
     }
@@ -492,12 +506,18 @@ void *GetDispEnv(void *env) { memcpy(env, cur_dispenv, sizeof cur_dispenv); retu
 
 /* --patch-tex FILE (mods: button prompts, docs/PORT.md "Mods"; Spanish redraws, tools/gfx_es): VRAM rects re-applied
    after every LoadImage that overlaps them, so a texture the game uploads (a font/HUD page) shows our pixels instead.
-   Repeatable (up to 4 files).  File: "TBTX", u32 count, then per entry u16 x, y, w, h (VRAM words) followed by w*h u16 words. */
+   Repeatable (up to 4 files).  File: "TBTX", u32 count, then per entry u16 x, y, w, h (VRAM words) followed by w*h u16 words.
+   "TBTK" (tools/gfx_es redraws): each entry also has u16 kx, ky, kw, kh and u32 hash after x, y, w, h: a key rect inside
+   the original graphic the redraw replaces and the FNV-1a (bytes, row by row) of its original texels.  Such a rect is not
+   tied to uploads: it is written only while it is being drawn, i.e. when port_tex_patch_has() (asked by the fixes.txt rule
+   that draws the redraw) finds the key in VRAM holding exactly the original texels (the owning page is resident).  What
+   it covered is saved first and put back as soon as the game writes over the rect or the key, or the rule stops asking
+   (a few frames after the screen ends), so the screens that share that VRAM (the title...) never see our pixels. */
 const char *port_patch_tex_path;
 const char *port_patch_tex_paths[4];
 int port_patch_tex_count;
-static struct { u16 x, y, w, h; const u16 *data; } tex_patches[64];
-static int n_tex_patches, tex_patch_loaded;
+static struct { u16 x, y, w, h, kx, ky, kw, kh; u32 khash; u8 keyed, resident; int used; const u16 *data; u16 *saved; } tex_patches[64];
+static int n_tex_patches, tex_patch_loaded, tex_patch_resident;
 static u8 tex_patch_buf[512 * 1024];
 static u32 tex_patch_used;
 static void tex_patch_load_file(const char *path) {
@@ -506,18 +526,29 @@ static void tex_patch_load_file(const char *path) {
     u8 *buf = tex_patch_buf + tex_patch_used;
     int n = (int)fread(buf, 1, sizeof tex_patch_buf - tex_patch_used, f), before = n_tex_patches;
     fclose(f);
-    if (n < 8 || buf[0] != 'T' || buf[1] != 'B' || buf[2] != 'T' || buf[3] != 'X') { port_printf("[gpu] %s: not a TBTX file\n", path); return; }
-    u32 count = *(u32 *)(buf + 4), off = 8;
+    int keyed = n >= 8 && !memcmp(buf, "TBTK", 4);
+    if (n < 8 || (!keyed && memcmp(buf, "TBTX", 4))) { port_printf("[gpu] %s: not a TBTX file\n", path); return; }
+    u32 count, off = 8, hdr = keyed ? 20 : 8;
+    memcpy(&count, buf + 4, 4);
     for (u32 i = 0; i < count && n_tex_patches < 64; i++) {
-        if (off + 8 > (u32)n) break;
-        u16 *h = (u16 *)(buf + off);
+        if (off + hdr > (u32)n) break;
+        u16 h[8]; u32 kh = 0;
+        memcpy(h, buf + off, keyed ? 16 : 8);
+        if (keyed) memcpy(&kh, buf + off + 16, 4);
         u32 bytes = (u32)h[2] * h[3] * 2;
-        if (off + 8 + bytes > (u32)n) break;
+        if (off + hdr + bytes > (u32)n) break;
+        if (keyed && !(tex_patches[n_tex_patches].saved = (u16 *)malloc(bytes ? bytes : 1))) break;
         tex_patches[n_tex_patches].x = h[0]; tex_patches[n_tex_patches].y = h[1];
         tex_patches[n_tex_patches].w = h[2]; tex_patches[n_tex_patches].h = h[3];
-        tex_patches[n_tex_patches].data = (const u16 *)(buf + off + 8);
+        tex_patches[n_tex_patches].keyed = (u8)keyed;
+        if (keyed) {
+            tex_patches[n_tex_patches].kx = h[4]; tex_patches[n_tex_patches].ky = h[5];
+            tex_patches[n_tex_patches].kw = h[6]; tex_patches[n_tex_patches].kh = h[7];
+            tex_patches[n_tex_patches].khash = kh;
+        }
+        tex_patches[n_tex_patches].data = (const u16 *)(buf + off + hdr);
         n_tex_patches++;
-        off += 8 + bytes;
+        off += hdr + bytes;
     }
     tex_patch_used += (off + 3) & ~3u;
     port_printf("[gpu] %s: %d texture patches\n", path, n_tex_patches - before);
@@ -526,26 +557,72 @@ static void tex_patch_load(void) {
     tex_patch_loaded = 1;
     for (int i = 0; i < port_patch_tex_count; i++) tex_patch_load_file(port_patch_tex_paths[i]);
 }
-/* 1 when a loaded --patch-tex rect starts at VRAM word (x, y): port/fixes.txt rules that draw a redrawn sprite check it,
-   so the game keeps the original sprite when the file is missing */
+static int rect_overlap(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh) {
+    return !(ax >= bx + bw || ax + aw <= bx || ay >= by + bh || ay + ah <= by);
+}
+/* a keyed rect goes: what it covered comes back */
+static void tex_patch_evict(int i) {
+    tex_patches[i].resident = 0;
+    tex_patch_resident--;
+    vram_write_rect(tex_patches[i].x, tex_patches[i].y, tex_patches[i].w, tex_patches[i].h, tex_patches[i].saved);
+}
+/* 1 when a --patch-tex rect starting at VRAM word (x, y) is loaded and in VRAM: port/fixes.txt rules that draw a redrawn
+   sprite ask it every frame they draw it, so the game keeps the original sprite otherwise.  A keyed rect is put in VRAM
+   here, only while its key holds the original texels. */
 int port_tex_patch_has(int x, int y) {
     if (!port_patch_tex_count) return 0;
     if (!tex_patch_loaded) tex_patch_load();
-    for (int i = 0; i < n_tex_patches; i++) if (tex_patches[i].x == x && tex_patches[i].y == y) return 1;
+    for (int i = 0; i < n_tex_patches; i++) {
+        if (tex_patches[i].x != x || tex_patches[i].y != y) continue;
+        if (!tex_patches[i].keyed) return 1;
+        if (!tex_patches[i].resident) {
+            int kx = tex_patches[i].kx, ky = tex_patches[i].ky, kw = tex_patches[i].kw, kh = tex_patches[i].kh;
+            int px = tex_patches[i].x, py = tex_patches[i].y, pw = tex_patches[i].w, ph = tex_patches[i].h;
+            u32 hh = 2166136261u;
+            be->vram_read(kx, ky, kw, kh);
+            for (int j = 0; j < kh; j++) for (int q = 0; q < kw; q++) {
+                u16 v = vram[(ky + j) & 511][(kx + q) & 1023];
+                hh = (hh ^ (v & 255)) * 16777619u; hh = (hh ^ (v >> 8)) * 16777619u;
+            }
+            if (hh != tex_patches[i].khash) return 0;                /* the original graphic's page is not in VRAM */
+            be->vram_read(px, py, pw, ph);
+            for (int j = 0; j < ph; j++) for (int q = 0; q < pw; q++) tex_patches[i].saved[j * pw + q] = vram[(py + j) & 511][(px + q) & 1023];
+            vram_write_rect(px, py, pw, ph, tex_patches[i].data);
+            tex_patches[i].resident = 1;
+            tex_patch_resident++;
+        }
+        tex_patches[i].used = port_frame;
+        return 1;
+    }
     return 0;
 }
+/* before the game writes VRAM (x, y, w, h) (LoadImage, fill, copy, GP0 upload): a keyed rect it touches (or whose key it
+   touches) goes first, so the game's pixels land on what was there */
+static void tex_patch_pre(int x, int y, int w, int h) {
+    if (!tex_patch_resident) return;
+    for (int i = 0; i < n_tex_patches; i++)
+        if (tex_patches[i].resident &&
+            (rect_overlap(x, y, w, h, tex_patches[i].x, tex_patches[i].y, tex_patches[i].w, tex_patches[i].h) ||
+             rect_overlap(x, y, w, h, tex_patches[i].kx, tex_patches[i].ky, tex_patches[i].kw, tex_patches[i].kh))) tex_patch_evict(i);
+}
+/* DrawOTag: keyed rects no rule has drawn for a few frames go (the screen that showed them is over) */
+static void tex_patch_idle(void) {
+    if (!tex_patch_resident) return;
+    for (int i = 0; i < n_tex_patches; i++)
+        if (tex_patches[i].resident && port_frame - tex_patches[i].used > 2) tex_patch_evict(i);
+}
+/* after LoadImage: plain TBTX rects are re-applied over any upload that touches them */
 static void tex_patch_apply(int x, int y, int w, int h) {
     if (!port_patch_tex_count) return;
     if (!tex_patch_loaded) tex_patch_load();
     for (int i = 0; i < n_tex_patches; i++) {
         int px = tex_patches[i].x, py = tex_patches[i].y, pw = tex_patches[i].w, ph = tex_patches[i].h;
-        if (px >= x + w || px + pw <= x || py >= y + h || py + ph <= y) continue;
-        vram_write_rect(px, py, pw, ph, tex_patches[i].data);
+        if (!tex_patches[i].keyed && rect_overlap(x, y, w, h, px, py, pw, ph)) vram_write_rect(px, py, pw, ph, tex_patches[i].data);
     }
 }
 int LoadImage(RECT *r, u32 *p) {
     if (r->w <= 0 || r->h <= 0) return 0;
-    if (getenv("TEXLOG")) { u32 hh = 2166136261u; const u16 *q = (const u16 *)p; for (int k = 0; k < r->w * r->h; k++) { hh = (hh ^ (q[k] & 255)) * 16777619u; hh = (hh ^ (q[k] >> 8)) * 16777619u; } port_printf("[LI] %d %d %d %d %08x\n", r->x, r->y, r->w, r->h, hh); if (getenv("TEXDUMP")) { char fn[256]; snprintf(fn, sizeof fn, "%s/li_%d_%d_%d_%d_%08x.bin", getenv("TEXDUMP"), r->x, r->y, r->w, r->h, hh); FILE *ff = fopen(fn, "wb"); if (ff) { fwrite(p, 2, r->w * r->h, ff); fclose(ff); } } }
+    tex_patch_pre(r->x, r->y, r->w, r->h);
     vram_write_rect(r->x, r->y, r->w, r->h, (const u16 *)p);
     tex_patch_apply(r->x, r->y, r->w, r->h);
     return 0;
@@ -570,12 +647,16 @@ u16 LoadClut2(u32 *clut, int x, int y) {
 }
 int MoveImage(RECT *r, int x, int y) {
     if (r->w <= 0 || r->h <= 0) return 0;
+    tex_patch_pre(x & 1023, y & 511, r->w, r->h);
+    if (port_texpack_on) port_texpack_copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     be->copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     return 0;
 }
 int ClearImage(RECT *r, u8 R, u8 G, u8 B) {
     u16 c = (R >> 3) | ((G >> 3) << 5) | ((B >> 3) << 10);
     if (r->w <= 0 || r->h <= 0) return 0;
+    tex_patch_pre(r->x & 1023, r->y & 511, r->w, r->h);
+    if (port_texpack_on) port_texpack_write(r->x & 1023, r->y & 511, r->w, r->h, 0);
     be->fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     ws_fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     return 0;
@@ -598,6 +679,7 @@ void DrawOTag(u32 *ot) {
     u32 *p = ot; int n = 0;
     unsigned h = 2166136261u;
     unsigned long long t0 = port_time_us();
+    tex_patch_idle();
     gpu_lists++;
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
