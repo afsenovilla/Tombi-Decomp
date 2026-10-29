@@ -1019,9 +1019,16 @@ class App:
             cmd += ["--fps60"]
         if s.get("lang"):
             cmd += ["--lang", str(s["lang"])]
-            gfx = os.path.join(data_dir(), DP.GFX_TBTX)
-            if str(s["lang"]) == "5" and cmd[1] == "--data" and os.path.isfile(gfx):
-                cmd += ["--patch-tex", gfx]     # the Spanish redraws the text patch generated (tools/gfx_es)
+        gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
+        if str(s.get("lang")) != "5":
+            self.gfx_note = "no (language is not Spanish)"
+        elif cmd[1] != "--data":
+            self.gfx_note = "no (running from the disc image, not data/)"
+        elif not os.path.isfile(gfx):
+            self.gfx_note = "no (%s missing: text patch off, or its redraws were skipped)" % gfx
+        else:
+            cmd += ["--patch-tex", gfx]
+            self.gfx_note = "yes (%s)" % gfx
         if s.get("savedir"):
             cmd += ["--save-dir", s["savedir"]]
         if s.get("fullscreen"):
@@ -1047,11 +1054,15 @@ class App:
         if cmd[1] == "--data":
             if not self.sync_patch():
                 return
+            cmd = self.command()     # sync_patch may just have (re)built the redraws: --patch-tex must see them
+            self.cmd_text.delete("1.0", "end")
+            self.cmd_text.insert("1.0", subprocess.list2cmdline(cmd))
         elif self.s.get("patch_on"):
             self.say(tr("s.patchnodata"), "busy")
         self.log_path = os.path.join(app_dir(), "tombi-port.log")
         log = open(self.log_path, "w", encoding="utf-8", errors="replace")
-        log.write("[launcher] build %s\n" % BUILD_ID)      # the exe then prints its own id: [port2] build <sha> <date>
+        log.write("[launcher] build %s\n" % BUILD_ID)
+        log.write("[launcher] Spanish graphics (--patch-tex): %s\n" % getattr(self, "gfx_note", "?"))      # the exe then prints its own id: [port2] build <sha> <date>
         log.flush()
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         self.proc = subprocess.Popen(cmd, cwd=app_dir(), stdout=log, stderr=subprocess.STDOUT, creationflags=flags)

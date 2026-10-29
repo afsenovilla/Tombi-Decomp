@@ -591,3 +591,38 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
         }
     }
 }
+
+/* --widescreen: the wrapping parallax backdrop of AREA01 / AREA09 (updateParallaxBackdropSprite subtype 1: 64-wide
+ * columns at x = ((column X - camera X) & 0xfff) >> 3, so the strip repeats every 512 screen columns) only fills the
+ * 4:3 width.  The update registers each column with its period (fixes.txt; its x < 0x160 cull is dropped so every
+ * column of the cycle is listed) and the layer-7 drawer (drawCategory7Objects -> port_ws_cat7) draws it again one
+ * period to the left and right wherever that lands on the wide frame.  Same scroll, same texture: no seams. */
+extern int port_frame;
+static struct { void *o; int period, frame; } ws_rep[32];
+int port_ws_backdrop_period(void *o, int period)
+{
+    int k, free_k = -1;
+    for (k = 0; k < 32; k++) {
+        if (ws_rep[k].o == o) break;
+        if (free_k < 0 && (!ws_rep[k].o || port_frame - ws_rep[k].frame > 8)) free_k = k;
+    }
+    if (k == 32) k = free_k;
+    if (k >= 0) { ws_rep[k].o = o; ws_rep[k].period = period; ws_rep[k].frame = port_frame; }
+    return 1;
+}
+void port_ws_cat7(void *o, void (*draw)(void *))
+{
+    draw(o);
+    if (!port_ws_cull) return;
+    for (int k = 0; k < 32; k++) {
+        if (ws_rep[k].o != o || port_frame - ws_rep[k].frame > 8) continue;
+        s16 x = S16(o, 0x12);
+        for (int c = -1; c <= 1; c += 2) {
+            int nx = x + c * ws_rep[k].period;
+            if (nx + 128 < -port_ws_cull || nx - 128 >= 320 + port_ws_cull) continue;   /* (parts sit within +-128) */
+            S16(o, 0x12) = nx; draw(o);
+        }
+        S16(o, 0x12) = x;
+        return;
+    }
+}
