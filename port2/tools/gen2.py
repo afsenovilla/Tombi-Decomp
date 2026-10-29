@@ -466,6 +466,7 @@ def libc_symbols(nm):
             for l in r.split("\n"):
                 w = l.split()
                 if len(w) == 3 and w[1] in "TWiDIR" and w[2].startswith("_") and not w[2].startswith("__imp_"): out.add(w[2][1:])
+        out.add("atexit")      # defined in crt2.o, not in the libraries above
         return out
     for p in ("/usr/lib32/libc.so.6", "/usr/lib/i386-linux-gnu/libc.so.6", "/lib32/libc.so.6"):
         if os.path.exists(p):
