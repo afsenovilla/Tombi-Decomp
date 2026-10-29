@@ -30,6 +30,7 @@ on:
       - tools/wfm_charmap.json
       - patches/es_mejorada.tombipatch.json
       - tools/prompt_glyphs.py
+      - tools/gfx_es/**
       - tools/i18n.py
       - tools/icons/**
       - .github/workflows/port2-exe.yml
@@ -201,7 +202,7 @@ jobs:
           python -m pip install pyinstaller pillow
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --paths tools \
+            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import area000 --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --paths tools \
             --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "build_id.txt;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
             --add-data "tools/wfm_charmap.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" \
@@ -258,7 +259,7 @@ jobs:
           python -c "import tkinter"
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --hidden-import PIL.ImageTk --paths tools \
+            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import area000 --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --hidden-import PIL.ImageTk --paths tools \
             --add-data "tools/icons/launcher.ico:icons" --add-data "tools/icons/launcher.png:icons" --add-data "build_id.txt:." \
             --add-data "port/assets/prompts/manifest.json:port/assets/prompts" \
             --add-data "tools/wfm_charmap.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" \

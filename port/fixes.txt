@@ -326,3 +326,16 @@ src/d0spsub2/memCardScreenStep.c | switch (memCardFileListStep(m, c)) { | switch
 src/d0spsub2/memCardScreenStep.c | if (memCardFormatStep(m, c) == -1) m->sub--; | if (memCardFormatStep(m, c) == -1) { m->sub--; port_mc_back = 1; }
 src/d0spsub2/memCardScreenStep.c | if (JOYPAD_STATE & 0x2000) m->sub--; | if (JOYPAD_STATE & 0x2000) { m->sub--; port_mc_back = 2; }
 src/d0spsub2/memCardScreenStep.c | if (JOYPAD_STATE & 0x2000) { | if ((JOYPAD_STATE & 0x2000) && (port_mc_back = 2)) {
+#
+# --lang 5 graphic redraws (tools/gfx_es: generated from the user's disc data at patch time, loaded with --patch-tex).
+# Each rule checks that its rect is actually loaded (port_tex_patch_has), so without the file the original sprite stays.
+# drawNowLoadingSprite: ids 0x40+ read port_es_ui_defs (0x40 is kept for a later CARGANDO redraw, VRAM 0,72).
+src/drawNowLoadingSprite.c | extern UiSpriteDef UI_SPRITE_DEFS[]; | extern UiSpriteDef UI_SPRITE_DEFS[]; static UiSpriteDef port_es_ui_defs[] = { { 0, 0, 0, 0, 0, 0 }, { 0, 104, 116, 32, 352, 509 } }; /* 0x40: (reserved, CARGANDO); 0x41: VUELVE A INTENTARLO */
+src/drawNowLoadingSprite.c | UI_SPRITE_DEFS[sprt_id] | (sprt_id >= 0x40 ? port_es_ui_defs[sprt_id - 0x40] : UI_SPRITE_DEFS[sprt_id])
+# TRY AGAIN -> VUELVE A / INTENTARLO: one 116x32 sprite (two lines) at VRAM (896,104) = tpage 0x0E (0x2E semi-transparent), 8 px higher
+src/drawNowLoading.c | extern void g(int a, int b, int c, int d, int e); | extern void g(int a, int b, int c, int d, int e); extern int port_lang; extern int port_tex_patch_has(int x, int y); static int port_es_tryagain(void) { return port_lang == 5 && port_tex_patch_has(896, 104); }
+src/drawNowLoading.c | g(0x68, 0x60, 1, v, p); | if (port_es_tryagain()) g(0x68, 0x58, 0x41, v == 0x24 ? 0x2E : 0x0E, p); else g(0x68, 0x60, 1, v, p);
+src/drawNowLoading.c | g(0xa0, 0x60, 2, v, p); | if (!port_es_tryagain()) g(0xa0, 0x60, 2, v, p);
+# memory card screen title LOAD/SAVE (40x16 at u=168 v=136/120 of the SYSTEM/A00400 page) -> CARGAR (64x16 at u=0 v=160) /
+# GUARDAR (72x16 at u=0 v=176), free 4bpp space of the same page and CLUT; raised 14 px so the wider word sits above the box
+src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; extern int port_tex_patch_has(int x, int y); int es = port_lang == 5 && port_tex_patch_has(64, 160) && port_tex_patch_has(64, 176); if (es) { S->u0 = 0; S->v0 = no ? 0xB0 : 0xA0; S->y0 = y - 0xE; } s->w = es ? (no ? 0x48 : 0x40) : 0x28; }

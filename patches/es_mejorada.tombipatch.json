@@ -11,6 +11,7 @@
   "sha1": "ec50074b6fd98f611bae11e3de68d6e76ffdd6d4"
  },
  "verbFirst": true,
+ "portGfx": "es",
  "menus": {
   "SYSTEM/O5PTSUB0.BIN": {
    "title": {

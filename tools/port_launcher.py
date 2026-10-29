@@ -1008,6 +1008,9 @@ class App:
             cmd += ["--internal-res", str(s["internal_res"])]
         if s.get("lang"):
             cmd += ["--lang", str(s["lang"])]
+            gfx = os.path.join(data_dir(), DP.GFX_TBTX)
+            if str(s["lang"]) == "5" and cmd[1] == "--data" and os.path.isfile(gfx):
+                cmd += ["--patch-tex", gfx]     # the Spanish redraws the text patch generated (tools/gfx_es)
         if s.get("savedir"):
             cmd += ["--save-dir", s["savedir"]]
         if s.get("fullscreen"):

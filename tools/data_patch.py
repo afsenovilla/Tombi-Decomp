@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Applies a text patch (*.tombipatch.json, tools/text_patch.py) to an extracted data/ folder (tools/extract_data.py) for
 the native port, reversibly: the original of every touched file (and manifest.txt) is kept in data/.orig/ and put back
-before another patch is applied or when the patch is switched off.
+before another patch is applied or when the patch is switched off. A patch with "portGfx": "es" also gets the port's
+Spanish graphic redraws (tools/gfx_es), generated from data/ into data/port_gfx_es.tbtx (loaded with --patch-tex, --lang 5).
 
   python3 tools/data_patch.py apply DATA_DIR PATCH.tombipatch.json [--disc IMAGE] [--force]
   python3 tools/data_patch.py restore DATA_DIR
@@ -27,6 +28,7 @@ import extract_data as X
 
 ORIG = ".orig"
 STATE = "state.json"
+GFX_TBTX = "port_gfx_es.tbtx"     # tools/gfx_es: graphic redraws for the port (--patch-tex), built from data/ when the patch asks
 
 
 class PatchError(Exception):
@@ -59,6 +61,9 @@ def status(data_dir):
 
 def restore(data_dir):
     """Puts the originals kept in data/.orig back (every file there, manifest.txt among them); returns their count."""
+    gfx = os.path.join(data_dir, GFX_TBTX)
+    if os.path.isfile(gfx):
+        os.remove(gfx)
     od = os.path.join(data_dir, ORIG)
     if not os.path.isdir(od):
         return 0
@@ -167,13 +172,18 @@ def apply(data_dir, patch_path, disc=None, disc_hash=None, force=False, log=prin
             raise PatchError("%s: %s" % (e, ex))
         if ch or e in files:
             files[e] = new_bytes
+    gfx = 0
+    if patch.get("portGfx") == "es":    # built from the pristine data (the files the patch touches are not read)
+        import gfx_es
+        gfx = gfx_es.build(data_dir, os.path.join(data_dir, GFX_TBTX), log=log)
     state = {"patch": os.path.abspath(patch_path), "sha1": file_sha1(patch_path), "title": patch.get("title") or "",
-             "files": sorted(files), "moved": moved}
+             "files": sorted(files), "moved": moved, "gfx": gfx}
     json.dump(state, open(os.path.join(od, STATE), "w", encoding="utf-8"), indent=1)
     for p, data in files.items():
         _write(os.path.join(data_dir, *p.split("/")), data)
     X.write_manifest(data_dir, man)
-    return {"files": sorted(files), "applied": applied, "problems": problems, "moved": moved, "title": state["title"]}
+    return {"files": sorted(files), "applied": applied, "problems": problems, "moved": moved, "title": state["title"],
+            "gfx": gfx}
 
 
 def main(argv):
