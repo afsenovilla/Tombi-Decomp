@@ -575,7 +575,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); Fábrica (AREA11 s2), puerta; AREA16 s1 (también recortada).
 - **Objetos**: 7 (I0NFO2 0x801001D4 / 0x801001D8); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A07600` (lista de recarga SYS 76), dibujados con paletas reales: AREA16/CLUT07 fila 53 para «Male Stonetown Resident» (subtipo 2, confirmada con TCRF), filas 54 (subtipo 0) y 48 (subtipos 1 y 3) para el resto (suposiciones).
+- **Muñecos**: `SYSTEM/A07600` (lista de recarga SYS 76), dibujados con paletas reales: AREA16/CLUT07 fila 53 para «Male Stonetown Resident» (subtipo 2, confirmada con TCRF), fila 37 para el chico (subtipo 1, confirmada por los colores de TCRF: los 14 colores de la hoja de TCRF están en esa fila, también en AREA16/CLUT06, AREA17/CLUT03/06 y AREA18/CLUT02), fila 54 para el subtipo 0 (suposición).
 - **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 
@@ -656,7 +656,7 @@ La herramienta reconstruye las secciones que funcionan sólo con datos del disco
 | Dibujo del mapa 8F | falta | la parte difícil. Un dibujo prerrenderizado de 8 bpp por pueblo, de unos 640 x 576 (AREA11), 448 x 544 (AREA16) y 704 x 480 (AREA17). Se puede pintar, o montar con AREA05/08/19 y los recortes de decorado de las páginas de recarga SYS |
 | Sprites de personajes 3B | falta la tabla, las páginas sobreviven en parte | la página de aldeanos de 4 bpp de A06100 (y las partes equivalentes de A07600/A08000) tiene los fotogramas. Una tabla SPR nueva debe ordenar sus fotogramas como esperan los guiones de animación de I0NFO2, o hay que aportar guiones nuevos |
 | Decorado 3D / tejados | falta la tabla, los recortes sobreviven en la parte de 8 bpp de las páginas de recarga | el mismo trabajo que 3B. Los tejados deben cubrir los rectángulos de las casas |
-| Paletas | las filas de los vecinos sobreviven (AREA16/CLUT07 fila 53 confirmada; 48/54, AREA11/CLUT02 4/36/68 confirmadas por los colores de TCRF; AREA16 48/54, AREA17/CLUT03 1 según una captura del juego) | cargar el archivo CLUT del área cuyas filas 48..54 las contienen; el TIM lleva la paleta propia del dibujo |
+| Paletas | las filas de los vecinos sobreviven (AREA16/CLUT07 fila 53 confirmada, fila 37 (el chico) confirmada por los colores de TCRF; 48/54, AREA11/CLUT02 4/36/68 confirmadas por los colores de TCRF; AREA16 48/54, AREA17/CLUT03 1 según una captura del juego) | cargar el archivo CLUT del área cuyas filas 48..54 las contienen; el TIM lleva la paleta propia del dibujo |
 | Texto | PAL tiene "···??", JP lo tiene todo | traducir las frases japonesas a los huecos de PAL (ya están en los índices que usa el código) |
 
 En la versión para PC esto es una tarea de datos, no de código. El motor ya ejecuta AREA05/08/19 s0/s2, y cargar

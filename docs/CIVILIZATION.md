@@ -556,7 +556,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s2), door; AREA16 s1 (also cut).
 - **Props**: 7 (I0NFO2 0x801001D4 / 0x801001D8); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for Male Stonetown Resident (subtype 2, confirmed against TCRF), rows 54 (subtype 0) and 48 (subtypes 1, 3) for the rest (guesses).
+- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for Male Stonetown Resident (subtype 2, confirmed against TCRF), row 37 for the boy (subtype 1, confirmed by TCRF colours: all 14 colours of TCRF's sheet are in that row, also in AREA16/CLUT06, AREA17/CLUT03/06 and AREA18/CLUT02), row 54 for subtype 0 (guess).
 - **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 
@@ -634,7 +634,7 @@ The tool rebuilds working sections from disc data alone:
 | Map picture 8F | missing | the hard part. One pre-rendered 8 bpp picture per town, about 640 x 576 (AREA11), 448 x 544 (AREA16) and 704 x 480 (AREA17). It can be painted, or assembled from AREA05/08/19 and the scenery cut-outs in the SYS reload pages |
 | Actor sprites 3B | missing table, pages partly survive | the 4 bpp villager page of A06100 (and the matching parts of A07600/A08000) has the frames. A new SPR table must lay its frames out in the order the I0NFO2 anim scripts expect, or new anim scripts must be supplied |
 | Scenery 3D / roofs | missing table, cut-outs survive in the 8 bpp part of the reload pages | the same work as 3B. The roofs must cover the house rectangles |
-| Palettes | resident rows survive (AREA16/CLUT07 row 53 confirmed; 48/54, AREA11/CLUT02 4/36/68 confirmed by TCRF colours; AREA16 48/54, AREA17/CLUT03 1 matched to a retail screenshot) | load the area CLUT file whose rows 48..54 hold them; the TIM carries the picture's own palette |
+| Palettes | resident rows survive (AREA16/CLUT07 row 53 confirmed, row 37 (the boy) confirmed by TCRF colours; 48/54, AREA11/CLUT02 4/36/68 confirmed by TCRF colours; AREA16 48/54, AREA17/CLUT03 1 matched to a retail screenshot) | load the area CLUT file whose rows 48..54 hold them; the TIM carries the picture's own palette |
 | Text | PAL has "···??", JP has everything | translate the JP lines into the PAL slots (they already sit at the indices the code uses) |
 
 In the port this is a data task, not a code task. The engine already runs AREA05/08/19 s0/s2, and loading I0NFO2 at
