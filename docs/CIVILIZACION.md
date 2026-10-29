@@ -698,6 +698,15 @@ los datos cenitales recortados.** Son los mismos recursos que en PAL con otros n
 nada nuevo. Las listas de la sección 0 de AREA11/16/17/18 están vacías, no hay bloques 0x8E/0x8F/0x3B..0x3E ni imágenes de
 8 bpp nuevas, las únicas filas de CLUT propias de la beta son del HUD y los diálogos de los pueblos ya son «···??».
 
+**Demo japonesa SLPM-80165** ([JPDEMO.md](JPDEMO.md), "Civilization check"): tampoco trae nada. No hay carpetas AREA16/17/18
+ni listas de carga de AREA11/16/17/18 (la tabla de archivos con nombre del ejecutable solo lista SYSTEM, MOVIE, AREA00 y
+`AREA15/0000.WSS`); `AREA11` solo tiene `CA11.BIN` (294 bytes, sin referencias), una tabla de datos cuyos primeros 204 bytes
+coinciden con una tabla en el desplazamiento 0x30D58 de `X016.BIN` de PAL (código de AREA16 lateral, no de vista desde arriba).
+La única imagen de 8 bpp es `AREA08/D002.000`, idéntica en píxeles a `AREA08/D002` de PAL (el mapa ya conocido). Ningún tramo
+de 32 bytes de las páginas A06100 / A07600 / A07601 / A08000 / A08600 / A08601 aparece en el disco; las páginas de SYSTEM
+propias de la demo son sprites del pueblo, cerdos, el anciano y menús. Ningún texto de la Civilización (solo los objetos
+Bumerán de piedra/hierro).
+
 ## Catálogo de paletas (todos los discos)
 
 `tools/clut_catalog.py catalog OUT` reúne todas las paletas de todos los discos que tenemos y `tools/clut_catalog.py test OUT ...`
@@ -707,7 +716,7 @@ bloques CLUT pequeños de las listas de carga (archivos `.000` de 32..1024 bytes
 y en el ejecutable/overlays), `CLUT00` (640 x 32) y `SYS001/002/004/006/007` de PrePre 8, y una búsqueda conservadora de
 series de 16 colores en el resto de datos que no son páginas (entrada 0 = 0, 15 colores de 15 bits distintos de cero, >= 12
 distintos, al menos dos series seguidas). Cada fuente se corta en filas de 16 colores y ventanas de 256 (pasos de 16) y se
-calcula su hash. SLPM-80165 no estaba disponible en esta pasada.
+calcula su hash. SLPM-80165 se añadió después (8 archivos CLUT, 40 filas solo de la demo: filas de HUD/pueblo de los `CLUTnn` de AREA00 y series de 16 colores en `AREA03/CA03.BIN`).
 
 | Disco | Filas de 16 colores distintas | Solo en este disco | Dónde están |
 |---|---|---|---|
@@ -715,6 +724,7 @@ calcula su hash. SLPM-80165 no estaba disponible en esta pasada.
 | USA SCUS-94236 | 1980 | 26 | `SYSTEM/A00013`, `A001901` (paletas del menú en inglés); series de 16 colores en `X14.BIN` y `DSPSUB3.BIN` |
 | JP SLPS-01144 | 1851 | 308 | las mismas filas de HUD/sistema en casi todos los `CLUTnn` (filas 2, 4, 5..7, 16..25 en columnas fijas), algunas filas propias de cada área, `DSPCLUT.TIM`, el CLUT de la imagen `D005` de AREA19 |
 | PrePre 8 PCPX-96084 | 269 | 62 | `CLUT00` (59 filas), `SYS006`, dos TIM en `TOMBA.EXE` |
+| Demo JP SLPM-80165 | 431 | 40 | `CLUT01..06` de AREA00 (filas de HUD/pueblo), series de 16 colores en `AREA03/CA03.BIN` |
 
 1305 filas están en PAL, USA y JP; 171 también en PrePre 8. Ninguna fila de los `CLUTnn` de AREA11/16/17/18 es exclusiva de un
 disco, salvo las filas de HUD/sistema de JP, que están en todas las áreas.
@@ -725,7 +735,8 @@ disco, salvo las filas de HUD/sistema de JP, que están en todas las áreas.
   Ninguna paleta exclusiva mejora la suposición de las filas 48 / 54 de AREA16/CLUT07.
 - Páginas de decorado, con los renders de la comunidad como referencia índice → color, error medio ponderado por píxel de cada
   ventana de 256 colores: A08000 72,9, A08600 67,4 (una paleta de sistema 256 x 1), A06100 82,4; las mejores ventanas de
-  PrePre 8 son peores (85,4 / 72,3 / 94,8). Los renders con las mejores ventanas son ruido. Los CLUT del decorado no están en
+  PrePre 8 son peores (85,4 / 72,3 / 94,8), igual que las de SLPM-80165 (A08000 83,6, A08600 67,5 con `SYSTEM/A00009` = PAL `A00201`,
+  A06100 95,7); la mejor fila de la demo para el sprite (24,1) es la fila común de AREA00/CLUT06. Los renders con las mejores ventanas son ruido. Los CLUT del decorado no están en
   ninguno de estos discos.
 
 ## Reconstrucción (no original)

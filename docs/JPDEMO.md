@@ -125,6 +125,29 @@ attached to an NPC through the script/WSS side). The early village model is rend
 layout converted to PAL WMD (straightforward: same vertices/uv, reorder fields) and its WHM/textures loaded together;
 cosmetic only. The debug/test menu in the demo exe remains the most valuable code lead; CA07 is not.
 
+## Civilization check
+
+Same checks as for PAL, USA, JP, PrePre 8 and the 1998-02-03 beta (docs/CIVILIZATION.md). **Result: nothing of the
+cut top-down towns.**
+
+- **No AREA16/17/18 folders, no load lists.** The exe's named file table covers only SYSTEM, MOVIE, AREA00 and
+  `AREA15/0000.WSS`, so there is no AREA11/16/17/18 section-0 list (empty or not) and no 0x8E/0x8F/0x3B..0x3E kind to
+  read. `AREA11/CA11.BIN` (294 bytes, unreferenced) is data: its first 204 bytes equal a table at file offset 0x30D58
+  of PAL `AREA16/X016.BIN` (side-scrolling overlay; part of it also in X017/X018), not a top-down block.
+- **8 bpp pictures** (`tools/beta980203.py tim8 /dev/shm/jpdemo/fs`): only `AREA08/D002.000`, 544x448,
+  pixel-identical to PAL `AREA08/D002`/`D202` (the file differs only in its header/other chunks; 147 of 149 2 KB
+  blocks are on PAL).
+- **Blocks without a twin.** Every file (GAM unpacked) hashed whole and in 2 KB blocks against PAL, USA, JP, PrePre 8
+  and beta: apart from the known AREA00/AREA08/CAnn/exe differences, the demo-only data are the SYSTEM pages
+  `A00007/12/18/20/21/22` (menu, pigs, elder, Kemu, village people). No 32-byte run (with more than 4 distinct
+  bytes) of the reload pages A06100 / A07600 / A07601 / A08000 / A08600 / A08601 occurs in any demo file.
+- **Palettes** (`tools/clut_catalog.py`, `jpdemo` disc): 431 distinct rows, 40 demo-only (AREA00 `CLUTnn`
+  HUD/village rows, 16-colour runs in `AREA03/CA03.BIN`). Female Stonetown Resident: best row 24.1, the shared
+  AREA00/CLUT06 row; no demo-only row improves it. Scenery pages, best demo windows: A08000 83.6, A08600 67.5
+  (`SYSTEM/A00009` = PAL `A00201`), A06100 95.7, all worse than the retail best (72.9 / 67.4 / 82.4).
+- **Text** (`tools/jpdemo_text.py`): no town or Civilization lines; the only related words are the item names
+  ストーンブーメラン / アイアンブーメラン.
+
 ## Making the demo a second matching target
 
 **Status:** `config/slpm80165/slpm80165.yaml` and `config/slpm80165/x00.yaml` split the exe (text 0x80014C38..0x80069FC4)

@@ -676,6 +676,14 @@ cut top-down data either.** It is the same build of the assets as PAL, renamed, 
 section-0 lists of AREA11/16/17/18 are empty, there is no new 0x8E/0x8F/0x3B..0x3E block and no new 8 bpp picture, the
 only beta-only CLUT rows are HUD rows, and the town dialogue slots are already "···??".
 
+**SLPM-80165 Japanese demo** ([JPDEMO.md](JPDEMO.md), "Civilization check"): nothing either. There are no AREA16/17/18
+folders and no AREA11/16/17/18 load lists at all (the exe's named file table only lists SYSTEM, MOVIE, AREA00 and
+`AREA15/0000.WSS`); `AREA11` holds only the unreferenced 294-byte `CA11.BIN`, a data table whose first 204 bytes match a
+table at file offset 0x30D58 of PAL `X016.BIN` (side-scrolling AREA16 code, not top-down data). The only 8 bpp picture is
+`AREA08/D002.000`, pixel-identical to PAL `AREA08/D002` (the known AREA08 map). No 32-byte run of the reload pages
+A06100 / A07600 / A07601 / A08000 / A08600 / A08601 occurs anywhere on the disc; the demo-only SYSTEM pages are village,
+pig, elder and menu sprites. No Civilization text (only the item names Stone/Iron Boomerang).
+
 ## Palette catalog (all discs)
 
 `tools/clut_catalog.py catalog OUT` collects every palette on every disc we have and `tools/clut_catalog.py test OUT ...`
@@ -684,7 +692,7 @@ CLUT blocks (`.000` files of 32..1024 bytes, e.g. PAL `SYSTEM/A00007` 256 x 1, `
 4-aligned offset of any file (this includes the 0x8E/0x8F top-down pictures, TIMs inside chunks and in the exe/overlays),
 PrePre 8 `CLUT00` (640 x 32) and `SYS001/002/004/006/007`, and a conservative scan for 16-colour runs in the remaining
 non-page data (entry 0 = 0, 15 non-zero 15-bit colours, >= 12 distinct, at least two runs in a row). Every source is cut into
-16-colour rows and 256-colour windows (16-entry steps) and hashed. SLPM-80165 was not available for this run.
+16-colour rows and 256-colour windows (16-entry steps) and hashed. SLPM-80165 was added later (8 CLUT files, 40 demo-only rows: AREA00 `CLUTnn` HUD/village rows and 16-colour runs in `AREA03/CA03.BIN`).
 
 | Disc | Distinct 16-colour rows | Only on this disc | Where the disc-only rows are |
 |---|---|---|---|
@@ -692,6 +700,7 @@ non-page data (entry 0 = 0, 15 non-zero 15-bit colours, >= 12 distinct, at least
 | USA SCUS-94236 | 1980 | 26 | `SYSTEM/A00013`, `A001901` (English menu palettes); 16-colour runs in `X14.BIN` and `DSPSUB3.BIN` |
 | JP SLPS-01144 | 1851 | 308 | the same HUD/system rows in nearly every `CLUTnn` (rows 2, 4, 5..7, 16..25 at fixed columns), some area-specific rows, `DSPCLUT.TIM`, the AREA19 `D005` picture CLUT |
 | PrePre 8 PCPX-96084 | 269 | 62 | `CLUT00` (59 rows), `SYS006`, two TIMs in `TOMBA.EXE` |
+| JP demo SLPM-80165 | 431 | 40 | AREA00 `CLUT01..06` (HUD/village rows), 16-colour runs in `AREA03/CA03.BIN` |
 
 1305 rows are on PAL, USA and JP; 171 also on PrePre 8. No AREA11/16/17/18 `CLUTnn` row is disc-only except the JP
 HUD/system rows, which are on every area.
@@ -702,7 +711,8 @@ HUD/system rows, which are on every area.
   disc-only palette improves on the AREA16/CLUT07 rows 48 / 54 guess.
 - Scenery pages, community renders as index → colour reference, pixel-weighted mean error of every 256-colour window:
   A08000 72.9, A08600 67.4 (a 256 x 1 system palette), A06100 82.4; the best PrePre 8 windows are worse (85.4 / 72.3 /
-  94.8). Renders with the best windows are noise. The scenery CLUTs are not on any of these discs.
+  94.8), and so are the best SLPM-80165 windows (A08000 83.6, A08600 67.5 with `SYSTEM/A00009` = PAL
+  `A00201`, A06100 95.7); the demo's best sprite row (24.1) is the shared AREA00/CLUT06 row. Renders with the best windows are noise. The scenery CLUTs are not on any of these discs.
 
 ## Reconstruction (not original)
 
