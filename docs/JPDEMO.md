@@ -96,6 +96,35 @@ Masked match (relocations and non-`$sp` immediates ignored, whole functions only
 Not done yet: `tools/objects.py` and `tools/room.py` are wired to PAL overlays and symbols. Object and event lists
 for the demo need the X00 symbol mapping from `tools/xmatch.py --csv` first.
 
+## Findings from the extracted files
+
+Tools: `tools/jpdemo_text.py` (WFM1 text dump + match against retail JP), `tools/jpdemo_rooms.py` (demo WMD rooms
+rendered with the PAL renderer), `tools/audio.py wvd` (now accepts the demo's header-first WVD layout).
+
+- **Text.** WFM1 = WFM2 without the 128-byte group table (glyph pointers at 0x10). Blocks: `SYSTEM/A00013` (= A00016,
+  201 item descriptions), `SYSTEM/A00014` (200 event titles, most still `イベント０xx` placeholders), and inside the
+  unpacked `AREA00/A006.GAM` and `AREA08/A003.GAM`. 54 new kanji were added to `tools/jp_charmap.json`. Against retail JP,
+  21 dialogues have no close match: the elder's end-of-demo speech, an elder line offering to **appraise unknown items**
+  (no such feature in the final game), early place names (始まりの村, 始まりの森, ふるいけ), AREA08 lines about a broken
+  machine that "the guy in red clothes" could fix, and reworded item descriptions.
+- **AREA08 is early AREA02.** 158 of the 228 dialogues of `AREA08/A003.GAM` match retail `AREA02/A003.GAM`, so the
+  unreferenced AREA08 set is the area later renumbered to 02 (compare CA11 -> X016).
+- **Rooms.** Demo `D003/D103/D203` (identical) are the village WMD in an older packet layout (GPU order: colour+cmd,
+  uv+clut, uv+tpage, uv, uv, then `x y z pad` vertices; some sectors add a fifth group of untextured quads). Rendered
+  with `B?00` + `CLUT0?` at PAL positions, it is the PAL `D001` village with differences: houses without thatched
+  roofs, a different house by the river, a missing pillar. `D302/D402/D503` and `D?01` are WHM collision, `D?02.000`
+  and `A004.000` are WVD sound banks (not pictures). Demo `B300` = PAL `B300`+`B301` in one file. Demo `B400` is a
+  different sprite page (effects and small creature sprites). `AREA08/D003` is not a WMD.
+- **CA07** is an early `updateAreaScroll` for area 7: per-room exit/camera checks against the player position
+  (`0x1F80016A/16E/172`) with the same thresholds as `src/x001/updateAreaScroll.c` (0xB6E, 0x109B, 0x779, 0x7FC, 0xFAB).
+  PAL AREA07 runs X001, which kept this table, so it is not cut logic.
+- **Sound.** `AREA08/SND002_.WVD`: 52 samples, 39 found in PAL banks (`SND_INI`, `SND0020`, ...), 13 demo-only.
+
+Insertion into the PAL port: the text lines are easy (WFM3 encoder exists; a translated appraisal/extra line could be
+attached to an NPC through the script/WSS side). The early village model is renderable but would need the old packet
+layout converted to PAL WMD (straightforward: same vertices/uv, reorder fields) and its WHM/textures loaded together;
+cosmetic only. The debug/test menu in the demo exe remains the most valuable code lead; CA07 is not.
+
 ## Making the demo a second matching target
 
 **Status:** `config/slpm80165/slpm80165.yaml` and `config/slpm80165/x00.yaml` split the exe (text 0x80014C38..0x80069FC4)

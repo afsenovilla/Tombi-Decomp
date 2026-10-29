@@ -101,6 +101,8 @@ def split_wvd(d):
         n = struct.unpack("<I", d[t:t + 4])[0] // 4
         return struct.unpack("<%dI" % n, d[t:t + 4 * n])
     bo, ho = tbl(bt), tbl(ht)
+    if d[bt + bo[0]:bt + bo[0] + 4] == b"pBAV":     # the Japanese demo (SLPM-80165) stores the header table first
+        bt, ht, bo, ho = ht, bt, ho, bo
     n = len(bo) - 1
     out = []
     for i in range(n):
