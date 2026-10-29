@@ -78,6 +78,17 @@ discs, by frame/sample comparison, or by eye.
    in PAL `SND_INI`/`SND0000`/`SND0044X`... and SLPM-80165 `SND002_`. No SEQ file is on the disc; one `pQES`
    sequence sits inside DATA000.
 
+## Civilization top-down data (checked 2026-10-29)
+
+No trace. The disc has only `AREA00` (no AREA11/16/17/18 directories or names: the exe file table lists only the
+39 files above), and no load-list record or GAM sub-chunk uses kind 0x3B. Kinds present: 0x30-0x37, 0x39, 0x40-0x45,
+0x50-0x53, 0x60/0x61, 0x70, 0x80-0x86, 0x90-0x92, 0xA0-0xA2, 0xB0. The loader 0x800240BC files each chunk by high
+nibble into a slot table indexed by the low nibble: 0x2x -> 0x1F800150, 0x3x -> 0x1F800198 (8 slots up to
+0x1F8001B8), 0x4x -> 0x1F8001B8, 0x5x -> 0x1F8001C8, 0x6x -> 0x1F800190, 0x7x -> 0x1F8001D8, 0x8x -> D_800DE4B0,
+0x9x -> D_800DE4D0, 0xAx -> D_800DE750, 0xBx -> D_800DE074. A 0x3B chunk would land on the 0x43 slot, so this build
+has no room for the PAL 0x3B sprite tables (0x39 itself shares the 0x41 slot, read from the slot arithmetic only).
+No TIM/CLUT page holds a top-down or isometric map: the pages are the village, interior and HUD art listed above.
+
 ## Debug features
 
 - 0x8008299C is NOT a mode dispatcher: it is the unlayered-object spawner. It walks the per-room list
