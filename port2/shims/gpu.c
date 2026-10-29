@@ -30,12 +30,6 @@ typedef struct { s16 x, y, w, h; } RECT;
 extern const char *port_drawdump_path;
 void port_drawdump(const u16 *vram, int tx, int ty, int depth, int cx, int cy, int tpage, int clut,
                    int u0, int v0, int w, int h, int sx, int sy, int sw, int sh, int semi, int kind);
-/* --dump-textures / --texture-pack (texpack.c): only called while one is on */
-extern int port_texpack_on;
-void port_texpack_write(int x, int y, int w, int h, const u16 *src);
-void port_texpack_copy(int sx, int sy, int dx, int dy, int w, int h);
-const PortTexRep *port_texpack_prim(const GpuTex *t, const GpuVtx *v, int n);
-const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int v1);
 
 static u16 vram[512][1024];
 static int gpu_prims, gpu_lists;
@@ -256,12 +250,11 @@ static void tex_patch_pre(int x, int y, int w, int h);
 static void tex_patch_idle(void);
 static void fill(u32 col, u32 xy, u32 wh) {
     int x = xy & 0x3F0, y = (xy >> 16) & 0x1FF, w = ((wh & 0x3FF) + 15) & ~15, h = (wh >> 16) & 0x1FF;
-    if (w && h) { tex_patch_pre(x, y, w, h); if (port_texpack_on) port_texpack_write(x, y, w, h, 0); be->fill(x, y, w, h, rgb24to15(col)); ws_fill(x, y, w, h, rgb24to15(col)); }
+    if (w && h) { tex_patch_pre(x, y, w, h); be->fill(x, y, w, h, rgb24to15(col)); ws_fill(x, y, w, h, rgb24to15(col)); }
 }
 static void copy(u32 s, u32 d, u32 wh) {
     int sx = s & 1023, sy = (s >> 16) & 511, dx = d & 1023, dy = (d >> 16) & 511;
     int w = ((wh & 0xFFFF) - 1) & 1023, h = (((wh >> 16) - 1) & 511); w++; h++;
-    if (port_texpack_on) port_texpack_copy(sx, sy, dx, dy, w, h);
     be->copy(sx, sy, dx, dy, w, h);
 }
 /* the GPU drops polygons and lines larger than 1023x511 (the distance between any two vertices) */
@@ -275,7 +268,6 @@ static int too_big(const Vtx *v, int n) {
 }
 /* host-side VRAM writes (LoadImage & co.) go through here so the backend can mirror them */
 static void vram_write_rect(int x, int y, int w, int h, const u16 *s) {
-    if (port_texpack_on) port_texpack_write(x, y, w, h, s);
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) & 511][(x + i) & 1023] = *s++;
     be->vram_written(x, y, w, h);
     ws_mirror_write(x, y, w, h);
@@ -384,7 +376,6 @@ static int gp0(const u32 *p, int n) {
         if (tex) {
             set_texpage16(tpage);
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511;
-            t.rep = port_texpack_on ? port_texpack_prim(&t, v, nv) : 0;
         }
         if (tex && port_drawdump_path) {                     /* --dump-draws (drawdump.c) */
             int u0 = 255, u1 = 0, v0 = 255, v1 = 0, x0 = 1 << 20, x1 = -(1 << 20), y0 = 1 << 20, y1 = -(1 << 20);
@@ -432,7 +423,6 @@ static int gp0(const u32 *p, int n) {
         else { w = h = size == 1 ? 1 : size == 2 ? 8 : 16; }
         if (tex && port_drawdump_path && w && h)            /* --dump-draws (drawdump.c) */
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7, (p[2] >> 16) & 0xFFFF, u, v, w, h, a.x, a.y, w, h, semi ? 1 : 0, 2);
-        if (tex) t.rep = port_texpack_on && w && h ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
         if (w && h) be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
         return need;
     }
@@ -453,7 +443,6 @@ static int gp0(const u32 *p, int n) {
         const u16 *s = (const u16 *)(p + 3); int avail = (n - 3) * 2;
         if (w && h) tex_patch_pre(x, y, w, h);
         for (int j = 0; j < h; j++) for (int q = 0; q < w; q++, i++) if (i < avail) vram[(y + j) & 511][(x + q) & 1023] = s[i];
-        if (w && h && port_texpack_on) port_texpack_write(x, y, w, h, 0);
         if (w && h) be->vram_written(x, y, w, h);
         return n;
     }
@@ -648,7 +637,6 @@ u16 LoadClut2(u32 *clut, int x, int y) {
 int MoveImage(RECT *r, int x, int y) {
     if (r->w <= 0 || r->h <= 0) return 0;
     tex_patch_pre(x & 1023, y & 511, r->w, r->h);
-    if (port_texpack_on) port_texpack_copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     be->copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     return 0;
 }
@@ -656,7 +644,6 @@ int ClearImage(RECT *r, u8 R, u8 G, u8 B) {
     u16 c = (R >> 3) | ((G >> 3) << 5) | ((B >> 3) << 10);
     if (r->w <= 0 || r->h <= 0) return 0;
     tex_patch_pre(r->x & 1023, r->y & 511, r->w, r->h);
-    if (port_texpack_on) port_texpack_write(r->x & 1023, r->y & 511, r->w, r->h, 0);
     be->fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     ws_fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     return 0;
