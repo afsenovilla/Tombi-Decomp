@@ -18,4 +18,5 @@ void *port_bios_tcb_table(void);
 #define port_ws_cull 0                   /* (port2 --widescreen only) */
 #define PORT_WSX(v) ((unsigned short)((v) + port_ws_cull))
 #define PORT_WSW(c) ((c) + 2 * port_ws_cull)
+extern int port_ws_backdrop_period(void *, int);   /* --widescreen: repeat a wrapping backdrop column (port2 main0_handwritten.c) */
 #endif
