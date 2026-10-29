@@ -693,3 +693,69 @@ HUD/system rows, which are on every area.
 - Scenery pages, community renders as index → colour reference, pixel-weighted mean error of every 256-colour window:
   A08000 72.9, A08600 67.4 (a 256 x 1 system palette), A06100 82.4; the best PrePre 8 windows are worse (85.4 / 72.3 /
   94.8). Renders with the best windows are noise. The scenery CLUTs are not on any of these discs.
+
+## Reconstruction (not original)
+
+`tools/civ_rebuild.py` builds a **best-effort** background picture (kind 0x8F) and cell map (kind 0x8E) for AREA11,
+AREA16 and AREA17 s0, from your own disc plus the layout file `tools/civ_rebuild_layout.json`. That file holds only
+coordinates and reasons, no pixels. None of the output is original data.
+
+```
+python3 tools/civ_rebuild.py [--area 17] [--both | --no-fmv] [--refdir DIR] [--community-cluts DIR] [--preview DIR]
+```
+
+Output goes to `build/civ_rebuild/AREAnn/` (`AREAnn_nofmv/` without the FMV layer):
+
+- `map8F.tim`: the 8 bpp TIM exactly as the engine reads kind 0x8F (CLUT at +0x14, pixels at +0x220).
+- `map8E.bin`: the cell map as kind 0x8E (`u16 w, u16 h`, then 0x4000 bytes).
+- `picture.png`, `cells.png`, `preview.png` (residents, patrol boxes, houses, props and exits overlaid), `source.png`.
+- `manifest.json`: CLUT provenance and the warnings from the cell-map checks.
+
+Sizes: AREA11 is 736 x 672 (92 x 84 cells), AREA16 is 544 x 608 (68 x 76), AREA17 is 832 x 704 (104 x 88).
+
+**What is real**
+- Every cut-out pixel and its index comes from the SYS reload pages. Page identities: A06100 is Lumberjack Town,
+  A08000 is Iron Town, A07600 and A07601 are Stonetown, A08600 and A08601 are AREA18. Each pair shares one CLUT;
+  this was confirmed by the community files, which share a palette across each pair.
+- The house rectangles, residents, patrol boxes and exit rectangles are read from I0NFO2 and the StepC/D/E code
+  at build time.
+
+**What is ours**
+- **Colours: FMV-derived, not original.** For each index, the first available source wins:
+  1. `--community-cluts`: the community *clutgen* pairs (labelled "community FMV-derived CLUT (clutgen)"), re-run
+     with their own method. Each 2x2 block of a `PHOT*.png` is averaged into the index whose `GGDdefault.act` colour
+     the matching `CLUT*.png` pixel has.
+  2. `--refdir`: the community renders 125/127/128 (an exact index-to-colour mapping).
+  3. Our BUNMEI.STR anchors (`fmv_anchors`): page patches registered in the median mosaic of the flyover.
+  4. Harmonic interpolation over the page's index adjacency, which comes within 18-26 per channel when tested on
+     known pages.
+
+  The `1..6.bmp` files in that folder carry only the default palette (`GGDdefault.act`), not a finished CLUT, so they
+  are used only to identify the pages. Agreement between sources: clutgen and the renders differ by 23.6 (A08000)
+  and 15.1 (A06100) mean per channel; the renders and our FMV anchors differ by 17.2 (A08000). Stonetown has no
+  render, so its CLUT is clutgen plus our anchors plus fill.
+- **FMV layer.** BUNMEI.STR pans across each town at 1 FMV pixel = 1 picture pixel. The median of the pan (frames
+  61-91 Iron, 6-30 Lumberjack, 31-60 Stonetown) removes the sparkles. It is re-indexed into the town CLUT and laid
+  under the cut-outs. Its placement:
+  - Iron Town is pinned by the code. The dome fills house H1, the gate, dome and top-door axis is world x 223 (the
+    centre of both exit rectangles), and the people in the FMV stand on residents #15, #6 and #7.
+  - Lumberjack Town and Stonetown are our guesses. The old man is placed on resident #11, and the strong man on
+    resident #2.
+
+  The FMV's own people are erased, leaving flat ground patches. `--no-fmv` drops this layer.
+- **Placement.** Real cut-outs go where they register on the FMV (the A08000 double-gate cut-out lands on the
+  round gate). Elsewhere it is our design:
+  - houses outside the FMV are a roof of page tiles, a real wall cut-out tiled along the front, and a door;
+  - fences continue the FMV's own fences;
+  - the ground is FMV or page tiles.
+
+  Every choice is recorded with its reason in the layout file.
+- **Collision.**
+  - Shape 9 is used for the map border, for the house blocks and for our "solid" rectangles.
+  - House interiors and door gaps are trigger floor (0x80). The engine resets the room whenever the player stands on
+    a non-trigger cell, as AREA05 and AREA19 show.
+  - The exit rectangles from the code are kept open.
+  - Every resident and patrol box is forced onto floor, and each carved cell is reported.
+  - No diagonal shapes are used.
+
+Nothing derived from the disc, the FMV or the community files is committed. The palettes are rebuilt at every run.

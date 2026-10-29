@@ -716,3 +716,52 @@ disco, salvo las filas de HUD/sistema de JP, que están en todas las áreas.
   ventana de 256 colores: A08000 72,9, A08600 67,4 (una paleta de sistema 256 x 1), A06100 82,4; las mejores ventanas de
   PrePre 8 son peores (85,4 / 72,3 / 94,8). Los renders con las mejores ventanas son ruido. Los CLUT del decorado no están en
   ninguno de estos discos.
+
+## Reconstrucción (no original)
+
+`tools/civ_rebuild.py` construye una imagen de fondo (tipo 0x8F) y un mapa de celdas (tipo 0x8E) **aproximados**
+para AREA11, AREA16 y AREA17 s0. Parte de tu propio disco y del fichero `tools/civ_rebuild_layout.json`, que solo
+contiene coordenadas y motivos, sin píxeles. Nada del resultado es original.
+
+```
+python3 tools/civ_rebuild.py [--area 17] [--both | --no-fmv] [--refdir DIR] [--community-cluts DIR] [--preview DIR]
+```
+
+La salida va a `build/civ_rebuild/AREAnn/` (`AREAnn_nofmv/` sin la capa del FMV):
+
+- `map8F.tim`: el TIM de 8 bpp tal como lo lee el motor (CLUT en +0x14, píxeles en +0x220).
+- `map8E.bin`: el mapa de celdas (`u16 w, u16 h` y 0x4000 bytes).
+- Las vistas previas: `picture.png`, `cells.png`, `preview.png` (con los vecinos, sus recorridos, las casas, los
+  objetos y las salidas) y `source.png`.
+- `manifest.json`: de dónde sale cada color y los avisos de las comprobaciones del mapa de celdas.
+
+**Lo real**
+- Los píxeles e índices de los recortes vienen de las páginas SYS. A06100 es Lumberjack Town, A08000 es Iron Town,
+  A07600 y A07601 son Stonetown, y A08600 y A08601 son AREA18. Cada pareja comparte un CLUT.
+- Las casas, los vecinos, sus recorridos y las salidas se leen de I0NFO2 y del código en cada ejecución.
+
+**Lo nuestro**
+- **Colores: derivados del FMV, no originales.** Para cada índice se usa la primera fuente disponible:
+  1. `--community-cluts`: los pares *clutgen* de la comunidad ("community FMV-derived CLUT (clutgen)"),
+     recalculados con su propio método.
+  2. `--refdir`: los renders 125/127/128 de la comunidad.
+  3. Nuestras anclas en BUNMEI.STR.
+  4. Interpolación armónica sobre la vecindad de índices de la página.
+
+  Los ficheros `1..6.bmp` solo traen la paleta por defecto (`GGDdefault.act`), así que solo sirven para identificar
+  las páginas.
+- **Capa del FMV.** Es la mediana del barrido de BUNMEI.STR, a escala 1:1 y reindexada al CLUT del pueblo.
+  - En Iron Town la posición la fija el código: la cúpula ocupa la casa H1, el eje coincide con las dos salidas y
+    las personas del FMV están sobre los vecinos #15, #6 y #7.
+  - En los otros dos pueblos la posición es una estimación nuestra.
+
+  Las personas del FMV se borran. `--no-fmv` quita esta capa.
+- **Colocación.** Los recortes reales van donde coinciden con el FMV. El resto es diseño nuestro, con el motivo de
+  cada decisión anotado en el fichero de layout.
+- **Colisión.**
+  - Bloques de forma 9 para el borde, las casas y nuestros rectángulos.
+  - Los interiores y las puertas de las casas son suelo de disparo (0x80).
+  - Las salidas del código quedan abiertas.
+  - Cada vecino y cada recorrido quedan sobre suelo, y se informa de cada celda abierta para ello.
+
+No se sube nada derivado del disco, del FMV ni de los ficheros de la comunidad.

@@ -1,0 +1,1328 @@
+{
+ "_doc": [
+  "Layout for tools/civ_rebuild.py: RECONSTRUCTION, NOT ORIGINAL (docs/CIVILIZATION.md, 'Reconstruction (not original)').",
+  "No pixels here: page rectangles [page, x, y, w, h] (bytes of the 8 bpp view of SYSTEM/<page>), picture positions",
+  "in px (world (x, y) = px (x + 128, y - 40)), FMV mosaic rectangles, and the reason for each choice.",
+  "mosaics: name -> [movie, first frame, last frame]: the median mosaic of a BUNMEI.STR camera pan (1 FMV px = 1 picture px).",
+  "fmv_anchors: page -> [x, y, size, mosaic, mx, my]: page patch (x, y, size) registered at (mx, my) in the mosaic; it",
+  "  gives the FMV colour of the patch's indices. Found by tools/civ_rebuild.py-independent search (per-index colour",
+  "  variance, kept only when two neighbouring patches agree on the offset; strict = refined score < 0.07).",
+  "place: [piece | 'fmv:stamp', x, y, note]; a note starting '[fmv]' or '[nofmv]' limits the entry to that mode,",
+  "  'flip' as first word mirrors it. Houses (index = TOPDOWN_TRIGGER_RECT_LISTS order): door = [x, width] px on the",
+  "  south wall; draw = roof tileset + wall piece tiled along the front + door piece/stamp."
+ ],
+ "mosaics": {
+  "iron": [
+   "BUNMEI",
+   61,
+   91
+  ],
+  "stone": [
+   "BUNMEI",
+   31,
+   60
+  ],
+  "wood": [
+   "BUNMEI",
+   6,
+   30
+  ],
+  "late": [
+   "BUNMEI",
+   135,
+   205
+  ]
+ },
+ "pages": {
+  "A08000": {
+   "skip_x": 128
+  },
+  "A06100": {
+   "skip_x": 128
+  },
+  "A08600": {
+   "skip_x": 128
+  },
+  "A07600": {
+   "skip_x": 128,
+   "clut_group": [
+    "A07600",
+    "A07601"
+   ]
+  },
+  "A07601": {
+   "skip_x": 0,
+   "clut_group": [
+    "A07600",
+    "A07601"
+   ]
+  }
+ },
+ "fmv_anchors": {
+  "A08000": [
+   [
+    808,
+    0,
+    32,
+    "iron",
+    196,
+    305
+   ],
+   [
+    808,
+    20,
+    32,
+    "iron",
+    196,
+    325
+   ],
+   [
+    648,
+    60,
+    32,
+    "iron",
+    124,
+    365
+   ]
+  ],
+  "A07600": [
+   [
+    560,
+    60,
+    32,
+    "stone",
+    37,
+    36
+   ],
+   [
+    580,
+    60,
+    32,
+    "stone",
+    57,
+    36
+   ],
+   [
+    580,
+    80,
+    32,
+    "stone",
+    57,
+    56
+   ],
+   [
+    180,
+    180,
+    32,
+    "late",
+    411,
+    5
+   ],
+   [
+    180,
+    200,
+    32,
+    "late",
+    411,
+    22
+   ]
+  ],
+  "A07601": [
+   [
+    20,
+    0,
+    32,
+    "stone",
+    -1,
+    187
+   ],
+   [
+    20,
+    20,
+    32,
+    "stone",
+    -1,
+    207
+   ],
+   [
+    140,
+    20,
+    32,
+    "stone",
+    126,
+    271
+   ],
+   [
+    160,
+    20,
+    32,
+    "stone",
+    146,
+    271
+   ],
+   [
+    140,
+    40,
+    32,
+    "stone",
+    126,
+    291
+   ],
+   [
+    60,
+    100,
+    32,
+    "stone",
+    109,
+    197
+   ],
+   [
+    60,
+    120,
+    32,
+    "stone",
+    109,
+    217
+   ],
+   [
+    60,
+    140,
+    32,
+    "stone",
+    109,
+    237
+   ],
+   [
+    220,
+    140,
+    32,
+    "late",
+    321,
+    119
+   ],
+   [
+    20,
+    160,
+    32,
+    "stone",
+    221,
+    105
+   ],
+   [
+    220,
+    160,
+    32,
+    "late",
+    320,
+    142
+   ],
+   [
+    20,
+    180,
+    32,
+    "stone",
+    221,
+    125
+   ]
+  ],
+  "A06100": []
+ },
+ "tilesets": {
+  "iron_grass": {
+   "page": "A08000",
+   "size": [
+    16,
+    16
+   ],
+   "at": [
+    [
+     832,
+     54
+    ],
+    [
+     742,
+     102
+    ],
+    [
+     770,
+     104
+    ],
+    [
+     822,
+     84
+    ],
+    [
+     816,
+     52
+    ]
+   ],
+   "why": "the only fully green 16x16 windows of A08000 (the lawn inside the double-gate cut-out)"
+  },
+  "iron_lawn": {
+   "mosaic": "iron",
+   "size": [
+    24,
+    24
+   ],
+   "at": [
+    [
+     216,
+     132
+    ],
+    [
+     56,
+     176
+    ],
+    [
+     228,
+     356
+    ],
+    [
+     204,
+     364
+    ],
+    [
+     38,
+     368
+    ],
+    [
+     2,
+     370
+    ],
+    [
+     72,
+     370
+    ],
+    [
+     288,
+     376
+    ]
+   ],
+   "nofmv": "iron_grass",
+   "why": "24x24 windows of the FMV mosaic that are all green and within 10 of the sunlit lawn colour, so the ground continues the FMV's own grass"
+  },
+  "iron_stone": {
+   "page": "A08000",
+   "size": [
+    16,
+    16
+   ],
+   "at": [
+    [
+     306,
+     8
+    ],
+    [
+     386,
+     128
+    ],
+    [
+     624,
+     182
+    ],
+    [
+     152,
+     88
+    ],
+    [
+     240,
+     88
+    ],
+    [
+     864,
+     32
+    ],
+    [
+     434,
+     74
+    ],
+    [
+     490,
+     18
+    ]
+   ],
+   "why": "lowest-variance grey 16x16 windows of A08000 (room floors and wall faces); used for roofs and paving"
+  },
+  "wood_deck_page": {
+   "page": "A06100",
+   "size": [
+    16,
+    16
+   ],
+   "at": [
+    [
+     520,
+     70
+    ],
+    [
+     552,
+     72
+    ],
+    [
+     536,
+     80
+    ]
+   ],
+   "why": "deck planks of A06100 (the railing cut-out, x 512-590 y 64-95)"
+  },
+  "wood_deck": {
+   "mosaic": "wood",
+   "size": [
+    24,
+    24
+   ],
+   "at": [
+    [
+     207,
+     270
+    ],
+    [
+     240,
+     189
+    ],
+    [
+     147,
+     219
+    ],
+    [
+     264,
+     201
+    ],
+    [
+     153,
+     126
+    ]
+   ],
+   "nofmv": "wood_deck_page",
+   "why": "lowest-variance sunlit plank windows of the Lumberjack mosaic"
+  },
+  "stone_paving": {
+   "mosaic": "stone",
+   "size": [
+    24,
+    24
+   ],
+   "at": [
+    [
+     66,
+     177
+    ]
+   ],
+   "nofmv": "stone_floor_page",
+   "why": "the tan paving window of the Stonetown mosaic (its lawn and grey flagstone windows re-index badly in this CLUT, so they are not used)"
+  },
+  "stone_floor_page": {
+   "page": "A07601",
+   "size": [
+    16,
+    16
+   ],
+   "at": [
+    [
+     64,
+     104
+    ],
+    [
+     80,
+     120
+    ],
+    [
+     64,
+     136
+    ]
+   ],
+   "why": "the stone path cut-out of A07601 registered on the FMV (anchor 60,100)"
+  },
+  "stone_roof": {
+   "page": "A07600",
+   "size": [
+    16,
+    16
+   ],
+   "at": [
+    [
+     564,
+     64
+    ],
+    [
+     584,
+     64
+    ],
+    [
+     584,
+     84
+    ]
+   ],
+   "why": "the teal tiled roof cut-out of A07600 registered on the FMV (anchors 560-580, 60-80)"
+  }
+ },
+ "pieces": {
+  "iron_wall_a": [
+   "A08000",
+   388,
+   2,
+   160,
+   52
+  ],
+  "iron_wall_b": [
+   "A08000",
+   384,
+   58,
+   166,
+   52
+  ],
+  "iron_wall_hole": [
+   "A08000",
+   387,
+   158,
+   127,
+   44
+  ],
+  "iron_pillars": [
+   "A08000",
+   512,
+   112,
+   113,
+   40
+  ],
+  "iron_plant1": [
+   "A08000",
+   540,
+   156,
+   40,
+   32
+  ],
+  "iron_plant2": [
+   "A08000",
+   514,
+   205,
+   34,
+   30
+  ],
+  "iron_vane": [
+   "A08000",
+   734,
+   128,
+   30,
+   72
+  ],
+  "iron_gate_panel": [
+   "A08000",
+   640,
+   50,
+   96,
+   78
+  ],
+  "iron_arch_wall": [
+   "A08000",
+   832,
+   0,
+   62,
+   112
+  ],
+  "iron_arch_top": [
+   "A08000",
+   832,
+   0,
+   62,
+   70
+  ],
+  "iron_pole1": [
+   "A08000",
+   645,
+   134,
+   17,
+   84
+  ],
+  "iron_pole2": [
+   "A08000",
+   666,
+   132,
+   16,
+   84
+  ],
+  "wood_fence": [
+   "A06100",
+   512,
+   138,
+   80,
+   54
+  ],
+  "wood_fence2": [
+   "A06100",
+   440,
+   196,
+   72,
+   56
+  ],
+  "wood_door": [
+   "A06100",
+   256,
+   190,
+   96,
+   66
+  ],
+  "wood_bush": [
+   "A06100",
+   512,
+   96,
+   80,
+   42
+  ],
+  "wood_planks": [
+   "A06100",
+   512,
+   190,
+   80,
+   60
+  ],
+  "stone_arch": [
+   "A07601",
+   0,
+   0,
+   104,
+   80
+  ],
+  "stone_well": [
+   "A07601",
+   40,
+   96,
+   100,
+   90
+  ]
+ },
+ "fmv_stamps": {
+  "iron_hut_door": [
+   "iron",
+   18,
+   316,
+   56,
+   56
+  ],
+  "iron_arch_door": [
+   "iron",
+   216,
+   304,
+   42,
+   56
+  ],
+  "iron_planter": [
+   "iron",
+   104,
+   56,
+   36,
+   40
+  ],
+  "iron_barrel": [
+   "iron",
+   284,
+   330,
+   34,
+   50
+  ],
+  "wood_arch_door": [
+   "wood",
+   10,
+   150,
+   60,
+   70
+  ],
+  "stone_door": [
+   "stone",
+   40,
+   130,
+   40,
+   56
+  ],
+  "stone_teal_door": [
+   "stone",
+   225,
+   150,
+   45,
+   60
+  ]
+ },
+ "towns": {
+  "17": {
+   "name": "Iron Town",
+   "page": "A08000",
+   "size": [
+    832,
+    704
+   ],
+   "seed": 17,
+   "why_size": "civ_sheets estimate (832 x 704); covers every house rectangle (H5 starts at px -23 and is clipped) and both exit rows",
+   "ground": [
+    {
+     "rect": [
+      0,
+      0,
+      832,
+      704
+     ],
+     "tiles": "iron_lawn"
+    },
+    {
+     "rect": [
+      0,
+      0,
+      196,
+      200
+     ],
+     "tiles": "iron_stone"
+    },
+    {
+     "rect": [
+      516,
+      0,
+      316,
+      200
+     ],
+     "tiles": "iron_stone"
+    }
+   ],
+   "fmv": [
+    {
+     "mosaic": "iron",
+     "crop": [
+      0,
+      0,
+      320,
+      459
+     ],
+     "at": [
+      196,
+      36
+     ],
+     "why": "frames 61-91 pan down the town's central axis. Offset fixed by the code: the dome fills house H1 (px 305-398 x 163-296), the gate/dome/top-door axis is world x 223 (the centre of both exit rectangles), and the people baked into the FMV stand on residents #15 (blue hat), #6 (by the hut: 'go into this hut') and #7 (by the barrel)",
+     "erase": [
+      [
+       46,
+       126,
+       30,
+       50
+      ],
+      [
+       0,
+       64,
+       14,
+       48
+      ],
+      [
+       90,
+       318,
+       30,
+       62
+      ],
+      [
+       254,
+       320,
+       30,
+       64
+      ]
+     ],
+     "why_erase": "the FMV's own people (residents #15, #6, #7 and one at the left edge): the game draws its residents itself"
+    }
+   ],
+   "houses": [
+    {
+     "door": [
+      336,
+      30
+     ],
+     "why": "H1 is the dome: its dark arched doorway is at mosaic x 140-170 -> px 336-366"
+    },
+    {
+     "door": [
+      630,
+      28
+     ],
+     "draw": {
+      "roof": "iron_stone",
+      "wall": "iron_wall_a",
+      "wall_h": 52,
+      "door": "fmv:iron_arch_door",
+      "door_nofmv": "iron_arch_top"
+     },
+     "why": "H2, east of the FMV: grey roof, the riveted wall cut-out along its front, the FMV's arched door"
+    },
+    {
+     "door": [
+      545,
+      28
+     ],
+     "draw": {
+      "roof": "iron_stone",
+      "wall": "iron_wall_b",
+      "wall_h": 52,
+      "door": "fmv:iron_hut_door",
+      "door_nofmv": "iron_arch_top"
+     },
+     "why": "H3 ('the lift used to run on machinery'), top right"
+    },
+    {
+     "door": [
+      124,
+      28
+     ],
+     "draw": {
+      "roof": "iron_stone",
+      "wall": "iron_wall_a",
+      "wall_h": 52,
+      "door": "fmv:iron_hut_door",
+      "door_nofmv": "iron_arch_top"
+     },
+     "why": "H4, top left"
+    },
+    {
+     "door": [
+      50,
+      28
+     ],
+     "draw": {
+      "roof": "iron_stone",
+      "wall": "iron_wall_b",
+      "wall_h": 52,
+      "door": "fmv:iron_arch_door",
+      "door_nofmv": "iron_arch_top"
+     },
+     "why": "H5, the smith ('an iron gear?'), cut by the left edge of the picture as its rectangle is"
+    }
+   ],
+   "place": [
+    [
+     "iron_gate_panel",
+     312,
+     391,
+     "real cut-out at its FMV match: the left gate of the double-gate cut-out registers on the round gate (anchor 648,60 -> mosaic 124,365); the panel's top 40 rows are cropped so the sign stays visible"
+    ],
+    [
+     "iron_wall_b",
+     30,
+     431,
+     "the FMV fence (mosaic y 395-445) continued west with the real wall cut-out"
+    ],
+    [
+     "iron_wall_b",
+     516,
+     431,
+     "...and east"
+    ],
+    [
+     "iron_wall_b",
+     682,
+     431,
+     "...to the east edge"
+    ],
+    [
+     "iron_wall_b",
+     -136,
+     431,
+     "...to the west edge"
+    ],
+    [
+     "iron_pillars",
+     520,
+     200,
+     "pillar row like the FMV's at the courtyard edge (mosaic 0-110, 262-300)"
+    ],
+    [
+     "iron_pillars",
+     84,
+     200,
+     "mirror of the above on the west side"
+    ],
+    [
+     "iron_plant1",
+     222,
+     150,
+     "potted plants: the FMV has them along the upper terrace; ours mark the side streets"
+    ],
+    [
+     "iron_plant2",
+     470,
+     150,
+     ""
+    ],
+    [
+     "iron_pole1",
+     40,
+     470,
+     "lamp poles beside the outer fence"
+    ],
+    [
+     "iron_pole2",
+     780,
+     470,
+     ""
+    ],
+    [
+     "iron_vane",
+     262,
+     136,
+     "[nofmv] the weathervane where the FMV shows it (mosaic 85-110, 130-200)"
+    ],
+    [
+     "fmv:iron_barrel",
+     760,
+     520,
+     "[fmv] the FMV's water barrel reused by the east lamp"
+    ]
+   ],
+   "solid": [
+    [
+     196,
+     300,
+     320,
+     72,
+     "the 'Iron the No.1' building band (mosaic y 264-336): walk round it by the side streets"
+    ],
+    [
+     0,
+     440,
+     321,
+     30,
+     "outer fence west of the gate"
+    ],
+    [
+     381,
+     440,
+     451,
+     30,
+     "outer fence east of the gate"
+    ],
+    [
+     0,
+     470,
+     321,
+     234,
+     "outside the fence"
+    ],
+    [
+     381,
+     470,
+     451,
+     234,
+     "outside the fence"
+    ],
+    [
+     0,
+     0,
+     321,
+     32,
+     "north wall west of the top door"
+    ],
+    [
+     381,
+     0,
+     451,
+     32,
+     "north wall east of the top door"
+    ]
+   ],
+   "free": [
+    [
+     321,
+     0,
+     60,
+     120,
+     "top door corridor (exit 1)"
+    ],
+    [
+     321,
+     400,
+     60,
+     304,
+     "gate corridor (exit 0)"
+    ]
+   ],
+   "exits": [
+    {
+     "world": [
+      167,
+      571,
+      279,
+      2000
+     ],
+     "to": "AREA18 (Civilization Town)",
+     "code": "topdownSectionStepE: y > 0x23A and x - 0xA7 < 0x71"
+    },
+    {
+     "world": [
+      176,
+      -2000,
+      271,
+      79
+     ],
+     "to": "AREA17 s1 (inside Iron Town)",
+     "code": "topdownSectionStepE: y < 0x50 and x - 0xB0 < 0x60"
+    }
+   ]
+  },
+  "11": {
+   "name": "Lumberjack Town",
+   "page": "A06100",
+   "size": [
+    736,
+    672
+   ],
+   "seed": 11,
+   "why_size": "civ_sheets estimate; holds the three houses, all patrols and the east exit (px x > 683)",
+   "ground": [
+    {
+     "rect": [
+      0,
+      0,
+      736,
+      672
+     ],
+     "tiles": "wood_deck"
+    }
+   ],
+   "fmv": [
+    {
+     "mosaic": "wood",
+     "crop": [
+      0,
+      0,
+      345,
+      320
+     ],
+     "at": [
+      339,
+      114
+     ],
+     "why": "frames 6-30 (windmill, tower, deck). Our alignment: the FMV's old man stands on resident #11 (sub 3, male resident, world 496,344 -> px 624,304); the hard-hat worker then falls 56 px east of #10's vertical patrol (x 280). Not pinned by the code as tightly as Iron Town",
+     "erase": [
+      [
+       118,
+       70,
+       30,
+       50
+      ],
+      [
+       275,
+       165,
+       30,
+       55
+      ]
+     ],
+     "why_erase": "the FMV's worker and old man"
+    }
+   ],
+   "houses": [
+    {
+     "door": [
+      190,
+      28
+     ],
+     "draw": {
+      "roof": "wood_deck_page",
+      "wall": "wood_fence",
+      "wall_h": 54,
+      "door": "fmv:wood_arch_door",
+      "door_nofmv": "wood_door"
+     },
+     "why": "H1, the workshop house of the two factory workers"
+    },
+    {
+     "door": [
+      110,
+      28
+     ],
+     "draw": {
+      "roof": "wood_deck_page",
+      "wall": "wood_fence2",
+      "wall_h": 56,
+      "door": "wood_door"
+     },
+     "why": "H2 ('this machine is iron')"
+    },
+    {
+     "door": [
+      545,
+      28
+     ],
+     "draw": {
+      "roof": "wood_deck_page",
+      "wall": "wood_fence",
+      "wall_h": 54,
+      "door": "wood_door"
+     },
+     "why": "H3, the raft maker's hut, drawn over the FMV's deck corner"
+    }
+   ],
+   "place": [
+    [
+     "wood_bush",
+     20,
+     560,
+     "bushes along the south edge"
+    ],
+    [
+     "wood_bush",
+     260,
+     600,
+     ""
+    ],
+    [
+     "wood_planks",
+     420,
+     560,
+     "lumber stack"
+    ],
+    [
+     "wood_fence",
+     0,
+     40,
+     "north fence"
+    ],
+    [
+     "wood_fence",
+     80,
+     40,
+     ""
+    ],
+    [
+     "wood_fence",
+     160,
+     40,
+     ""
+    ],
+    [
+     "wood_fence",
+     420,
+     40,
+     ""
+    ]
+   ],
+   "solid": [
+    [
+     0,
+     0,
+     327,
+     40,
+     "north edge west of the factory exit"
+    ],
+    [
+     392,
+     0,
+     344,
+     40,
+     "north edge east of it"
+    ]
+   ],
+   "free": [
+    [
+     327,
+     0,
+     65,
+     80,
+     "factory corridor (exit 1)"
+    ],
+    [
+     680,
+     321,
+     56,
+     100,
+     "east corridor (exit 0)"
+    ]
+   ],
+   "exits": [
+    {
+     "world": [
+      556,
+      361,
+      2000,
+      460
+     ],
+     "to": "AREA18 (Civilization Town)",
+     "code": "topdownSectionStepC: x > 0x22B and y - 0x169 < 0x64"
+    },
+    {
+     "world": [
+      199,
+      -2000,
+      263,
+      78
+     ],
+     "to": "AREA11 s1 (the Factory)",
+     "code": "topdownSectionStepC: y < 0x4F and x - 0xC7 < 0x41"
+    }
+   ]
+  },
+  "16": {
+   "name": "Stonetown",
+   "page": "A07600",
+   "size": [
+    544,
+    608
+   ],
+   "seed": 16,
+   "why_size": "civ_sheets estimate; holds the four houses, the west exit row (px y 480-489) and the boy at px (165,488)",
+   "ground": [
+    {
+     "rect": [
+      0,
+      0,
+      544,
+      608
+     ],
+     "tiles": "stone_paving"
+    }
+   ],
+   "fmv": [
+    {
+     "mosaic": "stone",
+     "crop": [
+      0,
+      0,
+      320,
+      340
+     ],
+     "at": [
+      57,
+      62
+     ],
+     "why": "frames 31-60 (teal roofs, white arch, keyhole well). Our alignment: the strong man on the tower stands on resident #2 ('Hup... HAAA!', a sub-3 lifter, px 272,292)",
+     "erase": [
+      [
+       200,
+       5,
+       45,
+       50
+      ],
+      [
+       120,
+       60,
+       30,
+       50
+      ],
+      [
+       195,
+       170,
+       50,
+       60
+      ],
+      [
+       85,
+       235,
+       30,
+       55
+      ]
+     ],
+     "why_erase": "the FMV's four people"
+    }
+   ],
+   "houses": [
+    {
+     "door": [
+      250,
+      28
+     ],
+     "draw": {
+      "roof": "stone_roof",
+      "wall": "stone_well",
+      "wall_h": 60,
+      "door": "fmv:stone_door",
+      "door_nofmv": "stone_arch"
+     },
+     "why": "H1"
+    },
+    {
+     "door": [
+      310,
+      24
+     ],
+     "why": "H2 lies inside the FMV (its teal-roofed house)"
+    },
+    {
+     "door": [
+      372,
+      24
+     ],
+     "why": "H3 lies inside the FMV"
+    },
+    {
+     "door": [
+      128,
+      28
+     ],
+     "draw": {
+      "roof": "stone_roof",
+      "wall": "stone_well",
+      "wall_h": 60,
+      "door": "fmv:stone_teal_door",
+      "door_nofmv": "stone_arch"
+     },
+     "why": "H4, the craftsman"
+    }
+   ],
+   "place": [
+    [
+     "stone_arch",
+     420,
+     420,
+     "the white arch cut-out marks the road to the north-east exit"
+    ]
+   ],
+   "solid": [
+    [
+     0,
+     0,
+     275,
+     24,
+     "north edge west of the AREA16 s1 exit"
+    ]
+   ],
+   "free": [
+    [
+     0,
+     470,
+     60,
+     30,
+     "west corridor (exit 0)"
+    ],
+    [
+     275,
+     0,
+     269,
+     40,
+     "north-east opening (exit 2)"
+    ]
+   ],
+   "exits": [
+    {
+     "world": [
+      -2000,
+      520,
+      -117,
+      529
+     ],
+     "to": "AREA18 (Civilization Town)",
+     "code": "topdownSectionStepD: x < -0x74 and y - 0x208 < 0xA"
+    },
+    {
+     "world": [
+      107,
+      319,
+      114,
+      320
+     ],
+     "to": "AREA11 s2 (Factory door)",
+     "code": "topdownSectionStepD: x - 0x6B < 8 and y - 0x13F < 2"
+    },
+    {
+     "world": [
+      148,
+      -2000,
+      2000,
+      73
+     ],
+     "to": "AREA16 s1 (also cut)",
+     "code": "topdownSectionStepD: x > 0x93 and y < 0x4A"
+    }
+   ]
+  }
+ }
+}
