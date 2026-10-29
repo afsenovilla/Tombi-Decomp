@@ -240,7 +240,7 @@ static void open_game_data(const char *argv0) {
         port_printf("[port2] warning: no data/ folder (tools/extract_data.py) and no disc image at %s: CD reads will fail\n", port_disc_path);
 }
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9|32:9] [--widescreen [16:9|21:9|32:9]] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
+    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9|32:9] [--widescreen [16:9|21:9|32:9]] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--title-bg FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID] [--movie FRAME:ID]\n"
@@ -257,6 +257,8 @@ static int usage(const char *argv0) {
                 "  instead (any integer scale; docs/PORT.md \"Texture packs\")\n", argv0);
     return 2;
 }
+int port_cut_content;     /* --cut-content: opt-in cut text recovered from the Japanese release (port/fixes.txt) */
+int port_cc_boatman = 3;  /* AREA00 boatman: extra lines (7,3..5) still to show */
 int main(int argc, char **argv) {
     extern void port_pad_script(const char *), port_poke_add(const char *), port_poke_add_every(const char *, int),
         port_menu_add(const char *), port_title_add(const char *), port_dump_ram_add(const char *);
@@ -267,6 +269,7 @@ int main(int argc, char **argv) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : 0;
         if (!strcmp(a, "--disc") && v) port_disc_path = argv[++i];
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
+        else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);
         else if (!strcmp(a, "--headless")) headless = 1;

@@ -337,6 +337,34 @@ def set_icon(root):
 
 
 # ---------------------------------------------------------------------------------------------- window
+# --cut-content (port/fixes.txt): text cut from the game, recovered from the Japanese release
+i18n.add({
+    "es": {"l.cutcontent": "Activar contenido recortado",
+           "i.cutcontent": "Textos que se quitaron del juego y que se han encontrado en la versión japonesa (Ore! Tomba). "
+                           "Se activan dos:\n\n"
+                           "• El barquero de la Ciudad de todo principio (AREA00): en el estanque al que llegas sobre la tortuga, "
+                           "tras su «¡Hasta luego... o hasta nunca!» dice tres frases más (una puerta cerrada con llave, la cerradura "
+                           "de los hombres de hierro y su barca en la playa del Bosque de las setas).\n"
+                           "• Una carta de Ciudad Baco en la Montaña Fénix (AREA03): un segundo cartel a la izquierda del de guardar "
+                           "partida, al principio de la zona; se lee igual que este (arriba y hablar).\n\n"
+                           "Mencionan lugares y cosas que no existen en el juego final (el País de la Civilización, esa cerradura, "
+                           "la barca).\n\n"
+                           "Los textos están en español con el parche «Traducción mejorada»; en los demás idiomas, o sin el parche, "
+                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»)."},
+    "en": {"l.cutcontent": "Enable cut content",
+           "i.cutcontent": "Text that was removed from the game and found in the Japanese release (Ore! Tomba). "
+                           "Two pieces are enabled:\n\n"
+                           "• The boatman in the Village of All Beginnings (AREA00): at the pond you reach on the turtle, after his "
+                           "farewell he says three more lines (a locked door, a lock made by the Iron Men, his boat on the Mushroom "
+                           "Forest beach).\n"
+                           "• A letter from Baccus Village on Phoenix Mountain (AREA03): a second sign to the left of the save sign at "
+                           "the start of the area, read the same way (Up, then talk).\n\n"
+                           "They mention places and things that do not exist in the final game (the Land of Civilization, that lock, "
+                           "the boat).\n\n"
+                           "The texts are in Spanish with the 'Improved translation' patch; in the other languages, or without the "
+                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???')."},
+})
+
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
 i18n.add({
     "es": {"l.experimental": "Mostrar funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
@@ -833,6 +861,11 @@ class App:
         bp = bundled_patch()
         ttk.Label(c, text=tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), style="Muted.TLabel", wraplength=640,
                   justify="left").pack(anchor="w", pady=(8, 0))
+        row = ttk.Frame(c)                                     # --cut-content (port/fixes.txt)
+        row.pack(anchor="w", pady=(10, 0))
+        ttk.Checkbutton(row, text=tr("l.cutcontent"), variable=self.var("cut_content", tk.BooleanVar, False)).pack(side="left")
+        ttk.Button(row, text="(i)", width=3,
+                   command=lambda: messagebox.showinfo(tr("l.cutcontent"), tr("i.cutcontent"))).pack(side="left", padx=(6, 0))
         if self.experimental:
             o, c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
             o.pack(fill="x", pady=(12, 0), padx=(0, 4))
@@ -1110,6 +1143,8 @@ class App:
             cmd += ["--fps60"]
         if s.get("lang"):
             cmd += ["--lang", str(s["lang"])]
+        if s.get("cut_content"):
+            cmd += ["--cut-content"]
         gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
         if str(s.get("lang")) != "5":
             self.gfx_note = "no (language is not Spanish)"

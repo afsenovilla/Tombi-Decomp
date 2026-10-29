@@ -366,3 +366,13 @@ src/x010/updateParallaxBackdropSprite.c | if (o->a.p.whole - 0x40 < 0x141 && o->
 #
 # --title-bg (widescreen, runtime/titlebg.c): mark the ordering-table node the title background / logo sprites go into
 src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } addTilePrim(&r, 0, 0, 1);
+#
+# --cut-content (port_cut_content, opt-in; console build unchanged): text cut from the game that the Japanese release
+# still has (tools/jp_text.py). 1) AREA00 boatman scene: after his third line (7,2) a00Variant0EventScene
+# ends the scene; with the flag it first shows the three unused lines (7,3), (7,4), (7,5) (MFNT000 #162-164).
+src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if (port_cut_content && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
+src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc_boatman; port_cc_boatman = 0; }
+# 2) AREA03 letter (MFNT030 #208 = sign text (1,1), no sign shows it): next to the save-point sign of Phoenix Mountain
+# (subtype 25, AREA03 sections 0/4, x 440) spawn a sign of subtype 27 (D_80079EBC[27] = (1,1)) 40 px to its left (read with Up there, like the post).
+src/updateL4Type1AObject.c | void updateL4Type1AObject(O *o) | extern char *allocObjectLayer4(void); static void port_cc_letter(O *o) { extern int port_verbose; extern void port_printf(const char *, ...); char *n = allocObjectLayer4(); int i; if (!n) return; for (i = 0; i < 0x20; i++) n[i] = ((char *)o)[i]; n[3] = 27; n[4] = 0; n[0x2e] = ((char *)o)[0x2e]; n[0x6b] = ((char *)o)[0x6b]; *(int *)(n + 0xa0) = *(int *)((char *)o + 0xa0); n[0xa4] = ((char *)o)[0xa4]; *(int *)(n + 0x10) -= 40 << 16; if (port_verbose) port_printf("[port] --cut-content: AREA03 letter sign spawned at x %d\n", *(short *)(n + 0x12)); } void updateL4Type1AObject(O *o)
+src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; if (port_cut_content && o->subtype == 25 && GAME[0] == 3) port_cc_letter(o); } o->box0 = 4;

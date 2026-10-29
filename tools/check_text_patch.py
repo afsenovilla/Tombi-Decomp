@@ -48,6 +48,13 @@ def tags(text):
     return [t for t in TAG.findall(text) if not t.startswith("{NL") and not t.startswith("{BOX")]
 
 
+def placeholder(text):
+    """A cut-content filler slot of the PAL disc ("···??", "!!!!!!!!!!", "..........???"): never shown by the retail game,
+    so its box size says nothing about the room the speaker has; the port shows it only with --cut-content."""
+    vis = re.sub(r"\s", "", TAG.sub("", text))
+    return bool(vis) and all(c in ".·!?" for c in vis)
+
+
 def box(text):
     m = re.search(r"\{BOX (\d+) (\d+)\}", text)
     return (int(m.group(1)), int(m.group(2))) if m else None
@@ -95,6 +102,11 @@ def check_entry(proj, path, idx, text):
         if (b is None) != (ob is None):
             errs.append("BOX added/removed")
         elif b:
+            if placeholder(orig):                # filler slot: a full-size box, up to 5 lines
+                if b[0] > MAX_W or b[1] > 16 + 13 * 5:
+                    errs.append("BOX too big for a restored cut-content slot (%dx%d)" % b)
+                b = ob = None
+        if b and ob:
             if b[1] > ob[1]:
                 errs.append("BOX taller than original (%d > %d)" % (b[1], ob[1]))
             mv = re.search(r"\{MOVE (\d+) (\d+)\}", orig)
