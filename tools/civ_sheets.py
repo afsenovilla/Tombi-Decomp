@@ -54,6 +54,30 @@ def _clip_figure(p, bb):
     return (x0, y0, x1, y1)
 
 
+def lost_marker(scale=1.0):
+    """Stand-in for a resident whose drawing is on a texture page that did not survive (its w1e page is not the
+    reloaded SYS page): a grey capsule with a question mark. Not a drawing of the character."""
+    w, h = int(18 * scale), int(36 * scale)
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    d.rounded_rectangle([0, 0, w - 1, h - 1], radius=max(2, w // 2), fill=(150, 150, 150, 140), outline=(90, 90, 90, 255), width=max(1, int(scale)))
+    d.text((w / 2, h / 2), '?', font=F(max(8, int(14 * scale)), True), fill=(255, 255, 255, 255), anchor='mm')
+    return im
+
+
+# What decides a resident's drawing (see SUB_EVIDENCE and docs/CIVILIZATION.md "Which drawing each subtype is"):
+# the actor def's w1e is the texture page the parts are drawn from (page = part.tpage + w1e; the parts use relative
+# page 0 in the retail top-down tables). The surviving SYS reload pages sit at VRAM x 0x40.., so only w1e 1 (page x 0x40,
+# the 4 bpp sprite area of SYSTEM/A06100 / A07600 / A08000) can be drawn from them; w1e 0x0A/0x0B/0x10/0x11/0x08 are pages
+# that no surviving file fills. Within page 1, the retail tables (AREA05/08) pack frames in frame-id order, row by row,
+# and each subtype's scripts use a consecutive frame range (A16: sub 0 from 30, sub 1 from 60, sub 2 from 90).
+SUB_EVIDENCE = {
+    11: {0: 'proven page (w1e 1); hard-hat worker = first frames 0..29, consistent with id order'},
+    16: {0: 'proven page (w1e 1); consistent: frames from 30, first group of the page', 1: 'proven page (w1e 1); consistent: frames from 60, second group',
+         2: 'proven page (w1e 1); consistent: frames from 90, third group; palette row 53 pixel-exact with TCRF', 3: 'drawn from page w1e 0x11: lost'},
+    17: {0: 'proven page (w1e 1); spiky-haired resident, consistent with id order'},
+}
+
+
 def comps(p):
     m=[[1 if p[y][x] else 0 for x in range(256)] for y in range(256)]
     seen=[[0]*256 for _ in range(256)]; out=[]
@@ -89,19 +113,19 @@ def sub_pal(C, sub):
 
 
 PAL_NOTE = {
-    'es': {16: 'Paletas reales de AREA16/CLUT07: fila 53 = Male Stonetown Resident (el forzudo; coincide píxel a píxel con ese sprite de TCRF); filas 54 y 48 para Female Stonetown Resident y los demás (suposición: el código no lo dice)',
-           11: 'Paletas reales de AREA11/CLUT02, confirmadas por los colores de TCRF: fila 4 = Lumberjack Factory Worker (el trabajador del casco), fila 36 = Male Lumberjack Town Resident (el anciano; fila 68 = su variante "maldita", no usada aquí). Nombres de TCRF; qué tipo de vecino del código es cada dibujo es una suposición nuestra',
-           17: 'Paleta real AREA17/CLUT03 fila 1 (= AREA17/CLUT06 filas 1 y 129, AREA18/CLUT02 fila 6): coincide con una captura del juego de un vecino de hierro del mismo tipo (por conjunto de colores, no píxel a píxel); que todos los vecinos la usen es una suposición'},
-    'en': {16: 'Real palettes from AREA16/CLUT07: row 53 = Male Stonetown Resident (the strongman; matches that TCRF sprite pixel-exact); rows 54 and 48 for Female Stonetown Resident and the others (a guess: the code does not say)',
-           11: 'Real palettes from AREA11/CLUT02, confirmed by TCRF colours: row 4 = Lumberjack Factory Worker (hard hat), row 36 = Male Lumberjack Town Resident (the old man; row 68 = his "cursed" variant, not used here). TCRF names; which code resident type each drawing is remains our guess',
-           17: 'Real palette AREA17/CLUT03 row 1 (= AREA17/CLUT06 rows 1 and 129, AREA18/CLUT02 row 6): matched to a retail screenshot of the same character type (colour set), not pixel-exact; that every resident uses it is a guess'}}
+    'es': {16: 'Subtipos 0-2 dibujados de la página que sobrevive (w1e 1, probado); el orden de fotogramas da tipo 0 = Female Stonetown Resident, 1 = el chico, 2 = Male Stonetown Resident (coherente). Paletas reales de AREA16/CLUT07: fila 53 para el subtipo 2 (píxel a píxel con TCRF), 54 y 48 para 0 y 1 (suposición). Subtipo 3 (w1e 0x11): página perdida, cápsula gris',
+           11: 'Sólo el subtipo 0 se dibuja de la página que sobrevive (w1e 1, probado): Lumberjack Factory Worker, paleta real AREA11/CLUT02 fila 4 (confirmada por colores de TCRF). Subtipos 1-4 (w1e 0x0A/0x0B/0x10/0x11): página perdida, cápsula gris',
+           17: 'Sólo el subtipo 0 se dibuja de la página que sobrevive (w1e 1, probado), paleta real AREA17/CLUT03 fila 1 (según una captura del juego). Subtipos 1-4 (w1e 0x0A/0x0B/0x10/0x08): página perdida, cápsula gris'},
+    'en': {16: 'Subtypes 0-2 are drawn from the surviving page (w1e 1, proven); frame order gives 0 = Female Stonetown Resident, 1 = the boy, 2 = Male Stonetown Resident (consistent). Real palettes AREA16/CLUT07: row 53 for subtype 2 (pixel-exact with TCRF), 54 and 48 for 0 and 1 (a guess). Subtype 3 (w1e 0x11): page lost, grey capsule',
+           11: 'Only subtype 0 is drawn from the surviving page (w1e 1, proven): Lumberjack Factory Worker, real palette AREA11/CLUT02 row 4 (confirmed by TCRF colours). Subtypes 1-4 (w1e 0x0A/0x0B/0x10/0x11): page lost, grey capsule',
+           17: 'Only subtype 0 is drawn from the surviving page (w1e 1, proven), real palette AREA17/CLUT03 row 1 (matched to a retail screenshot). Subtypes 1-4 (w1e 0x0A/0x0B/0x10/0x08): page lost, grey capsule'}}
 
 
 # ------------------------------------------------------------------ per-town data (ES) and the flat plan sheet
 SC=1.5
 CIVI='Ciudad de civilización (AREA18)'
 AREAS={
-16:dict(atlas='A07600',clut='AREA16/CLUT07',pals={0:54,1:48,2:53,3:48},sub={0:9,1:28,2:34,3:16},
+16:dict(atlas='A07600',clut='AREA16/CLUT07',pals={0:54,1:48,2:53},sub={0:9,1:28,2:34,3:None},
  title='AREA16 sección 0 — pueblo recortado de la gente de piedra',
  cap='Pueblo recortado de la gente de piedra (Ciudad de Piedra, AREA16, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((-140,520),'L','→ '+CIVI),((110,320),'D','→ Fábrica (AREA11 s2), puerta'),((220,60),'U','→ AREA16 s1 (también recortada)')],
@@ -120,7 +144,7 @@ AREAS={
  'Casa 2: sin diálogo en el código',
  'Al final: el chico que vio a la bruja Mizuno (texto PAL #229), inicia el evento 0x67'],
  ),
-11:dict(atlas='A06100',clut='AREA11/CLUT02',pals={0:4,1:4,2:36,3:36,4:4},sub={0:0,1:2,2:12,3:21,4:25},
+11:dict(atlas='A06100',clut='AREA11/CLUT02',pals={0:4},sub={0:0,1:None,2:None,3:None,4:None},
  title='AREA11 sección 0 — pueblo recortado de la gente de madera',
  cap='Pueblo recortado de la gente de madera (junto a la Fábrica, AREA11, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((560,410),'R','→ '+CIVI),((231,70),'U','→ Fábrica (AREA11 s1)')],
@@ -138,7 +162,7 @@ AREAS={
  'Vecino: «Este cartel es viejo y peligroso» → «Siempre tan lleno de energía»',
  'Casa 3, sentado: probablemente el constructor de balsas («¿Quieres una balsa? Tráeme madera del Árbol Sabio»); el código no le da diálogo'],
  ),
-17:dict(atlas='A08000',clut='AREA17/CLUT03',pals={0:1,1:1,2:1,3:1,4:1},sub={0:2,1:0,2:21,3:28,4:38},
+17:dict(atlas='A08000',clut='AREA17/CLUT03',pals={0:1},sub={0:2,1:None,2:None,3:None,4:None},
  title='AREA17 sección 0 — pueblo recortado de los Hombres de hierro',
  cap='Pueblo recortado de los Hombres de hierro (Ciudad de hierro, AREA17, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((223,575),'D','→ '+CIVI),((223,30),'U','→ interior de la Ciudad de hierro (AREA17 s1)')],
@@ -180,6 +204,7 @@ def explicado_es(area,out):
     actors,props=T.npc_set(var); rects=T.trigger_rects(area)
     p=page(C['atlas']); cs=comps(p)
     def sprite(sub):
+        if C['sub'][sub] is None: return lost_marker(SC)
         pal=clut_row(*sub_pal(C,sub))
         b=cs[C['sub'][sub]]; w,h=b[2]-b[0]+1,b[3]-b[1]+1
         im=Image.new('RGBA',(w,h),(0,0,0,0)); px=im.load()
@@ -310,6 +335,7 @@ def explicado_en(area,out):
     actors,props=T.npc_set(var); rects=T.trigger_rects(area)
     p=page(C['atlas']); cs=comps(p)
     def sprite(sub):
+        if C['sub'][sub] is None: return lost_marker(SC)
         pal=clut_row(*sub_pal(C,sub))
         b=cs[C['sub'][sub]]; w,h=b[2]-b[0]+1,b[3]-b[1]+1
         im=Image.new('RGBA',(w,h),(0,0,0,0)); px=im.load()
@@ -396,9 +422,7 @@ def explicado_en(area,out):
 # TCRF wiki names of the drawings (sprite group of each resident subtype; which code subtype wears which drawing is
 # our identification, as is reading AREA11 as TCRF's "Lumberjack Town")
 TCRF_NAMES = {
-    11: {0: ('Lumberjack Factory Worker', 'trabajador de la fábrica'), 1: ('Lumberjack Factory Worker', 'trabajador de la fábrica'),
-         4: ('Lumberjack Factory Worker', 'trabajador de la fábrica'),
-         2: ('Male Lumberjack Town Resident', 'vecino de Lumberjack Town'), 3: ('Male Lumberjack Town Resident', 'vecino de Lumberjack Town')},
+    11: {0: ('Lumberjack Factory Worker', 'trabajador de la fábrica')},
     16: {2: ('Male Stonetown Resident', 'vecino de Stonetown'), 0: ('Female Stonetown Resident', 'vecina de Stonetown')},
 }
 
@@ -469,6 +493,7 @@ def esquema_es(area,out):
     for g in range(0,H*S,64): d1.line([0,g,W*S,g],fill=(210,205,195))
     p=page(C['atlas']); cs=comps(p)
     def spr(sub):
+        if C['sub'][sub] is None: return lost_marker(S)
         pal=clut_row(*sub_pal(C,sub))
         bb=cs[C['sub'][sub]]; w,h=bb[2]-bb[0]+1,bb[3]-bb[1]+1
         im=Image.new('RGBA',(w,h)); q=im.load()
@@ -573,6 +598,7 @@ def esquema_en(area,out):
     for g in range(0,H*S,64): d1.line([0,g,W*S,g],fill=(210,205,195))
     p=page(C['atlas']); cs=comps(p)
     def spr(sub):
+        if C['sub'][sub] is None: return lost_marker(S)
         pal=clut_row(*sub_pal(C,sub))
         bb=cs[C['sub'][sub]]; w,h=bb[2]-bb[0]+1,bb[3]-bb[1]+1
         im=Image.new('RGBA',(w,h)); q=im.load()
@@ -742,12 +768,12 @@ PLAN_INFO = {
              lst='0x80100784', props='0x80100368'),
 }
 PAL_STATUS = {
-    11: ['AREA11/CLUT02 row 4: Lumberjack Factory Worker (hard hat), subtypes 0, 1, 4 - confirmed by TCRF colours',
-         'AREA11/CLUT02 row 36: Male Lumberjack Town Resident (old man), subtypes 2, 3 - confirmed by TCRF colours (row 68 = his "cursed" twin, not drawn)'],
+    11: ['AREA11/CLUT02 row 4: Lumberjack Factory Worker (hard hat), subtype 0 - confirmed by TCRF colours',
+         'AREA11/CLUT02 row 36: Male Lumberjack Town Resident (old man; on the same page, frames 30..50 of subtype 0\'s extra scripts, which no placed resident uses) - confirmed by TCRF colours, not drawn here'],
     16: ['AREA16/CLUT07 row 53: Male Stonetown Resident (strongman), subtype 2 - pixel-exact match with TCRF\'s sprite',
          'AREA16/CLUT07 row 54: Female Stonetown Resident, subtype 0 - guess',
-         'AREA16/CLUT07 row 48: subtypes 1, 3 - guess'],
-    17: ['AREA17/CLUT03 row 1 (= AREA17/CLUT06 rows 1/129, AREA18/CLUT02 row 6): all subtypes - matched to a retail screenshot of an Iron Town NPC (colour set, not pixel-exact); using it for every resident is a guess'],
+         'AREA16/CLUT07 row 48: subtype 1 - guess'],
+    17: ['AREA17/CLUT03 row 1 (= AREA17/CLUT06 rows 1/129, AREA18/CLUT02 row 6): subtype 0 - matched to a retail screenshot of an Iron Town NPC (colour set, not pixel-exact)'],
 }
 
 
@@ -761,12 +787,12 @@ def plan_legend(area, plan_png, size, frames):
         ('Marks', ['Blue rectangle: house trigger rectangle (TOPDOWN_TRIGGER_RECT_LISTS 0x800FEC9C); inside it the roof hides and the interior shows.',
                    'Green box or line: the area a resident patrols (record bounds, behaviour 1-4).',
                    'Yellow dot: prop / scenery position. Props are dots because their sprite tables are lost.',
-                   'Sprite: a resident; its feet are on the record position.']),
+                   'Sprite: a resident; its feet are on the record position. Grey capsule: a resident whose drawing is lost (its page did not survive).']),
         ('Facing', ['In the game, each resident record sets its facing: field +4 (frame -> animFrame, 0..3) picks the direction and field +6 (anim set -> wb4) the animation; patrolling residents turn as they walk.',
                     'Values in this town (field +4 per resident, in record order): ' + ', '.join(str(f) for f in frames) + '.',
                     'This image does NOT apply them: every resident is drawn with one front-facing frame of the page. That frame is our choice.']),
         ('Sprites', ['Drawings from the surviving texture page SYSTEM/A%s (a VRAM copy the menu reloads, SYS list %d).' % ({11: '06100', 16: '07600', 17: '08000'}[area], I['sysl']),
-                     'Which drawing goes with each resident subtype is our guess: the SPR tables that would say it are lost.',
+                     'Which subtype uses this page is proven by the actor defs: w1e (the texture page) is 1 only for the subtypes drawn here; the others (grey capsules) use pages that did not survive. Which figure of the page each of them is follows the frame-id order of their animation scripts (consistent, see docs/CIVILIZATION.md).',
                      'Palettes (real 16-colour rows of the game\'s CLUT files):'] + ['  - ' + t for t in PAL_STATUS[area]]),
         ('Source', ['Decompiled data in I0NFO2: NPC set %s, resident list at %s (28-byte records), props at %s.' % (I['set'], I['lst'], I['props']),
                     'Generated by tools/civ_sheets.py --sheet plan1x (Tombi-Decomp).']),
@@ -814,6 +840,9 @@ def plan1x(area, outd):
                 A_, B_ = P(x0, y0), P(x1, y1)
                 dr.rectangle([min(A_[0], B_[0]), min(A_[1], B_[1]), max(A_[0], B_[0]), max(A_[1], B_[1])], outline=(20, 170, 40, 255), width=1)
         for a in sorted(actors, key=lambda a: a['y']):
+            X, Y = P(a['x'], a['y'])
+            if C['sub'][a['sub']] is None:
+                lm = lost_marker(1); im.paste(lm, (int(X - lm.width / 2), int(Y - lm.height)), lm); continue
             bb = cs[C['sub'][a['sub']]]; w, h = bb[2] - bb[0] + 1, bb[3] - bb[1] + 1
             pal = clut_row(*sub_pal(C, a['sub']))
             sp = Image.new('RGBA', (w, h)); q = sp.load()

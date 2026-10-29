@@ -421,6 +421,34 @@ is no controller. Restoring one means:
 The town's spawn points are the `GAME_SELECTED_SPAWN_POINT` values its own exit records use when coming back
 (AREA11 s1 exit 0 → 18:1 spawn 1 and so on).
 
+### Which drawing each subtype is (evidence)
+
+The animation scripts survive in I0NFO2 (`TOPDOWN_Ann_ACTOR_DEFS[sub].anims`, 8-byte steps `{u16 frame, -, -, u16 control}`).
+The idle/walk/talk code reads scripts `animFrame + 0/4/8` of table 0. Per subtype:
+
+| Town | Sub | w1e (page) | Frames used by its scripts | Drawing | Status |
+|---|---|---|---|---|---|
+| AREA11 | 0 | 0x01 | 0..29 (idle, walk, talk), plus 30..50 in extra scripts 12..23 | hard-hat worker, Lumberjack Factory Worker (the old man is on the same page, frames 30..50) | page proven; figure consistent |
+| AREA11 | 1, 2, 3, 4 | 0x0A, 0x0B, 0x10, 0x11 | 36..89, 75..128, 108..196, 204..240 | on pages no surviving file fills | lost |
+| AREA16 | 0 | 0x01 | 30..80 | first figure group of A07600 (Female Stonetown Resident) | page proven; figure consistent |
+| AREA16 | 1 | 0x01 | 60..110 | second group (the boy) | page proven; figure consistent |
+| AREA16 | 2 | 0x01 | 90..129 | third group (the strongman, Male Stonetown Resident) | page proven; figure consistent; palette pixel-exact |
+| AREA16 | 3 | 0x11 | 0..29 | page at VRAM y 256 | lost |
+| AREA17 | 0 | 0x01 | 0..55 | the spiky-haired resident of A08000 | page proven; figure consistent |
+| AREA17 | 1, 2, 3, 4 | 0x0A, 0x0B, 0x10, 0x08 | 41..96, 82..135, 115..147, none | lost pages | lost |
+
+- **Page (proven).** A part is drawn from page `part.tpage + w1e`. In the retail top-down tables (AREA05/08/19) the actor
+  parts use relative page 0. The surviving SYS reload pages start at VRAM x 0x40, which is page 1, and the 4 bpp
+  sprite area is their first 64 words. So only subtypes with w1e 1 can draw from them; every other subtype's page is
+  filled by no surviving file.
+- **Figure (consistent).** In AREA05/08 the frames of SPR_DATA[11] are packed on the page in frame-id order, row by row,
+  with mirrored frames reusing the texels at u - 1. The AREA16 subtypes 0/1/2 start at frames 30/60/90, in the same
+  order as the three figure groups on A07600 from the top: hooded women, the boy, the strongman. The strongman's colours
+  match TCRF pixel-exact. AREA11 subtype 0 uses frames 0..29 first, and the hard-hat worker is the first group on
+  A06100.
+- **Not shown.** The facing frame drawn on the sheets is our choice (the record's field +4 picks the real one).
+  Residents whose page is lost are drawn as grey capsules with a question mark.
+
 ## The cut towns, one by one (sheets)
 
 `tools/civ_sheets.py` draws three explanatory sheets per town, in Spanish or English, from your own extracted disc
@@ -441,7 +469,7 @@ python3 tools/civ_sheets.py --area 16 --lang en --sheet esquema --out OUT   # on
 Marks: houses are the `TOPDOWN_TRIGGER_RECT_LISTS` rectangles, where the roof disappears and the inside shows when
 Tomba walks in; red residents stand outdoors, purple ones inside a house; green is the box a resident walks in;
 yellow squares are props. The resident lines are short glosses of the Japanese text (the PAL slots hold "···??").
-Which sprite of the surviving page stands for which resident subtype is a guess. The picture size of each town is an
+Which subtypes use the surviving page, and which figure each is, is set out under "Which drawing each subtype is"; residents on lost pages are grey capsules. The picture size of each town is an
 estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 704 px with margins).
 
 ### AREA11 s0, the Wood People's village
@@ -466,7 +494,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s1).
 - **Props**: 14 (I0NFO2 0x800FFE24); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A06100` (SYS reload list 61), drawn with AREA11/CLUT02 row 4 (Lumberjack Factory Worker, subtypes 0, 1, 4) and row 36 (Male Lumberjack Town Resident, subtypes 2, 3): rows confirmed by TCRF colours, the subtype-to-drawing match is ours.
+- **Sprites**: `SYSTEM/A06100` (SYS reload list 61), drawn for subtype 0 only (Lumberjack Factory Worker, AREA11/CLUT02 row 4, confirmed by TCRF colours); subtypes 1-4 are on lost pages.
 - **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 11 --lang all --out build/civ`
 
@@ -523,7 +551,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepE`, I0NFO2 0x800E9040; destinations MAIN0 0x80079A48): Civilization Town (AREA18); inside Iron Town (AREA17 s1).
 - **Props**: 35 (I0NFO2 0x80100368); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A08000` (SYS reload list 80), drawn with the real palette AREA17/CLUT03 row 1 (matched to a retail screenshot; that every resident uses it is a guess).
+- **Sprites**: `SYSTEM/A08000` (SYS reload list 80), subtype 0 drawn with the real palette AREA17/CLUT03 row 1 (matched to a retail screenshot); subtypes 1-4 are on lost pages.
 - **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 17 --lang all --out build/civ`
 

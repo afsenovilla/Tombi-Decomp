@@ -438,6 +438,34 @@ carga están vacías y (en AREA18) no hay controlador. Recuperar uno supone:
 Los puntos de entrada del pueblo son los valores de `GAME_SELECTED_SPAWN_POINT` que usan sus propios registros de
 salida al volver (salida 0 de AREA11 s1 → 18:1 punto 1, etc.).
 
+### Qué dibujo es cada subtipo (pruebas)
+
+Los guiones de animación sobreviven en I0NFO2 (`TOPDOWN_Ann_ACTOR_DEFS[sub].anims`, pasos de 8 bytes `{u16 fotograma, -, -, u16
+control}`). El código de quieto/andar/hablar lee los guiones `animFrame + 0/4/8` de la tabla 0. Por subtipo:
+
+| Pueblo | Sub | w1e (página) | Fotogramas de sus guiones | Dibujo | Estado |
+|---|---|---|---|---|---|
+| AREA11 | 0 | 0x01 | 0..29 (quieto, andar, hablar), más 30..50 en los guiones extra 12..23 | el trabajador del casco, Lumberjack Factory Worker (el anciano está en la misma página, fotogramas 30..50) | página probada; figura coherente |
+| AREA11 | 1, 2, 3, 4 | 0x0A, 0x0B, 0x10, 0x11 | 36..89, 75..128, 108..196, 204..240 | en páginas que no rellena ningún archivo que sobreviva | perdido |
+| AREA16 | 0 | 0x01 | 30..80 | primer grupo de figuras de A07600 (Female Stonetown Resident) | página probada; figura coherente |
+| AREA16 | 1 | 0x01 | 60..110 | segundo grupo (el chico) | página probada; figura coherente |
+| AREA16 | 2 | 0x01 | 90..129 | tercer grupo (el forzudo, Male Stonetown Resident) | página probada; figura coherente; paleta píxel a píxel |
+| AREA16 | 3 | 0x11 | 0..29 | página en VRAM y 256 | perdido |
+| AREA17 | 0 | 0x01 | 0..55 | el vecino de pelo de punta de A08000 | página probada; figura coherente |
+| AREA17 | 1, 2, 3, 4 | 0x0A, 0x0B, 0x10, 0x08 | 41..96, 82..135, 115..147, ninguno | páginas perdidas | perdido |
+
+- **Página (probado).** Una parte se dibuja de la página `part.tpage + w1e`. En las tablas de vista desde arriba del juego
+  (AREA05/08/19) las partes de personaje usan la página relativa 0. Las páginas de recarga SYS que sobreviven empiezan
+  en VRAM x 0x40, que es la página 1, y la zona de sprites de 4 bpp son sus primeras 64 palabras. Así que sólo los
+  subtipos con w1e 1 pueden dibujarse de ellas; la página de los demás no la rellena ningún archivo que sobreviva.
+- **Figura (coherente).** En AREA05/08 los fotogramas de SPR_DATA[11] están colocados en la página por orden de número,
+  fila a fila, y los fotogramas en espejo reutilizan los texeles en u - 1. Los subtipos 0/1/2 de AREA16 empiezan en los
+  fotogramas 30/60/90, en el mismo orden que los tres grupos de figuras de A07600 desde arriba: mujeres con capucha, el
+  chico, el forzudo. Los colores del forzudo coinciden píxel a píxel con TCRF. El subtipo 0 de AREA11 usa primero los
+  fotogramas 0..29, y el trabajador del casco es el primer grupo de A06100.
+- **Lo que no se muestra.** El fotograma de orientación dibujado en las láminas es elección nuestra (el campo +4 del
+  registro elige el de verdad). Los vecinos cuya página se perdió se dibujan como cápsulas grises con interrogación.
+
 ## Los pueblos recortados uno a uno (láminas)
 
 `tools/civ_sheets.py` dibuja tres láminas explicativas por pueblo, en español o en inglés, a partir de tu propio
@@ -458,8 +486,7 @@ python3 tools/civ_sheets.py --area 16 --lang es --sheet esquema --out SALIDA   #
 Marcas: las casas son los rectángulos de `TOPDOWN_TRIGGER_RECT_LISTS`, donde al entrar Tombi desaparece el tejado y se
 ve el interior; los vecinos rojos están en la calle y los morados dentro de una casa; el verde es la zona por la que
 camina un vecino; los cuadraditos amarillos son objetos. Las frases de los vecinos son resúmenes cortos del texto
-japonés (en PAL esos huecos tienen "···??"). Qué sprite de la página que sobrevive corresponde a cada subtipo de vecino
-es una suposición. El tamaño del dibujo de cada pueblo es una estimación a partir de las posiciones (AREA11 736 x 608,
+japonés (en PAL esos huecos tienen "···??"). Qué subtipos usan la página que sobrevive, y qué figura es cada uno, está en «Qué dibujo es cada subtipo»; los vecinos de páginas perdidas son cápsulas grises. El tamaño del dibujo de cada pueblo es una estimación a partir de las posiciones (AREA11 736 x 608,
 AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 ### AREA11 s0, el pueblo de la gente de madera
@@ -484,7 +511,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); Fábrica (AREA11 s1).
 - **Objetos**: 14 (I0NFO2 0x800FFE24); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A06100` (lista de recarga SYS 61), dibujados con AREA11/CLUT02 fila 4 («Lumberjack Factory Worker», subtipos 0, 1 y 4) y fila 36 («Male Lumberjack Town Resident», subtipos 2 y 3): filas confirmadas por los colores de TCRF; qué subtipo es cada dibujo es nuestro.
+- **Muñecos**: `SYSTEM/A06100` (lista de recarga SYS 61), dibujado sólo el subtipo 0 («Lumberjack Factory Worker», AREA11/CLUT02 fila 4, confirmada por los colores de TCRF); los subtipos 1-4 están en páginas perdidas.
 - **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 11 --lang all --out build/civ`
 
@@ -541,7 +568,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepE`, I0NFO2 0x800E9040; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); interior de la Ciudad de hierro (AREA17 s1).
 - **Objetos**: 35 (I0NFO2 0x80100368); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A08000` (lista de recarga SYS 80), dibujados con la paleta real AREA17/CLUT03 fila 1 (según una captura del juego; que la usen todos es suposición).
+- **Muñecos**: `SYSTEM/A08000` (lista de recarga SYS 80), subtipo 0 dibujado con la paleta real AREA17/CLUT03 fila 1 (según una captura del juego); los subtipos 1-4 están en páginas perdidas.
 - **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 17 --lang all --out build/civ`
 
