@@ -2,6 +2,10 @@
 
 Spanish twin: [CONTENIDO_RECORTADO.md](CONTENIDO_RECORTADO.md).
 
+Other builds surveyed for cut content: [PREPRE8.md](PREPRE8.md) (PrePre Vol. 8, 1997-06), [JPDEMO.md](JPDEMO.md)
+(SLPM-80165) and the English preview CD-R of 1998-02-03, [BETA_980203.md](BETA_980203.md) ([español](BETA_980203_ES.md)):
+early English script, a subtitled 100US movie and an instrumental opening, but no cut Civilization data.
+
 Everything the port restores is **opt-in** (`tombi2 --cut-content`, the launcher's "Enable cut content" checkbox) and
 **port-only** (`port/fixes.txt` rules or `port2/runtime` code). The matching build is untouched and stays
 byte-identical (`tools/build_full.py`, every sha1 OK). Nothing from any disc is shipped: text comes from the player's

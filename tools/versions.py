@@ -16,8 +16,10 @@ JP_OVL = 0x800E9AF8   # retail JP overlay base (jal targets on prologues, like t
 JP_SHARED = 0x2B680   # every JP X<nn>.BIN starts with these bytes of X00.BIN; the area part follows
 
 REFERENCE = "sces01331"
-SERIALS = {"sces01331": "SCES_01331", "slps01144": "SLPS_01144", "slpm80165": "SLPM_80165", "pcpx96084": "PCPX_96084"}
-ALIASES = {"pal": "sces01331", "jp": "slps01144", "jpdemo": "slpm80165", "prepre8": "pcpx96084"}
+SERIALS = {"sces01331": "SCES_01331", "slps01144": "SLPS_01144", "slpm80165": "SLPM_80165", "pcpx96084": "PCPX_96084",
+           "beta980203": "BETA_980203"}
+ALIASES = {"pal": "sces01331", "jp": "slps01144", "jpdemo": "slpm80165", "prepre8": "pcpx96084", "beta": "beta980203"}
+BETA_OVL = 0x800EDAA8  # overlay base of the 1998-02-03 English preview (jal targets on X00 prologues)
 
 VERSIONS = {
     "slpm80165": {
@@ -31,6 +33,14 @@ VERSIONS = {
         "game": "game_prepre8", "serial": "PCPX_96084",
         "progs": {"tomba": ("TOMBA.EXE (PrePre 8)", "TOMBA.EXE", 0x80010000, 0)},
     },
+    # "Tomba! (Beta prototype) (1998-02-03)", CD-R "TOMBI NTSC Preview Version": English text, JP-style layout, boot
+    # SLPS_011.44 (the JP serial, but a different executable). Serial-less, so the key is the build date. See
+    # docs/BETA_980203.md.
+    "beta980203": {
+        "game": "game_beta980203", "serial": "BETA_980203",
+        "progs": {"beta980203": ("SLPS_011.44 (beta 1998-02-03)", "SLPS_011.44", 0x80010000, 0),
+                  "x00": ("X00.BIN (SYSTEM, beta)", "X00.BIN", BETA_OVL, 0)},
+    },
     "slps01144": {
         "game": "game_jp", "serial": "SLPS_01144",
         "progs": dict([("slps01144", ("SLPS_011.44", "SLPS_011.44", 0x80010000, 0)),
@@ -42,7 +52,7 @@ VERSIONS = {
 
 # PAL program whose src directory holds the shared C of a version program (main exe and X00 -> src/, xNN -> src/x0NN/)
 def pal_prog(ver, prog):
-    if prog in ("slps01144", "slpm80165", "tomba"): return "main0"
+    if prog in ("slps01144", "slpm80165", "tomba", "beta980203"): return "main0"
     return "x0" + prog[1:]
 
 

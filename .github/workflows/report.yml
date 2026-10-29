@@ -321,3 +321,77 @@ jobs:
         with:
           name: PCPX_960.84_report
           path: build/pcpx96084/report.json
+
+  # "Tomba! (Beta prototype) (1998-02-03)", CD-R "TOMBI NTSC Preview Version": the English preview build between the
+  # JP retail and the USA release (boot SLPS_011.44, a different executable from JP retail). Separate decomp.dev
+  # version, artifact BETA_980203_report. The image (raw MODE2/2352 .bin, or a zip holding SLPS_011.44 and
+  # SYSTEM/X00.BIN) comes from the GAME_FILES_URL_BETA980203 secret; never committed. Skipped when the secret is
+  # missing. See docs/BETA_980203.md.
+  report-beta980203:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch beta disc
+        id: fetch
+        env:
+          GAME_FILES_URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
+        run: |
+          if [ -z "$GAME_FILES_URL_BETA980203" ]; then
+            echo "::notice::GAME_FILES_URL_BETA980203 secret not set; skipping the 1998-02-03 beta report."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ ! -f config/beta980203/beta980203.yaml ]; then
+            echo "::notice::config/beta980203 not set up; beta report skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_BETA980203" | tr -d '\r\n"'"'"' ')"
+          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+          curl -fsSL -o "$RUNNER_TEMP/beta.dl" "$URL"
+          mkdir -p "$RUNNER_TEMP/beta"
+          if unzip -tq "$RUNNER_TEMP/beta.dl" >/dev/null 2>&1; then
+            unzip -o -q "$RUNNER_TEMP/beta.dl" -d "$RUNNER_TEMP/beta"
+          elif [ "$(stat -c%s "$RUNNER_TEMP/beta.dl")" -gt 100000000 ]; then
+            python3 -I tools/isoext.py "$RUNNER_TEMP/beta.dl" "$RUNNER_TEMP/beta"
+          else
+            echo "::error::The download is neither a zip nor a disc image. Share the file as 'Anyone with the link' and check GAME_FILES_URL_BETA980203."; exit 1
+          fi
+          rm -f "$RUNNER_TEMP/beta.dl"
+          mkdir -p game_beta980203/SYSTEM
+          cp "$(find "$RUNNER_TEMP/beta" -iname SLPS_011.44 | head -1)" game_beta980203/SLPS_011.44
+          cp "$(find "$RUNNER_TEMP/beta" -ipath '*SYSTEM/X00.BIN' | head -1)" game_beta980203/SYSTEM/X00.BIN
+          printf '%s\n' "1e69d1414dcca09fe360fe69337fc8e62968fda7  game_beta980203/SLPS_011.44" \
+                        "2a1109fb39432f8f6414f4dd85c74a5cff1b6c10  game_beta980203/SYSTEM/X00.BIN" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Install toolchain
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev
+          python3 -m pip install -r tools/requirements.txt
+          python3 -m pip install --no-deps splat64==0.35.2
+          python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          sudo tools/setup_native.sh
+          mkdir -p "$RUNNER_TEMP/objdiff"
+          curl -fsSL -o "$RUNNER_TEMP/objdiff/objdiff-cli" https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
+          chmod +x "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Build beta report
+        if: steps.fetch.outputs.ok == 'true'
+        run: python3 tools/build_report.py --version beta980203 --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Upload beta report
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: BETA_980203_report
+          path: build/beta980203/report.json

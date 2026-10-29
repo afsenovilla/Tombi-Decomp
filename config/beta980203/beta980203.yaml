@@ -1,0 +1,48 @@
+# "Tomba! (Beta prototype) (1998-02-03)", CD-R "TOMBI NTSC Preview Version", boot SLPS_011.44 (not the JP retail
+# executable). See docs/BETA_980203.md.
+# Text range 0x80016070..0x8007555C (first prologue after the rodata, i.e. main, up to the end of SpuGetAllKeysStatus),
+# like config/slps01144/slps01144.yaml.
+name: SLPS_011.44
+sha1: 1e69d1414dcca09fe360fe69337fc8e62968fda7
+options:
+  basename: beta980203
+  target_path: game_beta980203/SLPS_011.44
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/beta980203/beta980203
+  src_path: build/beta980203/splat_src/beta980203
+  build_path: build/beta980203
+  asset_path: build/beta980203/assets
+  ld_script_path: build/beta980203/beta980203.ld
+  symbol_addrs_path:
+    - config/beta980203/symbol_addrs_beta980203.txt
+    - config/beta980203/symbol_addrs_manual.txt
+  undefined_funcs_auto_path: build/beta980203/undefined_funcs_auto.beta980203.txt
+  undefined_syms_auto_path: build/beta980203/undefined_syms_auto.beta980203.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: beta980203
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x800, rodata, beta980203_rodata]
+      - [0x6870, c, beta980203]
+      - [0x65D5C, data, beta980203_data]
+  - [0x92000]
