@@ -35,6 +35,12 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Pig / ol' coot / geezer | vejete, vejestorio | registro coloquial |
 | Ha ha ha | ¡Ja, ja, ja! | con comas |
 | See ya! | ¡Hasta luego! | |
+| GrappleJack | Garfio-porra | antes "Garfio-gancho" (Grapple + Blackjack = Porra) |
+| Dashing Pants | Pantalón veloz | antes "Pantalón elegante" |
+| Funky Parasol | Sombrilla chula | antes "Sombrilla rara" |
+| Miner's Hat | Casco de minero | antes "Gorro (del) minero" |
+| 1 UP | Vida extra | antes "1 +" |
+| Tear Bottle | Tarro lágrimas | también en el título "Necesito un Tarro lágrimas" |
 
 ## Mensajes de objeto y evento (sin concordancia de género)
 
