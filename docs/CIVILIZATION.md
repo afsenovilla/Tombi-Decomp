@@ -1,5 +1,7 @@
 # The cut top-down towns of the Land of Civilization
 
+*Versión en español: [CIVILIZACION.md](CIVILIZACION.md).*
+
 Section 0 of AREA11, AREA16, AREA17 and AREA18 was meant to be a top-down town. It would use the same engine as the
 Baccus Village and Baccus Lake overviews (`SYSTEM/I0NFO2.BIN`). The code for these towns is on the PAL disc and fully
 matched in `src/i0nfo2/`. The NPC and prop placements are also on the disc, as data inside I0NFO2. The section
@@ -395,6 +397,113 @@ is no controller. Restoring one means:
 
 The town's spawn points are the `GAME_SELECTED_SPAWN_POINT` values its own exit records use when coming back
 (AREA11 s1 exit 0 → 18:1 spawn 1 and so on).
+
+## The cut towns, one by one (sheets)
+
+`tools/civ_sheets.py` draws three explanatory sheets per town, in Spanish or English, from your own extracted disc
+(`game/disc/fs` or `TOMBI_FS`). The sheets contain disc art (the AREA08 picture and the surviving resident sprites),
+so they are never committed: regenerate them locally.
+
+```
+python3 tools/civ_sheets.py                                   # all towns, both languages, all sheets -> build/civ/
+python3 tools/civ_sheets.py --area 16 --lang en --sheet esquema --out OUT   # one sheet
+```
+
+| Sheet | File (ES / EN) | What it shows |
+|---|---|---|
+| esquema | `civ_esquema_aNN.png` / `civ_esquema_aNN_en.png` | evidence only. Panel A is the real AREA08 s0 picture with the marks its own code places. Panel B is the cut town at the same scale on grey, with the real resident sprites (borrowed palette), houses, patrol boxes, props and the exits at their code positions. Below: what each mark means, where each exit leads, what each resident says, and where every element comes from |
+| explicado | `civ_explicado_aNN.png` / `civ_explicado_aNN_en.png` | a flat plan with drawn house shapes, sprites, exit arrows and a side legend, next to the AREA08 reference |
+| perspectiva | `civ_perspectiva_aNN.png` / `civ_perspective_aNN_en.png` | the same data in perspective; the only invented value is the house height |
+
+Marks: houses are the `TOPDOWN_TRIGGER_RECT_LISTS` rectangles, where the roof disappears and the inside shows when
+Tomba walks in; red residents stand outdoors, purple ones inside a house; green is the box a resident walks in;
+yellow squares are props. The resident lines are short glosses of the Japanese text (the PAL slots hold "···??").
+Which sprite of the surviving page stands for which resident subtype is a guess. The picture size of each town is an
+estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 704 px with margins).
+
+### AREA11 s0, the Wood People's village
+
+- **Houses** (`TOPDOWN_TRIGGER_RECT_LISTS` 0x800FEC9C, world x0,y0-x1,y1): H1 (-10,191)-(154,283); H2 (-60,278)-(51,379); H3 (361,419)-(500,520).
+- **Residents** (NPC_SET_0D, list at I0NFO2 0x80100080; lines via topdownA11ActorOpenDialogue 0x800F1C88 → AREA11/MFNT110S.WFM #249-#265): 12, numbered as on the sheets.
+
+| # | Where (x, y) | Room | Who / what they say (gloss of the JP line) |
+|---|---|---|---|
+| 1 | (88, 240) | H1 | House 1: "...Now I can make something really interesting..." (PAL text #227) |
+| 2 | (12, 256) | H1 | House 1: no line, sets a flag |
+| 3 | (16, 352) | H2 | House 2: "It doesn't work, but this machine is iron... I could use it" |
+| 4 | (400, 520) | outdoors | Diagonal patrol: "A fortune-teller lives in this hut, but she has a condition" |
+| 5 | (300, 470) | outdoors | Horizontal patrol: "Wood is the best; stone and iron are cold" |
+| 6 | (170, 528) | outdoors | Horizontal patrol: "It doesn't work, but this machine is iron..." |
+| 7 | (172, 424) | outdoors | Neighbour: "There's a maze under the floor; don't wander in carelessly" |
+| 8 | (50, 320) | outdoors | Vertical patrol: "You can only reach that hut from under the floor" |
+| 9 | (62, 294) | outdoors | Horizontal patrol: "A gear? Made of wood it would break" → "I'm thirsty, I'll get a coconut" → "Karakuri Village sank" |
+| 10 | (280, 236) | outdoors | Vertical patrol: "The workshop entrance is up there; go take a look" |
+| 11 | (496, 344) | outdoors | Neighbour: "This sign is old and dangerous" → "You're always so full of energy" |
+| 12 | (432, 448) | H3 | House 3, sitting: probably the raft maker ("Want a raft? Bring me wood from the Wise Old Tree"); the code gives him no dialogue |
+
+- **Exits** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s1).
+- **Props**: 14 (I0NFO2 0x800FFE24); the code does not say what each one is.
+- **Sprites**: `SYSTEM/A06100` (SYS reload list 61), shown with a borrowed palette (`AREA11/CLUT01`).
+- **Missing**: background picture, cell map (collision), palette, sprite tables.
+- **Regenerate**: `python3 tools/civ_sheets.py --area 11 --lang all --out build/civ`
+
+### AREA16 s0, the Stone People's village
+
+- **Houses** (`TOPDOWN_TRIGGER_RECT_LISTS` 0x800FEC9C, world x0,y0-x1,y1): H1 (78,351)-(202,486); H2 (160,264)-(235,343); H3 (219,176)-(299,258); H4 (-25,146)-(51,244).
+- **Residents** (NPC_SET_0E, list at I0NFO2 0x80100364; lines via topdownA16ActorOpenDialogue 0x800F2E84 → AREA16/MFNT160S.WFM #230-#247): 13, numbered as on the sheets.
+
+| # | Where (x, y) | Room | Who / what they say (gloss of the JP line) |
+|---|---|---|---|
+| 1 | (86, 460) | outdoors | Strongman: "Heave... HO!" |
+| 2 | (144, 332) | outdoors | Strongman: "Hup... HAAA!" |
+| 3 | (244, 427) | outdoors | Neighbour by the lift: "This thing on the wall is supposed to be a lift... but it doesn't move" |
+| 4 | (176, 384) | H1 | House 1: "Can't get into the other towns? Don't know, don't care" → later talks about the gear and the generator |
+| 5 | (-72, 362) | outdoors | Vertical patrol: "The folks from the other towns..." → "A gear that won't break? If it were iron..." |
+| 6 | (0, 245) | outdoors | Diagonal patrol: "First time in this town?" → "Long ago I tried to go into the river..." |
+| 7 | (86, 315) | outdoors | Neighbour: "Should I go in...?" → "You'll beat the Evil Pig who cursed this land, right?" |
+| 8 | (239, 106) | outdoors | Diagonal patrol (after the first milestone): "I secretly opened the door between the Iron and Wood towns" |
+| 9 | (26, 174) | H4 | House 4, craftsman: "Hmm... I want to make something" / "Come to think of it..." |
+| 10 | (140, 192) | outdoors | Neighbour (before the first milestone): no line, sets a flag |
+| 11 | (169, 210) | outdoors | Neighbour (before the first milestone): no line, sets a flag |
+| 12 | (205, 290) | H2 | House 2: no dialogue in the code |
+| 13 | (37, 528) | outdoors | At the end: the boy who saw Mizuno the witch (PAL text #229), starts event 0x67 |
+
+- **Exits** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s2), door; AREA16 s1 (also cut).
+- **Props**: 7 (I0NFO2 0x801001D4 / 0x801001D8); the code does not say what each one is.
+- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), shown with a borrowed palette (`AREA16/CLUT01`).
+- **Missing**: background picture, cell map (collision), palette, sprite tables.
+- **Regenerate**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
+
+### AREA17 s0, the Iron Men's village
+
+- **Houses** (`TOPDOWN_TRIGGER_RECT_LISTS` 0x800FEC9C, world x0,y0-x1,y1): H1 (177,203)-(270,336); H2 (454,280)-(580,420); H3 (373,100)-(488,195); H4 (-62,75)-(81,197); H5 (-151,257)-(0,422).
+- **Residents** (NPC_SET_0F, list at I0NFO2 0x80100784; lines via topdownA17ActorOpenDialogue 0x800F4110 (+ DialogueBank2/3) → AREA17/MFNT170S.WFM #213-#218, #257-#268, #270-#289): 16, numbered as on the sheets.
+
+| # | Where (x, y) | Room | Who / what they say (gloss of the JP line) |
+|---|---|---|---|
+| 1 | (7, 152) | H4 | House 4: "I hear you fixed the stone clock tower" |
+| 2 | (27, 140) | H4 | House 4: "Good material! Wait a moment..." |
+| 3 | (-75, 371) | H5 | House 5, the smith: "Need something? An iron gear?" → gives you the gear (item 0x3E) |
+| 4 | (223, 123) | outdoors | The bomb maker: "Haven't seen your face before..." → "To make bombs I need electricity" |
+| 5 | (223, 0) | H1 | House 1: no dialogue in the code |
+| 6 | (175, 424) | outdoors | Neighbour: "Want to go up? Go into this hut" |
+| 7 | (256, 450) | outdoors | Horizontal patrol: "Welcome, this is the Iron Men's town" |
+| 8 | (500, 363) | H2 | House 2: "Iron is sturdy and lasts" → "You even fixed the generator?" |
+| 9 | (370, 310) | outdoors | Diagonal patrol: "Why are we always at each other's throats?" |
+| 10 | (300, 313) | outdoors | Horizontal patrol: "Everyone and their wood and stone..." → "Wood, stone and iron: balance is what matters" |
+| 11 | (290, 191) | outdoors | Neighbour: "Use me as a landmark and go straight down to leave" |
+| 12 | (440, 152) | H3 | House 3: "The lift used to run on machinery" |
+| 13 | (300, 108) | outdoors | Horizontal patrol: "Ride the lift and take the middle path to the Iron Castle" |
+| 14 | (90, 120) | outdoors | Diagonal patrol: "That old Gantetsu won't let me go to the Castle" → "Sorry I made fun of you" |
+| 15 | (128, 232) | outdoors | Diagonal patrol: "This land is under the Evil Pigs' spell too" |
+| 16 | (70, 290) | outdoors | Diagonal patrol: "If you want something iron, try the lift hut" → "Are you a good swimmer?" |
+
+- **Exits** (`topdownSectionStepE`, I0NFO2 0x800E9040; destinations MAIN0 0x80079A48): Civilization Town (AREA18); inside Iron Town (AREA17 s1).
+- **Props**: 35 (I0NFO2 0x80100368); the code does not say what each one is.
+- **Sprites**: `SYSTEM/A08000` (SYS reload list 80), shown with a borrowed palette (`AREA17/CLUT01`).
+- **Missing**: background picture, cell map (collision), palette, sprite tables.
+- **Regenerate**: `python3 tools/civ_sheets.py --area 17 --lang all --out build/civ`
+
 
 ## Validation (tools/topdown.py)
 
