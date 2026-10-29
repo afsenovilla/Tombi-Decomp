@@ -721,7 +721,8 @@ class App:
         hint = ttk.Label(parent, text=tr("l.patchhint"), style="Muted.TLabel", wraplength=300, justify="left")
 
         def chosen(_e=None):
-            m = modes[cb.current()]
+            spanish = self.vars["lang"].get() == 5 if "lang" in self.vars else False
+            m = [x for x in modes if x != "bundled" or spanish][cb.current()]
             if m == "none":
                 self.vars["patch_on"].set(False)
             elif m == "bundled":
@@ -745,7 +746,10 @@ class App:
         spanish = self.vars.get("lang") is not None and self.vars["lang"].get() == 5
         for cb, modes, row, hint in getattr(self, "patch_ui", []):
             try:
-                cb.current(modes.index(m) if m in modes else 0)
+                # the bundled Spanish translation only for the Spanish game (it does not touch the other languages)
+                shown = [x for x in modes if x != "bundled" or spanish]
+                cb.configure(values=[tr("p." + x) for x in shown])
+                cb.current(shown.index(m) if m in shown else 0)
                 row.pack(fill="x", pady=(6, 0)) if m == "custom" else row.pack_forget()
                 hint.pack(anchor="w", pady=(4, 0)) if (m == "none" and spanish and "bundled" in modes) else hint.pack_forget()
             except tk.TclError:
@@ -938,6 +942,8 @@ class App:
         d, s = data_dir(), self.s
         st = DP.status(d)
         want = s.get("patch_on") and (s.get("patch") or "").strip()
+        if want and str(s.get("lang")) != "5" and self._patch_mode() == "bundled":
+            want = ""        # the bundled translation is for the Spanish game only: other languages play the original data
         try:
             if not want:
                 if st:
