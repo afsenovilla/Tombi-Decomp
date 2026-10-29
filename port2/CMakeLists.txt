@@ -121,6 +121,8 @@ target_compile_options(port2gen PRIVATE ${PORT2_ARCH_FLAGS} -O0 -w -fno-zero-ini
 add_executable(tombi2 $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2gen>)
 set_target_properties(tombi2 PROPERTIES LINKER_LANGUAGE C LINK_DEPENDS ${GEN}/syms.ld)
 if(WIN32)
+  enable_language(RC)                               # the exe's icon (tools/icons/port.ico)
+  target_sources(tombi2 PRIVATE tombi2.rc)
   # a console program (the launcher captures stderr; no SDL2main: main() is the plain C one); based at 4 MB with
   # ASLR off so the data image stays below 16 MB (the 24-bit OT links); 16 MB main stack; no libgcc DLL
   target_link_options(tombi2 PRIVATE -m32 -mconsole -static-libgcc -Wl,--image-base,0x400000 -Wl,--disable-dynamicbase

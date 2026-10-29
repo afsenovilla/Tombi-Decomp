@@ -12,6 +12,7 @@
 #include "../shims/gpu_backend.h"
 
 int port_window;
+#include "icon_rgba.h"
 int port_window_scale = 2;
 int port_window_square = 0;                 /* 0: the 320x256 frame shows at 4:3 as on a PAL TV; 1: square pixels (5:4) */
 int port_window_fullscreen;        /* --fullscreen */
@@ -56,6 +57,11 @@ void port_window_start(void) {
                                256 * port_window_scale, SDL_WINDOW_RESIZABLE | (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     }
     if (!win) port_fatal("SDL_CreateWindow: %s", SDL_GetError());
+    {   /* the taskbar / title bar icon */
+        SDL_Surface *ic = SDL_CreateRGBSurfaceFrom((void *)port_icon_rgba, 64, 64, 32, 64 * 4,
+                                                   0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+        if (ic) { SDL_SetWindowIcon(win, ic); SDL_FreeSurface(ic); }
+    }
     SDL_AudioSpec want, have;
     SDL_zero(want);
     want.freq = 44100; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = 1024; want.callback = audio_cb;
