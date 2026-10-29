@@ -378,23 +378,6 @@ static void ws_full_width_quad(Vtx *v) {
         if (v[i].x >= R && v[i].x < R + port_widescreen) v[i].x = R + port_widescreen;
     }
 }
-/* --widescreen: an untextured tile or quad that covers the whole 4:3 width (pause dimming, fades to black/white,
-   screen flashes and wipes) is stretched over the side strips too; anything narrower is left alone */
-static void ws_full_width_rect(int *x, int *w) {
-    int L = ws_ax + ws_dx, R = L + 320;
-    if (*x > L || *x + *w < R) return;
-    if (*x > L - port_widescreen) { *w += *x - (L - port_widescreen); *x = L - port_widescreen; }
-    if (*x + *w < R + port_widescreen) *w = R + port_widescreen - *x;
-}
-static void ws_full_width_quad(Vtx *v) {
-    int L = ws_ax + ws_dx, R = L + 320, i, l = 0, r = 0;
-    for (i = 0; i < 4; i++) { if (v[i].x <= L) l++; else if (v[i].x >= R) r++; else return; }
-    if (l != 2 || r != 2) return;
-    for (i = 0; i < 4; i++) {
-        if (v[i].x <= L && v[i].x > L - port_widescreen) v[i].x = L - port_widescreen;
-        if (v[i].x >= R && v[i].x < R + port_widescreen) v[i].x = R + port_widescreen;
-    }
-}
 static int unknown_cmds;
 /* executes one command; returns the number of words it used (0 = ignore the rest of the packet) */
 static int gp0(const u32 *p, int n) {
@@ -412,13 +395,13 @@ static int gp0(const u32 *p, int n) {
                 u32 uv = p[k++];
                 v[i].u = uv & 255; v[i].v = (uv >> 8) & 255;
                 if (i == 0) clut = uv >> 16;
-        if (ws_on && !tex && quad) ws_full_width_quad(v);
                 if (i == 1) tpage = uv >> 16;
             } else v[i].u = v[i].v = 0;
         }
         if (tex) {
             set_texpage16(tpage);
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511;
+            t.rep = port_texpack_on ? port_texpack_prim(&t, v, nv) : 0;
         }
         if (tex && port_drawdump_path) {                     /* --dump-draws (drawdump.c) */
             int u0 = 255, u1 = 0, v0 = 255, v1 = 0, x0 = 1 << 20, x1 = -(1 << 20), y0 = 1 << 20, y1 = -(1 << 20);
@@ -429,15 +412,14 @@ static int gp0(const u32 *p, int n) {
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, tpage, clut, u0, v0, u1 - u0 + 1, v1 - v0 + 1, x0, y0, x1 - x0, y1 - y0, semi ? 1 : 0, quad ? 1 : 0);
         }
         if (tex && raw) shade = 0;
-        if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
         if (ws_on && !tex && quad) ws_full_width_quad(v);
+        if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
         if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
         return need;
     }
     if (cmd >= 0x40 && cmd < 0x60) {                         /* line / polyline */
         int shade = cmd & 0x10, poly = cmd & 8, semi = cmd & 2;
         int k = 1; u32 c0 = p[0] & 0xFFFFFF; Vtx a;
-            t.rep = port_texpack_on ? port_texpack_prim(&t, v, nv) : 0;
         if (n < 3) return 0;
         vertex(&a, p[k++]);
         for (;;) {
@@ -450,8 +432,6 @@ static int gp0(const u32 *p, int n) {
                 be->line(a.x, a.y, c0, b.x, b.y, c1, shade, semi);
             a = b; c0 = c1;
             if (!poly) break;
-        if (tex) t.rep = port_texpack_on && w && h ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
-        if (ws_on && !tex && w && h) ws_full_width_rect(&a.x, &w);
         }
         return poly ? n : k;
     }
@@ -490,9 +470,9 @@ static int gp0(const u32 *p, int n) {
         if (n < 3) return 0;
         int x = p[1] & 1023, y = (p[1] >> 16) & 511, w = p[2] & 0xFFFF, h = p[2] >> 16, i = 0;
         const u16 *s = (const u16 *)(p + 3); int avail = (n - 3) * 2;
-        if (tex) t.rep = port_texpack_on && w && h ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
         if (w && h) tex_patch_pre(x, y, w, h);
         for (int j = 0; j < h; j++) for (int q = 0; q < w; q++, i++) if (i < avail) vram[(y + j) & 511][(x + q) & 1023] = s[i];
+        if (w && h && port_texpack_on) port_texpack_write(x, y, w, h, 0);
         if (w && h) be->vram_written(x, y, w, h);
         return n;
     }
@@ -512,7 +492,6 @@ static void packet(const u32 *p, int n) {
     }
 }
 
-        if (w && h && port_texpack_on) port_texpack_write(x, y, w, h, 0);
 /* ------------------------------------------------------------------ libgpu API */
 int GetGraphType(void) { return 0; }          /* retail consoles: 1 MB VRAM GPU */
 int GetGraphDebug(void) { return 0; }
@@ -688,6 +667,7 @@ u16 LoadClut2(u32 *clut, int x, int y) {
 int MoveImage(RECT *r, int x, int y) {
     if (r->w <= 0 || r->h <= 0) return 0;
     tex_patch_pre(x & 1023, y & 511, r->w, r->h);
+    if (port_texpack_on) port_texpack_copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     be->copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     return 0;
 }
@@ -695,6 +675,7 @@ int ClearImage(RECT *r, u8 R, u8 G, u8 B) {
     u16 c = (R >> 3) | ((G >> 3) << 5) | ((B >> 3) << 10);
     if (r->w <= 0 || r->h <= 0) return 0;
     tex_patch_pre(r->x & 1023, r->y & 511, r->w, r->h);
+    if (port_texpack_on) port_texpack_write(r->x & 1023, r->y & 511, r->w, r->h, 0);
     be->fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     ws_fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     return 0;
@@ -707,7 +688,6 @@ u32 *ClearOTagR(u32 *ot, int n) {
 }
 u32 *ClearOTag(u32 *ot, int n) {
     for (int i = 0; i < n - 1; i++) ot[i] = (u32)&ot[i + 1] & 0xFFFFFF;
-    if (port_texpack_on) port_texpack_copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     ot[n - 1] = 0xFFFFFF;
     return ot;
 }
@@ -715,7 +695,6 @@ int port_dump_packets;   /* --dump-packets FRAME: print every GP0 packet drawn i
 /* GPU DMA linked-list walk: every node is (len << 24 | next), followed by len GP0 words */
 unsigned long long port_prof_draw_us;   /* time spent walking + rasterizing ordering tables (the fps line, shims/psyq.c) */
 /* --title-bg (runtime/titlebg.c): while the title screen's background is in this list, fill the wide copy of the
-    if (port_texpack_on) port_texpack_write(r->x & 1023, r->y & 511, r->w, r->h, 0);
    buffer with the user's wide picture first (the game then draws its own 4:3 background, logo and text over it) */
 static void ws_title_bg(u32 *ot) {
     extern void *port_title_bg_take(void); extern void port_title_bg_done(void);
