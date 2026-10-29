@@ -4,6 +4,7 @@
  * `func_XXXXXXXX(` definitions of this file and resolves those table words (and the run-time relocation of a
  * loaded file) to them. */
 #include "port_runtime.h"
+#include <string.h>
 
 typedef unsigned char u8; typedef signed char s8; typedef unsigned short u16; typedef short s16;
 typedef unsigned int u32; typedef int s32;
@@ -559,5 +560,34 @@ void func_8004AE7C(u8 *o) {
     case 4:
         func_80116398(o);
         return;
+    }
+}
+
+/* --widescreen (port/fixes.txt, callAreaModelLinkHook): the per-area hook picks which 80-unit-wide blocks of the
+ * area's background model (all already in RAM) are drawn this frame from the camera X (scratchpad 0x176,
+ * SCREEN_ORIGIN_X).  With wider screens the blocks just past the 4:3 window popped in at the edges, so for the areas
+ * whose hook only selects blocks (no palette uploads or counters: GAME 0, 1, 2, 3, 7) it is run again with the camera
+ * moved left and right and the extra blocks are added to the list (capacity 88, the size the game's own clear keeps).
+ * Drawing only: nothing else reads the list.  Off (port_ws_cull 0) the hook runs once exactly as before. */
+extern int port_ws_cull;
+void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int game, u16 *origin_x)
+{
+    hook(list, wmd);
+    if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7)) return;
+    static u32 tmp[0x5b + 4];
+    int d = 2 * port_ws_cull + 40;
+    for (int s = -1; s <= 1; s += 2) {
+        s16 cam = SPAD(s16, 0x176); u16 ox = *origin_x;
+        memset(tmp, 0, sizeof tmp);
+        SPAD(s16, 0x176) = cam + s * d; *origin_x = ox + s * d;
+        hook((char *)tmp, wmd);
+        SPAD(s16, 0x176) = cam; *origin_x = ox;
+        int n = ((u8 *)tmp)[3]; if (n > 88) n = 88;
+        for (int i = 0; i < n; i++) {
+            u8 cnt = (u8)list[3]; int k;
+            if (cnt >= 88) return;
+            for (k = 0; k < cnt; k++) if (((u32 *)list)[1 + k] == tmp[1 + i]) break;
+            if (k == cnt) { ((u32 *)list)[1 + cnt] = tmp[1 + i]; list[3] = cnt + 1; }
+        }
     }
 }

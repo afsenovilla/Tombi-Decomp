@@ -342,3 +342,7 @@ src/drawNowLoading.c | g(0xa0, 0x60, 2, v, p); | if (!port_es_tryagain()) g(0xa0
 # memory card screen title LOAD/SAVE (40x16 at u=168 v=136/120 of the SYSTEM/A00400 page) -> CARGAR (64x16 at u=0 v=160) /
 # GUARDAR (72x16 at u=0 v=176), free 4bpp space of the same page and CLUT; raised 14 px so the wider word sits above the box
 src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; extern int port_tex_patch_has(int x, int y); int es = port_lang == 5 && port_tex_patch_has(64, 160) && port_tex_patch_has(64, 176); if (es) { S->u0 = 0; S->v0 = no ? 0xB0 : 0xA0; S->x0 = x - 12; } s->w = es ? (no ? 0x48 : 0x40) : 0x28; }
+#
+# --widescreen: the area background's block selection (camera X window of 80-unit blocks) also takes the blocks
+# just outside the 4:3 window (port2/runtime/main0_handwritten.c port_ws_area_model_link; identity when off)
+src/callAreaModelLinkHook.c | PTR_DAT_80079b3c[GAME](AREA_MODEL_DRAW_LIST, WMD_DATA); | { extern unsigned short SCREEN_ORIGIN_X; extern void port_ws_area_model_link(void (*)(char *, int), char *, int, int, unsigned short *); port_ws_area_model_link(PTR_DAT_80079b3c[GAME], AREA_MODEL_DRAW_LIST, WMD_DATA, GAME, &SCREEN_ORIGIN_X); }
