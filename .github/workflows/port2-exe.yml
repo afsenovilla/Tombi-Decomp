@@ -56,7 +56,9 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
           python3 -m pip install -r tools/requirements.txt
           python3 -m pip install --no-deps splat64==0.35.2
           python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
@@ -140,6 +142,29 @@ jobs:
           name: tombi-port-game
           path: build/win-bin
 
+      - name: Build tombi-pc (the Linux game, i386; CMake target tombi2)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          # The same policy as the Windows exe: MAIN0/X000 bytes are compiled in from the secret's disc image, nothing else.
+          cmake -S port2 -B build/port2 -G Ninja
+          ninja -C build/port2 -j 4
+          mkdir -p build/linux-bin
+          cp build/port2/tombi2 build/linux-bin/tombi-pc
+          # bundle the 32-bit libSDL2 next to it (few desktops have libsdl2-2.0-0:i386) and look it up via $ORIGIN
+          cp -L /usr/lib/i386-linux-gnu/libSDL2-2.0.so.0 build/linux-bin/
+          patchelf --set-rpath '$ORIGIN' build/linux-bin/tombi-pc
+          file build/linux-bin/tombi-pc; ldd build/linux-bin/tombi-pc || true
+          build/linux-bin/tombi-pc --headless --test-null
+          build/linux-bin/tombi-pc --headless --frames 200 --data build/data-sample 2>&1 | grep -i 'data:\|warning\|violation' | head -5 || true
+          cp THIRD_PARTY_NOTICES.md build/linux-bin/
+          ls -l build/linux-bin
+
+      - uses: actions/upload-artifact@v4
+        if: steps.fetch.outputs.ok == 'true'
+        with:
+          name: tombi-port-game-linux
+          path: build/linux-bin
+
   launcher:
     needs: game
     if: needs.game.outputs.ok == 'true'
@@ -200,5 +225,58 @@ jobs:
           git add -f dist/windows/tombi-port.exe
           if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
           git commit -m "dist: rebuild tombi-port.exe (${GITHUB_SHA::7})"
-          git pull --no-rebase -q -X theirs origin master
-          git push origin HEAD:master
+          for i in 1 2 3 4 5; do
+            git pull --no-rebase -q -X theirs origin master && git push origin HEAD:master && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
+
+  launcher-linux:
+    needs: game
+    if: needs.game.outputs.ok == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tombi-port-game-linux
+          path: build/linux-bin
+
+      - name: Build tombi-port (Linux)
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y libc6:i386
+          chmod +x build/linux-bin/tombi-pc
+          build/linux-bin/tombi-pc --headless --test-null
+          python -m pip install pyinstaller pillow
+          python -c "import tkinter"
+          echo "${GITHUB_SHA::7}" > build_id.txt
+          pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
+            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFont --hidden-import PIL.ImageTk --paths tools \
+            --add-data "tools/icons/launcher.ico:icons" --add-data "tools/icons/launcher.png:icons" --add-data "build_id.txt:." \
+            --add-data "port/assets/prompts/manifest.json:port/assets/prompts" \
+            --add-data "tools/wfm_charmap.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" \
+            --add-binary "build/linux-bin/tombi-pc:." --add-binary "build/linux-bin/libSDL2-2.0.so.0:." \
+            tools/port_launcher.py
+          mkdir -p dist/linux
+          cp build/exe/tombi-port dist/linux/tombi-port
+          chmod +x dist/linux/tombi-port
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/linux/tombi-port
+          if git diff --cached --quiet; then echo "binary unchanged"; exit 0; fi
+          git commit -m "dist: rebuild linux tombi-port (${GITHUB_SHA::7})"
+          for i in 1 2 3 4 5; do
+            git pull --no-rebase -q -X theirs origin master && git push origin HEAD:master && exit 0
+            sleep $((i * 10))
+          done
+          exit 1
