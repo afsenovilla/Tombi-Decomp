@@ -11,6 +11,118 @@
   "sha1": "ec50074b6fd98f611bae11e3de68d6e76ffdd6d4"
  },
  "verbFirst": true,
+ "menus": {
+  "SYSTEM/O5PTSUB0.BIN": {
+   "title": {
+    "0": {
+     "text": "PULSA [START] o EL BOTÓN {176}",
+     "pal": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      0,
+      0,
+      0,
+      3,
+      3,
+      3,
+      3,
+      3,
+      0
+     ]
+    }
+   },
+   "options": {
+    "0": "OPCIONES",
+    "1": "TEXTO:",
+    "4": "AJUSTAR LA PANTALLA",
+    "5": "AJUSTAR Y VER CONTROLES",
+    "6": "LENTO",
+    "7": "RÁPIDO",
+    "9": "ESTÉREO",
+    "20": "Botón  : Guardar cambios",
+    "21": "Botón  : Cancelar",
+    "22": "Botón  : Volver",
+    "23": "Tipo",
+    "24": "Por defecto",
+    "2": "SONIDO:"
+   },
+   "optionsAfter": {
+    "5": "VER Y AJUSTAR "
+   },
+   "cursorRects": {
+    "1": [
+     172,
+     56,
+     56,
+     24
+    ],
+    "4": [
+     76,
+     128,
+     160,
+     24
+    ],
+    "5": [
+     76,
+     152,
+     192,
+     24
+    ],
+    "6": [
+     76,
+     104,
+     160,
+     24
+    ],
+    "7": [
+     76,
+     128,
+     192,
+     24
+    ]
+   },
+   "optionsSprites": {
+    "0": [
+     139,
+     188
+    ],
+    "1": [
+     139,
+     204
+    ]
+   },
+   "buttonSprites": {
+    "0": [
+     139,
+     188
+    ],
+    "1": [
+     139,
+     204
+    ]
+   },
+   "adjustSprites": {
+    "0": [
+     139,
+     188
+    ],
+    "1": [
+     139,
+     204
+    ]
+   }
+  }
+ },
  "edits": {
   "AREA00/CFNT999S.WFM": {
    "0": "¡ESTUPENDO!",
