@@ -503,11 +503,11 @@ void *port_lang_item(void *p) {
 }
 
 /* ------------------------------------------------------------------ MAIN: file table and resident data */
-/* The event-title tile tables of spawnEventTitle (D_800804E0: u16 tile kind per layout flag, D_800804EC: s16 x
-   offset per flag, 6 entries in MAIN0, 11 in MAIN5, 9 in MAIN6, 5 in MAIN7): the language's lists use flags up to
+/* The event-title tile tables of spawnEventTitle (D_800804E0: u16 glyph id per layout flag, D_800804EC: s16 x,
+   s16 y per flag, the "completed" banner, 6 entries in MAIN0, 11 in MAIN5, 9 in MAIN6, 5 in MAIN7): the language's lists use flags up to
    its own count, and the tables sit at other addresses with other sizes, so the C takes these copies when set.
    Found in MAINn after the anchor 00 00 B4 00 00 00 00 00 (D_800804D8, notes/formats.md): the u16 list, padded to
-   4, then the x offsets, one u32 each, -20 * m .. +20 * m' in steps of 20. */
+   4, then the positions {x, y} (y 400 = hidden tile), then s32 {0, 500}. */
 int port_title_k;
 unsigned short port_title_e0[16];
 struct { unsigned short unk0, unk2; } port_title_ec[16];
@@ -516,15 +516,19 @@ static void title_tables(const unsigned char *B, unsigned nb) {
     unsigned at = 0;
     for (unsigned o = DATA_OFF; o + 8 <= nb; o += 4) if (!memcmp(B + o, anchor, 8)) { at = o; break; }
     if (!at) { port_printf("[port2] --lang: the event-title tables of MAIN%d were not found: MAIN0's are used\n", port_lang); return; }
-    unsigned e0 = at + 8, ec = e0;
-    while (ec + 4 <= nb && !((W(B, ec) & 0xFFFF) >= 0x8000 && !(W(B, ec) >> 16))) ec += 4;   /* the first negative x offset */
-    int k = 0; int prev = 0;
-    for (unsigned o = ec; o + 4 <= nb && k < 16; o += 4, k++) {
-        unsigned w = W(B, o); int x = (short)(w & 0xFFFF);
-        if (w >> 16 || x % 20 || (k && x != prev + 20)) break;
-        prev = x;
+    /* K is found by the end marker after the positions, s32 {0, 500} (tools/title_layout.banner_find): a text patch rewrites
+       the tables for its banner (centred x not on the 20 px grid, unused tiles at y = 400), so the values are not checked */
+    unsigned e0 = at + 8, ec = 0; int k = 0;
+    for (int n = 1; n < 16; n++) {
+        unsigned s = e0 + ((2u * n + 3) & ~3u);
+        if (s + 4u * n + 8 > nb) break;
+        if (W(B, s + 4 * n) == 0 && W(B, s + 4 * n + 4) == 500) {
+            int ok = 1;
+            for (int j = 0; j < n; j++) { unsigned y = W(B, s + 4 * j) >> 16; if (y != 0 && y != 400) ok = 0; }
+            if (ok) { k = n; ec = s; break; }
+        }
     }
-    if (k < 2 || ec - e0 < 2u * k || ec - e0 > 2u * k + 2) { port_printf("[port2] --lang: unexpected event-title tables in MAIN%d (%d entries, %u bytes): MAIN0's are used\n", port_lang, k, ec - e0); return; }
+    if (k < 2) { port_printf("[port2] --lang: unexpected event-title tables in MAIN%d: MAIN0's are used\n", port_lang); return; }
     for (int i = 0; i < k; i++) { port_title_e0[i] = B[e0 + 2 * i] | B[e0 + 2 * i + 1] << 8; port_title_ec[i].unk0 = W(B, ec + 4 * i) & 0xFFFF; port_title_ec[i].unk2 = W(B, ec + 4 * i) >> 16; }
     port_title_k = k;
     if (port_verbose) port_printf("[port2]   event-title tables of MAIN%d at %08x: %d entries\n", port_lang, PORT_MAIN0_LOAD + at, k);
