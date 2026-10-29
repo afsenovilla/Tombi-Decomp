@@ -684,3 +684,33 @@ los datos cenitales recortados.** Son los mismos recursos que en PAL con otros n
   mejores filas son las mismas que en PAL (distancia media ponderada al color más cercano unos 24, sin negro/blanco/gris) y la
   mejor fila de datos solo USA es peor (unos 35). La página (`A07600` = USA `A00153`) y AREA16/CLUT07 no cambian, así que la
   suposición de las filas 48 / 54 se mantiene.
+
+## Catálogo de paletas (todos los discos)
+
+`tools/clut_catalog.py catalog OUT` reúne todas las paletas de todos los discos que tenemos y `tools/clut_catalog.py test OUT ...`
+las compara con los colores perdidos. Fuentes: los archivos `CLUTnn` (y `SYSTEM/DSPCLUT.TIM`, que es un CLUT sin cabecera), los
+bloques CLUT pequeños de las listas de carga (archivos `.000` de 32..1024 bytes, p. ej. PAL `SYSTEM/A00007` 256 x 1, `A00805`
+16 x 16), el CLUT de cada TIM en cualquier desplazamiento múltiplo de 4 (incluye las imágenes 0x8E/0x8F, TIM dentro de bloques
+y en el ejecutable/overlays), `CLUT00` (640 x 32) y `SYS001/002/004/006/007` de PrePre 8, y una búsqueda conservadora de
+series de 16 colores en el resto de datos que no son páginas (entrada 0 = 0, 15 colores de 15 bits distintos de cero, >= 12
+distintos, al menos dos series seguidas). Cada fuente se corta en filas de 16 colores y ventanas de 256 (pasos de 16) y se
+calcula su hash. SLPM-80165 no estaba disponible en esta pasada.
+
+| Disco | Filas de 16 colores distintas | Solo en este disco | Dónde están |
+|---|---|---|---|
+| PAL SCES-01331 | 1981 | 59 | paletas 256 x 1 de título/menú `SYSTEM/A00203`, `A00402`, `A00502`, `A09401`; los dos TIM de `SCES_013.31` (CLUT en (128,480) y (320,480)) |
+| USA SCUS-94236 | 1980 | 26 | `SYSTEM/A00013`, `A001901` (paletas del menú en inglés); series de 16 colores en `X14.BIN` y `DSPSUB3.BIN` |
+| JP SLPS-01144 | 1851 | 308 | las mismas filas de HUD/sistema en casi todos los `CLUTnn` (filas 2, 4, 5..7, 16..25 en columnas fijas), algunas filas propias de cada área, `DSPCLUT.TIM`, el CLUT de la imagen `D005` de AREA19 |
+| PrePre 8 PCPX-96084 | 269 | 62 | `CLUT00` (59 filas), `SYS006`, dos TIM en `TOMBA.EXE` |
+
+1305 filas están en PAL, USA y JP; 171 también en PrePre 8. Ninguna fila de los `CLUTnn` de AREA11/16/17/18 es exclusiva de un
+disco, salvo las filas de HUD/sistema de JP, que están en todas las áreas.
+
+**Pruebas, sin coincidencia.**
+- Female Stonetown Resident (sprite de TCRF, distancia media ponderada al color más cercano, sin grises, contra todas las filas
+  de todos los discos): mejor 24,1 (fila común a PAL/USA/JP, AREA00/CLUT06), mejor fila solo JP 26,9, mejor de PrePre 8 29,8.
+  Ninguna paleta exclusiva mejora la suposición de las filas 48 / 54 de AREA16/CLUT07.
+- Páginas de decorado, con los renders de la comunidad como referencia índice → color, error medio ponderado por píxel de cada
+  ventana de 256 colores: A08000 72,9, A08600 67,4 (una paleta de sistema 256 x 1), A06100 82,4; las mejores ventanas de
+  PrePre 8 son peores (85,4 / 72,3 / 94,8). Los renders con las mejores ventanas son ruido. Los CLUT del decorado no están en
+  ninguno de estos discos.
