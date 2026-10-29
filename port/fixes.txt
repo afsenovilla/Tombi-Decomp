@@ -416,3 +416,7 @@ src/i0nfo2/topdownA11ActorInit.c | o->b0d = 0; | o->b0d = 0; { extern int port_c
 # resident talks, so a bank larger than the file's 13 disc sectors (all the translated lines of tools/civ_test_data.py)
 # can be shown; port only, read once into the heap.
 src/i0nfo2/topdownA11ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); }
+# --civ-line N (dev): every bank-4 line a set-0D resident says becomes (4, N), so each translated line (also the ones
+# no placed resident reaches: dx 8, 9, 12..15, 17) can be shown through one reachable resident.
+src/i0nfo2/topdownA11ActorOpenDialogue.c | func_8002DCC8(4, | port_civ_msg(4,
+src/i0nfo2/topdownA11ActorOpenDialogue.c | extern int func_8002DCC8(int a, int b, Pos6 *p); | extern int func_8002DCC8(int a, int b, Pos6 *p); extern int port_civ_line; static int port_civ_msg(int k, int dx, Pos6 *p) { return func_8002DCC8(k, port_civ_line >= 0 ? port_civ_line : dx, p); }

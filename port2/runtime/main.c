@@ -303,6 +303,7 @@ int port_civ_spr(void) {
 }
 /* --civ-wfm FILE: replaces AREA11's dialogue bank (WFM3_DATA[0] = scratchpad 0x1F800398) before a set-0D resident talks */
 static const char *port_civ_wfm_path;
+int port_civ_line = -1;   /* --civ-line N: bank-4 line shown by every set-0D resident (dev) */
 static unsigned char *port_civ_wfm_buf;
 void port_civ_wfm_swap(void) {
     extern void *port_ram_ptr(unsigned);
@@ -356,6 +357,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
         else if (!strcmp(a, "--civ-wfm") && v) port_civ_wfm_path = argv[++i];
+        else if (!strcmp(a, "--civ-line") && v) port_civ_line = atoi(argv[++i]);
         else if (!strcmp(a, "--civ-spawn") && v) { port_civ_spawn_set = sscanf(argv[++i], "%d,%d", &port_civ_spawn_x, &port_civ_spawn_y) == 2; }
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);
