@@ -249,8 +249,7 @@ even though the tables themselves are lost.
     Stonetown Resident" sprite pixel-exact (100 % of the pixels in 5-bit colour, no silhouette mismatch); no other row
     of the file does. **Confirmed.**
   - AREA16/CLUT07 rows 48 and 54 as TCRF's "Female Stonetown Resident" and the other Stone People: **refuted**. Row 54
-    is the red-shirt resident of the FMV (A08600 figure, see below), and the Female Stonetown Resident uses a custom CLUT
-    taken from TCRF.
+    is the red-shirt resident of the FMV (A08600 figure, see below), and the Female Stonetown Resident uses row 21.
   - The TCRF names, and reading AREA11 as TCRF's "Lumberjack Town" (the hard-hat worker belonging to the Factory, the old
     man to the town), are our identification.
   - **AREA11/CLUT02 rows 4, 36 and 68** (the same rows are in AREA17/CLUT03, AREA17/CLUT06 and AREA18/CLUT02):
@@ -285,7 +284,7 @@ even though the tables themselves are lost.
       hat, orange trim), but no row gives a red cloak, so this one is unresolved.
     These residents are drawn only on A08600 (AREA18's page), not on the surviving Iron Town / Stonetown pages. Row 54 of
     AREA16/CLUT07, the old guess for the Female Stonetown Resident, is therefore the red-shirt resident's palette; the guess
-    was wrong (that subtype now uses the custom CLUT taken from TCRF).
+    was wrong (that subtype uses row 21).
 - Which row each top-down resident uses is not in the surviving code: a resident's CLUT comes from the parts of its
   SPR table (the actor inits clear `b0d`, so `w08` is not used), and those tables are lost. `tools/civ_sheets.py`
   states the file and row it draws each resident group with (`sub_pal`, `PAL_NOTE`).
@@ -580,7 +579,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s2), door; AREA16 s1 (also cut).
 - **Props**: 7 (I0NFO2 0x801001D4 / 0x801001D8); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for Male Stonetown Resident (subtype 2, confirmed against TCRF), row 37 for the boy (subtype 1, confirmed by TCRF colours: all 14 colours of TCRF's sheet are in that row, also in AREA16/CLUT06, AREA17/CLUT03/06 and AREA18/CLUT02), and for the Female Stonetown Resident (subtype 0) a custom CLUT derived pixel-exact from the TCRF sheet with `tools/clut_from_sprite.py` (24 frames, 0 silhouette mismatches, all 15 indices with one colour); not found on any disc (best disc row: mean error 30): `0000 0000 7FFF 3A78 25D2 194F 5233 41B0 314D 1D0C 1677 0DD1 096E 1D4C 10EA 21D2`.
+- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for Male Stonetown Resident (subtype 2, confirmed against TCRF), row 37 for the boy (subtype 1, confirmed by TCRF colours: all 14 colours of TCRF's sheet are in that row, also in AREA16/CLUT06, AREA17/CLUT03/06 and AREA18/CLUT02), and for the Female Stonetown Resident (subtype 0) **row 21** (`0000 0421 7FFF 4AFD 3238 29B2 6EB6 5E33 4DD0 3D6E 22FC 1E56 1DD1 4210 2108 19FB`, also in AREA16/CLUT06, AREA17/CLUT03/06 and AREA18/CLUT02): real disc row, found by matching TCRF sheet's appearance (blonde woman, lilac dress); TCRF colours are shifted (up to 9 levels). Superseded: a custom CLUT derived pixel-exact from the TCRF sheet with `tools/clut_from_sprite.py` (24 frames, 0 silhouette mismatches, all 15 indices with one colour); not found on any disc (best disc row: mean error 30): `0000 0000 7FFF 3A78 25D2 194F 5233 41B0 314D 1D0C 1677 0DD1 096E 1D4C 10EA 21D2`.
 - **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 

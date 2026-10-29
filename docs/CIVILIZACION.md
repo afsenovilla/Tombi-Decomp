@@ -259,7 +259,7 @@ estas tablas, así que la numeración de fotogramas la fija el código aunque la
     5 bits, sin diferencias de silueta); ninguna otra fila del archivo lo hace. **Confirmado.**
   - AREA16/CLUT07 filas 48 y 54 como la «Female Stonetown Resident» de TCRF y el resto de la gente de piedra:
     **refutado**. La fila 54 es el vecino de camisa roja del FMV (figura de A08600, ver abajo), y la «Female Stonetown
-    Resident» usa un CLUT propio sacado de TCRF.
+    Resident» usa la fila 21.
   - Los nombres de TCRF, y leer AREA11 como la «Lumberjack Town» de TCRF (el trabajador del casco es de la Fábrica y el
     anciano, del pueblo), son identificación nuestra.
   - **AREA11/CLUT02 filas 4, 36 y 68** (las mismas filas están en AREA17/CLUT03, AREA17/CLUT06 y AREA18/CLUT02):
@@ -297,7 +297,7 @@ estas tablas, así que la numeración de fotogramas la fija el código aunque la
       AREA18/CLUT02 (sombrero gris azulado, ribetes naranja), pero ninguna fila da una capa roja: queda sin resolver.
     Estos vecinos sólo están dibujados en A08600 (la página de AREA18), no en las páginas que sobreviven de la Ciudad de hierro ni
     de la de piedra. La fila 54 de AREA16/CLUT07, la antigua suposición para la «Female Stonetown Resident», es por tanto la
-    paleta del vecino de camisa roja: la suposición era errónea (ese subtipo usa ahora el CLUT propio sacado de TCRF).
+    paleta del vecino de camisa roja: la suposición era errónea (ese subtipo usa la fila 21).
 - Qué fila usa cada vecino de la vista desde arriba no está en el código que sobrevive: la CLUT de un vecino viene de las
   partes de su tabla SPR (las inicializaciones de personaje ponen `b0d` a 0, así que no se usa `w08`), y esas tablas se
   perdieron. `tools/civ_sheets.py` indica con qué archivo y fila dibuja cada grupo de vecinos (`sub_pal`, `PAL_NOTE`).
@@ -601,7 +601,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); Fábrica (AREA11 s2), puerta; AREA16 s1 (también recortada).
 - **Objetos**: 7 (I0NFO2 0x801001D4 / 0x801001D8); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A07600` (lista de recarga SYS 76), dibujados con paletas reales: AREA16/CLUT07 fila 53 para «Male Stonetown Resident» (subtipo 2, confirmada con TCRF), fila 37 para el chico (subtipo 1, confirmada por los colores de TCRF: los 14 colores de la hoja de TCRF están en esa fila, también en AREA16/CLUT06, AREA17/CLUT03/06 y AREA18/CLUT02), y para la «Female Stonetown Resident» (subtipo 0) un CLUT propio derivado píxel a píxel de la hoja de TCRF con `tools/clut_from_sprite.py` (24 fotogramas, 0 diferencias de silueta, los 15 índices con un solo color); no está en ningún disco (la mejor fila del disco: error medio 30): `0000 0000 7FFF 3A78 25D2 194F 5233 41B0 314D 1D0C 1677 0DD1 096E 1D4C 10EA 21D2`.
+- **Muñecos**: `SYSTEM/A07600` (lista de recarga SYS 76), dibujados con paletas reales: AREA16/CLUT07 fila 53 para «Male Stonetown Resident» (subtipo 2, confirmada con TCRF), fila 37 para el chico (subtipo 1, confirmada por los colores de TCRF: los 14 colores de la hoja de TCRF están en esa fila, también en AREA16/CLUT06, AREA17/CLUT03/06 y AREA18/CLUT02), y para la «Female Stonetown Resident» (subtipo 0) la **fila 21** (`0000 0421 7FFF 4AFD 3238 29B2 6EB6 5E33 4DD0 3D6E 22FC 1E56 1DD1 4210 2108 19FB`, también en AREA16/CLUT06, AREA17/CLUT03/06 y AREA18/CLUT02): fila real del disco, encontrada comparando el aspecto de la hoja de TCRF (mujer rubia, vestido lila); los colores de TCRF están desplazados (hasta 9 niveles). Sustituido: un CLUT propio derivado píxel a píxel de la hoja de TCRF con `tools/clut_from_sprite.py` (24 fotogramas, 0 diferencias de silueta, los 15 índices con un solo color); no está en ningún disco (la mejor fila del disco: error medio 30): `0000 0000 7FFF 3A78 25D2 194F 5233 41B0 314D 1D0C 1677 0DD1 096E 1D4C 10EA 21D2`.
 - **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 
