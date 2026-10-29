@@ -278,19 +278,25 @@ short *port_civ_row(short *row) {
     if (port_civ_spawn_set) { port_civ_row_buf[0] = port_civ_spawn_x; port_civ_row_buf[1] = port_civ_spawn_y; }
     return port_civ_row_buf;
 }
-/* SPR table for AREA11 subtype 0 (frames 0..50 of its scripts): every frame is one part, the front-facing hard-hat
-   worker at (1, 0) 22 x 43 of the A06100 4 bpp page (page 0 relative, w1e 1 = VRAM x 0x40), CLUT AREA11/CLUT02 row 4
-   (VRAM (192, 480)), feet on the origin. A test stand-in: the real table (per-frame poses) is lost. */
-static unsigned char port_civ_spr_buf[51 * 4 + 16];
+/* SPR table for AREA11 subtype 0 (frames 0..29 of its scripts: idle 0-2, walk 3-20, talk 21-29), built at runtime from
+   boxes on the surviving A06100 4 bpp page (page 0 relative, w1e 1 = VRAM x 0x40), CLUT AREA11/CLUT02 row 4 (VRAM
+   (192, 480)). Frame f = the f-th figure of the page in reading order (48-pixel rows): the retail top-down tables pack
+   frames that way (docs/CIVILIZATION.md); consistent, not proven. Boxes from tools/civ_sheets.py comps(); no pixels. */
+static const unsigned char port_civ_boxes[30][4] = {{1,0,22,43}, {27,0,17,45}, {49,0,22,44}, {74,0,19,43}, {97,0,21,43}, {121,0,22,43}, {151,0,24,43}, {179,0,17,43}, {203,0,18,43}, {231,0,24,43}, {3,48,17,44}, {27,48,18,44}, {51,48,19,45}, {73,48,22,45}, {97,48,22,43}, {124,48,23,43}, {153,48,21,43}, {177,49,22,42}, {201,48,20,45}, {225,48,24,45}, {1,96,26,45}, {36,96,24,44}, {66,96,21,44}, {89,96,22,45}, {115,111,34,32}, {155,104,28,35}, {187,104,34,37}, {228,107,26,36}, {2,156,28,35}, {34,157,28,34}};
+static unsigned char port_civ_spr_buf[30 * 4 + 30 * 16];
 int port_civ_spr(void) {
-    unsigned char *p = port_civ_spr_buf, *e = p + 51 * 4;
-    int f, u0 = 1, v0 = 0, w = 22, h = 43;
+    unsigned char *p = port_civ_spr_buf;
     unsigned clut = (480u << 6) | (192u >> 4);
-    for (f = 0; f < 51; f++) { p[4 * f] = 1; p[4 * f + 1] = 0; p[4 * f + 2] = (51 * 4) & 0xFF; p[4 * f + 3] = (51 * 4) >> 8; }
-    e[0] = u0; e[1] = v0; e[2] = clut & 0xFF; e[3] = clut >> 8;
-    e[4] = u0 + w; e[5] = v0; e[6] = 0; e[7] = 0;
-    e[8] = u0; e[9] = v0 + h; e[10] = w; e[11] = h;
-    e[12] = u0 + w; e[13] = v0 + h; e[14] = (unsigned char)(-(w / 2)); e[15] = (unsigned char)(-h);
+    int f;
+    for (f = 0; f < 30; f++) {
+        int off = 30 * 4 + f * 16, u0 = port_civ_boxes[f][0], v0 = port_civ_boxes[f][1], w = port_civ_boxes[f][2], h = port_civ_boxes[f][3];
+        unsigned char *e = p + off;
+        p[4 * f] = 1; p[4 * f + 1] = 0; p[4 * f + 2] = off & 0xFF; p[4 * f + 3] = off >> 8;
+        e[0] = u0; e[1] = v0; e[2] = clut & 0xFF; e[3] = clut >> 8;
+        e[4] = u0 + w; e[5] = v0; e[6] = 0; e[7] = 0;
+        e[8] = u0; e[9] = v0 + h; e[10] = w; e[11] = h;
+        e[12] = u0 + w; e[13] = v0 + h; e[14] = (unsigned char)(-(w / 2)); e[15] = (unsigned char)(-h);
+    }
     return (int)(long)port_civ_spr_buf;
 }
 int port_civ_list(void) {
