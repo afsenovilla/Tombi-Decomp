@@ -542,6 +542,34 @@ def build(area, L, refs, out, use_fmv=True, preview=None):
     return d
 
 
+PAGE_SETS = [["A06100"], ["A07600", "A07601"], ["A08000"], ["A08600", "A08601"]]
+
+
+def render_pages(L, refs, out, cache):
+    """Each scenery page (pairs side by side) in its quantized custom CLUT, with the 256 entries below as swatches
+    labelled with their 15-bit hex words. The 4 bpp sprite columns (skip_x) are shown as stored, in the same CLUT."""
+    os.makedirs(out, exist_ok=True)
+    f = font(10)
+    for grp in PAGE_SETS:
+        pal, _, st = derive_clut(grp[0], L, refs, cache)
+        ims = [page(n) for n in grp]
+        W = sum(p.shape[1] for p in ims)
+        sw, rows = W // 16, 16
+        im = Image.new("RGB", (W, 256 + 20 + rows * 30), (24, 24, 24))
+        x = 0
+        for p in ims:
+            im.paste(Image.fromarray(pal[p]), (x, 0)); x += p.shape[1]
+        dr = ImageDraw.Draw(im)
+        dr.text((4, 258), "%s  FMV-derived custom CLUT, not original, quantized to PS1 15-bit  (collapsed %d, max change %d)"
+                % (" + ".join(grp), st["quant_collapsed"], st["quant_max_change"]), fill=(230, 230, 230), font=f)
+        for i in range(256):
+            cx, cy = (i % 16) * sw, 276 + (i // 16) * 30
+            dr.rectangle([cx + 1, cy + 1, cx + sw - 2, cy + 17], fill=tuple(int(v) for v in pal[i]))
+            dr.text((cx + 2, cy + 18), "%02X:%s" % (i, st["clut15"][i]), fill=(200, 200, 200), font=f)
+        fn = os.path.join(out, "scenery_%s.png" % grp[0]); im.save(fn)
+        print(fn, {k: v for k, v in st.items() if k != "clut15"})
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--area", type=int, action="append", choices=(11, 16, 17))
@@ -553,6 +581,7 @@ def main():
                     "(125.png = A08000, 127.png = A08600, 128.png = A06100); same as three --ref")
     ap.add_argument("--community-cluts", metavar="DIR", help="the community clutgen folder (GGDdefault.act, CLUT*.png, "
                     "PHOT*.png): its index colours come first ('community FMV-derived CLUT (clutgen)')")
+    ap.add_argument("--pages", metavar="OUT", help="only render the scenery pages with their CLUTs to OUT")
     ap.add_argument("--no-fmv", action="store_true", help="cut-outs and ground only, no FMV mosaic underlay")
     ap.add_argument("--both", action="store_true", help="build with and without the FMV underlay")
     ap.add_argument("--preview", help="also write the previews to this directory")
@@ -566,6 +595,8 @@ def main():
                 refs.setdefault(pg_, f)
     if a.community_cluts:
         COMMUNITY.update(clutgen_samples(a.community_cluts))
+    if a.pages:
+        return render_pages(L, refs, a.pages, os.path.join(a.out, "fmv"))
     for area in a.area or (17, 11, 16):
         for fmv in ((True, False) if a.both else (not a.no_fmv,)):
             build(area, L, refs, a.out, fmv, a.preview)
