@@ -306,6 +306,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--poke") && v) port_poke_add(argv[++i]);
         else if (!strcmp(a, "--poke-every") && v) port_poke_add_every(argv[++i], 1);
         else if (!strcmp(a, "--menu") && v) port_menu_add(argv[++i]);
+        else if (!strcmp(a, "--test-item") && v) { extern void port_test_item_add(const char *); port_test_item_add(argv[++i]); }
         else if (!strcmp(a, "--title") && v) port_title_add(argv[++i]);
         else if (!strcmp(a, "--movie") && v) { extern void port_movie_add(const char *); port_movie_add(argv[++i]); }
         else if (!strcmp(a, "--save-dir") && v) port_save_dir = argv[++i];

@@ -128,6 +128,8 @@ def make(proj, author="", title="", notes=""):
          "verbFirst": bool(proj.verb_first), "edits": edits}
     if proj.glyph_shift:
         p["glyphShift"] = proj.glyph_shift
+    if proj.menus:
+        p["menus"] = proj.menus
     return p
 
 
@@ -157,6 +159,10 @@ def merge(patches):
             out = json.loads(json.dumps(p))
             continue
         out["verbFirst"] = out.get("verbFirst") or p.get("verbFirst")
+        for path, spec in (p.get("menus") or {}).items():        # menu_text.py edits: per file and section, the last wins
+            o = out.setdefault("menus", {}).setdefault(path, {})
+            for sec, v in spec.items():
+                o[sec] = dict(o.get(sec) or {}, **v) if isinstance(v, dict) else v
         for h, d in (p.get("glyphShift") or {}).items():
             out.setdefault("glyphShift", {}).setdefault(h, {}).update(d)
         for path, d in p["edits"].items():
@@ -185,6 +191,8 @@ def apply_to_project(proj, patch):
     langs = {C.lang_of(p) for p in patch["edits"]} & set(proj.languages())
     proj.langs |= langs
     proj.verb_first = proj.verb_first or bool(patch.get("verbFirst"))
+    for path, spec in (patch.get("menus") or {}).items():
+        proj.menus[path] = spec
     if isinstance(patch.get("glyphShift"), dict):
         for h, d in patch["glyphShift"].items():
             proj.glyph_shift.setdefault(str(h), {}).update({c: int(v) for c, v in d.items()})
@@ -201,7 +209,7 @@ def apply(disc, patches, out_bin, work=None, force=False, files_out=None, log=pr
     proj = C.Project(C.Source(disc))
     applied, problems = apply_to_project(proj, patch)
     problems = warns + problems
-    if not proj.n_edits() and not proj.verb_first:
+    if not proj.n_edits() and not proj.verb_first and not proj.menus:
         raise C.CoreError(tr("tp.noedits"))
     if files_out:
         return {"files": C.write_patched(proj, files_out), "out": files_out, "applied": applied, "problems": problems}
