@@ -132,7 +132,7 @@ def version_source(src, serial, tmpdir):
     return out
 
 
-def _jpdemo_spad_set(text):
+def _jpdemo_spad_set(text, serial=None):
     """`.set` lines that make PAL scratchpad symbols (config/slpm80165/spad.txt) constants, since the demo target keeps
     every scratchpad address literal (config/slpm80165/symbol_addrs_manual.txt). Demo C may also name any scratchpad
     address D_1F80xxxx."""
@@ -141,6 +141,13 @@ def _jpdemo_spad_set(text):
         p = os.path.join(ROOT, "config", "slpm80165", "spad.txt")
         S["tab"] = [l.split()[:2] for l in open(p) if l.strip() and not l.startswith("#")] if os.path.exists(p) else []
     tab = dict(S["tab"])
+    # config/<ver>/spad_remap.txt (`<PAL addr> <version addr>` per line): that version keeps the variable elsewhere in
+    # the scratchpad, so every PAL symbol at that address is assembled at the version's address instead.
+    ver = next((v for v, c in VERSIONS.items() if c.get("serial") == serial), None) if serial else None
+    rp = os.path.join(ROOT, "config", ver or "-", "spad_remap.txt")
+    if os.path.exists(rp):
+        rm = dict(l.split()[:2] for l in open(rp) if l.strip() and not l.startswith("#"))
+        tab = {n: rm.get(a.upper(), a) for n, a in tab.items()}
     tab.update((n, n[2:]) for n in re.findall(r"\bD_1F80[0-9A-F]{4}\b", text))
     return "".join("\t.set\t%s,0x%s\n" % (n, a) for n, a in sorted(tab.items()))
 
@@ -159,7 +166,7 @@ def _jpdemo_compile(job):
     d = tempfile.mkdtemp()
     src = version_source(src, serial, d)
     t = open(src, errors="replace").read()
-    NC["EXTRA_AS"] = _jpdemo_spad_set(t)
+    NC["EXTRA_AS"] = _jpdemo_spad_set(t, serial)
     fm = re.search(r"//\s*FLAGS\s+(.*)", t)
     flags = fm.group(1).strip() if fm else "-O2 -G0"
     try:

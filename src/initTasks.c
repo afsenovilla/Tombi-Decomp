@@ -2,7 +2,13 @@
 // MATCHING 8001703c 76
 void initTasks(void)
 {
-int r = *(int *)0x110; char *p = (char *)0x801fd800; int i = 0; unsigned k = 0x40000404; char *q = (char *)0x801fe400;
+int r = *(int *)0x110; char *p = (char *)
+#if defined(VERSION_PCPX_96084)
+    0x801fc000; /* PrePre 8 task table */
+#else
+    0x801fd800;
+#endif
+ int i = 0; unsigned k = 0x40000404; char *q = (char *)0x801fe400;
 for (; i < 3; i++) {
     r += 0xc0;
     *(short *)p = 0;

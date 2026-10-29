@@ -8,6 +8,11 @@ void setObjectSpeedPolar2(TObj *o, short a, short b)
 {
     int c = MulCos(a, b);
     int s = MulNegSinScaled(a, b);
+#if defined(VERSION_PCPX_96084) /* PrePre 8: the speed pair sits 4 bytes lower */
+    *(short *)((char *)o + 0x7c) = c;
+    *(short *)((char *)o + 0x7e) = s;
+#else
     o->velH = c;
     o->velV = s;
+#endif
 }

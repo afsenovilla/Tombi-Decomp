@@ -1,5 +1,9 @@
 // FUNC 80018cf0 60 MAIN0
 // MATCHING 80018cf0 60
+#if defined(VERSION_PCPX_96084) /* PrePre 8 scratchpad layout */
+#define CAT4_OBJECT_LIST D_1F80030C
+#define CAT4_OBJECT_COUNT D_1F8002D8
+#endif
 extern int *CAT4_OBJECT_LIST;
 extern unsigned short CAT4_OBJECT_COUNT;
 

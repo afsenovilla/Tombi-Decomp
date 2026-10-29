@@ -42,7 +42,11 @@ typedef struct fileLink {
 #define JOYPAD_STATE       (*(u16*)0x1F8001FC)      /* 0x1FC */
 
 #define CURRENT_TASK       (*(Task**)0x1F8001D4)
+#if defined(VERSION_PCPX_96084)
+#define TASK_TABLE  0x801FC000 /* PrePre 8 */
+#else
 #define TASK_TABLE  0x801FD800
+#endif
 #define TIM_SCRATCH ((u_long*)0x801FBE00)
 
 #define MOVIE_DEC_IMGBUF ((u_long*)((byte*)&MOVIE_DEC_ENV+0xC))

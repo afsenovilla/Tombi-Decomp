@@ -1,5 +1,8 @@
 // FUNC 800491f0 820 MAIN0
 // MATCHING 800491f0 820
+#if defined(VERSION_PCPX_96084) /* PrePre 8 scratchpad layout */
+#define D_1F80019E D_1F8002A6
+#endif
 /* The outer list loop is a real do-while so the refs of the case-32 box test get loop depth 3 (goto loop = depth 2),
    which flips local-alloc's priority order (box/sum/andi chain before lim/slt and o-val/d) and gives the game's
    registers (box+d in v0, d tied to o-val in v1, e-ptr/e-val in a0). The dead `two = 2` in case 0 is debt: it makes

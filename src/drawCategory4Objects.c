@@ -1,5 +1,10 @@
 // FUNC 80057288 224 MAIN0
 // MATCHING 80057288 224
+#if defined(VERSION_PCPX_96084) /* PrePre 8 scratchpad layout */
+#define CAT4_OBJECT_LIST D_1F80031C
+#define CAT4_OBJECT_COUNT D_1F8002E0
+#define DAT_1f80024c D_1F8002E0
+#endif
 extern short DAT_1f8001c6;
 extern short CAT4_OBJECT_COUNT_SAVED;
 extern short DAT_1f80024c;

@@ -1,5 +1,8 @@
 // FUNC 80049524 824 MAIN0
 // MATCHING 80049524 824
+#if defined(VERSION_PCPX_96084) /* PrePre 8 scratchpad layout */
+#define D_1F80019E D_1F8002A6
+#endif
 #include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"

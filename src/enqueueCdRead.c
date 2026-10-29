@@ -1,6 +1,9 @@
 // FUNC 8004f34c 64 MAIN0
 // MATCHING 8004f34c 64
 // Ported from psx_tomba (cdfile.c, enqueueCdRead); MIT licence of the original project.
+#if defined(VERSION_PCPX_96084) /* PrePre 8 scratchpad layout */
+#define D_1F80029C D_1F8003E4
+#endif
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"

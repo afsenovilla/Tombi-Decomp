@@ -1,5 +1,12 @@
 // FUNC 80057dfc 224 MAIN0
 // MATCHING 80057dfc 224
+#if defined(VERSION_PCPX_96084) /* PrePre 8 draws category 8 from the PAL category 7 list (0x1F80022C/240) */
+#define CAT8_OBJECT_LIST CAT7_OBJECT_LIST
+#define DAT_1f800230 SCR_22C
+#define CAT8_OBJECT_COUNT CAT7_OBJECT_COUNT
+#define DAT_1f800242 SCR_240
+#define CAT8_OBJECT_COUNT_s DAT_1f800240
+#endif
 extern short DAT_1f8001c6;
 extern short CAT8_OBJECT_COUNT_SAVED;
 extern int *CAT8_OBJECT_LIST_SAVED;

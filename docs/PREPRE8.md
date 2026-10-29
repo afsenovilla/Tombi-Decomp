@@ -155,7 +155,14 @@ program `tomba` = TOMBA.EXE, game dir `game_prepre8/`, git-ignored). It is set u
 - `config/pcpx96084/symbol_addrs_manual.txt` is the task-table and scratchpad block copied from SLPM-80165.
 - `python3 tools/build_report.py --version pcpx96084 [--objdiff PATH]` writes `build/pcpx96084/report.json`. C is
   reused only automatically, through the symbol-file pairing. First run: 1424 functions, 441 matched (31.0 %),
-  94060 of 565892 code bytes (16.6 %), 475 base objects. No `// VERSION PCPX_96084` branches exist yet.
+  94060 of 565892 code bytes (16.6 %), 475 base objects. 2026-10-29: 472 matched (33.1 %), 96976 code bytes (17.1 %). The gain comes from two things:
+  `config/pcpx96084/spad_remap.txt` (PAL scratchpad address -> PrePre 8 address, applied by `tools/build_report.py`
+  to the PAL scratchpad symbols for this version only), and `#if defined(VERSION_PCPX_96084)` lines in shared C for
+  literal addresses and small differences (task table at 0x801FC000, `TASK_C` is the global `D_800DE0B0`,
+  `isObjectInView` screen origin at 0x1F80028A/0x1F800392, 0x1F8002A6 in place of 0x1F80019E, category 8 drawn from
+  the PAL category 7 list, 0xE4-byte layer-1 objects, `setObjectSpeedPolar2` fields at +0x7C, `startAreaBgm(1)`).
+  `closeTask` and `startTask` stay at 99.6 %: the only difference is the operand order of the `addu` that the
+  assembler emits for a symbol+register load, which C cannot change.
 - CI job `report-prepre8` (`.github/workflows/report.yml`) downloads the disc image from the
   **`GAME_FILES_URL_PREPRE8`** secret (raw data track .bin or a zip with TOMBA.EXE; Drive links handled like the
   demo job), extracts only `/TOMBA` with `tools/prepre8.py extract`, checks the TOMBA.EXE sha1

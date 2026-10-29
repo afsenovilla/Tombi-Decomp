@@ -7,6 +7,9 @@
 #include "game.h"
 
 
+#if defined(VERSION_PCPX_96084)
+extern s32 D_801FC004[];
+#endif
 void closeTask(s32 id)
 {
     s32  off;
@@ -18,7 +21,11 @@ void closeTask(s32 id)
     if (*flag != 0) {
         *flag = 0;
         EnterCriticalSection();
+#if defined(VERSION_PCPX_96084) /* PrePre 8: splat symbolizes the thread-id field */
+        CloseTh(D_801FC004[id * 0x1c]);
+#else
         CloseTh(*(s32*)((TASK_TABLE + 0x4) + off));
+#endif
         ExitCriticalSection();
     }
 }
