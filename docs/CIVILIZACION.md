@@ -775,6 +775,12 @@ La salida va a `build/civ_rebuild/AREAnn/` (`AREAnn_nofmv/` sin la capa del FMV)
   3. Nuestras anclas en BUNMEI.STR.
   4. Interpolación armónica sobre la vecindad de índices de la página.
 
+  El resultado se **cuantiza al color de 15 bits de PS1**: cada canal pasa a `round(c*31/255)` y se muestra como
+  `round(v*255/31)`, la misma regla que `tools/clut_from_sprite.py`. Se aplica a todos los CLUT de decorado, al CLUT
+  de la imagen y a `map8F.tim`, cuyo CLUT guarda esas palabras de 15 bits con la misma regla STP que antes. El cambio
+  es como máximo 4 y de unos 2 de media por canal. Algunos índices coinciden en el mismo color de 15 bits: 26
+  (A08000), 25 (A06100) y 33 (A07600/01). El manifest lista cada CLUT en hexadecimal de 15 bits (`clut.clut15`),
+  junto con el cambio máximo y medio y el número de coincidencias.
   Los ficheros `1..6.bmp` solo traen la paleta por defecto (`GGDdefault.act`), así que solo sirven para identificar
   las páginas.
 - **Capa del FMV.** Es la mediana del barrido de BUNMEI.STR, a escala 1:1 y reindexada al CLUT del pueblo.

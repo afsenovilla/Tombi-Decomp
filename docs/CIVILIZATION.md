@@ -754,6 +754,12 @@ Sizes: AREA11 is 736 x 672 (92 x 84 cells), AREA16 is 544 x 608 (68 x 76), AREA1
   4. Harmonic interpolation over the page's index adjacency, which comes within 18-26 per channel when tested on
      known pages.
 
+  The result is **quantized to the PS1's 15-bit colour**: each channel becomes `round(c*31/255)`, shown back as
+  `round(v*255/31)`, the same rule as `tools/clut_from_sprite.py`. This applies to every scenery CLUT, the town
+  picture CLUT and `map8F.tim`, whose CLUT holds those 15-bit words with the same STP rule as before. The change is
+  at most 4 and about 2 on average per channel. Some indices collapse onto the same 15-bit colour: 26 (A08000),
+  25 (A06100) and 33 (A07600/01). The manifest lists each CLUT as hex 15-bit words (`clut.clut15`), together with
+  the maximum and mean change and the collapse count.
   The `1..6.bmp` files in that folder carry only the default palette (`GGDdefault.act`), not a finished CLUT, so they
   are used only to identify the pages. Agreement between sources: clutgen and the renders differ by 23.6 (A08000)
   and 15.1 (A06100) mean per channel; the renders and our FMV anchors differ by 17.2 (A08000). Stonetown has no

@@ -214,7 +214,15 @@ def derive_clut(name, L, refs, cache):
                  clutgen_vs_ref_mean_abs=round(float(np.mean([np.abs(comm[i] - ref[i]).mean() for i in cr])), 1) if cr else None,
                  ref=len(ref), fmv=len(fmv), fill=src.count("fill"),
                  ref_vs_fmv_mean_abs=round(float(np.mean([np.abs(ref[i] - fmv[i]).mean() for i in both])), 1) if both else None)
-    return P.astype(np.uint8), src, stats
+    raw = np.clip(np.round(P), 0, 255)
+    Q = quantize15(raw)
+    d = np.abs(Q.astype(int) - raw)[used]
+    words = [rgb555(Q[i]) if i else 0 for i in range(256)]
+    uw = [words[i] for i in range(1, 256) if used[i]]
+    stats.update(quantized="PS1 15-bit, round(c*31/255)", quant_max_change=int(d.max()) if d.size else 0,
+                 quant_mean_change=round(float(d.mean()), 2) if d.size else 0.0,
+                 quant_collapsed=len(uw) - len(set(uw)), clut15=["%04X" % w for w in words])
+    return Q, src, stats
 
 
 _MOS = {}
@@ -422,8 +430,18 @@ def cellmap(area, T_):
 
 
 # ---------------------------------------------------------------- output
+def q5(c):
+    """Nearest PS1 5-bit level of an 8-bit channel (same rule as tools/clut_from_sprite.py)."""
+    return int(round(float(c) * 31 / 255))
+
+
+def quantize15(P):
+    """Each entry to the nearest 15-bit colour, shown back as round(v*255/31)."""
+    return np.array([[round(q5(c) * 255 / 31) for c in e] for e in P], np.uint8)
+
+
 def rgb555(c):
-    v = (int(c[0]) >> 3) | (int(c[1]) >> 3) << 5 | (int(c[2]) >> 3) << 10
+    v = q5(c[0]) | q5(c[1]) << 5 | q5(c[2]) << 10
     return v or 0x8000  # 0x0000 is transparent on the PS1: an opaque black needs the STP bit
 
 
@@ -507,7 +525,7 @@ def build(area, L, refs, out, use_fmv=True, preview=None):
     pv.save(os.path.join(d, "preview.png"))
     man = dict(area=area, name=T_["name"], width=int(pix.shape[1]), height=int(pix.shape[0]),
                cells=[int(cells.shape[1]), int(cells.shape[0])], clut_page=T_["page"], clut=stats, fmv_underlay=use_fmv,
-               clut_note="FMV-derived, not original (sources per index: clutgen = community FMV-derived CLUT (clutgen), ref = community render, fmv = our BUNMEI.STR anchors, fill = harmonic interpolation)", pixel_sources={k: int((src == v).sum()) for k, v in
+               clut_note="FMV-derived, not original, quantized to PS1 15-bit (clut.clut15 = the TIM words; sources per index: clutgen = community FMV-derived CLUT (clutgen), ref = community render, fmv = our BUNMEI.STR anchors, fill = harmonic interpolation)", pixel_sources={k: int((src == v).sum()) for k, v in
                                                                    (("ground", 1), ("fmv", 2), ("cutout", 3), ("fmv_stamp", 4))},
                warnings=warn, files=["map8F.tim", "map8E.bin", "picture.png", "cells.png", "preview.png", "source.png"])
     json.dump(man, open(os.path.join(d, "manifest.json"), "w"), indent=1)
@@ -518,7 +536,7 @@ def build(area, L, refs, out, use_fmv=True, preview=None):
         Image.fromarray(rgb).save(os.path.join(preview, "%s_picture.png" % tag))
         Image.fromarray(srcpal[src]).save(os.path.join(preview, "%s_source.png" % tag))
     print("AREA%02d s0 %s: %dx%d px, %dx%d cells, CLUT %s %s -> %s" % (area, T_["name"], pix.shape[1], pix.shape[0],
-          cells.shape[1], cells.shape[0], T_["page"], stats, d))
+          cells.shape[1], cells.shape[0], T_["page"], {k: v for k, v in stats.items() if k != "clut15"}, d))
     for w in warn:
         print("  warning:", w)
     return d
