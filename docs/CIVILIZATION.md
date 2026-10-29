@@ -266,6 +266,19 @@ even though the tables themselves are lost.
     use 0x7849 = row 17). The handler that draws them is not pinned (it must leave `b0d` 0 so the part word is used);
     `updateScriptActor` subtype 10 of the area overlays also sets `w08 = 0x7809`. B202 is the same character as the
     A08000 figures but drawn again larger; no frame is pixel-identical.
+  - **Community FMV crops with palette strips (images 138-140 of the project).** Each strip is a real disc row,
+    15/15 colours exact (shown as 5-bit << 3), so these are not FMV-derived palettes:
+    - red-shirt, curly-haired Iron Town resident (BUNMEI.STR, frame not identified):
+      `0000 0421 7FFF 56B5 318C 4AFF 3639 2174 21BC 10D6 0010 01B6 0174 0132 6358 4AF0` = **row 3** of AREA16/CLUT06/07,
+      AREA17/CLUT03/06, AREA18/CLUT02 (all discs);
+    - purple-dressed resident (BUNMEI.STR, frame not identified):
+      `0000 2A17 7FFF 4210 318C 2108 52DD 3A59 6593 5571 454F 011B 00B3 006B 0218 0173` = **row 2** of the same files;
+    - bald, brown man inside a building: `0000 0421 4210 294A 6B5A 1E39 012F 1193 56B5 4A52 2D6B 5EF7 35AD 6B5A 0000 7FFF`
+      = row 15 of the CLUT files of AREA00, 01, 02 and other areas (a row every area shares, not a Civilization row).
+    Rows 2 and 3 sit next to row 1 (the Iron Men) in the same resident block, and none of the three draws a surviving
+    page (A06100 / A07600 / A08000 4 bpp) correctly. So rows 2 and 3 are most likely the palettes of residents whose
+    drawings are lost (AREA17 subtypes 1-4, AREA16 subtype 3 or AREA11 subtypes 1-4). Which subtype each one is cannot
+    be proven. These FMV crops are the only surviving picture of those residents.
 - Which row each top-down resident uses is not in the surviving code: a resident's CLUT comes from the parts of its
   SPR table (the actor inits clear `b0d`, so `w08` is not used), and those tables are lost. `tools/civ_sheets.py`
   states the file and row it draws each resident group with (`sub_pal`, `PAL_NOTE`).

@@ -277,6 +277,19 @@ estas tablas, así que la numeración de fotogramas la fija el código aunque la
     el manejador que los dibuja (debe dejar `b0d` en 0 para que se use la palabra de la pieza); `updateScriptActor`
     subtipo 10 de los overlays de área también pone `w08 = 0x7809`. B202 es el mismo personaje que las figuras de
     A08000, pero dibujado otra vez y más grande; ningún fotograma es idéntico píxel a píxel.
+  - **Recortes del FMV de la comunidad con tiras de paleta (imágenes 138-140 del proyecto).** Cada tira es una fila
+    real del disco, con los 15 colores exactos (mostrados como 5 bits << 3), así que no son paletas sacadas del FMV:
+    - vecino de la Ciudad de hierro de camisa roja y pelo rizado (BUNMEI.STR, fotograma sin identificar):
+      `0000 0421 7FFF 56B5 318C 4AFF 3639 2174 21BC 10D6 0010 01B6 0174 0132 6358 4AF0` = **fila 3** de AREA16/CLUT06/07,
+      AREA17/CLUT03/06, AREA18/CLUT02 (todos los discos);
+    - vecino vestido de morado (BUNMEI.STR, fotograma sin identificar):
+      `0000 2A17 7FFF 4210 318C 2108 52DD 3A59 6593 5571 454F 011B 00B3 006B 0218 0173` = **fila 2** de los mismos archivos;
+    - hombre calvo y moreno dentro de un edificio: `0000 0421 4210 294A 6B5A 1E39 012F 1193 56B5 4A52 2D6B 5EF7 35AD 6B5A 0000 7FFF`
+      = fila 15 de los CLUT de AREA00, 01, 02 y otras áreas (una fila común a todas las áreas, no de Civilización).
+    Las filas 2 y 3 están junto a la fila 1 (los Hombres de hierro) en el mismo bloque de vecinos, y ninguna de las tres
+    colorea bien una página que sobreviva (A06100 / A07600 / A08000 a 4 bpp). Lo más probable es que sean las paletas de
+    vecinos cuyos dibujos se perdieron (subtipos 1-4 de AREA17, subtipo 3 de AREA16 o subtipos 1-4 de AREA11). Qué subtipo
+    es cada uno no se puede probar. Estos recortes del FMV son la única imagen que queda de esos vecinos.
 - Qué fila usa cada vecino de la vista desde arriba no está en el código que sobrevive: la CLUT de un vecino viene de las
   partes de su tabla SPR (las inicializaciones de personaje ponen `b0d` a 0, así que no se usa `w08`), y esas tablas se
   perdieron. `tools/civ_sheets.py` indica con qué archivo y fila dibuja cada grupo de vecinos (`sub_pal`, `PAL_NOTE`).
