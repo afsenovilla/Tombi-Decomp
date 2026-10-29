@@ -61,17 +61,18 @@ def clut_row(fn, row):
 def sub_pal(C, sub):
     """(file, row) of the CLUT row drawn for resident subtype `sub`. The code does not say it: a resident's CLUT is in
     the parts of its lost SPR table (the actor inits clear b0d, so w08 is not used). Rows 48..54 of these files are the
-    villager palettes (44..47 and 60..63 are flash/tint variants of the same row block)."""
+    villager palettes (44..47 and 60..63 are flash/tint variants of the same row block). Rows 32 apart (4/36/68 in
+    AREA11/CLUT02, 16/48/80 and 21/53 in AREA16/CLUT07) belong to the same set of resident palettes."""
     r = C['pals'][sub]
     return r if isinstance(r, tuple) else (C['clut'], r)
 
 
 PAL_NOTE = {
-    'es': {16: 'Paletas reales de AREA16/CLUT07: fila 53 = el forzudo (coincide píxel a píxel con el sprite "Male Stonestown Resident" de TCRF); filas 48 y 54 para los demás (suposición: el código no lo dice)',
-           11: 'Paleta real de AREA11/CLUT01 fila 48 (la fila de aldeano, como la 48 de piedra); qué vecino usa cuál es una suposición',
+    'es': {16: 'Paletas reales de AREA16/CLUT07: fila 53 = Male Stonetown Resident (el forzudo; coincide píxel a píxel con ese sprite de TCRF); filas 54 y 48 para Female Stonetown Resident y los demás (suposición: el código no lo dice)',
+           11: 'Paletas reales de AREA11/CLUT02, confirmadas por los colores de TCRF: fila 4 = Lumberjack Factory Worker (el trabajador del casco), fila 36 = Male Lumberjack Town Resident (el anciano; fila 68 = su variante "maldita", no usada aquí). Nombres de TCRF; qué tipo de vecino del código es cada dibujo es una suposición nuestra',
            17: 'Paletas reales de AREA17/CLUT01 fila 48 y AREA17/CLUT03 fila 49; qué vecino usa cuál es una suposición'},
-    'en': {16: 'Real palettes from AREA16/CLUT07: row 53 = the strongman (matches TCRF\'s "Male Stonestown Resident" sprite pixel-exact); rows 48 and 54 for the others (a guess: the code does not say)',
-           11: 'Real palette from AREA11/CLUT01 row 48 (the villager row, like stone row 48); which resident uses which is a guess',
+    'en': {16: 'Real palettes from AREA16/CLUT07: row 53 = Male Stonetown Resident (the strongman; matches that TCRF sprite pixel-exact); rows 54 and 48 for Female Stonetown Resident and the others (a guess: the code does not say)',
+           11: 'Real palettes from AREA11/CLUT02, confirmed by TCRF colours: row 4 = Lumberjack Factory Worker (hard hat), row 36 = Male Lumberjack Town Resident (the old man; row 68 = his "cursed" variant, not used here). TCRF names; which code resident type each drawing is remains our guess',
            17: 'Real palettes from AREA17/CLUT01 row 48 and AREA17/CLUT03 row 49; which resident uses which is a guess'}}
 
 
@@ -84,8 +85,8 @@ AREAS={
  cap='Pueblo recortado de la gente de piedra (Ciudad de Piedra, AREA16, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((-140,520),'L','→ '+CIVI),((110,320),'D','→ Fábrica (AREA11 s2), puerta'),((220,60),'U','→ AREA16 s1 (también recortada)')],
  legend=[
- 'Forzudo: «¡Aúpa... YA!»',
- 'Forzudo: «¡Hop... AAAH!»',
+ 'Vecino que levanta algo: «¡Aúpa... YA!»',
+ 'Vecino que levanta algo: «¡Hop... AAAH!»',
  'Vecino junto al ascensor: «Esto pegado a la pared es un ascensor... pero no se mueve»',
  'Casa 1: «¿No puedes entrar en los otros pueblos? Ni lo sé ni me importa» → luego habla del engranaje y del generador',
  'Patrulla vertical: «La gente de los otros pueblos...» → «¿Un engranaje que no se rompa? Si fuera de hierro...»',
@@ -98,7 +99,7 @@ AREAS={
  'Casa 2: sin diálogo en el código',
  'Al final: el chico que vio a la bruja Mizuno (texto PAL #229), inicia el evento 0x67'],
  ),
-11:dict(atlas='A06100',clut='AREA11/CLUT01',pals={0:48,1:48,2:48,3:48,4:48},sub={0:0,1:2,2:12,3:21,4:25},
+11:dict(atlas='A06100',clut='AREA11/CLUT02',pals={0:4,1:4,2:36,3:36,4:4},sub={0:0,1:2,2:12,3:21,4:25},
  title='AREA11 sección 0 — pueblo recortado de la gente de madera',
  cap='Pueblo recortado de la gente de madera (junto a la Fábrica, AREA11, vista desde arriba): lo que el código coloca; el fondo dibujado se perdió.',
  exits=[((560,410),'R','→ '+CIVI),((231,70),'U','→ Fábrica (AREA11 s1)')],
@@ -245,7 +246,7 @@ EN={
 16:dict(title='AREA16 section 0 — cut Stone People village',
  cap='Cut Stone People village (Stone Town, AREA16, top-down view): what the code places; the painted background is lost.',
  exits=['→ '+CIVI_EN,'→ Factory (AREA11 s2), door','→ AREA16 s1 (also cut)'],
- legend=['Strongman: "Heave... HO!"','Strongman: "Hup... HAAA!"',
+ legend=['Neighbour lifting something: "Heave... HO!"','Neighbour lifting something: "Hup... HAAA!"',
  'Neighbour by the lift: "This thing on the wall is supposed to be a lift... but it doesn\'t move"',
  'House 1: "Can\'t get into the other towns? Don\'t know, don\'t care" → later talks about the gear and the generator',
  'Vertical patrol: "The folks from the other towns..." → "A gear that won\'t break? If it were iron..."',
@@ -366,6 +367,30 @@ def explicado_en(area,out):
     dr.text((lx,y),'Red = outdoors · purple = inside a house',font=F(21,True),fill=(60,60,60))
     im=im.crop((0,0,W,max(H,y+60)))
     im.save(out); print(out,im.size)
+
+# TCRF wiki names of the drawings (sprite group of each resident subtype; which code subtype wears which drawing is
+# our identification, as is reading AREA11 as TCRF's "Lumberjack Town")
+TCRF_NAMES = {
+    11: {0: ('Lumberjack Factory Worker', 'trabajador de la fábrica'), 1: ('Lumberjack Factory Worker', 'trabajador de la fábrica'),
+         4: ('Lumberjack Factory Worker', 'trabajador de la fábrica'),
+         2: ('Male Lumberjack Town Resident', 'vecino de Lumberjack Town'), 3: ('Male Lumberjack Town Resident', 'vecino de Lumberjack Town')},
+    16: {2: ('Male Stonetown Resident', 'vecino de Stonetown'), 0: ('Female Stonetown Resident', 'vecina de Stonetown')},
+}
+
+
+def _name_legends():
+    for a, names in TCRF_NAMES.items():
+        actors, _ = T.npc_set(T.CUT[a])
+        for tab, es in ((AREAS, True), (AREAS_EN, False)):
+            leg = tab[a]['legend']
+            for i, act in enumerate(actors):
+                n = names.get(act['sub'])
+                if n and i < len(leg) and not leg[i].startswith(n[0]) and not leg[i].startswith('«' + n[0]):
+                    leg[i] = ('«%s» (%s) — ' % n if es else '%s — ' % n[0]) + leg[i]
+
+
+_name_legends()
+
 
 # ------------------------------------------------------------------ evidence-only schematic (esquema)
 SRC={11:dict(step='topdownSectionStepC',stepa='0x800E8D98',set='0D',lst='0x80100080',props='0x800FFE24',dlg='topdownA11ActorOpenDialogue 0x800F1C88',tab='',txt='AREA11/MFNT110S.WFM #249-#265',sys=61,

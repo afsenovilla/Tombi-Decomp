@@ -254,13 +254,20 @@ estas tablas, así que la numeración de fotogramas la fija el código aunque la
   tienen las paletas de los aldeanos de los barrios de vista lateral (44..47 y 60..63 son variantes de destello o tinte
   del mismo bloque), y esas mismas filas colorean las páginas de la vista desde arriba:
   - **AREA16/CLUT07 fila 53** (también en AREA16/CLUT06, AREA17/CLUT03, AREA17/CLUT06 y AREA18/CLUT02, con el mismo
-    número de fila): el forzudo de la Ciudad de Piedra. Con esta fila, la página de 4 bpp de A07600 en (75, 202),
-    50 x 52, coincide píxel a píxel con el sprite "Male Stonestown Resident" de TCRF (el 100 % de los píxeles en color de
+    número de fila): «Male Stonetown Resident» de TCRF (vecino de Stonetown, el forzudo). Con esta fila, la página de 4 bpp de A07600 en (75, 202),
+    50 x 52, coincide píxel a píxel con el sprite "Male Stonetown Resident" de TCRF (el 100 % de los píxeles en color de
     5 bits, sin diferencias de silueta); ninguna otra fila del archivo lo hace. **Confirmado.**
-  - AREA16/CLUT07 filas 48 y 54: el resto de la gente de piedra (aldeanos de pelo morado y de pelo rojo). Plausible, no
-    confirmado.
-  - AREA11/CLUT01 fila 48: la gente de madera (sombrero marrón, camisa blanca). Es la única fila natural del bloque en
-    los archivos de AREA11. Suposición.
+  - AREA16/CLUT07 filas 48 y 54: «Female Stonetown Resident» de TCRF (vecina de Stonetown) y el resto de la gente de
+    piedra. Plausible, no confirmado.
+  - Los nombres de TCRF, y leer AREA11 como la «Lumberjack Town» de TCRF (el trabajador del casco es de la Fábrica y el
+    anciano, del pueblo), son identificación nuestra.
+  - **AREA11/CLUT02 filas 4, 36 y 68** (las mismas filas están en AREA17/CLUT03, AREA17/CLUT06 y AREA18/CLUT02):
+    fila 4 = «Lumberjack Factory Worker» de TCRF (trabajador de la fábrica, el del casco de SYSTEM/A06100), fila 36 =
+    «Male Lumberjack Town Resident» de TCRF (vecino de Lumberjack Town, el anciano), fila 68 = el mismo anciano
+    «maldito» (más oscuro). **Confirmadas por los colores de TCRF**: los 14 colores de cada sprite de TCRF están en esa
+    única fila (por conjunto de colores; los fotogramas de TCRF son algo distintos, así que no es píxel a píxel). Las
+    filas separadas 32 forman un mismo juego de paletas de vecinos; AREA16/CLUT07 tiene la misma disposición (16/48/80,
+    21/53).
   - AREA17/CLUT01 fila 48 y AREA17/CLUT03 fila 49: los Hombres de hierro. Suposición.
 - Qué fila usa cada vecino de la vista desde arriba no está en el código que sobrevive: la CLUT de un vecino viene de las
   partes de su tabla SPR (las inicializaciones de personaje ponen `b0d` a 0, así que no se usa `w08`), y esas tablas se
@@ -459,22 +466,22 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 | # | Dónde (x, y) | Casa | Quién / qué dice (resumen de la frase japonesa) |
 |---|---|---|---|
-| 1 | (88, 240) | C1 | Casa 1: «...Ahora puedo hacer algo muy interesante...» (texto PAL #227) |
-| 2 | (12, 256) | C1 | Casa 1: no habla, activa una bandera |
-| 3 | (16, 352) | C2 | Casa 2: «No funciona, pero esta máquina es de hierro... me vendría bien» |
-| 4 | (400, 520) | calle | Patrulla diagonal: «En esta choza vive una adivina, pero pone una condición» |
-| 5 | (300, 470) | calle | Patrulla horizontal: «La madera es lo mejor; la piedra y el hierro son fríos» |
-| 6 | (170, 528) | calle | Patrulla horizontal: «No funciona, pero esta máquina es de hierro...» |
-| 7 | (172, 424) | calle | Vecino: «Bajo el suelo hay un laberinto; no te metas sin cuidado» |
-| 8 | (50, 320) | calle | Patrulla vertical: «A esa choza sólo se llega por debajo del suelo» |
-| 9 | (62, 294) | calle | Patrulla horizontal: «¿Un engranaje? De madera se rompería» → «Tengo sed, iré a por un coco» → «El Pueblo Karakuri se hundió» |
-| 10 | (280, 236) | calle | Patrulla vertical: «Al taller se entra por arriba; ve a echar un vistazo» |
-| 11 | (496, 344) | calle | Vecino: «Este cartel es viejo y peligroso» → «Siempre tan lleno de energía» |
-| 12 | (432, 448) | C3 | Casa 3, sentado: probablemente el constructor de balsas («¿Quieres una balsa? Tráeme madera del Árbol Sabio»); el código no le da diálogo |
+| 1 | (88, 240) | C1 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 1: «...Ahora puedo hacer algo muy interesante...» (texto PAL #227) |
+| 2 | (12, 256) | C1 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 1: no habla, activa una bandera |
+| 3 | (16, 352) | C2 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 2: «No funciona, pero esta máquina es de hierro... me vendría bien» |
+| 4 | (400, 520) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla diagonal: «En esta choza vive una adivina, pero pone una condición» |
+| 5 | (300, 470) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla horizontal: «La madera es lo mejor; la piedra y el hierro son fríos» |
+| 6 | (170, 528) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla horizontal: «No funciona, pero esta máquina es de hierro...» |
+| 7 | (172, 424) | calle | «Male Lumberjack Town Resident» (vecino de Lumberjack Town) — Vecino: «Bajo el suelo hay un laberinto; no te metas sin cuidado» |
+| 8 | (50, 320) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla vertical: «A esa choza sólo se llega por debajo del suelo» |
+| 9 | (62, 294) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla horizontal: «¿Un engranaje? De madera se rompería» → «Tengo sed, iré a por un coco» → «El Pueblo Karakuri se hundió» |
+| 10 | (280, 236) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla vertical: «Al taller se entra por arriba; ve a echar un vistazo» |
+| 11 | (496, 344) | calle | «Male Lumberjack Town Resident» (vecino de Lumberjack Town) — Vecino: «Este cartel es viejo y peligroso» → «Siempre tan lleno de energía» |
+| 12 | (432, 448) | C3 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 3, sentado: probablemente el constructor de balsas («¿Quieres una balsa? Tráeme madera del Árbol Sabio»); el código no le da diálogo |
 
 - **Salidas** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); Fábrica (AREA11 s1).
 - **Objetos**: 14 (I0NFO2 0x800FFE24); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A06100` (lista de recarga SYS 61), dibujados con la paleta real AREA11/CLUT01 fila 48 (suposición para todos los vecinos).
+- **Muñecos**: `SYSTEM/A06100` (lista de recarga SYS 61), dibujados con AREA11/CLUT02 fila 4 («Lumberjack Factory Worker», subtipos 0, 1 y 4) y fila 36 («Male Lumberjack Town Resident», subtipos 2 y 3): filas confirmadas por los colores de TCRF; qué subtipo es cada dibujo es nuestro.
 - **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 11 --lang all --out build/civ`
 
@@ -485,11 +492,11 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 | # | Dónde (x, y) | Casa | Quién / qué dice (resumen de la frase japonesa) |
 |---|---|---|---|
-| 1 | (86, 460) | calle | Forzudo: «¡Aúpa... YA!» |
-| 2 | (144, 332) | calle | Forzudo: «¡Hop... AAAH!» |
-| 3 | (244, 427) | calle | Vecino junto al ascensor: «Esto pegado a la pared es un ascensor... pero no se mueve» |
-| 4 | (176, 384) | C1 | Casa 1: «¿No puedes entrar en los otros pueblos? Ni lo sé ni me importa» → luego habla del engranaje y del generador |
-| 5 | (-72, 362) | calle | Patrulla vertical: «La gente de los otros pueblos...» → «¿Un engranaje que no se rompa? Si fuera de hierro...» |
+| 1 | (86, 460) | calle | Vecino que levanta algo: «¡Aúpa... YA!» |
+| 2 | (144, 332) | calle | Vecino que levanta algo: «¡Hop... AAAH!» |
+| 3 | (244, 427) | calle | «Female Stonetown Resident» (vecina de Stonetown) — Vecino junto al ascensor: «Esto pegado a la pared es un ascensor... pero no se mueve» |
+| 4 | (176, 384) | C1 | «Male Stonetown Resident» (vecino de Stonetown) — Casa 1: «¿No puedes entrar en los otros pueblos? Ni lo sé ni me importa» → luego habla del engranaje y del generador |
+| 5 | (-72, 362) | calle | «Female Stonetown Resident» (vecina de Stonetown) — Patrulla vertical: «La gente de los otros pueblos...» → «¿Un engranaje que no se rompa? Si fuera de hierro...» |
 | 6 | (0, 245) | calle | Patrulla diagonal: «¿Primera vez en este pueblo?» → «Hace mucho intenté meterme en el río...» |
 | 7 | (86, 315) | calle | Vecino: «¿Debería entrar...?» → «Hermano, vencerás al Cerdiablo que hechizó esta tierra, ¿verdad?» |
 | 8 | (239, 106) | calle | Patrulla diagonal (sale tras el 1er avance): «Abrí en secreto la puerta entre el pueblo de hierro y el de madera» |
@@ -501,7 +508,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 
 - **Salidas** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); Fábrica (AREA11 s2), puerta; AREA16 s1 (también recortada).
 - **Objetos**: 7 (I0NFO2 0x801001D4 / 0x801001D8); el código no dice qué es cada uno.
-- **Muñecos**: `SYSTEM/A07600` (lista de recarga SYS 76), dibujados con paletas reales: AREA16/CLUT07 fila 53 para el forzudo (subtipo 2, confirmada con TCRF), filas 54 (subtipo 0) y 48 (subtipos 1 y 3) para el resto (suposiciones).
+- **Muñecos**: `SYSTEM/A07600` (lista de recarga SYS 76), dibujados con paletas reales: AREA16/CLUT07 fila 53 para «Male Stonetown Resident» (subtipo 2, confirmada con TCRF), filas 54 (subtipo 0) y 48 (subtipos 1 y 3) para el resto (suposiciones).
 - **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 
@@ -557,7 +564,7 @@ La herramienta reconstruye las secciones que funcionan sólo con datos del disco
 | Dibujo del mapa 8F | falta | la parte difícil. Un dibujo prerrenderizado de 8 bpp por pueblo, de unos 640 x 576 (AREA11), 448 x 544 (AREA16) y 704 x 480 (AREA17). Se puede pintar, o montar con AREA05/08/19 y los recortes de decorado de las páginas de recarga SYS |
 | Sprites de personajes 3B | falta la tabla, las páginas sobreviven en parte | la página de aldeanos de 4 bpp de A06100 (y las partes equivalentes de A07600/A08000) tiene los fotogramas. Una tabla SPR nueva debe ordenar sus fotogramas como esperan los guiones de animación de I0NFO2, o hay que aportar guiones nuevos |
 | Decorado 3D / tejados | falta la tabla, los recortes sobreviven en la parte de 8 bpp de las páginas de recarga | el mismo trabajo que 3B. Los tejados deben cubrir los rectángulos de las casas |
-| Paletas | las filas de los vecinos sobreviven (AREA16/CLUT07 fila 53 confirmada; 48/54, AREA11/CLUT01 48, AREA17/CLUT01 48 / CLUT03 49 plausibles) | cargar el archivo CLUT del área cuyas filas 48..54 las contienen; el TIM lleva la paleta propia del dibujo |
+| Paletas | las filas de los vecinos sobreviven (AREA16/CLUT07 fila 53 confirmada; 48/54, AREA11/CLUT02 4/36/68 confirmadas por los colores de TCRF; AREA16 48/54, AREA17/CLUT01 48 / CLUT03 49 plausibles) | cargar el archivo CLUT del área cuyas filas 48..54 las contienen; el TIM lleva la paleta propia del dibujo |
 | Texto | PAL tiene "···??", JP lo tiene todo | traducir las frases japonesas a los huecos de PAL (ya están en los índices que usa el código) |
 
 En la versión para PC esto es una tarea de datos, no de código. El motor ya ejecuta AREA05/08/19 s0/s2, y cargar
