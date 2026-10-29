@@ -92,6 +92,34 @@ static __inline__ void callit(O *o, int a)
 
 #define TBL(x) (*(unsigned short *)(WFM3_DATA + (x) * 2 + 0x10))
 
+#ifdef PORT2
+/* every popup: its box width comes from MAINn tables (+ per-language pads), not from the text it draws, so a translated
+   verb/name (verb first: "Obtienes Bumerán de madera") overflowed the right border. Once the text is laid out, widen
+   the box to the real glyph extent (the WFM advance widths; glyph x is relative to the box) plus the 8-pixel margin
+   the text starts at on the left, recentred as setpos() does; never narrower than the table width.  Corner icons
+   (0x4000 glyphs, placed at FC2 - 16 by drawMessageGlyph) follow the right edge. */
+typedef struct { unsigned short id; short pad; short x, y; } PortGE;
+extern PortGE MESSAGE_GLYPHS[][128];
+extern unsigned char D_800A5DE4[];
+static void port_fit_box(O *o)
+{
+    int i, n = MESSAGE_SLOTS[FCA].n, right = 0, need;
+    for (i = 0; i < n; i++) {
+        PortGE *g = &MESSAGE_GLYPHS[FCA][i];
+        int r;
+        if (g->id & 0x4000) continue;
+        r = g->x + D_800A5DE4[(g->id & 0xfff) * 10 + 2];
+        if (r > right) right = r;
+    }
+    need = right + 8;
+    if (need <= FC2 || need > 0x130) return;   /* 0x130: never past the 320-pixel screen */
+    for (i = 0; i < n; i++)
+        if (MESSAGE_GLYPHS[FCA][i].id & 0x4000) MESSAGE_GLYPHS[FCA][i].x += need - FC2;
+    FBE += ((unsigned short)FC2 >> 1) - ((unsigned short)need >> 1);
+    FC2 = need;
+}
+#endif
+
 O *printInfoMessage(int a, int b)
 {
     int i;
@@ -200,7 +228,9 @@ O *printInfoMessage(int a, int b)
             k = *p++;
             if ((unsigned short)(k + 2) < 2) {
 #ifdef PORT2
-                { extern int port_verb_first; if (port_verb_first) return o; }
+                { extern int port_verb_first; if (!port_verb_first && (b == 0 || b == 3)) drawInfoMessageText(o, 2); }
+                port_fit_box(o);
+                return o;
 #endif
                 if (b == 0 || b == 3) drawInfoMessageText(o, 2);
                 return o;
