@@ -345,7 +345,7 @@ i18n.add({
                            "• El barquero de la Ciudad de todo principio (AREA00): en el estanque al que llegas sobre la tortuga, "
                            "tras su «¡Hasta luego... o hasta nunca!» dice tres frases más (una puerta cerrada con llave, la cerradura "
                            "de los hombres de hierro y su barca en la playa del Bosque de las setas).\n"
-                           "• Una carta de Ciudad Baco en la Montaña Fénix (AREA03): un segundo cartel a la izquierda del de guardar "
+                           "• Una carta de Ciudad Baco en la Montaña del Fénix (AREA03): un segundo cartel a la izquierda del de guardar "
                            "partida, al principio de la zona; se lee igual que este (arriba y hablar).\n\n"
                            "Mencionan lugares y cosas que no existen en el juego final (el País de la Civilización, esa cerradura, "
                            "la barca).\n\n"
@@ -353,7 +353,9 @@ i18n.add({
                            "• Bayas plateadas y doradas: la fruta que sueltan enemigos y cofres sale a veces plateada (1 de cada 8) "
                            "o dorada (1 de cada 32); dan 2 de vida en vez de 1 (y 100 AP, como la normal).\n"
                            "• El bocadillo grande «?»: aparece sobre Tombi cuando vuelves a hablar con alguien que no tiene nada "
-                           "nuevo que decir (personajes que repiten su frase).\n\n"
+                           "nuevo que decir (personajes que repiten su frase), en las escenas vistas desde arriba.\n"
+                           "La frecuencia de las bayas y el momento del «?» los hemos elegido nosotros: el juego tiene el "
+                           "código y los gráficos, pero no dice cuándo debían salir.\n\n"
                            "Los textos están en español con el parche «Traducción mejorada»; en los demás idiomas, o sin el parche, "
                            "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content)."},
     "en": {"l.cutcontent": "Enable cut content",
@@ -370,7 +372,9 @@ i18n.add({
                            "• Silver and golden berries: fruit dropped by enemies and chests is sometimes silver (1 in 8) or golden "
                            "(1 in 32); they restore 2 vitality instead of 1 (and give 100 AP like the normal one).\n"
                            "• The big '?' bubble: it shows over Tombi when you talk again to someone who has nothing new to say "
-                           "(characters that repeat their line).\n\n"
+                           "(characters that repeat their line), in the top-down scenes.\n"
+                           "How often the berries show up and when the '?' appears are our choice: the game has the code and the "
+                           "graphics but never says when they were meant to appear.\n\n"
                            "The texts are in Spanish with the 'Improved translation' patch; in the other languages, or without the "
                            "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied."},
 })
