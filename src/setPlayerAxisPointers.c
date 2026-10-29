@@ -2,10 +2,6 @@
 // MATCHING 80020828 592
 // VERSION SLPS_01144 slps01144 800217A0 592
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_800217A0_slps01144);
-#else
 #include "spad.h"
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0xec - 0x48]; } S1;
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0xd4 - 0x48]; } S2;
@@ -74,4 +70,3 @@ void setPlayerAxisPointers(void)
         }
     }
 }
-#endif

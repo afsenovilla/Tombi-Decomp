@@ -1,5 +1,254 @@
 // FUNC 801176b0 1836 X006
 // MATCHING 801176b0 1836
+// VERSION SLPS_01144 x06 80116954 1836
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+extern char *TASK_C;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B, DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
+extern void *D_80122FB0, *D_80122FB4[];
+extern void AnimLoadDuration(TObj *);
+extern void AnimAdvance(TObj *);
+extern void cullObjectToDrawList(TObj *, int);
+extern void spawnRaceMessage(int, int, int);
+extern int FUN_8001e4f0(int);
+extern void queueSfxKeyOff(int);
+extern void FUN_8001f110(int);
+extern void printInfoMessage(int, int);
+extern TObj *showMessageBox(int, int, int, int);
+extern void FUN_8001e560(int, int);
+extern TObj *showMessageBoxDirect(int, int, Fix16 *);
+extern void setEventStarted(int, int, int);
+extern void playJingle(int);
+extern void FUN_800187e4(TObj *);
+
+void updateMotocrossRaceStarter(TObj *o)
+{
+    TObj *pl = (*(TObj **)&GVARS.p4c);
+    char *p;
+    unsigned short a, b, k;
+    unsigned char *c;
+
+    switch (o->b04) {
+    case 0:
+        o->b.p.whole = 0x1f00;
+        o->w1e = 3;
+        o->b0f = 10;
+        o->animFrame = 1;
+        o->b0d = 0;
+        o->b0a = 0;
+        o->b0c = 3;
+        o->b04++;
+        o->d3c = ((int*)&SPAD.i2d0)[0];
+        o->anim = D_80122FB0;
+        AnimLoadDuration(o);
+        GVARS.b3e = 1;
+        ((unsigned char*)&GVARS.b58)[0] = 1;
+        o->d30 = FUN_8001e4f0(0xfd);
+        break;
+    case 1:
+        cullObjectToDrawList(o, 0xa0);
+        switch (o->step) {
+        case 0:
+            if (GVARS.playerLanded == 0)
+                break;
+            if ((*(short*)((char*)&SPAD.i168 + 2)) < 0x177)
+                break;
+            ((unsigned char*)&GVARS.b58)[0] = 0;
+            queueSfxKeyOff(o->d30);
+            FUN_8001e4f0(0xfe);
+            o->timer = 0x1e;
+            o->step++;
+            if (GCD.bcfce == 1)
+                o->step = 5;
+            break;
+        case 1:
+        case 6:
+            if (--o->timer != -1)
+                break;
+            o->step++;
+            break;
+        case 2:
+            o->step++;
+            o->d90 = (int)showMessageBoxDirect(2, 0, &o->a);
+            GCD.bcfce = 1;
+            o->anim = D_80122FB4[0];
+            AnimLoadDuration(o);
+            break;
+        case 3:
+        case 8:
+            AnimAdvance(o);
+            if (((TObj *)o->d90)->b04 != 2)
+                break;
+            ((TObj *)o->d90)->b04 = 3;
+            o->step++;
+            break;
+        case 4:
+            setEventStarted(0x79, 0, 0);
+            o->step = 6;
+            o->timer = 0x15e;
+            break;
+        case 5:
+            o->timer = 0x28;
+            o->step++;
+            break;
+        case 7:
+            o->step++;
+            o->d90 = (int)showMessageBoxDirect(2, 1, &o->a);
+            o->anim = D_80122FB4[0];
+            AnimLoadDuration(o);
+            break;
+        case 9:
+            o->step++;
+            o->anim = D_80122FB0;
+            AnimLoadDuration(o);
+            break;
+        case 10:
+            spawnRaceMessage(o->b0c, 0xa0, 0x50);
+            FUN_8001e4f0(o->b0c == 0 ? 0x100 : 0xff);
+            o->timer = 0x3c;
+            o->step++;
+            break;
+        case 11:
+            if (--o->timer != 0)
+                break;
+            if (o->b0c == 0) {
+                FUN_8001e4f0(0xfc);
+                o->step++;
+            } else {
+                o->b0c--;
+                o->step--;
+            }
+            break;
+        case 12:
+            ((unsigned char*)&GVARS.b58)[0] = 4;
+            o->timer = 0x14;
+            o->step++;
+            break;
+        case 13:
+            if (--o->timer != -1)
+                break;
+            o->step++;
+            o->d30 = FUN_8001e4f0(0xfd);
+            break;
+        case 14:
+            o->step = 0;
+            o->b04++;
+            break;
+        }
+        break;
+    case 2:
+        cullObjectToDrawList(o, 0xa0);
+        switch (o->step) {
+        case 0:
+            if (pl->animTimer > 0xc0) {
+                spawnRaceMessage(4, 0x64, 0x78);
+                o->b04 = 3;
+                break;
+            }
+            if (GVARS.b42 != 1)
+                break;
+            queueSfxKeyOff(o->d30);
+            FUN_8001e4f0(0xfe);
+            o->step++;
+            break;
+        case 1:
+            FUN_8001f110(1);
+            FUN_8001e4f0(0x101);
+            printInfoMessage(0x25, 2);
+            c = &GAME.playerHealth;
+            if (--*c == 0) {
+                o->step = 8;
+                o->timer = 0x3c;
+            } else {
+                o->timer = 0x3c;
+                o->step++;
+            }
+            break;
+        case 2:
+            if (--o->timer != -1)
+                break;
+            o->step++;
+            showMessageBox(2, 0xb, 0xa0, 0x6e);
+            o->timer = 0x46;
+            break;
+        case 3:
+            if (--o->timer != -1)
+                break;
+            o->step++;
+            break;
+        case 4:
+            k = SPAD.s1fc;
+            if (k & 0x20) {
+                o->step = 6;
+                FUN_8001e560(10, 10);
+            } else if (k & 0x40) {
+                FUN_8001e560(0x1b, 0x1c);
+                o->step++;
+                (*(short*)&GAME.nextSection) = 4;
+                (*(short*)&GAME.nextSpawnPoint) = 1;
+                (*(short*)&GAME.nextArea) = 0;
+                GVARS.fadeEffect = 0;
+                GAME.fadeScreenControl = 3;
+            }
+            break;
+        case 5:
+            if (GAME.fadeScreenControl != 1)
+                break;
+            p = TASK_C;
+            *(short *)(p + 0x4c) = 7;
+            *(short *)(p + 0x4e) = 0;
+            break;
+        case 6:
+            FUN_8001f110(1);
+            GVARS.fadeEffect = 0;
+            GAME.fadeScreenControl = 3;
+            o->step++;
+            break;
+        case 7:
+            if (GAME.fadeScreenControl != 1)
+                break;
+            p = TASK_C;
+            *(short *)(p + 0x4c) = 0;
+            *(short *)(p + 0x4e) = 3;
+            a = GAME.selectedArea;
+            b = GAME.selectedSection;
+            (*(short*)&GAME.selectedSpawnPoint) = 0;
+            (*(short*)&GAME.nextSpawnPoint) = 0;
+            (*(short*)&GAME.currentSpawnPoint) = 0;
+            GAME.keepBgm = 0;
+            DISPLAY_BUFFER_0_BG_R = 0;
+            DISPLAY_BUFFER_0_BG_G = 0;
+            DISPLAY_BUFFER_0_BG_B = 0;
+            DISPLAY_BUFFER_1_BG_R = 0;
+            DISPLAY_BUFFER_1_BG_G = 0;
+            DISPLAY_BUFFER_1_BG_B = 0;
+            (*(short*)&GAME.currentArea) = a;
+            (*(short*)&GAME.currentSection) = b;
+            break;
+        case 8:
+            if (--o->timer != -1)
+                break;
+            playJingle(3);
+            o->timer = 0x5a;
+            o->step++;
+            break;
+        case 9:
+            if (--o->timer != -1)
+                break;
+            GVARS.hurtState = 2;
+            break;
+        }
+        break;
+    case 3:
+        FUN_800187e4(o);
+        break;
+    }
+}
+#else
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
@@ -246,3 +495,4 @@ void updateMotocrossRaceStarter(TObj *o)
         break;
     }
 }
+#endif

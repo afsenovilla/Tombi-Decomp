@@ -1,5 +1,42 @@
 // FUNC 800ee6d0 272 X000
 // MATCHING 800ee6d0 272
+// VERSION SLPS_01144 x00 800EE88C 272
+#if defined(VERSION_SLPS_01144)
+extern unsigned short PAD_PRESSED;
+extern unsigned short GAME;
+extern short FUN_8001fe3c(int, int);
+
+void playerFloatDirFromPad(char *o)
+{
+
+    volatile unsigned short *pad = &PAD_PRESSED;
+    int a = 10;
+    short d;
+    int t;
+    if ((*pad & 0xa000) == 0)
+        *(short *)(o + 0x76) = 0;
+    if ((*pad & 0x4000) != 0)
+        a = 8;
+    if ((*pad & 0x8000) != 0)
+        *(short *)(o + 0x76) = 0xf0;
+    if ((*pad & 0x2000) != 0)
+        *(short *)(o + 0x76) = 0x10;
+    t = *(int *)(o + 0x88);
+    d = (*(unsigned short *)(o + 0x76) - t) & 0xff;
+    if (d != 0) {
+        unsigned char e = d;
+        if (e < 0x80)
+            *(int *)(o + 0x88) = t + 1;
+        else
+            *(int *)(o + 0x88) = t - 1;
+    }
+    if (GAME == 3)
+        *(int *)(o + 0x84) = *(int *)(o + 0x84) + 6;
+    else
+        *(int *)(o + 0x84) = *(int *)(o + 0x84) + 4;
+    *(int *)(o + 0x8c) = (*(int *)(o + 0x88) + FUN_8001fe3c(*(unsigned char *)(o + 0x84), a)) & 0xff;
+}
+#else
 extern unsigned short PAD_PRESSED;
 extern unsigned short GAME;
 extern short FUN_8001fe3c(int, int);
@@ -34,3 +71,4 @@ void playerFloatDirFromPad(char *o)
         *(int *)(o + 0x84) = *(int *)(o + 0x84) + 4;
     *(int *)(o + 0x8c) = (*(int *)(o + 0x88) + FUN_8001fe3c(*(unsigned char *)(o + 0x84), a)) & 0xff;
 }
+#endif

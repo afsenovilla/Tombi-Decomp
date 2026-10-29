@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 53.8 % of code (838 KB of 1556 KB, 2183 of 3542 functions)**, mostly PAL C reused as is, the rest from
+**Progress: 55.2 % of code (859 KB of 1556 KB, 2225 of 3542 functions)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -63,11 +63,23 @@ assemble `D_1F80xxxx` scratchpad symbols as constants (build_report, like the C 
 `config/slpm80165/spad.txt` was regenerated (union with the old table) so the PAL scratchpad names such as
 `VIEW_CAMERA` compile to constants. Gain: 2111 -> 2183 functions (50.7 % -> 53.8 % of code).
 
+Near-miss pass (2026-10, 2183 -> 2225 functions, 53.8 % -> 55.2 %):
+- task table: `config/slps01144/symbol_addrs_manual.txt` keeps `D_801FD800..810` unsymbolized (like the demo), so
+  `startTask`, `closeTask`, `ThreadCreate` build from the PAL C (literal addresses) with no JP branch;
+- `build_report` gives a multi-function PAL file's first symbol the whole `.text` when the version target is one
+  function of the same total size (`chainedPartFrameTo80.c`, `chainedPartPlaceChild.c`, PAL C as is);
+- objdiff ignores relocation addends, so a field reached through a splat symbol (`D_8009EE6B` for `GV2.bc3`) needs
+  no change; `setPlayerAxisPointers` builds from PAL C;
+- 35 JP branches with instruction-level edits, found by pairing every unmatched JP function with the most similar
+  PAL function that has C (masked words) and diffing the PAL C compiled for JP: pad bits 0x10..0x80 -> 0x1000..0x8000
+  (and the reverse in `updateMotocrossRaceStarter`), camera Y offset 0x800000 -> 0x780000, player flag +0xe3 -> +0xd3
+  with the `G934 = 0` store moved first, player anim ids, a dropped call or store, the progress check
+  `GV2.bc3 & 2` -> `D_8009E50A >= 4`. Not doable in a shared file: one PAL function whose JP copies differ between
+  overlays (e.g. `initJuiceSeller` x16 matches PAL, x18 does not): needs a JP-only file.
+
 What remains, by kind (for the paired functions with PAL C):
 - about 40 that differ in size from their PAL pair (edited code, not just offsets);
-- a few where PAL C uses a literal global address (e.g. task table `0x801FD80C`) and the JP target has a relocated
-  symbol, or the other way round: they need a JP branch that names the symbol;
-- multi-function PAL files (e.g. `chainedPartFrameTo80.c`) whose JP counterpart is split differently;
+- multi-function PAL files whose JP counterpart is split differently (other than the whole-file case below);
 - about 145 JP functions are paired with PAL functions that have no C yet, and about 840 have no PAL pair at all
   (edited or JP-only code, text/font system): manual decompilation of the near-misses (`fuzzy_match_percent` 90 %
   or more) is the next step.

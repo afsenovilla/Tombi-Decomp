@@ -2,7 +2,7 @@
 // MATCHING 8012236c 340
 // VERSION SLPM_80165 x00 8011976C 340
 // VERSION SLPS_01144 x00 8012135C 340
-#if defined(VERSION_SLPM_80165)
+#if defined(VERSION_SLPM_80165) || defined(VERSION_SLPS_01144)
 // Demo version of PAL x000 8012236C (FUN_8012236c.c): reads 0x1F80017A (PAL 0x1F800186).
 /* size 340: splat fragment 80122410 is the tail of case 0. */
 #include "TOBJ.H"
@@ -55,9 +55,6 @@ void FUN_8012236c(TObj *o)
         break;
     }
 }
-#elif defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x00/nonmatchings/x00", func_8012135C_slps01144);
 #else
 /* size 340: splat fragment 80122410 is the tail of case 0. */
 #include "TOBJ.H"

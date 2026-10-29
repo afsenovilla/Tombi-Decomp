@@ -1,5 +1,48 @@
 // FUNC 80118cf4 260 X003
 // MATCHING 80118cf4 260
+// VERSION SLPS_01144 x03 80117EF0 260
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gv2.h"
+#include "TOBJ.H"
+
+extern char D_80139030[];
+extern char D_8013905C[];
+extern char D_80139028[];
+extern char D_80139054[];
+static void *D_80138EA0[4] = {
+    D_80139030, D_8013905C, D_80139028, D_80139054,
+};
+extern void AnimLoadDuration(TObj *);
+extern int ObjCullRegister(TObj *);
+extern int AnimAdvance(TObj *);
+extern void ObjFree(TObj *);
+
+extern unsigned short D_8009E50A;
+void updateWindSwayDecor(TObj *o)
+{
+    switch (o->b04) {
+    case 0:
+        if (D_8009E50A >= 4) o->subtype += 2;
+        o->w1e = 8;
+        o->b0d = 0;
+        o->b04++;
+        o->d3c = ((int*)&SPAD.i2d4)[0];
+
+        o->anim = D_80138EA0[o->subtype];
+        AnimLoadDuration(o);
+        break;
+    case 1:
+        if (ObjCullRegister(o)) AnimAdvance(o);
+        break;
+    case 2:
+        break;
+    case 3:
+        ObjFree(o);
+        break;
+    }
+}
+#else
 #include "spad.h"
 #include "gv2.h"
 #include "TOBJ.H"
@@ -39,3 +82,4 @@ void updateWindSwayDecor(TObj *o)
         break;
     }
 }
+#endif

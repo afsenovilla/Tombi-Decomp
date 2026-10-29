@@ -1,5 +1,31 @@
 // FUNC 800fc104 136 X000
 // MATCHING 800fc104 136
+// VERSION SLPS_01144 x00 800FBD74 124
+#if defined(VERSION_SLPS_01144)
+#include "gvars.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+typedef struct { char pad[8]; unsigned char b8; } P;
+extern P *PLAYER_EXT;
+extern void stopBgm(int);
+extern void playJingle(int);
+
+void updatePlayerHealth(TObj *o)
+{
+    char pad;
+    if (o->w9a != o->w98) {
+        o->w9a = o->w98;
+        PLAYER_EXT->b8 = 1;
+        ((unsigned char*)&GAME.playerHealth)[0] = o->w98;
+        if (o->w98 <= 0) {
+            GVARS.b42 = 1;
+            GVARS.hurtState = 1;
+            stopBgm(0);
+            playJingle(3);
+        }
+    }
+}
+#else
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -23,3 +49,4 @@ void updatePlayerHealth(TObj *o)
         }
     }
 }
+#endif

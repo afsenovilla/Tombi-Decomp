@@ -15,6 +15,7 @@ options:
   ld_script_path: build/slps01144/slps01144.ld
   symbol_addrs_path:
     - config/slps01144/symbol_addrs_slps01144.txt
+    - config/slps01144/symbol_addrs_manual.txt
   undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.slps01144.txt
   undefined_syms_auto_path: build/slps01144/undefined_syms_auto.slps01144.txt
   find_file_boundaries: False

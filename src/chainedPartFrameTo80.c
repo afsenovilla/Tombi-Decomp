@@ -13,9 +13,6 @@ void func_80116314(char *o)
         else *(unsigned short *)(o + 0x2e) = x - 1;
     }
 }
-#elif defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("x00/nonmatchings/x00", func_8011C1E4_slps01144);
 #else
 #include "TOBJ.H"
 

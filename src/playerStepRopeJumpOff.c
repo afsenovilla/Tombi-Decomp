@@ -1,5 +1,84 @@
 // FUNC 800fbdb4 632 X000
 // MATCHING 800fbdb4 632
+// VERSION SLPS_01144 x00 800FBA24 632
+#if defined(VERSION_SLPS_01144)
+#include "gv6.h"
+typedef struct S {
+    char p0[5]; unsigned char step, state; char p1[0x20 - 7];
+    short timer; char p2[0x2c - 0x22]; unsigned short w2c, frame; char p3[0x69 - 0x30];
+    unsigned char b69; char p4[0x7c - 0x6a]; short velX, velY; char p5[0x84 - 0x80];
+    int d84; int d88; int d8c; char p6[0x9c - 0x90]; unsigned char b9c, p9d, b9e; char p7[0xac - 0x9f];
+    unsigned char bac; char p8[0xb0 - 0xad]; short wb0, wb2, wb4, wb6;
+} S;
+typedef struct V { short x, y; } V;
+extern short PLAYER_ROPE_JUMP_OFF_SPEEDS[];
+extern S *PLAYER_EXT;
+extern void ObjSetAnimFromTable(S *);
+extern void AnimJump(S *, int);
+extern void SfxPlay2(int, int);
+void playerStepRopeJumpOff(S *o)
+{
+    int a;
+    char pad8;
+    short v, k, i, vx;
+    S *g;
+    if (o->state != 0)
+        return;
+    a = o->d84;
+    o->d8c = 0;
+    o->b9e = 0;
+    o->b69 = 0;
+    o->b9c = 1;
+    o->wb0 = 0;
+    o->bac = 0;
+    if ((unsigned short)(a - 0x40) < 0x80) {
+        v = a - 0x40;
+        if (v < 0x20) k = 4;
+        else if (v < 0x40) k = 5;
+        else if (v < 0x60) k = 6;
+        else if (v < 0x80) k = 7;
+    } else {
+        v = a;
+        if (v < 0x20) k = 0;
+        else if (v < 0x40) k = 1;
+        else if (v < 0xe0) k = 2;
+        else k = 3;
+    }
+    i = k * 2;
+    vx = PLAYER_ROPE_JUMP_OFF_SPEEDS[i];
+    if (o->frame & 1)
+        vx = -vx;
+    o->velX = vx;
+    o->velY = PLAYER_ROPE_JUMP_OFF_SPEEDS[i + 1];
+    if (o->wb2 == 0) o->velX = 0;
+    if (o->wb4 < 0x29) o->velX = 0;
+    if (o->frame & 1) {
+        o->velX = -0x300;
+        o->velY = -0x600;
+        if (*(volatile unsigned short *)&GV6.s70 & 0x8000) { o->velX = -0x480; o->velY = -0x800; }
+        if (*(volatile unsigned short *)&GV6.s70 & 0x2000) { o->velX = -0x200; o->velY = -0x400; }
+    } else {
+        o->velX = 0x300;
+        o->velY = -0x600;
+        if (*(volatile unsigned short *)&GV6.s70 & 0x8000) { o->velX = 0x200; o->velY = -0x400; }
+        if (*(volatile unsigned short *)&GV6.s70 & 0x2000) { o->velX = 0x480; o->velY = -0x800; }
+    }
+    g = PLAYER_EXT;
+    g->timer = 10;
+    o->wb2 = 0;
+    o->wb6 = 0;
+    g->w2c = 8;
+    if (g->frame != 8) {
+        g->w2c = 8;
+        ObjSetAnimFromTable(o);
+        AnimJump(o, 0);
+        PLAYER_EXT->frame = PLAYER_EXT->w2c;
+    }
+    SfxPlay2(2, 4);
+    o->step = 2;
+    o->state = 2;
+}
+#else
 #include "gv6.h"
 typedef struct S {
     char p0[5]; unsigned char step, state; char p1[0x20 - 7];
@@ -76,3 +155,4 @@ void playerStepRopeJumpOff(S *o)
     o->step = 2;
     o->state = 2;
 }
+#endif

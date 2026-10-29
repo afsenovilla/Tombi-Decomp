@@ -146,7 +146,8 @@ def _jpdemo_spad_set(text):
 
 
 def _jpdemo_compile(job):
-    src, out, name, inc, serial = job
+    src, out, name, inc, serial = job[:5]
+    tsize = job[5] if len(job) > 5 else 0
     NC = _jpdemo_compile.__dict__.setdefault("nc", {})
     if not NC:
         s = open(os.path.join(ROOT, "tools", "ncheck.py")).read().replace("\nmain()\n", "\n")
@@ -174,9 +175,12 @@ def _jpdemo_compile(job):
         if first != name:
             subprocess.run(["mipsel-linux-gnu-objcopy", "--redefine-sym", "%s=%s" % (name, name + "_pal"),
                             "--redefine-sym", "%s=%s" % (first, name), d + "/a.o"], check=True)
-        if len(funcs) == 1:  # the only function: give it the whole .text (trailing alignment nops), like splat does
+        whole = len(funcs) > 1 and tsize and tsize == e.size(".text")
+        if len(funcs) == 1 or whole:
+            # the only function: give it the whole .text (trailing alignment nops), like splat does; or several PAL
+            # functions that the version target splits as one function of the same total size (e.g. x00 8011C1E4)
             e = Elf(d + "/a.o")
-            y = next(y for y in e.syms if y["type"] == 2 and y["shndx"] == text)
+            y = next(y for y in e.syms if y["type"] == 2 and y["shndx"] == text and y["name"] == name)
             struct.pack_into("<I", e.d, y["off"] + 8, e.size(".text"))
             e.save(d + "/a.o")
         os.makedirs(os.path.dirname(out), exist_ok=True)
@@ -205,7 +209,7 @@ def jpdemo_base(progs, units, out_dir, ver="slpm80165"):
         if a is None or (prog, a) not in srcs: continue
         src, _ = srcs[(prog, a)]
         out = "%s/base/%s/%s.o" % (out_dir, prog, name)
-        jobs.append((src, out, name, inc, VERSIONS[ver]["serial"])); want.append((u, out))
+        jobs.append((src, out, name, inc, VERSIONS[ver]["serial"], u.get("size", 0))); want.append((u, out))
     with Pool(os.cpu_count() or 4) as pool:
         res = pool.map(_jpdemo_compile, jobs)
     n = nasm = 0
