@@ -556,7 +556,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 
 - **Exits** (`topdownSectionStepD`, I0NFO2 0x800E8ED4; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s2), door; AREA16 s1 (also cut).
 - **Props**: 7 (I0NFO2 0x801001D4 / 0x801001D8); the code does not say what each one is.
-- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for Male Stonetown Resident (subtype 2, confirmed against TCRF), row 37 for the boy (subtype 1, confirmed by TCRF colours: all 14 colours of TCRF's sheet are in that row, also in AREA16/CLUT06, AREA17/CLUT03/06 and AREA18/CLUT02), row 54 for subtype 0 (guess).
+- **Sprites**: `SYSTEM/A07600` (SYS reload list 76), drawn with real palettes: AREA16/CLUT07 row 53 for Male Stonetown Resident (subtype 2, confirmed against TCRF), row 37 for the boy (subtype 1, confirmed by TCRF colours: all 14 colours of TCRF's sheet are in that row, also in AREA16/CLUT06, AREA17/CLUT03/06 and AREA18/CLUT02), and for the Female Stonetown Resident (subtype 0) a custom CLUT derived pixel-exact from the TCRF sheet with `tools/clut_from_sprite.py` (24 frames, 0 silhouette mismatches, all 15 indices with one colour); not found on any disc (best disc row: mean error 30): `0000 0000 7FFF 3678 21B2 154E 5213 3DAF 2D4D 190B 1677 09B1 054D 194B 10E9 21D1`.
 - **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 16 --lang all --out build/civ`
 
