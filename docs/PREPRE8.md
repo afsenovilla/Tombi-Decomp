@@ -80,18 +80,22 @@ discs, by frame/sample comparison, or by eye.
 
 ## Debug features
 
-- A **mode dispatcher** (code around 0x800829D0) indexes a five-entry table at 0x800AF14C: 0x80082BA4, 0x80083998,
-  0x80083CD4, **0x80083D88 (enemy viewer, prints `enemy=%01d` and the table at 0x800AF158)** and **0x800853A8
-  (OPTION MODE)**.
-- OPTION MODE has `MUSIC PLAY TEST` (BGM number, volume), `SOUND OUTPUT TEST` (voice, tone, pitch, reverb type and
-  depth: ROOM ... PIPE ECHO), `CDROM LOAD TEST` (file list with sizes and MSF) and `MEMORY CARD TEST` (both slots,
-  DUMP). Its state jump table is at 0x80015B88. The title menu strings (`LOAD START`, `NEW  START`, `  OPTION  `,
-  pointer table 0x800A1A7C) suggest that OPTION is a normal title entry in this build, so the tests are probably
-  reachable without codes. This is not yet confirmed in an emulator.
-- On-screen dumps: camera (`scrl_x/y/z`, `rot_flag`, `pl_x`, `tar_x`, `n_area_pos`), player (`plX/plY/rot/spd/spx/spy/MX/MY`)
-  and `char=%02d` (character viewer, 0x8007029C).
-- `PLAY DEMO` and `RANKING DEMO` (0x8001F9E0): an attract demo and a ranking screen. `PSDEMO` (referenced next to the
-  entry point) is the compilation's return-to-menu hook.
+- 0x8008299C is NOT a mode dispatcher: it is the unlayered-object spawner. It walks the per-room list
+  D_800AF144[area=D_800DE0D8][room=D_800DE0DA] (area 0 -> 0x800AF114, area 1 -> 0x800AF12C; 6 rooms each) of 4-byte
+  records {type, arg, 0, run_now} ended by 0xFF, allocates an object (allocObjectUnlayered), sets obj[2]=type,
+  obj[3]=arg, and calls D_800AF14C[type] at once when run_now != 0. The same table drives updateObjectsUnlayered.
+  Types: 0 = 0x80082BA4 (state object, PoolFree), 1 = 0x80083998, 2 = 0x80083CD4 (initSectionSpawnerAlt, PAL match),
+  3 = 0x80083D88 (prints `enemy=%01d`; pointer also at 0x800AF158), 4 = 0x800853A8 (2-variant state object, tables
+  0x800AF0B4..0x800AF0D0: variant 0 = 84030/841D0/841F0/84768, variant 1 = 84774/84868/84934/84E48).
+  Room lists: area0 rooms 0-2 = {0 run, 1, 4 arg1, 4 arg2}; rooms 3,4 = {2 run, 1}; room 5 = {2 run, 1, 4 arg0};
+  area1 room 0 = {0 run, 1, 3}; rooms 1-5 = {2 run, 1}. So the `enemy=` object spawns only in area 1 room 0.
+- OPTION MODE root is 0x800854B4 (prints `IRQ=%d`, jump table 0x80015B88, strings table 0x800AF1BC..0x800AF1DC:
+  `OPTION MODE`, `[O] : EXECUTE`, `[X] : EXIT`, `MUSIC : PLAY TEST`, `SOUND : OUTPUT TEST`, `CDROM : LOAD TEST`,
+  `MEMORY CARD : ACCESS TEST`). Children: 0x80085650 menu, 0x80085854 MEMORY CARD TEST, 0x800862C8 CDROM LOAD TEST,
+  0x800867E0 SOUND OUTPUT TEST, 0x80086F7C MUSIC PLAY TEST. No pointer, jal or %hi/%lo pair to 0x800854B4 exists in
+  TOMBA.EXE: the OPTION MODE root is dead code in this build (port feasibility: needs a new hook).
+- Title: state machine 0x8001ECD4 (jump table 0x800100E0), menu strings table 0x800A1A78 = NEW START / LOAD START /
+  OPTION; attract modes 0x8001F9D8 (`PLAY DEMO`) and 0x8001FACC (`RANKING DEMO`) are called from 0x8001ECD4.
 
 ## Insertion into the PAL port
 
