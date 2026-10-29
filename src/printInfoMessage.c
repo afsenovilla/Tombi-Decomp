@@ -212,6 +212,14 @@ O *printInfoMessage(int a, int b)
                     FD0 = FC0 + 8;
                     break;
                 case -6:
+#ifdef PORT2
+                    /* lost/escaped popups size their box from a MAINn table, not the {BOX}: a translated text longer than the
+                       original overflowed ("La rana se escapó..."); take the BOX width when it is wider */
+                    if ((b == 2 || b == 3) && (short)p[0] > (short)FC2) {
+                        FBE -= ((unsigned short)p[0] >> 1) - ((unsigned short)FC2 >> 1);
+                        FC2 = p[0];
+                    }
+#endif
                     h = (unsigned short)FC2 >> 1;
                     p += 2;
                     FBC = 0;
