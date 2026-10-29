@@ -585,6 +585,27 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 - **Regenerate**: `python3 tools/civ_sheets.py --area 17 --lang all --out build/civ`
 
 
+## Port test (`--civ-test`)
+
+A dev flag of the native port (`port2/`, port only; the console build is unchanged) that runs AREA11 s0 with its own
+code (NPC set 0D, `topdownSectionStepC`, the AREA11 actor and dialogue handlers) over a stand-in map: AREA08 s0's
+picture, cell map, sprite tables and I0NFO2 (rules in `port/fixes.txt`, gated on `port_civ_test`). The residents walk
+their patrols and talk (Square, facing them). They wear the AREA08 villager, because the town's own sprite tables are
+lost. Their PAL text slots hold "···??", so the test data puts short Spanish glosses of the Japanese lines there.
+
+```
+python3 tools/civ_test_data.py OUT/civdata                      # symlinked copy of data/ + rebuilt MFNT110S / LD5AR11
+PORT_STALE_FULL=warn cmake -S port2 -B OUT/bp && cmake --build OUT/bp -j 8
+OUT/bp/tombi2 --headless --skip-movies --data OUT/civdata --lang 5 --civ-test --civ-spawn 100,294 --frames 1760 \
+  --poke 900:1F8001B4:1 --poke 1250:8009C960:B:2 --poke 1250:8009C962:0:2 \
+  --pad-script 1000:start,1300:circle:3,1600:left:1,1610:square:2x120/8 --dump-frames OUT/shots --dump-every 20
+```
+
+The pokes open the debug area select on AREA11 s0. `--civ-spawn 100,294` puts Tomba on the patrol line of resident 9,
+and Square talks to him (frame 1740 shows his line). `tools/civ_test_data.py` keeps the translations as text and
+writes them in priority order while the WFM stays under 26540 bytes (`--cap`). Bigger builds showed garbage glyphs, so
+six of the 18 lines fit (`#249 #250 #251 #252 #254 #257`); the script lists the rest.
+
 ## Validation (tools/topdown.py)
 
 The tool rebuilds working sections from disc data alone:

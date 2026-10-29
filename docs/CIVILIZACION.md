@@ -602,6 +602,29 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 - **Falta**: dibujo de fondo, mapa de celdas (colisión), tablas de sprites.
 - **Regenerar**: `python3 tools/civ_sheets.py --area 17 --lang all --out build/civ`
 
+## Prueba en la versión para PC (`--civ-test`)
+
+Es una opción de desarrollo de la versión nativa (`port2/`, sólo PC; la compilación de consola no cambia) que ejecuta
+AREA11 s0 con su propio código (conjunto 0D, `topdownSectionStepC`, los manejadores de personajes y diálogos de AREA11)
+sobre un mapa prestado: el dibujo, el mapa de celdas, las tablas de sprites y el I0NFO2 de AREA08 s0 (reglas en
+`port/fixes.txt`, condicionadas a `port_civ_test`). Los vecinos recorren sus patrullas y hablan (Cuadrado, mirándolos).
+Llevan el aldeano de AREA08, porque las tablas de sprites del pueblo se perdieron. Sus huecos de texto PAL tienen
+"···??", así que los datos de prueba ponen ahí resúmenes en español de las frases japonesas.
+
+```
+python3 tools/civ_test_data.py SALIDA/civdata                   # copia con enlaces de data/ + MFNT110S / LD5AR11 reconstruidos
+PORT_STALE_FULL=warn cmake -S port2 -B SALIDA/bp && cmake --build SALIDA/bp -j 8
+SALIDA/bp/tombi2 --headless --skip-movies --data SALIDA/civdata --lang 5 --civ-test --civ-spawn 100,294 --frames 1760 \
+  --poke 900:1F8001B4:1 --poke 1250:8009C960:B:2 --poke 1250:8009C962:0:2 \
+  --pad-script 1000:start,1300:circle:3,1600:left:1,1610:square:2x120/8 --dump-frames SALIDA/capturas --dump-every 20
+```
+
+Los pokes abren el selector de áreas de depuración en AREA11 s0. `--civ-spawn 100,294` pone a Tombi en la línea de
+patrulla del vecino 9, y Cuadrado habla con él (el fotograma 1740 muestra su frase). `tools/civ_test_data.py` guarda las
+traducciones como texto y las escribe por orden de prioridad mientras el WFM no pase de 26540 bytes (`--cap`). Con más
+bytes salieron glifos basura, así que caben seis de las 18 frases (`#249 #250 #251 #252 #254 #257`); el script lista las
+demás.
+
 ## Comprobación (tools/topdown.py)
 
 La herramienta reconstruye las secciones que funcionan sólo con datos del disco:
