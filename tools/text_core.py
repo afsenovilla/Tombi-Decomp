@@ -19,6 +19,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wfm_py as W
 import title_layout as TL
 import verb_order as VO
+import menu_text as MT
+import memcard_text as MC
 
 LANG_MAIN = "S"          # the PAL Spanish disc uses the *S.WFM files; the other languages are still on the disc
 PROJECT_VERSION = 1
@@ -148,6 +150,7 @@ class Project:
         self.undo_stack = []
         self.langs = {LANG_MAIN}   # languages shown / exported / imported / built (saved in the project file)
         self.glyph_shift = {}      # {height: {char: dx}}: glyph bitmaps moved inside their cell in the edited files (W.shift_glyphs)
+        self.menus = {}            # title / options menu texts of SYSTEM/OnPTSUB0.BIN (menu_text.py; saved in the project file)
         self.verb_first = False    # item popup order "Obtienes: Rana" (verb_order.py patch of EXE/MAINn.EXE; saved in the project file)
 
     def languages(self):
@@ -419,7 +422,7 @@ class Project:
     # project file
     def to_json(self):
         return {"version": PROJECT_VERSION, "disc": os.path.basename(self.src.path), "languages": sorted(self.langs),
-                "link": self.link, "verbFirst": self.verb_first, "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
+                "link": self.link, "verbFirst": self.verb_first, **({"menus": self.menus} if self.menus else {}), "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
 
     def load_edits(self, data, replace=True):
         """data: {"edits": {path: {idx: text}}} (project) or {path: {idx: text}} (export). Returns (applied, problems)."""
@@ -430,6 +433,7 @@ class Project:
                 self.link = data["link"]
             if isinstance(data.get("verbFirst"), bool):
                 self.verb_first = data["verbFirst"]
+            self.menus = dict(data["menus"]) if isinstance(data.get("menus"), dict) else {}
             if isinstance(data.get("languages"), list):
                 self.langs = {str(l).upper() for l in data["languages"]} & set(self.languages()) or {LANG_MAIN}
         applied, problems = 0, []
@@ -517,7 +521,25 @@ class Project:
         self._title_patches(files, errors)
         self._banner_patches(files, errors)
         self._verb_patches(files, errors)
+        self._menu_patches(files, errors)
         return ({} if errors else files), errors
+
+    def _menu_patches(self, files, errors):
+        """Title screen / options menu texts (not WFM: glyph strings in SYSTEM/OnPTSUB0.BIN, tools/menu_text.py) and the
+        memory card screen's (SYSTEM/DnSPSUB2.BIN, tools/memcard_text.py)."""
+        for path, spec in sorted(self.menus.items()):
+            mod = MC if re.search(r"D\dSPSUB2\.BIN$", path, re.I) else MT
+            try:
+                data = files[path] if path in files else self.src.read_any(path)
+                new = mod.apply(data, spec)
+            except (OSError, KeyError):
+                errors.append(tr("tc.nofilein", path))
+                continue
+            except (MT.MenuError, MC.MemcardError) as ex:
+                errors.append("%s: %s" % (path, ex))
+                continue
+            if new != data:
+                files[path] = new
 
     def _title_patches(self, files, errors):
         """Event titles: the spacing and line breaks of the edited titles go into the overlays that hold the layout (same number of
