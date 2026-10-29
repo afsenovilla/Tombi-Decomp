@@ -55,12 +55,13 @@ def page_key(page, stride, vx, vy, u, v, w, h):
 def generator_id():
     """sha1 of this package's sources: a .tbtx built by another version of the generator is rebuilt (written next to it
     as <out>.ver)"""
-    import hashlib
-    d = os.path.dirname(os.path.abspath(__file__))
+    # the modules' code objects, not their .py files: a PyInstaller exe has no sources on disk
+    import hashlib, importlib.util, marshal
     h = hashlib.sha1()
-    for f in sorted(os.listdir(d)):
-        if f.endswith(".py"):
-            h.update(f.encode() + b"\0" + open(os.path.join(d, f), "rb").read())
+    for name in ["gfx_es"] + sorted("gfx_es." + p[1] for p in PARTS):
+        spec = importlib.util.find_spec(name)
+        code = spec.loader.get_code(name) if spec and spec.loader else None
+        h.update(name.encode() + b"\0" + (marshal.dumps(code) if code else b""))
     return h.hexdigest()
 
 
