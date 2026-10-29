@@ -818,50 +818,62 @@ La salida va a `build/civ_rebuild/AREAnn/` (`AREAnn_nofmv/` sin la capa del FMV)
   - Las salidas del código quedan abiertas.
   - Cada vecino y cada recorrido quedan sobre suelo, y se informa de cada celda abierta para ello.
 
-### Interiores de las casas (estimaciones nuestras)
+### Interiores de las casas y layout de la comunidad (v2, estimaciones nuestras)
 
-`--interiors OUT` escribe además dos imágenes por pueblo:
-- `aNN_interior_view.png`: cada casa sin tejado, con su habitación dibujada dentro del rectángulo de disparo y
-  recortada a él, y con los vecinos de dentro marcados. Es lo que muestra el motor cuando Tomba está dentro.
-- `aNN_interiors_sheet.png`: el exterior de cada casa junto a su habitación.
+**Fuente del layout: los montajes de la comunidad.** Usamos las imágenes 129-132 de la comunidad (que se citan aquí
+como fuente del layout) para ver cómo se unen los fragmentos de las páginas.
+- Cómo se hizo la correspondencia: cada ventana de 8x8 se emparejó exactamente con nuestras páginas, por
+  correspondencia color↔índice. El desplazamiento más votado da el rectángulo de cada fragmento y su posición en el
+  objeto.
+- Lo que se guarda: `assemblies` en el layout lista los fragmentos de cada objeto. Todos los píxeles salen de tu
+  disco.
 
-Las habitaciones son los recortes de 8 bpp de la página de cada pueblo. A08600 (AREA18) repite varias y aporta una
-habitación de hierro más; A08601 solo tiene muros de AREA18.
+Hay 19 habitaciones en total:
+- 5 de Iron Town (4 casetas de tambor con cadena y la de la tubería);
+- 4 de Stonestown;
+- 3 de Lumberjack;
+- 7 de la página A08600 de AREA18.
 
-Las asignaciones son reconstrucción y estimación, a partir de:
-- el tamaño de la habitación frente al rectángulo;
-- el estilo;
-- los objetos que encajan con lo que dice el vecino;
-- las notas de Folkin.
+`--rooms OUT` las dibuja sueltas, ensambladas y con el relleno en magenta. El relleno solo cierra juntas, un 0,2-1,4 %
+de cada habitación. Cada habitación se recorta al rectángulo de su casa solo después de ensamblarla.
+
+**Pueblos.**
+- Iron Town usa la muralla sur completa con la puerta redonda y el tejado de la cúpula de la imagen 131.
+- Lumberjack Town usa el molino, la valla y las tres fachadas de la imagen 132.
+- Stonestown lleva la losa "Stone the No.1". La salida 1, hacia el Pozo de los Deseos Seco, queda unos 40 px al
+  este del pozo del FMV; manda el código.
+- El suelo son teselas rotas por parches aleatorios.
+- Las personas del FMV se rellenan por difusión.
+- En los mosaicos se quitan los bordes negros de cada fotograma y las bandas oscuras.
 
 Los motivos de cada fila están en inglés, igual que en el fichero de layout.
 
 **AREA17 (Iron Town)**
 
-| Casa | Interior (página x,y,w,h) | Confianza | Por qué |
+| Casa | Habitación ensamblada | Confianza | Por qué |
 |---|---|---|---|
-| H1 | A08000 128,5,75,138 | plausible | H1 is the dome (93x133 px). This is the tall iron room with the copper pipe and round porthole (75x138), the only iron interior as tall as the dome; AREA18's page repeats it (A08600 13). Its resident (#5) has no dialogue |
-| H2 | A08600 208,13,64,114 | guess | H2 (126x140, 'iron is sturdy' then 'you fixed the generator'): an iron room with a cabinet and stove that exists only on the AREA18 page; no other iron room is left for it |
-| H3 | A08000 305,82,83,116 | plausible | H3 ('the lift used to run on machinery'): the room whose chain runs up the wall to a pulley with a counterweight, i.e. a lift crank hut (Folkin's notes: Iron Town has crank huts for the lifts) |
-| H4 | A08000 208,0,98,90 | guess | H4 (143x122, 'good material! wait a moment'): a workroom with a stool, a lamp and a coal basket, fitting a maker |
-| H5 | A08000 175,177,143,79 | plausible | H5, the smith who gives the iron gear: the widest iron room (143 px vs the 151 px rectangle), with a chain hoist and a hexagonal coal brazier, read as a forge |
+| H1 | `room_iron_pipe` (A08000, 1 fragmentos, relleno 0.4 %) | plausible | H1, the dome (93x133): the tall pipe room (75x138), the only iron room as tall as the dome |
+| H2 | `room_iron_hut_c` (A08000, 5 fragmentos, relleno 0.8 %) | plausible | Iron Town has four chain-drum crank huts (Folkin) and four houses besides the dome, so every other house gets one. Which hut goes where is a guess, by size: 117x135 for the 126x140 house |
+| H3 | `room_iron_hut_d` (A08000, 2 fragmentos, relleno 0.7 %) | plausible | H3 ('the lift used to run on machinery'): a chain-drum hut with a doorway, the smallest (104x117) for the smallest house (115x95) |
+| H4 | `room_iron_hut_b` (A08000, 4 fragmentos, relleno 1.3 %) | guess | H4 ('good material! wait a moment'): the chain-drum hut with a plant shelf |
+| H5 | `room_iron_hut_a` (A08000, 2 fragmentos, relleno 0.6 %) | guess | H5, the smith with the iron gear: the largest chain-drum hut (118x143), whose coal basket reads as a forge |
 
 **AREA11 (Lumberjack Town)**
 
-| Casa | Interior (página x,y,w,h) | Confianza | Por qué |
+| Casa | Habitación ensamblada | Confianza | Por qué |
 |---|---|---|---|
-| H1 | A06100 272,0,110,143 | plausible | H1, the two factory workers ('now I can make something really interesting'): the log workshop with tools, a pot and stacked logs |
-| H2 | A06100 131,150,124,105 | guess | H2 ('this machine is iron, I could use it'): the remaining wooden room (round table on a green rug); its footprint (124x105) is closest to H2 (111x101) |
-| H3 | A06100 131,0,140,150 | plausible | H3, by resident #4 who says 'a fortune-teller lives in this hut': the octagonal room with a 'ZZZ' sign and a plant on a table, the most ornate wooden room; its width (140) matches H3's (139). AREA18's page repeats it (A08600 15). The sitting resident #12 is in this house |
+| H1 | `room_wood_logs` (A06100, 1 fragmentos, relleno 1.2 %) | plausible | H1, the two workers ('now I can make something'): the log workshop with tools and a pot |
+| H2 | `room_wood_table` (A06100, 4 fragmentos, relleno 0.2 %) | guess | H2: the remaining wooden room (round table on a green rug) |
+| H3 | `room_wood_zzz` (A06100, 1 fragmentos, relleno 0.5 %) | plausible | H3, next to resident #4 who says 'a fortune-teller lives in this hut': the ornate octagonal room with the 'ZZZ' sign; same width as the house |
 
-**AREA16 (Stonetown)**
+**AREA16 (Stonestown)**
 
-| Casa | Interior (página x,y,w,h) | Confianza | Por qué |
+| Casa | Habitación ensamblada | Confianza | Por qué |
 |---|---|---|---|
-| H1 | A07600 385,100,188,155 | plausible | H1, the largest house (124x135), where the strongman lives (#4: the gear and the generator): the largest stone room (chair, teal cabinet, stairs) |
-| H2 | A07600 129,0,166,197 | guess | H2 (75x79, #12 with no dialogue): the remaining stone room (teal stool and table); it is far bigger than the rectangle, so it is drawn cropped |
-| H3 | A07600 280,154,104,101 | plausible | H3, the top-right house: the teal room with a wooden inner door, matching Folkin's 'locked closet in the top-right house' |
-| H4 | A07600 129,175,151,80 | plausible | H4, the craftsman ('I want to make something'): the room with shelves, jugs and a book, a workshop |
+| H1 | `room_stone_chair` (A07600, 3 fragmentos, relleno 0.6 %) | plausible | H1, the strongman, largest house: the largest stone room |
+| H2 | `room_stone_stool` (A07600, 5 fragmentos, relleno 0.8 %) | guess | H2 (#12, no dialogue): the remaining room, drawn clipped |
+| H3 | `room_stone_closet` (A07600, 7 fragmentos, relleno 0.9 %) | plausible | H3, top right: the teal room with the inner wooden door = Folkin's locked closet |
+| H4 | `room_stone_shelves` (A07600, 4 fragmentos, relleno 1.1 %) | plausible | H4, the craftsman: shelves, jugs and a book |
 
 No se sube nada derivado del disco, del FMV ni de los ficheros de la comunidad.
 

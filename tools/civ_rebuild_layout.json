@@ -600,6 +600,13 @@
    96,
    100,
    90
+  ],
+  "stone_slab_no1": [
+   "A07601",
+   137,
+   200,
+   40,
+   40
   ]
  },
  "fmv_stamps": {
@@ -802,34 +809,34 @@
    ],
    "place": [
     [
-     "iron_gate_panel",
-     312,
-     391,
-     "real cut-out at its FMV match: the left gate of the double-gate cut-out registers on the round gate (anchor 648,60 -> mosaic 124,365); the panel's top 40 rows are cropped so the sign stays visible"
+     "asm:iron_south_wall",
+     131,
+     392,
+     "the full south wall with the round gate, joined exactly as in community image 131 (6 fragments), anchored on the FMV gate by colour matching"
     ],
     [
      "iron_wall_b",
-     30,
-     431,
-     "the FMV fence (mosaic y 395-445) continued west with the real wall cut-out"
+     -35,
+     427,
+     "the wall continued west with the same real wall cut-out (our extension)"
     ],
     [
      "iron_wall_b",
-     516,
-     431,
+     583,
+     427,
      "...and east"
     ],
     [
      "iron_wall_b",
-     682,
-     431,
-     "...to the east edge"
+     749,
+     427,
+     ""
     ],
     [
-     "iron_wall_b",
-     -136,
-     431,
-     "...to the west edge"
+     "asm:iron_dome_roof",
+     311,
+     163,
+     "the dome's barrel roof as joined in community image 131, anchored on the FMV dome"
     ],
     [
      "iron_pillars",
@@ -1027,13 +1034,6 @@
       190,
       28
      ],
-     "draw": {
-      "roof": "wood_deck_page",
-      "wall": "wood_fence",
-      "wall_h": 54,
-      "door": "fmv:wood_arch_door",
-      "door_nofmv": "wood_door"
-     },
      "why": "H1, the workshop house of the two factory workers"
     },
     {
@@ -1041,12 +1041,6 @@
       110,
       28
      ],
-     "draw": {
-      "roof": "wood_deck_page",
-      "wall": "wood_fence2",
-      "wall_h": 56,
-      "door": "wood_door"
-     },
      "why": "H2 ('this machine is iron')"
     },
     {
@@ -1054,16 +1048,16 @@
       545,
       28
      ],
-     "draw": {
-      "roof": "wood_deck_page",
-      "wall": "wood_fence",
-      "wall_h": 54,
-      "door": "wood_door"
-     },
      "why": "H3, the raft maker's hut, drawn over the FMV's deck corner"
     }
    ],
    "place": [
+    [
+     "asm:wood_windmill",
+     451,
+     204,
+     "the windmill block joined as in community image 132 (6 fragments), anchored on the FMV windmill by colour matching"
+    ],
     [
      "wood_bush",
      20,
@@ -1083,28 +1077,34 @@
      "lumber stack"
     ],
     [
-     "wood_fence",
+     "asm:wood_fence_long",
      0,
-     40,
-     "north fence"
+     20,
+     "north fence: the long fence with bushes as joined in community image 132"
     ],
     [
-     "wood_fence",
-     80,
-     40,
-     ""
-    ],
-    [
-     "wood_fence",
-     160,
-     40,
-     ""
-    ],
-    [
-     "wood_fence",
+     "asm:wood_fence_long",
      420,
-     40,
+     20,
      ""
+    ],
+    [
+     "asm:wood_house_tower",
+     126,
+     125,
+     "H1: the tower house with green arches from community image 132, the widest exterior (149 px) for the widest house (164 px) (bottom-aligned, centred; code rectangle wins)"
+    ],
+    [
+     "asm:wood_house_hut",
+     73,
+     224,
+     "H2: the hut front from image 132 (101 px) for the 111 px house (bottom-aligned, centred; code rectangle wins)"
+    ],
+    [
+     "asm:wood_house_bush",
+     487,
+     293,
+     "H3: the steep-roofed house with a bush from image 132 (143 px) for the 139 px house; it rises above the rectangle (bottom-aligned, centred; code rectangle wins)"
     ]
    ],
    "solid": [
@@ -1163,7 +1163,7 @@
    ]
   },
   "16": {
-   "name": "Stonetown",
+   "name": "Stonestown",
    "page": "A07600",
    "size": [
     544,
@@ -1275,6 +1275,12 @@
      420,
      420,
      "the white arch cut-out marks the road to the north-east exit"
+    ],
+    [
+     "stone_slab_no1",
+     246,
+     300,
+     "the 'Stone the No.1' slab (A07601 137..176, 200..240, Folkin), set by the well (our placement)"
     ]
    ],
    "solid": [
@@ -1333,7 +1339,8 @@
      "to": "AREA16 s1 (also cut)",
      "code": "topdownSectionStepD: x > 0x93 and y < 0x4A"
     }
-   ]
+   ],
+   "note_well": "Code vs FMV: exit 1 (the 7x1 px hole that leads to the Dried Wishing Well) is at px 235-243, 279-281; the FMV's keyhole well is about 40 px further west. The code wins for collision (the exit cells stay open); the well picture stays where the FMV has it, because the page's well fragments do not form a clean standalone piece"
   }
  },
  "interiors": {
@@ -1341,152 +1348,1762 @@
    {
     "house": 1,
     "piece": [
-     "A08000",
-     128,
-     5,
-     75,
-     138
+     "asm",
+     "room_iron_pipe"
     ],
     "conf": "plausible",
-    "why": "H1 is the dome (93x133 px). This is the tall iron room with the copper pipe and round porthole (75x138), the only iron interior as tall as the dome; AREA18's page repeats it (A08600 13). Its resident (#5) has no dialogue"
+    "why": "H1, the dome (93x133): the tall pipe room (75x138), the only iron room as tall as the dome"
    },
    {
     "house": 2,
     "piece": [
-     "A08600",
-     208,
-     13,
-     64,
-     114
+     "asm",
+     "room_iron_hut_c"
     ],
-    "conf": "guess",
-    "why": "H2 (126x140, 'iron is sturdy' then 'you fixed the generator'): an iron room with a cabinet and stove that exists only on the AREA18 page; no other iron room is left for it"
+    "conf": "plausible",
+    "why": "Iron Town has four chain-drum crank huts (Folkin) and four houses besides the dome, so every other house gets one. Which hut goes where is a guess, by size: 117x135 for the 126x140 house"
    },
    {
     "house": 3,
     "piece": [
-     "A08000",
-     305,
-     82,
-     83,
-     116
+     "asm",
+     "room_iron_hut_d"
     ],
     "conf": "plausible",
-    "why": "H3 ('the lift used to run on machinery'): the room whose chain runs up the wall to a pulley with a counterweight, i.e. a lift crank hut (Folkin's notes: Iron Town has crank huts for the lifts)"
+    "why": "H3 ('the lift used to run on machinery'): a chain-drum hut with a doorway, the smallest (104x117) for the smallest house (115x95)"
    },
    {
     "house": 4,
     "piece": [
-     "A08000",
-     208,
-     0,
-     98,
-     90
+     "asm",
+     "room_iron_hut_b"
     ],
     "conf": "guess",
-    "why": "H4 (143x122, 'good material! wait a moment'): a workroom with a stool, a lamp and a coal basket, fitting a maker"
+    "why": "H4 ('good material! wait a moment'): the chain-drum hut with a plant shelf"
    },
    {
     "house": 5,
     "piece": [
-     "A08000",
-     175,
-     177,
-     143,
-     79
+     "asm",
+     "room_iron_hut_a"
     ],
-    "conf": "plausible",
-    "why": "H5, the smith who gives the iron gear: the widest iron room (143 px vs the 151 px rectangle), with a chain hoist and a hexagonal coal brazier, read as a forge"
+    "conf": "guess",
+    "why": "H5, the smith with the iron gear: the largest chain-drum hut (118x143), whose coal basket reads as a forge"
    }
   ],
   "11": [
    {
     "house": 1,
     "piece": [
-     "A06100",
-     272,
-     0,
-     110,
-     143
+     "asm",
+     "room_wood_logs"
     ],
     "conf": "plausible",
-    "why": "H1, the two factory workers ('now I can make something really interesting'): the log workshop with tools, a pot and stacked logs"
+    "why": "H1, the two workers ('now I can make something'): the log workshop with tools and a pot"
    },
    {
     "house": 2,
     "piece": [
-     "A06100",
-     131,
-     150,
-     124,
-     105
+     "asm",
+     "room_wood_table"
     ],
     "conf": "guess",
-    "why": "H2 ('this machine is iron, I could use it'): the remaining wooden room (round table on a green rug); its footprint (124x105) is closest to H2 (111x101)"
+    "why": "H2: the remaining wooden room (round table on a green rug)"
    },
    {
     "house": 3,
     "piece": [
-     "A06100",
-     131,
-     0,
-     140,
-     150
+     "asm",
+     "room_wood_zzz"
     ],
     "conf": "plausible",
-    "why": "H3, by resident #4 who says 'a fortune-teller lives in this hut': the octagonal room with a 'ZZZ' sign and a plant on a table, the most ornate wooden room; its width (140) matches H3's (139). AREA18's page repeats it (A08600 15). The sitting resident #12 is in this house"
+    "why": "H3, next to resident #4 who says 'a fortune-teller lives in this hut': the ornate octagonal room with the 'ZZZ' sign; same width as the house"
    }
   ],
   "16": [
    {
     "house": 1,
     "piece": [
-     "A07600",
-     385,
-     100,
-     188,
-     155
+     "asm",
+     "room_stone_chair"
     ],
     "conf": "plausible",
-    "why": "H1, the largest house (124x135), where the strongman lives (#4: the gear and the generator): the largest stone room (chair, teal cabinet, stairs)"
+    "why": "H1, the strongman, largest house: the largest stone room"
    },
    {
     "house": 2,
     "piece": [
-     "A07600",
-     129,
-     0,
-     166,
-     197
+     "asm",
+     "room_stone_stool"
     ],
     "conf": "guess",
-    "why": "H2 (75x79, #12 with no dialogue): the remaining stone room (teal stool and table); it is far bigger than the rectangle, so it is drawn cropped"
+    "why": "H2 (#12, no dialogue): the remaining room, drawn clipped"
    },
    {
     "house": 3,
     "piece": [
-     "A07600",
-     280,
-     154,
-     104,
-     101
+     "asm",
+     "room_stone_closet"
     ],
     "conf": "plausible",
-    "why": "H3, the top-right house: the teal room with a wooden inner door, matching Folkin's 'locked closet in the top-right house'"
+    "why": "H3, top right: the teal room with the inner wooden door = Folkin's locked closet"
    },
    {
     "house": 4,
     "piece": [
-     "A07600",
-     129,
-     175,
-     151,
-     80
+     "asm",
+     "room_stone_shelves"
     ],
     "conf": "plausible",
-    "why": "H4, the craftsman ('I want to make something'): the room with shelves, jugs and a book, a workshop"
+    "why": "H4, the craftsman: shelves, jugs and a book"
    }
   ]
  },
- "_doc_interiors": "interiors: town -> per house (1-based TOPDOWN_TRIGGER_RECT_LISTS index) the page rectangle of the matched room cut-out, a confidence (strong / plausible / guess) and the reasons. All matches are our guesses."
+ "_doc_interiors": "interiors: town -> per house (1-based TOPDOWN_TRIGGER_RECT_LISTS index) the page rectangle of the matched room cut-out, a confidence (strong / plausible / guess) and the reasons. All matches are our guesses.",
+ "assemblies": {
+  "room_iron_hut_a": {
+   "fragments": [
+    [
+     "A08000",
+     224,
+     112,
+     74,
+     32,
+     32,
+     111,
+     [
+      [
+       0,
+       16,
+       6,
+       4
+      ]
+     ]
+    ],
+    [
+     "A08000",
+     203,
+     0,
+     125,
+     80,
+     -5,
+     31,
+     [
+      [
+       97,
+       0,
+       5,
+       3
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    118,
+    143
+   ],
+   "coverage_of_community": 0.877,
+   "community_group": [
+    "131",
+    1
+   ],
+   "kind": "room",
+   "why": "Iron Town chain-drum hut (crank hut, Folkin): coal basket, stool",
+   "source": "community image 131 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.6
+  },
+  "room_iron_hut_b": {
+   "fragments": [
+    [
+     "A08000",
+     165,
+     143,
+     35,
+     17,
+     30,
+     106
+    ],
+    [
+     "A08000",
+     184,
+     149,
+     40,
+     33,
+     16,
+     8,
+     [
+      [
+       0,
+       0,
+       8,
+       11
+      ]
+     ]
+    ],
+    [
+     "A08000",
+     326,
+     0,
+     58,
+     81,
+     -2,
+     35
+    ],
+    [
+     "A08000",
+     128,
+     151,
+     46,
+     105,
+     56,
+     2
+    ]
+   ],
+   "size": [
+    103,
+    123
+   ],
+   "coverage_of_community": 0.975,
+   "community_group": [
+    "131",
+    2
+   ],
+   "kind": "room",
+   "why": "Iron Town chain-drum hut with plant shelf",
+   "source": "community image 131 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 1.3
+  },
+  "room_iron_pipe": {
+   "fragments": [
+    [
+     "A08000",
+     128,
+     0,
+     80,
+     144,
+     0,
+     -5
+    ]
+   ],
+   "size": [
+    75,
+    138
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "131",
+    3
+   ],
+   "kind": "room",
+   "why": "Iron Town tall room with copper pipe and porthole",
+   "source": "community image 131 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.4
+  },
+  "room_iron_hut_c": {
+   "fragments": [
+    [
+     "A08000",
+     325,
+     232,
+     51,
+     23,
+     21,
+     111
+    ],
+    [
+     "A08000",
+     314,
+     195,
+     41,
+     37,
+     74,
+     50,
+     [
+      [
+       37,
+       5,
+       4,
+       24
+      ]
+     ]
+    ],
+    [
+     "A08000",
+     224,
+     144,
+     84,
+     33,
+     0,
+     55
+    ],
+    [
+     "A08000",
+     200,
+     232,
+     117,
+     24,
+     0,
+     87
+    ],
+    [
+     "A08000",
+     201,
+     176,
+     108,
+     56,
+     1,
+     -1
+    ]
+   ],
+   "size": [
+    117,
+    135
+   ],
+   "coverage_of_community": 0.984,
+   "community_group": [
+    "131",
+    4
+   ],
+   "kind": "room",
+   "why": "Iron Town chain-drum hut, chain to a wall pulley",
+   "source": "community image 131 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.8
+  },
+  "room_iron_hut_d": {
+   "fragments": [
+    [
+     "A08000",
+     175,
+     176,
+     25,
+     80,
+     79,
+     7
+    ],
+    [
+     "A08000",
+     306,
+     84,
+     78,
+     116,
+     2,
+     3,
+     [
+      [
+       0,
+       0,
+       7,
+       6
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    104,
+    117
+   ],
+   "coverage_of_community": 0.983,
+   "community_group": [
+    "131",
+    5
+   ],
+   "kind": "room",
+   "why": "Iron Town chain-drum hut with a doorway",
+   "source": "community image 131 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.7
+  },
+  "room_stone_chair": {
+   "fragments": [
+    [
+     "A07600",
+     546,
+     0,
+     74,
+     36,
+     25,
+     156
+    ],
+    [
+     "A07600",
+     578,
+     221,
+     44,
+     35,
+     143,
+     93
+    ],
+    [
+     "A07600",
+     384,
+     102,
+     192,
+     154,
+     -1,
+     2
+    ]
+   ],
+   "size": [
+    189,
+    186
+   ],
+   "coverage_of_community": 0.997,
+   "community_group": [
+    "130",
+    4
+   ],
+   "kind": "room",
+   "why": "Stonetown room with tall chair and teal cabinet",
+   "source": "community image 130 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.6
+  },
+  "room_stone_stool": {
+   "fragments": [
+    [
+     "A07600",
+     168,
+     0,
+     28,
+     27,
+     78,
+     167
+    ],
+    [
+     "A07600",
+     128,
+     0,
+     40,
+     122,
+     -2,
+     48
+    ],
+    [
+     "A07600",
+     168,
+     5,
+     128,
+     123,
+     38,
+     4,
+     [
+      [
+       0,
+       0,
+       22,
+       19
+      ]
+     ]
+    ],
+    [
+     "A07600",
+     128,
+     122,
+     44,
+     80,
+     38,
+     121,
+     [
+      [
+       41,
+       77,
+       3,
+       3
+      ]
+     ]
+    ],
+    [
+     "A07600",
+     129,
+     129,
+     104,
+     42,
+     39,
+     128,
+     [
+      [
+       103,
+       15,
+       1,
+       27
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    166,
+    197
+   ],
+   "coverage_of_community": 0.787,
+   "community_group": [
+    "130",
+    5
+   ],
+   "added": "A07600 128,122,44,80 and 129,129,104,42: the flat floor pieces, found by brute-force offset search (98.9 %) and by window matching inside the uncovered area; the window matcher skips flat floors",
+   "kind": "room",
+   "why": "Stonetown room with teal stool and jars",
+   "source": "community image 130 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.8
+  },
+  "room_stone_closet": {
+   "fragments": [
+    [
+     "A07600",
+     393,
+     40,
+     54,
+     37,
+     42,
+     142
+    ],
+    [
+     "A07600",
+     223,
+     146,
+     49,
+     44,
+     96,
+     24
+    ],
+    [
+     "A07600",
+     495,
+     40,
+     53,
+     43,
+     88,
+     198
+    ],
+    [
+     "A07600",
+     272,
+     140,
+     47,
+     44,
+     105,
+     58
+    ],
+    [
+     "A07600",
+     451,
+     40,
+     51,
+     60,
+     92,
+     142
+    ],
+    [
+     "A07600",
+     386,
+     0,
+     153,
+     40,
+     -5,
+     102
+    ],
+    [
+     "A07600",
+     281,
+     157,
+     104,
+     99,
+     2,
+     3,
+     [
+      [
+       0,
+       0,
+       31,
+       27
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    145,
+    235
+   ],
+   "coverage_of_community": 0.98,
+   "community_group": [
+    "130",
+    6
+   ],
+   "kind": "room",
+   "why": "Stonetown teal room with a wooden inner door (closet), on a stone pillar",
+   "source": "community image 130 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.9
+  },
+  "room_stone_shelves": {
+   "fragments": [
+    [
+     "A07600",
+     360,
+     87,
+     31,
+     34,
+     39,
+     129
+    ],
+    [
+     "A07600",
+     298,
+     93,
+     62,
+     58,
+     1,
+     79,
+     [
+      [
+       0,
+       51,
+       14,
+       7
+      ]
+     ]
+    ],
+    [
+     "A07600",
+     296,
+     0,
+     88,
+     96,
+     63,
+     82
+    ],
+    [
+     "A07600",
+     128,
+     177,
+     142,
+     79,
+     -1,
+     3,
+     [
+      [
+       7,
+       0,
+       33,
+       21
+      ],
+      [
+       104,
+       0,
+       38,
+       7
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    143,
+    175
+   ],
+   "coverage_of_community": 0.993,
+   "community_group": [
+    "130",
+    7
+   ],
+   "kind": "room",
+   "why": "Stonetown room with shelves, jugs and a book, on a pillar",
+   "source": "community image 130 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 1.1
+  },
+  "room_wood_table": {
+   "fragments": [
+    [
+     "A06100",
+     258,
+     144,
+     62,
+     32,
+     49,
+     -1
+    ],
+    [
+     "A06100",
+     315,
+     144,
+     57,
+     32,
+     74,
+     31
+    ],
+    [
+     "A06100",
+     256,
+     176,
+     64,
+     32,
+     15,
+     31
+    ],
+    [
+     "A06100",
+     128,
+     152,
+     128,
+     104,
+     -1,
+     63
+    ]
+   ],
+   "size": [
+    127,
+    162
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "132",
+    1
+   ],
+   "kind": "room",
+   "why": "Lumberjack room with a round table on a green rug",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.2
+  },
+  "room_wood_logs": {
+   "fragments": [
+    [
+     "A06100",
+     272,
+     0,
+     112,
+     144,
+     0,
+     0
+    ]
+   ],
+   "size": [
+    112,
+    144
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "132",
+    5
+   ],
+   "kind": "room",
+   "why": "Lumberjack log workshop with tools and a pot",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 1.2
+  },
+  "room_wood_zzz": {
+   "fragments": [
+    [
+     "A06100",
+     128,
+     0,
+     144,
+     152,
+     -1,
+     0
+    ]
+   ],
+   "size": [
+    143,
+    152
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "132",
+    6
+   ],
+   "kind": "room",
+   "why": "Lumberjack octagonal room with a 'ZZZ' sign and a plant on a table",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.5
+  },
+  "room_a18_pipe": {
+   "fragments": [
+    [
+     "A08600",
+     128,
+     0,
+     80,
+     149,
+     -2,
+     -2
+    ]
+   ],
+   "size": [
+    75,
+    138
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "129",
+    1
+   ],
+   "kind": "room",
+   "why": "AREA18 page: the iron pipe room",
+   "source": "community image 129 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.5
+  },
+  "room_a18_zzz": {
+   "fragments": [
+    [
+     "A08600",
+     128,
+     140,
+     50,
+     113,
+     70,
+     -9
+    ],
+    [
+     "A08600",
+     312,
+     3,
+     75,
+     109,
+     -2,
+     -10
+    ]
+   ],
+   "size": [
+    112,
+    95
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "129",
+    2
+   ],
+   "kind": "room",
+   "why": "AREA18 page: the 'ZZZ' wooden room",
+   "source": "community image 129 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.8
+  },
+  "room_a18_iron": {
+   "fragments": [
+    [
+     "A08600",
+     272,
+     0,
+     42,
+     102,
+     0,
+     10
+    ],
+    [
+     "A08600",
+     205,
+     5,
+     67,
+     122,
+     37,
+     -8
+    ]
+   ],
+   "size": [
+    104,
+    114
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "129",
+    3
+   ],
+   "kind": "room",
+   "why": "AREA18 page: iron room with cabinet and stove",
+   "source": "community image 129 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.8
+  },
+  "room_a18_logs": {
+   "fragments": [
+    [
+     "A08600",
+     173,
+     140,
+     99,
+     112,
+     -5,
+     -6
+    ]
+   ],
+   "size": [
+    92,
+    100
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "129",
+    4
+   ],
+   "kind": "room",
+   "why": "AREA18 page: log workshop",
+   "source": "community image 129 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 1.4
+  },
+  "room_a18_wood_big": {
+   "fragments": [
+    [
+     "A08600",
+     257,
+     102,
+     66,
+     42,
+     41,
+     -2
+    ],
+    [
+     "A08600",
+     270,
+     136,
+     58,
+     118,
+     -2,
+     24
+    ],
+    [
+     "A08600",
+     328,
+     108,
+     56,
+     124,
+     56,
+     28
+    ]
+   ],
+   "size": [
+    112,
+    144
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "129",
+    5
+   ],
+   "kind": "room",
+   "why": "AREA18 page: large wooden room with shelves and a round table",
+   "source": "community image 129 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.4
+  },
+  "room_a18_stone_teal": {
+   "fragments": [
+    [
+     "A08600",
+     464,
+     104,
+     49,
+     108,
+     -1,
+     6
+    ],
+    [
+     "A08600",
+     384,
+     112,
+     81,
+     140,
+     47,
+     -2
+    ]
+   ],
+   "size": [
+    127,
+    132
+   ],
+   "coverage_of_community": 0.998,
+   "community_group": [
+    "129",
+    6
+   ],
+   "kind": "room",
+   "why": "AREA18 page: teal-walled stone room with a double door",
+   "source": "community image 129 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.5
+  },
+  "room_a18_stone": {
+   "fragments": [
+    [
+     "A08600",
+     505,
+     0,
+     32,
+     16,
+     38,
+     106
+    ],
+    [
+     "A08600",
+     395,
+     0,
+     50,
+     24,
+     40,
+     -6
+    ],
+    [
+     "A08600",
+     384,
+     24,
+     64,
+     90,
+     -3,
+     18
+    ],
+    [
+     "A08600",
+     448,
+     0,
+     71,
+     108,
+     61,
+     18,
+     [
+      [
+       58,
+       0,
+       13,
+       11
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    132,
+    128
+   ],
+   "coverage_of_community": 0.998,
+   "community_group": [
+    "129",
+    7
+   ],
+   "kind": "room",
+   "why": "AREA18 page: stone room with flagstone floor",
+   "source": "community image 129 (fragment offsets registered exactly against our pages)",
+   "filled_pct": 0.4
+  },
+  "iron_south_wall": {
+   "fragments": [
+    [
+     "A08000",
+     618,
+     80,
+     22,
+     34,
+     166,
+     19
+    ],
+    [
+     "A08000",
+     574,
+     56,
+     42,
+     56,
+     154,
+     43
+    ],
+    [
+     "A08000",
+     616,
+     0,
+     24,
+     81,
+     252,
+     19
+    ],
+    [
+     "A08000",
+     552,
+     0,
+     64,
+     56,
+     188,
+     -5
+    ],
+    [
+     "A08000",
+     384,
+     0,
+     168,
+     58,
+     -4,
+     35
+    ],
+    [
+     "A08000",
+     384,
+     54,
+     186,
+     58,
+     276,
+     33
+    ]
+   ],
+   "size": [
+    452,
+    96
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "131",
+    32
+   ],
+   "kind": "set",
+   "why": "Iron Town south wall with the round gate",
+   "source": "community image 131 (fragment offsets registered exactly against our pages)"
+  },
+  "iron_dome_roof": {
+   "fragments": [
+    [
+     "A08000",
+     768,
+     214,
+     39,
+     42,
+     44,
+     2,
+     [
+      [
+       24,
+       0,
+       15,
+       2
+      ]
+     ]
+    ],
+    [
+     "A08000",
+     768,
+     167,
+     48,
+     45,
+     -4,
+     -5
+    ]
+   ],
+   "size": [
+    83,
+    36
+   ],
+   "coverage_of_community": 0.992,
+   "community_group": [
+    "131",
+    6
+   ],
+   "kind": "set",
+   "why": "the dome's barrel roof",
+   "source": "community image 131 (fragment offsets registered exactly against our pages)"
+  },
+  "wood_house_hut": {
+   "fragments": [
+    [
+     "A06100",
+     440,
+     1,
+     48,
+     57,
+     56,
+     13
+    ],
+    [
+     "A06100",
+     384,
+     0,
+     56,
+     72,
+     0,
+     -4
+    ],
+    [
+     "A06100",
+     253,
+     208,
+     108,
+     47,
+     -3,
+     68
+    ]
+   ],
+   "size": [
+    101,
+    116
+   ],
+   "coverage_of_community": 0.99,
+   "community_group": [
+    "132",
+    2
+   ],
+   "kind": "set",
+   "why": "Lumberjack hut front with roof",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)"
+  },
+  "wood_house_tower": {
+   "fragments": [
+    [
+     "A06100",
+     752,
+     16,
+     40,
+     105,
+     111,
+     15
+    ],
+    [
+     "A06100",
+     712,
+     16,
+     40,
+     104,
+     -1,
+     15
+    ],
+    [
+     "A06100",
+     640,
+     24,
+     72,
+     119,
+     39,
+     0,
+     [
+      [
+       0,
+       0,
+       4,
+       17
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    149,
+    119
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "132",
+    3
+   ],
+   "kind": "set",
+   "why": "Lumberjack tower with green arches",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)"
+  },
+  "wood_house_bush": {
+   "fragments": [
+    [
+     "A06100",
+     843,
+     2,
+     36,
+     35,
+     67,
+     2
+    ],
+    [
+     "A06100",
+     721,
+     184,
+     71,
+     25,
+     73,
+     144
+    ],
+    [
+     "A06100",
+     784,
+     64,
+     55,
+     48,
+     0,
+     144
+    ],
+    [
+     "A06100",
+     790,
+     16,
+     40,
+     48,
+     70,
+     32
+    ],
+    [
+     "A06100",
+     712,
+     120,
+     72,
+     64,
+     72,
+     80
+    ],
+    [
+     "A06100",
+     633,
+     144,
+     79,
+     112,
+     -7,
+     32
+    ]
+   ],
+   "size": [
+    143,
+    188
+   ],
+   "coverage_of_community": 0.996,
+   "community_group": [
+    "132",
+    4
+   ],
+   "kind": "set",
+   "why": "Lumberjack steep-roofed house with a bush",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)"
+  },
+  "wood_fence_long": {
+   "fragments": [
+    [
+     "A06100",
+     599,
+     144,
+     42,
+     48,
+     302,
+     16
+    ],
+    [
+     "A06100",
+     354,
+     208,
+     30,
+     46,
+     -7,
+     48
+    ],
+    [
+     "A06100",
+     440,
+     120,
+     48,
+     87,
+     23,
+     16
+    ],
+    [
+     "A06100",
+     440,
+     200,
+     80,
+     54,
+     231,
+     39
+    ],
+    [
+     "A06100",
+     384,
+     136,
+     56,
+     88,
+     175,
+     8
+    ],
+    [
+     "A06100",
+     488,
+     96,
+     112,
+     96,
+     71,
+     0
+    ]
+   ],
+   "size": [
+    335,
+    96
+   ],
+   "coverage_of_community": 0.985,
+   "community_group": [
+    "132",
+    8
+   ],
+   "kind": "set",
+   "why": "Lumberjack long fence with bushes",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)"
+  },
+  "wood_windmill": {
+   "fragments": [
+    [
+     "A06100",
+     712,
+     0,
+     106,
+     16,
+     139,
+     64
+    ],
+    [
+     "A06100",
+     837,
+     32,
+     59,
+     65,
+     59,
+     -4
+    ],
+    [
+     "A06100",
+     635,
+     0,
+     77,
+     24,
+     62,
+     56
+    ],
+    [
+     "A06100",
+     713,
+     212,
+     73,
+     44,
+     1,
+     80
+    ],
+    [
+     "A06100",
+     784,
+     164,
+     72,
+     92,
+     72,
+     80
+    ],
+    [
+     "A06100",
+     520,
+     192,
+     108,
+     64,
+     139,
+     0
+    ]
+   ],
+   "size": [
+    237,
+    171
+   ],
+   "coverage_of_community": 0.912,
+   "community_group": [
+    "132",
+    10
+   ],
+   "kind": "set",
+   "why": "Lumberjack windmill and deck",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)"
+  },
+  "wood_railing": {
+   "fragments": [
+    [
+     "A06100",
+     595,
+     112,
+     45,
+     32,
+     83,
+     0
+    ],
+    [
+     "A06100",
+     600,
+     80,
+     40,
+     32,
+     128,
+     0
+    ],
+    [
+     "A06100",
+     440,
+     56,
+     48,
+     66,
+     168,
+     32
+    ],
+    [
+     "A06100",
+     384,
+     72,
+     56,
+     66,
+     112,
+     32
+    ],
+    [
+     "A06100",
+     488,
+     32,
+     112,
+     64,
+     0,
+     32
+    ]
+   ],
+   "size": [
+    216,
+    96
+   ],
+   "coverage_of_community": 0.997,
+   "community_group": [
+    "132",
+    11
+   ],
+   "kind": "set",
+   "why": "Lumberjack railing with stairs",
+   "source": "community image 132 (fragment offsets registered exactly against our pages)"
+  },
+  "stone_arch_well": {
+   "fragments": [
+    [
+     "A07601",
+     1,
+     240,
+     39,
+     16,
+     263,
+     35
+    ],
+    [
+     "A07601",
+     85,
+     184,
+     80,
+     16,
+     211,
+     115
+    ],
+    [
+     "A07601",
+     0,
+     208,
+     40,
+     32,
+     270,
+     51
+    ],
+    [
+     "A07601",
+     40,
+     208,
+     47,
+     48,
+     214,
+     131
+    ],
+    [
+     "A07601",
+     187,
+     80,
+     69,
+     32,
+     290,
+     3
+    ],
+    [
+     "A07601",
+     88,
+     200,
+     48,
+     50,
+     42,
+     208
+    ],
+    [
+     "A07601",
+     136,
+     200,
+     39,
+     50,
+     51,
+     248
+    ],
+    [
+     "A07601",
+     5,
+     81,
+     43,
+     62,
+     75,
+     172
+    ],
+    [
+     "A07601",
+     0,
+     0,
+     56,
+     85,
+     0,
+     150
+    ],
+    [
+     "A07601",
+     88,
+     96,
+     56,
+     88,
+     158,
+     139
+    ],
+    [
+     "A07601",
+     48,
+     81,
+     40,
+     95,
+     118,
+     140
+    ],
+    [
+     "A07601",
+     169,
+     112,
+     86,
+     101,
+     303,
+     35,
+     [
+      [
+       0,
+       88,
+       18,
+       13
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    390,
+    303
+   ],
+   "coverage_of_community": 0.55,
+   "community_group": [
+    "130",
+    1
+   ],
+   "kind": "set",
+   "why": "Stonetown arch, keyhole well and teal-roof house parts (partly joined)",
+   "source": "community image 130 (fragment offsets registered exactly against our pages)"
+  },
+  "stone_roof": {
+   "fragments": [
+    [
+     "A07600",
+     528,
+     193,
+     44,
+     27,
+     94,
+     97,
+     [
+      [
+       0,
+       24,
+       3,
+       3
+      ]
+     ]
+    ],
+    [
+     "A07600",
+     574,
+     150,
+     58,
+     106,
+     90,
+     26
+    ],
+    [
+     "A07600",
+     542,
+     30,
+     98,
+     125,
+     -6,
+     -6
+    ]
+   ],
+   "size": [
+    139,
+    124
+   ],
+   "coverage_of_community": 1.0,
+   "community_group": [
+    "130",
+    2
+   ],
+   "kind": "set",
+   "why": "Stonetown teal roof piece",
+   "source": "community image 130 (fragment offsets registered exactly against our pages)"
+  },
+  "stone_wall": {
+   "fragments": [
+    [
+     "A07601",
+     80,
+     2,
+     25,
+     32,
+     7,
+     26
+    ],
+    [
+     "A07601",
+     104,
+     0,
+     38,
+     93,
+     -1,
+     48,
+     [
+      [
+       31,
+       69,
+       1,
+       7
+      ]
+     ]
+    ],
+    [
+     "A07601",
+     144,
+     0,
+     46,
+     113,
+     31,
+     -1,
+     [
+      [
+       24,
+       101,
+       22,
+       12
+      ],
+      [
+       0,
+       110,
+       3,
+       3
+      ]
+     ]
+    ]
+   ],
+   "size": [
+    77,
+    144
+   ],
+   "coverage_of_community": 0.989,
+   "community_group": [
+    "130",
+    3
+   ],
+   "kind": "set",
+   "why": "Stonetown stone wall",
+   "source": "community image 130 (fragment offsets registered exactly against our pages)"
+  }
+ },
+ "_doc_assemblies": "assemblies: objects made of several page fragments, joined as the community did in images 129-132. fragments = [page, sx, sy, w, h, x, y(, cuts)]: page rect drawn at (x, y) in the object. Found by exact 8x8 colour<->index window matching against the community images, rects grown pixel by pixel while they still agree; isolated fragments under 600 px dropped. An 8th fragment element lists cut boxes [x, y, w, h] (fragment-local) of pixels that belong to a neighbouring cut-out packed inside the same page rectangle; they are skipped.",
+ "section_names": {
+  "11": "Lumberjack Town (s1 Factory, s2 Dried Wishing Well)",
+  "16": "Stonestown",
+  "17": "Iron Town",
+  "source": "D0SPSUB section-name table 0x80108E5C (docs, Folkin-notes verification d384774)"
+ }
 }

@@ -78,6 +78,26 @@ def _shift(a, b):
     return (y - H if y > H // 2 else y), (x - W if x > W // 2 else x)
 
 
+def destripe(m):
+    """Thin dark horizontal bands left in the median (frame seams, letterbox rows): a pixel much darker than both the
+    row 2 above and 2 below, on a row where that holds for a quarter of the width or more (dotted bands too), is replaced by the vertical
+    interpolation of its neighbours; uncovered (NaN) pixels likewise. No black line may remain."""
+    m = np.array(m, np.float32)
+    H = m.shape[0]
+    for _ in range(2):
+        lum = np.nan_to_num(m.mean(2), nan=-1)
+        for y in range(2, H - 2):
+            up, dn, c = lum[y - 2], lum[y + 2], lum[y]
+            valid = (up > 0) & (dn > 0)
+            dark = valid & (c < 0.75 * np.minimum(up, dn)) | (c < 0)
+            if valid.sum() and dark.sum() > 0.25 * valid.sum():  # also dotted bands
+                for yy in (y - 1, y, y + 1):
+                    l2 = np.nan_to_num(m[yy].mean(1), nan=-1)
+                    bad = (l2 < 0.75 * np.minimum(up, dn)) | (l2 < 0)
+                    m[yy][bad] = (np.nan_to_num(m[y - 2][bad]) + np.nan_to_num(m[y + 2][bad])) / 2
+    return np.nan_to_num(m).clip(0, 255).astype(np.uint8)
+
+
 def mosaic(movie, f0, f1, cache):
     """Median mosaic of frames f0..f1 (a camera pan at the page scale): sparkles and walkers drop out."""
     fn = os.path.join(cache, "%s_%d_%d.png" % (movie, f0, f1))
@@ -92,9 +112,13 @@ def mosaic(movie, f0, f1, cache):
             break
         if num >= f0:
             fr.append(np.frombuffer(S.decode_frame(bs, w, h), np.uint8).reshape(h, w, 3).astype(np.float32))
+    for F in fr:  # black border rows/columns of a frame (letterbox, MDEC edges) carry no picture: drop them
+        lum = F.mean(2)
+        F[(lum < 24).mean(1) > 0.8] = np.nan
+        F[:, (lum < 24).mean(0) > 0.8] = np.nan
     pos = [(0, 0)]
     for a, b in zip(fr, fr[1:]):
-        dy, dx = _shift(a.mean(2), b.mean(2))
+        dy, dx = _shift(np.nan_to_num(a.mean(2)), np.nan_to_num(b.mean(2)))
         pos.append((pos[-1][0] + dy, pos[-1][1] + dx))
     y0 = min(p[0] for p in pos); x0 = min(p[1] for p in pos)
     h, w = fr[0].shape[:2]
@@ -105,7 +129,8 @@ def mosaic(movie, f0, f1, cache):
     with np.errstate(all="ignore"):
         import warnings
         warnings.simplefilter("ignore")
-        m = np.nan_to_num(np.nanmedian(st, 0)).astype(np.uint8)
+        m = np.nanmedian(st, 0)
+    m = destripe(m)
     os.makedirs(cache, exist_ok=True)
     Image.fromarray(m).save(fn)
     return m
@@ -235,6 +260,104 @@ def mosaics(L, cache):
     return _MOS
 
 
+# ---------------------------------------------------------------- assemblies (community joins, our pixels)
+def assemble(name, L, fill=False):
+    """(page-of-pixel array, index array, filled mask) of a layout assembly. With fill, small holes inside the object
+    (pixels the fragments do not reach, inside its closed outline) are completed conservatively by copying the nearest
+    covered pixel of the same row, else column (an extension of the existing floor or wall texture)."""
+    A_ = L["assemblies"][name]
+    W, H = A_["size"]
+    pg_ = np.full((H, W), -1, np.int16)
+    ix = np.zeros((H, W), np.uint8)
+    names = []
+    for fr in A_["fragments"]:
+        pn, sx, sy, w, h, x, y = fr[:7]
+        if pn not in names:
+            names.append(pn)
+        P = page(pn)[sy:sy + h, sx:sx + w].copy()
+        for cx, cy, cw, chh in (fr[7] if len(fr) > 7 else []):  # pixels of a neighbouring cut-out in the same rect
+            P[cy:cy + chh, cx:cx + cw] = 0
+        v, u = np.nonzero(P)
+        Y, X = v + y, u + x
+        ok = (Y >= 0) & (Y < H) & (X >= 0) & (X < W)
+        ix[Y[ok], X[ok]] = P[v[ok], u[ok]]
+        pg_[Y[ok], X[ok]] = names.index(pn)
+    filled = np.zeros((H, W), bool)
+    if fill:
+        cov = pg_ >= 0
+        r = 2
+
+        def shift_or(m, op):
+            pad = np.pad(m, r, constant_values=(op == "and"))
+            out = m.copy()
+            for dy in range(-r, r + 1):
+                for dx in range(-r, r + 1):
+                    sl = pad[r + dy:r + dy + H, r + dx:r + dx + W]
+                    out = (out | sl) if op == "or" else (out & sl)
+            return out
+        ero = shift_or(shift_or(cov, "or"), "and")  # closing: only seams and pinholes, never the outline's notches
+        holes = ero & ~cov
+        for y, x in zip(*np.nonzero(holes)):
+            row = np.nonzero(cov[y])[0]
+            if row.size:
+                k = row[np.argmin(np.abs(row - x))]
+                if abs(k - x) <= 2 * r:
+                    ix[y, x], pg_[y, x] = ix[y, k], pg_[y, k]; filled[y, x] = True; continue
+            col = np.nonzero(cov[:, x])[0]
+            if col.size:
+                k = col[np.argmin(np.abs(col - y))]
+                ix[y, x], pg_[y, x] = ix[k, x], pg_[k, x]; filled[y, x] = True
+    return names, pg_, ix, filled
+
+
+def assembly_rgb(name, L, refs, cache, fill=False):
+    names, pg_, ix, filled = assemble(name, L, fill)
+    H, W = ix.shape
+    rgb = np.zeros((H, W, 3), np.uint8)
+    for k, pn in enumerate(names):
+        pal, _, _ = derive_clut(pn, L, refs, cache)
+        m = pg_ == k
+        rgb[m] = pal[ix[m]]
+    return rgb, pg_ >= 0, filled
+
+
+def rooms_sheet(L, refs, out, cache):
+    """Every assembled room: fragments laid out apart (left), assembled (middle), assembled + fill with the filled
+    pixels tinted magenta (right), labelled with page(s), fragment count and filled %."""
+    os.makedirs(out, exist_ok=True)
+    rows = []
+    f = font(11)
+    for name, A_ in L["assemblies"].items():
+        if A_["kind"] != "room":
+            continue
+        rgb0, cov0, _ = assembly_rgb(name, L, refs, cache, False)
+        rgb1, cov1, filled = assembly_rgb(name, L, refs, cache, True)
+        tint = rgb1.copy(); tint[filled] = (tint[filled] * 0.4 + np.array([255, 0, 255]) * 0.6).astype(np.uint8)
+        frs = []
+        for fr in A_["fragments"]:
+            pn, sx, sy, w, h = fr[:5]
+            pal, _, _ = derive_clut(pn, L, refs, cache)
+            frs.append(Image.fromarray(pal[page(pn)[sy:sy + h, sx:sx + w]]))
+        fw = sum(i.width + 6 for i in frs); fh = max(i.height for i in frs)
+        pct = 100.0 * filled.sum() / max(1, cov1.sum())
+        A_["filled_pct"] = round(pct, 1)
+        rows.append((name, A_, frs, fw, fh, Image.fromarray(rgb0), Image.fromarray(tint), pct))
+    W = max(r[3] + r[5].width * 2 + 60 for r in rows)
+    H = sum(max(r[4], r[5].height) + 40 for r in rows)
+    S = Image.new("RGB", (W, H), (32, 32, 32)); d = ImageDraw.Draw(S); y = 0
+    for name, A_, frs, fw, fh, a0, a1, pct in rows:
+        pages_ = sorted({fr[0] for fr in A_["fragments"]})
+        d.text((6, y + 4), "%s  [%s]  %d fragments, filled %.1f %%  - %s (reconstruction)" % (name, "+".join(pages_), len(frs), pct, A_["why"]),
+               fill=(255, 255, 255), font=f)
+        x = 6
+        for im in frs:
+            S.paste(im, (x, y + 24)); x += im.width + 6
+        S.paste(a0, (fw + 24, y + 24)); S.paste(a1, (fw + 36 + a0.width, y + 24))
+        y += max(fh, a0.height) + 40
+    S.save(os.path.join(out, "rooms_sheet.png"))
+    return {r[0]: round(r[7], 1) for r in rows}
+
+
 # ---------------------------------------------------------------- composition
 def nearest(rgb, pal, allowed):
     """Index (from `allowed`) of the closest palette colour for each RGB pixel."""
@@ -290,8 +413,32 @@ def compose(area, L, T_, pal, cache, use_fmv=True):
                 can[yy:yy + t.shape[0], xx:xx + t.shape[1]] = t
                 src[yy:yy + t.shape[0], xx:xx + t.shape[1]] = 1
 
+    def quilt(tset, x0, y0, w, h):
+        """Break the grid: scatter random tiles of the set at random positions through soft irregular masks
+        (a disc with a noisy edge), so the ground reads as one continuous texture rather than a tiled pattern."""
+        tiles = L["tilesets"][tset]
+        if "mosaic" in tiles and not use_fmv:
+            return quilt(tiles["nofmv"], x0, y0, w, h)
+        P = fmv_tiles[tset] if "mosaic" in tiles else pg(tiles["page"])
+        tw, th = tiles["size"]
+        yy_, xx_ = np.mgrid[0:th, 0:tw]
+        for _ in range(int(3 * w * h / (tw * th))):
+            sx, sy = tiles["at"][rng.integers(len(tiles["at"]))]
+            t = P[sy:sy + th, sx:sx + tw]
+            r = (min(tw, th) / 2) * (0.6 + 0.4 * rng.random((th, tw)))
+            m = ((yy_ - th / 2) ** 2 + (xx_ - tw / 2) ** 2 < r ** 2) & (t > 0)
+            ty, tx = y0 + int(rng.integers(-th // 2, h)), x0 + int(rng.integers(-tw // 2, w))
+            ya, xa = max(ty, y0, 0), max(tx, x0, 0)
+            yb, xb = min(ty + th, y0 + h, H), min(tx + tw, x0 + w, W)
+            if yb <= ya or xb <= xa:
+                continue
+            mm = m[ya - ty:yb - ty, xa - tx:xb - tx]
+            can[ya:yb, xa:xb][mm] = t[ya - ty:yb - ty, xa - tx:xb - tx][mm]
+
     for g in T_["ground"]:
         tile_fill(g["tiles"], *g["rect"])
+        if g.get("quilt", True):
+            quilt(g["tiles"], *g["rect"])
     if use_fmv:
         for f in T_.get("fmv", []):
             m = mosaics(L, cache)[f["mosaic"]]
@@ -299,8 +446,21 @@ def compose(area, L, T_, pal, cache, use_fmv=True):
             ax, ay = f["at"]
             part = m[sy:sy + h, sx:sx + w]
             keep = part.sum(2) > 0
-            for ex in f.get("erase", []):  # mosaic rects left to the ground (baked-in people, frame edges)
-                keep[max(0, ex[1] - sy):ex[1] - sy + ex[3], max(0, ex[0] - sx):ex[0] - sx + ex[2]] = False
+            part = part.astype(np.float32).copy()
+            for ex in f.get("erase", []):  # the FMV's own people: inpainted from their surroundings (diffusion)
+                hole = np.zeros(part.shape[:2], bool)
+                hole[max(0, ex[1] - sy):ex[1] - sy + ex[3], max(0, ex[0] - sx):ex[0] - sx + ex[2]] = True
+                part[hole] = 0
+                known = ~hole
+                for _ in range(200):
+                    acc = np.zeros_like(part); n = np.zeros(part.shape[:2], np.float32)
+                    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        sh = np.roll(np.roll(part, dy, 0), dx, 1); kn = np.roll(np.roll(known, dy, 0), dx, 1)
+                        acc += sh * kn[..., None]; n += kn
+                    upd = hole & (n > 0)
+                    part[upd] = acc[upd] / n[upd][:, None]
+                    known = known | upd
+            part = part.clip(0, 255).astype(np.uint8)
             idx = nearest(part, pal, allowed)
             y0, x0 = max(0, ay), max(0, ax)
             y1, x1 = min(H, ay + h), min(W, ax + w)
@@ -322,14 +482,22 @@ def compose(area, L, T_, pal, cache, use_fmv=True):
         door = dw.get("door") if use_fmv else dw.get("door_nofmv", dw.get("door"))
         if door and not (door.startswith("fmv:") and not use_fmv):
             dx0, dwid = T_["houses"][i]["door"]
-            w_, h_ = (L["fmv_stamps"][door[4:]] if door.startswith("fmv:") else L["pieces"][door])[3:5]
+            w_, h_ = (L["fmv_stamps"][door[4:]][3:5] if door.startswith("fmv:") else
+                      L["assemblies"][door[4:]]["size"] if door.startswith("asm:") else L["pieces"][door][3:5])
             place.append([door, dx0 + dwid // 2 - w_ // 2, y1 + 1 - h_ + dw.get("door_dy", 0)])
     for p in place:
         name, ax, ay = p[0], p[1], p[2]
         note = p[3] if len(p) > 3 and isinstance(p[3], str) else ""
         if (note.startswith("[nofmv]") and use_fmv) or (note.startswith("[fmv]") and not use_fmv):
             continue
-        if name.startswith("@"):  # internal: a cropped piece "@page:x:y:w:h:flip"
+        if name.startswith("asm:"):  # a community-joined assembly, our pixels, each page remapped to the town CLUT
+            names_, pga, ixa, _ = assemble(name[4:], L)
+            spr = np.zeros(ixa.shape, np.uint8)
+            for k_, pn in enumerate(names_):
+                m_ = pga == k_
+                spr[m_] = remap(pn)[ixa[m_]]
+            kind = 3
+        elif name.startswith("@"):  # internal: a cropped piece "@page:x:y:w:h:flip"
             pn, sx, sy, w, h, _ = name[1:].split(":")
             sx, sy, w, h = int(sx), int(sy), int(w), int(h)
             spr, kind = remap(pn)[pg(pn)[sy:sy + h, sx:sx + w]], 3
@@ -510,11 +678,17 @@ def render_interiors(area, L, refs, T_, rgb, out, cache):
     rects = T.trigger_rects(area)
     f = font(12)
     for it in L.get("interiors", {}).get(str(area), []):
-        pn, sx, sy, w, h = it["piece"]
-        pal, _, _ = derive_clut(pn, L, refs, cache)
-        P = page(pn)[sy:sy + h, sx:sx + w]
-        room = Image.fromarray(pal[P]).convert("RGBA")
-        room.putalpha(Image.fromarray(((P > 0) * 255).astype(np.uint8)))
+        if it["piece"][0] == "asm":
+            rgbA, covA, _ = assembly_rgb(it["piece"][1], L, refs, cache, True)
+            h, w = covA.shape
+            room = Image.fromarray(rgbA).convert("RGBA")
+            room.putalpha(Image.fromarray((covA * 255).astype(np.uint8)))
+        else:
+            pn, sx, sy, w, h = it["piece"]
+            pal, _, _ = derive_clut(pn, L, refs, cache)
+            P = page(pn)[sy:sy + h, sx:sx + w]
+            room = Image.fromarray(pal[P]).convert("RGBA")
+            room.putalpha(Image.fromarray(((P > 0) * 255).astype(np.uint8)))
         x0, y0, x1, y1 = world_rect_px(rects[it["house"] - 1])
         ext = view.crop((x0 - 16, y0 - 16, x1 + 16, y1 + 16))
         box = Image.new("RGBA", (x1 - x0 + 1, y1 - y0 + 1), (0, 0, 0, 255))
@@ -542,8 +716,8 @@ def render_interiors(area, L, refs, T_, rgb, out, cache):
         H = sum(max(e.height, r.height) + 70 for _, e, r in sheet_rows)
         S = Image.new("RGB", (max(W, 700), H), (30, 30, 30)); d = ImageDraw.Draw(S); y = 0
         for it, e, r in sheet_rows:
-            d.text((8, y + 4), "%s H%d -> %s %s  [%s]  (reconstruction, our guess)" % (T_["name"], it["house"], it["piece"][0],
-                   tuple(it["piece"][1:]), it["conf"]), fill=(255, 255, 255), font=f)
+            d.text((8, y + 4), "%s H%d -> %s  [%s]  (reconstruction, our guess)" % (T_["name"], it["house"],
+                   " ".join(str(v) for v in it["piece"]), it["conf"]), fill=(255, 255, 255), font=f)
             d.text((8, y + 22), it["why"][:150], fill=(190, 190, 190), font=font(10))
             S.paste(e, (8, y + 44)); S.paste(r, (e.width + 40, y + 44), r)
             y += max(e.height, r.height) + 70
@@ -633,6 +807,7 @@ def main():
     ap.add_argument("--community-cluts", metavar="DIR", help="the community clutgen folder (GGDdefault.act, CLUT*.png, "
                     "PHOT*.png): its index colours come first ('community FMV-derived CLUT (clutgen)')")
     ap.add_argument("--interiors", metavar="OUT", help="also render the interior view and the house/interior sheet to OUT")
+    ap.add_argument("--rooms", metavar="OUT", help="render the sheet of every assembled room to OUT")
     ap.add_argument("--pages", metavar="OUT", help="only render the scenery pages with their CLUTs to OUT")
     ap.add_argument("--no-fmv", action="store_true", help="cut-outs and ground only, no FMV mosaic underlay")
     ap.add_argument("--both", action="store_true", help="build with and without the FMV underlay")
@@ -647,6 +822,9 @@ def main():
                 refs.setdefault(pg_, f)
     if a.community_cluts:
         COMMUNITY.update(clutgen_samples(a.community_cluts))
+    if a.rooms:
+        print(rooms_sheet(L, refs, a.rooms, os.path.join(a.out, "fmv")))
+        return
     if a.pages:
         return render_pages(L, refs, a.pages, os.path.join(a.out, "fmv"))
     for area in a.area or (17, 11, 16):
