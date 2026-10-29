@@ -2,7 +2,8 @@
 """Builds the data folder for the port's --civ-test (the cut top-down town AREA11 s0, docs/CIVILIZATION.md "Port test").
 
   python3 tools/civ_test_data.py OUT_DIR [--data data] [--cap BYTES]
-Also writes OUT_DIR/civ_MFNT110S.WFM with ALL the lines (no cap) for the port's --civ-wfm side-file load.
+Also writes OUT_DIR/civ_MFNT110S.WFM with ALL the lines (no cap), and civ_MFNT160S.WFM / civ_MFNT170S.WFM (AREA16 and
+AREA17 s0, AREA_LINES), for the port's --civ-wfm side-file load (--civ-wfm OUT_DIR picks the town's file).
 
 OUT_DIR becomes a copy of your extracted data folder (tools/extract_data.py): every file is a symlink to the original,
 except AREA11/MFNT110S.WFM and the language's SYS/LD?AR11.BIN, which are rebuilt with the Spanish lines below written
@@ -43,6 +44,98 @@ LINES = [
     (15, "¿Estará bien el{NL}de las balsas?"),
     (17, "Me casaré con una{NL}chica de piedra."),
 ]
+
+
+# AREA16 / AREA17 s0: Spanish glosses of the Japanese lines (AREA16/A003.GAM and AREA17/A003.GAM WFM2 block 0,
+# tools/jp_text.py) for the PAL slots that hold "···??", by dialogue index of the PAL bank. "/" = new line,
+# "|" = next box (the JP {C:▼} page break). Only the residents' lines of AREA17 (#213-#218, #255, #257-#259,
+# #262-#268, #270-#289); its scripted generator scene (#219-#239, #253, #254) is left as it is.
+AREA_LINES = {
+    16: {
+        230: "¡Aúpa... YA!",
+        231: "¡Hop... AAAH!",
+        232: "Esto pegado a la pared/parece un ascensor.../pero no se mueve.",
+        233: "¿Que no puedes entrar en/los otros pueblos? Ni idea./No quiero saber nada de ellos.",
+        234: "La gente de los otros pueblos...|Parece que se burlan/de nosotros./¡Me pone de los nervios!",
+        235: "¿Primera vez en el pueblo?|Lo único de lo que/presumimos es la Torre/reloj, pero...",
+        236: "¿Entro o no entro...?|Pero me dijeron que no/me metiera en el pozo.../¿Qué hago?",
+        237: "¿Has visto el engranaje?|Mmm.../¿qué podemos hacer?",
+        238: "¿Un engranaje que no se/rompa? De hierro, claro...|Pero a mí no me gustan/ni la madera ni el hierro.",
+        239: "Je, je... He abierto a/escondidas la puerta...|entre el pueblo de hierro/y el de madera. ¡Chitón!",
+        240: "¿Un generador? ¡Eso es!/El ascensor de esta casa/funcionaba con eso.",
+        241: "Tan pequeño y tan/valiente...|Quizá yo también deje/de ser tan cabezota.",
+        242: "Hace tiempo intenté/meterme en el río...|y de repente ¡me dio/un calambrazo! ¿Qué sería?",
+        243: "Je, je... Me han pillado.|Pero es un rollo que/todos estén peleados.",
+        244: "El generador funciona,/pero dentro del muro/que rodea el país|las máquinas no van.../Será el Cerdiablo...",
+        245: "Quiero hacer las paces/con todos...|pero todavía estamos/un poco tensos.",
+        246: "¿Vas al pueblo Karakuri/desde el estanque viejo?/¡Ánimo!",
+        247: "Hermano, tú vencerás/al Cerdiablo que hechizó/este país, ¿verdad?",
+    },
+    17: {
+        213: "¿Eh? ¿Qué quieres?|Aunque no lo parezca,/soy un herrero de primera.|Si quieres algo de hierro,/ven cuando quieras.",
+        214: "¿Un engranaje de hierro?|¡Ja, ja! Eso lo hago/en un periquete...|...si tuviera hierro./Tráeme el material/y te lo hago enseguida.",
+        215: "¡Buen material!/Espera un momento...",
+        216: "¡Toma! Así trabajo yo./Llévatelo.",
+        217: "Pero ¿para qué quieres/un engranaje de hierro?",
+        218: "Dicen que arreglaste/la torre de piedra.|Arreglar cosas está/bien... Gracias.",
+        255: "¿Gantetsu? ¿Ese doctor/tan cascarrabias?|Se fue a su casa: la del/medio, se llega por/el ascensor.",
+        257: "Hmm, cara nueva... Ahí/está el Castillo de hierro./Si no vas a nada, vete.|¿Yo? Me llamo Gantetsu.|Si eres útil a este país,/te echaré una mano.",
+        258: "Quién iba a decir que un/chico arreglaría la torre.|Siento lo que te dije./Y otra cosa...",
+        259: "La torre que arreglaste...|para que funcione de/verdad hay que arrancar/el generador del castillo.|Pero hay un problema./Ve al Castillo de hierro/y míralo tú mismo.",
+        262: "Para hacer una bomba,/esta máquina necesita/un poco de electricidad.|Basta con una Anguila/eléctrica de la jungla.|Y el Agua negra, la base/de la bomba. Tráeme las/dos cosas. ¡Cuento contigo!",
+        263: "¡Espera! ¿Vas a coger la/anguila con las manos?|¡Qué impaciente!/Toma, llévate esto.",
+        264: "¡Vaya! Ya tienes las dos./Dame el material.",
+        265: "¡Bien! Ya puedo hacer/la mezcla de la bomba.|Mientras la preparo,/¿me traes un coco?/Hay en la jungla.|Se llena la cáscara con/la mezcla ¡y listo!",
+        266: "¡Por fin!/Dame el coco.",
+        267: "Se mete la mezcla en/la cáscara... ¡Lista!",
+        268: "¿Quieres más bombas?|Tráeme cocos y te hago/todas las que quieras.",
+        270: "¿Quieres subir?/Entonces entra en esta casa.",
+        271: "Bienvenido. Esto es el/pueblo de los Hombres/de hierro.",
+        272: "Duro y duradero.../¡El hierro es lo mejor!",
+        273: "Yo me pregunto... ¿por/qué se pelea todo el mundo?/No me gusta nada.",
+        274: "Todos con la madera y la/piedra, ¡qué blandos!|¡Un hombre es de hierro!/¿Qué otra cosa?",
+        275: "Si bajas recto desde mí,/llegas a la salida. Desde/aquí cuesta verlo, ¿eh?",
+        276: "Antes el ascensor iba/con la máquina, sin/manivela...",
+        277: "Sube en el ascensor y/sigue el camino del medio:/allí está el castillo.",
+        278: "¡Ese viejo de Gantetsu!/¿Por qué no me deja ir/al Castillo de hierro?",
+        279: "A este país también lo/hechizó el Cerdiablo.../y no podemos hacer nada.",
+        280: "¿Buscas algo? Si quieres/algo de hierro, ve a la/casa del ascensor.",
+        281: "¿Arreglaste la torre?/¡Qué pasada!|Tal como está el país,/es increíble.",
+        282: "¿La torre de piedra se/arregló con un engranaje/de hierro?|¿Eh? ¿Que no se mueve?/Vaya...",
+        283: "¿La puerta del Castillo/de hierro?|¡Ja, ja, ja! Esa no/la rompe nadie.",
+        284: "¿Sabes nadar bien, chico?|Yo me hundo como/una piedra.",
+        285: "Yo también quiero decir/con orgullo...|¡Esto es la Ciudad/de civilización!",
+        286: "¿T-también arreglaste/el generador?/¡E-eres increíble!",
+        287: "Madera, piedra y hierro.../lo importante es el/equilibrio.",
+        288: "¿Vas a ver al Viejo de/los 10.000 años?/¿Tienes una balsa?",
+        289: "Vaya, eres increíble.../Siento haberme burlado./Ven a jugar otra vez.",
+    },
+}
+
+
+def dialogue(text):
+    """One WFM dialogue: a box sized for its tallest page (13 px per line, 8 px per character), pages joined by
+    {WAIT}{CLEAR}."""
+    pages = [p.split("/") for p in text.split("|")]
+    n = max(len(p) for p in pages)
+    w = min(300, max(120, 8 * max(len(l) for p in pages for l in p) + 24))
+    body = "{WAIT}{CLEAR}".join("{NL}".join(p) for p in pages)
+    return "{BOX %d %d}{VOICE 6 0}{MOVE 0 0}%s{WAIT}{CLEAR}" % (w, 16 + 13 * n, body)
+
+
+def build_area_wfm(data, area, out_wfm):
+    """AREA16 / AREA17: every line of AREA_LINES into that area's bank, as a side file for --civ-wfm (no disc file is
+    rebuilt for them)."""
+    wfm = "AREA%d/MFNT%d0S.WFM" % (area, area)
+    p = TC.Project(TC.Source(data))
+    for n, t in AREA_LINES[area].items():
+        p.edits.setdefault(wfm, {})[n] = dialogue(t)
+    f, errors = p.encode_edited()
+    if errors:
+        raise SystemExit("\n".join(errors[:10]))
+    open(out_wfm, "wb").write(f[wfm])
+    print("%s: %d lines, %d bytes (port: --civ-wfm %s)" % (out_wfm, len(AREA_LINES[area]), len(f[wfm]),
+                                                          os.path.dirname(out_wfm)))
 
 
 def sector_limit(data, path):
@@ -108,6 +201,8 @@ def main():
     a = ap.parse_args()
     build(a.data, a.out, cap=a.cap)
     build_wfm(a.data, os.path.join(a.out, "civ_MFNT110S.WFM"))
+    for area in (16, 17):
+        build_area_wfm(a.data, area, os.path.join(a.out, "civ_MFNT%d0S.WFM" % area))
 
 
 if __name__ == "__main__":

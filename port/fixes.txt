@@ -437,3 +437,18 @@ src/i0nfo2/topdownA16ActorInit.c | o->b0d = 0; | o->b0d = 0; { extern int port_c
 # room logic and platforms still run.
 src/i0nfo2/topdownA16SceneryUpdate.c | o->visible = 1; | { extern int port_civ_test; o->visible = !port_civ_test; }
 src/i0nfo2/topdownA17SceneryUpdate.c | ObjListPush_1F800220(o); | { extern int port_civ_test; if (!port_civ_test) ObjListPush_1F800220(o); }
+# --civ-maps rooms: the engine hides the map layer while a room (house) is active and draws the room's furniture as
+# objects, whose tables are lost. With a rebuilt room view (map8F_in.tim: the house interiors on black) the port
+# keeps the layer visible and builds its strips from that picture instead; back outside, from the town picture
+# (both have the town's CLUT; --civ-collision uses the tinted debug pair, which share theirs). The map object
+# (topdownMapObjHandler, every frame) and topdownRefreshMap build the strips the same way: both get the rule.
+src/i0nfo2/topdownRefreshMap.c | topdownBuildVisibleTileList(o); | { extern unsigned long *D_800A4680; extern unsigned long *port_civ_room_pixels(int); unsigned long *q_ = port_civ_room_pixels(D_800A60A3); if (q_) D_800A4680 = q_; } topdownBuildVisibleTileList(o);
+src/i0nfo2/topdownRefreshMap.c | if (D_800A60A3 == 0) { | if (D_800A60A3 == 0 || port_civ_room_pixels(D_800A60A3)) {
+src/i0nfo2/topdownRefreshMap.c | extern short SCREEN_ORIGIN_X[]; | extern short SCREEN_ORIGIN_X[]; extern unsigned long *port_civ_room_pixels(int);
+src/i0nfo2/topdownMapObjHandler.c | o->y.p.whole = 0x1F - ((SPXY->s17a - 0xF0) & 0x1F); | o->y.p.whole = 0x1F - ((SPXY->s17a - 0xF0) & 0x1F); { extern unsigned long *D_800A4680; unsigned long *q_ = port_civ_room_pixels(D_800A60A3); if (q_) D_800A4680 = q_; }
+src/i0nfo2/topdownMapObjHandler.c | if (D_800A60A3 == 0) { | if (D_800A60A3 == 0 || port_civ_room_pixels(D_800A60A3)) {
+src/i0nfo2/topdownMapObjHandler.c | extern int TOPDOWN_MAP_STRIP_BUFFER; | extern int TOPDOWN_MAP_STRIP_BUFFER; extern unsigned long *port_civ_room_pixels(int);
+# --civ-wfm DIR: the AREA16 / AREA17 residents load their town's translated bank too (DIR/civ_MFNT160S.WFM,
+# civ_MFNT170S.WFM from tools/civ_test_data.py: Spanish glosses of the JP lines in the "···??" slots).
+src/i0nfo2/topdownA16ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); }
+src/i0nfo2/topdownA17ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); }

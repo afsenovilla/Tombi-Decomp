@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <errno.h>
 #include "port_runtime.h"
@@ -323,17 +324,24 @@ int port_civ_fig(int area, int sub) {
 static const char *port_civ_wfm_path;
 int port_civ_line = -1;   /* --civ-line N: bank-4 line shown by every set-0D resident (dev) */
 static unsigned char *port_civ_wfm_buf;
-void port_civ_wfm_swap(void) {
+void port_civ_wfm_swap(void) {   /* --civ-wfm FILE (AREA11's bank) or DIR (DIR/civ_MFNTnn0S.WFM of the current town) */
     extern void *port_ram_ptr(unsigned);
+    static int warea = -1;
+    int area = *(unsigned short *)port_ram_ptr(0x8009C960u);
+    char path[1024]; struct stat st;
     if (!port_civ_test || !port_civ_wfm_path) return;
-    if (!port_civ_wfm_buf) {
-        FILE *f = fopen(port_civ_wfm_path, "rb"); long n;
-        if (!f) { port_printf("[port] --civ-wfm: cannot open %s\n", port_civ_wfm_path); port_civ_wfm_path = 0; return; }
+    if (!port_civ_wfm_buf || warea != area) {
+        FILE *f; long n;
+        if (!stat(port_civ_wfm_path, &st) && S_ISDIR(st.st_mode)) snprintf(path, sizeof path, "%s/civ_MFNT%02d0S.WFM", port_civ_wfm_path, area);
+        else if (area == 11) snprintf(path, sizeof path, "%s", port_civ_wfm_path);
+        else return;
+        f = fopen(path, "rb");
+        if (!f) { port_printf("[port] --civ-wfm: cannot open %s\n", path); return; }
         fseek(f, 0, SEEK_END); n = ftell(f); fseek(f, 0, SEEK_SET);
-        port_civ_wfm_buf = malloc(n + 16);
-        if (fread(port_civ_wfm_buf, 1, n, f) != (size_t)n) { fclose(f); port_civ_wfm_path = 0; return; }
-        fclose(f);
-        if (port_verbose) port_printf("[port] --civ-wfm: %s (%ld bytes)\n", port_civ_wfm_path, n);
+        free(port_civ_wfm_buf); port_civ_wfm_buf = malloc(n + 16);
+        if (fread(port_civ_wfm_buf, 1, n, f) != (size_t)n) { fclose(f); free(port_civ_wfm_buf); port_civ_wfm_buf = 0; return; }
+        fclose(f); warea = area;
+        if (port_verbose) port_printf("[port] --civ-wfm: %s (%ld bytes)\n", path, n);
     }
     *(unsigned char **)port_ram_ptr(0x1F800398u) = port_civ_wfm_buf;
 }
@@ -356,6 +364,19 @@ static void *port_civ_slurp(const char *path) {
     if (fread(b, 1, n, f) != (size_t)n) { fclose(f); free(b); return 0; }
     fclose(f); return b;
 }
+/* --civ-collision: the debug pictures (map8F_cells.tim / map8F_in_cells.tim: the cell map tinted over the picture,
+   red solid, orange diagonal, cyan trigger) replace the pictures. The room view (map8F_in.tim, the house interiors on
+   black) is shown while Tomba is inside a house (port_civ_room_pixels, topdownRefreshMap rule in fixes.txt). */
+int port_civ_collision;
+static void *port_civ_tim_out, *port_civ_tim_in;
+static const char *port_civ_tim_name(int in) {
+    return port_civ_collision ? (in ? "map8F_in_cells.tim" : "map8F_cells.tim") : (in ? "map8F_in.tim" : "map8F.tim");
+}
+unsigned long *port_civ_room_pixels(int room) {
+    void *t = room ? port_civ_tim_in : port_civ_tim_out;
+    if (!port_civ_test || !t) return 0;
+    return (unsigned long *)((char *)t + 0x220);
+}
 void port_civ_maps(void) {
     extern void *port_ram_ptr(unsigned);
     char path[1024]; void *e, *t; int area = *(unsigned short *)port_ram_ptr(0x8009C960u);
@@ -363,9 +384,11 @@ void port_civ_maps(void) {
     if (!port_civ_maps_dir || !port_civ_on(area, *(unsigned short *)port_ram_ptr(0x8009C962u))) return;
     if (carea != area) {
         snprintf(path, sizeof path, "%s/AREA%02d/map8E.bin", port_civ_maps_dir, area); e = port_civ_slurp(path);
-        snprintf(path, sizeof path, "%s/AREA%02d/map8F.tim", port_civ_maps_dir, area); t = port_civ_slurp(path);
+        snprintf(path, sizeof path, "%s/AREA%02d/%s", port_civ_maps_dir, area, port_civ_tim_name(0)); t = port_civ_slurp(path);
         if (!e || !t) { port_printf("[port] --civ-maps: no rebuilt map for AREA%02d in %s\n", area, port_civ_maps_dir); return; }
         ce = e; ct = t; carea = area;
+        snprintf(path, sizeof path, "%s/AREA%02d/%s", port_civ_maps_dir, area, port_civ_tim_name(1));
+        port_civ_tim_out = t; port_civ_tim_in = port_civ_slurp(path);   /* none: rooms keep the engine's hidden map */
         port_civ_map_w = ((unsigned short *)ce)[0] * 8; port_civ_map_h = ((unsigned short *)ce)[1] * 8;
         if (port_verbose) port_printf("[port] --civ-maps: AREA%02d rebuilt map %dx%d px\n", area, port_civ_map_w, port_civ_map_h);
     }
@@ -462,6 +485,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--civ-wfm") && v) port_civ_wfm_path = argv[++i];
         else if (!strcmp(a, "--civ-line") && v) port_civ_line = atoi(argv[++i]);
         else if (!strcmp(a, "--civ-maps") && v) port_civ_maps_dir = argv[++i];
+        else if (!strcmp(a, "--civ-collision")) port_civ_collision = 1;
         else if (!strcmp(a, "--civ-spawn") && v) { port_civ_spawn_set = sscanf(argv[++i], "%d,%d", &port_civ_spawn_x, &port_civ_spawn_y) == 2; }
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
         else if (!strcmp(a, "--frames") && v) port_max_frames = atoi(argv[++i]);

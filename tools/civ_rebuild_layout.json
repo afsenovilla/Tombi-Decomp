@@ -975,6 +975,424 @@
      "to": "AREA17 s1 (inside Iron Town)",
      "code": "topdownSectionStepE: y < 0x50 and x - 0xB0 < 0x60"
     }
+   ],
+   "collision": [
+    {
+     "t": "wall",
+     "poly": [
+      [
+       0,
+       0
+      ],
+      [
+       300,
+       0
+      ],
+      [
+       300,
+       36
+      ],
+      [
+       196,
+       36
+      ],
+      [
+       196,
+       200
+      ],
+      [
+       0,
+       200
+      ]
+     ],
+     "note": "north-west rock (H4 hut cut into it)"
+    },
+    {
+     "t": "wall",
+     "poly": [
+      [
+       404,
+       0
+      ],
+      [
+       832,
+       0
+      ],
+      [
+       832,
+       200
+      ],
+      [
+       516,
+       200
+      ],
+      [
+       516,
+       36
+      ],
+      [
+       404,
+       36
+      ]
+     ],
+     "note": "north-east rock (H3 hut cut into it)"
+    },
+    {
+     "t": "line",
+     "pts": [
+      [
+       84,
+       218
+      ],
+      [
+       196,
+       218
+      ]
+     ],
+     "w": 26,
+     "note": "pillar fence west of the fortress"
+    },
+    {
+     "t": "line",
+     "pts": [
+      [
+       520,
+       218
+      ],
+      [
+       634,
+       218
+      ]
+     ],
+     "w": 26,
+     "note": "pillar fence east of the fortress"
+    },
+    {
+     "t": "rect",
+     "r": [
+      196,
+      36,
+      14,
+      170
+     ],
+     "note": "fortress west wall"
+    },
+    {
+     "t": "rect",
+     "r": [
+      502,
+      36,
+      14,
+      165
+     ],
+     "note": "fortress east wall"
+    },
+    {
+     "t": "rect",
+     "r": [
+      210,
+      36,
+      92,
+      22
+     ],
+     "note": "back railing west of the top door"
+    },
+    {
+     "t": "rect",
+     "r": [
+      402,
+      36,
+      100,
+      22
+     ],
+     "note": "back railing east of the top door"
+    },
+    {
+     "t": "rect",
+     "r": [
+      300,
+      36,
+      20,
+      80
+     ],
+     "note": "top door arch, west pier"
+    },
+    {
+     "t": "rect",
+     "r": [
+      388,
+      36,
+      20,
+      80
+     ],
+     "note": "top door arch, east pier"
+    },
+    {
+     "t": "rect",
+     "r": [
+      226,
+      96,
+      20,
+      34
+     ],
+     "note": "west lamp post"
+    },
+    {
+     "t": "rect",
+     "r": [
+      458,
+      96,
+      20,
+      34
+     ],
+     "note": "east lamp post"
+    },
+    {
+     "t": "rect",
+     "r": [
+      300,
+      104,
+      22,
+      22
+     ],
+     "note": "plant pot"
+    },
+    {
+     "t": "rect",
+     "r": [
+      388,
+      104,
+      22,
+      22
+     ],
+     "note": "plant pot"
+    },
+    {
+     "t": "line",
+     "pts": [
+      [
+       210,
+       196
+      ],
+      [
+       262,
+       224
+      ]
+     ],
+     "w": 10,
+     "note": "west terrace railing (its lower end is open: the brick ramp joins the garden)"
+    },
+    {
+     "t": "line",
+     "pts": [
+      [
+       458,
+       222
+      ],
+      [
+       512,
+       190
+      ]
+     ],
+     "w": 10,
+     "note": "east terrace railing (open at its lower end)"
+    },
+    {
+     "t": "rect",
+     "r": [
+      280,
+      200,
+      22,
+      62
+     ],
+     "note": "the key tower"
+    },
+    {
+     "t": "wall",
+     "poly": [
+      [
+       196,
+       262
+      ],
+      [
+       300,
+       262
+      ],
+      [
+       300,
+       392
+      ],
+      [
+       196,
+       392
+      ]
+     ],
+     "note": "west block (copper roof, door)"
+    },
+    {
+     "t": "wall",
+     "poly": [
+      [
+       404,
+       300
+      ],
+      [
+       516,
+       300
+      ],
+      [
+       516,
+       366
+      ],
+      [
+       480,
+       366
+      ],
+      [
+       480,
+       392
+      ],
+      [
+       404,
+       392
+      ]
+     ],
+     "note": "east block"
+    },
+    {
+     "t": "rect",
+     "r": [
+      480,
+      366,
+      34,
+      34
+     ],
+     "note": "barrel"
+    },
+    {
+     "t": "rect",
+     "r": [
+      300,
+      424,
+      20,
+      46
+     ],
+     "note": "gate west pier"
+    },
+    {
+     "t": "rect",
+     "r": [
+      386,
+      424,
+      20,
+      46
+     ],
+     "note": "gate east pier"
+    },
+    {
+     "t": "rect",
+     "r": [
+      0,
+      430,
+      300,
+      40
+     ],
+     "note": "outer wall west of the gate"
+    },
+    {
+     "t": "rect",
+     "r": [
+      406,
+      430,
+      426,
+      40
+     ],
+     "note": "outer wall east of the gate"
+    },
+    {
+     "t": "rect",
+     "r": [
+      38,
+      472,
+      16,
+      82
+     ],
+     "note": "west lamp"
+    },
+    {
+     "t": "rect",
+     "r": [
+      780,
+      472,
+      16,
+      50
+     ],
+     "note": "east lamp"
+    },
+    {
+     "t": "rect",
+     "r": [
+      758,
+      516,
+      40,
+      50
+     ],
+     "note": "bucket"
+    },
+    {
+     "t": "rect",
+     "r": [
+      300,
+      330,
+      22,
+      40
+     ],
+     "note": "'Iron the No.1' facade, west of the passage"
+    },
+    {
+     "t": "rect",
+     "r": [
+      384,
+      330,
+      20,
+      62
+     ],
+     "note": "'Iron the No.1' facade, east of the passage (gate -> dome door)"
+    },
+    {
+     "t": "floor",
+     "r": [
+      541,
+      150,
+      36,
+      82
+     ],
+     "note": "path from the H3 hut door down through the rock and the fence"
+    },
+    {
+     "t": "floor",
+     "r": [
+      120,
+      150,
+      36,
+      82
+     ],
+     "note": "path from the H4 hut door down through the rock and the fence"
+    },
+    {
+     "t": "floor",
+     "r": [
+      196,
+      392,
+      320,
+      30
+     ],
+     "note": "forecourt in front of the fortress: the gate joins both lawns"
+    }
+   ],
+   "spawn": [
+    223,
+    540
    ]
   },
   "11": {
@@ -1048,7 +1466,14 @@
       545,
       28
      ],
-     "why": "H3, the raft maker's hut, drawn over the FMV's deck corner"
+     "why": "H3, the raft maker's hut, drawn over the FMV's deck corner",
+     "body": [
+      489,
+      379,
+      628,
+      466
+     ],
+     "body_why": "resident 4 (room 0) patrols the bottom edge of H3's rectangle: the hut ends above it"
     }
    ],
    "place": [
@@ -1160,6 +1585,178 @@
      "to": "AREA11 s1 (the Factory)",
      "code": "topdownSectionStepC: y < 0x4F and x - 0xC7 < 0x41"
     }
+   ],
+   "spawn": [
+    530,
+    410
+   ],
+   "collision": [
+    {
+     "t": "rect",
+     "r": [
+      0,
+      0,
+      327,
+      66
+     ],
+     "note": "hedge north-west of the factory corridor"
+    },
+    {
+     "t": "rect",
+     "r": [
+      392,
+      0,
+      344,
+      66
+     ],
+     "note": "hedge north-east of it"
+    },
+    {
+     "t": "rect",
+     "r": [
+      0,
+      66,
+      312,
+      44
+     ],
+     "note": "log fence west"
+    },
+    {
+     "t": "rect",
+     "r": [
+      420,
+      66,
+      316,
+      44
+     ],
+     "note": "log fence east"
+    },
+    {
+     "t": "rect",
+     "r": [
+      128,
+      124,
+      146,
+      30
+     ],
+     "note": "H1 roof ridge north of its rectangle"
+    },
+    {
+     "t": "rect",
+     "r": [
+      340,
+      113,
+      96,
+      70
+     ],
+     "note": "the spire tower"
+    },
+    {
+     "t": "wall",
+     "poly": [
+      [
+       338,
+       250
+      ],
+      [
+       500,
+       250
+      ],
+      [
+       500,
+       300
+      ],
+      [
+       470,
+       330
+      ],
+      [
+       470,
+       432
+      ],
+      [
+       338,
+       432
+      ]
+     ],
+     "note": "the big house under the spire (its front faces the yard)"
+    },
+    {
+     "t": "wall",
+     "poly": [
+      [
+       512,
+       330
+      ],
+      [
+       600,
+       330
+      ],
+      [
+       610,
+       420
+      ],
+      [
+       500,
+       432
+      ],
+      [
+       500,
+       340
+      ]
+     ],
+     "note": "windmill base"
+    },
+    {
+     "t": "rect",
+     "r": [
+      596,
+      180,
+      92,
+      70
+     ],
+     "note": "house behind the deck"
+    },
+    {
+     "t": "rect",
+     "r": [
+      640,
+      330,
+      48,
+      40
+     ],
+     "note": "stairs and plant on the deck"
+    },
+    {
+     "t": "rect",
+     "r": [
+      20,
+      562,
+      80,
+      38
+     ],
+     "note": "bush"
+    },
+    {
+     "t": "rect",
+     "r": [
+      262,
+      602,
+      78,
+      38
+     ],
+     "note": "bush"
+    },
+    {
+     "t": "rect",
+     "r": [
+      430,
+      562,
+      70,
+      56
+     ],
+     "note": "saw-horse and pot"
+    }
    ]
   },
   "16": {
@@ -1238,7 +1835,14 @@
       "door": "fmv:stone_door",
       "door_nofmv": "stone_arch"
      },
-     "why": "H1"
+     "why": "H1",
+     "body": [
+      206,
+      311,
+      330,
+      402
+     ],
+     "body_why": "resident 1 (room 0) stands in the bottom of H1's trigger rectangle: the house ends above it, the rest is its front yard"
     },
     {
      "door": [
@@ -1340,7 +1944,152 @@
      "code": "topdownSectionStepD: x > 0x93 and y < 0x4A"
     }
    ],
-   "note_well": "Code vs FMV: exit 1 (the 7x1 px hole that leads to the Dried Wishing Well) is at px 235-243, 279-281; the FMV's keyhole well is about 40 px further west. The code wins for collision (the exit cells stay open); the well picture stays where the FMV has it, because the page's well fragments do not form a clean standalone piece"
+   "note_well": "Code vs FMV: exit 1 (the 7x1 px hole that leads to the Dried Wishing Well) is at px 235-243, 279-281; the FMV's keyhole well is about 40 px further west. The code wins for collision (the exit cells stay open); the well picture stays where the FMV has it, because the page's well fragments do not form a clean standalone piece",
+   "spawn": [
+    -95,
+    524
+   ],
+   "collision": [
+    {
+     "t": "rect",
+     "r": [
+      0,
+      0,
+      276,
+      24
+     ],
+     "note": "north edge west of the AREA16 s1 exit"
+    },
+    {
+     "t": "line",
+     "pts": [
+      [
+       132,
+       236
+      ],
+      [
+       262,
+       166
+      ]
+     ],
+     "w": 20,
+     "note": "the stone rampart (diagonal); open at its east end"
+    },
+    {
+     "t": "rect",
+     "r": [
+      178,
+      62,
+      40,
+      40
+     ],
+     "note": "broken pillar"
+    },
+    {
+     "t": "rect",
+     "r": [
+      250,
+      82,
+      56,
+      36
+     ],
+     "note": "rock dome"
+    },
+    {
+     "t": "rect",
+     "r": [
+      96,
+      300,
+      40,
+      100
+     ],
+     "note": "big arch, east pier"
+    },
+    {
+     "t": "rect",
+     "r": [
+      60,
+      250,
+      30,
+      40
+     ],
+     "note": "big arch, top of the west pier"
+    },
+    {
+     "t": "rect",
+     "r": [
+      172,
+      282,
+      40,
+      34
+     ],
+     "note": "the well"
+    },
+    {
+     "t": "rect",
+     "r": [
+      420,
+      448,
+      26,
+      52
+     ],
+     "note": "south-east arch, west pier"
+    },
+    {
+     "t": "rect",
+     "r": [
+      494,
+      440,
+      28,
+      60
+     ],
+     "note": "south-east arch, east pier"
+    },
+    {
+     "t": "wall",
+     "poly": [
+      [
+       56,
+       64
+      ],
+      [
+       100,
+       64
+      ],
+      [
+       100,
+       240
+      ],
+      [
+       56,
+       250
+      ]
+     ],
+     "note": "north-west house wing west of H4"
+    },
+    {
+     "t": "wall",
+     "poly": [
+      [
+       310,
+       112
+      ],
+      [
+       346,
+       112
+      ],
+      [
+       346,
+       224
+      ],
+      [
+       310,
+       224
+      ]
+     ],
+     "note": "teal house block between H2 and H3"
+    }
+   ]
   }
  },
  "interiors": {

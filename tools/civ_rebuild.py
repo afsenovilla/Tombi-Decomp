@@ -541,6 +541,51 @@ def patrol_box(var, a):
     return min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1)
 
 
+SS = 4  # collision raster: sub-samples per cell side (8 px / SS)
+
+
+def collision_mask(items, cw, ch):
+    """Solid mask (SS samples per cell side) of the editable collision shapes of a town (layout 'collision', picture
+    px): {"t": "wall", "poly": [[x, y], ...]} a filled polygon; {"t": "line", "pts": [[x, y], ...], "w": px} a thick
+    polyline (fences, railings); {"t": "rect", "r": [x, y, w, h]}; {"t": "water", ...} as wall (the top-down engine has
+    no water or drop shape: both block); {"t": "floor", ...} carves (applied in order, so a later floor opens a wall)."""
+    k = SS / 8.0
+    im = Image.new("L", (cw * SS, ch * SS), 0)
+    dr = ImageDraw.Draw(im)
+    for it in items:
+        v = 0 if it["t"] == "floor" else 255
+        if "poly" in it:
+            dr.polygon([(x * k, y * k) for x, y in it["poly"]], fill=v)
+        if "r" in it:
+            x, y, w, h = it["r"]
+            dr.rectangle([x * k, y * k, (x + w) * k - 1, (y + h) * k - 1], fill=v)
+        if "pts" in it:
+            P = [(x * k, y * k) for x, y in it["pts"]]
+            wd = max(1, int(round(it.get("w", 8) * k)))
+            dr.line(P, fill=v, width=wd)
+            for x, y in P:
+                dr.ellipse([x - wd / 2, y - wd / 2, x + wd / 2, y + wd / 2], fill=v)
+    return np.asarray(im) > 127
+
+
+def collision_cells(items, cw, ch):
+    """Cell shapes from the collision mask: a full cell is 9 (solid); a half-covered cell whose solid part is a
+    corner triangle gets the matching diagonal (1: solid below "/", bottom-right; 2: above "/", top-left; 3: above
+    "\\", top-right; 4: below "\\", bottom-left); other cells at least half covered are 9, the rest floor."""
+    m = collision_mask(items, cw, ch).reshape(ch, SS, cw, SS).transpose(0, 2, 1, 3)
+    cov = m.sum((2, 3))
+    out = np.where(cov * 2 >= SS * SS, 9, 0).astype(np.uint8)
+    yy, xx = np.mgrid[0:SS, 0:SS] + 0.5
+    tri = {1: yy + xx > SS, 2: yy + xx < SS, 3: yy < xx, 4: yy > xx}
+    part = (cov > SS * SS // 4) & (cov < SS * SS)
+    for cy, cx in zip(*np.nonzero(part)):
+        blk = m[cy, cx]
+        best = max(tri, key=lambda t: (blk == tri[t]).mean())
+        if (blk == tri[best]).mean() >= 0.85:
+            out[cy, cx] = best
+    return out
+
+
 def cellmap(area, T_):
     """Our collision: 9 = solid block, 0 = floor, 0x80 = trigger floor (house interiors and doors).
     The working sections also use the diagonal and one-sided walls (1-8); we use only 9."""
@@ -554,12 +599,16 @@ def cellmap(area, T_):
 
     c[0, :] = c[-1, :] = 9
     c[:, 0] = c[:, -1] = 9
-    for r in T_.get("solid", []):
-        c[cells(r[0], r[1], r[0] + r[2] - 1, r[1] + r[3] - 1)] = 9
+    if "collision" in T_:
+        c = np.maximum(c, collision_cells(T_["collision"], cw, ch))
+    else:
+        for r in T_.get("solid", []):
+            c[cells(r[0], r[1], r[0] + r[2] - 1, r[1] + r[3] - 1)] = 9
     rects = T.trigger_rects(area)
     for i, r in enumerate(rects):
-        x0, y0, x1, y1 = world_rect_px(r)
         hs = T_["houses"][i]
+        # 'body': the walls when the code's trigger rectangle also holds a front yard with room-0 residents
+        x0, y0, x1, y1 = hs.get("body", world_rect_px(r))
         c[cells(x0, y0, x1, y1)] = 9
         ix0, iy0, ix1, iy1 = hs.get("inside", [x0 + 8, y0 + 8, x1 - 8, y1 - 8])
         c[cells(ix0, iy0, ix1, iy1)] = 0x80
@@ -594,7 +643,61 @@ def cellmap(area, T_):
                 c[sl] = np.where(bad > 0, 0x80 if a["room"] else 0, c[sl])
             if a["room"] and not (c[sl] & 0x80).all():
                 warn.append("resident %d (%d,%d) is indoors (room %d) but stands on non-trigger floor" % (n, a["x"], a["y"], a["room"]))
+    for sl in ((0, slice(None)), (-1, slice(None)), (slice(None), 0), (slice(None), -1)):   # the picture's edge stays shut,
+        c[sl] = (c[sl] & 0x80) | 9                                       # also where a house rectangle runs past it
+    for e in T_["exits"]:   # ... except at the exit rectangles
+        x0, y0, x1, y1 = world_rect_px(e["world"])
+        sl = cells(max(0, x0), max(0, y0), min(W - 1, x1), min(H - 1, y1))
+        c[sl] &= 0x80
+    c = edge_walls(c)
+    warn += reach_check(area, T_, c, actors, var)
     return c, warn
+
+
+def edge_walls(c):
+    """The engine's 9 is a corner, not a solid fill: topdownResolveCornerTile pushes the probe out by the quadrant and
+    gives up if the next cell is blocked too, so a body walked into along its edge lets Tomba slide through. The
+    retail maps (AREA05/08/19) draw every outline with one-sided walls instead and leave 9 for the corners. Same here:
+    a solid cell with exactly one free side (floor, trigger floor or a diagonal) becomes the wall that pushes towards
+    it (5 left, 6 up, 7 right, 8 down); corners, thin walls and the inside of bodies stay 9."""
+    lo = c & 0x7F
+    free = (lo == 0) | ((lo >= 1) & (lo <= 4))
+    P = np.pad(free, 1, constant_values=False)
+    n, s_, w, e = P[:-2, 1:-1], P[2:, 1:-1], P[1:-1, :-2], P[1:-1, 2:]
+    cnt = n.astype(int) + s_ + w + e
+    out = c.copy()
+    solid = lo == 9
+    for m, v in ((n, 6), (s_, 8), (w, 5), (e, 7)):
+        sel = solid & (cnt == 1) & m
+        out[sel] = (c[sel] & 0x80) | v
+    return out
+
+
+def reach_check(area, T_, c, actors, var):
+    """Flood fill over the cells from the town's entry spawn (layout 'spawn', world; the port's --civ-town start):
+    report residents and exits that cannot be walked to (shapes 1-8 count as passable, 9 blocks)."""
+    if "spawn" not in T_:
+        return []
+    ch, cw = c.shape
+    sx, sy = T.world_to_px(*T_["spawn"])
+    ok = np.zeros_like(c, bool)
+    st = [(sy // 8, sx // 8)]
+    while st:
+        y, x = st.pop()
+        if 0 <= y < ch and 0 <= x < cw and not ok[y, x] and (c[y, x] & 0x7F) != 9:
+            ok[y, x] = True
+            st += [(y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)]
+    out = []
+    for n, a in enumerate(actors, 1):
+        px, py = T.world_to_px(a["x"], a["y"])
+        if 0 <= py // 8 < ch and 0 <= px // 8 < cw and not ok[py // 8, px // 8]:
+            out.append("reach: resident %d (room %d) cannot be walked to from the entry" % (n, a["room"]))
+    for e in T_["exits"]:
+        x0, y0, x1, y1 = world_rect_px(e["world"])
+        sl = (slice(max(0, y0 // 8), max(0, min(ch, y1 // 8 + 1))), slice(max(0, x0 // 8), max(0, min(cw, x1 // 8 + 1))))
+        if not ok[sl].any():
+            out.append("reach: exit to %s cannot be walked to from the entry" % e.get("to", "?"))
+    return out
 
 
 # ---------------------------------------------------------------- output
@@ -669,6 +772,32 @@ def overlay(area, T_, rgb):
     return im
 
 
+def interior_boxes(area, L, refs, cache):
+    """[(house n, x0, y0, RGBA box)]: each matched room (layout 'interiors') centred in its trigger rectangle and
+    clipped to it, on black, as the room view shows it when Tomba is inside house n."""
+    rects = T.trigger_rects(area)
+    out = []
+    for it in L.get("interiors", {}).get(str(area), []):
+        if it["piece"][0] == "asm":
+            rgbA, covA, _ = assembly_rgb(it["piece"][1], L, refs, cache, True)
+            h, w = covA.shape
+            room = Image.fromarray(rgbA).convert("RGBA")
+            room.putalpha(Image.fromarray((covA * 255).astype(np.uint8)))
+        else:
+            pn, sx, sy, w, h = it["piece"]
+            pal, _, _ = derive_clut(pn, L, refs, cache)
+            P = page(pn)[sy:sy + h, sx:sx + w]
+            room = Image.fromarray(pal[P]).convert("RGBA")
+            room.putalpha(Image.fromarray(((P > 0) * 255).astype(np.uint8)))
+        x0, y0, x1, y1 = world_rect_px(rects[it["house"] - 1])
+        box = Image.new("RGBA", (x1 - x0 + 1, y1 - y0 + 1), (0, 0, 0, 255))
+        cx, cy = max(0, (w - box.width) // 2), max(0, (h - box.height) // 2)
+        crop = room.crop((cx, cy, cx + min(w, box.width), cy + min(h, box.height)))
+        box.alpha_composite(crop, (max(0, (box.width - w) // 2), max(0, (box.height - h) // 2)))
+        out.append((it["house"], x0, y0, box))
+    return out
+
+
 def render_interiors(area, L, refs, T_, rgb, out, cache):
     """Interior view (each house's roof gone and its matched room drawn centred in the trigger rectangle, clipped to
     it, as when Tomba is inside; the residents with room n are marked) and a contact sheet (exterior | interior)."""
@@ -724,6 +853,25 @@ def render_interiors(area, L, refs, T_, rgb, out, cache):
         S.save(os.path.join(out, "a%02d_interiors_sheet.png" % area))
 
 
+CELL_TINT = ((9, (255, 40, 40)), (1, (255, 160, 0)), (2, (255, 160, 0)), (3, (255, 160, 0)), (4, (255, 160, 0)),
+             (5, (255, 0, 255)), (6, (255, 0, 255)), (7, (255, 0, 255)), (8, (255, 0, 255)))
+
+
+def cell_tint(rgb, cells, exits=None):
+    """The picture with the cell map tinted on top: red = solid (9), orange = diagonal (1-4), magenta = one-sided
+    wall (5-8), cyan = trigger (bit 7), every cell outlined."""
+    t = rgb.astype(float).copy()
+    big = np.kron(cells, np.ones((8, 8), np.uint8))[:t.shape[0], :t.shape[1]]
+    for v, col in CELL_TINT:
+        m = (big & 0x7F) == v
+        t[m] = t[m] * 0.45 + np.array(col) * 0.55
+    m = big >= 0x80
+    t[m] = t[m] * 0.45 + np.array((0, 220, 255)) * 0.55
+    t[::8, :] *= 0.75
+    t[:, ::8] *= 0.75
+    return t.astype(np.uint8)
+
+
 def build(area, L, refs, out, use_fmv=True, preview=None, interiors=None):
     T_ = L["towns"][str(area)]
     cache = os.path.join(out, "fmv")
@@ -734,13 +882,34 @@ def build(area, L, refs, out, use_fmv=True, preview=None, interiors=None):
     os.makedirs(d, exist_ok=True)
     open(os.path.join(d, "map8F.tim"), "wb").write(tim8(pix, pal))
     open(os.path.join(d, "map8E.bin"), "wb").write(cells8e(cells))
+    # room view (--civ-town in the port shows it while Tomba is inside a house: the engine hides the map layer then,
+    # the port swaps this picture in instead): black, every house rectangle showing its matched interior re-indexed to
+    # the town CLUT; and the debug pictures with the cell map tinted on top (--civ-collision), with their own CLUT
+    pix_in = np.zeros_like(pix)  # outside the houses: black, as the engine shows a room (map layer hidden)
+    for n, x0, y0, box in interior_boxes(area, L, refs, cache):
+        B = np.asarray(box.convert("RGB"))
+        H_, W_ = pix.shape
+        bx0, by0 = max(0, x0), max(0, y0)
+        sub = B[by0 - y0:min(H_, y0 + B.shape[0]) - y0, bx0 - x0:min(W_, x0 + B.shape[1]) - x0]
+        pix_in[by0:by0 + sub.shape[0], bx0:bx0 + sub.shape[1]] = nearest(sub, pal, list(range(1, 256)))
+    open(os.path.join(d, "map8F_in.tim"), "wb").write(tim8(pix_in, pal))
+    tints = [cell_tint(pal[q], cells) for q in (pix, pix_in)]
+    both = Image.fromarray(np.vstack(tints)).quantize(255, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+    cp = np.array(both.getpalette()[:765], np.uint8).reshape(-1, 3)
+    cp = np.vstack([np.zeros((1, 3), np.uint8), cp, np.zeros((256 - 1 - len(cp), 3), np.uint8)])
+    qi = np.asarray(both).astype(np.uint8) + 1
+    Hh = pix.shape[0]
+    open(os.path.join(d, "map8F_cells.tim"), "wb").write(tim8(qi[:Hh], cp))
+    open(os.path.join(d, "map8F_in_cells.tim"), "wb").write(tim8(qi[Hh:], cp))
+    Image.fromarray(cp[qi[Hh:]]).save(os.path.join(d, "interiors.png"))
     pim = Image.fromarray(pix, "P"); pim.putpalette(pal.astype(np.uint8).ravel().tolist()); pim.save(os.path.join(d, "picture.png"))
     rgb = pal[pix]
     tint = rgb.copy().astype(float)
     big = np.kron(cells, np.ones((8, 8), np.uint8))
-    for v, col in ((9, (255, 255, 255)), (0x80, (0, 255, 255))):
-        m = big == v
-        tint[m] = tint[m] * 0.7 + np.array(col) * 0.3
+    for v, col in ((9, (255, 255, 255)), (1, (255, 140, 0)), (2, (255, 140, 0)), (3, (255, 140, 0)), (4, (255, 140, 0)),
+                   (0x80, (0, 255, 255))):
+        m = (big == v) if v != 0x80 else (big >= 0x80)
+        tint[m] = tint[m] * 0.45 + np.array(col) * 0.55
     Image.fromarray(tint.astype(np.uint8)).save(os.path.join(d, "cells.png"))
     srcpal = np.array([(0, 0, 0), (110, 110, 110), (60, 110, 255), (60, 220, 60), (255, 220, 0)], np.uint8)
     Image.fromarray(srcpal[src]).save(os.path.join(d, "source.png"))
