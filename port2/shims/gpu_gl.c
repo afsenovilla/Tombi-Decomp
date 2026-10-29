@@ -313,8 +313,13 @@ static void set_vtx(GVtx *o, float x, float y, int r, int g, int b, float u, flo
 }
 /* PS1 sample points are the integer pixel positions; GL samples pixel centres, so polygons move by +0.5 and by
    -1/64 (both axes) so that a centre exactly on an edge follows the PS1's top-left rule whatever the driver's own
-   tie rule is (a top or left edge includes it, a bottom or right one does not) */
-#define POLY_SHIFT (0.5f - 1.0f / 64.0f)
+   tie rule is (a top or left edge includes it, a bottom or right one does not).  At internal res R the GL samples
+   sub-pixel centres (m + 0.5) / R: the shift is divided by R, so that sub-pixel m samples the PS1 point m / R and
+   the R sub-pixels of PS1 pixel x land on x .. x + (R - 1) / R, inside it.  A full half-pixel shift at R > 1 put
+   the first sub-pixels of a polygon before its first PS1 pixel: they were covered (edge moved left/up by
+   0.5 - 0.5 / R) and their interpolated u/v fell below the first texel, so they read the texel before it (stray
+   lines along dialogue box borders and under text rows). */
+#define POLY_SHIFT ((0.5f - 1.0f / 64.0f) / (float)R)
 
 static void gl_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade, const GpuTex *tex, int semi, int raw) {
     Key k; (void)shade;
