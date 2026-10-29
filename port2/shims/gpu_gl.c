@@ -84,6 +84,7 @@ typedef gpu_u8 u8; typedef gpu_u16 u16; typedef gpu_u32 u32;
     X(void, glReadPixels, (GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void *)) \
     X(void, glDrawArrays, (GLenum, GLint, GLsizei)) \
     X(void, glFlush, (void)) \
+    X(void, glLineWidth, (GLfloat)) \
     X(void, glGenFramebuffers, (GLsizei, GLuint *)) \
     X(void, glBindFramebuffer, (GLenum, GLuint)) \
     X(void, glFramebufferTexture2D, (GLenum, GLenum, GLenum, GLuint, GLint)) \
@@ -143,10 +144,10 @@ static const char vs_src[] =
    texels (the offset already masked); u_setmask: the mask bit to write.  All integer arithmetic is on floats
    (exact below 2^24): a VRAM word is rebuilt from the 8-bit channels and taken apart with floor/mod. */
 static const char fs_src[] =
-    "uniform sampler2D u_vram; uniform int u_tex; uniform int u_pass; uniform vec4 u_tw; uniform float u_setmask;\n"
+    "uniform sampler2D u_vram; uniform int u_tex; uniform int u_pass; uniform vec4 u_tw; uniform float u_setmask; uniform float u_half;\n"
     "varying vec4 v_col; varying vec2 v_uv; varying vec4 v_tex;\n"
     "float vword(float x, float y) {\n"
-    "  vec4 t = texture2D(u_vram, vec2((x + 0.5) / 1024.0, (y + 0.5) / 512.0));\n"
+    "  vec4 t = texture2D(u_vram, vec2((x + u_half) / 1024.0, (y + u_half) / 512.0));\n"
     "  return floor(t.r * 31.0 + 0.5) + floor(t.g * 31.0 + 0.5) * 32.0 + floor(t.b * 31.0 + 0.5) * 1024.0 + floor(t.a + 0.5) * 32768.0;\n"
     "}\n"
     "float twin(float u, float mask, float off) {\n"          /* (u & ~mask) | off, bit by bit over the 5 window bits */
@@ -229,6 +230,13 @@ static Op ops[MAX_OPS];
 static int n_vtx, n_ops;
 static GLuint vram_tex, fbo, vbo, prog, bprog;
 static GLint u_tex, u_pass, u_tw, u_setmask, bu_vram, u_hw;
+/* --internal-res N (docs/PORT.md "HD"): the VRAM and wide targets are N times larger in both axes; primitives are
+   rasterised at that resolution (the vertex shader works in normalised coordinates, so only the viewport, scissors
+   and copies scale), texels and CLUT entries are read at the centre sub-pixel of each PS1 word (sub-pixel N / 2: the one
+   whose centre is the native sample point when N is odd), host uploads are replicated N x N, readbacks take that
+   same sub-pixel.  1 = the original path, bit for bit. */
+int port_internal_res = 1;
+static int R = 1;
 /* --widescreen: the wide plane (gpu.c "widescreen"), 2048x512 RGBA8 with its own framebuffer; drawn into, never sampled */
 static GLuint wide_tex, wide_fbo;
 static int bound_wide = -1;
@@ -272,8 +280,8 @@ static void op_sample(Op *op, const GpuTex *t) {
     op_sample_rect(op, t->tx, t->ty, t->tx + pw - 1, t->ty + 255);
     if (t->depth < 2) op_sample_rect(op, t->cx, t->cy, t->cx + (t->depth == 0 ? 16 : 256) - 1, t->cy);
 }
-static u16 stage[1024 * 512];
-static u8 stage8[1024 * 512 * 4];
+static u16 *stage;     /* 2048 x 512 x R x R words (uploads, replicated) */
+static u8 *stage8;     /* the same in RGBA8 (readbacks) */
 static unsigned long long stat_draws, stat_ops;
 
 static const GpuState *gs = &port_gs;
@@ -362,7 +370,7 @@ static void bind_target(int wide) {
     if (bound_wide == wide) return;
     bound_wide = wide;
     p_glBindFramebuffer(GL_FRAMEBUFFER, wide ? wide_fbo : fbo);
-    p_glViewport(0, 0, wide ? 2048 : 1024, 512);
+    p_glViewport(0, 0, (wide ? 2048 : 1024) * R, 512 * R);
     p_glUseProgram(prog);
     p_glUniform1f(u_hw, wide ? 1024.0f : 512.0f);
 }
@@ -389,7 +397,7 @@ static void draw_op(const Op *op, int pass) {
     int w = k->x2 - k->x1 + 1, h = k->y2 - k->y1 + 1;
     if (w <= 0 || h <= 0) return;
     bind_target(k->wide);
-    p_glScissor(k->x1, k->y1, w, h);
+    p_glScissor(k->x1 * R, k->y1 * R, w * R, h * R);
     set_blend(k, pass);
     p_glUniform1i(u_tex, k->tex);
     p_glUniform1i(u_pass, pass);
@@ -418,7 +426,7 @@ static void submit(void) {
         if (op->kind == OP_FILL) {
             u16 c = op->col;
             bind_target(op->r[4]);
-            p_glScissor(op->r[0], op->r[1], op->r[2], op->r[3]);
+            p_glScissor(op->r[0] * R, op->r[1] * R, op->r[2] * R, op->r[3] * R);
             p_glClearColor((c & 31) / 31.0f, ((c >> 5) & 31) / 31.0f, ((c >> 10) & 31) / 31.0f, (c >> 15) ? 1.0f : 0.0f);
             p_glClear(GL_COLOR_BUFFER_BIT);
             if (!op->r[4]) dirty_add(op->r[0], op->r[1], op->r[0] + op->r[2] - 1, op->r[1] + op->r[3] - 1);
@@ -431,7 +439,7 @@ static void submit(void) {
             if (w > 0 && h > 0) {
                 bind_target(0);
                 barrier_if(sx, sy, sx + w - 1, sy + h - 1);
-                p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, dx, dy, sx, sy, w, h);
+                p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, dx * R, dy * R, sx * R, sy * R, w * R, h * R);
                 dirty_add(dx, dy, dx + w - 1, dy + h - 1);
             }
         } else if (op->key.tex && op->key.semi) { draw_op(op, 1); draw_op(op, 2); }
@@ -444,6 +452,29 @@ static void submit(void) {
 static void gl_list_end(void) { submit(); p_glFlush(); }
 
 /* ------------------------------------------------------------------ coherence with vram[] */
+/* stage[] (w x h words) into the bound texture at (x, y) PS1 pixels, each word replicated R x R */
+static void upload_stage(int x, int y, int w, int h) {
+    p_glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+    if (R == 1) { p_glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, stage); return; }
+    u16 *big = stage + (size_t)w * h;            /* after the source words (the buffer holds 2048x512xRxR + that) */
+    for (int j = 0; j < h; j++) {
+        u16 *row = big + (size_t)j * R * w * R;
+        for (int i = 0; i < w; i++) for (int k = 0; k < R; k++) row[i * R + k] = stage[j * w + i];
+        for (int k = 1; k < R; k++) memcpy(row + (size_t)k * w * R, row, (size_t)w * R * 2);
+    }
+    p_glTexSubImage2D(GL_TEXTURE_2D, 0, x * R, y * R, w * R, h * R, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, big);
+}
+/* the bound framebuffer's (x, y, w, h) PS1 pixels as 15-bit words (the centre sub-pixel of each) */
+static void read_words(int x, int y, int w, int h, u16 *dst, int stride) {
+    p_glPixelStorei(GL_PACK_ALIGNMENT, 4);
+    p_glReadPixels(x * R, y * R, w * R, h * R, GL_RGBA, GL_UNSIGNED_BYTE, stage8);
+    /* 8-bit channels back to 5 bits (round to nearest, the inverse of the upload's k * 255 / 31) */
+    for (int j = 0; j < h; j++) {
+        const u8 *s = stage8 + ((size_t)(j * R + R / 2) * w * R + R / 2) * 4; u16 *d = dst + (size_t)j * stride;
+        for (int i = 0; i < w; i++, s += 4 * R)
+            d[i] = (u16)(((s[0] * 31 + 127) / 255) | (((s[1] * 31 + 127) / 255) << 5) | (((s[2] * 31 + 127) / 255) << 10) | (s[3] >= 128 ? 0x8000 : 0));
+    }
+}
 static void gl_vram_written(int x, int y, int w, int h) {
     if (!gl_ready) return;
     submit();
@@ -454,8 +485,7 @@ static void gl_vram_written(int x, int y, int w, int h) {
     if (w <= 0 || h <= 0) return;
     for (int j = 0; j < h; j++) memcpy(stage + j * w, vram + (y + j) * 1024 + x, (size_t)w * 2);
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
-    p_glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
-    p_glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, stage);
+    upload_stage(x, y, w, h);
 }
 static void gl_vram_read(int x, int y, int w, int h) {
     if (!gl_ready) return;
@@ -466,14 +496,7 @@ static void gl_vram_read(int x, int y, int w, int h) {
     if (y + h > 512) h = 512 - y;
     if (w <= 0 || h <= 0) return;
     bind_vram_fbo();
-    p_glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    p_glReadPixels(x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, stage8);
-    /* 8-bit channels back to 5 bits (round to nearest, the inverse of the upload's k * 255 / 31) */
-    for (int j = 0; j < h; j++) {
-        const u8 *s = stage8 + (size_t)j * w * 4; u16 *d = vram + (y + j) * 1024 + x;
-        for (int i = 0; i < w; i++, s += 4)
-            d[i] = (u16)(((s[0] * 31 + 127) / 255) | (((s[1] * 31 + 127) / 255) << 5) | (((s[2] * 31 + 127) / 255) << 10) | (s[3] >= 128 ? 0x8000 : 0));
-    }
+    read_words(x, y, w, h, vram + y * 1024 + x, 1024);
 }
 
 /* ------------------------------------------------------------------ the --widescreen plane */
@@ -482,7 +505,7 @@ static void gl_ws_copy_down(int wx, int wy, int vx, int vy, int w, int h) {
     submit();
     p_glBindFramebuffer(GL_FRAMEBUFFER, wide_fbo);
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
-    p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, vx, vy, wx, wy, w, h);
+    p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, vx * R, vy * R, wx * R, wy * R, w * R, h * R);
     bind_vram_fbo();
 }
 static void gl_ws_upload(int wx, int wy, int w, int h, const u16 *src, int stride) {
@@ -490,21 +513,14 @@ static void gl_ws_upload(int wx, int wy, int w, int h, const u16 *src, int strid
     submit();
     for (int j = 0; j < h; j++) memcpy(stage + j * w, src + j * stride, (size_t)w * 2);
     p_glBindTexture(GL_TEXTURE_2D, wide_tex);
-    p_glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
-    p_glTexSubImage2D(GL_TEXTURE_2D, 0, wx, wy, w, h, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, stage);
+    upload_stage(wx, wy, w, h);
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
 }
 static void gl_ws_read(int wx, int wy, int w, int h, u16 *dst, int stride) {
     if (!gl_ready || !wide_fbo || w <= 0 || h <= 0) return;
     submit();
     bind_target(1);
-    p_glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    p_glReadPixels(wx, wy, w, h, GL_RGBA, GL_UNSIGNED_BYTE, stage8);
-    for (int j = 0; j < h; j++) {
-        const u8 *s = stage8 + (size_t)j * w * 4; u16 *d = dst + j * stride;
-        for (int i = 0; i < w; i++, s += 4)
-            d[i] = (u16)(((s[0] * 31 + 127) / 255) | (((s[1] * 31 + 127) / 255) << 5) | (((s[2] * 31 + 127) / 255) << 10) | (s[3] >= 128 ? 0x8000 : 0));
-    }
+    read_words(wx, wy, w, h, dst, stride);
     bind_vram_fbo();
 }
 static int gl_ws_present(int wx, int wy, int w, int h);
@@ -522,6 +538,7 @@ static void blit(GLuint tex, float u0, float v0, float u1, float v1, int dh, int
        goes back to nearest for the game's own sampling */
     p_glBindTexture(GL_TEXTURE_2D, tex);
     p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, port_window_square ? GL_NEAREST : GL_LINEAR);
+    if (R > 1) p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);   /* N x internal in a smaller window */
     float q[24] = { x0, y1, u0, v0,  x1, y1, u1, v0,  x0, y0, u0, v1,   x1, y1, u1, v0,  x1, y0, u1, v1,  x0, y0, u0, v1 };
     p_glUseProgram(bprog);
     p_glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -531,6 +548,7 @@ static void blit(GLuint tex, float u0, float v0, float u1, float v1, int dh, int
     p_glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 16, (const void *)8);
     p_glDrawArrays(GL_TRIANGLES, 0, 6);
     p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     p_glEnableVertexAttribArray(1); p_glEnableVertexAttribArray(3);
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
 }
@@ -594,6 +612,19 @@ static int gl_present_rgb(const gpu_u8 *rgb, int w, int h) {
     return 1;
 }
 
+/* --dump-frames with --internal-res N > 1: the display area (15-bit mode, VRAM or wide plane) at the internal
+   resolution, as RGB8 (rgb holds w * R x h * R pixels); 0 = done, -1 = not available */
+int port_gl_frame_hd(gpu_u8 *rgb, int x, int y, int w, int h, int wide, int *ow, int *oh) {
+    if (!gl_ready || R == 1 || (wide && !wide_fbo)) return -1;
+    submit();
+    bind_target(wide);
+    p_glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    *ow = w * R; *oh = h * R;
+    p_glReadPixels(x * R, y * R, w * R, h * R, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+    bind_vram_fbo();
+    return 0;
+}
+
 /* ------------------------------------------------------------------ start / stop */
 static int gl_start(void) {
     if (port_window_gl_start() < 0) return -1;
@@ -602,6 +633,15 @@ static int gl_start(void) {
     port_printf("[gpu] OpenGL: %s, %s, GLSL %s%s\n", ren ? ren : "?", ver ? ver : "?",
                 p_glGetString(GL_SHADING_LANGUAGE_VERSION) ? (const char *)p_glGetString(GL_SHADING_LANGUAGE_VERSION) : "?",
                 p_glTextureBarrier ? ", texture barrier" : "");
+    R = port_internal_res < 1 ? 1 : port_internal_res > 4 ? 4 : port_internal_res;
+    {   GLint mx = 0; p_glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mx);
+        while (R > 1 && 2048 * R > mx) R--;
+        if (R != port_internal_res) port_printf("[gpu] OpenGL: internal resolution %dx (asked %dx)\n", R, port_internal_res);
+        else if (R > 1) port_printf("[gpu] OpenGL: internal resolution %dx (%dx%d VRAM)\n", R, 1024 * R, 512 * R);
+        port_internal_res = R; }
+    stage = (u16 *)SDL_malloc((size_t)2048 * 512 * (R * R + 1) * 2);
+    stage8 = (u8 *)SDL_malloc((size_t)2048 * 512 * R * R * 4);
+    if (!stage || !stage8) return -1;
     prog = link(vs_src, fs_src, "gpu");
     bprog = link(bvs_src, bfs_src, "blit");
     if (!prog || !bprog) return -1;
@@ -610,6 +650,8 @@ static int gl_start(void) {
     u_tex = p_glGetUniformLocation(prog, "u_tex"); u_pass = p_glGetUniformLocation(prog, "u_pass");
     u_tw = p_glGetUniformLocation(prog, "u_tw"); u_setmask = p_glGetUniformLocation(prog, "u_setmask");
     u_hw = p_glGetUniformLocation(prog, "u_hw"); p_glUniform1f(u_hw, 512.0f);
+    p_glUniform1f(p_glGetUniformLocation(prog, "u_half"), (R / 2 + 0.5f) / R);
+    if (R > 1) p_glLineWidth((float)R);
     p_glUseProgram(bprog);
     bu_vram = p_glGetUniformLocation(bprog, "u_vram"); p_glUniform1i(bu_vram, 0);
     /* VRAM: RGBA8, nearest, uploaded from the mirror (whatever LoadImage wrote before the backend started) */
@@ -620,7 +662,8 @@ static int gl_start(void) {
     p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     p_glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
-    p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 512, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, port_vram());
+    p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024 * R, 512 * R, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, R == 1 ? port_vram() : 0);
+    if (R > 1) { memcpy(stage, port_vram(), 1024 * 512 * 2); upload_stage(0, 0, 1024, 512); }
     p_glGenFramebuffers(1, &fbo);
     p_glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     p_glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, vram_tex, 0);
@@ -628,15 +671,15 @@ static int gl_start(void) {
     if (st != GL_FRAMEBUFFER_COMPLETE) { port_printf("[gpu] OpenGL: VRAM framebuffer incomplete (0x%x)\n", (unsigned)st); return -1; }
     {   extern int port_widescreen;
         if (port_widescreen) {
-            static const u16 zero[2048];
+            static const u16 zero[2048 * 4];
             p_glGenTextures(1, &wide_tex);
             p_glBindTexture(GL_TEXTURE_2D, wide_tex);
             p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 2048, 512, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, 0);
-            for (int y = 0; y < 512; y++) p_glTexSubImage2D(GL_TEXTURE_2D, 0, 0, y, 2048, 1, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, zero);
+            p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 2048 * R, 512 * R, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, 0);
+            for (int y = 0; y < 512 * R; y++) p_glTexSubImage2D(GL_TEXTURE_2D, 0, 0, y, 2048 * R, 1, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, zero);
             p_glGenFramebuffers(1, &wide_fbo);
             p_glBindFramebuffer(GL_FRAMEBUFFER, wide_fbo);
             p_glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, wide_tex, 0);

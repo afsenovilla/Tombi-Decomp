@@ -241,7 +241,7 @@ static void open_game_data(const char *argv0) {
 }
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9] [--widescreen [16:9|21:9]] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
-                "       [--renderer gl|soft] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
+                "       [--renderer gl|soft] [--internal-res 1..4] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--trace-cd] [--save-dir DIR] [-v]\n"
@@ -250,7 +250,8 @@ static int usage(const char *argv0) {
                 "  --data DIR reads the game files extracted once from your disc by tools/extract_data.py (default: data/ in the\n"
                 "  current folder or next to the executable); --disc reads the disc image itself\n"
                 "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n"
-                "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)\n", argv0);
+                "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)\n"
+                "  --internal-res N (OpenGL) renders at N x the PS1 resolution (1 = original); --dump-frames also writes hd_*.png\n", argv0);
     return 2;
 }
 int main(int argc, char **argv) {
@@ -268,6 +269,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--headless")) headless = 1;
         else if (!strcmp(a, "--window")) headless = 0;
         else if (!strcmp(a, "--scale") && v) port_window_scale = atoi(argv[++i]);
+        else if (!strcmp(a, "--internal-res") && v) { extern int port_internal_res; port_internal_res = atoi(argv[++i]); if (port_internal_res < 1) port_internal_res = 1; if (port_internal_res > 4) port_internal_res = 4; }
         else if (!strcmp(a, "--renderer") && v) {
             extern int port_renderer;
             i++;

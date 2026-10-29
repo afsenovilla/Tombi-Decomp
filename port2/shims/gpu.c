@@ -14,6 +14,7 @@
  * the frame dumps are shared; the host-side VRAM operations tell the backend what they wrote and what they read.
  *
  * Written for this project from the public GPU documentation (psx-spx); no emulator code is copied. */
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -627,9 +628,15 @@ static void chunk(FILE *fd, const char *type, const u8 *data, u32 n) {
     be32(h, c); fwrite(h, 1, 4, fd);
 }
 /* RGB8 PNG with stored (uncompressed) deflate blocks: no zlib needed */
-static u8 png_buf[(1024 * 3 + 1) * 512 + 65536];
-static u8 raw_rows[(1024 * 3 + 1) * 512];
+static u8 *png_buf, *raw_rows; static size_t png_cap;     /* grown for the --internal-res frames */
 static int write_png(const char *path, const u8 *rgb, int w, int h) {
+    size_t need = (size_t)(w * 3 + 1) * h;
+    if (need > png_cap) {
+        free(png_buf); free(raw_rows);
+        png_buf = (u8 *)malloc(need + need / 65535 * 5 + 65536); raw_rows = (u8 *)malloc(need);
+        png_cap = png_buf && raw_rows ? need : 0;
+        if (!png_cap) return -1;
+    }
     FILE *fd = fopen(path, "wb");
     if (!fd) return -1;
     static const u8 sig[8] = { 137, 'P', 'N', 'G', 13, 10, 26, 10 };
@@ -724,6 +731,22 @@ void port_gpu_vblank(void) {
     port_gpu_frame(frame_rgb, &w, &h);
     path_for(path, "frame_");
     if (write_png(path, frame_rgb, w, h)) port_printf("[gpu] cannot write %s\n", path);
+    {   /* --internal-res N > 1 on OpenGL: the display area at N x as well (hd_*.png) */
+        extern int port_internal_res;
+        extern int port_gl_frame_hd(u8 *rgb, int x, int y, int w, int h, int wide, int *ow, int *oh);
+        RECT *d = (RECT *)cur_dispenv;
+        int W = d->w > 0 ? d->w : 320, H = d->h > 0 ? d->h : 240, ow, oh, wide;
+        if (W > 1024) W = 1024; if (H > 512) H = 512;
+        wide = ws_frame(d, W, cur_dispenv[0x11]);
+        if (port_internal_res > 1 && be == &port_gpu_gl && disp_mask && !cur_dispenv[0x11]) {
+            static u8 *hd; if (!hd) hd = (u8 *)malloc((size_t)2048 * 512 * 3 * 16);
+            if (hd && !port_gl_frame_hd(hd, wide ? 2 * (d->x & 1023) : d->x & 1023, d->y & 511, wide ? 320 + 2 * port_widescreen : W, H, wide, &ow, &oh)) {
+                /* GL rows are bottom-up in memory order = VRAM top-down: already in PNG order */
+                path_for(path, "hd_");
+                write_png(path, hd, ow, oh);
+            }
+        }
+    }
     if (port_dump_vram) {
         be->vram_read(0, 0, 1024, 512);
         for (int y = 0; y < 512; y++) for (int x = 0; x < 1024; x++) {

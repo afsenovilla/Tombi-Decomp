@@ -2074,6 +2074,40 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
 Launcher: Play tab, "Imagen" 16:9 / 21:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
 
+### HD (plan; phase 1 prototyped): `--internal-res N`
+
+Three phases, all on the OpenGL backend only (the software renderer stays the reference and keeps 1x):
+
+1. **Internal resolution** (done, prototype): `--internal-res 1..4` (launcher: Play tab, "Resolución interna";
+   ignored with `--renderer soft`).  `shims/gpu_gl.c` allocates the VRAM target at (1024N)x(512N) and the wide plane
+   at (2048N)x(512N).  The vertex shader already works in normalised coordinates, so only the viewport, the scissors
+   (drawing area, fills) and the copies (MoveImage, GP0 80, wide plane -> VRAM) scale by N; polygons get N x N
+   coverage and sub-pixel precision for free, lines are drawn N pixels thick.  Texture/CLUT reads stay on the PS1
+   texel grid: each 15-bit word is read at the *centre sub-pixel* of its N x N block (sub-pixel N/2, `u_half`), the
+   one whose centre is the native sample point when N is odd.  Host writes (LoadImage, CLUTs, `--patch-tex`) are
+   uploaded replicated N x N; host reads (StoreImage, `port_vram()` readbacks, the 1x `frame_*.png` dumps) take the
+   same centre sub-pixel, so the CPU still sees a native VRAM.  Mask bit and semi-transparency are unchanged.  The
+   window blit samples the big target (linear min filter when the window is smaller).  `--dump-frames` also writes
+   `hd_NNNNNN.png`, the display area at N x.  N = 1 is the old path bit for bit (GL dumps identical, software
+   regression untouched).
+   Result (AREA00, frames 2400/3400, N = 3): the 3D parts (ground and hills, bushes, the cut-stone hives, the
+   signposts, fences) have clean edges and smooth texture mapping; the 2D sprites (Tombi, NPCs, the HUD, the title
+   cards, the painted backdrop layers) are the same pixel art scaled up, with no seams between sprite tiles, no
+   UV misalignment and no CLUT errors seen.  The 1x readback of the N = 3 run differs from the 1x run in 0-7 pixels
+   per frame (polygon edge rounding), so game logic that reads VRAM is unaffected.  Headless llvmpipe: 3600 frames
+   7.0 s at 1x, 32.5 s at 3x (about 4.6x the time for 9x the pixels).  Not done: render-to-texture effects that
+   sample what was drawn at N x read only one sub-pixel per texel (DuckStation-style; no visible case in AREA00),
+   24-bit (MDEC) frames stay 1x, mask check on semi-transparent primitives still unemulated.
+2. **Texture replacement** by hash of the VRAM texture + CLUT: `--dump-textures DIR` writes each distinct
+   (page rect, depth, CLUT) the frame samples as a PNG named by its hash; `--texture-pack DIR` swaps in a
+   replacement of k x the size, sampled at k x the texel position in the shader (GL only).  Needs tracking of the VRAM
+   regions a texture came from (LoadImage rectangles) and invalidation when they are overwritten; Tombi's palette swaps
+   (the same 4-bit sheet with several CLUTs, CLUT animation) mean the key must include the CLUT contents, not its address.
+3. **Pack generation**: dump with phase 2, upscale with AI (Real-ESRGAN pixel-art models, e.g. 4x
+   `realesr-animevideov3` / pixel-art fine-tunes), then manual touch-ups with the gfx editor; alpha (0x0000 = transparent)
+   and the semi-transparency bit must survive.  Packs are derived from the game, so they are not committed: only the
+   scripts that build them.
+
 ### Open points / next
 
 1. The "code labels kept" of a loaded overlay (2312 for X000, 2298 in the audit's `label-jtbl` column plus 9
