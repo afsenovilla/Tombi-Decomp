@@ -1017,7 +1017,7 @@ class App:
 
         def work():
             try:
-                total = DT.dump_static(out, data_dir(), log=lambda *a: None, progress=progress)
+                total = DT.dump_static(out, data_dir(), log=lambda *a: None, progress=progress, make_capture=True)
                 self.root.after(0, self.dumpall_msg.set, tr("s.dumpallok", total, out))
                 self.root.after(0, lambda: self.dumpall_open.pack(side="left", padx=(10, 0)))
             except Exception as e:

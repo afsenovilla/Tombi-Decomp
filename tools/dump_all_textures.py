@@ -253,12 +253,12 @@ def any_key(uphash, depth, x, y, part):
     return _fnv(struct.pack("<5I", depth, x1 - x, y1 - y, x2 - x1, y2 - y1), k)
 
 
-def _png(path, w, h, rows, pal=None):
+def _png(path, w, h, rows, pal=None, opaque=False):
     """PNG of rows of 15-bit colour words (pal None: RGBA, alpha classes of texpack.c: 0x0000 transparent, STP 128, else 255) or of
     CLUT indices (pal = the palette words: a palette PNG, PLTE + tRNS with the same classes; the port reads the indices)."""
     import zlib, struct
     ch = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xFFFFFFFF)
-    alpha = lambda c: 0 if c == 0 else 128 if c & 0x8000 else 255
+    alpha = lambda c: 0 if c == 0 else 255 if opaque else 128 if c & 0x8000 else 255     # opaque: previews (STP shown solid)
     rgb = lambda c: bytes((((c & 31) << 3) | ((c & 31) >> 2), (((c >> 5) & 31) << 3) | (((c >> 5) & 31) >> 2),
                            (((c >> 10) & 31) << 3) | (((c >> 10) & 31) >> 2)))
     raw = bytearray()
@@ -309,6 +309,205 @@ def _part_box(p):
     """(u, v, w, h) texel box of an SPR part (u0 v0 clut u1 v1 tpage u2 v2 w h u3 v3 dx dy; flipped parts run backwards)."""
     us, vs = (p[0], p[3], p[6], p[10]), (p[1], p[4], p[7], p[11])
     return min(us), min(vs), p[8], p[9]
+
+
+def nibble_jump(d, w, h):
+    """Mean |low - high| nibble of the non-empty bytes of a page (sampled).  A real 4 bpp page draws neighbour texels with near indices
+    (about 0.5..1.6); 8 bpp data read as nibbles jumps (about 4..5): the room pictures stored next to the room atlases (AREA00 B301,
+    AREA02 B001...) are 8 bpp although the load list pairs them with no 256 colour CLUT of their own (vram.pair_cluts takes them for 4 bpp)."""
+    s = n = 0
+    for y in range(0, h, 3):
+        row = d[y * w * 2:(y + 1) * w * 2:2]
+        for v in row:
+            lo, hi = v & 15, v >> 4
+            if lo and hi:
+                s += abs(lo - hi)
+                n += 1
+    return s / n if n > 50 else 0.0
+
+
+def smooth_score(d, w, h, pal):
+    """Mean RGB distance of horizontal neighbour texels of an 8 bpp page under the 256 colour palette `pal` (words; lower = more natural)."""
+    rgb = [((c & 31), (c >> 5) & 31, (c >> 10) & 31) for c in pal]
+    s = n = miss = 0
+    wp = w * 2
+    for y in range(0, h, 3):
+        b = y * wp
+        for x in range(0, wp - 1, 2):
+            i, j = d[b + x], d[b + x + 1]
+            if i and j:
+                if not pal[i] or not pal[j]:        # a texel the row leaves empty: this is not the picture's palette
+                    miss += 1
+                    continue
+                a, c = rgb[i], rgb[j]
+                s += abs(a[0] - c[0]) + abs(a[1] - c[1]) + abs(a[2] - c[2])
+                n += 1
+    return s / n + 200.0 * miss / (n + miss) if n > 50 else 999.0
+
+
+def _blob_palettes(rows, w, h, owner, cands, first):
+    """Texels of a 4 bpp page no known draw covers: cut into blobs (8 x 8 cells joined when they touch) and give each the 16 colour
+    palette among `cands` under which it looks most natural (neighbour colour distance; used indices that are empty or share a colour
+    cost a lot).  Marks them in `owner` with first + index of the palette; returns the palettes used ([(palette)])."""
+    C = 8
+    cw, chh = (w + C - 1) // C, (h + C - 1) // C
+    occ = [0] * (cw * chh)
+    for y in range(h):
+        r = rows[y]
+        for x in range(w):
+            if r[x] and not owner[y * w + x]:
+                occ[(y // C) * cw + x // C] = 1
+    lab, blobs = [0] * (cw * chh), []
+    for c0 in range(cw * chh):
+        if occ[c0] and not lab[c0]:
+            st, cells = [c0], []
+            lab[c0] = len(blobs) + 1
+            while st:
+                c = st.pop()
+                cells.append(c)
+                cx, cy = c % cw, c // cw
+                for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                    if 0 <= nx < cw and 0 <= ny < chh and occ[ny * cw + nx] and not lab[ny * cw + nx]:
+                        lab[ny * cw + nx] = len(blobs) + 1
+                        st.append(ny * cw + nx)
+            blobs.append(cells)
+    crgb = [[((c & 31), (c >> 5) & 31, (c >> 10) & 31) for c in p] for p in cands]
+    used, out = {}, []
+    for bi, cells in enumerate(blobs):
+        pairs, idx = {}, set()
+        for c in cells:
+            cx, cy = c % cw, c // cw
+            for y in range(cy * C, min(cy * C + C, h)):
+                r = rows[y]
+                for x in range(cx * C, min(cx * C + C, w)):
+                    a = r[x]
+                    if a and not owner[y * w + x]:
+                        idx.add(a)
+                        if x + 1 < w and r[x + 1]:
+                            pairs[(a, r[x + 1])] = pairs.get((a, r[x + 1]), 0) + 1
+                        if y + 1 < h and rows[y + 1][x]:
+                            pairs[(a, rows[y + 1][x])] = pairs.get((a, rows[y + 1][x]), 0) + 1
+        tot = sum(pairs.values()) or 1
+        best = None
+        for pi, (p, rgb) in enumerate(zip(cands, crgb)):
+            pen = sum(1 for i in idx if not p[i]) * 60.0 + (len(idx) - len({p[i] for i in idx})) * 15.0
+            if best is not None and pen >= best[0]:
+                continue
+            dist = lambda a, b: abs(rgb[a][0] - rgb[b][0]) + abs(rgb[a][1] - rgb[b][1]) + abs(rgb[a][2] - rgb[b][2])
+            near = sum(n * dist(a, b) for (a, b), n in pairs.items()) / tot
+            spread = sum(dist(a, b) for a in idx for b in idx) / max(1, len(idx) * (len(idx) - 1))
+            s = pen + 40.0 * near / (spread + 4.0)     # neighbours close for the colours the blob has: flat ramps do not win
+            if best is None or s < best[0]:
+                best = (s, pi)
+        if best is None:
+            continue
+        if best[1] not in used:
+            used[best[1]] = first + len(out)
+            out.append(cands[best[1]])
+        val = used[best[1]]
+        for c in cells:
+            cx, cy = c % cw, c // cw
+            for y in range(cy * C, min(cy * C + C, h)):
+                r = rows[y]
+                for x in range(cx * C, min(cx * C + C, w)):
+                    if r[x] and not owner[y * w + x]:
+                        owner[y * w + x] = val
+    return out
+
+
+def locate(v, tp, u0, v0, u1, v1, uphash):
+    """(key, part, px, py, tpw, depth) of the dumped page part a primitive with tpage `tp` and texel box u0..u1 x v0..v1 (inclusive)
+    samples in VRAM context `v`, or None."""
+    depth = (tp >> 7) & 3
+    if depth > 1 or u0 < 0 or v0 < 0 or u1 > 255 or v1 > 255:
+        return None
+    tpw = (4, 2)[depth]
+    px, py = (tp & 15) * 64, ((tp >> 4) & 1) * 256
+    wx0, wx1, wy0, wy1 = px + u0 // tpw, px + u1 // tpw + 1, py + v0, py + v1 + 1
+    rec = next((rc for rc in reversed(v.recs) if rc[5] == "page" and rc[1] <= wx0 and wx1 <= rc[1] + rc[3]
+                and rc[2] <= wy0 and wy1 <= rc[2] + rc[4]), None)
+    if not rec:
+        return None
+    nm, x, y, rw, rh, _k = rec
+    hsh = uphash(nm, rw, rh)
+    if hsh is None:
+        return None
+    part = next((pp for pp in page_parts(x, y, rw, rh, depth) if pp[0] <= wx0 and wx1 <= pp[2] and pp[1] <= wy0 and wy1 <= pp[3]), None)
+    if not part:
+        return None
+    return any_key(hsh, depth, x, y, part), part, px, py, tpw, depth
+
+
+def _model_blobs(lst):
+    """Bytes of the WMD room model (kind 0x50) and of the object model table (kind 0x51) of a load list (own files or pieces)."""
+    import vram
+    data, off = None, 0
+    for r in lst:
+        if r["type"] != 0xFFFFFFFF:
+            data, off = vram.resource(r["name"]), (r["arg"] if r["kind"] == 0x50 else 0)
+            if r["kind"] in (0x50, 0x51) and data:
+                yield r["kind"], data
+        elif data is not None:
+            if r["kind"] in (0x50, 0x51):
+                yield r["kind"], data[off:off + r["arg"]]
+            off += r["arg"]
+
+
+def model_uses(ld, idx, lst, uphash):
+    """[(key, depth, palette words, [(x, y)] polygon in page part texels)]: every textured polygon of the room / object models of list
+    idx (tools/room.py WMD packets carry the real GPU tpage + CLUT words, so each polygon names its own palette)."""
+    import struct
+    import vram, room as R
+    out, v = [], None
+    for kind, b in _model_blobs(lst):
+        pks = []
+        try:
+            if kind == 0x50:
+                pks = R.parse_wmd_ex(b, lenient=True)
+            else:
+                n = struct.unpack_from("<I", b)[0]
+                if not 0 < n < 1000 or len(b) < 4 + 4 * n:
+                    continue
+                o = list(struct.unpack_from("<%dI" % n, b, 4)) + [len(b)]
+                for i in range(n):
+                    if o[i] < o[i + 1] <= len(b):
+                        pks += R.parse_wmd_ex(struct.pack("<II", 1, 8) + b[o[i]:o[i + 1]], lenient=True)
+        except Exception:
+            continue
+        if not pks:
+            continue
+        v = v or vram.ctx_get(ld, idx)
+        seen = set()
+        for cl, tp, _cmd, vs, _c in pks:
+            uv = tuple((q[3], q[4]) for q in vs)
+            if (cl, tp, uv) in seen:
+                continue
+            seen.add((cl, tp, uv))
+            us, ws = [q[0] for q in uv], [q[1] for q in uv]
+            loc = locate(v, tp, min(us), min(ws), max(us), max(ws), uphash)
+            if not loc:
+                continue
+            key, part, px, py, tpw, depth = loc
+            pal = tuple(v.palette(cl, (16, 256)[depth])[2])
+            pts = [(u + (px - part[0]) * tpw, w + py - part[1]) for u, w in uv]
+            for tri in ([pts[:3]] if len(pts) == 3 else [pts[:3], [pts[1], pts[3], pts[2]]]):
+                out.append((key, depth, pal, tri))
+    return out
+
+
+def _fill_tri(owner, W, H, tri, val):
+    """Marks with `val` the texels of `owner` (W x H list) inside the triangle (edges included)."""
+    (x0, y0), (x1, y1), (x2, y2) = tri
+    den = (y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2)
+    for y in range(max(min(y0, y1, y2), 0), min(max(y0, y1, y2), H - 1) + 1):
+        for x in range(max(min(x0, x1, x2), 0), min(max(x0, x1, x2), W - 1) + 1):
+            if den == 0:
+                owner[y * W + x] = val       # degenerate (a line of texels): its box
+                continue
+            a = ((y1 - y2) * (x - x2) + (x2 - x1) * (y - y2)) / den
+            b = ((y2 - y0) * (x - x2) + (x0 - x2) * (y - y2)) / den
+            if a >= -.01 and b >= -.01 and a + b <= 1.01:
+                owner[y * W + x] = val
 
 
 def sprite_crops(ld, idx, lst, uphash, log=print):
@@ -388,7 +587,36 @@ def sprite_crops(ld, idx, lst, uphash, log=print):
     return out
 
 
-def dump_static(out, data, log=print, progress=None):
+def capture_uses(path, pending, log=print):
+    """{page key: [(palette, ("rect", u, v, w, h))]} from a capture of the port (tools/gfx_capture.py, port2 --dump-draws): every draw
+    the game was seen making whose texels are those of a dumped page part, with the palette it was drawn with (exact)."""
+    import gfx_capture as GC
+    try:
+        draws = [d for d in GC.load(path) if d.depth < 2]
+    except Exception as e:
+        log("  (capture %s: %s)" % (path, e))
+        return {}
+    parts = [(m["vram"], dep, key, rows) for key, (_t, _p, _w, _h, rows, m, dep, _r) in pending.items()]
+    out, seen = {}, set()
+    for d in draws:
+        wx, wy, ww = d.page_xy()
+        q = 1 if d.kind != 2 and d.w > 1 and d.h > 1 else 0          # a polygon's UV box has one extra (undrawn) texel
+        for (x1, y1, pw, ph), dep, key, rows in parts:
+            if dep != d.depth or not (x1 <= wx and wx + ww <= x1 + pw and y1 <= wy and wy + d.h <= y1 + ph):
+                continue
+            tpw = (4, 2)[dep]
+            cu, cv = (d.tx - x1) * tpw + d.u, d.ty - y1 + d.v
+            if cu < 0 or cv < 0 or any(bytes(rows[cv + j][cu:cu + d.w]) != bytes(d.tex[j * d.w:(j + 1) * d.w]) for j in range(d.h)):
+                continue
+            k = (key, cu, cv, d.w - q, d.h - q, tuple(d.pal))
+            if k not in seen:
+                seen.add(k)
+                out.setdefault(key, []).append((tuple(d.pal), ("rect", cu, cv, d.w - q, d.h - q)))
+            break
+    return out
+
+
+def dump_static(out, data, log=print, progress=None, capture=None, make_capture=False):
     """Every image of every resource, read from the disc files (no game run): each GRPX page of every load list cut at its texture
     pages, and every WPP sprite frame, named "<descripcion>__r<key>.png" in the readable tree.  Returns the number of images."""
     import struct
@@ -423,7 +651,45 @@ def dump_static(out, data, log=print, progress=None):
                             return p, "%s row %d +%d" % (r["name"], y, sx * 16)
         return _grey(256 if bpp == 8 else 16), "grey"
 
+    def best8(ld, k, d, w, h):
+        """The 256 colour CLUT row that makes an unpaired 8 bpp page look most natural (room pictures: a row of the area CLUTnn)."""
+        order = [(ld, k)] + ([(ld, 0)] if ld != "SYS" and k else [])
+        best = None
+        for l, kk in order:
+            for r in lists[l][kk]:
+                if vram.is_grpx(r) and vram.is_clut_rec(r) and r["w"] == 256:
+                    for row in range(r["h"]):
+                        p = _clut_words(A, r["name"], row * 256, 256)
+                        if p and sum(1 for c in p if c) > 16:
+                            sc = smooth_score(d, w, h, p)
+                            if best is None or sc < best[0]:
+                                best = (sc, p, "%s row %d" % (r["name"], row))
+        return (best[1], best[2]) if best else (None, None)
+
+    s16 = {}
+
+    def sub16(lk):
+        """Every non-empty 16 colour palette of the CLUT records of list lk ("AR00:4"), its area list 0 and SYSTEM list 0."""
+        if lk not in s16:
+            ld, k = lk.split(":")
+            k = int(k)
+            order = [(ld, k)] + ([(ld, 0)] if ld != "SYS" and k else []) + ([("SYS", 0)] if (ld, k) != ("SYS", 0) else [])
+            out, seen = [], set()
+            for l, kk in order:
+                for r in lists[l][kk]:
+                    if vram.is_grpx(r) and vram.is_clut_rec(r) and r["name"] not in seen:
+                        seen.add(r["name"])
+                        for y in range(r["h"]):
+                            for sx in range(r["w"] // 16):
+                                p = _clut_words(A, r["name"], y * r["w"] + sx * 16, 16)
+                                if p and sum(1 for c in p if c) > 3 and tuple(p) not in seen:
+                                    seen.add(tuple(p))
+                                    out.append(tuple(p))
+            s16[lk] = out
+        return s16[lk]
+
     page_dir, crops_done, n_crops, hcache = {}, set(), [0], {}
+    pending, uses = {}, {}       # page key -> (folder, prefix, w, h, rows, meta, depth, palette is real); page key -> [(palette, shape)]
 
     def uphash(nm, w, h):
         if (nm, w, h) not in hcache:
@@ -451,11 +717,20 @@ def dump_static(out, data, log=print, progress=None):
                     d = vram.resource(nm)
                     if not d or len(d) < w * h * 2 or w <= 0 or h <= 0:
                         continue
-                    bpp = 8 if i in pr else 4
+                    pal = None
+                    if i in pr:
+                        bpp = 8
+                    elif nibble_jump(d, w, h) > 2.5:           # a room picture (8 bpp) with no CLUT of its own: the most natural row
+                        bpp = 8
+                        pal, pal_src = best8(ld, k, d, w, h)
+                    else:
+                        bpp = 4
                     depth = (4, 8).index(bpp)
                     up = _fnv(d[:w * h * 2])
                     words = struct.unpack_from("<%dH" % (w * h), d)
-                    pal, pal_src = first_pal(ld, k, bpp, lst[pr[i]] if i in pr else None)
+                    real = bpp == 8
+                    if pal is None:
+                        pal, pal_src = first_pal(ld, k, bpp, lst[pr[i]] if i in pr else None)
                     short = os.path.basename(_base(nm))
                     if _base(nm) in SCREENS:
                         top = ["Interfaz", SCREENS[_base(nm)]] if "HUD" in SCREENS[_base(nm)] else ["Pantallas", SCREENS[_base(nm)]]
@@ -471,9 +746,11 @@ def dump_static(out, data, log=print, progress=None):
                         x1, y1, x2, y2 = part
                         tpw = (4, 2)[depth]
                         rows = _decode(words, w, x2 - x1, y2 - y1, x1 - x, y1 - y, depth, pal)
-                        emit(top, "%s_p%d-%d_%dbpp" % (short, x1 - x1 % 64, y1 - y1 % 256, bpp), key, (x2 - x1) * tpw, y2 - y1,
-                             rows, dict(_pal=pal, kind="page", resource=nm, list="%s:%d" % (ld, k), depth=bpp, vram=[x1, y1, x2 - x1, y2 - y1],
-                                        upload=[x, y, w, h], palette=pal_src))
+                        prefix = "%s_p%d-%d_%dbpp" % (short, x1 - x1 % 64, y1 - y1 % 256, bpp)
+                        page_dir[key] = (list(top), prefix)
+                        pending[key] = (top, prefix, (x2 - x1) * tpw, y2 - y1, rows,
+                                        dict(_pal=pal, kind="page", resource=nm, list="%s:%d" % (ld, k), depth=bpp, vram=[x1, y1, x2 - x1, y2 - y1],
+                                             upload=[x, y, w, h], palette=pal_src), depth, real)
                 elif (r["kind"] & 0xF0) == 0x60 and r["type"] != 0xFFFFFFFF and nm.endswith(".000") and wpp.is_wpp(nm):
                     _m, files, frames = wpp.unpack_wpp(vram.resource(nm), nm, wpp.is_wpp(nm))
                     try:
@@ -508,11 +785,17 @@ def dump_static(out, data, log=print, progress=None):
                 log("  (%s: %s)" % (nm, e))
         if ld != "SYS":
             try:
+                for key, depth, pal, tri in model_uses(ld, k, lst, uphash):
+                    uses.setdefault(key, []).append((pal, ("tri", tri)))
+            except Exception as e:
+                log("  (models %s:%d: %s)" % (ld, k, e))
+            try:
                 for key, cu, cv, w, h, depth, pal, rows, label in sprite_crops(ld, k, lst, uphash, log):
                     ck = (key, cu, cv, w, h)
                     if ck in crops_done:
                         continue
                     crops_done.add(ck)
+                    uses.setdefault(key, []).append((tuple(pal), ("rect", cu, cv, w, h)))
                     page = page_dir.get(key)
                     if not page:
                         folder = ["Zonas", zona(int(ld[2:])), "Sprites sueltos"]
@@ -530,9 +813,72 @@ def dump_static(out, data, log=print, progress=None):
                 log("  (sprites %s:%d: %s)" % (ld, k, e))
         if progress:
             progress(wi, len(work))
+    import gfx_capture as GC
+    if capture is None:
+        capture = GC.default_store()
+    if make_capture and not os.path.isfile(capture) and os.path.isfile(default_exe()):
+        log("capturing the game's draws (port headless, every room) into %s ..." % capture)
+        try:
+            GC.run(default_exe(), capture, data=data, jobs=max(2, (os.cpu_count() or 4) // 2), log=log)
+        except Exception as e:
+            log("  (capture failed: %s)" % e)
+    cap = capture_uses(capture, pending, log) if capture and os.path.isfile(capture) else {}
+    if cap:
+        log("capture %s: %d pages with draws seen in the game" % (capture, len(cap)))
+    for key, lst_ in cap.items():                # last = on top: what the game was seen drawing wins
+        uses.setdefault(key, []).extend(lst_)
+    n_prev = 0
+    for key, (top, prefix, w, h, rows, meta, depth, real) in pending.items():
+        # the page as the game shows it ("Vista previa", RGBA, never read by the port: no "__<key>" in its name): every texel a model
+        # polygon or a sprite samples, with that polygon's / sprite's own palette; texels nothing known draws stay grey (4 bpp) or keep
+        # the page palette (8 bpp pictures, whose palette is the real one)
+        owner, pals, cover = [0] * (w * h), [None], {}
+        for pal, shp in uses.get(key, ()):
+            if len(pal) != (16, 256)[depth] or not any(pal):
+                continue
+            if pal not in cover:
+                cover[pal] = len(pals)
+                pals.append(pal)
+            pi = cover[pal]
+            if shp[0] == "tri":
+                _fill_tri(owner, w, h, shp[1], pi)
+            else:
+                _c, cu, cv, cw, ch = shp
+                for yy in range(max(cv, 0), min(cv + ch, h)):
+                    owner[yy * w + max(cu, 0):yy * w + min(cu + cw, w)] = [pi] * (min(cu + cw, w) - max(cu, 0))
+        cnt = {}
+        for yy in range(h):
+            r = rows[yy]
+            for xx in range(w):
+                o = owner[yy * w + xx]
+                if o and r[xx]:
+                    cnt[o] = cnt.get(o, 0) + 1
+        known = sum(cnt.values())
+        if depth == 0 and not real:            # texels no known draw covers: a palette per blob, deduced (neighbour colours)
+            pals += _blob_palettes(rows, w, h, owner, sub16(meta["list"]), len(pals))
+        if cnt and not real:                    # the editable page: the palette most of it is drawn with instead of an example one
+            meta["_pal"] = list(pals[max(cnt, key=cnt.get)])
+            meta["palette"] = "most used by its sprites / models"
+        base = meta["_pal"] if real else None
+        grey = [0] + [((i * 2 if depth == 0 else i // 8) | 1) * 0x421 for i in range(1, 256)]
+        prow = []
+        for yy in range(h):
+            r, line = rows[yy], []
+            for xx in range(w):
+                ix, o = r[xx], owner[yy * w + xx]
+                c = pals[o][ix] if o else base[ix] if base else grey[ix]
+                line.append(0 if not ix and not (o or base) else c if c else (0x8000 if ix and real else 0))
+            prow.append(line)
+        meta["preview"] = "%.0f%% exact, rest deduced" % (100.0 * known / max(1, sum(1 for r in rows for v in r if v)))
+        emit(top, prefix, key, w, h, rows, meta)
+        pdir = os.path.join(out, *[safe(x) for x in top], "Vista previa (solo para ver)")
+        os.makedirs(pdir, exist_ok=True)
+        _png(os.path.join(pdir, safe(prefix).replace("__", "_") + ".png"), w, h, prow, None, opaque=True)
+        n_prev += 1
     index.close()
     with open(os.path.join(out, "LEEME.txt"), "w", encoding="utf-8") as f:
         f.write(LEEME)
+    log("%d page previews" % n_prev)
     log("%d images + %d sprite rectangles in %s (%.0f s)" % (n, n_crops[0], out, time.time() - t0))
     return n + n_crops[0]
 
@@ -650,14 +996,20 @@ Carpetas
   Comun/...                           paginas y sprites del sistema comunes a todo el juego
   ".../<pagina> - sprites/"           cada sprite de esa pagina recortado y CON SU PALETA REAL
   ".../Partes con su paleta/"         cada parte de un fotograma (p.ej. cabeza y piernas de Tombi) con su paleta
+  ".../Vista previa (solo para ver)/"  LAS PAGINAS COMO SE VEN EN EL JUEGO (RGBA): cada zona con la paleta con
+                                      la que el juego la dibuja. Solo para mirar: el juego no las carga
+                                      (no llevan "__r<clave>"); edita las de la carpeta de arriba.
 
 Nombres
   <recurso>_p<X>-<Y>_<bits>__r<clave>.png  (pagina de VRAM X,Y de un fichero, 4/8 bits por pixel)
   <recurso>_f<NNNN>__r<clave>.png          (fotograma NNNN de un sprite)
   <sprite>__r<clave>_U_V_W_H.png          (un rectangulo U,V de W x H de esa pagina o fotograma)
   Solo importa lo que va tras el ultimo "__": el juego busca la clave en cualquier subcarpeta.
-  Los colores de las paginas completas son de una paleta de ejemplo; los de los recortes de sprites
-  son los reales. Edita el recorte (se pega encima de la pagina al cargar el pack) o la pagina entera.
+  Las paginas completas editables son PNG con paleta (indices): una pagina mezcla sprites con paletas
+  distintas, asi que un solo PNG con paleta no puede mostrarlos todos bien; llevan la paleta que mas usa
+  esa pagina. Para ver los colores reales abre "Vista previa (solo para ver)". Los fondos de habitacion
+  (p.ej. B301 de la Aldea) son de 8 bits por pixel y salen con su paleta real.
+  Los recortes de sprites llevan su paleta real. Edita el recorte (se pega encima de la pagina al cargar el pack) o la pagina entera.
   Puedes mover las imagenes o cambiar la parte de delante, pero no toques "__r<clave>.png".
 
 Como hacer un pack HD
@@ -665,8 +1017,7 @@ Como hacer un pack HD
   2. Reescalalas al MISMO tamano multiplicado por un entero (2x, 4x, 8x... hasta 16x).
   3. IMPORTANTE: las imagenes son PNG con paleta (indices de color). Si las guardas COMO PNG CON PALETA
      (sin cambiar la paleta), el juego aplica en cada momento la paleta real: la misma pagina sale bien
-     con todas sus paletas (enemigos de otro color, destellos, animaciones de color). Los colores que ves
-     al abrirlas son solo una paleta de ejemplo.
+     con todas sus paletas (enemigos de otro color, destellos, animaciones de color).
      Si las guardas en RGB/RGBA (color libre), se dibujan siempre con esos colores, sea cual sea la paleta.
   4. Transparencia (RGBA): alfa < 64 transparente, 64..191 semitransparente, >= 192 opaco.
   5. Lanzador: Mods > Pack de texturas (HD) > elige la carpeta. Solo con OpenGL; para un pack 4x usa
@@ -703,11 +1054,13 @@ def main(argv=None):
     ap.add_argument("--quick", action="store_true", help="--runtime: rooms once, no item pop-ups")
     ap.add_argument("--only", choices=["rooms", "title", "menus", "items"])
     ap.add_argument("--raw", action="store_true", help="--runtime: keep the port's flat areaXX/<key>.png layout")
+    ap.add_argument("--capture", default=None, help="draw capture of the port (tools/gfx_capture.py; default gfx_capture.drw.gz): exact palettes for the previews")
+    ap.add_argument("--make-capture", action="store_true", help="run the port headless through every room first when there is no capture")
     a = ap.parse_args(argv)
     data = a.data or os.path.join(ROOT, "data")
     out = a.out or os.path.join(os.path.dirname(os.path.abspath(data)), "texture_dump")
     if not a.runtime:
-        dump_static(out, data)
+        dump_static(out, data, capture=a.capture, make_capture=a.make_capture)
         return 0
     run(a.exe or default_exe(), out, data, None, a.jobs, a.quick, a.only, organize_data=None if a.raw else data)
     return 0
