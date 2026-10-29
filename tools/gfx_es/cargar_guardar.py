@@ -56,16 +56,16 @@ def build(page):
             L = [r[:i] + r[i+1:] for r in L]
         return L
 
-    def word(ls, W):                                             # 7-wide letters, 1 px gap (the shadow): fits left of the dialog box
+    def word(ls, W, lw):                                         # lw-wide letters, 1 px gap (the shadow): fits left of the dialog box
         rows = [''] * 10
-        for L in map(narrow, ls):
+        for L in (narrow(L, lw) for L in ls):
             for i in range(10): rows[i] += L[i] + '.'
         x0 = 1                                                  # left edge of the ink at column 1, as in LOAD
         rows = ['.' * x0 + r for r in rows]; rows = [(r + '.' * W)[:W] for r in rows]
         return ['.' * W] * 4 + rows + ['.' * W] * 2
 
     out = []
-    for g, v in ((render(word([C, A, R, G, A, R], 64)), 160), (render(word([G, U, A, R, D, A, R], 72)), 176)):
+    for g, v in ((render(word([C, A, R, G, A, R], 64, 8)), 160), (render(word([G, U, A, R, D, A, R], 72, 7)), 176)):
         words = [sum(r[x+k] << (4*k) for k in range(4)) for r in g for x in range(0, len(r), 4)]
         out.append((VRAM_X, v, len(g[0]) // 4, 16, words))
     return out
