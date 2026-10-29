@@ -921,10 +921,12 @@ class App:
             if not os.path.isfile(p):
                 messagebox.showerror(tr("title"), tr("s.patchmissing", p))
                 return False
-            gfx_missing = False      # applied by an older launcher (no redraws yet), or the redraws were skipped then
+            gfx_missing = False      # missing (older launcher, or skipped then) or built by another gfx_es version: rebuild
             try:
-                gfx_missing = json.load(open(p, encoding="utf-8")).get("portGfx") and not os.path.isfile(os.path.join(d, DP.GFX_TBTX))
-            except (OSError, ValueError):
+                if json.load(open(p, encoding="utf-8")).get("portGfx"):
+                    import gfx_es
+                    gfx_missing = not gfx_es.is_current(os.path.join(d, DP.GFX_TBTX))
+            except (OSError, ValueError, ImportError):
                 pass
             if st and st.get("sha1") == DP.file_sha1(p) and X.manifest_sha1(d) and not gfx_missing:
                 self.say(tr("s.patchon", st.get("title") or os.path.basename(p)), "ok")

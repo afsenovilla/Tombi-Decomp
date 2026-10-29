@@ -52,6 +52,29 @@ def page_key(page, stride, vx, vy, u, v, w, h):
     return (vx + u//4, vy + v, w//4, h, words)
 
 
+def generator_id():
+    """sha1 of this package's sources: a .tbtx built by another version of the generator is rebuilt (written next to it
+    as <out>.ver)"""
+    import hashlib
+    d = os.path.dirname(os.path.abspath(__file__))
+    h = hashlib.sha1()
+    for f in sorted(os.listdir(d)):
+        if f.endswith(".py"):
+            h.update(f.encode() + b"\0" + open(os.path.join(d, f), "rb").read())
+    return h.hexdigest()
+
+
+def is_current(path):
+    """True when path is a TBTK file this generator version wrote (else apply/launcher rebuild it)"""
+    try:
+        with open(path, "rb") as f:
+            if f.read(4) != b"TBTK":
+                return False
+        return open(path + ".ver", encoding="utf-8").read().strip() == generator_id()
+    except OSError:
+        return False
+
+
 def build(data_dir, out, log=print):
     """Writes the TBTX of every part that builds; returns the number of rects (0: nothing written)."""
     import importlib
@@ -74,6 +97,8 @@ def build(data_dir, out, log=print):
     with open(out + ".part", "wb") as f:
         f.write(b)
     os.replace(out + ".part", out)
+    with open(out + ".ver", "w", encoding="utf-8") as f:
+        f.write(generator_id() + "\n")
     return len(rects)
 
 
