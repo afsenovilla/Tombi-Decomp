@@ -124,6 +124,11 @@ class Disc:
             shutil.rmtree(self.tmp, ignore_errors=True)
 
 
+def hashlib_md5(words):
+    import hashlib
+    return hashlib.md5(struct.pack("<%dH" % len(words), *words)).hexdigest()[:8]
+
+
 # ------------------------------------------------------------------ pixel formats
 def decode_plane(data, w_words, h, bpp):
     """Index plane (bytearray, one byte per pixel; 16 bpp: array('H') of words) of a page of w_words x h words."""
@@ -214,8 +219,10 @@ class Core:
         self.lists = A.load_lists()
         if not self.lists:
             raise err("c.nolists")
+        self.truth()
         self._cl = None
         self._wpp = {}
+        self._cap_pals = {}        # read-only palettes seen in the port capture that no CLUT file holds (set at run time)
 
     # ---- data
     def original(self, key):
@@ -330,6 +337,8 @@ class Core:
 
     # ---- palettes
     def pal_words(self, ref):
+        if ref.file.startswith("capture:"):
+            return list(self._cap_pals.get(ref.file, [0] * ref.n))
         d = self.get(ref.file)
         n = min(ref.n, max(0, len(d) // 2 - ref.off))
         ws = list(struct.unpack_from("<%dH" % n, d, ref.off * 2)) + [0] * (ref.n - n)
@@ -354,6 +363,8 @@ class Core:
         return self.set_word(ref, i, v)
 
     def set_word(self, ref, i, v):
+        if ref.file.startswith("capture:"):
+            raise err("c.capro")
         d = bytearray(self.get(ref.file))
         struct.pack_into("<H", d, (ref.off + i) * 2, v & 0xFFFF)
         return self.edit({ref.file: d})
@@ -505,8 +516,51 @@ class Core:
             return self._composed_surface(item[1], item[2], item[3])
         raise err("c.badkind", k)
 
+    # ---- ground truth: the port capture (tools/gfx_capture.py)
+    def truth(self):
+        if not hasattr(self, "_truth"):
+            try:
+                import gfx_capture
+                self._truth = gfx_capture.truth(getattr(self, "capture_path", None))
+                self.vram.TRUTH = self._truth       # SPR parts the game was seen drawing are shown as it drew them
+            except Exception:
+                self._truth = None
+        return self._truth
+
+    def captured_page(self, name):
+        """(bit depth, [entries]) of the draws the game was seen making from page `name`, or (None, [])."""
+        t = self.truth()
+        if not t:
+            return None, []
+        ents = t.pages(self).get(name) or []
+        if not ents:
+            return None, []
+        wt = {}
+        for e in ents:
+            wt[e[0]] = wt.get(e[0], 0) + e[-1]
+        return (4, 8)[max(wt, key=wt.get)], ents
+
+    def captured_ref(self, cx, cy, words):
+        """PalRef for a captured palette: the CLUT record that holds it when its words match (editable), else a read-only copy."""
+        n = len(words)
+        ref = self.clut_lookup(cx, cy, n)
+        if ref and list(self.pal_words(ref)) == list(words):
+            return ref
+        for r2 in self._cap_scan(n):
+            if list(self.pal_words(r2)) == list(words):
+                return r2
+        key = "capture:%d,%d:%s" % (cx, cy, hashlib_md5(words))
+        self._cap_pals[key] = list(words)
+        return PalRef(key, 0, n)
+
+    def _cap_scan(self, n):
+        return []
+
     def _page_surface(self, name, ld, idx, crop=None, pal=None, title=None):
-        p = self.page_info(name, ld, idx)
+        p = dict(self.page_info(name, ld, idx))
+        cbpp, cents = self.captured_page(name) if crop is None and pal is None else (None, [])
+        if cbpp and cbpp != p["bpp"]:
+            p["bpp"] = cbpp
         s = Surface(self, title or name, p["bpp"])
         s.layers = [(name, 0, p["w"], p["h"])]
         s.pageinfo = p
@@ -533,6 +587,21 @@ class Core:
                     s.pal, s.pal_note = g.ref, tr("l.deduced", g.label, g.method)
                 else:
                     s.pal = (s.candidates()[:1] or [(None, None)])[0][1]
+        if cents:
+            # what the game draws from this page (port capture): each sprite rectangle with its own palette, the most used one as default
+            n = 16 if p["bpp"] == 4 else 256
+            wt, seen = {}, {}
+            for dep, cx, cy, x, y, w, h, hx, k in sorted(cents, key=lambda e: e[-1]):     # heaviest last: it wins where draws overlap
+                if (4, 8)[dep] != p["bpp"]:
+                    continue
+                words = [int(hx[i:i + 4], 16) for i in range(0, len(hx), 4)][:n]
+                ref = seen.get(hx) or seen.setdefault(hx, self.captured_ref(cx, cy, words))
+                wt[ref] = wt.get(ref, 0) + k
+                s.rects.append(Rect("", x, y, w, h, ref, "capture"))
+            if wt:
+                s.pal = max(wt, key=wt.get)
+                s.pal_note = tr("l.captured")
+                s.multi_pal = len(wt) > 1
         s.inferred = s.pal
         s.apply_choice()
         if name == UI_PAGE:
@@ -547,7 +616,21 @@ class Core:
                 s.rects = keep
         return s
 
+    def title_screen(self):
+        """The title background as the game shows it (O0PTSUB0, frame 1300 of the port): the 320 x 240 landscape (A00200, CLUT A00201)
+        at y 8 of the 320 x 256 PAL frame, the TOMBI! logo of A00202 (CLUT A00203) cut in two strips (page px 8,0 240x112 at 16,24 and
+        8,112 48x112 at 256,24, the draws of the capture); the PRESS START text is not part of it.  PIL RGBA image."""
+        from PIL import Image
+        out = Image.new("RGBA", (320, 256), (0, 0, 0, 255))
+        out.alpha_composite(self._screen_surface("title_landscape").render(), (0, 8))
+        logo = self._screen_surface("title_logo_page").render()
+        out.alpha_composite(logo.crop((8, 0, 248, 112)), (16, 24))
+        out.alpha_composite(logo.crop((8, 112, 56, 224)), (256, 24))
+        return out
+
     def _screen_surface(self, name):
+        if name == "title_screen":      # composed, read only: edit title_landscape / title_logo_page
+            return ComposedSurface(self, name, self.title_screen())
         if name.startswith("backdrop_L"):
             return self._backdrop_surface(int(name[10:]))
         for sc in screens_list():
@@ -670,7 +753,37 @@ class Core:
         pal = self.wpp_palette(name, n)
         s.pal = pal
         s.wpp = True
+        # the SPR table that cuts these frames (same frame count) gives each part its own CLUT: Tombi's upper body uses row 480 of the
+        # area CLUT, the lower body row 481 (port capture); show each part with its palette
+        try:
+            for i, p in enumerate(self.wpp_parts(name, n)):
+                c = self.vram.wpp_clut(p[2])
+                ref = self.clut_lookup((c & 0x3F) * 16, c >> 6 & 0x1FF, 16, [(s.ld, s.idx), (s.ld, 0)])
+                if ref:
+                    u, v = min(p[0], p[3], p[6], p[10]), min(p[1], p[4], p[7], p[11])
+                    s.rects.append(Rect("", u, v, p[8], p[9], ref, "part"))
+            if len({r.pal for r in s.rects}) > 1:
+                s.multi_pal = True
+        except Exception:
+            pass
         return s
+
+    def wpp_parts(self, name, n):
+        """Parts of frame n of the SPR table linked to the WPP file `name` (same frame count in its load list), [] when none."""
+        c = self.__dict__.setdefault("_wppspr", {})
+        if name not in c:
+            man, files, frames = self.wpp(name)
+            cnt = len([k for k in files if k.startswith("frame_")])
+            lst = self.A.find_list(name)
+            tab = None
+            if lst:
+                for r, d in self.A.list_blocks(lst[0], lst[1]):
+                    if (r["kind"] & 0xF0) == 0x30 and d and len(d) >= 4 and struct.unpack_from("<H", d, 2)[0] // 4 == cnt:
+                        tab = self.vram.parse_spr(d)
+                        break
+            c[name] = tab
+        tab = c[name]
+        return [p for p in tab[n] if p[8] and p[9]] if tab and n < len(tab) else []
 
     def anim_owner(self, owner):
         """(owner dict, frame source) of one animation owner of tools/anim.py: "tombi" or an enemy/NPC/object handler id "aNN_<handler>"; cached."""
@@ -802,7 +915,8 @@ class Core:
         """[node] with node = dict(text, item, children|lazy)."""
         N = lambda text, item=None, children=None, lazy=None, id=None: dict(text=text, item=item, children=children or [], lazy=lazy, id=id)
         root = []
-        scr = [N(sc["name"], ("screen", sc["name"])) for sc in screens_list()] + [N(e[0], ("screen", e[0])) for e in EXTRA_SCREENS]
+        scr = ([N("title_screen", ("screen", "title_screen"))] + [N(sc["name"], ("screen", sc["name"])) for sc in screens_list()]
+               + [N(e[0], ("screen", e[0])) for e in EXTRA_SCREENS])
         for n in scr:
             n["id"] = "screen:" + n["item"][1]
         import palinfer
@@ -1069,6 +1183,7 @@ class Surface:
         self.pageinfo = None
         self.key = None            # Core.pal_choice key (name of the first page)
         self.inferred = None       # the palette the editor deduced (before any manual choice)
+        self.multi_pal = False     # rects carry their own palettes (captured from the game): render each with it
 
     def apply_choice(self):
         c = self.core.pal_choice.get(self.key)
@@ -1168,9 +1283,31 @@ class Surface:
             lut = Image.frombytes("L", (W, H), bytes(pl).translate(alpha + bytes(256 - len(alpha))))
             rgba.putalpha(lut)
             im = rgba
+            if self.multi_pal and ref is None:
+                im = self._multi(im, pl, W, H)
         if region:
             x, y, w, h = region
             im = im.crop((x, y, x + w, y + h))
+        return im
+
+    def _multi(self, im, pl, W, H):
+        """Paints every rect that has its own palette with it (the sprites as the game draws them)."""
+        from PIL import Image
+        import vram
+        luts = {}
+        for r in self.rects:
+            if not r.pal:
+                continue
+            if r.pal not in luts:
+                ws = self.core.pal_words(r.pal)
+                ws = (ws + [0] * 256)[:256]
+                luts[r.pal] = [vram.RGB[w & 0x7FFF] + (b"\xff" if (self.opaque or w) else b"\0") for w in ws]
+            lut = luts[r.pal]
+            x0, y0, x1, y1 = max(r.x, 0), max(r.y, 0), min(r.x + r.w, W), min(r.y + r.h, H)
+            if x0 >= x1 or y0 >= y1:
+                continue
+            raw = b"".join(lut[pl[y * W + x]] for y in range(y0, y1) for x in range(x0, x1))
+            im.paste(Image.frombytes("RGBA", (x1 - x0, y1 - y0), raw), (x0, y0))
         return im
 
     def indexed(self, region=None, ref=None):
@@ -1324,7 +1461,8 @@ class ComposedSurface(Surface):
 
 # ------------------------------------------------------------------ strings
 S_ES = {
-    "l.deduced": "paleta deducida: {0} ({1})",
+    "l.deduced": "paleta deducida: {0} ({1})", "l.captured": "paletas capturadas del juego (cada sprite con la suya)",
+    "c.capro": "Esta paleta solo existe en tiempo de ejecución (capturada del juego): no hay archivo que editar.",
     "c.notiso": "{0} no es una imagen de disco ISO9660 (.bin de 2352 bytes por sector o .iso).", "c.nofile": "No existe {0}.",
     "c.nofs": "No se encuentra la carpeta SYS en {0}: ¿es el disco de Tombi! (PAL)?", "c.nolists": "No se pudieron leer las listas de carga (SYS/LD0*.BIN).",
     "c.nocomposed": "La vista compuesta de AREA{0:02d} sala {1} aún no está generada.", "c.composedro": "La vista compuesta es solo de lectura.",
@@ -1351,7 +1489,8 @@ S_ES = {
     "w.index0": "El índice 0 de esta paleta no es transparente (palabra distinta de 0): se verá como color opaco.",
 }
 S_EN = {
-    "l.deduced": "palette inferred: {0} ({1})",
+    "l.deduced": "palette inferred: {0} ({1})", "l.captured": "palettes captured from the game (each sprite with its own)",
+    "c.capro": "This palette only exists at run time (captured from the game): there is no file to edit.",
     "c.notiso": "{0} is not an ISO9660 disc image (.bin with 2352-byte sectors or .iso).", "c.nofile": "{0} does not exist.",
     "c.nofs": "No SYS folder found in {0}: is it the Tombi! (PAL) disc?", "c.nolists": "The load lists (SYS/LD0*.BIN) could not be read.",
     "c.nocomposed": "The composed view of AREA{0:02d} room {1} is not generated yet.", "c.composedro": "The composed view is read-only.",
@@ -1402,6 +1541,13 @@ def main(argv=None):
     s.add_argument("out")
     a = ap.parse_args(argv)
     core = Core(a.disc)
+    try:
+        return _main(core, a)
+    finally:
+        core.disc.close()      # the extraction cache of a disc image is a temp folder: never leave it behind
+
+
+def _main(core, a):
     if a.c == "list":
         print("\n".join(_walk(core.tree())))
         return 0

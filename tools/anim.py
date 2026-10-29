@@ -144,13 +144,30 @@ class Sprites:
         spr = next(d for k, n, d in wpp.spr_candidates(TOMBI_WPP) if k == 0x30 and n == 358)
         parts = vram.parse_spr(spr)
         blob = A.read_resource(A.find_clut(TOMBI_WPP)["name"])
-        pal = [(0, 0, 0, 0)] + [tuple(A.rgb555(v)) + (255,) for v in struct.unpack_from("<15H", blob, (row * 256 + 1) * 2)]
+        def pal_of(r):
+            return [(0, 0, 0, 0)] + [tuple(A.rgb555(v)) + (255,) for v in struct.unpack_from("<15H", blob, (r * 256 + 1) * 2)]
+        pals = {}
         self.n = len(frames)
         self.img, self.off = [], []
         for i, o in enumerate(frames):
             rows, w, h = vram.wpp_plane(o)
             im = Image.new("RGBA", (w, h))
-            im.putdata([pal[b] for r in rows for b in r])
+            # every part has its own CLUT (the game draws the upper body with row 480, the lower body with row 481 of the area
+            # CLUT, captured from the port): colour each part's box of the frame with its palette
+            px = [pals.setdefault(row, pal_of(row))[b] for r in rows for b in r]
+            for p in parts[i]:
+                if not p[8] or not p[9]:
+                    continue
+                pr = row + (((p[2] >> 6) & 0x1FF) - 480)
+                if pr == row or not 0 <= pr < 32:
+                    continue
+                pl = pals.setdefault(pr, pal_of(pr))
+                u0, v0 = min(p[0], p[3], p[6], p[10]), min(p[1], p[4], p[7], p[11])
+                for y in range(max(v0, 0), min(v0 + p[9], h)):
+                    rr = rows[y]
+                    for x in range(max(u0, 0), min(u0 + p[8], w)):
+                        px[y * w + x] = pl[rr[x]]
+            im.putdata(px)
             ps = parts[i]
             ox = min(p[12] for p in ps) if ps else 0
             oy = min(p[13] for p in ps) if ps else 0

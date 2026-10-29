@@ -177,11 +177,13 @@ def pair_cluts(lst):
             continue
         if not is_clut_rec(r):
             run.append(i)
-        elif r["w"] == 256:
+        elif r["w"] == 256 and r["h"] == 1:
+            # a single 256 colour CLUT: the pages before it are 8 bpp.  A 256 x n block (n > 1, the CLUTnn.GAM of a room) is a set of
+            # 16 colour strips: the room atlases before it are 4 bpp, each sprite picks its own row (the port capture draws them 4 bpp)
             for p in run:
                 out[p] = i
             run = []
-        elif r["w"] == 16:
+        else:
             run = []
     return out
 
@@ -596,8 +598,57 @@ def _rgba_row_idx(rowidx, prgba):
     return b"".join(map(prgba.__getitem__, rowidx))
 
 
+TRUTH = None    # gfx_capture.Truth (set by the editor when a port capture exists): parts the game was seen drawing come from it
+
+
+def _truth_part(v, p, base, plane):
+    """(w, h, png, rgba rows, blank, note) of the part as the port drew it, or None.  The capture is looked up by the part's UV box
+    and CLUT in the area; a streamed (WPP) part must also have the same texels, a page part prefers the page the editor computed."""
+    if TRUTH is None or not v.ld or not v.ld.startswith("AR"):
+        return None
+    u0, v0, clut, u1, v1, tpage, u2, v2, w, h, u3, v3, dx, dy = p
+    us, vs = (u0, u1, u2, u3), (v0, v1, v2, v3)
+    box = (min(us), min(vs), max(us) - min(us) + 1, max(vs) - min(vs) + 1)
+    c = clut if plane is None else wpp_clut(clut)
+    cx, cy = (c & 0x3F) * 16, c >> 6 & 0x1FF
+    tp = tpage + base
+    area = int(v.ld[2:])
+    cands = TRUTH.parts(area, box, cx, cy)
+    if not cands:
+        return None
+    fx, fy = (u1 < u0), (v2 < v0)
+
+    def cut(d):
+        ox = 1 if fx and d.w > box[2] else 0
+        oy = 1 if fy and d.h > box[3] else 0
+        t = bytes(d.tex)
+        rows = [t[(oy + j) * d.w + ox:(oy + j) * d.w + ox + box[2]] for j in range(box[3])]
+        return rows
+    if plane is not None:
+        rows_in, pw, ph = plane
+        want = [bytes(rows_in[box[1] + j][box[0]:box[0] + box[2]]) if 0 <= box[1] + j < ph else b"" for j in range(box[3])]
+        d = next((d for d in cands if cut(d) == want), None)
+    else:
+        q = tp & 0x1F
+        d = next((d for d in cands if (d.tx, d.ty) == ((q & 15) * 64, (q >> 4) * 256)), None) or cands[0]
+    if d is None:
+        return None
+    pal = [RGBA[x] for x in d.pal]
+    rows = cut(d)
+    out = []
+    for j in range(h):
+        r = rows[(h - 1 - j) if fy else j]
+        r = r[::-1] if fx else r
+        out.append(b"".join(pal[i] for i in r[:w]))
+    blank = not any(d.pal[i] for r in rows for i in r)
+    return w, h, png_rgba(w, h, out), out, blank, "captured from the game"
+
+
 def render_part(v, p, base, plane=None):
     """(w, h, png bytes, rgba rows, blank, note) of one SPR part from VRAM `v` (offset `base`) or from a WPP frame plane (rows, W, H)."""
+    t = _truth_part(v, p, base, plane)
+    if t is not None:
+        return t
     u0, v0, clut, u1, v1, tpage, u2, v2, w, h, u3, v3, dx, dy = p
     fx, fy = (u1 < u0), (v2 < v0)
     if plane is not None:
