@@ -6,7 +6,9 @@ its texture pages, and every WPP sprite frame, written as palette PNGs (CLUT ind
 "<descripcion>__r<key>.png" in readable folders (Zonas/NN Nombre/{Escenario,Objetos y enemigos,Sprites/..}, Personajes/Tombi,
 Interfaz/.., Pantallas/.., Comun/..) with textures.jsonl and LEEME.txt.  key = FNV-1a(FNV-1a of the words LoadImage receives,
 depth, page part) - the CLUT-less key of port2/shims/texpack.c, which matches it under any palette and applies the live
-palette to an indexed replacement.
+palette to an indexed replacement.  SPR sprite parts take the texture page offset and CLUT the game code assigns
+(tools/sprite_cluts.py: o->w1e / o->b0d & 1 -> o->w08 of the handlers of the objects placed in each room, read from src/),
+one crop per code variant; sprite_cluts.json counts the parts resolved from code / WPP / fallback guess per area.
 
   python3 tools/dump_all_textures.py [--data DIR] [--out DIR]
   python3 tools/dump_all_textures.py --runtime [--exe build/port2/tombi2] [--jobs N] [--quick]   (secondary: headless sweep
@@ -510,24 +512,75 @@ def _fill_tri(owner, W, H, tri, val):
                 owner[y * W + x] = val
 
 
-def sprite_crops(ld, idx, lst, uphash, log=print):
-    """[(key, u, v, w, h, depth, palette words, index rows, label)]: every SPR part of the tables of list idx as a rectangle of the
-    page part (or WPP frame) it is cut from, with the palette the part is drawn with (vram.export_spr's resolution of each table:
-    the WPP frame of the same number, else the context and tpage offset of infer_base; Tombi's placeholder CLUT -> vram.wpp_clut)."""
+def _crop(v, p, tp, clut, uphash):
+    """(key, u, v, w, h, depth, palette words, index rows) of one SPR part drawn with texture page word tp and CLUT word clut in the
+    VRAM context v (the rectangle of the dumped page part it samples), or None when it does not land on loaded page data."""
+    u, vv, w, h = _part_box(p)
+    depth = (tp >> 7) & 3
+    if depth > 1 or w <= 0 or h <= 0 or u + w > 256 or vv + h > 256:
+        return None
+    tpw = (4, 2)[depth]
+    px, py = (tp & 15) * 64, ((tp >> 4) & 1) * 256
+    wx0, wx1, wy0, wy1 = px + u // tpw, px + (u + w - 1) // tpw + 1, py + vv, py + vv + h
+    rec = next((rc for rc in reversed(v.recs) if rc[5] == "page" and rc[1] <= wx0 and wx1 <= rc[1] + rc[3]
+                and rc[2] <= wy0 and wy1 <= rc[2] + rc[4]), None)
+    if not rec:
+        return None
+    nm, x, y, rw, rh, _k = rec
+    hsh = uphash(nm, rw, rh)
+    if hsh is None:
+        return None
+    part = next((pp for pp in page_parts(x, y, rw, rh, depth) if pp[0] <= wx0 and wx1 <= pp[2] and pp[1] <= wy0 and wy1 <= pp[3]), None)
+    if not part:
+        return None
+    key = any_key(hsh, depth, x, y, part)
+    cu, cv = u + (px - part[0]) * tpw, vv + py - part[1]
+    if cu < 0 or cv < 0:
+        return None
+    n = (16, 256)[depth]
+    pal = list(v.palette(clut, n)[2])
+    src = v.nib if depth == 0 else v.d
+    VWp = 1024 * tpw
+    rows = [bytes(src[(py + vv + j) * VWp + px * tpw + u:(py + vv + j) * VWp + px * tpw + u + w]) for j in range(h)]
+    return key, cu, cv, w, h, depth, pal, rows, nm
+
+
+def sprite_crops(ld, idx, lst, uphash, log=print, lists=None, stats=None, trace=None):
+    """[(key, u, v, w, h, depth, palette words, index rows, label)]: every SPR part of the tables loaded with list idx as a rectangle of
+    the page part (or WPP frame) it is cut from, with the palette the part is drawn with.
+
+    Room lists (idx > 0) also take the tables of the area list 0 (they stay in their SPR slot while the room's pages are loaded: the
+    AREA00 enemies of kind 0x32 sample the Bn00 atlas of the room).  For a table whose slot (kind & 0xF) the area's code uses, the tpage
+    offset and CLUT come from the code (tools/sprite_cluts.py: o->w1e, o->b0d & 1 -> o->w08, read from the decompiled handlers),
+    one crop per code variant that lands on loaded texture data; other tables: the WPP frame of the same number, else the context and
+    tpage offset of vram.infer_base (a guess).  stats (dict) counts parts as "code" / "fallback" / "unresolved"; trace (list) gets
+    (source, table kind, frame, part, tpage word, CLUT word, (u, v, w, h)) of every crop (tests)."""
     import struct, hashlib
-    import area000 as A, vram
+    import area000 as A, vram, sprite_cluts as SC
     out = []
     tabs = [(r, d) for r, d in A.list_blocks(ld, idx) if (r["kind"] & 0xF0) == 0x30 and d and len(d) >= 4]
+    var = {}
+    if idx > 0 and lists is not None:
+        mine = {r["kind"] for r, _d in tabs}
+        var = SC.variants(lists, ld, idx)
+        used = SC.variants(lists, ld, idx, by_room=False)       # slots the area's code uses in some room
+        # an area-list table whose slot only objects of other rooms use is not drawn with this room's pages
+        tabs = [(r, d) for r, d in A.list_blocks(ld, 0) if (r["kind"] & 0xF0) == 0x30 and d and len(d) >= 4 and r["kind"] not in mine
+                and not ((r["kind"] & 0xF) in used and (r["kind"] & 0xF) not in var)] + tabs
     if not tabs:
         return out
-    wt = vram.wpp_tables(lst)
+    st = stats if stats is not None else {}
+    count = lambda what, n: st.__setitem__(what, st.get(what, 0) + n)
+    wt = vram.wpp_tables(lst) + (vram.wpp_tables(lists[ld][0]) if idx > 0 and lists is not None else [])
     cands = None
     for r, d in tabs:
         nfr = struct.unpack_from("<H", d, 2)[0] // 4
         frames = vram.parse_spr(d)
+        nparts = sum(1 for f in frames for p in f if p[8] and p[9])
         link = next((t for t in wt if len(t[2]) == nfr), None)
         if link:
             v = vram.ctx_get(ld, idx)
+            count("wpp", nparts)
             for fi, o in enumerate(link[2]):
                 fw, fh = struct.unpack_from("<HH", o)
                 if not fw or not fh or fi >= len(frames):
@@ -539,8 +592,37 @@ def sprite_crops(ld, idx, lst, uphash, log=print):
                     if w <= 0 or h <= 0 or u + w > W or vv + h > H:
                         continue
                     pal = list(v.palette(vram.wpp_clut(p[2]), 16)[2])
+                    if trace is not None:
+                        trace.append(("wpp", r["kind"], fi, pi, None, vram.wpp_clut(p[2]), (u, vv, w, h)))
                     out.append((key, u, vv, w, h, 0, pal, [rows[vv + j][u:u + w] for j in range(h)],
                                 "%s_f%04d_parte%d" % (os.path.basename(_base(link[0])), fi, pi)))
+            continue
+        slot = r["kind"] & 0xF
+        if slot in var:
+            # the code's tpage offset / CLUT: one crop per variant that lands on loaded, non-empty texels
+            ctxs = [v for _k, v in vram.candidates(ld, idx)]
+            hit = set()
+            for w1e, clut, who in var[slot]:
+                for fi, f in enumerate(frames):
+                    for pi, p in enumerate(f):
+                        if not (p[8] and p[9]):
+                            continue
+                        c = clut if clut is not None else p[2]
+                        for v in ctxs:
+                            res = _crop(v, p, (p[5] + w1e) & 0xFFFF, c, uphash)
+                            if res and any(any(rw) for rw in res[7]) and any(res[6]):
+                                key, cu, cv, w, h, depth, pal, rows, nm = res
+                                hit.add((fi, pi))
+                                if trace is not None:
+                                    trace.append(("code", r["kind"], fi, pi, (p[5] + w1e) & 0xFFFF, c, _part_box(p)))
+                                out.append((key, cu, cv, w, h, depth, pal, rows,
+                                            "%s_spr%02X_f%04d_parte%d_%s_clut%d-%d" % (os.path.basename(_base(nm)), r["kind"], fi, pi,
+                                                                                     who[0], (c & 0x3F) * 16, c >> 6 & 0x1FF)))
+                                break
+            count("code", len(hit))
+            if len(hit) >= nparts:
+                continue
+            count("unresolved", nparts - len(hit))
             continue
         if (r["kind"], hashlib.md5(d).hexdigest()) in vram.shared_tables():
             cs = vram.shared_candidates(ld)
@@ -550,40 +632,23 @@ def sprite_crops(ld, idx, lst, uphash, log=print):
         parts = [p for f in frames for p in f if p[8] and p[9]]
         res = vram.infer_base(cs, parts) if parts else None
         if res is None:
+            count("unresolved", nparts)
             continue
         ci, base, _info = res
         v = cs[ci][1]
+        nfb = 0
         for fi, f in enumerate(frames):
             for pi, p in enumerate(f):
-                u, vv, w, h = _part_box(p)
-                tp = p[5] + base
-                depth = (tp >> 7) & 3
-                if depth > 1 or w <= 0 or h <= 0 or u + w > 256 or vv + h > 256:
+                res = _crop(v, p, p[5] + base, p[2], uphash)
+                if not res:
                     continue
-                tpw = (4, 2)[depth]
-                px, py = (tp & 15) * 64, ((tp >> 4) & 1) * 256
-                wx0, wx1, wy0, wy1 = px + u // tpw, px + (u + w - 1) // tpw + 1, py + vv, py + vv + h
-                rec = next((rc for rc in reversed(v.recs) if rc[5] == "page" and rc[1] <= wx0 and wx1 <= rc[1] + rc[3]
-                            and rc[2] <= wy0 and wy1 <= rc[2] + rc[4]), None)
-                if not rec:
-                    continue
-                nm, x, y, rw, rh, _k = rec
-                hsh = uphash(nm, rw, rh)
-                if hsh is None:
-                    continue
-                part = next((pp for pp in page_parts(x, y, rw, rh, depth) if pp[0] <= wx0 and wx1 <= pp[2] and pp[1] <= wy0 and wy1 <= pp[3]), None)
-                if not part:
-                    continue
-                key = any_key(hsh, depth, x, y, part)
-                cu, cv = u + (px - part[0]) * tpw, vv + py - part[1]
-                if cu < 0 or cv < 0:
-                    continue
-                n = (16, 256)[depth]
-                pal = list(v.palette(p[2], n)[2])
-                src = v.nib if depth == 0 else v.d
-                VWp = 1024 * tpw
-                rows = [bytes(src[(py + vv + j) * VWp + px * tpw + u:(py + vv + j) * VWp + px * tpw + u + w]) for j in range(h)]
+                key, cu, cv, w, h, depth, pal, rows, nm = res
+                nfb += 1
+                if trace is not None:
+                    trace.append(("fallback", r["kind"], fi, pi, p[5] + base, p[2], _part_box(p)))
                 out.append((key, cu, cv, w, h, depth, pal, rows, "%s_spr%02X_f%04d_parte%d" % (os.path.basename(_base(nm)), r["kind"], fi, pi)))
+        count("fallback", nfb)
+        count("unresolved", max(0, nparts - nfb))
     return out
 
 
@@ -751,6 +816,7 @@ def dump_static(out, data, log=print, progress=None, capture=None, make_capture=
         return s16[lk]
 
     page_dir, crops_done, n_crops, hcache = {}, set(), [0], {}
+    spr_stats = {}               # area -> {"code" / "fallback" / "unresolved": SPR parts} (tools/sprite_cluts.py)
     pending, uses = {}, {}       # page key -> (folder, prefix, w, h, rows, meta, depth, palette is real); page key -> [(palette, shape)]
 
     def uphash(nm, w, h):
@@ -853,8 +919,8 @@ def dump_static(out, data, log=print, progress=None, capture=None, make_capture=
             except Exception as e:
                 log("  (models %s:%d: %s)" % (ld, k, e))
             try:
-                for key, cu, cv, w, h, depth, pal, rows, label in sprite_crops(ld, k, lst, uphash, log):
-                    ck = (key, cu, cv, w, h)
+                for key, cu, cv, w, h, depth, pal, rows, label in sprite_crops(ld, k, lst, uphash, log, lists, spr_stats.setdefault(ld, {})):
+                    ck = (key, cu, cv, w, h, tuple(pal))
                     if ck in crops_done:
                         continue
                     crops_done.add(ck)
@@ -958,6 +1024,13 @@ def dump_static(out, data, log=print, progress=None, capture=None, make_capture=
     with open(os.path.join(out, "LEEME.txt"), "w", encoding="utf-8") as f:
         f.write(LEEME)
     log("%d page previews" % n_prev)
+    for ld_, st_ in sorted(spr_stats.items()):
+        tot = sum(st_.values())
+        if tot:
+            log("  %s SPR parts: %d from code, %d WPP-linked, %d fallback guess, %d unresolved" % (
+                ld_, st_.get("code", 0), st_.get("wpp", 0), st_.get("fallback", 0), st_.get("unresolved", 0)))
+    with open(os.path.join(out, "sprite_cluts.json"), "w", encoding="utf-8") as f:
+        json.dump(spr_stats, f, indent=1)
     log("%d images + %d sprite rectangles in %s (%.0f s)" % (n, n_crops[0], out, time.time() - t0))
     return n + n_crops[0]
 
