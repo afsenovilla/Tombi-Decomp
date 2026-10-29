@@ -62,8 +62,9 @@ def status(data_dir):
 def restore(data_dir):
     """Puts the originals kept in data/.orig back (every file there, manifest.txt among them); returns their count."""
     gfx = os.path.join(data_dir, GFX_TBTX)
-    if os.path.isfile(gfx):
-        os.remove(gfx)
+    for f in (gfx, gfx + ".ver"):
+        if os.path.isfile(f):
+            os.remove(f)
     od = os.path.join(data_dir, ORIG)
     if not os.path.isdir(od):
         return 0
