@@ -27,6 +27,7 @@ Importable: extract(image, out_dir, progress=None) -> manifest dict; manifest_sh
 """
 import hashlib, os, struct, sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # `python3 -I` (CI) leaves the script's folder out
 import chd
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331
