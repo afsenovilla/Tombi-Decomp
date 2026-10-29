@@ -20,6 +20,19 @@
 #endif
 #include "port_runtime.h"
 
+/* "<prefix>XXXXXXXX fault address=XXXXXXXX\n" without libc formatting: the first line of a crash report, written raw
+   before anything else (a wild copy can trash the state the formatted report needs, and the report then dies silently) */
+static unsigned raw_fault_line(char *o, const char *prefix, unsigned long eip, unsigned long fault) {
+    static const char hx[] = "0123456789abcdef", mid[] = " fault address=";
+    unsigned n = 0;
+    while (*prefix) o[n++] = *prefix++;
+    for (int i = 28; i >= 0; i -= 4) o[n++] = hx[(eip >> i) & 15];
+    for (const char *m = mid; *m; ) o[n++] = *m++;
+    for (int i = 28; i >= 0; i -= 4) o[n++] = hx[(fault >> i) & 15];
+    o[n++] = '\n';
+    return n;
+}
+
 #define PORT_LOW_JUMP 1
 #define PORT_LOW_REGS 2
 #define LOW_SITES 160
@@ -189,6 +202,15 @@ static LONG WINAPI on_exception(EXCEPTION_POINTERS *ep) {
         }
     }
     {
+        /* a fault while reporting (the crash may have trashed the state port_printf/port_sym_near use): say so plainly */
+        static volatile LONG reporting;
+        { char raw[64]; unsigned n = raw_fault_line(raw, "[port2] fault: eip=", eip, fault);
+          DWORD w; WriteFile(GetStdHandle(STD_ERROR_HANDLE), raw, n, &w, 0); }
+        if (InterlockedExchange(&reporting, 1)) {
+            static const char msg[] = "[port2] access violation while reporting an access violation\n";
+            DWORD w; WriteFile(GetStdHandle(STD_ERROR_HANDLE), msg, sizeof msg - 1, &w, 0);
+            return EXCEPTION_CONTINUE_SEARCH;
+        }
         unsigned long off; const char *nm = port_sym_near((void *)eip, &off);
         port_printf("[port2] access violation: eip=%08lx (%s+0x%lx) fault address=%08lx (%s, frame %d, thread %d, image base %p); stack:", eip, nm, off, fault,
                     rec->ExceptionInformation[0] == 8 ? "execute" : rec->ExceptionInformation[0] ? "write" : "read", port_frame, port_thread_current(), (void *)__ImageBase);
@@ -231,6 +253,11 @@ static void on_segv(int sig, siginfo_t *info, void *ucv) {
         }
     }
     {
+        static volatile sig_atomic_t reporting;
+        char raw[64]; unsigned n = raw_fault_line(raw, "[port2] fault: eip=", eip, fault);
+        { long r; __asm__ volatile ("int $0x80" : "=a"(r) : "a"(4), "b"(2), "c"(raw), "d"(n) : "memory"); (void)r; }  /* write(2): the game has its own `write` (a stub) */
+        if (reporting) { signal(sig, SIG_DFL); raise(sig); return; }     /* faulted while reporting: the raw line is all */
+        reporting = 1;
         unsigned long off; const char *nm = port_sym_near((void *)eip, &off);
         port_printf("[port2] signal %d: eip=%08lx (%s+0x%lx) fault address=%08lx (frame %d); stack:", sig, eip, nm, off, fault, port_frame);
         port_dump_stack(uc->uc_mcontext.gregs[REG_ESP]);

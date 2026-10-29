@@ -207,6 +207,9 @@ void FUN_8005aa74(int event_id, int completed, int duration, int state)
                   *(u16*)(obj + 0xC8) = port_title_ec[n].unk0;
                   *(u16*)(obj + 0xCA) = port_title_ec[n].unk2;
               } else {
+                  /* MAIN0's tables have 6 entries: a language list with higher flags (MAINn tables not parsed) read past
+                     them, a wild glyph id, and acquireSpriteSlot copied from a wild pointer (crash after a new game) */
+                  if (n >= 6) n = 5;
                   *(u16*)(obj + 0xC0) = D_800804E0[n];
                   *(u16*)(obj + 0xC8) = D_800804EC[n].unk0;
                   *(u16*)(obj + 0xCA) = D_800804EC[n].unk2;
