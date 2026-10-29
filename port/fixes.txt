@@ -11,7 +11,7 @@ src/initTasks.c | int r = *(int *)0x110; | int r = (int)port_bios_tcb_table();
 # startTask(i, fn): the matching C declares one parameter; fn reaches setTaskEntry in $a1 untouched
 src/startTask.c | extern void setTaskEntry(void *); | extern void setTaskEntry(void *, int);
 src/startTask.c | void startTask(int i) | void startTask(int i, int fn)
-src/startTask.c | setTaskEntry((void *)(k + 0x801fd80c)); | setTaskEntry((void *)(k + 0x801fd80c), fn);
+src/startTask.c | setTaskEntry((void *)(k + TASK_ENTRY)); | setTaskEntry((void *)(k + TASK_ENTRY), fn);
 #
 # Register-carried arguments where $a0 is not the caller's own argument (gen_port.py forwards the rest)
 src/updateAreaScreenEffect.c | dispatchScreenEffect(); | dispatchScreenEffect((char *)p);
