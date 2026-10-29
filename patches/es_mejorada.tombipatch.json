@@ -121,6 +121,59 @@
      204
     ]
    }
+  },
+  "SYSTEM/D5SPSUB2.BIN": {
+   "messages": {
+    "11": "Elige un archivo\n",
+    "13": "Elige un archivo\n(sobrescribir)\n",
+    "15": "Archivo nuevo\n",
+    "16": "¿Este archivo?\n \n    Sí   No\n",
+    "17": "Elige ranura de tarjeta\n",
+    "18": "Botón {0xAB}: Seleccionar{0xA8}Botón {0x5F}: Cancelar\n",
+    "20": "Guardado completo\n",
+    "21": "Carga completa\n"
+   },
+   "locations": {
+    "2": "Cabaña del Anciano \ncentenario\n",
+    "5": "Bosque \nde las 100 Flores\n",
+    "6": "Bosque \nde las 100 Flores\n",
+    "8": "Torre de \nvigilancia\n",
+    "15": "La pequeña y \nextraña cámara\n",
+    "18": "Cueva de lava",
+    "31": "Cámara de \ntribulación\n",
+    "49": "Bosque \nde las 100 Flores\n",
+    "50": "Bosque \nde las 100 Flores\n",
+    "52": "Torre de \nvigilancia\n",
+    "67": "Colina del \nárbol noble\n"
+   },
+   "font": {
+    "0xA8": [
+     56,
+     232,
+     0,
+     12,
+     0
+    ],
+    "0x5F": [
+     56,
+     232,
+     12,
+     12,
+     0
+    ]
+   },
+   "iconParts": {
+    "0": [
+     32,
+     2,
+     112,
+     16,
+     8,
+     16,
+     304,
+     496
+    ]
+   }
   }
  },
  "edits": {

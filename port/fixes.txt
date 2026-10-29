@@ -314,3 +314,15 @@ src/titleSequenceTask.c | void titleSequenceTask(void) | extern int port_skip_mo
 src/titleSequenceTask.c | (JOYPAD_STATE & (JOY_CROSS | (port_skip_movies == 2 ? 1 : JOYPAD_STATE & (JOY_CROSS
 # --lang 5: the green box of the controls screen's layout name is 64 px wide in the code; the patch's "Por defecto" is 88
 src/o0ptsub0/buttonConfigDrawCursor.c | D_1F800000.w = 0x40; | { extern int port_lang; D_1F800000.w = port_lang == 5 ? 0x60 : 0x40; }
+# The memory card screen (LOAD / SAVE) skips the card slot prompt: on PC both cards are files (tombi_mc0.mcd / mc1),
+# so once the probe finds card 1 its file list opens at once (no select sound); a Cancel that would go back to the
+# prompt (the file list's -1, a declined format, Cancel on an unformatted / unreadable card) leaves the screen as
+# Cancel on the prompt did.  A removed card still goes back to the prompt (the probe runs again).  Card 2 is not reachable.
+src/d0spsub2/memCardScreenStep.c | int memCardScreenStep(void) | static int port_mc_back; static int port_mc_list(Menu *m, Card *c) { int r = memCardFileListStep(m, c); if (r == -1) port_mc_back = 1; return r; } int memCardScreenStep(void)
+src/d0spsub2/memCardScreenStep.c | MEMCARD_PROBED = 0; | MEMCARD_PROBED = 0; port_mc_back = 0;
+src/d0spsub2/memCardScreenStep.c | if ((JOYPAD_STATE & 0x4000) && MEMCARD_SELECTED_SLOT) { | if (port_mc_back) { int s = port_mc_back; port_mc_back = 0; if (s == 2) SfxPlay2(0x1B, 0x1C); return -1; } if (MEMCARD_PROBED && MEMCARD_SLOT_PRESENT[0]) MEMCARD_SELECTED_SLOT = 1; if (((JOYPAD_STATE & 0x4000) || (MEMCARD_PROBED && MEMCARD_SLOT_PRESENT[0])) && MEMCARD_SELECTED_SLOT) {
+src/d0spsub2/memCardScreenStep.c | SfxPlay2(10, 10); | if (JOYPAD_STATE & 0x4000) SfxPlay2(10, 10);
+src/d0spsub2/memCardScreenStep.c | switch (memCardFileListStep(m, c)) { | switch (port_mc_list(m, c)) {
+src/d0spsub2/memCardScreenStep.c | if (memCardFormatStep(m, c) == -1) m->sub--; | if (memCardFormatStep(m, c) == -1) { m->sub--; port_mc_back = 1; }
+src/d0spsub2/memCardScreenStep.c | if (JOYPAD_STATE & 0x2000) m->sub--; | if (JOYPAD_STATE & 0x2000) { m->sub--; port_mc_back = 2; }
+src/d0spsub2/memCardScreenStep.c | if (JOYPAD_STATE & 0x2000) { | if ((JOYPAD_STATE & 0x2000) && (port_mc_back = 2)) {
