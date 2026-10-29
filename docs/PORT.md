@@ -2168,7 +2168,10 @@ Objetos y enemigos,Sprites/<file>}`, `Personajes/Tombi`, `Interfaz/..`, `Pantall
 `LEEME.txt`. The `r` key is texpack.c's key without the CLUT: FNV-1a(FNV-1a of the words LoadImage receives, depth, page part);
 the port tries the exact key first, then the `r` key (`use_any`). An `r` image saved as a palette PNG (any bit depth) is applied
 with the **live** CLUT (one GL texture per palette seen, cached by CLUT hash), so one image covers every palette of the page;
-an RGB/RGBA `r` image is drawn as is. Any prefix ending in `__` is allowed before a key. Checked: a 2x pack of the static dump
+an RGB/RGBA `r` image is drawn as is. Every SPR part (object/enemy atlases via `vram.infer_base`, WPP frames with their part
+CLUT through `vram.wpp_clut`: Tombi's legs are row 481) is also written as its own crop `<label>__r<key>_U_V_W_H.png` with its
+real palette (folders `<page> - sprites`, `Partes con su paleta`; ~13000 crops, ~1 min, ~70 MB); the loader pastes crops
+(indices, or RGBA colours) over the `r` page image or the original indices read from VRAM, at the crops' scale. Any prefix ending in `__` is allowed before a key. Checked: a 2x pack of the static dump
 with striped indices replaces scenery, Tombi, HUD and NPC sprites in AREA03:1 / AREA00:1 with correct colours; 422 of the 460
 images the port dumped at run time in the title + 4 rooms have their `r` key in the static dump. Gaps: uploads the game builds
 or modifies before LoadImage (e.g. AREA00 `A002` pages at 576,0, some 8-bit room backdrops such as AREA09:2) do not hash like

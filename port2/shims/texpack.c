@@ -387,31 +387,51 @@ static void pk_add(u64 key, const char *path) {
 /* "r" keys (tools/dump_all_textures.py, computed from the disc files without running the game): FNV-1a(upload hash, depth, page
    part) without the CLUT, so one image replaces that page part with whatever palette it is drawn; an exact key wins over it */
 #define ANYMARK 0x414E59414E59414Eull
-static int parse_name(const char *n, u64 *key) {
+typedef struct { u64 key; int u, v, w, h; char *path; } Crop;    /* "r<key>_U_V_W_H": a sprite rectangle of an "r" page part */
+static Crop *crops; static int n_crops, cap_crops;
+static int parse_key(const char *n, u64 *key, int *crop) {
     int sub = 0, any = 0; u64 k = 0;
-    for (const char *q = strstr(n, "__"); q; q = strstr(q + 1, "__")) {   /* the last "__" followed by a key */
-        size_t r = strlen(q + 2);
-        if (r == 20 || (r == 21 && (q[2] == 'r' || q[2] == 'R')) || (r == 24 && (!strncmp(q + 2, "sub_", 4) || !strncmp(q + 2, "SUB_", 4)))) { n = q + 2; break; }
-    }
     if (!strncmp(n, "sub_", 4) || !strncmp(n, "SUB_", 4)) { sub = 1; n += 4; }
-    else if ((n[0] == 'r' || n[0] == 'R') && strlen(n) == 21) { any = 1; n++; }   /* "r<16 hex>": the page part, any palette */
+    else if (n[0] == 'r' || n[0] == 'R') { any = 1; n++; }          /* "r<16 hex>": the page part, any palette */
     for (int i = 0; i < 16; i++) {
         char c = n[i]; int v = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1;
         if (v < 0) return 0;
         k = k << 4 | (u64)v;
     }
-    if (strcmp(n + 16, ".png") && strcmp(n + 16, ".PNG")) return 0;
+    n += 16;
+    crop[0] = -1;
+    if (any && *n == '_') {
+        int u, v, w, h, used = 0;
+        if (sscanf(n, "_%d_%d_%d_%d%n", &u, &v, &w, &h, &used) != 4 || u < 0 || v < 0 || w <= 0 || h <= 0 || u + w > 256 || v + h > 256) return 0;
+        n += used; crop[0] = u; crop[1] = v; crop[2] = w; crop[3] = h;
+    }
+    if (strcmp(n, ".png") && strcmp(n, ".PNG")) return 0;
     *key = sub ? k ^ SUBMARK : any ? k ^ ANYMARK : k;
-    return sub ? 2 : 1;
+    return sub ? 2 : crop[0] >= 0 ? 3 : 1;
+}
+/* "<16 hex>.png", "sub_<16 hex>.png", "r<16 hex>.png", "r<16 hex>_U_V_W_H.png" (any case), alone or after a descriptive prefix
+   ending in "__" ("tombi_corre__r0123456789abcdef.png", tools/dump_all_textures.py); sub and r keys live in their own spaces */
+static int parse_name(const char *n, u64 *key, int *crop) {
+    int t = parse_key(n, key, crop);
+    for (const char *q = strstr(n, "__"); q; q = strstr(q + 1, "__")) { int r = parse_key(q + 2, key, crop); if (r) t = r; }
+    return t;
 }
 static void scan(const char *dir, int depth) {
     DIR *d = opendir(dir); struct dirent *e;
     if (!d) { if (!depth) port_printf("[texpack] cannot open %s\n", dir); return; }
     while ((e = readdir(d))) {
         if (e->d_name[0] == '.') continue;
-        char p[1024]; u64 k; int t;
+        char p[1024]; u64 k; int t, cr[4];
         snprintf(p, sizeof p, "%s/%s", dir, e->d_name);
-        if ((t = parse_name(e->d_name, &k))) { pk_add(k, p); if (t == 2) pk_has_sub = 1; continue; }
+        if ((t = parse_name(e->d_name, &k, cr))) {
+            if (t == 3) {
+                if (n_crops == cap_crops) { Crop *nc = realloc(crops, sizeof *crops * (cap_crops = cap_crops ? cap_crops * 2 : 256)); if (!nc) continue; crops = nc; }
+                crops[n_crops].key = k; crops[n_crops].u = cr[0]; crops[n_crops].v = cr[1]; crops[n_crops].w = cr[2]; crops[n_crops].h = cr[3];
+                crops[n_crops++].path = strdup(p);
+            } else pk_add(k, p);
+            if (t == 2) pk_has_sub = 1;
+            continue;
+        }
         struct stat st;
         if (depth < 8 && !stat(p, &st) && S_ISDIR(st.st_mode)) scan(p, depth + 1);
     }
@@ -527,33 +547,103 @@ static const PortTexRep *use(u64 key, int ou, int ov, int w, int h) {
     e->rep.ou = ou; e->rep.ov = ov;
     return &e->rep;
 }
-/* An "r" image (any palette) of a 4/8-bit page saved as a palette PNG holds CLUT indices (tools/dump_all_textures.py writes them
-   so): each palette the game draws the page with is applied to the indices and gets its own GL texture (cached by CLUT hash), so
-   one indexed image replaces the page under every palette, palette animations included.  An RGBA image is used as it is. */
+/* An "r" image (any palette) of a 4/8-bit page part saved as a palette PNG holds CLUT indices (tools/dump_all_textures.py writes them
+   so): each palette the game draws the part with is applied to the indices and gets its own GL texture (cached by CLUT hash), so one
+   indexed image replaces the part under every palette, palette animations included.  "r<key>_U_V_W_H" images are sprite rectangles
+   of that part (each exported with its own palette for editing): they are pasted over the part (over the "r" page image when there
+   is one, else over the original indices read from VRAM) at the same scale.  Indexed images paste indices, RGB/RGBA ones paste
+   colours that are drawn as they are under every palette. */
+typedef struct { u64 key; int state, iw, ih, s; u8 *idx, *ov; PortTexRep rep; } AnyPage;   /* state 1 rgba (rep), 2 composed */
+static AnyPage any_pg[1024];
 static struct { u64 k; PortTexRep rep; } any_var[4096];
-static const PortTexRep *use_any(u64 key0, const GpuTex *t, u64 ch, int np, int ou, int ov, int w, int h) {
-    PackEnt *e = pk_find(key0 ^ ANYMARK);
-    if (!e || e->state < 0) return 0;
-    if (e->state == 0) {
-        int iw, ih; u8 *rgba = read_png_rgba(e->path, &iw, &ih);
-        e->state = -1;
-        if (!rgba) return 0;
-        int s = iw / w;
-        if (s < 1 || s > 16 || iw != s * w || ih != s * h) {
-            port_printf("[texpack] %s: %dx%d is not an integer scale (1..16) of the original %dx%d: ignored\n", e->path, iw, ih, w, h);
-            free(rgba); return 0;
+static int crop_cmp(const void *a, const void *b) { u64 x = ((const Crop *)a)->key, y = ((const Crop *)b)->key; return x < y ? -1 : x > y; }
+static int crops_sorted;
+static int crops_of(u64 k, int *first) {
+    if (!n_crops) return 0;
+    if (!crops_sorted) { qsort(crops, n_crops, sizeof *crops, crop_cmp); crops_sorted = 1; }
+    int lo = 0, hi = n_crops;
+    while (lo < hi) { int m = (lo + hi) / 2; if (crops[m].key < k) lo = m + 1; else hi = m; }
+    int n = 0;
+    while (lo + n < n_crops && crops[lo + n].key == k) n++;
+    *first = lo;
+    return n;
+}
+static AnyPage *any_load(u64 k, int depth, int vx, int vy, int w, int h, int np) {
+    u32 m = 1023, i = (u32)(k ^ (k >> 32)) & m, tries = 0;
+    while (any_pg[i].key && any_pg[i].key != k && tries++ < 1024) i = (i + 1) & m;
+    AnyPage *a = &any_pg[i];
+    if (a->key == k) return a->state > 0 ? a : 0;
+    if (a->key) return 0;
+    a->key = k; a->state = -1;
+    PackEnt *e = pk_find(k);
+    int c0 = 0, nc = np ? crops_of(k, &c0) : 0;
+    if (!e && !nc) return 0;
+    u8 *rgba = 0; int iw = 0, ih = 0, s = 0;
+    if (e) {
+        rgba = read_png_rgba(e->path, &iw, &ih);
+        s = rgba ? iw / w : 0;
+        if (!rgba || s < 1 || s > 16 || iw != s * w || ih != s * h) {
+            if (rgba) port_printf("[texpack] %s: %dx%d is not an integer scale (1..16) of the original %dx%d: ignored\n", e->path, iw, ih, w, h);
+            free(rgba); rgba = 0; s = 0;
         }
-        if (np && png_last_idx) { e->idx = png_last_idx; png_last_idx = 0; e->iw = iw; e->ih = ih; e->state = 2; free(rgba); }
-        else {
-            unsigned tex = port_gl_rep_texture(rgba, iw, ih);
-            free(rgba);
-            if (!tex) return 0;
-            e->rep.gltex = tex; e->rep.w = w; e->rep.h = h; e->state = 1;
-        }
-        if (n_rep_loaded++ < 50 || port_verbose) port_printf("[texpack] %s (%dx%s)\n", e->path, s, e->state == 2 ? ", indexed" : "");
     }
-    if (e->state == 1) { e->rep.ou = ou; e->rep.ov = ov; return &e->rep; }
-    if (!np) return 0;
+    if (!s && nc) {                                    /* the scale of the first readable crop */
+        for (int c = 0; c < nc && !s; c++) {
+            Crop *cr = &crops[c0 + c]; int cw, chh; u8 *t = read_png_rgba(cr->path, &cw, &chh);
+            if (t && cw % cr->w == 0 && cw / cr->w >= 1 && cw / cr->w <= 16 && chh == cw / cr->w * cr->h) s = cw / cr->w;
+            free(t);
+        }
+    }
+    if (!s) return 0;
+    if (!np || (e && rgba && !png_last_idx && !nc)) {  /* a plain RGBA "r" image: one texture for every palette */
+        if (!rgba) return 0;
+        unsigned tex = port_gl_rep_texture(rgba, iw, ih);
+        free(rgba);
+        if (!tex) return 0;
+        a->rep.gltex = tex; a->rep.w = w; a->rep.h = h; a->state = 1; a->s = s;
+        if (n_rep_loaded++ < 50 || port_verbose) port_printf("[texpack] %s (%dx)\n", e->path, s);
+        return a;
+    }
+    int W = w * s, H = h * s;
+    a->idx = calloc((size_t)W * H, 1);
+    if (!a->idx) { free(rgba); return 0; }
+    a->iw = W; a->ih = H; a->s = s;
+    if (rgba && png_last_idx) memcpy(a->idx, png_last_idx, (size_t)W * H);
+    else {                                             /* the original indices from VRAM, upscaled */
+        const u16 *vr = port_vram(); int sh = depth == 0 ? 2 : 1, tpw = 1 << sh;
+        for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
+            u16 wd = vr[((vy + y) & 511) * 1024 + ((vx + x / tpw) & 1023)];
+            u8 ix = (u8)((wd >> ((x & (tpw - 1)) << (4 - sh))) & (np - 1));
+            for (int yy = 0; yy < s; yy++) memset(a->idx + (size_t)(y * s + yy) * W + x * s, ix, (size_t)s);
+        }
+        if (rgba) { a->ov = rgba; rgba = 0; }         /* an RGBA page image: colours over everything, crops still paste */
+    }
+    free(rgba);
+    for (int c = 0; c < nc; c++) {
+        Crop *cr = &crops[c0 + c]; int cw, chh; u8 *t = read_png_rgba(cr->path, &cw, &chh);
+        if (!t || cw != cr->w * s || chh != cr->h * s || cr->u + cr->w > w || cr->v + cr->h > h) {
+            if (t) port_printf("[texpack] %s: %dx%d is not the %dx scale of %dx%d inside the %dx%d page part: ignored\n", cr->path, cw, chh, s, cr->w, cr->h, w, h);
+            free(t); continue;
+        }
+        for (int y = 0; y < chh; y++) {
+            size_t o = (size_t)(cr->v * s + y) * W + cr->u * s;
+            if (png_last_idx) memcpy(a->idx + o, png_last_idx + (size_t)y * cw, (size_t)cw);
+            else {
+                if (!a->ov && !(a->ov = calloc((size_t)W * H, 4))) break;
+                memcpy(a->ov + o * 4, t + (size_t)y * cw * 4, (size_t)cw * 4);
+                for (int x = 0; x < cw; x++) if (a->ov[(o + x) * 4 + 3] == 0) a->ov[(o + x) * 4 + 3] = 1;   /* (alpha 0 = no overlay: keep 1) */
+            }
+        }
+        free(t);
+        if (n_rep_loaded++ < 50 || port_verbose) port_printf("[texpack] %s (%dx, sprite)\n", cr->path, s);
+    }
+    a->state = 2;
+    return a;
+}
+static const PortTexRep *use_any(u64 key0, const GpuTex *t, u64 ch, int np, int vx, int vy, int ou, int ov, int w, int h) {
+    AnyPage *a = any_load(key0 ^ ANYMARK, t->depth, vx, vy, w, h, np);
+    if (!a) return 0;
+    if (a->state == 1) { a->rep.ou = ou; a->rep.ov = ov; return &a->rep; }
     u64 vk = fnv(key0, &ch, 8); if (!vk) vk = 1;
     u32 m = 4095, i = (u32)(vk ^ (vk >> 32)) & m, tries = 0;
     while (any_var[i].k && any_var[i].k != vk && tries++ < 4096) i = (i + 1) & m;
@@ -561,10 +651,13 @@ static const PortTexRep *use_any(u64 key0, const GpuTex *t, u64 ch, int np, int 
     if (any_var[i].k) return 0;                       /* (table full) */
     const u16 *vram = port_vram(); u16 pal[256];
     for (int c = 0; c < np; c++) pal[c] = vram[(t->cy & 511) * 1024 + ((t->cx + c) & 1023)];
-    size_t n = (size_t)e->iw * e->ih; u8 *rgba = malloc(n * 4);
+    size_t n = (size_t)a->iw * a->ih; u8 *rgba = malloc(n * 4);
     if (!rgba) return 0;
-    for (size_t q = 0; q < n; q++) px(rgba + q * 4, pal[e->idx[q] & (np - 1)]);
-    unsigned tex = port_gl_rep_texture(rgba, e->iw, e->ih);
+    for (size_t q = 0; q < n; q++) {
+        if (a->ov && a->ov[q * 4 + 3]) { memcpy(rgba + q * 4, a->ov + q * 4, 4); if (rgba[q * 4 + 3] == 1) rgba[q * 4 + 3] = 0; }
+        else px(rgba + q * 4, pal[a->idx[q] & (np - 1)]);
+    }
+    unsigned tex = port_gl_rep_texture(rgba, a->iw, a->ih);
     free(rgba);
     if (!tex) return 0;
     any_var[i].k = vk; any_var[i].rep.gltex = tex; any_var[i].rep.w = w; any_var[i].rep.h = h; any_var[i].rep.ou = ou; any_var[i].rep.ov = ov;
@@ -576,10 +669,10 @@ const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int 
     if (v1 < v0) v1 = 255;
     if (!pk_scanned && port_texpack_dir) {
         pk_scanned = 1; scan(port_texpack_dir, 0);
-        port_printf("[texpack] %s: %u replacement images\n", port_texpack_dir, pk_n);
+        port_printf("[texpack] %s: %u replacement images, %d sprite rectangles\n", port_texpack_dir, pk_n, n_crops);
     }
     if (port_texdump_dir && !index_f && !n_dumped) mkdir1(port_texdump_dir);
-    int want_rep = port_texpack_dir && pk_n && port_gpu_be == &port_gpu_gl;
+    int want_rep = port_texpack_dir && (pk_n || n_crops) && port_gpu_be == &port_gpu_gl;
     if (!want_rep && !port_texdump_dir) return 0;
     window(&u0, &u1, g->twmx, g->twox); window(&v0, &v1, g->twmy, g->twoy);
     int sh = t->depth == 0 ? 2 : t->depth == 1 ? 1 : 0, tpw = 1 << sh;
@@ -629,7 +722,7 @@ const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int 
         }
         if (!want_rep) return 0;
         const PortTexRep *r = use(key, ou, ovv, w, h);
-        return r ? r : use_any(key0, t, ch, np, ou, ovv, w, h);
+        return r ? r : use_any(key0, t, ch, np, x1, y1, ou, ovv, w, h);
     }
     if (!port_texdump_dir && !(want_rep && pk_has_sub)) return 0;
     /* the sampled box itself: only inside uploaded VRAM (not the frame buffers or other drawn areas) */

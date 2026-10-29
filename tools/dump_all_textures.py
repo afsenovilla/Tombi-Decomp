@@ -305,6 +305,89 @@ def _grey(n):
     return [0] + [((i * 31 // (n - 1)) * 0x421) | 0x8000 * 0 for i in range(1, n)]
 
 
+def _part_box(p):
+    """(u, v, w, h) texel box of an SPR part (u0 v0 clut u1 v1 tpage u2 v2 w h u3 v3 dx dy; flipped parts run backwards)."""
+    us, vs = (p[0], p[3], p[6], p[10]), (p[1], p[4], p[7], p[11])
+    return min(us), min(vs), p[8], p[9]
+
+
+def sprite_crops(ld, idx, lst, uphash, log=print):
+    """[(key, u, v, w, h, depth, palette words, index rows, label)]: every SPR part of the tables of list idx as a rectangle of the
+    page part (or WPP frame) it is cut from, with the palette the part is drawn with (vram.export_spr's resolution of each table:
+    the WPP frame of the same number, else the context and tpage offset of infer_base; Tombi's placeholder CLUT -> vram.wpp_clut)."""
+    import struct, hashlib
+    import area000 as A, vram
+    out = []
+    tabs = [(r, d) for r, d in A.list_blocks(ld, idx) if (r["kind"] & 0xF0) == 0x30 and d and len(d) >= 4]
+    if not tabs:
+        return out
+    wt = vram.wpp_tables(lst)
+    cands = None
+    for r, d in tabs:
+        nfr = struct.unpack_from("<H", d, 2)[0] // 4
+        frames = vram.parse_spr(d)
+        link = next((t for t in wt if len(t[2]) == nfr), None)
+        if link:
+            v = vram.ctx_get(ld, idx)
+            for fi, o in enumerate(link[2]):
+                fw, fh = struct.unpack_from("<HH", o)
+                if not fw or not fh or fi >= len(frames):
+                    continue
+                key = any_key(_fnv(o[4:4 + fw * fh * 2]), 0, 0, 0, (0, 0, fw, fh))
+                rows, W, H = vram.wpp_plane(o)
+                for pi, p in enumerate(frames[fi]):
+                    u, vv, w, h = _part_box(p)
+                    if w <= 0 or h <= 0 or u + w > W or vv + h > H:
+                        continue
+                    pal = list(v.palette(vram.wpp_clut(p[2]), 16)[2])
+                    out.append((key, u, vv, w, h, 0, pal, [rows[vv + j][u:u + w] for j in range(h)],
+                                "%s_f%04d_parte%d" % (os.path.basename(_base(link[0])), fi, pi)))
+            continue
+        if (r["kind"], hashlib.md5(d).hexdigest()) in vram.shared_tables():
+            cs = vram.shared_candidates(ld)
+        else:
+            cands = cands if cands is not None else vram.candidates(ld, idx)
+            cs = cands
+        parts = [p for f in frames for p in f if p[8] and p[9]]
+        res = vram.infer_base(cs, parts) if parts else None
+        if res is None:
+            continue
+        ci, base, _info = res
+        v = cs[ci][1]
+        for fi, f in enumerate(frames):
+            for pi, p in enumerate(f):
+                u, vv, w, h = _part_box(p)
+                tp = p[5] + base
+                depth = (tp >> 7) & 3
+                if depth > 1 or w <= 0 or h <= 0 or u + w > 256 or vv + h > 256:
+                    continue
+                tpw = (4, 2)[depth]
+                px, py = (tp & 15) * 64, ((tp >> 4) & 1) * 256
+                wx0, wx1, wy0, wy1 = px + u // tpw, px + (u + w - 1) // tpw + 1, py + vv, py + vv + h
+                rec = next((rc for rc in reversed(v.recs) if rc[5] == "page" and rc[1] <= wx0 and wx1 <= rc[1] + rc[3]
+                            and rc[2] <= wy0 and wy1 <= rc[2] + rc[4]), None)
+                if not rec:
+                    continue
+                nm, x, y, rw, rh, _k = rec
+                hsh = uphash(nm, rw, rh)
+                if hsh is None:
+                    continue
+                part = next((pp for pp in page_parts(x, y, rw, rh, depth) if pp[0] <= wx0 and wx1 <= pp[2] and pp[1] <= wy0 and wy1 <= pp[3]), None)
+                if not part:
+                    continue
+                key = any_key(hsh, depth, x, y, part)
+                cu, cv = u + (px - part[0]) * tpw, vv + py - part[1]
+                if cu < 0 or cv < 0:
+                    continue
+                n = (16, 256)[depth]
+                pal = list(v.palette(p[2], n)[2])
+                src = v.nib if depth == 0 else v.d
+                VWp = 1024 * tpw
+                rows = [bytes(src[(py + vv + j) * VWp + px * tpw + u:(py + vv + j) * VWp + px * tpw + u + w]) for j in range(h)]
+                out.append((key, cu, cv, w, h, depth, pal, rows, "%s_spr%02X_f%04d_parte%d" % (os.path.basename(_base(nm)), r["kind"], fi, pi)))
+    return out
+
+
 def dump_static(out, data, log=print, progress=None):
     """Every image of every resource, read from the disc files (no game run): each GRPX page of every load list cut at its texture
     pages, and every WPP sprite frame, named "<descripcion>__r<key>.png" in the readable tree.  Returns the number of images."""
@@ -340,8 +423,17 @@ def dump_static(out, data, log=print, progress=None):
                             return p, "%s row %d +%d" % (r["name"], y, sx * 16)
         return _grey(256 if bpp == 8 else 16), "grey"
 
+    page_dir, crops_done, n_crops, hcache = {}, set(), [0], {}
+
+    def uphash(nm, w, h):
+        if (nm, w, h) not in hcache:
+            d = vram.resource(nm)
+            hcache[(nm, w, h)] = _fnv(d[:w * h * 2]) if d and len(d) >= w * h * 2 else None
+        return hcache[(nm, w, h)]
+
     def emit(parts_dir, prefix, key, w, h, rows, meta):
         nonlocal n
+        page_dir[key] = (list(parts_dir), prefix)
         rel = "/".join(safe(x) for x in parts_dir) + "/" + safe(prefix).replace("__", "_") + "__r%016x.png" % key
         os.makedirs(os.path.join(out, os.path.dirname(rel)), exist_ok=True)
         _png(os.path.join(out, rel), w, h, rows, meta.pop("_pal", None))
@@ -414,13 +506,35 @@ def dump_static(out, data, log=print, progress=None):
                              dict(_pal=pal, kind="sprite", resource=nm, frame=fno, list="%s:%d" % (ld, k), depth=4, palette=src))
             except Exception as e:
                 log("  (%s: %s)" % (nm, e))
+        if ld != "SYS":
+            try:
+                for key, cu, cv, w, h, depth, pal, rows, label in sprite_crops(ld, k, lst, uphash, log):
+                    ck = (key, cu, cv, w, h)
+                    if ck in crops_done:
+                        continue
+                    crops_done.add(ck)
+                    page = page_dir.get(key)
+                    if not page:
+                        folder = ["Zonas", zona(int(ld[2:])), "Sprites sueltos"]
+                    elif "_spr" in label:                      # a rectangle of an atlas page: next to the page, one folder per page
+                        folder = page[0] + [page[1] + " - sprites"]
+                    else:                                       # a part of a WPP frame: one folder per sprite file
+                        folder = page[0] + ["Partes con su paleta"]
+                    rel = "/".join(safe(x) for x in folder) + "/" + safe(label).replace("__", "_") + "__r%016x_%d_%d_%d_%d.png" % (key, cu, cv, w, h)
+                    os.makedirs(os.path.join(out, os.path.dirname(rel)), exist_ok=True)
+                    _png(os.path.join(out, rel), w, h, [list(r) for r in rows], pal)
+                    index.write(json.dumps(dict(kind="sprite part", file=rel, key="r%016x" % key, rect=[cu, cv, w, h], depth=(4, 8)[depth],
+                                                list="%s:%d" % (ld, k)), ensure_ascii=False) + "\n")
+                    n_crops[0] += 1
+            except Exception as e:
+                log("  (sprites %s:%d: %s)" % (ld, k, e))
         if progress:
             progress(wi, len(work))
     index.close()
     with open(os.path.join(out, "LEEME.txt"), "w", encoding="utf-8") as f:
         f.write(LEEME)
-    log("%d images in %s (%.0f s)" % (n, out, time.time() - t0))
-    return n
+    log("%d images + %d sprite rectangles in %s (%.0f s)" % (n, n_crops[0], out, time.time() - t0))
+    return n + n_crops[0]
 
 
 def _base(nm):
@@ -534,11 +648,16 @@ Carpetas
   Personajes/Tombi                    los fotogramas de Tombi
   Interfaz/...  Pantallas/...         HUD y fuentes; logos, titulo, menus, mapa, NOW LOADING
   Comun/...                           paginas y sprites del sistema comunes a todo el juego
+  ".../<pagina> - sprites/"           cada sprite de esa pagina recortado y CON SU PALETA REAL
+  ".../Partes con su paleta/"         cada parte de un fotograma (p.ej. cabeza y piernas de Tombi) con su paleta
 
 Nombres
   <recurso>_p<X>-<Y>_<bits>__r<clave>.png  (pagina de VRAM X,Y de un fichero, 4/8 bits por pixel)
   <recurso>_f<NNNN>__r<clave>.png          (fotograma NNNN de un sprite)
+  <sprite>__r<clave>_U_V_W_H.png          (un rectangulo U,V de W x H de esa pagina o fotograma)
   Solo importa lo que va tras el ultimo "__": el juego busca la clave en cualquier subcarpeta.
+  Los colores de las paginas completas son de una paleta de ejemplo; los de los recortes de sprites
+  son los reales. Edita el recorte (se pega encima de la pagina al cargar el pack) o la pagina entera.
   Puedes mover las imagenes o cambiar la parte de delante, pero no toques "__r<clave>.png".
 
 Como hacer un pack HD
