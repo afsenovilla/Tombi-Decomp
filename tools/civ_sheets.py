@@ -10,6 +10,7 @@ Sheets (file names; *_en.png for English):
                             what each resident says, and where every element comes from (I0NFO2 / MAIN0 addresses)
   civ_explicado_aNN.png     flat plan with drawn house shapes, sprites, exit arrows and a side legend
   civ_perspectiva_aNN.png   (EN: civ_perspective_aNN_en.png) the same data in perspective; only the house height is invented
+  civ_plan_aNN_1x[_transparent].png  (--sheet plan1x, no text) panel B alone at 1:1, grey ground or transparent
 
 Everything is read from YOUR extracted disc (game/disc/fs, or TOMBI_FS) through tools/topdown.py / tools/area000.py:
 the AREA08 s0 picture, the I0NFO2 NPC sets / house rectangles, the SYS reload pages SYSTEM/A06100, A07600, A08000
@@ -709,11 +710,50 @@ def perspectiva(area,lang,outd):
     out=os.path.join(outd,'civ_%s_a%d%s.png'%('perspectiva' if lang=='es' else 'perspective',area,'' if lang=='es' else '_en'))
     im.save(out); print(out)
 
+# ------------------------------------------------------------------ panel B alone at 1:1 (civ_plan_aNN_1x*.png)
+def plan1x(area, outd):
+    """Panel B of the schematic at actual size (one image pixel = one background pixel, the estimated picture size),
+    no labels: grey ground + house rectangles, patrols, props and resident sprites; and a transparent variant."""
+    C = AREAS[area]; var = T.CUT[area]
+    actors, props = T.npc_set(var); rects = T.trigger_rects(area)
+    xs = [a['x'] for a in actors] + [q['x'] for l in props[:1] for q in l] + [r[0] for r in rects] + [r[2] for r in rects] + [e[0][0] for e in C['exits']]
+    ys = [a['y'] for a in actors] + [q['y'] for l in props[:1] for q in l] + [r[1] for r in rects] + [r[3] for r in rects] + [e[0][1] for e in C['exits']]
+    px0 = (min(xs) + 128 - 40) // 32 * 32; py0 = (min(ys) - 40 - 70) // 32 * 32
+    px1 = (max(xs) + 128 + 40 + 31) // 32 * 32; py1 = (max(ys) - 40 + 40 + 31) // 32 * 32
+    W, H = px1 - px0, py1 - py0
+    P = lambda x, y: (x + 128 - px0, y - 40 - py0)
+    p = page(C['atlas']); cs = comps(p)
+    for bg, sfx in (((226, 222, 212, 255), ''), ((0, 0, 0, 0), '_transparent')):
+        im = Image.new('RGBA', (W, H), bg); dr = ImageDraw.Draw(im)
+        for (a, b, c, d) in rects:
+            dr.rectangle([P(a, b), P(c, d)], outline=(40, 120, 255, 255), width=1)
+        for q in (props[0] if props else []):
+            X, Y = P(q['x'], q['y']); dr.rectangle([X - 1, Y - 1, X + 1, Y + 1], fill=(240, 190, 0, 255))
+        for a in actors:
+            if a['beh']:
+                x0, y0, x1, y1 = a['bx0'], a['by0'], a['bx1'], a['by1']
+                if var == 0x0E: x0, y0, x1, y1 = a['x'] + x0, a['y'] + y0, a['x'] + x1, a['y'] + y1
+                A_, B_ = P(x0, y0), P(x1, y1)
+                dr.rectangle([min(A_[0], B_[0]), min(A_[1], B_[1]), max(A_[0], B_[0]), max(A_[1], B_[1])], outline=(20, 170, 40, 255), width=1)
+        for a in sorted(actors, key=lambda a: a['y']):
+            bb = cs[C['sub'][a['sub']]]; w, h = bb[2] - bb[0] + 1, bb[3] - bb[1] + 1
+            pal = clut_row(*sub_pal(C, a['sub']))
+            sp = Image.new('RGBA', (w, h)); q = sp.load()
+            for y in range(h):
+                for x in range(w):
+                    v = p[bb[1] + y][bb[0] + x]
+                    if v: q[x, y] = pal[v] + (255,)
+            X, Y = P(a['x'], a['y'])
+            im.paste(sp, (int(X - w / 2), int(Y - h)), sp)
+        out = os.path.join(outd, 'civ_plan_a%d_1x%s.png' % (area, sfx))
+        (im if sfx else im.convert('RGB')).save(out); print(out, im.size)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--lang", default="all", choices=("es", "en", "all"))
     ap.add_argument("--area", default="all", choices=("11", "16", "17", "all"))
-    ap.add_argument("--sheet", default="all", choices=("esquema", "explicado", "perspectiva", "all"))
+    ap.add_argument("--sheet", default="all", choices=("esquema", "explicado", "perspectiva", "plan1x", "all"))
     ap.add_argument("--out", default=os.path.join(os.path.dirname(HERE), "build", "civ"))
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
@@ -729,6 +769,8 @@ def main():
                 (explicado_es if lg == "es" else explicado_en)(ar, os.path.join(a.out, "civ_explicado_a%d%s.png" % (ar, sfx)))
             if "perspectiva" in sheets:
                 perspectiva(ar, lg, a.out)
+        if "plan1x" in sheets:
+            plan1x(ar, a.out)
 
 
 if __name__ == "__main__":
