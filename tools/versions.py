@@ -16,14 +16,20 @@ JP_OVL = 0x800E9AF8   # retail JP overlay base (jal targets on prologues, like t
 JP_SHARED = 0x2B680   # every JP X<nn>.BIN starts with these bytes of X00.BIN; the area part follows
 
 REFERENCE = "sces01331"
-SERIALS = {"sces01331": "SCES_01331", "slps01144": "SLPS_01144", "slpm80165": "SLPM_80165"}
-ALIASES = {"pal": "sces01331", "jp": "slps01144", "jpdemo": "slpm80165"}
+SERIALS = {"sces01331": "SCES_01331", "slps01144": "SLPS_01144", "slpm80165": "SLPM_80165", "pcpx96084": "PCPX_96084"}
+ALIASES = {"pal": "sces01331", "jp": "slps01144", "jpdemo": "slpm80165", "prepre8": "pcpx96084"}
 
 VERSIONS = {
     "slpm80165": {
         "game": "game_jpdemo", "serial": "SLPM_80165",
         "progs": {"slpm80165": ("SLPM_801.65", "SLPM_801.65", 0x80010000, 0),
                   "x00": ("X00.BIN (SYSTEM)", "X00.BIN", 0x800E7698, 0)},
+    },
+    # PrePre Vol. 8 (PCPX-96084), Sony's Japanese demo compilation: the oldest known Tomba build (TOMBA/TOMBA.EXE,
+    # one executable, no overlays). See docs/PREPRE8.md.
+    "pcpx96084": {
+        "game": "game_prepre8", "serial": "PCPX_96084",
+        "progs": {"tomba": ("TOMBA.EXE (PrePre 8)", "TOMBA.EXE", 0x80010000, 0)},
     },
     "slps01144": {
         "game": "game_jp", "serial": "SLPS_01144",
@@ -36,7 +42,7 @@ VERSIONS = {
 
 # PAL program whose src directory holds the shared C of a version program (main exe and X00 -> src/, xNN -> src/x0NN/)
 def pal_prog(ver, prog):
-    if prog in ("slps01144", "slpm80165"): return "main0"
+    if prog in ("slps01144", "slpm80165", "tomba"): return "main0"
     return "x0" + prog[1:]
 
 

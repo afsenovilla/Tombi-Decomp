@@ -250,3 +250,74 @@ jobs:
         with:
           name: SLPM_801.65_report
           path: build/slpm80165/report.json
+
+  # PrePre Vol. 8 (PCPX-96084), Sony's Japanese demo compilation: TOMBA/TOMBA.EXE, the oldest known Tomba build.
+  # Separate decomp.dev version, artifact PCPX_960.84_report. The image (raw MODE2/2352 data track 1 .bin, about
+  # 455 MB, or a zip holding TOMBA.EXE) comes from the GAME_FILES_URL_PREPRE8 secret; never committed. Only /TOMBA is
+  # extracted (the other directories are other games). Skipped when the secret is missing. See docs/PREPRE8.md.
+  report-prepre8:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch PrePre 8 disc
+        id: fetch
+        env:
+          GAME_FILES_URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
+        run: |
+          if [ -z "$GAME_FILES_URL_PREPRE8" ]; then
+            echo "::notice::GAME_FILES_URL_PREPRE8 secret not set; skipping the PrePre 8 report."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ ! -f config/pcpx96084/tomba.yaml ]; then
+            echo "::notice::config/pcpx96084 not set up; PrePre 8 report skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_PREPRE8" | tr -d '\r\n"'"'"' ')"
+          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+          curl -fsSL -o "$RUNNER_TEMP/prepre8.dl" "$URL"
+          mkdir -p "$RUNNER_TEMP/prepre8"
+          if unzip -tq "$RUNNER_TEMP/prepre8.dl" >/dev/null 2>&1; then
+            unzip -o -q "$RUNNER_TEMP/prepre8.dl" -d "$RUNNER_TEMP/prepre8"
+          elif [ "$(stat -c%s "$RUNNER_TEMP/prepre8.dl")" -gt 10000000 ]; then
+            python3 -I tools/prepre8.py extract "$RUNNER_TEMP/prepre8.dl" "$RUNNER_TEMP/prepre8"
+          else
+            echo "::error::The download is neither a zip nor a disc image. Share the file as 'Anyone with the link' and check GAME_FILES_URL_PREPRE8."; exit 1
+          fi
+          rm -f "$RUNNER_TEMP/prepre8.dl"
+          mkdir -p game_prepre8
+          cp "$(find "$RUNNER_TEMP/prepre8" -iname TOMBA.EXE | head -1)" game_prepre8/TOMBA.EXE
+          echo "032d6f371b31085098b86aebbce465d30599293a  game_prepre8/TOMBA.EXE" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Install toolchain
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev
+          python3 -m pip install -r tools/requirements.txt
+          python3 -m pip install --no-deps splat64==0.35.2
+          python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          sudo tools/setup_native.sh
+          mkdir -p "$RUNNER_TEMP/objdiff"
+          curl -fsSL -o "$RUNNER_TEMP/objdiff/objdiff-cli" https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
+          chmod +x "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Build PrePre 8 report
+        if: steps.fetch.outputs.ok == 'true'
+        run: python3 tools/build_report.py --version pcpx96084 --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Upload PrePre 8 report
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: PCPX_960.84_report
+          path: build/pcpx96084/report.json

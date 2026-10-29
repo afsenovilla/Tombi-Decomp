@@ -1,0 +1,46 @@
+# PrePre Vol. 8 (PCPX-96084) demo compilation, TOMBA/TOMBA.EXE (oldest known Tomba build). See docs/PREPRE8.md.
+# Text range 0x80016D40..0x800A10F4 (first prologue after the rodata tables, end of the last Psy-Q function).
+# The file is 0x128000 bytes: everything after the data is zero (bss shipped in the file).
+name: TOMBA.EXE
+sha1: 032d6f371b31085098b86aebbce465d30599293a
+options:
+  basename: tomba
+  target_path: game_prepre8/TOMBA.EXE
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/pcpx96084/tomba
+  src_path: build/pcpx96084/splat_src/tomba
+  build_path: build/pcpx96084
+  ld_script_path: build/pcpx96084/tomba.ld
+  symbol_addrs_path:
+    - config/pcpx96084/symbol_addrs_tomba.txt
+    - config/pcpx96084/symbol_addrs_manual.txt
+  undefined_funcs_auto_path: build/pcpx96084/undefined_funcs_auto.tomba.txt
+  undefined_syms_auto_path: build/pcpx96084/undefined_syms_auto.tomba.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  subalign: 4
+  string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: tomba
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x800, rodata, tomba_rodata]
+      - [0x7540, c, tomba]
+      - [0x918F4, data, tomba_data]
+  - [0x128000]
