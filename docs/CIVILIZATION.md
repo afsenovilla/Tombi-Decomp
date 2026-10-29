@@ -585,3 +585,33 @@ In the port this is a data task, not a code task. The engine already runs AREA05
 the overlay base works (docs/PORT.md). The cheapest test is to load AREA08 s0's picture, cell map and sprite tables
 under AREA11 s0 with set 0D. The NPCs, houses and dialogue would then appear on the lake's deck (`plan 11 --from 8:0`
 shows the overlap) before any art is made.
+
+## USA disc (SCUS-94236)
+
+Checked against the USA disc (*Tomba!*) with `tools/usa_compare.py USA_IMAGE USA_FS`. **Result: the USA disc has none of the
+cut top-down data either.** It is the same build of the assets as PAL, renamed, so it brings back nothing PAL lost.
+
+- **Layout.** One load-list set (`SYS/LDARnn.BIN`, `LDSYS.BIN`; PAL has LD0..LD8, one per language) and the file table inside
+  `SCUS_942.36` at file offset 0x699A0 (1054 entries, same format as MAINn). Files were renumbered (PAL `SYSTEM/A07600.000`
+  = USA `SYSTEM/A00153.000`, A07601 = A00154, ...), so a name diff is meaningless: 367 "USA-only" and 1392 "PAL-only" names in
+  AREAnn + SYSTEM are almost all the same bytes under another name. The comparison is therefore by content, every load-list block
+  and every whole file (GAM unpacked) against all of PAL.
+- **The files named USA-only in AREA11/16/17/18** (`A003.GAM`, `B404.GAM`, `D303.000`, `D305.GAM`, `D401.000`, `D402.GAM`,
+  `B103.GAM`, `Xnn.BIN`, `INFO2.BIN`) belong to the side-scrolling sections or the area list: kinds 0x10 GRPX, 0x30/0x34 SPR,
+  0x54, 0x60 WPP and 0xF0 code. Their blocks are either byte-identical to PAL blocks or are text/code (below).
+- **Section 0 load lists are empty on USA too:** AR11 `[12, 0, 21, 12, 0, 0]`, AR16 `[11, 0, 0, 0, 12, 13, 15, 13]`, AR17
+  `[12, 0, 10, 13, 11, 11, 13, 0, ...]`, AR18 `[11, 0, 16, 12]` records per list (list 1 = section 0).
+- **No new 0x8E / 0x8F / 0x3B..0x3E block anywhere.** The 302 USA blocks with no byte-identical PAL twin are kinds 0xF0 (code:
+  `Xnn.BIN`, `INFO2.BIN`), 0x54 / 0xD0 / 0xD1 / 0x34 / 0x39 (English text, fonts, the HUD word sprites), 0x70, a few APD
+  placement blocks 0x80..0x86 of side-scrolling sections, and 17 SYSTEM GRPX pages (title / menu graphics in English). The
+  only 8 bpp TIMs on the disc are the working top-down pictures (AREA05 D003/D203, AREA08 D002/D202, AREA19 D005/D206, AREA02
+  D005) plus the one inside X13.BIN; no ISO directory gap holds data (the gaps are directory sectors, the tail is zeros).
+- **Orphan files.** Not in the SCUS table: AREA11 CLUT01/04/05, AREA16 CLUT01..03, AREA17 CLUT01/07..11, AREA18 CLUT01 and the
+  per-area `INFO2.BIN` copies. The CLUTs are byte-identical to PAL (AREA11/16/17/18 CLUT01 is the same file in all four areas).
+- **`INFO2.BIN`** (USA name of `I0NFO2.BIN`, one identical copy in SYSTEM and in every top-down area, 136672 bytes vs PAL 137436)
+  is another build of the same overlay: the NPC_SET_0D/0E/0F/10 records of the cut towns are there with the same contents,
+  0x340 bytes lower (e.g. PAL 0x8010009C = USA 0x800FFD3C); only the embedded pointers differ.
+- **Female Stonetown Resident palette.** No USA block improves the match with TCRF's (colour-adjusted) sprite: the best rows are
+  the same ones as on PAL (weighted mean nearest-colour distance about 24, ignoring black/white/grey), and the best row from
+  USA-only data is worse (about 35). The page itself (`A07600` = USA `A00153`) and AREA16/CLUT07 are unchanged, so the rows 48 / 54
+  guess stands.

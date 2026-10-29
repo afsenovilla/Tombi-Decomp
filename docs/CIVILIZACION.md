@@ -601,3 +601,33 @@ En la versión para PC esto es una tarea de datos, no de código. El motor ya ej
 I0NFO2 en la base de overlays funciona (docs/PORT.md). La prueba más barata es cargar el dibujo, el mapa de celdas y
 las tablas de sprites de AREA08 s0 bajo AREA11 s0 con el conjunto 0D. Los vecinos, las casas y los diálogos aparecerían
 entonces sobre el muelle del lago (`plan 11 --from 8:0` muestra cómo se solapan) antes de crear ningún arte.
+
+## USA disc (SCUS-94236)
+
+Comparado con el disco USA (*Tomba!*) con `tools/usa_compare.py IMAGEN_USA FS_USA`. **Resultado: el disco USA tampoco tiene
+los datos cenitales recortados.** Son los mismos recursos que en PAL con otros nombres; no recupera nada de lo que PAL perdió.
+
+- **Estructura.** Un solo juego de listas de carga (`SYS/LDARnn.BIN`, `LDSYS.BIN`; PAL tiene LD0..LD8, uno por idioma) y la
+  tabla de ficheros dentro de `SCUS_942.36` en el offset 0x699A0 (1054 entradas, mismo formato que MAINn). Los ficheros se
+  renumeraron (PAL `SYSTEM/A07600.000` = USA `SYSTEM/A00153.000`, A07601 = A00154...), así que comparar nombres no sirve: los
+  367 nombres "solo USA" y 1392 "solo PAL" de AREAnn + SYSTEM son casi todos los mismos bytes con otro nombre. Se compara por
+  contenido: cada bloque de lista de carga y cada fichero entero (GAM descomprimido) contra todo PAL.
+- **Los ficheros solo USA de AREA11/16/17/18** (`A003.GAM`, `B404.GAM`, `D303.000`, `D305.GAM`, `D401.000`, `D402.GAM`,
+  `B103.GAM`, `Xnn.BIN`, `INFO2.BIN`) son de las secciones de scroll lateral o de la lista del área: tipos 0x10 GRPX, 0x30/0x34
+  SPR, 0x54, 0x60 WPP y 0xF0 código. Sus bloques son idénticos a bloques PAL o son texto/código (abajo).
+- **Las listas de la sección 0 también están vacías en USA:** registros por lista AR11 `[12, 0, 21, 12, 0, 0]`, AR16
+  `[11, 0, 0, 0, 12, 13, 15, 13]`, AR17 `[12, 0, 10, 13, 11, 11, 13, 0, ...]`, AR18 `[11, 0, 16, 12]` (lista 1 = sección 0).
+- **Ningún bloque 0x8E / 0x8F / 0x3B..0x3E nuevo.** Los 302 bloques USA sin gemelo PAL son de tipo 0xF0 (código: `Xnn.BIN`,
+  `INFO2.BIN`), 0x54 / 0xD0 / 0xD1 / 0x34 / 0x39 (texto en inglés, fuentes, sprites de palabras del HUD), 0x70, algunos bloques
+  APD 0x80..0x86 de secciones laterales y 17 páginas GRPX de SYSTEM (título y menús en inglés). Los únicos TIM de 8 bpp del
+  disco son los fondos cenitales que funcionan (AREA05 D003/D203, AREA08 D002/D202, AREA19 D005/D206, AREA02 D005) y el de
+  X13.BIN; los huecos entre ficheros son sectores de directorio y el final del disco son ceros.
+- **Ficheros huérfanos.** Fuera de la tabla de SCUS: AREA11 CLUT01/04/05, AREA16 CLUT01..03, AREA17 CLUT01/07..11, AREA18 CLUT01
+  y las copias de `INFO2.BIN` por área. Los CLUT son idénticos a los de PAL (CLUT01 es el mismo fichero en las cuatro áreas).
+- **`INFO2.BIN`** (nombre USA de `I0NFO2.BIN`; una copia idéntica en SYSTEM y en cada área cenital, 136672 bytes frente a 137436
+  en PAL) es otra compilación del mismo overlay: los registros NPC_SET_0D/0E/0F/10 de los pueblos recortados están igual,
+  0x340 bytes más abajo (p. ej. PAL 0x8010009C = USA 0x800FFD3C); solo cambian los punteros.
+- **Paleta de la Mujer de Stonetown.** Ningún bloque USA mejora el parecido con el sprite de TCRF (con colores retocados): las
+  mejores filas son las mismas que en PAL (distancia media ponderada al color más cercano unos 24, sin negro/blanco/gris) y la
+  mejor fila de datos solo USA es peor (unos 35). La página (`A07600` = USA `A00153`) y AREA16/CLUT07 no cambian, así que la
+  suposición de las filas 48 / 54 se mantiene.
