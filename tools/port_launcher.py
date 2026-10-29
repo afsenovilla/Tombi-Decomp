@@ -65,6 +65,7 @@ i18n.add({
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
+        "l.titlebg": "Fondo de título panorámico (PNG / JPG):", "l.titlebg.d": "Solo se usa con imagen panorámica (16:9, 21:9, 32:9): rellena los lados de la pantalla de título.", "ft.image": "Imágenes",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
         "b.play": "Jugar", "b.extracting": "Extrayendo... {0}%", "l.extracting": "Extrayendo los archivos del disco (solo la primera vez). Espera a que termine para jugar.", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco compatible: {0}, MAIN0.EXE verificado (sha1).",
@@ -93,6 +94,7 @@ i18n.add({
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
+        "l.titlebg": "Wide title background (PNG / JPG):", "l.titlebg.d": "Only used in widescreen (16:9, 21:9, 32:9): fills the sides of the title screen.", "ft.image": "Images",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
         "b.play": "Play", "b.extracting": "Extracting... {0}%", "l.extracting": "Extracting the disc files (first time only). Wait for it to finish to play.", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Compatible disc: {0}, MAIN0.EXE verified (sha1).",
@@ -775,6 +777,9 @@ class App:
         o, c = self.card(grid, tr("c.aspect"))
         o.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(12, 0))
         self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9")])
+        ttk.Label(c, text=tr("l.titlebg"), style="Muted.TLabel").pack(anchor="w", pady=(10, 4))   # --title-bg
+        self._browse_row(c, "title_bg", self.pick_title_bg)
+        ttk.Label(c, text=tr("l.titlebg.d"), style="Muted.TLabel", wraplength=300, justify="left").pack(anchor="w", pady=(4, 0))
         o, c = self.card(grid, tr("c.ires"))     # --internal-res: 3D drawn at N x (docs/PORT.md "HD"), OpenGL only
         o.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(12, 0))
         self.ires_btns = self._radios(c, "internal_res", tk.IntVar, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
@@ -949,6 +954,11 @@ class App:
             messagebox.showerror(tr("title"), tr("s.patchfail", e))
             return False
 
+    def pick_title_bg(self):
+        p = filedialog.askopenfilename(filetypes=[(tr("ft.image"), "*.png *.jpg *.jpeg *.PNG *.JPG *.JPEG")])
+        if p:
+            self.vars["title_bg"].set(p)
+
     def pick_savedir(self):
         p = filedialog.askdirectory()
         if p:
@@ -1031,6 +1041,8 @@ class App:
             self.gfx_note = "yes (%s)" % gfx
         if s.get("savedir"):
             cmd += ["--save-dir", s["savedir"]]
+        if s.get("title_bg") and s.get("aspect") in ("16:9", "21:9", "32:9"):
+            cmd += ["--title-bg", s["title_bg"]]
         if s.get("fullscreen"):
             cmd += ["--fullscreen"]
         cmd += M.mod_args(s, app_dir())

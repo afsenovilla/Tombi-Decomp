@@ -346,3 +346,16 @@ src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; ext
 # --widescreen: the area background's block selection (camera X window of 80-unit blocks) also takes the blocks
 # just outside the 4:3 window (port2/runtime/main0_handwritten.c port_ws_area_model_link; identity when off)
 src/callAreaModelLinkHook.c | PTR_DAT_80079b3c[GAME](AREA_MODEL_DRAW_LIST, WMD_DATA); | { extern unsigned short SCREEN_ORIGIN_X; extern void port_ws_area_model_link(void (*)(char *, int), char *, int, int, unsigned short *); port_ws_area_model_link(PTR_DAT_80079b3c[GAME], AREA_MODEL_DRAW_LIST, WMD_DATA, GAME, &SCREEN_ORIGIN_X); }
+#
+# --widescreen: the wrapping parallax backdrop columns of AREA01 / AREA09 repeat one period (512 columns) left and right
+# (port2/runtime/main0_handwritten.c port_ws_backdrop_period / port_ws_cat7; identity when off)
+src/drawCategory7Objects.c | drawObjectSprtWithMode(o); | { extern void port_ws_cat7(TObj *, void (*)(TObj *)); port_ws_cat7(o, drawObjectSprtWithMode); }
+src/drawCategory7Objects.c | drawScreenSpriteObject(o); | { extern void port_ws_cat7(TObj *, void (*)(TObj *)); port_ws_cat7(o, drawScreenSpriteObject); }
+src/x001/updateParallaxBackdropSprite.c | if ((short)t < 0x160) { | if (((short)t < 0x160 || port_ws_cull) && (!port_ws_cull || port_ws_backdrop_period(o, 512))) {
+src/x009/updateParallaxBackdropSprite.c | if ((short)t < 0x160) { | if (((short)t < 0x160 || port_ws_cull) && (!port_ws_cull || port_ws_backdrop_period(o, 512))) {
+# and the world-placed parallax sprites of AREA06 / AREA10 keep the ones over the side strips
+src/x006/updateParallaxBackdropSprite.c | if (x - 0x40 < 0x141 && x + 0x40 >= 0) { | if (x - 0x40 < 0x141 + port_ws_cull && x + 0x40 + port_ws_cull >= 0) {
+src/x010/updateParallaxBackdropSprite.c | if (o->a.p.whole - 0x40 < 0x141 && o->a.p.whole + 0x40 >= 0) { | if (o->a.p.whole - 0x40 < 0x141 + port_ws_cull && o->a.p.whole + 0x40 + port_ws_cull >= 0) {
+#
+# --title-bg (widescreen, runtime/titlebg.c): mark the ordering-table node the title background / logo sprites go into
+src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } addTilePrim(&r, 0, 0, 1);
