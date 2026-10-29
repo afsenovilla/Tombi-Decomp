@@ -191,9 +191,9 @@ def data_ready():
     return X.manifest_sha1(data_dir())
 
 
-def bundled_patch():
-    """patches/es_mejorada.tombipatch.json: bundled in the exe (copied next to it, so the saved path stays valid) or in the checkout."""
-    name = "es_mejorada.tombipatch.json"
+def bundled_patch(name="es_mejorada.tombipatch.json"):
+    """patches/<name> (es_mejorada.tombipatch.json by default): bundled in the exe (copied next to it, so the saved path stays
+    valid) or in the checkout."""
     src = os.path.join(getattr(sys, "_MEIPASS", None) or ROOT, "patches", name)
     if not os.path.isfile(src):
         return None
@@ -350,7 +350,7 @@ i18n.add({
                            "Mencionan lugares y cosas que no existen en el juego final (el País de la Civilización, esa cerradura, "
                            "la barca).\n\n"
                            "Los textos están en español con el parche «Traducción mejorada»; en los demás idiomas, o sin el parche, "
-                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»)."},
+                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content)."},
     "en": {"l.cutcontent": "Enable cut content",
            "i.cutcontent": "Text that was removed from the game and found in the Japanese release (Ore! Tomba). "
                            "Two pieces are enabled:\n\n"
@@ -362,7 +362,7 @@ i18n.add({
                            "They mention places and things that do not exist in the final game (the Land of Civilization, that lock, "
                            "the boat).\n\n"
                            "The texts are in Spanish with the 'Improved translation' patch; in the other languages, or without the "
-                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???')."},
+                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied."},
 })
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
@@ -987,6 +987,10 @@ class App:
         want = s.get("patch_on") and (s.get("patch") or "").strip()
         if want and str(s.get("lang")) != "5" and self._patch_mode() == "bundled":
             want = ""        # the bundled translation is for the Spanish game only: other languages play the original data
+        if not want and s.get("cut_content") and str(s.get("lang") or 0) == "0":
+            # --cut-content in English: the English text of the cut lines (data/ holds one patch at a time; with another
+            # text patch chosen that one wins and the cut lines show the disc's filler)
+            want = bundled_patch("en_cut_content.tombipatch.json") or ""
         try:
             if not want:
                 if st:

@@ -29,6 +29,7 @@ on:
       - tools/cdfiles.py
       - tools/wfm_charmap.json
       - patches/es_mejorada.tombipatch.json
+      - patches/en_cut_content.tombipatch.json
       - tools/prompt_glyphs.py
       - tools/gfx_es/**
       - tools/i18n.py
@@ -462,7 +463,7 @@ jobs:
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --paths tools \
             --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "build_id.txt;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
-            --add-data "tools/wfm_charmap.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" \
+            --add-data "tools/wfm_charmap.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" --add-data "patches/en_cut_content.tombipatch.json;patches" \
             --add-binary "build/win-bin/tombi-pc.exe;." --add-binary "build/win-bin/SDL2.dll;." \
             tools/port_launcher.py
           mkdir -p dist/windows build/out
@@ -510,7 +511,7 @@ jobs:
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import PIL.ImageTk --paths tools \
             --add-data "tools/icons/launcher.ico:icons" --add-data "tools/icons/launcher.png:icons" --add-data "build_id.txt:." \
             --add-data "port/assets/prompts/manifest.json:port/assets/prompts" \
-            --add-data "tools/wfm_charmap.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" \
+            --add-data "tools/wfm_charmap.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" --add-data "patches/en_cut_content.tombipatch.json:patches" \
             --add-binary "build/linux-bin/tombi-pc:." --add-binary "build/linux-bin/libSDL2-2.0.so.0:." \
             tools/port_launcher.py
           mkdir -p dist/linux

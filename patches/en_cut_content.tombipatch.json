@@ -1,0 +1,23 @@
+{
+ "format": "tombi-text-patch",
+ "version": 1,
+ "title": "Cut content (English)",
+ "author": "Tombi-Decomp",
+ "notes": "English text for the two lines of cut content that tombi2 --cut-content shows (AREA00 boatman, AREA03 Baccus letter), translated from the Japanese release. Only the English files (MFNTnnnB) of the filler slots are touched.",
+ "created": "2026-10-29",
+ "disc": {
+  "name": "Tombi.bin",
+  "size": 492370032,
+  "sha1": "ec50074b6fd98f611bae11e3de68d6e76ffdd6d4"
+ },
+ "edits": {
+  "AREA00/MFNT000B.WFM": {
+   "162": "{BOX 312 55}\n{VOICE 7 28672}{MOVE 65446 65526}Whoa! You can swim, huh?{NL}\n...But there's a lock on it here,{NL}\nso for now you can't get across...{WAIT}{CLEAR}\n",
+   "163": "{BOX 312 42}\n{VOICE 7 28672}{MOVE 65446 65526}Hmm... Looks like a lock made by{NL}\nthe Iron Men of Civilization...{WAIT}{CLEAR}\n",
+   "164": "{BOX 312 68}\n{VOICE 7 28672}{MOVE 65446 65526}Oh, you already had it...{NL}\nTake care. I'll be on my boat{NL}\nby the Mushroom Forest beach.{NL}\nCome and visit!{WAIT}{CLEAR}\n"
+  },
+  "AREA03/MFNT030B.WFM": {
+   "208": "{BOX 312 68}\n{VOICE 6 0}{MOVE 0 0}Mr. Tomba, any trouble on{NL}\nPhoenix Mountain? Ask the locals.{NL}\nGood luck! Baccus Village{NL}\nP.S. No promises.{WAIT}{CLEAR}\n"
+  }
+ }
+}
