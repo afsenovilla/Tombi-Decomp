@@ -421,6 +421,35 @@ is no controller. Restoring one means:
 The town's spawn points are the `GAME_SELECTED_SPAWN_POINT` values its own exit records use when coming back
 (AREA11 s1 exit 0 → 18:1 spawn 1 and so on).
 
+### Scenery colours, the FMV and community reference images
+
+- **The 8 bpp scenery cut-outs have no surviving palette.** The pages hold room interiors, walls, gates, fences and the
+  windmill. We fitted community colour renders of SYSTEM/A06100, A08000 and A08600 (index → colour, exact page match)
+  against every 256-colour window, at 16-entry steps, of every file on the PAL and USA discs. Nothing came close: the
+  best mean error was over 60 per colour. The real scenery CLUTs went with the lost section data.
+- **The only colour reference is the FMV.** `MOVIE/BUNMEI.STR` (文明, "civilization"), identical on PAL and USA, is the
+  purified-Civilization flyover. It shows Lumberjack Town with the windmill, the hard-hat worker and the old man, Stonetown
+  with its green-tiled roofs, and Iron Town with the round iron gate and the "Iron the No.1" sign. `BUNMEI2.STR` follows
+  with the machine room and the gears. `python3 tools/str.py frames game/disc/Tombi.bin BUNMEI OUT 12 25` extracts
+  stills (never committed).
+- **Community reference images.** A TCRF contributor coloured the reload pages and assembled scenery views (seven
+  images, plus two "screenshots" of Iron Town and Lumberjack Town). They are reconstructions made from BUNMEI.STR frames
+  with a custom-derived CLUT, not pre-release screenshots and not in-game palettes. We use them as visual reference
+  only, and they are not in the repository.
+- **The community VRAM files are the PAL pages.** The seven `.000` files (USA names) are, byte for byte:
+
+| USA name | PAL name | Content |
+|---|---|---|
+| SYSTEM/A00147 | SYSTEM/A06100 (SYS list 61) | Lumberjack Town page |
+| SYSTEM/A00153 | SYSTEM/A07600 (SYS list 76) | Stonetown page |
+| SYSTEM/A00154 | SYSTEM/A07601 (SYS list 76) | Stonetown page, second part |
+| SYSTEM/A00157 | SYSTEM/A07702 (SYS list 77) | 128 x 256 page at (0x180, 0) |
+| SYSTEM/A00163 | SYSTEM/A08000 (SYS list 80) | Iron Town page |
+| SYSTEM/A00175 | SYSTEM/A08600 (SYS list 86) | AREA18 page (interiors of all three towns) |
+| SYSTEM/A00176 | SYSTEM/A08601 (SYS list 86) | AREA18 page, second part |
+
+  They are the same SYS reload pages under the USA disc's file numbering, not USA-only data.
+
 ### Which drawing each subtype is (evidence)
 
 The animation scripts survive in I0NFO2 (`TOPDOWN_Ann_ACTOR_DEFS[sub].anims`, 8-byte steps `{u16 frame, -, -, u16 control}`).

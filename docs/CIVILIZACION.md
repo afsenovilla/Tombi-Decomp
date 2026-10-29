@@ -438,6 +438,36 @@ carga están vacías y (en AREA18) no hay controlador. Recuperar uno supone:
 Los puntos de entrada del pueblo son los valores de `GAME_SELECTED_SPAWN_POINT` que usan sus propios registros de
 salida al volver (salida 0 de AREA11 s1 → 18:1 punto 1, etc.).
 
+### Colores del decorado, el FMV e imágenes de referencia de la comunidad
+
+- **Los recortes de decorado de 8 bpp no tienen paleta que sobreviva.** Son las páginas con interiores de casas, muros,
+  puertas, vallas y el molino. Comparamos los renders en color de la comunidad de SYSTEM/A06100, A08000 y A08600
+  (índice → color, con coincidencia exacta de página) con cada ventana de 256 colores, en pasos de 16 entradas, de cada
+  archivo de los discos PAL y USA. Nada se acercó: el mejor error medio pasa de 60 por color. Las CLUT reales del
+  decorado se perdieron con los datos de las secciones.
+- **La única referencia de color es el FMV.** `MOVIE/BUNMEI.STR` (文明, «civilización»), idéntico en PAL y USA, es el
+  vuelo sobre la Civilización purificada. Muestra Lumberjack Town con el molino, el trabajador del casco y el anciano,
+  Stonetown con sus tejados de tejas verdes, e Iron Town con la puerta redonda de hierro y el cartel «Iron the No.1».
+  Le sigue `BUNMEI2.STR`, con la sala de máquinas y los engranajes.
+  `python3 tools/str.py frames game/disc/Tombi.bin BUNMEI SALIDA 12 25` saca fotogramas (nunca se suben).
+- **Imágenes de referencia de la comunidad.** Un colaborador de TCRF coloreó las páginas de recarga y montó vistas del
+  decorado (siete imágenes, más dos «capturas» de Iron Town y Lumberjack Town). Son reconstrucciones hechas con
+  fotogramas de BUNMEI.STR y una CLUT deducida a mano, no capturas previas al lanzamiento ni paletas del juego. Las usamos
+  sólo como referencia visual y no están en el repositorio.
+- **Los archivos VRAM de la comunidad son las páginas PAL.** Los siete archivos `.000` (nombres USA) son, byte a byte:
+
+| Nombre USA | Nombre PAL | Contenido |
+|---|---|---|
+| SYSTEM/A00147 | SYSTEM/A06100 (lista SYS 61) | página de Lumberjack Town |
+| SYSTEM/A00153 | SYSTEM/A07600 (lista SYS 76) | página de Stonetown |
+| SYSTEM/A00154 | SYSTEM/A07601 (lista SYS 76) | página de Stonetown, segunda parte |
+| SYSTEM/A00157 | SYSTEM/A07702 (lista SYS 77) | página de 128 x 256 en (0x180, 0) |
+| SYSTEM/A00163 | SYSTEM/A08000 (lista SYS 80) | página de Iron Town |
+| SYSTEM/A00175 | SYSTEM/A08600 (lista SYS 86) | página de AREA18 (interiores de los tres pueblos) |
+| SYSTEM/A00176 | SYSTEM/A08601 (lista SYS 86) | página de AREA18, segunda parte |
+
+  Son las mismas páginas de recarga SYS con la numeración de archivos del disco USA, no datos sólo de USA.
+
 ### Qué dibujo es cada subtipo (pruebas)
 
 Los guiones de animación sobreviven en I0NFO2 (`TOPDOWN_Ann_ACTOR_DEFS[sub].anims`, pasos de 8 bytes `{u16 fotograma, -, -, u16
