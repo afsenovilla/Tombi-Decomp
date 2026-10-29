@@ -454,7 +454,9 @@ jobs:
       - name: Build tombi-port.exe
         shell: bash
         run: |
-          python -m pip install pyinstaller pillow
+          # PyInstaller's prebuilt Windows bootloader is what antivirus / browser scanners flag (false positives that
+          # come and go with each release): build the bootloader here from source (MSVC on the runner), pinned version
+          PYINSTALLER_COMPILE_BOOTLOADER=1 python -m pip install --no-binary pyinstaller "pyinstaller==6.11.1" pillow
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --paths tools \
