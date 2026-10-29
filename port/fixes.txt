@@ -356,3 +356,6 @@ src/x009/updateParallaxBackdropSprite.c | if ((short)t < 0x160) { | if (((short)
 # and the world-placed parallax sprites of AREA06 / AREA10 keep the ones over the side strips
 src/x006/updateParallaxBackdropSprite.c | if (x - 0x40 < 0x141 && x + 0x40 >= 0) { | if (x - 0x40 < 0x141 + port_ws_cull && x + 0x40 + port_ws_cull >= 0) {
 src/x010/updateParallaxBackdropSprite.c | if (o->a.p.whole - 0x40 < 0x141 && o->a.p.whole + 0x40 >= 0) { | if (o->a.p.whole - 0x40 < 0x141 + port_ws_cull && o->a.p.whole + 0x40 + port_ws_cull >= 0) {
+#
+# --title-bg (widescreen, runtime/titlebg.c): mark the ordering-table node the title background / logo sprites go into
+src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } addTilePrim(&r, 0, 0, 1);
