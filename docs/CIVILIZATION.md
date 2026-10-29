@@ -665,3 +665,31 @@ cut top-down data either.** It is the same build of the assets as PAL, renamed, 
   the same ones as on PAL (weighted mean nearest-colour distance about 24, ignoring black/white/grey), and the best row from
   USA-only data is worse (about 35). The page itself (`A07600` = USA `A00153`) and AREA16/CLUT07 are unchanged, so the rows 48 / 54
   guess stands.
+
+## Palette catalog (all discs)
+
+`tools/clut_catalog.py catalog OUT` collects every palette on every disc we have and `tools/clut_catalog.py test OUT ...`
+fits them against the lost colours. Sources: the `CLUTnn` files (and the bare `SYSTEM/DSPCLUT.TIM`), the small load-list
+CLUT blocks (`.000` files of 32..1024 bytes, e.g. PAL `SYSTEM/A00007` 256 x 1, `A00805` 16 x 16), every TIM CLUT at any
+4-aligned offset of any file (this includes the 0x8E/0x8F top-down pictures, TIMs inside chunks and in the exe/overlays),
+PrePre 8 `CLUT00` (640 x 32) and `SYS001/002/004/006/007`, and a conservative scan for 16-colour runs in the remaining
+non-page data (entry 0 = 0, 15 non-zero 15-bit colours, >= 12 distinct, at least two runs in a row). Every source is cut into
+16-colour rows and 256-colour windows (16-entry steps) and hashed. SLPM-80165 was not available for this run.
+
+| Disc | Distinct 16-colour rows | Only on this disc | Where the disc-only rows are |
+|---|---|---|---|
+| PAL SCES-01331 | 1981 | 59 | 256 x 1 title/menu palettes `SYSTEM/A00203`, `A00402`, `A00502`, `A09401`; the two TIMs in `SCES_013.31` (CLUT at (128,480) and (320,480)) |
+| USA SCUS-94236 | 1980 | 26 | `SYSTEM/A00013`, `A001901` (English menu palettes); 16-colour runs in `X14.BIN` and `DSPSUB3.BIN` |
+| JP SLPS-01144 | 1851 | 308 | the same HUD/system rows in nearly every `CLUTnn` (rows 2, 4, 5..7, 16..25 at fixed columns), some area-specific rows, `DSPCLUT.TIM`, the AREA19 `D005` picture CLUT |
+| PrePre 8 PCPX-96084 | 269 | 62 | `CLUT00` (59 rows), `SYS006`, two TIMs in `TOMBA.EXE` |
+
+1305 rows are on PAL, USA and JP; 171 also on PrePre 8. No AREA11/16/17/18 `CLUTnn` row is disc-only except the JP
+HUD/system rows, which are on every area.
+
+**Tests, no match.**
+- Female Stonetown Resident (TCRF sprite, weighted mean nearest-colour distance over its non-grey colours, every row on
+  every disc): best 24.1 (a row shared by PAL/USA/JP, AREA00/CLUT06), best JP-only row 26.9, best PrePre 8 row 29.8. No
+  disc-only palette improves on the AREA16/CLUT07 rows 48 / 54 guess.
+- Scenery pages, community renders as index → colour reference, pixel-weighted mean error of every 256-colour window:
+  A08000 72.9, A08600 67.4 (a 256 x 1 system palette), A06100 82.4; the best PrePre 8 windows are worse (85.4 / 72.3 /
+  94.8). Renders with the best windows are noise. The scenery CLUTs are not on any of these discs.

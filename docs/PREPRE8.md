@@ -168,3 +168,10 @@ program `tomba` = TOMBA.EXE, game dir `game_prepre8/`, git-ignored). It is set u
   demo job), extracts only `/TOMBA` with `tools/prepre8.py extract`, checks the TOMBA.EXE sha1
   (032d6f371b31085098b86aebbce465d30599293a) and uploads `PCPX_960.84_report`. It is skipped when the secret is
   missing.
+
+## Palettes (tools/clut_catalog.py, 2026-10-29)
+
+`CLUT00` gives 269 distinct 16-colour rows with `SYS001/002/004/006/007` and the two TIMs in `TOMBA.EXE`; 62 of them are on
+no retail disc (59 in `CLUT00`, `SYS006`, the exe TIMs), and 35 are shared only with JP SLPS-01144. None of them fits the
+Civilization scenery pages or the Female Stonetown Resident better than the retail rows (docs/CIVILIZATION.md, "Palette
+catalog").
