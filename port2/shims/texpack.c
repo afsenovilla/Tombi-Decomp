@@ -286,7 +286,9 @@ static u8 *inflate_z(const u8 *in, size_t n, size_t outcap, size_t *outn) {
     *outn = on; return o;
 }
 static u32 rd32(const u8 *p) { return (u32)p[0] << 24 | (u32)p[1] << 16 | (u32)p[2] << 8 | p[3]; }
+static u8 *png_last_idx;             /* read_png_rgba of a palette PNG (colour type 3): its indices, w * h bytes (caller frees) */
 static u8 *read_png_rgba(const char *path, int *pw, int *ph) {
+    free(png_last_idx); png_last_idx = 0;
     FILE *f = fopen(path, "rb");
     if (!f) return 0;
     fseek(f, 0, SEEK_END); long fl = ftell(f); fseek(f, 0, SEEK_SET);
@@ -308,10 +310,11 @@ static u8 *read_png_rgba(const char *path, int *pw, int *ph) {
         off += 12 + n;
     }
     int ch = ct == 0 ? 1 : ct == 2 ? 3 : ct == 3 ? 1 : ct == 4 ? 2 : ct == 6 ? 4 : 0;
-    if (!idat || w <= 0 || h <= 0 || w > 16384 || h > 16384 || bd != 8 || !ch || il) {
+    int lowbd = ct == 3 && (bd == 1 || bd == 2 || bd == 4);     /* palette PNGs may pack 2/4/16 colours per byte */
+    if (!idat || w <= 0 || h <= 0 || w > 16384 || h > 16384 || (bd != 8 && !lowbd) || !ch || il) {
         port_printf("[texpack] %s: unsupported PNG (needs 8 bits per channel, not interlaced)\n", path); goto done;
     }
-    size_t stride = (size_t)w * ch, rn;
+    size_t stride = lowbd ? ((size_t)w * bd + 7) / 8 : (size_t)w * ch, rn;
     raw = inflate_z(idat, in_n, (stride + 1) * h, &rn);
     if (!raw || rn != (stride + 1) * h) { port_printf("[texpack] %s: bad PNG data\n", path); goto done; }
     for (int y = 0; y < h; y++) {                   /* unfilter in place */
@@ -328,6 +331,15 @@ static u8 *read_png_rgba(const char *path, int *pw, int *ph) {
             }
         }
     }
+    if (lowbd) {                                    /* expand to one index byte per pixel, rows keep their filter byte slot */
+        u8 *ex = malloc(((size_t)w + 1) * h);
+        if (!ex) goto done;
+        for (int y = 0; y < h; y++) {
+            const u8 *r = raw + y * (stride + 1) + 1; u8 *o = ex + (size_t)y * (w + 1) + 1;
+            for (int x = 0; x < w; x++) { int bit = x * bd; o[x] = (u8)((r[bit >> 3] >> (8 - bd - (bit & 7))) & ((1 << bd) - 1)); }
+        }
+        free(raw); raw = ex; stride = (size_t)w;
+    }
     out = malloc((size_t)w * h * 4);
     if (!out) goto done;
     for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
@@ -340,6 +352,8 @@ static u8 *read_png_rgba(const char *path, int *pw, int *ph) {
         default: memcpy(o, s, 4); break;
         }
     }
+    if (ct == 3 && (png_last_idx = malloc((size_t)w * h)))
+        for (int y = 0; y < h; y++) memcpy(png_last_idx + (size_t)y * w, raw + y * (stride + 1) + 1, (size_t)w);
     *pw = w; *ph = h;
 done:
     free(buf); free(idat); free(raw);
@@ -347,7 +361,7 @@ done:
 }
 
 /* ------------------------------------------------------------------ the pack: key -> file */
-typedef struct { u64 key; char *path; int state; PortTexRep rep; } PackEnt;   /* state 0 not loaded, 1 ok, -1 unusable */
+typedef struct { u64 key; char *path; int state; PortTexRep rep; u8 *idx; int iw, ih; } PackEnt;   /* state 0 not loaded, 1 ok, 2 indexed, -1 unusable */
 static PackEnt *pk; static u32 pk_cap, pk_n; static int pk_scanned, pk_has_sub;
 static PackEnt *pk_find(u64 key) {
     if (!pk_cap) return 0;
@@ -370,20 +384,24 @@ static void pk_add(u64 key, const char *path) {
 /* "<16 hex>.png" or "sub_<16 hex>.png" (any case), also after a descriptive prefix ending in "__"
    ("tombi_corre__0123456789abcdef.png", tools/dump_all_textures.py); the "sub" keys get a separate space: key ^ SUBMARK */
 #define SUBMARK 0x5355425355425355ull
+/* "r" keys (tools/dump_all_textures.py, computed from the disc files without running the game): FNV-1a(upload hash, depth, page
+   part) without the CLUT, so one image replaces that page part with whatever palette it is drawn; an exact key wins over it */
+#define ANYMARK 0x414E59414E59414Eull
 static int parse_name(const char *n, u64 *key) {
-    int sub = 0; u64 k = 0;
+    int sub = 0, any = 0; u64 k = 0;
     for (const char *q = strstr(n, "__"); q; q = strstr(q + 1, "__")) {   /* the last "__" followed by a key */
         size_t r = strlen(q + 2);
-        if (r == 20 || (r == 24 && (!strncmp(q + 2, "sub_", 4) || !strncmp(q + 2, "SUB_", 4)))) { n = q + 2; break; }
+        if (r == 20 || (r == 21 && (q[2] == 'r' || q[2] == 'R')) || (r == 24 && (!strncmp(q + 2, "sub_", 4) || !strncmp(q + 2, "SUB_", 4)))) { n = q + 2; break; }
     }
     if (!strncmp(n, "sub_", 4) || !strncmp(n, "SUB_", 4)) { sub = 1; n += 4; }
+    else if ((n[0] == 'r' || n[0] == 'R') && strlen(n) == 21) { any = 1; n++; }   /* "r<16 hex>": the page part, any palette */
     for (int i = 0; i < 16; i++) {
         char c = n[i]; int v = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1;
         if (v < 0) return 0;
         k = k << 4 | (u64)v;
     }
     if (strcmp(n + 16, ".png") && strcmp(n + 16, ".PNG")) return 0;
-    *key = sub ? k ^ SUBMARK : k;
+    *key = sub ? k ^ SUBMARK : any ? k ^ ANYMARK : k;
     return sub ? 2 : 1;
 }
 static void scan(const char *dir, int depth) {
@@ -509,6 +527,49 @@ static const PortTexRep *use(u64 key, int ou, int ov, int w, int h) {
     e->rep.ou = ou; e->rep.ov = ov;
     return &e->rep;
 }
+/* An "r" image (any palette) of a 4/8-bit page saved as a palette PNG holds CLUT indices (tools/dump_all_textures.py writes them
+   so): each palette the game draws the page with is applied to the indices and gets its own GL texture (cached by CLUT hash), so
+   one indexed image replaces the page under every palette, palette animations included.  An RGBA image is used as it is. */
+static struct { u64 k; PortTexRep rep; } any_var[4096];
+static const PortTexRep *use_any(u64 key0, const GpuTex *t, u64 ch, int np, int ou, int ov, int w, int h) {
+    PackEnt *e = pk_find(key0 ^ ANYMARK);
+    if (!e || e->state < 0) return 0;
+    if (e->state == 0) {
+        int iw, ih; u8 *rgba = read_png_rgba(e->path, &iw, &ih);
+        e->state = -1;
+        if (!rgba) return 0;
+        int s = iw / w;
+        if (s < 1 || s > 16 || iw != s * w || ih != s * h) {
+            port_printf("[texpack] %s: %dx%d is not an integer scale (1..16) of the original %dx%d: ignored\n", e->path, iw, ih, w, h);
+            free(rgba); return 0;
+        }
+        if (np && png_last_idx) { e->idx = png_last_idx; png_last_idx = 0; e->iw = iw; e->ih = ih; e->state = 2; free(rgba); }
+        else {
+            unsigned tex = port_gl_rep_texture(rgba, iw, ih);
+            free(rgba);
+            if (!tex) return 0;
+            e->rep.gltex = tex; e->rep.w = w; e->rep.h = h; e->state = 1;
+        }
+        if (n_rep_loaded++ < 50 || port_verbose) port_printf("[texpack] %s (%dx%s)\n", e->path, s, e->state == 2 ? ", indexed" : "");
+    }
+    if (e->state == 1) { e->rep.ou = ou; e->rep.ov = ov; return &e->rep; }
+    if (!np) return 0;
+    u64 vk = fnv(key0, &ch, 8); if (!vk) vk = 1;
+    u32 m = 4095, i = (u32)(vk ^ (vk >> 32)) & m, tries = 0;
+    while (any_var[i].k && any_var[i].k != vk && tries++ < 4096) i = (i + 1) & m;
+    if (any_var[i].k == vk) { any_var[i].rep.ou = ou; any_var[i].rep.ov = ov; return &any_var[i].rep; }
+    if (any_var[i].k) return 0;                       /* (table full) */
+    const u16 *vram = port_vram(); u16 pal[256];
+    for (int c = 0; c < np; c++) pal[c] = vram[(t->cy & 511) * 1024 + ((t->cx + c) & 1023)];
+    size_t n = (size_t)e->iw * e->ih; u8 *rgba = malloc(n * 4);
+    if (!rgba) return 0;
+    for (size_t q = 0; q < n; q++) px(rgba + q * 4, pal[e->idx[q] & (np - 1)]);
+    unsigned tex = port_gl_rep_texture(rgba, e->iw, e->ih);
+    free(rgba);
+    if (!tex) return 0;
+    any_var[i].k = vk; any_var[i].rep.gltex = tex; any_var[i].rep.w = w; any_var[i].rep.h = h; any_var[i].rep.ou = ou; any_var[i].rep.ov = ov;
+    return &any_var[i].rep;
+}
 const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int v1) {
     const GpuState *g = &port_gs;
     if (u1 < u0) u1 = 255;
@@ -555,6 +616,7 @@ const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int 
         u32 hd[5] = { (u32)t->depth, (u32)(x1 - best->x), (u32)(y1 - best->y), (u32)(x2 - x1), (u32)(y2 - y1) };
         u64 key = fnv(FNV0, &best->hash, 8);
         key = fnv(key, hd, sizeof hd);
+        u64 key0 = key;
         if (np) key = fnv(key, &ch, 8);
         int ou = (x1 - t->tx) * tpw, ovv = y1 - t->ty, w = (x2 - x1) * tpw, h = y2 - y1;
         if (port_texdump_dir && best->data && best->nkeys < 256) {
@@ -565,7 +627,9 @@ const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int 
                 dump(key, 0, best->data + (y1 - best->y) * best->w + (x1 - best->x), best->w, 0, w, h, t, vram, x1, y1, x2 - x1, y2 - y1, ou, ovv);
             }
         }
-        return want_rep ? use(key, ou, ovv, w, h) : 0;
+        if (!want_rep) return 0;
+        const PortTexRep *r = use(key, ou, ovv, w, h);
+        return r ? r : use_any(key0, t, ch, np, ou, ovv, w, h);
     }
     if (!port_texdump_dir && !(want_rep && pk_has_sub)) return 0;
     /* the sampled box itself: only inside uploaded VRAM (not the frame buffers or other drawn areas) */

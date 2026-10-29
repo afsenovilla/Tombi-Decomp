@@ -66,11 +66,10 @@ i18n.add({
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
         "l.titlebg": "Fondo de título panorámico (PNG / JPG):", "l.titlebg.d": "Solo se usa con imagen panorámica (16:9, 21:9, 32:9): rellena los lados de la pantalla de título.", "ft.image": "Imágenes",
-        "c.texpack": "Pack de texturas", "l.texpack": "Carpeta del pack de texturas (vacío = ninguno; solo OpenGL):",
-        "l.texdump": "Volcar texturas (a la carpeta texture_dump junto a data/)",
-        "b.dumpall": "Volcar todas las texturas", "l.dumpall.d": "Recorre sin jugar el título, todas las zonas y secciones, menús y objetos (varios minutos) y deja en texture_dump/ un PNG por textura, en carpetas por zona y tipo, con LEEME.txt.",
-        "s.dumpall": "Volcando texturas: %d/%d ejecuciones...", "s.dumpallok": "Volcado completo: %d texturas en %s", "s.dumpallfail": "No se pudo volcar: %s",
-        "l.texpack.d": "Las texturas volcadas son PNG con nombres fijos; un pack contiene las mismas, redibujadas a 1x..16x (docs/PORT.md, \"Texture packs\").",
+        "c.texpack": "Pack de texturas (HD)", "l.texpack": "Carpeta del pack (déjalo vacío para usar las texturas originales). Solo con OpenGL.",
+        "b.dumpall": "Volcar todas las texturas", "b.openfolder": "Abrir carpeta",
+        "l.texpack.d": "Pulsa «Volcar todas las texturas» para exportar las texturas del juego a la carpeta texture_dump. Edítalas o reescálalas (2x, 4x…) manteniendo el nombre del archivo y elige esa carpeta como pack.",
+        "s.dumpall": "Volcando texturas… %d%%", "s.dumpallok": "Listo: %d texturas en %s", "s.dumpallfail": "No se pudo volcar: %s",
         "l.pad": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente; teclado: cursores, X = Cruz, Z = Cuadrado, S = Triángulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Intro = Start, Retroceso = Select.",
         "b.play": "Jugar", "b.extracting": "Extrayendo... {0}%", "l.extracting": "Extrayendo los archivos del disco (solo la primera vez). Espera a que termine para jugar.", "b.stop": "Cerrar el juego", "b.copylog": "Copiar el registro", "s.copied": "Registro copiado al portapapeles ({0} líneas).", "l.autostart": "Empezar partida nueva automáticamente (pulsa Start en el título)",
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco compatible: {0}, MAIN0.EXE verificado (sha1).",
@@ -100,11 +99,10 @@ i18n.add({
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
         "l.titlebg": "Wide title background (PNG / JPG):", "l.titlebg.d": "Only used in widescreen (16:9, 21:9, 32:9): fills the sides of the title screen.", "ft.image": "Images",
-        "c.texpack": "Texture pack", "l.texpack": "Texture pack folder (empty = none; OpenGL only):",
-        "l.texdump": "Dump textures (to the texture_dump folder next to data/)",
-        "b.dumpall": "Dump all textures", "l.dumpall.d": "Walks through the title, every area and section, menus and items without playing (several minutes) and leaves one PNG per texture in texture_dump/, in folders per area and kind, with LEEME.txt.",
-        "s.dumpall": "Dumping textures: %d/%d runs...", "s.dumpallok": "Full dump: %d textures in %s", "s.dumpallfail": "Could not dump: %s",
-        "l.texpack.d": "Dumped textures are PNGs with stable names; a pack holds the same files redrawn at 1x..16x (docs/PORT.md, \"Texture packs\").",
+        "c.texpack": "Texture pack (HD)", "l.texpack": "Pack folder (leave empty for the original textures). OpenGL only.",
+        "b.dumpall": "Dump all textures", "b.openfolder": "Open folder",
+        "l.texpack.d": "Press “Dump all textures” to export the game's textures to the texture_dump folder. Edit or upscale them (2x, 4x…) keeping the file names, then choose that folder as the pack.",
+        "s.dumpall": "Dumping textures… %d%%", "s.dumpallok": "Done: %d textures in %s", "s.dumpallfail": "Could not dump: %s",
         "l.pad": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically; keyboard: arrows, X = Cross, Z = Square, S = Triangle, D = Circle, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
         "b.play": "Play", "b.extracting": "Extracting... {0}%", "l.extracting": "Extracting the disc files (first time only). Wait for it to finish to play.", "b.stop": "Close the game", "b.copylog": "Copy log", "s.copied": "Log copied to the clipboard ({0} lines).", "l.autostart": "Start a new game automatically (presses Start on the title)",
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Compatible disc: {0}, MAIN0.EXE verified (sha1).",
@@ -826,15 +824,16 @@ class App:
         o.pack(fill="x", pady=(12, 0), padx=(0, 4))
         ttk.Label(c, text=tr("l.texpack"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
         self._browse_row(c, "texpack", self.pick_texpack)
-        ttk.Checkbutton(c, text=tr("l.texdump"), variable=self.var("texdump", tk.BooleanVar, False)).pack(anchor="w", pady=(6, 0))
-        ttk.Label(c, text=tr("l.texpack.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
-        row = ttk.Frame(c)                                     # the full dump without playing (tools/dump_all_textures.py)
+        row = ttk.Frame(c)                                     # the full dump from the disc files (tools/dump_all_textures.py)
         row.pack(fill="x", pady=(8, 0))
         self.dumpall_btn = ttk.Button(row, text=tr("b.dumpall"), command=self.dump_all_textures)
         self.dumpall_btn.pack(side="left")
         self.dumpall_bar = ttk.Progressbar(row, mode="determinate", maximum=100, length=200)
         self.dumpall_bar.pack(side="left", padx=(10, 0))
-        ttk.Label(c, text=tr("l.dumpall.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
+        self.dumpall_open = ttk.Button(row, text=tr("b.openfolder"), command=self.open_texture_dump)
+        self.dumpall_msg = tk.StringVar()
+        ttk.Label(c, textvariable=self.dumpall_msg, wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
+        ttk.Label(c, text=tr("l.texpack.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
         o, c = self.card(f, tr("c.mods"))
         o.pack(fill="x", pady=(12, 0), padx=(0, 4))
         ttk.Label(c, text=tr("l.modshelp"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(0, 8))
@@ -982,25 +981,41 @@ class App:
         if p:
             self.vars["title_bg"].set(p)
 
+    def texture_dump_dir(self):
+        return os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")
+
+    def open_texture_dump(self):
+        p = self.texture_dump_dir()
+        try:
+            if os.name == "nt":
+                os.startfile(p)
+            else:
+                subprocess.Popen(["open" if sys.platform == "darwin" else "xdg-open", p])
+        except OSError:
+            pass
+
     def dump_all_textures(self):
-        """Runs tools/dump_all_textures.py in a thread: every room / screen headless, into texture_dump/ next to data/."""
+        """Every texture of the game read from the disc files in data/ (tools/dump_all_textures.py, no game run) into texture_dump/."""
         if not data_ready():
             messagebox.showerror(tr("title"), tr("s.nodata"))
             return
         import dump_all_textures as DT
-        out = os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")
+        out = self.texture_dump_dir()
         self.dumpall_btn.state(["disabled"])
+        self.dumpall_open.pack_forget()
 
         def progress(i, n):
-            self.root.after(0, self.say, tr("s.dumpall", i, n), "busy")
-            self.root.after(0, self.dumpall_bar.configure, {"value": i * 100 // max(1, n)})
+            pct = i * 100 // max(1, n)
+            self.root.after(0, self.dumpall_msg.set, tr("s.dumpall", pct))
+            self.root.after(0, self.dumpall_bar.configure, {"value": pct})
 
         def work():
             try:
-                _new, total, _runs = DT.run(game_binary(), out, data_dir(), log=lambda *a: None, progress=progress, organize_data=data_dir())
-                self.root.after(0, self.say, tr("s.dumpallok", total, out), "ok")
+                total = DT.dump_static(out, data_dir(), log=lambda *a: None, progress=progress)
+                self.root.after(0, self.dumpall_msg.set, tr("s.dumpallok", total, out))
+                self.root.after(0, lambda: self.dumpall_open.pack(side="left", padx=(10, 0)))
             except Exception as e:
-                self.root.after(0, self.say, tr("s.dumpallfail", e), "bad")
+                self.root.after(0, self.dumpall_msg.set, tr("s.dumpallfail", e))
             self.root.after(0, self.dumpall_btn.state, ["!disabled"])
         threading.Thread(target=work, daemon=True).start()
 
@@ -1093,8 +1108,6 @@ class App:
             cmd += ["--save-dir", s["savedir"]]
         if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft":
             cmd += ["--texture-pack", s["texpack"]]
-        if s.get("texdump"):
-            cmd += ["--dump-textures", os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")]
         if s.get("title_bg") and s.get("aspect") in ("16:9", "21:9", "32:9"):
             cmd += ["--title-bg", s["title_bg"]]
         if s.get("fullscreen"):

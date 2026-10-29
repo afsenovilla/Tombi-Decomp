@@ -2159,17 +2159,21 @@ state, and the fragment shader maps the texel (u, v) plus its sub-texel position
 boxes, flipped / scaled sprites, texture windows and 4/8/16-bit pages all line up. Texels outside the image fall back to
 VRAM. A palette change (palette animation, flashes) gives a key the pack does not have: the original is drawn.
 
-**Full dump without playing: `tools/dump_all_textures.py`** (launcher: card "Pack de texturas", button "Volcar todas las
-texturas"). Drives the port headless (`--dump-textures` into one temporary folder per run, so the keys are the port's own)
-through the title (with and without the logos), every debug-select room twice (new game, and all event flags set) with
-the walk/jump/attack/pause pad script of `gfx_capture.py`, `--menu 1700:0..9` with paging, `--test-item` for item ids
-0..0x9F and a game over; merges by key into `texture_dump/` next to `data/` and sorts it into readable folders
-(`Zonas/NN Nombre/{Escenario,Objetos y enemigos,Sprites/<file>}`, `Personajes/Tombi`, `Interfaz/..`, `Pantallas/..`,
-`Comun/..`, `Sin identificar/..`) with `LEEME.txt`. The index now carries `upload` (FNV-1a of the upload) and `uprect`;
-the tool hashes every GRPX record of the load lists and every WPP sprite frame of `data/` the same way to name an image
-after its disc resource (`B000_p64-0_256x256_pal..__<key>.png`; `~` = matched by VRAM rectangle only). The loader
-accepts any prefix ending in `__` before the key (`parse_name`). `--raw` keeps the flat layout, `--organize-only` sorts
-an existing dump, `--quick` skips the event pass and item pop-ups.
+**Full dump from the disc files: `tools/dump_all_textures.py`** (launcher: card "Pack de texturas (HD)", button "Volcar
+todas las texturas"; ~15 s, ~1400 images, ~14 MB). No game run: every GRPX page of every load list (read from `data/` through
+`tools/area000`, the file table from `data/manifest.txt`) cut at its texture pages (4-bit: 64-word columns, 8-bit: 128 from the
+upload's 64-aligned column, rows 0/256; bpp from `vram.pair_cluts`), and every WPP sprite frame, as **palette PNGs** (CLUT
+indices + a representative palette) named `<descripcion>__r<16 hex>.png` in readable folders (`Zonas/NN Nombre/{Escenario,
+Objetos y enemigos,Sprites/<file>}`, `Personajes/Tombi`, `Interfaz/..`, `Pantallas/..`, `Comun/..`) with `textures.jsonl` and
+`LEEME.txt`. The `r` key is texpack.c's key without the CLUT: FNV-1a(FNV-1a of the words LoadImage receives, depth, page part);
+the port tries the exact key first, then the `r` key (`use_any`). An `r` image saved as a palette PNG (any bit depth) is applied
+with the **live** CLUT (one GL texture per palette seen, cached by CLUT hash), so one image covers every palette of the page;
+an RGB/RGBA `r` image is drawn as is. Any prefix ending in `__` is allowed before a key. Checked: a 2x pack of the static dump
+with striped indices replaces scenery, Tombi, HUD and NPC sprites in AREA03:1 / AREA00:1 with correct colours; 422 of the 460
+images the port dumped at run time in the title + 4 rooms have their `r` key in the static dump. Gaps: uploads the game builds
+or modifies before LoadImage (e.g. AREA00 `A002` pages at 576,0, some 8-bit room backdrops such as AREA09:2) do not hash like
+any disc file; for those `--dump-textures` while playing (exact per-palette keys) or `--runtime` (headless sweep of every
+room / menu / item, slow) remain. The index of `--dump-textures` now also carries `upload` (hash) and `uprect`.
 
 **Limits.** The software renderer only dumps. Textures the game generates by drawing (render-to-texture effects) and
 MDEC movies are not textures here (the intro landscape is a movie). A replacement with partial alpha is thresholded, not

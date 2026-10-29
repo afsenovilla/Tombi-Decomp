@@ -1,27 +1,17 @@
 #!/usr/bin/env python3
-"""Complete texture dump without playing: drives the native port headless through every screen and room.
+"""Complete texture dump straight from the disc files (no game run): every page and sprite frame, ready for a texture pack.
 
-Every texture the game draws is written by the port's own `--dump-textures` (port2/shims/texpack.c), so the file
-names / keys are exactly the ones `--texture-pack` looks up (no reimplementation of the keying that could drift).
-This script only decides *where* the game goes:
+Default (static, seconds): every GRPX page of every load list (SYS/LD0*.BIN, read through tools/area000 from data/) cut at
+its texture pages, and every WPP sprite frame, written as palette PNGs (CLUT indices + a representative palette) named
+"<descripcion>__r<key>.png" in readable folders (Zonas/NN Nombre/{Escenario,Objetos y enemigos,Sprites/..}, Personajes/Tombi,
+Interfaz/.., Pantallas/.., Comun/..) with textures.jsonl and LEEME.txt.  key = FNV-1a(FNV-1a of the words LoadImage receives,
+depth, page part) - the CLUT-less key of port2/shims/texpack.c, which matches it under any palette and applies the live
+palette to an indexed replacement.
 
-  * the title screen (with the intro logos, and with them skipped),
-  * every room of the debug area select (port_mods.ROOM_COUNTS minus DOOR_ROOMS), twice: once as a new game and
-    once with every event flag set (other objects / NPCs / doors), each time walking, jumping, attacking and
-    opening the pause screen (the pad script of tools/gfx_capture.py),
-  * the in-game menu screens (`--menu`, D0SPSUB/2/3: items, status, save/load, ...), paging through them,
-  * every item pop-up (`--test-item`, the item icons) and the game-over screen.
-
-Each run dumps into its own temporary folder; the results are merged into OUT (default texture_dump/ next to data/)
-with the same layout the port writes (areaXX/<key>.png, sub_<key>.png, textures.jsonl): a name already present
-anywhere in OUT is skipped, so the tool can be re-run or combined with dumps made while playing.
-
-  python3 tools/dump_all_textures.py [--exe build/port2/tombi2] [--data DIR | --disc IMG] [--out DIR] [--jobs N]
-                                     [--quick] [--only rooms|title|menus|items]
-
-Known gaps (cannot be reached from the debug hooks): textures only uploaded during scripted events/boss fights
-that the debug select does not start, the ending, and palette-animation frames (a palette that changes every frame
-gives one key per palette seen: only those that happen to be on screen in a run are dumped)."""
+  python3 tools/dump_all_textures.py [--data DIR] [--out DIR]
+  python3 tools/dump_all_textures.py --runtime [--exe build/port2/tombi2] [--jobs N] [--quick]   (secondary: headless sweep
+        of every room/menu/item with the port's --dump-textures, exact per-palette keys, for uploads the game builds itself)
+"""
 import json, os, shutil, subprocess, sys, tempfile, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -187,8 +177,7 @@ def zona(a):
     return "%02d %s" % (a, ZONAS.get(a, "Area %02d" % a))
 
 
-def _fnv(b):
-    h = 0xCBF29CE484222325
+def _fnv(b, h=0xCBF29CE484222325):
     for x in b:
         h = ((h ^ x) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
     return h
@@ -197,15 +186,8 @@ def _fnv(b):
 def resource_index(data, log=print):
     """{upload hash: (resource, load list folder, list index, wpp frame or None)} and {(x, y, w, h): [(resource, folder)]}: every
     GRPX record of the load lists (the words LoadImage receives) and every WPP sprite frame, hashed like texpack.c."""
-    import cdfiles, extract_data as X
-    man = X.read_manifest(data)
-    if man:
-        lay = {p: (l, sz) for l, _n, _sb, sz, p in man["files"] if not p.startswith("_disc")}
-        cdfiles.layout_from_image = lambda _p: lay
-    import area000 as A
-    A.FS, A._LISTS = data, None
+    A = disc_env(data)
     import vram, wpp
-    vram._RES.clear()
     byhash, byrect = {}, {}
     lists = A.load_lists(data)
     for ld, ll in lists.items():
@@ -225,6 +207,220 @@ def resource_index(data, log=print):
                 except Exception as e:          # one unreadable resource only loses its names
                     log("  (%s: %s)" % (nm, e))
     return byhash, byrect
+
+
+def disc_env(data):
+    """Points tools/area000 (load lists, resources) at an extracted data/ folder: the file table comes from its manifest.txt
+    (tools/extract_data.py), so no disc image is needed."""
+    import cdfiles, extract_data as X
+    man = X.read_manifest(data)
+    if man:
+        lay = {p: (l, sz) for l, _n, _sb, sz, p in man["files"] if not p.startswith("_disc")}
+        cdfiles.layout_from_image = lambda _p: lay
+    import area000 as A
+    if not hasattr(A, "_dt_orig_read"):
+        A._dt_orig_read = A.read_resource
+    A.read_resource = lambda name, fs=None: A._dt_orig_read(name, data)
+    A.FS, A._LISTS = data, None
+    import vram
+    vram._RES.clear()
+    A.load_lists(data)
+    return A
+
+
+def page_parts(x, y, w, h, depth):
+    """[(x1, y1, x2, y2)] VRAM word boxes of the upload (x, y, w, h) cut at the texture pages a primitive of this depth (0 4-bit,
+    1 8-bit, 2 15-bit) uses: page columns start at multiples of 64 words (8-bit pages tiled from the upload's own column),
+    rows at 0 / 256; texpack.c keys the part of the upload inside the page."""
+    pw = (64, 128, 256)[depth]
+    out = []
+    tx0 = x - x % 64
+    for ty in range(y - y % 256, y + h, 256):
+        tx = tx0
+        while tx < x + w:
+            x1, y1, x2, y2 = max(x, tx), max(y, ty), min(x + w, tx + pw), min(y + h, ty + 256)
+            if x2 > x1 and y2 > y1:
+                out.append((x1, y1, x2, y2))
+            tx += pw
+    return out
+
+
+def any_key(uphash, depth, x, y, part):
+    """The "r" key of texpack.c: FNV-1a(upload hash, depth, offset / size of the page part), no CLUT."""
+    import struct
+    x1, y1, x2, y2 = part
+    k = _fnv(struct.pack("<Q", uphash))
+    return _fnv(struct.pack("<5I", depth, x1 - x, y1 - y, x2 - x1, y2 - y1), k)
+
+
+def _png(path, w, h, rows, pal=None):
+    """PNG of rows of 15-bit colour words (pal None: RGBA, alpha classes of texpack.c: 0x0000 transparent, STP 128, else 255) or of
+    CLUT indices (pal = the palette words: a palette PNG, PLTE + tRNS with the same classes; the port reads the indices)."""
+    import zlib, struct
+    ch = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xFFFFFFFF)
+    alpha = lambda c: 0 if c == 0 else 128 if c & 0x8000 else 255
+    rgb = lambda c: bytes((((c & 31) << 3) | ((c & 31) >> 2), (((c >> 5) & 31) << 3) | (((c >> 5) & 31) >> 2),
+                           (((c >> 10) & 31) << 3) | (((c >> 10) & 31) >> 2)))
+    raw = bytearray()
+    if pal is None:
+        for row in rows:
+            raw.append(0)
+            for c in row:
+                raw += rgb(c) + bytes((alpha(c),))
+        hdr, extra = struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0), b""
+    else:
+        for row in rows:
+            raw.append(0)
+            raw += bytes(row)
+        hdr = struct.pack(">IIBBBBB", w, h, 8, 3, 0, 0, 0)
+        extra = ch(b"PLTE", b"".join(rgb(c) for c in pal)) + ch(b"tRNS", bytes(alpha(c) for c in pal))
+    with open(path, "wb") as f:
+        f.write(b"\x89PNG\r\n\x1a\n" + ch(b"IHDR", hdr) + extra + ch(b"IDAT", zlib.compress(bytes(raw), 6)) + ch(b"IEND", b""))
+
+
+def _decode(words, ww, part_w, part_h, ox, oy, depth, pal=None):
+    """Rows of the part (ox, oy words into a ww-word-wide plane): CLUT indices (4/8-bit) or colour words (15-bit)."""
+    rows = []
+    for yy in range(part_h):
+        base = (oy + yy) * ww + ox
+        seg = words[base:base + part_w]
+        if depth == 2:
+            rows.append(list(seg))
+        elif depth == 1:
+            rows.append([(v >> s) & 255 for v in seg for s in (0, 8)])
+        else:
+            rows.append([(v >> s) & 15 for v in seg for s in (0, 4, 8, 12)])
+    return rows
+
+
+def _clut_words(A, name, first, n):
+    import struct
+    d = A.read_resource(name)
+    if not d or len(d) < (first + n) * 2:
+        return None
+    return list(struct.unpack_from("<%dH" % n, d, first * 2))
+
+
+def _grey(n):
+    return [0] + [((i * 31 // (n - 1)) * 0x421) | 0x8000 * 0 for i in range(1, n)]
+
+
+def dump_static(out, data, log=print, progress=None):
+    """Every image of every resource, read from the disc files (no game run): each GRPX page of every load list cut at its texture
+    pages, and every WPP sprite frame, named "<descripcion>__r<key>.png" in the readable tree.  Returns the number of images."""
+    import struct
+    A = disc_env(data)
+    import vram, wpp
+    lists = A.load_lists(data)
+    if not lists:
+        raise RuntimeError("no load lists in %s (is it an extracted disc? tools/extract_data.py)" % data)
+    os.makedirs(out, exist_ok=True)
+    index = open(os.path.join(out, "textures.jsonl"), "w", encoding="utf-8")
+    done, n, t0 = set(), 0, time.time()
+    work = [(ld, k, lst) for ld, ll in sorted(lists.items(), key=lambda kv: (kv[0] != "SYS", kv[0])) for k, lst in enumerate(ll)]
+    global PLAYER_WPP
+    PLAYER_WPP = ("AREA00/A004",)            # Tombi's sprite file (the WPP of the area list of AREA00, drawn in every area)
+    safe = lambda t: "".join(c if c.isalnum() or c in " -_~." else "_" for c in t).strip()
+
+    def first_pal(ld, k, bpp, paired):
+        """A representative palette (the preview colours only: the "r" key matches the page with any palette)."""
+        if bpp == 8 and paired is not None:
+            return _clut_words(A, paired["name"], 0, 256), paired["name"] + " row 0"
+        order = [(ld, k)] + ([(ld, 0)] if ld != "SYS" and k else []) + ([("SYS", 0)] if (ld, k) != ("SYS", 0) else [])
+        recs = [r for l, kk in order for r in lists[l][kk] if vram.is_grpx(r) and vram.is_clut_rec(r)]
+        recs.sort(key=lambda r: r["w"] == 256)
+        for r in recs:
+            if bpp == 8 and r["w"] == 256:
+                return _clut_words(A, r["name"], 0, 256), r["name"] + " row 0"
+            if bpp == 4:
+                for y in range(r["h"]):
+                    for sx in range(r["w"] // 16):
+                        p = _clut_words(A, r["name"], y * r["w"] + sx * 16, 16)
+                        if p and any(p):
+                            return p, "%s row %d +%d" % (r["name"], y, sx * 16)
+        return _grey(256 if bpp == 8 else 16), "grey"
+
+    def emit(parts_dir, prefix, key, w, h, rows, meta):
+        nonlocal n
+        rel = "/".join(safe(x) for x in parts_dir) + "/" + safe(prefix).replace("__", "_") + "__r%016x.png" % key
+        os.makedirs(os.path.join(out, os.path.dirname(rel)), exist_ok=True)
+        _png(os.path.join(out, rel), w, h, rows, meta.pop("_pal", None))
+        meta.update(file=rel, key="r%016x" % key, size=[w, h])
+        index.write(json.dumps(meta, ensure_ascii=False) + "\n")
+        n += 1
+
+    for wi, (ld, k, lst) in enumerate(work, 1):
+        pr = vram.pair_cluts(lst)
+        for i, r in enumerate(lst):
+            nm = r["name"]
+            try:
+                if vram.is_grpx(r) and not vram.is_clut_rec(r):
+                    x, y, w, h = r["arg"] & 0xFFFF, r["arg"] >> 16, r["w"], r["h"]
+                    d = vram.resource(nm)
+                    if not d or len(d) < w * h * 2 or w <= 0 or h <= 0:
+                        continue
+                    bpp = 8 if i in pr else 4
+                    depth = (4, 8).index(bpp)
+                    up = _fnv(d[:w * h * 2])
+                    words = struct.unpack_from("<%dH" % (w * h), d)
+                    pal, pal_src = first_pal(ld, k, bpp, lst[pr[i]] if i in pr else None)
+                    short = os.path.basename(_base(nm))
+                    if _base(nm) in SCREENS:
+                        top = ["Interfaz", SCREENS[_base(nm)]] if "HUD" in SCREENS[_base(nm)] else ["Pantallas", SCREENS[_base(nm)]]
+                    elif ld == "SYS":
+                        top = ["Comun", "Paginas"]
+                    else:
+                        top = ["Zonas", zona(int(ld[2:])), "Escenario" if short.startswith("B") else "Objetos y enemigos"]
+                    for part in page_parts(x, y, w, h, depth):
+                        key = any_key(up, depth, x, y, part)
+                        if key in done:
+                            continue
+                        done.add(key)
+                        x1, y1, x2, y2 = part
+                        tpw = (4, 2)[depth]
+                        rows = _decode(words, w, x2 - x1, y2 - y1, x1 - x, y1 - y, depth, pal)
+                        emit(top, "%s_p%d-%d_%dbpp" % (short, x1 - x1 % 64, y1 - y1 % 256, bpp), key, (x2 - x1) * tpw, y2 - y1,
+                             rows, dict(_pal=pal, kind="page", resource=nm, list="%s:%d" % (ld, k), depth=bpp, vram=[x1, y1, x2 - x1, y2 - y1],
+                                        upload=[x, y, w, h], palette=pal_src))
+                elif (r["kind"] & 0xF0) == 0x60 and r["type"] != 0xFFFFFFFF and nm.endswith(".000") and wpp.is_wpp(nm):
+                    _m, files, frames = wpp.unpack_wpp(vram.resource(nm), nm, wpp.is_wpp(nm))
+                    try:
+                        fps = wpp.frame_palettes(nm, frames)
+                    except Exception:
+                        fps = {}
+                    short = os.path.basename(_base(nm))
+                    player = _base(nm) in PLAYER_WPP
+                    who = ["Personajes", "Tombi"] if player else (["Comun", "Sprites", short] if ld == "SYS" else
+                                                                ["Zonas", zona(int(ld[2:])), "Sprites", short])
+                    for fk in sorted(frames):
+                        o = frames[fk]
+                        fw, fh = struct.unpack_from("<HH", o)
+                        if not fw or not fh:
+                            continue
+                        key = any_key(_fnv(o[4:4 + fw * fh * 2]), 0, 0, 0, (0, 0, fw, fh))
+                        if key in done:
+                            continue
+                        done.add(key)
+                        info = fps.get(fk)
+                        pal = _clut_words(A, info["clut"], info["row"] * 256 + info["x0"], 16) if info else None
+                        if not pal:
+                            pal, src = first_pal(ld, k, 4, None)
+                        else:
+                            src = "%s row %d +%d" % (info["clut"], info["row"], info["x0"])
+                        words = struct.unpack_from("<%dH" % (fw * fh), o, 4)
+                        fno = int(fk.split("frame_")[1][:4])
+                        emit(who, "%s_f%04d" % ("Tombi" if player else short, fno), key, fw * 4, fh,
+                             _decode(words, fw, fw, fh, 0, 0, 0, pal),
+                             dict(_pal=pal, kind="sprite", resource=nm, frame=fno, list="%s:%d" % (ld, k), depth=4, palette=src))
+            except Exception as e:
+                log("  (%s: %s)" % (nm, e))
+        if progress:
+            progress(wi, len(work))
+    index.close()
+    with open(os.path.join(out, "LEEME.txt"), "w", encoding="utf-8") as f:
+        f.write(LEEME)
+    log("%d images in %s (%.0f s)" % (n, out, time.time() - t0))
+    return n
 
 
 def _base(nm):
@@ -329,35 +525,36 @@ def organize(out, data, log=print):
 LEEME = """Volcado completo de texturas de Tombi! (tools/dump_all_textures.py)
 =====================================================================
 
+Sale directamente de los ficheros del disco (carpeta data/), sin jugar.
+
 Carpetas
   Zonas/NN Nombre/Escenario           paginas de los escenarios (ficheros Bnnn del disco)
-  Zonas/NN Nombre/Objetos y enemigos  paginas de objetos, enemigos y PNJ de la zona (Annn)
+  Zonas/NN Nombre/Objetos y enemigos  paginas de objetos, enemigos y personajes de la zona (Annn)
   Zonas/NN Nombre/Sprites/<fichero>   fotogramas de sprites animados de la zona
   Personajes/Tombi                    los fotogramas de Tombi
-  Interfaz/...                        HUD, fuentes, menus, objetos del inventario, game over
-  Pantallas/...                       logos, titulo, mapa del mundo, menus de guardar/cargar
-  Comun/...                           paginas y sprites comunes a todo el juego
-  Sin identificar/NN Nombre           texturas que no se pudieron asociar a un fichero del disco
-                                      (cajas compuestas de varias subidas, datos generados por el juego)
+  Interfaz/...  Pantallas/...         HUD y fuentes; logos, titulo, menus, mapa, NOW LOADING
+  Comun/...                           paginas y sprites del sistema comunes a todo el juego
 
 Nombres
-  <recurso>_<detalle>__<clave>.png. Solo importa la clave (los 16 hexadecimales, o sub_ + 16, tras el
-  ultimo "__"): el juego busca la clave en cualquier subcarpeta. Puedes mover o renombrar la parte de
-  delante como quieras, pero no toques "__<clave>.png".
-  _p X-Y = pagina de textura en VRAM, _pal X-Y = paleta (CLUT) con la que se dibuja: la misma pagina
-  con otra paleta es otra imagen. _fNNNN = fotograma de sprite. Un "~" delante = asociado por posicion.
-  textures.jsonl: una linea por imagen (fichero, clave, recurso del disco, tamano, VRAM, paleta, zona).
+  <recurso>_p<X>-<Y>_<bits>__r<clave>.png  (pagina de VRAM X,Y de un fichero, 4/8 bits por pixel)
+  <recurso>_f<NNNN>__r<clave>.png          (fotograma NNNN de un sprite)
+  Solo importa lo que va tras el ultimo "__": el juego busca la clave en cualquier subcarpeta.
+  Puedes mover las imagenes o cambiar la parte de delante, pero no toques "__r<clave>.png".
 
 Como hacer un pack HD
-  1. Copia a una carpeta nueva solo los PNG que quieras cambiar (puedes conservar las subcarpetas).
-  2. Redibujalos al MISMO tamano multiplicado por un entero (2x, 4x, 8x... hasta 16x), igual ancho y alto.
-     PNG RGBA de 8 bits por canal, sin entrelazado.
-  3. Transparencia: alfa < 64 = transparente, 64..191 = semitransparente (bit STP), >= 192 = opaco.
-     Respeta las zonas transparentes del original.
-  4. En el lanzador: Parches y mods > Pack de texturas > elige la carpeta. Necesita el renderizador OpenGL;
-     usa "resolucion interna" 4 para un pack 4x. Linea de ordenes: tombi --renderer gl --texture-pack CARPETA
-  Las texturas que no esten en el pack se dibujan como siempre. Si una paleta cambia en el juego
-  (destellos, animaciones de color) se dibuja la original mientras dure.
+  1. Copia a una carpeta nueva solo las imagenes que quieras cambiar (con subcarpetas o sin ellas).
+  2. Reescalalas al MISMO tamano multiplicado por un entero (2x, 4x, 8x... hasta 16x).
+  3. IMPORTANTE: las imagenes son PNG con paleta (indices de color). Si las guardas COMO PNG CON PALETA
+     (sin cambiar la paleta), el juego aplica en cada momento la paleta real: la misma pagina sale bien
+     con todas sus paletas (enemigos de otro color, destellos, animaciones de color). Los colores que ves
+     al abrirlas son solo una paleta de ejemplo.
+     Si las guardas en RGB/RGBA (color libre), se dibujan siempre con esos colores, sea cual sea la paleta.
+  4. Transparencia (RGBA): alfa < 64 transparente, 64..191 semitransparente, >= 192 opaco.
+  5. Lanzador: Mods > Pack de texturas (HD) > elige la carpeta. Solo con OpenGL; para un pack 4x usa
+     resolucion interna 4. Linea de ordenes: --renderer gl --texture-pack CARPETA
+
+Limites: algunos fondos que el juego compone o modifica antes de subirlos a la VRAM no salen del
+disco tal cual y no se pueden reemplazar con este volcado (usa --dump-textures jugando para esos).
 """
 
 
@@ -379,28 +576,21 @@ def default_exe():
 def main(argv=None):
     import argparse
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--exe", default=None)
     ap.add_argument("--data", default=None, help="extracted disc folder (default: data/ of the checkout)")
-    ap.add_argument("--disc")
     ap.add_argument("--out", default=None, help="default: texture_dump/ next to the data folder")
+    ap.add_argument("--runtime", action="store_true", help="secondary: run the game headless through every room (--dump-textures keys)")
+    ap.add_argument("--exe", default=None, help="--runtime: the port binary")
     ap.add_argument("--jobs", type=int, default=None)
-    ap.add_argument("--quick", action="store_true", help="rooms once (no event-flag pass), no item pop-ups")
+    ap.add_argument("--quick", action="store_true", help="--runtime: rooms once, no item pop-ups")
     ap.add_argument("--only", choices=["rooms", "title", "menus", "items"])
-    ap.add_argument("--list", action="store_true", help="print the runs and exit")
-    ap.add_argument("--raw", action="store_true", help="keep the port's flat areaXX/<key>.png layout (no readable folders)")
-    ap.add_argument("--organize-only", action="store_true", help="only sort an existing dump in OUT into the readable folders")
+    ap.add_argument("--raw", action="store_true", help="--runtime: keep the port's flat areaXX/<key>.png layout")
     a = ap.parse_args(argv)
-    if a.list:
-        for lb, args, fr in jobs(a.quick, a.only):
-            print("%-22s %5d  %s" % (lb, fr, " ".join(args)))
+    data = a.data or os.path.join(ROOT, "data")
+    out = a.out or os.path.join(os.path.dirname(os.path.abspath(data)), "texture_dump")
+    if not a.runtime:
+        dump_static(out, data)
         return 0
-    data = a.data or (None if a.disc else os.path.join(ROOT, "data"))
-    out = a.out or os.path.join(os.path.dirname(os.path.abspath(data or a.disc)), "texture_dump")
-    names = None if a.raw or not data else data
-    if a.organize_only:
-        organize(out, names)
-        return 0
-    run(a.exe or default_exe(), out, data, a.disc, a.jobs, a.quick, a.only, organize_data=names)
+    run(a.exe or default_exe(), out, data, None, a.jobs, a.quick, a.only, organize_data=None if a.raw else data)
     return 0
 
 
