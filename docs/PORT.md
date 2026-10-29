@@ -2045,7 +2045,7 @@ area signature words still match, and (`-v -v`, from a copy of the overlay regio
 many words of the region changed since the vblank and the first/last of them: the difference between a swapped
 overlay (a CD read, logged) and a buffer overrun (the two causes above).
 
-### Widescreen (experimental): `--widescreen [16:9|21:9]`, `--aspect 16:9|21:9`
+### Widescreen (experimental): `--widescreen [16:9|21:9|32:9]`, `--aspect 16:9|21:9|32:9`
 
 Off by default (with it off the standard regression stays byte-identical).  Done in the GPU shim and at the game's
 culls, not in the GTE: the projection keeps its scale, so nothing is stretched; the frame just gets wider.
@@ -2054,7 +2054,8 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   shown (Tombi draws at x 384 and 704, y 256, and flips the display between them; a 320-wide target at any other x is
   a texture and is left alone), every primitive goes to a wide plane (2048x512; the copy of a buffer at x sits at
   columns 2x .. 2x + 320 + 2*pad - 1) with its X shifted by `pad` (`port_widescreen`: 53 for 16:9 = 426 columns, 120
-  for 21:9 = 560) and the clip widened to match.  After every DrawOTag the 4:3 middle is copied back into VRAM
+  for 21:9 = 560, 267 for 32:9 = 854; at 32:9 the two buffers would overlap at 2x, so the copy of a buffer below
+  x 512 starts at column 0 and the other at 1024: `ws_base()`) and the clip widened to match.  After every DrawOTag the 4:3 middle is copied back into VRAM
   (StoreImage, VRAM copies and textures made from the frame read it); LoadImage into a wide buffer is mirrored
   forward; full-buffer fills (GP0 02, DRAWENV isbg, ClearImage) clear the wide copy.  Frame dumps and the window show
   the wide copy; the window is sized for the wider aspect (`port_window_fit` with `port_window_fit_wide`; 24-bit
@@ -2071,7 +2072,13 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
 - **HUD** (`drawHud`, fixes.txt): lives, vitality and weapon move left by pad, the AP counter right by pad (anchored to
   the wide frame's edges).  Other HUDs (race, item gauges, menus) stay at their 4:3 place, centred.
 
-Launcher: Play tab, "Imagen" 16:9 / 21:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
+- **Background blocks** (`callAreaModelLinkHook`, fixes.txt -> `port_ws_area_model_link` in
+  `runtime/main0_handwritten.c`): the area background is one model in RAM split into 80-unit-wide blocks; a per-area
+  hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select
+  (areas 0, 1, 2, 3, 7; the others also animate palettes or keep counters) it is run again with the camera X moved
+  2*pad+40 each way and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+
+Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
 
 ### HD (plan; phase 1 prototyped): `--internal-res N`
