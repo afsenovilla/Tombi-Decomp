@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Launcher of the native-pointer port (tombi-port.exe, docs/PORT.md "M3 phase 3" / "Mods"): a window where the
 player picks their own disc image (.bin/.cue/.iso/.chd of Tombi! PAL SCES-01331), a save folder, the window options and
-the mods, and a Play button that runs tombi2.exe --window with those options.  Same Tk toolkit and tools/i18n.py
+the mods, and a Play button that runs tombi-pc.exe --window with those options.  Same Tk toolkit and tools/i18n.py
 catalogs as tombi-gfx / tombi-text.  No game data is bundled: the disc is checked (MAIN0.EXE extracted next to
 tombi-port.json, the saved settings, and compared by sha1) before the first run, and the disc is then extracted
 once into data/ next to the launcher (tools/extract_data.py): the game runs with --data and no longer needs the
@@ -151,7 +151,10 @@ def bin_dir():
 
 
 def game_binary():
-    return os.path.join(bin_dir(), "tombi2.exe" if os.name == "nt" else "tombi2")
+    if os.name == "nt":         # tombi-pc.exe: the game (the CMake target is still called tombi2); older bundles: tombi2.exe
+        p = os.path.join(bin_dir(), "tombi-pc.exe")
+        return p if os.path.isfile(p) else os.path.join(bin_dir(), "tombi2.exe")
+    return os.path.join(bin_dir(), "tombi2")
 
 
 def settings_file():

@@ -1,11 +1,11 @@
 name: Native port (Windows exe)
 
-# Builds the native-pointer port (docs/PORT.md "M3 phase 3") for Windows: tombi2.exe (the game, cross-compiled with
+# Builds the native-pointer port (docs/PORT.md "M3 phase 3") for Windows: tombi-pc.exe (the game, CMake target tombi2, cross-compiled with
 # mingw-w64 on Linux: port2/cmake/mingw-i686.cmake) and the launcher tools/port_launcher.py (PyInstaller, on Windows)
 # that bundles it with SDL2.dll into dist/windows/tombi-port.exe.  The generator takes the retail addresses and the
 # data image from the player's own game files like report.yml (GAME_FILES_URL secret, the whole disc image), so NO
 # game data ends up in the artifact: only our code, SDL2.dll (zlib licence, THIRD_PARTY_NOTICES.md) and the launcher
-# (the image's MAIN0/X000 bytes are compiled into tombi2.exe: it is built from the player's own copy, and the exe
+# (the image's MAIN0/X000 bytes are compiled into tombi-pc.exe: it is built from the player's own copy, and the exe
 # published here is the one the repository owner built from theirs).
 on:
   push:
@@ -121,7 +121,7 @@ jobs:
         if: steps.fetch.outputs.ok == 'true'
         run: python3 tools/build_full.py -j 4
 
-      - name: Build tombi2.exe
+      - name: Build tombi-pc.exe (the game; CMake target tombi2)
         if: steps.fetch.outputs.ok == 'true'
         run: |
           cmake -S port2 -B build/port2-win -G Ninja -DCMAKE_TOOLCHAIN_FILE="$PWD/port2/cmake/mingw-i686.cmake" \
@@ -129,7 +129,7 @@ jobs:
           ninja -C build/port2-win -j 4
           cat build/port2-win/gen/report.txt | head -12
           mkdir -p build/win-bin
-          cp build/port2-win/tombi2.exe "$RUNNER_TEMP/sdl/SDL2-${SDL2_VERSION}/i686-w64-mingw32/bin/SDL2.dll" build/win-bin/
+          cp build/port2-win/tombi2.exe build/win-bin/tombi-pc.exe; cp "$RUNNER_TEMP/sdl/SDL2-${SDL2_VERSION}/i686-w64-mingw32/bin/SDL2.dll" build/win-bin/
           cp -r build/data-sample build/win-bin/data-sample
           cp "$RUNNER_TEMP/sdl/SDL2-${SDL2_VERSION}/i686-w64-mingw32/share/licenses/SDL2/LICENSE.txt" build/win-bin/SDL2-LICENSE.txt || true
           ls -l build/win-bin
@@ -156,19 +156,19 @@ jobs:
           name: tombi-port-game
           path: build/win-bin
 
-      - name: Smoke test tombi2.exe (fault handlers, headless boot)
+      - name: Smoke test tombi-pc.exe (fault handlers, headless boot)
         shell: bash
         run: |
-          build/win-bin/tombi2.exe --headless --test-null
-          build/win-bin/tombi2.exe --headless --frames 200 --disc nonexistent.bin 2>&1 | head -5 || true
+          build/win-bin/tombi-pc.exe --headless --test-null
+          build/win-bin/tombi-pc.exe --headless --frames 200 --disc nonexistent.bin 2>&1 | head -5 || true
           # the data/ path: a manifest with MAIN0 and the PVD blob only (every other read is zeros, logged), and a
           # missing folder (must say so and exit, not crash)
-          build/win-bin/tombi2.exe --headless --frames 200 --data build/win-bin/data-sample 2>&1 | grep -i 'data:\|warning\|violation' | head -5 || true
-          build/win-bin/tombi2.exe --headless --frames 10 --data nonexistent 2>&1 | grep -i 'FATAL' || true
+          build/win-bin/tombi-pc.exe --headless --frames 200 --data build/win-bin/data-sample 2>&1 | grep -i 'data:\|warning\|violation' | head -5 || true
+          build/win-bin/tombi-pc.exe --headless --frames 10 --data nonexistent 2>&1 | grep -i 'FATAL' || true
           rm -rf build/win-bin/data-sample
           # the OpenGL renderer on the runner's desktop (no GPU driver: the GDI OpenGL 1.1 cannot make the context,
           # which must fall back to the software rasteriser, not fail)
-          build/win-bin/tombi2.exe --headless --renderer gl --frames 100 --disc nonexistent.bin 2>&1 | grep -i 'renderer\|opengl' || true
+          build/win-bin/tombi-pc.exe --headless --renderer gl --frames 100 --disc nonexistent.bin 2>&1 | grep -i 'renderer\|opengl' || true
 
       - name: Build tombi-port.exe
         shell: bash
@@ -180,11 +180,11 @@ jobs:
             --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "build_id.txt;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
             --add-data "tools/wfm_charmap.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" \
-            --add-binary "build/win-bin/tombi2.exe;." --add-binary "build/win-bin/SDL2.dll;." \
+            --add-binary "build/win-bin/tombi-pc.exe;." --add-binary "build/win-bin/SDL2.dll;." \
             tools/port_launcher.py
           mkdir -p dist/windows build/out
           cp build/exe/tombi-port.exe dist/windows/tombi-port.exe
-          cp build/exe/tombi-port.exe build/win-bin/tombi2.exe build/win-bin/SDL2.dll build/out/
+          cp build/exe/tombi-port.exe build/win-bin/tombi-pc.exe build/win-bin/SDL2.dll build/out/
           cp THIRD_PARTY_NOTICES.md build/out/
 
       - uses: actions/upload-artifact@v4

@@ -47,13 +47,13 @@ void port_window_start(void) {
     if (port_widescreen)        /* the same logical width port_window_fit uses, times the scale (scaling the rounded 4:3
                                    width came out a pixel short of k * lw, so the fit dropped to 1x) */
         ww = (port_window_square ? 320 + 2 * port_widescreen : 256 * 4 * (320 + 2 * port_widescreen) / (3 * 320)) * port_window_scale;
-    win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
+    win = SDL_CreateWindow("Tombi! (PC port)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
                            256 * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
                            (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     if (!win && want_gl) {
         port_printf("[port2] SDL_CreateWindow (OpenGL): %s; trying without\n", SDL_GetError());
         port_renderer = 0;
-        win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
+        win = SDL_CreateWindow("Tombi! (PC port)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
                                256 * port_window_scale, SDL_WINDOW_RESIZABLE | (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     }
     if (!win) port_fatal("SDL_CreateWindow: %s", SDL_GetError());
@@ -86,7 +86,7 @@ int port_window_gl_start(void) {
         SDL_SetMainReady();
         if (SDL_Init(SDL_INIT_VIDEO) < 0) { port_printf("[port2] SDL_Init (video, for OpenGL): %s\n", SDL_GetError()); return -1; }
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        win = SDL_CreateWindow("Tombi! (port2)", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 64, 64, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+        win = SDL_CreateWindow("Tombi! (PC port)", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 64, 64, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
         if (!win) { port_printf("[port2] SDL_CreateWindow (hidden, OpenGL): %s\n", SDL_GetError()); return -1; }
         win_hidden = 1;
     }
