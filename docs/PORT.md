@@ -1204,7 +1204,7 @@ matching build), cross-builds `tombi2.exe` and uploads it with `SDL2.dll` (artif
 `launcher` (windows-latest) runs `tombi2.exe --headless --test-null` on a real Windows, packs the launcher
 with PyInstaller into `tombi-port.exe` (artifact `tombi-port-windows`: `tombi-port.exe`, `tombi2.exe`,
 `SDL2.dll`, `THIRD_PARTY_NOTICES.md`) and commits `dist/windows/tombi-port.exe` to master; `zip-exe.yml` adds
-it to `tombi-tools.zip`. No game data is in any artifact (the MAIN0/X000 bytes compiled into `tombi2.exe` come
+it to `tombi-tools.7z`. No game data is in any artifact (the MAIN0/X000 bytes compiled into `tombi2.exe` come
 from the owner's own disc, as the retail addresses of the matching build do).
 
 **Running on Windows.** Download `tombi-port.exe` (or the `tombi-port-windows` artifact), start it, pick the
