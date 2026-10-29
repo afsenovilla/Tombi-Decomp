@@ -35,6 +35,25 @@ W={'A06100':448,'A07600':320,'A08000':448}
 def page(n):
     d=A.read_resource('SYSTEM/'+n); w=W[n]
     return [[(d[y*w*2+x//2]>>((x&1)*4))&15 for x in range(256)] for y in range(256)]
+def _clip_figure(p, bb):
+    """Drop what the 2-pixel joining pulled in across a fully empty row or column (the atlas's marker tiles, "ooo"
+    rings and X boxes next to a figure): keep the band with the most non-zero texels, rows then columns."""
+    x0, y0, x1, y1 = bb
+    for axis in (0, 1):
+        n = (y1 - y0 + 1) if axis == 0 else (x1 - x0 + 1)
+        filled = [sum(1 for x in range(x0, x1 + 1) if p[y0 + i][x]) if axis == 0 else sum(1 for y in range(y0, y1 + 1) if p[y][x0 + i]) for i in range(n)]
+        bands, cur = [], None
+        for i, f in enumerate(filled):
+            if f and cur is None: cur = [i, i, 0]
+            if f: cur[1] = i; cur[2] += f
+            elif cur is not None: bands.append(cur); cur = None
+        if cur is not None: bands.append(cur)
+        a, b, _ = max(bands, key=lambda t: t[2])
+        if axis == 0: y0, y1 = y0 + a, y0 + b
+        else: x0, x1 = x0 + a, x0 + b
+    return (x0, y0, x1, y1)
+
+
 def comps(p):
     m=[[1 if p[y][x] else 0 for x in range(256)] for y in range(256)]
     seen=[[0]*256 for _ in range(256)]; out=[]
@@ -50,7 +69,7 @@ def comps(p):
                             nx,ny=cx+dx,cy+dy
                             if 0<=nx<256 and 0<=ny<256 and m[ny][nx] and not seen[ny][nx]:
                                 seen[ny][nx]=1; st.append((nx,ny))
-                if n>60 and bb[3]-bb[1]>14: out.append(tuple(bb))
+                if n>60 and bb[3]-bb[1]>14: out.append(_clip_figure(p, tuple(bb)))
     return out
 
 # ------------------------------------------------------------------ real palettes: 16-colour rows of the areas' CLUT files
