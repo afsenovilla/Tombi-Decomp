@@ -10,7 +10,8 @@ Sheets (file names; *_en.png for English):
                             what each resident says, and where every element comes from (I0NFO2 / MAIN0 addresses)
   civ_explicado_aNN.png     flat plan with drawn house shapes, sprites, exit arrows and a side legend
   civ_perspectiva_aNN.png   (EN: civ_perspective_aNN_en.png) the same data in perspective; only the house height is invented
-  civ_plan_aNN_1x[_transparent].png  (--sheet plan1x, no text) panel B alone at 1:1, grey ground or transparent
+  civ_plan_aNN_1x[_transparent].png  (--sheet plan1x, no text) panel B alone at 1:1, grey ground or transparent;
+                            civ_plan_aNN_1x_legend.png the same plan unscaled with an English legend panel on the right
 
 Everything is read from YOUR extracted disc (game/disc/fs, or TOMBI_FS) through tools/topdown.py / tools/area000.py:
 the AREA08 s0 picture, the I0NFO2 NPC sets / house rectangles, the SYS reload pages SYSTEM/A06100, A07600, A08000
@@ -710,6 +711,64 @@ def perspectiva(area,lang,outd):
     out=os.path.join(outd,'civ_%s_a%d%s.png'%('perspectiva' if lang=='es' else 'perspective',area,'' if lang=='es' else '_en'))
     im.save(out); print(out)
 
+PLAN_INFO = {
+    11: dict(place='AREA11 section 0 - Lumberjack Town (TCRF name; the Wood People\'s village)', step='topdownSectionStepC',
+             exits='Its own exits lead to Civilization Town (AREA18 s1) and the Factory (AREA11 s1)', sysl=61, set='0D',
+             lst='0x80100080', props='0x800FFE24'),
+    16: dict(place='AREA16 section 0 - Stonetown (TCRF name; the Stone People\'s village)', step='topdownSectionStepD',
+             exits='Its own exits lead to Civilization Town (AREA18 s1), the Factory door (AREA11 s2) and AREA16 s1 (also cut)',
+             sysl=76, set='0E', lst='0x80100364', props='0x801001D4 / 0x801001D8'),
+    17: dict(place='AREA17 section 0 - Iron Town (the Iron Men\'s village)', step='topdownSectionStepE',
+             exits='Its own exits lead to Civilization Town (AREA18 s1) and inside Iron Town (AREA17 s1)', sysl=80, set='0F',
+             lst='0x80100784', props='0x80100368'),
+}
+PAL_STATUS = {
+    11: ['AREA11/CLUT02 row 4: Lumberjack Factory Worker (hard hat), subtypes 0, 1, 4 - confirmed by TCRF colours',
+         'AREA11/CLUT02 row 36: Male Lumberjack Town Resident (old man), subtypes 2, 3 - confirmed by TCRF colours (row 68 = his "cursed" twin, not drawn)'],
+    16: ['AREA16/CLUT07 row 53: Male Stonetown Resident (strongman), subtype 2 - pixel-exact match with TCRF\'s sprite',
+         'AREA16/CLUT07 row 54: Female Stonetown Resident, subtype 0 - guess',
+         'AREA16/CLUT07 row 48: subtypes 1, 3 - guess'],
+    17: ['AREA17/CLUT03 row 1 (= AREA17/CLUT06 rows 1/129, AREA18/CLUT02 row 6): all subtypes - matched to a retail screenshot of an Iron Town NPC (colour set, not pixel-exact); using it for every resident is a guess'],
+}
+
+
+def plan_legend(area, plan_png, size, frames):
+    I = PLAN_INFO[area]; W, H = size
+    blocks = [
+        ('Place', [I['place'] + '.', 'A cut top-down section: the code and placements survive in I0NFO2, the load list is empty.',
+                   'No retail exit leads into it. ' + I['exits'] + ' (exit rectangles in ' + I['step'] + ', destinations in the MAIN0 exit table 0x80079A48).']),
+        ('Scale', ['1 image pixel = 1 background pixel. Picture %d x %d px, estimated from the placements (the background picture is lost).' % (W, H),
+                   'World position (x, y) -> background pixel (x + 128, y - 40) (topdownCollideMapTile 0x800EE18C); this image starts at the estimated picture origin.']),
+        ('Marks', ['Blue rectangle: house trigger rectangle (TOPDOWN_TRIGGER_RECT_LISTS 0x800FEC9C); inside it the roof hides and the interior shows.',
+                   'Green box or line: the area a resident patrols (record bounds, behaviour 1-4).',
+                   'Yellow dot: prop / scenery position. Props are dots because their sprite tables are lost.',
+                   'Sprite: a resident; its feet are on the record position.']),
+        ('Facing', ['In the game, each resident record sets its facing: field +4 (frame -> animFrame, 0..3) picks the direction and field +6 (anim set -> wb4) the animation; patrolling residents turn as they walk.',
+                    'Values in this town (field +4 per resident, in record order): ' + ', '.join(str(f) for f in frames) + '.',
+                    'This image does NOT apply them: every resident is drawn with one front-facing frame of the page. That frame is our choice.']),
+        ('Sprites', ['Drawings from the surviving texture page SYSTEM/A%s (a VRAM copy the menu reloads, SYS list %d).' % ({11: '06100', 16: '07600', 17: '08000'}[area], I['sysl']),
+                     'Which drawing goes with each resident subtype is our guess: the SPR tables that would say it are lost.',
+                     'Palettes (real 16-colour rows of the game\'s CLUT files):'] + ['  - ' + t for t in PAL_STATUS[area]]),
+        ('Source', ['Decompiled data in I0NFO2: NPC set %s, resident list at %s (28-byte records), props at %s.' % (I['set'], I['lst'], I['props']),
+                    'Generated by tools/civ_sheets.py --sheet plan1x (Tombi-Decomp).']),
+    ]
+    LW = 900; f = F(16); fb = F(18, True)
+    tmp = Image.new('RGB', (10, 10)); dd = ImageDraw.Draw(tmp)
+    lines = []
+    for head, items in blocks:
+        lines.append((head, fb))
+        for t in items:
+            for ln in wrap(dd, t, f, LW - 40): lines.append((ln, f))
+        lines.append(('', f))
+    LH = 30 + sum(24 if fo is fb else 21 for _, fo in lines)
+    plan = Image.open(plan_png).convert('RGB')
+    im = Image.new('RGB', (W + LW, max(H, LH)), (250, 247, 240)); im.paste(plan, (0, 0))
+    dr = ImageDraw.Draw(im); y = 16
+    for t, fo in lines:
+        dr.text((W + 20, y), t, font=fo, fill=(20, 20, 20)); y += 24 if fo is fb else 21
+    return im
+
+
 # ------------------------------------------------------------------ panel B alone at 1:1 (civ_plan_aNN_1x*.png)
 def plan1x(area, outd):
     """Panel B of the schematic at actual size (one image pixel = one background pixel, the estimated picture size),
@@ -747,6 +806,8 @@ def plan1x(area, outd):
             im.paste(sp, (int(X - w / 2), int(Y - h)), sp)
         out = os.path.join(outd, 'civ_plan_a%d_1x%s.png' % (area, sfx))
         (im if sfx else im.convert('RGB')).save(out); print(out, im.size)
+    lg = plan_legend(area, os.path.join(outd, 'civ_plan_a%d_1x.png' % area), (W, H), [a['frame'] for a in actors])
+    out = os.path.join(outd, 'civ_plan_a%d_1x_legend.png' % area); lg.save(out); print(out, lg.size)
 
 
 def main():
