@@ -242,7 +242,7 @@ static void open_game_data(const char *argv0) {
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9|32:9] [--widescreen [16:9|21:9|32:9]] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--title-bg FILE]\n"
-                "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
+                "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--trace-cd] [--save-dir DIR] [-v]\n"
                 "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk\n"
@@ -252,7 +252,9 @@ static int usage(const char *argv0) {
                 "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n"
                 "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)\n"
                 "  --internal-res N (OpenGL) renders at N x the PS1 resolution (1 = original); --dump-frames also writes hd_*.png\n"
-                "  --fps60 (OpenGL, experimental) presents frames interpolated between the 50 Hz logic steps\n", argv0);
+                "  --fps60 (OpenGL, experimental) presents frames interpolated between the 50 Hz logic steps\n"
+                "  --dump-textures DIR writes every texture drawn as PNG; --texture-pack DIR (OpenGL) draws the PNGs of a pack\n"
+                "  instead (any integer scale; docs/PORT.md \"Texture packs\")\n", argv0);
     return 2;
 }
 int main(int argc, char **argv) {
@@ -301,6 +303,12 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--dump-frames") && v) port_dump_dir = argv[++i];
         else if (!strcmp(a, "--dump-every") && v) port_dump_every = atoi(argv[++i]);
         else if (!strcmp(a, "--dump-vram")) port_dump_vram = 1;
+        else if ((!strcmp(a, "--dump-textures") || !strcmp(a, "--texture-pack")) && v) {   /* shims/texpack.c */
+            extern const char *port_texdump_dir, *port_texpack_dir; extern int port_texpack_on; extern void port_texpack_stop(void);
+            if (a[2] == 'd') port_texdump_dir = argv[++i]; else port_texpack_dir = argv[++i];
+            if (!port_texpack_on) atexit(port_texpack_stop);
+            port_texpack_on = 1;
+        }
         else if (!strcmp(a, "--dump-draws") && v) { extern const char *port_drawdump_path; port_drawdump_path = argv[++i]; }
         else if (!strcmp(a, "--dump-ram") && v) port_dump_ram_add(argv[++i]);
         else if (!strcmp(a, "--dump-audio") && v) port_audio_path = argv[++i];
