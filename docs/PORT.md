@@ -2072,6 +2072,10 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
 - **HUD** (`drawHud`, fixes.txt): lives, vitality and weapon move left by pad, the AP counter right by pad (anchored to
   the wide frame's edges).  Other HUDs (race, item gauges, menus) stay at their 4:3 place, centred.
 
+- **Title background** (`--title-bg FILE`, PNG / JPG, launcher "Wide title background"): a user-supplied wide version
+  of the title picture (not shipped: game art) fills the wide copy behind the title screen (`runtime/titlebg.c`,
+  gated by the ordering-table node titleLogoDraw marks, fixes.txt).  Its full height is the game's 240 background
+  rows, its centred 56.24 % the game's 320 columns (measured on a 2000x848 picture); wider than the picture is black.
 - **Background blocks** (`callAreaModelLinkHook`, fixes.txt -> `port_ws_area_model_link` in
   `runtime/main0_handwritten.c`): the area background is one model in RAM split into 80-unit-wide blocks; a per-area
   hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select

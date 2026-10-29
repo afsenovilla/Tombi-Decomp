@@ -662,7 +662,22 @@ u32 *ClearOTag(u32 *ot, int n) {
 int port_dump_packets;   /* --dump-packets FRAME: print every GP0 packet drawn in that vblank */
 /* GPU DMA linked-list walk: every node is (len << 24 | next), followed by len GP0 words */
 unsigned long long port_prof_draw_us;   /* time spent walking + rasterizing ordering tables (the fps line, shims/psyq.c) */
+/* --title-bg (runtime/titlebg.c): while the title screen's background is in this list, fill the wide copy of the
+   buffer with the user's wide picture first (the game then draws its own 4:3 background, logo and text over it) */
+static void ws_title_bg(u32 *ot) {
+    extern void *port_title_bg_take(void); extern void port_title_bg_done(void);
+    extern const unsigned short *port_title_bg_pixels(int w, int h, int pad);
+    void *m = port_title_bg_take(); u32 *p = ot; const unsigned short *px; int n = 0, w, h, bx;
+    if (!m || !ws_area()) return;
+    for (;;) { if (p == m) break; if ((*p & 0xFFFFFF) == 0xFFFFFF || ++n > 200000) return; p = (u32 *)(*p & 0xFFFFFF); }
+    port_title_bg_done();
+    w = 320 + 2 * port_widescreen; h = gs.y2 - gs.y1 + 1; bx = ws_base(gs.x1);
+    if (gs.y1 + h > 512 || !(px = port_title_bg_pixels(w, h, port_widescreen))) return;
+    for (int j = 0; j < h; j++) memcpy(&wvram[gs.y1 + j][bx], px + (size_t)j * w, (size_t)w * 2);
+    if (be->ws_upload) be->ws_upload(bx, gs.y1, w, h, &wvram[gs.y1][bx], WS_STRIDE);
+}
 void DrawOTag(u32 *ot) {
+    { extern const char *port_title_bg_path; if (port_title_bg_path && port_widescreen) ws_title_bg(ot); }
     u32 *p = ot; int n = 0;
     unsigned h = 2166136261u;
     unsigned long long t0 = port_time_us();
