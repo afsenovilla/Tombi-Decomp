@@ -616,12 +616,74 @@ def capture_uses(path, pending, log=print):
     return out
 
 
+def editor_core(data, capture=None, log=print):
+    """The graphics editor's core (tools/gfx_core.py) on the extracted disc folder, so the dump shows every page and sprite with the
+    palette the editor shows it with (same code: port capture rects when a capture exists, else tools/palinfer.py).  None on failure."""
+    old = os.environ.get("TOMBI_GFX_CAPTURE")
+    if capture:
+        os.environ["TOMBI_GFX_CAPTURE"] = capture
+    try:
+        import gfx_core
+        return gfx_core.Core(data)
+    except Exception as e:
+        log("  (graphics editor palettes unavailable: %s)" % e)
+        return None
+    finally:
+        if old is None:
+            os.environ.pop("TOMBI_GFX_CAPTURE", None)
+        else:
+            os.environ["TOMBI_GFX_CAPTURE"] = old
+
+
+_EV = {}
+
+
+def editor_view(core, meta, depth):
+    """(page palette, [(x, y, w, h, palette)] rects with their own palette, note) of the page of `meta` (resource + list) exactly as
+    gfx_core.Core.surface_for / Surface.render show it in the graphics editor (page coordinates in pixels), or None."""
+    if core is None:
+        return None
+    ld, k = meta["list"].split(":")
+    key = (id(core), meta["resource"], ld, int(k))
+    if key not in _EV:
+        _EV[key] = None
+        try:
+            s = core.surface_for(("page", meta["resource"], ld, int(k)))
+            n = (16, 256)[depth]
+            if s.bpp == (4, 8)[depth] and s.pal:
+                fix = lambda ref: tuple((list(core.pal_words(ref)) + [0] * n)[:n])
+                rects = [(r.x, r.y, r.w, r.h, fix(r.pal)) for r in s.rects if r.pal] if s.multi_pal else []
+                _EV[key] = (fix(s.pal), rects, s.pal_note or core._ref_label(s.pal))
+        except Exception:
+            pass
+    return _EV[key]
+
+
+def editor_wpp_palette(core, name, n):
+    """(16 words, label) the graphics editor gives frame n of WPP file `name` (Core.wpp_palette), or (None, None)."""
+    if core is None:
+        return None, None
+    try:
+        ref = core.wpp_palette(name, n)
+        if ref:
+            ws = list(core.pal_words(ref))[:16]
+            if any(ws):
+                return ws, "graphics editor: " + core._ref_label(ref)
+    except Exception:
+        pass
+    return None, None
+
+
 def dump_static(out, data, log=print, progress=None, capture=None, make_capture=False):
     """Every image of every resource, read from the disc files (no game run): each GRPX page of every load list cut at its texture
     pages, and every WPP sprite frame, named "<descripcion>__r<key>.png" in the readable tree.  Returns the number of images."""
     import struct
     A = disc_env(data)
     import vram, wpp
+    import gfx_capture as GC
+    if capture is None:
+        capture = GC.default_store()
+    core = editor_core(data, capture, log)
     lists = A.load_lists(data)
     if not lists:
         raise RuntimeError("no load lists in %s (is it an extracted disc? tools/extract_data.py)" % data)
@@ -771,13 +833,14 @@ def dump_static(out, data, log=print, progress=None, capture=None, make_capture=
                             continue
                         done.add(key)
                         info = fps.get(fk)
-                        pal = _clut_words(A, info["clut"], info["row"] * 256 + info["x0"], 16) if info else None
+                        fno = int(fk.split("frame_")[1][:4])
+                        pal, src = editor_wpp_palette(core, nm, fno)
+                        if not pal:
+                            pal = _clut_words(A, info["clut"], info["row"] * 256 + info["x0"], 16) if info else None
+                            src = "%s row %d +%d" % (info["clut"], info["row"], info["x0"]) if info else None
                         if not pal:
                             pal, src = first_pal(ld, k, 4, None)
-                        else:
-                            src = "%s row %d +%d" % (info["clut"], info["row"], info["x0"])
                         words = struct.unpack_from("<%dH" % (fw * fh), o, 4)
-                        fno = int(fk.split("frame_")[1][:4])
                         emit(who, "%s_f%04d" % ("Tombi" if player else short, fno), key, fw * 4, fh,
                              _decode(words, fw, fw, fh, 0, 0, 0, pal),
                              dict(_pal=pal, kind="sprite", resource=nm, frame=fno, list="%s:%d" % (ld, k), depth=4, palette=src))
@@ -813,9 +876,6 @@ def dump_static(out, data, log=print, progress=None, capture=None, make_capture=
                 log("  (sprites %s:%d: %s)" % (ld, k, e))
         if progress:
             progress(wi, len(work))
-    import gfx_capture as GC
-    if capture is None:
-        capture = GC.default_store()
     if make_capture and not os.path.isfile(capture) and os.path.isfile(default_exe()):
         log("capturing the game's draws (port headless, every room) into %s ..." % capture)
         try:
@@ -846,6 +906,7 @@ def dump_static(out, data, log=print, progress=None, capture=None, make_capture=
                 _c, cu, cv, cw, ch = shp
                 for yy in range(max(cv, 0), min(cv + ch, h)):
                     owner[yy * w + max(cu, 0):yy * w + min(cu + cw, w)] = [pi] * (min(cu + cw, w) - max(cu, 0))
+        owner_x = list(owner)                   # texels an exact draw covers (models, SPR parts, capture)
         cnt = {}
         for yy in range(h):
             r = rows[yy]
@@ -854,11 +915,29 @@ def dump_static(out, data, log=print, progress=None, capture=None, make_capture=
                 if o and r[xx]:
                     cnt[o] = cnt.get(o, 0) + 1
         known = sum(cnt.values())
-        if depth == 0 and not real:            # texels no known draw covers: a palette per blob, deduced (neighbour colours)
+        ev = None if real else editor_view(core, meta, depth)
+        if ev:                                  # texels no known draw covers: the palette(s) the graphics editor shows them with
+            ux, uy = meta["upload"][:2]
+            vx, vy = meta["vram"][:2]
+            ox, oy = (vx - ux) * (4, 2)[depth], vy - uy
+            for (rx, ry, rw, rh, rp) in [(ox, oy, w, h, ev[0])] + ev[1]:
+                if rp not in cover:
+                    cover[rp] = len(pals)
+                    pals.append(rp)
+                pi = cover[rp]
+                for yy in range(max(ry - oy, 0), min(ry - oy + rh, h)):
+                    x0, x1 = max(rx - ox, 0), min(rx - ox + rw, w)
+                    for xx in range(x0, x1):
+                        if not owner_x[yy * w + xx]:
+                            owner[yy * w + xx] = pi
+        elif depth == 0 and not real:          # no editor palette either: a palette per blob, deduced (neighbour colours)
             pals += _blob_palettes(rows, w, h, owner, sub16(meta["list"]), len(pals))
         if cnt and not real:                    # the editable page: the palette most of it is drawn with instead of an example one
             meta["_pal"] = list(pals[max(cnt, key=cnt.get)])
             meta["palette"] = "most used by its sprites / models"
+        elif ev:
+            meta["_pal"] = list(ev[0])
+            meta["palette"] = "as the graphics editor shows it: " + ev[2]
         base = meta["_pal"] if real else None
         grey = [0] + [((i * 2 if depth == 0 else i // 8) | 1) * 0x421 for i in range(1, 256)]
         prow = []
@@ -869,7 +948,7 @@ def dump_static(out, data, log=print, progress=None, capture=None, make_capture=
                 c = pals[o][ix] if o else base[ix] if base else grey[ix]
                 line.append(0 if not ix and not (o or base) else c if c else (0x8000 if ix and real else 0))
             prow.append(line)
-        meta["preview"] = "%.0f%% exact, rest deduced" % (100.0 * known / max(1, sum(1 for r in rows for v in r if v)))
+        meta["preview"] = ("%.0f%% exact, rest as the graphics editor shows it" if ev else "%.0f%% exact, rest deduced") % (100.0 * known / max(1, sum(1 for r in rows for v in r if v)))
         emit(top, prefix, key, w, h, rows, meta)
         pdir = os.path.join(out, *[safe(x) for x in top], "Vista previa (solo para ver)")
         os.makedirs(pdir, exist_ok=True)
