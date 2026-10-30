@@ -276,34 +276,43 @@ static unsigned char port_civ_buf[sizeof port_civ_recs];
 /* --civ-test spawn: AREA08 s0's row, optionally moved with --civ-spawn X,Y (world) to stand next to a resident */
 /* SPR table for AREA11 subtype 0 (frames 0..29 of its scripts: idle 0-2, walk 3-20, talk 21-29), built at runtime from
    boxes on the surviving A06100 4 bpp page (page 0 relative, w1e 1 = VRAM x 0x40), CLUT AREA11/CLUT02 row 4 (VRAM
-   (192, 480)). Frame f = the f-th figure of the page in reading order (48-pixel rows): the retail top-down tables pack
-   frames that way for AREA05/08 (not AREA19, so this is a working assumption). Figures 24..29 of the page are sitting /
-   lying poses, not talk poses, so talk frames 24..29 reuse the standing gesture figures 17..20 / 15..17 (our choice).
-   Boxes from tools/civ_sheets.py comps(); no pixels. */
-static const unsigned char port_civ_boxes[30][4] = {{1,0,22,43}, {27,0,17,45}, {49,0,22,44}, {74,0,19,43}, {97,0,21,43}, {121,0,22,43}, {151,0,24,43}, {179,0,17,43}, {203,0,18,43}, {231,0,24,43}, {3,48,17,44}, {27,48,18,44}, {51,48,19,45}, {73,48,22,45}, {97,48,22,43}, {124,48,23,43}, {153,48,21,43}, {177,49,22,42}, {201,48,20,45}, {225,48,24,45}, {1,96,26,45}, {36,96,24,44}, {66,96,21,44}, {89,96,22,45}, {177,49,22,42}, {201,48,20,45}, {225,48,24,45}, {124,48,23,43}, {153,48,21,43}, {177,49,22,42}};
-static unsigned char port_civ_spr_buf[30 * 4 + 30 * 16];
-int port_civ_spr(void) {
-    unsigned char *p = port_civ_spr_buf;
-    unsigned clut = (480u << 6) | (192u >> 4);
-    int f;
-    for (f = 0; f < 30; f++) {
-        int off = 30 * 4 + f * 16, u0 = port_civ_boxes[f][0], v0 = port_civ_boxes[f][1], w = port_civ_boxes[f][2], h = port_civ_boxes[f][3];
-        unsigned char *e = p + off;
-        p[4 * f] = 1; p[4 * f + 1] = 0; p[4 * f + 2] = off & 0xFF; p[4 * f + 3] = off >> 8;
-        e[0] = u0; e[1] = v0; e[2] = clut & 0xFF; e[3] = clut >> 8;
-        e[4] = u0 + w; e[5] = v0; e[6] = 0; e[7] = 0;
-        e[8] = u0; e[9] = v0 + h; e[10] = w; e[11] = h;
-        e[12] = u0 + w; e[13] = v0 + h; e[14] = (unsigned char)(-(w / 2)); e[15] = (unsigned char)(-h);
-    }
-    return (int)(long)port_civ_spr_buf;
-}
+   (192, 480)): port_civ_fig(11, 0), frame order from the worker's GIFs (port_civ_worker below). Boxes from
+   tools/civ_sheets.py comps(); no pixels. */
+int port_civ_fig(int area, int sub);
+int port_civ_spr(void) { return port_civ_fig(11, 0); }
 /* Real sprites of AREA16 subtypes 0..2 and AREA17 subtype 0 (docs/CIVILIZATION.md): one standing figure of the
    surviving page (w1e 1 = VRAM x 64, boxes from tools/civ_sheets.py comps()) with its real CLUT row (VRAM
-   (128 + 16 * (r % 16), 480 + r / 16)): AREA16/CLUT07 rows 21 / 37 / 53, AREA17/CLUT03 row 1. Their tables are lost,
-   so every frame index of the anim scripts (up to 128) points to the same part: the figure stands still. */
+   (128 + 16 * (r % 16), 480 + r / 16)): AREA16/CLUT07 rows 21 / 37 / 53, AREA17/CLUT03 row 1. Their tables are lost;
+   a frame index of the anim scripts with no entry in port_civ_anim points to this part (the figure stands still). */
 static const struct { unsigned char area, sub, u, v, w, h, row; } port_civ_figs[] = {
     {16, 0, 67, 48, 36, 45, 21}, {16, 1, 145, 148, 24, 35, 37}, {16, 2, 75, 203, 50, 52, 53}, {17, 0, 25, 3, 22, 45, 1}};
-static unsigned char port_civ_fig_buf[4][128 * 4 + 16];
+static unsigned char port_civ_fig_buf[5][128 * 4 + 32 * 16];
+/* Rebuilt frame tables (tools/civ_anim.py): frame ids first..first+n-1 of the I0NFO2 anim scripts (idle 3, walk 3x6,
+   talk 3x2 or 3x3; facing order back, side, front) -> part box on the page, flip = mirrored (texels at u - 1). The order
+   comes from the community's GIFs of these residents, matched pixel-exact against the page; the walk-back/front
+   frames 4..6 are frames 1..3 mirrored, as in the worker's GIFs. */
+struct port_civ_part { unsigned char u, v, w, h, flip; };
+static const struct port_civ_part port_civ_worker[30] = {   /* AREA11 sub 0 (Lumberjack Factory Worker), frames 0..29 */
+    {1,0,22,43,0}, {27,0,17,45,0}, {49,0,22,44,0}, {74,0,19,43,0}, {97,0,21,43,0}, {121,0,22,43,0}, {74,0,19,43,1},
+    {97,0,21,43,1}, {121,0,22,43,1}, {151,0,24,43,0}, {179,0,17,43,0}, {203,0,18,43,0}, {231,0,24,43,0}, {3,48,17,44,0},
+    {27,48,18,44,0}, {51,48,19,45,0}, {73,48,22,45,0}, {97,48,22,43,0}, {51,48,19,45,1}, {73,48,22,45,1},
+    {97,48,22,43,1}, {124,48,23,43,0}, {153,48,21,43,0}, {177,49,22,42,0}, {201,48,20,45,0}, {225,48,24,45,0},
+    {1,96,26,45,0}, {36,96,24,44,0}, {66,96,21,44,0}, {89,96,22,45,0}};
+static const struct port_civ_part port_civ_woman[27] = {    /* AREA16 sub 0 (Female Stonetown Resident), frames 30..56 */
+    {225,48,29,45,0}, {234,96,18,46,0}, {49,144,29,46,0}, {2,0,37,45,0}, {42,0,35,45,0}, {81,0,37,43,0}, {2,0,37,45,1},
+    {42,0,35,45,1}, {81,0,37,43,1}, {122,0,23,45,0}, {153,0,24,46,0}, {186,0,26,45,0}, {217,0,24,45,0}, {2,48,23,44,0},
+    {33,48,28,43,0}, {67,48,36,45,0}, {107,48,36,44,0}, {147,48,32,44,0}, {67,48,36,45,1}, {107,48,36,44,1},
+    {147,48,32,44,1}, {186,49,37,44,0}, {2,96,37,45,0}, {65,96,20,47,0}, {234,96,18,46,0}, {91,97,39,45,0},
+    {138,96,41,46,0}};
+static const struct { unsigned char area, sub, first, n, row; const struct port_civ_part *t; } port_civ_anim[] = {
+    {11, 0, 0, 30, 4, port_civ_worker}, {16, 0, 30, 27, 21, port_civ_woman}};
+static void port_civ_put_part(unsigned char *e, const struct port_civ_part *q, unsigned clut) {
+    int u0 = q->flip ? q->u + q->w - 1 : q->u, u1 = q->flip ? q->u - 1 : q->u + q->w;
+    e[0] = u0; e[1] = q->v; e[2] = clut & 0xFF; e[3] = clut >> 8;
+    e[4] = u1; e[5] = q->v; e[6] = 0; e[7] = 0;
+    e[8] = u0; e[9] = q->v + q->h; e[10] = q->w; e[11] = q->h;
+    e[12] = u1; e[13] = q->v + q->h; e[14] = (unsigned char)(-(q->w / 2)); e[15] = (unsigned char)(-q->h);
+}
 /* stand-in villager CLUT (b0d 1, w08): one real resident row of the town's CLUT block, since the villager's own rows
    (AREA08/CLUT01 1, 17, 49, 97, 113, 129) are not loaded: AREA11 row 36 (the old man), AREA16 row 54 and AREA17
    row 49 (the red-shirt resident of the FMV, docs/CIVILIZATION.md) */
@@ -312,20 +321,31 @@ int port_civ_standin_clut(int area) {
     return ((480 + r / 16) << 6) | ((128 + 16 * (r % 16)) >> 4);
 }
 int port_civ_fig(int area, int sub) {
-    int i, f;
+    int i, f, a, k = -1;
+    const struct port_civ_part *t = 0;
+    struct port_civ_part q;
+    unsigned clut, off = 128 * 4;
+    unsigned char *p;
     for (i = 0; i < 4; i++) if (port_civ_figs[i].area == area && port_civ_figs[i].sub == sub) break;
-    if (i == 4) return 0;
+    for (a = 0; a < 2; a++) if (port_civ_anim[a].area == area && port_civ_anim[a].sub == sub) t = port_civ_anim[a].t, k = a;
+    if (i == 4 && !t) return 0;
+    p = port_civ_fig_buf[i == 4 ? 4 : i];
+    if (i < 4) { q.u = port_civ_figs[i].u; q.v = port_civ_figs[i].v; q.w = port_civ_figs[i].w; q.h = port_civ_figs[i].h; }
+    else q = t[0];
+    q.flip = 0;
     {
-        unsigned char *p = port_civ_fig_buf[i], *e = p + 128 * 4;
-        int u0 = port_civ_figs[i].u, v0 = port_civ_figs[i].v, w = port_civ_figs[i].w, h = port_civ_figs[i].h, r = port_civ_figs[i].row;
-        unsigned clut = ((480u + r / 16) << 6) | ((128u + 16 * (r % 16)) >> 4), off = 128 * 4;
-        for (f = 0; f < 128; f++) { p[4 * f] = 1; p[4 * f + 1] = 0; p[4 * f + 2] = off & 0xFF; p[4 * f + 3] = off >> 8; }
-        e[0] = u0; e[1] = v0; e[2] = clut & 0xFF; e[3] = clut >> 8;
-        e[4] = u0 + w; e[5] = v0; e[6] = 0; e[7] = 0;
-        e[8] = u0; e[9] = v0 + h; e[10] = w; e[11] = h;
-        e[12] = u0 + w; e[13] = v0 + h; e[14] = (unsigned char)(-(w / 2)); e[15] = (unsigned char)(-h);
-        return (int)(long)p;
+        int r = i < 4 ? port_civ_figs[i].row : port_civ_anim[k].row;
+        clut = ((480u + r / 16) << 6) | ((128u + 16 * (r % 16)) >> 4);
     }
+    port_civ_put_part(p + off, &q, clut);
+    for (f = 0; f < 128; f++) { p[4 * f] = 1; p[4 * f + 1] = 0; p[4 * f + 2] = off & 0xFF; p[4 * f + 3] = off >> 8; }
+    if (t)
+        for (f = 0; f < port_civ_anim[k].n; f++) {
+            unsigned o = off + 16 * (f + 1), id = port_civ_anim[k].first + f;
+            port_civ_put_part(p + o, &t[f], clut);
+            p[4 * id + 2] = o & 0xFF; p[4 * id + 3] = o >> 8;
+        }
+    return (int)(long)p;
 }
 /* --civ-wfm FILE: replaces AREA11's dialogue bank (WFM3_DATA[0] = scratchpad 0x1F800398) before a set-0D resident talks */
 static const char *port_civ_wfm_path;

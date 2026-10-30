@@ -664,7 +664,7 @@ OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata    
 
 **Residents.** AREA11 subtype 0 (the hard-hat worker, AREA11/CLUT02 row 4), AREA16 subtypes 0/1/2 (rows 21/37/53
 of AREA16/CLUT07) and AREA17 subtype 0 (AREA17/CLUT03 row 1) are drawn from their surviving page with their real
-row (one standing figure per resident: the tables that order the frames are lost). The other subtypes wear the
+row. The tables that order the frames are lost; the worker (frames 0..29) and the woman (30..56) animate with a rebuilt table: the frame order comes from the community GIFs of these residents (Tomba Unused Animations), whose frames match the page pixel-exact (worker: every frame; woman: idle and talk, walk inferred from the page layout and the worker's mirrored walk-back/front frames). The boy, the strongman and the Iron Town resident stay one standing figure. The other subtypes wear the
 AREA08 villager (its page loaded at VRAM x 512) in one real resident row of the town (AREA11 36, AREA16 54,
 AREA17 49), because the villager's own rows are not in the town's CLUT block. Scenery and props with lost tables
 (roofs, signs, the lift, the platforms) are not drawn; their logic runs.

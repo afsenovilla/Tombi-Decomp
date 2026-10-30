@@ -692,7 +692,7 @@ OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata    
 
 **Vecinos.** El subtipo 0 de AREA11 (el trabajador del casco, AREA11/CLUT02 fila 4), los subtipos 0/1/2 de AREA16
 (filas 21/37/53 de AREA16/CLUT07) y el subtipo 0 de AREA17 (AREA17/CLUT03 fila 1) se dibujan de su página que
-sobrevive con su fila real (una figura de pie por vecino: las tablas que ordenan los fotogramas se perdieron). Los
+sobrevive con su fila real. Las tablas que ordenan los fotogramas se perdieron; el trabajador (fotogramas 0..29) y la mujer (30..56) se animan con una tabla reconstruida: el orden sale de los GIF de la comunidad (Tomba Unused Animations), cuyos cuadros coinciden píxel a píxel con la página (trabajador: todos; mujer: reposo y hablar; andar deducido de la página y de los cuadros espejados del trabajador). El chico, el forzudo y el vecino de la Ciudad de hierro siguen siendo una figura de pie. Los
 demás subtipos llevan el aldeano de AREA08 (su página cargada en la VRAM x 512) con una fila real de vecino del pueblo
 (AREA11 36, AREA16 54, AREA17 49), porque las filas propias del aldeano no están en el bloque CLUT del pueblo. El
 decorado y los objetos con tablas perdidas (tejados, carteles, el ascensor, las plataformas) no se dibujan; su lógica
