@@ -28,6 +28,10 @@ python3 -I tools/jp_syms.py match /opt/gproj_jp/out --csv matches.csv --md sin_n
 2. `fuzzy`: difflib sobre las palabras enmascaradas, tamano +-30 %, mejor >= 0.80 con margen 0.03.
 3. `callgraph`: los `jal` de un par ya emparejado se emparejan en orden de llamada.
 4. `similar`: Dice de 4-gramas de opcode/funct >= 0.70 con margen (variantes con constantes u offsets de struct distintos).
+5. (etapa 2) `skel`/`callsig`, solo overlays de area y contra TODOS los modulos PAL (el codigo cambia de overlay entre
+   builds): `skel` = ratio difflib sobre el esqueleto opcode/funct (insensible a registros, constantes y reubicaciones),
+   >= 0.80 con margen 0.04; `callsig` = ratio >= 0.50 y Jaccard >= 0.5 del conjunto de callees ya nombrados (>= 2 por lado),
+   iterado 3 rondas. Tarda ~3.5 min (difflib); sobre exe/x00 no se aplica (coste).
 
 ## Cobertura (funciones de >= 8 bytes segun Ghidra)
 
@@ -36,9 +40,9 @@ python3 -I tools/jp_syms.py match /opt/gproj_jp/out --csv matches.csv --md sin_n
 | slps01144 | 1581 | 1266 | 80.1% | 338588 | 294828 |
 | x00 | 550 | 381 | 69.3% | 291004 | 180432 |
 | info2 | 165 | 161 | 97.6% | 86504 | 84332 |
-| x10 | 354 | 103 | 29.1% | 72936 | 34932 |
-| x11 | 59 | 7 | 11.9% | 10580 | 2856 |
-| x16 | 58 | 21 | 36.2% | 9072 | 4808 |
+| x10 | 354 | 110 | 31.1% | 72936 | 36428 |
+| x11 | 59 | 8 | 13.6% | 10580 | 3748 |
+| x16 | 58 | 23 | 39.7% | 9072 | 5116 |
 | x17 | 50 | 15 | 30.0% | 8668 | 4800 |
 
 `x10..x17` cuentan solo la parte de area (>= `0x80115178`). Ghidra ve 2063 funciones en el exe, pero 482 miden menos de
@@ -51,13 +55,13 @@ primero; el nombre es el mismo de verdad solo si el codigo compartido lo es).
 |---|---:|---:|---:|
 | slps01144 | 13 | 34 | 268 |
 | x00 | 9 | 55 | 105 |
-| x10 | 5 | 19 | 227 |
-| x11 | 0 | 1 | 51 |
-| x16 | 1 | 0 | 36 |
+| x10 | 4 | 17 | 223 |
+| x11 | 0 | 1 | 50 |
+| x16 | 1 | 0 | 34 |
 | x17 | 0 | 1 | 34 |
 | info2 | 0 | 1 | 3 |
 
-(Las de menos de 32 bytes no se comparan y van en la ultima columna.)
+(Tabla de la etapa 1 salvo x10..x17, recalculadas tras la etapa 2.) (Las de menos de 32 bytes no se comparan y van en la ultima columna.)
 
 ## Sin contraparte PAL (mejor parecido < 0.4, >= 200 bytes): 148 funciones
 
@@ -216,3 +220,53 @@ tienen parecido con ninguna funcion PAL (hipotesis por confirmar: codigo de obje
 | info2 | 800EC5A8 | 1280 | handler de objeto INFO2: maquina de estados por byte +5 (0x30, 0x63=99, ...) con flags +0x2E |
 | info2 | 800ECCA4 | 320 | handler de objeto (maquina de estados +4/+5/+6) |
 | info2 | 800EEEEC | 292 | handler de objeto (maquina de estados +4/+5/+6) |
+
+## Etapa 2: que se probo y que quedo sin contraparte
+
+Resultado de la etapa 2: x10 29.1 -> 31.1 %, x11 11.9 -> 13.6 %, x16 36.2 -> 39.7 %, x17 sin cambio (30.0 %); +10 funciones
+en total. Las 10 nuevas (callsig/skel, todas comprobadas a ojo contra el nombre PAL: mismo papel): x10 `updateZiplinePulley`,
+`flyingBugWeaponHit`, `blockingWallObjectCollision`, `rotatingWheelObjectCollision`, `updateJuiceManJoinFight`,
+`flyingBugProbeBlocked`, `windblownMonkeyRepeatTalk`; x11 `goGoCarWineReceivedTalk`; x16 `updateNpcSet22`,
+`checkStoneGearsTrigger`. Con umbral skel 0.70 aparecian 7 mas, pero eran funciones de 60-120 B con falsos positivos
+evidentes (p. ej. `transitionToGameOver` en X10), asi que se subio a 0.80.
+
+Conclusion (verificada): el techo no es el algoritmo. Se comprobo que los `symbol_addrs_x0nn.txt` PAL cubren todo el codigo
+de area de X010/X011/X016/X017 (no hay funciones PAL sin simbolo; un barrido de prologos `addiu sp,sp,-N` en los huecos no
+encuentra ninguna) y que la busqueda ya usa los 8302 simbolos de todos los modulos. El 70 % restante de X10 (y 85-90 % de
+X11/16/17) tiene esqueleto de opcodes < 0.4 de parecido con cualquier funcion PAL: el area JP es otra version de los
+handlers (build anterior, reescrita antes del PAL), no una reubicacion.
+
+### Lectura de lo que sobrevive (C de Ghidra; V = verificado en el C, G = conjetura)
+
+- **x11 `0x80116348` (632 B) - evento que arranca una cutscene con dialogos encadenados.** Handler de objeto, maquina de
+  estados por `+6`:
+  - V caso 0: se activa si el jugador esta cerca (`DAT_800a7b8a-0x40 < 0x20`, `*(short*)(DAT_800a7bbc+2)==0`) y se pulsa el boton
+    (`DAT_1f8003c8 & DAT_1f8001fc`); pone `DAT_800a7b7c=5` (modo de juego: cutscene), `DAT_8009ee58=2`, `DAT_8009e4ea=1`,
+    guarda `+0x2E` en `+0xBC`, elige sprite `+0x24` de la tabla `PTR 0x801188B4[subtipo(+3)*3]+4`, `AnimLoadDuration`.
+  - V casos 0,2,4,6,7 abren cuadros de mensaje con `showMessageBoxDirect(2, n, &pos)` con n = 6, 7, 8, 9, 10 (cinco textos
+    seguidos); los casos 1,3,5,7,8 esperan a que el hijo (`+0x90`) llegue a `+4==2` y lo ponen a 3 (cuadro cerrado).
+  - V caso 1 crea con `allocObjectLayer5` un objeto auxiliar (`[0]=2,[2]=0x0F,[3]=0x33,[0xC]=0x80`); `DAT_8009ec2a` actua de
+    semaforo (1/2/3) con ese objeto en casos 2-4.
+  - V caso 5 llama `setEventStarted(0x68,0,0)` (evento 0x68 = 104) y arma un temporizador de 0x168 = 360 fotogramas (caso 6).
+  - V caso 9 restaura `DAT_800a7b7c=1` (juego normal), `+0x2E`, y borra `+5/+6/+0x68`.
+  - G: es un NPC/puerta de historia con 5 dialogos (ids de mensaje 6-10 del script del area, no resueltos a texto); el
+    objeto 0x33/sub 0x0F es un efecto o camara de escena. No esta en el PAL con esta forma (ni `callsig` ni `skel`).
+- **x00 `0x80101F30` (1620 B; es codigo compartido X00, no de area; offset +0x18438 en el overlay):** V estado del jugador con
+  `PlayerSetAnimIfChanged(...,4)` cada fotograma, desplaza `+0/+0x14` por `DAT_8009e4ec/ee * 0x100` (velocidad de plataforma
+  movil), sonido `0x1C`, y salidas por `+5` = 0x0E, 1, 0x1B, 0x2A/0x2B (segun `DAT_8009ee59`) y lectura de pad `DAT_1f8003c6`.
+  G: jugador agarrado o llevado por una plataforma movil/cuerda y la logica de soltarse; aparece igual en X10/X11/X16/X17.
+- **x10 `0x8011DCC8` (1404 B):** V colision AABB objeto-objeto en X/Z/Y (`+0x40/+0x44` posiciones, `+0x6C..+0x72` radios, `+0x16`
+  altura) con `switch(param_2+3)` por subtipo (0,3,4,9,10,0xB); si `param_1+4==1` y `+5 in {4,0x3F,0x41}` ajusta velocidades
+  `+0x7C/+0x7E` segun pad `DAT_8009f200`, sonido `0xA0`, marca `+0x9C=1/2`, `param_2+0x69=1`. G: es el equivalente JP de
+  `solidSceneryPlayerCollision` (Dice 0.37, estructura distinta): decorado solido contra jugador.
+- **x10 `0x8011AA10` (2112 B):** V objeto que sigue al jugador (`DAT_800a0c7c`, posicion `+0x40/+0x16` + offset `+0xB8/+0xBA`),
+  rotando con seno/coseno del angulo del jugador (`+0x8C + 0x400`), con temporizador `+0x20`, toca `DAT_8009dee0` (bloque
+  extra del jugador, campos +2,+6,+9,+0xC,+0xE,+0x10,+0x12,+0x28..+0x2E). G: objeto/arma llevada por el jugador
+  (p. ej. algo que se agarra o gira alrededor); mejor PAL `playerStepClingRotating` (0.61) = parecido flojo.
+- **x10 `0x80127DFC` (1048 B):** V objeto con hitbox seleccionada de tablas `DAT_8012D9A4..BB` segun `+0xB4` (dos variantes),
+  estados 0/1.. con `AnimLoad`, sonido `0xA4`, `+0x82=0xFC00` (salto/impulso). G: enemigo tipo cerdo con carga
+  (mejor PAL `spearPigChargeB` 0.42, flojo).
+- Resto de X10 >= 360 B sin contraparte (V solo la lista, G la lectura): `0x80121A30` (980 B, ~`leafButterflyRoam` 0.64),
+  `0x8011D278` (836 B, ~`seesawPlankProbeFace` 0.55), `0x801285A0` (808 B, ~`spearPigJumpAttack` 0.35), `0x80121074`
+  (672 B, ~`bitingPlantBiteCarry` 0.59), `0x8011C9B8` (544 B, ~`collideEnemyWithTiltedBar` 0.42), `0x80117378` (540 B,
+  ~`ziplinePulleySlide` 0.32). Los de Dice >= 0.55 son variantes (misma familia de objeto); sin leer a fondo.

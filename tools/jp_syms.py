@@ -11,6 +11,8 @@
                                                  allowing an equal-size PAL twin; pass 3 fuzzy (difflib on masked words,
                                                  size within 30%, unique best >= 0.80); pass 4 call-graph propagation
                                                  (callees of a matched pair paired in call order).
+                                                 pass 6 opcode-skeleton ratio >= 0.80 (area overlays) and pass 7 callee-name
+                                                 signature, both against ALL PAL modules.
 Needs the PAL files only for `match`. Prints coverage per program and writes the unmatched list.
 """
 import argparse, collections, csv, difflib, os, re, struct, sys
@@ -198,6 +200,45 @@ def match(outdir, md, csvp):
         if best is not None:
             if bs >= 0.70 and bs - second >= 0.03: result[(tag, a)] = (best[1], best[0], best[2], "similar%.2f" % bs)
             else: weak[(tag, a)] = (best[1], best[0], best[2], bs)
+    # pass 6/7: opcode-skeleton ratio (difflib on opcode/funct only, so register allocation and constants do not matter) and
+    # callee-name signature (set of already-named callees, resolved through result on the JP side and the PAL symbols).
+    # Both use ALL PAL modules: code moves between overlays across builds.
+    pnm = {(p[0], p[2]): p[1] for p in named}
+    def pcallees(p): return {pnm.get((p[0], c)) or pnm.get(("main0", c)) for c in p[6]} - {None}
+    def jcallees(f):
+        out = set()
+        for c in f[5]:
+            t = jp_by_addr.get(c)
+            if t is not None and (t[0], t[1]) in result: out.add(result[(t[0], t[1])][0])
+        return out
+    pshape = {id(p): shape(p[4]) for p in named if p[3] >= 32}
+    pcs = {id(p): pcallees(p) for p in named}
+    pbs = sorted((p for p in named if p[3] >= 32), key=lambda p: p[3])
+    psz = [p[3] for p in pbs]
+    jshape = {}
+    for rnd in range(3):
+        new = 0
+        for (tag, a), f in sorted(allf.items()):
+            if (tag, a) in result or f[2] < 32 or f[2] > 2400 or tag in ("slps01144", "x00", "info2"): continue   # area overlays only (cost)
+            jc = jcallees(f)
+            fs = jshape.setdefault((tag, a), shape(f[3]))
+            lo, hi = bisect.bisect_left(psz, int(f[2] * 0.6)), bisect.bisect_right(psz, int(f[2] * 1.6))
+            sc = []
+            for p in pbs[lo:hi]:
+                pc = pcs[id(p)]
+                jac = len(jc & pc) / len(jc | pc) if (jc and pc) else 0.0
+                if rnd == 0 and jac == 0 and len(set(fs) & set(pshape[id(p)])) < 0.5 * len(set(fs)): continue
+                sm = difflib.SequenceMatcher(None, fs, pshape[id(p)], autojunk=False)
+                if sm.real_quick_ratio() < 0.5 or sm.quick_ratio() < 0.5: continue
+                r = sm.ratio()
+                sc.append((r + 0.4 * jac if len(jc) >= 2 and len(pc) >= 2 else r, r, jac, p))
+            sc.sort(key=lambda x: -x[0])
+            if not sc: continue
+            b = sc[0]; sec = sc[1][0] if len(sc) > 1 else 0
+            if (b[1] >= 0.80 and b[0] - sec >= 0.04) or (len(jc) >= 2 and b[2] >= 0.5 and b[1] >= 0.50 and b[0] - sec >= 0.05):
+                result[(tag, a)] = (b[3][1], b[3][0], b[3][2], ("callsig%.2f/%.2f" if b[2] >= 0.5 else "skel%.2f/%.2f") % (b[1], b[2])); new += 1
+        print("pass6/7 round", rnd, "new", new)
+        if not new: break
     rows, lines = [], []
     tot = collections.OrderedDict()
     for tag, fl in jp.items():
