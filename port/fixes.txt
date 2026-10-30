@@ -456,3 +456,8 @@ src/i0nfo2/topdownMapObjHandler.c | extern int TOPDOWN_MAP_STRIP_BUFFER; | exter
 # civ_MFNT170S.WFM from tools/civ_test_data.py: Spanish glosses of the JP lines in the "···??" slots).
 src/i0nfo2/topdownA16ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); }
 src/i0nfo2/topdownA17ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); }
+# --civ-test: setEventStarted -> spawnEventTitle picks the event-title layout table by GAME.selectedArea; for AREA17
+# (and 11/16) that is a pointer inside the town's own area data (D_8011C088), which the AREA08 stand-in list never
+# loads, so tbl was a code word and tbl[event] faulted (npcSet0FSceneStep1, event 0x4C, ~50 s into AREA17). Read the
+# AREA08 table that is loaded instead, and drop the title if a pointer still is not in RAM.
+src/spawnEventTitle.c | done = 0; | done = 0; { extern int port_civ_on(int, int); extern int port_is_ram_ptr(const void *); if (port_civ_on(GAME.selectedArea, GAME.selectedSection)) { tbl = (D_8009BCCA == 1 || D_8009BCCA == 3) ? D_801184C4 : D_80102F9C; if (!port_is_ram_ptr(tbl) || !port_is_ram_ptr(tbl[event_id]) || !port_is_ram_ptr(src)) return; } }

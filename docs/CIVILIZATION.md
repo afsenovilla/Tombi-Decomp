@@ -717,6 +717,13 @@ the room's furniture as objects, whose tables are lost. The port keeps the layer
 instead: black, with each house rectangle showing its matched interior (layout `interiors`). Back outside, the town
 picture returns. The residents of room n appear as the engine shows them.
 
+**Event titles and scene text.** A scene's `setEventStarted` (e.g. AREA17 H4, `npcSet0FSceneStep1`, event 0x4C)
+spawns the event title from a per-area table that lives in the town's lost area data; the stand-in list never loads
+it, so the port reads AREA08's table instead and skips the title when that is not usable (it crashed before: a code
+word read as the table). The scenes' own lines use dialogue bank 2, which `--civ-wfm` does not replace: they show
+AREA08's text (e.g. "¿Sabías que si nadas contra la corriente del Masakari...?" in H4). The event itself (the "!",
+the AP) works.
+
 **Collision** (`tools/civ_rebuild.py`, layout `towns.N.collision`): editable shapes in picture px, traced over the
 v2 pictures: `{"t": "wall", "poly": [...]}`, `{"t": "line", "pts": [...], "w": px}` (fences, railings), `{"t":
 "rect", "r": [x, y, w, h]}`, `{"t": "water"}` (blocks like a wall: the top-down engine has no water or drop shape)
