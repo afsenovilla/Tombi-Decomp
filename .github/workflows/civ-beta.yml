@@ -1,0 +1,59 @@
+name: civ-beta
+
+# Manual check: diff the top-down engine overlay (I0NFO2 / INFO2, kind 0xF0) of the 1998-02-03 beta and of the
+# SLPM-80165 JP demo against PAL (tools/civ_i0nfo2_diff.py). Discs come from secrets, never committed; the job
+# summary gets analysis numbers only. See docs/BETA_980203.md, docs/CIVILIZATION.md.
+on:
+  workflow_dispatch:
+
+jobs:
+  civ:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch discs
+        env:
+          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL }}
+          GAME_FILES_URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
+          GAME_FILES_URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
+        run: |
+          fetch() {  # $1 secret value, $2 out dir
+            [ -n "$1" ] || { echo "::warning::secret for $2 not set"; return 0; }
+            URL="$(printf '%s' "$1" | tr -d '\r\n"'"'"' ')"
+            ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+            if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+            if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+            curl -fsSL -o "$RUNNER_TEMP/dl" "$URL"
+            mkdir -p "$RUNNER_TEMP/$2"
+            if unzip -tq "$RUNNER_TEMP/dl" >/dev/null 2>&1; then
+              unzip -o -q "$RUNNER_TEMP/dl" -d "$RUNNER_TEMP/$2"
+            else
+              python3 -I tools/isoext.py "$RUNNER_TEMP/dl" "$RUNNER_TEMP/$2"
+            fi
+            rm -f "$RUNNER_TEMP/dl"
+          }
+          fetch "$GAME_FILES_URL" pal
+          fetch "$GAME_FILES_URL_BETA980203" beta
+          fetch "$GAME_FILES_URL_JP_DEMO" jpdemo
+          mkdir -p game/disc/fs/SYSTEM
+          cp "$(find "$RUNNER_TEMP/pal" -ipath '*SYSTEM/I0NFO2.BIN' | head -1)" game/disc/fs/SYSTEM/I0NFO2.BIN
+          cp "$(find "$RUNNER_TEMP/pal" -iname MAIN0.EXE | head -1)" game/MAIN0.EXE
+          echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
+          sha1sum game/disc/fs/SYSTEM/I0NFO2.BIN
+          ls "$RUNNER_TEMP/beta" "$RUNNER_TEMP/jpdemo" | head -60
+
+      - name: Beta 1998-02-03 vs PAL
+        continue-on-error: true
+        run: |
+          EXE="$(find "$RUNNER_TEMP/beta" -iname 'SLPS_011.44' | head -1)"
+          python3 -I tools/civ_i0nfo2_diff.py "$RUNNER_TEMP/beta" ${EXE:+--exe "$EXE"} --title "(beta 1998-02-03)" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: JP demo vs PAL
+        continue-on-error: true
+        run: |
+          EXE="$(find "$RUNNER_TEMP/jpdemo" -iname 'SLPM_801.65' | head -1)"
+          python3 -I tools/civ_i0nfo2_diff.py "$RUNNER_TEMP/jpdemo" ${EXE:+--exe "$EXE"} --title "(JP demo SLPM-80165)" | tee -a "$GITHUB_STEP_SUMMARY"
