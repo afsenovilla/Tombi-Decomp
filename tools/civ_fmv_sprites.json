@@ -1,0 +1,227 @@
+{
+ "_note": "RECONSTRUCTION, not original data: hand-authored 4bpp index grids (hex digit = index into the row, '.' = 0 transparent), drawn from the BUNMEI.STR median stills by tools/civ_fmv_sprites.py.",
+ "clut": "AREA16/CLUT07",
+ "chars": {
+  "redshirt": {
+   "desc": "red shirt, curly orange hair, pale green shorts, front view",
+   "row": 54,
+   "fmv": {
+    "ref": 85,
+    "frames": [
+     76,
+     96
+    ],
+    "vel": [
+     0,
+     -8
+    ],
+    "box": [
+     84,
+     116,
+     140,
+     186
+    ],
+    "core": [
+     98,
+     128,
+     128,
+     180
+    ],
+    "fig": [
+     6,
+     14,
+     34,
+     62
+    ]
+   },
+   "grid": [
+    "......1111.1111.......",
+    "....11bbbb1bbbb111....",
+    "...1bbbcbbbbbcbbbb1...",
+    "..1bbcbbbcbbcbbbcbb1..",
+    "..1bcbbcbbcbbbcbcbc1..",
+    ".1bbbcbbbcbbcbbcbbcd1.",
+    ".1bcbbcbcbbcbbcbcbcd1.",
+    ".1cbcbbcbcbbcbbcbccd1.",
+    ".1cccbcccbccbccbcccd1.",
+    ".1dcc7555555555dccdd1.",
+    "..1dc5555555555c6dd1..",
+    "..1d5555555555556dd1..",
+    ".17d5122551225566d671.",
+    ".1675121551215566d671.",
+    "..1d5555565555566dd1..",
+    "..1d655557755556dd1...",
+    "...1d6557aa7556dd1....",
+    "....1766555566771.....",
+    ".....17766667771......",
+    "....1a1222222221a1....",
+    "...1882988889822891...",
+    "..18888898888889a891..",
+    ".15988888988889aa951..",
+    ".1559888898888999a551.",
+    ".15598888988889a9a551.",
+    ".1559898888888a9a9561.",
+    ".1659898888889a9a9671.",
+    ".1661a9898898a9aa1671.",
+    ".1561aa99a99aaaaa1561.",
+    ".15571aaaaaaaaaa17561.",
+    "..1771eeeeeeeeef17771.",
+    "...11eeeeeeeeeff111...",
+    "....1eeeeeffeeff1.....",
+    "....1eeef1fffeff1.....",
+    "....1eef11feeff1......",
+    "....15661.165661......",
+    "....15671..15671......",
+    "....15671..15671......",
+    "....15671..15671......",
+    "....1567...1567.......",
+    "....18891..18891......",
+    "...188991..189991.....",
+    "...1aaaa1..1aaaa1.....",
+    "....1111....1111......"
+   ]
+  },
+  "purple": {
+   "desc": "orange hair, purple dress, red shoes, side view facing left; left (front) half cut by the screen edge, face/front continued by hand",
+   "row": 38,
+   "fmv": {
+    "ref": 64,
+    "frames": [
+     56,
+     72
+    ],
+    "vel": [
+     0,
+     -8
+    ],
+    "box": [
+     0,
+     40,
+     36,
+     112
+    ],
+    "core": [
+     0,
+     52,
+     20,
+     100
+    ],
+    "fig": [
+     0,
+     0,
+     20,
+     46
+    ]
+   },
+   "grid": [
+    ".....ddddd......",
+    "...ddeeeeedd....",
+    "..dbbeeeeefed...",
+    ".dbcbeeefeeefd..",
+    ".dccdefeeeefffd.",
+    ".deeeffeeeffffd.",
+    ".de66eeefeffffd.",
+    ".d6667eeeeffffd.",
+    ".d6267efeeeffd..",
+    ".d6d67effefffd..",
+    "d666667effffd...",
+    ".d7766effffdd...",
+    "..d777eefdfd....",
+    "...d777fdd......",
+    "...db777d.......",
+    "..db8888d.......",
+    "..d888889d......",
+    "..d888889ad.....",
+    "..d888899ad.....",
+    "..d866899ad.....",
+    "..d677899ad.....",
+    "..d677999ad.....",
+    "..d898999ad.....",
+    "..d889999ad.....",
+    "..d889999ad.....",
+    "..d889999ad.....",
+    "..d889999ad.....",
+    "..d8899999ad....",
+    "..d8899999ad....",
+    "..d8899999ad....",
+    ".d88999999aad...",
+    ".daa9999aaaad...",
+    "..ddaaaaaaddd...",
+    "...d677d67d.....",
+    "...d677d67d.....",
+    "...d677.d67d....",
+    "..dbbccddbbcd...",
+    ".dbbbbcdbbbccd..",
+    "..ddddd.ddddd..."
+   ]
+  },
+  "bald": {
+   "desc": "bald man, load/frame on his back seen over the shoulders, front view",
+   "row": 255,
+   "fmv": {
+    "ref": 207,
+    "frames": [
+     196,
+     227
+    ],
+    "vel": [
+     8,
+     0
+    ],
+    "box": [
+     64,
+     132,
+     124,
+     192
+    ],
+    "core": [
+     76,
+     145,
+     112,
+     185
+    ],
+    "fig": [
+     12,
+     12,
+     50,
+     52
+    ]
+   },
+   "grid": [
+    "...........1111111111...........",
+    "..........155555555771..........",
+    ".........15555555557761.........",
+    ".........15555555557761.........",
+    "........1a5555555557761a........",
+    ".......1aa5555555557771aa1......",
+    "......1aa375555555577761aa1.....",
+    "..1111aa31f41755571f417a3aa1111.",
+    ".1fbb1aa3f141575571f1416a3a1bbf1",
+    ".1bb81a3a67755777577761a3a18bb81",
+    ".1b8891a3a167777777661a3a198b891",
+    ".1b8891aa3a1666666661a3aa198b891",
+    ".1b88891aa31a6666661a13a198b8891",
+    ".198889a1aa311111111133a1a988891",
+    ".198889aa1a3c3a3a3c3a3a1aa988891",
+    ".19888a1aca33a3a3a33aca1a9988891",
+    "11988a1acc3a3a3aa3a3acca1a989911",
+    "1571a1accc3a3aaaa3a3accca1a11751",
+    "1557111acc3aaaaaaaa3acc1111a7551",
+    "155711dd1accaaaaaaccca1dd1a17551",
+    "1557a1ddd1dddddddddd1ddd1aa7551.",
+    "1567a14ddddd4dddd4ddddd41a17651.",
+    ".1671a14dddddddddddddd41aa1761..",
+    ".1561aa14dddd8888dddd41aaa1651..",
+    "..11.1aaa14888888884111aa1.11...",
+    "......1aac1111111111caa1........",
+    ".......1acca1....1acca1.........",
+    ".......1aaca1....1acaa1.........",
+    "......1accca1....1accca1........",
+    "......1aaaaa1....1aaaaa1........",
+    ".....1d4daaa1....1aaad4d1.......",
+    ".....1dddddd1....1dddddd1.......",
+    "......111111......111111........"
+   ]
+  }
+ }
+}

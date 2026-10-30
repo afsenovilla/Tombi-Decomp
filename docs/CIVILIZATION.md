@@ -946,24 +946,30 @@ Sizes: AREA11 is 736 x 672 (92 x 84 cells), AREA16 is 544 x 608 (68 x 76), AREA1
 
 ### FMV residents as top-down sprites (`tools/civ_fmv_sprites.py`, RECONSTRUCTION)
 
-The three BUNMEI.STR residents with matched palette strips have no surviving drawing on the Iron Town / Stonetown pages,
-so `python3 tools/civ_fmv_sprites.py --out DIR` rebuilds them from YOUR disc: each takes every frame of a surviving
-resident of the same scale (same outline, shading and frame order as the port's tables, `tools/civ_anim.py`: idle
-back/side/front, walk 3x6, talk) and re-indexes its texels into the real row of that FMV resident with hand-written
-index remap tables (head band / body / feet). Only real row colours are used, index 0 transparent. Not original data.
+The three BUNMEI.STR residents with matched palette strips have no surviving drawing on the Iron Town / Stonetown pages.
+`python3 tools/civ_fmv_sprites.py --out DIR` draws them from the FMV itself, from YOUR disc:
+1. Still: the camera pans at a constant 8 px/frame over a resident who does not move, so each frame of the range is
+   aligned to a reference frame (SSD search of +-3 px around the predicted offset, bad matches dropped) and the
+   per-pixel median is taken at 1 FMV px = 1 picture px, the towns' scale. The figures are already 33-44 px tall,
+   like the A07600/A08000 residents, so nothing is rescaled.
+2. Sprite: drawn pixel by pixel FROM that still, in the resident's real 16-colour row (index 0 transparent): same
+   silhouette, pose, proportions, clothes and hair, with a 1-px dark outline, eyes and flat shading bands. The index
+   grids are hand-authored data in `tools/civ_fmv_sprites.json` (RECONSTRUCTION). No pixels are taken from other
+   sprites. Not original data.
 
-| Resident | FMV frames (median, 1:1) | Real row | Body taken from |
+| Resident | FMV frames (median) | Real row | Sprite |
 |---|---|---|---|
-| red shirt, curly orange hair, pale green shorts | 85-89 | AREA16/CLUT07 row 54 (= AREA17/CLUT03 row 49) | A06100 worker, 30 frames; hat becomes the hair, trouser ends become bare legs |
-| purple dress, orange hair, red shoes (side) | 62-68 (half off screen) | row 38 (= AREA17/CLUT03 row 33) | A07600 Stonetown woman, 27 frames |
-| bald brown man in grey | 200-214 | row 255 of every area CLUT (VRAM (368, 495)) | A06100 worker, hat becomes the bald scalp |
+| red shirt, curly orange hair, pale green shorts, front | 81-90, ref 85 | AREA16/CLUT07 row 54 (= AREA17/CLUT03 row 49) | 22x44 |
+| purple dress, orange hair, red shoes, side, facing left | 62-69, ref 64 | row 38 (= AREA17/CLUT03 row 33) | 16x39 |
+| bald man, load on his back over the shoulders, front | 199-219, ref 207 | row 255 of every area CLUT (VRAM (368, 495)) | 32x33 |
 
 The "row 15" given above for the bald man is row 255 (the last row, slot 15 of VRAM line 495) of every CLUT file.
-Limits: the red-shirt resident and the bald man share the worker's body; the bald man's load is not drawn. Output
-(sheets with the FMV crop at 4x, indexed frame strips, a GIF per walk/talk facing) contains disc art and is not
-committed. The port does not use them yet: its resident parts can only point into pages loaded from disc files
-(`port_civ_recs`, `port_civ_fig`), so it would need a hook that uploads the generated 4 bpp texels to a free VRAM area
-(for example x 512, where the AREA08 stand-in page goes) plus the remap done in C or read from a file the tool writes.
+Limits: only the one standing view the FMV shows is drawn (no walk or talk frames). The purple resident is cut by the
+left screen edge in every frame, so only her back half (back of the hair, dress, shoes) is visible; her face, chest
+and front shoe are continued by hand. The bald man's load is only seen as the wide grey shape behind his shoulders,
+so its shape is a guess. The FMV is blurred by MDEC, so faces are reinterpreted. Output (sheets: FMV still 4x |
+sprite 4x | sprite at 1x on the AREA16 picture) contains disc art and is not committed. The port does not use them
+yet: it would need a hook that uploads the 4 bpp texels to a free VRAM area (for example x 512).
 
 ### House interiors and community layout (v2, our guesses)
 
