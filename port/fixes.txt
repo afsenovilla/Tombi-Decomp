@@ -535,3 +535,7 @@ src/d0spsub3/subScreenDrawPopupMenu.c | SUBSCREEN_DRAW_PARAMS.y = (short)(i * 16
 src/d0spsub3/subScreenDrawPopupMenu.c | T->y0 = (short)(SUBSCREEN_POPUP_SUB_CURSOR * 16 + 0x78) - SUBSCREEN_POPUP_SUB_COUNT * 8 + 6; | T->h = port_pop_step(1); T->y0 = (short)(SUBSCREEN_POPUP_SUB_CURSOR * port_pop_step(1) + 0x78) - SUBSCREEN_POPUP_SUB_COUNT * port_pop_step(1) / 2 + 6;
 src/d0spsub3/subScreenDrawPopupMenu.c | lp->b = 0x78 - SUBSCREEN_POPUP_SUB_COUNT * 8; | lp->b = 0x78 - SUBSCREEN_POPUP_SUB_COUNT * port_pop_step(1) / 2;
 src/d0spsub3/subScreenDrawPopupMenu.c | lp->d = SUBSCREEN_POPUP_SUB_COUNT * 16 + 0xC; | lp->d = SUBSCREEN_POPUP_SUB_COUNT * port_pop_step(1) + 0xC;
+#
+# playerCheckPerchLanding: GRABBED_OBJECT can hold a small non-pointer value (lowmem read at +0xae -> 3, X004/X009);
+# on the PS1 that reads BIOS RAM and the type test fails, so treat it as "nothing grabbed"
+src/x008/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if ((unsigned long)GRABBED_OBJECT >= 0x10000 && GRABBED_OBJECT->type == 0x14
