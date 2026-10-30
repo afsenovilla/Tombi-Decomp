@@ -1375,7 +1375,7 @@
    "251": "{BOX 232 55}\n{VOICE 6 0}{MOVE 0 0}¡Aah!{NL}\n¡El vino de nuestro lago es{NL}\nel mejor, sin duda!{WAIT}{CLEAR}\n",
    "252": "{BOX 168 42}\n{VOICE 6 0}{MOVE 0 0}...¡iiih, iiih,{NL}\niiiiih!...{WAIT}{CLEAR}\n",
    "253": "{BOX 208 55}\n{VOICE 6 0}{MOVE 0 0}¿Qué le pasa a este?{NL}\nNo ha hecho otra cosa{NL}\nque beber leche...{WAIT}{CLEAR}\n",
-   "254": "{BOX 160 55}\n{VOICE 6 0}{MOVE 0 0}¿¡Que está dónde!?{NL}\nAy, madre... ¿qué{NL}\nvamos a hacer...?{WAIT}{CLEAR}\n",
+   "254": "{BOX 200 55}\n{VOICE 6 0}{MOVE 0 0}¿Dónde se habrá metido?{NL}\nAy, madre...{NL}\n¿Y ahora qué hago?{WAIT}{CLEAR}\n",
    "255": "{BOX 296 42}\n{VOICE 6 0}{MOVE 0 0}¡Madre mía! Nunca habría pensado{NL}\nque estuviera en un sitio así...{C052}{WAIT}{CLEAR}\nEntendido... iremos a buscarlo{NL}\nahora mismo.{C052}{WAIT}{CLEAR}\nEsto... si quieres, vuelve a{NL}\nmirar el tablón de anuncios...{WAIT}{CLEAR}\n",
    "257": "{BOX 280 55}\n{VOICE 6 16384}{MOVE 0 0}¡¡Me has visto!!, ¿verdad?{C052}{WAIT}{CLEAR}\nMmm, qué raro,{NL}\n¿no te doy miedo?{C052}{WAIT}{CLEAR}\nBueno, como ves, parezco{NL}\nun ratón de los pies a la cabeza.{C052}{WAIT}{CLEAR}\nCasi todos gritan y salen{NL}\ncorriendo al vernos.{C052}{WAIT}{CLEAR}\nPero claro, en realidad{NL}\nno somos ratones.{C052}{WAIT}{CLEAR}\nLos Cerdiablos hechizaron{NL}\nnuestra ciudad y nos{NL}\nconvirtieron a todos en ratones.{WAIT}{CLEAR}\n",
    "258": "{BOX 200 55}\n{VOICE 6 16384}{MOVE 0 0}Por eso llevamos{NL}\nsombreros grandes, para{NL}\nno asustar a nadie...{C052}{WAIT}{CLEAR}\n...¡oye!{NL}\nVas de viaje,{NL}\n¿verdad?{C052}{WAIT}{CLEAR}\nQuiero pedirte un{NL}\nfavor...{WAIT}{CLEAR}\n",
