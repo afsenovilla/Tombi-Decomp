@@ -242,3 +242,8 @@ Source: [PREPRE8.md](PREPRE8.md), "Functions vs PAL". All absent from PAL, JP re
 | Camera waypoint debug view (`area_pos`, `pos_num`, `tar_x/y/z`) | 0x800268C0 | debug only |
 | Test menus: SOUND OUTPUT (reverb types), MUSIC PLAY, MEMORY CARD, CDROM LOAD | dead code from 0x800854B4, no caller | debug only, not content |
 | Title attract modes `PLAY DEMO`, `RANKING DEMO` | strings 0x80010174/0x80010180, called from the title state machine 0x8001ECD4 | lost (no demo data on the disc) |
+| Village exits to rooms 4 (DATA003, thatched houses/watch tower/river) and 5 (DATA004, house with pig sign) | entry records `D_800A273C` (room 0 -> room 4, room 1 -> room 5, and back) + position triggers in the player controller 0x80028B50 (states 4/5/9/10); DATA004's only sign reads 「ふるいけ」 | lost in later builds as these models; reachable by the code (not emulated). ふるいけ is a retail place, so DATA004 is an early ふるいけ, not a lost location; DATA003 has no name, no NPC, nothing linking it to a civilization |
+
+Not found (2026-10-30, do not re-search): no dialogue line or room record starts events 20 (5つの箱の忘れもの) or 22
+(地下ロウの大ドロボウ), or any id outside 1-4, 6, 9-11, 13; DATA003/DATA004 spawn no object type absent from the village;
+no debug room select in TOMBA.EXE; area 1 has no load list. Details: PREPRE8.md "Event ids from data, and the rooms".

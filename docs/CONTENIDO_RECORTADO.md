@@ -262,3 +262,9 @@ Fuente: [PREPRE8.md](PREPRE8.md), "Functions vs PAL". Nada de esto esta en PAL, 
 | Vista de depuracion de camara con waypoints (`area_pos`, `pos_num`, `tar_x/y/z`) | 0x800268C0 | solo depuracion |
 | Menus de prueba: SOUND OUTPUT (tipos de reverb), MUSIC PLAY, MEMORY CARD, CDROM LOAD | codigo muerto desde 0x800854B4, sin llamador | solo depuracion, no es contenido |
 | Modos de demo del titulo `PLAY DEMO`, `RANKING DEMO` | cadenas 0x80010174/0x80010180, llamadas desde la maquina de estados 0x8001ECD4 | perdido (no hay datos de demo en el disco) |
+| Salidas del pueblo a las salas 4 (DATA003, casas de paja/torre de vigia/rio) y 5 (DATA004, casa con letrero de cerdo) | registros de entrada `D_800A273C` (sala 0 -> sala 4, sala 1 -> sala 5, y vuelta) + disparadores por posicion en el control del jugador 0x80028B50 (estados 4/5/9/10); el unico letrero de DATA004 dice 「ふるいけ」 | perdido en versiones posteriores con estos modelos; alcanzable segun el codigo (sin emular). ふるいけ existe en el juego final, asi que DATA004 es una ふるいけ temprana, no un lugar perdido; DATA003 no tiene nombre ni NPC ni nada que lo ligue a una civilizacion |
+
+No encontrado (2026-10-30, no volver a buscar): ninguna linea de dialogo ni registro de sala inicia los eventos 20 (5つの箱の
+忘れもの) o 22 (地下ロウの大ドロボウ), ni ningun id fuera de 1-4, 6, 9-11, 13; DATA003/DATA004 no generan ningun tipo de objeto
+ausente del pueblo; no hay selector de salas de depuracion en TOMBA.EXE; el area 1 no tiene lista de carga. Detalles:
+PREPRE8.md "Event ids from data, and the rooms".

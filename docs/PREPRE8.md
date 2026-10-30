@@ -95,9 +95,11 @@ No TIM/CLUT page holds a top-down or isometric map: the pages are the village, i
 - **Room table**: `D_800A1AA4[area]` -> six u16 per room (area 0 = 1,1,1,2,1,1; area 1 = 1,1,1,1,1,4), copied to
   `D_800E2B44` before the loader `func_80023FCC` runs. Area 0 room 3 is the only room flagged 2: the 2D room (the
   elder's house over `TIM007`, collision `DATA002`). Area 1 room 5 is the only room flagged 4.
-- **Load lists**: `D_800B03D8` holds 7 list pointers: 0 = common (CLUT, TIM000-002, banks, PLAYER.WPP, DATA000),
-  1 = DATA001 + TIM003/004, 2 = DATA001 + TIM005/006, 3 = TIM007-009 + DATA002 (the 2D interior), 4 = DATA003,
-  5 = TIM010 + DATA004, 6 = empty. `func_80023FCC(list, ...)` loads one through `func_800240BC`.
+- **Load lists**: `D_800B03D8` holds 7 list pointers (corrected 2026-10-30): 0 = common (CLUT, TIM000-002, banks, PLAYER.WPP,
+  DATA000), 1 = DATA001, 2 = TIM003/004 + DATA001, 3 = TIM005/006 + DATA001, 4 = TIM007-009 + DATA002 (the 2D interior),
+  5 = DATA003, 6 = TIM010 + DATA004 (no empty list). `func_80023FCC(area, room, common)` loads `D_800B03D8[area]` when
+  `common` is set, then `D_800B03F4[area][room]`; `D_800B03F4` has a single valid entry (area 0 -> lists 1..6 for rooms
+  0..5; the word after it, 0x1F801070, is not a pointer), so **area 1 has no load list** in this build.
 - **Room entry and exit**: `D_800A273C[area][room]` -> 16-byte entry records indexed by `D_800DE0FA`, read by
   `func_8002816C` (x, y, mode, ...). Mode 2 means "came through a door"; area 0 room 3's first record is mode 2.
   The next area/room/entry (`D_800DE20C`/`D_800DE20E`/`D_800DE218`) are set by `func_8002816C` and by
@@ -170,6 +172,47 @@ TIM000 strip glyphs (rows, left to right): ボンプ岩の謎 ？り里ヤオイ
 - **Now decoded from the exe** (see Text above): all of Folkin's titles are in the title table.
 - **Not in strip**: no 宝箱 (chests), 盗/泥棒 (thief), 転 (tumbling), 光/落 (light falls). Those titles come from Folkin's list only (the strip is not the full list).
 - Proposed retail slots (unverified): Five Chests -> Lost and Found (area 0, 魔女の忘れもの), Great Thief -> before The Great Escape, Tumbling Down / Again -> Where did I come from? / Lava Caves, Where the Light Falls -> event 32 (trumpets) slot.
+
+### Event ids from data, and the rooms DATA003/DATA004 (checked 2026-10-30, static only, no emulator run)
+
+- **Dynamic event ids: nothing beyond the constants.** The two data-driven call sites carry no other id:
+  - 0x80043C88 reads 8-byte records `D_800A7F7C[area][room][entry]` {u16, s16 event, u16, u16}: of the 30 records
+    (area 0 and 1, 6 rooms each) only area 0 room 0 entry 0 has an event (**2**, 100年老人との出会い); all others are -1.
+  - 0x800359C0 is not an object script but the **dialogue-text interpreter** (0x8003588C): codes 0xFFF7..0xFFFF go
+    through the jump table 0x80010A08, where **0xFFFA id,arg = start event** (0x800216F4) and **0xFFF9 id = set 4**
+    (0x800217A8). The message pointers (`D_800A5DE4[bank][i]`, all inside 0x800A2BCC..0x800A5DC0) never contain 0xFFFA
+    or 0xFFF9 (a scan of file 0x92000..0x9F000 finds neither inside the dialogue): no dialogue starts an event.
+  - Complete list of event ids touched in TOMBA.EXE: start 2, 3, 4, 6, 9, 10, 13 (+2 from the table above); set-4 2, 3,
+    4, 6, 10, 11; event 1 (ジィちゃんの形見) is set to 1 directly at 0x800204C0; reads of the status bytes only for 2,
+    6, 10. Events **20 (5つの箱の忘れもの) and 22 (地下ロウの大ドロボウ) are never started, set or read**; they are
+    list titles only. The interior door object (class 4 type 21, 0x80034C34, in DATA002) handles 2, 10, 11 and 13.
+  - GAM object lists hold no event ids: records are 16 bytes {chunk, class, type, 0, u16 sub, x, y, z, ...}; class 4
+    uses the type table 0x800A2760, class 5 the table 0x800A7364.
+- **The rooms**: room 4 = DATA003 (thatched houses, watch tower, river), room 5 = TIM010 + DATA004 (house with pig sign).
+  Both have load lists, room flags 1, and their own entry records (`D_800A273C`, 16 bytes {x, y, mode, next area,
+  next room, next entry, 0, 0}; `func_8002816C` copies the "next" triple to 0x800DE20C/E/218 and the room-change task
+  0x80020EA4 copies those into the current area/room/entry and calls the loader). Exit graph from those records:
+  village room 0 -> room 4 (DATA003) entry 0, village room 1 -> room 5 (DATA004) entry 0, DATA003 -> room 0 entry 1,
+  DATA004 -> room 1 entry 1, village room 2 -> room 3 (interior), interior -> room 2 entry 2 or **area 1 room 0**
+  (unloadable, see Load lists).
+  The player controller (0x80028B50, state from `D_800A2758[room]` = 4, 5, 6, 4, 9, 10) has the triggers: in room 0
+  (state 4) x >= 0x4A2 with y >= -0x3C starts the exit; in room 1 (state 5) 0x4EC <= x < 0xA46 with y >= -0x122 does;
+  in DATA003 (state 9) x < 0x51 and in DATA004 (state 10) x < 0x29 lead back. So by the code the two rooms are
+  **reachable exits of the village**, not dead data; this was not confirmed in an emulator (tools/psxemu HLE is keyed
+  to PAL MAIN0 addresses and needs a disc image).
+- **Objects**: DATA003's list (chunk 0x84) has only 8 class-7 records (also present in the village); no NPC or sign.
+  DATA004's list (chunk 0x85) has 16 class-4 type-25 objects (0x80035530, common in the village: 66 there) and one
+  class-5 type-26 sign (0x800404A8, the same place-name sign type as the village's), sub 9 -> message table
+  0x800A7DDC[9] = bank 4 line 8 = **「ふるいけ」**. Village signs: sub 0 = 始まりの村 (x 83), 4 = 始まりの森 (x 1610),
+  8 = 100年老人の小屋 (x 2327, high up); DATA004's (x 2638) is the only ふるいけ sign. ふるいけ is a retail place (JP
+  retail text: 「この小屋のウラをまっすぐ奥に行くと ふるいけ」, ふるいけのカギ, DSPSUB2 place name), so DATA004 is an
+  early form of the ふるいけ area, not a lost location. (Mapping record `sub` -> sign index is inferred from the
+  village signs matching their positions.) DATA003 has no name; nothing ties it to a cut civilization.
+- **No room select**: the current room (0x800DE0DA) is written only by the new-game reset (0x800199D4), the village
+  section switch (0x80028D98..0x80028EB4, rooms 0..2) and the room-change task (0x80020F6C); the area word is written
+  only by that task. No pad-driven area/room selector exists in the exe.
+- Renders: `python3 -I tools/prepre8.py rooms UNPACKED OUT` (already covers DATA003/DATA004).
+
 
 ## Debug features
 
