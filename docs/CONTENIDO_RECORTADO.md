@@ -133,7 +133,7 @@ hemos comprobado.
 | Texto de estado "Thin" / "Fat" | **no encontrado** | No aparece en el texto WFM inglés/español PAL de AREA03/11/16/17/18 ni en CFNT999. No hemos buscado en los gráficos del submenú. |
 | Apertura del reloj de la Mansión y gema | sin verificar | |
 | Puerta del Cerdo final | sin verificar | |
-| Un objeto Tubería antiguo dibujado como Válvula | **confirmado** | El objeto 64 es "Pipe" (MFNT #67). Su icono (A00300 palabras 64..127, celda 64: x 72, y 72) es un volante redondo, es decir una válvula. No se puede probar que sea arte "antiguo". |
+| Un objeto Tubería antiguo dibujado como Válvula | **confirmado** | El objeto 64 es "Pipe" (MFNT #67). Su icono (A00300 palabras 64..127, celda 64: x 72, y 72) es un volante redondo, es decir una válvula. No se puede probar que sea arte "antiguo". Su icono del inventario sale gris porque `ITEM_ICON_CLUTS[64]` = 1, la fila gris del submenú, igual en PAL y JP (rareza del original, no fallo del port); en AREA08 el objeto es el fotograma 2 de SPR_DATA[3], una rueda de madera marrón (CLUT de área (304,482)). El port dibuja el icono con la fila 0, la fila real cuyo color de acento es el más cercano a esa madera (`port/fixes.txt`, subScreenDrawItemIcon). |
 | Demo Pure 8: orugas en la VRAM de AREA00; el evento "Motocross Course" empieza normal | sin verificar | Ese disco no está en nuestro conjunto. La tira de títulos de PrePre 8 sí lleva モトクロスコース (ver la entrada del cartel DIRT MOTOCROSS). |
 | Demo Pure 9: un cofre del anciano de 10.000 años donde la versión final tiene el de 1000 | sin verificar | Ese disco no está en nuestro conjunto. |
 

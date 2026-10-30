@@ -123,7 +123,7 @@ These are the rest, checked only where it was cheap. **Unverified** means we did
 | "Thin" / "Fat" status text | **not found** | No such word in the PAL English/Spanish WFM text of AREA03/11/16/17/18 or CFNT999. The sub-screen graphics were not searched. |
 | Mansion clock opening and gem | unverified | |
 | Final Evil Pig door | unverified | |
-| An older Pipe item drawn as a Valve | **confirmed** | Item 64 is "Pipe" (MFNT #67). Its icon (A00300 words 64..127, cell 64: x 72, y 72) is a round handwheel, i.e. a valve. Whether this is "older" art is not provable. |
+| An older Pipe item drawn as a Valve | **confirmed** | Item 64 is "Pipe" (MFNT #67). Its icon (A00300 words 64..127, cell 64: x 72, y 72) is a round handwheel, i.e. a valve. Whether this is "older" art is not provable. Its inventory icon is grey because `ITEM_ICON_CLUTS[64]` = 1, the all-grey sub-screen row, on retail PAL and JP alike (an original quirk, not a port bug); the pickup in AREA08 is SPR_DATA[3] frame 2, a brown wooden wheel (area CLUT (304,482)). The port draws the icon with row 0, the real row whose accent colour is closest to that wood (`port/fixes.txt`, subScreenDrawItemIcon). |
 | Pure 8 demo: caterpillars in the AREA00 VRAM; "Motocross Course" event starts normally | unverified | That disc is not in our set. PrePre 8's title strip does carry モトクロスコース (see the DIRT MOTOCROSS sign entry). |
 | Pure 9 demo: a 10,000-year-old-man chest where retail has the 1000-year one | unverified | That disc is not in our set. |
 

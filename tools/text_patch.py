@@ -195,7 +195,7 @@ def apply_to_project(proj, patch):
         proj.menus[path] = spec
     if isinstance(patch.get("glyphShift"), dict):
         for h, d in patch["glyphShift"].items():
-            proj.glyph_shift.setdefault(str(h), {}).update({c: int(v) for c, v in d.items()})
+            proj.glyph_shift.setdefault(str(h), {}).update({c: [int(x) for x in v] if isinstance(v, list) else int(v) for c, v in d.items()})
     return proj.load_edits({"edits": patch["edits"]}, replace=False)
 
 

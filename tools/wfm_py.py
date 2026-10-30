@@ -386,27 +386,43 @@ class GlyphPool:
         return _glyph_from_pixels(clut, h, wd, dot.hand, out, ":")
 
 
+def _shift_up(px, wd, h):
+    """Moves the glyph up one row: drops the first empty row between ink rows (the gap under an accent), or the top row
+    when there is none (an accented capital that fills the cell: its accent loses one row). The last row becomes empty."""
+    rows = [r for r in range(h) if any(px[r * wd:(r + 1) * wd])]
+    if not rows or rows[-1] == 0:
+        return px
+    gap = next((r for r in range(rows[0] + 1, rows[-1]) if r not in rows), None)
+    drop = gap if gap is not None else 0
+    return px[:drop * wd] + px[(drop + 1) * wd:] + [0] * wd
+
+
 def shift_glyphs(w, shifts):
-    """shifts: {height (str/int): {char: dx}}. Moves the bitmap of every glyph of w with that character and height dx pixels
-    right (negative: left) inside its cell, where the cell has empty columns to spare (the advance is fixed by the cell width,
-    so this is how a glyph gets more room on one side, e.g. the 16 px ',' that sat on the column of the letter before it).
+    """shifts: {height (str/int): {char: dx or [dx, dy]}}. Moves the bitmap of every glyph of w with that character and
+    height dx pixels right (negative: left) inside its cell, where the cell has empty columns to spare (the advance is fixed
+    by the cell width, so this is how a glyph gets more room on one side, e.g. the 16 px ',' that sat on the column of the
+    letter before it). A negative dy moves it up that many rows (_shift_up: the empty row under the accent goes first), for
+    the 8 px accented letters of the PAL Spanish font, drawn one row below the baseline of the plain ones (á, é, ñ, Á...).
     Replaces the Glyph objects (they can be shared with other clones); returns how many glyphs moved."""
     n = 0
     for i, g in enumerate(w.glyphs):
-        dx = (shifts.get(str(g.height)) or {}).get(g.char) if g.char and g.width and g.height else None
-        if not dx:
+        v = (shifts.get(str(g.height)) or {}).get(g.char) if g.char and g.width and g.height else None
+        dx, dy = (v[0], v[1]) if isinstance(v, (list, tuple)) else (v or 0, 0)
+        if not dx and not dy:
             continue
         wd, px = g.width, g.pixels()
         cols = [c for c in range(wd) if any(px[r * wd + c] for r in range(g.height))]
         if not cols:
             continue
         dx = max(min(dx, wd - 1 - cols[-1]), -cols[0])
-        if not dx:
+        if not dx and dy >= 0:
             continue
         out = [0] * (wd * g.height)
         for r in range(g.height):
             for c in range(cols[0], cols[-1] + 1):
                 out[r * wd + c + dx] = px[r * wd + c]
+        for _ in range(max(0, -dy)):
+            out = _shift_up(out, wd, g.height)
         ng = _glyph_from_pixels(g.clut, g.height, wd, g.hand, out, g.char)
         w.glyphs[i] = ng
         if i < len(w.glyph_ptrs):          # an original glyph: encode() copies glyph_blob, so rewrite it there (same size)
