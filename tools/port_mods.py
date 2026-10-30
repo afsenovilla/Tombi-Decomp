@@ -26,8 +26,6 @@ CIV_TOWNS = {11: "Lumberjack Town", 16: "Stonetown", 17: "Iron Town"}
 
 def area_label(a):
     """The area select entry: number, name and, for the rebuilt cut towns, the i18n tag."""
-    if a in CIV_TOWNS:
-        return "★ %02d %s  %s" % (a, AREA_NAMES.get(a, ""), i18n.tr("mod.civtag"))
     return "%02d %s" % (a, AREA_NAMES.get(a, ""))
 # rooms with an empty load list cannot be entered from the debug select (tools/psxemu/rooms.py DOOR_ROOMS)
 DOOR_ROOMS = {(11, 0), (11, 3), (11, 4), (16, 0), (16, 1), (16, 2), (17, 0), (17, 6), (17, 7), (17, 8), (17, 9), (17, 10), (18, 0)}
@@ -46,13 +44,19 @@ i18n.add({
         "mod.areasel": "Selección de área (debug select)",
         "mod.areasel.d": "Abre el selector de áreas de depuración del juego y entra en el área/sección elegida en lugar de empezar la partida.",
         "mod.area": "Área", "mod.section": "Sección",
-        "mod.civtag": "(recortado, jugable, reconstruido)",
-        "mod.civnote": "★ La sección 0 de esta área es una ciudad recortada ({0}) reconstruida para el port. Elige la sección «0 — pueblo reconstruido» para jugarla (--civ-town {1}). La primera vez el lanzador genera el mapa y los textos a partir de tus datos del disco (alrededor de un minuto; el progreso sale en la página Registro).",
-        "mod.civsec": "0 — pueblo reconstruido ({0})",
+        "cut.hint": "Los pueblos recortados reconstruidos (áreas 11, 16 y 17) se juegan desde la página «Contenido recortado».",
+        "cut.c.text": "Textos y extras recortados",
+        "cut.text.d": "Recupera diálogos quitados del juego y algunos detalles sin usar (bayas plateadas/doradas, bocadillo «?»).",
+        "cut.c.towns": "Pueblos recortados (reconstruidos)",
+        "cut.towns.d": "Tres pueblos que se quitaron del juego. Son reconstrucciones hechas para el port, no datos originales. La primera vez se generan a partir de tu disco (un minuto).",
+        "cut.towns.i": "Los mapas y textos se montan con piezas del propio juego (tools/civ_rebuild.py, tools/civ_test_data.py) y se guardan en civ_cache/ junto a data/. Son una reconstrucción: el diseño final de estos pueblos no existe en el disco. Más detalles en docs/CIVILIZATION.md («Playable towns»).",
+        "cut.play11": "Jugar Leñadores (AREA11)", "cut.d11": "El pueblo de los leñadores del País de la Civilización.",
+        "cut.play16": "Jugar Ciudad de Piedra (AREA16)", "cut.d16": "La ciudad de piedra, junto a la torre del reloj.",
+        "cut.play17": "Jugar Ciudad de hierro (AREA17)", "cut.d17": "La ciudad de los hombres de hierro.",
         "mod.civcoll": "Mostrar la capa de colisiones",
         "mod.civcoll.i": "En los pueblos reconstruidos (Lumberjack Town, Stonetown, Iron Town) dibuja el mapa de celdas encima del dibujo: rojo = sólido, naranja = diagonal, magenta = pared de un solo lado, cian = disparador. Sirve para comprobar el ajuste mientras caminas (--civ-collision).",
         "mod.civroute": "Entrar en los pueblos reconstruidos desde el centro en partida normal",
-        "mod.civroute.i": "En partida normal, las salidas del centro de la Ciudad de la Civilización llevan a los pueblos recortados reconstruidos (sección 0 de las áreas 11, 16 y 17) en lugar de a las secciones de siempre; las salidas de los pueblos siguen al resto del juego (--civ-route). Usa los mismos mapas y textos generados que el selector de área.",
+        "mod.civroute.i": "En partida normal, las salidas del centro de la Ciudad de la Civilización llevan a los pueblos recortados reconstruidos (sección 0 de las áreas 11, 16 y 17) en lugar de a las secciones de siempre; las salidas de los pueblos siguen al resto del juego (--civ-route). Usa los mismos mapas y textos generados que los botones de los pueblos.",
         "s.civgen": "Generando los pueblos reconstruidos en {0} (solo la primera vez, alrededor de un minuto)...",
         "s.civgenok": "Pueblos reconstruidos listos en {0}.",
         "s.civgenfail": "No se pudieron generar los pueblos reconstruidos: {0}",
@@ -73,13 +77,19 @@ i18n.add({
         "mod.areasel": "Area select (debug select)",
         "mod.areasel.d": "Opens the game's debug area select and enters the chosen area/section instead of starting the story.",
         "mod.area": "Area", "mod.section": "Section",
-        "mod.civtag": "(cut, playable, rebuilt)",
-        "mod.civnote": "★ Section 0 of this area is a cut town ({0}) rebuilt for the port. Choose section \"0 — rebuilt town\" to play it (--civ-town {1}). The first time, the launcher generates the map and the texts from your own disc data (about a minute; the progress shows on the Log page).",
-        "mod.civsec": "0 — rebuilt town ({0})",
+        "cut.hint": "The rebuilt cut towns (areas 11, 16 and 17) are played from the \"Cut content\" page.",
+        "cut.c.text": "Cut text and extras",
+        "cut.text.d": "Restores dialogue removed from the game and a few unused details (silver/golden berries, '?' bubble).",
+        "cut.c.towns": "Cut towns (rebuilt)",
+        "cut.towns.d": "Three towns removed from the game. They are reconstructions made for the port, not original data. The first time they are generated from your disc (about a minute).",
+        "cut.towns.i": "The maps and texts are assembled from the game's own pieces (tools/civ_rebuild.py, tools/civ_test_data.py) and kept in civ_cache/ next to data/. They are a reconstruction: the final design of these towns is not on the disc. More in docs/CIVILIZATION.md (\"Playable towns\").",
+        "cut.play11": "Play Lumberjack Town (AREA11)", "cut.d11": "The lumberjacks' town of the Land of Civilization.",
+        "cut.play16": "Play Stonetown (AREA16)", "cut.d16": "The stone town by the clock tower.",
+        "cut.play17": "Play Iron Town (AREA17)", "cut.d17": "The town of the Iron Men.",
         "mod.civcoll": "Show collision overlay",
         "mod.civcoll.i": "In the rebuilt towns (Lumberjack Town, Stonetown, Iron Town) the cell map is drawn over the picture: red = solid, orange = diagonal, magenta = one-sided wall, cyan = trigger. For checking the fit while walking (--civ-collision).",
         "mod.civroute": "Enter the rebuilt towns from the hub in normal play",
-        "mod.civroute.i": "In normal play the exits of the Civilization Town hub lead to the rebuilt cut towns (section 0 of areas 11, 16 and 17) instead of the usual sections; the towns' own exits lead on to the rest of the game (--civ-route). Uses the same generated maps and texts as the area select.",
+        "mod.civroute.i": "In normal play the exits of the Civilization Town hub lead to the rebuilt cut towns (section 0 of areas 11, 16 and 17) instead of the usual sections; the towns' own exits lead on to the rest of the game (--civ-route). Uses the same generated maps and texts as the town buttons.",
         "s.civgen": "Generating the rebuilt towns in {0} (first time only, about a minute)...",
         "s.civgenok": "Rebuilt towns ready in {0}.",
         "s.civgenfail": "Could not generate the rebuilt towns: {0}",
@@ -108,10 +118,9 @@ def args_hz60(s):
 
 
 def civ_town(s):
-    """The rebuilt town the area select asks for (section 0 of 11/16/17, which the debug select cannot enter), else None."""
-    if s.get("areasel") and int(s.get("area", 0)) in CIV_TOWNS and int(s.get("section", 0)) == 0:
-        return int(s["area"])
-    return None
+    """The rebuilt town a "Cut content" page button asked for (transient "civ_play", never saved), else None."""
+    t = s.get("civ_play")
+    return int(t) if t in CIV_TOWNS else None
 
 
 def civ_wanted(s):

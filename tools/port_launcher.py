@@ -465,7 +465,7 @@ i18n.add({
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
 i18n.add({
-    "es": {"l.experimental": "Funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.log": "Registro",
+    "es": {"l.experimental": "Funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.cut": "Contenido recortado", "nav.log": "Registro",
            "l.uilang": "Idioma del launcher", "l.starting": "Iniciando el juego...", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
            "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
            "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
@@ -474,7 +474,7 @@ i18n.add({
            "l.iresoff": "Solo con OpenGL: el dibujado por software usa siempre la resolución original.",
            "c.keys": "Teclado", "c.pad": "Mando", "c.mods": "Mods", 
            "c.cmd": "Línea de comandos", "c.log": "Últimas líneas del registro", "c.status": "Estado"},
-    "en": {"l.experimental": "Experimental features", "l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.log": "Log",
+    "en": {"l.experimental": "Experimental features", "l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.cut": "Cut content", "nav.log": "Log",
            "l.uilang": "Launcher language", "l.starting": "Starting the game...", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
            "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
            "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
@@ -489,7 +489,7 @@ i18n.add({
 C_BG, C_SIDE, C_CARD, C_LINE = "#f3f3f5", "#ebecef", "#ffffff", "#e3e4e8"
 C_TEXT, C_MUTED, C_ACCENT, C_ACCENT_HI = "#1b1b1f", "#5f636b", "#1f5fbf", "#2b6fd6"
 DOT = {"ok": "#1e9e4a", "bad": "#d13438", "busy": "#e08a00", "info": "#8a8f98"}
-PAGES = ["play", "gfx", "controls", "mods", "log"]
+PAGES = ["play", "gfx", "controls", "mods", "cut", "log"]
 
 
 def ui_font():
@@ -663,7 +663,7 @@ class App:
         self.status = tk.StringVar(value=tr("s.nodata"))
         r.columnconfigure(1, weight=1)
         r.rowconfigure(0, weight=1)
-        side = ttk.Frame(r, style="Side.TFrame", padding=(10, 14, 10, 14), width=208)
+        side = ttk.Frame(r, style="Side.TFrame", padding=(10, 14, 10, 14), width=228)
         side.grid(row=0, column=0, rowspan=2, sticky="ns")
         side.grid_propagate(False)
         side.pack_propagate(False)
@@ -707,6 +707,7 @@ class App:
         self._build_gfx(self.page_frame("gfx", tr("nav.gfx")))
         self._build_controls(self.page_frame("controls", tr("nav.controls")))
         self._build_mods(self.page_frame("mods", tr("nav.mods"), scroll=True))
+        self._build_cut(self.page_frame("cut", tr("nav.cut"), scroll=True))
         self._build_log(self.page_frame("log", tr("nav.log")))
         self._build_bar(r)
         self.show(self.page)
@@ -736,7 +737,7 @@ class App:
         ttk.Label(self.start_box, text=tr("l.starting"), style="Bg.TLabel", foreground=C_ACCENT).pack(side="left", padx=(0, 10))
         self.start_bar = ttk.Progressbar(self.start_box, mode="indeterminate", length=240)
         self.start_bar.pack(side="left")
-        self.play_btn = ttk.Button(bar, text=tr("b.play"), command=self.play, style="Accent.TButton", width=14)
+        self.play_btn = ttk.Button(bar, text=tr("b.play"), command=self.play_normal, style="Accent.TButton", width=14)
         self.play_btn.pack(side="right")
         self.stop_btn = ttk.Button(bar, text=tr("b.stop"), command=self.stop, style="Bar.TButton")
         ttk.Button(bar, text=tr("b.copylog"), command=self.copy_log, style="Bar.TButton").pack(side="right", padx=(0, 8))
@@ -958,14 +959,6 @@ class App:
         bp = bundled_patch()
         ttk.Label(c, text=tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), style="Muted.TLabel", wraplength=640,
                   justify="left").pack(anchor="w", pady=(8, 0))
-        row = ttk.Frame(c)                                     # --cut-content (port/fixes.txt)
-        row.pack(anchor="w", pady=(10, 0))
-        ttk.Checkbutton(row, text=tr("l.cutcontent"), variable=self.var("cut_content", tk.BooleanVar, False)).pack(side="left")
-        info = ttk.Label(row, text="\u24d8", style="Help.TLabel", cursor="hand2")   # circled i: click for the explanation
-        info.bind("<Button-1>", lambda e: messagebox.showinfo(tr("l.cutcontent"), tr("i.cutcontent")))
-        info.pack(side="left", padx=(6, 0))
-        ttk.Label(c, text=tr("l.earlytitle"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(8, 4))
-        self._browse_row(c, "early_title", self.pick_early_title)            # --early-title (port2/runtime/titlebg.c)
         if self.experimental:
             o, c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
             o.pack(fill="x", pady=(12, 0), padx=(0, 4))
@@ -996,7 +989,7 @@ class App:
                 row.pack(fill="x")
                 ttk.Label(row, text=tr("mod.area")).pack(side="left", padx=(0, 4))
                 names = [M.area_label(a) for a, _ in M.ROOM_COUNTS]
-                row2 = ttk.Frame(c, padding=(24, 2, 0, 2))    # the section below: "0 — rebuilt town (...)" is long too
+                row2 = ttk.Frame(c, padding=(24, 2, 0, 2))
                 row2.pack(fill="x")
                 ttk.Label(row2, text=tr("mod.section")).pack(side="left", padx=(0, 4))
                 self.sec_cb = ttk.Combobox(row2, state="readonly", width=4)
@@ -1005,9 +998,6 @@ class App:
                 idx = [a for a, _ in M.ROOM_COUNTS]
                 self.area_cb.current(idx.index(av.get()) if av.get() in idx else 0)
                 self.area_cb.pack(side="left", fill="x", expand=True)
-                civ_var = tk.StringVar()
-                civ_lbl = ttk.Label(c, textvariable=civ_var, style="Muted.TLabel", wraplength=480, justify="left")
-                civ_lbl.pack(anchor="w", padx=(24, 0))
 
                 def widen_popdown(cb=self.area_cb, names=names):
                     # the drop-down list is as wide as the box by default; -postoffset lets it grow to the longest
@@ -1020,11 +1010,7 @@ class App:
                 def fill_sections(_=None, av=av, sv=sv):
                     a = M.ROOM_COUNTS[self.area_cb.current()][0]
                     av.set(a)
-                    civ_var.set(tr("mod.civnote", M.CIV_TOWNS[a], a) if a in M.CIV_TOWNS else "")
-                    # section 0 of 11/16/17: the rebuilt town (--civ-town; the debug select cannot enter it)
-                    secs = [(k, tr("mod.civsec", M.CIV_TOWNS[a]) if (a in M.CIV_TOWNS and k == 0) else str(k))
-                            for k in range(M.ROOM_COUNTS[self.area_cb.current()][1])
-                            if (a, k) not in M.DOOR_ROOMS or (a in M.CIV_TOWNS and k == 0)]
+                    secs = [(k, str(k)) for k in range(M.ROOM_COUNTS[self.area_cb.current()][1]) if (a, k) not in M.DOOR_ROOMS]
                     self.sec_nums = [k for k, _ in secs]
                     self.sec_cb["values"] = [t for _, t in secs]
                     self.sec_cb.configure(width=max(len(t) for _, t in secs) + 1)
@@ -1038,16 +1024,53 @@ class App:
                 iv = self.var(key, tk.IntVar, int(lo))
                 ttk.Spinbox(box, from_=int(lo), to=int(hi), increment=int(step), textvariable=iv, width=10).pack(side="left", padx=12)
             ttk.Label(c, text=tr(dk), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", padx=(24, 0), pady=(0, 6))
-            if kind == "check+area":                  # the rebuilt cut towns (docs/CIVILIZATION.md "Playable towns")
-                for key in ("civ_route", "civ_collision"):
-                    row = ttk.Frame(c, padding=(0, 2))
-                    row.pack(fill="x")
-                    lk_ = {"civ_route": "mod.civroute", "civ_collision": "mod.civcoll"}[key]
-                    ttk.Checkbutton(row, text="★ " + tr(lk_), variable=self.var(key, tk.BooleanVar, False)).pack(side="left")
-                    info = ttk.Label(row, text="\u24d8", style="Help.TLabel", cursor="hand2")
-                    info.bind("<Button-1>", lambda e, lk_=lk_: messagebox.showinfo(tr(lk_), tr(lk_ + ".i")))
-                    info.pack(side="left", padx=(6, 0))
-                ttk.Frame(c, height=6).pack()
+            if kind == "check+area":                  # the rebuilt cut towns live on their own page now
+                ttk.Label(c, text=tr("cut.hint"), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", padx=(24, 0), pady=(0, 6))
+
+    def _build_cut(self, f):
+        """The "Cut content" page: the --cut-content switch, the early title and the rebuilt towns (one button each)."""
+        def info(parent, title, text):
+            i = ttk.Label(parent, text="\u24d8", style="Help.TLabel", cursor="hand2")   # circled i: click for the explanation
+            i.bind("<Button-1>", lambda e: messagebox.showinfo(title, text))
+            i.pack(side="left", padx=(6, 0))
+        o, c = self.card(f, tr("cut.c.text"))
+        o.pack(fill="x", padx=(0, 4))
+        row = ttk.Frame(c)                                     # --cut-content (port/fixes.txt)
+        row.pack(anchor="w")
+        ttk.Checkbutton(row, text=tr("l.cutcontent"), variable=self.var("cut_content", tk.BooleanVar, False)).pack(side="left")
+        info(row, tr("l.cutcontent"), tr("i.cutcontent"))
+        ttk.Label(c, text=tr("cut.text.d"), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", padx=(24, 0), pady=(2, 0))
+        ttk.Label(c, text=tr("l.earlytitle"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(12, 4))
+        self._browse_row(c, "early_title", self.pick_early_title)            # --early-title (port2/runtime/titlebg.c)
+        o, c = self.card(f, tr("cut.c.towns"))                  # docs/CIVILIZATION.md "Playable towns"
+        o.pack(fill="x", pady=(12, 0), padx=(0, 4))
+        row = ttk.Frame(c)
+        row.pack(anchor="w", fill="x")
+        ttk.Label(row, text=tr("cut.towns.d"), style="Muted.TLabel", wraplength=600, justify="left").pack(side="left")
+        info(row, tr("cut.c.towns"), tr("cut.towns.i"))
+        for a in (11, 16, 17):
+            r = ttk.Frame(c, padding=(0, 8, 0, 0))
+            r.pack(fill="x")
+            ttk.Button(r, text=tr("cut.play%d" % a), width=32, command=lambda a=a: self.play_town(a)).pack(side="left")
+            d = ttk.Label(r, text=tr("cut.d%d" % a), wraplength=300, justify="left")
+            d.pack(side="left", fill="x", expand=True, padx=(12, 0))
+            d.bind("<Configure>", lambda e, d=d: d.configure(wraplength=max(120, e.width)))
+        ttk.Frame(c, height=8).pack()
+        for key in ("civ_route", "civ_collision"):
+            row = ttk.Frame(c, padding=(0, 2))
+            row.pack(fill="x")
+            lk_ = {"civ_route": "mod.civroute", "civ_collision": "mod.civcoll"}[key]
+            ttk.Checkbutton(row, text=tr(lk_), variable=self.var(key, tk.BooleanVar, False)).pack(side="left")
+            info(row, tr(lk_), tr(lk_ + ".i"))
+
+    def play_town(self, a):
+        """A town button: --civ-town a (the maps and texts are generated the first time, then the game starts)."""
+        self.civ_play = a
+        self.play()
+
+    def play_normal(self):
+        self.civ_play = None
+        self.play()
 
     def _build_log(self, f):
         o, c = self.card(f, tr("c.status"))
@@ -1265,7 +1288,7 @@ class App:
 
     def command(self):
         self.collect()
-        s = self.s
+        s = self.cmd_s = dict(self.s, civ_play=getattr(self, "civ_play", None))     # civ_play: transient, never saved
         exe = game_binary()
         source = ["--data", data_dir()] if data_ready() else ["--disc", bin_of_cue(s["disc"])]
         cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
@@ -1325,7 +1348,7 @@ class App:
             self.cmd_text.insert("1.0", subprocess.list2cmdline(cmd))
         elif self.s.get("patch_on"):
             self.say(tr("s.patchnodata"), "busy")
-        if M.civ_wanted(self.s):
+        if M.civ_wanted(self.cmd_s):
             if cmd[1] != "--data":
                 messagebox.showerror(tr("title"), tr("s.civnodata"))
                 return
@@ -1338,6 +1361,7 @@ class App:
         log.write("[launcher] Spanish graphics (--patch-tex): %s\n" % getattr(self, "gfx_note", "?"))      # the exe then prints its own id: [port2] build <sha> <date>
         log.flush()
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+        self.civ_play = None
         self.proc = subprocess.Popen(cmd, cwd=app_dir(), stdout=log, stderr=subprocess.STDOUT, creationflags=flags)
         self.say(tr("s.running"), "ok")
         self.play_btn.state(["disabled"])
