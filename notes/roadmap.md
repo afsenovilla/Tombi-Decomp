@@ -6,7 +6,7 @@ When an item is done, tick it, note the commit, and move on without waiting. Upd
 after each JP batch.
 
 ## P1 — quick wins (minutes to an hour)
-- [ ] Port: guard `playerCheckPerchLanding+0xae` null read (lowmem 3), port-only fix in port/fixes.txt.
+- [x] Port: guard `playerCheckPerchLanding+0xae` null read (GRABBED_OBJECT == 1) — 71568b9.
 - [ ] Civ towns: check ES title 74 accent; check the green teller's head above the room view.
 - [ ] Civ towns: look at the unchecked teller sheets (EN low/300k, ES 300k).
 - [ ] Civ towns: test resident 2 (AREA11, dlg 1) and AREA17 dlg 4 in game (only the safety net covers them).
