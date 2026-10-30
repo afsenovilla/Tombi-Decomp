@@ -635,6 +635,66 @@ and Square talks to him (frame 1740 shows his line). `tools/civ_test_data.py` ke
 writes them in priority order while the WFM stays under 26540 bytes (`--cap`). Bigger builds showed garbage glyphs, so
 six of the 18 lines fit (`#249 #250 #251 #252 #254 #257`) in the disc file. The script also writes `civ_MFNT110S.WFM` with all 18 lines; `--civ-wfm OUT/civdata/civ_MFNT110S.WFM` makes the port load that bank straight into memory before a resident talks, so every line plays (checked: with the retail data and this option, resident 9 says his translated line).
 
+## Playable towns (`--civ-town`, port only)
+
+The three rebuilt towns run in their own area slots (AREA11, AREA16 and AREA17 section 0, the real cut sections),
+with the town's own code (NPC sets 0D/0E/0F, StepC/D/E exits, the actor and dialogue handlers). Everything is
+port-only and opt-in; the console build is unchanged (rules in `port/fixes.txt`, gated on `port_civ_test`).
+
+```
+python3 tools/civ_rebuild.py --out OUT/maps [--refdir IMAGES] [--community-cluts CLUTGEN]   # pictures, cells, rooms
+python3 tools/civ_test_data.py OUT/civdata              # civ_MFNT110S/160S/170S.WFM (Spanish glosses of the JP lines)
+OUT/bp/tombi2 --lang 5 --civ-town 17 --civ-maps OUT/maps --civ-wfm OUT/civdata [--civ-collision]
+OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata      # through the hub, in normal play
+```
+
+- `--civ-town 11|16|17` is `--civ-test` plus the debug area select opened on that town's section 0 (Start, then
+  Circle, as the pokes of the old command did). Tomba starts just inside the exit from Civilization Town
+  (AREA11 world (530, 410), AREA16 (-95, 524), AREA17 (223, 540); `--civ-spawn X,Y` overrides it). The camera limits
+  follow the rebuilt picture (x max = W - 288, y max = H - 112).
+- `--civ-maps DIR` loads `DIR/AREAnn/map8F.tim` and `map8E.bin`, and the room view `map8F_in.tim`.
+- `--civ-collision` swaps in the debug pictures `map8F_cells.tim` / `map8F_in_cells.tim`: the cell map tinted over
+  the picture (red solid 9, orange diagonal 1-4, magenta one-sided wall 5-8, cyan trigger, every cell outlined), so
+  the fit can be checked while walking.
+- `--civ-wfm DIR` gives each town its translated bank (`civ_MFNT110S.WFM`, `civ_MFNT160S.WFM`, `civ_MFNT170S.WFM`);
+  a file instead of a folder still works for AREA11.
+- `--civ-route` (opt-in): the hub AREA18 s1 sends exits 0/1/2 to 11:0, 17:0 and 16:0 instead of 11:1, 17:1 and 16:4,
+  and Stonetown's top exit (to the cut 16:1) continues to 16:4. The towns' own exits already lead on to 11:1 / 17:1
+  and back to 18:1. Checked: walking right from the hub enters the rebuilt Stonetown. Needs `--civ-maps`.
+
+**Residents.** AREA11 subtype 0 (the hard-hat worker, AREA11/CLUT02 row 4), AREA16 subtypes 0/1/2 (rows 21/37/53
+of AREA16/CLUT07) and AREA17 subtype 0 (AREA17/CLUT03 row 1) are drawn from their surviving page with their real
+row (one standing figure per resident: the tables that order the frames are lost). The other subtypes wear the
+AREA08 villager (its page loaded at VRAM x 512) in one real resident row of the town (AREA11 36, AREA16 54,
+AREA17 49), because the villager's own rows are not in the town's CLUT block. Scenery and props with lost tables
+(roofs, signs, the lift, the platforms) are not drawn; their logic runs.
+
+**Rooms.** The engine hides the map layer while a room is active (Tomba on a trigger cell inside house n) and draws
+the room's furniture as objects, whose tables are lost. The port keeps the layer and builds it from `map8F_in.tim`
+instead: black, with each house rectangle showing its matched interior (layout `interiors`). Back outside, the town
+picture returns. The residents of room n appear as the engine shows them.
+
+**Collision** (`tools/civ_rebuild.py`, layout `towns.N.collision`): editable shapes in picture px, traced over the
+v2 pictures: `{"t": "wall", "poly": [...]}`, `{"t": "line", "pts": [...], "w": px}` (fences, railings), `{"t":
+"rect", "r": [x, y, w, h]}`, `{"t": "water"}` (blocks like a wall: the top-down engine has no water or drop shape)
+and `{"t": "floor"}` (carves, in order). Each item has a `note`. The raster becomes retail-style cells, because the
+engine's 9 is a corner and not a fill (`topdownResolveCornerTile` pushes the probe out by the quadrant and gives up
+when the next cell is blocked too, so a body walked into along its edge lets Tomba slide through): a solid cell with
+one free side becomes the one-sided wall that pushes towards it (5 left, 6 up, 7 right, 8 down), half-covered corner
+cells become diagonals 1-4, corners and the inside stay 9, as in AREA05/08/19. Then the houses (walls on the code's
+trigger rectangle, or on `body` where a room-0 resident stands in its front yard, a door gap and a trigger interior),
+the picture edge (shut except at the exit rectangles), the residents (every spawn and patrol box carved to floor) and
+a reach check (flood fill from the entry spawn, layout `spawn`; a resident or exit that cannot be walked to is
+reported). What is traced: Iron Town's rock, pillar fences, fortress walls, lamp posts, the key tower, the blocks of
+the front building with a passage from the gate to the dome, the outer wall with the round gate, the lamps and the
+bucket; Lumberjack Town's hedges and log fences, the spire, the big house, the windmill base, the deck house, bushes
+and the saw-horse; Stonetown's rampart, the house wings, the broken pillar, the rock dome, the arches and the well.
+These are our reading of the reconstructed pictures, not original data.
+
+**Checked headless** (screenshots, frames dumped with `--dump-frames`): in each town, walking with the overlay on and
+off, entering a house (AREA17 H5, AREA16 H1, AREA11 H3: the room view and its occupant appear) and a dialogue
+(AREA17 resident 6 "¿Quieres subir?", AREA16 resident 7 "¿Entro o no entro...?", AREA11 resident 9).
+
 ## Validation (tools/topdown.py)
 
 The tool rebuilds working sections from disc data alone:
