@@ -424,7 +424,7 @@ void port_civ_maps(void) {
         snprintf(path, sizeof path, "%s/AREA%02d/%s", port_civ_maps_dir, area, port_civ_tim_name(1));
         port_civ_tim_out = t; port_civ_tim_in = port_civ_slurp(path);   /* none: rooms keep the engine's hidden map */
         port_civ_map_w = ((unsigned short *)ce)[0] * 8; port_civ_map_h = ((unsigned short *)ce)[1] * 8;
-        if (port_verbose) port_printf("[port] --civ-maps: AREA%02d rebuilt map %dx%d px\n", area, port_civ_map_w, port_civ_map_h);
+        port_printf("[port] --civ-maps: AREA%02d rebuilt map %dx%d px loaded from %s\n", area, port_civ_map_w, port_civ_map_h, port_civ_maps_dir);
     }
     *(void **)port_ram_ptr(0x1F800390u) = ce;
     *(void **)port_ram_ptr(0x1F800394u) = ct;
@@ -529,7 +529,7 @@ int main(int argc, char **argv) {
         }
         else if (!strcmp(a, "--civ-wfm") && v) port_civ_wfm_path = argv[++i];
         else if (!strcmp(a, "--civ-line") && v) port_civ_line = atoi(argv[++i]);
-        else if (!strcmp(a, "--civ-maps") && v) port_civ_maps_dir = argv[++i];
+        else if (!strcmp(a, "--civ-maps") && v) { port_civ_maps_dir = argv[++i]; port_printf("[port] --civ-maps %s\n", port_civ_maps_dir); }
         else if (!strcmp(a, "--civ-collision")) port_civ_collision = 1;
         else if (!strcmp(a, "--civ-spawn") && v) { port_civ_spawn_set = sscanf(argv[++i], "%d,%d", &port_civ_spawn_x, &port_civ_spawn_y) == 2; }
         else if (!strcmp(a, "--lang") && v) { port_lang = atoi(argv[++i]); if (port_lang < 0 || port_lang > 8) return usage(argv[0]); }
