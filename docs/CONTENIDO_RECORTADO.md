@@ -123,6 +123,33 @@ Tabla completa en notes/secrets.md, "Where the 0xFF events are started / complet
 - **Los otros 19** (6, 18, 45, 52, 59, 60, 67, 74, 83, 89, 94, 95, 96, 100, 138, 139, 140, 184, 186) no tienen código, datos de sala ni script que los inicie, complete o lea.
   **89 (Adivino verde)** es uno de ellos. Su único contexto es una frase del pueblo de madera recortado: "en esta choza vive un adivino, pero tiene una condición" (AREA11 s0).
 
+## Jungla (AREA10): lo que queda del contenido Masakari / Funga
+
+AREA10 (overlay `X010`, texto `MFNT100*`, JP `X10` + `AREA10/A003.GAM`) es toda la jungla: nombres de guardado "Jungla" y
+"Colina del árbol noble"; lista de títulos JP ジャングル / ジャングル奥地. No existe un área "Jungla Masakari" aparte.
+
+- **Verificado: la tabla de títulos JP de X10 (JP `X10.BIN` +0x44068) titula aquí los eventos cortados:** 6 大きな水たまり？,
+  59 族長のたのみごと？ (el encargo del jefe), 60 コトバを吸いとろう！Ⅱ, 61 マサカリ族のヒミツ, 74 電気うなぎを捕まえろ！,
+  184 おいら、悪い子？ ("¿Soy un niño malo?"), 186 マサカリの集落？, y 138-140 (tres hermanas). La cadena Masakari era de la jungla.
+- **Verificado: no hay código para 59/60/61/74/186 en PAL.** Ningún `jal setEventStarted/Complete` (0x8005A8A8 / 0x8005A9A4) con
+  esos ids como a0 inmediato en ningún X0nn, overlay de SYSTEM ni el exe; ningún `lui 0x800A` + carga/escritura de `SCRIPT_FLAGS`+E en
+  los binarios de idioma 0 salvo la lectura ya conocida de 61 en I0NFO2 (+0xAE00, +0xAF1C, pueblo cortado de AREA16). El resto de
+  aciertos caen en datos de las variantes de idioma.
+- **Verificado: la escena del juicio del jefe Funga sobrevive solo como texto.** `MFNT100S` grupo 2 (base 211) dx 11-18 = PAL
+  #222-#229 (JP AREA10 A003 bloque 0 #188-#195): "¡Eres tú! ¡Nuestro amigo! ¡No has hecho daño a nadie!", "Si tuviera un **tambor
+  Funga** me pondría a bailar" (JP añade: es un secreto, ¡olvídalo!), "¡Puedes irte!", "¡Has herido a mis amigos! ... Voy a mirar en
+  tu destino; si has sido amable te perdonaré. ¡Fungaaa! ¡Hongaaa!", "Has sido bueno, te perdono", "¡Has sido un malvado! ¡Lo
+  pagarás!". dx 14 y 18 son los mismos discursos en galimatías Masakari (glifos ◆★ en JP, `?????` en PAL), lo que se ve antes de
+  entender el idioma. Ninguna llamada estática llega a ellos. Las 4 llamadas con argumentos calculados de X010 dan el grupo 4
+  (lostHatManTalk) y el grupo 2 dx 22-36 (profesor de natación, tabla de botones `D_8012F3C8` = dx 27-32), y los 9 WSS tampoco los
+  usan. La comprobación del destino probablemente iba con el evento 184 "¿Soy un niño malo?" (inferido).
+- También sin referencia en el banco: grupo 5 dx 15 ("¿y esa cara de cansancio?"), y los
+  avisos de guardado del grupo 1 (van por datos, no son cortes). El JP #171 ポテンシャルが　たりない ("no hay potencial suficiente") está vacío en PAL.
+- **Sprites:** las tablas SPR de AREA10 dan 37 fotogramas candidatos, todos poses de Tomba (nadar/pelear, movidas por código: falsos
+  positivos). La SPR 0x33 JP de AREA10 tiene 3 fotogramas que no están en PAL (f41, f42, f45: barras de color, sin dibujo). No hay
+  sprite del jefe, de la anguila ni del tambor.
+- **Sin revisar:** lista completa de funciones muertas de X010 (el escaneo simple de punteros da demasiado ruido) y subtipos colocados por sala.
+
 ## Notas de Folkin — verificación (afirmaciones fuera de Civilización)
 
 Las afirmaciones sobre Civilización se comprueban en [CIVILIZACION.md](CIVILIZACION.md) ("Notas de Folkin —
@@ -132,17 +159,17 @@ hemos comprobado.
 | Afirmación | Veredicto | Pruebas |
 |---|---|---|
 | Adivino verde, recortada del todo | **en parte** | El evento 89 tiene icono propio (fotograma 227, "adivino verde", ver Iconos de evento), pero no está en `SUBSCREEN_EVENT_ORDER` y ningún código lo inicia. La versión final tiene "The Red Fortune Teller" (CFNT #69) y "The Blue Fortune Teller" (#125). El objeto sin usar 90 es una carta "para las tres hermanas". No hemos mirado sprites. |
-| Jefe Funga recortado; eventos de castigo, tambor y lanza | **en parte** | Objetos sin usar: Funga Leather / Tree / Sap (119/122/123, JP "material del tambor"), Small Drum (137) y Chief's Spear (140). Sus listas de comprobación de uso son `subScreenCondFalse` (D0SPSUB `D_800FECE8`) y ningún código los da. No hay sprite del jefe ni evento de castigo. |
+| Jefe Funga recortado; eventos de castigo, tambor y lanza | **en parte** | Objetos sin usar: Funga Leather / Tree / Sap (119/122/123, JP "material del tambor"), Small Drum (137) y Chief's Spear (140). Sus listas de comprobación de uso son `subScreenCondFalse` (D0SPSUB `D_800FECE8`) y ningún código los da. No hay sprite del jefe. El **diálogo del juicio del jefe sí existe** (AREA10 `MFNT100S` grupo 2 dx 11-18, sin referencia; ver "Jungla (AREA10)" abajo). |
 | Anciano de Lumberjack Town, recortado del todo | **confirmado** | Sus fotogramas cenitales están en `SYSTEM/A06100` (fotogramas extra 30..50 del subtipo 0 de AREA11, AREA11/CLUT02 fila 36). Pertenecen a la AREA11 s0 recortada, "Lumberjack Town" ([CIVILIZACION.md](CIVILIZACION.md)). |
 | Pez globo y caracola, recortados del todo | sin verificar | |
-| El idioma Masakari se aprende mordiendo | sin verificar | Los eventos 59-61 (la cadena Masakari) no se usan y no tienen código. |
+| El idioma Masakari se aprende mordiendo | **en parte** | El título JP del evento 60 es コトバを吸いとろう！Ⅱ "¡Absorbe las palabras! II" (tabla JP de AREA10), y las frases cortadas del jefe van en parejas: texto traducido más una copia en galimatías ◆★ (JP #191/#195, PAL `?????`). Sin código: 59-61 no se inician, completan ni leen en X010 (ver "Jungla (AREA10)"). |
 | Bolsa del Cerdo Marino que da el jefe | sin verificar | |
 | Cactus del GoGoCar y una pieza de pista extra | **en parte** | Los cactus están confirmados (ver "GoGoCart cacti / sign" arriba). La pieza de pista no se ha comprobado. |
 | Modelo de cartel metálico de la Mansión Encantada | sin verificar | |
 | Texturas/sprites de Doodle Rock en el Bosque Subterráneo | sin verificar | |
 | Sprites de flor creciendo, maldita y sin maldición | **en parte** | Los fotogramas 27-32 del SPR 0x3B de AREA02 existen, pero la VRAM a la que apuntan está vacía en PAL (ver Perdido). |
 | Puerta de hierro en el Castillo de hierro | **en parte** | El evento 100 "Iron Keyhole" tiene icono (fotograma 209), no está en el orden del menú y nada lo inicia. No hemos mirado el sprite de la puerta. |
-| Planta rara en la VRAM de la Jungla Masakari | sin verificar | |
+| Planta rara en la VRAM de la Jungla Masakari | **no encontrada** | Páginas 4 bpp de AREA10 de sus 10 listas de carga renderizadas (tools/vram.py + find_unused_gfx.py): las zonas no muestreadas son palmeras, juncos, flores y texturas de pared de fondos/modelos, más la página B002 ya retirada. No hay ningún sprite de planta suelto. Sin paleta, una planta pequeña podría escaparse. |
 | Texto de estado "Thin" / "Fat" | **no encontrado** | No aparece en el texto WFM inglés/español PAL de AREA03/11/16/17/18 ni en CFNT999. No hemos buscado en los gráficos del submenú. |
 | Apertura del reloj de la Mansión y gema | sin verificar | |
 | Puerta del Cerdo final | sin verificar | |

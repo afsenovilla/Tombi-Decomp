@@ -114,6 +114,31 @@ Full table: notes/secrets.md, "Where the 0xFF events are started / completed". S
 - **The other 19** (6, 18, 45, 52, 59, 60, 67, 74, 83, 89, 94, 95, 96, 100, 138, 139, 140, 184, 186) have no code, room data or script that starts, completes or reads them.
   **89 (Green Fortune Teller)** is one of these. Its only context is the cut Wood village line "a fortune-teller lives in this hut, but he has a condition" (AREA11 s0).
 
+## Jungle (AREA10): what is left of the Masakari / Funga content
+
+AREA10 (overlay `X010`, text `MFNT100*`, JP `X10` + `AREA10/A003.GAM`) is the whole jungle: save names "Jungla" and
+"Colina del árbol noble"; JP title list ジャングル / ジャングル奥地. There is no separate "Masakari Jungle" area.
+
+- **Verified: the JP per-area title table of X10 (JP `X10.BIN` +0x44068) titles the cut events here:** 6 大きな水たまり？,
+  59 族長のたのみごと？ (the chief's request), 60 コトバを吸いとろう！Ⅱ, 61 マサカリ族のヒミツ, 74 電気うなぎを捕まえろ！,
+  184 おいら、悪い子？ ("Am I a bad kid?"), 186 マサカリの集落？, plus 138-140 (three sisters). So the Masakari chain was a jungle chain.
+- **Verified: no code for 59/60/61/74/186 in PAL.** No `jal setEventStarted/Complete` (0x8005A8A8 / 0x8005A9A4) with those ids as
+  immediate a0 in any X0nn, SYSTEM overlay or the exe; no `lui 0x800A` + load/store of `SCRIPT_FLAGS`+E in any language-0
+  binary except the known I0NFO2 read of 61 (+0xAE00, +0xAF1C, cut AREA16 town). The other hits are in language-variant data.
+- **Verified: the Funga chief's judgement scene survives as text only.** `MFNT100S` group 2 (base 211) dx 11-18 = PAL #222-#229
+  (JP AREA10 A003 block 0 #188-#195). The lines: "You! Our friend! You hurt no one!", "Good boy! If I had a **Funga drum** I'd dance...
+  (JP adds: that's a secret, forget it!)", "You may go!", then "You! You hurt my friends! ... I will read your fate; if you were good I'll
+  forgive you. Fungaaa! Hongaaa!", "You were good, I forgive you", "You were bad! You'll pay! Fungaaa!!". dx 14 and 18 are
+  the same speeches in Masakari gibberish (JP ◆★ glyphs, PAL `?????`), shown before you can understand the language. No static
+  call reaches them. The 4 computed call sites of X010 resolve to group 4 (lostHatManTalk) and group 2 dx 22-36
+  (swim teacher, button table `D_8012F3C8` = dx 27-32), and the 9 WSS scripts do not use them either. The fortune check probably went
+  with event 184 "Am I a bad kid?" (inferred).
+- Also in the bank, unreferenced: group 5 dx 15 ("you look tired, you need energy"),
+  group 1 save prompts (data-driven, not cut). JP #171 ポテンシャルが　たりない ("not enough potential") is empty in PAL.
+- **Sprites:** AREA10 SPR tables have 37 candidate frames, all Tomba's own swim/fight poses (code-driven, false positives).
+  JP AREA10 SPR 0x33 has 3 frames not in PAL (f41, f42, f45: plain coloured bars, no art). No chief, eel or drum sprite.
+- **Not checked:** a full dead-function list of X010 (the naive pointer scan is too noisy), placed-object subtypes per room.
+
 ## Folkin's rough notes — verification (non-Civilization claims)
 
 The Civilization claims are checked in [CIVILIZATION.md](CIVILIZATION.md) ("Folkin's rough notes — verification").
@@ -122,17 +147,17 @@ These are the rest, checked only where it was cheap. **Unverified** means we did
 | Claim | Verdict | Evidence |
 |---|---|---|
 | Green Fortune Teller completely cut | **partly** | Event 89 has its own icon (frame 227, "green fortune teller", see Event icons) but is not in `SUBSCREEN_EVENT_ORDER` and no code starts it. Retail has "The Red Fortune Teller" (CFNT #69) and "The Blue Fortune Teller" (#125). The unused item 90 is a letter "addressed to the three sisters". No sprite checked. |
-| Funga Chief completely cut; punishment, drum and spear events | **partly** | Unused items: Funga Leather / Tree / Sap (119/122/123, JP "drum material"), Small Drum (137) and Chief's Spear (140). Their use-check lists are `subScreenCondFalse` (D0SPSUB `D_800FECE8`) and no code gives them. No chief sprite and no punishment event found. |
+| Funga Chief completely cut; punishment, drum and spear events | **partly** | Unused items: Funga Leather / Tree / Sap (119/122/123, JP "drum material"), Small Drum (137) and Chief's Spear (140). Their use-check lists are `subScreenCondFalse` (D0SPSUB `D_800FECE8`) and no code gives them. No chief sprite found. The chief's **judgement dialogue does exist** (AREA10 `MFNT100S` group 2 dx 11-18, unreferenced; see "Jungle (AREA10)" below). |
 | Old Lumberjack Town Man completely cut | **confirmed** | His top-down frames are on `SYSTEM/A06100` (AREA11 subtype 0 extra frames 30..50, AREA11/CLUT02 row 36). They belong to the cut AREA11 s0 "Lumberjack Town" ([CIVILIZATION.md](CIVILIZATION.md)). |
 | Puffer Fish, Whelk completely cut | unverified | |
-| Masakari language learned by biting | unverified | Events 59-61 (the Masakari chain) are unused, with no code. |
+| Masakari language learned by biting | **partly** | JP title of event 60 is コトバを吸いとろう！Ⅱ "Suck up the words! II" (JP AREA10 table), and the cut chief lines come in pairs: translated text plus a ◆★ gibberish copy (JP #191/#195, PAL `?????`). No code: 59-61 have no start/complete/read in X010 (see "Jungle (AREA10)"). |
 | Navy Evil Pig Bag from the chief | unverified | |
 | GoGoCar cacti and an extra track piece | **partly** | The cacti are confirmed (see "GoGoCart cacti / sign" above). The track piece was not checked. |
 | Haunted Mansion metal sign model | unverified | |
 | Doodle Rock textures/sprites in the Underground Forest | unverified | |
 | Growing flower sprites, cursed and uncursed | **partly** | AREA02 SPR 0x3B frames 27-32 exist, but the VRAM they point at is empty on PAL (see Lost). |
 | Iron door in the Iron Castle | **partly** | Event 100 "Iron Keyhole" has an icon (frame 209), is not in the menu order, and nothing starts it. No door sprite checked. |
-| Weird plant in the Masakari Jungle VRAM | unverified | |
+| Weird plant in the Masakari Jungle VRAM | **not found** | AREA10 4 bpp pages of all 10 load lists rendered (tools/vram.py + find_unused_gfx.py): the unsampled regions are palms, reeds, flowers and wall textures used by backdrops/models, plus the known withdrawn B002 page. No isolated plant sprite. No palette, so a small plant could be missed. |
 | "Thin" / "Fat" status text | **not found** | No such word in the PAL English/Spanish WFM text of AREA03/11/16/17/18 or CFNT999. The sub-screen graphics were not searched. |
 | Mansion clock opening and gem | unverified | |
 | Final Evil Pig door | unverified | |
