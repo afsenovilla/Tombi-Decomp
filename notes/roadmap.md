@@ -24,7 +24,7 @@ Order by expected yield per effort: areas whose PAL twin is fully matched and th
 - [ ] Mid areas X01, X03, X04, X06, X09, X14.
 - [ ] X00 shared object code (47 %), then the engine SLPS_011.44 (54 %): kana/kanji text system, file loading.
 - [x] Ghidra analysis stages 1-2 (notes/jp_retail.md, 2e5e0da, 70fbba1): names ported; no-counterpart lists are an older build of the area handlers, not relocated code.
-- [ ] JP X11 0x80116348: cutscene object, message boxes 6-10 + setEventStarted(0x68): resolve the texts and the helper object 0x33/0x0F; compare with PAL event 0x68.
+- [x] JP X11 0x80116348: older build of goGoCarMechanicTalk (Food for Fuel?, 0x68), not JP-only (5d8e580). JP text: "Bofutto Car" runs on alcohol; PAL: GoGo car, wine.
 - [ ] Read the remaining large X10 no-counterpart functions (list in notes/jp_retail.md).
       Anything JP-only goes to docs/CUT_CONTENT.md and, if worth it, into the port.
 
