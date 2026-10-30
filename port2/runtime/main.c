@@ -397,13 +397,17 @@ int port_civ_on(int area, int sec) {   /* area: GAME.selectedArea (the load list
 /* --civ-maps DIR: DIR/AREAnn/map8E.bin and map8F.tim (tools/civ_rebuild.py) replace APD_DATA[14] / [15] */
 static const char *port_civ_maps_dir;
 static int port_civ_map_w, port_civ_map_h;   /* rebuilt picture size in px (0: the stand-in AREA08 one) */
+#define PORT_CIV_PAD_PRE (64 * 1024)
+#define PORT_CIV_PAD_POST (1024 * 1024)
 static void *port_civ_slurp(const char *path) {
     FILE *f = fopen(path, "rb"); long n; void *b;
     if (!f) return 0;
     fseek(f, 0, SEEK_END); n = ftell(f); fseek(f, 0, SEEK_SET);
-    b = malloc(n + 16);
-    if (fread(b, 1, n, f) != (size_t)n) { fclose(f); free(b); return 0; }
-    fclose(f); return b;
+    /* zeroed margins: topdownBuildMapStrip reads up to 24 rows above and 232 below the camera's tile row, which the
+       retail pictures cover and a rebuilt one cut to the walkable area does not (crash walking to the bottom edge) */
+    b = calloc(1, PORT_CIV_PAD_PRE + n + PORT_CIV_PAD_POST);
+    if (!b || fread((char *)b + PORT_CIV_PAD_PRE, 1, n, f) != (size_t)n) { fclose(f); free(b); return 0; }
+    fclose(f); return (char *)b + PORT_CIV_PAD_PRE;
 }
 /* --civ-collision: the debug pictures (map8F_cells.tim / map8F_in_cells.tim: the cell map tinted over the picture,
    red solid, orange diagonal, cyan trigger) replace the pictures. The room view (map8F_in.tim, the house interiors on
@@ -435,6 +439,18 @@ void port_civ_maps(void) {
     }
     *(void **)port_ram_ptr(0x1F800390u) = ce;
     *(void **)port_ram_ptr(0x1F800394u) = ct;
+}
+/* topdownBuildMapStrip rule (fixes.txt): keeps the strip of a rebuilt picture inside it (rows of `stride` words,
+   port_civ_map_h rows); logs the first clamp with the tile index, so a bad camera position can be traced */
+unsigned long *port_civ_clamp_strip(unsigned long *base, unsigned long *s, int stride, int rows, unsigned v, unsigned w) {
+    static int said;
+    long lo, hi, off;
+    if (!port_civ_test || !port_civ_map_h || stride <= 0) return s;
+    off = (long)(s - base); lo = 0; hi = (long)stride * (port_civ_map_h - rows);
+    if (hi < 0) hi = 0;
+    if (off >= lo && off <= hi) return s;
+    if (!said++) port_printf("[port] --civ-maps: map strip clamped (tile %u, width %u tiles, offset %ld words, picture %dx%d)\n", v, w, off, port_civ_map_w, port_civ_map_h);
+    return base + (off < lo ? lo : hi) - (off < lo ? 0 : 0);
 }
 /* camera limits {xmin, xmax, ymin, ymax} and start for the rebuilt picture (AREA08's rows follow xmax = W - 288,
    ymax = H - 112); spawn at the bottom exit of AREA17 (the way in from Civilization Town) */

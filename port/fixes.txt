@@ -424,6 +424,9 @@ src/i0nfo2/topdownA11ActorOpenDialogue.c | extern int func_8002DCC8(int a, int b
 # the stand-in AREA08 ones (APD_DATA[15] / [14]) just before the engine reads them. AREA17 s0 (Iron Town) also runs
 # (port_civ_on): its residents wear the AREA08 villager (TOPDOWN_A08_ACTOR_DEFS[0]), their own tables being lost.
 src/i0nfo2/topdownLoadMapTiles.c | unsigned short *src = *(unsigned short **)0x1F800390; | unsigned short *src; { extern void port_civ_maps(void); port_civ_maps(); } src = *(unsigned short **)0x1F800390;
+# --civ-maps: a rebuilt picture's strip read is kept inside the picture (and logged once): a camera tile beyond it read
+# outside the buffer and crashed on Windows (topdownBuildMapStrip+0x19e); retail pictures are never clamped
+src/i0nfo2/topdownBuildMapStrip.c | s += ((v / w) * 32 - 24) * stride + (v % w) * 8; | s += ((v / w) * 32 - 24) * stride + (v % w) * 8; { extern unsigned long *port_civ_clamp_strip(unsigned long *, unsigned long *, int, int, unsigned, unsigned); s = port_civ_clamp_strip(D_800A4680, s, stride, rows, v, w); }
 src/i0nfo2/topdownA17ActorInit.c | o->box0 = TOPDOWN_A17_ACTOR_DEFS[o->subtype].box[0]; | { extern int port_civ_test, port_civ_fig(int, int); typedef struct { unsigned char b[4]; unsigned short w; short s; void **a; } Def_; extern Def_ TOPDOWN_A08_ACTOR_DEFS[]; if (port_civ_test && !port_civ_fig(17, o->subtype)) { ((Def_ *)TOPDOWN_A17_ACTOR_DEFS)[o->subtype] = TOPDOWN_A08_ACTOR_DEFS[0]; ((Def_ *)TOPDOWN_A17_ACTOR_DEFS)[o->subtype].w += 7; } } o->box0 = TOPDOWN_A17_ACTOR_DEFS[o->subtype].box[0];
 # Subtypes whose page survives (AREA17 0; AREA16 0..2) keep their own defs (boxes, anim scripts) and are drawn from a
 # runtime-built table on that page with their real CLUT row (port_civ_fig: one standing figure for every frame); AREA16
