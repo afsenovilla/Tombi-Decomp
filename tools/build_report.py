@@ -308,7 +308,8 @@ def jpdemo_main(ver="slpm80165"):
                 # scratchpad addresses are fixed: assemble them as constants, like _jpdemo_spad_set does on the C side
                 # (splat names some of them D_1F80xxxx in the Japanese retail target)
                 spad = "".join("\t.set\t%s,0x%s\n" % (n, n[2:]) for n in sorted(set(re.findall(r"\bD_1F80[0-9A-F]{4}\b", src_s))))
-                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n' + spad + '.section .text\n' + src_s)
+                # handwritten/data-as-code functions can hold R4000 opcodes (dsll32, sd...): allow them, the bytes are identical
+                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n' + (".set mips3\n" if re.search(r"\b(dsll32|dsrl32|dsra32|dsll|dsrl|dsra|dadd[u]?|ddiv[u]?|dmult[u]?|sd|ld)\b", src_s) else "") + spad + '.section .text\n' + src_s)
             try:
                 run(AS + [t.name, "-o", out])
             except subprocess.CalledProcessError as e:

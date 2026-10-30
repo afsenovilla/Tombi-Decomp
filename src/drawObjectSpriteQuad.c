@@ -5,6 +5,7 @@
 // Japanese version of PAL main0 80054C38 (drawObjectSpriteQuad.c): 320 -> 321, 256 -> 241.
 /* c loaded before an empty loop (its notes split the scheduling block) so the e constant lands after lw c, as in the game (debt). */
 #include "TOBJ.H"
+#include "camera.h"
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct {
