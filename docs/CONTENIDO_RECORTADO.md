@@ -246,3 +246,15 @@ Asi que **no hay recurso grafico ni sonoro sin cargar** mas alla de lo conocido 
 El disco PAL no guarda ninguna funcion zombi oculta que el inventario anterior no hubiera visto: el codigo muerto son restos de
 integracion/portado y los datos muertos son relleno. Lo unico que merece una segunda mirada es `updateWaterCurrent`; el barrido de
 dialogos (4) es donde un resolutor de `(k, dx)` calculados aun podria encontrar lineas nuevas.
+
+## Hallazgos de codigo de PrePre Vol. 8 (2026-10-30)
+
+Fuente: [PREPRE8.md](PREPRE8.md), "Functions vs PAL". Nada de esto esta en PAL, JP retail ni la beta de 1998.
+
+| Hallazgo | Evidencia | Estado |
+|---|---|---|
+| Tarjeta `TO BE CONTINUED...` de fin de demo | cadena 0x80010228, dibujada en (20, 26) durante 360 fotogramas por la tarea 0x80021050 cuando el byte 0x800DE4A3 == 2 | perdido (solo codigo; el disparador no esta trazado) |
+| Generador de oleadas de enemigos por scroll en area 1 sala 0 | 0x80083D88 imprime `enemy=%01d`; 8 umbrales de scroll X (0x800AF1A4), tabla de retardo aleatorio (0x800AF194); las otras salas no lo generan | perdido (tipo de enemigo sin identificar) |
+| Vista de depuracion de camara con waypoints (`area_pos`, `pos_num`, `tar_x/y/z`) | 0x800268C0 | solo depuracion |
+| Menus de prueba: SOUND OUTPUT (tipos de reverb), MUSIC PLAY, MEMORY CARD, CDROM LOAD | codigo muerto desde 0x800854B4, sin llamador | solo depuracion, no es contenido |
+| Modos de demo del titulo `PLAY DEMO`, `RANKING DEMO` | cadenas 0x80010174/0x80010180, llamadas desde la maquina de estados 0x8001ECD4 | perdido (no hay datos de demo en el disco) |

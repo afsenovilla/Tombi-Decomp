@@ -176,17 +176,95 @@ no retail disc (59 in `CLUT00`, `SYS006`, the exe TIMs), and 35 are shared only 
 Civilization scenery pages or the Female Stonetown Resident better than the retail rows (docs/CIVILIZATION.md, "Palette
 catalog").
 
-## Functions vs PAL (2026-10-30): not done
+## Functions vs PAL (2026-10-30)
 
-The comparison with `tools/fn_vs_pal.py` (see docs/BETA_980203.md, "Functions vs PAL") could not be run on this
-build in that session: `game_prepre8/TOMBA.EXE` is a symlink into `/dev/shm/prepre8_out/`, which had been wiped, and
-the PrePre Vol. 8 image was not on the machine. Re-extract with `tools/prepre8.py extract`, then:
+Tool: `tools/fn_vs_pal.py` (method in docs/BETA_980203.md). `game_prepre8/TOMBA.EXE` against PAL, with `--also` JP
+`SLPS_011.44`, JP `X00.BIN` and the 1998-02-03 beta `SLPS_011.44`:
 
 ```
 python3 -I tools/xmatch.py game_prepre8/TOMBA.EXE --csv m.csv
-python3 -I tools/fn_vs_pal.py game_prepre8/TOMBA.EXE m.csv --vram 0x80010000 --text 0x80016D40 0x800A10F4
+python3 -I tools/fn_vs_pal.py game_prepre8/TOMBA.EXE m.csv --vram 0x80010000 --text 0x80016D40 0x800A10F4 \
+   --also game_jp/SLPS_011.44 game_jp/SYSTEM/X00.BIN game_beta980203/SLPS_011.44 --top 1000
 ```
 
-Existing leads: 494 of the 508 PAL matches are MAIN0 (86 identical); the code the exe has that PAL lacks is the
-OPTION MODE tree rooted at 0x800854B4 (dead code, see "Debug features"), the `enemy=%01d` object 0x80083D88, and
-the 2D-room path of room list 3.
+| Class | Pieces | Bytes |
+|---|---|---|
+| Masked twin in PAL (xmatch; 494 MAIN0, 14 X000/X001/X003; 86 byte-identical) | 508 | 103664 |
+| Gap pieces >= 48 B (all) | 680 | 461636 |
+| sim >= 60 (a revised PAL function) | 59 | 17780 |
+| sim 30-59 | 124 | 56084 |
+| sim < 30, "no counterpart" | 497 | 387772 |
+| exact masked twin in JP retail / beta | 20 | 2092 (all PsyQ library: `CdMix`, `StartCARD`, `SsStart2`, ...) |
+
+Reading. Nothing in the game code is an exact twin of JP retail or the beta: no function in this exe reappears
+unchanged in a later build except SDK library code. The 497 "none" pieces (388 KB, 463 of them below 0x80087390) are
+not 388 KB of cut features. TOMBA.EXE holds the code that PAL splits into MAIN0 plus the X000/X001 overlays, and this
+early version was written differently. Evidence (sizes, not names): the "best PAL" name the tool prints is only the
+nearest by shingles, but the sizes agree with the PAL function of the same job: the area-0 boatman/event scene
+0x800841F0 is 1412 B (PAL `a00Variant0EventScene` 1704 B), the dark cloaked figure scene 0x80084934 is 1648 B (PAL
+1676 B), rolling barrel 0x8007DF3C 1492 B (2548), rope chain 0x8003D40C 2628 B (2388), `weapon0Swing`-type 0x800560AC
+6984 B (6188), spin-on-object 0x800462B0 5744 B (5740), pig enemy states 0x80070514..0x80078E84 (the PAL Koma Pig
+set), chick/egg/treasure chest/zipline/solid block 0x80079698..0x8007DE78 (sim 40-70, named by PAL). So the village
+(AREA00) actors of PAL already existed in June 1997. This is a size-and-structure judgement (guess for each
+individual function; the pig, chick and chest groups are matched by sim 40-70 and are more solid).
+
+### Biggest "no counterpart" functions, what they are
+
+1. **Model vertex drawers 0x800294E8 (18360 B) and 0x8002DCA0 (8516 B).** *Verified as renderers*: 70 and 45 GTE
+   (COP2) ops, 212 and 131 `lwc2/swc2`, no calls, a switch on the scratchpad model type word (0x1F800128 = 0/1/2).
+   PAL's `drawModelVtx` (1976 B) and `modelDrawG4Lit` (608 B) are the same jobs compiled as loops; here they are fully
+   unrolled. Not content.
+2. **Player move code** 0x800560AC (6984 B weapon swing), 0x800462B0 (5744 B), 0x8005B3F8 (3640 B player sprite drawer
+   with a debug read-out, see below), 0x800493F4 / 0x80047D44 / 0x8004B8A8 / 0x8004DCE0 ...: earlier forms of
+   `weapon0Swing`, `playerStepSpinOnObject`, `drawPlayerSprite*`, swing/cling/flip/bitten states. They call
+   `AnimJump`, `MulCos`, `MulNegSin` like PAL. *Guess by structure*: the same moves. One thing to note: all 5 pose
+   "step" functions exist, so the pig-carrying pose and no swimming set (item 2 above) is data, not a missing code path
+   (swimming is not handled by any function found; not checked in depth).
+3. **Area-0 scripted scenes** 0x800841F0 and 0x80084934 (+ 0x800853A8 state object). They run a state byte at
+   `D_800F4FDC/4FDD/4FDE` (6/1/0, 6/4/5, ...) and call 0x80035ADC (a message/box opener, args 2,0xD0,0xAC) 3-4 times: boatman
+   and cloaked-figure events. *Verified as event scripts; which line is said not read.* PAL has both. No new event.
+4. **Area-1 wave spawner 0x80083D88 (type 3, prints `enemy=%01d`).** *Verified from asm*: state 0 sets a timer
+   from a random 0..7 index into the u16 table 0x800AF194; state 1 waits until the scroll X (0x1F80028A) passes one of 8
+   thresholds in the s16 table 0x800AF1A4, then allocates an object (0x8001A36C) with kind 2, repeats up to 8 times. So
+   it is a scroll-triggered enemy wave in area 1 room 0 (the only room that spawns it). *Guess*: what the enemy is
+   (the pig/bird sprites of TIM000 are the candidates). PAL has no such spawner and no `enemy=` string.
+5. **`TO BE CONTINUED...` end screen, 0x80021050 task.** *Verified*: when the state byte at 0x800DE4A3 is 2 the task
+   draws the string at (20, 26) with 0x8001E2D4 (text draw), clears 0x800DE4A1/A2 and sets a 0x168 (360 frame)
+   timer. Neither PAL, JP retail nor the beta contain the string. It is the end-of-demo card (guess: shown after the last
+   room of the demo; what triggers state 2 not traced). `GAME OVER` is drawn by the same task, and exists in JP.
+6. **Dead system/test tree** (0x800854B4..0x80087xxx, 0x8008585C MEMORY CARD TEST 2676 B, 0x800862C8 CDROM LOAD TEST, 0x800867E8
+   SOUND OUTPUT TEST 1948 B, 0x80086F7C MUSIC PLAY TEST). See "Debug features". New here: the SOUND test selects reverb
+   types (`ROOM`, `STUDIO(small/large)`, `HALL`, `SPACE ECHO`, `DELAY`, `PIPE ECHO`, `OFF`; depth with L1/R1, pitch with
+   left/right, voice/tone/type numbers), the MUSIC test prints `BGM : %3d` and volumes, the MEMORY CARD test lists
+   `bu00:`/`bu10:` cards with `IOE (FORMATTED)`, `NEW (UNFORMATTED)`, `TIMOUT (NO CARD)`, `ERROR (ERROR)` and dumps blocks
+   (`(%2d) %02X:%02X:%02X [%6d] %s`). *Verified (strings and calls)*.
+7. **Own CD file system**, strings `CD_newmedia: ... cd_read(PVD)`, `CD_cachefile: searching...`, `CdSearchFile: searching
+   %s...`, `%s: path level (%d) error`, `CD001`: the exe reads the ISO PVD and path table itself and caches the
+   directory to fill the 0x40-byte file table. No later build has these strings. Not content.
+
+### Debug text in TOMBA.EXE that is not in PAL (all absent from JP retail, the beta and every PAL MAINn)
+
+All are `drawDebugText` read-outs (0x8001E2D4 text + 0x800878B4 sprintf), stripped later. Only `hit pos`/`flag=` (JP and
+beta) and `GAME OVER` (JP) survive in other builds.
+
+| Where | Strings | Likely use |
+|---|---|---|
+| 0x800268C0 (camera/scroll) | `scrl_x/y/z=%05d`, `pl_x/y/z=%05d`, `anglX/anglY=%04d`, `area_pos`, `n_area_pos`, `pos_num`, `n_pos_num`, `rot_flag`, `tar_x/y/z=%05d`, `x=`, `z=` | camera with area-position waypoints (`area_pos`/`pos_num`) and a rotating target. The waypoint idea has a PAL echo only in the scroll controller; here it is a debug view. |
+| 0x8005B3F8 (player sprite) | `plX:%4d plY:%4d`, `rot:%4d spd:%4d`, `spx:%4d spy:%4d` | player position, rotation, speed |
+| 0x800656B0 | `MX:%2d MY:%2d` | message glyph / cursor cell |
+| 0x8007029C (Koma Pig anim advance) | `char=%02d` | pig character index |
+| 0x80079034 (`updateKomaPig` dispatcher) | `x=%05d y=%05d r0..r3=%01d`, `spdx=%05x spdy=%05x` | pig position, 4 sub-states, speed |
+| 0x8007DF3C (rolling barrel) | `addx=%04x`, `x=%05d y=%05d` | barrel velocity |
+| 0x80083D88 | `enemy=%01d` | wave counter |
+| 0x800854BC | `IRQ=%d` | OPTION MODE |
+| 0x80086F84 | `BGM    : %3d` | MUSIC PLAY TEST |
+
+Also: `PLAY DEMO` and `RANKING DEMO` (title attract modes; PAL has no such text), `PSDEMO` (0x800C8074, checked at boot
+0x8008735C/0x80087414, the PlayStation demo-disc marker), `@1997 WHOOPEE CAMP Co.,Ltd.`, and the 39 `\TOMBA\...;1` paths.
+
+### Verdict
+
+No new mechanic, area or NPC turns up in the function comparison: the exe is a smaller, earlier form of the same
+engine, and its actors (pigs, chicks, eggs, chest, rolling barrel, zipline, boatman, cloaked figure) are the PAL area-0
+set. What is new is the wave spawner, the `TO BE CONTINUED...` card, the debug read-outs and the test tree. Open:
+trace what sets 0x800DE4A3 = 2 (TO BE CONTINUED), and identify the area-1 wave enemy by emulating room 1-0.

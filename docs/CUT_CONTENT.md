@@ -226,3 +226,15 @@ So **no unloaded graphic or sound resource** beyond what is known (X019, the Civ
 The PAL disc keeps no hidden zombie feature that the earlier inventory missed: the dead code is inlining/porting leftovers, and
 the dead data is filler. The only item worth a second look is `updateWaterCurrent`; the dialogue sweep (4) is the place where a
 resolver of computed `(k, dx)` could still find new lines.
+
+## PrePre Vol. 8 code findings (2026-10-30)
+
+Source: [PREPRE8.md](PREPRE8.md), "Functions vs PAL". All absent from PAL, JP retail and the 1998 beta.
+
+| Find | Evidence | Status |
+|---|---|---|
+| `TO BE CONTINUED...` end-of-demo card | string 0x80010228, drawn at (20, 26) for 360 frames by the task at 0x80021050 when state byte 0x800DE4A3 == 2 | lost (code only; the trigger is not traced) |
+| Scroll-triggered enemy wave spawner in area 1 room 0 | 0x80083D88 prints `enemy=%01d`; 8 scroll-X thresholds (0x800AF1A4), random delay table (0x800AF194); the other rooms do not spawn it | lost (enemy type not identified) |
+| Camera waypoint debug view (`area_pos`, `pos_num`, `tar_x/y/z`) | 0x800268C0 | debug only |
+| Test menus: SOUND OUTPUT (reverb types), MUSIC PLAY, MEMORY CARD, CDROM LOAD | dead code from 0x800854B4, no caller | debug only, not content |
+| Title attract modes `PLAY DEMO`, `RANKING DEMO` | strings 0x80010174/0x80010180, called from the title state machine 0x8001ECD4 | lost (no demo data on the disc) |
