@@ -131,6 +131,17 @@ Decoder: `python3 -I tools/prepre8_text.py TOMBA.EXE [--raw]` (prints to stdout;
   ~135-line forest/dwarf script, whose kanji page is not in the file tree (kana decode fully; kanji show as `{xx}`).
   Dialogue kana: hiragana 0x31, katakana 0x68, dakuten 0x2F/0x30. Codes 0x2B-0x2E (shown ャ/ョ) are unsure.
 
+Event data behind the titles (checked 2026-10-30): only the **first 25 titles** (少年の旅立ち .. バロンは友だち) are
+referenced. Pointer table 0x800AE594 (25 pointers) + 0x800AE5F8 = `・・・・・・・・・・・` (placeholder). The event-list
+screen (0x80067EA0) builds index = page*16 + row, forces it to 0 if >= 0x18, and draws the title when the status byte
+0x800DE21C[i] is non-zero, else the placeholder: the demo's list has 24 usable slots (indices 0..23). Status functions:
+0x800216F4 (start), 0x800217A8 (sets 4), 0x800217F0 (complete; AP from table 0x800A2198), 0x80021914 (get). The AP
+table is a placeholder: 20 entries, all (500, 2000). Per-event 10-byte records at 0x800A1B0C are uniform (0, 180, 0, 0,
+n). Constant ids passed to start/set4 in the exe: 2, 3, 4, 6, 9, 10, 11, 13; others come from object/script data.
+Titles 25..163 (島のヒミツその1-5, 大停電, 人魚の王を救え, 「大団円1-3」, 光の落ちるところ, コロガルゾォ〜, ...) have
+**no pointer and no reference anywhere** in the exe: no area, map position, icon, AP or flag code exists for them in this
+build. 5つの箱の忘れもの (index 20) and 地下ロウの大ドロボウ (22) do have a list slot, but no area/icon data either.
+
 Event-title list (167 entries; the order is the in-game list order). Highlights not in retail: 少年の旅立ち (Young Boy
 Sets Off), 大きな水たまり? (A Large Puddle?; the strip's あれま is not in the title), APゲート, ドワーフの助け, 5つの箱の
 忘れもの / 5つの箱のカギ, 地下ロウの大ドロボウ, コロガルゾォ〜 / またコロガルゾォ〜 (Tumbling Down / Again), 光の落ちる
