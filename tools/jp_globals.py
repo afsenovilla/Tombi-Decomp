@@ -124,6 +124,7 @@ def jp_pairs():
 
 def main():
     write = "--write" in sys.argv
+    extra = []
     palsyms = load_pal_names()
     palfuncs, _ = load_pal_funcs()
     sorted_syms = sorted(palsyms)
@@ -139,6 +140,11 @@ def main():
             if s and b <= a < b + s and (best is None or s < palsyms[best][1]): best = b
         return best
 
+    PALSIZE = {}
+    if "--neartwin" in sys.argv:   # also learn from near-twins (similar skeleton, different size): tools/jp_neartwin.py candidates
+        import jp_neartwin as NT
+        for prog, a, s, name, us in NT.candidates(0.9):
+            u = us[0]; mm = NT.MOD[u.file]; extra.append((prog, a, s, mm, u.addr)); PALSIZE[(mm, u.addr)] = u.size
     pal_img = {"main0": Image("game/MAIN0.EXE", 0x80010000, 0x800)}
     for p in glob.glob(ROOT + "/config/x0??.yaml"):
         m = os.path.basename(p)[:-5]
@@ -160,9 +166,9 @@ def main():
     fvote = collections.defaultdict(collections.Counter)   # pal func addr -> Counter(jp addr)
     fprog = collections.defaultdict(set)
     npairs = 0
-    for prog, ja, js, mod, pa in jp_pairs():
+    for prog, ja, js, mod, pa in jp_pairs() + extra:
         if prog not in jp_img or mod not in pal_img: continue
-        pw, jw = pal_img[mod].words(pa, js), jp_img[prog].words(ja, js)
+        pw, jw = pal_img[mod].words(pa, PALSIZE.get((mod, pa), js)), jp_img[prog].words(ja, js)
         if pw is None:
             # near twins can have a different size; take the PAL size when known
             continue
@@ -277,4 +283,5 @@ def main():
     print("written")
 
 
-main()
+if __name__ == "__main__":
+    main()
