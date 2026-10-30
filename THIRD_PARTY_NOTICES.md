@@ -47,7 +47,7 @@ Sony's PSY-Q 4.5 libraries and that the licence grants nothing in them. Its own 
 psy-q-decomp for parts they match (their notices are in its `LICENSES/`).
 - Used: `_SsSetNrpnVabAttr0` .. `_SsSetNrpnVabAttr16`, `_SsSndPlay`, `_SsVmDamperOn`, `SsStart`, `_spu_init`,
   `_spu_FsetPCR`, `trapIntr`, `setIntr`, `startIntrVSync`, `init_ring_status`, `memcpy`, `bcopy`, `strcpy`,
-  `strncpy`, `strlen`. The `IntrEnv`/`IntrCallbacks` and `SsAdsr` typedefs in those files are its.
+  `strncpy`, `strlen`; as a non-matching algorithm reference only (`src/wip/`): `_SsVmSetVol`, `_SsContDataEntry`. The `IntrEnv`/`IntrCallbacks` and `SsAdsr` typedefs in those files are its.
 - MIT License. Copyright (c) 2026 Bash Alarmist.
   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
   documentation files (the "Software"), to deal in the Software without restriction, including without limitation
