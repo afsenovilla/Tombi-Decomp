@@ -395,3 +395,44 @@ jobs:
         with:
           name: BETA_980203_report
           path: build/beta980203/report.json
+
+  # PS1 Classics (PSN) releases: NPJJ00566 (JP) and NPUJ94236 (USA). Each secret is a direct
+  # download URL to a .zip with EBOOT.PBP + KEYS.BIN. Prints header info (disc id, TOC, block
+  # index) and tries the experimental image extraction; see docs/PSN.md.
+  report-psn:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: PSN EBOOT report
+        env:
+          GAME_FILES_URL_PSN_JP: ${{ secrets.GAME_FILES_URL_PSN_JP }}
+          GAME_FILES_URL_PSN_USA: ${{ secrets.GAME_FILES_URL_PSN_USA }}
+        run: |
+          python3 -m pip install cryptography
+          for r in JP USA; do
+            v="GAME_FILES_URL_PSN_$r"; URL="${!v}"
+            if [ -z "$URL" ]; then echo "::notice::$v secret not set; skipping $r."; continue; fi
+            URL="$(printf '%s' "$URL" | tr -d '\r\n"'"'"' ')"
+            ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+            if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+            if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+            d="$RUNNER_TEMP/psn_$r"; mkdir -p "$d"
+            curl -fsSL -o "$d/dl.zip" "$URL"
+            if ! unzip -o -q "$d/dl.zip" -d "$d"; then echo "::error::$v is not a zip"; exit 1; fi
+            pbp="$(find "$d" -iname EBOOT.PBP | head -1)"; keys="$(find "$d" -iname KEYS.BIN | head -1)"
+            if [ -z "$pbp" ] || [ -z "$keys" ]; then echo "::error::$r zip lacks EBOOT.PBP/KEYS.BIN"; exit 1; fi
+            { echo "### PSN $r"; echo '```'; python3 -I tools/psn_eboot.py info "$pbp" "$keys"; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
+            if python3 -I tools/psn_eboot.py extract "$pbp" "$keys" "$d/disc.bin"; then
+              sha1sum "$d/disc.bin" | tee -a "$GITHUB_STEP_SUMMARY"
+            else
+              echo "::warning::$r image extraction not working yet (see docs/PSN.md)"
+            fi
+            rm -rf "$d"
+          done
