@@ -592,6 +592,27 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 - **Missing**: background picture, cell map (collision), sprite tables.
 - **Regenerate**: `python3 tools/civ_sheets.py --area 11 --lang all --out build/civ`
 
+### The fortune-teller of house H3 (AREA11 subtype 4)
+
+- **Drawing found.** The turbaned man (green turban, red jewel, green trousers, purple shoes; community sheet) is
+  `AREA02/B300.GAM` words 64..127 (4 bpp page at VRAM (192, 0) in AREA02 s3, the underground tunnels; also the SYS
+  reload copy `SYSTEM/A02100`). Pixel-exact: the sheet is that page from u 1. Retail draws it top-down with
+  `SPR_DATA[3]` of the section (`AREA02/D305.GAM`, SPR chunk at 0x143C), frames 10..46 (+ shadow part u 208 v 48),
+  for `TUNNEL_ACTOR_DEFS[1]` (w1e 3), with the template CLUT 0x780D = **AREA02/CLUT04 row 5 = the Blue Fortune Teller**
+  (blue turban/clothes). **Row 21 of the same file is the green one**: its 15 colours are exactly the sheet's
+  (`0000 4A52 7FFF 2260 19E0 1161 08E1 0482 327D 29F7 2192 192D 6535 480D 03FF 0219`); row 37 is the shadow.
+  Nothing on any disc file sets row 21, and no CLUT row anywhere has this skin ramp with red clothes, so the Red
+  Fortune Teller does not use this sheet+skin (not found).
+- **Resident.** AREA11 subtype 4 (`TOPDOWN_A11_ACTOR_DEFS[4]`, w1e 0x11 = page (64, 256), lost in AREA11) is resident
+  12, the only resident of H3, next to resident 4 ("a fortune-teller lives in this hut"). Its scripts (frames 204..240:
+  idle 3, walk 3x6, talk 3x3, extras 234 / 235-237 / 238-240) have exactly the layout and timings of the tunnel teller's
+  frames 10..46, frame f = retail f - 194. So he is the Green Fortune Teller, not the raft maker guessed before. His
+  `dlg 11` has no talk case in PAL and no code starts event 89.
+- **Port (`--civ-town 11`, port only, `port_civ_teller` in port2/runtime/main.c).** Copies B300 words 64..127 to
+  VRAM (64, 256) (his own w1e page), CLUT04 rows 21 / 37 to (0, 510) / (0, 511), and rebuilds his table from the
+  retail parts of D305 (frames 10..46 at ids 204..240, CLUT words relinked). The A08 stand-in substitution (fixes.txt)
+  skips subtype 4.
+
 ### AREA16 s0, the Stone People's village
 
 - **Houses** (`TOPDOWN_TRIGGER_RECT_LISTS` 0x800FEC9C, world x0,y0-x1,y1): H1 (78,351)-(202,486); H2 (160,264)-(235,343); H3 (219,176)-(299,258); H4 (-25,146)-(51,244).

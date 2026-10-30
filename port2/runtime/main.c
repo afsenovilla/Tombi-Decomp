@@ -326,8 +326,59 @@ int port_civ_standin_clut(int area) {
     int r = area == 11 ? 36 : area == 16 ? 54 : 49;
     return ((480 + r / 16) << 6) | ((128 + 16 * (r % 16)) >> 4);
 }
+/* AREA11 subtype 4 (resident 12, house H3) = the fortune-teller: its I0NFO2 scripts (frames 204..240: idle 3,
+   walk 3x6, talk 3x3, extras 234 / 235-237 / 238-240) have exactly the layout of the retail Blue Fortune Teller of the
+   AREA02 s3 tunnels (TUNNEL_ACTOR_DEFS[1]: SPR_DATA[3] frames 10..46, w1e 3), frame f = retail frame f - 194. Its page
+   was w1e 0x11 = VRAM (64, 256), which no AREA11 file fills; the same drawings survive in AREA02/B300 (words 64..127,
+   the turbaned man) and the green palette in AREA02/CLUT04 row 21 (row 5 = the blue teller, row 37 = shadow).
+   Port only: the page is copied from the disc to (64, 256), rows 21 / 37 to (0, 510) / (0, 511) (unused in AREA11),
+   and the table is rebuilt from the retail parts of AREA02/D305 (SPR chunk at 0x143C), CLUT words relinked. */
+static unsigned char *port_civ_gam(const char *name, unsigned *n) {
+    unsigned sz; unsigned char *d = port_cd_read_named(name, &sz), *o; unsigned p = 8, m, i, fl = 0, left = 0;
+    if (!d || sz < 8 || memcmp(d, "GAM", 4)) { free(d); return 0; }
+    m = d[4] | d[5] << 8 | d[6] << 16 | (unsigned)d[7] << 24; o = malloc(m + 16);
+    for (i = 0; i < m && p + 1 < sz;) {
+        if (!left) { fl = d[p] | d[p + 1] << 8; p += 2; left = 16; }
+        if (fl & 1) { unsigned off = d[p], ln = d[p + 1], k; p += 2; for (k = 0; k < ln && i < m; k++, i++) o[i] = o[i - off]; }
+        else o[i++] = d[p++];
+        fl >>= 1; left--;
+    }
+    free(d); *n = m; return o;
+}
+static int port_civ_teller(void) {
+    static unsigned char *t;
+    unsigned nb, nc, ns, f, k; unsigned char *b, *c, *s, *spr;
+    struct { short x, y, w, h; } r;
+    extern int LoadImage(void *, unsigned *);
+    b = port_civ_gam("AREA02/B300.GAM", &nb); c = port_civ_gam("AREA02/CLUT04.GAM", &nc); s = port_civ_gam("AREA02/D305.GAM", &ns);
+    if (!b || !c || !s || nb < 384 * 256 || nc < 38 * 32 || ns < 0x143C + 47 * 4) { free(b); free(c); free(s); return 0; }
+    {   /* page: words 64..127 of the 192-word B300 */
+        static unsigned short pg[64 * 256];
+        for (k = 0; k < 256; k++) memcpy(pg + 64 * k, b + 384 * k + 128, 128);
+        r.x = 64; r.y = 256; r.w = 64; r.h = 256; LoadImage(&r, (unsigned *)pg);
+        r.x = 0; r.y = 510; r.w = 16; r.h = 1; LoadImage(&r, (unsigned *)(c + 21 * 32));
+        r.y = 511; LoadImage(&r, (unsigned *)(c + 37 * 32));
+    }
+    if (!t) {
+        spr = s + 0x143C; t = calloc(1, 241 * 4 + 37 * 32);
+        for (f = 0; f < 37; f++) {
+            unsigned fo = spr[4 * (10 + f) + 2] | spr[4 * (10 + f) + 3] << 8, cnt = spr[4 * (10 + f)], o = 241 * 4 + 32 * f;
+            if (cnt > 2) cnt = 2;
+            memcpy(t + o, spr + fo, 16 * cnt);
+            for (k = 0; k < cnt; k++) {   /* 0x780D (row 5) -> (0, 510); 0xF88D (row 37 | 0x8000) -> (0, 511) */
+                unsigned w = t[o + 16 * k + 2] | t[o + 16 * k + 3] << 8, nw = ((w & 0x7FFF) == 0x788D ? (511 << 6) : (510 << 6)) | (w & 0x8000);
+                t[o + 16 * k + 2] = nw & 0xFF; t[o + 16 * k + 3] = nw >> 8;
+            }
+            t[4 * (204 + f)] = cnt; t[4 * (204 + f) + 2] = o & 0xFF; t[4 * (204 + f) + 3] = o >> 8;
+        }
+        for (f = 0; f < 204; f++) memcpy(t + 4 * f, t + 4 * 205, 4);
+    }
+    free(b); free(c); free(s);
+    return (int)(long)t;
+}
 int port_civ_fig(int area, int sub) {
     int i, f, a, k = -1;
+    if (area == 11 && sub == 4) return port_civ_teller();
     const struct port_civ_part *t = 0;
     struct port_civ_part q;
     unsigned clut, off = 128 * 4;

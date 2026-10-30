@@ -422,14 +422,14 @@ src/initSectionCamera.c | p = (short *)&D_80078B7C[GAME[0]][GAME_SELECTED_SECTIO
 src/initSectionCamera.c | q = D_80079474[GAME[0]][GAME_SELECTED_SECTION]; | { extern int port_civ_test; q = D_80079474[GAME[0]][GAME_SELECTED_SECTION]; { extern int port_civ_on(int, int); extern short *port_civ_cam(short *); if (port_civ_on(GAME[0], GAME_SELECTED_SECTION)) q = port_civ_cam(D_80079474[8][0]); } }
 # The residents of set 0D wear the AREA08 villager (TOPDOWN_A08_ACTOR_DEFS[0]: its sprite table, page offset and anim
 # scripts are loaded); AREA11's own actor tables are lost, so its defs would index frames that do not exist here.
-src/i0nfo2/topdownA11ActorInit.c | o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0]; | { extern int port_civ_test; extern ObjInit TOPDOWN_A08_ACTOR_DEFS[]; if (port_civ_test && o->subtype != 0) { TOPDOWN_A11_ACTOR_DEFS[o->subtype] = TOPDOWN_A08_ACTOR_DEFS[0]; TOPDOWN_A11_ACTOR_DEFS[o->subtype].w1e += 7; } } o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0];
+src/i0nfo2/topdownA11ActorInit.c | o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0]; | { extern int port_civ_test, port_civ_fig(int, int); extern ObjInit TOPDOWN_A08_ACTOR_DEFS[]; if (port_civ_test && o->subtype != 0 && !(o->subtype == 4 && port_civ_fig(11, 4))) { TOPDOWN_A11_ACTOR_DEFS[o->subtype] = TOPDOWN_A08_ACTOR_DEFS[0]; TOPDOWN_A11_ACTOR_DEFS[o->subtype].w1e += 7; } } o->box0 = TOPDOWN_A11_ACTOR_DEFS[o->subtype].box[0];
 # AREA11's scenery (roofs, signs: TOPDOWN_A11_SCENERY_DEFS) goes through the generic sprite list with a lost table: not drawn.
 src/i0nfo2/topdownA11SceneryHandler.c | o->visible = 1; | { extern int port_civ_test; o->visible = !port_civ_test; }
 # The surviving Lumberjack page SYSTEM/A06100 replaces AREA08's sprite page in the stand-in list, and AREA11/CLUT02
 # replaces AREA08's CLUT block: subtype 0 (w1e 1, the only subtype on that page, docs/CIVILIZATION.md) is drawn with a
 # runtime-built SPR table (port_civ_spr: every frame = the front-facing hard-hat worker of the page, CLUT row 4).
 # The other subtypes' pages are lost: they wear the AREA08 villager (its page at VRAM x 512, so w1e + 7).
-src/i0nfo2/topdownA11ActorInit.c | o->b0d = 0; | o->b0d = 0; { extern int port_civ_test; extern int port_civ_spr(void), port_civ_standin_clut(int); if (port_civ_test && o->subtype == 0) { o->d3c = port_civ_spr(); o->w1e = 1; } else if (port_civ_test) { o->b0d = 1; o->w08 = port_civ_standin_clut(11); } }
+src/i0nfo2/topdownA11ActorInit.c | o->b0d = 0; | o->b0d = 0; { extern int port_civ_test; extern int port_civ_spr(void), port_civ_standin_clut(int), port_civ_fig(int, int); if (port_civ_test && o->subtype == 0) { o->d3c = port_civ_spr(); o->w1e = 1; } else if (port_civ_test && o->subtype == 4 && port_civ_fig(11, 4)) { o->d3c = port_civ_fig(11, 4); o->w1e = 0x11; } else if (port_civ_test) { o->b0d = 1; o->w08 = port_civ_standin_clut(11); } }
 # --civ-wfm FILE: AREA11's dialogue bank (WFM3_DATA[0], loaded from AREA11/MFNT110S.WFM) is replaced by FILE before a
 # resident talks, so a bank larger than the file's 13 disc sectors (all the translated lines of tools/civ_test_data.py)
 # can be shown; port only, read once into the heap.

@@ -375,6 +375,22 @@ Los generadores ajustan tres variables de avance:
     #220-#249; el constructor de balsas (#237-#241 "¿quieres una balsa? tráeme madera de debajo del Árbol Sabio...
     pum, clan... ¡ay!") es k3 dx10-14.
 
+### La adivina/adivino de la casa H3 (AREA11 subtipo 4)
+
+- **Dibujo encontrado.** El hombre del turbante (hoja de la comunidad) es `AREA02/B300.GAM` palabras 64..127 (página 4 bpp
+  en VRAM (192, 0) de AREA02 s3, los túneles; también la copia `SYSTEM/A02100`), píxel a píxel desde u 1. La versión
+  final lo dibuja en vista cenital con `SPR_DATA[3]` (`AREA02/D305.GAM`, tabla en 0x143C), fotogramas 10..46, para
+  `TUNNEL_ACTOR_DEFS[1]` (w1e 3), con el CLUT 0x780D = **AREA02/CLUT04 fila 5 = el adivino azul**. **La fila 21 del
+  mismo fichero es la verde**: sus 15 colores son exactamente los de la hoja; la fila 37 es la sombra. El adivino rojo
+  no usa esta hoja con esta piel (ninguna fila del disco la tiene con ropa roja).
+- **Vecino.** AREA11 subtipo 4 (w1e 0x11 = página (64, 256), perdida en AREA11) es el vecino 12, el único de H3, junto al
+  vecino 4 («en esta choza vive una adivina»). Sus guiones (fotogramas 204..240) tienen exactamente la estructura y los
+  tiempos de los 10..46 del adivino de los túneles (f = f_final + 194): es el Adivino Verde, no el constructor de
+  balsas. Su `dlg 11` no tiene caso en PAL y nada inicia el evento 89.
+- **Port (`--civ-town 11`, sólo port, `port_civ_teller`).** Copia esa página a (64, 256), las filas 21 / 37 a
+  (0, 510) / (0, 511) y rehace su tabla con las piezas reales de D305; la sustitución por el aldeano de AREA08 ya no
+  toca el subtipo 4.
+
 ### AREA16 s0: el pueblo de la gente de piedra (conjunto 0E)
 
 - **Salidas** (`topdownSectionStepD`):
