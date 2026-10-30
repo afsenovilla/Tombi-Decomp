@@ -456,6 +456,11 @@ src/i0nfo2/topdownMapObjHandler.c | extern int TOPDOWN_MAP_STRIP_BUFFER; | exter
 # civ_MFNT170S.WFM from tools/civ_test_data.py: Spanish glosses of the JP lines in the "···??" slots).
 src/i0nfo2/topdownA16ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); }
 src/i0nfo2/topdownA17ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); }
+# --civ-wfm DIR: the scripted resident scenes (AREA16 npcSet0ESceneStep1, AREA17 npcSet0FSceneStep1, H4 event 0x4C)
+# open boxes straight from groups 2/3 of the same bank without a talk step: swap the town's bank in there too, or they
+# read the AREA08 stand-in's bank.
+src/i0nfo2/npcSet0ESceneStep1.c | switch (o->state) { | { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); } switch (o->state) {
+src/i0nfo2/npcSet0FSceneStep1.c | switch (o->state) { | { extern void port_civ_wfm_swap(void); port_civ_wfm_swap(); } switch (o->state) {
 # --civ-test: setEventStarted -> spawnEventTitle picks the event-title layout table by GAME.selectedArea; for AREA17
 # (and 11/16) that is a pointer inside the town's own area data (D_8011C088), which the AREA08 stand-in list never
 # loads, so tbl was a code word and tbl[event] faulted (npcSet0FSceneStep1, event 0x4C, ~50 s into AREA17). Read the

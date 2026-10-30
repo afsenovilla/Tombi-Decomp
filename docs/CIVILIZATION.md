@@ -720,9 +720,15 @@ picture returns. The residents of room n appear as the engine shows them.
 **Event titles and scene text.** A scene's `setEventStarted` (e.g. AREA17 H4, `npcSet0FSceneStep1`, event 0x4C)
 spawns the event title from a per-area table that lives in the town's lost area data; the stand-in list never loads
 it, so the port reads AREA08's table instead and skips the title when that is not usable (it crashed before: a code
-word read as the table). The scenes' own lines use dialogue bank 2, which `--civ-wfm` does not replace: they show
-AREA08's text (e.g. "¿Sabías que si nadas contra la corriente del Masakari...?" in H4). The event itself (the "!",
-the AP) works.
+word read as the table). The title stays hidden: the AREA17 table and its title glyphs are lost, and no cheap source
+for event 0x4C's title was found. The "banks" of `showMessageBoxDirect(k, dx)` are not separate files: k is a group of
+the one main WFM (`WFM3_DATA[0]`, line = u16 group start at +0x10 + 2k, plus dx). AREA17's groups start at 0, 207,
+208, 257, 269, 270 (AREA16: 0, 207, 208, 230, 248), so bank 2/3 lines live in `civ_MFNT170<L>.WFM` already. The scenes
+open their boxes without a talk step, so `--civ-wfm` now also swaps the town's bank in at `npcSet0ESceneStep1` /
+`npcSet0FSceneStep1` (`port/fixes.txt`). The H4 lines (2,0..4) = #208-#212 are AREA17's own PAL text: the two
+residents talk about swimming up the Masakari to the waterfall ("¿Sabías que si nadas contra la corriente del
+Masakari...?" / "Did you know, if you swim against the current..."; AREA08's #209.. are other lines). Still "···??":
+AREA16 #208-#210 and AREA17 #219-#239, #253, #254, #261; the JP disc (game_jp) was not available to translate them.
 
 **Collision** (`tools/civ_rebuild.py`, layout `towns.N.collision`): editable shapes in picture px, traced over the
 v2 pictures: `{"t": "wall", "poly": [...]}`, `{"t": "line", "pts": [...], "w": px}` (fences, railings), `{"t":

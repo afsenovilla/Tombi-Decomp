@@ -745,6 +745,14 @@ casa n) y dibuja los muebles como objetos, cuyas tablas se perdieron. El port ma
 `map8F_in.tim`: negro, y cada rectángulo de casa con su interior emparejado (`interiors` del layout). Al salir vuelve
 el dibujo del pueblo. Los vecinos de la sala n aparecen como los muestra el motor.
 
+**Títulos de evento y texto de escenas.** El título del evento de una escena (p. ej. AREA17 H4, evento 0x4C)
+sigue oculto: su tabla por área y sus glifos están en los datos perdidos del pueblo. Los "bancos" de
+`showMessageBoxDirect(k, dx)` son grupos del mismo WFM principal (línea = inicio del grupo k en +0x10 + dx; AREA17: 0,
+207, 208, 257, 269, 270; AREA16: 0, 207, 208, 230, 248), así que ya están en `civ_MFNT170<L>.WFM`. Como las escenas
+abren cuadros sin paso de diálogo, `--civ-wfm` cambia también el banco en `npcSet0ESceneStep1` / `npcSet0FSceneStep1`.
+Las líneas de H4 (2,0..4) = #208-#212 son texto PAL propio de AREA17 (la corriente del Masakari y la cascada). Siguen
+en "···??": AREA16 #208-#210 y AREA17 #219-#239, #253, #254, #261 (sin disco JP para traducirlas).
+
 **Colisión** (`tools/civ_rebuild.py`, `towns.N.collision` del layout): formas editables en px del dibujo, calcadas
 sobre los dibujos v2: `{"t": "wall", "poly": [...]}`, `{"t": "line", "pts": [...], "w": px}` (vallas, barandillas),
 `{"t": "rect", "r": [x, y, an, al]}`, `{"t": "water"}` (bloquea como un muro: el motor de vista desde arriba no tiene
