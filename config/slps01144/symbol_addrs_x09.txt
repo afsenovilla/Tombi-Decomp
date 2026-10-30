@@ -108,3 +108,5 @@ func_80128D04_slps01144 = 0x80128D04; // type:func size:0x128  PAL x009 0x80129B
 func_80128E2C_slps01144 = 0x80128E2C; // type:func size:0x260  PAL x009 0x80129C98
 CdFlush = 0x80129830; // type:func size:0x20  PAL main0 0x80064DD0
 func_8012985C_slps01144 = 0x8012985C; // type:func size:0xA8  PAL x002 0x8011C628
+func_80128CF8_slps01144 = 0x80128CF8; // type:func size:0xC
+func_80129850_slps01144 = 0x80129850; // type:func size:0xC
