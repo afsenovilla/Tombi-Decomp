@@ -26,7 +26,9 @@ CIV_TOWNS = {11: "Lumberjack Town", 16: "Stonetown", 17: "Iron Town"}
 
 def area_label(a):
     """The area select entry: number, name and, for the rebuilt cut towns, the i18n tag."""
-    return "%02d %s%s" % (a, AREA_NAMES.get(a, ""), ("  " + i18n.tr("mod.civtag")) if a in CIV_TOWNS else "")
+    if a in CIV_TOWNS:
+        return "★ %02d %s  %s" % (a, AREA_NAMES.get(a, ""), i18n.tr("mod.civtag"))
+    return "%02d %s" % (a, AREA_NAMES.get(a, ""))
 # rooms with an empty load list cannot be entered from the debug select (tools/psxemu/rooms.py DOOR_ROOMS)
 DOOR_ROOMS = {(11, 0), (11, 3), (11, 4), (16, 0), (16, 1), (16, 2), (17, 0), (17, 6), (17, 7), (17, 8), (17, 9), (17, 10), (18, 0)}
 EVENT_COUNT = 0x82     # event ids 0..0x81 (notes/names.md "Event links"); the flag bytes follow each other
@@ -44,7 +46,7 @@ i18n.add({
         "mod.areasel": "Selección de área (debug select)",
         "mod.areasel.d": "Abre el selector de áreas de depuración del juego y entra en el área/sección elegida en lugar de empezar la partida.",
         "mod.area": "Área", "mod.section": "Sección",
-        "mod.civtag": "★ recortado, jugable (reconstruido)",
+        "mod.civtag": "(recortado, jugable, reconstruido)",
         "mod.civnote": "★ La sección 0 de esta área es una ciudad recortada ({0}) reconstruida para el port. El selector no puede entrar en ella; se juega con --civ-town {1} o --civ-route (docs/CIVILIZATION.md, \"Playable towns\").",
         "mod.ap": "Empezar con AP", "mod.ap.d": "Puntos de aventura al empezar la partida (0..99999999).",
         "mod.lives": "Empezar con vidas", "mod.lives.d": "Vidas al empezar la partida (1..99).",
@@ -62,7 +64,7 @@ i18n.add({
         "mod.areasel": "Area select (debug select)",
         "mod.areasel.d": "Opens the game's debug area select and enters the chosen area/section instead of starting the story.",
         "mod.area": "Area", "mod.section": "Section",
-        "mod.civtag": "★ cut, playable (rebuilt)",
+        "mod.civtag": "(cut, playable, rebuilt)",
         "mod.civnote": "★ Section 0 of this area is a cut town ({0}) rebuilt for the port. The debug select cannot enter it; play it with --civ-town {1} or --civ-route (docs/CIVILIZATION.md, \"Playable towns\").",
         "mod.ap": "Start with AP", "mod.ap.d": "Adventure points at the start of the game (0..99999999).",
         "mod.lives": "Start with lives", "mod.lives.d": "Lives at the start of the game (1..99).",

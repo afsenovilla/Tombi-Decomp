@@ -227,13 +227,15 @@ def explicado_es(area,out):
     xs=[a['x'] for a in actors]+[q['x'] for l in props for q in l]+[r[0] for r in rects]+[r[2] for r in rects]+[e[0][0] for e in C['exits']]
     ys=[a['y'] for a in actors]+[q['y'] for l in props for q in l]+[r[1] for r in rects]+[r[3] for r in rects]+[e[0][1] for e in C['exits']]
     x0,x1,y0,y1=min(xs)-110,max(xs)+110,min(ys)-110,max(ys)+70
+    pr=perimeter(area)
+    if pr: x0,y0,x1,y1=min(x0,-128),min(y0,40),max(x1,pr[1]-128),max(y1,pr[2]+40)
     TW,TH=int((x1-x0)*SC),int((y1-y0)*SC)
     # reference
     s=T.section_data(8,0); rw,rh,clut,pix=T.parse_tim(s['tim'])
     ref=Image.new('RGB',(rw,rh)); ref.putdata([clut[v] for v in pix[:rw*rh]])
     ref=ref.resize((int(rw*SC),int(rh*SC)),Image.NEAREST)
     LW=820; M=30; top=150
-    W=M+ref.width+M+TW+M+LW+M; H=top+max(ref.height,TH)+200
+    W=M+ref.width+M+TW+M+LW+M; H=top+max(ref.height,TH)+420
     im=Image.new('RGB',(W,H),(250,247,240)); dr=ImageDraw.Draw(im)
     dr.text((M,25),C['title'],font=F(44,True),fill=(30,30,30))
     dr.text((M,85),C['cap'],font=F(25),fill=(60,60,60))
@@ -247,6 +249,7 @@ def explicado_es(area,out):
     for gy in range(0,TH,int(32*SC)):
         dr.line([ox,top+gy,ox+TW,top+gy],fill=(196,186,158))
     def P(x,y): return ox+(x-x0)*SC, top+(y-y0)*SC
+    draw_perimeter_on(dr,area,lambda u,v:P(u-128,v+40),5,3)
     roof=[(150,70,50),(120,90,60),(90,90,110),(140,60,70),(110,80,50)]
     for i,(a,b,c,d) in enumerate(rects):
         X0,Y0=P(a,b);X1,Y1=P(c,d); col=roof[i%5]
@@ -283,7 +286,9 @@ def explicado_es(area,out):
     yy=top+TH+44
     for ln in wrap(dr,'Muñecos: sprites de SYSTEM/%s. '%C['atlas']+PAL_NOTE['es'][area],F(22),W-ox-M):
         dr.text((ox,yy),ln,font=F(22),fill=(150,40,40)); yy+=28
-    dr.text((ox,yy),'Verde = recorrido de patrulla · tejados = casas (al entrar se ve el interior) · cuadros marrones = objetos',font=F(22),fill=(60,60,60))
+    dr.text((ox,yy),'Verde = recorrido de patrulla · tejados = casas (al entrar se ve el interior) · cuadros marrones = objetos',font=F(22),fill=(60,60,60)); yy+=30
+    for t_,c_ in ((PERIM_ES,PERIM_RED),(BORDE_ES,PERIM_PUR)):
+        for ln in wrap(dr,t_,F(22),W-ox-M): dr.text((ox,yy),ln,font=F(22),fill=c_); yy+=28
     lx=ox+TW+M; y=top
     dr.text((lx,y),'Quién es quién (y qué dice, del texto japonés)',font=F(28,True),fill=(30,30,30)); y+=46
     f=F(21)
@@ -358,13 +363,15 @@ def explicado_en(area,out):
     xs=[a['x'] for a in actors]+[q['x'] for l in props for q in l]+[r[0] for r in rects]+[r[2] for r in rects]+[e[0][0] for e in C['exits']]
     ys=[a['y'] for a in actors]+[q['y'] for l in props for q in l]+[r[1] for r in rects]+[r[3] for r in rects]+[e[0][1] for e in C['exits']]
     x0,x1,y0,y1=min(xs)-110,max(xs)+110,min(ys)-110,max(ys)+70
+    pr=perimeter(area)
+    if pr: x0,y0,x1,y1=min(x0,-128),min(y0,40),max(x1,pr[1]-128),max(y1,pr[2]+40)
     TW,TH=int((x1-x0)*SC),int((y1-y0)*SC)
     # reference
     s=T.section_data(8,0); rw,rh,clut,pix=T.parse_tim(s['tim'])
     ref=Image.new('RGB',(rw,rh)); ref.putdata([clut[v] for v in pix[:rw*rh]])
     ref=ref.resize((int(rw*SC),int(rh*SC)),Image.NEAREST)
     LW=820; M=30; top=150
-    W=M+ref.width+M+TW+M+LW+M; H=top+max(ref.height,TH)+200
+    W=M+ref.width+M+TW+M+LW+M; H=top+max(ref.height,TH)+420
     im=Image.new('RGB',(W,H),(250,247,240)); dr=ImageDraw.Draw(im)
     dr.text((M,25),C['title'],font=F(44,True),fill=(30,30,30))
     dr.text((M,85),C['cap'],font=F(25),fill=(60,60,60))
@@ -378,6 +385,7 @@ def explicado_en(area,out):
     for gy in range(0,TH,int(32*SC)):
         dr.line([ox,top+gy,ox+TW,top+gy],fill=(196,186,158))
     def P(x,y): return ox+(x-x0)*SC, top+(y-y0)*SC
+    draw_perimeter_on(dr,area,lambda u,v:P(u-128,v+40),5,3)
     roof=[(150,70,50),(120,90,60),(90,90,110),(140,60,70),(110,80,50)]
     for i,(a,b,c,d) in enumerate(rects):
         X0,Y0=P(a,b);X1,Y1=P(c,d); col=roof[i%5]
@@ -414,7 +422,9 @@ def explicado_en(area,out):
     yy=top+TH+44
     for ln in wrap(dr,'Figures: sprites from SYSTEM/%s. '%C['atlas']+PAL_NOTE['en'][area],F(22),W-ox-M):
         dr.text((ox,yy),ln,font=F(22),fill=(150,40,40)); yy+=28
-    dr.text((ox,yy),'Green = patrol route · roofs = houses (entering shows the inside) · brown squares = props',font=F(22),fill=(60,60,60))
+    dr.text((ox,yy),'Green = patrol route · roofs = houses (entering shows the inside) · brown squares = props',font=F(22),fill=(60,60,60)); yy+=30
+    for t_,c_ in ((PERIM_EN,PERIM_RED),(BORDER_EN,PERIM_PUR)):
+        for ln in wrap(dr,t_,F(22),W-ox-M): dr.text((ox,yy),ln,font=F(22),fill=c_); yy+=28
     lx=ox+TW+M; y=top
     dr.text((lx,y),'Who is who (lines from the Japanese text)',font=F(28,True),fill=(30,30,30)); y+=46
     f=F(21)
@@ -497,10 +507,13 @@ def esquema_es(area,out):
     ys=[a['y'] for a in actors]+[q['y'] for l in props[:1] for q in l]+[r[1] for r in rects]+[r[3] for r in rects]+[e[0][1] for e in C['exits']]
     px0=(min(xs)+128-40)//32*32; py0=(min(ys)-40-70)//32*32
     px1=(max(xs)+128+40+31)//32*32; py1=(max(ys)-40+40+31)//32*32
+    pr=perimeter(area)
+    if pr: px0,py0,px1,py1=min(px0,0),min(py0,0),max(px1,pr[1]),max(py1,pr[2])
     W,H=px1-px0,py1-py0
     pl=Image.new('RGBA',(W*S,H*S),(226,222,212,255)); d1=ImageDraw.Draw(pl)
     for g in range(0,W*S,64): d1.line([g,0,g,H*S],fill=(210,205,195))
     for g in range(0,H*S,64): d1.line([0,g,W*S,g],fill=(210,205,195))
+    draw_perimeter_on(d1,area,lambda x,y:((x-px0)*S,(y-py0)*S),6,3)
     p=page(C['atlas']); cs=comps(p)
     def spr(sub):
         if C['sub'][sub] is None: return lost_marker(S)
@@ -528,7 +541,7 @@ def esquema_es(area,out):
     y=top+max(ref.height,pl.height)+12
     D.text((M,y),'A. Lago Baco (AREA08 s0), fondo real del disco + marcas de su código',font=F(26,True),fill=(20,20,20))
     D.text((M,y+34),'(AREA08 no tiene lista de casas: sólo vecinos y objetos)',font=F(24),fill=(60,60,60))
-    D.text((rx,y),'B. AREA%d s0: fondo PERDIDO (gris). Tamaño estimado %d × %d px'%(area,W,H),font=F(26,True),fill=(20,20,20))
+    D.text((rx,y),'B. AREA%d s0: fondo PERDIDO (gris). Tamaño reconstruido %d × %d px'%(area,W,H),font=F(26,True),fill=(20,20,20))
     D.text((rx,y+34),'Muñecos: SYSTEM/%s, paletas reales del juego (ver abajo)'%C['atlas'],font=F(24,True),fill=(170,30,30))
     y+=100; f=F(25)
     def para(t,yy,x=M,w=Wt-2*M,font=f,col=(30,30,30)):
@@ -539,7 +552,8 @@ def esquema_es(area,out):
                 (RED,'Círculo rojo con número = sitio donde está un vecino en la calle (los pies del muñeco están en el punto).'),
                 (MAG,'Círculo morado = vecino que está dentro de una casa (sólo se ve cuando Tombi entra en ella).'),
                 (GRN,'Rectángulo verde = zona por la que camina ese vecino (su patrulla).'),
-                (YEL,'Cuadradito amarillo = objeto o decorado del pueblo (tejados, carteles, rocas…); el código no dice cuál es cada uno.')]:
+                (YEL,'Cuadradito amarillo = objeto o decorado del pueblo (tejados, carteles, rocas…); el código no dice cuál es cada uno.'),
+                (PERIM_RED,PERIM_ES),(PERIM_PUR,BORDE_ES)]:
         D.rectangle([M,y+4,M+28,y+28],fill=c); y=para(t,y,M+44,Wt-2*M-44)+6
     y+=10; D.text((M,y),'Salidas (posiciones del código: '+Q['step']+')',font=F(32,True),fill=(20,20,20)); y+=48
     for k,(_,_,lab) in enumerate(C['exits']):
@@ -561,7 +575,7 @@ def esquema_es(area,out):
          'Paso mundo → píxel del fondo (x+128, y-40): topdownCollideMapTile 0x800EE18C, comprobado con AREA08/AREA19.',
          'Muñecos: página de texturas SYSTEM/%s (copia de VRAM que recarga el menú, lista SYS %d); qué dibujo es cada tipo de vecino es una suposición.'%(C['atlas'],Q['sys']),
          'Panel A: fondo, cuadrícula y vecinos reales de AREA08 s0 (dibujo TIM del disco + NPC_SET_0C).',
-         'Paletas: '+PAL_NOTE['es'][area]+'.', 'FALTA (perdido en el disco): el dibujo de fondo del pueblo, el mapa de colisiones y las tablas de sprites; por eso el panel B es gris y el tamaño del fondo es una estimación.']
+         'Paletas: '+PAL_NOTE['es'][area]+'.', 'FALTA (perdido en el disco): el dibujo de fondo del pueblo, el mapa de colisiones y las tablas de sprites; por eso el panel B es gris. El tamaño del fondo y el contorno del pueblo salen de la reconstrucción (tools/civ_rebuild.py, colisión trazada), no de datos originales.']
     for t in src: y=para('• '+t,y)+4
     im=im.crop((0,0,Wt,y+30)); im.save(out); print(out,im.size)
 def overlay_en(img,dr,var,area,px0,py0,sprites=None):
@@ -602,10 +616,13 @@ def esquema_en(area,out):
     ys=[a['y'] for a in actors]+[q['y'] for l in props[:1] for q in l]+[r[1] for r in rects]+[r[3] for r in rects]+[e[0][1] for e in C['exits']]
     px0=(min(xs)+128-40)//32*32; py0=(min(ys)-40-70)//32*32
     px1=(max(xs)+128+40+31)//32*32; py1=(max(ys)-40+40+31)//32*32
+    pr=perimeter(area)
+    if pr: px0,py0,px1,py1=min(px0,0),min(py0,0),max(px1,pr[1]),max(py1,pr[2])
     W,H=px1-px0,py1-py0
     pl=Image.new('RGBA',(W*S,H*S),(226,222,212,255)); d1=ImageDraw.Draw(pl)
     for g in range(0,W*S,64): d1.line([g,0,g,H*S],fill=(210,205,195))
     for g in range(0,H*S,64): d1.line([0,g,W*S,g],fill=(210,205,195))
+    draw_perimeter_on(d1,area,lambda x,y:((x-px0)*S,(y-py0)*S),6,3)
     p=page(C['atlas']); cs=comps(p)
     def spr(sub):
         if C['sub'][sub] is None: return lost_marker(S)
@@ -633,7 +650,7 @@ def esquema_en(area,out):
     y=top+max(ref.height,pl.height)+12
     D.text((M,y),'A. Baccus Lake (AREA08 s0): real background + its marks',font=F(26,True),fill=(20,20,20))
     D.text((M,y+34),'(AREA08 has no house list: only residents and props)',font=F(24),fill=(60,60,60))
-    D.text((rx,y),'B. AREA%d s0: background LOST (grey). Estimated size %d × %d px'%(area,W,H),font=F(26,True),fill=(20,20,20))
+    D.text((rx,y),'B. AREA%d s0: background LOST (grey). Reconstructed size %d × %d px'%(area,W,H),font=F(26,True),fill=(20,20,20))
     D.text((rx,y+34),'Figures: SYSTEM/%s, real in-game palettes (see below)'%C['atlas'],font=F(24,True),fill=(170,30,30))
     y+=100; f=F(25)
     def para(t,yy,x=M,w=Wt-2*M,font=f,col=(30,30,30)):
@@ -644,7 +661,8 @@ def esquema_en(area,out):
                 (RED,'Red numbered circle = where a resident stands outdoors (the figure\'s feet are on the dot).'),
                 (MAG,'Purple circle = resident inside a house (only visible when Tomba goes in).'),
                 (GRN,'Green rectangle = the box that resident walks in (their patrol).'),
-                (YEL,'Small yellow square = village prop or scenery (roofs, signs, rocks…); the code does not say which is which.')]:
+                (YEL,'Small yellow square = village prop or scenery (roofs, signs, rocks…); the code does not say which is which.'),
+                (PERIM_RED,PERIM_EN),(PERIM_PUR,BORDER_EN)]:
         D.rectangle([M,y+4,M+28,y+28],fill=c); y=para(t,y,M+44,Wt-2*M-44)+6
     y+=10; D.text((M,y),'Exits (positions from the code: '+Q['step']+')',font=F(32,True),fill=(20,20,20)); y+=48
     for k,(_,_,lab) in enumerate(C['exits']):
@@ -666,7 +684,7 @@ def esquema_en(area,out):
          'World → background pixel (x+128, y-40): topdownCollideMapTile 0x800EE18C, checked against AREA08/AREA19.',
          'Figures: texture page SYSTEM/%s (VRAM copy the menu reloads, SYS list %d); which drawing goes with each resident type is a guess.'%(C['atlas'],Q['sys']),
          'Panel A: real background, grid and residents of AREA08 s0 (TIM picture from the disc + NPC_SET_0C).',
-         'Palettes: '+PAL_NOTE['en'][area]+'.', 'MISSING (lost from the disc): the village background picture, the collision map and the sprite tables; that is why panel B is grey and the background size is an estimate.']
+         'Palettes: '+PAL_NOTE['en'][area]+'.', 'MISSING (lost from the disc): the village background picture, the collision map and the sprite tables; that is why panel B is grey. The background size and the town outline come from the reconstruction (tools/civ_rebuild.py, traced collision), not from original data.']
     for t in src: y=para('• '+t,y)+4
     im=im.crop((0,0,Wt,y+30)); im.save(out); print(out,im.size)
 
@@ -690,6 +708,8 @@ def perspectiva(area,lang,outd):
     for (a0,b0,a1,b1) in houses: pts+= [P(a0,b0),P(a1,b1)]
     U0=min(0,min(q[0] for q in pts)-24); V0=min(0,min(q[1] for q in pts)-24)
     W=max(W,max(q[0] for q in pts)+24); H=max(H,max(q[1] for q in pts)+24)
+    pr=perimeter(area)
+    if pr: W,H=max(W,pr[1]),max(H,pr[2])
     cu,cv_,cz=(U0+W)/2,H+700,520; pitch=math.radians(36)
     def raw(u,v,z=0):
         dy=cv_-v; dz=z-cz
@@ -708,6 +728,7 @@ def perspectiva(area,lang,outd):
     poly([(U0,V0,0),(W,V0,0),(W,H,0),(U0,H,0)],fill=(228,224,212),outline=(120,110,90))
     for x in range(int(U0)//32*32+32,W+1,32): line((x,V0,0),(x,H,0),(205,200,188),1)
     for y in range(int(V0)//32*32+32,H+1,32): line((U0,y,0),(W,y,0),(205,200,188),1)
+    if pr: draw_perimeter_on(d,area,lambda u,v:proj(u,v,0),3,2)
     for a in actors:
         if a["beh"]:
             a0,b0,a1,b1=a["bx0"],a["by0"],a["bx1"],a["by1"]
@@ -749,14 +770,14 @@ def perspectiva(area,lang,outd):
     if lang=='es':
         title="Esquema en perspectiva — "+t['es']
         sub="Datos del código vistos en perspectiva. Lo único inventado es la altura de las casas: el código no la da."
-        leg=[(B,"%s1–%s%d: casa. Al entrar Tombi desaparece el tejado y se ve el interior"%(hl,hl,nh)),((210,30,30),"Número rojo: vecino en la calle (el punto del suelo es donde pisa)"),((160,40,190),"Número morado: vecino dentro de una casa"),((20,160,40),"Verde en el suelo: zona por la que camina ese vecino"),((245,200,40),"Cubito amarillo: objeto o decorado"),((0,0,0),ex)]
-        foot="De dónde sale: casas = TOPDOWN_TRIGGER_RECT_LISTS (I0NFO2 0x800FEC9C); vecinos, zonas y objetos = NPC_SET_%02X (I0NFO2);\nsalidas = %s. Se perdió el dibujo de fondo y la colisión: por eso no hay calles ni paredes.\nLas salidas están en el borde del mapa por el que se sale (el código solo da \"x mayor que...\" o \"y menor que...\")."%(var,t['src'])
+        leg=[(B,"%s1–%s%d: casa. Al entrar Tombi desaparece el tejado y se ve el interior"%(hl,hl,nh)),((210,30,30),"Número rojo: vecino en la calle (el punto del suelo es donde pisa)"),((160,40,190),"Número morado: vecino dentro de una casa"),((20,160,40),"Verde en el suelo: zona por la que camina ese vecino"),((245,200,40),"Cubito amarillo: objeto o decorado"),((0,0,0),ex)]+([(PERIM_RED,"Rojo grueso: perímetro del pueblo (RECONSTRUCCIÓN, colisión trazada; no son datos originales)"),(PERIM_PUR,"Morado fino: borde del fondo reconstruido")] if pr else [])
+        foot="De dónde sale: casas = TOPDOWN_TRIGGER_RECT_LISTS (I0NFO2 0x800FEC9C); vecinos, zonas y objetos = NPC_SET_%02X (I0NFO2);\nsalidas = %s. Se perdió el dibujo de fondo y la colisión: no hay calles ni paredes; el contorno sale de la reconstrucción.\nLas salidas están en el borde del mapa por el que se sale (el código solo da \"x mayor que...\" o \"y menor que...\")."%(var,t['src'])
         lh="Leyenda"
     else:
         title="Perspective diagram — "+t['en']
         sub="Data from the code, seen in perspective. The only invented value is the house height: the code doesn't store it."
-        leg=[(B,"%s1–%s%d: house. When Tomba walks in, the roof disappears and the inside shows"%(hl,hl,nh)),((210,30,30),"Red number: resident outdoors (the dot on the ground is where they stand)"),((160,40,190),"Purple number: resident inside a house"),((20,160,40),"Green on the ground: area that resident walks around in"),((245,200,40),"Small yellow cube: object or scenery prop"),((0,0,0),ex)]
-        foot="Sources: houses = TOPDOWN_TRIGGER_RECT_LISTS (I0NFO2 0x800FEC9C); residents, walk areas and props = NPC_SET_%02X (I0NFO2);\nexits = %s.\nBackground picture and collision map are lost from the disc, so there are no streets or walls.\nExits are drawn at the map edge you leave through (the code only gives \"x greater than...\" or \"y less than...\")."%(var,t['src'].replace('destinos','destinations'))
+        leg=[(B,"%s1–%s%d: house. When Tomba walks in, the roof disappears and the inside shows"%(hl,hl,nh)),((210,30,30),"Red number: resident outdoors (the dot on the ground is where they stand)"),((160,40,190),"Purple number: resident inside a house"),((20,160,40),"Green on the ground: area that resident walks around in"),((245,200,40),"Small yellow cube: object or scenery prop"),((0,0,0),ex)]+([(PERIM_RED,"Thick red: town perimeter (RECONSTRUCTION from traced collision, not original data)"),(PERIM_PUR,"Thin purple: reconstructed picture border")] if pr else [])
+        foot="Sources: houses = TOPDOWN_TRIGGER_RECT_LISTS (I0NFO2 0x800FEC9C); residents, walk areas and props = NPC_SET_%02X (I0NFO2);\nexits = %s.\nBackground picture and collision map are lost from the disc: no streets or walls; the outline comes from the reconstruction.\nExits are drawn at the map edge you leave through (the code only gives \"x greater than...\" or \"y less than...\")."%(var,t['src'].replace('destinos','destinations'))
         lh="Legend"
     d.text((30,20),title,fill='black',font=F(28,True)); d.text((30,62),sub,fill=(60,60,60),font=F(19))
     y=1060; d.text((30,y-42),lh,fill='black',font=F(24,True))
@@ -787,9 +808,50 @@ PAL_STATUS = {
 }
 
 
-def plan_legend(area, plan_png, size, frames):
+PLAN_ES = {
+    11: dict(place='AREA11 sección 0 - Lumberjack Town (nombre de TCRF; el pueblo de la gente de madera)',
+             exits='Sus salidas llevan a la Ciudad de civilización (AREA18 s1) y a la Fábrica (AREA11 s1)'),
+    16: dict(place='AREA16 sección 0 - Stonetown (nombre de TCRF; el pueblo de la gente de piedra)',
+             exits='Sus salidas llevan a la Ciudad de civilización (AREA18 s1), a la puerta de la Fábrica (AREA11 s2) y a AREA16 s1 (también recortada)'),
+    17: dict(place='AREA17 sección 0 - Ciudad de hierro (el pueblo de los hombres de hierro)',
+             exits='Sus salidas llevan a la Ciudad de civilización (AREA18 s1) y al interior de la Ciudad de hierro (AREA17 s1)'),
+}
+PAL_STATUS_ES = {
+    11: ['AREA11/CLUT02 fila 4: Lumberjack Factory Worker (casco), subtipo 0 - confirmada por los colores de TCRF',
+         'AREA11/CLUT02 fila 36: Male Lumberjack Town Resident (anciano; en la misma página, fotogramas 30..50 de los scripts extra del subtipo 0, que ningún vecino colocado usa) - confirmada por los colores de TCRF, no dibujada aquí'],
+    16: ['AREA16/CLUT07 fila 53: Male Stonetown Resident (forzudo), subtipo 2 - coincide píxel a píxel con el sprite de TCRF',
+         'AREA16/CLUT07 fila 21 (también AREA16/CLUT06, AREA17/CLUT03/06, AREA18/CLUT02): Female Stonetown Resident, subtipo 0 - fila real del disco, encontrada comparando el aspecto de la hoja de TCRF; los colores de TCRF están desplazados (sustituye a la CLUT a medida woman16)',
+         'AREA16/CLUT07 fila 37 (también AREA16/CLUT06, AREA17/CLUT03/06, AREA18/CLUT02): el chico de Stonetown, subtipo 1 - confirmada por los colores de TCRF (los 14)'],
+    17: ['AREA17/CLUT03 fila 1 (= AREA17/CLUT06 filas 1/129, AREA18/CLUT02 fila 6): subtipo 0 - confirmada: la misma fila que usa el vecino lateral de la Ciudad de hierro del juego final (AREA17/D205 fotogramas 94-112, palabra CLUT 0x7809; handler sin localizar)'],
+}
+
+
+def plan_blocks_es(area, W, H, frames):
+    I = PLAN_INFO[area]; E = PLAN_ES[area]
+    return [
+        ('Lugar', [E['place'] + '.', 'Una sección vista desde arriba recortada: el código y las posiciones sobreviven en I0NFO2, la lista de carga está vacía.',
+                   'Ninguna salida del juego final lleva a ella. ' + E['exits'] + ' (rectángulos de salida en ' + I['step'] + ', destinos en la tabla de salidas de MAIN0 0x80079A48).']),
+        ('Escala', ['1 píxel de la imagen = 1 píxel del fondo. Imagen %d x %d px: las posiciones más el fondo reconstruido (el dibujo de fondo original se perdió).' % (W, H),
+                    'Posición del mundo (x, y) -> píxel del fondo (x + 128, y - 40) (topdownCollideMapTile 0x800EE18C).']),
+        ('Marcas', ['Rectángulo azul: rectángulo de casa (TOPDOWN_TRIGGER_RECT_LISTS 0x800FEC9C); dentro, el tejado se oculta y se ve el interior.',
+                    'Caja o línea verde: zona que patrulla un vecino (límites del registro, comportamiento 1-4).',
+                    'Punto amarillo: posición de un objeto / decorado. Son puntos porque sus tablas de sprites se perdieron.',
+                    PERIM_ES, BORDE_ES,
+                    'Muñeco: un vecino; sus pies están en la posición del registro. Cápsula gris: vecino cuyo dibujo se perdió (su página no sobrevivió).']),
+        ('Orientación', ['En el juego cada registro de vecino fija su orientación: el campo +4 (fotograma -> animFrame, 0..3) elige la dirección y el campo +6 (juego de animaciones -> wb4) la animación; los que patrullan giran al andar.',
+                         'Valores en este pueblo (campo +4 por vecino, en orden de registro): ' + ', '.join(str(f) for f in frames) + '.',
+                         'Esta imagen NO los aplica: todos los vecinos se dibujan con un mismo fotograma de frente de la página. Ese fotograma es elección nuestra.']),
+        ('Muñecos', ['Dibujos de la página de texturas que sobrevive SYSTEM/A%s (copia de VRAM que recarga el menú, lista SYS %d).' % ({11: '06100', 16: '07600', 17: '08000'}[area], I['sysl']),
+                     'Qué subtipo usa esta página lo prueban las definiciones de actor: w1e (la página de texturas) vale 1 sólo para los subtipos dibujados aquí; los demás (cápsulas grises) usan páginas que no sobrevivieron. Qué figura de la página es cada uno sigue el orden de fotogramas de sus scripts de animación (coherente, ver docs/CIVILIZACION.md).',
+                     'Paletas (filas reales de 16 colores de los ficheros CLUT del juego):'] + ['  - ' + t for t in PAL_STATUS_ES[area]]),
+        ('Fuente', ['Datos decompilados de I0NFO2: juego de NPC %s, lista de vecinos en %s (registros de 28 bytes), objetos en %s.' % (I['set'], I['lst'], I['props']),
+                    'Perímetro: tools/civ_rebuild.py (reconstrucción). Generado por tools/civ_sheets.py --sheet plan1x (Tombi-Decomp).']),
+    ]
+
+
+def plan_legend(area, plan_png, size, frames, lang='en'):
     I = PLAN_INFO[area]; W, H = size
-    blocks = [
+    blocks = plan_blocks_es(area, W, H, frames) if lang == 'es' else [
         ('Place', [I['place'] + '.', 'A cut top-down section: the code and placements survive in I0NFO2, the load list is empty.',
                    'No retail exit leads into it. ' + I['exits'] + ' (exit rectangles in ' + I['step'] + ', destinations in the MAIN0 exit table 0x80079A48).']),
         ('Scale', ['1 image pixel = 1 background pixel. Image %d x %d px: the placements plus the reconstructed picture (the original background picture is lost).' % (W, H),
@@ -858,25 +920,49 @@ def perimeter(area):
     return np.kron(town, np.ones((8, 8), bool)), cw * 8, ch * 8
 
 
-def draw_perimeter(im, area, px0, py0):
-    import numpy as np
+def perimeter_segments(area):
+    """(segments [((px, py), (px, py))] along the cell edges of the town outline, picture W, H) in background px, or None."""
     r = perimeter(area)
-    if r is None: return
-    m, PW, PH = r
-    e = m & ~(np.roll(m, 1, 0) & np.roll(m, -1, 0) & np.roll(m, 1, 1) & np.roll(m, -1, 1))
-    e[0, :] |= m[0, :]; e[-1, :] |= m[-1, :]; e[:, 0] |= m[:, 0]; e[:, -1] |= m[:, -1]
-    dr = ImageDraw.Draw(im)
-    dr.rectangle([-px0, -py0, PW - 1 - px0, PH - 1 - py0], outline=(120, 60, 160, 255), width=2)
-    q = im.load(); W_, H_ = im.size
-    for y, x in zip(*np.nonzero(e)):
-        for dy in (-1, 0, 1):
-            for dx in (-1, 0, 1):
-                X, Y = x + dx - px0, y + dy - py0
-                if 0 <= X < W_ and 0 <= Y < H_: q[X, Y] = (220, 30, 30, 255)
+    if r is None: return None
+    m, PW, PH = r; t = m[::8, ::8]; ch, cw = t.shape; seg = []
+    g = lambda y, x: 0 <= y < ch and 0 <= x < cw and t[y, x]
+    for y in range(ch):
+        for x in range(cw):
+            if not t[y, x]: continue
+            X, Y = x * 8, y * 8
+            if not g(y - 1, x): seg.append(((X, Y), (X + 8, Y)))
+            if not g(y + 1, x): seg.append(((X, Y + 8), (X + 8, Y + 8)))
+            if not g(y, x - 1): seg.append(((X, Y), (X, Y + 8)))
+            if not g(y, x + 1): seg.append(((X + 8, Y), (X + 8, Y + 8)))
+    return seg, PW, PH
+
+
+PERIM_ES = ('Contorno rojo grueso = perímetro del pueblo: borde exterior de la zona por la que se puede andar desde la entrada. '
+            'RECONSTRUCCIÓN, NO DATOS ORIGINALES: relleno sobre la colisión trazada de tools/civ_rebuild.py (map8E.bin, la celda 9 bloquea); el mapa original se perdió.')
+PERIM_EN = ('Thick red contour = town perimeter: outer outline of the area walkable from the entry. '
+            'RECONSTRUCTION, NOT ORIGINAL DATA: flood fill over the traced collision of tools/civ_rebuild.py (map8E.bin, cell 9 blocks); the original map is lost.')
+BORDER_EN = 'Thin purple frame = reconstructed picture border (camera limits x <= W-288, y <= H-112).'
+BORDE_ES = 'Marco morado fino = borde del fondo reconstruido (límites de cámara x <= W-288, y <= H-112).'
+PERIM_RED = (220, 30, 30); PERIM_PUR = (120, 60, 160)
+
+
+def draw_perimeter_on(dr, area, f, w=3, wb=2):
+    """Draw the town outline (thick red) and the reconstructed picture border (thin purple); f maps background px to
+    image coordinates. Returns False when the reconstruction is missing."""
+    r = perimeter_segments(area)
+    if r is None: return False
+    seg, PW, PH = r
+    dr.line([f(0, 0), f(PW, 0), f(PW, PH), f(0, PH), f(0, 0)], fill=PERIM_PUR, width=wb)
+    for a, b in seg: dr.line([f(*a), f(*b)], fill=PERIM_RED, width=w)
+    return True
+
+
+def draw_perimeter(im, area, px0, py0):
+    draw_perimeter_on(ImageDraw.Draw(im), area, lambda x, y: (x - px0, y - py0), 3, 2)
 
 
 # ------------------------------------------------------------------ panel B alone at 1:1 (civ_plan_aNN_1x*.png)
-def plan1x(area, outd):
+def plan1x(area, outd, langs=('en',)):
     """Panel B of the schematic at actual size (one image pixel = one background pixel, the estimated picture size),
     no labels: grey ground + house rectangles, patrols, props and resident sprites; and a transparent variant."""
     C = AREAS[area]; var = T.CUT[area]
@@ -917,8 +1003,9 @@ def plan1x(area, outd):
             im.paste(sp, (int(X - w / 2), int(Y - h)), sp)
         out = os.path.join(outd, 'civ_plan_a%d_1x%s.png' % (area, sfx))
         (im if sfx else im.convert('RGB')).save(out); print(out, im.size)
-    lg = plan_legend(area, os.path.join(outd, 'civ_plan_a%d_1x.png' % area), (W, H), [a['frame'] for a in actors])
-    out = os.path.join(outd, 'civ_plan_a%d_1x_legend.png' % area); lg.save(out); print(out, lg.size)
+    for lang in langs:
+        lg = plan_legend(area, os.path.join(outd, 'civ_plan_a%d_1x.png' % area), (W, H), [a['frame'] for a in actors], lang)
+        out = os.path.join(outd, 'civ_plan_a%d_1x_%s.png' % (area, 'leyenda' if lang == 'es' else 'legend')); lg.save(out); print(out, lg.size)
 
 
 def main():
@@ -931,7 +1018,7 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     areas = (11, 16, 17) if a.area == "all" else (int(a.area),)
     langs = ("es", "en") if a.lang == "all" else (a.lang,)
-    sheets = ("esquema", "explicado", "perspectiva") if a.sheet == "all" else (a.sheet,)
+    sheets = ("esquema", "explicado", "perspectiva", "plan1x") if a.sheet == "all" else (a.sheet,)
     for ar in areas:
         for lg in langs:
             sfx = "" if lg == "es" else "_en"
@@ -942,7 +1029,7 @@ def main():
             if "perspectiva" in sheets:
                 perspectiva(ar, lg, a.out)
         if "plan1x" in sheets:
-            plan1x(ar, a.out)
+            plan1x(ar, a.out, langs)
 
 
 if __name__ == "__main__":
