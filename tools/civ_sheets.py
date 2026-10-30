@@ -792,11 +792,13 @@ def plan_legend(area, plan_png, size, frames):
     blocks = [
         ('Place', [I['place'] + '.', 'A cut top-down section: the code and placements survive in I0NFO2, the load list is empty.',
                    'No retail exit leads into it. ' + I['exits'] + ' (exit rectangles in ' + I['step'] + ', destinations in the MAIN0 exit table 0x80079A48).']),
-        ('Scale', ['1 image pixel = 1 background pixel. Picture %d x %d px, estimated from the placements (the background picture is lost).' % (W, H),
-                   'World position (x, y) -> background pixel (x + 128, y - 40) (topdownCollideMapTile 0x800EE18C); this image starts at the estimated picture origin.']),
+        ('Scale', ['1 image pixel = 1 background pixel. Image %d x %d px: the placements plus the reconstructed picture (the original background picture is lost).' % (W, H),
+                   'World position (x, y) -> background pixel (x + 128, y - 40) (topdownCollideMapTile 0x800EE18C).']),
         ('Marks', ['Blue rectangle: house trigger rectangle (TOPDOWN_TRIGGER_RECT_LISTS 0x800FEC9C); inside it the roof hides and the interior shows.',
                    'Green box or line: the area a resident patrols (record bounds, behaviour 1-4).',
                    'Yellow dot: prop / scenery position. Props are dots because their sprite tables are lost.',
+                   'Thick red contour: town perimeter = outer outline of the area walkable from the entry spawn. RECONSTRUCTION, NOT ORIGINAL DATA: flood fill over the traced collision of tools/civ_rebuild.py (map8E.bin, cell 9 blocks); the original map is lost.',
+                   'Thin purple frame: the reconstructed picture border (camera limits x <= W-288, y <= H-112).',
                    'Sprite: a resident; its feet are on the record position. Grey capsule: a resident whose drawing is lost (its page did not survive).']),
         ('Facing', ['In the game, each resident record sets its facing: field +4 (frame -> animFrame, 0..3) picks the direction and field +6 (anim set -> wb4) the animation; patrolling residents turn as they walk.',
                     'Values in this town (field +4 per resident, in record order): ' + ', '.join(str(f) for f in frames) + '.',
@@ -824,6 +826,55 @@ def plan_legend(area, plan_png, size, frames):
     return im
 
 
+# ------------------------------------------------------------------ town perimeter from the reconstruction (not original)
+MAPS_DIR = os.environ.get("CIV_MAPS", "/dev/shm/maps")
+
+
+def perimeter(area):
+    """(reach mask in px, picture W, H) from tools/civ_rebuild.py's cell map MAPS_DIR/AREAnn/map8E.bin, flood-filled
+    from the layout spawn (cells 9 block, everything else passes), or None when the map is missing.
+    RECONSTRUCTION: the collision is traced, the original map is lost."""
+    import json, numpy as np
+    fn = os.path.join(MAPS_DIR, 'AREA%d' % area, 'map8E.bin')
+    if not os.path.exists(fn):
+        print('warning: %s missing (run tools/civ_rebuild.py --out %s): no perimeter' % (fn, MAPS_DIR)); return None
+    b = open(fn, 'rb').read(); cw, ch = struct.unpack_from('<HH', b)
+    c = np.frombuffer(b[4:4 + cw * ch], np.uint8).reshape(ch, cw)
+    L = json.load(open(os.path.join(HERE, 'civ_rebuild_layout.json')))
+    sp = L['towns'][str(area)]['spawn']
+    sx, sy = T.world_to_px(*sp)
+    ok = np.zeros((ch, cw), bool); st = [(sy // 8, sx // 8)]
+    while st:
+        y, x = st.pop()
+        if 0 <= y < ch and 0 <= x < cw and not ok[y, x] and (c[y, x] & 0x7F) != 9:
+            ok[y, x] = True; st += [(y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)]
+    # outer outline only: fill the holes (solid bodies inside the town) = everything not reachable from the border
+    out = np.zeros((ch + 2, cw + 2), bool); P = np.pad(ok, 1); st = [(0, 0)]
+    while st:
+        y, x = st.pop()
+        if 0 <= y < ch + 2 and 0 <= x < cw + 2 and not out[y, x] and not P[y, x]:
+            out[y, x] = True; st += [(y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)]
+    town = ~out[1:-1, 1:-1]
+    return np.kron(town, np.ones((8, 8), bool)), cw * 8, ch * 8
+
+
+def draw_perimeter(im, area, px0, py0):
+    import numpy as np
+    r = perimeter(area)
+    if r is None: return
+    m, PW, PH = r
+    e = m & ~(np.roll(m, 1, 0) & np.roll(m, -1, 0) & np.roll(m, 1, 1) & np.roll(m, -1, 1))
+    e[0, :] |= m[0, :]; e[-1, :] |= m[-1, :]; e[:, 0] |= m[:, 0]; e[:, -1] |= m[:, -1]
+    dr = ImageDraw.Draw(im)
+    dr.rectangle([-px0, -py0, PW - 1 - px0, PH - 1 - py0], outline=(120, 60, 160, 255), width=2)
+    q = im.load(); W_, H_ = im.size
+    for y, x in zip(*np.nonzero(e)):
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                X, Y = x + dx - px0, y + dy - py0
+                if 0 <= X < W_ and 0 <= Y < H_: q[X, Y] = (220, 30, 30, 255)
+
+
 # ------------------------------------------------------------------ panel B alone at 1:1 (civ_plan_aNN_1x*.png)
 def plan1x(area, outd):
     """Panel B of the schematic at actual size (one image pixel = one background pixel, the estimated picture size),
@@ -834,11 +885,13 @@ def plan1x(area, outd):
     ys = [a['y'] for a in actors] + [q['y'] for l in props[:1] for q in l] + [r[1] for r in rects] + [r[3] for r in rects] + [e[0][1] for e in C['exits']]
     px0 = (min(xs) + 128 - 40) // 32 * 32; py0 = (min(ys) - 40 - 70) // 32 * 32
     px1 = (max(xs) + 128 + 40 + 31) // 32 * 32; py1 = (max(ys) - 40 + 40 + 31) // 32 * 32
+    pr = perimeter(area)
+    if pr: px0, py0, px1, py1 = min(px0, 0), min(py0, 0), max(px1, pr[1]), max(py1, pr[2])
     W, H = px1 - px0, py1 - py0
     P = lambda x, y: (x + 128 - px0, y - 40 - py0)
     p = page(C['atlas']); cs = comps(p)
     for bg, sfx in (((226, 222, 212, 255), ''), ((0, 0, 0, 0), '_transparent')):
-        im = Image.new('RGBA', (W, H), bg); dr = ImageDraw.Draw(im)
+        im = Image.new('RGBA', (W, H), bg); draw_perimeter(im, area, px0, py0); dr = ImageDraw.Draw(im)
         for (a, b, c, d) in rects:
             dr.rectangle([P(a, b), P(c, d)], outline=(40, 120, 255, 255), width=1)
         for q in (props[0] if props else []):
