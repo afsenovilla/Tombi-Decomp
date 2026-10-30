@@ -39,6 +39,22 @@ pointers to it). Layout record list = area-overlay table `[e]`.
   which is not in a MAIN0 table, so the scripts use the overlay op table). Not resolved: tracing the per-area table at 0x8013A044 (it holds a pointer and
   a byte table, not the pointer array the decompile assumes).
 
+## Event titles in other versions (tools/event_titles.py)  [V]
+- **Beta 980203**: one 200-byte table (exe 0x6623C), byte-identical to PAL (90/126 unreferenced too).
+- **JP (SLPS-01144)**: one 200-byte table per area into that area's own title list (WFM2 block 1 of AREAnn/A00x.GAM; AREA01/A008 and AREA18/A003 have a block whose dialogue-table word is only valid as u16, so tools/jp_text.py skips them). Tables: X00 0x4E0B4, X01 0x5151C, X03 0x4B850, X04 0x45E80, X06 0x358B8, X09 0x409B0, X10 0x44068, X11 0x2EE74, X13 0x2D164, X14 0x39F08, X16 0x2E638, X17 0x2E8F0; exe file offsets 0x662D0 (area 2), 0x66438 (5), 0x665A0 (8), 0x66708 (18), 0x66870 (19). PAL's 20 identical pointers are the remains of this.
+- Only JP title text no table uses: 風になりたい ("I want to be the wind", AREA19 list). CLEAR!/dummy as in PAL.
+- Events PAL leaves 0xFF that JP titles (JP description from SYSTEM/DSPSUB.BIN block 1 in brackets):
+  6 大きな水たまり？ (Big puddle?) · 18 ドワーフの助け (Dwarves' help; area 0: 魔女の忘れもの) · 45 ＡＰスロットマシーン · 52 渡れなくなっちゃった… (Can't cross any more) ·
+  59 族長のたのみごと？ · 60 コトバを吸いとろう！Ⅱ · 61 マサカリ族のヒミツ · 67 解読？らくがき岩 (Decode the graffiti rock) · 74 電気うなぎを捕まえろ！ ·
+  **76 黒い水の不思議 = PAL #90 "The Black Water"** · **83 動かない鉄の車 = PAL #126 "The Rusty Steel Car"** (so both "unreferenced" PAL strings are just unwired: 76/83 are 0xFF in PAL) ·
+  89 緑の占い師 (Green fortune teller) · 94 仲良くしようよ · 95 木人の村の大岩 · 96 未完の橋… · **97 = 0x61 動かない時計台 ("The clock tower that won't move", [clock with stopped hands])** ·
+  98 こわれない歯車？ (Unbreakable gear?) · **99 = 0x63 材料はどこだ！？ ("Where's the material?!", [something tougher than stone])** · 100 鉄のカギ穴 (Iron keyhole) ·
+  138 つかまえてごらん · 139 ３姉妹のかくれんぼ · 140 ３姉妹への手紙 · 184 おいら、悪い子？ · 186 マサカリの集落？
+- The other cut-town events are titled in PAL already: 0x3E #89 "Tree of Knowledge Knows", 0x4F #98, 0x67 #100 "The Cute Witch", 0x69 #94 "I Need a Bomb".
+- Port candidates: 0x61 -> new string "The Clock Tower That Won't Move" (started by Stonetown npcSet0ESceneStep1, the stopped-clock talk); 0x63 -> "Where's the Material?!" (npcSet0FSceneStep2, the smith / iron gear item 0x3E); 0x62 "An Unbreakable Gear?"; 76 -> #90, 83 -> #126 (existing PAL strings). No version gives English text for 0x61/0x63.
+- Still 0xFF everywhere checked: 48, 66, 68-72, 75, 84, 91-93, 101, 106-110, 117, 122, 130, 131, 136, 137, 141-143, 147-149, 152, 154, 155, 158, 162, 163, 165, 192-199.
+- USA / jpdemo / PrePre8: dumped by the report.yml jobs (event_titles.py). PrePre8's TIM title strip (docs/PREPRE8.md) adds 少年旅立ち and あれま大きな水たまり (= event 6).
+
 ## Not done
 - Exhaustive proof that no overlay has a button sequence (checked: MAIN0 pad readers; overlay pad code not audited one by one).
 - Unreferenced dialogue / room / item text.

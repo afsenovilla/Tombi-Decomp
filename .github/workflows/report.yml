@@ -227,6 +227,11 @@ jobs:
           echo "fb7cbf02470e8bcbf700414dd7fada0d19578852  game_jpdemo/SYSTEM/X00.BIN" | sha1sum -c -
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
+      - name: Event-title tables (docs/CUT_CONTENT.md)
+        if: steps.fetch.outputs.ok == 'true'
+        continue-on-error: true
+        run: python3 -I tools/event_titles.py "$RUNNER_TEMP/jpdemo" | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Install toolchain
         if: steps.fetch.outputs.ok == 'true'
         run: |
@@ -297,6 +302,11 @@ jobs:
           cp "$(find "$RUNNER_TEMP/prepre8" -iname TOMBA.EXE | head -1)" game_prepre8/TOMBA.EXE
           echo "032d6f371b31085098b86aebbce465d30599293a  game_prepre8/TOMBA.EXE" | sha1sum -c -
           echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Event-title tables (docs/CUT_CONTENT.md)
+        if: steps.fetch.outputs.ok == 'true'
+        continue-on-error: true
+        run: python3 -I tools/event_titles.py "$RUNNER_TEMP/prepre8" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Install toolchain
         if: steps.fetch.outputs.ok == 'true'
@@ -371,6 +381,11 @@ jobs:
           printf '%s\n' "1e69d1414dcca09fe360fe69337fc8e62968fda7  game_beta980203/SLPS_011.44" \
                         "2a1109fb39432f8f6414f4dd85c74a5cff1b6c10  game_beta980203/SYSTEM/X00.BIN" | sha1sum -c -
           echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Event-title tables (docs/CUT_CONTENT.md)
+        if: steps.fetch.outputs.ok == 'true'
+        continue-on-error: true
+        run: python3 -I tools/event_titles.py "$RUNNER_TEMP/beta" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Install toolchain
         if: steps.fetch.outputs.ok == 'true'
@@ -447,6 +462,7 @@ jobs:
           if [ -n "$GAME_FILES_URL_JP" ]; then fetch GAME_FILES_URL_JP "$RUNNER_TEMP/rjp" && tree "$RUNNER_TEMP/rjp" "$RUNNER_TEMP/tjp" || echo "::warning::JP retail fetch failed"; fi
           if [ -n "$GAME_FILES_URL_USA" ]; then fetch GAME_FILES_URL_USA "$RUNNER_TEMP/rusa" && tree "$RUNNER_TEMP/rusa" "$RUNNER_TEMP/tusa" || echo "::warning::USA retail fetch failed"; fi
           if [ -n "$GAME_FILES_URL" ]; then fetch GAME_FILES_URL "$RUNNER_TEMP/rpal" && tree "$RUNNER_TEMP/rpal" "$RUNNER_TEMP/tpal" || echo "::notice::PAL is not a disc image; no PAL tree"; fi
+          if [ -d "$RUNNER_TEMP/tusa" ]; then echo "### USA event-title tables"; python3 -I tools/event_titles.py "$RUNNER_TEMP/tusa" || true; else echo "::notice::No USA retail tree (GAME_FILES_URL_USA empty?): no USA event-title tables."; fi
           for r in JP USA; do
             v="GAME_FILES_URL_PSN_$r"
             if [ -z "${!v}" ]; then echo "::notice::$v secret not set; skipping $r."; continue; fi
