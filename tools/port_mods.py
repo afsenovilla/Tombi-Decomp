@@ -20,7 +20,7 @@ AREA_NAMES = {0: "Village of All Beginnings", 1: "Forest / Watch Tower (AREA01)"
               8: "Baccus Lake", 9: "Mushroom Village", 10: "Deep Jungle",
               11: "Civilization: Lumberjack Town / Factory", 13: "Pig Island", 14: "Evil Pigs",
               16: "Civilization: Stonetown / Clock Tower", 17: "Civilization: Iron Town / Iron Castle",
-              18: "Civilization Town (hub)", 19: "Civilization (purified)"}
+              18: "Civilization Town (hub)", 19: "Dwarf Village (Hidden Village)"}
 # areas 11/16/17/18 named after the retail text (docs/CIVILIZATION.md "Names"), not the README's "Village of ...";
 # section 0 of 11/16/17 is a cut town rebuilt playable in the port (--civ-town N, docs/CIVILIZATION.md "Playable towns")
 CIV_TOWNS = {11: "Lumberjack Town", 16: "Stonetown", 17: "Iron Town"}
