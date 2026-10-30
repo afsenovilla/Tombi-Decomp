@@ -112,7 +112,7 @@ Full table: notes/secrets.md, "Where the 0xFF events are started / completed". S
   smith when he gives the Iron Wheel (AREA17 s0, `npcSet0FSceneStep4`). That smith is the only code that gives item 0x3E.
 - **76 (Black Water)** and **99 (Where's the Material!?)** are started only in the cut Iron Town (AREA17 s0) and completed nowhere. **61** is only read by the cut Stonetown dialogue.
 - **The other 19** (6, 18, 45, 52, 59, 60, 67, 74, 83, 89, 94, 95, 96, 100, 138, 139, 140, 184, 186) have no code, room data or script that starts, completes or reads them.
-  **89 (Green Fortune Teller)** is one of these. Its only context is the cut Wood village line "a fortune-teller lives in this hut, but she has a condition" (AREA11 s0).
+  **89 (Green Fortune Teller)** is one of these. Its only context is the cut Wood village line "a fortune-teller lives in this hut, but he has a condition" (AREA11 s0).
 
 ## Folkin's rough notes — verification (non-Civilization claims)
 

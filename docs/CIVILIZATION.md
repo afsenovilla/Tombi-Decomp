@@ -576,7 +576,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 | 1 | (88, 240) | H1 | Lumberjack Factory Worker — House 1: "...Now I can make something really interesting..." (PAL text #227) |
 | 2 | (12, 256) | H1 | Lumberjack Factory Worker — House 1: no line, sets a flag |
 | 3 | (16, 352) | H2 | Lumberjack Factory Worker — House 2: "It doesn't work, but this machine is iron... I could use it" |
-| 4 | (400, 520) | outdoors | Lumberjack Factory Worker — Diagonal patrol: "A fortune-teller lives in this hut, but she has a condition" |
+| 4 | (400, 520) | outdoors | Lumberjack Factory Worker — Diagonal patrol: "A fortune-teller lives in this hut, but he has a condition" |
 | 5 | (300, 470) | outdoors | Lumberjack Factory Worker — Horizontal patrol: "Wood is the best; stone and iron are cold" |
 | 6 | (170, 528) | outdoors | Lumberjack Factory Worker — Horizontal patrol: "It doesn't work, but this machine is iron..." |
 | 7 | (172, 424) | outdoors | Male Lumberjack Town Resident — Neighbour: "There's a maze under the floor; don't wander in carelessly" |
