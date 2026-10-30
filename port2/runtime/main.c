@@ -663,6 +663,9 @@ int main(int argc, char **argv) {
             snprintf(b, sizeof b, "1250:8009C960:%X:2", n); port_poke_add(b);
             port_poke_add("1250:8009C962:0:2");
             port_pad_script("1000:start,1300:circle:3");
+            /* Stonetown's top exit (AREA16 s0 exit 2) leads to the cut 16:1, which has no data (the game hangs in the
+               load): send it on to 16:4 as --civ-route does */
+            port_poke_add_every("50:80079906:4", 1);
             port_printf("[port] --civ-town %d: the debug area select opens by itself and enters the rebuilt town at about frame 1300 (~26 s); don't press anything until then\n", n);
         }
         else if (!strcmp(a, "--civ-wfm") && v) port_civ_wfm_path = argv[++i];
