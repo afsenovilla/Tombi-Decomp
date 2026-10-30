@@ -775,7 +775,7 @@ int main(int argc, char **argv) {
    the sub-screen is up), on every draw, so a later area load cannot leave a stale row there. */
 int port_valve_clut(void) {
     static const unsigned short pal[16] = {0x0000, 0x56B5, 0x39CE, 0x2529, 0x6B5A, 0x0CAA, 0x052D, 0x1153,
-                                           0x0A37, 0x0A9A, 0x0F1F, 0x43FF, 0x1530, 0x19B7, 0x0444, 0x7FFF};
+                                           0x0A37, 0x0A9A, 0x0F1F, 0x43FF, 0x1530, 0x19B7, 0x0C63, 0x7FFF};
     /* the icon's cell (u 72, v 72 of the 4 bpp page at (192,0)) with its frame corners / bevel re-indexed to 1 / 2 / 3 */
     static const unsigned short cell[64] = {
         0xFF10, 0xFFFF, 0xFFFF, 0x01FF, 0x32F1, 0xEEEE, 0xEEEE, 0x1FEE,
