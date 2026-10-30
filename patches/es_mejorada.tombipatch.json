@@ -1985,7 +1985,7 @@
    "199": "{BOX 176 29}\nGuardas la sombrilla{NL}\n",
    "200": "{BOX 200 29}\nGuardas el Pez psíquico{NL}\n",
    "201": "{BOX 144 55}\n{MOVE 0 0}Hay un agujero{NL}\ndonde parece que{NL}\nencaja algo...{WAIT}{CLEAR}\n",
-   "202": "{BOX 192 29}\n{MOVE 0 0}¡Has colocado la válvula!{WAIT}{CLEAR}\n",
+   "202": "{BOX 168 29}\n{MOVE 0 0}¡Válvula colocada!{WAIT}{CLEAR}\n",
    "204": "{BOX 256 29}\n{MOVE 0 0}¡Has encendido el interruptor!{WAIT}{CLEAR}\n",
    "205": "{BOX 200 55}\n{MOVE 0 0}...Se oye el débil{NL}\nsonido de la bomba...{NL}\nParece que funciona...{WAIT}{CLEAR}\n",
    "206": "{BOX 224 29}\n¡Te falta experiencia!{NL}\n",
