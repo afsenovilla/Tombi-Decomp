@@ -66,8 +66,7 @@ dispatcher `func_800ED0C4` (now `subScreenItemListStep`) was matched by [michael
 functions keep a generic name (`notes/unnamed.json`; empty stubs are named `stubNop<addr>` / `stubFreeObj<addr>`). Data naming is done by usage for
 MAIN0 (342 globals, `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM overlays (266 in their
 `notes/data_names_<overlay>.csv`), applied with `tools/rename_data.py`; what is still spelled by address is animation
-scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release (55.2 %) and demo
-(39.6 %) are paused.
+scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release is active again (see "Japanese release progress"); the demo (39.6 %) is paused.
 
 ## Target
 
@@ -188,12 +187,41 @@ offsets and the function or splat range that produced them.
 - Rules for new C files: a data table shared by several functions must be referenced as an `extern` symbol in
   each file (it can only be linked once), and do not emit another function's data with `__asm__(".word")`.
 
+## Japanese release progress
+
+<!-- jp-progress:start -->
+**Ore! Tomba (SLPS-01144): 55.21 % of the code matches byte for byte** (859196 of 1556336 bytes, 2225 of 3542 functions).
+
+| Part | Code | Matching bytes | Functions | Matching |
+|---|---:|---:|---:|---|
+| SLPS_011.44: engine | 378332 B | 203484 B | 881 / 1354 | 53.8 % `[#############...........]` |
+| X00.BIN: shared object code | 327896 B | 155236 B | 364 / 596 | 47.3 % `[###########.............]` |
+| X01.BIN: area code | 165468 B | 104248 B | 181 / 253 | 63.0 % `[###############.........]` |
+| X02.BIN: area code | 30964 B | 11464 B | 24 / 41 | 37.0 % `[#########...............]` |
+| X03.BIN: area code | 136736 B | 90288 B | 166 / 268 | 66.0 % `[################........]` |
+| X04.BIN: area code | 117168 B | 63060 B | 143 / 235 | 53.8 % `[#############...........]` |
+| X05.BIN: area code | 9216 B | 6092 B | 14 / 22 | 66.1 % `[################........]` |
+| X06.BIN: area code | 43996 B | 24720 B | 37 / 52 | 56.2 % `[#############...........]` |
+| X08.BIN: area code | 628 B | 228 B | 1 / 3 | 36.3 % `[#########...............]` |
+| X09.BIN: area code | 101904 B | 56860 B | 112 / 168 | 55.8 % `[#############...........]` |
+| X10.BIN: area code | 106072 B | 66156 B | 133 / 260 | 62.4 % `[###############.........]` |
+| X11.BIN: area code | 15924 B | 5856 B | 13 / 37 | 36.8 % `[#########...............]` |
+| X13.BIN: area code | 8580 B | 3368 B | 6 / 11 | 39.3 % `[#########...............]` |
+| X14.BIN: area code | 65348 B | 34444 B | 76 / 117 | 52.7 % `[#############...........]` |
+| X16.BIN: area code | 12620 B | 9724 B | 27 / 45 | 77.1 % `[##################......]` |
+| X17.BIN: area code | 15120 B | 10288 B | 21 / 37 | 68.0 % `[################........]` |
+| X18.BIN: area code | 18212 B | 13332 B | 25 / 40 | 73.2 % `[##################......]` |
+| X19.BIN: area code | 2152 B | 348 B | 1 / 3 | 16.2 % `[####....................]` |
+
+Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
+<!-- jp-progress:end -->
+
 ## Versions
 
 | Version | Serial | Status |
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
-| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, 55.2 % of code (objdiff), paused, see [docs/JP.md](docs/JP.md) |
+| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, in progress, see "Japanese release progress" and [docs/JP.md](docs/JP.md) |
 | Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 39.6 % of code (objdiff), paused, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 
 All versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
