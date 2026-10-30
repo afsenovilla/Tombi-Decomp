@@ -191,6 +191,14 @@ def bad_jumps(code, ref, addr):
 
 
 def main():
+    if "--version" in sys.argv:  # non-PAL versions: single-function check against the splat target (tools/jpcheck.py)
+        i = sys.argv.index("--version")
+        v = sys.argv[i + 1] if i + 1 < len(sys.argv) else ""
+        if v.lower() not in ("sces01331", "pal"):
+            if v.lower() not in ("slps01144", "jp"): sys.exit("ncheck --version: only pal and slps01144 are supported")
+            rest = sys.argv[1:i] + sys.argv[i + 2:]
+            os.execv(sys.executable, [sys.executable, os.path.join(ROOT, "tools", "jpcheck.py")] + rest)
+        del sys.argv[i:i + 2]
     opts = {a for a in sys.argv[1:] if a.startswith("--")}
     files = [a for a in sys.argv[1:] if not a.startswith("--")]
     inc = tempfile.mkdtemp()
