@@ -286,7 +286,7 @@ estas tablas, así que la numeración de fotogramas la fija el código aunque la
     - vecino vestido de morado (BUNMEI.STR, fotograma sin identificar):
       `0000 2A17 7FFF 4210 318C 2108 52DD 3A59 6593 5571 454F 011B 00B3 006B 0218 0173` = **fila 38** de AREA16/CLUT06/07 y AREA18/CLUT02, **fila 33** de AREA17/CLUT03/06;
     - hombre calvo y moreno dentro de un edificio: `0000 0421 4210 294A 6B5A 1E39 012F 1193 56B5 4A52 2D6B 5EF7 35AD 6B5A 0000 7FFF`
-      = fila 15 de los CLUT de AREA00, 01, 02 y otras áreas (una fila común a todas las áreas, no de Civilización).
+      = fila 255 (antes "fila 15": hueco 15 de la línea 495 de VRAM) de los CLUT de AREA00, 01, 02 y otras áreas (una fila común a todas las áreas, no de Civilización).
     - figura de sombrero azul y capa roja vista de espaldas en el césped de la Ciudad de hierro (imagen 143; BUNMEI.STR,
       fotograma sin identificar).
     Estos colores encajan con la **página de figuras de AREA18, `SYSTEM/A08600`** (4 bpp en sus primeras 64 palabras; probada
@@ -960,6 +960,28 @@ La salida va a `build/civ_rebuild/AREAnn/` (`AREAnn_nofmv/` sin la capa del FMV)
   - Los interiores y las puertas de las casas son suelo de disparo (0x80).
   - Las salidas del código quedan abiertas.
   - Cada vecino y cada recorrido quedan sobre suelo, y se informa de cada celda abierta para ello.
+
+### Residentes del FMV como sprites cenitales (`tools/civ_fmv_sprites.py`, RECONSTRUCCIÓN)
+
+Los tres residentes de BUNMEI.STR con tira de paleta identificada no tienen dibujo en las páginas que sobreviven, así
+que `python3 tools/civ_fmv_sprites.py --out DIR` los reconstruye desde TU disco: cada uno toma todos los fotogramas de un
+residente superviviente de la misma escala (mismo contorno, sombreado y orden de fotogramas que las tablas del port,
+`tools/civ_anim.py`: reposo espalda/lado/frente, andar 3x6, hablar) y reindexa sus téxeles a la fila real de ese
+residente con tablas de reasignación escritas a mano (cabeza / cuerpo / pies). Sólo colores de la fila real, índice 0
+transparente. No son datos originales.
+
+| Residente | Fotogramas FMV (mediana, 1:1) | Fila real | Cuerpo tomado de |
+|---|---|---|---|
+| camisa roja, pelo rizado naranja, pantalón corto verde claro | 85-89 | AREA16/CLUT07 fila 54 (= AREA17/CLUT03 fila 49) | obrero de A06100, 30 fotogramas; el casco pasa a pelo, los bajos del pantalón a piernas |
+| vestido morado, pelo naranja, zapatos rojos (de lado) | 62-68 (medio fuera de pantalla) | fila 38 (= AREA17/CLUT03 fila 33) | mujer de Stonetown de A07600, 27 fotogramas |
+| hombre calvo moreno de gris | 200-214 | fila 255 de todos los CLUT (VRAM (368, 495)) | obrero de A06100, el casco pasa a calva |
+
+La "fila 15" indicada arriba para el calvo es la fila 255 (la última, hueco 15 de la línea 495 de VRAM) de todos los CLUT.
+Límites: el de camisa roja y el calvo comparten el cuerpo del obrero; la carga del calvo no está dibujada. La salida
+(láminas con el recorte del FMV a 4x, tiras indexadas, un GIF por dirección de andar/hablar) contiene arte del disco y
+no se sube. El port aún no los usa: sus partes sólo apuntan a páginas cargadas de archivos del disco (`port_civ_recs`,
+`port_civ_fig`); haría falta un gancho que suba los téxeles 4 bpp generados a una zona libre de VRAM (p. ej. x 512,
+donde va la página del aldeano sustituto de AREA08) y la reasignación en C o leída de un archivo que escriba la herramienta.
 
 ### Interiores de las casas y layout de la comunidad (v2, estimaciones nuestras)
 

@@ -274,7 +274,7 @@ even though the tables themselves are lost.
     - purple-dressed resident (BUNMEI.STR, frame not identified):
       `0000 2A17 7FFF 4210 318C 2108 52DD 3A59 6593 5571 454F 011B 00B3 006B 0218 0173` = **row 38** of AREA16/CLUT06/07 and AREA18/CLUT02, **row 33** of AREA17/CLUT03/06;
     - bald, brown man inside a building: `0000 0421 4210 294A 6B5A 1E39 012F 1193 56B5 4A52 2D6B 5EF7 35AD 6B5A 0000 7FFF`
-      = row 15 of the CLUT files of AREA00, 01, 02 and other areas (a row every area shares, not a Civilization row).
+      = row 255 (the docs said "row 15": slot 15 of VRAM line 495) of the CLUT files of AREA00, 01, 02 and other areas (a row every area shares, not a Civilization row).
     - blue-hat, red-cloaked figure seen from behind on the Iron Town lawn (image 143; BUNMEI.STR, frame not identified).
     These colours fit the **AREA18 figure page `SYSTEM/A08600`** (4 bpp in its first 64 words; tested with every resident row of
     AREA18/CLUT02, judged by eye; FMV renders are 3D, so this is not a silhouette proof):
@@ -943,6 +943,27 @@ Sizes: AREA11 is 736 x 672 (92 x 84 cells), AREA16 is 544 x 608 (68 x 76), AREA1
   - The exit rectangles from the code are kept open.
   - Every resident and patrol box is forced onto floor, and each carved cell is reported.
   - No diagonal shapes are used.
+
+### FMV residents as top-down sprites (`tools/civ_fmv_sprites.py`, RECONSTRUCTION)
+
+The three BUNMEI.STR residents with matched palette strips have no surviving drawing on the Iron Town / Stonetown pages,
+so `python3 tools/civ_fmv_sprites.py --out DIR` rebuilds them from YOUR disc: each takes every frame of a surviving
+resident of the same scale (same outline, shading and frame order as the port's tables, `tools/civ_anim.py`: idle
+back/side/front, walk 3x6, talk) and re-indexes its texels into the real row of that FMV resident with hand-written
+index remap tables (head band / body / feet). Only real row colours are used, index 0 transparent. Not original data.
+
+| Resident | FMV frames (median, 1:1) | Real row | Body taken from |
+|---|---|---|---|
+| red shirt, curly orange hair, pale green shorts | 85-89 | AREA16/CLUT07 row 54 (= AREA17/CLUT03 row 49) | A06100 worker, 30 frames; hat becomes the hair, trouser ends become bare legs |
+| purple dress, orange hair, red shoes (side) | 62-68 (half off screen) | row 38 (= AREA17/CLUT03 row 33) | A07600 Stonetown woman, 27 frames |
+| bald brown man in grey | 200-214 | row 255 of every area CLUT (VRAM (368, 495)) | A06100 worker, hat becomes the bald scalp |
+
+The "row 15" given above for the bald man is row 255 (the last row, slot 15 of VRAM line 495) of every CLUT file.
+Limits: the red-shirt resident and the bald man share the worker's body; the bald man's load is not drawn. Output
+(sheets with the FMV crop at 4x, indexed frame strips, a GIF per walk/talk facing) contains disc art and is not
+committed. The port does not use them yet: its resident parts can only point into pages loaded from disc files
+(`port_civ_recs`, `port_civ_fig`), so it would need a hook that uploads the generated 4 bpp texels to a free VRAM area
+(for example x 512, where the AREA08 stand-in page goes) plus the remap done in C or read from a file the tool writes.
 
 ### House interiors and community layout (v2, our guesses)
 
