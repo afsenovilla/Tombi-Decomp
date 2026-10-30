@@ -1358,7 +1358,8 @@ class App:
         self.log_path = os.path.join(app_dir(), "tombi-port.log")
         log = open(self.log_path, "w", encoding="utf-8", errors="replace")
         log.write("[launcher] build %s\n" % BUILD_ID)
-        log.write("[launcher] Spanish graphics (--patch-tex): %s\n" % getattr(self, "gfx_note", "?"))      # the exe then prints its own id: [port2] build <sha> <date>
+        log.write("[launcher] Spanish graphics (--patch-tex): %s\n" % getattr(self, "gfx_note", "?"))
+        log.write("[launcher] command: %s\n" % " ".join(cmd))      # the exe then prints its own id: [port2] build <sha> <date>
         log.flush()
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         self.civ_play = None
