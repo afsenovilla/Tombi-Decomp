@@ -480,6 +480,16 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
+        else if (!strcmp(a, "--civ-route")) {
+            /* opt-in cut route (port only): the Civilization Town hub (AREA18 s1) exits 0/1/2 lead into the cut
+               section 0 of AREA11 / AREA17 / AREA16 instead of 11:1 / 17:1 / 16:4, and Stonetown's top exit
+               (AREA16 s0 exit 2, to the cut 16:1) continues to 16:4; the other town exits already lead on to 11:1
+               and 17:1 and back to 18:1. Exit records D_80079A48 {x, y, kind, area, section, spawn}, rewritten every
+               second (MAIN0 data). Needs --civ-maps. */
+            port_civ_test = 1;
+            port_poke_add_every("50:800799E6:0", 1); port_poke_add_every("50:800799EE:0", 1);
+            port_poke_add_every("50:800799F6:0", 1); port_poke_add_every("50:80079906:4", 1);
+        }
         else if (!strcmp(a, "--civ-town") && v) {   /* --civ-test + the debug area select opened on AREA N s0 */
             char b[48]; int n = atoi(argv[++i]);
             if (n != 11 && n != 16 && n != 17) return usage(argv[0]);
