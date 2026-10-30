@@ -358,7 +358,7 @@ int port_civ_fig(int area, int sub) {
 static const char *port_civ_wfm_path;
 int port_civ_line = -1;   /* --civ-line N: bank-4 line shown by every set-0D resident (dev) */
 static unsigned char *port_civ_wfm_buf;
-void port_civ_wfm_swap(void) {   /* --civ-wfm FILE (AREA11's bank) or DIR (DIR/civ_MFNTnn0S.WFM of the current town) */
+void port_civ_wfm_swap(void) {   /* --civ-wfm FILE (AREA11's bank) or DIR (DIR/civ_MFNTnn0<L>.WFM of the current town and --lang) */
     extern void *port_ram_ptr(unsigned);
     static int warea = -1;
     int area = *(unsigned short *)port_ram_ptr(0x8009C960u);
@@ -366,8 +366,15 @@ void port_civ_wfm_swap(void) {   /* --civ-wfm FILE (AREA11's bank) or DIR (DIR/c
     if (!port_civ_test || !port_civ_wfm_path) return;
     if (!port_civ_wfm_buf || warea != area) {
         FILE *f; long n;
-        if (!stat(port_civ_wfm_path, &st) && S_ISDIR(st.st_mode)) snprintf(path, sizeof path, "%s/civ_MFNT%02d0S.WFM", port_civ_wfm_path, area);
-        else if (area == 11) snprintf(path, sizeof path, "%s", port_civ_wfm_path);
+        if (!stat(port_civ_wfm_path, &st) && S_ISDIR(st.st_mode)) {
+            /* the bank of the current --lang (BFGIHSPWD = 0..8, tools/civ_test_data.py), else English, else Spanish */
+            const char *try_ = "BS", *letters = "BFGIHSPWD"; char want[3]; int k;
+            want[0] = letters[port_lang >= 0 && port_lang < 9 ? port_lang : 0]; want[1] = try_[0]; want[2] = try_[1];
+            for (k = 0; k < 3; k++) {
+                snprintf(path, sizeof path, "%s/civ_MFNT%02d0%c.WFM", port_civ_wfm_path, area, want[k]);
+                if (!stat(path, &st)) break;
+            }
+        } else if (area == 11) snprintf(path, sizeof path, "%s", port_civ_wfm_path);
         else return;
         f = fopen(path, "rb");
         if (!f) { port_printf("[port] --civ-wfm: cannot open %s\n", path); return; }

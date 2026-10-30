@@ -2,8 +2,10 @@
 """Builds the data folder for the port's --civ-test (the cut top-down town AREA11 s0, docs/CIVILIZATION.md "Port test").
 
   python3 tools/civ_test_data.py OUT_DIR [--data data] [--cap BYTES]
-Also writes OUT_DIR/civ_MFNT110S.WFM with ALL the lines (no cap), and civ_MFNT160S.WFM / civ_MFNT170S.WFM (AREA16 and
-AREA17 s0, AREA_LINES), for the port's --civ-wfm side-file load (--civ-wfm OUT_DIR picks the town's file).
+Also writes OUT_DIR/civ_MFNT110<L>.WFM with ALL the lines (no cap), and civ_MFNT160<L>.WFM / civ_MFNT170<L>.WFM
+(AREA16 and AREA17 s0, AREA_LINES), one set per PAL language letter L (BFGIHSPWD = --lang 0..8): Spanish in S, English
+in B and, as a fallback, in the other languages; for the port's --civ-wfm side-file load (--civ-wfm OUT_DIR picks the
+town's file of the current --lang).
 
 OUT_DIR becomes a copy of your extracted data folder (tools/extract_data.py): every file is a symlink to the original,
 except AREA11/MFNT110S.WFM and the language's SYS/LD?AR11.BIN, which are rebuilt with the Spanish lines below written
@@ -112,6 +114,100 @@ AREA_LINES = {
     },
 }
 
+# English versions (translated from the same Japanese lines), by dx / dialogue index; the English text is also written
+# into the banks of the PAL languages without a translation here (F G I H P W D: English fallback).
+LINES_EN = {
+    5: "A gear? A wooden one{NL}would break.",
+    3: "There's a maze{NL}under the floor.",
+    1: "Wood is the best.{NL}Stone is cold.",
+    2: "It doesn't work, but{NL}it's made of iron...",
+    0: "A fortune-teller lives here,{NL}but she has a condition.",
+    4: "You reach that hut{NL}from under the floor.",
+    6: "You get into the{NL}workshop from above.",
+    7: "This sign is old{NL}and dangerous.",
+    10: "I'm thirsty... I'll go{NL}get a coconut.",
+    11: "You're always so{NL}full of energy.",
+    16: "Karakuri Village{NL}has sunk.",
+    8: "Phew, that was close...",
+    9: "That big rock is{NL}really in the way.",
+    12: "Who owns this{NL}strange vehicle?",
+    13: "Without the spell, this{NL}land will be reborn.",
+    14: "The clock works, but{NL}the village still doesn't...",
+    15: "I wonder if the raft{NL}guy is all right.",
+    17: "I'm going to marry{NL}a stone girl.",
+}
+
+AREA_LINES_EN = {
+    16: {
+        230: "Heave... HO!",
+        231: "Hup... WAAAH!",
+        232: "This thing on the wall/looks like an elevator.../but it won't move.",
+        233: "You can't get into the/other villages? No idea./I want nothing to do with them.",
+        234: "The people of the other villages...|They seem to look/down on us./It really gets on my nerves!",
+        235: "First time in the village?|The only thing we can/brag about is the Clock/tower, but...",
+        236: "Should I go in or not...?|But they told me not/to go into the well.../What do I do?",
+        237: "Have you seen the gear?|Hmm.../what can we do?",
+        238: "A gear that won't break?/Iron, of course...|But I don't like/wood or iron.",
+        239: "Heh heh... I secretly/opened the door...|between the iron village/and the wood one. Shh!",
+        240: "A generator? That's it!/This house's elevator/used to run on that.",
+        241: "So small and so/brave...|Maybe I should stop/being so stubborn too.",
+        242: "Once I tried to/go into the river...|and suddenly I got/a big shock! What was it?",
+        243: "Heh heh... I got caught.|But it's a drag that/everyone is fighting.",
+        244: "The generator works,/but inside the wall/around the country|machines won't run.../Must be the Evil Pig...",
+        245: "I want to make peace/with everyone...|but things are still/a little tense.",
+        246: "Going to Karakuri Village/from the old pond?/Good luck!",
+        247: "Big brother, you'll beat/the Evil Pig who cursed/this land, right?",
+    },
+    17: {
+        213: "Huh? What do you want?|I may not look it, but/I'm a first-class smith.|If you need something iron,/come by anytime.",
+        214: "An iron gear?|Ha ha! I can make that/in no time...|...if I had iron./Bring me the material/and I'll make it at once.",
+        215: "Good material!/Wait a moment...",
+        216: "Here! That's how I work./Take it.",
+        217: "But what do you need/an iron gear for?",
+        218: "They say you fixed/the stone tower.|Fixing things is/good... Thanks.",
+        255: "Gantetsu? That grumpy/old doctor?|He went home: the middle/house, you get there by/the elevator.",
+        257: "Hmm, a new face... That's/the Iron Castle over there./If you've no business, go.|Me? I'm Gantetsu.|If you're useful to this/land, I'll lend a hand.",
+        258: "Who'd have thought a/kid would fix the tower.|Sorry about what I said./And one more thing...",
+        259: "The tower you fixed...|to make it really work/you must start the/castle's generator.|But there's a problem./Go to the Iron Castle/and see for yourself.",
+        262: "To make a bomb, this/machine needs a little/electricity.|An Electric eel from the/jungle will do.|And Black water, the base/of the bomb. Bring me/both. I'm counting on you!",
+        263: "Wait! You're going to/grab the eel by hand?|So impatient!/Here, take this.",
+        264: "Wow! You've got both./Give me the material.",
+        265: "Good! Now I can make/the bomb mixture.|While I make it, can/you bring me a coconut?/There are some in the jungle.|Fill the shell with/the mixture and done!",
+        266: "At last!/Give me the coconut.",
+        267: "Put the mixture in/the shell... Done!",
+        268: "Want more bombs?|Bring me coconuts and/I'll make as many as you like.",
+        270: "Want to go up?/Then go into this house.",
+        271: "Welcome. This is the/village of the Iron/men.",
+        272: "Hard and long-lasting.../Iron is the best!",
+        273: "I wonder... why is/everyone fighting?/I don't like it at all.",
+        274: "Everyone with wood and/stone, how soft!|A man is made of iron!/What else?",
+        275: "Go straight down from me/and you reach the exit./It's hard to see from here, huh?",
+        276: "The elevator used to run/on the machine, without/a crank...",
+        277: "Take the elevator and/follow the middle path:/the castle is there.",
+        278: "That old Gantetsu!/Why won't he let me go/to the Iron Castle?",
+        279: "This land was cursed/by the Evil Pig too.../and we can't do a thing.",
+        280: "Looking for something? For/iron things, go to the/elevator house.",
+        281: "You fixed the tower?/That's amazing!|With the land as it is,/it's incredible.",
+        282: "The stone tower was fixed/with an iron gear?|Huh? It doesn't move?/Oh well...",
+        283: "The Iron Castle's/door?|Ha ha ha! Nobody can/break that one.",
+        284: "Can you swim well, kid?|I sink like/a stone.",
+        285: "I want to say it/proudly too...|This is the City/of civilization!",
+        286: "Y-you fixed the/generator too?/Y-you're amazing!",
+        287: "Wood, stone and iron.../what matters is/balance.",
+        288: "Going to see the/10,000-Year-Old Man?/Do you have a raft?",
+        289: "Wow, you're amazing.../Sorry I made fun of you./Come play again.",
+    },
+}
+
+LANGS = "BFGIHSPWD"     # language letter of the WFM files by --lang N (tools/title_layout.py LANG_N)
+
+
+def lang_lines(letter):
+    """(LINES, AREA_LINES) for a language: Spanish for S, English for every other one."""
+    if letter == "S":
+        return LINES, AREA_LINES
+    return [(d, LINES_EN[d]) for d, _ in LINES], AREA_LINES_EN
+
 
 def dialogue(text):
     """One WFM dialogue: a box sized for its tallest page (13 px per line, 8 px per character), pages joined by
@@ -123,18 +219,20 @@ def dialogue(text):
     return "{BOX %d %d}{VOICE 6 0}{MOVE 0 0}%s{WAIT}{CLEAR}" % (w, 16 + 13 * n, body)
 
 
-def build_area_wfm(data, area, out_wfm):
-    """AREA16 / AREA17: every line of AREA_LINES into that area's bank, as a side file for --civ-wfm (no disc file is
-    rebuilt for them)."""
-    wfm = "AREA%d/MFNT%d0S.WFM" % (area, area)
+def build_area_wfm(data, area, out_wfm, lang="S"):
+    """AREA16 / AREA17: every line of AREA_LINES into that area's bank (of language letter lang), as a side file for
+    --civ-wfm (no disc file is rebuilt for them)."""
+    wfm = "AREA%d/MFNT%d0%s.WFM" % (area, area, lang)
+    lines = lang_lines(lang)[1][area]
     p = TC.Project(TC.Source(data))
-    for n, t in AREA_LINES[area].items():
+    p.langs = {lang}
+    for n, t in lines.items():
         p.edits.setdefault(wfm, {})[n] = dialogue(t)
     f, errors = p.encode_edited()
     if errors:
         raise SystemExit("\n".join(errors[:10]))
     open(out_wfm, "wb").write(f[wfm])
-    print("%s: %d lines, %d bytes (port: --civ-wfm %s)" % (out_wfm, len(AREA_LINES[area]), len(f[wfm]),
+    print("%s: %d lines, %d bytes (port: --civ-wfm %s)" % (out_wfm, len(lines), len(f[wfm]),
                                                           os.path.dirname(out_wfm)))
 
 
@@ -180,17 +278,29 @@ def build(data, out, lang=5, cap=None):
                                                             WFM, len(files[WFM]), limit))
 
 
-def build_wfm(data, out_wfm):
-    """All lines, no cap: the whole MFNT110S bank as a side file for the port's --civ-wfm (read straight into memory,
-    not through the disc sectors)."""
+def build_wfm(data, out_wfm, lang="S"):
+    """All lines, no cap: the whole MFNT110<lang> bank as a side file for the port's --civ-wfm (read straight into
+    memory, not through the disc sectors)."""
+    wfm = WFM.replace("S.WFM", lang + ".WFM")
+    lines = lang_lines(lang)[0]
     p = TC.Project(TC.Source(data))
-    for d, t in LINES:
-        p.edits.setdefault(WFM, {})[BASE_K4 + d] = "{BOX 256 42}{VOICE 6 0}{MOVE 0 0}" + t + "{WAIT}{CLEAR}"
+    p.langs = {lang}
+    for d, t in lines:
+        p.edits.setdefault(wfm, {})[BASE_K4 + d] = "{BOX 256 42}{VOICE 6 0}{MOVE 0 0}" + t + "{WAIT}{CLEAR}"
     f, errors = p.encode_edited()
     if errors:
         raise SystemExit("\n".join(errors[:10]))
-    open(out_wfm, "wb").write(f[WFM])
-    print("%s: all %d lines, %d bytes (port: --civ-wfm %s)" % (out_wfm, len(LINES), len(f[WFM]), out_wfm))
+    open(out_wfm, "wb").write(f[wfm])
+    print("%s: all %d lines, %d bytes (port: --civ-wfm %s)" % (out_wfm, len(lines), len(f[wfm]), out_wfm))
+
+
+def build_all_wfm(data, out_dir):
+    """Every language's side files: OUT/civ_MFNTnn0<letter>.WFM for AREA11/16/17 and each letter of LANGS (Spanish for
+    S, English for the rest)."""
+    for L in LANGS:
+        build_wfm(data, os.path.join(out_dir, "civ_MFNT110%s.WFM" % L), L)
+        for area in (16, 17):
+            build_area_wfm(data, area, os.path.join(out_dir, "civ_MFNT%d0%s.WFM" % (area, L)), L)
 
 
 def main():
@@ -200,9 +310,7 @@ def main():
     ap.add_argument("--cap", type=int, default=26540, help="byte limit for the rebuilt WFM (default 26540: checked in the port; a 26600-byte build with 7 lines showed garbage glyphs, so the 13-sector limit of 26624 is not the real one)")
     a = ap.parse_args()
     build(a.data, a.out, cap=a.cap)
-    build_wfm(a.data, os.path.join(a.out, "civ_MFNT110S.WFM"))
-    for area in (16, 17):
-        build_area_wfm(a.data, area, os.path.join(a.out, "civ_MFNT%d0S.WFM" % area))
+    build_all_wfm(a.data, a.out)
 
 
 if __name__ == "__main__":

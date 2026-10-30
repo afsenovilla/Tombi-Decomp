@@ -679,7 +679,7 @@ port-only and opt-in; the console build is unchanged (rules in `port/fixes.txt`,
 
 ```
 python3 tools/civ_rebuild.py --out OUT/maps [--refdir IMAGES] [--community-cluts CLUTGEN]   # pictures, cells, rooms
-python3 tools/civ_test_data.py OUT/civdata              # civ_MFNT110S/160S/170S.WFM (Spanish glosses of the JP lines)
+python3 tools/civ_test_data.py OUT/civdata              # civ_MFNT110?/160?/170?.WFM, one per language letter
 OUT/bp/tombi2 --lang 5 --civ-town 17 --civ-maps OUT/maps --civ-wfm OUT/civdata [--civ-collision]
 OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata      # through the hub, in normal play
 ```
@@ -697,8 +697,10 @@ OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata    
 - `--civ-collision` swaps in the debug pictures `map8F_cells.tim` / `map8F_in_cells.tim`: the cell map tinted over
   the picture (red solid 9, orange diagonal 1-4, magenta one-sided wall 5-8, cyan trigger, every cell outlined), so
   the fit can be checked while walking.
-- `--civ-wfm DIR` gives each town its translated bank (`civ_MFNT110S.WFM`, `civ_MFNT160S.WFM`, `civ_MFNT170S.WFM`);
-  a file instead of a folder still works for AREA11.
+- `--civ-wfm DIR` gives each town its translated bank for the current `--lang`: `civ_MFNTnn0<L>.WFM` with L =
+  `BFGIHSPWD` for `--lang 0..8` (falls back to B, then S). The texts are translated from the JP lines: Spanish (S) and
+  English (B); the other PAL languages get the English text in their file names (fallback, no translation yet). The
+  launcher builds every language into civ_cache/wfm. A file instead of a folder still works for AREA11.
 - `--civ-route` (opt-in): the hub AREA18 s1 sends exits 0/1/2 to 11:0, 17:0 and 16:0 instead of 11:1, 17:1 and 16:4,
   and Stonetown's top exit (to the cut 16:1) continues to 16:4. The towns' own exits already lead on to 11:1 / 17:1
   and back to 18:1. Checked: walking right from the hub enters the rebuilt Stonetown. Needs `--civ-maps`.
@@ -734,7 +736,7 @@ These are our reading of the reconstructed pictures, not original data.
 
 **Checked headless** (screenshots, frames dumped with `--dump-frames`): in each town, walking with the overlay on and
 off, entering a house (AREA17 H5, AREA16 H1, AREA11 H3: the room view and its occupant appear) and a dialogue
-(AREA17 resident 6 "¿Quieres subir?", AREA16 resident 7 "¿Entro o no entro...?", AREA11 resident 9).
+(AREA17 resident 6 "¿Quieres subir?"; in English, `--lang 0 --civ-town 17 --civ-spawn 300,462 --pad-script 1600:left:300,1600:square:2x60/6` shows "Welcome. This is the village of the Iron men." at frame 1700, AREA16 resident 7 "¿Entro o no entro...?", AREA11 resident 9).
 
 ## Validation (tools/topdown.py)
 

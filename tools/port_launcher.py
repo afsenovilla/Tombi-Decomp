@@ -197,7 +197,7 @@ CIV_SOURCES = ("civ_rebuild.py", "civ_rebuild_layout.json", "civ_test_data.py", 
 
 def civ_stamp():
     """What the cache was built from: the generator sources (bundled layout + build id when frozen) and data/'s MAIN0."""
-    h = hashlib.sha1()
+    h = hashlib.sha1(b"civ-cache 2")   # 2: one WFM bank per language (civ_MFNTnn0<letter>.WFM)
     here = getattr(sys, "_MEIPASS", None) or os.path.dirname(os.path.abspath(__file__))
     for n in CIV_SOURCES:
         p = os.path.join(here, n)
@@ -215,7 +215,7 @@ def civ_ready():
     except OSError:
         return False
     need = [os.path.join(d, "maps", "AREA%d" % a, f) for a in (11, 16, 17) for f in ("map8F.tim", "map8E.bin", "map8F_in.tim")]
-    need += [os.path.join(d, "wfm", "civ_MFNT%d0S.WFM" % a) for a in (11, 16, 17)]
+    need += [os.path.join(d, "wfm", "civ_MFNT%d0%s.WFM" % (a, L)) for a in (11, 16, 17) for L in "BFGIHSPWD"]
     return ok and all(os.path.isfile(p) for p in need)
 
 
@@ -249,9 +249,7 @@ def civ_generate(log):
             os.remove(os.path.join(d, "stamp.txt"))
         except OSError:
             pass
-        civ_test_data.build_wfm(data, os.path.join(wfm, "civ_MFNT110S.WFM"))
-        for a in (16, 17):
-            civ_test_data.build_area_wfm(data, a, os.path.join(wfm, "civ_MFNT%d0S.WFM" % a))
+        civ_test_data.build_all_wfm(data, wfm)     # one bank per language letter (Spanish S, English elsewhere)
         layout = json.load(open(civ_rebuild.LAYOUT, encoding="utf-8"))
         for a in (17, 11, 16):
             civ_rebuild.build(a, layout, {}, maps)

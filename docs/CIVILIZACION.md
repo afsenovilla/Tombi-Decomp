@@ -709,7 +709,7 @@ vecinos y de diálogo). Todo es sólo de la versión para PC y opcional; la vers
 
 ```
 python3 tools/civ_rebuild.py --out OUT/maps [--refdir IMAGENES] [--community-cluts CLUTGEN]   # dibujos, celdas, salas
-python3 tools/civ_test_data.py OUT/civdata              # civ_MFNT110S/160S/170S.WFM (frases del JP en castellano)
+python3 tools/civ_test_data.py OUT/civdata              # civ_MFNT110?/160?/170?.WFM, uno por letra de idioma
 OUT/bp/tombi2 --lang 5 --civ-town 17 --civ-maps OUT/maps --civ-wfm OUT/civdata [--civ-collision]
 OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata      # por el cruce, jugando normal
 ```
@@ -723,8 +723,10 @@ OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata    
 - `--civ-collision` pone en su lugar los dibujos de depuración `map8F_cells.tim` / `map8F_in_cells.tim`: el mapa de
   celdas teñido sobre el dibujo (rojo macizo 9, naranja diagonal 1-4, magenta muro de un lado 5-8, cian disparador,
   cada celda con su borde), para comprobar el encaje mientras se camina.
-- `--civ-wfm DIR` da a cada pueblo su banco traducido (`civ_MFNT110S.WFM`, `civ_MFNT160S.WFM`, `civ_MFNT170S.WFM`);
-  un archivo en vez de una carpeta sigue valiendo para AREA11.
+- `--civ-wfm DIR` da a cada pueblo su banco traducido para el `--lang` actual: `civ_MFNTnn0<L>.WFM` con L =
+  `BFGIHSPWD` para `--lang 0..8` (si falta, B y luego S). Los textos se traducen del JP: castellano (S) e inglés (B);
+  los demás idiomas PAL llevan el texto inglés con su nombre de fichero (sin traducción propia aún). El lanzador genera
+  todos en civ_cache/wfm. Un fichero en vez de carpeta sigue valiendo para AREA11.
 - `--civ-route` (opcional): el cruce AREA18 s1 manda sus salidas 0/1/2 a 11:0, 17:0 y 16:0 en vez de 11:1, 17:1 y
   16:4, y la salida de arriba de la Ciudad de piedra (hacia la 16:1 recortada) sigue hasta la 16:4. Las salidas de
   los pueblos ya llevan a 11:1 / 17:1 y de vuelta a 18:1. Comprobado: andando a la derecha desde el cruce se entra en
