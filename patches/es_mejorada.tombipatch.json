@@ -178,6 +178,22 @@
      304,
      496
     ]
+   },
+   "itemNames": {
+    "Mata hierbajos": "Herbicida",
+    "Tubería": "Válvula"
+   }
+  },
+  "SYSTEM/D5SPSUB.BIN": {
+   "itemNames": {
+    "Mata hierbajos": "Herbicida",
+    "Tubería": "Válvula"
+   }
+  },
+  "SYSTEM/D5SPSUB3.BIN": {
+   "itemNames": {
+    "Mata hierbajos": "Herbicida",
+    "Tubería": "Válvula"
    }
   }
  },

@@ -532,15 +532,20 @@ class Project:
     def _menu_patches(self, files, errors):
         """Title screen / options menu texts (not WFM: glyph strings in SYSTEM/OnPTSUB0.BIN, tools/menu_text.py) and the
         memory card screen's (SYSTEM/DnSPSUB2.BIN, tools/memcard_text.py)."""
+        import subscreen_text as SS
         for path, spec in sorted(self.menus.items()):
-            mod = MC if re.search(r"D\dSPSUB2\.BIN$", path, re.I) else MT
+            mod = MC if re.search(r"D\dSPSUB2\.BIN$", path, re.I) else SS if re.search(r"D\dSPSUB3?\.BIN$", path, re.I) else MT
+            spec = dict(spec)
+            names = spec.pop("itemNames", None)
             try:
                 data = files[path] if path in files else self.src.read_any(path)
-                new = mod.apply(data, spec)
+                new = data if mod is SS else mod.apply(data, spec)
+                if names:
+                    new = SS.apply_names(new, names)
             except (OSError, KeyError):
                 errors.append(tr("tc.nofilein", path))
                 continue
-            except (MT.MenuError, MC.MemcardError) as ex:
+            except (MT.MenuError, MC.MemcardError, SS.SubscreenError) as ex:
                 errors.append("%s: %s" % (path, ex))
                 continue
             if new != data:
