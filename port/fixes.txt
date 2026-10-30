@@ -133,6 +133,8 @@ src/loopTitleScreen.c | D_8007DE98[TASK_C->b69] | (TASK_C->b69 == 3 ? port_title
 src/loopTitleScreen.c | TASK_C->b69 < 2) | TASK_C->b69 < 2 + (port_title_debug && port_title_angle3))
 src/loopTitleScreen.c | switch (TASK_C->b69) { | switch (TASK_C->b69 == 3 ? 0 : TASK_C->b69) {
 src/loopTitleScreen.c | TASK_C->b68 = 0; | if (TASK_C->b69 == 3) { DAT_1f8001b4 = 1; port_title_debug_go(); } TASK_C->b68 = 0;
+# debug area select: place names (English, or Spanish with --lang 5) under the numbers; runtime/main.c port_debug_select_names
+src/displayDebugScreen.c | sprintf(&SPRINTF_BUFFER_MSG, "*"); | { extern void port_debug_select_names(int, int); port_debug_select_names(GAME.selectedArea, GAME.selectedSection); } sprintf(&SPRINTF_BUFFER_MSG, "*");
 # drawPauseMenu: its entry lists and glyph UV table (MAIN0 0x80080300..0x800803fc) changed size in MAINn (lang.c finds them through the code)
 src/drawPauseMenu.c | extern XY D_80080404[]; | extern XY D_80080404[]; extern void *port_lang_item(void *);
 src/drawPauseMenu.c | e = D_8008037c; | e = (ENT *)port_lang_item(D_8008037c);

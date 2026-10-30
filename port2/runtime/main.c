@@ -427,6 +427,89 @@ void port_title_debug_go(void) {
     if (port_civ_maps_dir) port_civ_test = 1;
     port_printf("[port] --title-debug: DEBUG chosen, the area select opens%s\n", port_civ_maps_dir ? " (rebuilt towns on: AREA11/16/17 section 0)" : "");
 }
+/* debug area select (src/displayDebugScreen.c, port/fixes.txt): place names under the AREA / SECTION numbers.
+   Built-in table from include/tomba/game.h's AREAnn_SECTIONnn names and tools/port_mods.py AREA_NAMES, English or
+   (--lang 5) Spanish; ASCII only (the debug font has no accents). Unknown rooms read "Section N" / "Seccion N". */
+static const char *const port_dbg_area[2][20] = {
+ { "Village of All Beginnings", "Forest of 100 Flowers", "Dwarf Village", "Phoenix Mountain", "Haunted Mansion",
+   "Baccus Village", "Mermaid Singing Rock", "Forest of 100 Flowers 2", "Baccus Lake", "Mushroom Forest",
+   "Masakari Jungle", "Lumberjack Town/Factory", "Haunted Mansion (pure)", "Pig Island", "Evil Pigs", "(unused)",
+   "Stonetown/Clock Tower", "Iron Town/Iron Castle", "Civilization Village", "Civilization (pure)" },
+ { "Aldea del Principio", "Bosque de 100 Flores", "Aldea de los Enanos", "Montana Fenix", "Mansion Encantada",
+   "Ciudad Baco", "Roca de la Sirena", "Bosque de 100 Flores 2", "Lago Baco", "Bosque de Setas",
+   "Jungla Masakari", "Lenadores/Fabrica", "Mansion (purificada)", "Isla de los Cerdos", "Cerdos Malvados", "(sin uso)",
+   "Ciudad de Piedra/Reloj", "Ciudad de Hierro/Castillo", "Aldea Civilizacion", "Civilizacion (purif.)" } };
+static const char *const port_dbg_sec[2][20][20] = { {
+ { "Village", "Forest of All Beginnings", "Forest: hut entrance", "100 Year Old Man's Hut", "Behind the Hut", "Ol' Pond" },
+ { "Forest of 100 Flowers", "Forest: right entrance", "Wobbly Wharf", "Watch Tower", "Charity Square" },
+ { "Dwarf Village", "Dwarf Elder's Hut", "Underground Prison", "Underground Maze", "Million Year Old Man", "Small Strange Room" },
+ { "Stormy Mountain", "Stormy Mountain 2", "Lava Caves", "Phoenix Nest", "Stormy Mtn (purified)", "Stormy Mtn 2 (purified)" },
+ { "North side of Mansion", "West side of Mansion", "South side of Mansion", "East side of Mansion", "Sunny Room",
+   "Thief's Room 1", "Swimming Room", "Keyhole Room", "Hiding Room", "Room of Tribulation", "Laughing Room",
+   "Civilization Room", "Trap Room", "Trick Room", "Sun Torch Stand", "1000 Year Old Man", "Shadow Room",
+   "Thief's Room 2", "Thief's Room 3", "Crying Room" },
+ { "Baccus Village", "Central Park", "Baccus Village 2", "Central Park 2" },
+ { "Beach", "Mermaid" },
+ { "Forest of 100 Flowers", "Forest: right entrance", "Wobbly Wharf", "Watch Tower", "Charity Square" },
+ { "Baccus Lake", "Baccus Pier", "Baccus Lake 2", "Baccus Pier 2" },
+ { "Mushroom Forest", "Lake", "Mansion: clock room", "Mansion: chandelier", "Mansion: stairs down", "Mansion: stairs up", "Leaf Slider" },
+ { "Masakari Jungle", "Masakari River", "Old Tree Hill", "Trick Village", "Jungle (purified)", "River (purified)",
+   "Old Tree Hill (purified)", "Trick Village (purified)", "10000 Year Old Man" },
+ { "Lumberjack Town", "Lumberjack Factory", "Dried Wishing Well" },
+ { "North side of Mansion", "West side of Mansion", "South side of Mansion", "East side of Mansion", "Sunny Room",
+   "Thief's Room 1", "Swimming Room", "Keyhole Room", "Hiding Room", "Room of Tribulation", "Laughing Room",
+   "Civilization Room", "Trap Room", "Trick Room", "Sun Torch Stand", "1000 Year Old Man", "Shadow Room",
+   "Thief's Room 2", "Thief's Room 3", "Crying Room" },
+ { "Pig Island", "Pig Island Cave", "Pig Island Cave end" },
+ { "Evil Pig area 1", "Evil Pig area 2", "Evil Pig area 3", "Evil Pig area 4", "Evil Pig area 5", "Evil Pig area 6", "Evil Pig area 7", "Evil Pig area 8" },
+ { 0 },
+ { "Stonetown", "Clock Tower (softlock)", "Clock Tower (crash)", "Clock Tower engines", "Clock Tower entrance", "Clock Tower halfway", "Engines (no exit)" },
+ { "Iron Town", "Iron Castle entrance", "Iron Castle main room", "Iron Castle left room", "Iron Castle right room",
+   "Iron Castle engine room", "Iron Castle (softlock)", "Iron Castle (softlock)", "Iron Castle (softlock)",
+   "Iron Castle (crash)", "Iron Castle (softlock)", "Iron Castle (softlock)" },
+ { "Civilization Village", "Y Crossing", "Witch's Hut" },
+ { "Dwarf Elder's Hut", "Dwarf Elder's Hut 2", "Hidden Village" } }, {
+ { "Aldea", "Bosque del Principio", "Bosque: entrada cabana", "Cabana del Anciano", "Detras de la cabana", "Estanque" },
+ { "Bosque de 100 Flores", "Bosque: entrada dcha.", "Muelle tambaleante", "Torre vigia", "Plaza de la Caridad" },
+ { "Aldea de los Enanos", "Cabana del jefe enano", "Prision subterranea", "Laberinto subterraneo", "Anciano millonario", "Cuarto extrano" },
+ { "Montana tormentosa", "Montana tormentosa 2", "Cuevas de lava", "Nido del Fenix", "Montana (purificada)", "Montana 2 (purificada)" },
+ { "Mansion: lado norte", "Mansion: lado oeste", "Mansion: lado sur", "Mansion: lado este", "Sala soleada",
+   "Sala del ladron 1", "Sala de la piscina", "Sala de la cerradura", "Sala escondite", "Sala de la tribulacion", "Sala de la risa",
+   "Sala de la civilizacion", "Sala trampa", "Sala del truco", "Pedestal antorcha solar", "Anciano milenario", "Sala de las sombras",
+   "Sala del ladron 2", "Sala del ladron 3", "Sala del llanto" },
+ { "Ciudad Baco", "Parque central", "Ciudad Baco 2", "Parque central 2" },
+ { "Playa", "Sirena" },
+ { "Bosque de 100 Flores", "Bosque: entrada dcha.", "Muelle tambaleante", "Torre vigia", "Plaza de la Caridad" },
+ { "Lago Baco", "Embarcadero Baco", "Lago Baco 2", "Embarcadero Baco 2" },
+ { "Bosque de Setas", "Lago", "Mansion: sala del reloj", "Mansion: sala lampara", "Mansion: escalera baja", "Mansion: escalera sube", "Tobogan de hojas" },
+ { "Jungla Masakari", "Rio Masakari", "Colina del Arbol Viejo", "Aldea del Truco", "Jungla (purificada)", "Rio (purificado)",
+   "Colina (purificada)", "Aldea Truco (purif.)", "Anciano de 10000 anos" },
+ { "Pueblo de lenadores", "Fabrica de lenadores", "Pozo seco" },
+ { "Mansion: lado norte", "Mansion: lado oeste", "Mansion: lado sur", "Mansion: lado este", "Sala soleada",
+   "Sala del ladron 1", "Sala de la piscina", "Sala de la cerradura", "Sala escondite", "Sala de la tribulacion", "Sala de la risa",
+   "Sala de la civilizacion", "Sala trampa", "Sala del truco", "Pedestal antorcha solar", "Anciano milenario", "Sala de las sombras",
+   "Sala del ladron 2", "Sala del ladron 3", "Sala del llanto" },
+ { "Isla de los Cerdos", "Cueva de la isla", "Fondo de la cueva" },
+ { "Cerdo Malvado 1", "Cerdo Malvado 2", "Cerdo Malvado 3", "Cerdo Malvado 4", "Cerdo Malvado 5", "Cerdo Malvado 6", "Cerdo Malvado 7", "Cerdo Malvado 8" },
+ { 0 },
+ { "Ciudad de Piedra", "Torre reloj (bloqueo)", "Torre reloj (cuelgue)", "Torre reloj: motores", "Torre reloj: entrada", "Torre reloj: mitad", "Motores (sin salida)" },
+ { "Ciudad de Hierro", "Castillo: entrada", "Castillo: sala central", "Castillo: sala izq.", "Castillo: sala dcha.",
+   "Castillo: motores", "Castillo (bloqueo)", "Castillo (bloqueo)", "Castillo (bloqueo)",
+   "Castillo (cuelgue)", "Castillo (bloqueo)", "Castillo (bloqueo)" },
+ { "Aldea Civilizacion", "Cruce en Y", "Cabana de la bruja" },
+ { "Cabana del jefe enano", "Cabana del jefe enano 2", "Aldea oculta" } } };
+void port_debug_select_names(int area, int sec) {
+    extern void fontDebugPrintf(short, short, short, char *);
+    static char b[2][48];
+    int es = port_lang == 5;
+    const char *a = (area >= 0 && area < 20) ? port_dbg_area[es][area] : 0;
+    const char *s = (area >= 0 && area < 20 && sec >= 0 && sec < 20) ? port_dbg_sec[es][area][sec] : 0;
+    snprintf(b[0], sizeof b[0], "%s", a ? a : es ? "Area ?" : "Area ?");
+    if (s) snprintf(b[1], sizeof b[1], "%s%s", s, sec == 0 && port_civ_maps_dir && (area == 11 || area == 16 || area == 17) ? " [port]" : "");
+    else snprintf(b[1], sizeof b[1], es ? "Seccion %d" : "Section %d", sec);
+    fontDebugPrintf(32, 120, 0, b[0]);
+    fontDebugPrintf(32, 128, 0, b[1]);
+}
 static int port_civ_map_w, port_civ_map_h;   /* rebuilt picture size in px (0: the stand-in AREA08 one) */
 #define PORT_CIV_PAD_PRE (64 * 1024)
 #define PORT_CIV_PAD_POST (1024 * 1024)
