@@ -354,8 +354,7 @@ Los generadores ajustan tres variables de avance:
   - habitación 1: dos aldeanos.
   - habitación 2: un aldeano.
   - habitación 3: un aldeano (subtipo 4, `dlg 11`). `dlg 11` no tiene caso de conversación, así que `OpenDialogue`
-    devuelve 0 y por este camino no dice nada. Probablemente es el constructor de balsas de k3 dx10-14, al que no
-    llega ninguna llamada de I0NFO2.
+    devuelve 0 y por este camino no dice nada. Es el adivino verde (k3 dx16..19, ver «La adivina/adivino de la casa H3»).
   - en la calle: ocho aldeanos, seis de ellos patrullando (dos en vertical, tres en horizontal, uno en diagonal).
 - **Objetos**: 14. Tres objetos de tipo 2 están en las habitaciones 1..3, en los rectángulos de las casas. Los otros
   11 son objetos de la calle con animaciones 3..15.
@@ -387,6 +386,22 @@ Los generadores ajustan tres variables de avance:
   vecino 4 («en esta choza vive una adivina»). Sus guiones (fotogramas 204..240) tienen exactamente la estructura y los
   tiempos de los 10..46 del adivino de los túneles (f = f_final + 194): es el Adivino Verde, no el constructor de
   balsas. Su `dlg 11` no tiene caso en PAL y nada inicia el evento 89.
+- **Sus frases sobreviven, su código no.** Banco de AREA11 k3 dx16..19 = PAL MFNT110 #243-#246 (traducidas en todos
+  los idiomas PAL; JP A002 bloque 0 #226-#229): «soy uno de los adivinos que dicen el nivel de experiencia» / «sólo
+  hablo con quien tenga 300.000 PA» / «parece que tienes bastante... veamos» / la pista de colores (JP: azul marino =
+  la puerta de la playa, naranja = la mansión del lago, amarillo = el guardián del tiempo; PAL cambió los colores).
+  Ningún código de ningún disco llega a ellas: el `topdownA11ActorOpenDialogue` japonés (JP AREA11/INFO2.BIN 0x9508)
+  es el de PAL (`sltiu dlg, 11`, casos 0..10, mismas frases), y las únicas llamadas (3, 0x10..0x13) del disco JP están
+  en X18 (el banco propio de AREA18). La pista JP del evento 89 es 緑の占い師の話をきく «escuchar al adivino verde».
+- **Bloqueo (corregido, sólo port).** Sin caso, `OpenDialogue` devuelve 0 y los `TalkStep` de A11/16/17 (a diferencia
+  de `topdownActorTalkStep` / A19) no devuelven el control a Tomba: hablarle congelaba el juego. Con `--civ-test` esa
+  rama suelta al jugador como A19, para cualquier vecino cuyo dlg no tenga caso (AREA11 dlg 11, AREA17 dlg 4).
+- **Su conversación (reconstruida, sólo port, `port_civ_teller_talk` / `port_civ_teller_next` en
+  port2/runtime/main.c).** Las frases son originales; el orden y el evento son nuestra reconstrucción a partir de ellas
+  y de la pista del evento 89: dx16, luego con PA < 300.000 dx17 y se inicia el evento 89 (el estado 2 del propio
+  TalkStep, título «El adivino verde»), con PA >= 300.000 dx18, dx19 y el evento 89 se completa. Comprobado sin
+  ventana (`--civ-town 11 --civ-spawn 418,500`, arriba, Cuadrado) en `--lang 5` y `0`, con y sin
+  `--poke 1550:8009C96C:493E0:4`: los cuadros salen, se cierran y Tomba sigue andando.
 - **Port (`--civ-town 11`, sólo port, `port_civ_teller`).** Copia esa página a (64, 256), las filas 21 / 37 a
   (0, 510) / (0, 511) y rehace su tabla con las piezas reales de D305; la sustitución por el aldeano de AREA08 ya no
   toca el subtipo 4.
@@ -626,7 +641,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 | 9 | (62, 294) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla horizontal: «¿Un engranaje? De madera se rompería» → «Tengo sed, iré a por un coco» → «El Pueblo Karakuri se hundió» |
 | 10 | (280, 236) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla vertical: «Al taller se entra por arriba; ve a echar un vistazo» |
 | 11 | (496, 344) | calle | «Male Lumberjack Town Resident» (vecino de Lumberjack Town) — Vecino: «Este cartel es viejo y peligroso» → «Siempre tan lleno de energía» |
-| 12 | (432, 448) | C3 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 3, sentado: probablemente el constructor de balsas («¿Quieres una balsa? Tráeme madera del Árbol Sabio»); el código no le da diálogo |
+| 12 | (432, 448) | C3 | El adivino verde (subtipo 4) — Casa 3, sentado: «sólo hablo con quien tenga 300.000 PA» (k3 dx16..19; el código no le da diálogo, el port lo reconstruye) |
 
 - **Salidas** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinos MAIN0 0x80079A48): Ciudad de civilización (AREA18); Fábrica (AREA11 s1).
 - **Objetos**: 14 (I0NFO2 0x800FFE24); el código no dice qué es cada uno.

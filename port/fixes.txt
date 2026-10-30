@@ -438,6 +438,16 @@ src/i0nfo2/topdownA11ActorTalkStep.c | D_800A60E4[0] = 3; | D_800A60E4[0] = 3; {
 # no placed resident reaches: dx 8, 9, 12..15, 17) can be shown through one reachable resident.
 src/i0nfo2/topdownA11ActorOpenDialogue.c | func_8002DCC8(4, | port_civ_msg(4,
 src/i0nfo2/topdownA11ActorOpenDialogue.c | extern int func_8002DCC8(int a, int b, Pos6 *p); | extern int func_8002DCC8(int a, int b, Pos6 *p); extern int port_civ_line; static int port_civ_msg(int k, int dx, Pos6 *p) { return func_8002DCC8(k, port_civ_line >= 0 ? port_civ_line : dx, p); }
+# Talking to a cut-town resident whose dlg has no case (AREA11 dlg 11, the Green Fortune Teller; AREA17 dlg 4) left
+# Tomba frozen: OpenDialogue returns 0 and the A11/16/17 TalkSteps, unlike topdownActorTalkStep / A19, do not give the
+# player back. With --civ-test the r == 0 branch releases him as topdownA19ActorTalkStep does.
+src/i0nfo2/topdownA11ActorTalkStep.c | o->b04 = 1; | o->b04 = 1; { extern int port_civ_test; if (port_civ_test) { D_8009C942[0] = 0; D_800A60E4[0] = 0; PLAYER_STATE[0] = 1; PLAYER_SUBSTATE[0] = 0; PLAYER_STEP[0] = 0; o->b68 = 0; o->animFrame = o->wb0; } }
+src/i0nfo2/topdownA16ActorTalkStep.c | o->b04 = 1; | o->b04 = 1; { extern int port_civ_test; if (port_civ_test) { D_8009C942[0] = 0; D_800A60E4[0] = 0; PLAYER_STATE[0] = 1; PLAYER_SUBSTATE[0] = 0; PLAYER_STEP[0] = 0; o->b68 = 0; } }
+src/i0nfo2/topdownA17ActorTalkStep.c | o->b04 = 1; | o->b04 = 1; { extern int port_civ_test; if (port_civ_test) { D_8009C942[0] = 0; D_800A60E4[0] = 0; PLAYER_STATE[0] = 1; PLAYER_SUBSTATE[0] = 0; PLAYER_STEP[0] = 0; o->b68 = 0; o->animFrame = o->wb0; } }
+# --civ-test: AREA11 dlg 11 (resident 12 of H3, the Green Fortune Teller) gets the reconstructed talk of
+# port_civ_teller_talk (port2/runtime/main.c): his surviving lines k3 dx16..19 chained box after box, then event 89.
+src/i0nfo2/topdownA11ActorOpenDialogue.c | return r; | { extern int port_civ_test; extern short port_civ_teller_talk(void *, void *); if (port_civ_test && U16(o, 0xBA) == 11) r = port_civ_teller_talk(o, &p); } return r;
+src/i0nfo2/topdownA11ActorTalkStep.c | p->b04 = 3; | p->b04 = 3; { extern int port_civ_test, port_civ_teller_next(void *); int nx = port_civ_test ? port_civ_teller_next(o) : 0; if (nx == 2) { o->wac = 89; o->state = 2; } if (nx) break; }
 # --civ-maps DIR: the town's rebuilt picture / cell map (tools/civ_rebuild.py: DIR/AREAnn/map8F.tim, map8E.bin) replace
 # the stand-in AREA08 ones (APD_DATA[15] / [14]) just before the engine reads them. AREA17 s0 (Iron Town) also runs
 # (port_civ_on): its residents wear the AREA08 villager (TOPDOWN_A08_ACTOR_DEFS[0]), their own tables being lost.

@@ -338,7 +338,7 @@ Three progress variables are set by the spawners:
   - room 1: two villagers.
   - room 2: one villager.
   - room 3: one villager (subtype 4, `dlg 11`). `dlg 11` has no talk case, so `OpenDialogue` returns 0 and he says
-    nothing through this path. He is probably the raft craftsman of k3 dx10-14, which no I0NFO2 call reaches.
+    nothing through this path. He is the Green Fortune Teller (k3 dx16..19, see "The fortune-teller of house H3").
   - outdoors: eight villagers, six of them on patrols (two vertical, three horizontal, one diagonal).
 - **Props**: 14. Three type-2 props sit in rooms 1..3, at the house rectangles. The other 11 are outdoor props with
   anims 3..15.
@@ -584,7 +584,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 | 9 | (62, 294) | outdoors | Lumberjack Factory Worker — Horizontal patrol: "A gear? Made of wood it would break" → "I'm thirsty, I'll get a coconut" → "Karakuri Village sank" |
 | 10 | (280, 236) | outdoors | Lumberjack Factory Worker — Vertical patrol: "The workshop entrance is up there; go take a look" |
 | 11 | (496, 344) | outdoors | Male Lumberjack Town Resident — Neighbour: "This sign is old and dangerous" → "You're always so full of energy" |
-| 12 | (432, 448) | H3 | Lumberjack Factory Worker — House 3, sitting: probably the raft maker ("Want a raft? Bring me wood from the Wise Old Tree"); the code gives him no dialogue |
+| 12 | (432, 448) | H3 | The Green Fortune Teller (subtype 4) — House 3, sitting: "I only talk to those with 300,000 AP" (k3 dx16..19; the code gives him no dialogue, the port reconstructs it) |
 
 - **Exits** (`topdownSectionStepC`, I0NFO2 0x800E8D98; destinations MAIN0 0x80079A48): Civilization Town (AREA18); Factory (AREA11 s1).
 - **Props**: 14 (I0NFO2 0x800FFE24); the code does not say what each one is.
@@ -608,6 +608,22 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
   idle 3, walk 3x6, talk 3x3, extras 234 / 235-237 / 238-240) have exactly the layout and timings of the tunnel teller's
   frames 10..46, frame f = retail f - 194. So he is the Green Fortune Teller, not the raft maker guessed before. His
   `dlg 11` has no talk case in PAL and no code starts event 89.
+- **His lines survive, his talk code does not.** AREA11 bank k3 dx16..19 = PAL MFNT110 #243-#246 (translated in every
+  PAL language; JP A002 block 0 #226-#229): "I am one of the fortune-tellers who tell a person's experience level" /
+  "I only talk to those with 300,000 AP" / "...your experience seems enough... let's see" / the colour hint (JP: navy
+  = the beach door, orange = the lake mansion, yellow = the time keeper; PAL changed the colours). No code of any
+  disc reaches them: JP's `topdownA11ActorOpenDialogue` (JP AREA11/INFO2.BIN 0x9508) is the PAL one (`sltiu dlg, 11`,
+  cases 0..10, same lines), and the only (3, 0x10..0x13) calls on the JP disc are in X18 (AREA18's own bank). JP's
+  sub-screen hint for event 89 is 緑の占い師の話をきく "listen to the Green Fortune Teller".
+- **Softlock (fixed, port only).** With no case, `OpenDialogue` returns 0 and the A11/16/17 `TalkStep`s (unlike
+  `topdownActorTalkStep` / A19) never give Tomba back: talking to him froze the game. With `--civ-test` that branch
+  now releases the player as A19 does, for any resident whose dlg has no case (AREA11 dlg 11, AREA17 dlg 4).
+- **His talk (reconstructed, port only, `port_civ_teller_talk` / `port_civ_teller_next` in port2/runtime/main.c).**
+  The lines are original; the order and the event are our reconstruction from them and from the event-89 hint: dx16,
+  then with AP < 300,000 dx17 and event 89 started (the game's own TalkStep state 2, title "The Green Fortune
+  Teller"), with AP >= 300,000 dx18, dx19 and event 89 completed. Checked headless (`--civ-town 11 --civ-spawn
+  418,500`, up, Square) in `--lang 5` and `0`, with and without `--poke 1550:8009C96C:493E0:4`: the boxes show,
+  close, and Tomba walks on.
 - **Port (`--civ-town 11`, port only, `port_civ_teller` in port2/runtime/main.c).** Copies B300 words 64..127 to
   VRAM (64, 256) (his own w1e page), CLUT04 rows 21 / 37 to (0, 510) / (0, 511), and rebuilds his table from the
   retail parts of D305 (frames 10..46 at ids 204..240, CLUT words relinked). The A08 stand-in substitution (fixes.txt)

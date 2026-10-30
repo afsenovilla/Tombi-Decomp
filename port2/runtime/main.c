@@ -408,6 +408,39 @@ int port_civ_fig(int area, int sub) {
 /* --civ-wfm FILE: replaces AREA11's dialogue bank (WFM3_DATA[0] = scratchpad 0x1F800398) before a set-0D resident talks */
 static const char *port_civ_wfm_path;
 int port_civ_line = -1;   /* --civ-line N: bank-4 line shown by every set-0D resident (dev) */
+/* The Green Fortune Teller (AREA11 resident 12, dlg 11): neither PAL nor JP topdownA11ActorOpenDialogue has a case 11
+   (both switch on dlg < 11), but his four lines survive in every bank: k3 dx16..19 (PAL MFNT110 #243-#246, JP A002
+   #226-#229): "I am one of the fortune-tellers who tell a person's experience" / "I only talk to those with 300,000 AP"
+   / "you have enough... let's see" / the colour hint.  Reconstructed flow (docs/CIVILIZATION.md): dx16, then dx17 and
+   event 89 started (AP < 300,000), or dx18, dx19 and event 89 completed.  port_civ_teller_next is called from
+   topdownA11ActorTalkStep each time a box closes: 1 = next box opened, 2 = the last box opened and event 89 must start
+   when it closes (TalkStep state 2, the game's own path), 0 = done. */
+static int port_civ_tq[3], port_civ_tn, port_civ_ti, port_civ_tev;
+static short port_civ_tpos[6];
+short port_civ_teller_talk(void *o, void *pos) {
+    extern void *port_ram_ptr(unsigned);
+    extern void *showMessageBoxDirect(int, int, void *);
+    unsigned ap = *(unsigned *)port_ram_ptr(0x8009C96Cu);
+    memcpy(port_civ_tpos, pos, sizeof port_civ_tpos);
+    port_civ_tn = 0; port_civ_ti = 0;
+    if (ap >= 300000) { port_civ_tq[port_civ_tn++] = 18; port_civ_tq[port_civ_tn++] = 19; port_civ_tev = 2; }
+    else { port_civ_tq[port_civ_tn++] = 17; port_civ_tev = 1; }
+    *(int *)((char *)o + 0x90) = (int)(long)showMessageBoxDirect(3, 16, port_civ_tpos);
+    return 1;
+}
+int port_civ_teller_next(void *o) {
+    extern void *port_ram_ptr(unsigned);
+    extern void *showMessageBoxDirect(int, int, void *);
+    extern void setEventComplete(int, int);
+    unsigned char *ev = (unsigned char *)port_ram_ptr(0x8009CDA4u + 89);
+    if (port_civ_ti >= port_civ_tn) {
+        if (port_civ_tn && port_civ_tev == 2 && *ev != 0xFF) setEventComplete(89, 0);
+        port_civ_tn = port_civ_ti = 0;
+        return 0;
+    }
+    *(int *)((char *)o + 0x90) = (int)(long)showMessageBoxDirect(3, port_civ_tq[port_civ_ti++], port_civ_tpos);
+    return port_civ_ti >= port_civ_tn && port_civ_tev == 1 ? (port_civ_tn = port_civ_ti = 0, 2) : 1;
+}
 static unsigned char *port_civ_wfm_buf;
 void port_civ_wfm_swap(void) {   /* --civ-wfm FILE (AREA11's bank) or DIR (DIR/civ_MFNTnn0<L>.WFM of the current town and --lang) */
     extern void *port_ram_ptr(unsigned);
