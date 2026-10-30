@@ -225,7 +225,8 @@
     "Gran panel de llave 5": "Trozo de llave gigante 5",
     "Mata hierbajos": "Herbicida",
     "Tubería": "Válvula",
-    "El favorito del Fénix": "La comida del Fénix"
+    "El favorito del Fénix": "La comida del Fénix",
+    "La caja PA": "La caja AP"
    },
    "placeNames": {
     "Plaza de \ncaridad\n": "Plaza de \nla caridad\n",
@@ -277,7 +278,8 @@
     "Gran panel de llave 5": "Trozo de llave gigante 5",
     "Mata hierbajos": "Herbicida",
     "Tubería": "Válvula",
-    "El favorito del Fénix": "La comida del Fénix"
+    "El favorito del Fénix": "La comida del Fénix",
+    "La caja PA": "La caja AP"
    },
    "placeNames": {
     "Plaza de \ncaridad\n": "Plaza de \nla caridad\n",
@@ -343,7 +345,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA00/MFNT000S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -562,7 +565,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA01/MFNT010S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -731,7 +735,7 @@
    "338": "{BOX 248 42}\n{VOICE 13 0}{MOVE 0 0}¡Esta es la Torre de flores!{NL}\nPero, ¿cómo se entra?{WAIT}{CLEAR}\n",
    "339": "{BOX 224 68}\n{VOICE 13 0}{MOVE 0 0}¡Hala!{NL}\n¡Mira, gracias a las{NL}\nEstatuas de la caridad,{NL}\nlos brotes son enormes!{WAIT}{CLEAR}\n",
    "340": "{BOX 304 29}\n{VOICE 13 0}{MOVE 0 0}¿Tienes curiosidad por lo de arriba?{WAIT}{CLEAR}\n",
-   "341": "{BOX 280 55}\n{VOICE 13 0}{MOVE 0 0}Ja, ja, ja... ¿te he asustado?{NL}\n¡¡Si quieres entrar en la torre,{NL}\nvas a necesitar muchos PA!!{WAIT}{CLEAR}\n",
+   "341": "{BOX 280 55}\n{VOICE 13 0}{MOVE 0 0}Ja, ja, ja... ¿te he asustado?{NL}\n¡¡Si quieres entrar en la torre,{NL}\nvas a necesitar muchos AP!!{WAIT}{CLEAR}\n",
    "342": "{BOX 256 55}\n{VOICE 13 0}{MOVE 0 0}Tengo que hacer esto para que{NL}\nla Torre de flores no vuelva{NL}\na secarse.{WAIT}{CLEAR}\n",
    "343": "{BOX 256 55}\n{VOICE 13 0}{MOVE 0 0}¿Me traes la comida?{NL}\nAh... la ha hecho mi padre,{NL}\n¿verdad?{C057}{WAIT}{CLEAR}\nGracias, pero no tengo hambre.{NL}\nToma, para ti.{C057}{WAIT}{CLEAR}\nSi quieres, quédate también{NL}\ncon esto. ¡Adiós!{WAIT}{CLEAR}\n",
    "344": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}¿Qué?{NL}\n¿Te has comido toda la comida{NL}\nque me hizo mi padre?{C057}{WAIT}{CLEAR}\nBah, no te preocupes.{NL}\nEs difícil resistirse.{NL}\nMi padre cocina de maravilla.{C057}{WAIT}{CLEAR}\nBueno, me voy. ¡Hasta luego!{NL}\n¿Esto es de mi padre?{C057}{WAIT}{CLEAR}\nMmm... estará preocupado.{NL}\nLlevo mucho tiempo escondido{NL}\ny nadie me ha visto.{C057}{WAIT}{CLEAR}\nBueno, no lo necesito, así{NL}\nque ¿por qué no te lo comes?{C057}{WAIT}{CLEAR}\n¡Esto tampoco lo necesito,{NL}\nasí que también es para ti!{WAIT}{CLEAR}\n",
@@ -741,7 +745,8 @@
    "212": "{BOX 168 42}\n{MOVE 0 0}Plaza de la caridad{C057}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "213": "{BOX 152 42}\n{MOVE 0 0}Bosque de setas{C057}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "214": "{BOX 152 42}\n{MOVE 0 0}Tobogán de hoja{C057}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA02/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -796,7 +801,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA02/MFNT020S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -873,7 +879,7 @@
    "240": "{BOX 216 42}\n{VOICE 13 0}{MOVE 0 0}Si encuentras semillas{NL}\nde flores, avísame...{WAIT}{CLEAR}\n",
    "241": "{BOX 296 55}\n{VOICE 13 0}{MOVE 0 0}Me gustaría plantar flores{NL}\nen el jardín.{C056}{WAIT}{CLEAR}\nAntes de que llegaran los cerdos,{NL}\nel bosque estaba lleno de semillas.{C056}{WAIT}{CLEAR}\nAhora todas las flores se han{NL}\nmarchitado.{C056}{WAIT}{CLEAR}\nTengo la extraña sensación{NL}\nde que los Cerdiablos no{NL}\nson la única causa.{WAIT}{CLEAR}\n",
    "242": "{BOX 184 42}\n{VOICE 13 0}{MOVE 0 0}Quizá no volvamos{NL}\na ver flores nunca...{WAIT}{CLEAR}\n",
-   "243": "{BOX 216 42}\n{VOICE 13 0}{MOVE 0 0}¿Has visto ese chisme{NL}\nraro con las letras \"PA\"?{WAIT}{CLEAR}\n",
+   "243": "{BOX 216 42}\n{VOICE 13 0}{MOVE 0 0}¿Has visto ese chisme{NL}\nraro con las letras \"AP\"?{WAIT}{CLEAR}\n",
    "244": "{BOX 216 55}\n{VOICE 13 0}{MOVE 0 0}Mis amigos dicen que han{NL}\nvisto puertas y cajas con{NL}\nlas mismas letras.{WAIT}{CLEAR}\n",
    "245": "{BOX 232 55}\n{VOICE 13 0}{MOVE 0 0}¿Que cómo se abren?{NL}\nEso mismo me pregunto{NL}\nyo.{WAIT}{CLEAR}\n",
    "246": "{BOX 216 42}\n{VOICE 13 0}{MOVE 0 0}Los enanos tienen ahora{NL}\nun problema muy gordo...{WAIT}{CLEAR}\n",
@@ -957,7 +963,7 @@
    "377": "{BOX 168 42}\n{VOICE 13 0}{MOVE 0 0}¡Ese pelo rosa{NL}\nmola mucho!{PAUSE 360}",
    "378": "{BOX 128 42}\n{VOICE 13 0}{MOVE 0 0}Eres todo un{NL}\nhéroe local...{PAUSE 240}",
    "379": "{BOX 288 55}\n{VOICE 13 0}{MOVE 0 0}¡Ah! Q... qué susto me has dado...{NL}\nAh... eres el chaval de antes.{C056}{WAIT}{CLEAR}\nEsto... al final me han soltado,{NL}\n¿sabes? N... no es que me haya{NL}\nescapado ni nada de eso...{C056}{WAIT}{CLEAR}\n¡Bueno, tengo que irme!{WAIT}{CLEAR}\n",
-   "380": "{BOX 208 55}\n{VOICE 13 0}{MOVE 0 0}He oído que se llama{NL}\nPA o algo así...{NL}\nPero no podemos abrirlo.{WAIT}{CLEAR}\n",
+   "380": "{BOX 208 55}\n{VOICE 13 0}{MOVE 0 0}He oído que se llama{NL}\nAP o algo así...{NL}\nPero no podemos abrirlo.{WAIT}{CLEAR}\n",
    "381": "{BOX 288 68}\n{VOICE 13 0}{MOVE 0 0}¿Lo has notado?{C056}{WAIT}{CLEAR}\nAcabas de sentir el espíritu{NL}\nmaligno de la Montaña del Fénix.{C056}{WAIT}{CLEAR}\nEso demuestra que la montaña{NL}\nestá bajo un hechizo{NL}\nmaligno.{C056}{WAIT}{CLEAR}\nSi vuelves a sentir algo así,{NL}\nsignifica que el lugar donde{NL}\nestás está hechizado.{C056}{WAIT}{CLEAR}\nBusca las Bolsas Cerdiablo{NL}\nen esos lugares...{C056}{WAIT}{CLEAR}\nLa clave para encontrar las{NL}\nBolsas Cerdiablo es buscar{NL}\nen las zonas que han sido{NL}\nhechizadas.{WAIT}{CLEAR}\n",
    "382": "{BOX 200 55}\n{VOICE 13 0}{MOVE 0 0}¡Anda, mi túnel!{NL}\n¡Gracias por la ayuda!{NL}\n¡Por fin puedo escapar!{WAIT}{CLEAR}\n",
    "383": "{BOX 224 55}\n{VOICE 13 32768}{MOVE 0 0}Soy... un guardia...{NL}\n¿Que qué vigilo?{NL}\n...No te lo puedo decir...{WAIT}{CLEAR}\n",
@@ -987,7 +993,7 @@
    "410": "{BOX 264 42}\n{VOICE 13 0}{MOVE 0 0}Estoy tan emocionado que noto{NL}\nlos latidos de mi corazón...{WAIT}{CLEAR}\n",
    "411": "{BOX 184 29}\n{VOICE 13 0}{MOVE 0 0}¡Buena suerte, Tombi!{WAIT}{CLEAR}\n",
    "419": "{BOX 144 55}\n{VOICE 6 0}{MOVE 0 0}Soy un adivino{NL}\nque puede leer{NL}\ntu futuro.{WAIT}{CLEAR}\n",
-   "420": "{BOX 280 42}\n{VOICE 6 0}{MOVE 0 0}Pero solo hablo con quien tenga{NL}\n500.000 PA o más...{WAIT}{CLEAR}\n",
+   "420": "{BOX 280 42}\n{VOICE 6 0}{MOVE 0 0}Pero solo hablo con quien tenga{NL}\n500.000 AP o más...{WAIT}{CLEAR}\n",
    "421": "{BOX 304 55}\n{VOICE 6 0}{MOVE 0 0}Bien, parece que tienes{NL}\nsuficientes...{NL}\nVeamos. Mmm...{C056}{WAIT}{CLEAR}\n...el azul, la puerta de la playa...{C056}{WAIT}{CLEAR}\nel naranja, la jungla profunda...{NL}\nel amarillo, el guardián del tiempo{NL}\ny el azul que queda está...{C056}{WAIT}{CLEAR}\naquí... en algún lugar de{NL}\neste laberinto subterráneo.{C056}{WAIT}{CLEAR}\nVe primero a ver al Anciano{NL}\nsabio del millón de años.{C056}{WAIT}{CLEAR}\n...Tu batalla aún está por{NL}\nllegar... Toma esto... de{NL}\nparte de los adivinos...{WAIT}{CLEAR}\n",
    "422": "{BOX 176 29}\n{VOICE 6 0}{MOVE 0 0}Cuídate mucho...{WAIT}{CLEAR}\n",
    "423": "{BOX 224 55}\n{VOICE 6 0}{MOVE 0 0}Fui a cavar un túnel allí,{NL}\npero ya había una sala{NL}\nmuy rara...{WAIT}{CLEAR}\n",
@@ -1000,7 +1006,7 @@
    "432": "{BOX 256 55}\n{VOICE 6 0}{MOVE 0 0}¡Ah! ¡Qué susto!{NL}\n¿¡Cómo has entrado aquí!?{C056}{WAIT}{CLEAR}\n¿Qué?{NL}\n¿Un cable?{C056}{WAIT}{CLEAR}\n¿Que se te rompió el cable?{NL}\nMmm, ¿y por eso estás{NL}\nen apuros?{C056}{WAIT}{CLEAR}\nO sea, que lo que necesitas es{NL}\nun cable irrompible, ¿no?{WAIT}{CLEAR}\n",
    "433": "{BOX 296 55}\n{VOICE 6 0}{MOVE 0 0}¡Ya sé! ¡Puede que las herramientas{NL}\ndel ladrón estén en la Mansión!{C056}{WAIT}{CLEAR}\n¡Y da la casualidad de que uno{NL}\nde nuestros amigos está ahora{NL}\nen la Mansión encantada!{C056}{WAIT}{CLEAR}\nBúscalo y pregúntale...{WAIT}{CLEAR}\n",
    "434": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}¿Qué?{NL}\n¿Querías preguntarme{NL}\nalgo?{C056}{WAIT}{CLEAR}\n¿Un cable? ¿Y no uno normal,{NL}\nsino uno irrompible?{NL}\nJa, ja, ja...{C056}{WAIT}{CLEAR}\nQué bien te vendría que{NL}\nyo tuviera algo así,{NL}\n¿verdad?{C056}{WAIT}{CLEAR}\nPues sí que lo tengo... pero{NL}\nme ha costado mucho...{C056}{WAIT}{CLEAR}\nBueno, para serte sincero,{NL}\nlo encontré aquí mismo{NL}\nhace un minuto.{C056}{WAIT}{CLEAR}\n¡Vale, vale, tú ganas!{NL}\n¡Es tuyo! ...pero deja de{NL}\nmirarme así, por favor.{WAIT}{CLEAR}\n",
-   "435": "{BOX 296 55}\n{VOICE 6 0}{MOVE 0 0}He oído que en este laberinto{NL}\nsubterráneo también hay un adivino.{C056}{WAIT}{CLEAR}\nNunca lo he visto, pero seguro{NL}\nque pide una barbaridad{NL}\nde PA...{WAIT}{CLEAR}\n",
+   "435": "{BOX 296 55}\n{VOICE 6 0}{MOVE 0 0}He oído que en este laberinto{NL}\nsubterráneo también hay un adivino.{C056}{WAIT}{CLEAR}\nNunca lo he visto, pero seguro{NL}\nque pide una barbaridad{NL}\nde AP...{WAIT}{CLEAR}\n",
    "438": "{BOX 280 55}\n{VOICE 6 0}{MOVE 0 0}Para nosotros, cavar es una{NL}\nforma de vida...{C056}{WAIT}{CLEAR}\nDicen que aquí abajo hay un{NL}\nlugar legendario donde se{NL}\nguardaban tesoros.{WAIT}{CLEAR}\n",
    "440": "{BOX 240 42}\n{VOICE 6 0}{MOVE 0 0}¡Bueno, voy a probar a cavar{NL}\nen otro sitio!{WAIT}{CLEAR}\n",
    "441": "{BOX 232 42}\n{VOICE 6 0}{MOVE 0 0}¡Hola!{NL}\n¡Echa un vistazo!{C056}{WAIT}{CLEAR}\n¡El camino está despejado!{NL}\nNo ha sido nada, de verdad.{C056}{WAIT}{CLEAR}\n¡Yo hago un túnel{NL}\nen cualquier cosa!{WAIT}{CLEAR}\n",
@@ -1024,7 +1030,8 @@
    "208": "{BOX 184 42}\n{MOVE 0 0}Laberinto subterráneo{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "209": "{BOX 152 42}\n{MOVE 0 0}Ciudad de Enanos{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 160 42}\n{MOVE 0 0}Cabaña Enano Mayor{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA03/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -1079,7 +1086,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA03/MFNT030S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1179,7 +1187,8 @@
    "257": "{BOX 232 55}\n{VOICE 6 0}{MOVE 0 0}¿D... dó... dónde...?{NL}\n¿¡Dónde lo has encontrado!?{NL}\n¡Gracias, gracias, gracias!{WAIT}{CLEAR}\n",
    "258": "{BOX 240 55}\n{VOICE 6 0}{MOVE 0 0}Buf, gracias a ti mi jefe{NL}\nno se enfadará conmigo.{NL}\nYa puedo volver.{WAIT}{CLEAR}\n",
    "207": "{BOX 160 42}\n{MOVE 0 0}Montaña tormentosa{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA04/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -1234,7 +1243,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA04/MFNT040S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1340,7 +1350,8 @@
    "209": "{BOX 168 42}\n{MOVE 0 0}Oeste de la mansión{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 152 42}\n{MOVE 0 0}Sur de la mansión{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "211": "{BOX 160 42}\n{MOVE 0 0}Este de la mansión{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA05/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -1395,7 +1406,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA05/MFNT050S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1484,7 +1496,7 @@
    "246": "{BOX 208 55}\n{VOICE 6 0}{MOVE 0 0}Bua... bua... ¡Anda!{NL}\n¡Estoy curado!{NL}\nUf, gracias.{C052}{WAIT}{CLEAR}\nMe comí una seta rara{NL}\ndel Bosque de las setas.{C052}{WAIT}{CLEAR}\nCreía que no iba a{NL}\nparar de llorar nunca.{WAIT}{CLEAR}\n",
    "247": "{BOX 192 55}\n{VOICE 6 0}{MOVE 0 0}Oye, por cierto, ¿has{NL}\nvisto alguna vez una{NL}\ncría de Cerdo Koma?{C052}{WAIT}{CLEAR}\nLos llaman Cerditos,{NL}\npero no consigo{NL}\nencontrar ninguno.{C052}{WAIT}{CLEAR}\nSi encuentras uno,{NL}\n¿me lo darías?{C052}{WAIT}{CLEAR}\nTe prometo cambiártelo{NL}\npor algo especial.{WAIT}{CLEAR}\n",
    "248": "{BOX 248 55}\n{VOICE 6 0}{MOVE 0 0}¡Eh, es ese! ¿Dónde lo has{NL}\nencontrado?{C052}{WAIT}{CLEAR}\n¡Genial! Como te prometí,{NL}\nte daré algo muy{NL}\nespecial.{C052}{WAIT}{CLEAR}\n¡Redoble de tambores!{NL}\n¡La Garra Kokka más{NL}\nrara del mundo!{C052}{WAIT}{CLEAR}\n¿Que qué tiene de raro?{NL}\nVenga, venga, sígueme{NL}\nla corriente, ¿vale?{C052}{WAIT}{CLEAR}\nHaz como que te gusta.{NL}\n¡Me voy, gracias!{WAIT}{CLEAR}\n",
-   "249": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}Soy un adivino que puede ver{NL}\nlo que le espera a la gente.{C052}{WAIT}{CLEAR}\nLos adivinos solo suelen hablar{NL}\ncon quien tiene muchos{NL}\nPA,{C052}{WAIT}{CLEAR}\npero como aún estoy aprendiendo,{NL}\nte leeré el futuro.{WAIT}{CLEAR}\n",
+   "249": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}Soy un adivino que puede ver{NL}\nlo que le espera a la gente.{C052}{WAIT}{CLEAR}\nLos adivinos solo suelen hablar{NL}\ncon quien tiene muchos{NL}\nAP,{C052}{WAIT}{CLEAR}\npero como aún estoy aprendiendo,{NL}\nte leeré el futuro.{WAIT}{CLEAR}\n",
    "250": "{BOX 304 42}\n{VOICE 6 0}{MOVE 0 0}Mmm...{C052}{WAIT}{CLEAR}\nEl rosa, en un lugar muy caluroso...{C052}{WAIT}{CLEAR}\nEl verde, la mansión{NL}\ndel lago...{C052}{WAIT}{CLEAR}\nEl rojo espera un milagro...{WAIT}{CLEAR}\n",
    "251": "{BOX 232 55}\n{VOICE 6 0}{MOVE 0 0}¡Aah!{NL}\n¡El vino de nuestro lago es{NL}\nel mejor, sin duda!{WAIT}{CLEAR}\n",
    "252": "{BOX 168 42}\n{VOICE 6 0}{MOVE 0 0}...¡iiih, iiih,{NL}\niiiiih!...{WAIT}{CLEAR}\n",
@@ -1541,7 +1553,8 @@
    "316": "{BOX 248 55}\n{VOICE 6 0}{MOVE 0 0}¡Eh, Tombi!{NL}\nCuánto tiempo sin verte...{C052}{WAIT}{CLEAR}\n...¿Qué te trae por aquí?{NL}\n...¿Necesitas vino?{C052}{WAIT}{CLEAR}\nMuy bien, mientras no sea{NL}\npara ti, puedes llevarte{NL}\ntodo el que quieras.{C052}{WAIT}{CLEAR}\n...pero ni se te ocurra{NL}\nbebértelo, jovencito.{WAIT}{CLEAR}\n",
    "317": "{BOX 144 42}\n{VOICE 6 0}{MOVE 0 0}...¡Hasta luego!{C052}{WAIT}{CLEAR}\nVuelve a vernos{NL}\ncuando quieras.{WAIT}{CLEAR}\n",
    "207": "{BOX 152 42}\n{MOVE 0 0}Ciudad Baco{C052}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA06/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -1596,7 +1609,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA06/MFNT060S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1664,7 +1678,8 @@
    "215": "{BOX 288 55}\n{VOICE 6 0}{MOVE 0 0}¡¡Enhorabuena!!{NL}\n¡¡Lo has logrado!!{C055}{WAIT}{CLEAR}\n¿¡Debes de ser el campeón de{NL}\nmotocross más rápido del mundo!?{C055}{WAIT}{CLEAR}\nSupongo que los programadores{NL}\nde Tombi estarán rojos{NL}\ncomo tomates...{C055}{WAIT}{CLEAR}\nUy, ¿qué estoy diciendo...?{C055}{WAIT}{CLEAR}\nBueno, ¡¡desde hoy eres{NL}\nel campeón!!{WAIT}{CLEAR}\n",
    "216": "{BOX 200 29}\n{VOICE 6 0}{MOVE 0 0}Siempre más alto...{WAIT}{CLEAR}\n",
    "218": "{BOX 152 68}\n{VOICE 6 0}{MOVE 0 0}¡Los récords son!{NL}\n1º....24,96 seg.{NL}\n2º....26,55 seg.{NL}\n3º....28,16 seg.{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA07/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -1719,7 +1734,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA07/MFNT010S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1888,7 +1904,7 @@
    "338": "{BOX 248 42}\n{VOICE 13 0}{MOVE 0 0}¡Esta es la Torre de flores!{NL}\nPero, ¿cómo se entra?{WAIT}{CLEAR}\n",
    "339": "{BOX 224 68}\n{VOICE 13 0}{MOVE 0 0}¡Hala!{NL}\n¡Mira, gracias a las{NL}\nEstatuas de la caridad,{NL}\nlos brotes son enormes!{WAIT}{CLEAR}\n",
    "340": "{BOX 304 29}\n{VOICE 13 0}{MOVE 0 0}¿Tienes curiosidad por lo de arriba?{WAIT}{CLEAR}\n",
-   "341": "{BOX 280 55}\n{VOICE 13 0}{MOVE 0 0}Ja, ja, ja... ¿te he asustado?{NL}\n¡¡Si quieres entrar en la torre,{NL}\nvas a necesitar muchos PA!!{WAIT}{CLEAR}\n",
+   "341": "{BOX 280 55}\n{VOICE 13 0}{MOVE 0 0}Ja, ja, ja... ¿te he asustado?{NL}\n¡¡Si quieres entrar en la torre,{NL}\nvas a necesitar muchos AP!!{WAIT}{CLEAR}\n",
    "342": "{BOX 256 55}\n{VOICE 13 0}{MOVE 0 0}Tengo que hacer esto para que{NL}\nla Torre de flores no vuelva{NL}\na secarse.{WAIT}{CLEAR}\n",
    "343": "{BOX 256 55}\n{VOICE 13 0}{MOVE 0 0}¿Me traes la comida?{NL}\nAh... la ha hecho mi padre,{NL}\n¿verdad?{C057}{WAIT}{CLEAR}\nGracias, pero no tengo hambre.{NL}\nToma, para ti.{C057}{WAIT}{CLEAR}\nSi quieres, quédate también{NL}\ncon esto. ¡Adiós!{WAIT}{CLEAR}\n",
    "344": "{BOX 272 55}\n{VOICE 13 0}{MOVE 0 0}¿Qué?{NL}\n¿Te has comido toda la comida{NL}\nque me hizo mi padre?{C057}{WAIT}{CLEAR}\nBah, no te preocupes.{NL}\nEs difícil resistirse.{NL}\nMi padre cocina de maravilla.{C057}{WAIT}{CLEAR}\nBueno, me voy. ¡Hasta luego!{NL}\n¿Esto es de mi padre?{C057}{WAIT}{CLEAR}\nMmm... estará preocupado.{NL}\nLlevo mucho tiempo escondido{NL}\ny nadie me ha visto.{C057}{WAIT}{CLEAR}\nBueno, no lo necesito, así{NL}\nque ¿por qué no te lo comes?{C057}{WAIT}{CLEAR}\n¡Esto tampoco lo necesito,{NL}\nasí que también es para ti!{WAIT}{CLEAR}\n",
@@ -1898,7 +1914,8 @@
    "212": "{BOX 168 42}\n{MOVE 0 0}Plaza de la caridad{C057}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "213": "{BOX 152 42}\n{MOVE 0 0}Bosque de setas{C057}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "214": "{BOX 152 42}\n{MOVE 0 0}Tobogán de hoja{C057}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA08/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -1953,7 +1970,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA08/MFNT080S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2020,7 +2038,8 @@
    "209": "{BOX 256 55}\n{VOICE 6 0}{MOVE 0 0}Bueno, por fin hemos llegado.{NL}\nHe intentado arreglarla, pero{NL}\nno tengo fuerza suficiente.{WAIT}{CLEAR}\n",
    "211": "{BOX 240 42}\n{VOICE 6 0}{MOVE 0 0}Parece que ha funcionado.{NL}\nVolvamos...{WAIT}{CLEAR}\n",
    "208": "{BOX 152 42}\n{MOVE 0 0}Ciudad Baco{C06C}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA09/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -2075,7 +2094,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA09/MFNT090S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2147,7 +2167,8 @@
    "221": "{BOX 296 55}\n{MOVE 0 0}Me voy al Bosque de todo principio,{NL}\nasí que el barco no saldrá{NL}\nhasta dentro de un rato.{WAIT}{CLEAR}\n",
    "222": "{BOX 248 42}\n{VOICE 6 0}{MOVE 0 0}¡Hola! ¡Ja, ja, ja!{NL}\nVolvemos a vernos.{C053}{WAIT}{CLEAR}\n¿Quieres dar una vuelta en{NL}\nmi barco?{C053}{WAIT}{CLEAR}\nVale, pero estoy muy liado,{NL}\nasí que solo te llevo de ida.{WAIT}{CLEAR}\n",
    "212": "{BOX 152 42}\n{MOVE 0 0}Bosque de setas{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA10/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -2202,7 +2223,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA10/MFNT100S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2319,7 +2341,8 @@
    "274": "{BOX 288 42}\n{VOICE 6 0}{MOVE 0 0}¿Y esa cara de cansado?{NL}\n¡Parece que te hace falta energía!{WAIT}{CLEAR}\n",
    "208": "{BOX 152 42}\n{MOVE 0 0}Jungla{C050}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 176 42}\n{MOVE 0 0}Ciudad de los trucos{C050}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA11/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -2374,7 +2397,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA11/MFNT110S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2461,12 +2485,13 @@
    "235": "{BOX 160 55}\n{VOICE 6 0}{MOVE 0 0}A ver... esto aquí{NL}\ny esto allí...{NL}\n¡Hala, terminado!{WAIT}{CLEAR}\n",
    "242": "{BOX 256 42}\n{VOICE 6 0}{MOVE 0 0}Ten cuidado cuando veas{NL}\nal Anciano de 10.000 años.{C04B}{WAIT}{CLEAR}\nDicen que es un poco raro,{NL}\n¿sabes...?{WAIT}{CLEAR}\n",
    "243": "{BOX 184 42}\n{VOICE 6 0}{MOVE 0 0}Soy un adivino que{NL}\nlee el futuro.{WAIT}{CLEAR}\n",
-   "244": "{BOX 280 42}\n{VOICE 6 0}{MOVE 0 0}Pero solo hablo con quien tenga{NL}\n300.000 PA o más...{WAIT}{CLEAR}\n",
-   "245": "{BOX 208 55}\n{VOICE 6 0}{MOVE 0 0}Vaya, parece que tienes{NL}\nPA suficientes...{NL}\nVeamos...{WAIT}{CLEAR}\n",
+   "244": "{BOX 280 42}\n{VOICE 6 0}{MOVE 0 0}Pero solo hablo con quien tenga{NL}\n300.000 AP o más...{WAIT}{CLEAR}\n",
+   "245": "{BOX 208 55}\n{VOICE 6 0}{MOVE 0 0}Vaya, parece que tienes{NL}\nAP suficientes...{NL}\nVeamos...{WAIT}{CLEAR}\n",
    "246": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}Mmm... el azul, la puerta de{NL}\nla playa... el verde, la mansión{NL}\ndel lago...{C04B}{WAIT}{CLEAR}\nel amarillo, el guardián del{NL}\ntiempo...{C04B}{WAIT}{CLEAR}\n¿Lo entiendes?{WAIT}{CLEAR}\n",
    "247": "{BOX 280 42}\n{VOICE 6 0}{MOVE 0 0}¡Bueno, me voy! ¡Voy a probar{NL}\neste cacharro! ¡Adiós, amigo!{WAIT}{CLEAR}\n",
    "248": "{BOX 240 55}\n{VOICE 6 0}{MOVE 0 0}Vaya...{NL}\nHas hecho mucho por mí...{NL}\n¡Yo también quiero ayudarte!{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA12/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -2521,7 +2546,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA12/MFNT040S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2627,7 +2653,8 @@
    "209": "{BOX 168 42}\n{MOVE 0 0}Oeste de la mansión{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 152 42}\n{MOVE 0 0}Sur de la mansión{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "211": "{BOX 160 42}\n{MOVE 0 0}Este de la mansión{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA13/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -2682,7 +2709,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA13/MFNT001S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2803,7 +2831,8 @@
    "201": "{BOX 192 29}\nGuardas el Pez sagrado{NL}\n",
    "205": "{BOX 224 29}\n¡Te falta experiencia!{NL}\n",
    "206": "{BOX 168 29}\nHas usado un objeto{NL}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA14/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -2858,7 +2887,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA14/MFNT140S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2936,7 +2966,8 @@
    "224": "{BOX 280 55}\n{VOICE 6 0}{MOVE 0 0}¿Te suena? Es el cachorrito{NL}\nque salvaste en el{NL}\nBosque enano.{C04B}{WAIT}{CLEAR}\nLo he estado cuidando,{NL}\npero ya está curado.{NL}\nBarón tiene poderes especiales.{C04B}{WAIT}{CLEAR}\n¡Si lo usas en la pantalla{NL}\nde objetos, tiene el mismo efecto{NL}\nque las Alas de la caridad!{C04B}{WAIT}{CLEAR}\n¡Venga, Barón, ve!{WAIT}{CLEAR}\n",
    "225": "{BOX 224 42}\n{VOICE 6 0}{MOVE 0 0}¡Ah, ahora que me acuerdo!{NL}\n¡Toma!{WAIT}{CLEAR}\n",
    "226": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}¡Tombi, te presento a Barón!{NL}\nEste perro se hizo daño{NL}\nen el Bosque enano.{C04B}{WAIT}{CLEAR}\nYa tiene las heridas curadas{NL}\ny creo que te será{NL}\nmuy útil.{C04B}{WAIT}{CLEAR}\nTrátalo como a un amigo{NL}\ny cuídalo bien.{NL}\nBarón tiene poderes especiales.{C04B}{WAIT}{CLEAR}\nUsa a Barón en la pantalla de{NL}\nobjetos: tiene el mismo efecto{NL}\nque las Alas de la caridad.{C04B}{WAIT}{CLEAR}\n¡Hala, en marcha!{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA16/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -2991,7 +3022,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA16/MFNT160S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -3069,7 +3101,8 @@
    "229": "{BOX 288 42}\n{VOICE 6 0}{MOVE 0 0}Escucha... acabo de volver{NL}\nde la Ciudad de todo principio.{C052}{WAIT}{CLEAR}\nY allí la vi... ¡a la{NL}\nBruja!{C052}{WAIT}{CLEAR}\nSe llama Mizuno y... bueno...{NL}\n¡es monísima!{C052}{WAIT}{CLEAR}\n¡Ay, ojalá pudiera volver a verla!{WAIT}{CLEAR}\n",
    "248": "{BOX 232 42}\n{VOICE 6 0}{MOVE 0 0}Los engranajes de piedra{NL}\nestán rotos...{WAIT}{CLEAR}\n",
    "207": "{BOX 152 42}\n{MOVE 0 0}Ciudad de Piedra{C052}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA17/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -3124,7 +3157,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA17/MFNT170S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -3202,7 +3236,8 @@
    "260": "{BOX 216 55}\n{VOICE 6 0}{MOVE 0 0}¿Has visto la puerta que{NL}\nno se abre?{NL}\nEs viejísima...{C053}{WAIT}{CLEAR}\nLa única forma de abrirla{NL}\nes volarla con una bomba{NL}\no algo parecido.{WAIT}{CLEAR}\n",
    "269": "{BOX 240 55}\n{VOICE 6 0}{MOVE 0 0}Me has vuelto a encontrar,{NL}\n¿eh? ¿Hay algo que tú{NL}\nno encuentres?{WAIT}{CLEAR}\n",
    "207": "{BOX 152 42}\n{MOVE 0 0}Ciudad de hierro{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA18/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -3257,7 +3292,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA18/MFNT180S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -3334,7 +3370,8 @@
    "238": "{BOX 272 42}\n{VOICE 6 0}{MOVE 0 0}Parece que te falta un{NL}\ningrediente... Todavía necesitas{WAIT}{CLEAR}\n",
    "239": "{BOX 208 29}\n{VOICE 6 0}{MOVE 0 0}Flor carnívora{WAIT}{CLEAR}\n",
    "246": "{BOX 288 42}\n{VOICE 6 0}{MOVE 0 0}Escucha... acabo de volver{NL}\nde la Ciudad de todo principio.{C056}{WAIT}{CLEAR}\nY allí la vi... ¡a la{NL}\nbruja!{C056}{WAIT}{CLEAR}\nSe llama Mizuno y... bueno...{NL}\n¡es monísima!{C056}{WAIT}{CLEAR}\n¡Ay, ojalá pudiera volver a verla!{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA19/CFNT999S.WFM": {
    "0": "¡SUPERADO!",
@@ -3389,7 +3426,8 @@
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
    "133": "El Cerdiablo{NL}\nreal",
-   "63": "La comida{NL}\ndel Fénix"
+   "63": "La comida{NL}\ndel Fénix",
+   "21": "La caja AP"
   },
   "AREA19/MFNT020S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -3466,7 +3504,7 @@
    "240": "{BOX 216 42}\n{VOICE 13 0}{MOVE 0 0}Si encuentras semillas{NL}\nde flores, avísame...{WAIT}{CLEAR}\n",
    "241": "{BOX 296 55}\n{VOICE 13 0}{MOVE 0 0}Me gustaría plantar flores{NL}\nen el jardín.{C056}{WAIT}{CLEAR}\nAntes de que llegaran los cerdos,{NL}\nel bosque estaba lleno de semillas.{C056}{WAIT}{CLEAR}\nAhora todas las flores se han{NL}\nmarchitado.{C056}{WAIT}{CLEAR}\nTengo la extraña sensación{NL}\nde que los Cerdiablos no{NL}\nson la única causa.{WAIT}{CLEAR}\n",
    "242": "{BOX 184 42}\n{VOICE 13 0}{MOVE 0 0}Quizá no volvamos{NL}\na ver flores nunca...{WAIT}{CLEAR}\n",
-   "243": "{BOX 216 42}\n{VOICE 13 0}{MOVE 0 0}¿Has visto ese chisme{NL}\nraro con las letras \"PA\"?{WAIT}{CLEAR}\n",
+   "243": "{BOX 216 42}\n{VOICE 13 0}{MOVE 0 0}¿Has visto ese chisme{NL}\nraro con las letras \"AP\"?{WAIT}{CLEAR}\n",
    "244": "{BOX 216 55}\n{VOICE 13 0}{MOVE 0 0}Mis amigos dicen que han{NL}\nvisto puertas y cajas con{NL}\nlas mismas letras.{WAIT}{CLEAR}\n",
    "245": "{BOX 232 55}\n{VOICE 13 0}{MOVE 0 0}¿Que cómo se abren?{NL}\nEso mismo me pregunto{NL}\nyo.{WAIT}{CLEAR}\n",
    "246": "{BOX 216 42}\n{VOICE 13 0}{MOVE 0 0}Los enanos tienen ahora{NL}\nun problema muy gordo...{WAIT}{CLEAR}\n",
@@ -3550,7 +3588,7 @@
    "377": "{BOX 168 42}\n{VOICE 13 0}{MOVE 0 0}¡Ese pelo rosa{NL}\nmola mucho!{PAUSE 360}",
    "378": "{BOX 128 42}\n{VOICE 13 0}{MOVE 0 0}Eres todo un{NL}\nhéroe local...{PAUSE 240}",
    "379": "{BOX 288 55}\n{VOICE 13 0}{MOVE 0 0}¡Ah! Q... qué susto me has dado...{NL}\nAh... eres el chaval de antes.{C056}{WAIT}{CLEAR}\nEsto... al final me han soltado,{NL}\n¿sabes? N... no es que me haya{NL}\nescapado ni nada de eso...{C056}{WAIT}{CLEAR}\n¡Bueno, tengo que irme!{WAIT}{CLEAR}\n",
-   "380": "{BOX 208 55}\n{VOICE 13 0}{MOVE 0 0}He oído que se llama{NL}\nPA o algo así...{NL}\nPero no podemos abrirlo.{WAIT}{CLEAR}\n",
+   "380": "{BOX 208 55}\n{VOICE 13 0}{MOVE 0 0}He oído que se llama{NL}\nAP o algo así...{NL}\nPero no podemos abrirlo.{WAIT}{CLEAR}\n",
    "381": "{BOX 288 68}\n{VOICE 13 0}{MOVE 0 0}¿Lo has notado?{C056}{WAIT}{CLEAR}\nAcabas de sentir el espíritu{NL}\nmaligno de la Montaña del Fénix.{C056}{WAIT}{CLEAR}\nEso demuestra que la montaña{NL}\nestá bajo un hechizo{NL}\nmaligno.{C056}{WAIT}{CLEAR}\nSi vuelves a sentir algo así,{NL}\nsignifica que el lugar donde{NL}\nestás está hechizado.{C056}{WAIT}{CLEAR}\nBusca las Bolsas Cerdiablo{NL}\nen esos lugares...{C056}{WAIT}{CLEAR}\nLa clave para encontrar las{NL}\nBolsas Cerdiablo es buscar{NL}\nen las zonas que han sido{NL}\nhechizadas.{WAIT}{CLEAR}\n",
    "382": "{BOX 200 55}\n{VOICE 13 0}{MOVE 0 0}¡Anda, mi túnel!{NL}\n¡Gracias por la ayuda!{NL}\n¡Por fin puedo escapar!{WAIT}{CLEAR}\n",
    "383": "{BOX 224 55}\n{VOICE 13 32768}{MOVE 0 0}Soy... un guardia...{NL}\n¿Que qué vigilo?{NL}\n...No te lo puedo decir...{WAIT}{CLEAR}\n",
@@ -3580,7 +3618,7 @@
    "410": "{BOX 264 42}\n{VOICE 13 0}{MOVE 0 0}Estoy tan emocionado que noto{NL}\nlos latidos de mi corazón...{WAIT}{CLEAR}\n",
    "411": "{BOX 184 29}\n{VOICE 13 0}{MOVE 0 0}¡Buena suerte, Tombi!{WAIT}{CLEAR}\n",
    "419": "{BOX 144 55}\n{VOICE 6 0}{MOVE 0 0}Soy un adivino{NL}\nque puede leer{NL}\ntu futuro.{WAIT}{CLEAR}\n",
-   "420": "{BOX 280 42}\n{VOICE 6 0}{MOVE 0 0}Pero solo hablo con quien tenga{NL}\n500.000 PA o más...{WAIT}{CLEAR}\n",
+   "420": "{BOX 280 42}\n{VOICE 6 0}{MOVE 0 0}Pero solo hablo con quien tenga{NL}\n500.000 AP o más...{WAIT}{CLEAR}\n",
    "421": "{BOX 304 55}\n{VOICE 6 0}{MOVE 0 0}Bien, parece que tienes{NL}\nsuficientes...{NL}\nVeamos. Mmm...{C056}{WAIT}{CLEAR}\n...el azul, la puerta de la playa...{C056}{WAIT}{CLEAR}\nel naranja, la jungla profunda...{NL}\nel amarillo, el guardián del tiempo{NL}\ny el azul que queda está...{C056}{WAIT}{CLEAR}\naquí... en algún lugar de{NL}\neste laberinto subterráneo.{C056}{WAIT}{CLEAR}\nVe primero a ver al Anciano{NL}\nsabio del millón de años.{C056}{WAIT}{CLEAR}\n...Tu batalla aún está por{NL}\nllegar... Toma esto... de{NL}\nparte de los adivinos...{WAIT}{CLEAR}\n",
    "422": "{BOX 176 29}\n{VOICE 6 0}{MOVE 0 0}Cuídate mucho...{WAIT}{CLEAR}\n",
    "423": "{BOX 224 55}\n{VOICE 6 0}{MOVE 0 0}Fui a cavar un túnel allí,{NL}\npero ya había una sala{NL}\nmuy rara...{WAIT}{CLEAR}\n",
@@ -3593,7 +3631,7 @@
    "432": "{BOX 256 55}\n{VOICE 6 0}{MOVE 0 0}¡Ah! ¡Qué susto!{NL}\n¿¡Cómo has entrado aquí!?{C056}{WAIT}{CLEAR}\n¿Qué?{NL}\n¿Un cable?{C056}{WAIT}{CLEAR}\n¿Que se te rompió el cable?{NL}\nMmm, ¿y por eso estás{NL}\nen apuros?{C056}{WAIT}{CLEAR}\nO sea, que lo que necesitas es{NL}\nun cable irrompible, ¿no?{WAIT}{CLEAR}\n",
    "433": "{BOX 296 55}\n{VOICE 6 0}{MOVE 0 0}¡Ya sé! ¡Puede que las herramientas{NL}\ndel ladrón estén en la Mansión!{C056}{WAIT}{CLEAR}\n¡Y da la casualidad de que uno{NL}\nde nuestros amigos está ahora{NL}\nen la Mansión encantada!{C056}{WAIT}{CLEAR}\nBúscalo y pregúntale...{WAIT}{CLEAR}\n",
    "434": "{BOX 272 55}\n{VOICE 6 0}{MOVE 0 0}¿Qué?{NL}\n¿Querías preguntarme{NL}\nalgo?{C056}{WAIT}{CLEAR}\n¿Un cable? ¿Y no uno normal,{NL}\nsino uno irrompible?{NL}\nJa, ja, ja...{C056}{WAIT}{CLEAR}\nQué bien te vendría que{NL}\nyo tuviera algo así,{NL}\n¿verdad?{C056}{WAIT}{CLEAR}\nPues sí que lo tengo... pero{NL}\nme ha costado mucho...{C056}{WAIT}{CLEAR}\nBueno, para serte sincero,{NL}\nlo encontré aquí mismo{NL}\nhace un minuto.{C056}{WAIT}{CLEAR}\n¡Vale, vale, tú ganas!{NL}\n¡Es tuyo! ...pero deja de{NL}\nmirarme así, por favor.{WAIT}{CLEAR}\n",
-   "435": "{BOX 296 55}\n{VOICE 6 0}{MOVE 0 0}He oído que en este laberinto{NL}\nsubterráneo también hay un adivino.{C056}{WAIT}{CLEAR}\nNunca lo he visto, pero seguro{NL}\nque pide una barbaridad{NL}\nde PA...{WAIT}{CLEAR}\n",
+   "435": "{BOX 296 55}\n{VOICE 6 0}{MOVE 0 0}He oído que en este laberinto{NL}\nsubterráneo también hay un adivino.{C056}{WAIT}{CLEAR}\nNunca lo he visto, pero seguro{NL}\nque pide una barbaridad{NL}\nde AP...{WAIT}{CLEAR}\n",
    "438": "{BOX 280 55}\n{VOICE 6 0}{MOVE 0 0}Para nosotros, cavar es una{NL}\nforma de vida...{C056}{WAIT}{CLEAR}\nDicen que aquí abajo hay un{NL}\nlugar legendario donde se{NL}\nguardaban tesoros.{WAIT}{CLEAR}\n",
    "440": "{BOX 240 42}\n{VOICE 6 0}{MOVE 0 0}¡Bueno, voy a probar a cavar{NL}\nen otro sitio!{WAIT}{CLEAR}\n",
    "441": "{BOX 232 42}\n{VOICE 6 0}{MOVE 0 0}¡Hola!{NL}\n¡Echa un vistazo!{C056}{WAIT}{CLEAR}\n¡El camino está despejado!{NL}\nNo ha sido nada, de verdad.{C056}{WAIT}{CLEAR}\n¡Yo hago un túnel{NL}\nen cualquier cosa!{WAIT}{CLEAR}\n",
@@ -3617,7 +3655,8 @@
    "208": "{BOX 184 42}\n{MOVE 0 0}Laberinto subterráneo{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "209": "{BOX 152 42}\n{MOVE 0 0}Ciudad de Enanos{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 160 42}\n{MOVE 0 0}Cabaña Enano Mayor{C056}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA19/MFNT190S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -3695,7 +3734,7 @@
    "239": "{BOX 216 42}\n{VOICE 6 0}{MOVE 0 0}Si encuentras semillas{NL}\nde flores, avísame...{WAIT}{CLEAR}\n",
    "240": "{BOX 296 55}\n{VOICE 6 0}{MOVE 0 0}Me gustaría plantar flores{NL}\nen el jardín.{C053}{WAIT}{CLEAR}\nAntes de que llegaran los cerdos,{NL}\nel bosque estaba lleno de semillas.{C053}{WAIT}{CLEAR}\nAhora todas las flores se han{NL}\nmarchitado.{C053}{WAIT}{CLEAR}\nTengo la extraña sensación{NL}\nde que los Cerdiablos no{NL}\nson la única causa.{WAIT}{CLEAR}\n",
    "241": "{BOX 184 42}\n{VOICE 6 0}{MOVE 0 0}Quizá no volvamos{NL}\na ver flores nunca...{WAIT}{CLEAR}\n",
-   "242": "{BOX 216 42}\n{VOICE 6 0}{MOVE 0 0}¿Has visto ese chisme{NL}\nraro con las letras \"PA\"?{WAIT}{CLEAR}\n",
+   "242": "{BOX 216 42}\n{VOICE 6 0}{MOVE 0 0}¿Has visto ese chisme{NL}\nraro con las letras \"AP\"?{WAIT}{CLEAR}\n",
    "243": "{BOX 216 55}\n{VOICE 6 0}{MOVE 0 0}Mis amigos dicen que han{NL}\nvisto puertas y cajas con{NL}\nlas mismas letras.{WAIT}{CLEAR}\n",
    "244": "{BOX 232 55}\n{VOICE 6 0}{MOVE 0 0}¿Que cómo se abren?{NL}\nEso mismo me pregunto{NL}\nyo.{WAIT}{CLEAR}\n",
    "245": "{BOX 216 42}\n{VOICE 6 0}{MOVE 0 0}Los enanos tienen ahora{NL}\nun problema muy gordo...{WAIT}{CLEAR}\n",
@@ -3783,7 +3822,7 @@
    "376": "{BOX 168 42}\n{VOICE 6 0}{MOVE 0 0}¡Ese pelo rosa{NL}\nmola mucho!{PAUSE 120}",
    "377": "{BOX 128 42}\n{VOICE 6 0}{MOVE 0 0}Eres todo un{NL}\nhéroe local...{PAUSE 120}",
    "378": "{BOX 288 55}\n{VOICE 6 0}{MOVE 0 0}¡Ah! Q... qué susto me has dado...{NL}\nAh... eres el chaval de antes.{C053}{WAIT}{CLEAR}\nEsto... al final me han soltado,{NL}\n¿sabes? N... no es que me haya{NL}\nescapado ni nada de eso...{C053}{WAIT}{CLEAR}\n¡Bueno, tengo que irme!{WAIT}{CLEAR}\n",
-   "379": "{BOX 208 55}\n{VOICE 6 0}{MOVE 0 0}He oído que se llama{NL}\nPA o algo así...{NL}\nPero no podemos abrirlo.{WAIT}{CLEAR}\n",
+   "379": "{BOX 208 55}\n{VOICE 6 0}{MOVE 0 0}He oído que se llama{NL}\nAP o algo así...{NL}\nPero no podemos abrirlo.{WAIT}{CLEAR}\n",
    "380": "{BOX 288 68}\n{VOICE 6 0}{MOVE 0 0}¿Lo has notado?{C053}{WAIT}{CLEAR}\nAcabas de sentir el espíritu{NL}\nmaligno de la Montaña del Fénix.{C053}{WAIT}{CLEAR}\nEso demuestra que la montaña{NL}\nestá bajo un hechizo{NL}\nmaligno.{C053}{WAIT}{CLEAR}\nSi vuelves a sentir algo así,{NL}\nsignifica que el lugar donde{NL}\nestás está hechizado.{C053}{WAIT}{CLEAR}\nBusca las Bolsas Cerdiablo{NL}\nen esos lugares...{C053}{WAIT}{CLEAR}\nLa clave para encontrar las{NL}\nBolsas Cerdiablo es buscar{NL}\nen las zonas que han sido{NL}\nhechizadas.{WAIT}{CLEAR}\n",
    "381": "{BOX 200 55}\n{VOICE 6 0}{MOVE 0 0}¡Anda, mi túnel!{NL}\n¡Gracias por la ayuda!{NL}\n¡Por fin puedo escapar!{WAIT}{CLEAR}\n",
    "382": "{BOX 224 55}\n{VOICE 6 8192}{MOVE 0 0}Soy... un guardia...{NL}\n¿Que qué vigilo?{NL}\n...No te lo puedo decir...{WAIT}{CLEAR}\n",
@@ -3828,7 +3867,8 @@
    "208": "{BOX 152 42}\n{MOVE 0 0}Ciudad oculta{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "209": "{BOX 152 42}\n{MOVE 0 0}Ciudad de Enanos{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
    "210": "{BOX 160 42}\n{MOVE 0 0}Cabaña Enano Mayor{C053}{WAIT}{CLEAR}\n{CHOICE}¿Guardar datos?  {NL}\nSí⮊✕ No⮊○{WAIT}{CLEAR}\n",
-   "67": "{BOX 72 29}\nVálvula{NL}\n"
+   "67": "{BOX 72 29}\nVálvula{NL}\n",
+   "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   }
  },
  "glyphShift": {

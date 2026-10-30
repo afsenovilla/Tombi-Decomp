@@ -17,7 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TITLES = {
     6:   ("A Big/Puddle?", "¿Un gran/charco?"),                       # 大きな水たまり？
     18:  ("The Dwarves'/Help", "La ayuda de/los Enanos"),             # ドワーフの助け
-    45:  ("AP Slot/Machine", "Tragaperras/de PA"),                    # ＡＰスロットマシーン
+    45:  ("AP Slot/Machine", "Tragaperras/de AP"),                    # ＡＰスロットマシーン
     52:  ("No Way/Across...", "Ya no se/puede cruzar..."),            # 渡れなくなっちゃった…
     59:  ("The Chief's/Favor?", "¿El encargo/del jefe?"),             # 族長のたのみごと？
     60:  ("Masakari/Language", "Idioma/Masakari"),                    # コトバを吸いとろう！Ⅱ (learn the Masakari words)
