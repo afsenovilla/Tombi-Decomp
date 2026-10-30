@@ -31,7 +31,7 @@ LINES = [
     (3, "Bajo el suelo hay{NL}un laberinto."),
     (1, "La madera es lo mejor.{NL}La piedra es fría."),
     (2, "No funciona, pero es{NL}de hierro..."),
-    (0, "Aquí vive una adivina,{NL}pero pone una condición."),
+    (0, "Aquí vive un adivino,{NL}pero pone una condición."),
     (4, "A esa choza se llega{NL}por debajo del suelo."),
     (6, "Al taller se entra{NL}por arriba."),
     (7, "Este cartel es viejo{NL}y peligroso."),

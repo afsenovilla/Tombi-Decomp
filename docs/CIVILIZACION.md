@@ -354,14 +354,14 @@ Los generadores ajustan tres variables de avance:
   - habitación 1: dos aldeanos.
   - habitación 2: un aldeano.
   - habitación 3: un aldeano (subtipo 4, `dlg 11`). `dlg 11` no tiene caso de conversación, así que `OpenDialogue`
-    devuelve 0 y por este camino no dice nada. Es el adivino verde (k3 dx16..19, ver «La adivina/adivino de la casa H3»).
+    devuelve 0 y por este camino no dice nada. Es el adivino verde (k3 dx16..19, ver «La adivino de la casa H3»).
   - en la calle: ocho aldeanos, seis de ellos patrullando (dos en vertical, tres en horizontal, uno en diagonal).
 - **Objetos**: 14. Tres objetos de tipo 2 están en las habitaciones 1..3, en los rectángulos de las casas. Los otros
   11 son objetos de la calle con animaciones 3..15.
 - **Diálogo** (`topdownA11ActorOpenDialogue` 0x800F1C88, por `dlg`):
   - 0 → (3,0)
   - 2/5 → (4,2) "esta máquina es de hierro..."
-  - 3 → (4,0) la choza de la adivina
+  - 3 → (4,0) la choza del adivino
   - 4 → (4,1) "la madera es lo mejor"
   - 6 → (4,3) el laberinto bajo el suelo
   - 7 → (4,4) "a esa choza sólo se llega por debajo del suelo"
@@ -374,7 +374,7 @@ Los generadores ajustan tres variables de avance:
     #220-#249; el constructor de balsas (#237-#241 "¿quieres una balsa? tráeme madera de debajo del Árbol Sabio...
     pum, clan... ¡ay!") es k3 dx10-14.
 
-### La adivina/adivino de la casa H3 (AREA11 subtipo 4)
+### La adivino de la casa H3 (AREA11 subtipo 4)
 
 - **Dibujo encontrado.** El hombre del turbante (hoja de la comunidad) es `AREA02/B300.GAM` palabras 64..127 (página 4 bpp
   en VRAM (192, 0) de AREA02 s3, los túneles; también la copia `SYSTEM/A02100`), píxel a píxel desde u 1. La versión
@@ -383,7 +383,7 @@ Los generadores ajustan tres variables de avance:
   mismo fichero es la verde**: sus 15 colores son exactamente los de la hoja; la fila 37 es la sombra. El adivino rojo
   no usa esta hoja con esta piel (ninguna fila del disco la tiene con ropa roja).
 - **Vecino.** AREA11 subtipo 4 (w1e 0x11 = página (64, 256), perdida en AREA11) es el vecino 12, el único de H3, junto al
-  vecino 4 («en esta choza vive una adivina»). Sus guiones (fotogramas 204..240) tienen exactamente la estructura y los
+  vecino 4 («en esta choza vive un adivino»). Sus guiones (fotogramas 204..240) tienen exactamente la estructura y los
   tiempos de los 10..46 del adivino de los túneles (f = f_final + 194): es el Adivino Verde, no el constructor de
   balsas. Su `dlg 11` no tiene caso en PAL y nada inicia el evento 89.
 - **Sus frases sobreviven, su código no.** Banco de AREA11 k3 dx16..19 = PAL MFNT110 #243-#246 (traducidas en todos
@@ -633,7 +633,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 | 1 | (88, 240) | C1 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 1: «...Ahora puedo hacer algo muy interesante...» (texto PAL #227) |
 | 2 | (12, 256) | C1 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 1: no habla, activa una bandera |
 | 3 | (16, 352) | C2 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 2: «No funciona, pero esta máquina es de hierro... me vendría bien» |
-| 4 | (400, 520) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla diagonal: «En esta choza vive una adivina, pero pone una condición» |
+| 4 | (400, 520) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla diagonal: «En esta choza vive una adivino, pero pone una condición» |
 | 5 | (300, 470) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla horizontal: «La madera es lo mejor; la piedra y el hierro son fríos» |
 | 6 | (170, 528) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla horizontal: «No funciona, pero esta máquina es de hierro...» |
 | 7 | (172, 424) | calle | «Male Lumberjack Town Resident» (vecino de Lumberjack Town) — Vecino: «Bajo el suelo hay un laberinto; no te metas sin cuidado» |

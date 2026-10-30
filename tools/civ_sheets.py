@@ -162,7 +162,7 @@ AREAS={
  'Casa 1: «...Ahora puedo hacer algo muy interesante...» (texto PAL #227)',
  'Casa 1: no habla, activa una bandera',
  'Casa 2: «No funciona, pero esta máquina es de hierro... me vendría bien»',
- 'Patrulla diagonal: «En esta choza vive una adivina, pero pone una condición»',
+ 'Patrulla diagonal: «En esta choza vive una adivino, pero pone una condición»',
  'Patrulla horizontal: «La madera es lo mejor; la piedra y el hierro son fríos»',
  'Patrulla horizontal: «No funciona, pero esta máquina es de hierro...»',
  'Vecino: «Bajo el suelo hay un laberinto; no te metas sin cuidado»',

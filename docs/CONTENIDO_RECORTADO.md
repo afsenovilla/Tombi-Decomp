@@ -121,7 +121,7 @@ Tabla completa en notes/secrets.md, "Where the 0xFF events are started / complet
   de la Ciudad de hierro recortada al dar la Rueda de hierro (AREA17 s0, `npcSet0FSceneStep4`). Ese herrero es el único código que da el objeto 0x3E.
 - **76 (Agua negra)** y **99 (¡¿Dónde está el material?!)** solo se inician en la Ciudad de hierro recortada (AREA17 s0) y nada los completa. **61** solo lo lee el diálogo de la Ciudad de Piedra recortada.
 - **Los otros 19** (6, 18, 45, 52, 59, 60, 67, 74, 83, 89, 94, 95, 96, 100, 138, 139, 140, 184, 186) no tienen código, datos de sala ni script que los inicie, complete o lea.
-  **89 (Adivina verde)** es uno de ellos. Su único contexto es una frase del pueblo de madera recortado: "en esta choza vive una adivina, pero tiene una condición" (AREA11 s0).
+  **89 (Adivino verde)** es uno de ellos. Su único contexto es una frase del pueblo de madera recortado: "en esta choza vive un adivino, pero tiene una condición" (AREA11 s0).
 
 ## Notas de Folkin — verificación (afirmaciones fuera de Civilización)
 
@@ -131,7 +131,7 @@ hemos comprobado.
 
 | Afirmación | Veredicto | Pruebas |
 |---|---|---|
-| Adivina verde, recortada del todo | **en parte** | El evento 89 tiene icono propio (fotograma 227, "adivina verde", ver Iconos de evento), pero no está en `SUBSCREEN_EVENT_ORDER` y ningún código lo inicia. La versión final tiene "The Red Fortune Teller" (CFNT #69) y "The Blue Fortune Teller" (#125). El objeto sin usar 90 es una carta "para las tres hermanas". No hemos mirado sprites. |
+| Adivino verde, recortada del todo | **en parte** | El evento 89 tiene icono propio (fotograma 227, "adivino verde", ver Iconos de evento), pero no está en `SUBSCREEN_EVENT_ORDER` y ningún código lo inicia. La versión final tiene "The Red Fortune Teller" (CFNT #69) y "The Blue Fortune Teller" (#125). El objeto sin usar 90 es una carta "para las tres hermanas". No hemos mirado sprites. |
 | Jefe Funga recortado; eventos de castigo, tambor y lanza | **en parte** | Objetos sin usar: Funga Leather / Tree / Sap (119/122/123, JP "material del tambor"), Small Drum (137) y Chief's Spear (140). Sus listas de comprobación de uso son `subScreenCondFalse` (D0SPSUB `D_800FECE8`) y ningún código los da. No hay sprite del jefe ni evento de castigo. |
 | Anciano de Lumberjack Town, recortado del todo | **confirmado** | Sus fotogramas cenitales están en `SYSTEM/A06100` (fotogramas extra 30..50 del subtipo 0 de AREA11, AREA11/CLUT02 fila 36). Pertenecen a la AREA11 s0 recortada, "Lumberjack Town" ([CIVILIZACION.md](CIVILIZACION.md)). |
 | Pez globo y caracola, recortados del todo | sin verificar | |
