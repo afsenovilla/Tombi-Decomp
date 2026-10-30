@@ -48,12 +48,21 @@ LINES = [
 ]
 
 
-# AREA16 / AREA17 s0: Spanish glosses of the Japanese lines (AREA16/A003.GAM and AREA17/A003.GAM WFM2 block 0,
-# tools/jp_text.py) for the PAL slots that hold "···??", by dialogue index of the PAL bank. "/" = new line,
-# "|" = next box (the JP {C:▼} page break). Only the residents' lines of AREA17 (#213-#218, #255, #257-#259,
-# #262-#268, #270-#289); its scripted generator scene (#219-#239, #253, #254) is left as it is.
+# AREA11 / AREA16 / AREA17 s0: Spanish glosses of the Japanese lines (AREAnn/A00x.GAM WFM2 block 0, tools/jp_text.py)
+# for the PAL slots that hold "···??", by dialogue index of the PAL bank (PAL # = JP block # + 17 in AREA11/17, + 23 in
+# AREA16). "/" = new line, "|" = next box (the JP {C:▼} page break). AREA11 here holds only the slots outside k4 (the
+# raft maker #237/#238/#241, JP #220/#221/#224; k4 is LINES). Every "···??" slot of the three banks is filled except
+# the AREA11 save prompt #207 (JP town name バッカスの村).
 AREA_LINES = {
+    11: {
+        237: "¿Qué pasa? ¿Querías algo?|Soy artesano de balsas,/solo hago balsas...|pero últimamente ya/nadie las necesita...",
+        238: "¿Qué? ¿Que q-quieres/una balsa?|¡Qué alegría me das!/¡De acuerdo!|Yo lo preparo todo en/el taller; tú tráeme/madera.",
+        241: "Toc, toc... ñic, ñic.../¡Crac!... ¡Ay!... Toc...|¡Ya está! Úsala en el/río de la colina del/árbol noble y a navegar.",
+    },
     16: {
+        208: "Mmm... Quiero fabricar/algo...|Algo que valga la pena,/donde pueda lucir/mi habilidad...",
+        209: "¡¿Qué?! ¿Te atrapó la/tribu Masakari?/¡Menos mal que estás bien!",
+        210: "Por cierto...|He oído que los Masakari/hacen sus fiestas con el/gran tambor Funga.|Dicen que suena de/maravilla, pero cuesta/conseguir el material.|¡Ya sé! Quizá el Árbol/del saber sepa algo...",
         230: "¡Aúpa... YA!",
         231: "¡Hop... AAAH!",
         232: "Esto pegado a la pared/parece un ascensor.../pero no se mueve.",
@@ -74,6 +83,29 @@ AREA_LINES = {
         247: "Hermano, tú vencerás/al Cerdiablo que hechizó/este país, ¿verdad?",
     },
     17: {
+        219: "¿Qué tal? ¿Se movió el/engranaje?|...Ya me lo imaginaba.|El doctor Gantetsu me/ha mandado a buscarte.|Para mover la torre no/basta con el engranaje...|Las máquinas necesitan/electricidad. Pregúntale/los detalles a Gantetsu.",
+        221: "...Así que esto es el/generador... Pero ¿cómo/se pone en marcha?",
+        222: "¡Lo demás déjanoslo/a nosotros!",
+        223: "Mmm... Primero,/el combustible...",
+        224: "...Pero ¿de dónde/sacamos eso?",
+        225: "Mmm... A ver.../Si tuviéramos carbón...",
+        226: "¿Carbón...? ¡Espera!/Creo que había en algún/sitio del pueblo de madera...",
+        227: "¡Muy bien!/¡Pues manos a la obra!",
+        228: "¡Déjamelo a mí!",
+        229: "¡Aúpa! ¡Aúpa!",
+        230: "¡Muy bien!/¡Allá vamos!",
+        231: "¡¿Q-qué pasa?!",
+        232: "...Se ha parado...",
+        233: "...Parece que se ha/sobrecalentado...",
+        234: "¿Sobrecalentado?",
+        235: "Sí, el calor ha parado/la máquina.../Pero ¿qué hacemos ahora?",
+        236: "¡Ya lo tengo!/¡Esto es cosa mía!/...¡Esperad un momento!",
+        237: "Esto, esto... y ahora/lo pongo justo aquí...",
+        238: "Bueno... con esto/ya está.../¡Un ventilador apañado!",
+        239: "¡Otra vez!/¡Vamos allá!",
+        253: "...Con tanto óxido.../no se mueve ni empujando/ni tirando.",
+        254: "¡Has encendido el/interruptor!",
+        261: "¿Cómo se hace una bomba?|¡Ja, ja, ja!/...¿Te lo has creído?|Qué inocente eres...|Bueno, es verdad que/nadie había llegado/tan lejos.|¡Venga, probemos!/Pero tendrás que traerme/algunas cosas...",
         213: "¿Eh? ¿Qué quieres?|Aunque no lo parezca,/soy un herrero de primera.|Si quieres algo de hierro,/ven cuando quieras.",
         214: "¿Un engranaje de hierro?|¡Ja, ja! Eso lo hago/en un periquete...|...si tuviera hierro./Tráeme el material/y te lo hago enseguida.",
         215: "¡Buen material!/Espera un momento...",
@@ -138,7 +170,15 @@ LINES_EN = {
 }
 
 AREA_LINES_EN = {
+    11: {
+        237: "What is it? Need something?|I'm a raft maker, I only/make rafts...|but lately nobody/needs them anymore...",
+        238: "What? Y-you want/a raft?|You've made my day!/All right!|I'll get things ready/at the workshop; you/bring me some wood.",
+        241: "Tap, tap... creak, creak.../Crack!... Ouch!... Tap...|Done! Use it at the river/by the hill with the old/tree and off you go.",
+    },
     16: {
+        208: "Hmm... I want to make/something...|Something worth making,/to show off my skill...",
+        209: "What?! The Masakari/tribe caught you?/Lucky you got out OK!",
+        210: "By the way...|I hear the Masakari hold/their festivals with the/great Funga Drum.|They say it sounds/great, but the materials/are hard to find.|I know! Maybe the Tree/of Knowledge knows...",
         230: "Heave... HO!",
         231: "Hup... WAAAH!",
         232: "This thing on the wall/looks like an elevator.../but it won't move.",
@@ -159,6 +199,29 @@ AREA_LINES_EN = {
         247: "Big brother, you'll beat/the Evil Pig who cursed/this land, right?",
     },
     17: {
+        219: "How did it go? Did the/gear move?|...I thought not.|Doctor Gantetsu sent/me after you.|Fixing the gear isn't/enough to run the tower...|Machines need/electricity. Ask Gantetsu/for the details.",
+        221: "...So this is the/generator... But how do/you start it?",
+        222: "Leave the rest/to us!",
+        223: "Hmm... First,/the fuel...",
+        224: "...But where do we/get something like that?",
+        225: "Hmm... Let's see.../If only we had coal...",
+        226: "Coal...? Hold on!/I think there was some/in the wood village...",
+        227: "All right!/Let's get started!",
+        228: "Leave it to me!",
+        229: "Heave! Ho!",
+        230: "All right!/Here we go!",
+        231: "Wh-what's going on?!",
+        232: "...It stopped...",
+        233: "...Looks like it/overheated...",
+        234: "Overheated?",
+        235: "Yeah, the heat stopped/the machine.../But now what do we do?",
+        236: "I've got it!/This is a job for me!/...Wait right there!",
+        237: "This one... and now/it goes right here...",
+        238: "There... that should/do it.../An instant cooling fan!",
+        239: "Once more!/Here goes!",
+        253: "...With all this rust.../it won't budge, push/or pull.",
+        254: "You flipped the/switch!",
+        261: "How to make a bomb?|Ha ha ha!/...You believed me?|You're too honest...|Well, it's true nobody/has ever gone that far.|All right, let's try!/But you'll have to bring/me a few things...",
         213: "Huh? What do you want?|I may not look it, but/I'm a first-class smith.|If you need something iron,/come by anytime.",
         214: "An iron gear?|Ha ha! I can make that/in no time...|...if I had iron./Bring me the material/and I'll make it at once.",
         215: "Good material!/Wait a moment...",
@@ -287,6 +350,8 @@ def build_wfm(data, out_wfm, lang="S"):
     p.langs = {lang}
     for d, t in lines:
         p.edits.setdefault(wfm, {})[BASE_K4 + d] = "{BOX 256 42}{VOICE 6 0}{MOVE 0 0}" + t + "{WAIT}{CLEAR}"
+    for n, t in lang_lines(lang)[1][11].items():     # the other "···??" slots of the bank (raft maker)
+        p.edits[wfm][n] = dialogue(t)
     f, errors = p.encode_edited()
     if errors:
         raise SystemExit("\n".join(errors[:10]))

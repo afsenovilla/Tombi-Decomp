@@ -727,8 +727,15 @@ the one main WFM (`WFM3_DATA[0]`, line = u16 group start at +0x10 + 2k, plus dx)
 open their boxes without a talk step, so `--civ-wfm` now also swaps the town's bank in at `npcSet0ESceneStep1` /
 `npcSet0FSceneStep1` (`port/fixes.txt`). The H4 lines (2,0..4) = #208-#212 are AREA17's own PAL text: the two
 residents talk about swimming up the Masakari to the waterfall ("¿Sabías que si nadas contra la corriente del
-Masakari...?" / "Did you know, if you swim against the current..."; AREA08's #209.. are other lines). Still "···??":
-AREA16 #208-#210 and AREA17 #219-#239, #253, #254, #261; the JP disc (game_jp) was not available to translate them.
+Masakari...?" / "Did you know, if you swim against the current..."; AREA08's #209.. are other lines). The other
+"···??" slots are now translated from the JP disc too (PAL # = JP block # + 17 in AREA11/17, + 23 in AREA16, found by
+matching the surrounding PAL lines): AREA16 #208-#210 (the H4 craftsman, JP #185-#187: wants to build something, the
+Masakari, the Funga drum), AREA17 #219, #221-#239 (the JP generator start-up scene: fuel, coal, overheating, the
+improvised fan; JP #202-#222), #253 (the rusted castle door), #254 ("switch on!"), #261 (Gantetsu agrees to make a
+bomb), and AREA11 #237/#238/#241 (the raft maker, JP #220/#221/#224). No code of the rebuilt towns opens AREA17
+#219-#239 (PAL X017 runs its own rewritten scene with #220/#240+), so they were checked by putting them in resident 6's
+slot (#271): every page renders in `--lang 5` and `0`. Only the AREA11 save prompt #207 stays "..........???" (JP
+names the town バッカスの村).
 
 **Collision** (`tools/civ_rebuild.py`, layout `towns.N.collision`): editable shapes in picture px, traced over the
 v2 pictures: `{"t": "wall", "poly": [...]}`, `{"t": "line", "pts": [...], "w": px}` (fences, railings), `{"t":

@@ -750,8 +750,16 @@ sigue oculto: su tabla por área y sus glifos están en los datos perdidos del p
 `showMessageBoxDirect(k, dx)` son grupos del mismo WFM principal (línea = inicio del grupo k en +0x10 + dx; AREA17: 0,
 207, 208, 257, 269, 270; AREA16: 0, 207, 208, 230, 248), así que ya están en `civ_MFNT170<L>.WFM`. Como las escenas
 abren cuadros sin paso de diálogo, `--civ-wfm` cambia también el banco en `npcSet0ESceneStep1` / `npcSet0FSceneStep1`.
-Las líneas de H4 (2,0..4) = #208-#212 son texto PAL propio de AREA17 (la corriente del Masakari y la cascada). Siguen
-en "···??": AREA16 #208-#210 y AREA17 #219-#239, #253, #254, #261 (sin disco JP para traducirlas).
+Las líneas de H4 (2,0..4) = #208-#212 son texto PAL propio de AREA17 (la corriente del Masakari y la cascada). Los
+demás huecos "···??" ya están traducidos del disco JP (n.º PAL = n.º del bloque JP + 17 en AREA11/17, + 23 en AREA16,
+casando las líneas PAL vecinas): AREA16 #208-#210 (el artesano de H4, JP #185-#187: quiere fabricar algo, los
+Masakari, el tambor Funga), AREA17 #219, #221-#239 (la escena JP del arranque del generador: combustible, carbón,
+sobrecalentamiento, el ventilador apañado; JP #202-#222), #253 (la puerta oxidada del castillo), #254 («¡Has encendido
+el interruptor!»), #261 (Gantetsu acepta hacer una bomba) y AREA11 #237/#238/#241 (el artesano de balsas, JP
+#220/#221/#224). Ningún código de los pueblos reconstruidos abre AREA17 #219-#239 (el X017 PAL usa su propia escena
+reescrita con #220/#240+), así que se comprobaron poniéndolas en el hueco del vecino 6 (#271): todas las páginas se ven
+bien con `--lang 5` y `0`. Solo queda el aviso de guardado de AREA11 #207 en "..........???" (el JP llama al pueblo
+バッカスの村).
 
 **Colisión** (`tools/civ_rebuild.py`, `towns.N.collision` del layout): formas editables en px del dibujo, calcadas
 sobre los dibujos v2: `{"t": "wall", "poly": [...]}`, `{"t": "line", "pts": [...], "w": px}` (vallas, barandillas),

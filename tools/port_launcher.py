@@ -197,7 +197,7 @@ CIV_SOURCES = ("civ_rebuild.py", "civ_rebuild_layout.json", "civ_test_data.py", 
 
 def civ_stamp():
     """What the cache was built from: the generator sources (bundled layout + build id when frozen) and data/'s MAIN0."""
-    h = hashlib.sha1(b"civ-cache 2")   # 2: one WFM bank per language (civ_MFNTnn0<letter>.WFM)
+    h = hashlib.sha1(b"civ-cache 3")   # 2: one WFM bank per language (civ_MFNTnn0<letter>.WFM); 3: AREA16/17 scene lines
     here = getattr(sys, "_MEIPASS", None) or os.path.dirname(os.path.abspath(__file__))
     for n in CIV_SOURCES:
         p = os.path.join(here, n)
