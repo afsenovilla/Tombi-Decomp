@@ -22,3 +22,7 @@ func_801191B4_slps01144 = 0x801191B4; // type:func size:0x168  PAL x002 0x80119F
 func_8011931C_slps01144 = 0x8011931C; // type:func size:0x6C  PAL x002 0x8011A0A8
 func_8011B724_slps01144 = 0x8011B724; // type:func size:0x130  PAL x002 0x8011C4EC
 func_8011B860_slps01144 = 0x8011B860; // type:func size:0xA8  PAL x002 0x8011C628
+func_8011896C_slps01144 = 0x8011896C; // type:func size:0xA0
+func_80118B8C_slps01144 = 0x80118B8C; // type:func size:0xC
+func_8011B854_slps01144 = 0x8011B854; // type:func size:0xC
+stubNop8011B908_slps01144 = 0x8011B908; // type:func size:0x8

@@ -19,6 +19,7 @@ Order by expected yield per effort: areas whose PAL twin is fully matched and th
 - [ ] Auto-match pass: reuse PAL C for every JP function whose masked bytes equal a matched PAL function
       (`config/slps01144/reuse.txt`, `tools/version_share.py`), all programs. Cheapest % gain.
 - [ ] Small areas to 100 %: X08 (3 f), X19 (3 f), X05 (22 f), X13 (11 f), X02 (41 f).
+      Partial: X05 16/22, X13 7/11, X02 27/41 (stubs, updateMightyFishFood); what is left in X08/X19/X05 is data mis-split as functions, X13 80115FD8 done, 801162DC (2196 B) and X02 big handlers open.
 - [ ] Cut towns X16 (77 %), X17 (68 %), X18 (73 %), X11 (37 %): finish; X18 also uses the teller lines.
 - [ ] Jungle X10 (62 %): finish; read every function with no PAL counterpart (notes/jp_retail.md).
 - [ ] Mid areas X01, X03, X04, X06, X09, X14.
