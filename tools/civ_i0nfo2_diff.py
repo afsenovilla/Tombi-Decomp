@@ -8,7 +8,7 @@
    windows of PAL I0NFO2's code (an embedded 0xF0 block). Prints name, size, sha1, hits.
 2. Per candidate: identical or not; if not, a word-level alignment (masked like tools/xmatch.py: j/jal targets, lui and
    the low 16 bits of loads/stores/addiu/ori are ignored) against PAL, reported per PAL symbol
-   (config/symbol_addrs_i0nfo2.txt + notes/data_names_i0nfo2.csv): symbols missing/changed, inserted target words.
+   (notes/functions_i0nfo2.csv + notes/data_names_i0nfo2.csv): symbols missing/changed, inserted target words.
    Civ functions (A11/A16/A17/A18, NpcSet0D..10, SectionStepC/D/E) also list immediate-level differences.
 3. Civ tables re-parsed through the address mapping: NPC_SET_0D/0E/0F/10 SpawnA/SpawnB records (residents: count,
    position, patrol box, behaviour, dialogue case, subtype), A11/16/17/18 actor defs, scenery defs, anim script counts,
@@ -48,10 +48,8 @@ def words(b):
 
 def symbols():
     syms = {}
-    for line in open(os.path.join(ROOT, "config", "symbol_addrs_i0nfo2.txt")):
-        m = re.match(r"\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+);", line)
-        if m:
-            syms[int(m.group(2), 16)] = m.group(1)
+    for r in csv.DictReader(open(os.path.join(ROOT, "notes", "functions_i0nfo2.csv"))):
+        syms[int(r["address"], 16)] = r["name"]
     p = os.path.join(ROOT, "notes", "data_names_i0nfo2.csv")
     if os.path.exists(p):
         for r in csv.DictReader(open(p)):
