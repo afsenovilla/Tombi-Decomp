@@ -385,6 +385,12 @@ src/x010/updateParallaxBackdropSprite.c | if (o->a.p.whole - 0x40 < 0x141 && o->
 # --title-bg (widescreen, runtime/titlebg.c): mark the ordering-table node the title background / logo sprites go into
 src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } addTilePrim(&r, 0, 0, 1);
 #
+# showMessageBox is matched as void, but on the console $v0 still holds openMessageBox's box when it returns, and the
+# sign handler (updateL4Type1AObject: o->msg), the AREA00 boatman and others keep that box; natively the value was
+# lost, so a sign's box was never seen closing (sign stuck in its read step, its event never started). Return it.
+src/showMessageBox.c | extern void openMessageBox(int a, int b, short *c, int d, int e); | extern void *openMessageBox(int a, int b, short *c, int d, int e);
+src/showMessageBox.c | void showMessageBox(int a, int b, short c, short d) | void *showMessageBox(int a, int b, short c, short d)
+src/showMessageBox.c | openMessageBox(a, b, s, 0, -1); | return openMessageBox(a, b, s, 0, -1);
 # --cut-content (port_cut_content, opt-in; console build unchanged): text cut from the game that the Japanese release
 # still has (tools/jp_text.py). 1) AREA00 boatman scene: after his third line (7,2) a00Variant0EventScene
 # ends the scene; with the flag it first shows the three unused lines (7,3), (7,4), (7,5) (MFNT000 #162-164).
@@ -393,7 +399,16 @@ src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc
 # 2) AREA03 letter (MFNT030 #208 = sign text (1,1), no sign shows it): next to the save-point sign of Phoenix Mountain
 # (subtype 25, AREA03 sections 0/4, x 440) spawn a sign of subtype 27 (D_80079EBC[27] = (1,1)) 40 px to its left (read with Up there, like the post).
 src/updateL4Type1AObject.c | void updateL4Type1AObject(O *o) | extern char *allocObjectLayer4(void); static void port_cc_letter(O *o) { extern int port_verbose; extern void port_printf(const char *, ...); char *n = allocObjectLayer4(); int i; if (!n) return; for (i = 0; i < 0x20; i++) n[i] = ((char *)o)[i]; n[3] = 27; n[4] = 0; n[0x2e] = ((char *)o)[0x2e]; n[0x6b] = ((char *)o)[0x6b]; *(int *)(n + 0xa0) = *(int *)((char *)o + 0xa0); n[0xa4] = ((char *)o)[0xa4]; *(int *)(n + 0x10) -= 40 << 16; if (port_verbose) port_printf("[port] --cut-content: AREA03 letter sign spawned at x %d\n", *(short *)(n + 0x12)); } void updateL4Type1AObject(O *o)
-src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; if (port_cut_content && o->subtype == 25 && GAME[0] == 3) port_cc_letter(o); } o->box0 = 4;
+src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; extern void port_cc_sign(void *, int, int); if (port_cut_content && o->subtype == 25 && GAME[0] == 3) port_cc_letter(o); if (port_cut_content) port_cc_sign(o, GAME[0], GAME[1]); } o->box0 = 4;
+# 2b) AREA05 notice board (MFNT050 (1,5) MISSING MOUSE, (1,7) ADVENTURER WANTED, (1,6) CONGRATULATIONS): spawnNpcSet09 (X005,
+# table D_80117AC8[GCD.bceed]) does place the board's sign in section 1, subtype 19 (-> 20 once the baby mouse is back,
+# -> 35 after event 50), at (28,-144) depth 90 next to the townsfolk who mentions it, but nothing Tombi can stand on is
+# within its hit depth (the ledge above the wall is at depth 144, |dz| 54 > 45; the ground is 88 px too low), so the
+# board was never readable and events 46/49 never started from it. port_cc_sign (runtime/main.c) moves it down to the
+# ground under the board; port_cc_sign_text shows the unused (1,6) once before the first (1,7) (mouse found, event 49
+# not started yet) and chains (1,7) after it. Save points restored with the same hook: port_cc_sign spawns them.
+src/updateL4Type1AObject.c | o->msg = showMessageBox(text, opt, 0xa0, 0x8c); | { extern void port_cc_sign_text(void *, int, int, int, unsigned short *, unsigned short *); port_cc_sign_text(o, GAME[0], D_8009CEED, D_8009CDD5, &text, &opt); } o->msg = showMessageBox(text, opt, 0xa0, 0x8c);
+src/updateL4Type1AObject.c | D_8009C942 = 0; | { extern void *port_cc_sign_next(void *); M *nm = (M *)port_cc_sign_next(o); if (nm) { o->msg = nm; break; } } D_8009C942 = 0;
 # 3) Silver / golden berries: the fruit item (item desc palette mode 1, CLUT 352,501 + (b0c & 0x7f)) has rows 503 silver and
 # 504 gold, and rewardHeart already pays 2 HP for b0c & 0x7f != 0, but no drop table ever uses b0c 2/3. Every table drop
 # (spawnItemDropsFromTable in each overlay, enemies and chests) goes through spawnItemFromEntry: remember the object it

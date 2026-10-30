@@ -733,6 +733,63 @@ int port_cc_berry_roll(void) {
     if (r <= 4) { if (port_verbose) port_printf("[port] --cut-content: silver berry\n"); return 2; }
     return 0;
 }
+/* --cut-content signs (port/fixes.txt 2b, updateL4Type1AObject). A sign object: type 0x1A, subtype = row of the MAIN0
+   sign table D_80079EBC (text group, line), x/y/z whole parts at +0x12/+0x16/+0x1a. Port-made signs use subtypes
+   0x40+i (no table row): port_cc_sign_text gives them their (group, line) from port_cc_saves[i]. */
+struct port_cc_save { short area, section, anchor, dx, dy, k, line; const char *what; };
+static const struct port_cc_save port_cc_saves[] = {
+    /* AREA06 s1 (Dirt Motocross finish beach): MFNT060 (1,0) "The Mermaid's Singing Rock / Save DATA?", which no
+       sign shows; the race man's (1,1) says the finish line is near the rock. 48 px left of the record board (subtype 36). */
+    { 6, 1, 36, -48, 0, 1, 0, "AREA06 Mermaid's Singing Rock save" },
+    { -1, 0, 0, 0, 0, 0, 0, 0 },
+};
+static void *port_cc_chain_obj; static unsigned short port_cc_chain_k, port_cc_chain_l;
+static void port_cc_spawn(unsigned char *o, int sub, int dx, int dy, int dz, const char *what) {
+    extern char *allocObjectLayer4(void);
+    unsigned char *n = (unsigned char *)allocObjectLayer4();
+    int i;
+    if (!n) return;
+    for (i = 0; i < 0x20; i++) n[i] = o[i];
+    n[3] = sub; n[4] = 0;
+    n[0x2e] = o[0x2e]; n[0x6b] = o[0x6b];
+    *(int *)(n + 0xa0) = *(int *)(o + 0xa0); n[0xa4] = o[0xa4];
+    *(short *)(n + 0x12) += dx; *(short *)(n + 0x16) += dy; *(short *)(n + 0x1a) += dz;
+    if (port_verbose) port_printf("[port] --cut-content: %s sign spawned at %d,%d,%d\n", what, *(short *)(n + 0x12), *(short *)(n + 0x16), *(short *)(n + 0x1a));
+}
+void port_cc_sign(void *obj, int area, int section) {
+    unsigned char *o = obj;
+    int i;
+    if (port_verbose > 1) port_printf("[port] --cut-content: sign AREA%02d s%d subtype %d at %d,%d,%d\n", area, section, o[3], *(short *)(o + 0x12), *(short *)(o + 0x16), *(short *)(o + 0x1a));
+    if (area == 5 && (o[3] == 19 || o[3] == 20) && *(short *)(o + 0x16) == -144 && *(short *)(o + 0x1a) == 90) {
+        /* AREA05 s1 notice board: from the unreachable depth-90 spot onto the ground under the board */
+        *(short *)(o + 0x16) = -60; *(short *)(o + 0x1a) = 0;
+        if (port_verbose) port_printf("[port] --cut-content: AREA05 notice board (subtype %d) moved to %d,-60,0\n", o[3], *(short *)(o + 0x12));
+        return;
+    }
+    for (i = 0; port_cc_saves[i].area >= 0; i++) {
+        const struct port_cc_save *s = &port_cc_saves[i];
+        if (s->area == area && s->section == section && s->anchor == o[3])
+            port_cc_spawn(o, 0x40 + i, s->dx, s->dy, 0, s->what);
+    }
+}
+void port_cc_sign_text(void *obj, int area, int bceed, int ev49, unsigned short *text, unsigned short *opt) {
+    unsigned char *o = obj;
+    if (!port_cut_content) return;
+    if (o[3] >= 0x40) { *text = port_cc_saves[o[3] - 0x40].k; *opt = port_cc_saves[o[3] - 0x40].line; return; }
+    if (area == 5 && o[3] == 20 && bceed == 2 && ev49 == 0) {
+        /* the baby mouse is back and the pump notice was never read: CONGRATULATIONS (1,6) first, then (1,7) */
+        *text = 1; *opt = 6;
+        port_cc_chain_obj = obj; port_cc_chain_k = 1; port_cc_chain_l = 7;
+    }
+}
+void *port_cc_sign_next(void *obj) {
+    extern void *showMessageBox(short, short, int, int);
+    if (!port_cut_content || obj != port_cc_chain_obj) return 0;
+    port_cc_chain_obj = 0;
+    { void *m = showMessageBox(port_cc_chain_k, port_cc_chain_l, 0xa0, 0x8c);
+      if (port_verbose) port_printf("[port] --cut-content: notice board continues with (%d,%d) box %p\n", port_cc_chain_k, port_cc_chain_l, m);
+      return m; }
+}
 int main(int argc, char **argv) {
     extern void port_pad_script(const char *), port_poke_add(const char *), port_poke_add_every(const char *, int),
         port_menu_add(const char *), port_title_add(const char *), port_dump_ram_add(const char *);

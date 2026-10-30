@@ -2183,6 +2183,24 @@ MDEC movies are not textures here (the intro landscape is a movie). A replacemen
 blended. Changing a texture's pixels by a sub-upload keeps the larger upload's key for boxes outside the changed part.
 Debug: `TEXPACK_LOG=1` prints uploads, invalidations and unkeyed boxes.
 
+### `--cut-content`: signs (notice board, extra save point) and the sign box fix
+
+`--cut-content` (launcher: *Cut content* page) now also makes the AREA05 notice board readable and adds the AREA06
+Mermaid's Singing Rock save point (docs/CUT_CONTENT.md, Restored). Both go through one port hook on sign set-up,
+`port_cc_sign` (port2/runtime/main.c, rule in port/fixes.txt on `updateL4Type1AObject`): the board sign that
+`spawnNpcSet09` places out of reach (AREA05 s1, depth 90) is moved to the ground under the painted board, and
+`port_cc_saves` lists port signs spawned next to an existing sign (area, section, anchor subtype, offset, text group
+and line; subtypes 0x40+i, their text set by `port_cc_sign_text`). `-v` logs each spawn/move, `-v -v` every sign set
+up. Check: `--cut-content --skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:5:2 --poke 1250:8009C962:1:2
+--pad-script 1000:start,1300:circle:3,2400:left:20,2500:up:60,2540:square:3,2700:cross:3x10/150` (MISSING MOUSE, then
+the event-46 title; add `--poke 1250:8009CEED:2:1` for CONGRATULATIONS + ADVENTURER WANTED and event 49); AREA06 s1:
+`2100:right:68,2300:up:60,2340:square:3,2500:cross:3,2650:cross:3,...` saves a block named "La roca de la sirena".
+
+Not tied to the option: `showMessageBox` is matched as `void` (on the console `$v0` still holds openMessageBox's box),
+but `updateL4Type1AObject` keeps that box to see it close; natively it got NULL, so every sign stayed in its read
+step after its text (its close code, and the events 0x25/0x2E/0x31 it starts, never ran). port/fixes.txt now makes the
+port's `showMessageBox` return the box.
+
 ### Open points / next
 
 1. The "code labels kept" of a loaded overlay (2312 for X000, 2298 in the audit's `label-jtbl` column plus 9
