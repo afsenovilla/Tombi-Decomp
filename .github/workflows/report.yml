@@ -462,7 +462,7 @@ jobs:
           if [ -n "$GAME_FILES_URL_JP" ]; then fetch GAME_FILES_URL_JP "$RUNNER_TEMP/rjp" && tree "$RUNNER_TEMP/rjp" "$RUNNER_TEMP/tjp" || echo "::warning::JP retail fetch failed"; fi
           if [ -n "$GAME_FILES_URL_USA" ]; then fetch GAME_FILES_URL_USA "$RUNNER_TEMP/rusa" && tree "$RUNNER_TEMP/rusa" "$RUNNER_TEMP/tusa" || echo "::warning::USA retail fetch failed"; fi
           if [ -n "$GAME_FILES_URL" ]; then fetch GAME_FILES_URL "$RUNNER_TEMP/rpal" && tree "$RUNNER_TEMP/rpal" "$RUNNER_TEMP/tpal" || echo "::notice::PAL is not a disc image; no PAL tree"; fi
-          if [ -d "$RUNNER_TEMP/tusa" ]; then echo "### USA event-title tables"; python3 -I tools/event_titles.py "$RUNNER_TEMP/tusa" || true; else echo "::notice::No USA retail tree (GAME_FILES_URL_USA empty?): no USA event-title tables."; fi
+          if [ -d "$RUNNER_TEMP/tusa" ]; then echo "### USA event-title tables"; P=""; m="$(find "$RUNNER_TEMP/tpal" -iname MAIN0.EXE 2>/dev/null | head -1)"; [ -n "$m" ] && P="--pal $m"; python3 -I tools/event_titles.py "$RUNNER_TEMP/tusa" $P | tee -a "$GITHUB_STEP_SUMMARY" || true; else echo "::notice::No USA retail tree (GAME_FILES_URL_USA empty?): no USA event-title tables."; fi
           for r in JP USA; do
             v="GAME_FILES_URL_PSN_$r"
             if [ -z "${!v}" ]; then echo "::notice::$v secret not set; skipping $r."; continue; fi
