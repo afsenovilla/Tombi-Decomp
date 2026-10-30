@@ -660,6 +660,72 @@ bytes salieron glifos basura, así que caben seis de las 18 frases (`#249 #250 #
 directamente en memoria antes de que hable un vecino, así se oyen todas (comprobado: con los datos originales y esta
 opción, el vecino 9 dice su frase traducida).
 
+## Pueblos jugables (`--civ-town`, sólo en la versión para PC)
+
+Los tres pueblos reconstruidos funcionan en su propia ranura (la sección 0 de AREA11, AREA16 y AREA17, las secciones
+recortadas de verdad), con el código del propio pueblo (juegos de NPC 0D/0E/0F, salidas StepC/D/E, manejadores de
+vecinos y de diálogo). Todo es sólo de la versión para PC y opcional; la versión de consola no cambia (reglas en
+`port/fixes.txt`, condicionadas a `port_civ_test`).
+
+```
+python3 tools/civ_rebuild.py --out OUT/maps [--refdir IMAGENES] [--community-cluts CLUTGEN]   # dibujos, celdas, salas
+python3 tools/civ_test_data.py OUT/civdata              # civ_MFNT110S/160S/170S.WFM (frases del JP en castellano)
+OUT/bp/tombi2 --lang 5 --civ-town 17 --civ-maps OUT/maps --civ-wfm OUT/civdata [--civ-collision]
+OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata      # por el cruce, jugando normal
+```
+
+- `--civ-town 11|16|17` equivale a `--civ-test` más el selector de áreas de depuración abierto en la sección 0 de ese
+  pueblo (Start y luego Círculo, como hacían los pokes del comando anterior). Tomba empieza justo dentro de la salida
+  que viene de la Ciudad de civilización (AREA11 mundo (530, 410), AREA16 (-95, 524), AREA17 (223, 540);
+  `--civ-spawn X,Y` lo cambia). Los límites de la cámara siguen al dibujo reconstruido (x máx = An - 288,
+  y máx = Al - 112).
+- `--civ-maps DIR` carga `DIR/AREAnn/map8F.tim` y `map8E.bin`, y la vista de sala `map8F_in.tim`.
+- `--civ-collision` pone en su lugar los dibujos de depuración `map8F_cells.tim` / `map8F_in_cells.tim`: el mapa de
+  celdas teñido sobre el dibujo (rojo macizo 9, naranja diagonal 1-4, magenta muro de un lado 5-8, cian disparador,
+  cada celda con su borde), para comprobar el encaje mientras se camina.
+- `--civ-wfm DIR` da a cada pueblo su banco traducido (`civ_MFNT110S.WFM`, `civ_MFNT160S.WFM`, `civ_MFNT170S.WFM`);
+  un archivo en vez de una carpeta sigue valiendo para AREA11.
+- `--civ-route` (opcional): el cruce AREA18 s1 manda sus salidas 0/1/2 a 11:0, 17:0 y 16:0 en vez de 11:1, 17:1 y
+  16:4, y la salida de arriba de la Ciudad de piedra (hacia la 16:1 recortada) sigue hasta la 16:4. Las salidas de
+  los pueblos ya llevan a 11:1 / 17:1 y de vuelta a 18:1. Comprobado: andando a la derecha desde el cruce se entra en
+  la Ciudad de piedra reconstruida. Necesita `--civ-maps`.
+
+**Vecinos.** El subtipo 0 de AREA11 (el trabajador del casco, AREA11/CLUT02 fila 4), los subtipos 0/1/2 de AREA16
+(filas 21/37/53 de AREA16/CLUT07) y el subtipo 0 de AREA17 (AREA17/CLUT03 fila 1) se dibujan de su página que
+sobrevive con su fila real (una figura de pie por vecino: las tablas que ordenan los fotogramas se perdieron). Los
+demás subtipos llevan el aldeano de AREA08 (su página cargada en la VRAM x 512) con una fila real de vecino del pueblo
+(AREA11 36, AREA16 54, AREA17 49), porque las filas propias del aldeano no están en el bloque CLUT del pueblo. El
+decorado y los objetos con tablas perdidas (tejados, carteles, el ascensor, las plataformas) no se dibujan; su lógica
+sí funciona.
+
+**Salas.** El motor oculta la capa del mapa mientras hay una sala activa (Tomba en una celda disparadora dentro de la
+casa n) y dibuja los muebles como objetos, cuyas tablas se perdieron. El port mantiene la capa y la construye con
+`map8F_in.tim`: negro, y cada rectángulo de casa con su interior emparejado (`interiors` del layout). Al salir vuelve
+el dibujo del pueblo. Los vecinos de la sala n aparecen como los muestra el motor.
+
+**Colisión** (`tools/civ_rebuild.py`, `towns.N.collision` del layout): formas editables en px del dibujo, calcadas
+sobre los dibujos v2: `{"t": "wall", "poly": [...]}`, `{"t": "line", "pts": [...], "w": px}` (vallas, barandillas),
+`{"t": "rect", "r": [x, y, an, al]}`, `{"t": "water"}` (bloquea como un muro: el motor de vista desde arriba no tiene
+forma de agua ni de caída) y `{"t": "floor"}` (abre, en orden). Cada una lleva su `note`. La rasterización da celdas
+al estilo de los mapas reales, porque el 9 del motor es una esquina y no un relleno (`topdownResolveCornerTile` saca
+la sonda por el cuadrante y se rinde si la celda siguiente también está bloqueada, así que Tomba atraviesa un bloque
+si entra por su borde): una celda maciza con un solo lado libre pasa a ser el muro de un lado que empuja hacia él
+(5 izquierda, 6 arriba, 7 derecha, 8 abajo), las celdas de esquina medio cubiertas pasan a diagonales 1-4, y las
+esquinas y el interior quedan en 9, como en AREA05/08/19. Después van las casas (muros en el rectángulo disparador del
+código, o en `body` cuando un vecino de la sala 0 está en su patio delantero, un hueco de puerta y el interior
+disparador), el borde del dibujo (cerrado salvo en los rectángulos de salida), los vecinos (cada aparición y cada caja
+de patrulla se abre a suelo) y una comprobación de alcance (relleno desde la aparición de entrada, `spawn` del layout;
+se avisa de cada vecino o salida a los que no se puede llegar andando). Lo calcado: en la Ciudad de hierro la roca,
+las vallas de pilares, los muros de la fortaleza, las farolas, la torre de la llave, los bloques del edificio de
+delante con un paso de la puerta redonda a la cúpula, la muralla con la puerta redonda, los faroles y el cubo; en la
+Ciudad de madera los setos y las vallas de troncos, la aguja, la casa grande, la base del molino, la casa del muelle,
+los arbustos y el caballete; en la Ciudad de piedra la muralla, las alas de las casas, el pilar roto, la cúpula de
+roca, los arcos y el pozo. Es nuestra lectura de los dibujos reconstruidos, no datos originales.
+
+**Comprobado sin ventana** (capturas con `--dump-frames`): en cada pueblo, andar con la capa de colisión y sin ella,
+entrar en una casa (AREA17 H5, AREA16 H1, AREA11 H3: aparecen la vista de sala y su ocupante) y un diálogo (AREA17
+vecino 6 «¿Quieres subir?», AREA16 vecino 7 «¿Entro o no entro...?», AREA11 vecino 9).
+
 ## Comprobación (tools/topdown.py)
 
 La herramienta reconstruye las secciones que funcionan sólo con datos del disco:
