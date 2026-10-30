@@ -84,6 +84,25 @@ The sub-screen event list is not changed. English / Spanish:
   184 (0xB8): "Am I a Bad Kid?" / «¿Soy un niño malo?»
   186 (0xBA): "The Masakari Village?" / «¿La aldea Masakari?»
 
+### Where the 0xFF events are started / completed (PAL and JP)  [V = binary scan, I = inferred]
+Method: every `jal` to `awardEventProgress` / `setEventStarted` / `setEventComplete` / `getEventState` (PAL 0x8005A7A0/A8A8/A9A4/AA60, JP 0x8001C784/C88C/C988/CA3C)
+with an immediate a0, in MAIN0..8 and every X/I/D overlay of both discs (`/dev/shm` throw-away scanner); `lui 0x800A` + load/store of `SCRIPT_FLAGS` (0x8009CDA4) + E in the
+language-0 binaries; `objects.py events` (doors, sequences, AREA14 controller); the 9 WSS scripts; src/** (`setEvent*`, `o->wac` is a timer in enemies, not an event id here).
+**JP = PAL for every hit** (same functions in JP INFO2.BIN / X16.BIN). JP hint = DSPSUB.BIN block 1 dialogue E. Icon = `ICONS[E]` frame (see "Event icons" in docs/CUT_CONTENT.md).
+| E | started | completed | flag read | JP hint | verdict |
+|---|---|---|---|---|---|
+| 6, 18, 45, 52, 59, 60, 67, 74, 94, 95, 96, 100, 138, 139, 140, 184, 186 | nowhere | nowhere | nowhere | 6 "heard about a big puddle", 18 "have the lumberjack dwarf cut a tree", 45 "more AP = better item", 52 "no bridge, stuck", 59 "find the spear the chief lost", 60 "learn the Masakari language", 67 "decode the graffiti rock", 74 "catch the dangerous electric eel", 94 "don't compete, get along", 95 "stopped by a broken bridge", 100 "a door with a keyhole that won't open", 138 "keep calm, find the exit!!", 184 "friends matter", 186 "climb high to see far"; 96/139/140 "······???" | dead ids: no code, no data, no script references them [V]; icon and JP title only. 60/61/186 (Masakari), 94/95/96/100 (Wood village / bridge / Iron keyhole) belong to cut content by theme [I] |
+| 61 Masakari Secret | nowhere | nowhere | AREA16 s0 Stone town (I0NFO2 `topdownA16ActorOpenDialogue` case 8 / `topdownA16ActorDialogueBank2`): 0x3E started -> (2,2), 61 == 0 -> (2,0), else a counter | "solve the Masakari secret" | read only in the cut town [V] |
+| 76 Black Water (PAL #90) | AREA17 s0 Iron town scene `npcSet0FSceneStep1` (I0NFO2 0x800FC7D4; JP INFO2 +0x13E20), after (2,3)/(2,4) | nowhere | AREA17 bomb maker `topdownA17ActorDialogueBank3` (compares its byte with event 97's) | "a thing with dangerous power" | cut town only [V]. Item 109 "Black Water" is never given (no `addItemToInventory(0x6D)`) and its use-check (AREA18 s2) has no reaction |
+| 83 Rusty Steel Car (PAL #126) | nowhere | nowhere | nowhere | "how do you move the iron car?" | dead id [V]; tie to the AREA11 Factory "GoGo car" text is [I] |
+| 89 Green Fortune Teller | nowhere | nowhere | nowhere | "hear the green fortune-teller's story" | dead id [V]. Only context: AREA11 s0 (Wood village) villager dlg 3 "a fortune-teller lives in this hut, but she has a condition" and the ZZZ hut H3 (docs/CIVILIZATION.md); icon frame 227 |
+| 97 Stopped Clock Tower | AREA16 s0 Stone town scene `npcSet0ESceneStep1` (I0NFO2 0x800FBAC8; JP +0x13114), two Stone People, (2,5)..(2,9) | **X016 `brokenStoneGearsRepair`** (0x80117710; JP X16 0x80114FF0): use item 0x3E Iron Wheel at the gears (Clock Tower, AREA16 s3/s6) | AREA17 smith / bomb maker (== 0xFF = done) | "a clock with stopped hands" | start cut; completion in the side-view Clock Tower code [V]. `checkStoneGearsTrigger` only needs 97 != 0xFF, so it does not need the start. The Iron Wheel is given only by the cut AREA17 smith (`npcSet0FSceneStep4`, only immediate `addItemToInventory(0x3E)`); a data-driven chest was not ruled out |
+| 98 Unbreakable Gear? | **X016 `brokenStoneGearsTalk`** (0x801175E0; JP 0x80114EC0): Up at the gears, MFNT160 (4,0) "the stone gears are broken", when 98 == 0 | AREA17 s0 `npcSet0FSceneStep4` (I0NFO2 0x800FD844), with the Iron Wheel gift | AREA17 smith | "the clock tower's important gear" | start in the Clock Tower side view (loaded in AREA16 s1..s6) [V]; completion cut |
+| 99 Where's the Material!? | AREA17 s0 smith (`topdownA17ActorDialogueBank2` / `OpenDialogue`: `o->wac = 0x63` after (2,6) "an iron gear?") and `npcSet0FSceneStep2` | nowhere | smith: started -> (2,9) | "something tougher than stone?" | cut town only, never completed [V] |
+Conclusion: of the 24, only **97 (complete) and 98 (start)** have code outside the cut top-down towns, both in the X016 Clock Tower gears object; whether a retail player can reach
+them depends on the Clock Tower sections being loadable (docs/CIVILIZATION.md: AREA16 s4..s6 from AREA18 s1) and, for 97, on having the Iron Wheel. Everything else is either cut-town
+code (61, 76, 99 and the other halves of 97/98) or a dead id (20 events).
+
 ## Not done
 - Exhaustive proof that no overlay has a button sequence (checked: MAIN0 pad readers; overlay pad code not audited one by one).
 - Unreferenced dialogue / room / item text.

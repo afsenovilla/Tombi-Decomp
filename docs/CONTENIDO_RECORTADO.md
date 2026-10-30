@@ -112,6 +112,17 @@ La bomba (211, ev 106) sí se usa.
 - **PrePre8:** 59 charco, 67 hacha, 72 enano gorro verde.
 - **Retail:** conserva los ids de evento, con otros iconos o sin mostrarlos.
 
+## Eventos sin título PAL (0xFF): dónde se inician
+
+Tabla completa en notes/secrets.md, "Where the 0xFF events are started / completed". Es un escaneo estático de los dos discos (PAL = JP):
+- **97 "La torre del reloj parada"** lo inicia una escena de la Ciudad de Piedra recortada (AREA16 s0, I0NFO2 `npcSet0ESceneStep1`). Lo completa el objeto
+  de los engranajes de la Torre reloj (X016 `brokenStoneGearsRepair`) cuando se usa la Rueda de hierro (objeto 0x3E).
+- **98 "¿Un engranaje irrompible?"** se inicia en esos mismos engranajes (X016 `brokenStoneGearsTalk`, "los piñones de piedra están rotos"). Lo completa el herrero
+  de la Ciudad de hierro recortada al dar la Rueda de hierro (AREA17 s0, `npcSet0FSceneStep4`). Ese herrero es el único código que da el objeto 0x3E.
+- **76 (Agua negra)** y **99 (¡¿Dónde está el material?!)** solo se inician en la Ciudad de hierro recortada (AREA17 s0) y nada los completa. **61** solo lo lee el diálogo de la Ciudad de Piedra recortada.
+- **Los otros 19** (6, 18, 45, 52, 59, 60, 67, 74, 83, 89, 94, 95, 96, 100, 138, 139, 140, 184, 186) no tienen código, datos de sala ni script que los inicie, complete o lea.
+  **89 (Adivina verde)** es uno de ellos. Su único contexto es una frase del pueblo de madera recortado: "en esta choza vive una adivina, pero tiene una condición" (AREA11 s0).
+
 ## Notas de Folkin — verificación (afirmaciones fuera de Civilización)
 
 Las afirmaciones sobre Civilización se comprueban en [CIVILIZACION.md](CIVILIZACION.md) ("Notas de Folkin —

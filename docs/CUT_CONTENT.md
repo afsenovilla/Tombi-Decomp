@@ -103,6 +103,17 @@ The community sheet of icons is the **event list** page, not the inventory. `too
 - **PrePre8** (`SYSTEM/SYS008.000`, sprites in `AREA00/DATA000.GAM`, CLUT `CLUT00.GAM` x=608): 59 puddle (ev 6), 67 axe (ev 18), 72 green-hat dwarf (ev 14).
 - **Retail:** keeps the event ids. Events 6, 18, 32, 45 and 60 got new, unshown art. Events 44, 49, 167 and 14 are used in retail with a different icon.
 
+## Events with no PAL title (0xFF): where they are started
+
+Full table: notes/secrets.md, "Where the 0xFF events are started / completed". Static scan of both discs (PAL = JP):
+- **97 "The Stopped Clock Tower"** is started by a scene in the cut Stonetown (AREA16 s0, I0NFO2 `npcSet0ESceneStep1`) and completed by the Clock Tower
+  gears object (X016 `brokenStoneGearsRepair`, using the Iron Wheel, item 0x3E).
+- **98 "An Unbreakable Gear?"** is started at the same gears (X016 `brokenStoneGearsTalk`, "the stone gears are broken") and completed by the cut Iron Town
+  smith when he gives the Iron Wheel (AREA17 s0, `npcSet0FSceneStep4`). That smith is the only code that gives item 0x3E.
+- **76 (Black Water)** and **99 (Where's the Material!?)** are started only in the cut Iron Town (AREA17 s0) and completed nowhere. **61** is only read by the cut Stonetown dialogue.
+- **The other 19** (6, 18, 45, 52, 59, 60, 67, 74, 83, 89, 94, 95, 96, 100, 138, 139, 140, 184, 186) have no code, room data or script that starts, completes or reads them.
+  **89 (Green Fortune Teller)** is one of these. Its only context is the cut Wood village line "a fortune-teller lives in this hut, but she has a condition" (AREA11 s0).
+
 ## Folkin's rough notes — verification (non-Civilization claims)
 
 The Civilization claims are checked in [CIVILIZATION.md](CIVILIZATION.md) ("Folkin's rough notes — verification").
