@@ -304,6 +304,13 @@ int port_civ_spr(void) {
 static const struct { unsigned char area, sub, u, v, w, h, row; } port_civ_figs[] = {
     {16, 0, 67, 48, 36, 45, 21}, {16, 1, 145, 148, 24, 35, 37}, {16, 2, 75, 203, 50, 52, 53}, {17, 0, 25, 3, 22, 45, 1}};
 static unsigned char port_civ_fig_buf[4][128 * 4 + 16];
+/* stand-in villager CLUT (b0d 1, w08): one real resident row of the town's CLUT block, since the villager's own rows
+   (AREA08/CLUT01 1, 17, 49, 97, 113, 129) are not loaded: AREA11 row 36 (the old man), AREA16 row 54 and AREA17
+   row 49 (the red-shirt resident of the FMV, docs/CIVILIZATION.md) */
+int port_civ_standin_clut(int area) {
+    int r = area == 11 ? 36 : area == 16 ? 54 : 49;
+    return ((480 + r / 16) << 6) | ((128 + 16 * (r % 16)) >> 4);
+}
 int port_civ_fig(int area, int sub) {
     int i, f;
     for (i = 0; i < 4; i++) if (port_civ_figs[i].area == area && port_civ_figs[i].sub == sub) break;
