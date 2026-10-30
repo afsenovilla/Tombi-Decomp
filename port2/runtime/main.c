@@ -769,13 +769,26 @@ int main(int argc, char **argv) {
    NOT an original palette.  The sub-screen block (288,480) has no row that colours this wheel as tarnished brass:
    row 1 (ITEM_ICON_CLUTS[64], retail) is all grey.  This is row 0 with the wheel's indices (13, 7, 12, 5, 14, light to
    shadow) replaced by a rusted ochre ramp (RGB 190,110,50 / 155,80,35 / 135,70,40 / 85,40,25 / 32,16,10, rounded to
-   15 bits as c * 31 / 255); index 15, the icon's outer frame, stays white like every other item's.  It is uploaded to (304,511), the row below the block (unused while
+   15 bits as c * 31 / 255); index 15, the icon's outer frame, stays white like every other item's.
+   The frame corners (13) and the inner bevel (12, 5 next to the frame) share indices with the wheel, so those pixels of
+   the cell are re-indexed to the unused 1 / 2 / 3, which hold the grey 172 / 115 / 74 of row 0 (Platanos' frame).  It is uploaded to (304,511), the row below the block (unused while
    the sub-screen is up), on every draw, so a later area load cannot leave a stale row there. */
 int port_valve_clut(void) {
-    static const unsigned short pal[16] = {0x0000, 0x034F, 0x02E0, 0x0241, 0x6B5A, 0x0CAA, 0x052D, 0x1153,
+    static const unsigned short pal[16] = {0x0000, 0x56B5, 0x39CE, 0x2529, 0x6B5A, 0x0CAA, 0x052D, 0x1153,
                                            0x0A37, 0x0A9A, 0x0F1F, 0x43FF, 0x1530, 0x19B7, 0x0444, 0x7FFF};
-    struct { short x, y, w, h; } r = {304, 511, 16, 1};
+    /* the icon's cell (u 72, v 72 of the 4 bpp page at (192,0)) with its frame corners / bevel re-indexed to 1 / 2 / 3 */
+    static const unsigned short cell[64] = {
+        0xFF10, 0xFFFF, 0xFFFF, 0x01FF, 0x32F1, 0xEEEE, 0xEEEE, 0x1FEE,
+        0xE32F, 0xDCEE, 0xECDD, 0xFEEE, 0xEE2F, 0x7DDE, 0xDD7D, 0xFEEE,
+        0xEE2F, 0xEECD, 0xCEED, 0xFEED, 0xCE2F, 0xEEED, 0xEEED, 0xFECD,
+        0xDE2F, 0xEEE7, 0xEEED, 0xFED7, 0xDE2F, 0x7EE7, 0xEE77, 0xFED7,
+        0xDE2F, 0xDEE7, 0xEED7, 0xFED7, 0xCE2F, 0xEDED, 0xEDEE, 0xFECD,
+        0xEE2F, 0xEEDD, 0xDEEE, 0xFEED, 0xEE2F, 0x7DDE, 0xDD77, 0xFEEE,
+        0xEE2F, 0xDCEE, 0xECDD, 0xFEEE, 0xE32F, 0xEEEE, 0xEEEE, 0xFEEE,
+        0x32F1, 0xEEEE, 0xEEEE, 0x1FEE, 0xFF10, 0xFFFF, 0xFFFF, 0x01FF};
+    struct { short x, y, w, h; } r = {304, 511, 16, 1}, c = {192 + 72 / 4, 72, 4, 16};
     extern int LoadImage(void *, unsigned *);
     LoadImage(&r, (unsigned *)pal);
+    LoadImage(&c, (unsigned *)cell);
     return (511 << 6) | (304 >> 4);
 }
