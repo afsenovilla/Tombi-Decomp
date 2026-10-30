@@ -91,7 +91,7 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals. Th
 | `AREA16/X016.BIN` | Area overlay, AREA16 (Village of Civilization: Clock Tower), loaded at `0x800E8028` | `7c93915bc943e8d9d8fa5d5efbd02f7e563650e4` |
 | `AREA17/X017.BIN` | Area overlay, AREA17 (Village of Civilization: Iron Tower), loaded at `0x800E8028` | `59c5964cbb4536bc62b1a65262d963fab1ad3d33` |
 | `AREA18/X018.BIN` | Area overlay, AREA18 (Village of Civilization: Y Crossing), loaded at `0x800E8028` | `83eca42eb30944bb0c61056632b2ef7bb9891b34` |
-| `AREA19/X019.BIN` | Area overlay, AREA19 (Village of Civilization (purified)), loaded at `0x800E8028` | `94060c10f7b6e3af1adc55a0c9cff4b81890988c` |
+| `AREA19/X019.BIN` | Area overlay built for AREA19 (Village of Civilization (purified)), **never loaded** by the retail game: no file table lists it and AREA19 runs `AREA19/X002.BIN` (= AREA02's X002); see docs/CUT_CONTENT.md | `94060c10f7b6e3af1adc55a0c9cff4b81890988c` |
 
 The 17 area overlays (`X0nn.BIN`, Spanish; `X1nn`..`X8nn` are the other languages) are raw code blobs, all
 loaded at `0x800E8028`. Their first 188 KB (`0x800E8028`..`0x80115EA4`: header, ~300 shared object handlers and

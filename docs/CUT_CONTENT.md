@@ -46,6 +46,7 @@ logo.
 | PrePre8 OPTION MODE / enemy viewer | 0x800854B4 (`OPTION MODE`, music/sound/CD/memory-card tests), 0x80083D88 (`enemy=%01d`), dead code in that build. | Port-only re-implementation; PAL has no such code. |
 | GoGoCart cacti / sign (AREA06) | VRAM of `A001.GAM` (577,256), (516,256), (581,348); no SPR part nor model polygon; D004.000 has 60 models and `a06AddModelsBySection` uses all 60. | New sprite parts and placement: ours. |
 | AREA17 B201 page (backpack man, strap-shirt big man, bald old man, helmet walker; side view) | **Not a cut-content finding: withdrawn.** The user reports the backpack man in the final game. The same 192 x 256 page is loaded, byte-identical, by AREA10 s0 (B002, VRAM x 384) and s4 (B403, x 640), AREA16 s5/s6 (B501, B601), AREA17 s2/s5 (B201, B501) and AREA18 s1 (B101). Our static checks find no reference to its figures: no SPR table frame of any area list whose parts bound one of them, no WPP bank holding their pixels, no 16-byte part record pointing at them. These checks miss code-built primitives and other drawing paths, so "no static reference" here does not mean unused. The retail section, SPR id and address are not known yet. The B201 page renders with a real palette: AREA11/CLUT02 row 36 (same row in AREA17/CLUT03, AREA17/CLUT06, AREA18/CLUT02; the Male Lumberjack Town Resident's row) colours its side-view man with a backpack exactly like TCRF's colour sprite (all 14 colours in that row; silhouette close, not pixel-exact, TCRF's frame differs). Our identification. | Find the drawing path (dynamic capture in AREA10 s0/s4 or AREA17 s2) before calling any frame unused. |
+| AREA19's own overlay `X019.BIN` (and `X119`..`X819`) | On the disc (`SYSTEM/` and `AREA19/`, 190,180 B, sha1 `94060c10...`) but **never loaded**: none of the nine file tables lists it (notes/cdfiles.md), and AREA19's load lists name `AREA19/X002.BIN`, byte-identical to AREA02's `X002.BIN` (sha1 `646aa8b5...`). JP does the same: AREA19 ships `X02.BIN` and `X19.BIN`, its lists name only `X02`. So the purified village runs AREA02's code; X019 is a separate, dead AREA19 build. | Study what X019 does differently from X002 (its area part, from 0x80115EA4); a port switch to run it would be ours. Unknown cost. |
 | Small "?" bubble | SPR 0x34 f49; no script, no pointer. | Graphics only. |
 
 ## Lost
@@ -56,6 +57,20 @@ logo.
 | Growing golden flower frames (AREA02 SPR 0x3B f27-32) | The rectangles they point at are empty in PAL VRAM: the art is not on the disc. |
 | JP-only text of class D tied to Civilization (MFNT110/170/180: raft maker, generator, coal, Dr. Gantetsu, new town) | Their scenes are the cut top-down towns. |
 | PrePre8 dialogue script | The 10x10 font is there but no script text using it was found (still open, see docs/PREPRE8.md). |
+
+## JP-only text survey (SOLO_JAPON, 179 candidates)
+
+JP dialogue whose PAL slot is empty or filler, aligned by control-code structure (SLPS-01144 vs PAL). Almost all is
+already above: Civilization towns MFNT110/160/170/180 (116, see Lost / docs/CIVILIZATION.md), unused item
+descriptions (DSPSUB#0, 21) and unused event hints (DSPSUB#1, 7) (Possible: unused items/events), AREA00 hint variants
+per button config (14), boatman lines (MFNT000 JP #156-158), motocross sign (#159), dwarf woodcutter lines (AREA02/19,
+6), AREA02 group lines (7), Baccus letter (AREA03 #178). New, minor:
+
+- AREA00 JP #111 `ポスト　あけるな！` ("Mailbox: don't open!"): no PAL slot. Unplaced.
+- AREA03 #174 and AREA10 #171 `ポテンシャルが　たりない` ("Not enough potential"): PAL slot is filler. Probably an
+  AP/requirement message; not traced to code.
+
+Minor: the JP disc has empty folders `AREA20`..`AREA24` (PAL has none); nothing in them, nothing loads from them.
 
 ## How to run
 

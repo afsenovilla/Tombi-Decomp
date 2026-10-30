@@ -47,6 +47,7 @@ bajo el logo final.
 | OPTION MODE / visor de enemigos (PrePre8) | 0x800854B4 (`OPTION MODE`, pruebas de música/sonido/CD/tarjeta), 0x80083D88 (`enemy=%01d`), código muerto en esa versión. | Reimplementación solo en el port; PAL no tiene ese código. |
 | Cactus / cartel del GoGoCart (AREA06) | VRAM de `A001.GAM` (577,256), (516,256), (581,348); sin parte SPR ni polígono; D004.000 tiene 60 modelos y `a06AddModelsBySection` usa los 60. | Partes de sprite nuevas y colocación: nuestras. |
 | Página de AREA17 B201 (hombre con mochila, grandullón con correa, anciano calvo, caminante con casco; de lado) | **No es contenido recortado: se retira.** El usuario ha visto al hombre de la mochila en el juego final. La misma página de 192 x 256, idéntica byte a byte, la cargan AREA10 s0 (B002, VRAM x 384) y s4 (B403, x 640), AREA16 s5/s6 (B501, B601), AREA17 s2/s5 (B201, B501) y AREA18 s1 (B101). Nuestras comprobaciones estáticas no encuentran ninguna referencia a sus figuras: ningún fotograma de tabla SPR de ninguna lista de área cuyas partes las encuadren, ningún banco WPP con sus píxeles y ningún registro de parte de 16 bytes que apunte a ellas. Esas comprobaciones no ven las primitivas construidas por código ni otras vías de dibujo, así que aquí «sin referencia estática» no significa sin usar. Todavía no se conoce la sección, el id SPR ni la dirección en el juego. La página B201 se ve con una paleta real: AREA11/CLUT02 fila 36 (la misma fila en AREA17/CLUT03, AREA17/CLUT06 y AREA18/CLUT02; la fila del «Male Lumberjack Town Resident») colorea a su hombre de lado con mochila igual que el sprite en color de TCRF (los 14 colores están en esa fila; la silueta se parece pero no es píxel a píxel, el fotograma de TCRF es distinto). Identificación nuestra. | Encontrar la vía de dibujo (captura dinámica en AREA10 s0/s4 o AREA17 s2) antes de dar ningún fotograma por no usado. |
+| Overlay propio de AREA19 `X019.BIN` (y `X119`..`X819`) | Está en el disco (`SYSTEM/` y `AREA19/`, 190.180 B, sha1 `94060c10...`) pero **nunca se carga**: no aparece en ninguna de las nueve tablas de ficheros (notes/cdfiles.md), y las listas de carga de AREA19 nombran `AREA19/X002.BIN`, idéntico byte a byte al `X002.BIN` de AREA02 (sha1 `646aa8b5...`). El JP hace lo mismo: AREA19 trae `X02.BIN` y `X19.BIN` y sus listas solo nombran `X02`. El pueblo purificado ejecuta el código de AREA02; X019 es una versión muerta de AREA19. | Estudiar qué hace X019 distinto de X002 (su parte de área, desde 0x80115EA4); un interruptor en el port para usarlo sería nuestro. Coste desconocido. |
 | Bocadillo «?» pequeño | SPR 0x34 f49; sin guion ni puntero. | Solo gráficos. |
 
 ## Perdido
@@ -57,6 +58,21 @@ bajo el logo final.
 | Fotogramas de la flor dorada creciendo (AREA02 SPR 0x3B f27-32) | Los rectángulos a los que apuntan están vacíos en la VRAM PAL: el arte no está en el disco. |
 | Texto JP de clase D ligado a la Civilización (MFNT110/170/180: balsero, generador, carbón, Dr. Gantetsu, pueblo nuevo) | Sus escenas son los pueblos cenitales cortados. |
 | Guion de diálogos de PrePre8 | La fuente 10x10 está, pero no se encontró texto que la use (abierto, ver docs/PREPRE8.md). |
+
+## Texto solo en JP (SOLO_JAPON, 179 candidatas)
+
+Diálogos JP cuyo hueco PAL está vacío o es relleno, alineados por la estructura de códigos (SLPS-01144 frente a PAL).
+Casi todo ya está arriba: pueblos de la Civilización MFNT110/160/170/180 (116, ver Perdido / docs/CIVILIZATION.md),
+descripciones de objetos sin usar (DSPSUB#0, 21) y pistas de eventos sin usar (DSPSUB#1, 7) (Posible: objetos/eventos
+sin usar), variantes de pistas de AREA00 por configuración de botones (14), frases del barquero (MFNT000 JP #156-158),
+cartel de motocross (#159), frases del enano leñador (AREA02/19, 6), frases de grupo de AREA02 (7) y carta de Baccus
+(AREA03 #178). Nuevo, menor:
+
+- AREA00 JP #111 `ポスト　あけるな！` ("Buzón: ¡no abrir!"): sin hueco PAL. Sin ubicar.
+- AREA03 #174 y AREA10 #171 `ポテンシャルが　たりない` ("Potencial insuficiente"): el hueco PAL es relleno.
+  Probablemente un aviso de AP/requisito; no rastreado en el código.
+
+Menor: el disco JP tiene carpetas vacías `AREA20`..`AREA24` (el PAL no las tiene); no contienen nada ni se carga nada de ellas.
 
 ## Cómo se usa
 
