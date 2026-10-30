@@ -831,6 +831,41 @@ disco, salvo las filas de HUD/sistema de JP, que están en todas las áreas.
   A06100 95,7); la mejor fila de la demo para el sprite (24,1) es la fila común de AREA00/CLUT06. Los renders con las mejores ventanas son ruido. Los CLUT del decorado no están en
   ninguno de estos discos.
 
+### Búsqueda de paletas con tolerancia amplia (CLUT de escenario)
+
+La fila real de la Mujer de Stonetown resultó diferir hasta 9 niveles de los colores de TCRF. Por eso se repitió la
+búsqueda del escenario con una coincidencia mucho más laxa (`tools/clut_wide/`, sólo scripts).
+- **Corpus:** todos los archivos de PAL, USA, JP, la beta, SLPM-80165 y PrePre 8 (ambos volcados), salvo `.STR`. Los
+  GAM se leen en bruto y desempaquetados; sin duplicados (3283 archivos). Las dos fases de byte dan 272 M palabras.
+- **Disposiciones:** una ventana de 256 entradas en **cada** desplazamiento de palabra, con pasos 1, 2, 4 y 16. Esto
+  cubre imágenes VRAM de 256 x N / 512 x 1, bloques de 16 x 16 y filas o columnas intercaladas. Aparte, el mejor bloque
+  de 16 entradas en cualquier lugar para cada fila de la CLUT (ensamblado no contiguo).
+- **Objetivos:** las CLUT propias cuantizadas de `civ_rebuild.py`. Sólo cuentan los índices medidos por clutgen o por
+  los anclajes FMV (los interpolados no), ponderados por los píxeles de la página que los usan.
+- **Métricas:**
+  - en bruto: por índice, la diferencia máxima de canal en niveles de 5 bits, y la fracción ponderada dentro de 6 / 9 / 12;
+  - corregida: un ajuste afín ponderado por canal (ganancia 0,5..2, calculado en cada desplazamiento por correlación
+    FFT), y después las mismas fracciones;
+  - se descartan las ventanas con menos de 80 colores distintos o con menos de 2 niveles de variación por canal.
+- **Control positivo:** la CLUT real de 256 colores de AREA08/D002, alterada como una CLUT de FMV (ganancia 0,85, +2,
+  ruido sigma 3, 10 % de entradas al azar), sale primera con 83 / 94 / 96 % dentro de 6 / 9 / 12. La mejor ventana
+  ajena llega a 24 / 52 / 64 %.
+- **Resultado (mejor ventana por página, bruto w6/9/12 -> corregido):**
+
+| Página | Mejor ventana | Bruto | Corregido |
+|--------|---------------|-------|-----------|
+| A06100 | AREA02/CLUT03 desempaquetado 0x3DAE (todos los discos) | 31/52/66 % | 50/74/86 % |
+| A07600/01 | JP AREA09/CLUT04 0x1294 paso 2 | 28/44/58 % | 48/70/81 % |
+| A08000 | AREA11/CLUT03 desempaquetado 0x3E1A | 43/69/79 % | 67/84/88 % |
+| A08600/01 | USA AREA05/INFO2.BIN 0x130 paso 2; USA X03.BIN 0x2E510 paso 4 | 46/66/79, 42/78/94 % | 67/88/97, 65/94/98 % |
+
+  Todos los ajustes tocan el suelo de ganancia (0,5). Eso aplana la ventana hacia la media del objetivo, así que las
+  fracciones corregidas premian el bajo contraste, no una coincidencia. Con estas ventanas todas las páginas salen como
+  ruido. El ensamblado por bloques de 16 toma cada fila de un archivo distinto y sin relación (CLUT de otras áreas, una
+  fuente, overlays), lo que es azar.
+- **Conclusión:** ninguna paleta real de escenario existe en los discos que tenemos, ni con 12 niveles de tolerancia y
+  corrección de ganancia/desplazamiento. Se mantienen las CLUT propias derivadas del FMV.
+
 ## Reconstrucción (no original)
 
 `tools/civ_rebuild.py` construye una imagen de fondo (tipo 0x8F) y un mapa de celdas (tipo 0x8E) **aproximados**

@@ -797,6 +797,40 @@ HUD/system rows, which are on every area.
   94.8), and so are the best SLPM-80165 windows (A08000 83.6, A08600 67.5 with `SYSTEM/A00009` = PAL
   `A00201`, A06100 95.7); the demo's best sprite row (24.1) is the shared AREA00/CLUT06 row. Renders with the best windows are noise. The scenery CLUTs are not on any of these discs.
 
+### Wide-tolerance palette search (scenery CLUTs)
+
+After the Female Stonetown Resident's real row turned out to differ from TCRF's colours by up to 9 levels, the scenery
+search was redone with a much looser match (`tools/clut_wide/`, scripts only).
+- **Corpus:** every file of PAL, USA, JP, the beta, SLPM-80165 and PrePre 8 (both dumps), except `.STR`. GAM files are
+  read raw and unpacked; duplicates are removed (3283 unique files). Both byte phases give 272 M words.
+- **Layouts:** a 256-entry window at **every** word offset with strides 1, 2, 4 and 16. This covers 256 x N / 512 x 1
+  VRAM images, 16 x 16 blocks, interleaved rows and columns. Separately, the best 16-entry block anywhere for each CLUT
+  row (non-contiguous assembly).
+- **Targets:** the quantized custom CLUTs of `civ_rebuild.py`. Only indices measured by clutgen or the FMV anchors are
+  used (interpolated ones are ignored), weighted by how many page pixels use them.
+- **Metrics:**
+  - raw: per index, the max channel difference in 5-bit levels, and the weighted share within 6 / 9 / 12;
+  - corrected: a weighted per-channel affine fit (gain 0.5..2, computed for every offset by FFT correlation), then the
+    same shares;
+  - windows with fewer than 80 distinct colours, or less than 2 levels of spread per channel, are dropped.
+- **Positive control:** the real 256-colour CLUT of AREA08/D002, perturbed like an FMV CLUT (gain 0.85, +2, noise
+  sigma 3, 10 % random entries), is found first with 83 / 94 / 96 % within 6 / 9 / 12. The best unrelated window
+  reaches 24 / 52 / 64 %.
+- **Result (best window per page, raw w6/9/12 -> corrected):**
+
+| Page | Best window | Raw | Gain-corrected |
+|------|-------------|-----|----------------|
+| A06100 | AREA02/CLUT03 unpacked 0x3DAE (all discs) | 31/52/66 % | 50/74/86 % |
+| A07600/01 | JP AREA09/CLUT04 0x1294 stride 2 | 28/44/58 % | 48/70/81 % |
+| A08000 | AREA11/CLUT03 unpacked 0x3E1A | 43/69/79 % | 67/84/88 % |
+| A08600/01 | USA AREA05/INFO2.BIN 0x130 stride 2; USA X03.BIN 0x2E510 stride 4 | 46/66/79, 42/78/94 % | 67/88/97, 65/94/98 % |
+
+  Every fit hits the gain floor (0.5). It flattens the window towards the target's mean, so the corrected shares
+  reward low contrast, not a match. Rendered with these windows, every page is noise. The 16-entry block assembly
+  takes each row from a different, unrelated file (CLUT files of other areas, a font, overlays), which is chance.
+- **Conclusion:** no real scenery palette exists on any disc we have, even at 12 levels of tolerance with a gain/offset
+  correction. The custom FMV-derived CLUTs stay.
+
 ## Reconstruction (not original)
 
 `tools/civ_rebuild.py` builds a **best-effort** background picture (kind 0x8F) and cell map (kind 0x8E) for AREA11,
