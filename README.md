@@ -190,13 +190,13 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 61.20 % of the code matches byte for byte** (884508 of 1445364 bytes, 2365 of 3145 functions).
+**Ore! Tomba (SLPS-01144): 61.20 % of the code matches byte for byte** (884508 of 1445372 bytes, 2365 of 3101 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 378336 B | 222424 B | 942 / 1243 | 58.8 % `[##############..........]` |
-| X00.BIN: shared object code | 314396 B | 155252 B | 366 / 546 | 49.4 % `[############............]` |
-| X01.BIN: area code | 151304 B | 104296 B | 185 / 240 | 68.9 % `[#################.......]` |
+| SLPS_011.44: engine | 378336 B | 222424 B | 942 / 1236 | 58.8 % `[##############..........]` |
+| X00.BIN: shared object code | 314404 B | 155252 B | 366 / 511 | 49.4 % `[############............]` |
+| X01.BIN: area code | 151304 B | 104296 B | 185 / 239 | 68.9 % `[#################.......]` |
 | X02.BIN: area code | 29764 B | 11496 B | 27 / 40 | 38.6 % `[#########...............]` |
 | X03.BIN: area code | 122684 B | 90408 B | 178 / 222 | 73.7 % `[##################......]` |
 | X04.BIN: area code | 102832 B | 63212 B | 157 / 197 | 61.5 % `[###############.........]` |
@@ -207,7 +207,7 @@ offsets and the function or splat range that produced them.
 | X10.BIN: area code | 97636 B | 66260 B | 143 / 175 | 67.9 % `[################........]` |
 | X11.BIN: area code | 15648 B | 10048 B | 26 / 36 | 64.2 % `[###############.........]` |
 | X13.BIN: area code | 6336 B | 4140 B | 7 / 8 | 65.3 % `[################........]` |
-| X14.BIN: area code | 54584 B | 34444 B | 76 / 111 | 63.1 % `[###############.........]` |
+| X14.BIN: area code | 54584 B | 34444 B | 76 / 110 | 63.1 % `[###############.........]` |
 | X16.BIN: area code | 11688 B | 10172 B | 35 / 37 | 87.0 % `[#####################...]` |
 | X17.BIN: area code | 14544 B | 10340 B | 26 / 37 | 71.1 % `[#################.......]` |
 | X18.BIN: area code | 17144 B | 13724 B | 28 / 39 | 80.1 % `[###################.....]` |
