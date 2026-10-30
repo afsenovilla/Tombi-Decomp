@@ -61,6 +61,9 @@ class Disc:
             self.image = path
             self.layout = cdfiles.layout_from_image(path)
             self.tmp = cache or tempfile.mkdtemp(prefix="tombi-gfx-")
+            if not cache:       # a scratch copy of the disc files (~45 MB): removed at exit even when close() is never called
+                import atexit
+                atexit.register(self.close)
             self.fs = os.path.join(self.tmp, "fs")
             os.makedirs(self.fs, exist_ok=True)
             for n in sorted(self.layout):
