@@ -487,6 +487,10 @@ src/spawnEventTitle.c | done = 0; | done = 0; { extern int port_civ_on(int, int)
 #
 # Item 64 (Pipe / "Valvula") inventory icon: ITEM_ICON_CLUTS[64] = 1, the all-grey sub-screen row (retail PAL and JP
 # alike, so the grey wheel is the original's), while the pickup in AREA08 is the brown wooden wheel (SPR_DATA[3] frame 2,
-# area CLUT (304,482)). Row 0 is the real sub-screen row whose accent colour (139,106,8) is closest to that wood.
-src/d0spsub/subScreenDrawItemIcon.c | (ITEM_ICON_CLUTS[n] + 0x1E0) | ((n == 64 ? 0 : ITEM_ICON_CLUTS[n]) + 0x1E0)
-src/d0spsub3/subScreenDrawItemIcon.c | (ITEM_ICON_CLUTS[n] + 0x1E0) | ((n == 64 ? 0 : ITEM_ICON_CLUTS[n]) + 0x1E0)
+# area CLUT (304,482)); the valve is tarnished brass.  No sub-screen row colours it so, so the port draws it with a
+# custom CLUT (not original): row 0 with the icon's indices turned into an ochre ramp, port_valve_clut in
+# port2/runtime/main.c, uploaded to (304,511).
+src/d0spsub/subScreenDrawItemIcon.c | extern unsigned char ITEM_ICON_CLUTS[]; | extern unsigned char ITEM_ICON_CLUTS[]; extern int port_valve_clut(void);
+src/d0spsub/subScreenDrawItemIcon.c | S->clut = ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6) | S->clut = n == 64 ? port_valve_clut() : ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6)
+src/d0spsub3/subScreenDrawItemIcon.c | extern unsigned char ITEM_ICON_CLUTS[]; | extern unsigned char ITEM_ICON_CLUTS[]; extern int port_valve_clut(void);
+src/d0spsub3/subScreenDrawItemIcon.c | S->clut = ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6) | S->clut = n == 64 ? port_valve_clut() : ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6)
