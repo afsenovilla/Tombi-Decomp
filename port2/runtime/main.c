@@ -245,7 +245,7 @@ static int usage(const char *argv0) {
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID] [--movie FRAME:ID]\n"
-                "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--trace-cd] [--save-dir DIR] [-v]\n"
+                "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--trace-cd] [--save-dir DIR] [-v]\n"
                 "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk\n"
                 "  (1..4 the other MAINn of the disc, docs/PORT.md \"Languages\")\n"
                 "  --data DIR reads the game files extracted once from your disc by tools/extract_data.py (default: data/ in the\n"
@@ -396,6 +396,37 @@ int port_civ_on(int area, int sec) {   /* area: GAME.selectedArea (the load list
 }
 /* --civ-maps DIR: DIR/AREAnn/map8E.bin and map8F.tim (tools/civ_rebuild.py) replace APD_DATA[14] / [15] */
 static const char *port_civ_maps_dir;
+/* --title-debug (port only, port/fixes.txt titleDrawMenuCarousel / loopTitleScreen): a 4th title carousel entry
+   "DEBUG" right of OPTIONS.  Its glyph list is the language's TITLE_MENU_GLYPHS with the word appended (one window
+   right after the last glyph, the word 6 glyphs in like OPTIONS); its palette bytes copy the last word's.  Choosing it
+   sets the debug flag 1F8001B4 (introSequenceHandler then opens the game's area select instead of the story) and,
+   with --civ-maps, --civ-test so sections 0 of AREA11/16/17 load the rebuilt towns. */
+int port_title_debug; unsigned char port_title_angle3;
+void port_title_debug_list(short **ps, unsigned char **ppal) {
+    static short list[200]; static unsigned char pal[200]; static const short *src; static const unsigned char *srcp;
+    short *s = *ps; unsigned char *p = *ppal;
+    if (s != src || p != srcp) {
+        static const char word[] = "DEBUG";
+        int n = 0, nz = 0, last = -1, lw = 0, k, w3, np;
+        while (s[n] != -3 && n < 140) { if (s[n]) { nz++; last = n; } n++; }
+        for (k = last; k >= 0 && s[k]; k--) lw++;
+        np = nz - (port_lang == 5);                 /* MAIN5's list has one glyph more than palette bytes */
+        memcpy(list, s, n * sizeof *s); memcpy(pal, p, np > 0 ? np : 0);
+        if (np < nz && np > 0) pal[np] = pal[np - 1];
+        w3 = last + 1; if (w3 > 0x37) w3 = 0x37;
+        for (k = n; k < w3 + 6; k++) list[k] = 0;
+        if (k < n) k = n;
+        for (int i = 0; word[i]; i++) { list[k++] = word[i] - 32; pal[nz + i] = pal[nz - lw + (i < lw ? i : lw - 1)]; }
+        list[k++] = -3; list[k] = -1;
+        port_title_angle3 = (unsigned char)(0xE0 - 4 * w3);
+        src = s; srcp = p;
+    }
+    *ps = list; *ppal = pal;
+}
+void port_title_debug_go(void) {
+    if (port_civ_maps_dir) port_civ_test = 1;
+    port_printf("[port] --title-debug: DEBUG chosen, the area select opens%s\n", port_civ_maps_dir ? " (rebuilt towns on: AREA11/16/17 section 0)" : "");
+}
 static int port_civ_map_w, port_civ_map_h;   /* rebuilt picture size in px (0: the stand-in AREA08 one) */
 #define PORT_CIV_PAD_PRE (64 * 1024)
 #define PORT_CIV_PAD_POST (1024 * 1024)
@@ -530,6 +561,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
+        else if (!strcmp(a, "--title-debug")) port_title_debug = 1;   /* title carousel DEBUG entry: the area select */
         else if (!strcmp(a, "--civ-route")) {
             /* opt-in cut route (port only): the Civilization Town hub (AREA18 s1) exits 0/1/2 lead into the cut
                section 0 of AREA11 / AREA17 / AREA16 instead of 11:1 / 17:1 / 16:4, and Stonetown's top exit

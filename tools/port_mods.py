@@ -8,6 +8,8 @@ Addresses (PAL SCES-01331, include/tomba/game.h `gameConfig GAME` at 0x8009C960)
   playerHealth 0x8009C970 (u8, 4 = full), playerHealthDisplayed 0x8009C971, playerLives 0x8009C980 (u8),
   debug-select flag 0x1F8001B4 (scratchpad), event flag bytes 0x8009CDA4 + id (0xFF = completed; notes/names.md).
 """
+import os
+
 import i18n
 
 # (area, sections) of the debug area select (tools/psxemu/rooms.py ROOM_COUNTS); the names from README
@@ -44,6 +46,8 @@ i18n.add({
         "mod.areasel": "Selección de área (debug select)",
         "mod.areasel.d": "Abre el selector de áreas de depuración del juego y entra en el área/sección elegida en lugar de empezar la partida.",
         "mod.area": "Área", "mod.section": "Sección",
+        "mod.titledebug": "Entrada DEBUG en el menú del título",
+        "mod.titledebug.d": "Añade DEBUG a la derecha de OPCIONES en el título: abre el selector de áreas de depuración (y los pueblos reconstruidos si están generados) (--title-debug).",
         "cut.hint": "Los pueblos recortados reconstruidos (áreas 11, 16 y 17) se juegan desde la página «Contenido recortado».",
         "cut.c.text": "Textos y extras recortados",
         "cut.text.d": "Recupera diálogos quitados del juego y algunos detalles sin usar (bayas plateadas/doradas, bocadillo «?»).",
@@ -77,6 +81,8 @@ i18n.add({
         "mod.areasel": "Area select (debug select)",
         "mod.areasel.d": "Opens the game's debug area select and enters the chosen area/section instead of starting the story.",
         "mod.area": "Area", "mod.section": "Section",
+        "mod.titledebug": "DEBUG entry in the title menu",
+        "mod.titledebug.d": "Adds DEBUG right of OPTIONS on the title screen: it opens the debug area select (and the rebuilt towns once generated) (--title-debug).",
         "cut.hint": "The rebuilt cut towns (areas 11, 16 and 17) are played from the \"Cut content\" page.",
         "cut.c.text": "Cut text and extras",
         "cut.text.d": "Restores dialogue removed from the game and a few unused details (silver/golden berries, '?' bubble).",
@@ -132,6 +138,9 @@ def civ_args(s, maps, wfm):
     docs/CIVILIZATION.md "Playable towns"."""
     t = civ_town(s)
     if not (t or s.get("civ_route")):
+        # the title DEBUG entry's area select reaches the rebuilt towns (sections 0 of 11/16/17) once they exist
+        if s.get("titledebug") and os.path.isdir(maps) and os.path.isdir(wfm):
+            return ["--civ-maps", maps, "--civ-wfm", wfm]
         return []
     out = ["--civ-town", str(t)] if t else ["--civ-route"]
     out += ["--civ-maps", maps, "--civ-wfm", wfm]
@@ -144,6 +153,10 @@ def args_areasel(s):
     area, section = int(s.get("area", 0)), int(s.get("section", 0))
     return ["--poke", "900:1F8001B4:1", "--poke", "%d:8009C960:%X:2" % (F_SELECT, area),
             "--poke", "%d:8009C962:%X:2" % (F_SELECT, section), "--pad-script", "%d:start,%d:circle:3" % (F_START, F_CIRCLE)]
+
+
+def args_titledebug(s):
+    return ["--title-debug"] if s.get("titledebug") else []
 
 
 def args_ap(s):
@@ -201,6 +214,7 @@ MODS = [
     ("skipintro", "mod.skipintro", "mod.skipintro.d", "check", args_skipintro),
     ("hz60", "mod.hz60", "mod.hz60.d", "check", args_hz60),
     ("areasel", "mod.areasel", "mod.areasel.d", "check+area", args_areasel),
+    ("titledebug", "mod.titledebug", "mod.titledebug.d", "check", args_titledebug),
     ("ap_on", "mod.ap", "mod.ap.d", "check+int:ap:0:99999999:1000", args_ap),
     ("lives_on", "mod.lives", "mod.lives.d", "check+int:lives:1:99:5", args_lives),
     ("inflives", "mod.inflives", "mod.inflives.d", "check", args_inflives),
@@ -221,6 +235,6 @@ def mod_args(settings, out_dir=None):
 
 
 def default_settings():
-    return {"skipintro": True, "hz60": False, "areasel": False, "area": 0, "section": 0, "ap_on": False, "ap": 10000,
+    return {"skipintro": True, "hz60": False, "areasel": False, "titledebug": False, "area": 0, "section": 0, "ap_on": False, "ap": 10000,
             "lives_on": False, "lives": 5, "inflives": False, "infhealth": False, "events": False, "keys_on": False,
             "keys": dict(DEFAULT_KEYS), "autostart": False, "prompts": "playstation", "civ_collision": False, "civ_route": False}

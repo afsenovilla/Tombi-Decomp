@@ -117,6 +117,22 @@ src/o0ptsub0/titleDrawMenuCarousel.c | m.x = 0x70; | m.x = port_lang == 5 && por
 # ("AJUSTAR Y VER CONTROLES", the options row that shares the index): drawn, then string 5 from its CONTROLES
 src/o0ptsub0/optionsDrawLabel.c | m.b = OPTIONS_FONT; | m.b = OPTIONS_FONT; { extern int port_lang; if (port_lang == 5 && y < 0x30 && (i == 0 || i == 4 || i == 5)) { short *s = (short *)m.a, *e, *t; int w = 0, we = 0; for (t = s; *t != -1; t++) if (*t >= 0 && !OPTIONS_FONT[*t * 5 + 4]) w += (unsigned char)OPTIONS_FONT[*t * 5 + 2]; e = t + 1; if ((long)e & 2) e++; if (i == 5 && y == 0x28 && t - s > 22 && s[13] == 0 && s[14] == 'C' - 32 && e[0] == 'V' - 32) { for (w = 0, t = s + 14; *t != -1; t++) if (*t >= 0) w += (unsigned char)OPTIONS_FONT[*t * 5 + 2]; for (t = e; *t != -1; t++) if (*t >= 0) we += (unsigned char)OPTIONS_FONT[*t * 5 + 2]; m.x = (0x140 - we - w) / 2; m.a = (int)(long)e; titleDrawString(&m, 0, 1, 0); m.x += we; m.a = (int)(long)(s + 14); } else m.x = (0x140 - w) / 2; } }
 src/o0ptsub0/titleDrawMenuCarousel.c | titleDrawCarouselGlyph(*s, (short)ang, 4, *pal++); | { extern int port_lang; titleDrawCarouselGlyph(*s, (short)ang, 4, port_lang == 5 && s[1] == -3 ? pal[-1] : *pal++); }
+# --title-debug (runtime/main.c port_title_debug_list): a 4th carousel entry DEBUG right of OPTIONS (retail stops at the
+# ends, so does this: 0..3).  The language's glyph list gets the word appended; a glyph whose unwrapped angle went past
+# the ring's front half twice (< 0x40 or > 0x1C0, never the case with the three retail angles) is not drawn, so the
+# first entry does not show again next to DEBUG.  OPTIONS gets both arrows, DEBUG the left one, placed on the word's span
+src/o0ptsub0/titleDrawMenuCarousel.c | void titleDrawMenuCarousel(int angle, int sel) | extern int port_title_debug; extern void port_title_debug_list(short **, unsigned char **); void titleDrawMenuCarousel(int angle, int sel)
+src/o0ptsub0/titleDrawMenuCarousel.c | pal = TITLE_MENU_GLYPH_PALETTES; | pal = TITLE_MENU_GLYPH_PALETTES; if (port_title_debug) port_title_debug_list(&s, &pal);
+src/o0ptsub0/titleDrawMenuCarousel.c | while (*s != -3) { | while (*s != -3) { if (port_title_debug && ((short)ang < 0x40 || (short)ang > 0x1C0)) { if (*s) pal++; s++; ang += 4; continue; }
+src/o0ptsub0/titleDrawMenuCarousel.c | if (port_lang == 5) port_es_carousel_span(*s, idx); | if (port_lang == 5 || port_title_debug) port_es_carousel_span(*s, idx);
+src/o0ptsub0/titleDrawMenuCarousel.c | port_lang == 5 && port_es_x1 | (port_lang == 5 || (port_title_debug && sel >= 2)) && port_es_x1
+src/o0ptsub0/titleDrawMenuCarousel.c | switch (sel) { | switch (port_title_debug && sel >= 2 ? sel - 1 : sel) {
+# loopTitleScreen: right goes on to entry 3 once its angle is known; DEBUG starts a new game with the debug flag set
+src/loopTitleScreen.c | extern unsigned short D_8007DE98[]; | extern unsigned short D_8007DE98[]; extern int port_title_debug; extern unsigned char port_title_angle3; extern void port_title_debug_go(void); extern unsigned char DAT_1f8001b4;
+src/loopTitleScreen.c | D_8007DE98[TASK_C->b69] | (TASK_C->b69 == 3 ? port_title_angle3 : D_8007DE98[TASK_C->b69])
+src/loopTitleScreen.c | TASK_C->b69 < 2) | TASK_C->b69 < 2 + (port_title_debug && port_title_angle3))
+src/loopTitleScreen.c | switch (TASK_C->b69) { | switch (TASK_C->b69 == 3 ? 0 : TASK_C->b69) {
+src/loopTitleScreen.c | TASK_C->b68 = 0; | if (TASK_C->b69 == 3) { DAT_1f8001b4 = 1; port_title_debug_go(); } TASK_C->b68 = 0;
 # drawPauseMenu: its entry lists and glyph UV table (MAIN0 0x80080300..0x800803fc) changed size in MAINn (lang.c finds them through the code)
 src/drawPauseMenu.c | extern XY D_80080404[]; | extern XY D_80080404[]; extern void *port_lang_item(void *);
 src/drawPauseMenu.c | e = D_8008037c; | e = (ENT *)port_lang_item(D_8008037c);
