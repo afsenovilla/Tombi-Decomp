@@ -410,29 +410,55 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: PSN EBOOT report
+      - name: PSN report (image or EBOOT) + retail comparison
         env:
           GAME_FILES_URL_PSN_JP: ${{ secrets.GAME_FILES_URL_PSN_JP }}
           GAME_FILES_URL_PSN_USA: ${{ secrets.GAME_FILES_URL_PSN_USA }}
+          GAME_FILES_URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+          GAME_FILES_URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
+          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL }}
         run: |
           python3 -m pip install cryptography
-          for r in JP USA; do
-            v="GAME_FILES_URL_PSN_$r"; URL="${!v}"
-            if [ -z "$URL" ]; then echo "::notice::$v secret not set; skipping $r."; continue; fi
+          # fetch VAR DIR: downloads secret VAR (never echoed) into DIR/dl and unzips it if it is a zip
+          fetch() {
+            local URL="${!1}" ID
             URL="$(printf '%s' "$URL" | tr -d '\r\n"'"'"' ')"
             ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
             if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
             if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-            d="$RUNNER_TEMP/psn_$r"; mkdir -p "$d"
-            curl -fsSL -o "$d/dl.zip" "$URL"
-            if ! unzip -o -q "$d/dl.zip" -d "$d"; then echo "::error::$v is not a zip"; exit 1; fi
-            pbp="$(find "$d" -iname EBOOT.PBP | head -1)"; keys="$(find "$d" -iname KEYS.BIN | head -1)"
-            if [ -z "$pbp" ] || [ -z "$keys" ]; then echo "::error::$r zip lacks EBOOT.PBP/KEYS.BIN"; exit 1; fi
-            { echo "### PSN $r"; echo '```'; python3 -I tools/psn_eboot.py info "$pbp" "$keys"; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
-            if python3 -I tools/psn_eboot.py extract "$pbp" "$keys" "$d/disc.bin"; then
-              sha1sum "$d/disc.bin" | tee -a "$GITHUB_STEP_SUMMARY"
-            else
-              echo "::warning::$r image extraction not working yet (see docs/PSN.md)"
+            mkdir -p "$2"; curl -fsSL -o "$2/dl" "$URL" || return 1
+            if unzip -tq "$2/dl" >/dev/null 2>&1; then unzip -o -q "$2/dl" -d "$2" && rm "$2/dl"; fi
+          }
+          # tree DIR OUT: extracts the file system of the biggest disc image found under DIR into OUT
+          tree() {
+            local img; img="$(find "$1" -type f \( -iname '*.bin' -o -iname '*.img' -o -iname '*.iso' -o -name dl -o -name disc.raw \) -size +50M -printf '%s %p\n' | sort -nr | head -1 | cut -d' ' -f2-)"
+            [ -n "$img" ] || { mkdir -p "$2"; cp -r "$1"/. "$2"/; return 0; }
+            if [ $(( $(stat -c%s "$img") % 2352 )) -ne 0 ]; then echo "::warning::$img is not 2352-byte sectors"; fi
+            mkdir -p "$2"; python3 -I tools/isoext.py "$img" "$2"; sha1sum "$img" | sed "s#  .*#  $(basename "$img")#"
+          }
+          S="$GITHUB_STEP_SUMMARY"
+          if [ -n "$GAME_FILES_URL_JP" ]; then fetch GAME_FILES_URL_JP "$RUNNER_TEMP/rjp" && tree "$RUNNER_TEMP/rjp" "$RUNNER_TEMP/tjp" || echo "::warning::JP retail fetch failed"; fi
+          if [ -n "$GAME_FILES_URL_USA" ]; then fetch GAME_FILES_URL_USA "$RUNNER_TEMP/rusa" && tree "$RUNNER_TEMP/rusa" "$RUNNER_TEMP/tusa" || echo "::warning::USA retail fetch failed"; fi
+          if [ -n "$GAME_FILES_URL" ]; then fetch GAME_FILES_URL "$RUNNER_TEMP/rpal" && tree "$RUNNER_TEMP/rpal" "$RUNNER_TEMP/tpal" || echo "::notice::PAL is not a disc image; no PAL tree"; fi
+          for r in JP USA; do
+            v="GAME_FILES_URL_PSN_$r"
+            if [ -z "${!v}" ]; then echo "::notice::$v secret not set; skipping $r."; continue; fi
+            d="$RUNNER_TEMP/psn_$r"; fetch "$v" "$d" || { echo "::error::$r download failed"; continue; }
+            echo "### PSN $r" >> "$S"; echo "contents:"; find "$d" -type f -printf '%s %P\n' | tee -a "$S"
+            if ! find "$d" -type f \( -iname '*.bin' -o -iname '*.img' -o -iname '*.iso' \) -size +50M | grep -q .; then
+              pbp="$(find "$d" -iname EBOOT.PBP | head -1)"; keys="$(find "$d" -iname KEYS.BIN | head -1)"
+              if [ -z "$pbp" ]; then echo "::error::$r: no disc image nor EBOOT.PBP"; continue; fi
+              { echo '```'; python3 -I tools/psn_eboot.py info "$pbp" $keys; echo '```'; } | tee -a "$S"
+              python3 -I tools/psn_eboot.py extract "$pbp" $keys "$d/disc.raw" || { echo "::warning::$r EBOOT image extraction not working (see docs/PSN.md)"; continue; }
             fi
-            rm -rf "$d"
+            { echo '```'; tree "$d" "$d/fs"; } | tee -a "$S"
+            ref=""; [ "$r" = JP ] && ref="$RUNNER_TEMP/tjp"; [ "$r" = USA ] && ref="$RUNNER_TEMP/tusa"
+            if [ -n "$ref" ] && [ -d "$ref" ]; then
+              echo "--- vs $r retail" | tee -a "$S"; python3 -I tools/psn_compare.py "$d/fs" "$ref" | tee -a "$S"
+            else
+              [ "$r" = USA ] && echo "::notice::No USA retail secret (GAME_FILES_URL_USA); USA PSN compared structurally against PAL only."
+              if [ -d "$RUNNER_TEMP/tpal" ]; then echo "--- vs PAL (structure)" | tee -a "$S"; python3 -I tools/psn_compare.py "$d/fs" "$RUNNER_TEMP/tpal" --struct | tee -a "$S"; fi
+              echo "--- file list" | tee -a "$S"; (cd "$d/fs" && find . -type f -exec sha1sum {} + | sort -k2) | tee -a "$S"
+            fi
+            echo '```' >> "$S"; rm -rf "$d"
           done
