@@ -684,6 +684,11 @@ OUT/bp/tombi2 --lang 5 --civ-town 17 --civ-maps OUT/maps --civ-wfm OUT/civdata [
 OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata      # through the hub, in normal play
 ```
 
+- The launcher (tools/port_launcher.py, "Patches and mods") offers it as section "0 — rebuilt town" of the ★ areas in
+  the area select, plus checkboxes for `--civ-collision` and `--civ-route`. On first use it builds the maps and texts
+  in-process from its own data/ (civ_cache/ next to tombi-port.json; rebuilt when the generator sources, the bundled
+  layout or MAIN0 change). No disc image is needed: tools/area000.py reads the ISO layout from data/manifest.txt and the
+  BUNMEI.STR mosaic comes from data/MOVIE when TOMBI_FS points at a launcher data folder.
 - `--civ-town 11|16|17` is `--civ-test` plus the debug area select opened on that town's section 0 (Start, then
   Circle, as the pokes of the old command did). Tomba starts just inside the exit from Civilization Town
   (AREA11 world (530, 410), AREA16 (-95, 524), AREA17 (223, 540); `--civ-spawn X,Y` overrides it). The camera limits

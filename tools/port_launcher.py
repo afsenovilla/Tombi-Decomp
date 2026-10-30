@@ -186,6 +186,78 @@ def data_dir():
     return os.path.join(app_dir(), "data")
 
 
+def civ_dir():
+    """Cache of the rebuilt cut towns (--civ-town / --civ-route): maps/ (tools/civ_rebuild.py) and wfm/
+    (tools/civ_test_data.py), generated from data/ by the launcher; next to data/, never in the repo."""
+    return os.path.join(app_dir(), "civ_cache")
+
+
+CIV_SOURCES = ("civ_rebuild.py", "civ_rebuild_layout.json", "civ_test_data.py", "area000.py", "topdown.py")
+
+
+def civ_stamp():
+    """What the cache was built from: the generator sources (bundled layout + build id when frozen) and data/'s MAIN0."""
+    h = hashlib.sha1()
+    here = getattr(sys, "_MEIPASS", None) or os.path.dirname(os.path.abspath(__file__))
+    for n in CIV_SOURCES:
+        p = os.path.join(here, n)
+        if os.path.isfile(p):
+            h.update(open(p, "rb").read())
+    if getattr(sys, "frozen", False):
+        h.update(BUILD_ID.encode())
+    return "%s %s" % (h.hexdigest(), X.manifest_sha1(data_dir()) or "")
+
+
+def civ_ready():
+    d = civ_dir()
+    try:
+        ok = open(os.path.join(d, "stamp.txt"), encoding="utf-8").read().strip() == civ_stamp()
+    except OSError:
+        return False
+    need = [os.path.join(d, "maps", "AREA%d" % a, f) for a in (11, 16, 17) for f in ("map8F.tim", "map8E.bin", "map8F_in.tim")]
+    need += [os.path.join(d, "wfm", "civ_MFNT%d0S.WFM" % a) for a in (11, 16, 17)]
+    return ok and all(os.path.isfile(p) for p in need)
+
+
+def civ_generate(log):
+    """Builds civ_dir() from data/ in this process (the frozen launcher has no python to run the scripts with)."""
+    import contextlib
+    d, data = civ_dir(), data_dir()
+    os.environ["TOMBI_FS"] = data              # tools/area000.py reads the extracted disc from here (no image needed:
+    os.environ["TOMBI_IMG"] = ""               # the ISO layout comes from data/manifest.txt, the movie from data/MOVIE)
+    import area000, topdown, civ_rebuild, civ_test_data
+    area000.FS = topdown.FS = data
+    area000.IMG = ""
+    area000._REC = area000._LISTS = None
+
+    class W:              # print() writes its pieces separately: one log line per newline
+        buf = ""
+
+        def write(self, t):
+            self.buf += t
+            *lines, self.buf = self.buf.split("\n")
+            for line in lines:
+                if line.strip():
+                    log(line)
+
+        def flush(self):
+            pass
+    with contextlib.redirect_stdout(W()):
+        maps, wfm = os.path.join(d, "maps"), os.path.join(d, "wfm")
+        os.makedirs(wfm, exist_ok=True)
+        try:
+            os.remove(os.path.join(d, "stamp.txt"))
+        except OSError:
+            pass
+        civ_test_data.build_wfm(data, os.path.join(wfm, "civ_MFNT110S.WFM"))
+        for a in (16, 17):
+            civ_test_data.build_area_wfm(data, a, os.path.join(wfm, "civ_MFNT%d0S.WFM" % a))
+        layout = json.load(open(civ_rebuild.LAYOUT, encoding="utf-8"))
+        for a in (17, 11, 16):
+            civ_rebuild.build(a, layout, {}, maps)
+    open(os.path.join(d, "stamp.txt"), "w", encoding="utf-8").write(civ_stamp() + "\n")
+
+
 def data_ready():
     """sha1 of MAIN0.EXE of a complete extraction in data_dir(), else None."""
     return X.manifest_sha1(data_dir())
@@ -924,9 +996,11 @@ class App:
                 row.pack(fill="x")
                 ttk.Label(row, text=tr("mod.area")).pack(side="left", padx=(0, 4))
                 names = [M.area_label(a) for a, _ in M.ROOM_COUNTS]
-                self.sec_cb = ttk.Combobox(row, state="readonly", width=4)
-                self.sec_cb.pack(side="right")      # packed first: the area box takes what is left, never hides it
-                ttk.Label(row, text=tr("mod.section")).pack(side="right", padx=(12, 4))
+                row2 = ttk.Frame(c, padding=(24, 2, 0, 2))    # the section below: "0 — rebuilt town (...)" is long too
+                row2.pack(fill="x")
+                ttk.Label(row2, text=tr("mod.section")).pack(side="left", padx=(0, 4))
+                self.sec_cb = ttk.Combobox(row2, state="readonly", width=4)
+                self.sec_cb.pack(side="left")
                 self.area_cb = ttk.Combobox(row, values=names, state="readonly", width=30)
                 idx = [a for a, _ in M.ROOM_COUNTS]
                 self.area_cb.current(idx.index(av.get()) if av.get() in idx else 0)
@@ -947,18 +1021,33 @@ class App:
                     a = M.ROOM_COUNTS[self.area_cb.current()][0]
                     av.set(a)
                     civ_var.set(tr("mod.civnote", M.CIV_TOWNS[a], a) if a in M.CIV_TOWNS else "")
-                    secs = [str(k) for k in range(M.ROOM_COUNTS[self.area_cb.current()][1]) if (a, k) not in M.DOOR_ROOMS]
-                    self.sec_cb["values"] = secs
-                    self.sec_cb.current(secs.index(str(sv.get())) if str(sv.get()) in secs else 0)
-                    sv.set(int(self.sec_cb.get()))
+                    # section 0 of 11/16/17: the rebuilt town (--civ-town; the debug select cannot enter it)
+                    secs = [(k, tr("mod.civsec", M.CIV_TOWNS[a]) if (a in M.CIV_TOWNS and k == 0) else str(k))
+                            for k in range(M.ROOM_COUNTS[self.area_cb.current()][1])
+                            if (a, k) not in M.DOOR_ROOMS or (a in M.CIV_TOWNS and k == 0)]
+                    self.sec_nums = [k for k, _ in secs]
+                    self.sec_cb["values"] = [t for _, t in secs]
+                    self.sec_cb.configure(width=max(len(t) for _, t in secs) + 1)
+                    self.sec_cb.current(self.sec_nums.index(sv.get()) if sv.get() in self.sec_nums else 0)
+                    sv.set(self.sec_nums[self.sec_cb.current()])
                 self.area_cb.bind("<<ComboboxSelected>>", fill_sections)
-                self.sec_cb.bind("<<ComboboxSelected>>", lambda _e, sv=sv: sv.set(int(self.sec_cb.get())))
+                self.sec_cb.bind("<<ComboboxSelected>>", lambda _e, sv=sv: sv.set(self.sec_nums[self.sec_cb.current()]))
                 fill_sections()
             elif kind.startswith("check+int:"):
                 _, key, lo, hi, step = kind.split(":")
                 iv = self.var(key, tk.IntVar, int(lo))
                 ttk.Spinbox(box, from_=int(lo), to=int(hi), increment=int(step), textvariable=iv, width=10).pack(side="left", padx=12)
             ttk.Label(c, text=tr(dk), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", padx=(24, 0), pady=(0, 6))
+            if kind == "check+area":                  # the rebuilt cut towns (docs/CIVILIZATION.md "Playable towns")
+                for key in ("civ_route", "civ_collision"):
+                    row = ttk.Frame(c, padding=(0, 2))
+                    row.pack(fill="x")
+                    lk_ = {"civ_route": "mod.civroute", "civ_collision": "mod.civcoll"}[key]
+                    ttk.Checkbutton(row, text="★ " + tr(lk_), variable=self.var(key, tk.BooleanVar, False)).pack(side="left")
+                    info = ttk.Label(row, text="\u24d8", style="Help.TLabel", cursor="hand2")
+                    info.bind("<Button-1>", lambda e, lk_=lk_: messagebox.showinfo(tr(lk_), tr(lk_ + ".i")))
+                    info.pack(side="left", padx=(6, 0))
+                ttk.Frame(c, height=6).pack()
 
     def _build_log(self, f):
         o, c = self.card(f, tr("c.status"))
@@ -1210,6 +1299,7 @@ class App:
         if s.get("fullscreen"):
             cmd += ["--fullscreen"]
         cmd += M.mod_args(s, app_dir())
+        cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))
         return cmd
 
     def play(self):
@@ -1235,6 +1325,13 @@ class App:
             self.cmd_text.insert("1.0", subprocess.list2cmdline(cmd))
         elif self.s.get("patch_on"):
             self.say(tr("s.patchnodata"), "busy")
+        if M.civ_wanted(self.s):
+            if cmd[1] != "--data":
+                messagebox.showerror(tr("title"), tr("s.civnodata"))
+                return
+            if not civ_ready():
+                self.generate_civ()       # Play goes on by itself once the towns are built
+                return
         self.log_path = os.path.join(app_dir(), "tombi-port.log")
         log = open(self.log_path, "w", encoding="utf-8", errors="replace")
         log.write("[launcher] build %s\n" % BUILD_ID)
@@ -1267,6 +1364,37 @@ class App:
         self.play_btn.state(["!disabled"])
         self.stop_btn.pack_forget()
         self.proc = None
+
+    def generate_civ(self):
+        """First use of --civ-town / --civ-route: the maps and texts, built in a thread (about a minute), the output on
+        the Log page; Play continues when they are ready."""
+        self.play_btn.state(["disabled"])
+        self.show("log")
+        self.log_text.delete("1.0", "end")
+        self.say(tr("s.civgen", civ_dir()), "busy")
+
+        def log(line):
+            self.root.after(0, lambda: (self.log_text.insert("end", line + "\n"), self.log_text.see("end")))
+
+        def done(err):
+            self.play_btn.state(["!disabled"])
+            if err:
+                self.say(tr("s.civgenfail", err), "bad")
+                return
+            self.say(tr("s.civgenok", civ_dir()), "ok")
+            self.play()
+
+        def work():
+            err = None
+            try:
+                civ_generate(log)
+            except BaseException as e:          # SystemExit from the scripts too
+                import traceback
+                for l in traceback.format_exc().splitlines():
+                    log(l)
+                err = str(e) or type(e).__name__
+            self.root.after(0, done, err)
+        threading.Thread(target=work, daemon=True).start()
 
     def _starting(self, on):
         """The "Starting the game..." notice in the bottom bar (indeterminate bar) above the summary."""

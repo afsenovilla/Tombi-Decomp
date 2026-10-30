@@ -28,6 +28,11 @@ on:
       - tools/verb_order.py
       - tools/cdfiles.py
       - tools/wfm_charmap.json
+      - tools/civ_rebuild.py
+      - tools/civ_rebuild_layout.json
+      - tools/civ_test_data.py
+      - tools/area000.py
+      - tools/topdown.py
       - patches/es_mejorada.tombipatch.json
       - patches/en_cut_content.tombipatch.json
       - tools/prompt_glyphs.py
@@ -457,13 +462,13 @@ jobs:
         run: |
           # PyInstaller's prebuilt Windows bootloader is what antivirus / browser scanners flag (false positives that
           # come and go with each release): build the bootloader here from source (MSVC on the runner), pinned version
-          PYINSTALLER_COMPILE_BOOTLOADER=1 python -m pip install --no-binary pyinstaller "pyinstaller==6.11.1" pillow
+          PYINSTALLER_COMPILE_BOOTLOADER=1 python -m pip install --no-binary pyinstaller "pyinstaller==6.11.1" pillow numpy
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --paths tools \
+            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --paths tools \
             --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "build_id.txt;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
-            --add-data "tools/wfm_charmap.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" --add-data "patches/en_cut_content.tombipatch.json;patches" \
+            --add-data "tools/wfm_charmap.json;." --add-data "tools/civ_rebuild_layout.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" --add-data "patches/en_cut_content.tombipatch.json;patches" \
             --add-binary "build/win-bin/tombi-pc.exe;." --add-binary "build/win-bin/SDL2.dll;." \
             tools/port_launcher.py
           mkdir -p dist/windows build/out
@@ -504,14 +509,14 @@ jobs:
           sudo apt-get install -y libc6:i386 libsdl2-2.0-0:i386   # (Ubuntu's libSDL2 links ALSA/Pulse/X11 directly: the user needs this too, README)
           chmod +x build/linux-bin/tombi-pc
           build/linux-bin/tombi-pc --headless --test-null
-          python -m pip install pyinstaller pillow
+          python -m pip install pyinstaller pillow numpy
           python -c "import tkinter"
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import PIL.ImageTk --paths tools \
+            --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import PIL.ImageTk --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --paths tools \
             --add-data "tools/icons/launcher.ico:icons" --add-data "tools/icons/launcher.png:icons" --add-data "build_id.txt:." \
             --add-data "port/assets/prompts/manifest.json:port/assets/prompts" \
-            --add-data "tools/wfm_charmap.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" --add-data "patches/en_cut_content.tombipatch.json:patches" \
+            --add-data "tools/wfm_charmap.json:." --add-data "tools/civ_rebuild_layout.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" --add-data "patches/en_cut_content.tombipatch.json:patches" \
             --add-binary "build/linux-bin/tombi-pc:." --add-binary "build/linux-bin/libSDL2-2.0.so.0:." \
             tools/port_launcher.py
           mkdir -p dist/linux

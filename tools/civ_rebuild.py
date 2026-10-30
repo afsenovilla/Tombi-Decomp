@@ -27,7 +27,8 @@ Output per town (build/civ_rebuild/AREAnn/):
   preview.png   picture + houses, residents, patrol boxes, props and exits (world (x, y) = pixel (x+128, y-40))
   source.png    which layer each pixel came from (grey ground, blue FMV, green cut-out, yellow stamp)
   manifest.json sizes, CLUT provenance, the warnings of the cell-map checks
-Needs numpy and Pillow, the extracted disc (game/disc/fs or TOMBI_FS) and the image (game/disc/Tombi.bin or TOMBI_IMG).
+Needs numpy and Pillow, the extracted disc (game/disc/fs or TOMBI_FS) and the image (game/disc/Tombi.bin or TOMBI_IMG);
+with TOMBI_FS set to a launcher data folder (tools/extract_data.py) the image is not needed.
 """
 import argparse, importlib, json, os, struct, sys
 
@@ -105,7 +106,11 @@ def mosaic(movie, f0, f1, cache):
         return np.array(Image.open(fn).convert("RGB"))
     S = importlib.import_module("str")
     img = img_path()
-    lba, size = S.str_files(img)["MOVIE/%s.STR" % movie]
+    raw = os.path.join(A.FS, "MOVIE", "%s.STR" % movie)
+    if not os.path.isfile(img) and os.path.isfile(raw):   # a launcher data folder: the movie kept as raw 2352-byte sectors
+        img, lba, size = raw, 0, os.path.getsize(raw) // 2352 * 2048
+    else:
+        lba, size = S.str_files(img)["MOVIE/%s.STR" % movie]
     fr = []
     for num, w, h, bs in S.frames(img, lba, size):
         if num > f1:

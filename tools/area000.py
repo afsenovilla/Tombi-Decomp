@@ -37,6 +37,22 @@ KIND_NAMES = {0x10: "GRPX", 0x20: "NONE", 0x30: "SPR", 0x40: "FOUR", 0x50: "WMD"
 TYPE_NAMES = {0: "STAGING", 1: "LZ_TO_VRAM", 2: "RAW", 3: "LZ_TO_RAM", 4: "RAW_4"}
 
 
+def disc_layout(fs):
+    """{name: (lba, size)} of the disc: the ISO9660 directory of the image, or, without one, the manifest.txt of a
+    launcher/port data folder (tools/extract_data.py: `file <lba> <sectors> <stored bytes> <bytes> <path>`)."""
+    import cdfiles
+    img = IMG or os.path.join(os.path.dirname(fs), "Tombi.bin")
+    man = os.path.join(fs, "manifest.txt")
+    if not os.path.isfile(img) and os.path.isfile(man):
+        out = {}
+        for line in open(man, encoding="utf-8"):
+            p = line.split()
+            if len(p) >= 6 and p[0] == "file" and not p[5].startswith("_disc/"):
+                out[p[5]] = (int(p[1]), int(p[2]) * 2048 if p[3] == "2352" else int(p[4]))
+        return out
+    return cdfiles.layout_from_image(img)
+
+
 # ---------------------------------------------------------------- PNG (pure python)
 def _chunk(tag, data):
     c = struct.pack(">I", len(data)) + tag + data
@@ -90,7 +106,7 @@ def load_records(fs=FS):
     try:
         sys.path.insert(0, os.path.join(ROOT, "tools"))
         import cdfiles
-        ref = cdfiles.layout_from_image(IMG or os.path.join(os.path.dirname(fs), "Tombi.bin"))
+        ref = disc_layout(fs)
         rows = cdfiles.resolve(cdfiles.read_exe(os.path.join(fs, "EXE", "MAIN0.EXE")), ref)
         names = {i: r[3] for i, r in enumerate(rows) if r[3]}
         sysdir = os.path.join(fs, "SYS")
@@ -184,7 +200,7 @@ def load_lists(fs=FS):
     try:
         sys.path.insert(0, os.path.join(ROOT, "tools"))
         import cdfiles
-        ref = cdfiles.layout_from_image(IMG or os.path.join(os.path.dirname(fs), "Tombi.bin"))
+        ref = disc_layout(fs)
         rows = cdfiles.resolve(cdfiles.read_exe(os.path.join(fs, "EXE", "MAIN0.EXE")), ref)
         names = {i: r[3] for i, r in enumerate(rows) if r[3]}
         for fn in sorted(os.listdir(os.path.join(fs, "SYS"))):

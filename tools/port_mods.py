@@ -47,7 +47,16 @@ i18n.add({
         "mod.areasel.d": "Abre el selector de áreas de depuración del juego y entra en el área/sección elegida en lugar de empezar la partida.",
         "mod.area": "Área", "mod.section": "Sección",
         "mod.civtag": "(recortado, jugable, reconstruido)",
-        "mod.civnote": "★ La sección 0 de esta área es una ciudad recortada ({0}) reconstruida para el port. El selector no puede entrar en ella; se juega con --civ-town {1} o --civ-route (docs/CIVILIZATION.md, \"Playable towns\").",
+        "mod.civnote": "★ La sección 0 de esta área es una ciudad recortada ({0}) reconstruida para el port. Elige la sección «0 — pueblo reconstruido» para jugarla (--civ-town {1}). La primera vez el lanzador genera el mapa y los textos a partir de tus datos del disco (alrededor de un minuto; el progreso sale en la página Registro).",
+        "mod.civsec": "0 — pueblo reconstruido ({0})",
+        "mod.civcoll": "Mostrar la capa de colisiones",
+        "mod.civcoll.i": "En los pueblos reconstruidos (Lumberjack Town, Stonetown, Iron Town) dibuja el mapa de celdas encima del dibujo: rojo = sólido, naranja = diagonal, magenta = pared de un solo lado, cian = disparador. Sirve para comprobar el ajuste mientras caminas (--civ-collision).",
+        "mod.civroute": "Entrar en los pueblos reconstruidos desde el centro en partida normal",
+        "mod.civroute.i": "En partida normal, las salidas del centro de la Ciudad de la Civilización llevan a los pueblos recortados reconstruidos (sección 0 de las áreas 11, 16 y 17) en lugar de a las secciones de siempre; las salidas de los pueblos siguen al resto del juego (--civ-route). Usa los mismos mapas y textos generados que el selector de área.",
+        "s.civgen": "Generando los pueblos reconstruidos en {0} (solo la primera vez, alrededor de un minuto)...",
+        "s.civgenok": "Pueblos reconstruidos listos en {0}.",
+        "s.civgenfail": "No se pudieron generar los pueblos reconstruidos: {0}",
+        "s.civnodata": "Los pueblos reconstruidos se generan a partir de la carpeta data/ extraída del disco: elige primero la imagen del disco.",
         "mod.ap": "Empezar con AP", "mod.ap.d": "Puntos de aventura al empezar la partida (0..99999999).",
         "mod.lives": "Empezar con vidas", "mod.lives.d": "Vidas al empezar la partida (1..99).",
         "mod.inflives": "Vidas infinitas", "mod.inflives.d": "Mantiene las vidas en 99 cada segundo.",
@@ -65,7 +74,16 @@ i18n.add({
         "mod.areasel.d": "Opens the game's debug area select and enters the chosen area/section instead of starting the story.",
         "mod.area": "Area", "mod.section": "Section",
         "mod.civtag": "(cut, playable, rebuilt)",
-        "mod.civnote": "★ Section 0 of this area is a cut town ({0}) rebuilt for the port. The debug select cannot enter it; play it with --civ-town {1} or --civ-route (docs/CIVILIZATION.md, \"Playable towns\").",
+        "mod.civnote": "★ Section 0 of this area is a cut town ({0}) rebuilt for the port. Choose section \"0 — rebuilt town\" to play it (--civ-town {1}). The first time, the launcher generates the map and the texts from your own disc data (about a minute; the progress shows on the Log page).",
+        "mod.civsec": "0 — rebuilt town ({0})",
+        "mod.civcoll": "Show collision overlay",
+        "mod.civcoll.i": "In the rebuilt towns (Lumberjack Town, Stonetown, Iron Town) the cell map is drawn over the picture: red = solid, orange = diagonal, magenta = one-sided wall, cyan = trigger. For checking the fit while walking (--civ-collision).",
+        "mod.civroute": "Enter the rebuilt towns from the hub in normal play",
+        "mod.civroute.i": "In normal play the exits of the Civilization Town hub lead to the rebuilt cut towns (section 0 of areas 11, 16 and 17) instead of the usual sections; the towns' own exits lead on to the rest of the game (--civ-route). Uses the same generated maps and texts as the area select.",
+        "s.civgen": "Generating the rebuilt towns in {0} (first time only, about a minute)...",
+        "s.civgenok": "Rebuilt towns ready in {0}.",
+        "s.civgenfail": "Could not generate the rebuilt towns: {0}",
+        "s.civnodata": "The rebuilt towns are generated from the data/ folder extracted from the disc: choose the disc image first.",
         "mod.ap": "Start with AP", "mod.ap.d": "Adventure points at the start of the game (0..99999999).",
         "mod.lives": "Start with lives", "mod.lives.d": "Lives at the start of the game (1..99).",
         "mod.inflives": "Infinite lives", "mod.inflives.d": "Keeps the lives at 99 every second.",
@@ -89,8 +107,30 @@ def args_hz60(s):
     return ["--hz", "60"] if s.get("hz60") else ["--hz", "50"]
 
 
+def civ_town(s):
+    """The rebuilt town the area select asks for (section 0 of 11/16/17, which the debug select cannot enter), else None."""
+    if s.get("areasel") and int(s.get("area", 0)) in CIV_TOWNS and int(s.get("section", 0)) == 0:
+        return int(s["area"])
+    return None
+
+
+def civ_wanted(s):
+    return bool(civ_town(s) or s.get("civ_route"))
+
+
+def civ_args(s, maps, wfm):
+    """--civ-town / --civ-route with the generated maps (tools/civ_rebuild.py) and texts (tools/civ_test_data.py),
+    docs/CIVILIZATION.md "Playable towns"."""
+    t = civ_town(s)
+    if not (t or s.get("civ_route")):
+        return []
+    out = ["--civ-town", str(t)] if t else ["--civ-route"]
+    out += ["--civ-maps", maps, "--civ-wfm", wfm]
+    return out + (["--civ-collision"] if s.get("civ_collision") else [])
+
+
 def args_areasel(s):
-    if not s.get("areasel"):
+    if not s.get("areasel") or civ_town(s):
         return []
     area, section = int(s.get("area", 0)), int(s.get("section", 0))
     return ["--poke", "900:1F8001B4:1", "--poke", "%d:8009C960:%X:2" % (F_SELECT, area),
@@ -174,4 +214,4 @@ def mod_args(settings, out_dir=None):
 def default_settings():
     return {"skipintro": True, "hz60": False, "areasel": False, "area": 0, "section": 0, "ap_on": False, "ap": 10000,
             "lives_on": False, "lives": 5, "inflives": False, "infhealth": False, "events": False, "keys_on": False,
-            "keys": dict(DEFAULT_KEYS), "autostart": False, "prompts": "playstation"}
+            "keys": dict(DEFAULT_KEYS), "autostart": False, "prompts": "playstation", "civ_collision": False, "civ_route": False}
