@@ -15,9 +15,18 @@ ROOM_COUNTS = [(0, 6), (1, 5), (2, 6), (3, 6), (4, 20), (5, 4), (6, 3), (8, 4), 
                (14, 8), (16, 7), (17, 11), (18, 3), (19, 3)]
 AREA_NAMES = {0: "Village of All Beginnings", 1: "Forest / Watch Tower (AREA01)", 2: "Caves / tunnels (AREA02)",
               3: "Phoenix Mountain", 4: "Trick Village area (AREA04)", 5: "Baccus Village", 6: "Dirt Motocross",
-              8: "Baccus Lake", 9: "Mushroom Village", 10: "Deep Jungle", 11: "Village of Civilization",
-              13: "Pig Island", 14: "Evil Pigs", 16: "Civilization: Clock Tower", 17: "Civilization: Iron Tower",
-              18: "Civilization: Y Crossing", 19: "Civilization (purified)"}
+              8: "Baccus Lake", 9: "Mushroom Village", 10: "Deep Jungle",
+              11: "Civilization: Lumberjack Town / Factory", 13: "Pig Island", 14: "Evil Pigs",
+              16: "Civilization: Stonetown / Clock Tower", 17: "Civilization: Iron Town / Iron Castle",
+              18: "Civilization Town (hub)", 19: "Civilization (purified)"}
+# areas 11/16/17/18 named after the retail text (docs/CIVILIZATION.md "Names"), not the README's "Village of ...";
+# section 0 of 11/16/17 is a cut town rebuilt playable in the port (--civ-town N, docs/CIVILIZATION.md "Playable towns")
+CIV_TOWNS = {11: "Lumberjack Town", 16: "Stonetown", 17: "Iron Town"}
+
+
+def area_label(a):
+    """The area select entry: number, name and, for the rebuilt cut towns, the i18n tag."""
+    return "%02d %s%s" % (a, AREA_NAMES.get(a, ""), ("  " + i18n.tr("mod.civtag")) if a in CIV_TOWNS else "")
 # rooms with an empty load list cannot be entered from the debug select (tools/psxemu/rooms.py DOOR_ROOMS)
 DOOR_ROOMS = {(11, 0), (11, 3), (11, 4), (16, 0), (16, 1), (16, 2), (17, 0), (17, 6), (17, 7), (17, 8), (17, 9), (17, 10), (18, 0)}
 EVENT_COUNT = 0x82     # event ids 0..0x81 (notes/names.md "Event links"); the flag bytes follow each other
@@ -35,6 +44,8 @@ i18n.add({
         "mod.areasel": "Selección de área (debug select)",
         "mod.areasel.d": "Abre el selector de áreas de depuración del juego y entra en el área/sección elegida en lugar de empezar la partida.",
         "mod.area": "Área", "mod.section": "Sección",
+        "mod.civtag": "★ recortado, jugable (reconstruido)",
+        "mod.civnote": "★ La sección 0 de esta área es una ciudad recortada ({0}) reconstruida para el port. El selector no puede entrar en ella; se juega con --civ-town {1} o --civ-route (docs/CIVILIZATION.md, \"Playable towns\").",
         "mod.ap": "Empezar con AP", "mod.ap.d": "Puntos de aventura al empezar la partida (0..99999999).",
         "mod.lives": "Empezar con vidas", "mod.lives.d": "Vidas al empezar la partida (1..99).",
         "mod.inflives": "Vidas infinitas", "mod.inflives.d": "Mantiene las vidas en 99 cada segundo.",
@@ -51,6 +62,8 @@ i18n.add({
         "mod.areasel": "Area select (debug select)",
         "mod.areasel.d": "Opens the game's debug area select and enters the chosen area/section instead of starting the story.",
         "mod.area": "Area", "mod.section": "Section",
+        "mod.civtag": "★ cut, playable (rebuilt)",
+        "mod.civnote": "★ Section 0 of this area is a cut town ({0}) rebuilt for the port. The debug select cannot enter it; play it with --civ-town {1} or --civ-route (docs/CIVILIZATION.md, \"Playable towns\").",
         "mod.ap": "Start with AP", "mod.ap.d": "Adventure points at the start of the game (0..99999999).",
         "mod.lives": "Start with lives", "mod.lives.d": "Lives at the start of the game (1..99).",
         "mod.inflives": "Infinite lives", "mod.inflives.d": "Keeps the lives at 99 every second.",
