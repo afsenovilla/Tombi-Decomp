@@ -23,3 +23,7 @@ witchMizunoCuredTalk = 0x801182F4; // type:func size:0x2F8  PAL x018 0x801191DC
 witchMizunoHuntPigsTalk = 0x801185EC; // type:func size:0x268  PAL x018 0x801194D4
 func_801191C0_slps01144 = 0x801191C0; // type:func size:0x178  PAL x018 0x8011A1B4
 updateWitchMizuno = 0x80119338; // type:func size:0x174  PAL x018 0x8011A32C
+func_801164F0_slps01144 = 0x801164F0; // type:func size:0x8
+func_801164F8_slps01144 = 0x801164F8; // type:func size:0xC
+func_80116098_slps01144 = 0x80116098; // type:func size:0x174
+func_8011903C_slps01144 = 0x8011903C; // type:func size:0x184
