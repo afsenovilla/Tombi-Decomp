@@ -23,7 +23,9 @@ Order by expected yield per effort: areas whose PAL twin is fully matched and th
 - [ ] Jungle X10 (62 %): finish; read every function with no PAL counterpart (notes/jp_retail.md).
 - [ ] Mid areas X01, X03, X04, X06, X09, X14.
 - [ ] X00 shared object code (47 %), then the engine SLPS_011.44 (54 %): kana/kanji text system, file loading.
-- [ ] Ghidra analysis stages (notes/jp_retail.md): better PAL-name matching, then read what has no counterpart.
+- [x] Ghidra analysis stages 1-2 (notes/jp_retail.md, 2e5e0da, 70fbba1): names ported; no-counterpart lists are an older build of the area handlers, not relocated code.
+- [ ] JP X11 0x80116348: cutscene object, message boxes 6-10 + setEventStarted(0x68): resolve the texts and the helper object 0x33/0x0F; compare with PAL event 0x68.
+- [ ] Read the remaining large X10 no-counterpart functions (list in notes/jp_retail.md).
       Anything JP-only goes to docs/CUT_CONTENT.md and, if worth it, into the port.
 
 ## P3 — restoring cut content in the port (only what P2 or earlier digging proves)
