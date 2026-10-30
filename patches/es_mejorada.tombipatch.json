@@ -218,13 +218,22 @@
     "Medicina fría": "Antigripal",
     "Llave viejo estanque": "Llave del Viejo estanque",
     "Gorro minero": "Casco de minero",
-    "Gran panel de llave 1": "Panel gran llave 1",
-    "Gran panel de llave 2": "Panel gran llave 2",
-    "Gran panel de llave 3": "Panel gran llave 3",
-    "Gran panel de llave 4": "Panel gran llave 4",
-    "Gran panel de llave 5": "Panel gran llave 5",
+    "Gran panel de llave 1": "Trozo de llave gigante 1",
+    "Gran panel de llave 2": "Trozo de llave gigante 2",
+    "Gran panel de llave 3": "Trozo de llave gigante 3",
+    "Gran panel de llave 4": "Trozo de llave gigante 4",
+    "Gran panel de llave 5": "Trozo de llave gigante 5",
     "Mata hierbajos": "Herbicida",
-    "Tubería": "Válvula"
+    "Tubería": "Válvula",
+    "El favorito del Fénix": "La comida del Fénix"
+   },
+   "placeNames": {
+    "Plaza de \ncaridad\n": "Plaza de \nla caridad\n",
+    "Bosque de \nde las 100 Flores\n": "Bosque \nde las 100 Flores\n",
+    "Cabaña de Anciano \ncentenario\n": "Cabaña del Anciano \ncentenario\n",
+    "Cámara de \nTribulación\n": "Cámara de \ntribulación\n",
+    "Colina del \nÁrbol noble\n": "Colina del \nárbol noble\n",
+    "Cuevas Lava\n": "Cuevas de lava\n"
    }
   },
   "SYSTEM/D5SPSUB3.BIN": {
@@ -261,13 +270,22 @@
     "Medicina fría": "Antigripal",
     "Llave viejo estanque": "Llave del Viejo estanque",
     "Gorro minero": "Casco de minero",
-    "Gran panel de llave 1": "Panel gran llave 1",
-    "Gran panel de llave 2": "Panel gran llave 2",
-    "Gran panel de llave 3": "Panel gran llave 3",
-    "Gran panel de llave 4": "Panel gran llave 4",
-    "Gran panel de llave 5": "Panel gran llave 5",
+    "Gran panel de llave 1": "Trozo de llave gigante 1",
+    "Gran panel de llave 2": "Trozo de llave gigante 2",
+    "Gran panel de llave 3": "Trozo de llave gigante 3",
+    "Gran panel de llave 4": "Trozo de llave gigante 4",
+    "Gran panel de llave 5": "Trozo de llave gigante 5",
     "Mata hierbajos": "Herbicida",
-    "Tubería": "Válvula"
+    "Tubería": "Válvula",
+    "El favorito del Fénix": "La comida del Fénix"
+   },
+   "placeNames": {
+    "Plaza de \ncaridad\n": "Plaza de \nla caridad\n",
+    "Bosque de \nde las 100 Flores\n": "Bosque \nde las 100 Flores\n",
+    "Cabaña de Anciano \ncentenario\n": "Cabaña del Anciano \ncentenario\n",
+    "Cámara de \nTribulación\n": "Cámara de \ntribulación\n",
+    "Colina del \nÁrbol noble\n": "Colina del \nárbol noble\n",
+    "Cuevas Lava\n": "Cuevas de lava\n"
    }
   }
  },
@@ -324,7 +342,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA00/MFNT000S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -542,7 +561,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA01/MFNT010S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -564,11 +584,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -775,7 +795,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA02/MFNT020S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -797,11 +818,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -1057,7 +1078,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA03/MFNT030S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1079,11 +1101,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "99": "{BOX 112 29}\nPez psíquico{NL}\n",
@@ -1211,7 +1233,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA04/MFNT040S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1233,11 +1256,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -1371,7 +1394,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA05/MFNT050S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1393,11 +1417,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -1571,7 +1595,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA06/MFNT060S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1593,11 +1618,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -1693,7 +1718,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA07/MFNT010S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1715,11 +1741,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -1926,7 +1952,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA08/MFNT080S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -1948,11 +1975,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -2047,7 +2074,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA09/MFNT090S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2069,11 +2097,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -2173,7 +2201,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA10/MFNT100S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2195,11 +2224,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -2344,7 +2373,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA11/MFNT110S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2366,11 +2396,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -2490,7 +2520,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA12/MFNT040S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2512,11 +2543,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -2650,7 +2681,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA13/MFNT001S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2735,11 +2767,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -2825,7 +2857,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA14/MFNT140S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2847,11 +2880,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -2957,7 +2990,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA16/MFNT160S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -2979,11 +3013,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -3089,7 +3123,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA17/MFNT170S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -3111,11 +3146,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -3221,7 +3256,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA18/MFNT180S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -3243,11 +3279,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -3352,7 +3388,8 @@
    "119": "Quiero{NL}\nla plata",
    "129": "¡Qué hambre{NL}\ntengo!",
    "131": "¿La 8ª Bolsa{NL}\nCerdiablo?",
-   "133": "El Cerdiablo{NL}\nreal"
+   "133": "El Cerdiablo{NL}\nreal",
+   "63": "La comida{NL}\ndel Fénix"
   },
   "AREA19/MFNT020S.WFM": {
    "0": "{BOX 88 29}\nUsas {NL}\n",
@@ -3374,11 +3411,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -3602,11 +3639,11 @@
    "45": "{BOX 192 29}\nBolsa Cerdiablo marina{NL}\n",
    "47": "{BOX 176 29}\nLlave de 10.000 años{NL}\n",
    "48": "{BOX 224 29}\nLlave de un millón de años{NL}\n",
-   "49": "{BOX 184 29}\nPanel gran llave 1{NL}\n",
-   "50": "{BOX 184 29}\nPanel gran llave 2{NL}\n",
-   "51": "{BOX 184 29}\nPanel gran llave 3{NL}\n",
-   "52": "{BOX 184 29}\nPanel gran llave 4{NL}\n",
-   "53": "{BOX 184 29}\nPanel gran llave 5{NL}\n",
+   "49": "{BOX 232 29}\nTrozo de llave gigante 1{NL}\n",
+   "50": "{BOX 232 29}\nTrozo de llave gigante 2{NL}\n",
+   "51": "{BOX 232 29}\nTrozo de llave gigante 3{NL}\n",
+   "52": "{BOX 232 29}\nTrozo de llave gigante 4{NL}\n",
+   "53": "{BOX 232 29}\nTrozo de llave gigante 5{NL}\n",
    "55": "{BOX 152 29}\nEsencia de lluvia{NL}\n",
    "57": "{BOX 120 29}\nLlave pequeña{NL}\n",
    "65": "{BOX 136 29}\nRueda de hierro{NL}\n",
@@ -3800,12 +3837,30 @@
    "ú": -1
   },
   "8": {
-   "Á": [0, -1],
-   "á": [0, -1],
-   "é": [0, -1],
-   "í": [0, -1],
-   "ñ": [0, -1],
-   "ó": [0, -1]
+   "Á": [
+    0,
+    -1
+   ],
+   "á": [
+    0,
+    -1
+   ],
+   "é": [
+    0,
+    -1
+   ],
+   "í": [
+    0,
+    -1
+   ],
+   "ñ": [
+    0,
+    -1
+   ],
+   "ó": [
+    0,
+    -1
+   ]
   }
  }
 }
