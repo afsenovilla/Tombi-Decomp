@@ -34,3 +34,4 @@ func_8011CD74_slps01144 = 0x8011CD74; // type:func size:0x770  PAL x006 0x8011DB
 func_8011D4E4_slps01144 = 0x8011D4E4; // type:func size:0x50  PAL x006 0x8011E364
 func_8011D680_slps01144 = 0x8011D680; // type:func size:0x38  PAL x006 0x8011E514
 updateSceneSequence = 0x8011D6B8; // type:func size:0x684  PAL x006 0x8011E54C
+func_8011D534_slps01144 = 0x8011D534; // type:func size:0x14C
