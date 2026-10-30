@@ -483,8 +483,9 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: dist-windows
+          name: bin-windows-port
           path: dist/windows/tombi-port.exe
+          retention-days: 90
 
   launcher-linux:
     needs: game-linux
@@ -525,32 +526,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: dist-linux
+          name: bin-linux-port
           path: dist/linux/tombi-port
-
-  publish:
-    # one job publishes both binaries to the commit's build-* release and to "latest" (.github/scripts/publish-release.sh)
-    needs: [launcher, launcher-linux]
-    if: always() && (needs.launcher.result == 'success' || needs.launcher-linux.result == 'success')
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        if: needs.launcher.result == 'success'
-        with:
-          name: dist-windows
-          path: dist/windows
-
-      - uses: actions/download-artifact@v4
-        if: needs.launcher-linux.result == 'success'
-        with:
-          name: dist-linux
-          path: dist/linux
-
-      - name: Publish release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          chmod +x dist/linux/tombi-port 2>/dev/null || true
-          bash .github/scripts/publish-release.sh $(ls dist/windows/tombi-port.exe dist/linux/tombi-port 2>/dev/null)
+          retention-days: 90

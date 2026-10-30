@@ -1,7 +1,7 @@
 name: Text editor (Windows exe)
 
 # Builds tools/text_editor.py (dialogue editor with live preview, see README) into a single Windows executable with
-# PyInstaller and publishes it as a release asset (was dist/windows/tombi-text.exe).  The exe bundles the mkpsxiso/dumpsxiso release binaries
+# PyInstaller and uploads it as an artifact for release.yml (was dist/windows/tombi-text.exe).  The exe bundles the mkpsxiso/dumpsxiso release binaries
 # (Lameguy64/mkpsxiso, GPL-2.0, see THIRD_PARTY_NOTICES.md) so that "Generar ISO" works without installing anything.
 on:
   push:
@@ -58,11 +58,11 @@ jobs:
           mkdir -p dist/windows
           cp build/exe/tombi-text.exe dist/windows/tombi-text.exe
 
-      - name: Publish release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/publish-release.sh dist/windows/tombi-text.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-windows-text
+          path: dist/windows/tombi-text.exe
+          retention-days: 90
   linux:
     runs-on: ubuntu-24.04
     steps:
@@ -93,8 +93,8 @@ jobs:
           cp build/exe/tombi-text dist/linux/tombi-text
           chmod +x dist/linux/tombi-text
 
-      - name: Publish release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/publish-release.sh dist/linux/tombi-text
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-linux-text
+          path: dist/linux/tombi-text
+          retention-days: 90

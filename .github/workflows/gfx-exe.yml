@@ -1,7 +1,7 @@
 name: Graphics editor (Windows exe)
 
 # Builds tools/gfx_editor.py (graphics editor, see README) into a single Windows executable with
-# PyInstaller and publishes it as a release asset (was dist/windows/tombi-gfx.exe).  The exe bundles the mkpsxiso/dumpsxiso release binaries
+# PyInstaller and uploads it as an artifact for release.yml (was dist/windows/tombi-gfx.exe).  The exe bundles the mkpsxiso/dumpsxiso release binaries
 # (Lameguy64/mkpsxiso, GPL-2.0, see THIRD_PARTY_NOTICES.md) so that "Generar ISO" works without installing anything.
 on:
   push:
@@ -74,11 +74,11 @@ jobs:
           mkdir -p dist/windows
           cp build/exe/tombi-gfx.exe dist/windows/tombi-gfx.exe
 
-      - name: Publish release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/publish-release.sh dist/windows/tombi-gfx.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-windows-gfx
+          path: dist/windows/tombi-gfx.exe
+          retention-days: 90
   linux:
     runs-on: ubuntu-24.04
     steps:
@@ -110,8 +110,8 @@ jobs:
           cp build/exe/tombi-gfx dist/linux/tombi-gfx
           chmod +x dist/linux/tombi-gfx
 
-      - name: Publish release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/publish-release.sh dist/linux/tombi-gfx
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-linux-gfx
+          path: dist/linux/tombi-gfx
+          retention-days: 90

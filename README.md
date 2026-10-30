@@ -22,7 +22,7 @@ A **matching decompilation and native recompilation** of *Tombi!* (known as *Tom
   naming and documentation.
 - **Recompilation: the native PC port.** The same C is built as a native Windows/Linux program (`port2/`): OpenGL
   or software rendering, SDL2 controllers, the original music, voices and movies, saves, every language of the
-  disc, and a launcher with mods ([`tombi-port.exe`](https://github.com/afsenovilla/Tombi-Decomp/releases/latest/download/tombi-port.exe), [Releases](https://github.com/afsenovilla/Tombi-Decomp/releases), see [docs/PORT.md](docs/PORT.md)). The game is
+  disc, and a launcher with mods (`tombi-port-<ver>-windows-x64.exe` / `tombi-port-<ver>-linux-x64.tar.gz` of the [latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), see [docs/PORT.md](docs/PORT.md)). The game is
   fully playable; you supply your own disc image (Tombi! PAL `SCES-01331` Rev 1), which the launcher extracts once.
 
 This repository targets the **European release** (`SCES-01331` Rev 1) and works function by function: every
@@ -321,9 +321,9 @@ identical WFM; `gam.py --check` reports how many of the 816 GAM files the re-com
 765 with its second variant, 816 when the original bytes are kept for unchanged data); `mkdisc.py --check` rebuilds
 the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.md](notes/assets_tombatools.md).
 
-**Windows exes** (download from the [latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), or all of them in one go as [`tombi-tools.7z`](https://github.com/afsenovilla/Tombi-Decomp/releases/latest/download/tombi-tools.7z); every build also stays available as a versioned `build-YYYYMMDD-<sha>` release; `tombi-port.exe` is the native port with its launcher; built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them; the native port extracts it (`.bin`/`.cue`/`.iso`, or a MAME `.chd`: `tools/chd.py`) once into a `data/` folder and runs from that, see [docs/PORT.md](docs/PORT.md) "Running without the disc image"):
-- [`tombi-assets.exe`](https://github.com/afsenovilla/Tombi-Decomp/releases/latest/download/tombi-assets.exe): sprite/sound/video extractor (window with checkboxes).
-- [`tombi-text.exe`](https://github.com/afsenovilla/Tombi-Decomp/releases/latest/download/tombi-text.exe): text editor. Open `Tombi.bin` (or the extracted folder), pick an area/file/dialogue in the tree (search box on top),
+**Windows exes** (the port is `tombi-port-<ver>-windows-x64.exe` of the [latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), the tools are in `Tombi-Tools-<ver>-windows-x64.zip` of the releases that include them; older versions stay on the [Releases](https://github.com/afsenovilla/Tombi-Decomp/releases) page; `tombi-port.exe` is the native port with its launcher; built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them; the native port extracts it (`.bin`/`.cue`/`.iso`, or a MAME `.chd`: `tools/chd.py`) once into a `data/` folder and runs from that, see [docs/PORT.md](docs/PORT.md) "Running without the disc image"):
+- `tombi-assets.exe`: sprite/sound/video extractor (window with checkboxes).
+- `tombi-text.exe`: text editor. Open `Tombi.bin` (or the extracted folder), pick an area/file/dialogue in the tree (search box on top),
   edit the text in the middle; the preview below redraws as you type with the game font at x1/x2/x3 and warns in red when a line is wider than the
   box, a page has more lines than the box height allows, or a page exceeds 128 characters. `Ajustar caja` rewrites `{BOX w h}` to fit.
   `Guardar/Cargar proyecto` keep your edits as JSON, `Exportar todo`/`Importar` use TXT or JSON, and `Generar ISO` writes a new `.bin`/`.cue`
@@ -340,7 +340,7 @@ the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.
   `python tools/data_patch.py apply data FIX.tombipatch.json`): it patches the extracted `data/` reversibly (originals in
   `data/.orig/`), updates `manifest.txt` and the file tables for files that grew; tombi-port.exe bundles
   `patches/es_mejorada.tombipatch.json` (docs/PORT.md "Text patches in `data/`").
-- [`tombi-gfx.exe`](https://github.com/afsenovilla/Tombi-Decomp/releases/latest/download/tombi-gfx.exe): graphics editor. Open `Tombi.bin`; the tree on the left has Screens, Interface/HUD (the three plausible `UiSpriteDef`
+- `tombi-gfx.exe`: graphics editor. Open `Tombi.bin`; the tree on the left has Screens, Interface/HUD (the three plausible `UiSpriteDef`
   entries of MAIN0: 0 unused, 1 NOW, 2 LOADING), Pages by load list, Sprites (WPP frames) and Palettes (CLUT). The middle shows the page with the palette
   chosen in the right-hand list (x1..x8, optional sprite rectangles; click one or drag a region). `Export/Import PNG` work on the whole image or the
   selection: an indexed PNG with the same palette is used as is, an RGB(A) PNG is converted to the nearest palette colour (transparent = index 0 / word
@@ -350,12 +350,20 @@ the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.
 - All three exes have an **Idioma / Language** selector (Español, English, Français, Deutsch, Italiano, Português; default = system language,
   saved in `%APPDATA%/TombiTools/settings.json`) (Linux: `~/.config/TombiTools/settings.json`).
 
-**Linux binaries** (assets of the same [releases](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), built by the same workflows on `ubuntu-24.04`, same data policy: nothing of the game inside, except that
+**Linux binaries** (`tombi-port-<ver>-linux-x64.tar.gz` / `Tombi-Tools-<ver>-linux-x64.tar.gz` of the [releases](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), executable bits kept, built by the same workflows on `ubuntu-24.04`, same data policy: nothing of the game inside, except that
 `tombi-port` embeds the MAIN0/X000 bytes exactly like `tombi-port.exe`): `tombi-port` (launcher with the game `tombi-pc` and a bundled
 32-bit `libSDL2-2.0.so.0` found through rpath `$ORIGIN`; Ubuntu's build links ALSA/PulseAudio/X11 directly, so the 32-bit SDL2 package below is still needed), `tombi-text`, `tombi-gfx`, `tombi-assets` (PyInstaller one-file; text/gfx bundle
-mkpsxiso/dumpsxiso built from source). `chmod +x` them after downloading. The game `tombi-pc` is an **i386** program (port2 builds with
+mkpsxiso/dumpsxiso built from source). The game `tombi-pc` is an **i386** program (port2 builds with
 `-m32`), so a 64-bit distro needs the 32-bit runtime: on Debian/Ubuntu `sudo dpkg --add-architecture i386 && sudo apt install libc6:i386
 libsdl2-2.0-0:i386` (the latter pulls the 32-bit X11/Wayland/GL libraries SDL2 loads at run time); Fedora: `glibc.i686 SDL2.i686`.
+
+**Releases.** Every push only builds (the binaries stay as Actions artifacts `bin-<platform>-<tool>`).
+`.github/workflows/release.yml` publishes a release `build-YYYYMMDD-<sha7>` from the newest green port build
+(`tombi-port-<ver>-windows-x64.exe`, `tombi-port-<ver>-linux-x64.tar.gz`): on request (GitHub > Actions >
+"Publish release" > Run workflow, or `gh workflow run release.yml`; tick **include tools**, or
+`-f include_tools=true`, to add `Tombi-Tools-<ver>-windows-x64.zip` / `-linux-x64.tar.gz` with tombi-text,
+tombi-gfx and tombi-assets), or automatically after a port build once master has 5 non-CI commits (subject not
+starting with `ci:`/`dist:`) since the last release.
 
 ## Related projects
 

@@ -1,7 +1,7 @@
 name: Assets extractor (Windows exe)
 
-# Builds tools/extract_sprites.py into a single Windows executable with PyInstaller and publishes it as a
-# release asset (.github/scripts/publish-release.sh; was dist/windows/tombi-assets.exe), so the sprite extractor can be used on a retail disc image without Python or the
+# Builds tools/extract_sprites.py into a single Windows executable with PyInstaller and uploads it as the artifact
+# bin-windows-*/bin-linux-* that release.yml packs (was dist/windows/tombi-assets.exe), so the sprite extractor can be used on a retail disc image without Python or the
 # repository.  Runs when the extractor or the modules it bundles change.
 on:
   push:
@@ -51,11 +51,11 @@ jobs:
           mkdir -p dist/windows
           cp build/exe/tombi-assets.exe dist/windows/tombi-assets.exe
 
-      - name: Publish release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/publish-release.sh dist/windows/tombi-assets.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-windows-assets
+          path: dist/windows/tombi-assets.exe
+          retention-days: 90
   linux:
     runs-on: ubuntu-24.04
     steps:
@@ -76,8 +76,8 @@ jobs:
           cp build/exe/tombi-assets dist/linux/tombi-assets
           chmod +x dist/linux/tombi-assets
 
-      - name: Publish release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/publish-release.sh dist/linux/tombi-assets
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-linux-assets
+          path: dist/linux/tombi-assets
+          retention-days: 90

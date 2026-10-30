@@ -1,0 +1,108 @@
+name: Publish release
+
+# Publishes the newest green build of the native port (artifacts bin-<platform>-port of port2-exe) as ONE GitHub
+# Release with tombi-port-<ver>-windows-x64.exe and tombi-port-<ver>-linux-x64.tar.gz (tar keeps the executable bit);
+# with the dispatch input "include tools" also Tombi-Tools-<ver>-windows-x64.zip / -linux-x64.tar.gz (tombi-text,
+# tombi-gfx, tombi-assets of assets-exe/gfx-exe/text-exe).  Tag tag <ver> = build-YYYYMMDD-<sha7> (date and commit of master's head).  The build workflows only
+# upload artifacts; a release is made
+#   - on request: Actions > "Publish release" > Run workflow (or `gh workflow run release.yml`), or
+#   - automatically, after a port build finishes, once no port build is running and master has >= 5 non-CI commits (subject not starting
+#     with "ci:"/"dist:") since the last build-* release.
+on:
+  workflow_dispatch:
+    inputs:
+      include_tools:
+        description: "include tools (Tombi-Tools zip/tar.gz with tombi-text, tombi-gfx, tombi-assets)"
+        type: boolean
+        default: false
+  workflow_run:
+    workflows: ["Native port (Windows exe)"]
+    types: [completed]
+    branches: [master]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      R: ${{ github.repository }}
+      MIN_COMMITS: 5
+    steps:
+      - name: Decide
+        id: d
+        run: |
+          SHA=$(gh api "repos/$R/commits/master" --jq .sha)
+          D=$(gh api "repos/$R/commits/$SHA" --jq '.commit.committer.date' | cut -c1-10 | tr -d -)
+          VER="build-$D-${SHA::7}"
+          PREV=$(gh api "repos/$R/releases?per_page=30" --jq '[.[] | select(.tag_name | startswith("build-"))][0].tag_name // empty')
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"; echo "ver=$VER" >> "$GITHUB_OUTPUT"; echo "prev=$PREV" >> "$GITHUB_OUTPUT"
+          if gh api "repos/$R/releases/tags/$VER" >/dev/null 2>&1; then echo "$VER already released"; echo "go=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "${{ github.event_name }}" = workflow_dispatch ]; then echo "go=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ -z "$PREV" ]; then n=0; else   # no release yet: only on request
+            n=$(gh api "repos/$R/compare/$PREV...$SHA" --jq '[.commits[] | .commit.message | split("\n")[0] | select(test("^(ci|dist)[:(]") | not)] | length')
+          fi
+          busy=0
+          for wf in port2-exe.yml; do
+            for st in queued in_progress; do
+              busy=$((busy + $(gh api "repos/$R/actions/workflows/$wf/runs?branch=master&status=$st" --jq .total_count)))
+            done
+          done
+          if [ "$busy" -gt 0 ]; then echo "$busy build runs still going: the last one to finish decides"; echo "go=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "$n non-CI commits since ${PREV:-<none>} (need $MIN_COMMITS)"
+          [ "$n" -ge "$MIN_COMMITS" ] && echo "go=1" >> "$GITHUB_OUTPUT" || echo "go=0" >> "$GITHUB_OUTPUT"
+
+      - name: Collect the newest green builds
+        if: steps.d.outputs.go == '1'
+        run: |
+          TOOLS="port:port2-exe.yml"
+          [ "${{ inputs.include_tools }}" = true ] && TOOLS="$TOOLS assets:assets-exe.yml gfx:gfx-exe.yml text:text-exe.yml"
+          for t in $TOOLS; do
+            tool=${t%%:*}; wf=${t#*:}
+            for plat in windows linux; do
+              run=""
+              for id in $(gh api "repos/$R/actions/workflows/$wf/runs?branch=master&status=success&per_page=20" --jq '.workflow_runs[].id'); do
+                if gh api "repos/$R/actions/runs/$id/artifacts" --jq '.artifacts[] | select(.expired | not) | .name' | grep -qx "bin-$plat-$tool"; then run=$id; break; fi
+              done
+              [ -n "$run" ] || { echo "::error::no artifact bin-$plat-$tool"; exit 1; }
+              gh run download "$run" -R "$R" -n "bin-$plat-$tool" -D "art/$plat-$tool"
+              echo "bin-$plat-$tool <- run $run"
+            done
+          done
+          find art -type f | xargs ls -l
+
+      - name: Package and publish
+        if: steps.d.outputs.go == '1'
+        run: |
+          VER=${{ steps.d.outputs.ver }}; SHA=${{ steps.d.outputs.sha }}; PREV=${{ steps.d.outputs.prev }}
+          mkdir out
+          cp art/windows-port/tombi-port.exe "out/tombi-port-$VER-windows-x64.exe"
+          mkdir pl && cp art/linux-port/tombi-port pl/ && chmod +x pl/tombi-port
+          tar -C pl -czf "out/tombi-port-$VER-linux-x64.tar.gz" tombi-port
+          if [ -d art/windows-text ]; then
+            mkdir tw tl
+            cp art/windows-assets/*.exe art/windows-gfx/*.exe art/windows-text/*.exe tw/
+            cp art/linux-assets/tombi-* art/linux-gfx/tombi-* art/linux-text/tombi-* tl/ && chmod +x tl/*
+            (cd tw && zip -9 -q "../out/Tombi-Tools-$VER-windows-x64.zip" *.exe)
+            tar -C tl -czf "out/Tombi-Tools-$VER-linux-x64.tar.gz" .
+          fi
+          {
+            echo "Build of $SHA."; echo
+            if [ -n "$PREV" ]; then echo "### Changes since $PREV"
+              gh api "repos/$R/compare/$PREV...$SHA" --jq '.commits[] | .commit.message | split("\n")[0] | select(test("^(ci|dist)[:(]") | not) | "- " + .' | tail -n 150
+            else echo "### Commit"; gh api "repos/$R/commits/$SHA" --jq '"- " + (.commit.message | split("\n")[0])'; fi
+            echo; echo "### Assets"
+            echo "- \`tombi-port-$VER-windows-x64.exe\`: native port with launcher (Windows)"
+            echo "- \`tombi-port-$VER-linux-x64.tar.gz\`: \`tombi-port\` (Linux; the game is i386, see README)"
+            [ -d tw ] && echo "- \`Tombi-Tools-$VER-windows-x64.zip\` / \`-linux-x64.tar.gz\`: $(cd tw && ls | tr '\n' ' ')"
+            true
+          } > notes.md
+          cat notes.md
+          gh release create "$VER" -R "$R" --target "$SHA" --title "Tombi $VER" --notes-file notes.md out/*

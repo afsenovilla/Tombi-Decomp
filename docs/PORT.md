@@ -904,8 +904,8 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
 - **CI.** `.github/workflows/port-exe.yml`: job `game` (ubuntu, mingw) fetches the player's disc image from the
   `GAME_FILES_URL` secret like report.yml, runs `tools/build_full.py`, cross-compiles `tombi.exe`/`tombi-view.exe` and
   uploads them with `SDL2.dll`; job `launcher` (windows-latest) packs them with PyInstaller into `tombi-port.exe`
-  (`--onefile --windowed`), uploads the artifact `tombi-port-windows` and publishes `tombi-port.exe` as a release asset (`build-YYYYMMDD-<sha>` + rolling `latest`);
-  `zip-exe.yml` adds it to `tombi-tools.zip`. No game data is in any artifact (SDL2 licence: THIRD_PARTY_NOTICES.md).
+  (`--onefile --windowed`), uploads the artifacts `tombi-port-windows` and the artifact `bin-windows-port` that `release.yml` packs into the release zip;
+  No game data is in any artifact (SDL2 licence: THIRD_PARTY_NOTICES.md).
 
 ### The launcher (tools/port_launcher.py, tombi-port.exe)
 
@@ -1203,8 +1203,8 @@ image like `report.yml`, runs `tools/build_full.py` (the generator takes the ret
 matching build), cross-builds `tombi2.exe` and uploads it with `SDL2.dll` (artifact `tombi-port-game`); job
 `launcher` (windows-latest) runs `tombi2.exe --headless --test-null` on a real Windows, packs the launcher
 with PyInstaller into `tombi-port.exe` (artifact `tombi-port-windows`: `tombi-port.exe`, `tombi2.exe`,
-`SDL2.dll`, `THIRD_PARTY_NOTICES.md`) and publishes `tombi-port.exe` (and the Linux `tombi-port`) to the commit's `build-YYYYMMDD-<sha>` release and the rolling `latest` pre-release (`.github/scripts/publish-release.sh`); `zip-exe.yml` adds
-it to `tombi-tools.7z`. No game data is in any artifact (the MAIN0/X000 bytes compiled into `tombi2.exe` come
+`SDL2.dll`, `THIRD_PARTY_NOTICES.md`) and uploads `tombi-port.exe` / the Linux `tombi-port` as artifacts `bin-windows-port` / `bin-linux-port`; `release.yml` puts
+them in the release packages. No game data is in any artifact (the MAIN0/X000 bytes compiled into `tombi2.exe` come
 from the owner's own disc, as the retail addresses of the matching build do).
 
 **Running on Windows.** Download `tombi-port.exe` (or the `tombi-port-windows` artifact), start it, pick the
