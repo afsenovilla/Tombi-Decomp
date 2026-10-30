@@ -178,3 +178,59 @@ hemos comprobado.
 | Demo Pure 9: un cofre del anciano de 10.000 años donde la versión final tiene el de 1000 | sin verificar | Ese disco no está en nuestro conjunto. |
 
 Imagen (no se sube): `item_icons_63_64_65_62_52_grey.png` (Flower Seeds, Pipe, Wine, Rueda de hierro, Esencia lluvia).
+
+## Barrido de zombis (PAL)
+
+Barrido estatico de MAIN0, X000..X019 (no existen X007/X012/X015) y los 8 overlays SYSTEM (D0SPSUB 1-3, G0OVER, I0NFO 1-3,
+O0PTSUB0), con script (escaner desechable, no incluido): cada simbolo `type:func` de `config/symbol_addrs_*.txt` se busca en los
+binarios crudos como `jal`/`j`, puntero de 32 bits (tablas) o pareja `lui`+`addiu/ori/lw..`; despues se cierra la alcanzabilidad en el
+grafo de llamadas (una funcion solo llamada por muertas esta muerta). Raices: cualquier referencia desde datos, la primera
+funcion de cada overlay y punteros de MAIN0 al espacio de overlays. Un nombre cuenta solo si **todas** sus copias (la libreria del
+jugador esta enlazada en cada overlay) estan muertas. Limites: referencias construidas en ejecucion (`jalr` calculado, offsets)
+son invisibles; "muerta" = sin referencia estatica.
+
+**Resultado: 575 nombres de funcion sin referencia viva; 263 son libreria PsyQ (libgpu/libcd/libspu/libgte...).** De las otras 312,
+89 ya estaban marcadas "unreferenced / no caller" en `notes/names.md`; 223 no. **Veredicto: todas son codigo muerto, ninguna es
+contenido recortado.** Nada de este barrido es restaurable como funcion del juego.
+
+| Clase | N | Que (nuevo = sin marcar en names.md) | Confianza |
+|---|---|---|---|
+| Casos `scriptOp*` sueltos + el ejecutor antiguo | 53 | MAIN0 `scriptOp*` (49: 0x80038238..0x8003AF94, `opNop`) y `runScript` 0x800391B0, `runScriptContext` 0x8003926C, `scriptRunOpcode` 0x80039150, `scriptLoadHeader` 0x80038B04: los casos del interprete de scripts WS (magia `"WS"` 0x530057, 64 objetos) como funciones aparte mas una copia anterior del ejecutor. El ejecutor vivo (codigo tras 0x80039338) llama directo a `execCoreOpcode` / `execGameOpcode`, que integran los mismos casos. `scriptOpSetObjField6B.c` ya dice "a separate function here". | verificado sin refs; "copia" = lectura del C |
+| Copias `step*` en overlays | ~60 | El compilador integro el switch de pasos en `updateX`; la copia `stepX` independiente se quedo en el binario: `stepWindDiesEvent` (X003 0x80133938), `phoenixFavoriteCompleteScene`, `stepUnderwaterPigBagStart`, `stepBucket`, `stepPaintingSlotHintTalk`, `stepTownHallWorkerTalk`, `stepScaredGoldVolunteerTalk`, `stepSoakedPhoenixGuideTalk`, `stepTreasureChestGuardTalk`, `stepTenThousandYearElderTalk`, `juiceManJoinFightStep`, `overheadActor*Step` (I0NFO)... Mismos ids de dialogo que su gemela viva. | verificado (C leido en 12) |
+| `check*Trigger` / `spawn*` de un uso | ~25 | `checkWindDiesEventTrigger` (X003, evento 0xAA), `checkKeyHolesTrigger`, `checkBigKeyPaintingPanels`, `spawnBigKeyPiece`, `spawnMermaidForMathBeads`, `spawnHauntedPaintingObj` (X004), `spawnLostSeedKidDwarf`, `initPuppyRumorNpc`, `playPuppyBarkNearby`, `checkPuppyRumorNpcTalk` (X001), `spawnGoldenFlowerIfAffordable` (X002), `spawnBaccusVillagePigShotPieces`, `spawnFlowerForestPigShotPieces` (X014), `spawnCharlesNpcAlt` (X000, Charles, tipo 0x15, salvo 0x8009CEBD >= 6): la misma logica esta en el `update*` vivo que la integra; el NPC/evento al que sirven esta en el juego. | verificado en los 6 leidos; el resto por nombre/forma: suposicion |
+| Ayudas de la libreria del jugador (X000.. todas) | ~35 | `playerTiltTowardSlope`, `playerAirControlTimed`, `setWeaponAimFromPad*`, `playerBiteEntry*`, `playerTryStartJump`, `playerGrabSpinEntry`... muertas en todos los overlays (casi todas copias integradas de la misma maquina de estados). | verificado sin refs |
+| Restos del motor en MAIN0 | ~60 | `dispatchAreaActor{Init,Update,Draw1,Draw2,Spawn}`, `dispatchAreaNpcInit`, `dispatchAreaCollisionHook{A,B}`, `dispatchAreaUnlayeredHandler`, `spawnUnlayeredObject*`, `onOverlap*`, `tryAttach*`, `modelDrawF3/G3`, `initMsgBoxA/B`, `showMessageBoxTimed`, `enqueueCdRead`, `lzDecompressToBuffer`, `getEventState`, `computeRotatedQuad`, `spawnItemLinked`, `stubCamera1..3`. Envoltorios por area y ayudas cuyos llamadores se optimizaron o nunca se escribieron. | verificado sin refs; papel por nombre |
+| Manejadores vacios | 5 | `updateL4Type08Object`, `updateL8Type07Object`, `stubNop*` (`i0nfo2`, X0nn), `stubFreeObj*`: cuerpos vacios. | verificado |
+| Un posible resto (suposicion) | 1 | **`updateWaterCurrent` (X010 0x8012E9E0, 388 B)**: objeto de la jungla que fija la deriva de "corriente" (`GVARS.driftH=0`, `driftY=-0x40`), pone un nivel de agua segun seccion / areas purificadas (`-0xEA`, `-0x50`, `-0x3B8`) y devuelve al jugador nadando (pasos 0x3E, 2, 0xD) al paso 0x3D en ese nivel. Sus companeras `a10SetPlatformY` y `a10ClampPlayerAboveY` tambien estan muertas. Sin llamada ni puntero en PAL. El agua viva de la jungla se resuelve en los pasos del jugador; puede ser un objeto de nivel de agua anterior. No se asocio a ningun objeto colocado. | papel: suposicion |
+
+**No nuevo pero confirmado:** los tres `topdownA11/A16/A17ActorDialogueBank2` de I0NFO2 (pueblos de la Civilizacion recortados, mensajes (2,4)/(2,5), (2,0)/(2,2), (2,5..10)) y `topdownA05/A08/A11/A16/A17/A19Scenery*` no tienen llamador: el codigo de escenas de los pueblos recortados (ver Perdido, docs/CIVILIZACION.md).
+
+### 2. Ranuras de manejador de objetos que ninguna sala coloca
+`tools/objects.py list --all-slots` (6533 registros) frente a las tablas de MAIN0. Ranuras sin colocar que tampoco crea nadie
+(grep de `allocObjectLayerN` + `->type =`): capa 4 tipo 8 (`updateL4Type08Object`, vacio), capa 8 tipo 7 (vacio), capa 2 tipo 0x30
+(`updateL2Type30Object`: despachador por area al decorado de pueblo de I0NFO2 de las areas 5/8/11/16/17/19; esas salas son los
+pueblos recortados), capa 5 tipos 9/0xA (`updateL5Type09Item`, `updateL5Type0AItem`: objetos objeto; se crean con `ObjSpawn` con tipo
+variable, no se puede probar que no se usen), capa 7 tipos 5/10/13 y capas 2/4 tipos 0x19, 0x2D, 0x2E, 0x45, 0x4C, 0x41
+(`overheadActorHandler`, `topdownItemSpotHandler`, `topdownTalkSpotHandler`, `tunnelActorHandler`, `tunnelTalkSpotHandler`,
+`tunnelStaticObjHandler`: secciones cenitales / tuneles del AREA02 de I0NFO / I0NFO3, colocadas por los objetos de seccion de esos
+overlays). **Ningun manejador sin colocar tiene contenido real.** La capa 8 no tiene ningun registro de colocacion (sus dos
+manejadores vivos los crea el codigo).
+
+### 3. Ids de evento
+Nada que anadir a "Eventos sin titulo PAL (0xFF)" y "Eventos sin usar": los 19 sin referencia y los 6 ligados a la Civilizacion quedan como estan listados.
+
+### 4. Dialogo
+`tools/dialogue_refs.py` (estatico, solo `(k, dx)` literales) marca 30 grupos de dialogo sin referencia estatica y muchos parciales (p. ej. MFNT000S grupos 1, 7, 8: carteles de rutina de ejercicio, el rival "¿Quieres adelantarme?" de natacion; MFNT010S/020S grupo 2 dx 3..68). No ve argumentos calculados (11-15 sitios de llamada por fichero): es lista de candidatos, no prueba. Los casos conocidos de este fichero (barquero, cartel de motocross, enanos, jefe Funga) estan en ella; no se confirmo nada nuevo. Falta un resolutor de argumentos calculados; no hecho.
+
+### 5. Ficheros y listas de carga
+Cada fichero de `game/disc/fs` frente a las nueve tablas de ficheros MAINn: 2199 de 2287 estan listados; 77 no (el resto son los ejecutables MAIN0..8, SCES_013.31, SYSTEM.CNF):
+- **`AREA19/X019..X819.BIN` y `SYSTEM/X019..X819.BIN`**: ya listados (nunca se cargan).
+- **`I0NFO2.BIN` ... `I8NFO2.BIN` en AREA11, 16, 17, 18**: identicos byte a byte a `SYSTEM/I?NFO2.BIN` (sha1 comprobado en 0 y 8): copias del overlay de pueblo que ninguna tabla lista, porque los pueblos cargan `SYSTEM/I?NFO2`. Nuevo pero inocuo: resto de cuando los overlays de pueblo estaban en las carpetas de area.
+- **CLUT sin listar: `AREA11/CLUT01,04,05`, `AREA16/CLUT01-03`, `AREA17/CLUT01,07-11`, `AREA18/CLUT01` (13 ficheros, 4457 B) y `AREA15/CLUT01-09` (9 ficheros, 161 B)**: los 13 son identicos entre si (prefijo sha1 `fa9c666a`), los 9 tambien (`2aca3f83`): paletas de relleno / plantilla, sin contenido. Las CLUT usadas de esas areas (AREA11/02,03; AREA16/04-07; AREA17/02-06; AREA18/02,03) son las que usa docs/CIVILIZACION.md.
+- `ZZZ/DUMMY.DAT`: relleno.
+Asi que **no hay recurso grafico ni sonoro sin cargar** mas alla de lo conocido (X019, los sets de la Civilizacion).
+
+### Resumen
+El disco PAL no guarda ninguna funcion zombi oculta que el inventario anterior no hubiera visto: el codigo muerto son restos de
+integracion/portado y los datos muertos son relleno. Lo unico que merece una segunda mirada es `updateWaterCurrent`; el barrido de
+dialogos (4) es donde un resolutor de `(k, dx)` calculados aun podria encontrar lineas nuevas.

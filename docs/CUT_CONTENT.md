@@ -166,3 +166,51 @@ These are the rest, checked only where it was cheap. **Unverified** means we did
 | Pure 9 demo: a 10,000-year-old-man chest where retail has the 1000-year one | unverified | That disc is not in our set. |
 
 Image (not committed): `item_icons_63_64_65_62_52_grey.png` (Flower Seeds, Pipe, Wine, Iron Wheel, Rain Essence).
+
+## Zombie sweep (PAL)
+
+Static sweep of MAIN0, X000..X019 (X007/X012/X015 do not exist) and the 8 SYSTEM overlays (D0SPSUB 1-3, G0OVER, I0NFO 1-3,
+O0PTSUB0), scripted (throw-away scanner, not committed): every `type:func` symbol of `config/symbol_addrs_*.txt` is searched in the
+raw binaries for `jal`/`j`, a raw 32-bit pointer (tables) and `lui`+`addiu/ori/lw..` pairs, then reachability is closed over the
+call graph (a function only called by dead functions is dead too). Roots: any reference from data, every overlay's first
+function, MAIN0 pointers into overlay space. A name counts only if **every** copy of it (the player library is linked into each
+overlay) is dead. Limits: references built at run time (computed `jalr`, offsets) are invisible; "dead" = no static reference.
+
+**Result: 575 distinct function names have no live reference; 263 are PsyQ library (libgpu/libcd/libspu/libgte...).** Of the other
+312, 89 were already tagged "unreferenced / no caller" in `notes/names.md`; 223 were not. **Verdict: all of them are dead code, none
+is cut content.** Nothing in this sweep is restorable as a feature.
+
+| Class | Count | What (new = not tagged in names.md) | Confidence |
+|---|---|---|---|
+| Split-out `scriptOp*` cases + the older runner | 53 | MAIN0 `scriptOp*` (49: 0x80038238..0x8003AF94, `opNop`) and `runScript` 0x800391B0, `runScriptContext` 0x8003926C, `scriptRunOpcode` 0x80039150, `scriptLoadHeader` 0x80038B04: the WS-script (`"WS"` magic 0x530057, 64 script objects) opcode cases as separate functions plus an earlier copy of the runner. The live runner (the code after 0x80039338) calls `execCoreOpcode` / `execGameOpcode` directly, which inline the same cases. `scriptOpSetObjField6B.c` already says "a separate function here". | verified no refs; "copy" = read C |
+| `step*` switch copies in overlays | ~60 | The compiler inlined an object's step switch into `updateX`; the stand-alone `stepX` copy stayed in the binary: `stepWindDiesEvent` (X003 0x80133938), `phoenixFavoriteCompleteScene`, `stepUnderwaterPigBagStart`, `stepBucket`, `stepPaintingSlotHintTalk`, `stepTownHallWorkerTalk`, `stepScaredGoldVolunteerTalk`, `stepSoakedPhoenixGuideTalk`, `stepTreasureChestGuardTalk`, `stepTenThousandYearElderTalk`, `juiceManJoinFightStep`, `overheadActor*Step` (I0NFO) ... Same dialogue ids as the live twin. | verified (C read for 12) |
+| `check*Trigger` / `spawn*` one-shots | ~25 | `checkWindDiesEventTrigger` (X003, event 0xAA), `checkKeyHolesTrigger`, `checkBigKeyPaintingPanels`, `spawnBigKeyPiece`, `spawnMermaidForMathBeads`, `spawnHauntedPaintingObj` (X004), `spawnLostSeedKidDwarf`, `initPuppyRumorNpc`, `playPuppyBarkNearby`, `checkPuppyRumorNpcTalk` (X001), `spawnGoldenFlowerIfAffordable` (X002), `spawnBaccusVillagePigShotPieces`, `spawnFlowerForestPigShotPieces` (X014), `spawnCharlesNpcAlt` (X000, Charles, type 0x15, unless 0x8009CEBD >= 6): the same logic exists in the live `update*` that inlines them; the NPC/event they serve is in the game. | verified for the 6 read; the rest by name/shape: guess |
+| Player library helpers (X000.. all areas) | ~35 | `playerTiltTowardSlope`, `playerAirControlTimed`, `setWeaponAimFromPad*`, `playerBiteEntry*`, `playerTryStartJump`, `playerGrabSpinEntry`... dead in every overlay (mostly inlined copies of the same player state machine). | verified no refs |
+| MAIN0 engine remnants | ~60 | `dispatchAreaActor{Init,Update,Draw1,Draw2,Spawn}`, `dispatchAreaNpcInit`, `dispatchAreaCollisionHook{A,B}`, `dispatchAreaUnlayeredHandler`, `spawnUnlayeredObject*`, `onOverlap*`, `tryAttach*`, `modelDrawF3/G3`, `initMsgBoxA/B`, `showMessageBoxTimed`, `enqueueCdRead`, `lzDecompressToBuffer`, `getEventState`, `computeRotatedQuad`, `spawnItemLinked`, `stubCamera1..3`. Per-area dispatch wrappers and helpers whose callers were optimised away or never written. | verified no refs; role from names |
+| Empty handlers | 5 | `updateL4Type08Object`, `updateL8Type07Object`, `stubNop*` (`i0nfo2`, X0nn), `stubFreeObj*`: empty bodies. | verified |
+| One possible leftover (guess) | 1 | **`updateWaterCurrent` (X010 0x8012E9E0, 388 B)**: a jungle object that sets the "current" drift (`GVARS.driftH=0`, `driftY=-0x40`), sets a water level by section / purified areas (`-0xEA`, `-0x50`, `-0x3B8`) and snaps the swimming player (steps 0x3E, 2, 0xD) back to step 0x3D at that level. Its companions `a10SetPlatformY` and `a10ClampPlayerAboveY` are dead too. No caller or pointer in PAL. The live jungle water is handled in the player steps; this may be an earlier water-level object. Not matched to any placed object. | role: guess |
+
+**Not new but confirmed:** the three I0NFO2 `topdownA11/A16/A17ActorDialogueBank2` (cut Civilization towns, messages (2,4)/(2,5), (2,0)/(2,2), (2,5..10)) and `topdownA05/A08/A11/A16/A17/A19Scenery*` have no caller: the cut towns' own scene code (see Lost, docs/CIVILIZATION.md).
+
+### 2. Object handler slots no room places
+`tools/objects.py list --all-slots` (6533 records) against the MAIN0 handler tables. Unplaced slots that nothing spawns either (grep of
+`allocObjectLayerN` + `->type =`): layer 4 type 8 (`updateL4Type08Object`, empty), layer 8 type 7 (empty), layer 2 type 0x30 (`updateL2Type30Object`: per-area dispatcher to the I0NFO2 town scenery of areas 5/8/11/16/17/19; those rooms are the cut towns), layer 5 types 9/0xA (`updateL5Type09Item`, `updateL5Type0AItem`: item objects; spawned through `ObjSpawn` with a variable type, so not provably unused), layer 7 types 5/10/13 and layer 2/4 types 0x19, 0x2D, 0x2E, 0x45, 0x4C, 0x41 (`overheadActorHandler`, `topdownItemSpotHandler`, `topdownTalkSpotHandler`, `tunnelActorHandler`, `tunnelTalkSpotHandler`, `tunnelStaticObjHandler`: the AREA02 top-down / tunnel sections of I0NFO / I0NFO3, placed by those overlays' own section objects). **No unplaced handler with real content.** Layer 8 has no placement record at all (its two live handlers are spawned by code).
+
+### 3. Event ids
+Nothing to add to "Events with no PAL title (0xFF)" and "Unused events": the 19 unreferenced and the 6 Civilization-linked ids stand as listed.
+
+### 4. Dialogue
+`tools/dialogue_refs.py` (static, literal `(k, dx)` only) flags 30 dialogue groups with no static reference and many partial ones (e.g. MFNT000S groups 1, 7, 8: exercise-routine signs, the "Do you want to overtake me?" swimming rival; MFNT010S/020S group 2 dx 3..68). It cannot see computed arguments (11-15 call sites per file), so it is a candidate list, not proof: the known cases in this file (boatman, motocross sign, dwarves, Funga chief) are in it, nothing new was confirmed. A computed-argument resolver is the missing piece; not done.
+
+### 5. Files and load lists
+Every file of `game/disc/fs` against the nine MAINn file tables: 2199 of 2287 are listed; 77 are not (the rest are the MAIN0..8 executables, SCES_013.31, SYSTEM.CNF):
+- **`AREA19/X019..X819.BIN` and `SYSTEM/X019..X819.BIN`**: already listed (never loaded).
+- **`I0NFO2.BIN` ... `I8NFO2.BIN` in AREA11, 16, 17, 18**: byte-identical to `SYSTEM/I?NFO2.BIN` (sha1 prefix checked for 0 and 8): copies of the town overlay that no table lists, since the towns load `SYSTEM/I?NFO2`. New but harmless: a leftover from when the town overlays lived in the area folders.
+- **Unlisted CLUTs: `AREA11/CLUT01,04,05`, `AREA16/CLUT01-03`, `AREA17/CLUT01,07-11`, `AREA18/CLUT01` (13 files, 4457 B) and `AREA15/CLUT01-09` (9 files, 161 B)**: the 13 are byte-identical to each other (sha1 prefix `fa9c666a`), the 9 likewise (`2aca3f83`): filler / template palettes, no content. The used CLUTs of those areas (AREA11/02,03; AREA16/04-07; AREA17/02-06; AREA18/02,03) are the ones docs/CIVILIZATION.md uses.
+- `ZZZ/DUMMY.DAT`: padding.
+So **no unloaded graphic or sound resource** beyond what is known (X019, the Civilization sets).
+
+### Summary
+The PAL disc keeps no hidden zombie feature that the earlier inventory missed: the dead code is inlining/porting leftovers, and
+the dead data is filler. The only item worth a second look is `updateWaterCurrent`; the dialogue sweep (4) is the place where a
+resolver of computed `(k, dx)` could still find new lines.
