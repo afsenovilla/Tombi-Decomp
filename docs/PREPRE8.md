@@ -63,6 +63,7 @@ discs, by frame/sample comparison, or by eye.
    text. Titles that can be rebuilt from it: ポンプ岩の謎 (retail ポンプ岩のナゾ), ジィちゃんの形見, １００年老人と出会い,
    霧を吹き飛ばせ！, モトクロスコース, キミ、だあれ？, 卵の中身 (retail コッカタマゴの中身), ドワーフの長老. Two exist only here:
    **少年旅立ち** ("The boy sets out") and **あれま大きな水たまり(?)** ("Oh my, what a big puddle").
+   Re-read 2026-10-30: the strip is a **glyph sheet** (8 rows of 16x16 glyphs, not whole titles), so only glyphs can be matched; see "Event list" below.
 6. **Village model** (DATA001): 1839 of its 3192 polygons are not in SLPM-80165's D003. It has separate round trees
    instead of the forest wall, a bare slope, a different house by the river and the same small red castle. DATA003
    (thatched houses, a watch tower, a river) and DATA004 (a house with a pig sign) are other early rooms.
@@ -109,6 +110,15 @@ No TIM/CLUT page holds a top-down or isometric map: the pages are the village, i
   handler that reads the 0x39/0x41 sprite slot (0x1F8001BC) is type 15, `func_8003D40C` (uses sine motion and
   `isObjectInView`), so it is the best candidate, but this is unconfirmed.
 - **Old event titles**: the code that draws the TIM000 title strip has not been traced.
+
+### Event list (Folkin, Pure 8 = PrePre 8)
+Community researcher Folkin reports that the "Pure 8" demo is this same build and published its in-game event list (from video). Titles not in retail: A Young Boy Sets Off (少年旅立ち), A Large Puddle?, AP Gate, Help from the Dwarves, The Forgotten Things Inside the Five Chests, The Key for the Five Chests, Great Thief in the Underground Prison, Tumbling Down!, Tumbling Down Again!, Where the Light Falls, Mystery of the Stormy Mountain, Get Out of the Way, Can You Beat the Monsters?, Crush the Reaper Fruit, Make the Flower Bloom!, The Unmoving Charity Priests, Blow Away the Fog, Meeting the 100 Year Old Man, Tale of the 100 Year Old Man, A Friend of the 100 Year Old Man's, Learn the Language! I, A Lost Dwarf Child, Baron is Your Friend, The Elder Disappeared, Take a Peek?!, Yan of the Hidden Village, Return the Frog to..., The Hole-Digging Master!, Master of the Skies.
+
+TIM000 strip glyphs (rows, left to right): ボンプ岩の謎 ？り里ヤオイラ身 / ちゃん形見 10年泳げッ卵中フ / 老人と出会い霧を話仲間ドワ長 / 吹き飛ばせカエル！ / ...にかえるモトクCLEAR / ロスコーキミ、だ / あれま大きな水た / 少年旅立ちッィく.
+- **Confirmed in strip**: 少年旅立ち (Young Boy Sets Off), あれま大きな水たまり (Large Puddle?), 霧を吹き飛ばせ (Blow Away the Fog), 老人と出会い (Meeting the 100 Year Old Man), ドワ(ーフの)長(老) (The Elder / dwarves), モトクロス, キミ、だあれ, カエル (frog titles).
+- **Glyph-only hints (not proof)**: 話 (Tale of the 100 Year Old Man), 仲間 (A Friend of...), 里 + ヤ (Yan of the Hidden Village), 泳 (swim, unmatched).
+- **Not in strip**: no 宝箱 (chests), 盗/泥棒 (thief), 転 (tumbling), 光/落 (light falls). Those titles come from Folkin's list only (the strip is not the full list).
+- Proposed retail slots (unverified): Five Chests -> Lost and Found (area 0, 魔女の忘れもの), Great Thief -> before The Great Escape, Tumbling Down / Again -> Where did I come from? / Lava Caves, Where the Light Falls -> event 32 (trumpets) slot.
 
 ## Debug features
 
