@@ -416,7 +416,7 @@ void port_title_debug_list(short **ps, unsigned char **ppal) {
         w3 = last + 1; if (w3 > 0x37) w3 = 0x37;
         for (k = n; k < w3 + 6; k++) list[k] = 0;
         if (k < n) k = n;
-        for (int i = 0; word[i]; i++) { list[k++] = word[i] - 32; pal[nz + i] = pal[nz - lw + (i < lw ? i : lw - 1)]; }
+        for (int i = 0; word[i]; i++) { list[k++] = word[i] - 32; pal[nz + i] = 2; }   /* palette 2: the orange of PULSA (title string 0) */
         list[k++] = -3; list[k] = -1;
         port_title_angle3 = (unsigned char)(0xE0 - 4 * w3);
         src = s; srcp = p;
