@@ -143,15 +143,88 @@ static void menu_open(void) {
     SPAD32(0x1D4) = saved;
     port_printf("[port] frame %d: menu screen %d opened\n", port_frame, menu_id);
 }
-/* --title FRAME:ID (debug): spawn the event title banner of event ID of the current area at that vblank, as an
-   event start would (spawnEventTitle = FUN_8005aa74; the letters' layout lists are language data: --lang tests) */
-static int title_frame, title_id, movie_frame, movie_id;
+/* --title FRAME:ID[:start] (debug): spawn the event title banner of event ID of the current area at that frame, as an
+   event start would (spawnEventTitle = FUN_8005aa74; the letters' layout lists are language data: --lang tests).
+   ID may be 0xNN.  With ":start" the whole "event received" sequence runs: the event's flag is cleared and
+   setEventStarted(ID, 0, 0) plays banner, sub-screen message, jingle (sfx 0x2A) and icon, as a script would.
+   It runs from the game loop (port/fixes.txt gameMainTask -> port_title_tick), not from the vblank: spawning the
+   banner objects in the middle of a frame corrupted the object lists (side-view areas crashed in drawPlayerSprite). */
+static int title_frame, title_id, title_start, title_due, movie_frame, movie_id;
 void port_title_add(const char *s) {
     int f = 0;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
-    title_frame = f; title_id = 0;
-    while (*s >= '0' && *s <= '9') title_id = title_id * 10 + *s++ - '0';
+    title_frame = f; title_id = (int)strtol(s, (char **)&s, 0);
+    title_start = !strcmp(s, ":start");
+}
+/* Event titles of the rebuilt Civilization towns (--civ-test; port/fixes.txt spawnEventTitle).  The MAIN0 table that
+   maps event -> title text (0x80080410) has 0xFF for the events the cut towns start with no title of their own: the
+   engine then draws text 1 ("!!!DUMMYCUBE!!!") with the shared 17-letter placeholder layout, whose last records read
+   past the text (glyph 0xFFF: a wild sprite copy in acquireSpriteSlot).  Event 0x4C ("The Black Water", started by the
+   Iron Town scene npcSet0FSceneStep1) still has its title on the disc: CFNT999 text 90, which no event points to; only
+   its link and its layout list were cut.  This rebuilds the link and a layout list (letters 20 px apart, a space 10 px,
+   lines 28 px apart, centred, as tools/title_layout.py measures them) sized to the text actually drawn. */
+static signed char civ_title_recs[64 * 4 + 4];
+static const char *const civ_title90[9] = {        /* word lengths of text 90 per language (BFGIHSPWD), '/' = line break */
+    "3 5/5", "3 5/10", "14/6", "8/10/4", "8/6 5", "10 2/4 5", "10 2/4 5", "6 1/12", "6 3/3 5 4" };
+signed char *port_civ_title(int event_id, unsigned char **src, signed char *p) {
+    extern unsigned char D_80080410[]; extern int port_lang;
+    unsigned char *base = *(unsigned char **)((unsigned char *)port_scratch + 0x39C);
+    int idx = D_80080410[event_id], n = 0, k, nl = 0, ln[8], gaps[64], j;
+    const char *lay = 0;
+    if (!base || idx != 0xFF) return p;               /* a real title: the engine's own list */
+    if (event_id == 0x4C) { idx = 90; if (port_lang >= 0 && port_lang < 9) lay = civ_title90[port_lang]; } else idx = 1;
+    { unsigned char *off = base + *(unsigned short *)(base + 8);
+      *src = off + *(unsigned short *)(off + idx * 2); }
+    while (n < 64 && ((unsigned short *)*src)[n] != 0xFFFF) n++;
+    if (!n) return 0;
+    for (k = 0; k < n; k++) gaps[k] = 0;
+    if (lay) {                                        /* the language's words, if their letters add up to the text */
+        int w, tot = 0, a[64], na = 0, br[64];
+        for (const char *c = lay; *c; ) {
+            w = 0; while (*c >= '0' && *c <= '9') w = w * 10 + *c++ - '0';
+            br[na] = *c == '/'; a[na++] = w; tot += w; if (*c) c++;
+        }
+        if (tot == n) {
+            for (j = 0, k = 0; j < na; j++) {
+                if (j && !br[j - 1]) gaps[k] = 1;
+                if (j && br[j - 1]) ln[nl++] = k;
+                k += a[j];
+            }
+        }
+    }
+    if (!nl && n > 11) ln[nl++] = (n + 1) / 2;        /* no word list: two halves */
+    ln[nl] = n;
+    { int start = 0, r = 0, o = 0;
+      for (int li = 0; li <= nl; li++) {
+          int end = ln[li], width = 0;
+          for (k = start; k < end; k++) width += 2 + (k > start ? gaps[k] : 0);
+          int col = -(width / 2), row = -2 * (nl - li) + (nl ? 0 : 0);
+          for (k = start; k < end; k++, r++) {
+              if (k > start) col += gaps[k];
+              int f = r < 6 ? 0x80 | r : 2 + r * 4 / n; if ((f & 0xF) > 5) f = 5;
+              civ_title_recs[o++] = 0; civ_title_recs[o++] = col; civ_title_recs[o++] = row; civ_title_recs[o++] = f;
+              col += 2;
+          }
+          start = end;
+      }
+      civ_title_recs[o] = -1; }
+    port_printf("[port] civ: event 0x%02X title from text %d (%d letters, %d lines)\n", event_id, idx, n, nl + 1);
+    return civ_title_recs;
+}
+void port_title_tick(void) {
+    if (!title_due) return;
+    title_due = 0;
+    if (title_start) {
+        extern unsigned char SCRIPT_FLAGS[]; extern unsigned char setEventStarted(int, int, int);
+        SCRIPT_FLAGS[title_id] = 0;
+        setEventStarted(title_id, 0, 0);
+        port_printf("[port] frame %d: event 0x%02X started (setEventStarted)\n", port_frame, title_id);
+    } else {
+        extern void FUN_8005aa74(int, int, int, int);
+        FUN_8005aa74(title_id, 0, 120, 0);
+        port_printf("[port] frame %d: event title 0x%02X spawned\n", port_frame, title_id);
+    }
 }
 /* --movie FRAME:ID (debug): play movie ID at that vblank as updateA00ScrollController's case 11 does (movie mode,
    the player task), so a mid-game FMV can be timed headless */
@@ -235,7 +308,7 @@ void port_vblank(void) {
     if (dump_ram_path && port_frame == dump_ram_frame) dump_ram();
     if (menu_frame && port_frame == menu_frame) menu_open();
     if (item_frame && port_frame == item_frame) { extern void *printInfoMessage(int, int); printInfoMessage(item_id, item_b); port_printf("[port] frame %d: item popup %d/%d\n", port_frame, item_id, item_b); }
-    if (title_frame && port_frame == title_frame) { extern void FUN_8005aa74(int, int, int, int); FUN_8005aa74(title_id, 0, 120, 0); port_printf("[port] frame %d: event title %d spawned\n", port_frame, title_id); }
+    if (title_frame && port_frame == title_frame) title_due = 1;
     if (movie_frame && port_frame == movie_frame) {
         extern void FUN_800171b8(int, void *), FUN_8001f4bc(void), moviePlayerTask(void);
         SPAD8(0x1C6) = 2; FUN_8001f4bc(); SPAD8(0x1CC) = 1; SPAD8(0x1CD) = (unsigned char)movie_id;
