@@ -53,7 +53,7 @@ pointers to it). Layout record list = area-overlay table `[e]`.
 - The other cut-town events are titled in PAL already: 0x3E #89 "Tree of Knowledge Knows", 0x4F #98, 0x67 #100 "The Cute Witch", 0x69 #94 "I Need a Bomb".
 - Port candidates: 0x61 -> new string "The Clock Tower That Won't Move" (started by Stonetown npcSet0ESceneStep1, the stopped-clock talk); 0x63 -> "Where's the Material?!" (npcSet0FSceneStep2, the smith / iron gear item 0x3E); 0x62 "An Unbreakable Gear?"; 76 -> #90, 83 -> #126 (existing PAL strings). No version gives English text for 0x61/0x63.
 - Still 0xFF everywhere checked: 48, 66, 68-72, 75, 84, 91-93, 101, 106-110, 117, 122, 130, 131, 136, 137, 141-143, 147-149, 152, 154, 155, 158, 162, 163, 165, 192-199.
-- USA / jpdemo / PrePre8: dumped by the report.yml jobs (event_titles.py). PrePre8's TIM title strip (docs/PREPRE8.md) adds 少年旅立ち and あれま大きな水たまり (= event 6).
+- CI run 41058469474 (report.yml): beta 980203 table == PAL (confirmed on CI too); jpdemo SLPM-80165 and PrePre8: no table found by event_titles.py (PrePre8 draws titles from a TIM strip; the jpdemo titles are mostly イベント０xx placeholders); USA: GAME_FILES_URL_USA is empty, not checked. PrePre8's TIM title strip (docs/PREPRE8.md) adds 少年旅立ち and あれま大きな水たまり (= event 6).
 
 ## Not done
 - Exhaustive proof that no overlay has a button sequence (checked: MAIN0 pad readers; overlay pad code not audited one by one).
