@@ -16,7 +16,7 @@ after each JP batch.
 
 ## P2 — JP retail decompilation, easy first
 Order by expected yield per effort: areas whose PAL twin is fully matched and the JP code is near-identical.
-- [ ] Auto-match pass: reuse PAL C for every JP function whose masked bytes equal a matched PAL function
+- [x] Auto-match pass (2026-10, tools/jpdemo_reuse.py fixed for data.o, 2049 -> 2085 pairs, JP stays 55.26 %: new pairs already covered by JP C): reuse PAL C for every JP function whose masked bytes equal a matched PAL function
       (`config/slps01144/reuse.txt`, `tools/version_share.py`), all programs. Cheapest % gain.
 - [ ] Small areas to 100 %: X08 (3 f), X19 (3 f), X05 (22 f), X13 (11 f), X02 (41 f).
       Partial: X05 16/22, X13 7/11, X02 27/41 (stubs, updateMightyFishFood); what is left in X08/X19/X05 is data mis-split as functions, X13 80115FD8 done, 801162DC (2196 B) and X02 big handlers open.
