@@ -97,9 +97,10 @@ def vram_views(data, w, h):
 _REC = None
 
 
-def load_records(fs=FS):
+def load_records(fs=None):
     """{'AREA05/D003.000': (record file, kind byte, type, arg, w, h)} read from SYS/LD0*.BIN; {} if the disc image is missing."""
     global _REC
+    fs = fs or FS
     if _REC is not None:
         return _REC
     _REC = {}
@@ -177,8 +178,9 @@ def gam_unpack(d):
     return bytes(out[:size])
 
 
-def read_resource(name, fs=FS):
+def read_resource(name, fs=None):
     """Bytes of `AREA00/B000.GAM` (unpacked) or `.000`; the extension may be omitted (.GAM is tried first)."""
+    fs = fs or FS
     for ext in ("", ".GAM", ".000"):
         p = os.path.join(fs, name + ext)
         if os.path.isfile(p):
@@ -190,10 +192,11 @@ def read_resource(name, fs=FS):
 _LISTS = None
 
 
-def load_lists(fs=FS):
+def load_lists(fs=None):
     """{'AREA00': [[rec, ...], ...]}: the load records of SYS/LD0*.BIN split at the fileId -1 terminators (lists: the area list,
     then one per section/room). rec = dict(name, kind, type, addr, arg, w, h). Empty if the disc image is missing."""
     global _LISTS
+    fs = fs or FS
     if _LISTS is not None:
         return _LISTS
     _LISTS = {}
