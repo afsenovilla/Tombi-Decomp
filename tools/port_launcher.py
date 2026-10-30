@@ -920,19 +920,33 @@ class App:
             ttk.Checkbutton(box, text=tr(lk), variable=self.var(mid, tk.BooleanVar, False)).pack(side="left")
             if kind == "check+area":
                 av, sv = self.var("area", tk.IntVar, 0), self.var("section", tk.IntVar, 0)
-                ttk.Label(box, text=tr("mod.area")).pack(side="left", padx=(12, 4))
-                names = ["%02d %s" % (a, M.AREA_NAMES.get(a, "")) for a, _ in M.ROOM_COUNTS]
-                self.area_cb = ttk.Combobox(box, values=names, state="readonly", width=20)
+                row = ttk.Frame(c, padding=(24, 2, 0, 2))     # own row: the labels are long (no truncation)
+                row.pack(fill="x")
+                ttk.Label(row, text=tr("mod.area")).pack(side="left", padx=(0, 4))
+                names = [M.area_label(a) for a, _ in M.ROOM_COUNTS]
+                self.sec_cb = ttk.Combobox(row, state="readonly", width=4)
+                self.sec_cb.pack(side="right")      # packed first: the area box takes what is left, never hides it
+                ttk.Label(row, text=tr("mod.section")).pack(side="right", padx=(12, 4))
+                self.area_cb = ttk.Combobox(row, values=names, state="readonly", width=30)
                 idx = [a for a, _ in M.ROOM_COUNTS]
                 self.area_cb.current(idx.index(av.get()) if av.get() in idx else 0)
-                self.area_cb.pack(side="left")
-                ttk.Label(box, text=tr("mod.section")).pack(side="left", padx=(12, 4))
-                self.sec_cb = ttk.Combobox(box, state="readonly", width=4)
-                self.sec_cb.pack(side="left")
+                self.area_cb.pack(side="left", fill="x", expand=True)
+                civ_var = tk.StringVar()
+                civ_lbl = ttk.Label(c, textvariable=civ_var, style="Muted.TLabel", wraplength=480, justify="left")
+                civ_lbl.pack(anchor="w", padx=(24, 0))
+
+                def widen_popdown(cb=self.area_cb, names=names):
+                    # the drop-down list is as wide as the box by default; -postoffset lets it grow to the longest
+                    # entry so no label is cut when the window is narrow
+                    from tkinter import font
+                    need = max(font.nametofont("TkDefaultFont").measure(n) for n in names) + 40
+                    ttk.Style().configure("AreaWide.TCombobox", postoffset=(0, 0, max(0, need - cb.winfo_width()), 0))
+                self.area_cb.configure(style="AreaWide.TCombobox", postcommand=widen_popdown)
 
                 def fill_sections(_=None, av=av, sv=sv):
                     a = M.ROOM_COUNTS[self.area_cb.current()][0]
                     av.set(a)
+                    civ_var.set(tr("mod.civnote", M.CIV_TOWNS[a], a) if a in M.CIV_TOWNS else "")
                     secs = [str(k) for k in range(M.ROOM_COUNTS[self.area_cb.current()][1]) if (a, k) not in M.DOOR_ROOMS]
                     self.sec_cb["values"] = secs
                     self.sec_cb.current(secs.index(str(sv.get())) if str(sv.get()) in secs else 0)
