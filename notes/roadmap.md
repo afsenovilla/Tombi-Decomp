@@ -15,6 +15,7 @@ after each JP batch.
 - [ ] JP: re-run the report and refresh README + decomp.dev after every matching batch (standing item).
 
 ## P2 — JP retail decompilation, easy first
+- [x] JP tooling (2026-10): `tools/ncheck.py --version slps01144 FILE.c` (= `tools/jpcheck.py [--norm]`) compiles one JP function and diffs it against the splat target; `tools/jp_data_units.py --write` finds mis-split data and writes `config/slps01144/data_units.txt` (45 units / 129 KB of jump tables, id words, trailing tables left out of the code totals: 55.59 -> 59.87 %); 60 tiny functions scripted (nops, return-const, `p[4]=3`, global getters/setters): 59.91 %. What is left that is tiny is splat fragments of larger functions.
 Order by expected yield per effort: areas whose PAL twin is fully matched and the JP code is near-identical.
 - [x] Auto-match pass (2026-10, tools/jpdemo_reuse.py fixed for data.o, 2049 -> 2085 pairs, JP stays 55.26 %: new pairs already covered by JP C): reuse PAL C for every JP function whose masked bytes equal a matched PAL function
       (`config/slps01144/reuse.txt`, `tools/version_share.py`), all programs. Cheapest % gain.
