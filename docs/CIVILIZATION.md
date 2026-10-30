@@ -507,6 +507,42 @@ The idle/walk/talk code reads scripts `animFrame + 0/4/8` of table 0. Per subtyp
 - **Not shown.** The facing frame drawn on the sheets is our choice (the record's field +4 picks the real one).
   Residents whose page is lost are drawn as grey capsules with a question mark.
 
+### Music of the cut sections
+
+Short answer: no dedicated town theme survives, and none is missing. Each cut section 0 still has a music entry, and it
+points at the same track as the rest of its area. `tools/music_refs.py` prints the whole table from your MAIN0.
+
+- **How music is picked (proven, MAIN0 code).** Music is not in the `SYS/LDnARxx` lists. Those lists carry only the
+  small `0xB2`/`0xB3` sub-pieces inside the area bundle. `loadAreaSectionResources` (0x8001D1BC) reads a sound-set
+  number from `PTR_DAT_80077c4c[area + AREA_VARIANT][section]`. `loadSoundSet` (0x8004FB68) then runs
+  `SOUND_SET_LOAD_LISTS[set]` (0x8007D1B4). This is 0x34 load lists stored inside MAIN0: one WVD (kind 0x93) plus one
+  SEQ (kind 0xB0). `openAreaBgm` (0x8001EC80) plays whatever SEQ was loaded. It changes only the volume (per area, plus
+  section tweaks for AREA06/09) and the reverb. No code chooses music per section.
+- **I0NFO2 does not touch music (proven).** None of the `topdown*` handlers sets a BGM. The only sound-control call is
+  `stopBgm(1)` in `topdownPlayerDropExitStep` (0x800EAAA0), which fades out when an exit leads to another area. Working
+  top-down sections use the plain area table: AREA05 s0 set 0x0F `S_AR050` (same as s1..s3), AREA08 s0 set 0x13
+  `S_AR080` (same as s1..s3), AREA19 s0 set 0x2B `S_AR192`.
+- **What would play if a cut section were entered (proven from the table, not run):**
+
+| Section | Row (byte) | Set | Files | Shared with |
+|---|---|---|---|---|
+| AREA11 s0 | 0x80077C10 | 0x1B | `SND0110.WVD` + `S_AR110.SEQ` | AREA11 s1..s3 (Factory) |
+| AREA16 s0 | 0x80077C34 | 0x27 | `SND0160.WVD` + `S_AR160.SEQ` | AREA16 s1..s7 (Stonetown) |
+| AREA17 s0 | 0x80077C3C | 0x28 | `SND0170.WVD` + `S_AR170.SEQ` | AREA17 s1..s7 (Iron Town) |
+| AREA18 s0 | 0x80077C44 | 0x29 | `SND0181.WVD` + `S_AR181.SEQ` | AREA18 s1 (hub); s2/s3 use 0x2A `S_AR1802` |
+
+- **No unused track (proven).** All 44 sound sets are reached from the area table, from the extra effect-bank tables at
+  0x80077C9C/CA4/CB0, or from boot/title code. Every `SOUND/*.SEQ`/`*.WVD` belongs to a reached set. There is no XA
+  audio on the disc. The only streamed audio is inside `MOVIE/*.STR`.
+- **Names (inference).** Files are named after an area and the first section that uses them (`S_AR003`, `S_AR023`,
+  `S_AR147`...). So `S_AR110`/`S_AR160`/`S_AR170` carry the section-0 name of the cut towns. The same naming applies to
+  every area's default track (`S_AR050`, `S_AR080`), so this does not show a town-only theme. AREA18 is the exception:
+  its first track is `S_AR181`, not `S_AR180`. That may mean an `S_AR180` for the reunited town was planned. No table,
+  file or string names one.
+- **JP disc (SLPS-01144, `game_jp/disc/tomba_jp.bin`).** The banks sit in the area folders: `AREA11/SND0110.WVD`,
+  `AREA16/SND0160`, `AREA17/SND0170`, `AREA18/SND0181` and `SND0182`. Their sizes match PAL byte for byte, and there is
+  no `SND0180`. We did not trace the JP set table. The JP and 980203 beta executables have no byte copy of the PAL rows.
+
 ## The cut towns, one by one (sheets)
 
 `tools/civ_sheets.py` draws three explanatory sheets per town, in Spanish or English, from your own extracted disc

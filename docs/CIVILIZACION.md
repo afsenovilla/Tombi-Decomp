@@ -529,6 +529,46 @@ control}`). El código de quieto/andar/hablar lee los guiones `animFrame + 0/4/8
 - **Lo que no se muestra.** El fotograma de orientación dibujado en las láminas es elección nuestra (el campo +4 del
   registro elige el de verdad). Los vecinos cuya página se perdió se dibujan como cápsulas grises con interrogación.
 
+### Música de las secciones recortadas
+
+En resumen: no queda ningún tema propio de los pueblos, y tampoco falta ninguno. Cada sección 0 recortada todavía
+tiene su entrada de música, y apunta a la misma pista que el resto de su área. `tools/music_refs.py` imprime la tabla
+entera a partir de tu MAIN0.
+
+- **Cómo se elige la música (probado, código de MAIN0).** La música no está en las listas `SYS/LDnARxx`. Esas listas
+  solo llevan los subtrozos pequeños `0xB2`/`0xB3` dentro del paquete del área. `loadAreaSectionResources`
+  (0x8001D1BC) lee un número de juego de sonido de `PTR_DAT_80077c4c[área + AREA_VARIANT][sección]`. Después
+  `loadSoundSet` (0x8004FB68) ejecuta `SOUND_SET_LOAD_LISTS[juego]` (0x8007D1B4). Son 0x34 listas de carga guardadas
+  dentro de MAIN0: un WVD (tipo 0x93) más un SEQ (tipo 0xB0). `openAreaBgm` (0x8001EC80) toca el SEQ que se haya
+  cargado. Solo cambia el volumen (por área, con ajustes por sección en AREA06/09) y la reverberación. Ningún código
+  elige la música por sección.
+- **I0NFO2 no toca la música (probado).** Ninguno de los manejadores `topdown*` pone una BGM. La única llamada de
+  control de sonido es `stopBgm(1)` en `topdownPlayerDropExitStep` (0x800EAAA0), que hace un fundido de salida cuando
+  una salida lleva a otra área. Las secciones cenitales que funcionan usan la tabla normal del área: AREA05 s0 juego
+  0x0F `S_AR050` (igual que s1..s3), AREA08 s0 juego 0x13 `S_AR080` (igual que s1..s3), AREA19 s0 juego 0x2B `S_AR192`.
+- **Qué sonaría al entrar en una sección recortada (probado por la tabla, sin ejecutarlo):**
+
+| Sección | Fila (byte) | Juego | Ficheros | Compartido con |
+|---|---|---|---|---|
+| AREA11 s0 | 0x80077C10 | 0x1B | `SND0110.WVD` + `S_AR110.SEQ` | AREA11 s1..s3 (Fábrica) |
+| AREA16 s0 | 0x80077C34 | 0x27 | `SND0160.WVD` + `S_AR160.SEQ` | AREA16 s1..s7 (Ciudad de Piedra) |
+| AREA17 s0 | 0x80077C3C | 0x28 | `SND0170.WVD` + `S_AR170.SEQ` | AREA17 s1..s7 (Ciudad de hierro) |
+| AREA18 s0 | 0x80077C44 | 0x29 | `SND0181.WVD` + `S_AR181.SEQ` | AREA18 s1 (centro); s2/s3 usan 0x2A `S_AR1802` |
+
+- **No hay pistas sin usar (probado).** Se llega a los 44 juegos de sonido desde la tabla de áreas, desde las tablas
+  de bancos de efectos extra en 0x80077C9C/CA4/CB0 o desde el código de arranque y del título. Cada
+  `SOUND/*.SEQ`/`*.WVD` pertenece a un juego al que se llega. No hay audio XA en el disco. El único audio en streaming
+  está dentro de `MOVIE/*.STR`.
+- **Nombres (deducción).** Los ficheros llevan el nombre de un área y de la primera sección que los usa (`S_AR003`,
+  `S_AR023`, `S_AR147`...). Así, `S_AR110`/`S_AR160`/`S_AR170` llevan el nombre de la sección 0 de los pueblos
+  recortados. Pero la pista por defecto de todas las áreas sigue la misma regla (`S_AR050`, `S_AR080`), así que esto no
+  demuestra un tema exclusivo de los pueblos. AREA18 es la excepción: su primera pista es `S_AR181`, no `S_AR180`. Puede
+  que se pensara en un `S_AR180` para el pueblo reunido. Ninguna tabla, fichero ni cadena lo nombra.
+- **Disco JP (SLPS-01144, `game_jp/disc/tomba_jp.bin`).** Los bancos están en las carpetas de área:
+  `AREA11/SND0110.WVD`, `AREA16/SND0160`, `AREA17/SND0170`, `AREA18/SND0181` y `SND0182`. Sus tamaños coinciden byte a
+  byte con los PAL, y no hay `SND0180`. No hemos rastreado la tabla de juegos JP. Los ejecutables JP y beta 980203 no
+  tienen una copia byte a byte de las filas PAL.
+
 ## Los pueblos recortados uno a uno (láminas)
 
 `tools/civ_sheets.py` dibuja tres láminas explicativas por pueblo, en español o en inglés, a partir de tu propio
