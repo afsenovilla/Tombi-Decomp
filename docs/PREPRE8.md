@@ -69,8 +69,8 @@ discs, by frame/sample comparison, or by eye.
    (thatched houses, a watch tower, a river) and DATA004 (a house with a pig sign) are other early rooms.
 7. **Menu and HUD art** (TIM001): a 10x10 kana font plus about 125 kanji, `ステータス アイテム EXIT`,
    `イベントマップ PAUSE`, `GET!!`, `Thank You!! Bye-Bye..`, a Tomba-with-umbrella sprite, early clouds and trees.
-   The script text that uses this font was not found: there are no WFM or Shift-JIS strings, and searches with
-   byte, u16 and cell-index encodings failed. This is still open.
+   **Solved 2026-10-30**: the script is in TOMBA.EXE as u16 glyph indices (no WFM, no Shift-JIS); decoder
+   `tools/prepre8_text.py`. See "Text (event titles and dialogue)" below.
 8. **Movies**: `OPING.STR` is a short opening, 626 frames (about 42 s) against 1395 frames for PAL `OP_INST` and
    SLPM-80165 `OP_UTA`. It is a cut of the same animation (landscape, feet in the grass, Tomba, the red bird, Tomba
    shouting, a pig). `MIST.STR` has 311 frames against 266 in PAL. `ffmpeg -f psxstr` plays the `.STR.raw` output
@@ -103,13 +103,52 @@ No TIM/CLUT page holds a top-down or isometric map: the pages are the village, i
   The next area/room/entry (`D_800DE20C`/`D_800DE20E`/`D_800DE218`) are set by `func_8002816C` and by
   `func_80034C34` (object type in the table at 0x800A2760), which hard-codes area 0, room 2, entry 1. That is the
   elder's-house exit back to the village (from the code only; not checked in an emulator).
-- **Dialogue text**: still not found. The room GAMs carry only models, collision and object tables (kinds 0x70,
-  0x80-0x86), the DATA000 0xB0 chunk is the `pQES` sequence, and no other chunk is text. The demo may have no
-  dialogue beyond the pre-rendered event titles and menu art.
+- **Dialogue text**: found in TOMBA.EXE (not in the GAMs), see "Text (event titles and dialogue)".
 - **Grey bird**: not identified. The object type table is `D_800A7364` (31 entries, 0x80036FA4 = empty). The only
   handler that reads the 0x39/0x41 sprite slot (0x1F8001BC) is type 15, `func_8003D40C` (uses sine motion and
   `isObjectInView`), so it is the best candidate, but this is unconfirmed.
-- **Old event titles**: the code that draws the TIM000 title strip has not been traced.
+- **Old event titles**: the TIM000 strip is a runtime glyph cache, filled from the event-title font (see below); the
+  draw code itself is still not traced.
+
+### Text (event titles and dialogue), found 2026-10-30
+Decoder: `python3 -I tools/prepre8_text.py TOMBA.EXE [--raw]` (prints to stdout; do not commit the output).
+
+- **Encoding**: strings are arrays of u16 glyph indices ending in 0xFFFE. Each text block is preceded by a glyph table
+  of 5-byte records (u, v, w, h, flag), and the code is the record index: 10x10 kana/symbol cells (25 per row), then
+  12x12 kanji (21 per row) sorted by on-reading (gojuon), then two 18x10 cells "100" and "1000". Dakuten/handakuten
+  are separate glyphs after the base kana. Dialogue adds controls: 0xFFFB + 3 halfwords (window/speaker header),
+  0x4019 (wait), 0xFFFD/0xFFFC (end of page/box), 0xFFF8. This is why byte/u16/Shift-JIS searches failed: no fixed
+  base, kanji are a per-table subset, and text is u16.
+- **Event titles**: table 0x800A99FC (file 0x9A1FC, 372 glyphs: 174 kana/symbols, 196 kanji), 167 titles at
+  0x800AA140..0x800AB12A (file 0x9A940). Kana: symbols are ASCII order from code 0 (space) to `}`, then `…「」、。・、〜ー`
+  and `▼←→↑↓○×△□‼AP`; hiragana 0x3E, katakana 0x75, dakuten 0xAC/0xAD, kanji 0xAE..0x171. The font page is not in
+  any AREA00/SYSTEM GAM: it only exists in `SYSTEM/SYS008.000` (a 384x256 VRAM snapshot, font at x=768 in 4 bpp).
+  The TIM000 16x16 strip is a cache of glyphs for the titles on screen, which is why it held only fragments.
+  About 15 kanji are still unread (12x12 glyphs; shown as 〓 by the decoder).
+- **Dialogue**: tables 0x800A2BCC, 0x800A4060, 0x800A5E74, 0x800AB130 (file 0x933CC, 0x94860, 0x96674, 0x9B930,
+  0x9CDC4). Three of them (0x933CC, 0x96674, 0x9B930) use the TIM001 font (kanji from code 0x95, 94 kanji, decoded) and
+  carry the same 104-line area-0 script; the other two (305-glyph tables, file 0x94860 and 0x9CDC4) carry the same
+  ~135-line forest/dwarf script, whose kanji page is not in the file tree (kana decode fully; kanji show as `{xx}`).
+  Dialogue kana: hiragana 0x31, katakana 0x68, dakuten 0x2F/0x30. Codes 0x2B-0x2E (shown ャ/ョ) are unsure.
+
+Event-title list (167 entries; the order is the in-game list order). Highlights not in retail: 少年の旅立ち (Young Boy
+Sets Off), 大きな水たまり? (A Large Puddle?; the strip's あれま is not in the title), APゲート, ドワーフの助け, 5つの箱の
+忘れもの / 5つの箱のカギ, 地下ロウの大ドロボウ, コロガルゾォ〜 / またコロガルゾォ〜 (Tumbling Down / Again), 光の落ちる
+ところ, 嵐の山の怪, そこ、どいて, 怪物?勝てるかな?, 死神の実をつぶせ, 花をさかせよう!, 霧を吹き飛ばせ, 100年老人との出会い
+/ の話 / の仲間, コトバをおぼえよう!Ⅰ/Ⅱ/Ⅲ, まいごのドワーフ, バロンは友だち, 消えた長老, のぞいてごらん?!, かくれ里の
+ヤン, カエル…にかえる, いよっ!穴ほり名人!, 大トリの山 - Folkin's list matches the first ~45 entries. The rest is
+the full planned game: 島のヒミツその1-5, 大停電, 電気うなぎを捕まえろ!, 事件発生、犯人を探せ!, 黒い水の不思議, 文明の
+キカイ, 進め!きかんしゃ, 赤/緑/青/黒の占い師, 金/銀/銅色のメダルがほしい, からくり〓の3姉妹, 1000年老人, 万年老人の
+数字玉, 億年老人の願い, 人魚の王を救え, 歌を忘れた人魚, 海底通路の行き先, 本当の魔ブタ, 夢?幻?黄金郷を探せ, ミリオンの塔,
+「大団円1-3」, plus item names (ヒヨコ, カエル, ドワーフの迷子, バナナ, たつまき, 花の〓).
+
+Dialogue (summary): tutorial signs (jump into the background with ↑+×, swing on branches, charge attack, AP, save
+point), place names (始まりの村, 始まりの森, 100年老人の小屋, ふるいけ), a hungry monkey who takes a banana and teaches a
+dash, **Yan of the Hidden Village** (隠れ里のヤン) who is found repeatedly and gives hints, a kid asking 「キミ、泳げる
+のかい?」 (swimming needed for the big puddle), the 100-year-old man asking Tomba to collect the Kokka eggs and then
+sending him to the dwarf elder. The forest script: lost dwarf child, wilted flowers, dwarves who talk about the AP
+"point gate", the dwarf elder, two quarrelling dwarves, a broken pot, a trapped thief (「…コマブタ…のすきを見て逃げ
+出そうとしたら…」), a dwarf nurse who treats an injured dog and names it **Baron** (バロン).
 
 ### Event list (Folkin, Pure 8 = PrePre 8)
 Community researcher Folkin reports that the "Pure 8" demo is this same build and published its in-game event list (from video). Titles not in retail: A Young Boy Sets Off (少年旅立ち), A Large Puddle?, AP Gate, Help from the Dwarves, The Forgotten Things Inside the Five Chests, The Key for the Five Chests, Great Thief in the Underground Prison, Tumbling Down!, Tumbling Down Again!, Where the Light Falls, Mystery of the Stormy Mountain, Get Out of the Way, Can You Beat the Monsters?, Crush the Reaper Fruit, Make the Flower Bloom!, The Unmoving Charity Priests, Blow Away the Fog, Meeting the 100 Year Old Man, Tale of the 100 Year Old Man, A Friend of the 100 Year Old Man's, Learn the Language! I, A Lost Dwarf Child, Baron is Your Friend, The Elder Disappeared, Take a Peek?!, Yan of the Hidden Village, Return the Frog to..., The Hole-Digging Master!, Master of the Skies.
@@ -117,6 +156,7 @@ Community researcher Folkin reports that the "Pure 8" demo is this same build an
 TIM000 strip glyphs (rows, left to right): ボンプ岩の謎 ？り里ヤオイラ身 / ちゃん形見 10年泳げッ卵中フ / 老人と出会い霧を話仲間ドワ長 / 吹き飛ばせカエル！ / ...にかえるモトクCLEAR / ロスコーキミ、だ / あれま大きな水た / 少年旅立ちッィく.
 - **Confirmed in strip**: 少年旅立ち (Young Boy Sets Off), あれま大きな水たまり (Large Puddle?), 霧を吹き飛ばせ (Blow Away the Fog), 老人と出会い (Meeting the 100 Year Old Man), ドワ(ーフの)長(老) (The Elder / dwarves), モトクロス, キミ、だあれ, カエル (frog titles).
 - **Glyph-only hints (not proof)**: 話 (Tale of the 100 Year Old Man), 仲間 (A Friend of...), 里 + ヤ (Yan of the Hidden Village), 泳 (swim, unmatched).
+- **Now decoded from the exe** (see Text above): all of Folkin's titles are in the title table.
 - **Not in strip**: no 宝箱 (chests), 盗/泥棒 (thief), 転 (tumbling), 光/落 (light falls). Those titles come from Folkin's list only (the strip is not the full list).
 - Proposed retail slots (unverified): Five Chests -> Lost and Found (area 0, 魔女の忘れもの), Great Thief -> before The Great Escape, Tumbling Down / Again -> Where did I come from? / Lava Caves, Where the Light Falls -> event 32 (trumpets) slot.
 

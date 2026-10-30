@@ -61,7 +61,7 @@ bajo el logo final.
 | Pueblos de la Civilización (secciones cenitales de AREA11/16/17/18) | Los lleva docs/CIVILIZATION.md (`--civ-test`): el código de I0NFO2 está completo, pero las listas de carga están vacías y sus ficheros de mapa / SPR / paletas no están en ningún disco. 63 frases (clase B*). |
 | Fotogramas de la flor dorada creciendo (AREA02 SPR 0x3B f27-32) | Los rectángulos a los que apuntan están vacíos en la VRAM PAL: el arte no está en el disco. |
 | Texto JP de clase D ligado a la Civilización (MFNT110/170/180: balsero, generador, carbón, Dr. Gantetsu, pueblo nuevo) | Sus escenas son los pueblos cenitales cortados. |
-| Guion de diálogos de PrePre8 | La fuente 10x10 está, pero no se encontró texto que la use (abierto, ver docs/PREPRE8.md). |
+| Guion de diálogos de PrePre8 | Encontrado el 2026-10-30 en TOMBA.EXE (índices de glifo u16, `tools/prepre8_text.py`): guion del área 0 (tutorial, Yan, anciano de 100 años) y guion del bosque/enanos (niño enano perdido, Baron bautizado por una enfermera enana, ladrón atrapado). Falta la página de kanji del bosque. Ver docs/PREPRE8.md. |
 
 ## Texto solo en JP (SOLO_JAPON, 179 candidatas)
 
@@ -179,7 +179,7 @@ hemos comprobado.
 | Demo Pure 8: orugas en la VRAM de AREA00; el evento "Motocross Course" empieza normal | orugas **no encontradas**; título Motocross **confirmado** en la tira | Según Folkin, "Pure 8" es la misma versión que nuestra PrePre 8 (`docs/PREPRE8.md`). Las 11 páginas TIM de AREA00 renderizadas: TIM000 solo tiene sprites de Tomba, cerdos y el ave/dragón gris; el resto son fondos/texturas/fuentes. Ninguna oruga (sin búsqueda de paletas). La tira sí lleva モトクロスコース. Arranque del evento sin probar. |
 | Demo Pure 9: un cofre del anciano de 10.000 años donde la versión final tiene el de 1000 | sin verificar | Ese disco no está en nuestro conjunto. |
 
-Títulos de evento de PrePre 8 / "Pure 8" (lista de Folkin, detalle en `docs/PREPRE8.md`): 29 títulos que no están en la versión final. Huecos probables, sin verificar: Five Chests (Forgotten Things / Key) -> Lost and Found (el título de área 0 魔女の忘れもの encaja), Great Thief in the Underground Prison -> antes de The Great Escape, Tumbling Down / Again -> Where did I come from? / Lava Caves, Where the Light Falls -> evento 32 (trompetas). Confirmados como glifos en la tira de TIM000: Young Boy Sets Off, Large Puddle, Blow Away the Fog, Meeting the 100 Year Old Man, Elder; los de cofres, ladrón, caída y luz no están en la tira.
+Títulos de evento de PrePre 8 / "Pure 8" (lista de Folkin, detalle en `docs/PREPRE8.md`): 29 títulos que no están en la versión final. Huecos probables, sin verificar: Five Chests (Forgotten Things / Key) -> Lost and Found (el título de área 0 魔女の忘れもの encaja), Great Thief in the Underground Prison -> antes de The Great Escape, Tumbling Down / Again -> Where did I come from? / Lava Caves, Where the Light Falls -> evento 32 (trompetas). Confirmados como glifos en la tira de TIM000: Young Boy Sets Off, Large Puddle, Blow Away the Fog, Meeting the 100 Year Old Man, Elder; los de cofres, ladrón, caída y luz no están en la tira. Actualización 2026-10-30: la tabla completa (167 títulos, con cofres, ladrón, rodar, luz y muchos de áreas posteriores como 島のヒミツ1-5, 大停電, 人魚の王を救え, 「大団円1-3」) está decodificada desde TOMBA.EXE, ver docs/PREPRE8.md.
 
 Imagen (no se sube): `item_icons_63_64_65_62_52_grey.png` (Flower Seeds, Pipe, Wine, Rueda de hierro, Esencia lluvia).
 

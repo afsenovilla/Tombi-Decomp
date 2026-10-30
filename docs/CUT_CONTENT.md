@@ -60,7 +60,7 @@ logo.
 | Civilization towns (AREA11/16/17/18 top-down sections) | Owned by docs/CIVILIZATION.md (`--civ-test`): code in I0NFO2 is complete, but the sections' load lists are empty and their map / SPR / palette files are on no disc. 63 lines (class B*). |
 | Growing golden flower frames (AREA02 SPR 0x3B f27-32) | The rectangles they point at are empty in PAL VRAM: the art is not on the disc. |
 | JP-only text of class D tied to Civilization (MFNT110/170/180: raft maker, generator, coal, Dr. Gantetsu, new town) | Their scenes are the cut top-down towns. |
-| PrePre8 dialogue script | The 10x10 font is there but no script text using it was found (still open, see docs/PREPRE8.md). |
+| PrePre8 dialogue script | Found 2026-10-30 in TOMBA.EXE (u16 glyph indices, `tools/prepre8_text.py`): area-0 tutorial/Yan/100-year-old-man script and a forest/dwarf script (lost dwarf child, Baron named by a dwarf nurse, trapped thief). Forest kanji page missing. See docs/PREPRE8.md. |
 
 ## JP-only text survey (SOLO_JAPON, 179 candidates)
 
@@ -167,7 +167,7 @@ These are the rest, checked only where it was cheap. **Unverified** means we did
 | Pure 8 demo: caterpillars in the AREA00 VRAM; "Motocross Course" event starts normally | caterpillars **not found**; Motocross title **confirmed** in strip | Per Folkin, "Pure 8" is the same build as our PrePre 8 (`docs/PREPRE8.md`). All 11 AREA00 TIM pages rendered (`tools/prepre8.py unpack` + `pages`): TIM000 holds only Tomba, pig and grey bird/dragon sprites, the rest are backdrops/textures/fonts. No caterpillar sprite (no palette search, so a tiny one could hide). The title strip does carry モトクロスコース. Gameplay start of the event not tested. |
 | Pure 9 demo: a 10,000-year-old-man chest where retail has the 1000-year one | unverified | That disc is not in our set. |
 
-Event titles of PrePre 8 / "Pure 8" (list by Folkin, details in `docs/PREPRE8.md`): 29 titles absent from retail. Slot guesses, unverified: Five Chests (Forgotten Things / Key) -> Lost and Found (area 0 title 魔女の忘れもの fits), Great Thief in the Underground Prison -> before The Great Escape, Tumbling Down / Again -> Where did I come from? / Lava Caves, Where the Light Falls -> event 32 (trumpets). Confirmed as glyphs in the TIM000 strip: Young Boy Sets Off, Large Puddle, Blow Away the Fog, Meeting the 100 Year Old Man, Elder; the chests, thief, tumbling and light titles are not in the strip.
+Event titles of PrePre 8 / "Pure 8" (list by Folkin, details in `docs/PREPRE8.md`): 29 titles absent from retail. Slot guesses, unverified: Five Chests (Forgotten Things / Key) -> Lost and Found (area 0 title 魔女の忘れもの fits), Great Thief in the Underground Prison -> before The Great Escape, Tumbling Down / Again -> Where did I come from? / Lava Caves, Where the Light Falls -> event 32 (trumpets). Update 2026-10-30: the full table (167 titles, incl. chests, thief, tumbling, light and many later-area titles such as 島のヒミツ1-5, 大停電, 人魚の王を救え, 「大団円1-3」) is decoded from TOMBA.EXE, see docs/PREPRE8.md. Confirmed as glyphs in the TIM000 strip: Young Boy Sets Off, Large Puddle, Blow Away the Fog, Meeting the 100 Year Old Man, Elder; the chests, thief, tumbling and light titles are not in the strip.
 
 Image (not committed): `item_icons_63_64_65_62_52_grey.png` (Flower Seeds, Pipe, Wine, Iron Wheel, Rain Essence).
 
