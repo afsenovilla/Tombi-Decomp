@@ -20,7 +20,9 @@ Order by expected yield per effort: areas whose PAL twin is fully matched and th
       (`config/slps01144/reuse.txt`, `tools/version_share.py`), all programs. Cheapest % gain.
 - [ ] Small areas to 100 %: X08 (3 f), X19 (3 f), X05 (22 f), X13 (11 f), X02 (41 f).
       Partial: X05 16/22, X13 7/11, X02 27/41 (stubs, updateMightyFishFood); what is left in X08/X19/X05 is data mis-split as functions, X13 80115FD8 done, 801162DC (2196 B) and X02 big handlers open.
-- [ ] Cut towns X16 (77 %), X17 (68 %), X18 (73 %), X11 (37 %): finish; X18 also uses the teller lines.
+- [ ] Cut towns X16, X17, X18, X11 (37 %): X16/X17/X18 small JP-only functions done (stubs, `p[4]=3` setters, x16 80116128, x18 80116098).
+      Open: x16 80115A80 (93 %), x17 801170F4 (90 %), x18 8011903C (95 %): register/scheduling stalls. x18 80118854 (2024 B switch) untouched.
+      Data mis-split as functions: x16 80118004, x17 80115178/80118314, x18 80115178/801194AC. X18 also uses the teller lines.
 - [ ] Jungle X10 (62 %): finish; read every function with no PAL counterpart (notes/jp_retail.md).
 - [ ] Mid areas X01, X03, X04, X06, X09, X14.
 - [ ] X00 shared object code (47 %), then the engine SLPS_011.44 (54 %): kana/kanji text system, file loading.
