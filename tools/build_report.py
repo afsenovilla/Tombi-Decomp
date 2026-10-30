@@ -294,8 +294,12 @@ def jpdemo_main(ver="slpm80165"):
             if r.returncode:
                 sys.exit("splat failed for %s %s:\n%s" % (ver, prog, (r.stdout + r.stderr)[-3000:]))
         fdir = "asm/%s/%s/nonmatchings/%s" % (ver, prog, prog)
+        dfile = "config/%s/data_units.txt" % ver  # splat 'functions' that are data (tools/jp_data_units.py): not code units
+        dunits = {(l.split()[0], int(l.split()[1], 16)) for l in (open(dfile) if os.path.exists(dfile) else ())
+                  if l.strip() and not l.startswith("#")}
         for fn in sorted(os.listdir(fdir)):
             if not fn.endswith(".s"): continue
+            if (prog, int((re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", open(os.path.join(fdir, fn)).read()) or [0, "0"])[1], 16)) in dunits: continue
             name = fn[:-2]
             out = "%s/target/%s/%s.o" % (out_dir, prog, name)
             os.makedirs(os.path.dirname(out), exist_ok=True)
