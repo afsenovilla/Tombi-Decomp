@@ -50,7 +50,10 @@ def main():
         asmdir = "asm/%s/%s/nonmatchings/%s" % (ver, prog, prog)
         for fn in sorted(os.listdir("build/%s/target/%s" % (ver, prog))):
             name = fn[:-2]
-            am = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", open("%s/%s.s" % (asmdir, name)).read())
+            sf = "%s/%s.s" % (asmdir, name)
+            if not os.path.exists(sf): continue  # data.o: a data object, not a function (no nonmatchings asm)
+            am = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", open(sf).read())
+            if not am: continue
             b, rel = text_and_relocs("build/%s/target/%s/%s" % (ver, prog, fn), tmp)
             n = len(b) // 4
             mk = [0xFFFFFFFF & ~rel.get(4 * i, 0) for i in range(n)]
