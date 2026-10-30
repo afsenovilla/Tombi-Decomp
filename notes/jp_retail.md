@@ -249,8 +249,31 @@ handlers (build anterior, reescrita antes del PAL), no una reubicacion.
     semaforo (1/2/3) con ese objeto en casos 2-4.
   - V caso 5 llama `setEventStarted(0x68,0,0)` (evento 0x68 = 104) y arma un temporizador de 0x168 = 360 fotogramas (caso 6).
   - V caso 9 restaura `DAT_800a7b7c=1` (juego normal), `+0x2E`, y borra `+5/+6/+0x68`.
-  - G: es un NPC/puerta de historia con 5 dialogos (ids de mensaje 6-10 del script del area, no resueltos a texto); el
+  - (corregido abajo: es `goGoCarMechanicTalk`) G: es un NPC/puerta de historia con 5 dialogos (ids de mensaje 6-10 del script del area, no resueltos a texto); el
     objeto 0x33/sub 0x0F es un efecto o camara de escena. No esta en el PAL con esta forma (ni `callsig` ni `skel`).
+#### x11 `0x80116348` resuelto: es `goGoCarMechanicTalk` (no es contenido solo-JP)
+
+Resuelto con `tools/jp_text.py` y `src/x011/goGoCarMechanicTalk.c` (PAL, MATCHING). Todo verificado leyendo texto y C.
+- V Es el mismo handler que PAL `goGoCarMechanicTalk` (x011 `8011708c`, 1236 B): mismos casos, mismos `showMessageBoxDirect(2, 6..10)`,
+  mismo `allocObjectLayer5` (tipo 0x0F, subtipo 0x33, `b0c`=0x80), mismo `setEventStarted(0x68)` + temporizador 0x168 y mismo cierre.
+  La version JP es una build previa mas corta (632 B frente a 1236 B); la forma distinta es lo que hizo fallar `callsig`/`skel`.
+  Se corrige la lectura "G: NPC/puerta de historia ... no esta en el PAL" de arriba.
+- V Textos (banco 2 = dialogos `base[2]+n`; base JP 191, PAL 208; JP 197..201, PAL 214..218):
+  6 JP "よっこらしょっと！" / PAL "Arriba! Alla vamos!" (el mecanico levanta el cubo);
+  7 JP "おっ おっ おおおおおお～～っっ！！" / PAL "Eh, eh! Eh! Ehi!!";
+  8 JP "ダメかぁ…ただの水だもんなぁ…エサねんりょうにはやっぱりアレを使わないと" (no, es solo agua; para la barra de combustible hace falta eso) /
+  PAL "Aaaa! Supongo que no funciona con agua normal... necesito eso para hacer una barra de combustible";
+  9 JP "んっ？…何だ聞いてたのか…" (Mm? ah, estabas escuchando) / PAL "Mm? Oh, no sabia que estabas escuchando";
+  10 JP "コイツはボフットカー... エサねんりょうが必要...ほんのチョットのアルコール... バッカスの村の中央公園のポンプ" /
+  PAL "Esto se llama coche GoGo... necesito una barra de combustible... un poco de vino... un cubo". Diferencia: el JP dice
+  "Bofutto Car" y manda al pozo/bomba del parque de la aldea de Baco (alcohol); el PAL cambia a "coche GoGo" y "vino".
+- V Evento 0x68 (104) = "Food for Fuel?" (titulo PAL; `updateFoodForFuelObject` lo usa, flag GCD.bce0c). En PAL lo arranca
+  `goGoCarMechanicTalk` (`setEventStarted(0x68)`) y lo completa `goGoCarWineReceivedTalk` (`setEventComplete(0x68)`); el
+  segundo ya esta emparejado tambien en JP (`goGoCarWineReceivedTalk`, etapa 2).
+- V Objeto capa 5 tipo 0x0F = `updateTossedItem` (`x011 80116b58`, `initItemObject`: objeto lanzado en arco); subtipo 0x33 = item 0x33
+  (51) = "Barra de combustible" (JP "エサねんりょう", item #51 del banco 0 de AREA11; PAL "Barra de combustible"). Es decir, el mecanico
+  lanza la barra de combustible al jugador. G: no se comprobo en las tablas de colocacion de AREA11 si hay un registro propio con
+  ese tipo/subtipo (`objects.py` tarda >2 min); el codigo PAL lo crea en tiempo de ejecucion, asi que no hace falta.
 - **x00 `0x80101F30` (1620 B; es codigo compartido X00, no de area; offset +0x18438 en el overlay):** V estado del jugador con
   `PlayerSetAnimIfChanged(...,4)` cada fotograma, desplaza `+0/+0x14` por `DAT_8009e4ec/ee * 0x100` (velocidad de plataforma
   movil), sonido `0x1C`, y salidas por `+5` = 0x0E, 1, 0x1B, 0x2A/0x2B (segun `DAT_8009ee59`) y lectura de pad `DAT_1f8003c6`.
