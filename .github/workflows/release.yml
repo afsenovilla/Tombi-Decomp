@@ -3,16 +3,27 @@ name: Publish release
 # Publishes the newest green build of the native port (artifacts bin-<platform>-port of port2-exe) as ONE GitHub
 # Release with tombi-port-<ver>-windows-x64.exe and tombi-port-<ver>-linux-x64.tar.gz (tar keeps the executable bit);
 # with the dispatch input "include tools" also Tombi-Tools-<ver>-windows-x64.zip / -linux-x64.tar.gz (tombi-text,
-# tombi-gfx, tombi-assets of assets-exe/gfx-exe/text-exe).  Tag tag <ver> = build-YYYYMMDD-<sha7> (date and commit of master's head).  The build workflows only
+# tombi-gfx, tombi-assets of assets-exe/gfx-exe/text-exe).  Versions: tag v0.0.N, title "Tombi PC port 0.0.N",
+# <ver> = 0.0.N; N = highest v0.0.* + 1 (auto releases bump the patch of the latest vX.Y.Z); the dispatch input
+# "version" (X.Y.Z, greater than the latest) overrides it, e.g. 0.1.0.  Old build-YYYYMMDD-<sha7> releases are dev
+# pre-releases (dispatch input migrate_dev=true retitles them "dev build YYYYMMDD-<sha7>", publishes nothing).  The build workflows only
 # upload artifacts; a release is made
 #   - on request: Actions > "Publish release" > Run workflow (or `gh workflow run release.yml`), or
 #   - automatically, after a port build finishes, once no port build is running and master has >= 5 non-CI commits (subject not starting
-#     with "ci:"/"dist:") since the last build-* release.
+#     with "ci:"/"dist:") since the last v* release.
 on:
   workflow_dispatch:
     inputs:
       include_tools:
         description: "include tools (Tombi-Tools zip/tar.gz with tombi-text, tombi-gfx, tombi-assets)"
+        type: boolean
+        default: false
+      version:
+        description: "version X.Y.Z (optional; default: latest patch + 1, e.g. 0.0.N)"
+        type: string
+        default: ""
+      migrate_dev:
+        description: "only mark old build-* releases as pre-release 'dev build ...' (no new release)"
         type: boolean
         default: false
   workflow_run:
@@ -40,12 +51,20 @@ jobs:
         id: d
         run: |
           SHA=$(gh api "repos/$R/commits/master" --jq .sha)
-          D=$(gh api "repos/$R/commits/$SHA" --jq '.commit.committer.date' | cut -c1-10 | tr -d -)
-          VER="build-$D-${SHA::7}"
-          PREV=$(gh api "repos/$R/releases?per_page=30" --jq '[.[] | select(.tag_name | startswith("build-"))][0].tag_name // empty')
+          PREV=$(gh api "repos/$R/releases?per_page=100" --jq '.[].tag_name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
+          LAST=${PREV#v}; LAST=${LAST:-0.0.0}
+          IN="${{ inputs.version }}"; IN=${IN#v}
+          if [ -n "$IN" ]; then
+            [[ "$IN" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::version '$IN' is not X.Y.Z"; exit 1; }
+            [ "$IN" != "$LAST" ] && [ "$(printf '%s\n%s\n' "$LAST" "$IN" | sort -V | tail -n1)" = "$IN" ] || { echo "::error::version $IN must be greater than $LAST"; exit 1; }
+            VER=$IN
+          else IFS=. read -r a b c <<< "$LAST"; VER="$a.$b.$((c + 1))"; fi
+          if [ "${{ inputs.migrate_dev }}" = true ]; then echo "go=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          [ -n "$PREV" ] && [ "$(gh api "repos/$R/releases/tags/$PREV" --jq .target_commitish 2>/dev/null)" = "$SHA" ] && { echo "$SHA already released as $PREV"; echo "go=0" >> "$GITHUB_OUTPUT"; exit 0; }
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"; echo "ver=$VER" >> "$GITHUB_OUTPUT"; echo "prev=$PREV" >> "$GITHUB_OUTPUT"
-          if gh api "repos/$R/releases/tags/$VER" >/dev/null 2>&1; then echo "$VER already released"; echo "go=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if gh api "repos/$R/releases/tags/v$VER" >/dev/null 2>&1; then echo "v$VER already released"; echo "go=0" >> "$GITHUB_OUTPUT"; exit 0; fi
           if [ "${{ github.event_name }}" = workflow_dispatch ]; then echo "go=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          [ -n "$PREV" ] || PREV=$(gh api "repos/$R/releases?per_page=100" --jq '[.[] | select(.tag_name | startswith("build-"))][0].tag_name // empty')
           if [ -z "$PREV" ]; then n=0; else   # no release yet: only on request
             n=$(gh api "repos/$R/compare/$PREV...$SHA" --jq '[.commits[] | .commit.message | split("\n")[0] | select(test("^(ci|dist)[:(]") | not)] | length')
           fi
@@ -94,7 +113,7 @@ jobs:
             tar -C tl -czf "out/Tombi-Tools-$VER-linux-x64.tar.gz" .
           fi
           {
-            echo "Build of $SHA."; echo
+            echo "Tombi PC port $VER (build of ${SHA::7})."; echo
             if [ -n "$PREV" ]; then echo "### Changes since $PREV"
               gh api "repos/$R/compare/$PREV...$SHA" --jq '.commits[] | .commit.message | split("\n")[0] | select(test("^(ci|dist)[:(]") | not) | "- " + .' | tail -n 150
             else echo "### Commit"; gh api "repos/$R/commits/$SHA" --jq '"- " + (.commit.message | split("\n")[0])'; fi
@@ -105,7 +124,16 @@ jobs:
             true
           } > notes.md
           cat notes.md
-          gh release create "$VER" -R "$R" --target "$SHA" --title "Tombi $VER" --notes-file notes.md out/*
+          gh release create "v$VER" -R "$R" --target "$SHA" --title "Tombi PC port $VER" --latest --notes-file notes.md out/*
+
+      - name: Move build-* releases to dev (pre-release, "dev build YYYYMMDD-<sha7>")
+        if: steps.d.outputs.go == '1' || inputs.migrate_dev
+        run: |
+          for t in $(gh api "repos/$R/releases?per_page=100" --jq '.[] | select(.tag_name | startswith("build-")) | select((.prerelease | not) or (.name | startswith("dev build") | not)) | .tag_name'); do
+            gh release edit "$t" -R "$R" --prerelease --latest=false --title "dev build ${t#build-}" && echo "dev: $t"
+          done
+          L=$(gh api "repos/$R/releases?per_page=100" --jq '.[].tag_name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
+          [ -n "$L" ] && gh release edit "$L" -R "$R" --latest || true
 
       - name: Remove legacy releases (rolling "latest", build-* without the tombi-port-* assets)
         if: steps.d.outputs.go == '1'

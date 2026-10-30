@@ -234,6 +234,20 @@ compiled for every version**, and each version has its own splat configs, symbol
   shared tree, `asm <version>` adds the INCLUDE_ASM branches for the PAL files whose version counterpart is not
   matched yet. The PAL build is unaffected (it never defines the other macros).
 
+## Releases
+
+Releases of the PC port are published by `.github/workflows/release.yml` (Actions > "Publish release" > Run
+workflow, or automatically after a port build once master has >= 5 non-CI commits since the last release).
+
+- Versions are `vX.Y.Z`: tag `v0.0.N`, title "Tombi PC port 0.0.N", assets `tombi-port-0.0.N-windows-x64.exe`,
+  `tombi-port-0.0.N-linux-x64.tar.gz` (optionally `Tombi-Tools-0.0.N-...`). Each release bumps the patch of the
+  latest `v*` tag and is marked Latest; the notes list the commits since the previous `v*` tag.
+- To bump the minor/major version run the workflow with the input `version` (e.g. `0.1.0`; must be `X.Y.Z` and
+  greater than the latest): `gh workflow run release.yml -f version=0.1.0`. Later automatic releases continue
+  from it (0.1.1, ...).
+- The old `build-YYYYMMDD-<sha7>` releases are kept as pre-releases titled "dev build YYYYMMDD-<sha7>"
+  (`gh workflow run release.yml -f migrate_dev=true` re-applies that without publishing anything).
+
 ## Progress report (objdiff / decomp.dev)
 
 `tools/build_report.py` produces the [objdiff](https://github.com/encounter/objdiff) report that
