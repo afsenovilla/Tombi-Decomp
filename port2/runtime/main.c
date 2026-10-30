@@ -767,13 +767,13 @@ int main(int argc, char **argv) {
 
 /* Item 64 (Pipe / "Valvula") inventory icon, port only (port/fixes.txt subScreenDrawItemIcon): a custom 16-colour CLUT,
    NOT an original palette.  The sub-screen block (288,480) has no row that colours this wheel as tarnished brass:
-   row 1 (ITEM_ICON_CLUTS[64], retail) is all grey.  This is row 0 with only the indices the icon uses (15, 13, 7, 12, 5,
-   14, light to shadow) replaced by an ochre ramp (RGB 240,200,110 / 205,150,60 / 170,110,35 / 150,95,40 / 95,55,25 /
-   35,22,10, rounded to 15 bits as c * 31 / 255).  It is uploaded to (304,511), the row below the block (unused while
+   row 1 (ITEM_ICON_CLUTS[64], retail) is all grey.  This is row 0 with the wheel's indices (13, 7, 12, 5, 14, light to
+   shadow) replaced by a rusted ochre ramp (RGB 190,110,50 / 155,80,35 / 135,70,40 / 85,40,25 / 32,16,10, rounded to
+   15 bits as c * 31 / 255); index 15, the icon's outer frame, stays white like every other item's.  It is uploaded to (304,511), the row below the block (unused while
    the sub-screen is up), on every draw, so a later area load cannot leave a stale row there. */
 int port_valve_clut(void) {
-    static const unsigned short pal[16] = {0x0000, 0x034F, 0x02E0, 0x0241, 0x6B5A, 0x0CEC, 0x052D, 0x11B5,
-                                           0x0A37, 0x0A9A, 0x0F1F, 0x43FF, 0x1592, 0x1E59, 0x0464, 0x371D};
+    static const unsigned short pal[16] = {0x0000, 0x034F, 0x02E0, 0x0241, 0x6B5A, 0x0CAA, 0x052D, 0x1153,
+                                           0x0A37, 0x0A9A, 0x0F1F, 0x43FF, 0x1530, 0x19B7, 0x0444, 0x7FFF};
     struct { short x, y, w, h; } r = {304, 511, 16, 1};
     extern int LoadImage(void *, unsigned *);
     LoadImage(&r, (unsigned *)pal);
