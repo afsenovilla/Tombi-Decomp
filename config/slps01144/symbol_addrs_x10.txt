@@ -139,3 +139,10 @@ func_8012D35C_slps01144 = 0x8012D35C; // type:func size:0xC
 func_8012D4F0_slps01144 = 0x8012D4F0; // type:func size:0x8
 func_8012D4F8_slps01144 = 0x8012D4F8; // type:func size:0xC
 func_8011A8C8_slps01144 = 0x8011A8C8; // type:func size:0x148
+// BEGIN jp_globals (tools/jp_globals.py)
+GVARS = 0x8009E4D8; // size:0x30 PAL 0x8009C930
+GVARS_PLAYER_DRIFT_Y = 0x8009E4EE; // size:0x2 PAL 0x8009C946
+GAME = 0x8009E508; // size:0x988 PAL 0x8009C960
+GAME_SELECTED_SECTION = 0x8009E50A; // size:0x2 PAL 0x8009C962
+GCD = 0x8009E8A8; // size:0x400 PAL 0x8009CD00
+// END jp_globals

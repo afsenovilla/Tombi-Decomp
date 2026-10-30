@@ -110,3 +110,9 @@ CdFlush = 0x80129830; // type:func size:0x20  PAL main0 0x80064DD0
 func_8012985C_slps01144 = 0x8012985C; // type:func size:0xA8  PAL x002 0x8011C628
 func_80128CF8_slps01144 = 0x80128CF8; // type:func size:0xC
 func_80129850_slps01144 = 0x80129850; // type:func size:0xC
+// BEGIN jp_globals (tools/jp_globals.py)
+GCD = 0x8009E8A8; // size:0x400 PAL 0x8009CD00
+BITTEN_OBJECT = 0x8009EE90; // size:0x4 PAL 0x8009D2E8
+PLAYER_Y = 0x800A7B8E; // size:0x2 PAL 0x800A604E
+PLAYER_H = 0x800A7BB8; // size:0x4 PAL 0x800A6078
+// END jp_globals

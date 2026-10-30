@@ -153,3 +153,13 @@ func_8012D1BC_slps01144 = 0x8012D1BC; // type:func size:0x8
 func_8012D1C4_slps01144 = 0x8012D1C4; // type:func size:0xC
 func_8012DAF0_slps01144 = 0x8012DAF0; // type:func size:0xC
 func_8012DE30_slps01144 = 0x8012DE30; // type:func size:0xC
+// BEGIN jp_globals (tools/jp_globals.py)
+MOVE_TABLE_0 = 0x800716C4; // size:0x18 PAL 0x80077CDC
+GVARS = 0x8009E4D8; // size:0x30 PAL 0x8009C930
+GCD = 0x8009E8A8; // size:0x400 PAL 0x8009CD00
+GV2 = 0x8009EE48; // size:0x40 PAL 0x8009D2A0
+PLAYER_STEP = 0x800A7B7E; // size:0x1 PAL 0x800A603E
+PLAYER_Y = 0x800A7B8E; // size:0x2 PAL 0x800A604E
+PLAYER_ANIM = 0x800A7B9C; // size:0x4 PAL 0x800A605C
+PLAYER_H = 0x800A7BB8; // size:0x4 PAL 0x800A6078
+// END jp_globals

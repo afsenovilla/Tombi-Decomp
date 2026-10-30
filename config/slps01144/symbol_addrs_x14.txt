@@ -74,3 +74,7 @@ func_80122200_slps01144 = 0x80122200; // type:func size:0x28C  PAL x014 0x80124F
 func_8012248C_slps01144 = 0x8012248C; // type:func size:0x430  PAL x014 0x801251B4
 func_801153F4_slps01144 = 0x801153F4; // type:func size:0x1E8
 func_8011A538_slps01144 = 0x8011A538; // type:func size:0x190
+// BEGIN jp_globals (tools/jp_globals.py)
+GVARS = 0x8009E4D8; // size:0x30 PAL 0x8009C930
+PLAYER_H = 0x800A7BB8; // size:0x4 PAL 0x800A6078
+// END jp_globals
