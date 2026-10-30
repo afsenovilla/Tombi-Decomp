@@ -175,3 +175,18 @@ program `tomba` = TOMBA.EXE, game dir `game_prepre8/`, git-ignored). It is set u
 no retail disc (59 in `CLUT00`, `SYS006`, the exe TIMs), and 35 are shared only with JP SLPS-01144. None of them fits the
 Civilization scenery pages or the Female Stonetown Resident better than the retail rows (docs/CIVILIZATION.md, "Palette
 catalog").
+
+## Functions vs PAL (2026-10-30): not done
+
+The comparison with `tools/fn_vs_pal.py` (see docs/BETA_980203.md, "Functions vs PAL") could not be run on this
+build in that session: `game_prepre8/TOMBA.EXE` is a symlink into `/dev/shm/prepre8_out/`, which had been wiped, and
+the PrePre Vol. 8 image was not on the machine. Re-extract with `tools/prepre8.py extract`, then:
+
+```
+python3 -I tools/xmatch.py game_prepre8/TOMBA.EXE --csv m.csv
+python3 -I tools/fn_vs_pal.py game_prepre8/TOMBA.EXE m.csv --vram 0x80010000 --text 0x80016D40 0x800A10F4
+```
+
+Existing leads: 494 of the 508 PAL matches are MAIN0 (86 identical); the code the exe has that PAL lacks is the
+OPTION MODE tree rooted at 0x800854B4 (dead code, see "Debug features"), the `enemy=%01d` object 0x80083D88, and
+the 2D-room path of room list 3.
