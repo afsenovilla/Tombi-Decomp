@@ -628,7 +628,12 @@ void port_civ_maps(void) {
     if (carea != area) {
         snprintf(path, sizeof path, "%s/AREA%02d/map8E.bin", port_civ_maps_dir, area); e = port_civ_slurp(path);
         snprintf(path, sizeof path, "%s/AREA%02d/%s", port_civ_maps_dir, area, port_civ_tim_name(0)); t = port_civ_slurp(path);
-        if (!e || !t) { port_printf("[port] --civ-maps: no rebuilt map for AREA%02d in %s\n", area, port_civ_maps_dir); return; }
+        if (!e || !t) {   /* the cut town has no picture of its own: drawing it reads past nothing (topdownBuildMapStrip) */
+            port_printf("[port] --civ-maps: no rebuilt map for AREA%02d in %s (map8E.bin + %s); the cut town cannot be drawn "
+                        "without it, quitting (rebuild it: tools/civ_rebuild.py, or let the launcher regenerate civ_cache)\n",
+                        area, port_civ_maps_dir, port_civ_tim_name(0));
+            exit(1);
+        }
         ce = e; ct = t; carea = area;
         snprintf(path, sizeof path, "%s/AREA%02d/%s", port_civ_maps_dir, area, port_civ_tim_name(1));
         port_civ_tim_out = t; port_civ_tim_in = port_civ_slurp(path);   /* none: rooms keep the engine's hidden map */
