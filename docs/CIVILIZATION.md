@@ -692,7 +692,11 @@ OUT/bp/tombi2 --lang 5 --civ-route --civ-maps OUT/maps --civ-wfm OUT/civdata    
 - `--civ-town 11|16|17` is `--civ-test` plus the debug area select opened on that town's section 0 (Start, then
   Circle, as the pokes of the old command did). Tomba starts just inside the exit from Civilization Town
   (AREA11 world (530, 410), AREA16 (-95, 524), AREA17 (223, 540); `--civ-spawn X,Y` overrides it). The camera limits
-  follow the rebuilt picture (x max = W - 288, y max = H - 112).
+  follow the rebuilt picture (x max = W - 288; y kept in 175 .. about H - 114, so the visible tile rows and the
+  strip margins never leave the picture), and the camera starts at the spawn clamped to them.
+- AREA11's page A06100 has its own BUNMEI.STR anchors (four windmill cut-outs registered on the 'wood' mosaic,
+  layout `fmv_anchors`; 141 colours, the rest filled). Before, it had none: without community CLUTs every colour was
+  black and the town drew as a black background.
 - `--civ-maps DIR` loads `DIR/AREAnn/map8F.tim` and `map8E.bin`, and the room view `map8F_in.tim`.
 - `--civ-collision` swaps in the debug pictures `map8F_cells.tim` / `map8F_in_cells.tim`: the cell map tinted over
   the picture (red solid 9, orange diagonal 1-4, magenta one-sided wall 5-8, cyan trigger, every cell outlined), so

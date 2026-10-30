@@ -567,7 +567,7 @@ unsigned long *port_civ_clamp_strip(unsigned long *base, unsigned long *s, int s
     return base + (off < lo ? lo : hi) - (off < lo ? 0 : 0);
 }
 /* camera limits {xmin, xmax, ymin, ymax} and start for the rebuilt picture (AREA08's rows follow xmax = W - 288,
-   ymax = H - 112); spawn at the bottom exit of AREA17 (the way in from Civilization Town) */
+   ymax about H - 112); spawn at the bottom exit of AREA17 (the way in from Civilization Town) */
 static short port_civ_lim[4], port_civ_campos[8];
 static int port_civ_spawn_set, port_civ_spawn_x, port_civ_spawn_y;
 static void port_civ_default_spawn(int *x, int *y) {
@@ -582,13 +582,25 @@ static void port_civ_default_spawn(int *x, int *y) {
 short *port_civ_limits(short *row) {
     memcpy(port_civ_lim, row, sizeof port_civ_lim);
     port_civ_maps();   /* size of the rebuilt picture (loads the files once) */
-    if (port_civ_map_w) { port_civ_lim[1] = port_civ_map_w - 288; port_civ_lim[3] = port_civ_map_h - 112; }
+    /* x max = W - 288; y range such that topdownBuildVisibleTileList's 9 tile rows (from ((y + 128 - 0xEF) >> 5) - 1)
+       and topdownBuildMapStrip's -24 / +32 row margins stay inside the picture (no strip clamp at the edges) */
+    if (port_civ_map_w) {
+        int ymax = 32 * ((port_civ_map_h - 8) / 32 - 7) + 31 + 111;
+        port_civ_lim[1] = port_civ_map_w - 288;
+        if (port_civ_lim[2] < 175) port_civ_lim[2] = 175;
+        port_civ_lim[3] = ymax < port_civ_map_h - 112 ? ymax : port_civ_map_h - 112;
+        if (port_civ_lim[3] < port_civ_lim[2]) port_civ_lim[3] = port_civ_lim[2];
+    }
     return port_civ_lim;
 }
 short *port_civ_cam(short *row) {
     int x, y;
     memcpy(port_civ_campos, row, sizeof port_civ_campos);
-    port_civ_default_spawn(&x, &y); port_civ_campos[0] = x; port_civ_campos[1] = y;
+    /* the camera follows Tomba's world position (AREA08's camera row = its spawn row); start it there, inside the limits */
+    port_civ_default_spawn(&x, &y);
+    if (x < port_civ_lim[0]) x = port_civ_lim[0]; if (x > port_civ_lim[1]) x = port_civ_lim[1];
+    if (y < port_civ_lim[2]) y = port_civ_lim[2]; if (y > port_civ_lim[3]) y = port_civ_lim[3];
+    port_civ_campos[0] = x; port_civ_campos[1] = y;
     return port_civ_campos;
 }
 static short port_civ_row_buf[4];

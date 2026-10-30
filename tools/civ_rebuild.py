@@ -216,7 +216,8 @@ def derive_clut(name, L, refs, cache):
     for n, D in Ds.items():
         for x, y, k, mos, dx, dy in L["fmv_anchors"].get(n, []):
             m = mosaics(L, cache)[mos]
-            P = D[y:y + k, x:x + k]
+            kw, kh = k if isinstance(k, list) else (k, k)   # a square patch, or [w, h] (a whole cut-out)
+            P = D[y:y + kh, x:x + kw]
             v, u = np.nonzero(P)
             Y, X = v + dy, u + dx
             ok = (Y >= 0) & (Y < m.shape[0]) & (X >= 0) & (X < m.shape[1])
