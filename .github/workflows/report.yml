@@ -427,7 +427,11 @@ jobs:
             if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
             if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
             mkdir -p "$2"; curl -fsSL -o "$2/dl" "$URL" || return 1
-            if unzip -tq "$2/dl" >/dev/null 2>&1; then unzip -o -q "$2/dl" -d "$2" && rm "$2/dl"; fi
+            echo "download type: $(file -b "$2/dl" | cut -c1-80), $(stat -c%s "$2/dl") bytes"
+            if unzip -tq "$2/dl" >/dev/null 2>&1; then unzip -o -q "$2/dl" -d "$2" && rm "$2/dl"
+            elif file -b "$2/dl" | grep -qiE '7-zip|rar|gzip|xz|bzip2|tar'; then 7z x -y -bd -o"$2" "$2/dl" >/dev/null && rm "$2/dl"; fi
+            # extract nested EBOOT/zip-in-archive once more
+            find "$2" -mindepth 1 -type f -iname '*.zip' -exec unzip -o -q {} -d "$2" \; 2>/dev/null || true
           }
           # tree DIR OUT: extracts the file system of the biggest disc image found under DIR into OUT
           tree() {
@@ -445,7 +449,7 @@ jobs:
             if [ -z "${!v}" ]; then echo "::notice::$v secret not set; skipping $r."; continue; fi
             d="$RUNNER_TEMP/psn_$r"; fetch "$v" "$d" || { echo "::error::$r download failed"; continue; }
             echo "### PSN $r" >> "$S"; echo "contents:"; find "$d" -type f -printf '%s %P\n' | tee -a "$S"
-            if ! find "$d" -type f \( -iname '*.bin' -o -iname '*.img' -o -iname '*.iso' \) -size +50M | grep -q .; then
+            if ! find "$d" -type f \( -iname '*.bin' -o -iname '*.img' -o -iname '*.iso' -o -name dl \) -size +50M | grep -q .; then
               pbp="$(find "$d" -iname EBOOT.PBP | head -1)"; keys="$(find "$d" -iname KEYS.BIN | head -1)"
               if [ -z "$pbp" ]; then echo "::error::$r: no disc image nor EBOOT.PBP"; continue; fi
               { echo '```'; python3 -I tools/psn_eboot.py info "$pbp" $keys; echo '```'; } | tee -a "$S"
