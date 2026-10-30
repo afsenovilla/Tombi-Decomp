@@ -10,6 +10,12 @@ Edits (the "menus" section of a *.tombipatch.json, key "itemNames" under each of
                                   of pointed strings around them is repacked (identical strings shared) and its pointers
                                   rewritten
 
+  "placeNames": {"OLD": "NEW"}    DnSPSUB / DnSPSUB3 only: the place names of the warp list ("Usar" -> place popup,
+                                  SUBSCREEN_POPUP_SUB_STRINGS), in the popup font (latin-1 - 32, 0xC0.. - 0x60, "\n" = the
+                                  -3 line break, -1 ends one; tools/memcard_text.py encode). Every pointed copy of OLD
+                                  changes; the pool of pointed place strings around them is repacked, pointers rewritten
+  In "itemNames" a "\n" writes the -3 line break too.
+
   subscreen_text.py dump FILE.BIN      prints the strings
 """
 import struct, sys
@@ -23,7 +29,9 @@ def encode(text):
     out = []
     for c in text:
         o = ord(c)
-        if 32 <= o < 0x80:
+        if c == "\n":
+            out.append(-3)  # in-string line break
+        elif 32 <= o < 0x80:
             out.append(o + 140)
         elif 0xC0 <= o <= 0xFF:
             out.append(o + 74)
@@ -116,6 +124,76 @@ def apply_names(data, names):
         if len(out) > stop - start:
             raise SubscreenError("the item names need %d bytes, the pool has %d" % (len(out), stop - start))
         d[start:stop] = out + b"\0" * (stop - start - len(out))
+    for i, w in enumerate(words):
+        if w - base in moved:
+            struct.pack_into("<I", d, 4 * i, base + moved[w - base])
+    return bytes(d)
+
+
+def _place_at(d, o):
+    """Glyphs of the popup-font string at o (up to and with the -1), or None."""
+    g = []
+    while o + 2 * len(g) + 2 <= len(d) and len(g) < 80:
+        c = struct.unpack_from("<H", d, o + 2 * len(g))[0]
+        g.append(c)
+        if c == 0xFFFF:
+            return g if len(g) > 2 else None
+        if not (c < 0xA8 or c == 0xFFFD):
+            return None
+    return None
+
+
+def apply_places(data, names):
+    import memcard_text as MC
+    d = bytearray(data)
+    enc = {}
+    for o, n in names.items():
+        try:
+            enc[tuple(MC.encode(o))] = tuple(MC.encode(n))
+        except MC.MemcardError as ex:
+            raise SubscreenError(str(ex))
+    base = _base(bytes(d), 0)
+    nw = len(d) // 4
+    words = list(struct.unpack_from("<%dI" % nw, d))
+    strs = {}
+    for w in set(words):
+        o = w - base
+        if 0 <= o < len(d) and not o & 1:
+            g = _place_at(d, o)
+            if g:
+                strs[o] = tuple(g)
+    hits = [o for o, g in strs.items() if g in enc]
+    missing = set(enc) - {strs[o] for o in hits}
+    if missing:
+        raise SubscreenError("place name %r not found" % MC.decode(list(sorted(missing)[0])))
+    targets = sorted(strs)
+    runs = set()
+    for h in hits:
+        lo = hi = targets.index(h)
+        while lo > 0 and targets[lo - 1] + 2 * len(strs[targets[lo - 1]]) <= targets[lo] <= targets[lo - 1] + 2 * len(strs[targets[lo - 1]]) + 6:
+            lo -= 1
+        while hi + 1 < len(targets) and targets[hi] + 2 * len(strs[targets[hi]]) <= targets[hi + 1] <= targets[hi] + 2 * len(strs[targets[hi]]) + 6:
+            hi += 1
+        runs.add((lo, hi))
+    moved = {}
+    for lo, hi in sorted(runs):
+        pool = targets[lo:hi + 1]
+        start = pool[0]
+        stop = pool[-1] + 2 * len(strs[pool[-1]])
+        while stop + 2 <= len(d) and d[stop:stop + 2] == b"\xff\xff":
+            stop += 2
+        out, where = bytearray(), {}
+        for o in pool:
+            g = enc.get(strs[o], strs[o])
+            if g not in where:
+                while (start + len(out)) & 3:
+                    out += b"\xff\xff"
+                where[g] = start + len(out)
+                out += struct.pack("<%dH" % len(g), *g)
+            moved[o] = where[g]
+        if len(out) > stop - start:
+            raise SubscreenError("the place names need %d bytes, the pool has %d" % (len(out), stop - start))
+        d[start:stop] = out + b"\xff" * (stop - start - len(out))
     for i, w in enumerate(words):
         if w - base in moved:
             struct.pack_into("<I", d, 4 * i, base + moved[w - base])

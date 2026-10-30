@@ -537,11 +537,14 @@ class Project:
             mod = MC if re.search(r"D\dSPSUB2\.BIN$", path, re.I) else SS if re.search(r"D\dSPSUB3?\.BIN$", path, re.I) else MT
             spec = dict(spec)
             names = spec.pop("itemNames", None)
+            places = spec.pop("placeNames", None)
             try:
                 data = files[path] if path in files else self.src.read_any(path)
                 new = data if mod is SS else mod.apply(data, spec)
                 if names:
                     new = SS.apply_names(new, names)
+                if places:
+                    new = SS.apply_places(new, places)
             except (OSError, KeyError):
                 errors.append(tr("tc.nofilein", path))
                 continue
