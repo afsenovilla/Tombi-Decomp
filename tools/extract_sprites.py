@@ -32,7 +32,7 @@ Steps: the ISO9660 file system of the .bin is extracted to OUT_DIR/fs (tools/iso
   OUT_DIR/sound/movie_audio/*.wav                the XA ADPCM audio track of each of the 30 .STR movies (37.8 kHz stereo)
   OUT_DIR/video/NAME.avi, NAME.mp4               each movie (pure Python MDEC, tools/str.py); mp4 only if ffmpeg is in PATH
                                                  (all frames as PNG: python3 tools/str.py frames Tombi.bin NAME OUT_DIR)
-The retail disc is only read.  Windows users: dist/windows/tombi-assets.exe (built by .github/workflows/assets-exe.yml) does the same
+The retail disc is only read.  Windows users: tombi-assets.exe from the GitHub Releases (built by .github/workflows/assets-exe.yml) does the same
 with no Python:
   double-click it (window), or  tombi-assets.exe Tombi.bin OUT_DIR"""
 import os, sys

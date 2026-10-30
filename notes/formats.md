@@ -36,7 +36,7 @@ FFF2 pose n, FFF3 halt, FFF5 choice, FFF6 move dx dy, FFF7 color n, FFF8 voice t
 FFFD newline. Glyph tables are per file (only the glyphs that file uses, 71-148 for the S files); characters are not stored, the bitmaps are identified
 with `tools/wfm_charmap.json` (331 bitmap hashes incl. 81 labelled by hand from word context: accented letters of all languages, ° º « » ( ) ; + 2 3 at 24 px; the generator keeps them). The two 8 px `Z`-like bitmaps are a capital `Z` (`aef0ef9a0232`, "Zwerge") and a lowercase `z` (`b610f5095df5`, x-height, "azul", "Pez"; wfm.py had labelled it `Z`, so 16 px text typed with `Z` got a small raised z). There is no special snore glyph. The encoder only uses glyphs of the dialogue's height and borrows from another file before falling back to another height; a glyph of another height decodes as `{G:n}`. Box metrics measured on 5,802 boxed dialogues: width = widest line (sum of advances) + 16 (88 % exact, the rest has trailing spaces),
 height = 16 + 13 * lines, cursor starts at (8, 6), 128 glyphs per message slot (`MESSAGE_GLYPHS[][128]`). WFM files are plain files of the disc (no
-container): a changed size only needs `mkdisc.py --relayout`. `tools/text_editor.py` / `dist/windows/tombi-text.exe` build on this.
+container): a changed size only needs `mkdisc.py --relayout`. `tools/text_editor.py` / `tombi-text.exe` (release asset) build on this.
 
 
 ### Event title layout (CFNT999*.WFM, 24 px): spaces and line breaks are in the overlays (`tools/title_layout.py`)

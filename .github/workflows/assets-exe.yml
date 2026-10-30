@@ -1,7 +1,7 @@
 name: Assets extractor (Windows exe)
 
-# Builds tools/extract_sprites.py into a single Windows executable with PyInstaller and commits it to
-# dist/windows/tombi-assets.exe, so the sprite extractor can be used on a retail disc image without Python or the
+# Builds tools/extract_sprites.py into a single Windows executable with PyInstaller and publishes it as a
+# release asset (.github/scripts/publish-release.sh; was dist/windows/tombi-assets.exe), so the sprite extractor can be used on a retail disc image without Python or the
 # repository.  Runs when the extractor or the modules it bundles change.
 on:
   push:
@@ -51,20 +51,11 @@ jobs:
           mkdir -p dist/windows
           cp build/exe/tombi-assets.exe dist/windows/tombi-assets.exe
 
-      - name: Commit
+      - name: Publish release
         shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dist/windows/tombi-assets.exe
-          if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
-          git commit -m "dist: rebuild tombi-assets.exe (${GITHUB_SHA::7})"
-          for i in 1 2 3 4 5; do
-            git pull --no-rebase -q -X theirs origin master && git push origin HEAD:master && exit 0
-            sleep $((i * 10))
-          done
-          exit 1
-
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/publish-release.sh dist/windows/tombi-assets.exe
   linux:
     runs-on: ubuntu-24.04
     steps:
@@ -85,15 +76,8 @@ jobs:
           cp build/exe/tombi-assets dist/linux/tombi-assets
           chmod +x dist/linux/tombi-assets
 
-      - name: Commit
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f dist/linux/tombi-assets
-          if git diff --cached --quiet; then echo "exe unchanged"; exit 0; fi
-          git commit -m "dist: rebuild linux tombi-assets (${GITHUB_SHA::7})"
-          for i in 1 2 3 4 5; do
-            git pull --no-rebase -q -X theirs origin master && git push origin HEAD:master && exit 0
-            sleep $((i * 10))
-          done
-          exit 1
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/publish-release.sh dist/linux/tombi-assets

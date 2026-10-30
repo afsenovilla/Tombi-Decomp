@@ -43,11 +43,9 @@ include/labels.inc
 include/include_asm.h
 include/gte_macros.inc
 
-# Windows build of the asset extractor (committed by .github/workflows/assets-exe.yml)
-!dist/
-!dist/windows/
-!dist/windows/tombi-assets.exe
-!dist/windows/tombi-text.exe
-!dist/windows/tombi-gfx.exe
 gfx_capture.drw.gz*
 game_beta980203
+
+# built binaries are published as GitHub Releases (.github/scripts/publish-release.sh), not committed
+/dist/*
+!/dist/README.md

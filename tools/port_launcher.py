@@ -166,7 +166,7 @@ def game_binary():
     if os.name == "nt":         # tombi-pc.exe: the game (the CMake target is still called tombi2); older bundles: tombi2.exe
         p = os.path.join(bin_dir(), "tombi-pc.exe")
         return p if os.path.isfile(p) else os.path.join(bin_dir(), "tombi2.exe")
-    p = os.path.join(bin_dir(), "tombi-pc")     # the Linux bundle (dist/linux/tombi-port); the build tree: tombi2
+    p = os.path.join(bin_dir(), "tombi-pc")     # the Linux bundle (release asset tombi-port); the build tree: tombi2
     if not os.path.isfile(p):
         return os.path.join(bin_dir(), "tombi2")
     if not os.access(p, os.X_OK):               # (PyInstaller extraction may drop the exec bit)
