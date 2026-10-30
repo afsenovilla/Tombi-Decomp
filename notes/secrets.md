@@ -53,7 +53,36 @@ pointers to it). Layout record list = area-overlay table `[e]`.
 - The other cut-town events are titled in PAL already: 0x3E #89 "Tree of Knowledge Knows", 0x4F #98, 0x67 #100 "The Cute Witch", 0x69 #94 "I Need a Bomb".
 - Port candidates: 0x61 -> new string "The Clock Tower That Won't Move" (started by Stonetown npcSet0ESceneStep1, the stopped-clock talk); 0x63 -> "Where's the Material?!" (npcSet0FSceneStep2, the smith / iron gear item 0x3E); 0x62 "An Unbreakable Gear?"; 76 -> #90, 83 -> #126 (existing PAL strings). No version gives English text for 0x61/0x63.
 - Still 0xFF everywhere checked: 48, 66, 68-72, 75, 84, 91-93, 101, 106-110, 117, 122, 130, 131, 136, 137, 141-143, 147-149, 152, 154, 155, 158, 162, 163, 165, 192-199.
-- CI run 41058469474 (report.yml): beta 980203 table == PAL (confirmed on CI too); jpdemo SLPM-80165 and PrePre8: no table found by event_titles.py (PrePre8 draws titles from a TIM strip; the jpdemo titles are mostly イベント０xx placeholders); USA: GAME_FILES_URL_USA is empty, not checked. PrePre8's TIM title strip (docs/PREPRE8.md) adds 少年旅立ち and あれま大きな水たまり (= event 6).
+- CI run 41058469474 (report.yml): beta 980203 table == PAL (confirmed on CI too); jpdemo SLPM-80165 and PrePre8: no table found by event_titles.py (PrePre8 draws titles from a TIM strip; the jpdemo titles are mostly イベント０xx placeholders); USA SCUS-94236 (run 41059231331, secret now set): one table at exe 0x67C28, byte-identical to PAL (90/126 unreferenced); USA adds nothing. PrePre8's TIM title strip (docs/PREPRE8.md) adds 少年旅立ち and あれま大きな水たまり (= event 6).
+
+### Port: titles for the 0xFF events (with --cut-content; console untouched)
+`port_civ_title` (port2/shims/psyq.c, hook in port/fixes.txt spawnEventTitle) now also runs with --cut-content in every area:
+76 (0x4C) -> CFNT999 #90, 83 (0x53) -> #126, and 22 titles translated from JP (tools/port_event_titles.py ->
+port2/shims/port_event_titles.h: glyph indices of each CFNT999x font + word layout; other languages use the English text
+when their font has the letters, else no title). Checked with `--title 3000:ID` (EN 97/99/139/83/95, ES 97/99/74/83).
+The sub-screen event list is not changed. English / Spanish:
+  6 (0x06): "A Big Puddle?" / «¿Un gran charco?»
+  18 (0x12): "The Dwarves' Help" / «La ayuda de los Enanos»
+  45 (0x2D): "AP Slot Machine" / «Tragaperras de PA»
+  52 (0x34): "No Way Across..." / «Ya no se puede cruzar...»
+  59 (0x3B): "The Chief's Favor?" / «¿El encargo del jefe?»
+  60 (0x3C): "Masakari Language" / «Idioma Masakari»
+  61 (0x3D): "The Masakari Secret" / «El secreto Masakari»
+  67 (0x43): "Decipher? The Graffiti Rock" / «¿Descifrar? La roca garabateada»
+  74 (0x4A): "Catch the Electric Eel!" / «¡Atrapa la anguila eléctrica!»
+  89 (0x59): "The Green Fortune Teller" / «El adivino verde»
+  94 (0x5E): "Let's Get Along" / «Llevémonos bien»
+  95 (0x5F): "The Wood Village's Big Rock" / «La gran roca del pueblo de madera»
+  96 (0x60): "The Unfinished Bridge..." / «El puente sin terminar...»
+  97 (0x61): "The Stopped Clock Tower" / «La torre del reloj parada»
+  98 (0x62): "An Unbreakable Gear?" / «¿Un engranaje irrompible?»
+  99 (0x63): "Where's the Material!?" / «¡¿Dónde está el material?!»
+  100 (0x64): "The Iron Keyhole" / «La cerradura de hierro»
+  138 (0x8A): "Catch Me If You Can" / «Atrápame si puedes»
+  139 (0x8B): "The Three Sisters' Hide and Seek" / «El escondite de las tres hermanas»
+  140 (0x8C): "A Letter to the Three Sisters" / «Carta para las tres hermanas»
+  184 (0xB8): "Am I a Bad Kid?" / «¿Soy un niño malo?»
+  186 (0xBA): "The Masakari Village?" / «¿La aldea Masakari?»
 
 ## Not done
 - Exhaustive proof that no overlay has a button sequence (checked: MAIN0 pad readers; overlay pad code not audited one by one).

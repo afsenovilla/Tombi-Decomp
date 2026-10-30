@@ -164,6 +164,8 @@ void port_title_add(const char *s) {
    Iron Town scene npcSet0FSceneStep1) still has its title on the disc: CFNT999 text 90, which no event points to; only
    its link and its layout list were cut.  This rebuilds the link and a layout list (letters 20 px apart, a space 10 px,
    lines 28 px apart, centred, as tools/title_layout.py measures them) sized to the text actually drawn. */
+#include "port_event_titles.h"
+int port_civ_title_civ;                            /* set by the spawnEventTitle hook: in a rebuilt town */
 static signed char civ_title_recs[64 * 4 + 4];
 static const char *const civ_title90[9] = {        /* word lengths of text 90 per language (BFGIHSPWD), '/' = line break */
     "3 5/5", "3 5/10", "14/6", "8/10/4", "8/6 5", "10 2/4 5", "10 2/4 5", "6 1/12", "6 3/3 5 4" };
@@ -172,9 +174,20 @@ signed char *port_civ_title(int event_id, unsigned char **src, signed char *p) {
     unsigned char *base = *(unsigned char **)((unsigned char *)port_scratch + 0x39C);
     int idx = D_80080410[event_id], n = 0, k, nl = 0, ln[8], gaps[64], j;
     const char *lay = 0;
+    int li = port_lang >= 0 && port_lang < 9 ? port_lang : 0, civ;
     if (!base || idx != 0xFF) return p;               /* a real title: the engine's own list */
-    if (event_id == 0x4C) { idx = 90; if (port_lang >= 0 && port_lang < 9) lay = civ_title90[port_lang]; } else idx = 1;
-    { unsigned char *off = base + *(unsigned short *)(base + 8);
+    civ = port_civ_title_civ;
+    /* port-only titles (--cut-content / --civ-test): 0x4C -> text 90, 0x53 -> text 126 (both unreferenced on the disc),
+       the others translated from the Japanese per-area lists (tools/port_event_titles.py, notes/secrets.md) */
+    if (event_id == 0x4C) { idx = 90; lay = civ_title90[li]; }
+    else if (event_id == 0x53) { idx = 126; lay = li == 0 ? "3 5/5 3" : li == 5 ? "5/7" : 0; }
+    else {
+        for (k = 0; k < PORT_ET_N; k++) if (port_et_events[k] == event_id && port_et_tab[li][k].w) break;
+        if (k < PORT_ET_N) { *src = (unsigned char *)port_et_tab[li][k].w; lay = port_et_tab[li][k].lay; idx = -1; }
+        else if (!civ) return p;                      /* outside the rebuilt towns: the engine as it was */
+        else idx = 1;
+    }
+    if (idx >= 0) { unsigned char *off = base + *(unsigned short *)(base + 8);
       *src = off + *(unsigned short *)(off + idx * 2); }
     while (n < 64 && ((unsigned short *)*src)[n] != 0xFFFF) n++;
     if (!n) return 0;

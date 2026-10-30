@@ -487,8 +487,9 @@ src/spawnEventTitle.c | done = 0; | done = 0; { extern int port_civ_on(int, int)
 # The towns are top-down (section 0): the table to use is I0NFO2's D_80102F9C, a full per-event table (the same lists
 # as every X0NN copy; AREA08 s0 / AREA05 s0 read it too), loaded with the town's I0NFO2.  Its entries may point into the
 # --lang spill (outside RAM), so only NULL is refused.  Events with no title link (0xFF) get a rebuilt one
+# With --cut-content also everywhere: 0x53 -> text 126 and 22 titles translated from JP (tools/port_event_titles.py).
 # (port_civ_title in port2/shims/psyq.c: 0x4C = CFNT999 text 90 "The Black Water", others the dummy text sized right).
-src/spawnEventTitle.c | p = tbl[event_id]; | p = tbl[event_id]; { extern int port_civ_on(int, int); extern s8 *port_civ_title(int, u8 **, s8 *); if (port_civ_on(GAME.selectedArea, GAME.selectedSection) && !(p = port_civ_title(event_id, &src, p))) return; }
+src/spawnEventTitle.c | p = tbl[event_id]; | p = tbl[event_id]; { extern int port_civ_on(int, int); extern s8 *port_civ_title(int, u8 **, s8 *); extern int port_cut_content, port_civ_title_civ; port_civ_title_civ = port_civ_on(GAME.selectedArea, GAME.selectedSection); if ((port_civ_title_civ || port_cut_content) && !(p = port_civ_title(event_id, &src, p))) return; }
 #
 # Item 64 (Pipe / "Valvula") inventory icon: ITEM_ICON_CLUTS[64] = 1, the all-grey sub-screen row (retail PAL and JP
 # alike, so the grey wheel is the original's), while the pickup in AREA08 is the brown wooden wheel (SPR_DATA[3] frame 2,
