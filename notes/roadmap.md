@@ -8,7 +8,7 @@ after each JP batch.
 ## P1 — quick wins (minutes to an hour)
 - [x] Port: guard `playerCheckPerchLanding+0xae` null read (GRABBED_OBJECT == 1) — 71568b9.
 - [x] Civ towns: ES title 74 accent renders correctly (headless check, frames 1545-1650).
-- [ ] Civ towns: check the green teller's head above the room view.
+- [x] Civ towns: green teller's hat pokes ~8 px above the H3 room view (he stands on its top edge); cosmetic, left as is.
 - [x] Port: --civ-town with --civ-maps lacking the area segfaulted in I0NFO2_topdownBuildMapStrip+0x1d5; fall back to the stock town or refuse with a message.
 - [ ] Civ towns: look at the unchecked teller sheets (EN low/300k, ES 300k).
 - [ ] Civ towns: test resident 2 (AREA11, dlg 1) and AREA17 dlg 4 in game (only the safety net covers them).
