@@ -304,8 +304,17 @@ static const struct port_civ_part port_civ_woman[27] = {    /* AREA16 sub 0 (Fem
     {33,48,28,43,0}, {67,48,36,45,0}, {107,48,36,44,0}, {147,48,32,44,0}, {67,48,36,45,1}, {107,48,36,44,1},
     {147,48,32,44,1}, {186,49,37,44,0}, {2,96,37,45,0}, {65,96,20,47,0}, {234,96,18,46,0}, {91,97,39,45,0},
     {138,96,41,46,0}};
+/* AREA16 sub 1 (the boy), frames 60..86: walk front = figures 1-2, walk side = 3-6 (frame order given by the project
+   owner from the page); no back, idle or talk drawings on the page, so idle/talk reuse 1 (front) and 3 (side) */
+static const struct port_civ_part port_civ_boy[27] = {
+    {113,148,26,35,0}, {176,146,20,37,0}, {113,148,26,35,0}, {113,148,26,35,0}, {145,148,24,35,0}, {113,148,26,35,0}, {145,148,24,35,0}, {113,148,26,35,0}, {145,148,24,35,0}, {176,146,20,37,0}, {226,147,21,37,0}, {209,185,21,36,0}, {232,186,23,36,0}, {176,146,20,37,0}, {226,147,21,37,0}, {113,148,26,35,0}, {145,148,24,35,0}, {113,148,26,35,0}, {145,148,24,35,0}, {113,148,26,35,0}, {145,148,24,35,0}, {113,148,26,35,0}, {113,148,26,35,0}, {176,146,20,37,0}, {176,146,20,37,0}, {113,148,26,35,0}, {113,148,26,35,0}};
+/* AREA17 sub 0 (Iron Town resident), frames 0..29: walk down 1-6, up 7-12, side 13-18, idle front 20, wave front
+   21-23, side 24-26, back 27-29 (figure numbers of the A08000 sheet, order given by the project owner) */
+static const struct port_civ_part port_civ_iron[30] = {
+    {145,2,21,46,0}, {49,51,26,45,0}, {33,97,22,47,0}, {145,2,21,46,0}, {169,3,21,44,0}, {193,4,22,44,0}, {217,2,21,46,0}, {1,51,20,44,0}, {25,52,21,44,0}, {49,51,26,45,0}, {81,51,24,45,0}, {114,51,24,45,0}, {145,51,25,45,0}, {177,51,24,44,0}, {210,51,24,45,0}, {1,4,20,43,0}, {25,3,22,45,0}, {49,3,22,45,0}, {73,4,20,43,0}, {97,3,22,45,0}, {121,3,22,45,0}, {5,148,26,44,0}, {36,149,27,43,0}, {71,150,24,42,0}, {154,98,24,46,0}, {185,99,22,45,0}, {211,98,24,46,0}, {59,99,28,45,0}, {92,99,27,45,0}, {126,99,25,45,0}};
 static const struct { unsigned char area, sub, first, n, row; const struct port_civ_part *t; } port_civ_anim[] = {
-    {11, 0, 0, 30, 4, port_civ_worker}, {16, 0, 30, 27, 21, port_civ_woman}};
+    {11, 0, 0, 30, 4, port_civ_worker}, {16, 0, 30, 27, 21, port_civ_woman}, {16, 1, 60, 27, 37, port_civ_boy},
+    {17, 0, 0, 30, 1, port_civ_iron}};
 static void port_civ_put_part(unsigned char *e, const struct port_civ_part *q, unsigned clut) {
     int u0 = q->flip ? q->u + q->w - 1 : q->u, u1 = q->flip ? q->u - 1 : q->u + q->w;
     e[0] = u0; e[1] = q->v; e[2] = clut & 0xFF; e[3] = clut >> 8;
@@ -327,7 +336,7 @@ int port_civ_fig(int area, int sub) {
     unsigned clut, off = 128 * 4;
     unsigned char *p;
     for (i = 0; i < 4; i++) if (port_civ_figs[i].area == area && port_civ_figs[i].sub == sub) break;
-    for (a = 0; a < 2; a++) if (port_civ_anim[a].area == area && port_civ_anim[a].sub == sub) t = port_civ_anim[a].t, k = a;
+    for (a = 0; a < 4; a++) if (port_civ_anim[a].area == area && port_civ_anim[a].sub == sub) t = port_civ_anim[a].t, k = a;
     if (i == 4 && !t) return 0;
     p = port_civ_fig_buf[i == 4 ? 4 : i];
     if (i < 4) { q.u = port_civ_figs[i].u; q.v = port_civ_figs[i].v; q.w = port_civ_figs[i].w; q.h = port_civ_figs[i].h; }
