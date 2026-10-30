@@ -22,8 +22,10 @@ Order by expected yield per effort: areas whose PAL twin is fully matched and th
       Partial: X05 16/22, X13 7/11, X02 27/41 (stubs, updateMightyFishFood); what is left in X08/X19/X05 is data mis-split as functions, X13 80115FD8 done, 801162DC (2196 B) and X02 big handlers open.
 - [ ] Cut towns X16, X17, X18, X11 (37 %): X16/X17/X18 small JP-only functions done (stubs, `p[4]=3` setters, x16 80116128, x18 80116098).
       Open: x16 80115A80 (93 %), x17 801170F4 (90 %), x18 8011903C (95 %): register/scheduling stalls. x18 80118854 (2024 B switch) untouched.
+      X11 (26/33 now): 801170E0..80117D08 (5 talk twins), 80116F28, 80117644, 801167A8, 80116D24, 80115FC0 and stubs done (talk template: PLAYER fields + volatile wbc read + `volatile short D_800A7C2A`).
+      Open X11: 80117AFC (block order of the shared showMessage call, goto/msg var stalls), 80116348 (1120 B, PAL goGoCarMechanicTalk differs a lot), 801156A0, 801169A8, 80117260, 801188AC; data mis-split: 80115178 (jump tables).
       Data mis-split as functions: x16 80118004, x17 80115178/80118314, x18 80115178/801194AC. X18 also uses the teller lines.
-- [ ] Jungle X10 (62 %): finish; read every function with no PAL counterpart (notes/jp_retail.md).
+- [ ] Jungle X10 (62 %; 10 stubs/setters done 143/178, 80119D9C tried twice: reg alloc a2/a3 + hoist, open; 80115178 is jump tables): finish; read every function with no PAL counterpart (notes/jp_retail.md).
 - [ ] Mid areas X01, X03, X04, X06, X09, X14.
 - [ ] X00 shared object code (47 %), then the engine SLPS_011.44 (54 %): kana/kanji text system, file loading.
 - [x] Ghidra analysis stages 1-2 (notes/jp_retail.md, 2e5e0da, 70fbba1): names ported; no-counterpart lists are an older build of the area handlers, not relocated code.
