@@ -951,33 +951,6 @@ Sizes: AREA11 is 736 x 672 (92 x 84 cells), AREA16 is 544 x 608 (68 x 76), AREA1
   - Every resident and patrol box is forced onto floor, and each carved cell is reported.
   - No diagonal shapes are used.
 
-### FMV residents as top-down sprites (`tools/civ_fmv_sprites.py`, RECONSTRUCTION)
-
-The three BUNMEI.STR residents with matched palette strips have no surviving drawing on the Iron Town / Stonetown pages.
-`python3 tools/civ_fmv_sprites.py --out DIR` draws them from the FMV itself, from YOUR disc:
-1. Still: the camera pans at a constant 8 px/frame over a resident who does not move, so each frame of the range is
-   aligned to a reference frame (SSD search of +-3 px around the predicted offset, bad matches dropped) and the
-   per-pixel median is taken at 1 FMV px = 1 picture px, the towns' scale. The figures are already 33-44 px tall,
-   like the A07600/A08000 residents, so nothing is rescaled.
-2. Sprite: drawn pixel by pixel FROM that still, in the resident's real 16-colour row (index 0 transparent): same
-   silhouette, pose, proportions, clothes and hair, with a 1-px dark outline, eyes and flat shading bands. The index
-   grids are hand-authored data in `tools/civ_fmv_sprites.json` (RECONSTRUCTION). No pixels are taken from other
-   sprites. Not original data.
-
-| Resident | FMV frames (median) | Real row | Sprite |
-|---|---|---|---|
-| red shirt, curly orange hair, pale green shorts, front | 81-90, ref 85 | AREA16/CLUT07 row 54 (= AREA17/CLUT03 row 49) | 22x44 |
-| purple dress, orange hair, red shoes, side, facing left | 62-69, ref 64 | row 38 (= AREA17/CLUT03 row 33) | 16x39 |
-| bald man, load on his back over the shoulders, front | 199-219, ref 207 | row 255 of every area CLUT (VRAM (368, 495)) | 32x33 |
-
-The "row 15" given above for the bald man is row 255 (the last row, slot 15 of VRAM line 495) of every CLUT file.
-Limits: only the one standing view the FMV shows is drawn (no walk or talk frames). The purple resident is cut by the
-left screen edge in every frame, so only her back half (back of the hair, dress, shoes) is visible; her face, chest
-and front shoe are continued by hand. The bald man's load is only seen as the wide grey shape behind his shoulders,
-so its shape is a guess. The FMV is blurred by MDEC, so faces are reinterpreted. Output (sheets: FMV still 4x |
-sprite 4x | sprite at 1x on the AREA16 picture) contains disc art and is not committed. The port does not use them
-yet: it would need a hook that uploads the 4 bpp texels to a free VRAM area (for example x 512).
-
 ### House interiors and community layout (v2, our guesses)
 
 **Layout source: the community assemblies.** We used community images 129-132 (credited here as the layout source)

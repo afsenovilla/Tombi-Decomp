@@ -961,33 +961,6 @@ La salida va a `build/civ_rebuild/AREAnn/` (`AREAnn_nofmv/` sin la capa del FMV)
   - Las salidas del código quedan abiertas.
   - Cada vecino y cada recorrido quedan sobre suelo, y se informa de cada celda abierta para ello.
 
-### Residentes del FMV como sprites cenitales (`tools/civ_fmv_sprites.py`, RECONSTRUCCIÓN)
-
-Los tres residentes de BUNMEI.STR con tira de paleta identificada no tienen dibujo en las páginas que sobreviven.
-`python3 tools/civ_fmv_sprites.py --out DIR` los dibuja a partir del propio FMV, desde TU disco:
-1. Imagen fija: la cámara se desplaza 8 px/fotograma sobre un residente quieto, así que cada fotograma del tramo se
-   alinea con uno de referencia (búsqueda SSD de +-3 px alrededor del desplazamiento previsto, se descartan los malos)
-   y se toma la mediana por píxel a 1 px de FMV = 1 px de imagen, la escala de los pueblos. Las figuras ya miden
-   33-44 px, como los residentes de A07600/A08000, así que no se reescala nada.
-2. Sprite: dibujado píxel a píxel A PARTIR de esa imagen, en la fila real de 16 colores del residente (índice 0
-   transparente): misma silueta, pose, proporciones, ropa y pelo, con contorno oscuro de 1 px, ojos y bandas de
-   sombreado limpias. Las rejillas de índices son datos dibujados a mano en `tools/civ_fmv_sprites.json`
-   (RECONSTRUCCIÓN). No se toman píxeles de otros sprites. No son datos originales.
-
-| Residente | Fotogramas FMV (mediana) | Fila real | Sprite |
-|---|---|---|---|
-| camisa roja, pelo rizado naranja, pantalón corto verde claro, de frente | 81-90, ref. 85 | AREA16/CLUT07 fila 54 (= AREA17/CLUT03 fila 49) | 22x44 |
-| vestido morado, pelo naranja, zapatos rojos, de lado mirando a la izquierda | 62-69, ref. 64 | fila 38 (= AREA17/CLUT03 fila 33) | 16x39 |
-| hombre calvo, carga a la espalda asomando sobre los hombros, de frente | 199-219, ref. 207 | fila 255 de todos los CLUT (VRAM (368, 495)) | 32x33 |
-
-La "fila 15" indicada arriba para el calvo es la fila 255 (la última, hueco 15 de la línea 495 de VRAM) de todos los CLUT.
-Límites: sólo se dibuja la vista de pie que muestra el FMV (sin andar ni hablar). La del vestido morado está cortada
-por el borde izquierdo en todos los fotogramas: sólo se ve su mitad trasera (pelo, vestido, zapatos); cara, pecho y
-zapato delantero se continúan a mano. La carga del calvo sólo se ve como la forma gris ancha tras sus hombros, así
-que su forma es una suposición. El FMV está emborronado por MDEC, así que las caras son reinterpretadas. La salida
-(láminas: imagen del FMV 4x | sprite 4x | sprite 1x sobre la imagen de AREA16) contiene arte del disco y no se sube.
-El port aún no los usa: haría falta un gancho que suba los téxeles 4 bpp a una zona libre de VRAM (p. ej. x 512).
-
 ### Interiores de las casas y layout de la comunidad (v2, estimaciones nuestras)
 
 **Fuente del layout: los montajes de la comunidad.** Usamos las imágenes 129-132 de la comunidad (que se citan aquí
