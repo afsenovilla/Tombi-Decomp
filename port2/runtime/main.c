@@ -240,6 +240,28 @@ static void open_game_data(const char *argv0) {
     if (port_cd_open(port_disc_path) < 0)
         port_printf("[port2] warning: no data/ folder (tools/extract_data.py) and no disc image at %s: CD reads will fail\n", port_disc_path);
 }
+/* --text-patch FILE (repeatable) / --patch-dir DIR: text patches in memory (shims/tpatch.c, docs/PORT.md "Standalone
+   (no launcher) mode").  As the PC launcher does: with --cut-content in English and no other text patch, the bundled
+   en_cut_content.tpatch (English text of the cut lines) from --patch-dir, else patches/ in the cwd or next to the exe. */
+static const char *port_text_patches[8]; static int port_text_patch_n;
+static const char *port_patch_dir;
+extern int port_cut_content, port_lang;
+int port_tpatch_load(const char *path);
+static void open_text_patches(const char *argv0) {
+    for (int i = 0; i < port_text_patch_n; i++) port_tpatch_load(port_text_patches[i]);
+    if (port_text_patch_n || !port_cut_content || port_lang) return;
+    char buf[1200]; FILE *f;
+    int n = (int)strlen(argv0);
+    while (n > 0 && argv0[n - 1] != '/' && argv0[n - 1] != '\\') n--;
+    const char *dirs[3] = { port_patch_dir, "patches", 0 };
+    static char exe_dir[1100];
+    if (n > 0 && n < 1000) { memcpy(exe_dir, argv0, n); strcpy(exe_dir + n, "patches"); dirs[2] = exe_dir; }
+    for (int i = 0; i < 3; i++) {
+        if (!dirs[i]) continue;
+        snprintf(buf, sizeof buf, "%s/en_cut_content.tpatch", dirs[i]);
+        if ((f = fopen(buf, "rb"))) { fclose(f); port_tpatch_load(buf); return; }
+    }
+}
 /* --widescreen auto / --aspect auto: the pad that fills the real display. The port shows 320 columns as 4:3, so a
    W x H screen wants 320 * (W/H) / (4/3) columns: pad = (that - 320) / 2, rounded (16:9 -> 53, 21:9 -> 120,
    32:9 -> 267), 0 below 4:3 (letterboxed), at most 267 (the widest mode tested; wvram allows up to 352) */
@@ -266,7 +288,7 @@ static int port_ws_resolve(void) {
 
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
-                "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
+                "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--text-patch FILE.tpatch|.tombipatch.json]... [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--debug-menu] [--trace-cd] [--save-dir DIR] [-v]\n"
@@ -829,6 +851,8 @@ int main(int argc, char **argv) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : 0;
         if (!strcmp(a, "--disc") && v) port_disc_path = argv[++i];
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
+        else if (!strcmp(a, "--text-patch") && v) { if (port_text_patch_n < 8) port_text_patches[port_text_patch_n++] = argv[i + 1]; i++; }
+        else if (!strcmp(a, "--patch-dir") && v) port_patch_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
         else if (!strcmp(a, "--debug-menu")) { extern int port_debug_menu; port_debug_menu = 1; }   /* runtime/debugmenu.c */
@@ -954,6 +978,7 @@ int main(int argc, char **argv) {
     if (port_window) { port_window_start(); port_realtime = 1; }
     port_gpu_start();
     open_game_data(argv[0]);
+    open_text_patches(argv[0]);
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
     SPAD16(0x3D8) = 1;
     SPAD16(0x3DA) = 7;

@@ -798,7 +798,24 @@ int port_cd_open(const char *path) {
     else if (port_verbose || port_trace_cd) port_printf("[port] disc self-check: PVD ok, volume \"%.32s\"\n", sec + 40);
     return 0;
 }
+int port_tpatch_sector(int lba, unsigned char *d, int bytes);              /* shims/tpatch.c (--text-patch) */
+unsigned char *port_tpatch_named(const char *path, unsigned *size);
+extern int port_tpatch_count;
+static int cd_read_sectors_base(int lba, int count, void *dst, int bytes);
 int port_cd_read_sectors(int lba, int count, void *dst, int bytes) {
+    if (!port_tpatch_count) return cd_read_sectors_base(lba, count, dst, bytes);
+    /* text patches in memory: their sectors from the rebuilt files, runs of the others from the disc / data */
+    u8 *d = dst;
+    for (int i = 0; i < count;) {
+        if (port_tpatch_sector(lba + i, d + (size_t)i * bytes, bytes)) { i++; continue; }
+        int j = i + 1;
+        while (j < count && !port_tpatch_sector(lba + j, d + (size_t)j * bytes, bytes)) j++;
+        if (cd_read_sectors_base(lba + i, j - i, d + (size_t)i * bytes, bytes)) return -1;
+        i = j;
+    }
+    return 0;
+}
+static int cd_read_sectors_base(int lba, int count, void *dst, int bytes) {
     u8 *d = dst;
     if (cd_data) {
         int holes = 0;
@@ -855,6 +872,7 @@ static int cd_dir_find(int lba, int size, const char *name, int *elba, int *esiz
 }
 unsigned char *port_cd_read_named(const char *path, unsigned *size) {
     *size = 0;
+    { unsigned char *t = port_tpatch_named(path, size); if (t) return t; }
     if (cd_data) {
         FILE *f = fopen(port_data_fullpath(path), "rb");
         if (!f) return 0;

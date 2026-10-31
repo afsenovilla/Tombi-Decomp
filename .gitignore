@@ -50,3 +50,4 @@ game_beta980203
 /dist/*
 !/dist/README.md
 port2/android/app/src/main/assets/fonts/
+port2/android/app/src/main/assets/patches/

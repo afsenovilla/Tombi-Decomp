@@ -2407,3 +2407,39 @@ audio buffer are linear-memory pointers; ~1 day); the GL renderer (gpu_gl.c's ca
 backend reading VRAM from linear memory; 1-2 days); arm64 Android (bionic has no ucontext: a 20-line AArch64
 switch in host.c, plus the SDL shim above; then an `arm64-v8a` Gradle/CMake variant compiling `build/wasm/w2c` +
 host; ~1-2 days); CMake integration instead of `build.py`; the save-state and watchdog paths (untested).
+
+## Standalone (no launcher) mode
+
+Goal: `tombi2` (PC and Android) runs from the player's disc image alone, with no `data/` folder and nothing prepared on
+a PC. Everything the PC launcher (`tools/port_launcher.py`, `tools/port_mods.py`) does before Play, and where it lives now:
+
+| Launcher step (Python) | Writes / passes | Native (C) |
+|---|---|---|
+| disc check: MAIN0.EXE extracted next to `tombi-port.json`, sha1 vs SCES-01331 | `MAIN0.EXE`, settings | Android launcher hashes MAIN0 itself; `tombi2` logs the MAIN0 sha1 of the image |
+| extraction (`extract_data.py`) | `data/` (every file, `_disc/*.raw`, `manifest.txt`) | not needed: `--disc Tombi.bin\|.cue\|.iso` reads everything through the CD layer (sector reads by LBA and reads by name, `EXE/MAINn.EXE`; raw 2352 and cooked 2048 images; `.cue` -> its `.bin`) |
+| `.chd` images (launcher decodes them in Python, `extract_data.chd`) | `data/` | **not native yet**: would need libchdr + zlib/lzma/flac/zstd; convert with `chdman extractcd` meanwhile |
+| text patch "Traducción mejorada" (`data_patch.apply` = `text_patch` encoder + MAINn.EXE file tables, grown WFMs moved past the end of the disc) — Spanish only | patched files in `data/`, `data/.orig/` backups, `manifest.txt` | `--text-patch patches/es_mejorada.tombipatch.json` (or `.tpatch`): applied in memory at load time (`port2/shims/tpatch.c`) |
+| English cut-content text (`en_cut_content.tombipatch.json`) with `--cut-content --lang 0` and no other text patch | same | automatic: `--cut-content` in English loads `en_cut_content.tpatch` from `--patch-dir DIR` (else `patches/` in the cwd or next to the exe); or pass it with `--text-patch` |
+| Spanish graphic redraws (`gfx_es`, patch key `portGfx`) | `data/port_gfx_es.tbtx` + `--patch-tex` (lang 5 only) | **not native yet**: the redraws are pixels derived from the disc's own sprites (PIL drawing); shipping them would ship game-derived art, porting the generator to C is open work. Without it the original English sprites (NOW LOADING, TRY AGAIN, LOAD/SAVE) stay |
+| rebuilt cut towns (`civ_rebuild.py`, `civ_test_data.py`) | `civ_cache/maps`, `civ_cache/wfm`, `--civ-maps/--civ-wfm` | **not native yet** (only for the "Cut content" town buttons / `--civ-route`); same approach as `.tpatch` would work for the WFM banks, the maps need the generator in C |
+| button-prompt glyphs (`prompt_glyphs.py`, mod) | `prompts-*.tbtx` + `--patch-tex` | not native (optional mod) |
+| mods (`port_mods.py`) | flags only: `--skip-intro`, `--hz`, `--poke`, `--poke-every`, `--pad-script`, `--title-debug`, `--debug-menu`, `--civ-*` | already flags: any launcher can pass them |
+| window options | `--window --scale --renderer --aspect --internal-res --fps60 --lang --save-dir --texture-pack --fullscreen --show-fps` | already flags |
+
+**Text patches natively.** The JSON holds only our text; turning it into game files needs the WFM encoder and the glyph
+pool of the disc's fonts. `tools/tpatch_build.py DATA_DIR X.tombipatch.json -o X.tpatch` runs the exact Python pipeline
+(`data_patch.apply`) once on a developer's pristine `data/` and stores each rebuilt file as COPY runs of the disc's own
+files plus LITERAL bytes (our encoded text: word indices, headers, tables); `--max-literal` caps literals per file. The
+C side reads the sources from the player's disc, checks every source's and every result's sha1 (a different disc gets
+no patch, never half of one) and serves the rebuilt files for their LBA ranges (incl. the post-disc LBA of grown files
+that the patched MAINn.EXE points at) and for reads by name. `--text-patch X.tombipatch.json` uses `X.tpatch` next to
+it and refuses it when it was compiled from another version of the JSON: **rebuild the `.tpatch` whenever the JSON
+changes** (a user's own JSON patch must be compiled with `tpatch_build.py` too). Byte-exactness:
+`tools/tpatch_check.py DISC X.tombipatch.json [--patched-data D]` dumps what tombi2 rebuilt (`TOMBI_TPATCH_DUMP=DIR`)
+and compares it with `text_patch.py --files-out` and with `data_patch`'s patched `data/` (es_mejorada: 113/113
+identical; en_cut_content: 4/4). Frames of the opening dialogue, `--disc` + `--text-patch` vs the launcher's patched
+`data/`, are identical.
+
+**Android.** CI copies `patches/*.tombipatch.json` and `*.tpatch` into `assets/patches/`; the Selva launcher extracts
+them to `files/patches/` and passes `--disc`, `--text-patch files/patches/es_mejorada.tombipatch.json` (Spanish +
+toggle), `--patch-dir files/patches` (English + cut content), `--lang N`.

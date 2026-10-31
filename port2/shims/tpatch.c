@@ -1,0 +1,176 @@
+/* --text-patch FILE (docs/PORT.md "Standalone (no launcher) mode"): text patches applied in memory, from the disc image
+   (or a pristine data/), with no launcher and no Python: what tools/data_patch.py writes into data/ for the PC launcher.
+   FILE is a .tpatch (tools/tpatch_build.py: the patched files as COPY runs of the disc's own files + LITERAL bytes of our
+   encoded text) or the *.tombipatch.json it was compiled from (the .tpatch next to it is used; its recorded sha1 of the
+   JSON must match, else the patch is refused as stale).  Each rebuilt file is checked against its sha1 and served for the
+   LBA ranges it occupies (its own place, plus the LBA past the end of the disc a grown file moved to, which the patched
+   MAINn.EXE table points at) and for reads by name (port_cd_read_named).  Sources and results are verified by sha1: a
+   different disc gets no patch at all (logged), never half of one. */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "port_runtime.h"
+
+extern unsigned char *port_cd_read_named(const char *path, unsigned *size);
+
+/* ---- sha1 (FIPS 180-1), small and portable */
+typedef struct { unsigned h[5]; unsigned long long n; unsigned char b[64]; } Sha1;
+static unsigned rol(unsigned x, int k) { return x << k | x >> (32 - k); }
+static void sha1_block(Sha1 *s, const unsigned char *p) {
+    unsigned w[80], a, b, c, d, e, t; int i;
+    for (i = 0; i < 16; i++) w[i] = (unsigned)p[4 * i] << 24 | p[4 * i + 1] << 16 | p[4 * i + 2] << 8 | p[4 * i + 3];
+    for (; i < 80; i++) w[i] = rol(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
+    a = s->h[0]; b = s->h[1]; c = s->h[2]; d = s->h[3]; e = s->h[4];
+    for (i = 0; i < 80; i++) {
+        unsigned f, k;
+        if (i < 20) { f = (b & c) | (~b & d); k = 0x5A827999; } else if (i < 40) { f = b ^ c ^ d; k = 0x6ED9EBA1; }
+        else if (i < 60) { f = (b & c) | (b & d) | (c & d); k = 0x8F1BBCDC; } else { f = b ^ c ^ d; k = 0xCA62C1D6; }
+        t = rol(a, 5) + f + e + k + w[i]; e = d; d = c; c = rol(b, 30); b = a; a = t;
+    }
+    s->h[0] += a; s->h[1] += b; s->h[2] += c; s->h[3] += d; s->h[4] += e;
+}
+static void sha1(const unsigned char *p, unsigned n, unsigned char out[20]) {
+    Sha1 s = { { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }, 0, { 0 } };
+    unsigned i, r = n;
+    while (r >= 64) { sha1_block(&s, p); p += 64; r -= 64; }
+    unsigned char last[128] = { 0 };
+    memcpy(last, p, r); last[r] = 0x80;
+    unsigned tot = r + 1 + 8 <= 64 ? 64 : 128;
+    unsigned long long bits = (unsigned long long)n * 8;
+    for (i = 0; i < 8; i++) last[tot - 1 - i] = (unsigned char)(bits >> (8 * i));
+    sha1_block(&s, last); if (tot == 128) sha1_block(&s, last + 64);
+    for (i = 0; i < 20; i++) out[i] = (unsigned char)(s.h[i / 4] >> (24 - 8 * (i % 4)));
+}
+static void hex(const unsigned char *d, char *o) { static const char *x = "0123456789abcdef"; for (int i = 0; i < 20; i++) { o[2*i] = x[d[i] >> 4]; o[2*i+1] = x[d[i] & 15]; } o[40] = 0; }
+
+/* ---- the installed overlay */
+typedef struct { char path[64]; unsigned char *data; unsigned size; int nr; unsigned lba[4], sec[4]; } TpFile;
+static TpFile tp_files[512];
+static int tp_nfiles, tp_busy;      /* tp_busy: reading the sources (the original files, not the overlay) */
+int port_tpatch_count;              /* files served from text patches */
+
+static unsigned char *slurp(const char *path, long *n) {
+    FILE *f = fopen(path, "rb"); unsigned char *d;
+    if (!f) return 0;
+    fseek(f, 0, SEEK_END); *n = ftell(f); fseek(f, 0, SEEK_SET);
+    d = malloc(*n > 0 ? (size_t)*n : 1);
+    if (d && (long)fread(d, 1, (size_t)*n, f) != *n) { free(d); d = 0; }
+    fclose(f); return d;
+}
+static unsigned u32(const unsigned char *p) { return p[0] | p[1] << 8 | p[2] << 16 | (unsigned)p[3] << 24; }
+static unsigned u16(const unsigned char *p) { return p[0] | p[1] << 8; }
+
+/* returns the number of files installed, -1 on error (nothing installed) */
+int port_tpatch_load(const char *arg) {
+    char path[1200], jsha[48] = ""; long n = 0; unsigned char *b, *json;
+    size_t L = strlen(arg);
+    const char *suf = ".tombipatch.json";
+    snprintf(path, sizeof path, "%s", arg);
+    if (L > strlen(suf) && !strcmp(arg + L - strlen(suf), suf)) {      /* the JSON the launcher knows: its compiled twin */
+        long jn; unsigned char d[20];
+        if ((json = slurp(arg, &jn))) { sha1(json, (unsigned)jn, d); hex(d, jsha); free(json); }
+        else { port_printf("[tpatch] cannot read %s\n", arg); return -1; }
+        snprintf(path + (L - strlen(suf)), sizeof path - (L - strlen(suf)), ".tpatch");
+    }
+    if (!(b = slurp(path, &n)) || n < 58 || memcmp(b, "TPCH", 4) || u32(b + 4) != 1) {
+        port_printf("[tpatch] %s: %s\n", path, b ? "not a version 1 .tpatch (tools/tpatch_build.py)" : "cannot open (compile the JSON with tools/tpatch_build.py)");
+        free(b); return -1;
+    }
+    unsigned ns = u32(b + 8), ne = u32(b + 12), p = 16 + 40, i, k;
+    if (jsha[0] && memcmp(b + 16, jsha, 40)) {
+        port_printf("[tpatch] %s was compiled from another version of %s (sha1 %.12s, file %.12s): rebuild it with tools/tpatch_build.py\n", path, arg, (char *)b + 16, jsha);
+        free(b); return -1;
+    }
+    unsigned tl = u16(b + p); p += 2;
+    port_printf("[tpatch] %s: \"%.*s\", %u files from %u disc files\n", path, (int)tl, (char *)b + p, ne, ns);
+    p += tl;
+    unsigned char **src = calloc(ns ? ns : 1, sizeof *src); unsigned *ssz = calloc(ns ? ns : 1, sizeof *ssz);
+    int ok = 1, base = tp_nfiles;
+    tp_busy = 1;
+    for (i = 0; i < ns && ok; i++) {
+        unsigned pl = u16(b + p); char name[256]; unsigned char d[20];
+        snprintf(name, sizeof name, "%.*s", (int)pl, (char *)b + p + 2); p += 2 + pl;
+        unsigned want = u32(b + p); p += 4;
+        src[i] = port_cd_read_named(name, &ssz[i]);
+        if (!src[i] || ssz[i] != want) { port_printf("[tpatch] source %s: %s\n", name, src[i] ? "size differs (not the PAL disc SCES-01331?)" : "not on the disc"); ok = 0; }
+        else { sha1(src[i], ssz[i], d); if (memcmp(d, b + p, 20)) { port_printf("[tpatch] source %s: sha1 differs (not the PAL disc SCES-01331, or already patched)\n", name); ok = 0; } }
+        p += 20;
+    }
+    tp_busy = 0;
+    for (i = 0; i < ne && ok; i++) {
+        if (tp_nfiles >= 512) { ok = 0; break; }
+        TpFile *f = &tp_files[tp_nfiles];
+        unsigned pl = u16(b + p); unsigned char d[20];
+        snprintf(f->path, sizeof f->path, "%.*s", (int)pl, (char *)b + p + 2); p += 2 + pl;
+        f->size = u32(b + p); p += 4;
+        const unsigned char *want = b + p; p += 20;
+        f->nr = b[p++];
+        for (k = 0; k < (unsigned)f->nr; k++) { if (k < 4) { f->lba[k] = u32(b + p); f->sec[k] = u32(b + p + 4); } p += 8; }
+        if (f->nr > 4) f->nr = 4;
+        unsigned nops = u32(b + p), o = 0; p += 4;
+        f->data = malloc(f->size + 4);
+        for (k = 0; k < nops && ok; k++) {
+            if (b[p] == 0) {
+                unsigned s = u16(b + p + 1), off = u32(b + p + 3), len = u32(b + p + 7); p += 11;
+                if (s >= ns || off + len > ssz[s] || o + len > f->size) ok = 0; else { memcpy(f->data + o, src[s] + off, len); o += len; }
+            } else {
+                unsigned len = u32(b + p + 1); p += 5;
+                if (o + len > f->size || p + len > (unsigned)n) ok = 0; else { memcpy(f->data + o, b + p, len); o += len; p += len; }
+            }
+        }
+        if (ok && o == f->size) { sha1(f->data, f->size, d); if (memcmp(d, want, 20)) ok = 0; }
+        else ok = 0;
+        if (!ok) { port_printf("[tpatch] %s: rebuilt file does not match its sha1 (corrupt .tpatch?)\n", f->path); free(f->data); break; }
+        tp_nfiles++;
+    }
+    for (i = 0; i < ns; i++) free(src[i]);
+    free(src); free(ssz); free(b);
+    if (!ok) {
+        while (tp_nfiles > base) free(tp_files[--tp_nfiles].data);
+        port_printf("[tpatch] %s NOT applied: the game runs with the disc's own text\n", path);
+        return -1;
+    }
+    port_tpatch_count = tp_nfiles;
+    {   /* TOMBI_TPATCH_DUMP=DIR: write the rebuilt files (tools/tpatch_check.py compares them with the Python pipeline) */
+        const char *dd = getenv("TOMBI_TPATCH_DUMP");
+        if (dd && *dd) for (int j = base; j < tp_nfiles; j++) {
+            char o[1400]; FILE *w;
+            snprintf(o, sizeof o, "%s/", dd);
+            size_t l = strlen(o);
+            snprintf(o + l, sizeof o - l, "%s", tp_files[j].path);
+            for (char *c = o + l; *c; c++) if (*c == '/') *c = '_';
+            if ((w = fopen(o, "wb"))) { fwrite(tp_files[j].data, 1, tp_files[j].size, w); fclose(w); }
+        }
+    }
+    if (port_verbose) for (int j = base; j < tp_nfiles; j++) port_printf("[tpatch]   %s %u bytes, lba %u\n", tp_files[j].path, tp_files[j].size, tp_files[j].lba[0]);
+    return tp_nfiles - base;
+}
+
+/* 1 when lba belongs to a patched file: d gets the sector (bytes 2048, or 2340/2352-style raw with the data at +12) */
+int port_tpatch_sector(int lba, unsigned char *d, int bytes) {
+    if (tp_busy || !tp_nfiles) return 0;
+    for (int i = tp_nfiles - 1; i >= 0; i--) {
+        TpFile *f = &tp_files[i];
+        for (int r = 0; r < f->nr; r++) {
+            if ((unsigned)lba < f->lba[r] || (unsigned)lba >= f->lba[r] + f->sec[r]) continue;
+            unsigned off = (lba - f->lba[r]) * 2048u;
+            unsigned char *u = bytes == 2048 ? d : d + 12;
+            if (bytes != 2048) memset(d, 0, bytes);
+            unsigned avail = off >= f->size ? 0 : f->size - off > 2048 ? 2048 : f->size - off;
+            memcpy(u, f->data + off, avail);
+            memset(u + avail, 0, 2048 - avail);
+            return 1;
+        }
+    }
+    return 0;
+}
+/* a malloc'd copy of a patched file read by name (EXE/MAIN5.EXE...), else 0 */
+unsigned char *port_tpatch_named(const char *path, unsigned *size) {
+    if (tp_busy) return 0;
+    for (int i = tp_nfiles - 1; i >= 0; i--) if (!strcmp(tp_files[i].path, path)) {
+        unsigned char *d = malloc(tp_files[i].size + 4);
+        if (!d) return 0;
+        memcpy(d, tp_files[i].data, tp_files[i].size); *size = tp_files[i].size; return d;
+    }
+    return 0;
+}

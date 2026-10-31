@@ -153,6 +153,14 @@ jobs:
           curl -fsSL -o "$D/Nunito-OFL.txt" "$GF/ofl/nunito/OFL.txt"
           ls -l "$D"
 
+      # Text patches for --text-patch (our own translation text; the .tpatch twins carry no game data, tools/tpatch_build.py)
+      - name: Bundle the text patches (assets/patches)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          D=port2/android/app/src/main/assets/patches; mkdir -p "$D"
+          cp patches/*.tombipatch.json patches/*.tpatch "$D/"
+          ls -l "$D"
+
       - name: Build the APK (debug-signed)
         if: steps.fetch.outputs.ok == 'true'
         run: |
@@ -224,15 +232,15 @@ jobs:
             echo "**BETA $N - untested on real hardware** (build of ${SHA::7}). / **BETA $N - sin probar en hardware real.**"; echo
             echo "## English"
             echo "- Android port of Tombi!, 32-bit ARM (armeabi-v7a). Needs a device with 32-bit app support (most current handhelds); Snapdragon 8 Gen 3 and newer cannot run it."
-            echo "- No game data included. Copy the \`data\` folder prepared by the PC launcher to \`Android/data/io.github.tombi.port/files/data\`."
-            echo "- Optional flags in \`files/args.txt\` (e.g. \`--aspect 4:3\`, \`--cut-content\`). Aspect is automatic by default."
-            echo "- Log: \`files/tombi.log\`. APK is $SIG."
+            echo "- No game data included and no PC needed: pick your own disc image (.bin/.cue/.iso of the PAL SCES-01331) on the device from the Selva launcher; it is checked (MAIN0.EXE sha1) and played directly."
+            echo "- Launcher options: language, improved Spanish translation toggle (applied in memory, natively), debug menu, cut content, aspect (automatic by default), renderer, 60 Hz, cheats."
+            echo "- Extra flags in \`files/args.txt\`. Log: \`files/tombi.log\`. APK is $SIG."
             echo "- Please report results with \`tombi.log\` (or \`adb logcat\`) attached."
             echo; echo "## Espanol"
             echo "- Port de Tombi! para Android, ARM de 32 bits (armeabi-v7a). Requiere un dispositivo con soporte de apps de 32 bits (la mayoria de portatiles actuales); los Snapdragon 8 Gen 3 o posteriores no lo ejecutan."
-            echo "- No incluye datos del juego. Copia la carpeta \`data\` que prepara el launcher de PC a \`Android/data/io.github.tombi.port/files/data\`."
-            echo "- Opciones en \`files/args.txt\` (p. ej. \`--aspect 4:3\`, \`--cut-content\`). El aspecto es automatico por defecto."
-            echo "- Registro: \`files/tombi.log\`. El APK esta firmado en modo debug: desinstala la beta anterior antes de instalar una nueva (si no se firma con clave propia)."
+            echo "- No incluye datos del juego y no hace falta PC: elige tu propia imagen del disco (.bin/.cue/.iso del PAL SCES-01331) en el dispositivo desde el launcher Selva; se comprueba (sha1 de MAIN0.EXE) y se juega directamente."
+            echo "- Opciones del launcher: idioma, traduccion mejorada al espanol (se aplica en memoria, de forma nativa), menu de depuracion, contenido recortado, aspecto (automatico por defecto), renderizador, 60 Hz, trucos."
+            echo "- Opciones extra en \`files/args.txt\`. Registro: \`files/tombi.log\`. El APK esta firmado en modo debug: desinstala la beta anterior antes de instalar una nueva (si no se firma con clave propia)."
             echo "- Reporta resultados adjuntando \`tombi.log\` (o \`adb logcat\`)."
           } > notes.md
           gh release create "$TAG" -R "$R" --target "$SHA" --title "Tombi! port – Android BETA $N (armeabi-v7a, untested)" \

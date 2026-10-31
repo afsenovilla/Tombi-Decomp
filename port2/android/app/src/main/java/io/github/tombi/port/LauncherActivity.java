@@ -111,18 +111,24 @@ public class LauncherActivity extends Activity {
     boolean ready() { return discFile() != null || dataValid(); }
     boolean textPatchOn() { return flag("textpatch", LANG_N[langIdx()] == 5); }
 
-    /** files/patches/<name>, extracted from the APK's assets/patches when it is not there yet; null without it. */
-    File textPatch() {
-        File f = new File(new File(filesDir(), "patches"), TEXT_PATCH);
-        if (f.isFile()) return f;
+    /** files/patches/<name>, (re)extracted from the APK's assets/patches (the files are small; copying each time keeps
+     *  them in step with an updated APK); null without it. */
+    File patchAsset(String name) {
+        File f = new File(new File(filesDir(), "patches"), name);
         try {
-            InputStream in = getAssets().open("patches/" + TEXT_PATCH);
+            InputStream in = getAssets().open("patches/" + name);
             f.getParentFile().mkdirs();
             OutputStream out = new FileOutputStream(f);
             byte[] buf = new byte[1 << 15]; int n;
             try { while ((n = in.read(buf)) > 0) out.write(buf, 0, n); } finally { in.close(); out.close(); }
             return f;
-        } catch (Exception e) { return null; }
+        } catch (Exception e) { return f.isFile() ? f : null; }
+    }
+
+    /** the text patch and its compiled twin (tombi2 --text-patch X.tombipatch.json reads X.tpatch: tools/tpatch_build.py) */
+    File textPatch() {
+        patchAsset(TEXT_PATCH.replace(".tombipatch.json", ".tpatch"));
+        return patchAsset(TEXT_PATCH);
     }
 
     String[] buildArgs() {
@@ -136,7 +142,11 @@ public class LauncherActivity extends Activity {
         a.add("--lang"); a.add(String.valueOf(LANG_N[langIdx()]));
         a.add("--aspect"); a.add(ASPECTS[aspectIdx()]);
         a.add("--renderer"); a.add(flag("gl", false) ? "gl" : "soft");
-        if (flag("cut", false)) a.add("--cut-content");
+        if (flag("cut", false)) {
+            a.add("--cut-content");
+            // English cut lines: tombi2 picks en_cut_content.tpatch from --patch-dir by itself (as the PC launcher does)
+            if (LANG_N[langIdx()] == 0 && patchAsset("en_cut_content.tpatch") != null) { a.add("--patch-dir"); a.add(new File(filesDir(), "patches").getAbsolutePath()); }
+        }
         if (flag("debugmenu", false)) a.add("--debug-menu");
         if (flag("skipintro", false)) a.add("--skip-intro");
         if (flag("hz60", false)) { a.add("--hz"); a.add("60"); }
