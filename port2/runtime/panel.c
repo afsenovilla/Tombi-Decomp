@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "port_runtime.h"
-#include "panel_font.h"
+#include "panel_assets.h"
 #ifdef __ANDROID__
 #include <jni.h>
 #include <pthread.h>
@@ -35,10 +35,12 @@ int port_panel_on;                 /* --second-screen or --dump-panel */
 int port_panel_window;             /* --second-screen (the PC window / the Android Presentation) */
 const char *port_panel_dump_dir;   /* --dump-panel DIR */
 
-#define PW_MAX 960
-#define PH_MAX 960
-static int pw = 640, ph = 480, req_w, req_h;
-static u32 pix[PW_MAX * PH_MAX];
+/* the canvas is in game pixels (about 414 x 360), shown scaled by an integer k (nearest neighbour) to the display */
+#define CW_MAX 640
+#define CH_MAX 640
+#define OUT_MAX 1920
+static int pw, ph, pk = 1, req_w, req_h;   /* pw x ph = the canvas x pk */
+static u32 *pix;                           /* malloc'd: the scaled frame (PC window, PNG dumps) */
 
 /* ---------------------------------------------------------------- game RAM (include/gamestate.h, notes/data_names_main0.csv) */
 #define G8(a)  (*(u8 *)PORT_M0(a))
@@ -132,6 +134,7 @@ static u32 map_table(const Ovl *o0, const Ovl *on, u32 T) {
 void port_panel_init(void) {
     if (loaded) return;
     load_tables();
+    pa_init();
 }
 static void load_tables(void) {
     char name[32]; unsigned n0, nn = 0; u8 *d0, *dn = NULL;
@@ -198,111 +201,94 @@ static void load_tables(void) {
     loaded = 1;
 }
 
-/* ---------------------------------------------------------------- drawing into pix (0xAABBGGRR in memory = R,G,B,A bytes) */
+/* ---------------------------------------------------------------- drawing (panel_assets.c: canvas in game pixels, scaled x k) */
 #define RGB(r, g, b) (0xFF000000u | (u32)(b) << 16 | (u32)(g) << 8 | (u32)(r))
-static const u32 C_BG = RGB(0xF4, 0xEC, 0xD4), C_CARD = RGB(0xFF, 0xF8, 0xE6), C_GREEN = RGB(0x2F, 0x6B, 0x3A),
-    C_DGREEN = RGB(0x1F, 0x4A, 0x28), C_PINK = RGB(0xFF, 0x6A, 0xA8), C_INK = RGB(0x2A, 0x2A, 0x22), C_MUTED = RGB(0x7A, 0x74, 0x60),
-    C_LINE = RGB(0xDD, 0xD2, 0xB4), C_CREAM = RGB(0xFF, 0xF8, 0xE6), C_ROUTE = RGB(0x5E, 0x8F, 0x5E), C_RED = RGB(0xE0, 0x4A, 0x3C),
-    C_BLUE = RGB(0x3A, 0x7B, 0xD5), C_LGREEN = RGB(0x4C, 0xB0, 0x50);
+static const u32 C_PINK = RGB(248, 200, 192), C_DARK = RGB(40, 24, 16), C_EDGE = RGB(170, 130, 110), C_RED = RGB(176, 40, 30),
+    C_REDE = RGB(200, 150, 130), C_WHITE = RGB(250, 246, 230), C_WOODE = RGB(120, 70, 40), C_GREEN = RGB(30, 110, 40),
+    C_MUTED = RGB(130, 90, 80), C_SEA = RGB(120, 176, 232), C_SEA2 = RGB(150, 200, 244), C_SEL = RGB(96, 168, 72);
 
-static inline void blend(int x, int y, u32 c, int a) {   /* a 0..255 */
-    if ((unsigned)x >= (unsigned)pw || (unsigned)y >= (unsigned)ph || a <= 0) return;
-    u32 *p = &pix[y * pw + x];
-    if (a >= 255) { *p = c; return; }
-    u32 d = *p;
-    u32 r = ((c & 0xFF) * a + (d & 0xFF) * (255 - a)) / 255, g = ((c >> 8 & 0xFF) * a + (d >> 8 & 0xFF) * (255 - a)) / 255,
-        b = ((c >> 16 & 0xFF) * a + (d >> 16 & 0xFF) * (255 - a)) / 255;
-    *p = 0xFF000000u | b << 16 | g << 8 | r;
+/* the sub-screen's pieces: page (64, 0) = SYSTEM/A10301.000, CLUT rows of D0SPSUB's block at (288, 480) */
+#define SUB 64, 0
+static void stone(int x, int y, int w, int h) { pa_tile(x, y, w, h, SUB, 152, 0, 80, 56, 288, 480); }
+static void window_(int x, int y, int w, int h) { pa_nine(x, y, w, h, SUB, 0, 216, 248, 32, 8, 288, 487, 0); }   /* cream window */
+static void frame_(int x, int y, int w, int h) { pa_nine(x, y, w, h, SUB, 0, 216, 248, 32, 8, 288, 487, 1); }    /* its rim only */
+static void plank(int x, int y, int w) {   /* blank wood plank, 24 high, with its end grain */
+    pa_tile(x + 4, y, w - 8, 24, SUB, 193, 128, 31, 24, 288, 481);
+    pa_spr(x, y, SUB, 184, 128, 4, 24, 288, 481, 0);
+    pa_spr(x + w - 9, y, SUB, 224, 128, 9, 24, 288, 481, 0);
 }
-static void rect(int x, int y, int w, int h, u32 c) {
-    for (int j = y < 0 ? 0 : y; j < y + h && j < ph; j++) for (int i = x < 0 ? 0 : x; i < x + w && i < pw; i++) pix[j * pw + i] = c;
+static void ctext(int cx, int y, int h, const char *s, u32 b, u32 e) { pa_text(cx - pa_text_w(h, s) / 2, y, h, s, b, e); }
+
+/* the HUD's pieces: page (320, 256) = SYSTEM/A00000.GAM, CLUT rows at (368, 480..) */
+#define HUD 320, 256
+static const u8 fruit_digit_u[10] = { 0, 8, 24, 40, 56, 72, 88, 104, 120, 0 };
+static void fruit(int x, int y, int hp, int max) {   /* the vitality fruit: 4 segments a side, the number in the middle */
+    static const u8 seg[4][4] = { {16, 152, 22, 33}, {32, 152, 14, 26}, {48, 152, 14, 13}, {64, 152, 22, 6} };
+    if (max > 8) max = 8;
+    for (int i = 0; i < max; i++) {
+        int k = i & 3, right = i >= 4, sx = right ? 72 - seg[k][2] - 16 : seg[k][2];
+        pa_spr(x + sx, y + seg[k][3], HUD, seg[k][0], seg[k][1], 16, 16, 368, 502, (right ? PA_FLIPX : 0) | (i < hp ? 0 : PA_SHADE));
+    }
+    pa_spr(x + 24, y + 16, HUD, 144, 200, 24, 24, 368, 483, 0);
+    if (hp >= 0 && hp <= 8) pa_spr(x + 28, y + 19, HUD, fruit_digit_u[hp], hp == 8 ? 116 : 120, 16, 16, 368, 489, 0);
 }
-static void rrect(int x, int y, int w, int h, int r, u32 c) {   /* rounded, anti-aliased corners */
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
-        int cx = i < r ? r - i : i >= w - r ? i - (w - r - 1) : 0, cy = j < r ? r - j : j >= h - r ? j - (h - r - 1) : 0;
-        if (cx && cy) {
-            float dx = cx - 0.5f, dy = cy - 0.5f, d2 = dx * dx + dy * dy, R = (float)r;
-            if (d2 > R * R) { float e = (R + 1) * (R + 1); if (d2 < e) blend(x + i, y + j, c, (int)(255 * (e - d2) / (e - R * R))); continue; }
-        }
-        blend(x + i, y + j, c, 255);
+static void lives(int x, int y, int n) {
+    pa_spr(x, y, HUD, 128, 56, 32, 24, 368, 481, 0);
+    if (n >= 0 && n <= 9) pa_spr(x + 12, y + 12, HUD, 8 * n, 64, 8, 8, 368, 481, 0);
+}
+static void ap_badge(int x, int y) {   /* the HUD's "AP" box (drawn, its letters in the game's 8 px font) */
+    pa_fill(x + 1, y, 28, 14, RGB(200, 176, 64)); pa_fill(x, y + 1, 30, 12, RGB(200, 176, 64));
+    pa_fill(x + 1, y + 1, 28, 12, RGB(96, 96, 140)); pa_fill(x + 2, y + 2, 26, 4, RGB(130, 130, 176));
+    ctext(x + 15, y + 3, 8, "AP", C_WHITE, RGB(40, 30, 70));
+}
+static void face(int x, int y) { pa_spr(x, y, SUB, 8, 8, 24, 24, 288, 482, 0); }
+
+static void line(int x0, int y0, int x1, int y1, int t, u32 c) {   /* pixel-art line, t x t brush */
+    int dx = x1 > x0 ? x1 - x0 : x0 - x1, dy = y1 > y0 ? y0 - y1 : y1 - y0, sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, e = dx + dy;
+    for (int n = 0; n < 4096; n++) {
+        pa_fill(x0 - t / 2, y0 - t / 2, t, t, c);
+        if (x0 == x1 && y0 == y1) break;
+        int e2 = 2 * e;
+        if (e2 >= dy) { e += dy; x0 += sx; }
+        if (e2 <= dx) { e += dx; y0 += sy; }
     }
 }
-static void disc(float cx, float cy, float r, u32 c) {
-    for (int j = (int)(cy - r - 1); j <= (int)(cy + r + 1); j++) for (int i = (int)(cx - r - 1); i <= (int)(cx + r + 1); i++) {
-        float dx = i + 0.5f - cx, dy = j + 0.5f - cy, d = dx * dx + dy * dy;
-        if (d <= (r - 0.5f) * (r - 0.5f)) blend(i, j, c, 255);
-        else if (d < (r + 0.5f) * (r + 0.5f)) { float k = r + 0.5f - __builtin_sqrtf(d); blend(i, j, c, (int)(k * 255)); }
-    }
+static void dot(int cx, int cy, int r, u32 c) {
+    for (int j = -r; j <= r; j++) for (int i = -r; i <= r; i++) if (i * i + j * j <= r * r + r) pa_put(cx + i, cy + j, i * i + j * j >= r * r - r ? RGB(90, 20, 20) : c);
 }
-static void thick_line(float x0, float y0, float x1, float y1, float w, u32 c) {   /* a capsule, anti-aliased */
-    float minx = (x0 < x1 ? x0 : x1) - w, maxx = (x0 > x1 ? x0 : x1) + w, miny = (y0 < y1 ? y0 : y1) - w, maxy = (y0 > y1 ? y0 : y1) + w;
-    float dx = x1 - x0, dy = y1 - y0, L = dx * dx + dy * dy, r = w / 2;
-    for (int j = (int)miny; j <= (int)maxy; j++) for (int i = (int)minx; i <= (int)maxx; i++) {
-        float px = i + 0.5f - x0, py = j + 0.5f - y0, t = L > 0 ? (px * dx + py * dy) / L : 0;
-        if (t < 0) t = 0; if (t > 1) t = 1;
-        float ex = px - t * dx, ey = py - t * dy, d = __builtin_sqrtf(ex * ex + ey * ey);
-        if (d <= r - 0.5f) blend(i, j, c, 255); else if (d < r + 0.5f) blend(i, j, c, (int)((r + 0.5f - d) * 255));
-    }
-}
-static int text_w(const PanelFont *f, const char *s) {
-    int w = 0;
-    for (; *s; s++) { int c = (u8)*s; if (c < 32) continue; w += f->g[c - 32].adv; }
-    return w;
-}
-static int text(const PanelFont *f, int x, int y, const char *s, u32 col) {   /* y = top of the line; returns the end x */
-    for (; *s; s++) {
-        int c = (u8)*s; if (c < 32) continue;
-        const PanelGlyph *g = &f->g[c - 32];
-        const u8 *b = f->bits + g->off;
-        for (int j = 0; j < g->h; j++) for (int i = 0; i < g->w; i++) {
-            int k = j * g->w + i, v = (b[k >> 1] >> ((k & 1) * 4)) & 15;
-            if (v) blend(x + g->ox + i, y + g->oy + j, col, v * 17);
-        }
-        x += g->adv;
-    }
-    return x;
-}
-/* text cut with "..." to fit w */
-static void text_fit(const PanelFont *f, int x, int y, int w, const char *s, u32 col) {
-    char b[160]; int n = (int)strlen(s);
-    if (n > 150) n = 150;
-    memcpy(b, s, n); b[n] = 0;
-    if (text_w(f, b) <= w) { text(f, x, y, b, col); return; }
-    while (n > 0) { b[--n] = 0; while (n > 0 && b[n - 1] == ' ') b[--n] = 0; char t[164]; snprintf(t, sizeof t, "%s...", b); if (text_w(f, t) <= w) { text(f, x, y, t, col); return; } }
-}
-static void heart(float cx, float cy, float s, u32 c) {
-    disc(cx - s * 0.5f, cy - s * 0.15f, s * 0.55f, c);
-    disc(cx + s * 0.5f, cy - s * 0.15f, s * 0.55f, c);
-    for (int j = 0; j < (int)(s * 1.3f); j++) {
-        float hw = s * 1.05f * (1 - (float)j / (s * 1.3f));
-        for (int i = (int)(cx - hw); i <= (int)(cx + hw); i++) blend(i, (int)(cy + j), c, 255);
-    }
-}
-static void bar(int x, int y, int w, int h, int v, int max, u32 c) {
-    rrect(x, y, w, h, h / 2, C_LINE);
-    int f = max > 0 ? w * (v > max ? max : v) / max : 0;
-    if (f >= h) rrect(x, y, f, h, h / 2, c); else if (f > 0) disc(x + h / 2.0f, y + h / 2.0f, h / 2.0f, c);
-}
+static void page_events(int play);
 
 /* ---------------------------------------------------------------- the panel */
 static int es(void) { return port_lang == 5; }
 #define T(en, sp) (es() ? sp : en)
+enum { PAGE_MAP, PAGE_EVENTS, PAGE_SIDE, NPAGES };
+static int page;
+static const char *page_name(int p) {
+    return p == PAGE_MAP ? T("Map", "Mapa") : p == PAGE_EVENTS ? T("Events", "Eventos") : T("Side map", "Lateral");
+}
 
-static void card(int x, int y, int w, int h, const char *title) {
-    rrect(x + 1, y + 2, w, h, 10, RGB(0xDD, 0xD2, 0xB4));   /* shadow */
-    rrect(x, y, w, h, 10, C_CARD);
-    if (title) {
-        text(&pf_small, x + 12, y + 8, title, C_GREEN);
-        rect(x + 12, y + 26, w - 24, 1, C_LINE);
+static void header(const char *title) {
+    int W = pa_cw;
+    stone(0, 0, W, pa_ch);
+    plank(0, 0, W);
+    pa_spr(2, 0, SUB, 96, 48, 24, 24, 288, 481, 0);
+    pa_spr(W - 26, 0, SUB, 96, 72, 24, 24, 288, 481, 0);
+    pa_text_fit(W / 2 - pa_text_w(16, title) / 2 < 30 ? 30 : W / 2 - pa_text_w(16, title) / 2, 4, 16, W - 60, title, C_DARK, C_WOODE);
+    int n = NPAGES, tw = (W - 16 * (n + 1)) / n;
+    for (int i = 0; i < n; i++) {
+        int x = 16 + i * (tw + 16);
+        plank(x, 26, tw);
+        ctext(x + tw / 2, 30, 16, page_name(i), i == page ? C_WHITE : C_DARK, C_WOODE);
     }
+    pa_fill(4, 52, W - 8, pa_ch - 56, C_PINK);
 }
 
 static void draw_map(int x, int y, int w, int h, int link) {
-    card(x, y, w, h, T("MAP", "MAPA"));
-    int mx = x + 14, my = y + 34, mw = w - 28, mh = h - 46;
-    if (loaded != 1 || nb_hi <= nb_lo || nz_hi <= nz_lo) { text(&pf_small, mx, my + 4, T("No map data", "Sin datos del mapa"), C_MUTED); return; }
+    window_(x, y, w, h);
+    int mx = x + 7, my = y + 7, mw = w - 14, mh = h - 14;
+    for (int j = 0; j < mh; j++) pa_fill(mx, my + j, mw, 1, ((j / 3) & 1) ? C_SEA : C_SEA2);
+    if (loaded != 1 || nb_hi <= nb_lo || nz_hi <= nz_lo) { pa_text(mx + 6, my + 6, 16, T("No map data", "Sin datos del mapa"), C_DARK, C_EDGE); return; }
     int cur_reg = link >= 0 ? links[link][2] : -1;
-    /* the view: the routes shown (revealed regions and the room's), at least 160 units wide */
     int x0 = 9999, x1 = -9999, z0 = 9999, z1 = -9999;
     for (int r = 0; r < 12; r++) if (G_MAPREG(r) || r == cur_reg) for (int k = 0; k < nroutes[r]; k++) {
         int ids[2] = { routes[r][k].a, routes[r][k].b };
@@ -314,34 +300,32 @@ static void draw_map(int x, int y, int w, int h, int link) {
     if (x1 < x0) { x0 = nb_lo; x1 = nb_hi; z0 = nz_lo; z1 = nz_hi; }
     if (x1 - x0 < 160) { int c = (x0 + x1) / 2; x0 = c - 80; x1 = c + 80; }
     if (z1 - z0 < 120) { int c = (z0 + z1) / 2; z0 = c - 60; z1 = c + 60; }
-    mx += 12; my += 12; mw -= 24; mh -= 24;
-    float sx = (float)mw / (x1 - x0), sz = (float)mh / (z1 - z0), s = sx < sz ? sx : sz;
-    float ox = mx + (mw - (x1 - x0) * s) / 2, oy = my + (mh - (z1 - z0) * s) / 2;
-#define PX(n) (ox + (nodes[n].x - x0) * s)
-#define PY(n) (oy + (nodes[n].z - z0) * s)
-    for (int pass = 0; pass < 2; pass++) for (int r = 0; r < 12; r++) {
-        int shown = G_MAPREG(r) != 0 || r == cur_reg;
-        if (!shown) continue;
+    int ix = mx + 12, iy = my + 12, iw = mw - 24, ih = mh - 24;
+    float sx = (float)iw / (x1 - x0), sz = (float)ih / (z1 - z0), s = sx < sz ? sx : sz;
+    float ox = ix + (iw - (x1 - x0) * s) / 2, oy = iy + (ih - (z1 - z0) * s) / 2;
+    int cx0 = pa_clip_x0, cy0 = pa_clip_y0, cx1 = pa_clip_x1, cy1 = pa_clip_y1;
+    pa_clip_x0 = mx; pa_clip_y0 = my; pa_clip_x1 = mx + mw; pa_clip_y1 = my + mh;
+#define PX(n) ((int)(ox + (nodes[n].x - x0) * s))
+#define PY(n) ((int)(oy + (nodes[n].z - z0) * s))
+    for (int pass = 0; pass < 3; pass++) for (int r = 0; r < 12; r++) {
+        if (!(G_MAPREG(r) != 0 || r == cur_reg)) continue;
         for (int k = 0; k < nroutes[r]; k++) {
             int a = routes[r][k].a, b = routes[r][k].b;
             if (a < 0 || a >= NNODES) continue;
-            if (routes[r][k].type == 1 && b >= 0 && b < NNODES) {
-                if (pass == 0) thick_line(PX(a), PY(a), PX(b), PY(b), 7, C_DGREEN);
-                else thick_line(PX(a), PY(a), PX(b), PY(b), 4, C_ROUTE);
-            } else if (routes[r][k].type == 0 && pass == 1) { disc(PX(a), PY(a), 4.5f, C_DGREEN); disc(PX(a), PY(a), 2.5f, C_CREAM); }
+            if (routes[r][k].type == 1 && b >= 0 && b < NNODES && pass < 2) line(PX(a), PY(a), PX(b), PY(b), pass ? 1 : 2, pass ? C_WHITE : RGB(40, 60, 90));
+            else if (routes[r][k].type == 0 && pass == 2) dot(PX(a), PY(a), 3, C_RED);
         }
     }
     if (link >= 0) {
         int a = links[link][0], b = links[link][1];
         if (a < NNODES && b < NNODES) {
-            thick_line(PX(a), PY(a), PX(b), PY(b), 6, C_PINK);
-            float cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2;
-            int pulse = (port_frame / 8) & 3;
-            disc(cx, cy, 10.0f + pulse, RGB(0xFF, 0xC4, 0xDC));
-            disc(cx, cy, 8, C_PINK);
-            disc(cx, cy, 3.5f, C_CREAM);
+            line(PX(a), PY(a), PX(b), PY(b), 2, RGB(255, 96, 160));
+            int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2, bob = (port_frame / 10) & 1;
+            face(cx - 12, cy - 26 - bob);
+            pa_fill(cx - 1, cy - 3 - bob, 3, 3, RGB(255, 96, 160));
         }
     }
+    pa_clip_x0 = cx0; pa_clip_y0 = cy0; pa_clip_x1 = cx1; pa_clip_y1 = cy1;
 }
 
 static int fmt_ap(char *b, int n, u32 v) {   /* 1.234.567 / 1,234,567 */
@@ -349,120 +333,110 @@ static int fmt_ap(char *b, int n, u32 v) {   /* 1.234.567 / 1,234,567 */
     for (int i = 0; i < k && o < n - 2; i++) { if (i && (k - i) % 3 == 0) b[o++] = es() ? '.' : ','; b[o++] = t[i]; }
     b[o] = 0; return o;
 }
-static const char *weapon_name(void) {
-    static const struct { u8 w, item; } t[] = {{0, 27}, {5, 21}, {6, 22}, {7, 23}, {8, 33}, {9, 34}};   /* subScreenDrawItemGrid's checks */
-    static char b[16];
-    for (unsigned i = 0; i < sizeof t / sizeof t[0]; i++) if (t[i].w == G_WEAPON && item_name[t[i].item]) return item_name[t[i].item];
-    snprintf(b, sizeof b, "#%d", G_WEAPON); return b;
-}
-static const char *pants_name(void) {
-    static const u8 t[4] = {32, 29, 24, 28};
-    static char b[16];
-    if ((G_PANTS & 3) == G_PANTS && item_name[t[G_PANTS]]) return item_name[t[G_PANTS]];
-    snprintf(b, sizeof b, "#%d", G_PANTS); return b;
-}
-
-static int status_a(int lx, int vx, int ly) {   /* vitality, AP, lives, level; returns the next y */
-    char b[64]; int row = 25;
-    text(&pf_body, lx, ly, T("Vitality", "Vitalidad"), C_MUTED);
-    snprintf(b, sizeof b, "%d/%d", G_HEALTH, G_MAXHEALTH);
-    text(&pf_bold, vx - text_w(&pf_bold, b), ly - 1, b, C_INK);
-    {
-        int mh = G_MAXHEALTH > 16 ? 16 : G_MAXHEALTH, per = 22;
-        for (int i = 0; i < mh; i++) heart(lx + 8 + (i % 8) * per, ly + 28 + (i / 8) * 20, 7, i < G_HEALTH ? C_PINK : C_LINE);
-        ly += mh > 8 ? 62 : 44;
-    }
-    text(&pf_body, lx, ly, "AP", C_MUTED); fmt_ap(b, sizeof b, G_AP); text(&pf_bold, vx - text_w(&pf_bold, b), ly - 1, b, C_INK); ly += row;
-    text(&pf_body, lx, ly, T("Lives", "Vidas"), C_MUTED); snprintf(b, sizeof b, "%d", G_LIVES); text(&pf_bold, vx - text_w(&pf_bold, b), ly - 1, b, C_INK); ly += row;
-    text(&pf_body, lx, ly, T("Level", "Nivel"), C_MUTED); snprintf(b, sizeof b, "%d", G_LEVEL); text(&pf_bold, vx - text_w(&pf_bold, b), ly - 1, b, C_INK); ly += row;
-    return ly;
-}
-static void status_b(int lx, int vx, int ly, int bottom) {   /* the exp bars, weapon, pants */
-    char b[16]; u32 col[3] = { C_RED, C_LGREEN, C_BLUE };
-    for (int i = 0; i < 3; i++) {   /* red / green / blue: the level and its bar (0..255) */
-        snprintf(b, sizeof b, "%d", G_EXPLEV(i));
-        text(&pf_small, lx, ly + i * 18, b, col[i]);
-        bar(lx + 26, ly + 4 + i * 18, vx - lx - 26, 9, G_EXPBAR(i), 255, col[i]);
-    }
-    ly += 3 * 18 + 8;
-    text(&pf_small, lx, ly, T("WEAPON", "ARMA"), C_MUTED); text_fit(&pf_bold, lx, ly + 16, vx - lx, weapon_name(), C_INK); ly += 44;
-    if (ly + 40 <= bottom) { text(&pf_small, lx, ly, T("PANTS", "PANTAL\xD3N"), C_MUTED); text_fit(&pf_bold, lx, ly + 16, vx - lx, pants_name(), C_INK); }
+static int count_events(int *started, int *done) {
+    int s = 0, d = 0;
+    for (int e = 0; e < EVENTS; e++) { int v = G_EVENT(e); if (v == 0xFF) d++; else if (v) s++; }
+    if (started) *started = s; if (done) *done = d;
+    return s + d;
 }
 static void draw_status(int x, int y, int w, int h) {
-    card(x, y, w, h, T("STATUS", "ESTADO"));
-    if (w >= 400) {   /* two columns */
-        int cw = (w - 42) / 2;
-        status_a(x + 14, x + 14 + cw, y + 36);
-        status_b(x + 28 + cw, x + w - 14, y + 38, y + h);
-    } else {
-        int ly = status_a(x + 14, x + w - 14, y + 36) + 2;
-        rect(x + 14, ly - 4, w - 28, 1, C_LINE);
-        status_b(x + 14, x + w - 14, ly + 4, y + h);
+    char b[48]; int ly = y + 10;
+    window_(x, y, w, h);
+    fruit(x + 8, ly - 4, G_HEALTH, G_MAXHEALTH);
+    lives(x + w - 44, ly + 8, G_LIVES);
+    ly += 50;
+    ap_badge(x + 10, ly + 1); fmt_ap(b, sizeof b, G_AP); pa_text_fit(x + 46, ly, 16, w - 54, b, C_DARK, C_EDGE);
+    ly += 22;
+    u32 t = G_TIME / 50;
+    if (ly + 34 <= y + h) {
+        pa_text(x + 10, ly, 16, T("Time", "Tiempo"), C_RED, C_REDE);
+        snprintf(b, sizeof b, "%02u:%02u:%02u", t / 3600, t / 60 % 60, t % 60);
+        pa_text(x + 10, ly + 16, 16, b, C_DARK, C_EDGE);
+        ly += 40;
     }
+    int s, d; count_events(&s, &d);
+    if (ly + 16 <= y + h - 6) { snprintf(b, sizeof b, T("Events %d", "Eventos %d"), s + d); pa_text(x + 10, ly, 16, b, C_DARK, C_EDGE); }
 }
-
-static void draw_events(int x, int y, int w, int h) {
-    char b[64]; int ids[EVENTS], n = 0, done = 0;
-    for (int e = 0; e < EVENTS; e++) { int v = G_EVENT(e); if (v == 0xFF) done++; else if (v) ids[n++] = e; }
-    snprintf(b, sizeof b, T("EVENTS IN PROGRESS (%d)", "EVENTOS EN CURSO (%d)"), n);
-    card(x, y, w, h, b);
-    {   int tw = text_w(&pf_small, b) + 24;
-        snprintf(b, sizeof b, T("%d done", "%d completados"), done);
-        if (tw + text_w(&pf_small, b) + 12 < w) text(&pf_small, x + w - 12 - text_w(&pf_small, b), y + 8, b, C_MUTED); }
-    int ly = y + 34, lh = 23, max = (h - 40) / lh;
-    if (!n) { text(&pf_body, x + 14, ly, T("None right now", "Ninguno ahora mismo"), C_MUTED); return; }
+static const char *ev_title(int e, char *b, int n) {
+    if (e >= 0 && e < EVENTS && ev_name[e]) return ev_name[e];
+    snprintf(b, n, T("Event %d", "Evento %d"), e); return b;
+}
+static void draw_in_progress(int x, int y, int w, int h) {
+    char b[48]; int ids[EVENTS], n = 0;
+    for (int e = 0; e < EVENTS; e++) { int v = G_EVENT(e); if (v && v != 0xFF) ids[n++] = e; }
+    window_(x, y, w, h);
+    pa_text(x + 10, y + 6, 16, T("In progress", "En curso"), C_RED, C_REDE);
+    int ly = y + 24, lh = 20, max = (h - 30) / lh;
+    if (!n) { pa_text(x + 34, ly, 16, T("None right now", "Ninguno ahora mismo"), C_MUTED, C_EDGE); return; }
     for (int i = 0; i < n && i < max; i++) {
-        if (i == max - 1 && n > max) { snprintf(b, sizeof b, T("+ %d more", "+ %d m\xE1s"), n - i); text(&pf_body, x + 30, ly, b, C_MUTED); break; }
-        disc(x + 19, ly + 10, 4, C_PINK);
-        char t[160];
-        if (ev_name[ids[i]]) snprintf(t, sizeof t, "%s", ev_name[ids[i]]); else snprintf(t, sizeof t, T("Event %d", "Evento %d"), ids[i]);
-        text_fit(&pf_body, x + 30, ly, w - 44, t, C_INK);
+        if (i == max - 1 && n > max) { snprintf(b, sizeof b, T("+ %d more", "+ %d m\xE1s"), n - i); pa_text(x + 34, ly, 16, b, C_MUTED, C_EDGE); break; }
+        pa_event_icon(x + 8, ly + 1, ids[i], 0);
+        pa_text_fit(x + 36, ly, 16, w - 46, ev_title(ids[i], b, sizeof b), C_DARK, C_EDGE);
         ly += lh;
     }
 }
 
-static void render(void) {
-    char b[96];
-    if (req_w > 0 && req_h > 0) {   /* the display's aspect (Android: the Presentation's display) */
-        if (req_w >= req_h) { pw = 640; ph = 640 * req_h / req_w; if (ph < 400) ph = 400; if (ph > 640) ph = 640; }
-        else { pw = 540; ph = 540 * req_h / req_w; if (ph > 900) ph = 900; if (ph < 600) ph = 600; }
+static void page_map(int play, int link) {
+    int W = pa_cw, H = pa_ch, top = 56, g = 6;
+    if (!play) { draw_map(8, top, W - 16, H - top - 8, -1); return; }
+    if (W >= H) {
+        int sw = W * 34 / 100, mw = W - 16 - sw - g, mh = (H - top - 8) * 56 / 100;
+        draw_map(8, top, mw, mh, link);
+        draw_status(8 + mw + g, top, sw, mh);
+        draw_in_progress(8, top + mh + g, W - 16, H - top - mh - g - 8);
+    } else {
+        int mh = (H - top - 8) * 42 / 100, sh = 150;
+        draw_map(8, top, W - 16, mh, link);
+        draw_status(8, top + mh + g, W - 16, sh);
+        draw_in_progress(8, top + mh + sh + 2 * g, W - 16, H - top - mh - sh - 2 * g - 8);
     }
-    rect(0, 0, pw, ph, C_BG);
+}
+
+static void room_names(int play, int area, int sec, int link, const char **an, const char **rn) {
+    *an = *rn = NULL;
+    if (!play) return;
+    if (area == 14) { *an = sec + 14 < 24 ? a14_area[sec + 14] : NULL; *rn = sec < 24 ? a14_room[sec] : NULL; }
+    else if (link >= 0) { int c = links[link][2], d = links[link][3]; *an = c < 12 ? area_name[c] : NULL; *rn = c < 12 && d < 24 ? room_name[c][d] : NULL; }
+}
+
+static void page_events(int play) { (void)play; window_(8, 56, pa_cw - 16, pa_ch - 64); }
+
+static void layout(void);
+static void render(void) {
+    layout();
     int play = in_gameplay() && G_AREA < 20;
     int area = G_AREA, sec = G_SECTION, link = play && area < 20 && sec < 24 ? roomlink[area][sec] : -1;
-    /* header: the map screen's area and room names */
-    int hh = 62;
-    rect(0, 0, pw, hh, C_GREEN);
-    rect(0, hh, pw, 3, C_PINK);
-    const char *an = NULL, *rn = NULL;
-    if (play) {
-        if (area == 14) { an = sec + 14 < 24 ? a14_area[sec + 14] : NULL; rn = sec < 24 ? a14_room[sec] : NULL; }
-        else if (link >= 0) { int c = links[link][2], d = links[link][3]; an = c < 12 ? area_name[c] : NULL; rn = c < 12 && d < 24 ? room_name[c][d] : NULL; }
-    }
-    char an_b[48], rn_b[48];
-    if (!play) { an = "Tombi!"; rn = T("Waiting for the game...", "Esperando a la partida..."); }
-    if (!an) { snprintf(an_b, sizeof an_b, T("Area %d", "\xC1rea %d"), area); an = an_b; }
-    if (!rn) { snprintf(rn_b, sizeof rn_b, T("Section %d", "Secci\xF3n %d"), sec); rn = rn_b; }
-    {
-        u32 t = G_TIME / 50;
-        snprintf(b, sizeof b, "%u:%02u:%02u", t / 3600, t / 60 % 60, t % 60);
-        int tw = play ? text_w(&pf_bold, b) : 0;
-        if (play) { text(&pf_small, pw - 14 - text_w(&pf_small, T("TIME", "TIEMPO")), 10, T("TIME", "TIEMPO"), RGB(0xBF, 0xD8, 0xB8)); text(&pf_bold, pw - 14 - tw, 30, b, C_CREAM); }
-        text_fit(&pf_big, 16, 6, pw - 40 - tw, an, C_CREAM);
-        text_fit(&pf_body, 16, 38, pw - 40 - tw, rn, RGB(0xD6, 0xE8, 0xD0));
-    }
-    if (!play) { draw_map(16, hh + 16, pw - 32, ph - hh - 32, -1); return; }
-    int g = 12, top = hh + 3 + g;
-    if (pw > ph) {      /* landscape: status left, map and events right */
-        int lw = 236, rx = g + lw + g, rw = pw - rx - g, mh = (ph - top - g) * 54 / 100;
-        draw_status(g, top, lw, ph - top - g);
-        draw_map(rx, top, rw, mh, link);
-        draw_events(rx, top + mh + g, rw, ph - top - mh - 2 * g);
-    } else {            /* portrait: map, then status and events side by side */
-        int sh = 214, mh = (ph - top - sh - 3 * g) * 60 / 100, sy = top + mh + g, ey = sy + sh + g;
-        draw_map(g, top, pw - 2 * g, mh, link);
-        draw_status(g, sy, pw - 2 * g, sh);
-        draw_events(g, ey, pw - 2 * g, ph - ey - g);
+    const char *an, *rn; char ab[48];
+    room_names(play, area, sec, link, &an, &rn);
+    if (!play) an = T("Waiting for the game...", "Esperando a la partida...");
+    else if (!an) { snprintf(ab, sizeof ab, T("Area %d", "\xC1rea %d"), area); an = ab; }
+    pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = pa_cw; pa_clip_y1 = pa_ch;
+    header(page == PAGE_MAP ? an : page_name(page));
+    if (page == PAGE_MAP) page_map(play, link);
+    else page_events(play);
+}
+
+/* canvas size and scale for the display (req_w x req_h; default 828 x 720): k = about display / 400, canvas = display / k */
+static void layout(void) {
+    int W = req_w > 0 ? req_w : 828, H = req_h > 0 ? req_h : 720;
+    int k = (int)((W < H ? W / 360.0 : H / 300.0) + 0.25);
+    if (W >= H) { int k2 = (int)(W / 400.0 + 0.25); if (k2 < k) k = k2; }
+    if (k < 1) k = 1;
+    int cw = W / k, ch = H / k;
+    while ((cw > CW_MAX || ch > CH_MAX || cw * k > OUT_MAX || ch * k > OUT_MAX) && k < 16) { k++; cw = W / k; ch = H / k; }
+    if (cw > CW_MAX) cw = CW_MAX; if (ch > CH_MAX) ch = CH_MAX;
+    if (cw < 320) cw = 320; if (ch < 240) ch = 240;
+    if (!pa_cv) pa_cv = malloc(CW_MAX * CH_MAX * 4);
+    if (!pix) pix = malloc((size_t)OUT_MAX * OUT_MAX * 4);
+    pa_cw = cw; pa_ch = ch; pk = k; pw = cw * k; ph = ch * k;
+    if (pw > OUT_MAX || ph > OUT_MAX) { pk = 1; pw = cw; ph = ch; }
+}
+static void upscale(void) {
+    for (int y = 0; y < pa_ch; y++) {
+        const u32 *s = pa_cv + y * pa_cw;
+        u32 *d = pix + (size_t)y * pk * pw;
+        for (int x = 0; x < pa_cw; x++) for (int i = 0; i < pk; i++) d[x * pk + i] = s[x];
+        for (int j = 1; j < pk; j++) memcpy(d + (size_t)j * pw, d, (size_t)pw * 4);
     }
 }
 
@@ -473,7 +447,7 @@ extern void port_mkdir(const char *dir);                                        
 void port_panel_window_frame(const unsigned char *rgba, int w, int h);                   /* runtime/sdl.c */
 #ifdef __ANDROID__
 static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
-static u32 out[PW_MAX * PH_MAX]; static int out_w, out_h, out_seq, registered;
+static u32 out[CW_MAX * CH_MAX]; static int out_w, out_h, out_seq, registered;
 static jint JNICALL n_frame(JNIEnv *env, jclass c, jobject buf, jintArray dims, jint seq) {
     (void)c; jint r = 0;
     pthread_mutex_lock(&mtx);
@@ -508,17 +482,23 @@ void port_panel_vblank(void) {
     if (!dump && (frames++ & 1)) return;   /* ~25 fps is plenty */
     render();
 #ifdef __ANDROID__
+    if (dump) upscale();
+#else
+    upscale();
+#endif
+#ifdef __ANDROID__
     if (port_panel_window) {
         if (!registered) android_register();
         pthread_mutex_lock(&mtx);
-        memcpy(out, pix, (size_t)pw * ph * 4); out_w = pw; out_h = ph; if (++out_seq == 0) out_seq = 1;
+        memcpy(out, pa_cv, (size_t)pa_cw * pa_ch * 4); out_w = pa_cw; out_h = pa_ch; if (++out_seq == 0) out_seq = 1;
         pthread_mutex_unlock(&mtx);
     }
 #else
     if (port_panel_window) port_panel_window_frame((const unsigned char *)pix, pw, ph);
 #endif
     if (dump) {
-        static u8 rgb[PW_MAX * PH_MAX * 3]; char path[512];
+        static u8 *rgb; char path[512];
+        if (!rgb) rgb = malloc((size_t)OUT_MAX * OUT_MAX * 3);
         for (int i = 0; i < pw * ph; i++) { u32 c = pix[i]; rgb[3 * i] = c & 0xFF; rgb[3 * i + 1] = c >> 8 & 0xFF; rgb[3 * i + 2] = c >> 16 & 0xFF; }
         port_mkdir(port_panel_dump_dir);
         snprintf(path, sizeof path, "%s/panel_%06d.png", port_panel_dump_dir, port_frame);

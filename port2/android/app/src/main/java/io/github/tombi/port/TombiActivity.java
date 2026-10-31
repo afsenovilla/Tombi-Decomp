@@ -106,13 +106,13 @@ public class TombiActivity extends SDLActivity {
         private Bitmap bmp;
         private int seq;
         private boolean nativeReady = true, layoutSent;
-        private final Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
+        private final Paint paint = new Paint();   // nearest neighbour: the panel is pixel art
         private final Rect src = new Rect(), dst = new Rect();
         private final Runnable tick = new Runnable() {
             @Override public void run() { poll(); postDelayed(this, 33); }
         };
 
-        PanelView(Context c) { super(c); setBackgroundColor(Color.rgb(0xF4, 0xEC, 0xD4)); }
+        PanelView(Context c) { super(c); setBackgroundColor(Color.rgb(0x60, 0x50, 0x48)); }
 
         @Override protected void onAttachedToWindow() { super.onAttachedToWindow(); post(tick); }
         @Override protected void onDetachedFromWindow() { removeCallbacks(tick); super.onDetachedFromWindow(); }
@@ -141,8 +141,8 @@ public class TombiActivity extends SDLActivity {
         protected void onDraw(Canvas c) {
             if (bmp == null) return;
             int W = getWidth(), H = getHeight(), w = bmp.getWidth(), h = bmp.getHeight();
-            float k = Math.min((float) W / w, (float) H / h);
-            int dw = Math.round(w * k), dh = Math.round(h * k);
+            int k = Math.max(1, Math.min(W / w, H / h));   // integer scale (the canvas is the display / k)
+            int dw = w * k, dh = h * k;
             src.set(0, 0, w, h);
             dst.set((W - dw) / 2, (H - dh) / 2, (W - dw) / 2 + dw, (H - dh) / 2 + dh);
             c.drawBitmap(bmp, src, dst, paint);

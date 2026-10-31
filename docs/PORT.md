@@ -2303,15 +2303,28 @@ Verified headless (soft renderer; the overlay also on OpenGL under xvfb and with
 ### Second screen: `--second-screen`, `--dump-panel DIR` (port only, opt-in)
 
 A live "map + status" panel for dual-screen handhelds (AYN Thor...): the game stays on the main screen and never
-pauses; `port2/runtime/panel.c` draws the panel into its own RGBA buffer (640 x 400..640 landscape, 540 x 600..900
-portrait, after the display's aspect) from the game's RAM, about 25 times a second, with its own fonts (Inter, SIL OFL,
-rasterised by `port2/tools/gen_panel_font.py` into `runtime/panel_font.h`; no game graphics).
+pauses; `port2/runtime/panel.c` draws the panel from the game's RAM about 25 times a second, in the look of the game's own
+sub-screen, with the game's graphics and fonts read from the user's disc when the panel starts (`runtime/panel_assets.c`;
+nothing of them is in the repository). The panel is pixel art: a canvas in game pixels (about 414 x 360, the display / k)
+scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; Android: the Presentation's view).
+- Graphics: a private copy of the VRAM areas the sub-screen and the HUD use, filled from the same files the game uploads:
+  `SYSTEM/A10301.000` (64,0: stone, wood planks, cream windows, Tomba face), `SYSTEM/A00300.000` (128,0: item icons at
+  192,0, event icons at 256,0), `SYSTEM/A10003.GAM` / `SYSTEM/A00000.GAM` (256,256 / 320,256: the HUD's vitality fruit,
+  lives, digits), `AREA00/CLUT01.GAM` (128,480) and the 48 x 31 palette block of `SYSTEM/D0SPSUB.BIN` +0x98B8 (288,480).
+  The sprite rects are coordinates seen in the primitives the game sends (`--dump-draws`); the event icon of event k is the
+  first part of frame `ICONS[k]` (D0SPSUB +0x1694C) of the sub-screen sprite bank `AREA19/A103.GAM` (tools/event_icons.py),
+  the item icon n the cell (n % 15 * 16 + 8, n / 15 * 16 + 8) with CLUT row `ITEM_ICON_CLUTS[n]` (D0SPSUB +0x21C60).
+- Text: the game's WFM fonts (`AREA00/MFNT000L.WFM`, `MFNT001L`, `AREAnn/MFNTnn0L` until the alphabet is complete: 8 / 16 px;
+  `CFNT999L.WFM`: the 24 px event-title letters; L = the `--lang` letter B F G I H S P W D). A WFM glyph is a bitmap with no
+  character code: each is named by the SHA-1 of its image through `runtime/panel_charmap.h` (hashes only, generated from
+  `tools/wfm_charmap.json` by `port2/tools/gen_panel_charmap.py`). No colon glyph exists: two dots, as the game does.
+- Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
 
 - Header: the area and room names of the game's own map screen (`MAP_AREA_NAMES[link.c]`, `MAP_ROOM_NAMES[link.c][link.d]`
   of the room's `MAP_LINKS` entry, `MAP_ROOM_LINK[area][section]`; AREA14 by section) and the play time.
-- Status: vitality (hearts) / max, AP, lives, level, the red / green / blue exp levels and bars, weapon and pants (item
-  names; the weapon id -> item id pairs of `subScreenDrawItemGrid`; an unknown id shows `#n`).
-- Events in progress: SCRIPT_FLAGS 1..0xFE of ids 0..0x81 with their names (`EVENT_NAME_STRINGS`), and the count completed.
+- Layout: the wooden title bar (area name), three tabs (Mapa / Eventos / Lateral), pink page in a stone border, cream windows.
+- Status: the HUD's vitality fruit (segments = vitality / max, the number in the middle), lives, AP, play time, events seen.
+- Events in progress: SCRIPT_FLAGS 1..0xFE of ids 0..0x81 with their icons and names (`EVENT_NAME_STRINGS`).
 - Map: the game's map graph seen from above (x, z of `MAP_NODES`), the routes (`MAP_AREA_ROUTES`) of each region the player
   has revealed (`D_8009D2C4[region]`) plus the current one, the room's link in pink with a marker on its middle (where
   `subScreenMapInitMarker` puts the pause map's marker). Not drawn: the pause map's 3D terrain model, its icons.
@@ -2321,11 +2334,11 @@ rasterised by `port2/tools/gen_panel_font.py` into `runtime/panel_font.h`; no ga
   Labels are Spanish with `--lang 5`, English otherwise. Before a game starts (play time 0) it shows a waiting page.
 - PC: `--second-screen` (with `--window`) opens a second window (window surface, no renderer: the game window may
   hold the GL context); closing it hides the panel, closing the game window quits. `--dump-panel DIR` writes
-  `panel_NNNNNN.png` every `--dump-every` frames; `--panel-size WxH` picks the layout's aspect (e.g. `1080x1240`).
+  `panel_NNNNNN.png` every `--dump-every` frames; `--panel-size WxH` is the display size (default 828x720; `1240x1080` = AYN Thor).
 - Android: launcher option *Segunda pantalla: mapa y estado* (default on when `DisplayManager` lists a
   `DISPLAY_CATEGORY_PRESENTATION` display) adds `--second-screen`; `TombiActivity` shows an `android.app.Presentation`
   (not focusable: the controller stays with the game) whose view polls `nativePanelFrame` ~30 times a second and draws
-  the buffer aspect-fit; displays added / removed while playing are followed, no second display changes nothing.
+  the canvas scaled by the largest integer that fits (nearest neighbour); displays added / removed while playing are followed, no second display changes nothing.
   The natives are registered by libtombi.so itself (`RegisterNatives` on the activity's class on the first panel frame),
   since loader.c loads it `RTLD_LOCAL`.
 - Off: one flag test in `port_gpu_vblank`; verified headless: the standard run's 36 frames are byte-identical with and
