@@ -18,13 +18,11 @@
         android:appCategory="game"
         android:hardwareAccelerated="true"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        <activity android:name="org.libsdl.app.SDLActivity"
+        <!-- the launcher (Selva design; LauncherActivity.java) comes first and starts the game with its arguments -->
+        <activity android:name=".LauncherActivity"
             android:label="@string/app_name"
-            android:alwaysRetainTaskState="true"
-            android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
-            android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
-            android:preferMinimalPostProcessing="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,5 +30,14 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- the game (SDLActivity) in its own process: libmain.so reserves the low range in JNI_OnLoad, once per process -->
+        <activity android:name=".TombiActivity"
+            android:label="@string/app_name"
+            android:process=":game"
+            android:alwaysRetainTaskState="true"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+            android:preferMinimalPostProcessing="true"
+            android:exported="false" />
     </application>
 </manifest>

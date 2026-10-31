@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subtitle">PORT NATIVO · ANDROID</string>
+    <string name="play">¡A jugar!</string>
+    <string name="options">Opciones</string>
+    <string name="data">Disco y datos</string>
+    <string name="quit">Salir</string>
+    <string name="back">Volver</string>
+    <string name="on">Sí</string>
+    <string name="off">No</string>
+    <string name="opt_lang">Idioma del juego</string>
+    <string name="opt_aspect">Aspecto</string>
+    <string name="opt_cut">Contenido recortado</string>
+    <string name="opt_debug">Menú de depuración</string>
+    <string name="opt_renderer">Renderizador</string>
+    <string name="renderer_soft">Software</string>
+    <string name="renderer_gl">OpenGL ES (experimental)</string>
+    <string name="opt_skipintro">Saltar logos y vídeo inicial</string>
+    <string name="opt_hz60">60 Hz (velocidad NTSC)</string>
+    <string name="opt_fps60">60 fps</string>
+    <string name="opt_showfps">Mostrar FPS</string>
+    <string name="opt_inflives">Vidas infinitas</string>
+    <string name="opt_infhealth">Salud infinita</string>
+    <string name="aspect_auto">Auto</string>
+    <string name="chip_cut_on">Recortado: sí</string>
+    <string name="chip_cut_off">Recortado: no</string>
+    <string name="opt_hint">Cruceta: elegir · Izq./Der. o A: cambiar · B: volver. Las opciones de files/args.txt se siguen añadiendo.</string>
+    <string name="data_ok">Datos del juego encontrados (manifest.txt).</string>
+    <string name="data_missing">No se encuentran los datos del juego.</string>
+    <string name="data_path">Carpeta: %1$s</string>
+    <string name="data_howto">Prepara la carpeta data a partir de tu propio disco de Tombi! con el launcher de PC o tools/extract_data.py (contiene manifest.txt) y cópiala a la carpeta de arriba, o impórtala aquí. La app no incluye datos del juego.</string>
+    <string name="data_import">Importar carpeta data…</string>
+    <string name="data_copying">Copiando… %1$d archivos</string>
+    <string name="data_done">Importación terminada: %1$d archivos.</string>
+    <string name="data_bad">Esa carpeta no tiene manifest.txt (elige la carpeta data preparada).</string>
+    <string name="data_fail">Error al importar: %1$s</string>
+    <string name="data_nosaf">Este dispositivo no tiene selector de carpetas.</string>
+    <string name="need_data">Primero copia los datos del juego (Disco y datos).</string>
+</resources>

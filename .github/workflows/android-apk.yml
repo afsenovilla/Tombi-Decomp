@@ -141,6 +141,18 @@ jobs:
         with:
           gradle-version: "8.5"
 
+      # The launcher's fonts (SIL OFL 1.1), from google/fonts at a pinned commit; never committed (.gitignore)
+      - name: Launcher fonts (Lilita One, Nunito; OFL)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          GF=https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec
+          D=port2/android/app/src/main/assets/fonts; mkdir -p "$D"
+          curl -fsSL -o "$D/LilitaOne-Regular.ttf" "$GF/ofl/lilitaone/LilitaOne-Regular.ttf"
+          curl -fsSL -o "$D/LilitaOne-OFL.txt" "$GF/ofl/lilitaone/OFL.txt"
+          curl -fsSL -o "$D/Nunito.ttf" "$GF/ofl/nunito/Nunito%5Bwght%5D.ttf"
+          curl -fsSL -o "$D/Nunito-OFL.txt" "$GF/ofl/nunito/OFL.txt"
+          ls -l "$D"
+
       - name: Build the APK (debug-signed)
         if: steps.fetch.outputs.ok == 'true'
         run: |
@@ -154,6 +166,7 @@ jobs:
           mkdir -p dist/android
           cp "$APK" dist/android/tombi-port-armeabi-v7a-debug.apk
           cp "$SDL2_SOURCE/LICENSE.txt" dist/android/SDL2-LICENSE.txt
+          cp port2/android/app/src/main/assets/fonts/*-OFL.txt dist/android/
 
       # Optional release signing; without the four secrets the APK stays debug-signed.  Never commit a keystore.
       - name: Sign with the release keystore (optional)

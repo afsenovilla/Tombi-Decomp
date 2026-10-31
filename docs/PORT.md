@@ -406,13 +406,22 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
 - **Data.** `Android/data/io.github.tombi.port/files/data` (the PC `--data` folder, with `manifest.txt`); when it is
   missing, a message box gives the path. Saves go to `files/saves`, the log to `files/tombi.log`, extra PC flags
   to `files/args.txt` (defaults: `--fullscreen --renderer soft --widescreen auto`: the pad fits the panel, e.g. 107 on a 20:9 phone; `--aspect 4:3` in args.txt for 4:3). Input: SDL GameController (built-in pads).
+- **Launcher.** `LauncherActivity` (plain Canvas, "Selva" design, 1280x720 virtual space scaled to the panel) is the
+  app's entry: *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
+  with the chosen flags as `argv[1..]`, which `loader.c` puts after its defaults and before `files/args.txt` (still
+  read, so it overrides). *Opciones* (SharedPreferences): `--lang` 0/5/6/7/8, `--aspect auto|4:3|16:9|21:9`,
+  `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps60`, `--show-fps`, infinite
+  lives/health (the `tools/port_mods.py` pokes). *Disco y datos*: manifest.txt check, path, how to prepare, and a SAF
+  folder import (`ACTION_OPEN_DOCUMENT_TREE`, the folder or its `data/` child, copied into `files/data`). Gamepad
+  (D-pad, A, B/Back, Start) and touch; English + Spanish strings. Fonts Lilita One and Nunito (OFL) are fetched by CI
+  from google/fonts at a pinned commit into `assets/fonts` (not committed; OFL texts shipped with the APK artifact).
 - **Beta releases / signing.** `gh workflow run android-apk.yml -f publish=true` creates the pre-release
   `android-beta-<run_number>` (not "Latest"; the APK renamed `tombi-port-android-beta-<n>.apk`). Optional release
   signing (zipalign + apksigner from the runner SDK) when all four secrets exist: `ANDROID_KEYSTORE_B64` (base64 of the
   keystore), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`; otherwise it stays debug-signed.
   Never commit a keystore.
 - **PC builds unchanged**: same i386 disassembly, title smoke frames byte-identical, `--test-null` ok.
-- Not done yet: running on a device, the GLES path of `gpu_gl.c`, SAF disc import, touch overlay, arm64 (phase 2).
+- Not done yet: running on a device, the GLES path of `gpu_gl.c`, SAF disc-image import (folder import done), touch overlay, arm64 (phase 2).
   Roadmap: `notes/roadmap.md` "Android".
 
 ## 5. Inventory

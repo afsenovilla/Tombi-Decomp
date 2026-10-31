@@ -49,3 +49,4 @@ game_beta980203
 # built binaries are published as GitHub Releases (.github/scripts/publish-release.sh), not committed
 /dist/*
 !/dist/README.md
+port2/android/app/src/main/assets/fonts/

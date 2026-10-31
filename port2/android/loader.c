@@ -59,7 +59,6 @@ static int fail(const char *title, const char *msg) {
 int SDL_main(int argc, char *argv[]) {
     static char msg[1024], data[512], saves[512], logp[512], argsbuf[2048];
     char *args[64]; int n = 0;
-    (void)argc;
     const char *files = SDL_AndroidGetExternalStoragePath();     /* Android/data/<package>/files (created by SDL) */
     if (!files) return fail("Tombi!", "No app storage folder (SDL_AndroidGetExternalStoragePath failed).");
     snprintf(data, sizeof data, "%s/data", files);
@@ -98,6 +97,8 @@ int SDL_main(int argc, char *argv[]) {
     args[n++] = (char *)"--fullscreen";
     args[n++] = (char *)"--renderer"; args[n++] = (char *)"soft";
     args[n++] = (char *)"--widescreen"; args[n++] = (char *)"auto";   /* fit the panel (args.txt "--aspect 4:3" turns it off) */
+    /* the launcher's choices (LauncherActivity -> TombiActivity.getArguments(): SDL passes them as argv[1..]) */
+    for (int i = 1; argv && i < argc && argv[i] && n < 56; i++) args[n++] = argv[i];
     {   /* files/args.txt: extra PC flags, whitespace separated (later flags override the defaults above) */
         char ap[600]; snprintf(ap, sizeof ap, "%s/args.txt", files);
         FILE *f = fopen(ap, "r");

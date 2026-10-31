@@ -1,4 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tombi!</string>
+    <string name="subtitle">NATIVE PORT · ANDROID</string>
+    <string name="play">Let\'s play!</string>
+    <string name="options">Options</string>
+    <string name="data">Disc and data</string>
+    <string name="quit">Quit</string>
+    <string name="back">Back</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="opt_lang">Game language</string>
+    <string name="opt_aspect">Aspect</string>
+    <string name="opt_cut">Cut content</string>
+    <string name="opt_debug">Debug menu</string>
+    <string name="opt_renderer">Renderer</string>
+    <string name="renderer_soft">Software</string>
+    <string name="renderer_gl">OpenGL ES (experimental)</string>
+    <string name="opt_skipintro">Skip intro logos and movie</string>
+    <string name="opt_hz60">60 Hz (NTSC speed)</string>
+    <string name="opt_fps60">60 fps</string>
+    <string name="opt_showfps">Show FPS</string>
+    <string name="opt_inflives">Infinite lives</string>
+    <string name="opt_infhealth">Infinite health</string>
+    <string name="aspect_auto">Auto</string>
+    <string name="chip_cut_on">Cut content: on</string>
+    <string name="chip_cut_off">Cut content: off</string>
+    <string name="opt_hint">D-pad: choose · Left/Right or A: change · B: back. Extra flags in files/args.txt are still added.</string>
+    <string name="data_ok">Game data found (manifest.txt).</string>
+    <string name="data_missing">Game data not found.</string>
+    <string name="data_path">Folder: %1$s</string>
+    <string name="data_howto">Prepare the data folder from your own Tombi! disc with the PC launcher or tools/extract_data.py (it contains manifest.txt), then copy it to the folder above, or import it here. The app ships no game data.</string>
+    <string name="data_import">Import data folder…</string>
+    <string name="data_copying">Copying… %1$d files</string>
+    <string name="data_done">Import finished: %1$d files.</string>
+    <string name="data_bad">That folder has no manifest.txt (pick the prepared data folder).</string>
+    <string name="data_fail">Import failed: %1$s</string>
+    <string name="data_nosaf">This device has no folder picker.</string>
+    <string name="need_data">Copy the game data first (Disc and data).</string>
 </resources>

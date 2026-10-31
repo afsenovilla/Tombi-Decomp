@@ -55,6 +55,7 @@ Order by expected yield per effort: areas whose PAL twin is fully matched and th
 - [x] port2 builds for armeabi-v7a (ARM null-page emulation, coroutines, thunks, loader below 16 MB) — low
 - [x] Gradle/NDK project + `android-apk.yml` (debug APK artifact) — medium
 - [ ] First run on a handheld (Retroid / AYN Odin): logcat + `files/tombi.log`, fix crashes (VFP loads from null, Thumb faults, layout reservation) — medium
+- [x] Native launcher (Selva design: play / options / disc+data with SAF folder import; ES+EN) — medium
 - [ ] GLES path of `shims/gpu_gl.c` on Android (soft renderer is the default now) — medium
 - [ ] In-app options screen writing `files/args.txt` (language, 60 fps, widescreen, renderer) — low
 - [ ] SAF import: pick a .bin/.cue/.chd, verify MAIN0 SHA-1, run extract_data logic natively into `files/data` — medium
