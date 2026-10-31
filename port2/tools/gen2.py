@@ -489,7 +489,9 @@ def libc_symbols(nm):
     for p in ([os.environ["PORT2_LIBC"]] if os.environ.get("PORT2_LIBC") else []) + ["/usr/lib32/libc.so.6", "/usr/lib/i386-linux-gnu/libc.so.6", "/lib32/libc.so.6"]:
         if os.path.exists(p):
             r = subprocess.run([nm, "-D", p], capture_output=True, text=True).stdout
-            return set(l.split()[2].split("@")[0] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] in "TWiD")
+            out = set(l.split()[2].split("@")[0] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] in "TWiD")
+            if os.environ.get("PORT2_LIBC"): out.add("atexit")     # bionic: defined in crtbegin_so.o, not in libc.so
+            return out
     return set()
 
 
