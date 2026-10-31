@@ -15,8 +15,9 @@ android {
         applicationId 'io.github.tombi.port'
         minSdk 23                      // android_dlopen_ext (21+); 23: the oldest level recent NDKs target
         targetSdk 34
-        versionCode 1
-        versionName '0.1'
+        // every CI build a higher versionCode, so a newer beta installs over the old one (same signing key needed too)
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
+        versionName "0.1.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
         ndk { abiFilters 'armeabi-v7a' }   // phase 1 pointer model: 32-bit only (arm64 needs phase 2)
         externalNativeBuild {
             cmake {
