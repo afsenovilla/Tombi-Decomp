@@ -566,9 +566,33 @@ void func_8004AE7C(u8 *o) {
 /* --widescreen (port/fixes.txt, callAreaModelLinkHook): the per-area hook picks which 80-unit-wide blocks of the
  * area's background model (all already in RAM) are drawn this frame from the camera X (scratchpad 0x176,
  * SCREEN_ORIGIN_X).  With wider screens the blocks just past the 4:3 window popped in at the edges, so for the areas
- * whose hook only selects blocks (no palette uploads or counters: GAME 0, 1, 2, 3, 7) it is run again with the camera
+ * whose hook selects blocks (GAME 0, 1, 2, 3, 7; AREA03's other work is kept out, below) it is run again with the camera
  * moved left and right and the extra blocks are added to the list (capacity 88, the size the game's own clear keeps).
- * Drawing only: nothing else reads the list.  Off (port_ws_cull 0) the hook runs once exactly as before. */
+ * Drawing only: nothing else reads the list.  Off (port_ws_cull 0) the hook runs once exactly as before.
+ * What of AREA03's hook (animateArea3Palettes) the extra runs must not pick up or repeat:
+ *  - sections 2/3 store block k at slot k - base and count only k >= 0, so with the camera moved left of the room's
+ *    start (base < 0) the first slots of the zeroed list stay 0 and are counted: a NULL block went into the list and
+ *    drawModelUnlit(NULL) walked the kernel area from address 0 (harmless while page 0 is zero; once something has
+ *    written there, e.g. the KomaPig `(*(short *)o->d90)--` through a NULL d90, it read the count 0xFFFE and ran off
+ *    page 0: the access violation in modelDrawFT3 at the left end of the Lava Caves with --aspect 16:9).  Null
+ *    entries are skipped.
+ *  - section 2 uploads the lava CLUT rows every 8 frames from counters kept in the list (loadArea3ClutRows) and
+ *    section 3 copies VRAM once, guarded by the list's byte 0x164: on the zeroed list the extra runs re-uploaded the
+ *    rows of step 0 over the game's (the lava stood still) and repeated the copy every frame.  For these two sections
+ *    the extra runs do only the block selection of the hook (area3_blocks), nothing else. */
+/* animateArea3Palettes (src/x003) sections 2/3, the block selection alone: blocks base..base+10 of the WMD list */
+extern short getScrollOffsetX(void);
+static void area3_blocks(u32 *o, const u8 *tbl)
+{
+    int n = tbl[0];
+    const s32 *list = (const s32 *)(tbl + 4);
+    s16 base = (SPAD(s16, 0x176) + getScrollOffsetX()) / 80;
+    for (int i = 0; i < 11; i++) {
+        int k = base + i;
+        if (k >= n) break;
+        if (k >= 0) { o[1 + i] = (u32)(unsigned long)tbl + list[k]; ((u8 *)o)[3]++; }
+    }
+}
 extern int port_ws_cull;
 void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int game, u16 *origin_x)
 {
@@ -576,16 +600,20 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
     if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7)) return;
     static u32 tmp[0x5b + 4];
     int d = 2 * port_ws_cull + 40;
+    u16 sec = *(volatile u16 *)PORT_M0(0x8009C962u);
+    int a3 = game == 3 && (sec == 2 || sec == 3);
     for (int s = -1; s <= 1; s += 2) {
         s16 cam = SPAD(s16, 0x176); u16 ox = *origin_x;
         memset(tmp, 0, sizeof tmp);
         SPAD(s16, 0x176) = cam + s * d; *origin_x = ox + s * d;
-        hook((char *)tmp, wmd);
+        if (a3) area3_blocks(tmp, (u8 *)wmd);
+        else hook((char *)tmp, wmd);
         SPAD(s16, 0x176) = cam; *origin_x = ox;
         int n = ((u8 *)tmp)[3]; if (n > 88) n = 88;
         for (int i = 0; i < n; i++) {
             u8 cnt = (u8)list[3]; int k;
             if (cnt >= 88) return;
+            if (!tmp[1 + i]) continue;                        /* a slot the hook counted but did not fill */
             for (k = 0; k < cnt; k++) if (((u32 *)list)[1 + k] == tmp[1 + i]) break;
             if (k == cnt) { ((u32 *)list)[1 + cnt] = tmp[1 + i]; list[3] = cnt + 1; }
         }
