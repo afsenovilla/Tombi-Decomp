@@ -962,8 +962,19 @@ void port_fps60_wait(unsigned long long due_us, unsigned long long period_us, in
     if (due_us > port_time_us()) port_sleep_until_us(due_us);
 }
 
+/* runtime/panel.c (--second-screen / --dump-panel): its PNG dumps */
+int port_gpu_write_png(const char *path, const u8 *rgb, int w, int h) { return write_png(path, rgb, w, h); }
+void port_mkdir(const char *dir) {
+#ifdef _WIN32
+    _mkdir(dir);
+#else
+    mkdir(dir, 0777);
+#endif
+}
+
 void port_gpu_vblank(void) {
     { extern int port_debug_menu; extern void port_debug_draw(void); if (port_debug_menu) port_debug_draw(); }
+    { extern int port_panel_on; extern void port_panel_vblank(void); if (port_panel_on) port_panel_vblank(); }
     if (port_fps60 && be == &port_gpu_gl) fps60_vblank();
     else if (port_window) present_window();
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;

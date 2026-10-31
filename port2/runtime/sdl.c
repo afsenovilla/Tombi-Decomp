@@ -22,6 +22,8 @@ static SDL_Texture *tex;
 static int tex_w, tex_h;
 static SDL_GLContext glctx;
 static void pump(void);
+static SDL_Window *pwin;          /* --second-screen: the panel's window (runtime/panel.c) */
+static int pwin_closed;
 static int win_hidden;             /* --headless --renderer gl: a hidden window carries the context */
 static SDL_AudioDeviceID dev;
 static SDL_GameController *ctrl;
@@ -166,6 +168,11 @@ static void pump(void) {
     while (SDL_PollEvent(&e)) {
         switch (e.type) {
         case SDL_QUIT: port_printf("[port2] window closed\n"); port_quit(0);
+        case SDL_WINDOWEVENT:   /* two windows (--second-screen): closing the game's ends the game, closing the panel's hides it */
+            if (e.window.event != SDL_WINDOWEVENT_CLOSE) break;
+            if (pwin && e.window.windowID == SDL_GetWindowID(pwin)) { SDL_DestroyWindow(pwin); pwin = NULL; pwin_closed = 1; break; }
+            if (win && e.window.windowID == SDL_GetWindowID(win)) { port_printf("[port2] window closed\n"); port_quit(0); }
+            break;
         case SDL_KEYDOWN:
             if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) { port_printf("[port2] escape\n"); port_quit(0); }
             if (e.key.keysym.scancode == SDL_SCANCODE_F1 && !e.key.repeat) { extern int port_debug_key; port_debug_key = 1; break; }   /* --debug-menu */
@@ -238,4 +245,22 @@ int port_window_refresh(void) {
     SDL_DisplayMode m;
     if (!win || win_hidden || SDL_GetWindowDisplayMode(win, &m) < 0) return 0;
     return m.refresh_rate > 0 && m.refresh_rate <= 360 ? m.refresh_rate : 0;
+}
+
+/* --second-screen on the PC: the panel (runtime/panel.c, RGBA) in a window of its own, through the window surface (no
+   renderer: the game window may carry the OpenGL context) */
+void port_panel_window_frame(const unsigned char *rgba, int w, int h) {
+    if (!win || pwin_closed) return;
+    if (!pwin) {
+        pwin = SDL_CreateWindow("Tombi! - map and status", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, 0);
+        if (!pwin) { port_printf("[port2] --second-screen: SDL_CreateWindow: %s\n", SDL_GetError()); pwin_closed = 1; return; }
+        SDL_RaiseWindow(win);
+    }
+    {   int cw, ch; SDL_GetWindowSize(pwin, &cw, &ch); if (cw != w || ch != h) SDL_SetWindowSize(pwin, w, h); }
+    SDL_Surface *sf = SDL_GetWindowSurface(pwin);
+    if (!sf) return;
+    SDL_LockSurface(sf);
+    SDL_ConvertPixels(w < sf->w ? w : sf->w, h < sf->h ? h : sf->h, SDL_PIXELFORMAT_ABGR8888, rgba, w * 4, sf->format->format, sf->pixels, sf->pitch);
+    SDL_UnlockSurface(sf);
+    SDL_UpdateWindowSurface(pwin);
 }

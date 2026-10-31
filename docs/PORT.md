@@ -2300,6 +2300,37 @@ Verified headless (soft renderer; the overlay also on OpenGL under xvfb and with
 - infinite vitality (a `--poke` of the health to 1 shows 4/4), give item 5, event flag set, event 3 started with
   its "Take Me Home" banner and +1000 AP; slow 300 frames 10.3 s (normal 6 s for the same part), fast 500 frames 2.8 s (10 s).
 
+### Second screen: `--second-screen`, `--dump-panel DIR` (port only, opt-in)
+
+A live "map + status" panel for dual-screen handhelds (AYN Thor...): the game stays on the main screen and never
+pauses; `port2/runtime/panel.c` draws the panel into its own RGBA buffer (640 x 400..640 landscape, 540 x 600..900
+portrait, after the display's aspect) from the game's RAM, about 25 times a second, with its own fonts (Inter, SIL OFL,
+rasterised by `port2/tools/gen_panel_font.py` into `runtime/panel_font.h`; no game graphics).
+
+- Header: the area and room names of the game's own map screen (`MAP_AREA_NAMES[link.c]`, `MAP_ROOM_NAMES[link.c][link.d]`
+  of the room's `MAP_LINKS` entry, `MAP_ROOM_LINK[area][section]`; AREA14 by section) and the play time.
+- Status: vitality (hearts) / max, AP, lives, level, the red / green / blue exp levels and bars, weapon and pants (item
+  names; the weapon id -> item id pairs of `subScreenDrawItemGrid`; an unknown id shows `#n`).
+- Events in progress: SCRIPT_FLAGS 1..0xFE of ids 0..0x81 with their names (`EVENT_NAME_STRINGS`), and the count completed.
+- Map: the game's map graph seen from above (x, z of `MAP_NODES`), the routes (`MAP_AREA_ROUTES`) of each region the player
+  has revealed (`D_8009D2C4[region]`) plus the current one, the room's link in pink with a marker on its middle (where
+  `subScreenMapInitMarker` puts the pause map's marker). Not drawn: the pause map's 3D terrain model, its icons.
+- The tables come from the user's disc at start: `SYSTEM/D0SPSUB.BIN` for the graph (MAIN0 addresses), `SYSTEM/DnSPSUB.BIN`
+  (n = `--lang`) for the names: that file is linked elsewhere, so each pointer table is the run of overlay pointers of the
+  same length nearest to MAIN0's (checked on all nine languages). Strings: the sub-screen glyph ids (`tools/subscreen_text.py`).
+  Labels are Spanish with `--lang 5`, English otherwise. Before a game starts (play time 0) it shows a waiting page.
+- PC: `--second-screen` (with `--window`) opens a second window (window surface, no renderer: the game window may
+  hold the GL context); closing it hides the panel, closing the game window quits. `--dump-panel DIR` writes
+  `panel_NNNNNN.png` every `--dump-every` frames; `--panel-size WxH` picks the layout's aspect (e.g. `1080x1240`).
+- Android: launcher option *Segunda pantalla: mapa y estado* (default on when `DisplayManager` lists a
+  `DISPLAY_CATEGORY_PRESENTATION` display) adds `--second-screen`; `TombiActivity` shows an `android.app.Presentation`
+  (not focusable: the controller stays with the game) whose view polls `nativePanelFrame` ~30 times a second and draws
+  the buffer aspect-fit; displays added / removed while playing are followed, no second display changes nothing.
+  The natives are registered by libtombi.so itself (`RegisterNatives` on the activity's class on the first panel frame),
+  since loader.c loads it `RTLD_LOCAL`.
+- Off: one flag test in `port_gpu_vblank`; verified headless: the standard run's 36 frames are byte-identical with and
+  without `--dump-panel`.
+
 ### Open points / next
 
 1. The "code labels kept" of a loaded overlay (2312 for X000, 2298 in the audit's `label-jtbl` column plus 9

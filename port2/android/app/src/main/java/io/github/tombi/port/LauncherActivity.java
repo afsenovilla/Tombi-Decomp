@@ -91,6 +91,12 @@ public class LauncherActivity extends Activity {
     }
     int aspectIdx() { return clamp(prefs.getInt("aspect", 0), ASPECTS.length); }
     boolean flag(String k, boolean def) { return prefs.getBoolean(k, def); }
+    /* second screen panel (runtime/panel.c, TombiActivity): default on when the device has a secondary display */
+    boolean secondScreenOn() {
+        android.hardware.display.DisplayManager dm = (android.hardware.display.DisplayManager) getSystemService(DISPLAY_SERVICE);
+        boolean has = dm != null && dm.getDisplays(android.hardware.display.DisplayManager.DISPLAY_CATEGORY_PRESENTATION).length > 0;
+        return flag("secondscreen", has);
+    }
     static int clamp(int v, int n) { return v < 0 || v >= n ? 0 : v; }
 
     File filesDir() {
@@ -142,6 +148,7 @@ public class LauncherActivity extends Activity {
             if (LANG_N[langIdx()] == 0 && patchAsset("en_cut_content.tpatch") != null) { a.add("--patch-dir"); a.add(new File(filesDir(), "patches").getAbsolutePath()); }
         }
         if (flag("debugmenu", false)) a.add("--debug-menu");
+        if (secondScreenOn()) a.add("--second-screen");
         if (flag("skipintro", false)) a.add("--skip-intro");
         if (flag("hz60", false)) { a.add("--hz"); a.add("60"); }
         if (flag("fps60", false)) a.add("--fps60");
@@ -363,6 +370,10 @@ public class LauncherActivity extends Activity {
                 items.add(tpi);
                 items.add(toggle(R.string.opt_cut, "cut"));
                 items.add(toggle(R.string.opt_debug, "debugmenu"));
+                Item ss = new Item(getString(R.string.opt_secondscreen), null);
+                ss.value = onoff(secondScreenOn());
+                ss.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("secondscreen", !secondScreenOn()).apply(); } };
+                items.add(ss);
                 Item r = new Item(getString(R.string.opt_renderer), null);
                 r.value = getString(flag("gl", false) ? R.string.renderer_gl : R.string.renderer_soft);
                 r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
