@@ -267,6 +267,11 @@ static const char *page_name(int p) {
     return p == PAGE_MAP ? T("Map", "Mapa") : p == PAGE_EVENTS ? T("Events", "Eventos") : T("Side map", "Lateral");
 }
 
+/* touch / mouse targets registered while drawing (canvas coordinates) */
+enum { HS_PAGE = 0x100, HS_FILTER = 0x200, HS_ROW = 0x300, HS_BACK = 0x400, HS_PREV = 0x500, HS_NEXT = 0x600 };
+static struct { short x, y, w, h; int id; } hs[64]; static int nhs;
+static void hot(int x, int y, int w, int h, int id) { if (nhs < 64) { hs[nhs].x = (short)x; hs[nhs].y = (short)y; hs[nhs].w = (short)w; hs[nhs].h = (short)h; hs[nhs].id = id; nhs++; } }
+
 static void header(const char *title) {
     int W = pa_cw;
     stone(0, 0, W, pa_ch);
@@ -277,12 +282,13 @@ static void header(const char *title) {
     int n = NPAGES, tw = (W - 16 * (n + 1)) / n;
     for (int i = 0; i < n; i++) {
         int x = 16 + i * (tw + 16);
-        plank(x, 26, tw);
+        plank(x, 26, tw); hot(x, 26, tw, 24, HS_PAGE + i);
         ctext(x + tw / 2, 30, 16, page_name(i), i == page ? C_WHITE : C_DARK, C_WOODE);
     }
     pa_fill(4, 52, W - 8, pa_ch - 56, C_PINK);
 }
 
+static int map_mark_link = -1, map_mark_ev = -1;   /* the event browser's marker (a room link) */
 static void draw_map(int x, int y, int w, int h, int link) {
     window_(x, y, w, h);
     int mx = x + 7, my = y + 7, mw = w - 14, mh = h - 14;
@@ -323,6 +329,16 @@ static void draw_map(int x, int y, int w, int h, int link) {
             int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2, bob = (port_frame / 10) & 1;
             face(cx - 12, cy - 26 - bob);
             pa_fill(cx - 1, cy - 3 - bob, 3, 3, RGB(255, 96, 160));
+        }
+    }
+    if (map_mark_link >= 0 && map_mark_link < NLINKS) {
+        int a = links[map_mark_link][0], b = links[map_mark_link][1];
+        if (a < NNODES && b < NNODES) {
+            int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2;
+            line(PX(a), PY(a), PX(b), PY(b), 2, RGB(255, 220, 64));
+            dot(cx, cy - 12, 13, C_WHITE);
+            pa_event_icon(cx - 12, cy - 20, map_mark_ev, 0);
+            for (int i = 0; i < 4; i++) pa_fill(cx - 3 + i, cy + 1 + i, 7 - 2 * i, 1, C_RED);
         }
     }
     pa_clip_x0 = cx0; pa_clip_y0 = cy0; pa_clip_x1 = cx1; pa_clip_y1 = cy1;
@@ -399,7 +415,7 @@ static void room_names(int play, int area, int sec, int link, const char **an, c
     else if (link >= 0) { int c = links[link][2], d = links[link][3]; *an = c < 12 ? area_name[c] : NULL; *rn = c < 12 && d < 24 ? room_name[c][d] : NULL; }
 }
 
-static void page_events(int play) { (void)play; window_(8, 56, pa_cw - 16, pa_ch - 64); }
+#include "panel_events.inc"
 
 static void layout(void);
 static void render(void) {
@@ -410,7 +426,7 @@ static void render(void) {
     room_names(play, area, sec, link, &an, &rn);
     if (!play) an = T("Waiting for the game...", "Esperando a la partida...");
     else if (!an) { snprintf(ab, sizeof ab, T("Area %d", "\xC1rea %d"), area); an = ab; }
-    pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = pa_cw; pa_clip_y1 = pa_ch;
+    pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = pa_cw; pa_clip_y1 = pa_ch; nhs = 0;
     header(page == PAGE_MAP ? an : page_name(page));
     if (page == PAGE_MAP) page_map(play, link);
     else page_events(play);
@@ -463,23 +479,69 @@ static jint JNICALL n_frame(JNIEnv *env, jclass c, jobject buf, jintArray dims, 
     return r;
 }
 static void JNICALL n_layout(JNIEnv *env, jclass c, jint w, jint h) { (void)env; (void)c; req_w = w; req_h = h; }
+static void JNICALL n_touch(JNIEnv *env, jclass c, jint x, jint y, jint action) { (void)env; (void)c; inq_push(1, action, x, y); }   /* canvas pixels */
 static void android_register(void) {
     JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv(); jobject act = (jobject)SDL_AndroidGetActivity();
     registered = 1;
     if (!env || !act) return;
     jclass cls = (*env)->GetObjectClass(env, act);
-    JNINativeMethod m[] = { { "nativePanelFrame", "(Ljava/nio/ByteBuffer;[II)I", (void *)n_frame }, { "nativePanelLayout", "(II)V", (void *)n_layout } };
-    if ((*env)->RegisterNatives(env, cls, m, 2) != 0) { (*env)->ExceptionClear(env); port_printf("[panel] RegisterNatives failed\n"); }
+    JNINativeMethod m[] = { { "nativePanelFrame", "(Ljava/nio/ByteBuffer;[II)I", (void *)n_frame }, { "nativePanelLayout", "(II)V", (void *)n_layout },
+                              { "nativePanelTouch", "(III)V", (void *)n_touch } };
+    if ((*env)->RegisterNatives(env, cls, m, 3) != 0) { (*env)->ExceptionClear(env); port_printf("[panel] RegisterNatives failed\n"); }
     else port_printf("[panel] JNI ready\n");
     (*env)->DeleteLocalRef(env, cls); (*env)->DeleteLocalRef(env, act);
 }
 #endif
 
+/* input queue: touches / clicks (canvas pixels) and keys, from the Android UI thread or the SDL loop, applied before drawing */
+static struct { short kind, a, x, y; } inq[64]; static int inq_n;
+#ifdef __ANDROID__
+static pthread_mutex_t inq_mtx = PTHREAD_MUTEX_INITIALIZER;
+#define INQ_LOCK() pthread_mutex_lock(&inq_mtx)
+#define INQ_UNLOCK() pthread_mutex_unlock(&inq_mtx)
+#else
+#define INQ_LOCK()
+#define INQ_UNLOCK()
+#endif
+static void inq_push(int kind, int a, int x, int y) {
+    INQ_LOCK();
+    if (inq_n < 64) { inq[inq_n].kind = (short)kind; inq[inq_n].a = (short)a; inq[inq_n].x = (short)x; inq[inq_n].y = (short)y; inq_n++; }
+    INQ_UNLOCK();
+}
+static void inq_run(void) {
+    INQ_LOCK();
+    for (int i = 0; i < inq_n; i++) { if (inq[i].kind) panel_touch_canvas(inq[i].x, inq[i].y, inq[i].a); else panel_action(inq[i].a); }
+    inq_n = 0;
+    INQ_UNLOCK();
+}
+/* PC window: mouse in window pixels (the canvas x pk), keys as IN_* */
+void port_panel_touch(int x, int y, int action) { inq_push(1, action, x / (pk ? pk : 1), y / (pk ? pk : 1)); }
+void port_panel_key(int a) { inq_push(0, a, 0, 0); }
+/* --panel-input FRAME:ACTION,... (headless tests): up down left right ok back tabl tabr, tap@X@Y (canvas pixels) */
+static const char *panel_script;
+void port_panel_input_script(const char *s) { panel_script = s; }
+static void script_step(void) {
+    static const char *names[] = { "", "up", "down", "left", "right", "ok", "back", "tabl", "tabr" };
+    for (const char *p = panel_script; p && *p;) {
+        int f = atoi(p); const char *c = strchr(p, ':'), *e = strchr(p, ',');
+        if (!c) break;
+        if (f == port_frame) {
+            char a[24]; int n = (int)((e ? e : c + strlen(c)) - c - 1); if (n > 23) n = 23; memcpy(a, c + 1, n); a[n] = 0;
+            int x, y;
+            if (sscanf(a, "tap@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); inq_push(1, 1, x, y); }
+            else for (int i = 1; i < 9; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);
+        }
+        p = e ? e + 1 : NULL;
+    }
+}
+
 static int frames;
 /* every vblank (shims/gpu.c port_gpu_vblank) while the panel is on */
 void port_panel_vblank(void) {
     int dump = port_panel_dump_dir && port_dump_every > 0 && port_frame % port_dump_every == 0;
+    if (panel_script) script_step();
     if (!dump && (frames++ & 1)) return;   /* ~25 fps is plenty */
+    inq_run();
     render();
 #ifdef __ANDROID__
     if (dump) upscale();

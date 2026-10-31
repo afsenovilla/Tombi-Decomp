@@ -173,7 +173,22 @@ static void pump(void) {
             if (pwin && e.window.windowID == SDL_GetWindowID(pwin)) { SDL_DestroyWindow(pwin); pwin = NULL; pwin_closed = 1; break; }
             if (win && e.window.windowID == SDL_GetWindowID(win)) { port_printf("[port2] window closed\n"); port_quit(0); }
             break;
+        case SDL_MOUSEBUTTONDOWN: case SDL_MOUSEBUTTONUP: case SDL_MOUSEMOTION: {   /* the panel window (runtime/panel.c) */
+            extern void port_panel_touch(int, int, int);
+            Uint32 id = e.type == SDL_MOUSEMOTION ? e.motion.windowID : e.button.windowID;
+            if (!pwin || id != SDL_GetWindowID(pwin)) break;
+            if (e.type == SDL_MOUSEMOTION) { if (e.motion.state & SDL_BUTTON_LMASK) port_panel_touch(e.motion.x, e.motion.y, 2); }
+            else if (e.button.button == SDL_BUTTON_LEFT) port_panel_touch(e.button.x, e.button.y, e.type == SDL_MOUSEBUTTONDOWN ? 0 : 1);
+            break;
+        }
         case SDL_KEYDOWN:
+            if (pwin && e.key.windowID == SDL_GetWindowID(pwin)) {   /* keys typed in the panel window drive the panel, not the game */
+                extern void port_panel_key(int);
+                static const struct { SDL_Scancode sc; int a; } pk[] = { {SDL_SCANCODE_UP, 1}, {SDL_SCANCODE_DOWN, 2}, {SDL_SCANCODE_LEFT, 3},
+                    {SDL_SCANCODE_RIGHT, 4}, {SDL_SCANCODE_RETURN, 5}, {SDL_SCANCODE_BACKSPACE, 6}, {SDL_SCANCODE_Q, 7}, {SDL_SCANCODE_E, 8} };
+                for (unsigned i = 0; i < sizeof pk / sizeof pk[0]; i++) if (pk[i].sc == e.key.keysym.scancode) port_panel_key(pk[i].a);
+                break;
+            }
             if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) { port_printf("[port2] escape\n"); port_quit(0); }
             if (e.key.keysym.scancode == SDL_SCANCODE_F1 && !e.key.repeat) { extern int port_debug_key; port_debug_key = 1; break; }   /* --debug-menu */
             if (e.key.keysym.scancode == SDL_SCANCODE_F11 && !e.key.repeat) {
@@ -182,7 +197,7 @@ static void pump(void) {
                 break;
             }
             keys_down |= key_mask(e.key.keysym.scancode); seen_since |= key_mask(e.key.keysym.scancode); break;
-        case SDL_KEYUP: keys_down &= ~key_mask(e.key.keysym.scancode); break;
+        case SDL_KEYUP: if (pwin && e.key.windowID == SDL_GetWindowID(pwin)) break; keys_down &= ~key_mask(e.key.keysym.scancode); break;
         case SDL_CONTROLLERBUTTONDOWN: ctrl_down |= ctrl_mask(e.cbutton.button); seen_since |= ctrl_mask(e.cbutton.button); break;
         case SDL_CONTROLLERBUTTONUP: ctrl_down &= ~ctrl_mask(e.cbutton.button); break;
         case SDL_CONTROLLERDEVICEADDED: if (!ctrl) ctrl = SDL_GameControllerOpen(e.cdevice.which); break;

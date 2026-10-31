@@ -29,6 +29,7 @@ public class TombiActivity extends SDLActivity {
     /* registered at run time by libtombi.so (runtime/panel.c, RegisterNatives on this class) */
     static native int nativePanelFrame(ByteBuffer dst, int[] dims, int lastSeq);
     static native void nativePanelLayout(int w, int h);
+    static native void nativePanelTouch(int x, int y, int action);   // canvas pixels; 0 down, 1 up, 2 move
 
     private DisplayManager dm;
     private PanelPresentation panel;
@@ -94,7 +95,7 @@ public class TombiActivity extends SDLActivity {
         @Override
         protected void onCreate(Bundle b) {
             super.onCreate(b);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL   // touchable, never takes the controller
                     | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             setContentView(new PanelView(getContext()));
         }
@@ -137,12 +138,28 @@ public class TombiActivity extends SDLActivity {
             }
         }
 
+        private int scale = 1;
+
+        @Override
+        public boolean onTouchEvent(android.view.MotionEvent e) {
+            int a = e.getActionMasked();
+            int act = a == android.view.MotionEvent.ACTION_DOWN ? 0 : a == android.view.MotionEvent.ACTION_UP ? 1
+                    : a == android.view.MotionEvent.ACTION_MOVE ? 2 : -1;
+            if (act < 0 || bmp == null) return true;
+            try {
+                nativePanelTouch((int) ((e.getX() - dst.left) / scale), (int) ((e.getY() - dst.top) / scale), act);
+            } catch (UnsatisfiedLinkError ignored) {
+            }
+            return true;
+        }
+
         @Override
         protected void onDraw(Canvas c) {
             if (bmp == null) return;
             int W = getWidth(), H = getHeight(), w = bmp.getWidth(), h = bmp.getHeight();
             int k = Math.max(1, Math.min(W / w, H / h));   // integer scale (the canvas is the display / k)
             int dw = w * k, dh = h * k;
+            scale = k;
             src.set(0, 0, w, h);
             dst.set((W - dw) / 2, (H - dh) / 2, (W - dw) / 2 + dw, (H - dh) / 2 + dh);
             c.drawBitmap(bmp, src, dst, paint);
