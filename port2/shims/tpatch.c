@@ -1,7 +1,7 @@
 /* --text-patch FILE (docs/PORT.md "Standalone (no launcher) mode"): text patches applied in memory, from the disc image
    (or a pristine data/), with no launcher and no Python: what tools/data_patch.py writes into data/ for the PC launcher.
-   FILE is a .tpatch (tools/tpatch_build.py: the patched files as COPY runs of the disc's own files + LITERAL bytes of our
-   encoded text) or the *.tombipatch.json it was compiled from (the .tpatch next to it is used; its recorded sha1 of the
+   FILE is a .tpatch (tools/tpatch_build.py: the patched files as COPY runs of the disc's own files, GLYPH ops that build a
+   moved/composed glyph bitmap from rows of the disc's glyphs, and LITERAL bytes of our own encoded text only) or the *.tombipatch.json it was compiled from (the .tpatch next to it is used; its recorded sha1 of the
    JSON must match, else the patch is refused as stale).  Each rebuilt file is checked against its sha1 and served for the
    LBA ranges it occupies (its own place, plus the LBA past the end of the disc a grown file moved to, which the patched
    MAINn.EXE table points at) and for reads by name (port_cd_read_named).  Sources and results are verified by sha1: a
@@ -72,8 +72,8 @@ int port_tpatch_load(const char *arg) {
         else { port_printf("[tpatch] cannot read %s\n", arg); return -1; }
         snprintf(path + (L - strlen(suf)), sizeof path - (L - strlen(suf)), ".tpatch");
     }
-    if (!(b = slurp(path, &n)) || n < 58 || memcmp(b, "TPCH", 4) || u32(b + 4) != 1) {
-        port_printf("[tpatch] %s: %s\n", path, b ? "not a version 1 .tpatch (tools/tpatch_build.py)" : "cannot open (compile the JSON with tools/tpatch_build.py)");
+    if (!(b = slurp(path, &n)) || n < 58 || memcmp(b, "TPCH", 4) || u32(b + 4) != 2) {
+        port_printf("[tpatch] %s: %s\n", path, b ? "not a version 2 .tpatch (tools/tpatch_build.py)" : "cannot open (compile the JSON with tools/tpatch_build.py)");
         free(b); return -1;
     }
     unsigned ns = u32(b + 8), ne = u32(b + 12), p = 16 + 40, i, k;
@@ -113,6 +113,22 @@ int port_tpatch_load(const char *arg) {
             if (b[p] == 0) {
                 unsigned s = u16(b + p + 1), off = u32(b + p + 3), len = u32(b + p + 7); p += 11;
                 if (s >= ns || off + len > ssz[s] || o + len > f->size) ok = 0; else { memcpy(f->data + o, src[s] + off, len); o += len; }
+            } else if (b[p] == 2) {     /* GLYPH: w x h 4bpp bitmap, each row a (shifted) row of a disc glyph */
+                unsigned w = u16(b + p + 1), h = u16(b + p + 3), len = (w * h + 1) / 2, r, c; p += 5;
+                if (o + len > f->size || p + 8u * h > (unsigned)n) { ok = 0; break; }
+                memset(f->data + o, 0, len);
+                for (r = 0; r < h && ok; r++, p += 8) {
+                    unsigned s = u16(b + p), off = u32(b + p + 2), sr = b[p + 6]; int dx = (signed char)b[p + 7];
+                    if (sr == 0xFF) continue;
+                    if (s >= ns || sr >= h || off + (w * h + 1) / 2 > ssz[s]) { ok = 0; break; }
+                    for (c = 0; c < w; c++) {
+                        int sc = (int)c - dx;
+                        if (sc < 0 || sc >= (int)w) continue;
+                        unsigned k = sr * w + sc, q = r * w + c, v = src[s][off + k / 2] >> (k & 1 ? 4 : 0) & 15;
+                        f->data[o + q / 2] |= (unsigned char)(v << (q & 1 ? 4 : 0));
+                    }
+                }
+                o += len;
             } else {
                 unsigned len = u32(b + p + 1); p += 5;
                 if (o + len > f->size || p + len > (unsigned)n) ok = 0; else { memcpy(f->data + o, b + p, len); o += len; p += len; }

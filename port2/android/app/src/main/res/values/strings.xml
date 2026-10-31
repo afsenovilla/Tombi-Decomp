@@ -4,7 +4,7 @@
     <string name="subtitle">NATIVE PORT · ANDROID</string>
     <string name="play">Let\'s play!</string>
     <string name="options">Options</string>
-    <string name="data">Disc and data</string>
+    <string name="disc">Disc</string>
     <string name="quit">Quit</string>
     <string name="back">Back</string>
     <string name="on">On</string>
@@ -26,16 +26,10 @@
     <string name="chip_cut_on">Cut content: on</string>
     <string name="chip_cut_off">Cut content: off</string>
     <string name="opt_hint">D-pad: choose · Left/Right or A: change · B: back. Extra flags in files/args.txt are still added.</string>
-    <string name="data_ok">Game data found (manifest.txt).</string>
-    <string name="data_missing">Game data not found.</string>
-    <string name="data_path">Folder: %1$s</string>
-    <string name="data_import">Import data folder…</string>
-    <string name="data_copying">Copying… %1$d files</string>
-    <string name="data_done">Import finished: %1$d files.</string>
-    <string name="data_bad">That folder has no manifest.txt (pick the prepared data folder).</string>
-    <string name="data_fail">Import failed: %1$s</string>
-    <string name="data_nosaf">This device has no folder picker.</string>
-    <string name="need_data">Copy the game data first (Disc and data).</string>
+    <string name="disc_path">Image: %1$s</string>
+    <string name="disc_fail">Copy failed: %1$s</string>
+    <string name="disc_nosaf">This device has no file picker.</string>
+    <string name="need_disc">Pick your disc first (Disc).</string>
     <string name="opt_textpatch">Improved Spanish translation</string>
     <string name="disc_pick">Pick disc image…</string>
     <string name="disc_copying">Copying the disc… %1$d MB</string>
@@ -45,5 +39,6 @@
     <string name="disc_badsha">NOT a compatible disc (MAIN0.EXE sha1 %1$s). The port runs Tombi! PAL SCES-01331; it may fail.</string>
     <string name="disc_nomain0">No EXE/MAIN0.EXE found in that image (pick the .bin or .iso; for a .cue select the .bin too).</string>
     <string name="disc_needbin">Select the .bin together with the .cue.</string>
-    <string name="data_howto">Pick the image of your own Tombi! disc (.bin, .iso, or .cue together with its .bin): it is copied into app storage and checked. Fallback: import or copy a prepared data folder (with manifest.txt) to the folder above. The app ships no game data.</string>
+    <string name="disc_howto">Pick the image of your own Tombi! disc (.bin, .iso, or .cue together with its .bin): it is copied into app storage and checked. The app ships no game data.</string>
+    <string name="disc_missing">No disc image picked: pick your disc.</string>
 </resources>

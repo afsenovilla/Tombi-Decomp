@@ -14,7 +14,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -36,7 +35,7 @@ import java.util.Locale;
 
 /**
  * The launcher shown before the game ("Selva" design, docs/PORT.md "4. Android"): main menu, options (persisted in
- * SharedPreferences, turned into port flags for TombiActivity), disc/data status with a SAF folder import, quit.
+ * SharedPreferences, turned into port flags for TombiActivity), disc status with the disc image picker (SAF), quit.
  * Drawn on a Canvas in a 1280x720 virtual space scaled to the screen; gamepad (D-pad/A/B/Start) and touch.
  * Fonts (OFL, assets/fonts) are fetched by the CI build; without them the system bold face is used.
  */
@@ -47,7 +46,7 @@ public class LauncherActivity extends Activity {
     static final int[] LANG_N = {0, 5, 6, 7, 8};
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
-    static final int REQ_TREE = 1, REQ_DISC = 2;
+    static final int REQ_DISC = 2;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
 
@@ -98,17 +97,12 @@ public class LauncherActivity extends Activity {
         File f = getExternalFilesDir(null);
         return f != null ? f : getFilesDir();
     }
-    File dataDir() { return new File(filesDir(), "data"); }
-    boolean dataValid() {
-        File m = new File(dataDir(), "manifest.txt");
-        return m.isFile() && m.length() > 0;
-    }
 
     File discFile() {
         String d = prefs.getString("disc", null);
         return d != null && new File(d).isFile() ? new File(d) : null;
     }
-    boolean ready() { return discFile() != null || dataValid(); }
+    boolean ready() { return discFile() != null; }
     boolean textPatchOn() { return flag("textpatch", LANG_N[langIdx()] == 5); }
 
     /** files/patches/<name>, (re)extracted from the APK's assets/patches (the files are small; copying each time keeps
@@ -159,8 +153,8 @@ public class LauncherActivity extends Activity {
 
     void play() {
         if (!ready()) {
-            Toast.makeText(this, R.string.need_data, Toast.LENGTH_LONG).show();
-            view.setScreen(LauncherView.DATA);
+            Toast.makeText(this, R.string.need_disc, Toast.LENGTH_LONG).show();
+            view.setScreen(LauncherView.DISC);
             return;
         }
         Intent i = new Intent(this, TombiActivity.class);
@@ -173,23 +167,14 @@ public class LauncherActivity extends Activity {
         catch (Exception e) { return "v?"; }
     }
 
-    // ---- SAF import ----
-    void pickTree() {
-        try {
-            startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), REQ_TREE);
-        } catch (ActivityNotFoundException e) {
-            importStatus = getString(R.string.data_nosaf);
-            view.invalidate();
-        }
-    }
-
+    // ---- SAF disc picker ----
     void pickDisc() {
         Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
         i.setType("*/*");
         i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);   // a .cue together with its .bin
         try { startActivityForResult(i, REQ_DISC); }
-        catch (ActivityNotFoundException e) { status(getString(R.string.data_nosaf)); }
+        catch (ActivityNotFoundException e) { status(getString(R.string.disc_nosaf)); }
     }
 
     String displayName(Uri u) {
@@ -230,7 +215,7 @@ public class LauncherActivity extends Activity {
             status(sha == null ? getString(R.string.disc_nomain0) : MAIN0_SHA1.equals(sha)
                     ? getString(R.string.disc_ok) : getString(R.string.disc_badsha, sha));
         } catch (Exception e) {
-            status(getString(R.string.data_fail, String.valueOf(e.getMessage())));
+            status(getString(R.string.disc_fail, String.valueOf(e.getMessage())));
         }
     }
 
@@ -293,72 +278,6 @@ public class LauncherActivity extends Activity {
                 for (int i = 0; i < data.getClipData().getItemCount(); i++) uris.add(data.getClipData().getItemAt(i).getUri());
             else if (data.getData() != null) uris.add(data.getData());
             if (!uris.isEmpty()) new Thread(new Runnable() { public void run() { importDisc(uris); } }, "tombi-disc").start();
-            return;
-        }
-        if (req != REQ_TREE || res != RESULT_OK || data == null || data.getData() == null) return;
-        final Uri tree = data.getData();
-        new Thread(new Runnable() { public void run() { importTree(tree); } }, "tombi-import").start();
-    }
-
-    static class Doc { String id, name; boolean dir; }
-
-    List<Doc> children(Uri tree, String docId) {
-        List<Doc> out = new ArrayList<>();
-        Uri u = DocumentsContract.buildChildDocumentsUriUsingTree(tree, docId);
-        Cursor c = getContentResolver().query(u, new String[]{DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE}, null, null, null);
-        if (c == null) return out;
-        try {
-            while (c.moveToNext()) {
-                Doc d = new Doc();
-                d.id = c.getString(0); d.name = c.getString(1);
-                d.dir = DocumentsContract.Document.MIME_TYPE_DIR.equals(c.getString(2));
-                out.add(d);
-            }
-        } finally { c.close(); }
-        return out;
-    }
-
-    static Doc find(List<Doc> l, String name, boolean dir) {
-        for (Doc d : l) if (d.dir == dir && d.name != null && d.name.equalsIgnoreCase(name)) return d;
-        return null;
-    }
-
-    int copied;
-
-    void importTree(Uri tree) {
-        try {
-            String root = DocumentsContract.getTreeDocumentId(tree);
-            List<Doc> top = children(tree, root);
-            if (find(top, "manifest.txt", false) == null) {
-                Doc sub = find(top, "data", true);
-                if (sub == null || find(children(tree, sub.id), "manifest.txt", false) == null) {
-                    status(getString(R.string.data_bad));
-                    return;
-                }
-                root = sub.id;
-            }
-            copied = 0;
-            File dst = dataDir();
-            dst.mkdirs();
-            copyDir(tree, root, dst);
-            status(getString(R.string.data_done, copied));
-        } catch (Exception e) {
-            status(getString(R.string.data_fail, String.valueOf(e.getMessage())));
-        }
-    }
-
-    void copyDir(Uri tree, String docId, File dst) throws Exception {
-        byte[] buf = new byte[1 << 16];
-        for (Doc d : children(tree, docId)) {
-            File f = new File(dst, d.name);
-            if (d.dir) { f.mkdirs(); copyDir(tree, d.id, f); continue; }
-            InputStream in = getContentResolver().openInputStream(DocumentsContract.buildDocumentUriUsingTree(tree, d.id));
-            if (in == null) throw new Exception(d.name);
-            OutputStream out = new FileOutputStream(f);
-            try { int n; while ((n = in.read(buf)) > 0) out.write(buf, 0, n); }
-            finally { in.close(); out.close(); }
-            if (++copied % 25 == 0) status(getString(R.string.data_copying, copied));
         }
     }
 
@@ -378,7 +297,7 @@ public class LauncherActivity extends Activity {
     interface Adjust { void by(int d); }
 
     class LauncherView extends View {
-        static final int MAIN = 0, OPTIONS = 1, DATA = 2;
+        static final int MAIN = 0, OPTIONS = 1, DISC = 2;
         int screen = MAIN, focus = 0;
         int[] lastFocus = new int[3];
         List<Item> items = new ArrayList<>();
@@ -408,7 +327,7 @@ public class LauncherActivity extends Activity {
             lastFocus[screen] = focus;
             screen = sc;
             focus = lastFocus[sc];
-            importStatus = sc == DATA ? importStatus : null;
+            importStatus = sc == DISC ? importStatus : null;
             invalidate();
         }
 
@@ -427,7 +346,7 @@ public class LauncherActivity extends Activity {
                 Item a = new Item(getString(R.string.play), new Runnable() { public void run() { play(); } });
                 a.primary = true; items.add(a);
                 items.add(new Item(getString(R.string.options), new Runnable() { public void run() { setScreen(OPTIONS); } }));
-                items.add(new Item(getString(R.string.data), new Runnable() { public void run() { setScreen(DATA); } }));
+                items.add(new Item(getString(R.string.disc), new Runnable() { public void run() { setScreen(DISC); } }));
                 items.add(new Item(getString(R.string.quit), new Runnable() { public void run() { finish(); } }));
             } else if (screen == OPTIONS) {
                 Item l = new Item(getString(R.string.opt_lang), null);
@@ -457,7 +376,6 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             } else {
                 items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
-                items.add(new Item(getString(R.string.data_import), new Runnable() { public void run() { pickTree(); } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             }
             if (focus >= items.size()) focus = 0;
@@ -562,7 +480,7 @@ public class LauncherActivity extends Activity {
             c.scale(s, s);
             if (screen == MAIN) drawMain();
             else if (screen == OPTIONS) drawOptions();
-            else drawData();
+            else drawDisc();
             c.restore();
         }
 
@@ -634,22 +552,21 @@ public class LauncherActivity extends Activity {
             canvas.restore();
         }
 
-        void drawData() {
-            bigTitle(getString(R.string.data), 60, 92);
+        void drawDisc() {
+            bigTitle(getString(R.string.disc), 60, 92);
             File disc = discFile();
-            boolean ok = disc != null ? prefs.getBoolean("disc_ok", false) : dataValid();
-            String head = disc != null ? getString(ok ? R.string.disc_ok : R.string.disc_unverified)
-                    : getString(dataValid() ? R.string.data_ok : R.string.data_missing);
+            boolean ok = disc != null && prefs.getBoolean("disc_ok", false);
+            String head = getString(disc == null ? R.string.disc_missing : ok ? R.string.disc_ok : R.string.disc_unverified);
             tmp.set(640 - 300, 124, 640 + 300, 164);
             p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
             canvas.drawRoundRect(tmp, 20, 20, p);
-            text(nunito, 19, ok || (disc == null && dataValid()) ? SUB : ACCENT);
+            text(nunito, 19, ok ? SUB : ACCENT);
             canvas.drawText((ok ? "✓  " : "✗  ") + head, 640, midBase(tmp), p);
             tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT);
             tp.setTextSize(16); tp.setColor(Color.WHITE);
-            wrapped(getString(R.string.data_path, disc != null ? disc.getAbsolutePath() : dataDir().getAbsolutePath()), 178);
+            if (disc != null) wrapped(getString(R.string.disc_path, disc.getAbsolutePath()), 178);
             tp.setColor(SUB);
-            wrapped(getString(R.string.data_howto), 222);
+            wrapped(getString(R.string.disc_howto), 222);
             String st = importStatus;
             if (st != null) { tp.setColor(Color.WHITE); tp.setTextSize(18); wrapped(st, 330); }
             float y = 400;

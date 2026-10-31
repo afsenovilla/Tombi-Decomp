@@ -6,10 +6,9 @@
  *   1. reserves [PORT2_LOW_BASE, +PORT2_LOW_SIZE) with mmap as early as possible (JNI_OnLoad, when SDLActivity
  *      loads libmain.so, before SDL's threads and the GL driver map anything there);
  *   2. in SDL_main, loads libtombi.so into that reservation with android_dlopen_ext(ANDROID_DLEXT_RESERVED_ADDRESS);
- *   3. finds the game data: the folder tools/extract_data.py / the launcher prepares (the PC port's --data folder:
- *      data/manifest.txt, EXE/MAIN0.EXE, AREAxx/...), in the app's external files dir
- *      (Android/data/<package>/files/data).  No game data is in the APK.  Missing: a message box says where to put it;
- *   4. calls port_main with PC-style flags: --data, --save-dir, --fullscreen, --renderer soft (the GLES path of
+ *   3. needs the disc image the launcher (LauncherActivity) copied from the user's own disc and passes as --disc; no
+ *      game data is in the APK and there is no other source.  Without --disc a message box says to pick the disc;
+ *   4. calls port_main with PC-style flags: the launcher's (--disc ...), --save-dir, --fullscreen, --renderer soft (the GLES path of
  *      shims/gpu_gl.c is untested here), then the words of files/args.txt (any PC flag, e.g. "--lang 5 --fps60").
  * stderr (the port's log) goes to files/tombi.log. */
 #include <android/dlext.h>
@@ -57,28 +56,19 @@ static int fail(const char *title, const char *msg) {
 }
 
 int SDL_main(int argc, char *argv[]) {
-    static char msg[1024], data[512], saves[512], logp[512], argsbuf[2048];
+    static char msg[1024], saves[512], logp[512], argsbuf[2048];
     char *args[64]; int n = 0;
     const char *files = SDL_AndroidGetExternalStoragePath();     /* Android/data/<package>/files (created by SDL) */
     if (!files) return fail("Tombi!", "No app storage folder (SDL_AndroidGetExternalStoragePath failed).");
-    snprintf(data, sizeof data, "%s/data", files);
     snprintf(saves, sizeof saves, "%s/saves", files);
     snprintf(logp, sizeof logp, "%s/tombi.log", files);
     mkdir(saves, 0755);
     if (chdir(files) != 0) __android_log_print(ANDROID_LOG_WARN, TAG, "chdir %s: %s", files, strerror(errno));
-    int has_disc = 0;   /* the launcher picked a disc image (--disc): no data/ folder needed */
+    int has_disc = 0;   /* the launcher passes the disc image picked on the device (--disc): the only game source */
     for (int i = 1; argv && i < argc && argv[i]; i++) if (!strcmp(argv[i], "--disc")) has_disc = 1;
-    if (!has_disc) {
-        char man[600]; struct stat st;
-        snprintf(man, sizeof man, "%s/manifest.txt", data);
-        if (stat(man, &st) != 0) {
-            snprintf(msg, sizeof msg,
-                     "Game data not found.\n\nPick your disc image in the launcher (Disc and data), or copy the data folder prepared from your own Tombi! disc (the same folder the PC port "
-                     "uses with --data: made by the launcher or tools/extract_data.py; it holds manifest.txt) to:\n\n%s\n\n"
-                     "The app ships no game data.", data);
-            return fail("Tombi! - game data missing", msg);
-        }
-    }
+    if (!has_disc)
+        return fail("Tombi! - pick your disc", "No disc image.\n\nOpen the Tombi! launcher and pick the image of your own disc "
+                    "(Disc).\n\nThe app ships no game data.");
     reserve_low();
     if (!low_base) {
         snprintf(msg, sizeof msg, "Could not reserve the low address range the game needs (%s).", low_err);
@@ -94,7 +84,6 @@ int SDL_main(int argc, char *argv[]) {
     if (!port_main) return fail("Tombi!", "libtombi.so has no port_main.");
     if (!freopen(logp, "w", stderr)) __android_log_print(ANDROID_LOG_WARN, TAG, "cannot write %s", logp);
     args[n++] = argv && argv[0] ? argv[0] : (char *)"tombi";
-    if (!has_disc) { args[n++] = (char *)"--data"; args[n++] = data; }
     args[n++] = (char *)"--save-dir"; args[n++] = saves;
     args[n++] = (char *)"--fullscreen";
     args[n++] = (char *)"--renderer"; args[n++] = (char *)"soft";

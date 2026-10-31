@@ -5,29 +5,39 @@
 The JSON holds only our text; turning it into game files needs the WFM encoder, the glyph pool of the disc's fonts and the
 file-table updates of tools/data_patch.py.  This tool runs that exact pipeline once on a developer's extracted disc
 (DATA_DIR = data/ of tools/extract_data.py, pristine) and stores the result as a COPY/LITERAL delta against the files of
-the same disc: every run of 12+ bytes that exists somewhere in the source files becomes a COPY (source file, offset,
-length), the rest are literals (our encoded text: dialogue word indices, headers, sizes, tables).  The player's own disc
-supplies the copied bytes, so the .tpatch carries no game data; --max-literal guards that (the build fails when a file
-needs more literal bytes than that, e.g. glyph bitmaps that are not copies).  The C side checks the sha1 of every source
-file and of every rebuilt file, so a different disc never gets a half-applied patch.
+the same disc, so the literals hold ONLY our own data (our encoded text: dialogue word indices, headers, sizes, the table
+values computed from our text) and everything that comes from the disc is an operation the C applies to the player's own
+files at load time:
+  - COPY: every run of 12+ bytes found in the source files (and, after the check below, every shorter run of 8+);
+  - GLYPH: a glyph bitmap of a WFM that is not a byte copy of a disc glyph (glyphShift: the 16 px ',' and 'u'-acute moved
+    sideways, the 8 px accented letters moved up; composed accented capitals): built row by row from rows of the disc's
+    glyphs (source glyph, row, horizontal shift), so no pixel is stored in the .tpatch.
+The build fails when a literal run still holds 8+ bytes that occur anywhere in the source files (game data), or a file
+needs more than --max-literal literal bytes; it prints what the remaining literal bytes are.  The C side checks the
+sha1 of every source file and of every rebuilt file, so a different disc never gets a half-applied patch.
 
   python3 tools/tpatch_build.py data/ patches/es_mejorada.tombipatch.json -o patches/es_mejorada.tpatch
   python3 tools/tpatch_build.py data/ patches/en_cut_content.tombipatch.json -o patches/en_cut_content.tpatch
 
-Format (little endian): "TPCH" u32 version=1, u32 n_sources, u32 n_entries, char json_sha1[40], u16 title_len, title
+Format (little endian): "TPCH" u32 version=2, u32 n_sources, u32 n_entries, char json_sha1[40], u16 title_len, title
   source: u16 path_len, path, u32 size, u8 sha1[20]
   entry:  u16 path_len, path, u32 size, u8 sha1[20], u8 n_ranges, n_ranges * (u32 lba, u32 sectors), u32 n_ops, ops
           (n_ranges 0: not a disc file, e.g. a --patch-tex TBTX; ranges: where the rebuilt file is read on the CD,
            the original place first, then the LBA past the end of the disc a grown file moved to)
   op:     u8 0 = COPY u16 source, u32 offset, u32 length | u8 1 = LITERAL u32 length, bytes
+        | u8 2 = GLYPH u16 width, u16 height, height * (u16 source, u32 offset, u8 row, i8 dx): writes (width*height+1)/2
+          bytes of 4bpp pixels (low nibble first); output row r = row `row` of the width x height 4bpp image at `offset`
+          of source `source`, moved dx pixels right (pixels moved out are dropped, the rest are 0); row 0xFF = empty
 """
 import argparse, hashlib, json, os, shutil, struct, sys, tempfile
+import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import extract_data as X
 
 K, STRIDE = 12, 4
+CHECK = 8          # no literal run may hold this many bytes that occur in the source files
 
 
 def manifest_files(d):
@@ -84,6 +94,166 @@ class Index:
         return ops
 
 
+def wfm_glyphs(b):
+    """[(image offset, width, height)] of the glyph bitmaps of a WFM3 file, one per distinct offset"""
+    if b[:4] != b"WFM3" or len(b) < 144:
+        return []
+    ng, out = struct.unpack_from("<H", b, 14)[0], {}
+    for i in range(ng):
+        p = struct.unpack_from("<H", b, 144 + 2 * i)[0]
+        if p + 8 > len(b):
+            continue
+        _, h, w, _ = struct.unpack_from("<4H", b, p)
+        n = (w * h + 1) // 2
+        if n and p + 8 + n <= len(b):
+            out[p + 8] = (w, h)
+    return sorted((o, w, h) for o, (w, h) in out.items())
+
+
+def glyph_rows(b, o, w, h):
+    px = []
+    for x in b[o:o + (w * h + 1) // 2]:
+        px += (x & 15, x >> 4)
+    return [tuple(px[r * w:(r + 1) * w]) for r in range(h)]
+
+
+def render_glyph(sources, op):
+    """the bytes a GLYPH op writes (same as port2/shims/tpatch.c)"""
+    _, w, h, spec = op
+    px = [0] * (w * h)
+    for r, sp in enumerate(spec):
+        if sp is None:
+            continue
+        si, o, sr, dx = sp
+        b = sources[si][1]
+        for c in range(w):
+            sc = c - dx
+            if 0 <= sc < w:
+                k = sr * w + sc
+                x = b[o + k // 2]
+                px[r * w + c] = x >> 4 if k & 1 else x & 15
+    if len(px) % 2:
+        px.append(0)
+    return bytes(px[i] | px[i + 1] << 4 for i in range(0, len(px), 2))
+
+
+class Glyphs:
+    """the glyph bitmaps of the source WFMs: exact copies, and rows (with a horizontal shift) to build the others from"""
+
+    def __init__(self, sources):
+        self.sources, self.img, self.byfile, self.rowidx = sources, {}, {}, {}
+        for si, (p, b) in enumerate(sources):
+            if p.upper().endswith(".WFM"):
+                for o, w, h in wfm_glyphs(b):
+                    self.img.setdefault((w, h, b[o:o + (w * h + 1) // 2]), (si, o))
+                    self.byfile.setdefault((si, w, h), []).append((si, o))
+                    self.byfile.setdefault((None, w, h), []).append((si, o))
+
+    def rows(self, key):
+        """{ink of a row without its leading/trailing empty columns: (source, offset, row, first ink column)}"""
+        if key not in self.rowidx:
+            d = {}
+            for si, o in self.byfile.get(key, ()):
+                for r, R in enumerate(glyph_rows(self.sources[si][1], o, key[1], key[2])):
+                    nz = [c for c, x in enumerate(R) if x]
+                    if nz:
+                        d.setdefault(R[nz[0]:nz[-1] + 1], (si, o, r, nz[0]))
+            self.rowidx[key] = d
+        return self.rowidx[key]
+
+    def explain(self, new, o, w, h, prefer):
+        """a GLYPH op that rebuilds the bitmap new[o:...] from rows of the disc's glyphs, or None"""
+        spec = []
+        for R in glyph_rows(new, o, w, h):
+            nz = [c for c, x in enumerate(R) if x]
+            if not nz:
+                spec.append(None)
+                continue
+            ink = R[nz[0]:nz[-1] + 1]
+            hit = self.rows((prefer, w, h)).get(ink) if prefer is not None else None
+            hit = hit or self.rows((None, w, h)).get(ink)
+            if not hit:
+                return None
+            spec.append((hit[0], hit[1], hit[2], nz[0] - hit[3]))
+        op = (2, w, h, spec)
+        return op if render_glyph(self.sources, op) == new[o:o + (w * h + 1) // 2] else None
+
+
+def disc_grams(entries, sources):
+    """{8-byte window of a literal run that occurs in a source file: (source, offset)}"""
+    grams = set()
+    for e in entries:
+        for op in e[3]:
+            if op[0] == 1:
+                L = op[1]
+                grams.update(int.from_bytes(L[i:i + CHECK], "little") for i in range(len(L) - CHECK + 1))
+    found = {}
+    if not grams:
+        return found
+    keys = np.array(sorted(grams), dtype=np.uint64)
+    for si, (_, b) in enumerate(sources):
+        n = len(b) - CHECK + 1
+        if n <= 0:
+            continue
+        a = np.frombuffer(b, dtype=np.uint8)
+        v = np.zeros(n, dtype=np.uint64)
+        for k in range(CHECK):
+            v |= a[k:k + n].astype(np.uint64) << np.uint64(8 * k)
+        for i in np.nonzero(np.isin(v, keys, assume_unique=False))[0]:
+            found.setdefault(int(v[i]), (si, int(i)))
+    return found
+
+
+def copy_disc_runs(entries, sources, found):
+    """turns every literal stretch of 8+ bytes that exists in a source file into a COPY"""
+    for e in entries:
+        ops = []
+        for op in e[3]:
+            if op[0] != 1:
+                ops.append(op)
+                continue
+            L, i, lit = op[1], 0, bytearray()
+            while i < len(L):
+                hit = found.get(int.from_bytes(L[i:i + CHECK], "little")) if i + CHECK <= len(L) else None
+                if hit:
+                    si, o = hit
+                    src, n = sources[si][1], CHECK
+                    while i + n < len(L) and o + n < len(src) and src[o + n] == L[i + n]:
+                        n += 1
+                    if lit:
+                        ops.append((1, bytes(lit))); lit = bytearray()
+                    ops.append((0, si, o, n))
+                    i += n
+                else:
+                    lit.append(L[i]); i += 1
+            if lit:
+                ops.append((1, bytes(lit)))
+        e[3] = ops
+
+
+def op_len(op):
+    return op[3] if op[0] == 0 else len(op[1]) if op[0] == 1 else (op[1] * op[2] + 1) // 2
+
+
+def literal_kind(path, new, o):
+    """what a literal byte at offset o of a rebuilt file is (for the report)"""
+    if path.upper().endswith(".WFM") and new[:4] == b"WFM3":
+        dpt, nd, ng = struct.unpack_from("<IHH", new, 8)
+        if o < 144:
+            return "WFM header (sizes, counts)"
+        if o < 144 + 2 * ng:
+            return "WFM glyph pointer table"
+        if dpt <= o < dpt + 2 * nd:
+            return "WFM dialogue pointer table"
+        if o >= dpt + 2 * nd:
+            return "WFM dialogue words (our text: glyph indices, codes)"
+        for p in struct.unpack_from("<%dH" % ng, new, 144):
+            if p <= o < p + 8:
+                return "WFM glyph headers (width, height, advance)"
+        return "WFM other"
+    return "%s (file tables / our text)" % (path.split("/")[0] if path.upper().startswith("EXE/") else path.rsplit(".", 1)[-1].upper())
+
+
 def build(data_dir, patch_path, out, max_literal, work=None, log=print):
     import data_patch as DP
     patch = json.load(open(patch_path, encoding="utf-8"))
@@ -106,22 +276,63 @@ def build(data_dir, patch_path, out, max_literal, work=None, log=print):
     sources = [(p, open(os.path.join(data_dir, *p.split("/")), "rb").read()) for p in src_paths]
     sidx = {p: i for i, (p, _) in enumerate(sources)}
     log("indexing %d source files (%d KB)" % (len(sources), sum(len(b) for _, b in sources) >> 10))
-    idx = Index(sources)
-    entries, used, total_lit = [], set(), 0
+    idx, gp = Index(sources), Glyphs(sources)
+    entries = []
     for p, new, ranges in targets:
-        ops = idx.delta(new, sidx.get(p))
-        nlit = sum(len(o[1]) for o in ops if o[0] == 1)
+        segs = []      # the glyph bitmaps of a WFM: a COPY of the same disc glyph, else a GLYPH op (never literal pixels)
+        if p.upper().endswith(".WFM"):
+            for o, w, h in wfm_glyphs(new):
+                n = (w * h + 1) // 2
+                hit = gp.img.get((w, h, new[o:o + n]))
+                op = (0, hit[0], hit[1], n) if hit else gp.explain(new, o, w, h, sidx.get(p))
+                if not op:
+                    raise SystemExit("%s: glyph bitmap at %#x (%dx%d) is not made of rows of the disc's glyphs" % (p, o, w, h))
+                segs.append((o, o + n, op))
+        ops, pos = [], 0
+        for a, e, op in segs:
+            if a < pos:
+                raise SystemExit("%s: overlapping glyph bitmaps at %#x" % (p, a))
+            if a > pos:
+                ops += idx.delta(new[pos:a], sidx.get(p))
+            ops.append(op)
+            pos = e
+        if pos < len(new):
+            ops += idx.delta(new[pos:], sidx.get(p))
+        # the original range first (manifest order is by LBA; the moved copy is past the end of the disc)
+        entries.append([p, new, sorted((lba, n) for lba, n, _ in ranges), ops])
+    log("checking the literals against the source files")
+    copy_disc_runs(entries, sources, disc_grams(entries, sources))
+    left = disc_grams(entries, sources)
+    if left:
+        raise SystemExit("FAIL: %d literal %d-byte runs still occur in the source files (game data)" % (len(left), CHECK))
+    kinds, used, total_lit, nglyph = {}, set(), 0, 0
+    for p, new, _, ops in entries:
+        o, nlit = 0, 0
+        for op in ops:
+            if op[0] == 1:
+                nlit += len(op[1])
+                for j in range(len(op[1])):
+                    k = literal_kind(p, new, o + j)
+                    kinds[k] = kinds.get(k, 0) + 1
+            elif op[0] == 0:
+                used.add(op[1])
+            else:
+                nglyph += 1
+                used |= {sp[0] for sp in op[3] if sp}
+            o += op_len(op)
+        assert o == len(new), p
         total_lit += nlit
         if nlit > max_literal:
             raise SystemExit("%s: %d literal bytes (> --max-literal %d): not compiled" % (p, nlit, max_literal))
-        used |= {o[1] for o in ops if o[0] == 0}
-        # the original range first (manifest order is by LBA; the moved copy is past the end of the disc)
-        entries.append((p, new, sorted((lba, n) for lba, n, _ in ranges), ops))
-        log("  %-24s %6d bytes  %3d ops  %5d literal" % (p, len(new), len(ops), nlit))
+        log("  %-24s %6d bytes  %4d ops  %5d literal" % (p, len(new), len(ops), nlit))
+    log("literal bytes by kind (none of them occurs as %d+ bytes in the disc files; %d glyph bitmaps built by GLYPH ops):"
+        % (CHECK, nglyph))
+    for k, v in sorted(kinds.items(), key=lambda x: -x[1]):
+        log("  %7d  %s" % (v, k))
     used = sorted(used)
     remap = {si: k for k, si in enumerate(used)}
     title = (patch.get("title") or "").encode("utf-8")
-    b = bytearray(b"TPCH" + struct.pack("<III", 1, len(used), len(entries)))
+    b = bytearray(b"TPCH" + struct.pack("<III", 2, len(used), len(entries)))
     b += DP.file_sha1(patch_path).encode() + struct.pack("<H", len(title)) + title
     for si in used:
         p, data = sources[si]
@@ -133,7 +344,14 @@ def build(data_dir, patch_path, out, max_literal, work=None, log=print):
         b += struct.pack("<B", len(ranges)) + b"".join(struct.pack("<II", l, n) for l, n in ranges)
         b += struct.pack("<I", len(ops))
         for o in ops:
-            b += struct.pack("<BHII", 0, remap[o[1]], o[2], o[3]) if o[0] == 0 else struct.pack("<BI", 1, len(o[1])) + o[1]
+            if o[0] == 0:
+                b += struct.pack("<BHII", 0, remap[o[1]], o[2], o[3])
+            elif o[0] == 1:
+                b += struct.pack("<BI", 1, len(o[1])) + o[1]
+            else:
+                b += struct.pack("<BHH", 2, o[1], o[2])
+                for sp in o[3]:
+                    b += struct.pack("<HIBb", remap[sp[0]], sp[1], sp[2], sp[3]) if sp else struct.pack("<HIBb", 0, 0, 0xFF, 0)
     open(out, "wb").write(b)
     log("%s: %d files, %d sources, %d literal bytes, %d bytes" % (out, len(entries), len(used), total_lit, len(b)))
     if not work:

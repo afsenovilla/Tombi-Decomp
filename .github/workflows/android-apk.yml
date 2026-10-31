@@ -4,8 +4,8 @@ name: Native port (Android APK)
 # android-project (port2/android, Gradle + NDK) around port2/CMakeLists.txt.  The runner's preinstalled Android SDK/NDK
 # are used; SDL2 is the pinned release source tarball from GitHub (never vendored).  Like port2-exe.yml, the generator
 # takes the retail addresses and the MAIN0/X000 image from the owner's own disc (GAME_FILES_URL secret), so the game
-# code in libtombi.so is built from that copy; the APK carries NO game data files (the player copies the data/ folder
-# the launcher / tools/extract_data.py prepares to Android/data/io.github.tombi.port/files/data).
+# code in libtombi.so is built from that copy; the APK carries NO game data files (the player picks their own disc image
+# on the device in the launcher; it is the only game source).
 on:
   push:
     branches: [master]

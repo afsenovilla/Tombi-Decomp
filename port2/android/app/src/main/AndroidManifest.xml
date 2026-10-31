@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SDL2's android-project manifest, trimmed: landscape, gamepad first (handhelds: Retroid, AYN Odin...), no
-     permissions (the game data is read from the app's own external files folder, Android/data/<package>/files/data) -->
+     permissions (the disc image the player picks is copied into the app's own external files folder) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     android:installLocation="auto">
     <uses-feature android:glEsVersion="0x00020000" />

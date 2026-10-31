@@ -403,18 +403,18 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   memcpy, which lld cannot alias), parses `llvm-nm -A`, reads bionic's `libc.so` (`PORT2_LIBC`) and turns
   K&R declarations (`extern void f(o);`, which clang rejects) into `f()`. All 3150 game sources and the runtime
   were compiled locally with `clang --target=armv7a` before the first CI run.
-- **Data.** `Android/data/io.github.tombi.port/files/data` (the PC `--data` folder, with `manifest.txt`); when it is
-  missing, a message box gives the path. Saves go to `files/saves`, the log to `files/tombi.log`, extra PC flags
+- **Game source.** Only the disc image the player picks on the device (launcher, *Disco*), passed as `--disc`;
+  without it `loader.c` shows a message box asking to pick the disc. Saves go to `files/saves`, the log to `files/tombi.log`, extra PC flags
   to `files/args.txt` (defaults: `--fullscreen --renderer soft --widescreen auto`: the pad fits the panel, e.g. 107 on a 20:9 phone; `--aspect 4:3` in args.txt for 4:3). Input: SDL GameController (built-in pads).
 - **Launcher.** `LauncherActivity` (plain Canvas, "Selva" design, 1280x720 virtual space scaled to the panel) is the
   app's entry: *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
   with the chosen flags as `argv[1..]`, which `loader.c` puts after its defaults and before `files/args.txt` (still
   read, so it overrides). *Opciones* (SharedPreferences): `--lang` 0/5/6/7/8, `--aspect auto|4:3|16:9|21:9`,
   `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps60`, `--show-fps`, infinite
-  lives/health (the `tools/port_mods.py` pokes). *Disco y datos*: the player picks their own disc image on the device
+  lives/health (the `tools/port_mods.py` pokes). *Disco*: the player picks their own disc image on the device
   (SAF `ACTION_OPEN_DOCUMENT`, `.bin`/`.iso` or `.cue`+`.bin`), copied to `files/disc` and checked by the SHA-1 of
-  `EXE/MAIN0.EXE` (ISO 9660 read in Java, 2048 or raw 2352 sectors); the game then runs with `--disc` (loader.c drops
-  `--data` and its manifest check). Fallback: a prepared `data/` folder (SAF tree import into `files/data`).
+  `EXE/MAIN0.EXE` (ISO 9660 read in Java, 2048 or raw 2352 sectors); the game then runs with `--disc`. There is no
+  other source (no data folder).
   *Traducción mejorada* (default on in Spanish) passes `--text-patch files/patches/es_mejorada.tombipatch.json`
   (extracted from `assets/patches` when the APK carries it). Gamepad
   (D-pad, A, B/Back, Start) and touch; English + Spanish strings. Fonts Lilita One and Nunito (OFL) are fetched by CI
@@ -2429,7 +2429,11 @@ a PC. Everything the PC launcher (`tools/port_launcher.py`, `tools/port_mods.py`
 **Text patches natively.** The JSON holds only our text; turning it into game files needs the WFM encoder and the glyph
 pool of the disc's fonts. `tools/tpatch_build.py DATA_DIR X.tombipatch.json -o X.tpatch` runs the exact Python pipeline
 (`data_patch.apply`) once on a developer's pristine `data/` and stores each rebuilt file as COPY runs of the disc's own
-files plus LITERAL bytes (our encoded text: word indices, headers, tables); `--max-literal` caps literals per file. The
+files, GLYPH ops (format v2: a glyph bitmap that is not a byte copy of a disc glyph, e.g. the glyphShift-moved ',' 'ú'
+and 8 px accents, is built row by row from rows of the disc's glyphs with a horizontal shift, so no pixel is stored)
+and LITERAL bytes that are only our own data (encoded text: word indices, pointer tables, sizes, table values). The build
+fails if any literal run holds 8+ bytes found in the source files, and prints the literal bytes by kind (es_mejorada:
+70363, 173 GLYPH ops; en_cut_content: 376); `--max-literal` caps literals per file. The
 C side reads the sources from the player's disc, checks every source's and every result's sha1 (a different disc gets
 no patch, never half of one) and serves the rebuilt files for their LBA ranges (incl. the post-disc LBA of grown files
 that the patched MAINn.EXE points at) and for reads by name. `--text-patch X.tombipatch.json` uses `X.tpatch` next to
