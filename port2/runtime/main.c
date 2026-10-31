@@ -252,6 +252,8 @@ static void open_game_data(const char *argv0) {
    (no launcher) mode").  As the PC launcher does: with --cut-content in English and no other text patch, the bundled
    en_cut_content.tpatch (English text of the cut lines) from --patch-dir, else patches/ in the cwd or next to the exe. */
 static const char *port_text_patches[8]; static int port_text_patch_n;
+static int port_gfx_es = 1;          /* --no-gfx-es: no native Spanish redraws (--lang 5) */
+void port_gfx_es_load(void);
 static const char *port_patch_dir;
 extern int port_cut_content, port_lang;
 int port_tpatch_load(const char *path);
@@ -296,7 +298,7 @@ static int port_ws_resolve(void) {
 
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
-                "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--text-patch FILE.tpatch|.tombipatch.json]... [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
+                "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--debug-menu] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
@@ -950,6 +952,8 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--dump-draws") && v) { extern const char *port_drawdump_path; port_drawdump_path = argv[++i]; }
         else if (!strcmp(a, "--dump-ram") && v) port_dump_ram_add(argv[++i]);
         else if (!strcmp(a, "--dump-audio") && v) port_audio_path = argv[++i];
+        else if (!strcmp(a, "--gfx-es")) port_gfx_es = 1;
+        else if (!strcmp(a, "--no-gfx-es")) port_gfx_es = 0;
         else if (!strcmp(a, "--skip-movies")) port_skip_movies = 1;
         else if (!strcmp(a, "--skip-intro")) port_skip_movies = 2;
         else if (!strcmp(a, "--play-movies")) port_skip_movies = 0;     /* (the default now; kept for old scripts) */
@@ -992,6 +996,9 @@ int main(int argc, char **argv) {
     port_gpu_start();
     open_game_data(argv[0]);
     open_text_patches(argv[0]);
+    /* --lang 5: the Spanish graphic redraws (CARGANDO, CARGAR / GUARDAR, VUELVE A INTENTARLO) built from the disc data
+       (shims/gfx_es.c, the twin of tools/gfx_es) and loaded as --patch-tex rects; --no-gfx-es keeps the English sprites */
+    if (port_lang == 5 && port_gfx_es) port_gfx_es_load();
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
     SPAD16(0x3D8) = 1;
     SPAD16(0x3DA) = 7;

@@ -181,6 +181,9 @@ public class LauncherActivity extends Activity {
             if (tp != null) { a.add("--text-patch"); a.add(tp.getAbsolutePath()); }
         }
         a.add("--lang"); a.add(String.valueOf(LANG_N[langIdx()]));
+        // Spanish: the graphic redraws (CARGANDO, CARGAR / GUARDAR, VUELVE A INTENTARLO), built by tombi2 itself from
+        // the disc data at startup (shims/gfx_es.c; the PC launcher's tools/gfx_es file is not needed)
+        if (LANG_N[langIdx()] == 5) a.add("--gfx-es");
         a.add("--aspect"); a.add(ASPECTS[aspectIdx()]);
         a.add("--renderer"); a.add(flag("gl", false) ? "gl" : "soft");
         if (flag("cut", false)) {

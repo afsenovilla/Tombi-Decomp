@@ -107,3 +107,6 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         sys.exit("usage: python3 -m gfx_es DATA_DIR OUT.tbtx   (from tools/)")
     print("%d rects" % build(sys.argv[1], sys.argv[2]))
+
+# port2/shims/gfx_es.c is the C twin the port runs by itself at --lang 5 (Android, standalone): it must stay
+# byte-identical to build() here, so mirror any change to these modules there (its header has the comparison command).

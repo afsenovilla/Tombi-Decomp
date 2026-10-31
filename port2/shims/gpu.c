@@ -539,12 +539,25 @@ static struct { u16 x, y, w, h, kx, ky, kw, kh; u32 khash; u8 keyed, resident; i
 static int n_tex_patches, tex_patch_loaded, tex_patch_resident;
 static u8 tex_patch_buf[512 * 1024];
 static u32 tex_patch_used;
+/* port_gfx_es_load (shims/gfx_es.c, --lang 5): the Spanish redraws built in memory, a TBTK image loaded after the
+   --patch-tex files; a rect a file already provides (same x, y: the launcher's tools/gfx_es output) is left to it */
+static const u8 *tex_patch_mem; static unsigned tex_patch_mem_n; static const char *tex_patch_mem_name;
+int port_tex_patch_add_mem(const char *name, unsigned char *buf, unsigned n) {
+    if (tex_patch_mem || tex_patch_loaded) return -1;
+    tex_patch_mem = buf; tex_patch_mem_n = n; tex_patch_mem_name = name;
+    return 0;
+}
+static void tex_patch_parse(const char *path, const u8 *buf, int n, int skip_known);
 static void tex_patch_load_file(const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) { port_printf("[gpu] cannot open %s\n", path); return; }
     u8 *buf = tex_patch_buf + tex_patch_used;
-    int n = (int)fread(buf, 1, sizeof tex_patch_buf - tex_patch_used, f), before = n_tex_patches;
+    int n = (int)fread(buf, 1, sizeof tex_patch_buf - tex_patch_used, f);
     fclose(f);
+    tex_patch_parse(path, buf, n, 0);
+}
+static void tex_patch_parse(const char *path, const u8 *buf, int n, int skip_known) {
+    int before = n_tex_patches, skipped = 0;
     int keyed = n >= 8 && !memcmp(buf, "TBTK", 4);
     if (n < 8 || (!keyed && memcmp(buf, "TBTX", 4))) { port_printf("[gpu] %s: not a TBTX file\n", path); return; }
     u32 count, off = 8, hdr = keyed ? 20 : 8;
@@ -556,6 +569,11 @@ static void tex_patch_load_file(const char *path) {
         if (keyed) memcpy(&kh, buf + off + 16, 4);
         u32 bytes = (u32)h[2] * h[3] * 2;
         if (off + hdr + bytes > (u32)n) break;
+        if (skip_known) {
+            int known = 0;
+            for (int j = 0; j < n_tex_patches; j++) if (tex_patches[j].x == h[0] && tex_patches[j].y == h[1]) known = 1;
+            if (known) { skipped++; off += hdr + bytes; continue; }
+        }
         if (keyed && !(tex_patches[n_tex_patches].saved = (u16 *)malloc(bytes ? bytes : 1))) break;
         tex_patches[n_tex_patches].x = h[0]; tex_patches[n_tex_patches].y = h[1];
         tex_patches[n_tex_patches].w = h[2]; tex_patches[n_tex_patches].h = h[3];
@@ -569,12 +587,14 @@ static void tex_patch_load_file(const char *path) {
         n_tex_patches++;
         off += hdr + bytes;
     }
-    tex_patch_used += (off + 3) & ~3u;
-    port_printf("[gpu] %s: %d texture patches\n", path, n_tex_patches - before);
+    if (buf == tex_patch_buf + tex_patch_used) tex_patch_used += (off + 3) & ~3u;
+    if (skipped) port_printf("[gpu] %s: %d texture patches (%d left to --patch-tex)\n", path, n_tex_patches - before, skipped);
+    else port_printf("[gpu] %s: %d texture patches\n", path, n_tex_patches - before);
 }
 static void tex_patch_load(void) {
     tex_patch_loaded = 1;
     for (int i = 0; i < port_patch_tex_count; i++) tex_patch_load_file(port_patch_tex_paths[i]);
+    if (tex_patch_mem) tex_patch_parse(tex_patch_mem_name, tex_patch_mem, (int)tex_patch_mem_n, 1);
 }
 static int rect_overlap(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh) {
     return !(ax >= bx + bw || ax + aw <= bx || ay >= by + bh || ay + ah <= by);
@@ -589,7 +609,7 @@ static void tex_patch_evict(int i) {
    sprite ask it every frame they draw it, so the game keeps the original sprite otherwise.  A keyed rect is put in VRAM
    here, only while its key holds the original texels. */
 int port_tex_patch_has(int x, int y) {
-    if (!port_patch_tex_count) return 0;
+    if (!port_patch_tex_count && !tex_patch_mem) return 0;
     if (!tex_patch_loaded) tex_patch_load();
     for (int i = 0; i < n_tex_patches; i++) {
         if (tex_patches[i].x != x || tex_patches[i].y != y) continue;
@@ -632,7 +652,7 @@ static void tex_patch_idle(void) {
 }
 /* after LoadImage: plain TBTX rects are re-applied over any upload that touches them */
 static void tex_patch_apply(int x, int y, int w, int h) {
-    if (!port_patch_tex_count) return;
+    if (!port_patch_tex_count && !tex_patch_mem) return;
     if (!tex_patch_loaded) tex_patch_load();
     for (int i = 0; i < n_tex_patches; i++) {
         int px = tex_patches[i].x, py = tex_patches[i].y, pw = tex_patches[i].w, ph = tex_patches[i].h;

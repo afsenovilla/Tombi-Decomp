@@ -97,6 +97,13 @@ target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(port2rt PRIVATE ${CHDR_DIR}/include)
 target_compile_definitions(port2rt PRIVATE PORT_HAVE_CHD)
 target_compile_options(port2rt PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_RT_FLAGS} -O2 -Wall -Wno-unused-function)
+# the Spanish redraws generator must round like Pillow / Python (byte-identical to tools/gfx_es): no fused multiply-adds,
+# and on 32-bit x86 SSE2 doubles instead of the x87's 80-bit intermediates
+if(ANDROID)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shims/gfx_es.c PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-math-errno")
+else()
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shims/gfx_es.c PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-math-errno;-msse2;-mfpmath=sse")
+endif()
 if(ANDROID)
   # -DPORT2_SDL2_SOURCE=DIR: an SDL2 2.30.x source tree (the workflow .github/workflows/android-apk.yml downloads the
   # release tarball; never vendored).  Built here as libSDL2.so; the headers are copied to gen/sdlinc/SDL2 so the
