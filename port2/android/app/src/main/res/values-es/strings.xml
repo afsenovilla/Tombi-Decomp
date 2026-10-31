@@ -28,7 +28,6 @@
     <string name="data_ok">Datos del juego encontrados (manifest.txt).</string>
     <string name="data_missing">No se encuentran los datos del juego.</string>
     <string name="data_path">Carpeta: %1$s</string>
-    <string name="data_howto">Prepara la carpeta data a partir de tu propio disco de Tombi! con el launcher de PC o tools/extract_data.py (contiene manifest.txt) y cópiala a la carpeta de arriba, o impórtala aquí. La app no incluye datos del juego.</string>
     <string name="data_import">Importar carpeta data…</string>
     <string name="data_copying">Copiando… %1$d archivos</string>
     <string name="data_done">Importación terminada: %1$d archivos.</string>
@@ -36,4 +35,14 @@
     <string name="data_fail">Error al importar: %1$s</string>
     <string name="data_nosaf">Este dispositivo no tiene selector de carpetas.</string>
     <string name="need_data">Primero copia los datos del juego (Disco y datos).</string>
+    <string name="opt_textpatch">Traducción mejorada</string>
+    <string name="disc_pick">Elegir imagen del disco…</string>
+    <string name="disc_copying">Copiando el disco… %1$d MB</string>
+    <string name="disc_checking">Comprobando el disco (SHA-1 de MAIN0.EXE)…</string>
+    <string name="disc_ok">Imagen del disco verificada (Tombi! PAL SCES-01331).</string>
+    <string name="disc_unverified">Imagen del disco sin verificar: puede fallar.</string>
+    <string name="disc_badsha">Disco NO compatible (sha1 de MAIN0.EXE %1$s). El port funciona con Tombi! PAL SCES-01331; puede fallar.</string>
+    <string name="disc_nomain0">No hay EXE/MAIN0.EXE en esa imagen (elige el .bin o .iso; con un .cue selecciona también el .bin).</string>
+    <string name="disc_needbin">Selecciona el .bin junto con el .cue.</string>
+    <string name="data_howto">Elige la imagen de tu propio disco de Tombi! (.bin, .iso, o el .cue junto con su .bin): se copia al almacenamiento de la app y se comprueba. Alternativa: importa o copia una carpeta data preparada (con manifest.txt) a la carpeta de arriba. La app no incluye datos del juego.</string>
 </resources>

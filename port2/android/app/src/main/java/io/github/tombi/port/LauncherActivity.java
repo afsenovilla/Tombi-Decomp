@@ -24,6 +24,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.RandomAccessFile;
+import java.security.MessageDigest;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,7 +47,9 @@ public class LauncherActivity extends Activity {
     static final int[] LANG_N = {0, 5, 6, 7, 8};
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
-    static final int REQ_TREE = 1;
+    static final int REQ_TREE = 1, REQ_DISC = 2;
+    static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
+    static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
 
     SharedPreferences prefs;
     LauncherView view;
@@ -99,8 +104,35 @@ public class LauncherActivity extends Activity {
         return m.isFile() && m.length() > 0;
     }
 
+    File discFile() {
+        String d = prefs.getString("disc", null);
+        return d != null && new File(d).isFile() ? new File(d) : null;
+    }
+    boolean ready() { return discFile() != null || dataValid(); }
+    boolean textPatchOn() { return flag("textpatch", LANG_N[langIdx()] == 5); }
+
+    /** files/patches/<name>, extracted from the APK's assets/patches when it is not there yet; null without it. */
+    File textPatch() {
+        File f = new File(new File(filesDir(), "patches"), TEXT_PATCH);
+        if (f.isFile()) return f;
+        try {
+            InputStream in = getAssets().open("patches/" + TEXT_PATCH);
+            f.getParentFile().mkdirs();
+            OutputStream out = new FileOutputStream(f);
+            byte[] buf = new byte[1 << 15]; int n;
+            try { while ((n = in.read(buf)) > 0) out.write(buf, 0, n); } finally { in.close(); out.close(); }
+            return f;
+        } catch (Exception e) { return null; }
+    }
+
     String[] buildArgs() {
         List<String> a = new ArrayList<>();
+        File disc = discFile();
+        if (disc != null) { a.add("--disc"); a.add(disc.getAbsolutePath()); }
+        if (textPatchOn() && LANG_N[langIdx()] == 5) {
+            File tp = textPatch();
+            if (tp != null) { a.add("--text-patch"); a.add(tp.getAbsolutePath()); }
+        }
         a.add("--lang"); a.add(String.valueOf(LANG_N[langIdx()]));
         a.add("--aspect"); a.add(ASPECTS[aspectIdx()]);
         a.add("--renderer"); a.add(flag("gl", false) ? "gl" : "soft");
@@ -116,7 +148,7 @@ public class LauncherActivity extends Activity {
     }
 
     void play() {
-        if (!dataValid()) {
+        if (!ready()) {
             Toast.makeText(this, R.string.need_data, Toast.LENGTH_LONG).show();
             view.setScreen(LauncherView.DATA);
             return;
@@ -141,9 +173,118 @@ public class LauncherActivity extends Activity {
         }
     }
 
+    void pickDisc() {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("*/*");
+        i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);   // a .cue together with its .bin
+        try { startActivityForResult(i, REQ_DISC); }
+        catch (ActivityNotFoundException e) { status(getString(R.string.data_nosaf)); }
+    }
+
+    String displayName(Uri u) {
+        Cursor c = getContentResolver().query(u, new String[]{android.provider.OpenableColumns.DISPLAY_NAME}, null, null, null);
+        if (c != null) try { if (c.moveToFirst() && c.getString(0) != null) return c.getString(0); } finally { c.close(); }
+        String l = u.getLastPathSegment();
+        return l != null ? l.replaceAll(".*[/:]", "") : "disc.bin";
+    }
+
+    /** Copies the picked .bin/.iso (and .cue) into files/disc, checks MAIN0.EXE's SHA-1, remembers the image. */
+    void importDisc(List<Uri> uris) {
+        try {
+            File dir = new File(filesDir(), "disc");
+            dir.mkdirs();
+            File image = null, cue = null;
+            byte[] buf = new byte[1 << 16];
+            for (Uri u : uris) {
+                String name = displayName(u).replace('/', '_');
+                String low = name.toLowerCase(Locale.ROOT);
+                File dst = new File(dir, name);
+                InputStream in = getContentResolver().openInputStream(u);
+                if (in == null) throw new Exception(name);
+                OutputStream out = new FileOutputStream(dst);
+                long total = 0; int n;
+                try {
+                    while ((n = in.read(buf)) > 0) {
+                        out.write(buf, 0, n);
+                        if (((total += n) & ((32 << 20) - 1)) < n) status(getString(R.string.disc_copying, total >> 20));
+                    }
+                } finally { in.close(); out.close(); }
+                if (low.endsWith(".cue")) cue = dst; else image = dst;
+            }
+            if (image == null) { status(getString(R.string.disc_needbin)); return; }
+            status(getString(R.string.disc_checking));
+            String sha = main0Sha1(image);
+            prefs.edit().putString("disc", (cue != null ? cue : image).getAbsolutePath())
+                    .putBoolean("disc_ok", MAIN0_SHA1.equals(sha)).apply();
+            status(sha == null ? getString(R.string.disc_nomain0) : MAIN0_SHA1.equals(sha)
+                    ? getString(R.string.disc_ok) : getString(R.string.disc_badsha, sha));
+        } catch (Exception e) {
+            status(getString(R.string.data_fail, String.valueOf(e.getMessage())));
+        }
+    }
+
+    // ---- ISO 9660 reader (2048-byte .iso or raw 2352-byte .bin, Mode 1 or Mode 2 Form 1) ----
+    RandomAccessFile isoF; int secSize, secOff;
+
+    byte[] sector(int lba) throws Exception {
+        byte[] b = new byte[2048];
+        isoF.seek((long) lba * secSize + secOff);
+        isoF.readFully(b);
+        return b;
+    }
+    static int le32(byte[] b, int o) { return (b[o] & 255) | (b[o + 1] & 255) << 8 | (b[o + 2] & 255) << 16 | (b[o + 3] & 255) << 24; }
+
+    /** {lba, size} of the entry `name` in the directory at (lba, size), or null. */
+    int[] findEntry(int lba, int size, String name) throws Exception {
+        for (int s = 0; s < (size + 2047) / 2048; s++) {
+            byte[] b = sector(lba + s);
+            for (int o = 0; o < 2048 && (b[o] & 255) > 0; o += b[o] & 255) {
+                int nl = b[o + 32] & 255;
+                String n = new String(b, o + 33, nl, "ISO-8859-1");
+                int semi = n.indexOf(';'); if (semi >= 0) n = n.substring(0, semi);
+                if (n.equalsIgnoreCase(name)) return new int[]{le32(b, o + 2), le32(b, o + 10)};
+            }
+        }
+        return null;
+    }
+
+    String main0Sha1(File image) {
+        try {
+            isoF = new RandomAccessFile(image, "r");
+            if (isoF.length() % 2352 == 0) {
+                secSize = 2352;
+                isoF.seek(16L * 2352 + 15);
+                secOff = isoF.read() == 2 ? 24 : 16;
+            } else { secSize = 2048; secOff = 0; }
+            byte[] pvd = sector(16);
+            int[] dir = findEntry(le32(pvd, 156 + 2), le32(pvd, 156 + 10), "EXE");
+            int[] f = dir != null ? findEntry(dir[0], dir[1], "MAIN0.EXE") : null;
+            if (f == null) return null;
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            for (int left = f[1], l = f[0]; left > 0; left -= 2048, l++) md.update(sector(l), 0, Math.min(2048, left));
+            StringBuilder sb = new StringBuilder();
+            for (byte x : md.digest()) sb.append(String.format("%02x", x & 255));
+            return sb.toString();
+        } catch (Exception e) {
+            return null;
+        } finally {
+            try { if (isoF != null) isoF.close(); } catch (Exception e) { /* ignore */ }
+            isoF = null;
+        }
+    }
+
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
         super.onActivityResult(req, res, data);
+        if (req == REQ_DISC && res == RESULT_OK && data != null) {
+            final List<Uri> uris = new ArrayList<>();
+            if (data.getClipData() != null)
+                for (int i = 0; i < data.getClipData().getItemCount(); i++) uris.add(data.getClipData().getItemAt(i).getUri());
+            else if (data.getData() != null) uris.add(data.getData());
+            if (!uris.isEmpty()) new Thread(new Runnable() { public void run() { importDisc(uris); } }, "tombi-disc").start();
+            return;
+        }
         if (req != REQ_TREE || res != RESULT_OK || data == null || data.getData() == null) return;
         final Uri tree = data.getData();
         new Thread(new Runnable() { public void run() { importTree(tree); } }, "tombi-import").start();
@@ -287,6 +428,10 @@ public class LauncherActivity extends Activity {
                 as.value = aspectName(aspectIdx());
                 as.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("aspect", (aspectIdx() + d + ASPECTS.length) % ASPECTS.length).apply(); } };
                 items.add(as);
+                Item tpi = new Item(getString(R.string.opt_textpatch), null);
+                tpi.value = onoff(textPatchOn());
+                tpi.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("textpatch", !textPatchOn()).apply(); } };
+                items.add(tpi);
                 items.add(toggle(R.string.opt_cut, "cut"));
                 items.add(toggle(R.string.opt_debug, "debugmenu"));
                 Item r = new Item(getString(R.string.opt_renderer), null);
@@ -301,6 +446,7 @@ public class LauncherActivity extends Activity {
                 items.add(toggle(R.string.opt_infhealth, "infhealth"));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             } else {
+                items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
                 items.add(new Item(getString(R.string.data_import), new Runnable() { public void run() { pickTree(); } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             }
@@ -445,12 +591,12 @@ public class LauncherActivity extends Activity {
         }
 
         void drawOptions() {
-            bigTitle(getString(R.string.options), 52, 68);
-            float y = 92;
+            bigTitle(getString(R.string.options), 50, 66);
+            float y = 88;
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
                 boolean f = i == focus;
-                it.r.set(640 - 380, y, 640 + 380, y + 40);
+                it.r.set(640 - 380, y, 640 + 380, y + 38);
                 pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
                 int col = f ? ACCENT_TEXT : BG;
                 text(nunito, 19, col);
@@ -462,11 +608,11 @@ public class LauncherActivity extends Activity {
                     p.setTextAlign(Paint.Align.RIGHT);
                     canvas.drawText("‹  " + it.value + "  ›", it.r.right - 26, midBase(it.r), p);
                 }
-                y += 47;
+                y += 44;
             }
             tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB);
             tp.setTextAlign(Paint.Align.LEFT);
-            wrapped(getString(R.string.opt_hint), 680);
+            wrapped(getString(R.string.opt_hint), 684);
         }
 
         void wrapped(String t, float top) {
@@ -479,29 +625,32 @@ public class LauncherActivity extends Activity {
         }
 
         void drawData() {
-            bigTitle(getString(R.string.data), 64, 110);
-            boolean ok = dataValid();
-            tmp.set(640 - 250, 150, 640 + 250, 192);
+            bigTitle(getString(R.string.data), 60, 92);
+            File disc = discFile();
+            boolean ok = disc != null ? prefs.getBoolean("disc_ok", false) : dataValid();
+            String head = disc != null ? getString(ok ? R.string.disc_ok : R.string.disc_unverified)
+                    : getString(dataValid() ? R.string.data_ok : R.string.data_missing);
+            tmp.set(640 - 300, 124, 640 + 300, 164);
             p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
-            canvas.drawRoundRect(tmp, 21, 21, p);
-            text(nunito, 20, ok ? SUB : ACCENT);
-            canvas.drawText((ok ? "✓  " : "✗  ") + getString(ok ? R.string.data_ok : R.string.data_missing), 640, midBase(tmp), p);
+            canvas.drawRoundRect(tmp, 20, 20, p);
+            text(nunito, 19, ok || (disc == null && dataValid()) ? SUB : ACCENT);
+            canvas.drawText((ok ? "✓  " : "✗  ") + head, 640, midBase(tmp), p);
             tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT);
-            tp.setTextSize(17); tp.setColor(Color.WHITE);
-            wrapped(getString(R.string.data_path, dataDir().getAbsolutePath()), 214);
-            tp.setTextSize(17); tp.setColor(SUB);
-            wrapped(getString(R.string.data_howto), 270);
+            tp.setTextSize(16); tp.setColor(Color.WHITE);
+            wrapped(getString(R.string.data_path, disc != null ? disc.getAbsolutePath() : dataDir().getAbsolutePath()), 178);
+            tp.setColor(SUB);
+            wrapped(getString(R.string.data_howto), 222);
             String st = importStatus;
-            if (st != null) { tp.setColor(Color.WHITE); tp.setTextSize(19); wrapped(st, 380); }
-            float y = 450;
+            if (st != null) { tp.setColor(Color.WHITE); tp.setTextSize(18); wrapped(st, 330); }
+            float y = 400;
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
                 boolean f = i == focus;
-                it.r.set(640 - 230, y, 640 + 230, y + 62);
+                it.r.set(640 - 230, y, 640 + 230, y + 58);
                 pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
-                text(nunito, 24, BG);
+                text(nunito, 22, BG);
                 canvas.drawText(it.label, 640, midBase(it.r), p);
-                y += 62 + 5 + 18;
+                y += 58 + 5 + 18;
             }
         }
     }

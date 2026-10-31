@@ -29,7 +29,6 @@
     <string name="data_ok">Game data found (manifest.txt).</string>
     <string name="data_missing">Game data not found.</string>
     <string name="data_path">Folder: %1$s</string>
-    <string name="data_howto">Prepare the data folder from your own Tombi! disc with the PC launcher or tools/extract_data.py (it contains manifest.txt), then copy it to the folder above, or import it here. The app ships no game data.</string>
     <string name="data_import">Import data folder…</string>
     <string name="data_copying">Copying… %1$d files</string>
     <string name="data_done">Import finished: %1$d files.</string>
@@ -37,4 +36,14 @@
     <string name="data_fail">Import failed: %1$s</string>
     <string name="data_nosaf">This device has no folder picker.</string>
     <string name="need_data">Copy the game data first (Disc and data).</string>
+    <string name="opt_textpatch">Improved Spanish translation</string>
+    <string name="disc_pick">Pick disc image…</string>
+    <string name="disc_copying">Copying the disc… %1$d MB</string>
+    <string name="disc_checking">Checking the disc (MAIN0.EXE SHA-1)…</string>
+    <string name="disc_ok">Disc image verified (Tombi! PAL SCES-01331).</string>
+    <string name="disc_unverified">Disc image not verified: it may fail.</string>
+    <string name="disc_badsha">NOT a compatible disc (MAIN0.EXE sha1 %1$s). The port runs Tombi! PAL SCES-01331; it may fail.</string>
+    <string name="disc_nomain0">No EXE/MAIN0.EXE found in that image (pick the .bin or .iso; for a .cue select the .bin too).</string>
+    <string name="disc_needbin">Select the .bin together with the .cue.</string>
+    <string name="data_howto">Pick the image of your own Tombi! disc (.bin, .iso, or .cue together with its .bin): it is copied into app storage and checked. Fallback: import or copy a prepared data folder (with manifest.txt) to the folder above. The app ships no game data.</string>
 </resources>

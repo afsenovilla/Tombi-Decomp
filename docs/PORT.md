@@ -411,8 +411,12 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   with the chosen flags as `argv[1..]`, which `loader.c` puts after its defaults and before `files/args.txt` (still
   read, so it overrides). *Opciones* (SharedPreferences): `--lang` 0/5/6/7/8, `--aspect auto|4:3|16:9|21:9`,
   `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps60`, `--show-fps`, infinite
-  lives/health (the `tools/port_mods.py` pokes). *Disco y datos*: manifest.txt check, path, how to prepare, and a SAF
-  folder import (`ACTION_OPEN_DOCUMENT_TREE`, the folder or its `data/` child, copied into `files/data`). Gamepad
+  lives/health (the `tools/port_mods.py` pokes). *Disco y datos*: the player picks their own disc image on the device
+  (SAF `ACTION_OPEN_DOCUMENT`, `.bin`/`.iso` or `.cue`+`.bin`), copied to `files/disc` and checked by the SHA-1 of
+  `EXE/MAIN0.EXE` (ISO 9660 read in Java, 2048 or raw 2352 sectors); the game then runs with `--disc` (loader.c drops
+  `--data` and its manifest check). Fallback: a prepared `data/` folder (SAF tree import into `files/data`).
+  *Traducción mejorada* (default on in Spanish) passes `--text-patch files/patches/es_mejorada.tombipatch.json`
+  (extracted from `assets/patches` when the APK carries it). Gamepad
   (D-pad, A, B/Back, Start) and touch; English + Spanish strings. Fonts Lilita One and Nunito (OFL) are fetched by CI
   from google/fonts at a pinned commit into `assets/fonts` (not committed; OFL texts shipped with the APK artifact).
 - **Beta releases / signing.** `gh workflow run android-apk.yml -f publish=true` creates the pre-release
@@ -421,7 +425,7 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   keystore), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`; otherwise it stays debug-signed.
   Never commit a keystore.
 - **PC builds unchanged**: same i386 disassembly, title smoke frames byte-identical, `--test-null` ok.
-- Not done yet: running on a device, the GLES path of `gpu_gl.c`, SAF disc-image import (folder import done), touch overlay, arm64 (phase 2).
+- Not done yet: running on a device, the GLES path of `gpu_gl.c`,  touch overlay, arm64 (phase 2).
   Roadmap: `notes/roadmap.md` "Android".
 
 ## 5. Inventory

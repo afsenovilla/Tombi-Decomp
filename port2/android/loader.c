@@ -66,12 +66,14 @@ int SDL_main(int argc, char *argv[]) {
     snprintf(logp, sizeof logp, "%s/tombi.log", files);
     mkdir(saves, 0755);
     if (chdir(files) != 0) __android_log_print(ANDROID_LOG_WARN, TAG, "chdir %s: %s", files, strerror(errno));
-    {
+    int has_disc = 0;   /* the launcher picked a disc image (--disc): no data/ folder needed */
+    for (int i = 1; argv && i < argc && argv[i]; i++) if (!strcmp(argv[i], "--disc")) has_disc = 1;
+    if (!has_disc) {
         char man[600]; struct stat st;
         snprintf(man, sizeof man, "%s/manifest.txt", data);
         if (stat(man, &st) != 0) {
             snprintf(msg, sizeof msg,
-                     "Game data not found.\n\nCopy the data folder prepared from your own Tombi! disc (the same folder the PC port "
+                     "Game data not found.\n\nPick your disc image in the launcher (Disc and data), or copy the data folder prepared from your own Tombi! disc (the same folder the PC port "
                      "uses with --data: made by the launcher or tools/extract_data.py; it holds manifest.txt) to:\n\n%s\n\n"
                      "The app ships no game data.", data);
             return fail("Tombi! - game data missing", msg);
@@ -92,7 +94,7 @@ int SDL_main(int argc, char *argv[]) {
     if (!port_main) return fail("Tombi!", "libtombi.so has no port_main.");
     if (!freopen(logp, "w", stderr)) __android_log_print(ANDROID_LOG_WARN, TAG, "cannot write %s", logp);
     args[n++] = argv && argv[0] ? argv[0] : (char *)"tombi";
-    args[n++] = (char *)"--data"; args[n++] = data;
+    if (!has_disc) { args[n++] = (char *)"--data"; args[n++] = data; }
     args[n++] = (char *)"--save-dir"; args[n++] = saves;
     args[n++] = (char *)"--fullscreen";
     args[n++] = (char *)"--renderer"; args[n++] = (char *)"soft";
