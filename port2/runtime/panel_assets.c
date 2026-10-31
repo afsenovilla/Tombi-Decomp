@@ -153,6 +153,14 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
         }
         for (int k = 0; k < w * h; k++) { idx[k] &= 15; if (pa_drop_mask >> idx[k] & 1) vis[k] = 0; }
     }
+    if (flags & PA_SMALL) {   /* 3/4 size, nearest neighbour (map markers) */
+        int w2 = w * 3 / 4, h2 = h * 3 / 4;
+        for (int j = 0; j < h2; j++) for (int i = 0; i < w2; i++) {
+            int si = (i * 4 + 2) / 3, sj = (j * 4 + 2) / 3; if (si >= w) si = w - 1; if (sj >= h) sj = h - 1;
+            idx[j * w2 + i] = idx[sj * w + si]; vis[j * w2 + i] = vis[sj * w + si];   /* in place: (j, i) <= (sj, si) */
+        }
+        w = w2; h = h2;
+    }
     if (flags & PA_OUTLINE)
         for (int j = -1; j <= h; j++) for (int i = -1; i <= w; i++) {
             if (i >= 0 && j >= 0 && i < w && j < h && vis[j * w + i]) continue;

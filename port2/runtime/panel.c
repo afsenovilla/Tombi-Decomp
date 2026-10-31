@@ -247,7 +247,9 @@ static void ap_badge(int x, int y) {   /* the HUD's "AP" box (drawn, its letters
     pa_text_ol(x + 15 - pa_text_w(8, "AP") / 2, y + 3, 8, "AP", C_WHITE, RGB(40, 30, 70), C_DARK);
 }
 /* Tomba's face: the sub-screen sprite has a green box (CLUT 482 indices 2, 3, 5, 6); the map marker drops it */
-static void face(int x, int y) { pa_cut_mask = 1u << 2 | 1u << 3 | 1u << 5 | 1u << 6; pa_drop_mask = 1u << 3 | 1u << 6; pa_spr(x, y, SUB, 8, 8, 24, 24, 288, 482, PA_CUTBOX | PA_OUTLINE); }
+static void face_f(int x, int y, int f) { pa_cut_mask = 1u << 2 | 1u << 3 | 1u << 5 | 1u << 6; pa_drop_mask = 1u << 3 | 1u << 6; pa_spr(x, y, SUB, 8, 8, 24, 24, 288, 482, PA_CUTBOX | PA_OUTLINE | f); }
+static void face(int x, int y) { face_f(x, y, 0); }
+static void face_mark(int cx, int by) { face_f(cx - 9, by - 18, PA_SMALL); }   /* map marker: 18 x 18, bottom centre at (cx, by) */
 
 static void line(int x0, int y0, int x1, int y1, int t, u32 c) {   /* pixel-art line, t x t brush */
     int dx = x1 > x0 ? x1 - x0 : x0 - x1, dy = y1 > y0 ? y0 - y1 : y1 - y0, sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, e = dx + dy;
@@ -335,7 +337,7 @@ static void draw_map(int x, int y, int w, int h, int link) {
         if (a < NNODES && b < NNODES) {
             line(PX(a), PY(a), PX(b), PY(b), 2, RGB(255, 96, 160));
             int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2, bob = (port_frame / 10) & 1;
-            face(cx - 12, cy - 26 - bob);
+            face_mark(cx, cy - 4 - bob);
             pa_fill(cx - 1, cy - 3 - bob, 3, 3, RGB(255, 96, 160));
         }
     }
@@ -344,7 +346,7 @@ static void draw_map(int x, int y, int w, int h, int link) {
         if (a < NNODES && b < NNODES) {
             int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2;
             line(PX(a), PY(a), PX(b), PY(b), 2, RGB(255, 220, 64));
-            pa_event_icon(cx - 12, cy - 20, map_mark_ev, PA_OUTLINE);
+            pa_event_icon(cx - 9, cy - 15, map_mark_ev, PA_OUTLINE | PA_SMALL);
             for (int i = 0; i < 4; i++) pa_fill(cx - 3 + i, cy + 1 + i, 7 - 2 * i, 1, C_RED);
         }
     }

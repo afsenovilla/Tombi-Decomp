@@ -120,12 +120,12 @@ static void page_side(int play) {
         const PanelEventLoc *L = &panel_event_locs[i];
         if (L->area != 0 || L->sec > 2 || L->x == -32768) continue;
         int ex = WX(L->x), ey = WY(L->y), st = ev_state(L->ev);
-        pa_event_icon(ex - 12, ey - 17, L->ev, PA_OUTLINE | (st == F_PENDING ? PA_DIM : 0));
+        pa_event_icon(ex - 9, ey - 13, L->ev, PA_OUTLINE | PA_SMALL | (st == F_PENDING ? PA_DIM : 0));
     }
     if (here) {
         int tx = WX(px), ty = WY(py), bob = (port_frame / 10) & 1;
-        face(tx - 12, ty - 26 - bob);
-        pa_text_ol(tx - 6, ty - 36 - bob, 8, es() ? "T\xDA" : "YOU", C_YELLOW, C_WOODE, C_DARK);
+        face_mark(tx, ty - 6 - bob);
+        pa_text_ol(tx - 6, ty - 34 - bob, 8, es() ? "T\xDA" : "YOU", C_YELLOW, C_WOODE, C_DARK);
     }
     pa_clip_x0 = cx0; pa_clip_y0 = cy0; pa_clip_x1 = cx1; pa_clip_y1 = cy1;
 }
