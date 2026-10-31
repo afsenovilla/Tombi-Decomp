@@ -406,6 +406,8 @@ def sources(outdir, progs):
             # 11 game files) where gcc only warns: an unprototyped `f()` there (Android builds only: the PC objects
             # stay as they are)
             if os.environ.get("PORT2_ARCH") in ("arm", "wasm"): new = KR_DECL_RE.sub(kr_decl, new)
+            new, left = named_port_args(new)
+            if left: print("gen2: %s: %d PORT_ARG left on the frame pointer" % (pth, left))
             if new != txt: open(pth, "w").write(new)
     amap = AddrMap(outdir)
     res = Resolver(amap)
@@ -454,6 +456,98 @@ def sources(outdir, progs):
 
 # ---------------------------------------------------------------------------------------------------------------
 # step 3: link-time resolution: data image, aliases, stubs
+PORT_ARG_RE = re.compile(r"\bPORT_ARG\((\d+)\)")
+DEF_RE = re.compile(r"(?:^|(?<=;))[ \t]*[A-Za-z_][\w \t\*]*?\b(\w+)\s*\(([^;{)]*(?:\([^)]*\)[^;{)]*)*)\)\s*\{", re.M)
+
+
+def _param_name(p):
+    """the declared name of one parameter (`char *o` -> o, `void (*cb)(int)` -> cb); None when it has none"""
+    m = re.search(r"\(\s*\*\s*(\w+)\s*\)", p)
+    if m: return m.group(1)
+    ids = re.findall(r"[A-Za-z_]\w*", p)
+    return ids[-1] if ids and ids[-1] not in ("void", "int", "char", "short", "long", "unsigned", "signed", "float", "double") else None
+
+
+def named_port_args(txt):
+    """PORT_ARG(i) (port/tools/gen_port.py forward_short_calls: a call passing fewer arguments than the callee takes
+    forwards the caller's incoming argument i, as $a0-$a3 still hold it on the PS1) read the i386 stack slot of the
+    caller's argument i through the frame pointer.  On ARM the arguments arrive in r0-r3, and that slot is unrelated
+    stack (Android SIGBUS in updatePlayer: dispatchScreenEffect forwarded garbage as the player object).  Here the
+    enclosing function names its parameter i instead, gaining hidden `int port_aN` parameters up to the highest i
+    forwarded: a caller's register (ARM) or stack slot (i386, the same slot as before) reaches it like any argument.
+    A function given hidden parameters that this file also calls (a static helper) gets those calls completed with
+    PORT_ARG(i) of their callers, which the next round names in turn.
+    Returns (text, count of PORT_ARG left unnamed)."""
+    for _ in range(8):
+        txt, grown = _name_port_args(txt)
+        if not grown: break
+        for n, k in grown.items():
+            txt = _complete_calls(txt, n, k)
+    return txt, len(PORT_ARG_RE.findall(txt))
+
+
+def _complete_calls(txt, n, k):
+    """calls of n in txt passing fewer than k arguments get PORT_ARG(i) for the missing ones (not its definition)"""
+    edits = []
+    for m in re.finditer(r"(?<![\w.>])%s\s*\(" % re.escape(n), txt):
+        ls = txt.rfind("\n", 0, m.start()) + 1
+        if re.match(r"\s*(?:static|extern|typedef|void|int|char|short|unsigned|signed|long)\b", txt[ls:m.start()]): continue
+        i = m.end() - 1; depth = 0; cnt = 1; empty = True; end = None
+        for j in range(i, len(txt)):
+            c = txt[j]
+            if c == "(": depth += 1
+            elif c == ")":
+                depth -= 1
+                if depth == 0: end = j; break
+            elif c == "," and depth == 1: cnt += 1
+            elif not c.isspace() and depth >= 1 and j > i: empty = False
+        if end is None: continue
+        cnt = 0 if empty else cnt
+        if cnt < k: edits.append((end, ("" if cnt == 0 else ", ") + ", ".join("PORT_ARG(%d)" % a for a in range(cnt, k))))
+    for pos, ins in sorted(edits, reverse=True):
+        txt = txt[:pos] + ins + txt[pos:]
+    return txt
+
+
+def _name_port_args(txt):
+    grown = {}
+    if "PORT_ARG(" not in txt: return txt, grown
+    out, pos = [], 0
+    for m in DEF_RE.finditer(txt):
+        if m.start() < pos or m.group(1) in ("if", "while", "for", "switch", "return"): continue
+        b = m.end() - 1; depth = 0; e = None
+        for j in range(b, len(txt)):
+            c = txt[j]
+            if c == "{": depth += 1
+            elif c == "}":
+                depth -= 1
+                if depth == 0: e = j; break
+        if e is None: break
+        body = txt[b:e]
+        idx = [int(k) for k in PORT_ARG_RE.findall(body)]
+        if not idx: continue
+        raw = m.group(2).strip()
+        parts, d, cur = [], 0, ""
+        for c in raw:
+            if c == "," and d == 0: parts.append(cur); cur = ""; continue
+            d += (c == "(") - (c == ")"); cur += c
+        if cur.strip(): parts.append(cur)
+        if len(parts) == 1 and parts[0].strip() == "void": parts = []
+        if any(p.strip() == "..." for p in parts): continue
+        names = [_param_name(p) for p in parts]
+        if None in names: continue
+        extra = ["int port_a%d" % i for i in range(len(parts), max(idx) + 1)]
+        if extra: grown[m.group(1)] = max(idx) + 1
+        names += ["port_a%d" % i for i in range(len(parts), max(idx) + 1)]
+        params = ", ".join([p.strip() for p in parts] + extra)
+        body = PORT_ARG_RE.sub(lambda k: "((int)(%s))" % names[int(k.group(1))], body)
+        ps, pe = m.start(2), m.end(2)
+        out.append(txt[pos:ps]); out.append(params); out.append(txt[pe:b]); out.append(body)
+        pos = e
+    out.append(txt[pos:])
+    return "".join(out), grown
+
+
 KR_DECL_RE = re.compile(r"^([ \t]*extern\s+[\w\s*]*?\w+)\((?!\s*void\s*\))[A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*\);", re.M)
 KR_TYPES = set("void int short char long unsigned signed float double size_t".split())
 
