@@ -211,7 +211,7 @@ jobs:
           "$BT/apksigner" verify "$RUNNER_TEMP/signed.apk"
           mv "$RUNNER_TEMP/signed.apk" "$A"
           rm -f "$RUNNER_TEMP/release.jks"
-          echo "signed=true" > dist/android/.signed
+          echo "signed=true" > dist/android/SIGNED.txt   # (not a dot file: upload-artifact leaves hidden files out)
 
       - uses: actions/upload-artifact@v4
         if: steps.fetch.outputs.ok == 'true'
@@ -241,7 +241,7 @@ jobs:
           N=${{ github.run_number }}; SHA=${{ github.sha }}; TAG="android-beta-$N"
           APK="tombi-port-android-beta-$N.apk"
           mkdir out; cp art/tombi-port-armeabi-v7a-debug.apk "out/$APK"
-          if [ -f art/.signed ]; then SIG="signed with the project release key"; else SIG="debug-signed: uninstall the old beta before installing a newer one"; fi
+          if [ -f art/SIGNED.txt ]; then SIG="signed with the project release key"; else SIG="debug-signed: uninstall the old beta before installing a newer one"; fi
           {
             echo "**BETA $N - untested on real hardware** (build of ${SHA::7})."; echo
             echo "- Android port of Tombi!, 32-bit ARM (armeabi-v7a). Needs a device with 32-bit app support (most current handhelds); Snapdragon 8 Gen 3 and newer cannot run it."
@@ -249,7 +249,8 @@ jobs:
             echo "- New: crash reports without adb: if the game closes unexpectedly the launcher shows the last lines of the log with Copy report / Share / Export log (also Options > View last log). Disc > Delete data removes the extracted data (saves kept unless ticked)."
             echo "- Launcher options: language, improved Spanish translation toggle (applied in memory, natively), debug menu, cut content, aspect (automatic by default), renderer, 60 Hz, cheats."
             echo "- New: progress bar while copying and checking the disc (percentage, MB, Cancel with B); .chd images (chdman createcd) are read natively, no conversion; a .cue whose FILE name does not match the copied .bin now works (second-screen names/map included); second-screen panel (map + status) for dual-screen handhelds (option Second screen)."
-            echo "- Fixed: the game closed 0.1 s after starting (every log line of the game faulted in vfprintf: \`stderr\` was a stub instead of bionic's); crash reports now name the real function (symbol table kept in libtombi.so)."
+            echo "- Fixed: the game closed during the opening movie (SIGABRT: SDL/JNI called on a game task's stack) and right after New Game (SIGBUS: forwarded arguments read from the wrong place on ARM); signed betas install over the previous one (one last uninstall when coming from a debug-signed beta)."
+            echo "- Fixed earlier: the game closed 0.1 s after starting (every log line of the game faulted in vfprintf: \`stderr\` was a stub instead of bionic's); crash reports now name the real function (symbol table kept in libtombi.so)."
             echo "- Extra flags in \`files/args.txt\`. APK is $SIG."
             echo "- Please report results with the log (launcher: Options > View last log > Share / Export log)."
           } > notes.md
