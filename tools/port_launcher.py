@@ -489,6 +489,47 @@ i18n.add({
            "c.cmd": "Command line", "c.log": "Last lines of the log", "c.status": "Status"},
 })
 
+# the Controls page: the drawn pad (App._pad_draw)
+i18n.add({
+    "es": {"c.controls": "Teclado y mando", "pad.hint": "Haz clic en un botón o en su tecla y pulsa la tecla nueva (Esc cancela). Cambiar una tecla activa las teclas personalizadas.",
+           "pad.press": "Pulsa una tecla", "pad.nokey": "(ninguna)",
+           "pad.note": "Mando: cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro) se usa automáticamente, con los botones en la misma posición del dibujo.",
+           "btn.up": "Arriba", "btn.down": "Abajo", "btn.left": "Izquierda", "btn.right": "Derecha", "btn.cross": "Cruz", "btn.circle": "Círculo",
+           "btn.square": "Cuadrado", "btn.triangle": "Triángulo", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+           "btn.start": "Start", "btn.select": "Select"},
+    "en": {"c.controls": "Keyboard and controller", "pad.hint": "Click a button or its key, then press the new key (Esc cancels). Changing a key turns custom keys on.",
+           "pad.press": "Press a key", "pad.nokey": "(none)",
+           "pad.note": "Controller: any SDL2-compatible pad (Xbox, PS4/PS5, Switch Pro) is used automatically, with the buttons where the drawing has them.",
+           "btn.up": "Up", "btn.down": "Down", "btn.left": "Left", "btn.right": "Right", "btn.cross": "Cross", "btn.circle": "Circle",
+           "btn.square": "Square", "btn.triangle": "Triangle", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+           "btn.start": "Start", "btn.select": "Select"},
+})
+
+# Tk keysym -> SDL key name (what --keys takes, SDL_GetScancodeFromName); letters, digits and F1..F24 map to themselves
+# (letters upper-cased).  "," is left out: it separates the --keys entries.
+TK_TO_SDL = {"Return": "Return", "BackSpace": "Backspace", "space": "Space", "Tab": "Tab", "Up": "Up", "Down": "Down",
+             "Left": "Left", "Right": "Right", "Shift_L": "Left Shift", "Shift_R": "Right Shift", "Control_L": "Left Ctrl",
+             "Control_R": "Right Ctrl", "Alt_L": "Left Alt", "Alt_R": "Right Alt", "Super_L": "Left GUI", "Super_R": "Right GUI",
+             "Prior": "PageUp", "Next": "PageDown", "Home": "Home", "End": "End", "Insert": "Insert", "Delete": "Delete",
+             "Caps_Lock": "CapsLock", "minus": "-", "equal": "=", "bracketleft": "[", "bracketright": "]", "backslash": "\\",
+             "semicolon": ";", "apostrophe": "'", "grave": "`", "period": ".", "slash": "/", "KP_Enter": "Keypad Enter",
+             "KP_Add": "Keypad +", "KP_Subtract": "Keypad -", "KP_Multiply": "Keypad *", "KP_Divide": "Keypad /",
+             "KP_Decimal": "Keypad .", "KP_Delete": "Keypad .", "KP_Insert": "Keypad 0", "KP_End": "Keypad 1", "KP_Down": "Keypad 2",
+             "KP_Next": "Keypad 3", "KP_Left": "Keypad 4", "KP_Begin": "Keypad 5", "KP_Right": "Keypad 6", "KP_Home": "Keypad 7",
+             "KP_Up": "Keypad 8", "KP_Prior": "Keypad 9"}
+
+
+def sdl_key_name(keysym):
+    if keysym in TK_TO_SDL:
+        return TK_TO_SDL[keysym]
+    if len(keysym) == 1 and keysym.isascii() and keysym.isalnum():
+        return keysym.upper()
+    if re.fullmatch(r"F([1-9]|1[0-9]|2[0-4])", keysym):
+        return keysym
+    if re.fullmatch(r"KP_[0-9]", keysym):
+        return "Keypad " + keysym[3]
+    return None
+
 # design "A": Windows 11-like light window, grey sidebar, white cards
 C_BG, C_SIDE, C_CARD, C_LINE = "#f3f3f5", "#ebecef", "#ffffff", "#e3e4e8"
 C_TEXT, C_MUTED, C_ACCENT, C_ACCENT_HI = "#1b1b1f", "#5f636b", "#1f5fbf", "#2b6fd6"
@@ -937,24 +978,253 @@ class App:
         self.ires_note = ttk.Label(c, text=tr("l.iresoff"), style="Muted.TLabel", wraplength=300, justify="left")
 
     def _build_controls(self, f):
-        o, c = self.card(f, tr("c.keys"))
-        o.pack(fill="x")
-        ttk.Checkbutton(c, text=tr("mod.keys"), variable=self.var("keys_on", tk.BooleanVar, False)).pack(anchor="w")
-        ttk.Label(c, text=tr("mod.keys.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", padx=(24, 0), pady=(0, 10))
-        grid = ttk.Frame(c)
-        grid.pack(anchor="w")
+        """A PS1 digital pad drawn on a canvas, a leader line from each button to its key; clicking a button or its key
+        and pressing a key rebinds it.  Same settings as before: keys_on + keys {button: SDL key name} (--keys)."""
+        o, c = self.card(f, tr("c.controls"))
+        o.pack(fill="both", expand=True)
+        top = ttk.Frame(c)
+        top.pack(fill="x")
+        keys_on = self.var("keys_on", tk.BooleanVar, False)
+        ttk.Checkbutton(top, text=tr("mod.keys"), variable=keys_on).pack(side="left")
+        ttk.Button(top, text=tr("b.defaults"), command=lambda: [v.set(M.DEFAULT_KEYS[b]) for b, v in self.key_vars.items()]).pack(side="right")
+        hint = ttk.Label(c, text=tr("pad.hint"), style="Muted.TLabel", wraplength=640, justify="left")
+        hint.pack(anchor="w", fill="x", pady=(4, 0))
+        note = ttk.Label(c, text=tr("pad.note"), style="Muted.TLabel", wraplength=640, justify="left")
+        note.pack(side="bottom", anchor="w", fill="x")
+        c.bind("<Configure>", lambda e: [w.configure(wraplength=max(200, e.width - 40)) for w in (hint, note)], add="+")
         keys = self.s.get("keys") or dict(M.DEFAULT_KEYS)
         self.key_vars = {}
-        for i, b in enumerate(M.BUTTONS):
-            ttk.Label(grid, text=b.capitalize(), width=10).grid(row=i % 7, column=(i // 7) * 2, sticky="w", pady=2)
-            v = self.key_vars[b] = tk.StringVar(value=keys.get(b, M.DEFAULT_KEYS[b]))
-            ttk.Entry(grid, textvariable=v, width=14).grid(row=i % 7, column=(i // 7) * 2 + 1, sticky="w", padx=(2, 24))
-        ttk.Button(c, text=tr("b.defaults"), command=lambda: [v.set(M.DEFAULT_KEYS[b]) for b, v in self.key_vars.items()]).pack(anchor="w", pady=(10, 0))
-        o, c = self.card(f, tr("c.pad"))
-        o.pack(fill="x", pady=(12, 0))
-        lbl = ttk.Label(c, text=tr("l.pad"), wraplength=640, justify="left")
-        lbl.pack(anchor="w", fill="x")
-        c.bind("<Configure>", lambda e: lbl.configure(wraplength=max(200, e.width - 40)))
+        for b in M.BUTTONS:
+            self.key_vars[b] = tk.StringVar(value=keys.get(b, M.DEFAULT_KEYS[b]))
+            self.key_vars[b].trace_add("write", lambda *_: self._pad_redraw())
+        keys_on.trace_add("write", lambda *_: self._pad_redraw())
+        from tkinter import font
+        self.pad_fonts = {k: font.Font(family=self.fam, weight=w) for k, w in (("name", "normal"), ("key", "bold"), ("tiny", "bold"))}
+        self.pad_cv = cv = tk.Canvas(c, background=C_CARD, highlightthickness=0, bd=0, height=260, takefocus=0)
+        cv.pack(fill="both", expand=True, pady=(6, 6))
+        self.pad_capture = None
+        self.pad_hot = None
+        self._pad_pending = False
+        cv.bind("<Configure>", lambda e: self._pad_redraw())
+        cv.bind("<KeyPress>", self._pad_key)
+        cv.bind("<FocusOut>", lambda e: self._pad_cancel())
+        cv.bind("<Button-1>", lambda e: None if "btn" in cv.gettags("current") else self._pad_cancel())
+
+    # ---- the drawn pad.  Base coordinates: a PAD_W x PAD_H box, scaled to the canvas (and the DPI: the fonts are pixel sized)
+    PAD_W, PAD_H = 660, 326
+    # left column: label row y; right column mirrors it; select/start sit under the pad
+    PAD_ROWS = {"l2": 26, "l1": 62, "up": 100, "left": 138, "down": 176, "right": 214,
+                "r2": 26, "r1": 62, "triangle": 100, "circle": 138, "cross": 176, "square": 214, "select": 306, "start": 306}
+    FACE = {"triangle": "#1fa67a", "circle": "#e0413c", "cross": "#4f7fd9", "square": "#d96bb0"}   # the classic symbol colours
+
+    def _pad_redraw(self):
+        if not self._pad_pending:
+            self._pad_pending = True
+            self.root.after_idle(self._pad_draw)
+
+    def _pad_key_text(self, b):
+        if self.pad_capture == b:
+            return tr("pad.press") + "…"
+        if not self.vars["keys_on"].get():
+            return M.DEFAULT_KEYS[b]            # what the game uses without --keys
+        return self.key_vars[b].get().strip() or tr("pad.nokey")
+
+    def _pad_draw(self):
+        self._pad_pending = False
+        cv = self.pad_cv
+        try:
+            cw, ch = cv.winfo_width(), cv.winfo_height()
+        except tk.TclError:
+            return
+        cv.delete("all")
+        if cw < 50 or ch < 50:
+            return
+        dpi = float(self.root.tk.call("tk", "scaling")) / (96 / 72.0)
+        s = min(cw / self.PAD_W, ch / self.PAD_H, 1.3 * dpi)
+        ox, oy = (cw - self.PAD_W * s) / 2, (ch - self.PAD_H * s) / 2
+        F = self.pad_fonts
+        F["name"].configure(size=-max(9, round(12.5 * s)))
+        F["key"].configure(size=-max(9, round(12.5 * s)))
+        F["tiny"].configure(size=-max(6, round(8 * s)))
+
+        def P(*xy):
+            return [ox + v * s if i % 2 == 0 else oy + v * s for i, v in enumerate(xy)]
+
+        def rrect(x0, y0, x1, y1, r, **kw):
+            pts = (x0 + r, y0, x1 - r, y0, x1, y0, x1, y0 + r, x1, y1 - r, x1, y1, x1 - r, y1, x0 + r, y1, x0, y1, x0, y1 - r,
+                   x0, y0 + r, x0, y0)
+            return cv.create_polygon(*P(*pts), smooth=True, **kw)
+
+        def tag(b):
+            return ("b_" + b, "btn")
+
+        cx = self.PAD_W / 2
+        body, edge, well, dark = "#d7d8dc", "#9a9da5", "#c3c5ca", "#55585f"
+        # shoulders behind the body: L2 (back) then L1
+        for side in (-1, 1):
+            for b2, (xa, xb, y0, y1) in ((("l2", "r2")[side > 0], (152, 98, 40, 62)), (("l1", "r1")[side > 0], (162, 88, 54, 82))):
+                x0, x1 = sorted((cx + side * xa, cx + side * xb))
+                rrect(x0, y0, x1, y1, 6, fill="#b9bbc1", outline=edge, width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
+                cv.create_text(*P((x0 + x1) / 2, y0 + 8), text=b2.upper(), font=F["tiny"], fill="#6d7078", tags=tag(b2))
+        # body: the outline of the left half, mirrored (smooth spline through these control points)
+        half = [(0, 76), (-60, 74), (-122, 68), (-158, 78), (-174, 106), (-176, 146), (-168, 196), (-154, 244), (-140, 272),
+                (-118, 284), (-96, 274), (-86, 244), (-74, 208), (-46, 192), (0, 188)]
+        pts = [(cx + x, y) for x, y in half] + [(cx - x, y) for x, y in reversed(half)]
+        flat = [v for p in pts for v in p]
+        shadow = [v + (3 if i % 2 else 0) for i, v in enumerate(flat)]
+        cv.create_polygon(*P(*shadow), smooth=True, fill="#e9eaed", outline="")
+        cv.create_polygon(*P(*flat), smooth=True, fill=body, outline=edge, width=max(1, 1.2 * s))
+        # d-pad: a round well and the four separate direction buttons of the PS1 pad, each pointed towards the centre
+        dx, dy, a, L = cx - 108, 138, 11, 34
+        cv.create_oval(*P(dx - 46, dy - 46, dx + 46, dy + 46), fill=well, outline="#b3b5bb", width=max(1, s))
+        for b2, (ux, uy) in {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}.items():
+            px, py = -uy, ux                     # across the arm
+            arm = []
+            for along, across in ((L, -a), (L, a), (a + 2.5, a), (6, 0), (a + 2.5, -a)):
+                arm += [dx + ux * along + px * across, dy + uy * along + py * across]
+            cv.create_polygon(*P(*arm), fill=dark, outline="#3c3e44", width=max(1, s), joinstyle="round",
+                              tags=tag(b2) + ("hl_" + b2, "arm"))
+        for b2, (ux, uy) in {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}.items():
+            tx, ty = dx + ux * (L - 7), dy + uy * (L - 7)       # a small arrow near each tip
+            px, py = -uy, ux
+            cv.create_polygon(*P(tx + ux * 4, ty + uy * 4, tx - ux * 3 + px * 5, ty - uy * 3 + py * 5, tx - ux * 3 - px * 5,
+                                 ty - uy * 3 - py * 5), fill="#9a9da5", outline="", tags=tag(b2))
+        # face buttons: a well, dark discs, the symbols as shapes in their colours
+        fx, fy, d, r = cx + 108, 138, 26, 12.5
+        cv.create_oval(*P(fx - 46, fy - 46, fx + 46, fy + 46), fill=well, outline="#b3b5bb", width=max(1, s))
+        lw = max(1.5, 2.2 * s)
+        for b2, (bx, by) in {"triangle": (fx, fy - d), "circle": (fx + d, fy), "cross": (fx, fy + d), "square": (fx - d, fy)}.items():
+            col = self.FACE[b2]
+            cv.create_oval(*P(bx - r, by - r, bx + r, by + r), fill="#3f4148", outline="#2c2e33", width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
+            k = 6.2
+            if b2 == "triangle":
+                cv.create_polygon(*P(bx, by - k, bx + k * 0.95, by + k * 0.62, bx - k * 0.95, by + k * 0.62), fill="", outline=col,
+                                  width=lw, joinstyle="miter", tags=tag(b2))
+            elif b2 == "circle":
+                cv.create_oval(*P(bx - k + 0.6, by - k + 0.6, bx + k - 0.6, by + k - 0.6), outline=col, width=lw, tags=tag(b2))
+            elif b2 == "cross":
+                cv.create_line(*P(bx - k + 0.8, by - k + 0.8, bx + k - 0.8, by + k - 0.8), fill=col, width=lw, tags=tag(b2))
+                cv.create_line(*P(bx - k + 0.8, by + k - 0.8, bx + k - 0.8, by - k + 0.8), fill=col, width=lw, tags=tag(b2))
+            else:
+                cv.create_rectangle(*P(bx - k + 1, by - k + 1, bx + k - 1, by + k - 1), outline=col, width=lw, tags=tag(b2))
+        # select / start: small pills, their names above them (the leader lines leave downwards)
+        for b2, bx in (("select", cx - 26), ("start", cx + 26)):
+            rrect(bx - 12, 146, bx + 12, 155, 4.5, fill="#6b6e75", outline="#4d5056", width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
+            cv.create_text(*P(bx, 138), text=b2.upper(), font=F["tiny"], fill="#7a7d85", tags=tag(b2))
+
+        # leader lines and key labels.  target: where the line ends; route: the points between the label and the target
+        R = self.PAD_ROWS
+        lx_in, rx_in = 150, self.PAD_W - 150          # inner edge of the label columns (the chips sit there)
+        lines = {
+            "l2": [(cx - 152, 49)], "l1": [(cx - 162, 68)], "up": [(dx - a, dy - 22)], "left": [(dx - L, dy)],
+            "down": [(dx - a, dy + 22)], "right": [(dx + 23, R["right"]), (dx + 23, dy + a)],
+            "r2": [(cx + 152, 49)], "r1": [(cx + 162, 68)], "triangle": [(fx + r * 0.9, fy - d - 4)], "circle": [(fx + d + r, fy)],
+            "cross": [(fx + r * 0.9, fy + d + 4)], "square": [(fx - d, R["square"]), (fx - d, fy + r)],
+            "select": [(cx - 26, R["select"]), (cx - 26, 155)], "start": [(cx + 26, R["start"]), (cx + 26, 155)],
+        }
+        chip_h, pad_x = 24, 9
+        nf, kf = F["name"], F["key"]
+        for b2, route in lines.items():
+            y = R[b2]
+            left = b2 in ("l2", "l1", "up", "left", "down", "right", "select")
+            if b2 in ("select", "start"):
+                edge_x = cx - 38 if left else cx + 38
+            else:
+                edge_x = lx_in if left else rx_in
+            name = "" if self.pad_capture == b2 else tr("btn." + b2)     # rebinding: the chip takes the whole column
+            key = self._pad_key_text(b2)
+            room = (edge_x if left else self.PAD_W - edge_x) - 6 - (nf.measure(name) / s + 8 if name else 0)
+            maxw = max(40, room) * s - 2 * pad_x * s
+            if kf.measure(key) > maxw:                       # a long key name: cut it with an ellipsis
+                while len(key) > 1 and kf.measure(key + "…") > maxw:
+                    key = key[:-1]
+                key += "…"
+            kw = kf.measure(key) / s + 2 * pad_x
+            x0, x1 = (edge_x - kw, edge_x) if left else (edge_x, edge_x + kw)
+            # the line first (under the chip), elbow 12 px out of the chip, then the route, then a dot on the button
+            knee = edge_x + (12 if left else -12)
+            path = [edge_x, y] + ([knee, y] if b2 not in ("select", "start", "right", "square") else []) + [v for p in route for v in p]
+            cv.create_line(*P(*path), fill="#8a8f98", width=max(1, 1.2 * s), tags=tag(b2) + ("ln_" + b2,))
+            ex, ey = route[-1]
+            cv.create_oval(*P(ex - 2.6, ey - 2.6, ex + 2.6, ey + 2.6), fill="#8a8f98", outline=C_CARD, width=max(1, s),
+                           tags=tag(b2) + ("dot_" + b2,))
+            capt = self.pad_capture == b2
+            rrect(x0, y - chip_h / 2, x1, y + chip_h / 2, 6, fill=C_ACCENT if capt else "#ffffff",
+                  outline=C_ACCENT if capt else "#c9ccd3", width=max(1, s), tags=tag(b2) + ("chip_" + b2,))
+            cv.create_text(*P((x0 + x1) / 2, y), text=key, font=kf, fill="white" if capt else C_TEXT, tags=tag(b2))
+            cv.create_text(*P(x0 - 7, y) if left else P(x1 + 7, y), text=name, font=nf, anchor="e" if left else "w",
+                           fill=C_MUTED, tags=tag(b2) + ("nm_" + b2,))
+        self.pad_scale = s
+        for b2 in M.BUTTONS:
+            t = "b_" + b2
+            cv.tag_bind(t, "<Enter>", lambda e, b2=b2: self._pad_hover(b2, True))
+            cv.tag_bind(t, "<Leave>", lambda e, b2=b2: self._pad_hover(b2, False))
+            cv.tag_bind(t, "<Button-1>", lambda e, b2=b2: self._pad_begin(b2))
+        self._pad_style()
+
+    def _pad_style(self):
+        """The highlight of the hovered / rebinding button (its line, dot, chip, name and the button itself), restyled
+        in place: redrawing on hover would re-pick the item under the pointer and loop on Leave/Enter."""
+        cv, s = self.pad_cv, getattr(self, "pad_scale", 1.0)
+        for b in M.BUTTONS:
+            hot = b in (self.pad_hot, self.pad_capture)
+            capt = b == self.pad_capture
+            col = C_ACCENT if hot else "#8a8f98"
+            cv.itemconfigure("ln_" + b, fill=col, width=max(1, (2 if hot else 1.2) * s))
+            cv.itemconfigure("dot_" + b, fill=col)
+            cv.itemconfigure("nm_" + b, fill=C_ACCENT if hot else C_MUTED)
+            if not capt:
+                cv.itemconfigure("chip_" + b, fill="#eef4fd" if hot else "#ffffff",
+                                 outline=C_ACCENT if hot else "#c9ccd3")
+            for it in cv.find_withtag("hl_" + b):
+                kind = cv.type(it)
+                if "arm" in cv.gettags(it):      # a d-pad button
+                    cv.itemconfigure(it, fill=C_ACCENT_HI if hot else "#55585f", outline=C_ACCENT if hot else "#3c3e44")
+                elif kind == "oval":             # a face button
+                    cv.itemconfigure(it, outline=C_ACCENT if hot else "#2c2e33", width=max(1, (2.6 if hot else 1) * s))
+                else:                            # shoulders, select / start
+                    cv.itemconfigure(it, outline=C_ACCENT if hot else ("#4d5056" if b in ("select", "start") else "#9a9da5"),
+                                     width=max(1, (2.2 if hot else 1) * s))
+
+    def _pad_hover(self, b, inside):
+        new = b if inside else (None if self.pad_hot == b else self.pad_hot)
+        if new != self.pad_hot:
+            self.pad_hot = new
+            self.pad_cv.configure(cursor="hand2" if new else "")
+            self._pad_style()
+
+    def _pad_begin(self, b):
+        """Rebind b: the chip asks for a key, the next key press (on the canvas) is stored as its SDL name."""
+        self.pad_capture = b
+        self.pad_cv.focus_set()
+        self._pad_redraw()
+
+    def _pad_cancel(self):
+        if self.pad_capture:
+            self.pad_capture = None
+            self._pad_redraw()
+
+    def _pad_key(self, e):
+        b = self.pad_capture
+        if not b:
+            return
+        if e.keysym == "Escape":
+            self._pad_cancel()
+            return "break"
+        name = sdl_key_name(e.keysym)
+        if not name:
+            return "break"                   # a key --keys cannot name: keep waiting
+        if not self.vars["keys_on"].get():   # the drawing showed the defaults: start the custom set from them
+            for k, v in self.key_vars.items():
+                v.set(M.DEFAULT_KEYS[k])
+        old = self.key_vars[b].get().strip()
+        for k, v in self.key_vars.items():   # a key already used by another button: the two swap
+            if k != b and v.get().strip().lower() == name.lower():
+                v.set(old)
+        self.pad_capture = None
+        self.key_vars[b].set(name)
+        self.vars["keys_on"].set(True)
+        return "break"
 
     def _build_mods(self, f):
         o, c = self.card(f, tr("c.patch"))
