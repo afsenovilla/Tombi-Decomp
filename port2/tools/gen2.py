@@ -467,6 +467,7 @@ def kr_decl(m):
 
 FORCE_STUB = set("open close read write lseek ioctl format firstfile nextfile erase undelete rename cd "
                  "start _96_remove _96_init".split())
+LIBC_DATA = set("stdin stdout stderr environ optarg optind opterr optopt __sF".split())
 LIBC_OK = set("memcpy memset memmove memcmp strlen strcpy strncpy strcmp strncmp strcat strchr strrchr sprintf "
               "printf puts putchar atoi abs labs toupper tolower isdigit isalpha isspace isupper islower".split())
 
@@ -492,7 +493,11 @@ def libc_symbols(nm):
     for p in ([os.environ["PORT2_LIBC"]] if os.environ.get("PORT2_LIBC") else []) + ["/usr/lib32/libc.so.6", "/usr/lib/i386-linux-gnu/libc.so.6", "/lib32/libc.so.6"]:
         if os.path.exists(p):
             r = subprocess.run([nm, "-D", p], capture_output=True, text=True).stdout
-            out = set(l.split()[2].split("@")[0] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] in "TWiD")
+            # every defined symbol, code and data alike: the NDK's stub libc.so lists its variables (stdin, stdout,
+            # stderr, environ, ...) as bss ("B"), glibc as "D"; a variable missed here became a stub *function*
+            # of the same name in stubs.c, and `stderr` read the stub's code bytes as the FILE * (android beta 35:
+            # SIGSEGV in vfprintf at the first port_printf, r0 = 0x67616d69)
+            out = set(l.split()[2].split("@")[0] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] not in "UwvA")
             if os.environ.get("PORT2_LIBC"): out.add("atexit")     # bionic: defined in crtbegin_so.o, not in libc.so
             return out
     return set()
@@ -844,6 +849,10 @@ def link(outdir, nm, objlist):
         if f.startswith("port_thunk_"): continue
         a = next((a for a, n in amap.unit.items() if n == f), None)
         stubs.append((f, a, "psyq/bios" if a is None or GP_islib(a) else "game-asm"))
+    # a C-library variable must never be stubbed (a stub is a function: the code bytes would be read as the
+    # variable); seen when libc_symbols missed the target C library's data symbols
+    bad = sorted(set(s[0] for s in stubs) & LIBC_DATA)
+    if bad: sys.exit("gen2: C library variables would be stubbed as functions (libc_symbols missed them): %s" % " ".join(bad))
     # wasm32: clang names a main(argc, argv) __main_argc_argv (runtime/main.c's); never stub the game's `main` over it
     if "__main_argc_argv" in defined: stubs = [x for x in stubs if x[0] != "main"]
     ldsym = (lambda l: re.sub(r"(?<![\w$.])([A-Za-z_]\w*)", r"_\1", l)) if pfx else (lambda l: l)

@@ -143,14 +143,56 @@ static const char *signame(int s) {
                  case SIGABRT: return "SIGABRT"; case SIGFPE: return "SIGFPE"; case SIGTRAP: return "SIGTRAP";
                  case SIGSYS: return "SIGSYS"; case SIGUSR2: return "SIGUSR2"; default: return "?"; }
 }
-/* "0x1234 libtombi.so+0x5678 (sym+0x9)" */
+/* libtombi.so's full symbol table (.symtab: static functions too; the APK keeps it, app/build.gradle
+   keepDebugSymbols, with the DWARF already removed by port2/CMakeLists.txt).  Mapped once after the load, read by
+   the crash handler: dladdr only knows the exported names, and port_sym_near only the game functions, so a fault in
+   the runtime was named after the nearest game function ("FUN_8005aa74+0x9098" for port_printf) */
+static const Elf32_Sym *st_sym; static unsigned st_n; static const char *st_str; static unsigned st_strsz;
+static unsigned long st_base;
+static void symtab_load(const char *path, unsigned long base) {
+    int fd = open(path, O_RDONLY | O_CLOEXEC); struct stat sb;
+    if (fd < 0 || fstat(fd, &sb) || sb.st_size < (off_t)sizeof(Elf32_Ehdr)) { if (fd >= 0) close(fd); return; }
+    const unsigned char *f = mmap(0, (size_t)sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0); close(fd);
+    if (f == MAP_FAILED) return;
+    size_t sz = (size_t)sb.st_size; const Elf32_Ehdr *eh = (const Elf32_Ehdr *)f;
+    if (memcmp(eh->e_ident, ELFMAG, SELFMAG) || eh->e_ident[EI_CLASS] != ELFCLASS32 || eh->e_shentsize != sizeof(Elf32_Shdr)
+        || eh->e_shoff + (size_t)eh->e_shnum * sizeof(Elf32_Shdr) > sz) { munmap((void *)f, sz); return; }
+    const Elf32_Shdr *sh = (const Elf32_Shdr *)(f + eh->e_shoff);
+    for (unsigned i = 0; i < eh->e_shnum; i++) {
+        if (sh[i].sh_type != SHT_SYMTAB || sh[i].sh_link >= eh->e_shnum) continue;
+        const Elf32_Shdr *ss = &sh[sh[i].sh_link];
+        if (sh[i].sh_offset + sh[i].sh_size > sz || ss->sh_offset + ss->sh_size > sz) break;
+        st_sym = (const Elf32_Sym *)(f + sh[i].sh_offset); st_n = sh[i].sh_size / sizeof(Elf32_Sym);
+        st_str = (const char *)(f + ss->sh_offset); st_strsz = ss->sh_size; st_base = base;
+        tlog("libtombi.so symbol table: %u symbols", st_n);
+        return;
+    }
+    tlog("libtombi.so has no symbol table (stripped): crash addresses are named after exported symbols only");
+    munmap((void *)f, sz);
+}
+static const char *symtab_near(unsigned long a, unsigned long *off) {
+    if (!st_sym || a < st_base) return 0;
+    unsigned long v = a - st_base, best = 0; const char *nm = 0;
+    for (unsigned i = 1; i < st_n; i++) {
+        const Elf32_Sym *s = &st_sym[i];
+        if (ELF32_ST_TYPE(s->st_info) != STT_FUNC || s->st_shndx == SHN_UNDEF || s->st_name >= st_strsz) continue;
+        unsigned long sv = s->st_value & ~1ul;
+        if (sv <= v && (!nm || sv > best)) { best = sv; nm = st_str + s->st_name; }
+    }
+    if (nm && off) *off = v - best;
+    return nm;
+}
+/* "0x1234 libtombi.so+0x5678 (sym+0x9)": the nearest of the candidate names (full symbol table, the game's own
+   function map, dladdr's exported symbol) */
 static void describe(unsigned long a, char *o, size_t n) {
     Dl_info di; memset(&di, 0, sizeof di);
     if (a && dladdr((void *)a, &di) && di.dli_fname) {
         const char *base = strrchr(di.dli_fname, '/'); base = base ? base + 1 : di.dli_fname;
-        unsigned long off = 0; const char *nm = 0;
+        unsigned long off = 0, o2 = 0; const char *nm = 0, *n2;
         if (sym_near && strstr(base, "libtombi")) nm = sym_near((void *)a, &off);
-        if ((!nm || off > 0x100000ul) && di.dli_sname) { nm = di.dli_sname; off = a - (unsigned long)di.dli_saddr; }
+        if (nm && !strcmp(nm, "?")) nm = 0;
+        if (strstr(base, "libtombi") && (n2 = symtab_near(a, &o2)) && (!nm || o2 < off)) { nm = n2; off = o2; }
+        if (di.dli_sname && (!nm || a - (unsigned long)di.dli_saddr < off)) { nm = di.dli_sname; off = a - (unsigned long)di.dli_saddr; }
         if (nm) snprintf(o, n, "%08lx %s+0x%lx (%s+0x%lx)", a, base, a - (unsigned long)di.dli_fbase, nm, off);
         else snprintf(o, n, "%08lx %s+0x%lx", a, base, a - (unsigned long)di.dli_fbase);
     } else snprintf(o, n, "%08lx ?", a);
@@ -413,7 +455,10 @@ int SDL_main(int argc, char *argv[]) {
     sym_near = (const char *(*)(void *, unsigned long *))dlsym(h, "port_sym_near");
     frame_p = (int *)dlsym(h, "port_frame");
     exit_status_p = (int *)dlsym(h, "port_exit_status");
-    { Dl_info di; if (port_main && dladdr((void *)port_main, &di)) tlog("libtombi.so loaded at %p (port_main %p); port_frame %p", di.dli_fbase, (void *)port_main, (void *)frame_p); }
+    { Dl_info di; if (port_main && dladdr((void *)port_main, &di)) {
+        tlog("libtombi.so loaded at %p (port_main %p); port_frame %p", di.dli_fbase, (void *)port_main, (void *)frame_p);
+        if (di.dli_fname) symtab_load(di.dli_fname, (unsigned long)di.dli_fbase);
+    } }
     if (!port_main) return fail("Tombi!", "libtombi.so has no port_main.");
 
     args[n++] = argv && argv[0] ? argv[0] : (char *)"tombi";

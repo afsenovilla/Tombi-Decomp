@@ -177,6 +177,16 @@ if(ANDROID)
   set_target_properties(tombi2 PROPERTIES OUTPUT_NAME tombi LINKER_LANGUAGE C LINK_DEPENDS ${GEN}/syms.ld)
   target_link_options(tombi2 PRIVATE -Wl,-Bsymbolic -Wl,-z,noexecstack ${GEN}/syms.ld)
   target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
+  # crash reports with real names: the APK keeps libtombi.so's symbol table (app/build.gradle keepDebugSymbols; the
+  # loader's crash handler reads it) but not the DWARF, which goes with the full copy, libtombi.debug.so in this
+  # build dir (the workflow uploads it with the APK, for llvm-addr2line / llvm-symbolizer on device addresses)
+  find_program(PORT2_OBJCOPY NAMES llvm-objcopy HINTS ${ANDROID_TOOLCHAIN_ROOT}/bin ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin)
+  if(PORT2_OBJCOPY)
+    add_custom_command(TARGET tombi2 POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tombi2> ${CMAKE_CURRENT_BINARY_DIR}/libtombi.debug.so
+                       COMMAND ${PORT2_OBJCOPY} --strip-debug $<TARGET_FILE:tombi2>
+                       COMMENT "libtombi.so: symbol table kept, DWARF moved to libtombi.debug.so" VERBATIM)
+  endif()
   add_library(main SHARED ${CMAKE_CURRENT_SOURCE_DIR}/android/loader.c)
   target_include_directories(main PRIVATE ${GEN}/sdlinc)
   target_link_libraries(main PRIVATE SDL2 log dl)

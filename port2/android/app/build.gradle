@@ -36,7 +36,14 @@ android {
     sourceSets {
         main { java.srcDirs += ["${sdl2Source}/android-project/app/src/main/java"] }
     }
-    packagingOptions { jniLibs { useLegacyPackaging true } }   // extracted: android_dlopen_ext opens libtombi.so by name
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true   // extracted: android_dlopen_ext opens libtombi.so by name
+            // unstripped symbol table (its DWARF is already gone, port2/CMakeLists.txt): the crash handler of
+            // loader.c names static runtime functions too, not only the exported / game ones
+            keepDebugSymbols += ['**/libtombi.so']
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
