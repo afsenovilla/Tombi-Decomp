@@ -857,6 +857,21 @@ int port_gpu_frame(u8 *rgb, int *w, int *h) {
     *w = W; *h = H;
     return 0;
 }
+/* --debug-menu overlay (runtime/debugmenu.c): a GP0-02-style fill at (x, y) of the displayed frame (the wide plane
+   when the frame is a --widescreen one, x relative to its 4:3 part); returns 0 when the display is not 15-bit */
+int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c) {
+    RECT *d = (RECT *)cur_dispenv;
+    int W = d->w > 0 ? d->w : 320;
+    if (cur_dispenv[0x11] || !disp_mask) return 0;
+    if (w <= 0 || h <= 0) return 1;
+    if (ws_frame(d, W > 1024 ? 1024 : W, 0)) {
+        int bx = ws_base(d->x & 1023) + port_widescreen + x, by = (d->y + y) & 511;
+        if (be->ws_fill) be->ws_fill(bx, by, w, h, c);
+        else for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) wvram[(by + j) & 511][bx + i] = c;
+    } else be->fill((d->x + x) & 1023, (d->y + y) & 511, w, h, c);
+    return 1;
+}
+void port_gpu_overlay_end(void) { if (be->list_end) be->list_end(); }
 static void path_for(char *buf, const char *kind) { snprintf(buf, 512, "%s/%s%06d.png", port_dump_dir, kind, port_frame); }
 /* the window present of the displayed frame (port_gpu_vblank, and --fps60 when it has no interpolated frame) */
 static void present_window(void) {
@@ -948,6 +963,7 @@ void port_fps60_wait(unsigned long long due_us, unsigned long long period_us, in
 }
 
 void port_gpu_vblank(void) {
+    { extern int port_debug_menu; extern void port_debug_draw(void); if (port_debug_menu) port_debug_draw(); }
     if (port_fps60 && be == &port_gpu_gl) fps60_vblank();
     else if (port_window) present_window();
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;

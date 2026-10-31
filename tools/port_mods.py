@@ -69,6 +69,7 @@ i18n.add({
         "mod.lives": "Empezar con vidas", "mod.lives.d": "Vidas al empezar la partida (1..99).",
         "mod.inflives": "Vidas infinitas", "mod.inflives.d": "Mantiene las vidas en 99 cada segundo.",
         "mod.infhealth": "Vitalidad infinita", "mod.infhealth.d": "Mantiene la vitalidad al máximo (4) en cada vblank.",
+        "mod.debugmenu": "Menú de depuración", "mod.debugmenu.d": "En el juego: Select+L1+R1 o F1 abre un menú de depuración (atravesar paredes, volar, trucos, eventos, saltar a cualquier sala, info en pantalla, velocidad).",
         "mod.events": "Desbloquear todos los eventos",
         "mod.events.d": "Marca los %d eventos como completados al empezar (los objetos ligados a eventos desaparecen; útil para explorar)." % EVENT_COUNT,
         "mod.keys": "Teclas personalizadas", "mod.keys.d": "Teclas del visor para cada botón de PS1 (nombres de tecla SDL: X, Return, Space, Left...).",
@@ -104,6 +105,7 @@ i18n.add({
         "mod.lives": "Start with lives", "mod.lives.d": "Lives at the start of the game (1..99).",
         "mod.inflives": "Infinite lives", "mod.inflives.d": "Keeps the lives at 99 every second.",
         "mod.infhealth": "Infinite vitality", "mod.infhealth.d": "Keeps the vitality at the maximum (4) every vblank.",
+        "mod.debugmenu": "Debug menu", "mod.debugmenu.d": "In game: Select+L1+R1 or F1 opens a debug menu (noclip, fly, cheats, events, warp to any room, info overlay, speed).",
         "mod.events": "Unlock all events",
         "mod.events.d": "Marks all %d events as completed at the start (objects tied to events are gone; for exploring)." % EVENT_COUNT,
         "mod.keys": "Custom keys", "mod.keys.d": "Viewer keys for each PS1 button (SDL key names: X, Return, Space, Left...).",
@@ -177,6 +179,10 @@ def args_infhealth(s):
     return ["--poke-every", "1:8009C970:4:1"] if s.get("infhealth") else []
 
 
+def args_debugmenu(s):
+    return ["--debug-menu"] if s.get("debugmenu") else []
+
+
 def args_events(s):
     return ["--poke", "g1:8009CDA4:FF:1x%d" % EVENT_COUNT] if s.get("events") else []
 
@@ -220,6 +226,7 @@ MODS = [
     ("inflives", "mod.inflives", "mod.inflives.d", "check", args_inflives),
     ("infhealth", "mod.infhealth", "mod.infhealth.d", "check", args_infhealth),
     ("events", "mod.events", "mod.events.d", "check", args_events),
+    ("debugmenu", "mod.debugmenu", "mod.debugmenu.d", "check", args_debugmenu),
     ("keys_on", "mod.keys", "mod.keys.d", "check+keys", args_keys),
 ]
 
@@ -236,5 +243,5 @@ def mod_args(settings, out_dir=None):
 
 def default_settings():
     return {"skipintro": True, "hz60": False, "areasel": False, "titledebug": False, "area": 0, "section": 0, "ap_on": False, "ap": 10000,
-            "lives_on": False, "lives": 5, "inflives": False, "infhealth": False, "events": False, "keys_on": False,
+            "lives_on": False, "lives": 5, "inflives": False, "infhealth": False, "events": False, "debugmenu": False, "keys_on": False,
             "keys": dict(DEFAULT_KEYS), "autostart": False, "prompts": "playstation", "civ_collision": False, "civ_route": False}

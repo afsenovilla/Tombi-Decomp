@@ -168,6 +168,7 @@ static void pump(void) {
         case SDL_QUIT: port_printf("[port2] window closed\n"); port_quit(0);
         case SDL_KEYDOWN:
             if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) { port_printf("[port2] escape\n"); port_quit(0); }
+            if (e.key.keysym.scancode == SDL_SCANCODE_F1 && !e.key.repeat) { extern int port_debug_key; port_debug_key = 1; break; }   /* --debug-menu */
             if (e.key.keysym.scancode == SDL_SCANCODE_F11 && !e.key.repeat) {
                 port_window_fullscreen = !port_window_fullscreen;
                 SDL_SetWindowFullscreen(win, port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);

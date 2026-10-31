@@ -2244,6 +2244,49 @@ but `updateL4Type1AObject` keeps that box to see it close; natively it got NULL,
 step after its text (its close code, and the events 0x25/0x2E/0x31 it starts, never ran). port/fixes.txt now makes the
 port's `showMessageBox` return the box.
 
+### Debug menu: `--debug-menu` (port only, opt-in)
+
+An in-game debug menu for testing (`port2/runtime/debugmenu.c`). Off by default; `--debug-menu` turns it on
+(launcher: *Mods* page, "Debug menu" checkbox; Android: add `--debug-menu` to `files/args.txt`). **Select+L1+R1**
+(pad or the mapped keys) or **F1** (`--window`) opens / closes it; Up/Down pick a line, Left/Right change a value
+(L2 held: steps of 10), Cross applies, Triangle or Start closes. While it is open the game gets no buttons, and the
+buttons held when it closes are kept from the game until released.
+
+| Line | What it does |
+|---|---|
+| Noclip (walls) | the player's wall push is skipped (`port/fixes.txt` wraps `pushOutOfWallSegments`); floors and gravity stay, section scroll limits stay |
+| Fly | `GVARS.b3e` (0x8009C93E, `updatePlayer` returns at once) is held; with the menu closed the d-pad moves Tomba in H / Y, L1/R1 in depth, Cross held = 4x; the camera follows; no collision |
+| Infinite vitality / Max AP / Infinite lives | memory writes every vblank (`GAME.playerHealth` = max, `PLAYER+0x98`; AP 99999999; lives 99) |
+| Max vitality 16 | `GAME.playerMaxHealth` and health = 16 |
+| Give item N | `addItemToInventory(N, 1, 1)` from the game loop |
+| Equip weapon N | `GAME.playerEquips.weapon` = N |
+| Event N | X / Square / Circle: the progress byte `0x8009CDA4 + N` = 1 / 0xFF / 0 (any room). L1 / R1: the game's `setEventStarted` / `setEventComplete` (banner, AP, jingle) — **only events of the current area**: another area's title crashes in `acquireSpriteSlot`, exactly as `--title N:start` does |
+| Complete all events | the 0x82 flag bytes = 0xFF (the launcher's "Unlock all events", live) |
+| Warp area / section / spawn, Warp now | `GAME.nextArea/nextSection/nextSpawnPoint` (0x8009CD94/96/A0) and the main task's mode 7 (area transition), as `raceOfferRematch` does; every `ROOM_COUNTS` room, the cut towns (AREA11/16/17) included; the `DOOR_ROOMS` (empty load lists) are refused |
+| Info overlay | frame, measured vblank rate, area-section, player H/Y/depth, vitality, active cheats, and the player's wall hits (`WALL HIT r AT h,y`, the collision readout) |
+| Speed | normal / slow (each vblank ~2 periods: psyq.c re-anchors its schedule) / fast (`port_realtime` off: as fast as the host runs) |
+| Cut content | `port_cut_content` toggled live; it applies from the next room load |
+
+Launcher modifiers that are safe live, and are in the menu: infinite vitality, infinite lives, AP, all events,
+`--cut-content` (next room). Not live (boot-time only): `--skip-intro`, `--hz`, the area select / title DEBUG
+entry, `--lang`, `--widescreen`, `--renderer`, `--fps60`, `--internal-res`.
+
+Hooks, all inert without the flag: `shims/pad.c` (input), `shims/gpu.c` `port_gpu_vblank` (the overlay: GP0-02
+style fills into the displayed frame before the present and the dump, so it shows on both renderers, in
+`--widescreen` and in the PNG dumps; a built-in 5x7 font, no game graphics), `port/fixes.txt` `gameMainTask`
+(`port_debug_tick`: the game's own functions run between two frames of the game loop, never from the vblank)
+and `pushOutOfWallSegments`, `runtime/sdl.c` (F1). `PORT_DEBUG_WALLLOG=1` logs every wall hit of the player.
+
+Verified headless (soft renderer; the overlay also on OpenGL under xvfb and with `--widescreen 16:9`):
+- flag off: the standard run (`--pad-script 1000:start,1300:cross:3x45/30,3200:right:400`, 36 frames to 3600)
+  is byte-identical to the build before (and with the flag on but the menu unused too);
+- noclip: from the debug select in AREA00 section 1, walking right stops at the hollow wall x=2360 (wall hits
+  logged) and with noclip on goes through to x=2538;
+- fly: in AREA00 section 0 Tomba rises from y -53 to -253 and moves right to x 509 with the camera following;
+- warp: AREA00 -> AREA01 section 0 and, with `--cut-content`, AREA11 section 1 (the cut town);
+- infinite vitality (a `--poke` of the health to 1 shows 4/4), give item 5, event flag set, event 3 started with
+  its "Take Me Home" banner and +1000 AP; slow 300 frames 10.3 s (normal 6 s for the same part), fast 500 frames 2.8 s (10 s).
+
 ### Open points / next
 
 1. The "code labels kept" of a loaded overlay (2312 for X000, 2298 in the audit's `label-jtbl` column plus 9
@@ -2299,3 +2342,55 @@ port's `showMessageBox` return the box.
    (`LOADED_SOUND_SET` as a function stub) can no longer be used: `gen_port.provides()` refuses when any file of
    `src/` (wip excluded), `include/`, `notes/*.csv` or `config/*.yaml` is newer than `build/full/*.full.ld`
    (`PORT_STALE_FULL=warn` turns it into a warning) and names the file and the command to run.
+
+### wasm32 spike: a 64-bit host with a 32-bit guest address space (`port2/wasm/`)
+
+The game's structs and the retail data hold 32-bit pointers (2.1), so a native 64-bit build breaks layouts. The
+spike keeps the pointers 32-bit the way N64Recomp keeps a 32-bit guest: the same generated game C + runtime are
+compiled for **wasm32** (clang `--target=wasm32-wasi`, wasi-libc), translated back to portable C with **wasm2c**
+(WABT, pinned tag 1.0.36, cloned and built by the script) and compiled natively for x86-64 with a small host.
+
+    python3 port2/wasm/build.py -j 4          # -> build/wasm/tombi2w (x86-64, headless only); --from STEP resumes
+    build/wasm/tombi2w --headless --frames 1500 --dump-frames out --pad-script 1000:start
+
+Pipeline (`build.py`): `gen2.py sources` with `PORT2_ARCH=wasm` (the clang K&R fix-ups of the Android build) -> every
+game/runtime file to LLVM bitcode -> `gen2.py link` (llvm-nm; C dispatch thunks `gen/thunks.c` instead of
+`thunks.S`; wasi-libc's symbol list) -> `llvm-link` into one module -> `apply_aliases.py` (wasm-ld takes no linker
+script: `syms.ld`'s function aliases become renames, its region offsets GlobalAliases into `port_ram`) -> wasm-ld ->
+wasm2c (`--num-outputs`) -> `patch_w2c.py` -> native cc with `host.c`.
+
+How the hard parts were answered:
+- **Coroutines** (runtime/threads.c): no asyncify. wasm2c's output runs on the native C stack, so the BIOS-thread
+  switch is a host import (`port.ctx_switch`): `host.c` swaps native stacks with ucontext and the module's
+  `__stack_pointer` global (each coroutine's shadow stack is the top of its `stacks[]` slot). Zero cost in the game code.
+- **Null page** (lowmem.c's SIGSEGV emulation): wasm-ld `--global-base=65536` leaves nothing real below 64 KB and
+  `patch_w2c.py` makes `MEM_ADDR` add `port_ram`'s linear address to any effective address below 0x10000 (one
+  predictable branch per access). Same semantics as the i386 handler (the access hits the same byte of the BIOS area).
+- **Division by zero / INT_MIN/-1**: the wasm2c `DIV_S/REM_S/DIV_U/REM_U` macros give the R3000 results instead of trapping.
+- **Prototype mismatches** (K&R, calls with other arities, function pointers cast between types): one LLVM module,
+  so LLVM's FixFunctionBitcasts adapts what it can; the ~330 `*_bitcast_invalid` trap stubs it leaves are rewritten
+  by `patch_w2c.py` to call the function through the stub's own type, and `call_indirect`'s type check is dropped:
+  the native ABI (x86-64 SysV, AAPCS64: integer arguments in registers) tolerates the arity mismatch as i386 did.
+- **libc**: wasi-libc; `host.c` serves the WASI preview1 subset it imports (fd/path/clock/poll/proc_exit) onto POSIX,
+  one preopen "/" plus PWD so relative paths work. `wasm/wasm_compat.h` (force-included into the runtime) and
+  `wasm/rt_wasm.c` (stubs for lowmem.c, watchdog.c, sdl.c, gpu_gl.c) keep the shared runtime files unchanged except
+  two `#ifdef __wasm__` blocks (threads.c, psyq.c's memcpy prototype).
+
+Result (2026-10-31, x86-64, gcc -O2): the smoke run reaches the same state as the i386 build and **150 of 150 dumped
+frames are byte-identical** (and the logs match line for line); a 6000-frame run with
+`1000:start,1300:start,1600:cross` reaches AREA00 gameplay, but it is not identical to the i386 build from the same
+tree: every frame matches up to 1631, frame 1632 differs in 14 pixels of the "Now Loading" logo (the size pulse,
+`NEG_SIN_TABLE[s]` in drawNowLoadingSprite: the loading screen ran a different number of times), and the player's
+state differs later (both builds are deterministic run to run). Unexplained yet; suspects: a busy-wait the two
+compilers schedule differently around the CD/X000 load, ABI differences the wasm32 build exposes (clang's callee
+trusts the caller's extension of `short`/`char` arguments where i386 gcc re-extends; the forwarded
+`bitcast_invalid` calls pass unextended words; FixFunctionBitcasts passes undef/0 for missing arguments where i386
+read stack garbage), uninitialised locals, and `long long` alignment in structs (8 in wasm32 as on MIPS, 4 on i386).
+Headless speed: ~170 fps vs ~160 fps for the i386 build (uncapped, soft renderer) — the wasm2c path is not slower.
+Build: ~2.5 min bitcode + link, ~3 min native compile of the 23 MB of wasm2c C.
+
+Not done (next steps): the SDL host shim (window/audio/pad as imports: sdl.c's ~15 entry points, the frame and the
+audio buffer are linear-memory pointers; ~1 day); the GL renderer (gpu_gl.c's calls as imports, or a host-side
+backend reading VRAM from linear memory; 1-2 days); arm64 Android (bionic has no ucontext: a 20-line AArch64
+switch in host.c, plus the SDL shim above; then an `arm64-v8a` Gradle/CMake variant compiling `build/wasm/w2c` +
+host; ~1-2 days); CMake integration instead of `build.py`; the save-state and watchdog paths (untested).

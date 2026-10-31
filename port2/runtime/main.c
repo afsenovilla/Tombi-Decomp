@@ -269,7 +269,7 @@ static int usage(const char *argv0) {
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
-                "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--trace-cd] [--save-dir DIR] [-v]\n"
+                "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--debug-menu] [--trace-cd] [--save-dir DIR] [-v]\n"
                 "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk\n"
                 "  (1..4 the other MAINn of the disc, docs/PORT.md \"Languages\")\n"
                 "  --data DIR reads the game files extracted once from your disc by tools/extract_data.py (default: data/ in the\n"
@@ -831,6 +831,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
+        else if (!strcmp(a, "--debug-menu")) { extern int port_debug_menu; port_debug_menu = 1; }   /* runtime/debugmenu.c */
         else if (!strcmp(a, "--title-debug")) port_title_debug = 1;   /* title carousel DEBUG entry: the area select */
         else if (!strcmp(a, "--civ-route")) {
             /* opt-in cut route (port only): the Civilization Town hub (AREA18 s1) exits 0/1/2 lead into the cut

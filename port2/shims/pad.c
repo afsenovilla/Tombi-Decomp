@@ -77,6 +77,7 @@ void port_pad_vblank(void) {
         port_pad_buttons[0] = (port_frame / port_autostart) & 1 ? 0x4000 : 0x0008;
     else if (port_autostart)
         port_pad_buttons[0] = 0;
+    { extern int port_debug_menu; extern void port_debug_pad(u16 *); if (port_debug_menu) port_debug_pad(&port_pad_buttons[0]); }
     if (!started) return;
     for (int i = 0; i < 2; i++) {
         if (!buf[i]) continue;

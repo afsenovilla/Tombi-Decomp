@@ -42,6 +42,10 @@ Order by expected yield per effort: areas whose PAL twin is fully matched and th
 - [ ] Read the remaining large X10 no-counterpart functions (list in notes/jp_retail.md).
       Anything JP-only goes to docs/CUT_CONTENT.md and, if worth it, into the port.
 
+## Port tools
+- [x] In-game debug menu `--debug-menu` (noclip, fly, cheats, items, events, warp incl. cut rooms, overlay, speed; docs/PORT.md "Debug menu") — launcher checkbox, Android args.txt.
+- [ ] Debug menu: frame advance / pause, a drawn collision view (segments), item names in the item line.
+
 ## P3 — restoring cut content in the port (only what P2 or earlier digging proves)
 - [ ] Funga chief judgement scene (jungle text exists; needs a trigger, probably event 184).
 - [ ] JP titles/descriptions of unused events and items as a text patch.

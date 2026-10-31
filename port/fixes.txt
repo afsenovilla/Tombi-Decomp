@@ -527,7 +527,9 @@ src/d0spsub3/subScreenDrawItemIcon.c | extern unsigned char ITEM_ICON_CLUTS[]; |
 src/d0spsub3/subScreenDrawItemIcon.c | S->clut = ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6) | S->clut = n == 64 ? port_valve_clut() : ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6)
 # --title FRAME:ID[:start] (debug, port2/shims/psyq.c): the banner / event start runs here, between two frames of
 # the game loop, instead of inside the vblank
-src/gameMainTask.c | ThreadWaitFrames(1); | ThreadWaitFrames(1); { extern void port_title_tick(void); port_title_tick(); }
+src/gameMainTask.c | ThreadWaitFrames(1); | ThreadWaitFrames(1); { extern void port_title_tick(void); port_title_tick(); { extern void port_debug_tick(void); port_debug_tick(); } }
+# --debug-menu (port2/runtime/debugmenu.c): noclip skips the player's wall push; the overlay shows the player's wall hits
+src/pushOutOfWallSegments.c | int pushOutOfWallSegments(TObj *o, int x_, int y_, int fl_) | static int pushOutOfWallSegments_(TObj *o, int x_, int y_, int fl_); int pushOutOfWallSegments(TObj *o, int x_, int y_, int fl_) { extern int port_debug_noclip_obj(const void *), port_debug_wall(const void *, int); return port_debug_noclip_obj(o) ? 0 : port_debug_wall(o, pushOutOfWallSegments_(o, x_, y_, fl_)); } static int pushOutOfWallSegments_(TObj *o, int x_, int y_, int fl_)
 # warp lists (bell "Usar" -> area popup -> place popup): names broken in two 8 px lines filled the whole 16 px row, so the entries touched;
 # when an entry of the list has a line break, rows step 20 px (4 px gap), the highlight and the frame follow
 src/d0spsub/subScreenDrawPopupMenu.c | void subScreenDrawPopupMenu(void) | static int port_pop_step(int sub) { int i, n = sub ? SUBSCREEN_POPUP_SUB_COUNT : SUBSCREEN_POPUP_COUNT; for (i = 0; i < n; i++) { short *s = (short *)(sub ? SUBSCREEN_POPUP_SUB_STRINGS[SUBSCREEN_POPUP_ENTRIES[SUBSCREEN_POPUP_CURSOR]][SUBSCREEN_POPUP_SUB_ENTRIES[i]] : SUBSCREEN_POPUP_STRINGS[SUBSCREEN_POPUP_ENTRIES[i]]); for (; *s != -1; s++) if (*s == -3 && s[1] != -1) return 20; } return 16; } void subScreenDrawPopupMenu(void)
