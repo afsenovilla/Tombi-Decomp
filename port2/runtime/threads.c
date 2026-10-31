@@ -17,7 +17,14 @@ void port_ctx_switch(unsigned long **save, unsigned long *to);
 #define S_(x) #x
 #define S(x) S_(x)
 #define SYM(x) S(__USER_LABEL_PREFIX__) x     /* "_" prefix on Win32 */
-#if defined(__arm__)
+#if defined(__wasm__)
+/* wasm32 (port2/wasm): no stack switching inside wasm.  The switch is a host import: the wasm2c host
+   (port2/wasm/host.c) swaps the native C stack (the translated functions run on it) and the module's
+   __stack_pointer global (the shadow stack in linear memory: each coroutine uses the top of its stacks[] slot).
+   *save receives a host token; a `to` that is not a token is a fresh coroutine's stack top: the host starts
+   port_thread_entry_wasm there. */
+__attribute__((import_module("port"), import_name("ctx_switch"))) void port_ctx_switch(unsigned long **save, unsigned long *to);
+#elif defined(__arm__)
 /* AAPCS: r4-r11, lr and d8-d15 are callee-saved: 9 core + 16 VFP words below the saved sp */
 __asm__(".text\n.syntax unified\n.arm\n.align 2\n.globl port_ctx_switch\n.type port_ctx_switch,%function\nport_ctx_switch:\n"
         "\tpush {r4-r11, lr}\n\tvpush {d8-d15}\n"
@@ -75,6 +82,10 @@ static void switch_to(int n) {
     port_ctx_switch(&th[from].sp, th[n].sp);
 }
 
+static void entry(void);
+#ifdef __wasm__
+__attribute__((export_name("port_thread_entry_wasm"))) void port_thread_entry_wasm(void) { entry(); }
+#endif
 static void entry(void) {
     th[cur].fn();
     /* a task function returned: the BIOS would run off the end; treat it as exitTask */
@@ -90,7 +101,9 @@ int port_thread_open(void *fn) {
         unsigned long *sp = stacks[i - 1] + STACK_WORDS - 4;
         th[i].used = 1;
         th[i].fn = (void (*)(void))fn;      /* a native function pointer (the game names its task entry) */
-#if defined(__arm__)
+#if defined(__wasm__)
+        sp = (unsigned long *)((unsigned long)(stacks[i - 1] + STACK_WORDS) & ~15ul);   /* shadow stack top */
+#elif defined(__arm__)
         sp -= 2;                            /* (keeps sp 8-byte aligned at entry(): 4 + 9 + 16 words below) */
         *--sp = (unsigned long)entry;       /* lr: popped into pc by port_ctx_switch */
         for (int k = 0; k < 8 + 16; k++) *--sp = 0;   /* r4-r11, d8-d15 */

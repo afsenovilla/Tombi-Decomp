@@ -16,7 +16,11 @@
 
 typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef int s32; typedef unsigned int u32;
 typedef struct { s16 x, y, w, h; } RECT;
+#ifdef __wasm__
+#include <string.h>          /* (wasm32: size_t is unsigned long) */
+#else
 void *memcpy(void *d, const void *s, unsigned int n);
+#endif
 typedef struct { s16 m[3][3]; s32 t[3]; } MATRIX;
 typedef struct { s32 vx, vy, vz, pad; } VECTOR;
 typedef struct { s16 vx, vy, vz, pad; } SVECTOR;
