@@ -17,11 +17,19 @@ void port_ctx_switch(unsigned long **save, unsigned long *to);
 #define S_(x) #x
 #define S(x) S_(x)
 #define SYM(x) S(__USER_LABEL_PREFIX__) x     /* "_" prefix on Win32 */
+#if defined(__arm__)
+/* AAPCS: r4-r11, lr and d8-d15 are callee-saved: 9 core + 16 VFP words below the saved sp */
+__asm__(".text\n.syntax unified\n.arm\n.align 2\n.globl port_ctx_switch\n.type port_ctx_switch,%function\nport_ctx_switch:\n"
+        "\tpush {r4-r11, lr}\n\tvpush {d8-d15}\n"
+        "\tstr sp, [r0]\n\tmov sp, r1\n"
+        "\tvpop {d8-d15}\n\tpop {r4-r11, pc}\n");
+#else
 __asm__(".text\n.globl " SYM("port_ctx_switch") "\n" SYM("port_ctx_switch") ":\n"
         "\tmovl 4(%esp), %eax\n\tmovl 8(%esp), %edx\n"
         "\tpushl %ebp\n\tpushl %ebx\n\tpushl %esi\n\tpushl %edi\n"
         "\tmovl %esp, (%eax)\n\tmovl %edx, %esp\n"
         "\tpopl %edi\n\tpopl %esi\n\tpopl %ebx\n\tpopl %ebp\n\tret\n");
+#endif
 
 #ifdef _WIN32
 /* Windows keeps the stack bounds of the thread in the TIB (fs:[4] base, fs:[8] limit) and the exception dispatcher
@@ -82,9 +90,15 @@ int port_thread_open(void *fn) {
         unsigned long *sp = stacks[i - 1] + STACK_WORDS - 4;
         th[i].used = 1;
         th[i].fn = (void (*)(void))fn;      /* a native function pointer (the game names its task entry) */
+#if defined(__arm__)
+        sp -= 2;                            /* (keeps sp 8-byte aligned at entry(): 4 + 9 + 16 words below) */
+        *--sp = (unsigned long)entry;       /* lr: popped into pc by port_ctx_switch */
+        for (int k = 0; k < 8 + 16; k++) *--sp = 0;   /* r4-r11, d8-d15 */
+#else
         *--sp = 0;                          /* fake return address of entry() */
         *--sp = (unsigned long)entry;       /* ret of port_ctx_switch */
         *--sp = 0; *--sp = 0; *--sp = 0; *--sp = 0;   /* ebp ebx esi edi */
+#endif
         th[i].sp = sp;
         return 0xFF000000 | i;
     }

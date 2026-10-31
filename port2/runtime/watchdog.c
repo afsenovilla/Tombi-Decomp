@@ -157,7 +157,11 @@ static pthread_t game_thread;
 static void on_usr1(int sig, siginfo_t *info, void *ucv) {
     ucontext_t *uc = ucv; (void)sig; (void)info;
     port_log_direct++;
+#if defined(__arm__)
+    report(uc->uc_mcontext.arm_pc, uc->uc_mcontext.arm_sp, uc->uc_mcontext.arm_fp);
+#else
     report(uc->uc_mcontext.gregs[REG_EIP], uc->uc_mcontext.gregs[REG_ESP], uc->uc_mcontext.gregs[REG_EBP]);
+#endif
     port_log_direct--;
 }
 static void *wd_main(void *arg) {

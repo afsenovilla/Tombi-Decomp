@@ -7,7 +7,9 @@
  * Carried over from port/runtime/sys_common.c (port_low_emulate) and sys_linux_i386.c (on_segv).
  * SIGFPE: the x86 traps on a division by zero, the R3000 does not: LO = rs < 0 ? 1 : -1, HI = rs.
  * Windows: the same through a vectored exception handler (EXCEPTION_ACCESS_VIOLATION / INT_DIVIDE_BY_ZERO) with
- * the scratch page from VirtualAlloc; the operand decoder is shared. */
+ * the scratch page from VirtualAlloc; the operand decoder is shared.
+ * 32-bit ARM (Android armeabi-v7a, code built with -marm): lowmem_arm.inc emulates the A32 load/store in the handler
+ * and gives integer division by zero the R3000 result through __aeabi_idiv & co. */
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
@@ -80,6 +82,7 @@ void port_low_report(void) {
         port_printf("  %10lu  %08lx %s+0x%lx (first address %08lx)\n", low_sites[i].n, low_sites[i].eip, nm, off, low_sites[i].first);
     }
 }
+#ifndef __arm__     /* the x86 instruction decoder (Linux i386, Win32) */
 int port_low_emulate(unsigned long eip, unsigned long fault, unsigned char *scratch, unsigned long *neweip) {
     const unsigned char *p = (const unsigned char *)eip;
     int i = 0, opsize16 = 0;
@@ -143,6 +146,8 @@ static int div_len(const unsigned char *p) {
     }
     return len;
 }
+
+#endif
 
 /* A call through a data pointer into the overlay region (a MAIN0 table word relocated as data because its table
    holds data pointers too, or an overlay word at no function start of its own) lands in port_ram, which is not
@@ -227,6 +232,8 @@ void port_lowmem_install(void) {
     if (!low_scratch) port_printf("[port2] no executable scratch page: null-pointer accesses will crash\n");
     AddVectoredExceptionHandler(1, on_exception);
 }
+#elif defined(__arm__)
+#include "lowmem_arm.inc"
 #else
 void port_dump_stack(unsigned long esp) {
     const unsigned long *sp = (const unsigned long *)esp;

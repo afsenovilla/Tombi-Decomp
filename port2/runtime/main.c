@@ -790,6 +790,11 @@ void *port_cc_sign_next(void *obj) {
       if (port_verbose) port_printf("[port] --cut-content: notice board continues with (%d,%d) box %p\n", port_cc_chain_k, port_cc_chain_l, m);
       return m; }
 }
+#ifdef __ANDROID__
+/* Android: libtombi.so is a shared library loaded by the small libmain.so (port2/android/loader.c: SDL_main reserves
+   the low address range, android_dlopen_ext()s this library into it and calls port_main with the PC flags) */
+#define main port_main
+#endif
 int main(int argc, char **argv) {
     extern void port_pad_script(const char *), port_poke_add(const char *), port_poke_add_every(const char *, int),
         port_menu_add(const char *), port_title_add(const char *), port_dump_ram_add(const char *);
