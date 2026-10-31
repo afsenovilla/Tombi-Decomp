@@ -205,7 +205,11 @@ static void load_tables(void) {
 #define RGB(r, g, b) (0xFF000000u | (u32)(b) << 16 | (u32)(g) << 8 | (u32)(r))
 static const u32 C_PINK = RGB(248, 200, 192), C_DARK = RGB(40, 24, 16), C_EDGE = RGB(170, 130, 110), C_RED = RGB(176, 40, 30),
     C_REDE = RGB(200, 150, 130), C_WHITE = RGB(250, 246, 230), C_WOODE = RGB(120, 70, 40), C_GREEN = RGB(30, 110, 40),
-    C_MUTED = RGB(130, 90, 80), C_SEA = RGB(120, 176, 232), C_SEA2 = RGB(150, 200, 244), C_SEL = RGB(96, 168, 72);
+    C_MUTED = RGB(130, 90, 80), C_SEA = RGB(120, 176, 232), C_SEA2 = RGB(150, 200, 244), C_SEL = RGB(36, 88, 36),
+    C_MUTED8 = RGB(88, 56, 46), C_RED8 = RGB(136, 24, 16), C_ORANGE = RGB(168, 44, 20), C_YELLOW = RGB(255, 224, 96);
+/* contrast (WCAG) on the cream window (255, 238, 222): C_DARK 15.1, C_MUTED 5.3 / C_GREEN 5.6 / C_RED 5.9 / C_ORANGE 6.1
+   (16 px only), C_MUTED8 9.2 / C_RED8 8.5 (8 px); C_WHITE on C_SEL 7.8; light text over wood, the side map and the AP
+   badge carries the game's 1 px C_DARK outline (cream 15.8, yellow 13.1 against it) */
 
 /* the sub-screen's pieces: page (64, 0) = SYSTEM/A10301.000, CLUT rows of D0SPSUB's block at (288, 480) */
 #define SUB 64, 0
@@ -218,6 +222,7 @@ static void plank(int x, int y, int w) {   /* blank wood plank, 24 high, with it
     pa_spr(x + w - 9, y, SUB, 224, 128, 9, 24, 288, 481, 0);
 }
 static void ctext(int cx, int y, int h, const char *s, u32 b, u32 e) { pa_text(cx - pa_text_w(h, s) / 2, y, h, s, b, e); }
+static void plank_text(int cx, int y, const char *s, int sel) { pa_text_ol(cx - pa_text_w(16, s) / 2, y, 16, s, sel ? C_YELLOW : C_WHITE, C_WOODE, C_DARK); }
 
 /* the HUD's pieces: page (320, 256) = SYSTEM/A00000.GAM, CLUT rows at (368, 480..) */
 #define HUD 320, 256
@@ -239,9 +244,10 @@ static void lives(int x, int y, int n) {
 static void ap_badge(int x, int y) {   /* the HUD's "AP" box (drawn, its letters in the game's 8 px font) */
     pa_fill(x + 1, y, 28, 14, RGB(200, 176, 64)); pa_fill(x, y + 1, 30, 12, RGB(200, 176, 64));
     pa_fill(x + 1, y + 1, 28, 12, RGB(96, 96, 140)); pa_fill(x + 2, y + 2, 26, 4, RGB(130, 130, 176));
-    ctext(x + 15, y + 3, 8, "AP", C_WHITE, RGB(40, 30, 70));
+    pa_text_ol(x + 15 - pa_text_w(8, "AP") / 2, y + 3, 8, "AP", C_WHITE, RGB(40, 30, 70), C_DARK);
 }
-static void face(int x, int y) { pa_spr(x, y, SUB, 8, 8, 24, 24, 288, 482, 0); }
+/* Tomba's face: the sub-screen sprite has a green box (CLUT 482 indices 2, 3, 5, 6); the map marker drops it */
+static void face(int x, int y) { pa_cut_mask = 1u << 2 | 1u << 3 | 1u << 5 | 1u << 6; pa_drop_mask = 1u << 3 | 1u << 6; pa_spr(x, y, SUB, 8, 8, 24, 24, 288, 482, PA_CUTBOX | PA_OUTLINE); }
 
 static void line(int x0, int y0, int x1, int y1, int t, u32 c) {   /* pixel-art line, t x t brush */
     int dx = x1 > x0 ? x1 - x0 : x0 - x1, dy = y1 > y0 ? y0 - y1 : y1 - y0, sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, e = dx + dy;
@@ -278,12 +284,14 @@ static void header(const char *title) {
     plank(0, 0, W);
     pa_spr(2, 0, SUB, 96, 48, 24, 24, 288, 481, 0);
     pa_spr(W - 26, 0, SUB, 96, 72, 24, 24, 288, 481, 0);
-    pa_text_fit(W / 2 - pa_text_w(16, title) / 2 < 30 ? 30 : W / 2 - pa_text_w(16, title) / 2, 4, 16, W - 60, title, C_DARK, C_WOODE);
+    pa_outline = C_DARK;
+    pa_text_fit(W / 2 - pa_text_w(16, title) / 2 < 30 ? 30 : W / 2 - pa_text_w(16, title) / 2, 4, 16, W - 60, title, C_WHITE, C_WOODE);
+    pa_outline = 0;
     int n = NPAGES, tw = (W - 16 * (n + 1)) / n;
     for (int i = 0; i < n; i++) {
         int x = 16 + i * (tw + 16);
         plank(x, 26, tw); hot(x, 26, tw, 24, HS_PAGE + i);
-        ctext(x + tw / 2, 30, 16, page_name(i), i == page ? C_WHITE : C_DARK, C_WOODE);
+        plank_text(x + tw / 2, 30, page_name(i), i == page);
     }
     pa_fill(4, 52, W - 8, pa_ch - 56, C_PINK);
 }
@@ -336,8 +344,7 @@ static void draw_map(int x, int y, int w, int h, int link) {
         if (a < NNODES && b < NNODES) {
             int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2;
             line(PX(a), PY(a), PX(b), PY(b), 2, RGB(255, 220, 64));
-            dot(cx, cy - 12, 13, C_WHITE);
-            pa_event_icon(cx - 12, cy - 20, map_mark_ev, 0);
+            pa_event_icon(cx - 12, cy - 20, map_mark_ev, PA_OUTLINE);
             for (int i = 0; i < 4; i++) pa_fill(cx - 3 + i, cy + 1 + i, 7 - 2 * i, 1, C_RED);
         }
     }

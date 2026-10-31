@@ -55,7 +55,7 @@ static void filters(int y) {
     for (int i = 0; i < n; i++) {
         int x = 8 + i * (tw + 4);
         plank(x, y, tw); hot(x, y, tw, 24, HS_FILTER + i);
-        ctext(x + tw / 2, y + 4, 16, filter_name(i), i == ev_filter ? C_WHITE : C_DARK, C_WOODE);
+        plank_text(x + tw / 2, y + 4, filter_name(i), i == ev_filter);
     }
 }
 
@@ -79,14 +79,14 @@ static void event_list(void) {
         pa_text_fit(46, y - 1, 16, W - 60, pend ? "? ? ?" : ev_title(e, b, sizeof b), sel ? C_WHITE : st == F_DONE ? C_GREEN : C_DARK, sel ? RGB(60, 110, 50) : C_EDGE);
         const char *ar = L ? place_area(L->area, L->sec) : NULL;
         snprintf(b, sizeof b, "%s  -  %s", state_name(st), ar ? ar : T("location unknown", "ubicaci\xF3n desconocida"));
-        pa_text_fit(46, y + 16, 8, W - 60, b, sel ? C_WHITE : C_MUTED, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
+        pa_text_fit(46, y + 16, 8, W - 60, b, sel ? C_WHITE : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
     }
     int by = y0 + rows * rh + 4;
     snprintf(b, sizeof b, "%d / %d", n ? ev_sel + 1 : 0, n);
     pa_text(W - 24 - pa_text_w(16, b), by, 16, b, C_DARK, C_EDGE);
     int s, d; count_events(&s, &d);
     snprintf(b, sizeof b, T("%d started, %d done", "%d empezados, %d hechos"), s + d, d);
-    pa_text(20, by + 4, 8, b, C_MUTED, RGB(230, 200, 190));
+    pa_text(20, by + 4, 8, b, C_MUTED8, RGB(230, 200, 190));
     if (ev_top > 0) { pa_text(W - 40, y0 + 2, 16, "^", C_DARK, C_EDGE); }
     hot(8, y0 - 2, W - 16, 20, HS_PREV); hot(8, by - 4, W / 2, 24, HS_NEXT);
 }
@@ -116,14 +116,14 @@ static void event_detail(int e) {
     const char *ar = L ? place_area(L->area, L->sec) : NULL, *rm = L ? place_room(L->area, L->sec) : NULL;
     if (ar) {
         snprintf(b, sizeof b, "%s%s%s", ar, rm ? "  -  " : "", rm ? rm : "");
-        pa_text_fit(16, y + 22, 8, ww - 20, b, C_RED, C_REDE);
+        pa_text_fit(16, y + 22, 8, ww - 20, b, C_RED8, C_REDE);
         int l = L->area < 20 && L->sec < 24 ? roomlink[L->area][L->sec] : -1;
         map_mark_link = l; map_mark_ev = e;
         draw_map(12, y + 32, ww - 8, wh - 36, -1);
         map_mark_link = -1;
     } else {
         pa_text(16, y + 26, 16, T("Location unknown", "Ubicaci\xF3n desconocida"), C_MUTED, C_EDGE);
-        pa_text_fit(16, y + 46, 8, ww - 20, T("Not found in the decomp yet", "A\xFAn no localizada en la decomp"), C_MUTED, RGB(230, 200, 190));
+        pa_text_fit(16, y + 46, 8, ww - 20, T("Not found in the decomp yet", "A\xFAn no localizada en la decomp"), C_MUTED8, RGB(230, 200, 190));
     }
     /* who */
     int wx = 8 + ww + 6, wwid = W - 8 - wx;
@@ -132,15 +132,15 @@ static void event_detail(int e) {
     const char *kn = L ? kind_name(L->kind) : NULL;
     if (kn && !pend) {
         pa_text_fit(wx + 8, y + 26, 16, wwid - 16, kn, C_DARK, C_EDGE);
-        if (L->x != -32768) { snprintf(b, sizeof b, "x %d  y %d", L->x, L->y); pa_text(wx + 8, y + 44, 8, b, C_RED, C_REDE); }
+        if (L->x != -32768) { snprintf(b, sizeof b, "x %d  y %d", L->x, L->y); pa_text(wx + 8, y + 44, 8, b, C_RED8, C_REDE); }
     } else pa_text(wx + 8, y + 26, 16, "? ? ?", C_MUTED, C_EDGE);
     face(wx + wwid - 34, y + wh - 34);
     /* state */
     int sy = y + wh + 4;
     window_(8, sy, W - 16, H - sy - 6);
     pa_text(16, sy + 6, 16, T("State", "Estado"), C_DARK, C_EDGE);
-    pa_text(16 + pa_text_w(16, T("State", "Estado")) + 16, sy + 6, 16, state_name(st), st == F_PROGRESS ? RGB(200, 60, 30) : st == F_DONE ? C_GREEN : C_MUTED, C_REDE);
-    pa_text_fit(16, sy + 26, 8, W - 32, T("Back: tap the title or press Backspace", "Volver: toca el t\xEDtulo o pulsa Retroceso"), C_MUTED, RGB(230, 200, 190));
+    pa_text(16 + pa_text_w(16, T("State", "Estado")) + 16, sy + 6, 16, state_name(st), st == F_PROGRESS ? C_ORANGE : st == F_DONE ? C_GREEN : C_MUTED, C_REDE);
+    pa_text_fit(16, sy + 26, 8, W - 32, T("Back: tap the title or press Backspace", "Volver: toca el t\xEDtulo o pulsa Retroceso"), C_MUTED8, RGB(230, 200, 190));
 }
 
 static void page_events(int play) {

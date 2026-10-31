@@ -87,7 +87,7 @@ static void page_side(int play) {
     for (int i = 0; i < 2; i++) {
         int tw = (W - 20) / 2, x = 8 + i * (tw + 4);
         plank(x, 56, tw); hot(x, 56, tw, 24, HS_FILTER + 16 + i);
-        ctext(x + tw / 2, 60, 16, zn[i][es()], i == side_zoom ? C_WHITE : C_DARK, C_WOODE);
+        plank_text(x + tw / 2, 60, zn[i][es()], i == side_zoom);
     }
     int mx = 8, my = 84, mw = W - 16, mh = H - my - 8;
     window_(mx, my, mw, mh);
@@ -120,13 +120,12 @@ static void page_side(int play) {
         const PanelEventLoc *L = &panel_event_locs[i];
         if (L->area != 0 || L->sec > 2 || L->x == -32768) continue;
         int ex = WX(L->x), ey = WY(L->y), st = ev_state(L->ev);
-        pa_fill(ex - 13, ey - 18, 26, 18, RGB(255, 248, 230));
-        pa_event_icon(ex - 12, ey - 17, L->ev, st == F_PENDING ? PA_DIM : 0);
+        pa_event_icon(ex - 12, ey - 17, L->ev, PA_OUTLINE | (st == F_PENDING ? PA_DIM : 0));
     }
     if (here) {
         int tx = WX(px), ty = WY(py), bob = (port_frame / 10) & 1;
         face(tx - 12, ty - 26 - bob);
-        pa_text(tx - 6, ty - 36 - bob, 8, es() ? "T\xDA" : "YOU", RGB(255, 255, 120), RGB(40, 30, 60));
+        pa_text_ol(tx - 6, ty - 36 - bob, 8, es() ? "T\xDA" : "YOU", C_YELLOW, C_WOODE, C_DARK);
     }
     pa_clip_x0 = cx0; pa_clip_y0 = cy0; pa_clip_x1 = cx1; pa_clip_y1 = cy1;
 }

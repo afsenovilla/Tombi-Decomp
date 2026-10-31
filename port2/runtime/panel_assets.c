@@ -131,15 +131,38 @@ static inline int texel(int tx, int ty, int u, int v) { return (vram[((ty + v) &
 
 /* draw rect (u, v, w, h) of the 4 bpp page at (tx, ty) words with the CLUT at (cx, cy) at canvas (x, y).
    flags: PA_FLIPX, PA_DIM (silhouette), PA_SHADE (darker), PA_OPAQUE (index 0 drawn) */
+unsigned pa_cut_mask, pa_drop_mask;   /* PA_CUTBOX: indices flooded from the border / dropped anywhere */
 void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, int cy, int flags) {
-    if (!pa_ok) return;
-    u16 pal[16];
+    if (!pa_ok || w <= 0 || h <= 0 || w > 256 || h > 256) return;
+    u16 pal[16]; static u8 idx[258 * 258], vis[258 * 258];
     for (int i = 0; i < 16; i++) pal[i] = vram[(cy & 511) * 1024 + ((cx + i) & 1023)];
+    /* PS1 GPU, textured sprite: a texel whose CLUT colour is 0x0000 is not drawn; any other (STP bit 0x8000 or not)
+       is drawn (the panel draws opaque, like a primitive without semi-transparency) */
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
         int t = texel(tx, ty, u + ((flags & PA_FLIPX) ? w - 1 - i : i), v + j);
-        u16 c = pal[t];
-        if (!c && !(flags & PA_OPAQUE)) continue;
-        u32 col = c15(c);
+        idx[j * w + i] = (u8)t; vis[j * w + i] = pal[t] || (flags & PA_OPAQUE);
+    }
+    if (flags & PA_CUTBOX) {   /* flood from the border through the box's indices */
+        static int st[258 * 258]; int n = 0;
+        for (int j = 0; j < h; j++) for (int i = 0; i < w; i++)
+            if ((!i || !j || i == w - 1 || j == h - 1) && (pa_cut_mask >> idx[j * w + i] & 1)) { st[n++] = j * w + i; idx[j * w + i] |= 0x80; }
+        while (n) {
+            int p = st[--n], i = p % w, j = p / w; vis[p] = 0;
+            int nb[4] = { i > 0 ? p - 1 : -1, i < w - 1 ? p + 1 : -1, j > 0 ? p - w : -1, j < h - 1 ? p + w : -1 };
+            for (int k = 0; k < 4; k++) if (nb[k] >= 0 && !(idx[nb[k]] & 0x80) && (pa_cut_mask >> idx[nb[k]] & 1)) { idx[nb[k]] |= 0x80; st[n++] = nb[k]; }
+        }
+        for (int k = 0; k < w * h; k++) { idx[k] &= 15; if (pa_drop_mask >> idx[k] & 1) vis[k] = 0; }
+    }
+    if (flags & PA_OUTLINE)
+        for (int j = -1; j <= h; j++) for (int i = -1; i <= w; i++) {
+            if (i >= 0 && j >= 0 && i < w && j < h && vis[j * w + i]) continue;
+            int on = (i > 0 && j >= 0 && j < h && i - 1 < w && vis[j * w + i - 1]) || (i + 1 < w && i + 1 >= 0 && j >= 0 && j < h && vis[j * w + i + 1]) ||
+                     (j > 0 && i >= 0 && i < w && j - 1 < h && vis[(j - 1) * w + i]) || (j + 1 < h && j + 1 >= 0 && i >= 0 && i < w && vis[(j + 1) * w + i]);
+            if (on) pa_put(x + i, y + j, 0xFF101828u);
+        }
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
+        if (!vis[j * w + i]) continue;
+        u32 col = c15(pal[idx[j * w + i]]);
         if (flags & PA_DIM) col = 0xFF463240u;
         else if (flags & PA_SHADE) col = 0xFF000000u | ((col >> 1) & 0x7F7F7Fu);
         pa_put(x + i, y + j, col);
@@ -296,9 +319,16 @@ static void glyph(int x, int y, const Glyph *g, int k, u32 body, u32 edge) {
     }
 }
 /* text in the game's glyphs; h = 8, 16 or 24 (event titles); (x, y) = top left; returns the end x */
+extern u32 pa_outline;
 int pa_text(int x, int y, int h, const char *s, u32 body, u32 edge) {
     int k = hidx(h);
     if (k < 0) return x;
+    if (pa_outline && k < 2) {
+        static const int d[8][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {1, -1}, {-1, 1}, {1, 1} };
+        u32 o = pa_outline; pa_outline = 0;
+        for (int i = 0; i < 8; i++) pa_text(x + d[i][0], y + d[i][1], h, s, o, o);
+        pa_outline = o;
+    }
     for (; *s; s++) {
         int c = (u8)*s;
         if (c == ' ') { x += space_w(k); continue; }
@@ -313,6 +343,14 @@ int pa_text(int x, int y, int h, const char *s, u32 body, u32 edge) {
         x += g->w;
     }
     return x;
+}
+/* the same with the game's 1 px dark outline (light text over wood, green or the side map); pa_outline != 0 makes
+   pa_text / pa_text_fit draw it too */
+u32 pa_outline;
+int pa_text_ol(int x, int y, int h, const char *s, u32 body, u32 edge, u32 outline) {
+    u32 o = pa_outline; pa_outline = outline;
+    int r = pa_text(x, y, h, s, body, edge);
+    pa_outline = o; return r;
 }
 /* the same, cut with "..." to fit w */
 int pa_text_fit(int x, int y, int h, int w, const char *s, u32 body, u32 edge) {

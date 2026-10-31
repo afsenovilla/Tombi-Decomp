@@ -5,6 +5,9 @@
 #define PA_DIM    2
 #define PA_SHADE  4
 #define PA_OPAQUE 8
+#define PA_OUTLINE 16  /* 1 px dark outline around the opaque texels (game-style marker) */
+#define PA_CUTBOX 32   /* drop the texels of CLUT indices pa_cut_mask reachable from the rect border (a boxed icon) */
+extern unsigned pa_cut_mask, pa_drop_mask, pa_outline;
 extern int pa_ok, pa_font_ok;
 extern unsigned *pa_cv; extern int pa_cw, pa_ch;          /* the canvas, in game pixels (0xAABBGGRR) */
 extern int pa_clip_x0, pa_clip_y0, pa_clip_x1, pa_clip_y1;
@@ -21,5 +24,6 @@ int pa_event_icon(int x, int y, int e, int flags);
 void pa_item_icon(int x, int y, int n, int flags);
 int pa_text_w(int h, const char *s);
 int pa_text(int x, int y, int h, const char *s, unsigned body, unsigned edge);
+int pa_text_ol(int x, int y, int h, const char *s, unsigned body, unsigned edge, unsigned outline);
 int pa_text_fit(int x, int y, int h, int w, const char *s, unsigned body, unsigned edge);
 #endif

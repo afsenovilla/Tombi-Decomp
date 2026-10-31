@@ -2314,6 +2314,10 @@ scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; An
   The sprite rects are coordinates seen in the primitives the game sends (`--dump-draws`); the event icon of event k is the
   first part of frame `ICONS[k]` (D0SPSUB +0x1694C) of the sub-screen sprite bank `AREA19/A103.GAM` (tools/event_icons.py),
   the item icon n the cell (n % 15 * 16 + 8, n / 15 * 16 + 8) with CLUT row `ITEM_ICON_CLUTS[n]` (D0SPSUB +0x21C60).
+- Sprites as the GPU draws a textured sprite: a texel whose CLUT colour is 0x0000 is not drawn, any other (STP set or
+  not) is drawn opaque; map markers get a 1 px dark outline, Tomba's face drops its green box (CLUT 482 indices 2 3 5 6
+  flooded from the border). Text pairs meet WCAG 4.5:1 (16 px) / 7:1 (8 px): dark text on cream, light text over
+  wood / the side map with the game's 1 px dark outline (table in panel.c next to the colours).
 - Text: the game's WFM fonts (`AREA00/MFNT000L.WFM`, `MFNT001L`, `AREAnn/MFNTnn0L` until the alphabet is complete: 8 / 16 px;
   `CFNT999L.WFM`: the 24 px event-title letters; L = the `--lang` letter B F G I H S P W D). A WFM glyph is a bitmap with no
   character code: each is named by the SHA-1 of its image through `runtime/panel_charmap.h` (hashes only, generated from
