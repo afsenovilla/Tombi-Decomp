@@ -502,7 +502,8 @@ static jint JNICALL n_frame(JNIEnv *env, jclass c, jobject buf, jintArray dims, 
 }
 static void JNICALL n_layout(JNIEnv *env, jclass c, jint w, jint h) { (void)env; (void)c; req_w = w; req_h = h; }
 static void JNICALL n_touch(JNIEnv *env, jclass c, jint x, jint y, jint action) { (void)env; (void)c; inq_push(1, action, x, y); }   /* canvas pixels */
-static void android_register(void) {
+static void android_register_h(void *u) {
+    (void)u;
     JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv(); jobject act = (jobject)SDL_AndroidGetActivity();
     registered = 1;
     if (!env || !act) return;
@@ -513,6 +514,7 @@ static void android_register(void) {
     else port_printf("[panel] JNI ready\n");
     (*env)->DeleteLocalRef(env, cls); (*env)->DeleteLocalRef(env, act);
 }
+static void android_register(void) { port_host_call(android_register_h, 0); }   /* JNI: off the task stacks (threads.c) */
 #endif
 
 /* input queue: touches / clicks (canvas pixels) and keys, from the Android UI thread or the SDL loop, applied before drawing */

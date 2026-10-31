@@ -399,7 +399,13 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
 - **Null page.** `runtime/lowmem_arm.inc`: the SIGSEGV handler emulates A32 LDR/STR(B/H/SB/SH/D) and LDM/STM on
   `port_ram`; VFP loads and Thumb code are not covered (reported as a crash). Division by zero gets the R3000 result
   through `__aeabi_idiv`/`uidiv`/`idivmod`/`uidivmod`.
-- **Coroutines.** `threads.c` has an ARM switch (r4-r11, lr, d8-d15); the watchdog reads `arm_pc/sp/fp`.
+- **Coroutines.** `threads.c` has an ARM switch (r4-r11, lr, d8-d15); the watchdog reads `arm_pc/sp/fp`. SDL never runs
+  on a task's stack: a task's vblank wait (`StGetNext`, `VSync`, the CD spin) reaches `port_vblank` on its coroutine
+  stack, and on Android `SDL_PollEvent` -> `SDL_JoystickUpdate` calls Java, which ART aborts with sp outside the
+  thread's stack (SIGABRT at frame 732 in the opening movie, build ee68aad). `port_host_call` (threads.c) runs the SDL
+  entry points of `runtime/sdl.c` (pad poll, present, GL swap, refresh, panel window, stop), the panel's JNI
+  registration and `port_quit`/`port_fatal`'s exit on the main thread's stack below its suspended frames, then returns
+  to the task: same thread, same calls in the same order (the standard run with the intro movie is byte-identical).
 - **Generator.** `gen2.py` with `PORT2_ARCH=arm` writes ARM thunks (and ARM branches for libc aliases such as MAIN0's
   memcpy, which lld cannot alias), parses `llvm-nm -A`, reads bionic's `libc.so` (`PORT2_LIBC`) and turns
   K&R declarations (`extern void f(o);`, which clang rejects) into `f()`. All 3150 game sources and the runtime

@@ -51,7 +51,7 @@ static void tib_set(int from, int n) {
     __asm__ volatile("movl %0, %%fs:4\n\tmovl %1, %%fs:8" : : "r"(tib_base[n]), "r"(tib_limit[n]));
 }
 #else
-#define tib_set(from, n) ((void)0)
+#define tib_set(from, n) ((void)(from), (void)(n))
 #endif
 
 /* where each coroutine last yielded (the game call sites above ChangeTh on its stack, newest first): the
@@ -72,9 +72,11 @@ static void note_yield(int from) {
 }
 int port_thread_used(int n) { return n >= 1 && n <= MAX_TH && th[n].used; }
 
+static int on_host;                       /* port_host_call is running a host function (below) */
 static void switch_to(int n) {
     int from = cur;
     if (n == from) return;
+    if (on_host) port_fatal("ChangeTh(%d) from a host call: the main stack is in use", n);
     if (from >= 1 && from <= MAX_TH) note_yield(from);
     port_thread_switches++;
     cur = n;
@@ -124,6 +126,36 @@ void port_thread_change(int h) {
     if (n > MAX_TH || (n && !th[n].used)) { port_printf("[port] ChangeTh(%08x): no such thread\n", h); return; }
     switch_to(n);
 }
+
+/* SDL (and through it JNI on Android) only ever runs on the thread's own stack.  A task's vblank wait (StGetNext,
+   VSync, the CD spin...) reaches port_vblank on its coroutine stack, and from there the pad poll, the present, the
+   panel and port_quit call into SDL; on Android SDL_PollEvent -> SDL_JoystickUpdate calls Java, and ART aborts a JNI
+   call made with sp outside the thread's known stack (beta 36: SIGABRT at frame 732 in the opening movie).
+   port_host_call runs fn(arg) on the main thread's stack, below the frames it left suspended in port_ctx_switch
+   (nothing lives there while a task runs), and returns on the coroutine stack: the same thread, the same order of
+   calls, only the stack differs.  On the main thread, or already on its stack, fn is called directly. */
+void port_call_on_stack(void (*fn)(void *), void *arg, void *sp);
+#if defined(__wasm__)
+void port_host_call(void (*fn)(void *), void *arg) { fn(arg); }   /* (no JNI; the host owns the stacks) */
+#else
+#if defined(__arm__)
+__asm__(".text\n.syntax unified\n.arm\n.align 2\n.globl port_call_on_stack\n.type port_call_on_stack,%function\nport_call_on_stack:\n"
+        "\tpush {r4, lr}\n\tmov r4, sp\n\tmov sp, r2\n\tmov r3, r0\n\tmov r0, r1\n\tblx r3\n\tmov sp, r4\n\tpop {r4, pc}\n");
+#else
+__asm__(".text\n.globl " SYM("port_call_on_stack") "\n" SYM("port_call_on_stack") ":\n"
+        "\tpushl %ebp\n\tmovl %esp, %ebp\n\tmovl 8(%ebp), %eax\n\tmovl 12(%ebp), %ecx\n\tmovl 16(%ebp), %esp\n"
+        "\tsubl $12, %esp\n\tpushl %ecx\n\tcall *%eax\n\tmovl %ebp, %esp\n\tpopl %ebp\n\tret\n");
+#endif
+void port_host_call(void (*fn)(void *), void *arg) {
+    if (cur == 0 || on_host) { fn(arg); return; }
+    int me = cur;
+    on_host = 1;
+    tib_set(me, 0);
+    port_call_on_stack(fn, arg, (void *)(((unsigned long)th[0].sp - 256) & ~15ul));
+    tib_set(0, me);
+    on_host = 0;
+}
+#endif
 
 void port_thread_close(int h) {
     int n = h & 0xFF;

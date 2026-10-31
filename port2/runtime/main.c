@@ -45,10 +45,12 @@ void port_printf(const char *fmt, ...) {
     va_end(ap);
 }
 int port_exit_status = -1;   /* what port_fatal / port_quit exit with (android/loader.c reads it in its atexit handler) */
+static void exit_h(void *u) { (void)u; exit(1); }
 void port_fatal(const char *fmt, ...) {
     port_exit_status = 1;
     va_list ap; va_start(ap, fmt); fputs("[port2] FATAL: ", stderr); vfprintf(stderr, fmt, ap); va_end(ap);
     fputc('\n', stderr);
+    port_host_call(exit_h, 0);
     exit(1);
 }
 static int stub_count;
@@ -68,12 +70,15 @@ void port_stub_report(void) {
     if (port_exec_from_ram_calls()) port_printf("[port2] %d calls into RAM dispatched through the fault handler\n", port_exec_from_ram_calls());
 }
 void port_flush_log(void) { fflush(stderr); }
-void port_quit(int code) {
+/* (on the thread's own stack: SDL_Quit and the exit handlers may call Java on Android, threads.c port_host_call) */
+static void quit_h(void *a) {
+    int code = *(int *)a;
     port_exit_status = code;
     port_gpu_stop();
     port_window_stop();
     exit(code);
 }
+void port_quit(int code) { port_host_call(quit_h, &code); exit(code); }
 
 #ifndef _WIN32    /* (Windows: runtime/host_win32.c) */
 unsigned long long port_time_us(void) {

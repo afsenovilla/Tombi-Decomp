@@ -86,12 +86,14 @@ void port_window_start(void) {
     port_printf("[port2] window %dx%d (scale %d, %s)%s\n", ww, 256 * port_window_scale, port_window_scale, port_window_square ? "square pixels" : "4:3", dev ? ", audio 44.1 kHz (device pulls the mixer)" : "");
 }
 
-void port_window_stop(void) {
+static void window_stop_h(void *u) {
+    (void)u;
     if (dev) { port_sound_pulled(0); SDL_CloseAudioDevice(dev); }
     if (glctx) SDL_GL_DeleteContext(glctx);
     if (win) SDL_Quit();
     win = 0; dev = 0; glctx = 0;
 }
+void port_window_stop(void) { port_host_call(window_stop_h, 0); }
 
 /* the OpenGL backend (shims/gpu_gl.c): a context on the window, or on a hidden one in headless mode */
 int port_window_gl_start(void) {
@@ -114,11 +116,12 @@ int port_window_gl_start(void) {
     }
     return 0;
 }
-void port_window_gl_size(int *w, int *h) { if (win) SDL_GL_GetDrawableSize(win, w, h); else *w = *h = 0; }
+static void gl_size_h(void *a) { int **p = a; if (win) SDL_GL_GetDrawableSize(win, p[0], p[1]); else *p[0] = *p[1] = 0; }
+void port_window_gl_size(int *w, int *h) { int *p[2] = { w, h }; port_host_call(gl_size_h, p); }
+static void gl_swap_h(void *u) { (void)u; pump(); SDL_GL_SwapWindow(win); }
 void port_window_gl_swap(void) {
     if (!win || win_hidden) return;
-    pump();
-    SDL_GL_SwapWindow(win);
+    port_host_call(gl_swap_h, 0);
 }
 
 enum { P_SELECT = 1, P_START = 8, P_UP = 0x10, P_RIGHT = 0x20, P_DOWN = 0x40, P_LEFT = 0x80, P_L2 = 0x100, P_R2 = 0x200,
@@ -163,6 +166,7 @@ static unsigned short ctrl_mask(int b) {
     default: return 0;
     }
 }
+static void pump_h(void *u) { (void)u; pump(); }
 static void pump(void) {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
@@ -221,8 +225,9 @@ void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
     *w = (int)(ow + 0.5f); *hh = (int)(oh + 0.5f); *x = (W - *w) / 2; *y = (H - *hh) / 2;
 }
 
-void port_window_frame(const unsigned char *rgb, int w, int h) {
-    if (!win) return;
+typedef struct { const unsigned char *px; int w, h; } FrameArgs;
+static void window_frame_h(void *a) {
+    const unsigned char *rgb = ((FrameArgs *)a)->px; int w = ((FrameArgs *)a)->w, h = ((FrameArgs *)a)->h;
     pump();
     if (!ren) {
         /* (the OpenGL backend presents its own frames, 24-bit ones included, through gpu_gl.c: a renderer made here
@@ -246,27 +251,31 @@ void port_window_frame(const unsigned char *rgb, int w, int h) {
       SDL_RenderCopy(ren, tex, NULL, &dst); }  /* 512-wide modes show at the same size */
     SDL_RenderPresent(ren);
 }
+void port_window_frame(const unsigned char *rgb, int w, int h) {
+    if (!win) return;
+    FrameArgs a = { rgb, w, h }; port_host_call(window_frame_h, &a);
+}
 
 /* called by pad.c each vblank: every press since the previous vblank counts, so a tap is never lost */
 int port_window_poll_pad(unsigned short *out) {
     if (!win) return 0;
-    pump();
+    port_host_call(pump_h, 0);
     *out = keys_down | ctrl_down | seen_since;
     seen_since = 0;
     return 1;
 }
 
 /* --fps60: the display's refresh rate (Hz), 0 = unknown (no window, or the driver does not say) */
-int port_window_refresh(void) {
+static void refresh_h(void *a) {
     SDL_DisplayMode m;
-    if (!win || win_hidden || SDL_GetWindowDisplayMode(win, &m) < 0) return 0;
-    return m.refresh_rate > 0 && m.refresh_rate <= 360 ? m.refresh_rate : 0;
+    *(int *)a = !win || win_hidden || SDL_GetWindowDisplayMode(win, &m) < 0 ? 0 : m.refresh_rate > 0 && m.refresh_rate <= 360 ? m.refresh_rate : 0;
 }
+int port_window_refresh(void) { int r; port_host_call(refresh_h, &r); return r; }
 
 /* --second-screen on the PC: the panel (runtime/panel.c, RGBA) in a window of its own, through the window surface (no
    renderer: the game window may carry the OpenGL context) */
-void port_panel_window_frame(const unsigned char *rgba, int w, int h) {
-    if (!win || pwin_closed) return;
+static void panel_window_frame_h(void *a) {
+    const unsigned char *rgba = ((FrameArgs *)a)->px; int w = ((FrameArgs *)a)->w, h = ((FrameArgs *)a)->h;
     if (!pwin) {
         pwin = SDL_CreateWindow("Tombi! - map and status", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, 0);
         if (!pwin) { port_printf("[port2] --second-screen: SDL_CreateWindow: %s\n", SDL_GetError()); pwin_closed = 1; return; }
@@ -279,4 +288,8 @@ void port_panel_window_frame(const unsigned char *rgba, int w, int h) {
     SDL_ConvertPixels(w < sf->w ? w : sf->w, h < sf->h ? h : sf->h, SDL_PIXELFORMAT_ABGR8888, rgba, w * 4, sf->format->format, sf->pixels, sf->pitch);
     SDL_UnlockSurface(sf);
     SDL_UpdateWindowSurface(pwin);
+}
+void port_panel_window_frame(const unsigned char *rgba, int w, int h) {
+    if (!win || pwin_closed) return;
+    FrameArgs a = { rgba, w, h }; port_host_call(panel_window_frame_h, &a);
 }

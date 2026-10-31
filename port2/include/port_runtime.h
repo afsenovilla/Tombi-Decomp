@@ -90,6 +90,7 @@ void port_thread_change(int handle);
 void port_thread_close(int handle);
 int port_thread_current(void);
 int port_thread_used(int n);
+void port_host_call(void (*fn)(void *), void *arg);   /* fn(arg) on the thread's own stack, not a task's (SDL / JNI) */
 extern unsigned long port_thread_yield_site[][4];   /* threads.c: where each coroutine last yielded */
 extern unsigned port_thread_switches, port_ot_signature;
 
