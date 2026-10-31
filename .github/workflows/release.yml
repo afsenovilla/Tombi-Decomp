@@ -8,9 +8,8 @@ name: Publish release
 # "version" (X.Y.Z, greater than the latest) overrides it, e.g. 0.1.0.  Old build-YYYYMMDD-<sha7> releases are dev
 # pre-releases (dispatch input migrate_dev=true retitles them "dev build YYYYMMDD-<sha7>", publishes nothing).  The build workflows only
 # upload artifacts; a release is made
-#   - on request: Actions > "Publish release" > Run workflow (or `gh workflow run release.yml`), or
-#   - automatically, after a port build finishes, once no port build is running and master has >= 5 non-CI commits (subject not starting
-#     with "ci:"/"dist:") since the last v* release.
+#   - only on request: Actions > "Publish release" > Run workflow (or `gh workflow run release.yml`).  The automatic
+#     release after each green port build was removed: releases are published by hand once the owner approves.
 on:
   workflow_dispatch:
     inputs:
@@ -26,10 +25,6 @@ on:
         description: "only mark old build-* releases as pre-release 'dev build ...' (no new release)"
         type: boolean
         default: false
-  workflow_run:
-    workflows: ["Native port (Windows exe)"]
-    types: [completed]
-    branches: [master]
 
 permissions:
   contents: write
