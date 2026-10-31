@@ -135,6 +135,14 @@ static int arm_low_emulate(unsigned long *r, unsigned long cpsr, unsigned long f
     return 0;
 }
 
+/* the handlers in place before ours (android/loader.c's crash reporter, then debuggerd): a fault we cannot emulate
+   goes back to them; returning re-executes the instruction, which faults again into the restored handler */
+static struct sigaction prev_segv, prev_bus;
+static void chain_prev(int sig) {
+    struct sigaction *p = sig == SIGBUS ? &prev_bus : &prev_segv;
+    if (p->sa_handler == SIG_IGN || (!(p->sa_flags & SA_SIGINFO) && p->sa_handler == SIG_DFL)) { signal(sig, SIG_DFL); raise(sig); return; }
+    sigaction(sig, p, 0);
+}
 static void on_segv(int sig, siginfo_t *info, void *ucv) {
     ucontext_t *uc = ucv;
     unsigned long *r = (unsigned long *)&uc->uc_mcontext.arm_r0;
@@ -148,7 +156,7 @@ static void on_segv(int sig, siginfo_t *info, void *ucv) {
         static volatile sig_atomic_t reporting;
         char raw[64]; unsigned n = raw_fault_line(raw, "[port2] fault: pc=", eip, fault);
         syscall(SYS_write, 2, raw, n);           /* (the game has its own `write`, a stub) */
-        if (reporting) { signal(sig, SIG_DFL); raise(sig); return; }
+        if (reporting) { chain_prev(sig); return; }
         reporting = 1;
         unsigned long off; const char *nm = port_sym_near((void *)eip, &off);
         port_printf("[port2] signal %d: pc=%08lx (%s+0x%lx) fault address=%08lx (frame %d); stack:", sig, eip, nm, off, fault, port_frame);
@@ -156,8 +164,7 @@ static void on_segv(int sig, siginfo_t *info, void *ucv) {
         port_printf("\n");
     }
     port_low_report();
-    signal(sig, SIG_DFL);
-    raise(sig);
+    chain_prev(sig);
 }
 static unsigned char alt_stack[65536];
 void port_lowmem_install(void) {
@@ -165,5 +172,5 @@ void port_lowmem_install(void) {
     sigaltstack(&ss, 0);
     struct sigaction sa; memset(&sa, 0, sizeof sa);
     sa.sa_sigaction = on_segv; sa.sa_flags = SA_SIGINFO | SA_NODEFER | SA_ONSTACK;
-    sigaction(SIGSEGV, &sa, 0); sigaction(SIGBUS, &sa, 0);
+    sigaction(SIGSEGV, &sa, &prev_segv); sigaction(SIGBUS, &sa, &prev_bus);
 }

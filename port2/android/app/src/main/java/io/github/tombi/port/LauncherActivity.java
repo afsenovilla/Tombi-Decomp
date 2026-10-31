@@ -43,7 +43,7 @@ public class LauncherActivity extends Activity {
     static final int[] LANG_N = {0, 5, 6, 7, 8};
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
-    static final int REQ_DISC = 2;
+    static final int REQ_DISC = 2, REQ_EXPORT = 3;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
 
@@ -66,7 +66,45 @@ public class LauncherActivity extends Activity {
     protected void onResume() {
         super.onResume();
         immersive();
+        // the last game run ended abnormally (CrashLog markers): the crash card with the log, once
+        try {
+            if (view.screen != LauncherView.CRASH && CrashLog.crashedLastRun(this)) view.setScreen(LauncherView.CRASH);
+        } catch (Throwable ignored) { }
         view.invalidate();
+    }
+
+    // ---- the game's log (CrashLog): copy / share / export ----
+    void copyReport() {
+        try {
+            android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            cm.setPrimaryClip(android.content.ClipData.newPlainText("Tombi! log", CrashLog.report(this, 48 * 1024)));
+            Toast.makeText(this, R.string.log_copied, Toast.LENGTH_SHORT).show();
+        } catch (Throwable t) { Toast.makeText(this, String.valueOf(t), Toast.LENGTH_LONG).show(); }
+    }
+    void shareReport() {
+        try {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("text/plain");
+            i.putExtra(Intent.EXTRA_SUBJECT, "Tombi! Android log");
+            i.putExtra(Intent.EXTRA_TEXT, CrashLog.report(this, 96 * 1024));
+            startActivity(Intent.createChooser(i, getString(R.string.log_share)));
+        } catch (Throwable t) { Toast.makeText(this, String.valueOf(t), Toast.LENGTH_LONG).show(); }
+    }
+    void exportReport() {
+        Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("text/plain");
+        i.putExtra(Intent.EXTRA_TITLE, "tombi-log-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new java.util.Date()) + ".txt");
+        try { startActivityForResult(i, REQ_EXPORT); }
+        catch (ActivityNotFoundException e) { Toast.makeText(this, getString(R.string.log_export_fail, String.valueOf(e.getMessage())), Toast.LENGTH_LONG).show(); }
+    }
+    void writeExport(Uri u) {
+        try {
+            OutputStream o = getContentResolver().openOutputStream(u);
+            if (o == null) throw new Exception("openOutputStream");
+            try { o.write(CrashLog.report(this, 8 * 1024 * 1024).getBytes("UTF-8")); } finally { o.close(); }
+            Toast.makeText(this, R.string.log_exported, Toast.LENGTH_SHORT).show();
+        } catch (Throwable t) { Toast.makeText(this, getString(R.string.log_export_fail, String.valueOf(t.getMessage())), Toast.LENGTH_LONG).show(); }
     }
 
     @Override
@@ -89,17 +127,16 @@ public class LauncherActivity extends Activity {
     int aspectIdx() { return clamp(prefs.getInt("aspect", 0), ASPECTS.length); }
     boolean flag(String k, boolean def) { return prefs.getBoolean(k, def); }
     /* second screen panel (runtime/panel.c, TombiActivity): default on when the device has a secondary display */
-    boolean secondScreenOn() {
-        android.hardware.display.DisplayManager dm = (android.hardware.display.DisplayManager) getSystemService(DISPLAY_SERVICE);
-        boolean has = dm != null && dm.getDisplays(android.hardware.display.DisplayManager.DISPLAY_CATEGORY_PRESENTATION).length > 0;
-        return flag("secondscreen", has);
+    boolean hasSecondDisplay() {
+        try {
+            android.hardware.display.DisplayManager dm = (android.hardware.display.DisplayManager) getSystemService(DISPLAY_SERVICE);
+            android.view.Display[] ds = dm != null ? dm.getDisplays(android.hardware.display.DisplayManager.DISPLAY_CATEGORY_PRESENTATION) : null;
+            return ds != null && ds.length > 0;
+        } catch (Throwable t) { return false; }
     }
+    boolean secondScreenOn() { return flag("secondscreen", hasSecondDisplay()); }
     /* the game's HUD on the panel instead of the top screen (--hud-bottom): default on with a secondary display */
-    boolean hudBottomOn() {
-        android.hardware.display.DisplayManager dm = (android.hardware.display.DisplayManager) getSystemService(DISPLAY_SERVICE);
-        boolean has = dm != null && dm.getDisplays(android.hardware.display.DisplayManager.DISPLAY_CATEGORY_PRESENTATION).length > 0;
-        return flag("hudbottom", has);
-    }
+    boolean hudBottomOn() { return flag("hudbottom", hasSecondDisplay()); }
     static int clamp(int v, int n) { return v < 0 || v >= n ? 0 : v; }
 
     File filesDir() {
@@ -151,8 +188,11 @@ public class LauncherActivity extends Activity {
             if (LANG_N[langIdx()] == 0 && patchAsset("en_cut_content.tpatch") != null) { a.add("--patch-dir"); a.add(new File(filesDir(), "patches").getAbsolutePath()); }
         }
         if (flag("debugmenu", false)) a.add("--debug-menu");
-        if (secondScreenOn()) a.add("--second-screen");
-        if (secondScreenOn() && hudBottomOn()) a.add("--hud-bottom");
+        // the panel only with the option on AND a secondary display present now (off: no Presentation, no HUD move)
+        boolean panel = secondScreenOn() && hasSecondDisplay();
+        if (panel) a.add("--second-screen");
+        if (panel && hudBottomOn()) a.add("--hud-bottom");
+        a.add("--files-dir"); a.add(filesDir().getAbsolutePath());   // the loader's files dir (taken out before port_main)
         if (flag("skipintro", false)) a.add("--skip-intro");
         if (flag("hz60", false)) { a.add("--hz"); a.add("60"); }
         if (flag("fps60", false)) a.add("--fps60");
@@ -168,9 +208,20 @@ public class LauncherActivity extends Activity {
             view.setScreen(LauncherView.DISC);
             return;
         }
+        String[] args;
+        try { args = buildArgs(); }
+        catch (Throwable t) { Toast.makeText(this, String.valueOf(t), Toast.LENGTH_LONG).show(); return; }
+        // markers (CrashLog): "running" until TombiActivity finishes cleanly; a stale "crashed" is cleared
+        CrashLog.clearMarkers(this);
+        CrashLog.writeMarker(this, CrashLog.RUNNING, "launcher " + System.currentTimeMillis() + "\n");
         Intent i = new Intent(this, TombiActivity.class);
-        i.putExtra(TombiActivity.EXTRA_ARGS, buildArgs());
-        startActivity(i);
+        i.putExtra(TombiActivity.EXTRA_ARGS, args);
+        try { startActivity(i); }
+        catch (Throwable t) {
+            CrashLog.append(this, "launcher: startActivity(TombiActivity) failed: " + CrashLog.stack(t));
+            CrashLog.writeMarker(this, CrashLog.CRASHED, "startActivity failed: " + t + "\n");
+            view.setScreen(LauncherView.CRASH);
+        }
     }
 
     String version() {
@@ -276,6 +327,7 @@ public class LauncherActivity extends Activity {
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
         super.onActivityResult(req, res, data);
+        if (req == REQ_EXPORT && res == RESULT_OK && data != null && data.getData() != null) { writeExport(data.getData()); return; }
         if (req == REQ_DISC && res == RESULT_OK && data != null) {
             final List<Uri> uris = new ArrayList<>();
             if (data.getClipData() != null)
@@ -301,9 +353,10 @@ public class LauncherActivity extends Activity {
     interface Adjust { void by(int d); }
 
     class LauncherView extends View {
-        static final int MAIN = 0, OPTIONS = 1, DISC = 2;
+        static final int MAIN = 0, OPTIONS = 1, DISC = 2, CRASH = 3, LOG = 4;
         int screen = MAIN, focus = 0;
-        int[] lastFocus = new int[3];
+        int[] lastFocus = new int[5];
+        List<String> logLines = new ArrayList<>();
         List<Item> items = new ArrayList<>();
         final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         final TextPaint tp = new TextPaint(Paint.ANTI_ALIAS_FLAG);
@@ -332,6 +385,10 @@ public class LauncherActivity extends Activity {
             screen = sc;
             focus = lastFocus[sc];
             if (sc != DISC && phase == IDLE) { importStatus = null; result = 0; }
+            if (sc == CRASH || sc == LOG) {
+                try { logLines = CrashLog.tail(LauncherActivity.this, 40); } catch (Throwable t) { logLines = new ArrayList<>(); }
+                focus = 0;
+            }
             invalidate();
         }
 
@@ -385,7 +442,13 @@ public class LauncherActivity extends Activity {
                 items.add(toggle(R.string.opt_showfps, "showfps"));
                 items.add(toggle(R.string.opt_inflives, "inflives"));
                 items.add(toggle(R.string.opt_infhealth, "infhealth"));
+                items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
+            } else if (screen == CRASH || screen == LOG) {
+                items.add(new Item(getString(R.string.log_copy), new Runnable() { public void run() { copyReport(); } }));
+                items.add(new Item(getString(R.string.log_share), new Runnable() { public void run() { shareReport(); } }));
+                items.add(new Item(getString(R.string.log_export), new Runnable() { public void run() { exportReport(); } }));
+                items.add(new Item(getString(screen == CRASH ? R.string.log_close : R.string.back), new Runnable() { public void run() { closeLog(); } }));
             } else if (phase != IDLE) {   // importing: the only action is Cancel (also B)
                 items.add(new Item(getString(R.string.cancel), new Runnable() { public void run() { cancelImport = true; } }));
             } else {
@@ -393,6 +456,12 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             }
             if (focus >= items.size()) focus = 0;
+        }
+
+        /* leaving the crash card clears the markers (the log stays: Options > View last log) */
+        void closeLog() {
+            if (screen == CRASH) { CrashLog.clearMarkers(LauncherActivity.this); setScreen(MAIN); }
+            else setScreen(OPTIONS);
         }
 
         String aspectName(int i) { return i == 0 ? getString(R.string.aspect_auto) : ASPECTS[i]; }
@@ -405,6 +474,7 @@ public class LauncherActivity extends Activity {
                 case KeyEvent.KEYCODE_DPAD_UP: focus = (focus + n - 1) % n; break;
                 case KeyEvent.KEYCODE_DPAD_DOWN: focus = (focus + 1) % n; break;
                 case KeyEvent.KEYCODE_DPAD_LEFT: case KeyEvent.KEYCODE_DPAD_RIGHT: {
+                    if (screen == CRASH || screen == LOG) { focus = (focus + (code == KeyEvent.KEYCODE_DPAD_LEFT ? n - 1 : 1)) % n; break; }
                     Item it = items.get(focus);
                     if (it.adj != null) it.adj.by(code == KeyEvent.KEYCODE_DPAD_LEFT ? -1 : 1);
                     break;
@@ -414,11 +484,13 @@ public class LauncherActivity extends Activity {
                     activate(items.get(focus)); break;
                 case KeyEvent.KEYCODE_BUTTON_B: case KeyEvent.KEYCODE_BACK: case KeyEvent.KEYCODE_ESCAPE:
                     if (phase != IDLE) cancelImport = true;
+                    else if (screen == CRASH || screen == LOG) closeLog();
                     else if (screen == MAIN) finish(); else setScreen(MAIN);
                     break;
                 case KeyEvent.KEYCODE_BUTTON_START:
                     if (phase != IDLE) break;
-                    if (screen == MAIN) play(); else setScreen(MAIN);
+                    if (screen == CRASH || screen == LOG) closeLog();
+                    else if (screen == MAIN) play(); else setScreen(MAIN);
                     break;
                 default: return false;
             }
@@ -496,6 +568,7 @@ public class LauncherActivity extends Activity {
             c.scale(s, s);
             if (screen == MAIN) drawMain();
             else if (screen == OPTIONS) drawOptions();
+            else if (screen == CRASH || screen == LOG) drawLog();
             else drawDisc();
             c.restore();
         }
@@ -536,11 +609,17 @@ public class LauncherActivity extends Activity {
 
         void drawOptions() {
             bigTitle(getString(R.string.options), 50, 66);
-            float y = 88;
+            // more rows than fit above the hint: scroll so the focused row stays visible
+            float top = 88, bottom = 670, rowH = 44;
+            float scroll = Math.max(0, Math.min(items.size() * rowH - (bottom - top), (focus + 1) * rowH - (bottom - top)));
+            float y = top - scroll;
+            canvas.save();
+            canvas.clipRect(0, top - 10, 1280, bottom + 4);
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
                 boolean f = i == focus;
                 it.r.set(640 - 380, y, 640 + 380, y + 38);
+                if (y + 38 < top - 10 || y > bottom) it.r.set(-1, -1, -1, -1);   // off screen: not touchable
                 pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
                 int col = f ? ACCENT_TEXT : BG;
                 text(nunito, 19, col);
@@ -552,8 +631,9 @@ public class LauncherActivity extends Activity {
                     p.setTextAlign(Paint.Align.RIGHT);
                     canvas.drawText("‹  " + it.value + "  ›", it.r.right - 26, midBase(it.r), p);
                 }
-                y += 44;
+                y += rowH;
             }
+            canvas.restore();
             tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB);
             tp.setTextAlign(Paint.Align.LEFT);
             wrapped(getString(R.string.opt_hint), 684);
@@ -615,6 +695,39 @@ public class LauncherActivity extends Activity {
             canvas.translate(640 - 300, tmp.centerY() - l.getHeight() / 2f);
             l.draw(canvas);
             canvas.restore();
+        }
+
+        /* the crash card / the last log: title, the last 40 lines (monospace), the four buttons in a row */
+        void drawLog() {
+            boolean crash = screen == CRASH;
+            bigTitle(getString(crash ? R.string.crash_title : R.string.log_title), crash ? 44 : 50, 58);
+            tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT); tp.setTextSize(15); tp.setColor(SUB);
+            if (crash) wrapped(getString(R.string.crash_hint), 70);
+            tmp.set(40, 110, 1240, 620);
+            p.setStyle(Paint.Style.FILL); p.setColor(0xb0000000);
+            canvas.drawRoundRect(tmp, 16, 16, p);
+            p.setTypeface(Typeface.MONOSPACE); p.setTextSize(11.5f); p.setTextAlign(Paint.Align.LEFT); p.setLetterSpacing(0);
+            canvas.save();
+            canvas.clipRect(tmp.left + 8, tmp.top + 4, tmp.right - 8, tmp.bottom - 4);
+            if (logLines.isEmpty()) { p.setColor(Color.WHITE); canvas.drawText(getString(R.string.log_none), 56, 140, p); }
+            float ly = 126;
+            for (String l : logLines) {
+                boolean bad = l.contains("FATAL") || l.contains("FAILED") || l.contains("signal") || l.contains("EXCEPTION") || l.contains("blocked");
+                p.setColor(bad ? 0xffff8a8a : 0xffe8f0e0);
+                canvas.drawText(l, 52, ly, p);
+                ly += 12.4f;
+            }
+            canvas.restore();
+            float bw = 270, gap = 16, x = 640 - (items.size() * bw + (items.size() - 1) * gap) / 2;
+            for (int i = 0; i < items.size(); i++) {
+                Item it = items.get(i);
+                boolean f = i == focus;
+                it.r.set(x, 640, x + bw, 692);
+                pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
+                text(nunito, 20, f ? ACCENT_TEXT : BG);
+                canvas.drawText(it.label, it.r.centerX(), midBase(it.r), p);
+                x += bw + gap;
+            }
         }
 
         void drawDisc() {

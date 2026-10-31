@@ -46,4 +46,16 @@
     <string name="disc_cancelled">Copia cancelada: se han borrado los archivos a medias.</string>
     <string name="disc_phase_copy">Copiando…</string>
     <string name="disc_phase_check">Comprobando…</string>
+    <string name="crash_title">El juego se cerró inesperadamente</string>
+    <string name="crash_hint">Envía este informe al desarrollador: Copiar informe, Compartir o Exportar registro (guarda un .txt, p. ej. en Descargas).</string>
+    <string name="log_title">Último registro</string>
+    <string name="log_none">Todavía no hay registro: inicia el juego una vez.</string>
+    <string name="log_copy">Copiar informe</string>
+    <string name="log_share">Compartir</string>
+    <string name="log_export">Exportar registro</string>
+    <string name="log_close">Cerrar</string>
+    <string name="log_copied">Informe copiado al portapapeles.</string>
+    <string name="log_exported">Registro guardado.</string>
+    <string name="log_export_fail">No se pudo guardar el registro: %1$s</string>
+    <string name="opt_viewlog">Ver último registro</string>
 </resources>

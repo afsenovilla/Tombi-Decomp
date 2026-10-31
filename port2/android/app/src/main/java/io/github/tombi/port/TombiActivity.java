@@ -53,35 +53,91 @@ public class TombiActivity extends SDLActivity {
 
     @Override
     protected void onCreate(Bundle b) {
+        // the log first (CrashLog): a fresh tombi.log, its dir handed to libmain.so (loaded by super.onCreate, whose
+        // JNI_OnLoad opens it), Java exceptions and a blocked UI thread written into it
+        final Context app = getApplicationContext();
+        CrashLog.rotate(app);
+        CrashLog.append(app, "TombiActivity.onCreate, pid " + android.os.Process.myPid() + (b != null ? " (restored state)" : ""));
+        CrashLog.append(app, CrashLog.deviceInfo(app).replace("\n", "; "));
+        StringBuilder a = new StringBuilder("arguments:");
+        for (String s : getArguments()) a.append(' ').append(s);
+        CrashLog.append(app, a.toString());
+        try { android.system.Os.setenv("TOMBI_LOG_DIR", CrashLog.dir(app).getAbsolutePath(), true); }
+        catch (Throwable t) { CrashLog.append(app, "setenv TOMBI_LOG_DIR: " + t); }
+        final Thread.UncaughtExceptionHandler prev = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override public void uncaughtException(Thread t, Throwable e) {
+                CrashLog.append(app, "UNCAUGHT EXCEPTION in thread \"" + t.getName() + "\": " + CrashLog.stack(e));
+                CrashLog.writeMarker(app, CrashLog.CRASHED, "java exception: " + e + "\n");
+                if (prev != null) prev.uncaughtException(t, e); else System.exit(2);
+            }
+        });
+        startUiWatchdog(app);
         super.onCreate(b);
+        CrashLog.append(app, "SDLActivity.onCreate done");
         if (panelWanted()) {
-            dm = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
-            if (dm != null) { dm.registerDisplayListener(listener, ui); updatePanel(); }
+            try {
+                dm = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+                if (dm != null) { dm.registerDisplayListener(listener, ui); updatePanel(); }
+            } catch (Throwable t) {
+                CrashLog.append(app, "second screen: setup failed, playing without it: " + CrashLog.stack(t));
+                dm = null;
+            }
         }
+    }
+
+    /* "se cuelga y se cierra": the UI thread blocked (an ANR) leaves its stack in the log every 5 s (at most 4 times) */
+    private volatile long uiTick;
+    private void startUiWatchdog(final Context app) {
+        uiTick = android.os.SystemClock.uptimeMillis();
+        final Runnable tick = new Runnable() { @Override public void run() { uiTick = android.os.SystemClock.uptimeMillis(); } };
+        Thread w = new Thread(new Runnable() {
+            @Override public void run() {
+                int reports = 0;
+                while (reports < 4) {
+                    try { Thread.sleep(1000); } catch (InterruptedException e) { return; }
+                    ui.post(tick);
+                    long late = android.os.SystemClock.uptimeMillis() - uiTick;
+                    if (late < 5000 * (reports + 1)) continue;
+                    reports++;
+                    StringBuilder b = new StringBuilder("UI thread blocked for " + late / 1000 + " s (ANR?); its stack:");
+                    for (StackTraceElement e : Looper.getMainLooper().getThread().getStackTrace()) b.append("\n    at ").append(e);
+                    CrashLog.append(app, b.toString());
+                }
+            }
+        }, "tombi-ui-watchdog");
+        w.setDaemon(true);
+        w.start();
     }
 
     private void updatePanel() {
         if (dm == null || isFinishing()) return;
-        Display[] ds = dm.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
-        Display d = ds.length > 0 ? ds[0] : null;
-        if (panel != null && (d == null || panel.getDisplay().getDisplayId() != d.getDisplayId())) {
-            panel.dismiss(); panel = null;
-        }
-        if (d != null && panel == null) {
-            try {
-                panel = new PanelPresentation(this, d);
-                panel.show();
-            } catch (WindowManager.InvalidDisplayException e) {
+        try {
+            Display[] ds = dm.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
+            Display d = ds != null && ds.length > 0 ? ds[0] : null;
+            if (panel != null && (d == null || panel.getDisplay().getDisplayId() != d.getDisplayId())) {
+                try { panel.dismiss(); } catch (Throwable ignored) { }
                 panel = null;
             }
+            if (d != null && panel == null) {
+                CrashLog.append(getApplicationContext(), "second screen: Presentation on display #" + d.getDisplayId() + " \"" + d.getName() + "\"");
+                panel = new PanelPresentation(this, d);
+                panel.show();
+            }
+        } catch (Throwable t) {   // InvalidDisplayException, BadTokenException, ...: play without the panel
+            CrashLog.append(getApplicationContext(), "second screen: Presentation failed, playing without it: " + CrashLog.stack(t));
+            panel = null;
         }
     }
 
     @Override
     protected void onDestroy() {
         boolean finishing = isFinishing();
-        if (dm != null) dm.unregisterDisplayListener(listener);
-        if (panel != null) { panel.dismiss(); panel = null; }
+        CrashLog.append(getApplicationContext(), "TombiActivity.onDestroy (finishing " + finishing + ")");
+        try { if (dm != null) dm.unregisterDisplayListener(listener); } catch (Throwable ignored) { }
+        try { if (panel != null) panel.dismiss(); } catch (Throwable ignored) { }
+        panel = null;
+        if (finishing) CrashLog.file(getApplicationContext(), CrashLog.RUNNING).delete();   // a clean end ("crashed" stays if loader.c wrote it)
         super.onDestroy();
         // the ":game" process cannot start the game twice (the low range is reserved once, in JNI_OnLoad)
         if (finishing) System.exit(0);

@@ -47,4 +47,16 @@
     <string name="disc_cancelled">Copy cancelled: the partial files were deleted.</string>
     <string name="disc_phase_copy">Copying…</string>
     <string name="disc_phase_check">Checking…</string>
+    <string name="crash_title">The game closed unexpectedly</string>
+    <string name="crash_hint">Send this report to the developer: Copy report, Share, or Export log (saves a .txt, e.g. in Downloads).</string>
+    <string name="log_title">Last log</string>
+    <string name="log_none">No log yet: start the game once.</string>
+    <string name="log_copy">Copy report</string>
+    <string name="log_share">Share</string>
+    <string name="log_export">Export log</string>
+    <string name="log_close">Close</string>
+    <string name="log_copied">Report copied to the clipboard.</string>
+    <string name="log_exported">Log saved.</string>
+    <string name="log_export_fail">Could not save the log: %1$s</string>
+    <string name="opt_viewlog">View last log</string>
 </resources>

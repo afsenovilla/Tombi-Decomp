@@ -44,7 +44,9 @@ void port_printf(const char *fmt, ...) {
     } else { vfprintf(stderr, fmt, ap); fflush(stderr); }
     va_end(ap);
 }
+int port_exit_status = -1;   /* what port_fatal / port_quit exit with (android/loader.c reads it in its atexit handler) */
 void port_fatal(const char *fmt, ...) {
+    port_exit_status = 1;
     va_list ap; va_start(ap, fmt); fputs("[port2] FATAL: ", stderr); vfprintf(stderr, fmt, ap); va_end(ap);
     fputc('\n', stderr);
     exit(1);
@@ -67,6 +69,7 @@ void port_stub_report(void) {
 }
 void port_flush_log(void) { fflush(stderr); }
 void port_quit(int code) {
+    port_exit_status = code;
     port_gpu_stop();
     port_window_stop();
     exit(code);
