@@ -1,0 +1,11 @@
+// Tombi! native port for Android (docs/PORT.md "4. Android").  Built by .github/workflows/android-apk.yml:
+//   gradle -p port2/android assembleDebug -Psdl2Source=/path/to/SDL2-2.30.x
+// (SDL2's Java glue and libSDL2.so come from that source tree; nothing of SDL is vendored here)
+pluginManagement {
+    repositories { google(); mavenCentral(); gradlePluginPortal() }
+}
+dependencyResolutionManagement {
+    repositories { google(); mavenCentral() }
+}
+rootProject.name = "tombi"
+include ':app'

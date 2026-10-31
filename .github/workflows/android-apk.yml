@@ -1,0 +1,158 @@
+name: Native port (Android APK)
+
+# Builds the native-pointer port (port2/) for Android handhelds (armeabi-v7a, docs/PORT.md "4. Android"): SDL2's
+# android-project (port2/android, Gradle + NDK) around port2/CMakeLists.txt.  The runner's preinstalled Android SDK/NDK
+# are used; SDL2 is the pinned release source tarball from GitHub (never vendored).  Like port2-exe.yml, the generator
+# takes the retail addresses and the MAIN0/X000 image from the owner's own disc (GAME_FILES_URL secret), so the game
+# code in libtombi.so is built from that copy; the APK carries NO game data files (the player copies the data/ folder
+# the launcher / tools/extract_data.py prepares to Android/data/io.github.tombi.port/files/data).
+on:
+  push:
+    branches: [master]
+    paths:
+      - port2/**
+      - port/tools/gen_port.py
+      - port/fixes.txt
+      - .github/workflows/android-apk.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SDL2_VERSION: "2.30.11"
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install toolchain (matching build + generator)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev ninja-build
+          python3 -m pip install -r tools/requirements.txt
+          python3 -m pip install --no-deps splat64==0.35.2
+          python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          sudo tools/setup_native.sh
+          echo "NDK: $ANDROID_NDK_LATEST_HOME"; ls "$ANDROID_HOME/cmake" || true
+
+      - name: Fetch game files
+        id: fetch
+        env:
+          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL }}
+        run: |
+          # The same download as report.yml / port2-exe.yml: a raw disc image (.bin) of your own copy, never committed.
+          if [ -z "$GAME_FILES_URL" ]; then
+            echo "::notice::GAME_FILES_URL secret not set; skipping the APK build."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
+          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+          curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+          if [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ]; then
+            echo "::error::The port build needs the whole disc image (the generator reads every area and SYSTEM overlay)."; exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/game"
+          python3 -I tools/isoext.py "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/game"
+          mkdir -p game/disc/fs
+          cp -r "$RUNNER_TEMP/game"/. game/disc/fs/
+          cp "$(find "$RUNNER_TEMP/game" -iname MAIN0.EXE | head -1)" game/MAIN0.EXE
+          for a in 00 01 02 03 04 05 06 08 09 10 11 13 14 16 17 18 19; do
+            f="$(find "$RUNNER_TEMP/game" -ipath "*AREA$a/X0$a.BIN" | head -1)"
+            mkdir -p "game/AREA$a"; cp "$f" "game/AREA$a/X0$a.BIN"
+          done
+          mkdir -p game/disc/fs/SYSTEM
+          for s in O0PTSUB0 D0SPSUB D0SPSUB2 D0SPSUB3 G0OVER I0NFO I0NFO2 I0NFO3; do
+            f="$(find "$RUNNER_TEMP/game" -ipath "*SYSTEM/$s.BIN" | head -1)"; cp "$f" "game/disc/fs/SYSTEM/$s.BIN"
+          done
+          rm -f "$RUNNER_TEMP/game.dl"
+          echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      # build/full: the same exact-key cache as port2-exe.yml (inputs of tools/build_full.py only)
+      - name: Cache key
+        id: key
+        run: echo "full=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore matching build
+        id: full
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/full
+            build/*.EXE
+            build/*.BIN
+            !build/full/tmp
+          key: full-${{ steps.key.outputs.full }}
+
+      - name: Matching build (retail addresses for the generator)
+        if: steps.fetch.outputs.ok == 'true' && steps.full.outputs.cache-hit != 'true'
+        run: python3 tools/build_full.py -j "$(nproc)"
+
+      - name: Touch restored matching build
+        if: steps.full.outputs.cache-hit == 'true'
+        run: find build/full -type f -exec touch {} +; touch build/*.EXE build/*.BIN 2>/dev/null || true
+
+      - name: Save matching build
+        if: steps.fetch.outputs.ok == 'true' && steps.full.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/full
+            build/*.EXE
+            build/*.BIN
+            !build/full/tmp
+          key: full-${{ steps.key.outputs.full }}
+
+      - name: SDL2 source (pinned release)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/sdlsrc"
+          curl -fsSL -o "$RUNNER_TEMP/sdlsrc/sdl.tar.gz" "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz"
+          tar xzf "$RUNNER_TEMP/sdlsrc/sdl.tar.gz" -C "$RUNNER_TEMP/sdlsrc"
+          echo "SDL2_SOURCE=$RUNNER_TEMP/sdlsrc/SDL2-${SDL2_VERSION}" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-java@v4
+        if: steps.fetch.outputs.ok == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.fetch.outputs.ok == 'true'
+        with:
+          gradle-version: "8.5"
+
+      - name: Build the APK (debug-signed)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          export PORT2_PYTHON="$(command -v python3)"
+          gradle -p port2/android assembleDebug --no-daemon --stacktrace -Psdl2Source="$SDL2_SOURCE"
+          APK=port2/android/app/build/outputs/apk/debug/app-debug.apk
+          ls -l "$APK"
+          unzip -l "$APK" | grep -E "\.so$"
+          REP="$(find port2/android/app/.cxx -name report.txt -path '*gen*' | head -1)"
+          [ -n "$REP" ] && head -12 "$REP"
+          mkdir -p dist/android
+          cp "$APK" dist/android/tombi-port-armeabi-v7a-debug.apk
+          cp "$SDL2_SOURCE/LICENSE.txt" dist/android/SDL2-LICENSE.txt
+
+      - uses: actions/upload-artifact@v4
+        if: steps.fetch.outputs.ok == 'true'
+        with:
+          name: tombi-port-android
+          path: dist/android
+          retention-days: 14

@@ -1,0 +1,45 @@
+// The app is SDL2's android-project (SDLActivity + SDL_main) around the CMake project of port2/:
+// libmain.so (port2/android/loader.c) loads the game, libtombi.so, below 16 MB (docs/PORT.md "4. Android").
+plugins { id 'com.android.application' }
+
+def sdl2Source = project.findProperty('sdl2Source') ?: System.getenv('SDL2_SOURCE')
+if (!sdl2Source) throw new GradleException("-Psdl2Source=DIR (an SDL2 2.30.x source tree) is required")
+
+android {
+    namespace 'io.github.tombi.port'
+    compileSdk 34
+    def ndkDir = System.getenv('ANDROID_NDK_LATEST_HOME') ?: System.getenv('ANDROID_NDK_HOME')
+    if (ndkDir) ndkPath ndkDir
+
+    defaultConfig {
+        applicationId 'io.github.tombi.port'
+        minSdk 21                      // android_dlopen_ext
+        targetSdk 34
+        versionCode 1
+        versionName '0.1'
+        ndk { abiFilters 'armeabi-v7a' }   // phase 1 pointer model: 32-bit only (arm64 needs phase 2)
+        externalNativeBuild {
+            cmake {
+                arguments "-DPORT2_SDL2_SOURCE=${sdl2Source}", '-DANDROID_STL=c++_static'
+                // the generator (port2/tools/gen2.py) runs on the host Python with tools/requirements.txt installed
+                if (System.getenv('PORT2_PYTHON')) arguments "-DPython3_EXECUTABLE=${System.getenv('PORT2_PYTHON')}"
+                targets 'main', 'tombi2', 'SDL2'
+            }
+        }
+    }
+    buildTypes {
+        debug { jniDebuggable true }
+    }
+    externalNativeBuild {
+        cmake { path '../../CMakeLists.txt' }
+    }
+    sourceSets {
+        main { java.srcDirs += ["${sdl2Source}/android-project/app/src/main/java"] }
+    }
+    packagingOptions { jniLibs { useLegacyPackaging true } }   // extracted: android_dlopen_ext opens libtombi.so by name
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    lint { abortOnError false }
+}
