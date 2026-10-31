@@ -463,6 +463,7 @@ extern int port_gpu_write_png(const char *path, const unsigned char *rgb, int w,
 extern int port_dump_every;
 extern void port_mkdir(const char *dir);                                                  /* shims/gpu.c */
 void port_panel_window_frame(const unsigned char *rgba, int w, int h);                   /* runtime/sdl.c */
+static void inq_push(int kind, int a, int x, int y);
 #ifdef __ANDROID__
 static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 static u32 out[CW_MAX * CH_MAX]; static int out_w, out_h, out_seq, registered;
