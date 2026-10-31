@@ -9,11 +9,11 @@ android {
     namespace 'io.github.tombi.port'
     compileSdk 34
     def ndkDir = System.getenv('ANDROID_NDK_LATEST_HOME') ?: System.getenv('ANDROID_NDK_HOME')
-    if (ndkDir) ndkPath ndkDir
+    if (ndkDir) { ndkPath ndkDir; ndkVersion new File(ndkDir).name }
 
     defaultConfig {
         applicationId 'io.github.tombi.port'
-        minSdk 21                      // android_dlopen_ext
+        minSdk 23                      // android_dlopen_ext (21+); 23: the oldest level recent NDKs target
         targetSdk 34
         versionCode 1
         versionName '0.1'
