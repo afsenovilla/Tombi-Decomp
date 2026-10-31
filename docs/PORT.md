@@ -406,6 +406,11 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
 - **Data.** `Android/data/io.github.tombi.port/files/data` (the PC `--data` folder, with `manifest.txt`); when it is
   missing, a message box gives the path. Saves go to `files/saves`, the log to `files/tombi.log`, extra PC flags
   to `files/args.txt` (defaults: `--fullscreen --renderer soft --widescreen auto`: the pad fits the panel, e.g. 107 on a 20:9 phone; `--aspect 4:3` in args.txt for 4:3). Input: SDL GameController (built-in pads).
+- **Beta releases / signing.** `gh workflow run android-apk.yml -f publish=true` creates the pre-release
+  `android-beta-<run_number>` (not "Latest"; the APK renamed `tombi-port-android-beta-<n>.apk`). Optional release
+  signing (zipalign + apksigner from the runner SDK) when all four secrets exist: `ANDROID_KEYSTORE_B64` (base64 of the
+  keystore), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`; otherwise it stays debug-signed.
+  Never commit a keystore.
 - **PC builds unchanged**: same i386 disassembly, title smoke frames byte-identical, `--test-null` ok.
 - Not done yet: running on a device, the GLES path of `gpu_gl.c`, SAF disc import, touch overlay, arm64 (phase 2).
   Roadmap: `notes/roadmap.md` "Android".

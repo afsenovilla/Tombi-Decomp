@@ -15,6 +15,11 @@ on:
       - port/fixes.txt
       - .github/workflows/android-apk.yml
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "publish the APK as a BETA pre-release (android-beta-<run_number>), not 'Latest'"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -150,9 +155,72 @@ jobs:
           cp "$APK" dist/android/tombi-port-armeabi-v7a-debug.apk
           cp "$SDL2_SOURCE/LICENSE.txt" dist/android/SDL2-LICENSE.txt
 
+      # Optional release signing; without the four secrets the APK stays debug-signed.  Never commit a keystore.
+      - name: Sign with the release keystore (optional)
+        if: steps.fetch.outputs.ok == 'true'
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KS_B64" ] || [ -z "$KS_PASS" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASS" ]; then
+            echo "::notice::Android signing secrets not set; keeping the debug signature."; exit 0
+          fi
+          BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n1)"
+          printf '%s' "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          A=dist/android/tombi-port-armeabi-v7a-debug.apk
+          "$BT/zipalign" -f -p 4 "$A" "$RUNNER_TEMP/aligned.apk"
+          "$BT/apksigner" sign --ks "$RUNNER_TEMP/release.jks" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KS_PASS --key-pass env:KEY_PASS --out "$RUNNER_TEMP/signed.apk" "$RUNNER_TEMP/aligned.apk"
+          "$BT/apksigner" verify "$RUNNER_TEMP/signed.apk"
+          mv "$RUNNER_TEMP/signed.apk" "$A"
+          rm -f "$RUNNER_TEMP/release.jks"
+          echo "signed=true" > dist/android/.signed
+
       - uses: actions/upload-artifact@v4
         if: steps.fetch.outputs.ok == 'true'
         with:
           name: tombi-port-android
           path: dist/android
           retention-days: 14
+
+  publish:
+    # BETA pre-release (never "Latest": the normal v0.0.N releases come from release.yml)
+    if: inputs.publish == true
+    needs: apk
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      R: ${{ github.repository }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: tombi-port-android
+          path: art
+
+      - name: Create the pre-release
+        run: |
+          N=${{ github.run_number }}; SHA=${{ github.sha }}; TAG="android-beta-$N"
+          APK="tombi-port-android-beta-$N.apk"
+          mkdir out; cp art/tombi-port-armeabi-v7a-debug.apk "out/$APK"
+          if [ -f art/.signed ]; then SIG="signed with the project release key"; else SIG="debug-signed: uninstall the old beta before installing a newer one"; fi
+          {
+            echo "**BETA $N - untested on real hardware** (build of ${SHA::7}). / **BETA $N - sin probar en hardware real.**"; echo
+            echo "## English"
+            echo "- Android port of Tombi!, 32-bit ARM (armeabi-v7a). Needs a device with 32-bit app support (most current handhelds); Snapdragon 8 Gen 3 and newer cannot run it."
+            echo "- No game data included. Copy the \`data\` folder prepared by the PC launcher to \`Android/data/io.github.tombi.port/files/data\`."
+            echo "- Optional flags in \`files/args.txt\` (e.g. \`--aspect 4:3\`, \`--cut-content\`). Aspect is automatic by default."
+            echo "- Log: \`files/tombi.log\`. APK is $SIG."
+            echo "- Please report results with \`tombi.log\` (or \`adb logcat\`) attached."
+            echo; echo "## Espanol"
+            echo "- Port de Tombi! para Android, ARM de 32 bits (armeabi-v7a). Requiere un dispositivo con soporte de apps de 32 bits (la mayoria de portatiles actuales); los Snapdragon 8 Gen 3 o posteriores no lo ejecutan."
+            echo "- No incluye datos del juego. Copia la carpeta \`data\` que prepara el launcher de PC a \`Android/data/io.github.tombi.port/files/data\`."
+            echo "- Opciones en \`files/args.txt\` (p. ej. \`--aspect 4:3\`, \`--cut-content\`). El aspecto es automatico por defecto."
+            echo "- Registro: \`files/tombi.log\`. El APK esta firmado en modo debug: desinstala la beta anterior antes de instalar una nueva (si no se firma con clave propia)."
+            echo "- Reporta resultados adjuntando \`tombi.log\` (o \`adb logcat\`)."
+          } > notes.md
+          gh release create "$TAG" -R "$R" --target "$SHA" --title "Tombi! port – Android BETA $N (armeabi-v7a, untested)" \
+            --prerelease --latest=false --notes-file notes.md "out/$APK"
