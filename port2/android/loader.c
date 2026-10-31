@@ -340,6 +340,12 @@ int SDL_main(int argc, char *argv[]) {
     static char msg[1024], saves[512], argsbuf[2048], filesbuf[512];
     char *args[72]; int n = 0;
     open_log();                       /* (no-op: JNI_OnLoad opened it) */
+    static int runs;
+    if (runs++) {   /* the activity came back in a ":game" process that already ran the game: its state is used up */
+        tlog("SDL_main called again in the same process (run %d): the game cannot restart here", runs);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Tombi!", "The game was already started in this process.\n\nClose Tombi! and start it again from the launcher.", NULL);
+        exit(0);
+    }
     main_thread = pthread_self(); main_thread_set = 1;
     { stack_t ss; memset(&ss, 0, sizeof ss); ss.ss_sp = alt_stack_main; ss.ss_size = sizeof alt_stack_main; sigaltstack(&ss, 0); }
     start_watchdog();
