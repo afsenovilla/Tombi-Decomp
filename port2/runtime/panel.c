@@ -416,6 +416,7 @@ static void room_names(int play, int area, int sec, int link, const char **an, c
 }
 
 #include "panel_events.inc"
+#include "panel_side.inc"
 
 static void layout(void);
 static void render(void) {
@@ -429,7 +430,8 @@ static void render(void) {
     pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = pa_cw; pa_clip_y1 = pa_ch; nhs = 0;
     header(page == PAGE_MAP ? an : page_name(page));
     if (page == PAGE_MAP) page_map(play, link);
-    else page_events(play);
+    else if (page == PAGE_EVENTS) page_events(play);
+    else page_side(play);
 }
 
 /* canvas size and scale for the display (req_w x req_h; default 828 x 720): k = about display / 400, canvas = display / k */

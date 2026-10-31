@@ -2326,6 +2326,11 @@ scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; An
   Android (`nativePanelTouch` from the Presentation's view, canvas pixels), mouse in the PC window, keys typed in the PC
   panel window (arrows, Enter, Backspace, Q / E tabs; they do not reach the game); `--panel-input FRAME:ACTION,...`
   (up down left right ok back tabl tabr, `tap@X@Y`) for headless tests.
+- Side map PROTOTYPE (tab *Lateral*, AREA00 sections 0..2 only): the room model `AREA00/D001.GAM` (WMD, tools/room.py)
+  rasterised orthographically in C at 1/2 scale with the texels / palettes of the game's VRAM while the area is loaded
+  (`port_gpu_vram`, shims/gpu.c), built once (3491 polygons, 1752 x 923, a few ms); views *Área* (fit to width) and
+  *Sala* (1:2 around Tomba), event icons where panel_eventmap.h places them, Tomba (face marker) at PLAYER x / y.
+  Cost for all areas: see the second-screen notes in the report / EVENTS_MAP.md.
 - Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
 
 - Header: the area and room names of the game's own map screen (`MAP_AREA_NAMES[link.c]`, `MAP_ROOM_NAMES[link.c][link.d]`

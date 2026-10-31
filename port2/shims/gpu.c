@@ -1013,3 +1013,5 @@ void port_gpu_vblank(void) {
         write_png(path, frame_rgb, 1024, 512);
     }
 }
+/* runtime/panel_side.c (second screen, opt-in): the VRAM as the game left it, rect (x, y, w, h) brought up to date first */
+const unsigned short *port_gpu_vram(int x, int y, int w, int h) { be->vram_read(x, y, w, h); return &vram[0][0]; }

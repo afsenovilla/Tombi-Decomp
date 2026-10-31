@@ -8,6 +8,7 @@
 #include "panel_eventmap.h"
 
 enum { F_PROGRESS, F_DONE, F_PENDING, NFILTERS };
+static int side_zoom;
 static int ev_filter, ev_sel, ev_top, ev_detail = -1;
 
 static const PanelEventLoc *ev_loc(int e) {
@@ -152,6 +153,7 @@ enum { IN_UP = 1, IN_DOWN, IN_LEFT, IN_RIGHT, IN_OK, IN_BACK, IN_TAB_L, IN_TAB_R
 static void panel_action(int a) {
     if (a == IN_TAB_L) { page = (page + NPAGES - 1) % NPAGES; return; }
     if (a == IN_TAB_R) { page = (page + 1) % NPAGES; return; }
+    if (page == PAGE_SIDE && (a == IN_LEFT || a == IN_RIGHT || a == IN_OK)) { side_zoom ^= 1; return; }
     if (page != PAGE_EVENTS) return;
     if (ev_detail >= 0) { if (a == IN_BACK || a == IN_OK) ev_detail = -1; return; }
     int ids[EVENTS], n = ev_list(ids);
@@ -165,7 +167,7 @@ static void panel_hit(int id) {
     int k = id & 0xFF;
     switch (id & ~0xFF) {
     case HS_PAGE: page = k; ev_detail = -1; break;
-    case HS_FILTER: ev_filter = k; ev_sel = ev_top = 0; ev_detail = -1; break;
+    case HS_FILTER: if (k >= 16) { side_zoom = k - 16; break; } ev_filter = k; ev_sel = ev_top = 0; ev_detail = -1; break;
     case HS_ROW: { int ids[EVENTS], n = ev_list(ids); if (k < n) { if (ev_sel == k || 1) { ev_sel = k; ev_detail = ids[k]; } } break; }
     case HS_BACK: ev_detail = -1; break;
     case HS_PREV: ev_sel -= 5; break;
