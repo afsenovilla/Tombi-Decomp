@@ -46,5 +46,17 @@ Order by expected yield per effort: areas whose PAL twin is fully matched and th
 - [ ] Funga chief judgement scene (jungle text exists; needs a trigger, probably event 184).
 - [ ] JP titles/descriptions of unused events and items as a text patch.
 
+## Android (M7; docs/PORT.md §4 "Status")
+
+- [x] port2 builds for armeabi-v7a (ARM null-page emulation, coroutines, thunks, loader below 16 MB) — low
+- [x] Gradle/NDK project + `android-apk.yml` (debug APK artifact) — medium
+- [ ] First run on a handheld (Retroid / AYN Odin): logcat + `files/tombi.log`, fix crashes (VFP loads from null, Thumb faults, layout reservation) — medium
+- [ ] GLES path of `shims/gpu_gl.c` on Android (soft renderer is the default now) — medium
+- [ ] In-app options screen writing `files/args.txt` (language, 60 fps, widescreen, renderer) — low
+- [ ] SAF import: pick a .bin/.cue/.chd, verify MAIN0 SHA-1, run extract_data logic natively into `files/data` — medium
+- [ ] Touch overlay for phones (handhelds don't need it) — medium
+- [ ] Release signing + versioned APK in release.yml — low
+- [ ] arm64-v8a: phase 2 pointer model (32-bit offsets in a 4 GB arena, docs/PORT.md §2.1). Needed for Play Store and for newer SoCs that drop 32-bit app support (Snapdragon 8 Gen 3 and later, e.g. some recent handhelds) — high
+
 ## Parked (do not start without an explicit go)
 - PSP versions; Tombi-Tools zip; building ISOs; FMV-resident sprites; the JP demo (39.6 %).
