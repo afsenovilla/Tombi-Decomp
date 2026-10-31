@@ -37,10 +37,9 @@ import java.util.Locale;
  * Fonts (OFL, assets/fonts) are fetched by the CI build; without them the system bold face is used.
  */
 public class LauncherActivity extends Activity {
-    static final int BG = 0xff24592f, CIRCLE_BL = 0xff1e4c28, CIRCLE_TR = 0xff266030, ACCENT = 0xffff6aa8,
-            ACCENT_SH = 0xff7a2e00, ACCENT_TEXT = 0xff4a1530, CREAM = 0xfffff8e6, CREAM_SH = 0xff173d20,
-            SUB = 0xfffff8e6, CHIP = 0x59000000, CHIP_STATUS = 0x80000000, BTN_TEXT = 0xff1f4d29,
-            FOCUS = 0xffffe066, CARD = 0x47000000, SHADOW = 0x59000000, PINK = 0xffff8fbf;
+    static final int BG = 0xff2f6b3a, CIRCLE_BL = 0xff275a31, CIRCLE_TR = 0xff3a7c45, ACCENT = 0xffff6aa8,
+            ACCENT_SH = 0xff7a2e00, ACCENT_TEXT = 0xff4a1530, CREAM = 0xfffff8e6, CREAM_SH = 0xff1d4424,
+            SUB = 0xffffe8a8, CHIP = 0x40000000;
     static final int[] LANG_N = {0, 5, 6, 7, 8};
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
@@ -441,18 +440,16 @@ public class LauncherActivity extends Activity {
         // ---- drawing ----
         void text(Typeface tf, float size, int color) {
             p.setTypeface(tf); p.setTextSize(size); p.setColor(color); p.setLetterSpacing(0);
-            p.setTextAlign(Paint.Align.CENTER); p.setStyle(Paint.Style.FILL); p.clearShadowLayer();
+            p.setTextAlign(Paint.Align.CENTER); p.setStyle(Paint.Style.FILL);
         }
-
-        void shadowOn() { p.setShadowLayer(1.5f, 0, 2, SHADOW); }
 
         float midBase(RectF r) { return r.centerY() - (p.descent() + p.ascent()) / 2; }
 
         void pill(RectF r, int bg, int shadow, float sh, boolean focused) {
             float rad = r.height() / 2;
-            if (focused) {   // thick yellow focus ring around the pill and its shadow
-                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(7); p.setColor(FOCUS);
-                tmp.set(r.left - 9, r.top - 9, r.right + 9, r.bottom + sh + 9);
+            if (focused) {   // white focus ring around the pill and its shadow
+                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(5); p.setColor(Color.WHITE);
+                tmp.set(r.left - 7, r.top - 7, r.right + 7, r.bottom + sh + 7);
                 canvas.drawRoundRect(tmp, tmp.height() / 2, tmp.height() / 2, p);
                 p.setStyle(Paint.Style.FILL);
             }
@@ -494,8 +491,8 @@ public class LauncherActivity extends Activity {
 
         void drawMain() {
             bigTitle("TOMBI!", 108, 170);
-            text(nunito, 22, SUB); shadowOn();
-            p.setLetterSpacing(3f / 22f);
+            text(nunito, 20, SUB);
+            p.setLetterSpacing(3f / 20f);
             canvas.drawText(getString(R.string.subtitle), 640, 214, p);
             float y = 256;
             for (int i = 0; i < items.size(); i++) {
@@ -504,23 +501,23 @@ public class LauncherActivity extends Activity {
                 it.r.set(640 - 230, y, 640 + 230, y + hh);
                 boolean f = i == focus;
                 if (it.primary) pill(it.r, ACCENT, ACCENT_SH, 6, f);
-                else pill(it.r, CREAM, CREAM_SH, 5, f);
-                text(nunito, it.primary ? 30 : 26, it.primary ? ACCENT_TEXT : BTN_TEXT);
+                else pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
+                text(nunito, it.primary ? 30 : 24, it.primary ? ACCENT_TEXT : BG);
                 canvas.drawText(it.label, 640, midBase(it.r), p);
                 y += hh + (it.primary ? 6 : 5) + 16;
             }
             String[] chips = {LANG_NAME[langIdx()], aspectName(aspectIdx()),
                     getString(flag("cut", false) ? R.string.chip_cut_on : R.string.chip_cut_off), version()};
-            text(nunito, 22, SUB);
+            text(nunito, 15, Color.WHITE);
             float pad = 18, gap = 12, total = -gap;
             for (String t : chips) total += p.measureText(t) + 2 * pad + gap;
             float x = 640 - total / 2;
             for (String t : chips) {
                 float cw = p.measureText(t) + 2 * pad;
-                tmp.set(x, 640, x + cw, 686);
+                tmp.set(x, 650, x + cw, 684);
                 p.setColor(CHIP);
-                canvas.drawRoundRect(tmp, 23, 23, p);
-                p.setColor(SUB);
+                canvas.drawRoundRect(tmp, 17, 17, p);
+                p.setColor(Color.WHITE);
                 canvas.drawText(t, tmp.centerX(), midBase(tmp), p);
                 x += cw + gap;
             }
@@ -532,10 +529,10 @@ public class LauncherActivity extends Activity {
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
                 boolean f = i == focus;
-                it.r.set(640 - 380, y, 640 + 380, y + 48);
+                it.r.set(640 - 380, y, 640 + 380, y + 38);
                 pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
-                int col = f ? ACCENT_TEXT : BTN_TEXT;
-                text(nunito, 24, col);
+                int col = f ? ACCENT_TEXT : BG;
+                text(nunito, 19, col);
                 if (it.value == null) {
                     canvas.drawText(it.label, 640, midBase(it.r), p);
                 } else {
@@ -544,32 +541,20 @@ public class LauncherActivity extends Activity {
                     p.setTextAlign(Paint.Align.RIGHT);
                     canvas.drawText("‹  " + it.value + "  ›", it.r.right - 26, midBase(it.r), p);
                 }
-                y += 62;
+                y += 44;
             }
-            tp.setTypeface(nunito); tp.setTextSize(22); tp.setColor(SUB);
+            tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB);
             tp.setTextAlign(Paint.Align.LEFT);
-            wrapped(getString(R.string.opt_hint), Math.max(y + 10, 560), true);
+            wrapped(getString(R.string.opt_hint), 684);
         }
 
-        void wrapped(String t, float top) { wrapped(t, top, false); }
-
-        /** Body text (Nunito, soft dark shadow); card=true puts it on a translucent dark rounded card. */
-        float wrapped(String t, float top, boolean card) {
+        void wrapped(String t, float top) {
             @SuppressWarnings("deprecation")
             StaticLayout l = new StaticLayout(t, tp, 900, Layout.Alignment.ALIGN_CENTER, 1.1f, 0, false);
-            float lh = l.getHeight();
-            if (card) {
-                p.setStyle(Paint.Style.FILL); p.setColor(CARD); p.clearShadowLayer();
-                tmp.set(640 - 450 - 28, top, 640 + 450 + 28, top + lh + 40);
-                canvas.drawRoundRect(tmp, 18, 18, p);
-                top += 20;
-            }
-            tp.setShadowLayer(1.5f, 0, 2, SHADOW);
             canvas.save();
             canvas.translate(640 - 450, top);
             l.draw(canvas);
             canvas.restore();
-            return lh + (card ? 40 : 0);
         }
 
         /** Selva pill bar: dark track, accent fill with its shadow edge (as the buttons), phase / % / MB labels. */
@@ -579,7 +564,7 @@ public class LauncherActivity extends Activity {
             if (ph == CHECKING) frac = nativeOk ? Math.max(0, Math.min(1, nativeCheckProgress() / 1000f)) : 0;
             else frac = tot > 0 ? Math.min(1f, done / (float) tot) : 0;
             String label = getString(ph == CHECKING ? R.string.disc_phase_check : R.string.disc_phase_copy);
-            text(nunito, 22, SUB); shadowOn();
+            text(nunito, 20, Color.WHITE);
             p.setTextAlign(Paint.Align.LEFT);
             canvas.drawText(label, 640 - 300, top + 6, p);
             p.setTextAlign(Paint.Align.RIGHT);
@@ -587,7 +572,7 @@ public class LauncherActivity extends Activity {
             canvas.drawText(pct, 640 + 300, top + 6, p);
             RectF track = new RectF(640 - 300, top + 20, 640 + 300, top + 50);
             float rad = track.height() / 2;
-            p.clearShadowLayer(); p.setColor(0x59000000);
+            p.setColor(0x40000000);
             canvas.drawRoundRect(track, rad, rad, p);
             if (frac > 0) {
                 float wFill = Math.max(track.height(), track.width() * frac);
@@ -601,7 +586,7 @@ public class LauncherActivity extends Activity {
                 tmp.set(f.left + rad / 2, f.top + 4, f.right - rad / 2, f.top + 9);
                 if (tmp.width() > 0) canvas.drawRoundRect(tmp, 3, 3, p);
             }
-            text(nunito, 22, SUB); shadowOn();
+            text(nunito, 17, SUB);
             String mb = ph == CHECKING ? "MAIN0.EXE (SHA-1)"
                     : tot > 0 ? (done >> 20) + " / " + (tot >> 20) + " MB" : (done >> 20) + " MB";
             canvas.drawText(mb, 640, top + 78, p);
@@ -609,12 +594,12 @@ public class LauncherActivity extends Activity {
 
         void resultBox(boolean ok, String msg, float top) {
             tmp.set(640 - 320, top, 640 + 320, top + 80);
-            p.setStyle(Paint.Style.FILL); p.clearShadowLayer();
-            p.setColor(ok ? 0xff14522a : 0xff7a1d3d);
+            p.setStyle(Paint.Style.FILL);
+            p.setColor(ok ? 0x5527c25a : 0x55ff3a5c);
             canvas.drawRoundRect(tmp, 22, 22, p);
-            tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT); tp.setTextSize(22); tp.setColor(SUB); tp.clearShadowLayer();
+            tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT); tp.setTextSize(18); tp.setColor(Color.WHITE);
             @SuppressWarnings("deprecation")
-            StaticLayout l = new StaticLayout((ok ? "✓  " : "✗  ") + msg, tp, 600, Layout.Alignment.ALIGN_CENTER, 1.0f, 0, false);
+            StaticLayout l = new StaticLayout((ok ? "✓  " : "✗  ") + msg, tp, 600, Layout.Alignment.ALIGN_CENTER, 1.05f, 0, false);
             canvas.save();
             canvas.translate(640 - 300, tmp.centerY() - l.getHeight() / 2f);
             l.draw(canvas);
@@ -626,31 +611,29 @@ public class LauncherActivity extends Activity {
             File disc = discFile();
             boolean ok = disc != null && prefs.getBoolean("disc_ok", false);
             String head = getString(disc == null ? R.string.disc_missing : ok ? R.string.disc_ok : R.string.disc_unverified);
-            tmp.set(640 - 300, 112, 640 + 300, 158);
-            p.setColor(CHIP_STATUS); p.setStyle(Paint.Style.FILL);
-            canvas.drawRoundRect(tmp, 23, 23, p);
-            text(nunito, 24, ok ? SUB : PINK);
+            tmp.set(640 - 300, 124, 640 + 300, 164);
+            p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
+            canvas.drawRoundRect(tmp, 20, 20, p);
+            text(nunito, 19, ok ? SUB : ACCENT);
             canvas.drawText((ok ? "✓  " : "✗  ") + head, 640, midBase(tmp), p);
             tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT);
-            tp.setTextSize(22); tp.setColor(SUB);
-            if (disc != null) {
-                CharSequence pth = android.text.TextUtils.ellipsize(getString(R.string.disc_path, disc.getAbsolutePath()), tp, 900, android.text.TextUtils.TruncateAt.MIDDLE);
-                wrapped(pth.toString(), 166);
-            }
-            wrapped(getString(R.string.disc_howto), 206, true);
+            tp.setTextSize(16); tp.setColor(Color.WHITE);
+            if (disc != null) wrapped(getString(R.string.disc_path, disc.getAbsolutePath()), 178);
+            tp.setColor(SUB);
+            wrapped(getString(R.string.disc_howto), 222);
             int ph = phase;
-            if (ph != IDLE) { progressBar(ph, 352); postInvalidateDelayed(100); }   // ~10 Hz while busy
-            else if (result != 0 && importStatus != null) resultBox(result > 0, importStatus, 352);
-            else if (importStatus != null) { tp.setColor(SUB); wrapped(importStatus, 360); }
-            float y = 460;
+            if (ph != IDLE) { progressBar(ph, 300); postInvalidateDelayed(100); }   // ~10 Hz while busy
+            else if (result != 0 && importStatus != null) resultBox(result > 0, importStatus, 300);
+            else if (importStatus != null) { tp.setColor(Color.WHITE); tp.setTextSize(18); wrapped(importStatus, 330); }
+            float y = 400;
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
                 boolean f = i == focus;
                 it.r.set(640 - 230, y, 640 + 230, y + 58);
-                pill(it.r, CREAM, CREAM_SH, 5, f);
-                text(nunito, 26, BTN_TEXT);
+                pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
+                text(nunito, 22, BG);
                 canvas.drawText(it.label, 640, midBase(it.r), p);
-                y += 58 + 5 + 22;
+                y += 58 + 5 + 18;
             }
         }
     }
