@@ -652,6 +652,8 @@ def link(outdir, nm, objlist):
     pfx = "_" if "mingw" in nm else ""
     for l in r.split("\n"):
         parts = l.split()
+        # (llvm-nm -A, the NDK's: "obj.o: 00000000 T name", the address a separate field)
+        if len(parts) == 4 and parts[0].endswith(":"): parts = [parts[0] + parts[1], parts[2], parts[3]]
         if len(parts) != 3: continue
         o, t, n = parts
         if pfx:

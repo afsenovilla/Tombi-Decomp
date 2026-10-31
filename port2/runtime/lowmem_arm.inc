@@ -8,21 +8,36 @@
  * (SDL, libc: never game code), exclusive loads.
  * Division by zero: ARMv7-A without the integer divide extension calls __aeabi_idiv & co.; the definitions below
  * (bound inside libtombi.so by -Bsymbolic) give the R3000's result for a zero divisor (LO = rs < 0 ? 1 : -1, HI = rs;
- * unsigned: LO = 0xFFFFFFFF, HI = rs) and otherwise call compiler-rt's __divsi3 / __udivsi3. */
+ * unsigned: LO = 0xFFFFFFFF, HI = rs), otherwise the ordinary quotient. */
 #include <unistd.h>
 #include <sys/syscall.h>
 
-extern int __divsi3(int, int);
-extern unsigned __udivsi3(unsigned, unsigned);
-int __aeabi_idiv(int a, int b) { return b ? __divsi3(a, b) : (a < 0 ? 1 : -1); }
-unsigned __aeabi_uidiv(unsigned a, unsigned b) { return b ? __udivsi3(a, b) : 0xFFFFFFFFu; }
+/* (compiler-rt defines __aeabi_idiv/__aeabi_uidiv as aliases inside divsi3.S/udivsi3.S, so these cannot call
+   __divsi3/__udivsi3 without pulling in a duplicate: plain shift-subtract division instead) */
+static unsigned udiv32(unsigned a, unsigned b, unsigned *rem) {
+    unsigned q = 0, r = 0;
+    for (int i = 31; i >= 0; i--) {
+        r = (r << 1) | ((a >> i) & 1);
+        if (r >= b) { r -= b; q |= 1u << i; }
+    }
+    *rem = r;
+    return q;
+}
+static int sdiv32(int a, int b, int *rem) {
+    unsigned ua = a < 0 ? 0u - (unsigned)a : (unsigned)a, ub = b < 0 ? 0u - (unsigned)b : (unsigned)b, r;
+    unsigned q = udiv32(ua, ub, &r);
+    *rem = a < 0 ? -(int)r : (int)r;
+    return (a < 0) != (b < 0) ? -(int)q : (int)q;
+}
+int __aeabi_idiv(int a, int b) { int r; return b ? sdiv32(a, b, &r) : (a < 0 ? 1 : -1); }
+unsigned __aeabi_uidiv(unsigned a, unsigned b) { unsigned r; return b ? udiv32(a, b, &r) : 0xFFFFFFFFu; }
 /* {quotient, remainder} in r0:r1 (AAPCS returns a 64-bit integer there, low word in r0) */
 unsigned long long __aeabi_idivmod(int a, int b) {
-    int q = b ? __divsi3(a, b) : (a < 0 ? 1 : -1), r = b ? a - q * b : a;
+    int r = a, q = b ? sdiv32(a, b, &r) : (a < 0 ? 1 : -1);
     return (unsigned)q | (unsigned long long)(unsigned)r << 32;
 }
 unsigned long long __aeabi_uidivmod(unsigned a, unsigned b) {
-    unsigned q = b ? __udivsi3(a, b) : 0xFFFFFFFFu, r = b ? a - q * b : a;
+    unsigned r = a, q = b ? udiv32(a, b, &r) : 0xFFFFFFFFu;
     return q | (unsigned long long)r << 32;
 }
 
