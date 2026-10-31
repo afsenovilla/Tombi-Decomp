@@ -27,4 +27,5 @@ int pa_text_w(int h, const char *s);
 int pa_text(int x, int y, int h, const char *s, unsigned body, unsigned edge);
 int pa_text_ol(int x, int y, int h, const char *s, unsigned body, unsigned edge, unsigned outline);
 int pa_text_fit(int x, int y, int h, int w, const char *s, unsigned body, unsigned edge);
+int pa_wfm_dialogue(const unsigned char *wfm, unsigned n, int idx, char *out, int max);
 #endif

@@ -388,3 +388,34 @@ void pa_init(void) {
     load_fonts();
     port_printf("[panel] game graphics %s, icons %s\n", pa_ok ? "read" : "missing", icons_ok ? "read" : "missing");
 }
+
+/* dialogue idx of a WFM3 message bank as Latin-1 text (its glyphs named through panel_charmap like the fonts above;
+   NL -> '\n', the other control codes dropped, an unknown glyph -> '?'); returns the length, -1 when unreadable.
+   Used by the item tab for the item sub-screen's own messages (DnSPSUB3's bank: "Can't use this here.", ...). */
+int pa_wfm_dialogue(const unsigned char *d, unsigned n, int idx, char *out, int max) {
+    if (!d || n < 144 || memcmp(d, "WFM3", 4) || max < 2) return -1;
+    unsigned dpt = (unsigned)d[8] | d[9] << 8 | d[10] << 16 | (unsigned)d[11] << 24, nd = rd16(d, 12), ng = rd16(d, 14), k = 0;
+    if (idx < 0 || (unsigned)idx >= nd || dpt + 2 * nd > n) return -1;
+    for (unsigned p = dpt + rd16(d, dpt + 2 * idx); p + 2 <= n && k + 2 < (unsigned)max; p += 2) {
+        unsigned v = rd16(d, p);
+        if (v >= 0xFFFE) break;
+        if (v >= 0xFFF2) {
+            static const unsigned char nargs[12] = { 1, 0, 0, 0, 2, 1, 2, 1, 2, 0, 0, 0 };   /* POSE HALT F4 CHOICE MOVE COLOR VOICE PAUSE BOX CLEAR WAIT NL */
+            if (v == 0xFFFD) out[k++] = '\n';
+            p += 2 * nargs[v - 0xFFF2];
+            continue;
+        }
+        if (v < 0x8000 || v - 0x8000 >= ng) continue;
+        unsigned gp = rd16(d, 144 + 2 * (v - 0x8000)), h, w, sz; int ch = '?';
+        if (gp + 8 > n) continue;
+        h = rd16(d, gp + 2); w = rd16(d, gp + 4); sz = (w * h + 1) / 2;
+        if (gp + 8 + sz <= n) {
+            u8 s[20]; sha1(d + gp + 8, sz, s);
+            for (unsigned j = 0; j < sizeof panel_charmap / sizeof panel_charmap[0]; j++)
+                if (panel_charmap[j].h == h && panel_charmap[j].w == w && !memcmp(panel_charmap[j].sha, s, 6)) { ch = panel_charmap[j].ch; break; }
+        }
+        out[k++] = (char)ch;
+    }
+    out[k] = 0;
+    return (int)k;
+}

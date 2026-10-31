@@ -526,8 +526,8 @@ src/d0spsub/subScreenDrawItemIcon.c | S->clut = ((ITEM_ICON_CLUTS[n] + 0x1E0) <<
 src/d0spsub3/subScreenDrawItemIcon.c | extern unsigned char ITEM_ICON_CLUTS[]; | extern unsigned char ITEM_ICON_CLUTS[]; extern int port_valve_clut(void);
 src/d0spsub3/subScreenDrawItemIcon.c | S->clut = ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6) | S->clut = n == 64 ? port_valve_clut() : ((ITEM_ICON_CLUTS[n] + 0x1E0) << 6)
 # --title FRAME:ID[:start] (debug, port2/shims/psyq.c): the banner / event start runs here, between two frames of
-# the game loop, instead of inside the vblank
-src/gameMainTask.c | ThreadWaitFrames(1); | ThreadWaitFrames(1); { extern void port_title_tick(void); port_title_tick(); { extern void port_debug_tick(void); port_debug_tick(); } }
+# the game loop, instead of inside the vblank; the second-screen item tab's actions too (port2/runtime/panel_items.inc)
+src/gameMainTask.c | ThreadWaitFrames(1); | ThreadWaitFrames(1); { extern void port_title_tick(void); port_title_tick(); { extern void port_debug_tick(void); port_debug_tick(); } { extern void port_panel_tick(void); port_panel_tick(); } }
 # --debug-menu (port2/runtime/debugmenu.c): noclip skips the player's wall push; the overlay shows the player's wall hits
 src/pushOutOfWallSegments.c | int pushOutOfWallSegments(TObj *o, int x_, int y_, int fl_) | static int pushOutOfWallSegments_(TObj *o, int x_, int y_, int fl_); int pushOutOfWallSegments(TObj *o, int x_, int y_, int fl_) { extern int port_debug_noclip_obj(const void *), port_debug_wall(const void *, int); return port_debug_noclip_obj(o) ? 0 : port_debug_wall(o, pushOutOfWallSegments_(o, x_, y_, fl_)); } static int pushOutOfWallSegments_(TObj *o, int x_, int y_, int fl_)
 # warp lists (bell "Usar" -> area popup -> place popup): names broken in two 8 px lines filled the whole 16 px row, so the entries touched;

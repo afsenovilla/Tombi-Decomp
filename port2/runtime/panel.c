@@ -267,14 +267,15 @@ static void dot(int cx, int cy, int r, u32 c) {
     for (int j = -r; j <= r; j++) for (int i = -r; i <= r; i++) if (i * i + j * j <= r * r + r) pa_put(cx + i, cy + j, i * i + j * j >= r * r - r ? RGB(90, 20, 20) : c);
 }
 static void page_events(int play);
+static void page_items(int play);
 
 /* ---------------------------------------------------------------- the panel */
 static int es(void) { return port_lang == 5; }
 #define T(en, sp) (es() ? sp : en)
-enum { PAGE_MAP, PAGE_EVENTS, PAGE_SIDE, NPAGES };
+enum { PAGE_MAP, PAGE_EVENTS, PAGE_SIDE, PAGE_ITEMS, NPAGES };
 static int page;
 static const char *page_name(int p) {
-    return p == PAGE_MAP ? T("Map", "Mapa") : p == PAGE_EVENTS ? T("Events", "Eventos") : T("Side map", "Lateral");
+    return p == PAGE_MAP ? T("Map", "Mapa") : p == PAGE_EVENTS ? T("Events", "Eventos") : p == PAGE_ITEMS ? T("Items", "Objetos") : T("Side map", "Lateral");
 }
 
 /* touch / mouse targets registered while drawing (canvas coordinates) */
@@ -429,6 +430,7 @@ static void room_names(int play, int area, int sec, int link, const char **an, c
 
 #include "panel_events.inc"
 #include "panel_side.inc"
+#include "panel_items.inc"
 
 static void layout(void);
 int panel_loading_screen(void);   /* runtime/panel_hud.c: the game's NOW LOADING until gameplay */
@@ -445,6 +447,7 @@ static void render(void) {
     header(page == PAGE_MAP ? an : page_name(page));
     if (page == PAGE_MAP) page_map(play, link);
     else if (page == PAGE_EVENTS) page_events(play);
+    else if (page == PAGE_ITEMS) page_items(play);
     else page_side(play);
 }
 

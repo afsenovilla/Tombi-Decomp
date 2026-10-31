@@ -2335,6 +2335,26 @@ scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; An
   (`port_gpu_vram`, shims/gpu.c), built once (3491 polygons, 1752 x 923, a few ms); views *Área* (fit to width) and
   *Sala* (1:2 around Tomba), event icons where panel_eventmap.h places them, Tomba (face marker) at PLAYER x / y.
   Cost for all areas: see the second-screen notes in the report / EVENTS_MAP.md.
+- Item tab (*Objetos*, `runtime/panel_items.inc`): the game's Triangle item sub-screen (D0SPSUB3 `subScreenItemListStep`)
+  usable while the game runs. The player's items with their icons, names (`x NN` for counted ones) and descriptions (the
+  sub-screen's own WFM3 message bank of `SYSTEM/DnSPSUB3.BIN`), grouped as the menu's sort lays them out (categories
+  `D_800F67C8`, order `D_800F68E8[GAME.inventory.sortMode]`: keys, weapons, clothes and gear, key items, consumables;
+  *Ordenar* runs the menu's sort entry), the in-use items marked as `subScreenDrawItemGrid` does. Confirming an item
+  (tap the selected one, its action plank, Enter) does the menu's confirm path: the item's condition script
+  (`D_800F665C[D_800F584C[item]]`, ops `subScreenCond*`), then `func_800E8950` (equip a weapon, change pants, toggle the
+  umbrella / fish / jewels, eat, bells, `GVARS.useItemPending` for the room: chicks, tornado...) and its result's item
+  popup; Baron / the Wings (7, 14) ask for a destination among the revealed regions and start the flight as state 3 does.
+  While the menu is open the game does not run at all (the task runs menu mode 3, the area overlay is swapped for
+  D0SPSUB3), and Triangle opens it only when `updatePauseMenu` allows (no pause or fade, select menu enabled, the player
+  landed, idle, `playerMode` 1...). The tab evaluates the same checks live and greys an item with the reason (the menu's
+  own message: *No se puede usar aquí.*, ...); a confirmed item is queued and runs in the game loop between two frames
+  (`port/fixes.txt` gameMainTask -> `port_panel_tick`, next to the debug menu's actions), checked again there, through the
+  game's own native functions (D0SPSUB3's handler and condition ops reference only MAIN0 data, so they run with the area
+  overlay loaded). The tables are read from the user's `SYSTEM/D0SPSUB3.BIN` (checked against the known op addresses;
+  another overlay disables the tab). Headless check: inventory poked at frame 3000, `--panel-input
+  3060:tabr,3065:tabr,3070:tabr,3150:right,3160:ok,3300:right,3310:ok,3400:right,3403:right,3406:right,3420:ok`
+  equips the wooden boomerang (HUD icon, *Equipada Bumerang madera*), puts on the jumping pants and eats a lunchbox
+  (vitality 1 -> 4). Without `--second-screen` / `--dump-panel` nothing runs (frames byte-identical).
 - Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
 - `--hud-bottom` (Android launcher: *HUD en la pantalla inferior*, default on when a secondary display exists; it is
   passed only with the second screen): while the panel is on (PC / headless: always; Android: while the Presentation polls
