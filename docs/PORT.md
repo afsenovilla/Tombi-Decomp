@@ -2336,6 +2336,20 @@ scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; An
   *Sala* (1:2 around Tomba), event icons where panel_eventmap.h places them, Tomba (face marker) at PLAYER x / y.
   Cost for all areas: see the second-screen notes in the report / EVENTS_MAP.md.
 - Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
+- `--hud-bottom` (Android launcher: *HUD en la pantalla inferior*, default on when a secondary display exists; it is
+  passed only with the second screen): while the panel is on (PC / headless: always; Android: while the Presentation polls
+  the panel), the game's HUD (`drawHud`: vitality fruit, lives, AP, weapon icon, the exp gauges) is not drawn on the top
+  screen: `port/fixes.txt` makes `drawHudIfShown` test `port_hud_hide` (`runtime/panel_hud.c`). Banners, dialogue,
+  menus, the pause screens and cutscenes draw as before. The panel's status window shows the same HUD, the weapon icon
+  included (the HUD object's own sprite frame, `drawHudWeaponIcon`). Without the flag `port_hud_hide` stays 0: the game's
+  output is byte-identical (36 frames compared).
+- Lives: the panel shows `GAME.playerLives - 1`, as `drawHudLives` does (the stored value counts the life being played).
+- Loading mirror: until gameplay (no play time yet: intro, title, the load / new game menus), while the game draws its
+  loading screen (`displayLoadingScreen`, between areas) and on the game over / ending screens (`gameStateDispatcher`'s
+  state1 2 / 3), the panel shows the game's own NOW LOADING screen instead of the map: the 48 x 48 checkerboard tiles
+  swapping every 15 frames and the pulsing logo (`drawLoadingSprites`, `drawNowLoadingSprite`), from
+  `SYSTEM/A00900.000` and the sprite table at 0x800787F0 of the game's RAM. `port/fixes.txt` only records when those two
+  functions last ran (`port_loading_frame`, `port_game_state`).
 
 - Header: the area and room names of the game's own map screen (`MAP_AREA_NAMES[link.c]`, `MAP_ROOM_NAMES[link.c][link.d]`
   of the room's `MAP_LINKS` entry, `MAP_ROOM_LINK[area][section]`; AREA14 by section) and the play time.

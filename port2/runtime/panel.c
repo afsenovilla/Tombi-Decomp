@@ -237,9 +237,11 @@ static void fruit(int x, int y, int hp, int max) {   /* the vitality fruit: 4 se
     pa_spr(x + 24, y + 16, HUD, 144, 200, 24, 24, 368, 483, 0);
     if (hp >= 0 && hp <= 8) pa_spr(x + 28, y + 19, HUD, fruit_digit_u[hp], hp == 8 ? 116 : 120, 16, 16, 368, 489, 0);
 }
-static void lives(int x, int y, int n) {
+static void lives(int x, int y, int stored) {   /* drawHudLives shows GAME.playerLives - 1 (one or two digits) */
+    int n = stored - 1;
     pa_spr(x, y, HUD, 128, 56, 32, 24, 368, 481, 0);
-    if (n >= 0 && n <= 9) pa_spr(x + 12, y + 12, HUD, 8 * n, 64, 8, 8, 368, 481, 0);
+    if (n >= 10 && n <= 99) { pa_spr(x + 7, y + 12, HUD, 8 * (n / 10), 64, 8, 8, 368, 481, 0); pa_spr(x + 17, y + 12, HUD, 8 * (n % 10), 64, 8, 8, 368, 481, 0); }
+    else if (n >= 0 && n <= 9) pa_spr(x + 12, y + 12, HUD, 8 * n, 64, 8, 8, 368, 481, 0);
 }
 static void ap_badge(int x, int y) {   /* the HUD's "AP" box (drawn, its letters in the game's 8 px font) */
     pa_fill(x + 1, y, 28, 14, RGB(200, 176, 64)); pa_fill(x, y + 1, 30, 12, RGB(200, 176, 64));
@@ -369,6 +371,7 @@ static void draw_status(int x, int y, int w, int h) {
     window_(x, y, w, h);
     fruit(x + 8, ly - 4, G_HEALTH, G_MAXHEALTH);
     lives(x + w - 44, ly + 8, G_LIVES);
+    { extern int panel_weapon_icon(int, int); panel_weapon_icon(x + w - 24, y + 104); }   /* runtime/panel_hud.c: the HUD weapon icon, right of the play time */
     ly += 50;
     ap_badge(x + 10, ly + 1); fmt_ap(b, sizeof b, G_AP); pa_text_fit(x + 46, ly, 16, w - 54, b, C_DARK, C_EDGE);
     ly += 22;
@@ -428,8 +431,10 @@ static void room_names(int play, int area, int sec, int link, const char **an, c
 #include "panel_side.inc"
 
 static void layout(void);
+int panel_loading_screen(void);   /* runtime/panel_hud.c: the game's NOW LOADING until gameplay */
 static void render(void) {
     layout();
+    if (panel_loading_screen()) { nhs = 0; return; }
     int play = in_gameplay() && G_AREA < 20;
     int area = G_AREA, sec = G_SECTION, link = play && area < 20 && sec < 24 ? roomlink[area][sec] : -1;
     const char *an, *rn; char ab[48];
@@ -478,6 +483,7 @@ static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 static u32 out[CW_MAX * CH_MAX]; static int out_w, out_h, out_seq, registered;
 static jint JNICALL n_frame(JNIEnv *env, jclass c, jobject buf, jintArray dims, jint seq) {
     (void)c; jint r = 0;
+    { extern int port_panel_presented; port_panel_presented = port_frame; }   /* the Presentation is polling (panel_hud.c) */
     pthread_mutex_lock(&mtx);
     if (out_seq != seq && out_w) {
         void *p = (*env)->GetDirectBufferAddress(env, buf); jlong cap = (*env)->GetDirectBufferCapacity(env, buf);
@@ -549,7 +555,9 @@ static void script_step(void) {
 
 static int frames;
 /* every vblank (shims/gpu.c port_gpu_vblank) while the panel is on */
+void panel_hud_update(void);      /* runtime/panel_hud.c: --hud-bottom */
 void port_panel_vblank(void) {
+    panel_hud_update();
     int dump = port_panel_dump_dir && port_dump_every > 0 && port_frame % port_dump_every == 0;
     if (panel_script) script_step();
     if (!dump && (frames++ & 1)) return;   /* ~25 fps is plenty */

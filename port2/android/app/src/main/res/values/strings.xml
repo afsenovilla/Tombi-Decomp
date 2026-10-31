@@ -14,6 +14,7 @@
     <string name="opt_cut">Cut content</string>
     <string name="opt_debug">Debug menu</string>
     <string name="opt_secondscreen">Second screen: map and status</string>
+    <string name="opt_hudbottom">HUD on the bottom screen</string>
     <string name="opt_renderer">Renderer</string>
     <string name="renderer_soft">Software</string>
     <string name="renderer_gl">OpenGL ES (experimental)</string>

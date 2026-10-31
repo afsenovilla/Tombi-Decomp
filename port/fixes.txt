@@ -556,3 +556,11 @@ src/d0spsub3/subScreenDrawPopupMenu.c | lp->d = SUBSCREEN_POPUP_SUB_COUNT * 16 +
 # playerCheckPerchLanding: GRABBED_OBJECT can hold a small non-pointer value (lowmem read at +0xae -> 3, X004/X009);
 # on the PS1 that reads BIOS RAM and the type test fails, so treat it as "nothing grabbed"
 src/x008/playerCheckPerchLanding.c | if (GRABBED_OBJECT && GRABBED_OBJECT->type == 0x14 | if ((unsigned long)GRABBED_OBJECT >= 0x10000 && GRABBED_OBJECT->type == 0x14
+#
+# Second screen (port2/runtime/panel_hud.c, docs/PORT.md "Second screen"): --hud-bottom skips drawHud while the panel
+# shows it (port_hud_hide, 0 without the flag); the panel's loading mirror reads when the game last drew its loading
+# screen and the dispatcher's state1 (stores only: the game's own state and output are unchanged)
+src/drawHudIfShown.c | if (DAT_800b1418 == 0 && (*p & 1) != 0) | if (DAT_800b1418 == 0 && (*p & 1) != 0 && !port_hud_hide)
+src/drawHudIfShown.c | extern void drawHud(void *); | extern void drawHud(void *); extern int port_hud_hide;
+src/displayLoadingScreen.c | if (LOADING_SCREEN_STATE != 0) { | { extern int port_frame, port_loading_frame; port_loading_frame = port_frame; } if (LOADING_SCREEN_STATE != 0) {
+src/gameStateDispatcher.c | switch (TASK_C->state1) { | { extern int port_frame, port_game_state, port_game_state_frame; port_game_state = TASK_C->state1; port_game_state_frame = port_frame; } switch (TASK_C->state1) {

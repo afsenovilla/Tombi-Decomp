@@ -13,6 +13,7 @@
     <string name="opt_cut">Contenido recortado</string>
     <string name="opt_debug">Menú de depuración</string>
     <string name="opt_secondscreen">Segunda pantalla: mapa y estado</string>
+    <string name="opt_hudbottom">HUD en la pantalla inferior</string>
     <string name="opt_renderer">Renderizador</string>
     <string name="renderer_soft">Software</string>
     <string name="renderer_gl">OpenGL ES (experimental)</string>
