@@ -2,7 +2,7 @@
 """Explanatory sheets of the cut top-down towns of the Land of Civilization (AREA11/16/17 section 0), ES or EN.
 See docs/CIVILIZATION.md (EN) / docs/CIVILIZACION.md (ES), section "The cut towns, one by one".
 
-  tools/civ_sheets.py [--lang es|en|all] [--area 11|16|17|all] [--sheet esquema|explicado|perspectiva|all] [--out DIR]
+  tools/civ_sheets.py [--lang es|en|all] [--area 11|16|17|18|all] [--sheet esquema|explicado|perspectiva|plan1x|personajes|all] [--out DIR]
 
 Sheets (file names; *_en.png for English):
   civ_esquema_aNN.png       evidence-only schematic: A = AREA08 s0 (real picture) with the code's marks, B = the cut town
@@ -10,6 +10,9 @@ Sheets (file names; *_en.png for English):
                             what each resident says, and where every element comes from (I0NFO2 / MAIN0 addresses)
   civ_explicado_aNN.png     flat plan with drawn house shapes, sprites, exit arrows and a side legend
   civ_perspectiva_aNN.png   (EN: civ_perspective_aNN_en.png) the same data in perspective; only the house height is invented
+  civ_personajes_aNN.png    who goes where: every resident at its record position (also AREA18), numbered as in the docs, and a
+                            table (name, sprite, confidence, where, behaviour, line); a drawing only when the disc gives it,
+                            marked known / probable, otherwise a grey "sprite unknown" silhouette
   civ_plan_aNN_1x[_transparent].png  (--sheet plan1x, no text) panel B alone at 1:1, grey ground or transparent;
                             civ_plan_aNN_1x_legend.png the same plan unscaled with an English legend panel on the right
 
@@ -162,7 +165,7 @@ AREAS={
  'Casa 1: «...Ahora puedo hacer algo muy interesante...» (texto PAL #227)',
  'Casa 1: no habla, activa una bandera',
  'Casa 2: «No funciona, pero esta máquina es de hierro... me vendría bien»',
- 'Patrulla diagonal: «En esta choza vive una adivino, pero pone una condición»',
+ 'Patrulla diagonal: «En esta choza vive un adivino, pero pone una condición»',
  'Patrulla horizontal: «La madera es lo mejor; la piedra y el hierro son fríos»',
  'Patrulla horizontal: «No funciona, pero esta máquina es de hierro...»',
  'Vecino: «Bajo el suelo hay un laberinto; no te metas sin cuidado»',
@@ -170,7 +173,7 @@ AREAS={
  'Patrulla horizontal: «¿Un engranaje? De madera se rompería» → «Tengo sed, iré a por un coco» → «El Pueblo Karakuri se hundió»',
  'Patrulla vertical: «Al taller se entra por arriba; ve a echar un vistazo»',
  'Vecino: «Este cartel es viejo y peligroso» → «Siempre tan lleno de energía»',
- 'Casa 3, sentado: probablemente el constructor de balsas («¿Quieres una balsa? Tráeme madera del Árbol Sabio»); el código no le da diálogo'],
+ 'El adivino verde (subtipo 4) — Casa 3, sentado: «sólo hablo con quien tenga 300.000 PA» (k3 dx16..19; el código no le da diálogo, el port lo reconstruye)'],
  ),
 17:dict(atlas='A08000',clut='AREA17/CLUT03',pals={0:1},sub={0:2,1:None,2:None,3:None,4:None},
  title='AREA17 sección 0 — pueblo recortado de los Hombres de hierro',
@@ -323,12 +326,12 @@ EN={
  cap='Cut Wood People village (next to the Factory, AREA11, top-down view): what the code places; the painted background is lost.',
  exits=['→ '+CIVI_EN,'→ Factory (AREA11 s1)'],
  legend=['House 1: "...Now I can make something really interesting..." (PAL text #227)','House 1: no line, sets a flag',
- 'House 2: "It doesn\'t work, but this machine is iron... I could use it"','Diagonal patrol: "A fortune-teller lives in this hut, but she has a condition"',
+ 'House 2: "It doesn\'t work, but this machine is iron... I could use it"','Diagonal patrol: "A fortune-teller lives in this hut, but he has a condition"',
  'Horizontal patrol: "Wood is the best; stone and iron are cold"','Horizontal patrol: "It doesn\'t work, but this machine is iron..."',
  'Neighbour: "There\'s a maze under the floor; don\'t wander in carelessly"','Vertical patrol: "You can only reach that hut from under the floor"',
  'Horizontal patrol: "A gear? Made of wood it would break" → "I\'m thirsty, I\'ll get a coconut" → "Karakuri Village sank"',
  'Vertical patrol: "The workshop entrance is up there; go take a look"','Neighbour: "This sign is old and dangerous" → "You\'re always so full of energy"',
- 'House 3, sitting: probably the raft maker ("Want a raft? Bring me wood from the Wise Old Tree"); the code gives him no dialogue']),
+ 'The Green Fortune Teller (subtype 4) — House 3, sitting: "I only talk to those with 300,000 AP" (k3 dx16..19; the code gives him no dialogue, the port reconstructs it)']),
 17:dict(title='AREA17 section 0 — cut Iron Men village',
  cap='Cut Iron Men village (Iron Town, AREA17, top-down view): what the code places; the painted background is lost.',
  exits=['→ '+CIVI_EN,'→ inside Iron Town (AREA17 s1)'],
@@ -1008,27 +1011,600 @@ def plan1x(area, outd, langs=('en',)):
         out = os.path.join(outd, 'civ_plan_a%d_1x_%s.png' % (area, 'leyenda' if lang == 'es' else 'legend')); lg.save(out); print(out, lg.size)
 
 
+# ------------------------------------------------------------------ "who goes where" sheet (civ_personajes_aNN[_en].png)
+# One sheet per town: every resident of the I0NFO2 NPC set at its record position, numbered in record order (the numbers
+# of the docs' tables), with its drawing only when the disc gives it, a confidence mark for every drawing and name, and a
+# table (no. | name | sprite | confidence | where | behaviour | what they say). Houses, exits and props from the same data.
+CONF_COL = {'sabido': (20, 130, 50), 'probable': (215, 120, 0), 'suposicion': (130, 70, 180), 'desconocido': (120, 120, 120)}
+CONF_LBL = {'es': {'sabido': 'sabido', 'probable': 'probable', 'suposicion': 'suposición', 'desconocido': 'desconocido'},
+            'en': {'sabido': 'known', 'probable': 'probable', 'suposicion': 'guess', 'desconocido': 'unknown'}}
+
+
+def _teller_page():
+    """AREA02/B300 words 64..127 (the Green/Blue Fortune Teller page, docs: "The fortune-teller of house H3")."""
+    d = A.read_resource('AREA02/B300')
+    return [[(d[y * 384 + 128 + x // 2] >> ((x & 1) * 4)) & 15 for x in range(256)] for y in range(256)]
+
+
+# (area, subtype) -> (page, component index on the page, (CLUT file, row), confidence, why ES, why EN). Only these
+# subtypes have a drawing on a surviving page; all others are drawn as a neutral silhouette.
+PERS_SPRITES = {
+    (11, 0): ('A06100', 0, ('AREA11/CLUT02', 4), 'probable',
+              'página probada por el código (w1e 1); figura por orden de fotogramas; paleta fila 4 por los colores de TCRF',
+              'page proven by the code (w1e 1); figure by frame order; palette row 4 from TCRF colours'),
+    (11, 4): ('B300', 3, ('AREA02/CLUT04', 21), 'probable',
+              'su página en AREA11 se perdió; mismo dibujo en AREA02/B300 con la misma disposición de fotogramas; fila 21 = colores de la hoja de la comunidad (ningún fichero la usa)',
+              'his AREA11 page is lost; the same drawing is on AREA02/B300 with the same frame layout; row 21 = the community sheet colours (no file sets it)'),
+    (16, 0): ('A07600', 9, ('AREA16/CLUT07', 21), 'probable',
+              'página probada (w1e 1), figura por orden de fotogramas; paleta fila 21 hallada por parecido con TCRF (colores desplazados hasta 9 niveles)',
+              'page proven (w1e 1), figure by frame order; palette row 21 found by likeness to TCRF (colours off by up to 9 levels)'),
+    (16, 1): ('A07600', 28, ('AREA16/CLUT07', 37), 'probable',
+              'página probada (w1e 1), figura por orden de fotogramas; paleta fila 37 por los colores de TCRF',
+              'page proven (w1e 1), figure by frame order; palette row 37 from TCRF colours'),
+    (16, 2): ('A07600', 34, ('AREA16/CLUT07', 53), 'sabido',
+              'página probada (w1e 1); fila 53 coincide píxel a píxel con el sprite de TCRF; sus scripts 16-23 son las animaciones de levantar peso',
+              'page proven (w1e 1); row 53 matches TCRF\'s sprite pixel for pixel; its scripts 16-23 are the lifting anims'),
+    (17, 0): ('A08000', 2, ('AREA17/CLUT03', 1), 'sabido',
+              'página probada (w1e 1); fila 1 = la que usa el juego final para este mismo personaje (AREA17/D205)',
+              'page proven (w1e 1); row 1 = the row the retail game uses for this same character (AREA17/D205)'),
+}
+PERS_LOST = {  # why a subtype has no drawing
+    11: ('su página de texturas (w1e 0x0A/0x0B/0x10) no sobrevive', 'its texture page (w1e 0x0A/0x0B/0x10) did not survive'),
+    16: ('su página de texturas (w1e 0x11) no sobrevive', 'its texture page (w1e 0x11) did not survive'),
+    17: ('su página de texturas (w1e 0x0A/0x0B/0x10) no sobrevive', 'its texture page (w1e 0x0A/0x0B/0x10) did not survive'),
+    18: ('la página A08600 sobrevive (w1e 1), pero no se ha identificado qué figura es cada subtipo', 'page A08600 survives (w1e 1), but which figure each subtype is has not been identified'),
+    (17, 4): ('el subtipo 4 no tiene tabla de animación (0 scripts): el juego no lo dibujaría', 'subtype 4 has no anim table (0 scripts): the game would not draw it'),
+}
+
+# Exits: (x0, y0, x1, y1) in world coordinates, None = open towards the map edge (the code only tests x > / y <), and the
+# destination. From topdownSectionStepC/D/E + the MAIN0 exit table 0x80079A48 (docs: "Step 2"); names from D0SPSUB 0x80108E5C.
+PERS_EXITS = {
+    11: [((0x22B, 0x169, None, 0x1CC), 'Ciudad de civilización (AREA18 s1, punto 1)', 'Civilization Town (AREA18 s1, spawn 1)'),
+         ((0xC7, None, 0x107, 0x4F), 'Lumberjack Factory (AREA11 s1, punto 0)', 'Lumberjack Factory (AREA11 s1, spawn 0)')],
+    16: [((None, 0x208, -0x74, 0x211), 'Ciudad de civilización (AREA18 s1, punto 3)', 'Civilization Town (AREA18 s1, spawn 3)'),
+         ((0x6B, 0x13F, 0x72, 0x140), 'Dried Wishing Well (AREA11 s2, punto 0), por un hoyo de 7 x 1 px', 'Dried Wishing Well (AREA11 s2, spawn 0), through a 7 x 1 px hole'),
+         ((0x93, None, None, 0x4A), 'Clock Tower (AREA16 s1, punto 0; también recortada)', 'Clock Tower (AREA16 s1, spawn 0; also cut)')],
+    17: [((0xA7, 0x23A, 0x117, None), 'Ciudad de civilización (AREA18 s1, punto 2)', 'Civilization Town (AREA18 s1, spawn 2)'),
+         ((0xB0, None, 0x10F, 0x50), 'Iron Castle (AREA17 s1, punto 0)', 'Iron Castle (AREA17 s1, spawn 0)')],
+    18: [],
+}
+
+# Per resident, in record order: name (ES, EN), name source (ES, EN), name confidence, line(s) (ES, EN), extra note (ES, EN).
+# Lines are the docs' glosses of the JP text (CIVILIZACION.md / CIVILIZATION.md, "The cut towns, one by one").
+def _r(n, ns, nc, say, note=('', '')):
+    return dict(n=n, ns=ns, nc=nc, say=say, note=note)
+
+
+_LFW = ('Lumberjack Factory Worker (trabajador con casco)', 'Lumberjack Factory Worker (hard-hat worker)')
+_TCRF = ('nombre de TCRF', 'TCRF name')
+_NONAME = ('sin nombre', 'no name')
+_NN = lambda sub: ('vecino sin nombre (subtipo %d)' % sub, 'unnamed resident (subtype %d)' % sub)
+_DOC_LFW = ('la doc lo llama «Lumberjack Factory Worker», pero es el subtipo 1 (página perdida): sin base',
+            'the docs call it "Lumberjack Factory Worker", but it is subtype 1 (lost page): unsupported')
+PERS = {
+    11: [
+        _r(_LFW, _TCRF, 'probable', ('«...Ahora puedo hacer algo muy interesante...» (texto PAL #227)', '"...Now I can make something really interesting..." (PAL text #227)')),
+        _r(_LFW, _TCRF, 'probable', ('No habla: activa una bandera (D_8009CFA9)', 'No line: sets a flag (D_8009CFA9)')),
+        _r(_LFW, _TCRF, 'probable', ('«No funciona, pero esta máquina es de hierro... me vendría bien»', '"It doesn\'t work, but this machine is iron... I could use it"')),
+        _r(_LFW, _TCRF, 'probable', ('«En esta choza vive un adivino, pero pone una condición»', '"A fortune-teller lives in this hut, but he has a condition"')),
+        _r(_LFW, _TCRF, 'probable', ('«La madera es lo mejor; la piedra y el hierro son fríos»', '"Wood is the best; stone and iron are cold"')),
+        _r(_NN(1), _DOC_LFW, None, ('«No funciona, pero esta máquina es de hierro...»', '"It doesn\'t work, but this machine is iron..."')),
+        _r(('¿Male Lumberjack Town Resident?', 'Male Lumberjack Town Resident?'),
+           ('nombre de la doc, sin base: el anciano está en los fotogramas extra del subtipo 0; éste es el subtipo 2 (página perdida)',
+            'docs name, unsupported: the old man is in subtype 0\'s extra frames; this is subtype 2 (lost page)'), 'suposicion',
+           ('«Bajo el suelo hay un laberinto; no te metas sin cuidado»', '"There\'s a maze under the floor; don\'t wander in carelessly"')),
+        _r(_NN(1), _DOC_LFW, None, ('«A esa choza sólo se llega por debajo del suelo»', '"You can only reach that hut from under the floor"')),
+        _r(_NN(1), _DOC_LFW, None, ('Según el progreso: «¿Un engranaje? De madera se rompería» → «Tengo sed, iré a por un coco» → «El Pueblo Karakuri se hundió»',
+                                    'By progress: "A gear? Made of wood it would break" → "I\'m thirsty, I\'ll get a coconut" → "Karakuri Village sank"')),
+        _r(_NN(1), _DOC_LFW, None, ('«Al taller se entra por arriba; ve a echar un vistazo»', '"The workshop entrance is up there; go take a look"')),
+        _r(('¿Male Lumberjack Town Resident (el anciano)?', 'Male Lumberjack Town Resident (the old man)?'),
+           ('nombre de la doc, sin base: subtipo 3 (página perdida); la reconstrucción pone aquí al anciano del vídeo por suposición',
+            'docs name, unsupported: subtype 3 (lost page); the reconstruction puts the FMV\'s old man here as a guess'), 'suposicion',
+           ('«Este cartel es viejo y peligroso» → «Siempre tan lleno de energía»', '"This sign is old and dangerous" → "You\'re always so full of energy"')),
+        _r(('Adivino verde (Green Fortune Teller)', 'Green Fortune Teller'),
+           ('pista japonesa del evento 89 («escucha al adivino verde») + sus fotogramas = los del adivino del túnel',
+            'JP hint of event 89 ("listen to the Green Fortune Teller") + his frames = the tunnel teller\'s'), 'probable',
+           ('«Sólo hablo con quien tenga 300.000 PA» (k3 dx16-19). Su dlg 11 no tiene caso: en el código no dice nada (el port lo reconstruye)',
+            '"I only talk to those with 300,000 AP" (k3 dx16-19). His dlg 11 has no case: in the code he says nothing (the port reconstructs it)')),
+    ],
+    16: [
+        _r(_NN(3), _NONAME, None, ('«¡Aúpa... YA!» (levanta algo)', '"Heave... HO!" (lifting something)')),
+        _r(_NN(3), _NONAME, None, ('«¡Hop... AAAH!» (levanta algo)', '"Hup... HAAA!" (lifting something)')),
+        _r(('Female Stonetown Resident (mujer con capucha)', 'Female Stonetown Resident (hooded woman)'), _TCRF, 'probable',
+           ('«Esto pegado a la pared es un ascensor... pero no se mueve»', '"This thing on the wall is supposed to be a lift... but it doesn\'t move"')),
+        _r(('Male Stonetown Resident (el forzudo)', 'Male Stonetown Resident (the strongman)'), _TCRF, 'sabido',
+           ('«¿No puedes entrar en los otros pueblos? Ni lo sé ni me importa» → luego habla del engranaje y del generador',
+            '"Can\'t get into the other towns? Don\'t know, don\'t care" → later talks about the gear and the generator')),
+        _r(('Female Stonetown Resident (mujer con capucha)', 'Female Stonetown Resident (hooded woman)'), _TCRF, 'probable',
+           ('«La gente de los otros pueblos...» → «¿Un engranaje que no se rompa? Si fuera de hierro...»', '"The folks from the other towns..." → "A gear that won\'t break? If it were iron..."')),
+        _r(_NN(3), _NONAME, None, ('«¿Primera vez en este pueblo?» → «Hace mucho intenté meterme en el río...»', '"First time in this town?" → "Long ago I tried to go into the river..."')),
+        _r(('Stonetown Kid (el chico)', 'Stonetown Kid (the boy)'), ('nombre de Folkin (TCRF); frases infantiles', 'Folkin\'s (TCRF) name; childish lines'), 'probable',
+           ('«¿Debería entrar...?» → «Vencerás al Cerdiablo que hechizó esta tierra, ¿verdad?»', '"Should I go in...?" → "You\'ll beat the Evil Pig who cursed this land, right?"')),
+        _r(('Stonetown Kid (el chico)', 'Stonetown Kid (the boy)'), ('nombre de Folkin (TCRF); frases infantiles', 'Folkin\'s (TCRF) name; childish lines'), 'probable',
+           ('«Abrí en secreto la puerta entre el pueblo de hierro y el de madera... ¡es un secreto!» → «Descubrieron mi travesura...»',
+            '"I secretly opened the door between the Iron and Wood towns... it\'s a secret!" → "They found out my prank..."')),
+        _r(('artesano', 'craftsman'), ('por su frase (nuestra lectura)', 'from his line (our reading)'), 'suposicion',
+           ('«Mmm... quiero fabricar algo» / «Ahora que lo pienso...»', '"Hmm... I want to make something" / "Come to think of it..."')),
+        _r(_NN(3), _NONAME, None, ('No habla: activa una bandera (D_8009CFA7)', 'No line: sets a flag (D_8009CFA7)')),
+        _r(_NN(3), _NONAME, None, ('No habla: activa una bandera (D_8009CFA7)', 'No line: sets a flag (D_8009CFA7)')),
+        _r(_NN(3), _NONAME, None, ('Sin diálogo en el código (dlg 11 sin caso)', 'No dialogue in the code (dlg 11 has no case)')),
+        _r(('vecino que vio a la bruja Mizuno', 'resident who saw Mizuno the witch'),
+           ('la doc lo llama «el chico», pero es el subtipo 3, no el del chico (1)', 'the docs call him "the boy", but he is subtype 3, not the kid\'s (1)'), 'suposicion',
+           ('Habla de la bruja Mizuno (texto PAL #229) e inicia el evento 0x67', 'Talks about Mizuno the witch (PAL text #229) and starts event 0x67')),
+    ],
+    17: [
+        _r(('Hombre de hierro', 'Iron Man'), ('vecino de la Ciudad de hierro (doc)', 'Iron Town resident (docs)'), 'sabido',
+           ('«He oído que arreglaste la torre del reloj de piedra»', '"I hear you fixed the stone clock tower"')),
+        _r(_NN(1), _NONAME, None, ('«¡Buen material! Espera un momento...»', '"Good material! Wait a moment..."')),
+        _r(('el herrero', 'the smith'), ('por su código (topdownA17ActorDialogueBank2)', 'from his code (topdownA17ActorDialogueBank2)'), 'sabido',
+           ('«¿Necesitas algo? ¿Un engranaje de hierro?» (evento 0x63) → te da el engranaje (objeto 0x3E)', '"Need something? An iron gear?" (event 0x63) → gives you the gear (item 0x3E)')),
+        _r(('el fabricante de bombas', 'the bomb maker'), ('por su código (topdownA17ActorDialogueBank3)', 'from his code (topdownA17ActorDialogueBank3)'), 'sabido',
+           ('«No he visto tu cara...» → (evento 0x69) «Primero necesito electricidad» → «Ahora la mezcla de la bomba» → «¿Más bombas?»',
+            '"Haven\'t seen your face before..." → (event 0x69) "First I need electricity" → "Now the bomb mixture" → "More bombs?"')),
+        _r(_NN(4), _NONAME, None, ('Sin diálogo en el código (dlg 4 sin caso)', 'No dialogue in the code (dlg 4 has no case)'),
+           ('el registro dice casa 1, pero (223, 0) está fuera de C1 y dentro de la zona de la salida 1', 'the record says house 1, but (223, 0) is outside H1 and inside the exit 1 zone')),
+        _r(('Hombre de hierro', 'Iron Man'), ('vecino de la Ciudad de hierro (doc)', 'Iron Town resident (docs)'), 'sabido',
+           ('«¿Quieres subir? Entra en esta choza»', '"Want to go up? Go into this hut"')),
+        _r(_NN(1), _NONAME, None, ('«Bienvenido, éste es el pueblo de los Hombres de hierro»', '"Welcome, this is the Iron Men\'s town"')),
+        _r(('Hombre de hierro', 'Iron Man'), ('vecino de la Ciudad de hierro (doc)', 'Iron Town resident (docs)'), 'sabido',
+           ('«El hierro es resistente y duradero» → «¿Arreglaste hasta el generador?»', '"Iron is sturdy and lasts" → "You even fixed the generator?"')),
+        _r(_NN(3), _NONAME, None, ('«¿Por qué siempre andamos peleados?»', '"Why are we always at each other\'s throats?"')),
+        _r(_NN(1), _NONAME, None, ('«Todos con su madera y su piedra...» → «Madera, piedra y hierro: lo importante es el equilibrio»',
+                                   '"Everyone and their wood and stone..." → "Wood, stone and iron: balance is what matters"')),
+        _r(('Hombre de hierro', 'Iron Man'), ('vecino de la Ciudad de hierro (doc)', 'Iron Town resident (docs)'), 'sabido',
+           ('«Tómame como referencia y baja recto para salir»', '"Use me as a landmark and go straight down to leave"')),
+        _r(('Hombre de hierro', 'Iron Man'), ('vecino de la Ciudad de hierro (doc)', 'Iron Town resident (docs)'), 'sabido',
+           ('«Antes el ascensor funcionaba con máquinas»', '"The lift used to run on machinery"')),
+        _r(_NN(1), _NONAME, None, ('«Sube al ascensor y por el camino del medio llegas al Castillo de hierro»', '"Ride the lift and take the middle path to the Iron Castle"')),
+        _r(_NN(3), _NONAME, None, ('«Ese viejo Gantetsu no me deja ir al Castillo» → «Perdona que me burlara de ti»', '"That old Gantetsu won\'t let me go to the Castle" → "Sorry I made fun of you"')),
+        _r(('Hombre de hierro', 'Iron Man'), ('vecino de la Ciudad de hierro (doc)', 'Iron Town resident (docs)'), 'sabido',
+           ('«Esta tierra también está hechizada por los Cerdiablos»', '"This land is under the Evil Pigs\' spell too"')),
+        _r(_NN(2), _NONAME, None, ('«Si buscas algo de hierro, ve a la choza del ascensor» → «¿Sabes nadar bien?»', '"If you want something iron, try the lift hut" → "Are you a good swimmer?"')),
+    ],
+}
+PERS[18] = [None] * 10   # filled from the records (sprite viewer, no talk code)
+
+PERS_TITLE = {
+    11: ('Lumberjack Town (Ciudad leñadora) — AREA11 sección 0: quién va dónde', 'Lumberjack Town — AREA11 section 0: who goes where'),
+    16: ('Stonetown (Ciudad de piedra) — AREA16 sección 0: quién va dónde', 'Stonetown — AREA16 section 0: who goes where'),
+    17: ('Iron Town (Ciudad de hierro) — AREA17 sección 0: quién va dónde', 'Iron Town — AREA17 section 0: who goes where'),
+    18: ('Pueblo reunido — AREA18 sección 0 (sólo datos de prueba): quién va dónde', 'Reunited town — AREA18 section 0 (test data only): who goes where'),
+}
+PERS_SRC = {11: ('0D', '0x80100080', '0x800FFE24', 'topdownA11ActorOpenDialogue 0x800F1C88', 'topdownSectionStepC 0x800E8D98'),
+            16: ('0E', '0x80100364', '0x801001D4', 'topdownA16ActorOpenDialogue 0x800F2E84', 'topdownSectionStepD 0x800E8ED4'),
+            17: ('0F', '0x80100784', '0x80100368', 'topdownA17ActorOpenDialogue 0x800F4110', 'topdownSectionStepE 0x800E9040'),
+            18: ('10', '-', '-', 'topdownA18ActorHandler 0x800F548C', '-')}
+
+
+def _prop_note(area, i, q, lang):
+    """What the code (or the docs) says about prop i (0-based record index = its wb8)."""
+    es = lang == 'es'
+    if q['room']:
+        return ('interior, sólo se ve dentro de C%d' if es else 'interior, only shown inside H%d') % q['room'], 'sabido'
+    if area == 16 and i == 5:
+        return ('cambia de anim y de sitio con D_8009CFA8 (código); doc: probablemente el reloj reparado' if es else
+                'changes anim and place with D_8009CFA8 (code); docs: most likely the repaired clock'), 'probable'
+    if area == 17 and i in (13, 14):
+        return ('plataforma móvil = ascensor (topdownA17SceneryUpdate, lleva a Tombi)' if es else
+                'moving platform = lift (topdownA17SceneryUpdate, carries Tomba)'), 'sabido'
+    if area == 17 and i == 15:
+        return ('su anim suma D_8009CFA1: cambia con el progreso' if es else 'its anim adds D_8009CFA1: changes with progress'), 'sabido'
+    if area == 17 and q['anim'] == 23:
+        return ('fila de iguales (anim 23); ¿raíles del ascensor o muro? (la plataforma P%d está a la misma y)' % (14 if q['y'] > 200 else 15) if es else
+                'row of identical props (anim 23); lift rails or wall? (platform P%d is at the same y)' % (14 if q['y'] > 200 else 15)), 'suposicion'
+    return ('el código no dice qué es' if es else 'the code does not say what it is'), 'desconocido'
+
+
+def _sil(w, h, col=(150, 150, 150)):
+    """Neutral silhouette for a resident without a known drawing (not a drawing of the character)."""
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    hr = w * 0.30
+    d.ellipse([w / 2 - hr, 1, w / 2 + hr, 1 + 2 * hr], fill=col + (200,), outline=(80, 80, 80, 255), width=2)
+    d.rounded_rectangle([w * 0.12, 2 * hr + 3, w * 0.88, h - 1], radius=int(w * 0.3), fill=col + (200,), outline=(80, 80, 80, 255), width=2)
+    d.text((w / 2, 2 * hr + 3 + (h - 2 * hr - 3) / 2), '?', font=F(int(w * 0.6), True), fill=(255, 255, 255, 255), anchor='mm')
+    return im
+
+
+def _dashed_rect(dr, box, col, w=3, dash=8):
+    x0, y0, x1, y1 = box
+    for (a, b, c, d) in ((x0, y0, x1, y0), (x1, y0, x1, y1), (x1, y1, x0, y1), (x0, y1, x0, y0)):
+        L = math.hypot(c - a, d - b); n = max(1, int(L // (2 * dash)))
+        for k in range(n + 1):
+            t0 = min(1, 2 * k * dash / L) if L else 0; t1 = min(1, (2 * k + 1) * dash / L) if L else 0
+            if t1 > t0: dr.line([a + (c - a) * t0, b + (d - b) * t0, a + (c - a) * t1, b + (d - b) * t1], fill=col, width=w)
+
+
+def _dashed_line(dr, a, b, col, w=2, dash=7):
+    L = math.hypot(b[0] - a[0], b[1] - a[1]); n = int(L // (2 * dash)) + 1
+    for k in range(n):
+        t0 = 2 * k * dash / L if L else 0; t1 = min(1, (2 * k + 1) * dash / L) if L else 0
+        if t0 < 1: dr.line([a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0, a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1], fill=col, width=w)
+
+
+_PAGES = {}
+
+
+def _pers_sprite(area, sub):
+    """(RGBA 1x drawing or None, confidence, why ES, why EN)."""
+    k = (area, sub)
+    if k in PERS_SPRITES:
+        pg, ci, (cf, row), conf, wes, wen = PERS_SPRITES[k]
+        if pg not in _PAGES:
+            p = _teller_page() if pg == 'B300' else page(pg); _PAGES[pg] = (p, comps(p))
+        p, cs = _PAGES[pg]; pal = clut_row(cf, row); b = cs[ci]
+        w, h = b[2] - b[0] + 1, b[3] - b[1] + 1
+        im = Image.new('RGBA', (w, h), (0, 0, 0, 0)); px = im.load()
+        for y in range(h):
+            for x in range(w):
+                v = p[b[1] + y][b[0] + x]
+                if v: px[x, y] = pal[v] + (255,)
+        return im, conf, wes, wen
+    wes, wen = PERS_LOST.get(k, PERS_LOST[area])
+    return None, 'desconocido', wes, wen
+
+
+BEH_ES = {0: 'quieto', 1: 'patrulla vertical', 2: 'patrulla horizontal', 3: 'patrulla diagonal (tipo 3)', 4: 'patrulla diagonal (tipo 4)', 5: 'guionizado', 6: 'guionizado'}
+BEH_EN = {0: 'stands still', 1: 'vertical patrol', 2: 'horizontal patrol', 3: 'diagonal patrol (type 3)', 4: 'diagonal patrol (type 4)', 5: 'scripted', 6: 'scripted'}
+COND16 = {8: ('sólo aparece tras el 1er avance', 'only after the first milestone'), 11: ('sólo antes del 1er avance', 'only before the first milestone'),
+          12: ('sólo antes del 1er avance', 'only before the first milestone'), 15: ('sólo aparece al final', 'only at the end')}
+
+
+def personajes(area, lang, out):
+    es = lang == 'es'; L = 0 if es else 1; HL = 'C' if es else 'H'
+    var = T.CUT[area]; actors, props = T.npc_set(var); rects = T.trigger_rects(area)
+    props0 = props[0] if props else []; exits = PERS_EXITS[area]
+    rows = PERS[area]
+    if area == 18:
+        rows = [_r(('vecino del pueblo reunido (subtipo %d)' % a['sub'], 'reunited-town resident (subtype %d)' % a['sub']), _NONAME, None,
+                   ('No habla: su manejador sólo cambia de animación mientras se pulsa un botón (visor de sprites). El texto JP de AREA18 (#209-#221) no tiene llamada',
+                    'No line: its handler only cycles the animation while a button is held (a sprite viewer). AREA18\'s JP text (#209-#221) has no caller'))
+                for a in actors]
+    assert len(rows) == len(actors), (area, len(rows), len(actors))
+    boxes = []
+    for a in actors:
+        if not a['beh']: boxes.append(None); continue
+        x0, y0, x1, y1 = a['bx0'], a['by0'], a['bx1'], a['by1']
+        if var == 0x0E: x0, y0, x1, y1 = a['x'] + x0, a['y'] + y0, a['x'] + x1, a['y'] + y1
+        boxes.append((min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1)))
+    xs = [a['x'] for a in actors] + [q['x'] for q in props0] + [r[0] for r in rects] + [r[2] for r in rects] + [b[0] for b in boxes if b] + [b[2] for b in boxes if b]
+    ys = [a['y'] for a in actors] + [q['y'] for q in props0] + [r[1] for r in rects] + [r[3] for r in rects] + [b[1] for b in boxes if b] + [b[3] for b in boxes if b]
+    for (r, _, _) in exits:
+        xs += [v for v in (r[0], r[2]) if v is not None]; ys += [v for v in (r[1], r[3]) if v is not None]
+    wx0, wx1, wy0, wy1 = min(xs) - 60, max(xs) + 60, min(ys) - 100, max(ys) + 50
+    wx0, wy0 = wx0 // 32 * 32, wy0 // 32 * 32; wx1, wy1 = -(-wx1 // 32) * 32, -(-wy1 // 32) * 32
+    S = 1.5; AX = 56; M = 30; TOP = 150
+    PW, PH = int((wx1 - wx0) * S), int((wy1 - wy0) * S)
+    ox, oy = M + AX, TOP + 34
+    P = lambda x, y: (ox + (x - wx0) * S, oy + (y - wy0) * S)
+    # ---- sprites
+    spr = []
+    for a in actors:
+        im, conf, wes, wen = _pers_sprite(area, a['sub'])
+        if im is None:
+            big = area == 16 and a['sub'] == 3   # box 16x32 instead of 8x16
+            im = _sil(int((28 if big else 24) * S), int((54 if big else 46) * S))
+            spr.append((im, conf, wes, wen, False))
+        else:
+            spr.append((im.resize((int(im.width * S), int(im.height * S)), Image.NEAREST), conf, wes, wen, True))
+    # ---- table layout (to the right of the plan)
+    fT = F(18); fTb = F(19, True); fS = F(15); fH = F(19, True)
+    cols = [('Nº' if es else 'No.', 58), ('nombre' if es else 'name', 320), ('sprite', 120), ('confianza del sprite' if es else 'sprite confidence', 250),
+            ('dónde' if es else 'where', 210), ('comportamiento' if es else 'behaviour', 250), ('qué dice (resumen del texto japonés)' if es else 'what they say (summary of the JP text)', 500)]
+    TW = sum(c[1] for c in cols)
+    tmp = ImageDraw.Draw(Image.new('RGB', (8, 8)))
+    cells = []
+    for i, (a, r) in enumerate(zip(actors, rows)):
+        im, conf, wes, wen, real = spr[i]
+        where = (('dentro de %s%d' % (HL, a['room'])) if es else ('inside %s%d' % (HL, a['room']))) if a['room'] else ('en la calle' if es else 'outdoors')
+        where += ' (%d, %d)' % (a['x'], a['y'])
+        if r['note'][L]: where += '. ' + r['note'][L]
+        beh = (BEH_ES if es else BEH_EN)[a['beh']]
+        if boxes[i]:
+            b = boxes[i]
+            beh += (': x %d..%d, y %d..%d' % (b[0], b[2], b[1], b[3])) if (b[0] != b[2] and b[1] != b[3]) else (': x %d..%d' % (b[0], b[2]) if b[1] == b[3] else ': y %d..%d' % (b[1], b[3]))
+        if area == 16 and a['bc'] in COND16: beh += '; ' + COND16[a['bc']][L]
+        beh += '; dlg %d' % a['dlg']
+        nm = wrap(tmp, r['n'][L], fTb, cols[1][1] - 14); ns = wrap(tmp, r['ns'][L], fS, cols[1][1] - 14)
+        cf = wrap(tmp, ('' if real else ('Sprite desconocido: ' if es else 'Sprite unknown: ')) + (wes if es else wen), fS, cols[3][1] - 14)
+        wh = wrap(tmp, where, fT, cols[4][1] - 14); bh = wrap(tmp, beh, fT, cols[5][1] - 14); sy = wrap(tmp, r['say'][L], fT, cols[6][1] - 14)
+        hgt = max(len(nm) * 24 + len(ns) * 19 + 8, 34 + len(cf) * 19, len(wh) * 23, len(bh) * 23, len(sy) * 23, (im.height / S * 2 if real else im.height) + 8, 50) + 16
+        cells.append((nm, ns, cf, wh, bh, sy, int(hgt)))
+    TH = 44 + sum(c[6] for c in cells)
+    # ---- notes below the plan
+    notes = []   # (title, [(colour or None, text)])
+    marks = [((40, 110, 230), ('Rectángulo azul %s1…: casa (TOPDOWN_TRIGGER_RECT_LISTS); al entrar Tombi se oculta el tejado y se ven los de dentro' % HL) if es else
+              ('Blue rectangle %s1…: house (TOPDOWN_TRIGGER_RECT_LISTS); when Tomba walks in the roof hides and the residents inside show' % HL)),
+             ((215, 40, 40), 'Círculo rojo con número: vecino en la calle; la línea lleva a sus pies (posición del registro)' if es else 'Red numbered circle: resident outdoors; the line leads to the feet (record position)'),
+             ((150, 40, 170), 'Círculo morado: vecino dentro de una casa' if es else 'Purple circle: resident inside a house'),
+             ((30, 150, 50), 'Línea o caja verde: por dónde camina (patrulla); en diagonal, caja con su diagonal' if es else 'Green line or box: where they walk (patrol); diagonal walkers get a box with its diagonal'),
+             ((235, 130, 20), 'Rectángulo naranja: salida (rectángulo del código; un lado abierto llega al borde)' if es else 'Orange rectangle: exit (code rectangle; an open side runs to the edge)'),
+             ((240, 200, 20), 'Cuadrado amarillo P#: objeto / decorado (lista de objetos del juego de NPC)' if es else 'Yellow square P#: prop / scenery (prop list of the NPC set)')]
+    notes.append(('Marcas del plano' if es else 'Plan marks', marks))
+    conf = [(CONF_COL['sabido'], 'SABIDO (marco verde continuo): dibujo de la página que el código prueba y paleta probada en el disco' if es else
+             'KNOWN (solid green frame): drawing from the page the code proves and a palette proven on the disc'),
+            (CONF_COL['probable'], 'PROBABLE (marco naranja discontinuo): dibujo real del disco, pero la paleta o qué dibujo es sale de comparar con TCRF / la comunidad' if es else
+             'PROBABLE (dashed orange frame): real disc drawing, but its palette or which drawing it is comes from matching TCRF / community sheets'),
+            (CONF_COL['suposicion'], 'SUPOSICIÓN: deducción nuestra (sólo nombres y papeles; nunca se dibuja un sprite supuesto)' if es else
+             'GUESS: our own deduction (names and roles only; a guessed sprite is never drawn)'),
+            (CONF_COL['desconocido'], 'DESCONOCIDO (silueta gris con ?): sprite desconocido, su página de texturas se perdió; la silueta no es el personaje' if es else
+             'UNKNOWN (grey silhouette with ?): sprite unknown, its texture page is lost; the silhouette is not the character'),
+            (None, 'El fotograma (de frente) es elección nuestra; el registro fija la orientación real (campo +4).' if es else
+             'The (front) frame is our choice; the record sets the real facing (field +4).')]
+    notes.append(('Confianza' if es else 'Confidence', conf))
+    hs = []
+    for i, r in enumerate(rects):
+        who = [str(k + 1) for k, a in enumerate(actors) if a['room'] == i + 1]
+        pr = ['P%d' % (k + 1) for k, q in enumerate(props0) if q['room'] == i + 1]
+        t = '%s%d  x %d..%d, y %d..%d: ' % (HL, i + 1, r[0], r[2], r[1], r[3])
+        if who: t += ('dentro ' if es else 'inside ') + ', '.join('#' + w for w in who)
+        else: t += 'nadie dentro' if es else 'nobody inside'
+        if pr: t += ('; objeto ' if es else '; prop ') + ', '.join(pr)
+        hs.append((None, t))
+    if area == 17:
+        hs.append((None, 'Nota: #5 tiene casa 1 en su registro, pero su posición (223, 0) cae fuera de C1.' if es else
+                   'Note: #5 has house 1 in its record, but its position (223, 0) is outside H1.'))
+    if not rects:
+        hs.append((None, 'Ninguna: AREA18 no tiene lista de casas en TOPDOWN_TRIGGER_RECT_LISTS.' if es else 'None: AREA18 has no entry in TOPDOWN_TRIGGER_RECT_LISTS.'))
+    notes.append(('Casas y quién está dentro' if es else 'Houses and who is inside', hs))
+    ex = []
+    for k, (r, des, den) in enumerate(exits):
+        def rng(lo, hi, ax):
+            if lo is None: return '%s < %d' % (ax, hi)
+            if hi is None: return '%s > %d' % (ax, lo)
+            return '%s %d..%d' % (ax, lo, hi)
+        ex.append((None, ('Salida %d (%s, %s) → %s' if es else 'Exit %d (%s, %s) → %s') % (k, rng(r[0], r[2], 'x'), rng(r[1], r[3], 'y'), des if es else den)))
+    if area == 18:
+        ex.append((None, 'Sin rectángulos: AREA18 s0 no tiene controlador de sección; su tabla de salidas (0x800799D0) apunta a AREA01 s5 y AREA03 s1, marcadores.' if es else
+                   'No rectangles: AREA18 s0 has no section controller; its exit table (0x800799D0) points to AREA01 s5 and AREA03 s1, placeholders.'))
+    notes.append(('Salidas (adónde llevan)' if es else 'Exits (where they lead)', ex))
+    pl = []; groups = {}
+    for k, q in enumerate(props0):
+        t, c = _prop_note(area, k, q, lang)
+        groups.setdefault((t, c), []).append('P%d (%d, %d)' % (k + 1, q['x'], q['y']))
+    for (t, c), lst in groups.items():
+        pl.append((CONF_COL[c], ', '.join(lst) + ': ' + t))
+    if props0: pl.append((None, 'Cada registro de objeto da tipo, casa, anim, x, y y subtipo (página); la lista no dice qué dibujo es.' if es else
+               'Each prop record gives type, room, anim, x, y and subtype (page); the list does not say which drawing it is.'))
+    if area == 16:
+        pl.append((None, 'Con D_8009CFA8 == 4 se usa la lista alternativa: sólo cambia la anim de P6 (10 → 12).' if es else 'With D_8009CFA8 == 4 the alternative list is used: only P6\'s anim changes (10 → 12).'))
+    if not props0:
+        pl.append((None, 'Ninguno (el juego de NPC 0x10 no tiene objetos).' if es else 'None (NPC set 0x10 has no props).'))
+    notes.append(('Objetos (color = confianza de lo que es)' if es else 'Props (colour = confidence of what it is)', pl))
+    Q = PERS_SRC[area]
+    src = [(None, ('Vecinos: NPC_SET_%s, lista en I0NFO2 %s (registros de 28 bytes: tipo, casa, orientación, caja de patrulla, dlg, comportamiento, x, y, subtipo, b0c); el número es el orden del registro, como en docs/CIVILIZACION.md.' if es else
+                   'Residents: NPC_SET_%s, list at I0NFO2 %s (28-byte records: type, room, facing, patrol box, dlg, behaviour, x, y, subtype, b0c); the number is the record order, as in docs/CIVILIZATION.md.') % (Q[0], Q[1])),
+           (None, ('Frases: %s → texto japonés (PAL tiene «···??»); objetos: I0NFO2 %s; salidas: %s + tabla MAIN0 0x80079A48.' if es else
+                   'Lines: %s → JP text (PAL holds "···??"); props: I0NFO2 %s; exits: %s + MAIN0 table 0x80079A48.') % (Q[3], Q[2], Q[4])),
+           (None, 'Coordenadas del mundo (las de la doc); píxel del fondo = (x + 128, y - 40). El dibujo de fondo, la colisión y las tablas de sprites se perdieron.' if es else
+            'World coordinates (as in the docs); background pixel = (x + 128, y - 40). The background picture, the collision map and the sprite tables are lost.'),
+           (None, 'Generado por tools/civ_sheets.py --sheet personajes con tu propio disco; contiene arte del disco, no se sube al repositorio.' if es else
+            'Made by tools/civ_sheets.py --sheet personajes from your own disc; contains disc art, never committed.')]
+    if area == 18:
+        src[:2] = [(None, 'Vecinos: NPC_SET_10 de I0NFO2 (spawnNpcSet10, mismos registros de 28 bytes), tools/topdown.py npcs; manejador topdownA18ActorHandler 0x800F548C (sin código de diálogo).' if es else
+                    'Residents: I0NFO2 NPC_SET_10 (spawnNpcSet10, same 28-byte records), tools/topdown.py npcs; handler topdownA18ActorHandler 0x800F548C (no talk code).')]
+    notes.append(('Fuentes' if es else 'Sources', src))
+    NW = max(PW + AX, 1000); fN = F(19); fNb = F(23, True)
+    def notes_h():
+        h = 0
+        for t, items in notes:
+            h += 38
+            for c, s in items: h += 25 * len(wrap(tmp, s, fN, NW - 40)) + 4
+            h += 14
+        return h
+    W = M + max(AX + PW, NW) + 40 + TW + M
+    H = oy + PH + TH + notes_h() + 200
+    im = Image.new('RGB', (W, H), (250, 247, 240)); dr = ImageDraw.Draw(im, 'RGBA')
+    dr.text((M, 22), PERS_TITLE[area][L], font=F(42, True), fill=(20, 20, 20))
+    sub = ('Cada vecino en su posición exacta del código (juego de NPC %s de I0NFO2), numerado como en la doc. Sólo se dibuja el sprite si el disco lo da; si no, silueta «sprite desconocido».' % Q[0]) if es else \
+          ('Every resident at its exact code position (I0NFO2 NPC set %s), numbered as in the docs. A sprite is drawn only when the disc gives it; otherwise a "sprite unknown" silhouette.' % Q[0])
+    dr.text((M, 80), sub, font=F(22), fill=(60, 60, 60))
+    dr.text((M, 110), ('Plano (coordenadas del mundo, cuadrícula de 32 px, escala ×1,5)' if es else 'Plan (world coordinates, 32 px grid, scale ×1.5)'), font=F(20, True), fill=(40, 40, 40))
+    # ---- plan
+    dr.rectangle([ox, oy, ox + PW, oy + PH], fill=(232, 222, 196), outline=(120, 105, 80), width=3)
+    for gx in range(wx0, wx1 + 1, 32):
+        X = P(gx, 0)[0]; dr.line([X, oy, X, oy + PH], fill=(214, 202, 172) if gx % 64 else (200, 186, 154), width=1)
+        if gx % 64 == 0: dr.text((X, oy - 4), str(gx), font=F(14), fill=(90, 80, 60), anchor='mb')
+    for gy in range(wy0, wy1 + 1, 32):
+        Y = P(0, gy)[1]; dr.line([ox, Y, ox + PW, Y], fill=(214, 202, 172) if gy % 64 else (200, 186, 154), width=1)
+        if gy % 64 == 0: dr.text((ox - 6, Y), str(gy), font=F(14), fill=(90, 80, 60), anchor='rm')
+    # exits
+    for k, (r, des, den) in enumerate(exits):
+        x0 = r[0] if r[0] is not None else wx0; x1 = r[2] if r[2] is not None else wx1
+        y0 = r[1] if r[1] is not None else wy0; y1 = r[3] if r[3] is not None else wy1
+        A_, B_ = P(x0, y0), P(x1, y1)
+        if B_[0] - A_[0] < 14: c = (A_[0] + B_[0]) / 2; A_, B_ = (c - 7, A_[1]), (c + 7, B_[1])
+        if B_[1] - A_[1] < 14: c = (A_[1] + B_[1]) / 2; A_, B_ = (A_[0], c - 7), (B_[0], c + 7)
+        dr.rectangle([A_, B_], fill=(245, 150, 40, 90), outline=(225, 110, 10), width=4)
+    # houses
+    for i, r in enumerate(rects):
+        A_, B_ = P(r[0], r[1]), P(r[2], r[3])
+        dr.rectangle([A_, B_], fill=(60, 120, 240, 28), outline=(40, 110, 230), width=4)
+    # patrols
+    for i, b in enumerate(boxes):
+        if not b: continue
+        A_, B_ = P(b[0], b[1]), P(b[2], b[3]); G = (30, 150, 50)
+        if b[0] == b[2] or b[1] == b[3]:
+            dr.line([A_, B_], fill=G, width=5)
+            for e in (A_, B_): dr.ellipse([e[0] - 5, e[1] - 5, e[0] + 5, e[1] + 5], fill=G)
+        else:
+            dr.rectangle([A_, B_], fill=(30, 150, 50, 35), outline=G, width=3)
+            if actors[i]['beh'] == 3: _dashed_line(dr, A_, B_, G, 2)
+            else: _dashed_line(dr, (A_[0], B_[1]), (B_[0], A_[1]), G, 2)
+    # props
+    for k, q in enumerate(props0):
+        X, Y = P(q['x'], q['y']); dr.rectangle([X - 6, Y - 6, X + 6, Y + 6], fill=(245, 205, 30), outline=(60, 50, 0), width=2)
+    # residents (back to front), remember sprite boxes
+    sbox = [None] * len(actors)
+    for i in sorted(range(len(actors)), key=lambda k: actors[k]['y']):
+        a = actors[i]; X, Y = P(a['x'], a['y']); sp, conf, _, _, real = spr[i]
+        x0, y0 = int(X - sp.width / 2), int(Y - sp.height)
+        im.paste(sp, (x0, y0), sp); sbox[i] = (x0, y0, x0 + sp.width, y0 + sp.height)
+        if conf == 'probable': _dashed_rect(dr, (x0 - 3, y0 - 3, x0 + sp.width + 3, y0 + sp.height + 3), CONF_COL['probable'], 3, 6)
+        elif conf == 'sabido': dr.rectangle([x0 - 3, y0 - 3, x0 + sp.width + 3, y0 + sp.height + 3], outline=CONF_COL['sabido'], width=2)
+        col = (215, 40, 40) if a['room'] == 0 else (150, 40, 170)
+        dr.ellipse([X - 5, Y - 5, X + 5, Y + 5], fill=col, outline=(255, 255, 255), width=1)
+    # labels: houses, exits, props (fixed), then resident bubbles avoiding them
+    fixed = []; R = 17
+    def put_label(x, y, text, font, fg, bg, border, anchor_xy=None):
+        tw = dr.textlength(text, font=font); hgt = font.size + 8
+        bx = (x - 4, y - 3, x + tw + 4, y + hgt - 3)
+        dr.rectangle(bx, fill=bg, outline=border, width=2); dr.text((x, y), text, font=font, fill=fg)
+        fixed.append(bx); return bx
+    for i, r in enumerate(rects):
+        A_, B_ = P(r[0], r[1]), P(r[2], r[3])
+        put_label(A_[0] + 6, A_[1] + 5, '%s%d' % (HL, i + 1), F(22, True), (255, 255, 255), (40, 110, 230, 255), (20, 60, 150))
+    for k, (r, des, den) in enumerate(exits):
+        x0 = r[0] if r[0] is not None else wx0; x1 = r[2] if r[2] is not None else wx1
+        y0 = r[1] if r[1] is not None else wy0; y1 = r[3] if r[3] is not None else wy1
+        A_, B_ = P(x0, y0), P(x1, y1)
+        lab = ('Salida %d → %s' if es else 'Exit %d → %s') % (k, (des if es else den).split(' (')[0].replace('hoyo de 7 x 1 px → ', '').replace('7 x 1 px hole → ', ''))
+        lab = lab.replace(' → ', ' →\n', 1)
+        f = F(19, True); tw = max(dr.textlength(t_, font=f) for t_ in lab.split('\n')); th_ = 2 * 24
+        cx_, cy_ = (A_[0] + B_[0]) / 2, (A_[1] + B_[1]) / 2
+        if B_[1] - A_[1] < 40: cy_ = A_[1] - 40
+        keep = [(b[0], b[1] - 2 * R - 12, b[2], b[3]) for b in sbox if b] + fixed
+        def clash(lx, ly):
+            bb = (lx - 6, ly - 5, lx + tw + 6, ly + th_ + 4)
+            return sum(1 for b in keep if not (b[2] < bb[0] or b[0] > bb[2] or b[3] < bb[1] or b[1] > bb[3]))
+        best = None
+        for xs_ in ((cx_ - tw / 2, A_[0] + 8, B_[0] - tw - 8), (ox + PW - tw - 10, ox + 8)):
+            for dy in range(0, 400, 20):
+                for sg in (1, -1):
+                    for lx in xs_:
+                        lx = min(max(lx, ox + 6), ox + PW - tw - 10); ly = min(max(cy_ - th_ / 2 + sg * dy, oy + 6), oy + PH - th_ - 6)
+                        n = clash(lx, ly)
+                        if best is None or n < best[0]: best = (n, lx, ly)
+                if best[0] == 0: break
+            if best[0] == 0: break
+        _, lx, ly = best
+        bx = (lx - 5, ly - 4, lx + tw + 5, ly + th_ + 2)
+        if bx[2] < A_[0] or bx[0] > B_[0] or bx[3] < A_[1] or bx[1] > B_[1]:   # label away from its exit: leader line
+            ex_, ey_ = min(max(cx_, A_[0]), B_[0]), min(max((A_[1] + B_[1]) / 2, A_[1]), B_[1])
+            lx_, ly_ = min(max(ex_, bx[0]), bx[2]), min(max(ey_, bx[1]), bx[3])
+            dr.line([lx_, ly_, ex_, ey_], fill=(225, 110, 10), width=3)
+        dr.rectangle(bx, fill=(255, 240, 220, 240), outline=(225, 110, 10), width=2)
+        dr.multiline_text((lx, ly), lab, font=f, fill=(140, 60, 0), spacing=4); fixed.append(bx)
+    fP = F(14, True)
+    for k, q in enumerate(props0):
+        X, Y = P(q['x'], q['y']); t = 'P%d' % (k + 1); tw = dr.textlength(t, font=fP)
+        best = None
+        for (dx, dy) in ((8, -2), (-10 - tw, -2), (-tw / 2, 8), (-tw / 2, -24), (8, -18), (8, 12), (-10 - tw, -18), (-10 - tw, 12), (20, -2), (-22 - tw, -2)):
+            bx = (X + dx, Y + dy, X + dx + tw + 2, Y + dy + 17)
+            n = sum(1 for b in sbox + fixed if b and not (b[2] < bx[0] or b[0] > bx[2] or b[3] < bx[1] or b[1] > bx[3]))
+            if best is None or n < best[0]: best = (n, bx)
+            if n == 0: break
+        bx = best[1]; dr.text((bx[0] + 1, bx[1]), t, font=fP, fill=(100, 80, 0), stroke_width=2, stroke_fill=(255, 250, 225))
+        fixed.append(bx)
+    pos = [[(sbox[i][0] + sbox[i][2]) / 2, sbox[i][1] - R - 8] for i in range(len(actors))]
+    def hit(c, b, pad=3):
+        return b[0] - R - pad < c[0] < b[2] + R + pad and b[1] - R - pad < c[1] < b[3] + R + pad
+    for it in range(400):
+        moved = False
+        for i in range(len(pos)):
+            for j in range(i + 1, len(pos)):
+                dx, dy = pos[j][0] - pos[i][0], pos[j][1] - pos[i][1]; d = math.hypot(dx, dy)
+                if d < 2 * R + 6:
+                    if d < 0.01: dx, dy, d = 1.0, 0.0, 1.0
+                    s = (2 * R + 6 - d) / 2 + 0.5; pos[i][0] -= dx / d * s; pos[i][1] -= dy / d * s; pos[j][0] += dx / d * s; pos[j][1] += dy / d * s; moved = True
+            for b in [x for x in sbox] + fixed:
+                if hit(pos[i], b):
+                    c = pos[i]; opts = [(b[1] - R - 4 - c[1], 0, 1), (b[3] + R + 4 - c[1], 0, 1), (b[0] - R - 4 - c[0], 1, 0), (b[2] + R + 4 - c[0], 1, 0)]
+                    opts[0] = (opts[0][0] * 0.8, 0, 1)
+                    m = min(opts, key=lambda o: abs(o[0]))
+                    if m[1]: c[0] += m[0] * 0.6 + (0.5 if m[0] > 0 else -0.5)
+                    else: c[1] += m[0] * 0.6 + (0.5 if m[0] > 0 else -0.5)
+                    moved = True
+            pos[i][0] = min(max(pos[i][0], ox + R + 2), ox + PW - R - 2); pos[i][1] = min(max(pos[i][1], oy + R + 2), oy + PH - R - 2)
+        if not moved: break
+    for i, a in enumerate(actors):
+        X, Y = P(a['x'], a['y']); col = (215, 40, 40) if a['room'] == 0 else (150, 40, 170)
+        bx, by = pos[i]; tx, ty = (sbox[i][0] + sbox[i][2]) / 2, sbox[i][1]
+        b = sbox[i]; cx, cy = min(max(bx, b[0]), b[2]), min(max(by, b[1]), b[3])
+        if b[0] < bx < b[2] and by < b[1]: cx, cy = (b[0] + b[2]) / 2, b[1]
+        dr.line([bx, by, cx, cy], fill=col, width=2)
+        dr.ellipse([bx - R, by - R, bx + R, by + R], fill=col, outline=(255, 255, 255), width=3)
+        dr.text((bx, by), str(i + 1), font=F(19, True), fill=(255, 255, 255), anchor='mm')
+    # ---- table
+    tx0 = M + max(AX + PW, NW) + 40; y = oy
+    dr.text((tx0, TOP - 40), ('Quién es quién (%d vecinos)' % len(actors)) if es else ('Who is who (%d residents)' % len(actors)), font=F(26, True), fill=(20, 20, 20))
+    x = tx0; dr.rectangle([tx0, y, tx0 + TW, y + 40], fill=(60, 60, 70))
+    for name, w in cols: dr.text((x + 7, y + 9), name, font=fH, fill=(255, 255, 255)); x += w
+    y += 44
+    for i, (a, c) in enumerate(zip(actors, cells)):
+        nm, ns, cf, wh, bh, sy, hgt = c; sp, conf, _, _, real = spr[i]; r = rows[i]
+        dr.rectangle([tx0, y, tx0 + TW, y + hgt], fill=(255, 255, 255) if i % 2 == 0 else (244, 241, 234))
+        dr.line([tx0, y + hgt, tx0 + TW, y + hgt], fill=(210, 205, 195))
+        x = tx0; col = (215, 40, 40) if a['room'] == 0 else (150, 40, 170)
+        dr.ellipse([x + 10, y + 10, x + 46, y + 46], fill=col, outline=(255, 255, 255), width=2)
+        dr.text((x + 28, y + 28), str(i + 1), font=F(19, True), fill=(255, 255, 255), anchor='mm'); x += cols[0][1]
+        yy = y + 8
+        for ln in nm: dr.text((x + 7, yy), ln, font=fTb, fill=(20, 20, 20)); yy += 24
+        nc = r['nc']
+        for k, ln in enumerate(ns): dr.text((x + 7, yy), ln, font=fS, fill=CONF_COL[nc] if nc else (110, 110, 110)); yy += 19
+        x += cols[1][1]
+        th = sp.resize((int(sp.width / S * 2), int(sp.height / S * 2)), Image.NEAREST if real else Image.BILINEAR)
+        if th.height > hgt - 16: th = th.resize((int(th.width * (hgt - 16) / th.height), hgt - 16), Image.NEAREST)
+        px0, py0 = int(x + cols[2][1] / 2 - th.width / 2), int(y + (hgt - th.height) / 2)
+        im.paste(th, (px0, py0), th)
+        if conf == 'probable': _dashed_rect(dr, (px0 - 4, py0 - 4, px0 + th.width + 4, py0 + th.height + 4), CONF_COL['probable'], 3, 6)
+        elif conf == 'sabido': dr.rectangle([px0 - 4, py0 - 4, px0 + th.width + 4, py0 + th.height + 4], outline=CONF_COL['sabido'], width=3)
+        x += cols[2][1]
+        lab = CONF_LBL[lang][conf].upper()
+        bw = dr.textlength(lab, font=F(16, True))
+        dr.rounded_rectangle([x + 7, y + 8, x + 15 + bw, y + 32], 6, fill=CONF_COL[conf]); dr.text((x + 11, y + 10), lab, font=F(16, True), fill=(255, 255, 255))
+        yy = y + 38
+        for ln in cf: dr.text((x + 7, yy), ln, font=fS, fill=(70, 70, 70)); yy += 19
+        x += cols[3][1]
+        for lines, w in ((wh, cols[4][1]), (bh, cols[5][1]), (sy, cols[6][1])):
+            yy = y + 8
+            for ln in lines: dr.text((x + 7, yy), ln, font=fT, fill=(30, 30, 30)); yy += 23
+            x += w
+        y += hgt
+    # column rules
+    x = tx0
+    for name, w in cols[:-1]:
+        x += w; dr.line([x, oy, x, y], fill=(215, 210, 200))
+    dr.rectangle([tx0, oy, tx0 + TW, y], outline=(120, 120, 130), width=2)
+    # ---- notes: each block goes under the plan or under the table, whichever column ends higher
+    colx = [(M, NW - 40), (tx0, TW - 40)]; ny = [oy + PH + 30, y + 40]
+    for t, items in notes:
+        c = 0 if ny[0] <= ny[1] else 1; x0n, wn = colx[c]; yy = ny[c]
+        dr.text((x0n, yy), t, font=fNb, fill=(20, 20, 20)); yy += 38
+        for cc, s_ in items:
+            lines = wrap(dr, s_, fN, wn - 28)
+            if cc: dr.rectangle([x0n, yy + 4, x0n + 18, yy + 22], fill=cc)
+            for ln in lines: dr.text((x0n + 28, yy), ln, font=fN, fill=(30, 30, 30)); yy += 25
+            yy += 4
+        ny[c] = yy + 14
+    im = im.crop((0, 0, W, max(y, ny[0], ny[1]) + 30))
+    im.save(out); print(out, im.size)
+    return [s[1] for s in spr]
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--lang", default="all", choices=("es", "en", "all"))
-    ap.add_argument("--area", default="all", choices=("11", "16", "17", "all"))
-    ap.add_argument("--sheet", default="all", choices=("esquema", "explicado", "perspectiva", "plan1x", "all"))
+    ap.add_argument("--area", default="all", choices=("11", "16", "17", "18", "all"))
+    ap.add_argument("--sheet", default="all", choices=("esquema", "explicado", "perspectiva", "plan1x", "personajes", "all"))
     ap.add_argument("--out", default=os.path.join(os.path.dirname(HERE), "build", "civ"))
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    areas = (11, 16, 17) if a.area == "all" else (int(a.area),)
+    areas = (11, 16, 17, 18) if a.area == "all" else (int(a.area),)
     langs = ("es", "en") if a.lang == "all" else (a.lang,)
-    sheets = ("esquema", "explicado", "perspectiva", "plan1x") if a.sheet == "all" else (a.sheet,)
+    sheets = ("esquema", "explicado", "perspectiva", "plan1x", "personajes") if a.sheet == "all" else (a.sheet,)
     for ar in areas:
         for lg in langs:
             sfx = "" if lg == "es" else "_en"
+            if "personajes" in sheets:
+                personajes(ar, lg, os.path.join(a.out, "civ_personajes_a%d%s.png" % (ar, sfx)))
+            if ar == 18: continue   # only the personajes sheet covers the never-implemented AREA18 s0
             if "esquema" in sheets:
                 (esquema_es if lg == "es" else esquema_en)(ar, os.path.join(a.out, "civ_esquema_a%d%s.png" % (ar, sfx)))
             if "explicado" in sheets:
                 (explicado_es if lg == "es" else explicado_en)(ar, os.path.join(a.out, "civ_explicado_a%d%s.png" % (ar, sfx)))
             if "perspectiva" in sheets:
                 perspectiva(ar, lg, a.out)
-        if "plan1x" in sheets:
+        if "plan1x" in sheets and ar != 18:
             plan1x(ar, a.out, langs)
 
 
