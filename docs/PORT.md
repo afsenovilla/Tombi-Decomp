@@ -2329,12 +2329,26 @@ scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; An
   sites of `src/`; coverage per event in `docs/EVENTS_MAP.md`); unknown ones show *ubicación desconocida*. Input: touch on
   Android (`nativePanelTouch` from the Presentation's view, canvas pixels), mouse in the PC window, keys typed in the PC
   panel window (arrows, Enter, Backspace, Q / E tabs; they do not reach the game); `--panel-input FRAME:ACTION,...`
-  (up down left right ok back tabl tabr, `tap@X@Y`) for headless tests.
-- Side map PROTOTYPE (tab *Lateral*, AREA00 sections 0..2 only): the room model `AREA00/D001.GAM` (WMD, tools/room.py)
-  rasterised orthographically in C at 1/2 scale with the texels / palettes of the game's VRAM while the area is loaded
-  (`port_gpu_vram`, shims/gpu.c), built once (3491 polygons, 1752 x 923, a few ms); views *Área* (fit to width) and
-  *Sala* (1:2 around Tomba), event icons where panel_eventmap.h places them, Tomba (face marker) at PLAYER x / y.
-  Cost for all areas: see the second-screen notes in the report / EVENTS_MAP.md.
+  (up down left right ok back tabl tabr zoomout zoomin, `tap@X@Y`) for headless tests.
+- Map tab (*Lateral* / *Cenital*, `runtime/panel_side.inc` + `panel_topdown.inc`), chosen by section:
+  - Side view (every side-scrolling section): the room model the game has loaded (`WMD_DATA[0]`, scratch 0x1F800330;
+    tools/room.py format) rasterised orthographically in C as the GPU draws it: texels / CLUTs / pages from a VRAM
+    snapshot taken when the model is read, vertex colours modulating them (0x80 = 1.0, Gouraud), raw packets unlit,
+    STP texels of semi-transparent packets 1/2 + 1/2, far polygons first by mean z, supersampled and box filtered when
+    zoomed out. Behind it the area's far background: the frame as the game has drawn it once the ordering table's far
+    slots (0..99) are done (`port_panel_sky_req` in `DrawOTag`, shims/gpu.c; one flag test when off), each band of
+    strips repeated sideways, screen-fixed with slow parallax; sections with no far layer get the game's black.
+    Not drawn: objects (signs, NPCs, enemies), effects. AREA00 3491 polygons, AREA01 s0 2702, AREA02 s3 2506.
+  - Top-down (AREA05 s0/s2, AREA08 s0/s2, AREA19 s2 and the I0NFO sections AREA02 / AREA19 s0): the game's whole map
+    picture, the 8 bpp TIM it keeps in RAM (`APD_DATA[15]`, scratch 0x1F800394, checked against the cell map
+    `APD_DATA[14]`), world (x, y) = picture (x + 128, y - 40) (docs/CIVILIZATION.md).
+  - Zoom: `PANEL_MAP_ZOOMS` (3) levels, 1 = the whole map fitted, the last = the game screen's framing (side 440
+    world units, top-down 320 px across), geometric in between; zoomed levels follow Tomba, drag / arrows pan, OK
+    re-centres. Buttons `- / +` drawn in the plank style with the sub-screen's own "<L1" / "R1>" glyphs
+    (SYSTEM/A10301 u 56 / 80, v 206), "Zoom n/N"; keys PageDown / PageUp or - / + in the PC panel window;
+    `--panel-input` actions `zoomout` / `zoomin`.
+  - Markers: the events panel_eventmap.h places in the section (and the sections sharing its model), icons at 3/4
+    size outlined; Tomba's face at PLAYER x / y, flipped to the side he faces (PLAYER +0xA6: 0 left, 2 right).
 - Item tab (*Objetos*, `runtime/panel_items.inc`): the game's Triangle item sub-screen (D0SPSUB3 `subScreenItemListStep`)
   usable while the game runs. The player's items with their icons, names (`x NN` for counted ones) and descriptions (the
   sub-screen's own WFM3 message bank of `SYSTEM/DnSPSUB3.BIN`), grouped as the menu's sort lays them out (categories

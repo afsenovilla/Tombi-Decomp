@@ -268,6 +268,7 @@ static void dot(int cx, int cy, int r, u32 c) {
 }
 static void page_events(int play);
 static void page_items(int play);
+static const char *map_tab_name(void);   /* panel_side.inc: "Lateral" / "Cenital" by section */
 
 /* ---------------------------------------------------------------- the panel */
 static int es(void) { return port_lang == 5; }
@@ -275,7 +276,7 @@ static int es(void) { return port_lang == 5; }
 enum { PAGE_MAP, PAGE_EVENTS, PAGE_SIDE, PAGE_ITEMS, NPAGES };
 static int page;
 static const char *page_name(int p) {
-    return p == PAGE_MAP ? T("Map", "Mapa") : p == PAGE_EVENTS ? T("Events", "Eventos") : p == PAGE_ITEMS ? T("Items", "Objetos") : T("Side map", "Lateral");
+    return p == PAGE_MAP ? T("Map", "Mapa") : p == PAGE_EVENTS ? T("Events", "Eventos") : p == PAGE_ITEMS ? T("Items", "Objetos") : map_tab_name();
 }
 
 /* touch / mouse targets registered while drawing (canvas coordinates) */
@@ -542,7 +543,7 @@ void port_panel_key(int a) { inq_push(0, a, 0, 0); }
 static const char *panel_script;
 void port_panel_input_script(const char *s) { panel_script = s; }
 static void script_step(void) {
-    static const char *names[] = { "", "up", "down", "left", "right", "ok", "back", "tabl", "tabr" };
+    static const char *names[] = { "", "up", "down", "left", "right", "ok", "back", "tabl", "tabr", "zoomout", "zoomin" };
     for (const char *p = panel_script; p && *p;) {
         int f = atoi(p); const char *c = strchr(p, ':'), *e = strchr(p, ',');
         if (!c) break;
@@ -550,7 +551,7 @@ static void script_step(void) {
             char a[24]; int n = (int)((e ? e : c + strlen(c)) - c - 1); if (n > 23) n = 23; memcpy(a, c + 1, n); a[n] = 0;
             int x, y;
             if (sscanf(a, "tap@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); inq_push(1, 1, x, y); }
-            else for (int i = 1; i < 9; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);
+            else for (int i = 1; i < 11; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);
         }
         p = e ? e + 1 : NULL;
     }

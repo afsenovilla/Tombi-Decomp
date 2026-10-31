@@ -185,7 +185,8 @@ static void pump(void) {
             if (pwin && e.key.windowID == SDL_GetWindowID(pwin)) {   /* keys typed in the panel window drive the panel, not the game */
                 extern void port_panel_key(int);
                 static const struct { SDL_Scancode sc; int a; } pk[] = { {SDL_SCANCODE_UP, 1}, {SDL_SCANCODE_DOWN, 2}, {SDL_SCANCODE_LEFT, 3},
-                    {SDL_SCANCODE_RIGHT, 4}, {SDL_SCANCODE_RETURN, 5}, {SDL_SCANCODE_BACKSPACE, 6}, {SDL_SCANCODE_Q, 7}, {SDL_SCANCODE_E, 8} };
+                    {SDL_SCANCODE_RIGHT, 4}, {SDL_SCANCODE_RETURN, 5}, {SDL_SCANCODE_BACKSPACE, 6}, {SDL_SCANCODE_Q, 7}, {SDL_SCANCODE_E, 8},
+                    {SDL_SCANCODE_PAGEDOWN, 9}, {SDL_SCANCODE_MINUS, 9}, {SDL_SCANCODE_KP_MINUS, 9}, {SDL_SCANCODE_PAGEUP, 10}, {SDL_SCANCODE_EQUALS, 10}, {SDL_SCANCODE_KP_PLUS, 10} };   /* L1 / R1: map zoom */
                 for (unsigned i = 0; i < sizeof pk / sizeof pk[0]; i++) if (pk[i].sc == e.key.keysym.scancode) port_panel_key(pk[i].a);
                 break;
             }

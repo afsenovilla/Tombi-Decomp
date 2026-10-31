@@ -8,7 +8,7 @@
 #include "panel_eventmap.h"
 
 enum { F_PROGRESS, F_DONE, F_PENDING, NFILTERS };
-static int side_zoom;
+static int map_action(int a), map_touch(int x, int y, int action); static void map_hit(int k);   /* panel_side.inc */
 static int ev_filter, ev_sel, ev_top, ev_detail = -1;
 
 static const PanelEventLoc *ev_loc(int e) {
@@ -149,11 +149,11 @@ static void page_events(int play) {
 }
 
 /* ---------------------------------------------------------------- input */
-enum { IN_UP = 1, IN_DOWN, IN_LEFT, IN_RIGHT, IN_OK, IN_BACK, IN_TAB_L, IN_TAB_R };
+enum { IN_UP = 1, IN_DOWN, IN_LEFT, IN_RIGHT, IN_OK, IN_BACK, IN_TAB_L, IN_TAB_R, IN_ZOOM_OUT, IN_ZOOM_IN };
 static void panel_action(int a) {
     if (a == IN_TAB_L) { page = (page + NPAGES - 1) % NPAGES; return; }
     if (a == IN_TAB_R) { page = (page + 1) % NPAGES; return; }
-    if (page == PAGE_SIDE && (a == IN_LEFT || a == IN_RIGHT || a == IN_OK)) { side_zoom ^= 1; return; }
+    if (page == PAGE_SIDE) { map_action(a); return; }
     if (page == PAGE_ITEMS) { void items_action_(int); items_action_(a); return; }
     if (page != PAGE_EVENTS) return;
     if (ev_detail >= 0) { if (a == IN_BACK || a == IN_OK) ev_detail = -1; return; }
@@ -169,7 +169,7 @@ static void panel_hit(int id) {
     if (id >= 0x700) { void items_hit_(int); items_hit_(id); return; }
     switch (id & ~0xFF) {
     case HS_PAGE: page = k; ev_detail = -1; break;
-    case HS_FILTER: if (k >= 16) { side_zoom = k - 16; break; } ev_filter = k; ev_sel = ev_top = 0; ev_detail = -1; break;
+    case HS_FILTER: if (k >= 16) { map_hit(k); break; } ev_filter = k; ev_sel = ev_top = 0; ev_detail = -1; break;
     case HS_ROW: { int ids[EVENTS], n = ev_list(ids); if (k < n) { if (ev_sel == k || 1) { ev_sel = k; ev_detail = ids[k]; } } break; }
     case HS_BACK: ev_detail = -1; break;
     case HS_PREV: ev_sel -= 5; break;
@@ -180,6 +180,7 @@ static void panel_hit(int id) {
 static int touch_id = -1;
 static void panel_touch_canvas(int x, int y, int action) {   /* action: 0 down, 1 up, 2 move */
     int id = -1;
+    if (page == PAGE_SIDE && map_touch(x, y, action)) { touch_id = -1; return; }
     for (int i = nhs - 1; i >= 0; i--) if (x >= hs[i].x && y >= hs[i].y && x < hs[i].x + hs[i].w && y < hs[i].y + hs[i].h) { id = hs[i].id; break; }
     if (action == 0) touch_id = id;
     else if (action == 1) { if (id >= 0 && id == touch_id) panel_hit(id); touch_id = -1; }

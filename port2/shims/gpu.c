@@ -708,9 +708,22 @@ static void ws_title_bg(u32 *ot) {
     for (int j = 0; j < h; j++) memcpy(&wvram[gs.y1 + j][bx], px + (size_t)j * w, (size_t)w * 2);
     if (be->ws_upload) be->ws_upload(bx, gs.y1, w, h, &wvram[gs.y1][bx], WS_STRIDE);
 }
+/* --second-screen side map (runtime/panel_side.inc): when the panel asks, the frame as it stands once the far
+   background (ordering table slots 0..99, drawn first: the area overlay's sky / scenery) is done, before the room;
+   read back from the drawing area and handed to the panel.  Off: one flag test per ordering table. */
+int port_panel_sky_req;
+static void sky_grab(void) {
+    extern void port_panel_sky_take(const unsigned short *vr, int x, int y, int w, int h);
+    int w = gs.x2 - gs.x1 + 1, h = gs.y2 - gs.y1 + 1;
+    port_panel_sky_req = 0;
+    if (w < 256 || w > 1024 || h < 200 || h > 512) return;
+    ws_sync_down();
+    be->vram_read(gs.x1, gs.y1, w, h);
+    port_panel_sky_take(&vram[0][0], gs.x1, gs.y1, w, h);
+}
 void DrawOTag(u32 *ot) {
     { extern const char *port_title_bg_path; if (port_title_bg_path && port_widescreen) ws_title_bg(ot); }
-    u32 *p = ot; int n = 0;
+    u32 *p = ot; int n = 0, sky = port_panel_sky_req ? 1 : 0;
     unsigned h = 2166136261u;
     unsigned long long t0 = port_time_us();
     tex_patch_idle();
@@ -718,6 +731,10 @@ void DrawOTag(u32 *ot) {
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
         n++;
+        if (sky) {   /* sky = 1 + far packets seen; an ordering table node at slot >= 100 ends the far layer */
+            if (p <= ot && p > ot - 808) { if (ot - p >= 100) { if (sky > 1) sky_grab(); sky = 0; } }
+            else if (len) sky++;
+        }
         if (len) {
             if (port_dump_packets && port_frame == port_dump_packets) {
                 port_printf("PK@%p", (void *)p);
