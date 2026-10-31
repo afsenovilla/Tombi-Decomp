@@ -148,7 +148,7 @@ public class LauncherActivity extends Activity {
         String d = prefs.getString("disc", null);
         return d != null && new File(d).isFile() ? new File(d) : null;
     }
-    boolean ready() { return discFile() != null; }
+    boolean ready() { return dataReady() || discFile() != null; }
     boolean textPatchOn() { return flag("textpatch", LANG_N[langIdx()] == 5); }
 
     /** files/patches/<name>, (re)extracted from the APK's assets/patches (the files are small; copying each time keeps
@@ -174,7 +174,8 @@ public class LauncherActivity extends Activity {
     String[] buildArgs() {
         List<String> a = new ArrayList<>();
         File disc = discFile();
-        if (disc != null) { a.add("--disc"); a.add(disc.getAbsolutePath()); }
+        if (dataReady()) { a.add("--data"); a.add(dataDir().getAbsolutePath()); }   // extracted on the device
+        else if (disc != null) { a.add("--disc"); a.add(disc.getAbsolutePath()); }  // an image copied by an older version
         if (textPatchOn() && LANG_N[langIdx()] == 5) {
             File tp = textPatch();
             if (tp != null) { a.add("--text-patch"); a.add(tp.getAbsolutePath()); }
@@ -247,7 +248,9 @@ public class LauncherActivity extends Activity {
     }
 
     // ---- import state (written by the "tombi-disc" thread, drawn by the view at ~10 Hz while busy) ----
-    static final int IDLE = 0, COPYING = 1, CHECKING = 2;
+    static final int IDLE = 0, COPYING = 1, CHECKING = 2, EXTRACTING = 3;
+    /* nativeExtract's content SHA-1 (every ISO9660 file as stored in data/, by LBA) for a raw .bin of the reference PAL disc */
+    static final String CONTENT_SHA1 = "33d5f861ed02909236e9887376d80deaadbd234f";
     volatile int phase = IDLE;
     volatile long copied, copyTotal;          // bytes; copyTotal <= 0: size unknown (no OpenableColumns.SIZE)
     volatile boolean cancelImport;
@@ -260,6 +263,12 @@ public class LauncherActivity extends Activity {
     /** "sha1:<hex>" or "err:<reason>" ("err:nomain0"): port2/android/disccheck.c, the same for .bin/.iso/.chd */
     static native String nativeMain0Sha1(String path);
     static native int nativeCheckProgress();
+    /** extracts the image into outDir for the port's --data mode (manifest.txt last): "ok:<summary>" or "err:<reason>" */
+    static native String nativeExtract(String image, String outDir);
+    static native int nativeExtractCount();   // files done << 16 | files total
+    static native void nativeCancel();
+
+    void requestCancel() { cancelImport = true; if (nativeOk) try { nativeCancel(); } catch (Throwable ignored) { } }
 
     long sizeOf(Uri u) {
         try (Cursor c = getContentResolver().query(u, new String[]{android.provider.OpenableColumns.SIZE}, null, null, null)) {
@@ -268,61 +277,131 @@ public class LauncherActivity extends Activity {
         return -1;
     }
 
-    /** Copies the picked .bin/.iso/.chd (and .cue) into files/disc, checks MAIN0.EXE's SHA-1, remembers the image.
-     *  Cancel (B / "Cancel") stops the copy and deletes the partial files. */
+    /** The game's data, extracted on the device (docs/PORT.md "4. Android"): internal files/data with the manifest the
+     *  port's --data mode reads; files/data.tmp while extracting (renamed when complete). */
+    File dataDir() { return new File(getFilesDir(), "data"); }
+    boolean dataReady() { return new File(dataDir(), "manifest.txt").isFile(); }
+
+    /** The picked .bin/.iso/.chd (a .cue alongside is ignored: the data track is the image) is read in place through
+     *  its file descriptor when the provider gives a real file, else copied to the cache first; then MAIN0.EXE's SHA-1,
+     *  then every file extracted into files/data.tmp (each size-checked, any unreadable sector fails), renamed to
+     *  files/data.  Cancel (B / "Cancel") stops and deletes the partial files. */
     void importDisc(List<Uri> uris) {
-        List<File> written = new ArrayList<>();
-        cancelImport = false; result = 0; copied = 0;
-        long tot = 0;
-        for (Uri u : uris) { long n = sizeOf(u); if (n < 0) { tot = -1; break; } tot += n; }
-        copyTotal = tot;
-        phase = COPYING;
+        cancelImport = false; result = 0; copied = 0; copyTotal = -1;
+        phase = CHECKING;
         status(null);
+        File tmpDir = new File(getCacheDir(), "import"), tmp = new File(getFilesDir(), "data.tmp");
+        deleteTree(tmpDir);
+        List<android.os.ParcelFileDescriptor> fds = new ArrayList<>();
         try {
-            File dir = new File(filesDir(), "disc");
-            dir.mkdirs();
-            File image = null, cue = null;
-            byte[] buf = new byte[1 << 18];
+            Uri img = null; String name = null;
             for (Uri u : uris) {
-                String name = displayName(u).replace('/', '_');
-                String low = name.toLowerCase(Locale.ROOT);
-                File dst = new File(dir, name);
-                InputStream in = getContentResolver().openInputStream(u);
-                if (in == null) throw new Exception(name);
-                written.add(dst);
-                OutputStream out = new FileOutputStream(dst);
-                int n;
-                try {
-                    while ((n = in.read(buf)) > 0) {
-                        if (cancelImport) throw new InterruptedException();
-                        out.write(buf, 0, n);
-                        copied += n;
-                    }
-                } finally { in.close(); out.close(); }
-                if (low.endsWith(".cue")) cue = dst; else image = dst;
+                String nm = displayName(u);
+                if (!nm.toLowerCase(Locale.ROOT).endsWith(".cue") && img == null) { img = u; name = nm; }
             }
-            if (image == null) { fail(getString(R.string.disc_needbin)); return; }
+            if (img == null) { fail(getString(R.string.disc_needbin)); return; }
+            long size = sizeOf(img);
+            CrashLog.append(this, "disc import: " + name + " (" + (size >= 0 ? size + " bytes" : "size unknown") + "), " + uris.size() + " file(s) picked");
+            long free = getFilesDir().getUsableSpace(), need = (size > 0 ? size : 700L << 20) + (64L << 20);
+            if (free < need) { fail(getString(R.string.disc_space, need >> 20, free >> 20)); return; }
+            String path = null;
+            try {
+                android.os.ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(img, "r");
+                if (pfd != null) {
+                    fds.add(pfd);
+                    long st = pfd.getStatSize();
+                    CrashLog.append(this, "disc import: provider fd " + pfd.getFd() + ", stat size " + st);
+                    if (st > 0 && (size < 0 || st == size)) path = "/proc/self/fd/" + pfd.getFd();
+                }
+            } catch (Throwable t) { CrashLog.append(this, "disc import: no file descriptor (" + t + "): copying"); }
+            if (path == null) {   // a stream only (cloud providers ...): copy to the cache, checked against the size
+                if (free < need + (size > 0 ? size : 700L << 20)) { fail(getString(R.string.disc_space, (need + Math.max(size, 0)) >> 20, free >> 20)); return; }
+                phase = COPYING; copyTotal = size;
+                tmpDir.mkdirs();
+                String low = name.toLowerCase(Locale.ROOT);
+                File t = new File(tmpDir, "image" + (low.endsWith(".chd") ? ".chd" : low.endsWith(".iso") ? ".iso" : ".bin"));
+                InputStream in = getContentResolver().openInputStream(img);
+                if (in == null) throw new Exception(name);
+                FileOutputStream out = new FileOutputStream(t);
+                byte[] buf = new byte[1 << 18]; long got = 0; int n;
+                try {
+                    while ((n = in.read(buf)) >= 0) {
+                        if (cancelImport) throw new InterruptedException();
+                        if (n == 0) continue;
+                        out.write(buf, 0, n); copied += n; got += n;
+                    }
+                    out.flush(); out.getFD().sync();
+                } finally { in.close(); out.close(); }
+                CrashLog.append(this, "disc import: copied " + got + " bytes" + (size >= 0 ? " of " + size : ""));
+                if (size >= 0 && got != size) { fail(getString(R.string.disc_short, name, got, size)); return; }
+                path = t.getAbsolutePath();
+            }
+            if (!nativeOk) { fail(getString(R.string.disc_fail, "libtombidisc.so missing")); return; }
             phase = CHECKING;
             view.postInvalidate();
-            String r = nativeOk ? nativeMain0Sha1(image.getAbsolutePath()) : "err:libtombidisc.so missing";
+            String r = nativeMain0Sha1(path);
+            CrashLog.append(this, "disc import: MAIN0.EXE: " + r);
             String sha = r.startsWith("sha1:") ? r.substring(5) : null;
+            if (sha == null) { fail(r.equals("err:nomain0") ? getString(R.string.disc_nomain0) : getString(R.string.disc_fail, r.substring(4))); return; }
             boolean ok = MAIN0_SHA1.equals(sha);
-            prefs.edit().putString("disc", (cue != null ? cue : image).getAbsolutePath()).putBoolean("disc_ok", ok).apply();
+            if (cancelImport) throw new InterruptedException();
+            phase = EXTRACTING;
+            view.postInvalidate();
+            deleteTree(tmp);
+            String v = nativeExtract(path, tmp.getAbsolutePath());
+            CrashLog.append(this, "disc import: extraction: " + v);
+            if (v.equals("err:cancelled")) throw new InterruptedException();
+            if (!v.startsWith("ok:")) { deleteTree(tmp); fail(getString(R.string.disc_damaged, v.startsWith("err:") ? v.substring(4) : v)); return; }
+            deleteTree(dataDir());
+            if (!tmp.renameTo(dataDir())) { deleteTree(tmp); fail(getString(R.string.disc_fail, "rename data.tmp")); return; }
+            File old = discFile();   // an image copied by an older version: no longer needed
+            if (old != null && "disc".equals(old.getParentFile().getName())) deleteTree(old.getParentFile());
+            prefs.edit().remove("disc").putBoolean("disc_ok", ok).putString("disc_name", name)
+                    .putString("disc_info", v.substring(3) + (v.endsWith(CONTENT_SHA1) ? " (= reference PAL disc)" : "")).apply();
             phase = IDLE;
             result = ok ? 1 : -1;
-            status(ok ? getString(R.string.disc_ok) : sha != null ? getString(R.string.disc_badsha, sha)
-                    : r.equals("err:nomain0") ? getString(R.string.disc_nomain0) : getString(R.string.disc_fail, r.substring(4)));
+            status(ok ? getString(R.string.disc_ok) : getString(R.string.disc_badsha, sha));
         } catch (InterruptedException e) {
-            for (File f : written) f.delete();
+            deleteTree(tmp);
             phase = IDLE; result = -1;
             status(getString(R.string.disc_cancelled));
-        } catch (Exception e) {
-            for (File f : written) f.delete();
+            CrashLog.append(this, "disc import: cancelled");
+        } catch (Throwable e) {
+            deleteTree(tmp);
+            CrashLog.append(this, "disc import: " + CrashLog.stack(e));
             fail(getString(R.string.disc_fail, String.valueOf(e.getMessage())));
+        } finally {
+            for (android.os.ParcelFileDescriptor f : fds) try { f.close(); } catch (Throwable ignored) { }
+            deleteTree(tmpDir);
         }
     }
 
-    void fail(String msg) { phase = IDLE; result = -1; status(msg); }
+    void fail(String msg) { phase = IDLE; result = -1; status(msg); CrashLog.append(this, "disc import failed: " + msg); }
+
+    static void deleteTree(File f) {
+        if (f == null || !f.exists()) return;
+        File[] k = f.listFiles();
+        if (k != null) for (File c : k) deleteTree(c);
+        f.delete();
+    }
+    /** "Delete data" (Disc screen): the copied disc, the extracted patches, the caches and the markers; the saves only
+     *  when asked; the disc selection reset */
+    void wipeData(boolean saves) {
+        File fd = filesDir();
+        deleteTree(dataDir());
+        deleteTree(new File(getFilesDir(), "data.tmp"));
+        deleteTree(new File(fd, "disc"));
+        deleteTree(new File(fd, "patches"));
+        File[] cache = getCacheDir().listFiles();
+        if (cache != null) for (File c : cache) deleteTree(c);
+        if (getExternalCacheDir() != null) { File[] ec = getExternalCacheDir().listFiles(); if (ec != null) for (File c : ec) deleteTree(c); }
+        if (saves) deleteTree(new File(fd, "saves"));
+        CrashLog.clearMarkers(this);
+        prefs.edit().remove("disc").remove("disc_ok").remove("disc_info").remove("disc_name").apply();
+        CrashLog.append(this, "launcher: data deleted (saves " + (saves ? "deleted" : "kept") + ")");
+        result = 1;
+        status(getString(saves ? R.string.disc_wiped_saves : R.string.disc_wiped));
+    }
 
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
@@ -380,7 +459,10 @@ public class LauncherActivity extends Activity {
             } catch (Exception e) { return null; }
         }
 
+        boolean confirmWipe, wipeSaves;
+
         void setScreen(int sc) {
+            confirmWipe = false;
             lastFocus[screen] = focus;
             screen = sc;
             focus = lastFocus[sc];
@@ -450,9 +532,17 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.log_export), new Runnable() { public void run() { exportReport(); } }));
                 items.add(new Item(getString(screen == CRASH ? R.string.log_close : R.string.back), new Runnable() { public void run() { closeLog(); } }));
             } else if (phase != IDLE) {   // importing: the only action is Cancel (also B)
-                items.add(new Item(getString(R.string.cancel), new Runnable() { public void run() { cancelImport = true; } }));
+                items.add(new Item(getString(R.string.cancel), new Runnable() { public void run() { requestCancel(); } }));
+            } else if (confirmWipe) {   // in-page confirmation of "Delete data"
+                items.add(new Item(getString(R.string.disc_wipe_yes), new Runnable() { public void run() { wipeData(wipeSaves); confirmWipe = false; } }));
+                final Item sv = new Item(getString(R.string.disc_wipe_saves), null);
+                sv.value = onoff(wipeSaves);
+                sv.adj = new Adjust() { public void by(int d) { wipeSaves = !wipeSaves; } };
+                items.add(sv);
+                items.add(new Item(getString(R.string.cancel), new Runnable() { public void run() { confirmWipe = false; focus = 0; } }));
             } else {
                 items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
+                items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() { confirmWipe = true; wipeSaves = false; focus = 0; } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             }
             if (focus >= items.size()) focus = 0;
@@ -483,7 +573,7 @@ public class LauncherActivity extends Activity {
                 case KeyEvent.KEYCODE_NUMPAD_ENTER: case KeyEvent.KEYCODE_SPACE:
                     activate(items.get(focus)); break;
                 case KeyEvent.KEYCODE_BUTTON_B: case KeyEvent.KEYCODE_BACK: case KeyEvent.KEYCODE_ESCAPE:
-                    if (phase != IDLE) cancelImport = true;
+                    if (phase != IDLE) requestCancel();
                     else if (screen == CRASH || screen == LOG) closeLog();
                     else if (screen == MAIN) finish(); else setScreen(MAIN);
                     break;
@@ -652,14 +742,14 @@ public class LauncherActivity extends Activity {
         void progressBar(int ph, float top) {
             long done = copied, tot = copyTotal;
             float frac;
-            if (ph == CHECKING) frac = nativeOk ? Math.max(0, Math.min(1, nativeCheckProgress() / 1000f)) : 0;
+            if (ph == CHECKING || ph == EXTRACTING) frac = nativeOk ? Math.max(0, Math.min(1, nativeCheckProgress() / 1000f)) : 0;
             else frac = tot > 0 ? Math.min(1f, done / (float) tot) : 0;
-            String label = getString(ph == CHECKING ? R.string.disc_phase_check : R.string.disc_phase_copy);
+            String label = getString(ph == EXTRACTING ? R.string.disc_phase_extract : ph == CHECKING ? R.string.disc_phase_check : R.string.disc_phase_copy);
             text(nunito, 20, Color.WHITE);
             p.setTextAlign(Paint.Align.LEFT);
             canvas.drawText(label, 640 - 300, top + 6, p);
             p.setTextAlign(Paint.Align.RIGHT);
-            String pct = ph == CHECKING || tot > 0 ? Math.round(frac * 100) + " %" : "";
+            String pct = ph == CHECKING || ph == EXTRACTING || tot > 0 ? Math.round(frac * 100) + " %" : "";
             canvas.drawText(pct, 640 + 300, top + 6, p);
             RectF track = new RectF(640 - 300, top + 20, 640 + 300, top + 50);
             float rad = track.height() / 2;
@@ -678,9 +768,14 @@ public class LauncherActivity extends Activity {
                 if (tmp.width() > 0) canvas.drawRoundRect(tmp, 3, 3, p);
             }
             text(nunito, 17, SUB);
-            String mb = ph == CHECKING ? "MAIN0.EXE (SHA-1)"
+            String mb = ph == EXTRACTING ? extractDetail() : ph == CHECKING ? "MAIN0.EXE (SHA-1)"
                     : tot > 0 ? (done >> 20) + " / " + (tot >> 20) + " MB" : (done >> 20) + " MB";
             canvas.drawText(mb, 640, top + 78, p);
+        }
+
+        String extractDetail() {
+            int c = nativeOk ? nativeExtractCount() : 0;
+            return getString(R.string.disc_extract_files, (c >>> 16) & 0xFFFF, c & 0xFFFF);
         }
 
         void resultBox(boolean ok, String msg, float top) {
@@ -733,8 +828,9 @@ public class LauncherActivity extends Activity {
         void drawDisc() {
             bigTitle(getString(R.string.disc), 60, 92);
             File disc = discFile();
-            boolean ok = disc != null && prefs.getBoolean("disc_ok", false);
-            String head = getString(disc == null ? R.string.disc_missing : ok ? R.string.disc_ok : R.string.disc_unverified);
+            boolean have = dataReady() || disc != null;
+            boolean ok = have && prefs.getBoolean("disc_ok", false);
+            String head = getString(!have ? R.string.disc_missing : ok ? R.string.disc_ok : R.string.disc_unverified);
             tmp.set(640 - 300, 124, 640 + 300, 164);
             p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
             canvas.drawRoundRect(tmp, 20, 20, p);
@@ -742,22 +838,28 @@ public class LauncherActivity extends Activity {
             canvas.drawText((ok ? "✓  " : "✗  ") + head, 640, midBase(tmp), p);
             tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT);
             tp.setTextSize(16); tp.setColor(Color.WHITE);
-            if (disc != null) wrapped(getString(R.string.disc_path, disc.getAbsolutePath()), 178);
+            if (dataReady()) wrapped(getString(R.string.disc_data, prefs.getString("disc_name", "?"), prefs.getString("disc_info", "")), 172);
+            else if (disc != null) wrapped(getString(R.string.disc_path, disc.getAbsolutePath()), 178);
             tp.setColor(SUB);
             wrapped(getString(R.string.disc_howto), 222);
             int ph = phase;
             if (ph != IDLE) { progressBar(ph, 300); postInvalidateDelayed(100); }   // ~10 Hz while busy
             else if (result != 0 && importStatus != null) resultBox(result > 0, importStatus, 300);
             else if (importStatus != null) { tp.setColor(Color.WHITE); tp.setTextSize(18); wrapped(importStatus, 330); }
-            float y = 400;
+            if (confirmWipe) { tp.setColor(ACCENT); tp.setTextSize(18); wrapped(getString(R.string.disc_wipe_confirm), 300); }
+            float y = items.size() > 2 ? 384 : 400, bh = items.size() > 2 ? 52 : 58;
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
                 boolean f = i == focus;
-                it.r.set(640 - 230, y, 640 + 230, y + 58);
+                it.r.set(640 - 260, y, 640 + 260, y + bh);
                 pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
                 text(nunito, 22, BG);
-                canvas.drawText(it.label, 640, midBase(it.r), p);
-                y += 58 + 5 + 18;
+                if (it.value == null) canvas.drawText(it.label, 640, midBase(it.r), p);
+                else {
+                    p.setTextAlign(Paint.Align.LEFT); canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
+                    p.setTextAlign(Paint.Align.RIGHT); canvas.drawText("‹  " + it.value + "  ›", it.r.right - 26, midBase(it.r), p);
+                }
+                y += bh + 5 + 14;
             }
         }
     }

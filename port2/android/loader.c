@@ -7,8 +7,9 @@
  *      mmap as early as possible (JNI_OnLoad, when SDLActivity loads libmain.so, before SDL's threads and the GL
  *      driver map anything there);
  *   2. in SDL_main, loads libtombi.so into that reservation with android_dlopen_ext(ANDROID_DLEXT_RESERVED_ADDRESS);
- *   3. needs the disc image the launcher (LauncherActivity) copied from the user's own disc and passes as --disc; no
- *      game data is in the APK and there is no other source.  Without --disc a message box says to pick the disc;
+ *   3. needs the game data the launcher (LauncherActivity) extracted from the user's own disc image on the device
+ *      (--data, the port's data/ mode; --disc from older versions); no game data is in the APK and there is no other
+ *      source.  Without either a message box says to pick the disc;
  *   4. calls port_main with PC-style flags: the launcher's (--disc ...), --save-dir, --fullscreen, --renderer soft (the
  *      GLES path of shims/gpu_gl.c is untested here), then the words of files/args.txt (any PC flag).
  *
@@ -348,10 +349,11 @@ int SDL_main(int argc, char *argv[]) {
     { char m[64]; snprintf(m, sizeof m, "pid %d\n", getpid()); marker("running", m); }
 
     /* the game's files dir (disc copy, saves, args.txt): the launcher's (--files-dir), else SDL's external one */
-    const char *files = NULL, *disc = NULL;
+    const char *files = NULL, *disc = NULL, *data = NULL;
     for (int i = 1; argv && i + 1 < argc && argv[i]; i++) {
         if (!strcmp(argv[i], "--files-dir")) files = argv[i + 1];
         if (!strcmp(argv[i], "--disc")) disc = argv[i + 1];
+        if (!strcmp(argv[i], "--data")) data = argv[i + 1];
     }
     if (!files) { files = SDL_AndroidGetExternalStoragePath(); tlog("no --files-dir: SDL external storage path %s", files ? files : "(null)"); }
     if (!files) { tlog("no external storage (%s): using the internal dir", SDL_GetError()); snprintf(filesbuf, sizeof filesbuf, "%s", log_dir); files = filesbuf; }
@@ -361,10 +363,18 @@ int SDL_main(int argc, char *argv[]) {
     if (chdir(files) != 0) tlog("chdir %s: %s", files, strerror(errno));
     tlog("files dir %s, saves %s", files, saves);
 
-    if (!disc)
+    if (data) {   /* the launcher's extraction (LauncherActivity.importDisc, disccheck.c): data/manifest.txt */
+        char mp[700]; snprintf(mp, sizeof mp, "%s/manifest.txt", data);
+        struct stat st;
+        if (stat(mp, &st) != 0 || access(mp, R_OK) != 0) {
+            snprintf(msg, sizeof msg, "The extracted game data is missing or unreadable\n%s\n(%s).\n\nPick your disc again in the launcher (Disc).", mp, strerror(errno));
+            return fail("Tombi!", msg);
+        }
+        tlog("data %s: manifest %lld bytes", data, (long long)st.st_size);
+    } else if (!disc)
         return fail("Tombi! - pick your disc", "No disc image.\n\nOpen the Tombi! launcher and pick the image of your own disc "
                     "(Disc).\n\nThe app ships no game data.");
-    {   /* the disc image (and the .bin next to a .cue) must be readable from this process */
+    if (!data) {   /* the disc image (and the .bin next to a .cue) must be readable from this process */
         struct stat st; int fd = open(disc, O_RDONLY | O_CLOEXEC);
         if (fd < 0 || fstat(fd, &st) != 0) {
             snprintf(msg, sizeof msg, "Cannot open the disc image\n%s\n(%s).\n\nPick your disc again in the launcher (Disc).", disc, strerror(errno));

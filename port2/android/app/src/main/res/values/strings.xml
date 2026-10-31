@@ -41,7 +41,7 @@
     <string name="disc_badsha">NOT a compatible disc (MAIN0.EXE sha1 %1$s). The port runs Tombi! PAL SCES-01331; it may fail.</string>
     <string name="disc_nomain0">No EXE/MAIN0.EXE found in that image (pick the .bin, .iso or .chd; for a .cue select the .bin too).</string>
     <string name="disc_needbin">Select the .bin together with the .cue.</string>
-    <string name="disc_howto">Pick the image of your own Tombi! disc (.bin, .iso, .chd, or .cue together with its .bin): it is copied into app storage and checked. The app ships no game data.</string>
+    <string name="disc_howto">Pick the image of your own Tombi! disc (.bin, .iso, .chd, or .cue together with its .bin): its files are extracted into app storage (about 500 MB, checked file by file; the image itself is not kept). The app ships no game data.</string>
     <string name="disc_missing">No disc image picked: pick your disc.</string>
     <string name="cancel">Cancel</string>
     <string name="disc_cancelled">Copy cancelled: the partial files were deleted.</string>
@@ -59,4 +59,16 @@
     <string name="log_exported">Log saved.</string>
     <string name="log_export_fail">Could not save the log: %1$s</string>
     <string name="opt_viewlog">View last log</string>
+    <string name="disc_phase_extract">Extracting…</string>
+    <string name="disc_extract_files">%1$d / %2$d files</string>
+    <string name="disc_short">Incomplete copy of %1$s: %2$d of %3$d bytes.</string>
+    <string name="disc_damaged">Damaged or incomplete disc image: %1$s</string>
+    <string name="disc_space">Not enough free space: %1$d MB needed, %2$d MB free.</string>
+    <string name="disc_data">Extracted from %1$s: %2$s</string>
+    <string name="disc_wipe">Delete data…</string>
+    <string name="disc_wipe_confirm">Delete the extracted game data, the patches and the caches? Your saves are kept unless you choose otherwise below.</string>
+    <string name="disc_wipe_yes">Yes, delete</string>
+    <string name="disc_wipe_saves">Delete the saves too</string>
+    <string name="disc_wiped">Data deleted (saves kept). Pick your disc again to play.</string>
+    <string name="disc_wiped_saves">Data and saves deleted. Pick your disc again to play.</string>
 </resources>

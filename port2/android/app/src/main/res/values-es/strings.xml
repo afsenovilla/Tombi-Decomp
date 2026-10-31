@@ -40,7 +40,7 @@
     <string name="disc_badsha">Disco NO compatible (sha1 de MAIN0.EXE %1$s). El port funciona con Tombi! PAL SCES-01331; puede fallar.</string>
     <string name="disc_nomain0">No hay EXE/MAIN0.EXE en esa imagen (elige el .bin, .iso o .chd; con un .cue selecciona también el .bin).</string>
     <string name="disc_needbin">Selecciona el .bin junto con el .cue.</string>
-    <string name="disc_howto">Elige la imagen de tu propio disco de Tombi! (.bin, .iso, .chd, o el .cue junto con su .bin): se copia al almacenamiento de la app y se comprueba. La app no incluye datos del juego.</string>
+    <string name="disc_howto">Elige la imagen de tu propio disco de Tombi! (.bin, .iso, .chd, o el .cue junto con su .bin): sus archivos se extraen al almacenamiento de la app (unos 500 MB, comprobados uno a uno; la imagen no se guarda). La app no incluye datos del juego.</string>
     <string name="disc_missing">No hay imagen del disco: elige tu disco.</string>
     <string name="cancel">Cancelar</string>
     <string name="disc_cancelled">Copia cancelada: se han borrado los archivos a medias.</string>
@@ -58,4 +58,16 @@
     <string name="log_exported">Registro guardado.</string>
     <string name="log_export_fail">No se pudo guardar el registro: %1$s</string>
     <string name="opt_viewlog">Ver último registro</string>
+    <string name="disc_phase_extract">Extrayendo…</string>
+    <string name="disc_extract_files">%1$d / %2$d archivos</string>
+    <string name="disc_short">Copia incompleta de %1$s: %2$d de %3$d bytes.</string>
+    <string name="disc_damaged">Imagen del disco dañada o incompleta: %1$s</string>
+    <string name="disc_space">No hay espacio libre suficiente: hacen falta %1$d MB, hay %2$d MB.</string>
+    <string name="disc_data">Extraído de %1$s: %2$s</string>
+    <string name="disc_wipe">Borrar datos…</string>
+    <string name="disc_wipe_confirm">¿Borrar los datos del juego extraídos, los parches y la caché? Las partidas se conservan salvo que lo elijas abajo.</string>
+    <string name="disc_wipe_yes">Sí, borrar</string>
+    <string name="disc_wipe_saves">Borrar también las partidas</string>
+    <string name="disc_wiped">Datos borrados (partidas conservadas). Vuelve a elegir tu disco para jugar.</string>
+    <string name="disc_wiped_saves">Datos y partidas borrados. Vuelve a elegir tu disco para jugar.</string>
 </resources>

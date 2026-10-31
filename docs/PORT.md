@@ -391,8 +391,9 @@ Output: debug-signed `tombi-port-armeabi-v7a-debug.apk` artifact (first green ru
 Psy-Q/libc names bionic lacks, to check on device). Like the Windows exe, the game code is generated
 from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
 
-- **Layout.** `libmain.so` (`port2/android/loader.c`, the `SDL_main`) reserves `0x00100000 + 32 MB` in
-  `JNI_OnLoad`, then `android_dlopen_ext(ANDROID_DLEXT_RESERVED_ADDRESS)` loads `libtombi.so` (the game, `-fPIC
+- **Layout.** `libmain.so` (`port2/android/loader.c`, the `SDL_main`) reserves `0x00100000 + 32 MB` (more when
+  `libtombi.so`'s PT_LOAD span read from its ELF headers needs it; fallback bases 0x10000/0x200000/0x400000/0x800000,
+  `port_check_layout` decides) in `JNI_OnLoad`, then `android_dlopen_ext(ANDROID_DLEXT_RESERVED_ADDRESS)` loads `libtombi.so` (the game, `-fPIC
   -marm`, `-Bsymbolic` so the game's Psy-Q `write`/`open` stubs and the printf shim win over bionic) into it, so
   `port_ram` stays below 16 MB (`port_check_layout`). No fixed 0x80000000 mapping is used by port2.
 - **Null page.** `runtime/lowmem_arm.inc`: the SIGSEGV handler emulates A32 LDR/STR(B/H/SB/SH/D) and LDM/STM on
@@ -403,8 +404,13 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   memcpy, which lld cannot alias), parses `llvm-nm -A`, reads bionic's `libc.so` (`PORT2_LIBC`) and turns
   K&R declarations (`extern void f(o);`, which clang rejects) into `f()`. All 3150 game sources and the runtime
   were compiled locally with `clang --target=armv7a` before the first CI run.
-- **Game source.** Only the disc image the player picks on the device (launcher, *Disco*), passed as `--disc`;
-  without it `loader.c` shows a message box asking to pick the disc. Saves go to `files/saves`, the log to `files/tombi.log`, extra PC flags
+- **Game source.** The player's own disc image, picked on the device (launcher, *Disco*) and **extracted there** by
+  `libtombidisc.so` (`port2/android/disccheck.c`, the same layout and manifest as `tools/extract_data.py`, checked
+  byte-identical on the PAL image) into the internal `files/data` (written as `files/data.tmp`, every file size-checked
+  and renamed, `manifest.txt` last; renamed to `files/data` when complete); the game runs with `--data files/data`
+  (the port's data/ mode: `--text-patch` and the panel read through the same CD layer). An image copied by an older
+  version (`--disc`) still works. Without either `loader.c` shows a message box asking to pick the disc. Saves go to
+  `files/saves` (the external files dir, passed as `--files-dir`, which `loader.c` removes before `port_main`), extra PC flags
   to `files/args.txt` (defaults: `--fullscreen --renderer soft --widescreen auto`: the pad fits the panel, e.g. 107 on a 20:9 phone; `--aspect 4:3` in args.txt for 4:3). Input: SDL GameController (built-in pads).
 - **Launcher.** `LauncherActivity` (plain Canvas, "Selva" design, 1280x720 virtual space scaled to the panel) is the
   app's entry: *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
@@ -412,9 +418,23 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   read, so it overrides). *Opciones* (SharedPreferences): `--lang` 0/5/6/7/8, `--aspect auto|4:3|16:9|21:9`,
   `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps60`, `--show-fps`, infinite
   lives/health (the `tools/port_mods.py` pokes). *Disco*: the player picks their own disc image on the device
-  (SAF `ACTION_OPEN_DOCUMENT`, `.bin`/`.iso` or `.cue`+`.bin`), copied to `files/disc` and checked by the SHA-1 of
-  `EXE/MAIN0.EXE` (ISO 9660 read in Java, 2048 or raw 2352 sectors); the game then runs with `--disc`. There is no
-  other source (no data folder).
+  (SAF `ACTION_OPEN_DOCUMENT`, `.bin`/`.iso`/`.chd` or `.cue`+`.bin`): read in place through the provider's file
+  descriptor (`/proc/self/fd/N`; a `.chd` is recognised by its magic) or, for a stream-only provider, copied to the
+  cache first (size checked against `OpenableColumns.SIZE`); SHA-1 of `EXE/MAIN0.EXE`, then the extraction above
+  (phases *Copiando / Comprobando / Extrayendo*, files done / total, Cancel with B; a truncated image or an unreadable
+  sector fails with the reason). *Borrar datos…* (in-page confirmation) deletes `files/data`, the patches and caches,
+  the saves only when ticked.
+- **Crash diagnosis without adb.** Everything goes to `tombi.log` in the app's **internal** files dir (`getFilesDir()`,
+  the same path in both processes; Android 11+ hides `Android/data`): `TombiActivity` rotates it (`tombi.prev.log`),
+  writes `[java]` lines (device, displays, arguments, uncaught exceptions, the UI thread's stack when it is blocked
+  for 5 s) and passes the dir as `$TOMBI_LOG_DIR`; `loader.c` opens it first thing in `JNI_OnLoad` and logs every step
+  fsync'd (reservation with `/proc/self/maps` on failure, dlopen + `dlerror`, argv, data/disc check, `port_main`
+  args), `dup2`s stdout/stderr (the port's own log) into it, reports fatal signals (signal, fault address, registers,
+  unwinder backtrace, code addresses on the stack, game symbol names) before chaining to debuggerd, and a watchdog
+  logs frame milestones and the game thread's state after 10 s without a frame. Markers `running` (launcher, removed
+  on a clean finish) and `crashed` (loader: signal, non-zero exit, start-up failure): on the next start the launcher
+  shows *El juego se cerró inesperadamente* with the last 40 lines and *Copiar informe* / *Compartir* (ACTION_SEND) /
+  *Exportar registro* (SAF `ACTION_CREATE_DOCUMENT`); *Opciones > Ver último registro* shows it any time.
   *Traducción mejorada* (default on in Spanish) passes `--text-patch files/patches/es_mejorada.tombipatch.json`
   (extracted from `assets/patches` when the APK carries it). Gamepad
   (D-pad, A, B/Back, Start) and touch; English + Spanish strings. Fonts Lilita One and Nunito (OFL) are fetched by CI

@@ -2,9 +2,12 @@
    game reads (.bin raw 2352, .iso cooked 2048, .chd through shims/cd_chd.c + libchdr) is verified by the same code
    path: sector 16 (PVD) -> root directory -> EXE -> MAIN0.EXE -> SHA-1.  Small on purpose: no game code, no SDL. */
 #include <jni.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "port_chd.h"
 
 static volatile int progress;            /* 0..1000 while hashing (nativeCheckProgress) */
@@ -59,17 +62,31 @@ static void sha1_hex(Sha1 *s, char *out) {
     for (int i = 0; i < 5; i++) sprintf(out + 8 * i, "%08x", s->h[i]);
 }
 
-/* "sha1:<40 hex>", or "err:<reason>" ("nomain0" when the image has no EXE/MAIN0.EXE) */
-static const char *check(const char *path, char *res, int rlen) {
+static off_t img_size;
+/* opens the image (sets is_chd / sec_size / sec_off / img_size); 0 = ok, else res holds "err:..." */
+static int open_img(const char *path, char *res, int rlen) {
     size_t pl = strlen(path);
     is_chd = pl > 4 && !strcasecmp(path + pl - 4, ".chd");
-    progress = 0;
+    img_size = 0;
     if (is_chd) {
         char err[200];
-        if (port_chd_open(path, NULL, err, sizeof err)) { snprintf(res, rlen, "err:%s", err); return res; }
+        int ns = 0;
+        if (port_chd_open(path, &ns, err, sizeof err)) { snprintf(res, rlen, "err:%s", err); return -1; }
+        img_size = (off_t)ns * 2352;
     } else {
         img = fopen(path, "rb");
-        if (!img) { snprintf(res, rlen, "err:cannot open %s", path); return res; }
+        if (!img) { snprintf(res, rlen, "err:cannot open %s", path); return -1; }
+        {   /* a .chd under another name (/proc/self/fd/N of a picked file): its magic */
+            char mg[8] = { 0 };
+            if (fread(mg, 1, 8, img) == 8 && !memcmp(mg, "MComprHD", 8)) {
+                fclose(img); img = 0; is_chd = 1;
+                char err[200]; int ns = 0;
+                if (port_chd_open(path, &ns, err, sizeof err)) { snprintf(res, rlen, "err:%s", err); return -1; }
+                img_size = (off_t)ns * 2352;
+                return 0;
+            }
+            fseeko(img, 0, SEEK_SET);
+        }
         unsigned char head[16] = { 0 };
         static const unsigned char sync[12] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0 };
         fseeko(img, 0, SEEK_END); off_t size = ftello(img);
@@ -78,7 +95,16 @@ static const char *check(const char *path, char *res, int rlen) {
         if (!raw && size % 2352 == 0 && size % 2048 != 0) raw = 1;
         sec_size = raw ? 2352 : 2048; sec_off = 0;
         if (raw) { unsigned char m = 2; fseeko(img, 16L * 2352 + 15, SEEK_SET); if (fread(&m, 1, 1, img) != 1) m = 2; sec_off = m == 1 ? 16 : 24; }
+        img_size = size;
     }
+    return 0;
+}
+static void close_img(void) { if (is_chd) port_chd_close(); else if (img) { fclose(img); img = 0; } }
+
+/* "sha1:<40 hex>", or "err:<reason>" ("nomain0" when the image has no EXE/MAIN0.EXE) */
+static const char *check(const char *path, char *res, int rlen) {
+    progress = 0;
+    if (open_img(path, res, rlen)) return res;
     unsigned char pvd[2048]; unsigned dl, ds, fl, fs;
     if (read_sector(16, pvd) || memcmp(pvd + 1, "CD001", 5)) snprintf(res, rlen, "err:sector 16 is not an ISO9660 volume descriptor");
     else if (!find(le32(pvd + 158), le32(pvd + 166), "EXE", &dl, &ds) || !find(dl, ds, "MAIN0.EXE", &fl, &fs)) snprintf(res, rlen, "err:nomain0");
@@ -94,9 +120,70 @@ static const char *check(const char *path, char *res, int rlen) {
         if (ok) { char hex[41]; sha1_hex(&s, hex); snprintf(res, rlen, "sha1:%s", hex); }
         else snprintf(res, rlen, "err:read error in MAIN0.EXE");
     }
-    if (is_chd) port_chd_close(); else if (img) { fclose(img); img = 0; }
+    close_img();
     progress = 1000;
     return res;
+}
+
+/* ---- the whole image: the volume size against the file size (a truncated copy), then every sector of every file
+   of the ISO9660 tree read (a .chd decompressed), hashed in tree order.  "ok:<files> files, <sectors> sectors read,
+   volume <n> sectors, image <bytes> bytes, content sha1 <hex>" or "err:<reason>" */
+static unsigned vol_sectors, img_sectors, sectors_done, files_done; static Sha1 content; static char walk_err[200];
+static int walk(unsigned lba, unsigned size, int depth) {
+    if (depth > 10) return 0;
+    for (unsigned s = 0; s < (size + 2047) / 2048; s++) {
+        unsigned char b[2048];
+        if (read_sector((int)(lba + s), b)) { snprintf(walk_err, sizeof walk_err, "directory sector %u unreadable", lba + s); return -1; }
+        for (int o = 0; o < 2048 && b[o]; o += b[o]) {
+            if (o + 33 > 2048 || o + 33 + b[o + 32] > 2048) break;
+            int nl = b[o + 32]; const unsigned char *nm = b + o + 33;
+            if (nl == 1 && (nm[0] == 0 || nm[0] == 1)) continue;           /* . and .. */
+            unsigned el = le32(b + o + 2), es = le32(b + o + 10), ns = (es + 2047) / 2048;
+            char name[64]; int k = nl < 63 ? nl : 63; memcpy(name, nm, k); name[k] = 0;
+            if (img_sectors && el + ns > img_sectors) {
+                snprintf(walk_err, sizeof walk_err, "%s ends at sector %u, past the end of the image (%u sectors): truncated copy", name, el + ns, img_sectors);
+                return -1;
+            }
+            if (b[o + 25] & 2) { if (walk(el, es, depth + 1)) return -1; continue; }
+            for (unsigned i = 0; i < ns; i++) {
+                unsigned char d[2048];
+                if (read_sector((int)(el + i), d)) { snprintf(walk_err, sizeof walk_err, "%s: sector %u unreadable", name, el + i); return -1; }
+                sha1_update(&content, d, i + 1 < ns ? 2048 : es - 2048 * i);
+                sectors_done++;
+                progress = vol_sectors ? (int)(1000ull * (sectors_done < vol_sectors ? sectors_done : vol_sectors) / vol_sectors) : 0;
+            }
+            files_done++;
+        }
+    }
+    return 0;
+}
+static const char *verify(const char *path, char *res, int rlen) {
+    progress = 0;
+    if (open_img(path, res, rlen)) return res;
+    unsigned char pvd[2048];
+    if (read_sector(16, pvd) || memcmp(pvd + 1, "CD001", 5)) { snprintf(res, rlen, "err:sector 16 is not an ISO9660 volume descriptor"); close_img(); return res; }
+    vol_sectors = le32(pvd + 80);
+    img_sectors = is_chd ? 0 : (unsigned)(img_size / sec_size);   /* (a .chd decompresses or fails: walk() reads it all) */
+    if (!is_chd && img_sectors < vol_sectors)
+        snprintf(res, rlen, "err:truncated image: %u of the volume's %u sectors (%lld bytes, %u-byte sectors)", img_sectors, vol_sectors, (long long)img_size, sec_size);
+    else {
+        sectors_done = files_done = 0; walk_err[0] = 0; sha1_init(&content);
+        if (walk(le32(pvd + 158), le32(pvd + 166), 0)) snprintf(res, rlen, "err:%s", walk_err);
+        else { char hex[41]; sha1_hex(&content, hex);
+               snprintf(res, rlen, "ok:%u files, %u sectors read, volume %u sectors, image %lld bytes (%u-byte sectors%s), content sha1 %s",
+                        files_done, sectors_done, vol_sectors, (long long)img_size, is_chd ? 2352 : sec_size, is_chd ? ", chd" : "", hex); }
+    }
+    close_img();
+    progress = 1000;
+    return res;
+}
+JNIEXPORT jstring JNICALL Java_io_github_tombi_port_LauncherActivity_nativeVerifyImage(JNIEnv *env, jclass cls, jstring jpath) {
+    (void)cls;
+    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
+    char res[400];
+    verify(path, res, sizeof res);
+    (*env)->ReleaseStringUTFChars(env, jpath, path);
+    return (*env)->NewStringUTF(env, res);
 }
 
 JNIEXPORT jstring JNICALL Java_io_github_tombi_port_LauncherActivity_nativeMain0Sha1(JNIEnv *env, jclass cls, jstring jpath) {
@@ -110,3 +197,168 @@ JNIEXPORT jstring JNICALL Java_io_github_tombi_port_LauncherActivity_nativeMain0
 JNIEXPORT jint JNICALL Java_io_github_tombi_port_LauncherActivity_nativeCheckProgress(JNIEnv *env, jclass cls) {
     (void)env; (void)cls; return progress;
 }
+
+/* ---- extraction into a data/ folder for the port's --data mode (the same layout and manifest as
+   tools/extract_data.py, docs/PORT.md "Running without the disc image: data/"): every ISO9660 file as 2048-byte user
+   data, the files holding Mode 2 Form 2 sectors (the MOVIE .STR files, XA) as raw 2352-byte sectors, the sectors no file
+   covers as _disc/<lba>.raw; each file written as <path>.part, size checked, renamed; manifest.txt last. */
+typedef struct { unsigned lba, n, stored, bytes; char path[160]; } Ent;
+static Ent *ents; static int nents, cents;
+static volatile int ex_cancel, ex_done, ex_total;
+static char ex_err[300];
+
+static int raw_sector(unsigned lba, unsigned char *o) {
+    static const unsigned char sync[12] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0 };
+    if (is_chd) return port_chd_read_raw((int)lba, o) ? -1 : 0;
+    if (sec_size == 2352) {
+        if (fseeko(img, (off_t)lba * 2352, SEEK_SET)) return -1;
+        return fread(o, 1, 2352, img) == 2352 ? 0 : -1;
+    }
+    /* a cooked image: a synthesised Mode 2 Form 1 frame (zero EDC/ECC), as tools/extract_data.py Image.raw_sector */
+    unsigned a = lba + 150;
+    #define BCD(x) (unsigned char)(((x) / 10) << 4 | (x) % 10)
+    memcpy(o, sync, 12); o[12] = BCD(a / 4500); o[13] = BCD(a / 75 % 60); o[14] = BCD(a % 75); o[15] = 2;
+    static const unsigned char sub[8] = { 0, 0, 8, 0, 0, 0, 8, 0 };
+    memcpy(o + 16, sub, 8);
+    memset(o + 24 + 2048, 0, 280);
+    return read_sector((int)lba, o + 24);
+}
+static int has_form2(unsigned lba, unsigned n) {
+    if (!is_chd && sec_size == 2048) return 0;
+    unsigned char r[2352];
+    for (unsigned i = 0; i < n; i++) { if (raw_sector(lba + i, r)) return -1; if (r[18] & 0x20) return 1; }
+    return 0;
+}
+static int add_ent(unsigned lba, unsigned n, unsigned stored, unsigned bytes, const char *path) {
+    if (nents == cents) { int c = cents ? cents * 2 : 1024; Ent *e = realloc(ents, (size_t)c * sizeof *e); if (!e) return -1; ents = e; cents = c; }
+    Ent *e = &ents[nents++]; e->lba = lba; e->n = n; e->stored = stored; e->bytes = bytes;
+    snprintf(e->path, sizeof e->path, "%s", path);
+    return 0;
+}
+static int list_files(unsigned lba, unsigned size, const char *pre, int depth) {
+    if (depth > 10) return 0;
+    for (unsigned s = 0; s < (size + 2047) / 2048; s++) {
+        unsigned char b[2048];
+        if (read_sector((int)(lba + s), b)) { snprintf(ex_err, sizeof ex_err, "directory %s: sector %u unreadable", pre, lba + s); return -1; }
+        for (int o = 0; o < 2048 && b[o]; o += b[o]) {
+            if (o + 33 > 2048 || o + 33 + b[o + 32] > 2048) break;
+            int nl = b[o + 32]; const unsigned char *nm = b + o + 33;
+            if (nl == 1 && (nm[0] == 0 || nm[0] == 1)) continue;
+            char name[64]; int k = 0;
+            for (int i = 0; i < nl && i < 63 && nm[i] != ';'; i++) name[k++] = (char)nm[i];
+            name[k] = 0;
+            unsigned el = le32(b + o + 2), es = le32(b + o + 10);
+            char path[160]; snprintf(path, sizeof path, "%s%s", pre, name);
+            if (b[o + 25] & 2) { char sub[164]; snprintf(sub, sizeof sub, "%s/", path); if (list_files(el, es, sub, depth + 1)) return -1; continue; }
+            unsigned n = (es + 2047) / 2048;
+            size_t pl = strlen(path);
+            int raw = (pl > 4 && (!strcasecmp(path + pl - 4, ".STR"))) || (pl > 3 && !strcasecmp(path + pl - 3, ".XA"));
+            if (!raw) { int f2 = has_form2(el, n); if (f2 < 0) { snprintf(ex_err, sizeof ex_err, "%s: sector unreadable", path); return -1; } raw = f2; }
+            if (add_ent(el, n, raw ? 2352 : 2048, raw ? n * 2352 : es, path)) { snprintf(ex_err, sizeof ex_err, "out of memory"); return -1; }
+        }
+    }
+    return 0;
+}
+static int ent_cmp(const void *a, const void *b) { const Ent *x = a, *y = b; return x->lba < y->lba ? -1 : x->lba > y->lba; }
+static int mkdirs(char *path) {     /* the directories of path (a file path) */
+    for (char *p = path + 1; *p; p++) if (*p == '/') { *p = 0; if (mkdir(path, 0700) && errno != EEXIST) { *p = '/'; return -1; } *p = '/'; }
+    return 0;
+}
+static const char *extract(const char *image, const char *out, char *res, int rlen) {
+    progress = 0; ex_cancel = 0; ex_done = 0; ex_total = 0; ex_err[0] = 0; nents = 0;
+    if (open_img(image, res, rlen)) return res;
+    unsigned char pvd[2048], *buf = NULL; char main0[41] = ""; Sha1 content; sha1_init(&content);
+    unsigned total_sectors = 0, done_sectors = 0, sectors;
+    if (read_sector(16, pvd) || memcmp(pvd + 1, "CD001", 5)) { snprintf(res, rlen, "err:sector 16 is not an ISO9660 volume descriptor"); goto out; }
+    vol_sectors = le32(pvd + 80);
+    sectors = (unsigned)(img_size / (is_chd ? 2352 : sec_size));
+    if (sectors < vol_sectors) { snprintf(res, rlen, "err:truncated image: %u of the volume's %u sectors (%lld bytes)", sectors, vol_sectors, (long long)img_size); goto out; }
+    if (list_files(le32(pvd + 158), le32(pvd + 166), "", 0)) { snprintf(res, rlen, "err:%s", ex_err); goto out; }
+    qsort(ents, (size_t)nents, sizeof *ents, ent_cmp);
+    {   /* the sectors no file covers */
+        unsigned prev = 0; int nf = nents;
+        for (int i = 0; i < nf; i++) {
+            if (ents[i].lba > prev) { char p[32]; snprintf(p, sizeof p, "_disc/%06u.raw", prev); if (add_ent(prev, ents[i].lba - prev, 2352, (ents[i].lba - prev) * 2352, p)) goto oom; }
+            if (ents[i].lba + ents[i].n > prev) prev = ents[i].lba + ents[i].n;
+        }
+        if (prev < sectors) { char p[32]; snprintf(p, sizeof p, "_disc/%06u.raw", prev); if (add_ent(prev, sectors - prev, 2352, (sectors - prev) * 2352, p)) goto oom; }
+        qsort(ents, (size_t)nents, sizeof *ents, ent_cmp);
+    }
+    for (int i = 0; i < nents; i++) total_sectors += ents[i].n;
+    ex_total = nents;
+    buf = malloc(64 * 2352);
+    if (!buf) goto oom;
+    mkdir(out, 0700);
+    for (int i = 0; i < nents; i++) {
+        Ent *e = &ents[i];
+        char dst[700], part[710];
+        snprintf(dst, sizeof dst, "%s/%s", out, e->path); snprintf(part, sizeof part, "%s.part", dst);
+        if (mkdirs(dst)) { snprintf(res, rlen, "err:mkdir for %s: %s", e->path, strerror(errno)); goto out; }
+        FILE *o = fopen(part, "wb");
+        if (!o) { snprintf(res, rlen, "err:cannot write %s: %s", e->path, strerror(errno)); goto out; }
+        unsigned left = e->bytes; int bad = 0;
+        Sha1 m0; int is_main0 = !strcasecmp(e->path, "EXE/MAIN0.EXE"); if (is_main0) sha1_init(&m0);
+        for (unsigned s0 = 0; s0 < e->n && !bad; s0 += 64) {
+            unsigned cnt = e->n - s0 < 64 ? e->n - s0 : 64, len = 0;
+            for (unsigned k = 0; k < cnt; k++) {
+                if (e->stored == 2352 ? raw_sector(e->lba + s0 + k, buf + len) : read_sector((int)(e->lba + s0 + k), buf + len)) {
+                    snprintf(res, rlen, "err:%s: sector %u unreadable (damaged or incomplete image)", e->path, e->lba + s0 + k); bad = 1; break;
+                }
+                len += e->stored;
+            }
+            if (bad) break;
+            if (len > left) len = left;
+            if (fwrite(buf, 1, len, o) != len) { snprintf(res, rlen, "err:writing %s: %s (storage full?)", e->path, strerror(errno)); bad = 1; break; }
+            if (strncmp(e->path, "_disc/", 6)) sha1_update(&content, buf, len);
+            if (is_main0) sha1_update(&m0, buf, len);
+            left -= len; done_sectors += cnt;
+            progress = (int)(1000ull * done_sectors / (total_sectors ? total_sectors : 1));
+            if (ex_cancel) { snprintf(res, rlen, "err:cancelled"); bad = 1; break; }
+        }
+        if (fflush(o) || fsync(fileno(o))) { if (!bad) snprintf(res, rlen, "err:writing %s: %s", e->path, strerror(errno)); bad = 1; }
+        fclose(o);
+        struct stat st;
+        if (!bad && (stat(part, &st) || (unsigned)st.st_size != e->bytes)) { snprintf(res, rlen, "err:%s: %lld bytes written, %u expected", e->path, (long long)st.st_size, e->bytes); bad = 1; }
+        if (!bad && rename(part, dst)) { snprintf(res, rlen, "err:rename %s: %s", e->path, strerror(errno)); bad = 1; }
+        if (bad) { unlink(part); goto out; }
+        if (is_main0) sha1_hex(&m0, main0);
+        ex_done = i + 1;
+    }
+    {   /* the manifest last: its presence means a complete extraction */
+        char mp[600], mt[610];
+        snprintf(mp, sizeof mp, "%s/manifest.txt", out); snprintf(mt, sizeof mt, "%s.part", mp);
+        FILE *m = fopen(mt, "w");
+        if (!m) { snprintf(res, rlen, "err:cannot write the manifest: %s", strerror(errno)); goto out; }
+        const char *base = strrchr(image, '/');
+        fprintf(m, "tombi-data 1\n# one-time extraction of the player's own disc for the native port (Android launcher, port2/android/disccheck.c)\n");
+        fprintf(m, "sectors %u\nmain0_sha1 %s\nsource %s\n", sectors, main0, base ? base + 1 : image);
+        fprintf(m, "# file <lba> <sectors> <stored sector bytes> <file bytes> <path>\n");
+        for (int i = 0; i < nents; i++) fprintf(m, "file %u %u %u %u %s\n", ents[i].lba, ents[i].n, ents[i].stored, ents[i].bytes, ents[i].path);
+        if (fflush(m) || fsync(fileno(m))) { fclose(m); snprintf(res, rlen, "err:writing the manifest: %s", strerror(errno)); goto out; }
+        fclose(m);
+        if (rename(mt, mp)) { snprintf(res, rlen, "err:rename the manifest: %s", strerror(errno)); goto out; }
+    }
+    { char hex[41]; sha1_hex(&content, hex);
+      snprintf(res, rlen, "ok:%d files, %u sectors (%u-byte source sectors%s), main0 %s, content sha1 %s", nents, sectors, is_chd ? 2352 : sec_size, is_chd ? ", chd" : "", main0[0] ? main0 : "-", hex); }
+    goto out;
+oom:
+    snprintf(res, rlen, "err:out of memory");
+out:
+    free(buf); free(ents); ents = NULL; nents = cents = 0;
+    close_img();
+    progress = 1000;
+    return res;
+}
+JNIEXPORT jstring JNICALL Java_io_github_tombi_port_LauncherActivity_nativeExtract(JNIEnv *env, jclass cls, jstring jimg, jstring jout) {
+    (void)cls;
+    const char *im = (*env)->GetStringUTFChars(env, jimg, NULL), *out = (*env)->GetStringUTFChars(env, jout, NULL);
+    char res[500];
+    extract(im, out, res, sizeof res);
+    (*env)->ReleaseStringUTFChars(env, jimg, im); (*env)->ReleaseStringUTFChars(env, jout, out);
+    return (*env)->NewStringUTF(env, res);
+}
+/* files done << 16 | files total, while extracting */
+JNIEXPORT jint JNICALL Java_io_github_tombi_port_LauncherActivity_nativeExtractCount(JNIEnv *env, jclass cls) {
+    (void)env; (void)cls; return (jint)((ex_done & 0xFFFF) << 16 | (ex_total & 0xFFFF));
+}
+JNIEXPORT void JNICALL Java_io_github_tombi_port_LauncherActivity_nativeCancel(JNIEnv *env, jclass cls) { (void)env; (void)cls; ex_cancel = 1; }
