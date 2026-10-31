@@ -33,6 +33,17 @@ static void audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pu
 void port_audio_lock(void) { if (dev) SDL_LockAudioDevice(dev); }
 void port_audio_unlock(void) { if (dev) SDL_UnlockAudioDevice(dev); }
 
+/* the desktop size of display 0 (--widescreen auto); 0 = ok */
+int port_display_size(int *w, int *h) {
+    SDL_DisplayMode m; int r = -1;
+    SDL_SetMainReady();
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO) == 0) {
+        if (SDL_GetDesktopDisplayMode(0, &m) == 0) { *w = m.w; *h = m.h; r = 0; }
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    }
+    return r;
+}
+
 void port_window_start(void) {
     SDL_SetMainReady();     /* (no SDL2main on Windows: main() is the plain C one, the launcher captures stderr) */
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) port_fatal("SDL_Init: %s", SDL_GetError());

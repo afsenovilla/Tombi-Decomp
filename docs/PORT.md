@@ -405,7 +405,7 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   were compiled locally with `clang --target=armv7a` before the first CI run.
 - **Data.** `Android/data/io.github.tombi.port/files/data` (the PC `--data` folder, with `manifest.txt`); when it is
   missing, a message box gives the path. Saves go to `files/saves`, the log to `files/tombi.log`, extra PC flags
-  to `files/args.txt` (defaults: `--fullscreen --renderer soft`). Input: SDL GameController (built-in pads).
+  to `files/args.txt` (defaults: `--fullscreen --renderer soft --widescreen auto`: the pad fits the panel, e.g. 107 on a 20:9 phone; `--aspect 4:3` in args.txt for 4:3). Input: SDL GameController (built-in pads).
 - **PC builds unchanged**: same i386 disassembly, title smoke frames byte-identical, `--test-null` ok.
 - Not done yet: running on a device, the GLES path of `gpu_gl.c`, SAF disc import, touch overlay, arm64 (phase 2).
   Roadmap: `notes/roadmap.md` "Android".
@@ -2073,7 +2073,17 @@ area signature words still match, and (`-v -v`, from a copy of the overlay regio
 many words of the region changed since the vblank and the first/last of them: the difference between a swapped
 overlay (a CD read, logged) and a buffer overrun (the two causes above).
 
-### Widescreen (experimental): `--widescreen [16:9|21:9|32:9]`, `--aspect 16:9|21:9|32:9`
+### Widescreen (experimental): `--widescreen [16:9|21:9|32:9|auto]`, `--aspect 16:9|21:9|32:9|auto`
+
+**auto** (`runtime/main.c` `port_ws_pad_for`): reads the desktop size of display 0 at startup (`port_display_size`
+in `runtime/sdl.c`, SDL_GetDesktopDisplayMode; portrait reports are swapped) and sets
+pad = round((320 * (W/H) / (4/3) - 320) / 2): 16:9 -> 53, 20:9 (2400x1080) -> 107, 21:9 -> 120, 32:9 -> 267.
+Clamped to 0..267 (267 is the widest tested; narrower than 4:3, e.g. 5:4 or 1:1, gives 0 = 4:3 letterboxed).
+`--display-size WxH` fakes the display for tests.  The window fit is unchanged: integer scale when it fits,
+else exact aspect-preserving fit, centred, never stretched.  Default on Android (`android/loader.c`; `args.txt`
+`--aspect 4:3` turns it off; `--aspect` now always resets the pad), opt-in on PC (launcher "Auto").
+Checked: 1920x1080 -> 426 columns, 2400x1080 -> 534, 1280x960 and 1240x1080 -> 320, 3840x1080 -> 854; default PC
+frames byte-identical.
 
 Off by default (with it off the standard regression stays byte-identical).  Done in the GPU shim and at the game's
 culls, not in the GTE: the projection keeps its scale, so nothing is stretched; the frame just gets wider.

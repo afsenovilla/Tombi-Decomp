@@ -97,6 +97,7 @@ int SDL_main(int argc, char *argv[]) {
     args[n++] = (char *)"--save-dir"; args[n++] = saves;
     args[n++] = (char *)"--fullscreen";
     args[n++] = (char *)"--renderer"; args[n++] = (char *)"soft";
+    args[n++] = (char *)"--widescreen"; args[n++] = (char *)"auto";   /* fit the panel (args.txt "--aspect 4:3" turns it off) */
     {   /* files/args.txt: extra PC flags, whitespace separated (later flags override the defaults above) */
         char ap[600]; snprintf(ap, sizeof ap, "%s/args.txt", files);
         FILE *f = fopen(ap, "r");

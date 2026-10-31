@@ -240,8 +240,32 @@ static void open_game_data(const char *argv0) {
     if (port_cd_open(port_disc_path) < 0)
         port_printf("[port2] warning: no data/ folder (tools/extract_data.py) and no disc image at %s: CD reads will fail\n", port_disc_path);
 }
+/* --widescreen auto / --aspect auto: the pad that fills the real display. The port shows 320 columns as 4:3, so a
+   W x H screen wants 320 * (W/H) / (4/3) columns: pad = (that - 320) / 2, rounded (16:9 -> 53, 21:9 -> 120,
+   32:9 -> 267), 0 below 4:3 (letterboxed), at most 267 (the widest mode tested; wvram allows up to 352) */
+static int port_ws_auto, port_ws_disp_w, port_ws_disp_h;
+int port_ws_pad_for(int W, int H) {
+    if (W <= 0 || H <= 0) return 0;
+    double cols = 320.0 * W * 3.0 / (4.0 * H);
+    int pad = (int)((cols - 320.0) / 2.0 + 0.5);
+    if (cols <= 320.0 || pad < 0) pad = 0;
+    return pad > 267 ? 267 : pad;
+}
+static int port_ws_resolve(void) {
+    int W = port_ws_disp_w, H = port_ws_disp_h; const char *src = "--display-size";
+    if (W <= 0 || H <= 0) {
+        src = "desktop display mode";
+        extern int port_display_size(int *w, int *h);
+        if (port_display_size(&W, &H)) { W = H = 0; src = "no display"; }
+        if (W < H) { int t = W; W = H; H = t; }   /* (a handheld may report its panel in portrait before rotating) */
+    }
+    int pad = port_ws_pad_for(W, H);
+    port_printf("[port2] widescreen auto: display %dx%d (%s) -> pad %d (%d columns)\n", W, H, src, pad, 320 + 2 * pad);
+    return pad;
+}
+
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9|32:9] [--widescreen [16:9|21:9|32:9]] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
+    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--frames N] [--headless] [--window [--scale N] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...]]\n"
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--patch-tex FILE]... [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
@@ -855,11 +879,17 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--aspect") && v) {
             extern int port_widescreen; const char *as = argv[++i];
             port_window_square = !strcmp(as, "square");
+            port_ws_auto = 0;
+            if (!strcmp(as, "4:3") || port_window_square) port_widescreen = 0;
             if (!strcmp(as, "16:9")) port_widescreen = 53; else if (!strcmp(as, "21:9")) port_widescreen = 120; else if (!strcmp(as, "32:9")) port_widescreen = 267;
+            else if (!strcmp(as, "auto")) port_ws_auto = 1;
         }
-        else if (!strcmp(a, "--widescreen")) {      /* experimental (docs/PORT.md "Widescreen"): 16:9, or 21:9 */
-            extern int port_widescreen; port_widescreen = 53;
-            if (v && (!strcmp(v, "16:9") || !strcmp(v, "21:9") || !strcmp(v, "32:9"))) { const char *ws = argv[++i]; if (!strcmp(ws, "21:9")) port_widescreen = 120; else if (!strcmp(ws, "32:9")) port_widescreen = 267; }
+        else if (!strcmp(a, "--widescreen")) {      /* experimental (docs/PORT.md "Widescreen"): 16:9, 21:9, 32:9 or auto */
+            extern int port_widescreen; port_widescreen = 53; port_ws_auto = 0;
+            if (v && (!strcmp(v, "16:9") || !strcmp(v, "21:9") || !strcmp(v, "32:9") || !strcmp(v, "auto"))) { const char *ws = argv[++i]; if (!strcmp(ws, "21:9")) port_widescreen = 120; else if (!strcmp(ws, "32:9")) port_widescreen = 267; else if (!strcmp(ws, "auto")) port_ws_auto = 1; }
+        }
+        else if (!strcmp(a, "--display-size") && v) {   /* testing --widescreen auto: pretend the display is W x H */
+            if (sscanf(argv[++i], "%dx%d", &port_ws_disp_w, &port_ws_disp_h) != 2) return usage(argv[0]);
         }
         else if (!strcmp(a, "--keys") && v) port_window_keys(argv[++i]);
         else if (!strcmp(a, "--show-fps")) { port_show_fps = 1; if (v && (*v == '1' || *v == '2') && !v[1]) port_show_fps = atoi(argv[++i]); }
@@ -897,6 +927,7 @@ int main(int argc, char **argv) {
         else return usage(argv[0]);
     }
     if (headless) port_window = 0;
+    if (port_ws_auto) { extern int port_widescreen; port_widescreen = port_ws_resolve(); }
     { extern int port_widescreen, port_renderer, port_ws_cull;
       port_ws_cull = port_widescreen;
       (void)port_renderer; }

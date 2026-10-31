@@ -64,7 +64,7 @@ i18n.add({
         "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
-        "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
+        "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (llena la pantalla, experimental)",
         "ft.image": "Imágenes",
         "c.texpack": "Pack de texturas (HD) · experimental", "l.texpack": "Carpeta del pack (déjalo vacío para usar las texturas originales). Solo con OpenGL.",
         "b.dumpall": "Volcar todas las texturas", "b.openfolder": "Abrir carpeta",
@@ -97,7 +97,7 @@ i18n.add({
         "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
-        "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)",
+        "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (fill the display, experimental)",
         "ft.image": "Images",
         "c.texpack": "Texture pack (HD) · experimental", "l.texpack": "Pack folder (leave empty for the original textures). OpenGL only.",
         "b.dumpall": "Dump all textures", "b.openfolder": "Open folder",
@@ -756,7 +756,7 @@ class App:
             if gl and self.vars["internal_res"].get() in (2, 3, 4):
                 parts.append(tr("sum.ires", self.vars["internal_res"].get()))
             a = self.vars["aspect"].get()
-            parts.append({"square": "1:1 px", "16:9": "16:9", "21:9": "21:9", "32:9": "32:9"}.get(a, "4:3"))
+            parts.append({"square": "1:1 px", "16:9": "16:9", "21:9": "21:9", "32:9": "32:9", "auto": "auto"}.get(a, "4:3"))
             parts.append("60 Hz" if self.vars["hz60"].get() else "50 Hz")
         except tk.TclError:
             return
@@ -930,7 +930,7 @@ class App:
             ttk.Checkbutton(c, text=tr("l.fps60"), variable=self.var("fps60", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
         o, c = self.card(grid, tr("c.aspect"))
         o.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(12, 0))
-        self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9")])
+        self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9"), (tr("a.auto"), "auto")])
         o, c = self.card(grid, tr("c.ires"))     # --internal-res: 3D drawn at N x (docs/PORT.md "HD"), OpenGL only
         o.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(12, 0))
         self.ires_btns = self._radios(c, "internal_res", tk.IntVar, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
@@ -1298,7 +1298,7 @@ class App:
         cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
                "--show-fps", "2",     # the measured vblank rate and its histogram in the log
                "--renderer", "soft" if s.get("renderer") == "soft" else "gl",
-               "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9") else "4:3"]
+               "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9", "auto") else "4:3"]
         if s.get("renderer") != "soft" and s.get("internal_res", 1) in (2, 3, 4):
             cmd += ["--internal-res", str(s["internal_res"])]
         if s.get("renderer") != "soft" and s.get("fps60") and s.get("experimental"):
