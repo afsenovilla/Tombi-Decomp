@@ -1,0 +1,51 @@
+name: Save editor (Windows exe)
+
+# Builds tools/tombi_save_editor.py (Tombi Save Editor, docs/SAVE_EDITOR.md) into one Windows executable with
+# PyInstaller, like text-exe.yml.  Only scripts are bundled: item / event names are read from the user's disc at run time.
+on:
+  push:
+    branches: [master]
+    paths:
+      - tools/tombi_save.py
+      - tools/tombi_save_editor.py
+      - tools/test_tombi_save.py
+      - tools/text_core.py
+      - tools/wfm_py.py
+      - tools/cdfiles.py
+      - tools/i18n.py
+      - tools/text_strings.py
+      - .github/workflows/save-editor-exe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Test
+        shell: bash
+        run: python tools/test_tombi_save.py
+
+      - name: Build
+        shell: bash
+        run: |
+          python -m pip install pyinstaller
+          pyinstaller --onefile --windowed --name TombiSaveEditor --distpath build/exe --workpath build/pyi --specpath . \
+            --paths tools --hidden-import tombi_save --hidden-import text_core --hidden-import wfm_py --hidden-import cdfiles \
+            --hidden-import i18n --hidden-import text_strings --hidden-import title_layout --hidden-import verb_order --hidden-import menu_text --hidden-import memcard_text --add-data "tools/wfm_charmap.json;." tools/tombi_save_editor.py
+          mkdir -p dist/windows
+          cp build/exe/TombiSaveEditor.exe dist/windows/TombiSaveEditor.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-windows-save-editor
+          path: dist/windows/TombiSaveEditor.exe
+          retention-days: 90
