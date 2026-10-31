@@ -695,6 +695,7 @@ def link(outdir, nm, objlist):
     import sysovl
     ovl_re = re.compile(r"(?:%s|X0\d\d)_\w" % sysovl.PROG_RE)
     thunk_aliases = 0
+    libc_tramps = []
     for n in sorted(undefined):
         # (SDL_: the host library; port_: the runtime, or the tables this step generates)
         if n.startswith(("__", "_GLOBAL_OFFSET", "SDL_", "port_")) or n in libc or n in region_names: continue
@@ -725,6 +726,8 @@ def link(outdir, nm, objlist):
             if th:        # a function of the overlay region: the resident overlay decides at call time
                 ld.append("%s = %s;" % (n, th)); thunk_aliases += 1; continue
         if f and (f in defined or f in libc) and f != n:    # (libc: func_8005BD88 is MAIN0's memcpy, the host's serves)
+            if f not in defined and os.environ.get("PORT2_ARCH") == "arm":
+                libc_tramps.append((n, f)); continue      # (lld cannot alias a shared library's symbol: thunks.S branches)
             ld.append("%s = %s;" % (n, f)); continue
         if a is not None and (not amap.is_code(a) or is_data_name):
             # (a data name inside an X000 code unit: another overlay's data, or a table a coarse unit covers)
@@ -751,6 +754,8 @@ def link(outdir, nm, objlist):
                 f.write(".globl port_thunk_%08X\n.type port_thunk_%08X,%%function\nport_thunk_%08X:\n"
                         "  push {r0, r1, r2, r3, r11, lr}\n  movw r0, #0x%04X\n  movt r0, #0x%04X\n  bl port_resolve_call\n"
                         "  mov r12, r0\n  pop {r0, r1, r2, r3, r11, lr}\n  bx r12\n" % (a, a, a, a & 0xFFFF, a >> 16))
+            for name, target in libc_tramps:
+                f.write(".globl %s\n.type %s,%%function\n%s:\n  b %s\n" % (name, name, name, target))
             thunks_x86 = []
         else:
             thunks_x86 = thunks
