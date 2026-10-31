@@ -38,8 +38,12 @@
     <string name="disc_ok">Disc image verified (Tombi! PAL SCES-01331).</string>
     <string name="disc_unverified">Disc image not verified: it may fail.</string>
     <string name="disc_badsha">NOT a compatible disc (MAIN0.EXE sha1 %1$s). The port runs Tombi! PAL SCES-01331; it may fail.</string>
-    <string name="disc_nomain0">No EXE/MAIN0.EXE found in that image (pick the .bin or .iso; for a .cue select the .bin too).</string>
+    <string name="disc_nomain0">No EXE/MAIN0.EXE found in that image (pick the .bin, .iso or .chd; for a .cue select the .bin too).</string>
     <string name="disc_needbin">Select the .bin together with the .cue.</string>
-    <string name="disc_howto">Pick the image of your own Tombi! disc (.bin, .iso, or .cue together with its .bin): it is copied into app storage and checked. The app ships no game data.</string>
+    <string name="disc_howto">Pick the image of your own Tombi! disc (.bin, .iso, .chd, or .cue together with its .bin): it is copied into app storage and checked. The app ships no game data.</string>
     <string name="disc_missing">No disc image picked: pick your disc.</string>
+    <string name="cancel">Cancel</string>
+    <string name="disc_cancelled">Copy cancelled: the partial files were deleted.</string>
+    <string name="disc_phase_copy">Copying…</string>
+    <string name="disc_phase_check">Checking…</string>
 </resources>

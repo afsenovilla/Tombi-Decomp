@@ -23,7 +23,7 @@ android {
                 arguments "-DPORT2_SDL2_SOURCE=${sdl2Source}", '-DANDROID_STL=c++_static'
                 // the generator (port2/tools/gen2.py) runs on the host Python with tools/requirements.txt installed
                 if (System.getenv('PORT2_PYTHON')) arguments "-DPython3_EXECUTABLE=${System.getenv('PORT2_PYTHON')}"
-                targets 'main', 'tombi2', 'SDL2'
+                targets 'main', 'tombi2', 'SDL2', 'tombidisc'
             }
         }
     }

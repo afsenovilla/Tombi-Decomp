@@ -1,0 +1,12 @@
+libchdr, vendored as source for port2's .chd disc support (port2/shims/cd_chd.c).
+
+  upstream: https://github.com/rtissera/libchdr
+  commit:   47d794151b2b64f6aba60304e6480f4f5a2bc24b (2026-10-11)
+  license:  BSD-3-Clause (LICENSE.txt)
+
+Copied unchanged: LICENSE.txt, unity.c, include/ (libchdr headers, dr_libs/dr_flac.h: public domain / MIT-0),
+src/ (without libchdr_flac_microflac.cpp and link.T), deps/ as libchdr ships them:
+  deps/lzma-26.02  LZMA SDK decoder, public domain (deps/lzma-26.02/LICENSE)
+  deps/miniz-3.1.2 zlib-compatible inflate (libchdr's zlib replacement), MIT/Unlicense (header and end of miniz.c)
+  deps/zstd-1.5.7  zstd decoder (single-file zstddeclib.c), BSD-3-Clause (license header in the files)
+Removed: the deps' CMakeLists.txt and the LZMA SDK's optional Asm/ (not built). Source only; no binaries.

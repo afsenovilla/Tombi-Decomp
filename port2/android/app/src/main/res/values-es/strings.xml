@@ -37,8 +37,12 @@
     <string name="disc_ok">Imagen del disco verificada (Tombi! PAL SCES-01331).</string>
     <string name="disc_unverified">Imagen del disco sin verificar: puede fallar.</string>
     <string name="disc_badsha">Disco NO compatible (sha1 de MAIN0.EXE %1$s). El port funciona con Tombi! PAL SCES-01331; puede fallar.</string>
-    <string name="disc_nomain0">No hay EXE/MAIN0.EXE en esa imagen (elige el .bin o .iso; con un .cue selecciona también el .bin).</string>
+    <string name="disc_nomain0">No hay EXE/MAIN0.EXE en esa imagen (elige el .bin, .iso o .chd; con un .cue selecciona también el .bin).</string>
     <string name="disc_needbin">Selecciona el .bin junto con el .cue.</string>
-    <string name="disc_howto">Elige la imagen de tu propio disco de Tombi! (.bin, .iso, o el .cue junto con su .bin): se copia al almacenamiento de la app y se comprueba. La app no incluye datos del juego.</string>
+    <string name="disc_howto">Elige la imagen de tu propio disco de Tombi! (.bin, .iso, .chd, o el .cue junto con su .bin): se copia al almacenamiento de la app y se comprueba. La app no incluye datos del juego.</string>
     <string name="disc_missing">No hay imagen del disco: elige tu disco.</string>
+    <string name="cancel">Cancelar</string>
+    <string name="disc_cancelled">Copia cancelada: se han borrado los archivos a medias.</string>
+    <string name="disc_phase_copy">Copiando…</string>
+    <string name="disc_phase_check">Comprobando…</string>
 </resources>

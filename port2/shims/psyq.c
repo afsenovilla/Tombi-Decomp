@@ -8,11 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <dirent.h>
 #ifdef _WIN32
 #define fseeko fseeko64
 #define ftello ftello64
 #endif
 #include "port_runtime.h"
+#include "port_chd.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef int s32; typedef unsigned int u32;
 typedef struct { s16 x, y, w, h; } RECT;
@@ -616,6 +618,26 @@ static u8 cd_filter_file, cd_filter_chan;        /* CdlSetfilter: the XA file / 
 /* A `.cue` names the data track's `.bin` (FILE "name" BINARY, relative to the cue): resolve it, else
    the path is the image itself. */
 static char cd_bin_path[1024];
+static int cd_ieq(const char *a, const char *b) { while (*a && *b && (*a | 32) == (*b | 32)) a++, b++; return !*a && !*b; }
+static int cd_iends(const char *a, const char *e) { size_t n = strlen(a), m = strlen(e); return n >= m && cd_ieq(a + n - m, e); }
+static const char *cd_cue_fallback(const char *dir, const char *cuename, const char *want) {
+    static char found[512]; char stem[512], only[512] = ""; int nimg = 0, hit = 0;
+    snprintf(stem, sizeof stem, "%s", cuename);
+    if (strlen(stem) > 4) strcpy(stem + strlen(stem) - 4, ".bin");
+    DIR *d = opendir(dir);
+    if (!d) return 0;
+    struct dirent *e;
+    while ((e = readdir(d))) {
+        const char *n = e->d_name;
+        if (cd_ieq(n, want)) { snprintf(found, sizeof found, "%s", n); hit = 2; break; }
+        if (cd_ieq(n, stem) && hit < 1) { snprintf(found, sizeof found, "%s", n); hit = 1; }
+        if (cd_iends(n, ".bin") || cd_iends(n, ".img") || cd_iends(n, ".iso")) { nimg++; snprintf(only, sizeof only, "%s", n); }
+    }
+    closedir(d);
+    if (hit) return found;
+    if (nimg == 1) { snprintf(found, sizeof found, "%s", only); return found; }
+    return 0;
+}
 static const char *cd_resolve_cue(const char *path) {
     int n = 0; while (path[n]) n++;
     if (n < 4 || (path[n - 4] != '.') || ((path[n - 3] | 32) != 'c') || ((path[n - 2] | 32) != 'u') ||
@@ -644,7 +666,21 @@ static const char *cd_resolve_cue(const char *path) {
             if (!absolute) for (int q = 0; q < dir && o < 1000; q++) cd_bin_path[o++] = path[q];
             for (int q = 0; name[q] && o < 1020; q++) cd_bin_path[o++] = name[q];
             cd_bin_path[o] = 0;
-            port_printf("[port] cue sheet %s -> %s\n", path, cd_bin_path);
+            FILE *t = fopen(cd_bin_path, "rb");
+            if (t) { fclose(t); port_printf("[port] cue sheet %s -> %s\n", path, cd_bin_path); return cd_bin_path; }
+            /* the FILE name does not match a file next to the cue (a renamed .bin, "Tombi!.bin" vs "Tombi.bin", another
+               case, a copy the Android launcher saved under its display name): the same name in another case, else
+               <cue name>.bin, else the only .bin / .img / .iso in the cue's folder */
+            char want[512]; snprintf(want, sizeof want, "%s", name);
+            { int b = (int)strlen(want); while (b > 0 && want[b - 1] != '/' && want[b - 1] != '\\') b--; memmove(want, want + b, strlen(want + b) + 1); }
+            char dirp[1024]; snprintf(dirp, sizeof dirp, "%.*s", dir ? dir : 1, dir ? path : ".");
+            const char *alt = cd_cue_fallback(dirp, path + dir, want);
+            if (alt) {
+                snprintf(cd_bin_path, sizeof cd_bin_path, "%.*s%s", dir, path, alt);
+                port_printf("[port] cue sheet %s: FILE \"%s\" not found, using %s\n", path, name, cd_bin_path);
+                return cd_bin_path;
+            }
+            port_printf("[port] cue sheet %s -> %s (not found)\n", path, cd_bin_path);
             return cd_bin_path;
         }
     }
@@ -769,8 +805,19 @@ static int cd_data_read_sector(int lba, u8 *d, int bytes) {
    00 FF*10 00, a cooked (2048) ISO has the primary volume descriptor "\1CD001" at 16*2048. The file size
    alone is ambiguous (an image with a trailing audio track or a cue-less multi-track dump is not a multiple
    of 2352 and was read as 2048 before, which gives garbage directories and bogus load records). */
+static int cd_chd;                     /* 1: reads come from a .chd (shims/cd_chd.c) */
 int port_cd_open(const char *path) {
     path = cd_resolve_cue(path);
+    if (cd_iends(path, ".chd")) {
+        char err[256] = "";
+        if (port_chd_open(path, &cd_sector_count, err, sizeof err)) { port_printf("[port] %s: %s\n", path, err); return -1; }
+        cd_chd = 1; cd_raw = 1; cd_image_path = path; cd_image_size = (long long)cd_sector_count * 2352;
+        port_printf("[port] disc image %s: CHD, %d raw 2352 sectors\n", path, cd_sector_count);
+        u8 sec[2048];
+        if (port_cd_read_sectors(16, 1, sec, 2048) || sec[0] != 1 || sec[1] != 'C' || sec[2] != 'D')
+            port_printf("[port] warning: sector 16 of %s is not an ISO9660 primary volume descriptor\n", path);
+        return 0;
+    }
     cd_fp = fopen(path, "rb");
     if (!cd_fp) return -1;
     cd_image_path = path;
@@ -831,6 +878,17 @@ static int cd_read_sectors_base(int lba, int count, void *dst, int bytes) {
                                holes, count, lba, cd_sector_count);
         return 0;
     }
+    if (cd_chd) {
+        for (int i = 0; i < count; i++, d += bytes) {
+            u8 raw[2352];
+            int rc = port_chd_read_raw(lba + i, raw);
+            if (port_trace_cd) port_printf("[port] cd: lba %d (%d/%d) %d bytes from chd -> %s\n", lba + i, i + 1, count, bytes, rc ? "FAILED" : "ok");
+            if (rc) { port_printf("[port] CD read failed: lba %d of %s (%d sectors)%s\n", lba + i, cd_image_path, cd_sector_count,
+                                  rc == -2 ? ": beyond the end of the image" : ": chd decode error"); return -1; }
+            memcpy(d, raw + (bytes == 2048 ? 24 : 12), bytes);
+        }
+        return 0;
+    }
     if (!cd_fp) { port_printf("[port] CD read of lba %d: no disc image open\n", lba); return -1; }
     for (int i = 0; i < count; i++) {
         long long off = cd_raw ? (long long)(lba + i) * 2352 + (bytes == 2048 ? 24 : 12) : (long long)(lba + i) * 2048;
@@ -882,7 +940,7 @@ unsigned char *port_cd_read_named(const char *path, unsigned *size) {
         if (!d || (long long)fread(d, 1, (size_t)n, f) != n) { free(d); fclose(f); return 0; }
         fclose(f); *size = (unsigned)n; return d;
     }
-    if (!cd_fp) return 0;
+    if (!cd_fp && !cd_chd) return 0;
     u8 pvd[2048];
     if (port_cd_read_sectors(16, 1, pvd, 2048)) return 0;
     int lba = pvd[158] | pvd[159] << 8 | pvd[160] << 16 | pvd[161] << 24, sz = pvd[166] | pvd[167] << 8 | pvd[168] << 16 | pvd[169] << 24, isdir = 1;

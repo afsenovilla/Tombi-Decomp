@@ -23,9 +23,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.RandomAccessFile;
-import java.security.MessageDigest;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -191,90 +188,83 @@ public class LauncherActivity extends Activity {
         return l != null ? l.replaceAll(".*[/:]", "") : "disc.bin";
     }
 
-    /** Copies the picked .bin/.iso (and .cue) into files/disc, checks MAIN0.EXE's SHA-1, remembers the image. */
+    // ---- import state (written by the "tombi-disc" thread, drawn by the view at ~10 Hz while busy) ----
+    static final int IDLE = 0, COPYING = 1, CHECKING = 2;
+    volatile int phase = IDLE;
+    volatile long copied, copyTotal;          // bytes; copyTotal <= 0: size unknown (no OpenableColumns.SIZE)
+    volatile boolean cancelImport;
+    volatile int result;                       // 0 none, 1 success, -1 failure (after an import)
+
+    static boolean nativeOk;
+    static {
+        try { System.loadLibrary("tombidisc"); nativeOk = true; } catch (Throwable t) { nativeOk = false; }
+    }
+    /** "sha1:<hex>" or "err:<reason>" ("err:nomain0"): port2/android/disccheck.c, the same for .bin/.iso/.chd */
+    static native String nativeMain0Sha1(String path);
+    static native int nativeCheckProgress();
+
+    long sizeOf(Uri u) {
+        try (Cursor c = getContentResolver().query(u, new String[]{android.provider.OpenableColumns.SIZE}, null, null, null)) {
+            if (c != null && c.moveToFirst() && !c.isNull(0)) return c.getLong(0);
+        } catch (Exception e) { /* unknown */ }
+        return -1;
+    }
+
+    /** Copies the picked .bin/.iso/.chd (and .cue) into files/disc, checks MAIN0.EXE's SHA-1, remembers the image.
+     *  Cancel (B / "Cancel") stops the copy and deletes the partial files. */
     void importDisc(List<Uri> uris) {
+        List<File> written = new ArrayList<>();
+        cancelImport = false; result = 0; copied = 0;
+        long tot = 0;
+        for (Uri u : uris) { long n = sizeOf(u); if (n < 0) { tot = -1; break; } tot += n; }
+        copyTotal = tot;
+        phase = COPYING;
+        status(null);
         try {
             File dir = new File(filesDir(), "disc");
             dir.mkdirs();
             File image = null, cue = null;
-            byte[] buf = new byte[1 << 16];
+            byte[] buf = new byte[1 << 18];
             for (Uri u : uris) {
                 String name = displayName(u).replace('/', '_');
                 String low = name.toLowerCase(Locale.ROOT);
                 File dst = new File(dir, name);
                 InputStream in = getContentResolver().openInputStream(u);
                 if (in == null) throw new Exception(name);
+                written.add(dst);
                 OutputStream out = new FileOutputStream(dst);
-                long total = 0; int n;
+                int n;
                 try {
                     while ((n = in.read(buf)) > 0) {
+                        if (cancelImport) throw new InterruptedException();
                         out.write(buf, 0, n);
-                        if (((total += n) & ((32 << 20) - 1)) < n) status(getString(R.string.disc_copying, total >> 20));
+                        copied += n;
                     }
                 } finally { in.close(); out.close(); }
                 if (low.endsWith(".cue")) cue = dst; else image = dst;
             }
-            if (image == null) { status(getString(R.string.disc_needbin)); return; }
-            status(getString(R.string.disc_checking));
-            String sha = main0Sha1(image);
-            prefs.edit().putString("disc", (cue != null ? cue : image).getAbsolutePath())
-                    .putBoolean("disc_ok", MAIN0_SHA1.equals(sha)).apply();
-            status(sha == null ? getString(R.string.disc_nomain0) : MAIN0_SHA1.equals(sha)
-                    ? getString(R.string.disc_ok) : getString(R.string.disc_badsha, sha));
+            if (image == null) { fail(getString(R.string.disc_needbin)); return; }
+            phase = CHECKING;
+            view.postInvalidate();
+            String r = nativeOk ? nativeMain0Sha1(image.getAbsolutePath()) : "err:libtombidisc.so missing";
+            String sha = r.startsWith("sha1:") ? r.substring(5) : null;
+            boolean ok = MAIN0_SHA1.equals(sha);
+            prefs.edit().putString("disc", (cue != null ? cue : image).getAbsolutePath()).putBoolean("disc_ok", ok).apply();
+            phase = IDLE;
+            result = ok ? 1 : -1;
+            status(ok ? getString(R.string.disc_ok) : sha != null ? getString(R.string.disc_badsha, sha)
+                    : r.equals("err:nomain0") ? getString(R.string.disc_nomain0) : getString(R.string.disc_fail, r.substring(4)));
+        } catch (InterruptedException e) {
+            for (File f : written) f.delete();
+            phase = IDLE; result = -1;
+            status(getString(R.string.disc_cancelled));
         } catch (Exception e) {
-            status(getString(R.string.disc_fail, String.valueOf(e.getMessage())));
+            for (File f : written) f.delete();
+            fail(getString(R.string.disc_fail, String.valueOf(e.getMessage())));
         }
     }
 
-    // ---- ISO 9660 reader (2048-byte .iso or raw 2352-byte .bin, Mode 1 or Mode 2 Form 1) ----
-    RandomAccessFile isoF; int secSize, secOff;
-
-    byte[] sector(int lba) throws Exception {
-        byte[] b = new byte[2048];
-        isoF.seek((long) lba * secSize + secOff);
-        isoF.readFully(b);
-        return b;
-    }
-    static int le32(byte[] b, int o) { return (b[o] & 255) | (b[o + 1] & 255) << 8 | (b[o + 2] & 255) << 16 | (b[o + 3] & 255) << 24; }
-
-    /** {lba, size} of the entry `name` in the directory at (lba, size), or null. */
-    int[] findEntry(int lba, int size, String name) throws Exception {
-        for (int s = 0; s < (size + 2047) / 2048; s++) {
-            byte[] b = sector(lba + s);
-            for (int o = 0; o < 2048 && (b[o] & 255) > 0; o += b[o] & 255) {
-                int nl = b[o + 32] & 255;
-                String n = new String(b, o + 33, nl, "ISO-8859-1");
-                int semi = n.indexOf(';'); if (semi >= 0) n = n.substring(0, semi);
-                if (n.equalsIgnoreCase(name)) return new int[]{le32(b, o + 2), le32(b, o + 10)};
-            }
-        }
-        return null;
-    }
-
-    String main0Sha1(File image) {
-        try {
-            isoF = new RandomAccessFile(image, "r");
-            if (isoF.length() % 2352 == 0) {
-                secSize = 2352;
-                isoF.seek(16L * 2352 + 15);
-                secOff = isoF.read() == 2 ? 24 : 16;
-            } else { secSize = 2048; secOff = 0; }
-            byte[] pvd = sector(16);
-            int[] dir = findEntry(le32(pvd, 156 + 2), le32(pvd, 156 + 10), "EXE");
-            int[] f = dir != null ? findEntry(dir[0], dir[1], "MAIN0.EXE") : null;
-            if (f == null) return null;
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            for (int left = f[1], l = f[0]; left > 0; left -= 2048, l++) md.update(sector(l), 0, Math.min(2048, left));
-            StringBuilder sb = new StringBuilder();
-            for (byte x : md.digest()) sb.append(String.format("%02x", x & 255));
-            return sb.toString();
-        } catch (Exception e) {
-            return null;
-        } finally {
-            try { if (isoF != null) isoF.close(); } catch (Exception e) { /* ignore */ }
-            isoF = null;
-        }
-    }
+    void fail(String msg) { phase = IDLE; result = -1; status(msg); }
 
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
@@ -288,7 +278,7 @@ public class LauncherActivity extends Activity {
         }
     }
 
-    void status(String s) { importStatus = s; view.postInvalidate(); }
+    void status(String s) { importStatus = s; if (view != null) view.postInvalidate(); }
 
     @Override
     public boolean onKeyDown(int code, KeyEvent e) {
@@ -334,7 +324,7 @@ public class LauncherActivity extends Activity {
             lastFocus[screen] = focus;
             screen = sc;
             focus = lastFocus[sc];
-            importStatus = sc == DISC ? importStatus : null;
+            if (sc != DISC && phase == IDLE) { importStatus = null; result = 0; }
             invalidate();
         }
 
@@ -385,6 +375,8 @@ public class LauncherActivity extends Activity {
                 items.add(toggle(R.string.opt_inflives, "inflives"));
                 items.add(toggle(R.string.opt_infhealth, "infhealth"));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
+            } else if (phase != IDLE) {   // importing: the only action is Cancel (also B)
+                items.add(new Item(getString(R.string.cancel), new Runnable() { public void run() { cancelImport = true; } }));
             } else {
                 items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
@@ -410,9 +402,11 @@ public class LauncherActivity extends Activity {
                 case KeyEvent.KEYCODE_NUMPAD_ENTER: case KeyEvent.KEYCODE_SPACE:
                     activate(items.get(focus)); break;
                 case KeyEvent.KEYCODE_BUTTON_B: case KeyEvent.KEYCODE_BACK: case KeyEvent.KEYCODE_ESCAPE:
-                    if (screen == MAIN) finish(); else setScreen(MAIN);
+                    if (phase != IDLE) cancelImport = true;
+                    else if (screen == MAIN) finish(); else setScreen(MAIN);
                     break;
                 case KeyEvent.KEYCODE_BUTTON_START:
+                    if (phase != IDLE) break;
                     if (screen == MAIN) play(); else setScreen(MAIN);
                     break;
                 default: return false;
@@ -563,6 +557,55 @@ public class LauncherActivity extends Activity {
             canvas.restore();
         }
 
+        /** Selva pill bar: dark track, accent fill with its shadow edge (as the buttons), phase / % / MB labels. */
+        void progressBar(int ph, float top) {
+            long done = copied, tot = copyTotal;
+            float frac;
+            if (ph == CHECKING) frac = nativeOk ? Math.max(0, Math.min(1, nativeCheckProgress() / 1000f)) : 0;
+            else frac = tot > 0 ? Math.min(1f, done / (float) tot) : 0;
+            String label = getString(ph == CHECKING ? R.string.disc_phase_check : R.string.disc_phase_copy);
+            text(nunito, 20, Color.WHITE);
+            p.setTextAlign(Paint.Align.LEFT);
+            canvas.drawText(label, 640 - 300, top + 6, p);
+            p.setTextAlign(Paint.Align.RIGHT);
+            String pct = ph == CHECKING || tot > 0 ? Math.round(frac * 100) + " %" : "";
+            canvas.drawText(pct, 640 + 300, top + 6, p);
+            RectF track = new RectF(640 - 300, top + 20, 640 + 300, top + 50);
+            float rad = track.height() / 2;
+            p.setColor(0x40000000);
+            canvas.drawRoundRect(track, rad, rad, p);
+            if (frac > 0) {
+                float wFill = Math.max(track.height(), track.width() * frac);
+                RectF f = new RectF(track.left, track.top, track.left + wFill, track.bottom - 4);
+                p.setColor(ACCENT_SH);
+                tmp.set(f.left, f.top + 4, f.right, f.bottom + 4);
+                canvas.drawRoundRect(tmp, rad, rad, p);
+                p.setColor(ACCENT);
+                canvas.drawRoundRect(f, rad, rad, p);
+                p.setColor(0x40ffffff);   // highlight along the top edge
+                tmp.set(f.left + rad / 2, f.top + 4, f.right - rad / 2, f.top + 9);
+                if (tmp.width() > 0) canvas.drawRoundRect(tmp, 3, 3, p);
+            }
+            text(nunito, 17, SUB);
+            String mb = ph == CHECKING ? "MAIN0.EXE (SHA-1)"
+                    : tot > 0 ? (done >> 20) + " / " + (tot >> 20) + " MB" : (done >> 20) + " MB";
+            canvas.drawText(mb, 640, top + 78, p);
+        }
+
+        void resultBox(boolean ok, String msg, float top) {
+            tmp.set(640 - 320, top, 640 + 320, top + 80);
+            p.setStyle(Paint.Style.FILL);
+            p.setColor(ok ? 0x5527c25a : 0x55ff3a5c);
+            canvas.drawRoundRect(tmp, 22, 22, p);
+            tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT); tp.setTextSize(18); tp.setColor(Color.WHITE);
+            @SuppressWarnings("deprecation")
+            StaticLayout l = new StaticLayout((ok ? "✓  " : "✗  ") + msg, tp, 600, Layout.Alignment.ALIGN_CENTER, 1.05f, 0, false);
+            canvas.save();
+            canvas.translate(640 - 300, tmp.centerY() - l.getHeight() / 2f);
+            l.draw(canvas);
+            canvas.restore();
+        }
+
         void drawDisc() {
             bigTitle(getString(R.string.disc), 60, 92);
             File disc = discFile();
@@ -578,8 +621,10 @@ public class LauncherActivity extends Activity {
             if (disc != null) wrapped(getString(R.string.disc_path, disc.getAbsolutePath()), 178);
             tp.setColor(SUB);
             wrapped(getString(R.string.disc_howto), 222);
-            String st = importStatus;
-            if (st != null) { tp.setColor(Color.WHITE); tp.setTextSize(18); wrapped(st, 330); }
+            int ph = phase;
+            if (ph != IDLE) { progressBar(ph, 300); postInvalidateDelayed(100); }   // ~10 Hz while busy
+            else if (result != 0 && importStatus != null) resultBox(result > 0, importStatus, 300);
+            else if (importStatus != null) { tp.setColor(Color.WHITE); tp.setTextSize(18); wrapped(importStatus, 330); }
             float y = 400;
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);

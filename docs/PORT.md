@@ -2447,8 +2447,8 @@ a PC. Everything the PC launcher (`tools/port_launcher.py`, `tools/port_mods.py`
 | Launcher step (Python) | Writes / passes | Native (C) |
 |---|---|---|
 | disc check: MAIN0.EXE extracted next to `tombi-port.json`, sha1 vs SCES-01331 | `MAIN0.EXE`, settings | Android launcher hashes MAIN0 itself; `tombi2` logs the MAIN0 sha1 of the image |
-| extraction (`extract_data.py`) | `data/` (every file, `_disc/*.raw`, `manifest.txt`) | not needed: `--disc Tombi.bin\|.cue\|.iso` reads everything through the CD layer (sector reads by LBA and reads by name, `EXE/MAINn.EXE`; raw 2352 and cooked 2048 images; `.cue` -> its `.bin`) |
-| `.chd` images (launcher decodes them in Python, `extract_data.chd`) | `data/` | **not native yet**: would need libchdr + zlib/lzma/flac/zstd; convert with `chdman extractcd` meanwhile |
+| extraction (`extract_data.py`) | `data/` (every file, `_disc/*.raw`, `manifest.txt`) | not needed: `--disc Tombi.bin\|.cue\|.iso` reads everything through the CD layer (sector reads by LBA and reads by name, `EXE/MAINn.EXE`; raw 2352 and cooked 2048 images; `.cue` -> its `.bin`; `.chd`) |
+| `.chd` images (launcher decodes them in Python, `extract_data.chd`) | `data/` | native: `--disc Tombi.chd` (PC and Android) reads CHD v5 CDs from `chdman createcd` (codecs cdlz/cdzl/cdfl/cdzs) through vendored libchdr (`port2/third_party/libchdr`, BSD-3, pinned commit in `VENDORED.txt`, with the LZMA SDK / miniz / zstd / dr_flac copies it ships), see "CHD images" below |
 | text patch "Traducción mejorada" (`data_patch.apply` = `text_patch` encoder + MAINn.EXE file tables, grown WFMs moved past the end of the disc) — Spanish only | patched files in `data/`, `data/.orig/` backups, `manifest.txt` | `--text-patch patches/es_mejorada.tombipatch.json` (or `.tpatch`): applied in memory at load time (`port2/shims/tpatch.c`) |
 | English cut-content text (`en_cut_content.tombipatch.json`) with `--cut-content --lang 0` and no other text patch | same | automatic: `--cut-content` in English loads `en_cut_content.tpatch` from `--patch-dir DIR` (else `patches/` in the cwd or next to the exe); or pass it with `--text-patch` |
 | Spanish graphic redraws (`gfx_es`, patch key `portGfx`) | `data/port_gfx_es.tbtx` + `--patch-tex` (lang 5 only) | **not native yet**: the redraws are pixels derived from the disc's own sprites (PIL drawing); shipping them would ship game-derived art, porting the generator to C is open work. Without it the original English sprites (NOW LOADING, TRY AGAIN, LOAD/SAVE) stay |
@@ -2456,6 +2456,26 @@ a PC. Everything the PC launcher (`tools/port_launcher.py`, `tools/port_mods.py`
 | button-prompt glyphs (`prompt_glyphs.py`, mod) | `prompts-*.tbtx` + `--patch-tex` | not native (optional mod) |
 | mods (`port_mods.py`) | flags only: `--skip-intro`, `--hz`, `--poke`, `--poke-every`, `--pad-script`, `--title-debug`, `--debug-menu`, `--civ-*` | already flags: any launcher can pass them |
 | window options | `--window --scale --renderer --aspect --internal-res --fps60 --lang --save-dir --texture-pack --fullscreen --show-fps` | already flags |
+
+**CHD images.** `port2/shims/cd_chd.c` opens the `.chd` with libchdr, reads the CHT2 (or CHTR) track metadata and
+maps disc LBA n to CHD frame n of track 1 (plus its stored pregap when PGTYPE is `V...`); later tracks follow at their
+4-frame padded offsets. Frames are 2448 bytes (2352 + 96 subcode), a hunk holds `hunkbytes / 2448` of them; one decoded
+hunk is cached. Raw tracks are returned as stored (libchdr rebuilds sync/ECC), cooked MODE1/MODE2_FORM1 tracks as a
+Mode 2 Form 1 sector (data at +24). Verified on the PAL image: `chdman createcd` of `Tombi.cue` -> `--disc Tombi.chd
+--headless --frames 36` frames md5-identical to `--disc Tombi.bin`, and 600 frames with `--lang 5 --text-patch
+patches/es_mejorada.tombipatch.json` identical too. The wasm build has no libchdr (`PORT_HAVE_CHD` unset: `.chd`
+fails with a message). Android: the launcher copies the `.chd` as is; the MAIN0.EXE check for every format is C
+(`port2/android/disccheck.c` -> `libtombidisc.so`, JNI `nativeMain0Sha1`, sharing `cd_chd.c`), replacing the old Java
+ISO reader.
+
+**`.cue` FILE fallback.** When the cue's `FILE "name"` is not next to it (renamed `.bin`, the PAL dump's
+`"Tombi!.bin"` saved as `Tombi.bin`, different case, a copy saved under its SAF display name), the CD layer uses the
+same name in another case, else `<cue name>.bin`, else the only `.bin`/`.img`/`.iso` in the folder. Before, such a cue
+opened no image at all, so reads by name (`SYSTEM/D0SPSUB.BIN`: the second-screen names and map) failed.
+
+**Android disc import.** The Disco screen shows a pill progress bar (accent fill with the buttons' shadow edge,
+percentage, `224 / 680 MB` from `OpenableColumns.SIZE` summed over the picked files, phase Copiando…/Comprobando…,
+redrawn at ~10 Hz), Cancel (B or the button) stops the copy and deletes the partial files, then a success/failure box.
 
 **Text patches natively.** The JSON holds only our text; turning it into game files needs the WFM encoder and the glyph
 pool of the disc's fonts. `tools/tpatch_build.py DATA_DIR X.tombipatch.json -o X.tpatch` runs the exact Python pipeline

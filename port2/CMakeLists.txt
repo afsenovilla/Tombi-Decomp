@@ -85,9 +85,17 @@ add_custom_command(OUTPUT ${GEN}/build_id.stamp
                    BYPRODUCTS ${GEN}/build_id.c COMMENT "build id" VERBATIM)
 add_custom_target(port2_build_id ALL DEPENDS ${GEN}/build_id.stamp)
 execute_process(COMMAND ${CMAKE_COMMAND} -DSRC=${ROOT} -DOUT=${GEN}/build_id.c -P ${ROOT}/port/cmake/build_id.cmake)
+# libchdr (third_party/libchdr, BSD-3, with the zstd / LZMA / miniz / dr_flac copies it ships): .chd disc images
+set(CHDR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libchdr)
+add_library(port2chd OBJECT ${CHDR_DIR}/unity.c ${CHDR_DIR}/src/libchdr_codec_avhuff.c)
+target_include_directories(port2chd PRIVATE ${CHDR_DIR}/include)
+target_compile_definitions(port2chd PRIVATE ZSTD_DISABLE_ASM)
+target_compile_options(port2chd PRIVATE ${PORT2_ARCH_FLAGS} -O2 -w)
 add_library(port2rt OBJECT ${PORT2_RT} ${GEN}/funcmap.c ${GEN}/build_id.c)
 add_dependencies(port2rt port2_build_id)
 target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(port2rt PRIVATE ${CHDR_DIR}/include)
+target_compile_definitions(port2rt PRIVATE PORT_HAVE_CHD)
 target_compile_options(port2rt PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_RT_FLAGS} -O2 -Wall -Wno-unused-function)
 if(ANDROID)
   # -DPORT2_SDL2_SOURCE=DIR: an SDL2 2.30.x source tree (the workflow .github/workflows/android-apk.yml downloads the
@@ -148,10 +156,10 @@ endif()
 # 3. resolve the rest against the retail symbol table: data image (from the user's MAIN0.EXE/X000.BIN), aliases,
 #    stubs.  All three are generated into the build dir; data.c is game data and never leaves it.
 file(GENERATE OUTPUT ${GEN}/objects.txt
-     CONTENT "$<JOIN:$<TARGET_OBJECTS:game2>,\n>\n$<JOIN:$<TARGET_OBJECTS:game2_24>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2rt>,\n>\n")
+     CONTENT "$<JOIN:$<TARGET_OBJECTS:game2>,\n>\n$<JOIN:$<TARGET_OBJECTS:game2_24>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2rt>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2chd>,\n>\n")
 add_custom_command(OUTPUT ${GEN}/syms.ld ${GEN}/stubs.c ${GEN}/data.c ${GEN}/thunks.S ${GEN}/addrmap.c ${GEN}/report.txt
                    COMMAND ${PORT2_GEN_ENV} ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py link ${GEN} ${CMAKE_NM} ${GEN}/objects.txt
-                   DEPENDS game2 game2_24 port2rt $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt>
+                   DEPENDS game2 game2_24 port2rt port2chd $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt>
                            ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py
                    COMMENT "Resolving game symbols: data image, aliases, dispatch thunks, stubs")
 add_library(port2gen OBJECT ${GEN}/stubs.c ${GEN}/data.c ${GEN}/thunks.S ${GEN}/addrmap.c)
@@ -165,7 +173,7 @@ if(ANDROID)
   # libtombi.so (the game; entry port_main) and libmain.so (SDL_main: reserves the low range, loads libtombi.so into
   # it).  -Bsymbolic: the game's own definitions (its Psy-Q `write`/`open` stubs, the printf shim) win inside the
   # library, as they do in the PC executables, over bionic's that the dynamic linker would otherwise pick first.
-  add_library(tombi2 SHARED $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2gen>)
+  add_library(tombi2 SHARED $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:port2gen>)
   set_target_properties(tombi2 PROPERTIES OUTPUT_NAME tombi LINKER_LANGUAGE C LINK_DEPENDS ${GEN}/syms.ld)
   target_link_options(tombi2 PRIVATE -Wl,-Bsymbolic -Wl,-z,noexecstack ${GEN}/syms.ld)
   target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
@@ -173,9 +181,15 @@ if(ANDROID)
   target_include_directories(main PRIVATE ${GEN}/sdlinc)
   target_link_libraries(main PRIVATE SDL2 log dl)
   add_dependencies(main tombi2)
+  # libtombidisc.so: the launcher's disc check (MAIN0.EXE sha1 of a .bin/.iso/.chd), loaded in the launcher process
+  add_library(tombidisc SHARED ${CMAKE_CURRENT_SOURCE_DIR}/android/disccheck.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/cd_chd.c
+              $<TARGET_OBJECTS:port2chd>)
+  target_include_directories(tombidisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHDR_DIR}/include)
+  target_compile_definitions(tombidisc PRIVATE PORT_HAVE_CHD)
+  target_compile_options(tombidisc PRIVATE -O2 -fPIC)
   return()
 endif()
-add_executable(tombi2 $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2gen>)
+add_executable(tombi2 $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:port2gen>)
 set_target_properties(tombi2 PROPERTIES LINKER_LANGUAGE C LINK_DEPENDS ${GEN}/syms.ld)
 if(WIN32)
   enable_language(RC)                               # the exe's icon (tools/icons/port.ico)
