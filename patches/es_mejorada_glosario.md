@@ -30,6 +30,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | chest (100 year old chests) | cofre (cofres centenarios) | antes "arcón" |
 | Directional button | botón de dirección | |
 | Exercise Routine | Ejercicio | |
+| Item (menú de Select: Item / Event / Status / Map) | Objeto (Objeto / Evento / Estado / Mapa) | antes "Elmto": la tira de glifos del menú está llena y no tiene `O` ni `b`; el port las dibuja (`tools/pause_text.py`, clave `EXE/MAIN5.EXE` → `pause`). Singular como las otras tres y con sus 6 letras; el mismo término que "pantalla de objetos" y la pestaña *Objetos* del panel |
 | AP | PA | |
 | Kokka birds | pájaros Kokka | |
 | Pig / ol' coot / geezer | vejete, vejestorio | registro coloquial |

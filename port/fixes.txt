@@ -150,6 +150,12 @@ src/drawPauseMenu.c | extern char D_80012940[]; | extern char D_80012940[]; exte
 src/drawPauseMenu.c | for (; e->x != -1; e++) { | e = port_es_pause(e); for (; e->x != -1; e++) {
 src/drawPauseMenu.c | pt = (PT *)(DAT_1f8002d8 + h[1]); | pt = (PT *)(DAT_1f8002d8 + h[1]); port_es_frame(pt, n, D_80080404[mode]);
 src/drawPauseMenu.c |         w = pt->w; |         w = pt->w; if (port_es_dl || port_es_dr) port_es_widen(&p->x0, &w);
+# --lang 5: the Spanish glyph strip (32 cells at v 144 of the HUD page, all used) has no 'O' nor 'b', hence the disc's "Elmto";
+# a text patch may write "Objeto" with two more codes (tools/pause_text.py), drawn from the strip itself: 0x20 'O' = the
+# 'U' (0x0C) as it is from row 8 down, closed on top by its own rows 13..9 (a quad with v reversed), 0x21 'b' = the 'd'
+# (0x0E) mirrored (u reversed).  Without such a patch MAIN5 has no code >= 0x20 and nothing changes
+src/drawPauseMenu.c | extern char D_80012948[]; | extern char D_80012948[]; static void port_es_quad(int x0, int y0, int x1, int y1, int u0, int v0, int u1, int v1, unsigned short clut, int tp) { extern void AddPrim(void *, void *); FT4 *p = (FT4 *)NEXT_PRIM; ((unsigned char *)p)[3] = 9; p->code = 0x2d; p->r0 = p->g0 = p->b0 = 0x80; p->x0 = p->x2 = x0; p->x1 = p->x3 = x1; p->y0 = p->y1 = y0; p->y2 = p->y3 = y1; p->u0 = u0; p->v0 = v0; p->clut = clut; p->uv1 = (u1 & 0xff) + ((v0 & 0xff) << 8) + (tp << 16); p->uv2 = (u0 & 0xff) + ((v1 & 0xff) << 8); p->uv3 = (u1 & 0xff) + ((v1 & 0xff) << 8); AddPrim((void *)(CURRENT_OT + 4), p); NEXT_PRIM = NEXT_PRIM + 0x28; } static void port_es_glyph(int c, int x, int y) { extern void *port_lang_item(void *); extern unsigned short GetClut(int, int); extern int GetGraphType(void); UV *t = (UV *)port_lang_item(D_80080300); unsigned short clut = GetClut(0x160, 0x1e3); int tp = (GetGraphType() == 1 || GetGraphType() == 2) ? 0x24 : 0x14; if (c == 0x20) { int u = t[0x0c].u, v = t[0x0c].v; port_es_quad(x, y + 3, x + 8, y + 8, u, v + 13, u + 8, v + 8, clut, tp); port_es_quad(x, y + 8, x + 8, y + 16, u, v + 8, u + 8, v + 16, clut, tp); } else if (c == 0x21) { int u = t[0x0e].u, v = t[0x0e].v; port_es_quad(x, y, x + 8, y + 16, u + 7, v, u - 1, v + 16, clut, tp); } }
+src/drawPauseMenu.c | if (c) { | if (c >= 0x20 && port_lang == 5) port_es_glyph(c, x, y); else if (c) {
 #
 # weaponOnHitGetResult(o, p, r) returns its third argument r for weapon types it does not handle (2, 3, > 10: in
 # practice cat-3 type 3, AREA04's thrown breakable, updateThrownBreakable sets ba5). The C passes (o, p); the R3000

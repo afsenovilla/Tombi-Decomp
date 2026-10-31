@@ -1854,6 +1854,13 @@ MAINn, gives the language's address of the item (Bn); the old rule stays the fal
 the four lists and the UV table through it. `PAUSA / SALIR / CARGAR` (5), `PAUSA / SAIR / CARREGAR` (6),
 `PAUS / AVBRYT / HäMTA` (7), `PAUSE / AFSLUT / INDLÆS` (8). Sweep (lui pairs into every changed-size gap of
 MAIN0 and the AREA00 overlays): only these lists and the event-title tables (already `port_title_*`).
+The Select menu of MAIN5 reads `Elmto / Evento / Estado / Mapa`: its glyphs are a strip of 8x16 cells at v 144 of the
+HUD page (`SYSTEM/A60003.GAM`, tpage 0x14) holding just the letters the Spanish menus use, 31 of them plus the blank
+cell, i.e. the whole 256-px row, with no `O` nor `b`. A text patch can write `Objeto` (`tools/pause_text.py`,
+`"menus": {"EXE/MAIN5.EXE": {"pause": {"Elmto": "Objeto"}}}`: rewritten in its 8-byte slot, the entry's x moved to keep
+the centre) with two codes past the strip, which `port/fixes.txt` draws for `--lang 5` from the strip itself: 0x20 `O`
+= the `U` closed on top by its own rows 13..9 (a quad with v reversed), 0x21 `b` = the `d` mirrored (u reversed). No
+texel is added and the box is unchanged (6 glyphs, like Evento / Estado); without such a patch nothing changes.
 
 **Regression scripts** (headless, `--data`; three items are poked into the inventory, Triangle opens the item
 sub-screen, Cross on the first item shows its message, Triangle closes it, then again):

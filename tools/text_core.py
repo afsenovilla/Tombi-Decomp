@@ -21,6 +21,7 @@ import title_layout as TL
 import verb_order as VO
 import menu_text as MT
 import memcard_text as MC
+import pause_text as PT
 
 LANG_MAIN = "S"          # the PAL Spanish disc uses the *S.WFM files; the other languages are still on the disc
 PROJECT_VERSION = 1
@@ -531,9 +532,24 @@ class Project:
 
     def _menu_patches(self, files, errors):
         """Title screen / options menu texts (not WFM: glyph strings in SYSTEM/OnPTSUB0.BIN, tools/menu_text.py) and the
-        memory card screen's (SYSTEM/DnSPSUB2.BIN, tools/memcard_text.py)."""
+        memory card screen's (SYSTEM/DnSPSUB2.BIN, tools/memcard_text.py), the sub-screen lists' (DnSPSUB/DnSPSUB3.BIN,
+        tools/subscreen_text.py) and the in-game pause menus' (EXE/MAINn.EXE, tools/pause_text.py)."""
         import subscreen_text as SS
         for path, spec in sorted(self.menus.items()):
+            exe = re.fullmatch(r"EXE/MAIN(\d)\.EXE", path, re.I)
+            if exe:
+                try:
+                    data = files[path] if path in files else self.src.read_any(path)
+                    new = PT.apply(data, spec, int(exe.group(1)))
+                except (OSError, KeyError):
+                    errors.append(tr("tc.nofilein", path))
+                    continue
+                except PT.PauseError as ex:
+                    errors.append("%s: %s" % (path, ex))
+                    continue
+                if new != data:
+                    files[path] = new
+                continue
             mod = MC if re.search(r"D\dSPSUB2\.BIN$", path, re.I) else SS if re.search(r"D\dSPSUB3?\.BIN$", path, re.I) else MT
             spec = dict(spec)
             names = spec.pop("itemNames", None)
