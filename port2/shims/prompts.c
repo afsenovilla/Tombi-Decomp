@@ -87,29 +87,30 @@ static void draw_disc(void) {
     }
 }
 static void put(int x, int y, int c) { if (x >= 0 && x < GW && y >= 0 && y < GH) img[y][x] = (u8)c; }
-/* 5 x 7 letters, drawn centred on the disc */
-static const struct { char ch; u8 rows[7]; } font5[] = {
-    { 'A', { 0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11 } }, { 'B', { 0x1E, 0x11, 0x11, 0x1E, 0x11, 0x11, 0x1E } },
-    { 'X', { 0x11, 0x11, 0x0A, 0x04, 0x0A, 0x11, 0x11 } }, { 'Y', { 0x11, 0x11, 0x0A, 0x04, 0x04, 0x04, 0x04 } },
-    { 'L', { 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1F } }, { 'R', { 0x1E, 0x11, 0x11, 0x1E, 0x14, 0x12, 0x11 } },
-    { 'Z', { 0x1F, 0x01, 0x02, 0x04, 0x08, 0x10, 0x1F } }, { 'T', { 0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04 } },
-    { '1', { 0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E } }, { '2', { 0x0E, 0x11, 0x01, 0x02, 0x04, 0x08, 0x1F } },
+/* 6 x 8 letters: even size, so they sit exactly in the middle of the 12 x 12 disc (x 3..8, rows 4..11) */
+static const struct { char ch; u8 rows[8]; } font6[] = {
+    { 'A', { 0x0C, 0x12, 0x21, 0x21, 0x3F, 0x21, 0x21, 0x21 } },
+    { 'B', { 0x3E, 0x21, 0x21, 0x3E, 0x21, 0x21, 0x21, 0x3E } },
+    { 'X', { 0x21, 0x21, 0x12, 0x0C, 0x0C, 0x12, 0x21, 0x21 } },
+    { 'Y', { 0x21, 0x21, 0x12, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C } },
+    { 'L', { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x3F } },
+    { 'R', { 0x3E, 0x21, 0x21, 0x3E, 0x28, 0x24, 0x22, 0x21 } },
 };
 /* 3 x 5 letters for two-character labels (LB, ZR, L1...) */
 static const struct { char ch; u8 rows[5]; } font3[] = {
     { 'L', { 4, 4, 4, 4, 7 } }, { 'R', { 6, 5, 6, 5, 5 } }, { 'B', { 6, 5, 6, 5, 6 } }, { 'T', { 7, 2, 2, 2, 2 } },
     { 'Z', { 7, 1, 2, 4, 7 } }, { '1', { 2, 6, 2, 2, 7 } }, { '2', { 6, 1, 2, 4, 7 } },
 };
-static void letter5(char ch, int x0, int y0, int c) {
-    for (unsigned i = 0; i < sizeof font5 / sizeof font5[0]; i++) if (font5[i].ch == ch)
-        for (int y = 0; y < 7; y++) for (int x = 0; x < 5; x++) if (font5[i].rows[y] >> (4 - x) & 1) put(x0 + x, y0 + y, c);
+static void letter6(char ch, int x0, int y0, int c) {
+    for (unsigned i = 0; i < sizeof font6 / sizeof font6[0]; i++) if (font6[i].ch == ch)
+        for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if (font6[i].rows[y] >> (5 - x) & 1) put(x0 + x, y0 + y, c);
 }
 static void letter3(char ch, int x0, int y0, int c) {
     for (unsigned i = 0; i < sizeof font3 / sizeof font3[0]; i++) if (font3[i].ch == ch)
         for (int y = 0; y < 5; y++) for (int x = 0; x < 3; x++) if (font3[i].rows[y] >> (2 - x) & 1) put(x0 + x, y0 + y, c);
 }
 static void label(const char *s, int c) {
-    if (!s[1]) letter5(s[0], 4, 5, c);          /* one letter: 5 x 7 in the disc's 10 x 10 middle */
+    if (!s[1]) letter6(s[0], 3, 4, c);          /* one letter: 6 x 8, centred on the disc */
     else { letter3(s[0], 2, 6, c); letter3(s[1], 7, 6, c); }
 }
 /* the PlayStation symbols, in the game's colours */
