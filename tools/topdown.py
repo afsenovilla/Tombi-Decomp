@@ -391,6 +391,18 @@ DEFS = [  # name, address, kind ('obj' = {u8 box[4]; u16 w1e; s16 spad; void **a
 
 def cmd_defs():
     d = i0nfo2()
+    exe = main0()
+
+    def word(a):  # a pointer can land in I0NFO2 or in resident MAIN0 (AREA17 subtype 4 points its scripts at MAIN0 0x80014C90)
+        if I0NFO2_BASE <= a <= I0NFO2_BASE + len(d) - 4:
+            return u32(d, I0NFO2_BASE, a)
+        if 0x80010000 <= a <= MAIN0_BASE + len(exe) - 4:
+            return u32(exe, MAIN0_BASE, a)
+        return None
+
+    def valid(a):
+        return word(a) is not None
+
     for name, addr, kind, n in DEFS:
         print(name, hex(addr))
         for i in range(n):
@@ -402,13 +414,14 @@ def cmd_defs():
                 w1e, _, spad, _, anims = struct.unpack_from("<HhhhI", d, o)
                 head = "w1e %04x SPR_DATA[%d]" % (w1e, spad)
             ptrs = []
-            if I0NFO2_BASE <= anims < I0NFO2_BASE + len(d):
+            if valid(anims):
                 for k in range(24):
-                    v = u32(d, I0NFO2_BASE, anims + 4 * k)
-                    if not I0NFO2_BASE <= v < I0NFO2_BASE + len(d):
+                    v = word(anims + 4 * k)
+                    if v is None or not valid(v):
                         break
                     ptrs.append(v)
-            print("  [%d] %s anims %08x (%d scripts)" % (i, head, anims, len(ptrs)))
+            where = "" if not ptrs or all(I0NFO2_BASE <= v < I0NFO2_BASE + len(d) for v in ptrs) else ", scripts in MAIN0"
+            print("  [%d] %s anims %08x (%d scripts%s)" % (i, head, anims, len(ptrs), where))
 
 
 def cmd_warps():

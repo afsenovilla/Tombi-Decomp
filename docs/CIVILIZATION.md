@@ -221,11 +221,20 @@ scripts. The scripts use the script index `animFrame + k`: +0..3 idle facing, +4
 |---|---|---|---|
 | `TOPDOWN_A11_ACTOR_DEFS` 0x800FEEB8 | 5 | 11 (kind 0x3B) | 0x01, 0x0A, 0x0B, 0x10, 0x11 |
 | `TOPDOWN_A16_ACTOR_DEFS` 0x800FEEF4 | 4 | 11 | 0x01, 0x01, 0x01, 0x11 (boxes 8/16 and 16/32) |
-| `TOPDOWN_A17_ACTOR_DEFS` 0x800FEF64 | 5 | 11 | 0x01, 0x0A, 0x0B, 0x10, 0x08 (subtype 4 has no anim table) |
+| `TOPDOWN_A17_ACTOR_DEFS` 0x800FEF64 | 5 | 11 | 0x01, 0x0A, 0x0B, 0x10, 0x08 (subtype 4's anim table points into MAIN0, see below) |
 | `TOPDOWN_A18_ACTOR_DEFS` 0x800FEFA0 | 7 | 11 | all 0x01 |
 | `TOPDOWN_A11/16/17_SCENERY_DEFS` 0x800FF054 / 0x800FEDD0 / 0x800FEE04 | 2 / 3 / 3 | 13 (kind 0x3D) | 0x02.. 0x08 |
 
 `tools/topdown.py defs` prints the full table, with the anim table addresses and script counts.
+
+AREA17 subtype 4's table (`anims` 0x801098A4, the last 96 bytes of I0NFO2) holds 24 pointers into **resident MAIN0**,
+0x80014C90..0x80015008 (inside `D_80014C90`). They are valid 8-byte animation scripts: every frame id from 148 to 202
+appears, the box and argument words are zero, each script ends with bit 0x8000 and none jumps. The frames continue the
+A17 sequence (subtype 3 ends at 147). The JP copy (INFO2 0x8010854C → SLPS 0x80014B6C..) is byte-identical (920 bytes).
+Nothing but the nine `I*NFO2` copies points at them. Earlier versions of this page said "no anim table": `topdown.py
+defs` only followed pointers inside I0NFO2 (fixed). Found by SiergiejW, checked here on PAL and JP
+(SiergiejW, TombaEdit docs/cut-villages-jp-research.md). The scripts give frame order and timing only: the SPR rectangles and the page (w1e 8 = VRAM x 512) are still
+lost, so the sprite itself stays unknown.
 
 ### Sprite tables (kind 0x3B..0x3E, SPR)
 
@@ -353,7 +362,12 @@ Three progress variables are set by the spawners:
   - 9 → (4,6) the workshop entrance
   - 10 → (4,7) the dangerous old signboard, or (4,11) "you're always so full of energy"
   - 1 sets `D_8009CFA9` (1, or 2 if `D_8009CDF3`)
-  - `topdownA11ActorDialogueBank2` (0x800F1BAC) shows (2,4), then (2,5) and starts **event 0x4F**.
+  - `topdownA11ActorDialogueBank2` (0x800F1BAC) shows (2,4), then (2,5) and starts **event 0x4F**. Nothing calls it:
+    no `jal` and no pointer to it in PAL or JP (MAIN0/SLPS, I0NFO2/INFO2) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
+- **Spawn** (`spawnNpcSet0D`): while event 0x4D (`D_8009CDF1`, JP 0x8009E999) is still 0, actor 1 (the flag setter
+  in H1, (12,256)) is moved to x = -200; only x changes. The spawner also sets the phase `D_8009CFA5` once (see above);
+  the dialogue code only reads it. The controller `updateNpcSet0D` has no scene: state 1 is empty, so nothing reads
+  `D_8009CFA9` and no raft scene exists (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
   - These are MFNT110 #249-#265. PAL replaced them with "···??". The JP lines are in AREA11 A002 block 0 #220-#249;
     the raft craftsman (#237-#241 "you want a raft? bring wood from under the Wise Old Tree... bang clang... ouch")
     is k3 dx10-14.
@@ -401,15 +415,35 @@ Three progress variables are set by the spawners:
   - `npcSet0FSceneStep1` starts **event 0x4C**.
   - `npcSet0FSceneStep2` shows (2,6) and starts **event 0x63**.
   - `npcSet0FSceneStep4` shows (2,7) "good material... wait" and (2,8) "take it", then gives **item 0x3E** (the iron
-    gear) with `func_80026C50(0x3E, 1, 1)`.
+    gear, retail name Iron Wheel) with `addItemToInventory(0x3E, 1, 1)` and completes **event 0x62**
+    (`setEventComplete`). Event 0x62 is the one the retail Clock Tower starts (X016 `brokenStoneGearsTalk`), and
+    `checkStoneGearsTrigger` / `brokenStoneGearsRepair` take item 0x3E there. `npcSet0FPickStep` starts this scene only
+    when item **0x3D** is used (`GVARS_USE_ITEM_PENDING`) in room 5 (H5, the smith's house). It cannot run as shipped:
+    item 0x3D's menu condition is list 0, the always-false one (D0SPSUB `D_800FECE8[0x3D]` = 0 → 0x800FEDB0
+    `FF FF 00 FF 00 00 00 00`; JP DSPSUB 0x8010472C → 0x801047F4, same bytes). The scene also uses an actor pointer
+    that is never set (`n` in the C; JP keeps it in `s1`, saved at 0x800FE7DC and read at 0x800FE80C with no
+    assignment). It does not remove item 0x3D and has no one-time guard (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
+  - Steps **5, 6 and 7** are what the bomb maker asks for (`npcSet0FPickStep`: event 0x69 at 2 → step 5;
+    `D_8009CFA6` 1 → step 7; `D_8009CFAB` 1 → step 6). All three go to one block that only resets `step`/`state` to 0
+    (`updateNpcSet0F`; JP jump table 0x800EA534 has 0x800FED64 for entries 5, 6 and 7). There is no bomb-making scene
+    (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
   - `npcSet0FCheckTriggerSpots` and `topdownA17SceneryUpdate` drive two moving platforms (props `wb8` 0xD/0xE
-    between `TOPDOWN_A17_SCENERY_LIMITS`, carrying the player when bit 0x40 is set). These are the lifts.
+    between `TOPDOWN_A17_SCENERY_LIMITS`, carrying the player when bit 0x40 is set). These are the lifts. The stops are
+    `D_80100788` (JP 0x801018CC), seven `{x, y}` points, each a 3 x 3 px square that starts scene 3: (55,375),
+    (231,367), (390,375), (-999,-999) (a placeholder no one reaches), (111,159), (230,151), (334,159). Scene 3 picks
+    the platform with `index >= 4` and the stop with `index & 3`, so there are two lifts with three stops each, one
+    around y 370 and one around y 155 (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
+  - The same function has four rectangles for scenes 8-11, which hide the player and walk them straight up or down
+    in the same section (no warp): scene 8 x 100..128, y 420..428 → from (116,426) 84 px up; scene 9 x 110..128,
+    y 348..354 → from (116,346) 84 px down; scene 10 x 295..312, y 406..410 → from (302,407) 145 px up; scene 11
+    x 280..296, y 268..272 → from (288,272) 145 px down. So 8/9 and 10/11 are two hidden north-south passages; what
+    they looked like (tunnel, gate, stairs) is not in the code (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
 - **Text**: MFNT170 #213-#218, #257-#268 and #270-#289. They are "···??" in PAL; the JP text has them.
 
 ### AREA18 s0: the reunited town (NPC set 0x10), never implemented
 
 - The NPC set has 10 actors with no patrol, no props and dialogue cases 0/1 only.
-- `topdownA18ActorHandler` (0x800F548C) only cycles the animation (`wb4 = (wb4+1) & 7`) while pad bit 0x1000 is
+- `topdownA18ActorHandler` (0x800F548C, JP 0x800F6804) only cycles the animation (`wb4 = (wb4+1) & 7`) while pad bit 0x1000 is
   held. It is a sprite viewer, with no talk code at all.
 - The section controller entry `D_80079AD0[25]` (`dispatchSectionClose`) calls 0x80116234 for section 0. That is X0nn
   space, not I0NFO2 (in X018 it is not even a function start). A top-down AREA18 s0 would therefore jump into the
@@ -493,7 +527,7 @@ The idle/walk/talk code reads scripts `animFrame + 0/4/8` of table 0. Per subtyp
 | AREA16 | 2 | 0x01 | 90..129 | third group (the strongman, Male Stonetown Resident) | page proven; figure consistent; palette pixel-exact |
 | AREA16 | 3 | 0x11 | 0..29 | page at VRAM y 256 | lost |
 | AREA17 | 0 | 0x01 | 0..55 | the spiky-haired resident of A08000 | page proven; figure consistent |
-| AREA17 | 1, 2, 3, 4 | 0x0A, 0x0B, 0x10, 0x08 | 41..96, 82..135, 115..147, none | lost pages | lost |
+| AREA17 | 1, 2, 3, 4 | 0x0A, 0x0B, 0x10, 0x08 | 41..96, 82..135, 115..147, 148..202 (subtype 4: scripts in MAIN0) | lost pages | lost |
 
 - **Page (proven).** A part is drawn from page `part.tpage + w1e`. In the retail top-down tables (AREA05/08/19) the actor
   parts use relative page 0. The surviving SYS reload pages start at VRAM x 0x40, which is page 1, and the 4 bpp
@@ -575,7 +609,7 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 | # | Where (x, y) | Room | Who / what they say (gloss of the JP line) |
 |---|---|---|---|
 | 1 | (88, 240) | H1 | Lumberjack Factory Worker — House 1: "...Now I can make something really interesting..." (PAL text #227) |
-| 2 | (12, 256) | H1 | Lumberjack Factory Worker — House 1: no line, sets a flag |
+| 2 | (12, 256) | H1 | Lumberjack Factory Worker — House 1: no line, sets a flag (moved to x = -200 until event 0x4D starts) |
 | 3 | (16, 352) | H2 | Lumberjack Factory Worker — House 2: "It doesn't work, but this machine is iron... I could use it" |
 | 4 | (400, 520) | outdoors | Lumberjack Factory Worker — Diagonal patrol: "A fortune-teller lives in this hut, but he has a condition" |
 | 5 | (300, 470) | outdoors | Lumberjack Factory Worker — Horizontal patrol: "Wood is the best; stone and iron are cold" |
@@ -666,8 +700,8 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 |---|---|---|---|
 | 1 | (7, 152) | H4 | House 4: "I hear you fixed the stone clock tower" |
 | 2 | (27, 140) | H4 | House 4: "Good material! Wait a moment..." |
-| 3 | (-75, 371) | H5 | House 5, the smith: "Need something? An iron gear?" → gives you the gear (item 0x3E) |
-| 4 | (223, 123) | outdoors | The bomb maker: "Haven't seen your face before..." → "To make bombs I need electricity" |
+| 3 | (-75, 371) | H5 | House 5, the smith: "Need something? An iron gear?" → gives you the gear (item 0x3E; the scene needs item 0x3D, which the menu never lets you use) |
+| 4 | (223, 123) | outdoors | The bomb maker: "Haven't seen your face before..." → "To make bombs I need electricity" (the scenes he asks for are empty) |
 | 5 | (223, 0) | H1 | House 1: no dialogue in the code |
 | 6 | (175, 424) | outdoors | Neighbour: "Want to go up? Go into this hut" |
 | 7 | (256, 450) | outdoors | Horizontal patrol: "Welcome, this is the Iron Men's town" |
@@ -1132,3 +1166,30 @@ Resident sprites use real CLUT rows where known:
 - `stonetown_residents_palettes.png` (A07600 with AREA16/CLUT07 rows 48, 54, 37, 53 and TCRF's derived CLUT)
 - `icons_lava_vs_firebag.png`
 - `fmv/sheet.png` (HONOO2 vs HANA vs KARAKURI)
+
+## SiergiejW's JP research — verification
+
+SiergiejW, TombaEdit docs/cut-villages-jp-research.md (static research on the JP disc, citing this repo at 4220d8e1)
+was checked against our PAL decomp and the JP retail disc (SLPS_011.44 and INFO2.BIN hashes match theirs). JP
+INFO2 runs at 0x800E9AF8; for the functions below a JP INFO2 address is the PAL I0NFO2 address + 0x1378 (the data tables
+move by other amounts). Where they are right, the sections above now say so.
+
+| # | Claim | Verdict | Evidence |
+|---|---|---|---|
+| 1 | AREA17 subtype 4 has 24 animation scripts in resident MAIN, frames 148-202 | **confirmed** | PAL def 0x800FEF94: box 8/16/8/16, w1e 8, spad 11, anims 0x801098A4 → 24 pointers 0x80014C90..0x80015008; JP 0x8010854C → 0x80014B6C..0x80014EE4. Frame set = 148..202 exactly; the 920-byte region has the same SHA-256 on both (89d502a0...). Our "no anim table" was a `topdown.py` reader limit, now fixed. The sprite rectangles and page are still lost. |
+| 2 | Dialogue functions Wood 0x800F3000, Stone 0x800F41FC, Iron 0x800F5488 | **confirmed (JP addresses)** | They are JP: PAL `topdownA11/A16/A17ActorOpenDialogue` 0x800F1C88 / 0x800F2E84 / 0x800F4110 + 0x1378. JP SLPS 0x8003CA98 switches on area - 5 through 0x80013460 and calls 0x800F4020 (A11), 0x800F50FC (A16), 0x800F6604 (A17), **0x800F6804 (A18)**. 0x800F6804 = PAL 0x800F548C, so our `topdownA18ActorHandler` (PAL, AREA18 set 0x10, the pad-0x1000 viewer) is right and unrelated to JP 0x800F5488. Their wrong-handler finding is about TombaEdit's editor, not our names. |
+| 3 | Lumberjack Town: actor 1 → x = -200 while event 0x4D is unset; phases set at spawn from 0x66 / 0x4D; controller empty; `topdownA11ActorDialogueBank2` uncalled | **confirmed** | `spawnNpcSet0D.c` (`D_8009CDF1 == 0` → `SCRIPT_OBJECTS[1]->x = -0xC8`); JP 0x800FC32C `lbu 0x8009E999` / `sh -200`. Phase stored at JP 0x800FC1F8 (`sb → 0x8009EB4D`). `updateNpcSet0D` state 1 is empty (JP 0x800FC470). No `jal` or pointer to PAL 0x800F1BAC / JP 0x800F2F24 anywhere. The condition is "event byte 0" (not started), not "not completed". |
+| 4 | Iron lump 0x3D in room 5 → Iron Wheel 0x3E + event 0x62; menu never allows 0x3D; actor pointer unset; no removal / guard | **confirmed** | `npcSet0FPickStep.c` line 18; `npcSet0FSceneStep4.c` (`n` never set, `addItemToInventory(0x3E)`, `setEventComplete(0x62)`); X016 starts 0x62 and consumes 0x3E. Menu condition of 0x3D = list 0 = always false on PAL and JP. The item's retail description ("lump of iron") was not re-read here. |
+| 5 | Bomb-making steps 5, 6, 7 share a reset-only block | **confirmed** | `updateNpcSet0F.c` cases 5/6/7; JP jump table 0x800EA534 entries 5..7 = 0x800FED64 (`if state == 0: step = state = 0`). |
+| 6 | Lift: six stops + one placeholder; four rectangles for hidden passages in the same section | **confirmed** | `D_80100788` / JP 0x801018CC, same 7 pairs; rectangles and motion in `npcSet0FCheckTriggerSpots.c` and `npcSet0FSceneStep8..11.c`; no warp call. |
+| 7a | JP: the four cut s0 load lists are empty | **confirmed** | JP SLPS per-area row 0x800855EC: s0 lists 0x800819E0 / 0x80083D6C / 0x800843C0 / 0x80084ADC are `FF FF` + zeros. |
+| 7b | JP: entrance lists of 11:0, 16:0, 17:0 are shared with other sections | **confirmed** | JP entrance table 0x80075328: 11:0 = 11:1 = 11:3 (0x80075028); 16:0 = 16:1 = 16:4 (0x80075090); 17:0 = 17:1 = 17:6 (0x800750B8); 18:0 unique (0x80075100). |
+| 7c | JP music: town s0 lists carry no WVD / main SEQ; neighbour sections' SEQ match PAL | **unverified** | Not re-checked (only the empty s0 lists are). |
+| 7d | JP X19: same 0x2B680-byte prefix as X02; its 73 script blocks (1,476 bytes) all occur in X02 | **confirmed** | Prefix equal; 81 pointers → 73 starts; all 73 bounded blocks found in X02 with the 7 jump words wildcarded. |
+| 7e | JP disc residue: 13 uncatalogued CLUT files are one shared 16 KB block; 8 INFO2 copies identical; unused sectors zero | **partly checked** | The 13 CLUT files are byte-identical (4,078 B) and unpack to one 16,384-byte block, SHA-1 dfa19034..., 3,143 non-zero bytes. The 8 INFO2 copies share SHA-1 15ea8894.... LBA 122907..123056 (the tail) is all zero. We did not rebuild the full sector-allocation map or check file slack. |
+
+**What their page has that ours lacked** (now added above): the MAIN0 scripts of A17 subtype 4, event 0x62 in the gear
+scene and the blocked 0x3D menu condition, the unset actor pointer, the empty bomb-making steps, the lift stops and
+hidden passages, Wood's actor-1 move, and the JP-side checks (empty s0 lists, shared entrances, X19, CLUTs).
+**What ours has that theirs does not use:** which subtype each surviving page draws and with which palette row, the four
+lift-hut interiors on A08000, the reconstructed interiors and the port's playable towns, and the USA / beta disc checks.

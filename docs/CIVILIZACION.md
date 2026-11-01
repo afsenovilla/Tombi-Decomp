@@ -229,12 +229,22 @@ quieto según la orientación, +4..7 andando, +8..11 hablando (`TalkStep` usa `b
 |---|---|---|---|
 | `TOPDOWN_A11_ACTOR_DEFS` 0x800FEEB8 | 5 | 11 (tipo 0x3B) | 0x01, 0x0A, 0x0B, 0x10, 0x11 |
 | `TOPDOWN_A16_ACTOR_DEFS` 0x800FEEF4 | 4 | 11 | 0x01, 0x01, 0x01, 0x11 (cajas 8/16 y 16/32) |
-| `TOPDOWN_A17_ACTOR_DEFS` 0x800FEF64 | 5 | 11 | 0x01, 0x0A, 0x0B, 0x10, 0x08 (el subtipo 4 no tiene tabla de animaciones) |
+| `TOPDOWN_A17_ACTOR_DEFS` 0x800FEF64 | 5 | 11 | 0x01, 0x0A, 0x0B, 0x10, 0x08 (la tabla de animaciones del subtipo 4 apunta a MAIN0, ver abajo) |
 | `TOPDOWN_A18_ACTOR_DEFS` 0x800FEFA0 | 7 | 11 | todos 0x01 |
 | `TOPDOWN_A11/16/17_SCENERY_DEFS` 0x800FF054 / 0x800FEDD0 / 0x800FEE04 | 2 / 3 / 3 | 13 (tipo 0x3D) | 0x02.. 0x08 |
 
 `tools/topdown.py defs` imprime la tabla completa, con las direcciones de las tablas de animación y cuántos guiones
 tiene cada una.
+
+La tabla del subtipo 4 de AREA17 (`anims` 0x801098A4, los últimos 96 bytes de I0NFO2) tiene 24 punteros a **MAIN0
+residente**, 0x80014C90..0x80015008 (dentro de `D_80014C90`). Son guiones de animación válidos de 8 bytes: salen todos
+los fotogramas del 148 al 202, las palabras de caja y argumento son cero, cada guion acaba con el bit 0x8000 y ninguno
+salta. Los fotogramas siguen la serie de A17 (el subtipo 3 acaba en el 147). La copia JP (INFO2 0x8010854C → SLPS
+0x80014B6C..) es idéntica byte a byte (920 bytes). Sólo las nueve copias de `I*NFO2` apuntan a ellos. Versiones
+anteriores de esta página decían "no tiene tabla": `topdown.py defs` sólo seguía punteros dentro de I0NFO2 (corregido).
+Lo encontró SiergiejW y lo hemos comprobado en PAL y JP (SiergiejW, TombaEdit docs/cut-villages-jp-research.md). Los guiones dan sólo el orden y la duración de los
+fotogramas: los rectángulos SPR y la página (w1e 8 = VRAM x 512) siguen perdidos, así que el sprite sigue siendo
+desconocido.
 
 ### Tablas de sprites (tipo 0x3B..0x3E, SPR)
 
@@ -369,7 +379,12 @@ Los generadores ajustan tres variables de avance:
   - 9 → (4,6) la entrada del taller
   - 10 → (4,7) el cartel viejo y peligroso, o (4,11) "siempre estás lleno de energía"
   - 1 pone `D_8009CFA9` (1, o 2 si `D_8009CDF3`)
-  - `topdownA11ActorDialogueBank2` (0x800F1BAC) muestra (2,4), luego (2,5) e inicia el **evento 0x4F**.
+  - `topdownA11ActorDialogueBank2` (0x800F1BAC) muestra (2,4), luego (2,5) e inicia el **evento 0x4F**. Nadie la
+    llama: no hay `jal` ni puntero a ella en PAL ni en JP (MAIN0/SLPS, I0NFO2/INFO2) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
+- **Aparición** (`spawnNpcSet0D`): mientras el evento 0x4D (`D_8009CDF1`, JP 0x8009E999) siga a 0, el personaje 1 (el
+  que pone la bandera en C1, (12,256)) se mueve a x = -200; sólo cambia x. El mismo código fija una vez la fase
+  `D_8009CFA5` (ver arriba); el diálogo sólo la lee. El controlador `updateNpcSet0D` no tiene escena: el estado 1 está
+  vacío, así que nadie lee `D_8009CFA9` y no hay escena de la balsa (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
   - Son MFNT110 #249-#265. PAL los sustituyó por "···??". Las frases japonesas están en AREA11 A002 bloque 0
     #220-#249; el constructor de balsas (#237-#241 "¿quieres una balsa? tráeme madera de debajo del Árbol Sabio...
     pum, clan... ¡ay!") es k3 dx10-14.
@@ -451,15 +466,36 @@ Los generadores ajustan tres variables de avance:
   - `npcSet0FSceneStep1` inicia el **evento 0x4C**.
   - `npcSet0FSceneStep2` muestra (2,6) e inicia el **evento 0x63**.
   - `npcSet0FSceneStep4` muestra (2,7) "buen material... espera" y (2,8) "toma", y después da el **objeto 0x3E** (el
-    engranaje de hierro) con `func_80026C50(0x3E, 1, 1)`.
+    engranaje de hierro, en el juego final Iron Wheel) con `addItemToInventory(0x3E, 1, 1)` y completa el **evento
+    0x62** (`setEventComplete`). El evento 0x62 es el que inicia la Torre del reloj del juego final (X016
+    `brokenStoneGearsTalk`), y allí `checkStoneGearsTrigger` / `brokenStoneGearsRepair` se quedan el objeto 0x3E.
+    `npcSet0FPickStep` sólo arranca esta escena si se usa el objeto **0x3D** (`GVARS_USE_ITEM_PENDING`) en la habitación
+    5 (C5, la casa del herrero). Tal como salió no puede ocurrir: la condición de menú del objeto 0x3D es la lista 0, la
+    que siempre da falso (D0SPSUB `D_800FECE8[0x3D]` = 0 → 0x800FEDB0 `FF FF 00 FF 00 00 00 00`; JP DSPSUB 0x8010472C
+    → 0x801047F4, los mismos bytes). La escena usa además un puntero de personaje que nunca se asigna (`n` en el C; JP
+    lo tiene en `s1`, guardado en 0x800FE7DC y leído en 0x800FE80C sin asignarlo). No quita el objeto 0x3D ni tiene
+    protección para una sola vez (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
+  - Los pasos **5, 6 y 7** son los que pide el fabricante de bombas (`npcSet0FPickStep`: evento 0x69 a 2 → paso 5;
+    `D_8009CFA6` a 1 → paso 7; `D_8009CFAB` a 1 → paso 6). Los tres van a un mismo bloque que sólo pone `step`/`state`
+    a 0 (`updateNpcSet0F`; la tabla de saltos JP 0x800EA534 tiene 0x800FED64 en las entradas 5, 6 y 7). No hay escena
+    de fabricar la bomba (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
   - `npcSet0FCheckTriggerSpots` y `topdownA17SceneryUpdate` mueven dos plataformas (objetos `wb8` 0xD/0xE entre
-    `TOPDOWN_A17_SCENERY_LIMITS`, que llevan al jugador cuando está el bit 0x40). Son los ascensores.
+    `TOPDOWN_A17_SCENERY_LIMITS`, que llevan al jugador cuando está el bit 0x40). Son los ascensores. Las paradas son
+    `D_80100788` (JP 0x801018CC), siete puntos `{x, y}`, cada uno un cuadrado de 3 x 3 px que arranca la escena 3:
+    (55,375), (231,367), (390,375), (-999,-999) (un hueco al que nadie llega), (111,159), (230,151), (334,159). La
+    escena 3 elige la plataforma con `índice >= 4` y la parada con `índice & 3`: dos ascensores de tres paradas, uno
+    hacia y 370 y otro hacia y 155 (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
+  - La misma función tiene cuatro rectángulos para las escenas 8-11, que esconden al jugador y lo llevan recto arriba
+    o abajo en la misma sección (sin cambio de zona): escena 8 x 100..128, y 420..428 → desde (116,426) 84 px arriba;
+    escena 9 x 110..128, y 348..354 → desde (116,346) 84 px abajo; escena 10 x 295..312, y 406..410 → desde (302,407)
+    145 px arriba; escena 11 x 280..296, y 268..272 → desde (288,272) 145 px abajo. Así que 8/9 y 10/11 son dos
+    pasos ocultos norte-sur; cómo eran (túnel, puerta, escalera) no está en el código (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
 - **Texto**: MFNT170 #213-#218, #257-#268 y #270-#289. En PAL son "···??"; el texto japonés los tiene.
 
 ### AREA18 s0: el pueblo reunificado (conjunto 0x10), nunca terminado
 
 - El conjunto tiene 10 personajes sin patrulla, sin objetos y sólo con los casos de diálogo 0/1.
-- `topdownA18ActorHandler` (0x800F548C) sólo cambia la animación (`wb4 = (wb4+1) & 7`) mientras se mantiene pulsado el
+- `topdownA18ActorHandler` (0x800F548C, JP 0x800F6804) sólo cambia la animación (`wb4 = (wb4+1) & 7`) mientras se mantiene pulsado el
   bit 0x1000 del mando. Es un visor de sprites, sin nada de conversación.
 - La entrada del controlador de sección `D_80079AD0[25]` (`dispatchSectionClose`) llama a 0x80116234 para la sección
   0. Eso es espacio de X0nn, no de I0NFO2 (en X018 ni siquiera es el principio de una función). Una AREA18 s0 desde
@@ -546,7 +582,7 @@ control}`). El código de quieto/andar/hablar lee los guiones `animFrame + 0/4/8
 | AREA16 | 2 | 0x01 | 90..129 | tercer grupo (el forzudo, Male Stonetown Resident) | página probada; figura coherente; paleta píxel a píxel |
 | AREA16 | 3 | 0x11 | 0..29 | página en VRAM y 256 | perdido |
 | AREA17 | 0 | 0x01 | 0..55 | el vecino de pelo de punta de A08000 | página probada; figura coherente |
-| AREA17 | 1, 2, 3, 4 | 0x0A, 0x0B, 0x10, 0x08 | 41..96, 82..135, 115..147, ninguno | páginas perdidas | perdido |
+| AREA17 | 1, 2, 3, 4 | 0x0A, 0x0B, 0x10, 0x08 | 41..96, 82..135, 115..147, 148..202 (subtipo 4: guiones en MAIN0) | páginas perdidas | perdido |
 
 - **Página (probado).** Una parte se dibuja de la página `part.tpage + w1e`. En las tablas de vista desde arriba del juego
   (AREA05/08/19) las partes de personaje usan la página relativa 0. Las páginas de recarga SYS que sobreviven empiezan
@@ -632,7 +668,7 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 | # | Dónde (x, y) | Casa | Quién / qué dice (resumen de la frase japonesa) |
 |---|---|---|---|
 | 1 | (88, 240) | C1 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 1: «...Ahora puedo hacer algo muy interesante...» (texto PAL #227) |
-| 2 | (12, 256) | C1 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 1: no habla, activa una bandera |
+| 2 | (12, 256) | C1 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 1: no habla, activa una bandera (se mueve a x = -200 hasta que empieza el evento 0x4D) |
 | 3 | (16, 352) | C2 | «Lumberjack Factory Worker» (trabajador de la fábrica) — Casa 2: «No funciona, pero esta máquina es de hierro... me vendría bien» |
 | 4 | (400, 520) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla diagonal: «En esta choza vive una adivino, pero pone una condición» |
 | 5 | (300, 470) | calle | «Lumberjack Factory Worker» (trabajador de la fábrica) — Patrulla horizontal: «La madera es lo mejor; la piedra y el hierro son fríos» |
@@ -686,8 +722,8 @@ AREA16 544 x 608, AREA17 832 x 704 px con márgenes).
 |---|---|---|---|
 | 1 | (7, 152) | C4 | Casa 4: «He oído que arreglaste la torre del reloj de piedra» |
 | 2 | (27, 140) | C4 | Casa 4: «¡Buen material! Espera un momento...» |
-| 3 | (-75, 371) | C5 | Casa 5, el herrero: «¿Necesitas algo? ¿Un engranaje de hierro?» → te da el engranaje (objeto 0x3E) |
-| 4 | (223, 123) | calle | El fabricante de bombas: «No he visto tu cara...» → «Para hacer bombas necesito electricidad» |
+| 3 | (-75, 371) | C5 | Casa 5, el herrero: «¿Necesitas algo? ¿Un engranaje de hierro?» → te da el engranaje (objeto 0x3E; la escena necesita el objeto 0x3D, que el menú nunca deja usar) |
+| 4 | (223, 123) | calle | El fabricante de bombas: «No he visto tu cara...» → «Para hacer bombas necesito electricidad» (las escenas que pide están vacías) |
 | 5 | (223, 0) | C1 | Casa 1: sin diálogo en el código |
 | 6 | (175, 424) | calle | Vecino: «¿Quieres subir? Entra en esta choza» |
 | 7 | (256, 450) | calle | Patrulla horizontal: «Bienvenido, éste es el pueblo de los Hombres de hierro» |
@@ -1122,3 +1158,33 @@ original**. Los sprites de vecinos usan filas CLUT reales donde se conocen:
 - `stonetown_residents_palettes.png` (A07600 con las filas 48, 54, 37, 53 de AREA16/CLUT07 y la CLUT derivada de TCRF)
 - `icons_lava_vs_firebag.png`
 - `fmv/sheet.png` (HONOO2 frente a HANA y KARAKURI)
+
+## Investigación JP de SiergiejW — verificación
+
+SiergiejW, TombaEdit docs/cut-villages-jp-research.md (investigación estática del disco JP, que cita este repositorio
+en 4220d8e1) se ha comprobado con nuestra decompilación PAL y el disco JP final (los hashes de SLPS_011.44 e INFO2.BIN
+coinciden con los suyos). INFO2 JP se carga en 0x800E9AF8; para las funciones de abajo, la dirección JP de INFO2 es la de
+I0NFO2 PAL + 0x1378 (las tablas de datos se mueven otras cantidades). Donde tiene razón, las secciones de arriba ya lo
+dicen.
+
+| # | Afirmación | Veredicto | Pruebas |
+|---|---|---|---|
+| 1 | El subtipo 4 de AREA17 tiene 24 guiones de animación en MAIN residente, fotogramas 148-202 | **confirmado** | Definición PAL 0x800FEF94: caja 8/16/8/16, w1e 8, spad 11, anims 0x801098A4 → 24 punteros 0x80014C90..0x80015008; JP 0x8010854C → 0x80014B6C..0x80014EE4. Los fotogramas son exactamente 148..202; la zona de 920 bytes tiene el mismo SHA-256 en los dos (89d502a0...). Nuestro "no tiene tabla" venía de un límite del lector de `topdown.py`, ya corregido. Los rectángulos del sprite y la página siguen perdidos. |
+| 2 | Funciones de diálogo: madera 0x800F3000, piedra 0x800F41FC, hierro 0x800F5488 | **confirmado (direcciones JP)** | Son JP: `topdownA11/A16/A17ActorOpenDialogue` PAL 0x800F1C88 / 0x800F2E84 / 0x800F4110 + 0x1378. La SLPS JP 0x8003CA98 salta por área - 5 con la tabla 0x80013460 y llama a 0x800F4020 (A11), 0x800F50FC (A16), 0x800F6604 (A17), **0x800F6804 (A18)**. 0x800F6804 = PAL 0x800F548C, así que nuestro `topdownA18ActorHandler` (PAL, conjunto 0x10 de AREA18, el visor del botón 0x1000) es correcto y no tiene que ver con JP 0x800F5488. Su hallazgo de manejadores equivocados es sobre el editor TombaEdit, no sobre nuestros nombres. |
+| 3 | Pueblo de madera: personaje 1 → x = -200 mientras el evento 0x4D no está puesto; fases fijadas al aparecer desde 0x66 / 0x4D; controlador vacío; `topdownA11ActorDialogueBank2` sin llamadas | **confirmado** | `spawnNpcSet0D.c` (`D_8009CDF1 == 0` → `SCRIPT_OBJECTS[1]->x = -0xC8`); JP 0x800FC32C `lbu 0x8009E999` / `sh -200`. La fase se guarda en JP 0x800FC1F8 (`sb → 0x8009EB4D`). El estado 1 de `updateNpcSet0D` está vacío (JP 0x800FC470). No hay `jal` ni puntero a PAL 0x800F1BAC / JP 0x800F2F24 en ningún sitio. La condición es "byte del evento a 0" (no empezado), no "no completado". |
+| 4 | Hierro 0x3D en la habitación 5 → Iron Wheel 0x3E + evento 0x62; el menú nunca deja usar 0x3D; puntero sin asignar; no quita el objeto ni se protege | **confirmado** | `npcSet0FPickStep.c` línea 18; `npcSet0FSceneStep4.c` (`n` nunca se asigna, `addItemToInventory(0x3E)`, `setEventComplete(0x62)`); X016 inicia el 0x62 y gasta el 0x3E. La condición de menú de 0x3D es la lista 0, siempre falsa, en PAL y JP. La descripción del objeto ("un trozo de hierro") no se ha vuelto a leer aquí. |
+| 5 | Los pasos 5, 6 y 7 (la bomba) comparten un bloque que sólo reinicia | **confirmado** | `updateNpcSet0F.c` casos 5/6/7; tabla de saltos JP 0x800EA534, entradas 5..7 = 0x800FED64 (`si state == 0: step = state = 0`). |
+| 6 | Ascensor: seis paradas + un hueco; cuatro rectángulos de pasos ocultos en la misma sección | **confirmado** | `D_80100788` / JP 0x801018CC, los mismos 7 pares; rectángulos y movimiento en `npcSet0FCheckTriggerSpots.c` y `npcSet0FSceneStep8..11.c`; sin cambio de zona. |
+| 7a | JP: las cuatro listas de carga de s0 de los pueblos están vacías | **confirmado** | Fila por área de la SLPS JP 0x800855EC: las listas de s0 0x800819E0 / 0x80083D6C / 0x800843C0 / 0x80084ADC son `FF FF` + ceros. |
+| 7b | JP: las listas de entradas de 11:0, 16:0 y 17:0 se comparten con otras secciones | **confirmado** | Tabla de entradas JP 0x80075328: 11:0 = 11:1 = 11:3 (0x80075028); 16:0 = 16:1 = 16:4 (0x80075090); 17:0 = 17:1 = 17:6 (0x800750B8); 18:0 propia (0x80075100). |
+| 7c | Música JP: las listas de s0 no tienen WVD ni SEQ principal; los SEQ de las secciones vecinas coinciden con PAL | **sin comprobar** | No se ha repetido (sólo que las listas de s0 están vacías). |
+| 7d | X19 JP: mismo prefijo de 0x2B680 bytes que X02; sus 73 bloques de guiones (1.476 bytes) están todos en X02 | **confirmado** | Prefijo igual; 81 punteros → 73 comienzos; los 73 bloques acotados aparecen en X02 con las 7 palabras de salto como comodín. |
+| 7e | Restos del disco JP: 13 CLUT fuera del catálogo son un mismo bloque de 16 KB; 8 copias de INFO2 idénticas; sectores libres a cero | **comprobado en parte** | Los 13 ficheros CLUT son idénticos (4.078 B) y se descomprimen en un mismo bloque de 16.384 bytes, SHA-1 dfa19034..., 3.143 bytes no nulos. Las 8 copias de INFO2 tienen el SHA-1 15ea8894.... LBA 122907..123056 (el final) es todo ceros. No hemos rehecho el mapa completo de sectores ni mirado la holgura de los ficheros. |
+
+**Lo que su página tenía y la nuestra no** (ya añadido arriba): los guiones en MAIN0 del subtipo 4 de A17, el evento 0x62
+de la escena del engranaje y la condición de menú bloqueada de 0x3D, el puntero sin asignar, los pasos vacíos de la
+bomba, las paradas del ascensor y los pasos ocultos, el traslado del personaje 1 de madera y las comprobaciones del lado
+JP (listas de s0 vacías, entradas compartidas, X19, CLUT).
+**Lo que tiene la nuestra y la suya no usa:** qué subtipo dibuja cada página superviviente y con qué fila de paleta, los
+cuatro interiores de chozas de ascensor de A08000, los interiores reconstruidos y los pueblos jugables del port, y las
+comprobaciones de los discos USA y beta.

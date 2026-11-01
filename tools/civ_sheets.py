@@ -1053,7 +1053,8 @@ PERS_LOST = {  # why a subtype has no drawing
     16: ('su página de texturas (w1e 0x11) no sobrevive', 'its texture page (w1e 0x11) did not survive'),
     17: ('su página de texturas (w1e 0x0A/0x0B/0x10) no sobrevive', 'its texture page (w1e 0x0A/0x0B/0x10) did not survive'),
     18: ('la página A08600 sobrevive (w1e 1), pero no se ha identificado qué figura es cada subtipo', 'page A08600 survives (w1e 1), but which figure each subtype is has not been identified'),
-    (17, 4): ('el subtipo 4 no tiene tabla de animación (0 scripts): el juego no lo dibujaría', 'subtype 4 has no anim table (0 scripts): the game would not draw it'),
+    (17, 4): ('su página (w1e 8, VRAM x 512) no sobrevive; sus 24 scripts de animación sí (en MAIN0 0x80014C90, fotogramas 148-202; SiergiejW)',
+              'its page (w1e 8, VRAM x 512) did not survive; its 24 animation scripts did (in MAIN0 0x80014C90, frames 148-202; SiergiejW)'),
 }
 
 # Exits: (x0, y0, x1, y1) in world coordinates, None = open towards the map edge (the code only tests x > / y <), and the
@@ -1084,7 +1085,8 @@ _DOC_LFW = ('la doc lo llama «Lumberjack Factory Worker», pero es el subtipo 1
 PERS = {
     11: [
         _r(_LFW, _TCRF, 'probable', ('«...Ahora puedo hacer algo muy interesante...» (texto PAL #227)', '"...Now I can make something really interesting..." (PAL text #227)')),
-        _r(_LFW, _TCRF, 'probable', ('No habla: activa una bandera (D_8009CFA9)', 'No line: sets a flag (D_8009CFA9)')),
+        _r(_LFW, _TCRF, 'probable', ('No habla: activa una bandera (D_8009CFA9)', 'No line: sets a flag (D_8009CFA9)'),
+           ('antes del evento 0x4D el código lo saca a x = -200 (aquí, su registro)', 'before event 0x4D the code moves him to x = -200 (shown: his record)')),
         _r(_LFW, _TCRF, 'probable', ('«No funciona, pero esta máquina es de hierro... me vendría bien»', '"It doesn\'t work, but this machine is iron... I could use it"')),
         _r(_LFW, _TCRF, 'probable', ('«En esta choza vive un adivino, pero pone una condición»', '"A fortune-teller lives in this hut, but he has a condition"')),
         _r(_LFW, _TCRF, 'probable', ('«La madera es lo mejor; la piedra y el hierro son fríos»', '"Wood is the best; stone and iron are cold"')),
@@ -1137,10 +1139,11 @@ PERS = {
            ('«He oído que arreglaste la torre del reloj de piedra»', '"I hear you fixed the stone clock tower"')),
         _r(_NN(1), _NONAME, None, ('«¡Buen material! Espera un momento...»', '"Good material! Wait a moment..."')),
         _r(('el herrero', 'the smith'), ('por su código (topdownA17ActorDialogueBank2)', 'from his code (topdownA17ActorDialogueBank2)'), 'sabido',
-           ('«¿Necesitas algo? ¿Un engranaje de hierro?» (evento 0x63) → te da el engranaje (objeto 0x3E)', '"Need something? An iron gear?" (event 0x63) → gives you the gear (item 0x3E)')),
+           ('«¿Necesitas algo? ¿Un engranaje de hierro?» (evento 0x63). La escena que da el engranaje (objeto 0x3E, evento 0x62) sólo arranca usando el objeto 0x3D en C5, y el menú nunca deja usarlo',
+            '"Need something? An iron gear?" (event 0x63). The scene that gives the gear (item 0x3E, event 0x62) only starts when item 0x3D is used in H5, and the menu never allows that')),
         _r(('el fabricante de bombas', 'the bomb maker'), ('por su código (topdownA17ActorDialogueBank3)', 'from his code (topdownA17ActorDialogueBank3)'), 'sabido',
-           ('«No he visto tu cara...» → (evento 0x69) «Primero necesito electricidad» → «Ahora la mezcla de la bomba» → «¿Más bombas?»',
-            '"Haven\'t seen your face before..." → (event 0x69) "First I need electricity" → "Now the bomb mixture" → "More bombs?"')),
+           ('«No he visto tu cara...» → (evento 0x69) «Primero necesito electricidad» → «Ahora la mezcla de la bomba» → «¿Más bombas?». Las tres escenas que pide (pasos 5-7) están vacías',
+            '"Haven\'t seen your face before..." → (event 0x69) "First I need electricity" → "Now the bomb mixture" → "More bombs?". The three scenes he requests (steps 5-7) are empty')),
         _r(_NN(4), _NONAME, None, ('Sin diálogo en el código (dlg 4 sin caso)', 'No dialogue in the code (dlg 4 has no case)'),
            ('el registro dice casa 1, pero (223, 0) está fuera de C1 y dentro de la zona de la salida 1', 'the record says house 1, but (223, 0) is outside H1 and inside the exit 1 zone')),
         _r(('Hombre de hierro', 'Iron Man'), ('vecino de la Ciudad de hierro (doc)', 'Iron Town resident (docs)'), 'sabido',
