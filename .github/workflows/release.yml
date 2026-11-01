@@ -92,6 +92,11 @@ jobs:
           done
           find art -type f | xargs ls -l
 
+      - uses: actions/checkout@v4
+        if: steps.d.outputs.go == '1'
+        with:
+          fetch-depth: 0   # tools/release_notes.py reads the history between the two tags
+
       - name: Package and publish
         if: steps.d.outputs.go == '1'
         run: |
@@ -110,16 +115,7 @@ jobs:
           {
             echo "Tombi PC port $VER (build of ${SHA::7})."; echo
             if [ -n "$PREV" ]; then echo "### Changes since $PREV"
-              # player-facing changes only: no CI/docs/notes commits, and a commit and its revert both drop out
-              gh api --paginate "repos/$R/compare/$PREV...$SHA" --jq '.commits[] | .commit.message | split("\n")[0]' \
-                | python3 -c 'import sys,re
-          L=[l.rstrip() for l in sys.stdin if l.strip()]
-          rev=[re.match(r"Revert \"(.*)\"",l) for l in L]
-          gone={m.group(1) for m in rev if m}
-          gone|={g.split("\"")[0] for g in gone}
-          skip=re.compile(r"^(ci|dist|docs|TODO|notes|gitignore|report)[:( ]",re.I)
-          out=[l for l,m in zip(L,rev) if not m and not skip.match(l) and not any(l==g or l.startswith(g) for g in gone)]
-          print("\n".join("- "+l for l in out[-150:]))'
+              python3 tools/release_notes.py "$PREV" "$SHA"   # player-facing commits only (see the script)
             else echo "### Commit"; gh api "repos/$R/commits/$SHA" --jq '"- " + (.commit.message | split("\n")[0])'; fi
             echo; echo "### Assets"
             echo "- \`tombi-port-$VER-windows-x64.exe\`: native port with launcher (Windows)"
