@@ -61,7 +61,7 @@ i18n.add({
     "es": {
         "l.lang": "Idioma del juego:",
         "title": "Tombi! - port nativo", "tab.play": "Jugar", "tab.mods": "Mods", "tab.controls": "Controles",
-        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:",
+        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:", "b.saveimp": "Importar partida…", "b.saveexp": "Exportar partida…", "s.saverun": "Cierra el juego antes de importar o exportar partidas.", "s.saveimpok": "Partida importada", "s.saveexpok": "Tarjeta exportada a {}", "s.saveerr": "No se pudo importar/exportar: {}", "s.saveask": "¿Importar este archivo en la tarjeta del port ({})?\nUna tarjeta completa sustituye a la actual (se guarda una copia .bak).", "s.saveexpq": "¿Exportar solo una partida como .mcs? (No = tarjeta completa .mcd)",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (llena la pantalla, experimental)",
@@ -94,7 +94,7 @@ i18n.add({
     "en": {
         "l.lang": "Game language:",
         "title": "Tombi! - native port", "tab.play": "Play", "tab.mods": "Mods", "tab.controls": "Controls",
-        "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):",
+        "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):", "b.saveimp": "Import save…", "b.saveexp": "Export save…", "s.saverun": "Close the game before importing or exporting saves.", "s.saveimpok": "Save imported", "s.saveexpok": "Card exported to {}", "s.saveerr": "Import/export failed: {}", "s.saveask": "Import this file into the port's memory card ({})?\nA whole card replaces the current one (a .bak copy is kept).", "s.saveexpq": "Export a single save as .mcs? (No = whole card .mcd)",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (fill the display, experimental)",
@@ -858,6 +858,10 @@ class App:
         ttk.Label(c, text=tr("c.saves"), style="Head.TLabel").pack(anchor="w", pady=(16, 0))
         ttk.Label(c, text=tr("l.savedir"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
         self._browse_row(c, "savedir", self.pick_savedir)
+        sr = ttk.Frame(c)
+        sr.pack(fill="x", pady=(8, 0))
+        ttk.Button(sr, text=tr("b.saveimp"), command=self.import_save).pack(side="left")
+        ttk.Button(sr, text=tr("b.saveexp"), command=self.export_save).pack(side="left", padx=(8, 0))
 
         o, c = self.card(f)
         o.pack(fill="x", pady=(12, 0))
@@ -1670,6 +1674,66 @@ class App:
         p = filedialog.askdirectory()
         if p:
             self.vars["savedir"].set(p)
+
+    def card_file(self):
+        """the card the port uses (port2/shims/card.c: --save-dir, else next to the disc image / the data/ folder)"""
+        self.collect()
+        d = self.s.get("savedir") or (os.path.dirname(data_dir()) if data_ready()
+                                      else os.path.dirname(bin_of_cue(self.s["disc"])) if self.s.get("disc") else app_dir())
+        return os.path.join(d, "tombi_mc0.mcd")
+
+    def _save_busy(self):
+        if self.proc and self.proc.poll() is None:
+            messagebox.showwarning(tr("title"), tr("s.saverun"))
+            return True
+        return False
+
+    def import_save(self):
+        import save_import as SI
+        if self._save_busy():
+            return
+        p = filedialog.askopenfilename(filetypes=[("PS1 saves", "*.mcd *.mcr *.mc *.srm *.ddf *.ps *.bin *.gme *.vgs *.mem *.mcs *.ps1 *.mcb *.psv"), ("*", "*")])
+        if not p:
+            return
+        dest = self.card_file()
+        if not messagebox.askyesno(tr("title"), tr("s.saveask", dest)):
+            return
+        try:
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            lines, warn = SI.import_file(p, dest)
+        except (SI.ImportError_, OSError) as e:
+            messagebox.showerror(tr("title"), tr("s.saveerr", e))
+            return
+        (messagebox.showwarning if warn else messagebox.showinfo)(tr("title"), "\n".join(lines + warn))
+        self.say(tr("s.saveimpok"), "ok")
+
+    def export_save(self):
+        import save_import as SI
+        if self._save_busy():
+            return
+        src = self.card_file()
+        try:
+            card = open(src, "rb").read() if os.path.exists(src) else bytes(SI.blank_card())
+            saves = SI.list_saves(card)
+            if saves and messagebox.askyesno(tr("title"), tr("s.saveexpq")):
+                blk = saves[0][0]
+                if len(saves) > 1:
+                    from tkinter import simpledialog
+                    txt = "\n".join("%d: %s  %s" % s for s in saves)
+                    blk = simpledialog.askinteger(tr("title"), txt, initialvalue=blk, minvalue=1, maxvalue=15)
+                    if blk is None:
+                        return
+                out = filedialog.asksaveasfilename(defaultextension=".mcs", initialfile="tombi.mcs", filetypes=[("MCS", "*.mcs")])
+                if out:
+                    open(out, "wb").write(SI.export_save(card, blk))
+            else:
+                out = filedialog.asksaveasfilename(defaultextension=".mcd", initialfile="tombi.mcd", filetypes=[("Memory card", "*.mcd *.mcr"), ("*", "*")])
+                if out:
+                    SI.export_card(src, out)
+            if out:
+                self.say(tr("s.saveexpok", out), "ok")
+        except (SI.ImportError_, OSError) as e:
+            messagebox.showerror(tr("title"), tr("s.saveerr", e))
 
     def check_disc(self):
         self.collect()

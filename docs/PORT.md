@@ -1010,6 +1010,16 @@ report) and the exact command line. *Mods* and
 `build/port-win/tombi.exe` (Windows) or `build/port/tombi` (Linux); the PyInstaller exe carries `tombi.exe`,
 `tombi-view.exe` and `SDL2.dll` and unpacks them to its temporary folder on each run (PyInstaller onefile).
 
+**Save import / export ("cross save").** *Importar partida… / Exportar partida…* in both launchers (PC: buttons under
+the save folder; Android: right column of *Opciones*). They work on the card the game uses, `tombi_mc0.mcd` (PC: the
+save folder, else next to the disc image / `data/`; Android: `files/saves/`), a raw 128 KB image identical on both
+platforms and readable by DuckStation/ePSXe (raw `.mcd`/`.mcr`). Import accepts whole cards (raw
+`.mcd/.mcr/.mc/.srm/.ddf/.ps/.bin` starting with `MC`, DexDrive `.gme`, `.vgs/.mem`), which replace the card (old file
+kept as `.bak`, timestamped if one exists), and single saves (`.mcs/.ps1/.mcb`, PS3 `.psv`), inserted into free blocks
+with new directory frames (link chain, XOR checksum); a non-Tombi product code only warns. Export writes the whole card
+(default `tombi.mcd`); the PC launcher can also export one save as `.mcs`. Logic: `tools/save_import.py` (PC, also a
+CLI) and `SaveImport.java` (Android); the launchers only, never while the game runs.
+
 ## Mods (tools/port_mods.py)
 
 Every mod is a set of options of the port binary, assembled by the launcher (the *Mods* tab shows each one with its

@@ -92,4 +92,9 @@
     <string name="opt_dualshock">DualShock controller (analog)</string>
     <string name="opt_prompts">Button icons</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Generic</item><item>AYN Thor / Retroid</item></string-array>
+    <string name="save_import">Import save…</string>
+    <string name="save_import_confirm">Import the file into the memory card? A whole card replaces the current one (kept as .bak); a single save is added to a free slot.</string>
+    <string name="save_exported">Card exported (tombi.mcd).</string>
+    <string name="save_export">Export save…</string>
+    <string name="save_fail">Failed: %1$s</string>
 </resources>

@@ -48,7 +48,7 @@ public class LauncherActivity extends Activity {
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
     static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor"};   // button icons (--prompts); thor last: stored indices keep their meaning
-    static final int REQ_DISC = 2, REQ_EXPORT = 3;
+    static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
 
@@ -430,10 +430,69 @@ public class LauncherActivity extends Activity {
         status(getString(saves ? R.string.disc_wiped_saves : R.string.disc_wiped));
     }
 
+    // ---- save import / export (SaveImport.java; the game's single card, files/saves/tombi_mc0.mcd) ----
+    File cardFile() { File d = new File(filesDir(), "saves"); d.mkdirs(); return new File(d, "tombi_mc0.mcd"); }
+    void pickSaveImport() {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("*/*");
+        try { startActivityForResult(i, REQ_SAVE_IMPORT); }
+        catch (ActivityNotFoundException e) { Toast.makeText(this, String.valueOf(e.getMessage()), Toast.LENGTH_LONG).show(); }
+    }
+    void pickSaveExport() {
+        Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("application/octet-stream");
+        i.putExtra(Intent.EXTRA_TITLE, "tombi.mcd");
+        try { startActivityForResult(i, REQ_SAVE_EXPORT); }
+        catch (ActivityNotFoundException e) { Toast.makeText(this, String.valueOf(e.getMessage()), Toast.LENGTH_LONG).show(); }
+    }
+    void saveDialog(String title, String msg) {
+        new android.app.AlertDialog.Builder(this).setTitle(title).setMessage(msg).setPositiveButton(android.R.string.ok, null).show();
+    }
+    void doSaveImport(final Uri u) {
+        final boolean es = getResources().getConfiguration().locale.getLanguage().equals("es");
+        new android.app.AlertDialog.Builder(this)
+            .setTitle(R.string.save_import)
+            .setMessage(R.string.save_import_confirm)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(android.R.string.ok, new android.content.DialogInterface.OnClickListener() {
+                public void onClick(android.content.DialogInterface d, int w) {
+                    try {
+                        InputStream in = getContentResolver().openInputStream(u);
+                        if (in == null) throw new java.io.IOException("openInputStream");
+                        byte[] raw;
+                        try { raw = SaveImport.readAll(in, 4 << 20); } finally { in.close(); }
+                        SaveImport.Result r = SaveImport.importBytes(raw, cardFile(), es);
+                        StringBuilder sb = new StringBuilder();
+                        for (String l : r.lines) sb.append(l).append('\n');
+                        if (r.warn != null) sb.append('\n').append(r.warn);
+                        CrashLog.append(LauncherActivity.this, "launcher: save imported: " + r.lines.get(0));
+                        saveDialog(getString(R.string.save_import), sb.toString().trim());
+                    } catch (Exception e) {
+                        saveDialog(getString(R.string.save_import), getString(R.string.save_fail, String.valueOf(e.getMessage())));
+                    }
+                }
+            }).show();
+    }
+    void doSaveExport(Uri u) {
+        try {
+            byte[] c = SaveImport.exportCard(cardFile());
+            OutputStream o = getContentResolver().openOutputStream(u);
+            if (o == null) throw new java.io.IOException("openOutputStream");
+            try { o.write(c); } finally { o.close(); }
+            Toast.makeText(this, R.string.save_exported, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            saveDialog(getString(R.string.save_export), getString(R.string.save_fail, String.valueOf(e.getMessage())));
+        }
+    }
+
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
         super.onActivityResult(req, res, data);
         if (req == REQ_EXPORT && res == RESULT_OK && data != null && data.getData() != null) { writeExport(data.getData()); return; }
+        if (req == REQ_SAVE_IMPORT && res == RESULT_OK && data != null && data.getData() != null) { doSaveImport(data.getData()); return; }
+        if (req == REQ_SAVE_EXPORT && res == RESULT_OK && data != null && data.getData() != null) { doSaveExport(data.getData()); return; }
         if (req == REQ_DISC && res == RESULT_OK && data != null) {
             final List<Uri> uris = new ArrayList<>();
             if (data.getClipData() != null)
@@ -611,6 +670,8 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
                 items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
                     setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
+                items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
+                items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             } else if (screen == PADMAP) {
                 PadMap pm = new PadMap(prefs.getString("padmap", ""));
@@ -867,7 +928,8 @@ public class LauncherActivity extends Activity {
         void drawOptions() {
             bigTitle(getString(R.string.options), 50, 66);
             // two columns of buttons, no scrolling: 10 rows of 48 + 9 between 96 and 666
-            float rowH = 57, bh = 48, top = 98;
+            int rows = Math.max(optLeft, items.size() - optLeft);
+            float top = 98, rowH = Math.min(57, (712 - top + 9) / rows), bh = rowH - 9;
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
                 boolean f = i == focus, right = i >= optLeft;

@@ -91,4 +91,9 @@
     <string name="opt_dualshock">Mando DualShock (analógico)</string>
     <string name="opt_prompts">Iconos de botones</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Genérico</item><item>AYN Thor / Retroid</item></string-array>
+    <string name="save_import">Importar partida…</string>
+    <string name="save_import_confirm">¿Importar el archivo en la tarjeta de memoria? Una tarjeta completa sustituye a la actual (se guarda como .bak); una partida suelta se añade en un hueco libre.</string>
+    <string name="save_exported">Tarjeta exportada (tombi.mcd).</string>
+    <string name="save_export">Exportar partida…</string>
+    <string name="save_fail">Error: %1$s</string>
 </resources>
