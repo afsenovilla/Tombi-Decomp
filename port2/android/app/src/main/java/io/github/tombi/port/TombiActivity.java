@@ -67,9 +67,20 @@ public class TombiActivity extends SDLActivity {
 
     @Override
     protected void onCreate(Bundle b) {
+        final Context app = getApplicationContext();
+        try { onCreateLogged(app, b); }
+        catch (Throwable t) {   // anything before / in SDL's start-up: into tombi.log and the marker, then the usual crash
+            CrashLog.append(app, "TombiActivity.onCreate FAILED: " + CrashLog.stack(t));
+            CrashLog.writeMarker(app, CrashLog.CRASHED, "TombiActivity.onCreate: " + t + "\n");
+            if (t instanceof RuntimeException) throw (RuntimeException) t;
+            if (t instanceof Error) throw (Error) t;
+            throw new RuntimeException(t);
+        }
+    }
+
+    private void onCreateLogged(final Context app, Bundle b) {
         // the log first (CrashLog): a fresh tombi.log, its dir handed to libmain.so (loaded by super.onCreate, whose
         // JNI_OnLoad opens it), Java exceptions and a blocked UI thread written into it
-        final Context app = getApplicationContext();
         CrashLog.rotate(app);
         CrashLog.append(app, "TombiActivity.onCreate, pid " + android.os.Process.myPid() + (b != null ? " (restored state)" : ""));
         CrashLog.append(app, CrashLog.deviceInfo(app).replace("\n", "; "));
@@ -87,8 +98,10 @@ public class TombiActivity extends SDLActivity {
             }
         });
         startUiWatchdog(app);
-        pad = new PadMap(getIntent() != null ? getIntent().getStringExtra(EXTRA_PADMAP) : null);
-        CrashLog.append(app, "button mapping: " + (pad.save().isEmpty() ? "defaults" : pad.save()));
+        try {
+            pad = new PadMap(getIntent() != null ? getIntent().getStringExtra(EXTRA_PADMAP) : null);
+            CrashLog.append(app, "button mapping: " + (pad.save().isEmpty() ? "defaults" : pad.save()));
+        } catch (Throwable t) { pad = null; CrashLog.append(app, "button mapping failed, SDL reads the controller: " + CrashLog.stack(t)); }
         logControllers(app);
         super.onCreate(b);
         CrashLog.append(app, "SDLActivity.onCreate done");

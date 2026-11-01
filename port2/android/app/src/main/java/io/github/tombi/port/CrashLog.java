@@ -102,6 +102,16 @@ final class CrashLog {
     static boolean crashedLastRun(Context c) {
         return file(c, CRASHED).exists() || (file(c, RUNNING).exists() && !gameAlive(c));
     }
+    /** markers written before the app was last installed / updated: an update kills a running game (the "running"
+     *  marker stays), so they say nothing about this build; the launcher clears them instead of showing the crash card */
+    static boolean markersStale(Context c) {
+        try {
+            long upd = c.getPackageManager().getPackageInfo(c.getPackageName(), 0).lastUpdateTime;
+            File cr = file(c, CRASHED), ru = file(c, RUNNING);
+            if (!cr.exists() && !ru.exists()) return false;
+            return (!cr.exists() || cr.lastModified() < upd) && (!ru.exists() || ru.lastModified() < upd);
+        } catch (Throwable t) { return false; }
+    }
     static void clearMarkers(Context c) { file(c, CRASHED).delete(); file(c, RUNNING).delete(); }
 
     static String readMarker(Context c, String name) {
@@ -140,6 +150,14 @@ final class CrashLog {
         String cr = readMarker(c, CRASHED), ru = readMarker(c, RUNNING);
         if (cr != null) b.append("crashed marker: ").append(cr).append('\n');
         if (ru != null) b.append("running marker left over: ").append(ru).append('\n');
+        try {
+            long upd = c.getPackageManager().getPackageInfo(c.getPackageName(), 0).lastUpdateTime;
+            SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT);
+            b.append("app installed/updated: ").append(f.format(new Date(upd)));
+            if (file(c, RUNNING).exists()) b.append(", running marker: ").append(f.format(new Date(file(c, RUNNING).lastModified())));
+            if (file(c, CRASHED).exists()) b.append(", crashed marker: ").append(f.format(new Date(file(c, CRASHED).lastModified())));
+            b.append(", tombi.log: ").append(f.format(new Date(file(c, LOG).lastModified()))).append('\n');
+        } catch (Throwable ignored) { }
         File log = file(c, LOG);
         b.append("\n===== tombi.log (").append(log.length()).append(" bytes) =====\n");
         if (log.length() > maxBytes) b.append("[... first ").append(log.length() - maxBytes).append(" bytes cut ...]\n");

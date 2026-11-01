@@ -55,6 +55,16 @@ public class LauncherActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle b) {
+        // a launcher crash (menus, button mapping...) into tombi.log + the "crashed" marker: the crash card next time
+        final android.content.Context app = getApplicationContext();
+        final Thread.UncaughtExceptionHandler prev = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override public void uncaughtException(Thread t, Throwable e) {
+                CrashLog.append(app, "LAUNCHER UNCAUGHT EXCEPTION in thread \"" + t.getName() + "\" (" + version() + "): " + CrashLog.stack(e));
+                CrashLog.writeMarker(app, CrashLog.CRASHED, "launcher exception: " + e + "\n");
+                if (prev != null) prev.uncaughtException(t, e); else System.exit(2);
+            }
+        });
         super.onCreate(b);
         prefs = getSharedPreferences("launcher", MODE_PRIVATE);
         view = new LauncherView(this);
@@ -70,7 +80,8 @@ public class LauncherActivity extends Activity {
         immersive();
         // the last game run ended abnormally (CrashLog markers): the crash card with the log, once
         try {
-            if (view.screen != LauncherView.CRASH && CrashLog.crashedLastRun(this)) view.setScreen(LauncherView.CRASH);
+            if (CrashLog.markersStale(this)) CrashLog.clearMarkers(this);   // left by the build before an update
+            else if (view.screen != LauncherView.CRASH && CrashLog.crashedLastRun(this)) view.setScreen(LauncherView.CRASH);
         } catch (Throwable ignored) { }
         view.invalidate();
     }
@@ -219,11 +230,15 @@ public class LauncherActivity extends Activity {
         catch (Throwable t) { Toast.makeText(this, String.valueOf(t), Toast.LENGTH_LONG).show(); return; }
         // markers (CrashLog): "running" until TombiActivity finishes cleanly; a stale "crashed" is cleared
         CrashLog.clearMarkers(this);
-        CrashLog.writeMarker(this, CrashLog.RUNNING, "launcher " + System.currentTimeMillis() + "\n");
-        Intent i = new Intent(this, TombiActivity.class);
-        i.putExtra(TombiActivity.EXTRA_ARGS, args);
-        i.putExtra(TombiActivity.EXTRA_PADMAP, prefs.getString("padmap", ""));
-        try { startActivity(i); }
+        CrashLog.writeMarker(this, CrashLog.RUNNING, "launcher " + version() + " " + System.currentTimeMillis() + "\n");
+        try {
+            Intent i = new Intent(this, TombiActivity.class);
+            i.putExtra(TombiActivity.EXTRA_ARGS, args);
+            String pm = "";
+            try { pm = prefs.getString("padmap", ""); } catch (Throwable t) { CrashLog.append(this, "launcher: padmap pref: " + t); }
+            i.putExtra(TombiActivity.EXTRA_PADMAP, pm);
+            startActivity(i);
+        }
         catch (Throwable t) {
             CrashLog.append(this, "launcher: startActivity(TombiActivity) failed: " + CrashLog.stack(t));
             CrashLog.writeMarker(this, CrashLog.CRASHED, "startActivity failed: " + t + "\n");
