@@ -103,7 +103,7 @@ static char *ovl_string(const Ovl *o, u32 a) {
         if (g == -1) break;
         if (g == -3) { if (k && b[k - 1] != ' ') b[k++] = ' '; continue; }
         if (g <= 0) continue;
-        c = g - 140 < 0x80 ? g - 140 : g - 74;
+        c = g == 332 ? 0xA1 : g == 337 ? 0xBF : g - 140 < 0x80 ? g - 140 : g - 74;   /* the opening marks sit past the Latin-1 range */
         if (c >= 32 && c < 256) b[k++] = (char)c;
     }
     while (k && b[k - 1] == ' ') k--;

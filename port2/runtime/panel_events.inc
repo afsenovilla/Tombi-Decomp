@@ -9,6 +9,7 @@
  * the map markers until "Ocultos: s\xED" lists them again (dimmed); kept in panel_hidden.txt next to the memory cards
  * (the event ids, one line). */
 #include "panel_eventmap.h"
+#include "panel_givers.h"
 
 enum { F_PROGRESS, F_DONE, F_PENDING, NFILTERS };
 static int map_action(int a), map_touch(int x, int y, int action); static void map_hit(int k);   /* panel_side.inc */
@@ -120,7 +121,7 @@ static void pin_mark(int x, int y, unsigned c) {   /* a push pin, 10 x 14: round
     pa_fill(x + 1, y + 6, 9, 2, RGB(60, 20, 10));
     pa_fill(x + 5, y + 8, 1, 6, RGB(60, 40, 30));
 }
-static const char *kind_name(int k);
+static const char *kind_name(int k), *ev_giver(int e);
 static const char *place_area(int area, int sec), *place_room(int area, int sec);
 static void pin_row(int x, int y, int w, int e) {   /* Status: a tracked event, two lines */
     char b[160], t[96]; int st = ev_state(e);
@@ -128,10 +129,14 @@ static void pin_row(int x, int y, int w, int e) {   /* Status: a tracked event, 
     pa_event_icon(x, y + 4, e, st == F_PENDING ? PA_DIM : 0);
     pa_text_fit(x + 28, y, 16, w - 30, st == F_PENDING ? "? ? ?" : ev_title(e, t, sizeof t), st == F_DONE ? C_GREEN : C_DARK, C_EDGE);
     const char *ar = L ? place_area(L->area, L->sec) : NULL, *rm = L ? place_room(L->area, L->sec) : NULL;
-    const char *hint = L && st != F_PENDING ? kind_name(L->kind) : NULL;
+    const char *hint = st == F_PENDING ? NULL : ev_giver(e) ? ev_giver(e) : L ? kind_name(L->kind) : NULL;
     snprintf(b, sizeof b, "%s  -  %s%s%s%s%s", state_name(st), ar ? ar : T("zone not extracted yet", "zona a\xFAn sin extraer"), rm ? ", " : "", rm ? rm : "",
              hint ? "  -  " : "", hint ? hint : "");
     text_wrap(x + 28, y + 16, 8, w - 30, 9, 2, 0, b, st == F_PROGRESS ? C_RED8 : C_MUTED8, RGB(230, 200, 190));
+}
+static const char *ev_giver(int e) {   /* panel_givers.h, in the panel's language */
+    for (unsigned i = 0; i < sizeof panel_givers / sizeof panel_givers[0]; i++) if (panel_givers[i].ev == e) return T(panel_givers[i].en, panel_givers[i].es);
+    return NULL;
 }
 static const char *kind_name(int k) {
     switch (k) {
@@ -234,10 +239,9 @@ static void event_detail(int e) {
     int wx = 8 + ww + 6, wwid = W - 8 - wx;
     window_(wx, y, wwid, wh);
     pa_text(wx + 8, y + 5, 16, T("Who", "Qui\xE9n"), C_DARK, C_EDGE);
-    const char *kn = L ? kind_name(L->kind) : NULL;
+    const char *kn = ev_giver(e) ? ev_giver(e) : L ? kind_name(L->kind) : NULL;
     if (kn && !pend) {
         text_wrap(wx + 8, y + 26, 16, wwid - 16, 17, 2, 0, kn, C_DARK, C_EDGE);
-        if (L->x != -32768 && L->area < 254) { snprintf(b, sizeof b, "x %d  y %d", L->x, L->y); pa_text(wx + 8, y + 44, 8, b, C_RED8, C_REDE); }
     } else pa_text(wx + 8, y + 26, 16, "? ? ?", C_MUTED, C_EDGE);
     face(wx + wwid - 34, y + wh - 34);
     /* state */
