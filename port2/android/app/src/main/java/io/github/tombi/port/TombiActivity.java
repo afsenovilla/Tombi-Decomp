@@ -65,15 +65,20 @@ public class TombiActivity extends SDLActivity {
         // face button with the player's mapping (shims/prompts.c)
         java.util.ArrayList<String> out = new java.util.ArrayList<>();
         boolean prompts = false;
+        String style = null;
         for (int i = 0; i < a.length; i++) {
             if ("--prompts".equals(a[i]) && i + 1 < a.length) {
                 prompts = true;
-                out.add(a[i]); out.add("auto".equals(a[i + 1]) ? autoPromptStyle() : a[i + 1]); i++;
+                style = "auto".equals(a[i + 1]) ? autoPromptStyle() : a[i + 1];
+                out.add(a[i]); out.add(style); i++;
             } else out.add(a[i]);
         }
         if (prompts) {
             PadMap pm = pad != null ? pad : new PadMap(getIntent().getStringExtra(EXTRA_PADMAP));
-            out.add("--prompt-map"); out.add(promptMap(pm));
+            /* Thor / Retroid / Nintendo pads send Android's key codes by their printed labels (A east, B south, X north,
+               Y west); prompts.c takes positions (Xbox names: a south, b east, x west, y north): swap the pairs */
+            boolean labels = "thor".equals(style) || "nintendo".equals(style);
+            out.add("--prompt-map"); out.add(promptMap(pm, labels));
         }
         return out.toArray(new String[0]);
     }
@@ -100,16 +105,20 @@ public class TombiActivity extends SDLActivity {
         } catch (Throwable ignored) { }
         return "playstation";   // no controller (touch): the game's own glyphs
     }
-    static String promptMap(PadMap pm) {
+    static String promptMap(PadMap pm) { return promptMap(pm, false); }
+    static String promptMap(PadMap pm, boolean labels) {
         String[] ps = {"cross", "circle", "square", "triangle"};
         StringBuilder b = new StringBuilder();
         for (String p : ps) {
             String src = "none";
-            for (String s : pm.src[PadMap.index(p)]) { String v = promptSrc(s); if (v != null) { src = v; break; } }
+            for (String s : pm.src[PadMap.index(p)]) { String v = promptSrc(s); if (v != null) { src = labels ? labelToPos(v) : v; break; } }
             if (b.length() > 0) b.append(',');
             b.append(p).append('=').append(src);
         }
         return b.toString();
+    }
+    static String labelToPos(String v) {
+        switch (v) { case "a": return "b"; case "b": return "a"; case "x": return "y"; case "y": return "x"; default: return v; }
     }
     static String promptSrc(String s) {
         if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_A)) return "a";
