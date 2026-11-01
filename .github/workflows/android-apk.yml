@@ -51,6 +51,15 @@ jobs:
           sudo tools/setup_native.sh
           echo "NDK: $ANDROID_NDK_LATEST_HOME"; ls "$ANDROID_HOME/cmake" || true
 
+      # the disc image is kept in the Actions cache: Google Drive refuses downloads for a while after many in a row
+      # (its quota page then arrives instead of the image), and the image never changes
+      - name: Restore disc image
+        id: disccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
+
       - name: Fetch game files
         id: fetch
         env:
@@ -65,7 +74,9 @@ jobs:
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-          curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+          mkdir -p "$RUNNER_TEMP/disccache"
+          if [ -s "$RUNNER_TEMP/disccache/game.bin" ]; then cp "$RUNNER_TEMP/disccache/game.bin" "$RUNNER_TEMP/game.dl"
+          else curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"; fi
           if [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ]; then
             echo "::error::The port build needs the whole disc image (the generator reads every area and SYSTEM overlay)."; exit 1
           fi
@@ -82,11 +93,19 @@ jobs:
           for s in O0PTSUB0 D0SPSUB D0SPSUB2 D0SPSUB3 G0OVER I0NFO I0NFO2 I0NFO3; do
             f="$(find "$RUNNER_TEMP/game" -ipath "*SYSTEM/$s.BIN" | head -1)"; cp "$f" "game/disc/fs/SYSTEM/$s.BIN"
           done
+          [ -s "$RUNNER_TEMP/disccache/game.bin" ] || mv "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/disccache/game.bin"
           rm -f "$RUNNER_TEMP/game.dl"
           echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
       # build/full: the same exact-key cache as port2-exe.yml (inputs of tools/build_full.py only)
+
+      - name: Save disc image
+        if: steps.fetch.outputs.ok == 'true' && steps.disccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
       - name: Cache key
         id: key
         run: echo "full=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
