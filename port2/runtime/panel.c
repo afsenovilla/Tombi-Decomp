@@ -457,6 +457,29 @@ static void room_names(int play, int area, int sec, int link, const char **an, c
     else if (link >= 0) { int c = links[link][2], d = links[link][3]; *an = c < 12 ? area_name[c] : NULL; *rn = c < 12 && d < 24 ? room_name[c][d] : NULL; }
 }
 
+/* word-wrapped text: lines of at most w pixels broken at spaces (a word longer than w is split), at most maxl lines
+   (the last one shrinks to fit only when the text runs past it); centred when center.  Returns the lines drawn. */
+static int text_wrap(int x, int y, int h, int w, int lh, int maxl, int center, const char *s, unsigned body, unsigned edge) {
+    char ln[256]; int n = 0;
+    while (*s && n < maxl) {
+        while (*s == ' ') s++;
+        int len = 0, brk = 0;
+        for (int i = 0; s[i] && s[i] != '\n' && i < 255; i++) {
+            memcpy(ln, s, i + 1); ln[i + 1] = 0;
+            if (pa_text_w(h, ln) > w) break;
+            len = i + 1; if (s[i + 1] == ' ' || !s[i + 1] || s[i + 1] == '\n') brk = len;
+        }
+        if (!len) len = 1;
+        int take = brk && s[len] && s[len] != '\n' ? brk : len;
+        if (n == maxl - 1 && s[take] && s[take] != '\n') take = (int)strlen(s) < 255 ? (int)strlen(s) : 255;   /* last line: all of the rest */
+        memcpy(ln, s, take); ln[take] = 0;
+        int tw = pa_text_w(h, ln); if (tw > w) tw = w;
+        pa_text_fit(center ? x + (w - tw) / 2 : x, y + n * lh, h, w, ln, body, edge);
+        s += take; if (*s == '\n') s++;
+        n++;
+    }
+    return n;
+}
 #include "panel_events.inc"
 #include "panel_side.inc"
 #include "panel_items.inc"
@@ -576,7 +599,8 @@ void port_panel_touch(int x, int y, int action) { inq_push(1, action, x / (pk ? 
 void port_panel_key(int a) { inq_push(0, a, 0, 0); }
 void port_panel_pinch(float f, int x, int y) { int k = pk ? pk : 1; port_panel_pinch_canvas(f, x < 0 ? -1 : x / k, y < 0 ? -1 : y / k); }   /* PC: the mouse wheel */
 /* --panel-input FRAME:ACTION,... (headless tests): up down left right ok back tabl tabr zoomout zoomin hide showhidden,
-   tap@X@Y (canvas pixels), hold@X@Y (a long press), pinch@PERCENT@X@Y (a two-finger pinch: the distance ratio x 100) */
+   tap@X@Y (canvas pixels), hold@X@Y (a long press), pinch@PERCENT@X@Y (a two-finger pinch: the distance ratio x 100),
+   drag@X0@Y0@X1@Y1 (a swipe) */
 static const char *panel_script;
 static int hold_x, hold_y, hold_at = -1;   /* hold@X@Y: the release, 40 frames later */
 void port_panel_input_script(const char *s) { panel_script = s; }
@@ -588,8 +612,13 @@ static void script_step(void) {
         if (f == port_frame) {
             char a[24]; int n = (int)((e ? e : c + strlen(c)) - c - 1); if (n > 23) n = 23; memcpy(a, c + 1, n); a[n] = 0;
             int x, y;
-            int pct;
+            int pct, x1, y1;
             if (sscanf(a, "pinch@%d@%d@%d", &pct, &x, &y) == 3) port_panel_pinch_canvas(pct / 100.f, x, y);   /* pinch@PERCENT@X@Y */
+            else if (sscanf(a, "drag@%d@%d@%d@%d", &x, &y, &x1, &y1) == 4) {   /* drag@X0@Y0@X1@Y1: a quick swipe (8 moves, then up) */
+                inq_push(1, 0, x, y);
+                for (int k = 1; k <= 8; k++) inq_push(1, 2, x + (x1 - x) * k / 8, y + (y1 - y) * k / 8);
+                inq_push(1, 1, x1, y1);
+            }
             else if (sscanf(a, "tap@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); inq_push(1, 1, x, y); }
             else if (sscanf(a, "hold@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); hold_x = x; hold_y = y; hold_at = port_frame + 40; }
             else for (int i = 1; i < 13; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);

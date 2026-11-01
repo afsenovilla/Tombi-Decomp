@@ -235,6 +235,7 @@ static int touch_id = -1, touch_t0;
 static void panel_touch_canvas(int x, int y, int action) {   /* action: 0 down, 1 up, 2 move */
     int id = -1;
     if (page == PAGE_SIDE && map_touch(x, y, action)) { touch_id = -1; return; }
+    if (page == PAGE_ITEMS) { int items_touch_(int, int, int); if (items_touch_(x, y, action)) { touch_id = -1; return; } }
     for (int i = nhs - 1; i >= 0; i--) if (x >= hs[i].x && y >= hs[i].y && x < hs[i].x + hs[i].w && y < hs[i].y + hs[i].h) { id = hs[i].id; break; }
     if (action == 0) { touch_id = id; touch_t0 = port_frame; }
     else if (action == 1) { touch_long = port_frame - touch_t0 >= 30; if (id >= 0 && id == touch_id) panel_hit(id); touch_id = -1; touch_long = 0; }
