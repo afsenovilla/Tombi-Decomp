@@ -1856,8 +1856,8 @@ the four lists and the UV table through it. `PAUSA / SALIR / CARGAR` (5), `PAUSA
 MAIN0 and the AREA00 overlays): only these lists and the event-title tables (already `port_title_*`).
 The Select menu of MAIN5 reads `Elmto / Evento / Estado / Mapa`: its glyphs are a strip of 8x16 cells at v 144 of the
 HUD page (`SYSTEM/A60003.GAM`, tpage 0x14) holding just the letters the Spanish menus use, 31 of them plus the blank
-cell, i.e. the whole 256-px row, with no `O` nor `b`. A text patch can write `Objeto` (`tools/pause_text.py`,
-`"menus": {"EXE/MAIN5.EXE": {"pause": {"Elmto": "Objeto"}}}`: rewritten in its 8-byte slot, the entry's x moved to keep
+cell, i.e. the whole 256-px row, with no `O` nor `b`. A text patch can write `Objetos` / `Eventos` (`tools/pause_text.py`,
+`"menus": {"EXE/MAIN5.EXE": {"pause": {"Elmto": "Objetos", "Evento": "Eventos"}}}`: rewritten in its 8-byte slot, the entry's x moved to keep
 the centre) with two codes past the strip, which `port/fixes.txt` draws for `--lang 5` from the strip itself: 0x20 `O`
 = the `U` closed on top by its own rows 13..9 (a quad with v reversed), 0x21 `b` = the `d` mirrored (u reversed). No
 texel is added and the box is unchanged (6 glyphs, like Evento / Estado); without such a patch nothing changes.

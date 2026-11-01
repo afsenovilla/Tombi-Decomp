@@ -292,7 +292,8 @@
   },
   "EXE/MAIN5.EXE": {
    "pause": {
-    "Elmto": "Objeto"
+    "Elmto": "Objetos",
+    "Evento": "Eventos"
    }
   }
  },
