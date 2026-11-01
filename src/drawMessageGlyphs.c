@@ -60,6 +60,12 @@ void drawMessageGlyphs(int a)
         p->w = D_800A5DE4[f].w;
         p->h = D_800A5DE4[f].h;
         p->clut = GetClut(0x160, 0x1e3);
+#ifdef PORT2
+        {   /* a controller button glyph in a colour the font CLUT lacks: the port CLUT (port2/shims/prompts.c) */
+            extern unsigned short port_prompt_sprite_clut(int, unsigned short);
+            p->clut = port_prompt_sprite_clut(f, p->clut);
+        }
+#endif
         AddPrim(CURRENT_OT + 4, p);
         NEXT_PRIM++;
     }

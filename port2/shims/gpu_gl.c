@@ -185,11 +185,11 @@ static const char fs_src[] =
     "      w = vword(mod(tx + floor(u / 4.0), 1024.0), mod(ty + v, 512.0));\n"
     "      float sh = mod(u, 4.0), dv = sh < 0.5 ? 1.0 : sh < 1.5 ? 16.0 : sh < 2.5 ? 256.0 : 4096.0;\n"
     "      float idx = mod(floor(w / dv), 16.0);\n"
-    "      w = vword(mod(tp.x + idx, 1024.0), tp.y);\n"
+    "      w = tp.y > 511.5 ? pclut(idx) : vword(mod(tp.x + idx, 1024.0), tp.y);\n"
     "    } else if (depth < 1.5) {\n"
     "      w = vword(mod(tx + floor(u / 2.0), 1024.0), mod(ty + v, 512.0));\n"
     "      float idx = mod(floor(w / (mod(u, 2.0) < 0.5 ? 1.0 : 256.0)), 256.0);\n"
-    "      w = vword(mod(tp.x + idx, 1024.0), tp.y);\n"
+    "      w = tp.y > 511.5 ? pclut(mod(idx, 16.0)) : vword(mod(tp.x + idx, 1024.0), tp.y);\n"
     "    } else w = vword(mod(tx + u, 1024.0), mod(ty + v, 512.0));\n"
     "    if (w < 0.5) discard;\n"
     "    float ta = floor(w / 32768.0);\n"
@@ -296,7 +296,7 @@ static void op_sample_rect(Op *op, int x1, int y1, int x2, int y2) {
 static void op_sample(Op *op, const GpuTex *t) {
     int pw = t->depth == 0 ? 64 : t->depth == 1 ? 128 : 256;
     op_sample_rect(op, t->tx, t->ty, t->tx + pw - 1, t->ty + 255);
-    if (t->depth < 2) op_sample_rect(op, t->cx, t->cy, t->cx + (t->depth == 0 ? 16 : 256) - 1, t->cy);
+    if (t->depth < 2 && t->cy != PORT_CLUT_Y) op_sample_rect(op, t->cx, t->cy, t->cx + (t->depth == 0 ? 16 : 256) - 1, t->cy);
 }
 static u16 *stage;     /* 2048 x 512 x R x R words (uploads, replicated) */
 static u8 *stage8;     /* the same in RGBA8 (readbacks) */
@@ -984,7 +984,14 @@ static int gl_start(void) {
     stage = (u16 *)SDL_malloc((size_t)2048 * 512 * (R * R + 1) * 2);
     stage8 = (u8 *)SDL_malloc((size_t)2048 * 512 * R * R * 4);
     if (!stage || !stage8) return -1;
-    prog = link(vs_src, fs_src, "gpu");
+    {   /* the fragment shader, after pclut(): the port-only CLUT (gpu_backend.h PORT_CLUT_Y) as constants */
+        static char fs_full[sizeof fs_src + 1024];
+        int n = snprintf(fs_full, sizeof fs_full, "float pclut(float i) {\n");
+        for (int i = 0; i < 15; i++) n += snprintf(fs_full + n, sizeof fs_full - n, "  if (i < %d.5) return %d.0;\n", i, port_prompt_clut[i]);
+        n += snprintf(fs_full + n, sizeof fs_full - n, "  return %d.0;\n}\n", port_prompt_clut[15]);
+        snprintf(fs_full + n, sizeof fs_full - n, "%s", fs_src);
+        prog = link(vs_src, fs_full, "gpu");
+    }
     bprog = link(bvs_src, bfs_src, "blit");
     if (!prog || !bprog) return -1;
     p_glUseProgram(prog);

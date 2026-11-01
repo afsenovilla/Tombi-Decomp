@@ -518,10 +518,10 @@ i18n.add({
 i18n.add({
     "es": {"c.pad": "Mando", "l.dualshock": "Mando DualShock (analógico): stick izquierdo con velocidad y vibración",
            "l.prompts": "Iconos de botones en los textos:", "p.auto": "Auto (según el mando)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.gen": "Genérico"},
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor / Retroid", "p.gen": "Genérico"},
     "en": {"c.pad": "Controller", "l.dualshock": "DualShock controller (analog): left stick with speed, and rumble",
            "l.prompts": "Button icons in the texts:", "p.auto": "Auto (from the controller)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.gen": "Generic"},
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor / Retroid", "p.gen": "Generic"},
 })
 
 # Tk keysym -> SDL key name (what --keys takes, SDL_GetScancodeFromName); letters, digits and F1..F24 map to themselves
@@ -1005,7 +1005,7 @@ class App:
         ttk.Checkbutton(c, text=tr("l.dualshock"), variable=self.var("dualshock", tk.BooleanVar, False)).pack(anchor="w")
         ttk.Label(c, text=tr("l.prompts")).pack(anchor="w", pady=(8, 2))
         self._radios(c, "prompts_style", tk.StringVar, "auto", [(tr("p.auto"), "auto"), (tr("p.ps"), "playstation"),
-                     (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.gen"), "generic")])
+                     (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.thor"), "thor"), (tr("p.gen"), "generic")])
         o, c = self.card(f, tr("c.controls"))
         o.pack(fill="both", expand=True)
         top = ttk.Frame(c)
@@ -1758,7 +1758,7 @@ class App:
             cmd += ["--fullscreen"]
         if s.get("dualshock"):
             cmd += ["--dualshock"]
-        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "generic"):
+        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "thor", "generic"):
             cmd += ["--prompts", s["prompts_style"]]
         cmd += M.mod_args(s, app_dir())
         cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))

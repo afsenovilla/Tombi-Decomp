@@ -83,7 +83,7 @@ public class TombiActivity extends SDLActivity {
         return false;
     }
     /* the style for the controller in use: its name (Xbox / PlayStation / Nintendo pads; the AYN Thor's "Odin
-       Controller" and the Retroid handhelds label their buttons A B X Y as Android's key codes: Nintendo look) */
+       Controller" and the Retroid handhelds label their buttons A B X Y as Android's key codes, SNES-coloured: Thor) */
     static String autoPromptStyle() {
         try {
             for (int id : InputDevice.getDeviceIds()) {
@@ -93,8 +93,8 @@ public class TombiActivity extends SDLActivity {
                 if (n.contains("xbox") || n.contains("x-box")) return "xbox";
                 if (n.contains("dualsense") || n.contains("dualshock") || n.contains("playstation") || n.contains("wireless controller")
                         || n.contains("ps4") || n.contains("ps5") || n.contains("ps3")) return "playstation";
-                if (n.contains("nintendo") || n.contains("pro controller") || n.contains("joy-con") || n.contains("odin")
-                        || n.contains("ayn") || n.contains("thor") || n.contains("retroid")) return "nintendo";
+                if (n.contains("odin") || n.contains("ayn") || n.contains("thor") || n.contains("retroid")) return "thor";
+                if (n.contains("nintendo") || n.contains("pro controller") || n.contains("joy-con")) return "nintendo";
                 return "generic";
             }
         } catch (Throwable ignored) { }

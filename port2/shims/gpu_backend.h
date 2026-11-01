@@ -17,6 +17,11 @@ typedef struct { int x, y, r, g, b, u, v; } GpuVtx;             /* x, y: VRAM pi
 /* --texture-pack (texpack.c): a replacement image (GL texture) for the texels (ou .. ou + w - 1, ov .. ov + h - 1) of the page */
 typedef struct PortTexRep { unsigned gltex; int ou, ov, w, h; } PortTexRep;
 typedef struct { int tx, ty, depth, cx, cy; const PortTexRep *rep; } GpuTex;   /* texture page base, 0 = 4-bit / 1 = 8-bit / 2 = 15-bit, CLUT x, y; rep: 0 = none */
+/* the port-only CLUT (prompts.c "port CLUT": the controller button glyphs): a primitive with CLUT id PORT_CLUT_ID (bit 15
+   set: never a GetClut value) reads its 16 colours from port_prompt_clut, not VRAM; GpuTex.cy = PORT_CLUT_Y marks it */
+#define PORT_CLUT_ID 0xFFFF
+#define PORT_CLUT_Y 512
+extern const gpu_u16 port_prompt_clut[16];
 
 typedef struct {
     int abr;                        /* semi-transparency mode 0..3 */

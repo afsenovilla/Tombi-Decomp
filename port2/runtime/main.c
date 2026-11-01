@@ -964,7 +964,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--prompts") && v) {   /* shims/prompts.c */
             extern int port_prompt_option, port_prompt_style, port_prompt_parse_style(const char *);
             int st = port_prompt_parse_style(argv[++i]);
-            if (st < -1) port_printf("[port] --prompts: unknown style '%s' (auto playstation xbox nintendo generic)\n", argv[i]);
+            if (st < -1) port_printf("[port] --prompts: unknown style '%s' (auto playstation xbox nintendo thor generic)\n", argv[i]);
             else { port_prompt_option = st; if (st >= 0) port_prompt_style = st; }
         }
         else if (!strcmp(a, "--prompt-map") && v) { extern void port_prompt_map(const char *); port_prompt_map(argv[++i]); }

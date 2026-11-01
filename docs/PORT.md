@@ -1055,17 +1055,27 @@ glyphs (the message strings embed them as glyph codes), which are not identified
 
 **Controller-specific button prompts (port2, native; supersedes the TBTX route above for the message boxes).**
 `port2/shims/prompts.c`: the four face-button glyphs ✕ ○ □ △ are the same 12 x 16 4 bpp bitmaps in all 369 WFM3 banks
-(every language), so `loadMessageGlyph` (PORT2 block) hands each glyph to `port_prompt_glyph`, which recognises them by
-the FNV-1a of their pixels and returns one drawn by code with the font CLUT's own indices (0 transparent, 1..5 ink,
-6 dark disc, 7 blue, 8 green, 9 pink, 10 red, 11..13 khaki rim, 14/15 cream; no yellow, so the Xbox Y is khaki).
-No game pixels are shipped. What is drawn is the *physical* button that gives that PS1 button with the current
-mapping: `runtime/sdl.c` derives it from the controller bindings (`--pad-map` included), Android passes
-`--prompt-map cross=a,...` from PadMap. Styles (`--prompts auto|playstation|xbox|nintendo|generic`): PlayStation
-shapes, Xbox coloured A/B/X/Y, Nintendo cream letters, generic = a diamond with the button's position lit. Auto: SDL's
-controller type on the PC (PS3/4/5 -> PlayStation, Xbox/Luna/Stadia/Shield -> Xbox, Switch Pro/Joy-Con -> Nintendo,
-other -> generic, no controller -> PlayStation); on Android the controller name (Xbox, DualShock/DualSense, Nintendo,
-AYN "Odin Controller"/Thor and Retroid -> Nintendo letters = Android's key-code names, i.e. A = Cross by default).
-PlayStation with the default mapping returns the game's own glyph: frames byte-identical. The letters follow SDL's
+(every language), so `loadMessageGlyph` (PORT2 block) hands each glyph and its glyph cache slot to `port_prompt_glyph`,
+which recognises them by the FNV-1a of their pixels and returns one drawn by code. No game pixels are shipped. Every
+style is drawn (PlayStation too): the disc sits on rows 4..15 of the glyph, 2 px lower than the game's own (rows
+2..13, centred on the capitals), so it lines up with the lowercase text. What is drawn is the *physical* button that
+gives that PS1 button with the current mapping: `runtime/sdl.c` derives it from the controller bindings (`--pad-map`
+included), Android passes `--prompt-map cross=a,...` from PadMap. Styles (`--prompts
+auto|playstation|xbox|nintendo|thor|generic`): PlayStation shapes; Xbox A/B/X/Y in the Xbox colours (green, red,
+blue, yellow) on the dark disc; Nintendo = the letters by position (south B, east A, west Y, north X) in cream on
+the dark disc, like a Switch Pro pad; Thor ("AYN Thor / Retroid" in the launchers) = the same letters, white, on the
+SNES-coloured discs of those handhelds (X deep blue, Y dark green, A red, B yellow); generic = a diamond with the
+button's position lit. Auto: SDL's controller type on the PC (PS3/4/5 -> PlayStation, Xbox/Luna/Stadia/Shield ->
+Xbox, Switch Pro/Joy-Con -> Nintendo, other -> generic, no controller -> PlayStation); on Android the controller name
+(Xbox, DualShock/DualSense, "odin"/"ayn"/"thor"/"retroid" -> Thor, Nintendo/Pro Controller/Joy-Con -> Nintendo).
+*Colours:* PlayStation, Nintendo and generic use the font CLUT's own indices (0 transparent, 1..5 ink, 6 dark disc,
+7 blue, 8 green, 9 pink, 10 red, 11..13 khaki rim, 14/15 cream). Xbox and Thor need colours it lacks, so they use a
+port-only 16-colour CLUT (`port_prompt_clut`: the font CLUT's transparent, grey, disc, rim and cream entries kept, the
+rest replaced by the Xbox / SNES colours and white). It is not in game VRAM: `loadMessageGlyph` marks the cache slot,
+`drawMessageBox` / `drawMessageGlyphs` (PORT2 blocks) give that slot's sprites the CLUT id `PORT_CLUT_ID` = 0xFFFF
+(bit 15 set, never a `GetClut` value), and the port GPU maps it to `GpuTex.cy = PORT_CLUT_Y` (512, past VRAM): the
+software texel fetch (`gpu.c`) and the GL fragment shader (`gpu_gl.c`, the table compiled in as `pclut()` constants)
+read the 16 colours from the table; texture packs and `--dump-draws` skip those sprites. The letters follow SDL's
 names (with SDL's default label mapping a Switch pad's SDL "A" is its labelled A). Only the face buttons are glyphs;
 L1/R1/START/SELECT and the d-pad arrows in the texts are words / arrows and stay. Debug: `--test-message FRAME:K:L`
 opens `showMessageBox(K, L)` (AREA00: 4:4 / 4:5 / 4:6 / 4:9 are the "□/✕/○/△ to run" hints).

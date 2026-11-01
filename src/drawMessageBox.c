@@ -64,6 +64,12 @@ void drawMessageBox(O *o)
             s->w = DAT_800a5de4[(short)f].w;
             s->h = DAT_800a5de4[(short)f].h;
             s->clut = MESSAGE_GLYPHS[o->idx][j].clut;
+#ifdef PORT2
+            {   /* a controller button glyph in a colour the font CLUT lacks: the port CLUT (port2/shims/prompts.c) */
+                extern unsigned short port_prompt_sprite_clut(int, unsigned short);
+                s->clut = port_prompt_sprite_clut((short)f, s->clut);
+            }
+#endif
             {
                 Sprt *q = NEXT_PRIM;
                 *q = *s;

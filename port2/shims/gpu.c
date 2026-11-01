@@ -120,11 +120,11 @@ static inline u16 texel(int u, int v) {
     if (tp_depth == 0) {
         u16 w = vram[(tp_y + v) & 511][(tp_x + (u >> 2)) & 1023];
         int i = (w >> ((u & 3) * 4)) & 15;
-        return vram[clut_y][(clut_x + i) & 1023];
+        return clut_y == PORT_CLUT_Y ? port_prompt_clut[i] : vram[clut_y][(clut_x + i) & 1023];
     } else if (tp_depth == 1) {
         u16 w = vram[(tp_y + v) & 511][(tp_x + (u >> 1)) & 1023];
         int i = (w >> ((u & 1) * 8)) & 255;
-        return vram[clut_y][(clut_x + i) & 1023];
+        return clut_y == PORT_CLUT_Y ? port_prompt_clut[i & 15] : vram[clut_y][(clut_x + i) & 1023];
     }
     return vram[(tp_y + v) & 511][(tp_x + u) & 1023];
 }
@@ -401,9 +401,10 @@ static int gp0(const u32 *p, int n) {
         if (tex) {
             set_texpage16(tpage);
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511;
-            t.rep = port_texpack_on ? port_texpack_prim(&t, v, nv) : 0;
+            if (clut == PORT_CLUT_ID) { t.cx = 0; t.cy = PORT_CLUT_Y; }
+            t.rep = port_texpack_on && t.cy != PORT_CLUT_Y ? port_texpack_prim(&t, v, nv) : 0;
         }
-        if (tex && port_drawdump_path) {                     /* --dump-draws (drawdump.c) */
+        if (tex && port_drawdump_path && t.cy != PORT_CLUT_Y) {                     /* --dump-draws (drawdump.c) */
             int u0 = 255, u1 = 0, v0 = 255, v1 = 0, x0 = 1 << 20, x1 = -(1 << 20), y0 = 1 << 20, y1 = -(1 << 20);
             for (int i = 0; i < nv; i++) {
                 if (v[i].u < u0) u0 = v[i].u; if (v[i].u > u1) u1 = v[i].u; if (v[i].v < v0) v0 = v[i].v; if (v[i].v > v1) v1 = v[i].v;
@@ -444,13 +445,14 @@ static int gp0(const u32 *p, int n) {
         if (tex) {
             u32 uv = p[k++]; u = uv & 255; v = (uv >> 8) & 255;
             t.cx = ((uv >> 16) & 0x3F) * 16; t.cy = (uv >> 22) & 511;
+            if ((uv >> 16) == PORT_CLUT_ID) { t.cx = 0; t.cy = PORT_CLUT_Y; }
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp;
         }
         if (size == 0) { w = p[k] & 0x3FF; h = (p[k] >> 16) & 0x1FF; k++; }
         else { w = h = size == 1 ? 1 : size == 2 ? 8 : 16; }
-        if (tex && port_drawdump_path && w && h)            /* --dump-draws (drawdump.c) */
+        if (tex && port_drawdump_path && w && h && t.cy != PORT_CLUT_Y)            /* --dump-draws (drawdump.c) */
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7, (p[2] >> 16) & 0xFFFF, u, v, w, h, a.x, a.y, w, h, semi ? 1 : 0, 2);
-        if (tex) t.rep = port_texpack_on && w && h ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
+        if (tex) t.rep = port_texpack_on && w && h && t.cy != PORT_CLUT_Y ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
         if (ws_on && !tex && w && h) ws_full_width_rect(&a.x, &w);
         if (w && h) be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
         return need;

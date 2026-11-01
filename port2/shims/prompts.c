@@ -11,20 +11,29 @@
  * What is drawn is the PHYSICAL button that produces that PS1 button with the current mapping:
  *   port_prompt_src[ps] (PROMPT_SRC_*: south / east / west / north face button, shoulders, triggers) is set by the host
  *   (runtime/sdl.c from its controller bindings on the PC; --prompt-map from TombiActivity's PadMap on Android), and
- *   port_prompt_style (PROMPT_*) picks the look: PlayStation shapes, Xbox coloured letters, Nintendo letters, or a
+ *   port_prompt_style (PROMPT_*) picks the look: PlayStation shapes, Xbox coloured letters, Nintendo letters (cream on the dark disc, like
+ *   the Switch Pro), Thor (the same letters, white on the SNES-coloured discs of the AYN Thor / Retroid), or a
  *   generic diamond that marks the button's position.  The letters are the controller's own button names as SDL /
  *   Android report them (SDL's A = the button labelled A on Xbox and, with SDL's default label mapping, on Nintendo
  *   pads; Android's KEYCODE_BUTTON_A = the button the AYN / Retroid handhelds label A).
- * Style PlayStation with the default mapping draws nothing of ours: the game's own glyphs, frames unchanged. */
+ * Every style draws its own glyph (PlayStation too, so all sit at the same height): the disc on rows 4..15 of the 16-row
+ * glyph, 2 px lower than the game's (rows 2..13), which centred it on the capitals; lowered, it lines up with the
+ * lowercase text around it.
+ *
+ * Colours: the PlayStation and generic glyphs use the font CLUT.  The Xbox and Thor ones need colours it lacks
+ * (yellow, deep blue, dark green, white), so the cache slots holding them are drawn with a port-only 16-colour CLUT
+ * (port_prompt_clut below): the message box sprites of those slots get the CLUT id PORT_CLUT_ID (drawMessageBox.c,
+ * drawMessageGlyphs.c PORT2 blocks), which the port GPU (gpu.c texel fetch, gpu_gl.c fragment shader) reads from this
+ * table instead of VRAM.  No game VRAM is used: 0xFFFF is not a value GetClut can return (bit 15 set). */
 #include <string.h>
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
-enum { PROMPT_AUTO = -1, PROMPT_PS = 0, PROMPT_XBOX = 1, PROMPT_NINTENDO = 2, PROMPT_GENERIC = 3 };
+enum { PROMPT_AUTO = -1, PROMPT_PS = 0, PROMPT_XBOX = 1, PROMPT_NINTENDO = 2, PROMPT_GENERIC = 3, PROMPT_THOR = 4 };
 enum { PS_CROSS, PS_CIRCLE, PS_SQUARE, PS_TRIANGLE };
 enum { SRC_SOUTH, SRC_EAST, SRC_WEST, SRC_NORTH, SRC_L1, SRC_R1, SRC_L2, SRC_R2, SRC_NONE };
 
-int port_prompt_option = PROMPT_AUTO;   /* --prompts auto|playstation|xbox|nintendo|generic */
+int port_prompt_option = PROMPT_AUTO;   /* --prompts auto|playstation|xbox|nintendo|generic|thor */
 int port_prompt_style = PROMPT_PS;      /* the style in use (auto: runtime/sdl.c sets it from the controller type) */
 /* the physical source of each PS1 face button; the default mapping (SDL / Android A = Cross, B = Circle, ...) */
 int port_prompt_src[4] = { SRC_SOUTH, SRC_EAST, SRC_WEST, SRC_NORTH };
@@ -38,6 +47,7 @@ int port_prompt_parse_style(const char *s) {
     if (!strcmp(s, "xbox")) return PROMPT_XBOX;
     if (!strcmp(s, "nintendo") || !strcmp(s, "switch")) return PROMPT_NINTENDO;
     if (!strcmp(s, "generic")) return PROMPT_GENERIC;
+    if (!strcmp(s, "thor") || !strcmp(s, "retroid")) return PROMPT_THOR;
     return -2;
 }
 static int src_parse(const char *s, int n) {
@@ -69,9 +79,26 @@ static u8 img[GH][GW];
 /* palette indices of the font CLUT (measured: every index drawn in a box): 0 transparent, 1 the black ink, 2..5 its
    grey anti-aliasing (156 / 74 / 107 / 132), 6 dark grey (41), 7 blue (107,148,255), 8 green (0,255,0), 9 pink
    (255,132,132), 10 red (255,90,82), 11..13 the rim's khaki tones (206,198,165 / 165,156,140 / 140,132,115), 14 and 15
-   the box's cream (255,239,222).  There is no yellow and no pure white: the Xbox Y is drawn in the light khaki and the
-   letters on a dark disc in cream. */
+   the box's cream (255,239,222).  There is no yellow, dark blue / green or pure white: the Xbox and Thor glyphs use
+   the port CLUT below. */
 enum { C_T = 0, C_GREY = 3, C_DISC = 6, C_BLUE = 7, C_GREEN = 8, C_PINK = 9, C_RED = 10, C_KHAKI = 11, C_CREAM = 14 };
+/* the port CLUT (Xbox / Thor glyphs): the font CLUT's entries 0, 3, 6, 11..14 kept (transparent, grey, dark disc,
+   rim, cream), the others replaced: 1 / 2 / 4 / 5 the Xbox green / red / blue / yellow, 7 / 8 / 9 / 10 the SNES-coloured
+   blue / green / yellow / red of the Nintendo-layout pads (AYN Thor, Retroid), 15 white.  BGR555. */
+enum { P_XGREEN = 1, P_XRED = 2, P_XBLUE = 4, P_XYELLOW = 5, P_NBLUE = 7, P_NGREEN = 8, P_NYELLOW = 9, P_NRED = 10, P_WHITE = 15 };
+#define BGR(r, g, b) (u16)(((r) >> 3) | ((g) >> 3) << 5 | ((b) >> 3) << 10)
+const u16 port_prompt_clut[16] = {
+    0, BGR(0x3C, 0xB0, 0x43), BGR(0xE0, 0x3C, 0x31), BGR(107, 107, 107), BGR(0x2F, 0x6F, 0xD6), BGR(0xF5, 0xC5, 0x18),
+    BGR(41, 41, 41), BGR(0x1E, 0x3F, 0xB0), BGR(0x2E, 0x8B, 0x4E), BGR(0xF2, 0xC2, 0x30), BGR(0xC8, 0x28, 0x1E),
+    BGR(206, 198, 165), BGR(165, 156, 140), BGR(140, 132, 115), BGR(255, 239, 222), BGR(255, 255, 255),
+};
+#define PORT_CLUT_ID 0xFFFF
+#define NSLOTS 0x3c
+static unsigned char slot_port_clut[NSLOTS];   /* glyph cache slot -> drawn with port_prompt_clut */
+/* drawMessageBox / drawMessageGlyphs PORT2 hook: the CLUT id for a sprite of glyph cache slot `slot` */
+unsigned short port_prompt_sprite_clut(int slot, unsigned short clut) {
+    return slot >= 0 && slot < NSLOTS && slot_port_clut[slot] ? PORT_CLUT_ID : clut;
+}
 
 /* the disc the PlayStation glyphs sit on (rows 2..13): an anti-aliased ring, the same shape as the game's */
 static const char *disc_rows[12] = {
@@ -145,11 +172,11 @@ static void draw(int ps, int src, int style) {
     static const char *ps_sh[] = { "L1", "R1", "L2", "R2" }, *xb_sh[] = { "LB", "RB", "LT", "RT" },
                       *nt_sh[] = { "L", "R", "ZL", "ZR" };
     static const char *letters = "ABXY";
-    static const int xb_col[4] = { C_GREEN, C_RED, C_BLUE, C_KHAKI };
+    static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };   /* port CLUT */
     draw_disc();
     if (src == SRC_NONE) return;
     if (src >= SRC_L1) {
-        const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
+        const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || style == PROMPT_THOR ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
         label(t, C_CREAM);
         return;
     }
@@ -159,19 +186,25 @@ static void draw(int ps, int src, int style) {
         char t[2] = { letters[src], 0 };
         label(t, xb_col[src]);
         break; }
-    case PROMPT_NINTENDO: {
-        /* by position, as printed on Nintendo pads and the AYN Thor / Retroid (SNES colours): south B (yellow: the
-           palette's light khaki, dark letter), east A red, west Y green, north X blue.  src is the positional
-           (Xbox-named) button: SDL with button labels off, Android's KEYCODE_BUTTON_A = south. */
+    case PROMPT_NINTENDO: case PROMPT_THOR: {
+        /* by position, as printed on Nintendo pads and the AYN Thor / Retroid: south B, east A, west Y, north X.
+           Nintendo: cream letters on the dark disc (Switch Pro); Thor: white letters on the SNES colours (port CLUT:
+           B yellow, A red, Y green, X blue).  src is the positional (Xbox-named) button: SDL with button labels off,
+           Android's KEYCODE_BUTTON_A = south. */
         static const char nl[4] = { 'B', 'A', 'Y', 'X' };
-        static const int ndisc[4] = { C_KHAKI, C_RED, C_GREEN, C_BLUE }, nink[4] = { C_DISC, C_CREAM, C_DISC, C_CREAM };
+        static const int ndisc[4] = { P_NYELLOW, P_NRED, P_NGREEN, P_NBLUE };
         char t[2] = { nl[src], 0 };
-        draw_disc_col(ndisc[src]);
-        label(t, nink[src]);
+        if (style == PROMPT_THOR) { draw_disc_col(ndisc[src]); label(t, P_WHITE); }
+        else label(t, C_CREAM);
         break; }
     default: diamond(src); break;
     }
     (void)ps;
+}
+/* 2 px lower: the disc from rows 2..13 to 4..15 (rows 14, 15 are empty before) */
+static void lower2(void) {
+    memmove(img[2], img[0], sizeof img[0] * (GH - 2));
+    memset(img, 0, sizeof img[0] * 2);
 }
 
 static u16 out[GW / 4 * GH];
@@ -184,17 +217,19 @@ static void pack(void) {
 }
 
 /* loadMessageGlyph's PORT2 hook: src = the glyph's pixels (after its 8-byte header), w in VRAM words, h rows; returns
-   the pixels to load (ours for a button glyph that the style / mapping changes, src otherwise) */
-const u16 *port_prompt_glyph(const u16 *src, int w, int h) {
+   the pixels to load (ours for a button glyph, src otherwise); slot = the glyph cache slot it is loaded into */
+const u16 *port_prompt_glyph(const u16 *src, int w, int h, int slot) {
+    if (slot >= 0 && slot < NSLOTS) slot_port_clut[slot] = 0;
     if (w != GW / 4 || h != GH) return src;
-    if (port_prompt_style == PROMPT_PS && port_prompt_src[0] == SRC_SOUTH && port_prompt_src[1] == SRC_EAST
-        && port_prompt_src[2] == SRC_WEST && port_prompt_src[3] == SRC_NORTH) return src;
     u32 hsh = 2166136261u;
     const u8 *b = (const u8 *)src;
     for (int i = 0; i < GW * GH / 2; i++) hsh = (hsh ^ b[i]) * 16777619u;
     for (int ps = 0; ps < 4; ps++) if (hsh == ps_hash[ps]) {
         draw(ps, port_prompt_src[ps], port_prompt_style);
+        lower2();
         pack();
+        if (slot >= 0 && slot < NSLOTS)
+            slot_port_clut[slot] = port_prompt_style == PROMPT_XBOX || port_prompt_style == PROMPT_THOR;
         return out;
     }
     return src;
