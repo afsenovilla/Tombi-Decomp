@@ -1326,6 +1326,13 @@ What the cross build needed (`port2/CMakeLists.txt` `if(WIN32)`, `port2/cmake/mi
   PS1 button's defaults; the triggers are L2 / R2 by default, past half way), `--patch-tex FILE` (button prompts), `--show-fps [1|2]`,
   `--test-null` (fault-handler self-test: exit code 0 when both emulations work on this host). `--poke`,
   `--poke-every`, `--pad-script`, `--menu` were already there.
+- **`--show-fps [1|2]`** (the launchers' "Show FPS" / "Mostrar FPS") draws an on-screen counter in the top-left corner
+  of the game picture (inside it, so also right with `--widescreen` / `--aspect`): white 3x5 digits on a
+  semi-transparent dark box, drawn at window resolution after the frame (integer scale from the picture height, 2..8),
+  updated twice a second (`runtime/fps_overlay.c`; drawn by `runtime/sdl.c` for `--renderer soft`, `shims/gpu_gl.c` for
+  OpenGL / GL ES on Android). It shows the frames actually presented per second, `50 FPS`, or presented / vblank (game
+  logic) rate when they differ, `25/50 FPS`. Main window only (not the second-screen panel), and not in `--dump-frames`
+  PNGs (those are the PS1 frame). The once-a-second `[port] fps:` log line (and the `2` histogram) stays.
 - **Build id.** `port/cmake/build_id.cmake` writes `gen/build_id.c`; the first log line is
   `[port2] build <sha>[+] <date>` (`+` = modified tree).
 

@@ -209,6 +209,10 @@ static const char bfs_src[] =
     "uniform sampler2D u_vram; varying vec2 v_uv;\n"
     "void main() { gl_FragColor = vec4(texture2D(u_vram, v_uv).rgb, 1.0); }\n";
 
+static const char ofs_src[] =   /* the --show-fps counter: RGBA, blended */
+    "uniform sampler2D u_vram; varying vec2 v_uv;\n"
+    "void main() { gl_FragColor = texture2D(u_vram, v_uv); }\n";
+
 static GLuint compile(GLenum kind, const char *src, const char *what) {
     const char *parts[2]; int es = 0;
     { int profile = 0; SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &profile); es = profile == SDL_GL_CONTEXT_PROFILE_ES; }
@@ -603,9 +607,11 @@ static int gl_ws_present(int wx, int wy, int w, int h);
 /* the display area (a rectangle of the VRAM texture, or the whole 24-bit frame texture) onto the window: the
    logical frame is 320 pixels wide whatever the display mode (a 512-wide mode shows at the same size), integer-scaled
    to the largest multiple that fits, centred; smaller windows get the fit */
+static int img_x, img_y, img_h;   /* the picture's rectangle on the window (last blit), for the --show-fps counter */
 static void blit(GLuint tex, float u0, float v0, float u1, float v1, int dh, int W, int H) {
     int fx, fy, fw, fh;
     port_window_fit(W, H, dh, &fx, &fy, &fw, &fh);   /* 4:3 as a PAL TV (or square pixels), centred */
+    img_x = fx; img_y = fy; img_h = fh;
     float ow = (float)fw, oh = (float)fh;
     float x0 = -ow / W, x1 = ow / W, y0 = -oh / H, y1 = oh / H;
     /* a non-integer horizontal scale (4:3) samples between texels: filter the blit linearly, the VRAM texture
@@ -626,6 +632,48 @@ static void blit(GLuint tex, float u0, float v0, float u1, float v1, int dh, int
     p_glEnableVertexAttribArray(1); p_glEnableVertexAttribArray(3);
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
 }
+/* --show-fps: the counter (runtime/fps_overlay.c) over the top-left corner of the picture at the window's
+   resolution, blended over the frame just blitted, then the swap */
+static GLuint oprog, otex; static int otex_w, otex_h;
+static void overlay_swap(int W, int H) {
+    extern const unsigned char *port_fps_overlay(int, int *, int *, int *);
+    int w = 0, h = 0, changed = 0; const unsigned char *px = W > 0 && H > 0 ? port_fps_overlay(img_h, &w, &h, &changed) : 0;
+    if (px && oprog) {
+        if (!otex) {
+            p_glGenTextures(1, &otex);
+            p_glBindTexture(GL_TEXTURE_2D, otex);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            p_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            changed = 1;
+        } else p_glBindTexture(GL_TEXTURE_2D, otex);
+        if (changed || w != otex_w || h != otex_h) {
+            p_glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, px);
+            p_glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+            otex_w = w; otex_h = h;
+        }
+        int m = h / 4;
+        float x0 = 2.0f * (img_x + m) / W - 1, x1 = 2.0f * (img_x + m + w) / W - 1;
+        float y0 = 1 - 2.0f * (img_y + m) / H, y1 = 1 - 2.0f * (img_y + m + h) / H;
+        float q[24] = { x0, y0, 0, 0,  x1, y0, 1, 0,  x0, y1, 0, 1,   x1, y0, 1, 0,  x1, y1, 1, 1,  x0, y1, 0, 1 };
+        p_glEnable(GL_BLEND);
+        p_glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+        p_glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
+        p_glUseProgram(oprog);
+        p_glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        p_glBufferData(GL_ARRAY_BUFFER, sizeof q, q, GL_STREAM_DRAW);
+        p_glDisableVertexAttribArray(1); p_glDisableVertexAttribArray(3);
+        p_glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 16, (const void *)0);
+        p_glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 16, (const void *)8);
+        p_glDrawArrays(GL_TRIANGLES, 0, 6);
+        p_glEnableVertexAttribArray(1); p_glEnableVertexAttribArray(3);
+        p_glDisable(GL_BLEND);
+        p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+    }
+    port_window_gl_swap();
+}
 static int present_begin(int *W, int *H) {
     if (!gl_ready || !port_window) return 0;
     submit();
@@ -644,7 +692,7 @@ static int gl_present(int dx, int dy, int dw, int dh, int masked) {
     if (!present_begin(&W, &H)) return 0;
     if (W > 0 && H > 0 && !masked)
         blit(vram_tex, dx / 1024.0f, dy / 512.0f, (dx + dw) / 1024.0f, (dy + dh) / 512.0f, dh, W, H);
-    port_window_gl_swap();
+    overlay_swap(W, H);
     return 1;
 }
 static int gl_ws_present(int wx, int wy, int w, int h) {
@@ -654,7 +702,7 @@ static int gl_ws_present(int wx, int wy, int w, int h) {
     port_window_fit_wide = 1;
     if (W > 0 && H > 0) blit(wide_tex, wx / 2048.0f, wy / 512.0f, (wx + w) / 2048.0f, (wy + h) / 512.0f, h, W, H);
     port_window_fit_wide = 0;
-    port_window_gl_swap();
+    overlay_swap(W, H);
     bound_wide = -1;
     return 1;
 }
@@ -682,7 +730,7 @@ static int gl_present_rgb(const gpu_u8 *rgb, int w, int h) {
         p_glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
         blit(frame_tex, 0.0f, 0.0f, 1.0f, 1.0f, h, W, H);
     }
-    port_window_gl_swap();
+    overlay_swap(W, H);
     return 1;
 }
 
@@ -947,7 +995,7 @@ int port_gl_fps60_show(void) {
         else blit(workV, d_x / 1024.0f, d_y / 512.0f, (d_x + d_w) / 1024.0f, (d_y + d_h) / 512.0f, d_h, W, H);
     }
     port_window_fit_wide = 0;
-    port_window_gl_swap();
+    overlay_swap(W, H);
     bound_wide = -1;
     return 1;
 }
@@ -993,6 +1041,7 @@ static int gl_start(void) {
         prog = link(vs_src, fs_full, "gpu");
     }
     bprog = link(bvs_src, bfs_src, "blit");
+    oprog = link(bvs_src, ofs_src, "overlay");
     if (!prog || !bprog) return -1;
     p_glUseProgram(prog);
     p_glUniform1i(p_glGetUniformLocation(prog, "u_vram"), 0);

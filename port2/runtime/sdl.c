@@ -396,6 +396,23 @@ void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
     *w = (int)(ow + 0.5f); *hh = (int)(oh + 0.5f); *x = (W - *w) / 2; *y = (H - *hh) / 2;
 }
 
+/* --show-fps: the counter (runtime/fps_overlay.c) over the top-left corner of the picture, at window resolution */
+static void fps_overlay_soft(int ix, int iy, int ih) {
+    extern const unsigned char *port_fps_overlay(int, int *, int *, int *);
+    static SDL_Texture *otex; static int ow, oh;
+    int w, h, changed; const unsigned char *px = port_fps_overlay(ih, &w, &h, &changed);
+    if (!px) return;
+    if (!otex || ow != w || oh != h) {
+        if (otex) SDL_DestroyTexture(otex);
+        otex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, w, h);
+        if (!otex) return;
+        SDL_SetTextureBlendMode(otex, SDL_BLENDMODE_BLEND);
+        ow = w; oh = h; changed = 1;
+    }
+    if (changed) SDL_UpdateTexture(otex, NULL, px, w * 4);
+    int m = h / 4; SDL_Rect r = { ix + m, iy + m, w, h };
+    SDL_RenderCopy(ren, otex, NULL, &r);
+}
 typedef struct { const unsigned char *px; int w, h; } FrameArgs;
 static void window_frame_h(void *a) {
     const unsigned char *rgb = ((FrameArgs *)a)->px; int w = ((FrameArgs *)a)->w, h = ((FrameArgs *)a)->h;
@@ -419,7 +436,8 @@ static void window_frame_h(void *a) {
     { int W, H; SDL_GetRendererOutputSize(ren, &W, &H);
       extern int port_widescreen; port_window_fit_wide = port_widescreen && w == 320 + 2 * port_widescreen;
       SDL_Rect dst; port_window_fit(W, H, h, &dst.x, &dst.y, &dst.w, &dst.h);
-      SDL_RenderCopy(ren, tex, NULL, &dst); }  /* 512-wide modes show at the same size */
+      SDL_RenderCopy(ren, tex, NULL, &dst);   /* 512-wide modes show at the same size */
+      fps_overlay_soft(dst.x, dst.y, dst.h); }
     SDL_RenderPresent(ren);
 }
 void port_window_frame(const unsigned char *rgb, int w, int h) {
