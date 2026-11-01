@@ -59,6 +59,23 @@
     <string name="log_exported">Log saved.</string>
     <string name="log_export_fail">Could not save the log: %1$s</string>
     <string name="opt_viewlog">View last log</string>
+    <!-- Options > Controls / Button mapping (PadMap.java) -->
+    <string name="opt_padmap">Controls / Button mapping</string>
+    <string name="pad_title">Button mapping</string>
+    <string name="pad_hint">A: pick a PS1 button, then press the controller button, trigger or stick for it (a button already in use swaps). Hold B or press Esc to cancel.</string>
+    <string name="pad_press">Press the button or trigger for %1$s</string>
+    <string name="pad_cancel">Hold B (1 s) or press Esc to cancel</string>
+    <string name="pad_reset">Restore defaults</string>
+    <string name="pad_reset_done">Button mapping restored to the defaults</string>
+    <string name="pad_bound">%1$s: %2$s</string>
+    <string name="pad_cancelled">Not changed</string>
+    <string-array name="pad_names">
+        <item>Select</item><item>Start</item><item>Up</item><item>Right</item><item>Down</item><item>Left</item>
+        <item>L2</item><item>R2</item><item>L1</item><item>R1</item>
+        <item>Triangle</item><item>Circle</item><item>Cross</item><item>Square</item>
+        <item>Panel: previous tab</item><item>Panel: next tab</item><item>Panel: zoom out</item><item>Panel: zoom in</item>
+        <item>Panel: hide / show event</item>
+    </string-array>
     <string name="disc_phase_extract">Extracting…</string>
     <string name="disc_extract_files">%1$d / %2$d files</string>
     <string name="disc_short">Incomplete copy of %1$s: %2$d of %3$d bytes.</string>

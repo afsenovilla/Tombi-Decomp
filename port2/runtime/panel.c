@@ -251,7 +251,16 @@ static void ap_badge(int x, int y) {   /* the HUD's "AP" box (drawn, its letters
 /* Tomba's face: the sub-screen sprite has a green box (CLUT 482 indices 2, 3, 5, 6); the map marker drops it */
 static void face_f(int x, int y, int f) { pa_cut_mask = 1u << 2 | 1u << 3 | 1u << 5 | 1u << 6; pa_drop_mask = 1u << 3 | 1u << 6; pa_spr(x, y, SUB, 8, 8, 24, 24, 288, 482, PA_CUTBOX | PA_OUTLINE | f); }
 static void face(int x, int y) { face_f(x, y, 0); }
-static void face_mark(int cx, int by) { face_f(cx - 9, by - 18, PA_SMALL); }   /* map marker: 18 x 18, bottom centre at (cx, by) */
+/* map markers: drawn at an integer scale sc (1..3: every texel an sc x sc block of canvas pixels, the canvas itself shown
+   at an integer scale), never resampled */
+static int mk_flag(int sc) { return sc >= 3 ? PA_X3 : sc == 2 ? PA_X2 : 0; }
+static int mk_scale(int view_h) { return view_h >= 200 ? 2 : 1; }   /* 2x in the big map views, 1x in the small ones */
+static void face_mark(int cx, int by, int sc, int f) { face_f(cx - 12 * sc, by - 22 * sc, mk_flag(sc) | f); }   /* bottom centre at (cx, by) */
+static void event_mark(int cx, int by, int e, int sc, int f) {   /* the event's icon, outlined, bottom centre at (cx, by) */
+    int w = pa_event_icon_w(e), h = pa_event_icon_h(e);
+    if (w <= 0) w = 16; if (h <= 0) h = 16;
+    pa_event_icon(cx - w * sc / 2, by - h * sc, e, PA_OUTLINE | mk_flag(sc) | f);
+}
 
 static void line(int x0, int y0, int x1, int y1, int t, u32 c) {   /* pixel-art line, t x t brush */
     int dx = x1 > x0 ? x1 - x0 : x0 - x1, dy = y1 > y0 ? y0 - y1 : y1 - y0, sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, e = dx + dy;
@@ -327,31 +336,32 @@ static void draw_map(int x, int y, int w, int h, int link) {
     pa_clip_x0 = mx; pa_clip_y0 = my; pa_clip_x1 = mx + mw; pa_clip_y1 = my + mh;
 #define PX(n) ((int)(ox + (nodes[n].x - x0) * s))
 #define PY(n) ((int)(oy + (nodes[n].z - z0) * s))
+    int sc = mk_scale(mh), lo = 2, li = 2;   /* routes: a white core 2 px wide in a dark edge (4 px) */
     for (int pass = 0; pass < 3; pass++) for (int r = 0; r < 12; r++) {
         if (!(G_MAPREG(r) != 0 || r == cur_reg)) continue;
         for (int k = 0; k < nroutes[r]; k++) {
             int a = routes[r][k].a, b = routes[r][k].b;
             if (a < 0 || a >= NNODES) continue;
-            if (routes[r][k].type == 1 && b >= 0 && b < NNODES && pass < 2) line(PX(a), PY(a), PX(b), PY(b), pass ? 1 : 2, pass ? C_WHITE : RGB(40, 60, 90));
-            else if (routes[r][k].type == 0 && pass == 2) dot(PX(a), PY(a), 3, C_RED);
+            if (routes[r][k].type == 1 && b >= 0 && b < NNODES && pass < 2) line(PX(a), PY(a), PX(b), PY(b), pass ? li : lo + li, pass ? C_WHITE : RGB(40, 60, 90));
+            else if (routes[r][k].type == 0 && pass == 2) dot(PX(a), PY(a), 3 + sc, C_RED);
         }
     }
     if (link >= 0) {
         int a = links[link][0], b = links[link][1];
         if (a < NNODES && b < NNODES) {
-            line(PX(a), PY(a), PX(b), PY(b), 2, RGB(255, 96, 160));
-            int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2, bob = (port_frame / 10) & 1;
-            face_mark(cx, cy - 4 - bob);
-            pa_fill(cx - 1, cy - 3 - bob, 3, 3, RGB(255, 96, 160));
+            line(PX(a), PY(a), PX(b), PY(b), lo + li, RGB(120, 30, 70)); line(PX(a), PY(a), PX(b), PY(b), lo, RGB(255, 96, 160));
+            int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2, bob = ((port_frame / 10) & 1) * sc;
+            face_mark(cx, (cy - 2 * sc < my + 23 * sc ? my + 23 * sc : cy - 2 * sc) - bob, sc, 0);   /* kept inside the map */
+            pa_fill(cx - sc, cy - sc, 2 * sc + 1, 2 * sc + 1, RGB(120, 30, 70)); pa_fill(cx - sc + 1, cy - sc + 1, 2 * sc - 1, 2 * sc - 1, RGB(255, 96, 160));
         }
     }
     if (map_mark_link >= 0 && map_mark_link < NLINKS) {
         int a = links[map_mark_link][0], b = links[map_mark_link][1];
         if (a < NNODES && b < NNODES) {
             int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2;
-            line(PX(a), PY(a), PX(b), PY(b), 2, RGB(255, 220, 64));
-            pa_event_icon(cx - 9, cy - 15, map_mark_ev, PA_OUTLINE | PA_SMALL);
-            for (int i = 0; i < 4; i++) pa_fill(cx - 3 + i, cy + 1 + i, 7 - 2 * i, 1, C_RED);
+            line(PX(a), PY(a), PX(b), PY(b), lo + li, RGB(110, 80, 10)); line(PX(a), PY(a), PX(b), PY(b), lo, RGB(255, 220, 64));
+            event_mark(cx, cy - 3 * sc < my + 18 * sc ? my + 18 * sc : cy - 3 * sc, map_mark_ev, sc, 0);
+            for (int i = 0; i < 3 * sc; i++) pa_fill(cx - 3 * sc + i, cy - 3 * sc + i, 6 * sc + 1 - 2 * i, 1, C_RED);
         }
     }
     pa_clip_x0 = cx0; pa_clip_y0 = cy0; pa_clip_x1 = cx1; pa_clip_y1 = cy1;
@@ -391,9 +401,10 @@ static const char *ev_title(int e, char *b, int n) {
     if (e >= 0 && e < EVENTS && ev_name[e]) return ev_name[e];
     snprintf(b, n, T("Event %d", "Evento %d"), e); return b;
 }
+static int ev_hidden_now(int e);   /* panel_events.inc: hidden by the player (panel_hidden.txt) */
 static void draw_in_progress(int x, int y, int w, int h) {
     char b[48]; int ids[EVENTS], n = 0;
-    for (int e = 0; e < EVENTS; e++) { int v = G_EVENT(e); if (v && v != 0xFF) ids[n++] = e; }
+    for (int e = 0; e < EVENTS; e++) { int v = G_EVENT(e); if (v && v != 0xFF && !ev_hidden_now(e)) ids[n++] = e; }
     window_(x, y, w, h);
     pa_text(x + 10, y + 6, 16, T("In progress", "En curso"), C_RED, C_REDE);
     int ly = y + 24, lh = 20, max = (h - 30) / lh;
@@ -502,6 +513,7 @@ static jint JNICALL n_frame(JNIEnv *env, jclass c, jobject buf, jintArray dims, 
 }
 static void JNICALL n_layout(JNIEnv *env, jclass c, jint w, jint h) { (void)env; (void)c; req_w = w; req_h = h; }
 static void JNICALL n_touch(JNIEnv *env, jclass c, jint x, jint y, jint action) { (void)env; (void)c; inq_push(1, action, x, y); }   /* canvas pixels */
+static void JNICALL n_key(JNIEnv *env, jclass c, jint a) { (void)env; (void)c; if (a > 0 && a < 16) inq_push(0, a, 0, 0); }   /* IN_*: a controller button the launcher bound to a panel action */
 static void android_register_h(void *u) {
     (void)u;
     JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv(); jobject act = (jobject)SDL_AndroidGetActivity();
@@ -509,8 +521,8 @@ static void android_register_h(void *u) {
     if (!env || !act) return;
     jclass cls = (*env)->GetObjectClass(env, act);
     JNINativeMethod m[] = { { "nativePanelFrame", "(Ljava/nio/ByteBuffer;[II)I", (void *)n_frame }, { "nativePanelLayout", "(II)V", (void *)n_layout },
-                              { "nativePanelTouch", "(III)V", (void *)n_touch } };
-    if ((*env)->RegisterNatives(env, cls, m, 3) != 0) { (*env)->ExceptionClear(env); port_printf("[panel] RegisterNatives failed\n"); }
+                              { "nativePanelTouch", "(III)V", (void *)n_touch }, { "nativePanelKey", "(I)V", (void *)n_key } };
+    if ((*env)->RegisterNatives(env, cls, m, 4) != 0) { (*env)->ExceptionClear(env); port_printf("[panel] RegisterNatives failed\n"); }
     else port_printf("[panel] JNI ready\n");
     (*env)->DeleteLocalRef(env, cls); (*env)->DeleteLocalRef(env, act);
 }
@@ -541,11 +553,13 @@ static void inq_run(void) {
 /* PC window: mouse in window pixels (the canvas x pk), keys as IN_* */
 void port_panel_touch(int x, int y, int action) { inq_push(1, action, x / (pk ? pk : 1), y / (pk ? pk : 1)); }
 void port_panel_key(int a) { inq_push(0, a, 0, 0); }
-/* --panel-input FRAME:ACTION,... (headless tests): up down left right ok back tabl tabr, tap@X@Y (canvas pixels) */
+/* --panel-input FRAME:ACTION,... (headless tests): up down left right ok back tabl tabr zoomout zoomin hide showhidden,
+   tap@X@Y (canvas pixels), hold@X@Y (a long press) */
 static const char *panel_script;
+static int hold_x, hold_y, hold_at = -1;   /* hold@X@Y: the release, 40 frames later */
 void port_panel_input_script(const char *s) { panel_script = s; }
 static void script_step(void) {
-    static const char *names[] = { "", "up", "down", "left", "right", "ok", "back", "tabl", "tabr", "zoomout", "zoomin" };
+    static const char *names[] = { "", "up", "down", "left", "right", "ok", "back", "tabl", "tabr", "zoomout", "zoomin", "hide", "showhidden" };
     for (const char *p = panel_script; p && *p;) {
         int f = atoi(p); const char *c = strchr(p, ':'), *e = strchr(p, ',');
         if (!c) break;
@@ -553,7 +567,8 @@ static void script_step(void) {
             char a[24]; int n = (int)((e ? e : c + strlen(c)) - c - 1); if (n > 23) n = 23; memcpy(a, c + 1, n); a[n] = 0;
             int x, y;
             if (sscanf(a, "tap@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); inq_push(1, 1, x, y); }
-            else for (int i = 1; i < 11; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);
+            else if (sscanf(a, "hold@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); hold_x = x; hold_y = y; hold_at = port_frame + 40; }
+            else for (int i = 1; i < 13; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);
         }
         p = e ? e + 1 : NULL;
     }
@@ -566,6 +581,7 @@ void port_panel_vblank(void) {
     panel_hud_update();
     int dump = port_panel_dump_dir && port_dump_every > 0 && port_frame % port_dump_every == 0;
     if (panel_script) script_step();
+    if (hold_at == port_frame) { inq_push(1, 1, hold_x, hold_y); hold_at = -1; }
     if (!dump && (frames++ & 1)) return;   /* ~25 fps is plenty */
     inq_run();
     render();

@@ -34,6 +34,8 @@ import java.util.Locale;
  * The launcher shown before the game ("Selva" design, docs/PORT.md "4. Android"): main menu, options (persisted in
  * SharedPreferences, turned into port flags for TombiActivity), disc status with the disc image picker (SAF), quit.
  * Drawn on a Canvas in a 1280x720 virtual space scaled to the screen; gamepad (D-pad/A/B/Start) and touch.
+ * Options > Controls / Button mapping: the 14 PS1 buttons and the panel's actions, each bound by pressing the controller
+ * button / trigger / stick (PadMap; saved as "padmap", handed to TombiActivity as EXTRA_PADMAP).
  * Fonts (OFL, assets/fonts) are fetched by the CI build; without them the system bold face is used.
  */
 public class LauncherActivity extends Activity {
@@ -220,6 +222,7 @@ public class LauncherActivity extends Activity {
         CrashLog.writeMarker(this, CrashLog.RUNNING, "launcher " + System.currentTimeMillis() + "\n");
         Intent i = new Intent(this, TombiActivity.class);
         i.putExtra(TombiActivity.EXTRA_ARGS, args);
+        i.putExtra(TombiActivity.EXTRA_PADMAP, prefs.getString("padmap", ""));
         try { startActivity(i); }
         catch (Throwable t) {
             CrashLog.append(this, "launcher: startActivity(TombiActivity) failed: " + CrashLog.stack(t));
@@ -423,7 +426,18 @@ public class LauncherActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int code, KeyEvent e) {
+        if (view.capture >= 0) return view.captureKey(code, e, true);
         return view.key(code) || super.onKeyDown(code, e);
+    }
+    @Override
+    public boolean onKeyUp(int code, KeyEvent e) {
+        if (view.capture >= 0 || view.swallowUp == code) return view.captureKey(code, e, false);
+        return super.onKeyUp(code, e);
+    }
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent e) {
+        if (view.capture >= 0 && view.captureMotion(e)) return true;
+        return super.onGenericMotionEvent(e);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -435,9 +449,9 @@ public class LauncherActivity extends Activity {
     interface Adjust { void by(int d); }
 
     class LauncherView extends View {
-        static final int MAIN = 0, OPTIONS = 1, DISC = 2, CRASH = 3, LOG = 4;
+        static final int MAIN = 0, OPTIONS = 1, DISC = 2, CRASH = 3, LOG = 4, PADMAP = 5;
         int screen = MAIN, focus = 0;
-        int[] lastFocus = new int[5];
+        int[] lastFocus = new int[6];
         List<String> logLines = new ArrayList<>();
         List<Item> items = new ArrayList<>();
         final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -466,6 +480,7 @@ public class LauncherActivity extends Activity {
 
         void setScreen(int sc) {
             confirmWipe = false;
+            padStatus = null; capture = -1;
             lastFocus[screen] = focus;
             screen = sc;
             focus = lastFocus[sc];
@@ -527,8 +542,21 @@ public class LauncherActivity extends Activity {
                 items.add(toggle(R.string.opt_showfps, "showfps"));
                 items.add(toggle(R.string.opt_inflives, "inflives"));
                 items.add(toggle(R.string.opt_infhealth, "infhealth"));
+                items.add(new Item(getString(R.string.opt_padmap), new Runnable() { public void run() { setScreen(PADMAP); } }));
                 items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
+            } else if (screen == PADMAP) {
+                PadMap pm = new PadMap(prefs.getString("padmap", ""));
+                String[] names = getResources().getStringArray(R.array.pad_names);
+                for (int t = 0; t < PadMap.NAMES.length; t++) {
+                    final int target = t;
+                    Item it = new Item(t < names.length ? names[t] : PadMap.NAMES[t], new Runnable() { public void run() { startCapture(target); } });
+                    it.value = pm.describe(t, spanish());
+                    items.add(it);
+                }
+                items.add(new Item(getString(R.string.pad_reset), new Runnable() { public void run() {
+                    prefs.edit().remove("padmap").apply(); padStatus = getString(R.string.pad_reset_done); } }));
+                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTIONS); } }));
             } else if (screen == CRASH || screen == LOG) {
                 items.add(new Item(getString(R.string.log_copy), new Runnable() { public void run() { copyReport(); } }));
                 items.add(new Item(getString(R.string.log_share), new Runnable() { public void run() { shareReport(); } }));
@@ -578,7 +606,7 @@ public class LauncherActivity extends Activity {
                 case KeyEvent.KEYCODE_BUTTON_B: case KeyEvent.KEYCODE_BACK: case KeyEvent.KEYCODE_ESCAPE:
                     if (phase != IDLE) requestCancel();
                     else if (screen == CRASH || screen == LOG) closeLog();
-                    else if (screen == MAIN) finish(); else setScreen(MAIN);
+                    else if (screen == MAIN) finish(); else setScreen(screen == PADMAP ? OPTIONS : MAIN);
                     break;
                 case KeyEvent.KEYCODE_BUTTON_START:
                     if (phase != IDLE) break;
@@ -599,6 +627,7 @@ public class LauncherActivity extends Activity {
 
         @Override
         public boolean onTouchEvent(MotionEvent e) {
+            if (capture >= 0) { if (e.getActionMasked() == MotionEvent.ACTION_UP) endCapture(null); return true; }
             float x = (e.getX() - ox) / s, y = (e.getY() - oy) / s;
             int hit = -1;
             for (int i = 0; i < items.size(); i++) if (items.get(i).r.contains(x, y)) hit = i;
@@ -661,6 +690,7 @@ public class LauncherActivity extends Activity {
             c.scale(s, s);
             if (screen == MAIN) drawMain();
             else if (screen == OPTIONS) drawOptions();
+            else if (screen == PADMAP) drawPadMap();
             else if (screen == CRASH || screen == LOG) drawLog();
             else drawDisc();
             c.restore();
@@ -730,6 +760,110 @@ public class LauncherActivity extends Activity {
             tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB);
             tp.setTextAlign(Paint.Align.LEFT);
             wrapped(getString(R.string.opt_hint), 684);
+        }
+
+        // ---- Options > Controls / Button mapping ----
+        int capture = -1, swallowUp = -1;        // the target waiting for a button; a key whose release is eaten
+        String padStatus;
+        long bDownAt;
+        final float[] axisBase = new float[64];
+        final boolean[] axisSeen = new boolean[64];
+        final Runnable holdCancel = new Runnable() { public void run() {
+            if (capture >= 0 && bDownAt != 0) { swallowUp = KeyEvent.KEYCODE_BUTTON_B; endCapture(null); }
+        } };
+
+        boolean spanish() { return getResources().getConfiguration().locale.getLanguage().equals("es"); }
+        void startCapture(int t) {
+            capture = t; bDownAt = 0; padStatus = null;
+            java.util.Arrays.fill(axisSeen, false);
+            invalidate();
+        }
+        /* s: the source to bind ("k103", "a18+"), null: cancelled.  A source another target had moves there from it:
+           that target gets this one's old first source instead (a swap), so no button does two things by accident */
+        void endCapture(String s) {
+            int t = capture;
+            capture = -1; bDownAt = 0;
+            removeCallbacks(holdCancel);
+            String[] names = getResources().getStringArray(R.array.pad_names);
+            if (s == null || t < 0) { padStatus = getString(R.string.pad_cancelled); invalidate(); return; }
+            PadMap pm = new PadMap(prefs.getString("padmap", ""));
+            String old = pm.src[t].length > 0 ? pm.src[t][0] : null;
+            for (int u = 0; u < PadMap.NAMES.length; u++) {
+                if (u == t) continue;
+                List<String> l = new ArrayList<>();
+                boolean had = false;
+                for (String x : pm.src[u]) { if (x.equals(s)) { had = true; if (old != null && !l.contains(old)) l.add(old); } else l.add(x); }
+                if (had) pm.src[u] = l.toArray(new String[0]);
+            }
+            pm.src[t] = new String[]{s};
+            prefs.edit().putString("padmap", pm.save()).apply();
+            padStatus = getString(R.string.pad_bound, t < names.length ? names[t] : PadMap.NAMES[t], PadMap.srcName(s, spanish()));
+            invalidate();
+        }
+        /* a key while waiting: a controller button binds (B: on release, unless held 1 s = cancel); Esc / the
+           system back cancel */
+        boolean captureKey(int code, KeyEvent e, boolean down) {
+            if (capture < 0) { if (!down && code == swallowUp) { swallowUp = -1; return true; } return false; }
+            boolean pad = PadMap.fromController(e.getDevice(), e.getSource());
+            if (down && e.getRepeatCount() > 0) return true;
+            if (code == KeyEvent.KEYCODE_ESCAPE || (code == KeyEvent.KEYCODE_BACK && !pad)) { if (down) { swallowUp = code; endCapture(null); } return true; }
+            if (PadMap.systemKey(code) || !pad) return false;
+            if (code == KeyEvent.KEYCODE_BUTTON_B) {
+                if (down) { bDownAt = android.os.SystemClock.uptimeMillis(); postDelayed(holdCancel, 1000); }
+                else if (bDownAt != 0) endCapture("k" + code);
+                return true;
+            }
+            if (down) { swallowUp = code; endCapture("k" + code); }
+            return true;
+        }
+        /* an axis while waiting: moved past half way from where it rested binds that direction */
+        boolean captureMotion(MotionEvent e) {
+            if ((e.getSource() & android.view.InputDevice.SOURCE_JOYSTICK) != android.view.InputDevice.SOURCE_JOYSTICK || e.getDevice() == null) return false;
+            for (android.view.InputDevice.MotionRange r : e.getDevice().getMotionRanges()) {
+                int a = r.getAxis();
+                if (a < 0 || a >= axisBase.length) continue;
+                float v = e.getAxisValue(a);
+                if (!axisSeen[a]) { axisSeen[a] = true; axisBase[a] = Math.abs(v) > 0.5f ? 0 : v; }
+                if (Math.abs(v - axisBase[a]) > 0.6f && Math.abs(v) > 0.5f) { endCapture("a" + a + (v > 0 ? "+" : "-")); return true; }
+            }
+            return true;
+        }
+
+        void drawPadMap() {
+            bigTitle(getString(R.string.pad_title), 50, 66);
+            float top = 88, bottom = 640, rowH = 40;
+            float scroll = Math.max(0, Math.min(items.size() * rowH - (bottom - top), (focus + 1) * rowH - (bottom - top)));
+            float y = top - scroll;
+            canvas.save();
+            canvas.clipRect(0, top - 10, 1280, bottom + 4);
+            for (int i = 0; i < items.size(); i++) {
+                Item it = items.get(i);
+                boolean f = i == focus;
+                it.r.set(640 - 380, y, 640 + 380, y + 34);
+                if (y + 34 < top - 10 || y > bottom) it.r.set(-1, -1, -1, -1);
+                pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
+                text(nunito, 18, f ? ACCENT_TEXT : BG);
+                if (it.value == null) canvas.drawText(it.label, 640, midBase(it.r), p);
+                else {
+                    p.setTextAlign(Paint.Align.LEFT); canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
+                    p.setTextAlign(Paint.Align.RIGHT); canvas.drawText(it.value, it.r.right - 26, midBase(it.r), p);
+                }
+                y += rowH;
+            }
+            canvas.restore();
+            tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
+            wrapped(padStatus != null ? padStatus : getString(R.string.pad_hint), 650);
+            if (capture >= 0) {   // the waiting card over the list
+                String[] names = getResources().getStringArray(R.array.pad_names);
+                p.setStyle(Paint.Style.FILL); p.setColor(0xc0000000);
+                canvas.drawRect(0, 0, 1280, 720, p);
+                tmp.set(640 - 360, 260, 640 + 360, 460);
+                pill(tmp, CREAM, CREAM_SH, 6, false);
+                text(lilita, 34, ACCENT_SH);
+                canvas.drawText(getString(R.string.pad_press, capture < names.length ? names[capture] : PadMap.NAMES[capture]), 640, 340, p);
+                text(nunito, 18, BG);
+                canvas.drawText(getString(R.string.pad_cancel), 640, 400, p);
+            }
         }
 
         void wrapped(String t, float top) {

@@ -2,7 +2,8 @@
  * Village, AREA08 s0/s2 Baccus Lake, AREA19 s2, and AREA02 / AREA19 s0 of the I0NFO engine) the game keeps the whole
  * map picture in RAM and streams it to VRAM in 32 x 32 blocks (docs/CIVILIZATION.md "Map picture"): the section's
  * kind 0x8F block, APD_DATA[15] (scratch 0x1F800394), a plain 8 bpp TIM (CLUT at +0x14, the image block after it),
- * read from the user's disc by the game's loader.  The panel shows that picture whole (box filtered when zoomed out);
+ * read from the user's disc by the game's loader.  The panel shows that picture whole (zoomed out: the mean of n x n
+ * blocks; in: each picture pixel an m x m block);
  * world (x, y) is picture pixel (x + 128, y - 40), the origin of the cell map (APD_DATA[14], 8 x 8 px cells:
  * topdownCollideMapTile), whose size the picture must match. */
 static const struct { u8 area, sec; } td_secs[] = { {2, 0}, {5, 0}, {5, 2}, {8, 0}, {8, 2}, {19, 0}, {19, 2} };
@@ -36,12 +37,15 @@ static int td_update(int area, int sec) {
     if (!td_ok && port_frame - td_since > 30 && port_frame >= td_next) { td_next = port_frame + 16; td_ok = td_read(); }
     return td_ok;
 }
-/* the picture into dst: world (wx0, wy0) at the top left, upp world units (= picture pixels) per output pixel */
+/* the picture into dst: world (wx0, wy0) at the top left, upp world units (= picture pixels) per output pixel; upp is
+   a whole number n (each output pixel the mean of an n x n block) or 1 / m (each picture pixel an m x m block) */
 static void td_render(u32 *dst, int vw, int vh, float wx0, float wy0, float upp) {
-    int n = upp > 1 ? (int)(upp + .5f) : 1;
+    int n = upp >= 1 ? (int)(upp + .5f) : 1, m = upp < 1 ? (int)(1 / upp + .5f) : 1;
     if (n > 6) n = 6;
+    int bx = (int)(wx0 * m + (wx0 < 0 ? -.5f : .5f)), by = (int)(wy0 * m + (wy0 < 0 ? -.5f : .5f));   /* in 1/m picture pixels */
     for (int y = 0; y < vh; y++) for (int x = 0; x < vw; x++) {
-        int sx = (int)(wx0 + x * upp) - td_x0, sy = (int)(wy0 + y * upp) - td_y0, r = 0, g = 0, b = 0, k = 0;
+        int ux = n > 1 ? bx + x * n : bx + x, uy = n > 1 ? by + y * n : by + y;
+        int sx = (ux >= 0 ? ux / m : -((-ux + m - 1) / m)) - td_x0, sy = (uy >= 0 ? uy / m : -((-uy + m - 1) / m)) - td_y0, r = 0, g = 0, b = 0, k = 0;
         for (int j = 0; j < n; j++) for (int i = 0; i < n; i++) {
             int X = sx + i, Y = sy + j;
             if (X < 0 || Y < 0 || X >= td_w || Y >= td_h) continue;

@@ -417,7 +417,25 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   (the port's data/ mode: `--text-patch` and the panel read through the same CD layer). An image copied by an older
   version (`--disc`) still works. Without either `loader.c` shows a message box asking to pick the disc. Saves go to
   `files/saves` (the external files dir, passed as `--files-dir`, which `loader.c` removes before `port_main`), extra PC flags
-  to `files/args.txt` (defaults: `--fullscreen --renderer soft --widescreen auto`: the pad fits the panel, e.g. 107 on a 20:9 phone; `--aspect 4:3` in args.txt for 4:3). Input: SDL GameController (built-in pads).
+  to `files/args.txt` (defaults: `--fullscreen --renderer soft --widescreen auto`: the pad fits the panel, e.g. 107 on a 20:9 phone; `--aspect 4:3` in args.txt for 4:3). Input: `TombiActivity` reads
+  the controller itself (`dispatchKeyEvent` / `dispatchGenericMotionEvent`: Android key codes and axes through the
+  launcher's button mapping, `PadMap.java`) and hands the 14 PS1 buttons to the game with `nativePadState`
+  (registered by `runtime/sdl.c` at start; every press counts until the next vblank reads it); controller events then
+  never reach SDL. Until the game has registered it (or if that fails) SDL's GameController reads the pad as before.
+  Why: SDL's own Android mapping is built from `InputDevice.hasKeys` (`SDL_CreateMappingForAndroidController`): a
+  shoulder button the device does not declare is left out (R1 did nothing on the AYN Thor's "Odin Controller"), and
+  the L2 / R2 keys (`KEYCODE_BUTTON_L2` / `R2`, raw buttons 15 / 16) are never mapped; the port also ignored the
+  trigger axes. Defaults: A cross, B circle, X square, Y triangle, L1 / R1 `BUTTON_L1` / `R1`, L2 / R2 the
+  `BUTTON_L2` / `R2` keys or the `LTRIGGER` / `BRAKE`, `RTRIGGER` / `GAS` axes past half way, Start (or Menu), Select (or
+  Back), the d-pad keys, the hat and the left stick. The log names every controller (`hasKeys` L1 R1 L2 R2, its axes)
+  and each key / axis the first time it is pressed.
+- **Button mapping.** Launcher *Opciones > Controles / Mapeo de botones*: the 14 PS1 buttons and five panel actions
+  (previous / next tab, zoom out / in, hide / show the event: unbound by default; sent with `nativePanelKey`), each with
+  its current controller source. A selects a row, then the next controller button, trigger or stick moved past half
+  way from rest is bound (a source another row had is swapped onto it, so no button does two things); holding B for a
+  second, Esc, the system back key or a touch cancels; *Restaurar por defecto* clears it. Saved as `padmap` (only the
+  changed rows, `r1=k103,l2=a17+`: `kN` an Android key code, `aN+` / `aN-` an axis) and handed to `TombiActivity`
+  as the intent extra `io.github.tombi.port.PADMAP`.
 - **Launcher.** `LauncherActivity` (plain Canvas, "Selva" design, 1280x720 virtual space scaled to the panel) is the
   app's entry: *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
   with the chosen flags as `argv[1..]`, which `loader.c` puts after its defaults and before `files/args.txt` (still
@@ -1256,7 +1274,9 @@ What the cross build needed (`port2/CMakeLists.txt` `if(WIN32)`, `port2/cmake/mi
   `tombi2.exe` is a console program with the plain `main()` (`SDL_SetMainReady`), the launcher runs it with
   `CREATE_NO_WINDOW` and captures stderr into `tombi-port.log`.
 - **Options for the launcher / mods** (also on Linux): `--scale N`, `--fullscreen` (F11 toggles),
-  `--keys up=Up,cross=X,...` (SDL key names), `--patch-tex FILE` (button prompts), `--show-fps [1|2]`,
+  `--keys up=Up,cross=X,...` (SDL key names), `--pad-map r1=rightshoulder,l2=lefttrigger,cross=a+b,...` (game controller:
+  an SDL button or axis name, `leftx-` for a direction, or the raw joystick's `bN`, `aN+` / `aN-`, `hN.M`; it replaces that
+  PS1 button's defaults; the triggers are L2 / R2 by default, past half way), `--patch-tex FILE` (button prompts), `--show-fps [1|2]`,
   `--test-null` (fault-handler self-test: exit code 0 when both emulations work on this host). `--poke`,
   `--poke-every`, `--pad-script`, `--menu` were already there.
 - **Build id.** `port/cmake/build_id.cmake` writes `gen/build_id.c`; the first log line is
@@ -2339,7 +2359,12 @@ A live "map + status" panel for dual-screen handhelds (AYN Thor...): the game st
 pauses; `port2/runtime/panel.c` draws the panel from the game's RAM about 25 times a second, in the look of the game's own
 sub-screen, with the game's graphics and fonts read from the user's disc when the panel starts (`runtime/panel_assets.c`;
 nothing of them is in the repository). The panel is pixel art: a canvas in game pixels (about 414 x 360, the display / k)
-scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; Android: the Presentation's view).
+scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; Android: the Presentation's view, whose
+`Paint` has bitmap filtering turned off: `new Paint()` filters by default since Android 9, which blurred the canvas on
+the AYN Thor). AYN Thor bottom screen 1240 x 1080: canvas 413 x 360, k = 3 (1239 x 1080, one spare column); 828 x 720:
+k = 2; 640 x 480: k = 1. Everything in the canvas is drawn at whole multiples too: the game's sprites and WFM text at
+1x, map markers at 2x (`PA_X2`: each texel and its outline a 2 x 2 block, never resampled), map pictures at whole
+canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed out).
 - Graphics: a private copy of the VRAM areas the sub-screen and the HUD use, filled from the same files the game uploads:
   `SYSTEM/A10301.000` (64,0: stone, wood planks, cream windows, Tomba face), `SYSTEM/A00300.000` (128,0: item icons at
   192,0, event icons at 256,0), `SYSTEM/A10003.GAM` / `SYSTEM/A00000.GAM` (256,256 / 320,256: the HUD's vitality fruit,
@@ -2359,10 +2384,17 @@ scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; An
   dimmed icon, "? ? ?"), a detail page with where (area / room names, the map graph with the event's icon on the room),
   who / what starts it and the state. Places come from `runtime/panel_eventmap.h` (ids and coordinates only, generated by
   `port2/tools/gen_panel_events.py` from `tools/objects.py` room lists and the `setEventStarted` / `setEventComplete` call
-  sites of `src/`; coverage per event in `docs/EVENTS_MAP.md`); unknown ones show *ubicación desconocida*. Input: touch on
+  sites of `src/`; coverage per event in `docs/EVENTS_MAP.md`); unknown ones show *ubicación desconocida*.
+  Hiding: *Ocultar* (the selected event; *Mostrar* when it is hidden), a long press (0.6 s) on its row, `H` in the PC
+  panel window, `--panel-input hide`; hidden events leave the lists, the Map tab's *En curso* box and the map markers
+  until *Ocultos: sí* (`V`, `showhidden`) lists them again, dimmed and marked *Oculto*. Kept in `panel_hidden.txt` next
+  to the memory cards (`--save-dir`; Android `files/saves`), the event ids on one line. Event 0 *La pulsera del abuelo*
+  is started by the intro and completed only by the ending's scene sequence (AREA13 s1, type 0x56, X013 op 7 arg 0,
+  right before the ending stats screen: notes/secrets.md), so *En curso* all game long is the game's own state.
+  Input: touch on
   Android (`nativePanelTouch` from the Presentation's view, canvas pixels), mouse in the PC window, keys typed in the PC
   panel window (arrows, Enter, Backspace, Q / E tabs; they do not reach the game); `--panel-input FRAME:ACTION,...`
-  (up down left right ok back tabl tabr zoomout zoomin, `tap@X@Y`) for headless tests.
+  (up down left right ok back tabl tabr zoomout zoomin hide showhidden, `tap@X@Y`, `hold@X@Y` a long press) for headless tests.
 - Map tab (*Lateral* / *Cenital*, `runtime/panel_side.inc` + `panel_topdown.inc`), chosen by section:
   - Side view (every side-scrolling section): the room model the game has loaded (`WMD_DATA[0]`, scratch 0x1F800330;
     tools/room.py format) rasterised orthographically in C as the GPU draws it: texels / CLUTs / pages from a VRAM
@@ -2380,8 +2412,18 @@ scaled by an integer k with nearest neighbour (PC window and PNG dumps: in C; An
     re-centres. Buttons `- / +` drawn in the plank style with the sub-screen's own "<L1" / "R1>" glyphs
     (SYSTEM/A10301 u 56 / 80, v 206), "Zoom n/N"; keys PageDown / PageUp or - / + in the PC panel window;
     `--panel-input` actions `zoomout` / `zoomin`.
-  - Markers: the events panel_eventmap.h places in the section (and the sections sharing its model), icons at 3/4
-    size outlined; Tomba's face at PLAYER x / y, flipped to the side he faces (PLAYER +0xA6: 0 left, 2 right).
+  - Markers: the events panel_eventmap.h places in the section (and the sections sharing its model), icons at 2x
+    outlined (pending ones as a silhouette); Tomba's face at 2x at PLAYER x / y, flipped to the side he faces (PLAYER
+    +0xA6: 0 left, 2 right). Views under 200 canvas pixels high (the Map tab's graph, the event page) draw them at 1x.
+  - Pixel perfect zoom: each level's scale is snapped to whole canvas pixels per world unit (1 / m) or whole world units
+    per pixel (n; level 1 rounds up so the whole map fits): AREA05's picture (864 x 608) at 3 / 2 / 1 picture pixels per
+    canvas pixel.
+  - Far background: the capture has holes where the room hid the strips; each row's period is the smallest shift under
+    which its drawn pixels agree (99.5 %), the holes are filled from the same column of the other periods and the row
+    repeats past the capture with the capture's own phase (rows with no period are shown once, the clear colour
+    around them); at the integer scale nearest the view's height, bottom aligned, centred where the camera was when
+    it was taken, slow parallax. (Before: each band repeated its drawn span, so strips of one cloud layer came out cut
+    and shifted.)
 - Item tab (*Objetos*, `runtime/panel_items.inc`): the game's Triangle item sub-screen (D0SPSUB3 `subScreenItemListStep`)
   usable while the game runs. The player's items with their icons, names (`x NN` for counted ones) and descriptions (the
   sub-screen's own WFM3 message bank of `SYSTEM/DnSPSUB3.BIN`), grouped as the menu's sort lays them out (categories

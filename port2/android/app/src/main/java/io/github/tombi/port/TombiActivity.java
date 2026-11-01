@@ -12,6 +12,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Display;
+import android.view.InputDevice;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -22,9 +25,17 @@ import org.libsdl.app.SDLActivity;
 /** The game: SDL2's activity, with the launcher's arguments handed to SDL_main (port2/android/loader.c).
  *  With --second-screen (launcher: "Segunda pantalla: mapa y estado") the port's map + status panel
  *  (port2/runtime/panel.c) is shown on a secondary display (dual-screen handhelds) through a Presentation;
- *  no secondary display: nothing changes; displays added / removed while playing are followed. */
+ *  no secondary display: nothing changes; displays added / removed while playing are followed.
+ *  The controller is read here with the launcher's button mapping (PadMap, EXTRA_PADMAP) and the PS1 buttons handed to
+ *  the game through nativePadState (runtime/sdl.c); until the game has registered it, SDL reads the controller. */
 public class TombiActivity extends SDLActivity {
     public static final String EXTRA_ARGS = "io.github.tombi.port.ARGS";
+    public static final String EXTRA_PADMAP = "io.github.tombi.port.PADMAP";
+
+    /* registered by libtombi.so at start (runtime/sdl.c): the PS1 buttons held (shims/pad.c bits) */
+    static native void nativePadState(int buttons);
+    /* registered with the panel (runtime/panel.c): a panel action (IN_*) */
+    static native void nativePanelKey(int action);
 
     /* registered at run time by libtombi.so (runtime/panel.c, RegisterNatives on this class) */
     static native int nativePanelFrame(ByteBuffer dst, int[] dims, int lastSeq);
@@ -33,6 +44,9 @@ public class TombiActivity extends SDLActivity {
 
     private DisplayManager dm;
     private PanelPresentation panel;
+    private PadMap pad;
+    private int padSent = -1;
+    private final java.util.HashSet<String> padSeen = new java.util.HashSet<>();
     private final Handler ui = new Handler(Looper.getMainLooper());
     private final DisplayManager.DisplayListener listener = new DisplayManager.DisplayListener() {
         @Override public void onDisplayAdded(int id) { updatePanel(); }
@@ -73,6 +87,9 @@ public class TombiActivity extends SDLActivity {
             }
         });
         startUiWatchdog(app);
+        pad = new PadMap(getIntent() != null ? getIntent().getStringExtra(EXTRA_PADMAP) : null);
+        CrashLog.append(app, "button mapping: " + (pad.save().isEmpty() ? "defaults" : pad.save()));
+        logControllers(app);
         super.onCreate(b);
         CrashLog.append(app, "SDLActivity.onCreate done");
         if (panelWanted()) {
@@ -84,6 +101,66 @@ public class TombiActivity extends SDLActivity {
                 dm = null;
             }
         }
+    }
+
+    // ---- the controller (PadMap) ----
+    /* every controller with the keys / axes the mapping cares about, into the log (for "button X does nothing") */
+    private void logControllers(Context app) {
+        try {
+            for (int id : InputDevice.getDeviceIds()) {
+                InputDevice d = InputDevice.getDevice(id);
+                if (d == null || (d.getSources() & (InputDevice.SOURCE_GAMEPAD | InputDevice.SOURCE_JOYSTICK)) == 0) continue;
+                int[] k = {KeyEvent.KEYCODE_BUTTON_L1, KeyEvent.KEYCODE_BUTTON_R1, KeyEvent.KEYCODE_BUTTON_L2, KeyEvent.KEYCODE_BUTTON_R2,
+                        KeyEvent.KEYCODE_BUTTON_THUMBL, KeyEvent.KEYCODE_BUTTON_THUMBR};
+                boolean[] has = d.hasKeys(k);
+                StringBuilder sb = new StringBuilder("controller \"" + d.getName() + "\" (vendor " + d.getVendorId() + ", product " + d.getProductId()
+                        + ", sources 0x" + Integer.toHexString(d.getSources()) + "): hasKeys L1 " + has[0] + " R1 " + has[1] + " L2 " + has[2] + " R2 " + has[3]
+                        + " L3 " + has[4] + " R3 " + has[5] + "; axes");
+                for (InputDevice.MotionRange r : d.getMotionRanges()) sb.append(' ').append(MotionEvent.axisToString(r.getAxis()).replace("AXIS_", ""));
+                CrashLog.append(app, sb.toString());
+            }
+        } catch (Throwable t) { CrashLog.append(app, "controllers: " + t); }
+    }
+    private void padSeen(String s) {   // each key / axis once in the log
+        if (padSeen.size() < 64 && padSeen.add(s)) CrashLog.append(getApplicationContext(), "controller input: " + s + " (" + PadMap.srcName(s, false) + ")");
+    }
+    /* the mapping's state to the game; false: the natives are not registered yet (the game registers them as it
+       starts), SDL keeps the controller meanwhile */
+    private boolean padSend() {
+        int t = pad.targets(), bits = PadMap.ps1Bits(t);
+        try {
+            if (bits != padSent) { nativePadState(bits); padSent = bits; }
+        } catch (UnsatisfiedLinkError e) {
+            return false;
+        }
+        int p = pad.pressed(t);
+        for (int i = PadMap.PS1; i < PadMap.NAMES.length; i++)
+            if ((p >> i & 1) != 0) try { nativePanelKey(PadMap.PANEL_ACTION[i - PadMap.PS1]); } catch (UnsatisfiedLinkError ignored) { }
+        return true;
+    }
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent e) {
+        int code = e.getKeyCode();
+        if (pad != null && !PadMap.systemKey(code) && PadMap.fromController(e.getDevice(), e.getSource())
+                && (e.getAction() == KeyEvent.ACTION_DOWN || e.getAction() == KeyEvent.ACTION_UP)) {
+            if (e.getAction() == KeyEvent.ACTION_DOWN && e.getRepeatCount() == 0) padSeen("k" + code);
+            pad.key(code, e.getAction() == KeyEvent.ACTION_DOWN);
+            if (padSend()) return true;
+        }
+        return super.dispatchKeyEvent(e);
+    }
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent e) {
+        if (pad != null && e.getActionMasked() == MotionEvent.ACTION_MOVE && (e.getSource() & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
+            pad.motion(e);
+            for (int a : new int[]{MotionEvent.AXIS_LTRIGGER, MotionEvent.AXIS_RTRIGGER, MotionEvent.AXIS_BRAKE, MotionEvent.AXIS_GAS,
+                    MotionEvent.AXIS_HAT_X, MotionEvent.AXIS_HAT_Y, MotionEvent.AXIS_Z, MotionEvent.AXIS_RZ}) {
+                float v = e.getAxisValue(a);
+                if (v > 0.5f) padSeen("a" + a + "+"); else if (v < -0.5f) padSeen("a" + a + "-");
+            }
+            if (padSend()) return true;
+        }
+        return super.dispatchGenericMotionEvent(e);
     }
 
     /* "se cuelga y se cierra": the UI thread blocked (an ANR) leaves its stack in the log every 5 s (at most 4 times) */
@@ -163,13 +240,19 @@ public class TombiActivity extends SDLActivity {
         private Bitmap bmp;
         private int seq;
         private boolean nativeReady = true, layoutSent;
-        private final Paint paint = new Paint();   // nearest neighbour: the panel is pixel art
+        // nearest neighbour: the panel is pixel art.  new Paint() has FILTER_BITMAP_FLAG set on Android 9+ (bilinear: the
+        // integer-scaled canvas came out blurred / "pixelated" on the AYN Thor), so it is cleared explicitly
+        private final Paint paint = new Paint();
+        { paint.setFilterBitmap(false); paint.setAntiAlias(false); paint.setDither(false); }
         private final Rect src = new Rect(), dst = new Rect();
         private final Runnable tick = new Runnable() {
             @Override public void run() { poll(); postDelayed(this, 33); }
         };
 
         PanelView(Context c) { super(c); setBackgroundColor(Color.rgb(0x60, 0x50, 0x48)); }
+
+        // the canvas follows the view's size (the display's, 1240 x 1080 on the Thor: canvas 413 x 360, k = 3)
+        @Override protected void onSizeChanged(int w, int h, int ow, int oh) { super.onSizeChanged(w, h, ow, oh); layoutSent = false; }
 
         @Override protected void onAttachedToWindow() { super.onAttachedToWindow(); post(tick); }
         @Override protected void onDetachedFromWindow() { removeCallbacks(tick); super.onDetachedFromWindow(); }

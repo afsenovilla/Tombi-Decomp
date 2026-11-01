@@ -56,6 +56,16 @@ static const char *disc_dir_from(const char *disc, char *buf, int n) {
     memcpy(buf, disc, len); buf[len] = 0;
     return buf;
 }
+/* a port file next to the memory cards (--save-dir, else as the cards): the second screen's hidden events */
+const char *port_save_file(const char *base, char *out, int n) {
+    char dir[1024]; int o = 0;
+    const char *d = port_save_dir ? port_save_dir : disc_dir_from(port_disc_path ? port_disc_path : port_data_dir ? port_data_dir : "", dir, sizeof dir);
+    for (int i = 0; d[i] && o < n - 2; i++) out[o++] = d[i];
+    if (o && out[o - 1] != '/' && out[o - 1] != '\\' && o < n - 1) out[o++] = '/';
+    for (int i = 0; base[i] && o < n - 1; i++) out[o++] = base[i];
+    out[o] = 0;
+    return out;
+}
 static u8 frame_sum(const u8 *f) { u8 x = 0; for (int i = 0; i < FRAME - 1; i++) x ^= f[i]; return x; }
 static void format_card(u8 *c) {
     memset(c, 0, CARD_SIZE);

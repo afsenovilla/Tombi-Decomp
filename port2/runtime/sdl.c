@@ -5,6 +5,12 @@
  * ring (shims/sound.c) from its callback thread; the keyboard and a game controller feed port 1 of the pad.
  * Keys: arrows = d-pad, X = cross, Z = square, D = circle, S = triangle, Q/W = L1/R1, A/E = L2/R2, Return = start,
  * Backspace = select, F11 = fullscreen, Escape = quit (--keys up=Up,cross=X,... remaps them: SDL key names).
+ * Game controller (SDL GameController): A = cross, B = circle, X = square, Y = triangle, LB / RB = L1 / R1, the
+ * triggers (axes, past half way) = L2 / R2, Back = select, Start, the d-pad; --pad-map r1=rightshoulder,l2=b6,...
+ * rebinds a PS1 button to a controller button or axis (SDL names, "lefttrigger", "leftx-"...) or to a raw joystick
+ * button / axis / hat of the controller (bN, aN+ / aN-, hN.M); it replaces that button's defaults.
+ * Android: TombiActivity reads the controller itself (its Android key codes / axes, the launcher's button mapping) and
+ * hands the PS1 buttons over through nativePadState (registered here); SDL's controller events then stay unused.
  * Closing the window ends the game. */
 #include <string.h>
 #include <SDL2/SDL.h>
@@ -28,6 +34,11 @@ static int win_hidden;             /* --headless --renderer gl: a hidden window 
 static SDL_AudioDeviceID dev;
 static SDL_GameController *ctrl;
 static unsigned short keys_down, ctrl_down, seen_since;
+#ifdef __ANDROID__
+static volatile unsigned short java_down, java_seen;   /* TombiActivity.nativePadState */
+static void android_pad_register(void);
+#endif
+static void ctrl_opened(void);
 
 /* the audio device pulls the mixer (shims/sound.c): audio time is what the device consumes, so the sequencer's
    tempo cannot depend on the game thread's pace; the game thread's calls into the mixer take the device lock */
@@ -82,7 +93,10 @@ void port_window_start(void) {
     if (dev) { port_sound_pulled(1); SDL_PauseAudioDevice(dev, 0); }
     else port_printf("[port2] no audio device: %s (the mixer runs per vblank, without output)\n", SDL_GetError());
     for (int i = 0; i < SDL_NumJoysticks(); i++)
-        if (SDL_IsGameController(i) && (ctrl = SDL_GameControllerOpen(i))) { port_printf("[port2] controller: %s\n", SDL_GameControllerName(ctrl)); break; }
+        if (SDL_IsGameController(i) && (ctrl = SDL_GameControllerOpen(i))) { ctrl_opened(); break; }
+#ifdef __ANDROID__
+    android_pad_register();
+#endif
     port_printf("[port2] window %dx%d (scale %d, %s)%s\n", ww, 256 * port_window_scale, port_window_scale, port_window_square ? "square pixels" : "4:3", dev ? ", audio 44.1 kHz (device pulls the mixer)" : "");
 }
 
@@ -155,17 +169,93 @@ void port_window_keys(const char *spec) {
         for (int i = 0; i < 14; i++) if (!strcmp(tok, button_names[i])) { keymap[i][0] = sc; keymap[i][1] = SDL_SCANCODE_UNKNOWN; }
     }
 }
-static unsigned short ctrl_mask(int b) {
-    switch (b) {
-    case SDL_CONTROLLER_BUTTON_DPAD_UP: return P_UP; case SDL_CONTROLLER_BUTTON_DPAD_DOWN: return P_DOWN;
-    case SDL_CONTROLLER_BUTTON_DPAD_LEFT: return P_LEFT; case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: return P_RIGHT;
-    case SDL_CONTROLLER_BUTTON_A: return P_CROSS; case SDL_CONTROLLER_BUTTON_B: return P_CIRCLE;
-    case SDL_CONTROLLER_BUTTON_X: return P_SQUARE; case SDL_CONTROLLER_BUTTON_Y: return P_TRI;
-    case SDL_CONTROLLER_BUTTON_LEFTSHOULDER: return P_L1; case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: return P_R1;
-    case SDL_CONTROLLER_BUTTON_START: return P_START; case SDL_CONTROLLER_BUTTON_BACK: return P_SELECT;
-    default: return 0;
+/* the controller -> PS1 bindings: SDL GameController buttons / axes, or the raw joystick's buttons / axes / hats */
+enum { CB_BUTTON, CB_AXIS, CB_JBUTTON, CB_JAXIS, CB_JHAT };
+typedef struct { unsigned char kind, idx, dir; unsigned short bit; } CtrlBind;   /* dir: axis +1 / -1 (0 = +), hat mask */
+static CtrlBind cbind[64]; static int ncbind;
+static void cbind_add(int kind, int idx, int dir, unsigned short bit) { if (ncbind < 64) { CtrlBind b = { (unsigned char)kind, (unsigned char)idx, (unsigned char)dir, bit }; cbind[ncbind++] = b; } }
+static void cbind_defaults(void) {
+    static const struct { int b; unsigned short m; } d[] = {
+        { SDL_CONTROLLER_BUTTON_DPAD_UP, P_UP }, { SDL_CONTROLLER_BUTTON_DPAD_DOWN, P_DOWN }, { SDL_CONTROLLER_BUTTON_DPAD_LEFT, P_LEFT },
+        { SDL_CONTROLLER_BUTTON_DPAD_RIGHT, P_RIGHT }, { SDL_CONTROLLER_BUTTON_A, P_CROSS }, { SDL_CONTROLLER_BUTTON_B, P_CIRCLE },
+        { SDL_CONTROLLER_BUTTON_X, P_SQUARE }, { SDL_CONTROLLER_BUTTON_Y, P_TRI }, { SDL_CONTROLLER_BUTTON_LEFTSHOULDER, P_L1 },
+        { SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, P_R1 }, { SDL_CONTROLLER_BUTTON_START, P_START }, { SDL_CONTROLLER_BUTTON_BACK, P_SELECT } };
+    ncbind = 0;
+    for (unsigned i = 0; i < sizeof d / sizeof d[0]; i++) cbind_add(CB_BUTTON, d[i].b, 0, d[i].m);
+    cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 1, P_L2);    /* (L2 / R2 were not read at all before) */
+    cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 1, P_R2);
+}
+/* --pad-map ps1=src[+src],...: src = an SDL controller button or axis name ("rightshoulder", "lefttrigger", "leftx-"),
+   bN (raw joystick button), aN+ / aN- (raw axis), hN.M (raw hat N, direction mask M: 1 up 2 right 4 down 8 left) */
+static const char *pad_map_spec;
+static void cbind_apply_map(void);
+void port_window_pad_map(const char *spec) {
+    pad_map_spec = spec; cbind_apply_map();
+    port_printf("[port2] --pad-map: %d controller bindings\n", ncbind);
+}
+static void cbind_apply_map(void) {
+    char buf[512];
+    cbind_defaults();
+    if (!pad_map_spec) return;
+    strncpy(buf, pad_map_spec, sizeof buf - 1); buf[sizeof buf - 1] = 0;
+    for (char *tok = strtok(buf, ","); tok; tok = strtok(NULL, ",")) {
+        char *eq = strchr(tok, '='); int bi = -1;
+        if (!eq) continue;
+        *eq = 0;
+        for (int i = 0; i < 14; i++) if (!strcmp(tok, button_names[i])) bi = i;
+        if (bi < 0) { port_printf("[port2] --pad-map: unknown PS1 button '%s'\n", tok); continue; }
+        for (int k = 0; k < ncbind; k++) if (cbind[k].bit == button_bits[bi]) { cbind[k--] = cbind[--ncbind]; }   /* the defaults go */
+        for (char *src = eq + 1, *nx; src && *src; src = nx) {
+            nx = strchr(src, '+');
+            int n, m; char sign = 0;
+            /* a trailing +/- of an axis is not a separator */
+            if (nx && (nx[1] == 0 || nx[1] == '+' || nx[1] == ',')) { sign = '+'; *nx = 0; nx = nx[1] == '+' ? nx + 2 : NULL; }
+            else if (nx) *nx++ = 0;
+            size_t L = strlen(src);
+            if (L && src[L - 1] == '-') { sign = '-'; src[--L] = 0; }
+            SDL_GameControllerButton gb = SDL_GameControllerGetButtonFromString(src);
+            SDL_GameControllerAxis ga = SDL_GameControllerGetAxisFromString(src);
+            if (gb != SDL_CONTROLLER_BUTTON_INVALID) cbind_add(CB_BUTTON, gb, 0, button_bits[bi]);
+            else if (ga != SDL_CONTROLLER_AXIS_INVALID) cbind_add(CB_AXIS, ga, sign == '-' ? 2 : 1, button_bits[bi]);
+            else if (sscanf(src, "b%d", &n) == 1 && n >= 0 && n < 64) cbind_add(CB_JBUTTON, n, 0, button_bits[bi]);
+            else if (sscanf(src, "a%d", &n) == 1 && n >= 0 && n < 16) cbind_add(CB_JAXIS, n, sign == '-' ? 2 : 1, button_bits[bi]);
+            else if (sscanf(src, "h%d.%d", &n, &m) == 2 && n >= 0 && n < 4) cbind_add(CB_JHAT, n, m & 15, button_bits[bi]);
+            else port_printf("[port2] --pad-map: unknown source '%s' for %s\n", src, tok);
+        }
     }
 }
+/* the PS1 buttons held on the controller now (polled state: no event can be missed or doubled) */
+static unsigned short ctrl_state(void) {
+    unsigned short m = 0;
+    SDL_Joystick *j = ctrl ? SDL_GameControllerGetJoystick(ctrl) : NULL;
+    if (!ctrl) return 0;
+    for (int k = 0; k < ncbind; k++) {
+        const CtrlBind *b = &cbind[k]; int on = 0, v;
+        switch (b->kind) {
+        case CB_BUTTON: on = SDL_GameControllerGetButton(ctrl, (SDL_GameControllerButton)b->idx); break;
+        case CB_AXIS: v = SDL_GameControllerGetAxis(ctrl, (SDL_GameControllerAxis)b->idx); on = b->dir == 2 ? v < -16384 : v > 16384; break;
+        case CB_JBUTTON: on = j && b->idx < SDL_JoystickNumButtons(j) && SDL_JoystickGetButton(j, b->idx); break;
+        case CB_JAXIS: if (j && b->idx < SDL_JoystickNumAxes(j)) { v = SDL_JoystickGetAxis(j, b->idx); on = b->dir == 2 ? v < -16384 : v > 16384; } break;
+        case CB_JHAT: on = j && b->idx < SDL_JoystickNumHats(j) && (SDL_JoystickGetHat(j, b->idx) & b->dir) != 0; break;
+        }
+        if (on) m |= b->bit;
+    }
+    return m;
+}
+static void ctrl_opened(void) {
+    SDL_Joystick *j = SDL_GameControllerGetJoystick(ctrl);
+    char *map = SDL_GameControllerMapping(ctrl);
+    cbind_apply_map();
+    port_printf("[port2] controller: %s (%d buttons, %d axes, %d hats; mapping %s)\n", SDL_GameControllerName(ctrl),
+                j ? SDL_JoystickNumButtons(j) : -1, j ? SDL_JoystickNumAxes(j) : -1, j ? SDL_JoystickNumHats(j) : -1, map ? map : "none");
+    SDL_free(map);
+}
+static void ctrl_update(void) {
+    unsigned short m = ctrl_state();
+    seen_since |= m & ~ctrl_down;
+    ctrl_down = m;
+}
+
 static void pump_h(void *u) { (void)u; pump(); }
 static void pump(void) {
     SDL_Event e;
@@ -190,7 +280,8 @@ static void pump(void) {
                 extern void port_panel_key(int);
                 static const struct { SDL_Scancode sc; int a; } pk[] = { {SDL_SCANCODE_UP, 1}, {SDL_SCANCODE_DOWN, 2}, {SDL_SCANCODE_LEFT, 3},
                     {SDL_SCANCODE_RIGHT, 4}, {SDL_SCANCODE_RETURN, 5}, {SDL_SCANCODE_BACKSPACE, 6}, {SDL_SCANCODE_Q, 7}, {SDL_SCANCODE_E, 8},
-                    {SDL_SCANCODE_PAGEDOWN, 9}, {SDL_SCANCODE_MINUS, 9}, {SDL_SCANCODE_KP_MINUS, 9}, {SDL_SCANCODE_PAGEUP, 10}, {SDL_SCANCODE_EQUALS, 10}, {SDL_SCANCODE_KP_PLUS, 10} };   /* L1 / R1: map zoom */
+                    {SDL_SCANCODE_PAGEDOWN, 9}, {SDL_SCANCODE_MINUS, 9}, {SDL_SCANCODE_KP_MINUS, 9}, {SDL_SCANCODE_PAGEUP, 10}, {SDL_SCANCODE_EQUALS, 10}, {SDL_SCANCODE_KP_PLUS, 10},   /* L1 / R1: map zoom */
+                    {SDL_SCANCODE_H, 11}, {SDL_SCANCODE_V, 12} };   /* events: hide / show the selected one, list the hidden ones */
                 for (unsigned i = 0; i < sizeof pk / sizeof pk[0]; i++) if (pk[i].sc == e.key.keysym.scancode) port_panel_key(pk[i].a);
                 break;
             }
@@ -203,9 +294,13 @@ static void pump(void) {
             }
             keys_down |= key_mask(e.key.keysym.scancode); seen_since |= key_mask(e.key.keysym.scancode); break;
         case SDL_KEYUP: if (pwin && e.key.windowID == SDL_GetWindowID(pwin)) break; keys_down &= ~key_mask(e.key.keysym.scancode); break;
-        case SDL_CONTROLLERBUTTONDOWN: ctrl_down |= ctrl_mask(e.cbutton.button); seen_since |= ctrl_mask(e.cbutton.button); break;
-        case SDL_CONTROLLERBUTTONUP: ctrl_down &= ~ctrl_mask(e.cbutton.button); break;
-        case SDL_CONTROLLERDEVICEADDED: if (!ctrl) ctrl = SDL_GameControllerOpen(e.cdevice.which); break;
+        case SDL_CONTROLLERBUTTONDOWN: case SDL_CONTROLLERBUTTONUP: case SDL_CONTROLLERAXISMOTION:
+        case SDL_JOYBUTTONDOWN: case SDL_JOYBUTTONUP: case SDL_JOYAXISMOTION: case SDL_JOYHATMOTION:
+            ctrl_update(); break;
+        case SDL_CONTROLLERDEVICEADDED: if (!ctrl && (ctrl = SDL_GameControllerOpen(e.cdevice.which))) ctrl_opened(); break;
+        case SDL_CONTROLLERDEVICEREMOVED:
+            if (ctrl && e.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(ctrl))) { SDL_GameControllerClose(ctrl); ctrl = NULL; ctrl_down = 0; }
+            break;
         }
     }
 }
@@ -262,6 +357,10 @@ int port_window_poll_pad(unsigned short *out) {
     port_host_call(pump_h, 0);
     *out = keys_down | ctrl_down | seen_since;
     seen_since = 0;
+#ifdef __ANDROID__
+    *out |= java_down | java_seen;
+    java_seen = 0;
+#endif
     return 1;
 }
 
@@ -293,3 +392,27 @@ void port_panel_window_frame(const unsigned char *rgba, int w, int h) {
     if (!win || pwin_closed) return;
     FrameArgs a = { rgba, w, h }; port_host_call(panel_window_frame_h, &a);
 }
+
+#ifdef __ANDROID__
+/* TombiActivity.nativePadState(buttons): the PS1 buttons its controller mapping holds (bits as the pad's, P_*); every
+   press counts until the next vblank reads it, like the keys */
+#include <jni.h>
+#include <SDL2/SDL_system.h>
+static void JNICALL n_pad_state(JNIEnv *env, jclass c, jint buttons) {
+    (void)env; (void)c;
+    unsigned short m = (unsigned short)buttons;
+    java_seen |= m & ~java_down;
+    java_down = m;
+}
+static void android_pad_register_h(void *u) {
+    (void)u;
+    JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv(); jobject act = (jobject)SDL_AndroidGetActivity();
+    if (!env || !act) { port_printf("[port2] nativePadState: no activity\n"); return; }
+    jclass cls = (*env)->GetObjectClass(env, act);
+    JNINativeMethod m[] = { { "nativePadState", "(I)V", (void *)n_pad_state } };
+    if ((*env)->RegisterNatives(env, cls, m, 1) != 0) { (*env)->ExceptionClear(env); port_printf("[port2] nativePadState: RegisterNatives failed (SDL reads the controller)\n"); }
+    else port_printf("[port2] nativePadState ready (TombiActivity maps the controller)\n");
+    (*env)->DeleteLocalRef(env, cls); (*env)->DeleteLocalRef(env, act);
+}
+static void android_pad_register(void) { port_host_call(android_pad_register_h, 0); }
+#endif

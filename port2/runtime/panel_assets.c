@@ -153,27 +153,21 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
         }
         for (int k = 0; k < w * h; k++) { idx[k] &= 15; if (pa_drop_mask >> idx[k] & 1) vis[k] = 0; }
     }
-    if (flags & PA_SMALL) {   /* 3/4 size, nearest neighbour (map markers) */
-        int w2 = w * 3 / 4, h2 = h * 3 / 4;
-        for (int j = 0; j < h2; j++) for (int i = 0; i < w2; i++) {
-            int si = (i * 4 + 2) / 3, sj = (j * 4 + 2) / 3; if (si >= w) si = w - 1; if (sj >= h) sj = h - 1;
-            idx[j * w2 + i] = idx[sj * w + si]; vis[j * w2 + i] = vis[sj * w + si];   /* in place: (j, i) <= (sj, si) */
-        }
-        w = w2; h = h2;
-    }
+    /* integer scale (PA_X2 / PA_X3, map markers): every texel, and the outline around them, an s x s block */
+    int sc = flags & PA_X3 ? 3 : flags & PA_X2 ? 2 : 1;
     if (flags & PA_OUTLINE)
         for (int j = -1; j <= h; j++) for (int i = -1; i <= w; i++) {
             if (i >= 0 && j >= 0 && i < w && j < h && vis[j * w + i]) continue;
             int on = (i > 0 && j >= 0 && j < h && i - 1 < w && vis[j * w + i - 1]) || (i + 1 < w && i + 1 >= 0 && j >= 0 && j < h && vis[j * w + i + 1]) ||
                      (j > 0 && i >= 0 && i < w && j - 1 < h && vis[(j - 1) * w + i]) || (j + 1 < h && j + 1 >= 0 && i >= 0 && i < w && vis[(j + 1) * w + i]);
-            if (on) pa_put(x + i, y + j, 0xFF101828u);
+            if (on) pa_fill(x + i * sc, y + j * sc, sc, sc, 0xFF101828u);
         }
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
         if (!vis[j * w + i]) continue;
         u32 col = c15(pal[idx[j * w + i]]);
         if (flags & PA_DIM) col = 0xFF463240u;
         else if (flags & PA_SHADE) col = 0xFF000000u | ((col >> 1) & 0x7F7F7Fu);
-        pa_put(x + i, y + j, col);
+        if (sc == 1) pa_put(x + i, y + j, col); else pa_fill(x + i * sc, y + j * sc, sc, sc, col);
     }
 }
 /* tile a rect over (x, y, W, H) */
@@ -205,12 +199,14 @@ void pa_nine(int x, int y, int W, int H, int tx, int ty, int u, int v, int w, in
 }
 
 /* ---------------------------------------------------------------- icons */
-int pa_event_icon(int x, int y, int e, int flags) {   /* returns the width drawn (0: none) */
+int pa_event_icon(int x, int y, int e, int flags) {   /* returns the width drawn, unscaled (0: none) */
     if (!pa_ok || !icons_ok || e < 0 || e >= NEV_ICONS || !ev_icon[e].w) return 0;
     u16 cw = ev_icon[e].clut;
     pa_spr(x, y, 256, 0, ev_icon[e].u, ev_icon[e].v, ev_icon[e].w, ev_icon[e].h, (cw & 63) * 16, cw >> 6, flags);
     return ev_icon[e].w;
 }
+int pa_event_icon_h(int e) { return pa_ok && icons_ok && e >= 0 && e < NEV_ICONS ? ev_icon[e].h : 0; }
+int pa_event_icon_w(int e) { return pa_ok && icons_ok && e >= 0 && e < NEV_ICONS ? ev_icon[e].w : 0; }
 void pa_item_icon(int x, int y, int n, int flags) {
     if (!pa_ok || !icons_ok || n < 0 || n >= 200) return;
     pa_spr(x, y, 192, 0, n % 15 * 16 + 8, n / 15 * 16 + 8, 16, 16, 304, 480 + item_clut[n], flags);

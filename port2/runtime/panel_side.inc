@@ -9,13 +9,14 @@
  * semi-transparent packets blended 1/2 + 1/2, colour 0x0000 transparent.  Supersampled and box filtered when zoomed out.
  * Behind it, the area's far background: the frame as the game has drawn it once the ordering table's far slots
  * (0..99: the overlay's sky / scenery, notes/formats.md) are done, read back by shims/gpu.c (port_panel_sky_req)
- * and shown screen-fixed (scaled to the view's height, each band repeated sideways, slow parallax) as the game shows it.
+ * and shown screen-fixed (at the integer scale nearest the view's height, bottom aligned, the top row continued above;
+ * each band repeated sideways with its own period found in the capture, slow parallax) as the game shows it.
  * Not drawn: objects (signs, NPCs, enemies: drawn by their handlers), effects.
  *
  * Zoom: PANEL_MAP_ZOOMS levels; 1 = the whole map fitted, the last = about the game screen's framing, geometric in
- * between.  Zoomed levels follow Tomba; drag (touch / mouse) or the arrows pan, OK re-centres.  -/+ buttons (with
+ * between, each snapped to whole canvas pixels per world unit or whole world units per canvas pixel (pixel perfect).  Zoomed levels follow Tomba; drag (touch / mouse) or the arrows pan, OK re-centres.  -/+ buttons (with
  * the game's L1 / R1 glyphs), keys PageDown/PageUp or - / + in the PC panel window, --panel-input zoomout / zoomin.
- * Markers: the events placed in the section (panel_eventmap.h, their icons at 3/4 size, outlined) and Tomba's face
+ * Markers: the events placed in the section (panel_eventmap.h, their icons at 2x, outlined) and Tomba's face (2x)
  * at his live position (PLAYER x / y), flipped to the side he faces (PLAYER +0xA6: 0 left, 2 right). */
 #include <stdint.h>
 extern const unsigned short *port_gpu_vram(int x, int y, int w, int h);   /* shims/gpu.c */
@@ -38,26 +39,30 @@ static float map_panx, map_pany;
 #define SKY_H 256
 static u32 sky_px[SKY_W * SKY_H]; static int sky_w, sky_h, sky_seq, sky_key = -1, sky_next, sky_tries;
 static u32 c15(u16 w) { return 0xFF000000u | (u32)((w >> 10 & 31) * 255 / 31) << 16 | (u32)((w >> 5 & 31) * 255 / 31) << 8 | (u32)((w & 31) * 255 / 31); }
-/* The far layer is strips the overlay places for the camera (parts may be missing where the room hides them):
-   rows of the same band (consecutive rows holding anything but the clear colour) repeat their drawn span sideways,
-   so the backdrop continues past the captured screen as the game's strips do. */
-static int sky_ra[SKY_H], sky_rp[SKY_H]; static u32 sky_bg;
+/* The far layer is strips the overlay places for the camera, textures that repeat sideways, and only the tiles the
+   room does not hide are drawn (the capture has holes of the clear colour).  Each row gets the period its drawn pixels
+   show (the smallest shift under which the pixels drawn on both sides are the same, 99.5 %): its holes are filled from
+   the same column of the other periods, and past the captured width it repeats with the capture's own phase, so the
+   strips line up as the game's do.  A row with no period is shown once, its holes and both sides the clear colour. */
+static int sky_rp[SKY_H]; static u32 sky_bg; static float sky_scroll0;
+#define SKY_SCROLL(wx) ((wx) / (SIDE_GAME_W / 320.f) * 0.25f)   /* slow parallax: capture pixels per world unit of the view */
+static int sky_period(const u32 *r) {   /* 0: none */
+    for (int P = 16; P <= sky_w - 16; P++) {
+        int known = 0, bad = 0;
+        for (int i = 0; i + P < sky_w; i++) if (r[i] != sky_bg && r[i + P] != sky_bg) { known++; bad += r[i] != r[i + P]; }
+        if (known * 8 >= sky_w - P && known >= 32 && bad * 200 <= known) return P;
+    }
+    return 0;
+}
 static void sky_bands(void) {
     u32 best = sky_px[0]; int bn = 0;   /* the clear colour: the most common one of the top row */
     for (int i = 0; i < sky_w; i += 4) { int n = 0; for (int k = 0; k < sky_w; k += 4) n += sky_px[k] == sky_px[i]; if (n > bn) { bn = n; best = sky_px[i]; } }
     sky_bg = best;
-    for (int j = 0; j < sky_h;) {
-        int a = sky_w, b = -1, j0 = j;
-        for (; j < sky_h; j++) {
-            int ra = sky_w, rb = -1;
-            for (int i = 0; i < sky_w; i++) if (sky_px[j * SKY_W + i] != best) { if (i < ra) ra = i; rb = i; }
-            if (rb < 0) break;
-            if (j > j0 && (ra - a > sky_w / 5 || a - ra > sky_w / 5 || rb - b > sky_w / 5 || b - rb > sky_w / 5)) break;   /* another strip */
-            if (ra < a) a = ra;
-            if (rb > b) b = rb;
-        }
-        for (int k = j0; k < j; k++) { sky_ra[k] = a; sky_rp[k] = b - a + 1; }
-        if (j == j0) { sky_ra[j] = 0; sky_rp[j] = 0; j++; }
+    for (int j = 0; j < sky_h; j++) {
+        u32 *r = sky_px + j * SKY_W;
+        int P = sky_period(r);
+        sky_rp[j] = P;
+        if (P) for (int i = 0; i < sky_w; i++) if (r[i] == sky_bg) for (int x = i % P; x < sky_w; x += P) if (r[x] != sky_bg) { r[i] = r[x]; break; }
     }
 }
 void port_panel_sky_take(const unsigned short *vr, int x, int y, int w, int h) {
@@ -68,6 +73,7 @@ void port_panel_sky_take(const unsigned short *vr, int x, int y, int w, int h) {
     while (bot > h * 3 / 4) { int k = 0; for (int i = 0; i < w; i += 8) k |= vr[((y + bot - 1) & 511) * 1024 + ((x + i) & 1023)] & 0x7FFF; if (k) break; bot--; }
     for (int j = top; j < bot; j++) for (int i = 0; i < w; i++) sky_px[(j - top) * SKY_W + i] = c15(vr[((y + j) & 511) * 1024 + ((x + i) & 1023)]);
     sky_w = w; sky_h = bot - top; sky_seq++;
+    sky_scroll0 = SKY_SCROLL(P_X);
     sky_bands();
 }
 static void sky_tick(int key) {
@@ -83,15 +89,18 @@ static void sky_draw(u32 *dst, int vw, int vh, float scroll) {
         for (int j = 0; j < vh; j++) { int t = j * 255 / (vh ? vh : 1); u32 c = RGB(120 + 80 * t / 255, 170 + 58 * t / 255, 255); for (int i = 0; i < vw; i++) dst[j * vw + i] = c; }
         return;
     }
-    int sc256 = vh * 256 / sky_h, off = (int)scroll;   /* cover the view's height; scale in 1/256 */
-    if (sc256 < 1) sc256 = 1;
+    if (sky_h <= 0) return;
+    int sc = (vh + sky_h / 2) / sky_h; if (sc < 1) sc = 1;   /* whole pixels, bottom aligned, the capture centred when the
+                                                                view is where the camera was when it was taken */
+    int top = vh - sky_h * sc, off = (int)((scroll - sky_scroll0) * sc) - (vw - sky_w * sc) / 2;
     for (int j = 0; j < vh; j++) {
-        int sy = j * 256 / sc256; if (sy >= sky_h) sy = sky_h - 1;
+        int sy = j - top; sy = sy < 0 ? 0 : sy / sc; if (sy >= sky_h) sy = sky_h - 1;   /* above the capture: its top row */
+        int p = sky_rp[sy];
+        const u32 *row = sky_px + sy * SKY_W;
         for (int i = 0; i < vw; i++) {
-            int sx = (i + off) * 256 / sc256, p = sky_rp[sy];
-            if (!p) { dst[j * vw + i] = sky_bg; continue; }
-            sx = (sx - sky_ra[sy]) % p; if (sx < 0) sx += p;
-            dst[j * vw + i] = sky_px[sy * SKY_W + sky_ra[sy] + sx];
+            int x = i + off, sx = x >= 0 ? x / sc : -((-x + sc - 1) / sc);
+            if (sx < 0 || sx >= sky_w) { if (!p) { dst[j * vw + i] = sky_bg; continue; } sx %= p; if (sx < 0) sx += p; }
+            dst[j * vw + i] = row[sx];
         }
     }
 }
@@ -227,7 +236,7 @@ static void side_render(u32 *dst, int vw, int vh, float wx0, float wy0, float up
         side_tri(buf, bw, bh, px, py, o, i0);
         if (o->nv == 4) { float qx[3] = { px[1], px[2], px[3] }, qy[3] = { py[1], py[2], py[3] }; side_tri(buf, bw, bh, qx, qy, o, i1); }
     }
-    sky_draw(dst, vw, vh, (wx0 + vw * upp / 2) / (SIDE_GAME_W / 320.f) * 0.25f);
+    sky_draw(dst, vw, vh, SKY_SCROLL(wx0 + vw * upp / 2));
     for (int y = 0; y < vh; y++) for (int x = 0; x < vw; x++) {   /* box filter, coverage over the sky */
         int r = 0, g = 0, b = 0, a = 0;
         for (int j = 0; j < ss; j++) for (int i = 0; i < ss; i++) {
@@ -283,12 +292,23 @@ static void map_view(float x0, float y0, float x1, float y1, float gw, int ancho
                      float *wx0, float *wy0, float *upp) {
     float W = x1 - x0, H = y1 - y0, u0 = W / vw > H / vh ? W / vw : H / vh, ug = gw / vw;
     if (ug > u0) ug = u0;
-    float u = u0;
-    if (PANEL_MAP_ZOOMS > 1 && map_zoom) {   /* u0 * (ug / u0) ^ (zoom / (N - 1)), geometric (no libm: the port's math shims) */
-        float r = ug / u0, lo = r, hi = 1, s = 1;
+    /* geometric levels u0 * (ug / u0) ^ (k / (N - 1)) (no libm: the port's math shims), each snapped pixel perfect:
+       whole world units per canvas pixel (n) or whole canvas pixels per world unit (1 / m); the last level rounds,
+       the others round towards the wider view (level 1: the whole map fits), and every level is closer than the one
+       before it */
+    float s = 1, u = u0, prev = 1e9f;
+    if (PANEL_MAP_ZOOMS > 1) {
+        float r = ug / u0, lo = r, hi = 1;
         for (int it = 0; it < 40; it++) { float m = (lo + hi) / 2, p = 1; for (int k = 0; k < PANEL_MAP_ZOOMS - 1; k++) p *= m; if (p > r) hi = m; else lo = m; }
         s = (lo + hi) / 2;
-        for (int k = 0; k < map_zoom; k++) u *= s;
+    }
+    for (int k = 0, last = PANEL_MAP_ZOOMS - 1; k <= map_zoom; k++) {
+        float g = u0, q;
+        for (int i = 0; i < k; i++) g *= s;
+        if (g >= 1) { int n = k == last ? (int)(g + .5f) : (int)(g + .999f); q = (float)(n < 1 ? 1 : n); }
+        else { int m = k == last ? (int)(1 / g + .5f) : (int)(1 / g + .001f); q = 1.f / (m < 1 ? 1 : m > 8 ? 8 : m); }
+        if (q >= prev) q = prev > 1.5f ? (float)((int)(prev + .5f) - 1) : 1.f / ((int)(1 / prev + .5f) + 1);   /* one step closer */
+        u = prev = q;
     }
     float cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     if (map_zoom && here) { cx = tx + map_panx; cy = ty - vh * u / 6 + map_pany; }
@@ -322,19 +342,21 @@ static void zoom_bar(int W) {   /* [<L1  -]  Zoom n/N  [+  R1>] */
     pa_text_ol(x + w1 + 10, y + 3, 16, n, C_YELLOW, C_WOODE, C_DARK);
 }
 
-static void map_marks(int vx, int vy, float wx0, float wy0, float upp, int here, int area, int sec, int topdown) {
+static void map_marks(int vx, int vy, int vh, float wx0, float wy0, float upp, int here, int area, int sec, int topdown) {
+    int sc = mk_scale(vh);
 #define WX(x) (vx + (int)(((x) - wx0) / upp))
 #define WY(y) (vy + (int)(((y) - wy0) / upp))
     for (unsigned i = 0; i < sizeof panel_event_locs / sizeof panel_event_locs[0]; i++) {
         const PanelEventLoc *L = &panel_event_locs[i];
         if (L->area != area || L->x == -32768) continue;
         if (topdown ? L->sec != sec : !(L->sec == sec || (L->sec < 31 && side_secs[L->sec] >= 0 && side_secs[L->sec] == side_secs[31]))) continue;
+        if (ev_hidden_now(L->ev)) continue;
         int st = ev_state(L->ev);
-        pa_event_icon(WX(L->x) - 9, WY(L->y) - 13, L->ev, PA_OUTLINE | PA_SMALL | (st == F_PENDING ? PA_DIM : 0));
+        event_mark(WX(L->x), WY(L->y) + 3 * sc, L->ev, sc, st == F_PENDING ? PA_DIM : 0);
     }
     if (here) {
-        int tx = WX(P_X), ty = WY(P_Y), bob = (port_frame / 10) & 1;
-        face_f(tx - 9, ty - 6 - bob - 18, PA_SMALL | (P_LEFT ? FACE_LEFT_FLIP : FACE_RIGHT_FLIP));
+        int tx = WX(P_X), ty = WY(P_Y), bob = ((port_frame / 10) & 1) * sc;
+        face_mark(tx, ty - 6 - bob, sc, P_LEFT ? FACE_LEFT_FLIP : FACE_RIGHT_FLIP);
     }
 #undef WX
 #undef WY
@@ -351,13 +373,13 @@ static void page_side(int play) {
     if (vw * vh > view_cap) { free(view); view_cap = vw * vh; view = malloc((size_t)view_cap * 4); last_id = -1; }
     int area = G_AREA, sec = G_SECTION, key = area * 32 + sec;
     if (key != map_key) { map_key = key; map_panx = map_pany = 0; }
-    if (!play) { sky_draw(view, vw, vh, 0); for (int j = 0; j < vh; j++) for (int i = 0; i < vw; i++) pa_put(vx + i, vy + j, view[j * vw + i]); pa_text(vx + 8, vy + 8, 16, T("Waiting for the game...", "Esperando a la partida..."), C_DARK, C_EDGE); return; }
+    if (!play) { sky_draw(view, vw, vh, sky_scroll0); for (int j = 0; j < vh; j++) for (int i = 0; i < vw; i++) pa_put(vx + i, vy + j, view[j * vw + i]); pa_text(vx + 8, vy + 8, 16, T("Waiting for the game...", "Esperando a la partida..."), C_DARK, C_EDGE); return; }
     int td = map_topdown(), ok, id;
     float x0, y0, x1, y1, gw, wx0, wy0, upp;
     if (td) { ok = td_update(area, sec); id = 1000000 + td_model; x0 = td_x0; y0 = td_y0; x1 = td_x0 + td_w; y1 = td_y0 + td_h; gw = 320; }
     else { sky_tick(key); ok = side_update(); id = (int)side_model; x0 = side_x0; y0 = side_y0; x1 = side_x1; y1 = side_y1; gw = SIDE_GAME_W; }
     if (!ok) {
-        sky_draw(view, vw, vh, 0);
+        sky_draw(view, vw, vh, sky_scroll0);
         for (int j = 0; j < vh; j++) for (int i = 0; i < vw; i++) pa_put(vx + i, vy + j, view[j * vw + i]);
         pa_text(vx + 8, vy + 8, 16, T("Reading the map...", "Leyendo el mapa..."), C_DARK, C_EDGE);
         return;
@@ -377,6 +399,6 @@ static void page_side(int play) {
     for (int j = 0; j < vh; j++) memcpy(pa_cv + (vy + j) * pa_cw + vx, view + j * vw, (size_t)vw * 4);
     int cx0 = pa_clip_x0, cy0 = pa_clip_y0, cx1 = pa_clip_x1, cy1 = pa_clip_y1;
     pa_clip_x0 = vx; pa_clip_y0 = vy; pa_clip_x1 = vx + vw; pa_clip_y1 = vy + vh;
-    map_marks(vx, vy, wx0, wy0, upp, 1, area, sec, td);
+    map_marks(vx, vy, vh, wx0, wy0, upp, 1, area, sec, td);
     pa_clip_x0 = cx0; pa_clip_y0 = cy0; pa_clip_x1 = cx1; pa_clip_y1 = cy1;
 }
