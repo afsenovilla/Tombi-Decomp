@@ -79,13 +79,14 @@ static const char *disc_rows[12] = {
     "D6666666666D", "C6666666666C", "B6666666666B", ".C66666666C.", ".EC666666CE.", "...BCDDCB...",
 };
 static int hexv(char c) { return c >= '0' && c <= '9' ? c - '0' : c - 'A' + 10; }
-static void draw_disc(void) {
+static void draw_disc_col(int fill) {
     memset(img, 0, sizeof img);
     for (int y = 0; y < 12; y++) for (int x = 0; x < GW; x++) {
         char c = disc_rows[y][x];
-        img[y + 2][x] = c == '.' ? C_T : (u8)hexv(c);
+        img[y + 2][x] = c == '.' ? C_T : c == '6' ? (u8)fill : (u8)hexv(c);
     }
 }
+static void draw_disc(void) { draw_disc_col(C_DISC); }
 static void put(int x, int y, int c) { if (x >= 0 && x < GW && y >= 0 && y < GH) img[y][x] = (u8)c; }
 /* 6 x 8 letters: even size, so they sit exactly in the middle of the 12 x 12 disc (x 3..8, rows 4..11) */
 static const struct { char ch; u8 rows[8]; } font6[] = {
@@ -158,7 +159,16 @@ static void draw(int ps, int src, int style) {
         char t[2] = { letters[src], 0 };
         label(t, xb_col[src]);
         break; }
-    case PROMPT_NINTENDO: { char t[2] = { letters[src], 0 }; label(t, C_CREAM); break; }
+    case PROMPT_NINTENDO: {
+        /* by position, as printed on Nintendo pads and the AYN Thor / Retroid (SNES colours): south B (yellow: the
+           palette's light khaki, dark letter), east A red, west Y green, north X blue.  src is the positional
+           (Xbox-named) button: SDL with button labels off, Android's KEYCODE_BUTTON_A = south. */
+        static const char nl[4] = { 'B', 'A', 'Y', 'X' };
+        static const int ndisc[4] = { C_KHAKI, C_RED, C_GREEN, C_BLUE }, nink[4] = { C_DISC, C_CREAM, C_DISC, C_CREAM };
+        char t[2] = { nl[src], 0 };
+        draw_disc_col(ndisc[src]);
+        label(t, nink[src]);
+        break; }
     default: diamond(src); break;
     }
     (void)ps;

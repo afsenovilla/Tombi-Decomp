@@ -60,6 +60,9 @@ int port_display_size(int *w, int *h) {
 
 void port_window_start(void) {
     SDL_SetMainReady();     /* (no SDL2main on Windows: main() is the plain C one, the launcher captures stderr) */
+    /* positional face buttons on Nintendo pads too (SDL "A" = south), so Cross is the bottom button on every pad and
+       the button icons (shims/prompts.c) can name the printed label by position */
+    SDL_SetHint("SDL_GAMECONTROLLER_USE_BUTTON_LABELS", "0");
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) port_fatal("SDL_Init: %s", SDL_GetError());
     int want_gl = port_renderer != 0;
     if (want_gl) {        /* (the SDL_Renderer of the software path is made on first use, so a failed GL start can fall back) */
