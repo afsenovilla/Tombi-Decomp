@@ -41,7 +41,11 @@ final class PadMap {
             case "circle": return new String[]{"k" + KeyEvent.KEYCODE_BUTTON_B};
             case "cross": return new String[]{"k" + KeyEvent.KEYCODE_BUTTON_A, "k" + KeyEvent.KEYCODE_DPAD_CENTER};
             case "square": return new String[]{"k" + KeyEvent.KEYCODE_BUTTON_X};
-            default: return new String[0];   // panel actions: unbound until the player picks a button
+            /* the second screen's map zoom shows "<L1  R1>" (runtime/panel_side.inc): the shoulder buttons by default
+               (they also still reach the game) */
+            case "p_zoomout": return new String[]{"k" + KeyEvent.KEYCODE_BUTTON_L1};
+            case "p_zoomin": return new String[]{"k" + KeyEvent.KEYCODE_BUTTON_R1};
+            default: return new String[0];   // other panel actions: unbound until the player picks a button
         }
     }
 
