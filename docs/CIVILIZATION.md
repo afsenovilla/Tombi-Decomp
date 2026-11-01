@@ -221,6 +221,9 @@ I0NFO2. `tools/topdown.py npcs` dumps them.
 | 1A | b0c | spawn condition (set 0E) / dialogue table row |
 
 `SpawnB`, 16 bytes, props and scenery (`ObjAlloc` layer 3, type 0x1D): type, room, -, anim, x, y, subtype, b0c.
+The first field ("type") is copied to object byte +0x0E and is a **draw-order kind**, not an item or handler id:
+`topdownSortDrawOrder` Y-sorts kind 0 with the other objects and gives kind 1 a fixed depth -12 and kind 2 +12 (+0x0F)
+(SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
 The 16th prop (index 15) adds `D_8009CFA1` to its anim, which is a progress-dependent prop.
 
 Actor definitions, 12 bytes each, `{u8 box[4]; u16 w1e; s16 spad; void **anims}` (`topdownAnnActorInit`).
@@ -234,7 +237,7 @@ scripts. The scripts use the script index `animFrame + k`: +0..3 idle facing, +4
 | `TOPDOWN_A16_ACTOR_DEFS` 0x800FEEF4 | 4 | 11 | 0x01, 0x01, 0x01, 0x11 (boxes 8/16 and 16/32) |
 | `TOPDOWN_A17_ACTOR_DEFS` 0x800FEF64 | 5 | 11 | 0x01, 0x0A, 0x0B, 0x10, 0x08 (subtype 4's anim table points into MAIN0, see below) |
 | `TOPDOWN_A18_ACTOR_DEFS` 0x800FEFA0 | 7 | 11 | all 0x01 |
-| `TOPDOWN_A11/16/17_SCENERY_DEFS` 0x800FF054 / 0x800FEDD0 / 0x800FEE04 | 2 / 3 / 3 | 13 (kind 0x3D) | 0x02.. 0x08 |
+| `TOPDOWN_A11/16/17_SCENERY_DEFS` 0x800FF054 / 0x800FEDD0 / 0x800FEE04 | 2 / 3 / 4 | 13 (kind 0x3D) | 0x02.. 0x08 |
 
 `tools/topdown.py defs` prints the full table, with the anim table addresses and script counts.
 
@@ -374,7 +377,10 @@ Three progress variables are set by the spawners:
   - 10 → (4,7) the dangerous old signboard, or (4,11) "you're always so full of energy"
   - 1 sets `D_8009CFA9` (1, or 2 if `D_8009CDF3`)
   - `topdownA11ActorDialogueBank2` (0x800F1BAC) shows (2,4), then (2,5) and starts **event 0x4F**. Nothing calls it:
-    no `jal` and no pointer to it in PAL or JP (MAIN0/SLPS, I0NFO2/INFO2) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
+    no `jal` and no pointer to it in PAL or JP (MAIN0/SLPS, I0NFO2/INFO2) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md). It is not
+    a raft helper: JP #195/#196 are "the bomb worked and the generator is fixed, well done" and "my grandpa said the
+    tower in the Dwarf Forest has a lift going underground". The retail Factory keeps the same pair: X011
+    `powerPlantThanksTalk` shows (2,4)/(2,5) and starts event 0x4F, called from `stepFactoryNpcTalk` (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
 - **Spawn** (`spawnNpcSet0D`): while event 0x4D (`D_8009CDF1`, JP 0x8009E999) is still 0, actor 1 (the flag setter
   in H1, (12,256)) is moved to x = -200; only x changes. The spawner also sets the phase `D_8009CFA5` once (see above);
   the dialogue code only reads it. The controller `updateNpcSet0D` has no scene: state 1 is empty, so nothing reads
@@ -405,6 +411,9 @@ Three progress variables are set by the spawners:
 - **Props**: the prop list switches to `NPC_SET_0E_EXTRA_RECORDS_ALT` when `D_8009CFA8 == 4`. That alternative list
   differs only in prop 5's anim (12 instead of 10), most likely the repaired clock. `topdownA16SceneryUpdate` moves
   prop `wb8 == 5` to (-4/-3, 0x193) with anim 0xB/0xC as `D_8009CFA8` goes to 2/3.
+  That update only writes the index (`wb4`) and the position, never the script pointer `anim`, so the prop keeps
+  drawing frame 10; only a respawn from the alternative list shows frame 15 (slot 12). Nothing ever sets `D_8009CFA8`
+  to 1: the only writes are the three increments in `npcSet0ESceneStep2`, which needs it to be 1 to start (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
 
 ### AREA17 s0: the Iron Men's town (NPC set 0F)
 
@@ -416,7 +425,8 @@ Three progress variables are set by the spawners:
   at y = 302 and y = 84. That is most likely the Evil Pig's wall, or the lift rails.
 - **Dialogue** (`topdownA17ActorOpenDialogue` 0x800F4110):
   - Case 0 → (2,0xA); case 1 → (2,7).
-  - Case 2 → `topdownA17ActorDialogueBank2`, the smith: (2,5) "you need something?", (2,6) "an iron gear?" plus
+  - Case 2 → an inline copy of `topdownA17ActorDialogueBank2` (the function itself has no caller; the same holds for
+    `topdownA16ActorDialogueBank2`, inline in Stone case 8), the smith: (2,5) "you need something?", (2,6) "an iron gear?" plus
     **event 0x63**, (2,9), (2,10).
   - Case 3 → `topdownA17ActorDialogueBank3`, the bomb maker: (3,0) "haven't seen your face", (3,2), (3,3) plus
     **event 0x69**, (3,5) "first I need electricity", (3,8) "now the bomb mixture", (3,0xB) "more bombs?".
@@ -669,7 +679,9 @@ estimate from the placements (AREA11 736 x 608, AREA16 544 x 608, AREA17 832 x 7
 - **Resident.** AREA11 subtype 4 (`TOPDOWN_A11_ACTOR_DEFS[4]`, w1e 0x11 = page (64, 256), lost in AREA11) is resident
   12, the only resident of H3, next to resident 4 ("a fortune-teller lives in this hut"). Its scripts (frames 204..240:
   idle 3, walk 3x6, talk 3x3, extras 234 / 235-237 / 238-240) have exactly the layout and timings of the tunnel teller's
-  frames 10..46, frame f = retail f - 194. So he is the Green Fortune Teller, not the raft maker guessed before. His
+  frames 10..46, frame f = retail f - 194. One difference: the walk/talk/extra scripts (compact slots 3-8, 10, 11) end
+  in hold (0x8000) here but loop (0x4000) in the tunnel copy. The table also has no direction aliases, so the Wood
+  talk step (`b69 + 7`) lands on slots 8..11 (one talk script, then the extras) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md). So he is the Green Fortune Teller, not the raft maker guessed before. His
   `dlg 11` has no talk case in PAL and no code starts event 89.
 - **His lines survive, his talk code does not.** AREA11 bank k3 dx16..19 = PAL MFNT110 #243-#246 (translated in every
   PAL language; JP A002 block 0 #226-#229): "I am one of the fortune-tellers who tell a person's experience level" /
@@ -1221,3 +1233,28 @@ scene and the blocked 0x3D menu condition, the unset actor pointer, the empty bo
 hidden passages, Wood's actor-1 move, and the JP-side checks (empty s0 lists, shared entrances, X19, CLUTs).
 **What ours has that theirs does not use:** which subtype each surviving page draws and with which palette row, the four
 lift-hut interiors on A08000, the reconstructed interiors and the port's playable towns, and the USA / beta disc checks.
+
+### Later audits (1 November 2026) — verification
+
+SiergiejW added four more passes to the same page (deeper orphan data, resident actions, state consumers). Checked
+on PAL I0NFO2 / the matched C and on the JP disc; where they hold, the sections above now say so.
+
+| Claim | Verdict | Evidence |
+|---|---|---|
+| A. Wood scenery table: props select slots 0-11, 14, 15; slots 12, 13, 16-23 are selected by nothing (12/13 = held frames 12/13; 16-23 = frames 141-166 in 8 scripts) | **confirmed** | PAL table 0x8010751C: the 14 `NPC_SET_0D_EXTRA_RECORDS` anims are exactly {0..11, 14, 15}; slots 16..23 = 141 / 142-147 / 148,149,150,149,148 / 151,152,153,152 (8,1,10,4) / 154 / 155-160 / 161,162,163,162,163 / 164,165,166,165, all ending in hold. |
+| B. A fourth Iron scenery definition (page offset 8) is kept but no prop uses it | **confirmed** | PAL 0x800FEE28 `08 00 00 00 0D 00 00 00`, anims 0x801082A8, right before the A19 table at 0x800FEE34. `tools/topdown.py` / `tools/civ_i0nfo2_diff.py` now list four. |
+| C. Scenery palette destinations: Wood indoor 0x7F48, Wood outdoor / Stone / Iron 0x7FC8, with the override flag +0x0D = 1 | **confirmed** | `topdownA11/16/17SceneryHandler.c` (`b0d = 1`, `w08`). |
+| D. Several helper bodies have no caller but their logic is inlined (A16/A17 `DialogueBank2`, scenery Init/ApplyState) | **confirmed** | `topdownA17ActorOpenDialogue.c` case 2 = `inl_800F3EA0`; no C calls the standalone bodies. Our "Case 2 → topdownA17ActorDialogueBank2" was loose wording, fixed. |
+| E. Iron P16 shows frames 13 → 14 → 15 as passage scene 8 sets `D_8009CFA1` to 1, then 2 | **confirmed** | `topdownA17SceneryUpdate.c` (`wb4 = flag + 0xD`), `npcSet0FSceneStep8.c`. Matches our "16th prop adds `D_8009CFA1`". |
+| F/M. The prop record's first word goes to +0x0E and is a draw-order kind (0 Y-sorted, 1 depth -12, 2 depth +12), not an item | **confirmed** | `spawnNpcSet0D.c` (`type = 0x1D`, `_pad0e[0] = e->type`), `topdownSortDrawOrder.c`. Added to the SpawnB line. |
+| G. Wood subtype 3's table has 12 extra pointers (frames 167-203) that are a copy of the teller's 12 scripts with every frame 37 lower; nothing points at that block | **confirmed** | PAL `data_80107648[28]`, last 12 = 0x80107E08..; compared record by record with `data_801076B8`: frame + 37, same durations and flags. No pointer to 0x80107688. Who it belonged to is unknown. |
+| H. Wood subtype 0 slot 16 (33,34,35,34) and subtype 1 slots 16/17 (69-71, 72-74) are not selected | **confirmed** | PAL tables of 17 and 18 entries (0x8010757C, 0x801075C0). |
+| I. Iron subtypes 0/1 slot 16: looping 9-record actions (33-40, 74-81), control 0x403C jumping to their own start | **confirmed** | PAL 0x80108638 / 0x801087EC. That subtype 1 includes the smith (#3) is their placement reading; "forging" is a guess. |
+| J. The teller's compact table does not fit Wood's selectors, and its scripts hold where the tunnel copy loops | **confirmed** | PAL I0NFO3 tunnel scripts: same frames - 194 and timings, end 0x40xx vs 0x80xx in compact slots 3-8, 10, 11; `topdownA11ActorTalkStep.c` uses `b69 + 7`. |
+| K. Stone P6: the updater changes only the index `wb4`, never the drawn script; nothing sets `D_8009CFA8` to 1 | **confirmed** | `topdownA16SceneryUpdate.c`; the only writes to `D_8009CFA8` are the `++` in `npcSet0ESceneStep2.c`, which runs only when it is 1. |
+| L. Stone scene 3 copies a position from an uninitialized pointer before loading the craftsman | **confirmed (PAL C)** | `npcSet0ESceneStep3.c` (`Pos6 p = *(Pos6 *)&n->a` before `n = D_8009F2F8`). That `s0` is the controller on JP is their trace. JP #185-#187 (Funga drum) were already here. |
+| N. `topdownA11ActorDialogueBank2` is the generator thanks + Dwarf Forest tower hint, kept in retail X011 | **confirmed** | JP AREA11 #195/#196 read; `x011/powerPlantThanksTalk.c` (2,4)/(2,5), `setEventStarted(0x4F)`. We never called it a raft helper. |
+| Gantetsu (Iron resident #4) asks for an electric eel and black water; #246 "catching an eel bare-handed? take this" | **confirmed (text)** | JP AREA17 #240 (わしの名はガンテツ), #245, #246, #247 read. No code shows #246 or gives an item: it points to the cut eel / Rubber Gloves chain. |
+| No Yan dialogue in Lumberjack Town | **consistent** | The only ヤン in the AREA11 bank is the item-use line ヤンの弁当をつかった. We never claimed one. |
+| Community civ_towns sheet: 82 of 108 palettes match JP; JP and PAL BUNMEI2 differ | **not checked** | The sheet was not re-read here. |
+| TombaEdit helper palettes, editor sync | **n/a** | Editor features, not disc evidence. |

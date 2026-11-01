@@ -230,7 +230,9 @@ tipo 0x30 con `b0a = 0xD`, guardado en `SCRIPT_OBJECTS[i]`:
 | 1A | b0c | condición de aparición (conjunto 0E) / fila de la tabla de diálogos |
 
 `SpawnB`, 16 bytes, objetos y decorado (`ObjAlloc` capa 3, tipo 0x1D): tipo, habitación, -, animación, x, y,
-subtipo, b0c. El objeto 16 (índice 15) suma `D_8009CFA1` a su animación: es un objeto que depende del avance.
+subtipo, b0c. El primer campo («tipo») se copia al byte +0x0E del objeto y es un **tipo de orden de dibujo**, no un objeto
+ni un manejador: `topdownSortDrawOrder` ordena por Y el tipo 0 con los demás y da al tipo 1 una profundidad fija -12 y al
+2 +12 (+0x0F) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md). El objeto 16 (índice 15) suma `D_8009CFA1` a su animación: es un objeto que depende del avance.
 
 Definiciones de personaje, 12 bytes cada una, `{u8 box[4]; u16 w1e; s16 spad; void **anims}`
 (`topdownAnnActorInit`). `box` es la caja de contacto, `w1e` la palabra de desplazamiento de CLUT/página, `spad` la
@@ -243,7 +245,7 @@ quieto según la orientación, +4..7 andando, +8..11 hablando (`TalkStep` usa `b
 | `TOPDOWN_A16_ACTOR_DEFS` 0x800FEEF4 | 4 | 11 | 0x01, 0x01, 0x01, 0x11 (cajas 8/16 y 16/32) |
 | `TOPDOWN_A17_ACTOR_DEFS` 0x800FEF64 | 5 | 11 | 0x01, 0x0A, 0x0B, 0x10, 0x08 (la tabla de animaciones del subtipo 4 apunta a MAIN0, ver abajo) |
 | `TOPDOWN_A18_ACTOR_DEFS` 0x800FEFA0 | 7 | 11 | todos 0x01 |
-| `TOPDOWN_A11/16/17_SCENERY_DEFS` 0x800FF054 / 0x800FEDD0 / 0x800FEE04 | 2 / 3 / 3 | 13 (tipo 0x3D) | 0x02.. 0x08 |
+| `TOPDOWN_A11/16/17_SCENERY_DEFS` 0x800FF054 / 0x800FEDD0 / 0x800FEE04 | 2 / 3 / 4 | 13 (tipo 0x3D) | 0x02.. 0x08 |
 
 `tools/topdown.py defs` imprime la tabla completa, con las direcciones de las tablas de animación y cuántos guiones
 tiene cada una.
@@ -392,7 +394,11 @@ Los generadores ajustan tres variables de avance:
   - 10 → (4,7) el cartel viejo y peligroso, o (4,11) "siempre estás lleno de energía"
   - 1 pone `D_8009CFA9` (1, o 2 si `D_8009CDF3`)
   - `topdownA11ActorDialogueBank2` (0x800F1BAC) muestra (2,4), luego (2,5) e inicia el **evento 0x4F**. Nadie la
-    llama: no hay `jal` ni puntero a ella en PAL ni en JP (MAIN0/SLPS, I0NFO2/INFO2) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
+    llama: no hay `jal` ni puntero a ella en PAL ni en JP (MAIN0/SLPS, I0NFO2/INFO2) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md). No es
+    de la balsa: JP #195/#196 son «la bomba funcionó y arreglaste el generador, bien hecho» y «mi abuelo decía que la
+    torre del Bosque de los Enanos tiene un ascensor que baja bajo tierra». La Fábrica del juego final conserva el
+    mismo par: X011 `powerPlantThanksTalk` muestra (2,4)/(2,5) e inicia el evento 0x4F, llamada desde
+    `stepFactoryNpcTalk` (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
 - **Aparición** (`spawnNpcSet0D`): mientras el evento 0x4D (`D_8009CDF1`, JP 0x8009E999) siga a 0, el personaje 1 (el
   que pone la bandera en C1, (12,256)) se mueve a x = -200; sólo cambia x. El mismo código fija una vez la fase
   `D_8009CFA5` (ver arriba); el diálogo sólo la lee. El controlador `updateNpcSet0D` no tiene escena: el estado 1 está
@@ -412,7 +418,9 @@ Los generadores ajustan tres variables de avance:
 - **Vecino.** AREA11 subtipo 4 (w1e 0x11 = página (64, 256), perdida en AREA11) es el vecino 12, el único de H3, junto al
   vecino 4 («en esta choza vive un adivino»). Sus guiones (fotogramas 204..240) tienen exactamente la estructura y los
   tiempos de los 10..46 del adivino de los túneles (f = f_final + 194): es el Adivino Verde, no el constructor de
-  balsas. Su `dlg 11` no tiene caso en PAL y nada inicia el evento 89.
+  balsas. Una diferencia: los guiones de andar/hablar/extra (huecos 3-8, 10, 11) acaban en pausa (0x8000) aquí y en
+  bucle (0x4000) en la copia de los túneles. La tabla no tiene alias de dirección, así que el paso de hablar de madera
+  (`b69 + 7`) cae en los huecos 8..11 (un guion de hablar y luego los extras) (SiergiejW, TombaEdit docs/cut-villages-jp-research.md). Su `dlg 11` no tiene caso en PAL y nada inicia el evento 89.
 - **Sus frases sobreviven, su código no.** Banco de AREA11 k3 dx16..19 = PAL MFNT110 #243-#246 (traducidas en todos
   los idiomas PAL; JP A002 bloque 0 #226-#229): «soy uno de los adivinos que dicen el nivel de experiencia» / «sólo
   hablo con quien tenga 300.000 PA» / «parece que tienes bastante... veamos» / la pista de colores (JP: azul marino =
@@ -455,7 +463,10 @@ Los generadores ajustan tres variables de avance:
 - **Objetos**: la lista de objetos pasa a `NPC_SET_0E_EXTRA_RECORDS_ALT` cuando `D_8009CFA8 == 4`. Esa lista
   alternativa sólo cambia la animación del objeto 5 (12 en vez de 10), seguramente el reloj arreglado.
   `topdownA16SceneryUpdate` mueve el objeto `wb8 == 5` a (-4/-3, 0x193) con la animación 0xB/0xC cuando
-  `D_8009CFA8` pasa a 2/3.
+  `D_8009CFA8` pasa a 2/3. Esa actualización sólo escribe el índice (`wb4`) y la posición, nunca el puntero de guion
+  `anim`, así que el objeto sigue dibujando el fotograma 10; sólo al reaparecer con la lista alternativa se ve el 15
+  (hueco 12). Nada pone nunca `D_8009CFA8` a 1: las únicas escrituras son los tres incrementos de `npcSet0ESceneStep2`,
+  que necesita que valga 1 para empezar (SiergiejW, TombaEdit docs/cut-villages-jp-research.md).
 
 ### AREA17 s0: el pueblo de los Hombres de hierro (conjunto 0F)
 
@@ -467,7 +478,8 @@ Los generadores ajustan tres variables de avance:
   (animación 23) en y = 302 y en y = 84. Seguramente es el muro del Cerdiablo, o los raíles del ascensor.
 - **Diálogo** (`topdownA17ActorOpenDialogue` 0x800F4110):
   - Caso 0 → (2,0xA); caso 1 → (2,7).
-  - Caso 2 → `topdownA17ActorDialogueBank2`, el herrero: (2,5) "¿necesitas algo?", (2,6) "¿un engranaje de hierro?"
+  - Caso 2 → una copia en línea de `topdownA17ActorDialogueBank2` (la función en sí no tiene llamada; igual
+    `topdownA16ActorDialogueBank2`, en línea en el caso 8 de piedra), el herrero: (2,5) "¿necesitas algo?", (2,6) "¿un engranaje de hierro?"
     y el **evento 0x63**, (2,9), (2,10).
   - Caso 3 → `topdownA17ActorDialogueBank3`, el fabricante de bombas: (3,0) "no he visto tu cara", (3,2), (3,3) y el
     **evento 0x69**, (3,5) "primero necesito electricidad", (3,8) "ahora la mezcla de la bomba", (3,0xB) "¿más
@@ -1220,3 +1232,28 @@ JP (listas de s0 vacías, entradas compartidas, X19, CLUT).
 **Lo que tiene la nuestra y la suya no usa:** qué subtipo dibuja cada página superviviente y con qué fila de paleta, los
 cuatro interiores de chozas de ascensor de A08000, los interiores reconstruidos y los pueblos jugables del port, y las
 comprobaciones de los discos USA y beta.
+
+### Revisiones posteriores (1 de noviembre de 2026) — verificación
+
+SiergiejW añadió cuatro pasadas más a la misma página (datos huérfanos, acciones de vecinos, consumidores de estado).
+Comprobadas en I0NFO2 PAL / el C emparejado y en el disco JP; donde aciertan, las secciones de arriba ya lo dicen.
+
+| Afirmación | Veredicto | Pruebas |
+|---|---|---|
+| A. Tabla de decorado de madera: los objetos eligen los huecos 0-11, 14, 15; nadie elige 12, 13, 16-23 (12/13 = fotogramas fijos 12/13; 16-23 = fotogramas 141-166 en 8 guiones) | **confirmado** | Tabla PAL 0x8010751C: las 14 animaciones de `NPC_SET_0D_EXTRA_RECORDS` son {0..11, 14, 15}; huecos 16..23 = 141 / 142-147 / 148,149,150,149,148 / 151,152,153,152 (8,1,10,4) / 154 / 155-160 / 161,162,163,162,163 / 164,165,166,165, todos acaban en pausa. |
+| B. Se conserva una cuarta definición de decorado de hierro (página +8) que ningún objeto usa | **confirmado** | PAL 0x800FEE28 `08 00 00 00 0D 00 00 00`, anims 0x801082A8, justo antes de la tabla de A19 (0x800FEE34). `tools/topdown.py` / `tools/civ_i0nfo2_diff.py` ya listan cuatro. |
+| C. Destinos de paleta del decorado: madera interior 0x7F48, madera exterior / piedra / hierro 0x7FC8, con +0x0D = 1 | **confirmado** | `topdownA11/16/17SceneryHandler.c` (`b0d = 1`, `w08`). |
+| D. Varias funciones no tienen llamada pero su lógica está copiada en línea (A16/A17 `DialogueBank2`, Init/ApplyState del decorado) | **confirmado** | `topdownA17ActorOpenDialogue.c` caso 2 = `inl_800F3EA0`; ningún C llama a las funciones sueltas. Nuestro «Caso 2 → topdownA17ActorDialogueBank2» era impreciso, corregido. |
+| E. El objeto P16 de hierro pasa por los fotogramas 13 → 14 → 15 cuando la escena 8 pone `D_8009CFA1` a 1 y luego a 2 | **confirmado** | `topdownA17SceneryUpdate.c` (`wb4 = flag + 0xD`), `npcSet0FSceneStep8.c`. Cuadra con nuestro «el objeto 16 suma `D_8009CFA1`». |
+| F/M. La primera palabra del registro va a +0x0E y es un tipo de orden de dibujo (0 por Y, 1 profundidad -12, 2 +12), no un objeto | **confirmado** | `spawnNpcSet0D.c` (`type = 0x1D`, `_pad0e[0] = e->type`), `topdownSortDrawOrder.c`. Añadido a la línea de SpawnB. |
+| G. La tabla del subtipo 3 de madera tiene 12 punteros más (fotogramas 167-203), copia de los 12 guiones del adivino con cada fotograma 37 menos; nada apunta a ese bloque | **confirmado** | PAL `data_80107648[28]`, los 12 últimos = 0x80107E08..; comparados registro a registro con `data_801076B8`: fotograma + 37, mismas duraciones y banderas. Ningún puntero a 0x80107688. De quién era, no se sabe. |
+| H. Madera subtipo 0 hueco 16 (33,34,35,34) y subtipo 1 huecos 16/17 (69-71, 72-74) no se eligen | **confirmado** | Tablas PAL de 17 y 18 entradas (0x8010757C, 0x801075C0). |
+| I. Hierro subtipos 0/1 hueco 16: acciones en bucle de 9 registros (33-40, 74-81), control 0x403C que salta a su inicio | **confirmado** | PAL 0x80108638 / 0x801087EC. Que el subtipo 1 incluya al herrero (#3) es su lectura de las posiciones; «forjar» es una suposición. |
+| J. La tabla compacta del adivino no encaja con los selectores de madera, y sus guiones se paran donde la copia de los túneles repite | **confirmado** | Guiones de túnel de I0NFO3 PAL: mismos fotogramas - 194 y tiempos, final 0x40xx frente a 0x80xx en los huecos 3-8, 10, 11; `topdownA11ActorTalkStep.c` usa `b69 + 7`. |
+| K. Objeto P6 de piedra: la actualización sólo cambia el índice `wb4`, nunca el guion dibujado; nada pone `D_8009CFA8` a 1 | **confirmado** | `topdownA16SceneryUpdate.c`; las únicas escrituras de `D_8009CFA8` son los `++` de `npcSet0ESceneStep2.c`, que sólo corre si vale 1. |
+| L. La escena 3 de piedra copia una posición de un puntero sin iniciar antes de cargar al artesano | **confirmado (C PAL)** | `npcSet0ESceneStep3.c` (`Pos6 p = *(Pos6 *)&n->a` antes de `n = D_8009F2F8`). Que en JP `s0` sea el controlador es su traza. Las JP #185-#187 (tambor Funga) ya estaban aquí. |
+| N. `topdownA11ActorDialogueBank2` es el agradecimiento por el generador + la pista de la torre del Bosque de los Enanos, conservado en X011 | **confirmado** | Leídas JP AREA11 #195/#196; `x011/powerPlantThanksTalk.c` (2,4)/(2,5), `setEventStarted(0x4F)`. Nunca la llamamos de la balsa. |
+| Gantetsu (vecino #4 de hierro) pide una anguila eléctrica y agua negra; #246 «¿vas a coger una anguila con las manos? toma esto» | **confirmado (texto)** | Leídas JP AREA17 #240 (わしの名はガンテツ), #245, #246, #247. Ningún código muestra #246 ni da un objeto: apunta a la cadena recortada de la anguila / guantes de goma. |
+| No hay diálogo de Yan en el pueblo de madera | **coherente** | El único ヤン del banco de AREA11 es la línea de uso ヤンの弁当をつかった. Nunca dijimos lo contrario. |
+| Hoja comunitaria civ_towns: 82 de 108 paletas coinciden con JP; BUNMEI2 JP y PAL difieren | **sin comprobar** | No se ha releído la hoja. |
+| Paletas de ayuda de TombaEdit, sincronización del editor | **n/a** | Funciones del editor, no pruebas del disco. |

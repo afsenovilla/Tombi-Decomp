@@ -32,7 +32,7 @@ NPC_SETS = {0x0D: (0x80100080, [0x800FFE24]), 0x0E: (0x80100364, ["*0x801001D4",
 DEFS = [("TOPDOWN_A11_ACTOR_DEFS", 0x800FEEB8, "obj", 5), ("TOPDOWN_A16_ACTOR_DEFS", 0x800FEEF4, "obj", 4),
         ("TOPDOWN_A17_ACTOR_DEFS", 0x800FEF64, "obj", 5), ("TOPDOWN_A18_ACTOR_DEFS", 0x800FEFA0, "obj", 7),
         ("TOPDOWN_A11_SCENERY_DEFS", 0x800FF054, "obj3", 2), ("TOPDOWN_A16_SCENERY_DEFS", 0x800FEDD0, "obj3", 3),
-        ("TOPDOWN_A17_SCENERY_DEFS", 0x800FEE04, "obj3", 3)]
+        ("TOPDOWN_A17_SCENERY_DEFS", 0x800FEE04, "obj3", 4)]
 A_FIELDS = ("type", "room", "frame", "anim", "bx0", "by0", "bx1", "by1", "dlg", "beh", "x", "y", "sub", "bc")
 B_FIELDS = ("type", "room", "w4", "anim", "x", "y", "sub", "bc")
 OUT = []

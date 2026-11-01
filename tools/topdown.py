@@ -384,7 +384,7 @@ DEFS = [  # name, address, kind ('obj' = {u8 box[4]; u16 w1e; s16 spad; void **a
     ("TOPDOWN_A05_SCENERY_DEFS", 0x800FEDC4, "obj3", 1),
     ("TOPDOWN_A11_SCENERY_DEFS", 0x800FF054, "obj3", 2),
     ("TOPDOWN_A16_SCENERY_DEFS", 0x800FEDD0, "obj3", 3),
-    ("TOPDOWN_A17_SCENERY_DEFS", 0x800FEE04, "obj3", 3),
+    ("TOPDOWN_A17_SCENERY_DEFS", 0x800FEE04, "obj3", 4),
     ("TOPDOWN_A19_SCENERY_DEFS", 0x800FEE34, "obj3", 3),
 ]
 
