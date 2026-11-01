@@ -533,6 +533,57 @@ i18n.add({
            "pc.pos": "Bottom (Xbox A)|Right (Xbox B)|Left (Xbox X)|Top (Xbox Y)", "pc.ok": "Use", "pc.cancel": "Cancel", "p.gen": "Generic"},
 })
 
+# the Controls page redesign: icons combobox, keyboard table, controller table (docs/PORT.md "Launcher")
+i18n.add({
+    "es": {"c.icons": "Iconos de botones", "c.keyboard": "Teclado", "b.restore": "Restaurar predeterminados",
+           "kb.hint": "Haz clic en la tecla de un botón y pulsa la tecla nueva (Esc cancela).",
+           "kb.clash": "Aviso: la tecla {0} está asignada a varios botones ({1}).",
+           "gp.hint": "Cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro). Haz clic en un botón de la foto o elige en la lista qué botón del mando hace de cada botón de PS1.",
+           "gp.clash": "Aviso: {0} está asignado a varios botones ({1}).", "p.gen": "Genérico"},
+    "en": {"c.icons": "Button icons", "c.keyboard": "Keyboard", "b.restore": "Restore defaults",
+           "kb.hint": "Click a button's key, then press the new key (Esc cancels).",
+           "kb.clash": "Warning: the key {0} is bound to several buttons ({1}).",
+           "gp.hint": "Any SDL2-compatible controller (Xbox, PS4/PS5, Switch Pro). Click a button on the photo or pick in the list which controller button acts as each PS1 button.",
+           "gp.clash": "Warning: {0} is bound to several buttons ({1}).", "p.gen": "Generic"},
+})
+
+# --prompts on PC (the AYN Thor styles are only offered by the Android launcher; a saved thor style reads as auto)
+PROMPT_STYLES = [("auto", "p.auto"), ("playstation", "p.ps"), ("xbox", "p.xbox"), ("nintendo", "p.nin"), ("generic", "p.gen"),
+                 ("custom", "p.custom")]
+# --pad-map: the defaults of runtime/sdl.c cbind_defaults(), and the SDL GameController sources offered
+PAD_DEFAULTS = {"up": "dpup", "down": "dpdown", "left": "dpleft", "right": "dpright", "cross": "a", "circle": "b", "square": "x",
+                "triangle": "y", "l1": "leftshoulder", "r1": "rightshoulder", "l2": "lefttrigger", "r2": "righttrigger",
+                "start": "start", "select": "back"}
+PAD_SOURCES = [   # SDL name, English label, Spanish label
+    ("dpup", "D-pad up", "Cruceta arriba"), ("dpdown", "D-pad down", "Cruceta abajo"), ("dpleft", "D-pad left", "Cruceta izquierda"),
+    ("dpright", "D-pad right", "Cruceta derecha"), ("a", "A (bottom)", "A (abajo)"), ("b", "B (right)", "B (derecha)"),
+    ("x", "X (left)", "X (izquierda)"), ("y", "Y (top)", "Y (arriba)"), ("leftshoulder", "LB / L1", "LB / L1"),
+    ("rightshoulder", "RB / R1", "RB / R1"), ("lefttrigger", "LT / L2", "LT / L2"), ("righttrigger", "RT / R2", "RT / R2"),
+    ("start", "Start / Menu", "Start / Menú"), ("back", "Back / Select / View", "Back / Select / Vista"),
+    ("guide", "Guide / Home / PS", "Guía / Home / PS"), ("leftstick", "L3 (left stick press)", "L3 (pulsar stick izq.)"),
+    ("rightstick", "R3 (right stick press)", "R3 (pulsar stick der.)"), ("misc1", "Share / Capture", "Compartir / Captura"),
+    ("touchpad", "Touchpad", "Panel táctil"), ("paddle1", "Paddle 1", "Paleta 1"), ("paddle2", "Paddle 2", "Paleta 2"),
+    ("paddle3", "Paddle 3", "Paleta 3"), ("paddle4", "Paddle 4", "Paleta 4"),
+    ("leftx-", "Left stick left", "Stick izq. izquierda"), ("leftx+", "Left stick right", "Stick izq. derecha"),
+    ("lefty-", "Left stick up", "Stick izq. arriba"), ("lefty+", "Left stick down", "Stick izq. abajo"),
+    ("rightx-", "Right stick left", "Stick der. izquierda"), ("rightx+", "Right stick right", "Stick der. derecha"),
+    ("righty-", "Right stick up", "Stick der. arriba"), ("righty+", "Right stick down", "Stick der. abajo"),
+    ("", "(none)", "(ninguno)")]
+PAD_SRC_KEYS = [k for k, _, _ in PAD_SOURCES]
+PAD_SHORT = {"dpup": "D-pad \u2191", "dpdown": "D-pad \u2193", "dpleft": "D-pad \u2190", "dpright": "D-pad \u2192", "a": "A", "b": "B",
+             "x": "X", "y": "Y", "leftshoulder": "LB", "rightshoulder": "RB", "lefttrigger": "LT", "righttrigger": "RT",
+             "start": "Start", "back": "Back", "guide": "Guide", "leftstick": "L3", "rightstick": "R3", "misc1": "Share",
+             "touchpad": "Touchpad", "leftx-": "LS \u2190", "leftx+": "LS \u2192", "lefty-": "LS \u2191", "lefty+": "LS \u2193",
+             "rightx-": "RS \u2190", "rightx+": "RS \u2192", "righty-": "RS \u2191", "righty+": "RS \u2193"}
+
+
+def pad_map_arg(pm):
+    """--pad-map value: only the PS1 buttons that differ from runtime/sdl.c's defaults ("" = unbound), or None."""
+    pm = pm or {}
+    diff = [(b, pm[b]) for b in M.BUTTONS if b in pm and pm[b] != PAD_DEFAULTS[b]]
+    return ",".join("%s=%s" % d for d in diff) or None
+
+
 RUMBLE_STEPS = [0, 25, 50, 75, 100, 125, 150, 200]   # --rumble choices, percent
 
 # Tk keysym -> SDL key name (what --keys takes, SDL_GetScancodeFromName); letters, digits and F1..F24 map to themselves
@@ -601,6 +652,8 @@ def setup_style(root):
     st.configure("Muted.TLabel", foreground=C_MUTED)
     st.configure("Help.TLabel", foreground=C_ACCENT, font=(fam, 13, "bold"))     # the small circled-i info icon
     st.map("Help.TLabel", foreground=[("active", C_ACCENT_HI)])
+    st.configure("Warn.TLabel", foreground="#b3261e")
+    st.configure("Sel.TLabel", foreground=C_ACCENT, font=(fam, 10, "bold"))
     st.configure("Head.TLabel", font=(fam, 10, "bold"))
     st.configure("Title.TLabel", background=C_BG, font=(fam, 18, "bold"))
     st.configure("Bg.TLabel", background=C_BG, foreground=C_MUTED)
@@ -656,8 +709,10 @@ class App:
         self._level = "info"
         set_icon(root)
         self.fam = setup_style(root)
-        root.geometry("960x660")
-        root.minsize(820, 600)
+        k = max(1.0, float(root.tk.call("tk", "scaling")) / (96 / 72.0))    # the DPI scale (1.25 at 125 %...)
+        w, h = min(int(960 * k), root.winfo_screenwidth()), min(int(660 * k), root.winfo_screenheight() - 40)
+        root.geometry("%dx%d" % (w, h))
+        root.minsize(min(w, int(820 * k)), min(h, int(600 * k)))
         root.protocol("WM_DELETE_WINDOW", self.on_close)
         self._build()
 
@@ -780,7 +835,7 @@ class App:
         self.patch_ui = []
         self._build_play(self.page_frame("play", tr("nav.play")))
         self._build_gfx(self.page_frame("gfx", tr("nav.gfx")))
-        self._build_controls(self.page_frame("controls", tr("nav.controls")))
+        self._build_controls(self.page_frame("controls", tr("nav.controls"), scroll=True))
         self._build_mods(self.page_frame("mods", tr("nav.mods"), scroll=True))
         self._build_cut(self.page_frame("cut", tr("nav.cut"), scroll=True))
         self._build_log(self.page_frame("log", tr("nav.log")))
@@ -1097,64 +1152,224 @@ class App:
         self.ires_note = ttk.Label(c, text=tr("l.iresoff"), style="Muted.TLabel", wraplength=300, justify="left")
 
     def _build_controls(self, f):
-        """A PS1 digital pad on a canvas (the photo tools/icons/ps1_pad.png, else drawn as vectors), a leader line from
-        each button to its key; clicking a button or its key and pressing a key rebinds it.  Same settings as before:
-        keys_on + keys {button: SDL key name} (--keys)."""
-        o, c = self.card(f, tr("c.pad"))
-        o.pack(side="bottom", fill="x", pady=(12, 0))
-        ttk.Checkbutton(c, text=tr("l.dualshock"), variable=self.var("dualshock", tk.BooleanVar, False)).pack(anchor="w")
-        # --rumble: vibration intensity (runtime/sdl.c), stored as the percent; shown as "Off" / "N %"
-        rr = ttk.Frame(c)
-        rr.pack(anchor="w", pady=(4, 0))
-        ttk.Label(rr, text=tr("l.rumble")).pack(side="left")
-        rv = self.var("rumble", tk.IntVar, 100)
-        names = [tr("rumble.off") if n == 0 else "%d %%" % n for n in RUMBLE_STEPS]
-        cb = ttk.Combobox(rr, values=names, state="readonly", width=9)
-        try:
-            cb.current(RUMBLE_STEPS.index(rv.get()))
-        except (ValueError, tk.TclError):
-            cb.current(RUMBLE_STEPS.index(100))
-        cb.bind("<<ComboboxSelected>>", lambda e: rv.set(RUMBLE_STEPS[cb.current()]))
-        cb.pack(side="left", padx=(6, 0))
-        ttk.Label(c, text=tr("l.prompts")).pack(anchor="w", pady=(8, 2))
-        self._radios(c, "prompts_style", tk.StringVar, "auto", [(tr("p.auto"), "auto"), (tr("p.ps"), "playstation"),
-                     (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.thorb"), "thor-black"), (tr("p.thorw"), "thor-white"), (tr("p.thor"), "thor"), (tr("p.gen"), "generic"), (tr("p.custom"), "custom")])
-        ttk.Button(c, text=tr("b.custom"), command=self.custom_buttons).pack(anchor="w", pady=(4, 0))
-        o, c = self.card(f, tr("c.controls"))
-        o.pack(fill="both", expand=True)
+        """Three cards: the button icons of the texts (--prompts, a combobox), the keyboard bindings (--keys, a table:
+        click a key and press the new one) and the controller bindings (--pad-map: the PS1 pad photo with a leader line
+        from each button to its controller button, and a table of comboboxes; clicking a button on the photo selects its
+        row), with the DualShock switch and the vibration intensity."""
+        # ---- button icons
+        o, c = self.card(f, tr("c.icons"))
+        o.pack(fill="x")
+        row = ttk.Frame(c)
+        row.pack(fill="x")
+        ttk.Label(row, text=tr("l.prompts")).pack(side="left")
+        pv = self.var("prompts_style", tk.StringVar, "auto")
+        if pv.get() not in [k for k, _ in PROMPT_STYLES]:
+            pv.set("auto")                   # the AYN Thor styles are Android only; an unknown value too
+        pcb = ttk.Combobox(row, state="readonly", width=24, values=[tr(t) for _, t in PROMPT_STYLES])
+        pcb.current([k for k, _ in PROMPT_STYLES].index(pv.get()))
+        pcb.pack(side="left", padx=(8, 8))
+        cust = ttk.Button(row, text=tr("b.custom"), command=self.custom_buttons)
+        cust.pack(side="left")
+
+        def prompts_sync(*_):
+            k = pv.get()
+            if k in [x for x, _ in PROMPT_STYLES]:
+                pcb.current([x for x, _ in PROMPT_STYLES].index(k))
+            cust.state(["!disabled"] if k == "custom" else ["disabled"])
+        pcb.bind("<<ComboboxSelected>>", lambda e: pv.set(PROMPT_STYLES[pcb.current()][0]))
+        pv.trace_add("write", prompts_sync)
+        prompts_sync()
+
+        # ---- keyboard
+        o, c = self.card(f, tr("c.keyboard"))
+        o.pack(fill="x", pady=(12, 0))
         top = ttk.Frame(c)
         top.pack(fill="x")
-        keys_on = self.var("keys_on", tk.BooleanVar, False)
-        ttk.Checkbutton(top, text=tr("mod.keys"), variable=keys_on).pack(side="left")
-        ttk.Button(top, text=tr("b.defaults"), command=lambda: [v.set(M.DEFAULT_KEYS[b]) for b, v in self.key_vars.items()]).pack(side="right")
-        hint = ttk.Label(c, text=tr("pad.hint"), style="Muted.TLabel", wraplength=640, justify="left")
-        hint.pack(anchor="w", fill="x", pady=(4, 0))
-        note = ttk.Label(c, text=tr("pad.note"), style="Muted.TLabel", wraplength=640, justify="left")
-        note.pack(side="bottom", anchor="w", fill="x")
-        c.bind("<Configure>", lambda e: [w.configure(wraplength=max(200, e.width - 40)) for w in (hint, note)], add="+")
-        keys = self.s.get("keys") or dict(M.DEFAULT_KEYS)
-        self.key_vars = {}
-        for b in M.BUTTONS:
-            self.key_vars[b] = tk.StringVar(value=keys.get(b, M.DEFAULT_KEYS[b]))
-            self.key_vars[b].trace_add("write", lambda *_: self._pad_redraw())
-        keys_on.trace_add("write", lambda *_: self._pad_redraw())
+        hint = ttk.Label(top, text=tr("kb.hint"), style="Muted.TLabel", wraplength=420, justify="left")
+        hint.pack(side="left", fill="x", expand=True, anchor="w")
+        ttk.Button(top, text=tr("b.restore"), command=self._keys_restore).pack(side="right", padx=(8, 0))
+        keys = self.s.get("keys") if self.s.get("keys_on") else None
+        keys = dict(M.DEFAULT_KEYS, **(keys or {}))
+        self.key_vars, self.key_btns, self.key_names = {}, {}, {}
+        self.key_capture = None
+        grid = ttk.Frame(c)
+        grid.pack(fill="x", pady=(8, 0))
+        for col in (0, 3):
+            grid.columnconfigure(col + 1, weight=1, uniform="kb")
+        grid.columnconfigure(2, minsize=24)
+        for i, b in enumerate(M.BUTTONS):
+            r, col = i % 7, (i // 7) * 3
+            self.key_vars[b] = tk.StringVar(value=keys.get(b) or "")
+            nm = ttk.Label(grid, text=tr("btn." + b))
+            nm.grid(row=r, column=col, sticky="w", pady=2, padx=(0, 8))
+            kb = ttk.Button(grid, width=16, command=lambda b=b: self._key_begin(b))
+            kb.grid(row=r, column=col + 1, sticky="ew", pady=2)
+            kb.bind("<KeyPress>", lambda e, b=b: self._key_press(b, e))
+            kb.bind("<FocusOut>", lambda e, b=b: self._key_end(b))
+            self.key_btns[b], self.key_names[b] = kb, nm
+            self.key_vars[b].trace_add("write", lambda *_: self._keys_sync())
+        self.key_warn = ttk.Label(c, text="", style="Warn.TLabel", wraplength=600, justify="left")
+        self.key_warn.pack(anchor="w", fill="x", pady=(6, 0))
+        self._keys_sync()
+
+        # ---- controller
+        o, c = self.card(f, tr("c.pad"))
+        o.pack(fill="x", pady=(12, 0))
+        top = ttk.Frame(c)
+        top.pack(fill="x")
+        phint = ttk.Label(top, text=tr("gp.hint"), style="Muted.TLabel", wraplength=420, justify="left")
+        phint.pack(side="left", fill="x", expand=True, anchor="w")
+        ttk.Button(top, text=tr("b.restore"), command=self._padmap_restore).pack(side="right", padx=(8, 0))
         from tkinter import font
         self.pad_fonts = {k: font.Font(family=self.fam, weight=w) for k, w in (("name", "normal"), ("key", "bold"), ("tiny", "bold"))}
-        self.pad_cv = cv = tk.Canvas(c, background=C_CARD, highlightthickness=0, bd=0, height=260, takefocus=0)
-        cv.pack(fill="both", expand=True, pady=(6, 6))
-        self.pad_capture = None
+        dpi = float(self.root.tk.call("tk", "scaling")) / (96 / 72.0)
+        self.pad_cv = cv = tk.Canvas(c, background=C_CARD, highlightthickness=0, bd=0, height=int(250 * dpi), takefocus=0)
+        cv.pack(fill="x", pady=(6, 6))
+        self.pad_capture = None              # the selected PS1 button (its row in the table below)
         self.pad_hot = None
         self._pad_pending = False
         self.pad_photo = self._pad_load_photo()
-        self.pad_spots = {}                  # photo mode: button -> hotspot box in canvas pixels (kind, x0, y0, x1, y1)
-        self.pad_imgs = []                   # PhotoImages on the canvas (Tk drops an image nobody references)
+        self.pad_spots = {}
+        self.pad_imgs = []
         self._pad_photo_cache = {}
         cv.bind("<Configure>", lambda e: self._pad_redraw())
-        cv.bind("<KeyPress>", self._pad_key)
-        cv.bind("<FocusOut>", lambda e: self._pad_cancel())
         cv.bind("<Button-1>", self._pad_click)
         cv.bind("<Motion>", self._pad_motion)
         cv.bind("<Leave>", lambda e: self._pad_hover(self.pad_hot, False) if self.pad_spots and self.pad_hot else None)
+        pm = dict(PAD_DEFAULTS, **(self.s.get("pad_map") or {}))
+        labels = [self._src_label(k) for k, _, _ in PAD_SOURCES]
+        self.pad_vars, self.pad_cbs, self.pad_names = {}, {}, {}
+        grid = ttk.Frame(c)
+        grid.pack(fill="x")
+        for col in (0, 3):
+            grid.columnconfigure(col + 1, weight=1, uniform="gp")
+        grid.columnconfigure(2, minsize=24)
+        for i, b in enumerate(M.BUTTONS):
+            r, col = i % 7, (i // 7) * 3
+            v = self.pad_vars[b] = tk.StringVar(value=pm.get(b, ""))
+            nm = ttk.Label(grid, text=tr("btn." + b))
+            nm.grid(row=r, column=col, sticky="w", pady=2, padx=(0, 8))
+            vals = labels if v.get() in PAD_SRC_KEYS else labels + [v.get()]     # a hand-written source stays choosable
+            cb = ttk.Combobox(grid, state="readonly", width=20, values=vals)
+            cb.set(self._src_label(v.get()))
+            cb.grid(row=r, column=col + 1, sticky="ew", pady=2)
+            cb.bind("<<ComboboxSelected>>", lambda e, b=b, cb=cb: self._padmap_chosen(b, cb))
+            cb.bind("<FocusIn>", lambda e, b=b: self._pad_select(b, focus=False))
+            self.pad_cbs[b], self.pad_names[b] = cb, nm
+            v.trace_add("write", lambda *_: self._padmap_sync())
+        self.pad_warn = ttk.Label(c, text="", style="Warn.TLabel", wraplength=600, justify="left")
+        self.pad_warn.pack(anchor="w", fill="x", pady=(4, 0))
+        ttk.Separator(c).pack(fill="x", pady=(6, 8))
+        ttk.Checkbutton(c, text=tr("l.dualshock"), variable=self.var("dualshock", tk.BooleanVar, False)).pack(anchor="w")
+        # --rumble: vibration intensity (runtime/sdl.c), stored as the percent; shown as "Off" / "N %"
+        rr = ttk.Frame(c)
+        rr.pack(anchor="w", pady=(6, 0))
+        ttk.Label(rr, text=tr("l.rumble")).pack(side="left")
+        rv = self.var("rumble", tk.IntVar, 100)
+        names = [tr("rumble.off") if n == 0 else "%d %%" % n for n in RUMBLE_STEPS]
+        rcb = ttk.Combobox(rr, values=names, state="readonly", width=9)
+        try:
+            rcb.current(RUMBLE_STEPS.index(rv.get()))
+        except (ValueError, tk.TclError):
+            rcb.current(RUMBLE_STEPS.index(100))
+        rcb.bind("<<ComboboxSelected>>", lambda e: rv.set(RUMBLE_STEPS[rcb.current()]))
+        rcb.pack(side="left", padx=(8, 0))
+        warns = (self.key_warn, self.pad_warn)
+        f.bind("<Configure>", lambda e: [w.configure(wraplength=max(200, e.width - 60)) for w in warns]
+               + [w.configure(wraplength=max(160, e.width - 260)) for w in (hint, phint)], add="+")
+        self._padmap_sync()
+
+    # ---- keyboard table
+    def _key_text(self, b):
+        k = self.key_vars[b].get().strip()
+        if not k:
+            return tr("pad.nokey")
+        if b == "select" and k == M.DEFAULT_KEYS["select"]:
+            return k + " / Right Shift"     # runtime/sdl.c keymap: the default select has a second key
+        return k
+
+    def _keys_sync(self):
+        used = {}
+        for b in M.BUTTONS:
+            k = self.key_vars[b].get().strip().lower()
+            if k:
+                used.setdefault(k, []).append(b)
+            self.key_btns[b].configure(text=tr("pad.press") + "…" if self.key_capture == b else self._key_text(b))
+        clash = [bs for bs in used.values() if len(bs) > 1]
+        for b in M.BUTTONS:
+            self.key_names[b].configure(style="Warn.TLabel" if any(b in bs for bs in clash) else "TLabel")
+        self.key_warn.configure(text="\n".join(tr("kb.clash", self.key_vars[bs[0]].get().strip(), ", ".join(tr("btn." + x) for x in bs))
+                                               for bs in clash))
+
+    def _key_begin(self, b):
+        if self.key_capture and self.key_capture != b:
+            self._key_end(self.key_capture)
+        self.key_capture = b
+        self.key_btns[b].focus_set()
+        self.key_btns[b].state(["pressed"])
+        self._keys_sync()
+
+    def _key_end(self, b):
+        if self.key_capture == b:
+            self.key_capture = None
+            self.key_btns[b].state(["!pressed"])
+            self._keys_sync()
+
+    def _key_press(self, b, e):
+        if self.key_capture != b:
+            return None                      # Space / Return on a focused button: click it (begin) as usual
+        if e.keysym == "Escape":
+            self._key_end(b)
+            return "break"
+        name = sdl_key_name(e.keysym)
+        if not name:
+            return "break"                   # a key --keys cannot name: keep waiting
+        self.key_capture = None
+        self.key_btns[b].state(["!pressed"])
+        self.key_vars[b].set(name)
+        return "break"
+
+    def _keys_restore(self):
+        self.key_capture = None
+        for b, v in self.key_vars.items():
+            v.set(M.DEFAULT_KEYS[b])
+
+    # ---- controller table
+    @staticmethod
+    def _src_label(k):
+        for key, en, es in PAD_SOURCES:
+            if key == k:
+                return es if i18n.current() == "es" else en
+        return k
+
+    def _padmap_chosen(self, b, cb):
+        lab = cb.get()
+        key = next((k for k, en, es in PAD_SOURCES if lab in (en, es)), lab)
+        self.pad_vars[b].set(key)
+
+    def _padmap_sync(self):
+        used = {}
+        for b in M.BUTTONS:
+            k = self.pad_vars[b].get()
+            self.pad_cbs[b].set(self._src_label(k))
+            if k:
+                used.setdefault(k, []).append(b)
+        clash = [(k, bs) for k, bs in used.items() if len(bs) > 1]
+        for b in M.BUTTONS:
+            hot = b == self.pad_capture
+            self.pad_names[b].configure(style="Sel.TLabel" if hot else ("Warn.TLabel" if any(b in bs for _, bs in clash) else "TLabel"))
+        self.pad_warn.configure(text="\n".join(tr("gp.clash", self._src_label(k), ", ".join(tr("btn." + x) for x in bs)) for k, bs in clash))
+        self._pad_redraw()
+
+    def _padmap_restore(self):
+        for b, v in self.pad_vars.items():
+            v.set(PAD_DEFAULTS[b])
+
+    def _pad_select(self, b, focus=True):
+        self.pad_capture = b
+        if focus:
+            self.pad_cbs[b].focus_set()
+        self._padmap_sync()
 
     @staticmethod
     def _pad_load_photo():
@@ -1205,11 +1420,8 @@ class App:
             self.root.after_idle(self._pad_draw)
 
     def _pad_key_text(self, b):
-        if self.pad_capture == b:
-            return tr("pad.press") + "…"
-        if not self.vars["keys_on"].get():
-            return M.DEFAULT_KEYS[b]            # what the game uses without --keys
-        return self.key_vars[b].get().strip() or tr("pad.nokey")
+        k = self.pad_vars[b].get()
+        return PAD_SHORT.get(k, k) or tr("pad.nokey")
 
     def _pad_draw(self):
         self._pad_pending = False
@@ -1321,7 +1533,7 @@ class App:
                 edge_x = cx - 38 if left else cx + 38
             else:
                 edge_x = lx_in if left else rx_in
-            name = "" if self.pad_capture == b2 else tr("btn." + b2)     # rebinding: the chip takes the whole column
+            name = tr("btn." + b2)
             key = self._pad_key_text(b2)
             room = (edge_x if left else self.PAD_W - edge_x) - 6 - (nf.measure(name) / s + 8 if name else 0)
             maxw = max(40, room) * s - 2 * pad_x * s
@@ -1469,37 +1681,13 @@ class App:
             self._pad_style()
 
     def _pad_begin(self, b):
-        """Rebind b: the chip asks for a key, the next key press (on the canvas) is stored as its SDL name."""
-        self.pad_capture = b
-        self.pad_cv.focus_set()
-        self._pad_redraw()
+        """A button clicked on the photo: select its row in the table (its combobox gets the focus)."""
+        self._pad_select(b)
 
     def _pad_cancel(self):
         if self.pad_capture:
             self.pad_capture = None
-            self._pad_redraw()
-
-    def _pad_key(self, e):
-        b = self.pad_capture
-        if not b:
-            return
-        if e.keysym == "Escape":
-            self._pad_cancel()
-            return "break"
-        name = sdl_key_name(e.keysym)
-        if not name:
-            return "break"                   # a key --keys cannot name: keep waiting
-        if not self.vars["keys_on"].get():   # the drawing showed the defaults: start the custom set from them
-            for k, v in self.key_vars.items():
-                v.set(M.DEFAULT_KEYS[k])
-        old = self.key_vars[b].get().strip()
-        for k, v in self.key_vars.items():   # a key already used by another button: the two swap
-            if k != b and v.get().strip().lower() == name.lower():
-                v.set(old)
-        self.pad_capture = None
-        self.key_vars[b].set(name)
-        self.vars["keys_on"].set(True)
-        return "break"
+            self._padmap_sync()
 
     def _build_mods(self, f):
         o, c = self.card(f, tr("c.patch"))
@@ -1650,6 +1838,9 @@ class App:
                 pass
         if hasattr(self, "key_vars"):
             self.s["keys"] = {b: v.get().strip() for b, v in self.key_vars.items()}
+            self.s["keys_on"] = self.s["keys"] != M.DEFAULT_KEYS     # --keys only when a key differs
+        if hasattr(self, "pad_vars"):
+            self.s["pad_map"] = {b: v.get() for b, v in self.pad_vars.items()}
         save_settings(self.s)
 
     def pick_disc(self):
@@ -1901,7 +2092,7 @@ class App:
         exe = game_binary()
         source = ["--data", data_dir()] if data_ready() else ["--disc", bin_of_cue(s["disc"])]
         cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
-               "--show-fps", "2",     # the measured vblank rate and its histogram in the log
+               "--log-fps", "2",      # the measured vblank rate and its histogram in the log (no counter on screen)
                "--renderer", "soft" if s.get("renderer") == "soft" else "gl",
                "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9", "auto") else "4:3"]
         if s.get("renderer") != "soft" and s.get("internal_res", 1) in (2, 3, 4):
@@ -1938,7 +2129,10 @@ class App:
             rumble = 100
         if rumble != 100:
             cmd += ["--rumble", str(rumble)]
-        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "thor", "thor-black", "thor-white", "generic", "custom"):
+        pm = pad_map_arg(s.get("pad_map"))
+        if pm:
+            cmd += ["--pad-map", pm]
+        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "generic", "custom"):
             cmd += ["--prompts", s["prompts_style"]]
         if s.get("prompts_style") == "custom":
             cmd += ["--prompt-colors", s.get("prompt_colors") or PC.DEFAULT]

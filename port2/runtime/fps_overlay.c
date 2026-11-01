@@ -10,6 +10,7 @@
 #include <string.h>
 
 extern int port_show_fps, port_frame;
+int port_fps_on_screen;   /* --show-fps: the counter on screen (--log-fps: only the log lines) */
 extern unsigned long long port_time_us(void);
 
 static const unsigned short glyph[] = {   /* 3x5, bit 14 = top-left */
@@ -28,7 +29,7 @@ static int bw, bh;
 const unsigned char *port_fps_overlay(int img_h, int *w, int *h, int *changed) {
     static unsigned long long t0; static int n0, presents, last_scale;
     static char text[24] = "-- FPS", shown[24];
-    if (!port_show_fps) return 0;
+    if (!port_fps_on_screen) return 0;
     unsigned long long t = port_time_us();
     presents++;
     if (!t0) { t0 = t; n0 = port_frame; presents = 0; }
