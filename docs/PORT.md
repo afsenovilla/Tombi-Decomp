@@ -2302,6 +2302,24 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select
   (areas 0, 1, 2, 3, 7; the others also animate palettes or keep counters) it is run again with the camera X moved
   2*pad+40 each way and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+- **Room ends** (`drawAreaModelList`, fixes.txt -> `port_ws_area_block` in `runtime/main0_handwritten.c`, GTE side in
+  `runtime/gte.c`): the background model was built for 4:3, so where the camera stops at a room's end (AREA00's first
+  village, Tombi and the old man at the left end) the wide strip looked past the last block into the clear colour.
+  The listed blocks are now drawn twice more, reflected about the room's left and right ends, so ground, grass,
+  hedges, houses and tree walls continue as a mirror image of the last stretch.  Nothing is stored: the ends are
+  measured at run time from the game's own model (each block is run once through the GTE in a probe mode that
+  records its vertices' X per 32-unit depth slot and emits nothing; ends = min / max per slot over every block seen
+  in this WMD, linear between slots).  The reflection is done in the GTE per triangle (X' = 2E - X with E the
+  outermost end among the triangle's corner depths, so it never overlaps the mesh and is not stretched; NCLIP's
+  sign flipped), about a line 48 units inside the end (authored ends curl down; reflecting the curl left a valley
+  of clear colour).  Off-screen copies are dropped by the drawers' own tests; the passes stop at 0xa000 bytes of
+  the frame's 0xc000 packet buffer.  It is a fill, not real level: the copy is a mirror image (AREA00 shows a
+  twin of the old man's house), objects and sprites are not mirrored, and GAME 0x60009 (AREA09 section 6, other
+  drawer) is not covered.
+- **Event titles** (`spawnEventTitle`, `l8Type01MoveStep`, `#ifdef PORT2`): the title tiles start at screen x 340
+  (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
+  now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over
+  the same 30 frames, so they land on the same frame.
 
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.

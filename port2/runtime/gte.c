@@ -10,6 +10,46 @@ typedef int s32; typedef unsigned int u32; typedef short s16; typedef unsigned s
 static s32 D[32];   /* data registers */
 static s32 C[32];   /* control registers */
 static u32 FLAG;
+/* --widescreen room-edge mirror (main0_handwritten.c port_ws_area_block).  port_gte_probe: RTPS/RTPT record each
+   vertex's X into the per-depth extents (one slot per 32 units of model Z) and fail the projection (flag bit 18), so
+   a model "drawn" in probe mode only measures itself.  port_gte_mirror 1 / 2: each RTPT triangle (and the RTPS
+   corner that completes a quad) is reflected rigidly, X' = 2E - X, about the room's left / right end at the depth of
+   whichever corner's end lies outermost (so the copy never overlaps the mesh at any of its depths, and no triangle
+   is stretched), and NCLIP's sign is flipped (a reflection reverses the winding).  port_gte_edges_build fills the slots no vertex reached. */
+#define WS_ZB 2048
+int port_gte_mirror, port_gte_probe;
+static s16 ws_lo[WS_ZB], ws_hi[WS_ZB], ws_el[WS_ZB], ws_eh[WS_ZB], ws_ly[WS_ZB], ws_hy[WS_ZB];
+static u16 ws_n[WS_ZB];
+void port_gte_edges_reset(void) { for (int i = 0; i < WS_ZB; i++) { ws_lo[i] = 0x7fff; ws_hi[i] = -0x8000; ws_n[i] = 0; } }
+int port_gte_edge_inset = 48;
+/* the end per depth slot, linear between the slots that have vertices, constant past the first / last one */
+static void fill(const s16 *src, s16 *dst, int lo_side) {
+    int prev = -1;
+    for (int i = 0; i < WS_ZB; i++) {
+        if (lo_side ? src[i] == 0x7fff : src[i] == -0x8000) continue;
+        if (prev < 0) for (int j = 0; j < i; j++) dst[j] = src[i];
+        else for (int j = prev + 1; j < i; j++)
+            dst[j] = (s16)(src[prev] + (src[i] - src[prev]) * (j - prev) / (i - prev));
+        dst[i] = src[i]; prev = i;
+    }
+    if (prev < 0) { for (int i = 0; i < WS_ZB; i++) dst[i] = 0; return; }
+    for (int j = prev + 1; j < WS_ZB; j++) dst[j] = src[prev];
+}
+int port_gte_edges_build(void) {
+    int any = 0; for (int i = 0; i < WS_ZB; i++) if (ws_lo[i] <= ws_hi[i]) any = 1;
+    fill(ws_lo, ws_el, 1); fill(ws_hi, ws_eh, 0);
+    /* reflect about a line port_gte_edge_inset units inside the end: authored ends curl down or fade out (AREA00's
+       front hill drops away at its left end), and a reflection about the very end mirrors the curl into a valley
+       showing the clear colour; from a little inside, the flat part of the mesh is what continues */
+    for (int i = 0; i < WS_ZB; i++) { ws_el[i] += port_gte_edge_inset; ws_eh[i] -= port_gte_edge_inset; }
+    return any;
+}
+static s64 ws_cur;
+static s64 ws_edge(const s16 *e, s64 z) {
+    s64 p = z + 0x8000, i = p >> 5, f = p & 31;
+    if (i >= WS_ZB - 1) return e[WS_ZB - 1];
+    return e[i] + ((e[i + 1] - e[i]) * f >> 5);
+}
 
 #define VX(n) ((s16)(D[(n) * 2] & 0xFFFF))
 #define VY(n) ((s16)((u32)D[(n) * 2] >> 16))
@@ -31,6 +71,26 @@ static void mat(int base, s16 m[3][3]) {
     m[2][0] = M16LO(base + 3); m[2][1] = M16HI(base + 3); m[2][2] = M16LO(base + 4);
 }
 
+/* is the room's left (side 1) / right (2) end already in view in the 4:3 window with the current matrices?  Each
+   depth slot with a real share of the mesh (>= 16 vertices) projects its end vertex; when more than a quarter of
+   those in front of the camera land inside the 4:3 columns, the end is part of the authored picture (a cliff with
+   open sky, a room seen whole) and is not mirrored.  No GTE register is touched. */
+int port_gte_end_in_view(int side) {
+    s16 r[3][3]; mat(0, r);
+    int tot = 0, in = 0;
+    for (int i = 0; i < WS_ZB; i++) {
+        if (ws_n[i] < 16) continue;
+        s64 x = side == 1 ? ws_lo[i] : ws_hi[i], y = side == 1 ? ws_ly[i] : ws_hy[i], z = i * 32 - 0x8000 + 16;
+        s64 m1 = ((s64)C[5] << 12) + r[0][0] * x + r[0][1] * y + r[0][2] * z;
+        s64 m3 = ((s64)C[7] << 12) + r[2][0] * x + r[2][1] * y + r[2][2] * z;
+        m1 >>= 12; m3 >>= 12;
+        if (m3 <= 16) continue;
+        s64 sx = (((s64)C[24]) + (m1 * (u16)C[26] << 16) / m3) >> 16;
+        tot++;
+        if (sx >= 4 && sx < 316) in++;
+    }
+    return tot && in * 4 > tot;
+}
 static s32 clampf(s64 v, s32 lo, s32 hi, u32 flag) {
     if (v < lo) { FLAG |= flag; return lo; }
     if (v > hi) { FLAG |= flag; return hi; }
@@ -46,6 +106,13 @@ static void set_ir(int lm) {
 static void rtp(int n, int last) {
     s16 r[3][3]; mat(0, r);
     s64 x = VX(n), y = VY(n), z = VZ(n);
+    if (port_gte_probe) {
+        int b = ((int)z + 0x8000) >> 5;
+        if (x < ws_lo[b]) { ws_lo[b] = (s16)x; ws_ly[b] = (s16)y; }
+        if (x > ws_hi[b]) { ws_hi[b] = (s16)x; ws_hy[b] = (s16)y; }
+        if (ws_n[b] < 0xffff) ws_n[b]++;
+        FLAG |= 1u << 18;
+    } else if (port_gte_mirror) x = 2 * ws_cur - x;
     s64 m1 = ((s64)C[5] << 12) + r[0][0] * x + r[0][1] * y + r[0][2] * z;
     s64 m2 = ((s64)C[6] << 12) + r[1][0] * x + r[1][1] * y + r[1][2] * z;
     s64 m3 = ((s64)C[7] << 12) + r[2][0] * x + r[2][1] * y + r[2][2] * z;
@@ -112,11 +179,26 @@ void port_gte_op(unsigned long op) {
     FLAG = 0;
     switch (op & 0x3F) {
     case 0x01: rtp(0, 1); break;                                     /* RTPS */
-    case 0x30: rtp(0, 0); rtp(1, 0); rtp(2, 1); break;               /* RTPT */
+    case 0x30:
+        if (port_gte_mirror) {       /* one end per triangle (the outermost of its corners' depths): a rigid reflection */
+            const s16 *e = port_gte_mirror == 1 ? ws_el : ws_eh;
+            for (int n = 0; n < 3; n++) {
+                s64 v = ws_edge(e, VZ(n));
+                if (n == 0 || (port_gte_mirror == 1 ? v < ws_cur : v > ws_cur)) ws_cur = v;
+            }
+        }
+        rtp(0, 0); rtp(1, 0); rtp(2, 1);                             /* RTPT */
+        if (port_gte_mirror) {       /* the copy only fills the wide strips: a triangle wholly inside 4:3 is dropped */
+            int inside = 1;
+            for (int n = 12; n <= 14; n++) { int sx = (s16)D[n]; if (sx < 0 || sx >= 320) inside = 0; }
+            if (inside) FLAG |= 1u << 18;
+        }
+        break;
     case 0x06: {                                                     /* NCLIP */
         s64 x0 = (s16)D[12], y0 = (s16)(D[12] >> 16), x1 = (s16)D[13], y1 = (s16)(D[13] >> 16);
         s64 x2 = (s16)D[14], y2 = (s16)(D[14] >> 16);
         MAC0 = (s32)(x0 * y1 + x1 * y2 + x2 * y0 - x0 * y2 - x1 * y0 - x2 * y1);
+        if (port_gte_mirror) MAC0 = -MAC0;
         break;
     }
     case 0x2D: {                                                     /* AVSZ3 */

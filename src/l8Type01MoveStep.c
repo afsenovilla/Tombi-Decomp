@@ -75,7 +75,12 @@ void l8Type01MoveStep(TObj *o)
         break;
     case 4:
         o->d30 += 0x80000;
+#ifdef PORT2
+        /* --widescreen: leave only once past the wide frame's right edge (screen x 480 is inside it at 21:9+) */
+        { extern int port_ws_cull; if (o->d30 > 0x1400000 + (port_ws_cull << 16)) o->b04++; }
+#else
         if (o->d30 > 0x1400000) o->b04++;
+#endif
         break;
     case 5:
         if (--o->timer != 0) break;

@@ -393,6 +393,10 @@ src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; ext
 # just outside the 4:3 window (port2/runtime/main0_handwritten.c port_ws_area_model_link; identity when off)
 src/callAreaModelLinkHook.c | PTR_DAT_80079b3c[GAME](AREA_MODEL_DRAW_LIST, WMD_DATA); | { extern unsigned short SCREEN_ORIGIN_X; extern void port_ws_area_model_link(void (*)(char *, int), char *, int, int, unsigned short *); port_ws_area_model_link(PTR_DAT_80079b3c[GAME], AREA_MODEL_DRAW_LIST, WMD_DATA, GAME, &SCREEN_ORIGIN_X); }
 #
+# --widescreen: the area background is drawn again mirrored about the room's left / right end, so the wide strips past
+# a room's authored end show a continuation instead of the clear colour (main0_handwritten.c port_ws_area_block)
+src/drawAreaModelList.c | drawModelUnlit(p[1], CURRENT_OT + 0x10); | { extern void port_ws_area_block(int, int, int, unsigned char *); port_ws_area_block(p[1], CURRENT_OT + 0x10, i, base); }
+#
 # --widescreen: the wrapping parallax backdrop columns of AREA01 / AREA09 repeat one period (512 columns) left and right
 # (port2/runtime/main0_handwritten.c port_ws_backdrop_period / port_ws_cat7; identity when off)
 src/drawCategory7Objects.c | drawObjectSprtWithMode(o); | { extern void port_ws_cat7(TObj *, void (*)(TObj *)); port_ws_cat7(o, drawObjectSprtWithMode); }

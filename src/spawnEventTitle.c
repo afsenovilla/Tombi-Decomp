@@ -199,6 +199,13 @@ void FUN_8005aa74(int event_id, int completed, int duration, int state)
                 *(int*)(obj + 0x30) = D_800804D8[1] << 16;
                 *(int*)(obj + 0x34) = D_800804D8[2] << 16;
                 *(int*)(obj + 0x38) = 0;
+#ifdef PORT2
+                /* --widescreen: the tiles start at screen x 340, just past the 4:3 edge and inside the wide frame
+                   (they appeared out of nothing there); start them past the wide edge (pad, plus 160 for the tiles' offsets
+                   within the title, up to about +-150).  l8Type01MoveStep derives the
+                   fly-in speed from the distance (30 frames), so they still land on the same frame */
+                { extern int port_ws_cull; int d = port_ws_cull ? port_ws_cull + 160 : 0; *(int*)(obj + 0x10) += d << 16; *(int*)(obj + 0x30) += d << 16; }
+#endif
             }
             obj[0xC] = i;
             n = p[3] & 0xF;
@@ -289,6 +296,9 @@ void FUN_8005aa74(int event_id, int completed, int duration, int state)
                     *(int*)(obj + 0x30) = D_800804D8[1] << 16;
                     *(int*)(obj + 0x34) = D_800804D8[2] << 16;
                     *(int*)(obj + 0x38) = 0;
+#ifdef PORT2
+                    { extern int port_ws_cull; int d = port_ws_cull ? port_ws_cull + 160 : 0; *(int*)(obj + 0x10) += d << 16; *(int*)(obj + 0x30) += d << 16; }
+#endif
                 }
                 obj[0xC] = i;
                 n = cnt & 0xF;
