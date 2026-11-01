@@ -334,6 +334,7 @@ public class LauncherActivity extends Activity {
         if (flag("hz60", false)) { a.add("--hz"); a.add("60"); }
         if (flag("fps60", false)) a.add("--fps60");
         if (flag("showfps", false)) a.add("--show-fps");
+        if (!flag("intscale", false)) a.add("--fit");   // fill the screen unless whole-number scaling is chosen
         if (flag("inflives", false)) { a.add("--poke-every"); a.add("50:8009C980:63:1"); }
         if (flag("infhealth", false)) { a.add("--poke-every"); a.add("1:8009C970:4:1"); }
         return a.toArray(new String[0]);
@@ -798,6 +799,7 @@ public class LauncherActivity extends Activity {
                     items.add(toggle(R.string.opt_hz60, "hz60"));
                     items.add(toggle(R.string.opt_fps60, "fps60"));
                     items.add(toggle(R.string.opt_showfps, "showfps"));
+                    items.add(toggle(R.string.opt_intscale, "intscale"));
                 } else if (cat == CAT_DUAL) {
                     Item ss = new Item(getString(R.string.opt_secondscreen), null);
                     ss.check = secondScreenOn() ? 1 : 0;

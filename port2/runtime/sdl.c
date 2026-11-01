@@ -398,12 +398,14 @@ static void pump(void) {
    256 lines (square pixels with port_window_square), the largest integer vertical scale that fits, centred;
    a smaller output gets the fit */
 int port_window_fit_wide;        /* the frame being shown is a --widescreen one (320 + 2 * pad wide) */
+int port_window_fill;            /* --fit: fill the screen with a non-integer scale (keeps the aspect) */
 void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
     extern int port_widescreen;
     int lw = port_window_square ? 320 : h * 4 / 3;
     if (port_window_fit_wide) lw = port_window_square ? 320 + 2 * port_widescreen : h * 4 * (320 + 2 * port_widescreen) / (3 * 320);
     int k = W / lw < H / h ? W / lw : H / h;
     float ow, oh;
+    if (port_window_fill) k = 0;
     if (k >= 1) { ow = (float)(lw * k); oh = (float)(h * k); }
     else { float s = (float)W / lw < (float)H / h ? (float)W / lw : (float)H / h; ow = lw * s; oh = h * s; }
     *w = (int)(ow + 0.5f); *hh = (int)(oh + 0.5f); *x = (W - *w) / 2; *y = (H - *hh) / 2;
