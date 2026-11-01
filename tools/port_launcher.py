@@ -1847,6 +1847,7 @@ class App:
             cmd += ["--rumble", str(rumble)]
         if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "thor", "generic"):
             cmd += ["--prompts", s["prompts_style"]]
+        cmd += ["--launcher-exit"]     # QUIT entries in the title and pause menus end the game back to this window
         cmd += M.mod_args(s, app_dir())
         cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))
         return cmd
@@ -1912,6 +1913,12 @@ class App:
             return
         self._starting(False)
         self.say(tr("s.ended", rc, self.log_path), "info")
+        try:                           # the game quit (its QUIT entry, or the window closed): this window comes back
+            self.root.deiconify()
+            self.root.lift()
+            self.root.focus_force()
+        except Exception:
+            pass
         self.play_btn.state(["!disabled"])
         self.stop_btn.pack_forget()
         self.proc = None

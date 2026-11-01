@@ -117,22 +117,24 @@ src/o0ptsub0/titleDrawMenuCarousel.c | m.x = 0x70; | m.x = port_lang == 5 && por
 # ("AJUSTAR Y VER CONTROLES", the options row that shares the index): drawn, then string 5 from its CONTROLES
 src/o0ptsub0/optionsDrawLabel.c | m.b = OPTIONS_FONT; | m.b = OPTIONS_FONT; { extern int port_lang; if (port_lang == 5 && y < 0x30 && (i == 0 || i == 4 || i == 5)) { short *s = (short *)m.a, *e, *t; int w = 0, we = 0; for (t = s; *t != -1; t++) if (*t >= 0 && !OPTIONS_FONT[*t * 5 + 4]) w += (unsigned char)OPTIONS_FONT[*t * 5 + 2]; e = t + 1; if ((long)e & 2) e++; if (i == 5 && y == 0x28 && t - s > 22 && s[13] == 0 && s[14] == 'C' - 32 && e[0] == 'V' - 32) { for (w = 0, t = s + 14; *t != -1; t++) if (*t >= 0) w += (unsigned char)OPTIONS_FONT[*t * 5 + 2]; for (t = e; *t != -1; t++) if (*t >= 0) we += (unsigned char)OPTIONS_FONT[*t * 5 + 2]; m.x = (0x140 - we - w) / 2; m.a = (int)(long)e; titleDrawString(&m, 0, 1, 0); m.x += we; m.a = (int)(long)(s + 14); } else m.x = (0x140 - w) / 2; } }
 src/o0ptsub0/titleDrawMenuCarousel.c | titleDrawCarouselGlyph(*s, (short)ang, 4, *pal++); | { extern int port_lang; titleDrawCarouselGlyph(*s, (short)ang, 4, port_lang == 5 && s[1] == -3 ? pal[-1] : *pal++); }
-# --title-debug (runtime/main.c port_title_debug_list): a 4th carousel entry DEBUG right of OPTIONS (retail stops at the
+# --title-debug / --launcher-exit (runtime/main.c port_title_debug_list): carousel entries DEBUG / QUIT right of OPTIONS (retail stops at the
 # ends, so does this: 0..3).  The language's glyph list gets the word appended; a glyph whose unwrapped angle went past
 # the ring's front half twice (< 0x40 or > 0x1C0, never the case with the three retail angles) is not drawn, so the
 # first entry does not show again next to DEBUG.  OPTIONS gets both arrows, DEBUG the left one, placed on the word's span
-src/o0ptsub0/titleDrawMenuCarousel.c | void titleDrawMenuCarousel(int angle, int sel) | extern int port_title_debug; extern void port_title_debug_list(short **, unsigned char **); void titleDrawMenuCarousel(int angle, int sel)
-src/o0ptsub0/titleDrawMenuCarousel.c | pal = TITLE_MENU_GLYPH_PALETTES; | pal = TITLE_MENU_GLYPH_PALETTES; if (port_title_debug) port_title_debug_list(&s, &pal);
-src/o0ptsub0/titleDrawMenuCarousel.c | while (*s != -3) { | while (*s != -3) { if (port_title_debug && ((short)ang < 0x40 || (short)ang > 0x1C0)) { if (*s) pal++; s++; ang += 4; continue; }
-src/o0ptsub0/titleDrawMenuCarousel.c | if (port_lang == 5) port_es_carousel_span(*s, idx); | if (port_lang == 5 || port_title_debug) port_es_carousel_span(*s, idx);
-src/o0ptsub0/titleDrawMenuCarousel.c | port_lang == 5 && port_es_x1 | (port_lang == 5 || (port_title_debug && sel >= 2)) && port_es_x1
-src/o0ptsub0/titleDrawMenuCarousel.c | switch (sel) { | switch (port_title_debug && sel >= 2 ? sel - 1 : sel) {
+src/o0ptsub0/titleDrawMenuCarousel.c | void titleDrawMenuCarousel(int angle, int sel) | extern int port_title_debug, port_title_extra, port_launcher_exit; extern void port_title_debug_list(short **, unsigned char **); void titleDrawMenuCarousel(int angle, int sel)
+src/o0ptsub0/titleDrawMenuCarousel.c | pal = TITLE_MENU_GLYPH_PALETTES; | pal = TITLE_MENU_GLYPH_PALETTES; if (port_title_debug || port_launcher_exit) port_title_debug_list(&s, &pal);
+src/o0ptsub0/titleDrawMenuCarousel.c | while (*s != -3) { | while (*s != -3) { if (port_title_extra && ((short)ang < 0x40 || (short)ang > 0x1C0)) { if (*s) pal++; s++; ang += 4; continue; }
+src/o0ptsub0/titleDrawMenuCarousel.c | if (port_lang == 5) port_es_carousel_span(*s, idx); | if (port_lang == 5 || port_title_extra) port_es_carousel_span(*s, idx);
+src/o0ptsub0/titleDrawMenuCarousel.c | port_lang == 5 && port_es_x1 | (port_lang == 5 || (port_title_extra && sel >= 2)) && port_es_x1
+src/o0ptsub0/titleDrawMenuCarousel.c | switch (sel) { | switch (port_title_extra && sel >= 2 ? (sel >= 2 + port_title_extra ? 2 : 1) : sel) {
 # loopTitleScreen: right goes on to entry 3 once its angle is known; DEBUG starts a new game with the debug flag set
-src/loopTitleScreen.c | extern unsigned short D_8007DE98[]; | extern unsigned short D_8007DE98[]; extern int port_title_debug; extern unsigned char port_title_angle3; extern void port_title_debug_go(void); extern unsigned char DAT_1f8001b4;
-src/loopTitleScreen.c | D_8007DE98[TASK_C->b69] | (TASK_C->b69 == 3 ? port_title_angle3 : D_8007DE98[TASK_C->b69])
-src/loopTitleScreen.c | TASK_C->b69 < 2) | TASK_C->b69 < 2 + (port_title_debug && port_title_angle3))
-src/loopTitleScreen.c | switch (TASK_C->b69) { | switch (TASK_C->b69 == 3 ? 0 : TASK_C->b69) {
-src/loopTitleScreen.c | TASK_C->b68 = 0; | if (TASK_C->b69 == 3) { DAT_1f8001b4 = 1; port_title_debug_go(); } TASK_C->b68 = 0;
+src/loopTitleScreen.c | extern unsigned short D_8007DE98[]; | extern unsigned short D_8007DE98[]; extern int port_title_debug, port_title_extra; extern unsigned char port_title_angles[]; extern void port_title_debug_go(void); extern int port_title_quit_go(int); extern unsigned char DAT_1f8001b4;
+src/loopTitleScreen.c | D_8007DE98[TASK_C->b69] | (TASK_C->b69 >= 3 ? port_title_angles[TASK_C->b69 - 3] : D_8007DE98[TASK_C->b69])
+src/loopTitleScreen.c | TASK_C->b69 < 2) | TASK_C->b69 < 2 + (port_title_angles[0] ? port_title_extra : 0))
+src/loopTitleScreen.c | switch (TASK_C->b69) { | switch (TASK_C->b69 >= 3 ? 0 : TASK_C->b69) {
+src/loopTitleScreen.c | TASK_C->b68 = 0; | if (TASK_C->b69 >= 3) { DAT_1f8001b4 = 1; port_title_debug_go(); } TASK_C->b68 = 0;
+# --launcher-exit: Cross / Start on the QUIT entry ends the game (runtime/main.c port_title_quit_go, runtime/launcher_exit.c)
+src/loopTitleScreen.c | if (JOYPAD_STATE & 0x4008) { | if ((JOYPAD_STATE & 0x4008) && port_title_quit_go(TASK_C->b69)) { } else if (JOYPAD_STATE & 0x4008) {
 # debug area select: place names (English, or Spanish with --lang 5) under the numbers; runtime/main.c port_debug_select_names
 src/displayDebugScreen.c | sprintf(&SPRINTF_BUFFER_MSG, "*"); | { extern void port_debug_select_names(int, int); port_debug_select_names(GAME.selectedArea, GAME.selectedSection); } sprintf(&SPRINTF_BUFFER_MSG, "*");
 # drawPauseMenu: its entry lists and glyph UV table (MAIN0 0x80080300..0x800803fc) changed size in MAINn (lang.c finds them through the code)
@@ -156,6 +158,19 @@ src/drawPauseMenu.c |         w = pt->w; |         w = pt->w; if (port_es_dl || 
 # (0x0E) mirrored (u reversed).  Without such a patch MAIN5 has no code >= 0x20 and nothing changes
 src/drawPauseMenu.c | extern char D_80012948[]; | extern char D_80012948[]; static void port_es_quad(int x0, int y0, int x1, int y1, int u0, int v0, int u1, int v1, unsigned short clut, int tp) { extern void AddPrim(void *, void *); FT4 *p = (FT4 *)NEXT_PRIM; ((unsigned char *)p)[3] = 9; p->code = 0x2d; p->r0 = p->g0 = p->b0 = 0x80; p->x0 = p->x2 = x0; p->x1 = p->x3 = x1; p->y0 = p->y1 = y0; p->y2 = p->y3 = y1; p->u0 = u0; p->v0 = v0; p->clut = clut; p->uv1 = (u1 & 0xff) + ((v0 & 0xff) << 8) + (tp << 16); p->uv2 = (u0 & 0xff) + ((v1 & 0xff) << 8); p->uv3 = (u1 & 0xff) + ((v1 & 0xff) << 8); AddPrim((void *)(CURRENT_OT + 4), p); NEXT_PRIM = NEXT_PRIM + 0x28; } static void port_es_glyph(int c, int x, int y) { extern void *port_lang_item(void *); extern unsigned short GetClut(int, int); extern int GetGraphType(void); UV *t = (UV *)port_lang_item(D_80080300); unsigned short clut = GetClut(0x160, 0x1e3); int tp = (GetGraphType() == 1 || GetGraphType() == 2) ? 0x24 : 0x14; if (c == 0x20) { int u = t[0x0c].u, v = t[0x0c].v; port_es_quad(x, y + 3, x + 8, y + 8, u, v + 13, u + 8, v + 8, clut, tp); port_es_quad(x, y + 8, x + 8, y + 16, u, v + 8, u + 8, v + 16, clut, tp); } else if (c == 0x21) { int u = t[0x0e].u, v = t[0x0e].v; port_es_quad(x, y, x + 8, y + 16, u + 7, v, u - 1, v + 16, clut, tp); } }
 src/drawPauseMenu.c | if (c) { | if (c >= 0x20 && port_lang == 5) port_es_glyph(c, x, y); else if (c) {
+# --launcher-exit (runtime/launcher_exit.c): a 4th Start menu entry STOP / CERRAR under LOAD (English and Spanish strips),
+# its Yes / No box as pause state 1F8003CD = 4 (the quit box's Yes / No line with our question), the frame 16 px taller
+src/drawPauseMenu.c | void drawPauseMenu(void) | extern int port_lx_dy; extern void *port_lx_pause_list(void *), *port_lx_confirm_list(void *); extern void port_lx_frame(const void *, int, int), port_lx_vmap(short *, short *, short *, short *); void drawPauseMenu(void)
+src/drawPauseMenu.c | switch (DAT_1f8003cd) { | port_lx_dy = 0; switch (DAT_1f8003cd) { case 4: e = (ENT *)port_lx_confirm_list(port_lang_item(D_8008039c)); mode = 2; break;
+src/drawPauseMenu.c | e = (ENT *)port_lang_item(D_8008037c); | e = (ENT *)port_lx_pause_list(port_lang_item(D_8008037c));
+src/drawPauseMenu.c | n = h[0]; | n = h[0]; if (port_lx_dy) port_lx_frame(DAT_1f8002d8 + h[1], n, D_80080404[mode].y);
+src/drawPauseMenu.c | p->y3 = p->y2; | p->y3 = p->y2; if (port_lx_dy) port_lx_vmap(&p->y0, &p->y1, &p->y2, &p->y3);
+src/updatePauseMenu.c | void updatePauseMenu(void) { | extern int port_lx_on(void); extern void port_launcher_quit(void); void updatePauseMenu(void) {
+src/updatePauseMenu.c | if (val < 2) { | if (val < 2 + (port_lx_on() && *(u8*)0x1F8003CD == 1)) {
+src/updatePauseMenu.c | if (pad & 0x4008) { | if ((pad & 0x4008) && GAME_INVENTORY_SCREEN == 3 && port_lx_on()) { func_80020058(10, 10); *(&SCRATCHPAD + 0x3CD) = 4; GAME_INVENTORY_SCREEN = 1; return; } if (pad & 0x4008) {
+src/updatePauseMenu.c | switch (*(u8*)0x1F8003CD) { | switch (*(u8*)0x1F8003CD == 4 ? 3 : *(u8*)0x1F8003CD) {
+src/updatePauseMenu.c | if (c10b == 0) { | if (c10b == 0) { if (*(u8*)0x1F8003CD == 4) { port_launcher_quit(); return; }
+src/updatePauseMenu.c | GAME_INVENTORY_SCREEN = 2; | GAME_INVENTORY_SCREEN = *(u8*)0x1F8003CD == 4 ? 3 : 2;
 #
 # weaponOnHitGetResult(o, p, r) returns its third argument r for weapon types it does not handle (2, 3, > 10: in
 # practice cat-3 type 3, AREA04's thrown breakable, updateThrownBreakable sets ba5). The C passes (o, p); the R3000

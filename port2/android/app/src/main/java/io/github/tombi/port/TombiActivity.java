@@ -81,6 +81,7 @@ public class TombiActivity extends SDLActivity {
             boolean labels = "thor".equals(style) || "nintendo".equals(style);
             out.add("--prompt-map"); out.add(promptMap(pm, labels));
         }
+        out.add("--launcher-exit");   // the pause menu / title QUIT entries: back here (quitToLauncher)
         return out.toArray(new String[0]);
     }
     private boolean dualshock() {
@@ -262,7 +263,46 @@ public class TombiActivity extends SDLActivity {
             pad.key(code, e.getAction() == KeyEvent.ACTION_DOWN);
             if (padSend()) return true;
         }
+        // Back (key or gesture, not a controller button: those are the pad's Select) asks before leaving the game
+        if (code == KeyEvent.KEYCODE_BACK && !PadMap.fromController(e.getDevice(), e.getSource())) {
+            if (e.getAction() == KeyEvent.ACTION_UP && !e.isCanceled()) confirmQuit();
+            return true;
+        }
         return super.dispatchKeyEvent(e);
+    }
+    @Override
+    public void onBackPressed() { confirmQuit(); }
+
+    // ---- back to the launcher (--launcher-exit: runtime/launcher_exit.c; Back) ----
+    private android.app.AlertDialog quitDialog;
+    private boolean spanish() {
+        String[] a = getIntent() != null ? getIntent().getStringArrayExtra(EXTRA_ARGS) : null;
+        if (a != null) for (int i = 0; i + 1 < a.length; i++) if ("--lang".equals(a[i])) return "5".equals(a[i + 1]);
+        return java.util.Locale.getDefault().getLanguage().equals("es");
+    }
+    void confirmQuit() {
+        if (isFinishing() || (quitDialog != null && quitDialog.isShowing())) return;
+        boolean es = spanish();
+        quitDialog = new android.app.AlertDialog.Builder(this)
+                .setMessage(es ? "\u00bfVolver al launcher? (no se guarda la partida)" : "Return to the launcher? (the game is not saved)")
+                .setPositiveButton(es ? "S\u00ed" : "Yes", new android.content.DialogInterface.OnClickListener() {
+                    public void onClick(android.content.DialogInterface d, int w) { quitGame("Back"); } })
+                .setNegativeButton(es ? "No" : "No", null)
+                .create();
+        quitDialog.show();
+    }
+    /* the game finishes: onDestroy sends SDL_QUIT, the game ends the :game process with status 0 (port_quit) and
+       LauncherActivity, under this one in the task, shows again */
+    void quitGame(String why) {
+        if (isFinishing()) return;
+        CrashLog.append(getApplicationContext(), "back to the launcher (" + why + ")");
+        finish();
+    }
+    /* called by libtombi.so (runtime/launcher_exit.c) from the game thread: the pause menu / title QUIT entry */
+    static void quitToLauncher() {
+        final TombiActivity a = self;
+        if (a == null) return;
+        a.ui.post(new Runnable() { public void run() { a.quitGame("game menu"); } });
     }
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent e) {

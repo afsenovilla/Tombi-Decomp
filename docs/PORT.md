@@ -1140,6 +1140,24 @@ motor = 160 at 100 %), whose device vibrator uses `VibrationEffect.createOneShot
 before). The Android launcher steps 0/25/50/75/100/125/150/200 % ("Apagada"/"N %") and buzzes once at the new strength;
 the PC launcher has the same choices in a combobox.
 
+**Back to the launcher (`--launcher-exit`, passed by both launchers; `runtime/launcher_exit.c`).** The retail
+"EXIT GAME" / "SALIR" only goes back to the title. With the flag the Start pause menu gets a 4th entry under LOAD /
+CARGAR, "STOP" (English) / "CERRAR" (`--lang 5`), with the game's own Yes / No box, "STOP GAME?" / "¿Cerrar el juego?"
+(pause state `1F8003CD` = 4, a port-only value beside the retail 2 = quit and 3 = load; `port/fixes.txt` rules on
+`updatePauseMenu` / `drawPauseMenu`). The words are glyph strings of the language's pause menu strip, so the game draws
+them in its own font; the strip only holds the letters the language's menus use (no H for "LAUNCHER", no Q or C in
+the English one), hence STOP / CERRAR. The menu frame, a fixed three-entry picture of 8x8 tiles, grows 16 px down
+(border tiles moved, interior tiles stretched). Languages other than English and Spanish keep the retail three entries
+(their strips are not mapped). The title carousel gets "QUIT" / "CERRAR" right of OPTIONS / OPCIONES (all languages:
+the title font has A-Z; after DEBUG when `--title-debug` is on too), chosen at once without a question. Choosing it
+saves nothing: on the PC the game exits with status 0 and `tools/port_launcher.py`, which waits for the process,
+re-enables Play and raises its window; on Android `TombiActivity.quitToLauncher()` (JNI, from the game thread) finishes
+the activity, whose `onDestroy` clears the "running" marker and sends SDL_QUIT, which the game's event pump turns into
+`port_quit(0)`: the `:game` process ends (it cannot run the game twice) and LauncherActivity, under it in the task,
+shows again; Play starts a fresh `:game` process. Android Back (key or gesture; not a controller's Back, which is the
+pad's Select) opens a "¿Volver al launcher?" / "Return to the launcher?" dialog (Yes: the same finish) instead of
+SDL's default of closing the activity without asking.
+
 Checked on Linux: the pokes of a new game (AP 5000, 9 lives, both `--poke-every`, the 130 event bytes) run 400 vblanks
 without a fault; a 1500-frame run with the title's Start stalls at vblank ~443 in this checkout (`sleepTask` loop after
 the SYSTEM overlay read at lba 176314) with and without the mods, and also with the port as committed before this work,
