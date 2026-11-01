@@ -33,6 +33,7 @@ void port_window_keys(const char *spec) { (void)spec; }
 void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) { *x = *y = 0; *w = W; *hh = H; (void)h; }
 void port_window_frame(const unsigned char *rgb, int w, int h) { (void)rgb; (void)w; (void)h; }
 int port_window_poll_pad(unsigned short *out) { (void)out; return 0; }
+void port_window_rumble(int small, int big) { (void)small; (void)big; }
 int port_window_refresh(void) { return 0; }
 /* gpu_gl.c: a backend whose start() fails, so gpu.c keeps the software rasteriser */
 static int gl_none(void) { return -1; }

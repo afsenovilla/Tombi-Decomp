@@ -36,6 +36,7 @@ static SDL_GameController *ctrl;
 static unsigned short keys_down, ctrl_down, seen_since;
 #ifdef __ANDROID__
 static volatile unsigned short java_down, java_seen;   /* TombiActivity.nativePadState */
+static int java_pad;                                    /* its natives are registered: Java reads the controller */
 static void android_pad_register(void);
 #endif
 static void ctrl_opened(void);
@@ -242,18 +243,90 @@ static unsigned short ctrl_state(void) {
     }
     return m;
 }
+/* button prompts (shims/prompts.c): which physical button gives each PS1 face button with the bindings, and with
+   --prompts auto the look of the controller (SDL's type); no controller: the game's own PlayStation glyphs */
+extern int port_prompt_option, port_prompt_style, port_prompt_src[4], port_prompt_map_fixed;
+static void prompts_update(void) {
+    static const unsigned short face[4] = { P_CROSS, P_CIRCLE, P_SQUARE, P_TRI };
+    if (!port_prompt_map_fixed)
+        for (int f = 0; f < 4; f++) {
+            int src = 8;                                       /* none */
+            for (int k = 0; k < ncbind && src == 8; k++) {
+                const CtrlBind *b = &cbind[k];
+                if (b->bit != face[f]) continue;
+                if (b->kind == CB_BUTTON) switch (b->idx) {
+                    case SDL_CONTROLLER_BUTTON_A: src = 0; break; case SDL_CONTROLLER_BUTTON_B: src = 1; break;
+                    case SDL_CONTROLLER_BUTTON_X: src = 2; break; case SDL_CONTROLLER_BUTTON_Y: src = 3; break;
+                    case SDL_CONTROLLER_BUTTON_LEFTSHOULDER: src = 4; break; case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: src = 5; break;
+                }
+                else if (b->kind == CB_AXIS && b->idx == SDL_CONTROLLER_AXIS_TRIGGERLEFT) src = 6;
+                else if (b->kind == CB_AXIS && b->idx == SDL_CONTROLLER_AXIS_TRIGGERRIGHT) src = 7;
+            }
+            port_prompt_src[f] = src;
+        }
+    if (port_prompt_option == -1) {
+        int st = 0;
+        if (ctrl) switch (SDL_GameControllerGetType(ctrl)) {
+            case SDL_CONTROLLER_TYPE_PS3: case SDL_CONTROLLER_TYPE_PS4: case SDL_CONTROLLER_TYPE_PS5: st = 0; break;
+            case SDL_CONTROLLER_TYPE_XBOX360: case SDL_CONTROLLER_TYPE_XBOXONE: case SDL_CONTROLLER_TYPE_AMAZON_LUNA:
+            case SDL_CONTROLLER_TYPE_GOOGLE_STADIA: case SDL_CONTROLLER_TYPE_NVIDIA_SHIELD: st = 1; break;
+            case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO: case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT:
+            case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT: case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR: st = 2; break;
+            default: st = 3; break;                            /* virtual / unknown: the generic position diamond */
+        }
+        port_prompt_style = st;
+    }
+    if (ctrl || port_prompt_option != -1)
+        port_printf("[port2] button prompts: %s (cross %d circle %d square %d triangle %d)\n",
+                    (const char *[]){ "playstation", "xbox", "nintendo", "generic" }[port_prompt_style & 3],
+                    port_prompt_src[0], port_prompt_src[1], port_prompt_src[2], port_prompt_src[3]);
+}
 static void ctrl_opened(void) {
     SDL_Joystick *j = SDL_GameControllerGetJoystick(ctrl);
     char *map = SDL_GameControllerMapping(ctrl);
     cbind_apply_map();
+    prompts_update();
     port_printf("[port2] controller: %s (%d buttons, %d axes, %d hats; mapping %s)\n", SDL_GameControllerName(ctrl),
                 j ? SDL_JoystickNumButtons(j) : -1, j ? SDL_JoystickNumAxes(j) : -1, j ? SDL_JoystickNumHats(j) : -1, map ? map : "none");
     SDL_free(map);
+}
+/* --dualshock: the left stick for the pad's analog bytes (shims/pad.c): a 15 % dead zone, full deflection from 90 %
+   (a real stick seldom reaches the ends, where the game reads the d-pad bits) */
+extern int port_dualshock, port_pad_lx, port_pad_ly;
+static int stick_byte(int v) {
+    float f = v / 32767.0f, a = f < 0 ? -f : f;
+    if (a < 0.15f) return 0x80;
+    a = (a - 0.15f) / 0.75f; if (a > 1) a = 1;
+    int r = (int)(a * 127.5f + 0.5f);
+    return f < 0 ? (0x80 - r < 0 ? 0 : 0x80 - r) : (0x7F + r > 0xFF ? 0xFF : 0x7F + r);
 }
 static void ctrl_update(void) {
     unsigned short m = ctrl_state();
     seen_since |= m & ~ctrl_down;
     ctrl_down = m;
+    if (port_dualshock && ctrl) {
+        port_pad_lx = stick_byte(SDL_GameControllerGetAxis(ctrl, SDL_CONTROLLER_AXIS_LEFTX));
+        port_pad_ly = stick_byte(SDL_GameControllerGetAxis(ctrl, SDL_CONTROLLER_AXIS_LEFTY));
+    }
+}
+/* the game's vibration (shims/pad.c, --dualshock): small motor on / off, big motor 0..255 */
+#ifdef __ANDROID__
+static void android_rumble(int small, int big);
+#endif
+typedef struct { int small, big; } RumbleArgs;
+static void rumble_h(void *a) {
+    RumbleArgs *r = (RumbleArgs *)a;
+#ifdef __ANDROID__
+    if (java_pad) { android_rumble(r->small, r->big); return; }
+#endif
+    if (!ctrl) return;
+    /* low frequency = the big motor, high frequency = the small one; refreshed by every change the game makes,
+       capped at 2 s in case a stop never comes */
+    SDL_GameControllerRumble(ctrl, (Uint16)(r->big * 257), r->small ? 0xFFFF : 0, r->small || r->big ? 2000 : 0);
+}
+void port_window_rumble(int small, int big) {
+    if (!win) return;
+    RumbleArgs a = { small, big }; port_host_call(rumble_h, &a);
 }
 
 static void pump_h(void *u) { (void)u; pump(); }
@@ -299,7 +372,7 @@ static void pump(void) {
             ctrl_update(); break;
         case SDL_CONTROLLERDEVICEADDED: if (!ctrl && (ctrl = SDL_GameControllerOpen(e.cdevice.which))) ctrl_opened(); break;
         case SDL_CONTROLLERDEVICEREMOVED:
-            if (ctrl && e.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(ctrl))) { SDL_GameControllerClose(ctrl); ctrl = NULL; ctrl_down = 0; }
+            if (ctrl && e.cdevice.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(ctrl))) { SDL_GameControllerClose(ctrl); ctrl = NULL; ctrl_down = 0; port_pad_lx = port_pad_ly = 0x80; prompts_update(); }
             break;
         }
     }
@@ -404,6 +477,11 @@ static void JNICALL n_pad_state(JNIEnv *env, jclass c, jint buttons) {
     java_seen |= m & ~java_down;
     java_down = m;
 }
+/* TombiActivity.nativePadStick(lx, ly) (--dualshock): the left stick as the pad's analog bytes, 0..255 */
+static void JNICALL n_pad_stick(JNIEnv *env, jclass c, jint lx, jint ly) {
+    (void)env; (void)c;
+    port_pad_lx = lx < 0 ? 0 : lx > 255 ? 255 : lx; port_pad_ly = ly < 0 ? 0 : ly > 255 ? 255 : ly;
+}
 static void android_pad_register_h(void *u) {
     (void)u;
     JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv(); jobject act = (jobject)SDL_AndroidGetActivity();
@@ -411,7 +489,19 @@ static void android_pad_register_h(void *u) {
     jclass cls = (*env)->GetObjectClass(env, act);
     JNINativeMethod m[] = { { "nativePadState", "(I)V", (void *)n_pad_state } };
     if ((*env)->RegisterNatives(env, cls, m, 1) != 0) { (*env)->ExceptionClear(env); port_printf("[port2] nativePadState: RegisterNatives failed (SDL reads the controller)\n"); }
-    else port_printf("[port2] nativePadState ready (TombiActivity maps the controller)\n");
+    else { java_pad = 1; port_printf("[port2] nativePadState ready (TombiActivity maps the controller)\n"); }
+    {   JNINativeMethod m2[] = { { "nativePadStick", "(II)V", (void *)n_pad_stick } };   /* (an older APK has no such method) */
+        if ((*env)->RegisterNatives(env, cls, m2, 1) != 0) (*env)->ExceptionClear(env); }
+    (*env)->DeleteLocalRef(env, cls); (*env)->DeleteLocalRef(env, act);
+}
+/* TombiActivity.rumble(small, big): the controller's vibrator, or the device's (handhelds) */
+static void android_rumble(int small, int big) {
+    JNIEnv *env = (JNIEnv *)SDL_AndroidGetJNIEnv(); jobject act = (jobject)SDL_AndroidGetActivity();
+    if (!env || !act) return;
+    jclass cls = (*env)->GetObjectClass(env, act);
+    jmethodID mid = (*env)->GetStaticMethodID(env, cls, "rumble", "(II)V");
+    if (mid) (*env)->CallStaticVoidMethod(env, cls, mid, (jint)small, (jint)big);
+    if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
     (*env)->DeleteLocalRef(env, cls); (*env)->DeleteLocalRef(env, act);
 }
 static void android_pad_register(void) { port_host_call(android_pad_register_h, 0); }

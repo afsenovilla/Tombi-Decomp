@@ -961,6 +961,15 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--poke") && v) port_poke_add(argv[++i]);
         else if (!strcmp(a, "--poke-every") && v) port_poke_add_every(argv[++i], 1);
         else if (!strcmp(a, "--menu") && v) port_menu_add(argv[++i]);
+        else if (!strcmp(a, "--prompts") && v) {   /* shims/prompts.c */
+            extern int port_prompt_option, port_prompt_style, port_prompt_parse_style(const char *);
+            int st = port_prompt_parse_style(argv[++i]);
+            if (st < -1) port_printf("[port] --prompts: unknown style '%s' (auto playstation xbox nintendo generic)\n", argv[i]);
+            else { port_prompt_option = st; if (st >= 0) port_prompt_style = st; }
+        }
+        else if (!strcmp(a, "--prompt-map") && v) { extern void port_prompt_map(const char *); port_prompt_map(argv[++i]); }
+        else if (!strcmp(a, "--dualshock")) { extern int port_dualshock; port_dualshock = 1; }   /* shims/pad.c */
+        else if (!strcmp(a, "--test-message") && v) { extern void port_test_message_add(const char *); port_test_message_add(argv[++i]); }
         else if (!strcmp(a, "--test-item") && v) { extern void port_test_item_add(const char *); port_test_item_add(argv[++i]); }
         else if (!strcmp(a, "--title") && v) port_title_add(argv[++i]);
         else if (!strcmp(a, "--movie") && v) { extern void port_movie_add(const char *); port_movie_add(argv[++i]); }

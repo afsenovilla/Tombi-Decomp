@@ -54,10 +54,94 @@ public class TombiActivity extends SDLActivity {
         @Override public void onDisplayChanged(int id) { }
     };
 
+    /* registered by libtombi.so (runtime/sdl.c, --dualshock): the left stick as the pad's analog bytes, 0..255 */
+    static native void nativePadStick(int lx, int ly);
+
     @Override
     protected String[] getArguments() {
         String[] a = getIntent() != null ? getIntent().getStringArrayExtra(EXTRA_ARGS) : null;
-        return a != null ? a : new String[0];
+        if (a == null) return new String[0];
+        // --prompts auto: the style from the controller's name; and --prompt-map: the physical button of each PS1
+        // face button with the player's mapping (shims/prompts.c)
+        java.util.ArrayList<String> out = new java.util.ArrayList<>();
+        boolean prompts = false;
+        for (int i = 0; i < a.length; i++) {
+            if ("--prompts".equals(a[i]) && i + 1 < a.length) {
+                prompts = true;
+                out.add(a[i]); out.add("auto".equals(a[i + 1]) ? autoPromptStyle() : a[i + 1]); i++;
+            } else out.add(a[i]);
+        }
+        if (prompts) {
+            PadMap pm = pad != null ? pad : new PadMap(getIntent().getStringExtra(EXTRA_PADMAP));
+            out.add("--prompt-map"); out.add(promptMap(pm));
+        }
+        return out.toArray(new String[0]);
+    }
+    private boolean dualshock() {
+        String[] a = getIntent() != null ? getIntent().getStringArrayExtra(EXTRA_ARGS) : null;
+        if (a != null) for (String s : a) if ("--dualshock".equals(s)) return true;
+        return false;
+    }
+    /* the style for the controller in use: its name (Xbox / PlayStation / Nintendo pads; the AYN Thor's "Odin
+       Controller" and the Retroid handhelds label their buttons A B X Y as Android's key codes: Nintendo look) */
+    static String autoPromptStyle() {
+        try {
+            for (int id : InputDevice.getDeviceIds()) {
+                InputDevice d = InputDevice.getDevice(id);
+                if (d == null || d.isVirtual() || (d.getSources() & InputDevice.SOURCE_GAMEPAD) != InputDevice.SOURCE_GAMEPAD) continue;
+                String n = d.getName() == null ? "" : d.getName().toLowerCase(java.util.Locale.ROOT);
+                if (n.contains("xbox") || n.contains("x-box")) return "xbox";
+                if (n.contains("dualsense") || n.contains("dualshock") || n.contains("playstation") || n.contains("wireless controller")
+                        || n.contains("ps4") || n.contains("ps5") || n.contains("ps3")) return "playstation";
+                if (n.contains("nintendo") || n.contains("pro controller") || n.contains("joy-con") || n.contains("odin")
+                        || n.contains("ayn") || n.contains("thor") || n.contains("retroid")) return "nintendo";
+                return "generic";
+            }
+        } catch (Throwable ignored) { }
+        return "playstation";   // no controller (touch): the game's own glyphs
+    }
+    static String promptMap(PadMap pm) {
+        String[] ps = {"cross", "circle", "square", "triangle"};
+        StringBuilder b = new StringBuilder();
+        for (String p : ps) {
+            String src = "none";
+            for (String s : pm.src[PadMap.index(p)]) { String v = promptSrc(s); if (v != null) { src = v; break; } }
+            if (b.length() > 0) b.append(',');
+            b.append(p).append('=').append(src);
+        }
+        return b.toString();
+    }
+    static String promptSrc(String s) {
+        if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_A)) return "a";
+        if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_B)) return "b";
+        if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_X)) return "x";
+        if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_Y)) return "y";
+        if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_L1)) return "l1";
+        if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_R1)) return "r1";
+        if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_L2) || s.startsWith("a" + MotionEvent.AXIS_LTRIGGER)) return "l2";
+        if (s.equals("k" + KeyEvent.KEYCODE_BUTTON_R2) || s.startsWith("a" + MotionEvent.AXIS_RTRIGGER)) return "r2";
+        return null;
+    }
+
+    // ---- vibration (--dualshock: the game's PadSetAct, runtime/sdl.c calls rumble) ----
+    private static TombiActivity self;
+    private static InputDevice lastPad;
+    /* small motor on / off, big motor 0..255; 0, 0 stops.  The controller's vibrator, else the device's own */
+    static void rumble(int small, int big) {
+        try {
+            TombiActivity a = self;
+            if (a == null) return;
+            android.os.Vibrator v = null;
+            InputDevice d = lastPad;
+            if (d != null) { android.os.Vibrator dv = d.getVibrator(); if (dv != null && dv.hasVibrator()) v = dv; }
+            if (v == null) v = (android.os.Vibrator) a.getSystemService(Context.VIBRATOR_SERVICE);
+            if (v == null || !v.hasVibrator()) return;
+            int amp = Math.max(big, small != 0 ? 160 : 0);
+            if (amp == 0) { v.cancel(); return; }
+            if (android.os.Build.VERSION.SDK_INT >= 26)
+                v.vibrate(android.os.VibrationEffect.createOneShot(2000, Math.max(1, Math.min(255, amp))));
+            else v.vibrate(2000);
+        } catch (Throwable ignored) { }
     }
 
     private boolean panelWanted() {
@@ -98,8 +182,10 @@ public class TombiActivity extends SDLActivity {
             }
         });
         startUiWatchdog(app);
+        self = this;
         try {
             pad = new PadMap(getIntent() != null ? getIntent().getStringExtra(EXTRA_PADMAP) : null);
+            if (dualshock()) pad.dropStickDpad();   // the stick goes to the game as analog (nativePadStick), not as d-pad
             CrashLog.append(app, "button mapping: " + (pad.save().isEmpty() ? "defaults" : pad.save()));
         } catch (Throwable t) { pad = null; CrashLog.append(app, "button mapping failed, SDL reads the controller: " + CrashLog.stack(t)); }
         logControllers(app);
@@ -166,6 +252,11 @@ public class TombiActivity extends SDLActivity {
     public boolean dispatchGenericMotionEvent(MotionEvent e) {
         if (pad != null && e.getActionMasked() == MotionEvent.ACTION_MOVE && (e.getSource() & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
             pad.motion(e);
+            lastPad = e.getDevice();
+            if (dualshock()) {
+                try { nativePadStick(stickByte(e.getAxisValue(MotionEvent.AXIS_X)), stickByte(e.getAxisValue(MotionEvent.AXIS_Y))); }
+                catch (UnsatisfiedLinkError ignored) { }
+            }
             for (int a : new int[]{MotionEvent.AXIS_LTRIGGER, MotionEvent.AXIS_RTRIGGER, MotionEvent.AXIS_BRAKE, MotionEvent.AXIS_GAS,
                     MotionEvent.AXIS_HAT_X, MotionEvent.AXIS_HAT_Y, MotionEvent.AXIS_Z, MotionEvent.AXIS_RZ}) {
                 float v = e.getAxisValue(a);
@@ -174,6 +265,15 @@ public class TombiActivity extends SDLActivity {
             if (padSend()) return true;
         }
         return super.dispatchGenericMotionEvent(e);
+    }
+
+    /* a 15 % dead zone, full deflection from 90 % (as runtime/sdl.c on the PC) */
+    static int stickByte(float f) {
+        float a = Math.abs(f);
+        if (a < 0.15f) return 0x80;
+        a = Math.min(1f, (a - 0.15f) / 0.75f);
+        int r = (int) (a * 127.5f + 0.5f);
+        return f < 0 ? Math.max(0, 0x80 - r) : Math.min(0xFF, 0x7F + r);
     }
 
     /* "se cuelga y se cierra": the UI thread blocked (an ANR) leaves its stack in the log every 5 s (at most 4 times) */

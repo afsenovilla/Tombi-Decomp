@@ -60,6 +60,16 @@ final class PadMap {
         }
     }
 
+    /** --dualshock: the left stick (AXIS_X / AXIS_Y) no longer presses the d-pad; it goes to the game as analog */
+    void dropStickDpad() {
+        for (String n : new String[]{"up", "down", "left", "right"}) {
+            int t = index(n);
+            List<String> keep = new ArrayList<>();
+            for (String s : src[t]) if (!s.matches("a(" + MotionEvent.AXIS_X + "|" + MotionEvent.AXIS_Y + ")[+-]")) keep.add(s);
+            src[t] = keep.toArray(new String[0]);
+        }
+    }
+
     static int index(String name) { for (int t = 0; t < NAMES.length; t++) if (NAMES[t].equals(name)) return t; return -1; }
 
     /** the saved form: only the targets that differ from their defaults */

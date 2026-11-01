@@ -264,7 +264,18 @@ void port_test_item_add(const char *s) {
     while (*s >= '0' && *s <= '9') item_id = item_id * 10 + *s++ - '0';
     if (*s++ == ':') while (*s >= '0' && *s <= '9') item_b = item_b * 10 + *s++ - '0';
 }
-void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; title_frame = 0; movie_frame = 0; item_frame = 0; }
+/* --test-message FRAME:K:L (debug): the message box showMessageBox(K, L) at that vblank (screenshots of the
+   button prompts, docs/PORT.md "Button prompts") */
+static int msg_frame, msg_k, msg_l;
+void port_test_message_add(const char *s) {
+    int f = 0;
+    while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
+    if (*s++ != ':') return;
+    msg_frame = f; msg_k = 0; msg_l = 0;
+    while (*s >= '0' && *s <= '9') msg_k = msg_k * 10 + *s++ - '0';
+    if (*s++ == ':') while (*s >= '0' && *s <= '9') msg_l = msg_l * 10 + *s++ - '0';
+}
+void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; title_frame = 0; movie_frame = 0; item_frame = 0; msg_frame = 0; }
 void port_vblank(void) {
     if (port_stall_frame && port_frame + 1 == port_stall_frame) port_sleep_us((unsigned long long)port_stall_ms * 1000);
     if (port_realtime) {
@@ -328,6 +339,7 @@ void port_vblank(void) {
     if (menu_frame && port_frame == menu_frame) menu_open();
     if (item_frame && port_frame == item_frame) { extern void *printInfoMessage(int, int); printInfoMessage(item_id, item_b); port_printf("[port] frame %d: item popup %d/%d\n", port_frame, item_id, item_b); }
     if (title_frame && port_frame == title_frame) title_due = 1;
+    if (msg_frame && port_frame == msg_frame) { extern void *showMessageBox(short, short, int, int); showMessageBox(msg_k, msg_l, 0xa0, 0x8c); port_printf("[port] frame %d: message box %d/%d\n", port_frame, msg_k, msg_l); }
     if (movie_frame && port_frame == movie_frame) {
         extern void FUN_800171b8(int, void *), FUN_8001f4bc(void), moviePlayerTask(void);
         SPAD8(0x1C6) = 2; FUN_8001f4bc(); SPAD8(0x1CC) = 1; SPAD8(0x1CD) = (unsigned char)movie_id;

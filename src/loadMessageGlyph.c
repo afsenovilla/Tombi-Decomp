@@ -175,6 +175,12 @@ short loadMessageGlyph(int p, int id, int bank)
     n = w * h;
     a = *src++;
     b = *src++;
+#ifdef PORT2
+    {   /* controller-specific button prompts (port2/shims/prompts.c): the PS1 button glyphs drawn for the pad in use */
+        extern const u16 *port_prompt_glyph(const u16 *, int, int);
+        src = (u16 *)port_prompt_glyph(src, w, h);
+    }
+#endif
     GLYPH_CACHE[(short)freeSlot].id = key;
     GLYPH_CACHE[(short)freeSlot].b8 = 0;
     GLYPH_CACHE[(short)freeSlot].b6 = a;

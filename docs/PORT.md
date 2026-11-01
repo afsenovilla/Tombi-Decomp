@@ -1053,6 +1053,33 @@ source: either patch the WFM3 entries of the button glyphs in RAM after the font
 payload in `gpu.c` against the original glyph bitmaps and substitute ours. Both need the WFM3 ids of the button
 glyphs (the message strings embed them as glyph codes), which are not identified yet.
 
+**Controller-specific button prompts (port2, native; supersedes the TBTX route above for the message boxes).**
+`port2/shims/prompts.c`: the four face-button glyphs ✕ ○ □ △ are the same 12 x 16 4 bpp bitmaps in all 369 WFM3 banks
+(every language), so `loadMessageGlyph` (PORT2 block) hands each glyph to `port_prompt_glyph`, which recognises them by
+the FNV-1a of their pixels and returns one drawn by code with the font CLUT's own indices (0 transparent, 1..5 ink,
+6 dark disc, 7 blue, 8 green, 9 pink, 10 red, 11..13 khaki rim, 14/15 cream; no yellow, so the Xbox Y is khaki).
+No game pixels are shipped. What is drawn is the *physical* button that gives that PS1 button with the current
+mapping: `runtime/sdl.c` derives it from the controller bindings (`--pad-map` included), Android passes
+`--prompt-map cross=a,...` from PadMap. Styles (`--prompts auto|playstation|xbox|nintendo|generic`): PlayStation
+shapes, Xbox coloured A/B/X/Y, Nintendo cream letters, generic = a diamond with the button's position lit. Auto: SDL's
+controller type on the PC (PS3/4/5 -> PlayStation, Xbox/Luna/Stadia/Shield -> Xbox, Switch Pro/Joy-Con -> Nintendo,
+other -> generic, no controller -> PlayStation); on Android the controller name (Xbox, DualShock/DualSense, Nintendo,
+AYN "Odin Controller"/Thor and Retroid -> Nintendo letters = Android's key-code names, i.e. A = Cross by default).
+PlayStation with the default mapping returns the game's own glyph: frames byte-identical. The letters follow SDL's
+names (with SDL's default label mapping a Switch pad's SDL "A" is its labelled A). Only the face buttons are glyphs;
+L1/R1/START/SELECT and the d-pad arrows in the texts are words / arrows and stay. Debug: `--test-message FRAME:K:L`
+opens `showMessageBox(K, L)` (AREA00: 4:4 / 4:5 / 4:6 / 4:9 are the "□/✕/○/△ to run" hints).
+
+**DualShock (`--dualshock`, launchers: "Mando DualShock (analógico)", default off).** The original game supports the
+analog pad: `setAnalogPadMode` switches a DualShock to analog, `readPadPort` keeps the left stick for pad type 7
+(0x73), `playerDecodePadInput` turns it into three walking speeds and `setVelXFromPadLR` / `playerUpdateSpeedFromPad`
+scale by it (menus see the d-pad bits the driver sets at the stick's ends); and vibration: `startPadVibration` /
+`updatePadVibration` / `stopPadVibration` drive `PadSetAct` (small motor on/off, big motor 0..255) when Tombi is hurt,
+grabbed, bitten, etc. With the option `shims/pad.c` reports 0x73 with the host's left stick (15 % dead zone, full at
+90 %) and a held d-pad as the stick's end (in analog mode the game rebuilds the d-pad bits from the axes), and sends the
+actuator bytes to `SDL_GameControllerRumble` (PC) or the controller's / device's vibrator (Android). Without it the pad is
+the digital one as before (Android keeps its left-stick-as-d-pad default; with the option the stick is analog instead).
+
 Checked on Linux: the pokes of a new game (AP 5000, 9 lives, both `--poke-every`, the 130 event bytes) run 400 vblanks
 without a fault; a 1500-frame run with the title's Start stalls at vblank ~443 in this checkout (`sleepTask` loop after
 the SYSTEM overlay read at lba 176314) with and without the mods, and also with the port as committed before this work,

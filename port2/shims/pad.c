@@ -2,7 +2,17 @@
  * controller port registers; port/tools/gen_port.py leaves those files out (GAME_SKIP) and this file provides
  * the Psy-Q API on top of host input.  Each vblank fills the receive buffers the game registered with
  * PadInitDirect exactly like the driver does: [0] = 0 (ok), [1] = 0x41 (digital pad), [2..3] = buttons,
- * active low.  The game reads them in readPadPort / updatePadInput.  Carried over from port/shims/pad.c. */
+ * active low.  The game reads them in readPadPort / updatePadInput.  Carried over from port/shims/pad.c.
+ *
+ * --dualshock (launcher: "Mando DualShock (analógico)"): the pad reports itself as a DualShock in analog mode (id 0x73)
+ * with the left stick in bytes 6 / 7, as the real driver fills them.  Tombi! supports it natively: readPadPort keeps the
+ * stick for type 7, playerDecodePadInput turns it into three walking speeds (dead zone 0x50..0xAF, then 0x30 / 0x10
+ * steps), setVelXFromPadLR / playerUpdateSpeedFromPad scale the speed by it, and menus see the d-pad bits the driver
+ * derives at the stick's ends.  As on the real pad in analog mode the game ignores the d-pad bits where it reads the
+ * stick (playerDecodePadInput rebuilds them from the axes), so a held d-pad direction is sent as the stick at that end.
+ * The game's vibration (startPadVibration / updatePadVibration: PadSetAct with the small motor on/off in byte 0 and the
+ * big motor's level in byte 1, when the player is hurt, grabbed, bitten...) goes to the host controller's rumble
+ * (port_window_rumble: SDL_GameControllerRumble on the PC, the controller's or the phone's vibrator on Android). */
 #include "port_runtime.h"
 
 typedef unsigned char u8; typedef unsigned short u16;
@@ -11,6 +21,11 @@ static int started;
 u16 port_pad_buttons[2];       /* active high, PSX bit order: 0 Select,3 Start,4 Up,5 Right,6 Down,7 Left,
                                   8 L2,9 R2,10 L1,11 R1,12 Triangle,13 Circle,14 Cross,15 Square */
 int port_autostart;            /* headless test input: tap Start (and Cross) every autostart frames */
+int port_dualshock;            /* --dualshock: analog pad (0x73) with the host's left stick, and vibration */
+int port_pad_lx = 0x80, port_pad_ly = 0x80;   /* the host's left stick, 0..255 (0x80 centre; set by runtime/sdl.c) */
+static const u8 *act_data;     /* PadSetAct: the game's actuator bytes (read every vblank, as the driver does) */
+static int act_sent = -1;
+void port_window_rumble(int small, int big);
 
 /* --pad-script "FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...": hold BUTTONS (names joined by '+': start select up down
    left right cross circle square triangle l1 r1 l2 r2, or a hex mask) from vblank FRAME for LEN vblanks (default
@@ -84,6 +99,16 @@ void port_pad_vblank(void) {
         if (i == 1) { buf[i][0] = 0xFF; continue; }         /* port 2: nothing connected */
         u16 b = (u16)~port_pad_buttons[i];
         buf[i][0] = 0; buf[i][1] = 0x41; buf[i][2] = b & 0xFF; buf[i][3] = b >> 8;
+        if (port_dualshock) {
+            int lx = port_pad_lx, ly = port_pad_ly, m = port_pad_buttons[i];
+            if (m & 0x80) lx = 0x00; else if (m & 0x20) lx = 0xFF;     /* the d-pad: the stick at that end */
+            if (m & 0x10) ly = 0x00; else if (m & 0x40) ly = 0xFF;
+            buf[i][1] = 0x73; buf[i][4] = 0x80; buf[i][5] = 0x80; buf[i][6] = (u8)lx; buf[i][7] = (u8)ly;
+        }
+    }
+    if (port_dualshock && act_data) {
+        int v = (act_data[0] ? 0x100 : 0) | act_data[1];
+        if (v != act_sent) { act_sent = v; port_window_rumble(act_data[0] != 0, act_data[1]); }
     }
 }
 
@@ -98,12 +123,17 @@ int PadGetState(int port) { return port == 0 ? 6 /* PadStateStable */ : 0 /* Pad
 int PadInfoMode(int port, int term, int offs) {
     if (port_verbose > 1 && port == 0 && buf[0])
         port_printf("[pad] frame %d: game reads %04x\n", port_frame, (~(buf[0][2] | buf[0][3] << 8)) & 0xFFFF);
+    if (port_dualshock && port == 0) {
+        if (term == 1) return 7;   /* InfoModeCurID: analog (DualShock) */
+        if (term == 2) return 0x73; /* InfoModeCurExID: a DualShock (setAnalogPadMode asks it) */
+        return 0;
+    }
     if (term == 1) return 4;      /* InfoModeCurID: standard digital pad */
     return 0;                      /* no analog modes, no actuators */
 }
 int PadInfoAct(int port, int act, int term) { return 0; }
 int PadInfoComb(int port, int a, int b) { return 0; }
-int PadSetAct(int port, u8 *data, int len) { return 1; }
+int PadSetAct(int port, u8 *data, int len) { if (port == 0 && len >= 2) act_data = data; return 1; }
 int PadSetActAlign(int port, u8 *data) { return 1; }
 int PadSetMainMode(int port, int offs, int lock) { return 1; }
 int PadChkMtap(void) { return 0; }

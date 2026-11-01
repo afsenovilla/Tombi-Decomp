@@ -47,6 +47,7 @@ public class LauncherActivity extends Activity {
     static final int[] LANG_N = {0, 5, 6, 7, 8};
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
+    static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic"};   // button icons (--prompts)
     static final int REQ_DISC = 2, REQ_EXPORT = 3;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
@@ -140,6 +141,7 @@ public class LauncherActivity extends Activity {
         return clamp(prefs.getInt("lang", def), LANG_N.length);
     }
     int aspectIdx() { return clamp(prefs.getInt("aspect", 0), ASPECTS.length); }
+    int promptIdx() { return clamp(prefs.getInt("prompts", 0), PROMPTS.length); }
     boolean flag(String k, boolean def) { return prefs.getBoolean(k, def); }
     /* second screen panel (runtime/panel.c, TombiActivity): default on when the device has a secondary display */
     boolean hasSecondDisplay() {
@@ -212,6 +214,8 @@ public class LauncherActivity extends Activity {
         if (panel) a.add("--second-screen");
         if (panel && hudBottomOn()) a.add("--hud-bottom");
         a.add("--files-dir"); a.add(filesDir().getAbsolutePath());   // the loader's files dir (taken out before port_main)
+        if (flag("dualshock", false)) a.add("--dualshock");
+        a.add("--prompts"); a.add(PROMPTS[promptIdx()]);
         if (flag("skipintro", false)) a.add("--skip-intro");
         if (flag("hz60", false)) { a.add("--hz"); a.add("60"); }
         if (flag("fps60", false)) a.add("--fps60");
@@ -578,6 +582,11 @@ public class LauncherActivity extends Activity {
                 items.add(toggle(R.string.opt_inflives, "inflives"));
                 items.add(toggle(R.string.opt_infhealth, "infhealth"));
                 items.add(new Item(getString(R.string.opt_padmap), new Runnable() { public void run() { setScreen(PADMAP); } }));
+                items.add(toggle(R.string.opt_dualshock, "dualshock"));   // --dualshock (shims/pad.c)
+                Item pr = new Item(getString(R.string.opt_prompts), null);   // --prompts (shims/prompts.c; TombiActivity resolves auto)
+                pr.value = getResources().getStringArray(R.array.prompt_names)[promptIdx()];
+                pr.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("prompts", (promptIdx() + d + PROMPTS.length) % PROMPTS.length).apply(); } };
+                items.add(pr);
                 items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
                 optLeft = items.size();
                 Item as = new Item(getString(R.string.opt_aspect), null);

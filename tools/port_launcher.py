@@ -514,6 +514,16 @@ i18n.add({
            "btn.start": "Start", "btn.select": "Select"},
 })
 
+# the Controls page: the controller card (--dualshock, --prompts; docs/PORT.md "DualShock" / "Button prompts")
+i18n.add({
+    "es": {"c.pad": "Mando", "l.dualshock": "Mando DualShock (analógico): stick izquierdo con velocidad y vibración",
+           "l.prompts": "Iconos de botones en los textos:", "p.auto": "Auto (según el mando)", "p.ps": "PlayStation",
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.gen": "Genérico"},
+    "en": {"c.pad": "Controller", "l.dualshock": "DualShock controller (analog): left stick with speed, and rumble",
+           "l.prompts": "Button icons in the texts:", "p.auto": "Auto (from the controller)", "p.ps": "PlayStation",
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.gen": "Generic"},
+})
+
 # Tk keysym -> SDL key name (what --keys takes, SDL_GetScancodeFromName); letters, digits and F1..F24 map to themselves
 # (letters upper-cased).  "," is left out: it separates the --keys entries.
 TK_TO_SDL = {"Return": "Return", "BackSpace": "Backspace", "space": "Space", "Tab": "Tab", "Up": "Up", "Down": "Down",
@@ -990,6 +1000,12 @@ class App:
         """A PS1 digital pad on a canvas (the photo tools/icons/ps1_pad.png, else drawn as vectors), a leader line from
         each button to its key; clicking a button or its key and pressing a key rebinds it.  Same settings as before:
         keys_on + keys {button: SDL key name} (--keys)."""
+        o, c = self.card(f, tr("c.pad"))
+        o.pack(side="bottom", fill="x", pady=(12, 0))
+        ttk.Checkbutton(c, text=tr("l.dualshock"), variable=self.var("dualshock", tk.BooleanVar, False)).pack(anchor="w")
+        ttk.Label(c, text=tr("l.prompts")).pack(anchor="w", pady=(8, 2))
+        self._radios(c, "prompts_style", tk.StringVar, "auto", [(tr("p.auto"), "auto"), (tr("p.ps"), "playstation"),
+                     (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.gen"), "generic")])
         o, c = self.card(f, tr("c.controls"))
         o.pack(fill="both", expand=True)
         top = ttk.Frame(c)
@@ -1740,6 +1756,10 @@ class App:
             cmd += ["--texture-pack", s["texpack"]]
         if s.get("fullscreen"):
             cmd += ["--fullscreen"]
+        if s.get("dualshock"):
+            cmd += ["--dualshock"]
+        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "generic"):
+            cmd += ["--prompts", s["prompts_style"]]
         cmd += M.mod_args(s, app_dir())
         cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))
         return cmd
