@@ -1272,7 +1272,7 @@ def personajes(area, lang, out):
         xs += [v for v in (r[0], r[2]) if v is not None]; ys += [v for v in (r[1], r[3]) if v is not None]
     wx0, wx1, wy0, wy1 = min(xs) - 60, max(xs) + 60, min(ys) - 100, max(ys) + 50
     wx0, wy0 = wx0 // 32 * 32, wy0 // 32 * 32; wx1, wy1 = -(-wx1 // 32) * 32, -(-wy1 // 32) * 32
-    S = 1.5; AX = 56; M = 30; TOP = 150
+    S = float(os.environ.get("CIV_PLAN_SCALE", "1.5")); AX = 56; M = 30; TOP = 150   # CIV_PLAN_SCALE=1: 1 px = 1 world unit = 1 picture pixel
     PW, PH = int((wx1 - wx0) * S), int((wy1 - wy0) * S)
     ox, oy = M + AX, TOP + 34
     P = lambda x, y: (ox + (x - wx0) * S, oy + (y - wy0) * S)
