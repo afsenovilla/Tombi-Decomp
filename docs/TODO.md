@@ -35,3 +35,19 @@
   (res/values, values-es); add an "Idioma del launcher" option in Options (Auto / each language), independent of
   the game language, applied without restarting. Translate both launchers (Android strings, tools/port_launcher.py
   via tools/i18n.py) into the game's other languages: French, German, Italian, Dutch, Portuguese, Swedish, Danish.
+- **Unused animations pack (community rip, 136 files).** Locate on the disc and document the animations the pack shows
+  that our docs (CUT_CONTENT, CIVILIZATION) don't cover: Taro (with shocked front/back/side), the Fisherman, the Sombrero
+  Man (normal, cursed, cursed shocked, shocked), the Miner and MinerSmashing, the Cowboy (normal, cursed shocked,
+  shocked); and check whether these are covered: the three thieves' duck/punch/knocked-back/surprised/lock-opening/laugh
+  frames, the Adventurer sawing, the Digger, the Haunted Mansion and Singing Rock mermaid animations, Yan's Dad shocked,
+  Baccus residents cursed/shocked and putting on a hat, Stonetown residents smashing, the Lumberjack factory worker
+  hammering (side and top-down, shocked), the cursed Lumberjack old man. The "cursed" / "shocked" sets across several
+  villages look like one cut curse mechanic: give it one section. For each: sprite table, frames, scripts, palette,
+  whether any code uses it. Also the Funga chief's real palette (blue body, red cape in the rip) and the chief in JP,
+  the Feb 1998 beta, PrePre and the JP demo. Never commit the pack or rendered pixels.
+- **Reconstructed Funga drum quest (cut content option).** The pieces that exist: the Funga Leather / Tree / Sap and
+  Small Drum items with their JP descriptions ("drum material"), the chief's unreferenced judgement dialogue (JP text to
+  translate; PAL shows "···???"), the jungle lines that mention the drum, and the chief's sprite (AREA10 SPR 0x37 frames
+  31, 47-58, no scripts). To build: where each material is found, the chief as an NPC (animation scripts from the
+  frames), the crafting scene, the event and its title. Offered as a clearly marked reconstruction under "Contenido
+  recortado", not as original content.
