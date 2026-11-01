@@ -685,3 +685,12 @@ void port_panel_vblank(void) {
 }
 /* --panel-size WxH (testing the portrait layout on the PC) */
 void port_panel_size(int w, int h) { req_w = w; req_h = h; }
+
+/* --log-events: every event start / complete (setEventStarted / setEventComplete / awardEventProgress, wrapped in
+   port/fixes.txt) with the frame, the room and Tombi's position: where an event really happens, for the panel's table */
+int port_log_events;
+void port_event_log(const char *what, int e, int before) {
+    if (!port_log_events || e < 0 || e > 255) return;
+    port_printf("[event] frame %d: %s %d (0x%02X) %d -> %d at area %d section %d, x %d y %d\n", port_frame, what, e, e, before,
+                G_EVENT(e), G_AREA, G_SECTION, (s16)G16(0x800A604Au), (s16)G16(0x800A604Eu));
+}

@@ -4,10 +4,11 @@ Where each event (`SCRIPT_FLAGS` id 0..0xBF) happens, as the second-screen event
 
 - **room + position**: an object placed in that room starts / completes it (`tools/objects.py`); the panel marks the room on the map.
 - **area only**: a `setEventStarted` / `setEventComplete` call site in that area's code (`src/xNNN/`, `src/aNN*`); the room is not known.
+- **script**: started / completed by game opcode 0x9a in the AREA15 script that `loadAreaSoundBank` loads for that room.
 - **owner**: a call site in a shared overlay (I0NFO2 / I0NFO3), attributed to the area that loads it.
 - **unknown**: none of these yet (data-driven ids, the other WSS scripts); the panel says the zone is not extracted yet.
 
-Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
+Coverage: 39 with room and position, 89 with the area only, 64 unknown, of 192.
 
 | event | where | kind | source |
 |---|---|---|---|
@@ -24,17 +25,17 @@ Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
 | 10 (0x0A) | AREA00 section 3 (x 120, y -56) | scene | objects: AREA00:3 3248 |
 | 11 (0x0B) | AREA04 section 15 (x 267, y -68) | scene | objects: AREA04:15 updateSceneSequence |
 | 12 (0x0C) | AREA00 section 3 (x 120, y -56) | scene | objects: AREA00:3 3248 |
-| 13 (0x0D) | unknown | - | - |
-| 14 (0x0E) | unknown | - | - |
-| 15 (0x0F) | unknown | - | - |
+| 13 (0x0D) | AREA01 (section unknown) | scene | script: AREA15/SCR0100.WSS (start), run in that room by initAreaScripts |
+| 14 (0x0E) | AREA02 section 0 | scene | script: AREA15/0200.WSS (start), run in that room by initAreaScripts |
+| 15 (0x0F) | AREA254 (section unknown) | scene | owner: D0SPSUB func_800E89F8: using item 0x3F from the pause menu completes it, anywhere |
 | 16 (0x10) | AREA00 section 2 (x 2725, y -1208) | scene | objects: AREA00:2 492 |
-| 17 (0x11) | unknown | - | - |
+| 17 (0x11) | AREA02 section 1 | scene | script: AREA15/0210.WSS (start), run in that room by initAreaScripts |
 | 18 (0x12) | unknown | - | - |
 | 19 (0x13) | unknown | - | - |
-| 20 (0x14) | unknown | - | - |
-| 21 (0x15) | unknown | - | - |
+| 20 (0x14) | AREA02 section 1 | scene | script: AREA15/0210.WSS (start), run in that room by initAreaScripts |
+| 21 (0x15) | AREA02 section 2 | scene | script: AREA15/0220.WSS (complete), run in that room by initAreaScripts |
 | 22 (0x16) | AREA01 section 3 (x 4178, y -1773) | scene | objects: AREA01:3 updateLookAndSeeViewpoint |
-| 23 (0x17) | unknown | - | - |
+| 23 (0x17) | AREA02 section 0 | scene | script: AREA15/0200.WSS (start), run in that room by initAreaScripts |
 | 24 (0x18) | AREA01 section 3 (x 4195, y -677) | scene | objects: AREA01:3 updateEventHitSwitch |
 | 25 (0x19) | AREA00 (section unknown) / also AREA01, AREA02, AREA03, AREA04, AREA05, AREA06, AREA08, AREA09, AREA10, AREA11, AREA13, AREA14, AREA16, AREA17, AREA18, AREA19 | scene | decomp: X000.BIN (call site), src/x001/treasureChestOpenLocked.c, src/x002/treasureChestOpenLocked.c, src/x003/treasureChestOpen |
 | 26 (0x1A) | AREA03 (section unknown) | scene | decomp: src/x003/phoenixSpiritHintTalkB.c |
@@ -49,22 +50,22 @@ Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
 | 35 (0x23) | AREA03 (section unknown) | scene | decomp: src/x003/masterOfTheSkiesScene.c, src/x003/soakedPhoenixGuideTalk.c |
 | 36 (0x24) | AREA03 (section unknown) | scene | decomp: src/x003/fungaDwarfTalk.c |
 | 37 (0x25) | AREA00 section 0 (x 83, y -29) | chest | objects: AREA00:0 updateL4Type1AObject |
-| 38 (0x26) | AREA05 (section unknown) | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors: notes/names.md) |
+| 38 (0x26) | AREA05 section 0 | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors; I0NFO2 runs in AREA05 / AREA08 section 0) |
 | 39 (0x27) | AREA02 (section unknown) | scene | decomp: src/x002/flowerGardenCompleteScene.c |
 | 40 (0x28) | AREA09 (section unknown) | scene | decomp: src/x009/flowerTearsSeekerTalk.c, src/x009/tearJarHeld.c |
 | 41 (0x29) | AREA03 section 1 (x 3152, y -1752) | scene | objects: AREA03:1 dispatchAreaInitB>updateAreaMechanisms |
 | 42 (0x2A) | AREA04 section 0 (x 1300, y -314) | scene | objects: AREA04:0 dispatchAreaInitB>updateAreaMechanisms |
-| 43 (0x2B) | AREA05 (section unknown) | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors: notes/names.md) |
-| 44 (0x2C) | unknown | - | - |
+| 43 (0x2B) | AREA05 section 0 | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors; I0NFO2 runs in AREA05 / AREA08 section 0) |
+| 44 (0x2C) | AREA05 section 0 | scene | owner: I0NFO2 topdownActorTalkStep: its dialogues (2, 0x22 / 0x23) exist only in AREA05's bank (the fortune teller) |
 | 45 (0x2D) | unknown | - | - |
 | 46 (0x2E) | AREA00 section 0 (x 83, y -29) | chest | objects: AREA00:0 updateL4Type1AObject |
-| 47 (0x2F) | AREA05 (section unknown) | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors: notes/names.md) |
+| 47 (0x2F) | AREA05 section 0 | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors; I0NFO2 runs in AREA05 / AREA08 section 0) |
 | 48 (0x30) | unknown | - | - |
 | 49 (0x31) | AREA00 section 0 (x 83, y -29) | chest | objects: AREA00:0 updateL4Type1AObject |
-| 50 (0x32) | unknown | - | - |
+| 50 (0x32) | AREA08 section 0 | scene | owner: I0NFO2 npcSet0CMessageScene (NPC set 0C = AREA08: tools/dialogue_refs.py NPCSET_AREA) |
 | 51 (0x33) | AREA04 section 0 (x 965, y -761) | scene | objects: AREA04:0 dispatchAreaInitB>updateAreaMechanisms |
 | 52 (0x34) | unknown | - | - |
-| 53 (0x35) | AREA05 (section unknown) | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors: notes/names.md) |
+| 53 (0x35) | AREA05 section 0 | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors; I0NFO2 runs in AREA05 / AREA08 section 0) |
 | 54 (0x36) | AREA14 section 6 (x 312, y -83) | scene | objects: AREA14:6 updateEvilPigBoss |
 | 55 (0x37) | AREA03 section 1 (x 4227, y -1893) | scene | objects: AREA03:1 dispatchAreaInitB>updateAreaMechanisms |
 | 56 (0x38) | AREA04 (section unknown) | scene | decomp: src/x004/paintingBigKeyReward.c, src/x004/paintingSlotHintTalk.c |
@@ -97,9 +98,9 @@ Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
 | 83 (0x53) | unknown | - | - |
 | 84 (0x54) | unknown | - | - |
 | 85 (0x55) | AREA14 section 5 (x 423, y -225) | scene | objects: AREA14:5 updateEvilPigBoss |
-| 86 (0x56) | unknown | - | - |
-| 87 (0x57) | unknown | - | - |
-| 88 (0x58) | unknown | - | - |
+| 86 (0x56) | AREA02 section 0 | scene | script: AREA15/0200.WSS (start), run in that room by initAreaScripts |
+| 87 (0x57) | AREA02 section 0 | scene | script: AREA15/0200.WSS (start), run in that room by initAreaScripts |
+| 88 (0x58) | AREA02 section 0 | scene | script: AREA15/0200.WSS (start), run in that room by initAreaScripts |
 | 89 (0x59) | unknown | - | - |
 | 90 (0x5A) | unknown | - | - |
 | 91 (0x5B) | unknown | - | - |
@@ -124,7 +125,7 @@ Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
 | 110 (0x6E) | unknown | - | - |
 | 111 (0x6F) | AREA14 section 1 (x 196, y -141) | scene | objects: AREA14:1 updateEvilPigBoss |
 | 112 (0x70) | AREA04 (section unknown) | scene | decomp: src/x004/mermaidDivingOfferTalk.c |
-| 113 (0x71) | unknown | - | - |
+| 113 (0x71) | AREA02 section 0 | scene | script: AREA15/0200.WSS (start), run in that room by initAreaScripts |
 | 114 (0x72) | AREA18 (section unknown) | scene | decomp: src/x018/witchMizunoCrystalBallsFoundTalk.c, src/x018/witchMizunoLostCrystalBallsTalk.c |
 | 115 (0x73) | AREA05 (section unknown) | scene | decomp: src/x005/safeMushroomHintTalk.c |
 | 116 (0x74) | AREA10 (section unknown) / also AREA18 | scene | decomp: src/x010/tenThousandYearElderTalk.c, src/x018/witchMizunoMagicMirrorTalk.c |
@@ -179,7 +180,7 @@ Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
 | 165 (0xA5) | unknown | - | - |
 | 166 (0xA6) | AREA00 (section unknown) | scene | decomp: X000.BIN (call site) |
 | 167 (0xA7) | AREA00 (section unknown) | scene | decomp: src/updateA00PinkPiglet.c |
-| 168 (0xA8) | unknown | - | - |
+| 168 (0xA8) | AREA02 section 1 | scene | script: AREA15/0210.WSS (complete), run in that room by initAreaScripts |
 | 169 (0xA9) | AREA18 (section unknown) | scene | decomp: src/x018/witchMizunoCandyRecipeTalk.c |
 | 170 (0xAA) | AREA03 section 1 (x 3216, y -1959) | scene | objects: AREA03:1 dispatchAreaInitB>updateAreaMechanisms |
 | 171 (0xAB) | AREA03 (section unknown) | scene | decomp: src/x003/phoenixFavoriteCompleteScene.c, src/x003/stepPhoenixFavoriteEvent.c |
@@ -190,7 +191,7 @@ Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
 | 176 (0xB0) | AREA09 (section unknown) | scene | decomp: src/x009/aspiringActorGuardTalk.c |
 | 177 (0xB1) | AREA01 (section unknown) | scene | decomp: src/x001/burningFireContact.c |
 | 178 (0xB2) | AREA01 (section unknown) / also AREA10 | scene | decomp: src/x001/leafButterflyEventStart.c, src/x010/leafButterflyEventStart.c |
-| 179 (0xB3) | unknown | - | - |
+| 179 (0xB3) | AREA02 section 2 | scene | script: AREA15/0220.WSS (start), run in that room by initAreaScripts |
 | 180 (0xB4) | AREA01 section 2 (x 2920, y -370) | scene | objects: AREA01:2 updateRollingBarrel |
 | 181 (0xB5) | AREA01 (section unknown) | scene | decomp: src/x001/raceResult.c |
 | 182 (0xB6) | AREA18 (section unknown) | scene | decomp: src/x018/witchMizunoMagicMirrorTalk.c |
@@ -198,8 +199,8 @@ Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
 | 184 (0xB8) | unknown | - | - |
 | 185 (0xB9) | AREA03 (section unknown) | scene | decomp: src/x003/treasureChestGuardTalk.c |
 | 186 (0xBA) | unknown | - | - |
-| 187 (0xBB) | unknown | - | - |
-| 188 (0xBC) | unknown | - | - |
+| 187 (0xBB) | AREA01 section 4 | scene | script: AREA15/0140.WSS (start), run in that room by initAreaScripts |
+| 188 (0xBC) | AREA01 section 4 | scene | script: AREA15/0140.WSS (start), run in that room by initAreaScripts |
 | 189 (0xBD) | AREA09 section 0 (x 1620, y -670) | scene | objects: AREA09:0 updateRedPlusBlueObject |
 | 190 (0xBE) | AREA03 (section unknown) | scene | decomp: src/x003/lostBossItemNpcTalk.c |
 | 191 (0xBF) | AREA04 (section unknown) | scene | decomp: src/x004/lostBossItemNpcTalk.c |

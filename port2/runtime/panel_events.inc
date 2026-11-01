@@ -99,6 +99,12 @@ static const char *state_name(int f) {
 }
 /* the area name of the map screen for (area, section) */
 static const char *place_area(int area, int sec) {
+    if (area == 254) {   /* no room: completed by using an item from the pause menu (panel_eventmap.h x = the item) */
+        static char b[96]; int it = -1;
+        for (unsigned i = 0; i < sizeof panel_event_locs / sizeof panel_event_locs[0]; i++) if (panel_event_locs[i].area == 254 && panel_event_locs[i].sec == sec) it = panel_event_locs[i].x;
+        snprintf(b, sizeof b, T("Use %s (anywhere)", "Usar %s (en cualquier lugar)"), it >= 0 && it < 256 && item_name[it] ? item_name[it] : T("an item", "un objeto"));
+        return b;
+    }
     if (area == 14) return sec + 14 < 24 ? a14_area[sec + 14] : NULL;
     int l = area < 20 && sec < 24 ? roomlink[area][sec] : -1;
     if (l < 0 && area < 20) for (int s = 0; s < 24 && l < 0; s++) l = roomlink[area][s];
@@ -231,7 +237,7 @@ static void event_detail(int e) {
     const char *kn = L ? kind_name(L->kind) : NULL;
     if (kn && !pend) {
         text_wrap(wx + 8, y + 26, 16, wwid - 16, 17, 2, 0, kn, C_DARK, C_EDGE);
-        if (L->x != -32768) { snprintf(b, sizeof b, "x %d  y %d", L->x, L->y); pa_text(wx + 8, y + 44, 8, b, C_RED8, C_REDE); }
+        if (L->x != -32768 && L->area < 254) { snprintf(b, sizeof b, "x %d  y %d", L->x, L->y); pa_text(wx + 8, y + 44, 8, b, C_RED8, C_REDE); }
     } else pa_text(wx + 8, y + 26, 16, "? ? ?", C_MUTED, C_EDGE);
     face(wx + wwid - 34, y + wh - 34);
     /* state */
