@@ -87,17 +87,68 @@ enum { C_T = 0, C_GREY = 3, C_DISC = 6, C_BLUE = 7, C_GREEN = 8, C_PINK = 9, C_R
    blue / green / yellow / red of the Nintendo-layout pads (AYN Thor, Retroid), 15 white.  BGR555. */
 enum { P_XGREEN = 1, P_XRED = 2, P_XBLUE = 4, P_XYELLOW = 5, P_NBLUE = 7, P_NGREEN = 8, P_NYELLOW = 9, P_NRED = 10, P_WHITE = 15 };
 #define BGR(r, g, b) (u16)(((r) >> 3) | ((g) >> 3) << 5 | ((b) >> 3) << 10)
-const u16 port_prompt_clut[16] = {
-    0, BGR(0x3C, 0xB0, 0x43), BGR(0xE0, 0x3C, 0x31), BGR(107, 107, 107), BGR(0x2F, 0x6F, 0xD6), BGR(0xF5, 0xC5, 0x18),
-    BGR(41, 41, 41), BGR(0x1E, 0x3F, 0xB0), BGR(0x2E, 0x8B, 0x4E), BGR(0xF2, 0xC2, 0x30), BGR(0xC8, 0x28, 0x1E),
-    BGR(206, 198, 165), BGR(165, 156, 140), BGR(140, 132, 115), BGR(255, 239, 222), BGR(255, 255, 255),
+/* The lettered glyphs (Xbox, Nintendo, Thor) get a 1 px drop shadow down-right (the fill 30 % toward black) and a soft
+   edge (the disc pixels 4-adjacent to the letter: the fill 35 % toward the letter's colour: white on Thor), so each needs
+   a few more colours: the port CLUT has PORT_CLUT_ROWS rows (gpu_backend.h; CLUT id 0xFFFF - row), all sharing entries
+   0, 3, 6, 11..14 (transparent, grey, dark disc, rim, cream):
+     row 0: the table above (generic, the PlayStation shapes drawn where the game's icon is missing);
+     row 1: Xbox: 1 / 2 / 4 / 5 the letters, 7 the shadow (disc * 0.7), 8 / 9 / 10 / 15 the soft edge per letter;
+     row 2: Nintendo (and the shoulder labels of every lettered style): 14 the cream letters, 7 shadow, 8 soft edge;
+     rows 3..6: Thor, one per button (south B yellow, east A red, west Y green, north X blue): 7 the disc, 8 its shadow,
+     9 its soft edge, 15 the white letter. */
+#define PORT_CLUT_ROWS 7   /* = gpu_backend.h */
+#define MX(a, b, t) ((a) + ((b) - (a)) * (t) / 100)
+#define MIX(r, g, b, r2, g2, b2, t) BGR(MX(r, r2, t), MX(g, g2, t), MX(b, b2, t))
+#define RGB_(...) BGR(__VA_ARGS__)   /* the colour macros below hold commas: expand them first */
+#define MIX_(...) MIX(__VA_ARGS__)
+#define DISC 41, 41, 41
+#define BASE0 0
+#define CREAM RGB_(255, 239, 222)
+#define KHAKI RGB_(206, 198, 165), RGB_(165, 156, 140), RGB_(140, 132, 115)
+#define XG 0x3C, 0xB0, 0x43
+#define XR 0xE0, 0x3C, 0x31
+#define XB 0x2F, 0x6F, 0xD6
+#define XY 0xF5, 0xC5, 0x18
+#define THOR_ROW(r, g, b) 0, 0, 0, RGB_(107, 107, 107), 0, 0, RGB_(DISC), RGB_(r, g, b), MIX_(r, g, b, 0, 0, 0, 30), \
+    MIX_(r, g, b, 255, 255, 255, 35), 0, KHAKI, CREAM, RGB_(255, 255, 255)
+const u16 port_prompt_clut[PORT_CLUT_ROWS * 16] = {
+    0, RGB_(XG), RGB_(XR), RGB_(107, 107, 107), RGB_(XB), RGB_(XY),
+    RGB_(DISC), RGB_(0x1E, 0x3F, 0xB0), RGB_(0x2E, 0x8B, 0x4E), RGB_(0xF2, 0xC2, 0x30), RGB_(0xC8, 0x28, 0x1E),
+    KHAKI, CREAM, RGB_(255, 255, 255),
+    /* 1 Xbox */
+    0, RGB_(XG), RGB_(XR), RGB_(107, 107, 107), RGB_(XB), RGB_(XY), RGB_(DISC), MIX_(DISC, 0, 0, 0, 30),
+    MIX_(DISC, XG, 35), MIX_(DISC, XR, 35), MIX_(DISC, XB, 35), KHAKI, CREAM, MIX_(DISC, XY, 35),
+    /* 2 Nintendo */
+    0, 0, 0, RGB_(107, 107, 107), 0, 0, RGB_(DISC), MIX_(DISC, 0, 0, 0, 30), MIX_(DISC, 255, 239, 222, 35), 0, 0,
+    KHAKI, CREAM, RGB_(255, 255, 255),
+    /* 3..6 Thor: B, A, Y, X */
+    THOR_ROW(0xF2, 0xC2, 0x30), THOR_ROW(0xC8, 0x28, 0x1E), THOR_ROW(0x2E, 0x8B, 0x4E), THOR_ROW(0x1E, 0x3F, 0xB0),
 };
+enum { ROW_XBOX = 1, ROW_NINTENDO = 2, ROW_THOR = 3 };
 #define PORT_CLUT_ID 0xFFFF
+/* the letter effects: letter pixels carry 0x80 | colour; the shadow, then the soft edge (pixels still == fill), then the
+   letters (soft_of[colour] = the soft edge index next to a letter of that colour) */
+static void letter_fx(u8 *p, int stride, int w, int h, int fill, int shadow, const u8 *soft_of) {
+    #define L(x, y) ((x) >= 0 && (x) < w && (y) >= 0 && (y) < h && (p[(y) * stride + (x)] & 0x80))
+    for (int y = h - 2; y >= 0; y--) for (int x = w - 2; x >= 0; x--)
+        if (L(x, y) && !L(x + 1, y + 1) && p[(y + 1) * stride + x + 1] == fill) p[(y + 1) * stride + x + 1] = (u8)shadow;
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
+        if (p[y * stride + x] != fill) continue;
+        int c = L(x - 1, y) ? p[y * stride + x - 1] : L(x + 1, y) ? p[y * stride + x + 1] :
+                L(x, y - 1) ? p[(y - 1) * stride + x] : L(x, y + 1) ? p[(y + 1) * stride + x] : 0;
+        if (c) p[y * stride + x] = soft_of[c & 15];
+    }
+    for (int i = 0; i < h; i++) for (int x = 0; x < w; x++) p[i * stride + x] &= 15;
+    #undef L
+}
+static const u8 soft_xbox[16] = { [P_XGREEN] = 8, [P_XRED] = 9, [P_XBLUE] = 10, [P_XYELLOW] = 15 };
+static const u8 soft_cream[16] = { [C_CREAM] = 8 };
+static const u8 soft_white[16] = { [P_WHITE] = 9 };
 #define NSLOTS 0x3c
-static unsigned char slot_port_clut[NSLOTS];   /* glyph cache slot -> drawn with port_prompt_clut */
+static unsigned char slot_port_clut[NSLOTS];   /* glyph cache slot -> 1 + the port CLUT row it is drawn with, 0 none */
 /* drawMessageBox / drawMessageGlyphs PORT2 hook: the CLUT id for a sprite of glyph cache slot `slot` */
 unsigned short port_prompt_sprite_clut(int slot, unsigned short clut) {
-    return slot >= 0 && slot < NSLOTS && slot_port_clut[slot] ? PORT_CLUT_ID : clut;
+    return slot >= 0 && slot < NSLOTS && slot_port_clut[slot] ? PORT_CLUT_ID - (slot_port_clut[slot] - 1) : clut;
 }
 
 /* the disc the PlayStation glyphs sit on (rows 2..13): an anti-aliased ring, the same shape as the game's */
@@ -168,38 +219,46 @@ static void diamond(int pos) {
     }
 }
 
-static void draw(int ps, int src, int style) {
+static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row, 0 = the font CLUT */
     static const char *ps_sh[] = { "L1", "R1", "L2", "R2" }, *xb_sh[] = { "LB", "RB", "LT", "RT" },
                       *nt_sh[] = { "L", "R", "ZL", "ZR" };
     static const char *letters = "ABXY";
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };   /* port CLUT */
     draw_disc();
-    if (src == SRC_NONE) return;
+    if (src == SRC_NONE) return 0;
     if (src >= SRC_L1) {
         const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || style == PROMPT_THOR ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
-        label(t, C_CREAM);
-        return;
+        if (style == PROMPT_PS || style == PROMPT_GENERIC) { label(t, C_CREAM); return 0; }
+        label(t, C_CREAM | 0x80);
+        letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_cream);
+        return 1 + ROW_NINTENDO;
     }
     switch (style) {
     case PROMPT_PS: ps_symbol(src); break;   /* SRC_SOUTH..NORTH are in PS_CROSS..TRIANGLE order */
     case PROMPT_XBOX: {
         char t[2] = { letters[src], 0 };
-        label(t, xb_col[src]);
-        break; }
+        label(t, xb_col[src] | 0x80);
+        letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_xbox);
+        return 1 + ROW_XBOX; }
     case PROMPT_NINTENDO: case PROMPT_THOR: {
         /* by position, as printed on Nintendo pads and the AYN Thor / Retroid: south B, east A, west Y, north X.
            Nintendo: cream letters on the dark disc (Switch Pro); Thor: white letters on the SNES colours (port CLUT:
            B yellow, A red, Y green, X blue).  src is the positional (Xbox-named) button: SDL with button labels off,
            Android's KEYCODE_BUTTON_A = south. */
         static const char nl[4] = { 'B', 'A', 'Y', 'X' };
-        static const int ndisc[4] = { P_NYELLOW, P_NRED, P_NGREEN, P_NBLUE };
         char t[2] = { nl[src], 0 };
-        if (style == PROMPT_THOR) { draw_disc_col(ndisc[src]); label(t, P_WHITE); }
-        else label(t, C_CREAM);
-        break; }
+        if (style == PROMPT_THOR) {
+            draw_disc_col(7); label(t, P_WHITE | 0x80);
+            letter_fx(&img[0][0], GW, GW, GH, 7, 8, soft_white);
+            return 1 + ROW_THOR + src;
+        }
+        label(t, C_CREAM | 0x80);
+        letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_cream);
+        return 1 + ROW_NINTENDO; }
     default: diamond(src); break;
     }
     (void)ps;
+    return 0;
 }
 /* 1 px lower: the disc from rows 2..13 to 3..14 (row 15 is empty before) */
 static void lower1(void) {
@@ -230,12 +289,13 @@ const u16 *port_prompt_glyph(const u16 *src, int w, int h, int slot) {
         for (int y = 0; y < GH; y++) for (int x = 0; x < GW; x++) orig[ps][y][x] = src[y * (GW / 4) + x / 4] >> (4 * (x & 3)) & 15;
         have_orig[ps] = 1;
         int s2 = port_prompt_src[ps];
+        int row1 = 0;
         if (port_prompt_style == PROMPT_PS && s2 < 4 && have_orig[s2]) memcpy(img, orig[s2], sizeof img);
-        else draw(ps, s2, port_prompt_style);
+        else row1 = draw(ps, s2, port_prompt_style);
         lower1();
         pack();
         if (slot >= 0 && slot < NSLOTS)
-            slot_port_clut[slot] = port_prompt_style == PROMPT_XBOX || port_prompt_style == PROMPT_THOR;
+            slot_port_clut[slot] = (unsigned char)row1;
         return out;
     }
     return src;
@@ -267,7 +327,7 @@ static const MenuIcon menu_icons[] = {
 static u16 mi_orig[NMI][16 * 4];
 static u8 mi_have[NMI];        /* the original was met (mi_orig holds it) */
 static u8 mi_on[NMI];          /* the rect holds our glyph now */
-static u8 mi_pclut[NMI];       /* ... drawn with the port CLUT */
+static u8 mi_pclut[NMI];       /* ... drawn with port CLUT row mi_pclut - 1 (0: its own CLUT) */
 static int mi_gen[NMI];
 int port_prompt_icons_on;      /* any mi_on: gpu.c's fast path */
 static void (*mi_write)(int, int, int, int, const unsigned short *);
@@ -276,7 +336,7 @@ static int prompt_gen(void) { return port_prompt_style * 4096 + port_prompt_src[
 #define MW 16
 static u8 mimg[16][MW];
 static void mput(int x, int y, int c, int w, int h) { if (x >= 0 && x < w && y >= 0 && y < h) mimg[y][x] = (u8)c; }
-/* the glyph of PS button `ps` for icon i (w x h texels), into mimg; returns 1 for the port CLUT */
+/* the glyph of PS button `ps` for icon i (w x h texels), into mimg; returns 1 + its port CLUT row (0 = its own CLUT) */
 static int mi_draw(int i, int w, int h) {
     int ps = menu_icons[i].ps, src = port_prompt_src[ps], st = port_prompt_style;
     int x0 = w, y0 = h, x1 = -1, y1 = -1;
@@ -299,8 +359,7 @@ static int mi_draw(int i, int w, int h) {
     int d = x1 - x0 + 1 < y1 - y0 + 1 ? x1 - x0 + 1 : y1 - y0 + 1;
     int cx2 = x0 + x1 + 1, cy2 = y0 + y1 + 1;            /* centre * 2 */
     int fill = C_DISC;
-    static const int ndisc[4] = { P_NYELLOW, P_NRED, P_NGREEN, P_NBLUE };
-    if (st == PROMPT_THOR && src < 4) fill = ndisc[src];
+    if (st == PROMPT_THOR && src < 4) fill = 7;          /* row ROW_THOR + src */
     for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
         int dx = 2 * x + 1 - cx2, dy = 2 * y + 1 - cy2, r2 = dx * dx + dy * dy;   /* in half pixels */
         if (r2 <= d * d - 2 * d) mimg[y][x] = (u8)fill;
@@ -310,16 +369,20 @@ static int mi_draw(int i, int w, int h) {
     const char *t = 0; int col = C_CREAM; char one[2] = { 0, 0 };
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };
     static const char *xb_sh[] = { "LB", "RB", "LT", "RT" }, *nt_sh[] = { "L", "R", "ZL", "ZR" }, *ps_sh[] = { "L1", "R1", "L2", "R2" };
-    if (src == SRC_NONE) return 1;
+    if (src == SRC_NONE) return 1;   /* the empty disc (row 0) */
     if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || st == PROMPT_THOR ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
     else if (st == PROMPT_XBOX) { one[0] = "ABXY"[src]; t = one; col = xb_col[src]; }
     else if (st == PROMPT_NINTENDO || st == PROMPT_THOR) { one[0] = "BAYX"[src]; t = one; col = st == PROMPT_THOR ? P_WHITE : C_CREAM; }
     if (t) {
         for (unsigned k = 0; k < sizeof font6 / sizeof font6[0] && !t[1]; k++) if (font6[k].ch == t[0])
-            for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if (font6[k].rows[y] >> (5 - x) & 1) mput(lx + x, ly + y, col, w, h);
+            for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if (font6[k].rows[y] >> (5 - x) & 1) mput(lx + x, ly + y, col | 0x80, w, h);
         if (t[1]) for (int c = 0; c < 2; c++) for (unsigned k = 0; k < sizeof font3 / sizeof font3[0]; k++) if (font3[k].ch == t[c])
-            for (int y = 0; y < 5; y++) for (int x = 0; x < 3; x++) if (font3[k].rows[y] >> (2 - x) & 1) mput(lx + c * 4 + x, ly + 2 + y, C_CREAM, w, h);
-        return 1;
+            for (int y = 0; y < 5; y++) for (int x = 0; x < 3; x++) if (font3[k].rows[y] >> (2 - x) & 1) mput(lx + c * 4 + x, ly + 2 + y, C_CREAM | 0x80, w, h);
+        if (t[1]) { letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_cream); return 1 + ROW_NINTENDO; }
+        if (st == PROMPT_XBOX) { letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_xbox); return 1 + ROW_XBOX; }
+        if (st == PROMPT_THOR) { letter_fx(&mimg[0][0], MW, w, h, 7, 8, soft_white); return 1 + ROW_THOR + src; }
+        letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_cream);
+        return 1 + ROW_NINTENDO;
     }
     if (st == PROMPT_PS) {   /* PS shapes where the source icon is not on the page (port CLUT: the nearest colours) */
         int s = src, c3 = cx2 / 2, c4 = cy2 / 2;
@@ -395,7 +458,7 @@ void port_prompt_vram_upload(const unsigned short *vram, int x, int y, int w, in
     port_prompt_icons_on = 0;
     for (int j = 0; j < NMI; j++) port_prompt_icons_on |= mi_on[j] | mi_have[j];
 }
-/* gpu.c, for a 4 bpp primitive of page (tx, ty) with texels u0..u1, v0..v1: 1 = give it the port CLUT */
+/* gpu.c, for a 4 bpp primitive of page (tx, ty) with texels u0..u1, v0..v1: 1 + the port CLUT row to give it, or 0 */
 int port_prompt_tex_clut(int tx, int ty, int u0, int v0, int u1, int v1) {
     int g = prompt_gen();
     for (int i = 0; i < NMI; i++) {
@@ -404,7 +467,7 @@ int port_prompt_tex_clut(int tx, int ty, int u0, int v0, int u1, int v1) {
         int ix = (m->x - tx) * 4, iy = m->y - ty;
         if (u0 < ix || u1 >= ix + m->w * 4 || v0 < iy || v1 >= iy + m->h) continue;
         if (mi_gen[i] != g && mi_write) mi_apply(i);
-        return mi_on[i] && mi_pclut[i];
+        return mi_on[i] ? mi_pclut[i] : 0;
     }
     return 0;
 }

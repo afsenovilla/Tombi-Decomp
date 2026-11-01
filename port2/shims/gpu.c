@@ -120,11 +120,11 @@ static inline u16 texel(int u, int v) {
     if (tp_depth == 0) {
         u16 w = vram[(tp_y + v) & 511][(tp_x + (u >> 2)) & 1023];
         int i = (w >> ((u & 3) * 4)) & 15;
-        return clut_y == PORT_CLUT_Y ? port_prompt_clut[i] : vram[clut_y][(clut_x + i) & 1023];
+        return clut_y == PORT_CLUT_Y ? port_prompt_clut[(clut_x + i) % (PORT_CLUT_ROWS * 16)] : vram[clut_y][(clut_x + i) & 1023];
     } else if (tp_depth == 1) {
         u16 w = vram[(tp_y + v) & 511][(tp_x + (u >> 1)) & 1023];
         int i = (w >> ((u & 1) * 8)) & 255;
-        return clut_y == PORT_CLUT_Y ? port_prompt_clut[i & 15] : vram[clut_y][(clut_x + i) & 1023];
+        return clut_y == PORT_CLUT_Y ? port_prompt_clut[(clut_x + (i & 15)) % (PORT_CLUT_ROWS * 16)] : vram[clut_y][(clut_x + i) & 1023];
     }
     return vram[(tp_y + v) & 511][(tp_x + u) & 1023];
 }
@@ -284,7 +284,7 @@ static void vram_write_rect(int x, int y, int w, int h, const u16 *s) {
 /* prompts.c: the menus' button icons, patched in VRAM after an upload covers them; their primitives get the port CLUT */
 extern int port_prompt_icons_on;
 extern void port_prompt_vram_upload(const unsigned short *, int, int, int, int, void (*)(int, int, int, int, const unsigned short *));
-extern int port_prompt_tex_clut(int tx, int ty, int u0, int v0, int u1, int v1);
+extern int port_prompt_tex_clut(int tx, int ty, int u0, int v0, int u1, int v1);   /* 0 or 1 + port CLUT row */
 static void prompt_write(int x, int y, int w, int h, const unsigned short *s) { vram_write_rect(x, y, w, h, s); }
 static void prompt_upload(int x, int y, int w, int h) {
     if (x + w <= 1024 && y + h <= 512) port_prompt_vram_upload(&vram[0][0], x, y, w, h, prompt_write);
@@ -410,13 +410,13 @@ static int gp0(const u32 *p, int n) {
         if (tex) {
             set_texpage16(tpage);
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511;
-            if (clut == PORT_CLUT_ID) { t.cx = 0; t.cy = PORT_CLUT_Y; }
+            if (PORT_CLUT_IS(clut)) { t.cx = (0xFFFF - clut) * 16; t.cy = PORT_CLUT_Y; }
             else if (port_prompt_icons_on && t.depth == 0) {
                 int u0 = 255, u1 = 0, v0 = 255, v1 = 0;
                 for (int i = 0; i < nv; i++) {
                     if (v[i].u < u0) u0 = v[i].u; if (v[i].u > u1) u1 = v[i].u; if (v[i].v < v0) v0 = v[i].v; if (v[i].v > v1) v1 = v[i].v;
                 }
-                if (port_prompt_tex_clut(t.tx, t.ty, u0, v0, u1, v1)) { t.cx = 0; t.cy = PORT_CLUT_Y; }
+                { int r = port_prompt_tex_clut(t.tx, t.ty, u0, v0, u1, v1); if (r) { t.cx = (r - 1) * 16; t.cy = PORT_CLUT_Y; } }
             }
             t.rep = port_texpack_on && t.cy != PORT_CLUT_Y ? port_texpack_prim(&t, v, nv) : 0;
         }
@@ -461,13 +461,15 @@ static int gp0(const u32 *p, int n) {
         if (tex) {
             u32 uv = p[k++]; u = uv & 255; v = (uv >> 8) & 255;
             t.cx = ((uv >> 16) & 0x3F) * 16; t.cy = (uv >> 22) & 511;
-            if ((uv >> 16) == PORT_CLUT_ID) { t.cx = 0; t.cy = PORT_CLUT_Y; }
+            if (PORT_CLUT_IS(uv >> 16)) { t.cx = (0xFFFF - (uv >> 16)) * 16; t.cy = PORT_CLUT_Y; }
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp;
         }
         if (size == 0) { w = p[k] & 0x3FF; h = (p[k] >> 16) & 0x1FF; k++; }
         else { w = h = size == 1 ? 1 : size == 2 ? 8 : 16; }
-        if (tex && port_prompt_icons_on && t.depth == 0 && t.cy != PORT_CLUT_Y && w && h && w <= 256 && h <= 256 &&
-            port_prompt_tex_clut(t.tx, t.ty, u, v, u + w - 1, v + h - 1)) { t.cx = 0; t.cy = PORT_CLUT_Y; }
+        if (tex && port_prompt_icons_on && t.depth == 0 && t.cy != PORT_CLUT_Y && w && h && w <= 256 && h <= 256) {
+            int r = port_prompt_tex_clut(t.tx, t.ty, u, v, u + w - 1, v + h - 1);   /* 0, or 1 + the port CLUT row */
+            if (r) { t.cx = (r - 1) * 16; t.cy = PORT_CLUT_Y; }
+        }
         if (tex && port_drawdump_path && w && h && t.cy != PORT_CLUT_Y)            /* --dump-draws (drawdump.c) */
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7, (p[2] >> 16) & 0xFFFF, u, v, w, h, a.x, a.y, w, h, semi ? 1 : 0, 2);
         if (tex) t.rep = port_texpack_on && w && h && t.cy != PORT_CLUT_Y ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;

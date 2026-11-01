@@ -1090,6 +1090,16 @@ names (with SDL's default label mapping a Switch pad's SDL "A" is its labelled A
 L1/R1/START/SELECT and the d-pad arrows in the texts are words / arrows and stay. Debug: `--test-message FRAME:K:L`
 opens `showMessageBox(K, L)` (AREA00: 4:4 / 4:5 / 4:6 / 4:9 are the "□/✕/○/△ to run" hints).
 
+*Letter rendering (Xbox, Nintendo, Thor; message glyphs and menu icons alike).* The 6 x 8 letters keep their place
+and get a 1 px drop shadow down-right (a disc pixel at +1,+1 of a letter pixel: the fill 30 % toward black) and a soft
+edge (disc pixels still equal to the fill and 4-adjacent to the letter: the fill 35 % toward the letter colour: white
+on Thor, the letter's own colour on the dark Xbox / Nintendo disc), letters on top (`letter_fx`). The extra colours
+come from **several port CLUT rows**: `PORT_CLUT_ROWS` = 7 rows of 16 in `port_prompt_clut`, CLUT id `0xFFFF - row`
+(row 0 the original table: generic / PlayStation fallback shapes; 1 Xbox; 2 Nintendo and every shoulder label; 3..6
+Thor one per button: disc, shadow, soft edge, white). `gpu.c` maps such an id to `GpuTex.cy = PORT_CLUT_Y`,
+`cx = 16 * row`; the soft texel fetch reads `port_prompt_clut[cx + i]`, the GL shader's `pclut(tp.x + idx)` has all 112
+entries compiled in. The message glyph cache slots and the patched menu rects remember their row.
+
 *Menu icons (title, options, button config, adjust screen, save / load).* Outside the message boxes the game draws its
 button icons as sprites from texture pages it uploads with `LoadImage`: the title's "PRESS START or ✕ BUTTON" (page
 384,0, a 16 x 16 ✕ at u 0 v 128), the options / adjust screen / button config screens of O0PTSUB0 ("✕ Button:CHANGE
