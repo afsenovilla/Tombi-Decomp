@@ -27,7 +27,6 @@
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Cut content: on</string>
     <string name="chip_cut_off">Cut content: off</string>
-    <string name="opt_hint">D-pad: choose · Left/Right or A: change · B: back. Extra flags in files/args.txt are still added.</string>
     <string name="disc_path">Image: %1$s</string>
     <string name="disc_fail">Copy failed: %1$s</string>
     <string name="disc_nosaf">This device has no file picker.</string>
@@ -88,4 +87,6 @@
     <string name="disc_wipe_saves">Delete the saves too</string>
     <string name="disc_wiped">Data deleted (saves kept). Pick your disc again to play.</string>
     <string name="disc_wiped_saves">Data and saves deleted. Pick your disc again to play.</string>
+    <string name="opt_disc">Disc / data…</string>
+    <string name="opt_hint">D-pad: move · A: toggle / open · Left/Right: change a value · L1/R1: other column · B: back. Extra flags in files/args.txt are still added.</string>
 </resources>

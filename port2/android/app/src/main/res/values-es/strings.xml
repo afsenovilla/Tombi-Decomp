@@ -26,7 +26,6 @@
     <string name="aspect_auto">Auto</string>
     <string name="chip_cut_on">Recortado: sí</string>
     <string name="chip_cut_off">Recortado: no</string>
-    <string name="opt_hint">Cruceta: elegir · Izq./Der. o A: cambiar · B: volver. Las opciones de files/args.txt se siguen añadiendo.</string>
     <string name="disc_path">Imagen: %1$s</string>
     <string name="disc_fail">Error al copiar: %1$s</string>
     <string name="disc_nosaf">Este dispositivo no tiene selector de archivos.</string>
@@ -87,4 +86,6 @@
     <string name="disc_wipe_saves">Borrar también las partidas</string>
     <string name="disc_wiped">Datos borrados (partidas conservadas). Vuelve a elegir tu disco para jugar.</string>
     <string name="disc_wiped_saves">Datos y partidas borrados. Vuelve a elegir tu disco para jugar.</string>
+    <string name="opt_disc">Disco / datos…</string>
+    <string name="opt_hint">Cruceta: mover · A: activar / abrir · Izq./Der.: cambiar un valor · L1/R1: otra columna · B: volver. Las opciones de files/args.txt se siguen añadiendo.</string>
 </resources>

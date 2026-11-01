@@ -19,7 +19,9 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.widget.OverScroller;
 import android.widget.Toast;
 
 import java.io.File;
@@ -452,6 +454,7 @@ public class LauncherActivity extends Activity {
     @Override
     public boolean onGenericMotionEvent(MotionEvent e) {
         if (view.capture >= 0 && view.captureMotion(e)) return true;
+        if (e.getActionMasked() == MotionEvent.ACTION_SCROLL && view.wheel(e.getAxisValue(MotionEvent.AXIS_VSCROLL))) return true;
         return super.onGenericMotionEvent(e);
     }
 
@@ -459,6 +462,7 @@ public class LauncherActivity extends Activity {
     static class Item {
         String label; String value; RectF r = new RectF(); boolean primary;
         Runnable act; Adjust adj;
+        int check = -1;   // on/off option: 0/1, drawn as a tick box instead of a value
         Item(String l, Runnable a) { label = l; act = a; }
     }
     interface Adjust { void by(int d); }
@@ -467,6 +471,39 @@ public class LauncherActivity extends Activity {
         static final int MAIN = 0, OPTIONS = 1, DISC = 2, CRASH = 3, LOG = 4, PADMAP = 5;
         int screen = MAIN, focus = 0;
         int[] lastFocus = new int[6];
+        /* Options grid: items[0..optLeft) are the left column, the rest the right column (row = index in the column).
+         *  discFromOptions = the Disc screen was opened from Options (B/Back return there) */
+        int optLeft;
+        /* Scrolling list (only the pad-mapping list overflows now; the 1280x720 canvas is scaled to fit any screen,
+         *  so Options needs none): listScroll/listMax in canvas units. Keys keep the focused row visible
+         *  (followFocus); a drag moves the list, with fling from the release velocity; a touch that moved less than
+         *  the slop (8dp) is a tap. */
+        float listScroll, listMax;
+        boolean followFocus = true, dragging;
+        float downX, downY, lastY;
+        final float slop = 8 * getResources().getDisplayMetrics().density;
+        VelocityTracker vt;
+        final OverScroller scroller = new OverScroller(getContext());
+
+        boolean scrolls() { return screen == PADMAP && listMax > 0; }
+
+        boolean wheel(float v) {
+            if (!scrolls() || v == 0) return false;
+            scroller.forceFinished(true);
+            followFocus = false;
+            listScroll = Math.max(0, Math.min(listMax, listScroll - v * 60));
+            invalidate();
+            return true;
+        }
+
+        @Override
+        public void computeScroll() {
+            if (scroller.computeScrollOffset()) {
+                listScroll = Math.max(0, Math.min(listMax, scroller.getCurrY() / s));
+                postInvalidateOnAnimation();
+            }
+        }
+        boolean discFromOptions;
         List<String> logLines = new ArrayList<>();
         List<Item> items = new ArrayList<>();
         final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -497,8 +534,10 @@ public class LauncherActivity extends Activity {
             confirmWipe = false;
             padStatus = null; capture = -1;
             lastFocus[screen] = focus;
+            if (sc == DISC) discFromOptions = screen == OPTIONS;
             screen = sc;
             focus = lastFocus[sc];
+            listScroll = 0; followFocus = true; scroller.forceFinished(true);
             if (sc != DISC && phase == IDLE) { importStatus = null; result = 0; }
             if (sc == CRASH || sc == LOG) {
                 try { logLines = CrashLog.tail(LauncherActivity.this, 40); } catch (Throwable t) { logLines = new ArrayList<>(); }
@@ -511,7 +550,7 @@ public class LauncherActivity extends Activity {
 
         Item toggle(int label, final String key) {
             final Item it = new Item(getString(label), null);
-            it.value = onoff(flag(key, false));
+            it.check = flag(key, false) ? 1 : 0;
             it.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean(key, !flag(key, false)).apply(); } };
             return it;
         }
@@ -524,41 +563,45 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.options), new Runnable() { public void run() { setScreen(OPTIONS); } }));
                 items.add(new Item(getString(R.string.disc), new Runnable() { public void run() { setScreen(DISC); } }));
                 items.add(new Item(getString(R.string.quit), new Runnable() { public void run() { finish(); } }));
-            } else if (screen == OPTIONS) {
+            } else if (screen == OPTIONS) {   // two columns, see drawOptions; left = game, right = display / dual screen / data
                 Item l = new Item(getString(R.string.opt_lang), null);
                 l.value = LANG_NAME[langIdx()];
                 l.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("lang", (langIdx() + d + LANG_N.length) % LANG_N.length).apply(); } };
                 items.add(l);
-                Item as = new Item(getString(R.string.opt_aspect), null);
-                as.value = aspectName(aspectIdx());
-                as.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("aspect", (aspectIdx() + d + ASPECTS.length) % ASPECTS.length).apply(); } };
-                items.add(as);
                 Item tpi = new Item(getString(R.string.opt_textpatch), null);
-                tpi.value = onoff(textPatchOn());
+                tpi.check = textPatchOn() ? 1 : 0;
                 tpi.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("textpatch", !textPatchOn()).apply(); } };
                 items.add(tpi);
                 items.add(toggle(R.string.opt_cut, "cut"));
-                items.add(toggle(R.string.opt_debug, "debugmenu"));
-                Item ss = new Item(getString(R.string.opt_secondscreen), null);
-                ss.value = onoff(secondScreenOn());
-                ss.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("secondscreen", !secondScreenOn()).apply(); } };
-                items.add(ss);
-                Item hb = new Item(getString(R.string.opt_hudbottom), null);
-                hb.value = onoff(hudBottomOn());
-                hb.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("hudbottom", !hudBottomOn()).apply(); } };
-                items.add(hb);
-                Item r = new Item(getString(R.string.opt_renderer), null);
-                r.value = getString(flag("gl", false) ? R.string.renderer_gl : R.string.renderer_soft);
-                r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
-                items.add(r);
                 items.add(toggle(R.string.opt_skipintro, "skipintro"));
-                items.add(toggle(R.string.opt_hz60, "hz60"));
-                items.add(toggle(R.string.opt_fps60, "fps60"));
-                items.add(toggle(R.string.opt_showfps, "showfps"));
+                items.add(toggle(R.string.opt_debug, "debugmenu"));
                 items.add(toggle(R.string.opt_inflives, "inflives"));
                 items.add(toggle(R.string.opt_infhealth, "infhealth"));
                 items.add(new Item(getString(R.string.opt_padmap), new Runnable() { public void run() { setScreen(PADMAP); } }));
                 items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
+                optLeft = items.size();
+                Item as = new Item(getString(R.string.opt_aspect), null);
+                as.value = aspectName(aspectIdx());
+                as.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("aspect", (aspectIdx() + d + ASPECTS.length) % ASPECTS.length).apply(); } };
+                items.add(as);
+                Item r = new Item(getString(R.string.opt_renderer), null);
+                r.value = getString(flag("gl", false) ? R.string.renderer_gl : R.string.renderer_soft);
+                r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
+                items.add(r);
+                items.add(toggle(R.string.opt_hz60, "hz60"));
+                items.add(toggle(R.string.opt_fps60, "fps60"));
+                items.add(toggle(R.string.opt_showfps, "showfps"));
+                Item ss = new Item(getString(R.string.opt_secondscreen), null);
+                ss.check = secondScreenOn() ? 1 : 0;
+                ss.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("secondscreen", !secondScreenOn()).apply(); } };
+                items.add(ss);
+                Item hb = new Item(getString(R.string.opt_hudbottom), null);
+                hb.check = hudBottomOn() ? 1 : 0;
+                hb.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("hudbottom", !hudBottomOn()).apply(); } };
+                items.add(hb);
+                items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
+                items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
+                    setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             } else if (screen == PADMAP) {
                 PadMap pm = new PadMap(prefs.getString("padmap", ""));
@@ -589,7 +632,7 @@ public class LauncherActivity extends Activity {
             } else {
                 items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
                 items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() { confirmWipe = true; wipeSaves = false; focus = 0; } }));
-                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
+                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(discFromOptions ? OPTIONS : MAIN); } }));
             }
             if (focus >= items.size()) focus = 0;
         }
@@ -605,6 +648,7 @@ public class LauncherActivity extends Activity {
         // ---- input ----
         boolean key(int code) {
             build();
+            if (screen == OPTIONS && optionsKey(code)) { invalidate(); return true; }
             int n = items.size();
             switch (code) {
                 case KeyEvent.KEYCODE_DPAD_UP: focus = (focus + n - 1) % n; break;
@@ -621,7 +665,7 @@ public class LauncherActivity extends Activity {
                 case KeyEvent.KEYCODE_BUTTON_B: case KeyEvent.KEYCODE_BACK: case KeyEvent.KEYCODE_ESCAPE:
                     if (phase != IDLE) requestCancel();
                     else if (screen == CRASH || screen == LOG) closeLog();
-                    else if (screen == MAIN) finish(); else setScreen(screen == PADMAP ? OPTIONS : MAIN);
+                    else if (screen == MAIN) finish(); else setScreen(screen == PADMAP || (screen == DISC && discFromOptions) ? OPTIONS : MAIN);
                     break;
                 case KeyEvent.KEYCODE_BUTTON_START:
                     if (phase != IDLE) break;
@@ -630,8 +674,31 @@ public class LauncherActivity extends Activity {
                     break;
                 default: return false;
             }
+            followFocus = true;
             invalidate();
             return true;
+        }
+
+        /** Options grid moves: Up/Down within the column (wrapping), Left/Right to the same row of the other column
+         *  (the last row if shorter); on a value button (language, aspect, renderer) Left/Right change the value
+         *  instead, and L1/R1 switch column from anywhere. A / B / Start take the common path. */
+        boolean optionsKey(int code) {
+            int n = items.size(), col = focus < optLeft ? 0 : 1, row = col == 0 ? focus : focus - optLeft;
+            int len = col == 0 ? optLeft : n - optLeft, base = col == 0 ? 0 : optLeft;
+            switch (code) {
+                case KeyEvent.KEYCODE_DPAD_UP: focus = base + (row + len - 1) % len; return true;
+                case KeyEvent.KEYCODE_DPAD_DOWN: focus = base + (row + 1) % len; return true;
+                case KeyEvent.KEYCODE_DPAD_LEFT: case KeyEvent.KEYCODE_DPAD_RIGHT: {
+                    Item it = items.get(focus);
+                    if (it.adj != null && it.check < 0) { it.adj.by(code == KeyEvent.KEYCODE_DPAD_LEFT ? -1 : 1); return true; }
+                }   // fall through: move to the other column
+                case KeyEvent.KEYCODE_BUTTON_L1: case KeyEvent.KEYCODE_BUTTON_R1: {
+                    int ob = col == 0 ? optLeft : 0, ol = col == 0 ? n - optLeft : optLeft;
+                    focus = ob + Math.min(row, ol - 1);
+                    return true;
+                }
+            }
+            return false;
         }
 
         void activate(Item it) {
@@ -646,12 +713,46 @@ public class LauncherActivity extends Activity {
             float x = (e.getX() - ox) / s, y = (e.getY() - oy) / s;
             int hit = -1;
             for (int i = 0; i < items.size(); i++) if (items.get(i).r.contains(x, y)) hit = i;
-            if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                if (hit >= 0) { focus = hit; invalidate(); }
+            int act = e.getActionMasked();
+            if (vt == null) vt = VelocityTracker.obtain();
+            vt.addMovement(e);
+            if (act == MotionEvent.ACTION_DOWN) {
+                boolean flinging = !scroller.isFinished();
+                scroller.forceFinished(true);
+                downX = e.getX(); downY = lastY = e.getY(); dragging = flinging;   // a touch that stops a fling is no tap
+                if (hit >= 0 && !flinging) { focus = hit; invalidate(); }
                 return true;
             }
-            if (e.getActionMasked() == MotionEvent.ACTION_UP && hit >= 0 && hit == focus) {
+            if (act == MotionEvent.ACTION_MOVE) {
+                if (!dragging && Math.hypot(e.getX() - downX, e.getY() - downY) > slop) dragging = true;
+                if (dragging && scrolls()) {
+                    followFocus = false;
+                    listScroll = Math.max(0, Math.min(listMax, listScroll - (e.getY() - lastY) / s));
+                    invalidate();
+                }
+                lastY = e.getY();
+                return true;
+            }
+            if (act == MotionEvent.ACTION_UP || act == MotionEvent.ACTION_CANCEL) {
+                boolean wasDrag = dragging;
+                dragging = false;
+                if (wasDrag && scrolls() && act == MotionEvent.ACTION_UP) {
+                    vt.computeCurrentVelocity(1000);
+                    float vy = vt.getYVelocity();
+                    if (Math.abs(vy) > 50 * getResources().getDisplayMetrics().density) {
+                        scroller.fling(0, Math.round(listScroll * s), 0, Math.round(-vy), 0, 0, 0, Math.round(listMax * s));
+                        postInvalidateOnAnimation();
+                    }
+                }
+                vt.recycle(); vt = null;
+                if (wasDrag || act == MotionEvent.ACTION_CANCEL) return true;
+            }
+            if (act == MotionEvent.ACTION_UP && hit >= 0 && hit == focus) {
                 build();
+                if (screen == OPTIONS && hit < items.size()) {   // value button: left half = previous, right half = next
+                    Item it = items.get(hit);
+                    if (it.adj != null && it.check < 0) { it.adj.by(x < it.r.centerX() ? -1 : 1); invalidate(); return true; }
+                }
                 if (hit < items.size()) activate(items.get(hit));
             }
             return true;
@@ -745,33 +846,58 @@ public class LauncherActivity extends Activity {
             }
         }
 
+        final android.graphics.Path tri = new android.graphics.Path();
+        /** a filled 12x16 triangle pointing right (dir 1) or left (-1) from x, in the current paint colour */
+        void arrow(float x, float cy, int dir) {
+            tri.reset();
+            tri.moveTo(x + dir * 12, cy); tri.lineTo(x, cy - 8); tri.lineTo(x, cy + 8); tri.close();
+            p.setStyle(Paint.Style.FILL);
+            canvas.drawPath(tri, p);
+        }
+
         void drawOptions() {
             bigTitle(getString(R.string.options), 50, 66);
-            // more rows than fit above the hint: scroll so the focused row stays visible
-            float top = 88, bottom = 670, rowH = 44;
-            float scroll = Math.max(0, Math.min(items.size() * rowH - (bottom - top), (focus + 1) * rowH - (bottom - top)));
-            float y = top - scroll;
-            canvas.save();
-            canvas.clipRect(0, top - 10, 1280, bottom + 4);
+            // two columns of buttons, no scrolling: 10 rows of 48 + 9 between 96 and 666
+            float rowH = 57, bh = 48, top = 98;
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
-                boolean f = i == focus;
-                it.r.set(640 - 380, y, 640 + 380, y + 38);
-                if (y + 38 < top - 10 || y > bottom) it.r.set(-1, -1, -1, -1);   // off screen: not touchable
+                boolean f = i == focus, right = i >= optLeft;
+                float x0 = right ? 652 : 72, y = top + (right ? i - optLeft : i) * rowH;
+                it.r.set(x0, y, x0 + 556, y + bh);
                 pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
                 int col = f ? ACCENT_TEXT : BG;
-                text(nunito, 19, col);
-                if (it.value == null) {
-                    canvas.drawText(it.label, 640, midBase(it.r), p);
-                } else {
+                text(nunito, 20, col);
+                if (it.check >= 0) {   // on/off: label + tick box on the right
+                    p.setTextAlign(Paint.Align.LEFT);
+                    canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
+                    float bx = it.r.right - 22 - 30, by = it.r.centerY() - 15;
+                    tmp.set(bx, by, bx + 30, by + 30);
+                    if (it.check == 1) {
+                        p.setColor(f ? ACCENT_TEXT : ACCENT_SH);
+                        canvas.drawRoundRect(tmp, 8, 8, p);
+                        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(4.5f); p.setStrokeCap(Paint.Cap.ROUND);
+                        p.setColor(f ? ACCENT : Color.WHITE);
+                        canvas.drawLine(bx + 7, by + 16, bx + 13, by + 22, p);
+                        canvas.drawLine(bx + 13, by + 22, bx + 24, by + 9, p);
+                        p.setStrokeCap(Paint.Cap.BUTT);
+                    } else {
+                        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(3.5f); p.setColor(col);
+                        tmp.inset(2, 2);
+                        canvas.drawRoundRect(tmp, 7, 7, p);
+                    }
+                    p.setStyle(Paint.Style.FILL);
+                } else if (it.value == null) {   // submenu / action
+                    canvas.drawText(it.label, it.r.centerX(), midBase(it.r), p);
+                } else {   // value: label + "◀ value ▶"
                     p.setTextAlign(Paint.Align.LEFT);
                     canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
                     p.setTextAlign(Paint.Align.RIGHT);
-                    canvas.drawText("‹  " + it.value + "  ›", it.r.right - 26, midBase(it.r), p);
+                    float vr = it.r.right - 50, cy = it.r.centerY();
+                    canvas.drawText(it.value, vr, midBase(it.r), p);
+                    arrow(vr + 14, cy, 1);
+                    arrow(vr - p.measureText(it.value) - 14, cy, -1);
                 }
-                y += rowH;
             }
-            canvas.restore();
             tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB);
             tp.setTextAlign(Paint.Align.LEFT);
             wrapped(getString(R.string.opt_hint), 684);
@@ -847,8 +973,11 @@ public class LauncherActivity extends Activity {
         void drawPadMap() {
             bigTitle(getString(R.string.pad_title), 50, 66);
             float top = 88, bottom = 640, rowH = 40;
-            float scroll = Math.max(0, Math.min(items.size() * rowH - (bottom - top), (focus + 1) * rowH - (bottom - top)));
-            float y = top - scroll;
+            listMax = Math.max(0, items.size() * rowH - (bottom - top));
+            if (followFocus)   // keyboard / pad: keep the focused row inside the window
+                listScroll = Math.max(focus * rowH - (bottom - top) + rowH, Math.min(listScroll, focus * rowH));
+            listScroll = Math.max(0, Math.min(listMax, listScroll));
+            float y = top - listScroll;
             canvas.save();
             canvas.clipRect(0, top - 10, 1280, bottom + 4);
             for (int i = 0; i < items.size(); i++) {
