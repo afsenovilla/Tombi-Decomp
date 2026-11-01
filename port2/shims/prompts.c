@@ -257,28 +257,33 @@ static void label(const char *s, int c) {
     if (!s[1]) letter6(s[0], 3, 4, c);          /* one letter: 6 x 8, centred on the disc */
     else { letter3(s[0], 2, 6, c); letter3(s[1], 7, 6, c); }
 }
+/* the PlayStation shapes, one design for the message boxes and every menu icon: (ox, oy) = the top-left of the 12 x 12
+   disc they sit on; small (a disc under 12 px, e.g. the save screens' 12 x 12 slots): the same shapes in a 6 x 6 box,
+   hollow like the big ones */
+static void ps_shape(u8 *buf, int stride, int w, int h, int ox, int oy, int which, int col, int small) {
+    #define SP(x, y) do { int X_ = ox + (x), Y_ = oy + (y); if (X_ >= 0 && X_ < w && Y_ >= 0 && Y_ < h) buf[Y_ * stride + X_] = (u8)col; } while (0)
+    static const u8 big[4][8] = { { 0 }, { 0x3C, 0x42, 0x81, 0x81, 0x81, 0x81, 0x42, 0x3C }, { 0 }, { 0 } };
+    static const u8 sm[4][6] = { { 0x21, 0x12, 0x0C, 0x0C, 0x12, 0x21 }, { 0x1E, 0x21, 0x21, 0x21, 0x21, 0x1E },
+                                 { 0x3F, 0x21, 0x21, 0x21, 0x21, 0x3F }, { 0x0C, 0x12, 0x12, 0x21, 0x21, 0x3F } };
+    if (small) {   /* centred: the disc is (12 - 2 * shrink) wide, the caller passes its centre - 6 */
+        for (int y = 0; y < 6; y++) for (int x = 0; x < 6; x++) if (sm[which][y] >> (5 - x) & 1) SP(3 + x, 3 + y);
+    } else switch (which) {
+    case PS_CROSS:  for (int i = 0; i < 6; i++) { SP(3 + i, 3 + i); SP(8 - i, 3 + i); } break;
+    case PS_CIRCLE: for (int y = 0; y < 8; y++) for (int x = 0; x < 8; x++) if (big[1][y] >> (7 - x) & 1) SP(2 + x, 2 + y); break;
+    case PS_SQUARE: for (int i = 0; i < 6; i++) { SP(3 + i, 3); SP(3 + i, 8); SP(3, 3 + i); SP(8, 3 + i); } break;
+    default:
+        for (int y = 0; y <= 6; y++) { SP(5 - y / 2, 2 + y); SP(6 + y / 2, 2 + y); }
+        for (int x = 2; x <= 9; x++) SP(x, 8);
+    }
+    #undef SP
+}
 /* the PlayStation symbols, in the game's colours */
 static void ps_symbol_c(int which, int col);
 static void ps_symbol(int which) { ps_symbol_c(which, -1); }
 /* col >= 0: every shape in that colour (the custom style) */
 static void ps_symbol_c(int which, int col) {
-    int x, y;
-    #define PC(c) (col >= 0 ? col : (c))
-    switch (which) {
-    case PS_CROSS:  for (int i = 0; i < 6; i++) { put(3 + i, 5 + i, PC(C_BLUE)); put(8 - i, 5 + i, PC(C_BLUE)); } break;
-    case PS_CIRCLE:
-        {   /* fallback only (the game's own circle is used once met): a clean 8 x 8 ring */
-            static const u8 ring[8] = { 0x3C, 0x42, 0x81, 0x81, 0x81, 0x81, 0x42, 0x3C };
-            for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) if (ring[y] >> (7 - x) & 1) put(2 + x, 4 + y, PC(C_RED));
-        }
-        break;
-    case PS_SQUARE: for (int i = 0; i < 6; i++) { put(3 + i, 5, PC(C_PINK)); put(3 + i, 10, PC(C_PINK)); put(3, 5 + i, PC(C_PINK)); put(8, 5 + i, PC(C_PINK)); } break;
-    case PS_TRIANGLE:
-        for (y = 0; y <= 6; y++) { int l = 5 - y / 2, r = 6 + y / 2; put(l, 4 + y, PC(C_GREEN)); put(r, 4 + y, PC(C_GREEN)); }
-        for (x = 2; x <= 9; x++) put(x, 10, PC(C_GREEN));
-        break;
-    }
-    #undef PC
+    static const int pcol[4] = { C_BLUE, C_RED, C_PINK, C_GREEN };   /* the circle: fallback only (the game's own is used once met) */
+    ps_shape(&img[0][0], GW, GW, GH, 0, 2, which, col >= 0 ? col : pcol[which], 0);
 }
 /* generic: four dots in a diamond, the button's position lit */
 static void diamond(int pos) {
@@ -466,19 +471,9 @@ static int mi_draw(int i, int w, int h) {
         return 1 + ROW_NINTENDO;
     }
     if (st == PROMPT_PS || st == PROMPT_CUSTOM) {   /* PS shapes where the source icon is not on the page (port CLUT: the nearest colours); custom: in its letter colour */
-        int s = src, c3 = cx2 / 2, c4 = cy2 / 2, cu = st == PROMPT_CUSTOM;
-        #define P_XBLUE (cu ? P_WHITE | 0x80 : 4)
-        #define P_XRED (cu ? P_WHITE | 0x80 : 2)
-        #define P_NRED (cu ? P_WHITE | 0x80 : 10)
-        #define P_XGREEN (cu ? P_WHITE | 0x80 : 1)
-        if (s == PS_CROSS) for (int k = -3; k < 3; k++) { mput(c3 + k, c4 + k, P_XBLUE, w, h); mput(c3 - 1 - k, c4 + k, P_XBLUE, w, h); }
-        else if (s == PS_CIRCLE) for (int y = -3; y < 3; y++) for (int x = -3; x < 3; x++) { int r = (2*x+1)*(2*x+1)+(2*y+1)*(2*y+1); if (r >= 14 && r <= 36) mput(c3 + x, c4 + y, P_XRED, w, h); }
-        else if (s == PS_SQUARE) for (int k = -3; k < 3; k++) { mput(c3 + k, c4 - 3, P_NRED, w, h); mput(c3 + k, c4 + 2, P_NRED, w, h); mput(c3 - 3, c4 + k, P_NRED, w, h); mput(c3 + 2, c4 + k, P_NRED, w, h); }
-        else { for (int y = 0; y < 6; y++) { mput(c3 - 1 - y / 2, c4 - 3 + y, P_XGREEN, w, h); mput(c3 + y / 2, c4 - 3 + y, P_XGREEN, w, h); } for (int x = -4; x < 4; x++) mput(c3 + x, c4 + 2, P_XGREEN, w, h); }
-        #undef P_XBLUE
-        #undef P_XRED
-        #undef P_NRED
-        #undef P_XGREEN
+        int cu = st == PROMPT_CUSTOM;
+        static const int pcl[4] = { 4, 2, 10, 1 };   /* port CLUT: the nearest blue / red / pink / green */
+        ps_shape(&mimg[0][0], MW, w, h, cx2 / 2 - 6, cy2 / 2 - 6, src, cu ? P_WHITE | 0x80 : pcl[src], d < 12);
         if (cu) { letter_fx(&mimg[0][0], MW, w, h, 7, 8, soft_white); return 1 + ROW_CUSTOM + src; }
         return 1;
     }

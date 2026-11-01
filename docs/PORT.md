@@ -1113,6 +1113,11 @@ botones* to *Personalizado* (appended to `PROMPTS`) and the launcher passes `--p
 labels for `custom` when the pad itself is a Thor / Nintendo one. PC launcher: *Personalizado* in the prompt styles and
 a *Personalizar botones…* dialog (presets, symbols, `tkinter.colorchooser` per disc / letter, a preview canvas;
 `tools/prompt_custom.py` holds the presets and the same glyph algorithm, checked pixel-exact against a game frame). The
+PlayStation shapes (PS style where the source icon is not on the page, custom with `sym=ps`) come from one function,
+`ps_shape()`, in the message boxes and every menu icon slot: same 8 x 8 ring, 6 x 6 cross / square, 8 x 7 triangle,
+placed on the 12 px disc exactly as in the message glyph; a slot whose disc is under 12 px gets the same shapes in a
+hollow 6 x 6 box. The OpenGL renderer builds its port-CLUT lookup (`pclut()`) as a binary search: the former chain of
+208 ifs gave one flat colour for rows 9..12 on Mesa llvmpipe (custom glyphs drawn as solid blocks). The
 named styles are unchanged.
 
 *Letter rendering (Xbox, Nintendo, Thor; message glyphs and menu icons alike).* The 6 x 8 letters keep their place

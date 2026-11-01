@@ -27,6 +27,15 @@
 #include <SDL2/SDL_opengl.h>
 #include "port_runtime.h"
 #include "gpu_backend.h"
+/* GLSL for "return port_prompt_clut[i]" over entries lo..hi-1, as nested ifs */
+static int pclut_tree(char *o, int cap, int lo, int hi) {
+    if (hi - lo == 1) return snprintf(o, cap, "return %d.0;\n", port_prompt_clut[lo]);
+    int mid = (lo + hi) / 2, n = snprintf(o, cap, "if (i < %d.5) {\n", mid - 1);
+    n += pclut_tree(o + n, cap - n, lo, mid);
+    n += snprintf(o + n, cap - n, "} else {\n");
+    n += pclut_tree(o + n, cap - n, mid, hi);
+    return n + snprintf(o + n, cap - n, "}\n");
+}
 
 typedef gpu_u8 u8; typedef gpu_u16 u16; typedef gpu_u32 u32;
 
@@ -1033,10 +1042,12 @@ static int gl_start(void) {
     stage8 = (u8 *)SDL_malloc((size_t)2048 * 512 * R * R * 4);
     if (!stage || !stage8) return -1;
     {   /* the fragment shader, after pclut(): the port-only CLUT (gpu_backend.h PORT_CLUT_Y) as constants */
-        static char fs_full[sizeof fs_src + 64 * PORT_CLUT_ROWS * 16];   /* i = 16 * row + index (GpuTex.cx + index) */
+        /* a binary search (8 comparisons), not a chain of 208 ifs: Mesa's llvmpipe returned a wrong constant past row 8 of
+           a long chain (the custom rows 9..12 came out as one flat colour) */
+        static char fs_full[sizeof fs_src + 96 * PORT_CLUT_ROWS * 16];   /* i = 16 * row + index (GpuTex.cx + index) */
         int n = snprintf(fs_full, sizeof fs_full, "float pclut(float i) {\n");
-        for (int i = 0; i < PORT_CLUT_ROWS * 16 - 1; i++) n += snprintf(fs_full + n, sizeof fs_full - n, "  if (i < %d.5) return %d.0;\n", i, port_prompt_clut[i]);
-        n += snprintf(fs_full + n, sizeof fs_full - n, "  return %d.0;\n}\n", port_prompt_clut[PORT_CLUT_ROWS * 16 - 1]);
+        n += pclut_tree(fs_full + n, (int)sizeof fs_full - n, 0, PORT_CLUT_ROWS * 16);
+        n += snprintf(fs_full + n, sizeof fs_full - n, "}\n");
         snprintf(fs_full + n, sizeof fs_full - n, "%s", fs_src);
         prog = link(vs_src, fs_full, "gpu");
     }
