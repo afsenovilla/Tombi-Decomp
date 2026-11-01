@@ -325,6 +325,8 @@ static void header(const char *title) {
 }
 
 static int map_mark_link = -1, map_mark_ev = -1;   /* the event browser's marker (a room link) */
+static int map_ev_marks;                            /* the Status page: mark the rooms of the started / completed events */
+static int ev_link_state(int link);                 /* panel_events.inc: 0 none, 1 an event in progress there, 2 all completed */
 static void draw_map(int x, int y, int w, int h, int link) {
     window_(x, y, w, h);
     int mx = x + 7, my = y + 7, mw = w - 14, mh = h - 14;
@@ -358,6 +360,13 @@ static void draw_map(int x, int y, int w, int h, int link) {
             if (routes[r][k].type == 1 && b >= 0 && b < NNODES && pass < 2) line(PX(a), PY(a), PX(b), PY(b), pass ? li : lo + li, pass ? C_WHITE : RGB(40, 60, 90));
             else if (routes[r][k].type == 0 && pass == 2) dot(PX(a), PY(a), 3 + sc, C_RED);
         }
+    }
+    if (map_ev_marks) for (int l = 0; l < NLINKS; l++) {   /* a dot per room with events: orange in progress, green completed */
+        int st = ev_link_state(l), a = links[l][0], b = links[l][1];
+        if (!st || a >= NNODES || b >= NNODES || !(G_MAPREG(links[l][2]) || links[l][2] == cur_reg)) continue;
+        int cx = (PX(a) + PX(b)) / 2, cy = (PY(a) + PY(b)) / 2, r = 2 + sc;
+        pa_fill(cx - r - 1, cy - r - 1, 2 * r + 3, 2 * r + 3, RGB(40, 30, 20));
+        pa_fill(cx - r, cy - r, 2 * r + 1, 2 * r + 1, st == 1 ? RGB(255, 150, 30) : RGB(90, 210, 80));
     }
     if (link >= 0) {
         int a = links[link][0], b = links[link][1];
@@ -419,9 +428,21 @@ static const char *ev_title(int e, char *b, int n) {
 static int ev_count(void) { return ev_norder ? ev_norder : EVENTS; }
 static int ev_id(int k) { return ev_norder ? ev_order[k] : k; }
 static int ev_hidden_now(int e);   /* panel_events.inc: hidden by the player (panel_hidden.txt) */
+static int ev_pins(int *ids);      /* panel_events.inc: the pinned events (panel_pins.txt), at most 4 */
+static void pin_mark(int x, int y, unsigned c);
+static void pin_row(int x, int y, int w, int e);
 static void draw_in_progress(int x, int y, int w, int h) {
-    char b[48]; int ids[EVENTS], n = 0;
-    for (int k = 0; k < ev_count(); k++) { int e = ev_id(k), v = G_EVENT(e); if (v && v != 0xFF && !ev_hidden_now(e)) ids[n++] = e; }
+    char b[48]; int ids[EVENTS], n = 0, pins[4], np = ev_pins(pins);
+    if (np) {   /* the events the player follows: title, state, place and a hint, then what is left of the box for the rest */
+        int ph = 28 + np * 34; if (ph > h - 28) ph = h - 28;
+        window_(x, y, w, ph);
+        pin_mark(x + 10, y + 6, C_RED);
+        pa_text(x + 24, y + 6, 16, T("Tracking", "Seguimiento"), C_RED, C_REDE);
+        for (int i = 0; i < np && 24 + i * 34 + 32 <= ph; i++) pin_row(x + 8, y + 24 + i * 34, w - 16, pins[i]);
+        y += ph + 4; h -= ph + 4;
+    }
+    for (int k = 0; k < ev_count(); k++) { int e = ev_id(k), v = G_EVENT(e); int p = 0; for (int i = 0; i < np; i++) p |= pins[i] == e; if (v && v != 0xFF && !ev_hidden_now(e) && !p) ids[n++] = e; }
+    if (h < 30) return;
     window_(x, y, w, h);
     pa_text(x + 10, y + 6, 16, T("In progress", "En curso"), C_RED, C_REDE);
     int ly = y + 24, lh = 20, max = (h - 30) / lh;
@@ -439,12 +460,12 @@ static void page_map(int play, int link) {
     if (!play) { draw_map(8, top, W - 16, H - top - 8, -1); return; }
     if (W >= H) {
         int sw = W * 34 / 100, mw = W - 16 - sw - g, mh = (H - top - 8) * 56 / 100;
-        draw_map(8, top, mw, mh, link);
+        map_ev_marks = 1; draw_map(8, top, mw, mh, link); map_ev_marks = 0;
         draw_status(8 + mw + g, top, sw, mh);
         draw_in_progress(8, top + mh + g, W - 16, H - top - mh - g - 8);
     } else {
         int mh = (H - top - 8) * 42 / 100, sh = 150;
-        draw_map(8, top, W - 16, mh, link);
+        map_ev_marks = 1; draw_map(8, top, W - 16, mh, link); map_ev_marks = 0;
         draw_status(8, top + mh + g, W - 16, sh);
         draw_in_progress(8, top + mh + sh + 2 * g, W - 16, H - top - mh - sh - 2 * g - 8);
     }
@@ -605,7 +626,7 @@ static const char *panel_script;
 static int hold_x, hold_y, hold_at = -1;   /* hold@X@Y: the release, 40 frames later */
 void port_panel_input_script(const char *s) { panel_script = s; }
 static void script_step(void) {
-    static const char *names[] = { "", "up", "down", "left", "right", "ok", "back", "tabl", "tabr", "zoomout", "zoomin", "hide", "showhidden" };
+    static const char *names[] = { "", "up", "down", "left", "right", "ok", "back", "tabl", "tabr", "zoomout", "zoomin", "hide", "showhidden", "pin" };
     for (const char *p = panel_script; p && *p;) {
         int f = atoi(p); const char *c = strchr(p, ':'), *e = strchr(p, ',');
         if (!c) break;
@@ -621,7 +642,7 @@ static void script_step(void) {
             }
             else if (sscanf(a, "tap@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); inq_push(1, 1, x, y); }
             else if (sscanf(a, "hold@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); hold_x = x; hold_y = y; hold_at = port_frame + 40; }
-            else for (int i = 1; i < 13; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);
+            else for (int i = 1; i < 14; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);
         }
         p = e ? e + 1 : NULL;
     }

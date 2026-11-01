@@ -277,6 +277,16 @@ static void load_fonts(void) {
         if (have >= 68) break;
         snprintf(name, sizeof name, "AREA%02d/MFNT%02d0%c.WFM", a, a, l); load_wfm(name);
     }
+    /* the fonts that lack the Spanish opening marks: draw them as the ? / ! glyph turned 180 degrees */
+    for (int k = 0; k < 3; k++) for (int m = 0; m < 2; m++) {
+        int inv = m ? 0xA1 : 0xBF, src = m ? '!' : '?';
+        const Glyph *g = &glyphs[k][src];
+        if (glyphs[k][inv].img || !g->img) continue;
+        int n = g->w * g->h; u8 *img = calloc((size_t)(n + 1) / 2, 1);
+        if (!img) continue;
+        for (int p = 0; p < n; p++) { int v = (g->img[p >> 1] >> ((p & 1) * 4)) & 15, q = n - 1 - p; img[q >> 1] |= (u8)(v << ((q & 1) * 4)); }
+        glyphs[k][inv].w = g->w; glyphs[k][inv].h = g->h; glyphs[k][inv].img = img;
+    }
     int n8 = 0, n16 = 0, n24 = 0;
     for (int c = 0; c < 256; c++) { n8 += !!glyphs[0][c].img; n16 += !!glyphs[1][c].img; n24 += !!glyphs[2][c].img; }
     pa_font_ok = n16 > 40;

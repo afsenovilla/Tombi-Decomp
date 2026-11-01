@@ -304,7 +304,7 @@ void port_panel_tick(void) {
     case 4: printInfoMessage(0x1F, 2); break;
     case 5: printInfoMessage(0x20, 2); break;
     }
-    { char t[96]; snprintf(t, sizeof t, T("Done: %s", "Hecho: %s"), it_name(item, b, sizeof b)); it_say(0, t); }
+    { char t[96]; snprintf(t, sizeof t, T("Completed: %s", "Completado: %s"), it_name(item, b, sizeof b)); it_say(0, t); }
     port_printf("[panel] frame %d: item %d used (handler result %d): weapon %d pants %d\n", port_frame, item, r, G8(0x8009D2B2u), G8(0x8009D2B3u));
 }
 
