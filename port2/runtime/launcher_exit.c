@@ -75,18 +75,21 @@ static const char *const STRIP[9] = {
     "ADEFHIJKL\x01NOPSTU\xc6" "abdefgijklnoprstu",    /* 8 Danish */
 };
 static const unsigned UVTAB[9] = { 0x70b02, 0x70b02, 0x70b02, 0x70b02, 0x70b02, 0x70aea, 0x70b02, 0x70b02, 0x70b02 };
-static const char *const ENTRY[9] = {
-    "Back to Launcher", "RETOUR AU LAUNCHER", "ZUM LAUNCHER", "TORNA AL LAUNCHER", "NAAR LAUNCHER",
-    "VOLVER AL LAUNCHER", "VOLTAR AO LAUNCHER", "TILL LAUNCHERN", "TIL LAUNCHEREN" };
+static const char *const ENTRY[9] = {     /* "quit game"; Swedish writes the small ä in capitals as its HäMTA does */
+    "Quit Game", "QUITTER LE JEU", "SPIEL BEENDEN", "CHIUDI GIOCO", "SPEL AFSLUITEN",
+    "CERRAR JUEGO", "FECHAR JOGO", "ST\xe4NG SPELET", "LUK SPILLET" };
+/* the first entry (PAUSE: it resumes the game) as "continue"; Swedish writes the small ä in capitals as its HäMTA does */
+static const char *const CONT[9] = {
+    "Continue", "CONTINUER", "WEITER", "CONTINUA", "VERDER", "CONTINUAR", "CONTINUAR", "FORTS\xe4TT", "FORTS\xc6T" };
 static const char *const QUEST[9] = {
-    "Return to the launcher?", "Retour au launcher?", "Zur\xfc" "ck zum Launcher?", "Tornare al launcher?",
-    "Terug naar launcher?", "\xbfVolver al launcher?", "Voltar ao launcher?", "Till launchern?", "Til launcheren?" };
+    "Quit the game?", "Quitter le jeu?", "Spiel beenden?", "Chiudere il gioco?", "Spel afsluiten?",
+    "\xbf" "Cerrar el juego?", "Fechar o jogo?", "St\xe4ng spelet?", "Luk spillet?" };
 static int lang(void) { return port_lang >= 0 && port_lang < 9 ? port_lang : 0; }
 
 /* the title carousel's label: the entry in capitals (the title font is ASCII) */
 const char *port_lx_title_label(void) {
     static char b[40]; const char *s = ENTRY[lang()]; int i;
-    for (i = 0; s[i] && i < 39; i++) { unsigned char c = (unsigned char)s[i]; b[i] = c >= 'a' && c <= 'z' ? c - 32 : c == 0xfc || c == 0xdc ? 'U' : c; }
+    for (i = 0; s[i] && i < 39; i++) { unsigned char c = (unsigned char)s[i]; b[i] = c >= 'a' && c <= 'z' ? c - 32 : c == 0xfc || c == 0xdc ? 'U' : c == 0xe4 ? 'A' : c; }
     b[i] = 0;
     return b;
 }
@@ -235,13 +238,17 @@ static int span(const ENT *e, int n, int *x0, int *x1) {
     }
     return *x1 > *x0;
 }
-/* the Start menu's list (PAUSE / QUIT / LOAD) with the 4th entry under LOAD, centred on the others */
+/* the Start menu's list (PAUSE / QUIT / LOAD): PAUSE reads "continue", the 4th entry under LOAD, centred on the others */
 void *port_lx_pause_list(void *list) {
     static ENT out[8]; static unsigned char txt[44]; ENT *e = (ENT *)list; int n, a, b, len;
     ent_x0 = ent_x1 = 0;
     if (!port_lx_on()) return list;
     for (n = 0; n < 6 && e[n].x != -1; n++) out[n] = e[n];
     if (n != 3 || !span(e, n, &a, &b)) return list;
+    {   /* entry 0 reads "continue", centred where the original was */
+        static unsigned char ct[44]; int c0, c1, cl = encode(CONT[lang()], ct, 0);
+        if (span(e, 1, &c0, &c1)) { out[0].s = ct; out[0].x = (short)((c0 + c1) / 2 - 4 * cl); }
+    }
     len = encode(ENTRY[lang()], txt, 0);
     out[3].s = txt; out[3].y = out[2].y + 16; out[3].x = (short)((a + b) / 2 - 4 * len);
     out[4] = e[3];
@@ -249,12 +256,13 @@ void *port_lx_pause_list(void *list) {
     port_lx_dy = 16;
     return out;
 }
-/* the highlight bar of the Start menu (x 0x74, 0x50 wide) covers the 4th entry */
-void port_lx_bar(short *x, short *w) {
-    if (ent_x1 <= ent_x0) return;
+/* a highlight bar of the pause / Select menus reaches 6 px past the text of the menu's entries (x0..x1, from port_es_pause) */
+void port_lx_bar(short *x, short *w, int x0, int x1) {
+    if (ent_x1 > ent_x0) { if (ent_x0 < x0) x0 = ent_x0; if (ent_x1 > x1) x1 = ent_x1; }
+    if (x1 <= x0) return;
     int a = *x, b = *x + *w;
-    if (ent_x0 - 4 < a) a = ent_x0 - 4;
-    if (ent_x1 + 4 > b) b = ent_x1 + 4;
+    if (x0 - 6 < a) a = x0 - 6;
+    if (x1 + 6 > b) b = x1 + 6;
     *x = (short)a; *w = (short)(b - a);
 }
 /* the Yes / No box of the 4th entry: the language's quit box (its Yes / No line) with our question over it */

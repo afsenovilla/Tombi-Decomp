@@ -1178,7 +1178,8 @@ the question "Return to the launcher?", "Retour au launcher?", "Zurück zum Laun
 naar launcher?", "¿Volver al launcher?", "Voltar ao launcher?", "Till launchern?", "Til launcheren?" (pause state
 `1F8003CD` = 4, port only, beside the retail 2 = quit and 3 = load; `port/fixes.txt` rules on `updatePauseMenu` /
 `drawPauseMenu`). The menu frame grows 16 px down and, like the Spanish question boxes, as wide as the text (border
-tiles moved, interior tiles stretched); the highlight bar covers the entry.
+tiles moved, interior tiles stretched); the highlight bar covers the entry. The first entry, PAUSE (it resumes the game), reads "Continue" / "CONTINUAR" / "CONTINUER" / "WEITER" /
+"CONTINUA" / "VERDER" / "FORTSäTT" (as the Swedish disc writes HäMTA) / "FORTSÆT" with the flag.
 
 The pause font is a strip of 8x16 glyphs per language (`SYSTEM/A{n+1}0003.GAM`, v 144, addressed by MAINn's UV table)
 holding only the letters that language's menus use. A letter of the current strip is drawn by the game (its code); any
