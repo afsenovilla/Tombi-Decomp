@@ -141,6 +141,18 @@ public class LauncherActivity extends Activity {
         return clamp(prefs.getInt("lang", def), LANG_N.length);
     }
     int aspectIdx() { return clamp(prefs.getInt("aspect", 0), ASPECTS.length); }
+    static final int[] RUMBLE = { 0, 25, 50, 75, 100, 125, 150, 200 };   // --rumble steps, %
+    int rumbleIdx() { return clamp(prefs.getInt("rumble", 4), RUMBLE.length); }
+    String rumbleName(int i) { return RUMBLE[i] == 0 ? getString(R.string.rumble_off) : RUMBLE[i] + " %"; }
+    /* a short test buzz at the chosen strength on the device's own vibrator (what the game does at full big motor) */
+    void rumbleTest() {
+        try {
+            int amp = Math.min(255, 255 * RUMBLE[rumbleIdx()] / 100);
+            if (amp <= 0) return;
+            android.os.Vibrator v = (android.os.Vibrator) getSystemService(VIBRATOR_SERVICE);
+            if (v != null && v.hasVibrator()) TombiActivity.vibrate(v, amp, 250);
+        } catch (Throwable ignored) { }
+    }
     int promptIdx() { return clamp(prefs.getInt("prompts", 0), PROMPTS.length); }
     boolean flag(String k, boolean def) { return prefs.getBoolean(k, def); }
     /* second screen panel (runtime/panel.c, TombiActivity): default on when the device has a secondary display */
@@ -215,6 +227,7 @@ public class LauncherActivity extends Activity {
         if (panel && hudBottomOn()) a.add("--hud-bottom");
         a.add("--files-dir"); a.add(filesDir().getAbsolutePath());   // the loader's files dir (taken out before port_main)
         if (flag("dualshock", false)) a.add("--dualshock");
+        a.add("--rumble"); a.add(String.valueOf(RUMBLE[rumbleIdx()]));   // runtime/sdl.c: vibration intensity
         a.add("--prompts"); a.add(PROMPTS[promptIdx()]);
         if (flag("skipintro", false)) a.add("--skip-intro");
         if (flag("hz60", false)) { a.add("--hz"); a.add("60"); }
@@ -670,6 +683,12 @@ public class LauncherActivity extends Activity {
                 } else if (cat == CAT_PAD) {
                     items.add(new Item(getString(R.string.opt_padmap), new Runnable() { public void run() { setScreen(PADMAP); } }));
                     items.add(toggle(R.string.opt_dualshock, "dualshock"));   // --dualshock (shims/pad.c)
+                    Item rb = new Item(getString(R.string.opt_rumble), null);   // --rumble (runtime/sdl.c)
+                    rb.value = rumbleName(rumbleIdx());
+                    rb.adj = new Adjust() { public void by(int d) {   // wraps like the other value rows (A / tap steps up)
+                        int n = (rumbleIdx() + d + RUMBLE.length) % RUMBLE.length;
+                        prefs.edit().putInt("rumble", n).apply(); rumbleTest(); } };
+                    items.add(rb);
                     Item pr = new Item(getString(R.string.opt_prompts), null);   // --prompts (shims/prompts.c; TombiActivity resolves auto)
                     pr.value = getResources().getStringArray(R.array.prompt_names)[promptIdx()];
                     pr.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("prompts", (promptIdx() + d + PROMPTS.length) % PROMPTS.length).apply(); } };

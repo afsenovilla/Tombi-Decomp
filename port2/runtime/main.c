@@ -969,6 +969,10 @@ int main(int argc, char **argv) {
         }
         else if (!strcmp(a, "--prompt-map") && v) { extern void port_prompt_map(const char *); port_prompt_map(argv[++i]); }
         else if (!strcmp(a, "--dualshock")) { extern int port_dualshock; port_dualshock = 1; }   /* shims/pad.c */
+        else if (!strcmp(a, "--rumble") && v) {   /* runtime/sdl.c: vibration intensity, 0..200 % */
+            extern int port_rumble_pct; int n = atoi(argv[++i]);
+            port_rumble_pct = n < 0 ? 0 : n > 200 ? 200 : n;
+        }
         else if (!strcmp(a, "--test-message") && v) { extern void port_test_message_add(const char *); port_test_message_add(argv[++i]); }
         else if (!strcmp(a, "--test-item") && v) { extern void port_test_item_add(const char *); port_test_item_add(argv[++i]); }
         else if (!strcmp(a, "--title") && v) port_title_add(argv[++i]);

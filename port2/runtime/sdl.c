@@ -316,19 +316,25 @@ static void ctrl_update(void) {
 #ifdef __ANDROID__
 static void android_rumble(int small, int big);
 #endif
+/* --rumble N: intensity in percent (0..200, default 100; 0 = off), scaling both motors (clamped to full) */
+int port_rumble_pct = 100;
+static int rumble_scale(int v) { v = v * port_rumble_pct / 100; return v < 0 ? 0 : v > 255 ? 255 : v; }
 typedef struct { int small, big; } RumbleArgs;
 static void rumble_h(void *a) {
     RumbleArgs *r = (RumbleArgs *)a;
+    int big = rumble_scale(r->big);
 #ifdef __ANDROID__
-    if (java_pad) { android_rumble(r->small, r->big); return; }
+    /* TombiActivity.rumble: the small motor as a level 0..255 (160 at 100 %, the device vibrator's "on") */
+    if (java_pad) { android_rumble(r->small ? rumble_scale(160) : 0, big); return; }
 #endif
     if (!ctrl) return;
-    /* low frequency = the big motor, high frequency = the small one; refreshed by every change the game makes,
-       capped at 2 s in case a stop never comes */
-    SDL_GameControllerRumble(ctrl, (Uint16)(r->big * 257), r->small ? 0xFFFF : 0, r->small || r->big ? 2000 : 0);
+    /* low frequency = the big motor, high frequency = the small one (full at 100 %); refreshed by every change the
+       game makes, capped at 2 s in case a stop never comes */
+    int small = r->small ? rumble_scale(255) : 0;
+    SDL_GameControllerRumble(ctrl, (Uint16)(big * 257), (Uint16)(small * 257), small || big ? 2000 : 0);
 }
 void port_window_rumble(int small, int big) {
-    if (!win) return;
+    if (!win || (port_rumble_pct <= 0 && (small || big))) return;
     RumbleArgs a = { small, big }; port_host_call(rumble_h, &a);
 }
 

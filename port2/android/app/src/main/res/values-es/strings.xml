@@ -89,6 +89,8 @@
     <string name="opt_disc">Disco / datos…</string>
     <string name="opt_hint">Cruceta: mover · A: activar / abrir · Izq./Der.: cambiar un valor · B: volver. Las opciones de files/args.txt se siguen añadiendo.</string>
     <string name="opt_dualshock">Mando DualShock (analógico)</string>
+    <string name="opt_rumble">Intensidad de vibración</string>
+    <string name="rumble_off">Apagada</string>
     <string name="opt_prompts">Iconos de botones</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Genérico</item><item>AYN Thor / Retroid</item></string-array>
     <string name="save_import">Importar partida…</string>

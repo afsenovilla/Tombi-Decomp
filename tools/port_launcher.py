@@ -516,13 +516,17 @@ i18n.add({
 
 # the Controls page: the controller card (--dualshock, --prompts; docs/PORT.md "DualShock" / "Button prompts")
 i18n.add({
-    "es": {"c.pad": "Mando", "l.dualshock": "Mando DualShock (analógico): stick izquierdo con velocidad y vibración",
+    "es": {"l.rumble": "Intensidad de vibración:", "rumble.off": "Apagada",
+           "c.pad": "Mando", "l.dualshock": "Mando DualShock (analógico): stick izquierdo con velocidad y vibración",
            "l.prompts": "Iconos de botones en los textos:", "p.auto": "Auto (según el mando)", "p.ps": "PlayStation",
            "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor / Retroid", "p.gen": "Genérico"},
-    "en": {"c.pad": "Controller", "l.dualshock": "DualShock controller (analog): left stick with speed, and rumble",
+    "en": {"l.rumble": "Vibration intensity:", "rumble.off": "Off",
+           "c.pad": "Controller", "l.dualshock": "DualShock controller (analog): left stick with speed, and rumble",
            "l.prompts": "Button icons in the texts:", "p.auto": "Auto (from the controller)", "p.ps": "PlayStation",
            "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor / Retroid", "p.gen": "Generic"},
 })
+
+RUMBLE_STEPS = [0, 25, 50, 75, 100, 125, 150, 200]   # --rumble choices, percent
 
 # Tk keysym -> SDL key name (what --keys takes, SDL_GetScancodeFromName); letters, digits and F1..F24 map to themselves
 # (letters upper-cased).  "," is left out: it separates the --keys entries.
@@ -1007,6 +1011,19 @@ class App:
         o, c = self.card(f, tr("c.pad"))
         o.pack(side="bottom", fill="x", pady=(12, 0))
         ttk.Checkbutton(c, text=tr("l.dualshock"), variable=self.var("dualshock", tk.BooleanVar, False)).pack(anchor="w")
+        # --rumble: vibration intensity (runtime/sdl.c), stored as the percent; shown as "Off" / "N %"
+        rr = ttk.Frame(c)
+        rr.pack(anchor="w", pady=(4, 0))
+        ttk.Label(rr, text=tr("l.rumble")).pack(side="left")
+        rv = self.var("rumble", tk.IntVar, 100)
+        names = [tr("rumble.off") if n == 0 else "%d %%" % n for n in RUMBLE_STEPS]
+        cb = ttk.Combobox(rr, values=names, state="readonly", width=9)
+        try:
+            cb.current(RUMBLE_STEPS.index(rv.get()))
+        except (ValueError, tk.TclError):
+            cb.current(RUMBLE_STEPS.index(100))
+        cb.bind("<<ComboboxSelected>>", lambda e: rv.set(RUMBLE_STEPS[cb.current()]))
+        cb.pack(side="left", padx=(6, 0))
         ttk.Label(c, text=tr("l.prompts")).pack(anchor="w", pady=(8, 2))
         self._radios(c, "prompts_style", tk.StringVar, "auto", [(tr("p.auto"), "auto"), (tr("p.ps"), "playstation"),
                      (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.thor"), "thor"), (tr("p.gen"), "generic")])
@@ -1822,6 +1839,12 @@ class App:
             cmd += ["--fullscreen"]
         if s.get("dualshock"):
             cmd += ["--dualshock"]
+        try:
+            rumble = max(0, min(200, int(s.get("rumble", 100))))
+        except (TypeError, ValueError):
+            rumble = 100
+        if rumble != 100:
+            cmd += ["--rumble", str(rumble)]
         if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "thor", "generic"):
             cmd += ["--prompts", s["prompts_style"]]
         cmd += M.mod_args(s, app_dir())

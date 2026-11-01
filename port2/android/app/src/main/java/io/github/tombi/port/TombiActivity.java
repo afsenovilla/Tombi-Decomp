@@ -135,7 +135,15 @@ public class TombiActivity extends SDLActivity {
     // ---- vibration (--dualshock: the game's PadSetAct, runtime/sdl.c calls rumble) ----
     private static TombiActivity self;
     private static InputDevice lastPad;
-    /* small motor on / off, big motor 0..255; 0, 0 stops.  The controller's vibrator, else the device's own */
+    /* one shot at amplitude 1..255 (API 26+: VibrationEffect; older devices only have on / off) */
+    @SuppressWarnings("deprecation")
+    static void vibrate(android.os.Vibrator v, int amp, long ms) {
+        if (android.os.Build.VERSION.SDK_INT >= 26)
+            v.vibrate(android.os.VibrationEffect.createOneShot(ms, Math.max(1, Math.min(255, amp))));
+        else v.vibrate(ms);
+    }
+
+    /* small motor level 0..255 (160 = on at 100 %), big motor 0..255, both scaled by --rumble; 0, 0 stops.  The controller's vibrator, else the device's own */
     static void rumble(int small, int big) {
         try {
             TombiActivity a = self;
@@ -145,11 +153,9 @@ public class TombiActivity extends SDLActivity {
             if (d != null) { android.os.Vibrator dv = d.getVibrator(); if (dv != null && dv.hasVibrator()) v = dv; }
             if (v == null) v = (android.os.Vibrator) a.getSystemService(Context.VIBRATOR_SERVICE);
             if (v == null || !v.hasVibrator()) return;
-            int amp = Math.max(big, small != 0 ? 160 : 0);
-            if (amp == 0) { v.cancel(); return; }
-            if (android.os.Build.VERSION.SDK_INT >= 26)
-                v.vibrate(android.os.VibrationEffect.createOneShot(2000, Math.max(1, Math.min(255, amp))));
-            else v.vibrate(2000);
+            int amp = Math.max(big, small);   // both already scaled by --rumble (runtime/sdl.c)
+            if (amp <= 0) { v.cancel(); return; }
+            vibrate(v, amp, 2000);
         } catch (Throwable ignored) { }
     }
 

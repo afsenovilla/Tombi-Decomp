@@ -90,6 +90,8 @@
     <string name="opt_disc">Disc / data…</string>
     <string name="opt_hint">D-pad: move · A: toggle / open · Left/Right: change a value · B: back. Extra flags in files/args.txt are still added.</string>
     <string name="opt_dualshock">DualShock controller (analog)</string>
+    <string name="opt_rumble">Vibration intensity</string>
+    <string name="rumble_off">Off</string>
     <string name="opt_prompts">Button icons</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Generic</item><item>AYN Thor / Retroid</item></string-array>
     <string name="save_import">Import save…</string>

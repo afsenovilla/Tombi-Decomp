@@ -1100,6 +1100,13 @@ grabbed, bitten, etc. With the option `shims/pad.c` reports 0x73 with the host's
 actuator bytes to `SDL_GameControllerRumble` (PC) or the controller's / device's vibrator (Android). Without it the pad is
 the digital one as before (Android keeps its left-stick-as-d-pad default; with the option the stick is analog instead).
 
+**Vibration intensity (`--rumble N`, launchers: "Intensidad de vibración" next to the DualShock option).** 0..200 %
+(default 100, 0 = off) scales both motors in `runtime/sdl.c` (clamped to full): on the PC the small motor's 0xFFFF and
+the big motor's level for `SDL_GameControllerRumble`; on Android the levels passed to `TombiActivity.rumble` (small
+motor = 160 at 100 %), whose device vibrator uses `VibrationEffect.createOneShot` with that amplitude on API 26+ (on/off
+before). The Android launcher steps 0/25/50/75/100/125/150/200 % ("Apagada"/"N %") and buzzes once at the new strength;
+the PC launcher has the same choices in a combobox.
+
 Checked on Linux: the pokes of a new game (AP 5000, 9 lives, both `--poke-every`, the 130 event bytes) run 400 vblanks
 without a fault; a 1500-frame run with the title's Start stalls at vblank ~443 in this checkout (`sleepTask` loop after
 the SYSTEM overlay read at lba 176314) with and without the mods, and also with the port as committed before this work,
