@@ -29,11 +29,14 @@
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
-enum { PROMPT_AUTO = -1, PROMPT_PS = 0, PROMPT_XBOX = 1, PROMPT_NINTENDO = 2, PROMPT_GENERIC = 3, PROMPT_THOR = 4 };
+enum { PROMPT_AUTO = -1, PROMPT_PS = 0, PROMPT_XBOX = 1, PROMPT_NINTENDO = 2, PROMPT_GENERIC = 3, PROMPT_THOR = 4, PROMPT_THOR_BLACK = 5, PROMPT_THOR_WHITE = 6 };
+/* Thor positions and labels: the AYN Thor's three button variants: SNES-coloured ("rainbow"), black, white */
+#define THORISH(st) ((st) == PROMPT_THOR || (st) == PROMPT_THOR_BLACK || (st) == PROMPT_THOR_WHITE)
+#define THOR_ROW_OF(st, src) ((st) == PROMPT_THOR_BLACK ? ROW_THOR_BLACK : (st) == PROMPT_THOR_WHITE ? ROW_THOR_WHITE : ROW_THOR + (src))
 enum { PS_CROSS, PS_CIRCLE, PS_SQUARE, PS_TRIANGLE };
 enum { SRC_SOUTH, SRC_EAST, SRC_WEST, SRC_NORTH, SRC_L1, SRC_R1, SRC_L2, SRC_R2, SRC_NONE };
 
-int port_prompt_option = PROMPT_AUTO;   /* --prompts auto|playstation|xbox|nintendo|generic|thor */
+int port_prompt_option = PROMPT_AUTO;   /* --prompts auto|playstation|xbox|nintendo|generic|thor|thor-black|thor-white */
 int port_prompt_style = PROMPT_PS;      /* the style in use (auto: runtime/sdl.c sets it from the controller type) */
 /* the physical source of each PS1 face button; the default mapping (SDL / Android A = Cross, B = Circle, ...) */
 int port_prompt_src[4] = { SRC_SOUTH, SRC_EAST, SRC_WEST, SRC_NORTH };
@@ -47,7 +50,9 @@ int port_prompt_parse_style(const char *s) {
     if (!strcmp(s, "xbox")) return PROMPT_XBOX;
     if (!strcmp(s, "nintendo") || !strcmp(s, "switch")) return PROMPT_NINTENDO;
     if (!strcmp(s, "generic")) return PROMPT_GENERIC;
-    if (!strcmp(s, "thor") || !strcmp(s, "retroid")) return PROMPT_THOR;
+    if (!strcmp(s, "thor") || !strcmp(s, "retroid") || !strcmp(s, "thor-rainbow") || !strcmp(s, "thor_rainbow")) return PROMPT_THOR;
+    if (!strcmp(s, "thor-white") || !strcmp(s, "thor_white")) return PROMPT_THOR_WHITE;
+    if (!strcmp(s, "thor-black") || !strcmp(s, "thor_black")) return PROMPT_THOR_BLACK;
     return -2;
 }
 static int src_parse(const char *s, int n) {
@@ -95,8 +100,10 @@ enum { P_XGREEN = 1, P_XRED = 2, P_XBLUE = 4, P_XYELLOW = 5, P_NBLUE = 7, P_NGRE
      row 1: Xbox: 1 / 2 / 4 / 5 the letters, 7 the shadow (disc * 0.7), 8 / 9 / 10 / 15 the soft edge per letter;
      row 2: Nintendo (and the shoulder labels of every lettered style): 14 the cream letters, 7 shadow, 8 soft edge;
      rows 3..6: Thor, one per button (south B yellow, east A red, west Y green, north X blue): 7 the disc, 8 its shadow,
-     9 its soft edge, 15 the white letter. */
-#define PORT_CLUT_ROWS 7   /* = gpu_backend.h */
+     9 its soft edge, 15 the white letter;
+     row 7: Thor with black buttons (thor-black): the same layout, a near-black disc;
+     row 8: Thor with white buttons (thor-white): an off-white disc, 15 = the mid-grey letter, soft edge toward it. */
+#define PORT_CLUT_ROWS 9   /* = gpu_backend.h */
 #define MX(a, b, t) ((a) + ((b) - (a)) * (t) / 100)
 #define MIX(r, g, b, r2, g2, b2, t) BGR(MX(r, r2, t), MX(g, g2, t), MX(b, b2, t))
 #define RGB_(...) BGR(__VA_ARGS__)   /* the colour macros below hold commas: expand them first */
@@ -109,8 +116,9 @@ enum { P_XGREEN = 1, P_XRED = 2, P_XBLUE = 4, P_XYELLOW = 5, P_NBLUE = 7, P_NGRE
 #define XR 0xE0, 0x3C, 0x31
 #define XB 0x2F, 0x6F, 0xD6
 #define XY 0xF5, 0xC5, 0x18
-#define THOR_ROW(r, g, b) 0, 0, 0, RGB_(107, 107, 107), 0, 0, RGB_(DISC), RGB_(r, g, b), MIX_(r, g, b, 0, 0, 0, 30), \
-    MIX_(r, g, b, 255, 255, 255, 35), 0, KHAKI, CREAM, RGB_(255, 255, 255)
+#define THOR_ROWL(r, g, b, lr, lg, lb) 0, 0, 0, RGB_(107, 107, 107), 0, 0, RGB_(DISC), RGB_(r, g, b), MIX_(r, g, b, 0, 0, 0, 30), \
+    MIX_(r, g, b, lr, lg, lb, 35), 0, KHAKI, CREAM, RGB_(lr, lg, lb)
+#define THOR_ROW(r, g, b) THOR_ROWL(r, g, b, 255, 255, 255)
 const u16 port_prompt_clut[PORT_CLUT_ROWS * 16] = {
     0, RGB_(XG), RGB_(XR), RGB_(107, 107, 107), RGB_(XB), RGB_(XY),
     RGB_(DISC), RGB_(0x1E, 0x3F, 0xB0), RGB_(0x2E, 0x8B, 0x4E), RGB_(0xF2, 0xC2, 0x30), RGB_(0xC8, 0x28, 0x1E),
@@ -123,8 +131,12 @@ const u16 port_prompt_clut[PORT_CLUT_ROWS * 16] = {
     KHAKI, CREAM, RGB_(255, 255, 255),
     /* 3..6 Thor: B, A, Y, X */
     THOR_ROW(0xF2, 0xC2, 0x30), THOR_ROW(0xC8, 0x28, 0x1E), THOR_ROW(0x2E, 0x8B, 0x4E), THOR_ROW(0x1E, 0x3F, 0xB0),
+    /* 7 Thor with black buttons: one near-black disc for all four */
+    THOR_ROW(24, 24, 24),
+    /* 8 Thor with white buttons: an off-white disc, mid-grey letters (index 15 holds the letter colour) */
+    THOR_ROWL(236, 236, 232, 130, 130, 130),
 };
-enum { ROW_XBOX = 1, ROW_NINTENDO = 2, ROW_THOR = 3 };
+enum { ROW_XBOX = 1, ROW_NINTENDO = 2, ROW_THOR = 3, ROW_THOR_BLACK = 7, ROW_THOR_WHITE = 8 };
 #define PORT_CLUT_ID 0xFFFF
 /* the letter effects: letter pixels carry 0x80 | colour; the shadow, then the soft edge (pixels still == fill), then the
    letters (soft_of[colour] = the soft edge index next to a letter of that colour) */
@@ -227,7 +239,7 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
     draw_disc();
     if (src == SRC_NONE) return 0;
     if (src >= SRC_L1) {
-        const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || style == PROMPT_THOR ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
+        const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || THORISH(style) ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
         if (style == PROMPT_PS || style == PROMPT_GENERIC) { label(t, C_CREAM); return 0; }
         label(t, C_CREAM | 0x80);
         letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_cream);
@@ -240,17 +252,17 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
         label(t, xb_col[src] | 0x80);
         letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_xbox);
         return 1 + ROW_XBOX; }
-    case PROMPT_NINTENDO: case PROMPT_THOR: {
+    case PROMPT_NINTENDO: case PROMPT_THOR: case PROMPT_THOR_BLACK: case PROMPT_THOR_WHITE: {
         /* by position, as printed on Nintendo pads and the AYN Thor / Retroid: south B, east A, west Y, north X.
            Nintendo: cream letters on the dark disc (Switch Pro); Thor: white letters on the SNES colours (port CLUT:
            B yellow, A red, Y green, X blue).  src is the positional (Xbox-named) button: SDL with button labels off,
            Android's KEYCODE_BUTTON_A = south. */
         static const char nl[4] = { 'B', 'A', 'Y', 'X' };
         char t[2] = { nl[src], 0 };
-        if (style == PROMPT_THOR) {
+        if (THORISH(style)) {
             draw_disc_col(7); label(t, P_WHITE | 0x80);
             letter_fx(&img[0][0], GW, GW, GH, 7, 8, soft_white);
-            return 1 + ROW_THOR + src;
+            return 1 + THOR_ROW_OF(style, src);
         }
         label(t, C_CREAM | 0x80);
         letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_cream);
@@ -359,7 +371,7 @@ static int mi_draw(int i, int w, int h) {
     int d = x1 - x0 + 1 < y1 - y0 + 1 ? x1 - x0 + 1 : y1 - y0 + 1;
     int cx2 = x0 + x1 + 1, cy2 = y0 + y1 + 1;            /* centre * 2 */
     int fill = C_DISC;
-    if (st == PROMPT_THOR && src < 4) fill = 7;          /* row ROW_THOR + src */
+    if (THORISH(st) && src < 4) fill = 7;               /* THOR_ROW_OF */
     for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
         int dx = 2 * x + 1 - cx2, dy = 2 * y + 1 - cy2, r2 = dx * dx + dy * dy;   /* in half pixels */
         if (r2 <= d * d - 2 * d) mimg[y][x] = (u8)fill;
@@ -370,9 +382,9 @@ static int mi_draw(int i, int w, int h) {
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };
     static const char *xb_sh[] = { "LB", "RB", "LT", "RT" }, *nt_sh[] = { "L", "R", "ZL", "ZR" }, *ps_sh[] = { "L1", "R1", "L2", "R2" };
     if (src == SRC_NONE) return 1;   /* the empty disc (row 0) */
-    if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || st == PROMPT_THOR ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
+    if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || THORISH(st) ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
     else if (st == PROMPT_XBOX) { one[0] = "ABXY"[src]; t = one; col = xb_col[src]; }
-    else if (st == PROMPT_NINTENDO || st == PROMPT_THOR) { one[0] = "BAYX"[src]; t = one; col = st == PROMPT_THOR ? P_WHITE : C_CREAM; }
+    else if (st == PROMPT_NINTENDO || THORISH(st)) { one[0] = "BAYX"[src]; t = one; col = THORISH(st) ? P_WHITE : C_CREAM; }
     if (t) {
         for (unsigned k = 0; k < sizeof font6 / sizeof font6[0] && !t[1]; k++) if (font6[k].ch == t[0])
             for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if (font6[k].rows[y] >> (5 - x) & 1) mput(lx + x, ly + y, col | 0x80, w, h);
@@ -380,7 +392,7 @@ static int mi_draw(int i, int w, int h) {
             for (int y = 0; y < 5; y++) for (int x = 0; x < 3; x++) if (font3[k].rows[y] >> (2 - x) & 1) mput(lx + c * 4 + x, ly + 2 + y, C_CREAM | 0x80, w, h);
         if (t[1]) { letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_cream); return 1 + ROW_NINTENDO; }
         if (st == PROMPT_XBOX) { letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_xbox); return 1 + ROW_XBOX; }
-        if (st == PROMPT_THOR) { letter_fx(&mimg[0][0], MW, w, h, 7, 8, soft_white); return 1 + ROW_THOR + src; }
+        if (THORISH(st)) { letter_fx(&mimg[0][0], MW, w, h, 7, 8, soft_white); return 1 + THOR_ROW_OF(st, src); }
         letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_cream);
         return 1 + ROW_NINTENDO;
     }

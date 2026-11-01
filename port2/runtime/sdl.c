@@ -281,7 +281,7 @@ static void prompts_update(void) {
     }
     if (ctrl || port_prompt_option != -1)
         port_printf("[port2] button prompts: %s (cross %d circle %d square %d triangle %d)\n",
-                    (const char *[]){ "playstation", "xbox", "nintendo", "generic", "thor" }[port_prompt_style > 4 ? 3 : port_prompt_style],
+                    (const char *[]){ "playstation", "xbox", "nintendo", "generic", "thor", "thor-black", "thor-white" }[port_prompt_style > 6 ? 3 : port_prompt_style],
                     port_prompt_src[0], port_prompt_src[1], port_prompt_src[2], port_prompt_src[3]);
 }
 static void ctrl_opened(void) {

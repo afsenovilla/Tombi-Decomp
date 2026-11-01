@@ -1073,11 +1073,11 @@ gives that PS1 button with the current mapping: `runtime/sdl.c` derives it from 
 included), Android passes `--prompt-map cross=a,...` from PadMap. Styles (`--prompts
 auto|playstation|xbox|nintendo|thor|generic`): PlayStation shapes; Xbox A/B/X/Y in the Xbox colours (green, red,
 blue, yellow) on the dark disc; Nintendo = the letters by position (south B, east A, west Y, north X) in cream on
-the dark disc, like a Switch Pro pad; Thor ("AYN Thor / Retroid" in the launchers) = the same letters, white, on the
+the dark disc, like a Switch Pro pad; Thor ("AYN Thor (arcoíris)" in the launchers, `--prompts thor`) = the same letters, white, on the
 SNES-coloured discs of those handhelds (X deep blue, Y dark green, A red, B yellow); generic = a diamond with the
 button's position lit. Auto: SDL's controller type on the PC (PS3/4/5 -> PlayStation, Xbox/Luna/Stadia/Shield ->
 Xbox, Switch Pro/Joy-Con -> Nintendo, other -> generic, no controller -> PlayStation); on Android the controller name
-(Xbox, DualShock/DualSense, "odin"/"ayn"/"thor"/"retroid" -> Thor, Nintendo/Pro Controller/Joy-Con -> Nintendo).
+(Xbox, DualShock/DualSense, "odin"/"ayn"/"thor"/"retroid" -> Thor with black buttons, Nintendo/Pro Controller/Joy-Con -> Nintendo).
 *Colours:* PlayStation, Nintendo and generic use the font CLUT's own indices (0 transparent, 1..5 ink, 6 dark disc,
 7 blue, 8 green, 9 pink, 10 red, 11..13 khaki rim, 14/15 cream). Xbox and Thor need colours it lacks, so they use a
 port-only 16-colour CLUT (`port_prompt_clut`: the font CLUT's transparent, grey, disc, rim and cream entries kept, the
@@ -1090,14 +1090,23 @@ names (with SDL's default label mapping a Switch pad's SDL "A" is its labelled A
 L1/R1/START/SELECT and the d-pad arrows in the texts are words / arrows and stay. Debug: `--test-message FRAME:K:L`
 opens `showMessageBox(K, L)` (AREA00: 4:4 / 4:5 / 4:6 / 4:9 are the "□/✕/○/△ to run" hints).
 
+*Thor colour variants.* The AYN Thor comes with three button variants: black buttons with white letters, white
+buttons with grey letters, and SNES-coloured ("rainbow") ones. `--prompts thor-black` (also `thor_black`), `thor-white`
+(`thor_white`) and `thor` (`thor-rainbow`) draw the same Thor letters and positions on a near-black disc (port CLUT row
+7), an off-white disc with mid-grey letters (row 8: shadow = the disc 30 % toward black, soft edge 35 % toward the
+grey) or the SNES colours; launchers: "AYN Thor (negro / blanco / arcoíris)", en "black / white / rainbow". Android's
+auto style picks `thor-black` for odin / ayn / thor / retroid pads: neither the controller name nor `Build.MODEL` tells
+the variant, so black is the default and the others a manual choice. Android treats all three as label-mapped pads (A
+east, B south). The Android `PROMPTS` list appends `thor-black`, `thor-white`, so saved indices keep their meaning.
+
 *Letter rendering (Xbox, Nintendo, Thor; message glyphs and menu icons alike).* The 6 x 8 letters keep their place
 and get a 1 px drop shadow down-right (a disc pixel at +1,+1 of a letter pixel: the fill 30 % toward black) and a soft
 edge (disc pixels still equal to the fill and 4-adjacent to the letter: the fill 35 % toward the letter colour: white
 on Thor, the letter's own colour on the dark Xbox / Nintendo disc), letters on top (`letter_fx`). The extra colours
-come from **several port CLUT rows**: `PORT_CLUT_ROWS` = 7 rows of 16 in `port_prompt_clut`, CLUT id `0xFFFF - row`
+come from **several port CLUT rows**: `PORT_CLUT_ROWS` = 9 rows of 16 in `port_prompt_clut`, CLUT id `0xFFFF - row`
 (row 0 the original table: generic / PlayStation fallback shapes; 1 Xbox; 2 Nintendo and every shoulder label; 3..6
-Thor one per button: disc, shadow, soft edge, white). `gpu.c` maps such an id to `GpuTex.cy = PORT_CLUT_Y`,
-`cx = 16 * row`; the soft texel fetch reads `port_prompt_clut[cx + i]`, the GL shader's `pclut(tp.x + idx)` has all 112
+Thor one per button: disc, shadow, soft edge, white; 7 Thor with black buttons, 8 Thor with white buttons). `gpu.c` maps such an id to `GpuTex.cy = PORT_CLUT_Y`,
+`cx = 16 * row`; the soft texel fetch reads `port_prompt_clut[cx + i]`, the GL shader's `pclut(tp.x + idx)` has all 144
 entries compiled in. The message glyph cache slots and the patched menu rects remember their row.
 
 *Menu icons (title, options, button config, adjust screen, save / load).* Outside the message boxes the game draws its

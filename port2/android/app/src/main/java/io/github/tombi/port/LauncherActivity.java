@@ -47,7 +47,7 @@ public class LauncherActivity extends Activity {
     static final int[] LANG_N = {0, 5, 6, 7, 8};
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
-    static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor"};   // button icons (--prompts); thor last: stored indices keep their meaning
+    static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor", "thor-black", "thor-white"};   // button icons (--prompts); new ones appended: stored indices keep their meaning
     static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";

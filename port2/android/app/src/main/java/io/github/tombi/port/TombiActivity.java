@@ -78,7 +78,7 @@ public class TombiActivity extends SDLActivity {
             PadMap pm = pad != null ? pad : new PadMap(getIntent().getStringExtra(EXTRA_PADMAP));
             /* Thor / Retroid / Nintendo pads send Android's key codes by their printed labels (A east, B south, X north,
                Y west); prompts.c takes positions (Xbox names: a south, b east, x west, y north): swap the pairs */
-            boolean labels = "thor".equals(style) || "nintendo".equals(style);
+            boolean labels = "thor".equals(style) || "thor-black".equals(style) || "thor-white".equals(style) || "nintendo".equals(style);
             out.add("--prompt-map"); out.add(promptMap(pm, labels));
         }
         out.add("--launcher-exit");   // the pause menu / title QUIT entries: back here (quitToLauncher)
@@ -100,7 +100,7 @@ public class TombiActivity extends SDLActivity {
                 if (n.contains("xbox") || n.contains("x-box")) return "xbox";
                 if (n.contains("dualsense") || n.contains("dualshock") || n.contains("playstation") || n.contains("wireless controller")
                         || n.contains("ps4") || n.contains("ps5") || n.contains("ps3")) return "playstation";
-                if (n.contains("odin") || n.contains("ayn") || n.contains("thor") || n.contains("retroid")) return "thor";
+                if (n.contains("odin") || n.contains("ayn") || n.contains("thor") || n.contains("retroid")) return "thor-black";   // the colour variant is not reported: black buttons by default, the white / rainbow ones by hand
                 if (n.contains("nintendo") || n.contains("pro controller") || n.contains("joy-con")) return "nintendo";
                 return "generic";
             }

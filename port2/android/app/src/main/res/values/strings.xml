@@ -93,7 +93,7 @@
     <string name="opt_rumble">Vibration intensity</string>
     <string name="rumble_off">Off</string>
     <string name="opt_prompts">Button icons</string>
-    <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Generic</item><item>AYN Thor / Retroid</item></string-array>
+    <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Generic</item><item>AYN Thor (rainbow)</item><item>AYN Thor (black)</item><item>AYN Thor (white)</item></string-array>
     <string name="save_import">Import save…</string>
     <string name="save_import_confirm">Import the file into the memory card? A whole card replaces the current one (kept as .bak); a single save is added to a free slot.</string>
     <string name="save_exported">Card exported (tombi.mcd).</string>

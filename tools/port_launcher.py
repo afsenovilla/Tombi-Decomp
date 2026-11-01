@@ -519,11 +519,11 @@ i18n.add({
     "es": {"l.rumble": "Intensidad de vibración:", "rumble.off": "Apagada",
            "c.pad": "Mando", "l.dualshock": "Mando DualShock (analógico): stick izquierdo con velocidad y vibración",
            "l.prompts": "Iconos de botones en los textos:", "p.auto": "Auto (según el mando)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor / Retroid", "p.gen": "Genérico"},
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor (arcoíris)", "p.thorb": "AYN Thor (negro)", "p.thorw": "AYN Thor (blanco)", "p.gen": "Genérico"},
     "en": {"l.rumble": "Vibration intensity:", "rumble.off": "Off",
            "c.pad": "Controller", "l.dualshock": "DualShock controller (analog): left stick with speed, and rumble",
            "l.prompts": "Button icons in the texts:", "p.auto": "Auto (from the controller)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor / Retroid", "p.gen": "Generic"},
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor (rainbow)", "p.thorb": "AYN Thor (black)", "p.thorw": "AYN Thor (white)", "p.gen": "Generic"},
 })
 
 RUMBLE_STEPS = [0, 25, 50, 75, 100, 125, 150, 200]   # --rumble choices, percent
@@ -1026,7 +1026,7 @@ class App:
         cb.pack(side="left", padx=(6, 0))
         ttk.Label(c, text=tr("l.prompts")).pack(anchor="w", pady=(8, 2))
         self._radios(c, "prompts_style", tk.StringVar, "auto", [(tr("p.auto"), "auto"), (tr("p.ps"), "playstation"),
-                     (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.thor"), "thor"), (tr("p.gen"), "generic")])
+                     (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.thorb"), "thor-black"), (tr("p.thorw"), "thor-white"), (tr("p.thor"), "thor"), (tr("p.gen"), "generic")])
         o, c = self.card(f, tr("c.controls"))
         o.pack(fill="both", expand=True)
         top = ttk.Frame(c)
@@ -1845,7 +1845,7 @@ class App:
             rumble = 100
         if rumble != 100:
             cmd += ["--rumble", str(rumble)]
-        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "thor", "generic"):
+        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "thor", "thor-black", "thor-white", "generic"):
             cmd += ["--prompts", s["prompts_style"]]
         cmd += ["--launcher-exit"]     # QUIT entries in the title and pause menus end the game back to this window
         cmd += M.mod_args(s, app_dir())
