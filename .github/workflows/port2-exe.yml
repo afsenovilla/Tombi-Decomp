@@ -123,7 +123,7 @@ jobs:
         id: fetch
         if: steps.bin.outputs.cache-hit != 'true'
         env:
-          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL }}
+          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL2 || secrets.GAME_FILES_URL }}   # URL2: Dropbox (Drive throttles)
         run: |
           # The same download as report.yml: a raw disc image (.bin) of your own copy, never committed.
           if [ -z "$GAME_FILES_URL" ]; then
@@ -131,6 +131,7 @@ jobs:
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
+          URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"   # Dropbox share link -> direct download
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
@@ -318,7 +319,7 @@ jobs:
         id: fetch
         if: steps.bin.outputs.cache-hit != 'true'
         env:
-          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL }}
+          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL2 || secrets.GAME_FILES_URL }}   # URL2: Dropbox (Drive throttles)
         run: |
           # The same download as report.yml: a raw disc image (.bin) of your own copy, never committed.
           if [ -z "$GAME_FILES_URL" ]; then
@@ -326,6 +327,7 @@ jobs:
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
+          URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"   # Dropbox share link -> direct download
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
