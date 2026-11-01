@@ -138,7 +138,25 @@ AREA10 (overlay `X010`, text `MFNT100*`, JP `X10` + `AREA10/A003.GAM`) is the wh
 - Also in the bank, unreferenced: group 5 dx 15 ("you look tired, you need energy"),
   group 1 save prompts (data-driven, not cut). JP #171 ポテンシャルが　たりない ("not enough potential") is empty in PAL.
 - **Sprites:** AREA10 SPR tables have 37 candidate frames, all Tomba's own swim/fight poses (code-driven, false positives).
-  JP AREA10 SPR 0x33 has 3 frames not in PAL (f41, f42, f45: plain coloured bars, no art). No chief, eel or drum sprite.
+  JP AREA10 SPR 0x33 has 3 frames not in PAL (f41, f42, f45: plain coloured bars, no art). No chief or separate drum sprite found. **Correction: the eel was too broad.** An unreferenced 3-frame
+  script survives: JP X10 cell 0x8012DEB8 → 0x8012E0E0 = frames 33, 34, 35 of SPR slot 3, 8 ticks each, the last
+  one held (0x8008), no loop; PAL X010 has the same 24 bytes at 0x80131F1C (cell 0x80131CE8). SiergiejW decoded the
+  frames as a 32x16 eel with its own palette (texture in `AREA10/B003.GAM`); we checked the script and its lack of
+  pointers in both builds, not the pixels (SiergiejW, TombaEdit docs/jp-retail-unused-research.md).
+- **Items vs the eel (JP SLPS, same on PAL where checked):** item 108 (Electric Eel) picks world descriptor 0 (table
+  0x80077BE4 → pointers 0x80077CAC; descriptor 0 = the generic berry frame), like 59 Rubber Gloves, 109 Black Water and
+  119 Funga Leather; none of the 97 descriptors points at the eel cell. Its menu condition is list 22 (PAL D0SPSUB
+  `D_800FECE8[108]` = 22 → 0x800FF3E8: AREA18 s2, player H 128..192), the same as Black Water: a place to use it, not
+  a spawn point. Funga Drum 125 (descriptor 94) and Small Drum 137 (61) share the anim cell 0x80011E8C (one sprite)
+  and differ only in the box (`08 10 08 10` vs `0C 0C 0C 0C`); the drum's menu condition is list 41. Wood 91,
+  Funga Tree 122, Funga Sap 123 and Chief's Spear 140 have their own descriptors (75, 73, 72, 74) (SiergiejW, TombaEdit docs/jp-retail-unused-research.md).
+- **JP item-use lines name two placeholders:** in the JP item-use block (AREA10 A003 #n = item n) #133 is
+  １ＵＰをつかった and #134 ゲージＭＡＸ　＋１をつかった (the two "Chick" slots: 1UP and gauge max +1), #131 地下迷宮の地図
+  (underground maze map), #147 石炭 (coal); #77-#86 (Math Bead 11.., Number Balls) say エラーです. All have menu list 0
+  (never usable); only 77 has a world descriptor (89). Text only, no effect code was found (SiergiejW, TombaEdit docs/jp-retail-unused-research.md).
+- **The shock reaction is PAL-only:** PAL X010 `playerStepHurtKnockback` (0x800FD358) sets animation 0x50 for
+  hurt reason 3 (+0xD1); the JP routine (X10 0x800FCE48, 1,492 bytes) never reads +0xD1 and always loads animation 0x39
+  (`li a2, 0x39` at 0x800FD01C) (SiergiejW, TombaEdit docs/jp-retail-unused-research.md).
 - **Not checked:** a full dead-function list of X010 (the naive pointer scan is too noisy), placed-object subtypes per room.
 
 ## Folkin's rough notes — verification (non-Civilization claims)

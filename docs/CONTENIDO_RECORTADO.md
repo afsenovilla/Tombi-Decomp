@@ -149,7 +149,27 @@ AREA10 (overlay `X010`, texto `MFNT100*`, JP `X10` + `AREA10/A003.GAM`) es toda 
   avisos de guardado del grupo 1 (van por datos, no son cortes). El JP #171 ポテンシャルが　たりない ("no hay potencial suficiente") está vacío en PAL.
 - **Sprites:** las tablas SPR de AREA10 dan 37 fotogramas candidatos, todos poses de Tomba (nadar/pelear, movidas por código: falsos
   positivos). La SPR 0x33 JP de AREA10 tiene 3 fotogramas que no están en PAL (f41, f42, f45: barras de color, sin dibujo). No hay
-  sprite del jefe, de la anguila ni del tambor.
+  sprite del jefe ni de un tambor aparte. **Corrección: lo de la anguila era demasiado amplio.** Sobrevive un guion
+  de 3 fotogramas sin referencias: JP X10 celda 0x8012DEB8 → 0x8012E0E0 = fotogramas 33, 34, 35 de la SPR 3, 8 tics
+  cada uno, el último fijo (0x8008), sin bucle; PAL X010 tiene los mismos 24 bytes en 0x80131F1C (celda 0x80131CE8).
+  SiergiejW decodificó los fotogramas como una anguila de 32x16 con su propia paleta (textura en `AREA10/B003.GAM`);
+  nosotros comprobamos el guion y que nada lo apunta en las dos versiones, no los píxeles (SiergiejW, TombaEdit docs/jp-retail-unused-research.md).
+- **Objetos frente a la anguila (SLPS JP, igual en PAL donde se ha mirado):** el objeto 108 (Anguila eléctrica) usa el
+  descriptor de mundo 0 (tabla 0x80077BE4 → punteros 0x80077CAC; el 0 es la baya genérica), como 59 Guantes de goma,
+  109 Agua negra y 119 Cuero Funga; ninguno de los 97 descriptores apunta a la celda de la anguila. Su condición de
+  menú es la lista 22 (D0SPSUB PAL `D_800FECE8[108]` = 22 → 0x800FF3E8: AREA18 s2, H del jugador 128..192), la misma
+  que el Agua negra: un sitio donde usarla, no donde aparece. El Tambor Funga 125 (descriptor 94) y el Tambor pequeño
+  137 (61) comparten la celda 0x80011E8C (un solo sprite) y sólo cambian la caja (`08 10 08 10` frente a
+  `0C 0C 0C 0C`); la condición del tambor es la lista 41. Madera 91, Árbol Funga 122, Savia Funga 123 y Lanza del
+  jefe 140 tienen descriptor propio (75, 73, 72, 74) (SiergiejW, TombaEdit docs/jp-retail-unused-research.md).
+- **Las líneas JP de uso nombran dos huecos de relleno:** en el bloque JP de uso (AREA10 A003 #n = objeto n) el #133 es
+  １ＵＰをつかった y el #134 ゲージＭＡＸ　＋１をつかった (los dos «Chick»: 1UP y medidor máx. +1), #131 地下迷宮の地図
+  (mapa del laberinto subterráneo), #147 石炭 (carbón); #77-#86 (Math Bead 11.., Number Balls) dicen エラーです. Todos
+  tienen la lista 0 (nunca se pueden usar); sólo el 77 tiene descriptor de mundo (89). Sólo texto, no hay código del
+  efecto (SiergiejW, TombaEdit docs/jp-retail-unused-research.md).
+- **La reacción de calambre es sólo PAL:** `playerStepHurtKnockback` de X010 PAL (0x800FD358) pone la animación 0x50
+  con el motivo 3 (+0xD1); la rutina JP (X10 0x800FCE48, 1.492 bytes) nunca lee +0xD1 y carga siempre la animación
+  0x39 (`li a2, 0x39` en 0x800FD01C) (SiergiejW, TombaEdit docs/jp-retail-unused-research.md).
 - **Sin revisar:** lista completa de funciones muertas de X010 (el escaneo simple de punteros da demasiado ruido) y subtipos colocados por sala.
 
 ## Notas de Folkin — verificación (afirmaciones fuera de Civilización)
