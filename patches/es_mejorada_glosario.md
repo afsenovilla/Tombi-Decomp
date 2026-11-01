@@ -36,7 +36,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Pig / ol' coot / geezer | vejete, vejestorio | registro coloquial |
 | Ha ha ha | ¡Ja, ja, ja! | con comas |
 | See ya! | ¡Hasta luego! | |
-| GrappleJack | Garfio-mangual | antes "Garfio-gancho" (Grapple + Blackjack = Mangual) |
+| GrappleJack | Manguancho | antes "Garfio-gancho"; mangual + gancho (Grapple + Blackjack), decisión del usuario |
 | Dashing Pants | Pantalón veloz | antes "Pantalón elegante" |
 | Funky Parasol | Sombrilla chula | antes "Sombrilla rara" |
 | Miner's Hat | Casco de minero | antes "Gorro (del) minero" |
