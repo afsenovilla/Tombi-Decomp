@@ -24,3 +24,10 @@
   overlay duplicates) and port the C; expect most game code to transfer, with differences in the text/font system
   (kana/kanji), the single-language file layout (no MAIN0-8) and older library revisions. Needs the user's disc image
   (kept out of the repo like the PAL one). Adapting the text editor to Japanese is a separate, larger task.
+- **High frame rates (90 / 120 / 144 FPS) at the original speed (port).** The game logic advances once per frame at
+  50 Hz (PAL), so uncapping simply speeds the game up (`--hz 60` = NTSC speed). Decouple drawing from logic: keep
+  the logic at 50 Hz and let the port draw in-between frames by interpolating the camera, 3D models (positions,
+  rotations, animation poses), sprites and 2D layers between the last two logic ticks, presenting at the display's
+  refresh rate. Handle the edge cases: objects spawned or removed this tick, teleports and camera cuts (no blend),
+  menus and message boxes (draw as-is), movies. Both renderers (software and GL), Android included; an option in
+  both launchers.
