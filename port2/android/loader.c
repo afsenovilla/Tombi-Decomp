@@ -275,7 +275,7 @@ static void on_usr2(int sig, siginfo_t *info, void *ucv) {
     tlog("watchdog: game thread state:");
     dump_context((ucontext_t *)ucv);
 }
-static volatile int wd_phase;   /* 0 loading, 1 in port_main */
+static volatile int wd_phase;   /* 0 loading, 1 in port_main, 2 a start-up message box is up (no reports) */
 static void *wd_main(void *arg) {
     (void)arg;
     int last = -1, still = 0, reports = 0; static const int marks[] = { 1, 2, 10, 60, 300, 1500 }; unsigned mk = 0;
@@ -284,6 +284,7 @@ static void *wd_main(void *arg) {
         int f = frame_p ? *frame_p : 0;
         while (mk < sizeof marks / sizeof marks[0] && f >= marks[mk]) { tlog("frame %d reached", marks[mk]); mk++; }
         if (f != last) { last = f; still = 0; continue; }
+        if (wd_phase == 2) { still = 0; continue; }   /* waiting for the user on a message box: not a hang */
         if (++still % 10 || reports >= 3) continue;
         reports++;
         tlog("watchdog: no new frame for %d s (frame %d, %s)", still, f, wd_phase ? "in port_main" : "loading");
@@ -352,6 +353,44 @@ static int try_reserve(unsigned long base, unsigned long size) {
     tlog("reserved %p-%#lx (%lu MB)", p, base + size, size >> 20);
     return 1;
 }
+/* lowest page-aligned base >= 64 KB where [base, base+size) touches no mapping and base stays below 16 MB (port_ram
+   has to end there; port_check_layout in libtombi.so checks the exact layout); 0 when there is none */
+static unsigned long find_low_gap(unsigned long size) {
+    FILE *f = fopen("/proc/self/maps", "re");
+    if (!f) return 0;
+    unsigned long cand = 0x00010000ul, found = 0; char line[512];
+    while (fgets(line, sizeof line, f)) {
+        unsigned long a, b;
+        if (sscanf(line, "%lx-%lx", &a, &b) != 2) continue;
+        if (b <= cand) continue;
+        if (a >= cand + size) break;                 /* the gap before this mapping fits */
+        cand = (b + 0xFFFFul) & ~0xFFFFul;           /* past it */
+        if (cand >= 0x01000000ul) break;
+    }
+    fclose(f);
+    if (cand < 0x01000000ul) found = cand;
+    tlog("free low gap for %#lx: %#lx", size, found);
+    return found;
+}
+/* what holds the range: a libtombi.so / libmain.so of ours (a previous game instance in a reused process) or something else */
+static int low_stale_self;
+static void low_conflict_describe(unsigned long size) {
+    FILE *f = fopen("/proc/self/maps", "re");
+    if (!f) return;
+    char line[512], who[160] = "";
+    while (fgets(line, sizeof line, f)) {
+        unsigned long a, b;
+        if (sscanf(line, "%lx-%lx", &a, &b) != 2 || b <= PORT2_LOW_BASE || a >= PORT2_LOW_BASE + size) continue;
+        if (strstr(line, "libtombi.so")) low_stale_self = 1;
+        if (!who[0]) { char *nl = strchr(line, '\n'); if (nl) *nl = 0; snprintf(who, sizeof who, "%s", line); }
+    }
+    fclose(f);
+    if (who[0]) {
+        size_t l = strlen(low_err);
+        snprintf(low_err + l, sizeof low_err - l, "; first mapping in the way: %.120s", who);
+    }
+    tlog("low range conflict: %s%s", low_err, low_stale_self ? " (a previous game instance of this process)" : "");
+}
 static void reserve_low(void) {
     if (low_base) return;
     unsigned long span = tombi_span();
@@ -364,6 +403,10 @@ static void reserve_low(void) {
        ends below 16 MB there) */
     static const unsigned long bases[] = { PORT2_LOW_BASE, 0x00010000ul, 0x00200000ul, 0x00400000ul, 0x00800000ul };
     for (unsigned i = 0; i < sizeof bases / sizeof bases[0]; i++) if (try_reserve(bases[i], size)) return;
+    /* every usual base is taken: the lowest free gap below 16 MB + size in /proc/self/maps (whatever sits in the way) */
+    unsigned long gap = find_low_gap(size);
+    if (gap && try_reserve(gap, size)) return;
+    low_conflict_describe(size);
 }
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -380,6 +423,7 @@ static int fail(const char *title, const char *msg) {
     tlog("FAILED: %s: %s", title, msg);
     char m[1200]; snprintf(m, sizeof m, "start-up failure: %s\n", msg);
     marker("crashed", m);
+    wd_phase = 2;   /* the box waits for the user (a JNI call blocked in Java): the watchdog must not call it a hang */
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, msg, NULL);
     return 1;
 }
@@ -391,6 +435,7 @@ int SDL_main(int argc, char *argv[]) {
     static int runs;
     if (runs++) {   /* the activity came back in a ":game" process that already ran the game: its state is used up */
         tlog("SDL_main called again in the same process (run %d): the game cannot restart here", runs);
+        wd_phase = 2;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Tombi!", "The game was already started in this process.\n\nClose Tombi! and start it again from the launcher.", NULL);
         exit(0);
     }
@@ -440,9 +485,18 @@ int SDL_main(int argc, char *argv[]) {
     }
 
     reserve_low();
+    if (!low_base && low_stale_self) {
+        /* our own previous instance still holds it (Android reused the ":game" process): not a real conflict. No
+           crash marker; the process ends so the next start from the launcher gets a fresh one */
+        tlog("low range held by a previous game instance in this process: ending the process");
+        marker("clean", "stale game process ended\n");
+        wd_phase = 2;
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Tombi!", "The previous game was still closing.\n\nPlease start Tombi! again from the launcher.", NULL);
+        _exit(0);
+    }
     if (!low_base) {
-        snprintf(msg, sizeof msg, "Could not reserve the low address range the game needs (%s).\n\nThe log (launcher: Options > View last log) has the details.", low_err);
-        return fail("Tombi!", msg);
+        snprintf(msg, sizeof msg, "Another library of this app's process already uses the low memory addresses the game must be loaded at, so it cannot start on this device as it is (%s).\n\nRestarting the device may help. Please send the log (launcher: Options > View last log).", low_err);
+        return fail("Tombi! cannot start", msg);
     }
     android_dlextinfo ext; memset(&ext, 0, sizeof ext);
     ext.flags = ANDROID_DLEXT_RESERVED_ADDRESS;

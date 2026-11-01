@@ -300,6 +300,11 @@ public class TombiActivity extends SDLActivity {
         CrashLog.append(getApplicationContext(), "back to the launcher (" + why + ")");
         markClean();
         finish();
+        // safety net: if onDestroy never comes (SDL's thread join stuck), end the ":game" process anyway
+        ui.postDelayed(new Runnable() { public void run() {
+            CrashLog.append(getApplicationContext(), "quit: onDestroy did not end the process in 4 s; killing it");
+            android.os.Process.killProcess(android.os.Process.myPid());
+        } }, 4000);
     }
     /* an intentional end: the "clean" marker (CrashLog.crashedLastRun ignores the others) and the native flag, so a
        fault while the process tears down is not written as a crash (loader.c checks port_clean_exit) */
@@ -406,7 +411,9 @@ public class TombiActivity extends SDLActivity {
         if (finishing) { CrashLog.file(getApplicationContext(), CrashLog.RUNNING).delete(); markClean(); }   // a clean end ("crashed" stays if loader.c wrote it)
         super.onDestroy();
         // the ":game" process cannot start the game twice (the low range is reserved once, in JNI_OnLoad)
-        if (finishing) System.exit(0);
+        // SIGKILL rather than System.exit: no atexit / static destructors racing the game thread (which may itself be in
+        // exit() from port_quit), so the process is gone for sure before the launcher starts the next game
+        if (finishing) android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     /** The panel on the secondary display: polls the native buffer ~30 times a second and draws it scaled to fit.

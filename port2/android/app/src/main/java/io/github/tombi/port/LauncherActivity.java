@@ -339,6 +339,25 @@ public class LauncherActivity extends Activity {
         return a.toArray(new String[0]);
     }
 
+    /* a ":game" process left from an earlier game (still tearing down, or kept cached by Android) would be reused for the
+       new TombiActivity, where the low range is already taken: kill it (same UID) and wait until it is gone */
+    void killStaleGame() {
+        try {
+            android.app.ActivityManager am = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            String name = getPackageName() + ":game";
+            for (int tries = 0; tries < 40; tries++) {
+                int pid = 0;
+                java.util.List<android.app.ActivityManager.RunningAppProcessInfo> l = am.getRunningAppProcesses();
+                if (l != null) for (android.app.ActivityManager.RunningAppProcessInfo p : l) if (name.equals(p.processName)) pid = p.pid;
+                if (pid == 0) { if (tries > 0) CrashLog.append(this, "launcher: stale :game process gone"); return; }
+                if (tries == 0) CrashLog.append(this, "launcher: a :game process (pid " + pid + ") is still there: killing it");
+                android.os.Process.killProcess(pid);
+                try { Thread.sleep(50); } catch (InterruptedException ignored) { }
+            }
+            CrashLog.append(this, "launcher: the stale :game process did not go away in 2 s; starting anyway");
+        } catch (Throwable t) { CrashLog.append(this, "launcher: killStaleGame: " + t); }
+    }
+
     void play() {
         if (!ready()) {
             Toast.makeText(this, R.string.need_disc, Toast.LENGTH_LONG).show();
@@ -351,6 +370,7 @@ public class LauncherActivity extends Activity {
         // markers (CrashLog): "running" until TombiActivity finishes cleanly; a stale "crashed" is cleared
         CrashLog.clearMarkers(this);
         CrashLog.writeMarker(this, CrashLog.RUNNING, "launcher " + version() + " " + System.currentTimeMillis() + "\n");
+        killStaleGame();
         try {
             Intent i = new Intent(this, TombiActivity.class);
             i.putExtra(TombiActivity.EXTRA_ARGS, args);
