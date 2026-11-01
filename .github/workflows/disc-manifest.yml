@@ -1,0 +1,65 @@
+# Hash manifest of a demo/prototype disc held in a GAME_FILES_URL_* secret. Prints paths, sizes, ISO dates and
+# hashes only (tools/disc_manifest.py); no disc data leaves the runner. Used to catalogue builds (docs/BUILDS.md)
+# and to compare files between builds by hash.
+name: disc-manifest
+
+on:
+  workflow_dispatch:
+    inputs:
+      disc:
+        description: "Secret suffix (GAME_FILES_URL_<disc>)"
+        type: choice
+        options: [DENGEKI_D5, PREPRE8, JP_DEMO, BETA980203, JP, USA]
+        default: DENGEKI_D5
+      prefix:
+        description: "Only paths starting with this (empty = whole disc)"
+        default: ""
+
+jobs:
+  manifest:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch disc
+        env:
+          URL_DENGEKI_D5: ${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}
+          URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
+          URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
+          URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
+          URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+          URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
+          DISC: ${{ inputs.disc }}
+        run: |
+          V="URL_$DISC"; URL="${!V}"
+          if [ -z "$URL" ]; then echo "::error::GAME_FILES_URL_$DISC is not set."; exit 1; fi
+          URL="$(printf '%s' "$URL" | tr -d '\r\n"'"'"' ')"
+          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+          mkdir -p "$RUNNER_TEMP/d"; cd "$RUNNER_TEMP/d"
+          curl -fsSL -o dl "$URL"
+          if unzip -tq dl >/dev/null 2>&1; then unzip -o -q dl -d x
+          elif 7z t dl >/dev/null 2>&1; then 7z x -y -ox dl >/dev/null
+          else mkdir x; mv dl x/disc.bin; fi
+          rm -f dl
+          IMG="$(find x -type f \( -iname '*.bin' -o -iname '*.iso' -o -iname '*.img' \) -printf '%s %p\n' | sort -n | tail -1 | cut -d' ' -f2-)"
+          if [ -z "$IMG" ]; then echo "::error::No disc image found in the download."; find x | head -50; exit 1; fi
+          echo "IMG=$RUNNER_TEMP/d/$IMG" >> "$GITHUB_ENV"
+          echo "Image: $(basename "$IMG"), $(stat -c%s "$IMG") bytes"
+
+      - name: Manifest
+        run: |
+          python3 -I tools/disc_manifest.py "$IMG" "${{ inputs.prefix }}" > manifest.tsv
+          {
+            echo "### GAME_FILES_URL_${{ inputs.disc }}"
+            echo; echo "Image MD5: \`$(md5sum "$IMG" | cut -d' ' -f1)\`"; echo
+            echo '| Path | Size | Date | MD5 | SHA1 |'; echo '|---|---|---|---|---|'
+            awk -F'\t' '{printf "| %s | %s | %s | `%s` | `%s` |\n",$1,$2,$3,$4,$5}' manifest.tsv
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -rf "$RUNNER_TEMP/d"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manifest-${{ inputs.disc }}
+          path: manifest.tsv
