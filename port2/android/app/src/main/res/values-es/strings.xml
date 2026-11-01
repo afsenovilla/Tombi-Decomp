@@ -87,7 +87,7 @@
     <string name="disc_wiped">Datos borrados (partidas conservadas). Vuelve a elegir tu disco para jugar.</string>
     <string name="disc_wiped_saves">Datos y partidas borrados. Vuelve a elegir tu disco para jugar.</string>
     <string name="opt_disc">Disco / datos…</string>
-    <string name="opt_hint">Cruceta: mover · A: activar / abrir · Izq./Der.: cambiar un valor · L1/R1: otra columna · B: volver. Las opciones de files/args.txt se siguen añadiendo.</string>
+    <string name="opt_hint">Cruceta: mover · A: activar / abrir · Izq./Der.: cambiar un valor · B: volver. Las opciones de files/args.txt se siguen añadiendo.</string>
     <string name="opt_dualshock">Mando DualShock (analógico)</string>
     <string name="opt_prompts">Iconos de botones</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Genérico</item><item>AYN Thor / Retroid</item></string-array>
@@ -96,4 +96,10 @@
     <string name="save_exported">Tarjeta exportada (tombi.mcd).</string>
     <string name="save_export">Exportar partida…</string>
     <string name="save_fail">Error: %1$s</string>
+    <string name="cat_game">Juego</string>
+    <string name="cat_gfx">Gráficos</string>
+    <string name="cat_dual">Segunda pantalla</string>
+    <string name="cat_pad">Controles</string>
+    <string name="cat_data">Partidas y datos</string>
+    <string name="cat_debug">Trucos y depuración</string>
 </resources>

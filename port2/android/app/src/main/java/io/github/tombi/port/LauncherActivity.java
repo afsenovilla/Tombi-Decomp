@@ -523,7 +523,7 @@ public class LauncherActivity extends Activity {
 
     // ---------------------------------------------------------------------------------------------------------------
     static class Item {
-        String label; String value; RectF r = new RectF(); boolean primary;
+        String label; String value; String sub; RectF r = new RectF(); boolean primary;   // sub: category summary
         Runnable act; Adjust adj;
         int check = -1;   // on/off option: 0/1, drawn as a tick box instead of a value
         Item(String l, Runnable a) { label = l; act = a; }
@@ -531,12 +531,12 @@ public class LauncherActivity extends Activity {
     interface Adjust { void by(int d); }
 
     class LauncherView extends View {
-        static final int MAIN = 0, OPTIONS = 1, DISC = 2, CRASH = 3, LOG = 4, PADMAP = 5;
-        int screen = MAIN, focus = 0;
-        int[] lastFocus = new int[6];
-        /* Options grid: items[0..optLeft) are the left column, the rest the right column (row = index in the column).
-         *  discFromOptions = the Disc screen was opened from Options (B/Back return there) */
-        int optLeft;
+        static final int MAIN = 0, OPTIONS = 1, DISC = 2, CRASH = 3, LOG = 4, PADMAP = 5, OPTCAT = 6;
+        /* Options = a list of categories; OPTCAT = the page of category `cat` (CAT_GAME..CAT_DEBUG).
+         *  discFromOptions = the Disc screen was opened from an Options page (B/Back return there) */
+        static final int CAT_GAME = 0, CAT_GFX = 1, CAT_DUAL = 2, CAT_PAD = 3, CAT_DATA = 4, CAT_DEBUG = 5;
+        int screen = MAIN, focus = 0, cat = CAT_GAME;
+        int[] lastFocus = new int[7];
         /* Scrolling list (only the pad-mapping list overflows now; the 1280x720 canvas is scaled to fit any screen,
          *  so Options needs none): listScroll/listMax in canvas units. Keys keep the focused row visible
          *  (followFocus); a drag moves the list, with fling from the release velocity; a touch that moved less than
@@ -597,7 +597,7 @@ public class LauncherActivity extends Activity {
             confirmWipe = false;
             padStatus = null; capture = -1;
             lastFocus[screen] = focus;
-            if (sc == DISC) discFromOptions = screen == OPTIONS;
+            if (sc == DISC) discFromOptions = screen == OPTCAT;
             screen = sc;
             focus = lastFocus[sc];
             listScroll = 0; followFocus = true; scroller.forceFinished(true);
@@ -626,53 +626,67 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.options), new Runnable() { public void run() { setScreen(OPTIONS); } }));
                 items.add(new Item(getString(R.string.disc), new Runnable() { public void run() { setScreen(DISC); } }));
                 items.add(new Item(getString(R.string.quit), new Runnable() { public void run() { finish(); } }));
-            } else if (screen == OPTIONS) {   // two columns, see drawOptions; left = game, right = display / dual screen / data
-                Item l = new Item(getString(R.string.opt_lang), null);
-                l.value = LANG_NAME[langIdx()];
-                l.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("lang", (langIdx() + d + LANG_N.length) % LANG_N.length).apply(); } };
-                items.add(l);
-                Item tpi = new Item(getString(R.string.opt_textpatch), null);
-                tpi.check = textPatchOn() ? 1 : 0;
-                tpi.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("textpatch", !textPatchOn()).apply(); } };
-                items.add(tpi);
-                items.add(toggle(R.string.opt_cut, "cut"));
-                items.add(toggle(R.string.opt_skipintro, "skipintro"));
-                items.add(toggle(R.string.opt_debug, "debugmenu"));
-                items.add(toggle(R.string.opt_inflives, "inflives"));
-                items.add(toggle(R.string.opt_infhealth, "infhealth"));
-                items.add(new Item(getString(R.string.opt_padmap), new Runnable() { public void run() { setScreen(PADMAP); } }));
-                items.add(toggle(R.string.opt_dualshock, "dualshock"));   // --dualshock (shims/pad.c)
-                Item pr = new Item(getString(R.string.opt_prompts), null);   // --prompts (shims/prompts.c; TombiActivity resolves auto)
-                pr.value = getResources().getStringArray(R.array.prompt_names)[promptIdx()];
-                pr.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("prompts", (promptIdx() + d + PROMPTS.length) % PROMPTS.length).apply(); } };
-                items.add(pr);
-                items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
-                optLeft = items.size();
-                Item as = new Item(getString(R.string.opt_aspect), null);
-                as.value = aspectName(aspectIdx());
-                as.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("aspect", (aspectIdx() + d + ASPECTS.length) % ASPECTS.length).apply(); } };
-                items.add(as);
-                Item r = new Item(getString(R.string.opt_renderer), null);
-                r.value = getString(flag("gl", false) ? R.string.renderer_gl : R.string.renderer_soft);
-                r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
-                items.add(r);
-                items.add(toggle(R.string.opt_hz60, "hz60"));
-                items.add(toggle(R.string.opt_fps60, "fps60"));
-                items.add(toggle(R.string.opt_showfps, "showfps"));
-                Item ss = new Item(getString(R.string.opt_secondscreen), null);
-                ss.check = secondScreenOn() ? 1 : 0;
-                ss.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("secondscreen", !secondScreenOn()).apply(); } };
-                items.add(ss);
-                Item hb = new Item(getString(R.string.opt_hudbottom), null);
-                hb.check = hudBottomOn() ? 1 : 0;
-                hb.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("hudbottom", !hudBottomOn()).apply(); } };
-                items.add(hb);
-                items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
-                items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
-                    setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
-                items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
-                items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
+            } else if (screen == OPTIONS) {   // category list, one column (drawOptions)
+                category(CAT_GAME, R.string.cat_game, LANG_NAME[langIdx()]);
+                category(CAT_GFX, R.string.cat_gfx, aspectName(aspectIdx()) + " · " + getString(flag("gl", false) ? R.string.renderer_gl_short : R.string.renderer_soft));
+                category(CAT_DUAL, R.string.cat_dual, onoff(secondScreenOn()));
+                category(CAT_PAD, R.string.cat_pad, getResources().getStringArray(R.array.prompt_names)[promptIdx()]);
+                category(CAT_DATA, R.string.cat_data, null);
+                category(CAT_DEBUG, R.string.cat_debug, null);
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
+            } else if (screen == OPTCAT) {   // one category page, same row style (drawOptions)
+                if (cat == CAT_GAME) {
+                    Item l = new Item(getString(R.string.opt_lang), null);
+                    l.value = LANG_NAME[langIdx()];
+                    l.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("lang", (langIdx() + d + LANG_N.length) % LANG_N.length).apply(); } };
+                    items.add(l);
+                    Item tpi = new Item(getString(R.string.opt_textpatch), null);
+                    tpi.check = textPatchOn() ? 1 : 0;
+                    tpi.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("textpatch", !textPatchOn()).apply(); } };
+                    items.add(tpi);
+                    items.add(toggle(R.string.opt_cut, "cut"));
+                    items.add(toggle(R.string.opt_skipintro, "skipintro"));
+                } else if (cat == CAT_GFX) {
+                    Item as = new Item(getString(R.string.opt_aspect), null);
+                    as.value = aspectName(aspectIdx());
+                    as.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("aspect", (aspectIdx() + d + ASPECTS.length) % ASPECTS.length).apply(); } };
+                    items.add(as);
+                    Item r = new Item(getString(R.string.opt_renderer), null);
+                    r.value = getString(flag("gl", false) ? R.string.renderer_gl : R.string.renderer_soft);
+                    r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
+                    items.add(r);
+                    items.add(toggle(R.string.opt_hz60, "hz60"));
+                    items.add(toggle(R.string.opt_fps60, "fps60"));
+                    items.add(toggle(R.string.opt_showfps, "showfps"));
+                } else if (cat == CAT_DUAL) {
+                    Item ss = new Item(getString(R.string.opt_secondscreen), null);
+                    ss.check = secondScreenOn() ? 1 : 0;
+                    ss.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("secondscreen", !secondScreenOn()).apply(); } };
+                    items.add(ss);
+                    Item hb = new Item(getString(R.string.opt_hudbottom), null);
+                    hb.check = hudBottomOn() ? 1 : 0;
+                    hb.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("hudbottom", !hudBottomOn()).apply(); } };
+                    items.add(hb);
+                } else if (cat == CAT_PAD) {
+                    items.add(new Item(getString(R.string.opt_padmap), new Runnable() { public void run() { setScreen(PADMAP); } }));
+                    items.add(toggle(R.string.opt_dualshock, "dualshock"));   // --dualshock (shims/pad.c)
+                    Item pr = new Item(getString(R.string.opt_prompts), null);   // --prompts (shims/prompts.c; TombiActivity resolves auto)
+                    pr.value = getResources().getStringArray(R.array.prompt_names)[promptIdx()];
+                    pr.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("prompts", (promptIdx() + d + PROMPTS.length) % PROMPTS.length).apply(); } };
+                    items.add(pr);
+                } else if (cat == CAT_DATA) {
+                    items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
+                    items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
+                    items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
+                    items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
+                        setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
+                } else {
+                    items.add(toggle(R.string.opt_inflives, "inflives"));
+                    items.add(toggle(R.string.opt_infhealth, "infhealth"));
+                    items.add(toggle(R.string.opt_debug, "debugmenu"));
+                    items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
+                }
+                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTIONS); } }));
             } else if (screen == PADMAP) {
                 PadMap pm = new PadMap(prefs.getString("padmap", ""));
                 String[] names = getResources().getStringArray(R.array.pad_names);
@@ -684,7 +698,7 @@ public class LauncherActivity extends Activity {
                 }
                 items.add(new Item(getString(R.string.pad_reset), new Runnable() { public void run() {
                     prefs.edit().remove("padmap").apply(); padStatus = getString(R.string.pad_reset_done); } }));
-                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTIONS); } }));
+                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTCAT); } }));
             } else if (screen == CRASH || screen == LOG) {
                 items.add(new Item(getString(R.string.log_copy), new Runnable() { public void run() { copyReport(); } }));
                 items.add(new Item(getString(R.string.log_share), new Runnable() { public void run() { shareReport(); } }));
@@ -702,7 +716,7 @@ public class LauncherActivity extends Activity {
             } else {
                 items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
                 items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() { confirmWipe = true; wipeSaves = false; focus = 0; } }));
-                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(discFromOptions ? OPTIONS : MAIN); } }));
+                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(discFromOptions ? OPTCAT : MAIN); } }));
             }
             if (focus >= items.size()) focus = 0;
         }
@@ -710,7 +724,15 @@ public class LauncherActivity extends Activity {
         /* leaving the crash card clears the markers (the log stays: Options > View last log) */
         void closeLog() {
             if (screen == CRASH) { CrashLog.clearMarkers(LauncherActivity.this); setScreen(MAIN); }
-            else setScreen(OPTIONS);
+            else setScreen(OPTCAT);
+        }
+
+        /** a row of the Options list: opens page c (focus on its first row) */
+        void category(final int c, int label, String sub) {
+            Item it = new Item(getString(label), new Runnable() { public void run() {
+                cat = c; setScreen(OPTCAT); focus = 0; } });
+            it.sub = sub;
+            items.add(it);
         }
 
         String aspectName(int i) { return i == 0 ? getString(R.string.aspect_auto) : ASPECTS[i]; }
@@ -718,7 +740,6 @@ public class LauncherActivity extends Activity {
         // ---- input ----
         boolean key(int code) {
             build();
-            if (screen == OPTIONS && optionsKey(code)) { invalidate(); return true; }
             int n = items.size();
             switch (code) {
                 case KeyEvent.KEYCODE_DPAD_UP: focus = (focus + n - 1) % n; break;
@@ -735,7 +756,8 @@ public class LauncherActivity extends Activity {
                 case KeyEvent.KEYCODE_BUTTON_B: case KeyEvent.KEYCODE_BACK: case KeyEvent.KEYCODE_ESCAPE:
                     if (phase != IDLE) requestCancel();
                     else if (screen == CRASH || screen == LOG) closeLog();
-                    else if (screen == MAIN) finish(); else setScreen(screen == PADMAP || (screen == DISC && discFromOptions) ? OPTIONS : MAIN);
+                    else if (screen == MAIN) finish(); else if (screen == OPTCAT) setScreen(OPTIONS);
+                    else setScreen(screen == PADMAP || (screen == DISC && discFromOptions) ? OPTCAT : MAIN);
                     break;
                 case KeyEvent.KEYCODE_BUTTON_START:
                     if (phase != IDLE) break;
@@ -747,28 +769,6 @@ public class LauncherActivity extends Activity {
             followFocus = true;
             invalidate();
             return true;
-        }
-
-        /** Options grid moves: Up/Down within the column (wrapping), Left/Right to the same row of the other column
-         *  (the last row if shorter); on a value button (language, aspect, renderer) Left/Right change the value
-         *  instead, and L1/R1 switch column from anywhere. A / B / Start take the common path. */
-        boolean optionsKey(int code) {
-            int n = items.size(), col = focus < optLeft ? 0 : 1, row = col == 0 ? focus : focus - optLeft;
-            int len = col == 0 ? optLeft : n - optLeft, base = col == 0 ? 0 : optLeft;
-            switch (code) {
-                case KeyEvent.KEYCODE_DPAD_UP: focus = base + (row + len - 1) % len; return true;
-                case KeyEvent.KEYCODE_DPAD_DOWN: focus = base + (row + 1) % len; return true;
-                case KeyEvent.KEYCODE_DPAD_LEFT: case KeyEvent.KEYCODE_DPAD_RIGHT: {
-                    Item it = items.get(focus);
-                    if (it.adj != null && it.check < 0) { it.adj.by(code == KeyEvent.KEYCODE_DPAD_LEFT ? -1 : 1); return true; }
-                }   // fall through: move to the other column
-                case KeyEvent.KEYCODE_BUTTON_L1: case KeyEvent.KEYCODE_BUTTON_R1: {
-                    int ob = col == 0 ? optLeft : 0, ol = col == 0 ? n - optLeft : optLeft;
-                    focus = ob + Math.min(row, ol - 1);
-                    return true;
-                }
-            }
-            return false;
         }
 
         void activate(Item it) {
@@ -819,7 +819,7 @@ public class LauncherActivity extends Activity {
             }
             if (act == MotionEvent.ACTION_UP && hit >= 0 && hit == focus) {
                 build();
-                if (screen == OPTIONS && hit < items.size()) {   // value button: left half = previous, right half = next
+                if (screen == OPTCAT && hit < items.size()) {   // value button: left half = previous, right half = next
                     Item it = items.get(hit);
                     if (it.adj != null && it.check < 0) { it.adj.by(x < it.r.centerX() ? -1 : 1); invalidate(); return true; }
                 }
@@ -875,7 +875,7 @@ public class LauncherActivity extends Activity {
             c.translate(ox, oy);
             c.scale(s, s);
             if (screen == MAIN) drawMain();
-            else if (screen == OPTIONS) drawOptions();
+            else if (screen == OPTIONS || screen == OPTCAT) drawOptions();
             else if (screen == PADMAP) drawPadMap();
             else if (screen == CRASH || screen == LOG) drawLog();
             else drawDisc();
@@ -926,19 +926,25 @@ public class LauncherActivity extends Activity {
         }
 
         void drawOptions() {
-            bigTitle(getString(R.string.options), 50, 66);
-            // two columns of buttons, no scrolling: 10 rows of 48 + 9 between 96 and 666
-            int rows = Math.max(optLeft, items.size() - optLeft);
-            float top = 98, rowH = Math.min(57, (712 - top + 9) / rows), bh = rowH - 9;
+            int[] catNames = {R.string.cat_game, R.string.cat_gfx, R.string.cat_dual, R.string.cat_pad, R.string.cat_data, R.string.cat_debug};
+            bigTitle(screen == OPTIONS ? getString(R.string.options) : getString(catNames[cat]), 50, 66);
+            // one column, no scrolling: rows (at most 72 tall incl. a 12 gap) between 100 and 640; the help text
+            // has its own band below (650..712), so it never overlaps a button
+            float top = 100, bottom = 640, rowH = Math.min(72, (bottom - top + 12) / Math.max(1, items.size())), bh = rowH - 12;
             for (int i = 0; i < items.size(); i++) {
                 Item it = items.get(i);
-                boolean f = i == focus, right = i >= optLeft;
-                float x0 = right ? 652 : 72, y = top + (right ? i - optLeft : i) * rowH;
-                it.r.set(x0, y, x0 + 556, y + bh);
+                boolean f = i == focus;
+                float y = top + i * rowH;
+                it.r.set(640 - 400, y, 640 + 400, y + bh);
                 pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
                 int col = f ? ACCENT_TEXT : BG;
-                text(nunito, 20, col);
-                if (it.check >= 0) {   // on/off: label + tick box on the right
+                text(nunito, 22, col);
+                if (it.sub != null) {   // category with a summary on the right
+                    p.setTextAlign(Paint.Align.LEFT);
+                    canvas.drawText(it.label, it.r.left + 30, midBase(it.r), p);
+                    p.setTextSize(17); p.setTextAlign(Paint.Align.RIGHT);
+                    canvas.drawText(it.sub, it.r.right - 30, midBase(it.r), p);
+                } else if (it.check >= 0) {   // on/off: label + tick box on the right
                     p.setTextAlign(Paint.Align.LEFT);
                     canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
                     float bx = it.r.right - 22 - 30, by = it.r.centerY() - 15;
@@ -971,7 +977,7 @@ public class LauncherActivity extends Activity {
             }
             tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB);
             tp.setTextAlign(Paint.Align.LEFT);
-            wrapped(getString(R.string.opt_hint), 684);
+            wrapped(getString(R.string.opt_hint), 656);
         }
 
         // ---- Options > Controls / Button mapping ----

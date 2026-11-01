@@ -88,7 +88,7 @@
     <string name="disc_wiped">Data deleted (saves kept). Pick your disc again to play.</string>
     <string name="disc_wiped_saves">Data and saves deleted. Pick your disc again to play.</string>
     <string name="opt_disc">Disc / data…</string>
-    <string name="opt_hint">D-pad: move · A: toggle / open · Left/Right: change a value · L1/R1: other column · B: back. Extra flags in files/args.txt are still added.</string>
+    <string name="opt_hint">D-pad: move · A: toggle / open · Left/Right: change a value · B: back. Extra flags in files/args.txt are still added.</string>
     <string name="opt_dualshock">DualShock controller (analog)</string>
     <string name="opt_prompts">Button icons</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Generic</item><item>AYN Thor / Retroid</item></string-array>
@@ -97,4 +97,11 @@
     <string name="save_exported">Card exported (tombi.mcd).</string>
     <string name="save_export">Export save…</string>
     <string name="save_fail">Failed: %1$s</string>
+    <string name="cat_game">Game</string>
+    <string name="cat_gfx">Graphics</string>
+    <string name="cat_dual">Second screen</string>
+    <string name="cat_pad">Controls</string>
+    <string name="cat_data">Saves and data</string>
+    <string name="cat_debug">Cheats and debug</string>
+    <string name="renderer_gl_short">OpenGL ES</string>
 </resources>
