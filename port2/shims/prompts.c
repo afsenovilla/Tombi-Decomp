@@ -147,9 +147,9 @@ static void ps_symbol(int which) {
     switch (which) {
     case PS_CROSS:  for (int i = 0; i < 6; i++) { put(3 + i, 5 + i, C_BLUE); put(8 - i, 5 + i, C_BLUE); } break;
     case PS_CIRCLE:
-        for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) {
-            int dx = 2 * x - 7, dy = 2 * y - 7, r = dx * dx + dy * dy;
-            if (r >= 26 && r <= 52) put(2 + x, 4 + y, C_RED);
+        {   /* fallback only (the game's own circle is used once met): a clean 8 x 8 ring */
+            static const u8 ring[8] = { 0x3C, 0x42, 0x81, 0x81, 0x81, 0x81, 0x42, 0x3C };
+            for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) if (ring[y] >> (7 - x) & 1) put(2 + x, 4 + y, C_RED);
         }
         break;
     case PS_SQUARE: for (int i = 0; i < 6; i++) { put(3 + i, 5, C_PINK); put(3 + i, 10, C_PINK); put(3, 5 + i, C_PINK); put(8, 5 + i, C_PINK); } break;
@@ -208,6 +208,7 @@ static void lower2(void) {
 }
 
 static u16 out[GW / 4 * GH];
+static u8 orig[4][GH][GW], have_orig[4];   /* the game's PS glyphs, as met */
 static void pack(void) {
     for (int y = 0; y < GH; y++) for (int w = 0; w < GW / 4; w++) {
         u16 v = 0;
@@ -225,7 +226,12 @@ const u16 *port_prompt_glyph(const u16 *src, int w, int h, int slot) {
     const u8 *b = (const u8 *)src;
     for (int i = 0; i < GW * GH / 2; i++) hsh = (hsh ^ b[i]) * 16777619u;
     for (int ps = 0; ps < 4; ps++) if (hsh == ps_hash[ps]) {
-        draw(ps, port_prompt_src[ps], port_prompt_style);
+        /* keep the game's own glyph: PlayStation style shows the original art (only lowered), read here at run time */
+        for (int y = 0; y < GH; y++) for (int x = 0; x < GW; x++) orig[ps][y][x] = src[y * (GW / 4) + x / 4] >> (4 * (x & 3)) & 15;
+        have_orig[ps] = 1;
+        int s2 = port_prompt_src[ps];
+        if (port_prompt_style == PROMPT_PS && s2 < 4 && have_orig[s2]) memcpy(img, orig[s2], sizeof img);
+        else draw(ps, s2, port_prompt_style);
         lower2();
         pack();
         if (slot >= 0 && slot < NSLOTS)
