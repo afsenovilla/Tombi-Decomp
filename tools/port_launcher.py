@@ -390,6 +390,15 @@ def build_id():
 BUILD_ID = build_id()
 
 
+def icon_file(name):
+    """A file of tools/icons: bundled under icons/ by port2-exe.yml (--add-data ...;icons), else the checkout's."""
+    for d in ([os.path.join(sys._MEIPASS, "icons")] if getattr(sys, "_MEIPASS", None) else []) + [os.path.join(ROOT, "tools", "icons")]:
+        p = os.path.join(d, name)
+        if os.path.isfile(p):
+            return p
+    return None
+
+
 def set_icon(root):
     for d in (os.path.join(getattr(sys, "_MEIPASS", ""), "icons"), os.path.join(ROOT, "tools", "icons")):
         for name in ("launcher", "port", "gfx"):
@@ -978,8 +987,9 @@ class App:
         self.ires_note = ttk.Label(c, text=tr("l.iresoff"), style="Muted.TLabel", wraplength=300, justify="left")
 
     def _build_controls(self, f):
-        """A PS1 digital pad drawn on a canvas, a leader line from each button to its key; clicking a button or its key
-        and pressing a key rebinds it.  Same settings as before: keys_on + keys {button: SDL key name} (--keys)."""
+        """A PS1 digital pad on a canvas (the photo tools/icons/ps1_pad.png, else drawn as vectors), a leader line from
+        each button to its key; clicking a button or its key and pressing a key rebinds it.  Same settings as before:
+        keys_on + keys {button: SDL key name} (--keys)."""
         o, c = self.card(f, tr("c.controls"))
         o.pack(fill="both", expand=True)
         top = ttk.Frame(c)
@@ -1005,10 +1015,30 @@ class App:
         self.pad_capture = None
         self.pad_hot = None
         self._pad_pending = False
+        self.pad_photo = self._pad_load_photo()
+        self.pad_spots = {}                  # photo mode: button -> hotspot box in canvas pixels (kind, x0, y0, x1, y1)
+        self.pad_imgs = []                   # PhotoImages on the canvas (Tk drops an image nobody references)
+        self._pad_photo_cache = {}
         cv.bind("<Configure>", lambda e: self._pad_redraw())
         cv.bind("<KeyPress>", self._pad_key)
         cv.bind("<FocusOut>", lambda e: self._pad_cancel())
-        cv.bind("<Button-1>", lambda e: None if "btn" in cv.gettags("current") else self._pad_cancel())
+        cv.bind("<Button-1>", self._pad_click)
+        cv.bind("<Motion>", self._pad_motion)
+        cv.bind("<Leave>", lambda e: self._pad_hover(self.pad_hot, False) if self.pad_spots and self.pad_hot else None)
+
+    @staticmethod
+    def _pad_load_photo():
+        """The pad photo as a PIL image, or None (no Pillow / ImageTk in this Python, or the PNG missing): the vector pad."""
+        try:
+            from PIL import Image, ImageTk  # noqa: F401  (ImageTk: checked here so a missing _imagingtk falls back early)
+            p = icon_file("ps1_pad.png")
+            if not p:
+                return None
+            im = Image.open(p).convert("RGBA")
+            im.load()
+            return im
+        except Exception:
+            return None
 
     # ---- the drawn pad.  Base coordinates: a PAD_W x PAD_H box, scaled to the canvas (and the DPI: the fonts are pixel sized)
     PAD_W, PAD_H = 660, 326
@@ -1016,6 +1046,28 @@ class App:
     PAD_ROWS = {"l2": 26, "l1": 62, "up": 100, "left": 138, "down": 176, "right": 214,
                 "r2": 26, "r1": 62, "triangle": 100, "circle": 138, "cross": 176, "square": 214, "select": 306, "start": 306}
     FACE = {"triangle": "#1fa67a", "circle": "#e0413c", "cross": "#4f7fd9", "square": "#d96bb0"}   # the classic symbol colours
+
+    # ---- the photo (tools/icons/ps1_pad.png, 463x315, background removed).  It is drawn PHOTO_W base units wide with its
+    # top-left at PHOTO_XY; the hotspots / line ends below are in the photo's own pixels.  The photo looks at the pad from
+    # the front, so of each shoulder only the top shows: L1/R1 are the light shoulder blocks (the "L"/"R" ones), L2/R2
+    # the dark ridge above them (the back buttons, peeking out behind).
+    PHOTO_XY, PHOTO_W, PHOTO_SIZE = (154, 34), 352, (463, 315)
+    PHOTO_ROWS = {"l2": 26, "l1": 58, "up": 92, "left": 121, "down": 150, "right": 180,
+                  "r2": 26, "r1": 58, "triangle": 92, "circle": 121, "cross": 150, "square": 180, "select": 306, "start": 306}
+    PHOTO_SPOTS = {   # kind, box (photo px).  The pad is symmetric about x 231
+        "l2": ("rect", 60, -4, 132, 10), "l1": ("rect", 50, 10, 140, 40),
+        "r2": ("rect", 330, -4, 402, 10), "r1": ("rect", 322, 10, 412, 40),
+        "up": ("rect", 77, 70, 109, 102), "down": ("rect", 77, 125, 109, 158),
+        "left": ("rect", 48, 99, 79, 129), "right": ("rect", 105, 99, 137, 129),
+        "triangle": ("oval", 349, 58, 387, 96), "circle": ("oval", 392, 97, 430, 135),
+        "cross": ("oval", 349, 134, 387, 172), "square": ("oval", 306, 96, 344, 134),
+        "select": ("rect", 186, 134, 215, 155), "start": ("rect", 245, 134, 276, 155),
+    }
+    # where each leader line ends (photo px); "v" routes go across to the x of their end, then straight up/down to it
+    # (on the button's edge towards its label, so the symbols stay visible)
+    PHOTO_LINES = {"l2": (80, 5), "l1": (68, 26), "up": (82, 84), "left": (54, 114), "down": (82, 147), "right": ("v", 121, 125),
+                   "r2": (382, 5), "r1": (394, 26), "triangle": (384, 72), "circle": (426, 116), "cross": (384, 158),
+                   "square": ("v", 325, 131), "select": ("v", 201, 152), "start": ("v", 260, 152)}
 
     def _pad_redraw(self):
         if not self._pad_pending:
@@ -1037,6 +1089,8 @@ class App:
         except tk.TclError:
             return
         cv.delete("all")
+        self.pad_spots = {}
+        self.pad_imgs = []
         if cw < 50 or ch < 50:
             return
         dpi = float(self.root.tk.call("tk", "scaling")) / (96 / 72.0)
@@ -1059,70 +1113,76 @@ class App:
             return ("b_" + b, "btn")
 
         cx = self.PAD_W / 2
-        body, edge, well, dark = "#d7d8dc", "#9a9da5", "#c3c5ca", "#55585f"
-        # shoulders behind the body: L2 (back) then L1
-        for side in (-1, 1):
-            for b2, (xa, xb, y0, y1) in ((("l2", "r2")[side > 0], (152, 98, 40, 62)), (("l1", "r1")[side > 0], (162, 88, 54, 82))):
-                x0, x1 = sorted((cx + side * xa, cx + side * xb))
-                rrect(x0, y0, x1, y1, 6, fill="#b9bbc1", outline=edge, width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
-                cv.create_text(*P((x0 + x1) / 2, y0 + 8), text=b2.upper(), font=F["tiny"], fill="#6d7078", tags=tag(b2))
-        # body: the outline of the left half, mirrored (smooth spline through these control points)
-        half = [(0, 76), (-60, 74), (-122, 68), (-158, 78), (-174, 106), (-176, 146), (-168, 196), (-154, 244), (-140, 272),
-                (-118, 284), (-96, 274), (-86, 244), (-74, 208), (-46, 192), (0, 188)]
-        pts = [(cx + x, y) for x, y in half] + [(cx - x, y) for x, y in reversed(half)]
-        flat = [v for p in pts for v in p]
-        shadow = [v + (3 if i % 2 else 0) for i, v in enumerate(flat)]
-        cv.create_polygon(*P(*shadow), smooth=True, fill="#e9eaed", outline="")
-        cv.create_polygon(*P(*flat), smooth=True, fill=body, outline=edge, width=max(1, 1.2 * s))
-        # d-pad: a round well and the four separate direction buttons of the PS1 pad, each pointed towards the centre
-        dx, dy, a, L = cx - 108, 138, 11, 34
-        cv.create_oval(*P(dx - 46, dy - 46, dx + 46, dy + 46), fill=well, outline="#b3b5bb", width=max(1, s))
-        for b2, (ux, uy) in {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}.items():
-            px, py = -uy, ux                     # across the arm
-            arm = []
-            for along, across in ((L, -a), (L, a), (a + 2.5, a), (6, 0), (a + 2.5, -a)):
-                arm += [dx + ux * along + px * across, dy + uy * along + py * across]
-            cv.create_polygon(*P(*arm), fill=dark, outline="#3c3e44", width=max(1, s), joinstyle="round",
-                              tags=tag(b2) + ("hl_" + b2, "arm"))
-        for b2, (ux, uy) in {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}.items():
-            tx, ty = dx + ux * (L - 7), dy + uy * (L - 7)       # a small arrow near each tip
-            px, py = -uy, ux
-            cv.create_polygon(*P(tx + ux * 4, ty + uy * 4, tx - ux * 3 + px * 5, ty - uy * 3 + py * 5, tx - ux * 3 - px * 5,
-                                 ty - uy * 3 - py * 5), fill="#9a9da5", outline="", tags=tag(b2))
-        # face buttons: a well, dark discs, the symbols as shapes in their colours
-        fx, fy, d, r = cx + 108, 138, 26, 12.5
-        cv.create_oval(*P(fx - 46, fy - 46, fx + 46, fy + 46), fill=well, outline="#b3b5bb", width=max(1, s))
-        lw = max(1.5, 2.2 * s)
-        for b2, (bx, by) in {"triangle": (fx, fy - d), "circle": (fx + d, fy), "cross": (fx, fy + d), "square": (fx - d, fy)}.items():
-            col = self.FACE[b2]
-            cv.create_oval(*P(bx - r, by - r, bx + r, by + r), fill="#3f4148", outline="#2c2e33", width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
-            k = 6.2
-            if b2 == "triangle":
-                cv.create_polygon(*P(bx, by - k, bx + k * 0.95, by + k * 0.62, bx - k * 0.95, by + k * 0.62), fill="", outline=col,
-                                  width=lw, joinstyle="miter", tags=tag(b2))
-            elif b2 == "circle":
-                cv.create_oval(*P(bx - k + 0.6, by - k + 0.6, bx + k - 0.6, by + k - 0.6), outline=col, width=lw, tags=tag(b2))
-            elif b2 == "cross":
-                cv.create_line(*P(bx - k + 0.8, by - k + 0.8, bx + k - 0.8, by + k - 0.8), fill=col, width=lw, tags=tag(b2))
-                cv.create_line(*P(bx - k + 0.8, by + k - 0.8, bx + k - 0.8, by - k + 0.8), fill=col, width=lw, tags=tag(b2))
-            else:
-                cv.create_rectangle(*P(bx - k + 1, by - k + 1, bx + k - 1, by + k - 1), outline=col, width=lw, tags=tag(b2))
-        # select / start: small pills, their names above them (the leader lines leave downwards)
-        for b2, bx in (("select", cx - 26), ("start", cx + 26)):
-            rrect(bx - 12, 146, bx + 12, 155, 4.5, fill="#6b6e75", outline="#4d5056", width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
-            cv.create_text(*P(bx, 138), text=b2.upper(), font=F["tiny"], fill="#7a7d85", tags=tag(b2))
+        lines = self._pad_draw_photo(cv, s, ox, oy) if self.pad_photo is not None else None
+        if lines:                            # the photo: rows / routes of PHOTO_ROWS / PHOTO_LINES
+            R = self.PHOTO_ROWS
+        else:                                # the vector pad
+            body, edge, well, dark = "#d7d8dc", "#9a9da5", "#c3c5ca", "#55585f"
+            # shoulders behind the body: L2 (back) then L1
+            for side in (-1, 1):
+                for b2, (xa, xb, y0, y1) in ((("l2", "r2")[side > 0], (152, 98, 40, 62)), (("l1", "r1")[side > 0], (162, 88, 54, 82))):
+                    x0, x1 = sorted((cx + side * xa, cx + side * xb))
+                    rrect(x0, y0, x1, y1, 6, fill="#b9bbc1", outline=edge, width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
+                    cv.create_text(*P((x0 + x1) / 2, y0 + 8), text=b2.upper(), font=F["tiny"], fill="#6d7078", tags=tag(b2))
+            # body: the outline of the left half, mirrored (smooth spline through these control points)
+            half = [(0, 76), (-60, 74), (-122, 68), (-158, 78), (-174, 106), (-176, 146), (-168, 196), (-154, 244), (-140, 272),
+                    (-118, 284), (-96, 274), (-86, 244), (-74, 208), (-46, 192), (0, 188)]
+            pts = [(cx + x, y) for x, y in half] + [(cx - x, y) for x, y in reversed(half)]
+            flat = [v for p in pts for v in p]
+            shadow = [v + (3 if i % 2 else 0) for i, v in enumerate(flat)]
+            cv.create_polygon(*P(*shadow), smooth=True, fill="#e9eaed", outline="")
+            cv.create_polygon(*P(*flat), smooth=True, fill=body, outline=edge, width=max(1, 1.2 * s))
+            # d-pad: a round well and the four separate direction buttons of the PS1 pad, each pointed towards the centre
+            dx, dy, a, L = cx - 108, 138, 11, 34
+            cv.create_oval(*P(dx - 46, dy - 46, dx + 46, dy + 46), fill=well, outline="#b3b5bb", width=max(1, s))
+            for b2, (ux, uy) in {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}.items():
+                px, py = -uy, ux                     # across the arm
+                arm = []
+                for along, across in ((L, -a), (L, a), (a + 2.5, a), (6, 0), (a + 2.5, -a)):
+                    arm += [dx + ux * along + px * across, dy + uy * along + py * across]
+                cv.create_polygon(*P(*arm), fill=dark, outline="#3c3e44", width=max(1, s), joinstyle="round",
+                                  tags=tag(b2) + ("hl_" + b2, "arm"))
+            for b2, (ux, uy) in {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}.items():
+                tx, ty = dx + ux * (L - 7), dy + uy * (L - 7)       # a small arrow near each tip
+                px, py = -uy, ux
+                cv.create_polygon(*P(tx + ux * 4, ty + uy * 4, tx - ux * 3 + px * 5, ty - uy * 3 + py * 5, tx - ux * 3 - px * 5,
+                                     ty - uy * 3 - py * 5), fill="#9a9da5", outline="", tags=tag(b2))
+            # face buttons: a well, dark discs, the symbols as shapes in their colours
+            fx, fy, d, r = cx + 108, 138, 26, 12.5
+            cv.create_oval(*P(fx - 46, fy - 46, fx + 46, fy + 46), fill=well, outline="#b3b5bb", width=max(1, s))
+            lw = max(1.5, 2.2 * s)
+            for b2, (bx, by) in {"triangle": (fx, fy - d), "circle": (fx + d, fy), "cross": (fx, fy + d), "square": (fx - d, fy)}.items():
+                col = self.FACE[b2]
+                cv.create_oval(*P(bx - r, by - r, bx + r, by + r), fill="#3f4148", outline="#2c2e33", width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
+                k = 6.2
+                if b2 == "triangle":
+                    cv.create_polygon(*P(bx, by - k, bx + k * 0.95, by + k * 0.62, bx - k * 0.95, by + k * 0.62), fill="", outline=col,
+                                      width=lw, joinstyle="miter", tags=tag(b2))
+                elif b2 == "circle":
+                    cv.create_oval(*P(bx - k + 0.6, by - k + 0.6, bx + k - 0.6, by + k - 0.6), outline=col, width=lw, tags=tag(b2))
+                elif b2 == "cross":
+                    cv.create_line(*P(bx - k + 0.8, by - k + 0.8, bx + k - 0.8, by + k - 0.8), fill=col, width=lw, tags=tag(b2))
+                    cv.create_line(*P(bx - k + 0.8, by + k - 0.8, bx + k - 0.8, by - k + 0.8), fill=col, width=lw, tags=tag(b2))
+                else:
+                    cv.create_rectangle(*P(bx - k + 1, by - k + 1, bx + k - 1, by + k - 1), outline=col, width=lw, tags=tag(b2))
+            # select / start: small pills, their names above them (the leader lines leave downwards)
+            for b2, bx in (("select", cx - 26), ("start", cx + 26)):
+                rrect(bx - 12, 146, bx + 12, 155, 4.5, fill="#6b6e75", outline="#4d5056", width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
+                cv.create_text(*P(bx, 138), text=b2.upper(), font=F["tiny"], fill="#7a7d85", tags=tag(b2))
 
-        # leader lines and key labels.  target: where the line ends; route: the points between the label and the target
-        R = self.PAD_ROWS
+            # leader lines.  target: where the line ends; route: the points between the label and the target
+            R = self.PAD_ROWS
+            lines = {
+                "l2": [(cx - 152, 49)], "l1": [(cx - 162, 68)], "up": [(dx - a, dy - 22)], "left": [(dx - L, dy)],
+                "down": [(dx - a, dy + 22)], "right": [(dx + 23, R["right"]), (dx + 23, dy + a)],
+                "r2": [(cx + 152, 49)], "r1": [(cx + 162, 68)], "triangle": [(fx + r * 0.9, fy - d - 4)], "circle": [(fx + d + r, fy)],
+                "cross": [(fx + r * 0.9, fy + d + 4)], "square": [(fx - d, R["square"]), (fx - d, fy + r)],
+                "select": [(cx - 26, R["select"]), (cx - 26, 155)], "start": [(cx + 26, R["start"]), (cx + 26, 155)],
+            }
+        # key labels
         lx_in, rx_in = 150, self.PAD_W - 150          # inner edge of the label columns (the chips sit there)
-        lines = {
-            "l2": [(cx - 152, 49)], "l1": [(cx - 162, 68)], "up": [(dx - a, dy - 22)], "left": [(dx - L, dy)],
-            "down": [(dx - a, dy + 22)], "right": [(dx + 23, R["right"]), (dx + 23, dy + a)],
-            "r2": [(cx + 152, 49)], "r1": [(cx + 162, 68)], "triangle": [(fx + r * 0.9, fy - d - 4)], "circle": [(fx + d + r, fy)],
-            "cross": [(fx + r * 0.9, fy + d + 4)], "square": [(fx - d, R["square"]), (fx - d, fy + r)],
-            "select": [(cx - 26, R["select"]), (cx - 26, 155)], "start": [(cx + 26, R["start"]), (cx + 26, 155)],
-        }
         chip_h, pad_x = 24, 9
+        self.pad_line_col = lc = "#6c717a" if self.pad_spots else "#8a8f98"     # darker over the grey photo
         nf, kf = F["name"], F["key"]
         for b2, route in lines.items():
             y = R[b2]
@@ -1144,9 +1204,9 @@ class App:
             # the line first (under the chip), elbow 12 px out of the chip, then the route, then a dot on the button
             knee = edge_x + (12 if left else -12)
             path = [edge_x, y] + ([knee, y] if b2 not in ("select", "start", "right", "square") else []) + [v for p in route for v in p]
-            cv.create_line(*P(*path), fill="#8a8f98", width=max(1, 1.2 * s), tags=tag(b2) + ("ln_" + b2,))
+            cv.create_line(*P(*path), fill=lc, width=max(1, 1.2 * s), tags=tag(b2) + ("ln_" + b2,))
             ex, ey = route[-1]
-            cv.create_oval(*P(ex - 2.6, ey - 2.6, ex + 2.6, ey + 2.6), fill="#8a8f98", outline=C_CARD, width=max(1, s),
+            cv.create_oval(*P(ex - 2.6, ey - 2.6, ex + 2.6, ey + 2.6), fill=lc, outline=C_CARD, width=max(1, s),
                            tags=tag(b2) + ("dot_" + b2,))
             capt = self.pad_capture == b2
             rrect(x0, y - chip_h / 2, x1, y + chip_h / 2, 6, fill=C_ACCENT if capt else "#ffffff",
@@ -1157,10 +1217,65 @@ class App:
         self.pad_scale = s
         for b2 in M.BUTTONS:
             t = "b_" + b2
-            cv.tag_bind(t, "<Enter>", lambda e, b2=b2: self._pad_hover(b2, True))
-            cv.tag_bind(t, "<Leave>", lambda e, b2=b2: self._pad_hover(b2, False))
+            if not self.pad_spots:           # the photo: hover is hit-tested in _pad_motion (hotspots + these items)
+                cv.tag_bind(t, "<Enter>", lambda e, b2=b2: self._pad_hover(b2, True))
+                cv.tag_bind(t, "<Leave>", lambda e, b2=b2: self._pad_hover(b2, False))
             cv.tag_bind(t, "<Button-1>", lambda e, b2=b2: self._pad_begin(b2))
         self._pad_style()
+
+    def _pad_draw_photo(self, cv, s, ox, oy):
+        """The photo scaled to the canvas (LANCZOS, cached per size), a hidden translucent accent ring per hotspot
+        (shown on hover / rebinding by _pad_style) and pad_spots in canvas pixels.  Returns the leader routes in base
+        units, or None when ImageTk fails (then the vector pad is drawn)."""
+        try:
+            from PIL import Image, ImageDraw, ImageTk
+            pw, ph = self.PHOTO_SIZE
+            k = self.PHOTO_W / pw                                   # photo px -> base units
+            w, h = max(1, round(pw * k * s)), max(1, round(ph * k * s))
+            img = self._pad_photo_cache.get((w, h))
+            if img is None:
+                self._pad_photo_cache = {(w, h): ImageTk.PhotoImage(self.pad_photo.resize((w, h), Image.LANCZOS))}
+                img = self._pad_photo_cache[(w, h)]
+            bx, by = self.PHOTO_XY
+            X0, Y0 = ox + bx * s, oy + by * s
+            cv.create_image(X0, Y0, image=img, anchor="nw")
+            f = k * s                                               # photo px -> canvas px
+            acc = tuple(int(C_ACCENT[i:i + 2], 16) for i in (1, 3, 5))
+            spots = {}
+            for b, (kind, u0, v0, u1, v1) in self.PHOTO_SPOTS.items():
+                x0, y0, x1, y1 = X0 + u0 * f, Y0 + v0 * f, X0 + u1 * f, Y0 + v1 * f
+                spots[b] = (kind, x0, y0, x1, y1)
+                # the ring: drawn 4x and scaled down (smooth edge); a 3 px margin for the outline
+                m, q = 3, 4
+                W, H = int(x1 - x0) + 2 * m, int(y1 - y0) + 2 * m
+                ring = Image.new("RGBA", (W * q, H * q), (0, 0, 0, 0))
+                d = ImageDraw.Draw(ring)
+                lw = max(2, round(2 * s)) * q
+                box = (m * q - lw / 2, m * q - lw / 2, (W - m) * q + lw / 2, (H - m) * q + lw / 2)
+                if kind == "oval":
+                    d.ellipse(box, fill=acc + (60,), outline=acc + (235,), width=lw)
+                else:
+                    d.rounded_rectangle(box, radius=5 * s * q, fill=acc + (60,), outline=acc + (235,), width=lw)
+                ph_ = ImageTk.PhotoImage(ring.resize((W, H), Image.LANCZOS))
+                self.pad_imgs.append(ph_)
+                cv.create_image(x0 - m, y0 - m, image=ph_, anchor="nw", state="hidden", tags=("ov_" + b,))
+        except Exception:
+            self.pad_photo = None            # e.g. no _imagingtk in this Pillow: the vector pad from now on
+            cv.delete("all")
+            self.pad_imgs = []
+            return None
+        self.pad_spots = spots
+        bx, by = self.PHOTO_XY
+        pt = lambda u, v: (bx + u * k, by + v * k)
+        R = self.PHOTO_ROWS
+        lines = {}
+        for b, end in self.PHOTO_LINES.items():
+            if end[0] == "v":
+                ex, ey = pt(*end[1:])
+                lines[b] = [(ex, R[b]), (ex, ey)]
+            else:
+                lines[b] = [pt(*end)]
+        return lines
 
     def _pad_style(self):
         """The highlight of the hovered / rebinding button (its line, dot, chip, name and the button itself), restyled
@@ -1169,7 +1284,7 @@ class App:
         for b in M.BUTTONS:
             hot = b in (self.pad_hot, self.pad_capture)
             capt = b == self.pad_capture
-            col = C_ACCENT if hot else "#8a8f98"
+            col = C_ACCENT if hot else getattr(self, "pad_line_col", "#8a8f98")
             cv.itemconfigure("ln_" + b, fill=col, width=max(1, (2 if hot else 1.2) * s))
             cv.itemconfigure("dot_" + b, fill=col)
             cv.itemconfigure("nm_" + b, fill=C_ACCENT if hot else C_MUTED)
@@ -1185,6 +1300,36 @@ class App:
                 else:                            # shoulders, select / start
                     cv.itemconfigure(it, outline=C_ACCENT if hot else ("#4d5056" if b in ("select", "start") else "#9a9da5"),
                                      width=max(1, (2.2 if hot else 1) * s))
+            cv.itemconfigure("ov_" + b, state="normal" if hot else "hidden")     # the photo's translucent ring
+
+    def _pad_spot_at(self, x, y):
+        for b, (kind, x0, y0, x1, y1) in self.pad_spots.items():
+            if kind == "oval":
+                rx, ry = (x1 - x0) / 2, (y1 - y0) / 2
+                if ((x - x0 - rx) / rx) ** 2 + ((y - y0 - ry) / ry) ** 2 <= 1:
+                    return b
+            elif x0 <= x <= x1 and y0 <= y <= y1:
+                return b
+        return None
+
+    def _pad_item_button(self):
+        cur = self.pad_cv.find_withtag("current")
+        tags = self.pad_cv.gettags(cur[0]) if cur else ()
+        return next((t[2:] for t in tags if t.startswith("b_")), None)
+
+    def _pad_motion(self, e):
+        if not self.pad_spots:
+            return                           # the vector pad: Enter / Leave of its items
+        b = self._pad_spot_at(e.x, e.y) or self._pad_item_button()
+        if b != self.pad_hot:
+            self._pad_hover(b, True) if b else self._pad_hover(self.pad_hot, False)
+
+    def _pad_click(self, e):
+        b = self._pad_spot_at(e.x, e.y) if self.pad_spots else None
+        if b:
+            self._pad_begin(b)
+        elif "btn" not in self.pad_cv.gettags("current"):
+            self._pad_cancel()
 
     def _pad_hover(self, b, inside):
         new = b if inside else (None if self.pad_hot == b else self.pad_hot)
