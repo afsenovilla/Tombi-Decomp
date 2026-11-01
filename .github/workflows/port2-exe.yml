@@ -110,6 +110,15 @@ jobs:
           curl -fsSL -o "$RUNNER_TEMP/sdl/sdl.tar.gz" "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-devel-${SDL2_VERSION}-mingw.tar.gz"
           tar xzf "$RUNNER_TEMP/sdl/sdl.tar.gz" -C "$RUNNER_TEMP/sdl"
 
+      # the disc image stays in the Actions cache (Google Drive throttles repeated downloads; the image never changes)
+      - name: Restore disc image
+        id: disccache1
+        if: steps.bin.outputs.cache-hit != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
+
       - name: Fetch game files
         id: fetch
         if: steps.bin.outputs.cache-hit != 'true'
@@ -125,7 +134,10 @@ jobs:
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-          curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+          mkdir -p "$RUNNER_TEMP/disccache"
+          if [ -s "$RUNNER_TEMP/disccache/game.bin" ]; then cp "$RUNNER_TEMP/disccache/game.bin" "$RUNNER_TEMP/game.dl"
+          else curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+            [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ] || cp "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/disccache/game.bin"; fi
           if [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ]; then
             echo "::error::The port build needs the whole disc image (the generator reads every area and SYSTEM overlay)."; exit 1
           fi
@@ -145,6 +157,14 @@ jobs:
           echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
+
+      - name: Save disc image
+        if: steps.bin.outputs.cache-hit != 'true' && steps.disccache1.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
       - name: Extract data/ from the disc (the runtime's data path, tools/extract_data.py)
         if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
         run: |
@@ -285,6 +305,15 @@ jobs:
           curl -fsSL -o "$RUNNER_TEMP/sdl/sdl.tar.gz" "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-devel-${SDL2_VERSION}-mingw.tar.gz"
           tar xzf "$RUNNER_TEMP/sdl/sdl.tar.gz" -C "$RUNNER_TEMP/sdl"
 
+      # the disc image stays in the Actions cache (Google Drive throttles repeated downloads; the image never changes)
+      - name: Restore disc image
+        id: disccache2
+        if: steps.bin.outputs.cache-hit != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
+
       - name: Fetch game files
         id: fetch
         if: steps.bin.outputs.cache-hit != 'true'
@@ -300,7 +329,10 @@ jobs:
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-          curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+          mkdir -p "$RUNNER_TEMP/disccache"
+          if [ -s "$RUNNER_TEMP/disccache/game.bin" ]; then cp "$RUNNER_TEMP/disccache/game.bin" "$RUNNER_TEMP/game.dl"
+          else curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+            [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ] || cp "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/disccache/game.bin"; fi
           if [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ]; then
             echo "::error::The port build needs the whole disc image (the generator reads every area and SYSTEM overlay)."; exit 1
           fi
@@ -320,6 +352,14 @@ jobs:
           echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
+
+      - name: Save disc image
+        if: steps.bin.outputs.cache-hit != 'true' && steps.disccache2.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
       - name: Extract data/ from the disc (the runtime's data path, tools/extract_data.py)
         if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
         run: |

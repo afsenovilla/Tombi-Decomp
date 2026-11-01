@@ -102,6 +102,7 @@ jobs:
 
       - name: Save disc image
         if: steps.fetch.outputs.ok == 'true' && steps.disccache.outputs.cache-hit != 'true'
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: ${{ runner.temp }}/disccache
