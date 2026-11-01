@@ -296,7 +296,25 @@ public class TombiActivity extends SDLActivity {
     void quitGame(String why) {
         if (isFinishing()) return;
         CrashLog.append(getApplicationContext(), "back to the launcher (" + why + ")");
+        markClean();
         finish();
+    }
+    /* an intentional end: the "clean" marker (CrashLog.crashedLastRun ignores the others) and the native flag, so a
+       fault while the process tears down is not written as a crash (loader.c checks port_clean_exit) */
+    private void markClean() {
+        try { CrashLog.writeMarker(getApplicationContext(), CrashLog.CLEAN, "quit " + System.currentTimeMillis() + "\n"); } catch (Throwable ignored) { }
+        try { nativeCleanExit(); } catch (Throwable ignored) { }
+    }
+    private static native void nativeCleanExit();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        try { CrashLog.file(getApplicationContext(), CrashLog.BACKGROUND).delete(); } catch (Throwable ignored) { }
+    }
+    @Override
+    protected void onStop() {
+        try { if (!isFinishing()) CrashLog.writeMarker(getApplicationContext(), CrashLog.BACKGROUND, "stop " + System.currentTimeMillis() + "\n"); } catch (Throwable ignored) { }
+        super.onStop();
     }
     /* called by libtombi.so (runtime/launcher_exit.c) from the game thread: the pause menu / title QUIT entry */
     static void quitToLauncher() {
@@ -383,7 +401,7 @@ public class TombiActivity extends SDLActivity {
         try { if (dm != null) dm.unregisterDisplayListener(listener); } catch (Throwable ignored) { }
         try { if (panel != null) panel.dismiss(); } catch (Throwable ignored) { }
         panel = null;
-        if (finishing) CrashLog.file(getApplicationContext(), CrashLog.RUNNING).delete();   // a clean end ("crashed" stays if loader.c wrote it)
+        if (finishing) { CrashLog.file(getApplicationContext(), CrashLog.RUNNING).delete(); markClean(); }   // a clean end ("crashed" stays if loader.c wrote it)
         super.onDestroy();
         // the ":game" process cannot start the game twice (the low range is reserved once, in JNI_OnLoad)
         if (finishing) System.exit(0);

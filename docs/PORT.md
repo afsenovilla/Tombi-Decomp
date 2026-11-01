@@ -1150,22 +1150,38 @@ before). The Android launcher steps 0/25/50/75/100/125/150/200 % ("Apagada"/"N %
 the PC launcher has the same choices in a combobox.
 
 **Back to the launcher (`--launcher-exit`, passed by both launchers; `runtime/launcher_exit.c`).** The retail
-"EXIT GAME" / "SALIR" only goes back to the title. With the flag the Start pause menu gets a 4th entry under LOAD /
-CARGAR, "STOP" (English) / "CERRAR" (`--lang 5`), with the game's own Yes / No box, "STOP GAME?" / "¿Cerrar el juego?"
-(pause state `1F8003CD` = 4, a port-only value beside the retail 2 = quit and 3 = load; `port/fixes.txt` rules on
-`updatePauseMenu` / `drawPauseMenu`). The words are glyph strings of the language's pause menu strip, so the game draws
-them in its own font; the strip only holds the letters the language's menus use (no H for "LAUNCHER", no Q or C in
-the English one), hence STOP / CERRAR. The menu frame, a fixed three-entry picture of 8x8 tiles, grows 16 px down
-(border tiles moved, interior tiles stretched). Languages other than English and Spanish keep the retail three entries
-(their strips are not mapped). The title carousel gets "QUIT" / "CERRAR" right of OPTIONS / OPCIONES (all languages:
-the title font has A-Z; after DEBUG when `--title-debug` is on too), chosen at once without a question. Choosing it
-saves nothing: on the PC the game exits with status 0 and `tools/port_launcher.py`, which waits for the process,
-re-enables Play and raises its window; on Android `TombiActivity.quitToLauncher()` (JNI, from the game thread) finishes
-the activity, whose `onDestroy` clears the "running" marker and sends SDL_QUIT, which the game's event pump turns into
-`port_quit(0)`: the `:game` process ends (it cannot run the game twice) and LauncherActivity, under it in the task,
-shows again; Play starts a fresh `:game` process. Android Back (key or gesture; not a controller's Back, which is the
-pad's Select) opens a "¿Volver al launcher?" / "Return to the launcher?" dialog (Yes: the same finish) instead of
-SDL's default of closing the activity without asking.
+"EXIT GAME" / "SALIR" only goes back to the title. With the flag the Start pause menu gets a 4th entry under LOAD in
+every language: "Back to Launcher", "RETOUR AU LAUNCHER", "ZUM LAUNCHER", "TORNA AL LAUNCHER", "NAAR LAUNCHER",
+"VOLVER AL LAUNCHER", "VOLTAR AO LAUNCHER", "TILL LAUNCHERN", "TIL LAUNCHEREN", with the game's own Yes / No box and
+the question "Return to the launcher?", "Retour au launcher?", "Zurück zum Launcher?", "Tornare al launcher?", "Terug
+naar launcher?", "¿Volver al launcher?", "Voltar ao launcher?", "Till launchern?", "Til launcheren?" (pause state
+`1F8003CD` = 4, port only, beside the retail 2 = quit and 3 = load; `port/fixes.txt` rules on `updatePauseMenu` /
+`drawPauseMenu`). The menu frame grows 16 px down and, like the Spanish question boxes, as wide as the text (border
+tiles moved, interior tiles stretched); the highlight bar covers the entry.
+
+The pause font is a strip of 8x16 glyphs per language (`SYSTEM/A{n+1}0003.GAM`, v 144, addressed by MAINn's UV table)
+holding only the letters that language's menus use. A letter of the current strip is drawn by the game (its code); any
+other gets a code `0x40 +` index of a glyph built at run time from the user's disc and drawn as flat TILE runs in the
+strip's own CLUT (`AREA00/CLUT01.GAM`, row 483 at x 352): the same letter from another language's strip (the nine
+strips together have A-W, Y, Z and a-x but q), or for ü the 'u' with the marks of the Swedish 'ä', for W the 'M'
+upside down, for a missing small letter the capital at the x-height of 'x'. No game pixels are in the repository.
+
+The title carousel gets the entry's words in capitals right of OPTIONS (after DEBUG with `--title-debug`; the carousel
+turns a little further for long words); Cross / Start opens the same question in a Yes / No box drawn in TILEs (the
+HUD page with the pause frame is not in VRAM on the title; left / right choose, Circle cancels, the attract-mode
+countdown is held while it is open). Choosing Yes saves nothing: on the PC the game exits with status 0 and
+`tools/port_launcher.py`, which waits for the process, re-enables Play and raises its window; on Android
+`TombiActivity.quitToLauncher()` (JNI, from the game thread) finishes the activity, whose `onDestroy` sends SDL_QUIT,
+which the game's event pump turns into `port_quit(0)`: the `:game` process ends (it cannot run the game twice) and
+LauncherActivity, under it in the task, shows again. Android Back (key or gesture; not a controller's Back, which is
+the pad's Select) opens a "¿Volver al launcher?" / "Return to the launcher?" dialog (Yes: the same finish).
+
+Crash card: every intentional end (the menu entries, the Back dialog, the activity finishing) writes the `clean`
+marker and sets `port_clean_exit` / `TombiActivity.nativeCleanExit`, so `android/loader.c` logs but does not mark a
+fault or exit status during the teardown, and `CrashLog.crashedLastRun` ignores the other markers. A `running` marker
+left over counts as a crash only when the game was in the foreground (`background` marker from `onStop`): a swipe-away
+or low-memory kill of the backgrounded game is not reported. Going back to the title in the game does not end the
+process and touches no marker.
 
 Checked on Linux: the pokes of a new game (AP 5000, 9 lives, both `--poke-every`, the 130 event bytes) run 400 vblanks
 without a fault; a 1500-frame run with the title's Start stalls at vblank ~443 in this checkout (`sleepTask` loop after

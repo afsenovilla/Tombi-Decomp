@@ -537,12 +537,12 @@ int port_civ_on(int area, int sec) {   /* area: GAME.selectedArea (the load list
 /* --civ-maps DIR: DIR/AREAnn/map8E.bin and map8F.tim (tools/civ_rebuild.py) replace APD_DATA[14] / [15] */
 static const char *port_civ_maps_dir;
 /* Extra title carousel entries right of OPTIONS (port only, port/fixes.txt titleDrawMenuCarousel / loopTitleScreen):
-   --title-debug adds "DEBUG", --launcher-exit (given by the launchers) "QUIT" / "CERRAR" (runtime/launcher_exit.c).
+   --title-debug adds "DEBUG", --launcher-exit (given by the launchers) "BACK TO LAUNCHER" / "VOLVER AL LAUNCHER"... (runtime/launcher_exit.c).
    The glyph list is the language's TITLE_MENU_GLYPHS with the words appended (each one window right after the last
    glyph, the word 6 glyphs in like OPTIONS); their palette bytes are 2 (the orange of PULSA).  port_title_angles[k] is
    the carousel angle of entry 3 + k.  DEBUG sets the debug flag 1F8001B4 (introSequenceHandler then opens the game's
    area select instead of the story) and, with --civ-maps, --civ-test so sections 0 of AREA11/16/17 load the rebuilt
-   towns; QUIT ends the game (port_launcher_quit). */
+   towns; the launcher entry opens a Yes / No box (port_lx_title_open). */
 int port_title_debug, port_title_extra; unsigned char port_title_angles[2];
 extern int port_launcher_exit;
 static int port_title_quit_index = -1;   /* b69 of the QUIT entry, -1: none */
@@ -553,7 +553,7 @@ void port_title_debug_list(short **ps, unsigned char **ppal) {
         const char *words[2]; int nw = 0;
         int n = 0, nz = 0, last = -1, k, w, np;
         if (port_title_debug) words[nw++] = "DEBUG";
-        if (port_launcher_exit) { port_title_quit_index = 3 + nw; words[nw++] = port_lang == 5 ? "CERRAR" : "QUIT"; }
+        if (port_launcher_exit) { extern const char *port_lx_title_label(void); port_title_quit_index = 3 + nw; words[nw++] = port_lx_title_label(); }
         while (s[n] != -3 && n < 140) { if (s[n]) { nz++; last = n; } n++; }
         np = nz - (port_lang == 5);                 /* MAIN5's list has one glyph more than palette bytes */
         memcpy(list, s, n * sizeof *s); memcpy(pal, p, np > 0 ? np : 0);
@@ -563,7 +563,7 @@ void port_title_debug_list(short **ps, unsigned char **ppal) {
             w = last + 1; if (w > 0x37) w = 0x37;
             for (; k < w + 6; k++) list[k] = 0;
             for (int i = 0; words[j][i]; i++) { last = k; list[k++] = words[j][i] - 32; pal[nz++] = 2; }
-            port_title_angles[j] = (unsigned char)(0xE0 - 4 * w);
+            { int len = (int)strlen(words[j]); port_title_angles[j] = (unsigned char)(0xE0 - 4 * w - (len > 8 ? 4 * ((len - 8) / 2) : 0)); }
         }
         list[k++] = -3; list[k] = -1;
         port_title_extra = nw;
@@ -571,11 +571,11 @@ void port_title_debug_list(short **ps, unsigned char **ppal) {
     }
     *ps = list; *ppal = pal;
 }
-/* loopTitleScreen: Cross / Start on entry b69.  QUIT: the game ends (returns 1: the title does nothing more) */
+/* loopTitleScreen: Cross / Start on entry b69.  The launcher entry: its Yes / No box opens (returns 1: the title does nothing more) */
 int port_title_quit_go(int b69) {
-    extern void port_launcher_quit(void);
+    extern void port_lx_title_open(void);
     if (b69 != port_title_quit_index || !port_title_extra) return 0;
-    port_launcher_quit();
+    port_lx_title_open();
     return 1;
 }
 void port_title_debug_go(void) {

@@ -134,6 +134,12 @@ static struct sigaction old_act[65];
 static void *tombi_h;                                        /* libtombi.so, once loaded */
 static const char *(*sym_near)(void *, unsigned long *);     /* libtombi's port_sym_near: names of game functions */
 static int *frame_p;                                         /* libtombi's port_frame */
+/* an intentional end (the game's "back to the launcher", the Back dialog, the activity finishing): libtombi's
+   port_clean_exit or TombiActivity.nativeCleanExit; after it a fault or exit status while the process tears down is
+   logged but not written as the "crashed" marker (the launcher's crash card is for abnormal ends only) */
+static int *clean_exit_p; static volatile int clean_exit;
+static int intentional(void) { return clean_exit || (clean_exit_p && *clean_exit_p); }
+JNIEXPORT void JNICALL Java_io_github_tombi_port_TombiActivity_nativeCleanExit(JNIEnv *env, jclass c) { (void)env; (void)c; clean_exit = 1; }
 static int *exit_status_p;                                   /* libtombi's port_exit_status (port_fatal / port_quit) */
 static pthread_t main_thread; static int main_thread_set;
 static volatile int in_crash;
@@ -244,7 +250,7 @@ static void on_fatal(int sig, siginfo_t *info, void *ucv) {
              frame_p ? *frame_p : -1);
         dump_context((ucontext_t *)ucv);
         char m[96]; snprintf(m, sizeof m, "signal %d (%s) at frame %d\n", sig, signame(sig), frame_p ? *frame_p : -1);
-        marker("crashed", m);
+        if (intentional()) tlog("(after an intentional quit: not marked as a crash)"); else marker("crashed", m);
         tlog("*** end of crash report: handing the signal on (debuggerd / default)");
     }
     /* chain: the previous handler (debuggerd's tombstone, or the default action) */
@@ -297,7 +303,7 @@ static void start_watchdog(void) {
 static void at_exit(void) {
     int st = exit_status_p ? *exit_status_p : -1;
     tlog("process exit() (game status %d)", st);
-    if (st > 0) { char m[64]; snprintf(m, sizeof m, "exit status %d\n", st); marker("crashed", m); }
+    if (st > 0 && !intentional()) { char m[64]; snprintf(m, sizeof m, "exit status %d\n", st); marker("crashed", m); }
 }
 
 /* ------------------------------------------------------------------------------------------------ the low range */
@@ -455,6 +461,7 @@ int SDL_main(int argc, char *argv[]) {
     sym_near = (const char *(*)(void *, unsigned long *))dlsym(h, "port_sym_near");
     frame_p = (int *)dlsym(h, "port_frame");
     exit_status_p = (int *)dlsym(h, "port_exit_status");
+    clean_exit_p = (int *)dlsym(h, "port_clean_exit");
     { Dl_info di; if (port_main && dladdr((void *)port_main, &di)) {
         tlog("libtombi.so loaded at %p (port_main %p); port_frame %p", di.dli_fbase, (void *)port_main, (void *)frame_p);
         if (di.dli_fname) symtab_load(di.dli_fname, (unsigned long)di.dli_fbase);

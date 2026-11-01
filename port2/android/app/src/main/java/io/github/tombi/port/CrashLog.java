@@ -25,7 +25,8 @@ import java.util.Locale;
  *  by TombiActivity on a clean finish) and "crashed" (loader.c: fatal signal, abnormal exit, start-up failure).
  *  The user reaches the log through the launcher (crash card, Options > View last log: copy / share / export). */
 final class CrashLog {
-    static final String LOG = "tombi.log", PREV = "tombi.prev.log", RUNNING = "running", CRASHED = "crashed";
+    static final String LOG = "tombi.log", PREV = "tombi.prev.log", RUNNING = "running", CRASHED = "crashed",
+            CLEAN = "clean", BACKGROUND = "background";   // an intentional end (quit to launcher, Back) / the game was in the background
     private CrashLog() { }
 
     static File dir(Context c) { return c.getFilesDir(); }
@@ -100,7 +101,11 @@ final class CrashLog {
     /** the last run ended abnormally: "crashed" left by loader.c, or "running" left over (killed: ANR, OOM, native crash
      *  before the handler) while the game process is gone */
     static boolean crashedLastRun(Context c) {
-        return file(c, CRASHED).exists() || (file(c, RUNNING).exists() && !gameAlive(c));
+        if (file(c, CLEAN).exists()) return false;          // the player left on purpose: whatever the exit looked like
+        if (file(c, CRASHED).exists()) return true;          // signal, Java exception, non-zero exit status (loader.c)
+        // "running" left over: killed.  In the foreground that is an ANR / native death; in the background (swipe-away,
+        // low memory) it is how Android ends apps, not a crash
+        return file(c, RUNNING).exists() && !file(c, BACKGROUND).exists() && !gameAlive(c);
     }
     /** markers written before the app was last installed / updated: an update kills a running game (the "running"
      *  marker stays), so they say nothing about this build; the launcher clears them instead of showing the crash card */
@@ -112,7 +117,7 @@ final class CrashLog {
             return (!cr.exists() || cr.lastModified() < upd) && (!ru.exists() || ru.lastModified() < upd);
         } catch (Throwable t) { return false; }
     }
-    static void clearMarkers(Context c) { file(c, CRASHED).delete(); file(c, RUNNING).delete(); }
+    static void clearMarkers(Context c) { file(c, CRASHED).delete(); file(c, RUNNING).delete(); file(c, CLEAN).delete(); file(c, BACKGROUND).delete(); }
 
     static String readMarker(Context c, String name) {
         File f = file(c, name);
