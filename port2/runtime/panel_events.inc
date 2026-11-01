@@ -233,7 +233,7 @@ static void event_detail(int e) {
         draw_map(12, y + 22 + nl * 10, ww - 8, wh - 26 - nl * 10, -1);
         map_mark_link = -1;
     } else {
-        text_wrap(16, y + 26, 16, ww - 20, 18, 3, 0, T("The zone of this event is not extracted from the game data yet", "La zona de este evento a\xFAn no se ha extra\xEDdo de los datos del juego"), C_MUTED, C_EDGE);
+        text_wrap(16, y + 26, 16, ww - 20, 18, 3, 0, T("The zone of this event is not extracted from the game data yet", "La zona de este evento a\xFAn no se ha extra\xED""do de los datos del juego"), C_MUTED, C_EDGE);
     }
     /* who */
     int wx = 8 + ww + 6, wwid = W - 8 - wx;
