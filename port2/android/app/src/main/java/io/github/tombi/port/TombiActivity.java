@@ -41,6 +41,7 @@ public class TombiActivity extends SDLActivity {
     static native int nativePanelFrame(ByteBuffer dst, int[] dims, int lastSeq);
     static native void nativePanelLayout(int w, int h);
     static native void nativePanelTouch(int x, int y, int action);   // canvas pixels; 0 down, 1 up, 2 move
+    static native void nativePanelPinch(float ratio, int x, int y);  // two fingers: distance now / before, midpoint (canvas pixels)
 
     private DisplayManager dm;
     private PanelPresentation panel;
@@ -406,13 +407,31 @@ public class TombiActivity extends SDLActivity {
         }
 
         private int scale = 1;
+        private boolean pinching;
+        private float pinchDist;
 
         @Override
         public boolean onTouchEvent(android.view.MotionEvent e) {
             int a = e.getActionMasked();
+            if (bmp == null) return true;
+            /* two fingers: a pinch (zoom on the map tab); the one-finger drag / tap is ended first and the rest of the
+               gesture is ignored until every finger is up */
+            if (e.getPointerCount() >= 2 && (a == android.view.MotionEvent.ACTION_POINTER_DOWN || a == android.view.MotionEvent.ACTION_MOVE)) {
+                float dx = e.getX(1) - e.getX(0), dy = e.getY(1) - e.getY(0), d = (float) Math.sqrt(dx * dx + dy * dy);
+                int mx = (int) (((e.getX(0) + e.getX(1)) / 2 - dst.left) / scale), my = (int) (((e.getY(0) + e.getY(1)) / 2 - dst.top) / scale);
+                try {
+                    if (!pinching) { pinching = true; nativePanelTouch(-10000, -10000, 1); }
+                    else if (pinchDist > 8 && d > 8) nativePanelPinch(d / pinchDist, mx, my);
+                } catch (UnsatisfiedLinkError ignored) {
+                }
+                pinchDist = d;
+                return true;
+            }
+            if (a == android.view.MotionEvent.ACTION_DOWN) pinching = false;
+            if (pinching) { if (a == android.view.MotionEvent.ACTION_UP || a == android.view.MotionEvent.ACTION_CANCEL) pinching = false; return true; }
             int act = a == android.view.MotionEvent.ACTION_DOWN ? 0 : a == android.view.MotionEvent.ACTION_UP ? 1
                     : a == android.view.MotionEvent.ACTION_MOVE ? 2 : -1;
-            if (act < 0 || bmp == null) return true;
+            if (act < 0) return true;
             try {
                 nativePanelTouch((int) ((e.getX() - dst.left) / scale), (int) ((e.getY() - dst.top) / scale), act);
             } catch (UnsatisfiedLinkError ignored) {

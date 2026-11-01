@@ -60,7 +60,10 @@ static u32 *pix;                           /* malloc'd: the scaled frame (PC win
 #define G_WEAPON    G8(0x8009D2B2u)
 #define G_PANTS     G8(0x8009D2B3u)
 #define G_MAPREG(i) G16(0x8009D2C4u + 2 * (i))
-#define EVENTS 0x82
+/* event ids: the pause menu's Events list (subScreenDrawEventList) shows SCRIPT_FLAGS[order[i] - 1] for the ids of
+   SUBSCREEN_EVENT_ORDER (D0SPSUB 0x801086F0, 256 bytes, 0xFF = none), which go up to 0xBF, past the 130 of the save
+   docs: the titles table EVENT_NAME_STRINGS has 195 entries and the event icons 192 */
+#define EVENTS 0xC0
 
 /* in a game: the play time (GAME.totalTimePlayed) runs only in gameplay, and is 0 at the title until a game starts
    or a save is loaded */
@@ -84,6 +87,7 @@ static void load_tables(void);
 static int nb_lo = 9999, nb_hi = -9999, nz_lo = 9999, nz_hi = -9999;
 
 /* names (latin-1, malloc'd; NULL = unknown) */
+static u8 ev_order[EVENTS]; static int ev_norder;   /* the menu's event ids in its order (from SUBSCREEN_EVENT_ORDER) */
 static char *ev_name[EVENTS], *area_name[12], *room_name[12][24], *a14_area[24], *a14_room[24], *item_name[256];
 
 static u32 rd32(const u8 *d, unsigned o) { return d[o] | d[o + 1] << 8 | d[o + 2] << 16 | (u32)d[o + 3] << 24; }
@@ -173,6 +177,15 @@ static void load_tables(void) {
             Node *q = &nodes[ids[j]];
             if (q->x < nb_lo) nb_lo = q->x; if (q->x > nb_hi) nb_hi = q->x;
             if (q->z < nz_lo) nz_lo = q->z; if (q->z > nz_hi) nz_hi = q->z;
+        }
+    }
+    /* the event ids of the pause menu, in its order */
+    ev_norder = 0;
+    {   static u8 seen[EVENTS];
+        for (int i = 0; i < 256; i++) {
+            int v = d0[A0(0x801086F0u) + i];
+            if (v == 0xFF || v == 0 || v - 1 >= EVENTS || seen[v - 1]) continue;
+            seen[v - 1] = 1; ev_order[ev_norder++] = (u8)(v - 1);
         }
     }
     /* the names (the language's file) */
@@ -277,7 +290,7 @@ static void dot(int cx, int cy, int r, u32 c) {
 }
 static void page_events(int play);
 static void page_items(int play);
-static const char *map_tab_name(void);   /* panel_side.inc: "Lateral" / "Cenital" by section */
+static const char *map_tab_name(void);   /* panel_side.inc: "Mapa" / "Cenital" by section */
 
 /* ---------------------------------------------------------------- the panel */
 static int es(void) { return port_lang == 5; }
@@ -285,7 +298,7 @@ static int es(void) { return port_lang == 5; }
 enum { PAGE_MAP, PAGE_EVENTS, PAGE_SIDE, PAGE_ITEMS, NPAGES };
 static int page;
 static const char *page_name(int p) {
-    return p == PAGE_MAP ? T("Map", "Mapa") : p == PAGE_EVENTS ? T("Events", "Eventos") : p == PAGE_ITEMS ? T("Items", "Objetos") : map_tab_name();
+    return p == PAGE_MAP ? T("Status", "Estado") : p == PAGE_EVENTS ? T("Events", "Eventos") : p == PAGE_ITEMS ? T("Items", "Objetos") : map_tab_name();
 }
 
 /* touch / mouse targets registered while drawing (canvas coordinates) */
@@ -374,7 +387,8 @@ static int fmt_ap(char *b, int n, u32 v) {   /* 1.234.567 / 1,234,567 */
 }
 static int count_events(int *started, int *done) {
     int s = 0, d = 0;
-    for (int e = 0; e < EVENTS; e++) { int v = G_EVENT(e); if (v == 0xFF) d++; else if (v) s++; }
+    /* as subScreenDrawEventCounters: every SCRIPT_FLAGS byte but 0x12 */
+    for (int e = 0; e < 0x100; e++) { int v = G_EVENT(e); if (e == 0x12) continue; if (v == 0xFF) d++; else if (v) s++; }
     if (started) *started = s; if (done) *done = d;
     return s + d;
 }
@@ -401,10 +415,13 @@ static const char *ev_title(int e, char *b, int n) {
     if (e >= 0 && e < EVENTS && ev_name[e]) return ev_name[e];
     snprintf(b, n, T("Event %d", "Evento %d"), e); return b;
 }
+/* the k-th event of the menu's order (all ids when D0SPSUB could not be read) */
+static int ev_count(void) { return ev_norder ? ev_norder : EVENTS; }
+static int ev_id(int k) { return ev_norder ? ev_order[k] : k; }
 static int ev_hidden_now(int e);   /* panel_events.inc: hidden by the player (panel_hidden.txt) */
 static void draw_in_progress(int x, int y, int w, int h) {
     char b[48]; int ids[EVENTS], n = 0;
-    for (int e = 0; e < EVENTS; e++) { int v = G_EVENT(e); if (v && v != 0xFF && !ev_hidden_now(e)) ids[n++] = e; }
+    for (int k = 0; k < ev_count(); k++) { int e = ev_id(k), v = G_EVENT(e); if (v && v != 0xFF && !ev_hidden_now(e)) ids[n++] = e; }
     window_(x, y, w, h);
     pa_text(x + 10, y + 6, 16, T("In progress", "En curso"), C_RED, C_REDE);
     int ly = y + 24, lh = 20, max = (h - 30) / lh;
@@ -493,6 +510,8 @@ extern int port_dump_every;
 extern void port_mkdir(const char *dir);                                                  /* shims/gpu.c */
 void port_panel_window_frame(const unsigned char *rgba, int w, int h);                   /* runtime/sdl.c */
 static void inq_push(int kind, int a, int x, int y);
+/* a pinch (kind 2): f = the fingers' distance now / before, (x, y) its midpoint in canvas pixels (-1: the view's centre) */
+static void port_panel_pinch_canvas(float f, int x, int y) { if (f > .2f && f < 5) inq_push(2, (int)(f * 10000 + .5f), x, y); }
 #ifdef __ANDROID__
 static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 static u32 out[CW_MAX * CH_MAX]; static int out_w, out_h, out_seq, registered;
@@ -513,6 +532,7 @@ static jint JNICALL n_frame(JNIEnv *env, jclass c, jobject buf, jintArray dims, 
 }
 static void JNICALL n_layout(JNIEnv *env, jclass c, jint w, jint h) { (void)env; (void)c; req_w = w; req_h = h; }
 static void JNICALL n_touch(JNIEnv *env, jclass c, jint x, jint y, jint action) { (void)env; (void)c; inq_push(1, action, x, y); }   /* canvas pixels */
+static void JNICALL n_pinch(JNIEnv *env, jclass c, jfloat f, jint x, jint y) { (void)env; (void)c; port_panel_pinch_canvas(f, x, y); }   /* two fingers: distance ratio, midpoint (canvas) */
 static void JNICALL n_key(JNIEnv *env, jclass c, jint a) { (void)env; (void)c; if (a > 0 && a < 16) inq_push(0, a, 0, 0); }   /* IN_*: a controller button the launcher bound to a panel action */
 static void android_register_h(void *u) {
     (void)u;
@@ -521,8 +541,9 @@ static void android_register_h(void *u) {
     if (!env || !act) return;
     jclass cls = (*env)->GetObjectClass(env, act);
     JNINativeMethod m[] = { { "nativePanelFrame", "(Ljava/nio/ByteBuffer;[II)I", (void *)n_frame }, { "nativePanelLayout", "(II)V", (void *)n_layout },
-                              { "nativePanelTouch", "(III)V", (void *)n_touch }, { "nativePanelKey", "(I)V", (void *)n_key } };
-    if ((*env)->RegisterNatives(env, cls, m, 4) != 0) { (*env)->ExceptionClear(env); port_printf("[panel] RegisterNatives failed\n"); }
+                              { "nativePanelTouch", "(III)V", (void *)n_touch }, { "nativePanelKey", "(I)V", (void *)n_key },
+                            { "nativePanelPinch", "(FII)V", (void *)n_pinch } };
+    if ((*env)->RegisterNatives(env, cls, m, 5) != 0) { (*env)->ExceptionClear(env); port_printf("[panel] RegisterNatives failed\n"); }
     else port_printf("[panel] JNI ready\n");
     (*env)->DeleteLocalRef(env, cls); (*env)->DeleteLocalRef(env, act);
 }
@@ -530,7 +551,7 @@ static void android_register(void) { port_host_call(android_register_h, 0); }   
 #endif
 
 /* input queue: touches / clicks (canvas pixels) and keys, from the Android UI thread or the SDL loop, applied before drawing */
-static struct { short kind, a, x, y; } inq[64]; static int inq_n;
+static struct { int kind, a, x, y; } inq[64]; static int inq_n;
 #ifdef __ANDROID__
 static pthread_mutex_t inq_mtx = PTHREAD_MUTEX_INITIALIZER;
 #define INQ_LOCK() pthread_mutex_lock(&inq_mtx)
@@ -541,20 +562,21 @@ static pthread_mutex_t inq_mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif
 static void inq_push(int kind, int a, int x, int y) {
     INQ_LOCK();
-    if (inq_n < 64) { inq[inq_n].kind = (short)kind; inq[inq_n].a = (short)a; inq[inq_n].x = (short)x; inq[inq_n].y = (short)y; inq_n++; }
+    if (inq_n < 64) { inq[inq_n].kind = kind; inq[inq_n].a = a; inq[inq_n].x = x; inq[inq_n].y = y; inq_n++; }
     INQ_UNLOCK();
 }
 static void inq_run(void) {
     INQ_LOCK();
-    for (int i = 0; i < inq_n; i++) { if (inq[i].kind) panel_touch_canvas(inq[i].x, inq[i].y, inq[i].a); else panel_action(inq[i].a); }
+    for (int i = 0; i < inq_n; i++) { if (inq[i].kind == 2) { if (page == PAGE_SIDE) map_pinch(inq[i].a / 10000.f, inq[i].x, inq[i].y); } else if (inq[i].kind) panel_touch_canvas(inq[i].x, inq[i].y, inq[i].a); else panel_action(inq[i].a); }
     inq_n = 0;
     INQ_UNLOCK();
 }
 /* PC window: mouse in window pixels (the canvas x pk), keys as IN_* */
 void port_panel_touch(int x, int y, int action) { inq_push(1, action, x / (pk ? pk : 1), y / (pk ? pk : 1)); }
 void port_panel_key(int a) { inq_push(0, a, 0, 0); }
+void port_panel_pinch(float f, int x, int y) { int k = pk ? pk : 1; port_panel_pinch_canvas(f, x < 0 ? -1 : x / k, y < 0 ? -1 : y / k); }   /* PC: the mouse wheel */
 /* --panel-input FRAME:ACTION,... (headless tests): up down left right ok back tabl tabr zoomout zoomin hide showhidden,
-   tap@X@Y (canvas pixels), hold@X@Y (a long press) */
+   tap@X@Y (canvas pixels), hold@X@Y (a long press), pinch@PERCENT@X@Y (a two-finger pinch: the distance ratio x 100) */
 static const char *panel_script;
 static int hold_x, hold_y, hold_at = -1;   /* hold@X@Y: the release, 40 frames later */
 void port_panel_input_script(const char *s) { panel_script = s; }
@@ -566,7 +588,9 @@ static void script_step(void) {
         if (f == port_frame) {
             char a[24]; int n = (int)((e ? e : c + strlen(c)) - c - 1); if (n > 23) n = 23; memcpy(a, c + 1, n); a[n] = 0;
             int x, y;
-            if (sscanf(a, "tap@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); inq_push(1, 1, x, y); }
+            int pct;
+            if (sscanf(a, "pinch@%d@%d@%d", &pct, &x, &y) == 3) port_panel_pinch_canvas(pct / 100.f, x, y);   /* pinch@PERCENT@X@Y */
+            else if (sscanf(a, "tap@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); inq_push(1, 1, x, y); }
             else if (sscanf(a, "hold@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); hold_x = x; hold_y = y; hold_at = port_frame + 40; }
             else for (int i = 1; i < 13; i++) if (!strcmp(a, names[i])) inq_push(0, i, 0, 0);
         }

@@ -64,7 +64,7 @@ The save list (`memCardReadDirectory`) reads only GAME +0x00..+0x7F: location = 
 | 0x434 | u16x2 | nextArea, nextSection | |
 | 0x438 | u8x3 | red/green/blue exp level | |
 | 0x43B | u8x3 | red/green/blue exp bar | |
-| 0x444 | u8[256] | **event flags** (`SCRIPT_FLAGS` 0x8009CDA4) | 0 = not started, 1..0xFE started (some count steps), 0xFF = completed (`setEventStarted` / `setEventComplete` / `getEventState`); ids 0..0x81 are the game's 130 events |
+| 0x444 | u8[256] | **event flags** (`SCRIPT_FLAGS` 0x8009CDA4) | 0 = not started, 1..0xFE started (some count steps), 0xFF = completed (`setEventStarted` / `setEventComplete` / `getEventState`); the 130 events of the pause menu are the ids listed (+1) by SUBSCREEN_EVENT_ORDER (D0SPSUB 0x801086F0), up to 0xBF, not 0..0x81 |
 | 0x544.. | | `SCRIPT_GLOBALS` / GCD area variables | per-event progress counters (named in notes/names.md) |
 | 0x71F | u8 | goldenBowlState | non-zero: max health can reach 16 |
 | 0x720 | u8 | bonusHealth | hearts collected at max health 8 |

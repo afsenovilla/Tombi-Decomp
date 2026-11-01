@@ -16,6 +16,7 @@
  * Zoom: PANEL_MAP_ZOOMS levels; 1 = the whole map fitted, the last = about the game screen's framing, geometric in
  * between, each snapped to whole canvas pixels per world unit or whole world units per canvas pixel (pixel perfect).  Zoomed levels follow Tomba; drag (touch / mouse) or the arrows pan, OK re-centres.  -/+ buttons (with
  * the game's L1 / R1 glyphs), keys PageDown/PageUp or - / + in the PC panel window, --panel-input zoomout / zoomin.
+ * Continuous zoom (map_zf) by a two-finger pinch (Android), the mouse wheel (PC) or --panel-input pinch@PERCENT@X@Y.
  * Markers: the events placed in the section (panel_eventmap.h, their icons at 2x, outlined) and Tomba's face (2x)
  * at his live position (PLAYER x / y), flipped to the side he faces (PLAYER +0xA6: 0 left, 2 right). */
 #include <stdint.h>
@@ -33,6 +34,7 @@ extern int port_panel_sky_req;                                            /* shi
 
 static int map_zoom, map_drag = -1, map_dx, map_dy, map_vx, map_vy, map_vw, map_vh, map_key = -1;
 static float map_panx, map_pany;
+static float map_zf = 1;   /* continuous zoom (pinch / wheel): the level's world units per pixel times this, clamped to the levels' range */
 
 /* ---------------------------------------------------------------- far background (sky) */
 #define SKY_W 320
@@ -109,6 +111,8 @@ static void sky_draw(u32 *dst, int vw, int vh, float scroll) {
 typedef struct { s16 x[4], y[4]; u8 u[4], v[4], c[4][3]; u16 clut, tp; u8 nv, cmd; s16 bx0, by0, bx1, by1; int z; } SPoly;
 static SPoly *sp; static int nsp, sp_cap, side_state, side_area = -1, side_sig, side_seen, side_x0, side_y0, side_x1, side_y1;
 static u16 *side_vr;                  /* VRAM snapshot (1024 x 512) taken when the model was read */
+static int side_snap;                 /* port_frame of the last VRAM check */
+static u16 side_tps[64], side_cluts[256]; static int side_ntp, side_nclut;   /* the pages / CLUTs the polygons sample */
 static unsigned side_model;           /* id of the model the view shows (changes when another is read) */
 static int side_secs[32];              /* per section of the area: the model signature seen there (events of those sections) */
 static int sp_cmp(const void *a, const void *b) { return ((const SPoly *)b)->z - ((const SPoly *)a)->z; }
@@ -159,11 +163,42 @@ static int side_build(const u8 *d) {
     }
     if (nsp < 16 || side_x1 <= side_x0 || side_y1 <= side_y0) return 0;
     qsort(sp, nsp, sizeof *sp, sp_cmp);
+    side_ntp = side_nclut = 0;
+    for (int i = 0; i < nsp; i++) {
+        if (!(sp[i].cmd & 4)) continue;
+        u16 tp = sp[i].tp & 0x1FF, cl = sp[i].clut, mode = tp >> 7 & 3;
+        int k;
+        for (k = 0; k < side_ntp && side_tps[k] != tp; k++) ;
+        if (k == side_ntp && side_ntp < 64) side_tps[side_ntp++] = tp;
+        if (mode < 2) { for (k = 0; k < side_nclut && side_cluts[k] != (u16)(cl | mode << 15); k++) ; if (k == side_nclut && side_nclut < 256) side_cluts[side_nclut++] = (u16)(cl | mode << 15); }
+    }
+    side_snap = port_frame;
     if (!side_vr) side_vr = malloc(1024 * 512 * 2);
     memcpy(side_vr, port_gpu_vram(0, 0, 1024, 512), 1024 * 512 * 2);
     side_model++;
     port_printf("[panel] side map: area %d section %d, %d polygons, x %d..%d y %d..%d\n", G_AREA, G_SECTION, nsp, side_x0, side_x1, side_y0, side_y1);
     return 1;
+}
+/* the textures change under the same model: the game streams each section's texture pages / CLUTs into the same VRAM
+   slots (and animates some), so a snapshot taken in one section shows another's ground as noise.  Every 25 frames out
+   of loading screens, the rectangles the polygons sample are compared with the live VRAM and the snapshot refreshed */
+static void side_refresh_vram(void) {
+    extern int port_loading_frame;
+    if (!side_vr || port_frame - side_snap < 25 || port_frame - port_loading_frame < 30) return;
+    side_snap = port_frame;
+    const u16 *v = port_gpu_vram(0, 0, 1024, 512);
+    int diff = 0;
+    for (int i = 0; i < side_ntp && !diff; i++) {
+        int tp = side_tps[i], mode = tp >> 7 & 3, x = (tp & 15) * 64, y = (tp >> 4 & 1) * 256, w = mode == 0 ? 64 : mode == 1 ? 128 : 256;
+        if (x + w > 1024) w = 1024 - x;
+        for (int j = 0; j < 256 && !diff; j++) diff = memcmp(side_vr + (y + j) * 1024 + x, v + (y + j) * 1024 + x, (size_t)w * 2) != 0;
+    }
+    for (int i = 0; i < side_nclut && !diff; i++) {
+        int cl = side_cluts[i] & 0x7FFF, n = side_cluts[i] >> 15 ? 256 : 16, o = (cl >> 6 & 511) * 1024 + (cl & 63) * 16;
+        if (o + n > 1024 * 512) n = 1024 * 512 - o;
+        diff = memcmp(side_vr + o, v + o, (size_t)n * 2) != 0;
+    }
+    if (diff) { memcpy(side_vr, v, 1024 * 512 * 2); side_model++; port_printf("[panel] side map: textures changed (area %d section %d), VRAM snapshot refreshed\n", G_AREA, G_SECTION); }
 }
 /* the model of the current section: (re)read once the loaded one has stayed the same for a moment */
 static int side_update(void) {
@@ -176,6 +211,7 @@ static int side_update(void) {
         side_secs[31] = side_state == 1 ? sig : -1;   /* (slot 31: the model in memory) */
     }
     if (side_state == 1 && sec < 31 && sig == side_secs[31]) side_secs[sec] = side_secs[31];
+    if (side_state == 1 && sig == side_secs[31]) side_refresh_vram();
     return side_state == 1 && sig == side_secs[31];
 }
 
@@ -254,18 +290,39 @@ static void side_render(u32 *dst, int vw, int vh, float wx0, float wy0, float up
 
 /* ---------------------------------------------------------------- view, zoom, input */
 static int map_topdown(void) { return in_gameplay() && G_AREA < 20 && td_section(G_AREA, G_SECTION); }
-static const char *map_tab_name(void) { return map_topdown() ? T("Top-down", "Cenital") : T("Side map", "Lateral"); }
+static const char *map_tab_name(void) { return map_topdown() ? T("Top-down", "Cenital") : T("Map", "Mapa"); }
 static void map_set_zoom(int z) {
     if (z < 0) z = 0; if (z > PANEL_MAP_ZOOMS - 1) z = PANEL_MAP_ZOOMS - 1;
-    if (z != map_zoom) { map_zoom = z; map_panx = map_pany = 0; }
+    if (z != map_zoom || map_zf != 1) { map_zoom = z; map_zf = 1; map_panx = map_pany = 0; }
 }
-static void map_pan(float dx, float dy) { if (map_zoom) { map_panx += dx; map_pany += dy; } }
+static int map_zoomed_now;
 static float map_upp_now = 1;
+static float map_ulev[PANEL_MAP_ZOOMS];   /* the levels' world units per pixel in the last view */
+/* -/+ : the next level out / in from the current view (after a pinch, the level just past where the view is) */
+static void map_step(int dir) {
+    if (map_zf == 1 || !map_ulev[0]) { map_set_zoom(map_zoom + dir); return; }
+    float u = map_upp_now; int z = dir > 0 ? PANEL_MAP_ZOOMS - 1 : 0;
+    if (dir > 0) { for (int k = 0; k < PANEL_MAP_ZOOMS; k++) if (map_ulev[k] < u * .999f) { z = k; break; } }
+    else { for (int k = PANEL_MAP_ZOOMS - 1; k >= 0; k--) if (map_ulev[k] > u * 1.001f) { z = k; break; } }
+    map_zoom = z; map_zf = 1; map_panx = map_pany = 0;
+}   /* the last view was closer than level 1 (follows Tomba, pans) */
+static void map_pan(float dx, float dy) { if (map_zoomed_now) { map_panx += dx; map_pany += dy; } }
+/* a pinch: the distance between the fingers grew by f (> 1: closer), centred on canvas (x, y) (-1: the view's centre) */
+static void map_pinch(float f, int x, int y) {
+    if (f < .2f || f > 5) return;
+    float u = map_upp_now, u2 = u / f;
+    map_zf /= f;                                      /* clamped by map_view */
+    if (x >= map_vx && y >= map_vy && x < map_vx + map_vw && y < map_vy + map_vh && map_zoomed_now) {
+        /* keep the world point under the pinch where it is */
+        map_panx += (x - map_vx - map_vw / 2.f) * (u - u2); map_pany += (y - map_vy - map_vh / 2.f) * (u - u2);
+    }
+    map_drag = -1;
+}
 static int map_action(int a) {   /* keys / pad on the map tab (1: used) */
     float st = 48 * map_upp_now;
     switch (a) {
-    case IN_ZOOM_OUT: map_set_zoom(map_zoom - 1); return 1;
-    case IN_ZOOM_IN: map_set_zoom(map_zoom + 1); return 1;
+    case IN_ZOOM_OUT: map_step(-1); return 1;
+    case IN_ZOOM_IN: map_step(1); return 1;
     case IN_LEFT: map_pan(-st, 0); return 1;
     case IN_RIGHT: map_pan(st, 0); return 1;
     case IN_UP: map_pan(0, -st); return 1;
@@ -274,7 +331,7 @@ static int map_action(int a) {   /* keys / pad on the map tab (1: used) */
     }
     return 0;
 }
-static void map_hit(int k) { if (k == 16) map_set_zoom(map_zoom - 1); else if (k == 17) map_set_zoom(map_zoom + 1); }
+static void map_hit(int k) { if (k == 16) map_step(-1); else if (k == 17) map_step(1); }
 static int map_touch(int x, int y, int action) {   /* drag inside the view pans (1: used) */
     if (action == 0) {
         if (x < map_vx || y < map_vy || x >= map_vx + map_vw || y >= map_vy + map_vh) { map_drag = -1; return 0; }
@@ -302,21 +359,31 @@ static void map_view(float x0, float y0, float x1, float y1, float gw, int ancho
         for (int it = 0; it < 40; it++) { float m = (lo + hi) / 2, p = 1; for (int k = 0; k < PANEL_MAP_ZOOMS - 1; k++) p *= m; if (p > r) hi = m; else lo = m; }
         s = (lo + hi) / 2;
     }
-    for (int k = 0, last = PANEL_MAP_ZOOMS - 1; k <= map_zoom; k++) {
+    float ulev[PANEL_MAP_ZOOMS];
+    for (int k = 0, last = PANEL_MAP_ZOOMS - 1; k <= last; k++) {
         float g = u0, q;
         for (int i = 0; i < k; i++) g *= s;
         if (g >= 1) { int n = k == last ? (int)(g + .5f) : (int)(g + .999f); q = (float)(n < 1 ? 1 : n); }
         else { int m = k == last ? (int)(1 / g + .5f) : (int)(1 / g + .001f); q = 1.f / (m < 1 ? 1 : m > 8 ? 8 : m); }
         if (q >= prev) q = prev > 1.5f ? (float)((int)(prev + .5f) - 1) : 1.f / ((int)(1 / prev + .5f) + 1);   /* one step closer */
-        u = prev = q;
+        ulev[k] = prev = q;
     }
+    for (int k = 0; k < PANEL_MAP_ZOOMS; k++) map_ulev[k] = ulev[k];
+    u = ulev[map_zoom];
+    if (map_zf != 1) {   /* the pinch's factor, kept inside level 1 .. the last level */
+        float uz = u * map_zf;
+        if (uz > ulev[0]) uz = ulev[0]; if (uz < ulev[PANEL_MAP_ZOOMS - 1]) uz = ulev[PANEL_MAP_ZOOMS - 1];
+        map_zf = uz / u; u = uz;
+    }
+    int zoomed = u < ulev[0] * .999f;
+    map_zoomed_now = zoomed;
     float cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    if (map_zoom && here) { cx = tx + map_panx; cy = ty - vh * u / 6 + map_pany; }
-    else if (map_zoom) { cx += map_panx; cy += map_pany; }
+    if (zoomed && here) { cx = tx + map_panx; cy = ty - vh * u / 6 + map_pany; }
+    else if (zoomed) { cx += map_panx; cy += map_pany; }
     float hw = vw * u / 2, hh = vh * u / 2;
     if (W > 2 * hw) { if (cx < x0 + hw) cx = x0 + hw; if (cx > x1 - hw) cx = x1 - hw; } else cx = (x0 + x1) / 2;
     if (H > 2 * hh) { if (cy < y0 + hh) cy = y0 + hh; if (cy > y1 - hh) cy = y1 - hh; } else cy = anchor_bottom ? y1 - hh : (y0 + y1) / 2;
-    if (map_zoom) { map_panx = (cx - (here ? tx : (x0 + x1) / 2)); map_pany = cy - (here ? ty - vh * u / 6 : (y0 + y1) / 2); }   /* clamp the pan too */
+    if (zoomed) { map_panx = (cx - (here ? tx : (x0 + x1) / 2)); map_pany = cy - (here ? ty - vh * u / 6 : (y0 + y1) / 2); }   /* clamp the pan too */
     *upp = u; *wx0 = cx - hw; *wy0 = cy - hh;
 }
 
@@ -386,7 +453,7 @@ static void page_side(int play) {
     }
     map_view(x0, y0, x1, y1, gw, !td, vw, vh, 1, P_X, P_Y, &wx0, &wy0, &upp);
     map_upp_now = upp;
-    if (!td && map_zoom) {   /* zoomed: the view's bottom on the ground under it, not the whole area's lowest point */
+    if (!td && map_zoomed_now) {   /* zoomed: the view's bottom on the ground under it, not the whole area's lowest point */
         int lb = -32768;
         for (int i = 0; i < nsp; i++) if (sp[i].bx1 >= wx0 && sp[i].bx0 <= wx0 + vw * upp && sp[i].by1 > lb) lb = sp[i].by1;
         if (lb > -32768 && wy0 + vh * upp > lb) { wy0 = lb - vh * upp; if (wy0 < y0) wy0 = y0; }

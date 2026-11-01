@@ -357,6 +357,13 @@ static void pump(void) {
             else if (e.button.button == SDL_BUTTON_LEFT) port_panel_touch(e.button.x, e.button.y, e.type == SDL_MOUSEBUTTONDOWN ? 0 : 1);
             break;
         }
+        case SDL_MOUSEWHEEL:   /* the panel window: continuous zoom of the map tab at the cursor (as a touch pinch) */
+            if (pwin && e.wheel.windowID == SDL_GetWindowID(pwin) && e.wheel.y) {
+                extern void port_panel_pinch(float, int, int);
+                int mx, my; SDL_GetMouseState(&mx, &my);
+                port_panel_pinch(e.wheel.y > 0 ? 1.15f : 1 / 1.15f, mx, my);
+            }
+            break;
         case SDL_KEYDOWN:
             if (pwin && e.key.windowID == SDL_GetWindowID(pwin)) {   /* keys typed in the panel window drive the panel, not the game */
                 extern void port_panel_key(int);

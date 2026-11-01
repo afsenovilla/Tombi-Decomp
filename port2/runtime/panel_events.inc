@@ -1,11 +1,11 @@
-/* Second screen panel: the event browser (included by panel.c).  Every event of SCRIPT_FLAGS 0..0x81 with its icon and
+/* Second screen panel: the event browser (included by panel.c).  Every event of the pause menu's Events list (SUBSCREEN_EVENT_ORDER, ids up to 0xBF, in its order) with its icon and
  * title from the user's disc, filtered by state (in progress 1..0xFE, done 0xFF, not started 0), and a detail page:
  * where (area / room names and the map graph with a marker on the room), who / what starts it, its state.  Where an
  * event happens comes from panel_eventmap.h, generated from the decomp by port2/tools/gen_panel_events.py (ids and
  * coordinates only; docs/EVENTS_MAP.md lists the coverage); unknown places show "location unknown".
  * Input: touch (Android: nativePanelTouch from the Presentation), the mouse in the PC window, and the keyboard of the
  * PC window (arrows, Enter, Backspace, Q / E: tabs, H: hide / show the selected event, V: list the hidden ones).
- * Hidden events (the Ocultar plank, a long press on a row, H): left out of the lists, the Map tab's "in progress" box and
+ * Hidden events (the Ocultar plank, a long press on a row, H): left out of the lists, the Status tab's "in progress" box and
  * the map markers until "Ocultos: s\xED" lists them again (dimmed); kept in panel_hidden.txt next to the memory cards
  * (the event ids, one line). */
 #include "panel_eventmap.h"
@@ -50,7 +50,7 @@ static const PanelEventLoc *ev_loc(int e) {
 static int ev_state(int e) { int v = G_EVENT(e); return v == 0xFF ? F_DONE : v ? F_PROGRESS : F_PENDING; }
 static int ev_list(int *ids) {
     int n = 0;
-    for (int e = 0; e < EVENTS; e++) if (ev_state(e) == ev_filter && (ev_name[e] || ev_loc(e)) && !ev_hidden_now(e)) ids[n++] = e;
+    for (int k = 0; k < ev_count(); k++) { int e = ev_id(k); if (ev_state(e) == ev_filter && (ev_norder || ev_name[e] || ev_loc(e)) && !ev_hidden_now(e)) ids[n++] = e; }
     return n;
 }
 static const char *filter_name(int f) {

@@ -2470,7 +2470,7 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   `port2/tools/gen_panel_events.py` from `tools/objects.py` room lists and the `setEventStarted` / `setEventComplete` call
   sites of `src/`; coverage per event in `docs/EVENTS_MAP.md`); unknown ones show *ubicación desconocida*.
   Hiding: *Ocultar* (the selected event; *Mostrar* when it is hidden), a long press (0.6 s) on its row, `H` in the PC
-  panel window, `--panel-input hide`; hidden events leave the lists, the Map tab's *En curso* box and the map markers
+  panel window, `--panel-input hide`; hidden events leave the lists, the Status tab's *En curso* box and the map markers
   until *Ocultos: sí* (`V`, `showhidden`) lists them again, dimmed and marked *Oculto*. Kept in `panel_hidden.txt` next
   to the memory cards (`--save-dir`; Android `files/saves`), the event ids on one line. Event 0 *La pulsera del abuelo*
   is started by the intro and completed only by the ending's scene sequence (AREA13 s1, type 0x56, X013 op 7 arg 0,
@@ -2479,7 +2479,7 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   Android (`nativePanelTouch` from the Presentation's view, canvas pixels), mouse in the PC window, keys typed in the PC
   panel window (arrows, Enter, Backspace, Q / E tabs; they do not reach the game); `--panel-input FRAME:ACTION,...`
   (up down left right ok back tabl tabr zoomout zoomin hide showhidden, `tap@X@Y`, `hold@X@Y` a long press) for headless tests.
-- Map tab (*Lateral* / *Cenital*, `runtime/panel_side.inc` + `panel_topdown.inc`), chosen by section:
+- Map tab (*Mapa* / *Cenital*, `runtime/panel_side.inc` + `panel_topdown.inc`), chosen by section:
   - Side view (every side-scrolling section): the room model the game has loaded (`WMD_DATA[0]`, scratch 0x1F800330;
     tools/room.py format) rasterised orthographically in C as the GPU draws it: texels / CLUTs / pages from a VRAM
     snapshot taken when the model is read, vertex colours modulating them (0x80 = 1.0, Gouraud), raw packets unlit,
@@ -2495,10 +2495,15 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
     world units, top-down 320 px across), geometric in between; zoomed levels follow Tomba, drag / arrows pan, OK
     re-centres. Buttons `- / +` drawn in the plank style with the sub-screen's own "<L1" / "R1>" glyphs
     (SYSTEM/A10301 u 56 / 80, v 206), "Zoom n/N"; keys PageDown / PageUp or - / + in the PC panel window;
-    `--panel-input` actions `zoomout` / `zoomin`.
+    `--panel-input` actions `zoomout` / `zoomin`. Continuous zoom between level 1 and the last: a two-finger pinch on
+    the Android second screen (`nativePanelPinch`, centred on the fingers' midpoint), the mouse wheel in the PC panel
+    window (at the cursor), `--panel-input pinch@PERCENT@X@Y`; `- / +` then step to the next level out / in.
+  - Textures: the VRAM snapshot is checked every 25 frames (outside loading screens) over the pages / CLUTs the
+    model samples and refreshed when they changed (sections stream their textures into the same slots: a stale
+    snapshot drew another section's ground as blue noise).
   - Markers: the events panel_eventmap.h places in the section (and the sections sharing its model), icons at 2x
     outlined (pending ones as a silhouette); Tomba's face at 2x at PLAYER x / y, flipped to the side he faces (PLAYER
-    +0xA6: 0 left, 2 right). Views under 200 canvas pixels high (the Map tab's graph, the event page) draw them at 1x.
+    +0xA6: 0 left, 2 right). Views under 200 canvas pixels high (the Status tab's graph, the event page) draw them at 1x.
   - Pixel perfect zoom: each level's scale is snapped to whole canvas pixels per world unit (1 / m) or whole world units
     per pixel (n; level 1 rounds up so the whole map fits): AREA05's picture (864 x 608) at 3 / 2 / 1 picture pixels per
     canvas pixel.
@@ -2546,7 +2551,7 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
 
 - Header: the area and room names of the game's own map screen (`MAP_AREA_NAMES[link.c]`, `MAP_ROOM_NAMES[link.c][link.d]`
   of the room's `MAP_LINKS` entry, `MAP_ROOM_LINK[area][section]`; AREA14 by section) and the play time.
-- Layout: the wooden title bar (area name), three tabs (Mapa / Eventos / Lateral), pink page in a stone border, cream windows.
+- Layout: the wooden title bar (area name), three tabs (Estado / Eventos / Mapa (Cenital in top-down sections)), pink page in a stone border, cream windows.
 - Status: the HUD's vitality fruit (segments = vitality / max, the number in the middle), lives, AP, play time, events seen.
 - Events in progress: SCRIPT_FLAGS 1..0xFE of ids 0..0x81 with their icons and names (`EVENT_NAME_STRINGS`).
 - Map: the game's map graph seen from above (x, z of `MAP_NODES`), the routes (`MAP_AREA_ROUTES`) of each region the player
