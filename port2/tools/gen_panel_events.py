@@ -20,9 +20,20 @@ EVENTS = 0xC0
 KINDS = ["EK_UNKNOWN", "EK_NPC", "EK_CHEST", "EK_ITEM", "EK_SCENE", "EK_OBJECT"]
 
 
+# updateL4Type1AObject (the signs and boards) starts one event per subtype (src/updateL4Type1AObject.c), not the three
+# objects.py lists for the handler: 0x11 the NO TRESPASSING sign (AREA09), 0x13 / 0x14 the Baccus Village board.
+SIGN_EVENTS = {0x11: 37, 0x13: 46, 0x14: 49}
+# updateItemObject: subtype = item id; picking it up runs its reward (src/updateL5Type09Item.c table), which starts the event:
+# rewardCrystalBalls (0x8E, the first ball starts 19 Lost and Found), rewardJewel (0x63 / 0x64 below blue / green level 9
+# start 90 / 129; 0x62 completes 58, started by the 1,000 Year Old Man's scene).
+ITEM_EVENTS = {0x8E: 19, 0x63: 90, 0x64: 129}
+
+
 def kind_of(handler, note):
     h = handler.lower()
-    if "chest" in h or "l4type1a" in h:
+    if "l4type1a" in h:
+        return 5
+    if "chest" in h:
         return 2
     if "item" in h:
         return 3
@@ -44,14 +55,46 @@ def from_objects(path):
         if r.get("own", "True") not in ("True", "1", "true"):
             continue
         evs = [int(e) for e in (r.get("events") or "").split() if e.isdigit()]
+        try:
+            sub = int(r.get("subtype", "-1"), 0)
+        except ValueError:
+            sub = -1
+        if r.get("handler_name") == "updateL4Type1AObject":
+            evs = [SIGN_EVENTS[sub]] if sub in SIGN_EVENTS else []
+        elif r.get("handler_name") == "updateItemObject" and sub in ITEM_EVENTS:
+            evs = [ITEM_EVENTS[sub]]
         for e in evs:
             if e >= EVENTS or e in out:
                 continue
             try:
-                out[e] = (int(r["area"]), int(r["section"]), int(r["x"]), int(r["y"]), kind_of(r.get("handler_name", ""), r.get("event_note", "")),
-                          "objects: AREA%02d:%s %s" % (int(r["area"]), r["section"], r.get("handler_name", "")))
+                k = 3 if r.get("handler_name") == "updateItemObject" else kind_of(r.get("handler_name", ""), r.get("event_note", ""))
+                out[e] = (int(r["area"]), int(r["section"]), int(r["x"]), int(r["y"]), k,
+                          "objects: AREA%02d:%s %s" % (int(r["area"]), r["section"], r.get("handler_name", ""))
+                          + (" subtype 0x%02X" % sub if r.get("handler_name") in ("updateL4Type1AObject", "updateItemObject") else ""))
             except (KeyError, ValueError):
                 pass
+    return out
+
+
+def from_npcset09():
+    """The Baccus Village board: spawnNpcSet09 (src/x005/spawnNpcSet09.c) places a layer-4 sign (type 0x1A) from the table of
+    D_80117AC8[GCD.bceed]; the sign subtype picks the event (SIGN_EVENTS).  It runs in AREA05 section 1 (--log-events:
+    'start 46 ... at area 5 section 1').  event -> (area, section, x, y, kind, why)."""
+    import struct
+    out = {}
+    try:
+        d = open(os.path.join(ROOT, "game", "disc", "fs", "AREA05", "X005.BIN"), "rb").read()
+    except OSError:
+        return out
+    base = 0x800E8028
+    for k in range(4):
+        p = struct.unpack_from("<I", d, 0x80117AC8 - base + 4 * k)[0]
+        for i in range(64):
+            e = struct.unpack_from("<14h", d, p - base + 28 * i)
+            if e[0] & 0xFF == 0xFF:
+                break
+            if e[0] & 0x80 and e[12] in SIGN_EVENTS and SIGN_EVENTS[e[12]] not in out:
+                out[SIGN_EVENTS[e[12]]] = (5, 1, e[9], e[10], 5, "objects: X005 spawnNpcSet09 board, sign subtype 0x%02X" % e[12])
     return out
 
 
@@ -120,6 +163,10 @@ OWNER[44] = (5, 0, "I0NFO2 topdownActorTalkStep: its dialogues (2, 0x22 / 0x23) 
 # area 254: no room; x = the item whose use from the pause menu completes it (D0SPSUB func_800E89F8 case 0x3F)
 OWNER[15] = (254, 255, "D0SPSUB func_800E89F8: using item 0x3F from the pause menu completes it, anywhere")
 USE_ITEM = {15: 0x3F}
+# titled events nothing in PAL starts or completes: no setEventStarted / setEventComplete with the id in any overlay or EXE,
+# no op 0x9a in the AREA15 scripts, no table entry of the data-driven setters (topdown actors +0xAC, hooded old man and
+# scene sequence scripts, signs, item rewards)
+NEVER_SET = {77: "never set: only read, by the cut Civilization towns' spawners (I0NFO2 spawnNpcSet0D / 0E / 0F, D_8009CDF1)"}
 # 4. the area scripts: loadAreaSoundBank (src/loadAreaSoundBank.c, the PAL branch) loads one AREA15 script per room and
 #    initAreaScripts runs it there; game opcode 0x9a (awardEventProgress) inside it starts / completes the event in that room.
 #    (area, section) per script; section 255 when the script runs in several sections of the area.
@@ -145,6 +192,9 @@ def from_wss():
 
 def main():
     objs = from_objects(sys.argv[1]) if len(sys.argv) > 1 else {}
+    if objs:
+        for e, v in from_npcset09().items():
+            objs.setdefault(e, v)
     src = from_src()
     wss = from_wss() if objs else {}
     for e, ars in (from_bin().items() if objs else ()):   # the disc is there: add the overlay call sites
@@ -171,6 +221,8 @@ def main():
             a, sec, why = OWNER[e]
             rows.append((e, a, sec, USE_ITEM.get(e, -32768), -32768, 3 if e in USE_ITEM else 4))
             doc.append((e, "AREA%02d" % a + (" section %d" % sec if sec != 255 else " (section unknown)"), "scene", "owner: " + why))
+        elif e in NEVER_SET:
+            doc.append((e, "none", "-", NEVER_SET[e]))
         else:
             doc.append((e, "unknown", "-", "-"))
     h = ["/* generated by port2/tools/gen_panel_events.py: event -> area, section (255 unknown), object x, y (-32768 unknown), kind.",
@@ -190,8 +242,9 @@ def main():
           "- **area only**: a `setEventStarted` / `setEventComplete` call site in that area's code (`src/xNNN/`, `src/aNN*`); the room is not known.",
           "- **script**: started / completed by game opcode 0x9a in the AREA15 script that `loadAreaSoundBank` loads for that room.",
           "- **owner**: a call site in a shared overlay (I0NFO2 / I0NFO3), attributed to the area that loads it.",
+          "- **none**: nothing in PAL starts or completes it (only read by cut content).",
           "- **unknown**: none of these yet (data-driven ids, the other WSS scripts); the panel says the zone is not extracted yet.", "",
-          "Coverage: %d with room and position, %d with the area only, %d unknown, of %d." % (n_obj, n_src, EVENTS - n_obj - n_src, EVENTS), "",
+          "Coverage: %d with room and position, %d with the area only, %d never set, %d unknown, of %d." % (n_obj, n_src, len(NEVER_SET), EVENTS - n_obj - n_src - len(NEVER_SET), EVENTS), "",
           "| event | where | kind | source |", "|---|---|---|---|"]
     for e, w, k, why in doc:
         md.append("| %d (0x%02X) | %s | %s | %s |" % (e, e, w, k, why.replace("|", "/")))

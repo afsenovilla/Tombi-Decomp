@@ -6,9 +6,10 @@ Where each event (`SCRIPT_FLAGS` id 0..0xBF) happens, as the second-screen event
 - **area only**: a `setEventStarted` / `setEventComplete` call site in that area's code (`src/xNNN/`, `src/aNN*`); the room is not known.
 - **script**: started / completed by game opcode 0x9a in the AREA15 script that `loadAreaSoundBank` loads for that room.
 - **owner**: a call site in a shared overlay (I0NFO2 / I0NFO3), attributed to the area that loads it.
+- **none**: nothing in PAL starts or completes it (only read by cut content).
 - **unknown**: none of these yet (data-driven ids, the other WSS scripts); the panel says the zone is not extracted yet.
 
-Coverage: 39 with room and position, 89 with the area only, 64 unknown, of 192.
+Coverage: 42 with room and position, 89 with the area only, 1 never set, 60 unknown, of 192.
 
 | event | where | kind | source |
 |---|---|---|---|
@@ -31,7 +32,7 @@ Coverage: 39 with room and position, 89 with the area only, 64 unknown, of 192.
 | 16 (0x10) | AREA00 section 2 (x 2725, y -1208) | scene | objects: AREA00:2 492 |
 | 17 (0x11) | AREA02 section 1 | scene | script: AREA15/0210.WSS (start), run in that room by initAreaScripts |
 | 18 (0x12) | unknown | - | - |
-| 19 (0x13) | unknown | - | - |
+| 19 (0x13) | AREA01 section 3 (x 4187, y -552) | item | objects: AREA01:3 updateItemObject subtype 0x8E |
 | 20 (0x14) | AREA02 section 1 | scene | script: AREA15/0210.WSS (start), run in that room by initAreaScripts |
 | 21 (0x15) | AREA02 section 2 | scene | script: AREA15/0220.WSS (complete), run in that room by initAreaScripts |
 | 22 (0x16) | AREA01 section 3 (x 4178, y -1773) | scene | objects: AREA01:3 updateLookAndSeeViewpoint |
@@ -49,7 +50,7 @@ Coverage: 39 with room and position, 89 with the area only, 64 unknown, of 192.
 | 34 (0x22) | AREA14 section 3 (x 398, y -138) | scene | objects: AREA14:3 updateEvilPigBoss |
 | 35 (0x23) | AREA03 (section unknown) | scene | decomp: src/x003/masterOfTheSkiesScene.c, src/x003/soakedPhoenixGuideTalk.c |
 | 36 (0x24) | AREA03 (section unknown) | scene | decomp: src/x003/fungaDwarfTalk.c |
-| 37 (0x25) | AREA00 section 0 (x 83, y -29) | chest | objects: AREA00:0 updateL4Type1AObject |
+| 37 (0x25) | AREA09 section 0 (x 3730, y -490) | object | objects: AREA09:0 updateL4Type1AObject subtype 0x11 |
 | 38 (0x26) | AREA05 section 0 | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors; I0NFO2 runs in AREA05 / AREA08 section 0) |
 | 39 (0x27) | AREA02 (section unknown) | scene | decomp: src/x002/flowerGardenCompleteScene.c |
 | 40 (0x28) | AREA09 (section unknown) | scene | decomp: src/x009/flowerTearsSeekerTalk.c, src/x009/tearJarHeld.c |
@@ -58,10 +59,10 @@ Coverage: 39 with room and position, 89 with the area only, 64 unknown, of 192.
 | 43 (0x2B) | AREA05 section 0 | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors; I0NFO2 runs in AREA05 / AREA08 section 0) |
 | 44 (0x2C) | AREA05 section 0 | scene | owner: I0NFO2 topdownActorTalkStep: its dialogues (2, 0x22 / 0x23) exist only in AREA05's bank (the fortune teller) |
 | 45 (0x2D) | unknown | - | - |
-| 46 (0x2E) | AREA00 section 0 (x 83, y -29) | chest | objects: AREA00:0 updateL4Type1AObject |
+| 46 (0x2E) | AREA05 section 1 (x 28, y -144) | object | objects: X005 spawnNpcSet09 board, sign subtype 0x13 |
 | 47 (0x2F) | AREA05 section 0 | scene | owner: I0NFO2 stepNpcSet07 / npcSet07Scene* (the AREA05 actors; I0NFO2 runs in AREA05 / AREA08 section 0) |
 | 48 (0x30) | unknown | - | - |
-| 49 (0x31) | AREA00 section 0 (x 83, y -29) | chest | objects: AREA00:0 updateL4Type1AObject |
+| 49 (0x31) | AREA05 section 1 (x 28, y -144) | object | objects: X005 spawnNpcSet09 board, sign subtype 0x14 |
 | 50 (0x32) | AREA08 section 0 | scene | owner: I0NFO2 npcSet0CMessageScene (NPC set 0C = AREA08: tools/dialogue_refs.py NPCSET_AREA) |
 | 51 (0x33) | AREA04 section 0 (x 965, y -761) | scene | objects: AREA04:0 dispatchAreaInitB>updateAreaMechanisms |
 | 52 (0x34) | unknown | - | - |
@@ -89,7 +90,7 @@ Coverage: 39 with room and position, 89 with the area only, 64 unknown, of 192.
 | 74 (0x4A) | unknown | - | - |
 | 75 (0x4B) | unknown | - | - |
 | 76 (0x4C) | unknown | - | - |
-| 77 (0x4D) | unknown | - | - |
+| 77 (0x4D) | none | - | never set: only read, by the cut Civilization towns' spawners (I0NFO2 spawnNpcSet0D / 0E / 0F, D_8009CDF1) |
 | 78 (0x4E) | AREA10 (section unknown) | scene | decomp: src/x010/lostHatManTalk.c |
 | 79 (0x4F) | AREA11 (section unknown) | scene | decomp: src/x011/powerPlantThanksTalk.c |
 | 80 (0x50) | AREA14 section 4 (x 600, y -224) | scene | objects: AREA14:4 updateEvilPigBoss |
@@ -102,7 +103,7 @@ Coverage: 39 with room and position, 89 with the area only, 64 unknown, of 192.
 | 87 (0x57) | AREA02 section 0 | scene | script: AREA15/0200.WSS (start), run in that room by initAreaScripts |
 | 88 (0x58) | AREA02 section 0 | scene | script: AREA15/0200.WSS (start), run in that room by initAreaScripts |
 | 89 (0x59) | unknown | - | - |
-| 90 (0x5A) | unknown | - | - |
+| 90 (0x5A) | AREA10 section 3 (x 1408, y -77) | item | objects: AREA10:3 updateItemObject subtype 0x63 |
 | 91 (0x5B) | unknown | - | - |
 | 92 (0x5C) | unknown | - | - |
 | 93 (0x5D) | unknown | - | - |
@@ -141,7 +142,7 @@ Coverage: 39 with room and position, 89 with the area only, 64 unknown, of 192.
 | 126 (0x7E) | AREA10 (section unknown) | scene | decomp: src/x010/tenThousandYearElderBeadsTalk.c, src/x010/tenThousandYearElderTalk.c |
 | 127 (0x7F) | AREA10 (section unknown) | scene | decomp: src/x010/powerFishCollectorTalk.c |
 | 128 (0x80) | AREA04 (section unknown) | scene | decomp: src/x004/unbendingCableTalk.c |
-| 129 (0x81) | unknown | - | - |
+| 129 (0x81) | AREA03 section 3 (x 768, y -1242) | item | objects: AREA03:3 updateItemObject subtype 0x64 |
 | 130 (0x82) | unknown | - | - |
 | 131 (0x83) | unknown | - | - |
 | 132 (0x84) | AREA18 (section unknown) | scene | decomp: src/x018/witchMizunoCuredTalk.c, src/x018/witchMizunoSneezeTalk.c |
