@@ -12,6 +12,17 @@ void optionsDrawFrame(void)
     tp = GetTPage(1, 0, 0x180, 0);
     d = OPTIONS_FRAME_SPRITES;
     while (d->x != -1) {
+#ifdef PORT2
+        {   /* widescreen: the checkered wallpaper (80-px tiles, four to a screen) repeats a screen to each side, so it
+               fills the wide side strips too (the drawing area clips the rest) */
+            extern int port_widescreen;
+            if (port_widescreen) {
+                SprDef c = *d;
+                c.x = d->x - 320; titleDrawSprite(&c, tp, 4);
+                c.x = d->x + 320; titleDrawSprite(&c, tp, 4);
+            }
+        }
+#endif
         titleDrawSprite(d++, tp, 4);
     }
 }

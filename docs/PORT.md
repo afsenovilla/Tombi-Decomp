@@ -2353,6 +2353,23 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
   now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over
   the same 30 frames, so they land on the same frame.
+- **Sub-screens** (Select screens Objetos / Eventos / Estado / Mapa, memory card, options, button config, screen
+  adjust).  The Select screens (`subScreenDrawTabs`, D0SPSUB / D0SPSUB3, `#ifdef PORT2`) call `port_ws_layout(left cut,
+  right cut, below)` each frame; while it is set, `shims/gpu.c` spreads the textured primitives of the frame
+  (`ws_layout_place`): pieces left of frame column 0x50 (the stone column, leaf buttons, first tab) move to the wide
+  left edge, frame-chrome pieces right of 0x11A (the wooden bar's right end) to the wide right edge, and a chrome piece
+  (a textured quad, i.e. the wooden bars, or a sprite with the stone CLUT 0x7812) that crosses a cut is repeated outwards
+  over the strip it opened, clipped to that strip, so the bars and stone walls run the full width, tiled from the
+  game's own pieces; everything else stays put and the pink content area just gets wider.  Status and map limit it to
+  the bar and tabs (frame lines < 0x30; their boxes and the 3D map keep the 4:3 layout).  The memory card logo
+  wallpaper (`memCardDrawBackground`) and the options checkerboard (`optionsDrawFrame`, also button config and screen
+  adjust) are drawn again a screen to each side (the drawing area clips them).
+- **Spanish improved translation labels** (`runtime/subscreen_es.c`, hooked on every VRAM upload in `gpu.c`): with
+  `--lang 5` and a text patch whose MAIN5.EXE pause list holds "Objetos" (es_mejorada), the sub-screen texture's
+  "Elmto." tab and "Usar elmto" leaf become "Objetos" / "Usar objeto", rebuilt in VRAM from the texture itself (tab
+  font letters cut from the "Evento" / "Estado" tabs, b = their d mirrored, O and j drawn with the same 2-px brush; the
+  leaf line cleared with the "Ver" / "Ordenar" leaves and redrawn in the leaf font's white strokes); the texture is
+  recognised by FNV hashes of the two rects.  "Inventario" was not used: it does not fit the 64-px tab nor the leaf.
 
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.

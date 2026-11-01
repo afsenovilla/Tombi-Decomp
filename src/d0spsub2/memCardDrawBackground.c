@@ -28,6 +28,14 @@ void memCardDrawBackground(void)
     SPRT *p;
     DR_MODE *m;
     Part *s = MEMCARD_BACKGROUND_PARTS;
+#ifdef PORT2
+    /* widescreen: the logo wallpaper is repeated a screen to each side, so it fills the wide side strips too
+       (the drawing area clips the rest) */
+    extern int port_widescreen;
+    int pass, dx = 0;
+    for (pass = 0; pass < (port_widescreen ? 3 : 1); pass++, s = MEMCARD_BACKGROUND_PARTS) {
+    dx = pass == 0 ? 0 : pass == 1 ? -320 : 320;
+#endif
     do {
         S->len = 4;
         S->code = 0x65;
@@ -36,6 +44,9 @@ void memCardDrawBackground(void)
         S->b0 = 0x80;
         S->code &= ~2;
         S->x0 = s->x;
+#ifdef PORT2
+        S->x0 += dx;
+#endif
         S->y0 = s->y;
         S->u0 = s->u;
         S->v0 = s->v;
@@ -51,4 +62,7 @@ void memCardDrawBackground(void)
         NEXT_PRIM += sizeof(DR_MODE);
         s++;
     } while (s->x != -1);
+#ifdef PORT2
+    }
+#endif
 }
