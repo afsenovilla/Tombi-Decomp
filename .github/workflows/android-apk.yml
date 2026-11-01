@@ -243,7 +243,7 @@ jobs:
           mkdir out; cp art/tombi-port-armeabi-v7a-debug.apk "out/$APK"
           if [ -f art/SIGNED.txt ]; then SIG="signed with the project release key"; else SIG="debug-signed: uninstall the old beta before installing a newer one"; fi
           {
-            echo "**BETA $N - untested on real hardware** (build of ${SHA::7})."; echo
+            echo "**BETA $N** (build of ${SHA::7})."; echo
             echo "- Android port of Tombi!, 32-bit ARM (armeabi-v7a). Needs a device with 32-bit app support (most current handhelds); Snapdragon 8 Gen 3 and newer cannot run it."
             echo "- No game data included and no PC needed: pick your own disc image (.bin/.cue/.iso/.chd of the PAL SCES-01331) on the device from the Selva launcher; it is checked (MAIN0.EXE sha1) and its files are extracted into app storage (about 500 MB, every file checked; a truncated or damaged image is refused with the reason)."
             echo "- New: crash reports without adb: if the game closes unexpectedly the launcher shows the last lines of the log with Copy report / Share / Export log (also Options > View last log). Disc > Delete data removes the extracted data (saves kept unless ticked)."
@@ -254,5 +254,5 @@ jobs:
             echo "- Extra flags in \`files/args.txt\`. APK is $SIG."
             echo "- Please report results with the log (launcher: Options > View last log > Share / Export log)."
           } > notes.md
-          gh release create "$TAG" -R "$R" --target "$SHA" --title "Tombi! port – Android BETA $N (armeabi-v7a, untested)" \
+          gh release create "$TAG" -R "$R" --target "$SHA" --title "Tombi! port – Android BETA $N (armeabi-v7a)" \
             --prerelease --latest=false --notes-file notes.md "out/$APK"
