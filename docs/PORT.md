@@ -2360,8 +2360,12 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   left edge, frame-chrome pieces right of 0x11A (the wooden bar's right end) to the wide right edge, and a chrome piece
   (a textured quad, i.e. the wooden bars, or a sprite with the stone CLUT 0x7812) that crosses a cut is repeated outwards
   over the strip it opened, clipped to that strip, so the bars and stone walls run the full width, tiled from the
-  game's own pieces; everything else stays put and the pink content area just gets wider.  Status and map limit it to
-  the bar and tabs (frame lines < 0x30; their boxes and the 3D map keep the 4:3 layout).  The memory card logo
+  game's own pieces; everything else stays put and the pink content area just gets wider.  Below the bar (frame
+  line 0x30) the map is left alone (its 3D view already fills the wide plane), and the status page widens its boxes
+  (CLUT 0x79D2): left corners and edges to the wide left edge, right ones to the right edge, the middles tiled over the
+  strips; its content moves half a strip towards its side (so it stays centred in the two upper boxes) and, in the
+  full-width boxes from line 144 down, a whole strip left (left-aligned text keeps its margin).  Checked on the
+  software and OpenGL renderers at 16:9 and 21:9.  The memory card logo
   wallpaper (`memCardDrawBackground`) and the options checkerboard (`optionsDrawFrame`, also button config and screen
   adjust) are drawn again a screen to each side (the drawing area clips them).
 - **Spanish improved translation labels** (`runtime/subscreen_es.c`, hooked on every VRAM upload in `gpu.c`): with

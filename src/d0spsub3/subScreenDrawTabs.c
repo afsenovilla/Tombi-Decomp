@@ -13,14 +13,14 @@ extern void subScreenDrawSprite(int n);
 extern void subScreenDrawSpriteFT4(int n);
 
 #ifdef PORT2
-extern void port_ws_layout(int left_cut, int right_cut, int below);   /* widescreen: spread the frame (port2/shims/gpu.c) */
+extern void port_ws_layout(int left_cut, int right_cut, int below, int boxes);   /* widescreen: spread the frame (port2/shims/gpu.c) */
 #endif
 
 void subScreenDrawTabs(Menu *m)
 {
     Slot *s;
 #ifdef PORT2
-    port_ws_layout(0x50, 0x11A, m->mode == 0 || m->mode == 3 ? 0x30 : 0x200);   /* status, map: only the bar and tabs */
+    port_ws_layout(0x50, 0x11A, m->mode == 0 || m->mode == 3 ? 0x30 : 0x200, m->mode == 0);   /* status: its boxes below; map: only the bar and tabs */
 #endif
     switch (m->mode) {
     case 0:

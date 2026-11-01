@@ -396,17 +396,36 @@ static void ws_full_width_quad(Vtx *v) {
    edge, and a chrome piece (a textured quad, or a sprite with one of the frame CLUTs) that crosses a cut is repeated
    outwards over the strip it opened (the wooden bars and stone walls continue, tiled from the game's own pieces);
    anything else stays put, so the content area simply gets wider.  Cuts are 4:3 frame columns. */
-int port_ws_layout_frame = -100, port_ws_layout_l = 0x50, port_ws_layout_r = 0x11A, port_ws_layout_y = 512;
-/* left / right cut, and the frame line below which nothing is touched (the status boxes and the 3D map keep their 4:3 layout) */
-void port_ws_layout(int left_cut, int right_cut, int below) { port_ws_layout_frame = port_frame; port_ws_layout_l = left_cut; port_ws_layout_r = right_cut; port_ws_layout_y = below; }
+int port_ws_layout_frame = -100, port_ws_layout_l = 0x50, port_ws_layout_r = 0x11A, port_ws_layout_y = 512, port_ws_layout_boxes;
+/* left / right cut of the frame chrome, the frame line where it ends, and below it: 0 = nothing is touched, 1 = the
+   status page's boxes (CLUT 0x79D2: corners, edges and 136 / 128-px middles) widen outwards (left corners to the wide
+   left edge, right corners to the right one, the middles tiled over the strips) and the content moves half a strip
+   towards its side (left of the frame centre left, the rest right), so it stays centred in the wider boxes; in the
+   full-width boxes from line 144 down it moves a whole strip left, keeping its margin */
+void port_ws_layout(int left_cut, int right_cut, int below, int boxes) {
+    port_ws_layout_frame = port_frame; port_ws_layout_l = left_cut; port_ws_layout_r = right_cut; port_ws_layout_y = below; port_ws_layout_boxes = boxes;
+}
 static int ws_layout_active(void) { return ws_on && port_ws_layout_frame == port_frame - 1; }   /* (the ordering table built in one frame is drawn in the next) */
-static int ws_layout_chrome_clut(u32 clut) { return clut == 0x7812; }
-/* what to do with a piece spanning frame columns [x0, x1): returns the shift, and *tile = -1 / 1 when it is repeated
-   to the left / right of itself over [x0 - pad, x0) / [x1, x1 + pad) */
-static int ws_layout_place(int x0, int x1, int y0, int chrome, int *tile) {
-    int L = ws_ax + ws_dx, a = port_ws_layout_l, b = port_ws_layout_r, P = port_widescreen;
+#define WS_QUAD (-1)                           /* clut argument: a textured quad (the wooden bars) */
+#define WS_FLAT (-2)                           /* clut argument: untextured */
+/* what to do with a piece spanning frame columns [x0, x1) from frame line y0: returns the shift, and *tile = -1 / 1
+   when it is repeated to the left / right of itself over [x0 - pad, x0) / [x1, x1 + pad) */
+static int ws_layout_place(int x0, int x1, int y0, int clut, int *tile) {
+    int L = ws_ax + ws_dx, a = port_ws_layout_l, b = port_ws_layout_r, P = port_widescreen, chrome;
     x0 -= L; x1 -= L; *tile = 0;
-    if (y0 - gs.oy >= port_ws_layout_y) return 0;
+    if (y0 - gs.oy >= port_ws_layout_y) {
+        if (!port_ws_layout_boxes || x1 - x0 >= 300) return 0;      /* (full-screen backgrounds stay) */
+        if (clut == 0x79D2) {
+            if (x1 <= 24) return -P;
+            if (x0 >= 296) return P;
+            if (x0 <= 24 && x1 > 24) *tile = -1; else if (x0 < 296 && x1 >= 296) *tile = 1;
+            return 0;
+        }
+        if (y0 - gs.oy >= 144) return -P;                         /* the full-width boxes: left-aligned text keeps its margin */
+        return x0 + x1 < 320 ? -P / 2 : P / 2;
+    }
+    if (clut == WS_FLAT) return 0;
+    chrome = clut == WS_QUAD || clut == 0x7812;
     if (x1 <= a && (chrome || x0 < a - 16)) return -P;     /* (small marks just left of the cut belong to the content) */
     if (x0 >= b) return chrome ? P : 0;
     if (chrome && x0 <= a && x1 > a) *tile = -1;
@@ -461,19 +480,20 @@ static int gp0(const u32 *p, int n) {
         if (tex && raw) shade = 0;
         if (ws_on && !tex && quad) ws_full_width_quad(v);
         {   int dx = 0, tile = 0, w = 0, x0 = 0, x1 = 0, sv[2], c;
-            if (tex && quad && ws_layout_active()) {
-                x0 = x1 = v[0].x; for (int i = 1; i < 4; i++) { if (v[i].x < x0) x0 = v[i].x; if (v[i].x > x1) x1 = v[i].x; }
+            if (ws_layout_active()) {
+                int y0 = v[0].y;
+                x0 = x1 = v[0].x;
+                for (int i = 1; i < nv; i++) { if (v[i].x < x0) x0 = v[i].x; if (v[i].x > x1) x1 = v[i].x; if (v[i].y < y0) y0 = v[i].y; }
                 w = x1 - x0;
-                { int y0 = v[0].y; for (int i = 1; i < 4; i++) if (v[i].y < y0) y0 = v[i].y;
-                  dx = w > 0 ? ws_layout_place(x0, x1, y0, 1, &tile) : 0; }
+                dx = w > 0 ? ws_layout_place(x0, x1, y0, tex && quad ? WS_QUAD : tex ? (int)(clut & 0xFFFF) : WS_FLAT, &tile) : 0;
             }
             for (c = tile ? -(port_widescreen / (w ? w : 1) + 1) : 0; c <= 0; c++) {   /* the copies, then the piece itself */
                 int off = c ? -c * tile * w : dx;
                 if (c) ws_layout_clip(1, tile < 0 ? x0 - port_widescreen : x1, tile < 0 ? x0 : x1 + port_widescreen, sv);
-                for (int i = 0; i < 4; i++) v[i].x += off;
+                for (int i = 0; i < nv; i++) v[i].x += off;
                 if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
                 if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
-                for (int i = 0; i < 4; i++) v[i].x -= off;
+                for (int i = 0; i < nv; i++) v[i].x -= off;
                 if (c) ws_layout_clip(0, 0, 0, sv);
             }
         }
@@ -519,11 +539,11 @@ static int gp0(const u32 *p, int n) {
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7, (p[2] >> 16) & 0xFFFF, u, v, w, h, a.x, a.y, w, h, semi ? 1 : 0, 2);
         if (tex) t.rep = port_texpack_on && w && h && t.cy != PORT_CLUT_Y ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
         if (ws_on && !tex && w && h) ws_full_width_rect(&a.x, &w);
-        if (w && h && tex && ws_layout_active()) {
-            int tile, dx = ws_layout_place(a.x, a.x + w, a.y, ws_layout_chrome_clut((p[2] >> 16) & 0xFFFF), &tile), sv[2];
+        if (w && h && ws_layout_active()) {
+            int tile, dx = ws_layout_place(a.x, a.x + w, a.y, tex ? (int)((p[2] >> 16) & 0xFFFF) : WS_FLAT, &tile), sv[2];
             if (tile) for (int c = port_widescreen / w + 1; c >= 1; c--) {
                 ws_layout_clip(1, tile < 0 ? a.x - port_widescreen : a.x + w, tile < 0 ? a.x : a.x + w + port_widescreen, sv);
-                be->rect(a.x + c * tile * w, a.y, w, h, p[0] & 0xFFFFFF, &t, u, v, semi, raw);
+                be->rect(a.x + c * tile * w, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
                 ws_layout_clip(0, 0, 0, sv);
             }
             a.x += dx;
