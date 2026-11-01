@@ -21,7 +21,6 @@
     <string name="opt_skipintro">Skip intro logos and movie</string>
     <string name="opt_hz60">60 Hz (NTSC speed)</string>
     <string name="opt_fps60">60 fps</string>
-    <string name="opt_intscale">Whole-number scale (pixel perfect, may leave borders)</string>
     <string name="opt_showfps">Show FPS</string>
     <string name="opt_inflives">Infinite lives</string>
     <string name="opt_infhealth">Infinite health</string>

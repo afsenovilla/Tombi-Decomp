@@ -20,7 +20,6 @@
     <string name="opt_skipintro">Saltar logos y vídeo inicial</string>
     <string name="opt_hz60">60 Hz (velocidad NTSC)</string>
     <string name="opt_fps60">60 fps</string>
-    <string name="opt_intscale">Escala entera (píxel perfecto, puede dejar bordes)</string>
     <string name="opt_showfps">Mostrar FPS</string>
     <string name="opt_inflives">Vidas infinitas</string>
     <string name="opt_infhealth">Salud infinita</string>
