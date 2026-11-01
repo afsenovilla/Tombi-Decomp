@@ -563,7 +563,11 @@ void port_title_debug_list(short **ps, unsigned char **ppal) {
             w = last + 1; if (w > 0x37) w = 0x37;
             for (; k < w + 6; k++) list[k] = 0;
             for (int i = 0; words[j][i]; i++) { last = k; list[k++] = words[j][i] - 32; pal[nz++] = 2; }
-            { int len = (int)strlen(words[j]); port_title_angles[j] = (unsigned char)(0xE0 - 4 * w - (len > 8 ? 4 * ((len - 8) / 2) : 0)); }
+            {   /* the carousel draws its front 16 cells flat (titleDrawMenuCarousel: angle 0xE0..0x1F), the rest in perspective:
+                   the word starts 6 cells in as OPTIONS does, or earlier for a long word so it ends inside (2 cells kept
+                   for the left arrow) */
+                int len = (int)strlen(words[j]), s0 = len > 10 ? (16 - len > 2 ? 16 - len : 2) : 6;
+                port_title_angles[j] = (unsigned char)(0xE0 - 4 * w - 4 * (6 - s0)); }
         }
         list[k++] = -3; list[k] = -1;
         port_title_extra = nw;
