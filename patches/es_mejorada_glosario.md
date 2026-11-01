@@ -26,7 +26,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Village | Ciudad (nombres propios: Ciudad Baco, Ciudad de Enanos...) | oficial |
 | Mr. Turtle | el Sr. Tortuga | antes "la Sra. Tortuga" |
 | Psychic Fish | Pez psíquico | antes "Pez potencia" |
-| Blackjack | Porra | antes "Bola" |
+| Blackjack | Mangual | antes "Bola"; bola de pinchos con cadena (como el francés *Fléau d'armes*) |
 | chest (100 year old chests) | cofre (cofres centenarios) | antes "arcón" |
 | Directional button | botón de dirección | |
 | Exercise Routine | Ejercicio | |
@@ -36,7 +36,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Pig / ol' coot / geezer | vejete, vejestorio | registro coloquial |
 | Ha ha ha | ¡Ja, ja, ja! | con comas |
 | See ya! | ¡Hasta luego! | |
-| GrappleJack | Garfio-porra | antes "Garfio-gancho" (Grapple + Blackjack = Porra) |
+| GrappleJack | Garfio-mangual | antes "Garfio-gancho" (Grapple + Blackjack = Mangual) |
 | Dashing Pants | Pantalón veloz | antes "Pantalón elegante" |
 | Funky Parasol | Sombrilla chula | antes "Sombrilla rara" |
 | Miner's Hat | Casco de minero | antes "Gorro (del) minero" |
