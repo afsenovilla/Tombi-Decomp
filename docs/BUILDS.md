@@ -42,3 +42,4 @@ Reference list of every known disc carrying a Tomba! demo, prototype or retail r
 
 - Builds 10/11 share one executable, as do 15–19 and the two halves of each PAL retail pair.
 - Build 14 (May 1998 PAL prototype) and 22 (Demo One) sit between the US retail and the PAL masters.
+- Build 6 (Dengeki D5) checked with the `disc-manifest` workflow: `TOMBA/TOMBA.EXE` MD5 matches. Its `AREA15` holds a single `0000.WSS` (2189 bytes, dated 1997-09-29), against 9 WSS files in JP retail (`0000.WSS` 2406 bytes, 1997-11-29) and PAL (`0000.WSS` 2609 bytes, 1998-02-19). All three `0000.WSS` hashes differ. PrePre Vol.8 has no `AREA15`.
