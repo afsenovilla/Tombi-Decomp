@@ -1393,18 +1393,20 @@ def personajes(area, lang, out):
         return h
     W = M + max(AX + PW, NW) + 40 + TW + M
     H = oy + PH + TH + notes_h() + 200
-    im = Image.new('RGB', (W, H), (250, 247, 240)); dr = ImageDraw.Draw(im, 'RGBA')
+    plan_only = bool(os.environ.get("CIV_PLAN_ONLY"))    # the plan alone, transparent background, no grid (crop below)
+    im = Image.new('RGBA', (W, H), (0, 0, 0, 0)) if plan_only else Image.new('RGB', (W, H), (250, 247, 240))
+    dr = ImageDraw.Draw(im, 'RGBA')
     dr.text((M, 22), PERS_TITLE[area][L], font=F(42, True), fill=(20, 20, 20))
     sub = ('Cada vecino en su posición exacta del código (juego de NPC %s de I0NFO2), numerado como en la doc. Sólo se dibuja el sprite si el disco lo da; si no, silueta «sprite desconocido».' % Q[0]) if es else \
           ('Every resident at its exact code position (I0NFO2 NPC set %s), numbered as in the docs. A sprite is drawn only when the disc gives it; otherwise a "sprite unknown" silhouette.' % Q[0])
     dr.text((M, 80), sub, font=F(22), fill=(60, 60, 60))
     dr.text((M, 110), ('Plano (coordenadas del mundo, cuadrícula de 32 px, escala ×1,5)' if es else 'Plan (world coordinates, 32 px grid, scale ×1.5)'), font=F(20, True), fill=(40, 40, 40))
     # ---- plan
-    dr.rectangle([ox, oy, ox + PW, oy + PH], fill=(232, 222, 196), outline=(120, 105, 80), width=3)
-    for gx in range(wx0, wx1 + 1, 32):
+    if not plan_only: dr.rectangle([ox, oy, ox + PW, oy + PH], fill=(232, 222, 196), outline=(120, 105, 80), width=3)
+    for gx in (range(wx0, wx1 + 1, 32) if not plan_only else ()):
         X = P(gx, 0)[0]; dr.line([X, oy, X, oy + PH], fill=(214, 202, 172) if gx % 64 else (200, 186, 154), width=1)
         if gx % 64 == 0: dr.text((X, oy - 4), str(gx), font=F(14), fill=(90, 80, 60), anchor='mb')
-    for gy in range(wy0, wy1 + 1, 32):
+    for gy in (range(wy0, wy1 + 1, 32) if not plan_only else ()):
         Y = P(0, gy)[1]; dr.line([ox, Y, ox + PW, Y], fill=(214, 202, 172) if gy % 64 else (200, 186, 154), width=1)
         if gy % 64 == 0: dr.text((ox - 6, Y), str(gy), font=F(14), fill=(90, 80, 60), anchor='rm')
     # exits
@@ -1576,7 +1578,11 @@ def personajes(area, lang, out):
             for ln in lines: dr.text((x0n + 28, yy), ln, font=fN, fill=(30, 30, 30)); yy += 25
             yy += 4
         ny[c] = yy + 14
-    im = im.crop((0, 0, W, max(y, ny[0], ny[1]) + 30))
+    if plan_only:
+        im = im.crop((ox - 4, oy - 4, ox + PW + 5, oy + PH + 5))
+        out = out[:-4] + "_plano.png" if out.endswith(".png") else out
+    else:
+        im = im.crop((0, 0, W, max(y, ny[0], ny[1]) + 30))
     im.save(out); print(out, im.size)
     return [s[1] for s in spr]
 
