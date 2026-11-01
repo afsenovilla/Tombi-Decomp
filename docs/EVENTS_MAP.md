@@ -4,10 +4,10 @@ Where each event (`SCRIPT_FLAGS` id 0..0xBF) happens, as the second-screen event
 
 - **room + position**: an object placed in that room starts / completes it (`tools/objects.py`); the panel marks the room on the map.
 - **area only**: a `setEventStarted` / `setEventComplete` call site in that area's code (`src/xNNN/`, `src/aNN*`); the room is not known.
-- **owner**: a call site in a shared overlay (I0NFO2 / I0NFO3) or an award in a WSS script, attributed to the area that loads it.
+- **owner**: a call site in a shared overlay (I0NFO2 / I0NFO3), attributed to the area that loads it.
 - **unknown**: none of these yet (data-driven ids, the other WSS scripts); the panel says the zone is not extracted yet.
 
-Coverage: 39 with room and position, 77 with the area only, 76 unknown, of 192.
+Coverage: 39 with room and position, 72 with the area only, 81 unknown, of 192.
 
 | event | where | kind | source |
 |---|---|---|---|
@@ -24,14 +24,14 @@ Coverage: 39 with room and position, 77 with the area only, 76 unknown, of 192.
 | 10 (0x0A) | AREA00 section 3 (x 120, y -56) | scene | objects: AREA00:3 3248 |
 | 11 (0x0B) | AREA04 section 15 (x 267, y -68) | scene | objects: AREA04:15 updateSceneSequence |
 | 12 (0x0C) | AREA00 section 3 (x 120, y -56) | scene | objects: AREA00:3 3248 |
-| 13 (0x0D) | AREA04 (section unknown) | scene | owner: AREA15/0210.WSS op 0x9a (file 990, loaded only by X004 = AREA04 / AREA12) |
-| 14 (0x0E) | AREA04 (section unknown) | scene | owner: AREA15/0210.WSS op 0x9a (file 990, loaded only by X004 = AREA04 / AREA12) |
+| 13 (0x0D) | unknown | - | - |
+| 14 (0x0E) | unknown | - | - |
 | 15 (0x0F) | unknown | - | - |
 | 16 (0x10) | AREA00 section 2 (x 2725, y -1208) | scene | objects: AREA00:2 492 |
-| 17 (0x11) | AREA04 (section unknown) | scene | owner: AREA15/0210.WSS op 0x9a (file 990, loaded only by X004 = AREA04 / AREA12) |
+| 17 (0x11) | unknown | - | - |
 | 18 (0x12) | unknown | - | - |
 | 19 (0x13) | unknown | - | - |
-| 20 (0x14) | AREA04 (section unknown) | scene | owner: AREA15/0210.WSS op 0x9a (file 990, loaded only by X004 = AREA04 / AREA12) |
+| 20 (0x14) | unknown | - | - |
 | 21 (0x15) | unknown | - | - |
 | 22 (0x16) | AREA01 section 3 (x 4178, y -1773) | scene | objects: AREA01:3 updateLookAndSeeViewpoint |
 | 23 (0x17) | unknown | - | - |
@@ -179,7 +179,7 @@ Coverage: 39 with room and position, 77 with the area only, 76 unknown, of 192.
 | 165 (0xA5) | unknown | - | - |
 | 166 (0xA6) | AREA00 (section unknown) | scene | decomp: X000.BIN (call site) |
 | 167 (0xA7) | AREA00 (section unknown) | scene | decomp: src/updateA00PinkPiglet.c |
-| 168 (0xA8) | AREA04 (section unknown) | scene | owner: AREA15/0210.WSS op 0x9a (file 990, loaded only by X004 = AREA04 / AREA12) |
+| 168 (0xA8) | unknown | - | - |
 | 169 (0xA9) | AREA18 (section unknown) | scene | decomp: src/x018/witchMizunoCandyRecipeTalk.c |
 | 170 (0xAA) | AREA03 section 1 (x 3216, y -1959) | scene | objects: AREA03:1 dispatchAreaInitB>updateAreaMechanisms |
 | 171 (0xAB) | AREA03 (section unknown) | scene | decomp: src/x003/phoenixFavoriteCompleteScene.c, src/x003/stepPhoenixFavoriteEvent.c |
