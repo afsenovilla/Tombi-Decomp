@@ -31,3 +31,7 @@
   refresh rate. Handle the edge cases: objects spawned or removed this tick, teleports and camera cuts (no blend),
   menus and message boxes (draw as-is), movies. Both renderers (software and GL), Android included; an option in
   both launchers.
+- **Launcher language (Android + PC).** Android follows the system language and only has English / Spanish
+  (res/values, values-es); add an "Idioma del launcher" option in Options (Auto / each language), independent of
+  the game language, applied without restarting. Translate both launchers (Android strings, tools/port_launcher.py
+  via tools/i18n.py) into the game's other languages: French, German, Italian, Dutch, Portuguese, Swedish, Danish.
