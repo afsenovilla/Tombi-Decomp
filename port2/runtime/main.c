@@ -546,8 +546,21 @@ static const char *port_civ_maps_dir;
 int port_title_debug, port_title_extra; unsigned char port_title_angles[2];
 extern int port_launcher_exit;
 static int port_title_quit_index = -1;   /* b69 of the QUIT entry, -1: none */
+/* the title font is ASCII: a letter with a diaeresis (Ä Ö Ü of a label) is its base letter, marked here, and
+   port_title_dots draws the two dots over it (titleDrawMenuCarousel, port/fixes.txt) */
+static short title_list[200]; static unsigned char title_umlaut[200];
+static int title_base(int c, int *um) {
+    *um = 1;
+    switch (c) { case 0xC4: case 0xE4: return 'A'; case 0xD6: case 0xF6: return 'O'; case 0xDC: case 0xFC: return 'U'; }
+    *um = 0;
+    return c;
+}
+void port_title_dots(const short *s, int idx, int pal) {
+    extern void port_lx_title_dots(int c, int idx, int pal);
+    if (s >= title_list && s < title_list + 200 && title_umlaut[s - title_list]) port_lx_title_dots(*s, idx, pal);
+}
 void port_title_debug_list(short **ps, unsigned char **ppal) {
-    static short list[200]; static unsigned char pal[200]; static const short *src; static const unsigned char *srcp;
+    short *list = title_list; static unsigned char pal[200]; static const short *src; static const unsigned char *srcp;
     short *s = *ps; unsigned char *p = *ppal;
     if (s != src || p != srcp) {
         const char *words[2]; int nw = 0;
@@ -562,7 +575,7 @@ void port_title_debug_list(short **ps, unsigned char **ppal) {
         for (int j = 0; j < nw; j++) {
             w = last + 1; if (w > 0x37) w = 0x37;
             for (; k < w + 6; k++) list[k] = 0;
-            for (int i = 0; words[j][i]; i++) { last = k; list[k++] = words[j][i] - 32; pal[nz++] = 2; }
+            for (int i = 0; words[j][i]; i++) { int um, c = title_base((unsigned char)words[j][i], &um); last = k; title_umlaut[k] = (unsigned char)um; list[k++] = (short)(c - 32); pal[nz++] = 2; }
             {   /* the carousel draws its front 16 cells flat (titleDrawMenuCarousel: angle 0xE0..0x1F), the rest in perspective:
                    the word starts 6 cells in as OPTIONS does, or earlier for a long word so it ends inside (2 cells kept
                    for the left arrow) */

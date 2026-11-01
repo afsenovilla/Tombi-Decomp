@@ -89,7 +89,7 @@ static int lang(void) { return port_lang >= 0 && port_lang < 9 ? port_lang : 0; 
 /* the title carousel's label: the entry in capitals (the title font is ASCII) */
 const char *port_lx_title_label(void) {
     static char b[40]; const char *s = ENTRY[lang()]; int i;
-    for (i = 0; s[i] && i < 39; i++) { unsigned char c = (unsigned char)s[i]; b[i] = c >= 'a' && c <= 'z' ? c - 32 : c == 0xfc || c == 0xdc ? 'U' : c == 0xe4 ? 'A' : c; }
+    for (i = 0; s[i] && i < 39; i++) { unsigned char c = (unsigned char)s[i]; b[i] = c >= 'a' && c <= 'z' ? c - 32 : c == 0xe4 ? 0xc4 : c == 0xf6 ? 0xd6 : c == 0xfc ? 0xdc : c;   /* Ä Ö Ü: port_title_dots */ }
     b[i] = 0;
     return b;
 }
@@ -355,4 +355,35 @@ void port_lx_title_draw(void) {
     tile(TOT, x0 + 2, y0 + 2, x1 - x0 - 4, y1 - y0 - 4, 0x6890a8, 1);
     tile(TOT, x0 + 2, y0 + 2, x1 - x0 - 4, y1 - y0 - 4, 0x5878a0, 1);   /* twice: the logo shows through less */
     { void *r = NEXT_PRIM; SetDrawMode(r, 0, 0, 0, 0); AddPrim((void *)(CURRENT_OT + TOT), r); NEXT_PRIM += 0xc; }
+}
+
+/* the title carousel: two dots over glyph c (Ä Ö Ü of a label, runtime/main.c port_title_dots) drawn flat at cell idx
+   (titleDrawCarouselGlyph's front window: x = 0xA0 + w * idx - MulNegSin(0xE0, 0x5A), y 0xB8), each a 1-px dot of the
+   glyph's brightest colour in a 3x3 of its darkest (its CLUT row 0x1E0 + pal at x 336, its texels on the page at 384, 0) */
+typedef struct { unsigned char u, v, w, h, big; } TGLY;
+extern TGLY TITLE_FONT[];
+extern int MulNegSin(int a, int b);
+void port_lx_title_dots(int c, int idx, int pal) {
+    extern unsigned short *port_vram(void); extern int GetGraphType(void);
+    const unsigned short *vr = port_vram(); const TGLY *g = &TITLE_FONT[c];
+    int b8 = GetGraphType() == 1 || GetGraphType() == 2;          /* tpage 0x86 (8 bpp) instead of 0x26 (4 bpp) */
+    int used[256] = {0}, x, y, X, gw = g->w, edge = -1, fill = -1, le = 1 << 30, lf = -1;
+    for (y = 0; y < g->h; y++) for (x = 0; x < gw; x++) {
+        int u = g->u + x, w = vr[(g->v + y) * 1024 + 384 + (b8 ? u / 2 : u / 4)];
+        used[b8 ? (w >> (8 * (u & 1))) & 255 : (w >> (4 * (u & 3))) & 15] = 1;
+    }
+    for (int i = 1; i < 256; i++) if (used[i]) {
+        unsigned short v = vr[(0x1E0 + pal) * 1024 + 336 + i];
+        int l = (v & 31) * 3 + ((v >> 5) & 31) * 6 + ((v >> 10) & 31);
+        if (!v) continue;
+        if (l < le) { le = l; edge = v; }
+        if (l > lf) { lf = l; fill = v; }
+    }
+    if (edge < 0 || fill < 0 || edge == fill) return;
+    X = 0xA0 + gw * idx - MulNegSin(0xE0, 0x5A);
+    for (int d = 0; d < 2; d++) {                                  /* 3x3: a 1-px dot of the fill in the outline */
+        int dx = X + (d ? 4 : 1), dy = 0xB8 - 3;
+        tile(0, dx + 1, dy + 1, 1, 1, rgb15((unsigned short)fill), 0);
+        tile(0, dx, dy, 3, 3, rgb15((unsigned short)edge), 0);
+    }
 }
