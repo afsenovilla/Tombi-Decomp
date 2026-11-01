@@ -98,6 +98,17 @@ How the pieces are wired, all in MAIN0:
 - **Map, player and shadow.** The map object is layer 7 type 0x0A (`topdownMapObjHandler` 0x800EDA90). The player's
   shadow is layer 3 type 0x3A (`topdownShadowHandler` 0x800E94AC). Item spots are layer 2 type 0x2D and talk spots
   layer 2 type 0x2E.
+- **Save points (retail).** The top-down sections save through a talk spot, not through the side-view save sign
+  (`updateL4Type1AObject`, layer 4 type 0x1A, which no top-down APD list places). `spawnNpcSet07` / `spawnNpcSet11`
+  turn a record whose room word has bit 0x80 into a type 0x2E object. `topdownTalkSpotHandler` (0x800EEAC8) draws
+  `SPR_DATA[4]` (kind 0x34, the resident item table, `AREAnn/A00x`) frame 50 with `w1e` 0x15 (page at VRAM (0x140,
+  0x100), `SYSTEM/A00000`): a wooden signpost. `topdownTalkSpotStep` (0x800EE8B0) opens
+  `showMessageBox(TOPDOWN_TALK_SPOT_DEFS[sub])`, and entries 0-4 (the placed records use 0 and 4) are all (1, 0), the
+  area's save prompt (AREA05 #207 "Ciudad Baco ¿Guardar DATOS?", AREA19 #208 "Ciudad oculta ¿Guardar DATOS?"), the
+  same message the side-view save signs open. Placed: AREA05 s0/s2 at (240, 456) in all six record lists, AREA19 s2 at
+  (6, 390). AREA08 (set 0x0C) has none. It is the only `showMessageBox` (0x8002DC50) call in I0NFO2; I0NFO2 never
+  calls `openMenuScreen`. The cut sets: 0x0D/0x0E/0x0F/0x10 have no such record (`spawnNpcSet10` makes every record a
+  type 0x30 actor).
 
 ### Section load list
 
@@ -451,6 +462,23 @@ Three progress variables are set by the spawners:
 - Its exit table (0x800799D0) points to AREA01 s5 and AREA03 s1, which are placeholders.
 - Its JP text (MFNT180 k2 dx0-12 = #209-#221, "we're one country again thanks to Tomba") has no caller anywhere.
 - This town was planned but never got past test data.
+- **The test data copies the FMV.** The 10 records sit 1:1 on the residents of `MOVIE/BUNMEI.STR` frames 135-225 (the
+  pan across the joined Iron Castle / Stonetown squares; frames 206-225 continue it to the left). With one translation
+  and no scaling, five records land on the five residents the movie shows: actor 3 (sub 1) on the wide-hat man (frame
+  220), actor 5 (sub 0) on the figure at the castle gate (cut off by the top of the frame), actor 9 (sub 6) on the
+  bald crouching man, actor 7 (sub 3) on the boy on the balcony, actor 2 (sub 2) under the blonde head at the bottom
+  edge. Fitted x scale 0.998, residuals 1 px or less; FMV mosaic pixel = record (x, y) - (215, 104) for the 135-205
+  median mosaic of `tools/civ_rebuild.py`. Actors 0, 1, 4, 6 and 8 fall outside what the movie shows.
+- **What each subtype looks like (consistent, not proven: the 0x3B table is lost).** All seven defs use `w1e` 1, so in
+  AREA18 they draw from `SYSTEM/A08600`. The anim tables are one list of scripts with overlapping windows (a subtype's
+  scripts 12-23 are the next subtype's 0-11; sub 1 has no talk frames, its scripts 8-11 are sub 2's idle). Frames used
+  by scripts 0-11: sub 0 0-26, sub 1 27-35 (scripts 0-7), sub 2 36-62, sub 3 63-89, sub 4 90-116, sub 5 117-143 (its
+  scripts 12-23 reach 150-179), sub 6 144-149 (8 scripts only). A08600 holds, in this order, a boy in a vest (21
+  drawings), the wide-hat man (9), the curly-haired figure (9) and an Iron Man (5, plus parts cut at row 255). Sub 1
+  has exactly 9 frames and is the second group, and the FMV shows a wide-hat man at its record; sub 0 is the first
+  group. The balcony boy (sub 3) and the bald man (sub 6) are not on A08600; the boy is the Stonetown boy of A07600
+  (row 37 colours). Sub 2 shows only a blonde head in the movie. Sub 4 (Iron Man?) and sub 5 are not in the movie; sub
+  5 is a walking actor with idle/walk/talk scripts like the others, not a save sign (see "Save points" above).
 
 ### How section 0 would have been entered (and why it cannot be)
 

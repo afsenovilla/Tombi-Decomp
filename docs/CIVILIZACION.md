@@ -103,6 +103,18 @@ Cómo se conectan las piezas, todo en MAIN0:
 - **Mapa, jugador y sombra.** El objeto del mapa es la capa 7 tipo 0x0A (`topdownMapObjHandler` 0x800EDA90). La
   sombra del jugador es la capa 3 tipo 0x3A (`topdownShadowHandler` 0x800E94AC). Los puntos de objeto son capa 2 tipo
   0x2D y los puntos de conversación capa 2 tipo 0x2E.
+- **Puntos de guardado (juego final).** Las secciones vistas desde arriba guardan con un punto de conversación, no con
+  el cartel de guardar de la vista lateral (`updateL4Type1AObject`, capa 4 tipo 0x1A, que ninguna lista APD de estas
+  secciones coloca). `spawnNpcSet07` / `spawnNpcSet11` convierten un registro cuya palabra de sala tiene el bit 0x80
+  en un objeto tipo 0x2E. `topdownTalkSpotHandler` (0x800EEAC8) dibuja el fotograma 50 de `SPR_DATA[4]` (tipo 0x34, la
+  tabla residente de objetos, `AREAnn/A00x`) con `w1e` 0x15 (página en VRAM (0x140, 0x100), `SYSTEM/A00000`): un poste
+  de madera con cartel. `topdownTalkSpotStep` (0x800EE8B0) abre `showMessageBox(TOPDOWN_TALK_SPOT_DEFS[sub])`, y las
+  entradas 0-4 (los registros colocados usan la 0 y la 4) son (1, 0), el mensaje de guardar del área (AREA05 #207
+  "Ciudad Baco ¿Guardar DATOS?", AREA19 #208 "Ciudad oculta ¿Guardar DATOS?"), el mismo que abren los carteles de
+  guardar laterales. Colocados: AREA05 s0/s2 en (240, 456) en las seis listas, AREA19 s2 en (6, 390). AREA08 (conjunto
+  0x0C) no tiene. Es la única llamada a `showMessageBox` (0x8002DC50) de I0NFO2; I0NFO2 nunca llama a
+  `openMenuScreen`. Los conjuntos recortados 0x0D/0x0E/0x0F/0x10 no tienen ese registro (`spawnNpcSet10` hace de cada
+  registro un personaje tipo 0x30).
 
 ### Lista de carga de la sección
 
@@ -504,6 +516,26 @@ Los generadores ajustan tres variables de avance:
 - Su texto japonés (MFNT180 k2 dx0-12 = #209-#221, "hemos vuelto a ser un solo país gracias a Tombi") no lo llama
   nadie.
 - Este pueblo se planeó pero nunca pasó de datos de prueba.
+- **Los datos de prueba copian el vídeo.** Los 10 registros caen 1:1 sobre los vecinos de `MOVIE/BUNMEI.STR`,
+  fotogramas 135-225 (la panorámica sobre las plazas unidas del Castillo de hierro y Stonetown; los fotogramas 206-225
+  la siguen hacia la izquierda). Con una sola traslación y sin escalar, cinco registros caen sobre los cinco vecinos
+  que se ven: el personaje 3 (sub 1) sobre el hombre del sombrero ancho (fotograma 220), el 5 (sub 0) sobre la figura
+  de la puerta del castillo (cortada por el borde de arriba), el 9 (sub 6) sobre el calvo agachado, el 7 (sub 3) sobre
+  el chico del balcón y el 2 (sub 2) bajo la cabeza rubia del borde de abajo. Escala x ajustada 0,998, residuos de 1
+  px o menos; píxel del mosaico = registro (x, y) - (215, 104) para el mosaico mediano 135-205 de
+  `tools/civ_rebuild.py`. Los personajes 0, 1, 4, 6 y 8 quedan fuera de lo que muestra el vídeo.
+- **Qué aspecto tiene cada subtipo (coherente, no probado: la tabla 0x3B se perdió).** Las siete definiciones usan
+  `w1e` 1, así que en AREA18 dibujan de `SYSTEM/A08600`. Las tablas de animación son una sola lista de scripts con
+  ventanas solapadas (los scripts 12-23 de un subtipo son los 0-11 del siguiente; el sub 1 no tiene fotogramas de
+  habla, sus scripts 8-11 son el reposo del sub 2). Fotogramas de los scripts 0-11: sub 0 0-26, sub 1 27-35 (scripts
+  0-7), sub 2 36-62, sub 3 63-89, sub 4 90-116, sub 5 117-143 (sus scripts 12-23 llegan a 150-179), sub 6 144-149
+  (sólo 8 scripts). A08600 tiene, en este orden, un chico con chaleco (21 dibujos), el hombre del sombrero ancho (9),
+  la figura de pelo rizado (9) y un hombre de hierro (5, más piezas cortadas en la fila 255). El sub 1 tiene justo 9
+  fotogramas y es el segundo grupo, y el vídeo muestra un hombre de sombrero ancho en su registro; el sub 0 es el
+  primer grupo. El chico del balcón (sub 3) y el calvo (sub 6) no están en A08600; el chico es el de Stonetown de
+  A07600 (colores de la fila 37). Del sub 2 el vídeo sólo enseña una cabeza rubia. El sub 4 (¿hombre de hierro?) y el
+  sub 5 no salen en el vídeo; el sub 5 es un personaje que camina, con scripts de reposo/paso/habla como los demás, no
+  un cartel de guardar (ver "Puntos de guardado" arriba).
 
 ### Cómo se habría entrado en la sección 0 (y por qué no se puede)
 
