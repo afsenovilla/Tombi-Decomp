@@ -1099,15 +1099,31 @@ auto style picks `thor-black` for odin / ayn / thor / retroid pads: neither the 
 the variant, so black is the default and the others a manual choice. Android treats all three as label-mapped pads (A
 east, B south). The Android `PROMPTS` list appends `thor-black`, `thor-white`, so saved indices keep their meaning.
 
+*Custom buttons (`--prompts custom`).* `--prompt-colors a=RRGGBB:RRGGBB,b=...,x=...,y=...,sym=xbox|nintendo|ps`
+gives each face button by position (a south, b east, x west, y north, as `--prompt-map`) a disc and a letter colour
+and picks the symbols (Xbox letters A B X Y, Nintendo / Thor letters B A Y X, PlayStation shapes ✕ ○ □ △, all by
+position); `prompts.c` builds port CLUT rows 9..12 from them at start-up (shadow = disc 30 % toward black, soft edge =
+disc 35 % toward the letter) and draws the custom glyphs like the Thor ones (same letters, placement, `letter_fx`), in
+the message boxes and the menu icons. Launchers: Android *Opciones → Controles → Personalizar botones…*: a page with
+*Partir de* (presets: Thor negro / blanco / arcoíris, Xbox, Nintendo, PlayStation, GameCube, SNES (América), SNES PAL /
+Super Famicom, Famicom, Pastel), *Símbolos*, one row per button and disc / letter (left / right step through a
+24-swatch palette; A or a tap opens an editor with R G B and H S V rows and the swatch grid, touch or pad) and a live
+preview drawn with the game's algorithm (`pcGlyph`, a Java copy of it, at integer scale); any change sets *Iconos de
+botones* to *Personalizado* (appended to `PROMPTS`) and the launcher passes `--prompt-colors`. Android maps the pad by
+labels for `custom` when the pad itself is a Thor / Nintendo one. PC launcher: *Personalizado* in the prompt styles and
+a *Personalizar botones…* dialog (presets, symbols, `tkinter.colorchooser` per disc / letter, a preview canvas;
+`tools/prompt_custom.py` holds the presets and the same glyph algorithm, checked pixel-exact against a game frame). The
+named styles are unchanged.
+
 *Letter rendering (Xbox, Nintendo, Thor; message glyphs and menu icons alike).* The 6 x 8 letters keep their place
 and get a 1 px drop shadow down-right (a disc pixel at +1,+1 of a letter pixel: the fill 30 % toward black) and a soft
 edge (disc pixels still equal to the fill and 4-adjacent to the letter: the fill 35 % toward the letter colour: white
 on Thor, the letter's own colour on the dark Xbox / Nintendo disc), letters on top (`letter_fx`). The extra colours
-come from **several port CLUT rows**: `PORT_CLUT_ROWS` = 9 rows of 16 in `port_prompt_clut`, CLUT id `0xFFFF - row`
+come from **several port CLUT rows**: `PORT_CLUT_ROWS` = 13 rows of 16 in `port_prompt_clut`, CLUT id `0xFFFF - row`
 (row 0 the original table: generic / PlayStation fallback shapes; 1 Xbox; 2 Nintendo and every shoulder label; 3..6
-Thor one per button: disc, shadow, soft edge, white; 7 Thor with black buttons, 8 Thor with white buttons). `gpu.c` maps such an id to `GpuTex.cy = PORT_CLUT_Y`,
-`cx = 16 * row`; the soft texel fetch reads `port_prompt_clut[cx + i]`, the GL shader's `pclut(tp.x + idx)` has all 144
-entries compiled in. The message glyph cache slots and the patched menu rects remember their row.
+Thor one per button: disc, shadow, soft edge, white; 7 Thor with black buttons, 8 Thor with white buttons, 9..12 custom, filled at start-up). `gpu.c` maps such an id to `GpuTex.cy = PORT_CLUT_Y`,
+`cx = 16 * row`; the soft texel fetch reads `port_prompt_clut[cx + i]`, the GL shader's `pclut(tp.x + idx)` has all 208
+entries compiled in (the shader is built after the arguments are read, so the custom rows are in it). The message glyph cache slots and the patched menu rects remember their row.
 
 *Menu icons (title, options, button config, adjust screen, save / load).* Outside the message boxes the game draws its
 button icons as sprites from texture pages it uploads with `LoadImage`: the title's "PRESS START or ✕ BUTTON" (page

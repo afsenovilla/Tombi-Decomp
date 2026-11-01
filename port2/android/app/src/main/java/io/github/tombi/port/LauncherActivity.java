@@ -47,7 +47,7 @@ public class LauncherActivity extends Activity {
     static final int[] LANG_N = {0, 5, 6, 7, 8};
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
-    static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor", "thor-black", "thor-white"};   // button icons (--prompts); new ones appended: stored indices keep their meaning
+    static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor", "thor-black", "thor-white", "custom"};   // button icons (--prompts); new ones appended: stored indices keep their meaning; custom last (pcSet)
     static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
@@ -154,6 +154,106 @@ public class LauncherActivity extends Activity {
         } catch (Throwable ignored) { }
     }
     int promptIdx() { return clamp(prefs.getInt("prompts", 0), PROMPTS.length); }
+
+    // ---- custom button icons: --prompts custom --prompt-colors (shims/prompts.c; tools/prompt_custom.py is the PC copy) ----
+    /* per position (south, east, west, north = a b x y) a disc and a letter colour: pc_c<2*pos> / pc_c<2*pos+1>;
+       pc_sym: the symbols (Xbox letters, Nintendo / Thor letters, PlayStation shapes) */
+    static final String[] PC_SYMS = {"xbox", "nintendo", "ps"};
+    static final int[] PC_PRESET_SYM = {1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0};   // names: R.array.pc_presets
+    static final int[][] PC_PRESET_COLS = {
+        {0x181818, 0xFFFFFF, 0x181818, 0xFFFFFF, 0x181818, 0xFFFFFF, 0x181818, 0xFFFFFF},   // Thor negro
+        {0xECECE8, 0x828282, 0xECECE8, 0x828282, 0xECECE8, 0x828282, 0xECECE8, 0x828282},   // Thor blanco
+        {0xF2C230, 0xFFFFFF, 0xC8281E, 0xFFFFFF, 0x2E8B4E, 0xFFFFFF, 0x1E3FB0, 0xFFFFFF},   // Thor arcoíris
+        {0x292929, 0x3CB043, 0x292929, 0xE03C31, 0x292929, 0x2F6FD6, 0x292929, 0xF5C518},   // Xbox
+        {0x292929, 0xFFEFDE, 0x292929, 0xFFEFDE, 0x292929, 0xFFEFDE, 0x292929, 0xFFEFDE},   // Nintendo
+        {0x292929, 0x6B94FF, 0x292929, 0xFF5A52, 0x292929, 0xFF8484, 0x292929, 0x00FF00},   // PlayStation
+        {0x1FAE4B, 0xFFFFFF, 0xD8D8D8, 0x404040, 0xE03C31, 0xFFFFFF, 0xD8D8D8, 0x404040},   // GameCube
+        {0x5B3F9E, 0xFFFFFF, 0x5B3F9E, 0xFFFFFF, 0xB8A8E0, 0x3A2A6E, 0xB8A8E0, 0x3A2A6E},   // SNES (US)
+        {0xF0C020, 0x5A4000, 0xD0302A, 0xFFE0D8, 0x3A9A50, 0xE0FFE0, 0x3050C0, 0xE0E8FF},   // SNES PAL / Super Famicom
+        {0xB02828, 0xFFFFFF, 0xB02828, 0xFFFFFF, 0xD8C8A0, 0x7A1E1E, 0xD8C8A0, 0x7A1E1E},   // Famicom
+        {0xA8E6CF, 0x3A3A3A, 0xFFB7B2, 0x3A3A3A, 0xC7CEEA, 0x3A3A3A, 0xFFDAC1, 0x3A3A3A},   // Pastel
+    };
+    static final int[] PC_PALETTE = {0x000000, 0x181818, 0x404040, 0x828282, 0xC8C8C8, 0xFFFFFF, 0xFFEFDE, 0xC8281E,
+        0x7A1E1E, 0xF08030, 0xF5C518, 0xF2C230, 0x8CD040, 0x3CB043, 0x2E8B4E, 0x20A0A0, 0x40C8F0, 0x2F6FD6, 0x1E3FB0,
+        0x5B3F9E, 0xB8A8E0, 0xFF8484, 0xE040A0, 0x8B5A2B};
+    int pcCol(int i) { return prefs.getInt("pc_c" + i, PC_PRESET_COLS[0][i]) & 0xFFFFFF; }
+    int pcSym() { return clamp(prefs.getInt("pc_sym", 1), PC_SYMS.length); }
+    int pcPreset() { return clamp(prefs.getInt("pc_preset", 0), PC_PRESET_COLS.length); }
+    /* any change here selects the custom style ("Iconos de botones" = Personalizado) */
+    void pcSet(int i, int rgb) { prefs.edit().putInt("pc_c" + i, rgb & 0xFFFFFF).putInt("prompts", PROMPTS.length - 1).apply(); }
+    void pcSetSym(int s) { prefs.edit().putInt("pc_sym", s).putInt("prompts", PROMPTS.length - 1).apply(); }
+    void pcApplyPreset(int n) {
+        SharedPreferences.Editor e = prefs.edit().putInt("pc_preset", n).putInt("pc_sym", PC_PRESET_SYM[n]).putInt("prompts", PROMPTS.length - 1);
+        for (int i = 0; i < 8; i++) e.putInt("pc_c" + i, PC_PRESET_COLS[n][i]);
+        e.apply();
+    }
+    String pcArg() {
+        StringBuilder b = new StringBuilder();
+        for (int pos = 0; pos < 4; pos++)
+            b.append("abxy".charAt(pos)).append('=').append(String.format(java.util.Locale.ROOT, "%06X:%06X", pcCol(2 * pos), pcCol(2 * pos + 1))).append(',');
+        return b.append("sym=").append(PC_SYMS[pcSym()]).toString();
+    }
+    static final String[] PC_DISC = {"...BCDDCB...", ".EC666666CE.", ".C66666666C.", "B6666666666B", "C6666666666C", "D6666666666D",
+        "D6666666666D", "C6666666666C", "B6666666666B", ".C66666666C.", ".EC666666CE.", "...BCDDCB..."};
+    static final int[][] PC_FONT6 = {{0x0C, 0x12, 0x21, 0x21, 0x3F, 0x21, 0x21, 0x21}, {0x3E, 0x21, 0x21, 0x3E, 0x21, 0x21, 0x21, 0x3E},
+        {0x21, 0x33, 0x1E, 0x0C, 0x0C, 0x1E, 0x33, 0x21}, {0x21, 0x33, 0x1E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C}};   // A B X Y
+    static int pcMix(int a, int b, int t) {
+        int o = 0;
+        for (int k = 0; k < 24; k += 8) { int x = a >> k & 255, y = b >> k & 255; o |= (x + (y - x) * t / 100) << k; }
+        return o;
+    }
+    static int pcQ(int c) {   // 5 bits per channel, expanded as the port GPU does
+        int o = 0;
+        for (int k = 0; k < 24; k += 8) { int v = c >> k & 255; o |= ((v & 248) | (v >> 5)) << k; }
+        return 0xFF000000 | o;
+    }
+    /** the 12 x 16 glyph of position pos as the game draws it (prompts.c draw(), PROMPT_CUSTOM): ARGB, 0 = transparent */
+    static int[] pcGlyph(int pos, int sym, int disc, int letter) {
+        char[] k = new char[16 * 12];   // '.', 'F' fill, 'S' shadow, 'Z' soft edge, or a rim letter B C D E
+        boolean[] m = new boolean[16 * 12];
+        java.util.Arrays.fill(k, '.');
+        for (int y = 0; y < 12; y++) for (int x = 0; x < 12; x++) { char c = PC_DISC[y].charAt(x); k[(y + 2) * 12 + x] = c == '6' ? 'F' : c; }
+        if (sym == 2) {
+            if (pos == 0) for (int i = 0; i < 6; i++) { m[(5 + i) * 12 + 3 + i] = true; m[(5 + i) * 12 + 8 - i] = true; }
+            else if (pos == 1) { int[] ring = {0x3C, 0x42, 0x81, 0x81, 0x81, 0x81, 0x42, 0x3C};
+                for (int y = 0; y < 8; y++) for (int x = 0; x < 8; x++) if ((ring[y] >> (7 - x) & 1) != 0) m[(4 + y) * 12 + 2 + x] = true; }
+            else if (pos == 2) for (int i = 0; i < 6; i++) { m[5 * 12 + 3 + i] = m[10 * 12 + 3 + i] = m[(5 + i) * 12 + 3] = m[(5 + i) * 12 + 8] = true; }
+            else { for (int y = 0; y <= 6; y++) { m[(4 + y) * 12 + 5 - y / 2] = true; m[(4 + y) * 12 + 6 + y / 2] = true; }
+                for (int x = 2; x <= 9; x++) m[10 * 12 + x] = true; }
+        } else {
+            String order = sym == 0 ? "ABXY" : "BAYX";
+            int ch = "ABXY".indexOf(order.charAt(pos));
+            for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if ((PC_FONT6[ch][y] >> (5 - x) & 1) != 0) m[(4 + y) * 12 + 3 + x] = true;
+        }
+        for (int y = 14; y >= 0; y--) for (int x = 10; x >= 0; x--)
+            if (m[y * 12 + x] && !m[(y + 1) * 12 + x + 1] && k[(y + 1) * 12 + x + 1] == 'F') k[(y + 1) * 12 + x + 1] = 'S';
+        for (int y = 0; y < 16; y++) for (int x = 0; x < 12; x++) {
+            if (k[y * 12 + x] != 'F' || m[y * 12 + x]) continue;
+            if ((x > 0 && m[y * 12 + x - 1]) || (x < 11 && m[y * 12 + x + 1]) || (y > 0 && m[(y - 1) * 12 + x]) || (y < 15 && m[(y + 1) * 12 + x]))
+                k[y * 12 + x] = 'Z';
+        }
+        int[] out = new int[16 * 12];
+        for (int y = 0; y < 15; y++) for (int x = 0; x < 12; x++) {   // 1 px lower (rows 3..14)
+            int i = y * 12 + x, c;
+            if (m[i]) c = pcQ(letter);
+            else switch (k[i]) {
+                case 'F': c = pcQ(disc); break;
+                case 'S': c = pcQ(pcMix(disc, 0, 30)); break;
+                case 'Z': c = pcQ(pcMix(disc, letter, 35)); break;
+                case 'B': c = 0xFFCEC6A5; break; case 'C': c = 0xFFA59C8C; break; case 'D': c = 0xFF8C8473; break;
+                case 'E': c = 0xFFFFEFDE; break;
+                default: c = 0;
+            }
+            out[i + 12] = c;
+        }
+        return out;
+    }
+    static int pcHsv(int rgb, int dh, int ds, int dv) {
+        float[] h = new float[3];
+        Color.colorToHSV(0xFF000000 | rgb, h);
+        h[0] = (h[0] + dh + 360) % 360; h[1] = Math.max(0, Math.min(1, h[1] + ds / 100f)); h[2] = Math.max(0, Math.min(1, h[2] + dv / 100f));
+        return Color.HSVToColor(h) & 0xFFFFFF;
+    }
     boolean flag(String k, boolean def) { return prefs.getBoolean(k, def); }
     /* second screen panel (runtime/panel.c, TombiActivity): default on when the device has a secondary display */
     boolean hasSecondDisplay() {
@@ -229,6 +329,7 @@ public class LauncherActivity extends Activity {
         if (flag("dualshock", false)) a.add("--dualshock");
         a.add("--rumble"); a.add(String.valueOf(RUMBLE[rumbleIdx()]));   // runtime/sdl.c: vibration intensity
         a.add("--prompts"); a.add(PROMPTS[promptIdx()]);
+        if ("custom".equals(PROMPTS[promptIdx()])) { a.add("--prompt-colors"); a.add(pcArg()); }
         if (flag("skipintro", false)) a.add("--skip-intro");
         if (flag("hz60", false)) { a.add("--hz"); a.add("60"); }
         if (flag("fps60", false)) a.add("--fps60");
@@ -539,17 +640,23 @@ public class LauncherActivity extends Activity {
         String label; String value; String sub; RectF r = new RectF(); boolean primary;   // sub: category summary
         Runnable act; Adjust adj;
         int check = -1;   // on/off option: 0/1, drawn as a tick box instead of a value
+        int swatch = -1;  // a colour row (custom buttons): its RGB, drawn as a swatch next to the value
+        boolean actFirst; // A / tap runs act (open the editor); left / right still adjust
         Item(String l, Runnable a) { label = l; act = a; }
     }
     interface Adjust { void by(int d); }
 
     class LauncherView extends View {
-        static final int MAIN = 0, OPTIONS = 1, DISC = 2, CRASH = 3, LOG = 4, PADMAP = 5, OPTCAT = 6;
+        static final int MAIN = 0, OPTIONS = 1, DISC = 2, CRASH = 3, LOG = 4, PADMAP = 5, OPTCAT = 6, CUSTOM = 7, COLOR = 8;
+        /* CUSTOM: "Customise buttons" (custom style): preset, symbols, 8 colour rows, live preview; COLOR: one colour
+         *  (pcEdit = 2 * position + 0 disc / 1 letter): R G B, H S V, a palette of swatches */
+        int pcEdit;
+        final RectF[] pcSw = new RectF[PC_PALETTE.length];
         /* Options = a list of categories; OPTCAT = the page of category `cat` (CAT_GAME..CAT_DEBUG).
          *  discFromOptions = the Disc screen was opened from an Options page (B/Back return there) */
         static final int CAT_GAME = 0, CAT_GFX = 1, CAT_DUAL = 2, CAT_PAD = 3, CAT_DATA = 4, CAT_DEBUG = 5;
         int screen = MAIN, focus = 0, cat = CAT_GAME;
-        int[] lastFocus = new int[7];
+        int[] lastFocus = new int[9];
         /* Scrolling list (only the pad-mapping list overflows now; the 1280x720 canvas is scaled to fit any screen,
          *  so Options needs none): listScroll/listMax in canvas units. Keys keep the focused row visible
          *  (followFocus); a drag moves the list, with fling from the release velocity; a touch that moved less than
@@ -693,6 +800,7 @@ public class LauncherActivity extends Activity {
                     pr.value = getResources().getStringArray(R.array.prompt_names)[promptIdx()];
                     pr.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("prompts", (promptIdx() + d + PROMPTS.length) % PROMPTS.length).apply(); } };
                     items.add(pr);
+                    items.add(new Item(getString(R.string.pc_open), new Runnable() { public void run() { setScreen(CUSTOM); } }));
                 } else if (cat == CAT_DATA) {
                     items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
                     items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
@@ -718,6 +826,10 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.pad_reset), new Runnable() { public void run() {
                     prefs.edit().remove("padmap").apply(); padStatus = getString(R.string.pad_reset_done); } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTCAT); } }));
+            } else if (screen == CUSTOM) {
+                buildCustom();
+            } else if (screen == COLOR) {
+                buildColor();
             } else if (screen == CRASH || screen == LOG) {
                 items.add(new Item(getString(R.string.log_copy), new Runnable() { public void run() { copyReport(); } }));
                 items.add(new Item(getString(R.string.log_share), new Runnable() { public void run() { shareReport(); } }));
@@ -738,6 +850,67 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(discFromOptions ? OPTCAT : MAIN); } }));
             }
             if (focus >= items.size()) focus = 0;
+        }
+
+        void buildCustom() {
+            final String[] presets = getResources().getStringArray(R.array.pc_presets);
+            Item pr = new Item(getString(R.string.pc_preset), null);
+            pr.value = presets[pcPreset()];
+            pr.adj = new Adjust() { public void by(int d) { pcApplyPreset((pcPreset() + d + presets.length) % presets.length); } };
+            items.add(pr);
+            final String[] syms = getResources().getStringArray(R.array.pc_syms);
+            Item sy = new Item(getString(R.string.pc_sym), null);
+            sy.value = syms[pcSym()];
+            sy.adj = new Adjust() { public void by(int d) { pcSetSym((pcSym() + d + syms.length) % syms.length); } };
+            items.add(sy);
+            String[] pos = getResources().getStringArray(R.array.pc_pos);
+            for (int i = 0; i < 8; i++) {
+                final int idx = i;
+                Item c = new Item(pos[i / 2] + " · " + getString(i % 2 == 0 ? R.string.pc_disc : R.string.pc_letter),
+                        new Runnable() { public void run() { pcEdit = idx; setScreen(COLOR); focus = 0; } });
+                c.swatch = pcCol(i);
+                c.value = String.format(java.util.Locale.ROOT, "#%06X", c.swatch);
+                c.actFirst = true;
+                c.adj = new Adjust() { public void by(int d) {   // steps through the palette from the nearest swatch
+                    int cur = pcCol(idx), best = 0; long bd = Long.MAX_VALUE;
+                    for (int k = 0; k < PC_PALETTE.length; k++) {
+                        int q = PC_PALETTE[k]; long dd = 0;
+                        for (int s = 0; s < 24; s += 8) { long e = (cur >> s & 255) - (q >> s & 255); dd += e * e; }
+                        if (dd < bd) { bd = dd; best = k; }
+                    }
+                    int n = bd == 0 ? (best + d + PC_PALETTE.length) % PC_PALETTE.length : best;
+                    pcSet(idx, PC_PALETTE[n]); } };
+                items.add(c);
+            }
+            items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTCAT); } }));
+        }
+
+        void buildColor() {
+            final int idx = pcEdit;
+            final int c = pcCol(idx);
+            String[] names = getResources().getStringArray(R.array.pc_channels);   // R G B H S V
+            for (int ch = 0; ch < 6; ch++) {
+                final int k = ch;
+                Item it = new Item(names[ch], null);
+                if (ch < 3) it.value = String.valueOf(c >> (16 - 8 * ch) & 255);
+                else { float[] h = new float[3]; Color.colorToHSV(0xFF000000 | c, h);
+                    it.value = ch == 3 ? Math.round(h[0]) + "°" : Math.round(h[ch - 3] * 100) + " %"; }
+                it.adj = new Adjust() { public void by(int d) {
+                    int v = pcCol(idx);
+                    if (k < 3) { int sh = 16 - 8 * k, x = Math.max(0, Math.min(255, (v >> sh & 255) + d * 8)); v = (v & ~(255 << sh)) | x << sh; }
+                    else v = pcHsv(v, k == 3 ? d * 10 : 0, k == 4 ? d * 5 : 0, k == 5 ? d * 5 : 0);
+                    pcSet(idx, v); } };
+                items.add(it);
+            }
+            Item pal = new Item(getString(R.string.pc_palette), null);
+            pal.swatch = c;
+            pal.value = String.format(java.util.Locale.ROOT, "#%06X", c);
+            pal.adj = new Adjust() { public void by(int d) {
+                int cur = pcCol(idx), n = 0;
+                for (int k = 0; k < PC_PALETTE.length; k++) if (PC_PALETTE[k] == cur) n = (k + d + PC_PALETTE.length) % PC_PALETTE.length;
+                pcSet(idx, PC_PALETTE[n]); } };
+            items.add(pal);
+            items.add(new Item(getString(R.string.pc_done), new Runnable() { public void run() { setScreen(CUSTOM); } }));
         }
 
         /* leaving the crash card clears the markers (the log stays: Options > View last log) */
@@ -776,6 +949,7 @@ public class LauncherActivity extends Activity {
                     if (phase != IDLE) requestCancel();
                     else if (screen == CRASH || screen == LOG) closeLog();
                     else if (screen == MAIN) finish(); else if (screen == OPTCAT) setScreen(OPTIONS);
+                    else if (screen == CUSTOM) setScreen(OPTCAT); else if (screen == COLOR) setScreen(CUSTOM);
                     else setScreen(screen == PADMAP || (screen == DISC && discFromOptions) ? OPTCAT : MAIN);
                     break;
                 case KeyEvent.KEYCODE_BUTTON_START:
@@ -791,7 +965,8 @@ public class LauncherActivity extends Activity {
         }
 
         void activate(Item it) {
-            if (it.adj != null) it.adj.by(1);
+            if (it.actFirst && it.act != null) it.act.run();
+            else if (it.adj != null) it.adj.by(1);
             else if (it.act != null) it.act.run();
             invalidate();
         }
@@ -836,11 +1011,14 @@ public class LauncherActivity extends Activity {
                 vt.recycle(); vt = null;
                 if (wasDrag || act == MotionEvent.ACTION_CANCEL) return true;
             }
+            if (act == MotionEvent.ACTION_UP && screen == COLOR) {   // a palette swatch
+                for (int k = 0; k < pcSw.length; k++) if (pcSw[k] != null && pcSw[k].contains(x, y)) { pcSet(pcEdit, PC_PALETTE[k]); invalidate(); return true; }
+            }
             if (act == MotionEvent.ACTION_UP && hit >= 0 && hit == focus) {
                 build();
-                if (screen == OPTCAT && hit < items.size()) {   // value button: left half = previous, right half = next
+                if ((screen == OPTCAT || screen == CUSTOM || screen == COLOR) && hit < items.size()) {   // value button: left half = previous, right half = next
                     Item it = items.get(hit);
-                    if (it.adj != null && it.check < 0) { it.adj.by(x < it.r.centerX() ? -1 : 1); invalidate(); return true; }
+                    if (it.adj != null && it.check < 0 && !it.actFirst) { it.adj.by(x < it.r.centerX() ? -1 : 1); invalidate(); return true; }
                 }
                 if (hit < items.size()) activate(items.get(hit));
             }
@@ -896,6 +1074,7 @@ public class LauncherActivity extends Activity {
             if (screen == MAIN) drawMain();
             else if (screen == OPTIONS || screen == OPTCAT) drawOptions();
             else if (screen == PADMAP) drawPadMap();
+            else if (screen == CUSTOM || screen == COLOR) drawCustom();
             else if (screen == CRASH || screen == LOG) drawLog();
             else drawDisc();
             c.restore();
@@ -942,6 +1121,74 @@ public class LauncherActivity extends Activity {
             tri.moveTo(x + dir * 12, cy); tri.lineTo(x, cy - 8); tri.lineTo(x, cy + 8); tri.close();
             p.setStyle(Paint.Style.FILL);
             canvas.drawPath(tri, p);
+        }
+
+        /** the custom buttons pages: the rows on the left, the preview (drawn as the game draws it) on the right */
+        void drawCustom() {
+            bigTitle(getString(R.string.pc_title), 50, 66);
+            float top = 96, bottom = 640, rowH = Math.min(56, (bottom - top + 8) / Math.max(1, items.size())), bh = rowH - 8;
+            for (int i = 0; i < items.size(); i++) {
+                Item it = items.get(i);
+                boolean f = i == focus;
+                float y = top + i * rowH;
+                it.r.set(40, y, 700, y + bh);
+                pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 3, f);
+                int col = f ? ACCENT_TEXT : BG;
+                text(nunito, 19, col);
+                if (it.value == null) { canvas.drawText(it.label, it.r.centerX(), midBase(it.r), p); continue; }
+                p.setTextAlign(Paint.Align.LEFT);
+                canvas.drawText(it.label, it.r.left + 22, midBase(it.r), p);
+                p.setTextAlign(Paint.Align.RIGHT);
+                float vr = it.r.right - 44, cy = it.r.centerY();
+                canvas.drawText(it.value, vr, midBase(it.r), p);
+                float vl = vr - p.measureText(it.value);
+                if (it.swatch >= 0) {
+                    tmp.set(vl - 40, cy - 13, vl - 12, cy + 13);
+                    p.setColor(0xFF000000 | it.swatch); canvas.drawRoundRect(tmp, 6, 6, p);
+                    p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(2); p.setColor(col); canvas.drawRoundRect(tmp, 6, 6, p);
+                    p.setStyle(Paint.Style.FILL); vl -= 40;
+                }
+                p.setColor(col);
+                arrow(vr + 12, cy, 1);
+                arrow(vl - 12, cy, -1);
+            }
+            // preview panel
+            tmp.set(740, 100, 1240, 640);
+            p.setColor(CHIP); canvas.drawRoundRect(tmp, 24, 24, p);
+            Paint px = new Paint();   // nearest: one rect per glyph pixel
+            if (screen == CUSTOM) {
+                float sc = 8, gw = 12 * sc, gh = 16 * sc, cx = 990, cy = 330;
+                float[][] at = {{cx - gw / 2, cy + 40}, {cx + 70, cy - gh / 2}, {cx - 70 - gw, cy - gh / 2}, {cx - gw / 2, cy - 40 - gh}};
+                for (int pos = 0; pos < 4; pos++) glyphAt(px, pcGlyph(pos, pcSym(), pcCol(2 * pos), pcCol(2 * pos + 1)), at[pos][0], at[pos][1], sc);
+                text(nunito, 16, Color.WHITE);
+                canvas.drawText(getString(R.string.pc_preview), 990, 612, p);
+            } else {
+                int pos = pcEdit / 2;
+                glyphAt(px, pcGlyph(pos, pcSym(), pcCol(2 * pos), pcCol(2 * pos + 1)), 990 - 60, 120, 10);
+                float sw = 64, gap = 12, x0 = 990 - (6 * sw + 5 * gap) / 2, y0 = 300;
+                for (int k = 0; k < PC_PALETTE.length; k++) {
+                    if (pcSw[k] == null) pcSw[k] = new RectF();
+                    float x = x0 + (k % 6) * (sw + gap), y = y0 + (k / 6) * (sw + gap);
+                    pcSw[k].set(x, y, x + sw, y + sw);
+                    p.setColor(0xFF000000 | PC_PALETTE[k]); canvas.drawRoundRect(pcSw[k], 10, 10, p);
+                    if (PC_PALETTE[k] == pcCol(pcEdit)) {
+                        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(4); p.setColor(Color.WHITE);
+                        canvas.drawRoundRect(pcSw[k], 10, 10, p); p.setStyle(Paint.Style.FILL);
+                    }
+                }
+            }
+            tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB);
+            tp.setTextAlign(Paint.Align.LEFT);
+            wrapped(getString(R.string.pc_hint), 656);
+        }
+
+        void glyphAt(Paint px, int[] g, float x0, float y0, float sc) {
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 12; x++) {
+                int c = g[y * 12 + x];
+                if (c == 0) continue;
+                px.setColor(c);
+                canvas.drawRect(x0 + x * sc, y0 + y * sc, x0 + (x + 1) * sc, y0 + (y + 1) * sc, px);
+            }
         }
 
         void drawOptions() {

@@ -20,6 +20,7 @@ from i18n import tr
 if i18n.load_settings().get("language") not in i18n.LANGS:
     i18n.set_language("en", save=False)
 import port_mods as M
+import prompt_custom as PC
 import extract_data as X
 import data_patch as DP
 
@@ -519,11 +520,17 @@ i18n.add({
     "es": {"l.rumble": "Intensidad de vibración:", "rumble.off": "Apagada",
            "c.pad": "Mando", "l.dualshock": "Mando DualShock (analógico): stick izquierdo con velocidad y vibración",
            "l.prompts": "Iconos de botones en los textos:", "p.auto": "Auto (según el mando)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor (arcoíris)", "p.thorb": "AYN Thor (negro)", "p.thorw": "AYN Thor (blanco)", "p.gen": "Genérico"},
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor (arcoíris)", "p.thorb": "AYN Thor (negro)", "p.thorw": "AYN Thor (blanco)", "p.custom": "Personalizado", "b.custom": "Personalizar botones…",
+           "pc.title": "Personalizar botones", "pc.preset": "Partir de:", "pc.sym": "Símbolos:", "pc.disc": "Disco", "pc.letter": "Letra",
+           "pc.sym.xbox": "Letras Xbox", "pc.sym.nintendo": "Letras Nintendo / Thor", "pc.sym.ps": "Formas PlayStation",
+           "pc.pos": "Abajo (A Xbox)|Derecha (B Xbox)|Izquierda (X Xbox)|Arriba (Y Xbox)", "pc.ok": "Usar", "pc.cancel": "Cancelar", "p.gen": "Genérico"},
     "en": {"l.rumble": "Vibration intensity:", "rumble.off": "Off",
            "c.pad": "Controller", "l.dualshock": "DualShock controller (analog): left stick with speed, and rumble",
            "l.prompts": "Button icons in the texts:", "p.auto": "Auto (from the controller)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor (rainbow)", "p.thorb": "AYN Thor (black)", "p.thorw": "AYN Thor (white)", "p.gen": "Generic"},
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor (rainbow)", "p.thorb": "AYN Thor (black)", "p.thorw": "AYN Thor (white)", "p.custom": "Custom", "b.custom": "Customise buttons…",
+           "pc.title": "Customise buttons", "pc.preset": "Start from:", "pc.sym": "Symbols:", "pc.disc": "Disc", "pc.letter": "Letter",
+           "pc.sym.xbox": "Xbox letters", "pc.sym.nintendo": "Nintendo / Thor letters", "pc.sym.ps": "PlayStation shapes",
+           "pc.pos": "Bottom (Xbox A)|Right (Xbox B)|Left (Xbox X)|Top (Xbox Y)", "pc.ok": "Use", "pc.cancel": "Cancel", "p.gen": "Generic"},
 })
 
 RUMBLE_STEPS = [0, 25, 50, 75, 100, 125, 150, 200]   # --rumble choices, percent
@@ -968,6 +975,91 @@ class App:
         self.vars["patch_on"].set(False)
         self._sync_patch_choice()
 
+    def custom_buttons(self):
+        """the "Customise buttons" dialog: per position a disc and a letter colour, the symbols, presets, a preview
+        drawn as the game draws it (tools/prompt_custom.py = port2/shims/prompts.c)"""
+        from tkinter import colorchooser
+        cv_var = self.var("prompt_colors", tk.StringVar, PC.DEFAULT)
+        sym, cols = PC.from_arg(cv_var.get())
+        st = {"sym": sym, "cols": list(cols)}
+        d = tk.Toplevel(self.root)
+        d.title(tr("pc.title"))
+        d.transient(d.master)
+        top = ttk.Frame(d, padding=12)
+        top.pack(fill="both", expand=True)
+        es = tr("pc.ok") == "Usar"
+        pr = ttk.Frame(top)
+        pr.grid(row=0, column=0, columnspan=3, sticky="w")
+        ttk.Label(pr, text=tr("pc.preset")).pack(side="left")
+        pcb = ttk.Combobox(pr, state="readonly", width=26, values=[p[1] if es else p[2] for p in PC.PRESETS])
+        pcb.pack(side="left", padx=6)
+        sr = ttk.Frame(top)
+        sr.grid(row=1, column=0, columnspan=3, sticky="w", pady=(6, 6))
+        ttk.Label(sr, text=tr("pc.sym")).pack(side="left")
+        scb = ttk.Combobox(sr, state="readonly", width=24, values=[tr("pc.sym." + k) for k in PC.SYMS])
+        scb.pack(side="left", padx=6)
+        canvas = tk.Canvas(top, width=12 * 7 * 3 + 40, height=16 * 7 * 3 + 20, bg="#5a8a5a", highlightthickness=0)
+        canvas.grid(row=2, column=2, rowspan=4, padx=(16, 0))
+        swatches = []
+
+        def hexs(c):
+            return "#%06x" % c
+
+        def redraw():
+            canvas.delete("all")
+            k = 6
+            spots = [(1, 2), (2, 1), (0, 1), (1, 0)]   # south, east, west, north on a 3 x 3 grid
+            for i, (gx, gy) in enumerate(spots):
+                g = PC.glyph(i, st["sym"], *st["cols"][i])
+                ox, oy = 10 + gx * 12 * k * 1.15, 10 + gy * 16 * k * 0.85
+                for y, row in enumerate(g):
+                    for x, c in enumerate(row):
+                        if c:
+                            canvas.create_rectangle(ox + x * k, oy + y * k, ox + x * k + k, oy + y * k + k,
+                                                    fill="#%02x%02x%02x" % c, width=0)
+            for i, (bd, bl) in enumerate(swatches):
+                bd.configure(bg=hexs(st["cols"][i][0]), activebackground=hexs(st["cols"][i][0]))
+                bl.configure(bg=hexs(st["cols"][i][1]), activebackground=hexs(st["cols"][i][1]))
+            scb.current(PC.SYMS.index(st["sym"]))
+
+        def pick(i, j):
+            c = colorchooser.askcolor(hexs(st["cols"][i][j]), parent=d)
+            if c and c[1]:
+                v = int(c[1][1:], 16)
+                cur = list(st["cols"][i]); cur[j] = v; st["cols"][i] = tuple(cur)
+                redraw()
+        names = tr("pc.pos").split("|")
+        for i in range(4):
+            r = ttk.Frame(top)
+            r.grid(row=2 + i, column=0, sticky="w", pady=2)
+            ttk.Label(r, text=names[i], width=20).pack(side="left")
+            bd = tk.Button(r, text=tr("pc.disc"), width=7, command=lambda i=i: pick(i, 0))
+            bd.pack(side="left", padx=2)
+            bl = tk.Button(r, text=tr("pc.letter"), width=7, command=lambda i=i: pick(i, 1))
+            bl.pack(side="left", padx=2)
+            swatches.append((bd, bl))
+
+        def on_preset(e=None):
+            p = PC.PRESETS[pcb.current()]
+            st["sym"], st["cols"] = p[3], list(p[4])
+            redraw()
+
+        def on_sym(e=None):
+            st["sym"] = PC.SYMS[scb.current()]
+            redraw()
+        pcb.bind("<<ComboboxSelected>>", on_preset)
+        scb.bind("<<ComboboxSelected>>", on_sym)
+        br = ttk.Frame(top)
+        br.grid(row=6, column=0, columnspan=3, sticky="e", pady=(10, 0))
+
+        def ok():
+            cv_var.set(PC.to_arg(st["sym"], st["cols"]))
+            self.var("prompts_style", tk.StringVar, "auto").set("custom")
+            d.destroy()
+        ttk.Button(br, text=tr("pc.cancel"), command=d.destroy).pack(side="right")
+        ttk.Button(br, text=tr("pc.ok"), command=ok).pack(side="right", padx=6)
+        redraw()
+
     def _radios(self, parent, key, kind, default, items):
         v = self.var(key, kind, default)
         out = []
@@ -1026,7 +1118,8 @@ class App:
         cb.pack(side="left", padx=(6, 0))
         ttk.Label(c, text=tr("l.prompts")).pack(anchor="w", pady=(8, 2))
         self._radios(c, "prompts_style", tk.StringVar, "auto", [(tr("p.auto"), "auto"), (tr("p.ps"), "playstation"),
-                     (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.thorb"), "thor-black"), (tr("p.thorw"), "thor-white"), (tr("p.thor"), "thor"), (tr("p.gen"), "generic")])
+                     (tr("p.xbox"), "xbox"), (tr("p.nin"), "nintendo"), (tr("p.thorb"), "thor-black"), (tr("p.thorw"), "thor-white"), (tr("p.thor"), "thor"), (tr("p.gen"), "generic"), (tr("p.custom"), "custom")])
+        ttk.Button(c, text=tr("b.custom"), command=self.custom_buttons).pack(anchor="w", pady=(4, 0))
         o, c = self.card(f, tr("c.controls"))
         o.pack(fill="both", expand=True)
         top = ttk.Frame(c)
@@ -1845,8 +1938,10 @@ class App:
             rumble = 100
         if rumble != 100:
             cmd += ["--rumble", str(rumble)]
-        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "thor", "thor-black", "thor-white", "generic"):
+        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "thor", "thor-black", "thor-white", "generic", "custom"):
             cmd += ["--prompts", s["prompts_style"]]
+        if s.get("prompts_style") == "custom":
+            cmd += ["--prompt-colors", s.get("prompt_colors") or PC.DEFAULT]
         cmd += ["--launcher-exit"]     # QUIT entries in the title and pause menus end the game back to this window
         cmd += M.mod_args(s, app_dir())
         cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))

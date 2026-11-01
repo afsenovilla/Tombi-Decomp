@@ -980,9 +980,10 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--prompts") && v) {   /* shims/prompts.c */
             extern int port_prompt_option, port_prompt_style, port_prompt_parse_style(const char *);
             int st = port_prompt_parse_style(argv[++i]);
-            if (st < -1) port_printf("[port] --prompts: unknown style '%s' (auto playstation xbox nintendo thor thor-black thor-white generic)\n", argv[i]);
+            if (st < -1) port_printf("[port] --prompts: unknown style '%s' (auto playstation xbox nintendo thor thor-black thor-white custom generic)\n", argv[i]);
             else { port_prompt_option = st; if (st >= 0) port_prompt_style = st; }
         }
+        else if (!strcmp(a, "--prompt-colors") && v) { extern void port_prompt_colors(const char *); port_prompt_colors(argv[++i]); }
         else if (!strcmp(a, "--prompt-map") && v) { extern void port_prompt_map(const char *); port_prompt_map(argv[++i]); }
         else if (!strcmp(a, "--dualshock")) { extern int port_dualshock; port_dualshock = 1; }   /* shims/pad.c */
         else if (!strcmp(a, "--rumble") && v) {   /* runtime/sdl.c: vibration intensity, 0..200 % */

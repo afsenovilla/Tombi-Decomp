@@ -26,17 +26,18 @@
  * drawMessageGlyphs.c PORT2 blocks), which the port GPU (gpu.c texel fetch, gpu_gl.c fragment shader) reads from this
  * table instead of VRAM.  No game VRAM is used: 0xFFFF is not a value GetClut can return (bit 15 set). */
 #include <string.h>
+#include <stdlib.h>
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
-enum { PROMPT_AUTO = -1, PROMPT_PS = 0, PROMPT_XBOX = 1, PROMPT_NINTENDO = 2, PROMPT_GENERIC = 3, PROMPT_THOR = 4, PROMPT_THOR_BLACK = 5, PROMPT_THOR_WHITE = 6 };
+enum { PROMPT_AUTO = -1, PROMPT_PS = 0, PROMPT_XBOX = 1, PROMPT_NINTENDO = 2, PROMPT_GENERIC = 3, PROMPT_THOR = 4, PROMPT_THOR_BLACK = 5, PROMPT_THOR_WHITE = 6, PROMPT_CUSTOM = 7 };
 /* Thor positions and labels: the AYN Thor's three button variants: SNES-coloured ("rainbow"), black, white */
 #define THORISH(st) ((st) == PROMPT_THOR || (st) == PROMPT_THOR_BLACK || (st) == PROMPT_THOR_WHITE)
 #define THOR_ROW_OF(st, src) ((st) == PROMPT_THOR_BLACK ? ROW_THOR_BLACK : (st) == PROMPT_THOR_WHITE ? ROW_THOR_WHITE : ROW_THOR + (src))
 enum { PS_CROSS, PS_CIRCLE, PS_SQUARE, PS_TRIANGLE };
 enum { SRC_SOUTH, SRC_EAST, SRC_WEST, SRC_NORTH, SRC_L1, SRC_R1, SRC_L2, SRC_R2, SRC_NONE };
 
-int port_prompt_option = PROMPT_AUTO;   /* --prompts auto|playstation|xbox|nintendo|generic|thor|thor-black|thor-white */
+int port_prompt_option = PROMPT_AUTO;   /* --prompts auto|playstation|xbox|nintendo|generic|thor|thor-black|thor-white|custom */
 int port_prompt_style = PROMPT_PS;      /* the style in use (auto: runtime/sdl.c sets it from the controller type) */
 /* the physical source of each PS1 face button; the default mapping (SDL / Android A = Cross, B = Circle, ...) */
 int port_prompt_src[4] = { SRC_SOUTH, SRC_EAST, SRC_WEST, SRC_NORTH };
@@ -52,6 +53,7 @@ int port_prompt_parse_style(const char *s) {
     if (!strcmp(s, "generic")) return PROMPT_GENERIC;
     if (!strcmp(s, "thor") || !strcmp(s, "retroid") || !strcmp(s, "thor-rainbow") || !strcmp(s, "thor_rainbow")) return PROMPT_THOR;
     if (!strcmp(s, "thor-white") || !strcmp(s, "thor_white")) return PROMPT_THOR_WHITE;
+    if (!strcmp(s, "custom")) return PROMPT_CUSTOM;
     if (!strcmp(s, "thor-black") || !strcmp(s, "thor_black")) return PROMPT_THOR_BLACK;
     return -2;
 }
@@ -75,6 +77,55 @@ void port_prompt_map(const char *s) {
         s = *end ? end + 1 : end;
     }
     port_prompt_map_fixed = 1;
+}
+
+/* --prompts custom: --prompt-colors a=RRGGBB:RRGGBB,b=...,x=...,y=...,sym=xbox|nintendo|ps.  a b x y are the face
+   buttons by POSITION as in --prompt-map (a south, b east, x west, y north), each disc:letter colour; sym the symbols
+   drawn (Xbox letters A B X Y, Nintendo / Thor letters B A Y X, PlayStation shapes ✕ ○ □ △, by position).  The shadow
+   (the disc 30 % toward black) and the soft edge (the disc 35 % toward the letter) are computed here. */
+enum { SYM_XBOX, SYM_NINTENDO, SYM_PS };
+static int custom_sym = SYM_NINTENDO;
+extern u16 port_prompt_clut[];
+static u16 bgr_of(u32 rgb) { return (u16)((rgb >> 19 & 31) | (rgb >> 11 & 31) << 5 | (rgb >> 3 & 31) << 10); }
+static u32 mix_rgb(u32 a, u32 b, int t) {
+    u32 o = 0;
+    for (int k = 0; k < 24; k += 8) { int x = a >> k & 255, y = b >> k & 255; o |= (u32)(x + (y - x) * t / 100) << k; }
+    return o;
+}
+static void custom_row(int pos, u32 disc, u32 letter) {
+    u16 *r = port_prompt_clut + (9 + pos) * 16;   /* ROW_CUSTOM + pos */
+    for (int i = 0; i < 16; i++) r[i] = port_prompt_clut[3 * 16 + i];   /* the shared entries of a Thor row */
+    r[7] = bgr_of(disc); r[8] = bgr_of(mix_rgb(disc, 0, 30)); r[9] = bgr_of(mix_rgb(disc, letter, 35)); r[15] = bgr_of(letter);
+    if (!r[7]) r[7] = 0x8000; if (!r[8]) r[8] = 0x8000; if (!r[9]) r[9] = 0x8000; if (!r[15]) r[15] = 0x8000;   /* black, not transparent */
+}
+static void custom_defaults(void);
+void port_prompt_colors(const char *s) {
+    static const char *pos = "abxy";
+    custom_defaults();   /* buttons not named keep the default */
+    while (*s) {
+        const char *end = strchr(s, ','), *eq = strchr(s, '=');
+        if (!end) end = s + strlen(s);
+        if (eq && eq < end) {
+            if (eq - s == 3 && !strncmp(s, "sym", 3)) {
+                custom_sym = !strncmp(eq + 1, "xbox", 4) ? SYM_XBOX : !strncmp(eq + 1, "ps", 2) ? SYM_PS : SYM_NINTENDO;
+            } else if (eq - s == 1 && strchr(pos, *s)) {
+                unsigned d = 0, l = 0xFFFFFF;
+                char buf[32]; int n = (int)(end - eq - 1) < 31 ? (int)(end - eq - 1) : 31;
+                memcpy(buf, eq + 1, n); buf[n] = 0;
+                char *c = strchr(buf, ':');
+                d = (unsigned)strtoul(buf, 0, 16);
+                if (c) l = (unsigned)strtoul(c + 1, 0, 16);
+                custom_row((int)(strchr(pos, *s) - pos), d, l);
+            }
+        }
+        s = *end ? end + 1 : end;
+    }
+}
+static void custom_defaults(void) {   /* before any --prompt-colors: black discs, white letters */
+    static int done;
+    if (done) return;
+    done = 1;
+    for (int i = 0; i < 4; i++) custom_row(i, 0x181818, 0xFFFFFF);
 }
 
 /* ---- drawing: a 12 x 16 index image ---- */
@@ -102,8 +153,10 @@ enum { P_XGREEN = 1, P_XRED = 2, P_XBLUE = 4, P_XYELLOW = 5, P_NBLUE = 7, P_NGRE
      rows 3..6: Thor, one per button (south B yellow, east A red, west Y green, north X blue): 7 the disc, 8 its shadow,
      9 its soft edge, 15 the white letter;
      row 7: Thor with black buttons (thor-black): the same layout, a near-black disc;
-     row 8: Thor with white buttons (thor-white): an off-white disc, 15 = the mid-grey letter, soft edge toward it. */
-#define PORT_CLUT_ROWS 9   /* = gpu_backend.h */
+     row 8: Thor with white buttons (thor-white): an off-white disc, 15 = the mid-grey letter, soft edge toward it;
+     rows 9..12: custom (--prompts custom), one per position (south, east, west, north), the Thor layout built at run
+     time from --prompt-colors. */
+#define PORT_CLUT_ROWS 13   /* = gpu_backend.h */
 #define MX(a, b, t) ((a) + ((b) - (a)) * (t) / 100)
 #define MIX(r, g, b, r2, g2, b2, t) BGR(MX(r, r2, t), MX(g, g2, t), MX(b, b2, t))
 #define RGB_(...) BGR(__VA_ARGS__)   /* the colour macros below hold commas: expand them first */
@@ -119,7 +172,7 @@ enum { P_XGREEN = 1, P_XRED = 2, P_XBLUE = 4, P_XYELLOW = 5, P_NBLUE = 7, P_NGRE
 #define THOR_ROWL(r, g, b, lr, lg, lb) 0, 0, 0, RGB_(107, 107, 107), 0, 0, RGB_(DISC), RGB_(r, g, b), MIX_(r, g, b, 0, 0, 0, 30), \
     MIX_(r, g, b, lr, lg, lb, 35), 0, KHAKI, CREAM, RGB_(lr, lg, lb)
 #define THOR_ROW(r, g, b) THOR_ROWL(r, g, b, 255, 255, 255)
-const u16 port_prompt_clut[PORT_CLUT_ROWS * 16] = {
+u16 port_prompt_clut[PORT_CLUT_ROWS * 16] = {   /* rows 9..12 (custom) are filled by --prompt-colors */
     0, RGB_(XG), RGB_(XR), RGB_(107, 107, 107), RGB_(XB), RGB_(XY),
     RGB_(DISC), RGB_(0x1E, 0x3F, 0xB0), RGB_(0x2E, 0x8B, 0x4E), RGB_(0xF2, 0xC2, 0x30), RGB_(0xC8, 0x28, 0x1E),
     KHAKI, CREAM, RGB_(255, 255, 255),
@@ -136,7 +189,7 @@ const u16 port_prompt_clut[PORT_CLUT_ROWS * 16] = {
     /* 8 Thor with white buttons: an off-white disc, mid-grey letters (index 15 holds the letter colour) */
     THOR_ROWL(236, 236, 232, 130, 130, 130),
 };
-enum { ROW_XBOX = 1, ROW_NINTENDO = 2, ROW_THOR = 3, ROW_THOR_BLACK = 7, ROW_THOR_WHITE = 8 };
+enum { ROW_XBOX = 1, ROW_NINTENDO = 2, ROW_THOR = 3, ROW_THOR_BLACK = 7, ROW_THOR_WHITE = 8, ROW_CUSTOM = 9 };
 #define PORT_CLUT_ID 0xFFFF
 /* the letter effects: letter pixels carry 0x80 | colour; the shadow, then the soft edge (pixels still == fill), then the
    letters (soft_of[colour] = the soft edge index next to a letter of that colour) */
@@ -205,22 +258,27 @@ static void label(const char *s, int c) {
     else { letter3(s[0], 2, 6, c); letter3(s[1], 7, 6, c); }
 }
 /* the PlayStation symbols, in the game's colours */
-static void ps_symbol(int which) {
+static void ps_symbol_c(int which, int col);
+static void ps_symbol(int which) { ps_symbol_c(which, -1); }
+/* col >= 0: every shape in that colour (the custom style) */
+static void ps_symbol_c(int which, int col) {
     int x, y;
+    #define PC(c) (col >= 0 ? col : (c))
     switch (which) {
-    case PS_CROSS:  for (int i = 0; i < 6; i++) { put(3 + i, 5 + i, C_BLUE); put(8 - i, 5 + i, C_BLUE); } break;
+    case PS_CROSS:  for (int i = 0; i < 6; i++) { put(3 + i, 5 + i, PC(C_BLUE)); put(8 - i, 5 + i, PC(C_BLUE)); } break;
     case PS_CIRCLE:
         {   /* fallback only (the game's own circle is used once met): a clean 8 x 8 ring */
             static const u8 ring[8] = { 0x3C, 0x42, 0x81, 0x81, 0x81, 0x81, 0x42, 0x3C };
-            for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) if (ring[y] >> (7 - x) & 1) put(2 + x, 4 + y, C_RED);
+            for (y = 0; y < 8; y++) for (x = 0; x < 8; x++) if (ring[y] >> (7 - x) & 1) put(2 + x, 4 + y, PC(C_RED));
         }
         break;
-    case PS_SQUARE: for (int i = 0; i < 6; i++) { put(3 + i, 5, C_PINK); put(3 + i, 10, C_PINK); put(3, 5 + i, C_PINK); put(8, 5 + i, C_PINK); } break;
+    case PS_SQUARE: for (int i = 0; i < 6; i++) { put(3 + i, 5, PC(C_PINK)); put(3 + i, 10, PC(C_PINK)); put(3, 5 + i, PC(C_PINK)); put(8, 5 + i, PC(C_PINK)); } break;
     case PS_TRIANGLE:
-        for (y = 0; y <= 6; y++) { int l = 5 - y / 2, r = 6 + y / 2; put(l, 4 + y, C_GREEN); put(r, 4 + y, C_GREEN); }
-        for (x = 2; x <= 9; x++) put(x, 10, C_GREEN);
+        for (y = 0; y <= 6; y++) { int l = 5 - y / 2, r = 6 + y / 2; put(l, 4 + y, PC(C_GREEN)); put(r, 4 + y, PC(C_GREEN)); }
+        for (x = 2; x <= 9; x++) put(x, 10, PC(C_GREEN));
         break;
     }
+    #undef PC
 }
 /* generic: four dots in a diamond, the button's position lit */
 static void diamond(int pos) {
@@ -239,7 +297,7 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
     draw_disc();
     if (src == SRC_NONE) return 0;
     if (src >= SRC_L1) {
-        const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || THORISH(style) ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
+        const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || THORISH(style) || style == PROMPT_CUSTOM ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
         if (style == PROMPT_PS || style == PROMPT_GENERIC) { label(t, C_CREAM); return 0; }
         label(t, C_CREAM | 0x80);
         letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_cream);
@@ -267,6 +325,14 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
         label(t, C_CREAM | 0x80);
         letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_cream);
         return 1 + ROW_NINTENDO; }
+    case PROMPT_CUSTOM: {   /* the user's colours (row ROW_CUSTOM + position), the chosen symbols */
+        static const u8 soft_c[16] = { [P_WHITE] = 9 };
+        custom_defaults();
+        draw_disc_col(7);
+        if (custom_sym == SYM_PS) ps_symbol_c(src, P_WHITE | 0x80);
+        else { char t[2] = { (custom_sym == SYM_XBOX ? "ABXY" : "BAYX")[src], 0 }; label(t, P_WHITE | 0x80); }
+        letter_fx(&img[0][0], GW, GW, GH, 7, 8, soft_c);
+        return 1 + ROW_CUSTOM + src; }
     default: diamond(src); break;
     }
     (void)ps;
@@ -371,7 +437,8 @@ static int mi_draw(int i, int w, int h) {
     int d = x1 - x0 + 1 < y1 - y0 + 1 ? x1 - x0 + 1 : y1 - y0 + 1;
     int cx2 = x0 + x1 + 1, cy2 = y0 + y1 + 1;            /* centre * 2 */
     int fill = C_DISC;
-    if (THORISH(st) && src < 4) fill = 7;               /* THOR_ROW_OF */
+    if ((THORISH(st) || st == PROMPT_CUSTOM) && src < 4) fill = 7;   /* THOR_ROW_OF / ROW_CUSTOM + src */
+    if (st == PROMPT_CUSTOM) custom_defaults();
     for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
         int dx = 2 * x + 1 - cx2, dy = 2 * y + 1 - cy2, r2 = dx * dx + dy * dy;   /* in half pixels */
         if (r2 <= d * d - 2 * d) mimg[y][x] = (u8)fill;
@@ -382,8 +449,9 @@ static int mi_draw(int i, int w, int h) {
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };
     static const char *xb_sh[] = { "LB", "RB", "LT", "RT" }, *nt_sh[] = { "L", "R", "ZL", "ZR" }, *ps_sh[] = { "L1", "R1", "L2", "R2" };
     if (src == SRC_NONE) return 1;   /* the empty disc (row 0) */
-    if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || THORISH(st) ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
+    if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || THORISH(st) || st == PROMPT_CUSTOM ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
     else if (st == PROMPT_XBOX) { one[0] = "ABXY"[src]; t = one; col = xb_col[src]; }
+    else if (st == PROMPT_CUSTOM && custom_sym != SYM_PS) { one[0] = (custom_sym == SYM_XBOX ? "ABXY" : "BAYX")[src]; t = one; col = P_WHITE; }
     else if (st == PROMPT_NINTENDO || THORISH(st)) { one[0] = "BAYX"[src]; t = one; col = THORISH(st) ? P_WHITE : C_CREAM; }
     if (t) {
         for (unsigned k = 0; k < sizeof font6 / sizeof font6[0] && !t[1]; k++) if (font6[k].ch == t[0])
@@ -393,15 +461,25 @@ static int mi_draw(int i, int w, int h) {
         if (t[1]) { letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_cream); return 1 + ROW_NINTENDO; }
         if (st == PROMPT_XBOX) { letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_xbox); return 1 + ROW_XBOX; }
         if (THORISH(st)) { letter_fx(&mimg[0][0], MW, w, h, 7, 8, soft_white); return 1 + THOR_ROW_OF(st, src); }
+        if (st == PROMPT_CUSTOM) { letter_fx(&mimg[0][0], MW, w, h, 7, 8, soft_white); return 1 + ROW_CUSTOM + src; }
         letter_fx(&mimg[0][0], MW, w, h, C_DISC, 7, soft_cream);
         return 1 + ROW_NINTENDO;
     }
-    if (st == PROMPT_PS) {   /* PS shapes where the source icon is not on the page (port CLUT: the nearest colours) */
-        int s = src, c3 = cx2 / 2, c4 = cy2 / 2;
+    if (st == PROMPT_PS || st == PROMPT_CUSTOM) {   /* PS shapes where the source icon is not on the page (port CLUT: the nearest colours); custom: in its letter colour */
+        int s = src, c3 = cx2 / 2, c4 = cy2 / 2, cu = st == PROMPT_CUSTOM;
+        #define P_XBLUE (cu ? P_WHITE | 0x80 : 4)
+        #define P_XRED (cu ? P_WHITE | 0x80 : 2)
+        #define P_NRED (cu ? P_WHITE | 0x80 : 10)
+        #define P_XGREEN (cu ? P_WHITE | 0x80 : 1)
         if (s == PS_CROSS) for (int k = -3; k < 3; k++) { mput(c3 + k, c4 + k, P_XBLUE, w, h); mput(c3 - 1 - k, c4 + k, P_XBLUE, w, h); }
         else if (s == PS_CIRCLE) for (int y = -3; y < 3; y++) for (int x = -3; x < 3; x++) { int r = (2*x+1)*(2*x+1)+(2*y+1)*(2*y+1); if (r >= 14 && r <= 36) mput(c3 + x, c4 + y, P_XRED, w, h); }
         else if (s == PS_SQUARE) for (int k = -3; k < 3; k++) { mput(c3 + k, c4 - 3, P_NRED, w, h); mput(c3 + k, c4 + 2, P_NRED, w, h); mput(c3 - 3, c4 + k, P_NRED, w, h); mput(c3 + 2, c4 + k, P_NRED, w, h); }
         else { for (int y = 0; y < 6; y++) { mput(c3 - 1 - y / 2, c4 - 3 + y, P_XGREEN, w, h); mput(c3 + y / 2, c4 - 3 + y, P_XGREEN, w, h); } for (int x = -4; x < 4; x++) mput(c3 + x, c4 + 2, P_XGREEN, w, h); }
+        #undef P_XBLUE
+        #undef P_XRED
+        #undef P_NRED
+        #undef P_XGREEN
+        if (cu) { letter_fx(&mimg[0][0], MW, w, h, 7, 8, soft_white); return 1 + ROW_CUSTOM + src; }
         return 1;
     }
     {   /* generic: the diamond, the button's position lit */

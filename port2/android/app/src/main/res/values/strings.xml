@@ -93,7 +93,7 @@
     <string name="opt_rumble">Vibration intensity</string>
     <string name="rumble_off">Off</string>
     <string name="opt_prompts">Button icons</string>
-    <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Generic</item><item>AYN Thor (rainbow)</item><item>AYN Thor (black)</item><item>AYN Thor (white)</item></string-array>
+    <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Generic</item><item>AYN Thor (rainbow)</item><item>AYN Thor (black)</item><item>AYN Thor (white)</item><item>Custom</item></string-array>
     <string name="save_import">Import save…</string>
     <string name="save_import_confirm">Import the file into the memory card? A whole card replaces the current one (kept as .bak); a single save is added to a free slot.</string>
     <string name="save_exported">Card exported (tombi.mcd).</string>
@@ -106,4 +106,18 @@
     <string name="cat_data">Saves and data</string>
     <string name="cat_debug">Cheats and debug</string>
     <string name="renderer_gl_short">OpenGL ES</string>
+    <string name="pc_open">Customise buttons…</string>
+    <string name="pc_title">Customise buttons</string>
+    <string name="pc_preset">Start from</string>
+    <string name="pc_sym">Symbols</string>
+    <string name="pc_disc">disc</string>
+    <string name="pc_letter">letter</string>
+    <string name="pc_palette">Palette</string>
+    <string name="pc_done">Done</string>
+    <string name="pc_preview">As in the game</string>
+    <string name="pc_hint">Left / right change the value (the colour rows step through the palette); A or a tap on a colour row opens its editor. Any change selects the Custom button icons.</string>
+    <string-array name="pc_syms"><item>Xbox letters</item><item>Nintendo / Thor letters</item><item>PlayStation shapes</item></string-array>
+    <string-array name="pc_pos"><item>Bottom</item><item>Right</item><item>Left</item><item>Top</item></string-array>
+    <string-array name="pc_channels"><item>Red</item><item>Green</item><item>Blue</item><item>Hue</item><item>Saturation</item><item>Brightness</item></string-array>
+    <string-array name="pc_presets"><item>Thor black</item><item>Thor white</item><item>Thor rainbow</item><item>Xbox</item><item>Nintendo</item><item>PlayStation</item><item>GameCube</item><item>SNES (US)</item><item>SNES PAL / Super Famicom</item><item>Famicom</item><item>Pastel</item></string-array>
 </resources>

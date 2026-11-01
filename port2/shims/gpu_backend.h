@@ -21,10 +21,10 @@ typedef struct { int tx, ty, depth, cx, cy; const PortTexRep *rep; } GpuTex;   /
    (r < PORT_CLUT_ROWS; bit 15 set: never a GetClut value) reads its 16 colours from row r of port_prompt_clut, not VRAM;
    GpuTex.cy = PORT_CLUT_Y marks it and GpuTex.cx = 16 * r picks the row */
 #define PORT_CLUT_ID 0xFFFF
-#define PORT_CLUT_ROWS 9
+#define PORT_CLUT_ROWS 13
 #define PORT_CLUT_IS(id) ((unsigned)(id) > 0xFFFFu - PORT_CLUT_ROWS && (unsigned)(id) <= 0xFFFFu)
 #define PORT_CLUT_Y 512
-extern const gpu_u16 port_prompt_clut[PORT_CLUT_ROWS * 16];
+extern gpu_u16 port_prompt_clut[PORT_CLUT_ROWS * 16];   /* rows 9..12 set at start-up (--prompt-colors) */
 
 typedef struct {
     int abr;                        /* semi-transparency mode 0..3 */

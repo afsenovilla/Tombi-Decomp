@@ -78,7 +78,9 @@ public class TombiActivity extends SDLActivity {
             PadMap pm = pad != null ? pad : new PadMap(getIntent().getStringExtra(EXTRA_PADMAP));
             /* Thor / Retroid / Nintendo pads send Android's key codes by their printed labels (A east, B south, X north,
                Y west); prompts.c takes positions (Xbox names: a south, b east, x west, y north): swap the pairs */
-            boolean labels = "thor".equals(style) || "thor-black".equals(style) || "thor-white".equals(style) || "nintendo".equals(style);
+            String dev = autoPromptStyle();   // custom: positions; whether the pad sends label key codes depends on the pad
+            boolean labels = "thor".equals(style) || "thor-black".equals(style) || "thor-white".equals(style) || "nintendo".equals(style)
+                    || ("custom".equals(style) && (dev.startsWith("thor") || "nintendo".equals(dev)));
             out.add("--prompt-map"); out.add(promptMap(pm, labels));
         }
         out.add("--launcher-exit");   // the pause menu / title QUIT entries: back here (quitToLauncher)

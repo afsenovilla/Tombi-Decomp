@@ -92,7 +92,7 @@
     <string name="opt_rumble">Intensidad de vibración</string>
     <string name="rumble_off">Apagada</string>
     <string name="opt_prompts">Iconos de botones</string>
-    <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Genérico</item><item>AYN Thor (arcoíris)</item><item>AYN Thor (negro)</item><item>AYN Thor (blanco)</item></string-array>
+    <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Genérico</item><item>AYN Thor (arcoíris)</item><item>AYN Thor (negro)</item><item>AYN Thor (blanco)</item><item>Personalizado</item></string-array>
     <string name="save_import">Importar partida…</string>
     <string name="save_import_confirm">¿Importar el archivo en la tarjeta de memoria? Una tarjeta completa sustituye a la actual (se guarda como .bak); una partida suelta se añade en un hueco libre.</string>
     <string name="save_exported">Tarjeta exportada (tombi.mcd).</string>
@@ -104,4 +104,18 @@
     <string name="cat_pad">Controles</string>
     <string name="cat_data">Partidas y datos</string>
     <string name="cat_debug">Trucos y depuración</string>
+    <string name="pc_open">Personalizar botones…</string>
+    <string name="pc_title">Personalizar botones</string>
+    <string name="pc_preset">Partir de</string>
+    <string name="pc_sym">Símbolos</string>
+    <string name="pc_disc">disco</string>
+    <string name="pc_letter">letra</string>
+    <string name="pc_palette">Paleta</string>
+    <string name="pc_done">Hecho</string>
+    <string name="pc_preview">Como en el juego</string>
+    <string name="pc_hint">Izquierda / derecha cambian el valor (las filas de color recorren la paleta); A o tocar una fila de color abre su editor. Cualquier cambio elige los iconos Personalizado.</string>
+    <string-array name="pc_syms"><item>Letras Xbox</item><item>Letras Nintendo / Thor</item><item>Formas PlayStation</item></string-array>
+    <string-array name="pc_pos"><item>Abajo</item><item>Derecha</item><item>Izquierda</item><item>Arriba</item></string-array>
+    <string-array name="pc_channels"><item>Rojo</item><item>Verde</item><item>Azul</item><item>Tono</item><item>Saturación</item><item>Brillo</item></string-array>
+    <string-array name="pc_presets"><item>Thor negro</item><item>Thor blanco</item><item>Thor arcoíris</item><item>Xbox</item><item>Nintendo</item><item>PlayStation</item><item>GameCube</item><item>SNES (América)</item><item>SNES PAL / Super Famicom</item><item>Famicom</item><item>Pastel</item></string-array>
 </resources>
