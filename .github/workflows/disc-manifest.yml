@@ -50,7 +50,7 @@ jobs:
 
       - name: Manifest
         run: |
-          python3 -I tools/disc_manifest.py "$IMG" "${{ inputs.prefix }}" > manifest.tsv
+          python3 -I tools/disc_manifest.py "$IMG" "${{ inputs.prefix }}" > manifest.tsv; md5sum "$IMG"; cat manifest.tsv
           {
             echo "### GAME_FILES_URL_${{ inputs.disc }}"
             echo; echo "Image MD5: \`$(md5sum "$IMG" | cut -d' ' -f1)\`"; echo
