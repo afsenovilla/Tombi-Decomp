@@ -281,6 +281,15 @@ static void vram_write_rect(int x, int y, int w, int h, const u16 *s) {
     ws_mirror_write(x, y, w, h);
 }
 
+/* prompts.c: the menus' button icons, patched in VRAM after an upload covers them; their primitives get the port CLUT */
+extern int port_prompt_icons_on;
+extern void port_prompt_vram_upload(const unsigned short *, int, int, int, int, void (*)(int, int, int, int, const unsigned short *));
+extern int port_prompt_tex_clut(int tx, int ty, int u0, int v0, int u1, int v1);
+static void prompt_write(int x, int y, int w, int h, const unsigned short *s) { vram_write_rect(x, y, w, h, s); }
+static void prompt_upload(int x, int y, int w, int h) {
+    if (x + w <= 1024 && y + h <= 512) port_prompt_vram_upload(&vram[0][0], x, y, w, h, prompt_write);
+}
+
 /* ------------------------------------------------------------------ GP0 decoder */
 static inline int sx11(u32 v) { return ((s32)(v << 21)) >> 21; }
 
@@ -402,6 +411,13 @@ static int gp0(const u32 *p, int n) {
             set_texpage16(tpage);
             t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511;
             if (clut == PORT_CLUT_ID) { t.cx = 0; t.cy = PORT_CLUT_Y; }
+            else if (port_prompt_icons_on && t.depth == 0) {
+                int u0 = 255, u1 = 0, v0 = 255, v1 = 0;
+                for (int i = 0; i < nv; i++) {
+                    if (v[i].u < u0) u0 = v[i].u; if (v[i].u > u1) u1 = v[i].u; if (v[i].v < v0) v0 = v[i].v; if (v[i].v > v1) v1 = v[i].v;
+                }
+                if (port_prompt_tex_clut(t.tx, t.ty, u0, v0, u1, v1)) { t.cx = 0; t.cy = PORT_CLUT_Y; }
+            }
             t.rep = port_texpack_on && t.cy != PORT_CLUT_Y ? port_texpack_prim(&t, v, nv) : 0;
         }
         if (tex && port_drawdump_path && t.cy != PORT_CLUT_Y) {                     /* --dump-draws (drawdump.c) */
@@ -450,6 +466,8 @@ static int gp0(const u32 *p, int n) {
         }
         if (size == 0) { w = p[k] & 0x3FF; h = (p[k] >> 16) & 0x1FF; k++; }
         else { w = h = size == 1 ? 1 : size == 2 ? 8 : 16; }
+        if (tex && port_prompt_icons_on && t.depth == 0 && t.cy != PORT_CLUT_Y && w && h && w <= 256 && h <= 256 &&
+            port_prompt_tex_clut(t.tx, t.ty, u, v, u + w - 1, v + h - 1)) { t.cx = 0; t.cy = PORT_CLUT_Y; }
         if (tex && port_drawdump_path && w && h && t.cy != PORT_CLUT_Y)            /* --dump-draws (drawdump.c) */
             port_drawdump(&vram[0][0], t.tx, t.ty, t.depth, t.cx, t.cy, (tpg.tx >> 6) | (tpg.ty >> 8) << 4 | tpg.tp << 7, (p[2] >> 16) & 0xFFFF, u, v, w, h, a.x, a.y, w, h, semi ? 1 : 0, 2);
         if (tex) t.rep = port_texpack_on && w && h && t.cy != PORT_CLUT_Y ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
@@ -476,6 +494,7 @@ static int gp0(const u32 *p, int n) {
         for (int j = 0; j < h; j++) for (int q = 0; q < w; q++, i++) if (i < avail) vram[(y + j) & 511][(x + q) & 1023] = s[i];
         if (w && h && port_texpack_on) port_texpack_write(x, y, w, h, 0);
         if (w && h) be->vram_written(x, y, w, h);
+        if (w && h) prompt_upload(x, y, w, h);
         return n;
     }
     if (cmd >= 0xC0 && cmd < 0xE0) return n;                 /* VRAM -> CPU: nothing to do */
@@ -666,6 +685,7 @@ int LoadImage(RECT *r, u32 *p) {
     tex_patch_pre(r->x, r->y, r->w, r->h);
     vram_write_rect(r->x, r->y, r->w, r->h, (const u16 *)p);
     tex_patch_apply(r->x, r->y, r->w, r->h);
+    prompt_upload(r->x, r->y, r->w, r->h);
     return 0;
 }
 int StoreImage(RECT *r, u32 *p) {

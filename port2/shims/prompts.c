@@ -16,9 +16,9 @@
  *   generic diamond that marks the button's position.  The letters are the controller's own button names as SDL /
  *   Android report them (SDL's A = the button labelled A on Xbox and, with SDL's default label mapping, on Nintendo
  *   pads; Android's KEYCODE_BUTTON_A = the button the AYN / Retroid handhelds label A).
- * Every style draws its own glyph (PlayStation too, so all sit at the same height): the disc on rows 4..15 of the 16-row
- * glyph, 2 px lower than the game's (rows 2..13), which centred it on the capitals; lowered, it lines up with the
- * lowercase text around it.
+ * Every style draws its own glyph (PlayStation too, so all sit at the same height): the disc on rows 3..14 of the 16-row
+ * glyph, 1 px lower than the game's (rows 2..13), which centred it on the capitals; lowered, it sits on
+ * the text line around it.
  *
  * Colours: the PlayStation and generic glyphs use the font CLUT.  The Xbox and Thor ones need colours it lacks
  * (yellow, deep blue, dark green, white), so the cache slots holding them are drawn with a port-only 16-colour CLUT
@@ -201,10 +201,10 @@ static void draw(int ps, int src, int style) {
     }
     (void)ps;
 }
-/* 2 px lower: the disc from rows 2..13 to 4..15 (rows 14, 15 are empty before) */
-static void lower2(void) {
-    memmove(img[2], img[0], sizeof img[0] * (GH - 2));
-    memset(img, 0, sizeof img[0] * 2);
+/* 1 px lower: the disc from rows 2..13 to 3..14 (row 15 is empty before) */
+static void lower1(void) {
+    memmove(img[1], img[0], sizeof img[0] * (GH - 1));
+    memset(img, 0, sizeof img[0]);
 }
 
 static u16 out[GW / 4 * GH];
@@ -232,11 +232,179 @@ const u16 *port_prompt_glyph(const u16 *src, int w, int h, int slot) {
         int s2 = port_prompt_src[ps];
         if (port_prompt_style == PROMPT_PS && s2 < 4 && have_orig[s2]) memcpy(img, orig[s2], sizeof img);
         else draw(ps, s2, port_prompt_style);
-        lower2();
+        lower1();
         pack();
         if (slot >= 0 && slot < NSLOTS)
             slot_port_clut[slot] = port_prompt_style == PROMPT_XBOX || port_prompt_style == PROMPT_THOR;
         return out;
     }
     return src;
+}
+
+/* ---- the button icons of the menus (title, options, button config, save / load screens) ----
+ * Outside the message boxes the game draws its button icons as sprites out of texture pages it uploads with LoadImage:
+ * the title's "PRESS START or ✕ BUTTON" (page 384,0: a 16 x 16 ✕), the options screen's "✕ Button:CHANGE OPTION /
+ * ○ Button:EXIT" and the button config pad (page 512,0: ○ □ △ ✕ in 16 x 16 at v 144, and in 12 x 16 next to them), the
+ * save / load screens' "✕ Button:Select / ○ Button:Cancel" (page 256,0: ○ □ △ ✕ in 12 x 12 at v 232).  Each is a
+ * fixed rect of its page, recognised by the FNV-1a of its texels when an upload covers it (gpu.c calls
+ * port_prompt_vram_upload after every LoadImage / GP0 upload, with the host VRAM fresh), and overwritten in VRAM by the
+ * glyph of the physical button, drawn here in the same rect (the disc in the original's bounding box).  The originals are
+ * kept: PlayStation style copies the original icon of the source button (same page, same CLUT), so with the default
+ * mapping nothing changes.  The other styles are drawn in the port CLUT: gpu.c gives any 4 bpp primitive whose texels
+ * lie inside a patched rect the CLUT id PORT_CLUT_ID (port_prompt_tex_clut).  A change of style or mapping (a
+ * controller plugged in) re-draws the patched rects at the next draw.  No game pixels are shipped: only the hashes. */
+typedef struct { short x, y, w, h; u8 ps, grp; u32 hash; } MenuIcon;   /* VRAM words; ps = PS_*; grp: icons of one row */
+static const MenuIcon menu_icons[] = {
+    { 384, 128, 4, 16, PS_CROSS, 0, 0x9e815eb5 },   /* title (page 384,0 u0 v128) */
+    { 512, 144, 4, 16, PS_CIRCLE, 1, 0x3195cb41 }, { 516, 144, 4, 16, PS_SQUARE, 1, 0xcc36ee81 },   /* page 512,0: 16 x 16 */
+    { 520, 144, 4, 16, PS_TRIANGLE, 1, 0x055e57e0 }, { 524, 144, 4, 16, PS_CROSS, 1, 0x721212d1 },
+    { 528, 144, 3, 16, PS_CIRCLE, 2, 0x0f32e06d }, { 531, 144, 3, 16, PS_SQUARE, 2, 0xe17028a1 },   /* page 512,0: 12 x 16 */
+    { 534, 144, 3, 16, PS_TRIANGLE, 2, 0x695e1096 }, { 537, 144, 3, 16, PS_CROSS, 2, 0xa8c08971 },
+    { 270, 232, 3, 12, PS_CIRCLE, 3, 0x03fef59d }, { 273, 232, 3, 12, PS_SQUARE, 3, 0xf4f0d4c5 },   /* page 256,0: 12 x 12 */
+    { 276, 232, 3, 12, PS_TRIANGLE, 3, 0xa28f628e }, { 279, 232, 3, 12, PS_CROSS, 3, 0xf26f9aa1 },
+};
+#define NMI (int)(sizeof menu_icons / sizeof menu_icons[0])
+static u16 mi_orig[NMI][16 * 4];
+static u8 mi_have[NMI];        /* the original was met (mi_orig holds it) */
+static u8 mi_on[NMI];          /* the rect holds our glyph now */
+static u8 mi_pclut[NMI];       /* ... drawn with the port CLUT */
+static int mi_gen[NMI];
+int port_prompt_icons_on;      /* any mi_on: gpu.c's fast path */
+static void (*mi_write)(int, int, int, int, const unsigned short *);
+static int prompt_gen(void) { return port_prompt_style * 4096 + port_prompt_src[0] * 512 + port_prompt_src[1] * 64 + port_prompt_src[2] * 8 + port_prompt_src[3]; }
+
+#define MW 16
+static u8 mimg[16][MW];
+static void mput(int x, int y, int c, int w, int h) { if (x >= 0 && x < w && y >= 0 && y < h) mimg[y][x] = (u8)c; }
+/* the glyph of PS button `ps` for icon i (w x h texels), into mimg; returns 1 for the port CLUT */
+static int mi_draw(int i, int w, int h) {
+    int ps = menu_icons[i].ps, src = port_prompt_src[ps], st = port_prompt_style;
+    int x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
+        if (mi_orig[i][y * menu_icons[i].w + x / 4] >> (4 * (x & 3)) & 15) {
+            if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        }
+    if (x1 < 0) { x0 = 0; y0 = 0; x1 = w - 1; y1 = h - 1; }
+    if (st == PROMPT_PS && src < 4) {      /* the game's own icon of that button, from the same row (same size, CLUT) */
+        for (int j = 0; j < NMI; j++)
+            if (menu_icons[j].grp == menu_icons[i].grp && menu_icons[j].ps == src && mi_have[j]) {
+                for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
+                    mimg[y][x] = mi_orig[j][y * menu_icons[j].w + x / 4] >> (4 * (x & 3)) & 15;
+                return 0;
+            }
+    }
+    /* the disc in the original's bounding box (1 px lower when there is room, like the message glyphs) */
+    if (y1 < h - 1 && h > 12) { y0++; y1++; }
+    memset(mimg, 0, sizeof mimg);
+    int d = x1 - x0 + 1 < y1 - y0 + 1 ? x1 - x0 + 1 : y1 - y0 + 1;
+    int cx2 = x0 + x1 + 1, cy2 = y0 + y1 + 1;            /* centre * 2 */
+    int fill = C_DISC;
+    static const int ndisc[4] = { P_NYELLOW, P_NRED, P_NGREEN, P_NBLUE };
+    if (st == PROMPT_THOR && src < 4) fill = ndisc[src];
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
+        int dx = 2 * x + 1 - cx2, dy = 2 * y + 1 - cy2, r2 = dx * dx + dy * dy;   /* in half pixels */
+        if (r2 <= d * d - 2 * d) mimg[y][x] = (u8)fill;
+        else if (r2 <= d * d + d / 2) mimg[y][x] = 12;                           /* the khaki rim */
+    }
+    int lx = cx2 / 2 - 3, ly = cy2 / 2 - 4;                /* a 6 x 8 letter centred */
+    const char *t = 0; int col = C_CREAM; char one[2] = { 0, 0 };
+    static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };
+    static const char *xb_sh[] = { "LB", "RB", "LT", "RT" }, *nt_sh[] = { "L", "R", "ZL", "ZR" }, *ps_sh[] = { "L1", "R1", "L2", "R2" };
+    if (src == SRC_NONE) return 1;
+    if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || st == PROMPT_THOR ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
+    else if (st == PROMPT_XBOX) { one[0] = "ABXY"[src]; t = one; col = xb_col[src]; }
+    else if (st == PROMPT_NINTENDO || st == PROMPT_THOR) { one[0] = "BAYX"[src]; t = one; col = st == PROMPT_THOR ? P_WHITE : C_CREAM; }
+    if (t) {
+        for (unsigned k = 0; k < sizeof font6 / sizeof font6[0] && !t[1]; k++) if (font6[k].ch == t[0])
+            for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if (font6[k].rows[y] >> (5 - x) & 1) mput(lx + x, ly + y, col, w, h);
+        if (t[1]) for (int c = 0; c < 2; c++) for (unsigned k = 0; k < sizeof font3 / sizeof font3[0]; k++) if (font3[k].ch == t[c])
+            for (int y = 0; y < 5; y++) for (int x = 0; x < 3; x++) if (font3[k].rows[y] >> (2 - x) & 1) mput(lx + c * 4 + x, ly + 2 + y, C_CREAM, w, h);
+        return 1;
+    }
+    if (st == PROMPT_PS) {   /* PS shapes where the source icon is not on the page (port CLUT: the nearest colours) */
+        int s = src, c3 = cx2 / 2, c4 = cy2 / 2;
+        if (s == PS_CROSS) for (int k = -3; k < 3; k++) { mput(c3 + k, c4 + k, P_XBLUE, w, h); mput(c3 - 1 - k, c4 + k, P_XBLUE, w, h); }
+        else if (s == PS_CIRCLE) for (int y = -3; y < 3; y++) for (int x = -3; x < 3; x++) { int r = (2*x+1)*(2*x+1)+(2*y+1)*(2*y+1); if (r >= 14 && r <= 36) mput(c3 + x, c4 + y, P_XRED, w, h); }
+        else if (s == PS_SQUARE) for (int k = -3; k < 3; k++) { mput(c3 + k, c4 - 3, P_NRED, w, h); mput(c3 + k, c4 + 2, P_NRED, w, h); mput(c3 - 3, c4 + k, P_NRED, w, h); mput(c3 + 2, c4 + k, P_NRED, w, h); }
+        else { for (int y = 0; y < 6; y++) { mput(c3 - 1 - y / 2, c4 - 3 + y, P_XGREEN, w, h); mput(c3 + y / 2, c4 - 3 + y, P_XGREEN, w, h); } for (int x = -4; x < 4; x++) mput(c3 + x, c4 + 2, P_XGREEN, w, h); }
+        return 1;
+    }
+    {   /* generic: the diamond, the button's position lit */
+        static const int px[4] = { 0, 3, -3, 0 }, py[4] = { 3, 0, 0, -3 };
+        for (int k = 0; k < 4; k++) { int c = k == src ? C_CREAM : C_GREY;
+            mput(cx2 / 2 - 1 + px[k], cy2 / 2 - 1 + py[k], c, w, h); mput(cx2 / 2 + px[k], cy2 / 2 - 1 + py[k], c, w, h);
+            mput(cx2 / 2 - 1 + px[k], cy2 / 2 + py[k], c, w, h); mput(cx2 / 2 + px[k], cy2 / 2 + py[k], c, w, h); }
+    }
+    return 1;
+}
+static void mi_apply(int i) {
+    const MenuIcon *m = &menu_icons[i];
+    static u16 o[16 * 4];
+    int w = m->w * 4, h = m->h;
+    mi_gen[i] = prompt_gen();
+    int same = port_prompt_style == PROMPT_PS && port_prompt_src[m->ps] == m->ps;
+    if (same) {                      /* the original: put it back if ours is there */
+        if (mi_on[i]) { mi_write(m->x, m->y, m->w, m->h, mi_orig[i]); mi_on[i] = 0; }
+        mi_pclut[i] = 0;
+    } else {
+        memset(mimg, 0, sizeof mimg);
+        mi_pclut[i] = (u8)mi_draw(i, w, h);
+        for (int y = 0; y < h; y++) for (int q = 0; q < m->w; q++) {
+            u16 v = 0;
+            for (int k = 0; k < 4; k++) v |= (u16)(mimg[y][q * 4 + k] & 15) << (4 * k);
+            o[y * m->w + q] = v;
+        }
+        mi_on[i] = 1;
+        mi_write(m->x, m->y, m->w, m->h, o);
+    }
+    port_prompt_icons_on = 0;
+    for (int j = 0; j < NMI; j++) port_prompt_icons_on |= mi_on[j] | mi_have[j];
+}
+static u32 mi_hash(const u16 *vram, int i) {
+    const MenuIcon *m = &menu_icons[i];
+    u32 h = 2166136261u;
+    for (int y = 0; y < m->h; y++) for (int q = 0; q < m->w; q++) {
+        u16 v = vram[(m->y + y) * 1024 + m->x + q];
+        h = (h ^ (v & 255)) * 16777619u; h = (h ^ (v >> 8)) * 16777619u;
+    }
+    return h;
+}
+/* gpu.c: VRAM (x, y, w, h) was just written by the game; vram = the host copy (1024 x 512), fresh in that rect */
+void port_prompt_vram_upload(const unsigned short *vram, int x, int y, int w, int h,
+                             void (*write)(int, int, int, int, const unsigned short *)) {
+    static int logged, log = -1;
+    int any = 0;
+    if (log < 0) { extern char *getenv(const char *); log = getenv("PORT_PROMPT_LOG") != 0; }
+    mi_write = write;
+    for (int i = 0; i < NMI; i++) {
+        const MenuIcon *m = &menu_icons[i];
+        if (x >= m->x + m->w || x + w <= m->x || y >= m->y + m->h || y + h <= m->y) continue;
+        mi_on[i] = 0; mi_have[i] = 0;
+        int part = m->x < x || m->x + m->w > x + w || m->y < y || m->y + m->h > y + h;   /* not all of it */
+        u32 hs = part ? 0 : mi_hash(vram, i);
+        if (log && logged < 400) {
+            extern void port_printf(const char *, ...); extern int port_frame; logged++;
+            port_printf("[prompts] frame %d: upload %d,%d %dx%d: icon %d at %d,%d: hash 0x%08x\n", port_frame, x, y, w, h, i, m->x, m->y, hs);
+        }
+        if (part) continue;
+        if (m->hash && hs != m->hash) continue;
+        for (int yy = 0; yy < m->h; yy++) for (int q = 0; q < m->w; q++) mi_orig[i][yy * m->w + q] = vram[(m->y + yy) * 1024 + m->x + q];
+        mi_have[i] = 1; any = 1;
+    }
+    if (any) for (int i = 0; i < NMI; i++) if (mi_have[i] && !mi_on[i]) mi_apply(i);
+    port_prompt_icons_on = 0;
+    for (int j = 0; j < NMI; j++) port_prompt_icons_on |= mi_on[j] | mi_have[j];
+}
+/* gpu.c, for a 4 bpp primitive of page (tx, ty) with texels u0..u1, v0..v1: 1 = give it the port CLUT */
+int port_prompt_tex_clut(int tx, int ty, int u0, int v0, int u1, int v1) {
+    int g = prompt_gen();
+    for (int i = 0; i < NMI; i++) {
+        if (!mi_have[i]) continue;
+        const MenuIcon *m = &menu_icons[i];
+        int ix = (m->x - tx) * 4, iy = m->y - ty;
+        if (u0 < ix || u1 >= ix + m->w * 4 || v0 < iy || v1 >= iy + m->h) continue;
+        if (mi_gen[i] != g && mi_write) mi_apply(i);
+        return mi_on[i] && mi_pclut[i];
+    }
+    return 0;
 }

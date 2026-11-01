@@ -1067,8 +1067,8 @@ glyphs (the message strings embed them as glyph codes), which are not identified
 `port2/shims/prompts.c`: the four face-button glyphs ✕ ○ □ △ are the same 12 x 16 4 bpp bitmaps in all 369 WFM3 banks
 (every language), so `loadMessageGlyph` (PORT2 block) hands each glyph and its glyph cache slot to `port_prompt_glyph`,
 which recognises them by the FNV-1a of their pixels and returns one drawn by code. No game pixels are shipped. Every
-style is drawn (PlayStation too): the disc sits on rows 4..15 of the glyph, 2 px lower than the game's own (rows
-2..13, centred on the capitals), so it lines up with the lowercase text. What is drawn is the *physical* button that
+style is drawn (PlayStation too): the disc sits on rows 3..14 of the glyph, 1 px lower than the game's own (rows
+2..13, centred on the capitals), so it sits on the text line (2 px looked too low on device). What is drawn is the *physical* button that
 gives that PS1 button with the current mapping: `runtime/sdl.c` derives it from the controller bindings (`--pad-map`
 included), Android passes `--prompt-map cross=a,...` from PadMap. Styles (`--prompts
 auto|playstation|xbox|nintendo|thor|generic`): PlayStation shapes; Xbox A/B/X/Y in the Xbox colours (green, red,
@@ -1089,6 +1089,29 @@ read the 16 colours from the table; texture packs and `--dump-draws` skip those 
 names (with SDL's default label mapping a Switch pad's SDL "A" is its labelled A). Only the face buttons are glyphs;
 L1/R1/START/SELECT and the d-pad arrows in the texts are words / arrows and stay. Debug: `--test-message FRAME:K:L`
 opens `showMessageBox(K, L)` (AREA00: 4:4 / 4:5 / 4:6 / 4:9 are the "□/✕/○/△ to run" hints).
+
+*Menu icons (title, options, button config, adjust screen, save / load).* Outside the message boxes the game draws its
+button icons as sprites from texture pages it uploads with `LoadImage`: the title's "PRESS START or ✕ BUTTON" (page
+384,0, a 16 x 16 ✕ at u 0 v 128), the options / adjust screen / button config screens of O0PTSUB0 ("✕ Button:CHANGE
+OPTION", "○ Button:EXIT", the pad diamond of *CONFIG MENU*: page 512,0, ○ □ △ ✕ in 16 x 16 at u 0..63 v 144 and in
+12 x 16 at u 64..111), and the save / load screens, in game (`openMenuScreen(4/5)`) and from the title's Load ("✕
+Button:Select / ○ Button:Cancel": page 256,0, ○ □ △ ✕ in 12 x 12 at u 56..103 v 232). `prompts.c` keeps a table of
+these 13 rects (VRAM words) with the FNV-1a of their texels; `gpu.c` calls `port_prompt_vram_upload` after every
+`LoadImage` / GP0 upload (the host VRAM copy is fresh there, so no GL read-back), and an icon whose texels match is
+saved and overwritten in VRAM by the glyph of the physical button (`mi_draw`: the disc in the original icon's bounding
+box, 1 px lower where the rect has room, the same letters / colours as the message glyphs). PlayStation style copies the
+game's own icon of the source button from the same row (so with the default mapping nothing is written at all; the
+title page has only ✕, so a remapped title icon is drawn as a shape). The other styles are drawn in the port CLUT:
+`gpu.c` gives every 4 bpp polygon / sprite whose texel box lies inside a patched rect the port CLUT
+(`port_prompt_tex_clut`), whatever function drew it. A style or mapping change (controller hot-plug) re-draws the
+patched rects on their next draw; an upload over a rect forgets it until the next upload that matches. Checked
+headless (soft renderer; the GL renderer on the config screen) in all five styles and with a remapped PlayStation pad: title, options, config, adjust screen,
+in-game save, title load. *Not covered / unverified:* the item / event / status / map sub-screens (D0SPSUB*) show no
+button icons in the screens reached (status, event, map; the item screen was not reached headless); the game over and
+I0NFO screens use message boxes (covered by the glyph path) but were not reached; other languages: the hashes were
+taken from the English (PAL default) pages, a page whose icon texels differ is left unpatched (no harm); the GL renderer
+path is the same `gpu.c` code but was not rendered here. The second-screen panel (`runtime/panel*.c`) draws no PS
+button symbols. Text that names a button in words (START, SELECT, L1...) is left as it is.
 
 **DualShock (`--dualshock`, launchers: "Mando DualShock (analógico)", default off).** The original game supports the
 analog pad: `setAnalogPadMode` switches a DualShock to analog, `readPadPort` keeps the left stick for pad type 7
