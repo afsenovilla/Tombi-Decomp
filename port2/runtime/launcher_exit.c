@@ -242,13 +242,14 @@ static int span(const ENT *e, int n, int *x0, int *x1) {
 void *port_lx_pause_list(void *list) {
     static ENT out[8]; static unsigned char txt[44]; ENT *e = (ENT *)list; int n, a, b, len;
     ent_x0 = ent_x1 = 0;
-    if (!port_lx_on()) return list;
     for (n = 0; n < 6 && e[n].x != -1; n++) out[n] = e[n];
     if (n != 3 || !span(e, n, &a, &b)) return list;
-    {   /* entry 0 reads "continue", centred where the original was */
+    out[3] = e[3];
+    {   /* entry 0 reads "continue", centred where the original was (every platform) */
         static unsigned char ct[44]; int c0, c1, cl = encode(CONT[lang()], ct, 0);
         if (span(e, 1, &c0, &c1)) { out[0].s = ct; out[0].x = (short)((c0 + c1) / 2 - 4 * cl); }
     }
+    if (!port_lx_on()) return out;   /* the 4th entry (quit to the launcher): --launcher-exit only */
     len = encode(ENTRY[lang()], txt, 0);
     out[3].s = txt; out[3].y = out[2].y + 16; out[3].x = (short)((a + b) / 2 - 4 * len);
     out[4] = e[3];

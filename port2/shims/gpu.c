@@ -428,6 +428,26 @@ void port_ws_layout(int left_cut, int right_cut, int below, int boxes) {
     port_ws_layout_frame = port_frame; port_ws_layout_l = left_cut; port_ws_layout_r = right_cut; port_ws_layout_y = below; port_ws_layout_boxes = boxes;
 }
 static int ws_layout_active(void) { return ws_on && port_ws_layout_frame == port_frame - 1; }   /* (the ordering table built in one frame is drawn in the next) */
+/* primitive ranges the sub-screen code marks while it builds its ordering table (port/fixes.txt): the popup menus
+   (subScreenDrawPopupMenu: their text, cursor and balloon frame stay whole where the game put them, mode 0) and the
+   event list's counters at the foot of the left column (subScreenDrawEventCounters: they move with it, mode 1).
+   Kept per frame parity: the ordering table built in one frame is drawn in the next. */
+static struct { const char *lo, *hi; int mode; } ws_marks[2][8];
+static int ws_nmarks[2], ws_marks_frame[2];
+void port_ws_mark(const void *lo, const void *hi, int mode) {
+    int b = port_frame & 1, k;
+    if (ws_marks_frame[b] != port_frame) { ws_marks_frame[b] = port_frame; ws_nmarks[b] = 0; }
+    for (k = 0; k < ws_nmarks[b]; k++)
+        if (ws_marks[b][k].lo == (const char *)lo && ws_marks[b][k].mode == mode) { ws_marks[b][k].hi = hi; return; }
+    if (ws_nmarks[b] < 8) { ws_marks[b][k].lo = lo; ws_marks[b][k].hi = hi; ws_marks[b][k].mode = mode; ws_nmarks[b]++; }
+}
+static int ws_mark_of(const void *pk) {        /* -1: not marked */
+    int b = (port_frame - 1) & 1;
+    if (ws_marks_frame[b] != port_frame - 1) return -1;
+    for (int k = 0; k < ws_nmarks[b]; k++)
+        if ((const char *)pk >= ws_marks[b][k].lo && (const char *)pk < ws_marks[b][k].hi) return ws_marks[b][k].mode;
+    return -1;
+}
 #define WS_QUAD (-1)                           /* clut argument: a textured quad (the wooden bars) */
 #define WS_FLAT (-2)                           /* clut argument: untextured */
 /* what to do with a piece spanning frame columns [x0, x1) from frame line y0: returns the shift, and *tile = -1 / 1
@@ -511,7 +531,12 @@ static int gp0(const u32 *p, int n) {
                 x0 = x1 = v[0].x;
                 for (int i = 1; i < nv; i++) { if (v[i].x < x0) x0 = v[i].x; if (v[i].x > x1) x1 = v[i].x; if (v[i].y < y0) y0 = v[i].y; }
                 w = x1 - x0;
-                dx = w > 0 ? ws_layout_place(x0, x1, y0, tex && quad ? WS_QUAD : tex ? (int)(clut & 0xFFFF) : WS_FLAT, &tile) : 0;
+                {   /* a textured quad is chrome (the wooden bars) unless it belongs to a popup balloon (drawBalloonFrame CLUTs) */
+                    int cl = (int)(clut & 0xFFFF), balloon = cl >= 0x78D6 && cl <= 0x7A16 && (cl & 0x3F) == 0x16;
+                    int mk = ws_mark_of(p);
+                    dx = mk == 0 ? 0 : mk == 1 ? -port_widescreen
+                       : w > 0 ? ws_layout_place(x0, x1, y0, tex && quad && !balloon ? WS_QUAD : tex ? cl : WS_FLAT, &tile) : 0;
+                }
             }
             for (c = tile ? -(port_widescreen / (w ? w : 1) + 1) : 0; c <= 0; c++) {   /* the copies, then the piece itself */
                 int off = c ? -c * tile * w : dx;
@@ -568,7 +593,8 @@ static int gp0(const u32 *p, int n) {
         if (tex) t.rep = port_texpack_on && w && h && t.cy != PORT_CLUT_Y ? port_texpack_box(&t, u, v, (u + w - 1) & 255, (v + h - 1) & 255) : 0;
         if (ws_on && !tex && w && h) ws_full_width_rect(&a.x, &w);
         if (w && h && ws_layout_active()) {
-            int tile, dx = ws_layout_place(a.x, a.x + w, a.y, tex ? (int)((p[2] >> 16) & 0xFFFF) : WS_FLAT, &tile), sv[2];
+            int tile = 0, mk = ws_mark_of(p), sv[2];
+            int dx = mk == 0 ? 0 : mk == 1 ? -port_widescreen : ws_layout_place(a.x, a.x + w, a.y, tex ? (int)((p[2] >> 16) & 0xFFFF) : WS_FLAT, &tile);
             if (tile) for (int c = port_widescreen / w + 1; c >= 1; c--) {
                 ws_layout_clip(1, tile < 0 ? a.x - port_widescreen : a.x + w, tile < 0 ? a.x : a.x + w + port_widescreen, sv);
                 be->rect(a.x + c * tile * w, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
