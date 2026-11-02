@@ -1,5 +1,67 @@
 // FUNC 8003fb90 488 MAIN0
 // MATCHING 8003fb90 488
+// VERSION SLPS_01144 slps01144 80040760 480
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+extern short COLLISION_HIT_HEIGHT;
+extern unsigned char DAT_1f8001d2;
+extern unsigned short DAT_1f800284[], COLLISION_HIT_FLAGS[];
+typedef struct { char pad[0xa0]; unsigned char ba0; } XA0;
+#define BA0(o) (((XA0 *)(o))->ba0)
+
+void func_80040760(TObj *o)
+{
+    char pad[4];
+    short a;
+    unsigned int w;
+    short hi;
+    short e;
+    short n;
+    short m;
+    a = COLLISION_HIT_HEIGHT;
+    if (a < 0)
+        a = -a;
+    if (a > 8)
+        a = 8;
+    if (COLLISION_HIT_HEIGHT < 0)
+        a = -a;
+    o->b69 = 1;
+    w = COLLISION_HIT_FLAGS[0];
+    e = DAT_1f800284[0];
+    o->wb0 = a;
+    DAT_1f8001d2 = 1;
+    hi = w >> 15;
+    o->wae = e;
+    m = (w >> 5) & 0xf;
+    n = m;
+    if (!(w & 0x3000)) {
+        switch (n) {
+        case 0: o->bbe = 0; break;
+        case 1: o->bbe = 2; break;
+        case 2: o->bbe = 0x10; break;
+        case 3: o->bbe = 0x20; break;
+        }
+        o->bbe = hi | o->bbe;
+        return;
+    }
+    if (w & 0x2000) {
+        n = (unsigned)n >> 2;
+        switch (n) {
+        case 0: BA0(o) = 2; break;
+        case 1: BA0(o) = 1; break;
+        case 2: BA0(o) = 3; break;
+        }
+    }
+    if (COLLISION_HIT_FLAGS[0] & 0x1000) {
+        switch (m & 3) {
+        case 0: BA0(o) |= 0x10; break;
+        case 1: BA0(o) |= 0x20; break;
+        case 2: BA0(o) |= 0x30; break;
+        case 3: BA0(o) |= 0x40; break;
+        }
+    }
+}
+#else
 #include "TOBJ.H"
 extern short COLLISION_HIT_HEIGHT;
 extern unsigned char DAT_1f8001d2;
@@ -61,3 +123,4 @@ void applyCollisionTileResponse(TObj *o)
         }
     }
 }
+#endif
