@@ -351,13 +351,63 @@ todos acaban en 0x8000 (se reproducen una vez y se quedan en el ultimo fotograma
 | X003 | 0x80139130 | 12-15 | tabla de la planta saltarina: una mata de hierba que se mece (decorado) |
 | X003 | 0x8013A074, 0x8013A0A4, 0x8013A0E4, 0x8013A114; 0x8013A194, 0x8013A1A4, 0x8013A1B4 | 29-32-30, 33-35, 38-41-39, 42-44 (ida y vuelta); 24-25, 26-27, 46-47 | tabla de los aldeanos del viento (AREA03 s0, SPR 0x32): gestos al hablar del **enano del sombrero marron** (29-35) y del **enano del sombrero mexicano** (38-44), y tres movimientos del **enano viejo abrigado con bufanda roja** (24-27, 46-47). Animaciones de charla que nadie elige |
 | X004 (tambien AREA12) | 0x80134E7C, 0x80134E9C | 16-19 / 19-16 | una **losa de piedra que gira** (pared o puerta giratoria que se abre y se cierra) |
-| X004 | 0x801354EC, 0x8013551C, 0x8013554C | 195 187 188 196 188 187; 186-189-187; 190-192-185 | AREA04 s4 SPR 0x32 base 1: otra vez el **enano del sombrero mexicano** (tres gestos de charla) |
-| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | sin render: el bloque es una tira de scripts cortos (fotogramas 1-4, 24-35) tras una tabla de saltos; su unico puntero (0x801184C8 -> 0x801184DC) tampoco tiene referencia; dueño desconocido |
+| X004 | 0x801354E4 (un solo fotograma, 185, que el primer barrido no vio), 0x801354EC, 0x8013551C, 0x8013554C | 185; 195 187 188 196 188 187; 186-189-187; 190-192-185 | AREA04 s4 SPR 0x32 base 1: otra vez el **enano del sombrero mexicano** (tres gestos de charla). **Seguimiento:** los cuatro scripts son una copia del juego del trabajador del ayuntamiento / NPC de la pista del cuadro (tabla 0x8013540C = 0x80135430 fotograma 173, 0x80135438, 0x8013546C, 0x801354A0, leida por `D_801311B8[subtipo]` y `D_801311D0[subtipo]`) con todos los fotogramas +12 y los saltos de bucle cambiados por paradas. La tabla que elegiria a este segundo personaje no existe |
+| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | sin render. **Dueño encontrado (seguimiento): el objeto Tubería.** El bloque 0x801184DC.. es una tira de scripts de objeto dibujados con `SPR_DATA[3]` (fotogramas 2-4, 24-35, 13-15, 0-5). 0x801184C8 si tiene referencia: el descriptor de objeto 81 de MAIN0 (0x8007AF44, objeto 64 = Tubería por `DAT_8007b084[64]`) apunta ahi, e `initItemObject` toma `anims[0]` (byte 7 del descriptor = 0) = 0x801184DC, la rueda de madera (fotograma 2) de AREA08 s1. Las demas palabras de 0x801184C8 no son punteros, asi que nada elige el resto del bloque |
 | X010 | 0x80131DFC, 0x80131E14 | 5-7, 8-10 | decorado de AREA10 s0 (base 12): matorral de la jungla y tiras de cascada / espuma |
 | X014 | 0x8012A090; 19 scripts en 0x8012A58C..0x8012A780 | 12-20; 9-33, 47-62 | sin render: en la sala del jefe (s7) y en s2 esas zonas de pagina no estan cargadas con las bases que usa la sala (solo 0-8, 18-21, 26-29) |
 | X002 = X019 | 0x8011F2BC, 0x8011F2CC | 6-7, 8-9 | sin render: no cargado en AREA02 s1 con base 4 ni 10 |
 
 Solo serian restaurables como decorado o poses de charla: ningun codigo los elige. La secuencia de la medusa/pulpo es la mas completa.
+
+#### Comprobacion en ejecucion (port `--log-anim`), 2 de noviembre de 2026
+Pregunta: ¿podria una seleccion calculada (base de tabla + desplazamiento), que una busqueda estatica no ve, llegar a estos scripts? **No: ninguno se elige
+nunca, ni en ejecucion ni por ningun camino del codigo.** [V]
+
+- **Herramienta (solo del port, desactivada por defecto):** `--log-anim [FICHERO]` (port2/runtime/animlog.c, ganchos en port/fixes.txt). Lee el TObj +0x24
+  tras cada actualizacion de objeto del pool principal, dentro de `AnimLoadDuration` (la llamada que sigue a cada `o->anim = script`), `AnimJump`, `AnimAdvance`,
+  `AnimAdvanceWithBox` (las cuatro copias) y `tickAnimationFixedRate`, y apunta el fotograma que muestra cada objeto visible en `drawObject`. Un puntero dentro
+  de las ventanas, o un script de medusa/pulpo mostrando los fotogramas 42-50, imprime `[anim] HIT`. Al salir, el resumen lista cada direccion de script y
+  fotograma por overlay, sala, categoria y tipo. `--log-anim-force CAT:TIPO,...` ademas pasa cada objeto de esos tipos por b04 1..3 x step 0..11 (state 0),
+  una combinacion cada 110 cuadros, para que cada rama de su switch se ejecute aunque el jugador no la provoque. Ventanas: la tabla de arriba, con X004
+  ampliada a 0x801354E4..0x8013558C y los 19 scripts de X014 como cuatro rangos.
+- **Ejecuciones (sin ventana, seleccion de area de depuracion):** todas las secciones de AREA02, 03, 04, 08, 09, 10, 11 (s1, s2) y 14 (62 salas x 3600 cuadros,
+  guion generico de andar / saltar / atacar / correr), y 19 salas de dueños dos veces (5800 cuadros cada una): una con Tombi teletransportado (`--poke` de su
+  posicion) junto a cada tipo de dueño por turno, atacando, saltando y pulsando Circulo; otra con `--log-anim-force` sobre los tipos de dueño (8451 cambios de
+  estado forzados). 447.200 cuadros en total. **0 lineas HIT; los fotogramas 42-50 nunca se dibujan.**
+- **Lo que hicieron los dueños:** la medusa (cat 2 tipo 0x21) uso 16 de los 19 scripts de su tabla (flotar, nadar, agarrar, golpe, caida herida, hija que sigue,
+  derrota); el pulpo volador (tipo 0x2A) uso uno, porque `flyingOctopusMove` solo elige `D_8011C420[0]` (su tabla es la de la medusa copiada, asi que sus
+  scripts 43-50 estan doblemente muertos); el trabajador del ayuntamiento de AREA04 s17/s18 (tipo 0x32) uso 0x80135430 y el bucle 0x801354A0, cuyo salto en
+  0x801354DC vuelve a 0x801354A0, el script justo antes de la ventana; el objeto Tubería de AREA08 solo mostro 0x801184DC; plantas saltarinas, aldeanos del
+  viento, plantas mordedoras, humo y los decorados de AREA10/14/02 recorrieron sus tablas con normalidad.
+
+| Script(s) | Veredicto | Pruebas |
+|---|---|---|
+| X009 0x8012F144/164/17C (medusa 43-50) | nunca | AREA09 todas las secciones; s0 natural + forzado (2 objetos); 42-50 nunca dibujados |
+| X011 0x8011C6E4/704/71C (copia del pulpo) | nunca | AREA11 s1/s2; el codigo solo elige la entrada 0 de su tabla |
+| X003 0x80139130 (planta 12-15) | nunca | AREA03 todas; tipos 2:24, 3:28, 3:29, 2:1D natural + forzado en s0/s1/s4/s5 |
+| X003 0x8013A074..0x8013A1B4 (poses de charla) | nunca | tipos 2:32, 2:37 natural (Circulo pulsado a su lado) + forzado en s0/s1/s4/s5 |
+| X004 0x80134E7C/9C (losa) | nunca | AREA04 las 20 secciones; planta mordedora 2:07, humo 3:2A/2B, coleccionable 2:29 forzados en s0/s9 |
+| X004 0x801354E4..0x8013554C (juego NPC +12) | nunca | trabajador del ayuntamiento 2:32 en s17/s18 natural + forzado; 2:35/3:3C en s15 |
+| X008 0x80118504/3C (bloque de la Tubería) | nunca | AREA08 todas; la Tubería solo muestra 0x801184DC (el descriptor usa `anims[0]`) |
+| X010 0x80131DFC/E14 (decorado) | nunca | AREA10 las 9 secciones; decorado 3:3F, 4:35, planta 2:07 forzados en s0/s4 |
+| X014 0x8012A090, 0x8012A58C..0x8012A780 | nunca | AREA14 las 8 secciones; decorado 2:4B, 3:50/51/52/23/61, 4:3A/3C forzados en s2/s3/s7 |
+| X002 0x8011F2BC/CC | nunca | AREA02 todas; decorado 2:18, 3:2C forzados en s1/s2 |
+| X019 0x80116178/88 (copia de los de X002) | sin ejecutar | el poke del selector para el area 19 acaba en AREA02; solo estatico |
+
+**Seleccion calculada, revisada de nuevo en estatico** (capstone sobre los nueve overlays dueños y MAIN0, scripts desechables):
+- **Cada escritura en TObj +0x24** se siguio hasta su registro de origen: una palabra cargada de una tabla (`lw`) o una constante lui/addiu. Las unicas fuentes
+  aritmeticas son las rutinas de avance (`AnimAdvance`, `AnimAdvanceWithBox`, `tickAnimationFixedRate`, las copias `komaPigAnimAdvance` de X003/X004: +8 a la
+  siguiente entrada, o la palabra puntero tras una entrada 0x4000), que siguen un script hasta su final y nunca pasan un terminador 0x8000. (X009 0x8011A3E0
+  escribe en +0x24 de una estructura de camara, no de un objeto.) Cuentas de `sw rX, 0x24(obj)`: X002 59 carga / 73 const, X003 221 / 73 (+3 avance), X004
+  217 / 73 (+3), X008 35 / 73, X009 125 / 78, X010 133 / 78, X011 73 / 73, X014 76 / 74, X019 35 / 73.
+- **`AnimJump(o, n)` es la unica aritmetica base + indice sobre un script** (`o->anim += n` entradas, MAIN0 0x8001FE94). En el codigo de area de los nueve
+  overlays toda llamada pasa n = 0, directamente o por los envoltorios de NPC `npcSetAnim` / `sevenFriendsSetAnim` / `sevenFriendsMemberSetAnim` (todos los
+  llamadores pasan k = 0); los envoltorios de X004 / X010 (`mermaidSetAnim`, `townHallWorkerSetAnim`, `scaredGoldVolunteerSetAnim`,
+  `paintingSlotHintNpcSetAnim`, `tenThousandYearElderSetAnim`) no tienen llamadores. Las constantes distintas de cero (2, 3, 4, 0xF, `lbu` de una tabla) estan
+  en el codigo comun del jugador y mueven los scripts de Tombi en MAIN0.
+- **Indexar tablas** (`tabla[n]`, `D_x[subtipo].anims[n]`, los `anims[b0c]` de los descriptores de objeto) carga una palabra, y ninguna palabra contiene una
+  direccion de las ventanas: ni en el overlay dueño, ni en MAIN0, ni en ningun fichero del disco leido en el mismo overlay (barrido de los 2287 ficheros; los
+  unicos aciertos en bruto estan dentro de peliculas STR y datos de imagen GAM).
 
 **Imagenes** (en el scratchpad de la sesion, no en el repo): un GIF por script `<prefijo>_<direccion>.gif`, una hoja por dueño `<prefijo>_sheet.png` y un
 atlas `<prefijo>_spr.png`; prefijos `x009_jellyfish`, `x011_octopus` (y `*_sequence.gif`: los tres scripts seguidos), `x003_monkey`, `x003_hopplant`,
@@ -430,8 +480,9 @@ de MAIN0 / X000 / I0NFO son las del barrido de zombis (ninguna mueve un objeto p
 - Sala: solo el Muelle tambaleante. Sus limites son las mismas constantes que la rutina viva, asi que la patrulla se escribio para esta sala. Los cuatro casos de
   subtipo duplicados de `updateSegmentedCrawler` son el sitio donde un subtipo llamaba a Wander [I].
 - Versiones: **sin referencia en las tres versiones finales**. JP X01 la tiene en 0x80131DB8 (base 0x800E9AF8) y su `updateSegmentedCrawler` solo
-  llama a Move (0x80133618). USA X01 en 0x80132814 (el fichero X01 de USA se mapea con base 0x800E7388), sin referencia. El X01 de la beta no esta en local; PrePre8
-  no tiene codigo de AREA01.
+  llama a Move (0x80133618). USA X01 en 0x80132814 (el fichero X01 de USA se mapea con base 0x800E7388), sin referencia. El X01 de la beta no esta en local. **PrePre Vol. 8
+  (seguimiento):** su unico TOMBA.EXE si tiene la oruga, como clase 2 tipo 0x13 (el mismo id que PAL), con sus propias rutinas de movimiento por
+  subtipo; ni Wander ni Move estan (similitud enmascarada <= 17 %), y el objeto nunca se coloca ni se crea en la demo (docs/PREPRE8.md "The segmented caterpillar").
 - **Port: `--crawler-patrol`** (port/fixes.txt, desactivado por defecto) hace que la cabeza use Wander en vez de Move. Grabado: las dos orugas bajan,
   van a la derecha hasta 1361, giran, vuelven y se quedan aparcadas una encima de otra en h 280 mirando a la derecha. La version final sigue en bucle.
   GIF lado a lado. La patrulla queda mas alta que los carriles normales; para grabar subimos la camara fijando la y de Tombi (gancho

@@ -214,6 +214,52 @@ TIM000 strip glyphs (rows, left to right): ボンプ岩の謎 ？り里ヤオイ
 - Renders: `python3 -I tools/prepre8.py rooms UNPACKED OUT` (already covers DATA003/DATA004).
 
 
+## The segmented caterpillar (class 2 type 0x13), checked 2 November 2026
+
+Community question: does PrePre 8 have the "pigapillar" of Wobbly Wharf (PAL X001 `updateSegmentedCrawler`, docs/CUT_CONTENT.md
+"Unused patrol routes"), and was its unused patrol `segmentedCrawlerWander` live in 1997? Static analysis of TOMBA.EXE (capstone,
+masked-shingle comparison against the 15 PAL crawler functions; throw-away scripts). [V] unless marked.
+
+- **It is there, with the same type id.** The class-2 pool (80 x 0xF0 bytes at 0x800E6D1C, category 2, allocator 0x8001A36C, dispatcher
+  0x80021660) uses the handler table 0x800A1AAC; entry **0x13 = 0x8007F364**. Its init allocates **5 segments** of type 0x13, linked by
+  +0x90 (parent) / +0x94 (child), segment index in +0x0C (b0c), like PAL `initSegmentedCrawler` (PAL: subtype 0 = 5 segments, 1 = 3). Mode 1
+  calls `D_800AEF2C[subtype]`, which runs the head mover and then the segment mover for each of the 5 segments.
+- **No PAL crawler function is in the exe.** Best masked-shingle similarities: Wander 17 %, Move 11 %, `updateSegmentedCrawler` 21 %,
+  the spawner 22 %; the PAL route limits 0x551 / 0x118 occur nowhere in TOMBA.EXE. So neither the live route nor the unused patrol existed in
+  this form in June 1997. The demo has its own, simpler movers:
+
+| Subtype | Head / segments | Movement |
+|---|---|---|
+| 0 | 0x8007F548 / 0x8007F8A4 | walks along the ground axis with a small vertical bob (sine on +0x88); when it is more than 480 units (0x1E0) from the h it started at, it turns on a cosine arc (angle +0x84 by 2 up to 0x80), flips its facing and walks back; repeats for ever. No wall check, no lanes, no fixed limits, no descent phase |
+| 1 | 0x8007FC74 / 0x8007FE50 | walks in a circle in the ground plane (h and depth, angle +1 a frame, speed 0x200), for ever |
+| 2 | 0x80080058 / 0x80080108 | stands still and animates; the segments sit in a row 16 units apart behind the head |
+| 3 | 0x80080204 | empty (`jr ra`) |
+
+  Subtype 0 is the closest thing to a patrol: a relative back-and-forth that loops, where PAL Wander is a one-way pass between absolute limits
+  that stops, and PAL Move adds walls and two lanes. PAL's caterpillar climbs in the vertical h/y plane (canopy); the demo's walks on the
+  ground plane. The handler has no hurt code: modes 2 and 3 only advance / free the object (PAL has Grabbed, Hit, HurtFlyOff, Defeated,
+  WeaponHit and Contact).
+- **Never placed, never spawned.** No record of the 9 object lists (village rooms 0-2 = DATA001 chunks 0x80-0x82, interior DATA002 0x83,
+  DATA003 0x84, DATA004 0x85; 16-byte records {room, class, type, ...}) has class 2 type 0x13 (class-2 types present: 1, 2, 5, 7, 8, 9, 18).
+  The callers of the class-2 allocator store types 2, 3, 14, 18, 19 (the caterpillar's own segments), 20 and 22, plus the list spawner
+  0x80083520, which takes the type from those records. The other type-0x13 store (0x80034500) is a class-4 object (allocator 0x8001A464). Area 1,
+  where it would belong, has no load list and no data on the disc.
+- **Animation and sprites.** It reads the SPR table of load kind **0x37** (`0x1F80016C`; PAL reads kind 0x38, `SPAD.i2e8`). Head scripts
+  `0x80014D70`: entry 0 frames 57/58 (as PAL's first head script), entries 1-11 two-frame loops 123/124 .. 143/144 (PAL: 124-131 and 148-153).
+  Subtype 1 / turning: `0x80014CB0`, ten two-frame loops 31/32 .. 49/50. Body `0x80014DF4`: frames 0-15 (the PAL body frames 0-15) and
+  0, 16-30. **The demo has no graphics for it:** its kind-0x37 table (DATA000) has 11 frames, so frames 57 and 123-144 do not exist, and none of
+  the 32 PAL caterpillar parts (AREA01 list 3, kind 0x38, frames 0-15, 57/58, 124-131, 148-153) is found in any TIM page of the disc (4 bpp index
+  blocks, >= 80 % of rows matching).
+- **The area-1 "enemy=" wave (0x80083D88) is Koma Pigs, not the caterpillar.** It allocates class 2 **type 2** (table entry 0x80079034, the
+  `updateKomaPig` dispatcher) subtype 8: four scripted ones when the scroll passes x 980 / 1300 / 1660 / 1966 (y -219, -29, -77, -23), then a
+  timed respawn (180-300 frames, random of 8) while fewer than 2 are alive. Its shape (timer table, at most 2 alive) is the same idea as PAL's
+  `updateSegmentedCrawlerSpawner` [I].
+- **Correction to "Civilization top-down data" above:** the case table of the loader 0x800240BC maps 0x3x -> 0x1F800150, 0x4x -> 0x1F800198,
+  0x5x -> 0x1F8001B8, 0x6x -> 0x1F8001C8, 0x7x -> 0x1F800190, 0x8x -> 0x1F8001D8, 0x9x -> D_800DE4B0, 0xAx -> D_800DE4D0, 0xBx -> D_800DE750
+  (each one high nibble higher than listed there; D_800DE074 is the per-file pointer table, not a slot base). The 0x3x sprite tables have 16
+  slots (0x1F800150..0x1F80018C), so a 0x3B table would have had its own slot; the remark that 0x3B / 0x39 collide with the 0x4x slots does
+  not hold. The other conclusion stands: no file on the disc is of kind 0x3B.
+
 ## Debug features
 
 - 0x8008299C is NOT a mode dispatcher: it is the unlayered-object spawner. It walks the per-room list
@@ -371,4 +417,5 @@ Also: `PLAY DEMO` and `RANKING DEMO` (title attract modes; PAL has no such text)
 No new mechanic, area or NPC turns up in the function comparison: the exe is a smaller, earlier form of the same
 engine, and its actors (pigs, chicks, eggs, chest, rolling barrel, zipline, boatman, cloaked figure) are the PAL area-0
 set. What is new is the wave spawner, the `TO BE CONTINUED...` card, the debug read-outs and the test tree. Open:
-trace what sets 0x800DE4A3 = 2 (TO BE CONTINUED), and identify the area-1 wave enemy by emulating room 1-0.
+trace what sets 0x800DE4A3 = 2 (TO BE CONTINUED). The area-1 wave enemy is the Koma Pig (type 2 subtype 8), and the exe also
+holds the Wobbly Wharf caterpillar (class 2 type 0x13), unplaced and without graphics: see "The segmented caterpillar".

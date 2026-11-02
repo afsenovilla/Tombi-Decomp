@@ -2704,6 +2704,20 @@ build/port2/tombi2 --window --crawler-patrol --skip-movies --poke 900:1F8001B4:1
 The first caterpillar appears about 12 s after the room loads, in the canopy above the bridge. It walks above the normal view, so the debug
 menu's Fly line helps to follow it.
 
+### `--log-anim [FILE]` and `--log-anim-force CAT:TYPE,...`: animation-script logger (port only, research)
+
+`--log-anim` watches the animation-script pointer of the game objects (TObj +0x24) after every main-pool update and in the animation helpers
+(`AnimLoadDuration`, `AnimJump`, `AnimAdvance`, `AnimAdvanceWithBox`, `tickAnimationFixedRate`), and the frame every visible object draws
+(`drawObject`). A pointer inside one of the unreferenced scripts of docs/CUT_CONTENT.md "Unreferenced animation scripts" prints `[anim] HIT`;
+the first update of each object prints `[anim] OBJ` (slot address and position, for `--poke`). At exit every distinct script address and frame
+per overlay / room / category / type goes to FILE (or to the log). `--log-anim-force CAT:TYPE,...` (implies `--log-anim`) also cycles every
+object of those types through b04 1..3 x step 0..11, one combination every 110 frames, to run each branch of its update switch: the forced
+states can do anything, research only. Code: `port2/runtime/animlog.c`, hooks in `port/fixes.txt`; the game is unchanged without the flags.
+```
+build/port2/tombi2 --headless --skip-movies --frames 5800 --poke 900:1F8001B4:1 --poke 1250:8009C960:9:2 --poke 1250:8009C962:0:2 \
+    --pad-script 1000:start,1300:circle:3 --log-anim-force 2:21 --log-anim jelly.txt
+```
+
 ### Debug menu: `--debug-menu` (port only, opt-in)
 
 An in-game debug menu for testing (`port2/runtime/debugmenu.c`). Off by default; `--debug-menu` turns it on

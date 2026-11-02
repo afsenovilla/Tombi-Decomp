@@ -606,3 +606,20 @@ src/awardEventProgress.c | unsigned char awardEventProgress(int a, int b, int c)
 # left to h 0x118, turn to face right, then it stops (state 14 has no case). Off by default; the game is unchanged without it.
 src/x001/updateSegmentedCrawler.c | extern void segmentedCrawlerMove(P *); | extern void segmentedCrawlerMove(P *); extern void X001_segmentedCrawlerWander(void *); extern int port_crawler_patrol;
 src/x001/updateSegmentedCrawler.c |                     segmentedCrawlerMove(o); |                     if (port_crawler_patrol) X001_segmentedCrawlerWander(o); else segmentedCrawlerMove(o);
+#
+# --log-anim (port only, research; port2/runtime/animlog.c, docs/CUT_CONTENT.md "Unreferenced animation scripts"): logs the
+# animation-script pointer (TObj +0x24) after every main-pool object update and in the animation helpers, and the frame every
+# drawn object shows; flags the scripts that nothing references. Off by default: the calls are behind port_log_anim.
+src/updateMainObjects.c | void updateMainObjects(void) | extern int port_log_anim; extern void port_anim_note(void *, int); void updateMainObjects(void)
+src/updateMainObjects.c | s1 += 0xD4; | if (port_log_anim && *s0) port_anim_note(s0, 0); s1 += 0xD4;
+src/drawObject.c | if (o->visible == 0) return; | if (o->visible == 0) return; { extern int port_log_anim; extern void port_anim_draw(void *); if (port_log_anim) port_anim_draw(o); }
+src/AnimLoadDuration.c | void AnimLoadDuration(TAnim *o) | extern int port_log_anim; extern void port_anim_note(void *, int); void AnimLoadDuration(TAnim *o)
+src/AnimLoadDuration.c | o->dur = o->a ? o->a->v & 0x3fff : 0; | o->dur = o->a ? o->a->v & 0x3fff : 0; if (port_log_anim) port_anim_note(o, 1);
+src/AnimJump.c | void AnimJump(A *o, short n) | extern int port_log_anim; extern void port_anim_note(void *, int); void AnimJump(A *o, short n)
+src/AnimJump.c | o->d += n; | o->d += n; if (port_log_anim) port_anim_note(o, 3);
+src/AnimAdvance.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;
+src/AnimAdvanceWithBox.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;
+src/x001/AnimAdvanceWithBox.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;
+src/x003/AnimAdvanceWithBox.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;
+src/x004/AnimAdvanceWithBox.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;
+src/tickAnimationFixedRate.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;

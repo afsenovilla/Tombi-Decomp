@@ -297,7 +297,7 @@ static int port_ws_resolve(void) {
 }
 
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--crawler-patrol] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
+    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--crawler-patrol] [--log-anim [FILE]] [--log-anim-force CAT:TYPE,...] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
@@ -902,6 +902,14 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
         else if (!strcmp(a, "--noclip")) port_noclip = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
+        else if (!strcmp(a, "--log-anim")) {   /* runtime/animlog.c: animation-script pointers and drawn frames, optional summary FILE */
+            extern int port_log_anim; extern const char *port_log_anim_path;
+            port_log_anim = 1; if (v && *v != '-') port_log_anim_path = argv[++i];
+        }
+        else if (!strcmp(a, "--log-anim-force") && v) {   /* runtime/animlog.c: cycle mode/step of objects CAT:TYPE,... */
+            extern int port_log_anim; extern void port_log_anim_force(const char *);
+            port_log_anim = 1; port_log_anim_force(argv[++i]);
+        }
         else if (!strcmp(a, "--crawler-patrol")) port_crawler_patrol = 1; /* port/fixes.txt: the unused segmentedCrawlerWander route */
         else if (!strcmp(a, "--log-events")) { extern int port_log_events; port_log_events = 1; }   /* runtime/panel.c */
         else if (!strcmp(a, "--debug-menu")) { extern int port_debug_menu; port_debug_menu = 1; }   /* runtime/debugmenu.c */

@@ -335,13 +335,63 @@ scripts ends in 0x8000 (play once and hold the last frame); none loops. Images: 
 | X003 | 0x80139130 | 12-15 | swaying hop plant table: a grass / reed tuft swaying (decor) |
 | X003 | 0x8013A074, 0x8013A0A4, 0x8013A0E4, 0x8013A114; 0x8013A194, 0x8013A1A4, 0x8013A1B4 | 29-32-30, 33-35, 38-41-39, 42-44 (ping-pong); 24-25, 26-27, 46-47 | wind-blown villager table (AREA03 s0, SPR 0x32): talk / gesture loops of the **brown-hat dwarf** (29-35) and the **sombrero dwarf** (38-44), and three two-frame moves of the **bundled-up old dwarf with the red scarf** (24-27, 46-47). Talk animations nobody selects |
 | X004 (also AREA12) | 0x80134E7C, 0x80134E9C | 16-19 forward / 19-16 backward | a **stone slab turning** (rotating wall / door panel opening and closing) in the biting-plant / smoke table area |
-| X004 | 0x801354EC, 0x8013551C, 0x8013554C | 195 187 188 196 188 187; 186-189-187; 190-192-185 | AREA04 s4 SPR 0x32 base 1: the **sombrero dwarf** again (three talk / nod gestures) |
-| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | not rendered: the block is a run of short scripts (frames 1-4, 24-35) right after a jump table; its only pointer (0x801184C8 -> 0x801184DC) is itself unreferenced; owner unknown |
+| X004 | 0x801354E4 (single frame 185, missed by the first scan), 0x801354EC, 0x8013551C, 0x8013554C | 185; 195 187 188 196 188 187; 186-189-187; 190-192-185 | AREA04 s4 SPR 0x32 base 1: the **sombrero dwarf** again (three talk / nod gestures). **Follow-up:** the four scripts are a copy of the town-hall-worker / painting-hint NPC set (table 0x8013540C = 0x80135430 frame 173, 0x80135438, 0x8013546C, 0x801354A0, read through `D_801311B8[subtype]` and `D_801311D0[subtype]`) with every frame number +12 and the loop jumps replaced by stops. The table that would select this second character does not exist |
+| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | not rendered. **Owner found (follow-up): the Pipe item.** The block 0x801184DC.. is a run of item scripts drawn from `SPR_DATA[3]` (frames 2-4, 24-35, 13-15, 0-5). 0x801184C8 is not unreferenced: MAIN0 item descriptor 81 (0x8007AF44, item 64 = Pipe through `DAT_8007b084[64]`) points at it, and `initItemObject` takes `anims[0]` (descriptor byte 7 = 0) = 0x801184DC, the wooden wheel (frame 2) seen in AREA08 s1. The other words of 0x801184C8 are not pointers, so nothing selects the rest of the block |
 | X010 | 0x80131DFC, 0x80131E14 | 5-7, 8-10 | AREA10 s0 decor (base 12): jungle bush frames and waterfall / foam strips |
 | X014 | 0x8012A090; 19 scripts in 0x8012A58C..0x8012A780 | 12-20; 9-33, 47-62 | not rendered: in the boss room (s7) and s2 the page areas of those frames are not resident at the bases the room uses (only frames 0-8, 18-21, 26-29 are) |
 | X002 = X019 | 0x8011F2BC, 0x8011F2CC (X019 0x80116178/88) | 6-7, 8-9 | not rendered: not resident in AREA02 s1 at base 4 or 10 |
 
 Restorable only as decoration or extra talk poses: no code selects them. The jellyfish/octopus sequence is the most complete one.
+
+#### Runtime check (port `--log-anim`), 2 November 2026
+Question: could a computed selection (table base + offset) reach these scripts, which a static search cannot see? **No: none of them
+is ever selected, either at run time or by any code path.** [V]
+
+- **Tool (port-only, off by default):** `--log-anim [FILE]` (port2/runtime/animlog.c, hooks in port/fixes.txt). It reads TObj +0x24 after every
+  main-pool object update, inside `AnimLoadDuration` (the call after each `o->anim = script`), `AnimJump`, `AnimAdvance`,
+  `AnimAdvanceWithBox` (all four copies) and `tickAnimationFixedRate`, and records the frame each visible object shows in `drawObject`.
+  Any pointer inside the windows below, or a jellyfish/octopus script showing frames 42-50, prints `[anim] HIT`. The summary at exit lists
+  every script address and frame per overlay, room, category and type. `--log-anim-force CAT:TYPE,...` also puts every object of those types
+  through b04 1..3 x step 0..11 (state 0), one combination every 110 frames, so each branch of its update switch runs whether or not the
+  player triggers it. Windows: the table above, with X004 widened to 0x801354E4..0x8013558C and the 19 X014 scripts as four ranges.
+- **Runs (headless, debug area select):** every section of AREA02, 03, 04, 08, 09, 10, 11 (s1, s2) and 14 (62 rooms x 3600 frames, generic
+  walk / jump / attack / run script), plus 19 owner rooms twice (5800 frames each): once with Tombi teleported (`--poke` of his position)
+  next to each owner type in turn, attacking, jumping and pressing Circle; once with `--log-anim-force` on the owner types (8451 forced state
+  changes). 447,200 frames in all. **0 HIT lines; frames 42-50 never drawn.**
+- **What the owners did meanwhile:** the jellyfish (cat 2 type 0x21) used 16 of the 19 scripts of its table (float, swim, grab, hit, hurt fall,
+  child follow, defeat); the flying octopus (type 0x2A) used one, because `flyingOctopusMove` only ever selects `D_8011C420[0]` (its table is
+  the jellyfish table copied, so its 43-50 scripts are doubly dead); the AREA04 s17/s18 town hall worker (type 0x32) ran 0x80135430 and the
+  0x801354A0 loop, whose jump at 0x801354DC goes back to 0x801354A0, the script right before the window; the AREA08 Pipe item showed only
+  0x801184DC; hop plants, wind-blown villagers, biting plants, smoke, and the AREA10/14/02 decor objects ran their tables normally.
+
+| Script(s) | Verdict | Evidence |
+|---|---|---|
+| X009 0x8012F144/164/17C (jellyfish 43-50) | never hit | AREA09 all sections; s0 natural + forced (2 objects); frames 42-50 never drawn |
+| X011 0x8011C6E4/704/71C (octopus copy) | never hit | AREA11 s1/s2; code selects only entry 0 of its table |
+| X003 0x80139130 (hop plant 12-15) | never hit | AREA03 all sections; types 2:24, 3:28, 3:29, 2:1D natural + forced in s0/s1/s4/s5 |
+| X003 0x8013A074..0x8013A1B4 (villager talk poses) | never hit | types 2:32, 2:37 natural (Circle pressed next to them) + forced in s0/s1/s4/s5 |
+| X004 0x80134E7C/9C (stone slab) | never hit | AREA04 all 20 sections; biting plant 2:07, smoke 3:2A/2B, collectible 2:29 forced in s0/s9 |
+| X004 0x801354E4..0x8013554C (+12 NPC set) | never hit | town hall worker 2:32 in s17/s18 natural + forced; 2:35/3:3C in s15 |
+| X008 0x80118504/3C (Pipe item block) | never hit | AREA08 all sections; the Pipe item shows 0x801184DC only (descriptor uses `anims[0]`) |
+| X010 0x80131DFC/E14 (decor) | never hit | AREA10 all 9 sections; decor 3:3F, 4:35, biting plant 2:07 forced in s0/s4 |
+| X014 0x8012A090, 0x8012A58C..0x8012A780 | never hit | AREA14 all 8 sections; decor 2:4B, 3:50/51/52/23/61, 4:3A/3C forced in s2/s3/s7 |
+| X002 0x8011F2BC/CC | never hit | AREA02 all sections; decor 2:18, 3:2C forced in s1/s2 |
+| X019 0x80116178/88 (copy of X002's) | not run | the debug select poke for area 19 lands in AREA02; static only |
+
+**Computed selection, re-checked statically** (capstone over the nine owner overlays and MAIN0, throw-away scripts):
+- **Every store to TObj +0x24** was traced back to its source register: a word loaded from a table (`lw`) or a lui/addiu constant. The only
+  arithmetic sources are the animation advance routines (`AnimAdvance`, `AnimAdvanceWithBox`, `tickAnimationFixedRate`, the X003/X004
+  `komaPigAnimAdvance` copies: +8 to the next entry, or the pointer word after a 0x4000 entry), which follow a script to its end and never cross
+  a 0x8000 terminator. (X009 0x8011A3E0 stores to +0x24 of a camera struct, not an object.) Counts of `sw rX, 0x24(obj)`: X002 59 load / 73 const,
+  X003 221 / 73 (+3 advance), X004 217 / 73 (+3), X008 35 / 73, X009 125 / 78, X010 133 / 78, X011 73 / 73, X014 76 / 74, X019 35 / 73.
+- **`AnimJump(o, n)` is the only base + index arithmetic on a script** (`o->anim += n` entries, MAIN0 0x8001FE94). In the area code of the nine
+  overlays every call passes n = 0, directly or through the NPC wrappers `npcSetAnim` / `sevenFriendsSetAnim` / `sevenFriendsMemberSetAnim`
+  (all callers pass k = 0); the X004 / X010 wrappers (`mermaidSetAnim`, `townHallWorkerSetAnim`, `scaredGoldVolunteerSetAnim`,
+  `paintingSlotHintNpcSetAnim`, `tenThousandYearElderSetAnim`) have no callers. The non-zero constants (2, 3, 4, 0xF, `lbu` from a table)
+  are in the shared player code and move Tombi's MAIN0 scripts.
+- **Table indexing** (`table[n]`, `D_x[subtype].anims[n]`, the item descriptors' `anims[b0c]`) loads a word, and no word holds an address in
+  any window: not in the owner overlay, not in MAIN0, and not in any file on the disc read in the same overlay (scan of all 2287 files; the
+  only raw hits are inside STR movies and GAM image data).
 
 **Images** (scratchpad of the session, not in the repo): per script a GIF `<prefix>_<address>.gif`, per owner a sheet
 `<prefix>_sheet.png` (one row per script, frame numbers on top) and an atlas `<prefix>_spr.png` (all SPR frames of the table):
@@ -428,7 +478,9 @@ functions are those of the zombie sweep above (none moves an object along a rout
   The four duplicate subtype cases of `updateSegmentedCrawler` (0/1, 2, 3 each call Move) are where one subtype once called Wander [I].
 - Builds: **unreferenced in all three retail builds**. JP X01 has it at 0x80131DB8 (masked twin, overlay base 0x800E9AF8) and its
   `updateSegmentedCrawler` (one call, 0x80133618) only calls Move. USA X01 has it at 0x80132814 (the USA X01 file maps to base 0x800E7388) with no reference.
-  The beta's X01 is not on the local disc, and PrePre8 has no AREA01 code.
+  The beta's X01 is not on the local disc. **PrePre Vol. 8 (follow-up):** its single TOMBA.EXE does have the caterpillar, as class 2 type
+  0x13 (the PAL type id), with its own movers per subtype; neither Wander nor Move is in it (masked-shingle similarity <= 17 %), and the object is
+  never placed or spawned in the demo (docs/PREPRE8.md "The segmented caterpillar").
 - **Port: `--crawler-patrol`** (port/fixes.txt, off by default) makes the head run Wander instead of Move. Recorded: both
   caterpillars come down, run right to 1361, turn, run left and park one above the other at h 280, facing right, for good. Retail keeps
   looping. GIF side by side (retail | patrol); the patrol stays higher than the retail lanes. For the recording the camera was lifted by holding Tombi's y (throw-away hook), because the crawlers walk above the top of the normal view.
