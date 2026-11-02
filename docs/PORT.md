@@ -1053,6 +1053,18 @@ with new directory frames (link chain, XOR checksum); a non-Tombi product code o
 (default `tombi.mcd`); the PC launcher can also export one save as `.mcs`. Logic: `tools/save_import.py` (PC, also a
 CLI) and `SaveImport.java` (Android); the launchers only, never while the game runs.
 
+**Edit save (PC launcher only).** *Editar partida… / Edit save…*, next to Import / Export, opens the save editor
+([SAVE_EDITOR.md](SAVE_EDITOR.md), `tools/tombi_save_editor.py`) as a window of the launcher's own process on that same
+`tombi_mc0.mcd` (`App.edit_save` -> `tombi_save_editor.host_in_tk`: one QApplication beside Tk, its events pumped from
+Tk's loop by an `after()` timer, the window transient for the launcher's). In the launcher's interface language (the
+editor has the same nine). Refused while the game runs; while the editor is open *Play* is refused (the game would
+write the card the editor holds) and a save attempt while the game runs is refused in the editor too. *Save* writes the
+card back in place after copying the old one to `tombi_mc0.mcd.YYYYmmdd-HHMMSS.bak`; the launcher's settings are not
+touched. Closing the launcher closes the editor first (asking about unsaved edits). `tombi-port.exe` bundles
+PySide6-Essentials, the editor and its fonts (`port2-exe.yml`); the Linux build and a source checkout without PySide6
+show a message instead (and off Windows the launcher first checks in a child Python that Qt can open a window: a
+missing `libxcb-cursor0` would otherwise abort the whole launcher).
+
 ## Mods (tools/port_mods.py)
 
 Every mod is a set of options of the port binary, assembled by the launcher (the *Mods* tab shows each one with its

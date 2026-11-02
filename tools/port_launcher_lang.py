@@ -1030,3 +1030,28 @@ i18n.add({
     "da": {"c.fps": "Billedfrekvens", "fps.off": "50 (original)", "fps.auto": "Auto (skærmens opdateringshastighed)", "fps.unl": "Ubegrænset (uden vsync)",
            "l.fpshint": "Over 50 interpoleres mellembillederne mellem spillets trin; spillet beholder sin hastighed. Med softwarerendereren koster hvert mellembillede lige så meget som at tegne et billede."},
 })
+
+
+i18n.add({   # Edit save... (port_launcher.py App.edit_save)
+    "fr": {"b.saveedit": "Modifier…", "s.editnocard": "Il n'y a pas encore de carte mémoire du portage :\n{}\nJouez et sauvegardez une fois (ou importez une sauvegarde) avant de la modifier.",
+           "s.editnoqt": "L'éditeur de sauvegardes a besoin de PySide6 (pip install PySide6-Essentials) : {}", "s.editrun": "fermez le jeu avant d'enregistrer",
+           "s.editopen": "Fermez l'éditeur de sauvegardes avant de jouer."},
+    "de": {"b.saveedit": "Bearbeiten…", "s.editnocard": "Es gibt noch keine Memory Card der Portierung:\n{}\nSpiele und speichere einmal (oder importiere einen Spielstand), bevor du ihn bearbeitest.",
+           "s.editnoqt": "Der Spielstand-Editor braucht PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "schließe das Spiel vor dem Speichern",
+           "s.editopen": "Schließe den Spielstand-Editor, bevor du spielst."},
+    "it": {"b.saveedit": "Modifica…", "s.editnocard": "Non c'è ancora una memory card del port:\n{}\nGioca e salva una volta (o importa un salvataggio) prima di modificarlo.",
+           "s.editnoqt": "L'editor dei salvataggi richiede PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "chiudi il gioco prima di salvare",
+           "s.editopen": "Chiudi l'editor dei salvataggi prima di giocare."},
+    "nl": {"b.saveedit": "Bewerken…", "s.editnocard": "Er is nog geen geheugenkaart van de port:\n{}\nSpeel en sla één keer op (of importeer een spel) voordat je het bewerkt.",
+           "s.editnoqt": "De save-editor heeft PySide6 nodig (pip install PySide6-Essentials): {}", "s.editrun": "sluit het spel voor het opslaan",
+           "s.editopen": "Sluit de save-editor voordat je speelt."},
+    "pt": {"b.saveedit": "Editar…", "s.editnocard": "Ainda não há cartão de memória do port:\n{}\nJogue e guarde uma vez (ou importe um jogo) antes de o editar.",
+           "s.editnoqt": "O editor de jogos guardados precisa do PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "feche o jogo antes de guardar",
+           "s.editopen": "Feche o editor de jogos guardados antes de jogar."},
+    "sv": {"b.saveedit": "Redigera…", "s.editnocard": "Det finns inget minneskort för porten ännu:\n{}\nSpela och spara en gång (eller importera ett spel) innan du redigerar det.",
+           "s.editnoqt": "Sparfilsredigeraren behöver PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "stäng spelet innan du sparar",
+           "s.editopen": "Stäng sparfilsredigeraren innan du spelar."},
+    "da": {"b.saveedit": "Redigér…", "s.editnocard": "Der er endnu intet hukommelseskort til porten:\n{}\nSpil og gem én gang (eller importér et spil), før du redigerer det.",
+           "s.editnoqt": "Editoren til gemte spil kræver PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "luk spillet, før du gemmer",
+           "s.editopen": "Luk editoren til gemte spil, før du spiller."},
+})

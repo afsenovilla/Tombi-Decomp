@@ -9,6 +9,7 @@ on:
     paths:
       - tools/tombi_save.py
       - tools/tombi_save_editor.py
+      - tools/tombi_save_editor_lang.py
       - tools/test_tombi_save.py
       - tools/test_tombi_save_editor.py
       - tools/save_editor_assets/**
@@ -49,7 +50,7 @@ jobs:
         shell: bash
         run: |
           pyinstaller --onefile --windowed --name TombiSaveEditor --distpath build/exe --workpath build/pyi --specpath . \
-            --paths tools --hidden-import tombi_save --hidden-import text_core --hidden-import wfm_py --hidden-import cdfiles \
+            --paths tools --hidden-import tombi_save --hidden-import tombi_save_editor_lang --hidden-import text_core --hidden-import wfm_py --hidden-import cdfiles \
             --hidden-import i18n --hidden-import text_strings --hidden-import title_layout --hidden-import verb_order --hidden-import menu_text --hidden-import memcard_text --add-data "tools/wfm_charmap.json;." \
             --add-data "tools/save_editor_assets;save_editor_assets" \
             --exclude-module tkinter --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml \

@@ -129,6 +129,16 @@ i18n.add({
 
 
 # ---------------------------------------------------------------------------------------------- files
+i18n.add({   # Edit save... (the save editor in a window of the launcher); the other languages: port_launcher_lang.py
+    "es": {"b.saveedit": "Editar partida…", "s.editnocard": "Todavía no hay tarjeta de memoria del port:\n{}\nJuega y guarda una vez (o importa una partida) antes de editarla.",
+           "s.editnoqt": "El editor de partidas necesita PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "cierra el juego antes de guardar",
+           "s.editopen": "Cierra el editor de partidas antes de jugar."},
+    "en": {"b.saveedit": "Edit save…", "s.editnocard": "There is no port memory card yet:\n{}\nPlay and save once (or import a save) before editing it.",
+           "s.editnoqt": "The save editor needs PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "close the game before saving",
+           "s.editopen": "Close the save editor before playing."},
+})
+
+
 def app_dir():
     """Folder of the launcher: next to the exe when frozen (settings, MAIN0.EXE, log), else the repo's build/."""
     if getattr(sys, "frozen", False):
@@ -698,6 +708,7 @@ class App:
         self.root = root
         self.s = load_settings()
         self.proc = None
+        self.editor = None           # the save editor window (edit_save), while open
         self.log_path = os.path.join(app_dir(), "tombi-port.log")   # the last run's log (Copy log works before a run too)
         self.vars = {}
         self.page = "play"
@@ -925,6 +936,7 @@ class App:
         sr.pack(fill="x", pady=(8, 0))
         ttk.Button(sr, text=tr("b.saveimp"), command=self.import_save).pack(side="left")
         ttk.Button(sr, text=tr("b.saveexp"), command=self.export_save).pack(side="left", padx=(8, 0))
+        ttk.Button(sr, text=tr("b.saveedit"), command=self.edit_save).pack(side="left", padx=(8, 0))
 
         o, c = self.card(f)
         o.pack(fill="x", pady=(12, 0))
@@ -2033,6 +2045,48 @@ class App:
         except (SI.ImportError_, OSError) as e:
             messagebox.showerror(tr("title"), tr("s.saveerr", e))
 
+    def editor_open(self):
+        try:
+            return self.editor is not None and self.editor.isVisible()
+        except RuntimeError:            # the Qt object is gone
+            self.editor = None
+            return False
+
+    def edit_save(self):
+        """Edit save...: the save editor (tools/tombi_save_editor.py, docs/SAVE_EDITOR.md) in a window of this process,
+        on the port's card (card_file).  Not while the game runs (nor saves while it runs); saving overwrites the card
+        and keeps a timestamped .bak next to it."""
+        if self.editor_open():
+            self.editor.raise_()
+            self.editor.activateWindow()
+            return
+        if self._save_busy():
+            return
+        card = self.card_file()
+        if not os.path.isfile(card):
+            messagebox.showinfo(tr("title"), tr("s.editnocard", card))
+            return
+        try:
+            import tombi_save_editor as SE
+        except ImportError as e:        # running from source without PySide6
+            messagebox.showerror(tr("title"), tr("s.editnoqt", e))
+            return
+        why = SE.qt_problem()
+        if why:                         # (Qt would abort this process)
+            messagebox.showerror(tr("title"), tr("s.editnoqt", why))
+            return
+
+        def guard():
+            return tr("s.editrun") if self.proc and self.proc.poll() is None else None
+
+        def closed():
+            self.editor = None
+        try:
+            self.editor = SE.host_in_tk(self.root, card, lang=i18n.current(), write_guard=guard, on_closed=closed)
+        except Exception as e:
+            self.editor = None
+            messagebox.showerror(tr("title"), tr("s.saveerr", e))
+
     def check_disc(self):
         self.collect()
         image = bin_of_cue(self.s["disc"])
@@ -2140,6 +2194,11 @@ class App:
         return cmd
 
     def play(self):
+        if self.editor_open():          # the game would read (and write) the card the editor holds
+            messagebox.showwarning(tr("title"), tr("s.editopen"))
+            self.editor.raise_()
+            self.editor.activateWindow()
+            return
         cmd = self.command()
         self.cmd_text.delete("1.0", "end")
         self.cmd_text.insert("1.0", subprocess.list2cmdline(cmd))
@@ -2277,6 +2336,10 @@ class App:
             self.proc.terminate()
 
     def on_close(self):
+        if self.editor_open():
+            self.editor.close()         # asks about unsaved edits; No keeps both windows open
+            if self.editor_open():
+                return
         self.collect()
         self.stop()
         self.root.destroy()

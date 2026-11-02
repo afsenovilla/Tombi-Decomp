@@ -16,7 +16,7 @@ sys.path.insert(0, HERE)
 import tombi_save as T  # noqa: E402
 
 from PySide6.QtCore import Qt, QSize, QRectF, QByteArray, QAbstractTableModel, QModelIndex, QSortFilterProxyModel, \
-    QTimer, Signal  # noqa: E402
+    QTimer, Signal, QEvent  # noqa: E402
 from PySide6.QtGui import QFont, QFontDatabase, QIcon, QPixmap, QPainter, QImage, QColor, QPen, QAction, \
     QKeySequence, QPainterPath, QFontMetrics  # noqa: E402
 from PySide6.QtSvg import QSvgRenderer  # noqa: E402
@@ -69,6 +69,8 @@ UI = {
         "datahint": "Item icons and names come from your disc at run time; nothing is stored.",
         "lv": "Lv", "sec": "Section", "spawn": "Spawn point", "area": "Area", "edit_ev": "event states",
         "edit_item": "item {0}", "tip_cycle": "Double-click a row to cycle its state",
+        "item_n": "Item #{0}", "event_n": "Event #{0}", "busy": "Not saved: {0}",
+        "savedstamp": "Saved {0} · backup {1}", "ui_lang": "Language",
     },
     "es": {
         "open": "Abrir tarjeta", "data": "Datos del juego", "save": "Guardar", "saveas": "Guardar como",
@@ -102,6 +104,8 @@ UI = {
         "range": "{0} – {1}", "events_n": "{0} / {1}", "datahint": "Los iconos y nombres se leen de tu disco al "
         "ejecutar; no se guarda nada.", "lv": "Nv", "sec": "Sección", "spawn": "Punto de aparición", "area": "Área",
         "edit_ev": "estados de eventos", "edit_item": "objeto {0}", "tip_cycle": "Doble clic en una fila cambia su estado",
+        "item_n": "Objeto #{0}", "event_n": "Evento #{0}", "busy": "No guardado: {0}",
+        "savedstamp": "Guardado {0} · copia de seguridad {1}", "ui_lang": "Idioma",
     },
 }
 FIELD_LABELS = {
@@ -124,6 +128,14 @@ FIELD_HINTS = {
     "es": {"max_health": "8 normalmente, hasta 16 con el cuenco dorado", "golden_bowl": "distinto de 0: vida "
            "máxima hasta 16", "level": "el Nivel del título de la partida", "health": "se rellena al cargar"},
 }
+# the seven other languages of the PC launcher (tools/i18n.py) live in tombi_save_editor_lang.py; a missing key = English
+import tombi_save_editor_lang as _LANG  # noqa: E402
+LANG_NAMES = {"en": "English", "es": "Español", "fr": "Français", "de": "Deutsch", "it": "Italiano", "nl": "Nederlands",
+              "pt": "Português", "sv": "Svenska", "da": "Dansk"}
+NAMES_LANG = {"en": "B", "es": "S", "fr": "F", "de": "G", "it": "I", "nl": "H", "pt": "P", "sv": "W", "da": "D"}
+for _tab, _extra in ((UI, _LANG.UI), (FIELD_LABELS, _LANG.FIELD_LABELS), (FIELD_HINTS, _LANG.FIELD_HINTS)):
+    for _code in LANG_NAMES:
+        _tab[_code] = {**_tab["en"], **_tab.get(_code, {}), **_extra.get(_code, {})}
 
 # ---- theme -----------------------------------------------------------------------------------------------------
 THEMES = {
@@ -626,10 +638,19 @@ def load_cfg():
 
 
 class Editor(QMainWindow):
-    def __init__(self, card=None, cfg=None):
+    """The editor window.  Standalone (main()) or hosted by another program (host_in_tk(): the PC launcher), which
+    passes lang (its interface language, "en" for one the editor lacks), write_guard (called before every write:
+    returns a reason not to write, e.g. the game is running, or None), stamp_bak (the backup of an overwritten card is
+    CARD.YYYYmmdd-HHMMSS.bak instead of CARD.bak) and on_closed (called once when the window closes)."""
+
+    def __init__(self, card=None, cfg=None, lang=None, write_guard=None, stamp_bak=False, on_closed=None):
         super().__init__()
         self.cfg = load_cfg() if cfg is None else cfg
-        self.lang = self.cfg.get("ui", "es") if self.cfg.get("ui") in UI else "es"
+        self.write_guard, self.stamp_bak, self.on_closed = write_guard, stamp_bak, on_closed
+        if lang:
+            self.lang = lang if lang in UI else "en"
+        else:
+            self.lang = self.cfg.get("ui", "es") if self.cfg.get("ui") in UI else "es"
         self.theme_name = self.cfg.get("theme", "dark") if self.cfg.get("theme") in THEMES else "dark"
         self.card = self.save = None
         self.saves = []
@@ -662,7 +683,7 @@ class Editor(QMainWindow):
 
     def names_lang(self):
         n = self.cfg.get("names_lang")
-        return n if n in T.LANGS else ("S" if self.lang == "es" else "B")
+        return n if n in T.LANGS else NAMES_LANG.get(self.lang, "B")
 
     def save_cfg(self):
         try:
@@ -677,7 +698,7 @@ class Editor(QMainWindow):
         return svg_icon(name, color or self.theme["text"], size)
 
     def item_name(self, i):
-        return self.names["items"].get(i) or ("Item #%d" % i if self.lang == "en" else "Objeto #%d" % i)
+        return self.names["items"].get(i) or self.L["item_n"].format(i)
 
     def event_title(self, i):
         t = self.names["events"].get(i)
@@ -685,7 +706,7 @@ class Editor(QMainWindow):
             return t
         if self.names["events"]:
             return self.L["untitled"]
-        return ("Event #%d" if self.lang == "en" else "Evento #%d") % i
+        return self.L["event_n"].format(i)
 
     def state_name(self, v):
         L = self.L
@@ -740,7 +761,9 @@ class Editor(QMainWindow):
         logo = QLabel()
         logo.setPixmap(self.logo_pixmap(30))
         h.addWidget(logo)
-        h.addWidget(label("Tombi! Save Editor", "appTitle"))
+        title = label("Tombi! Save Editor", "appTitle")
+        title.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        h.addWidget(title)
         h.addSpacing(10)
         self.file_chip = label("", "fileChip")
         self.dirty_chip = label("●  " + L["unsaved"], "dirtyChip")
@@ -755,6 +778,7 @@ class Editor(QMainWindow):
             b.setIcon(self.icon(icon, 16, t["primary_t"] if name == "primary" else None))
             b.setIconSize(QSize(16, 16))
             b.setCursor(Qt.PointingHandCursor)
+            b.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)     # longer languages widen the window instead
             b.clicked.connect(fn)
             if tip:
                 b.setToolTip(tip)
@@ -764,16 +788,16 @@ class Editor(QMainWindow):
         self.undo_btn = btn(L["undo"], "undo", self.undo, tip="Ctrl+Z")
         h.addWidget(self.undo_btn)
         h.addSpacing(6)
-        grp = QButtonGroup(bar)
-        for code, name in (("en", "segL"), ("es", "segR")):
-            b = QPushButton(code.upper())
-            b.setObjectName(name)
-            b.setCheckable(True)
-            b.setChecked(code == self.lang)
-            b.setCursor(Qt.PointingHandCursor)
-            b.clicked.connect(lambda _=False, c=code: self.set_lang(c))
-            grp.addButton(b)
-            h.addWidget(b)
+        lc = self.lang_cb = QComboBox()
+        lc.setObjectName("langCombo")
+        lc.setToolTip(L["ui_lang"])
+        lc.setCursor(Qt.PointingHandCursor)
+        for i, (code, name) in enumerate(LANG_NAMES.items()):
+            lc.addItem(code.upper(), code)
+            lc.setItemData(i, name, Qt.ToolTipRole)
+        lc.setCurrentIndex(list(LANG_NAMES).index(self.lang))
+        lc.currentIndexChanged.connect(lambda ix: self.set_lang(lc.itemData(ix)))
+        h.addWidget(lc)
         th = QToolButton()
         th.setObjectName("ghost")
         th.setIcon(self.icon("sun" if self.theme_name == "dark" else "moon", 18))
@@ -1775,10 +1799,21 @@ class Editor(QMainWindow):
                 s.fix_checksum()
 
     def write(self, out):
+        why = self.write_guard() if self.write_guard else None
+        if why:
+            self.set_status(self.L["busy"].format(why), "err")
+            return False
+        stamped = None
         try:
             self.validate()
             same = os.path.abspath(out) == os.path.abspath(self.card.path)
-            self.card.save(out)
+            if same and self.stamp_bak and os.path.exists(out):
+                import shutil
+                stamped = "%s.%s.bak" % (out, time.strftime("%Y%m%d-%H%M%S"))
+                shutil.copy2(out, stamped)
+                self.card.save(out, backup=False)
+            else:
+                self.card.save(out)
             if not same:
                 self.card.path = out
                 self.card.orig = open(out, "rb").read()
@@ -1790,7 +1825,9 @@ class Editor(QMainWindow):
         self.refresh_slots(light=True)
         self.card_name.setText(os.path.basename(out))
         bak = out + ".bak"
-        if same and os.path.exists(bak):
+        if stamped:
+            self.set_status(self.L["savedstamp"].format(out, os.path.basename(stamped)), "ok")
+        elif same and os.path.exists(bak):
             self.set_status(self.L["savedbak"].format(out, os.path.basename(bak)), "ok")
         else:
             self.set_status(self.L["saved"].format(out), "ok")
@@ -1826,17 +1863,85 @@ class Editor(QMainWindow):
             self.cfg["tab"] = self.tab_group.checkedId()
             self.save_cfg()
             e.accept()
+            cb, self.on_closed = self.on_closed, None
+            if cb:
+                cb()
         else:
             e.ignore()
 
 
 def make_app(argv=None):
     app = QApplication.instance() or QApplication(argv or sys.argv)
-    for f in ("Nunito-Regular.ttf", "Nunito-Bold.ttf", "Nunito-ExtraBold.ttf", "LilitaOne-Regular.ttf"):
-        QFontDatabase.addApplicationFont(os.path.join(ASSETS, "fonts", f))
+    if not getattr(app, "_tombi_fonts", False):
+        for f in ("Nunito-Regular.ttf", "Nunito-Bold.ttf", "Nunito-ExtraBold.ttf", "LilitaOne-Regular.ttf"):
+            QFontDatabase.addApplicationFont(os.path.join(ASSETS, "fonts", f))
+        app._tombi_fonts = True
     app.setFont(QFont("Nunito", 10))
     app.setApplicationName(APP)
     return app
+
+
+_QT_OK = None
+
+
+def qt_problem():
+    """None when a Qt window can be opened in this process, else why not.  Qt aborts the whole process when its
+    platform plugin cannot load (Linux without libxcb-cursor0, no display...), which in the launcher would take the
+    launcher down with it: off Windows it is tried first in a child Python (source runs; a frozen build cannot)."""
+    global _QT_OK
+    if _QT_OK is None:
+        _QT_OK = ""
+        if os.name != "nt" and not getattr(sys, "frozen", False) and not QApplication.instance():
+            import subprocess
+            try:
+                r = subprocess.run([sys.executable, "-c", "from PySide6.QtWidgets import QApplication; QApplication([])"],
+                                   capture_output=True, text=True, timeout=30)
+                if r.returncode:
+                    lines = [l for l in (r.stderr or "").splitlines() if l.strip()]
+                    _QT_OK = " ".join(lines[:2])[:300] or "Qt exit code %d" % r.returncode
+            except Exception as e:
+                _QT_OK = str(e)
+    return _QT_OK or None
+
+
+def host_in_tk(tk_root, card=None, lang=None, write_guard=None, on_closed=None):
+    """Open the editor from a Tk program (the PC launcher, tools/port_launcher.py) in the same process: one
+    QApplication next to Tk, its events pumped from Tk's main loop (an after() timer) while the window is open, and
+    the window kept above the Tk one (transient for it).  Overwriting the card keeps a timestamped .bak.  Returns the
+    Editor; on_closed() runs once when it closes."""
+    app = make_app([sys.argv[0] if sys.argv else APP])
+    app.setQuitOnLastWindowClosed(False)       # closing the editor must not end anything else
+    state = {"open": True}
+
+    def closed():
+        state["open"] = False
+        if on_closed:
+            on_closed()
+
+    w = Editor(card, lang=lang, write_guard=write_guard, stamp_bak=True, on_closed=closed)
+    app.setWindowIcon(QIcon(w.logo_pixmap(64)))
+    w.show()
+    try:                                       # stays over the launcher, minimises with it (best effort)
+        from PySide6.QtGui import QWindow
+        tk_root.update_idletasks()
+        w._tk_parent = QWindow.fromWinId(int(tk_root.wm_frame(), 16))
+        w.windowHandle().setTransientParent(w._tk_parent)
+    except Exception:
+        pass
+
+    def pump():
+        try:
+            app.processEvents()
+            app.sendPostedEvents(None, QEvent.DeferredDelete)   # (deleteLater outside exec())
+        except Exception:
+            pass
+        if state["open"]:
+            tk_root.after(15, pump)
+        else:
+            w.deleteLater()
+            app.sendPostedEvents(None, QEvent.DeferredDelete)
+    tk_root.after(15, pump)
+    return w
 
 
 def main():

@@ -7,6 +7,12 @@ of the workflow `save-editor-exe.yml`). The format is in [SAVE_FORMAT.md](SAVE_F
 
 Run from source: `pip install PySide6-Essentials` then `python3 tools/tombi_save_editor.py [CARD]`.
 
+**In the PC launcher.** `tombi-port.exe` / `tools/port_launcher.py` has *Edit save…* next to Import / Export save
+(docs/PORT.md "Edit save"): the same editor opens as a window of the launcher, in the launcher's language, on the port's
+`tombi_mc0.mcd` from the save folder. There *Save* keeps a timestamped `tombi_mc0.mcd.YYYYmmdd-HHMMSS.bak` and is
+refused while the game runs. Hosting API: `host_in_tk(tk_root, card, lang, write_guard, on_closed)`; the `Editor`
+class takes `lang`, `write_guard` (returns a reason not to write, or None), `stamp_bak` and `on_closed`.
+
 ## Use
 
 - **Open card** (or drop the file on the window): an emulator card (`.mcd`, `.mcr`, `.gme`, `.vgs`, `.mem`, `.mcs`)
@@ -16,7 +22,8 @@ Run from source: `pip install PySide6-Essentials` then `python3 tools/tombi_save
   names and the inventory item icons are then read from it at run time (nothing is cached or shipped); without it the
   editor shows ids. The path is remembered in `~/.tombi_save_editor.json`. Misc > game text language picks the
   language of those names (English, Español, Français, ...).
-- **EN / ES** switches the interface language; the sun / moon button switches dark / light theme.
+- The language box (EN, ES, FR, DE, IT, NL, PT, SV, DA: the PC launcher's nine; en / es in the editor,
+  the others in `tools/tombi_save_editor_lang.py`, a missing string falls back to English) switches the interface; the sun / moon button switches dark / light theme.
 - Tabs:
   - **Overview**: play time, AP, level, lives, vitality, location, events completed, items owned, checksum.
   - **Player**: HP, max HP (1..8, up to 16 with the golden bowl), lives, golden bowl, bonus hearts, AP, title level,
