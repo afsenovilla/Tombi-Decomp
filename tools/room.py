@@ -290,19 +290,46 @@ def build_glb(v, pk, scale=0.01, sky=None):
             + struct.pack("<II", len(blob), 0x004E4942) + blob)
 
 
+def list_piece(lst, kind, prefix=""):
+    """(file name, bytes) of the first record of load list lst with this kind whose file name starts with prefix, or (None, None).  A file
+    record returns the whole file.  A piece (type 0xFFFFFFFF) is sliced out of the file before it: a packed container (type 3) holds its own
+    first piece (`arg` bytes, any kind: WMD, WHM, SPR...) at offset 0, and each following piece starts where the previous one ends
+    (aligned to 4).  E.g. AREA01 lists 1..5: `D004.GAM` = WHM 0x70 + WMD 0x50 + objects 0x51; AREA09 lists 2/3: SPR first."""
+    data, off, name = None, 0, None
+    for r in lst:
+        if r["type"] != 0xFFFFFFFF:
+            name = r["name"]
+            data = V.resource(name) if name.startswith(prefix) else None
+            off = (r["arg"] + 3) & ~3 if r["type"] == 3 else 0
+            if r["kind"] == kind and data:
+                return name, data
+        elif data is not None:
+            if r["kind"] == kind:
+                return name, data[off:off + r["arg"]]
+            off = (off + r["arg"] + 3) & ~3  # the loader aligns each piece to 4 (area000.list_blocks)
+    return None, None
+
+
 def room_glb(ld, idx):
     """(name, glb bytes) of the WMD of load list idx of area ld, or (None, None)."""
-    lst = A.load_lists()[ld][idx]
-    rec = [r for r in lst if r["kind"] == 0x50 and r["name"].startswith("AREA")]
-    d = rec and V.resource(rec[0]["name"])
+    nm, d = list_piece(A.load_lists()[ld][idx], 0x50, "AREA")
     if not d:
         return None, None
     sp = find_sky(ld, idx)
-    return rec[0]["name"], build_glb(V.area_context(ld, idx), parse_wmd_ex(d), sky=load_sky(sp) if sp else None)
+    return nm, build_glb(V.area_context(ld, idx), parse_wmd_ex(d), sky=load_sky(sp) if sp else None)
+
+
+def _stem(seen, ld, i, nm):
+    """output stem of room ld:i; a WMD file shared by several lists (AREA01 D004.GAM, lists 1..5) gets the list index after the first one."""
+    st = nm.replace("/", "_").rsplit(".", 1)[0]
+    if st in seen:
+        st += "_%s_%d" % (ld, i)
+    seen.add(st)
+    return labels.fname("room:%s:%d" % (ld, i), st)
 
 
 def export_glb(out, log=print):
-    n = 0
+    n, seen = 0, set()
     for ld, lists in A.load_lists().items():
         for i in range(len(lists)):
             try:
@@ -311,27 +338,23 @@ def export_glb(out, log=print):
                 log("room %s:%d skipped: %r" % (ld, i, e))
                 continue
             if g:
-                V.write(os.path.join(out, labels.fname("room:%s:%d" % (ld, i), nm.replace("/", "_").rsplit(".", 1)[0]) + ".glb"), g)
+                V.write(os.path.join(out, _stem(seen, ld, i, nm) + ".glb"), g)
                 n += 1
     return n
 
 
 def room_image(ld, idx, scale=1):
     """PNG bytes of the WMD of load list idx of area ld ('AR00'), or None."""
-    lst = A.load_lists()[ld][idx]
-    rec = [r for r in lst if r["kind"] == 0x50 and r["name"].startswith("AREA")]
-    if not rec:
-        return None, None
-    d = V.resource(rec[0]["name"])
+    nm, d = list_piece(A.load_lists()[ld][idx], 0x50, "AREA")
     if not d:
         return None, None
     png = render(V.area_context(ld, idx), parse_wmd(d), scale)
     sp = find_sky(ld, idx)
-    return rec[0]["name"], sky_behind(png, load_sky(sp)) if sp else png
+    return nm, sky_behind(png, load_sky(sp)) if sp else png
 
 
 def export_rooms(out, log=print, scale=2):
-    n = 0
+    n, seen = 0, set()
     for ld, lists in A.load_lists().items():
         for i in range(len(lists)):
             try:
@@ -340,7 +363,7 @@ def export_rooms(out, log=print, scale=2):
                 log("room %s:%d skipped: %r" % (ld, i, e))
                 continue
             if png:
-                V.write(os.path.join(out, labels.fname("room:%s:%d" % (ld, i), nm.replace("/", "_").rsplit(".", 1)[0]) + ".png"), png)
+                V.write(os.path.join(out, _stem(seen, ld, i, nm) + ".png"), png)
                 n += 1
     return n
 
