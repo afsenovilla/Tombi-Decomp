@@ -80,6 +80,7 @@ jobs:
           echo "game=v1-${{ env.SDL2_VERSION }}-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/areas.py', 'tools/units.py', 'tools/requirements.txt', 'tools/setup_native.sh', 'port2/**', 'port/**', 'tools/extract_data.py', 'THIRD_PARTY_NOTICES.md') }}" >> "$GITHUB_OUTPUT"
 
   game-win:
+    if: false   # TEMP debug run (AREA06 2)
     needs: plan
     runs-on: ubuntu-24.04
     outputs:
@@ -290,7 +291,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: build/linux-bin
-          key: tombi-port-game-linux-${{ needs.plan.outputs.game }}
+          key: tombi-port-game-linux-dbg1-${{ needs.plan.outputs.game }}
 
       - uses: actions/setup-python@v5
         if: steps.bin.outputs.cache-hit != 'true'
@@ -446,6 +447,68 @@ jobs:
           cp THIRD_PARTY_NOTICES.md build/linux-bin/
           ls -l build/linux-bin
 
+      - name: TEMP debug AREA06 2
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        run: |
+          sudo apt-get install -y gdb >/dev/null
+          ARGS="--headless --skip-movies --data $RUNNER_TEMP/data --frames 3600 --poke 900:1F8001B4:1 --poke 1250:8009C960:6:2 --poke 1250:8009C962:2:2 --pad-script 1000:start,1300:circle:3,1500:right:300,1800:cross:3x8/40,2150:left:300,2450:square:3x8/40,2800:right+cross:3x30/60,3100:up:40,3160:down:40,3220:right:200,3450:cross:3x8/40"
+          (build/port2/tombi2 -v $ARGS > "$RUNNER_TEMP/run.log" 2>&1; echo "exit $?" >> "$RUNNER_TEMP/run.log") || true
+          grep -v "kernel-area access" "$RUNNER_TEMP/run.log" | grep -n "port2\]" | tail -80
+          nm build/port2/tombi2 | grep -w -E "PLAYER|DAT_800a6268|port_ram|port_resolve_call|D_801229A8|PLAYER_ANIM" || true
+          grep -n -E "^(PLAYER|DAT_800a6268|D_801229A8|D_801229A8__[0-9A-F]+|PLAYER_ANIM) =" build/port2/gen/syms.ld || true
+          cat > "$RUNNER_TEMP/g.gdb" <<'GDB'
+          set pagination off
+          set confirm off
+          set width 0
+          handle SIGSEGV nostop noprint pass
+          handle SIGBUS nostop noprint pass
+          handle SIGFPE nostop noprint pass
+          handle SIGPIPE nostop noprint pass
+          handle SIGUSR1 nostop noprint pass
+          handle SIGUSR2 nostop noprint pass
+          break port_resolve_call if *(unsigned int*)($esp+4) == 0x801194AC
+          commands
+            silent
+            printf "=== resolve 801194ac\n"
+            bt 12
+            x/150wx (char*)&DAT_800a6268
+            x/12wx (char*)&PLAYER
+            continue
+          end
+          watch -l *(unsigned int*)((char*)&PLAYER+0x24) if *(unsigned int*)((char*)&PLAYER+0x24) == 0x61680
+          commands
+            printf "=== PLAYER.anim = 61680\n"
+            bt 16
+            info registers
+            x/16i $pc-40
+            continue
+          end
+          watch -l *(unsigned char*)((char*)&DAT_800a6268+2) if *(unsigned char*)((char*)&DAT_800a6268+2) == 6
+          commands
+            printf "=== pool[0].type = 6\n"
+            bt 16
+            continue
+          end
+          watch -l *(unsigned char*)((char*)&DAT_800a6268+0x3c+2) if *(unsigned char*)((char*)&DAT_800a6268+0x3c+2) == 6
+          commands
+            printf "=== pool[1].type = 6\n"
+            bt 16
+            continue
+          end
+          watch -l *(unsigned char*)((char*)&DAT_800a6268+0x78+2) if *(unsigned char*)((char*)&DAT_800a6268+0x78+2) == 6
+          commands
+            printf "=== pool[2].type = 6\n"
+            bt 16
+            continue
+          end
+          run
+          bt 20
+          info registers
+          GDB
+          sed -i 's/^          //' "$RUNNER_TEMP/g.gdb"
+          timeout 1500 gdb -batch -x "$RUNNER_TEMP/g.gdb" --args build/port2/tombi2 $ARGS > "$RUNNER_TEMP/gdb.log" 2>&1 || true
+          grep -v "kernel-area access" "$RUNNER_TEMP/gdb.log" | grep -v "^\[New Thread\|^\[Thread .* exited" | head -400
+
       - name: Save ccache
         if: always() && steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
         uses: actions/cache/save@v4
@@ -458,7 +521,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: build/linux-bin
-          key: tombi-port-game-linux-${{ needs.plan.outputs.game }}
+          key: tombi-port-game-linux-dbg1-${{ needs.plan.outputs.game }}
 
       - name: Result
         id: ok
@@ -540,6 +603,7 @@ jobs:
           retention-days: 90
 
   launcher-linux:
+    if: false   # TEMP
     needs: game-linux
     if: needs.game-linux.outputs.ok == 'true'
     runs-on: ubuntu-24.04
