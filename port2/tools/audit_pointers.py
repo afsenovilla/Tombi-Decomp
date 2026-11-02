@@ -281,10 +281,19 @@ class Audit:
         out = defaultdict(list)
         words = [(MAIN0_LOAD + 4 * i, int.from_bytes(P.blob[4 * i:4 * i + 4], "little")) for i in range(len(P.blob) // 4)]
         self.scan_code_tables("MAIN0", P, words, out)
+        # emit_data's data runs: consecutive overlay-region words with one at no overlay's function start are a table
+        # of data pointers, every word data (no thunk, no native function: D_8007DE38[6] = 0x801228BC)
+        data_runs, run = set(), []
+        for a, v in words + [(0, 0)]:
+            if a and not T.is_code(a) and OVL_BASE <= v < OVL_END and not (v & 3) and (v & 0xFFFF):
+                run.append((a, v)); continue
+            if any(w not in self.starts_all for _, w in run): data_runs.update(x for x, _ in run)
+            run = []
         rows = []
         for a, v in words:
             if T.is_code(a): continue
             if v < MAIN0_LOAD or v >= 0x80200000 or (v & 3) or (v & 0xFFFF) == 0: continue
+            if a in data_runs: rows.append((a, v, None, "data")); continue
             if v in T.thunkmap: rows.append((a, v, None, "thunk")); continue
             if v in T.addrmap: rows.append((a, v, "ok", T.addrmap[v])); continue
             if v in T.unit and v not in T.addrmap:                      # a function start with no native code: a stub
