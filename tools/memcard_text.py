@@ -17,7 +17,9 @@ Edits (the "menus" section of a *.tombipatch.json, keyed by file, like tools/men
   "messages":  {"<i>": "TEXT"}             repacked in their own pool (index order, 4-byte aligned starts as the native port's
                                            --lang relocation wants) and the table rewritten: may grow while the pool holds them
   "locations": {"<i>": "TEXT"}             rewritten in place (the room up to the next string); every entry of the table
-                                           pointing at the same string changes with it
+                                           pointing at the same string changes with it.  A name longer than its room:
+                                           the whole place-name pool is repacked (identical names shared, which frees
+                                           room) and the location tables rewritten
   "font":      {"<glyph>": [u, v, w, h, flag]}   MEMCARD_FONT records (0xA0.. = 12x12 button icons: 0xA8 (o), 0xAB (x);
                                            w = 0 draws nothing and does not advance)
   "iconParts": {"<i>": [x, y, u, v, w, h, cx, cy]}  MEMCARD_FILE_ICON_PARTS (0..2 = the "LV." of a save entry, 8x16 cells
@@ -182,17 +184,20 @@ def apply(data, spec):
         d[lo:hi] = pool + b"\xff" * (hi - lo - len(pool))
         for i, p in enumerate(ptrs):
             struct.pack_into("<I", d, L.msg + 4 * i, p)
+    locs = {}
     for k, t in (spec.get("locations") or {}).items():
         i = int(k, 0)
         if not 0 <= i < len(L.locations):
             raise MemcardError("place name %s does not exist (0..%d)" % (k, len(L.locations) - 1))
-        a = L.locations[i]
-        g = encode(t)
-        room = L.room(a)
-        if 2 * len(g) > room:
-            raise MemcardError("place name %d: %d bytes, %d of room" % (i, 2 * len(g), room))
-        o = L.off(a)
-        d[o:o + room] = _pack(g) + b"\xff" * (room - 2 * len(g))
+        locs[i] = encode(t)
+    if all(2 * len(g) <= L.room(L.locations[i]) for i, g in locs.items()):
+        for i, g in locs.items():
+            a = L.locations[i]
+            room = L.room(a)
+            o = L.off(a)
+            d[o:o + room] = _pack(g) + b"\xff" * (room - 2 * len(g))
+    elif locs:
+        _repack_locations(L, d, locs)
     for k, r in (spec.get("font") or {}).items():
         i = int(k, 0)
         if len(r) != 5 or not 0 <= i < 0x100:
@@ -206,6 +211,38 @@ def apply(data, spec):
     if len(d) != len(data):
         raise MemcardError("size changed")
     return bytes(d)
+
+
+def _repack_locations(L, d, locs):
+    """A place name longer than its room: the whole pool of place names (from the first to the padding after the last) is
+    repacked, identical strings shared (the disc repeats "Castillo de Hierro" ten times), starts 4-byte aligned, and every
+    pointer of the location tables rewritten. Refused if any other word of the overlay points into the pool."""
+    base = L.base
+    offs = sorted(L.off(a) for a in L.locations)
+    lo = offs[0]
+    hi = offs[-1] + 2 * len(L.string(base + offs[-1]))
+    while hi + 2 <= len(d) and _h(d, hi) in (0, 0xFFFF):
+        hi += 2
+    hi &= ~3
+    known = {j for v in L.location_refs.values() for j in v}
+    for j in range(0, len(d) - 3, 4):
+        if lo <= struct.unpack_from("<I", d, j)[0] - base < hi and j not in known:
+            raise MemcardError("place names: a word at %X points into their pool, it cannot be repacked" % j)
+    new = {L.off(a): g for a, g in ((L.locations[i], g) for i, g in locs.items())}
+    pool, where, moved = bytearray(), {}, {}
+    for o in offs:
+        g = tuple(new.get(o) or L.string(base + o))
+        if g not in where:
+            where[g] = lo + len(pool)
+            b = _pack(g)
+            pool += b + b"\xff\xff" * ((-len(b) // 2) % 2)
+        moved[o] = where[g]
+    if len(pool) > hi - lo:
+        raise MemcardError("place names: %d bytes, their pool holds %d" % (len(pool), hi - lo))
+    d[lo:hi] = pool + b"\xff" * (hi - lo - len(pool))
+    for a, js in L.location_refs.items():
+        for j in js:
+            struct.pack_into("<I", d, j, base + moved[a - base])
 
 
 def dump(data):

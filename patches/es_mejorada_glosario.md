@@ -92,3 +92,14 @@ tesoro?*, *Zumo de Fruta mortal*, *Planta un jardín de flores*, *La adivina roj
 Gran pez*, *Quiero la medalla de bronce / de plata / de oro*. La lista de eventos del submenú (D5SPSUB/D5SPSUB3, que
 también usa el panel) sigue los títulos: *La Montaña del Fénix* tiene allí su propia cadena (`eventNames`), separada de la
 de los nombres de lugar, que dicen *Montaña del Fénix*.
+
+## Lista de lugares del archivo de guardado (SYSTEM/D5SPSUB2.BIN)
+
+Un nombre que no cabe en su hueco ya no se recorta: `tools/memcard_text.py` reempaqueta todo el bloque de nombres de
+lugar (los repetidos, como los diez "Castillo de Hierro", se comparten, y eso deja sitio) y reescribe las tablas.
+Corregidos: *Cuevas de lava* (antes "Cueva de lava" por falta de sitio), *Nido del Fénix*, *Plaza de la caridad*,
+*Cámara del Anciano de 1.000.000 años* (antes "Cámara Anciano 1 millón años"; cabe en la fila como el de los 10.000
+años), *Cámara del Anciano milenario*, *Cámara del ladrón uno / dos / tres* (antes "Una cámara del ladrón", "Dos / Tres
+cámaras de ladrones": error de traducción de *Thief's Room One/Two/Three*), *Cámara de la cerradura*, *Cámara del
+escondite*, *Cámara de la risa*, *Cámara de los trucos*, *Cámara de la sombra*, *Cámara del llanto*, *Muros exteriores
+de la Isla de Cerdos* (antes "Muros externos de Isla Cerdos").
