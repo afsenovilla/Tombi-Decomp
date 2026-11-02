@@ -15,6 +15,9 @@ void tunnelClampPlayerToGates(TObj *o)
   short t;
   short n;
   unsigned short xx, yy;
+#ifdef PORT2
+  { extern int port_noclip; if (port_noclip) return; }   /* --noclip: no one-way gates */
+#endif
   if (GAME_PLAYER_MODE != 3)
   {
     if (((D_8009CE21 != 0xFF) && (o->a.p.whole >= 0x3B6)) && (o->a.p.whole < 0x3E9))

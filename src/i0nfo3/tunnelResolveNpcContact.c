@@ -6,6 +6,9 @@ void tunnelResolveNpcContact(TObj *a, TObj *b)
 {
     short dx, s, dy, t, w, h;
     unsigned short u;
+#ifdef PORT2
+    { extern int port_noclip; if (port_noclip) return; }   /* --noclip: no pushes from actors / objects */
+#endif
     dx = a->a.p.whole - b->a.p.whole;
     s = b->box0 + a->box0;
     if ((unsigned short)(dx + s) > b->box1 + a->box1) return;

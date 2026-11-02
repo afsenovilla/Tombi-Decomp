@@ -25,6 +25,9 @@ void tunnelSectionStep(TObj *o)
     case 1:
         tunnelClampPlayerToGates(p);
         D_80079AD0[o->subtype](o);
+#ifdef PORT2
+        { extern int port_noclip; if (port_noclip) break; }   /* --noclip: the exits do not fire */
+#endif
         if (PLAYER_X >= 0x448 && PLAYER_X < 0x478 && PLAYER_Y >= -0x474 && PLAYER_Y < -0x460) {
             func_800270A0(o, 1, 0);
         } else if (p->a.p.whole < 0x99 && p->y.p.whole >= -0x4FE && p->y.p.whole < -0x47E) {

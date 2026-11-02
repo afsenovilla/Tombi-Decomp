@@ -14,6 +14,9 @@ short tunnelCheckSlideZone(void)
     int k, r;
     Zone *z;
     if (GAME_PLAYER_MODE == 3) return 0;
+#ifdef PORT2
+    { extern int port_noclip; if (port_noclip) return 0; }   /* --noclip: no slide zones */
+#endif
     y = PLAYER_Y;
     x = PLAYER_H[1];
     if ((unsigned short)(y + 0x4B0) >= 0x12D) return 0;

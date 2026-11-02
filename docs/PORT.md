@@ -2518,6 +2518,22 @@ but `updateL4Type1AObject` keeps that box to see it close; natively it got NULL,
 step after its text (its close code, and the events 0x25/0x2E/0x31 it starts, never ran). port/fixes.txt now makes the
 port's `showMessageBox` return the box.
 
+### `--noclip`: walk anywhere in the tunnels (port only, research)
+
+`--noclip` turns off everything that stops or moves the player in the top-down tunnel engine (I0NFO3, AREA02 section 3):
+wall tiles (`tunnelCollideMapTile`), the one-way gates (`tunnelClampPlayerToGates`), pushes from actors and objects
+(`tunnelResolveNpcContact`), the slide zones (`tunnelCheckSlideZone`), the trigger tiles (`tunnelCheckTileTrigger`, so no
+tunnel events start) and the five exits (`tunnelSectionStep`). The camera follows as usual. The hooks are `#ifdef PORT2`
+in those files; the console build is unchanged. The player is still clamped to x 90..1750 by the engine; y is not
+clamped (the map covers y -0x540..0). Square makes the walk faster (2.5 px a frame). Example, a full serpentine sweep
+from the debug select:
+```
+build/port2/tombi2 --headless --noclip --skip-movies --frames 11100 -v --poke 900:1F8001B4:1 \
+    --poke 1250:8009C960:2:2 --poke 1250:8009C962:3:2 \
+    --pad-script 1000:start,1300:circle:3,1600:down+square:140,1750:left+square:370,2130:right+square:675,2815:up+square:48,...
+```
+(used for the B301.000 glyph sheet check, docs/CUT_CONTENT.md). It has no effect outside the I0NFO3 rooms.
+
 ### Debug menu: `--debug-menu` (port only, opt-in)
 
 An in-game debug menu for testing (`port2/runtime/debugmenu.c`). Off by default; `--debug-menu` turns it on

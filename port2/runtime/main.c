@@ -297,7 +297,7 @@ static int port_ws_resolve(void) {
 }
 
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
+    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
@@ -801,6 +801,7 @@ int port_civ_list(void) {
     if (port_verbose) port_printf("[port] --civ-test: AREA%02d s0 loads AREA08 s0's map, sprites and I0NFO2\n", port_civ_cur_area());
     return (int)(long)port_civ_buf;
 }
+int port_noclip;          /* --noclip: research only; I0NFO3 tunnels (AREA02 s3): no walls, gates, pushes, slide zones, triggers, exits */
 int port_cut_content;     /* --cut-content: opt-in cut text recovered from the Japanese release (port/fixes.txt) */
 int port_cc_boatman = 3;  /* AREA00 boatman: extra lines (7,3..5) still to show */
 /* --cut-content berries: objects spawnItemFromEntry made (table drops) that initItemObject has not set up yet */
@@ -896,6 +897,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--text-patch") && v) { if (port_text_patch_n < 8) port_text_patches[port_text_patch_n++] = argv[i + 1]; i++; }
         else if (!strcmp(a, "--patch-dir") && v) port_patch_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
+        else if (!strcmp(a, "--noclip")) port_noclip = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
         else if (!strcmp(a, "--log-events")) { extern int port_log_events; port_log_events = 1; }   /* runtime/panel.c */
         else if (!strcmp(a, "--debug-menu")) { extern int port_debug_menu; port_debug_menu = 1; }   /* runtime/debugmenu.c */

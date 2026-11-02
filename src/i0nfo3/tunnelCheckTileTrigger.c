@@ -9,6 +9,9 @@ void tunnelCheckTileTrigger(TObj *o, short x, short y)
     if (!(o->active & 4)) {
         unsigned char c = TUNNEL_MAP_TILES[(short)((x >> 3) + ((y + 0x540) >> 3) * D_800A4670)];
         o->b68 = 0;
+#ifdef PORT2
+        { extern int port_noclip; if (port_noclip) return; }   /* --noclip: no trigger tiles (events) */
+#endif
         if (c & 0x80) {
             o->b68 = 1;
         }

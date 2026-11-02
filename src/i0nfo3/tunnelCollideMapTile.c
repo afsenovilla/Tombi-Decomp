@@ -11,6 +11,9 @@ int tunnelCollideMapTile(TObj *o, short x, short y, short f)
     short k;
     int ix;
     if (o->active & 4) return;
+#ifdef PORT2
+    { extern int port_noclip; if (port_noclip) return 0; }   /* --noclip: no wall tiles */
+#endif
     c = TUNNEL_MAP_TILES[(unsigned short)(ix = (x >> 3) + ((y + 0x540) >> 3) * D_800A4670[0])]; c &= 0x7F;
     if (c == 0) return 0;
     if (c == 9) {
