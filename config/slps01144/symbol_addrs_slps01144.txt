@@ -1199,3 +1199,7 @@ LOAD_BUFFER_ALT = 0x800B58F8; // size:0x1 PAL 0x800B3E28
 // END jp_globals
 func_80021A94_slps01144 = 0x80021A94; // type:func size:0xA8
 func_80021B3C_slps01144 = 0x80021B3C; // type:func size:0xB4
+func_8002C068_slps01144 = 0x8002C068; // type:func size:0x8  JP-only empty stub before updateL8Type01Object
+func_8002C070_slps01144 = 0x8002C070; // type:func size:0x290  PAL main0 0x8002B0BC
+func_80030A68_slps01144 = 0x80030A68; // type:func size:0x268  PAL main0 0x8002F960
+func_80030CD0_slps01144 = 0x80030CD0; // type:func size:0xA8

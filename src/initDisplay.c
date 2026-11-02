@@ -1,5 +1,49 @@
 // FUNC 80016ca8 396 MAIN0
 // MATCHING 80016ca8 396
+// VERSION SLPS_01144 slps01144 800163C8 384
+#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144)
+extern void FUN_8005e244(void *, int, int, int, int);
+extern void FUN_8005e314(void *, int, int, int, int);
+extern void FUN_8005f9c8(void *);
+extern void FUN_8005f770(void *);
+extern char DAT_8009e35c[], DAT_8009e348[], DAT_8009f06c[], DAT_8009f058[];
+extern short D_8009FEE0, D_8009FEE2, D_8009FEE4, D_8009FEE6, D_800A0BF0, D_800A0BF2, D_800A0BF4, D_800A0BF6;
+extern char D_800A0C12, D_800A0C13, D_800A0C14, D_8009FF02, D_8009FF03, D_8009FF04;
+extern unsigned short DAT_8009e350, DAT_8009e352, DAT_8009f060, DAT_8009f062, SCREEN_OFFSET_X, SCREEN_OFFSET_Y;
+extern char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B, DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
+
+void func_800163C8(char a, char b, char c)
+{
+    FUN_8005e244(DAT_8009e35c, 0x180, 0, 0x280, 0x1e0);
+    FUN_8005e314(DAT_8009e35c - 0x14, 0x180, 0, 0x280, 0x1e0);
+    FUN_8005e244(DAT_8009e35c + 0xd10, 0x180, 0, 0x280, 0x1e0);
+    FUN_8005e314(DAT_8009e35c + 0xcfc, 0x180, 0, 0x280, 0x1e0);
+    D_8009FEE0 = 0;
+    D_8009FEE2 = 0;
+    D_8009FEE4 = 256;
+    D_8009FEE6 = 240;
+    D_800A0BF6 = 240;
+    D_800A0BF0 = 0;
+    D_800A0BF2 = 0;
+    D_800A0BF4 = 256;
+    D_800A0C14 = 1;
+    D_8009FF04 = 1;
+    D_800A0C12 = 1;
+    D_8009FF02 = 1;
+    D_800A0C13 = 1;
+    D_8009FF03 = 1;
+    DISPLAY_BUFFER_0_BG_R = a;
+    DISPLAY_BUFFER_0_BG_G = b;
+    DISPLAY_BUFFER_0_BG_B = c;
+    DISPLAY_BUFFER_1_BG_R = a;
+    DISPLAY_BUFFER_1_BG_G = b;
+    DISPLAY_BUFFER_1_BG_B = c;
+    FUN_8005f9c8(DAT_8009e35c - 0x14);
+    FUN_8005f770(DAT_8009e35c);
+}
+#endif
+#else
 extern void FUN_8005e244(void *, int, int, int, int);
 extern void FUN_8005e314(void *, int, int, int, int);
 extern void FUN_8005f9c8(void *);
@@ -39,3 +83,4 @@ void initDisplay(char a, char b, char c)
     FUN_8005f9c8(DAT_8009e35c - 0x14);
     FUN_8005f770(DAT_8009e35c);
 }
+#endif

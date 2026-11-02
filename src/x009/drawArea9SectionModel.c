@@ -1,6 +1,7 @@
 // FUNC 80120280 140 X009
 // MATCHING 80120280 140
 // VERSION SLPM_80165 slpm80165 80023EC8 124
+// VERSION SLPS_01144 slps01144 8002493C 124
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x009 80120280 (func_80120280.c): the last four draw calls take (f, ot).
 extern long *func_8011F96C(long *, unsigned long *);
@@ -23,6 +24,29 @@ void func_80120280(long *f, unsigned long *ot)
     f = FUN_80022ea8(f, ot);
     func_80023084(f, ot);
 }
+#elif defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144)
+extern long *drawArea9ModelFT3(long *, unsigned long *);
+extern long *drawArea9ModelFT4(long *, unsigned long *);
+extern long *drawArea9ModelGT3(long *, unsigned long *);
+extern long *drawArea9ModelGT4(long *, unsigned long *);
+extern long *modelDrawF3Lit(long *, unsigned long *);
+extern long *modelDrawF4Lit(long *, unsigned long *);
+extern long *modelDrawG3Lit(long *, unsigned long *);
+extern long *modelDrawG4Lit(long *, unsigned long *);
+
+void func_8002493C(long *f, unsigned long *ot)
+{
+    f = drawArea9ModelFT3(f, ot);
+    f = drawArea9ModelFT4(f, ot);
+    f = drawArea9ModelGT3(f, ot);
+    f = drawArea9ModelGT4(f, ot);
+    f = modelDrawF3Lit(f, ot);
+    f = modelDrawF4Lit(f, ot);
+    f = modelDrawG3Lit(f, ot);
+    modelDrawG4Lit(f, ot);
+}
+#endif
 #else
 extern long *drawArea9ModelFT3(long *, unsigned long *);
 extern long *drawArea9ModelFT4(long *, unsigned long *);
