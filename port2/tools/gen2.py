@@ -698,7 +698,11 @@ def emit_data(outdir, amap, needed):
             if th:
                 thunks_used.add(th); nthunk += 1
                 words.append("(unsigned int)(unsigned long)&%s" % th); continue
-            f = amap.func_name(w)
+            # (nor a native function: D_8007DE38, the per-area item -> message index tables printInfoMessage reads,
+            # holds 0x801228BC for AREA06, X006 data and X000's playerInitAreaHook; as &playerInitAreaHook the game read
+            # host code as message text, the glyph run overflowed MESSAGE_GLYPHS into PLAYER.anim and the unlayered
+            # pool, and AREA06 section 2 crashed when Tombi got an item)
+            f = amap.func_name(w) if a not in data_runs else None
             if f:
                 funcs.add(f); nfunc += 1
                 words.append("(unsigned int)(unsigned long)&%s" % f); continue
