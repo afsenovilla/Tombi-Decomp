@@ -1,5 +1,6 @@
 // VERSION SLPS_01144 x02 8011896C 160
-// Japanese version of PAL x002 80119710 (spawnGoldenFlowerIfAffordable.c), as an object state step.
+// Japanese version of PAL x002 80119710 (spawnGoldenFlowerIfAffordable.c), as an object state step; the inlined helper
+// returns unsigned char (the result is copied to v0 before the test).
 #if defined(VERSION_SLPS_01144)
 #include "gcd.h"
 #include "TOBJ.H"
@@ -8,7 +9,7 @@
 extern unsigned int D_8009C98C;
 extern void ObjSpawnType0(short, short, void *);
 
-static inline int spawnFlower(void)
+static inline unsigned char spawnFlower(void)
 {
     Fix16 v[3];
     int r = 0;

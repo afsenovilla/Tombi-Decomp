@@ -259,7 +259,9 @@ def jpdemo_data(progs, units, addrs, out_dir, ver="slpm80165"):
             os.makedirs(os.path.dirname(dbase), exist_ok=True)
             dclaims = RD.patch_base(u["base_path"], dbase, info)
             with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
-                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n' + body
+                # same scratchpad `.set` constants as the plain target build below (the code is reassembled here)
+                spad = "".join("\t.set\t%s,0x%s\n" % (n, n[2:]) for n in sorted(set(re.findall(r"\bD_1F80[0-9A-F]{4}\b", body))))
+                t.write('.include "macro.inc"\n.set noat\n.set noreorder\n' + spad + '.section .text\n' + body
                         + RD.target_asm(dclaims, game, gbase, 0, dtmp))
             try:
                 run(AS + [t.name, "-o", u["target_path"]])

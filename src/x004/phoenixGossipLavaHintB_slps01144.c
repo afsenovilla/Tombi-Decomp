@@ -1,0 +1,55 @@
+// VERSION SLPS_01144 x04 8012B080 364
+// JP copy of PAL x003 80130644 (phoenixGossipLavaHintB.c) in X04 only: message (5, 0xd) and wac = 2 instead of
+// (2, 0xe) and 3; the X03 copy is the PAL code (config/slps01144/reuse.txt).
+#if defined(VERSION_SLPS_01144)
+#include "gvars.h"
+#include "player.h"
+#include "TOBJ.H"
+
+extern void *D_8013A3B4[], *D_8013A3A8[];
+extern TObj *showMessageBoxDirect(int, int, Fix16 *);
+extern void FUN_8001fe6c(TObj *);
+extern int FUN_8001fec0(TObj *);
+
+void phoenixGossipLavaHintB(TObj *o)
+{
+    TObj *p;
+
+    switch (o->state) {
+    case 0:
+        o->b68 = 0;
+        o->state++;
+        break;
+    case 1:
+        if (o->b68 == 0)
+            break;
+        o->state++;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->d90 = (int)showMessageBoxDirect(5, 0xd, &o->a);
+        o->wac = 2;
+        o->animFrame = o->b68 & 1;
+        o->anim = D_8013A3B4[0];
+        FUN_8001fe6c(o);
+        break;
+    case 2:
+        FUN_8001fec0(o);
+        p = (TObj *)o->d90;
+        if (p->b04 != 2)
+            break;
+        p->b04 = 3;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->wac = 0;
+        o->anim = D_8013A3A8[0];
+        o->state = 0;
+        break;
+    }
+}
+#endif

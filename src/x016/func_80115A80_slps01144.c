@@ -1,59 +1,64 @@
 // VERSION SLPS_01144 x16 80115A80 680
-// NOTE: 93 % (register choice for the constant 1 and the case-0 load order differ); stalled.
-// JP-only object handler (cutscene: player placed, camera scroll counter at +0x74 ramps to 0x4000).
+// JP near-twin of PAL x002 80117644 (evilPigBagPortalEnter.c): same code shape, without the `SPAD.b3d1 = 1` store of
+// case 2 (8 bytes shorter) and with the JP addresses (GVARS 0x8009E4D8, GAME 0x8009E508, PLAYER 0x800A7B78).
 #if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gvars.h"
 #include "TOBJ.H"
-typedef struct { short pad[0x26]; short s4c, s4e; } CamObj;
-extern unsigned char D_800A7B78, D_800A7B79, D_800A7B7C, D_800A7B7D;
-extern unsigned char D_8009E4E7, D_8009E4E6, D_8009E4EA, D_8009E4E4, D_8009E51D, D_800A609B;
-extern unsigned char D_8009FF05, D_8009FF06, D_8009FF07, D_800A0C15, D_800A0C16, D_800A0C17;
-extern int D_800A60B0;
-extern short D_8009E93C, D_8009E93E, D_8009E948;
-extern int D_1F800190, D_1F80018C;
-extern CamObj *D_1F8001D4;
-extern int func_801157DC_slps01144(TObj *);
+#include "gamestate.h"
+#include "gametask.h"
+#include "player.h"
+
+typedef struct { char pad[0x18]; int velY; } CamScroll;   /* D_800A60B0: the JP CAMERA_SCROLL.velY */
+extern CamScroll D_800A6098;
+extern unsigned char D_800A609B[];                        /* PAL D_800A4553 */
+extern int CAMERA_TARGET_Y_FIX, CAMERA_TARGET_H_FIX;      /* scratchpad 0x1F800190 / 0x1F80018C */
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[];   /* D_800A7B7C / D_800A7B7D */
+extern unsigned char DISPLAY_BUFFER_0_BG_R[], DISPLAY_BUFFER_0_BG_G[], DISPLAY_BUFFER_0_BG_B[];  /* D_8009FF05..07 */
+extern unsigned char DISPLAY_BUFFER_1_BG_R[], DISPLAY_BUFFER_1_BG_G[], DISPLAY_BUFFER_1_BG_B[];  /* D_800A0C15..17 */
+extern int func_801157DC_slps01144(TObj *);               /* the JP evilPigBagPortalCheckPlayer */
 
 void func_80115A80_slps01144(TObj *o)
 {
-    int v, y;
+    short t;
 
     switch (o->state) {
     case 0:
         if (o->visible == 0) break;
-        if (!func_801157DC_slps01144(o)) break;
+        if (func_801157DC_slps01144(o) == 0) break;
         o->state++;
-        D_800A7B78 = 2;
-        D_8009E4E7 = 1;
-        D_8009E4E6 = 1;
-        D_8009E4EA = 1;
-        D_800A609B = 3;
-        D_800A60B0 = 0;
-        y = o->y.raw;
-        v = **(int **)&o->h;
-        D_1F800190 = y;
+        PLAYER.obj.active = 2;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b3e)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        D_800A609B[0] = 3;
+        D_800A6098.velY = 0;
+        CAMERA_TARGET_Y_FIX = o->y.raw;
+        CAMERA_TARGET_H_FIX = o->h->raw;
         o->timer = 10;
-        D_1F80018C = v;
         break;
     case 1:
-        if (--o->timer != -1) break;
-        D_800A7B78 = 5;
-        D_800A7B7C = 5;
-        D_8009E4E6 = 0;
-        D_800A7B79 = 0;
-        D_800A7B7D = 0x40;
-        o->state++;
-        o->timer = 0x14;
-        D_8009E93C = 0xe;
-        D_8009E93E = 2;
-        D_8009E948 = 0;
+        if (--o->timer == -1) {
+            PLAYER.obj.active = 5;
+            PLAYER_STATE[0] = 5;
+            ((unsigned char*)&GVARS.b3e)[0] = 0;
+            PLAYER.obj.visible = 0;
+            PLAYER_SUBSTATE[0] = 0x40;
+            o->timer = 0x14;
+            o->state++;
+            ((short*)&GAME.nextArea)[0] = 0xe;
+            ((short*)&GAME.nextSection)[0] = 2;
+            ((short*)&GAME.nextSpawnPoint)[0] = 0;
+        }
         break;
     case 2:
-        if (o->timer == 0) {
-            D_8009E51D = 3;
-            D_8009E4E4 = 1;
+        t = o->timer;
+        if (t == 0) {
+            ((unsigned char*)&GAME.fadeScreenControl)[0] = 3;
+            ((unsigned char*)&GVARS.fadeEffect)[0] = 1;
             o->state++;
         } else {
-            o->timer--;
+            o->timer = t - 1;
         }
         o->w74 += 0x80;
         if (o->w74 > 0x4000) {
@@ -65,18 +70,20 @@ void func_80115A80_slps01144(TObj *o)
         break;
     case 3:
         o->w74 += 0x80;
-        if (o->w74 > 0x4000) o->w74 = 0x4000;
+        if (o->w74 > 0x4000) {
+            o->w74 = 0x4000;
+        }
         o->w76 = o->w74;
         o->w78 = o->w74;
-        if (D_8009E51D == 1) {
-            D_1F8001D4->s4c = 7;
-            D_1F8001D4->s4e = 0;
-            D_8009FF05 = 0xff;
-            D_8009FF06 = 0xff;
-            D_8009FF07 = 0xff;
-            D_800A0C15 = 0xff;
-            D_800A0C16 = 0xff;
-            D_800A0C17 = 0xff;
+        if (((unsigned char*)&GAME.fadeScreenControl)[0] == 1) {
+            TASK_C->mode = 7;
+            TASK_C->step = 0;
+            DISPLAY_BUFFER_0_BG_R[0] = 0xff;
+            DISPLAY_BUFFER_0_BG_G[0] = 0xff;
+            DISPLAY_BUFFER_0_BG_B[0] = 0xff;
+            DISPLAY_BUFFER_1_BG_R[0] = 0xff;
+            DISPLAY_BUFFER_1_BG_G[0] = 0xff;
+            DISPLAY_BUFFER_1_BG_B[0] = 0xff;
         }
         break;
     }

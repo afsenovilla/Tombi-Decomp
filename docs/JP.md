@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 55.2 % of code (859 KB of 1556 KB, 2225 of 3542 functions)**, mostly PAL C reused as is, the rest from
+**Progress: 61.87 % of code (894316 of 1445372 bytes, 2392 of 3101 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -76,6 +76,16 @@ Near-miss pass (2026-10, 2183 -> 2225 functions, 53.8 % -> 55.2 %):
   with the `G934 = 0` store moved first, player anim ids, a dropped call or store, the progress check
   `GV2.bc3 & 2` -> `D_8009E50A >= 4`. Not doable in a shared file: one PAL function whose JP copies differ between
   overlays (e.g. `initJuiceSeller` x16 matches PAL, x18 does not): needs a JP-only file.
+
+Near-miss pass 2 (2026-11, 2386 -> 2392 functions, 61.63 % -> 61.87 %): the six partially matching units. `phoenixGossipLavaHintB`
+has two JP copies that differ (X03 = PAL code via `reuse.txt`, X04 = other message id, now `src/x004/phoenixGossipLavaHintB_slps01144.c`);
+`build_report` reassembles the targets of the units that claim data (jump tables) without the scratchpad `.set` constants
+(`func_80057B74`, fixed); the four JP-only handlers of X02/X16/X17/X18 were matched by borrowing the idioms of their PAL
+near-twins (`evilPigBagPortalEnter.c`, `a17EntranceEventStep.c`): struct members (`GVARS.b39`, `GAME.fadeScreenControl`,
+`VIEW_CAMERA.pos[].p.hi`) and `D_xxxA[0]` array spellings decide what gcc 2.7's scheduler may reorder (scalar globals move
+freely around struct-member stores), an inlined helper returning `unsigned char` keeps the `move v0,a0` before the test,
+and per-branch `o->step = n` stores are cross-jumped into one. `tools/jpcheck.py` strips branch targets, so a wrong branch
+destination (X18) only shows in the objdiff report.
 
 What remains, by kind (for the paired functions with PAL C):
 - about 40 that differ in size from their PAL pair (edited code, not just offsets);
