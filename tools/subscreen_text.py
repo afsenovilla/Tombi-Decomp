@@ -16,6 +16,11 @@ Edits (the "menus" section of a *.tombipatch.json, key "itemNames" under each of
                                   changes; the pool of pointed place strings around them is repacked, pointers rewritten
   In "itemNames" a "\n" writes the -3 line break too.
 
+  "eventNames": {"OLD": "NEW"}    DnSPSUB / DnSPSUB3: only the copies of OLD that the event list points to (its pointer table:
+                                  the run of pointers that starts at the one to the first event name), applied before
+                                  "itemNames", so an event name can differ from a place / item name with the same text
+                                  ("Montaña de Fénix": the event "La Montaña del Fénix", the place "Montaña del Fénix")
+
   subscreen_text.py dump FILE.BIN      prints the strings
 """
 import struct, sys
@@ -81,6 +86,13 @@ def _strend(d, o):
     return o + 2
 
 
+def _slack(d, o, stop=None):
+    """End of the room after offset o (just past a string): the -1 / 0 words the disc pads strings with ("-3, -1, -1, 0")."""
+    while o + 2 <= len(d) and (stop is None or o < stop) and d[o:o + 2] in (b"\xff\xff", b"\0\0"):
+        o += 2
+    return o
+
+
 def apply_names(data, names):
     """In place when every new name fits its room; otherwise the whole pool of pointed strings around the item names
     is repacked (identical strings shared, starts 4-byte aligned) and every pointer to it rewritten."""
@@ -94,6 +106,63 @@ def apply_names(data, names):
     hits = [i for i in range(0, len(d), 2) for k in enc if d[i:i + len(k)] == k]
     if not hits:
         raise SubscreenError("no item name found")
+    d = _repack(d, hits, lambda o, body: enc.get(body, body))
+    # copies no pointer reaches (the room list's repeated slots) keep their place: rewritten where they fit
+    return _in_place(bytes(d), names, lenient=True)
+
+
+def _event_table(d, base):
+    """Word offsets of the event list's pointer table: the run of in-file pointers that starts at the first pointer to the
+    first event name (the string right after the "Habilidad" heading, dump index 3)."""
+    strs = dump(d)
+    first = next((o for i, (o, t) in enumerate(strs) if i and strs[i - 1][1] == "Habilidad"), None)
+    if first is None:
+        raise SubscreenError("event list not found")
+    nw = len(d) // 4
+    words = struct.unpack_from("<%dI" % nw, d)
+    try:
+        i = words.index(base + first)
+    except ValueError:
+        raise SubscreenError("event list pointer table not found")
+    j = i
+    while j < nw and 0 <= words[j] - base < len(d):
+        j += 1
+    return range(i, j)
+
+
+def apply_event_names(data, names):
+    """eventNames: the copies of OLD that only the event list points to get NEW (pool repacked as in apply_names)."""
+    d = bytearray(data)
+    base = _base(bytes(d), 0)
+    nw = len(d) // 4
+    words = struct.unpack_from("<%dI" % nw, d)
+    table = _event_table(bytes(d), base)
+    tset = set(table)
+    enc = {encode(o) + struct.pack("<2h", -3, -1): encode(n) + struct.pack("<2h", -3, -1) for o, n in names.items()}
+    hits = {}
+    for k, body in enc.items():
+        found = False
+        for i in table:
+            o = words[i] - base
+            if bytes(d[o:o + len(k)]) == k:
+                refs = [x for x in range(nw) if words[x] == words[i]]
+                if any(x not in tset for x in refs):
+                    raise SubscreenError("event name %r is shared with another list; split it first" % decode_body(k))
+                hits[o] = body
+                found = True
+        if not found:
+            raise SubscreenError("event name %r not found in the event list" % decode_body(k))
+    return _repack(d, sorted(hits), lambda o, body: hits.get(o, body))
+
+
+def decode_body(b):
+    g = struct.unpack_from("<%dh" % (len(b) // 2), b)
+    return "".join("\n" if x == -3 else chr(x - 140) if x < 268 else chr(x - 74) for x in g if x != -1)
+
+
+def _repack(d, hits, new_body):
+    """Repacks the pools of pointed strings around the offsets `hits` (new_body(offset, old body) -> body) and rewrites the
+    pointers. A pool's room runs to the padding after its last string (the -1 / 0 words)."""
     base = _base(bytes(d), hits[0])
     nw = len(d) // 4
     words = list(struct.unpack_from("<%dI" % nw, d))
@@ -112,11 +181,12 @@ def apply_names(data, names):
     moved = {}
     for lo, hi in sorted(runs):
         pool = targets[lo:hi + 1]
-        start, stop = pool[0], (_strend(d, pool[-1]) + 3) & ~3
+        nxt = targets[hi + 1] if hi + 1 < len(targets) else len(d)
+        start, stop = pool[0], _slack(d, _strend(d, pool[-1]), nxt) & ~3
         out, where = bytearray(), {}
         for o in pool:
             body = bytes(d[o:_strend(d, o)])
-            body = enc.get(body, body)
+            body = new_body(o, body)
             if body not in where:
                 where[body] = start + len(out)
                 out += body + b"\0" * (-len(body) % 4)
@@ -200,20 +270,22 @@ def apply_places(data, names):
     return bytes(d)
 
 
-def _in_place(data, names):
+def _in_place(data, names, lenient=False):
+    """Every copy of each OLD rewritten where it is. lenient: copies that are gone (repacked) or too small are skipped."""
     d = bytearray(data)
     for old, new in names.items():
         pat = encode(old) + struct.pack("<2h", -3, -1)
         hits = [i for i in range(0, len(d) - len(pat) + 1, 2) if d[i:i + len(pat)] == pat]
-        if not hits:
+        if not hits and not lenient:
             raise SubscreenError("item name %r not found" % old)
         for i in hits:
             room = len(encode(old))
-            j = i + room + 4                                  # zero padding after the terminator is room too
-            while j + 2 <= len(d) and d[j:j + 2] == b"\0\0":
-                room += 2; j += 2
+            j = _slack(d, i + room + 4)                       # the -1 / 0 padding after the terminator is room too
+            room += j - (i + room + 4)
             body = encode(new)
             if len(body) > room:
+                if lenient:
+                    continue
                 raise SubscreenError("%r does not fit in the room of %r" % (new, old))
             d[i:i + room + 4] = body + struct.pack("<2h", -3, -1) + b"\0" * (room - len(body))
     return bytes(d)

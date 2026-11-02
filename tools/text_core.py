@@ -587,10 +587,13 @@ class Project:
             mod = MC if re.search(r"D\dSPSUB2\.BIN$", path, re.I) else SS if re.search(r"D\dSPSUB3?\.BIN$", path, re.I) else MT
             spec = dict(spec)
             names = spec.pop("itemNames", None)
+            events = spec.pop("eventNames", None)
             places = spec.pop("placeNames", None)
             try:
                 data = files[path] if path in files else self.src.read_any(path)
                 new = data if mod is SS else mod.apply(data, spec)
+                if events:
+                    new = SS.apply_event_names(new, events)
                 if names:
                     new = SS.apply_names(new, names)
                 if places:

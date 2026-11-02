@@ -51,7 +51,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Baron's Strength (evento 113) | *El potencial de Barón* | el curandero cree que el cachorro tiene poderes especiales ("puede volar con esas orejas"); antes "Fuerza de Barón" |
 | Charles' Pants | Pantalones de Charles (título: *Los pantalones de Charles*) | como el objeto |
 | Precious Treasure Chest? | *¿Un cofre del tesoro?* | antes "de tesoro" |
-| Pump Rocks | Rocas bombeo (título: *Las Rocas bombeo*) | como en el diálogo |
+| Pump Rocks | rocas acordeón, en minúscula (título: *Las rocas acordeón*) | el nombre del español original (se hunden al pisarlas); el parche había puesto "Rocas bombeo" |
 | Trick Village | Ciudad de trucos | antes "Ciudad trucos" en el título |
 | Bronze / Silver / Gold Medal | *Quiero la medalla de bronce / de plata / de oro* | los tres títulos iguales; antes "Quiero el bronce", "Quiero la plata" |
 
@@ -88,7 +88,7 @@ alargados o corregidos con esto: *Gas de flor de melocotón*, *Pista de motocros
 *Hacia la Montaña del Fénix...*, *Preparados, listos, ¡ya!*, *Hierbas curativas para Barón*, *El potencial de Barón*,
 *Una Bolsa Cerdo tormentosa*, *La Montaña del Fénix*, *Cuevas de lava*, *Los pantalones de Charles*, *¿Un cofre del
 tesoro?*, *Zumo de Fruta mortal*, *Planta un jardín de flores*, *La adivina roja*, *¿Un cuadro de la Gran llave?*,
-*El Cerdo de la Jungla profunda*, *Las Rocas bombeo*, *Necesito un Tarro lágrimas*, *Ciudad de trucos*, *Comida para
+*El Cerdo de la Jungla profunda*, *Las rocas acordeón*, *Necesito un Tarro lágrimas*, *Ciudad de trucos*, *Comida para
 Gran pez*, *Quiero la medalla de bronce / de plata / de oro*. La lista de eventos del submenú (D5SPSUB/D5SPSUB3, que
-también usa el panel) sigue los títulos; *Montaña de Fénix* se queda así en esa lista porque comparte la cadena con los
-nombres de lugar y su bloque no tiene sitio.
+también usa el panel) sigue los títulos: *La Montaña del Fénix* tiene allí su propia cadena (`eventNames`), separada de la
+de los nombres de lugar, que dicen *Montaña del Fénix*.
