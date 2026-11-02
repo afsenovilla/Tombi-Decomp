@@ -1,5 +1,34 @@
 // FUNC 800e9f74 500 X000
 // MATCHING 800e9f74 500
+// VERSION SLPS_01144 x00 800EB894 456
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+extern unsigned short GAME;
+extern void func_8011719C_slps01144(TObj *, short, short, short, int);
+extern void func_80117304(TObj *, short, short, short, int);
+extern void func_80117AF8_slps01144(TObj *, short, short, short, int);
+extern void func_80119278(TObj *, short, short, short, int);
+extern void func_80116004(TObj *, short, short, short, int);
+extern void func_8011552C(TObj *, short, short, short, int);
+extern void func_801176F0(TObj *, short, short, short, int);
+extern void func_80116954(TObj *, short, short, short, int);
+extern void func_8011558C(TObj *, short, short, short, int);
+
+void func_800EB894(TObj *o, short x, short y, short z)
+{
+    switch (GAME) {
+    case 0: func_8011719C_slps01144(o, x, y, z, 1); break;
+    case 1: func_80117304(o, x, y, z, 1); break;
+    case 3: func_80117AF8_slps01144(o, x, y, z, 1); break;
+    case 4: func_80119278(o, x, y, z, 1); break;
+    case 6: func_80116004(o, x, y, z, 1); break;
+    case 7: func_8011552C(o, x, y, z, 1); break;
+    case 9: func_801176F0(o, x, y, z, 1); break;
+    case 10: func_80116954(o, x, y, z, 1); break;
+    case 12: func_8011558C(o, x, y, z, 1); break;
+    }
+}
+#else
 #include "TOBJ.H"
 extern unsigned short GAME;
 extern void spawnApAwardNumber(TObj *, short, short, short, int);
@@ -28,3 +57,4 @@ void awardAPByArea(TObj *o, short x, short y, short z)
     case 17: FUN_80116920(o, x, y, z, 1); break;
     }
 }
+#endif
