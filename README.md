@@ -5,7 +5,7 @@
 | Version | Code | Data | Functions | Notes |
 |---|---|---|---|---|
 | Europe, Spanish (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, 100 % of the game code |
-| Japan (*Ore! Tomba*, `SLPS_011.44`) | Code 69.05 % | Data 0.64 % | Functions 2539 / 3151 | see [docs/JP.md](docs/JP.md) |
+| Japan (*Ore! Tomba*, `SLPS_011.44`) | Code 69.45 % | Data 0.64 % | Functions 2543 / 3151 | see [docs/JP.md](docs/JP.md) |
 | Japan demo (`SLPM_801.65`, taikenban) | Code 39.6 % | | Functions 1034 / 1832 | shared C reuse, paused, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Beta 1998-02-03 (`SLPS_011.44` prototype) | Code 56.5 % | | Functions 1372 / 1915 | shared C reuse, see [docs/BETA_980203.md](docs/BETA_980203.md) |
 | PrePre 8 (`PCPX-96084` demo) | Code 17.1 % | | Functions 472 / 1424 | symbol pairing only, see [docs/PREPRE8.md](docs/PREPRE8.md) |
@@ -188,12 +188,12 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 69.05 % of the code matches byte for byte** (998044 of 1445372 bytes, 2539 of 3151 functions).
+**Ore! Tomba (SLPS-01144): 69.45 % of the code matches byte for byte** (1003760 of 1445372 bytes, 2543 of 3151 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 378336 B | 263048 B | 1024 / 1270 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.5 % |
-| X00.BIN: shared object code | 314404 B | 220936 B | 440 / 527 | 🟩🟩🟩🟩🟩🟩🟩⬜⬜⬜ 70.3 % |
+| SLPS_011.44: engine | 378336 B | 266704 B | 1027 / 1270 | 🟩🟩🟩🟩🟩🟩🟩⬜⬜⬜ 70.5 % |
+| X00.BIN: shared object code | 314404 B | 222996 B | 441 / 527 | 🟩🟩🟩🟩🟩🟩🟩⬜⬜⬜ 70.9 % |
 | X01.BIN: area code | 151304 B | 105432 B | 189 / 239 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.7 % |
 | X02.BIN: area code | 29764 B | 11656 B | 28 / 40 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 39.2 % |
 | X03.BIN: area code | 122684 B | 91724 B | 183 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 74.8 % |
