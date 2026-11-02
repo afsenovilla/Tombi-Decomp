@@ -186,16 +186,16 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 61.63 % of the code matches byte for byte** (890836 of 1445372 bytes, 2386 of 3101 functions).
+**Ore! Tomba (SLPS-01144): 66.96 % of the code matches byte for byte** (967824 of 1445372 bytes, 2486 of 3101 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 378336 B | 223852 B | 948 / 1236 | 🟩🟩🟩🟩🟩🟨⬜⬜⬜⬜ 59.2 % |
-| X00.BIN: shared object code | 314404 B | 156516 B | 369 / 511 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 49.8 % |
+| SLPS_011.44: engine | 378336 B | 249576 B | 993 / 1236 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 66.0 % |
+| X00.BIN: shared object code | 314404 B | 204188 B | 418 / 511 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 64.9 % |
 | X01.BIN: area code | 151304 B | 105432 B | 189 / 239 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.7 % |
-| X02.BIN: area code | 29764 B | 11496 B | 27 / 40 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 38.6 % |
-| X03.BIN: area code | 122684 B | 91360 B | 182 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 74.5 % |
-| X04.BIN: area code | 102832 B | 63212 B | 157 / 197 | 🟩🟩🟩🟩🟩🟩⬜⬜⬜⬜ 61.5 % |
+| X02.BIN: area code | 29764 B | 11656 B | 28 / 40 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 39.2 % |
+| X03.BIN: area code | 122684 B | 91724 B | 183 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 74.8 % |
+| X04.BIN: area code | 102832 B | 64564 B | 158 / 197 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 62.8 % |
 | X05.BIN: area code | 9152 B | 6112 B | 16 / 21 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 66.8 % |
 | X06.BIN: area code | 35844 B | 25052 B | 38 / 47 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.9 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
@@ -204,9 +204,9 @@ offsets and the function or splat range that produced them.
 | X11.BIN: area code | 15648 B | 10048 B | 26 / 36 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 64.2 % |
 | X13.BIN: area code | 6336 B | 4140 B | 7 / 8 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 65.3 % |
 | X14.BIN: area code | 54584 B | 35332 B | 78 / 110 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 64.7 % |
-| X16.BIN: area code | 11688 B | 10172 B | 35 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 87.0 % |
-| X17.BIN: area code | 14544 B | 10340 B | 26 / 37 | 🟩🟩🟩🟩🟩🟩🟩⬜⬜⬜ 71.1 % |
-| X18.BIN: area code | 17144 B | 13724 B | 28 / 39 | 🟩🟩🟩🟩🟩🟩🟩🟩⬜⬜ 80.1 % |
+| X16.BIN: area code | 11688 B | 10852 B | 36 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 92.8 % |
+| X17.BIN: area code | 14544 B | 10988 B | 27 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 75.6 % |
+| X18.BIN: area code | 17144 B | 14112 B | 29 / 39 | 🟩🟩🟩🟩🟩🟩🟩🟩⬜⬜ 82.3 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 
 Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
