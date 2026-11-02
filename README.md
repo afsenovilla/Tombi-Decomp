@@ -2,11 +2,13 @@
 
 # Tombi! (Tomba!) decomp + native PC port
 
-| Version | Code | Data | Functions |
-|---|---|---|---|
-| Europe, Spanish (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) |
-| Japan (*Ore! Tomba*) | in preparation, see [docs/JP.md](docs/JP.md) | | |
-| Japan demo (`SLPM-80165`) | split only, see [docs/JPDEMO.md](docs/JPDEMO.md) | | |
+| Version | Code | Data | Functions | Notes |
+|---|---|---|---|---|
+| Europe, Spanish (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, 100 % of the game code |
+| Japan (*Ore! Tomba*, `SLPS_011.44`) | Code 69.05 % | Data 0.64 % | Functions 2539 / 3151 | see [docs/JP.md](docs/JP.md) |
+| Japan demo (`SLPM_801.65`, taikenban) | Code 39.6 % | | Functions 1034 / 1832 | shared C reuse, paused, see [docs/JPDEMO.md](docs/JPDEMO.md) |
+| Beta 1998-02-03 (`SLPS_011.44` prototype) | Code 56.5 % | | Functions 1372 / 1915 | shared C reuse, see [docs/BETA_980203.md](docs/BETA_980203.md) |
+| PrePre 8 (`PCPX-96084` demo) | Code 17.1 % | | Functions 472 / 1424 | symbol pairing only, see [docs/PREPRE8.md](docs/PREPRE8.md) |
 
 [![Report](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml/badge.svg)](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml)
 [![Platform](https://img.shields.io/badge/platform-PlayStation-003791)](#target)
@@ -186,11 +188,11 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 69.02 % of the code matches byte for byte** (997632 of 1445372 bytes, 2538 of 3151 functions).
+**Ore! Tomba (SLPS-01144): 69.05 % of the code matches byte for byte** (998044 of 1445372 bytes, 2539 of 3151 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 378336 B | 262636 B | 1023 / 1270 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.4 % |
+| SLPS_011.44: engine | 378336 B | 263048 B | 1024 / 1270 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.5 % |
 | X00.BIN: shared object code | 314404 B | 220936 B | 440 / 527 | 🟩🟩🟩🟩🟩🟩🟩⬜⬜⬜ 70.3 % |
 | X01.BIN: area code | 151304 B | 105432 B | 189 / 239 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.7 % |
 | X02.BIN: area code | 29764 B | 11656 B | 28 / 40 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 39.2 % |
@@ -217,8 +219,10 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 | Version | Serial | Status |
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
-| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, in progress, see "Japanese release progress" and [docs/JP.md](docs/JP.md) |
+| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, matching in progress (figures in the table at the top and in "Japanese release progress"), see [docs/JP.md](docs/JP.md) |
 | Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 39.6 % of code (objdiff), paused, see [docs/JPDEMO.md](docs/JPDEMO.md) |
+| Ore! Tomba beta 1998-02-03 (Japan) | SLPS-01144 (prototype) | split + shared C, 56.5 % of code, see [docs/BETA_980203.md](docs/BETA_980203.md) |
+| Tomba! PrePre 8 (Japan demo) | PCPX-96084 | split + symbol pairing, 17.1 % of code, see [docs/PREPRE8.md](docs/PREPRE8.md) |
 
 All versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
 `<serial>_report` artifact per version.

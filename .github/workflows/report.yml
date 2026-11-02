@@ -69,7 +69,7 @@ jobs:
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-          curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+          tools/ci_download.sh "$URL" "$RUNNER_TEMP/game.dl" 100000000
           mkdir -p "$RUNNER_TEMP/game"
           if unzip -tq "$RUNNER_TEMP/game.dl" >/dev/null 2>&1; then
             unzip -o -q "$RUNNER_TEMP/game.dl" -d "$RUNNER_TEMP/game"
@@ -138,7 +138,7 @@ jobs:
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-          curl -fsSL -o "$RUNNER_TEMP/jp.dl" "$URL"
+          tools/ci_download.sh "$URL" "$RUNNER_TEMP/jp.dl" 100000000
           mkdir -p "$RUNNER_TEMP/jp"
           if unzip -tq "$RUNNER_TEMP/jp.dl" >/dev/null 2>&1; then
             unzip -o -q "$RUNNER_TEMP/jp.dl" -d "$RUNNER_TEMP/jp"
@@ -211,7 +211,7 @@ jobs:
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-          curl -fsSL -o "$RUNNER_TEMP/jpdemo.dl" "$URL"
+          tools/ci_download.sh "$URL" "$RUNNER_TEMP/jpdemo.dl" 10000000
           mkdir -p "$RUNNER_TEMP/jpdemo"
           if unzip -tq "$RUNNER_TEMP/jpdemo.dl" >/dev/null 2>&1; then
             unzip -o -q "$RUNNER_TEMP/jpdemo.dl" -d "$RUNNER_TEMP/jpdemo"
@@ -288,7 +288,7 @@ jobs:
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-          curl -fsSL -o "$RUNNER_TEMP/prepre8.dl" "$URL"
+          tools/ci_download.sh "$URL" "$RUNNER_TEMP/prepre8.dl" 10000000
           mkdir -p "$RUNNER_TEMP/prepre8"
           if unzip -tq "$RUNNER_TEMP/prepre8.dl" >/dev/null 2>&1; then
             unzip -o -q "$RUNNER_TEMP/prepre8.dl" -d "$RUNNER_TEMP/prepre8"
@@ -365,7 +365,7 @@ jobs:
           ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
           if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
           if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-          curl -fsSL -o "$RUNNER_TEMP/beta.dl" "$URL"
+          tools/ci_download.sh "$URL" "$RUNNER_TEMP/beta.dl" 100000000
           mkdir -p "$RUNNER_TEMP/beta"
           if unzip -tq "$RUNNER_TEMP/beta.dl" >/dev/null 2>&1; then
             unzip -o -q "$RUNNER_TEMP/beta.dl" -d "$RUNNER_TEMP/beta"

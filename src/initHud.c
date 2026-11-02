@@ -1,8 +1,9 @@
 // FUNC 80017b44 448 MAIN0
 // MATCHING 80017b44 448
 // VERSION SLPM_80165 slpm80165 800167F0 412
+// VERSION SLPS_01144 slps01144 8001713C 412
 // Portado de psx_tomba (gameinit.c, initHud); licencia MIT del proyecto original.
-#if defined(VERSION_SLPM_80165)
+#if defined(VERSION_SLPM_80165) || defined(VERSION_SLPS_01144)
 // Demo version of PAL main0 80017B44 (initHud.c): only clears 0x1F8001C6 and runs initAreaScripts before the AP
 // digits.
 // Portado de psx_tomba (gameinit.c, initHud); licencia MIT del proyecto original.
