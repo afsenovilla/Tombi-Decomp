@@ -126,9 +126,11 @@ def pct(a, b):
     return 100.0 * a / b if b else 0.0
 
 
-def bar(p, w=24):
-    k = int(round(p / 100 * w))
-    return "[" + "#" * k + "." * (w - k) + "]"
+def bar(p, w=10):
+    """A row of coloured squares (green = matched, yellow = the partly matched cell, white = to do)."""
+    full = int(p * w // 100)
+    part = 1 if full < w and p * w / 100 - full >= 0.25 else 0
+    return "\U0001F7E9" * full + "\U0001F7E8" * part + "\u2B1C" * (w - full - part)
 
 
 COL = {"match": "#16a34a", "named": "#22c55e", "typed": "#38bdf8", "unnamed": "#f59e0b", "lib": "#94a3b8"}
@@ -248,8 +250,8 @@ def summary_lines(res, cov, ovl, tot, matching):
     L = ["**Whole game: %.2f %% of the game's code matches byte for byte** (%d of %d bytes)." % (pct(M, T), M, T), "",
          "| Part | Code | Matching bytes | Matching |", "|---|---:|---:|---|"]
     for name, g, n, m, nm in rows:
-        L.append("| %s | %d B | %d B | %.1f %% `%s` |" % (name, g, m, pct(m, g), bar(pct(m, g))))
-    L.append("| **Whole game** | **%d B** | **%d B** | **%.2f %%** `%s` |" % (T, M, pct(M, T), bar(pct(M, T))))
+        L.append("| %s | %d B | %d B | %s %.1f %% |" % (name, g, m, bar(pct(m, g)), pct(m, g)))
+    L.append("| **Whole game** | **%d B** | **%d B** | %s **%.2f %%** |" % (T, M, bar(pct(M, T)), pct(M, T)))
     L += ["",
           "- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev"
           " (`tools/units.py` is the common list); Sony's Psy-Q library (%d B) is not counted: %d B of it (%.1f %%) also"

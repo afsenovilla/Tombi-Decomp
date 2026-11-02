@@ -14,9 +14,11 @@ README = os.path.join(ROOT, "README.md")
 LABEL = {"slps01144": "SLPS_011.44: engine", "x00": "X00.BIN: shared object code"}
 
 
-def bar(p, n=24):
-    k = int(round(p * n / 100))
-    return "`[" + "#" * k + "." * (n - k) + "]`"
+def bar(p, w=10):
+    """A row of coloured squares (green = matched, yellow = the partly matched cell, white = to do)."""
+    full = int(p * w // 100)
+    part = 1 if full < w and p * w / 100 - full >= 0.25 else 0
+    return "\U0001F7E9" * full + "\U0001F7E8" * part + "\u2B1C" * (w - full - part)
 
 
 def block(r):
@@ -33,7 +35,7 @@ def block(r):
            "| Part | Code | Matching bytes | Functions | Matching |", "|---|---:|---:|---:|---|"]
     for k, (c, mm, f, mf) in g.items():
         p = 100.0 * mm / c if c else 0.0
-        out.append("| %s | %d B | %d B | %d / %d | %.1f %% %s |" % (LABEL.get(k, k.upper() + ".BIN: area code"), c, mm, mf, f, p, bar(p)))
+        out.append("| %s | %d B | %d B | %d / %d | %s %.1f %% |" % (LABEL.get(k, k.upper() + ".BIN: area code"), c, mm, mf, f, bar(p), p))
     out += ["", "Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`."
             " Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart):"
             " [notes/jp_retail.md](notes/jp_retail.md)."]

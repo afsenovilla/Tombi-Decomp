@@ -31,10 +31,6 @@ function in `src/` is verified to produce exactly the same instructions as the r
 > This repository contains no game data, executables, disc images or Sony SDK files.
 > You need your own legally obtained copy of the game and of the toolchain.
 
-[![Progress map](https://decomp.dev/afsenovilla/Tombi-Decomp.png)](https://decomp.dev/afsenovilla/Tombi-Decomp)
-
-<sub>Each rectangle is a unit sized by its code; green means it matches. Click for the details on decomp.dev.</sub>
-
 ## Status
 
 <!-- progress:start -->
@@ -42,11 +38,11 @@ function in `src/` is verified to produce exactly the same instructions as the r
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 100.0 % `[########################]` |
-| X000.BIN: AREA00 + object code reused by all areas | 313676 B | 312708 B | 99.7 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 100.0 % `[########################]` |
-| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 184340 B | 95.3 % `[#######################.]` |
-| **Whole game** | **1530244 B** | **1520132 B** | **99.34 %** `[########################]` |
+| MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X000.BIN: AREA00 + object code reused by all areas | 313676 B | 312708 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.7 % |
+| X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 184340 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.3 % |
+| **Whole game** | **1530244 B** | **1520132 B** | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 **99.34 %** |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 90016 B of it (89.2 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
@@ -194,24 +190,24 @@ offsets and the function or splat range that produced them.
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 378336 B | 223852 B | 948 / 1236 | 59.2 % `[##############..........]` |
-| X00.BIN: shared object code | 314404 B | 156516 B | 369 / 511 | 49.8 % `[############............]` |
-| X01.BIN: area code | 151304 B | 105432 B | 189 / 239 | 69.7 % `[#################.......]` |
-| X02.BIN: area code | 29764 B | 11496 B | 27 / 40 | 38.6 % `[#########...............]` |
-| X03.BIN: area code | 122684 B | 91360 B | 182 / 222 | 74.5 % `[##################......]` |
-| X04.BIN: area code | 102832 B | 63212 B | 157 / 197 | 61.5 % `[###############.........]` |
-| X05.BIN: area code | 9152 B | 6112 B | 16 / 21 | 66.8 % `[################........]` |
-| X06.BIN: area code | 35844 B | 25052 B | 38 / 47 | 69.9 % `[#################.......]` |
-| X08.BIN: area code | 228 B | 228 B | 1 / 1 | 100.0 % `[########################]` |
-| X09.BIN: area code | 82896 B | 56884 B | 114 / 144 | 68.6 % `[################........]` |
-| X10.BIN: area code | 97636 B | 66588 B | 144 / 175 | 68.2 % `[################........]` |
-| X11.BIN: area code | 15648 B | 10048 B | 26 / 36 | 64.2 % `[###############.........]` |
-| X13.BIN: area code | 6336 B | 4140 B | 7 / 8 | 65.3 % `[################........]` |
-| X14.BIN: area code | 54584 B | 35332 B | 78 / 110 | 64.7 % `[################........]` |
-| X16.BIN: area code | 11688 B | 10172 B | 35 / 37 | 87.0 % `[#####################...]` |
-| X17.BIN: area code | 14544 B | 10340 B | 26 / 37 | 71.1 % `[#################.......]` |
-| X18.BIN: area code | 17144 B | 13724 B | 28 / 39 | 80.1 % `[###################.....]` |
-| X19.BIN: area code | 348 B | 348 B | 1 / 1 | 100.0 % `[########################]` |
+| SLPS_011.44: engine | 378336 B | 223852 B | 948 / 1236 | 🟩🟩🟩🟩🟩🟨⬜⬜⬜⬜ 59.2 % |
+| X00.BIN: shared object code | 314404 B | 156516 B | 369 / 511 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 49.8 % |
+| X01.BIN: area code | 151304 B | 105432 B | 189 / 239 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.7 % |
+| X02.BIN: area code | 29764 B | 11496 B | 27 / 40 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 38.6 % |
+| X03.BIN: area code | 122684 B | 91360 B | 182 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 74.5 % |
+| X04.BIN: area code | 102832 B | 63212 B | 157 / 197 | 🟩🟩🟩🟩🟩🟩⬜⬜⬜⬜ 61.5 % |
+| X05.BIN: area code | 9152 B | 6112 B | 16 / 21 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 66.8 % |
+| X06.BIN: area code | 35844 B | 25052 B | 38 / 47 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 69.9 % |
+| X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X09.BIN: area code | 82896 B | 56884 B | 114 / 144 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 68.6 % |
+| X10.BIN: area code | 97636 B | 66588 B | 144 / 175 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 68.2 % |
+| X11.BIN: area code | 15648 B | 10048 B | 26 / 36 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 64.2 % |
+| X13.BIN: area code | 6336 B | 4140 B | 7 / 8 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 65.3 % |
+| X14.BIN: area code | 54584 B | 35332 B | 78 / 110 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 64.7 % |
+| X16.BIN: area code | 11688 B | 10172 B | 35 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 87.0 % |
+| X17.BIN: area code | 14544 B | 10340 B | 26 / 37 | 🟩🟩🟩🟩🟩🟩🟩⬜⬜⬜ 71.1 % |
+| X18.BIN: area code | 17144 B | 13724 B | 28 / 39 | 🟩🟩🟩🟩🟩🟩🟩🟩⬜⬜ 80.1 % |
+| X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 
 Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
 <!-- jp-progress:end -->
