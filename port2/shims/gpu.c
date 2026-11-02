@@ -425,6 +425,9 @@ static int ws_layout_place(int x0, int x1, int y0, int clut, int *tile) {
         return x0 + x1 < 320 ? -P / 2 : P / 2;
     }
     if (clut == WS_FLAT) return 0;
+    /* the popup menus over the left column (Usar -> warp places, etc.: subScreenDrawPopupMenu) stay whole: their text
+       (CLUT 0x7C15) and balloon frame (drawBalloonFrame, CLUT rows 0x1E3.. at x 0x160) are content, not chrome */
+    if (clut == 0x7C15 || (clut >= 0x78D6 && clut <= 0x7A16 && (clut & 0x3F) == 0x16)) return 0;
     chrome = clut == WS_QUAD || clut == 0x7812;
     if (x1 <= a && (chrome || x0 < a - 16)) return -P;     /* (small marks just left of the cut belong to the content) */
     if (x0 >= b) return chrome ? P : 0;
