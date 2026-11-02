@@ -1,6 +1,142 @@
 // FUNC 8001dbdc 1040 MAIN0
 // MATCHING 8001dbdc 1040
+// VERSION SLPS_01144 slps01144 8001DAF0 928
 // Ported from psx_tomba (sound.c, updateSound); MIT licence of the original project.
+#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144)
+#define SKIP_ASM
+#include "common.h"
+#include "game.h"
+#define SOUND_QUEUE_SIZE 0x80
+#define BGM_VOICE_MASK (SPU_00CH | SPU_01CH | SPU_02CH | SPU_03CH | SPU_04CH | SPU_05CH | SPU_06CH | SPU_07CH | SPU_08CH | SPU_09CH | SPU_10CH | SPU_11CH | SPU_12CH | SPU_13CH | SPU_14CH | SPU_15CH)
+#define SFX_VOICE_MASK (SPU_16CH | SPU_17CH | SPU_18CH | SPU_19CH | SPU_20CH | SPU_21CH | SPU_22CH | SPU_23CH)
+
+enum {
+    SND_CMD_KEY_ON            = 0x0000,
+    SND_CMD_KEY_OFF           = 0x1000,
+    SND_CMD_OVERRIDE          = 0x8000,
+    SND_CMD_BGM_FADE          = 0x9000,
+    SND_CMD_PITCH_SLIDE       = 0xA000,
+    SND_CMD_TYPE_MASK         = 0xF000,
+    SND_CMD_PARAM_MASK        = 0x0F00,
+    SND_CMD_VALUE_MASK        = 0x00FF,
+    SND_SFX_ID_MASK           = 0x03FF,
+    SND_KEYON_NOTE_OVERRIDE   = 0x0400,
+    SND_KEYON_VOLUME_OVERRIDE = 0x0800,
+    SND_OVERRIDE_NOTE         = 0x0000,
+    SND_OVERRIDE_VOLUME       = 0x0100,
+    SND_FADE_INTERVAL         = 0x0000,
+    SND_FADE_STEP             = 0x0100,
+    SND_FADE_TARGET           = 0x0200,
+    SND_SLIDE_INTERVAL        = 0x0000,
+    SND_SLIDE_STEP            = 0x0100,
+    SND_SLIDE_DURATION        = 0x0200,
+    SND_SLIDE_START           = 0x0300
+};
+
+typedef struct {
+    u8 vab;
+    u8 prog;
+    u8 tone;
+    u8 note;
+    u8 volume;
+    u8 priority;
+    u8 pad[2];
+} SfxDef;
+
+typedef struct {
+    u16 id;
+    s16 arg;
+} SfxQueueEntry;
+
+typedef struct {
+    u8 seq;
+    u8 vab;
+    u8 fadeIn;
+    u8 unk3;
+} BgmDef;
+
+extern SfxQueueEntry SOUND_QUEUE[];
+extern BgmDef BGM_TRACK_DEFS[];
+extern s16 BGM_TRACK_VOLUME[];
+
+s32 getSfxVabOffset(u16 id);
+
+extern BgmDef AREA_BGM_DEFS[];
+
+void func_8001DAF0(void)
+{
+    int i;
+    u16 cmd;
+
+    SpuGetAllKeysStatus(VOICE_KEY_STATUS);
+    for (i = 0; i < 24; i++) {
+        if (VOICE_KEY_STATUS[i] == 0) {
+            VOICE_PRIORITY[i] = 0xF;
+        }
+    }
+    while (SOUND_QUEUE_COUNT != 0) {
+        cmd = SOUND_QUEUE[SOUND_QUEUE_HEAD].id;
+        switch (cmd & SND_CMD_TYPE_MASK) {
+        case SND_CMD_KEY_ON:
+            keyOnQueuedSfx(cmd);
+            break;
+        case SND_CMD_KEY_OFF:
+            keyOffSfxVoice(cmd & SND_CMD_VALUE_MASK);
+            break;
+        case SND_CMD_OVERRIDE:
+            setSfxOverride(cmd);
+            break;
+        case SND_CMD_BGM_FADE:
+            setBgmFadeParam(cmd);
+            break;
+        case SND_CMD_PITCH_SLIDE:
+            setPitchSlideParam(cmd);
+            break;
+        }
+        SOUND_QUEUE_HEAD = (SOUND_QUEUE_HEAD + 1) & (SOUND_QUEUE_SIZE - 1);
+        SOUND_QUEUE_COUNT--;
+    }
+    if (BGM_FADE_ACTIVE != 0) {
+        if (--BGM_FADE_TIMER == 0) {
+            BGM_FADE_TIMER = BGM_FADE_INTERVAL;
+            if (BGM_FADE_STEP < 0) {
+                BGM_FADE_VOLUME += BGM_FADE_STEP;
+                if (BGM_FADE_VOLUME <= 0) {
+                    if (BGM_SEQ_ID != -1) {
+                        SsSeqStop(BGM_SEQ_ID);
+                        SsSeqClose(BGM_SEQ_ID);
+                        BGM_SEQ_ID = -1;
+                    }
+                    BGM_FADE_ACTIVE = 0;
+                }
+            } else if (BGM_FADE_VOLUME >= BGM_FADE_TARGET) {
+                BGM_FADE_ACTIVE = 0;
+            }
+            SsSeqSetVol(BGM_SEQ_ID, BGM_FADE_VOLUME, BGM_FADE_VOLUME);
+        }
+    }
+    if (PITCH_SLIDE_ACTIVE != 0) {
+        if (--PITCH_SLIDE_TIMER == 0) {
+            PITCH_SLIDE_TIMER = PITCH_SLIDE_INTERVAL;
+            PITCH_SLIDE_NEW_FINE += PITCH_SLIDE_STEP;
+            if (PITCH_SLIDE_NEW_FINE < 0) {
+                PITCH_SLIDE_NEW_FINE += 0x80;
+                PITCH_SLIDE_NEW_NOTE--;
+            } else if (PITCH_SLIDE_NEW_FINE >= 0x80) {
+                PITCH_SLIDE_NEW_FINE -= 0x80;
+                PITCH_SLIDE_NEW_NOTE++;
+            }
+            SsUtChangePitch(PITCH_SLIDE_VOICE, PITCH_SLIDE_VAB, PITCH_SLIDE_PROG, PITCH_SLIDE_OLD_NOTE, PITCH_SLIDE_OLD_FINE, PITCH_SLIDE_NEW_NOTE, PITCH_SLIDE_NEW_FINE);
+        }
+        if (--PITCH_SLIDE_DURATION == 0) {
+            keyOffSfxVoice((u16)PITCH_SLIDE_VOICE);
+            PITCH_SLIDE_ACTIVE = 0;
+        }
+    }
+}
+#endif
+#else
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -139,3 +275,4 @@ void updateSound(void)
         }
     }
 }
+#endif
