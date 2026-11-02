@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 68.29 % of code (987084 of 1445372 bytes, 2522 of 3132 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 68.66 % of code (992460 of 1445372 bytes, 2533 of 3151 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -107,11 +107,12 @@ one to five minutes each. `tools/jpcheck.py --strict` keeps the branch targets (
 passes as IDENTICAL, as happened twice) and is what `--install`/`--install-file` verify with; relocated branch and
 jump targets (labels of the target asm) are ignored on both sides.
 
-Merged symbols (2026-11): 30 JP "functions" held a second function body after a `jr ra` (Ghidra missed the entry):
-split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split from <parent>`), which gives 3132 functions
+Merged symbols (2026-11): 44 JP "functions" held a second function body after a `jr ra` (Ghidra missed the entry):
+split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split from <parent>`), which gives 3151 functions
 (was 3101) and better PAL pairs for both halves; two "functions" of the old table were only the dead epilogue of a
 `for (;;)` task (`gameMainTask`) or a tail jumped into from elsewhere (`updateA00UnlayeredType0D`), merged back. The
-scan is in the notes of commit 8dd088d: a `jr $ra` whose delay slot is followed, with no label, by `addiu $sp, $sp, -N`.
+scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
+between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
 Left over with a known diff (`tools/jp_autofix.py --pair ... --show`): `func_8010D854` (swim spin: `li v0,62` scheduled
 before `sb zero,b69`), `func_80027D58` (increaseMaxHealth: the byte copies after the `sb`), `func_80115F54` (scroll
