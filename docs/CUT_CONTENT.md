@@ -302,7 +302,7 @@ binaries, **[I]** inferred. Nothing here is restored in the port.
   `sprintf` + `drawDebugText` with `TIME  %3d:%2d`, `AP    %8ld`, `EVENT %3d / %3d` (file +0x2B718). PAL/USA X013 have no
   format string; they draw the same numbers with glyph sprites (`drawGameStats` 0x801179B4 and helpers). The JP exe also prints
   `TRY AGAIN...`, ` GAME OVER ` and `NOW LOADING` with `drawDebugText` (0x8001A1D8, 0x8001C0C4, 0x8001B864). PAL draws those
-  from graphics. PAL MAIN0 keeps only the build stamp (`98/8/26 14:10`, 0x80019448) and the area select.
+  from graphics. PAL MAIN0 keeps only the build stamp (`98/8/26 14:10`, 0x80019448) and the area select. Follow-up: "The debug font" below.
 - **JP retail per-area code** [V for the method, I for the verdict]: `fn_vs_pal.py` over JP X01..X19 (area part from 0x80115178).
   The low-similarity pieces we read (X04 0x80117938, X03 0x8011D630, X10 0x8011C81C, X09 0x8011F65C, X01 0x80123014, X06 0x80117AB4)
   are rewritten player / collision / model-block code with the same callees. No JP-only feature apart from the X13 stats above.
@@ -318,31 +318,35 @@ overlay space; closure over dead callers) reproduces the zombie sweep above. Of 
 mentioned in this file. All but one are step-switch copies with a live twin (e.g. X005 `mansionKeyHintTalk` = the
 same (2,0x33) line as the live `stepBacoTownNpcTalk`; X016 `stepJuiceSellerTalk` and `stepBrokenStoneGearsTalk`; X004
 `stepBigKeyPainting`; X001 `stepRaceEvent`) or helpers / D0SPSUB3 copies of D0SPSUB code. The exception:
-- **X001 `segmentedCrawlerWander` (0x801334DC, 1352 B)** [V no reference in X001 or MAIN0; role I]: a fixed patrol for the
-  segmented crawler (AREA01). It heads up (angle 0xC0), turns, runs right until x >= 0x551, turns back, runs left until
-  x < 0x118, and so on. Its body segments follow, and it uses its own 12-entry directional animation table. The live
-  `updateSegmentedCrawler` (0x80134C00) switches on subtype 0..3 but every case calls `segmentedCrawlerMove`. The duplicated cases look like
-  the place where one subtype once called the patrol [I]. Port: one call in a subtype case would restore it (cheap), but no placement
-  tells which subtype or room should use it.
+- **X001 `segmentedCrawlerWander` (0x801334DC, 1352 B)** [V]: an older, simpler copy of the green caterpillar's movement routine.
+  It is unreferenced in PAL, USA and JP. Details, renders and a port experiment are in "Unused patrol routes" below.
 
 ### Unreferenced animation scripts
 Scan of the area-part data of every X0nn for 8-byte animation entries (tools/anim.py format) ending in 0x8000 or a backward
 0x4000 jump, kept only when no data word and no lui/addiu points into them. All of these sit **between referenced scripts of the
-same object's tables** (owners from `tools/anim.py list --owner all`). Frames were not identified: the static SPR cut of these
-pages is garbled.
+same object's tables** (owners from `tools/anim.py list --owner all`). **Rendered (follow-up):** the port was run headless into the
+owner's room from the debug select, the VRAM was dumped raw (a temporary port-only hook, not committed) and the SPR parts were cut from
+that VRAM with the owner's tpage offset (`w1e`) and CLUT (throw-away renderer, not committed). The decoder shows that every one of these
+scripts ends in 0x8000 (play once and hold the last frame); none loops. Images: see "Images" at the end of this section.
 
-| Overlay | Address(es) | Frames (SPR of the owner) | Owner by position |
+| Overlay | Address(es) | Frames | What it shows (render) |
 |---|---|---|---|
-| X009 / X011 | 0x8012F144, 0x8012F164, 0x8012F17C / 0x8011C6E4, 0x8011C704, 0x8011C71C | 43-45-44 (loop), 46-48, 49-50 (held) | jellyfish (AREA09) / flying octopus (AREA11), one shared table (SPR kind 0x3A). Frames 42-50 are the only gap in its 0..76 frame use [V] |
-| X003 | 0x80139130; 0x8013A074, 0x8013A0A4, 0x8013A0E4, 0x8013A114; 0x8013A194, 0x8013A1A4, 0x8013A1B4 | 12-15; 29-32-30, 33-35, 38-41-39, 42-44 (ping-pong); 24-25, 26-27, 46-47 | swaying hop plant; villager / wind-blown monkey tables (0x801399C4..) |
-| X004 (also AREA12) | 0x80134E7C, 0x80134E9C; 0x801354EC, 0x8013551C, 0x8013554C | 16-19 forward / backward; 185-196 | biting plant / smoke / counted collectible tables; the 0x8013540C.. table |
-| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | (no owner found) |
-| X010 | 0x80131DFC, 0x80131E14 | 5-7, 8-10 | decor / parallax sprites (the known eel script 0x80131F1C is nearby) |
-| X014 | 0x8012A090; 0x8012A58C..0x8012A780 (13 scripts) | 12-20; 9-33, 51-62 | boss room decor / pillar / vortex (`updateBossRoomDecorSprite` uses only frames 0-8 and 21) |
-| X002 = X019 | 0x8011F2BC, 0x8011F2CC (X019 0x80116178/88) | 6-7, 8-9 | `updateAnimDecorSprite` |
+| X009 / X011 | 0x8012F144, 0x8012F164, 0x8012F17C / 0x8011C6E4, 0x8011C704, 0x8011C71C | 43 44 45 44 / 46 47 48 / 49 50 (50 held for 255 ticks) | **Jellyfish (AREA09 s0) and flying octopus (AREA11 s1), one shared SPR table** (kind 0x3A, base 4 resp. 9, CLUT 30930 resp. 31058). It is one sequence: the body curls its tentacles under and squashes flat twice (43-45), springs up with the tentacles thrown down (46-48), then stands upright on curled tentacles (49-50, held). Frame 42 (tentacles curling in) is in no script. It looks like a landing / "stand on the ground" pose set, not an attack [I]. The AREA11 room does not even load the page area of frames 37-50 (the octopus's sideways swim 37-41, which its live table uses, is garbage there), so the octopus render takes the pixels from AREA09 and the CLUT from AREA11 |
+| X003 | 0x80139130 | 12-15 | swaying hop plant table: a grass / reed tuft swaying (decor) |
+| X003 | 0x8013A074, 0x8013A0A4, 0x8013A0E4, 0x8013A114; 0x8013A194, 0x8013A1A4, 0x8013A1B4 | 29-32-30, 33-35, 38-41-39, 42-44 (ping-pong); 24-25, 26-27, 46-47 | wind-blown villager table (AREA03 s0, SPR 0x32): talk / gesture loops of the **brown-hat dwarf** (29-35) and the **sombrero dwarf** (38-44), and three two-frame moves of the **bundled-up old dwarf with the red scarf** (24-27, 46-47). Talk animations nobody selects |
+| X004 (also AREA12) | 0x80134E7C, 0x80134E9C | 16-19 forward / 19-16 backward | a **stone slab turning** (rotating wall / door panel opening and closing) in the biting-plant / smoke table area |
+| X004 | 0x801354EC, 0x8013551C, 0x8013554C | 195 187 188 196 188 187; 186-189-187; 190-192-185 | AREA04 s4 SPR 0x32 base 1: the **sombrero dwarf** again (three talk / nod gestures) |
+| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | not rendered: the block is a run of short scripts (frames 1-4, 24-35) right after a jump table; its only pointer (0x801184C8 -> 0x801184DC) is itself unreferenced; owner unknown |
+| X010 | 0x80131DFC, 0x80131E14 | 5-7, 8-10 | AREA10 s0 decor (base 12): jungle bush frames and waterfall / foam strips |
+| X014 | 0x8012A090; 19 scripts in 0x8012A58C..0x8012A780 | 12-20; 9-33, 47-62 | not rendered: in the boss room (s7) and s2 the page areas of those frames are not resident at the bases the room uses (only frames 0-8, 18-21, 26-29 are) |
+| X002 = X019 | 0x8011F2BC, 0x8011F2CC (X019 0x80116178/88) | 6-7, 8-9 | not rendered: not resident in AREA02 s1 at base 4 or 10 |
 
-Restorable only as decoration: no code selects them, so each would need an owner and a trigger. The jellyfish/octopus set
-(three scripts that form one sequence: loop, play once, hold) is the strongest candidate for a cut enemy animation (an attack or death) [I].
+Restorable only as decoration or extra talk poses: no code selects them. The jellyfish/octopus sequence is the most complete one.
+
+**Images** (scratchpad of the session, not in the repo): per script a GIF `<prefix>_<address>.gif`, per owner a sheet
+`<prefix>_sheet.png` (one row per script, frame numbers on top) and an atlas `<prefix>_spr.png` (all SPR frames of the table):
+prefixes `x009_jellyfish`, `x011_octopus` (plus `x009_jellyfish_sequence.gif`, `x011_octopus_sequence.gif`: the three scripts
+played in a row), `x003_monkey`, `x003_hopplant`, `x004_bitingplant`, `x004_sombrero`, `x010_decor`, `x014_bossdecor`.
 
 ### Checked, nothing new
 - **Read-only save variables:** of every GCD byte (0x8009CD00..0x8009D100) that some code reads and none stores by absolute address, every
@@ -352,5 +356,99 @@ Restorable only as decoration: no code selects them, so each would need an owner
 
 ### Not checked
 SFX ids never played (the id comes from data and animation tables as well as from immediates; needs a census of
-`playSFX`/`SfxPlay2` arguments plus `D_800780C4`); the pixels of the unreferenced animation frames (needs a run-time VRAM capture);
+`playSFX`/`SfxPlay2` arguments plus `D_800780C4`); the pixels of the X002/X008/X014 unreferenced frames (see above);
 the beta's `X01..X19`, `INFO*` and `DSPSUB*` (not on the local disc); the USA/JP system overlays vs PAL.
+
+## The debug font (drawDebugText): follow-up, 2 November 2026
+
+Question: JP draws the ending stats and TRY AGAIN / GAME OVER / NOW LOADING as debug text, so is there a font we can write
+anything with? **Yes, in every build, PAL included, and the port can already call it.** [V unless marked]
+
+- **Not Psy-Q's FntPrint.** No `FntLoad` / `FntOpen` / `FntPrint` / `KanjiFntPrint` is identified in the PAL, USA, JP or beta symbol
+  maps. The game has its own printer, `drawDebugText(x, y, colour, string)` (PAL MAIN0 0x80020F14, 572 B, matched C in
+  `src/drawDebugText.c`; USA 0x80023AA4, JP 0x80021E5C, beta 0x800233A4, same code). Each character becomes one 8x8 `SPRT_8`
+  (code 0x75) with u = (c & 15) * 8, v = (c >> 4) * 8 on texture page 0x15 (4 bpp, VRAM x 320, y 256) and CLUT (368, 496 + colour). A `DR_MODE`
+  follows every call. It goes into the debug primitive buffer, 0x780 bytes per frame buffer. That is about 115-120 characters per frame in
+  total; further characters are dropped (seen in the port: a fifth line did not appear).
+- **The glyphs are part of the system texture page** `SYSTEM/A00000.GAM` (loaded at (320, 256) at boot and resident in every
+  frame we dumped: title, area select, rooms of AREA00/01; the menus draw other cells of the same page). The font area (128 x 128 px,
+  the left half of the page) is **byte-identical in PAL, USA and JP**. Cells: 0x10-0x1F = hex digits `0-9A-F`; 0x20-0x7E = printable
+  ASCII **with lower case**, except that 0x40 is **`©`** instead of `@` (hence JP's `@1997 WHOOPEE CAMP Co.,Ltd.` shows a ©);
+  0x80-0x89 = dim digits 0-9. Everything from 0x90 up is HUD / effect art of the same page, not font. No accents, no kana. The glyphs
+  are shaded (gradient plus shadow, about 10 colours). The 4 CLUT rows give white, blue, orange and green.
+- **Who calls it.** PAL / USA: `bootStartupTask` states 2-3 (build stamp `98/8/26` `14:10` in PAL, `98/3/22` in USA; unreachable, state 1
+  jumps to 4) and the debug area select `displayDebugScreen` (live with the debug flag `0x1F8001B4`, the port's
+  `--title-debug` / sweep pokes). JP adds, all live in retail: the title's `@1997 WHOOPEE CAMP Co.,Ltd.` and `PUSH [START] BUTTON`,
+  `TRY AGAIN...`, `NOW LOADING`, ` GAME OVER ` at (96, 96), the X13 ending stats at (32, 64/88/112) (`TIME` from two X13 counters,
+  `AP` = playerAP, `EVENT` = the number of event bytes equal to 0xFF over 256 ids / a total), and a collision readout
+  `flag= %01d`, `hit pos x/y= %04d`, `no hit`, `pos x/y= %04d`, `dir = %01d` (JP 0x8002FB98..0x8002FCF4, at x 8). PAL / USA replaced
+  all of the JP uses with graphics and removed the readout strings.
+- **Port.** `drawDebugText` is native code in the port and the page is resident, so port code can call it from any per-frame game hook
+  (tested with a throw-away hook in `drawHudIfShown`: the JP stats and a test text drew in-game in all 4 colours; the text goes into the
+  game's own ordering table, behind the message box, over the scene). Uses: debug / research overlays (positions, flags), an
+  in-picture FPS counter (the current `--show-fps` overlay is drawn at window resolution with its own 3x5 digits, which is sharper at high
+  internal resolution), new short texts. Limits: 8x8 fixed width, ASCII plus ©, 4 colours, about 115-120 characters per frame shared by all callers,
+  and screen-space only (no scaling).
+- Images: font page in the 4 CLUTs, a code chart, the JP screens rebuilt from data (font + JP coordinates + JP format strings with
+  sample values), and port screenshots (PAL area select; the JP stats and a test text drawn in-game by the port). Paths in the
+  session report.
+
+## Unused patrol routes
+
+Sweep (2 November 2026): every X0nn function list (notes CSV plus the `// FUNC` headers) against jal/j targets, raw pointers and lui/addiu
+pairs of the overlay and of MAIN0 (the MAIN0 handler tables point into overlay space). The dead functions were then searched for
+movement code (position += velocity, hard-coded position limits, `COS_TABLE` steering, waypoint tables) and for subtype cases that no
+placement reaches. The I0NFO2 NPC sets (top-down patrol boxes) were dumped with `tools/topdown.py npcs`. MAIN0 / X000 / I0NFO dead
+functions are those of the zombie sweep above (none moves an object along a route). [V] unless marked.
+
+### X001 segmentedCrawlerWander: the caterpillar's first route
+- **The owner is the green caterpillar of Wobbly Wharf** (render: a head with an orange underside and a dark mouth, plus 3 or 5
+  round green segments with a red spike and a pink spot). It is not the spider. Layer 2 type 0x13, handler `updateSegmentedCrawler` 0x80134C00.
+  No APD record places it. It is spawned by the unlayered object type 7 `updateSegmentedCrawlerSpawner` (0x8013C028, MAIN0 unlayered
+  table D_8007BF34 index 7). That object comes from the per-section unlayered list `PTR_8007bee4[area][section]` = {2, 1, 7}, found only in
+  **AREA01 section 2 (Wobbly Wharf)**. The same list pointer is also reached as AREA07 s2 (the AREA01 copy that is not on the disc) and as AREA00 index 8
+  (past AREA00's 6 sections).
+- Spawner: the first crawler after 600 frames, then one every 480 / 600 / 360 / 440 frames (random), at most 2 alive. It starts at one of four
+  points D_8013CA10 (h, y) = (525, -510), (710, -580), (940, -630), (1130, -570), at the player's depth. Subtype = frame parity & 1:
+  **0 = head + 5 segments, 1 = head + 3**. Subtypes 2 and 3 exist in the update switch but are never spawned.
+- In this room the horizontal axis is the TObj `b` field (Tombi enters at 215). The limits 0x118 (280) and 0x551 (1361) span the rope-bridge
+  stretch of the room [I], and the crawler walks in the tree canopy above it (y about -400 .. -630; Tombi on the bridge is at -229 .. -259).
+  Off screen its y is clamped to at most -0x190 (`updateSegmentedCrawler`).
+- **Live route (`segmentedCrawlerMove`, 0x80132B64)**: down for 110 frames (JP: 60), turn to face right, run right until h >= 0x551 *or*
+  `segmentedCrawlerCheckWall` hits, turn back (through below or above, chosen by y < -0x140), run left until h < 0x118 or a wall,
+  turn, and **loop forever** on two lanes.
+- **`segmentedCrawlerWander` (0x801334DC, 1352 B)**, no reference in X001, MAIN0 or any table: the same init (but 60 frames down, as
+  JP's Move), **no wall check, no lane choice, no loop**: right until h >= 0x551, U-turn to angle 0x80 (state 7; state 9 is a
+  no-op), left until h < 0x118, turn up and round to face right (state 13), and then **state 14 has no case: the head stops for good**,
+  facing right at h 280, and the body stays behind it. So it is a one-way patrol, a first draft of Move (Move = Wander + wall checks + lanes + loop).
+  It **shares** the animation tables with Move and `segmentedCrawlerGrabbed` (D_8013F034: 12 directional head scripts, frames 57/58,
+  152/153, 150/151, 148/149 and 124-131; D_8013F064; the body uses D_8013F1BC, frames 0-15). The earlier note "own animation table" and
+  "heads up" were wrong (angle 0xC0 is +y, down).
+- Which room fits: only Wobbly Wharf. Its limits are the same constants as the live routine, so the patrol was written for this room.
+  The four duplicate subtype cases of `updateSegmentedCrawler` (0/1, 2, 3 each call Move) are where one subtype once called Wander [I].
+- Builds: **unreferenced in all three retail builds**. JP X01 has it at 0x80131DB8 (masked twin, overlay base 0x800E9AF8) and its
+  `updateSegmentedCrawler` (one call, 0x80133618) only calls Move. USA X01 has it at 0x80132814 (the USA X01 file maps to base 0x800E7388) with no reference.
+  The beta's X01 is not on the local disc, and PrePre8 has no AREA01 code.
+- **Port: `--crawler-patrol`** (port/fixes.txt, off by default) makes the head run Wander instead of Move. Recorded: both
+  caterpillars come down, run right to 1361, turn, run left and park one above the other at h 280, facing right, for good. Retail keeps
+  looping. GIF side by side (retail | patrol); the patrol stays higher than the retail lanes. For the recording the camera was lifted by holding Tombi's y (throw-away hook), because the crawlers walk above the top of the normal view.
+
+### Other unused movement
+| Function | Owner / room | Route | Builds | Verdict |
+|---|---|---|---|---|
+| X009 `flowerTearsSeekerWalkOff` 0x80128B4C (248 B) | flower tears seeker NPC (MFNT090S "came for Flower tears to revive the Charity fountain") | walks left at 1 px a frame until off screen, then hides (b04 2). It is the live `flowerTearsSeekerPace` (paces h 0x708..0x780, with gravity and tile collision) without the turn and the collision | unreferenced in PAL, JP (X09 0x80127CD4) and USA (0x80127E94) | a leave-the-scene walk nobody calls; the live NPC is freed off screen once event 0x28 is done |
+| X002 `sevenFriendsMemberFlyUp` 0x80119088 (240 B) | a member of the Seven Friends (AREA02) | waits for its timer, then rises with velocity -0x10 per frame down to -0x600, switches to anim 1 at -0x80 and is freed off screen | unreferenced in PAL, JP (X02 0x801182E4) and USA (0x801183D8) | a fly-away exit; the live scene steps do their own exit [I] |
+| X001 `komaPigCheckWall` 0x8012BC84 | koma pig, AREA01 | (wall probe, not a route) | the X003 / X004 copies are live | AREA01's koma pigs never test walls |
+
+Live, for the record: X010 `spearPigWanderB` (subtype 1 of the spear pig, placed in AREA10 s0), X009 `flowerTearsSeekerPace`.
+
+### Top-down patrol boxes (I0NFO2 NPC sets)
+Record fields (docs/CIVILIZATION.md): behaviour 1 vertical, 2 horizontal, 3 / 4 diagonal, box = limits. **The only patrol that runs
+in retail is AREA19 s2 (set 11) actor 4** (vertical, y 268..304). All the others are in the cut Civilization towns and never run:
+set 0D (AREA11 s0) actors 3 (diagonal), 4, 5, 8 (horizontal), 7, 9 (vertical); set 0E (AREA16 s0, boxes relative to the actor) 2, 7 (diagonal),
+4 (vertical), 5 (diagonal); set 0F (AREA17 s0) 6, 9, 12 (horizontal), 8, 13, 14, 15 (diagonal); sets 0C (AREA08) and 10 (AREA18) have no patrols.
+Diagram: all four sets on one sheet.
+
+### Not checked
+Waypoint tables read by live code but with entries no path reaches (e.g. AREA09 `updateWaypointRide`). Unreachable states inside
+live movement routines other than the crawler's.

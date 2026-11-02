@@ -2678,6 +2678,19 @@ build/port2/tombi2 --headless --noclip --skip-movies --frames 11100 -v --poke 90
 ```
 (used for the B301.000 glyph sheet check, docs/CUT_CONTENT.md). It has no effect outside the I0NFO3 rooms.
 
+### `--crawler-patrol`: the caterpillar's unused route (port only, research)
+
+`--crawler-patrol` makes the green caterpillar of AREA01 s2 (Wobbly Wharf, X001 `updateSegmentedCrawler`) run the unreferenced
+`segmentedCrawlerWander` instead of `segmentedCrawlerMove`. With the flag the caterpillar goes down, runs right to h 0x551, turns, runs left to h 0x118,
+turns to face right and stops for good. Retail loops between the two limits on two lanes. The hook is two lines of
+`port/fixes.txt`, and the game is unchanged without the flag. Background, renders and a GIF: docs/CUT_CONTENT.md "Unused patrol routes".
+```
+build/port2/tombi2 --window --crawler-patrol --skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:1:2 \
+    --poke 1250:8009C962:2:2 --pad-script 1000:start,1300:circle:3
+```
+The first caterpillar appears about 12 s after the room loads, in the canopy above the bridge. It walks above the normal view, so the debug
+menu's Fly line helps to follow it.
+
 ### Debug menu: `--debug-menu` (port only, opt-in)
 
 An in-game debug menu for testing (`port2/runtime/debugmenu.c`). Off by default; `--debug-menu` turns it on

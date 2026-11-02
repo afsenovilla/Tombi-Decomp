@@ -322,7 +322,7 @@ Solo analisis estatico: escaneres desechables y desensamblado (capstone), sin co
 - **JP final dibuja las estadisticas del final con la fuente de depuracion** [V]: en JP `X13.BIN`, `updateSceneSequence` (0x801162DC) llama a
   `sprintf` + `drawDebugText` con `TIME  %3d:%2d`, `AP    %8ld`, `EVENT %3d / %3d` (fichero +0x2B718). PAL/USA dibujan los mismos
   numeros con sprites de glifos (`drawGameStats` 0x801179B4). El exe JP tambien escribe `TRY AGAIN...`, ` GAME OVER ` y `NOW LOADING`
-  con `drawDebugText` (0x8001A1D8, 0x8001C0C4, 0x8001B864). PAL usa graficos para ellos.
+  con `drawDebugText` (0x8001A1D8, 0x8001C0C4, 0x8001B864). PAL usa graficos para ellos. Mas detalle en "La fuente de depuracion" abajo.
 - **Codigo por area de JP** [V el metodo, I el veredicto]: las piezas de baja similitud que leimos (X04 0x80117938, X03 0x8011D630, X10
   0x8011C81C, X09 0x8011F65C, X01 0x80123014, X06 0x80117AB4) son codigo de jugador / colision / bloques de modelo reescrito, con las mismas llamadas.
   No hay ninguna funcion exclusiva de JP salvo las estadisticas de X13.
@@ -335,29 +335,33 @@ Solo analisis estatico: escaneres desechables y desensamblado (capstone), sin co
 Nuestro grafo de llamadas reproduce el barrido de zombis de arriba. De las funciones de parte de area de >= 150 B que lista, 66 no estan mencionadas en este fichero. Todas menos una
 son copias de switch de pasos con un gemelo vivo (p. ej. X005 `mansionKeyHintTalk` = la misma linea (2,0x33) que `stepBacoTownNpcTalk`;
 X016 `stepJuiceSellerTalk`, `stepBrokenStoneGearsTalk`; X004 `stepBigKeyPainting`; X001 `stepRaceEvent`) o auxiliares. La excepcion:
-- **X001 `segmentedCrawlerWander` (0x801334DC, 1352 B)** [V sin referencia; I el papel]: una patrulla fija del gusano segmentado (AREA01):
-  sube (angulo 0xC0), gira, corre a la derecha hasta x >= 0x551, vuelve, corre a la izquierda hasta x < 0x118, y asi sucesivamente. Los segmentos del cuerpo le siguen y usa su propia
-  tabla de 12 animaciones direccionales. El `updateSegmentedCrawler` vivo hace switch sobre el subtipo 0..3, pero todos los casos llaman a
-  `segmentedCrawlerMove`. Esos casos duplicados parecen el sitio donde algun subtipo llamaba a la patrulla [I]. Port: bastaria una llamada (barato), pero ninguna
-  colocacion dice que subtipo ni que sala la usaria.
+- **X001 `segmentedCrawlerWander` (0x801334DC, 1352 B)** [V]: una copia anterior y mas simple de la rutina de movimiento de la oruga
+  verde. No tiene referencia en PAL, USA ni JP. Detalle, imagenes y prueba en el port en "Rutas de patrulla sin usar" abajo.
 
 ### Scripts de animacion sin referencia
 Buscamos entradas de animacion de 8 bytes (formato de tools/anim.py) que acaben en 0x8000 o en un salto 0x4000 hacia atras, y nos quedamos solo con las que no
-tienen ningun puntero ni par lui/addiu. Todos estan **entre scripts referenciados de las tablas del mismo objeto**. No identificamos los fotogramas: el corte estatico
-del SPR de esas paginas sale corrupto.
+tienen ningun puntero ni par lui/addiu. Todos estan **entre scripts referenciados de las tablas del mismo objeto**. **Renderizados (seguimiento):** corrimos el
+port sin ventana hasta la sala del dueño con la seleccion de area de depuracion, volcamos la VRAM en bruto (gancho temporal del port, no subido) y cortamos las
+piezas del SPR de esa VRAM con el desplazamiento de tpage (`w1e`) y la CLUT del dueño (renderizador desechable, no subido). El decodificador muestra que
+todos acaban en 0x8000 (se reproducen una vez y se quedan en el ultimo fotograma); ninguno es un bucle.
 
-| Overlay | Direcciones | Fotogramas | Dueño por posicion |
+| Overlay | Direcciones | Fotogramas | Que muestra (render) |
 |---|---|---|---|
-| X009 / X011 | 0x8012F144, 0x8012F164, 0x8012F17C / 0x8011C6E4, 0x8011C704, 0x8011C71C | 43-45-44 (bucle), 46-48, 49-50 (fijo) | medusa (AREA09) / pulpo volador (AREA11), tabla compartida (SPR 0x3A). Los fotogramas 42-50 son el unico hueco de los 0..76 que usa [V] |
-| X003 | 0x80139130; 0x8013A074, 0x8013A0A4, 0x8013A0E4, 0x8013A114; 0x8013A194, 0x8013A1A4, 0x8013A1B4 | 12-15; 29-32, 33-35, 38-41, 42-44 (ida y vuelta); 24-25, 26-27, 46-47 | planta saltarina; tablas del aldeano / mono del viento |
-| X004 (tambien AREA12) | 0x80134E7C, 0x80134E9C; 0x801354EC, 0x8013551C, 0x8013554C | 16-19 hacia delante / atras; 185-196 | planta mordedora / humo / coleccionable contado |
-| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | (sin dueño) |
-| X010 | 0x80131DFC, 0x80131E14 | 5-7, 8-10 | sprites de decorado (junto al script de la anguila 0x80131F1C) |
-| X014 | 0x8012A090; 0x8012A58C..0x8012A780 (13 scripts) | 12-20; 9-33, 51-62 | decorado / pilar / vortice de la sala del jefe (`updateBossRoomDecorSprite` solo usa 0-8 y 21) |
-| X002 = X019 | 0x8011F2BC, 0x8011F2CC | 6-7, 8-9 | `updateAnimDecorSprite` |
+| X009 / X011 | 0x8012F144, 0x8012F164, 0x8012F17C / 0x8011C6E4, 0x8011C704, 0x8011C71C | 43 44 45 44 / 46 47 48 / 49 50 (50 fijo 255 ticks) | **Medusa (AREA09 s0) y pulpo volador (AREA11 s1), una sola tabla SPR** (tipo 0x3A, base 4 / 9, CLUT 30930 / 31058). Es una secuencia: recoge los tentaculos y se aplasta dos veces (43-45), se estira lanzando los tentaculos hacia abajo (46-48) y queda de pie sobre los tentaculos enroscados (49-50, fijo). El fotograma 42 no esta en ningun script. Parece una pose de aterrizar / estar en el suelo, no un ataque [I]. La sala de AREA11 ni siquiera carga la zona de pagina de los fotogramas 37-50 (el nado lateral 37-41, que su tabla viva usa, sale basura), asi que el render del pulpo toma los pixeles de AREA09 y la CLUT de AREA11 |
+| X003 | 0x80139130 | 12-15 | tabla de la planta saltarina: una mata de hierba que se mece (decorado) |
+| X003 | 0x8013A074, 0x8013A0A4, 0x8013A0E4, 0x8013A114; 0x8013A194, 0x8013A1A4, 0x8013A1B4 | 29-32-30, 33-35, 38-41-39, 42-44 (ida y vuelta); 24-25, 26-27, 46-47 | tabla de los aldeanos del viento (AREA03 s0, SPR 0x32): gestos al hablar del **enano del sombrero marron** (29-35) y del **enano del sombrero mexicano** (38-44), y tres movimientos del **enano viejo abrigado con bufanda roja** (24-27, 46-47). Animaciones de charla que nadie elige |
+| X004 (tambien AREA12) | 0x80134E7C, 0x80134E9C | 16-19 / 19-16 | una **losa de piedra que gira** (pared o puerta giratoria que se abre y se cierra) |
+| X004 | 0x801354EC, 0x8013551C, 0x8013554C | 195 187 188 196 188 187; 186-189-187; 190-192-185 | AREA04 s4 SPR 0x32 base 1: otra vez el **enano del sombrero mexicano** (tres gestos de charla) |
+| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | sin render: el bloque es una tira de scripts cortos (fotogramas 1-4, 24-35) tras una tabla de saltos; su unico puntero (0x801184C8 -> 0x801184DC) tampoco tiene referencia; dueño desconocido |
+| X010 | 0x80131DFC, 0x80131E14 | 5-7, 8-10 | decorado de AREA10 s0 (base 12): matorral de la jungla y tiras de cascada / espuma |
+| X014 | 0x8012A090; 19 scripts en 0x8012A58C..0x8012A780 | 12-20; 9-33, 47-62 | sin render: en la sala del jefe (s7) y en s2 esas zonas de pagina no estan cargadas con las bases que usa la sala (solo 0-8, 18-21, 26-29) |
+| X002 = X019 | 0x8011F2BC, 0x8011F2CC | 6-7, 8-9 | sin render: no cargado en AREA02 s1 con base 4 ni 10 |
 
-Solo serian restaurables como decorado: ningun codigo los elige, asi que cada uno necesitaria un dueño y un disparador. El juego de la medusa/pulpo (tres scripts que forman una secuencia: bucle, una vez, fijo) es el
-mejor candidato a animacion recortada de enemigo (ataque o muerte) [I].
+Solo serian restaurables como decorado o poses de charla: ningun codigo los elige. La secuencia de la medusa/pulpo es la mas completa.
+
+**Imagenes** (en el scratchpad de la sesion, no en el repo): un GIF por script `<prefijo>_<direccion>.gif`, una hoja por dueño `<prefijo>_sheet.png` y un
+atlas `<prefijo>_spr.png`; prefijos `x009_jellyfish`, `x011_octopus` (y `*_sequence.gif`: los tres scripts seguidos), `x003_monkey`, `x003_hopplant`,
+`x004_bitingplant`, `x004_sombrero`, `x010_decor`, `x014_bossdecor`.
 
 ### Revisado, nada nuevo
 - **Variables de guardado solo leidas:** cada byte del GCD que algun codigo lee y nadie escribe por direccion absoluta es un elemento del array de eventos
@@ -365,5 +369,89 @@ mejor candidato a animacion recortada de enemigo (ataque o muerte) [I].
 - Musica: ya cubierta por `tools/music_refs.py`.
 
 ### Sin revisar
-Ids de SFX que nunca suenan (los ids vienen tambien de datos y de tablas de animacion); los pixeles de los fotogramas sin referencia (hace falta una captura
-de VRAM en ejecucion); `X01..X19`, `INFO*`, `DSPSUB*` de la beta (no estan en local); los overlays de sistema de USA/JP frente a PAL.
+Ids de SFX que nunca suenan (los ids vienen tambien de datos y de tablas de animacion); los pixeles de los fotogramas sin referencia de X002/X008/X014 (ver arriba); `X01..X19`, `INFO*`, `DSPSUB*` de la beta (no estan en local); los overlays de sistema de USA/JP frente a PAL.
+
+## La fuente de depuracion (drawDebugText): seguimiento, 2 de noviembre de 2026
+
+Pregunta: JP dibuja las estadisticas del final y TRY AGAIN / GAME OVER / NOW LOADING como texto de depuracion. ¿Hay una fuente con la que escribir
+lo que queramos? **Si, en todas las versiones, PAL incluida, y el port ya puede usarla.** [V salvo marca]
+
+- **No es el FntPrint de Psy-Q.** No hay `FntLoad` / `FntOpen` / `FntPrint` / `KanjiFntPrint` identificados en los mapas de simbolos de PAL, USA, JP ni la beta.
+  El juego tiene su propio impresor, `drawDebugText(x, y, color, cadena)` (MAIN0 PAL 0x80020F14, 572 B, C emparejado en `src/drawDebugText.c`;
+  USA 0x80023AA4, JP 0x80021E5C, beta 0x800233A4, el mismo codigo). Cada caracter es un `SPRT_8` de 8x8 (codigo 0x75) con u = (c & 15) * 8,
+  v = (c >> 4) * 8 en la pagina de textura 0x15 (4 bpp, VRAM x 320, y 256) y la CLUT (368, 496 + color). Cada llamada añade un `DR_MODE`.
+  Todo va al bufer de primitivas de depuracion, 0x780 bytes por bufer de cuadro: unos 115-120 caracteres por cuadro en total. Los que pasan
+  se descartan (visto en el port: una quinta linea no salio).
+- **Los glifos son parte de la pagina de textura del sistema** `SYSTEM/A00000.GAM` (cargada en (320, 256) al arrancar y presente en todos los cuadros
+  que volcamos: titulo, seleccion de area, salas de AREA00/01; los menus usan otras celdas de la misma pagina). La zona de la fuente (128 x 128 px, la mitad
+  izquierda) es **identica byte a byte en PAL, USA y JP**. Celdas: 0x10-0x1F = digitos hexadecimales `0-9A-F`; 0x20-0x7E = ASCII imprimible
+  **con minusculas**, salvo que 0x40 es **`©`** en vez de `@` (por eso el `@1997 WHOOPEE CAMP Co.,Ltd.` de JP sale con ©); 0x80-0x89 = digitos
+  0-9 apagados. De 0x90 en adelante hay arte del HUD y de efectos de la misma pagina, no fuente. Sin acentos ni kana. Glifos sombreados (degradado y
+  sombra); las 4 filas de CLUT dan blanco, azul, naranja y verde.
+- **Quien la llama.** PAL / USA: `bootStartupTask` estados 2-3 (sello `98/8/26` `14:10` en PAL, `98/3/22` en USA; inalcanzable, el estado 1 salta al 4)
+  y la seleccion de area de depuracion `displayDebugScreen` (viva con el flag `0x1F8001B4`). JP añade, todo vivo en la version final: el
+  `@1997 WHOOPEE CAMP Co.,Ltd.` y `PUSH [START] BUTTON` del titulo, `TRY AGAIN...`, `NOW LOADING`, ` GAME OVER ` en (96, 96), las estadisticas de X13
+  en (32, 64/88/112), y una lectura de colision `flag= %01d`, `hit pos x/y= %04d`, `no hit`, `pos x/y= %04d`, `dir = %01d` (JP 0x8002FB98..0x8002FCF4).
+  PAL / USA cambiaron todos los usos de JP por graficos y quitaron las cadenas de la lectura.
+- **Port.** `drawDebugText` es codigo nativo en el port y la pagina esta cargada, asi que el codigo del port puede llamarla desde cualquier gancho
+  por cuadro (probado con un gancho desechable en `drawHudIfShown`: las estadisticas JP y un texto de prueba salen en el juego en los 4 colores; el texto va a la
+  tabla de orden del juego, detras del cuadro de mensaje y por encima de la escena). Usos: capas de depuracion / investigacion, un contador de FPS
+  dentro de la imagen (el `--show-fps` actual se dibuja a la resolucion de la ventana con sus propios digitos 3x5, mas nitido a alta resolucion interna),
+  textos cortos nuevos. Limites: 8x8 de ancho fijo, ASCII mas ©, 4 colores, unos 115-120 caracteres por cuadro para todos, solo en pantalla.
+
+## Rutas de patrulla sin usar
+
+Barrido (2 de noviembre de 2026): la lista de funciones de cada X0nn contra destinos jal/j, punteros y pares lui/addiu del overlay y de MAIN0. Luego buscamos
+en las funciones muertas codigo de movimiento (posicion += velocidad, limites fijos, direccion por `COS_TABLE`, tablas de puntos de paso) y casos de subtipo
+que ninguna colocacion alcanza. Volcamos los juegos de NPC de I0NFO2 (cajas de patrulla vistas desde arriba) con `tools/topdown.py npcs`. Las funciones muertas
+de MAIN0 / X000 / I0NFO son las del barrido de zombis (ninguna mueve un objeto por una ruta). [V] salvo marca.
+
+### X001 segmentedCrawlerWander: la primera ruta de la oruga
+- **El dueño es la oruga verde del Muelle tambaleante** (render: cabeza con la parte de abajo naranja y una boca oscura, y 3 o 5 segmentos verdes
+  redondos con un pincho rojo y una mancha rosa). No es la araña. Capa 2 tipo 0x13, `updateSegmentedCrawler` 0x80134C00. Ningun registro APD la
+  coloca. La crea el objeto sin capa tipo 7 `updateSegmentedCrawlerSpawner` (0x8013C028, tabla sin capa de MAIN0 D_8007BF34 indice 7). Ese objeto sale de la lista
+  sin capa por seccion `PTR_8007bee4[area][seccion]` = {2, 1, 7}, que solo esta en **AREA01 seccion 2 (Muelle tambaleante)**. El mismo puntero
+  aparece como AREA07 s2 (la copia de AREA01 que no esta en el disco) y como indice 8 de AREA00 (mas alla de sus 6 secciones).
+- Generador: la primera oruga a los 600 cuadros y luego una cada 480 / 600 / 360 / 440 (al azar), como mucho 2 a la vez, en uno de los cuatro puntos
+  D_8013CA10 (h, y) = (525, -510), (710, -580), (940, -630), (1130, -570), a la profundidad del jugador. Subtipo = paridad del cuadro & 1: **0 = cabeza +
+  5 segmentos, 1 = cabeza + 3**. Los subtipos 2 y 3 existen en el switch pero nunca se crean.
+- En esta sala el eje horizontal es el campo `b` del TObj (Tombi entra en 215). Los limites 0x118 (280) y 0x551 (1361) abarcan el tramo del puente de cuerda [I],
+  y la oruga anda por la copa de los arboles encima (y de -400 a -630; Tombi en el puente esta a -229 .. -259). Fuera de pantalla su y se limita a
+  -0x190 como mucho.
+- **Ruta viva (`segmentedCrawlerMove`, 0x80132B64)**: baja 110 cuadros (JP: 60), gira a la derecha, corre hasta h >= 0x551 *o* hasta que
+  `segmentedCrawlerCheckWall` choca, da la vuelta (por abajo o por arriba segun y < -0x140), corre a la izquierda hasta h < 0x118 o una pared, gira y
+  **repite siempre** en dos carriles.
+- **`segmentedCrawlerWander` (0x801334DC, 1352 B)**, sin referencia en X001, MAIN0 ni ninguna tabla: el mismo inicio (pero 60 cuadros, como el Move de
+  JP), **sin pared, sin carriles y sin bucle**: a la derecha hasta h >= 0x551, media vuelta a angulo 0x80 (estado 7; el 9 no hace nada), a la izquierda
+  hasta h < 0x118, giro por arriba hasta mirar a la derecha (estado 13) y **el estado 14 no tiene caso: la cabeza se para para siempre** en h 280
+  y el cuerpo se queda detras. Es una patrulla de ida y vuelta unica, un primer borrador de Move (Move = Wander + paredes + carriles + bucle). **Comparte** las
+  tablas de animacion con Move y `segmentedCrawlerGrabbed` (D_8013F034: 12 scripts de cabeza por direccion, fotogramas 57/58, 152/153, 150/151, 148/149 y
+  124-131; D_8013F064; el cuerpo usa D_8013F1BC, fotogramas 0-15). La nota anterior ("tabla propia", "sube") estaba mal (el angulo 0xC0 es +y, hacia abajo).
+- Sala: solo el Muelle tambaleante. Sus limites son las mismas constantes que la rutina viva, asi que la patrulla se escribio para esta sala. Los cuatro casos de
+  subtipo duplicados de `updateSegmentedCrawler` son el sitio donde un subtipo llamaba a Wander [I].
+- Versiones: **sin referencia en las tres versiones finales**. JP X01 la tiene en 0x80131DB8 (base 0x800E9AF8) y su `updateSegmentedCrawler` solo
+  llama a Move (0x80133618). USA X01 en 0x80132814 (el fichero X01 de USA se mapea con base 0x800E7388), sin referencia. El X01 de la beta no esta en local; PrePre8
+  no tiene codigo de AREA01.
+- **Port: `--crawler-patrol`** (port/fixes.txt, desactivado por defecto) hace que la cabeza use Wander en vez de Move. Grabado: las dos orugas bajan,
+  van a la derecha hasta 1361, giran, vuelven y se quedan aparcadas una encima de otra en h 280 mirando a la derecha. La version final sigue en bucle.
+  GIF lado a lado. La patrulla queda mas alta que los carriles normales; para grabar subimos la camara fijando la y de Tombi (gancho
+  desechable), porque las orugas andan por encima de la vista normal.
+
+### Otros movimientos sin usar
+| Funcion | Dueño / sala | Ruta | Versiones | Veredicto |
+|---|---|---|---|---|
+| X009 `flowerTearsSeekerWalkOff` 0x80128B4C (248 B) | el NPC que busca las lagrimas de flor (MFNT090S) | anda a la izquierda a 1 px por cuadro hasta salir de pantalla y se oculta (b04 2). Es el `flowerTearsSeekerPace` vivo (va y viene entre h 0x708 y 0x780 con gravedad y colision) sin el giro ni la colision | sin referencia en PAL, JP (0x80127CD4) y USA (0x80127E94) | salida de escena que nadie llama |
+| X002 `sevenFriendsMemberFlyUp` 0x80119088 (240 B) | un miembro de los Siete Amigos (AREA02) | espera su temporizador, sube acelerando (-0x10 por cuadro hasta -0x600), cambia a la anim 1 en -0x80 y se libera fuera de pantalla | sin referencia en PAL, JP (0x801182E4) y USA (0x801183D8) | salida volando; la escena viva hace su propia salida [I] |
+| X001 `komaPigCheckWall` 0x8012BC84 | cerdo koma, AREA01 | (sonda de pared, no ruta) | las copias de X003 / X004 estan vivas | los cerdos koma de AREA01 nunca miran paredes |
+
+Vivas, para que conste: X010 `spearPigWanderB` (subtipo 1 del cerdo de la lanza, colocado en AREA10 s0) y X009 `flowerTearsSeekerPace`.
+
+### Cajas de patrulla vistas desde arriba (juegos de NPC de I0NFO2)
+Campos en docs/CIVILIZACION.md: comportamiento 1 vertical, 2 horizontal, 3 / 4 diagonal; la caja son los limites. **La unica patrulla que corre en la
+version final es AREA19 s2 (juego 11) actor 4** (vertical, y 268..304). Todas las demas estan en los pueblos recortados de Civilizacion y nunca corren:
+juego 0D (AREA11 s0) actores 3 (diagonal), 4, 5, 8 (horizontal), 7, 9 (vertical); juego 0E (AREA16 s0, cajas relativas al actor) 2, 7 (diagonal), 4 (vertical),
+5 (diagonal); juego 0F (AREA17 s0) 6, 9, 12 (horizontal), 8, 13, 14, 15 (diagonal); los juegos 0C (AREA08) y 10 (AREA18) no tienen patrullas.
+
+### Sin revisar
+Tablas de puntos de paso leidas por codigo vivo con entradas que ninguna ruta alcanza (p. ej. `updateWaypointRide` de AREA09). Estados inalcanzables dentro de
+otras rutinas de movimiento vivas.
