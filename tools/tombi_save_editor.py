@@ -16,7 +16,7 @@ sys.path.insert(0, HERE)
 import tombi_save as T  # noqa: E402
 
 from PySide6.QtCore import Qt, QSize, QRectF, QByteArray, QAbstractTableModel, QModelIndex, QSortFilterProxyModel, \
-    QTimer, Signal, QEvent  # noqa: E402
+    QTimer, Signal  # noqa: E402
 from PySide6.QtGui import QFont, QFontDatabase, QIcon, QPixmap, QPainter, QImage, QColor, QPen, QAction, \
     QKeySequence, QPainterPath, QFontMetrics  # noqa: E402
 from PySide6.QtSvg import QSvgRenderer  # noqa: E402
@@ -638,13 +638,15 @@ def load_cfg():
 
 
 class Editor(QMainWindow):
-    """The editor window.  Standalone (main()) or hosted by another program (host_in_tk(): the PC launcher), which
+    """The editor window.  Standalone (main()) or hosted by another program (host_in_qt(): the PC launcher), which
     passes lang (its interface language, "en" for one the editor lacks), write_guard (called before every write:
     returns a reason not to write, e.g. the game is running, or None), stamp_bak (the backup of an overwritten card is
-    CARD.YYYYmmdd-HHMMSS.bak instead of CARD.bak) and on_closed (called once when the window closes)."""
+    CARD.YYYYmmdd-HHMMSS.bak instead of CARD.bak) and on_closed (called once when the window closes).  hosted: the
+    style sheet and font go on this window only, not on the whole QApplication (the launcher keeps its own look)."""
 
-    def __init__(self, card=None, cfg=None, lang=None, write_guard=None, stamp_bak=False, on_closed=None):
+    def __init__(self, card=None, cfg=None, lang=None, write_guard=None, stamp_bak=False, on_closed=None, hosted=False):
         super().__init__()
+        self.hosted = hosted
         self.cfg = load_cfg() if cfg is None else cfg
         self.write_guard, self.stamp_bak, self.on_closed = write_guard, stamp_bak, on_closed
         if lang:
@@ -692,7 +694,11 @@ class Editor(QMainWindow):
             pass
 
     def apply_theme(self):
-        QApplication.instance().setStyleSheet(qss(self.theme))
+        if self.hosted:
+            self.setFont(QFont("Nunito", 10))
+            self.setStyleSheet(qss(self.theme))
+        else:
+            QApplication.instance().setStyleSheet(qss(self.theme))
 
     def icon(self, name, size=18, color=None):
         return svg_icon(name, color or self.theme["text"], size)
@@ -1870,12 +1876,16 @@ class Editor(QMainWindow):
             e.ignore()
 
 
-def make_app(argv=None):
-    app = QApplication.instance() or QApplication(argv or sys.argv)
+def load_fonts(app):
     if not getattr(app, "_tombi_fonts", False):
         for f in ("Nunito-Regular.ttf", "Nunito-Bold.ttf", "Nunito-ExtraBold.ttf", "LilitaOne-Regular.ttf"):
             QFontDatabase.addApplicationFont(os.path.join(ASSETS, "fonts", f))
         app._tombi_fonts = True
+
+
+def make_app(argv=None):
+    app = QApplication.instance() or QApplication(argv or sys.argv)
+    load_fonts(app)
     app.setFont(QFont("Nunito", 10))
     app.setApplicationName(APP)
     return app
@@ -1904,43 +1914,26 @@ def qt_problem():
     return _QT_OK or None
 
 
-def host_in_tk(tk_root, card=None, lang=None, write_guard=None, on_closed=None):
-    """Open the editor from a Tk program (the PC launcher, tools/port_launcher.py) in the same process: one
-    QApplication next to Tk, its events pumped from Tk's main loop (an after() timer) while the window is open, and
-    the window kept above the Tk one (transient for it).  Overwriting the card keeps a timestamped .bak.  Returns the
-    Editor; on_closed() runs once when it closes."""
-    app = make_app([sys.argv[0] if sys.argv else APP])
-    app.setQuitOnLastWindowClosed(False)       # closing the editor must not end anything else
-    state = {"open": True}
+def host_in_qt(parent=None, card=None, lang=None, write_guard=None, on_closed=None):
+    """Open the editor from a Qt program already running (the PC launcher, tools/port_launcher.py): its own top-level
+    window kept above parent (transient for it), with its style sheet on itself only (hosted).  Overwriting the card
+    keeps a timestamped .bak.  Returns the Editor; on_closed() runs once when it closes."""
+    app = QApplication.instance()
+    load_fonts(app)
 
     def closed():
-        state["open"] = False
         if on_closed:
             on_closed()
+        w.deleteLater()
 
-    w = Editor(card, lang=lang, write_guard=write_guard, stamp_bak=True, on_closed=closed)
-    app.setWindowIcon(QIcon(w.logo_pixmap(64)))
+    w = Editor(card, lang=lang, write_guard=write_guard, stamp_bak=True, on_closed=closed, hosted=True)
+    w.setWindowIcon(QIcon(w.logo_pixmap(64)))
     w.show()
     try:                                       # stays over the launcher, minimises with it (best effort)
-        from PySide6.QtGui import QWindow
-        tk_root.update_idletasks()
-        w._tk_parent = QWindow.fromWinId(int(tk_root.wm_frame(), 16))
-        w.windowHandle().setTransientParent(w._tk_parent)
+        if parent is not None and parent.windowHandle() is not None:
+            w.windowHandle().setTransientParent(parent.windowHandle())
     except Exception:
         pass
-
-    def pump():
-        try:
-            app.processEvents()
-            app.sendPostedEvents(None, QEvent.DeferredDelete)   # (deleteLater outside exec())
-        except Exception:
-            pass
-        if state["open"]:
-            tk_root.after(15, pump)
-        else:
-            w.deleteLater()
-            app.sendPostedEvents(None, QEvent.DeferredDelete)
-    tk_root.after(15, pump)
     return w
 
 

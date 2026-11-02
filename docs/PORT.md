@@ -862,7 +862,7 @@ cmake -S port -B build/port-win -G Ninja -DCMAKE_TOOLCHAIN_FILE=$PWD/port/cmake/
       -DPORT_SDL2_MINGW=$PWD/SDL2-2.30.11/i686-w64-mingw32
 ninja -C build/port-win                                  # -> build/port-win/tombi.exe, tombi-view.exe (needs SDL2.dll next to it)
 wine build/port-win/tombi.exe --frames 600 --exe game/MAIN0.EXE --disc game/disc/Tombi.bin
-python3 tools/port_launcher.py                          # the launcher (Tk, tools/i18n.py); uses build/port-win/*.exe on Windows
+python3 tools/port_launcher.py                          # the launcher (Qt/PySide6, tools/i18n.py); uses build/port-win/*.exe on Windows
 ```
 
 - **Symbols.** The game is compiled with `-fno-leading-underscore -mno-ms-bitfields` so the generated tables (`syms.ld`,
@@ -1009,7 +1009,9 @@ python3 tools/port_launcher.py                          # the launcher (Tk, tool
 
 ### The launcher (tools/port_launcher.py, tombi-port.exe)
 
-Tk window with the same style/i18n as tombi-gfx/tombi-text. *Play* tab: disc image (.bin/.cue/.iso/.chd; `EXE/MAIN0.EXE` is
+Qt (PySide6, Fusion style plus its own light / dark style sheet following the system colour scheme; `TOMBI_THEME=light|dark`
+forces one) window with the tools/i18n.py catalogs of tombi-gfx/tombi-text; `tools/test_port_launcher.py` checks the
+command lines it builds (headless, `QT_QPA_PLATFORM=offscreen`). *Play* tab: disc image (.bin/.cue/.iso/.chd; `EXE/MAIN0.EXE` is
 read from its ISO9660 directory into the launcher's folder and checked against the SCES-01331 sha1
 `bec8dc5f...`), save folder (`--save-dir`), window scale 1x/2x/3x, fullscreen, 50/60 Hz, "start a new game
 automatically", a *Text patch* (see "Text patches in `data/`"), a Play button (runs `tombi.exe --exe MAIN0.EXE --disc ... --window --viewer-arg --scale N ...` with the
@@ -1056,15 +1058,13 @@ CLI) and `SaveImport.java` (Android); the launchers only, never while the game r
 
 **Edit save (PC launcher only).** *Editar partida… / Edit save…*, next to Import / Export, opens the save editor
 ([SAVE_EDITOR.md](SAVE_EDITOR.md), `tools/tombi_save_editor.py`) as a window of the launcher's own process on that same
-`tombi_mc0.mcd` (`App.edit_save` -> `tombi_save_editor.host_in_tk`: one QApplication beside Tk, its events pumped from
-Tk's loop by an `after()` timer, the window transient for the launcher's). In the launcher's interface language (the
+`tombi_mc0.mcd` (`App.edit_save` -> `tombi_save_editor.host_in_qt`: the launcher's own QApplication, the editor a top-level
+window transient for the launcher's, with its style sheet on itself only so each window keeps its look). In the launcher's interface language (the
 editor has the same nine). Refused while the game runs; while the editor is open *Play* is refused (the game would
 write the card the editor holds) and a save attempt while the game runs is refused in the editor too. *Save* writes the
 card back in place after copying the old one to `tombi_mc0.mcd.YYYYmmdd-HHMMSS.bak`; the launcher's settings are not
 touched. Closing the launcher closes the editor first (asking about unsaved edits). `tombi-port.exe` bundles
-PySide6-Essentials, the editor and its fonts (`port2-exe.yml`); the Linux build and a source checkout without PySide6
-show a message instead (and off Windows the launcher first checks in a child Python that Qt can open a window: a
-missing `libxcb-cursor0` would otherwise abort the whole launcher).
+PySide6-Essentials (the launcher itself is Qt), the editor and its fonts (`port2-exe.yml`, the Windows and the Linux build).
 
 ## Mods (tools/port_mods.py)
 
@@ -1157,7 +1157,7 @@ Super Famicom, Famicom, Pastel), *Símbolos*, one row per button and disc / lett
 preview drawn with the game's algorithm (`pcGlyph`, a Java copy of it, at integer scale); any change sets *Iconos de
 botones* to *Personalizado* (appended to `PROMPTS`) and the launcher passes `--prompt-colors`. Android maps the pad by
 labels for `custom` when the pad itself is a Thor / Nintendo one. PC launcher: *Personalizado* in the prompt styles and
-a *Personalizar botones…* dialog (presets, symbols, `tkinter.colorchooser` per disc / letter, a preview canvas;
+a *Personalizar botones…* dialog (presets, symbols, `QColorDialog` per disc / letter, a preview drawn with QPainter;
 `tools/prompt_custom.py` holds the presets and the same glyph algorithm, checked pixel-exact against a game frame). The
 PlayStation shapes (PS style where the source icon is not on the page, custom with `sym=ps`) come from one function,
 `ps_shape()`, in the message boxes and every menu icon slot: same 8 x 8 ring, 6 x 6 cross / square, 8 x 7 triangle,

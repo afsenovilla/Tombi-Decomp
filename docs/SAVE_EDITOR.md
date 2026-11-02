@@ -10,8 +10,9 @@ Run from source: `pip install PySide6-Essentials` then `python3 tools/tombi_save
 **In the PC launcher.** `tombi-port.exe` / `tools/port_launcher.py` has *Edit save…* next to Import / Export save
 (docs/PORT.md "Edit save"): the same editor opens as a window of the launcher, in the launcher's language, on the port's
 `tombi_mc0.mcd` from the save folder. There *Save* keeps a timestamped `tombi_mc0.mcd.YYYYmmdd-HHMMSS.bak` and is
-refused while the game runs. Hosting API: `host_in_tk(tk_root, card, lang, write_guard, on_closed)`; the `Editor`
-class takes `lang`, `write_guard` (returns a reason not to write, or None), `stamp_bak` and `on_closed`.
+refused while the game runs. Hosting API: `host_in_qt(parent, card, lang, write_guard, on_closed)` (from a running Qt program); the
+`Editor` class takes `lang`, `write_guard` (returns a reason not to write, or None), `stamp_bak`, `on_closed` and `hosted`
+(style sheet on the window only, not the whole QApplication).
 
 ## Use
 

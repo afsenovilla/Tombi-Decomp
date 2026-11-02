@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+"""Headless test of the PC launcher (tools/port_launcher.py, Qt): the tombi-pc command line built for a set of saved
+settings (the expected lines are the ones the earlier Tk launcher built for the same tombi-port.json, so the Qt
+rewrite passes the port exactly the same arguments), the settings written back, a few widget interactions (key
+capture, segmented buttons, controller table, frame rate) and the save editor opened in a window of the launcher.
+Skipped when PySide6 is not installed.
+
+  QT_QPA_PLATFORM=offscreen python3 tools/test_port_launcher.py
+"""
+import json, os, shutil, sys, tempfile, unittest
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    import PySide6  # noqa: F401
+except ImportError:
+    PySide6 = None
+if PySide6 is not None:
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    import i18n
+    import port_launcher as L
+
+# settings ({APP} = the launcher folder of the test) -> the expected arguments after the binary
+CASES = {
+    'defaults': {'cfg': {}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '50']},
+    'defaults_es': {'cfg': {}, 'ui': 'es', 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--lang', '5', '--skip-intro', '--hz', '50']},
+    'disc_only': {'cfg': {'disc': '{APP}/game.cue', 'savedir': '{APP}/saves'}, 'expect': ['--disc', '{APP}/game.cue', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--save-dir', '{APP}/saves', '--skip-intro', '--hz', '50']},
+    'everything': {'cfg': {'disc': '{APP}/tombi.bin', 'savedir': '{APP}/my saves', 'scale': 3, 'fullscreen': True, 'renderer': 'gl', 'internal_res': 4, 'aspect': '16:9', 'lang': 5, 'cut_content': True, 'early_title': '{APP}/TOMBA', 'texpack': '{APP}', 'experimental': True, 'show_fps': True, 'dualshock': True, 'rumble': 50, 'pad_map': {'cross': 'b', 'circle': 'a', 'start': 'guide', 'select': ''}, 'prompts_style': 'custom', 'prompt_colors': 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', 'keys_on': True, 'keys': {'cross': 'Space', 'circle': 'Return', 'up': 'W'}, 'areasel': True, 'area': 4, 'section': 7, 'ap_on': True, 'ap': 12345, 'lives_on': True, 'lives': 9, 'inflives': True, 'infhealth': True, 'events': True, 'debugmenu': True, 'titledebug': True, 'skipintro': False, 'hz60': True, 'autostart': True, 'civ_route': True, 'civ_collision': True, 'fps': '120'}, 'expect': ['--disc', '{APP}/tombi.bin', '--window', '--scale', '3', '--log-fps', '2', '--renderer', 'gl', '--aspect', '16:9', '--internal-res', '4', '--fps', '120', '--lang', '5', '--cut-content', '--early-title', '{APP}/TOMBA', '--save-dir', '{APP}/my saves', '--texture-pack', '{APP}', '--fullscreen', '--show-fps', '--dualshock', '--rumble', '50', '--pad-map', 'cross=b,circle=a,start=guide,select=', '--prompts', 'custom', '--prompt-colors', 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', '--hz', '60', '--poke', '900:1F8001B4:1', '--poke', '1250:8009C960:4:2', '--poke', '1250:8009C962:7:2', '--pad-script', '1000:start,1300:circle:3', '--title-debug', '--poke', 'g1:8009C96C:3039:4', '--poke', 'g1:8009C980:9:1', '--poke-every', '50:8009C980:63:1', '--poke-every', '1:8009C970:4:1', '--poke', 'g1:8009CDA4:FF:1x130', '--debug-menu', '--keys', 'up=W,cross=Space,circle=Return', '--civ-route', '--civ-maps', '{APP}/civ_cache/maps', '--civ-wfm', '{APP}/civ_cache/wfm', '--civ-collision']},
+    'soft_odd': {'cfg': {'renderer': 'soft', 'internal_res': 3, 'aspect': 'weird', 'prompts_style': 'thor_abxy', 'rumble': 'abc', 'fps': 'unlimited', 'texpack': '{APP}', 'experimental': False, 'scale': '1'}, 'expect': ['--disc', '', '--window', '--scale', '1', '--log-fps', '2', '--renderer', 'soft', '--aspect', '4:3', '--fps', 'unlimited', '--skip-intro', '--hz', '50']},
+    'fps60_legacy': {'cfg': {'fps60': True, 'experimental': True}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--fps', 'auto', '--skip-intro', '--hz', '50']},
+    'fps_auto': {'cfg': {'fps': 'auto', 'renderer': 'soft'}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'soft', '--aspect', '4:3', '--fps', 'auto', '--skip-intro', '--hz', '50']},
+    'data_es': {'cfg': {'lang': 5, 'patch_on': True}, 'data': True, 'expect': ['--data', '{APP}/data', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--lang', '5', '--patch-tex', '{APP}/data/port_gfx_es.tbtx', '--skip-intro', '--hz', '50']},
+    'data_en_gfx': {'cfg': {'lang': 0, 'cut_content': True}, 'data': True, 'expect': ['--data', '{APP}/data', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--cut-content', '--skip-intro', '--hz', '50']},
+    'civ_town': {'cfg': {'civ_collision': True}, 'data': True, 'civ_play': 16, 'expect': ['--data', '{APP}/data', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '50', '--civ-town', '16', '--civ-maps', '{APP}/civ_cache/maps', '--civ-wfm', '{APP}/civ_cache/wfm', '--civ-collision']},
+    'keys_default_on': {'cfg': {'keys_on': True, 'keys': {'up': 'Up'}, 'prompts_style': 'xbox', 'lang': '6', 'rumble': 0}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--lang', '6', '--rumble', '0', '--prompts', 'xbox', '--skip-intro', '--hz', '50']},
+    'keys_off_custom': {'cfg': {'keys_on': False, 'keys': {'up': 'W'}, 'pad_map': {'up': 'foo', 'down': 'leftx-'}, 'prompts_style': 'generic'}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--pad-map', 'up=foo,down=leftx-', '--prompts', 'generic', '--skip-intro', '--hz', '50']},
+    'area_door': {'cfg': {'areasel': True, 'area': 17, 'section': 0, 'ap': 500, 'lives': 3}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '50', '--poke', '900:1F8001B4:1', '--poke', '1250:8009C960:11:2', '--poke', '1250:8009C962:1:2', '--pad-script', '1000:start,1300:circle:3']},
+    'area_bad': {'cfg': {'areasel': True, 'area': 99, 'section': 2}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '50', '--poke', '900:1F8001B4:1', '--poke', '1250:8009C960:0:2', '--poke', '1250:8009C962:2:2', '--pad-script', '1000:start,1300:circle:3']},
+}
+
+
+def subst(v, d):
+    if isinstance(v, str):
+        return v.replace("{APP}", d)
+    if isinstance(v, dict):
+        return {k: subst(x, d) for k, x in v.items()}
+    if isinstance(v, list):
+        return [subst(x, d) for x in v]
+    return v
+
+
+@unittest.skipIf(PySide6 is None, "PySide6 not installed")
+class TestLauncher(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = L.make_app(["test"])
+        cls.app_dir = L.app_dir
+
+    @classmethod
+    def tearDownClass(cls):
+        L.app_dir = cls.app_dir
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.w = None
+
+    def tearDown(self):
+        if self.w is not None:
+            self.w.close()
+            self.w.deleteLater()
+            self.app.processEvents()
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def launcher(self, name, cfg, ui="en", data=False):
+        d = os.path.join(self.tmp, name)
+        os.makedirs(d)
+        with open(os.path.join(d, "tombi-port.json"), "w") as f:
+            json.dump(subst(cfg, d), f)
+        if data:          # a "complete extraction" of one file, with the Spanish redraws next to it
+            dd = os.path.join(d, "data")
+            os.makedirs(os.path.join(dd, "EXE"))
+            open(os.path.join(dd, "EXE", "MAIN0.EXE"), "wb").write(b"x" * 10)
+            open(os.path.join(dd, "manifest.txt"), "w").write(
+                "tombi-data 1\nmain0_sha1 %s\nfile 0 0 0 10 EXE/MAIN0.EXE\n" % L.MAIN0_SHA1)
+            open(os.path.join(dd, "port_gfx_es.tbtx"), "wb").write(b"t")
+        L.app_dir = lambda: d
+        i18n.set_language(ui, save=False)
+        self.w = L.App()
+        self.w.show()
+        self.app.processEvents()
+        return d
+
+    def args(self):
+        return self.w.command()[1:]
+
+    def test_command_lines_as_the_tk_launcher(self):
+        for name, c in CASES.items():
+            with self.subTest(name):
+                d = self.launcher(name, c["cfg"], c.get("ui", "en"), c.get("data", False))
+                self.w.civ_play = c.get("civ_play")
+                self.assertEqual(self.args(), subst(c["expect"], d))
+                self.w.close()
+                self.w.deleteLater()
+                self.w = None
+
+    def test_settings_written_back(self):
+        d = self.launcher("saved", {"keys_on": True, "keys": {"up": "W"}, "prompts_style": "thor_abxy", "rumble": "abc",
+                                    "scale": "3", "lang": "6"})
+        self.w.collect()
+        s = json.load(open(os.path.join(d, "tombi-port.json")))
+        self.assertEqual(s["keys"]["up"], "W")
+        self.assertTrue(s["keys_on"])
+        self.assertEqual(s["prompts_style"], "auto")         # the Thor styles are Android only
+        self.assertEqual(s["rumble"], "abc")                 # kept as saved (the combobox shows 100 %)
+        self.assertEqual((s["scale"], s["lang"]), (3, 6))
+        self.assertEqual(s["pad_map"], L.PAD_DEFAULTS)
+
+    def test_key_capture(self):
+        self.launcher("keys", {})
+        b = self.w.key_btns["cross"]
+        QTest.mouseClick(b, Qt.LeftButton)
+        self.assertEqual(self.w.key_capture, "cross")
+        QTest.keyClick(b, Qt.Key_Space)
+        self.assertIsNone(self.w.key_capture)
+        self.assertEqual(self.w.key_vals["cross"], "Space")
+        QTest.mouseClick(b, Qt.LeftButton)
+        QTest.keyClick(b, Qt.Key_Escape)                       # cancels
+        self.assertEqual(self.w.key_vals["cross"], "Space")
+        b = self.w.key_btns["circle"]
+        QTest.mouseClick(b, Qt.LeftButton)
+        QTest.keyClick(b, Qt.Key_5, Qt.KeypadModifier)
+        QTest.mouseClick(self.w.key_btns["l1"], Qt.LeftButton)
+        QTest.keyClick(self.w.key_btns["l1"], Qt.Key_F7)
+        a = self.args()
+        self.assertEqual(a[a.index("--keys") + 1], "cross=Space,circle=Keypad 5,l1=F7")
+        self.w._keys_restore()
+        self.assertNotIn("--keys", self.args())
+
+    def test_widgets_change_the_command(self):
+        self.launcher("widgets", {})
+        w = self.w
+        seg = [b for b in w.pages["gfx"].findChildren(L.QPushButton) if b.text() == "3x"][0]
+        QTest.mouseClick(seg, Qt.LeftButton)
+        fps = [b for b in w.pages["gfx"].findChildren(L.QPushButton) if b.text() == "90"][0]
+        QTest.mouseClick(fps, Qt.LeftButton)
+        soft = [b for b in w.pages["gfx"].findChildren(L.QRadioButton) if b.text() == L.tr("r.soft")][0]
+        soft.setChecked(True)
+        self.assertFalse(w.ires_btns[1].isEnabled())
+        cb = w.pad_cbs["cross"]
+        cb.setCurrentIndex(cb.findText(L.tr("src.b")))
+        cb.activated.emit(cb.currentIndex())
+        a = self.args()
+        self.assertEqual(a[a.index("--scale") + 1], "3")
+        self.assertEqual(a[a.index("--fps") + 1], "90")
+        self.assertEqual(a[a.index("--renderer") + 1], "soft")
+        self.assertEqual(a[a.index("--pad-map") + 1], "cross=b")
+        self.assertIn(L.tr("gp.clash", L.tr("src.b"), L.tr("btn.cross") + ", " + L.tr("btn.circle")), w.pad_warn.text())
+
+    def test_language_rebuild_keeps_settings(self):
+        self.launcher("rebuild", {"scale": 3})
+        i18n.set_language("es", save=False)
+        self.w.rebuild()
+        self.assertEqual(self.w.nav["play"].text().split()[-1], "Jugar")
+        self.assertEqual(self.args()[self.args().index("--scale") + 1], "3")
+        i18n.set_language("en", save=False)
+
+    def test_save_editor_window(self):
+        try:
+            import tombi_save_editor as SE
+            import save_import as SI
+        except ImportError as e:
+            self.skipTest(str(e))
+        d = self.launcher("editor", {})
+        SE.CFG = os.path.join(d, "editor.json")
+        open(os.path.join(d, "tombi_mc0.mcd"), "wb").write(bytes(SI.blank_card()))
+        self.w.s["savedir"] = d
+        self.w.edit_save()
+        self.app.processEvents()
+        self.assertTrue(self.w.editor_open())
+        self.assertEqual(self.app.styleSheet(), "")          # each window keeps its own look
+        self.assertIn("#sidebar", self.w.styleSheet())
+        self.w.editor.close()
+        self.app.processEvents()
+        self.assertFalse(self.w.editor_open())
+
+
+if __name__ == "__main__":
+    unittest.main()

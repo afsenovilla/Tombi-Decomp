@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Launcher of the native-pointer port (tombi-port.exe, docs/PORT.md "M3 phase 3" / "Mods"): a window where the
 player picks their own disc image (.bin/.cue/.iso/.chd of Tombi! PAL SCES-01331), a save folder, the window options and
-the mods, and a Play button that runs tombi-pc.exe --window with those options.  Same Tk toolkit and tools/i18n.py
-catalogs as tombi-gfx / tombi-text.  No game data is bundled: the disc is checked (MAIN0.EXE extracted next to
+the mods, and a Play button that runs tombi-pc.exe --window with those options.  Qt (PySide6) like the save editor
+(tools/tombi_save_editor.py, opened from it with Edit save...), the tools/i18n.py catalogs of tombi-gfx / tombi-text.  No game data is bundled: the disc is checked (MAIN0.EXE extracted next to
 tombi-port.json, the saved settings, and compared by sha1) before the first run, and the disc is then extracted
 once into data/ next to the launcher (tools/extract_data.py): the game runs with --data and no longer needs the
 image (the disc field is optional while data/ is valid for the same MAIN0.EXE).
@@ -11,8 +11,17 @@ image (the disc field is optional while data/ is valid for the same MAIN0.EXE).
   pyinstaller --onefile --windowed --name tombi-port ... tools/port_launcher.py   (.github/workflows/port2-exe.yml)
 """
 import hashlib, re, json, os, struct, subprocess, sys, threading
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+
+try:
+    from PySide6.QtCore import Qt, QTimer, QObject, Signal, QEvent, QSize, QRectF, QPointF
+    from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QFont, QFontMetricsF, QFontDatabase, QPainterPath, \
+        QPalette, QGuiApplication, QImage
+    from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QLabel, QPushButton, QToolButton, \
+        QHBoxLayout, QVBoxLayout, QGridLayout, QLineEdit, QComboBox, QCheckBox, QRadioButton, QButtonGroup, QSpinBox, \
+        QAbstractSpinBox, QProgressBar, QPlainTextEdit, QScrollArea, QStackedWidget, QFileDialog, QMessageBox, \
+        QInputDialog, QDialog, QColorDialog, QSizePolicy, QStyleFactory
+except ImportError as _e:       # running from source without Qt
+    sys.exit("tombi-port launcher: PySide6 is needed (pip install PySide6-Essentials): %s" % _e)
 
 import i18n
 from i18n import tr
@@ -29,32 +38,6 @@ MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of S
 GAME_LANGS = [(0, "English"), (5, "Español"), (6, "Português"), (7, "Svenska"), (8, "Dansk")]
 
 
-def flag_image(n, w=24, h=16):
-    """A small drawn flag for a game language (tk.PhotoImage; no files, no emoji: Tk on Windows draws neither)."""
-    img = tk.PhotoImage(width=w, height=h)
-    def fill(x0, y0, x1, y1, c):
-        img.put(c, to=(max(0, x0), max(0, y0), min(w, x1), min(h, y1)))
-    if n == 0:        # United Kingdom (simplified: blue field, white and red crosses)
-        fill(0, 0, w, h, "#012169")
-        for i in range(h):           # diagonals in white
-            for x in (i * w // h, w - 1 - i * w // h):
-                fill(x - 1, i, x + 2, i + 1, "white")
-        fill(0, h // 2 - 3, w, h // 2 + 3, "white"); fill(w // 2 - 3, 0, w // 2 + 3, h, "white")
-        fill(0, h // 2 - 2, w, h // 2 + 2, "#C8102E"); fill(w // 2 - 2, 0, w // 2 + 2, h, "#C8102E")
-    elif n == 5:      # Spain
-        fill(0, 0, w, h, "#AA151B"); fill(0, h // 4, w, h - h // 4, "#F1BF00")
-    elif n == 6:      # Portugal
-        fill(0, 0, w * 2 // 5, h, "#006600"); fill(w * 2 // 5, 0, w, h, "#FF0000")
-        cx, cy, r = w * 2 // 5, h // 2, h // 4
-        for y in range(h):
-            for x in range(w):
-                d = (x - cx) ** 2 + (y - cy) ** 2
-                if r * r - 2 * r <= d <= r * r + 2 * r: img.put("#FFE000", to=(x, y, x + 1, y + 1))
-    elif n == 7:      # Sweden
-        fill(0, 0, w, h, "#006AA7"); fill(0, h // 2 - 2, w, h // 2 + 2, "#FECC02"); fill(w * 3 // 8 - 2, 0, w * 3 // 8 + 2, h, "#FECC02")
-    elif n == 8:      # Denmark
-        fill(0, 0, w, h, "#C8102E"); fill(0, h // 2 - 2, w, h // 2 + 2, "white"); fill(w * 3 // 8 - 2, 0, w * 3 // 8 + 2, h, "white")
-    return img
 UI_TO_GAME_LANG = {"en": 0, "es": 5, "pt": 6, "sv": 7, "da": 8}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -394,22 +377,6 @@ def icon_file(name):
     return None
 
 
-def set_icon(root):
-    for d in (os.path.join(getattr(sys, "_MEIPASS", ""), "icons"), os.path.join(ROOT, "tools", "icons")):
-        for name in ("launcher", "port", "gfx"):
-            ico, png = os.path.join(d, name + ".ico"), os.path.join(d, name + ".png")
-            try:
-                if os.name == "nt" and os.path.isfile(ico):
-                    root.iconbitmap(ico)
-                    return
-                if os.path.isfile(png):
-                    root._icon_img = tk.PhotoImage(file=png)
-                    root.iconphoto(True, root._icon_img)
-                    return
-            except Exception:
-                pass
-
-
 # ---------------------------------------------------------------------------------------------- window
 # --cut-content (port/fixes.txt): text cut from the game, recovered from the Japanese release
 i18n.add({
@@ -591,7 +558,7 @@ def pad_map_arg(pm):
 
 RUMBLE_STEPS = [0, 25, 50, 75, 100, 125, 150, 200]   # --rumble choices, percent
 
-# Tk keysym -> SDL key name (what --keys takes, SDL_GetScancodeFromName); letters, digits and F1..F24 map to themselves
+# Tk keysym -> SDL key name, kept for reference (the Qt launcher maps key events with QT_TO_SDL below; what --keys takes, SDL_GetScancodeFromName); letters, digits and F1..F24 map to themselves
 # (letters upper-cased).  "," is left out: it separates the --keys entries.
 TK_TO_SDL = {"Return": "Return", "BackSpace": "Backspace", "space": "Space", "Tab": "Tab", "Up": "Up", "Down": "Down",
              "Left": "Left", "Right": "Right", "Shift_L": "Left Shift", "Shift_R": "Right Shift", "Control_L": "Left Ctrl",
@@ -616,794 +583,504 @@ def sdl_key_name(keysym):
         return "Keypad " + keysym[3]
     return None
 
-# design "A": Windows 11-like light window, grey sidebar, white cards
-C_BG, C_SIDE, C_CARD, C_LINE = "#f3f3f5", "#ebecef", "#ffffff", "#e3e4e8"
-C_TEXT, C_MUTED, C_ACCENT, C_ACCENT_HI = "#1b1b1f", "#5f636b", "#1f5fbf", "#2b6fd6"
+# Qt key -> SDL key name (what --keys takes); the same names as TK_TO_SDL above.  The keypad keys come with
+# Qt.KeypadModifier; left / right modifiers are told apart by the native key code (X11 keysym, Windows scan code).
+def _qk(name):
+    return Qt.Key[name].value
+
+
+QT_TO_SDL = {_qk(k): v for k, v in (
+    ("Key_Return", "Return"), ("Key_Enter", "Keypad Enter"), ("Key_Backspace", "Backspace"), ("Key_Space", "Space"),
+    ("Key_Tab", "Tab"), ("Key_Up", "Up"), ("Key_Down", "Down"), ("Key_Left", "Left"), ("Key_Right", "Right"),
+    ("Key_PageUp", "PageUp"), ("Key_PageDown", "PageDown"), ("Key_Home", "Home"), ("Key_End", "End"),
+    ("Key_Insert", "Insert"), ("Key_Delete", "Delete"), ("Key_CapsLock", "CapsLock"), ("Key_Minus", "-"),
+    ("Key_Equal", "="), ("Key_BracketLeft", "["), ("Key_BracketRight", "]"), ("Key_Backslash", "\\"),
+    ("Key_Semicolon", ";"), ("Key_Apostrophe", "'"), ("Key_QuoteLeft", "`"), ("Key_Period", "."), ("Key_Slash", "/"))}
+QT_KEYPAD = {_qk(k): v for k, v in (
+    ("Key_Enter", "Keypad Enter"), ("Key_Return", "Keypad Enter"), ("Key_Plus", "Keypad +"), ("Key_Minus", "Keypad -"),
+    ("Key_Asterisk", "Keypad *"), ("Key_Slash", "Keypad /"), ("Key_Period", "Keypad ."), ("Key_Comma", "Keypad ."),
+    ("Key_Delete", "Keypad ."), ("Key_Insert", "Keypad 0"), ("Key_End", "Keypad 1"), ("Key_Down", "Keypad 2"),
+    ("Key_PageDown", "Keypad 3"), ("Key_Left", "Keypad 4"), ("Key_Clear", "Keypad 5"), ("Key_Right", "Keypad 6"),
+    ("Key_Home", "Keypad 7"), ("Key_Up", "Keypad 8"), ("Key_PageUp", "Keypad 9"))}
+QT_KEYPAD.update({_qk("Key_%d" % n): "Keypad %d" % n for n in range(10)})
+QT_MODS = {_qk("Key_Shift"): "%s Shift", _qk("Key_Control"): "%s Ctrl", _qk("Key_Alt"): "%s Alt", _qk("Key_AltGr"): "%s Alt",
+           _qk("Key_Meta"): "%s GUI", _qk("Key_Super_L"): "Left GUI", _qk("Key_Super_R"): "Right GUI"}
+RIGHT_NATIVE = {0xffe2, 0xffe4, 0xffea, 0xffec, 0xffe8, 0xfe03,       # X11 keysyms Shift_R, Control_R, Alt_R, Super_R, Meta_R, AltGr
+                0xA1, 0xA3, 0xA5, 0x5C}                                # Windows VK_RSHIFT, VK_RCONTROL, VK_RMENU, VK_RWIN
+RIGHT_SCAN = {0x36, 0x11D, 0x138, 0x15C}                               # Windows scan codes (extended bit 0x100)
+
+
+def sdl_key_from_qt(e):
+    """The SDL name of a QKeyEvent's key, or None for one --keys cannot name ("," separates the --keys entries)."""
+    k = e.key()
+    if e.modifiers() & Qt.KeyboardModifier.KeypadModifier and k in QT_KEYPAD:
+        return QT_KEYPAD[k]
+    if k in QT_MODS:
+        fmt = QT_MODS[k]
+        if "%s" not in fmt:
+            return fmt
+        right = e.nativeVirtualKey() in RIGHT_NATIVE or (os.name == "nt" and e.nativeScanCode() in RIGHT_SCAN) \
+            or k == _qk("Key_AltGr")
+        return fmt % ("Right" if right else "Left")
+    if k in QT_TO_SDL:
+        return QT_TO_SDL[k]
+    if _qk("Key_A") <= k <= _qk("Key_Z") or _qk("Key_0") <= k <= _qk("Key_9"):
+        return chr(k)
+    if _qk("Key_F1") <= k <= _qk("Key_F24"):
+        return "F%d" % (k - _qk("Key_F1") + 1)
+    return None
+
+
+# ---------------------------------------------------------------------------------------------- look
+# One light and one dark palette (the system's colour scheme picks; TOMBI_THEME=light|dark forces one), drawn with
+# the Fusion style and a style sheet on the launcher window only (the save editor keeps its own).
+THEMES = {
+    "light": dict(bg="#f3f4f7", side="#e9ebf0", card="#ffffff", line="#e1e4ea", text="#1b1d22", muted="#5d6470",
+                  faint="#a0a6b0", accent="#2160c4", accent_hi="#2b6fd6", accent_press="#1a4fa3",
+                  accent_soft="#e7effb", accent_t="#ffffff", input="#ffffff", input_line="#cbd0d9", hover="#f1f3f6",
+                  press="#e3e6ec", warn="#b3261e", code="#f6f7f9", nav_hover="#dee1e7", track="#e3e6ec",
+                  pad_line="#6c717a", chip="#ffffff", chip_line="#c9ccd3"),
+    "dark": dict(bg="#15171b", side="#1c1f24", card="#22252b", line="#30343c", text="#e6e8ec", muted="#9ca3ae",
+                 faint="#646a74", accent="#4a8cff", accent_hi="#629bff", accent_press="#3a74d6", accent_soft="#223553",
+                 accent_t="#ffffff", input="#1a1c21", input_line="#3b4049", hover="#2a2e35", press="#343841",
+                 warn="#ff8a80", code="#1a1c21", nav_hover="#272a31", track="#343841", pad_line="#a3a9b3",
+                 chip="#2a2e35", chip_line="#4a505a"),
+}
 DOT = {"ok": "#1e9e4a", "bad": "#d13438", "busy": "#e08a00", "info": "#8a8f98"}
 PAGES = ["play", "gfx", "controls", "mods", "cut", "log"]
+NAV_GLYPHS = {"play": "▶", "gfx": "▣", "controls": "✛", "mods": "✦", "cut": "✂", "log": "☰"}
 
 
-def ui_font():
-    from tkinter import font
-    fams = set(font.families())
-    for f in ("Segoe UI", "Noto Sans", "DejaVu Sans", "Liberation Sans", "Helvetica"):
-        if f in fams:
-            return f
-    return font.nametofont("TkDefaultFont").actual("family")
-
-
-def setup_style(root):
-    """The clam theme recoloured (clam lets every colour change, vista does not) + the named fonts."""
-    from tkinter import font
-    fam = ui_font()
-    for name, size, weight in (("TkDefaultFont", 10, "normal"), ("TkTextFont", 10, "normal"), ("TkMenuFont", 10, "normal"),
-                               ("TkHeadingFont", 10, "bold")):
-        try:
-            font.nametofont(name).configure(family=fam, size=size, weight=weight)
-        except tk.TclError:
-            pass
-    root.configure(background=C_BG)
-    st = ttk.Style(root)
+def theme_name():
+    forced = os.environ.get("TOMBI_THEME", "").lower()
+    if forced in THEMES:
+        return forced
     try:
-        st.theme_use("clam")
-    except tk.TclError:
-        pass
-    st.configure(".", background=C_CARD, foreground=C_TEXT, font=(fam, 10), bordercolor=C_LINE, lightcolor=C_CARD,
-                 darkcolor=C_CARD, troughcolor=C_LINE, focuscolor=C_ACCENT, selectbackground=C_ACCENT, fieldbackground=C_CARD)
-    st.configure("TFrame", background=C_CARD)
-    st.configure("Bg.TFrame", background=C_BG)
-    st.configure("Side.TFrame", background=C_SIDE)
-    st.configure("TLabel", background=C_CARD)
-    st.configure("Muted.TLabel", foreground=C_MUTED)
-    st.configure("Help.TLabel", foreground=C_ACCENT, font=(fam, 13, "bold"))     # the small circled-i info icon
-    st.map("Help.TLabel", foreground=[("active", C_ACCENT_HI)])
-    st.configure("Warn.TLabel", foreground="#b3261e")
-    st.configure("Sel.TLabel", foreground=C_ACCENT, font=(fam, 10, "bold"))
-    st.configure("Head.TLabel", font=(fam, 10, "bold"))
-    st.configure("Title.TLabel", background=C_BG, font=(fam, 18, "bold"))
-    st.configure("Bg.TLabel", background=C_BG, foreground=C_MUTED)
-    st.configure("Side.TLabel", background=C_SIDE, foreground=C_MUTED, font=(fam, 9))
-    st.configure("App.TLabel", background=C_SIDE, font=(fam, 11, "bold"))
-    for w in ("TCheckbutton", "TRadiobutton"):
-        st.configure(w, background=C_CARD, indicatorbackground=C_CARD, indicatorforeground=C_ACCENT, indicatorsize=13, upperbordercolor=C_LINE,
-                     lowerbordercolor=C_LINE)
-        st.map(w, background=[("active", C_CARD)], indicatorbackground=[("disabled", C_BG), ("pressed", C_LINE)])
-    st.configure("TButton", background="#fbfbfc", bordercolor="#d0d2d8", lightcolor="#fbfbfc", darkcolor="#fbfbfc", padding=(10, 4))
-    st.map("TButton", background=[("pressed", "#e8e9ec"), ("active", "#f0f1f4")], lightcolor=[("active", "#f0f1f4")],
-           darkcolor=[("active", "#f0f1f4")])
-    st.configure("Accent.TButton", background=C_ACCENT, foreground="white", bordercolor=C_ACCENT, lightcolor=C_ACCENT,
-                 darkcolor=C_ACCENT, font=(fam, 11, "bold"), padding=(26, 8))
-    st.map("Accent.TButton", background=[("disabled", "#9db4d9"), ("pressed", "#174a96"), ("active", C_ACCENT_HI)],
-           lightcolor=[("disabled", "#9db4d9"), ("active", C_ACCENT_HI)], darkcolor=[("disabled", "#9db4d9"), ("active", C_ACCENT_HI)],
-           bordercolor=[("disabled", "#9db4d9")], foreground=[("disabled", "#eef2f8")])
-    st.configure("Bar.TButton", padding=(14, 8))
-    # sidebar entries: flat on grey, the current one a white pill (Nav.Sel)
-    st.configure("Nav.TButton", background=C_SIDE, bordercolor=C_SIDE, lightcolor=C_SIDE, darkcolor=C_SIDE, anchor="w",
-                 padding=(14, 7), font=(fam, 10))
-    st.map("Nav.TButton", background=[("active", "#e1e2e6")], lightcolor=[("active", "#e1e2e6")], darkcolor=[("active", "#e1e2e6")],
-           bordercolor=[("active", "#e1e2e6")])
-    st.configure("NavSel.TButton", background=C_CARD, bordercolor=C_LINE, lightcolor=C_CARD, darkcolor=C_CARD, anchor="w",
-                 padding=(14, 7), font=(fam, 10, "bold"), foreground=C_ACCENT)
-    st.map("NavSel.TButton", background=[("active", C_CARD)])
-    # segmented control: two toolbuttons, the chosen one in the accent colour
-    st.configure("Seg.Toolbutton", background="#f1f2f4", bordercolor="#d0d2d8", lightcolor="#f1f2f4", darkcolor="#f1f2f4",
-                 padding=(14, 4), anchor="center")
-    st.map("Seg.Toolbutton", background=[("selected", C_ACCENT), ("active", "#e6e7ea")], foreground=[("selected", "white")],
-           lightcolor=[("selected", C_ACCENT)], darkcolor=[("selected", C_ACCENT)], bordercolor=[("selected", C_ACCENT)])
-    st.configure("TEntry", padding=(6, 4), insertcolor=C_TEXT)
-    st.configure("TCombobox", padding=(6, 3), arrowsize=13, background="#fbfbfc")
-    st.map("TCombobox", fieldbackground=[("readonly", C_CARD)], selectbackground=[("readonly", C_CARD)],
-           selectforeground=[("readonly", C_TEXT)],
-           foreground=[("disabled", "#999999"), ("readonly", "focus", C_TEXT)])   # clam: white text on the (now white) focused field
-    st.configure("TSpinbox", padding=(6, 3), arrowsize=12)
-    st.configure("Horizontal.TProgressbar", background=C_ACCENT, troughcolor="#e8e9ec", bordercolor=C_LINE, lightcolor=C_ACCENT,
-                 darkcolor=C_ACCENT, thickness=6)
-    root.option_add("*TCombobox*Listbox.font", (fam, 10))
-    root.option_add("*TCombobox*Listbox.selectBackground", C_ACCENT)
-    return fam
+        return "dark" if QGuiApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark else "light"
+    except AttributeError:          # Qt < 6.5
+        return "light"
 
 
-class App:
-    def __init__(self, root):
-        self.root = root
-        self.s = load_settings()
-        self.proc = None
-        self.editor = None           # the save editor window (edit_save), while open
-        self.log_path = os.path.join(app_dir(), "tombi-port.log")   # the last run's log (Copy log works before a run too)
-        self.vars = {}
-        self.page = "play"
-        self.starting = False
-        self._level = "info"
-        set_icon(root)
-        self.fam = setup_style(root)
-        k = max(1.0, float(root.tk.call("tk", "scaling")) / (96 / 72.0))    # the DPI scale (1.25 at 125 %...)
-        w, h = min(int(960 * k), root.winfo_screenwidth()), min(int(660 * k), root.winfo_screenheight() - 40)
-        root.geometry("%dx%d" % (w, h))
-        root.minsize(min(w, int(820 * k)), min(h, int(600 * k)))
-        root.protocol("WM_DELETE_WINDOW", self.on_close)
-        self._build()
+_ART_DIR = None
 
-    def rebuild(self):
-        self.collect()
-        msg, lvl = self.status.get(), self._level
-        for w in self.root.winfo_children():
-            w.destroy()
-        self._build()
-        if msg and lvl != "info":
-            self.say(msg, lvl)
 
-    def var(self, key, kind=tk.StringVar, default=""):
-        v = self.vars.get(key)
-        if v is None:
-            v = self.vars[key] = kind(value=self.s.get(key, default))
-        return v
+def art_dir(t, name):
+    """Check marks, radio dots and the combobox arrow as PNGs (drawn 3x: sharp at any DPI) in a temporary folder
+    for the style sheet; one set per theme."""
+    global _ART_DIR
+    if _ART_DIR is None:
+        import tempfile, atexit, shutil
+        _ART_DIR = tempfile.mkdtemp(prefix="tombi-launcher-")
+        atexit.register(shutil.rmtree, _ART_DIR, True)
+    d = os.path.join(_ART_DIR, name)
+    if os.path.isdir(d):
+        return d.replace("\\", "/")
+    os.makedirs(d)
+    S = 54
 
-    def say(self, msg, level="info"):
-        """The status line (disc card, log page) and its coloured dot: ok green, bad red, busy orange, info grey."""
-        self._level = level
-        self.status.set(msg)
+    def img(fn, draw):
+        im = QImage(S, S, QImage.Format_ARGB32_Premultiplied)
+        im.fill(Qt.transparent)
+        p = QPainter(im)
+        p.setRenderHint(QPainter.Antialiasing)
+        draw(p)
+        p.end()
+        im.save(os.path.join(d, fn))
+
+    def box(fill, edge, tick):
+        def draw(p):
+            p.setPen(QPen(QColor(edge), 3.2))
+            p.setBrush(QColor(fill))
+            p.drawRoundedRect(QRectF(2.5, 2.5, S - 5, S - 5), 10, 10)
+            if tick:
+                pen = QPen(QColor(tick), 6.5)
+                pen.setCapStyle(Qt.RoundCap)
+                pen.setJoinStyle(Qt.RoundJoin)
+                p.setPen(pen)
+                path = QPainterPath(QPointF(14, 28))
+                path.lineTo(23, 37)
+                path.lineTo(40, 18)
+                p.setBrush(Qt.NoBrush)
+                p.drawPath(path)
+        return draw
+
+    def radio(fill, edge, dot):
+        def draw(p):
+            p.setPen(QPen(QColor(edge), 3.2))
+            p.setBrush(QColor(fill))
+            p.drawEllipse(QRectF(2.5, 2.5, S - 5, S - 5))
+            if dot:
+                p.setPen(Qt.NoPen)
+                p.setBrush(QColor(dot))
+                p.drawEllipse(QRectF(16, 16, S - 32, S - 32))
+        return draw
+
+    def arrow(col):
+        def draw(p):
+            pen = QPen(QColor(col), 5)
+            pen.setCapStyle(Qt.RoundCap)
+            pen.setJoinStyle(Qt.RoundJoin)
+            p.setPen(pen)
+            path = QPainterPath(QPointF(15, 21))
+            path.lineTo(27, 33)
+            path.lineTo(39, 21)
+            p.drawPath(path)
+        return draw
+    img("check_off.png", box(t["input"], t["input_line"], None))
+    img("check_off_hover.png", box(t["input"], t["accent"], None))
+    img("check_on.png", box(t["accent"], t["accent"], "#ffffff"))
+    img("check_off_dis.png", box(t["side"], t["line"], None))
+    img("check_on_dis.png", box(t["track"], t["track"], t["faint"]))
+    img("radio_off.png", radio(t["input"], t["input_line"], None))
+    img("radio_off_hover.png", radio(t["input"], t["accent"], None))
+    img("radio_on.png", radio(t["input"], t["accent"], t["accent"]))
+    img("radio_off_dis.png", radio(t["side"], t["line"], None))
+    img("radio_on_dis.png", radio(t["side"], t["line"], t["faint"]))
+    img("arrow.png", arrow(t["muted"]))
+    img("arrow_up.png", lambda p: (p.translate(0, S), p.scale(1, -1), arrow(t["muted"])(p)))
+    img("arrow_dis.png", arrow(t["faint"]))
+    return d.replace("\\", "/")
+
+
+def launcher_qss(t, name):
+    a = art_dir(t, name)
+    v = dict(t, art=a, dot_busy=DOT["busy"])
+    return """
+#root, #page, QScrollArea, #scrollBody { background: %(bg)s; }
+QWidget { color: %(text)s; }
+QToolTip { background: %(card)s; color: %(text)s; border: 1px solid %(line)s; padding: 4px 8px; }
+#sidebar { background: %(side)s; border-right: 1px solid %(line)s; }
+#appName { font-size: 16pt; font-weight: 700; color: %(text)s; }
+#appSub { color: %(muted)s; font-size: 9pt; }
+#sideCaption { color: %(muted)s; font-size: 9pt; }
+#build { color: %(faint)s; font-size: 8.5pt; }
+QPushButton#nav { text-align: left; padding: 8px 12px; border: 1px solid transparent; border-radius: 8px;
+    background: transparent; font-size: 10.5pt; }
+QPushButton#nav:hover { background: %(nav_hover)s; }
+QPushButton#nav:checked { background: %(card)s; border-color: %(line)s; color: %(accent)s; font-weight: 600; }
+#pageTitle { font-size: 19pt; font-weight: 700; }
+QScrollArea { border: none; }
+QFrame#card { background: %(card)s; border: 1px solid %(line)s; border-radius: 12px; }
+QFrame#card QLabel, QFrame#card QCheckBox, QFrame#card QRadioButton { background: transparent; }
+#cardTitle { font-size: 11pt; font-weight: 600; }
+#cellTitle { font-weight: 600; }
+#muted { color: %(muted)s; }
+#warn { color: %(warn)s; }
+#busyText { color: %(dot_busy)s; }
+#accentText { color: %(accent)s; }
+#nameSel { color: %(accent)s; font-weight: 600; }
+#nameWarn { color: %(warn)s; }
+QFrame#sep { background: %(line)s; border: none; min-height: 1px; max-height: 1px; }
+#bar { background: %(bg)s; border-top: 1px solid %(line)s; }
+#summary { color: %(muted)s; }
+QPushButton { background: %(input)s; border: 1px solid %(input_line)s; border-radius: 7px; padding: 6px 14px; min-height: 18px; }
+QPushButton:hover { background: %(hover)s; }
+QPushButton:pressed { background: %(press)s; }
+QPushButton:disabled { color: %(faint)s; background: %(side)s; border-color: %(line)s; }
+QPushButton:focus { border-color: %(accent)s; }
+QPushButton#primary { background: %(accent)s; color: %(accent_t)s; border: 1px solid %(accent)s; font-size: 11pt;
+    font-weight: 600; padding: 9px 34px; border-radius: 8px; }
+QPushButton#primary:hover { background: %(accent_hi)s; border-color: %(accent_hi)s; }
+QPushButton#primary:pressed { background: %(accent_press)s; }
+QPushButton#primary:disabled { background: %(accent_soft)s; border-color: %(accent_soft)s; color: %(faint)s; }
+QPushButton#seg { border-radius: 0px; margin-left: -1px; padding: 6px 14px; }
+QPushButton#segL { border-top-right-radius: 0px; border-bottom-right-radius: 0px; padding: 6px 14px; }
+QPushButton#segR { border-top-left-radius: 0px; border-bottom-left-radius: 0px; margin-left: -1px; padding: 6px 14px; }
+QPushButton#seg:checked, QPushButton#segL:checked, QPushButton#segR:checked {
+    background: %(accent)s; border-color: %(accent)s; color: %(accent_t)s; font-weight: 600; }
+QPushButton#keycap { font-weight: 600; text-align: center; }
+QPushButton#keycap:checked { background: %(accent)s; border-color: %(accent)s; color: %(accent_t)s; }
+QPushButton#swatch { min-width: 64px; }
+QToolButton#info { border: none; background: transparent; color: %(accent)s; font-size: 13pt; font-weight: 700; padding: 0px 2px; }
+QToolButton#info:hover { color: %(accent_hi)s; }
+QLineEdit, QComboBox, QSpinBox { background: %(input)s; border: 1px solid %(input_line)s; border-radius: 7px;
+    padding: 5px 8px; min-height: 18px; selection-background-color: %(accent)s; selection-color: #ffffff; }
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus { border-color: %(accent)s; }
+QComboBox:hover, QLineEdit:hover, QSpinBox:hover { border-color: %(faint)s; }
+QComboBox:disabled, QLineEdit:disabled { color: %(faint)s; background: %(side)s; }
+QComboBox::drop-down { border: none; width: 26px; subcontrol-origin: padding; subcontrol-position: center right; }
+QComboBox::down-arrow { image: url(%(art)s/arrow.png); width: 14px; height: 14px; }
+QComboBox::down-arrow:disabled { image: url(%(art)s/arrow_dis.png); }
+QComboBox QAbstractItemView { background: %(card)s; border: 1px solid %(line)s; border-radius: 6px; padding: 4px;
+    outline: none; selection-background-color: %(accent_soft)s; selection-color: %(text)s; }
+QSpinBox::up-button, QSpinBox::down-button { width: 18px; border: none; background: transparent; }
+QSpinBox::up-arrow { image: url(%(art)s/arrow_up.png); width: 10px; height: 10px; }
+QSpinBox::down-arrow { image: url(%(art)s/arrow.png); width: 10px; height: 10px; }
+QCheckBox, QRadioButton { spacing: 9px; padding: 2px 0px; }
+QCheckBox::indicator, QRadioButton::indicator { width: 18px; height: 18px; }
+QCheckBox::indicator:unchecked { image: url(%(art)s/check_off.png); }
+QCheckBox::indicator:unchecked:hover { image: url(%(art)s/check_off_hover.png); }
+QCheckBox::indicator:checked { image: url(%(art)s/check_on.png); }
+QCheckBox::indicator:unchecked:disabled { image: url(%(art)s/check_off_dis.png); }
+QCheckBox::indicator:checked:disabled { image: url(%(art)s/check_on_dis.png); }
+QRadioButton::indicator:unchecked { image: url(%(art)s/radio_off.png); }
+QRadioButton::indicator:unchecked:hover { image: url(%(art)s/radio_off_hover.png); }
+QRadioButton::indicator:checked { image: url(%(art)s/radio_on.png); }
+QRadioButton::indicator:unchecked:disabled { image: url(%(art)s/radio_off_dis.png); }
+QRadioButton::indicator:checked:disabled { image: url(%(art)s/radio_on_dis.png); }
+QCheckBox:disabled, QRadioButton:disabled { color: %(faint)s; }
+QProgressBar { background: %(track)s; border: none; border-radius: 3px; min-height: 6px; max-height: 6px; }
+QProgressBar::chunk { background: %(accent)s; border-radius: 3px; }
+QPlainTextEdit#code { background: %(code)s; border: 1px solid %(line)s; border-radius: 8px; padding: 4px;
+    selection-background-color: %(accent)s; selection-color: #ffffff; }
+QScrollBar:vertical { background: transparent; width: 12px; margin: 2px; }
+QScrollBar::handle:vertical { background: %(input_line)s; border-radius: 4px; min-height: 32px; }
+QScrollBar::handle:vertical:hover { background: %(faint)s; }
+QScrollBar:horizontal { background: transparent; height: 12px; margin: 2px; }
+QScrollBar::handle:horizontal { background: %(input_line)s; border-radius: 4px; min-width: 32px; }
+QScrollBar::add-line, QScrollBar::sub-line { width: 0px; height: 0px; }
+QScrollBar::add-page, QScrollBar::sub-page { background: none; }
+QDialog, QMessageBox { background: %(bg)s; }
+""" % v
+
+
+def launcher_palette(t):
+    p = QPalette()
+    for role, key in ((QPalette.Window, "bg"), (QPalette.WindowText, "text"), (QPalette.Base, "input"),
+                      (QPalette.AlternateBase, "card"), (QPalette.Text, "text"), (QPalette.Button, "input"),
+                      (QPalette.ButtonText, "text"), (QPalette.Highlight, "accent"), (QPalette.ToolTipBase, "card"),
+                      (QPalette.ToolTipText, "text"), (QPalette.PlaceholderText, "faint"), (QPalette.Mid, "line"),
+                      (QPalette.Link, "accent")):
+        p.setColor(role, QColor(t[key]))
+    p.setColor(QPalette.HighlightedText, QColor("#ffffff"))
+    for role, key in ((QPalette.Text, "faint"), (QPalette.WindowText, "faint"), (QPalette.ButtonText, "faint")):
+        p.setColor(QPalette.Disabled, role, QColor(t[key]))
+    return p
+
+
+def flag_pixmap(n, w=24, h=16):
+    """A small drawn flag for a game language (no files, no emoji), drawn at 2x for HiDPI."""
+    k = 2
+    pm = QPixmap(w * k, h * k)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    p.scale(k, k)
+
+    def fill(x0, y0, x1, y1, c):
+        p.fillRect(QRectF(x0, y0, x1 - x0, y1 - y0), QColor(c))
+    if n == 0:        # United Kingdom (simplified)
+        fill(0, 0, w, h, "#012169")
+        p.setPen(QPen(QColor("white"), 3))
+        p.drawLine(QPointF(0, 0), QPointF(w, h))
+        p.drawLine(QPointF(w, 0), QPointF(0, h))
+        p.setPen(QPen(QColor("#C8102E"), 1))
+        p.drawLine(QPointF(0, 0), QPointF(w, h))
+        p.drawLine(QPointF(w, 0), QPointF(0, h))
+        fill(0, h / 2 - 3, w, h / 2 + 3, "white")
+        fill(w / 2 - 3, 0, w / 2 + 3, h, "white")
+        fill(0, h / 2 - 2, w, h / 2 + 2, "#C8102E")
+        fill(w / 2 - 2, 0, w / 2 + 2, h, "#C8102E")
+    elif n == 5:      # Spain
+        fill(0, 0, w, h, "#AA151B")
+        fill(0, h / 4, w, h - h / 4, "#F1BF00")
+    elif n == 6:      # Portugal
+        fill(0, 0, w * 2 / 5, h, "#006600")
+        fill(w * 2 / 5, 0, w, h, "#FF0000")
+        p.setPen(QPen(QColor("#FFE000"), 1.6))
+        p.setBrush(Qt.NoBrush)
+        p.drawEllipse(QPointF(w * 2 / 5, h / 2), h / 4, h / 4)
+    elif n == 7:      # Sweden
+        fill(0, 0, w, h, "#006AA7")
+        fill(0, h / 2 - 2, w, h / 2 + 2, "#FECC02")
+        fill(w * 3 / 8 - 2, 0, w * 3 / 8 + 2, h, "#FECC02")
+    elif n == 8:      # Denmark
+        fill(0, 0, w, h, "#C8102E")
+        fill(0, h / 2 - 2, w, h / 2 + 2, "white")
+        fill(w * 3 / 8 - 2, 0, w * 3 / 8 + 2, h, "white")
+    p.setPen(QPen(QColor(0, 0, 0, 60), 0.6))
+    p.setBrush(Qt.NoBrush)
+    p.drawRect(QRectF(0.3, 0.3, w - 0.6, h - 0.6))
+    p.end()
+    pm.setDevicePixelRatio(k)
+    return pm
+
+
+def window_icon():
+    for d in (os.path.join(getattr(sys, "_MEIPASS", ""), "icons"), os.path.join(ROOT, "tools", "icons")):
+        for name in ("launcher", "port", "gfx"):
+            for ext in ((".ico", ".png") if os.name == "nt" else (".png", ".ico")):
+                p = os.path.join(d, name + ext)
+                if os.path.isfile(p):
+                    ic = QIcon(p)
+                    if not ic.isNull():
+                        return ic
+    return QIcon()
+
+
+def build_command(s, civ_play=None):
+    """The tombi-pc command line for the settings s (and a rebuilt town button's civ_play, never saved); returns
+    (cmd, gfx_note), gfx_note telling the log why the Spanish redraws (--patch-tex) are or are not passed."""
+    s = dict(s, civ_play=civ_play)
+    exe = game_binary()
+    source = ["--data", data_dir()] if data_ready() else ["--disc", bin_of_cue(s["disc"])]
+    cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
+           "--log-fps", "2",      # the measured vblank rate and its histogram in the log (no counter on screen)
+           "--renderer", "soft" if s.get("renderer") == "soft" else "gl",
+           "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9", "auto") else "4:3"]
+    if s.get("renderer") != "soft" and s.get("internal_res", 1) in (2, 3, 4):
+        cmd += ["--internal-res", str(s["internal_res"])]
+    fps = s.get("fps") or ("auto" if s.get("fps60") and s.get("experimental") else "off")
+    if fps != "off":                       # --fps: interpolated presents (both renderers; the old OpenGL-only 60 fps switch = auto)
+        cmd += ["--fps", str(fps)]
+    if s.get("lang"):
+        cmd += ["--lang", str(s["lang"])]
+    if s.get("cut_content"):
+        cmd += ["--cut-content"]
+        if s.get("early_title"):
+            cmd += ["--early-title", s["early_title"]]
+    gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
+    if str(s.get("lang")) != "5":
+        note = "no (language is not Spanish)"
+    elif cmd[1] != "--data":
+        note = "no (running from the disc image, not data/)"
+    elif not os.path.isfile(gfx):
+        note = "no (%s missing: text patch off, or its redraws were skipped)" % gfx
+    else:
+        cmd += ["--patch-tex", gfx]
+        note = "yes (%s)" % gfx
+    if s.get("savedir"):
+        cmd += ["--save-dir", s["savedir"]]
+    if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft" and s.get("experimental"):
+        cmd += ["--texture-pack", s["texpack"]]
+    if s.get("fullscreen"):
+        cmd += ["--fullscreen"]
+    if s.get("show_fps"):
+        cmd += ["--show-fps"]
+    if s.get("dualshock"):
+        cmd += ["--dualshock"]
+    try:
+        rumble = max(0, min(200, int(s.get("rumble", 100))))
+    except (TypeError, ValueError):
+        rumble = 100
+    if rumble != 100:
+        cmd += ["--rumble", str(rumble)]
+    pm = pad_map_arg(s.get("pad_map"))
+    if pm:
+        cmd += ["--pad-map", pm]
+    if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "generic", "custom"):
+        cmd += ["--prompts", s["prompts_style"]]
+    if s.get("prompts_style") == "custom":
+        cmd += ["--prompt-colors", s.get("prompt_colors") or PC.DEFAULT]
+    # no --launcher-exit on PC: the Quit Game entries are for handhelds; here the window is simply closed
+    cmd += M.mod_args(s, app_dir())
+    cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))
+    return cmd, note
+
+
+# ---------------------------------------------------------------------------------------------- settings
+_TCL_TRUE, _TCL_FALSE = ("1", "true", "yes", "on"), ("0", "false", "no", "off")
+
+
+def coerce(v, kind):
+    """A saved value read as the launcher's widgets read it (bool / int / str), or ValueError when it cannot be
+    (then the saved value is kept as it is, and the widget shows its default)."""
+    if kind is bool:
+        if isinstance(v, (bool, int, float)):
+            return bool(v)
+        t = str(v).strip().lower()
+        if t in _TCL_TRUE or t in _TCL_FALSE:
+            return t in _TCL_TRUE
+        raise ValueError(v)
+    if kind is int:
+        if isinstance(v, bool):
+            return int(v)
+        if isinstance(v, int):
+            return v
         try:
-            self.dot.itemconfigure("d", fill=DOT.get(level, DOT["info"]))
-        except tk.TclError:
-            pass
+            return int(str(v).strip())
+        except ValueError:
+            return int(float(str(v).strip()))
+    if isinstance(v, bool):
+        return "1" if v else "0"
+    return v if isinstance(v, str) else str(v)
 
-    # ---- layout helpers
-    def card(self, parent, title=None, pad=16):
-        """A white card with a 1 px border; returns the inner (ttk) frame."""
-        outer = tk.Frame(parent, background=C_CARD, highlightthickness=1, highlightbackground=C_LINE, highlightcolor=C_LINE, bd=0)
-        inner = ttk.Frame(outer, padding=pad)
-        inner.pack(fill="both", expand=True)
-        if title:
-            ttk.Label(inner, text=title, style="Head.TLabel").pack(anchor="w", pady=(0, 6))
-        return outer, inner
 
-    def page_frame(self, name, title, scroll=False):
-        """A page: title and a body on the grey background (a scrolled one for the long ones)."""
-        f = ttk.Frame(self.main, style="Bg.TFrame", padding=(24, 18, 24, 8))
-        f.grid(row=0, column=0, sticky="nsew")
-        ttk.Label(f, text=title, style="Title.TLabel").pack(anchor="w", pady=(0, 12))
-        if not scroll:
-            body = ttk.Frame(f, style="Bg.TFrame")
-            body.pack(fill="both", expand=True)
-            self.pages[name] = f
-            return body
-        holder = ttk.Frame(f, style="Bg.TFrame")
-        holder.pack(fill="both", expand=True)
-        cv = tk.Canvas(holder, background=C_BG, highlightthickness=0, bd=0)
-        sb = ttk.Scrollbar(holder, orient="vertical", command=cv.yview)
-        body = ttk.Frame(cv, style="Bg.TFrame")
-        win = cv.create_window(0, 0, window=body, anchor="nw")
-        body.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
-        cv.bind("<Configure>", lambda e: cv.itemconfigure(win, width=e.width))
-        cv.configure(yscrollcommand=sb.set)
-        cv.pack(side="left", fill="both", expand=True)
-        sb.pack(side="right", fill="y")
+class Bridge(QObject):
+    """Runs callables on the GUI thread (the disc check / extraction / texture dump / town generation threads)."""
+    call = Signal(object)
 
-        def wheel(e):
-            if self.page == name:
-                cv.yview_scroll(-1 if (e.num == 4 or e.delta > 0) else 1, "units")
-        for seq in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
-            self.root.bind_all(seq, wheel, add="+")
-        self.pages[name] = f
-        return body
+    def __init__(self):
+        super().__init__()
+        self.call.connect(lambda fn: fn())
 
-    def show(self, name):
-        self.page = name
-        self.pages[name].tkraise()
-        for n, b in self.nav.items():
-            b.configure(style="NavSel.TButton" if n == name else "Nav.TButton")
 
-    # ---- window
-    def _build(self):
-        r = self.root
-        r.title(tr("title") + "  [build " + BUILD_ID + "]")
-        self.status = tk.StringVar(value=tr("s.nodata"))
-        r.columnconfigure(1, weight=1)
-        r.rowconfigure(0, weight=1)
-        side = ttk.Frame(r, style="Side.TFrame", padding=(10, 14, 10, 14),
-                         width=int(228 * max(1.0, float(r.tk.call("tk", "scaling")) / (96 / 72.0))))
-        side.grid(row=0, column=0, rowspan=2, sticky="ns")
-        side.grid_propagate(False)
-        side.pack_propagate(False)
-        ttk.Label(side, text="Tombi!", style="App.TLabel").pack(anchor="w", padx=8, pady=(0, 14))
-        self.nav = {}
-        for n in PAGES:
-            b = ttk.Button(side, text=tr("nav." + n), style="Nav.TButton", command=lambda n=n: self.show(n), takefocus=False)
-            b.pack(fill="x", pady=1)
-            self.nav[n] = b
-        ttk.Label(side, text="build " + BUILD_ID, style="Side.TLabel").pack(side="bottom", anchor="w", padx=6, pady=(8, 0))
-        lang = ttk.Frame(side, style="Side.TFrame")
-        lang.pack(side="bottom", fill="x", padx=4)
-        # experimental features (texture dump / packs, 60 fps): hidden unless asked for
-        self.experimental = bool(self.s.get("experimental"))
-        ev = tk.BooleanVar(value=self.experimental)
+class WheelGuard(QObject):
+    """Comboboxes and spin boxes inside the scrolled pages change only when focused: a wheel over them scrolls the page."""
 
-        def toggled():
-            self.s["experimental"] = ev.get()
-            self.root.after_idle(self.rebuild)
-        ttk.Checkbutton(lang, text=tr("l.experimental"), variable=ev, command=toggled, takefocus=False).pack(anchor="w", pady=(0, 8))
-        ttk.Label(lang, text=tr("l.uilang"), style="Side.TLabel").pack(anchor="w", pady=(0, 3))
-        names = ["%s (%s)" % (v, k) for k, v in i18n.LANGS.items()]
-        lv = tk.StringVar(value="%s (%s)" % (i18n.LANGS[i18n.current()], i18n.current()))
-        cb = ttk.Combobox(lang, textvariable=lv, values=names, state="readonly")
-        cb.pack(fill="x")
+    def eventFilter(self, obj, e):
+        if e.type() == QEvent.Wheel and isinstance(obj, (QComboBox, QAbstractSpinBox)) and not obj.hasFocus() \
+                and obj.window() is self.parent():         # (the save editor's widgets keep their own behaviour)
+            w = obj.parentWidget()
+            while w is not None and not isinstance(w, QScrollArea):
+                w = w.parentWidget()
+            if w is not None:
+                QApplication.sendEvent(w.verticalScrollBar(), e)
+            return True
+        return False
 
-        def chosen(_=None):
-            code = lv.get().rsplit("(", 1)[1].rstrip(")")
-            if code != i18n.current():
-                i18n.set_language(code)
-                self.root.after_idle(self.rebuild)
-        cb.bind("<<ComboboxSelected>>", chosen)
 
-        self.main = ttk.Frame(r, style="Bg.TFrame")
-        self.main.grid(row=0, column=1, sticky="nsew")
-        self.main.columnconfigure(0, weight=1)
-        self.main.rowconfigure(0, weight=1)
-        self.pages = {}
-        self.patch_ui = []
-        self._build_play(self.page_frame("play", tr("nav.play")))
-        self._build_gfx(self.page_frame("gfx", tr("nav.gfx")))
-        self._build_controls(self.page_frame("controls", tr("nav.controls"), scroll=True))
-        self._build_mods(self.page_frame("mods", tr("nav.mods"), scroll=True))
-        self._build_cut(self.page_frame("cut", tr("nav.cut"), scroll=True))
-        self._build_log(self.page_frame("log", tr("nav.log")))
-        self._build_bar(r)
-        self.show(self.page)
-        for k in ("renderer", "scale", "fullscreen", "internal_res", "aspect", "hz60"):
-            self.vars[k].trace_add("write", lambda *_: self._refresh())
-        self._refresh()
-        if self.proc and self.proc.poll() is None:
-            self.play_btn.state(["disabled"])
-            self.stop_btn.pack(side="right", padx=(0, 8), after=self.play_btn)
-            if self.starting:
-                self._starting(True)
-        if self.s.get("disc"):
-            self.root.after(200, self.check_disc)
-        elif data_ready():
-            man = X.read_manifest(data_dir())
-            self.say(tr("s.dataok", data_dir(), len(man["files"]) if man else 0), "ok")
+class KeyButton(QPushButton):
+    """A keyboard-table key: click, then the next key pressed is the new binding (Esc cancels; focus loss ends)."""
 
-    def _build_bar(self, r):
-        """Bottom bar under every page: the options summary, Copy log, Close the game (while running) and Play."""
-        tk.Frame(r, background=C_LINE, height=1).grid(row=1, column=1, sticky="new")
-        bar = ttk.Frame(r, style="Bg.TFrame", padding=(24, 12, 24, 14))
-        bar.grid(row=1, column=1, sticky="ew")
-        self.summary = tk.StringVar()
-        self.summary_lbl = ttk.Label(bar, textvariable=self.summary, style="Bg.TLabel")
-        # shown from Play until the game prints "[port2] window ..." (port2/runtime/sdl.c) or exits
-        self.start_box = ttk.Frame(bar, style="Bg.TFrame")
-        ttk.Label(self.start_box, text=tr("l.starting"), style="Bg.TLabel", foreground=C_ACCENT).pack(side="left", padx=(0, 10))
-        self.start_bar = ttk.Progressbar(self.start_box, mode="indeterminate", length=240)
-        self.start_bar.pack(side="left")
-        self.play_btn = ttk.Button(bar, text=tr("b.play"), command=self.play_normal, style="Accent.TButton", width=14)
-        self.play_btn.pack(side="right")
-        self.stop_btn = ttk.Button(bar, text=tr("b.stop"), command=self.stop, style="Bar.TButton")
-        ttk.Button(bar, text=tr("b.copylog"), command=self.copy_log, style="Bar.TButton").pack(side="right", padx=(0, 8))
-        self.summary_lbl.pack(side="left")      # last: it gives up its width first when the bar is narrow
+    def __init__(self, app, b):
+        super().__init__()
+        self.app, self.b = app, b
+        self.setObjectName("keycap")
+        self.setCheckable(True)
+        self.clicked.connect(lambda: self.app._key_begin(self.b))
 
-    def _refresh(self):
-        """Summary line ("OpenGL · 2x window · 3x internal · 16:9") and the internal resolution enabled for OpenGL only."""
-        try:
-            gl = self.vars["renderer"].get() != "soft"
-            parts = ["OpenGL" if gl else "Software",
-                     tr("sum.full") if self.vars["fullscreen"].get() else tr("sum.window", self.vars["scale"].get())]
-            if gl and self.vars["internal_res"].get() in (2, 3, 4):
-                parts.append(tr("sum.ires", self.vars["internal_res"].get()))
-            a = self.vars["aspect"].get()
-            parts.append({"square": "1:1 px", "16:9": "16:9", "21:9": "21:9", "32:9": "32:9", "auto": "auto"}.get(a, "4:3"))
-            parts.append("60 Hz" if self.vars["hz60"].get() else "50 Hz")
-        except tk.TclError:
-            return
-        self.summary.set("  ·  ".join(parts))
-        for b in getattr(self, "ires_btns", []):
-            b.state(["!disabled"] if gl else ["disabled"])
-        if hasattr(self, "ires_note"):
-            if gl:
-                self.ires_note.pack_forget()
-            else:
-                self.ires_note.pack(anchor="w", pady=(6, 0))
+    def event(self, e):
+        if e.type() == QEvent.KeyPress and self.app.key_capture == self.b:
+            self.app._key_press(self.b, e)
+            return True
+        return super().event(e)
 
-    def _browse_row(self, parent, key, command):
-        row = ttk.Frame(parent)
-        row.pack(fill="x")
-        ttk.Entry(row, textvariable=self.var(key)).pack(side="left", fill="x", expand=True)
-        ttk.Button(row, text=tr("b.browse"), command=command).pack(side="left", padx=(8, 0))
-        return row
+    def focusOutEvent(self, e):
+        super().focusOutEvent(e)
+        self.app._key_end(self.b)
 
-    def _build_play(self, f):
-        o, c = self.card(f)
-        o.pack(fill="x")
-        ttk.Label(c, text=tr("c.disc"), style="Head.TLabel").pack(anchor="w")
-        ttk.Label(c, text=tr("l.disc"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
-        self._browse_row(c, "disc", self.pick_disc)
-        st = self.status_row = ttk.Frame(c)
-        st.pack(fill="x", pady=(8, 0))
-        self.dot = tk.Canvas(st, width=10, height=10, background=C_CARD, highlightthickness=0, bd=0)
-        self.dot.create_oval(1, 1, 9, 9, fill=DOT["info"], outline="", tags="d")
-        self.dot.pack(side="left", anchor="n", pady=(5, 0), padx=(0, 8))
-        self.status_lbl = ttk.Label(st, textvariable=self.status, wraplength=640, justify="left")
-        self.status_lbl.pack(side="left", fill="x", expand=True)
-        st.bind("<Configure>", lambda e: self.status_lbl.configure(wraplength=max(200, e.width - 30)))
-        # shown only while the disc is extracted into data/ (check_disc): a message and a bar under the status
-        self.ext_box = ttk.Frame(c)
-        ttk.Label(self.ext_box, text=tr("l.extracting"), foreground=DOT["busy"]).pack(anchor="w")
-        self.ext_bar = ttk.Progressbar(self.ext_box, mode="determinate", maximum=100)
-        self.ext_bar.pack(fill="x", pady=(4, 0))
-        ttk.Label(c, text=tr("c.saves"), style="Head.TLabel").pack(anchor="w", pady=(16, 0))
-        ttk.Label(c, text=tr("l.savedir"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
-        self._browse_row(c, "savedir", self.pick_savedir)
-        sr = ttk.Frame(c)
-        sr.pack(fill="x", pady=(8, 0))
-        ttk.Button(sr, text=tr("b.saveimp"), command=self.import_save).pack(side="left")
-        ttk.Button(sr, text=tr("b.saveexp"), command=self.export_save).pack(side="left", padx=(8, 0))
-        ttk.Button(sr, text=tr("b.saveedit"), command=self.edit_save).pack(side="left", padx=(8, 0))
 
-        o, c = self.card(f)
-        o.pack(fill="x", pady=(12, 0))
-        c.columnconfigure(0, weight=1, uniform="g")
-        c.columnconfigure(1, weight=1, uniform="g")
+class Swatch(QPushButton):
+    def set_color(self, rgb):
+        c = QColor("#%06x" % rgb)
+        fg = "#000000" if c.lightness() > 140 else "#ffffff"
+        self.setStyleSheet("QPushButton { background: %s; color: %s; border: 1px solid rgba(0,0,0,60); }" % (c.name(), fg))
 
-        def cell(row, col, title):
-            box = ttk.Frame(c)
-            box.grid(row=row, column=col, sticky="new", padx=(0 if col == 0 else 12, 12 if col == 0 else 0), pady=(0 if row == 0 else 14, 0))
-            ttk.Label(box, text=title, style="Head.TLabel").pack(anchor="w", pady=(0, 6))
-            return box
-        # game language (the boot menu's MAINn.EXE): a combobox
-        box = cell(0, 0, tr("c.game"))
-        default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)     # the launcher's language, English otherwise
-        lv = self.var("lang", tk.IntVar, default_lang)
-        names = [name for _n, name in GAME_LANGS]
-        ids = [n for n, _name in GAME_LANGS]
-        self.lang_cb = ttk.Combobox(box, values=names, state="readonly")
-        self.lang_cb.current(ids.index(lv.get()) if lv.get() in ids else 0)
-        self.lang_cb.bind("<<ComboboxSelected>>", lambda _e: (lv.set(ids[self.lang_cb.current()]), self._sync_patch_choice()))
-        self.lang_cb.pack(fill="x")
-        # text patch: none / the bundled one / another file (keys patch_on + patch, as before; no path shown unless "other")
-        box = cell(0, 1, tr("c.patch"))
-        self._patch_widget(box)
-        # speed: segmented 50 / 60 Hz (the hz60 mod)
-        box = cell(1, 0, tr("c.speed"))
-        seg = ttk.Frame(box)
-        seg.pack(anchor="w")
-        hv = self.var("hz60", tk.BooleanVar, False)
-        for text, val in (("50 Hz (PAL)", False), ("60 Hz", True)):
-            ttk.Radiobutton(seg, text=text, variable=hv, value=val, style="Seg.Toolbutton", width=12,
-                            command=self._refresh).pack(side="left")
-        box = cell(1, 1, tr("c.quick"))
-        ttk.Checkbutton(box, text=tr("l.skipintro"), variable=self.var("skipintro", tk.BooleanVar, True)).pack(anchor="w")
-        ttk.Checkbutton(box, text=tr("l.autostart2"), variable=self.var("autostart", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
 
-    def _patch_mode(self):
-        """none / bundled / custom from the saved patch_on + patch (an old saved path to the bundled file -> bundled)."""
-        bp = bundled_patch()
-        cur = (self.vars["patch"].get() or "").strip()
-        if not self.vars["patch_on"].get():
-            return "none"
-        if not cur or (bp and os.path.basename(cur) == os.path.basename(bp) and os.path.dirname(os.path.abspath(cur)).endswith("patches")):
-            return "bundled" if bp else "none"
-        return "custom"
+class GlyphPreview(QWidget):
+    """The four button prompts drawn as the game draws them (tools/prompt_custom.py = port2/shims/prompts.c)."""
 
-    def _patch_widget(self, parent):
-        """Combobox Ninguno / Traducción mejorada (incluida) / Otro archivo...; the path + Elegir only for "other"."""
-        self.var("patch_on", tk.BooleanVar, False)
-        self.var("patch")
-        if not hasattr(self, "patch_ui"):
-            self.patch_ui = []
-        if self._patch_mode() == "bundled":        # migrate: the bundled file wherever this exe now lives
-            self.vars["patch"].set(bundled_patch())
-        modes = ["none"] + (["bundled"] if bundled_patch() else []) + ["custom"]
-        names = [tr("p." + m) for m in modes]
-        cb = ttk.Combobox(parent, values=names, state="readonly")
-        cb.pack(fill="x")
-        row = ttk.Frame(parent)
-        ttk.Entry(row, textvariable=self.vars["patch"]).pack(side="left", fill="x", expand=True)
-        ttk.Button(row, text=tr("b.browse"), command=self.pick_patch).pack(side="left", padx=(8, 0))
-        hint = ttk.Label(parent, text=tr("l.patchhint"), style="Muted.TLabel", wraplength=300, justify="left")
+    def __init__(self, st):
+        super().__init__()
+        self.st = st
+        self.setFixedSize(12 * 7 * 3 + 40, 16 * 7 * 3 + 20)
 
-        def chosen(_e=None):
-            spanish = self.vars["lang"].get() == 5 if "lang" in self.vars else False
-            m = [x for x in modes if x != "bundled" or spanish][cb.current()]
-            if m == "none":
-                self.vars["patch_on"].set(False)
-            elif m == "bundled":
-                self.vars["patch"].set(bundled_patch() or "")
-                self.vars["patch_on"].set(True)
-            else:
-                if self._patch_mode() != "custom":
-                    old = self.vars["patch"].get(), self.vars["patch_on"].get()
-                    self.pick_patch()
-                    if self._patch_mode() != "custom":      # cancelled: back to what it was
-                        self.vars["patch"].set(old[0])
-                        self.vars["patch_on"].set(old[1])
-            self._sync_patch_choice()
-        cb.bind("<<ComboboxSelected>>", chosen)
-        self.patch_ui.append((cb, modes, row, hint))
-        self._sync_patch_choice()
+    def paintEvent(self, _e):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()), 10, 10)
+        p.fillPath(path, QColor("#5a8a5a"))
+        k = 6
+        for i, (gx, gy) in enumerate([(1, 2), (2, 1), (0, 1), (1, 0)]):    # south, east, west, north on a 3 x 3 grid
+            g = PC.glyph(i, self.st["sym"], *self.st["cols"][i])
+            ox, oy = 10 + gx * 12 * k * 1.15, 10 + gy * 16 * k * 0.85
+            for y, row in enumerate(g):
+                for x, c in enumerate(row):
+                    if c:
+                        p.fillRect(QRectF(ox + x * k, oy + y * k, k, k), QColor(*c))
+        p.end()
 
-    def _sync_patch_choice(self):
-        """Every patch combobox shown from the patch_on / patch settings."""
-        m = self._patch_mode()
-        spanish = self.vars.get("lang") is not None and self.vars["lang"].get() == 5
-        for cb, modes, row, hint in getattr(self, "patch_ui", []):
-            try:
-                # the bundled Spanish translation only for the Spanish game (it does not touch the other languages)
-                shown = [x for x in modes if x != "bundled" or spanish]
-                cb.configure(values=[tr("p." + x) for x in shown])
-                cb.current(shown.index(m) if m in shown else 0)
-                row.pack(fill="x", pady=(6, 0)) if m == "custom" else row.pack_forget()
-                hint.pack(anchor="w", pady=(4, 0)) if (m == "none" and spanish and "bundled" in modes) else hint.pack_forget()
-            except tk.TclError:
-                pass
 
-    def clear_patch(self):
-        self.vars["patch_on"].set(False)
-        self._sync_patch_choice()
-
-    def custom_buttons(self):
-        """the "Customise buttons" dialog: per position a disc and a letter colour, the symbols, presets, a preview
-        drawn as the game draws it (tools/prompt_custom.py = port2/shims/prompts.c)"""
-        from tkinter import colorchooser
-        cv_var = self.var("prompt_colors", tk.StringVar, PC.DEFAULT)
-        sym, cols = PC.from_arg(cv_var.get())
-        st = {"sym": sym, "cols": list(cols)}
-        d = tk.Toplevel(self.root)
-        d.title(tr("pc.title"))
-        d.transient(d.master)
-        top = ttk.Frame(d, padding=12)
-        top.pack(fill="both", expand=True)
-        es = tr("pc.ok") == "Usar"
-        pr = ttk.Frame(top)
-        pr.grid(row=0, column=0, columnspan=3, sticky="w")
-        ttk.Label(pr, text=tr("pc.preset")).pack(side="left")
-        pcb = ttk.Combobox(pr, state="readonly", width=26, values=[p[1] if es else p[2] for p in PC.PRESETS])
-        pcb.pack(side="left", padx=6)
-        sr = ttk.Frame(top)
-        sr.grid(row=1, column=0, columnspan=3, sticky="w", pady=(6, 6))
-        ttk.Label(sr, text=tr("pc.sym")).pack(side="left")
-        scb = ttk.Combobox(sr, state="readonly", width=24, values=[tr("pc.sym." + k) for k in PC.SYMS])
-        scb.pack(side="left", padx=6)
-        canvas = tk.Canvas(top, width=12 * 7 * 3 + 40, height=16 * 7 * 3 + 20, bg="#5a8a5a", highlightthickness=0)
-        canvas.grid(row=2, column=2, rowspan=4, padx=(16, 0))
-        swatches = []
-
-        def hexs(c):
-            return "#%06x" % c
-
-        def redraw():
-            canvas.delete("all")
-            k = 6
-            spots = [(1, 2), (2, 1), (0, 1), (1, 0)]   # south, east, west, north on a 3 x 3 grid
-            for i, (gx, gy) in enumerate(spots):
-                g = PC.glyph(i, st["sym"], *st["cols"][i])
-                ox, oy = 10 + gx * 12 * k * 1.15, 10 + gy * 16 * k * 0.85
-                for y, row in enumerate(g):
-                    for x, c in enumerate(row):
-                        if c:
-                            canvas.create_rectangle(ox + x * k, oy + y * k, ox + x * k + k, oy + y * k + k,
-                                                    fill="#%02x%02x%02x" % c, width=0)
-            for i, (bd, bl) in enumerate(swatches):
-                bd.configure(bg=hexs(st["cols"][i][0]), activebackground=hexs(st["cols"][i][0]))
-                bl.configure(bg=hexs(st["cols"][i][1]), activebackground=hexs(st["cols"][i][1]))
-            scb.current(PC.SYMS.index(st["sym"]))
-
-        def pick(i, j):
-            c = colorchooser.askcolor(hexs(st["cols"][i][j]), parent=d)
-            if c and c[1]:
-                v = int(c[1][1:], 16)
-                cur = list(st["cols"][i]); cur[j] = v; st["cols"][i] = tuple(cur)
-                redraw()
-        names = tr("pc.pos").split("|")
-        for i in range(4):
-            r = ttk.Frame(top)
-            r.grid(row=2 + i, column=0, sticky="w", pady=2)
-            ttk.Label(r, text=names[i], width=20).pack(side="left")
-            bd = tk.Button(r, text=tr("pc.disc"), width=7, command=lambda i=i: pick(i, 0))
-            bd.pack(side="left", padx=2)
-            bl = tk.Button(r, text=tr("pc.letter"), width=7, command=lambda i=i: pick(i, 1))
-            bl.pack(side="left", padx=2)
-            swatches.append((bd, bl))
-
-        def on_preset(e=None):
-            p = PC.PRESETS[pcb.current()]
-            st["sym"], st["cols"] = p[3], list(p[4])
-            redraw()
-
-        def on_sym(e=None):
-            st["sym"] = PC.SYMS[scb.current()]
-            redraw()
-        pcb.bind("<<ComboboxSelected>>", on_preset)
-        scb.bind("<<ComboboxSelected>>", on_sym)
-        br = ttk.Frame(top)
-        br.grid(row=6, column=0, columnspan=3, sticky="e", pady=(10, 0))
-
-        def ok():
-            cv_var.set(PC.to_arg(st["sym"], st["cols"]))
-            self.var("prompts_style", tk.StringVar, "auto").set("custom")
-            d.destroy()
-        ttk.Button(br, text=tr("pc.cancel"), command=d.destroy).pack(side="right")
-        ttk.Button(br, text=tr("pc.ok"), command=ok).pack(side="right", padx=6)
-        redraw()
-
-    def _radios(self, parent, key, kind, default, items):
-        v = self.var(key, kind, default)
-        out = []
-        for text, val in items:
-            b = ttk.Radiobutton(parent, text=text, variable=v, value=val)
-            b.pack(anchor="w", pady=2)
-            out.append(b)
-        return out
-
-    def _build_gfx(self, f):
-        grid = ttk.Frame(f, style="Bg.TFrame")
-        grid.pack(fill="x")
-        grid.columnconfigure(0, weight=1, uniform="g")
-        grid.columnconfigure(1, weight=1, uniform="g")
-        o, c = self.card(grid, tr("c.renderer"))
-        o.grid(row=0, column=0, sticky="nsew", padx=(0, 6))
-        self._radios(c, "renderer", tk.StringVar, "gl", [(tr("r.gl"), "gl"), (tr("r.soft"), "soft")])
-        o, c = self.card(grid, tr("c.window"))
-        o.grid(row=0, column=1, sticky="nsew", padx=(6, 0))
-        seg = ttk.Frame(c)
-        seg.pack(anchor="w")
-        sv = self.var("scale", tk.IntVar, 2)
-        for n in (1, 2, 3):
-            ttk.Radiobutton(seg, text="%dx" % n, variable=sv, value=n, style="Seg.Toolbutton", width=6).pack(side="left")
-        ttk.Checkbutton(c, text=tr("l.fullscreen"), variable=self.var("fullscreen", tk.BooleanVar, False)).pack(anchor="w", pady=(10, 0))
-        # --show-fps: the on-screen counter (--log-fps 2 always logs the rate)
-        ttk.Checkbutton(c, text=tr("l.showfps"), variable=self.var("show_fps", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
-        o, c = self.card(grid, tr("c.aspect"))
-        o.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(12, 0))
-        self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9"), (tr("a.auto"), "auto")])
-        o, c = self.card(grid, tr("c.ires"))     # --internal-res: 3D drawn at N x (docs/PORT.md "HD"), OpenGL only
-        o.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(12, 0))
-        self.ires_btns = self._radios(c, "internal_res", tk.IntVar, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
-        self.ires_note = ttk.Label(c, text=tr("l.iresoff"), style="Muted.TLabel", wraplength=300, justify="left")
-        # --fps (interpolated high frame rates, shims/hfr.inc) is not offered here: it waits for a correct 60 Hz mode
-        # (docs/TODO.md "High frame rates"); the port keeps it behind the command-line flag only
-
-    def _build_controls(self, f):
-        """Three cards: the button icons of the texts (--prompts, a combobox), the keyboard bindings (--keys, a table:
-        click a key and press the new one) and the controller bindings (--pad-map: the PS1 pad photo with a leader line
-        from each button to its controller button, and a table of comboboxes; clicking a button on the photo selects its
-        row), with the DualShock switch and the vibration intensity."""
-        # ---- button icons
-        o, c = self.card(f, tr("c.icons"))
-        o.pack(fill="x")
-        # the label on its own line: room for the combobox and the button in every launcher language
-        ttk.Label(c, text=tr("l.prompts")).pack(anchor="w", pady=(0, 4))
-        row = ttk.Frame(c)
-        row.pack(fill="x")
-        pv = self.var("prompts_style", tk.StringVar, "auto")
-        if pv.get() not in [k for k, _ in PROMPT_STYLES]:
-            pv.set("auto")                   # the AYN Thor styles are Android only; an unknown value too
-        pcb = ttk.Combobox(row, state="readonly", width=24, values=[tr(t) for _, t in PROMPT_STYLES])
-        pcb.current([k for k, _ in PROMPT_STYLES].index(pv.get()))
-        pcb.pack(side="left", padx=(0, 8))
-        cust = ttk.Button(row, text=tr("b.custom"), command=self.custom_buttons)
-        cust.pack(side="left")
-
-        def prompts_sync(*_):
-            k = pv.get()
-            if k in [x for x, _ in PROMPT_STYLES]:
-                pcb.current([x for x, _ in PROMPT_STYLES].index(k))
-            cust.state(["!disabled"] if k == "custom" else ["disabled"])
-        pcb.bind("<<ComboboxSelected>>", lambda e: pv.set(PROMPT_STYLES[pcb.current()][0]))
-        pv.trace_add("write", prompts_sync)
-        prompts_sync()
-
-        # ---- keyboard
-        o, c = self.card(f, tr("c.keyboard"))
-        o.pack(fill="x", pady=(12, 0))
-        top = ttk.Frame(c)
-        top.pack(fill="x")
-        hint = ttk.Label(top, text=tr("kb.hint"), style="Muted.TLabel", wraplength=420, justify="left")
-        hint.pack(fill="x", anchor="w")
-        keys = self.s.get("keys") if self.s.get("keys_on") else None
-        keys = dict(M.DEFAULT_KEYS, **(keys or {}))
-        self.key_vars, self.key_btns, self.key_names = {}, {}, {}
-        self.key_capture = None
-        grid = ttk.Frame(c)
-        grid.pack(fill="x", pady=(8, 0))
-        for col in (0, 3):
-            grid.columnconfigure(col + 1, weight=1, uniform="kb")
-        grid.columnconfigure(2, minsize=24)
-        for i, b in enumerate(M.BUTTONS):
-            r, col = i % 7, (i // 7) * 3
-            self.key_vars[b] = tk.StringVar(value=keys.get(b) or "")
-            nm = ttk.Label(grid, text=tr("btn." + b))
-            nm.grid(row=r, column=col, sticky="w", pady=2, padx=(0, 8))
-            kb = ttk.Button(grid, width=16, command=lambda b=b: self._key_begin(b))
-            kb.grid(row=r, column=col + 1, sticky="ew", pady=2)
-            kb.bind("<KeyPress>", lambda e, b=b: self._key_press(b, e))
-            kb.bind("<FocusOut>", lambda e, b=b: self._key_end(b))
-            self.key_btns[b], self.key_names[b] = kb, nm
-            self.key_vars[b].trace_add("write", lambda *_: self._keys_sync())
-        self.key_warn = ttk.Label(c, text="", style="Warn.TLabel", wraplength=600, justify="left")
-        self.key_warn.pack(anchor="w", fill="x", pady=(6, 0))
-        ttk.Button(c, text=tr("b.restore"), command=self._keys_restore).pack(anchor="e", pady=(4, 0))
-        self._keys_sync()
-
-        # ---- controller
-        o, c = self.card(f, tr("c.pad"))
-        o.pack(fill="x", pady=(12, 0))
-        top = ttk.Frame(c)
-        top.pack(fill="x")
-        phint = ttk.Label(top, text=tr("gp.hint"), style="Muted.TLabel", wraplength=420, justify="left")
-        phint.pack(fill="x", anchor="w")
-        from tkinter import font
-        self.pad_fonts = {k: font.Font(family=self.fam, weight=w) for k, w in (("name", "normal"), ("key", "bold"), ("tiny", "bold"))}
-        dpi = float(self.root.tk.call("tk", "scaling")) / (96 / 72.0)
-        self.pad_cv = cv = tk.Canvas(c, background=C_CARD, highlightthickness=0, bd=0, height=int(250 * dpi), takefocus=0)
-        cv.pack(fill="x", pady=(6, 6))
-        self.pad_capture = None              # the selected PS1 button (its row in the table below)
-        self.pad_hot = None
-        self._pad_pending = False
-        self.pad_photo = self._pad_load_photo()
-        self.pad_spots = {}
-        self.pad_imgs = []
-        self._pad_photo_cache = {}
-        cv.bind("<Configure>", lambda e: self._pad_redraw())
-        cv.bind("<Button-1>", self._pad_click)
-        cv.bind("<Motion>", self._pad_motion)
-        cv.bind("<Leave>", lambda e: self._pad_hover(self.pad_hot, False) if self.pad_spots and self.pad_hot else None)
-        pm = dict(PAD_DEFAULTS, **(self.s.get("pad_map") or {}))
-        labels = [self._src_label(k) for k, _, _ in PAD_SOURCES]
-        self.pad_vars, self.pad_cbs, self.pad_names = {}, {}, {}
-        grid = ttk.Frame(c)
-        grid.pack(fill="x")
-        for col in (0, 3):
-            grid.columnconfigure(col + 1, weight=1, uniform="gp")
-        grid.columnconfigure(2, minsize=24)
-        for i, b in enumerate(M.BUTTONS):
-            r, col = i % 7, (i // 7) * 3
-            v = self.pad_vars[b] = tk.StringVar(value=pm.get(b, ""))
-            nm = ttk.Label(grid, text=tr("btn." + b))
-            nm.grid(row=r, column=col, sticky="w", pady=2, padx=(0, 8))
-            vals = labels if v.get() in PAD_SRC_KEYS else labels + [v.get()]     # a hand-written source stays choosable
-            cb = ttk.Combobox(grid, state="readonly", width=20, values=vals)
-            cb.set(self._src_label(v.get()))
-            cb.grid(row=r, column=col + 1, sticky="ew", pady=2)
-            cb.bind("<<ComboboxSelected>>", lambda e, b=b, cb=cb: self._padmap_chosen(b, cb))
-            cb.bind("<FocusIn>", lambda e, b=b: self._pad_select(b, focus=False))
-            self.pad_cbs[b], self.pad_names[b] = cb, nm
-            v.trace_add("write", lambda *_: self._padmap_sync())
-        self.pad_warn = ttk.Label(c, text="", style="Warn.TLabel", wraplength=600, justify="left")
-        self.pad_warn.pack(anchor="w", fill="x", pady=(4, 0))
-        ttk.Button(c, text=tr("b.restore"), command=self._padmap_restore).pack(anchor="e", pady=(4, 0))
-        ttk.Separator(c).pack(fill="x", pady=(6, 8))
-        ttk.Checkbutton(c, text=tr("l.dualshock"), variable=self.var("dualshock", tk.BooleanVar, False)).pack(anchor="w")
-        # --rumble: vibration intensity (runtime/sdl.c), stored as the percent; shown as "Off" / "N %"
-        rr = ttk.Frame(c)
-        rr.pack(anchor="w", pady=(6, 0))
-        ttk.Label(rr, text=tr("l.rumble")).pack(side="left")
-        rv = self.var("rumble", tk.IntVar, 100)
-        names = [tr("rumble.off") if n == 0 else "%d %%" % n for n in RUMBLE_STEPS]
-        rcb = ttk.Combobox(rr, values=names, state="readonly", width=9)
-        try:
-            rcb.current(RUMBLE_STEPS.index(rv.get()))
-        except (ValueError, tk.TclError):
-            rcb.current(RUMBLE_STEPS.index(100))
-        rcb.bind("<<ComboboxSelected>>", lambda e: rv.set(RUMBLE_STEPS[rcb.current()]))
-        rcb.pack(side="left", padx=(8, 0))
-        warns = (self.key_warn, self.pad_warn)
-        f.bind("<Configure>", lambda e: [w.configure(wraplength=max(200, e.width - 60)) for w in warns]
-               + [w.configure(wraplength=max(160, e.width - 60)) for w in (hint, phint)], add="+")
-        self._padmap_sync()
-
-    # ---- keyboard table
-    def _key_text(self, b):
-        k = self.key_vars[b].get().strip()
-        if not k:
-            return tr("pad.nokey")
-        if b == "select" and k == M.DEFAULT_KEYS["select"]:
-            return k + " / Right Shift"     # runtime/sdl.c keymap: the default select has a second key
-        return k
-
-    def _keys_sync(self):
-        used = {}
-        for b in M.BUTTONS:
-            k = self.key_vars[b].get().strip().lower()
-            if k:
-                used.setdefault(k, []).append(b)
-            self.key_btns[b].configure(text=tr("pad.press") + "…" if self.key_capture == b else self._key_text(b))
-        clash = [bs for bs in used.values() if len(bs) > 1]
-        for b in M.BUTTONS:
-            self.key_names[b].configure(style="Warn.TLabel" if any(b in bs for bs in clash) else "TLabel")
-        self.key_warn.configure(text="\n".join(tr("kb.clash", self.key_vars[bs[0]].get().strip(), ", ".join(tr("btn." + x) for x in bs))
-                                               for bs in clash))
-
-    def _key_begin(self, b):
-        if self.key_capture and self.key_capture != b:
-            self._key_end(self.key_capture)
-        self.key_capture = b
-        self.key_btns[b].focus_set()
-        self.key_btns[b].state(["pressed"])
-        self._keys_sync()
-
-    def _key_end(self, b):
-        if self.key_capture == b:
-            self.key_capture = None
-            self.key_btns[b].state(["!pressed"])
-            self._keys_sync()
-
-    def _key_press(self, b, e):
-        if self.key_capture != b:
-            return None                      # Space / Return on a focused button: click it (begin) as usual
-        if e.keysym == "Escape":
-            self._key_end(b)
-            return "break"
-        name = sdl_key_name(e.keysym)
-        if not name:
-            return "break"                   # a key --keys cannot name: keep waiting
-        self.key_capture = None
-        self.key_btns[b].state(["!pressed"])
-        self.key_vars[b].set(name)
-        return "break"
-
-    def _keys_restore(self):
-        self.key_capture = None
-        for b, v in self.key_vars.items():
-            v.set(M.DEFAULT_KEYS[b])
-
-    # ---- controller table
-    @staticmethod
-    def _src_label(k):
-        return tr("src." + k) if k in PAD_SRC_KEYS else k
-
-    def _padmap_chosen(self, b, cb):
-        lab = cb.get()
-        key = next((k for k in PAD_SRC_KEYS if lab == tr("src." + k)), lab)
-        self.pad_vars[b].set(key)
-
-    def _padmap_sync(self):
-        used = {}
-        for b in M.BUTTONS:
-            k = self.pad_vars[b].get()
-            self.pad_cbs[b].set(self._src_label(k))
-            if k:
-                used.setdefault(k, []).append(b)
-        clash = [(k, bs) for k, bs in used.items() if len(bs) > 1]
-        for b in M.BUTTONS:
-            hot = b == self.pad_capture
-            self.pad_names[b].configure(style="Sel.TLabel" if hot else ("Warn.TLabel" if any(b in bs for _, bs in clash) else "TLabel"))
-        self.pad_warn.configure(text="\n".join(tr("gp.clash", self._src_label(k), ", ".join(tr("btn." + x) for x in bs)) for k, bs in clash))
-        self._pad_redraw()
-
-    def _padmap_restore(self):
-        for b, v in self.pad_vars.items():
-            v.set(PAD_DEFAULTS[b])
-
-    def _pad_select(self, b, focus=True):
-        self.pad_capture = b
-        if focus:
-            self.pad_cbs[b].focus_set()
-        self._padmap_sync()
-
-    @staticmethod
-    def _pad_load_photo():
-        """The pad photo as a PIL image, or None (no Pillow / ImageTk in this Python, or the PNG missing): the vector pad."""
-        try:
-            from PIL import Image, ImageTk  # noqa: F401  (ImageTk: checked here so a missing _imagingtk falls back early)
-            p = icon_file("ps1_pad.png")
-            if not p:
-                return None
-            im = Image.open(p).convert("RGBA")
-            im.load()
-            return im
-        except Exception:
-            return None
-
-    # ---- the drawn pad.  Base coordinates: a PAD_W x PAD_H box, scaled to the canvas (and the DPI: the fonts are pixel sized)
+class PadView(QWidget):
+    """The PS1 pad photo (tools/icons/ps1_pad.png) with a leader line from each button to a chip showing the
+    controller button bound to it; hovering highlights a button, clicking selects its row in the table below.
+    Without the photo the same layout is drawn over a plain vector pad."""
     PAD_W, PAD_H = 660, 326
-    # left column: label row y; right column mirrors it; select/start sit under the pad
-    PAD_ROWS = {"l2": 26, "l1": 62, "up": 100, "left": 138, "down": 176, "right": 214,
-                "r2": 26, "r1": 62, "triangle": 100, "circle": 138, "cross": 176, "square": 214, "select": 306, "start": 306}
-    FACE = {"triangle": "#1fa67a", "circle": "#e0413c", "cross": "#4f7fd9", "square": "#d96bb0"}   # the classic symbol colours
-
-    # ---- the photo (tools/icons/ps1_pad.png, 463x315, background removed).  It is drawn PHOTO_W base units wide with its
-    # top-left at PHOTO_XY; the hotspots / line ends below are in the photo's own pixels.  The photo looks at the pad from
-    # the front, so of each shoulder only the top shows: L1/R1 are the light shoulder blocks (the "L"/"R" ones), L2/R2
-    # the dark ridge above them (the back buttons, peeking out behind).
+    # the photo (463x315, background removed) is drawn PHOTO_W base units wide with its top-left at PHOTO_XY; the
+    # hotspots / line ends are in the photo's own pixels.  The photo looks at the pad from the front, so of each
+    # shoulder only the top shows: L1/R1 are the light shoulder blocks, L2/R2 the dark ridge above them.
     PHOTO_XY, PHOTO_W, PHOTO_SIZE = (154, 34), 352, (463, 315)
     PHOTO_ROWS = {"l2": 26, "l1": 58, "up": 92, "left": 121, "down": 150, "right": 180,
                   "r2": 26, "r1": 58, "triangle": 92, "circle": 121, "cross": 150, "square": 180, "select": 306, "start": 306}
@@ -1417,205 +1094,72 @@ class App:
         "select": ("rect", 186, 134, 215, 155), "start": ("rect", 245, 134, 276, 155),
     }
     # where each leader line ends (photo px); "v" routes go across to the x of their end, then straight up/down to it
-    # (on the button's edge towards its label, so the symbols stay visible)
     PHOTO_LINES = {"l2": (80, 5), "l1": (68, 26), "up": (82, 84), "left": (54, 114), "down": (82, 147), "right": ("v", 121, 125),
                    "r2": (382, 5), "r1": (394, 26), "triangle": (384, 72), "circle": (426, 116), "cross": (384, 158),
                    "square": ("v", 325, 131), "select": ("v", 201, 152), "start": ("v", 260, 152)}
+    FACE = {"triangle": "#1fa67a", "circle": "#e0413c", "cross": "#4f7fd9", "square": "#d96bb0"}
 
-    def _pad_redraw(self):
-        if not self._pad_pending:
-            self._pad_pending = True
-            self.root.after_idle(self._pad_draw)
+    def __init__(self, app):
+        super().__init__()
+        self.app = app
+        self.setMouseTracking(True)
+        self.setMinimumHeight(300)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        p = icon_file("ps1_pad.png")
+        self.photo = QPixmap(p) if p else QPixmap()
+        self.spots = {}
+        self.hot = None
+        self._cache = None
 
-    def _pad_key_text(self, b):
-        k = self.pad_vars[b].get()
-        return PAD_SHORT.get(k, k) or tr("pad.nokey")
+    def sizeHint(self):
+        return QSize(660, 300)
 
-    def _pad_draw(self):
-        self._pad_pending = False
-        cv = self.pad_cv
-        try:
-            cw, ch = cv.winfo_width(), cv.winfo_height()
-        except tk.TclError:
+    def _geom(self):
+        cw, ch = self.width(), self.height()
+        s = min(cw / self.PAD_W, ch / self.PAD_H, 1.3)
+        return s, (cw - self.PAD_W * s) / 2, (ch - self.PAD_H * s) / 2
+
+    def paintEvent(self, _e):
+        t = self.app.t
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.SmoothPixmapTransform)
+        s, ox, oy = self._geom()
+        if s <= 0.05:
             return
-        cv.delete("all")
-        self.pad_spots = {}
-        self.pad_imgs = []
-        if cw < 50 or ch < 50:
-            return
-        dpi = float(self.root.tk.call("tk", "scaling")) / (96 / 72.0)
-        s = min(cw / self.PAD_W, ch / self.PAD_H, 1.3 * dpi)
-        ox, oy = (cw - self.PAD_W * s) / 2, (ch - self.PAD_H * s) / 2
-        F = self.pad_fonts
-        F["name"].configure(size=-max(9, round(12.5 * s)))
-        F["key"].configure(size=-max(9, round(12.5 * s)))
-        F["tiny"].configure(size=-max(6, round(8 * s)))
-
-        def P(*xy):
-            return [ox + v * s if i % 2 == 0 else oy + v * s for i, v in enumerate(xy)]
-
-        def rrect(x0, y0, x1, y1, r, **kw):
-            pts = (x0 + r, y0, x1 - r, y0, x1, y0, x1, y0 + r, x1, y1 - r, x1, y1, x1 - r, y1, x0 + r, y1, x0, y1, x0, y1 - r,
-                   x0, y0 + r, x0, y0)
-            return cv.create_polygon(*P(*pts), smooth=True, **kw)
-
-        def tag(b):
-            return ("b_" + b, "btn")
-
-        cx = self.PAD_W / 2
-        lines = self._pad_draw_photo(cv, s, ox, oy) if self.pad_photo is not None else None
-        if lines:                            # the photo: rows / routes of PHOTO_ROWS / PHOTO_LINES
-            R = self.PHOTO_ROWS
-        else:                                # the vector pad
-            body, edge, well, dark = "#d7d8dc", "#9a9da5", "#c3c5ca", "#55585f"
-            # shoulders behind the body: L2 (back) then L1
-            for side in (-1, 1):
-                for b2, (xa, xb, y0, y1) in ((("l2", "r2")[side > 0], (152, 98, 40, 62)), (("l1", "r1")[side > 0], (162, 88, 54, 82))):
-                    x0, x1 = sorted((cx + side * xa, cx + side * xb))
-                    rrect(x0, y0, x1, y1, 6, fill="#b9bbc1", outline=edge, width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
-                    cv.create_text(*P((x0 + x1) / 2, y0 + 8), text=b2.upper(), font=F["tiny"], fill="#6d7078", tags=tag(b2))
-            # body: the outline of the left half, mirrored (smooth spline through these control points)
-            half = [(0, 76), (-60, 74), (-122, 68), (-158, 78), (-174, 106), (-176, 146), (-168, 196), (-154, 244), (-140, 272),
-                    (-118, 284), (-96, 274), (-86, 244), (-74, 208), (-46, 192), (0, 188)]
-            pts = [(cx + x, y) for x, y in half] + [(cx - x, y) for x, y in reversed(half)]
-            flat = [v for p in pts for v in p]
-            shadow = [v + (3 if i % 2 else 0) for i, v in enumerate(flat)]
-            cv.create_polygon(*P(*shadow), smooth=True, fill="#e9eaed", outline="")
-            cv.create_polygon(*P(*flat), smooth=True, fill=body, outline=edge, width=max(1, 1.2 * s))
-            # d-pad: a round well and the four separate direction buttons of the PS1 pad, each pointed towards the centre
-            dx, dy, a, L = cx - 108, 138, 11, 34
-            cv.create_oval(*P(dx - 46, dy - 46, dx + 46, dy + 46), fill=well, outline="#b3b5bb", width=max(1, s))
-            for b2, (ux, uy) in {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}.items():
-                px, py = -uy, ux                     # across the arm
-                arm = []
-                for along, across in ((L, -a), (L, a), (a + 2.5, a), (6, 0), (a + 2.5, -a)):
-                    arm += [dx + ux * along + px * across, dy + uy * along + py * across]
-                cv.create_polygon(*P(*arm), fill=dark, outline="#3c3e44", width=max(1, s), joinstyle="round",
-                                  tags=tag(b2) + ("hl_" + b2, "arm"))
-            for b2, (ux, uy) in {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}.items():
-                tx, ty = dx + ux * (L - 7), dy + uy * (L - 7)       # a small arrow near each tip
-                px, py = -uy, ux
-                cv.create_polygon(*P(tx + ux * 4, ty + uy * 4, tx - ux * 3 + px * 5, ty - uy * 3 + py * 5, tx - ux * 3 - px * 5,
-                                     ty - uy * 3 - py * 5), fill="#9a9da5", outline="", tags=tag(b2))
-            # face buttons: a well, dark discs, the symbols as shapes in their colours
-            fx, fy, d, r = cx + 108, 138, 26, 12.5
-            cv.create_oval(*P(fx - 46, fy - 46, fx + 46, fy + 46), fill=well, outline="#b3b5bb", width=max(1, s))
-            lw = max(1.5, 2.2 * s)
-            for b2, (bx, by) in {"triangle": (fx, fy - d), "circle": (fx + d, fy), "cross": (fx, fy + d), "square": (fx - d, fy)}.items():
-                col = self.FACE[b2]
-                cv.create_oval(*P(bx - r, by - r, bx + r, by + r), fill="#3f4148", outline="#2c2e33", width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
-                k = 6.2
-                if b2 == "triangle":
-                    cv.create_polygon(*P(bx, by - k, bx + k * 0.95, by + k * 0.62, bx - k * 0.95, by + k * 0.62), fill="", outline=col,
-                                      width=lw, joinstyle="miter", tags=tag(b2))
-                elif b2 == "circle":
-                    cv.create_oval(*P(bx - k + 0.6, by - k + 0.6, bx + k - 0.6, by + k - 0.6), outline=col, width=lw, tags=tag(b2))
-                elif b2 == "cross":
-                    cv.create_line(*P(bx - k + 0.8, by - k + 0.8, bx + k - 0.8, by + k - 0.8), fill=col, width=lw, tags=tag(b2))
-                    cv.create_line(*P(bx - k + 0.8, by + k - 0.8, bx + k - 0.8, by - k + 0.8), fill=col, width=lw, tags=tag(b2))
-                else:
-                    cv.create_rectangle(*P(bx - k + 1, by - k + 1, bx + k - 1, by + k - 1), outline=col, width=lw, tags=tag(b2))
-            # select / start: small pills, their names above them (the leader lines leave downwards)
-            for b2, bx in (("select", cx - 26), ("start", cx + 26)):
-                rrect(bx - 12, 146, bx + 12, 155, 4.5, fill="#6b6e75", outline="#4d5056", width=max(1, s), tags=tag(b2) + ("hl_" + b2,))
-                cv.create_text(*P(bx, 138), text=b2.upper(), font=F["tiny"], fill="#7a7d85", tags=tag(b2))
-
-            # leader lines.  target: where the line ends; route: the points between the label and the target
-            R = self.PAD_ROWS
-            lines = {
-                "l2": [(cx - 152, 49)], "l1": [(cx - 162, 68)], "up": [(dx - a, dy - 22)], "left": [(dx - L, dy)],
-                "down": [(dx - a, dy + 22)], "right": [(dx + 23, R["right"]), (dx + 23, dy + a)],
-                "r2": [(cx + 152, 49)], "r1": [(cx + 162, 68)], "triangle": [(fx + r * 0.9, fy - d - 4)], "circle": [(fx + d + r, fy)],
-                "cross": [(fx + r * 0.9, fy + d + 4)], "square": [(fx - d, R["square"]), (fx - d, fy + r)],
-                "select": [(cx - 26, R["select"]), (cx - 26, 155)], "start": [(cx + 26, R["start"]), (cx + 26, 155)],
-            }
-        # key labels
-        lx_in, rx_in = 150, self.PAD_W - 150          # inner edge of the label columns (the chips sit there)
-        chip_h, pad_x = 24, 9
-        self.pad_line_col = lc = "#6c717a" if self.pad_spots else "#8a8f98"     # darker over the grey photo
-        nf, kf = F["name"], F["key"]
-        for b2, route in lines.items():
-            y = R[b2]
-            left = b2 in ("l2", "l1", "up", "left", "down", "right", "select")
-            if b2 in ("select", "start"):
-                edge_x = cx - 38 if left else cx + 38
-            else:
-                edge_x = lx_in if left else rx_in
-            name = tr("btn." + b2)
-            key = self._pad_key_text(b2)
-            room = (edge_x if left else self.PAD_W - edge_x) - 6 - (nf.measure(name) / s + 8 if name else 0)
-            maxw = max(40, room) * s - 2 * pad_x * s
-            if kf.measure(key) > maxw:                       # a long key name: cut it with an ellipsis
-                while len(key) > 1 and kf.measure(key + "…") > maxw:
-                    key = key[:-1]
-                key += "…"
-            kw = kf.measure(key) / s + 2 * pad_x
-            x0, x1 = (edge_x - kw, edge_x) if left else (edge_x, edge_x + kw)
-            # the line first (under the chip), elbow 12 px out of the chip, then the route, then a dot on the button
-            knee = edge_x + (12 if left else -12)
-            path = [edge_x, y] + ([knee, y] if b2 not in ("select", "start", "right", "square") else []) + [v for p in route for v in p]
-            cv.create_line(*P(*path), fill=lc, width=max(1, 1.2 * s), tags=tag(b2) + ("ln_" + b2,))
-            ex, ey = route[-1]
-            cv.create_oval(*P(ex - 2.6, ey - 2.6, ex + 2.6, ey + 2.6), fill=lc, outline=C_CARD, width=max(1, s),
-                           tags=tag(b2) + ("dot_" + b2,))
-            capt = self.pad_capture == b2
-            rrect(x0, y - chip_h / 2, x1, y + chip_h / 2, 6, fill=C_ACCENT if capt else "#ffffff",
-                  outline=C_ACCENT if capt else "#c9ccd3", width=max(1, s), tags=tag(b2) + ("chip_" + b2,))
-            cv.create_text(*P((x0 + x1) / 2, y), text=key, font=kf, fill="white" if capt else C_TEXT, tags=tag(b2))
-            cv.create_text(*P(x0 - 7, y) if left else P(x1 + 7, y), text=name, font=nf, anchor="e" if left else "w",
-                           fill=C_MUTED, tags=tag(b2) + ("nm_" + b2,))
-        self.pad_scale = s
-        for b2 in M.BUTTONS:
-            t = "b_" + b2
-            if not self.pad_spots:           # the photo: hover is hit-tested in _pad_motion (hotspots + these items)
-                cv.tag_bind(t, "<Enter>", lambda e, b2=b2: self._pad_hover(b2, True))
-                cv.tag_bind(t, "<Leave>", lambda e, b2=b2: self._pad_hover(b2, False))
-            cv.tag_bind(t, "<Button-1>", lambda e, b2=b2: self._pad_begin(b2))
-        self._pad_style()
-
-    def _pad_draw_photo(self, cv, s, ox, oy):
-        """The photo scaled to the canvas (LANCZOS, cached per size), a hidden translucent accent ring per hotspot
-        (shown on hover / rebinding by _pad_style) and pad_spots in canvas pixels.  Returns the leader routes in base
-        units, or None when ImageTk fails (then the vector pad is drawn)."""
-        try:
-            from PIL import Image, ImageDraw, ImageTk
-            pw, ph = self.PHOTO_SIZE
-            k = self.PHOTO_W / pw                                   # photo px -> base units
-            w, h = max(1, round(pw * k * s)), max(1, round(ph * k * s))
-            img = self._pad_photo_cache.get((w, h))
-            if img is None:
-                self._pad_photo_cache = {(w, h): ImageTk.PhotoImage(self.pad_photo.resize((w, h), Image.LANCZOS))}
-                img = self._pad_photo_cache[(w, h)]
-            bx, by = self.PHOTO_XY
-            X0, Y0 = ox + bx * s, oy + by * s
-            cv.create_image(X0, Y0, image=img, anchor="nw")
-            f = k * s                                               # photo px -> canvas px
-            acc = tuple(int(C_ACCENT[i:i + 2], 16) for i in (1, 3, 5))
-            spots = {}
-            for b, (kind, u0, v0, u1, v1) in self.PHOTO_SPOTS.items():
-                x0, y0, x1, y1 = X0 + u0 * f, Y0 + v0 * f, X0 + u1 * f, Y0 + v1 * f
-                spots[b] = (kind, x0, y0, x1, y1)
-                # the ring: drawn 4x and scaled down (smooth edge); a 3 px margin for the outline
-                m, q = 3, 4
-                W, H = int(x1 - x0) + 2 * m, int(y1 - y0) + 2 * m
-                ring = Image.new("RGBA", (W * q, H * q), (0, 0, 0, 0))
-                d = ImageDraw.Draw(ring)
-                lw = max(2, round(2 * s)) * q
-                box = (m * q - lw / 2, m * q - lw / 2, (W - m) * q + lw / 2, (H - m) * q + lw / 2)
-                if kind == "oval":
-                    d.ellipse(box, fill=acc + (60,), outline=acc + (235,), width=lw)
-                else:
-                    d.rounded_rectangle(box, radius=5 * s * q, fill=acc + (60,), outline=acc + (235,), width=lw)
-                ph_ = ImageTk.PhotoImage(ring.resize((W, H), Image.LANCZOS))
-                self.pad_imgs.append(ph_)
-                cv.create_image(x0 - m, y0 - m, image=ph_, anchor="nw", state="hidden", tags=("ov_" + b,))
-        except Exception:
-            self.pad_photo = None            # e.g. no _imagingtk in this Pillow: the vector pad from now on
-            cv.delete("all")
-            self.pad_imgs = []
-            return None
-        self.pad_spots = spots
+        pw, ph = self.PHOTO_SIZE
+        k = self.PHOTO_W / pw                      # photo px -> base units
         bx, by = self.PHOTO_XY
+        X0, Y0 = ox + bx * s, oy + by * s
+        f = k * s                                  # photo px -> widget px
+        self.spots = {b: (kind, X0 + u0 * f, Y0 + v0 * f, X0 + u1 * f, Y0 + v1 * f)
+                      for b, (kind, u0, v0, u1, v1) in self.PHOTO_SPOTS.items()}
+        if not self.photo.isNull():
+            dpr = self.devicePixelRatioF()
+            w, h = max(1, round(pw * f * dpr)), max(1, round(ph * f * dpr))
+            if self._cache is None or self._cache.size() != QSize(w, h):
+                self._cache = self.photo.scaled(w, h, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+                self._cache.setDevicePixelRatio(dpr)
+            p.drawPixmap(QPointF(X0, Y0), self._cache)
+        else:
+            self._draw_vector(p, X0, Y0, f)
+        hot_set = {self.hot, self.app.pad_capture}
+        acc = QColor(t["accent"])
+        for b in M.BUTTONS:                        # the translucent ring of the hovered / selected button
+            if b not in hot_set:
+                continue
+            kind, x0, y0, x1, y1 = self.spots[b]
+            r = QRectF(x0, y0, x1 - x0, y1 - y0)
+            fill = QColor(acc)
+            fill.setAlpha(60)
+            ring = QColor(acc)
+            ring.setAlpha(235)
+            p.setPen(QPen(ring, max(2.0, 2 * s)))
+            p.setBrush(fill)
+            if kind == "oval":
+                p.drawEllipse(r)
+            else:
+                p.drawRoundedRect(r, 5 * s, 5 * s)
         pt = lambda u, v: (bx + u * k, by + v * k)
         R = self.PHOTO_ROWS
         lines = {}
@@ -1625,189 +1169,1147 @@ class App:
                 lines[b] = [(ex, R[b]), (ex, ey)]
             else:
                 lines[b] = [pt(*end)]
-        return lines
+        nf, kf = QFont(self.font()), QFont(self.font())
+        nf.setPixelSize(max(9, round(12.5 * s)))
+        kf.setPixelSize(max(9, round(12.5 * s)))
+        kf.setBold(True)
+        nfm, kfm = QFontMetricsF(nf), QFontMetricsF(kf)
+        P = lambda x, y: QPointF(ox + x * s, oy + y * s)
+        cx = self.PAD_W / 2
+        lx_in, rx_in = 150, self.PAD_W - 150
+        chip_h, pad_x = 24, 9
+        self.chips = {}
+        for b, route in lines.items():
+            y = R[b]
+            left = b in ("l2", "l1", "up", "left", "down", "right", "select")
+            edge_x = (cx - 38 if left else cx + 38) if b in ("select", "start") else (lx_in if left else rx_in)
+            name = tr("btn." + b)
+            key = self.app._pad_key_text(b)
+            room = (edge_x if left else self.PAD_W - edge_x) - 6 - (nfm.horizontalAdvance(name) / s + 8 if name else 0)
+            maxw = max(40, room) * s - 2 * pad_x * s
+            if kfm.horizontalAdvance(key) > maxw:
+                while len(key) > 1 and kfm.horizontalAdvance(key + "…") > maxw:
+                    key = key[:-1]
+                key += "…"
+            kw = kfm.horizontalAdvance(key) / s + 2 * pad_x
+            x0, x1 = (edge_x - kw, edge_x) if left else (edge_x, edge_x + kw)
+            hot = b in hot_set
+            capt = b == self.app.pad_capture
+            col = acc if hot else QColor(t["pad_line"])
+            knee = edge_x + (12 if left else -12)
+            pts = [(edge_x, y)] + ([(knee, y)] if b not in ("select", "start", "right", "square") else []) + route
+            pen = QPen(col, max(1.0, (2 if hot else 1.2) * s))
+            p.setPen(pen)
+            p.setBrush(Qt.NoBrush)
+            for (ax, ay), (bx2, by2) in zip(pts, pts[1:]):
+                p.drawLine(P(ax, ay), P(bx2, by2))
+            ex, ey = route[-1]
+            p.setPen(QPen(QColor(t["card"]), max(1.0, s)))
+            p.setBrush(col)
+            p.drawEllipse(P(ex, ey), 2.6 * s + 0.5, 2.6 * s + 0.5)
+            chip = QRectF(P(x0, y - chip_h / 2), P(x1, y + chip_h / 2))
+            self.chips[b] = chip
+            p.setPen(QPen(acc if (hot or capt) else QColor(t["chip_line"]), max(1.0, s)))
+            p.setBrush(acc if capt else (QColor(t["accent_soft"]) if hot else QColor(t["chip"])))
+            p.drawRoundedRect(chip, 6 * s, 6 * s)
+            p.setFont(kf)
+            p.setPen(QColor("#ffffff") if capt else QColor(t["text"]))
+            p.drawText(chip, Qt.AlignCenter, key)
+            p.setFont(nf)
+            p.setPen(acc if hot else QColor(t["muted"]))
+            if left:
+                p.drawText(QRectF(P(0, y - 12), P(x0 - 7, y + 12)), Qt.AlignRight | Qt.AlignVCenter, name)
+            else:
+                p.drawText(QRectF(P(x1 + 7, y - 12), P(self.PAD_W, y + 12)), Qt.AlignLeft | Qt.AlignVCenter, name)
+        p.end()
 
-    def _pad_style(self):
-        """The highlight of the hovered / rebinding button (its line, dot, chip, name and the button itself), restyled
-        in place: redrawing on hover would re-pick the item under the pointer and loop on Leave/Enter."""
-        cv, s = self.pad_cv, getattr(self, "pad_scale", 1.0)
-        for b in M.BUTTONS:
-            hot = b in (self.pad_hot, self.pad_capture)
-            capt = b == self.pad_capture
-            col = C_ACCENT if hot else getattr(self, "pad_line_col", "#8a8f98")
-            cv.itemconfigure("ln_" + b, fill=col, width=max(1, (2 if hot else 1.2) * s))
-            cv.itemconfigure("dot_" + b, fill=col)
-            cv.itemconfigure("nm_" + b, fill=C_ACCENT if hot else C_MUTED)
-            if not capt:
-                cv.itemconfigure("chip_" + b, fill="#eef4fd" if hot else "#ffffff",
-                                 outline=C_ACCENT if hot else "#c9ccd3")
-            for it in cv.find_withtag("hl_" + b):
-                kind = cv.type(it)
-                if "arm" in cv.gettags(it):      # a d-pad button
-                    cv.itemconfigure(it, fill=C_ACCENT_HI if hot else "#55585f", outline=C_ACCENT if hot else "#3c3e44")
-                elif kind == "oval":             # a face button
-                    cv.itemconfigure(it, outline=C_ACCENT if hot else "#2c2e33", width=max(1, (2.6 if hot else 1) * s))
-                else:                            # shoulders, select / start
-                    cv.itemconfigure(it, outline=C_ACCENT if hot else ("#4d5056" if b in ("select", "start") else "#9a9da5"),
-                                     width=max(1, (2.2 if hot else 1) * s))
-            cv.itemconfigure("ov_" + b, state="normal" if hot else "hidden")     # the photo's translucent ring
+    def _draw_vector(self, p, X0, Y0, f):
+        """A plain pad under the hotspots when the photo is missing."""
+        t = self.app.t
+        pw, ph = self.PHOTO_SIZE
+        body = QPainterPath()
+        body.addRoundedRect(QRectF(X0 + 20 * f, Y0 + 40 * f, (pw - 40) * f, 150 * f), 60 * f, 60 * f)
+        for gx in (93, 369):
+            body.addEllipse(QPointF(X0 + gx * f, Y0 + 200 * f), 75 * f, 100 * f)
+        p.setPen(QPen(QColor(t["faint"]), 1.2))
+        p.setBrush(QColor("#d7d8dc"))
+        p.drawPath(body.simplified())
+        for b, (kind, x0, y0, x1, y1) in self.spots.items():
+            r = QRectF(x0, y0, x1 - x0, y1 - y0)
+            p.setPen(QPen(QColor("#2c2e33"), 1))
+            if kind == "oval":
+                p.setBrush(QColor("#3f4148"))
+                p.drawEllipse(r)
+                p.setPen(QPen(QColor(self.FACE[b]), max(1.5, 2.2 * f)))
+                p.setBrush(Qt.NoBrush)
+                p.drawEllipse(r.adjusted(r.width() * .3, r.height() * .3, -r.width() * .3, -r.height() * .3))
+            else:
+                p.setBrush(QColor("#55585f") if b in ("up", "down", "left", "right") else QColor("#b9bbc1"))
+                p.drawRoundedRect(r, 4, 4)
 
-    def _pad_spot_at(self, x, y):
-        for b, (kind, x0, y0, x1, y1) in self.pad_spots.items():
+    def _button_at(self, pos):
+        x, y = pos.x(), pos.y()
+        for b, (kind, x0, y0, x1, y1) in self.spots.items():
             if kind == "oval":
                 rx, ry = (x1 - x0) / 2, (y1 - y0) / 2
-                if ((x - x0 - rx) / rx) ** 2 + ((y - y0 - ry) / ry) ** 2 <= 1:
+                if rx > 0 and ry > 0 and ((x - x0 - rx) / rx) ** 2 + ((y - y0 - ry) / ry) ** 2 <= 1:
                     return b
             elif x0 <= x <= x1 and y0 <= y <= y1:
                 return b
+        for b, r in getattr(self, "chips", {}).items():
+            if r.contains(QPointF(x, y)):
+                return b
         return None
 
-    def _pad_item_button(self):
-        cur = self.pad_cv.find_withtag("current")
-        tags = self.pad_cv.gettags(cur[0]) if cur else ()
-        return next((t[2:] for t in tags if t.startswith("b_")), None)
+    def mouseMoveEvent(self, e):
+        b = self._button_at(e.position())
+        if b != self.hot:
+            self.hot = b
+            self.setCursor(Qt.PointingHandCursor if b else Qt.ArrowCursor)
+            self.update()
 
-    def _pad_motion(self, e):
-        if not self.pad_spots:
-            return                           # the vector pad: Enter / Leave of its items
-        b = self._pad_spot_at(e.x, e.y) or self._pad_item_button()
-        if b != self.pad_hot:
-            self._pad_hover(b, True) if b else self._pad_hover(self.pad_hot, False)
+    def leaveEvent(self, _e):
+        if self.hot:
+            self.hot = None
+            self.setCursor(Qt.ArrowCursor)
+            self.update()
 
-    def _pad_click(self, e):
-        b = self._pad_spot_at(e.x, e.y) if self.pad_spots else None
+    def mousePressEvent(self, e):
+        b = self._button_at(e.position())
         if b:
-            self._pad_begin(b)
-        elif "btn" not in self.pad_cv.gettags("current"):
-            self._pad_cancel()
+            self.app._pad_select(b)
+        elif self.app.pad_capture:
+            self.app.pad_capture = None
+            self.app._padmap_sync()
 
-    def _pad_hover(self, b, inside):
-        new = b if inside else (None if self.pad_hot == b else self.pad_hot)
-        if new != self.pad_hot:
-            self.pad_hot = new
-            self.pad_cv.configure(cursor="hand2" if new else "")
-            self._pad_style()
 
-    def _pad_begin(self, b):
-        """A button clicked on the photo: select its row in the table (its combobox gets the focus)."""
-        self._pad_select(b)
+def wrap_label(text, name=None, sel=False):
+    lb = QLabel(text)
+    lb.setWordWrap(True)
+    if name:
+        lb.setObjectName(name)
+    if sel:
+        lb.setTextInteractionFlags(Qt.TextSelectableByMouse)
+    return lb
 
-    def _pad_cancel(self):
-        if self.pad_capture:
-            self.pad_capture = None
-            self._padmap_sync()
+
+def hbox(*widgets, spacing=8, margins=(0, 0, 0, 0), stretch_last=False):
+    w = QWidget()
+    lay = QHBoxLayout(w)
+    lay.setContentsMargins(*margins)
+    lay.setSpacing(spacing)
+    for x in widgets:
+        if x is None:
+            lay.addStretch(1)
+        elif isinstance(x, int):
+            lay.addSpacing(x)
+        else:
+            lay.addWidget(x)
+    return w, lay
+
+
+class App(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.s = load_settings()
+        self.proc = None
+        self.editor = None           # the save editor window (edit_save), while open
+        self.log_path = os.path.join(app_dir(), "tombi-port.log")   # the last run's log (Copy log works before a run too)
+        self.page = "play"
+        self.starting = False
+        self._level = "info"
+        self.status_msg = ""
+        self.civ_play = None
+        self.bridge = Bridge()
+        self.wheel_guard = WheelGuard(self)
+        QApplication.instance().installEventFilter(self.wheel_guard)
+        self.poll_timer = QTimer(self)
+        self.poll_timer.setSingleShot(True)
+        self.poll_timer.timeout.connect(self.poll)
+        self.setWindowIcon(window_icon())
+        scr = QGuiApplication.primaryScreen().availableGeometry() if QGuiApplication.primaryScreen() else None
+        w, h = 1010, 720
+        if scr is not None:
+            w, h = min(w, scr.width()), min(h, scr.height() - 40)
+        self.resize(w, h)
+        self.setMinimumSize(min(w, 860), min(h, 600))
+        self._apply_theme()
+        try:
+            QGuiApplication.styleHints().colorSchemeChanged.connect(lambda *_: (self._apply_theme(), self.rebuild()))
+        except AttributeError:
+            pass
+        self._build()
+
+    # ---- helpers
+    def after(self, ms, fn, *args):
+        QTimer.singleShot(ms, lambda: fn(*args))
+
+    def later(self, fn, *args):
+        """fn(*args) on the GUI thread (from a worker thread)."""
+        self.bridge.call.emit(lambda: fn(*args))
+
+    def _apply_theme(self):
+        self.theme = theme_name()
+        self.t = THEMES[self.theme]
+        self.setPalette(launcher_palette(self.t))
+        self.setStyleSheet(launcher_qss(self.t, self.theme))
+
+    def v(self, key, kind=str, default=""):
+        """The setting key read as a widget of kind bool / int / str reads it, written back normalised (what the
+        Tk launcher's variables did); a value that does not convert is kept and the widget shows default."""
+        raw = self.s.get(key, default)
+        try:
+            val = coerce(raw, kind)
+        except (ValueError, TypeError):
+            return coerce(default, kind)
+        self.s[key] = val
+        return val
+
+    def setv(self, key, val):
+        self.s[key] = val
+        if key in ("renderer", "scale", "fullscreen", "internal_res", "aspect", "hz60"):
+            self._refresh()
+
+    def say(self, msg, level="info"):
+        """The status line (disc card, log page) and its coloured dot: ok green, bad red, busy orange, info grey."""
+        self._level = level
+        self.status_msg = msg
+        for lb in (getattr(self, "status_lbl", None), getattr(self, "log_status", None)):
+            try:
+                if lb is not None:
+                    lb.setText(msg)
+            except RuntimeError:
+                pass
+        try:
+            self.dot.setStyleSheet("background: %s; border-radius: 5px;" % DOT.get(level, DOT["info"]))
+        except (RuntimeError, AttributeError):
+            pass
+
+    def info(self, text):
+        QMessageBox.information(self, tr("title"), text)
+
+    def error(self, text):
+        QMessageBox.critical(self, tr("title"), text)
+
+    def warning(self, text):
+        QMessageBox.warning(self, tr("title"), text)
+
+    def ask(self, text):
+        return QMessageBox.question(self, tr("title"), text, QMessageBox.Yes | QMessageBox.No) == QMessageBox.Yes
+
+    # ---- layout helpers
+    def card(self, parent_lay, title=None, spacing=8):
+        """A rounded card added to parent_lay; returns its inner vertical layout."""
+        fr = QFrame()
+        fr.setObjectName("card")
+        lay = QVBoxLayout(fr)
+        lay.setContentsMargins(20, 16, 20, 18)
+        lay.setSpacing(spacing)
+        if title:
+            t = QLabel(title)
+            t.setObjectName("cardTitle")
+            lay.addWidget(t)
+        if parent_lay is not None:
+            parent_lay.addWidget(fr)
+        lay.frame = fr
+        return lay
+
+    def page_frame(self, name, title):
+        """A page: its title and a scrolled body (cards stacked from the top)."""
+        page = QWidget()
+        page.setObjectName("page")
+        outer = QVBoxLayout(page)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+        area = QScrollArea()
+        area.setWidgetResizable(True)
+        area.setFrameShape(QFrame.NoFrame)
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        body = QWidget()
+        body.setObjectName("scrollBody")
+        lay = QVBoxLayout(body)
+        lay.setContentsMargins(28, 22, 28, 22)
+        lay.setSpacing(14)
+        t = QLabel(title)
+        t.setObjectName("pageTitle")
+        lay.addWidget(t)
+        lay.addSpacing(2)
+        area.setWidget(body)
+        outer.addWidget(area)
+        self.stack.addWidget(page)
+        self.pages[name] = page
+        self.page_areas[name] = area
+        return lay
+
+    def show_page(self, name):
+        self.page = name
+        self.stack.setCurrentWidget(self.pages[name])
+        for n, b in self.nav.items():
+            b.setChecked(n == name)
+
+    def check(self, key, text, default=False):
+        cb = QCheckBox(text)
+        cb.setChecked(self.v(key, bool, default))
+        cb.toggled.connect(lambda on, key=key: self.setv(key, on))
+        return cb
+
+    def radios(self, lay, key, kind, default, items):
+        cur = self.v(key, kind, default)
+        grp = QButtonGroup(lay.parentWidget() or self)
+        out = []
+        for text, val in items:
+            rb = QRadioButton(text)
+            rb.setChecked(cur == val)
+            rb.toggled.connect(lambda on, key=key, val=val: on and self.setv(key, val))
+            grp.addButton(rb)
+            lay.addWidget(rb)
+            out.append(rb)
+        grp.setExclusive(True)           # (an unknown saved value: none checked, the value kept until one is clicked)
+        out[0]._grp = grp
+        return out
+
+    def segmented(self, key, kind, default, items, min_w=0):
+        """A row of toggle buttons (one chosen, accent coloured) for key."""
+        cur = self.v(key, kind, default)
+        w, lay = hbox(spacing=0)
+        grp = QButtonGroup(w)
+        grp.setExclusive(False)
+        for i, (text, val) in enumerate(items):
+            b = QPushButton(text)
+            b.setCheckable(True)
+            b.setObjectName("segL" if i == 0 else "segR" if i == len(items) - 1 else "seg")
+            b.setChecked(cur == val)
+            b.setCursor(Qt.PointingHandCursor)
+            if min_w:
+                b.setMinimumWidth(min_w)
+
+            def clicked(_=False, b=b, val=val):
+                for x in grp.buttons():
+                    x.setChecked(x is b)
+                self.setv(key, val)
+            b.clicked.connect(clicked)
+            grp.addButton(b)
+            lay.addWidget(b)
+        lay.addStretch(1)
+        w._grp = grp
+        return w
+
+    def browse_row(self, key, command):
+        e = QLineEdit(self.v(key, str, ""))
+        e.textChanged.connect(lambda t, key=key: self.setv(key, t))
+        b = QPushButton(tr("b.browse"))
+        b.clicked.connect(command)
+        w, lay = hbox(e, b)
+        lay.setStretch(0, 1)
+        self.edits[key] = e
+        return w
+
+    def set_edit(self, key, text):
+        self.s[key] = text
+        e = self.edits.get(key)
+        if e is not None:
+            e.setText(text)
+
+    def info_button(self, title, text):
+        b = QToolButton()
+        b.setObjectName("info")
+        b.setText("ⓘ")
+        b.setCursor(Qt.PointingHandCursor)
+        b.setToolTip(title)
+        b.clicked.connect(lambda: QMessageBox.information(self, title, text))
+        return b
+
+    # ---- window
+    def rebuild(self):
+        self.collect()
+        msg, lvl = self.status_msg, self._level
+        old = self.centralWidget()
+        self._build()
+        if old is not None:
+            old.deleteLater()
+        if msg and lvl != "info":
+            self.say(msg, lvl)
+
+    def _build(self):
+        self.setWindowTitle(tr("title") + "  [build " + BUILD_ID + "]")
+        self.edits = {}
+        root = QWidget()
+        root.setObjectName("root")
+        grid = QGridLayout(root)
+        grid.setContentsMargins(0, 0, 0, 0)
+        grid.setSpacing(0)
+        side = QFrame()
+        side.setObjectName("sidebar")
+        side.setFixedWidth(236)
+        sl = QVBoxLayout(side)
+        sl.setContentsMargins(12, 18, 12, 14)
+        sl.setSpacing(2)
+        head, hl = hbox(spacing=10, margins=(6, 0, 0, 0))
+        logo = QLabel()
+        ic = window_icon()
+        if not ic.isNull():
+            logo.setPixmap(ic.pixmap(QSize(34, 34)))
+        name = QLabel("Tombi!")
+        name.setObjectName("appName")
+        hl.addWidget(logo)
+        hl.addWidget(name)
+        hl.addStretch(1)
+        sl.addWidget(head)
+        sl.addSpacing(16)
+        self.nav = {}
+        for n in PAGES:
+            b = QPushButton("%s   %s" % (NAV_GLYPHS[n], tr("nav." + n)))
+            b.setObjectName("nav")
+            b.setCheckable(True)
+            b.setCursor(Qt.PointingHandCursor)
+            b.setFocusPolicy(Qt.NoFocus)
+            b.clicked.connect(lambda _=False, n=n: self.show_page(n))
+            sl.addWidget(b)
+            self.nav[n] = b
+        sl.addStretch(1)
+        # experimental features (texture dump / packs): hidden unless asked for
+        self.experimental = bool(self.s.get("experimental"))
+        ex = QCheckBox(tr("l.experimental"))
+        ex.setChecked(self.experimental)
+        ex.setFocusPolicy(Qt.NoFocus)
+
+        def toggled(on):
+            self.s["experimental"] = on
+            QTimer.singleShot(0, self.rebuild)
+        ex.toggled.connect(toggled)
+        sl.addWidget(ex)
+        sl.addSpacing(10)
+        cap = QLabel(tr("l.uilang"))
+        cap.setObjectName("sideCaption")
+        sl.addWidget(cap)
+        cb = QComboBox()
+        codes = list(i18n.LANGS)
+        cb.addItems(["%s (%s)" % (i18n.LANGS[k], k) for k in codes])
+        cb.setCurrentIndex(codes.index(i18n.current()) if i18n.current() in codes else 0)
+
+        def chosen(i):
+            code = codes[i]
+            if code != i18n.current():
+                i18n.set_language(code)
+                QTimer.singleShot(0, self.rebuild)
+        cb.activated.connect(chosen)
+        sl.addWidget(cb)
+        sl.addSpacing(10)
+        bl = QLabel("build " + BUILD_ID)
+        bl.setObjectName("build")
+        sl.addWidget(bl)
+        grid.addWidget(side, 0, 0, 2, 1)
+
+        self.stack = QStackedWidget()
+        grid.addWidget(self.stack, 0, 1)
+        grid.setColumnStretch(1, 1)
+        grid.setRowStretch(0, 1)
+        self.pages, self.page_areas = {}, {}
+        self.patch_ui = []
+        self._build_play(self.page_frame("play", tr("nav.play")))
+        self._build_gfx(self.page_frame("gfx", tr("nav.gfx")))
+        self._build_controls(self.page_frame("controls", tr("nav.controls")))
+        self._build_mods(self.page_frame("mods", tr("nav.mods")))
+        self._build_cut(self.page_frame("cut", tr("nav.cut")))
+        self._build_log(self.page_frame("log", tr("nav.log")))
+        grid.addWidget(self._build_bar(), 1, 1)
+        self.setCentralWidget(root)
+        self.show_page(self.page)
+        self.play_btn.setFocus()
+        self.say(tr("s.nodata"), "info")
+        self._refresh()
+        if self.proc and self.proc.poll() is None:
+            self.play_btn.setEnabled(False)
+            self.stop_btn.show()
+            if self.starting:
+                self._starting(True)
+        if self.s.get("disc"):
+            self.after(200, self.check_disc)
+        elif data_ready():
+            man = X.read_manifest(data_dir())
+            self.say(tr("s.dataok", data_dir(), len(man["files"]) if man else 0), "ok")
+
+    def _build_bar(self):
+        """Bottom bar under every page: the options summary, Copy log, Close the game (while running) and Play."""
+        bar = QFrame()
+        bar.setObjectName("bar")
+        v = QVBoxLayout(bar)
+        v.setContentsMargins(28, 12, 28, 14)
+        v.setSpacing(10)
+        # shown from Play until the game prints "[port2] window ..." (port2/runtime/sdl.c) or exits
+        lb = QLabel(tr("l.starting"))
+        lb.setObjectName("accentText")
+        self.start_bar = QProgressBar()
+        self.start_bar.setTextVisible(False)
+        self.start_bar.setFixedWidth(240)
+        self.start_box, _ = hbox(lb, self.start_bar, None, spacing=10)
+        self.start_box.hide()
+        v.addWidget(self.start_box)
+        self.summary = QLabel()
+        self.summary.setObjectName("summary")
+        self.summary.setMinimumWidth(60)
+        self.summary.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+        copy = QPushButton(tr("b.copylog"))
+        copy.clicked.connect(self.copy_log)
+        self.stop_btn = QPushButton(tr("b.stop"))
+        self.stop_btn.clicked.connect(self.stop)
+        self.stop_btn.hide()
+        self.play_btn = QPushButton(tr("b.play"))
+        self.play_btn.setObjectName("primary")
+        self.play_btn.setMinimumWidth(150)
+        self.play_btn.setCursor(Qt.PointingHandCursor)
+        self.play_btn.clicked.connect(self.play_normal)
+        self.play_btn.setDefault(True)
+        row, rl = hbox(self.summary, copy, self.stop_btn, self.play_btn, spacing=8)
+        rl.setStretch(0, 1)
+        v.addWidget(row)
+        return bar
+
+    def _refresh(self):
+        """Summary line ("OpenGL · 2x window · 3x internal · 16:9 · 50 Hz") and the internal resolution enabled for OpenGL only."""
+        s = self.s
+        gl = s.get("renderer") != "soft"
+        parts = ["OpenGL" if gl else "Software",
+                 tr("sum.full") if s.get("fullscreen") else tr("sum.window", s.get("scale", 2))]
+        if gl and s.get("internal_res") in (2, 3, 4):
+            parts.append(tr("sum.ires", s.get("internal_res")))
+        a = s.get("aspect")
+        parts.append({"square": "1:1 px", "16:9": "16:9", "21:9": "21:9", "32:9": "32:9", "auto": "auto"}.get(a, "4:3"))
+        parts.append("60 Hz" if s.get("hz60") else "50 Hz")
+        try:
+            self.summary.setText("  ·  ".join(parts))
+            for b in getattr(self, "ires_btns", []):
+                b.setEnabled(gl)
+            if hasattr(self, "ires_note"):
+                self.ires_note.setVisible(not gl)
+        except (RuntimeError, AttributeError):
+            pass
+
+    def _build_play(self, f):
+        c = self.card(f, spacing=6)
+        t = QLabel(tr("c.disc"))
+        t.setObjectName("cardTitle")
+        c.addWidget(t)
+        c.addWidget(wrap_label(tr("l.disc"), "muted"))
+        c.addWidget(self.browse_row("disc", self.pick_disc))
+        self.dot = QLabel()
+        self.dot.setFixedSize(10, 10)
+        self.status_lbl = wrap_label("", sel=True)
+        st, sl = hbox(spacing=10, margins=(0, 6, 0, 0))
+        sl.addWidget(self.dot, 0, Qt.AlignTop)
+        sl.addSpacing(0)
+        sl.addWidget(self.status_lbl, 1)
+        self.dot.setContentsMargins(0, 0, 0, 0)
+        sl.setAlignment(self.dot, Qt.AlignTop)
+        self.dot_wrap = st
+        c.addWidget(st)
+        # shown only while the disc is extracted into data/ (check_disc): a message and a bar under the status
+        self.ext_box = QWidget()
+        el = QVBoxLayout(self.ext_box)
+        el.setContentsMargins(0, 6, 0, 0)
+        el.setSpacing(6)
+        el.addWidget(wrap_label(tr("l.extracting"), "busyText"))
+        self.ext_bar = QProgressBar()
+        self.ext_bar.setRange(0, 100)
+        self.ext_bar.setTextVisible(False)
+        el.addWidget(self.ext_bar)
+        self.ext_box.hide()
+        c.addWidget(self.ext_box)
+        c.addSpacing(12)
+        t = QLabel(tr("c.saves"))
+        t.setObjectName("cardTitle")
+        c.addWidget(t)
+        c.addWidget(wrap_label(tr("l.savedir"), "muted"))
+        c.addWidget(self.browse_row("savedir", self.pick_savedir))
+        bi, be, bed = QPushButton(tr("b.saveimp")), QPushButton(tr("b.saveexp")), QPushButton(tr("b.saveedit"))
+        bi.clicked.connect(self.import_save)
+        be.clicked.connect(self.export_save)
+        bed.clicked.connect(self.edit_save)
+        row, _ = hbox(bi, be, bed, None, margins=(0, 4, 0, 0))
+        c.addWidget(row)
+
+        c = self.card(f)
+        g = QGridLayout()
+        g.setHorizontalSpacing(28)
+        g.setVerticalSpacing(18)
+        g.setColumnStretch(0, 1)
+        g.setColumnStretch(1, 1)
+        c.addLayout(g)
+
+        def cell(row, col, title):
+            box = QWidget()
+            lay = QVBoxLayout(box)
+            lay.setContentsMargins(0, 0, 0, 0)
+            lay.setSpacing(6)
+            t = QLabel(title)
+            t.setObjectName("cellTitle")
+            lay.addWidget(t)
+            g.addWidget(box, row, col, Qt.AlignTop)
+            return lay
+        # game language (the boot menu's MAINn.EXE): a combobox with the flags
+        lay = cell(0, 0, tr("c.game"))
+        default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)     # the launcher's language, English otherwise
+        cur = self.v("lang", int, default_lang)
+        ids = [n for n, _name in GAME_LANGS]
+        self.lang_cb = QComboBox()
+        self.lang_cb.setIconSize(QSize(24, 16))
+        for n, name in GAME_LANGS:
+            self.lang_cb.addItem(QIcon(flag_pixmap(n)), name)
+        self.lang_cb.setCurrentIndex(ids.index(cur) if cur in ids else 0)
+        self.lang_cb.activated.connect(lambda i: (self.setv("lang", ids[i]), self._sync_patch_choice()))
+        lay.addWidget(self.lang_cb)
+        # text patch: none / the bundled one / another file (keys patch_on + patch; no path shown unless "other")
+        self._patch_widget(cell(0, 1, tr("c.patch")))
+        # speed: segmented 50 / 60 Hz (the hz60 mod)
+        lay = cell(1, 0, tr("c.speed"))
+        lay.addWidget(self.segmented("hz60", bool, False, [("50 Hz (PAL)", False), ("60 Hz", True)], min_w=110))
+        lay = cell(1, 1, tr("c.quick"))
+        lay.addWidget(self.check("skipintro", tr("l.skipintro"), True))
+        lay.addWidget(self.check("autostart", tr("l.autostart2"), False))
+        f.addStretch(1)
+
+    def _patch_mode(self):
+        """none / bundled / custom from the saved patch_on + patch (an old saved path to the bundled file -> bundled)."""
+        bp = bundled_patch()
+        cur = (self.s.get("patch") or "").strip()
+        if not self.s.get("patch_on"):
+            return "none"
+        if not cur or (bp and os.path.basename(cur) == os.path.basename(bp) and os.path.dirname(os.path.abspath(cur)).endswith("patches")):
+            return "bundled" if bp else "none"
+        return "custom"
+
+    def _patch_widget(self, lay):
+        """Combobox None / Improved translation (bundled) / Other file...; the path + Browse only for "other"."""
+        self.v("patch_on", bool, False)
+        self.v("patch", str, "")
+        if self._patch_mode() == "bundled":        # migrate: the bundled file wherever this exe now lives
+            self.s["patch"] = bundled_patch()
+        modes = ["none"] + (["bundled"] if bundled_patch() else []) + ["custom"]
+        cb = QComboBox()
+        lay.addWidget(cb)
+        e = QLineEdit(self.s.get("patch") or "")
+        e.textChanged.connect(lambda t: self.s.__setitem__("patch", t))
+        b = QPushButton(tr("b.browse"))
+        b.clicked.connect(self.pick_patch)
+        row, rl = hbox(e, b, margins=(0, 4, 0, 0))
+        rl.setStretch(0, 1)
+        lay.addWidget(row)
+        hint = wrap_label(tr("l.patchhint"), "muted")
+        lay.addWidget(hint)
+
+        def chosen(i):
+            spanish = self.s.get("lang") == 5
+            m = [x for x in modes if x != "bundled" or spanish][i]
+            if m == "none":
+                self.s["patch_on"] = False
+            elif m == "bundled":
+                self.s["patch"] = bundled_patch() or ""
+                self.s["patch_on"] = True
+            elif self._patch_mode() != "custom":
+                old = self.s.get("patch"), self.s.get("patch_on")
+                self.pick_patch()
+                if self._patch_mode() != "custom":      # cancelled: back to what it was
+                    self.s["patch"], self.s["patch_on"] = old
+            self._sync_patch_choice()
+        cb.activated.connect(chosen)
+        self.patch_ui.append((cb, modes, row, hint, e))
+        self._sync_patch_choice()
+
+    def _sync_patch_choice(self):
+        """Every patch combobox shown from the patch_on / patch settings."""
+        m = self._patch_mode()
+        spanish = self.s.get("lang") == 5
+        for cb, modes, row, hint, e in getattr(self, "patch_ui", []):
+            try:
+                # the bundled Spanish translation only for the Spanish game (it does not touch the other languages)
+                shown = [x for x in modes if x != "bundled" or spanish]
+                cb.blockSignals(True)
+                cb.clear()
+                cb.addItems([tr("p." + x) for x in shown])
+                cb.setCurrentIndex(shown.index(m) if m in shown else 0)
+                cb.blockSignals(False)
+                if e.text() != (self.s.get("patch") or ""):
+                    e.blockSignals(True)
+                    e.setText(self.s.get("patch") or "")
+                    e.blockSignals(False)
+                row.setVisible(m == "custom")
+                hint.setVisible(m == "none" and spanish and "bundled" in modes)
+            except RuntimeError:
+                pass
+
+    def clear_patch(self):
+        self.s["patch_on"] = False
+        self._sync_patch_choice()
+
+    def custom_buttons(self):
+        """The "Customise buttons" dialog: per position a disc and a letter colour, the symbols, presets, a preview
+        drawn as the game draws it (tools/prompt_custom.py = port2/shims/prompts.c)."""
+        sym, cols = PC.from_arg(self.v("prompt_colors", str, PC.DEFAULT))
+        st = {"sym": sym, "cols": list(cols)}
+        d = QDialog(self)
+        d.setWindowTitle(tr("pc.title"))
+        es = tr("pc.ok") == "Usar"
+        top = QGridLayout(d)
+        top.setContentsMargins(20, 18, 20, 18)
+        top.setHorizontalSpacing(10)
+        top.setVerticalSpacing(8)
+        pcb = QComboBox()
+        pcb.addItems([p[1] if es else p[2] for p in PC.PRESETS])
+        pcb.setCurrentIndex(-1)
+        scb = QComboBox()
+        scb.addItems([tr("pc.sym." + k) for k in PC.SYMS])
+        top.addWidget(QLabel(tr("pc.preset")), 0, 0)
+        top.addWidget(pcb, 0, 1, 1, 2)
+        top.addWidget(QLabel(tr("pc.sym")), 1, 0)
+        top.addWidget(scb, 1, 1, 1, 2)
+        preview = GlyphPreview(st)
+        top.addWidget(preview, 0, 3, 6, 1, Qt.AlignCenter)
+        top.setColumnMinimumWidth(3, preview.width() + 16)
+        swatches = []
+
+        def redraw():
+            for i, (bd, bl) in enumerate(swatches):
+                bd.set_color(st["cols"][i][0])
+                bl.set_color(st["cols"][i][1])
+            scb.blockSignals(True)
+            scb.setCurrentIndex(PC.SYMS.index(st["sym"]))
+            scb.blockSignals(False)
+            preview.update()
+
+        def pick(i, j):
+            c = QColorDialog.getColor(QColor("#%06x" % st["cols"][i][j]), d)
+            if c.isValid():
+                cur = list(st["cols"][i])
+                cur[j] = int(c.name()[1:], 16)
+                st["cols"][i] = tuple(cur)
+                redraw()
+        names = tr("pc.pos").split("|")
+        for i in range(4):
+            top.addWidget(QLabel(names[i]), 2 + i, 0)
+            bd, bl = Swatch(tr("pc.disc")), Swatch(tr("pc.letter"))
+            bd.setObjectName("swatch")
+            bl.setObjectName("swatch")
+            bd.clicked.connect(lambda _=False, i=i: pick(i, 0))
+            bl.clicked.connect(lambda _=False, i=i: pick(i, 1))
+            top.addWidget(bd, 2 + i, 1)
+            top.addWidget(bl, 2 + i, 2)
+            swatches.append((bd, bl))
+
+        def on_preset(i):
+            p = PC.PRESETS[i]
+            st["sym"], st["cols"] = p[3], list(p[4])
+            redraw()
+
+        def on_sym(i):
+            st["sym"] = PC.SYMS[i]
+            redraw()
+        pcb.activated.connect(on_preset)
+        scb.activated.connect(on_sym)
+
+        def ok():
+            self.s["prompt_colors"] = PC.to_arg(st["sym"], st["cols"])
+            self.v("prompts_style", str, "auto")
+            self.s["prompts_style"] = "custom"
+            self._prompts_sync()
+            d.accept()
+        okb, cancel = QPushButton(tr("pc.ok")), QPushButton(tr("pc.cancel"))
+        okb.setObjectName("primary")
+        okb.clicked.connect(ok)
+        cancel.clicked.connect(d.reject)
+        row, _ = hbox(None, okb, cancel, margins=(0, 10, 0, 0))
+        top.addWidget(row, 6, 0, 1, 4)
+        redraw()
+        d.exec()
+
+    def _build_gfx(self, f):
+        g = QGridLayout()
+        g.setHorizontalSpacing(14)
+        g.setVerticalSpacing(14)
+        g.setColumnStretch(0, 1)
+        g.setColumnStretch(1, 1)
+        f.addLayout(g)
+        c = self.card(None, tr("c.renderer"))
+        g.addWidget(c.frame, 0, 0)
+        self.radios(c, "renderer", str, "gl", [(tr("r.gl"), "gl"), (tr("r.soft"), "soft")])
+        c.addStretch(1)
+        c = self.card(None, tr("c.window"))
+        g.addWidget(c.frame, 0, 1)
+        c.addWidget(self.segmented("scale", int, 2, [("%dx" % n, n) for n in (1, 2, 3)], min_w=56))
+        c.addSpacing(4)
+        c.addWidget(self.check("fullscreen", tr("l.fullscreen"), False))
+        # --show-fps: the on-screen counter (--log-fps 2 always logs the rate)
+        c.addWidget(self.check("show_fps", tr("l.showfps"), False))
+        c.addStretch(1)
+        c = self.card(None, tr("c.aspect"))
+        g.addWidget(c.frame, 1, 0)
+        self.radios(c, "aspect", str, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"),
+                                            (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9"), (tr("a.auto"), "auto")])
+        c.addStretch(1)
+        c = self.card(None, tr("c.ires"))     # --internal-res: 3D drawn at N x (docs/PORT.md "HD"), OpenGL only
+        g.addWidget(c.frame, 1, 1)
+        self.ires_btns = self.radios(c, "internal_res", int, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
+        self.ires_note = wrap_label(tr("l.iresoff"), "muted")
+        c.addWidget(self.ires_note)
+        c.addStretch(1)
+        c = self.card(None, tr("c.fps"))      # --fps: presents per second, interpolated (both renderers)
+        g.addWidget(c.frame, 2, 0, 1, 2)
+        default = "auto" if self.s.get("fps60") and self.experimental else "off"
+        c.addWidget(self.segmented("fps", str, default, [(tr("fps.off"), "off"), ("Auto", "auto"), ("60", "60"), ("90", "90"),
+                                                         ("120", "120"), ("144", "144"), (tr("fps.unl").split(" (")[0], "unlimited")]))
+        c.addWidget(wrap_label(tr("fps.auto") + " · " + tr("fps.unl") + ". " + tr("l.fpshint"), "muted"))
+        f.addStretch(1)
+
+    def _build_controls(self, f):
+        """Three cards: the button icons of the texts (--prompts, a combobox), the keyboard bindings (--keys, a table:
+        click a key and press the new one) and the controller bindings (--pad-map: the PS1 pad photo with a leader line
+        from each button to its controller button, and a table of comboboxes; clicking a button on the photo selects its
+        row), with the DualShock switch and the vibration intensity."""
+        # ---- button icons
+        c = self.card(f, tr("c.icons"))
+        c.addWidget(QLabel(tr("l.prompts")))
+        cur = self.v("prompts_style", str, "auto")
+        if cur not in [k for k, _ in PROMPT_STYLES]:
+            self.s["prompts_style"] = "auto"            # the AYN Thor styles are Android only; an unknown value too
+        self.prompt_cb = QComboBox()
+        self.prompt_cb.addItems([tr(t) for _, t in PROMPT_STYLES])
+        self.prompt_cb.setMinimumWidth(220)
+        self.cust_btn = QPushButton(tr("b.custom"))
+        self.cust_btn.clicked.connect(self.custom_buttons)
+        self.prompt_cb.activated.connect(lambda i: (self.s.__setitem__("prompts_style", PROMPT_STYLES[i][0]), self._prompts_sync()))
+        row, _ = hbox(self.prompt_cb, self.cust_btn, None)
+        c.addWidget(row)
+        self._prompts_sync()
+
+        # ---- keyboard
+        c = self.card(f, tr("c.keyboard"))
+        c.addWidget(wrap_label(tr("kb.hint"), "muted"))
+        keys = self.s.get("keys") if self.s.get("keys_on") else None
+        keys = dict(M.DEFAULT_KEYS, **(keys or {}))
+        self.key_vals, self.key_btns, self.key_names = {}, {}, {}
+        self.key_capture = None
+        g = QGridLayout()
+        g.setHorizontalSpacing(10)
+        g.setVerticalSpacing(6)
+        g.setColumnStretch(1, 1)
+        g.setColumnStretch(4, 1)
+        g.setColumnMinimumWidth(2, 24)
+        for i, b in enumerate(M.BUTTONS):
+            r, col = i % 7, (i // 7) * 3
+            self.key_vals[b] = keys.get(b) or ""
+            nm = QLabel(tr("btn." + b))
+            kb = KeyButton(self, b)
+            kb.setMinimumWidth(150)
+            g.addWidget(nm, r, col)
+            g.addWidget(kb, r, col + 1)
+            self.key_btns[b], self.key_names[b] = kb, nm
+        c.addLayout(g)
+        self.key_warn = wrap_label("", "warn")
+        c.addWidget(self.key_warn)
+        rb = QPushButton(tr("b.restore"))
+        rb.clicked.connect(self._keys_restore)
+        row, _ = hbox(None, rb)
+        c.addWidget(row)
+        self._keys_sync()
+
+        # ---- controller
+        c = self.card(f, tr("c.pad"))
+        c.addWidget(wrap_label(tr("gp.hint"), "muted"))
+        self.pad_capture = None              # the selected PS1 button (its row in the table below)
+        self.pad_view = PadView(self)
+        c.addWidget(self.pad_view)
+        pm = dict(PAD_DEFAULTS, **(self.s.get("pad_map") or {}))
+        labels = [self._src_label(k) for k, _, _ in PAD_SOURCES]
+        self.pad_vals, self.pad_cbs, self.pad_names = {}, {}, {}
+        g = QGridLayout()
+        g.setHorizontalSpacing(10)
+        g.setVerticalSpacing(6)
+        g.setColumnStretch(1, 1)
+        g.setColumnStretch(4, 1)
+        g.setColumnMinimumWidth(2, 24)
+        for i, b in enumerate(M.BUTTONS):
+            r, col = i % 7, (i // 7) * 3
+            val = self.pad_vals[b] = pm.get(b, "")
+            nm = QLabel(tr("btn." + b))
+            cb = QComboBox()
+            cb.addItems(labels if val in PAD_SRC_KEYS else labels + [val])     # a hand-written source stays choosable
+            cb.setMaxVisibleItems(16)
+            cb.activated.connect(lambda _i, b=b, cb=cb: self._padmap_chosen(b, cb))
+            cb.installEventFilter(self)
+            cb._pad_button = b
+            g.addWidget(nm, r, col)
+            g.addWidget(cb, r, col + 1)
+            self.pad_cbs[b], self.pad_names[b] = cb, nm
+        c.addLayout(g)
+        self.pad_warn = wrap_label("", "warn")
+        c.addWidget(self.pad_warn)
+        rb = QPushButton(tr("b.restore"))
+        rb.clicked.connect(self._padmap_restore)
+        row, _ = hbox(None, rb)
+        c.addWidget(row)
+        sep = QFrame()
+        sep.setObjectName("sep")
+        c.addWidget(sep)
+        c.addWidget(self.check("dualshock", tr("l.dualshock"), False))
+        # --rumble: vibration intensity (runtime/sdl.c), stored as the percent; shown as "Off" / "N %"
+        rv = self.v("rumble", int, 100)
+        rcb = QComboBox()
+        rcb.addItems([tr("rumble.off") if n == 0 else "%d %%" % n for n in RUMBLE_STEPS])
+        rcb.setCurrentIndex(RUMBLE_STEPS.index(rv) if rv in RUMBLE_STEPS else RUMBLE_STEPS.index(100))
+        rcb.activated.connect(lambda i: self.s.__setitem__("rumble", RUMBLE_STEPS[i]))
+        row, _ = hbox(QLabel(tr("l.rumble")), rcb, None)
+        c.addWidget(row)
+        self._padmap_sync()
+        f.addStretch(1)
+
+    def eventFilter(self, obj, e):
+        if e.type() == QEvent.FocusIn and getattr(obj, "_pad_button", None):
+            if self.pad_capture != obj._pad_button:
+                self._pad_select(obj._pad_button, focus=False)
+        return False
+
+    def _prompts_sync(self):
+        k = self.s.get("prompts_style")
+        keys = [x for x, _ in PROMPT_STYLES]
+        try:
+            if k in keys:
+                self.prompt_cb.setCurrentIndex(keys.index(k))
+            self.cust_btn.setEnabled(k == "custom")
+        except (RuntimeError, AttributeError):
+            pass
+
+    # ---- keyboard table
+    def _key_text(self, b):
+        k = self.key_vals[b].strip()
+        if not k:
+            return tr("pad.nokey")
+        if b == "select" and k == M.DEFAULT_KEYS["select"]:
+            return k + " / Right Shift"     # runtime/sdl.c keymap: the default select has a second key
+        return k
+
+    def _keys_sync(self):
+        used = {}
+        for b in M.BUTTONS:
+            k = self.key_vals[b].strip().lower()
+            if k:
+                used.setdefault(k, []).append(b)
+            btn = self.key_btns[b]
+            btn.setText(tr("pad.press") + "…" if self.key_capture == b else self._key_text(b))
+            btn.setChecked(self.key_capture == b)
+        clash = [bs for bs in used.values() if len(bs) > 1]
+        for b in M.BUTTONS:
+            lb = self.key_names[b]
+            lb.setObjectName("nameWarn" if any(b in bs for bs in clash) else "")
+            lb.style().unpolish(lb)
+            lb.style().polish(lb)
+        self.key_warn.setText("\n".join(tr("kb.clash", self.key_vals[bs[0]].strip(), ", ".join(tr("btn." + x) for x in bs))
+                                        for bs in clash))
+        self.key_warn.setVisible(bool(clash))
+
+    def _key_begin(self, b):
+        if self.key_capture and self.key_capture != b:
+            self._key_end(self.key_capture)
+        self.key_capture = b
+        self.key_btns[b].setFocus()
+        self._keys_sync()
+
+    def _key_end(self, b):
+        if self.key_capture == b:
+            self.key_capture = None
+            self._keys_sync()
+
+    def _key_press(self, b, e):
+        if e.key() == Qt.Key_Escape:
+            self._key_end(b)
+            return
+        name = sdl_key_from_qt(e)
+        if not name:
+            return                           # a key --keys cannot name: keep waiting
+        self.key_capture = None
+        self.key_vals[b] = name
+        self._keys_sync()
+
+    def _keys_restore(self):
+        self.key_capture = None
+        for b in self.key_vals:
+            self.key_vals[b] = M.DEFAULT_KEYS[b]
+        self._keys_sync()
+
+    # ---- controller table
+    @staticmethod
+    def _src_label(k):
+        return tr("src." + k) if k in PAD_SRC_KEYS else k
+
+    def _padmap_chosen(self, b, cb):
+        lab = cb.currentText()
+        self.pad_vals[b] = next((k for k in PAD_SRC_KEYS if lab == tr("src." + k)), lab)
+        self._padmap_sync()
+
+    def _padmap_sync(self):
+        used = {}
+        for b in M.BUTTONS:
+            k = self.pad_vals[b]
+            cb = self.pad_cbs[b]
+            i = cb.findText(self._src_label(k))
+            if i < 0:
+                cb.addItem(self._src_label(k))
+                i = cb.count() - 1
+            cb.setCurrentIndex(i)
+            if k:
+                used.setdefault(k, []).append(b)
+        clash = [(k, bs) for k, bs in used.items() if len(bs) > 1]
+        for b in M.BUTTONS:
+            lb = self.pad_names[b]
+            lb.setObjectName("nameSel" if b == self.pad_capture else ("nameWarn" if any(b in bs for _, bs in clash) else ""))
+            lb.style().unpolish(lb)
+            lb.style().polish(lb)
+        self.pad_warn.setText("\n".join(tr("gp.clash", self._src_label(k), ", ".join(tr("btn." + x) for x in bs)) for k, bs in clash))
+        self.pad_warn.setVisible(bool(clash))
+        self.pad_view.update()
+
+    def _padmap_restore(self):
+        for b in self.pad_vals:
+            self.pad_vals[b] = PAD_DEFAULTS[b]
+        self._padmap_sync()
+
+    def _pad_select(self, b, focus=True):
+        self.pad_capture = b
+        if focus:
+            self.pad_cbs[b].setFocus()
+        self._padmap_sync()
+
+    def _pad_key_text(self, b):
+        k = self.pad_vals[b]
+        return PAD_SHORT.get(k, k) or tr("pad.nokey")
 
     def _build_mods(self, f):
-        o, c = self.card(f, tr("c.patch"))
-        o.pack(fill="x", padx=(0, 4))
+        c = self.card(f, tr("c.patch"))
         self._patch_widget(c)
         bp = bundled_patch()
-        ttk.Label(c, text=tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), style="Muted.TLabel", wraplength=640,
-                  justify="left").pack(anchor="w", pady=(8, 0))
+        c.addWidget(wrap_label(tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), "muted"))
         if self.experimental:
-            o, c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
-            o.pack(fill="x", pady=(12, 0), padx=(0, 4))
-            ttk.Label(c, text=tr("l.texpack"), style="Muted.TLabel").pack(anchor="w", pady=(0, 4))
-            self._browse_row(c, "texpack", self.pick_texpack)
-            row = ttk.Frame(c)                                     # the full dump from the disc files (tools/dump_all_textures.py)
-            row.pack(fill="x", pady=(8, 0))
-            self.dumpall_btn = ttk.Button(row, text=tr("b.dumpall"), command=self.dump_all_textures)
-            self.dumpall_btn.pack(side="left")
-            self.dumpall_bar = ttk.Progressbar(row, mode="determinate", maximum=100, length=200)
-            self.dumpall_bar.pack(side="left", padx=(10, 0))
-            self.dumpall_open = ttk.Button(row, text=tr("b.openfolder"), command=self.open_texture_dump)
-            self.dumpall_msg = tk.StringVar()
-            ttk.Label(c, textvariable=self.dumpall_msg, wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
-            ttk.Label(c, text=tr("l.texpack.d"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(4, 0))
-        o, c = self.card(f, tr("c.mods"))
-        o.pack(fill="x", pady=(12, 0), padx=(0, 4))
-        ttk.Label(c, text=tr("l.modshelp"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(0, 8))
+            c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
+            c.addWidget(wrap_label(tr("l.texpack"), "muted"))
+            c.addWidget(self.browse_row("texpack", self.pick_texpack))
+            self.dumpall_btn = QPushButton(tr("b.dumpall"))   # the full dump from the disc files (tools/dump_all_textures.py)
+            self.dumpall_btn.clicked.connect(self.dump_all_textures)
+            self.dumpall_bar = QProgressBar()
+            self.dumpall_bar.setRange(0, 100)
+            self.dumpall_bar.setTextVisible(False)
+            self.dumpall_bar.setFixedWidth(200)
+            self.dumpall_open = QPushButton(tr("b.openfolder"))
+            self.dumpall_open.clicked.connect(self.open_texture_dump)
+            self.dumpall_open.hide()
+            row, _ = hbox(self.dumpall_btn, self.dumpall_bar, self.dumpall_open, None, spacing=10, margins=(0, 4, 0, 0))
+            c.addWidget(row)
+            self.dumpall_msg = wrap_label("", sel=True)
+            self.dumpall_msg.hide()                           # shown with the first progress / result message
+            c.addWidget(self.dumpall_msg)
+            c.addWidget(wrap_label(tr("l.texpack.d"), "muted"))
+        c = self.card(f, tr("c.mods"))
+        c.addWidget(wrap_label(tr("l.modshelp"), "muted"))
+        c.addSpacing(4)
         for mid, lk, dk, kind, _fn in M.MODS:
             if mid in ("keys_on", "skipintro", "hz60"):
                 continue      # on the Controls / Play pages
-            box = ttk.Frame(c, padding=(0, 2))
-            box.pack(fill="x")
-            ttk.Checkbutton(box, text=tr(lk), variable=self.var(mid, tk.BooleanVar, False)).pack(side="left")
+            box = QWidget()
+            bl = QVBoxLayout(box)
+            bl.setContentsMargins(0, 2, 0, 6)
+            bl.setSpacing(4)
+            chk = self.check(mid, tr(lk), False)
+            row, rl = hbox(chk, spacing=12)
+            bl.addWidget(row)
             if kind == "check+area":
-                av, sv = self.var("area", tk.IntVar, 0), self.var("section", tk.IntVar, 0)
-                row = ttk.Frame(c, padding=(24, 2, 0, 2))     # own row: the labels are long (no truncation)
-                row.pack(fill="x")
-                ttk.Label(row, text=tr("mod.area")).pack(side="left", padx=(0, 4))
+                self.v("area", int, 0)
+                self.v("section", int, 0)
                 names = [M.area_label(a) for a, _ in M.ROOM_COUNTS]
-                row2 = ttk.Frame(c, padding=(24, 2, 0, 2))
-                row2.pack(fill="x")
-                ttk.Label(row2, text=tr("mod.section")).pack(side="left", padx=(0, 4))
-                self.sec_cb = ttk.Combobox(row2, state="readonly", width=4)
-                self.sec_cb.pack(side="left")
-                self.area_cb = ttk.Combobox(row, values=names, state="readonly", width=30)
                 idx = [a for a, _ in M.ROOM_COUNTS]
-                self.area_cb.current(idx.index(av.get()) if av.get() in idx else 0)
-                self.area_cb.pack(side="left", fill="x", expand=True)
+                self.area_cb = QComboBox()
+                self.area_cb.addItems(names)
+                self.area_cb.setCurrentIndex(idx.index(self.s["area"]) if self.s["area"] in idx else 0)
+                self.area_cb.view().setMinimumWidth(self.area_cb.minimumSizeHint().width())
+                self.sec_cb = QComboBox()
+                self.sec_cb.setMinimumWidth(70)
+                g = QGridLayout()
+                g.setContentsMargins(28, 2, 0, 2)
+                g.setHorizontalSpacing(10)
+                g.setVerticalSpacing(6)
+                g.addWidget(QLabel(tr("mod.area")), 0, 0)
+                g.addWidget(self.area_cb, 0, 1)
+                g.addWidget(QLabel(tr("mod.section")), 1, 0)
+                g.addWidget(self.sec_cb, 1, 1, Qt.AlignLeft)
+                g.setColumnStretch(2, 1)
+                bl.addLayout(g)
 
-                def widen_popdown(cb=self.area_cb, names=names):
-                    # the drop-down list is as wide as the box by default; -postoffset lets it grow to the longest
-                    # entry so no label is cut when the window is narrow
-                    from tkinter import font
-                    need = max(font.nametofont("TkDefaultFont").measure(n) for n in names) + 40
-                    ttk.Style().configure("AreaWide.TCombobox", postoffset=(0, 0, max(0, need - cb.winfo_width()), 0))
-                self.area_cb.configure(style="AreaWide.TCombobox", postcommand=widen_popdown)
-
-                def fill_sections(_=None, av=av, sv=sv):
-                    a = M.ROOM_COUNTS[self.area_cb.current()][0]
-                    av.set(a)
-                    secs = [(k, str(k)) for k in range(M.ROOM_COUNTS[self.area_cb.current()][1]) if (a, k) not in M.DOOR_ROOMS]
-                    self.sec_nums = [k for k, _ in secs]
-                    self.sec_cb["values"] = [t for _, t in secs]
-                    self.sec_cb.configure(width=max(len(t) for _, t in secs) + 1)
-                    self.sec_cb.current(self.sec_nums.index(sv.get()) if sv.get() in self.sec_nums else 0)
-                    sv.set(self.sec_nums[self.sec_cb.current()])
-                self.area_cb.bind("<<ComboboxSelected>>", fill_sections)
-                self.sec_cb.bind("<<ComboboxSelected>>", lambda _e, sv=sv: sv.set(self.sec_nums[self.sec_cb.current()]))
+                def fill_sections(_=None):
+                    i = self.area_cb.currentIndex()
+                    a = M.ROOM_COUNTS[i][0]
+                    self.s["area"] = a
+                    self.sec_nums = [k for k in range(M.ROOM_COUNTS[i][1]) if (a, k) not in M.DOOR_ROOMS]
+                    self.sec_cb.clear()
+                    self.sec_cb.addItems([str(k) for k in self.sec_nums])
+                    sv = self.s.get("section")
+                    self.sec_cb.setCurrentIndex(self.sec_nums.index(sv) if sv in self.sec_nums else 0)
+                    self.s["section"] = self.sec_nums[self.sec_cb.currentIndex()]
+                self.area_cb.activated.connect(fill_sections)
+                self.sec_cb.activated.connect(lambda i: self.s.__setitem__("section", self.sec_nums[i]))
                 fill_sections()
             elif kind.startswith("check+int:"):
                 _, key, lo, hi, step = kind.split(":")
-                iv = self.var(key, tk.IntVar, int(lo))
-                ttk.Spinbox(box, from_=int(lo), to=int(hi), increment=int(step), textvariable=iv, width=10).pack(side="left", padx=12)
-            ttk.Label(c, text=tr(dk), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", padx=(24, 0), pady=(0, 6))
+                val = self.v(key, int, int(lo))
+                sp = QSpinBox()
+                sp.setRange(int(lo), int(hi))
+                sp.setSingleStep(int(step))
+                sp.setValue(val if isinstance(val, int) else int(lo))
+                sp.setMinimumWidth(120)
+                sp.setFocusPolicy(Qt.StrongFocus)
+                sp.valueChanged.connect(lambda n, key=key: self.s.__setitem__(key, n))
+                rl.addWidget(sp)
+            rl.addStretch(1)
+            d = wrap_label(tr(dk), "muted")
+            d.setContentsMargins(28, 0, 0, 0)
+            bl.addWidget(d)
             if kind == "check+area":                  # the rebuilt cut towns live on their own page now
-                ttk.Label(c, text=tr("cut.hint"), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", padx=(24, 0), pady=(0, 6))
+                d = wrap_label(tr("cut.hint"), "muted")
+                d.setContentsMargins(28, 0, 0, 0)
+                bl.addWidget(d)
+            c.addWidget(box)
+        f.addStretch(1)
 
     def _build_cut(self, f):
         """The "Cut content" page: the --cut-content switch, the early title and the rebuilt towns (one button each)."""
-        def info(parent, title, text):
-            i = ttk.Label(parent, text="\u24d8", style="Help.TLabel", cursor="hand2")   # circled i: click for the explanation
-            i.bind("<Button-1>", lambda e: messagebox.showinfo(title, text))
-            i.pack(side="left", padx=(6, 0))
-        o, c = self.card(f, tr("cut.c.text"))
-        o.pack(fill="x", padx=(0, 4))
-        row = ttk.Frame(c)                                     # --cut-content (port/fixes.txt)
-        row.pack(anchor="w")
-        ttk.Checkbutton(row, text=tr("l.cutcontent"), variable=self.var("cut_content", tk.BooleanVar, False)).pack(side="left")
-        info(row, tr("l.cutcontent"), tr("i.cutcontent"))
-        ttk.Label(c, text=tr("cut.text.d"), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", padx=(24, 0), pady=(2, 0))
-        ttk.Label(c, text=tr("l.earlytitle"), style="Muted.TLabel", wraplength=640, justify="left").pack(anchor="w", pady=(12, 4))
-        self._browse_row(c, "early_title", self.pick_early_title)            # --early-title (port2/runtime/titlebg.c)
-        o, c = self.card(f, tr("cut.c.towns"))                  # docs/CIVILIZATION.md "Playable towns"
-        o.pack(fill="x", pady=(12, 0), padx=(0, 4))
-        row = ttk.Frame(c)
-        row.pack(anchor="w", fill="x")
-        ttk.Label(row, text=tr("cut.towns.d"), style="Muted.TLabel", wraplength=600, justify="left").pack(side="left")
-        info(row, tr("cut.c.towns"), tr("cut.towns.i"))
-        for a in (11, 16, 17):
-            r = ttk.Frame(c, padding=(0, 8, 0, 0))
-            r.pack(fill="x")
-            ttk.Button(r, text=tr("cut.play%d" % a), width=32, command=lambda a=a: self.play_town(a)).pack(side="left")
-            # width=1: the row never asks for more than the card has (a long translation wraps instead of running under the edge)
-            d = ttk.Label(r, text=tr("cut.d%d" % a), wraplength=300, justify="left", width=1)
-            d.pack(side="left", fill="x", expand=True, padx=(12, 0))
-            d.bind("<Configure>", lambda e, d=d: d.configure(wraplength=max(120, e.width - 6)))
-        ttk.Frame(c, height=8).pack()
+        c = self.card(f, tr("cut.c.text"))
+        row, _ = hbox(self.check("cut_content", tr("l.cutcontent"), False),          # --cut-content (port/fixes.txt)
+                      self.info_button(tr("l.cutcontent"), tr("i.cutcontent")), None, spacing=4)
+        c.addWidget(row)
+        d = wrap_label(tr("cut.text.d"), "muted")
+        d.setContentsMargins(28, 0, 0, 0)
+        c.addWidget(d)
+        c.addSpacing(8)
+        c.addWidget(wrap_label(tr("l.earlytitle"), "muted"))
+        c.addWidget(self.browse_row("early_title", self.pick_early_title))           # --early-title (port2/runtime/titlebg.c)
+        c = self.card(f, tr("cut.c.towns"))                  # docs/CIVILIZATION.md "Playable towns"
+        d = wrap_label(tr("cut.towns.d"), "muted")
+        row, rl = hbox(d, self.info_button(tr("cut.c.towns"), tr("cut.towns.i")), spacing=4)
+        rl.setStretch(0, 1)
+        rl.setAlignment(rl.itemAt(1).widget(), Qt.AlignTop)
+        c.addWidget(row)
+        g = QGridLayout()
+        g.setContentsMargins(0, 6, 0, 6)
+        g.setHorizontalSpacing(14)
+        g.setVerticalSpacing(10)
+        g.setColumnStretch(1, 1)
+        for i, a in enumerate((11, 16, 17)):
+            b = QPushButton(tr("cut.play%d" % a))
+            b.setMinimumWidth(260)
+            b.clicked.connect(lambda _=False, a=a: self.play_town(a))
+            g.addWidget(b, i, 0)
+            g.addWidget(wrap_label(tr("cut.d%d" % a)), i, 1)
+        c.addLayout(g)
         for key in ("civ_route", "civ_collision"):
-            row = ttk.Frame(c, padding=(0, 2))
-            row.pack(fill="x")
             lk_ = {"civ_route": "mod.civroute", "civ_collision": "mod.civcoll"}[key]
-            ttk.Checkbutton(row, text=tr(lk_), variable=self.var(key, tk.BooleanVar, False)).pack(side="left")
-            info(row, tr(lk_), tr(lk_ + ".i"))
+            row, _ = hbox(self.check(key, tr(lk_), False), self.info_button(tr(lk_), tr(lk_ + ".i")), None, spacing=4)
+            c.addWidget(row)
+        f.addStretch(1)
 
     def play_town(self, a):
         """A town button: --civ-town a (the maps and texts are generated the first time, then the game starts)."""
@@ -1819,20 +2321,28 @@ class App:
         self.play()
 
     def _build_log(self, f):
-        o, c = self.card(f, tr("c.status"))
-        o.pack(fill="x")
-        ttk.Label(c, textvariable=self.status, wraplength=640, justify="left").pack(anchor="w")
-        o, c = self.card(f, tr("c.cmd"))
-        o.pack(fill="x", pady=(12, 0))
-        mono = ("Consolas", 9) if os.name == "nt" else ("DejaVu Sans Mono", 9)
-        self.cmd_text = tk.Text(c, height=3, wrap="word", relief="flat", background="#f7f7f9", font=mono, highlightthickness=1,
-                                highlightbackground=C_LINE, padx=6, pady=4)
-        self.cmd_text.pack(fill="x")
-        o, c = self.card(f, tr("c.log"))
-        o.pack(fill="both", expand=True, pady=(12, 0))
-        self.log_text = tk.Text(c, height=8, wrap="none", relief="flat", background="#f7f7f9", font=mono, highlightthickness=1,
-                                highlightbackground=C_LINE, padx=6, pady=4)
-        self.log_text.pack(fill="both", expand=True)
+        c = self.card(f, tr("c.status"))
+        self.log_status = wrap_label(self.status_msg, sel=True)
+        c.addWidget(self.log_status)
+        mono = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        mono.setPointSizeF(max(8.5, self.font().pointSizeF() - 0.5))
+        c = self.card(f, tr("c.cmd"))
+        self.cmd_text = QPlainTextEdit()
+        self.cmd_text.setObjectName("code")
+        self.cmd_text.setFont(mono)
+        self.cmd_text.setReadOnly(True)
+        self.cmd_text.setFixedHeight(QFontMetricsF(mono).lineSpacing() * 3 + 22)
+        c.addWidget(self.cmd_text)
+        c = self.card(f, tr("c.log"))
+        self.log_text = QPlainTextEdit()
+        self.log_text.setObjectName("code")
+        self.log_text.setFont(mono)
+        self.log_text.setReadOnly(True)
+        self.log_text.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.log_text.setMinimumHeight(QFontMetricsF(mono).lineSpacing() * 10 + 22)
+        c.addWidget(self.log_text, 1)
+        c.frame.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        f.setStretchFactor(c.frame, 1)
         try:            # the previous run's log, if any
             self.show_log_tail(open(self.log_path, encoding="utf-8", errors="replace").read().splitlines())
         except OSError:
@@ -1840,31 +2350,33 @@ class App:
 
     # ---- actions
     def collect(self):
-        for k, v in self.vars.items():
-            try:
-                self.s[k] = v.get()
-            except tk.TclError:
-                pass
-        if hasattr(self, "key_vars"):
-            self.s["keys"] = {b: v.get().strip() for b, v in self.key_vars.items()}
+        if hasattr(self, "key_vals"):
+            self.s["keys"] = {b: v.strip() for b, v in self.key_vals.items()}
             self.s["keys_on"] = self.s["keys"] != M.DEFAULT_KEYS     # --keys only when a key differs
-        if hasattr(self, "pad_vars"):
-            self.s["pad_map"] = {b: v.get() for b, v in self.pad_vars.items()}
+        if hasattr(self, "pad_vals"):
+            self.s["pad_map"] = dict(self.pad_vals)
         save_settings(self.s)
 
+    def _open_file(self, title, filt):
+        p, _ = QFileDialog.getOpenFileName(self, title, "", filt)
+        return p
+
+    def _pick_dir(self):
+        return QFileDialog.getExistingDirectory(self)
+
     def pick_disc(self):
-        p = filedialog.askopenfilename(filetypes=[("Disc image", "*.bin *.cue *.iso *.img *.chd"), ("All", "*.*")])
+        p = self._open_file(tr("c.disc"), "Disc image (*.bin *.cue *.iso *.img *.chd);;All (*)")
         if p:
-            self.vars["disc"].set(p)
-            if not self.vars["savedir"].get():
-                self.vars["savedir"].set(os.path.dirname(p))
+            self.set_edit("disc", p)
+            if not self.s.get("savedir"):
+                self.set_edit("savedir", os.path.dirname(p))
             self.check_disc()
 
     def pick_patch(self):
-        p = filedialog.askopenfilename(filetypes=[("Text patch", "*.tombipatch.json"), ("JSON", "*.json"), ("All", "*.*")])
+        p = self._open_file(tr("c.patch"), "Text patch (*.tombipatch.json);;JSON (*.json);;All (*)")
         if p:
-            self.vars["patch"].set(p)
-            self.vars["patch_on"].set(True)
+            self.s["patch"] = p
+            self.s["patch_on"] = True
         self._sync_patch_choice()
 
     def disc_hash(self):
@@ -1902,7 +2414,7 @@ class App:
                 return True
             p = want
             if not os.path.isfile(p):
-                messagebox.showerror(tr("title"), tr("s.patchmissing", p))
+                self.error(tr("s.patchmissing", p))
                 return False
             gfx_missing = False      # missing (older launcher, or skipped then) or built by another gfx_es version: rebuild
             try:
@@ -1915,7 +2427,7 @@ class App:
                 self.say(tr("s.patchon", st.get("title") or os.path.basename(p)), "ok")
                 return True
             self.say(tr("s.patching", os.path.basename(p)), "busy")
-            self.root.update_idletasks()
+            QApplication.processEvents()
             h = self.disc_hash()
             r = DP.apply(d, p, disc_hash=h, log=lambda m: self.say(m, "bad") if "skipped" in m else None)
             chk = tr("s.patchchk.disc") if h else tr("s.patchchk.main0")
@@ -1929,13 +2441,13 @@ class App:
             except OSError:
                 pass
             self.say(tr("s.patchfail", e), "bad")
-            messagebox.showerror(tr("title"), tr("s.patchfail", e))
+            self.error(tr("s.patchfail", e))
             return False
 
     def pick_early_title(self):
-        p = filedialog.askdirectory()
+        p = self._pick_dir()
         if p:
-            self.vars["early_title"].set(p)
+            self.set_edit("early_title", p)
 
     def texture_dump_dir(self):
         return os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")
@@ -1953,37 +2465,39 @@ class App:
     def dump_all_textures(self):
         """Every texture of the game read from the disc files in data/ (tools/dump_all_textures.py, no game run) into texture_dump/."""
         if not data_ready():
-            messagebox.showerror(tr("title"), tr("s.nodata"))
+            self.error(tr("s.nodata"))
             return
         import dump_all_textures as DT
         out = self.texture_dump_dir()
-        self.dumpall_btn.state(["disabled"])
-        self.dumpall_open.pack_forget()
+        self.dumpall_btn.setEnabled(False)
+        self.dumpall_open.hide()
+
+        def msg(text):
+            self.dumpall_msg.setText(text)
+            self.dumpall_msg.show()
 
         def progress(i, n):
             pct = i * 100 // max(1, n)
-            self.root.after(0, self.dumpall_msg.set, tr("s.dumpall", pct))
-            self.root.after(0, self.dumpall_bar.configure, {"value": pct})
+            self.later(lambda: (msg(tr("s.dumpall", pct)), self.dumpall_bar.setValue(pct)))
 
         def work():
             try:
                 total = DT.dump_static(out, data_dir(), log=lambda *a: None, progress=progress)
-                self.root.after(0, self.dumpall_msg.set, tr("s.dumpallok", total, out))
-                self.root.after(0, lambda: self.dumpall_open.pack(side="left", padx=(10, 0)))
+                self.later(lambda: (msg(tr("s.dumpallok", total, out)), self.dumpall_open.show()))
             except Exception as e:
-                self.root.after(0, self.dumpall_msg.set, tr("s.dumpallfail", e))
-            self.root.after(0, self.dumpall_btn.state, ["!disabled"])
+                self.later(msg, tr("s.dumpallfail", e))
+            self.later(self.dumpall_btn.setEnabled, True)
         threading.Thread(target=work, daemon=True).start()
 
     def pick_texpack(self):
-        p = filedialog.askdirectory()
+        p = self._pick_dir()
         if p:
-            self.vars["texpack"].set(p)
+            self.set_edit("texpack", p)
 
     def pick_savedir(self):
-        p = filedialog.askdirectory()
+        p = self._pick_dir()
         if p:
-            self.vars["savedir"].set(p)
+            self.set_edit("savedir", p)
 
     def card_file(self):
         """the card the port uses (port2/shims/card.c: --save-dir, else next to the disc image / the data/ folder)"""
@@ -1994,7 +2508,7 @@ class App:
 
     def _save_busy(self):
         if self.proc and self.proc.poll() is None:
-            messagebox.showwarning(tr("title"), tr("s.saverun"))
+            self.warning(tr("s.saverun"))
             return True
         return False
 
@@ -2002,19 +2516,19 @@ class App:
         import save_import as SI
         if self._save_busy():
             return
-        p = filedialog.askopenfilename(filetypes=[("PS1 saves", "*.mcd *.mcr *.mc *.srm *.ddf *.ps *.bin *.gme *.vgs *.mem *.mcs *.ps1 *.mcb *.psv"), ("*", "*")])
+        p = self._open_file(tr("b.saveimp"), "PS1 saves (*.mcd *.mcr *.mc *.srm *.ddf *.ps *.bin *.gme *.vgs *.mem *.mcs *.ps1 *.mcb *.psv);;All (*)")
         if not p:
             return
         dest = self.card_file()
-        if not messagebox.askyesno(tr("title"), tr("s.saveask", dest)):
+        if not self.ask(tr("s.saveask", dest)):
             return
         try:
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             lines, warn = SI.import_file(p, dest)
         except (SI.ImportError_, OSError) as e:
-            messagebox.showerror(tr("title"), tr("s.saveerr", e))
+            self.error(tr("s.saveerr", e))
             return
-        (messagebox.showwarning if warn else messagebox.showinfo)(tr("title"), "\n".join(lines + warn))
+        (self.warning if warn else self.info)("\n".join(lines + warn))
         self.say(tr("s.saveimpok"), "ok")
 
     def export_save(self):
@@ -2025,25 +2539,24 @@ class App:
         try:
             card = open(src, "rb").read() if os.path.exists(src) else bytes(SI.blank_card())
             saves = SI.list_saves(card)
-            if saves and messagebox.askyesno(tr("title"), tr("s.saveexpq")):
+            if saves and self.ask(tr("s.saveexpq")):
                 blk = saves[0][0]
                 if len(saves) > 1:
-                    from tkinter import simpledialog
                     txt = "\n".join("%d: %s  %s" % s for s in saves)
-                    blk = simpledialog.askinteger(tr("title"), txt, initialvalue=blk, minvalue=1, maxvalue=15)
-                    if blk is None:
+                    blk, ok = QInputDialog.getInt(self, tr("title"), txt, blk, 1, 15)
+                    if not ok:
                         return
-                out = filedialog.asksaveasfilename(defaultextension=".mcs", initialfile="tombi.mcs", filetypes=[("MCS", "*.mcs")])
+                out, _ = QFileDialog.getSaveFileName(self, tr("b.saveexp"), "tombi.mcs", "MCS (*.mcs)")
                 if out:
                     open(out, "wb").write(SI.export_save(card, blk))
             else:
-                out = filedialog.asksaveasfilename(defaultextension=".mcd", initialfile="tombi.mcd", filetypes=[("Memory card", "*.mcd *.mcr"), ("*", "*")])
+                out, _ = QFileDialog.getSaveFileName(self, tr("b.saveexp"), "tombi.mcd", "Memory card (*.mcd *.mcr);;All (*)")
                 if out:
                     SI.export_card(src, out)
             if out:
                 self.say(tr("s.saveexpok", out), "ok")
         except (SI.ImportError_, OSError) as e:
-            messagebox.showerror(tr("title"), tr("s.saveerr", e))
+            self.error(tr("s.saveerr", e))
 
     def editor_open(self):
         try:
@@ -2053,9 +2566,9 @@ class App:
             return False
 
     def edit_save(self):
-        """Edit save...: the save editor (tools/tombi_save_editor.py, docs/SAVE_EDITOR.md) in a window of this process,
-        on the port's card (card_file).  Not while the game runs (nor saves while it runs); saving overwrites the card
-        and keeps a timestamped .bak next to it."""
+        """Edit save...: the save editor (tools/tombi_save_editor.py, docs/SAVE_EDITOR.md) in its own window of this
+        process, on the port's card (card_file).  Not while the game runs (nor saves while it runs); saving overwrites
+        the card and keeps a timestamped .bak next to it."""
         if self.editor_open():
             self.editor.raise_()
             self.editor.activateWindow()
@@ -2064,16 +2577,12 @@ class App:
             return
         card = self.card_file()
         if not os.path.isfile(card):
-            messagebox.showinfo(tr("title"), tr("s.editnocard", card))
+            self.info(tr("s.editnocard", card))
             return
         try:
             import tombi_save_editor as SE
-        except ImportError as e:        # running from source without PySide6
-            messagebox.showerror(tr("title"), tr("s.editnoqt", e))
-            return
-        why = SE.qt_problem()
-        if why:                         # (Qt would abort this process)
-            messagebox.showerror(tr("title"), tr("s.editnoqt", why))
+        except ImportError as e:        # running from source without QtSvg
+            self.error(tr("s.editnoqt", e))
             return
 
         def guard():
@@ -2082,10 +2591,10 @@ class App:
         def closed():
             self.editor = None
         try:
-            self.editor = SE.host_in_tk(self.root, card, lang=i18n.current(), write_guard=guard, on_closed=closed)
+            self.editor = SE.host_in_qt(self, card, lang=i18n.current(), write_guard=guard, on_closed=closed)
         except Exception as e:
             self.editor = None
-            messagebox.showerror(tr("title"), tr("s.saveerr", e))
+            self.error(tr("s.saveerr", e))
 
     def check_disc(self):
         self.collect()
@@ -2098,12 +2607,12 @@ class App:
                 name = "%s %s" % (serial or "?", KNOWN_DISCS.get(serial, ""))
                 msg = tr("s.ok", name.strip()) if sha == MAIN0_SHA1 else tr("s.badsha", name.strip(), sha[:8])
             except (OSError, ValueError, struct.error) as e:
-                self.root.after(0, self.say, str(e), "bad")
+                self.later(self.say, str(e), "bad")
                 return
-            self.root.after(0, self.say, msg, "ok" if sha == MAIN0_SHA1 else "bad")
+            self.later(self.say, msg, "ok" if sha == MAIN0_SHA1 else "bad")
             # the one-time extraction into data/ (again when data/ was made from another disc: a different MAIN0)
             if data_ready() != sha:
-                self.root.after(0, self._extracting, 0)
+                self.later(self._extracting, 0)
                 try:
                     DP.restore(data_dir())       # a text patch in an old data/: originals back before (re)extracting
                 except OSError:
@@ -2114,102 +2623,53 @@ class App:
                     pct = done * 100 // max(1, total)
                     if pct != last[0]:
                         last[0] = pct
-                        self.root.after(0, self.say, tr("s.extracting", data_dir(), pct, path), "busy")
-                        self.root.after(0, self._extracting, pct)
+                        self.later(self.say, tr("s.extracting", data_dir(), pct, path), "busy")
+                        self.later(self._extracting, pct)
                 try:
                     man = X.extract(image, data_dir(), progress)
-                    self.root.after(0, self.say, tr("s.dataok", data_dir(), len(man["files"])), "ok")
+                    self.later(self.say, tr("s.dataok", data_dir(), len(man["files"])), "ok")
                 except (OSError, ValueError, struct.error) as e:
-                    self.root.after(0, self.say, tr("s.extractfail", e), "bad")
-                self.root.after(0, self._extracting, None)
+                    self.later(self.say, tr("s.extractfail", e), "bad")
+                self.later(self._extracting, None)
         threading.Thread(target=work, daemon=True).start()
 
     def _extracting(self, pct):
         """pct 0..100 while data/ is being extracted (Play disabled, bar and message shown); None when it ends."""
         if pct is None:
-            self.ext_box.pack_forget()
-            self.play_btn.configure(text=tr("b.play"))
-            self.play_btn.state(["!disabled"])
+            self.ext_box.hide()
+            self.play_btn.setText(tr("b.play"))
+            self.play_btn.setEnabled(True)
             return
-        if not self.ext_box.winfo_ismapped():
-            self.ext_box.pack(fill="x", pady=(8, 0), after=self.status_row)
-        self.play_btn.state(["disabled"])
-        self.play_btn.configure(text=tr("b.extracting", pct))
-        self.ext_bar["value"] = pct
+        self.ext_box.show()
+        self.play_btn.setEnabled(False)
+        self.play_btn.setText(tr("b.extracting", pct))
+        self.ext_bar.setValue(pct)
 
     def command(self):
         self.collect()
-        s = self.cmd_s = dict(self.s, civ_play=getattr(self, "civ_play", None))     # civ_play: transient, never saved
-        exe = game_binary()
-        source = ["--data", data_dir()] if data_ready() else ["--disc", bin_of_cue(s["disc"])]
-        cmd = [exe] + source + ["--window", "--scale", str(s.get("scale", 2)),
-               "--log-fps", "2",      # the measured vblank rate and its histogram in the log (no counter on screen)
-               "--renderer", "soft" if s.get("renderer") == "soft" else "gl",
-               "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9", "auto") else "4:3"]
-        if s.get("renderer") != "soft" and s.get("internal_res", 1) in (2, 3, 4):
-            cmd += ["--internal-res", str(s["internal_res"])]
-        # --fps is never passed: interpolated high frame rates are hidden until the 60 Hz mode is right (docs/TODO.md)
-        if s.get("lang"):
-            cmd += ["--lang", str(s["lang"])]
-        if s.get("cut_content"):
-            cmd += ["--cut-content"]
-            if s.get("early_title"):
-                cmd += ["--early-title", s["early_title"]]
-        gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
-        if str(s.get("lang")) != "5":
-            self.gfx_note = "no (language is not Spanish)"
-        elif cmd[1] != "--data":
-            self.gfx_note = "no (running from the disc image, not data/)"
-        elif not os.path.isfile(gfx):
-            self.gfx_note = "no (%s missing: text patch off, or its redraws were skipped)" % gfx
-        else:
-            cmd += ["--patch-tex", gfx]
-            self.gfx_note = "yes (%s)" % gfx
-        if s.get("savedir"):
-            cmd += ["--save-dir", s["savedir"]]
-        if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft" and s.get("experimental"):
-            cmd += ["--texture-pack", s["texpack"]]
-        if s.get("fullscreen"):
-            cmd += ["--fullscreen"]
-        if s.get("show_fps"):
-            cmd += ["--show-fps"]
-        if s.get("dualshock"):
-            cmd += ["--dualshock"]
-        try:
-            rumble = max(0, min(200, int(s.get("rumble", 100))))
-        except (TypeError, ValueError):
-            rumble = 100
-        if rumble != 100:
-            cmd += ["--rumble", str(rumble)]
-        pm = pad_map_arg(s.get("pad_map"))
-        if pm:
-            cmd += ["--pad-map", pm]
-        if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "generic", "custom"):
-            cmd += ["--prompts", s["prompts_style"]]
-        if s.get("prompts_style") == "custom":
-            cmd += ["--prompt-colors", s.get("prompt_colors") or PC.DEFAULT]
-        # no --launcher-exit on PC: the Quit Game entries are for handhelds; here the window is simply closed
-        cmd += M.mod_args(s, app_dir())
-        cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))
+        self.cmd_s = dict(self.s, civ_play=self.civ_play)     # civ_play: transient, never saved
+        cmd, self.gfx_note = build_command(self.s, self.civ_play)
         return cmd
+
+    def _show_cmd(self, cmd):
+        self.cmd_text.setPlainText(subprocess.list2cmdline(cmd))
 
     def play(self):
         if self.editor_open():          # the game would read (and write) the card the editor holds
-            messagebox.showwarning(tr("title"), tr("s.editopen"))
+            self.warning(tr("s.editopen"))
             self.editor.raise_()
             self.editor.activateWindow()
             return
         cmd = self.command()
-        self.cmd_text.delete("1.0", "end")
-        self.cmd_text.insert("1.0", subprocess.list2cmdline(cmd))
+        self._show_cmd(cmd)
         if not os.path.isfile(cmd[0]):
-            messagebox.showerror(tr("title"), tr("s.nobin", cmd[0]))
+            self.error(tr("s.nobin", cmd[0]))
             return
         if cmd[1] == "--disc" and (not os.path.isfile(cmd[2]) or not os.path.isfile(os.path.join(app_dir(), "MAIN0.EXE"))
                                    or X.chd.is_chd(cmd[2])):     # tombi2 reads .bin/.iso only: a .chd always goes through data/
             if os.path.isfile(cmd[2]):
                 self.check_disc()      # extracts data/ as well; Play again when it says the data is ready
-            messagebox.showerror(tr("title"), tr("s.nodata"))
+            self.error(tr("s.nodata"))
             return
         if self.proc and self.proc.poll() is None:
             return
@@ -2217,13 +2677,12 @@ class App:
             if not self.sync_patch():
                 return
             cmd = self.command()     # sync_patch may just have (re)built the redraws: --patch-tex must see them
-            self.cmd_text.delete("1.0", "end")
-            self.cmd_text.insert("1.0", subprocess.list2cmdline(cmd))
+            self._show_cmd(cmd)
         elif self.s.get("patch_on"):
             self.say(tr("s.patchnodata"), "busy")
         if M.civ_wanted(self.cmd_s):
             if cmd[1] != "--data":
-                messagebox.showerror(tr("title"), tr("s.civnodata"))
+                self.error(tr("s.civnodata"))
                 return
             if not civ_ready():
                 self.generate_civ()       # Play goes on by itself once the towns are built
@@ -2238,10 +2697,10 @@ class App:
         self.civ_play = None
         self.proc = subprocess.Popen(cmd, cwd=app_dir(), stdout=log, stderr=subprocess.STDOUT, creationflags=flags)
         self.say(tr("s.running"), "ok")
-        self.play_btn.state(["disabled"])
+        self.play_btn.setEnabled(False)
         self._starting(True)
-        self.stop_btn.pack(side="right", padx=(0, 8), after=self.play_btn)
-        self.root.after(250, self.poll)
+        self.stop_btn.show()
+        self.poll_timer.start(250)
 
     def poll(self):
         if not self.proc:
@@ -2255,33 +2714,34 @@ class App:
             pass
         rc = self.proc.poll()
         if rc is None:
-            self.root.after(250 if self.starting else 1000, self.poll)
+            self.poll_timer.start(250 if self.starting else 1000)
             return
         self._starting(False)
         self.say(tr("s.ended", rc, self.log_path), "info")
         try:                           # the game quit (its QUIT entry, or the window closed): this window comes back
-            self.root.deiconify()
-            self.root.lift()
-            self.root.focus_force()
+            if self.isMinimized():
+                self.showNormal()
+            self.raise_()
+            self.activateWindow()
         except Exception:
             pass
-        self.play_btn.state(["!disabled"])
-        self.stop_btn.pack_forget()
+        self.play_btn.setEnabled(True)
+        self.stop_btn.hide()
         self.proc = None
 
     def generate_civ(self):
         """First use of --civ-town / --civ-route: the maps and texts, built in a thread (about a minute), the output on
         the Log page; Play continues when they are ready."""
-        self.play_btn.state(["disabled"])
-        self.show("log")
-        self.log_text.delete("1.0", "end")
+        self.play_btn.setEnabled(False)
+        self.show_page("log")
+        self.log_text.clear()
         self.say(tr("s.civgen", civ_dir()), "busy")
 
         def log(line):
-            self.root.after(0, lambda: (self.log_text.insert("end", line + "\n"), self.log_text.see("end")))
+            self.later(self.log_text.appendPlainText, line)
 
         def done(err):
-            self.play_btn.state(["!disabled"])
+            self.play_btn.setEnabled(True)
             if err:
                 self.say(tr("s.civgenfail", err), "bad")
                 return
@@ -2297,20 +2757,16 @@ class App:
                 for l in traceback.format_exc().splitlines():
                     log(l)
                 err = str(e) or type(e).__name__
-            self.root.after(0, done, err)
+            self.later(done, err)
         threading.Thread(target=work, daemon=True).start()
 
     def _starting(self, on):
-        """The "Starting the game..." notice in the bottom bar (indeterminate bar) above the summary."""
+        """The "Starting the game..." notice in the bottom bar (an indeterminate bar) above the summary."""
         self.starting = on
         try:
-            if on:
-                self.start_box.pack(side="top", fill="x", pady=(0, 10), before=self.play_btn)
-                self.start_bar.start(12)
-            else:
-                self.start_bar.stop()
-                self.start_box.pack_forget()
-        except tk.TclError:
+            self.start_bar.setRange(0, 0 if on else 1)
+            self.start_box.setVisible(on)
+        except RuntimeError:
             pass
 
     def show_log_tail(self, lines):
@@ -2318,38 +2774,55 @@ class App:
         missing disc, a bad layout) so a problem reported at startup stays visible under the final block."""
         tail = lines[-8:]
         warn = [l for l in lines[:-8] if "warning" in l or "FATAL" in l or "access violation" in l][:6]
-        self.log_text.delete("1.0", "end")
-        self.log_text.insert("1.0", "\n".join(warn + (["..."] if warn else []) + tail))
+        self.log_text.setPlainText("\n".join(warn + (["..."] if warn else []) + tail))
 
     def copy_log(self):
         """Whole log file to the clipboard (what to paste in a bug report)."""
         try:
-            text = open(self.log_path, encoding="utf-8", errors="replace").read() if self.log_path else self.log_text.get("1.0", "end")
+            text = open(self.log_path, encoding="utf-8", errors="replace").read() if self.log_path else self.log_text.toPlainText()
         except OSError:
-            text = self.log_text.get("1.0", "end")
-        self.root.clipboard_clear()
-        self.root.clipboard_append(text)
+            text = self.log_text.toPlainText()
+        QApplication.clipboard().setText(text)
         self.say(tr("s.copied", len(text.splitlines())), "info")
 
     def stop(self):
         if self.proc and self.proc.poll() is None:
             self.proc.terminate()
 
-    def on_close(self):
+    def closeEvent(self, e):
         if self.editor_open():
             self.editor.close()         # asks about unsaved edits; No keeps both windows open
             if self.editor_open():
+                e.ignore()
                 return
         self.collect()
         self.stop()
-        self.root.destroy()
+        e.accept()
+
+
+def make_app(argv=None):
+    QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    app = QApplication.instance() or QApplication(argv if argv is not None else sys.argv)
+    app.setStyle(QStyleFactory.create("Fusion"))
+    f = QFont(app.font())
+    if os.name == "nt":
+        fams = set(QFontDatabase.families())
+        for fam in ("Segoe UI Variable Text", "Segoe UI"):
+            if fam in fams:
+                f.setFamily(fam)
+                break
+    f.setPointSizeF(10)
+    app.setFont(f)
+    app.setApplicationName("Tombi! launcher")
+    return app
 
 
 def main():
-    root = tk.Tk()
-    App(root)
-    root.mainloop()
+    app = make_app()
+    w = App()
+    w.show()
+    return app.exec()
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
