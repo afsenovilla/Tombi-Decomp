@@ -15,10 +15,11 @@
   tools/build_full.py and marked complete by tools/build_report.py; remaining:) split each object's
   `.data`/`.rodata` out of the retail binary (roadmap step 4, segment split), keeping the linked
   executables byte-identical. Long, mechanical background task; start after the struct/type work.
-- **Free-form event titles (code mod).** Change `spawnEventTitle` (src/spawnEventTitle.c) so it lays out the
-  letters from the text itself (centred lines, a gap per space, `{NL}` breaks, tile animation kept) instead
-  of the fixed per-title layout lists in the overlays; build a modified MAIN0 and let the text editor put it
-  in the ISO. Then titles can have any length. Same idea for other text limits once more code is clean.
+- **Free-form event titles (code mod).** Done for the native port (docs/PORT.md "Free-form event titles": the
+  port lays the letters out from the text and a layout tail the text tools write; `"freeTitles": true` patches may
+  be longer than the lists). Still open for the console: a modified MAIN0 (`spawnEventTitle` reading the same tail)
+  that the text editor puts in the ISO; until then the console shows the first letters of a longer title
+  (`check_text_patch.py` warns). Same idea for other text limits once more code is clean.
 - **Japanese version (Ore no Tomba).** Next project: a matching decomp of the Japanese release reusing the PAL work.
   Split its executable(s), then auto-match functions against the PAL sources by masked byte hashes (as done for the
   overlay duplicates) and port the C; expect most game code to transfer, with differences in the text/font system

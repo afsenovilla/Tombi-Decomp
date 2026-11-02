@@ -126,6 +126,8 @@ def make(proj, author="", title="", notes=""):
     p = {"format": FORMAT, "version": VERSION, "title": title, "author": author, "notes": notes,
          "created": time.strftime("%Y-%m-%d"), "disc": disc_id(proj.src.image) if proj.src.image else None,
          "verbFirst": bool(proj.verb_first), "edits": edits}
+    if proj.free_titles:
+        p["freeTitles"] = True
     if proj.glyph_shift:
         p["glyphShift"] = proj.glyph_shift
     if proj.menus:
@@ -159,6 +161,8 @@ def merge(patches):
             out = json.loads(json.dumps(p))
             continue
         out["verbFirst"] = out.get("verbFirst") or p.get("verbFirst")
+        if p.get("freeTitles"):
+            out["freeTitles"] = True
         for path, spec in (p.get("menus") or {}).items():        # menu_text.py edits: per file and section, the last wins
             o = out.setdefault("menus", {}).setdefault(path, {})
             for sec, v in spec.items():
@@ -191,6 +195,7 @@ def apply_to_project(proj, patch):
     langs = {C.lang_of(p) for p in patch["edits"]} & set(proj.languages())
     proj.langs |= langs
     proj.verb_first = proj.verb_first or bool(patch.get("verbFirst"))
+    proj.free_titles = proj.free_titles or bool(patch.get("freeTitles"))
     for path, spec in (patch.get("menus") or {}).items():
         proj.menus[path] = spec
     if isinstance(patch.get("glyphShift"), dict):

@@ -276,6 +276,20 @@ def copies(read, names, wfm, lang, ref=None):
         for off, _ in find_blocks(data, counts)[:1]:
             lay = Layout(counts, data, off, name)
             where.update({k: lay.lists[j] for k, j in lay.at.items()})
+        # one list per place: the subset match pairs lists by length, so two titles of the same length could both claim one list
+        # (AREA00/X500.BIN: #86 and #107, 13 letters each); keep the claim whose records equal the reference, else the lower dialogue
+        byoff = {}
+        for k in sorted(where):
+            o = where[k][0]
+            if o in byoff:
+                j = byoff[o]
+                if ref and ref.get(k) == where[k][1] and ref.get(j) != where[j][1]:
+                    del where[j]
+                    byoff[o] = k
+                else:
+                    del where[k]
+            else:
+                byoff[o] = k
         if where:
             out[name] = where
     return out

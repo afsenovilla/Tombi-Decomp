@@ -149,10 +149,11 @@ static void menu_open(void) {
     SPAD32(0x1D4) = saved;
     port_printf("[port] frame %d: menu screen %d opened\n", port_frame, menu_id);
 }
-/* --title FRAME:ID[:start] (debug): spawn the event title banner of event ID of the current area at that frame, as an
+/* --title FRAME:ID[:start|:done] (debug): spawn the event title banner of event ID of the current area at that frame, as an
    event start would (spawnEventTitle = FUN_8005aa74; the letters' layout lists are language data: --lang tests).
    ID may be 0xNN.  With ":start" the whole "event received" sequence runs: the event's flag is cleared and
-   setEventStarted(ID, 0, 0) plays banner, sub-screen message, jingle (sfx 0x2A) and icon, as a script would.
+   setEventStarted(ID, 0, 0) plays banner, sub-screen message, jingle (sfx 0x2A) and icon, as a script would; with ":done"
+   the title is spawned as setEventComplete does (completed = 1: the letters regroup into the "completed" banner).
    It runs from the game loop (port/fixes.txt gameMainTask -> port_title_tick), not from the vblank: spawning the
    banner objects in the middle of a frame corrupted the object lists (side-view areas crashed in drawPlayerSprite). */
 static int title_frame, title_id, title_start, title_due, movie_frame, movie_id;
@@ -161,7 +162,7 @@ void port_title_add(const char *s) {
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
     title_frame = f; title_id = (int)strtol(s, (char **)&s, 0);
-    title_start = !strcmp(s, ":start");
+    title_start = !strcmp(s, ":start") ? 1 : !strcmp(s, ":done") ? 2 : 0;
 }
 /* Event titles of the rebuilt Civilization towns (--civ-test; port/fixes.txt spawnEventTitle).  The MAIN0 table that
    maps event -> title text (0x80080410) has 0xFF for the events the cut towns start with no title of their own: the
@@ -231,10 +232,131 @@ signed char *port_civ_title(int event_id, unsigned char **src, signed char *p) {
     port_printf("[port] civ: event 0x%02X title from text %d (%d letters, %d lines)\n", event_id, idx, n, nl + 1);
     return civ_title_recs;
 }
+/* Free-form event titles (port only; docs/PORT.md "Free-form event titles").  spawnEventTitle makes one tile per record of
+   the title's layout list (overlay data, fixed size: a translation could not be longer than the original) and the
+   "completed" banner from two tables of the executable (K letters, padded with tiles to only 6 in MAIN0's code, so
+   "¡SUPERADO!" lost its last letters, and the padded tiles that came from the hidden row 40 had not settled when they
+   stopped: "DO" a few px low).  The port lays the tiles out itself:
+   - title: the letters of the text.  A text longer than its list carries a layout tail after its letters (written by
+     tools/text_core.py: 0xFFF1, then one word per letter after the first: spaces before it, 0x100 = line break); without
+     one the list gives the places (its hidden records, row >= 40, are no letters).  Lines are centred, a letter is 20 px,
+     a space 10 px, lines 28 px apart upwards from the origin, and a line wider than 310 px wraps at its spaces.
+   - banner (completed = 1): CFNT999 text 0 when it carries a tail (longer than the tables), else the tables' shown
+     entries; always one baseline (y 0), centred.  As many tiles as the longer of the two; a tile without a title letter
+     is the original's padding tile (type 2, starts at the origin), one without a banner letter leaves the screen.
+   out: PORT_TT_N shorts per tile (see the enum); returns the number of tiles. */
+enum { TT_G, TT_X, TT_Y, TT_HAS, TT_BG, TT_BX, TT_BY, TT_FLAG, PORT_TT_N };
+#define PORT_TT_MAX 64
+#define TT_TAIL 0xFFF1
+#define TT_MAXCOL 31                                  /* 310 px: the widest original line ("Fruta deliciosa", 15 letters + 1 space) */
+static int tt_words(const unsigned short *w, int max) { int n = 0; while (n < max && w[n] != 0xFFFF && w[n] != 0xFFFE) n++; return n; }
+/* letters + gap codes from a dialogue with a layout tail: returns the letter count (0 without a tail) */
+static int tt_tail(const unsigned short *w, unsigned short *g, short *gap) {
+    int n = tt_words(w, 256), t, k;
+    for (t = 0; t < n && w[t] != TT_TAIL; t++) ;
+    if (t >= n) return 0;
+    int m = n - t;                                     /* marker + (letters - 1) codes */
+    if (m > PORT_TT_MAX || m > t + 1) return 0;
+    for (k = 0; k < m; k++) { g[k] = w[k] & 0xFFF; gap[k] = k ? (short)w[t + k] : 0; }
+    return m;
+}
+/* places n letters (gap[k]: spaces before letter k, 0x100 = line break) on centred lines, wrapping at maxcol */
+static void tt_place(int n, const short *gap, short *px, short *py, int maxcol) {
+    int start[PORT_TT_MAX + 1], g2[PORT_TT_MAX], nl = 0, k;
+    for (k = 0; k < n; k++) g2[k] = gap[k] & 0xFF;
+    /* explicit lines, then greedy wrap of each at word starts */
+    for (k = 0; k < n; ) {
+        int e = k + 1;
+        while (e < n && !(gap[e] & 0x100)) e++;
+        int ls = k, w = 2, lastws = -1;
+        start[nl++] = ls;
+        for (int j = k + 1; j < e; j++) {
+            int add = 2 + g2[j];
+            if (g2[j]) lastws = j;
+            if (w + add > maxcol) {
+                int b = lastws > ls ? lastws : j;      /* break at the last word start, or inside a too-long word */
+                start[nl++] = b; ls = b; lastws = -1;
+                w = 2; for (int q = b + 1; q <= j; q++) { w += 2 + g2[q]; if (g2[q]) lastws = q; }
+                continue;
+            }
+            w += add;
+        }
+        k = e;
+    }
+    start[nl] = n;
+    for (int li = 0; li < nl; li++) {
+        int a = start[li], b = start[li + 1], w = 0;
+        for (k = a; k < b; k++) w += 2 + (k > a ? g2[k] : 0);
+        int col = -(w / 2), row = -2 * (nl - 1 - li);
+        for (k = a; k < b; k++) {
+            if (k > a) col += g2[k];
+            px[k] = col * 10; py[k] = row * 14;
+            col += 2;
+        }
+    }
+}
+int port_title_layout(int completed, const signed char *p, const unsigned char *src, short *out) {
+    extern unsigned short D_800804E0[]; extern struct { unsigned short x, y; } D_800804EC[];
+    extern int port_title_k; extern unsigned short port_title_e0[16]; extern struct { unsigned short x, y; } port_title_ec[16];
+    unsigned short tg[PORT_TT_MAX], bg[PORT_TT_MAX]; short gap[PORT_TT_MAX], tx[PORT_TT_MAX], ty[PORT_TT_MAX], bx[PORT_TT_MAX], by[PORT_TT_MAX];
+    int nt = 0, nb = 0, k;
+    const unsigned short *w = (const unsigned short *)src;
+    int ff = 0;
+    if ((nt = tt_tail(w, tg, gap)) > 0) ff = 1, tt_place(nt, gap, tx, ty, TT_MAXCOL);
+    else if (p) {
+        for (k = 0; p[4 * k] != -1 && k < PORT_TT_MAX; k++) {
+            if (p[4 * k + 2] >= 40) continue;          /* a hidden record (title shorter than its list): no letter */
+            tg[nt] = w[k] & 0xFFF; tx[nt] = p[4 * k + 1] * 10; ty[nt] = p[4 * k + 2] * 14; nt++;
+        }
+    } else {
+        nt = tt_words(w, PORT_TT_MAX);
+        for (k = 0; k < nt; k++) { tg[k] = w[k] & 0xFFF; gap[k] = 0; }
+        tt_place(nt, gap, tx, ty, TT_MAXCOL);
+    }
+    if (completed == 1) {
+        unsigned char *base = *(unsigned char **)((unsigned char *)port_scratch + 0x39C);
+        const unsigned short *d0 = 0;
+        if (base) { unsigned char *off = base + *(unsigned short *)(base + 8); d0 = (const unsigned short *)(off + *(unsigned short *)off); }
+        if (d0 && (nb = tt_tail(d0, bg, gap)) > 0) {
+            for (k = 1; k < nb; k++) gap[k] &= 0xFF;   /* one line: a break is a space */
+            tt_place(nb, gap, bx, by, TT_MAXCOL);
+        } else {
+            int K = port_title_k ? port_title_k : 6;
+            for (k = 0; k < K && nb < PORT_TT_MAX; k++) {
+                unsigned short gid = port_title_k ? port_title_e0[k] : D_800804E0[k];
+                short x = (short)(port_title_k ? port_title_ec[k].x : D_800804EC[k].x), y = (short)(port_title_k ? port_title_ec[k].y : D_800804EC[k].y);
+                if (y == 400) continue;                /* a letter the banner does not show (shorter text) */
+                bg[nb] = gid; bx[nb] = x; by[nb] = 0; nb++;
+            }
+            if (nb) {                                  /* centred on x 0 */
+                int lo = bx[0], hi = bx[0];
+                for (k = 1; k < nb; k++) { if (bx[k] < lo) lo = bx[k]; if (bx[k] > hi) hi = bx[k]; }
+                int sh = (lo + hi) / 2;
+                for (k = 0; k < nb; k++) bx[k] -= sh;
+            }
+        }
+    }
+    int n = nt > nb ? nt : nb;
+    if (n > PORT_TT_MAX) n = PORT_TT_MAX;
+    for (k = 0; k < n; k++) {
+        short *o = out + k * PORT_TT_N;
+        o[TT_HAS] = k < nt;
+        o[TT_G] = k < nt ? tg[k] : 0; o[TT_X] = k < nt ? tx[k] : 0; o[TT_Y] = k < nt ? ty[k] : 0;
+        o[TT_BG] = k < nb ? bg[k] : nb ? bg[0] : tg[0];
+        o[TT_BX] = k < nb ? bx[k] : 0; o[TT_BY] = k < nb ? by[k] : 0;
+        o[TT_FLAG] = k < nb ? 0x80 | (k & 0x7F) : 2;  /* bit 7: becomes a banner letter (l8Type01MoveStep step 6) */
+    }
+    if (port_verbose) port_printf("[port] event title: %d letters%s, banner %d letters%s, %d tiles\n", nt, ff ? " (free-form)" : "", nb, completed == 1 ? "" : " (not completed)", n);
+    return n;
+}
 void port_title_tick(void) {
     if (!title_due) return;
     title_due = 0;
-    if (title_start) {
+    if (title_start == 2) {
+        extern void FUN_8005aa74(int, int, int, int);
+        FUN_8005aa74(title_id, 1, 1, 0);           /* as setEventComplete does: the title, then the "completed" banner */
+        port_printf("[port] frame %d: event title 0x%02X spawned completed\n", port_frame, title_id);
+    } else if (title_start) {
         extern unsigned char SCRIPT_FLAGS[]; extern unsigned char setEventStarted(int, int, int);
         SCRIPT_FLAGS[title_id] = 0;
         setEventStarted(title_id, 0, 0);

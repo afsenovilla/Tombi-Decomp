@@ -153,6 +153,8 @@ class Project:
         self.glyph_shift = {}      # {height: {char: dx}}: glyph bitmaps moved inside their cell in the edited files (W.shift_glyphs)
         self.menus = {}            # title / options menu texts of SYSTEM/OnPTSUB0.BIN (menu_text.py; saved in the project file)
         self.verb_first = False    # item popup order "Obtienes: Rana" (verb_order.py patch of EXE/MAINn.EXE; saved in the project file)
+        self.free_titles = False   # event titles may be longer than their layout lists (the native port lays them out from the text;
+                                   # the console shows only the first letters): "freeTitles" in the project / text patch
 
     def languages(self):
         """Language letters present on the disc, in LANG_NAMES order (unknown ones last)."""
@@ -191,6 +193,9 @@ class Project:
         if key not in self._orig:
             w = self.wfm(path)
             d = w.dialogues[idx]
+            if TL.is_title_file(path) and W.split_title_tail(d.words) is not None:
+                self._orig[key] = W.words_to_text(w, d.words, (W.TITLE_HEIGHT, 0))     # a patched title: its layout tail
+                return self._orig[key]
             lay = self.layout(path)
             lines = lay.lines(idx) if lay else None
             nvis = sum(map(len, lines)) if lines else 0
@@ -234,6 +239,21 @@ class Project:
                 return orig
         return lines
 
+    def console_lines(self, lay, idx, text):
+        """Lines the console's layout list gets: the text's (_effective_lines), cut to the size of the list when the title is longer
+        (free_titles: the console shows the first letters, the native port the whole text)."""
+        lines = self._effective_lines(lay, idx, text)
+        left = len(lay.recs[idx])
+        if sum(map(len, lines)) <= left:
+            return lines
+        cut = []
+        for l in lines:
+            if left <= 0:
+                break
+            cut.append(l[:left])
+            left -= len(cut[-1])
+        return cut
+
     def banner(self, path, idx):
         """Banner tables (title_layout.banner_info) when (path, idx) is dialogue 0 of a CFNT999 file (the "completed" banner), else None."""
         if idx != 0 or not TL.is_title_file(path):
@@ -255,16 +275,23 @@ class Project:
             if b is None:
                 return None
             n = TL.text_to_lines(text)[1]
-            if n > b["k"]:
+            if n > b["k"] and not self.free_titles:
                 return tr("tc.titlelen", n, b["k"])
             return tr("tc.titleempty") if n == 0 else None
         n = TL.text_to_lines(text)[1]
         want = len(lay.recs[idx])
-        if n > want:
+        if n > want and not self.free_titles:
             return tr("tc.titlelen", n, want)
         if n == 0:
             return tr("tc.titleempty")
         return None
+
+    def title_console_cut(self, path, idx, text):
+        """(letters, letters the console shows) of a title longer than its layout list / banner table (allowed with free_titles:
+        the native port lays it out from the text), else None."""
+        want = self.title_max(path, idx)
+        n = TL.text_to_lines(text)[1]
+        return (n, want) if want is not None and n > want else None
 
     def title_max(self, path, idx):
         """Most letters the title can have (the size of its layout list), or None when it has no list."""
@@ -423,7 +450,7 @@ class Project:
     # project file
     def to_json(self):
         return {"version": PROJECT_VERSION, "disc": os.path.basename(self.src.path), "languages": sorted(self.langs),
-                "link": self.link, "verbFirst": self.verb_first, **({"menus": self.menus} if self.menus else {}), "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
+                "link": self.link, "verbFirst": self.verb_first, **({"freeTitles": True} if self.free_titles else {}), **({"menus": self.menus} if self.menus else {}), "edits": {p: {str(i): t for i, t in sorted(e.items())} for p, e in sorted(self.edits.items())}}
 
     def load_edits(self, data, replace=True):
         """data: {"edits": {path: {idx: text}}} (project) or {path: {idx: text}} (export). Returns (applied, problems)."""
@@ -434,6 +461,7 @@ class Project:
                 self.link = data["link"]
             if isinstance(data.get("verbFirst"), bool):
                 self.verb_first = data["verbFirst"]
+            self.free_titles = bool(data.get("freeTitles"))
             self.menus = dict(data["menus"]) if isinstance(data.get("menus"), dict) else {}
             if isinstance(data.get("languages"), list):
                 self.langs = {str(l).upper() for l in data["languages"]} & set(self.languages()) or {LANG_MAIN}
@@ -510,6 +538,12 @@ class Project:
                         # shorter "completed" banner: keep dialogue 0 at K glyph words like the original (a shorter dialogue 0
                         # left the native port on NOW LOADING); _banner_patches only shows the first letters, the rest go off screen
                         words = words + [words[0]] * (self.banner(path, 0)["k"] - len(words))
+                    if words and TL.is_title_file(path) and ((lay is not None and idx in lay.recs) or (idx == 0 and self.banner(path, 0) is not None)):
+                        # the native port's free-form titles: the text's own layout after the letters (and the padding), which the
+                        # console never reads (it takes one letter per record of the list); words_to_text reads it back
+                        lines = TL.text_to_lines(text)[0] if idx else self._single_line(text)
+                        if sum(map(len, lines)) == len(W.text_to_words(w, text, d.font, self.pool())):
+                            words = words + W.title_tail(lines)
                     d.words = words
                 except W.WfmError as ex:
                     errors.append("%s #%d: %s" % (path, idx, ex))
@@ -586,10 +620,10 @@ class Project:
                 if prob:
                     errors.append("%s #%d: %s" % (path, idx, prob))
                     continue
-                lines = self._effective_lines(lay, idx, text)
-                if lines == lay.lines(idx):
-                    continue                    # same spacing as the original: nothing to write
+                lines = self.console_lines(lay, idx, text)
                 old = lay.recs[idx]
+                # written even when the I?NFO list already has this spacing: a per-area copy may not (AREA00/X500.BIN #69 "El adivino
+                # rojo" on two lines); patch_files only changes the copies that differ
                 recs = TL.pad_records(TL.lines_to_records(lines, [r[2] for r in old]), old)
                 new.setdefault(lang, (self.wfm(path), {}, {}))[2].update(lay.recs)
                 prev = new[lang][1]
@@ -669,8 +703,13 @@ class Project:
             if path not in files:
                 continue
             words = W.decode(files[path]).dialogues[0].words        # the words as stored in the encoded file
+            tl = W.split_title_tail(words)
+            if tl is not None:
+                words = tl[0]                                       # the letters (no padding, no layout tail)
             gaps = [g for l in self._single_line(text) for g in l]
             words = words[:len(gaps)]                               # drop the padding words (encode_edited)
+            k = self.banner(path, 0)["k"]
+            words, gaps = words[:k], gaps[:k]                       # free_titles: the console's tables hold the first K letters
             if len(gaps) != len(words):
                 errors.append("%s #0: %s" % (path, tr("tc.titleempty")))
                 continue

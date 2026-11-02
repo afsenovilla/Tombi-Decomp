@@ -1942,6 +1942,43 @@ Command line: `python3 tools/data_patch.py apply data PATCH.tombipatch.json [--d
 folder, and the standard test (`--data --lang 5`, 3600 frames) shows the patched AREA00 dialogue; the moved files
 (AREA02/10/18/19) were not reached in a run.
 
+### Free-form event titles (`spawnEventTitle`, `port_title_layout` in `shims/psyq.c`)
+
+On the console an event title (the flying letter tiles, CFNT999 text N) gets one tile per record of its layout list
+(`u8 0, s8 col, s8 row, u8 flags` in the overlays, `tools/title_layout.py`), and the "completed" banner (CFNT999 #0)
+is made from two tables of the executable (K glyph ids and K positions). The lists are fixed-size overlay data, so a
+translation could never be longer than the original title, and every per-area copy of a list must match it. The port
+lays the tiles out itself (PORT2 block of `src/spawnEventTitle.c`; the objects, their fields, animation and timing are
+the original's, the original loops are not reached):
+
+* **Title:** the letters of the text. A title longer than its list carries a *layout tail* after its letters
+  (written by `tools/text_core.py` for every edited title: `0xFFF1`, then one word per letter after the first: the
+  spaces before it, `0x100` = line break; `wfm_py.title_tail` / `split_title_tail`, and `words_to_text` reads it back
+  as spaces and `{NL}`). The console takes one letter per record of its list and never reads past them, so the tail
+  costs it nothing. Lines are centred, a letter 20 px, a space 10 px, lines 28 px apart going up from the origin; a
+  line wider than 310 px (the widest original line, *Fruta deliciosa*) wraps at its last space. A title without a tail (the disc's own) keeps its list,
+  minus the hidden records (row >= 40: the surplus of a shorter title, which are no letters).
+* **Banner** (`completed = 1`): CFNT999 #0 when it carries a tail, else the executable's table (`port_title_e0/ec` of
+  the loaded MAINn, `runtime/lang.c`) without its hidden entries (y = 400); always one baseline (y 0), centred. As many
+  tiles as the longer of title and banner: a tile with no title letter is the original's padding tile (type 2, starts
+  at the origin), one with no banner letter leaves the screen. Fixed by this: MAIN0's code padded the banner to only 6
+  tiles (`cnt < 6`, K of English), so with the Spanish table (K 11) `¡SUPERADO!` lost its last letters after every
+  short title (`¡SUPERAD` after *¡Sonríe!*, `¡SUPERADO` after *Llorica*), and the tiles that came from the hidden row
+  40 had not settled when their glide ended (`D`/`O` a few px low). Also fixed: AREA04's own copy of the list of
+  *Pantalón de Charles* has the 13 records of the English one-line title (retail data), which drew `Pantalon deCha`;
+  with the tail the text decides.
+* Widescreen: the tiles still start past the wide frame's edge (`port_ws_cull + 160`), as before.
+* `--title FRAME:ID:done` (debug) spawns the title as `setEventComplete` does (title, then the banner);
+  `-v` logs `event title: N letters (free-form), banner K letters, T tiles`.
+
+The text tools: a patch with `"freeTitles": true` (es_mejorada) may have titles longer than their lists
+(`Project.free_titles`): `check_text_patch.py` lists them as *console ISO* warnings (the console's lists and banner
+tables get the first letters of the text, laid out as the text says; the port shows the whole text). Without the flag
+the old limits stay errors. The title list copies are matched one list per place (`title_layout.copies`: two titles of
+the same length could both claim one subset list, AREA00/X500.BIN #86 / #107), and every copy of an edited title is
+rewritten even when the I?NFO list already had the spacing (X500's *El adivino rojo* is on two lines).
+Verified headless (AREA02 s0, whose I0NFO table has every event): scratchpad `event_titles_fixed.png`.
+
 ### CHD images (`tools/chd.py`)
 
 The launcher and `extract_data.py` also take a MAME CHD (v5) CD image: `chd.ChdFile` decompresses track 1 on the fly

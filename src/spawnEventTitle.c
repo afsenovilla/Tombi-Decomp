@@ -169,6 +169,78 @@ void FUN_8005aa74(int event_id, int completed, int duration, int state)
     D_8009BC9B = 1;
     once = 0;
     cnt = 0;
+#ifdef PORT2
+    /* free-form titles and banner: the tiles' places come from port_title_layout (port2/shims/psyq.c), the objects are
+       made as below (same fields, animation and timing); the original loops are not reached */
+    { extern int port_title_layout(int, const s8 *, const u8 *, short *);
+      extern int port_ws_cull; extern unsigned short D_800804E0[];
+      short tt[64 * 8], *t;
+      int nt = port_title_layout(completed, p, src, tt), k;
+      for (k = 0, t = tt; k < nt; k++, t += 8) {
+        obj = (u8*)allocObjectLayer1();
+        if (obj == NULL) continue;
+        obj[0] = t[3] ? 1 : 2;
+        obj[2] = 1;
+        obj[0xD] = 1;
+        *(s16*)(obj + 8) = 0x7D16;
+        obj[3] = completed;
+        *(s16*)(obj + 0x1E) = 0;
+        *(s8*)(obj + 0xF) = -0x5A;
+        *(s16*)(obj + 0x2E) = 1;
+        obj[0x1C] |= 0x80;
+        *(s16*)(obj + 0x20) = duration;
+        *(int*)(obj + 0xA0) = (int)(*(char **)&SPAD.p33c + *(int *)(*(char **)&SPAD.p33c + 4));
+        if (event_id == 1) {
+            *(int*)(obj + 0x10) = (x - 0xA0) << 16;
+            *(int*)(obj + 0x14) = y << 16;
+            *(int*)(obj + 0x18) = (PLAYER.obj.z.p.whole + 10) << 16;
+        } else {
+            /* --widescreen: start past the wide edge (see the loop below) */
+            int d = port_ws_cull ? port_ws_cull + 160 : 0;
+            *(int*)(obj + 0x10) = (D_800804D8[1] + d) << 16;
+            *(int*)(obj + 0x14) = D_800804D8[2] << 16;
+            *(int*)(obj + 0x18) = 0;
+        }
+        *(int*)(obj + 0x30) = *(int*)(obj + 0x10);
+        *(int*)(obj + 0x34) = *(int*)(obj + 0x14);
+        *(int*)(obj + 0x38) = *(int*)(obj + 0x18);
+        obj[0xC] = i++;
+        *(u16*)(obj + 0xBC) = t[0];
+        *(u16*)(obj + 0xC0) = t[4];
+        *(s16*)(obj + 0xC4) = t[1];
+        *(s16*)(obj + 0xC6) = t[2];
+        *(u16*)(obj + 0xC8) = t[5];
+        *(u16*)(obj + 0xCA) = t[6];
+        *(u16*)(obj + 0xCC) = t[7];
+        *(u16*)(obj + 0xCE) = 0;
+        if (D_8009C618[0] != 3 && done == 0) {
+            if (state != 0) {
+                *(u16*)(obj + 0xD0) = D_8009BC98[0xF];
+                D_8009BC98[0xF] = 1;
+                D_8009BCAA = 1;
+                if (state != 4 && (PLAYER.obj.unk9E == 0 || ((u8 *)&PLAYER)[0xAC] < 2)) {
+                    PLAYER.obj.state = 5;
+                    PLAYER.obj.subState = 0;
+                    PLAYER.obj.step = 0;
+                    PLAYER.obj.unk7 = 0;
+                } else if (D_8009BCA8 == 0) {
+                    D_8009BCA6 = 1;
+                }
+                *(u16*)(obj + 0xCE) = state;
+            }
+            *(u16*)(obj + 0xCE) |= 0x8000;
+            done = 1;
+        }
+        if (event_id == 0xF && completed == 1 && once == 0) {
+            once = 1;
+            *(u16*)(obj + 0xD2) = 0x27;
+            *(u16*)(obj + 0xCE) = 0x8002;
+        } else {
+            *(u16*)(obj + 0xD2) = 0;
+        }
+      }
+      return; }
+#endif
     for (; p[0] != -1; p += 4) {
         obj = (u8*)allocObjectLayer1();
         if (obj != NULL) {

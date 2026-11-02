@@ -16,7 +16,9 @@ There are no character codes in the file: a glyph is a bitmap. tools/wfm_charmap
 (made by tools/wfm_charmap_gen.py), so text can be shown and written as normal strings.
 
 Event titles (24 px glyphs, CFNT999*) hold only their letters: the gaps between words and the line breaks are stored in the code overlays
-(tools/title_layout.py); text_to_words ignores ' ' and {NL} for that font.
+(tools/title_layout.py); text_to_words ignores ' ' and {NL} for that font.  An edited title may be followed by a layout tail for the
+native port's free-form titles (title_tail: 0xFFF1, then per letter after the first its spaces, 0x100 = line break); the console reads
+only as many letters as its layout list has, never the tail; words_to_text turns a tail back into spaces and {NL}.
 
 Text syntax (what words_to_text writes and text_to_words reads; real line feeds are cosmetic and ignored when encoding):
   plain characters            glyphs with a known character
@@ -219,7 +221,44 @@ def detect_font(w, words):
     return (8, max(ks, key=ks.get)) if ks else ((w.glyphs[0].height, w.glyphs[0].clut) if w.glyphs else (8, 0))
 
 
+TITLE_TAIL, TAIL_NL = 0xFFF1, 0x100
+
+
+def title_tail(lines):
+    """Layout tail of a title laid out as `lines` (title_layout.text_to_lines: [[spaces before each letter]])."""
+    out = [TITLE_TAIL]
+    for li, gaps in enumerate(lines):
+        for j, g in enumerate(gaps):
+            if li == 0 and j == 0:
+                continue
+            out.append(TAIL_NL if j == 0 else min(g, 0xFF))
+    return out
+
+
+def split_title_tail(words):
+    """(letter words, [spaces before each letter or TAIL_NL]) of a title dialogue with a layout tail, or None."""
+    if TITLE_TAIL not in words:
+        return None
+    t = words.index(TITLE_TAIL)
+    codes = list(words[t + 1:])
+    if len(codes) + 1 > t:
+        return None
+    return list(words[:len(codes) + 1]), [0] + codes
+
+
 def words_to_text(w, words, font):
+    if font and font[0] == TITLE_HEIGHT:
+        tl = split_title_tail(words)
+        if tl is not None:
+            letters, gaps = tl
+            parts = []
+            for k, v in enumerate(letters):
+                if k and gaps[k] == TAIL_NL:
+                    parts.append("{NL}\n")
+                elif k:
+                    parts.append(" " * gaps[k])
+                parts.append(words_to_text(w, [v], font))
+            return "".join(parts)
     out, i, n = [], 0, len(words)
     while i < n:
         v = words[i]

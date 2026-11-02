@@ -5,9 +5,11 @@ For every edited dialogue:
   - the text encodes (known tags, glyphs that exist in the PAL fonts): Project.validate; a character the file's own
     font lacks is added from another file's font of the same height, like the editor does (listed as a note; with
     --strict-glyphs it is an error); a character no font of the disc has (':' at 16 px, '%', ...) is always an error
-  - the preview checks of the editor (text_preview): no line wider than the box, no page with more lines than the box
-    height allows, no page over 128 glyphs (a problem the original already had is tolerated, a new one is not)
-  - event titles: no more letters than the layout list (Project.title_problem), and every copy of the list (the I?NFO blocks
+  - the preview checks of the editor (text_preview): no line wider than the box (always: the original's own overflows do not
+    excuse ours), no page with more lines than the box height allows, no page over 128 glyphs (for these two a problem the
+    original already had is tolerated, a new one is not)
+  - event titles: no more letters than the layout list (Project.title_problem; with "freeTitles": true in the patch a longer title
+    is allowed: the native port lays it out from the text, the console shows its first letters, listed as console warnings), and every copy of the list (the I?NFO blocks
     and the per-area copies in X?NN, title_layout.copies) laid out as the text says (words not split, no leftover tiles); the "completed" banner (CFNT999 #0) at
     most as many letters as the executable's banner table (text_core pads a shorter one to that size)
   - control codes are kept: the sequence of tags other than {NL} and {BOX} (pauses, {WAIT}{CLEAR} pages, colours, voices,
@@ -40,6 +42,8 @@ MAX_W = 312
 ONE_LINE_W = 256
 STRICT_GLYPHS = False  # --strict-glyphs: a character the file's own font lacks is an error
 NOTES = []
+CONSOLE_SEEN = set()
+CONSOLE = []         # freeTitles: titles longer than the console's layout lists (warnings: the native port shows them whole)
 VERB_FIRST = False   # set from the patch: the executable patch (verb_order.py) then follows the verb box widths
 TAG = re.compile(r"\{[^}]*\}")
 
@@ -60,16 +64,21 @@ def box(text):
     return (int(m.group(1)), int(m.group(2))) if m else None
 
 
-def problems_of(wc, words):
-    """Kinds of preview problems: {'wide', 'lines', 'chars'} (same rules as text_preview.render)."""
+def problems_of(wc, words, detail=None):
+    """Kinds of preview problems: {'wide', 'lines', 'chars'} (same rules as text_preview.render). detail (a list) gets a readable
+    note per problem: page, line, width and how many px stick out of the box."""
     pages, bx = P.paginate(wc, words)
     out = set()
-    for p in pages:
+    for pn, p in enumerate(pages, 1):
         lines = p.lines[:-1] if len(p.lines) > 1 and not p.lines[-1] else p.lines
         if bx:
             bw, bh = bx
-            if any(p.width(i) > bw - 2 * P.MARGIN for i in range(len(lines))):
-                out.add("wide")
+            for i in range(len(lines)):
+                if p.width(i) > bw - 2 * P.MARGIN:
+                    out.add("wide")
+                    if detail is not None:
+                        detail.append("page %d line %d is %d px wide, the box holds %d (%d px out: \"%s\")" % (
+                            pn, i + 1, p.width(i), bw - 2 * P.MARGIN, p.width(i) - (bw - 2 * P.MARGIN), "".join(g.char or "?" for g in lines[i])))
             if len(lines) > (bh - 2 * P.MARGIN) // P.LINE_STEP:
                 out.add("lines")
         if p.glyphs > P.GLYPH_LIMIT:
@@ -93,11 +102,19 @@ def check_entry(proj, path, idx, text):
     tp = proj.title_problem(path, idx, text)
     if tp:
         errs.append("title: %s" % tp)
+    cut = proj.title_console_cut(path, idx, text) if not tp else None
+    if cut and (os.path.basename(path), idx) not in CONSOLE_SEEN:     # freeTitles: fine in the native port, cut on the console
+        CONSOLE_SEEN.add((os.path.basename(path), idx))
+        CONSOLE.append("%s #%d (and its copies in the other areas): %d letters, the console's layout shows only the first %d (the native port lays out the whole text)" % ((path, idx) + cut))
     if proj.title_max(path, idx) is None:          # ordinary dialogue
         ow, owc = proj.words(path, idx, orig)
-        new = problems_of(wc, words) - problems_of(owc, ow)
+        detail = []
+        # a line wider than its box is always an error in our text (the game draws past the frame: "direcc|ión" in the
+        # swimming lesson, AREA10/MFNT100S #238-243, slipped through while a 'wide' page of the original excused any other);
+        # too many lines or glyphs on a page only when the original did not have that problem already
+        new = (problems_of(wc, words, detail) - (problems_of(owc, ow) - {"wide"}))
         if new:
-            errs.append("preview: " + ", ".join(sorted(new)))
+            errs.append("preview: " + ", ".join(sorted(new)) + ("" if not detail else " (" + "; ".join(detail) + ")"))
         b, ob = box(text), box(orig)
         if (b is None) != (ob is None):
             errs.append("BOX added/removed")
@@ -176,21 +193,18 @@ def title_copies(proj, read_new, names):
         if lay is None:
             continue
         lang = C.lang_of(path)
-        ref = {}
-        for q in proj.src.names():
-            if TL.is_title_file(q) and C.lang_of(q) == lang and proj.layout(q):
-                ref.update(proj.layout(q).recs)
+        ref = dict(lay.recs)        # the reference Project._title_patches gives TL.patch_files: the same copies are matched
         orig = TL.copies(proj.src.read_any, names, proj.wfm(path), lang, ref)
         for idx, text in sorted(e.items()):
             if idx not in lay.recs:
                 continue
-            want = proj._effective_lines(lay, idx, text)
+            want = proj.console_lines(lay, idx, text)
             for name, where in sorted(orig.items()):
                 if idx not in where or (name, idx, text) in seen:
                     continue
                 seen.add((name, idx, text))
                 got = TL.parse_list(read_new(name), where[idx][0])
-                n = TL.text_to_lines(text)[1]
+                n = min(TL.text_to_lines(text)[1], len(where[idx][1])) if proj.free_titles else TL.text_to_lines(text)[1]
                 if got is None or len(got) != len(where[idx][1]):
                     out.append("%s #%d: the copy in %s has %s records, the list %d" % (path, idx, name, len(got or ()), len(where[idx][1])))
                 elif len(where[idx][1]) < n:
@@ -240,6 +254,7 @@ def main():
         print("DISC: %s" % e)
         bad += 1
     proj = C.Project(C.Source(a.disc))
+    proj.free_titles = bool(patch.get("freeTitles"))
     n = 0
     for path, d in sorted(patch["edits"].items()):
         if path not in proj.src.files:
@@ -267,6 +282,11 @@ def main():
         bad += 1
     for note in NOTES:
         print("note:", note)
+    if CONSOLE:
+        print("console ISO: %d event title(s) longer than the console's layout (freeTitles: written whole for the native port, cut "
+              "to the layout's letters in the console executable's data):" % len(CONSOLE))
+        for c in CONSOLE:
+            print("  warning:", c)
     print("%d entries checked, %d with problems" % (n, bad))
     return 1 if bad else 0
 
