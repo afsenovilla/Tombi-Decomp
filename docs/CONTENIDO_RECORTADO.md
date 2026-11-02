@@ -289,3 +289,81 @@ No encontrado (2026-10-30, no volver a buscar): ninguna linea de dialogo ni regi
 忘れもの) o 22 (地下ロウの大ドロボウ), ni ningun id fuera de 1-4, 6, 9-11, 13; DATA003/DATA004 no generan ningun tipo de objeto
 ausente del pueblo; no hay selector de salas de depuracion en TOMBA.EXE; el area 1 no tiene lista de carga. Detalles:
 PREPRE8.md "Event ids from data, and the rooms".
+
+## Busqueda en el codigo, 2 de noviembre de 2026 (Torre de flores, versiones, scripts de animacion sin usar)
+
+Solo analisis estatico: escaneres desechables y desensamblado (capstone), sin commitear. **[V]** verificado en los binarios,
+**[I]** inferido. Nada de esto esta restaurado en el port.
+
+### La zona de la Torre de flores (pregunta de la comunidad: "¿hay mas codigo?")
+- **El interior de la Torre de flores es AREA13 seccion 0** [V]. En PAL X001 `updateAreaScroll` (0x80116990), en el caso de la seccion 4
+  (Plaza de la caridad, AREA01 s4): mientras `GAME.playerAP > 999999` **y** `GCD.bce48 != 0` (= evento 164 "La Torre de flores"
+  iniciado, byte 0x8009CDA4 + 0xA4), si Tombi esta en x 0xB5C..0xB7B, el juego lo hace caminar hacia el fondo (x 0xB6C, profundidad >= 0x8D1).
+  A los 60 fotogramas pone `nextArea 0x0D / seccion 0 / punto 0`. Es la unica escritura de `nextArea = 13` del juego (revisamos
+  todas las de src/). El limite es la constante 999999 (`lui 0xF` + `0x423F`), asi que hacen falta **1.000.000 PA**. JP X01
+  tiene la misma constante (0x80116238) [V]. La pista en el juego es la frase del guardian MFNT010 (2,126): "si quieres entrar en la torre,
+  ¡vas a necesitar muchos PA!".
+- **La sala tiene un solo objeto** [V] (`tools/objects.py list --area 13`): un objeto de item, capa 5 tipo 4, subtipo 132 en
+  (160, -470). Su recompensa es la 1 = `rewardItem`, es decir, el item 0x84 **Pez sagrado** (MFNT #135). No hay NPC, ni enemigo, ni evento.
+  En s0, X013 `updateAreaScroll` (0x80115FB4) solo espera a que Tombi entre en la salida de x 0xA0 y lo devuelve a
+  AREA01 s4, punto 4.
+- **No hay mas codigo de la torre** [V]. La parte de area de X013 son 27 funciones y 10 KB en total (scroll, paso de llevar al jugador,
+  sprites de fondo, Comida de pez poderoso, la secuencia de s1 y las estadisticas del final). Nuestro escaneo de funciones muertas de X013 solo
+  encuentra sin referencia el auxiliar `func_801174C4`, que llevan todos los overlays. `MFNT130` tiene 208 lineas: el grupo 0 (sistema/items) mas un
+  relleno `..........???` (#207), sin ningun dialogo. La seccion 1 es el final (evento 0 "El brazalete del abuelo", `S_END`).
+  El nombre `AREA13_PIGISLAND` de las fuentes viene de las constantes de psx_tomba. En los datos, el area es "cima de la Torre de flores + final".
+- Restaurable: no falta nada. El titulo del evento en la beta, "The Million Tower" (docs/BETA_980203.md), alude a esta
+  puerta del millon de PA [I].
+
+### Versiones: codigo presente en una sola
+- **USA (SCUS-94236) frente a PAL** [V]: pasamos `tools/xmatch.py` + `tools/fn_vs_pal.py` por el exe USA y los 17 `SYSTEM/Xnn.BIN` (base
+  0x800E8028, la misma que PAL). Todas las piezas de >= 300 B con similitud < 40 son bloques de datos. **No hay codigo exclusivo de USA en los
+  overlays de area.** No comparamos INFO/DSPSUB/GOVER/OPTSUB.
+- **JP final dibuja las estadisticas del final con la fuente de depuracion** [V]: en JP `X13.BIN`, `updateSceneSequence` (0x801162DC) llama a
+  `sprintf` + `drawDebugText` con `TIME  %3d:%2d`, `AP    %8ld`, `EVENT %3d / %3d` (fichero +0x2B718). PAL/USA dibujan los mismos
+  numeros con sprites de glifos (`drawGameStats` 0x801179B4). El exe JP tambien escribe `TRY AGAIN...`, ` GAME OVER ` y `NOW LOADING`
+  con `drawDebugText` (0x8001A1D8, 0x8001C0C4, 0x8001B864). PAL usa graficos para ellos.
+- **Codigo por area de JP** [V el metodo, I el veredicto]: las piezas de baja similitud que leimos (X04 0x80117938, X03 0x8011D630, X10
+  0x8011C81C, X09 0x8011F65C, X01 0x80123014, X06 0x80117AB4) son codigo de jugador / colision / bloques de modelo reescrito, con las mismas llamadas.
+  No hay ninguna funcion exclusiva de JP salvo las estadisticas de X13.
+- **Correccion a docs/BETA_980203.md ("Glyph scene object", beta 0x8002F084):** la funcion esta en PAL. Es MAIN0
+  0x8002CF40..0x8002DC50 (3344 B), la entrada 0x80079C14 de la tabla del pool de objetos (justo despues de `dispatchMsgBoxHandler`). Llama a `loadMessageGlyph`,
+  `freeMessageGlyphs` x4, `GetClut`, `openMenuScreen`, `SfxPlay2` x3 y las llamadas de matrices [V]. En USA esta en 0x8002FA24. Se paso por alto porque
+  `notes/functions_main0.csv` y la tabla de simbolos se la saltan (`clearTalkPose` acaba en 0x8002CF40), asi que no tiene nombre. No es codigo recortado.
+
+### Funciones y handlers muertos (segunda pasada)
+Nuestro grafo de llamadas reproduce el barrido de zombis de arriba. De las funciones de parte de area de >= 150 B que lista, 66 no estan mencionadas en este fichero. Todas menos una
+son copias de switch de pasos con un gemelo vivo (p. ej. X005 `mansionKeyHintTalk` = la misma linea (2,0x33) que `stepBacoTownNpcTalk`;
+X016 `stepJuiceSellerTalk`, `stepBrokenStoneGearsTalk`; X004 `stepBigKeyPainting`; X001 `stepRaceEvent`) o auxiliares. La excepcion:
+- **X001 `segmentedCrawlerWander` (0x801334DC, 1352 B)** [V sin referencia; I el papel]: una patrulla fija del gusano segmentado (AREA01):
+  sube (angulo 0xC0), gira, corre a la derecha hasta x >= 0x551, vuelve, corre a la izquierda hasta x < 0x118, y asi sucesivamente. Los segmentos del cuerpo le siguen y usa su propia
+  tabla de 12 animaciones direccionales. El `updateSegmentedCrawler` vivo hace switch sobre el subtipo 0..3, pero todos los casos llaman a
+  `segmentedCrawlerMove`. Esos casos duplicados parecen el sitio donde algun subtipo llamaba a la patrulla [I]. Port: bastaria una llamada (barato), pero ninguna
+  colocacion dice que subtipo ni que sala la usaria.
+
+### Scripts de animacion sin referencia
+Buscamos entradas de animacion de 8 bytes (formato de tools/anim.py) que acaben en 0x8000 o en un salto 0x4000 hacia atras, y nos quedamos solo con las que no
+tienen ningun puntero ni par lui/addiu. Todos estan **entre scripts referenciados de las tablas del mismo objeto**. No identificamos los fotogramas: el corte estatico
+del SPR de esas paginas sale corrupto.
+
+| Overlay | Direcciones | Fotogramas | Dueño por posicion |
+|---|---|---|---|
+| X009 / X011 | 0x8012F144, 0x8012F164, 0x8012F17C / 0x8011C6E4, 0x8011C704, 0x8011C71C | 43-45-44 (bucle), 46-48, 49-50 (fijo) | medusa (AREA09) / pulpo volador (AREA11), tabla compartida (SPR 0x3A). Los fotogramas 42-50 son el unico hueco de los 0..76 que usa [V] |
+| X003 | 0x80139130; 0x8013A074, 0x8013A0A4, 0x8013A0E4, 0x8013A114; 0x8013A194, 0x8013A1A4, 0x8013A1B4 | 12-15; 29-32, 33-35, 38-41, 42-44 (ida y vuelta); 24-25, 26-27, 46-47 | planta saltarina; tablas del aldeano / mono del viento |
+| X004 (tambien AREA12) | 0x80134E7C, 0x80134E9C; 0x801354EC, 0x8013551C, 0x8013554C | 16-19 hacia delante / atras; 185-196 | planta mordedora / humo / coleccionable contado |
+| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | (sin dueño) |
+| X010 | 0x80131DFC, 0x80131E14 | 5-7, 8-10 | sprites de decorado (junto al script de la anguila 0x80131F1C) |
+| X014 | 0x8012A090; 0x8012A58C..0x8012A780 (13 scripts) | 12-20; 9-33, 51-62 | decorado / pilar / vortice de la sala del jefe (`updateBossRoomDecorSprite` solo usa 0-8 y 21) |
+| X002 = X019 | 0x8011F2BC, 0x8011F2CC | 6-7, 8-9 | `updateAnimDecorSprite` |
+
+Solo serian restaurables como decorado: ningun codigo los elige, asi que cada uno necesitaria un dueño y un disparador. El juego de la medusa/pulpo (tres scripts que forman una secuencia: bucle, una vez, fijo) es el
+mejor candidato a animacion recortada de enemigo (ataque o muerte) [I].
+
+### Revisado, nada nuevo
+- **Variables de guardado solo leidas:** cada byte del GCD que algun codigo lee y nadie escribe por direccion absoluta es un elemento del array de eventos
+  (0x8009CDA4 + evento) o del de cantidades de items (0x8009D0A4 + item), que se escriben por indice. No hay ningun flag olvidado.
+- Musica: ya cubierta por `tools/music_refs.py`.
+
+### Sin revisar
+Ids de SFX que nunca suenan (los ids vienen tambien de datos y de tablas de animacion); los pixeles de los fotogramas sin referencia (hace falta una captura
+de VRAM en ejecucion); `X01..X19`, `INFO*`, `DSPSUB*` de la beta (no estan en local); los overlays de sistema de USA/JP frente a PAL.

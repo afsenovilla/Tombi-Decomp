@@ -266,3 +266,91 @@ Source: [PREPRE8.md](PREPRE8.md), "Functions vs PAL". All absent from PAL, JP re
 Not found (2026-10-30, do not re-search): no dialogue line or room record starts events 20 (5つの箱の忘れもの) or 22
 (地下ロウの大ドロボウ), or any id outside 1-4, 6, 9-11, 13; DATA003/DATA004 spawn no object type absent from the village;
 no debug room select in TOMBA.EXE; area 1 has no load list. Details: PREPRE8.md "Event ids from data, and the rooms".
+
+## Code hunt, 2 November 2026 (Flower Tower, versions, unused animation scripts)
+
+Static analysis only: throw-away scanners and Ghidra-free disassembly (capstone), not committed. **[V]** verified in the
+binaries, **[I]** inferred. Nothing here is restored in the port.
+
+### The Flower Tower area (community question: "is there more code for it?")
+- **The inside of the Flower Tower is AREA13 section 0** [V]. PAL X001 `updateAreaScroll` (0x80116990), section 4
+  (Charity Square, AREA01 s4) case: while `GAME.playerAP > 999999` **and** `GCD.bce48 != 0` (= event 164 "The Flower Tower"
+  started, flag byte 0x8009CDA4 + 0xA4), Tombi standing at x 0xB5C..0xB7B is walked into the depth (x 0xB6C, depth >= 0x8D1);
+  after 60 frames the code sets `nextArea 0x0D / section 0 / spawn 0`. That is the only write of `nextArea = 13` in the game
+  (every other `nextArea` store in src/ was checked). The AP check is the constant 999999 (`lui 0xF` + `0x423F`), so you
+  need **1,000,000 AP**. JP X01 has the same constant (0x80116238) [V]. The keeper's line MFNT010 (2,126) "If you wanna get in
+  the tower, you're gonna need lots of AP!!" is the in-game hint.
+- **The room holds a single object** [V] (`tools/objects.py list --area 13`): an item object, layer 5 type 4, subtype 132 at
+  (160, -470). Reward handler 1 = `rewardItem`, so this is item 0x84 **Sacred Fish** (MFNT #135). No NPC, no enemy, no event.
+  X013 `updateAreaScroll` (0x80115FB4) in s0 only waits for Tombi to walk into the exit at x 0xA0 and drops him back into
+  AREA01 s4, spawn point 4.
+- **No more tower code exists** [V]. X013's area part is 27 functions, 10 KB in all (scroll, carry-player step, backdrop sprites,
+  Mighty Fish Food, the s1 scene sequence and the ending stats). Our dead-function scan of X013 finds only the
+  helper `func_801174C4`, which every overlay carries, unreferenced. `MFNT130` has 208 lines: group 0 (system/item text) plus one
+  `..........???` placeholder (#207), with no dialogue at all. Section 1 is the ending (event 0 "Grandpa's Bracelet",
+  `S_END`). The `AREA13_PIGISLAND` name in the sources comes from the psx_tomba constants. In the data the area is
+  "Flower Tower top + ending".
+- Restorable: nothing is missing. The beta's title for the event, "The Million Tower" (docs/BETA_980203.md), refers to this
+  million-AP gate [I].
+
+### Builds: code present in one build only
+- **USA (SCUS-94236) vs PAL** [V]: `tools/xmatch.py` + `tools/fn_vs_pal.py` over the USA exe and all 17 `SYSTEM/Xnn.BIN`
+  (base 0x800E8028, the same as PAL). Every gap piece of >= 300 B with similarity < 40 is a data block (the shared handler
+  tables at 0x800E8028 / 0x80114A38 and the tail data). **No USA-only code in the area overlays.** The INFO/DSPSUB/GOVER/OPTSUB
+  overlays were not compared (xmatch has no PAL index for them).
+- **JP retail draws the ending stats with the debug font** [V]: JP `X13.BIN` `updateSceneSequence` (0x801162DC) calls
+  `sprintf` + `drawDebugText` with `TIME  %3d:%2d`, `AP    %8ld`, `EVENT %3d / %3d` (file +0x2B718). PAL/USA X013 have no
+  format string; they draw the same numbers with glyph sprites (`drawGameStats` 0x801179B4 and helpers). The JP exe also prints
+  `TRY AGAIN...`, ` GAME OVER ` and `NOW LOADING` with `drawDebugText` (0x8001A1D8, 0x8001C0C4, 0x8001B864). PAL draws those
+  from graphics. PAL MAIN0 keeps only the build stamp (`98/8/26 14:10`, 0x80019448) and the area select.
+- **JP retail per-area code** [V for the method, I for the verdict]: `fn_vs_pal.py` over JP X01..X19 (area part from 0x80115178).
+  The low-similarity pieces we read (X04 0x80117938, X03 0x8011D630, X10 0x8011C81C, X09 0x8011F65C, X01 0x80123014, X06 0x80117AB4)
+  are rewritten player / collision / model-block code with the same callees. No JP-only feature apart from the X13 stats above.
+- **Correction to docs/BETA_980203.md ("Glyph scene object", beta 0x8002F084):** the function is in PAL. It is MAIN0
+  0x8002CF40..0x8002DC50 (3344 B), slot 0x80079C14 of the object pool table (right after `dispatchMsgBoxHandler`). It calls
+  `loadMessageGlyph`, `freeMessageGlyphs` x4, `GetClut`, `openMenuScreen`, `SfxPlay2` x3 and the matrix calls [V]. USA has it at
+  0x8002FA24 (table slot 0x8007C718). It was missed because `notes/functions_main0.csv` and the symbol table skip it
+  (`clearTalkPose` ends at 0x8002CF40), so it has no name. It is not cut code.
+
+### Dead functions and handlers (second pass)
+Our call graph over MAIN0, every X0nn, I0NFO 1-3, D0SPSUB 1-3, G0OVER and O0PTSUB0 (jal/j, data words, lui/addiu pairs, MAIN0 words into
+overlay space; closure over dead callers) reproduces the zombie sweep above. Of the area-part functions of >= 150 B it lists, 66 are not
+mentioned in this file. All but one are step-switch copies with a live twin (e.g. X005 `mansionKeyHintTalk` = the
+same (2,0x33) line as the live `stepBacoTownNpcTalk`; X016 `stepJuiceSellerTalk` and `stepBrokenStoneGearsTalk`; X004
+`stepBigKeyPainting`; X001 `stepRaceEvent`) or helpers / D0SPSUB3 copies of D0SPSUB code. The exception:
+- **X001 `segmentedCrawlerWander` (0x801334DC, 1352 B)** [V no reference in X001 or MAIN0; role I]: a fixed patrol for the
+  segmented crawler (AREA01). It heads up (angle 0xC0), turns, runs right until x >= 0x551, turns back, runs left until
+  x < 0x118, and so on. Its body segments follow, and it uses its own 12-entry directional animation table. The live
+  `updateSegmentedCrawler` (0x80134C00) switches on subtype 0..3 but every case calls `segmentedCrawlerMove`. The duplicated cases look like
+  the place where one subtype once called the patrol [I]. Port: one call in a subtype case would restore it (cheap), but no placement
+  tells which subtype or room should use it.
+
+### Unreferenced animation scripts
+Scan of the area-part data of every X0nn for 8-byte animation entries (tools/anim.py format) ending in 0x8000 or a backward
+0x4000 jump, kept only when no data word and no lui/addiu points into them. All of these sit **between referenced scripts of the
+same object's tables** (owners from `tools/anim.py list --owner all`). Frames were not identified: the static SPR cut of these
+pages is garbled.
+
+| Overlay | Address(es) | Frames (SPR of the owner) | Owner by position |
+|---|---|---|---|
+| X009 / X011 | 0x8012F144, 0x8012F164, 0x8012F17C / 0x8011C6E4, 0x8011C704, 0x8011C71C | 43-45-44 (loop), 46-48, 49-50 (held) | jellyfish (AREA09) / flying octopus (AREA11), one shared table (SPR kind 0x3A). Frames 42-50 are the only gap in its 0..76 frame use [V] |
+| X003 | 0x80139130; 0x8013A074, 0x8013A0A4, 0x8013A0E4, 0x8013A114; 0x8013A194, 0x8013A1A4, 0x8013A1B4 | 12-15; 29-32-30, 33-35, 38-41-39, 42-44 (ping-pong); 24-25, 26-27, 46-47 | swaying hop plant; villager / wind-blown monkey tables (0x801399C4..) |
+| X004 (also AREA12) | 0x80134E7C, 0x80134E9C; 0x801354EC, 0x8013551C, 0x8013554C | 16-19 forward / backward; 185-196 | biting plant / smoke / counted collectible tables; the 0x8013540C.. table |
+| X008 | 0x80118504, 0x8011853C | 26-29-26, 30-33 | (no owner found) |
+| X010 | 0x80131DFC, 0x80131E14 | 5-7, 8-10 | decor / parallax sprites (the known eel script 0x80131F1C is nearby) |
+| X014 | 0x8012A090; 0x8012A58C..0x8012A780 (13 scripts) | 12-20; 9-33, 51-62 | boss room decor / pillar / vortex (`updateBossRoomDecorSprite` uses only frames 0-8 and 21) |
+| X002 = X019 | 0x8011F2BC, 0x8011F2CC (X019 0x80116178/88) | 6-7, 8-9 | `updateAnimDecorSprite` |
+
+Restorable only as decoration: no code selects them, so each would need an owner and a trigger. The jellyfish/octopus set
+(three scripts that form one sequence: loop, play once, hold) is the strongest candidate for a cut enemy animation (an attack or death) [I].
+
+### Checked, nothing new
+- **Read-only save variables:** of every GCD byte (0x8009CD00..0x8009D100) that some code reads and none stores by absolute address, every
+  one is an element of the event array (0x8009CDA4 + event) or of the item count array (0x8009D0A4 + item, `subScreenDrawItemNames`),
+  which are written by index. No forgotten flag.
+- Music: `tools/music_refs.py` already shows every sound set and SOUND file reached (docs/CIVILIZATION.md).
+
+### Not checked
+SFX ids never played (the id comes from data and animation tables as well as from immediates; needs a census of
+`playSFX`/`SfxPlay2` arguments plus `D_800780C4`); the pixels of the unreferenced animation frames (needs a run-time VRAM capture);
+the beta's `X01..X19`, `INFO*` and `DSPSUB*` (not on the local disc); the USA/JP system overlays vs PAL.
