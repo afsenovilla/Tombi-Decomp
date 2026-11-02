@@ -99,7 +99,8 @@ class TestLauncher(unittest.TestCase):
             with self.subTest(name):
                 d = self.launcher(name, c["cfg"], c.get("ui", "en"), c.get("data", False))
                 self.w.civ_play = c.get("civ_play")
-                self.assertEqual(self.args(), subst(c["expect"], d))
+                norm = lambda l: [x.replace("\\", "/") if isinstance(x, str) else x for x in l]   # Windows paths
+                self.assertEqual(norm(self.args()), norm(subst(c["expect"], d)))
                 self.w.close()
                 self.w.deleteLater()
                 self.w = None
