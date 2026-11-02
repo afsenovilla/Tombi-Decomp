@@ -623,3 +623,12 @@ src/x001/AnimAdvanceWithBox.c | o->t = o->t - 1; | { extern int port_log_anim; e
 src/x003/AnimAdvanceWithBox.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;
 src/x004/AnimAdvanceWithBox.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;
 src/tickAnimationFixedRate.c | o->t = o->t - 1; | { extern int port_log_anim; extern void port_anim_note(void *, int); if (port_log_anim) port_anim_note(o, 2); } o->t = o->t - 1;
+#
+# --lang: the sub-screens' description banks (WFM3 inside DnSPSUB / DnSPSUB3) are read through the language's whole bank
+# (lang.c port_lang_item): the Spanish one is longer than MAIN0's and cannot always be copied in place over it
+src/d0spsub3/subScreenInitMenu.c | D_1F8003A0 = D_800EF600; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800EF600); }
+src/d0spsub3/subScreenUpdate.c | D_1F8003A0 = D_800EF600; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800EF600); }
+src/d0spsub/subScreenInitMenu.c | D_1F8003A0 = D_800F24E0; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800F24E0); }
+src/d0spsub/subScreenInitMenu.c | D_1F8003A4 = D_800F7B78; | { extern void *port_lang_item(void *); D_1F8003A4 = port_lang_item(D_800F7B78); }
+src/d0spsub/subScreenUpdate.c | D_1F8003A0 = D_800F24E0; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800F24E0); }
+src/d0spsub/subScreenUpdate.c | D_1F8003A4 = D_800F7B78; | { extern void *port_lang_item(void *); D_1F8003A4 = port_lang_item(D_800F7B78); }

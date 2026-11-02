@@ -54,10 +54,48 @@ def _end(data, o):
     raise SubscreenError("unterminated string")
 
 
+def _wfm_spans(d):
+    """[start, end) of the WFM3 dialogue banks embedded in the overlay (DnSPSUB / DnSPSUB3 carry the item and event
+    descriptions of "Ver" as one). Their text is a stream of 0x80nn glyph words, so two of them side by side read as a
+    word 0x80nn80nn: an address inside the overlay. Such words are never pointers and must not be rewritten."""
+    spans, w = [], d.find(b"WFM3")
+    while 0 <= w and w + 148 <= len(d):
+        dpt, nd, ng = struct.unpack_from("<IHH", d, w + 8)
+        end = w + dpt + 2 * nd
+        try:
+            for g in range(ng):
+                gp = struct.unpack_from("<H", d, w + 144 + 2 * g)[0]
+                cw, h = struct.unpack_from("<2H", d, w + gp)
+                end = max(end, w + gp + 8 + (cw * 4 * h + 1) // 2)
+            for i in range(nd):
+                o = w + dpt + struct.unpack_from("<H", d, w + dpt + 2 * i)[0]
+                while o + 2 <= len(d):
+                    c = struct.unpack_from("<H", d, o)[0]
+                    o += 2
+                    if c in (0xFFFE, 0xFFFF):
+                        break
+                end = max(end, o)
+        except struct.error:
+            end = len(d)
+        end = min(end, len(d))
+        spans.append((w, end))
+        w = d.find(b"WFM3", end)
+    return spans
+
+
+def _words(d):
+    """The overlay's 32-bit words, those inside an embedded WFM3 bank read as 0 (never a pointer)."""
+    words = list(struct.unpack_from("<%dI" % (len(d) // 4), d))
+    for a, b in _wfm_spans(bytes(d)):
+        for i in range(a // 4, min((b + 3) // 4, len(words))):
+            words[i] = 0
+    return words
+
+
 def _base(d, anchor):
     """Load address of the overlay: the shift that turns the most pointer words into string starts."""
     import collections
-    words = set(struct.unpack_from("<%dI" % (len(d) // 4), d))
+    words = set(_words(d))
     offs = [o for o, _ in dump(d)]
     c = collections.Counter(w - o for o in offs[::5] for w in words if 0x80000000 <= w < 0x80200000 and (w - o) % 4 == 0)
     best = max(((sum(1 for o in offs if cand + o in words), cand) for cand, _ in c.most_common(10)), default=(0, 0))
@@ -119,7 +157,7 @@ def _event_table(d, base):
     if first is None:
         raise SubscreenError("event list not found")
     nw = len(d) // 4
-    words = struct.unpack_from("<%dI" % nw, d)
+    words = _words(d)
     try:
         i = words.index(base + first)
     except ValueError:
@@ -135,7 +173,7 @@ def apply_event_names(data, names):
     d = bytearray(data)
     base = _base(bytes(d), 0)
     nw = len(d) // 4
-    words = struct.unpack_from("<%dI" % nw, d)
+    words = _words(d)
     table = _event_table(bytes(d), base)
     tset = set(table)
     enc = {encode(o) + struct.pack("<2h", -3, -1): encode(n) + struct.pack("<2h", -3, -1) for o, n in names.items()}
@@ -165,7 +203,7 @@ def _repack(d, hits, new_body):
     pointers. A pool's room runs to the padding after its last string (the -1 / 0 words)."""
     base = _base(bytes(d), hits[0])
     nw = len(d) // 4
-    words = list(struct.unpack_from("<%dI" % nw, d))
+    words = _words(d)
     targets = sorted({w - base for w in words if 0 <= w - base < len(d) and _is_str(d, w - base)})
     runs = set()
     for h in hits:
@@ -224,7 +262,7 @@ def apply_places(data, names):
             raise SubscreenError(str(ex))
     base = _base(bytes(d), 0)
     nw = len(d) // 4
-    words = list(struct.unpack_from("<%dI" % nw, d))
+    words = _words(d)
     strs = {}
     for w in set(words):
         o = w - base

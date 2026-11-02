@@ -49,11 +49,13 @@ const char *port_resident_overlay(void) {
 }
 
 /* the bytes of a WFM3 bank (loadMessageGlyph, subScreenOpenMessage): +8 the offset of the message offset table,
-   +0xE the message count, texts of u16 codes ended by -1, the glyph images (u16 w, h, a, b, w*h texels) at the
+   +0xC the message count (+0xE is the glyph count: read as the message count, D0SPSUB3's bank measured 17176 bytes of
+   22168 and D5SPSUB3's 16008 of 22368, so --lang 5 copied only the head of the Spanish bank in place and the item
+   descriptions past it read garbage, and glyph pairs in the tail were relocated as pointers), texts of u16 codes ended by -1, the glyph images (u16 w, h, a, b, w*h texels) at the
    offsets of the table at +0x90; the bank ends where its last text or glyph image ends.  0: not a bank. */
 unsigned port_wfm3_len(const unsigned char *p, unsigned n) {
     if (n < 0x200 || memcmp(p, "WFM3", 4)) return 0;
-    unsigned off8 = p[8] | p[9] << 8, nmsg = p[0xE] | p[0xF] << 8, end = 0;
+    unsigned off8 = p[8] | p[9] << 8, nmsg = p[0xC] | p[0xD] << 8, end = 0;
     if (off8 < 0x90 || nmsg > 1024 || off8 + 2 * nmsg > n) return 0;
     for (unsigned k = 0; k < nmsg; k++) {
         unsigned t = off8 + (p[off8 + 2 * k] | p[off8 + 2 * k + 1] << 8);

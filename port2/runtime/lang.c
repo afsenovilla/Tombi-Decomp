@@ -495,6 +495,13 @@ void *port_lang_item(void *p) {
     else if (b >= (const unsigned char *)port_x000_image && b < (const unsigned char *)port_x000_image + (PORT_OVL_END - PORT_OVL_BASE) && ovl_cur >= 0 && ovl_ring[ovl_cur].m.nc) {
         m = &ovl_ring[ovl_cur].m; oa = b - (const unsigned char *)port_x000_image; if (oa >= m->na) return p;
     } else return p;
+    /* a WFM3 message bank (the sub-screens' item / event descriptions, read through D_1F8003A0 / D_1F8003A4): the
+       language's whole bank in Bn, also when it could not be copied in place over MAIN0's (named_blobs: D5SPSUB3's
+       22368 bytes would overrun the chunk after D0SPSUB3's 22168) */
+    if (oa + 12 <= m->na && !memcmp(b, "WFM3", 4)) {
+        long ob = a2b(m, oa);
+        if (ob >= 0 && (unsigned)ob + 12 <= m->nb && !memcmp(bn_get(m) + ob, "WFM3", 4)) return bn_get(m) + ob;
+    }
     for (int k = 0; k < m->ng; k++) {
         const Gap *g = &m->g[k];
         if (oa >= g->a && oa < g->a + g->alen && g->alen != g->blen) {
