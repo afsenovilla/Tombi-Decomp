@@ -1,6 +1,7 @@
 // FUNC 800ebe6c 960 D0SPSUB2
 // MATCHING 800ebe6c 960
-// Memory card screen: draws a play time as MMM:SS (t in 1/60 s units; frame 3 is the colon sprite).
+// Memory card screen: draws a play time as HHH:MM (t in 1/50 s units: PAL divides by 50 * 60, the US build by 60 * 60;
+// frame 3 is the colon sprite).
 // Idiom (cf. memCardDrawSignedNumber): the digits are block-scoped temporaries: h100 = h/100, h10 = h/10, m10 = m/10,
 // d4 = m - m10*10, d1 = h10 - h100*10, d2 = h - h10*10 (unsigned char), then `h100 %= 10`, `m10 %= 10` and the
 // stores dg[4], dg[1], dg[2] last; every pseudo dies once so local-alloc ties them into the game's registers.

@@ -71,6 +71,20 @@ void port_pacing_report(void) {
 }
 int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
 int port_hz = 50; extern int port_hfr_fps;                     /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
+/* The 60 Hz mode (docs/PORT.md "60 Hz mode"): the PAL game logic is the NTSC logic frame for frame, so --hz 60 plays at the
+ * US/JP speed; the one PAL change for 50 Hz is the play-time clock (GAME.totalTimePlayed counts gameplay frames and the
+ * PAL builds divide it by 50 * 60 / 50 * 3600: memCardDrawPlayTime, D0SPSUB2 0x800E999C, the ending's x013
+ * updateSceneSequence; the US build divides by 60). Called by the five counters (gameplayMainHandler, areaMode2/4/5/6Handler,
+ * #ifdef PORT2): at 60 Hz the counter skips every sixth tick, so it stays in 1/50 s: the PAL screens show real time and
+ * a save keeps the same units whichever rate it was played at. */
+int port_play_time_tick(void)
+{
+    static int n;
+    if (port_hz != 60) return 1;
+    if (++n < 6) return 1;
+    n = 0;
+    return 0;
+}
 
 static void call_psx(void *fn) { ((void (*)(void))fn)(); }
 

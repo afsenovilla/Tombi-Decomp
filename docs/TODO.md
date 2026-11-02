@@ -31,11 +31,19 @@
   from the recorded draw list with every primitive blended towards where it was in the frame before, on the software
   and OpenGL renderers) but it is experimental and hidden: the *Frame rate* options were removed from both launchers,
   which no longer pass `--fps`; only the command-line flag remains. Offer it again once the 60 Hz mode (PAL game with
-  NTSC timing, see "60 Hz mode" below) plays like the US/JP versions. Still open then: the software renderer manages
+  NTSC timing, see "60 Hz mode" below) plays like the US/JP versions (now the case; waiting for the user's go-ahead). Still open then: the software renderer manages
   about one in-between frame per vblank on a slow CPU; a pre-projection variant would bend fast close-up rotations less.
-- **[All platforms] 60 Hz mode with NTSC timing (port).** `--hz 60` alone runs the PAL logic 20 % faster, which is
-  wrong wherever the PAL build compensated speeds, timers, animation durations or music tempo for 50 Hz. Needed: find
-  every PAL-vs-NTSC (US/JP) timing difference and swap the NTSC values in at run time at 60 Hz (docs/PORT.md "60 Hz").
+- **[All platforms] 60 Hz mode with NTSC timing (port).** Done (docs/PORT.md "60 Hz mode"): the PAL build turned out to
+  have no 50 Hz compensation in its game logic: `tools/ntsc_diff.py` (every PAL function against the USA executable and
+  overlays, 3,330 of 3,529 with a masked twin, every remaining difference read), the data comparison (animation scripts,
+  object tables, the SOUND and MOVIE files identical) and `tools/ntsc_check.py` (SCUS_942.36 run in tools/psxemu next to
+  MAIN0.EXE: the same jump arcs frame for frame) all say the speeds, physics, timers, animation durations and the
+  sequencer are the US build's. The one frame-rate change, the play-time clock (PAL divides by 50), is handled at 60 Hz by
+  `port_play_time_tick` (the counter stays in 1/50 s: real time on screen, saves compatible). The PAL race clock divides
+  by 60 (slow on a 50 Hz console) and is right at 60 Hz. Checked: 96 rooms x 3,600 frames and long random runs give the
+  same frames at 50 and 60 Hz. Left as is on purpose: 60.00 Hz rather than NTSC's 59.94 (0.1 %), the 256-line picture,
+  the PAL-only logic fixes. The condition for offering the high frame rates again (item above) is met; re-enabling the
+  launcher option is the user's call.
 - **[All platforms] Launcher language.** Done: Android *Options > Game > Launcher language* (Auto / nine languages,
   independent of the game language, applied without a restart; docs/PORT.md "Launcher language"), and both launchers
   translated into French, German, Italian, Dutch, Portuguese, Swedish and Danish (res/values-xx,

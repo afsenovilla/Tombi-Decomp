@@ -52,7 +52,11 @@ void areaMode5Handler(void)
         PAD_PRESSED[0] = DAT_8009d674;
         break;
     case 1:
+#ifdef PORT2
+        { extern int port_play_time_tick(void); if (port_play_time_tick()) GAME_TOTAL_TIME_PLAYED[0]++; }   /* --hz 60: play time in 1/50 s */
+#else
         GAME_TOTAL_TIME_PLAYED[0] = GAME_TOTAL_TIME_PLAYED[0] + 1;
+#endif
         areaMode5Tick();
         if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 8) != 0 && (PAD_PRESSED[0] & 0x800) != 0)
             TASK_C->c = 3;

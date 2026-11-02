@@ -38,7 +38,12 @@ void gameplayMainHandler(void)
             *(short*)(&SCRATCHPAD+0x1FC)=0;
             return;
         case 1:
+#ifdef PORT2
+            /* --hz 60: the play time stays in 1/50 s (the PAL divisors, PAL saves), see port_play_time_tick */
+            { extern int port_play_time_tick(void); if (port_play_time_tick()) GAME.totalTimePlayed++; }
+#else
             GAME.totalTimePlayed++;
+#endif
             gameplayTick(temp_a0);
             if (GVARS_PLAYER_HURT_STATE == 2) {
                 temp_v1_2 = *(Task** )(&SCRATCHPAD+0x1D4);

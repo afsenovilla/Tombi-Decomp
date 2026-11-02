@@ -163,7 +163,8 @@ vblank for tests. Verified headless: a save written from the save screen
 1000:right,1050:cross,1450:cross:3`) lists it as "Lv.1 Village of All Beginnings".
 
 **Pacing: `--realtime`, `--hz 50|60`, `--show-fps`, `--stall FRAME:MS`.** One vblank every 1/hz s from the host
-clock (default 50, PAL; 60 gives NTSC timing: the game logic runs 20% faster, as on an NTSC console). `--window`
+clock (default 50, PAL; 60 gives NTSC timing: the game logic runs 20% faster, as on an NTSC console, which is the
+US/JP game's speed since PAL changed no game constant for 50 Hz: "60 Hz mode"). `--window`
 implies `--realtime` and honours `--hz`. The schedule is absolute (`port_vblank` in `shims/psyq.c`): vblank n is
 due at `epoch + n/hz`, waited for with `port_sleep_until_us` (Linux: `clock_nanosleep` `TIMER_ABSTIME` to 200 µs
 before the deadline, then a spin on `clock_gettime`; Windows: `timeBeginPeriod(1)` at start, then `Sleep(1)` is
@@ -367,8 +368,8 @@ VBlank counter (`0x1F8001E8 < 0x1F8001EA`), so on PAL it runs at 50 Hz or 25 Hz.
    - Pause, menus and the boot logo run at the native rate.
 
    Doing this inside the renderer abstraction (§2.3 GL backend) keeps it out of `src/`.
-3. A "true 60 Hz logic" mode (halved per-tick constants) is not planned. It would change gameplay and touch
-   hundreds of functions.
+3. No separate "60 Hz logic" is needed: the PAL build kept the US game logic unchanged (no 50 Hz compensation; the
+   play-time clock is the one exception), so `--hz 60` is the NTSC speed. See "60 Hz mode" below.
 
 ## 4. Android
 
@@ -2558,6 +2559,120 @@ Known limitations:
 
 Recommendation: keep the default at 50 (off) for now and offer Auto as the suggested choice for OpenGL; the PC and
 Android launchers both default to 50.
+
+### 60 Hz mode: `--hz 60` plays at the NTSC (US/JP) speed
+
+**Result: the PAL build changed nothing in the game logic for 50 Hz.** Speeds, accelerations, gravity, jump tables,
+frame counters, timers, animation script durations, camera speeds, the sequencer's tick and the music are the US
+build's, frame for frame. A PAL console simply runs that logic 50 times a second instead of 60 (5/6 of the US speed,
+music excepted: see below), so the PAL game running at 60 vblanks a second *is* the US game's timing. The only PAL
+change tied to the frame rate is the play-time clock, which `--hz 60` corrects (below). Everything else that differs
+is the 256-line PAL picture, text, and a handful of later bug fixes, which the 60 Hz mode keeps.
+
+**How it was checked.**
+- **Code, function by function** (`tools/ntsc_diff.py US_FS`, the USA disc extracted with `tools/isoext.py`): every PAL
+  function with a size (main0, X000..X019, D0SPSUB*, I0NFO*, O0PTSUB0, G0OVER: 3,529 distinct functions, 8,580 with
+  the X000 code every area overlay repeats) is looked up in the matching USA file by masked words (`tools/xmatch.py`
+  masking). 3,330 have a masked twin; in a twin only relocations may differ, and the tool lists every other changed
+  immediate (li, slti/sltiu/andi/xori, shift amounts, small lui, addiu on a non-address register, division magic
+  numbers): 25 twins have one. The 199 without a twin are aligned against the USA bytes between their neighbours' twins
+  and diffed instruction by instruction (43 differ only by relocations once aligned). Every listed difference was read;
+  the full list is below.
+- **No run-time PAL branch.** The game never reads the video mode: `GetVideoMode`'s variable (0x800981A0) is read only
+  by libgpu/libsnd (`SetDefDrawEnv`, `PutDispEnv`, `SsSetTickMode`), no game code tests it, so a PAL scaling that would
+  look the same in both builds does not exist.
+- **Data** (`objdata`/gap comparison of every data object of MAIN0 and the overlays against the USA files, pointers
+  masked; `tools/usa_compare.py` for the disc's load-list blocks): the animation scripts, object/handler tables, jump
+  and speed tables, the shared X000 data block (one colour word differs) are byte-identical. What differs: sprite
+  frame ids of the item descriptors (+5 frames in the PAL banks), text layout tables (the two-line letter positions of
+  the PAL names), the X004 item-follow offsets (dx/dy only, the 7-frame durations are equal), 256-line coordinates.
+  On the disc, the 88 SOUND files (all SEQ and WVD) and the MOVIE streams are identical; the APD placement blocks
+  that differ move objects down by 24 / 52 lines (the taller PAL screen) or reorder two AREA04 records; two WHM
+  collision blocks (AREA09 s1, AREA14) differ (level fixes).
+- **The USA executable run side by side** (`tools/ntsc_check.py US_FS game_usa/tomba_us.bin OUT`): tools/psxemu
+  boots SCUS_942.36 from the USA disc with the PAL HLE names moved to their USA addresses (twins), and plays the
+  jumpcheck script (new game, opening dialogue, standing / running / Cross-held jump) next to MAIN0.EXE. Both reach
+  the title at frame 905/906 and give the same arcs frame for frame (only the emulator's one-frame sampling glitches
+  differ), and the port at `--hz 60` (`--skip-movies`, same script) gives the same arcs (identical to the USA run
+  for the two standing jumps; the other two differ only where the emulator's sampling glitches).
+- **50 vs 60 in the port.** The port's logic does not depend on the rate: every one of the 96 debug-select rooms run
+  for 3,600 frames with the sweep pad script (walk, jump, attack, run+jump, up/down) at `--hz 50` and `--hz 60` gives
+  the same per-frame player trace (`-v -v -v`, 0 differing frames in 345,600), and so do long random-input runs (below).
+  Audio, the CD stream and the sequencer keep real time (they are clocked by `port_hz` or by audio samples), as on a
+  console.
+
+| Quantity | PAL console / port `--hz 50` | Port `--hz 60` | US (NTSC, 59.94 Hz), from its code / its run | Match |
+|---|---|---|---|---|
+| Standing jump (AREA00, jumpcheck) | 42 px, 37 frames = 0.740 s | 42 px, 37 frames = 0.617 s | 42 px, 37 frames = 0.617 s (emulated SCUS_942.36) | yes |
+| Running jump | 98 px forward, 42 px high, 37 frames = 0.740 s | same frames = 0.617 s | same frames = 0.617 s | yes |
+| Jump with Cross held (onto the first tree) | 65 px, 19 frames = 0.38 s | 0.317 s | 0.317 s | yes |
+| Walk / run start (Right from standing) | 55 px in 40 frames, then 2 px/frame = 100 px/s | 120 px/s | 119.9 px/s (same per-frame profile) | yes |
+| Gravity, jump tables, anim durations | per-frame tables identical to US | ×1.2 per second vs PAL | US per-frame values | yes |
+| Race lap / best time (X006 `drawRaceHudLapTime`, `drawRaceHudBestTime`, `updateRaceMessageSprite`) | frames / 60 in both builds: the PAL clock shows 50/60 = 0.83 of real time | real time | real time (×0.999) | yes |
+| Play-time clock (`GAME.totalTimePlayed`) | PAL divides by 50 / 3000 / 180000: real time | counter advances 500 per 600 vblanks (measured), PAL divisors: real time | US divides by 60 / 3600 / 216000: real time | yes |
+| Music tempo (S_AR000: 87 bpm, step 116 tenth-ticks per tick) | 60.00 Hz root-counter tick (`SS_TICK60` on PAL): 87 bpm, 1.2 sequencer ticks per game frame | 87 bpm, 1 tick per frame | VSync tick at 59.94 Hz: 86.9 bpm, 1 tick per frame | yes (0.1 %) |
+| FMV | same STR files, 150 sectors/s | same | same | yes |
+| Frame rate | 50 | 60.00 | 59.94 | 0.1 % (deliberate) |
+
+**What differs PAL vs NTSC (the complete list from `tools/ntsc_diff.py` and the data comparison).**
+- *Frame-rate related:* only the play-time clock: `memCardDrawPlayTime` (D0SPSUB2), D0SPSUB2 `func_800E999C` (the save
+  list) and X013 `updateSceneSequence` (the ending's statistics) divide the frame counter by 50·60 / 50·3600 where the
+  US divides by 60·60 / 60·3600. Not compensated in PAL: the race clock (frames / 60 in PAL too, so it runs slow at 50 Hz).
+- *256-line picture:* screen centre and projection (`initGraphics` 128→112 in US, `computeCameraMatrix` /
+  `drawObjectModelCameraFixed` / X006 `setupCameraMatrixFromObj` / X009 `scrollFollowRotatingPlane` 128 vs 120, the camera
+  clamps of `updateCameraFollow` / `cameraClampAroundTarget` / `cameraModeHandler6` / `ObjCheckHeadCollision`
+  −92/−144 vs −84/−136, `resetCameraScratchDefaults` / `initGameConfig`), HUD and menus (`drawHud`, `drawRaceHud`
+  240→208, `drawScreenFade`, `drawLoadingSprites`, `printEventMessage`, `printInfoMessage`, the pause, title, options and
+  sub-screen layouts, `drawLetterboxOverlay`, the backdrop / parallax sprites +0x180 / +0x40 on y in X000/1/4/6/9/10/14),
+  movie height 0x110 vs 0x100 (`moviePlayerTask`, plus a decode timeout loop), the APD y offsets.
+- *Text and languages:* the PAL item list (one column of 10, `subScreenMoveGridCursor*`, `subScreenItemListStep`, ...),
+  the memory-card and options screens, the letter layout tables, MAIN0's language tables.
+- *Logic fixes in the later PAL build (kept):* `updatePlayer` (one extra state test), `playerHandleHazardContact` (one
+  AREA03/07 respawn point 0x44A,-0x414 vs 0x458,-0x3AC), `updateLeafButterflyByArea` (area 1 vs 3),
+  `tryStartItemInteraction`, `collidePlayerWithCat5Object(s)` and `processObjectCollisions` (extra checks),
+  `cameraEventScrollHandler` (a flag cleared), `l8Type01MoveStep` / `updateL8Type01Object` (the item model flying to the
+  HUD: ease 1/4 vs 1/8 per frame and the step order), X002 `spawnPigGateSceneNpcs`, X004 `updateArea4ItemObj`, X009
+  `jellyfishSwimB` / `jellyfishSink` (same work, other order), X011 bonsugee researcher talks, X013 scene code, I0NFO2
+  `topdownMapObjHandler`, I0NFO3 `tunnelClampPlayerToGates`, the WHM fixes. These are content, not timing: the 60 Hz
+  mode plays them as PAL has them.
+- *Libraries:* libpad / multitap (`_pad*`, `PadGetState`, ...), the memory-card BIOS stubs, `_padSendCmdByte`; irrelevant
+  to the port.
+
+**What `--hz 60` does.** It paces the vblank at 60.00 Hz (`shims/psyq.c`); the game, the CD stream and the audio need
+nothing else. The play time stays in 1/50 s: `port_play_time_tick` (`shims/psyq.c`, called under `#ifdef PORT2` from the
+five places that count it: `gameplayMainHandler`, `areaMode2Handler`, `areaMode4Handler`, `areaMode5Handler`,
+`areaMode6Handler`) skips every sixth increment at 60 Hz, so the save
+screen, the ending and the second screen show real time and a save keeps the same units whichever rate it was played
+at (checked: +600 per 600 vblanks at 50 Hz, +500 at 60 Hz). The rate is 60.00, not 59.94: on a 60 Hz display that is
+one present per refresh, and the 0.1 % (one frame in 16.7 s, and the same on the music) is below anything a player
+can notice. The launchers' *60 Hz (NTSC speed)* switch is this mode.
+
+**Long runs.** Random pad scripts (walk, run, jump, attack, Circle, L1/R1, up/down; seeded) of 20,000 frames (5.5
+minutes at 60 Hz) from the debug select into 12 rooms, at 50 and at 60 Hz, `-v -v -v` traces compared frame by frame:
+
+| Start room (rooms the run reached) | Frames compared | Differing | Play time 50 Hz / 60 Hz (1/50 s) | Ratio |
+|---|---|---|---|---|
+| 0:0 village (0:0 1:0 1:1) | 20,000 | 0 | 17560 / 14634 | 0.8334 |
+| 0:2 (0:0 0:2 1:0 1:2) | 20,000 | 0 | 17802 / 14835 | 0.8333 |
+| 1:1 side-scrolling (1:0 1:1 2:0 3:0 3:1 4:0 4:1) | 20,000 | 0 | 15903 / 13253 | 0.8334 |
+| 5:0 top-down town | 20,000 | 0 | 18271 / 15226 | 0.8333 |
+| 6:0 race track | 20,000 | 0 | 18275 / 15230 | 0.8334 |
+| 9:2 water (8:2 9:1 9:2 9:5) | 20,000 | 0 | 17783 / 14820 | 0.8334 |
+| 10:4 jungle (10:4 9:2..9:5) | 20,000 | 0 | 16780 / 13984 | 0.8334 |
+| 13:1 (13:0 13:1) | 20,000 | 0 | 17944 / 14954 | 0.8334 |
+| 14:3 | 20,000 | 0 | 8689 / 7241 | 0.8334 |
+| 17:2 (17:2 17:4) | 20,000 | 0 | 17872 / 14894 | 0.8334 |
+| 19:1 (16:4 17:1 17:2 18:1 19:1) | 20,000 | 0 | 16393 / 13661 | 0.8333 |
+| 4:5 (debug select into 5:5, 6:5, 7:5) | 3,079 | 0 | - | - |
+
+Ratio 5/6 = real time kept in 1/50 s. The 4:5 run ends with the same fault at both rates (`queueLoadList`, after the
+random L1/R1 presses of the debug mode moved the selection to area 7, which has no data); the only other log lines
+are the wall-clock "no game progress for 3 s" watchdog warnings in static scenes of headless runs, at one rate or the
+other, on frames that are identical. The sweep's AREA06 section 2 fault (frame 2804, `processObjectCollisions`, a
+call to X006 0x801194AC with no native code) is also the same at both rates: a port bug of its own, not timing.
+
+**Open.** Nothing in the game logic. The 256-line PAL picture stays (the port is not tied to a TV standard). A real
+NTSC console's 59.94 Hz is not reproduced (see above). The PAL-only logic fixes are kept on purpose.
 
 ### HD (plan; phase 1 prototyped): `--internal-res N`
 

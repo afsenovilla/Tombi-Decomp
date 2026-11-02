@@ -51,7 +51,11 @@ void cutsceneAreaHandler(void)
         *(volatile unsigned short *)&GV6.s70 = t;
         break;
     case 1:
+#ifdef PORT2
+        { extern int port_play_time_tick(void); if (port_play_time_tick()) ((int*)&GAME.totalTimePlayed)[0]++; }
+#else
         ((int*)&GAME.totalTimePlayed)[0]++;
+#endif
         areaMode6Tick();
         if (*(unsigned char *)0x1F8001C2 != 0) {
             k = &GV6.s70;
