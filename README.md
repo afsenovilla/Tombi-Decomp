@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/logo.png" alt="Tombi!" width="290">&nbsp;&nbsp;<img src="docs/logo_us.png" alt="Tomba!" width="290">&nbsp;&nbsp;<img src="docs/logo_jp.png" alt="Ore! Tomba" width="290"></p>
+<p align="center"><img src="docs/logo.png" alt="Tombi!" width="250">&nbsp;<img src="docs/logo_us.png" alt="Tomba!" width="250">&nbsp;<img src="docs/logo_jp.png" alt="Ore! Tomba" width="250"></p>
 
 # Tombi! (Tomba!) decomp + native PC port
 
