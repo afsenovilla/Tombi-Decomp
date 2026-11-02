@@ -42,6 +42,11 @@ jobs:
       R: ${{ github.repository }}
       MIN_COMMITS: 5
     steps:
+      # first: a later checkout would clean the downloaded artifacts away
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # tools/release_notes.py reads the history between the two tags
+
       - name: Decide
         id: d
         run: |
@@ -91,11 +96,6 @@ jobs:
             done
           done
           find art -type f | xargs ls -l
-
-      - uses: actions/checkout@v4
-        if: steps.d.outputs.go == '1'
-        with:
-          fetch-depth: 0   # tools/release_notes.py reads the history between the two tags
 
       - name: Package and publish
         if: steps.d.outputs.go == '1'
