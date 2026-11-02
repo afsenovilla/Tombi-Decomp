@@ -132,25 +132,28 @@ final class PadMap {
     int pressed(int now) { int p = now & ~lastTargets; lastTargets = now; return p; }
 
     // ---- names for the launcher ----
-    static String srcName(String s, boolean es) {
+    /** the translatable words of the source names: {d-pad prefix, axis prefix, unbound} (launcher: string resources) */
+    static final String[] WORDS_EN = {"DPAD ", "Axis ", "(none)"}, WORDS_ES = {"CRUCETA ", "Eje ", "(sin asignar)"};
+    static String srcName(String s, boolean es) { return srcName(s, es ? WORDS_ES : WORDS_EN); }
+    static String srcName(String s, String[] w) {
         try {
             if (s.startsWith("k")) {
                 String n = KeyEvent.keyCodeToString(Integer.parseInt(s.substring(1)));
-                n = n.replace("KEYCODE_", "").replace("BUTTON_", "").replace("DPAD_", es ? "CRUCETA " : "DPAD ").replace('_', ' ');
+                n = n.replace("KEYCODE_", "").replace("BUTTON_", "").replace("DPAD_", w[0]).replace('_', ' ');
                 return n;
             }
             if (s.startsWith("a")) {
                 boolean neg = s.endsWith("-");
                 int a = Integer.parseInt(s.substring(1, s.length() - (s.endsWith("+") || neg ? 1 : 0)));
-                return (es ? "Eje " : "Axis ") + MotionEvent.axisToString(a).replace("AXIS_", "") + (neg ? " -" : " +");
+                return w[1] + MotionEvent.axisToString(a).replace("AXIS_", "") + (neg ? " -" : " +");
             }
         } catch (Exception ignored) { }
         return s;
     }
-    String describe(int t, boolean es) {
-        if (src[t].length == 0) return es ? "(sin asignar)" : "(none)";
+    String describe(int t, String[] w) {
+        if (src[t].length == 0) return w[2];
         List<String> out = new ArrayList<>();
-        for (String s : src[t]) { String n = srcName(s, es); if (!out.contains(n)) out.add(n); }
+        for (String s : src[t]) { String n = srcName(s, w); if (!out.contains(n)) out.add(n); }
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < out.size() && i < 2; i++) { if (i > 0) b.append(" / "); b.append(out.get(i)); }
         if (out.size() > 2) b.append(" …");

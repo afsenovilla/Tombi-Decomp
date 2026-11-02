@@ -5,6 +5,8 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -56,6 +58,31 @@ public class LauncherActivity extends Activity {
     LauncherView view;
     volatile String importStatus;
 
+    /* the launcher's own language (Options > Game > Launcher language), independent of the game language: "" = the
+     * system's, else one of the translations in res/values-xx.  Applied without a restart: getResources() hands out
+     * resources for that locale (every getString / getStringArray / Toast / dialog of this activity goes through it)
+     * and the view rebuilds its rows on the next draw */
+    static final String[] UI_LANGS = {"", "en", "es", "fr", "de", "it", "nl", "pt", "sv", "da"};
+    static final String[] UI_LANG_NAME = {null, "English", "Español", "Français", "Deutsch", "Italiano", "Nederlands", "Português", "Svenska", "Dansk"};
+    Resources uiRes;
+
+    int uiLangIdx() { return prefs == null ? 0 : clamp(prefs.getInt("uilang", 0), UI_LANGS.length); }
+    String uiLangName(int i) { return i == 0 ? getString(R.string.uilang_auto) : UI_LANG_NAME[i]; }
+    void applyUiLang() {
+        String c = UI_LANGS[uiLangIdx()];
+        if (c.isEmpty()) { uiRes = null; return; }
+        Configuration cfg = new Configuration(super.getResources().getConfiguration());
+        cfg.setLocale(new Locale(c));
+        uiRes = createConfigurationContext(cfg).getResources();
+    }
+    @Override
+    public Resources getResources() { Resources r = uiRes; return r != null ? r : super.getResources(); }
+    @Override
+    public void onConfigurationChanged(Configuration c) {   // orientation / screen size (configChanges): rebuild for the new metrics
+        super.onConfigurationChanged(c);
+        if (uiRes != null) applyUiLang();
+    }
+
     @Override
     protected void onCreate(Bundle b) {
         // a launcher crash (menus, button mapping...) into tombi.log + the "crashed" marker: the crash card next time
@@ -70,6 +97,7 @@ public class LauncherActivity extends Activity {
         });
         super.onCreate(b);
         prefs = getSharedPreferences("launcher", MODE_PRIVATE);
+        applyUiLang();
         view = new LauncherView(this);
         setContentView(view);
         view.setFocusable(true);
@@ -781,6 +809,12 @@ public class LauncherActivity extends Activity {
                     l.value = LANG_NAME[langIdx()];
                     l.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("lang", (langIdx() + d + LANG_N.length) % LANG_N.length).apply(); } };
                     items.add(l);
+                    Item ul = new Item(getString(R.string.opt_uilang), null);   // the launcher's own language (applyUiLang)
+                    ul.value = uiLangName(uiLangIdx());
+                    ul.adj = new Adjust() { public void by(int d) {
+                        prefs.edit().putInt("uilang", (uiLangIdx() + d + UI_LANGS.length) % UI_LANGS.length).apply();
+                        applyUiLang(); } };
+                    items.add(ul);
                     Item tpi = new Item(getString(R.string.opt_textpatch), null);
                     tpi.check = textPatchOn() ? 1 : 0;
                     tpi.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("textpatch", !textPatchOn()).apply(); } };
@@ -841,7 +875,7 @@ public class LauncherActivity extends Activity {
                 for (int t = 0; t < PadMap.NAMES.length; t++) {
                     final int target = t;
                     Item it = new Item(t < names.length ? names[t] : PadMap.NAMES[t], new Runnable() { public void run() { startCapture(target); } });
-                    it.value = pm.describe(t, spanish());
+                    it.value = pm.describe(t, padWords());
                     items.add(it);
                 }
                 items.add(new Item(getString(R.string.pad_reset), new Runnable() { public void run() {
@@ -1054,6 +1088,21 @@ public class LauncherActivity extends Activity {
 
         float midBase(RectF r) { return r.centerY() - (p.descent() + p.ascent()) / 2; }
 
+        /** t at x, centred in r's height, in the current paint, shrunk to at most maxW wide (the translations differ
+         *  in length; nothing runs past its pill) */
+        void drawFit(String t, float x, RectF r, float maxW) {
+            float sz = p.getTextSize(), w = p.measureText(t);
+            if (w > maxW && maxW > 0) p.setTextSize(sz * maxW / w);
+            canvas.drawText(t, x, midBase(r), p);
+            p.setTextSize(sz);
+        }
+        void drawFitAt(String t, float x, float base, float maxW) {
+            float sz = p.getTextSize(), w = p.measureText(t);
+            if (w > maxW && maxW > 0) p.setTextSize(sz * maxW / w);
+            canvas.drawText(t, x, base, p);
+            p.setTextSize(sz);
+        }
+
         void pill(RectF r, int bg, int shadow, float sh, boolean focused) {
             float rad = r.height() / 2;
             if (focused) {   // white focus ring around the pill and its shadow
@@ -1071,6 +1120,8 @@ public class LauncherActivity extends Activity {
 
         void bigTitle(String t, float size, float base) {
             text(lilita, size, ACCENT_SH);
+            float w = p.measureText(t);
+            if (w > 1200) { size = size * 1200 / w; p.setTextSize(size); }
             canvas.drawText(t, 640, base + size * 6 / 108, p);
             p.setColor(ACCENT);
             canvas.drawText(t, 640, base, p);
@@ -1115,7 +1166,7 @@ public class LauncherActivity extends Activity {
                 if (it.primary) pill(it.r, ACCENT, ACCENT_SH, 6, f);
                 else pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
                 text(nunito, it.primary ? 30 : 24, it.primary ? ACCENT_TEXT : BG);
-                canvas.drawText(it.label, 640, midBase(it.r), p);
+                drawFit(it.label, 640, it.r, it.r.width() - 40);
                 y += hh + (it.primary ? 6 : 5) + 16;
             }
             String[] chips = {LANG_NAME[langIdx()], aspectName(aspectIdx()),
@@ -1156,11 +1207,11 @@ public class LauncherActivity extends Activity {
                 pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 3, f);
                 int col = f ? ACCENT_TEXT : BG;
                 text(nunito, 19, col);
-                if (it.value == null) { canvas.drawText(it.label, it.r.centerX(), midBase(it.r), p); continue; }
+                if (it.value == null) { drawFit(it.label, it.r.centerX(), it.r, it.r.width() - 40); continue; }
+                float vr = it.r.right - 44, cy = it.r.centerY(), vw = p.measureText(it.value) + (it.swatch >= 0 ? 40 : 0);
                 p.setTextAlign(Paint.Align.LEFT);
-                canvas.drawText(it.label, it.r.left + 22, midBase(it.r), p);
+                drawFit(it.label, it.r.left + 22, it.r, vr - vw - 40 - (it.r.left + 22));
                 p.setTextAlign(Paint.Align.RIGHT);
-                float vr = it.r.right - 44, cy = it.r.centerY();
                 canvas.drawText(it.value, vr, midBase(it.r), p);
                 float vl = vr - p.measureText(it.value);
                 if (it.swatch >= 0) {
@@ -1227,13 +1278,14 @@ public class LauncherActivity extends Activity {
                 int col = f ? ACCENT_TEXT : BG;
                 text(nunito, 22, col);
                 if (it.sub != null) {   // category with a summary on the right
-                    p.setTextAlign(Paint.Align.LEFT);
-                    canvas.drawText(it.label, it.r.left + 30, midBase(it.r), p);
                     p.setTextSize(17); p.setTextAlign(Paint.Align.RIGHT);
-                    canvas.drawText(it.sub, it.r.right - 30, midBase(it.r), p);
+                    float sw = Math.min(p.measureText(it.sub), 360);
+                    drawFit(it.sub, it.r.right - 30, it.r, 360);
+                    p.setTextSize(22); p.setTextAlign(Paint.Align.LEFT);
+                    drawFit(it.label, it.r.left + 30, it.r, it.r.width() - 60 - sw - 24);
                 } else if (it.check >= 0) {   // on/off: label + tick box on the right
                     p.setTextAlign(Paint.Align.LEFT);
-                    canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
+                    drawFit(it.label, it.r.left + 26, it.r, it.r.width() - 26 - 52 - 20);
                     float bx = it.r.right - 22 - 30, by = it.r.centerY() - 15;
                     tmp.set(bx, by, bx + 30, by + 30);
                     if (it.check == 1) {
@@ -1251,12 +1303,12 @@ public class LauncherActivity extends Activity {
                     }
                     p.setStyle(Paint.Style.FILL);
                 } else if (it.value == null) {   // submenu / action
-                    canvas.drawText(it.label, it.r.centerX(), midBase(it.r), p);
+                    drawFit(it.label, it.r.centerX(), it.r, it.r.width() - 60);
                 } else {   // value: label + "◀ value ▶"
-                    p.setTextAlign(Paint.Align.LEFT);
-                    canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
-                    p.setTextAlign(Paint.Align.RIGHT);
                     float vr = it.r.right - 50, cy = it.r.centerY();
+                    p.setTextAlign(Paint.Align.LEFT);
+                    drawFit(it.label, it.r.left + 26, it.r, vr - p.measureText(it.value) - 40 - (it.r.left + 26));
+                    p.setTextAlign(Paint.Align.RIGHT);
                     canvas.drawText(it.value, vr, midBase(it.r), p);
                     arrow(vr + 14, cy, 1);
                     arrow(vr - p.measureText(it.value) - 14, cy, -1);
@@ -1277,7 +1329,7 @@ public class LauncherActivity extends Activity {
             if (capture >= 0 && bDownAt != 0) { swallowUp = KeyEvent.KEYCODE_BUTTON_B; endCapture(null); }
         } };
 
-        boolean spanish() { return getResources().getConfiguration().locale.getLanguage().equals("es"); }
+        String[] padWords() { return new String[]{getString(R.string.pad_dpad) + " ", getString(R.string.pad_axis) + " ", getString(R.string.pad_none)}; }
         void startCapture(int t) {
             capture = t; bDownAt = 0; padStatus = null;
             java.util.Arrays.fill(axisSeen, false);
@@ -1302,7 +1354,7 @@ public class LauncherActivity extends Activity {
             }
             pm.src[t] = new String[]{s};
             prefs.edit().putString("padmap", pm.save()).apply();
-            padStatus = getString(R.string.pad_bound, t < names.length ? names[t] : PadMap.NAMES[t], PadMap.srcName(s, spanish()));
+            padStatus = getString(R.string.pad_bound, t < names.length ? names[t] : PadMap.NAMES[t], PadMap.srcName(s, padWords()));
             invalidate();
         }
         /* a key while waiting: a controller button binds (B: on release, unless held 1 s = cancel); Esc / the
@@ -1351,10 +1403,11 @@ public class LauncherActivity extends Activity {
                 if (y + 34 < top - 10 || y > bottom) it.r.set(-1, -1, -1, -1);
                 pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
                 text(nunito, 18, f ? ACCENT_TEXT : BG);
-                if (it.value == null) canvas.drawText(it.label, 640, midBase(it.r), p);
+                if (it.value == null) drawFit(it.label, 640, it.r, it.r.width() - 52);
                 else {
-                    p.setTextAlign(Paint.Align.LEFT); canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
                     p.setTextAlign(Paint.Align.RIGHT); canvas.drawText(it.value, it.r.right - 26, midBase(it.r), p);
+                    float vw = p.measureText(it.value);
+                    p.setTextAlign(Paint.Align.LEFT); drawFit(it.label, it.r.left + 26, it.r, it.r.width() - 52 - vw - 20);
                 }
                 y += rowH;
             }
@@ -1368,9 +1421,9 @@ public class LauncherActivity extends Activity {
                 tmp.set(640 - 360, 260, 640 + 360, 460);
                 pill(tmp, CREAM, CREAM_SH, 6, false);
                 text(lilita, 34, ACCENT_SH);
-                canvas.drawText(getString(R.string.pad_press, capture < names.length ? names[capture] : PadMap.NAMES[capture]), 640, 340, p);
+                drawFitAt(getString(R.string.pad_press, capture < names.length ? names[capture] : PadMap.NAMES[capture]), 640, 340, 680);
                 text(nunito, 18, BG);
-                canvas.drawText(getString(R.string.pad_cancel), 640, 400, p);
+                drawFitAt(getString(R.string.pad_cancel), 640, 400, 680);
             }
         }
 
@@ -1465,7 +1518,7 @@ public class LauncherActivity extends Activity {
                 it.r.set(x, 640, x + bw, 692);
                 pill(it.r, f ? ACCENT : CREAM, f ? ACCENT_SH : CREAM_SH, 4, f);
                 text(nunito, 20, f ? ACCENT_TEXT : BG);
-                canvas.drawText(it.label, it.r.centerX(), midBase(it.r), p);
+                drawFit(it.label, it.r.centerX(), it.r, bw - 30);
                 x += bw + gap;
             }
         }
@@ -1480,7 +1533,7 @@ public class LauncherActivity extends Activity {
             p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
             canvas.drawRoundRect(tmp, 20, 20, p);
             text(nunito, 19, ok ? SUB : ACCENT);
-            canvas.drawText((ok ? "✓  " : "✗  ") + head, 640, midBase(tmp), p);
+            drawFit((ok ? "✓  " : "✗  ") + head, 640, tmp, tmp.width() - 30);
             tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT);
             tp.setTextSize(16); tp.setColor(Color.WHITE);
             if (dataReady()) wrapped(getString(R.string.disc_data, prefs.getString("disc_name", "?"), prefs.getString("disc_info", "")), 172);
@@ -1499,7 +1552,7 @@ public class LauncherActivity extends Activity {
                 it.r.set(640 - 260, y, 640 + 260, y + bh);
                 pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
                 text(nunito, 22, BG);
-                if (it.value == null) canvas.drawText(it.label, 640, midBase(it.r), p);
+                if (it.value == null) drawFit(it.label, 640, it.r, it.r.width() - 40);
                 else {
                     p.setTextAlign(Paint.Align.LEFT); canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
                     p.setTextAlign(Paint.Align.RIGHT); canvas.drawText("‹  " + it.value + "  ›", it.r.right - 26, midBase(it.r), p);

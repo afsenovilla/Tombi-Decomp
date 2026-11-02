@@ -32,11 +32,10 @@
   refresh rate. Handle the edge cases: objects spawned or removed this tick, teleports and camera cuts (no blend),
   menus and message boxes (draw as-is), movies. Both renderers (software and GL), Android included; an option in
   both launchers.
-- **[All platforms] Launcher language.** The PC launcher already has a language selector (tools/i18n.py); the Android
-  launcher only follows the system language with English / Spanish (res/values, values-es). Bring the same selector
-  to Android (Options, Auto / each language, independent of the game language, applied without restarting), and
-  translate both launchers into the game's other languages: French, German, Italian, Dutch, Portuguese, Swedish,
-  Danish.
+- **[All platforms] Launcher language.** Done: Android *Options > Game > Launcher language* (Auto / nine languages,
+  independent of the game language, applied without a restart; docs/PORT.md "Launcher language"), and both launchers
+  translated into French, German, Italian, Dutch, Portuguese, Swedish and Danish (res/values-xx,
+  tools/port_launcher_lang.py), with the game's own names for menus and places.
 - **Unused animations pack (community rip, 136 files).** Locate on the disc and document the animations the pack shows
   that our docs (CUT_CONTENT, CIVILIZATION) don't cover: Taro (with shocked front/back/side), the Fisherman, the Sombrero
   Man (normal, cursed, cursed shocked, shocked), the Miner and MinerSmashing, the Cowboy (normal, cursed shocked,

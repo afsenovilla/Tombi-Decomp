@@ -17,6 +17,7 @@ on:
       - port/cmake/build_id.cmake
       - tools/port_launcher.py
       - tools/port_mods.py
+      - tools/port_launcher_lang.py
       - tools/extract_data.py
       - tools/chd.py
       - tools/data_patch.py

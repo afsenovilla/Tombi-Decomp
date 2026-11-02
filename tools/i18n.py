@@ -7,11 +7,12 @@ persisted choice.  Separate from the game languages of the text editor (those ar
   i18n.tr("key", 5)                                                   # -> "text 5" (current language; falls back to en, es, then the key)
   i18n.selector(parent, on_change)                                    # tk combobox "Idioma / Language" -> sets, saves and calls on_change()
 
-Languages: es, en, fr, de, it, pt.  Default = saved choice, else the system UI language, else English.  The choice is stored in
+Languages: es, en, fr, de, it, nl, pt, sv, da.  Default = saved choice, else the system UI language, else English.  The choice is stored in
 %APPDATA%/TombiTools/settings.json (Windows) or ~/.config/TombiTools/settings.json."""
 import json, locale, os, sys
 
-LANGS = {"es": "Español", "en": "English", "fr": "Français", "de": "Deutsch", "it": "Italiano", "pt": "Português"}
+LANGS = {"es": "Español", "en": "English", "fr": "Français", "de": "Deutsch", "it": "Italiano", "nl": "Nederlands", "pt": "Português",
+         "sv": "Svenska", "da": "Dansk"}
 CAT = {k: {} for k in LANGS}
 _cur = "en"
 
@@ -131,5 +132,8 @@ add({
     "de": {"ok": "OK", "cancel": "Abbrechen", "error": "Fehler", "warning": "Warnung", "info": "Information", "close": "Schließen", "yes": "Ja", "no": "Nein"},
     "it": {"ok": "OK", "cancel": "Annulla", "error": "Errore", "warning": "Avviso", "info": "Informazioni", "close": "Chiudi", "yes": "Sì", "no": "No"},
     "pt": {"ok": "OK", "cancel": "Cancelar", "error": "Erro", "warning": "Aviso", "info": "Informação", "close": "Fechar", "yes": "Sim", "no": "Não"},
+    "nl": {"ok": "OK", "cancel": "Annuleren", "error": "Fout", "warning": "Waarschuwing", "info": "Informatie", "close": "Sluiten", "yes": "Ja", "no": "Nee"},
+    "sv": {"ok": "OK", "cancel": "Avbryt", "error": "Fel", "warning": "Varning", "info": "Information", "close": "Stäng", "yes": "Ja", "no": "Nej"},
+    "da": {"ok": "OK", "cancel": "Annuller", "error": "Fejl", "warning": "Advarsel", "info": "Information", "close": "Luk", "yes": "Ja", "no": "Nej"},
 })
 init()

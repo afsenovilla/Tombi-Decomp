@@ -448,6 +448,14 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   (phases *Copiando / Comprobando / Extrayendo*, files done / total, Cancel with B; a truncated image or an unreadable
   sector fails with the reason). *Borrar datos…* (in-page confirmation) deletes `files/data`, the patches and caches,
   the saves only when ticked.
+- **Launcher language.** *Opciones > Juego > Idioma del launcher*: Auto (the system's) / English / Español / Français /
+  Deutsch / Italiano / Nederlands / Português / Svenska / Dansk (`res/values-xx/strings.xml`), saved as `uilang`,
+  independent of the game language. Applied at once, without a restart: `LauncherActivity.getResources()` returns
+  resources made for that locale (`createConfigurationContext`), so every string, Toast and dialog follows it and the
+  rows are rebuilt on the next draw; no AppCompat needed (minSdk 23). Rows and buttons shrink a label that does not
+  fit (`drawFit`) instead of running past the pill. The PC launcher has the same nine languages (`tools/i18n.py`;
+  catalogs of fr/de/it/nl/pt/sv/da in `tools/port_launcher_lang.py`); names shared with the game (menus, places)
+  follow the game's own text in each language.
 - **Crash diagnosis without adb.** Everything goes to `tombi.log` in the app's **internal** files dir (`getFilesDir()`,
   the same path in both processes; Android 11+ hides `Android/data`): `TombiActivity` rotates it (`tombi.prev.log`),
   writes `[java]` lines (device, displays, arguments, uncaught exceptions, the UI thread's stack when it is blocked

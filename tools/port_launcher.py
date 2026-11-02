@@ -125,22 +125,6 @@ i18n.add({
         "s.patchchk.disc": "disc sha1 checked", "s.patchchk.main0": "MAIN0.EXE of data/ checked; pick the .bin image to check the disc sha1 too",
         "s.patchmoved": "{0} files grew beyond their place on the disc and were moved to its end (read through the language's own file table)",
     },
-    "fr": {"l.lang": "Langue du jeu :", "title": "Tombi! - port natif", "tab.play": "Jouer", "tab.mods": "Mods", "tab.controls": "Commandes", "b.play": "Jouer",
-           "l.disc": "Image du disque (.bin / .cue / .iso / .chd ; extraite une fois dans le dossier data/) :", "b.browse": "Parcourir...", "l.savedir": "Dossier des sauvegardes :",
-           "s.extracting": "Extraction du disque vers {0}... {1} % ({2})", "s.dataok": "Données du jeu prêtes dans {0} ({1} fichiers) : l'image du disque n'est plus nécessaire.",
-           "s.extractfail": "Impossible d'extraire le disque : {0}", "s.nodata": "Choisissez votre image du disque : elle est extraite une fois dans le dossier data/ et le jeu n'en a plus besoin."},
-    "de": {"l.lang": "Spielsprache:", "title": "Tombi! - nativer Port", "tab.play": "Spielen", "tab.mods": "Mods", "tab.controls": "Steuerung", "b.play": "Spielen",
-           "l.disc": "Disc-Image (.bin / .cue / .iso / .chd; wird einmal in den Ordner data/ entpackt):", "b.browse": "Durchsuchen...", "l.savedir": "Speicherordner:",
-           "s.extracting": "Disc wird nach {0} entpackt... {1} % ({2})", "s.dataok": "Spieldaten bereit in {0} ({1} Dateien): das Disc-Image wird nicht mehr gebraucht.",
-           "s.extractfail": "Die Disc konnte nicht entpackt werden: {0}", "s.nodata": "Wähle dein Disc-Image: es wird einmal in den Ordner data/ entpackt, danach braucht das Spiel es nicht mehr."},
-    "it": {"l.lang": "Lingua del gioco:", "title": "Tombi! - port nativo", "tab.play": "Gioca", "tab.mods": "Mod", "tab.controls": "Controlli", "b.play": "Gioca",
-           "l.disc": "Immagine del disco (.bin / .cue / .iso / .chd; estratta una volta nella cartella data/):", "b.browse": "Sfoglia...", "l.savedir": "Cartella dei salvataggi:",
-           "s.extracting": "Estrazione del disco in {0}... {1}% ({2})", "s.dataok": "Dati del gioco pronti in {0} ({1} file): l'immagine del disco non serve più.",
-           "s.extractfail": "Impossibile estrarre il disco: {0}", "s.nodata": "Scegli l'immagine del disco: viene estratta una volta nella cartella data/ e il gioco non ne ha più bisogno."},
-    "pt": {"l.lang": "Idioma do jogo:", "title": "Tombi! - port nativo", "tab.play": "Jogar", "tab.mods": "Mods", "tab.controls": "Controlos", "b.play": "Jogar",
-           "l.disc": "Imagem do disco (.bin / .cue / .iso / .chd; extraída uma vez para a pasta data/):", "b.browse": "Procurar...", "l.savedir": "Pasta dos jogos guardados:",
-           "s.extracting": "A extrair o disco para {0}... {1}% ({2})", "s.dataok": "Dados do jogo prontos em {0} ({1} ficheiros): a imagem do disco já não é necessária.",
-           "s.extractfail": "Não foi possível extrair o disco: {0}", "s.nodata": "Escolhe a imagem do disco: é extraída uma vez para a pasta data/ e o jogo deixa de precisar dela."},
 })
 
 
@@ -570,6 +554,9 @@ PAD_SOURCES = [   # SDL name, English label, Spanish label
     ("righty-", "Right stick up", "Stick der. arriba"), ("righty+", "Right stick down", "Stick der. abajo"),
     ("", "(none)", "(ninguno)")]
 PAD_SRC_KEYS = [k for k, _, _ in PAD_SOURCES]
+i18n.add({"en": {"src." + k: en for k, en, _es in PAD_SOURCES}, "es": {"src." + k: es for k, _en, es in PAD_SOURCES}})
+# French, German, Italian, Dutch, Portuguese, Swedish and Danish: every key above (and port_mods.py's) in one file
+import port_launcher_lang  # noqa: E402,F401
 PAD_SHORT = {"dpup": "D-pad \u2191", "dpdown": "D-pad \u2193", "dpleft": "D-pad \u2190", "dpright": "D-pad \u2192", "a": "A", "b": "B",
              "x": "X", "y": "Y", "leftshoulder": "LB", "rightshoulder": "RB", "lefttrigger": "LT", "righttrigger": "RT",
              "start": "Start", "back": "Back", "guide": "Guide", "leftstick": "L3", "rightstick": "R3", "misc1": "Share",
@@ -1163,15 +1150,16 @@ class App:
         # ---- button icons
         o, c = self.card(f, tr("c.icons"))
         o.pack(fill="x")
+        # the label on its own line: room for the combobox and the button in every launcher language
+        ttk.Label(c, text=tr("l.prompts")).pack(anchor="w", pady=(0, 4))
         row = ttk.Frame(c)
         row.pack(fill="x")
-        ttk.Label(row, text=tr("l.prompts")).pack(side="left")
         pv = self.var("prompts_style", tk.StringVar, "auto")
         if pv.get() not in [k for k, _ in PROMPT_STYLES]:
             pv.set("auto")                   # the AYN Thor styles are Android only; an unknown value too
         pcb = ttk.Combobox(row, state="readonly", width=24, values=[tr(t) for _, t in PROMPT_STYLES])
         pcb.current([k for k, _ in PROMPT_STYLES].index(pv.get()))
-        pcb.pack(side="left", padx=(8, 8))
+        pcb.pack(side="left", padx=(0, 8))
         cust = ttk.Button(row, text=tr("b.custom"), command=self.custom_buttons)
         cust.pack(side="left")
 
@@ -1341,14 +1329,11 @@ class App:
     # ---- controller table
     @staticmethod
     def _src_label(k):
-        for key, en, es in PAD_SOURCES:
-            if key == k:
-                return es if i18n.current() == "es" else en
-        return k
+        return tr("src." + k) if k in PAD_SRC_KEYS else k
 
     def _padmap_chosen(self, b, cb):
         lab = cb.get()
-        key = next((k for k, en, es in PAD_SOURCES if lab in (en, es)), lab)
+        key = next((k for k in PAD_SRC_KEYS if lab == tr("src." + k)), lab)
         self.pad_vars[b].set(key)
 
     def _padmap_sync(self):
@@ -1793,9 +1778,10 @@ class App:
             r = ttk.Frame(c, padding=(0, 8, 0, 0))
             r.pack(fill="x")
             ttk.Button(r, text=tr("cut.play%d" % a), width=32, command=lambda a=a: self.play_town(a)).pack(side="left")
-            d = ttk.Label(r, text=tr("cut.d%d" % a), wraplength=300, justify="left")
+            # width=1: the row never asks for more than the card has (a long translation wraps instead of running under the edge)
+            d = ttk.Label(r, text=tr("cut.d%d" % a), wraplength=300, justify="left", width=1)
             d.pack(side="left", fill="x", expand=True, padx=(12, 0))
-            d.bind("<Configure>", lambda e, d=d: d.configure(wraplength=max(120, e.width)))
+            d.bind("<Configure>", lambda e, d=d: d.configure(wraplength=max(120, e.width - 6)))
         ttk.Frame(c, height=8).pack()
         for key in ("civ_route", "civ_collision"):
             row = ttk.Frame(c, padding=(0, 2))

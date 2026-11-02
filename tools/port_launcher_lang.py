@@ -1,0 +1,1014 @@
+#!/usr/bin/env python3
+"""The port launcher (tools/port_launcher.py, tools/port_mods.py) in French, German, Italian, Dutch, Portuguese, Swedish
+and Danish: every key of the English catalog, registered with tools/i18n.py (the Spanish and English ones stay next to
+the code that uses them).  Names shared with the game (menus, places, items) follow the game's own text in that language
+(SYSTEM/OnPTSUB0.BIN, the *F/G/I/H/P/W/D.WFM dialogues).  Placeholders ({0}, {}) as in English."""
+import i18n
+from port_mods import EVENT_COUNT
+
+FR = {
+    # port_mods.py
+    "mod.skipintro": "Passer les logos et les vidéos d'introduction",
+    "mod.skipintro.d": "Démarre sur l'écran titre sans les logos ni la vidéo d'ouverture (les vidéos de l'histoire sont toujours lues).",
+    "mod.hz60": "60 Hz (vitesse NTSC)",
+    "mod.hz60.d": "Le jeu PAL tourne à 50 Hz ; avec cette option, le port le cadence à 60 vblanks par seconde (plus rapide, musique comprise).",
+    "mod.areasel": "Sélection de zone (debug select)",
+    "mod.areasel.d": "Ouvre le sélecteur de zones de débogage du jeu et entre dans la zone/section choisie au lieu de commencer l'histoire.",
+    "mod.area": "Zone", "mod.section": "Section",
+    "mod.titledebug": "Entrée DEBUG dans le menu titre",
+    "mod.titledebug.d": "Ajoute DEBUG à droite d'OPTIONS sur l'écran titre : il ouvre le sélecteur de zones de débogage (et les villes reconstruites une fois générées) (--title-debug).",
+    "cut.hint": "Les villes coupées reconstruites (zones 11, 16 et 17) se jouent depuis la page « Contenu coupé ».",
+    "cut.c.text": "Textes et extras coupés",
+    "cut.text.d": "Restaure des dialogues retirés du jeu et quelques détails inutilisés (baies argentées/dorées, bulle « ? »).",
+    "cut.c.towns": "Villes coupées (reconstruites)",
+    "cut.towns.d": "Trois villes retirées du jeu. Ce sont des reconstructions faites pour le port, pas des données d'origine. La première fois, elles sont générées à partir de votre disque (environ une minute).",
+    "cut.towns.i": "Les cartes et les textes sont assemblés à partir de pièces du jeu lui-même (tools/civ_rebuild.py, tools/civ_test_data.py) et conservés dans civ_cache/ à côté de data/. C'est une reconstruction : la conception finale de ces villes n'est pas sur le disque. Plus d'informations dans docs/CIVILIZATION.md (« Playable towns »).",
+    "cut.play11": "Jouer la Ville des bûcherons (AREA11)", "cut.d11": "Les bûcherons du Pays de la civilisation.",
+    "cut.play16": "Jouer la Ville de pierre (AREA16)", "cut.d16": "La ville de pierre, près de la tour horloge.",
+    "cut.play17": "Jouer Ville fer (AREA17)", "cut.d17": "La ville des hommes de fer.",
+    "mod.civcoll": "Afficher la couche de collisions",
+    "mod.civcoll.i": "Dans les villes reconstruites (Ville des bûcherons, Ville de pierre, Ville fer), la carte des cellules est dessinée par-dessus l'image : rouge = solide, orange = diagonale, magenta = mur à sens unique, cyan = déclencheur. Pour vérifier l'ajustement en marchant (--civ-collision).",
+    "mod.civroute": "Entrer dans les villes reconstruites depuis le centre en partie normale",
+    "mod.civroute.i": "En partie normale, les sorties du centre de la Ville de la civilisation mènent aux villes coupées reconstruites (section 0 des zones 11, 16 et 17) au lieu des sections habituelles ; les sorties des villes mènent ensuite au reste du jeu (--civ-route). Utilise les mêmes cartes et textes générés que les boutons des villes.",
+    "s.civgen": "Génération des villes reconstruites dans {0} (la première fois seulement, environ une minute)...",
+    "s.civgenok": "Villes reconstruites prêtes dans {0}.",
+    "s.civgenfail": "Impossible de générer les villes reconstruites : {0}",
+    "s.civnodata": "Les villes reconstruites sont générées à partir du dossier data/ extrait du disque : choisissez d'abord l'image du disque.",
+    "mod.ap": "Commencer avec des PA", "mod.ap.d": "Points d'aventure au début de la partie (0..99999999).",
+    "mod.lives": "Commencer avec des vies", "mod.lives.d": "Vies au début de la partie (1..99).",
+    "mod.inflives": "Vies infinies", "mod.inflives.d": "Maintient les vies à 99 chaque seconde.",
+    "mod.infhealth": "Force infinie", "mod.infhealth.d": "Maintient la force au maximum (4) à chaque vblank.",
+    "mod.debugmenu": "Menu de débogage", "mod.debugmenu.d": "En jeu : Select+L1+R1 ou F1 ouvre un menu de débogage (traverser les murs, voler, triches, évènements, aller dans n'importe quelle salle, infos à l'écran, vitesse).",
+    "mod.events": "Débloquer tous les évènements",
+    "mod.events.d": "Marque les %d évènements comme terminés au départ (les objets liés aux évènements disparaissent ; pour explorer)." % EVENT_COUNT,
+    "mod.keys": "Touches personnalisées", "mod.keys.d": "Touches du clavier pour chaque bouton PS1 (noms de touches SDL : X, Return, Space, Left...).",
+    # port_launcher.py
+    "l.lang": "Langue du jeu :",
+    "title": "Tombi! - port natif", "tab.play": "Jouer", "tab.mods": "Mods", "tab.controls": "Commandes",
+    "l.disc": "Image du disque (.bin / .cue / .iso / .chd ; extraite une fois dans le dossier data/) :", "b.browse": "Parcourir...",
+    "l.savedir": "Dossier des sauvegardes (cartes mémoire) :", "b.saveimp": "Importer une sauvegarde…", "b.saveexp": "Exporter une sauvegarde…",
+    "s.saverun": "Fermez le jeu avant d'importer ou d'exporter des sauvegardes.", "s.saveimpok": "Sauvegarde importée",
+    "s.saveexpok": "Carte exportée vers {}", "s.saveerr": "Échec de l'import/export : {}",
+    "s.saveask": "Importer ce fichier dans la carte mémoire du port ({}) ?\nUne carte complète remplace la carte actuelle (une copie .bak est conservée).",
+    "s.saveexpq": "Exporter une seule sauvegarde en .mcs ? (Non = carte complète .mcd)",
+    "l.scale": "Taille de la fenêtre :", "l.fullscreen": "Plein écran (F11 en jeu)", "l.hz": "Vitesse :",
+    "l.ires": "Résolution interne (OpenGL uniquement) :", "r.ires1": "1x (d'origine)",
+    "l.renderer": "Rendu :", "r.gl": "OpenGL (carte graphique)", "r.soft": "Logiciel (CPU, plus lent)", "l.aspect": "Image :",
+    "a.tv": "4:3 (comme à la télé)", "a.sq": "Pixels carrés", "a.w16": "16:9 écran large (expérimental)", "a.w21": "21:9 (expérimental)",
+    "a.w32": "32:9 (expérimental)", "a.auto": "Auto (remplit l'écran, expérimental)",
+    "ft.image": "Images",
+    "c.texpack": "Pack de textures (HD) · expérimental", "l.texpack": "Dossier du pack (laissez vide pour les textures d'origine). OpenGL uniquement.",
+    "b.dumpall": "Extraire toutes les textures", "b.openfolder": "Ouvrir le dossier",
+    "l.texpack.d": "Cliquez sur « Extraire toutes les textures » pour exporter les textures du jeu dans le dossier texture_dump. Modifiez-les ou agrandissez-les (2x, 4x…) en gardant les noms de fichier, puis choisissez ce dossier comme pack.",
+    "s.dumpall": "Extraction des textures… {}%", "s.dumpallok": "Terminé : {} textures dans {}", "s.dumpallfail": "Extraction impossible : {}",
+    "l.pad": "Manette : toute manette compatible SDL2 (Xbox, PS4/PS5, Switch Pro) est utilisée automatiquement ; clavier : flèches, X = Croix, Z = Carré, S = Triangle, D = Rond, Q/W = L1/R1, A/E = L2/R2, Entrée = Start, Retour arrière = Select.",
+    "b.play": "Jouer", "b.extracting": "Extraction... {0}%", "l.extracting": "Extraction des fichiers du disque (la première fois seulement). Attendez la fin pour jouer.",
+    "b.stop": "Fermer le jeu", "b.copylog": "Copier le journal", "s.copied": "Journal copié dans le presse-papiers ({0} lignes).",
+    "l.autostart": "Commencer une nouvelle partie automatiquement (appuie sur Start à l'écran titre)",
+    "s.nodisc": "Choisissez votre image du disque.", "s.checking": "Vérification du disque...", "s.ok": "Disque compatible : {0}, MAIN0.EXE vérifié (sha1).",
+    "s.extracting": "Extraction du disque vers {0}... {1} % ({2})", "s.dataok": "Données du jeu prêtes dans {0} ({1} fichiers) : l'image du disque n'est plus nécessaire.",
+    "s.extractfail": "Impossible d'extraire le disque : {0}", "s.nodata": "Choisissez votre image du disque : elle est extraite une fois dans le dossier data/ et le jeu n'en a plus besoin.",
+    "s.badsha": "Disque NON compatible : {0} (sha1 de MAIN0.EXE {1}). Le port ne fonctionne qu'avec Tombi! PAL SCES-01331 Rev 1 (un SCES-01331 ici est la Rev 0) ; il risque d'échouer.",
+    "s.noexe": "EXE/MAIN0.EXE introuvable dans l'image : ce n'est pas un disque Tombi! PAL.", "s.notiso": "Ce n'est pas une image ISO9660 : {0}",
+    "s.running": "Partie en cours... (fermer la fenêtre du jeu y met fin)", "s.ended": "Le jeu s'est terminé (code {0}). Journal : {1}",
+    "s.nobin": "Exécutable du port introuvable ({0}). Compilez-le (docs/PORT.md) ou utilisez l'exe distribué.",
+    "l.log": "Dernières lignes du journal du port :", "l.modshelp": "Chaque mod est une option du port (--poke, --hz...) ; ils sont enregistrés dans tombi-port.json.",
+    "l.key": "Touche", "b.defaults": "Par défaut", "l.cmd": "Commande :",
+    "l.patch": "Patch de texte :", "b.nopatch": "Retirer",
+    "l.patchhelp": "Un patch *.tombipatch.json (tombi-text, « Créer un patch ») est appliqué au dossier data/ quand vous cliquez sur Jouer ; les originaux sont conservés dans data/.orig/ et remis en place quand il est retiré ou changé. Inclus : {0}.",
+    "l.patchnone": "aucun", "s.patching": "Application du patch de texte « {0} » à data/...",
+    "s.patchok": "Patch de texte « {0} » appliqué ({1} fichiers de data/ ; {2}).", "s.patchon": "Patch de texte actif : « {0} ».",
+    "s.patchoff": "Patch de texte retiré : data/ contient de nouveau les fichiers d'origine ({0}).",
+    "s.patchfail": "Impossible d'appliquer le patch de texte : {0}", "s.patchmissing": "Patch de texte introuvable : {0}",
+    "s.patchnodata": "Le patch de texte est appliqué une fois le disque extrait dans data/ (choisissez l'image du disque).",
+    "s.patchchk.disc": "sha1 du disque vérifié", "s.patchchk.main0": "MAIN0.EXE de data/ vérifié ; choisissez l'image .bin pour vérifier aussi le sha1 du disque",
+    "s.patchmoved": "{0} fichiers ont dépassé leur place sur le disque et ont été déplacés à la fin (lus via la table de fichiers de la langue)",
+    "l.cutcontent": "Activer le contenu coupé",
+    "i.cutcontent": "Des textes retirés du jeu et retrouvés dans la version japonaise (Ore! Tomba). "
+                    "Quatre sont activés :\n\n"
+                    "• Le passeur du village où tout débute (AREA00) : à l'étang où vous arrivez sur la tortue, après son au revoir "
+                    "il dit trois répliques de plus (une porte fermée à clé, une serrure faite par les hommes de fer, sa barque sur "
+                    "la plage de la forêt Champignon).\n"
+                    "• Une lettre du Village Baccus sur le mont Phénix (AREA03) : un second panneau à gauche du panneau de sauvegarde, "
+                    "au début de la zone, qui se lit de la même façon (Haut, puis parler).\n"
+                    "• Le panneau d'affichage du Village Baccus (AREA05) : il était hors de portée de Tombi ; il se lit maintenant "
+                    "depuis le sol, juste en dessous (souris disparue, puis « Félicitations ! » et « On recherche un aventurier ! »).\n"
+                    "• Un point de sauvegarde « Rocher de la sirène » sur la plage d'arrivée de la course (AREA06), à côté du tableau des records.\n\n"
+                    "Ils mentionnent des lieux et des choses qui n'existent pas dans le jeu final (le Pays de la civilisation, cette "
+                    "serrure, la barque).\n\n"
+                    "Et aussi deux choses que le jeu contient mais n'utilise jamais :\n"
+                    "• Les baies argentées et dorées : les fruits lâchés par les ennemis et les coffres sont parfois argentés (1 sur 8) "
+                    "ou dorés (1 sur 32) ; ils rendent 2 de force au lieu de 1 (et donnent 100 PA comme le fruit normal).\n"
+                    "• La grande bulle « ? » : elle apparaît au-dessus de Tombi quand vous reparlez à quelqu'un qui n'a rien de "
+                    "nouveau à dire (personnages qui répètent leur réplique), dans les scènes vues de dessus.\n"
+                    "La fréquence des baies et le moment où apparaît le « ? » sont notre choix : le jeu a le code et les "
+                    "graphismes, mais ne dit jamais quand ils devaient apparaître.\n\n"
+                    "Les textes sont en espagnol avec le patch « Traduction améliorée » ; dans les autres langues, ou sans le "
+                    "patch, ces emplacements du disque ne contiennent que du remplissage (« !!!!!!!!!! », « ..........??? »). Avec le jeu en anglais (et sans autre patch de texte), le texte anglais inclus (en_cut_content) est appliqué.\n\n"
+                    "Optionnel, écran titre précoce : si vous indiquez le dossier contenant les fichiers TOMBA du disque « PrePre Vol. 8 » "
+                    "(PCPX-96084, une démo japonaise de juin 1997 ; extraits de votre propre disque avec tools/prepre8.py extract), "
+                    "le paysage du titre est celui de cette version (rocher en flèche et rivière) au lieu du final. C'est du vrai "
+                    "graphisme du jeu de l'époque ; le logo, le menu et les textes restent les finaux (le logo « オレっ！トンバ » de cette "
+                    "version n'est pas utilisé : on ne sait pas comment il était disposé). Rien de ce disque n'est inclus.",
+    "l.earlytitle": "Titre précoce (optionnel) : dossier TOMBA du disque PrePre Vol. 8 (tools/prepre8.py extract) :",
+    "l.experimental": "Fonctions expérimentales", "l.fps60": "60 fps (expérimental)", "nav.play": "Jouer", "nav.gfx": "Graphismes",
+    "nav.controls": "Commandes", "nav.mods": "Patchs et mods", "nav.cut": "Contenu coupé", "nav.log": "Journal",
+    "l.uilang": "Langue du launcher", "l.starting": "Lancement du jeu...", "c.disc": "Disque", "c.saves": "Sauvegardes", "c.game": "Langue du jeu",
+    "c.patch": "Patch de texte", "c.speed": "Vitesse", "c.quick": "Options rapides", "l.skipintro": "Passer les logos et l'intro",
+    "l.autostart2": "Commencer une partie automatiquement", "p.none": "Aucun (texte d'origine)",
+    "l.patchhint": "Recommandé avec le jeu en espagnol : Traduction améliorée (incluse).", "p.bundled": "Traduction améliorée (incluse)",
+    "sum.window": "fenêtre {0}x", "sum.full": "plein écran",
+    "sum.ires": "{0}x interne", "c.renderer": "Rendu", "c.window": "Fenêtre", "c.aspect": "Image", "c.ires": "Résolution interne",
+    "l.iresoff": "OpenGL uniquement : le rendu logiciel dessine toujours à la résolution d'origine.",
+    "c.keys": "Clavier", "c.pad": "Manette", "c.mods": "Mods",
+    "c.cmd": "Ligne de commande", "c.log": "Dernières lignes du journal", "c.status": "État",
+    "c.controls": "Clavier et manette",
+    "pad.hint": "Cliquez sur un bouton ou sa touche, puis appuyez sur la nouvelle touche (Échap annule). Changer une touche active les touches personnalisées.",
+    "pad.press": "Appuyez sur une touche", "pad.nokey": "(aucune)",
+    "pad.note": "Manette : toute manette compatible SDL2 (Xbox, PS4/PS5, Switch Pro) est utilisée automatiquement, avec les boutons placés comme sur le dessin.",
+    "btn.up": "Haut", "btn.down": "Bas", "btn.left": "Gauche", "btn.right": "Droite", "btn.cross": "Croix", "btn.circle": "Rond",
+    "btn.square": "Carré", "btn.triangle": "Triangle", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+    "btn.start": "Start", "btn.select": "Select",
+    "l.rumble": "Intensité de la vibration :", "rumble.off": "Désactivée",
+    "l.dualshock": "Manette DualShock (analogique) : stick gauche avec vitesse, et vibration",
+    "l.prompts": "Icônes des boutons dans les textes :", "p.auto": "Auto (selon la manette)", "p.ps": "PlayStation",
+    "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Personnalisé", "b.custom": "Personnaliser les boutons…",
+    "pc.title": "Personnaliser les boutons", "pc.preset": "Partir de :", "pc.sym": "Symboles :", "pc.disc": "Disque", "pc.letter": "Lettre",
+    "pc.sym.xbox": "Lettres Xbox", "pc.sym.nintendo": "Lettres Nintendo", "pc.sym.ps": "Formes PlayStation",
+    "pc.pos": "Bas (A Xbox)|Droite (B Xbox)|Gauche (X Xbox)|Haut (Y Xbox)", "pc.ok": "Utiliser", "pc.cancel": "Annuler", "p.gen": "Générique",
+    "l.showfps": "Afficher les FPS", "c.icons": "Icônes des boutons", "c.keyboard": "Clavier", "b.restore": "Rétablir les réglages par défaut",
+    "kb.hint": "Cliquez sur la touche d'un bouton, puis appuyez sur la nouvelle touche (Échap annule).",
+    "kb.clash": "Attention : la touche {0} est attribuée à plusieurs boutons ({1}).",
+    "gp.hint": "Toute manette compatible SDL2 (Xbox, PS4/PS5, Switch Pro). Cliquez sur un bouton de la photo ou choisissez dans la liste quel bouton de la manette sert de chaque bouton PS1.",
+    "gp.clash": "Attention : {0} est attribué à plusieurs boutons ({1}).",
+    # the controller sources of the Controls page (PAD_SOURCES)
+    "src.dpup": "Croix directionnelle haut", "src.dpdown": "Croix directionnelle bas", "src.dpleft": "Croix directionnelle gauche",
+    "src.dpright": "Croix directionnelle droite", "src.a": "A (bas)", "src.b": "B (droite)", "src.x": "X (gauche)", "src.y": "Y (haut)",
+    "src.leftshoulder": "LB / L1", "src.rightshoulder": "RB / R1", "src.lefttrigger": "LT / L2", "src.righttrigger": "RT / R2",
+    "src.start": "Start / Menu", "src.back": "Back / Select / Affichage", "src.guide": "Guide / Home / PS",
+    "src.leftstick": "L3 (stick gauche enfoncé)", "src.rightstick": "R3 (stick droit enfoncé)", "src.misc1": "Partage / Capture",
+    "src.touchpad": "Pavé tactile", "src.paddle1": "Palette 1", "src.paddle2": "Palette 2", "src.paddle3": "Palette 3", "src.paddle4": "Palette 4",
+    "src.leftx-": "Stick gauche à gauche", "src.leftx+": "Stick gauche à droite", "src.lefty-": "Stick gauche en haut", "src.lefty+": "Stick gauche en bas",
+    "src.rightx-": "Stick droit à gauche", "src.rightx+": "Stick droit à droite", "src.righty-": "Stick droit en haut", "src.righty+": "Stick droit en bas",
+    "src.": "(aucun)",
+}
+
+DE = {
+    "mod.skipintro": "Intro-Logos und -Videos überspringen",
+    "mod.skipintro.d": "Startet beim Titelbildschirm ohne die Logos und das Eröffnungsvideo (die Videos der Geschichte laufen weiterhin).",
+    "mod.hz60": "60 Hz (NTSC-Geschwindigkeit)",
+    "mod.hz60.d": "Das PAL-Spiel läuft mit 50 Hz; damit taktet der Port es mit 60 Vblanks pro Sekunde (schneller, Musik inbegriffen).",
+    "mod.areasel": "Gebietsauswahl (Debug-Auswahl)",
+    "mod.areasel.d": "Öffnet die Debug-Gebietsauswahl des Spiels und betritt das gewählte Gebiet/den gewählten Abschnitt, statt die Geschichte zu beginnen.",
+    "mod.area": "Gebiet", "mod.section": "Abschnitt",
+    "mod.titledebug": "DEBUG-Eintrag im Titelmenü",
+    "mod.titledebug.d": "Fügt rechts von OPTIONEN auf dem Titelbildschirm DEBUG hinzu: es öffnet die Debug-Gebietsauswahl (und die nachgebauten Städte, sobald sie erzeugt sind) (--title-debug).",
+    "cut.hint": "Die nachgebauten entfernten Städte (Gebiete 11, 16 und 17) werden auf der Seite „Entfernte Inhalte“ gespielt.",
+    "cut.c.text": "Entfernte Texte und Extras",
+    "cut.text.d": "Stellt aus dem Spiel entfernte Dialoge und einige ungenutzte Details wieder her (silberne/goldene Beeren, „?“-Sprechblase).",
+    "cut.c.towns": "Entfernte Städte (nachgebaut)",
+    "cut.towns.d": "Drei aus dem Spiel entfernte Städte. Es sind Nachbauten für den Port, keine Originaldaten. Beim ersten Mal werden sie aus deiner Disc erzeugt (etwa eine Minute).",
+    "cut.towns.i": "Karten und Texte werden aus Teilen des Spiels selbst zusammengesetzt (tools/civ_rebuild.py, tools/civ_test_data.py) und in civ_cache/ neben data/ abgelegt. Es ist ein Nachbau: das endgültige Design dieser Städte ist nicht auf der Disc. Mehr in docs/CIVILIZATION.md („Playable towns“).",
+    "cut.play11": "Holzfällerstadt spielen (AREA11)", "cut.d11": "Die Stadt der Holzfäller im Land der Zivilisation.",
+    "cut.play16": "Steinstadt spielen (AREA16)", "cut.d16": "Die Steinstadt beim Uhrenturm.",
+    "cut.play17": "Eisenstadt spielen (AREA17)", "cut.d17": "Die Stadt der Eisenmänner.",
+    "mod.civcoll": "Kollisionsebene anzeigen",
+    "mod.civcoll.i": "In den nachgebauten Städten (Holzfällerstadt, Steinstadt, Eisenstadt) wird die Zellenkarte über das Bild gezeichnet: rot = fest, orange = diagonal, magenta = einseitige Wand, cyan = Auslöser. Zum Prüfen der Passform beim Laufen (--civ-collision).",
+    "mod.civroute": "Die nachgebauten Städte im normalen Spiel vom Zentrum aus betreten",
+    "mod.civroute.i": "Im normalen Spiel führen die Ausgänge des Zentrums der Stadt der Zivilisation zu den nachgebauten entfernten Städten (Abschnitt 0 der Gebiete 11, 16 und 17) statt zu den üblichen Abschnitten; die Ausgänge der Städte führen weiter zum Rest des Spiels (--civ-route). Verwendet dieselben erzeugten Karten und Texte wie die Stadt-Schaltflächen.",
+    "s.civgen": "Die nachgebauten Städte werden in {0} erzeugt (nur beim ersten Mal, etwa eine Minute)...",
+    "s.civgenok": "Nachgebaute Städte bereit in {0}.",
+    "s.civgenfail": "Die nachgebauten Städte konnten nicht erzeugt werden: {0}",
+    "s.civnodata": "Die nachgebauten Städte werden aus dem von der Disc entpackten Ordner data/ erzeugt: wähle zuerst das Disc-Image.",
+    "mod.ap": "Mit AP beginnen", "mod.ap.d": "Abenteuerpunkte zu Spielbeginn (0..99999999).",
+    "mod.lives": "Mit Leben beginnen", "mod.lives.d": "Leben zu Spielbeginn (1..99).",
+    "mod.inflives": "Unendlich Leben", "mod.inflives.d": "Hält die Leben jede Sekunde auf 99.",
+    "mod.infhealth": "Unendlich Energie", "mod.infhealth.d": "Hält die Energie bei jedem Vblank auf dem Maximum (4).",
+    "mod.debugmenu": "Debug-Menü", "mod.debugmenu.d": "Im Spiel: Select+L1+R1 oder F1 öffnet ein Debug-Menü (durch Wände gehen, fliegen, Cheats, Ereignisse, in jeden Raum springen, Infoanzeige, Geschwindigkeit).",
+    "mod.events": "Alle Ereignisse freischalten",
+    "mod.events.d": "Markiert zu Beginn alle %d Ereignisse als erledigt (an Ereignisse gebundene Objekte sind weg; zum Erkunden)." % EVENT_COUNT,
+    "mod.keys": "Eigene Tasten", "mod.keys.d": "Tastaturtasten für jede PS1-Taste (SDL-Tastennamen: X, Return, Space, Left...).",
+    "l.lang": "Spielsprache:",
+    "title": "Tombi! - nativer Port", "tab.play": "Spielen", "tab.mods": "Mods", "tab.controls": "Steuerung",
+    "l.disc": "Disc-Image (.bin / .cue / .iso / .chd; wird einmal in den Ordner data/ entpackt):", "b.browse": "Durchsuchen...",
+    "l.savedir": "Speicherordner (Memory Cards):", "b.saveimp": "Spielstand importieren…", "b.saveexp": "Spielstand exportieren…",
+    "s.saverun": "Schließe das Spiel, bevor du Spielstände importierst oder exportierst.", "s.saveimpok": "Spielstand importiert",
+    "s.saveexpok": "Karte exportiert nach {}", "s.saveerr": "Import/Export fehlgeschlagen: {}",
+    "s.saveask": "Diese Datei in die Memory Card des Ports ({}) importieren?\nEine ganze Karte ersetzt die aktuelle (eine .bak-Kopie wird behalten).",
+    "s.saveexpq": "Einen einzelnen Spielstand als .mcs exportieren? (Nein = ganze Karte .mcd)",
+    "l.scale": "Fenstergröße:", "l.fullscreen": "Vollbild (F11 im Spiel)", "l.hz": "Geschwindigkeit:",
+    "l.ires": "Interne Auflösung (nur OpenGL):", "r.ires1": "1x (original)",
+    "l.renderer": "Renderer:", "r.gl": "OpenGL (Grafikkarte)", "r.soft": "Software (CPU, langsamer)", "l.aspect": "Bild:",
+    "a.tv": "4:3 (wie am Fernseher)", "a.sq": "Quadratische Pixel", "a.w16": "16:9 Breitbild (experimentell)", "a.w21": "21:9 (experimentell)",
+    "a.w32": "32:9 (experimentell)", "a.auto": "Auto (füllt den Bildschirm, experimentell)",
+    "ft.image": "Images",
+    "c.texpack": "Texturpaket (HD) · experimentell", "l.texpack": "Paketordner (leer lassen für die Originaltexturen). Nur OpenGL.",
+    "b.dumpall": "Alle Texturen exportieren", "b.openfolder": "Ordner öffnen",
+    "l.texpack.d": "Klicke auf „Alle Texturen exportieren“, um die Texturen des Spiels in den Ordner texture_dump zu exportieren. Bearbeite oder vergrößere sie (2x, 4x…) unter Beibehaltung der Dateinamen und wähle dann diesen Ordner als Paket.",
+    "s.dumpall": "Texturen werden exportiert… {}%", "s.dumpallok": "Fertig: {} Texturen in {}", "s.dumpallfail": "Export nicht möglich: {}",
+    "l.pad": "Controller: jeder SDL2-kompatible Controller (Xbox, PS4/PS5, Switch Pro) wird automatisch verwendet; Tastatur: Pfeiltasten, X = Kreuz, Z = Quadrat, S = Dreieck, D = Kreis, Q/W = L1/R1, A/E = L2/R2, Eingabe = Start, Rücktaste = Select.",
+    "b.play": "Spielen", "b.extracting": "Entpacken... {0}%", "l.extracting": "Die Disc-Dateien werden entpackt (nur beim ersten Mal). Warte, bis es fertig ist, um zu spielen.",
+    "b.stop": "Spiel schließen", "b.copylog": "Protokoll kopieren", "s.copied": "Protokoll in die Zwischenablage kopiert ({0} Zeilen).",
+    "l.autostart": "Automatisch ein neues Spiel beginnen (drückt Start im Titelbildschirm)",
+    "s.nodisc": "Wähle dein Disc-Image.", "s.checking": "Disc wird geprüft...", "s.ok": "Kompatible Disc: {0}, MAIN0.EXE geprüft (sha1).",
+    "s.extracting": "Disc wird nach {0} entpackt... {1} % ({2})", "s.dataok": "Spieldaten bereit in {0} ({1} Dateien): das Disc-Image wird nicht mehr gebraucht.",
+    "s.extractfail": "Die Disc konnte nicht entpackt werden: {0}", "s.nodata": "Wähle dein Disc-Image: es wird einmal in den Ordner data/ entpackt, danach braucht das Spiel es nicht mehr.",
+    "s.badsha": "KEINE kompatible Disc: {0} (sha1 von MAIN0.EXE {1}). Der Port läuft nur mit Tombi! PAL SCES-01331 Rev 1 (eine SCES-01331 hier ist Rev 0); es kann fehlschlagen.",
+    "s.noexe": "EXE/MAIN0.EXE nicht im Image gefunden: keine Tombi!-PAL-Disc.", "s.notiso": "Kein ISO9660-Image: {0}",
+    "s.running": "Spiel läuft... (das Schließen des Spielfensters beendet es)", "s.ended": "Das Spiel wurde beendet (Code {0}). Protokoll: {1}",
+    "s.nobin": "Port-Programm nicht gefunden ({0}). Kompiliere es (docs/PORT.md) oder verwende die verteilte exe.",
+    "l.log": "Letzte Zeilen des Port-Protokolls:", "l.modshelp": "Jeder Mod ist eine Option des Ports (--poke, --hz...); sie werden in tombi-port.json gespeichert.",
+    "l.key": "Taste", "b.defaults": "Standard", "l.cmd": "Befehl:",
+    "l.patch": "Textpatch:", "b.nopatch": "Entfernen",
+    "l.patchhelp": "Ein Patch *.tombipatch.json (tombi-text, „Patch erstellen“) wird beim Klick auf Spielen auf den Ordner data/ angewendet; die Originale werden in data/.orig/ aufbewahrt und zurückgelegt, wenn er entfernt oder gewechselt wird. Enthalten: {0}.",
+    "l.patchnone": "keiner", "s.patching": "Textpatch „{0}“ wird auf data/ angewendet...",
+    "s.patchok": "Textpatch „{0}“ angewendet ({1} Dateien von data/; {2}).", "s.patchon": "Textpatch aktiv: „{0}“.",
+    "s.patchoff": "Textpatch entfernt: data/ enthält wieder die Originaldateien ({0}).",
+    "s.patchfail": "Der Textpatch konnte nicht angewendet werden: {0}", "s.patchmissing": "Textpatch nicht gefunden: {0}",
+    "s.patchnodata": "Der Textpatch wird angewendet, sobald die Disc in data/ entpackt ist (wähle das Disc-Image).",
+    "s.patchchk.disc": "sha1 der Disc geprüft", "s.patchchk.main0": "MAIN0.EXE von data/ geprüft; wähle das .bin-Image, um auch die sha1 der Disc zu prüfen",
+    "s.patchmoved": "{0} Dateien wurden größer als ihr Platz auf der Disc und ans Ende verschoben (gelesen über die eigene Dateitabelle der Sprache)",
+    "l.cutcontent": "Entfernte Inhalte aktivieren",
+    "i.cutcontent": "Texte, die aus dem Spiel entfernt und in der japanischen Version (Ore! Tomba) gefunden wurden. "
+                    "Vier davon werden aktiviert:\n\n"
+                    "• Der Fährmann im Dorf allen Anfangs (AREA00): am Teich, den du auf der Schildkröte erreichst, sagt er nach "
+                    "seinem Abschied drei weitere Sätze (eine verschlossene Tür, ein Schloss der Eisenmänner, sein Boot am Strand "
+                    "des Pilzwalds).\n"
+                    "• Ein Brief aus dem Dorf Baccus auf dem Phönix-Berg (AREA03): ein zweites Schild links vom Speicherschild am "
+                    "Anfang des Gebiets, das genauso gelesen wird (Oben, dann sprechen).\n"
+                    "• Das Anschlagbrett des Dorfs Baccus (AREA05): es war außerhalb von Tombis Reichweite; jetzt wird es vom "
+                    "Boden darunter gelesen (vermisste Maus, dann „Herzlichen Glückwunsch!“ und „Abenteurer gesucht!“).\n"
+                    "• Ein Speicherpunkt „Singender Fels der Meerjungfrau“ am Zielstrand des Rennens (AREA06), neben der Rekordtafel.\n\n"
+                    "Sie erwähnen Orte und Dinge, die es im fertigen Spiel nicht gibt (das Land der Zivilisation, jenes Schloss, "
+                    "das Boot).\n\n"
+                    "Außerdem zwei Dinge, die das Spiel enthält, aber nie verwendet:\n"
+                    "• Silberne und goldene Beeren: Früchte, die Gegner und Truhen fallen lassen, sind manchmal silbern (1 von 8) "
+                    "oder golden (1 von 32); sie geben 2 Energie statt 1 zurück (und 100 AP wie die normale).\n"
+                    "• Die große „?“-Sprechblase: sie erscheint über Tombi, wenn du erneut mit jemandem sprichst, der nichts Neues "
+                    "zu sagen hat (Figuren, die ihren Satz wiederholen), in den Szenen von oben.\n"
+                    "Wie oft die Beeren erscheinen und wann das „?“ auftaucht, haben wir gewählt: das Spiel hat den Code und die "
+                    "Grafiken, sagt aber nie, wann sie erscheinen sollten.\n\n"
+                    "Die Texte sind auf Spanisch mit dem Patch „Verbesserte Übersetzung“; in den anderen Sprachen oder ohne den "
+                    "Patch enthalten diese Stellen der Disc nur Füllzeichen („!!!!!!!!!!“, „..........???“). Mit dem Spiel auf Englisch (und ohne anderen Textpatch) wird der enthaltene englische Text (en_cut_content) angewendet.\n\n"
+                    "Optional, früher Titelbildschirm: wenn du den Ordner mit den TOMBA-Dateien der Disc „PrePre Vol. 8“ angibst "
+                    "(PCPX-96084, eine japanische Demo vom Juni 1997; mit tools/prepre8.py extract von deiner eigenen Disc entpackt), "
+                    "ist die Titellandschaft die dieser Version (Felsnadel und Fluss) statt der endgültigen. Das ist echte Spielgrafik "
+                    "aus jener Zeit; Logo, Menü und Texte bleiben die endgültigen (das Logo „オレっ！トンバ“ dieser Version wird nicht "
+                    "verwendet: wie es angeordnet war, ist unbekannt). Nichts von dieser Disc ist enthalten.",
+    "l.earlytitle": "Früher Titel (optional): TOMBA-Ordner der Disc PrePre Vol. 8 (tools/prepre8.py extract):",
+    "l.experimental": "Experimentalfunktionen", "l.fps60": "60 fps (experimentell)", "nav.play": "Spielen", "nav.gfx": "Grafik",
+    "nav.controls": "Steuerung", "nav.mods": "Patches und Mods", "nav.cut": "Entfernte Inhalte", "nav.log": "Protokoll",
+    "l.uilang": "Launcher-Sprache", "l.starting": "Spiel wird gestartet...", "c.disc": "Disc", "c.saves": "Spielstände", "c.game": "Spielsprache",
+    "c.patch": "Textpatch", "c.speed": "Geschwindigkeit", "c.quick": "Schnelloptionen", "l.skipintro": "Logos und Intro überspringen",
+    "l.autostart2": "Automatisch ein neues Spiel beginnen", "p.none": "Keiner (Originaltext)",
+    "l.patchhint": "Empfohlen mit dem Spiel auf Spanisch: Verbesserte Übersetzung (enthalten).", "p.bundled": "Verbesserte Übersetzung (enthalten)",
+    "sum.window": "{0}x Fenster", "sum.full": "Vollbild",
+    "sum.ires": "{0}x intern", "c.renderer": "Renderer", "c.window": "Fenster", "c.aspect": "Bild", "c.ires": "Interne Auflösung",
+    "l.iresoff": "Nur OpenGL: der Software-Renderer zeichnet immer in der Originalauflösung.",
+    "c.keys": "Tastatur", "c.pad": "Controller", "c.mods": "Mods",
+    "c.cmd": "Befehlszeile", "c.log": "Letzte Zeilen des Protokolls", "c.status": "Status",
+    "c.controls": "Tastatur und Controller",
+    "pad.hint": "Klicke auf eine Taste oder ihre Belegung und drücke dann die neue Taste (Esc bricht ab). Eine geänderte Taste aktiviert die eigenen Tasten.",
+    "pad.press": "Drücke eine Taste", "pad.nokey": "(keine)",
+    "pad.note": "Controller: jeder SDL2-kompatible Controller (Xbox, PS4/PS5, Switch Pro) wird automatisch verwendet, mit den Tasten dort, wo die Zeichnung sie zeigt.",
+    "btn.up": "Oben", "btn.down": "Unten", "btn.left": "Links", "btn.right": "Rechts", "btn.cross": "Kreuz", "btn.circle": "Kreis",
+    "btn.square": "Quadrat", "btn.triangle": "Dreieck", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+    "btn.start": "Start", "btn.select": "Select",
+    "l.rumble": "Vibrationsstärke:", "rumble.off": "Aus",
+    "l.dualshock": "DualShock-Controller (analog): linker Stick mit Geschwindigkeit, und Vibration",
+    "l.prompts": "Tastensymbole in den Texten:", "p.auto": "Auto (je nach Controller)", "p.ps": "PlayStation",
+    "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Eigene", "b.custom": "Tasten anpassen…",
+    "pc.title": "Tasten anpassen", "pc.preset": "Ausgehend von:", "pc.sym": "Symbole:", "pc.disc": "Scheibe", "pc.letter": "Buchstabe",
+    "pc.sym.xbox": "Xbox-Buchstaben", "pc.sym.nintendo": "Nintendo-Buchstaben", "pc.sym.ps": "PlayStation-Formen",
+    "pc.pos": "Unten (Xbox A)|Rechts (Xbox B)|Links (Xbox X)|Oben (Xbox Y)", "pc.ok": "Übernehmen", "pc.cancel": "Abbrechen", "p.gen": "Generisch",
+    "l.showfps": "FPS anzeigen", "c.icons": "Tastensymbole", "c.keyboard": "Tastatur", "b.restore": "Standard wiederherstellen",
+    "kb.hint": "Klicke auf die Taste einer Schaltfläche und drücke dann die neue Taste (Esc bricht ab).",
+    "kb.clash": "Achtung: die Taste {0} ist mehreren Tasten zugewiesen ({1}).",
+    "gp.hint": "Jeder SDL2-kompatible Controller (Xbox, PS4/PS5, Switch Pro). Klicke auf eine Taste im Foto oder wähle in der Liste, welche Controller-Taste als welche PS1-Taste dient.",
+    "gp.clash": "Achtung: {0} ist mehreren Tasten zugewiesen ({1}).",
+    "src.dpup": "Steuerkreuz oben", "src.dpdown": "Steuerkreuz unten", "src.dpleft": "Steuerkreuz links", "src.dpright": "Steuerkreuz rechts",
+    "src.a": "A (unten)", "src.b": "B (rechts)", "src.x": "X (links)", "src.y": "Y (oben)",
+    "src.leftshoulder": "LB / L1", "src.rightshoulder": "RB / R1", "src.lefttrigger": "LT / L2", "src.righttrigger": "RT / R2",
+    "src.start": "Start / Menü", "src.back": "Back / Select / Ansicht", "src.guide": "Guide / Home / PS",
+    "src.leftstick": "L3 (linken Stick drücken)", "src.rightstick": "R3 (rechten Stick drücken)", "src.misc1": "Teilen / Aufnahme",
+    "src.touchpad": "Touchpad", "src.paddle1": "Paddle 1", "src.paddle2": "Paddle 2", "src.paddle3": "Paddle 3", "src.paddle4": "Paddle 4",
+    "src.leftx-": "Linker Stick links", "src.leftx+": "Linker Stick rechts", "src.lefty-": "Linker Stick oben", "src.lefty+": "Linker Stick unten",
+    "src.rightx-": "Rechter Stick links", "src.rightx+": "Rechter Stick rechts", "src.righty-": "Rechter Stick oben", "src.righty+": "Rechter Stick unten",
+    "src.": "(keine)",
+}
+
+IT = {
+    "mod.skipintro": "Salta loghi e filmati iniziali",
+    "mod.skipintro.d": "Avvia dalla schermata del titolo senza i loghi e il filmato d'apertura (i filmati della storia vengono comunque riprodotti).",
+    "mod.hz60": "60 Hz (velocità NTSC)",
+    "mod.hz60.d": "Il gioco PAL va a 50 Hz; con questa opzione il port lo sincronizza a 60 vblank al secondo (più veloce, musica compresa).",
+    "mod.areasel": "Selezione area (debug select)",
+    "mod.areasel.d": "Apre il selettore di aree di debug del gioco ed entra nell'area/sezione scelta invece di iniziare la storia.",
+    "mod.area": "Area", "mod.section": "Sezione",
+    "mod.titledebug": "Voce DEBUG nel menu del titolo",
+    "mod.titledebug.d": "Aggiunge DEBUG a destra di OPZIONI nella schermata del titolo: apre il selettore di aree di debug (e le città ricostruite una volta generate) (--title-debug).",
+    "cut.hint": "Le città tagliate ricostruite (aree 11, 16 e 17) si giocano dalla pagina «Contenuti tagliati».",
+    "cut.c.text": "Testi ed extra tagliati",
+    "cut.text.d": "Ripristina dialoghi rimossi dal gioco e alcuni dettagli inutilizzati (bacche d'argento/d'oro, fumetto «?»).",
+    "cut.c.towns": "Città tagliate (ricostruite)",
+    "cut.towns.d": "Tre città rimosse dal gioco. Sono ricostruzioni fatte per il port, non dati originali. La prima volta vengono generate dal tuo disco (circa un minuto).",
+    "cut.towns.i": "Le mappe e i testi sono assemblati con pezzi del gioco stesso (tools/civ_rebuild.py, tools/civ_test_data.py) e salvati in civ_cache/ accanto a data/. Sono una ricostruzione: il progetto finale di queste città non è sul disco. Altri dettagli in docs/CIVILIZATION.md («Playable towns»).",
+    "cut.play11": "Gioca la Città dei boscaioli (AREA11)", "cut.d11": "La città dei boscaioli della Terra della civiltà.",
+    "cut.play16": "Gioca la Città di pietra (AREA16)", "cut.d16": "La città di pietra, vicino alla torre dell'orologio.",
+    "cut.play17": "Gioca la Città di ferro (AREA17)", "cut.d17": "La città degli uomini di ferro.",
+    "mod.civcoll": "Mostra il livello delle collisioni",
+    "mod.civcoll.i": "Nelle città ricostruite (Città dei boscaioli, Città di pietra, Città di ferro) la mappa delle celle viene disegnata sopra l'immagine: rosso = solido, arancione = diagonale, magenta = muro a senso unico, ciano = attivatore. Serve a controllare l'allineamento mentre cammini (--civ-collision).",
+    "mod.civroute": "Entra nelle città ricostruite dal centro nella partita normale",
+    "mod.civroute.i": "Nella partita normale le uscite del centro della Città della civiltà portano alle città tagliate ricostruite (sezione 0 delle aree 11, 16 e 17) invece che alle sezioni solite; le uscite delle città portano poi al resto del gioco (--civ-route). Usa le stesse mappe e gli stessi testi generati dei pulsanti delle città.",
+    "s.civgen": "Generazione delle città ricostruite in {0} (solo la prima volta, circa un minuto)...",
+    "s.civgenok": "Città ricostruite pronte in {0}.",
+    "s.civgenfail": "Impossibile generare le città ricostruite: {0}",
+    "s.civnodata": "Le città ricostruite vengono generate dalla cartella data/ estratta dal disco: scegli prima l'immagine del disco.",
+    "mod.ap": "Inizia con AP", "mod.ap.d": "Punti avventura all'inizio della partita (0..99999999).",
+    "mod.lives": "Inizia con vite", "mod.lives.d": "Vite all'inizio della partita (1..99).",
+    "mod.inflives": "Vite infinite", "mod.inflives.d": "Mantiene le vite a 99 ogni secondo.",
+    "mod.infhealth": "Vita infinita", "mod.infhealth.d": "Mantiene la vita al massimo (4) a ogni vblank.",
+    "mod.debugmenu": "Menu di debug", "mod.debugmenu.d": "Nel gioco: Select+L1+R1 o F1 apre un menu di debug (attraversare i muri, volare, trucchi, eventi, andare in qualsiasi stanza, info a schermo, velocità).",
+    "mod.events": "Sblocca tutti gli eventi",
+    "mod.events.d": "Segna tutti i %d eventi come completati all'inizio (gli oggetti legati agli eventi spariscono; per esplorare)." % EVENT_COUNT,
+    "mod.keys": "Tasti personalizzati", "mod.keys.d": "Tasti della tastiera per ogni tasto PS1 (nomi dei tasti SDL: X, Return, Space, Left...).",
+    "l.lang": "Lingua del gioco:",
+    "title": "Tombi! - port nativo", "tab.play": "Gioca", "tab.mods": "Mod", "tab.controls": "Controlli",
+    "l.disc": "Immagine del disco (.bin / .cue / .iso / .chd; estratta una volta nella cartella data/):", "b.browse": "Sfoglia...",
+    "l.savedir": "Cartella dei salvataggi (memory card):", "b.saveimp": "Importa salvataggio…", "b.saveexp": "Esporta salvataggio…",
+    "s.saverun": "Chiudi il gioco prima di importare o esportare salvataggi.", "s.saveimpok": "Salvataggio importato",
+    "s.saveexpok": "Card esportata in {}", "s.saveerr": "Importazione/esportazione non riuscita: {}",
+    "s.saveask": "Importare questo file nella memory card del port ({})?\nUna card intera sostituisce quella attuale (viene conservata una copia .bak).",
+    "s.saveexpq": "Esportare un solo salvataggio come .mcs? (No = card intera .mcd)",
+    "l.scale": "Dimensione della finestra:", "l.fullscreen": "Schermo intero (F11 nel gioco)", "l.hz": "Velocità:",
+    "l.ires": "Risoluzione interna (solo OpenGL):", "r.ires1": "1x (originale)",
+    "l.renderer": "Renderer:", "r.gl": "OpenGL (scheda grafica)", "r.soft": "Software (CPU, più lento)", "l.aspect": "Immagine:",
+    "a.tv": "4:3 (come in TV)", "a.sq": "Pixel quadrati", "a.w16": "16:9 panoramico (sperimentale)", "a.w21": "21:9 (sperimentale)",
+    "a.w32": "32:9 (sperimentale)", "a.auto": "Auto (riempie lo schermo, sperimentale)",
+    "ft.image": "Immagini",
+    "c.texpack": "Pacchetto texture (HD) · sperimentale", "l.texpack": "Cartella del pacchetto (lascia vuoto per le texture originali). Solo OpenGL.",
+    "b.dumpall": "Esporta tutte le texture", "b.openfolder": "Apri cartella",
+    "l.texpack.d": "Premi «Esporta tutte le texture» per esportare le texture del gioco nella cartella texture_dump. Modificale o ingrandiscile (2x, 4x…) mantenendo i nomi dei file, poi scegli quella cartella come pacchetto.",
+    "s.dumpall": "Esportazione texture… {}%", "s.dumpallok": "Fatto: {} texture in {}", "s.dumpallfail": "Impossibile esportare: {}",
+    "l.pad": "Controller: qualsiasi controller compatibile con SDL2 (Xbox, PS4/PS5, Switch Pro) viene usato automaticamente; tastiera: frecce, X = Croce, Z = Quadrato, S = Triangolo, D = Cerchio, Q/W = L1/R1, A/E = L2/R2, Invio = Start, Backspace = Select.",
+    "b.play": "Gioca", "b.extracting": "Estrazione... {0}%", "l.extracting": "Estrazione dei file del disco (solo la prima volta). Attendi la fine per giocare.",
+    "b.stop": "Chiudi il gioco", "b.copylog": "Copia registro", "s.copied": "Registro copiato negli appunti ({0} righe).",
+    "l.autostart": "Inizia automaticamente una nuova partita (preme Start nel titolo)",
+    "s.nodisc": "Scegli l'immagine del disco.", "s.checking": "Verifica del disco...", "s.ok": "Disco compatibile: {0}, MAIN0.EXE verificato (sha1).",
+    "s.extracting": "Estrazione del disco in {0}... {1}% ({2})", "s.dataok": "Dati del gioco pronti in {0} ({1} file): l'immagine del disco non serve più.",
+    "s.extractfail": "Impossibile estrarre il disco: {0}", "s.nodata": "Scegli l'immagine del disco: viene estratta una volta nella cartella data/ e il gioco non ne ha più bisogno.",
+    "s.badsha": "Disco NON compatibile: {0} (sha1 di MAIN0.EXE {1}). Il port funziona solo con Tombi! PAL SCES-01331 Rev 1 (uno SCES-01331 qui è la Rev 0); potrebbe non funzionare.",
+    "s.noexe": "EXE/MAIN0.EXE non trovato nell'immagine: non è un disco di Tombi! PAL.", "s.notiso": "Non è un'immagine ISO9660: {0}",
+    "s.running": "Partita in corso... (chiudere la finestra del gioco la termina)", "s.ended": "Il gioco è terminato (codice {0}). Registro: {1}",
+    "s.nobin": "Eseguibile del port non trovato ({0}). Compilalo (docs/PORT.md) o usa l'exe distribuito.",
+    "l.log": "Ultime righe del registro del port:", "l.modshelp": "Ogni mod è un'opzione del port (--poke, --hz...); vengono salvate in tombi-port.json.",
+    "l.key": "Tasto", "b.defaults": "Predefiniti", "l.cmd": "Comando:",
+    "l.patch": "Patch di testo:", "b.nopatch": "Rimuovi",
+    "l.patchhelp": "Una patch *.tombipatch.json (tombi-text, «Crea patch») viene applicata alla cartella data/ quando premi Gioca; gli originali vengono conservati in data/.orig/ e rimessi al loro posto quando la rimuovi o la cambi. Inclusa: {0}.",
+    "l.patchnone": "nessuna", "s.patching": "Applicazione della patch di testo «{0}» a data/...",
+    "s.patchok": "Patch di testo «{0}» applicata ({1} file di data/; {2}).", "s.patchon": "Patch di testo attiva: «{0}».",
+    "s.patchoff": "Patch di testo rimossa: data/ ha di nuovo i file originali ({0}).",
+    "s.patchfail": "Impossibile applicare la patch di testo: {0}", "s.patchmissing": "Patch di testo non trovata: {0}",
+    "s.patchnodata": "La patch di testo viene applicata quando il disco è estratto in data/ (scegli l'immagine del disco).",
+    "s.patchchk.disc": "sha1 del disco verificato", "s.patchchk.main0": "MAIN0.EXE di data/ verificato; scegli l'immagine .bin per verificare anche lo sha1 del disco",
+    "s.patchmoved": "{0} file sono diventati più grandi del loro posto sul disco e sono stati spostati alla fine (letti tramite la tabella dei file della lingua)",
+    "l.cutcontent": "Attiva i contenuti tagliati",
+    "i.cutcontent": "Testi rimossi dal gioco e ritrovati nella versione giapponese (Ore! Tomba). "
+                    "Ne vengono attivati quattro:\n\n"
+                    "• Il barcaiolo del Villaggio di Tutti gli esordi (AREA00): allo stagno a cui arrivi sulla tartaruga, dopo il suo "
+                    "saluto dice altre tre frasi (una porta chiusa a chiave, una serratura fatta dagli uomini di ferro, la sua barca "
+                    "sulla spiaggia della Foresta dei funghi).\n"
+                    "• Una lettera del Villaggio di Bacco sul Monte della fenice (AREA03): un secondo cartello a sinistra di quello "
+                    "di salvataggio, all'inizio della zona, che si legge allo stesso modo (Su, poi parla).\n"
+                    "• La bacheca del Villaggio di Bacco (AREA05): era fuori dalla portata di Tombi; ora si legge da terra, sotto la "
+                    "bacheca (topo scomparso, poi «Congratulazioni!» e «Cercasi avventuriero!»).\n"
+                    "• Un punto di salvataggio «Scoglio della sirena» sulla spiaggia del traguardo della corsa (AREA06), accanto alla tabella dei record.\n\n"
+                    "Citano luoghi e cose che non esistono nel gioco finale (la Terra della civiltà, quella serratura, la barca).\n\n"
+                    "Inoltre, due cose che il gioco ha ma non usa mai:\n"
+                    "• Bacche d'argento e d'oro: la frutta lasciata da nemici e forzieri a volte è d'argento (1 su 8) o d'oro "
+                    "(1 su 32); ridanno 2 di vita invece di 1 (e danno 100 AP come quella normale).\n"
+                    "• Il grande fumetto «?»: appare sopra Tombi quando parli di nuovo con qualcuno che non ha niente di nuovo da "
+                    "dire (personaggi che ripetono la loro frase), nelle scene viste dall'alto.\n"
+                    "La frequenza delle bacche e il momento del «?» li abbiamo scelti noi: il gioco ha il codice e la grafica, "
+                    "ma non dice mai quando dovevano apparire.\n\n"
+                    "I testi sono in spagnolo con la patch «Traduzione migliorata»; nelle altre lingue, o senza la patch, quegli "
+                    "spazi del disco contengono solo riempitivi («!!!!!!!!!!», «..........???»). Con il gioco in inglese (e senza altre patch di testo) viene applicato il testo inglese incluso (en_cut_content).\n\n"
+                    "Facoltativo, schermata del titolo antica: se indichi la cartella con i file TOMBA del disco «PrePre Vol. 8» "
+                    "(PCPX-96084, una demo giapponese del giugno 1997; estratti dal tuo disco con tools/prepre8.py extract), il "
+                    "paesaggio del titolo è quello di quella versione (guglia di roccia e fiume) invece di quello finale. È vera "
+                    "grafica del gioco di allora; il logo, il menu e i testi restano quelli finali (il logo «オレっ！トンバ» di quella "
+                    "versione non viene usato: non si sa come fosse disposto). Di quel disco non è incluso nulla.",
+    "l.earlytitle": "Titolo antico (facoltativo): cartella TOMBA del disco PrePre Vol. 8 (tools/prepre8.py extract):",
+    "l.experimental": "Funzioni sperimentali", "l.fps60": "60 fps (sperimentale)", "nav.play": "Gioca", "nav.gfx": "Grafica",
+    "nav.controls": "Controlli", "nav.mods": "Patch e mod", "nav.cut": "Contenuti tagliati", "nav.log": "Registro",
+    "l.uilang": "Lingua del launcher", "l.starting": "Avvio del gioco...", "c.disc": "Disco", "c.saves": "Salvataggi", "c.game": "Lingua del gioco",
+    "c.patch": "Patch di testo", "c.speed": "Velocità", "c.quick": "Opzioni rapide", "l.skipintro": "Salta loghi e intro",
+    "l.autostart2": "Inizia automaticamente una partita", "p.none": "Nessuna (testo originale)",
+    "l.patchhint": "Consigliata con il gioco in spagnolo: Traduzione migliorata (inclusa).", "p.bundled": "Traduzione migliorata (inclusa)",
+    "sum.window": "finestra {0}x", "sum.full": "schermo intero",
+    "sum.ires": "{0}x interna", "c.renderer": "Renderer", "c.window": "Finestra", "c.aspect": "Immagine", "c.ires": "Risoluzione interna",
+    "l.iresoff": "Solo OpenGL: il renderer software disegna sempre alla risoluzione originale.",
+    "c.keys": "Tastiera", "c.pad": "Controller", "c.mods": "Mod",
+    "c.cmd": "Riga di comando", "c.log": "Ultime righe del registro", "c.status": "Stato",
+    "c.controls": "Tastiera e controller",
+    "pad.hint": "Fai clic su un tasto o sulla sua assegnazione, poi premi il nuovo tasto (Esc annulla). Cambiare un tasto attiva i tasti personalizzati.",
+    "pad.press": "Premi un tasto", "pad.nokey": "(nessuno)",
+    "pad.note": "Controller: qualsiasi controller compatibile con SDL2 (Xbox, PS4/PS5, Switch Pro) viene usato automaticamente, con i tasti dove li mostra il disegno.",
+    "btn.up": "Su", "btn.down": "Giù", "btn.left": "Sinistra", "btn.right": "Destra", "btn.cross": "Croce", "btn.circle": "Cerchio",
+    "btn.square": "Quadrato", "btn.triangle": "Triangolo", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+    "btn.start": "Start", "btn.select": "Select",
+    "l.rumble": "Intensità vibrazione:", "rumble.off": "Off",
+    "l.dualshock": "Controller DualShock (analogico): stick sinistro con velocità, e vibrazione",
+    "l.prompts": "Icone dei tasti nei testi:", "p.auto": "Auto (secondo il controller)", "p.ps": "PlayStation",
+    "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Personalizzato", "b.custom": "Personalizza i tasti…",
+    "pc.title": "Personalizza i tasti", "pc.preset": "Parti da:", "pc.sym": "Simboli:", "pc.disc": "Disco", "pc.letter": "Lettera",
+    "pc.sym.xbox": "Lettere Xbox", "pc.sym.nintendo": "Lettere Nintendo", "pc.sym.ps": "Forme PlayStation",
+    "pc.pos": "Basso (A Xbox)|Destra (B Xbox)|Sinistra (X Xbox)|Alto (Y Xbox)", "pc.ok": "Usa", "pc.cancel": "Annulla", "p.gen": "Generico",
+    "l.showfps": "Mostra FPS", "c.icons": "Icone dei tasti", "c.keyboard": "Tastiera", "b.restore": "Ripristina predefiniti",
+    "kb.hint": "Fai clic sul tasto assegnato a un pulsante, poi premi il nuovo tasto (Esc annulla).",
+    "kb.clash": "Attenzione: il tasto {0} è assegnato a più pulsanti ({1}).",
+    "gp.hint": "Qualsiasi controller compatibile con SDL2 (Xbox, PS4/PS5, Switch Pro). Fai clic su un tasto nella foto o scegli nell'elenco quale tasto del controller fa da ciascun tasto PS1.",
+    "gp.clash": "Attenzione: {0} è assegnato a più pulsanti ({1}).",
+    "src.dpup": "Croce direzionale su", "src.dpdown": "Croce direzionale giù", "src.dpleft": "Croce direzionale sinistra", "src.dpright": "Croce direzionale destra",
+    "src.a": "A (basso)", "src.b": "B (destra)", "src.x": "X (sinistra)", "src.y": "Y (alto)",
+    "src.leftshoulder": "LB / L1", "src.rightshoulder": "RB / R1", "src.lefttrigger": "LT / L2", "src.righttrigger": "RT / R2",
+    "src.start": "Start / Menu", "src.back": "Back / Select / Visualizza", "src.guide": "Guide / Home / PS",
+    "src.leftstick": "L3 (pressione stick sinistro)", "src.rightstick": "R3 (pressione stick destro)", "src.misc1": "Condividi / Acquisisci",
+    "src.touchpad": "Touchpad", "src.paddle1": "Paletta 1", "src.paddle2": "Paletta 2", "src.paddle3": "Paletta 3", "src.paddle4": "Paletta 4",
+    "src.leftx-": "Stick sinistro a sinistra", "src.leftx+": "Stick sinistro a destra", "src.lefty-": "Stick sinistro su", "src.lefty+": "Stick sinistro giù",
+    "src.rightx-": "Stick destro a sinistra", "src.rightx+": "Stick destro a destra", "src.righty-": "Stick destro su", "src.righty+": "Stick destro giù",
+    "src.": "(nessuno)",
+}
+
+NL = {
+    "mod.skipintro": "Logo's en introfilms overslaan",
+    "mod.skipintro.d": "Start op het titelscherm zonder de logo's en de openingsfilm (de films van het verhaal worden nog wel afgespeeld).",
+    "mod.hz60": "60 Hz (NTSC-snelheid)",
+    "mod.hz60.d": "Het PAL-spel draait op 50 Hz; hiermee laat de port het lopen op 60 vblanks per seconde (sneller, muziek inbegrepen).",
+    "mod.areasel": "Gebied kiezen (debug select)",
+    "mod.areasel.d": "Opent het debug-gebiedsmenu van het spel en gaat naar het gekozen gebied/deel in plaats van het verhaal te beginnen.",
+    "mod.area": "Gebied", "mod.section": "Deel",
+    "mod.titledebug": "DEBUG-optie in het titelmenu",
+    "mod.titledebug.d": "Voegt DEBUG toe rechts van OPTIES op het titelscherm: het opent het debug-gebiedsmenu (en de herbouwde steden zodra ze gegenereerd zijn) (--title-debug).",
+    "cut.hint": "De herbouwde geschrapte steden (gebieden 11, 16 en 17) speel je vanaf de pagina \"Geschrapte inhoud\".",
+    "cut.c.text": "Geschrapte teksten en extra's",
+    "cut.text.d": "Herstelt dialogen die uit het spel zijn gehaald en een paar ongebruikte details (zilveren/gouden bessen, '?'-ballon).",
+    "cut.c.towns": "Geschrapte steden (herbouwd)",
+    "cut.towns.d": "Drie steden die uit het spel zijn gehaald. Het zijn reconstructies gemaakt voor de port, geen originele data. De eerste keer worden ze gegenereerd uit je disc (ongeveer een minuut).",
+    "cut.towns.i": "De kaarten en teksten worden samengesteld uit stukken van het spel zelf (tools/civ_rebuild.py, tools/civ_test_data.py) en bewaard in civ_cache/ naast data/. Het is een reconstructie: het definitieve ontwerp van deze steden staat niet op de disc. Meer in docs/CIVILIZATION.md (\"Playable towns\").",
+    "cut.play11": "Houthakkersstad spelen (AREA11)", "cut.d11": "De stad van de houthakkers in het Land der Beschaving.",
+    "cut.play16": "Steenstad spelen (AREA16)", "cut.d16": "De stenen stad bij de klokketoren.",
+    "cut.play17": "IJzerstad spelen (AREA17)", "cut.d17": "De stad van de IJzeren Mannen.",
+    "mod.civcoll": "Botsingslaag tonen",
+    "mod.civcoll.i": "In de herbouwde steden (Houthakkersstad, Steenstad, IJzerstad) wordt de celkaart over het beeld getekend: rood = massief, oranje = diagonaal, magenta = eenzijdige muur, cyaan = trigger. Om de pasvorm te controleren tijdens het lopen (--civ-collision).",
+    "mod.civroute": "De herbouwde steden vanuit het centrum betreden in het normale spel",
+    "mod.civroute.i": "In het normale spel leiden de uitgangen van het centrum van de Beschavingsstad naar de herbouwde geschrapte steden (deel 0 van gebieden 11, 16 en 17) in plaats van naar de gewone delen; de uitgangen van de steden leiden verder naar de rest van het spel (--civ-route). Gebruikt dezelfde gegenereerde kaarten en teksten als de stadsknoppen.",
+    "s.civgen": "De herbouwde steden worden gegenereerd in {0} (alleen de eerste keer, ongeveer een minuut)...",
+    "s.civgenok": "Herbouwde steden klaar in {0}.",
+    "s.civgenfail": "Kon de herbouwde steden niet genereren: {0}",
+    "s.civnodata": "De herbouwde steden worden gegenereerd uit de map data/ die uit de disc is uitgepakt: kies eerst de disc-image.",
+    "mod.ap": "Beginnen met AP", "mod.ap.d": "Avonturenpunten aan het begin van het spel (0..99999999).",
+    "mod.lives": "Beginnen met levens", "mod.lives.d": "Levens aan het begin van het spel (1..99).",
+    "mod.inflives": "Oneindig levens", "mod.inflives.d": "Houdt de levens elke seconde op 99.",
+    "mod.infhealth": "Oneindige vitaliteit", "mod.infhealth.d": "Houdt de vitaliteit elke vblank op het maximum (4).",
+    "mod.debugmenu": "Debugmenu", "mod.debugmenu.d": "In het spel: Select+L1+R1 of F1 opent een debugmenu (door muren lopen, vliegen, cheats, gebeurtenissen, naar elke kamer springen, info op het scherm, snelheid).",
+    "mod.events": "Alle gebeurtenissen ontgrendelen",
+    "mod.events.d": "Markeert aan het begin alle %d gebeurtenissen als voltooid (voorwerpen die aan gebeurtenissen vastzitten zijn weg; om te verkennen)." % EVENT_COUNT,
+    "mod.keys": "Eigen toetsen", "mod.keys.d": "Toetsen van het toetsenbord voor elke PS1-knop (SDL-toetsnamen: X, Return, Space, Left...).",
+    "l.lang": "Taal van het spel:",
+    "title": "Tombi! - native port", "tab.play": "Spelen", "tab.mods": "Mods", "tab.controls": "Besturing",
+    "l.disc": "Disc-image (.bin / .cue / .iso / .chd; wordt één keer uitgepakt in de map data/):", "b.browse": "Bladeren...",
+    "l.savedir": "Map voor opgeslagen spellen (memory cards):", "b.saveimp": "Opgeslagen spel importeren…", "b.saveexp": "Opgeslagen spel exporteren…",
+    "s.saverun": "Sluit het spel voordat je opgeslagen spellen importeert of exporteert.", "s.saveimpok": "Opgeslagen spel geïmporteerd",
+    "s.saveexpok": "Kaart geëxporteerd naar {}", "s.saveerr": "Importeren/exporteren mislukt: {}",
+    "s.saveask": "Dit bestand importeren in de memory card van de port ({})?\nEen volledige kaart vervangt de huidige (er blijft een .bak-kopie bewaard).",
+    "s.saveexpq": "Eén opgeslagen spel exporteren als .mcs? (Nee = volledige kaart .mcd)",
+    "l.scale": "Venstergrootte:", "l.fullscreen": "Volledig scherm (F11 in het spel)", "l.hz": "Snelheid:",
+    "l.ires": "Interne resolutie (alleen OpenGL):", "r.ires1": "1x (origineel)",
+    "l.renderer": "Renderer:", "r.gl": "OpenGL (videokaart)", "r.soft": "Software (CPU, trager)", "l.aspect": "Beeld:",
+    "a.tv": "4:3 (zoals op tv)", "a.sq": "Vierkante pixels", "a.w16": "16:9 breedbeeld (experimenteel)", "a.w21": "21:9 (experimenteel)",
+    "a.w32": "32:9 (experimenteel)", "a.auto": "Auto (vult het scherm, experimenteel)",
+    "ft.image": "Images",
+    "c.texpack": "Texturepakket (HD) · experimenteel", "l.texpack": "Map van het pakket (laat leeg voor de originele textures). Alleen OpenGL.",
+    "b.dumpall": "Alle textures exporteren", "b.openfolder": "Map openen",
+    "l.texpack.d": "Klik op \"Alle textures exporteren\" om de textures van het spel naar de map texture_dump te exporteren. Bewerk of vergroot ze (2x, 4x…) met behoud van de bestandsnamen en kies die map daarna als pakket.",
+    "s.dumpall": "Textures exporteren… {}%", "s.dumpallok": "Klaar: {} textures in {}", "s.dumpallfail": "Exporteren mislukt: {}",
+    "l.pad": "Controller: elke SDL2-compatibele controller (Xbox, PS4/PS5, Switch Pro) wordt automatisch gebruikt; toetsenbord: pijltjes, X = Kruis, Z = Vierkant, S = Driehoek, D = Cirkel, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backspace = Select.",
+    "b.play": "Spelen", "b.extracting": "Uitpakken... {0}%", "l.extracting": "De bestanden van de disc worden uitgepakt (alleen de eerste keer). Wacht tot het klaar is om te spelen.",
+    "b.stop": "Spel sluiten", "b.copylog": "Logboek kopiëren", "s.copied": "Logboek naar het klembord gekopieerd ({0} regels).",
+    "l.autostart": "Automatisch een nieuw spel beginnen (drukt op Start in het titelscherm)",
+    "s.nodisc": "Kies je disc-image.", "s.checking": "Disc controleren...", "s.ok": "Compatibele disc: {0}, MAIN0.EXE gecontroleerd (sha1).",
+    "s.extracting": "Disc uitpakken naar {0}... {1}% ({2})", "s.dataok": "Speldata klaar in {0} ({1} bestanden): de disc-image is niet meer nodig.",
+    "s.extractfail": "Kon de disc niet uitpakken: {0}", "s.nodata": "Kies je disc-image: die wordt één keer uitgepakt in de map data/ en daarna heeft het spel hem niet meer nodig.",
+    "s.badsha": "GEEN compatibele disc: {0} (sha1 van MAIN0.EXE {1}). De port draait alleen Tombi! PAL SCES-01331 Rev 1 (een SCES-01331 hier is Rev 0); het kan mislukken.",
+    "s.noexe": "EXE/MAIN0.EXE niet gevonden in de image: geen Tombi! PAL-disc.", "s.notiso": "Geen ISO9660-image: {0}",
+    "s.running": "Spel bezig... (het spelvenster sluiten beëindigt het)", "s.ended": "Het spel is beëindigd (code {0}). Logboek: {1}",
+    "s.nobin": "Programma van de port niet gevonden ({0}). Compileer het (docs/PORT.md) of gebruik de verspreide exe.",
+    "l.log": "Laatste regels van het logboek van de port:", "l.modshelp": "Elke mod is een optie van de port (--poke, --hz...); ze worden bewaard in tombi-port.json.",
+    "l.key": "Toets", "b.defaults": "Standaard", "l.cmd": "Opdracht:",
+    "l.patch": "Tekstpatch:", "b.nopatch": "Verwijderen",
+    "l.patchhelp": "Een patch *.tombipatch.json (tombi-text, \"Patch maken\") wordt toegepast op de map data/ als je op Spelen klikt; de originelen worden bewaard in data/.orig/ en teruggezet als hij verwijderd of gewijzigd wordt. Meegeleverd: {0}.",
+    "l.patchnone": "geen", "s.patching": "Tekstpatch \"{0}\" wordt toegepast op data/...",
+    "s.patchok": "Tekstpatch \"{0}\" toegepast ({1} bestanden van data/; {2}).", "s.patchon": "Tekstpatch actief: \"{0}\".",
+    "s.patchoff": "Tekstpatch verwijderd: data/ heeft weer de originele bestanden ({0}).",
+    "s.patchfail": "Kon de tekstpatch niet toepassen: {0}", "s.patchmissing": "Tekstpatch niet gevonden: {0}",
+    "s.patchnodata": "De tekstpatch wordt toegepast zodra de disc in data/ is uitgepakt (kies de disc-image).",
+    "s.patchchk.disc": "sha1 van de disc gecontroleerd", "s.patchchk.main0": "MAIN0.EXE van data/ gecontroleerd; kies de .bin-image om ook de sha1 van de disc te controleren",
+    "s.patchmoved": "{0} bestanden werden groter dan hun plek op de disc en zijn naar het einde verplaatst (gelezen via de eigen bestandstabel van de taal)",
+    "l.cutcontent": "Geschrapte inhoud inschakelen",
+    "i.cutcontent": "Teksten die uit het spel zijn gehaald en in de Japanse versie (Ore! Tomba) zijn teruggevonden. "
+                    "Er worden er vier ingeschakeld:\n\n"
+                    "• De veerman in het dorp waar alles begint (AREA00): bij de vijver waar je op de schildpad aankomt, zegt hij "
+                    "na zijn afscheid nog drie zinnen (een op slot gedane deur, een slot gemaakt door de IJzeren Mannen, zijn boot "
+                    "op het strand van het Paddobos).\n"
+                    "• Een brief uit het Baccusdorp op de Phoenixberg (AREA03): een tweede bord links van het opslagbord aan het "
+                    "begin van het gebied, dat op dezelfde manier gelezen wordt (Omhoog, dan praten).\n"
+                    "• Het prikbord van het Baccusdorp (AREA05): Tombi kon er niet bij; nu lees je het vanaf de grond eronder "
+                    "(vermiste muis, daarna \"Gefeliciteerd!\" en \"Avonturier gezocht!\").\n"
+                    "• Een opslagpunt \"Zeemeermins zingende rots\" op het finishstrand van de race (AREA06), naast het recordbord.\n\n"
+                    "Ze noemen plaatsen en dingen die in het uiteindelijke spel niet bestaan (het Land der Beschaving, dat slot, "
+                    "de boot).\n\n"
+                    "Daarnaast twee dingen die het spel heeft maar nooit gebruikt:\n"
+                    "• Zilveren en gouden bessen: fruit dat vijanden en kisten laten vallen is soms zilver (1 op 8) of goud "
+                    "(1 op 32); ze geven 2 vitaliteit terug in plaats van 1 (en 100 AP, zoals het gewone).\n"
+                    "• De grote '?'-ballon: die verschijnt boven Tombi als je opnieuw praat met iemand die niets nieuws te "
+                    "zeggen heeft (personages die hun zin herhalen), in de scènes van bovenaf.\n"
+                    "Hoe vaak de bessen verschijnen en wanneer het '?' komt, hebben wij gekozen: het spel heeft de code en de "
+                    "graphics, maar zegt nooit wanneer ze moesten verschijnen.\n\n"
+                    "De teksten zijn in het Spaans met de patch \"Verbeterde vertaling\"; in de andere talen, of zonder de patch, "
+                    "staat op die plekken van de disc alleen opvulling ('!!!!!!!!!!', '..........???'). Met het spel in het Engels (en geen andere tekstpatch) wordt de meegeleverde Engelse tekst (en_cut_content) toegepast.\n\n"
+                    "Optioneel, vroeg titelscherm: als je de map met de TOMBA-bestanden van de disc \"PrePre Vol. 8\" opgeeft "
+                    "(PCPX-96084, een Japanse demo van juni 1997; uitgepakt van je eigen disc met tools/prepre8.py extract), is het "
+                    "titellandschap dat van die versie (rotspiek en rivier) in plaats van het definitieve. Dat is echte spelgrafiek "
+                    "van toen; het logo, het menu en de teksten blijven de definitieve (het logo 'オレっ！トンバ' van die versie wordt "
+                    "niet gebruikt: hoe het was opgemaakt is onbekend). Niets van die disc is meegeleverd.",
+    "l.earlytitle": "Vroege titel (optioneel): TOMBA-map van de disc PrePre Vol. 8 (tools/prepre8.py extract):",
+    "l.experimental": "Experimentele functies", "l.fps60": "60 fps (experimenteel)", "nav.play": "Spelen", "nav.gfx": "Graphics",
+    "nav.controls": "Besturing", "nav.mods": "Patches en mods", "nav.cut": "Geschrapte inhoud", "nav.log": "Logboek",
+    "l.uilang": "Taal van de launcher", "l.starting": "Het spel wordt gestart...", "c.disc": "Disc", "c.saves": "Opgeslagen spellen", "c.game": "Taal van het spel",
+    "c.patch": "Tekstpatch", "c.speed": "Snelheid", "c.quick": "Snelle opties", "l.skipintro": "Logo's en intro overslaan",
+    "l.autostart2": "Automatisch een nieuw spel beginnen", "p.none": "Geen (originele tekst)",
+    "l.patchhint": "Aanbevolen met het spel in het Spaans: Verbeterde vertaling (meegeleverd).", "p.bundled": "Verbeterde vertaling (meegeleverd)",
+    "sum.window": "{0}x venster", "sum.full": "volledig scherm",
+    "sum.ires": "{0}x intern", "c.renderer": "Renderer", "c.window": "Venster", "c.aspect": "Beeld", "c.ires": "Interne resolutie",
+    "l.iresoff": "Alleen OpenGL: de softwarerenderer tekent altijd op de originele resolutie.",
+    "c.keys": "Toetsenbord", "c.pad": "Controller", "c.mods": "Mods",
+    "c.cmd": "Opdrachtregel", "c.log": "Laatste regels van het logboek", "c.status": "Status",
+    "c.controls": "Toetsenbord en controller",
+    "pad.hint": "Klik op een knop of de toets ervan en druk dan op de nieuwe toets (Esc annuleert). Een toets wijzigen schakelt de eigen toetsen in.",
+    "pad.press": "Druk op een toets", "pad.nokey": "(geen)",
+    "pad.note": "Controller: elke SDL2-compatibele controller (Xbox, PS4/PS5, Switch Pro) wordt automatisch gebruikt, met de knoppen waar de tekening ze toont.",
+    "btn.up": "Omhoog", "btn.down": "Omlaag", "btn.left": "Links", "btn.right": "Rechts", "btn.cross": "Kruis", "btn.circle": "Cirkel",
+    "btn.square": "Vierkant", "btn.triangle": "Driehoek", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+    "btn.start": "Start", "btn.select": "Select",
+    "l.rumble": "Trillingssterkte:", "rumble.off": "Uit",
+    "l.dualshock": "DualShock-controller (analoog): linkerstick met snelheid, en trilling",
+    "l.prompts": "Knoppictogrammen in de teksten:", "p.auto": "Auto (volgens de controller)", "p.ps": "PlayStation",
+    "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Aangepast", "b.custom": "Knoppen aanpassen…",
+    "pc.title": "Knoppen aanpassen", "pc.preset": "Uitgaan van:", "pc.sym": "Symbolen:", "pc.disc": "Schijf", "pc.letter": "Letter",
+    "pc.sym.xbox": "Xbox-letters", "pc.sym.nintendo": "Nintendo-letters", "pc.sym.ps": "PlayStation-vormen",
+    "pc.pos": "Onder (Xbox A)|Rechts (Xbox B)|Links (Xbox X)|Boven (Xbox Y)", "pc.ok": "Gebruiken", "pc.cancel": "Annuleren", "p.gen": "Algemeen",
+    "l.showfps": "FPS tonen", "c.icons": "Knoppictogrammen", "c.keyboard": "Toetsenbord", "b.restore": "Standaard herstellen",
+    "kb.hint": "Klik op de toets van een knop en druk dan op de nieuwe toets (Esc annuleert).",
+    "kb.clash": "Let op: de toets {0} is aan meerdere knoppen toegewezen ({1}).",
+    "gp.hint": "Elke SDL2-compatibele controller (Xbox, PS4/PS5, Switch Pro). Klik op een knop op de foto of kies in de lijst welke controllerknop als welke PS1-knop dient.",
+    "gp.clash": "Let op: {0} is aan meerdere knoppen toegewezen ({1}).",
+    "src.dpup": "Richtingstoets omhoog", "src.dpdown": "Richtingstoets omlaag", "src.dpleft": "Richtingstoets links", "src.dpright": "Richtingstoets rechts",
+    "src.a": "A (onder)", "src.b": "B (rechts)", "src.x": "X (links)", "src.y": "Y (boven)",
+    "src.leftshoulder": "LB / L1", "src.rightshoulder": "RB / R1", "src.lefttrigger": "LT / L2", "src.righttrigger": "RT / R2",
+    "src.start": "Start / Menu", "src.back": "Back / Select / Weergave", "src.guide": "Guide / Home / PS",
+    "src.leftstick": "L3 (linkerstick indrukken)", "src.rightstick": "R3 (rechterstick indrukken)", "src.misc1": "Delen / Vastleggen",
+    "src.touchpad": "Touchpad", "src.paddle1": "Paddle 1", "src.paddle2": "Paddle 2", "src.paddle3": "Paddle 3", "src.paddle4": "Paddle 4",
+    "src.leftx-": "Linkerstick links", "src.leftx+": "Linkerstick rechts", "src.lefty-": "Linkerstick omhoog", "src.lefty+": "Linkerstick omlaag",
+    "src.rightx-": "Rechterstick links", "src.rightx+": "Rechterstick rechts", "src.righty-": "Rechterstick omhoog", "src.righty+": "Rechterstick omlaag",
+    "src.": "(geen)",
+}
+
+PT = {
+    "mod.skipintro": "Saltar logótipos e vídeos de introdução",
+    "mod.skipintro.d": "Arranca no ecrã de título sem os logótipos nem o vídeo de abertura (os vídeos da história continuam a ser reproduzidos).",
+    "mod.hz60": "60 Hz (velocidade NTSC)",
+    "mod.hz60.d": "O jogo PAL corre a 50 Hz; com esta opção o port sincroniza-o a 60 vblanks por segundo (mais rápido, música incluída).",
+    "mod.areasel": "Seleção de área (debug select)",
+    "mod.areasel.d": "Abre o seletor de áreas de depuração do jogo e entra na área/secção escolhida em vez de começar a história.",
+    "mod.area": "Área", "mod.section": "Secção",
+    "mod.titledebug": "Entrada DEBUG no menu do título",
+    "mod.titledebug.d": "Acrescenta DEBUG à direita de OPÇÕES no ecrã de título: abre o seletor de áreas de depuração (e as cidades reconstruídas, depois de geradas) (--title-debug).",
+    "cut.hint": "As cidades cortadas reconstruídas (áreas 11, 16 e 17) jogam-se a partir da página «Conteúdo cortado».",
+    "cut.c.text": "Textos e extras cortados",
+    "cut.text.d": "Recupera diálogos retirados do jogo e alguns detalhes não usados (bagas prateadas/douradas, balão «?»).",
+    "cut.c.towns": "Cidades cortadas (reconstruídas)",
+    "cut.towns.d": "Três cidades retiradas do jogo. São reconstruções feitas para o port, não dados originais. Da primeira vez são geradas a partir do teu disco (cerca de um minuto).",
+    "cut.towns.i": "Os mapas e os textos são montados com peças do próprio jogo (tools/civ_rebuild.py, tools/civ_test_data.py) e guardados em civ_cache/ ao lado de data/. São uma reconstrução: o design final destas cidades não está no disco. Mais detalhes em docs/CIVILIZATION.md («Playable towns»).",
+    "cut.play11": "Jogar a Cidade dos Lenhadores (AREA11)", "cut.d11": "A cidade dos lenhadores da Terra da Civilização.",
+    "cut.play16": "Jogar a Cidade de Pedra (AREA16)", "cut.d16": "A cidade de pedra, junto à Torre do Relógio.",
+    "cut.play17": "Jogar a Cidade de Ferro (AREA17)", "cut.d17": "A cidade dos Homens de Ferro.",
+    "mod.civcoll": "Mostrar a camada de colisões",
+    "mod.civcoll.i": "Nas cidades reconstruídas (Cidade dos Lenhadores, Cidade de Pedra, Cidade de Ferro) o mapa de células é desenhado por cima da imagem: vermelho = sólido, laranja = diagonal, magenta = parede de um só lado, ciano = ativador. Serve para verificar o ajuste enquanto andas (--civ-collision).",
+    "mod.civroute": "Entrar nas cidades reconstruídas a partir do centro no jogo normal",
+    "mod.civroute.i": "No jogo normal, as saídas do centro da Cidade da Civilização levam às cidades cortadas reconstruídas (secção 0 das áreas 11, 16 e 17) em vez das secções habituais; as saídas das cidades seguem para o resto do jogo (--civ-route). Usa os mesmos mapas e textos gerados que os botões das cidades.",
+    "s.civgen": "A gerar as cidades reconstruídas em {0} (só da primeira vez, cerca de um minuto)...",
+    "s.civgenok": "Cidades reconstruídas prontas em {0}.",
+    "s.civgenfail": "Não foi possível gerar as cidades reconstruídas: {0}",
+    "s.civnodata": "As cidades reconstruídas são geradas a partir da pasta data/ extraída do disco: escolhe primeiro a imagem do disco.",
+    "mod.ap": "Começar com PA", "mod.ap.d": "Pontos de aventura no início do jogo (0..99999999).",
+    "mod.lives": "Começar com vidas", "mod.lives.d": "Vidas no início do jogo (1..99).",
+    "mod.inflives": "Vidas infinitas", "mod.inflives.d": "Mantém as vidas em 99 a cada segundo.",
+    "mod.infhealth": "Vitalidade infinita", "mod.infhealth.d": "Mantém a vitalidade no máximo (4) a cada vblank.",
+    "mod.debugmenu": "Menu de depuração", "mod.debugmenu.d": "No jogo: Select+L1+R1 ou F1 abre um menu de depuração (atravessar paredes, voar, batotas, eventos, saltar para qualquer sala, informação no ecrã, velocidade).",
+    "mod.events": "Desbloquear todos os eventos",
+    "mod.events.d": "Marca os %d eventos como concluídos no início (os objetos ligados a eventos desaparecem; útil para explorar)." % EVENT_COUNT,
+    "mod.keys": "Teclas personalizadas", "mod.keys.d": "Teclas do teclado para cada botão da PS1 (nomes de tecla SDL: X, Return, Space, Left...).",
+    "l.lang": "Idioma do jogo:",
+    "title": "Tombi! - port nativo", "tab.play": "Jogar", "tab.mods": "Mods", "tab.controls": "Controlos",
+    "l.disc": "Imagem do disco (.bin / .cue / .iso / .chd; extraída uma vez para a pasta data/):", "b.browse": "Procurar...",
+    "l.savedir": "Pasta dos jogos guardados (cartões de memória):", "b.saveimp": "Importar jogo guardado…", "b.saveexp": "Exportar jogo guardado…",
+    "s.saverun": "Fecha o jogo antes de importar ou exportar jogos guardados.", "s.saveimpok": "Jogo guardado importado",
+    "s.saveexpok": "Cartão exportado para {}", "s.saveerr": "Falha ao importar/exportar: {}",
+    "s.saveask": "Importar este ficheiro para o cartão de memória do port ({})?\nUm cartão completo substitui o atual (fica guardada uma cópia .bak).",
+    "s.saveexpq": "Exportar só um jogo guardado como .mcs? (Não = cartão completo .mcd)",
+    "l.scale": "Tamanho da janela:", "l.fullscreen": "Ecrã inteiro (F11 no jogo)", "l.hz": "Velocidade:",
+    "l.ires": "Resolução interna (só OpenGL):", "r.ires1": "1x (original)",
+    "l.renderer": "Renderizador:", "r.gl": "OpenGL (placa gráfica)", "r.soft": "Software (CPU, mais lento)", "l.aspect": "Imagem:",
+    "a.tv": "4:3 (como na TV)", "a.sq": "Píxeis quadrados", "a.w16": "16:9 panorâmico (experimental)", "a.w21": "21:9 (experimental)",
+    "a.w32": "32:9 (experimental)", "a.auto": "Auto (enche o ecrã, experimental)",
+    "ft.image": "Imagens",
+    "c.texpack": "Pacote de texturas (HD) · experimental", "l.texpack": "Pasta do pacote (deixa vazio para usar as texturas originais). Só OpenGL.",
+    "b.dumpall": "Exportar todas as texturas", "b.openfolder": "Abrir pasta",
+    "l.texpack.d": "Clica em «Exportar todas as texturas» para exportar as texturas do jogo para a pasta texture_dump. Edita-as ou aumenta-as (2x, 4x…) mantendo os nomes dos ficheiros e escolhe essa pasta como pacote.",
+    "s.dumpall": "A exportar texturas… {}%", "s.dumpallok": "Concluído: {} texturas em {}", "s.dumpallfail": "Não foi possível exportar: {}",
+    "l.pad": "Comando: qualquer comando compatível com SDL2 (Xbox, PS4/PS5, Switch Pro) é usado automaticamente; teclado: setas, X = Cruz, Z = Quadrado, S = Triângulo, D = Círculo, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Retrocesso = Select.",
+    "b.play": "Jogar", "b.extracting": "A extrair... {0}%", "l.extracting": "A extrair os ficheiros do disco (só da primeira vez). Espera que termine para jogar.",
+    "b.stop": "Fechar o jogo", "b.copylog": "Copiar registo", "s.copied": "Registo copiado para a área de transferência ({0} linhas).",
+    "l.autostart": "Começar um jogo novo automaticamente (prime Start no título)",
+    "s.nodisc": "Escolhe a imagem do teu disco.", "s.checking": "A verificar o disco...", "s.ok": "Disco compatível: {0}, MAIN0.EXE verificado (sha1).",
+    "s.extracting": "A extrair o disco para {0}... {1}% ({2})", "s.dataok": "Dados do jogo prontos em {0} ({1} ficheiros): a imagem do disco já não é necessária.",
+    "s.extractfail": "Não foi possível extrair o disco: {0}", "s.nodata": "Escolhe a imagem do disco: é extraída uma vez para a pasta data/ e o jogo deixa de precisar dela.",
+    "s.badsha": "Disco NÃO compatível: {0} (sha1 de MAIN0.EXE {1}). O port só corre o Tombi! PAL SCES-01331 Rev 1 (um SCES-01331 aqui é a Rev 0); pode falhar.",
+    "s.noexe": "EXE/MAIN0.EXE não encontrado na imagem: não é um disco do Tombi! PAL.", "s.notiso": "Não é uma imagem ISO9660: {0}",
+    "s.running": "A jogar... (fechar a janela do jogo termina-o)", "s.ended": "O jogo terminou (código {0}). Registo: {1}",
+    "s.nobin": "Executável do port não encontrado ({0}). Compila-o (docs/PORT.md) ou usa o exe distribuído.",
+    "l.log": "Últimas linhas do registo do port:", "l.modshelp": "Cada mod é uma opção do port (--poke, --hz...); são guardados em tombi-port.json.",
+    "l.key": "Tecla", "b.defaults": "Predefinições", "l.cmd": "Comando:",
+    "l.patch": "Patch de texto:", "b.nopatch": "Remover",
+    "l.patchhelp": "Um patch *.tombipatch.json (tombi-text, «Gerar patch») é aplicado à pasta data/ quando clicas em Jogar; os originais ficam guardados em data/.orig/ e são repostos quando o removes ou mudas. Incluído: {0}.",
+    "l.patchnone": "nenhum", "s.patching": "A aplicar o patch de texto «{0}» a data/...",
+    "s.patchok": "Patch de texto «{0}» aplicado ({1} ficheiros de data/; {2}).", "s.patchon": "Patch de texto ativo: «{0}».",
+    "s.patchoff": "Patch de texto removido: data/ volta a ter os ficheiros originais ({0}).",
+    "s.patchfail": "Não foi possível aplicar o patch de texto: {0}", "s.patchmissing": "Patch de texto não encontrado: {0}",
+    "s.patchnodata": "O patch de texto é aplicado quando o disco estiver extraído em data/ (escolhe a imagem do disco).",
+    "s.patchchk.disc": "sha1 do disco verificado", "s.patchchk.main0": "MAIN0.EXE de data/ verificado; escolhe a imagem .bin para verificar também o sha1 do disco",
+    "s.patchmoved": "{0} ficheiros cresceram além do seu espaço no disco e foram movidos para o fim (lidos através da tabela de ficheiros do idioma)",
+    "l.cutcontent": "Ativar conteúdo cortado",
+    "i.cutcontent": "Textos que foram retirados do jogo e encontrados na versão japonesa (Ore! Tomba). "
+                    "São ativados quatro:\n\n"
+                    "• O barqueiro da Aldeia de Todos os Princípios (AREA00): no lago a que chegas em cima da tartaruga, depois da "
+                    "despedida diz mais três frases (uma porta trancada, uma fechadura feita pelos Homens de Ferro, o seu barco na "
+                    "praia da Floresta dos Cogumelos).\n"
+                    "• Uma carta da Aldeia de Baco na Montanha Fénix (AREA03): um segundo letreiro à esquerda do de gravar, no "
+                    "início da zona, que se lê da mesma maneira (Cima, depois falar).\n"
+                    "• O quadro de avisos da Aldeia de Baco (AREA05): estava fora do alcance do Tombi; agora lê-se a partir do chão, "
+                    "por baixo do quadro (rato desaparecido, depois «Parabéns!» e «Procura-se aventureiro!»).\n"
+                    "• Um ponto de gravação «A Rocha Canora da Sereia» na praia da meta da corrida (AREA06), junto ao quadro dos recordes.\n\n"
+                    "Mencionam lugares e coisas que não existem no jogo final (a Terra da Civilização, essa fechadura, o barco).\n\n"
+                    "Além disso, duas coisas que o jogo tem mas nunca usa:\n"
+                    "• Bagas prateadas e douradas: a fruta largada por inimigos e baús sai às vezes prateada (1 em 8) ou dourada "
+                    "(1 em 32); dão 2 de vitalidade em vez de 1 (e 100 PA, como a normal).\n"
+                    "• O balão grande «?»: aparece por cima do Tombi quando voltas a falar com alguém que não tem nada de novo "
+                    "para dizer (personagens que repetem a sua frase), nas cenas vistas de cima.\n"
+                    "A frequência das bagas e o momento do «?» foram escolhidos por nós: o jogo tem o código e os gráficos, "
+                    "mas nunca diz quando deviam aparecer.\n\n"
+                    "Os textos estão em espanhol com o patch «Tradução melhorada»; nos outros idiomas, ou sem o patch, esses "
+                    "espaços do disco só têm enchimento («!!!!!!!!!!», «..........???»). Com o jogo em inglês (e sem outro patch de texto) é aplicado o texto inglês incluído (en_cut_content).\n\n"
+                    "Opcional, ecrã de título antigo: se indicares a pasta com os ficheiros TOMBA do disco «PrePre Vol. 8» "
+                    "(PCPX-96084, uma demo japonesa de junho de 1997; extraídos do teu próprio disco com tools/prepre8.py extract), "
+                    "a paisagem do título é a dessa versão (agulha de rocha e rio) em vez da final. É arte verdadeira do jogo da "
+                    "época; o logótipo, o menu e os textos continuam a ser os finais (o logótipo «オレっ！トンバ» dessa versão não é "
+                    "usado: não se sabe como estava disposto). Nada desse disco é incluído.",
+    "l.earlytitle": "Título antigo (opcional): pasta TOMBA do disco PrePre Vol. 8 (tools/prepre8.py extract):",
+    "l.experimental": "Funções experimentais", "l.fps60": "60 fps (experimental)", "nav.play": "Jogar", "nav.gfx": "Gráficos",
+    "nav.controls": "Controlos", "nav.mods": "Patches e mods", "nav.cut": "Conteúdo cortado", "nav.log": "Registo",
+    "l.uilang": "Idioma do launcher", "l.starting": "A iniciar o jogo...", "c.disc": "Disco", "c.saves": "Jogos guardados", "c.game": "Idioma do jogo",
+    "c.patch": "Patch de texto", "c.speed": "Velocidade", "c.quick": "Opções rápidas", "l.skipintro": "Saltar logótipos e introdução",
+    "l.autostart2": "Começar um jogo automaticamente", "p.none": "Nenhum (texto original)",
+    "l.patchhint": "Recomendado com o jogo em espanhol: Tradução melhorada (incluída).", "p.bundled": "Tradução melhorada (incluída)",
+    "sum.window": "janela {0}x", "sum.full": "ecrã inteiro",
+    "sum.ires": "{0}x interna", "c.renderer": "Renderizador", "c.window": "Janela", "c.aspect": "Imagem", "c.ires": "Resolução interna",
+    "l.iresoff": "Só OpenGL: o renderizador por software desenha sempre na resolução original.",
+    "c.keys": "Teclado", "c.pad": "Comando", "c.mods": "Mods",
+    "c.cmd": "Linha de comandos", "c.log": "Últimas linhas do registo", "c.status": "Estado",
+    "c.controls": "Teclado e comando",
+    "pad.hint": "Clica num botão ou na sua tecla e prime a tecla nova (Esc cancela). Mudar uma tecla ativa as teclas personalizadas.",
+    "pad.press": "Prime uma tecla", "pad.nokey": "(nenhuma)",
+    "pad.note": "Comando: qualquer comando compatível com SDL2 (Xbox, PS4/PS5, Switch Pro) é usado automaticamente, com os botões na mesma posição do desenho.",
+    "btn.up": "Cima", "btn.down": "Baixo", "btn.left": "Esquerda", "btn.right": "Direita", "btn.cross": "Cruz", "btn.circle": "Círculo",
+    "btn.square": "Quadrado", "btn.triangle": "Triângulo", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+    "btn.start": "Start", "btn.select": "Select",
+    "l.rumble": "Intensidade da vibração:", "rumble.off": "Desligada",
+    "l.dualshock": "Comando DualShock (analógico): analógico esquerdo com velocidade, e vibração",
+    "l.prompts": "Ícones dos botões nos textos:", "p.auto": "Auto (conforme o comando)", "p.ps": "PlayStation",
+    "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Personalizado", "b.custom": "Personalizar botões…",
+    "pc.title": "Personalizar botões", "pc.preset": "Partir de:", "pc.sym": "Símbolos:", "pc.disc": "Disco", "pc.letter": "Letra",
+    "pc.sym.xbox": "Letras Xbox", "pc.sym.nintendo": "Letras Nintendo", "pc.sym.ps": "Formas PlayStation",
+    "pc.pos": "Baixo (A Xbox)|Direita (B Xbox)|Esquerda (X Xbox)|Cima (Y Xbox)", "pc.ok": "Usar", "pc.cancel": "Cancelar", "p.gen": "Genérico",
+    "l.showfps": "Mostrar FPS", "c.icons": "Ícones dos botões", "c.keyboard": "Teclado", "b.restore": "Repor predefinições",
+    "kb.hint": "Clica na tecla de um botão e prime a tecla nova (Esc cancela).",
+    "kb.clash": "Aviso: a tecla {0} está atribuída a vários botões ({1}).",
+    "gp.hint": "Qualquer comando compatível com SDL2 (Xbox, PS4/PS5, Switch Pro). Clica num botão da fotografia ou escolhe na lista que botão do comando faz de cada botão da PS1.",
+    "gp.clash": "Aviso: {0} está atribuído a vários botões ({1}).",
+    "src.dpup": "Botão direcional cima", "src.dpdown": "Botão direcional baixo", "src.dpleft": "Botão direcional esquerda", "src.dpright": "Botão direcional direita",
+    "src.a": "A (baixo)", "src.b": "B (direita)", "src.x": "X (esquerda)", "src.y": "Y (cima)",
+    "src.leftshoulder": "LB / L1", "src.rightshoulder": "RB / R1", "src.lefttrigger": "LT / L2", "src.righttrigger": "RT / R2",
+    "src.start": "Start / Menu", "src.back": "Back / Select / Vista", "src.guide": "Guide / Home / PS",
+    "src.leftstick": "L3 (premir analógico esq.)", "src.rightstick": "R3 (premir analógico dir.)", "src.misc1": "Partilhar / Captura",
+    "src.touchpad": "Painel tátil", "src.paddle1": "Patilha 1", "src.paddle2": "Patilha 2", "src.paddle3": "Patilha 3", "src.paddle4": "Patilha 4",
+    "src.leftx-": "Analógico esq. esquerda", "src.leftx+": "Analógico esq. direita", "src.lefty-": "Analógico esq. cima", "src.lefty+": "Analógico esq. baixo",
+    "src.rightx-": "Analógico dir. esquerda", "src.rightx+": "Analógico dir. direita", "src.righty-": "Analógico dir. cima", "src.righty+": "Analógico dir. baixo",
+    "src.": "(nenhum)",
+}
+
+SV = {
+    "mod.skipintro": "Hoppa över introns logotyper och filmer",
+    "mod.skipintro.d": "Startar på titelskärmen utan logotyperna och öppningsfilmen (berättelsens filmer spelas fortfarande).",
+    "mod.hz60": "60 Hz (NTSC-hastighet)",
+    "mod.hz60.d": "PAL-spelet går i 50 Hz; med det här taktar porten det i 60 vblanks per sekund (snabbare, musiken också).",
+    "mod.areasel": "Områdesval (debug select)",
+    "mod.areasel.d": "Öppnar spelets felsökningsval av område och går in i valt område/avsnitt i stället för att börja berättelsen.",
+    "mod.area": "Område", "mod.section": "Avsnitt",
+    "mod.titledebug": "DEBUG-post i titelmenyn",
+    "mod.titledebug.d": "Lägger till DEBUG till höger om ALTERNATIV på titelskärmen: den öppnar felsökningsvalet av område (och de återskapade städerna när de har genererats) (--title-debug).",
+    "cut.hint": "De återskapade bortklippta städerna (område 11, 16 och 17) spelas från sidan ”Bortklippt innehåll”.",
+    "cut.c.text": "Bortklippta texter och extramaterial",
+    "cut.text.d": "Återställer dialog som togs bort ur spelet och några oanvända detaljer (silver-/guldbär, ”?”-bubbla).",
+    "cut.c.towns": "Bortklippta städer (återskapade)",
+    "cut.towns.d": "Tre städer som togs bort ur spelet. De är rekonstruktioner gjorda för porten, inte originaldata. Första gången genereras de från din skiva (ungefär en minut).",
+    "cut.towns.i": "Kartorna och texterna sätts ihop av spelets egna delar (tools/civ_rebuild.py, tools/civ_test_data.py) och sparas i civ_cache/ bredvid data/. De är en rekonstruktion: den slutliga utformningen av städerna finns inte på skivan. Mer i docs/CIVILIZATION.md (”Playable towns”).",
+    "cut.play11": "Spela Timmerhuggarstaden (AREA11)", "cut.d11": "Timmerhuggarnas stad i Civilisationens land.",
+    "cut.play16": "Spela Stenstaden (AREA16)", "cut.d16": "Stenstaden vid klocktornet.",
+    "cut.play17": "Spela Järnstaden (AREA17)", "cut.d17": "Järnmännens stad.",
+    "mod.civcoll": "Visa kollisionslagret",
+    "mod.civcoll.i": "I de återskapade städerna (Timmerhuggarstaden, Stenstaden, Järnstaden) ritas cellkartan ovanpå bilden: rött = fast, orange = diagonal, magenta = enkelsidig vägg, cyan = utlösare. För att kontrollera passformen medan du går (--civ-collision).",
+    "mod.civroute": "Gå in i de återskapade städerna från centrum i vanligt spel",
+    "mod.civroute.i": "I vanligt spel leder utgångarna från Civilisationsstadens centrum till de återskapade bortklippta städerna (avsnitt 0 av område 11, 16 och 17) i stället för de vanliga avsnitten; städernas egna utgångar leder vidare till resten av spelet (--civ-route). Använder samma genererade kartor och texter som stadsknapparna.",
+    "s.civgen": "Genererar de återskapade städerna i {0} (bara första gången, ungefär en minut)...",
+    "s.civgenok": "De återskapade städerna är klara i {0}.",
+    "s.civgenfail": "Kunde inte generera de återskapade städerna: {0}",
+    "s.civnodata": "De återskapade städerna genereras från mappen data/ som packats upp från skivan: välj skivavbilden först.",
+    "mod.ap": "Börja med AP", "mod.ap.d": "Äventyrspoäng i början av spelet (0..99999999).",
+    "mod.lives": "Börja med liv", "mod.lives.d": "Liv i början av spelet (1..99).",
+    "mod.inflives": "Oändligt med liv", "mod.inflives.d": "Håller liven på 99 varje sekund.",
+    "mod.infhealth": "Oändlig vitalitet", "mod.infhealth.d": "Håller vitaliteten på max (4) vid varje vblank.",
+    "mod.debugmenu": "Felsökningsmeny", "mod.debugmenu.d": "I spelet: Select+L1+R1 eller F1 öppnar en felsökningsmeny (gå genom väggar, flyga, fusk, händelser, hoppa till valfritt rum, info på skärmen, hastighet).",
+    "mod.events": "Lås upp alla händelser",
+    "mod.events.d": "Markerar alla %d händelser som avklarade från början (föremål som hör till händelser är borta; för att utforska)." % EVENT_COUNT,
+    "mod.keys": "Egna tangenter", "mod.keys.d": "Tangenter för varje PS1-knapp (SDL-tangentnamn: X, Return, Space, Left...).",
+    "l.lang": "Spelets språk:",
+    "title": "Tombi! - inbyggd port", "tab.play": "Spela", "tab.mods": "Moddar", "tab.controls": "Kontroller",
+    "l.disc": "Skivavbild (.bin / .cue / .iso / .chd; packas upp en gång i mappen data/):", "b.browse": "Bläddra...",
+    "l.savedir": "Mapp för sparade spel (minneskort):", "b.saveimp": "Importera sparat spel…", "b.saveexp": "Exportera sparat spel…",
+    "s.saverun": "Stäng spelet innan du importerar eller exporterar sparade spel.", "s.saveimpok": "Sparat spel importerat",
+    "s.saveexpok": "Kortet exporterat till {}", "s.saveerr": "Import/export misslyckades: {}",
+    "s.saveask": "Importera den här filen till portens minneskort ({})?\nEtt helt kort ersätter det nuvarande (en .bak-kopia sparas).",
+    "s.saveexpq": "Exportera ett enskilt sparat spel som .mcs? (Nej = helt kort .mcd)",
+    "l.scale": "Fönsterstorlek:", "l.fullscreen": "Helskärm (F11 i spelet)", "l.hz": "Hastighet:",
+    "l.ires": "Intern upplösning (endast OpenGL):", "r.ires1": "1x (original)",
+    "l.renderer": "Rendering:", "r.gl": "OpenGL (grafikkort)", "r.soft": "Programvara (CPU, långsammare)", "l.aspect": "Bild:",
+    "a.tv": "4:3 (som på tv)", "a.sq": "Kvadratiska pixlar", "a.w16": "16:9 bredbild (experimentell)", "a.w21": "21:9 (experimentell)",
+    "a.w32": "32:9 (experimentell)", "a.auto": "Auto (fyller skärmen, experimentell)",
+    "ft.image": "Avbilder",
+    "c.texpack": "Texturpaket (HD) · experimentellt", "l.texpack": "Paketets mapp (lämna tomt för originaltexturerna). Endast OpenGL.",
+    "b.dumpall": "Exportera alla texturer", "b.openfolder": "Öppna mapp",
+    "l.texpack.d": "Klicka på ”Exportera alla texturer” för att exportera spelets texturer till mappen texture_dump. Redigera eller skala upp dem (2x, 4x…) med samma filnamn och välj sedan den mappen som paket.",
+    "s.dumpall": "Exporterar texturer… {}%", "s.dumpallok": "Klart: {} texturer i {}", "s.dumpallfail": "Kunde inte exportera: {}",
+    "l.pad": "Handkontroll: alla SDL2-kompatibla handkontroller (Xbox, PS4/PS5, Switch Pro) används automatiskt; tangentbord: piltangenter, X = Kryss, Z = Fyrkant, S = Triangel, D = Cirkel, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Backsteg = Select.",
+    "b.play": "Spela", "b.extracting": "Packar upp... {0}%", "l.extracting": "Packar upp skivans filer (bara första gången). Vänta tills det är klart för att spela.",
+    "b.stop": "Stäng spelet", "b.copylog": "Kopiera logg", "s.copied": "Loggen har kopierats till urklipp ({0} rader).",
+    "l.autostart": "Börja ett nytt spel automatiskt (trycker på Start på titelskärmen)",
+    "s.nodisc": "Välj din skivavbild.", "s.checking": "Kontrollerar skivan...", "s.ok": "Kompatibel skiva: {0}, MAIN0.EXE kontrollerad (sha1).",
+    "s.extracting": "Packar upp skivan till {0}... {1}% ({2})", "s.dataok": "Speldata klara i {0} ({1} filer): skivavbilden behövs inte längre.",
+    "s.extractfail": "Kunde inte packa upp skivan: {0}", "s.nodata": "Välj din skivavbild: den packas upp en gång i mappen data/ och sedan behöver spelet den inte längre.",
+    "s.badsha": "INTE en kompatibel skiva: {0} (sha1 för MAIN0.EXE {1}). Porten kör bara Tombi! PAL SCES-01331 Rev 1 (en SCES-01331 här är Rev 0); det kan misslyckas.",
+    "s.noexe": "EXE/MAIN0.EXE hittades inte i avbilden: inte en Tombi! PAL-skiva.", "s.notiso": "Inte en ISO9660-avbild: {0}",
+    "s.running": "Spelar... (att stänga spelfönstret avslutar det)", "s.ended": "Spelet avslutades (kod {0}). Logg: {1}",
+    "s.nobin": "Portens program hittades inte ({0}). Bygg det (docs/PORT.md) eller använd den distribuerade exe-filen.",
+    "l.log": "Sista raderna i portens logg:", "l.modshelp": "Varje modd är ett alternativ för porten (--poke, --hz...); de sparas i tombi-port.json.",
+    "l.key": "Tangent", "b.defaults": "Standard", "l.cmd": "Kommando:",
+    "l.patch": "Textpatch:", "b.nopatch": "Ta bort",
+    "l.patchhelp": "En patch *.tombipatch.json (tombi-text, ”Skapa patch”) tillämpas på mappen data/ när du klickar på Spela; originalen sparas i data/.orig/ och läggs tillbaka när den tas bort eller byts. Medföljer: {0}.",
+    "l.patchnone": "ingen", "s.patching": "Tillämpar textpatchen ”{0}” på data/...",
+    "s.patchok": "Textpatchen ”{0}” har tillämpats ({1} filer i data/; {2}).", "s.patchon": "Textpatch aktiv: ”{0}”.",
+    "s.patchoff": "Textpatchen har tagits bort: data/ har originalfilerna igen ({0}).",
+    "s.patchfail": "Kunde inte tillämpa textpatchen: {0}", "s.patchmissing": "Textpatchen hittades inte: {0}",
+    "s.patchnodata": "Textpatchen tillämpas när skivan har packats upp i data/ (välj skivavbilden).",
+    "s.patchchk.disc": "skivans sha1 kontrollerad", "s.patchchk.main0": "MAIN0.EXE i data/ kontrollerad; välj .bin-avbilden för att även kontrollera skivans sha1",
+    "s.patchmoved": "{0} filer växte utöver sin plats på skivan och flyttades till slutet (läses via språkets egen filtabell)",
+    "l.cutcontent": "Aktivera bortklippt innehåll",
+    "i.cutcontent": "Texter som togs bort ur spelet och hittades i den japanska versionen (Ore! Tomba). "
+                    "Fyra av dem aktiveras:\n\n"
+                    "• Färjkarlen i byn All Beginnings (AREA00): vid dammen du kommer till på sköldpaddan säger han efter sitt "
+                    "farväl tre repliker till (en låst dörr, ett lås gjort av järnmännen, hans båt på stranden vid svampskogen).\n"
+                    "• Ett brev från byn Baccus på Phoenix Mountain (AREA03): en andra skylt till vänster om sparskylten i början "
+                    "av området, som läses på samma sätt (Upp, sedan prata).\n"
+                    "• Anslagstavlan i byn Baccus (AREA05): den var utom räckhåll för Tombi; nu läses den från marken under den "
+                    "(försvunnen mus, sedan ”Grattis!” och ”Äventyrare sökes!”).\n"
+                    "• En sparpunkt ”Sjöjungfruns sångsten” på loppets målstrand (AREA06), bredvid rekordtavlan.\n\n"
+                    "De nämner platser och saker som inte finns i det färdiga spelet (Civilisationens land, det där låset, båten).\n\n"
+                    "Dessutom två saker som spelet har men aldrig använder:\n"
+                    "• Silver- och guldbär: frukt som fiender och kistor tappar är ibland av silver (1 av 8) eller guld (1 av 32); "
+                    "de ger tillbaka 2 vitalitet i stället för 1 (och 100 AP som den vanliga).\n"
+                    "• Den stora ”?”-bubblan: den visas över Tombi när du pratar igen med någon som inte har något nytt att säga "
+                    "(figurer som upprepar sin replik), i scenerna sedda ovanifrån.\n"
+                    "Hur ofta bären dyker upp och när ”?” visas har vi valt: spelet har koden och grafiken men säger aldrig när "
+                    "de skulle visas.\n\n"
+                    "Texterna finns på spanska med patchen ”Förbättrad översättning”; på de andra språken, eller utan patchen, "
+                    "innehåller de platserna på skivan bara utfyllnad (”!!!!!!!!!!”, ”..........???”). Med spelet på engelska (och ingen annan textpatch) tillämpas den medföljande engelska texten (en_cut_content).\n\n"
+                    "Valfritt, tidig titelskärm: om du anger mappen med TOMBA-filerna från skivan ”PrePre Vol. 8” (PCPX-96084, en "
+                    "japansk demo från juni 1997; uppackade från din egen skiva med tools/prepre8.py extract) blir titelns landskap "
+                    "den versionens (klippspira och flod) i stället för det slutliga. Det är riktig spelgrafik från den tiden; "
+                    "logotypen, menyn och texterna förblir de slutliga (den versionens logotyp ”オレっ！トンバ” används inte: hur den "
+                    "var placerad är okänt). Ingenting från den skivan medföljer.",
+    "l.earlytitle": "Tidig titel (valfritt): TOMBA-mappen från skivan PrePre Vol. 8 (tools/prepre8.py extract):",
+    "l.experimental": "Experimentfunktioner", "l.fps60": "60 fps (experimentell)", "nav.play": "Spela", "nav.gfx": "Grafik",
+    "nav.controls": "Kontroller", "nav.mods": "Patchar och moddar", "nav.cut": "Bortklippt innehåll", "nav.log": "Logg",
+    "l.uilang": "Launcherns språk", "l.starting": "Startar spelet...", "c.disc": "Skiva", "c.saves": "Sparade spel", "c.game": "Spelets språk",
+    "c.patch": "Textpatch", "c.speed": "Hastighet", "c.quick": "Snabbval", "l.skipintro": "Hoppa över logotyper och intro",
+    "l.autostart2": "Börja ett nytt spel automatiskt", "p.none": "Ingen (originaltext)",
+    "l.patchhint": "Rekommenderas med spelet på spanska: Förbättrad översättning (medföljer).", "p.bundled": "Förbättrad översättning (medföljer)",
+    "sum.window": "{0}x fönster", "sum.full": "helskärm",
+    "sum.ires": "{0}x intern", "c.renderer": "Rendering", "c.window": "Fönster", "c.aspect": "Bild", "c.ires": "Intern upplösning",
+    "l.iresoff": "Endast OpenGL: programvarurenderingen ritar alltid i originalupplösningen.",
+    "c.keys": "Tangentbord", "c.pad": "Handkontroll", "c.mods": "Moddar",
+    "c.cmd": "Kommandorad", "c.log": "Sista raderna i loggen", "c.status": "Status",
+    "c.controls": "Tangentbord och handkontroll",
+    "pad.hint": "Klicka på en knapp eller dess tangent och tryck sedan på den nya tangenten (Esc avbryter). Att ändra en tangent aktiverar egna tangenter.",
+    "pad.press": "Tryck på en tangent", "pad.nokey": "(ingen)",
+    "pad.note": "Handkontroll: alla SDL2-kompatibla handkontroller (Xbox, PS4/PS5, Switch Pro) används automatiskt, med knapparna där teckningen visar dem.",
+    "btn.up": "Upp", "btn.down": "Ner", "btn.left": "Vänster", "btn.right": "Höger", "btn.cross": "Kryss", "btn.circle": "Cirkel",
+    "btn.square": "Fyrkant", "btn.triangle": "Triangel", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+    "btn.start": "Start", "btn.select": "Select",
+    "l.rumble": "Vibrationsstyrka:", "rumble.off": "Av",
+    "l.dualshock": "DualShock-handkontroll (analog): vänster spak med hastighet, och vibration",
+    "l.prompts": "Knappikoner i texterna:", "p.auto": "Auto (efter handkontrollen)", "p.ps": "PlayStation",
+    "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Anpassad", "b.custom": "Anpassa knappar…",
+    "pc.title": "Anpassa knappar", "pc.preset": "Utgå från:", "pc.sym": "Symboler:", "pc.disc": "Skiva", "pc.letter": "Bokstav",
+    "pc.sym.xbox": "Xbox-bokstäver", "pc.sym.nintendo": "Nintendo-bokstäver", "pc.sym.ps": "PlayStation-former",
+    "pc.pos": "Nederst (Xbox A)|Höger (Xbox B)|Vänster (Xbox X)|Överst (Xbox Y)", "pc.ok": "Använd", "pc.cancel": "Avbryt", "p.gen": "Allmän",
+    "l.showfps": "Visa FPS", "c.icons": "Knappikoner", "c.keyboard": "Tangentbord", "b.restore": "Återställ standard",
+    "kb.hint": "Klicka på en knapps tangent och tryck sedan på den nya tangenten (Esc avbryter).",
+    "kb.clash": "Varning: tangenten {0} är tilldelad flera knappar ({1}).",
+    "gp.hint": "Alla SDL2-kompatibla handkontroller (Xbox, PS4/PS5, Switch Pro). Klicka på en knapp på fotot eller välj i listan vilken handkontrollknapp som fungerar som varje PS1-knapp.",
+    "gp.clash": "Varning: {0} är tilldelad flera knappar ({1}).",
+    "src.dpup": "Styrkors upp", "src.dpdown": "Styrkors ner", "src.dpleft": "Styrkors vänster", "src.dpright": "Styrkors höger",
+    "src.a": "A (nederst)", "src.b": "B (höger)", "src.x": "X (vänster)", "src.y": "Y (överst)",
+    "src.leftshoulder": "LB / L1", "src.rightshoulder": "RB / R1", "src.lefttrigger": "LT / L2", "src.righttrigger": "RT / R2",
+    "src.start": "Start / Meny", "src.back": "Back / Select / Visa", "src.guide": "Guide / Home / PS",
+    "src.leftstick": "L3 (tryck vänster spak)", "src.rightstick": "R3 (tryck höger spak)", "src.misc1": "Dela / Spela in",
+    "src.touchpad": "Pekplatta", "src.paddle1": "Paddel 1", "src.paddle2": "Paddel 2", "src.paddle3": "Paddel 3", "src.paddle4": "Paddel 4",
+    "src.leftx-": "Vänster spak vänster", "src.leftx+": "Vänster spak höger", "src.lefty-": "Vänster spak upp", "src.lefty+": "Vänster spak ner",
+    "src.rightx-": "Höger spak vänster", "src.rightx+": "Höger spak höger", "src.righty-": "Höger spak upp", "src.righty+": "Höger spak ner",
+    "src.": "(ingen)",
+}
+
+DA = {
+    "mod.skipintro": "Spring intrologoer og -film over",
+    "mod.skipintro.d": "Starter på titelskærmen uden logoerne og åbningsfilmen (historiens film afspilles stadig).",
+    "mod.hz60": "60 Hz (NTSC-hastighed)",
+    "mod.hz60.d": "PAL-spillet kører med 50 Hz; med denne indstilling kører porten det med 60 vblanks i sekundet (hurtigere, musikken med).",
+    "mod.areasel": "Områdevalg (debug select)",
+    "mod.areasel.d": "Åbner spillets fejlfindingsvalg af område og går ind i det valgte område/afsnit i stedet for at starte historien.",
+    "mod.area": "Område", "mod.section": "Afsnit",
+    "mod.titledebug": "DEBUG-punkt i titelmenuen",
+    "mod.titledebug.d": "Tilføjer DEBUG til højre for INDSTIL på titelskærmen: det åbner fejlfindingsvalget af område (og de genskabte byer, når de er genereret) (--title-debug).",
+    "cut.hint": "De genskabte fjernede byer (område 11, 16 og 17) spilles fra siden »Fjernet indhold«.",
+    "cut.c.text": "Fjernede tekster og ekstra",
+    "cut.text.d": "Genskaber dialog, der blev fjernet fra spillet, og nogle få ubrugte detaljer (sølv-/guldbær, »?«-boble).",
+    "cut.c.towns": "Fjernede byer (genskabt)",
+    "cut.towns.d": "Tre byer, der blev fjernet fra spillet. Det er rekonstruktioner lavet til porten, ikke originale data. Første gang genereres de ud fra din disk (cirka et minut).",
+    "cut.towns.i": "Kortene og teksterne sættes sammen af spillets egne dele (tools/civ_rebuild.py, tools/civ_test_data.py) og gemmes i civ_cache/ ved siden af data/. De er en rekonstruktion: byernes endelige design findes ikke på disken. Mere i docs/CIVILIZATION.md (»Playable towns«).",
+    "cut.play11": "Spil Skovhuggerbyen (AREA11)", "cut.d11": "Skovhuggernes by i Civilisationens land.",
+    "cut.play16": "Spil Stenbyen (AREA16)", "cut.d16": "Stenbyen ved klokketårnet.",
+    "cut.play17": "Spil Jernbyen (AREA17)", "cut.d17": "Jernmændenes by.",
+    "mod.civcoll": "Vis kollisionslaget",
+    "mod.civcoll.i": "I de genskabte byer (Skovhuggerbyen, Stenbyen, Jernbyen) tegnes cellekortet oven på billedet: rød = fast, orange = diagonal, magenta = ensidig væg, cyan = udløser. Til at kontrollere pasformen, mens du går (--civ-collision).",
+    "mod.civroute": "Gå ind i de genskabte byer fra centrum i almindeligt spil",
+    "mod.civroute.i": "I almindeligt spil fører udgangene fra Civilisationsbyens centrum til de genskabte fjernede byer (afsnit 0 af område 11, 16 og 17) i stedet for de sædvanlige afsnit; byernes egne udgange fører videre til resten af spillet (--civ-route). Bruger de samme genererede kort og tekster som byknapperne.",
+    "s.civgen": "Genererer de genskabte byer i {0} (kun første gang, cirka et minut)...",
+    "s.civgenok": "De genskabte byer er klar i {0}.",
+    "s.civgenfail": "Kunne ikke generere de genskabte byer: {0}",
+    "s.civnodata": "De genskabte byer genereres ud fra mappen data/, der er pakket ud fra disken: vælg først diskaftrykket.",
+    "mod.ap": "Start med AP", "mod.ap.d": "Eventyrpoint ved spillets start (0..99999999).",
+    "mod.lives": "Start med liv", "mod.lives.d": "Liv ved spillets start (1..99).",
+    "mod.inflives": "Uendelige liv", "mod.inflives.d": "Holder livene på 99 hvert sekund.",
+    "mod.infhealth": "Uendelig energi", "mod.infhealth.d": "Holder energien på maksimum (4) ved hver vblank.",
+    "mod.debugmenu": "Fejlfindingsmenu", "mod.debugmenu.d": "I spillet: Select+L1+R1 eller F1 åbner en fejlfindingsmenu (gå gennem vægge, flyve, snyd, begivenheder, hop til et hvilket som helst rum, info på skærmen, hastighed).",
+    "mod.events": "Lås alle begivenheder op",
+    "mod.events.d": "Markerer alle %d begivenheder som fuldførte fra start (genstande, der hører til begivenheder, er væk; til at udforske)." % EVENT_COUNT,
+    "mod.keys": "Egne taster", "mod.keys.d": "Taster til hver PS1-knap (SDL-tastnavne: X, Return, Space, Left...).",
+    "l.lang": "Spillets sprog:",
+    "title": "Tombi! - nativ port", "tab.play": "Spil", "tab.mods": "Mods", "tab.controls": "Styring",
+    "l.disc": "Diskaftryk (.bin / .cue / .iso / .chd; pakkes ud én gang i mappen data/):", "b.browse": "Gennemse...",
+    "l.savedir": "Mappe til gemte spil (hukommelseskort):", "b.saveimp": "Importér gemt spil…", "b.saveexp": "Eksportér gemt spil…",
+    "s.saverun": "Luk spillet, før du importerer eller eksporterer gemte spil.", "s.saveimpok": "Gemt spil importeret",
+    "s.saveexpok": "Kortet er eksporteret til {}", "s.saveerr": "Import/eksport mislykkedes: {}",
+    "s.saveask": "Importér denne fil til portens hukommelseskort ({})?\nEt helt kort erstatter det nuværende (en .bak-kopi gemmes).",
+    "s.saveexpq": "Eksportér et enkelt gemt spil som .mcs? (Nej = helt kort .mcd)",
+    "l.scale": "Vinduesstørrelse:", "l.fullscreen": "Fuld skærm (F11 i spillet)", "l.hz": "Hastighed:",
+    "l.ires": "Intern opløsning (kun OpenGL):", "r.ires1": "1x (original)",
+    "l.renderer": "Gengivelse:", "r.gl": "OpenGL (grafikkort)", "r.soft": "Software (CPU, langsommere)", "l.aspect": "Billede:",
+    "a.tv": "4:3 (som på tv)", "a.sq": "Kvadratiske pixels", "a.w16": "16:9 bredformat (eksperimentel)", "a.w21": "21:9 (eksperimentel)",
+    "a.w32": "32:9 (eksperimentel)", "a.auto": "Auto (fylder skærmen, eksperimentel)",
+    "ft.image": "Aftryk",
+    "c.texpack": "Teksturpakke (HD) · eksperimentel", "l.texpack": "Pakkens mappe (lad den være tom for de originale teksturer). Kun OpenGL.",
+    "b.dumpall": "Eksportér alle teksturer", "b.openfolder": "Åbn mappe",
+    "l.texpack.d": "Klik på »Eksportér alle teksturer« for at eksportere spillets teksturer til mappen texture_dump. Redigér eller opskalér dem (2x, 4x…) med de samme filnavne, og vælg derefter den mappe som pakke.",
+    "s.dumpall": "Eksporterer teksturer… {}%", "s.dumpallok": "Færdig: {} teksturer i {}", "s.dumpallfail": "Kunne ikke eksportere: {}",
+    "l.pad": "Controller: enhver SDL2-kompatibel controller (Xbox, PS4/PS5, Switch Pro) bruges automatisk; tastatur: piletaster, X = Kryds, Z = Firkant, S = Trekant, D = Cirkel, Q/W = L1/R1, A/E = L2/R2, Enter = Start, Tilbage = Select.",
+    "b.play": "Spil", "b.extracting": "Pakker ud... {0}%", "l.extracting": "Diskens filer pakkes ud (kun første gang). Vent, til det er færdigt, for at spille.",
+    "b.stop": "Luk spillet", "b.copylog": "Kopiér log", "s.copied": "Loggen er kopieret til udklipsholderen ({0} linjer).",
+    "l.autostart": "Start et nyt spil automatisk (trykker på Start på titelskærmen)",
+    "s.nodisc": "Vælg dit diskaftryk.", "s.checking": "Kontrollerer disken...", "s.ok": "Kompatibel disk: {0}, MAIN0.EXE kontrolleret (sha1).",
+    "s.extracting": "Pakker disken ud i {0}... {1}% ({2})", "s.dataok": "Spildata klar i {0} ({1} filer): diskaftrykket er ikke længere nødvendigt.",
+    "s.extractfail": "Kunne ikke pakke disken ud: {0}", "s.nodata": "Vælg dit diskaftryk: det pakkes ud én gang i mappen data/, og derefter har spillet ikke brug for det.",
+    "s.badsha": "IKKE en kompatibel disk: {0} (sha1 af MAIN0.EXE {1}). Porten kører kun Tombi! PAL SCES-01331 Rev 1 (en SCES-01331 her er Rev 0); det kan mislykkes.",
+    "s.noexe": "EXE/MAIN0.EXE blev ikke fundet i aftrykket: ikke en Tombi! PAL-disk.", "s.notiso": "Ikke et ISO9660-aftryk: {0}",
+    "s.running": "Spiller... (luk spilvinduet for at afslutte)", "s.ended": "Spillet sluttede (kode {0}). Log: {1}",
+    "s.nobin": "Portens program blev ikke fundet ({0}). Byg det (docs/PORT.md), eller brug den distribuerede exe.",
+    "l.log": "Sidste linjer i portens log:", "l.modshelp": "Hvert mod er en indstilling i porten (--poke, --hz...); de gemmes i tombi-port.json.",
+    "l.key": "Tast", "b.defaults": "Standard", "l.cmd": "Kommando:",
+    "l.patch": "Tekstpatch:", "b.nopatch": "Fjern",
+    "l.patchhelp": "En patch *.tombipatch.json (tombi-text, »Lav patch«) anvendes på mappen data/, når du klikker på Spil; originalerne gemmes i data/.orig/ og lægges tilbage, når den fjernes eller skiftes. Medfølger: {0}.",
+    "l.patchnone": "ingen", "s.patching": "Anvender tekstpatchen »{0}« på data/...",
+    "s.patchok": "Tekstpatchen »{0}« er anvendt ({1} filer i data/; {2}).", "s.patchon": "Tekstpatch aktiv: »{0}«.",
+    "s.patchoff": "Tekstpatchen er fjernet: data/ har de originale filer igen ({0}).",
+    "s.patchfail": "Kunne ikke anvende tekstpatchen: {0}", "s.patchmissing": "Tekstpatchen blev ikke fundet: {0}",
+    "s.patchnodata": "Tekstpatchen anvendes, når disken er pakket ud i data/ (vælg diskaftrykket).",
+    "s.patchchk.disc": "diskens sha1 kontrolleret", "s.patchchk.main0": "MAIN0.EXE i data/ kontrolleret; vælg .bin-aftrykket for også at kontrollere diskens sha1",
+    "s.patchmoved": "{0} filer voksede ud over deres plads på disken og blev flyttet til slutningen (læses via sprogets egen filtabel)",
+    "l.cutcontent": "Aktivér fjernet indhold",
+    "i.cutcontent": "Tekster, der blev fjernet fra spillet og fundet i den japanske udgave (Ore! Tomba). "
+                    "Fire af dem aktiveres:\n\n"
+                    "• Færgemanden i Landsbyen Al Begyndelse (AREA00): ved dammen, du når på skildpadden, siger han efter sin "
+                    "afsked tre replikker mere (en låst dør, en lås lavet af jernmændene, hans båd på stranden ved Svampeskoven).\n"
+                    "• Et brev fra Landsbyen Baccus på Føniksbjerget (AREA03): et ekstra skilt til venstre for gemmeskiltet i "
+                    "starten af området, som læses på samme måde (Op, og tal så).\n"
+                    "• Opslagstavlen i Landsbyen Baccus (AREA05): den var uden for Tombis rækkevidde; nu læses den fra jorden "
+                    "under den (forsvundet mus, så »Tillykke!« og »Eventyrer søges!«).\n"
+                    "• Et gemmepunkt »Havfruens sangsten« på løbets målstrand (AREA06), ved siden af rekordtavlen.\n\n"
+                    "De nævner steder og ting, der ikke findes i det færdige spil (Civilisationens land, den lås, båden).\n\n"
+                    "Desuden to ting, som spillet har, men aldrig bruger:\n"
+                    "• Sølv- og guldbær: frugt, som fjender og kister taber, er nogle gange af sølv (1 ud af 8) eller guld "
+                    "(1 ud af 32); de giver 2 energi tilbage i stedet for 1 (og 100 AP som den almindelige).\n"
+                    "• Den store »?«-boble: den vises over Tombi, når du igen taler med en, der ikke har noget nyt at sige "
+                    "(figurer, der gentager deres replik), i scenerne set oppefra.\n"
+                    "Hvor ofte bærrene dukker op, og hvornår »?« vises, har vi valgt: spillet har koden og grafikken, men siger "
+                    "aldrig, hvornår de skulle vises.\n\n"
+                    "Teksterne er på spansk med patchen »Forbedret oversættelse«; på de andre sprog, eller uden patchen, "
+                    "indeholder de pladser på disken kun fyld (»!!!!!!!!!!«, »..........???«). Med spillet på engelsk (og ingen anden tekstpatch) anvendes den medfølgende engelske tekst (en_cut_content).\n\n"
+                    "Valgfrit, tidlig titelskærm: hvis du angiver mappen med TOMBA-filerne fra disken »PrePre Vol. 8« "
+                    "(PCPX-96084, en japansk demo fra juni 1997; pakket ud fra din egen disk med tools/prepre8.py extract), bliver "
+                    "titlens landskab den versions (klippespir og flod) i stedet for det endelige. Det er ægte spilgrafik fra dengang; "
+                    "logoet, menuen og teksterne forbliver de endelige (den versions logo »オレっ！トンバ« bruges ikke: hvordan det var "
+                    "placeret, vides ikke). Intet fra den disk medfølger.",
+    "l.earlytitle": "Tidlig titel (valgfrit): TOMBA-mappen fra disken PrePre Vol. 8 (tools/prepre8.py extract):",
+    "l.experimental": "Forsøgsfunktioner", "l.fps60": "60 fps (eksperimentel)", "nav.play": "Spil", "nav.gfx": "Grafik",
+    "nav.controls": "Styring", "nav.mods": "Patches og mods", "nav.cut": "Fjernet indhold", "nav.log": "Log",
+    "l.uilang": "Launcherens sprog", "l.starting": "Starter spillet...", "c.disc": "Disk", "c.saves": "Gemte spil", "c.game": "Spillets sprog",
+    "c.patch": "Tekstpatch", "c.speed": "Hastighed", "c.quick": "Hurtige indstillinger", "l.skipintro": "Spring logoer og intro over",
+    "l.autostart2": "Start et nyt spil automatisk", "p.none": "Ingen (original tekst)",
+    "l.patchhint": "Anbefales med spillet på spansk: Forbedret oversættelse (medfølger).", "p.bundled": "Forbedret oversættelse (medfølger)",
+    "sum.window": "{0}x vindue", "sum.full": "fuld skærm",
+    "sum.ires": "{0}x intern", "c.renderer": "Gengivelse", "c.window": "Vindue", "c.aspect": "Billede", "c.ires": "Intern opløsning",
+    "l.iresoff": "Kun OpenGL: softwaregengivelsen tegner altid i den originale opløsning.",
+    "c.keys": "Tastatur", "c.pad": "Controller", "c.mods": "Mods",
+    "c.cmd": "Kommandolinje", "c.log": "Sidste linjer i loggen", "c.status": "Status",
+    "c.controls": "Tastatur og controller",
+    "pad.hint": "Klik på en knap eller dens tast, og tryk så på den nye tast (Esc annullerer). Når du ændrer en tast, slås egne taster til.",
+    "pad.press": "Tryk på en tast", "pad.nokey": "(ingen)",
+    "pad.note": "Controller: enhver SDL2-kompatibel controller (Xbox, PS4/PS5, Switch Pro) bruges automatisk, med knapperne der, hvor tegningen viser dem.",
+    "btn.up": "Op", "btn.down": "Ned", "btn.left": "Venstre", "btn.right": "Højre", "btn.cross": "Kryds", "btn.circle": "Cirkel",
+    "btn.square": "Firkant", "btn.triangle": "Trekant", "btn.l1": "L1", "btn.r1": "R1", "btn.l2": "L2", "btn.r2": "R2",
+    "btn.start": "Start", "btn.select": "Select",
+    "l.rumble": "Vibrationsstyrke:", "rumble.off": "Fra",
+    "l.dualshock": "DualShock-controller (analog): venstre stick med hastighed, og vibration",
+    "l.prompts": "Knapikoner i teksterne:", "p.auto": "Auto (efter controlleren)", "p.ps": "PlayStation",
+    "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Tilpasset", "b.custom": "Tilpas knapper…",
+    "pc.title": "Tilpas knapper", "pc.preset": "Tag udgangspunkt i:", "pc.sym": "Symboler:", "pc.disc": "Skive", "pc.letter": "Bogstav",
+    "pc.sym.xbox": "Xbox-bogstaver", "pc.sym.nintendo": "Nintendo-bogstaver", "pc.sym.ps": "PlayStation-figurer",
+    "pc.pos": "Nederst (Xbox A)|Højre (Xbox B)|Venstre (Xbox X)|Øverst (Xbox Y)", "pc.ok": "Brug", "pc.cancel": "Annuller", "p.gen": "Generisk",
+    "l.showfps": "Vis FPS", "c.icons": "Knapikoner", "c.keyboard": "Tastatur", "b.restore": "Gendan standard",
+    "kb.hint": "Klik på en knaps tast, og tryk så på den nye tast (Esc annullerer).",
+    "kb.clash": "Advarsel: tasten {0} er tildelt flere knapper ({1}).",
+    "gp.hint": "Enhver SDL2-kompatibel controller (Xbox, PS4/PS5, Switch Pro). Klik på en knap på billedet, eller vælg på listen, hvilken controllerknap der fungerer som hver PS1-knap.",
+    "gp.clash": "Advarsel: {0} er tildelt flere knapper ({1}).",
+    "src.dpup": "Retningsknap op", "src.dpdown": "Retningsknap ned", "src.dpleft": "Retningsknap venstre", "src.dpright": "Retningsknap højre",
+    "src.a": "A (nederst)", "src.b": "B (højre)", "src.x": "X (venstre)", "src.y": "Y (øverst)",
+    "src.leftshoulder": "LB / L1", "src.rightshoulder": "RB / R1", "src.lefttrigger": "LT / L2", "src.righttrigger": "RT / R2",
+    "src.start": "Start / Menu", "src.back": "Back / Select / Vis", "src.guide": "Guide / Home / PS",
+    "src.leftstick": "L3 (tryk venstre stick)", "src.rightstick": "R3 (tryk højre stick)", "src.misc1": "Del / Optag",
+    "src.touchpad": "Touchpad", "src.paddle1": "Paddle 1", "src.paddle2": "Paddle 2", "src.paddle3": "Paddle 3", "src.paddle4": "Paddle 4",
+    "src.leftx-": "Venstre stick venstre", "src.leftx+": "Venstre stick højre", "src.lefty-": "Venstre stick op", "src.lefty+": "Venstre stick ned",
+    "src.rightx-": "Højre stick venstre", "src.rightx+": "Højre stick højre", "src.righty-": "Højre stick op", "src.righty+": "Højre stick ned",
+    "src.": "(ingen)",
+}
+
+i18n.add({"fr": FR, "de": DE, "it": IT, "nl": NL, "pt": PT, "sv": SV, "da": DA})

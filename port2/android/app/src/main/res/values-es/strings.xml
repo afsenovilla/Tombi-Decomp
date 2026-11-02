@@ -118,4 +118,9 @@
     <string-array name="pc_pos"><item>Abajo</item><item>Derecha</item><item>Izquierda</item><item>Arriba</item></string-array>
     <string-array name="pc_channels"><item>Rojo</item><item>Verde</item><item>Azul</item><item>Tono</item><item>Saturación</item><item>Brillo</item></string-array>
     <string-array name="pc_presets"><item>Thor negro</item><item>Thor blanco</item><item>Thor arcoíris</item><item>Xbox</item><item>Nintendo</item><item>PlayStation</item><item>GameCube</item><item>SNES (América)</item><item>SNES PAL / Super Famicom</item><item>Famicom</item><item>Pastel</item></string-array>
+    <string name="opt_uilang">Idioma del launcher</string>
+    <string name="uilang_auto">Auto (sistema)</string>
+    <string name="pad_dpad">CRUCETA</string>
+    <string name="pad_axis">Eje</string>
+    <string name="pad_none">(sin asignar)</string>
 </resources>
