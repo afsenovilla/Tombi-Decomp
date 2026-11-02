@@ -504,14 +504,14 @@ i18n.add({
     "es": {"l.rumble": "Intensidad de vibración:", "rumble.off": "Apagada",
            "c.pad": "Mando", "l.dualshock": "Mando DualShock (analógico): stick izquierdo con velocidad y vibración",
            "l.prompts": "Iconos de botones en los textos:", "p.auto": "Auto (según el mando)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Personalizado", "b.custom": "Personalizar botones…",
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "pi.custom": "Personalizado", "b.custom": "Personalizar botones…",
            "pc.title": "Personalizar botones", "pc.preset": "Partir de:", "pc.sym": "Símbolos:", "pc.disc": "Disco", "pc.letter": "Letra",
            "pc.sym.xbox": "Letras Xbox", "pc.sym.nintendo": "Letras Nintendo", "pc.sym.ps": "Formas PlayStation",
            "pc.pos": "Abajo (A Xbox)|Derecha (B Xbox)|Izquierda (X Xbox)|Arriba (Y Xbox)", "pc.ok": "Usar", "pc.cancel": "Cancelar", "p.gen": "Genérico"},
     "en": {"l.rumble": "Vibration intensity:", "rumble.off": "Off",
            "c.pad": "Controller", "l.dualshock": "DualShock controller (analog): left stick with speed, and rumble",
            "l.prompts": "Button icons in the texts:", "p.auto": "Auto (from the controller)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Custom", "b.custom": "Customise buttons…",
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "pi.custom": "Custom", "b.custom": "Customise buttons…",
            "pc.title": "Customise buttons", "pc.preset": "Start from:", "pc.sym": "Symbols:", "pc.disc": "Disc", "pc.letter": "Letter",
            "pc.sym.xbox": "Xbox letters", "pc.sym.nintendo": "Nintendo letters", "pc.sym.ps": "PlayStation shapes",
            "pc.pos": "Bottom (Xbox A)|Right (Xbox B)|Left (Xbox X)|Top (Xbox Y)", "pc.ok": "Use", "pc.cancel": "Cancel", "p.gen": "Generic"},
@@ -533,7 +533,7 @@ i18n.add({
 
 # --prompts on PC (the AYN Thor styles are only offered by the Android launcher; a saved thor style reads as auto)
 PROMPT_STYLES = [("auto", "p.auto"), ("playstation", "p.ps"), ("xbox", "p.xbox"), ("nintendo", "p.nin"), ("generic", "p.gen"),
-                 ("custom", "p.custom")]
+                 ("custom", "pi.custom")]
 # --pad-map: the defaults of runtime/sdl.c cbind_defaults(), and the SDL GameController sources offered
 PAD_DEFAULTS = {"up": "dpup", "down": "dpdown", "left": "dpleft", "right": "dpright", "cross": "a", "circle": "b", "square": "x",
                 "triangle": "y", "l1": "leftshoulder", "r1": "rightshoulder", "l2": "lefttrigger", "r2": "righttrigger",
