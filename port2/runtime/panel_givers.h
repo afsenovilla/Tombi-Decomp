@@ -10,7 +10,7 @@ static const PanelGiver panel_givers[] = {
     {1, "Anciano sabio centenario", "100 Year Old Wise Man"},   /* 0000.WSS ev1; MFNT001 #85 'yo soy el sabio Anciano centenario' */
     {2, "La niebla", "The fog"},   /* updateA00L4Type0A; desc 2, MFNT000 #126 */
     {3, "Rana", "Frog"},   /* updateFrog; desc 3, item name */
-    {4, "Arc\xF3n del tesoro milenario", "1,000 year old treasure chest"},   /* treasureChestGuardTalk 4/1 MFNT030 #232-233 */
+    {4, "Cofre del tesoro milenario", "1,000 year old treasure chest"},   /* treasureChestGuardTalk 4/1 MFNT030 #232-233 */
     {5, "Yan", "Yan"},   /* a00DarkCloakedFigureScene 6/7 MFNT000 #156 */
     {7, "Yan", "Yan"},   /* a00DarkCloakedFigureScene 6/9; desc 7 */
     {8, "Yan", "Yan"},   /* a00L4Type18Active; bank 6 MFNT000 #159-160 (Yan's bank) */

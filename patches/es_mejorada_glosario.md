@@ -42,6 +42,18 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Miner's Hat | Casco de minero | antes "Gorro (del) minero" |
 | 1 UP | Vida extra | antes "1 +" |
 | Tear Bottle | Tarro lágrimas | también en el título "Necesito un Tarro lágrimas" |
+| Red Fortune Teller | la Adivina Roja (título: *La adivina roja*) | es una mujer: cartel de su casa, panel y las demás lenguas (Wahrsagerin, devineresse, indovina); antes "el adivino rojo". El azul sí es *el adivino azul* |
+| Phoenix Mountain | Montaña del Fénix (título: *La Montaña del Fénix*) | como en los diálogos; antes "Montaña de Fénix" en el título |
+| Lava Caves | Cuevas de lava | antes "Cuevas lava" en el título (recortado para caber) |
+| Masakari Jungle (AREA10 s0) | Jungla Masakari | rótulo del punto de guardado (antes solo "Jungla", el inglés dice "Jungle"): es el nombre del sitio en el archivo de guardado (D5SPSUB2) y en la lista de lugares del submenú (D5SPSUB) |
+| Deep Jungle | Jungla profunda | la región del mapa (D5SPSUB) y el Cerdo naranja: *El Cerdo de la Jungla profunda* (antes "Cerdo de la jungla oscura") |
+| Old Tree Hill | Colina del árbol viejo | el árbol es "el árbol viejo" en todos los diálogos; antes "Colina del árbol noble" en la lista de lugares, el archivo de guardado y los destinos de viaje |
+| Baron's Strength (evento 113) | *El potencial de Barón* | el curandero cree que el cachorro tiene poderes especiales ("puede volar con esas orejas"); antes "Fuerza de Barón" |
+| Charles' Pants | Pantalones de Charles (título: *Los pantalones de Charles*) | como el objeto |
+| Precious Treasure Chest? | *¿Un cofre del tesoro?* | antes "de tesoro" |
+| Pump Rocks | Rocas bombeo (título: *Las Rocas bombeo*) | como en el diálogo |
+| Trick Village | Ciudad de trucos | antes "Ciudad trucos" en el título |
+| Bronze / Silver / Gold Medal | *Quiero la medalla de bronce / de plata / de oro* | los tres títulos iguales; antes "Quiero el bronce", "Quiero la plata" |
 
 ## Mensajes de objeto y evento (sin concordancia de género)
 
@@ -54,14 +66,29 @@ personales que valen para cualquier objeto:
 | #0 objeto usado | `Usado(a) Rana` | `Usas Rana` |
 | #1 objeto equipado | `Equipada Rana` | `Equipas Rana` |
 | #2 objeto obtenido | `Rana Ganada` | `Obtienes Rana` |
-| CFNT999S #0, cartel de evento completado | `¡DESPEJADA!` | `¡ESTUPENDO!` |
+| CFNT999S #0, cartel de evento completado | `¡DESPEJADA!` | `¡SUPERADO!` |
 
 La `O` mayúscula no existe en la fuente de 16 px de los MFNT: se añade al banco de glifos de cada archivo copiándola de
 la fuente del mismo tamaño de otro archivo (igual que hace el editor). En general, si a un archivo le falta un glifo se
 añade así en vez de cambiar la frase; `check_text_patch.py` lo lista como nota (`--strict-glyphs` lo convierte en error).
 `¡COMPLETADO!` (12 letras) no cabe: el cartel lo dibuja EXE/MAINn.EXE con una tabla de K glifos y K posiciones seguidas
 de otros datos (title_layout.banner_find); K = 11 en español, que ya es el más largo del disco (inglés 6 `CLEAR!`,
-alemán 10 `GESCHAFFT!`, francés 8, italiano 9...). Ampliarla exigiría mover datos y código del ejecutable.
+alemán 10 `GESCHAFFT!`, francés 8, italiano 9...). Ampliarla exigiría mover datos y código del ejecutable; el port
+nativo no tiene ese límite (`freeTitles`: el cartel sale del texto #0), la consola sí.
 
 El cartel necesita exactamente 11 letras: con `¡SUPERADO!` (10) el port nativo se quedaba en la pantalla de carga al
 entrar en AREA00; `check_text_patch.py` ahora exige el número exacto de letras de la tabla de MAIN5.EXE.
+
+## Títulos de evento sin límite de letras (port nativo)
+
+El parche lleva `"freeTitles": true`: el port nativo coloca las letras de los títulos de evento a partir del texto
+(docs/PORT.md "Free-form event titles"), así que un título puede ser más largo que su lista de posiciones del disco y ya
+no hace falta recortarlo. En la consola (ISO) se ven solo las primeras letras (`check_text_patch.py` lo avisa). Títulos
+alargados o corregidos con esto: *Gas de flor de melocotón*, *Pista de motocross*, *Idioma Enano para novatos*,
+*Hacia la Montaña del Fénix...*, *Preparados, listos, ¡ya!*, *Hierbas curativas para Barón*, *El potencial de Barón*,
+*Una Bolsa Cerdo tormentosa*, *La Montaña del Fénix*, *Cuevas de lava*, *Los pantalones de Charles*, *¿Un cofre del
+tesoro?*, *Zumo de Fruta mortal*, *Planta un jardín de flores*, *La adivina roja*, *¿Un cuadro de la Gran llave?*,
+*El Cerdo de la Jungla profunda*, *Las Rocas bombeo*, *Necesito un Tarro lágrimas*, *Ciudad de trucos*, *Comida para
+Gran pez*, *Quiero la medalla de bronce / de plata / de oro*. La lista de eventos del submenú (D5SPSUB/D5SPSUB3, que
+también usa el panel) sigue los títulos; *Montaña de Fénix* se queda así en esa lista porque comparte la cadena con los
+nombres de lugar y su bloque no tiene sitio.
