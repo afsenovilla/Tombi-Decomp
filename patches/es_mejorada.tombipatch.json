@@ -304,7 +304,8 @@
     "Montaña de Fénix": "Montaña del Fénix"
    },
    "eventNames": {
-    "Montaña de Fénix": "La Montaña del Fénix"
+    "Montaña de Fénix": "La Montaña del Fénix",
+    "La gran huida": "La gran evasión"
    },
    "placeNames": {
     "Plaza de \ncaridad\n": "Plaza de \nla caridad\n",
@@ -409,7 +410,8 @@
     "Montaña de Fénix": "Montaña del Fénix"
    },
    "eventNames": {
-    "Montaña de Fénix": "La Montaña del Fénix"
+    "Montaña de Fénix": "La Montaña del Fénix",
+    "La gran huida": "La gran evasión"
    },
    "placeNames": {
     "Plaza de \ncaridad\n": "Plaza de \nla caridad\n",
@@ -430,7 +432,8 @@
  },
  "edits": {
   "AREA00/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -659,7 +662,8 @@
    "117": "{BOX 216 42}\n{MOVE 0 0}La bruja volverá a casa{NL}\ncuando oiga cierto rumor.{WAIT}{CLEAR}\n"
   },
   "AREA01/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -904,7 +908,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA02/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -1066,7 +1071,7 @@
    "265": "{BOX 280 55}\n{VOICE 13 0}{MOVE 0 0}Los Cerdiablos no se esconden{NL}\nen los lugares que han{NL}\nhechizado.{C056}{WAIT}{CLEAR}\nEncontrarás la {COLOR 1}Puerta{NL}\nCerdiablo{COLOR 0} con la {COLOR 3}Bolsa{NL}\nCerdiablo{COLOR 0}.{C056}{WAIT}{CLEAR}\nPero cada bolsa corresponde{NL}\na un Cerdiablo y solo puede{NL}\nencerrar a ese Cerdo.{C056}{WAIT}{CLEAR}\nNecesitas siete bolsas para{NL}\nencerrar a los siete Cerdiablos.{C056}{WAIT}{CLEAR}\nLas Bolsas Cerdiablo deberían{NL}\nestar cerca de los lugares{NL}\nhechizados.{WAIT}{CLEAR}\n",
    "269": "{BOX 256 55}\n{VOICE 13 0}{MOVE 0 0}Ay, madre, ¿has visto{NL}\nal Mayor?{C056}{WAIT}{CLEAR}\nHay dos Enanos del bosque{NL}\ndiscutiendo justo a la{NL}\nentrada de la ciudad.{C056}{WAIT}{CLEAR}\nNormalmente los dejamos,{NL}\npero están cortando el{NL}\npaso y nadie puede pasar.{WAIT}{CLEAR}\n",
    "270": "{BOX 208 55}\n{VOICE 13 0}{MOVE 0 0}Si el {COLOR 1}Mayor{COLOR 0} estuviera{NL}\naquí, lo arreglaría todo{NL}\nen un periquete...{WAIT}{CLEAR}\n",
-   "271": "{BOX 224 55}\n{VOICE 13 0}{MOVE 0 0}¡Lo escondí, pero puede{NL}\nque lo encuentre pronto!{NL}\n¡Díselo tú!{C056}{WAIT}{CLEAR}\n¡Yo no lo rompí,{NL}\nfuiste tú!{WAIT}{CLEAR}\n",
+   "271": "{BOX 224 55}\n{VOICE 13 0}{MOVE 0 0}¡Lo escondí, pero el Mayor{NL}\npodría encontrarlo pronto!{NL}\n¡Díselo tú!{C056}{WAIT}{CLEAR}\n¡Yo no lo rompí,{NL}\nfuiste tú!{WAIT}{CLEAR}\n",
    "272": "{BOX 200 42}\n{VOICE 13 0}{MOVE 0 0}Están discutiendo sobre{NL}\nquién rompió algo...{WAIT}{CLEAR}\n",
    "273": "{BOX 232 55}\n{VOICE 13 0}{MOVE 0 0}Parece que esos dos le{NL}\nestaban guardando algo{NL}\nal Mayor...{WAIT}{CLEAR}\n",
    "274": "{BOX 176 42}\n{VOICE 13 0}{MOVE 0 0}¡Aaaah!{NL}\n...¡Es... eso es...!{WAIT}{CLEAR}\n",
@@ -1198,7 +1203,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA03/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -1364,7 +1370,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA04/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -1536,7 +1543,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA05/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -1749,7 +1757,8 @@
    "317": "{BOX 144 42}\n{VOICE 6 0}{MOVE 0 0}...¡Hasta luego!{C052}{WAIT}{CLEAR}\nVuelve a vernos{NL}\ncuando quieras.{WAIT}{CLEAR}\n"
   },
   "AREA06/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -1883,7 +1892,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA07/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -2128,7 +2138,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA08/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -2261,7 +2272,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA09/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -2399,7 +2411,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA10/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -2582,7 +2595,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA11/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -2740,7 +2754,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA12/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -2912,7 +2927,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA13/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -3099,7 +3115,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA14/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -3243,7 +3260,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA16/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -3387,7 +3405,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA17/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -3531,7 +3550,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA18/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -3674,7 +3694,8 @@
    "81": "{BOX 96 29}\n300.000 AP{NL}\n"
   },
   "AREA19/CFNT999S.WFM": {
-   "0": "¡SUPERADO!",
+      "31": "La gran{NL}\nevasión",
+"0": "¡SUPERADO!",
    "3": "El sabio{NL}\ncentenario",
    "7": "Gas de flor{NL}\nde melocotón",
    "8": "Pista de{NL}\nmotocross",
@@ -3836,7 +3857,7 @@
    "265": "{BOX 280 55}\n{VOICE 13 0}{MOVE 0 0}Los Cerdiablos no se esconden{NL}\nen los lugares que han{NL}\nhechizado.{C056}{WAIT}{CLEAR}\nEncontrarás la {COLOR 1}Puerta{NL}\nCerdiablo{COLOR 0} con la {COLOR 3}Bolsa{NL}\nCerdiablo{COLOR 0}.{C056}{WAIT}{CLEAR}\nPero cada bolsa corresponde{NL}\na un Cerdiablo y solo puede{NL}\nencerrar a ese Cerdo.{C056}{WAIT}{CLEAR}\nNecesitas siete bolsas para{NL}\nencerrar a los siete Cerdiablos.{C056}{WAIT}{CLEAR}\nLas Bolsas Cerdiablo deberían{NL}\nestar cerca de los lugares{NL}\nhechizados.{WAIT}{CLEAR}\n",
    "269": "{BOX 256 55}\n{VOICE 13 0}{MOVE 0 0}Ay, madre, ¿has visto{NL}\nal Mayor?{C056}{WAIT}{CLEAR}\nHay dos Enanos del bosque{NL}\ndiscutiendo justo a la{NL}\nentrada de la ciudad.{C056}{WAIT}{CLEAR}\nNormalmente los dejamos,{NL}\npero están cortando el{NL}\npaso y nadie puede pasar.{WAIT}{CLEAR}\n",
    "270": "{BOX 208 55}\n{VOICE 13 0}{MOVE 0 0}Si el {COLOR 1}Mayor{COLOR 0} estuviera{NL}\naquí, lo arreglaría todo{NL}\nen un periquete...{WAIT}{CLEAR}\n",
-   "271": "{BOX 224 55}\n{VOICE 13 0}{MOVE 0 0}¡Lo escondí, pero puede{NL}\nque lo encuentre pronto!{NL}\n¡Díselo tú!{C056}{WAIT}{CLEAR}\n¡Yo no lo rompí,{NL}\nfuiste tú!{WAIT}{CLEAR}\n",
+   "271": "{BOX 224 55}\n{VOICE 13 0}{MOVE 0 0}¡Lo escondí, pero el Mayor{NL}\npodría encontrarlo pronto!{NL}\n¡Díselo tú!{C056}{WAIT}{CLEAR}\n¡Yo no lo rompí,{NL}\nfuiste tú!{WAIT}{CLEAR}\n",
    "272": "{BOX 200 42}\n{VOICE 13 0}{MOVE 0 0}Están discutiendo sobre{NL}\nquién rompió algo...{WAIT}{CLEAR}\n",
    "273": "{BOX 232 55}\n{VOICE 13 0}{MOVE 0 0}Parece que esos dos le{NL}\nestaban guardando algo{NL}\nal Mayor...{WAIT}{CLEAR}\n",
    "274": "{BOX 176 42}\n{VOICE 13 0}{MOVE 0 0}¡Aaaah!{NL}\n...¡Es... eso es...!{WAIT}{CLEAR}\n",
@@ -4066,7 +4087,7 @@
    "264": "{BOX 280 55}\n{VOICE 6 0}{MOVE 0 0}Los Cerdiablos no se esconden{NL}\nen los lugares que han{NL}\nhechizado.{C053}{WAIT}{CLEAR}\nEncontrarás la {COLOR 1}Puerta{NL}\nCerdiablo{COLOR 0} con la {COLOR 3}Bolsa{NL}\nCerdiablo{COLOR 0}.{C053}{WAIT}{CLEAR}\nPero cada bolsa corresponde{NL}\na un Cerdiablo y solo puede{NL}\nencerrar a ese Cerdo.{C053}{WAIT}{CLEAR}\nNecesitas siete bolsas para{NL}\nencerrar a los siete Cerdiablos.{C053}{WAIT}{CLEAR}\nLas Bolsas Cerdiablo deberían{NL}\nestar cerca de los lugares{NL}\nhechizados.{WAIT}{CLEAR}\n",
    "268": "{BOX 256 55}\n{VOICE 6 0}{MOVE 0 0}Ay, madre, ¿has visto{NL}\nal Mayor?{C053}{WAIT}{CLEAR}\nHay dos Enanos del bosque{NL}\ndiscutiendo justo a la{NL}\nentrada de la ciudad.{C053}{WAIT}{CLEAR}\nNormalmente los dejamos,{NL}\npero están cortando el{NL}\npaso y nadie puede pasar.{WAIT}{CLEAR}\n",
    "269": "{BOX 208 55}\n{VOICE 6 0}{MOVE 0 0}Si el {COLOR 1}Mayor{COLOR 0} estuviera{NL}\naquí, lo arreglaría todo{NL}\nen un periquete...{WAIT}{CLEAR}\n",
-   "270": "{BOX 224 68}\n{VOICE 6 0}{MOVE 0 0}¡Lo escondí, pero puede{NL}\nque lo encuentre pronto!{NL}\n¡Yo no lo rompí,{NL}\nfuiste tú!{WAIT}{CLEAR}\n",
+   "270": "{BOX 224 68}\n{VOICE 6 0}{MOVE 0 0}¡Lo escondí, pero el Mayor{NL}\npodría encontrarlo pronto!{NL}\n¡Yo no lo rompí,{NL}\nfuiste tú!{WAIT}{CLEAR}\n",
    "271": "{BOX 200 42}\n{VOICE 6 0}{MOVE 0 0}Están discutiendo sobre{NL}\nquién rompió algo...{WAIT}{CLEAR}\n",
    "272": "{BOX 232 55}\n{VOICE 6 0}{MOVE 0 0}Parece que esos dos le{NL}\nestaban guardando algo{NL}\nal Mayor...{WAIT}{CLEAR}\n",
    "273": "{BOX 176 42}\n{VOICE 6 0}{MOVE 0 0}¡Aaaah!{NL}\n...¡Es... eso es...!{WAIT}{CLEAR}\n",
