@@ -49,14 +49,6 @@ def main():
     s2, n = re.subn(r"<!-- jp-progress:start -->.*?<!-- jp-progress:end -->", lambda _: new, s, flags=re.S)
     if not n:
         sys.exit("README.md has no jp-progress markers")
-    # Version table at the top of the README: the Japan row carries the live figures.
-    m = r["measures"]
-    tc, mc = int(m["total_code"]), int(m["matched_code"])
-    row = ("| Japan (*Ore! Tomba*, `SLPS_011.44`) | Code %.2f %% | Data %.2f %% | Functions %d / %d | see [docs/JP.md](docs/JP.md) |"
-           % (100.0 * mc / tc, float(m.get("matched_data_percent", 0.0)), int(m.get("matched_functions", 0)), int(m.get("total_functions", 0))))
-    s2, n2 = re.subn(r"^\| Japan \(\*Ore! Tomba\*[^\n]*$", lambda _: row, s2, count=1, flags=re.M)
-    if not n2:
-        sys.exit("README.md has no Japan row in the version table")
     open(README, "w", encoding="utf-8").write(s2)
     print(block(r).splitlines()[0])
 
