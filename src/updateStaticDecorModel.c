@@ -1,5 +1,35 @@
 // FUNC 800ee18c 208 X000
 // MATCHING 800ee18c 208
+// VERSION SLPS_01144 x00 800EE3AC 204
+#if defined(VERSION_SLPS_01144)
+#include "raw7.h"
+extern unsigned short GAME;
+extern void f1(), f2(), f3();
+void func_800EE3AC(char *o)
+{
+    unsigned char s = U8(o, 4);
+    switch (s) {
+    case 0:
+        U8(o, 0) = 2;
+        U8(o, 0xa) = 0x10;
+        U8(o, 4)++;
+        break;
+    case 1:
+        if (GAME == 4 || GAME == 0xc) {
+            f1();
+        } else {
+            f2();
+        }
+        break;
+    case 2:
+        U8(o, 4) = s + 1;
+        break;
+    case 3:
+        f3();
+        break;
+    }
+}
+#else
 #include "raw7.h"
 extern unsigned short GAME;
 extern void f1(), f2(), f3();
@@ -28,3 +58,4 @@ void updateStaticDecorModel(char *o)
         break;
     }
 }
+#endif

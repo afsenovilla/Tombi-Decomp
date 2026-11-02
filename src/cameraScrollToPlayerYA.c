@@ -2,8 +2,59 @@
 // MATCHING 80028754 368
 // VERSION SLPS_01144 slps01144 80029564 368
 #if defined(VERSION_SLPS_01144)
-#include "include_asm.h"
-INCLUDE_ASM_V("slps01144/nonmatchings/slps01144", func_80029564_slps01144);
+/* char *base copy of o (no hard-reg preference on a pseudo used only via raw offsets) lets n take a0 and o go to t0 like the game. */
+typedef struct { char p[0x32]; short y; } TObj;
+extern unsigned char DAT_800a60d6;
+extern int DAT_800a606c;
+extern unsigned short VIEW_CAMERA_Y;
+extern short F2;
+extern unsigned short PLAYER_Y_WHOLE;
+extern short E[];
+extern short VIEW_CAMERA_ROT_Y;
+
+static __inline__ int calc(void)
+{
+    int t;
+    if (DAT_800a60d6 == 3) {
+        t = VIEW_CAMERA_Y - 0x14;
+        return t - DAT_800a606c;
+    }
+    return VIEW_CAMERA_Y - PLAYER_Y_WHOLE;
+}
+
+void func_80029564_slps01144(TObj *o)
+{
+    char pad;
+    short n;
+    int s;
+    int r;
+    char *b;
+    b = (char *)o;
+    r = calc();
+    s = r;
+    r = 0;
+    n = s;
+    n += E[0];
+    if (n != 0x3a) {
+        if (n < 0x3a) {
+            if (n < -6) {
+                F2 += 2;
+                if (*(short *)(b + 0x32) < F2) F2 = *(short *)(b + 0x32);
+                else s += 2;
+            } else {
+                E[0] += 2;
+            }
+            if ((short)s + E[0] > 0x3a)
+                E[0] = 0x3a - s;
+        } else {
+            E[0] -= 2;
+            if ((short)s + E[0] < 0x3a)
+                E[0] = 0x3a - s;
+        }
+    }
+    if (F2 + VIEW_CAMERA_ROT_Y > *(short *)(b + 0x32))
+        VIEW_CAMERA_ROT_Y = *(short *)(b + 0x32) - F2;
+}
 #else
 /* char *base copy of o (no hard-reg preference on a pseudo used only via raw offsets) lets n take a0 and o go to t0 like the game. */
 typedef struct { char p[0x32]; short y; } TObj;

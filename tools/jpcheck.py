@@ -27,9 +27,18 @@ def dump(o, norm):
         l = re.sub(r" <.*", "", l)
         l = re.sub(r"^(j|b\w*)\t(.*?)\b[0-9a-f]+$", r"\1\t\2", l)
         if norm:
-            if re.match(r"\s+R_MIPS_(HI|LO)16", l): continue
+            if re.match(r"\s+R_MIPS_PC16", l): continue  # branch to a jump-table label of the target asm
             l = re.sub(r"^(s[bhw]\t\w+,)\d+\(at\)", r"\1X(at)", l)
         if l.strip() and not l.startswith("Disassembly") and not l.startswith("0000"): L.append(l)
+    if norm:
+        # objdiff ignores relocation addends: an immediate carried by a HI16/LO16 reloc does not count
+        out = []
+        for i, l in enumerate(L):
+            if not l.startswith("   R_MIPS") and i + 1 < len(L) and re.match(r"\s+R_MIPS_(HI|LO)16", L[i + 1]) is not None:
+                l = re.sub(r"(\w+\t\$?\w+,(?:\$?\w+,)?)-?\d+(\(\w+\))?$", lambda m: m.group(1) + "X" + (m.group(2) or ""), l)
+                l = re.sub(r"^lui\t(\w+),0x[0-9a-f]+$", r"lui\t\1,X", l)
+            out.append(l)
+        L = [l for l in out if re.match(r"\s+R_MIPS_(HI|LO)16", l) is None]
     return L
 
 
@@ -46,7 +55,9 @@ def check(src, prog=None, norm=False):
             p = ROOT + "/include/" + f
             if os.path.isdir(p): shutil.copytree(p, inc + "/" + f); continue
             for nm in {f, f.upper(), f.lower()}: shutil.copy(p, inc + "/" + nm)
-        NC["EXTRA_AS"] = "".join(".set\t%s,0x%s\n" % (m, m[2:]) for m in sorted(set(re.findall(r"\bD_1F80[0-9A-F]{4}\b", t))))
+        # PAL scratchpad names (config/slpm80165/spad.txt) and D_1F80xxxx as constants, like build_report does
+        import build_report as BR
+        NC["EXTRA_AS"] = BR._jpdemo_spad_set(t, "SLPS_01144")
         fm = re.search(r"//\s*FLAGS\s+(.*)", t)
         NC["build"](src, fm.group(1).strip() if fm else "-O2 -G0", d, inc)
         name = os.path.basename(src)[:-2]
