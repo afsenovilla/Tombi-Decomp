@@ -189,7 +189,7 @@ hemos comprobado.
 | Bolsa del Cerdo Marino que da el jefe | sin verificar | |
 | Cactus del GoGoCar y una pieza de pista extra | **en parte** | Los cactus están confirmados (ver "GoGoCart cacti / sign" arriba). La pieza de pista no se ha comprobado. |
 | Modelo de cartel metálico de la Mansión Encantada | sin verificar | |
-| Texturas/sprites de Doodle Rock en el Bosque Subterráneo | sin verificar | |
+| Texturas/sprites de Doodle Rock en el Bosque Subterráneo | **confirmado (corregido)** | Las rocas de garabatos existen: cinco placas distintas de puntos y barras (2, 5, 18, 139, 59) en páginas de textura de salas, dos de ellas colocadas en el juego final como modelos 3D decorativos (Bosque de los Enanos AREA01 s1/s3 = 2, Mansión Encantada AREA04 s0/s1 = 5). Ver "Rocas de garabatos (らくがき岩): las placas existen". |
 | Sprites de flor creciendo, maldita y sin maldición | **en parte** | Los fotogramas 27-32 del SPR 0x3B de AREA02 existen, pero la VRAM a la que apuntan está vacía en PAL (ver Perdido). |
 | Puerta de hierro en el Castillo de hierro | **en parte** | El evento 100 "Iron Keyhole" tiene icono (fotograma 209), no está en el orden del menú y nada lo inicia. No hemos mirado el sprite de la puerta. |
 | Planta rara en la VRAM de la Jungla Masakari | **no encontrada** | Páginas 4 bpp de AREA10 de sus 10 listas de carga renderizadas (tools/vram.py + find_unused_gfx.py): las zonas no muestreadas son palmeras, juncos, flores y texturas de pared de fondos/modelos, más la página B002 ya retirada. No hay ningún sprite de planta suelto. Sin paleta, una planta pequeña podría escaparse. |
@@ -594,9 +594,12 @@ código para colocarlas?, ¿las menciona el texto japonés?). Las imágenes no s
   muchos tesoros... pero parece difícil... "·" es 1... "–" es 5... base veinte o algo así... yo no lo entiendo...»
   (el "·" y la "ー" son los mismos glifos que los puntos suspensivos y la raya de vocal larga, así que se lee como un
   murmullo). El PAL conservó las líneas pero perdió la notación: «1 es..por 5...a la 20ª potencia...» (todos los
-  idiomas dicen "potencia"). Punto = 1, barra = 5 y base 20 son los numerales mayas de la hoja. Las rocas están
-  recortadas: el evento 67 解読？らくがき岩 «¿Descifrar? La roca de garabatos» tiene título japonés pero ningún inicio,
-  final ni lectura de su marca (notes/secrets.md).
+  idiomas dicen "potencia"). Punto = 1, barra = 5 y base 20 son los numerales mayas de la hoja. **Corrección:** las
+  rocas no están recortadas; sus placas están en las páginas de textura de las salas y dos están colocadas en el juego
+  final (ver "Rocas de garabatos (らくがき岩): las placas existen" más abajo). Lo recortado es todo lo que las rodea: el
+  evento 67 解読？らくがき岩 «¿Descifrar? La roca de garabatos» tiene título japonés (y pista japonesa, DSPSUB#1 #67
+  らくがき岩の　もじを　かいどくする «descifrar la escritura de las rocas de garabatos») pero ningún inicio, final ni
+  lectura de su marca (notes/secrets.md).
 - **PrePre 8 nombra el suelo.** La tabla de títulos de evento de PrePre 8 (`tools/prepre8_text.py`, cadena en
   0x800AB038, glifos comprobados en `SYS008.000`) tiene らくがき床のナゾ «El enigma del suelo de garabatos», seguido de
   かくされた入口 «La entrada escondida»; también tiene 解読?らくがき岩 y 森の地下には何がある? «¿Qué hay bajo el
@@ -613,5 +616,69 @@ código para colocarlas?, ¿las menciona el texto japonés?). Las imágenes no s
 **Lectura:** lo más probable es que la hoja sea el juego de baldosas del mecanismo recortado del "suelo de garabatos"
 que guardaba la cámara del tesoro del Laberinto Subterráneo: una fila de diez símbolos enmarcados y placas de
 numerales en notación de puntos y barras en base 20, cuya clave estaba en seis rocas de garabatos de la superficie.
-No queda ni el suelo, ni las rocas, ni código para ellos; el juego final conservó el tesoro (evento 161, un cofre del
-tiempo) y dos líneas de pista, una de ellas sin usar.
+No queda el suelo ni código para él; las rocas sobreviven en parte (cinco texturas de placa, dos colocadas como simple
+decorado, abajo); el juego final conservó el tesoro (evento 161, un cofre del tiempo) y dos líneas de pista, una de
+ellas sin usar.
+
+## Rocas de garabatos (らくがき岩): las placas existen, 2 de noviembre de 2026
+
+Corrige la sección anterior, que decía que las seis rocas nunca se hicieron. Un ripeo de la comunidad muestra cinco
+placas de piedra con numerales de puntos y barras; están en los datos del juego. Las imágenes no se suben (píxeles del
+juego).
+
+### Dónde están
+Las cinco usan la misma baldosa de placa de 42 x 51 px (marco, veta de la piedra e índices de 4 bpp idénticos fuera de
+las marcas; solo cambian las marcas), así que se buscó ese patrón de índices en todo el disco (búsqueda por nibbles en
+cada fichero, GAM descomprimidos, PAL, USA y JP): cinco placas distintas; están todas las coincidencias.
+
+| Número | Fichero (PAL) | VRAM (página 4 bpp, u, v) | Sala | Se dibuja en el juego final |
+|---|---|---|---|---|
+| 2 | `AREA01/A003.GAM` (página de área, en la palabra (768,0)) x 102, y 64 | página 12 (768,0), u 102..143, v 64..114 | AREA01 (Bosque de las 100 flores / Bosque de los Enanos), todas las secciones | **sí**: modelo de objeto #22 de la tabla de modelos de s0/s1 (#10 en s3), CLUT 0x7849 (144,481), colocado por un registro de capa 4 tipo 0x13 (`updateStaticDecorModel`) en (4110, -399, z 48) en s1 y s3, justo a la izquierda de la salida del extremo derecho de s1. Igual en AREA07 (copia de las listas de AREA01). |
+| 5 | `AREA04/A003.GAM` (página de área, palabra (832,0)) x 654, y 192 | página 15 (960,0), u 142..183, v 192..242 | AREA04 (Mansión Encantada), todas las secciones | **sí**: modelo #22 de las tablas de s0..s3, CLUT 0x7ACF (240,491), registro decorativo tipo 0x13 en (1080, -675, z 940) en s0 y s1: un bloque de piedra con la placa en la terraza a la derecha de la puerta con cara de la mansión. Igual en AREA12 (copia de AREA04). |
+| 18 | `AREA03/A002.GAM` (página de área, palabra (0,256)) x 398, y 24 | página 17 (64,256), u 142..183, v 24..74 | AREA03 (Montaña tormentosa / Cuevas de lava / Nido del Fénix), todas las secciones | no |
+| 139 | `AREA10/B004, B104, B203, B302, B404, B504, B603, B702` x 266, y 176 | página 17 (64,256), u 10..51, v 176..226 | AREA10 (Jungla), secciones 0..7 | no |
+| 59 | `AREA11/B100.GAM` (página de sala, palabra (512,0)) x 10, y 136 | página 8 (512,0), u 10..51, v 136..186 | AREA11 sección 1 | no |
+| (2) | `AREA09/B002.GAM` x 870, y 64 | página 15 (960,0), u 102..143, v 64..114 | AREA09 (Bosque de setas) sección 0 | no; idéntica píxel a píxel al "2" de AREA01 |
+
+- **USA y JP** tienen las mismas placas en los mismos offsets (USA AREA04/A004, AREA09/B004; JP igual). **Solo JP:** la
+  placa "59" está además en seis páginas de sala de AREA10 del JP (B003, B102, B203, B403, B502, B603, en y 136), es
+  decir, la jungla japonesa también llevaba la textura de la roca 59; PAL/USA solo la conservan en AREA11.
+- **Cómo se decidió "se dibuja":** se comprobó contra las cajas UV de las placas cada polígono texturizado de cada
+  modelo de sala (kind 0x50, también los contenedores que empiezan por WHM de AREA01/09) y de cada tabla de modelos de
+  objeto (piezas kind 0x51..0x5F) de AREA01/03/04/07/09/10/11/12: solo los dos modelos de arriba muestrean una placa.
+  Para las otras tres, ningún polígono de sala, ningún modelo de objeto y ninguna parte SPR (solo mapas de sub-pantalla
+  de página entera) muestrea la placa. El generador de la capa 4 (`spawnObjectFromRecord`) toma el modelo del byte 14
+  del registro (`be`) cuando el byte 12 tiene el bit 0x10: be = 22 (AREA04) y 22 / 10 (AREA01).
+- **Comprobado en el port:** con el modo vuelo del menú de depuración del port (`--debug-menu`, L1+R1+Select),
+  AREA04 s0 con el jugador en (978, -716) muestra la roca "5" a la derecha de Tombi en la terraza de la mansión
+  (`--dump-draws`: CLUT (240,491), página (960,0), uv 129..197 x 186..248, frames 1809+); AREA01 s1 en (4252, -521)
+  muestra la pequeña placa "2" en el muro de piedra antes de la salida (CLUT (144,481), página (768,0)).
+- **Ningún código las usa:** `updateStaticDecorModel` (X001 = X004, 0x800EE18C) solo pone los flags de dibujo y dibuja;
+  sin diálogo, flag, evento ni comprobación. El evento 67 no tiene inicio/final/lectura (arriba). El aldeano de
+  Stonetown dice que vio una "en el taller de los hombres de madera" (木人の加工場, AREA16 #188): encaja con la textura
+  "59" de la página de AREA11. Ninguna otra línea japonesa nombra una roca, un número, un orden o un símbolo.
+
+### Lectura de los números (base 20 maya)
+Punto = 1, barra = 5, los niveles se leen de abajo (x1) a arriba (x20); dentro de un nivel los puntos van sobre las barras.
+- AREA01: dos puntos, un nivel: **2**.
+- AREA04: una barra: **5**.
+- AREA03: tres puntos sobre tres barras, espaciado uniforme, un nivel: 3 + 15 = **18**.
+- AREA10: nivel superior un punto sobre una barra (6), hueco claro, nivel inferior cuatro puntos sobre tres barras (19):
+  6 x 20 + 19 = **139**.
+- AREA11: nivel superior dos puntos (2), hueco, nivel inferior 19: 2 x 20 + 19 = **59**.
+(Leídas como un solo nivel las dos últimas serían 6+19 = 25 y 2+19 = 21; el hueco y el "base 20" del aldeano hacen que
+la lectura en dos niveles sea la buscada.) La sexta roca no está en ningún disco (PAL, USA, JP); la copia del "2" en
+AREA09 es la única placa extra.
+
+**Frente a la hoja de B301:** la hoja tiene baldosas de numeral sueltas 0 (concha), 1..9 y "=" (dos barras, 10), de
+24 x 24, más diez símbolos enmarcados. Las rocas necesitan dígitos hasta 19 (18, y 19 en dos de ellas), que la hoja no
+tiene, y sus marcas son más grandes y van sobre otra placa de piedra enmarcada de 42 x 51, así que las rocas no son las
+baldosas del suelo.
+
+**Puzle posible (inferencia, nada en el código ni en el texto lo dice):** seis rocas repartidas por las zonas de la
+superficie (bosque, montaña, mansión, jungla, Civilización) daban cada una un número; el "mecanismo" de la cámara era un
+suelo de baldosas de numerales y símbolos donde había que pisar o fijar las correctas. Con baldosas de dígitos solo
+hasta 10 y una baldosa "=", el diseño más coherente es una ecuación o una secuencia: p. ej. los seis números en el orden
+de las rocas (o sumados/combinados; los cinco conocidos suman 223) dan las baldosas que hay que pisar, o el número de
+cada roca elige uno de los diez símbolos. Los valores conocidos 2, 5, 18, 59, 139 no forman una serie evidente y, con
+una roca perdida, la respuesta buscada no se puede recuperar.

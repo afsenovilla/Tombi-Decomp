@@ -175,7 +175,7 @@ These are the rest, checked only where it was cheap. **Unverified** means we did
 | Navy Evil Pig Bag from the chief | unverified | |
 | GoGoCar cacti and an extra track piece | **partly** | The cacti are confirmed (see "GoGoCart cacti / sign" above). The track piece was not checked. |
 | Haunted Mansion metal sign model | unverified | |
-| Doodle Rock textures/sprites in the Underground Forest | unverified | |
+| Doodle Rock textures/sprites in the Underground Forest | **confirmed (corrected)** | The graffiti rocks exist: five distinct dot-and-bar plaques (2, 5, 18, 139, 59) on room texture pages, two of them placed in retail as 3D decor models (Dwarf Forest AREA01 s1/s3 = 2, Haunted Mansion AREA04 s0/s1 = 5). See "Graffiti rocks (らくがき岩): the plaques exist". |
 | Growing flower sprites, cursed and uncursed | **partly** | AREA02 SPR 0x3B frames 27-32 exist, but the VRAM they point at is empty on PAL (see Lost). |
 | Iron door in the Iron Castle | **partly** | Event 100 "Iron Keyhole" has an icon (frame 209), is not in the menu order, and nothing starts it. No door sprite checked. |
 | Weird plant in the Masakari Jungle VRAM | **not found** | AREA10 4 bpp pages of all 10 load lists rendered (tools/vram.py + find_unused_gfx.py): the unsampled regions are palms, reeds, flowers and wall textures used by backdrops/models, plus the known withdrawn B002 page. No isolated plant sprite. No palette, so a small plant could be missed. |
@@ -589,8 +589,11 @@ left, does the Japanese text mention them). Images are not committed (game pixel
   treasure... but it sounds hard... '·' is 1... '–' is 5... base twenty or something... I just don't get it..."
   (the "·" and "ー" are the same glyphs as the ellipsis dots and the long-vowel bar, so the line reads as a mumble).
   PAL kept the lines but lost the notation: "1 is...by 5...to the 20th power..." (all languages say "power"). Dot = 1,
-  bar = 5 and base 20 are the Maya numerals of the sheet. The rocks themselves are cut: event 67 解読？らくがき岩
-  "Decipher? The Graffiti Rock" has a JP title but no start, completion or flag read anywhere (notes/secrets.md).
+  bar = 5 and base 20 are the Maya numerals of the sheet. **Correction:** the rocks are not cut; their plaques are
+  on the room texture pages and two are placed in retail (see "Graffiti rocks (らくがき岩): the plaques exist" below).
+  What is cut is everything around them: event 67 解読？らくがき岩 "Decipher? The Graffiti Rock" has a JP title (and a
+  JP hint, DSPSUB#1 #67 らくがき岩の　もじを　かいどくする "decipher the writing of the graffiti rocks") but no start,
+  completion or flag read anywhere (notes/secrets.md).
 - **PrePre 8 names the floor.** The PrePre 8 event-title table (`tools/prepre8_text.py`, string at 0x800AB038,
   glyphs checked on `SYS008.000`) has らくがき床のナゾ "The Riddle of the Graffiti Floor", followed by かくされた入口
   "The Hidden Entrance"; it also has 解読?らくがき岩 and 森の地下には何がある? "What is under the forest?" (retail
@@ -604,5 +607,63 @@ left, does the Japanese text mention them). Images are not committed (game pixel
 
 **Reading:** the sheet is most likely the tile set of the cut "graffiti floor" contraption that guarded the
 Underground Maze treasure vault: a row of ten framed symbols and numeral plates in dot-and-bar, base-20 notation,
-whose code was to be found on six graffiti rocks on the surface. Neither the floor, nor the rocks, nor any code for
-them is left; the retail game kept the treasure (event 161, a time chest) and two hint lines, one of them unused.
+whose code was to be found on six graffiti rocks on the surface. The floor and any code for it are gone; the rocks
+partly survive (five plaque textures, two of them placed as plain decoration, below); the retail game kept the
+treasure (event 161, a time chest) and two hint lines, one of them unused.
+
+## Graffiti rocks (らくがき岩): the plaques exist, 2 November 2026
+
+Correction to the section above, which said the six rocks were never built. A community rip shows five stone
+plaques with dot-and-bar numerals; they are in the game data. Images are not committed (game pixels).
+
+### Where they are
+All five use one and the same 42 x 51 px plaque tile (frame, stone grain, 4 bpp indices identical outside the marks;
+only the marks differ), so the whole disc was searched for that index pattern (raw nibble scan of every file,
+GAM files unpacked, PAL, US and JP): five distinct plaques, every hit listed.
+
+| Number | File (PAL) | VRAM (4 bpp page, u, v) | Room | Drawn in retail |
+|---|---|---|---|---|
+| 2 | `AREA01/A003.GAM` (area page, at word (768,0)) x 102, y 64 | page 12 (768,0), u 102..143, v 64..114 | AREA01 (Forest of 100 Flowers / Dwarf Forest), every section | **yes**: object model #22 of the s0/s1 model table (#10 in s3), CLUT 0x7849 (144,481), placed by a layer-4 type 0x13 record (`updateStaticDecorModel`) at (4110, -399, z 48) in s1 and s3, just left of the exit at the right end of s1. Same in AREA07 (copy of AREA01's lists). |
+| 5 | `AREA04/A003.GAM` (area page, word (832,0)) x 654, y 192 | page 15 (960,0), u 142..183, v 192..242 | AREA04 (Haunted Mansion), every section | **yes**: model #22 of the s0..s3 tables, CLUT 0x7ACF (240,491), type 0x13 decor record at (1080, -675, z 940) in s0 and s1: a stone block with the plaque on the terrace right of the mansion's face door. Same in AREA12 (copy of AREA04). |
+| 18 | `AREA03/A002.GAM` (area page, word (0,256)) x 398, y 24 | page 17 (64,256), u 142..183, v 24..74 | AREA03 (Stormy Mountain / Lava Caves / Phoenix's Nest), every section | no |
+| 139 | `AREA10/B004, B104, B203, B302, B404, B504, B603, B702` x 266, y 176 | page 17 (64,256), u 10..51, v 176..226 | AREA10 (Jungle), sections 0..7 | no |
+| 59 | `AREA11/B100.GAM` (room page, word (512,0)) x 10, y 136 | page 8 (512,0), u 10..51, v 136..186 | AREA11 section 1 | no |
+| (2) | `AREA09/B002.GAM` x 870, y 64 | page 15 (960,0), u 102..143, v 64..114 | AREA09 (Mushroom Forest) section 0 | no; pixel-identical to the AREA01 "2" |
+
+- **US and JP** have the same plaques at the same offsets (US AREA04/A004, AREA09/B004; JP likewise). **JP only:** the
+  "59" plaque is also on six JP AREA10 room pages (B003, B102, B203, B403, B502, B603, at y 136), i.e. the Japanese
+  jungle carried the 59 rock's texture as well; PAL/US keep it only in AREA11.
+- **How "drawn" was decided:** every textured polygon of every room model (kind 0x50, also the WHM-first containers of
+  AREA01/09) and of every object-model table (kind 0x51..0x5F pieces) of AREA01/03/04/07/09/10/11/12 was tested against
+  the plaque UV boxes: only the two models above sample a plaque. For the other three, no room polygon, no object model
+  and no SPR part (only whole-page sub-screen maps) samples the plaque. The layer-4 spawner (`spawnObjectFromRecord`)
+  takes the model from record byte 14 (`be`) when byte 12 has bit 0x10: be = 22 (AREA04) and 22 / 10 (AREA01).
+- **Checked in the port:** with the fly mode of the port debug menu (`--debug-menu`, L1+R1+Select), AREA04 s0 at player (978, -716) shows the "5" rock right of
+  Tombi on the mansion terrace (`--dump-draws`: CLUT (240,491), page (960,0), uv 129..197 x 186..248, frames 1809+);
+  AREA01 s1 at (4252, -521) shows the small "2" plaque on the stone wall before the exit (CLUT (144,481), page (768,0)).
+- **No code uses them:** `updateStaticDecorModel` (X001 = X004, 0x800EE18C) only sets the draw flags and draws; no
+  talk, flag, event or check. Event 67 has no start/complete/read (above). The Stonetown villager says he saw one
+  "at the wood people's workshop" (木人の加工場, AREA16 #188): that fits the "59" texture on the AREA11 page. No other
+  JP line names a rock, a number, an order or a symbol.
+
+### Reading the numbers (Maya base 20)
+Dot = 1, bar = 5, levels read bottom (x1) to top (x20); within a level the dots sit above the bars.
+- AREA01: two dots, one level: **2**.
+- AREA04: one bar: **5**.
+- AREA03: three dots over three bars, evenly spaced, one level: 3 + 15 = **18**.
+- AREA10: upper level a dot over a bar (6), clear gap, lower level four dots over three bars (19): 6 x 20 + 19 = **139**.
+- AREA11: upper level two dots (2), gap, lower level 19: 2 x 20 + 19 = **59**.
+(Read naively as one level the last two would be 6+19 = 25 and 2+19 = 21; the gap and the villager's "base 20" make the
+two-level reading the intended one.) The sixth rock is not on any disc (PAL, US, JP); the AREA09 copy of "2" is the only
+extra plaque.
+
+**Against the B301 sheet:** the sheet has single numeral tiles 0 (shell), 1..9 and "=" (two bars, 10), 24 x 24 each,
+plus ten framed symbols. The rocks need digits up to 19 (18, and 19 in two of them), which the sheet does not have, and
+their marks are drawn larger and on a different, framed 42 x 51 stone plaque, so the rocks are not the floor tiles.
+
+**Possible puzzle (inference, nothing in code or text says it):** six rocks spread over the surface areas (forest,
+mountain, mansion, jungle, Civilization) each gave one number; the vault "contraption" was a floor of numeral and symbol
+tiles where the player had to step on or set the right ones. With digit tiles only up to 10 and an "=" tile, the most
+consistent design is an equation or a sequence: e.g. the six numbers in rock order (or summed/combined, the five
+known sum to 223) give the tiles to step on, or each rock's number picks one of the ten symbols. The known values 2, 5,
+18, 59, 139 do not form an obvious series, and with one rock missing the intended answer cannot be recovered.
