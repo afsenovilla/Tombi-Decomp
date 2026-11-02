@@ -80,7 +80,6 @@ jobs:
           echo "game=v1-${{ env.SDL2_VERSION }}-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/areas.py', 'tools/units.py', 'tools/requirements.txt', 'tools/setup_native.sh', 'port2/**', 'port/**', 'tools/extract_data.py', 'THIRD_PARTY_NOTICES.md') }}" >> "$GITHUB_OUTPUT"
 
   game-win:
-    if: false   # TEMP debug run (AREA06 2)
     needs: plan
     runs-on: ubuntu-24.04
     outputs:
@@ -291,7 +290,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: build/linux-bin
-          key: tombi-port-game-linux-dbg1-${{ needs.plan.outputs.game }}
+          key: tombi-port-game-linux-${{ needs.plan.outputs.game }}
 
       - uses: actions/setup-python@v5
         if: steps.bin.outputs.cache-hit != 'true'
@@ -447,20 +446,6 @@ jobs:
           cp THIRD_PARTY_NOTICES.md build/linux-bin/
           ls -l build/linux-bin
 
-      - name: TEMP debug AREA06 2
-        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
-        run: |
-          ARGS="--headless --skip-movies --data $RUNNER_TEMP/data --frames 3600 --poke 900:1F8001B4:1 --poke 1250:8009C960:6:2 --poke 1250:8009C962:2:2 --pad-script 1000:start,1300:circle:3,1500:right:300,1800:cross:3x8/40,2150:left:300,2450:square:3x8/40,2800:right+cross:3x30/60,3100:up:40,3160:down:40,3220:right:200,3450:cross:3x8/40"
-          for hz in 50 60; do
-            (build/port2/tombi2 --hz $hz $ARGS > "$RUNNER_TEMP/run$hz.log" 2>&1; echo "exit $?" >> "$RUNNER_TEMP/run$hz.log") || true
-            echo "== --hz $hz"; grep -v "kernel-area access" "$RUNNER_TEMP/run$hz.log" | grep -E "port2\]|exit|FATAL|glyph|frame 3[0-9]00" | tail -30
-          done
-          grep -n "gen2:\|data@fn\|thunk-data" build/port2/gen/report.txt 2>/dev/null | head -20 || true
-          python3 port2/tools/audit_pointers.py --out "$RUNNER_TEMP/audit.txt" > /dev/null 2>&1 || true
-          head -40 "$RUNNER_TEMP/audit.txt" || true
-          grep -n "8007DE38\|8007DE50" "$RUNNER_TEMP/audit.txt" | head || true
-          python3 port2/tools/sweep_areas.py --exe build/port2/tombi2 --data "$RUNNER_TEMP/data" --out "$RUNNER_TEMP/sweep" --jobs 4 2>&1 | tail -120 || true
-
       - name: Save ccache
         if: always() && steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
         uses: actions/cache/save@v4
@@ -473,7 +458,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: build/linux-bin
-          key: tombi-port-game-linux-dbg1-${{ needs.plan.outputs.game }}
+          key: tombi-port-game-linux-${{ needs.plan.outputs.game }}
 
       - name: Result
         id: ok

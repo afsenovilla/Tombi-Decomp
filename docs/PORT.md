@@ -2323,11 +2323,28 @@ table row per room; `--out DIR` keeps `sweep_AA_SS.log` (cut at 4 MB while the p
 killed: a fault report that re-entered the exit path wrote 1 GB and filled the disk). Paths must be absolute
 or relative to the repo (the rooms run with `cwd` = repo root).
 
-Sweep of the current build: **95 of 96 rooms clean, 96 rooms enter their area** (before the fixes below: 64 clean,
-87 entered; the build before that: "69 ok", not comparable, 52 of those rooms never left the title). The one
-finding, AREA01 section 1, is a watchdog line (`no game progress for 3 s` at frame 2462, every task yielding
-from the same place) that appears under four parallel jobs and not when the room runs alone: a wall-clock
-measure under load, listed here until the watchdog counts vblanks instead.
+Sweep of the current build (Linux i386, `--jobs 4`, after the AREA06 2 fix below): **93 of 96 rooms clean, 96 rooms
+enter their area**; AREA06 section 2 runs its 3600 frames clean at `--hz 50` and `--hz 60`. The three findings:
+AREA06 sections 0 and 1 call the stub `X006_area6ScriptOp` once (frame 1424: `src/x006/a06AddModelsBySection.c`
+defines `area6ScriptOp`, the csv names 0x801167A0 `a06AddModelsBySection`, so the generator finds no native code
+for it; not a fault, still open), and AREA10 section 3 has a watchdog line (`no game progress for 3 s` at frame
+2915) under four parallel jobs, the wall-clock measure under load that AREA01 section 1 showed in the sweep before
+(listed until the watchdog counts vblanks instead). An earlier sweep: 95 of 96 clean (before the fixes below: 64
+clean, 87 entered; the build before that: "69 ok", not comparable, 52 of those rooms never left the title).
+
+- **AREA06 2 (`processObjectCollisions+0x28` fault at 0x00061682 and `call to 801194ac: no native code in X006`,
+  frame 2804, both frame rates).** Neither is the cause. `emit_data` makes a run of MAIN0 region words that holds
+  a word at no overlay's function start into data, but only skipped the thunk: the next test still turned a word of
+  the run into a native function when one starts at that address. `D_8007DE38`, the per-area item -> message index
+  tables `printInfoMessage` reads, holds `0x801228BC` for AREA06 (X006 data; X000's `playerInitAreaHook` starts
+  there in every area), so the table became `&playerInitAreaHook`. When the scene sequence of section 2 gives Tombi
+  an item (`X006_updateSceneSequence -> addItemToInventory -> printInfoMessage`) the game read host code as the
+  message index, walked garbage text (`loadMessageGlyph: glyph 2311 of bank 0 out of range`) and `drawMessageGlyph`
+  ran its slot past the 128 entries of `MESSAGE_GLYPHS` into `PLAYER` (`PLAYER.anim` = 0x61680, the fault) and the
+  unlayered pool (an object's type byte became 6, whose MAIN0 handler `D_8007BF34[6]` = 0x801194AC is X002's
+  `updateLightsOutDarkness` and the middle of `motocrossBikeJumpStepB` in X006). Found with gdb watchpoints on
+  `PLAYER.anim` and the pool's type bytes. A word of a data run is now data, never a thunk or a native function
+  (`gen2.py` `emit_data`); `audit_pointers.py` `walk_main0` applies the same rule.
 
 What the 32 rooms with findings had, and the root cause of each (all fixed in the generator or the runtime,
 never in generated output):
