@@ -1,5 +1,112 @@
 // FUNC 80106b50 608 X000
 // MATCHING 80106b50 608
+// VERSION SLPS_01144 x00 80106844 680
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+#define B(o, n) (*((unsigned char *)(o) + (n)))
+extern unsigned char *PLAYER_EXT;
+extern unsigned char SLOPE_TILT_TABLE[];
+extern void FUN_800eeb5c(TObj *, int);
+extern void FUN_8001e4f0(int);
+extern void playerSetAngleFromSlope(TObj *);
+extern void playerSetFallLean(TObj *);
+extern void playerStickToGround(TObj *);
+extern void playerDecelerateSpeed(TObj *);
+extern void playerMoveByAngleSpeed(TObj *);
+extern void FUN_8001fec0(TObj *);
+
+void func_80106844(TObj *o)
+{
+    int t;
+    unsigned char u;
+    int v;
+    switch (o->state) {
+    case 0:
+        o->wb2 = 0;
+        FUN_800eeb5c(o, 0x28);
+        FUN_8001e4f0(0x20);
+        if (B(o, 0xab) & 0x80) {
+            o->active = 3;
+            o->timer = 0x3c;
+            o->state++;
+        } else {
+            o->timer = 0x28;
+            o->state = 2;
+        }
+        break;
+    case 1:
+        playerSetAngleFromSlope(o);
+        if (o->velY > 0x400) {
+            B(o, 0xac) = 1;
+            PLAYER_EXT[0x1e] = 0;
+            PLAYER_EXT[0x1f] = 0;
+            v = 0x10;
+            o->d84 = 0;
+            if (o->animFrame & 1) v = 0xf0;
+            o->timer = 10;
+            o->step = 2;
+            o->d88 = v;
+            o->d8c = 0;
+            o->state = 3;
+        }
+        playerStickToGround(o);
+        playerDecelerateSpeed(o);
+        playerMoveByAngleSpeed(o);
+        FUN_8001fec0(o);
+        if (--o->timer <= 0) {
+            o->active = 1;
+            o->wb2 = 0;
+            B(o, 0xac) = 0;
+            B(o, 0xab) = 0;
+            u = SLOPE_TILT_TABLE[o->wb0];
+            o->b04 = 1;
+            o->step = 0;
+            o->state = 0;
+            o->d8c = u;
+            break;
+        }
+        break;
+        {
+            o->step = 0;
+            o->state = 0;
+            o->d8c = t;
+        }
+        break;
+    case 2:
+        B(o, 0xab) = 1;
+        o->animFrame = (o->animFrame & 1) | 2;
+        o->state++;
+    case 3:
+        playerSetAngleFromSlope(o);
+        if (o->velY > 0x400) {
+            B(o, 0xac) = 1;
+            PLAYER_EXT[0x1e] = 0;
+            PLAYER_EXT[0x1f] = 0;
+            v = 0x10;
+            o->d84 = 0;
+            if (o->animFrame & 1) v = 0xf0;
+            o->timer = 10;
+            o->step = 2;
+            o->d88 = v;
+            o->d8c = 0;
+            o->state = 3;
+        }
+        playerStickToGround(o);
+        playerDecelerateSpeed(o);
+        playerMoveByAngleSpeed(o);
+        FUN_8001fec0(o);
+        if (--o->timer <= 0) {
+            t = SLOPE_TILT_TABLE[o->wb0];
+            B(o, 0xab) = 0;
+            o->b04 = 1;
+            o->step = 0;
+            o->state = 0;
+            o->d8c = t;
+        }
+        break;
+    }
+}
+#else
 #include "TOBJ.H"
 #define B(o, n) (*((unsigned char *)(o) + (n)))
 extern unsigned char *PLAYER_EXT;
@@ -93,3 +200,4 @@ void playerStepItemReactionA(TObj *o)
         break;
     }
 }
+#endif
