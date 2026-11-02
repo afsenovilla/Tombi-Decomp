@@ -3,8 +3,10 @@
 Compiles src/.../func_<addr>_slps01144.c (its `// VERSION SLPS_01144 <prog> <addr> <size>` line) with the VERSION_SLPS_01144
 define and the native gcc-2.7.2 + maspsx chain, then diffs the disassembly against the splat target object
 build/slps01144/target/<prog>/<func>.o (made by tools/build_report.py --version slps01144).
-Usage: tools/jpcheck.py [--norm] FILE.c [prog]     prints IDENTICAL or a unified diff (ours vs retail).
-  --norm  ignores HI/LO relocation lines and the scratchpad `(at)` offsets (for scratchpad/global accesses)."""
+Usage: tools/jpcheck.py [--norm] [--strict] FILE.c [prog] [target name]   prints IDENTICAL or a unified diff (ours vs retail).
+  --norm    ignores relocation addends and HI/LO/PC16 relocation lines, like objdiff.
+  --strict  keeps the branch targets (dropped by default): the check to run before committing a hand edit.
+  The target object is build/slps01144/target/<prog>/<name>.o, <name> = the file name or the JP symbol given as 3rd argument."""
 import difflib, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,6 +19,9 @@ def load_ncheck():
     return NC
 
 
+STRICT = False  # keep branch targets (a wrong branch destination otherwise passes as IDENTICAL)
+
+
 def dump(o, norm):
     out = subprocess.run(["mipsel-linux-gnu-objdump", "-dr", o], capture_output=True, text=True).stdout
     L = []
@@ -25,11 +30,16 @@ def dump(o, norm):
         l = re.sub(r"^\s*[0-9a-f]+: (R_MIPS_\w+)\t", r"   \1 ", l)
         if norm: l = re.sub(r"^(\s+R_MIPS_\w+) .*", r"\1", l)
         l = re.sub(r" <.*", "", l)
-        l = re.sub(r"^(j|b\w*)\t(.*?)\b[0-9a-f]+$", r"\1\t\2", l)
+        if not STRICT: l = re.sub(r"^(j|b\w*)\t(.*?)\b[0-9a-f]+$", r"\1\t\2", l)
         if norm:
-            if re.match(r"\s+R_MIPS_PC16", l): continue  # branch to a jump-table label of the target asm
+            if re.match(r"\s+R_MIPS_PC16", l):  # branch to a jump-table label of the target asm
+                if STRICT and L: L[-1] = re.sub(r"^(j|b\w*)\t(.*?)\b[0-9a-f]+$", r"\1\t\2RELOC", L[-1])
+                continue
             l = re.sub(r"^(s[bhw]\t\w+,)\d+\(at\)", r"\1X(at)", l)
         if l.strip() and not l.startswith("Disassembly") and not l.startswith("0000"): L.append(l)
+    if STRICT and not norm:  # a branch to a jump-table label of the target asm carries a PC16 reloc: its printed target means nothing
+        for i, l in enumerate(L):
+            if i + 1 < len(L) and L[i + 1].startswith("   R_MIPS_PC16"): L[i] = re.sub(r"^(j|b\w*)\t(.*?)\b[0-9a-f]+$", r"\1\t\2RELOC", l)
     if norm:
         # objdiff ignores relocation addends: an immediate carried by a HI16/LO16 reloc does not count
         out = []
@@ -42,7 +52,7 @@ def dump(o, norm):
     return L
 
 
-def check(src, prog=None, norm=False):
+def check(src, prog=None, norm=False, target=None):
     NC = load_ncheck()
     NC["EXTRA_CPP"] = ["-DVERSION_SLPS_01144", "-DSKIP_ASM"]
     t = open(src).read()
@@ -60,22 +70,29 @@ def check(src, prog=None, norm=False):
         NC["EXTRA_AS"] = BR._jpdemo_spad_set(t, "SLPS_01144")
         fm = re.search(r"//\s*FLAGS\s+(.*)", t)
         NC["build"](src, fm.group(1).strip() if fm else "-O2 -G0", d, inc)
-        name = os.path.basename(src)[:-2]
+        name = target or os.path.basename(src)[:-2]
         tdir = "%s/build/slps01144/target/%s" % (ROOT, prog)
         tn = name if os.path.exists("%s/%s.o" % (tdir, name)) else name.replace("_slps01144", "")
         if not os.path.exists("%s/%s.o" % (tdir, tn)):
             return "NO TARGET %s/%s.o (run build_report --version slps01144)" % (tdir, tn)
         a, b = dump(d + "/a.o", norm), dump("%s/%s.o" % (tdir, tn), norm)
+        if STRICT:  # the other side of a relocated branch keeps its printed target: drop it too
+            for i in range(min(len(a), len(b))):
+                if a[i].endswith("RELOC") or b[i].endswith("RELOC"):
+                    a[i] = re.sub(r"^(j|b\w*)\t(.*?)\b(?:[0-9a-f]+|RELOC)$", r"\1\t\2", a[i])
+                    b[i] = re.sub(r"^(j|b\w*)\t(.*?)\b(?:[0-9a-f]+|RELOC)$", r"\1\t\2", b[i])
         return "\n".join(difflib.unified_diff(a, b, "ours", "retail", lineterm="", n=2)) or "IDENTICAL"
     finally:
         shutil.rmtree(inc, ignore_errors=True); shutil.rmtree(d, ignore_errors=True)
 
 
 def main(argv):
+    global STRICT
     norm = "--norm" in argv
+    STRICT = "--strict" in argv
     args = [a for a in argv if not a.startswith("--")]
     if not args: sys.exit(__doc__)
-    r = check(args[0], args[1] if len(args) > 1 else None, norm)
+    r = check(args[0], args[1] if len(args) > 1 else None, norm, args[2] if len(args) > 2 else None)
     print(r)
     sys.exit(0 if r == "IDENTICAL" else 1)
 

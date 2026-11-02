@@ -1,6 +1,7 @@
 // FUNC 8005042c 280 MAIN0
 // MATCHING 8005042c 280
 // VERSION SLPM_80165 slpm80165 8003FAC4 264
+// VERSION SLPS_01144 slps01144 80043A90 324
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 8005042C (drawGameplayScene.c): extra D_8009B160 test, always the normal HUD.
 extern void FUN_80063e0c(void *);
@@ -48,6 +49,56 @@ void drawGameplayScene(void)
     FUN_80059d44(u);
 end:
     drawHudIfShown();
+}
+#elif defined(VERSION_SLPS_01144)
+extern void FUN_80063e0c(void *);
+extern void drawPlayer(void), drawCategory1Objects(void), drawCategory2Objects(void), drawCategory3Objects(void);
+extern void drawCategory4Objects(void), drawCategory5Objects(void), drawAreaModelList(void), drawCategory8Objects(void);
+extern void drawCategory7Objects(void), drawPauseMenu(void), FUN_8011bc34(void), drawHudIfShown(void);
+extern void drawScreenFade(int);
+extern char DAT_1f800118[];
+extern short DAT_1f8001c6;
+extern unsigned char GAME_FADE_SCREEN_CONTROL, GAME_FADE_SCREEN_AMOUNT;
+extern unsigned short GAME, GAME_SELECTED_SECTION;
+extern signed char D_8009EE58;
+
+void func_80043A90(void)
+{
+    int u;
+    FUN_80063e0c(DAT_1f800118);
+    drawPlayer();
+    drawCategory1Objects();
+    drawCategory2Objects();
+    drawCategory3Objects();
+    drawCategory4Objects();
+    drawCategory5Objects();
+    drawAreaModelList();
+    drawCategory8Objects();
+    drawCategory7Objects();
+    if (DAT_1f8001c6 == 1 && D_8009EE58 == 1)
+        drawPauseMenu();
+    switch (GAME_FADE_SCREEN_CONTROL) {
+    case 1:
+    case 4:
+        u = 0xff;
+        break;
+    case 2:
+        u = 0xff;
+        u -= GAME_FADE_SCREEN_AMOUNT;
+        break;
+    case 3:
+    case 0x10:
+        u = GAME_FADE_SCREEN_AMOUNT;
+        break;
+    default:
+        goto end;
+    }
+    drawScreenFade(u);
+end:
+    if (GAME == 6 && GAME_SELECTED_SECTION < 2)
+        FUN_8011bc34();
+    else
+        drawHudIfShown();
 }
 #else
 extern void FUN_80063e0c(void *);

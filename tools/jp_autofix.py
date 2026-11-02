@@ -150,9 +150,14 @@ def fmt_like(old_tok, new_val):
     return str(new_val)
 
 
-def check(path, prog):
-    try: return jpcheck.check(path, prog, norm=True)
+def check(path, prog, strict=False):
+    """jpcheck --norm; strict keeps the branch targets (the greedy edits count diff lines, so they use the loose form,
+    and a match is confirmed in strict form before it is installed)."""
+    try:
+        jpcheck.STRICT = strict
+        return jpcheck.check(path, prog, norm=True)
     except Exception as e: return "ERROR %s" % e
+    finally: jpcheck.STRICT = False
 
 
 def all_literals(text):
@@ -297,7 +302,7 @@ def install_files(files, sources, force=False):
         path = os.path.join(tempfile.mkdtemp(), jname + ".c")
         body = "\n".join(l for l in text.split("\n") if not l.startswith("// near-twin"))
         open(path, "w").write(body)
-        r = check(path, prog)
+        r = check(path, prog, strict=True)
         print("%s %s %08X %s" % ("MATCH" if r == "IDENTICAL" else "DIFF %d" % len(diff_lines(r)), prog, addr, jname))
         if r == "IDENTICAL" or force:
             print("   installed", install(prog, addr, size, jname, u.file, body, sources)); os.unlink(f); n += 1
@@ -344,7 +349,11 @@ def main():
         # the checker finds the target by the file name (JP symbol, with or without the version suffix)
         path = os.path.join(tmp, jname + ".c")
         text, r = try_fix(path, prog, text)
-        tag = "MATCH" if r == "IDENTICAL" else ("ERROR" if r.startswith("ERROR") else "DIFF %d" % len(diff_lines(r)))
+        if r == "IDENTICAL":
+            open(path, "w").write(text)
+            r = check(path, prog, strict=True)
+            if r != "IDENTICAL": r = "BRANCH " + r  # same instructions, a branch goes elsewhere
+        tag = "MATCH" if r == "IDENTICAL" else ("ERROR" if r.startswith("ERROR") else ("BRANCH %d" % len(diff_lines(r)) if r.startswith("BRANCH") else "DIFF %d" % len(diff_lines(r))))
         print("%s %.3f %s %08X %5d %-40s <- %s" % (tag, ratio, prog, addr, size, jname, os.path.relpath(u.file)))
         if r == "IDENTICAL":
             done.append((prog, addr, size, jname, u.file, text))

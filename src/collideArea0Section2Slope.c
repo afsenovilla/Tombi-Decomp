@@ -1,5 +1,60 @@
 // FUNC 80126770 464 X000
 // MATCHING 80126770 464
+// VERSION SLPS_01144 x00 801254A4 428
+#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+extern unsigned char DAT_1f8001a4;
+extern void decreaseObjectTimer(TObj *, int);
+
+void func_801254A4(TObj *o)
+{
+    short v;
+    short r;
+    short y;
+
+    if (o->d->p.whole > 0xb4) return;
+    if (o->d->p.whole == 0xb4) {
+        y = o->y.p.whole;
+        if (y >= -0x3a6) {
+            v = o->h->p.whole - 0xc36;
+            if (v >= 0) {
+                r = (v * -132) / 138;
+                if (r - 0x323 < y) {
+                    o->y.p.whole = r - 0x323;
+                    o->y.p.frac = 0;
+                    o->velY = 0;
+                    if (o->active & 2) {
+                        o->bbe = 9;
+                        o->wb0 = -2;
+                        o->b69 = 1;
+                    if (DAT_1f8001a4 != 0) return;
+                        return;
+                    }
+                    o->active = 2;
+                    o->animFrame = 1;
+                    o->b04 = 2;
+                    o->step = 0;
+                    o->state = 0;
+                    decreaseObjectTimer(o, 1);
+                }
+            }
+        }
+    }
+    if (o->d->p.whole < 0x5b && o->h->p.whole >= 0xc35 && (unsigned short)(-0x23f - o->y.p.whole) < 0xfb) {
+        o->h->p.whole = 0xc35;
+        if (!(o->active & 2)) {
+            o->active = 2;
+            o->animFrame = 1;
+            o->b04 = 2;
+            o->step = 0;
+            o->state = 0;
+            decreaseObjectTimer(o, 1);
+        }
+    }
+}
+#endif
+#else
 #include "TOBJ.H"
 extern unsigned char DAT_1f8001a4;
 extern void decreaseObjectTimer(TObj *, int);
@@ -50,3 +105,4 @@ void collideArea0Section2Slope(TObj *o)
         }
     }
 }
+#endif

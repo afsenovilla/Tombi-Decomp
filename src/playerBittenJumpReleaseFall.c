@@ -28,10 +28,8 @@ void func_801057BC(TObj *o)
         *((unsigned char *)o + 0xa7) = 1;
     v = 0x10;
     o->d84 = 0;
-    if (o->animFrame & 1) {
-        v = 0xf0;
-        o->timer = 10;
-    }
+    if (o->animFrame & 1) v = 0xf0;
+    o->timer = 10;
     o->step = 2;
     o->d88 = v;
     o->d8c = 0;
