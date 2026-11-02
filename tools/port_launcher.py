@@ -1146,14 +1146,8 @@ class App:
         o.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(12, 0))
         self.ires_btns = self._radios(c, "internal_res", tk.IntVar, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
         self.ires_note = ttk.Label(c, text=tr("l.iresoff"), style="Muted.TLabel", wraplength=300, justify="left")
-        o, c = self.card(grid, tr("c.fps"))      # --fps: presents per second, interpolated (both renderers)
-        o.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=(12, 0))
-        seg = ttk.Frame(c)
-        seg.pack(anchor="w")
-        fv = self.var("fps", tk.StringVar, "auto" if self.s.get("fps60") and self.experimental else "off")
-        for text, val in ((tr("fps.off"), "off"), ("Auto", "auto"), ("60", "60"), ("90", "90"), ("120", "120"), ("144", "144"), (tr("fps.unl").split(" (")[0], "unlimited")):
-            ttk.Radiobutton(seg, text=text, variable=fv, value=val, style="Seg.Toolbutton").pack(side="left")
-        ttk.Label(c, text=tr("fps.auto") + " · " + tr("fps.unl") + ". " + tr("l.fpshint"), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", pady=(8, 0))
+        # --fps (interpolated high frame rates, shims/hfr.inc) is not offered here: it waits for a correct 60 Hz mode
+        # (docs/TODO.md "High frame rates"); the port keeps it behind the command-line flag only
 
     def _build_controls(self, f):
         """Three cards: the button icons of the texts (--prompts, a combobox), the keyboard bindings (--keys, a table:
@@ -2100,9 +2094,7 @@ class App:
                "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9", "auto") else "4:3"]
         if s.get("renderer") != "soft" and s.get("internal_res", 1) in (2, 3, 4):
             cmd += ["--internal-res", str(s["internal_res"])]
-        fps = s.get("fps") or ("auto" if s.get("fps60") and s.get("experimental") else "off")
-        if fps != "off":                       # --fps: interpolated presents (both renderers; the old OpenGL-only 60 fps switch = auto)
-            cmd += ["--fps", str(fps)]
+        # --fps is never passed: interpolated high frame rates are hidden until the 60 Hz mode is right (docs/TODO.md)
         if s.get("lang"):
             cmd += ["--lang", str(s["lang"])]
         if s.get("cut_content"):

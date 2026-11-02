@@ -25,15 +25,17 @@
   overlay duplicates) and port the C; expect most game code to transfer, with differences in the text/font system
   (kana/kanji), the single-language file layout (no MAIN0-8) and older library revisions. Needs the user's disc image
   (kept out of the repo like the PAL one). Adapting the text editor to Japanese is a separate, larger task.
-- **[All platforms] High frame rates (90 / 120 / 144 FPS) at the original speed (port).** Done: `--fps
-  N|auto|unlimited` (docs/PORT.md "High frame rates"): the logic stays at 50 Hz, the presents run at the display's
-  refresh (auto), a cap or unlimited, the in-between ones re-drawn from the recorded draw list of the displayed frame
-  with every primitive blended towards where it was in the frame before (static / moved / animated sprites / streamed
-  backgrounds following the camera; new objects, scene changes, camera cuts, movies and the debug overlay not
-  blended), on the software and OpenGL renderers, PC and Android, with a *Frame rate* option in both launchers (default
-  50). Still open: the software renderer manages about one in-between frame per vblank on a slow CPU (a faster
-  rasteriser would lift that); a pre-projection variant (blending GTE inputs per object instead of screen positions)
-  would bend fast close-up rotations less but needs per-object tags through the game's draw code.
+- **[All platforms] High frame rates (90 / 120 / 144 FPS) at the original speed (port).** On hold until a correct
+  60 Hz mode exists (user decision). The code is done (`--fps N|auto|unlimited`, docs/PORT.md "High frame rates": the
+  logic stays at 50 Hz, the presents run at the display's refresh, a cap or unlimited, the in-between ones re-drawn
+  from the recorded draw list with every primitive blended towards where it was in the frame before, on the software
+  and OpenGL renderers) but it is experimental and hidden: the *Frame rate* options were removed from both launchers,
+  which no longer pass `--fps`; only the command-line flag remains. Offer it again once the 60 Hz mode (PAL game with
+  NTSC timing, see "60 Hz mode" below) plays like the US/JP versions. Still open then: the software renderer manages
+  about one in-between frame per vblank on a slow CPU; a pre-projection variant would bend fast close-up rotations less.
+- **[All platforms] 60 Hz mode with NTSC timing (port).** `--hz 60` alone runs the PAL logic 20 % faster, which is
+  wrong wherever the PAL build compensated speeds, timers, animation durations or music tempo for 50 Hz. Needed: find
+  every PAL-vs-NTSC (US/JP) timing difference and swap the NTSC values in at run time at 60 Hz (docs/PORT.md "60 Hz").
 - **[All platforms] Launcher language.** Done: Android *Options > Game > Launcher language* (Auto / nine languages,
   independent of the game language, applied without a restart; docs/PORT.md "Launcher language"), and both launchers
   translated into French, German, Italian, Dutch, Portuguese, Swedish and Danish (res/values-xx,
