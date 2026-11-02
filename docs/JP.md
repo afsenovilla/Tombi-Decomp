@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 61.87 % of code (894316 of 1445372 bytes, 2392 of 3101 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 66.96 % of code (967824 of 1445372 bytes, 2486 of 3101 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -99,6 +99,19 @@ player ext bytes 0xa0.., load lists: things the JP build lacks), in both orders.
 (+14, +50), `o->step = n` per branch, a `(x & 0x40)` test instead of `== 0xff`, calls merged (`loadSoundSet(5)` for
 `loadSoundSet(3); queueSystemLoadList(5, 1)`), statement order (gcc 2.7 reorders scalar globals around struct members,
 so a scratchpad short spelled `((short*)&SPAD.iec + 1)[0]` or `D_xxxA[0]` stays in place while `D_1F8000EE` moves).
+
+Result of the autofix pass plus hand edits (2026-11): 2392 -> 2486 functions, 61.87 % -> 66.96 %. The full
+`--install` run over the candidates at 0.8 or more takes hours (the generic edits compile up to 200 variants per
+function, in both orders) and matched 6 of 131 by itself; the hand edits from its `--emit` diffs did the rest, about
+one to five minutes each. `tools/jpcheck.py --strict` keeps the branch targets (a wrong branch destination otherwise
+passes as IDENTICAL, as happened twice) and is what `--install`/`--install-file` verify with; relocated branch and
+jump targets (labels of the target asm) are ignored on both sides.
+
+Left over with a known diff (`tools/jp_autofix.py --pair ... --show`): `func_8010D854` (swim spin: `li v0,62` scheduled
+before `sb zero,b69`), `func_80027D58` (increaseMaxHealth: the byte copies after the `sb`), `func_80115F54` (scroll
+controller: an `if` whose body compiles to nothing but keeps its branch), `func_8003F598`, `func_8001A108`,
+`func_8001A730`, `func_80106754`, `func_801043E0`, `func_8004BA68`, `func_80015FA8`, `func_80019A8C`, `func_8001A8CC`,
+`func_8003B688`, `func_800FEB14` and the nine `drawArea9Model*` JP engine variants (sizes differ from the four PAL ones).
 
 What remains, by kind (for the paired functions with PAL C):
 - about 40 that differ in size from their PAL pair (edited code, not just offsets);

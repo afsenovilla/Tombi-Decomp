@@ -32,9 +32,10 @@ def dump(o, norm):
         l = re.sub(r" <.*", "", l)
         if not STRICT: l = re.sub(r"^(j|b\w*)\t(.*?)\b[0-9a-f]+$", r"\1\t\2", l)
         if norm:
-            if re.match(r"\s+R_MIPS_PC16", l):  # branch to a jump-table label of the target asm
+            if re.match(r"\s+R_MIPS_PC16", l) or (re.match(r"\s+R_MIPS_26", l) and L and L[-1].startswith("j\t")):
+                # branch/jump to a label of the target asm (relocated): its printed target means nothing
                 if STRICT and L: L[-1] = re.sub(r"^(j|b\w*)\t(.*?)\b[0-9a-f]+$", r"\1\t\2RELOC", L[-1])
-                continue
+                if re.match(r"\s+R_MIPS_PC16", l): continue
             l = re.sub(r"^(s[bhw]\t\w+,)\d+\(at\)", r"\1X(at)", l)
         if l.strip() and not l.startswith("Disassembly") and not l.startswith("0000"): L.append(l)
     if STRICT and not norm:  # a branch to a jump-table label of the target asm carries a PC16 reloc: its printed target means nothing

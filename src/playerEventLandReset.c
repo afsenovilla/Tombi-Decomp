@@ -1,6 +1,7 @@
 // FUNC 8010186c 204 X000
 // MATCHING 8010186c 204
 // VERSION SLPM_80165 x00 80108E98 188
+// VERSION SLPS_01144 x00 80100D88 260
 // FLAGS -O2 -G0 -fno-schedule-insns
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 8010186C (FUN_8010186c.c): does not reset +0x8c from the per-object table. also clears +0x8c.
@@ -44,6 +45,58 @@ void FUN_8010186c(O *o)
     }
     o->state++;
 }
+#elif defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144)
+extern int GAME_WORD asm("GAME");
+typedef struct P { char p0[8]; unsigned char b8; char p1[0x20-9]; short h20; char p2[0x28-0x22]; unsigned short h28; unsigned short h2a; char p3[2]; unsigned short h2e; } P;
+typedef struct O { unsigned char active, visible, type, subtype, b04, step, state; char p1[0x24-7]; void *anim; char p2[0x7c-0x28]; short vx; short vy;
+  char p3[0x8c-0x80]; int d8c; char p4[0x9c-0x90]; unsigned char b9c; char p5[0xa4-0x9d]; unsigned char ba4; unsigned char ba5;
+  char p6[0xac-0xa6]; unsigned char bac; char p7[0xb0-0xad]; short hb0; short hb2; } O;
+extern P *PLAYER_EXT;
+extern unsigned char SLOPE_TILT_TABLE[];
+extern unsigned char DAT_8009d2af;
+extern unsigned char GVARS_PLAYER_LANDED;
+extern char LAB_80010748[];
+extern void FUN_8001fe94(O *, int);
+
+void func_80100D88(O *o)
+{
+    P *p;
+    unsigned char *q;
+    int i;
+    PLAYER_EXT->b8 = 0;
+    i = o->hb0;
+    o->ba4 = 0;
+    o->ba5 = 0;
+    o->b9c = 0;
+    o->bac = 0;
+    p = PLAYER_EXT;
+    o->hb2 = 0;
+    o->vx = 0;
+    o->vy = 0;
+    o->d8c = SLOPE_TILT_TABLE[i];
+    p->h20 = 0;
+    o->anim = LAB_80010748;
+    FUN_8001fe94(o, 0);
+    p = PLAYER_EXT;
+    p->h2e = 0xffff;
+    p->h28 = 0xffff;
+    p->h2a = 0xffff;
+    q = &DAT_8009d2af;
+    if (*q == 0) {
+        *q = 1;
+        GVARS_PLAYER_LANDED = 1;
+    }
+    o->state++;
+    if (GAME_WORD == 3 && *(int *)((char *)o + 0x60) == 1) {
+        *(int *)((char *)o + 0x60) = 0;
+        o->active = 1;
+        o->b04 = 1;
+        o->step = 0;
+        o->state = 0;
+    }
+}
+#endif
 #else
 typedef struct P { char p0[8]; unsigned char b8; char p1[0x20-9]; short h20; char p2[0x28-0x22]; unsigned short h28; unsigned short h2a; char p3[2]; unsigned short h2e; } P;
 typedef struct O { char p0[6]; unsigned char state; char p1[0x24-7]; void *anim; char p2[0x7c-0x28]; short vx; short vy;
