@@ -211,8 +211,9 @@ def args_keys(s):
     if not s.get("keys_on"):
         return []
     keys = s.get("keys") or {}
-    spec = ",".join("%s=%s" % (b, keys.get(b, DEFAULT_KEYS[b])) for b in BUTTONS if keys.get(b, DEFAULT_KEYS[b]))
-    return ["--keys", spec]
+    # only the keys that differ from runtime/sdl.c's defaults (a default kept keeps its second key, e.g. select's Right Shift)
+    spec = ",".join("%s=%s" % (b, keys[b]) for b in BUTTONS if keys.get(b) and keys[b] != DEFAULT_KEYS[b])
+    return ["--keys", spec] if spec else []
 
 
 # id, label key, description key, kind ("check" | "check+area" | "check+int" | "check+keys"), settings -> args

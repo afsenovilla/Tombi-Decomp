@@ -1006,9 +1006,33 @@ automatically", a *Text patch* (see "Text patches in `data/`"), a Play button (r
 game's stderr in `tombi-port.log` next to the exe, shown in the window: the last 8 lines, with any earlier `[port]
 warning` / `FATAL` lines kept above them), a *Copy log* button (the whole log file to the clipboard, for a bug
 report) and the exact command line. *Mods* and
-*Controls* tabs: see "Mods". Settings are saved in `tombi-port.json` next to the exe. From a checkout it runs
+*Controls* tabs: see "Mods" and below. Settings are saved in `tombi-port.json` next to the exe. From a checkout it runs
 `build/port-win/tombi.exe` (Windows) or `build/port/tombi` (Linux); the PyInstaller exe carries `tombi.exe`,
 `tombi-view.exe` and `SDL2.dll` and unpacks them to its temporary folder on each run (PyInstaller onefile).
+
+*Graphics* tab: renderer, window scale, fullscreen, aspect, internal resolution, and *Mostrar FPS / Show FPS*
+(default off: `--show-fps`, the on-screen counter; `--log-fps 2` is always passed so the rate goes to the log).
+
+*Controls* tab (scrolled page, three cards, sized by the DPI scale so nothing is clipped at 100/125/150 %):
+- *Button icons*: a combobox "Iconos de botones en los textos" — Auto (from the controller, no flag) / PlayStation /
+  Xbox / Nintendo / Generic / Custom (`--prompts STYLE`; Custom also `--prompt-colors`, edited with *Personalizar
+  botones…*, enabled only for Custom). The AYN Thor styles (`thor`, `thor-black`, `thor-white`) are Android only and
+  not offered on PC; a saved PC setting holding one reads as Auto. The custom editor's presets still include the Thor
+  palettes (just colours).
+- *Keyboard*: a table of the 14 PS1 buttons with their keys (defaults = `runtime/sdl.c` `keymap`: arrows, X ✕, D ○,
+  Z □, S △, Q L1, W R1, A L2, E R2, Return Start, Backspace / Right Shift Select). Click a key, press the new one
+  (Esc cancels); a key bound to two buttons is flagged in red; *Restore defaults*. Only the keys that differ from the
+  defaults are passed, as `--keys btn=Key,...` (so an untouched Select keeps Right Shift too).
+- *Controller*: the PS1 pad photo with a leader line from each button to the controller button that drives it
+  (clicking a button on the photo selects its row), a table of comboboxes (SDL GameController names: `a b x y`,
+  `leftshoulder rightshoulder lefttrigger righttrigger`, `start back guide`, `dpup...`, `leftstick`, stick
+  directions `leftx-`..., or none), a clash warning and *Restore defaults* (= `cbind_defaults()`). Only the
+  differences are passed, as `--pad-map btn=src,...` (`btn=` unbinds). Below: the DualShock switch and the vibration
+  intensity combobox (`--dualshock`, `--rumble N`).
+
+The PC launcher does not pass `--launcher-exit` (see below): the Quit Game / back-to-launcher entries are for
+handhelds; on PC the original pause menu is shown and the player just closes the game window (the launcher still
+re-enables Play and raises its window when the game exits).
 
 **Save import / export ("cross save").** *Importar partida… / Exportar partida…* in both launchers (PC: buttons under
 the save folder; Android: right column of *Opciones*). They work on the card the game uses, `tombi_mc0.mcd` (PC: the
@@ -1037,7 +1061,7 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 | Infinite lives | `--poke-every 50:8009C980:63:1` | new option: `--poke-every INTERVAL:ADDR:VALUE[:SIZE]` writes every INTERVAL vblanks |
 | Infinite vitality | `--poke-every 1:8009C970:4:1` | `GAME.playerHealth`, 4 = full (initGameConfig) |
 | Unlock all events | `--poke 1100:8009CDA4:FF:1x130` | new `SIZExCOUNT` suffix of `--poke`: COUNT consecutive values; event flag bytes 0x8009CDA4 + id (notes/names.md "Event links"), 0xFF = completed |
-| Custom keys | `--viewer-arg --keys --viewer-arg up=Up,cross=X,...` | *Controls* tab: one SDL key name per PS1 button |
+| Custom keys | `--keys up=Up,cross=X,...` | *Controls* tab, Keyboard card: only the keys changed from the defaults |
 | Button prompts (PlayStation / Xbox / Keyboard) | `--patch-tex prompts-SET.tbtx` | see below |
 
 **Button prompts.** `tools/prompt_glyphs.py` draws our own glyph sets with Pillow (no third-party icon pack):
@@ -1170,7 +1194,7 @@ motor = 160 at 100 %), whose device vibrator uses `VibrationEffect.createOneShot
 before). The Android launcher steps 0/25/50/75/100/125/150/200 % ("Apagada"/"N %") and buzzes once at the new strength;
 the PC launcher has the same choices in a combobox.
 
-**Back to the launcher (`--launcher-exit`, passed by both launchers; `runtime/launcher_exit.c`).** The retail
+**Back to the launcher (`--launcher-exit`, passed by the Android launcher only; `runtime/launcher_exit.c`).** The retail
 "EXIT GAME" / "SALIR" only goes back to the title. With the flag the Start pause menu gets a 4th entry under LOAD in
 every language: "Back to Launcher", "RETOUR AU LAUNCHER", "ZUM LAUNCHER", "TORNA AL LAUNCHER", "NAAR LAUNCHER",
 "VOLVER AL LAUNCHER", "VOLTAR AO LAUNCHER", "TILL LAUNCHERN", "TIL LAUNCHEREN", with the game's own Yes / No box and

@@ -520,27 +520,27 @@ i18n.add({
     "es": {"l.rumble": "Intensidad de vibración:", "rumble.off": "Apagada",
            "c.pad": "Mando", "l.dualshock": "Mando DualShock (analógico): stick izquierdo con velocidad y vibración",
            "l.prompts": "Iconos de botones en los textos:", "p.auto": "Auto (según el mando)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor (arcoíris)", "p.thorb": "AYN Thor (negro)", "p.thorw": "AYN Thor (blanco)", "p.custom": "Personalizado", "b.custom": "Personalizar botones…",
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Personalizado", "b.custom": "Personalizar botones…",
            "pc.title": "Personalizar botones", "pc.preset": "Partir de:", "pc.sym": "Símbolos:", "pc.disc": "Disco", "pc.letter": "Letra",
-           "pc.sym.xbox": "Letras Xbox", "pc.sym.nintendo": "Letras Nintendo / Thor", "pc.sym.ps": "Formas PlayStation",
+           "pc.sym.xbox": "Letras Xbox", "pc.sym.nintendo": "Letras Nintendo", "pc.sym.ps": "Formas PlayStation",
            "pc.pos": "Abajo (A Xbox)|Derecha (B Xbox)|Izquierda (X Xbox)|Arriba (Y Xbox)", "pc.ok": "Usar", "pc.cancel": "Cancelar", "p.gen": "Genérico"},
     "en": {"l.rumble": "Vibration intensity:", "rumble.off": "Off",
            "c.pad": "Controller", "l.dualshock": "DualShock controller (analog): left stick with speed, and rumble",
            "l.prompts": "Button icons in the texts:", "p.auto": "Auto (from the controller)", "p.ps": "PlayStation",
-           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.thor": "AYN Thor (rainbow)", "p.thorb": "AYN Thor (black)", "p.thorw": "AYN Thor (white)", "p.custom": "Custom", "b.custom": "Customise buttons…",
+           "p.xbox": "Xbox", "p.nin": "Nintendo", "p.custom": "Custom", "b.custom": "Customise buttons…",
            "pc.title": "Customise buttons", "pc.preset": "Start from:", "pc.sym": "Symbols:", "pc.disc": "Disc", "pc.letter": "Letter",
-           "pc.sym.xbox": "Xbox letters", "pc.sym.nintendo": "Nintendo / Thor letters", "pc.sym.ps": "PlayStation shapes",
+           "pc.sym.xbox": "Xbox letters", "pc.sym.nintendo": "Nintendo letters", "pc.sym.ps": "PlayStation shapes",
            "pc.pos": "Bottom (Xbox A)|Right (Xbox B)|Left (Xbox X)|Top (Xbox Y)", "pc.ok": "Use", "pc.cancel": "Cancel", "p.gen": "Generic"},
 })
 
 # the Controls page redesign: icons combobox, keyboard table, controller table (docs/PORT.md "Launcher")
 i18n.add({
-    "es": {"c.icons": "Iconos de botones", "c.keyboard": "Teclado", "b.restore": "Restaurar predeterminados",
+    "es": {"l.showfps": "Mostrar FPS", "c.icons": "Iconos de botones", "c.keyboard": "Teclado", "b.restore": "Restaurar predeterminados",
            "kb.hint": "Haz clic en la tecla de un botón y pulsa la tecla nueva (Esc cancela).",
            "kb.clash": "Aviso: la tecla {0} está asignada a varios botones ({1}).",
            "gp.hint": "Cualquier mando compatible con SDL2 (Xbox, PS4/PS5, Switch Pro). Haz clic en un botón de la foto o elige en la lista qué botón del mando hace de cada botón de PS1.",
            "gp.clash": "Aviso: {0} está asignado a varios botones ({1}).", "p.gen": "Genérico"},
-    "en": {"c.icons": "Button icons", "c.keyboard": "Keyboard", "b.restore": "Restore defaults",
+    "en": {"l.showfps": "Show FPS", "c.icons": "Button icons", "c.keyboard": "Keyboard", "b.restore": "Restore defaults",
            "kb.hint": "Click a button's key, then press the new key (Esc cancels).",
            "kb.clash": "Warning: the key {0} is bound to several buttons ({1}).",
            "gp.hint": "Any SDL2-compatible controller (Xbox, PS4/PS5, Switch Pro). Click a button on the photo or pick in the list which controller button acts as each PS1 button.",
@@ -688,7 +688,8 @@ def setup_style(root):
     st.configure("TEntry", padding=(6, 4), insertcolor=C_TEXT)
     st.configure("TCombobox", padding=(6, 3), arrowsize=13, background="#fbfbfc")
     st.map("TCombobox", fieldbackground=[("readonly", C_CARD)], selectbackground=[("readonly", C_CARD)],
-           selectforeground=[("readonly", C_TEXT)])
+           selectforeground=[("readonly", C_TEXT)],
+           foreground=[("disabled", "#999999"), ("readonly", "focus", C_TEXT)])   # clam: white text on the (now white) focused field
     st.configure("TSpinbox", padding=(6, 3), arrowsize=12)
     st.configure("Horizontal.TProgressbar", background=C_ACCENT, troughcolor="#e8e9ec", bordercolor=C_LINE, lightcolor=C_ACCENT,
                  darkcolor=C_ACCENT, thickness=6)
@@ -793,7 +794,8 @@ class App:
         self.status = tk.StringVar(value=tr("s.nodata"))
         r.columnconfigure(1, weight=1)
         r.rowconfigure(0, weight=1)
-        side = ttk.Frame(r, style="Side.TFrame", padding=(10, 14, 10, 14), width=228)
+        side = ttk.Frame(r, style="Side.TFrame", padding=(10, 14, 10, 14),
+                         width=int(228 * max(1.0, float(r.tk.call("tk", "scaling")) / (96 / 72.0))))
         side.grid(row=0, column=0, rowspan=2, sticky="ns")
         side.grid_propagate(False)
         side.pack_propagate(False)
@@ -1143,6 +1145,8 @@ class App:
         # --fps60: frames interpolated between the 50 Hz logic steps (OpenGL only)
         if self.experimental:
             ttk.Checkbutton(c, text=tr("l.fps60"), variable=self.var("fps60", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
+        # --show-fps: the on-screen counter (--log-fps 2 always logs the rate)
+        ttk.Checkbutton(c, text=tr("l.showfps"), variable=self.var("show_fps", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
         o, c = self.card(grid, tr("c.aspect"))
         o.grid(row=1, column=0, sticky="nsew", padx=(0, 6), pady=(12, 0))
         self._radios(c, "aspect", tk.StringVar, "tv", [(tr("a.tv"), "tv"), (tr("a.sq"), "square"), (tr("a.w16"), "16:9"), (tr("a.w21"), "21:9"), (tr("a.w32"), "32:9"), (tr("a.auto"), "auto")])
@@ -1186,8 +1190,7 @@ class App:
         top = ttk.Frame(c)
         top.pack(fill="x")
         hint = ttk.Label(top, text=tr("kb.hint"), style="Muted.TLabel", wraplength=420, justify="left")
-        hint.pack(side="left", fill="x", expand=True, anchor="w")
-        ttk.Button(top, text=tr("b.restore"), command=self._keys_restore).pack(side="right", padx=(8, 0))
+        hint.pack(fill="x", anchor="w")
         keys = self.s.get("keys") if self.s.get("keys_on") else None
         keys = dict(M.DEFAULT_KEYS, **(keys or {}))
         self.key_vars, self.key_btns, self.key_names = {}, {}, {}
@@ -1210,6 +1213,7 @@ class App:
             self.key_vars[b].trace_add("write", lambda *_: self._keys_sync())
         self.key_warn = ttk.Label(c, text="", style="Warn.TLabel", wraplength=600, justify="left")
         self.key_warn.pack(anchor="w", fill="x", pady=(6, 0))
+        ttk.Button(c, text=tr("b.restore"), command=self._keys_restore).pack(anchor="e", pady=(4, 0))
         self._keys_sync()
 
         # ---- controller
@@ -1218,8 +1222,7 @@ class App:
         top = ttk.Frame(c)
         top.pack(fill="x")
         phint = ttk.Label(top, text=tr("gp.hint"), style="Muted.TLabel", wraplength=420, justify="left")
-        phint.pack(side="left", fill="x", expand=True, anchor="w")
-        ttk.Button(top, text=tr("b.restore"), command=self._padmap_restore).pack(side="right", padx=(8, 0))
+        phint.pack(fill="x", anchor="w")
         from tkinter import font
         self.pad_fonts = {k: font.Font(family=self.fam, weight=w) for k, w in (("name", "normal"), ("key", "bold"), ("tiny", "bold"))}
         dpi = float(self.root.tk.call("tk", "scaling")) / (96 / 72.0)
@@ -1259,6 +1262,7 @@ class App:
             v.trace_add("write", lambda *_: self._padmap_sync())
         self.pad_warn = ttk.Label(c, text="", style="Warn.TLabel", wraplength=600, justify="left")
         self.pad_warn.pack(anchor="w", fill="x", pady=(4, 0))
+        ttk.Button(c, text=tr("b.restore"), command=self._padmap_restore).pack(anchor="e", pady=(4, 0))
         ttk.Separator(c).pack(fill="x", pady=(6, 8))
         ttk.Checkbutton(c, text=tr("l.dualshock"), variable=self.var("dualshock", tk.BooleanVar, False)).pack(anchor="w")
         # --rumble: vibration intensity (runtime/sdl.c), stored as the percent; shown as "Off" / "N %"
@@ -1276,7 +1280,7 @@ class App:
         rcb.pack(side="left", padx=(8, 0))
         warns = (self.key_warn, self.pad_warn)
         f.bind("<Configure>", lambda e: [w.configure(wraplength=max(200, e.width - 60)) for w in warns]
-               + [w.configure(wraplength=max(160, e.width - 260)) for w in (hint, phint)], add="+")
+               + [w.configure(wraplength=max(160, e.width - 60)) for w in (hint, phint)], add="+")
         self._padmap_sync()
 
     # ---- keyboard table
@@ -2121,6 +2125,8 @@ class App:
             cmd += ["--texture-pack", s["texpack"]]
         if s.get("fullscreen"):
             cmd += ["--fullscreen"]
+        if s.get("show_fps"):
+            cmd += ["--show-fps"]
         if s.get("dualshock"):
             cmd += ["--dualshock"]
         try:
@@ -2136,7 +2142,7 @@ class App:
             cmd += ["--prompts", s["prompts_style"]]
         if s.get("prompts_style") == "custom":
             cmd += ["--prompt-colors", s.get("prompt_colors") or PC.DEFAULT]
-        cmd += ["--launcher-exit"]     # QUIT entries in the title and pause menus end the game back to this window
+        # no --launcher-exit on PC: the Quit Game entries are for handhelds; here the window is simply closed
         cmd += M.mod_args(s, app_dir())
         cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))
         return cmd
