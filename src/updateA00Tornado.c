@@ -1,7 +1,8 @@
 // FUNC 801195f4 624 X000
 // MATCHING 801195f4 624
 // VERSION SLPM_80165 x00 80112124 692
-#if defined(VERSION_SLPM_80165)
+// VERSION SLPS_01144 x00 80118794 692
+#if defined(VERSION_SLPM_80165) || defined(VERSION_SLPS_01144)
 // Demo version of PAL x000 801195F4 (FUN_801195f4.c): subtype 0 also takes over the player (active 4, mode 5, GVARS
 // flags) and starts sound 0x36; subtypes 0/1 start at step 0 (PAL 10).
 #include "TOBJ.H"
