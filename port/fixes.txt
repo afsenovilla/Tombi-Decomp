@@ -632,3 +632,22 @@ src/d0spsub/subScreenInitMenu.c | D_1F8003A0 = D_800F24E0; | { extern void *port
 src/d0spsub/subScreenInitMenu.c | D_1F8003A4 = D_800F7B78; | { extern void *port_lang_item(void *); D_1F8003A4 = port_lang_item(D_800F7B78); }
 src/d0spsub/subScreenUpdate.c | D_1F8003A0 = D_800F24E0; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800F24E0); }
 src/d0spsub/subScreenUpdate.c | D_1F8003A4 = D_800F7B78; | { extern void *port_lang_item(void *); D_1F8003A4 = port_lang_item(D_800F7B78); }
+#
+# --widescreen sub-screens (shims/gpu.c port_ws_mark): the popup menus stay whole where the game put them (their text shares
+# CLUT 0x7C15 and their balloon frame the quads of the wooden bars), and the event list's counters move with the left column
+# whose foot they sit on (they used to stay behind in the pink area).
+src/d0spsub/subScreenDrawPopupMenu.c | TILE *T = (TILE *)0x1F800014; | TILE *T = (TILE *)0x1F800014; char *port_p0 = (char *)NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int);
+src/d0spsub/subScreenDrawPopupMenu.c | drawBalloonFrame(lp, 0, 0x14); | drawBalloonFrame(lp, 0, 0x14); port_ws_mark(port_p0, NEXT_PRIM, 0);
+src/d0spsub/subScreenDrawEventCounters.c | unsigned char d[3]; | unsigned char d[3]; extern char *NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int); char *port_p0 = NEXT_PRIM;
+src/d0spsub/subScreenDrawEventCounters.c | subScreenDrawSprite(1); | subScreenDrawSprite(1); port_ws_mark(port_p0, NEXT_PRIM, 1);
+src/d0spsub3/subScreenDrawPopupMenu.c | TILE *T = (TILE *)0x1F800014; | TILE *T = (TILE *)0x1F800014; char *port_p0 = (char *)NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int);
+src/d0spsub3/subScreenDrawPopupMenu.c | drawBalloonFrame(lp, 0, 0x14); | drawBalloonFrame(lp, 0, 0x14); port_ws_mark(port_p0, NEXT_PRIM, 0);
+src/d0spsub3/subScreenDrawEventCounters.c | unsigned char d[3]; | unsigned char d[3]; extern char *NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int); char *port_p0 = NEXT_PRIM;
+src/d0spsub3/subScreenDrawEventCounters.c | subScreenDrawSprite(1); | subScreenDrawSprite(1); port_ws_mark(port_p0, NEXT_PRIM, 1);
+#
+# Event list: rows 18 px apart instead of 16 (the 16-px icons of neighbouring events touched: the Kokka eggs and the
+# Cerdiablos tale), from the same first row; the list and its icons read their y from SUBSCREEN_EVENT_SLOTS.
+src/d0spsub/subScreenDrawEventList.c | SUBSCREEN_DRAW_PARAMS.y = s->y - 8; | SUBSCREEN_DRAW_PARAMS.y = SUBSCREEN_EVENT_SLOTS[0].y + (s->y - SUBSCREEN_EVENT_SLOTS[0].y) * 9 / 8 - 8;
+src/d0spsub/subScreenDrawEventIcons.c | SUBSCREEN_DRAW_PARAMS.y = s->y; | SUBSCREEN_DRAW_PARAMS.y = SUBSCREEN_EVENT_SLOTS[0].y + (s->y - SUBSCREEN_EVENT_SLOTS[0].y) * 9 / 8;
+src/d0spsub3/subScreenDrawEventList.c | SUBSCREEN_DRAW_PARAMS.y = s->y - 8; | SUBSCREEN_DRAW_PARAMS.y = SUBSCREEN_EVENT_SLOTS[0].y + (s->y - SUBSCREEN_EVENT_SLOTS[0].y) * 9 / 8 - 8;
+src/d0spsub3/subScreenDrawEventIcons.c | SUBSCREEN_DRAW_PARAMS.y = s->y; | SUBSCREEN_DRAW_PARAMS.y = SUBSCREEN_EVENT_SLOTS[0].y + (s->y - SUBSCREEN_EVENT_SLOTS[0].y) * 9 / 8;
