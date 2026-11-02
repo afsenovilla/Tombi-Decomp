@@ -59,7 +59,7 @@ logo.
 |---|---|
 | Civilization towns (AREA11/16/17/18 top-down sections) | Owned by docs/CIVILIZATION.md (`--civ-test`): code in I0NFO2 is complete, but the sections' load lists are empty and their map / SPR / palette files are on no disc. 63 lines (class B*). |
 | Growing golden flower frames (AREA02 SPR 0x3B f27-32) | The rectangles they point at are empty in PAL VRAM: the art is not on the disc. |
-| Tunnel glyph sheet: Maya-style numerals 1-9 (dots and bars), shell/eye 0, "=" 10, eleven boxed 24x24 symbols (sun, bird, moon, star, bow, crossed arrows, gear, ring of dots, grid, hill) | `AREA02/B301.000` (GRPX 256x256 words at VRAM (768,0), AREA02 section 3 = top-down tunnels), 4 bpp at (832,72) 240x72 (page 13, u 0..239, v 72..143), CLUT `AREA02/CLUT04` row 22 col 7 = (240,502), word 0x7D8F. Same pixels in US and PAL (identical file) and JP (different file, same block); not in any `SYSTEM/` reload copy, not in the PrePre8 data, beta disc not checked (not local). No static reference found: the CLUT word occurs nowhere in AREA02 code/data, and no part of the tunnel SPR banks (D305) samples v 72..143. **Checked in the port: never drawn.** `--dump-draws` over 13 headless runs from the debug select into AREA02 section 3 (walks covering player x 982..1677, y -80..-729 of the tunnel network, the exit into AREA01 section 3, and `D_800A60A3` poked to 1/3/4 to force the alternative backdrop sets of `tunnelSelectBackdropPieces`): 5508 distinct textured primitives in section 3, none sample page 13 at v 72..143 (page-13 use there is only v 0..56 and 146..158) and none use CLUT (240,502). `tunnelSelectBackdropPieces` (I0NFO3) only picks backdrop piece pointers (table entries 0..20 by camera x, or entry 0x5C/0x60 for `D_800A60A3`), so it cannot reach the block by itself. **Full sweep with `--noclip`** (port debug flag, docs/PORT.md): five headless serpentine walks over the whole section (player x 90..1750, the clamp of the section, i.e. past the x<0x99 exits; y -157..-1567, past the map's -0x540 and the lowest exit at -0x4FE; rows 118 px apart, camera x 199..1400+ so all 21 backdrop strips, camera y down from its top clamp -52), one per backdrop value `D_800A60A3` = 0..4 forced inside `tunnelSelectBackdropPieces` (a `--poke-every` of 0x800A60A3 does not stick: the hook read 0 every frame, so the earlier 1/3/4 runs most likely drew the default set): 2318 distinct textured primitives with the default set (0 and 4), 202 with 1/2 (entry 0x5C), 212 with 3 (entry 0x60); page 13 again only at v 0..55 and 146..157, no CLUT (240,502). With `--noclip` the trigger tiles and exits are off, so tunnel event scenes are not part of this sweep (the earlier 13 runs covered the reachable ones). **Backdrop data decoded:** the RAM block `tunnelSelectBackdropPieces` reads (0x1DC40 bytes, header of 24 piece offsets 0x64..0x1DC40) is a list of textured polys (CLUT word, tpage word, colour+GP0 code 0x24/0x2C, then x,y,z,u,v per vertex): 882 polys, tpages 0x0C/0x0D/0x0E/0x4D, 16 CLUTs (0x784E..0x7DCF), none 0x7D8F; page 13 only at v 0..31 and 144..159. **Static re-check:** 0x7D8F as a 16-bit word is absent from MAIN0 and every overlay except one false hit (X010 0x37608 is `j 0x8011F63C`); the tpage-13 4 bpp + UV pattern (hi 0x000D/2D/4D/6D, v 72..143, u<240) and GP0 0xE1 page-13 words hit only MIPS instructions in MAIN0/X001/X006; the AREA02 file hits (B001/B101/B200 GRPX pixels, D004/D304 compressed streams) are not references. No reference found. Unused art of a cut symbol/number puzzle. |
+| Tunnel glyph sheet: Maya-style numerals 1-9 (dots and bars), shell/eye 0, "=" 10, ten boxed 24x24 symbols (sun, bird, moon, framed star, bow, crossed arrows, gear, ring of small rings, grid, mound) | `AREA02/B301.000` (GRPX 256x256 words at VRAM (768,0), AREA02 section 3 = top-down tunnels), 4 bpp at (832,72) 240x72 (page 13, u 0..239, v 72..143), CLUT `AREA02/CLUT04` row 22 col 7 = (240,502), word 0x7D8F. Same pixels in US and PAL (identical file) and JP (different file, same block); not in any `SYSTEM/` reload copy, not in the PrePre8 data, beta disc not checked (not local). No static reference found: the CLUT word occurs nowhere in AREA02 code/data, and no part of the tunnel SPR banks (D305) samples v 72..143. **Checked in the port: never drawn.** `--dump-draws` over 13 headless runs from the debug select into AREA02 section 3 (walks covering player x 982..1677, y -80..-729 of the tunnel network, the exit into AREA01 section 3, and `D_800A60A3` poked to 1/3/4 to force the alternative backdrop sets of `tunnelSelectBackdropPieces`): 5508 distinct textured primitives in section 3, none sample page 13 at v 72..143 (page-13 use there is only v 0..56 and 146..158) and none use CLUT (240,502). `tunnelSelectBackdropPieces` (I0NFO3) only picks backdrop piece pointers (table entries 0..20 by camera x, or entry 0x5C/0x60 for `D_800A60A3`), so it cannot reach the block by itself. **Full sweep with `--noclip`** (port debug flag, docs/PORT.md): five headless serpentine walks over the whole section (player x 90..1750, the clamp of the section, i.e. past the x<0x99 exits; y -157..-1567, past the map's -0x540 and the lowest exit at -0x4FE; rows 118 px apart, camera x 199..1400+ so all 21 backdrop strips, camera y down from its top clamp -52), one per backdrop value `D_800A60A3` = 0..4 forced inside `tunnelSelectBackdropPieces` (a `--poke-every` of 0x800A60A3 does not stick: the hook read 0 every frame, so the earlier 1/3/4 runs most likely drew the default set): 2318 distinct textured primitives with the default set (0 and 4), 202 with 1/2 (entry 0x5C), 212 with 3 (entry 0x60); page 13 again only at v 0..55 and 146..157, no CLUT (240,502). With `--noclip` the trigger tiles and exits are off, so tunnel event scenes are not part of this sweep (the earlier 13 runs covered the reachable ones). **Backdrop data decoded:** the RAM block `tunnelSelectBackdropPieces` reads (0x1DC40 bytes, header of 24 piece offsets 0x64..0x1DC40) is a list of textured polys (CLUT word, tpage word, colour+GP0 code 0x24/0x2C, then x,y,z,u,v per vertex): 882 polys, tpages 0x0C/0x0D/0x0E/0x4D, 16 CLUTs (0x784E..0x7DCF), none 0x7D8F; page 13 only at v 0..31 and 144..159. **Static re-check:** 0x7D8F as a 16-bit word is absent from MAIN0 and every overlay except one false hit (X010 0x37608 is `j 0x8011F63C`); the tpage-13 4 bpp + UV pattern (hi 0x000D/2D/4D/6D, v 72..143, u<240) and GP0 0xE1 page-13 words hit only MIPS instructions in MAIN0/X001/X006; the AREA02 file hits (B001/B101/B200 GRPX pixels, D004/D304 compressed streams) are not references. No reference found. Unused art of a cut symbol/number puzzle; layout, code and the Japanese hint text (a cut "graffiti floor" contraption with dot-and-bar base-20 numerals): see "Tunnel glyph sheet (AREA02/B301): layout, code and text" below. |
 | JP-only text of class D tied to Civilization (MFNT110/170/180: raft maker, generator, coal, Dr. Gantetsu, new town) | Their scenes are the cut top-down towns. |
 | PrePre8 dialogue script | Found 2026-10-30 in TOMBA.EXE (u16 glyph indices, `tools/prepre8_text.py`): area-0 tutorial/Yan/100-year-old-man script and a forest/dwarf script (lost dwarf child, Baron named by a dwarf nurse, trapped thief). Forest kanji page missing. See docs/PREPRE8.md. |
 
@@ -452,3 +452,105 @@ Diagram: all four sets on one sheet.
 ### Not checked
 Waypoint tables read by live code but with entries no path reaches (e.g. AREA09 `updateWaypointRide`). Unreachable states inside
 live movement routines other than the crawler's.
+
+## Tunnel glyph sheet (AREA02/B301): layout, code and text, 2 November 2026
+
+Follow-up to the B301.000 row in "Lost" (community questions: are these separate floor tiles, is any placement code
+left, does the Japanese text mention them). Images are not committed (game pixels).
+
+### Layout
+- **Grid:** the block is exactly 10 x 3 cells of 24 x 24 px, no gutters (u 0..239, v 72..143). Row 0 (v 72..95):
+  Maya numerals 1, 2, 3, 4 (dots), 5 (bar), 6..9 (bar + dots), 0 (shell). Row 1 (v 96..119): **ten** symbols, not
+  eleven: sun, bird, crescent moon, framed star, bow and arrow, crossed arrows, gear/cog, ten small rings around a bar,
+  grid, mound with an arc. Row 2 (v 120..143): u 0..71 plain stone, u 72..95 "=" (two bars = Maya 10), u 96..239
+  index 0 (empty).
+- **One stone tile under every glyph:** all 21 glyph cells (numerals, symbols, "=") are the same 24 x 24 stone tile
+  with the glyph painted on it (median 97 % of the non-glyph pixels identical to the per-pixel mode; 62 % for the
+  framed star, whose inner box covers more). The tile wraps only roughly: mean luminance step at the wrap seams 17.4
+  (left/right) and 17.2 (top/bottom) against 11.9/15.7 inside the tile and 21.5 between random columns.
+- **The frames are a strip, not plaques:** in row 1 the 1-px frame (CLUT index 4) is the top and bottom row of each
+  cell and the **right** column (u = 24k + 23); only the first cell also has a left column (u 0). Cut out alone,
+  cells 1..9 are framed on three sides, so the symbols were drawn as one continuous row of boxes (or meant to be
+  placed side by side in that order). The numerals have no frame at all.
+- **Row 2 u 0..71 is one 72 x 24 piece of stone,** not three tiles: the seams between its cells (7.8, 9.2) are no
+  bigger than its interior steps (8.4), while its wrap seams (18.1 / 19.3) are as large as random (17.3).
+- **Not a font strip:** cells are 24 x 24, glyphs centred in them (numeral dots/bars in rows 7..17), no 8x8 or 16x16
+  sub-grid.
+- **Not cut from the tunnel floor:** the grey (CLUT 0x7D8F, neutral greys 80..184) matches no 24 x 24 window of
+  pages 12..15 of B301 (best 18 % identical indices, chance level); the tunnel floors are the light cobble of page 14
+  (CLUT 0x784F, greys 168..224), sand and dirt. 0x7D8F is row 502, the one free row between the page-13 backdrop
+  CLUTs 0x7D4F (501) and 0x7DCF (503).
+- **The tunnels have no floor tiles:** the I0NFO3 backdrop is free polygons (see below) with ~1 texel per world
+  unit on the floors (median world/texel 1.11 for the cobble, 1.06 for the dirt), and the only grid is the 8 x 8
+  collision map. A 24 px glyph cell would cover 3 x 3 collision cells.
+
+### Code (I0NFO3, AREA02 section 3): no placement path
+- **Backdrop format (corrects the "882 polys" above):** the kind 0x50 block (D306 + 968) is 24 piece offsets, and
+  each piece is groups of `u32 count` + polys in the order FT3, FT4, GT3, GT4 (textured: CLUT, tpage, 1 or 3/4
+  colour words, then x, y, z, u, v per vertex), then the untextured groups. 2,506 textured polys; page 13 only at
+  v 0..69 (pieces 0x5C/0x60, the alternative sets, CLUT 0x7C0F) and v 146..157 (CLUT 0x7DCF, the small cairn
+  stones); no CLUT 0x7D8F; nothing samples v 72..143. Rendering all pieces gives the whole tunnel network at 1:1
+  (sand, cobble, a cracked stone dais, a ring of seven small pyramid stones on the sand at about x 385..445,
+  y -992..-940).
+- **No tile-to-UV formula exists:** `tunnelCollideMapTile` / `tunnelCheckTileTrigger` read `TUNNEL_MAP_TILES`
+  (D303, 240 x 168 cells of 8 px, copied to 0x80124000) as collision only. Its values are 0..9 (shape) plus bit 7
+  (trigger) and nothing else (no unused values that could select graphics).
+- **Trigger cells:** 17 clusters. Five sit on the five exits of `tunnelSectionStep`; two are the backdrop-switch
+  zones: on a trigger cell `tunnelPlayerMainStep` stores 1 + the index of the `TUNNEL_TRIGGER_RECTS` rect that holds
+  the player into `PLAYER.b6b` = `D_800A60A3`, the value `tunnelSelectBackdropPieces` reads (rect 0 -> set 1,
+  rect 1 = (0,0,0,0) placeholder, rect 2 -> set 3). The other ten (5 x 5 cells at x 408..447 y -1184..-1145 and
+  592..631 y -1144..-1105, irregular ones at 864..903 / -1048..-1017 and 992..1023 / -968..-929, six single cells)
+  have no reader: nothing in I0NFO3 uses the player's trigger bit outside the rects, and the one MAIN0 reader of
+  `PLAYER.b68` (script opcode 0x93) calls the side-view overlay address 0x800ECB40, which is inside
+  `tunnelItemSpotHandler` in I0NFO3. None of them is 3 x 3 cells.
+- **No puzzle logic:** all 55 I0NFO3 functions are decompiled and named; none counts steps, compares a sequence or
+  keeps digit counters. Placement (kind 0x83): 20 type-7 records (paired gates) and 2 type-0x3F; the actor spawn
+  table: 11 type-0x45 actors; talk spots all show (1, 0) (the save prompt). Object tpage offsets are 0 (player),
+  2..4 (actors), 0xF (item spots, i.e. the time chests), 0x15 (talk spots); no sprite table of the section samples
+  page 13 v 72..143.
+- **Versions:** US I0NFO3 has the same rects and dialogue choices; JP INFO3 too (rects at file 0x67A4). The JP
+  collision map (`AREA02/D304.000` on the JP disc) differs from PAL/US in 136 wall cells, never in a trigger bit.
+  The JP B301 differs from PAL only at y 144..246 (words 64..175); the glyph block is identical. 0x7D8F occurs in no
+  JP/US INFO3 or X02. The beta 980203 and PrePre 8 builds have no AREA02 data.
+
+### The text: a cut "graffiti" puzzle with Maya numerals
+- **The digger's hint, skipped by the code.** AREA02 tunnel dialogue group 6 (`tunnelActorOpenDialogue`, the digger
+  of case 8): the code shows dx 0xF, starts event 161 "Underground Treasure", then shows dx 0x11; **dx 0x10 is never
+  shown** (same constants in PAL, US and JP). PAL #439 = dx 0x10 is `···???`; the JP line (AREA02 A003 #433) is:
+  言い伝えだと・・・宝物庫へ行くには仕掛けをクリアしないとダメらしい・・・ でも オレはさぁ 宝物庫を掘り当ててやるんだ！
+  ん・・・仕掛けを解く方法？ それは仕掛けをつくったヤツが残した岩のらくがきを 調べてみろよ たしか・・・地上に６コあるハズだから
+  見つければ やくに立つかもな・・・
+  "According to the legend... to get to the treasure vault you have to clear a contraption... But me, I'm going to
+  dig my way into the vault! Hm... how to solve the contraption? Go and study the rock graffiti left by whoever built
+  it. I think there are six of them up on the surface, so if you find them they might help..."
+  In retail, event 161 is completed by opening time chest subtype 7 in the tunnels (300,000 AP,
+  `tunnelItemSpotCheckStep`); no contraption exists.
+- **The six rocks use dots and bars in base 20.** AREA16 group 2 dx 3/4 (PAL #211/#212, JP AREA16 A003 #188/#189),
+  with no reference in X016:
+  キミ、いろんなところを旅してるんだって？ だったら、へんな点とか線がきざんである らくがき岩・・・見たことないかなぁ・・・
+  おれ、ずーっとまえに木人の加工場で 見たことがあるんだけど、どうも気になってなぁ・・・
+  "You travel all over the place, right? Then have you ever seen a graffiti rock with strange dots and lines carved
+  in it...? I saw one ages ago at the wood people's workshop and it's been bugging me..."
+  ウワサじゃ 全部で６つのらくがき岩があって、そこに書かれてあるナゾをとけば たくさんの お宝が 手に入るらしいんだけど
+  ・・・なんかむずかしそうだなぁ ・・・が１・・・ーが５の・・・ ２０進数とかなんとか・・・ おれにはとても わかんないよ・・・
+  "Rumour has it there are six graffiti rocks in all, and if you solve the riddle written on them you get lots of
+  treasure... but it sounds hard... '·' is 1... '–' is 5... base twenty or something... I just don't get it..."
+  (the "·" and "ー" are the same glyphs as the ellipsis dots and the long-vowel bar, so the line reads as a mumble).
+  PAL kept the lines but lost the notation: "1 is...by 5...to the 20th power..." (all languages say "power"). Dot = 1,
+  bar = 5 and base 20 are the Maya numerals of the sheet. The rocks themselves are cut: event 67 解読？らくがき岩
+  "Decipher? The Graffiti Rock" has a JP title but no start, completion or flag read anywhere (notes/secrets.md).
+- **PrePre 8 names the floor.** The PrePre 8 event-title table (`tools/prepre8_text.py`, string at 0x800AB038,
+  glyphs checked on `SYS008.000`) has らくがき床のナゾ "The Riddle of the Graffiti Floor", followed by かくされた入口
+  "The Hidden Entrance"; it also has 解読?らくがき岩 and 森の地下には何がある? "What is under the forest?" (retail
+  "What's Under the Forest?" is the tunnels' own event). No retail build has a "graffiti floor" title.
+- **Other hits, unrelated:** 数字玉１..１０ / "Math Bead 1-10" are retail items of the 10,000 Year Old Man's quest
+  (JP item text: "a ball with N written on it that the 10,000 Year Old Man asked for"), collected under water in the
+  Trick Village; they are numbered 1..10 like the numerals but nothing ties them to the sheet. The other tunnel
+  `···???` lines are the mine cart (PAL #436/#437 = JP #430/#431 "it needs water... burning water", "see, it ran on
+  water!"; #457 = JP #448 "the cart started moving!") and the gate scene (PAL #406, #414..#418 = JP #400, #408..#412).
+  No dialogue in JP retail, the JP demo or PrePre 8 uses 太陽, 鳥, 弓, 矢, 石板, パネル, 記号, 暗号 or パスワード for this.
+
+**Reading:** the sheet is most likely the tile set of the cut "graffiti floor" contraption that guarded the
+Underground Maze treasure vault: a row of ten framed symbols and numeral plates in dot-and-bar, base-20 notation,
+whose code was to be found on six graffiti rocks on the surface. Neither the floor, nor the rocks, nor any code for
+them is left; the retail game kept the treasure (event 161, a time chest) and two hint lines, one of them unused.

@@ -60,7 +60,7 @@ bajo el logo final.
 |---|---|
 | Pueblos de la Civilización (secciones cenitales de AREA11/16/17/18) | Los lleva docs/CIVILIZATION.md (`--civ-test`): el código de I0NFO2 está completo, pero las listas de carga están vacías y sus ficheros de mapa / SPR / paletas no están en ningún disco. 63 frases (clase B*). |
 | Fotogramas de la flor dorada creciendo (AREA02 SPR 0x3B f27-32) | Los rectángulos a los que apuntan están vacíos en la VRAM PAL: el arte no está en el disco. |
-| Hoja de glifos de los túneles: numerales de estilo maya 1-9 (puntos y barras), concha/ojo 0, "=" 10, once símbolos enmarcados de 24x24 (sol, pájaro, luna, estrella, arco, flechas cruzadas, engranaje, anillo de puntos, rejilla, colina) | `AREA02/B301.000` (GRPX 256x256 palabras en VRAM (768,0), sección 3 de AREA02 = túneles cenitales), 4 bpp en (832,72) 240x72 (página 13, u 0..239, v 72..143), CLUT `AREA02/CLUT04` fila 22 col 7 = (240,502), palabra 0x7D8F. Mismos píxeles en USA y PAL (archivo idéntico) y JP (archivo distinto, mismo bloque); no está en ninguna copia de recarga de `SYSTEM/` ni en los datos de PrePre8; el disco beta no se comprobó (no está local). Sin referencia estática: la palabra del CLUT no aparece en el código ni datos de AREA02 y ninguna parte de los bancos SPR de los túneles (D305) muestrea v 72..143. **Comprobado en el port: nunca se dibuja.** `--dump-draws` en 13 ejecuciones sin ventana desde el selector de depuración a la sección 3 de AREA02 (recorridos por x 982..1677, y -80..-729 de la red de túneles, la salida a la sección 3 de AREA01, y `D_800A60A3` forzado a 1/3/4 para los fondos alternativos de `tunnelSelectBackdropPieces`): 5508 primitivas texturizadas distintas en la sección 3, ninguna muestrea la página 13 en v 72..143 (allí la página 13 solo se usa en v 0..56 y 146..158) y ninguna usa el CLUT (240,502). `tunnelSelectBackdropPieces` (I0NFO3) solo elige punteros a piezas del fondo (entradas 0..20 según la x de la cámara, o la entrada 0x5C/0x60 según `D_800A60A3`), así que por sí sola no llega al bloque. **Barrido completo con `--noclip`** (opción de depuración del port, docs/PORT.md): cinco recorridos en zigzag sin ventana por toda la sección (x del jugador 90..1750, el límite de la sección, es decir más allá de las salidas en x<0x99; y -157..-1567, más allá del -0x540 del mapa y de la salida más baja en -0x4FE; filas a 118 px, x de cámara 199..1400+ así que las 21 tiras del fondo, y de cámara desde su tope -52), uno por valor de `D_800A60A3` = 0..4 forzado dentro de `tunnelSelectBackdropPieces` (un `--poke-every` de 0x800A60A3 no se mantiene: el gancho leía 0 en cada frame, así que las ejecuciones anteriores con 1/3/4 probablemente dibujaron el fondo normal): 2318 primitivas texturizadas distintas con el fondo normal (0 y 4), 202 con 1/2 (entrada 0x5C), 212 con 3 (entrada 0x60); la página 13 de nuevo solo en v 0..55 y 146..157, ningún CLUT (240,502). Con `--noclip` los tiles de disparo y las salidas están desactivados, así que las escenas de evento de los túneles no entran en este barrido (las 13 ejecuciones anteriores cubrieron las alcanzables). **Datos del fondo decodificados:** el bloque de RAM que lee `tunnelSelectBackdropPieces` (0x1DC40 bytes, cabecera de 24 offsets de piezas 0x64..0x1DC40) es una lista de polígonos texturizados (palabra CLUT, palabra tpage, color+código GP0 0x24/0x2C, luego x,y,z,u,v por vértice): 882 polígonos, tpages 0x0C/0x0D/0x0E/0x4D, 16 CLUTs (0x784E..0x7DCF), ninguno 0x7D8F; página 13 solo en v 0..31 y 144..159. **Nueva comprobación estática:** 0x7D8F como palabra de 16 bits no está en MAIN0 ni en ningún overlay salvo un falso positivo (X010 0x37608 es `j 0x8011F63C`); el patrón tpage 13 4 bpp + UV (alto 0x000D/2D/4D/6D, v 72..143, u<240) y las palabras GP0 0xE1 de página 13 solo coinciden con instrucciones MIPS en MAIN0/X001/X006; las coincidencias en ficheros de AREA02 (píxeles GRPX de B001/B101/B200, flujos comprimidos de D004/D304) no son referencias. Ninguna referencia encontrada. Arte sin usar de un puzle de símbolos/números recortado. |
+| Hoja de glifos de los túneles: numerales de estilo maya 1-9 (puntos y barras), concha/ojo 0, "=" 10, diez símbolos enmarcados de 24x24 (sol, pájaro, luna, estrella enmarcada, arco, flechas cruzadas, engranaje, anillo de aritos, rejilla, montículo) | `AREA02/B301.000` (GRPX 256x256 palabras en VRAM (768,0), sección 3 de AREA02 = túneles cenitales), 4 bpp en (832,72) 240x72 (página 13, u 0..239, v 72..143), CLUT `AREA02/CLUT04` fila 22 col 7 = (240,502), palabra 0x7D8F. Mismos píxeles en USA y PAL (archivo idéntico) y JP (archivo distinto, mismo bloque); no está en ninguna copia de recarga de `SYSTEM/` ni en los datos de PrePre8; el disco beta no se comprobó (no está local). Sin referencia estática: la palabra del CLUT no aparece en el código ni datos de AREA02 y ninguna parte de los bancos SPR de los túneles (D305) muestrea v 72..143. **Comprobado en el port: nunca se dibuja.** `--dump-draws` en 13 ejecuciones sin ventana desde el selector de depuración a la sección 3 de AREA02 (recorridos por x 982..1677, y -80..-729 de la red de túneles, la salida a la sección 3 de AREA01, y `D_800A60A3` forzado a 1/3/4 para los fondos alternativos de `tunnelSelectBackdropPieces`): 5508 primitivas texturizadas distintas en la sección 3, ninguna muestrea la página 13 en v 72..143 (allí la página 13 solo se usa en v 0..56 y 146..158) y ninguna usa el CLUT (240,502). `tunnelSelectBackdropPieces` (I0NFO3) solo elige punteros a piezas del fondo (entradas 0..20 según la x de la cámara, o la entrada 0x5C/0x60 según `D_800A60A3`), así que por sí sola no llega al bloque. **Barrido completo con `--noclip`** (opción de depuración del port, docs/PORT.md): cinco recorridos en zigzag sin ventana por toda la sección (x del jugador 90..1750, el límite de la sección, es decir más allá de las salidas en x<0x99; y -157..-1567, más allá del -0x540 del mapa y de la salida más baja en -0x4FE; filas a 118 px, x de cámara 199..1400+ así que las 21 tiras del fondo, y de cámara desde su tope -52), uno por valor de `D_800A60A3` = 0..4 forzado dentro de `tunnelSelectBackdropPieces` (un `--poke-every` de 0x800A60A3 no se mantiene: el gancho leía 0 en cada frame, así que las ejecuciones anteriores con 1/3/4 probablemente dibujaron el fondo normal): 2318 primitivas texturizadas distintas con el fondo normal (0 y 4), 202 con 1/2 (entrada 0x5C), 212 con 3 (entrada 0x60); la página 13 de nuevo solo en v 0..55 y 146..157, ningún CLUT (240,502). Con `--noclip` los tiles de disparo y las salidas están desactivados, así que las escenas de evento de los túneles no entran en este barrido (las 13 ejecuciones anteriores cubrieron las alcanzables). **Datos del fondo decodificados:** el bloque de RAM que lee `tunnelSelectBackdropPieces` (0x1DC40 bytes, cabecera de 24 offsets de piezas 0x64..0x1DC40) es una lista de polígonos texturizados (palabra CLUT, palabra tpage, color+código GP0 0x24/0x2C, luego x,y,z,u,v por vértice): 882 polígonos, tpages 0x0C/0x0D/0x0E/0x4D, 16 CLUTs (0x784E..0x7DCF), ninguno 0x7D8F; página 13 solo en v 0..31 y 144..159. **Nueva comprobación estática:** 0x7D8F como palabra de 16 bits no está en MAIN0 ni en ningún overlay salvo un falso positivo (X010 0x37608 es `j 0x8011F63C`); el patrón tpage 13 4 bpp + UV (alto 0x000D/2D/4D/6D, v 72..143, u<240) y las palabras GP0 0xE1 de página 13 solo coinciden con instrucciones MIPS en MAIN0/X001/X006; las coincidencias en ficheros de AREA02 (píxeles GRPX de B001/B101/B200, flujos comprimidos de D004/D304) no son referencias. Ninguna referencia encontrada. Arte sin usar de un puzle de símbolos/números recortado; disposición, código y el texto japonés de la pista (un mecanismo recortado de "suelo de garabatos" con numerales de puntos y barras en base 20): ver "Hoja de glifos de los túneles (AREA02/B301): disposición, código y texto" más abajo. |
 | Texto JP de clase D ligado a la Civilización (MFNT110/170/180: balsero, generador, carbón, Dr. Gantetsu, pueblo nuevo) | Sus escenas son los pueblos cenitales cortados. |
 | Guion de diálogos de PrePre8 | Encontrado el 2026-10-30 en TOMBA.EXE (índices de glifo u16, `tools/prepre8_text.py`): guion del área 0 (tutorial, Yan, anciano de 100 años) y guion del bosque/enanos (niño enano perdido, Baron bautizado por una enfermera enana, ladrón atrapado). Falta la página de kanji del bosque. Ver docs/PREPRE8.md. |
 
@@ -455,3 +455,112 @@ juego 0D (AREA11 s0) actores 3 (diagonal), 4, 5, 8 (horizontal), 7, 9 (vertical)
 ### Sin revisar
 Tablas de puntos de paso leidas por codigo vivo con entradas que ninguna ruta alcanza (p. ej. `updateWaypointRide` de AREA09). Estados inalcanzables dentro de
 otras rutinas de movimiento vivas.
+
+## Hoja de glifos de los túneles (AREA02/B301): disposición, código y texto, 2 de noviembre de 2026
+
+Continuación de la fila de B301.000 en "Perdido" (preguntas de la comunidad: ¿son baldosas de suelo sueltas?, ¿queda
+código para colocarlas?, ¿las menciona el texto japonés?). Las imágenes no se suben (píxeles del juego).
+
+### Disposición
+- **Rejilla:** el bloque son exactamente 10 x 3 celdas de 24 x 24 px, sin separación (u 0..239, v 72..143). Fila 0
+  (v 72..95): numerales mayas 1, 2, 3, 4 (puntos), 5 (barra), 6..9 (barra + puntos), 0 (concha). Fila 1 (v 96..119):
+  **diez** símbolos, no once: sol, pájaro, luna creciente, estrella enmarcada, arco y flecha, flechas cruzadas,
+  engranaje, diez aritos alrededor de una barra, rejilla, montículo con un arco. Fila 2 (v 120..143): u 0..71 piedra
+  lisa, u 72..95 "=" (dos barras = 10 maya), u 96..239 índice 0 (vacío).
+- **Una sola baldosa de piedra bajo cada glifo:** las 21 celdas con glifo (numerales, símbolos, "=") son la misma
+  baldosa de 24 x 24 con el glifo pintado encima (mediana del 97 % de los píxeles sin glifo idénticos a la moda por
+  píxel; 62 % en la estrella enmarcada, cuyo recuadro interior tapa más). La baldosa solo enlaza a medias: salto medio
+  de luminancia en las costuras 17,4 (izquierda/derecha) y 17,2 (arriba/abajo) frente a 11,9/15,7 dentro y 21,5
+  entre columnas al azar.
+- **Los marcos son una tira, no placas:** en la fila 1 el marco de 1 px (índice 4 del CLUT) es la fila superior e
+  inferior de cada celda y la columna **derecha** (u = 24k + 23); solo la primera celda tiene además columna izquierda
+  (u 0). Recortadas sueltas, las celdas 1..9 tienen marco por tres lados: los símbolos se dibujaron como una fila
+  continua de recuadros (o para ponerse uno junto a otro en ese orden). Los numerales no tienen marco.
+- **La fila 2 u 0..71 es una pieza de piedra de 72 x 24,** no tres baldosas: las costuras entre sus celdas (7,8; 9,2)
+  no superan sus saltos interiores (8,4), mientras que sus costuras de enlace (18,1 / 19,3) son como al azar (17,3).
+- **No es una tira de fuente:** celdas de 24 x 24 con el glifo centrado (puntos y barras en las filas 7..17), sin
+  subrejilla de 8x8 ni 16x16.
+- **No está recortada del suelo de los túneles:** el gris (CLUT 0x7D8F, grises neutros 80..184) no coincide con
+  ninguna ventana de 24 x 24 de las páginas 12..15 de B301 (como mucho 18 % de índices iguales, el azar); los suelos
+  son el empedrado claro de la página 14 (CLUT 0x784F, grises 168..224), arena y tierra. 0x7D8F es la fila 502, la
+  única libre entre los CLUT del fondo de la página 13 0x7D4F (501) y 0x7DCF (503).
+- **Los túneles no tienen baldosas de suelo:** el fondo de I0NFO3 son polígonos libres (ver abajo) con ~1 texel por
+  unidad de mundo en los suelos (mediana mundo/texel 1,11 en el empedrado, 1,06 en la tierra), y la única rejilla es
+  el mapa de colisión de 8 x 8. Una celda de 24 px cubriría 3 x 3 celdas de colisión.
+
+### Código (I0NFO3, sección 3 de AREA02): ningún camino de colocación
+- **Formato del fondo (corrige los "882 polígonos" de arriba):** el bloque de tipo 0x50 (D306 + 968) son 24 offsets
+  de piezas, y cada pieza son grupos `u32 cuenta` + polígonos en el orden FT3, FT4, GT3, GT4 (texturizados: CLUT,
+  tpage, 1 o 3/4 palabras de color, luego x, y, z, u, v por vértice) y después los grupos sin textura. 2.506
+  polígonos texturizados; la página 13 solo en v 0..69 (piezas 0x5C/0x60, los fondos alternativos, CLUT 0x7C0F) y
+  v 146..157 (CLUT 0x7DCF, las piedrecitas del anillo); ningún CLUT 0x7D8F; nada muestrea v 72..143. Dibujando todas
+  las piezas sale la red de túneles entera a 1:1 (arena, empedrado, un estrado de piedra agrietado y un anillo de
+  siete piedras piramidales sobre la arena hacia x 385..445, y -992..-940).
+- **No existe fórmula baldosa -> UV:** `tunnelCollideMapTile` / `tunnelCheckTileTrigger` leen `TUNNEL_MAP_TILES`
+  (D303, 240 x 168 celdas de 8 px, copiado a 0x80124000) solo como colisión. Sus valores son 0..9 (forma) más el
+  bit 7 (disparo) y nada más (ningún valor sin usar que pudiera elegir gráficos).
+- **Celdas de disparo:** 17 grupos. Cinco están sobre las cinco salidas de `tunnelSectionStep`; dos son las zonas
+  que cambian el fondo: sobre una celda de disparo `tunnelPlayerMainStep` guarda 1 + el índice del rectángulo de
+  `TUNNEL_TRIGGER_RECTS` que contiene al jugador en `PLAYER.b6b` = `D_800A60A3`, el valor que lee
+  `tunnelSelectBackdropPieces` (rect 0 -> fondo 1, rect 1 = (0,0,0,0) de relleno, rect 2 -> fondo 3). Las otras
+  diez (5 x 5 celdas en x 408..447 y -1184..-1145 y 592..631 y -1144..-1105, irregulares en 864..903 / -1048..-1017
+  y 992..1023 / -968..-929, seis celdas sueltas) no tienen lector: nada en I0NFO3 usa el bit de disparo del jugador
+  fuera de los rectángulos, y el único lector de `PLAYER.b68` en MAIN0 (opcode de script 0x93) llama a la dirección
+  de overlay lateral 0x800ECB40, que en I0NFO3 cae dentro de `tunnelItemSpotHandler`. Ninguna mide 3 x 3 celdas.
+- **Ninguna lógica de puzle:** las 55 funciones de I0NFO3 están decompiladas y con nombre; ninguna cuenta pasos,
+  compara una secuencia ni lleva contadores de dígitos. Colocación (tipo 0x83): 20 registros de tipo 7 (compuertas
+  en pareja) y 2 de tipo 0x3F; tabla de actores: 11 actores de tipo 0x45; los puntos de charla muestran todos (1, 0)
+  (el aviso de guardar). Desplazamientos de tpage: 0 (jugador), 2..4 (actores), 0xF (cofres del tiempo), 0x15 (puntos
+  de charla); ninguna tabla de sprites de la sección muestrea la página 13 en v 72..143.
+- **Versiones:** el I0NFO3 de USA tiene los mismos rectángulos y elecciones de diálogo; el INFO3 japonés también
+  (rectángulos en el offset 0x67A4). El mapa de colisión japonés (`AREA02/D304.000` del disco JP) difiere del
+  PAL/USA en 136 celdas de pared, nunca en un bit de disparo. El B301 japonés solo difiere del PAL en y 144..246
+  (palabras 64..175); el bloque de glifos es idéntico. 0x7D8F no aparece en ningún INFO3 ni X02 de JP/USA. Las
+  versiones beta 980203 y PrePre 8 no tienen datos de AREA02.
+
+### El texto: un puzle de "garabatos" recortado con numerales mayas
+- **La pista del excavador, saltada por el código.** Grupo 6 de diálogo de los túneles de AREA02
+  (`tunnelActorOpenDialogue`, el excavador del caso 8): el código muestra dx 0xF, inicia el evento 161 "Underground
+  Treasure" y luego muestra dx 0x11; **dx 0x10 nunca se muestra** (mismas constantes en PAL, USA y JP). El PAL #439 =
+  dx 0x10 es `···???`; la línea japonesa (AREA02 A003 #433) es:
+  言い伝えだと・・・宝物庫へ行くには仕掛けをクリアしないとダメらしい・・・ でも オレはさぁ 宝物庫を掘り当ててやるんだ！
+  ん・・・仕掛けを解く方法？ それは仕掛けをつくったヤツが残した岩のらくがきを 調べてみろよ たしか・・・地上に６コあるハズだから
+  見つければ やくに立つかもな・・・
+  «Según la leyenda... para llegar a la cámara del tesoro hay que superar un mecanismo... ¡Pero yo voy a llegar
+  a la cámara cavando! Mm... ¿cómo se resuelve el mecanismo? Estudia los garabatos de roca que dejó quien lo
+  construyó. Creo que hay seis allá arriba, en la superficie; si los encuentras, a lo mejor te sirven...»
+  En el juego final, el evento 161 se completa abriendo el cofre del tiempo de subtipo 7 en los túneles (300.000 PA,
+  `tunnelItemSpotCheckStep`); no hay mecanismo.
+- **Las seis rocas usan puntos y barras en base 20.** Grupo 2 dx 3/4 de AREA16 (PAL #211/#212, JP AREA16 A003
+  #188/#189), sin referencia en X016:
+  キミ、いろんなところを旅してるんだって？ だったら、へんな点とか線がきざんである らくがき岩・・・見たことないかなぁ・・・
+  おれ、ずーっとまえに木人の加工場で 見たことがあるんだけど、どうも気になってなぁ・・・
+  «Viajas por todas partes, ¿no? Entonces, ¿has visto alguna roca de garabatos con puntos y rayas raros grabados...?
+  Yo vi una hace mucho en el taller de la gente de madera y no se me va de la cabeza...»
+  ウワサじゃ 全部で６つのらくがき岩があって、そこに書かれてあるナゾをとけば たくさんの お宝が 手に入るらしいんだけど
+  ・・・なんかむずかしそうだなぁ ・・・が１・・・ーが５の・・・ ２０進数とかなんとか・・・ おれにはとても わかんないよ・・・
+  «Dicen que hay seis rocas de garabatos en total, y que si resuelves el acertijo escrito en ellas consigues
+  muchos tesoros... pero parece difícil... "·" es 1... "–" es 5... base veinte o algo así... yo no lo entiendo...»
+  (el "·" y la "ー" son los mismos glifos que los puntos suspensivos y la raya de vocal larga, así que se lee como un
+  murmullo). El PAL conservó las líneas pero perdió la notación: «1 es..por 5...a la 20ª potencia...» (todos los
+  idiomas dicen "potencia"). Punto = 1, barra = 5 y base 20 son los numerales mayas de la hoja. Las rocas están
+  recortadas: el evento 67 解読？らくがき岩 «¿Descifrar? La roca de garabatos» tiene título japonés pero ningún inicio,
+  final ni lectura de su marca (notes/secrets.md).
+- **PrePre 8 nombra el suelo.** La tabla de títulos de evento de PrePre 8 (`tools/prepre8_text.py`, cadena en
+  0x800AB038, glifos comprobados en `SYS008.000`) tiene らくがき床のナゾ «El enigma del suelo de garabatos», seguido de
+  かくされた入口 «La entrada escondida»; también tiene 解読?らくがき岩 y 森の地下には何がある? «¿Qué hay bajo el
+  bosque?» (en el juego final "What's Under the Forest?" es el evento propio de los túneles). Ninguna versión final
+  tiene un título de "suelo de garabatos".
+- **Otras coincidencias, sin relación:** 数字玉１..１０ / "Math Bead 1-10" son objetos del juego final de la misión del
+  Anciano de 10.000 Años (texto japonés: «una bola con el N escrito que te pidió el Anciano de 10.000 Años»), que se
+  recogen bajo el agua en Trick Village; van numerados del 1 al 10 como los numerales pero nada los une a la hoja.
+  Las demás líneas `···???` de los túneles son la vagoneta (PAL #436/#437 = JP #430/#431 «necesita agua... agua que
+  arde», «¿ves?, ¡funcionó con agua!»; #457 = JP #448 «¡la vagoneta arrancó!») y la escena de la compuerta (PAL #406,
+  #414..#418 = JP #400, #408..#412). Ningún diálogo del JP final, la demo japonesa ni PrePre 8 usa 太陽, 鳥, 弓, 矢,
+  石板, パネル, 記号, 暗号 ni パスワード para esto.
+
+**Lectura:** lo más probable es que la hoja sea el juego de baldosas del mecanismo recortado del "suelo de garabatos"
+que guardaba la cámara del tesoro del Laberinto Subterráneo: una fila de diez símbolos enmarcados y placas de
+numerales en notación de puntos y barras en base 20, cuya clave estaba en seis rocas de garabatos de la superficie.
+No queda ni el suelo, ni las rocas, ni código para ellos; el juego final conservó el tesoro (evento 161, un cofre del
+tiempo) y dos líneas de pista, una de ellas sin usar.
