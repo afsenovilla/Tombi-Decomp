@@ -148,19 +148,10 @@ def has_sky(ld, idx):
 
 
 def _obj_blob(ld, idx):
-    """Bytes of the kind 0x51 table of load list idx: an own file, or a piece (fileId -1) following the file of the previous records."""
-    import area000 as A, vram as V
-    data, off = None, 0
-    for r in A.load_lists()[ld][idx]:
-        if r["type"] != 0xFFFFFFFF:
-            data, off = V.resource(r["name"]), (r["arg"] if r["kind"] == 0x50 else 0)
-            if r["kind"] == 0x51:
-                return data
-        elif data is not None:
-            if r["kind"] == 0x51:
-                return data[off:off + r["arg"]]
-            off += r["arg"]
-    return None
+    """Bytes of the kind 0x51 table of load list idx: an own file, or a piece (fileId -1) following the file of the previous records (a packed
+    type 3 container: its `arg` is the size of its own first piece, whatever its kind, e.g. a WHM, WMD or SPR)."""
+    import area000 as A, room as R
+    return R.list_piece(A.load_lists()[ld][idx], 0x51)[1]
 
 
 def objects():
