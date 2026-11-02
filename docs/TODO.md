@@ -1,5 +1,9 @@
 # Pending (after the decompilation is complete)
 
+- **[Spanish patch] Name of Trick Village (からくり村).** User decision pending: keep the official "Ciudad de los trucos"
+  everywhere (today the sign says "Ciudad de los trucos" and the rest "Ciudad de trucos"), or retranslate from the Japanese
+  ("pueblo de los mecanismos / artilugios", e.g. "Ciudad de los artilugios"). Apply it to signs, save list, event names,
+  dialogue and docs/the glossary in one go.
 - **DuckStation HD texture packs.** Export from the graphics editor DuckStation-compatible texture
   replacement packs for the PAL disc (SCES-01331): textures named by DuckStation's hash convention
   (upload + palette), so users can repaint/upscale them and load them in DuckStation. A PS1 ISO cannot
@@ -25,14 +29,10 @@
   overlay duplicates) and port the C; expect most game code to transfer, with differences in the text/font system
   (kana/kanji), the single-language file layout (no MAIN0-8) and older library revisions. Needs the user's disc image
   (kept out of the repo like the PAL one). Adapting the text editor to Japanese is a separate, larger task.
-- **[All platforms] High frame rates (90 / 120 / 144 FPS) at the original speed (port).** On hold until a correct
-  60 Hz mode exists (user decision). The code is done (`--fps N|auto|unlimited`, docs/PORT.md "High frame rates": the
-  logic stays at 50 Hz, the presents run at the display's refresh, a cap or unlimited, the in-between ones re-drawn
-  from the recorded draw list with every primitive blended towards where it was in the frame before, on the software
-  and OpenGL renderers) but it is experimental and hidden: the *Frame rate* options were removed from both launchers,
-  which no longer pass `--fps`; only the command-line flag remains. Offer it again once the 60 Hz mode (PAL game with
-  NTSC timing, see "60 Hz mode" below) plays like the US/JP versions (now the case; waiting for the user's go-ahead). Still open then: the software renderer manages
-  about one in-between frame per vblank on a slow CPU; a pre-projection variant would bend fast close-up rotations less.
+- **[All platforms] High frame rates (90 / 120 / 144 FPS) at the original speed (port).** Offered again in both launchers
+  (PC *Graphics* → *Frame rate*, Android *Opciones → Gráficos → Frame rate*) now that the 60 Hz mode is verified (see below;
+  docs/PORT.md "High frame rates"). Still open: the software renderer manages about one in-between frame per vblank on a
+  slow CPU; a pre-projection variant would bend fast close-up rotations less.
 - **[All platforms] 60 Hz mode with NTSC timing (port).** Done (docs/PORT.md "60 Hz mode"): the PAL build turned out to
   have no 50 Hz compensation in its game logic: `tools/ntsc_diff.py` (every PAL function against the USA executable and
   overlays, 3,330 of 3,529 with a masked twin, every remaining difference read), the data comparison (animation scripts,

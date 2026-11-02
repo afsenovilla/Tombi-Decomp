@@ -442,7 +442,7 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   app's entry: *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
   with the chosen flags as `argv[1..]`, which `loader.c` puts after its defaults and before `files/args.txt` (still
   read, so it overrides). *Opciones* (SharedPreferences): `--lang` 0/5/6/7/8, `--aspect auto|4:3|16:9|21:9`,
-  `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--show-fps` (*Gráficos*; `--fps` is no longer offered, see "High frame rates"), infinite
+  `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps off|auto|60|90|120|144|unlimited` (*Gráficos*), `--show-fps`, infinite
   lives/health (the `tools/port_mods.py` pokes). *Disco*: the player picks their own disc image on the device
   (SAF `ACTION_OPEN_DOCUMENT`, `.bin`/`.iso`/`.chd` or `.cue`+`.bin`): read in place through the provider's file
   descriptor (`/proc/self/fd/N`; a `.chd` is recognised by its magic) or, for a stream-only provider, copied to the
@@ -627,7 +627,7 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 | M3 | SYSTEM overlays | decompile (or non-matching C) O?PTSUB0, D?SPSUB*, G?OVER, I?NFO*; MDEC + STR movies or skip | 3–6 weeks |
 | M4 | All areas | per-area symbol prefixing + overlay dispatch, fix register-carried calls and other ABI issues found by playing every area; correctness audit vs. an emulator (RAM diff per frame on the same inputs: compare the native build to PCSX/Duckstation traces) | 3–5 weeks |
 | M5 | Sound | software SPU + libsnd on the console's tick, XA audio of the movies (**done** in `port2/`, "Audio" below) | 2–3 weeks |
-| M6 | GL renderer + enhancements | GLES3/GL3 backend, internal resolution, widescreen, PGXP-style precision, **interpolated high frame rates** (`--fps`, both renderers: done, hidden from the launchers until the 60 Hz mode is right) | 3–4 weeks |
+| M6 | GL renderer + enhancements | GLES3/GL3 backend, internal resolution, widescreen, PGXP-style precision, **interpolated high frame rates** (`--fps`, both renderers: done) | 3–4 weeks |
 | M7 | Android | SDL android project, armeabi-v7a (**APK builds in CI**, §4 "Status"; device testing pending), SAF disc import, touch controls; then the 64-bit pointer model for arm64 | 2 weeks (+3–4 weeks for 64-bit) |
 
 **Main blockers today:**
@@ -2461,16 +2461,15 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
 
-### High frame rates: `--fps N|auto|unlimited` (experimental, command line only)
+### High frame rates: `--fps N|auto|unlimited` (both renderers, PC and Android)
 
 The game logic keeps advancing once per vblank (50 Hz PAL; `--hz 60` = NTSC speed), so audio, physics and every timer
 are unchanged; only the *presents* get their own clock: `--fps auto` = the display's refresh rate (60 if unknown or
 headless), `--fps 60|90|120|144|N` = that many per second, `--fps unlimited` = as fast as they go with vsync off. 50 or
 less, or `off`, is the old one-present-per-vblank path (the default). `--fps60` (the earlier experimental OpenGL-only
-switch) is now `--fps auto`. **Experimental and hidden:** the launchers no longer offer it (the PC *Graphics* card
-*Frame rate* and the Android *Opciones → Gráficos → Frame rate* row were removed, and neither passes `--fps` any more);
-it stays reachable from the command line only, until a correct 60 Hz mode exists (docs/TODO.md: interpolating a
-50 Hz PAL game to 60+ presents is pointless while 60 Hz itself is not right). The code is `port2/shims/hfr.inc` (included by `gpu.c`) plus the snapshot / work-target helpers at the end of `gpu_gl.c`.
+switch) is now `--fps auto`. Launchers: PC *Graphics* page, card *Frame rate* (50 (original) / Auto / 60 / 90 / 120 /
+144 / Unlimited); Android *Opciones → Gráficos → Frame rate* (same list; the old *60 fps* switch reads as Auto). The
+code is `port2/shims/hfr.inc` (included by `gpu.c`) plus the snapshot / work-target helpers at the end of `gpu_gl.c`.
 
 How it works:
 - **Recording.** While `--fps` is on, every operation the GP0 decoder hands to the backend is also appended to the
