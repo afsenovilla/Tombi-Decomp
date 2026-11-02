@@ -603,7 +603,6 @@ jobs:
           retention-days: 90
 
   launcher-linux:
-    if: false   # TEMP
     needs: game-linux
     if: needs.game-linux.outputs.ok == 'true'
     runs-on: ubuntu-24.04
