@@ -20,7 +20,8 @@
     <string name="renderer_gl">OpenGL ES (experimentell)</string>
     <string name="opt_skipintro">Hoppa över logotyper och intro</string>
     <string name="opt_hz60">60 Hz (NTSC-hastighet)</string>
-    <string name="opt_fps60">60 fps</string>
+    <string name="opt_fps">Bildfrekvens</string>
+    <string name="fps_unlimited">Obegränsad</string>
     <string name="opt_showfps">Visa FPS</string>
     <string name="opt_inflives">Oändligt med liv</string>
     <string name="opt_infhealth">Oändlig vitalitet</string>

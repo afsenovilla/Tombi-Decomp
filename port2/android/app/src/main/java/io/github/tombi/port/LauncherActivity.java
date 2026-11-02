@@ -172,6 +172,11 @@ public class LauncherActivity extends Activity {
     static final int[] RUMBLE = { 0, 25, 50, 75, 100, 125, 150, 200 };   // --rumble steps, %
     int rumbleIdx() { return clamp(prefs.getInt("rumble", 4), RUMBLE.length); }
     String rumbleName(int i) { return RUMBLE[i] == 0 ? getString(R.string.rumble_off) : RUMBLE[i] + " %"; }
+    // --fps (shims/hfr.inc): presents per second, the in-between ones interpolated; the game keeps its 50 Hz speed.
+    // "off" = one frame per vblank (the default); the old "fps60" switch counts as auto
+    static final String[] FPS = { "off", "auto", "60", "90", "120", "144", "unlimited" };
+    int fpsIdx() { return clamp(prefs.getInt("fps", flag("fps60", false) ? 1 : 0), FPS.length); }
+    String fpsName(int i) { return i == 0 ? "50 (PAL)" : i == 1 ? "Auto" : i == FPS.length - 1 ? getString(R.string.fps_unlimited) : FPS[i]; }
     /* a short test buzz at the chosen strength on the device's own vibrator (what the game does at full big motor) */
     void rumbleTest() {
         try {
@@ -360,7 +365,7 @@ public class LauncherActivity extends Activity {
         if ("custom".equals(PROMPTS[promptIdx()])) { a.add("--prompt-colors"); a.add(pcArg()); }
         if (flag("skipintro", false)) a.add("--skip-intro");
         if (flag("hz60", false)) { a.add("--hz"); a.add("60"); }
-        if (flag("fps60", false)) a.add("--fps60");
+        if (fpsIdx() > 0) { a.add("--fps"); a.add(FPS[fpsIdx()]); }
         if (flag("showfps", false)) a.add("--show-fps");
         a.add("--fit");   // the game always fills the screen (aspect kept)
         if (flag("inflives", false)) { a.add("--poke-every"); a.add("50:8009C980:63:1"); }
@@ -831,7 +836,10 @@ public class LauncherActivity extends Activity {
                     r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
                     items.add(r);
                     items.add(toggle(R.string.opt_hz60, "hz60"));
-                    items.add(toggle(R.string.opt_fps60, "fps60"));
+                    Item fp = new Item(getString(R.string.opt_fps), null);
+                    fp.value = fpsName(fpsIdx());
+                    fp.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("fps", (fpsIdx() + d + FPS.length) % FPS.length).apply(); } };
+                    items.add(fp);
                     items.add(toggle(R.string.opt_showfps, "showfps"));
                 } else if (cat == CAT_DUAL) {
                     Item ss = new Item(getString(R.string.opt_secondscreen), null);

@@ -20,7 +20,8 @@
     <string name="renderer_gl">OpenGL ES (expérimental)</string>
     <string name="opt_skipintro">Passer les logos et la vidéo d\'intro</string>
     <string name="opt_hz60">60 Hz (vitesse NTSC)</string>
-    <string name="opt_fps60">60 fps</string>
+    <string name="opt_fps">Images par seconde</string>
+    <string name="fps_unlimited">Illimité</string>
     <string name="opt_showfps">Afficher les FPS</string>
     <string name="opt_inflives">Vies infinies</string>
     <string name="opt_infhealth">Force infinie</string>

@@ -40,10 +40,9 @@ static int gl_none(void) { return -1; }
 const GpuBackend port_gpu_gl = { "none", gl_none };
 int port_internal_res = 1;
 unsigned port_gl_rep_texture(const unsigned char *rgba, int w, int h) { (void)rgba; (void)w; (void)h; return 0; }
-int port_gl_fps60_vblank(int x, int y, int w, int h, int wide, int plain) { return 0; }
-int port_gl_fps60_render(float alpha) { return 0; }
-int port_gl_fps60_show(void) { return 0; }
-int port_gl_fps60_read(unsigned char *rgb, int *w, int *h) { return 1; }
+void port_gl_hfr_snap(int slot) { (void)slot; }
+int port_gl_hfr_begin(int slot) { (void)slot; return 0; }
+void port_gl_hfr_end(void) { }
 int port_gl_frame_hd(unsigned char *rgb, int x, int y, int w, int h, int wide, int *ow, int *oh) { return 0; }
 
 /* the host passes its working directory as PWD (port2/wasm/host.c): relative paths as on the PC build */

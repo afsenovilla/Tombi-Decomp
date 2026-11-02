@@ -1012,3 +1012,21 @@ DA = {
 }
 
 i18n.add({"fr": FR, "de": DE, "it": IT, "nl": NL, "pt": PT, "sv": SV, "da": DA})
+
+# --fps (the Graphics page's frame-rate card)
+i18n.add({
+    "fr": {"c.fps": "Images par seconde", "fps.off": "50 (d'origine)", "fps.auto": "Auto (la fréquence de l'écran)", "fps.unl": "Illimité (sans vsync)",
+           "l.fpshint": "Au-delà de 50, les images intermédiaires sont interpolées entre les étapes du jeu, qui garde sa vitesse. Avec le rendu logiciel, chaque image intermédiaire coûte autant que d'en dessiner une."},
+    "de": {"c.fps": "Bildrate", "fps.off": "50 (Original)", "fps.auto": "Auto (die Bildwiederholrate des Bildschirms)", "fps.unl": "Unbegrenzt (ohne VSync)",
+           "l.fpshint": "Über 50 werden die Zwischenbilder zwischen den Schritten des Spiels interpoliert; das Spiel behält seine Geschwindigkeit. Mit dem Software-Renderer kostet jedes Zwischenbild so viel wie ein gezeichnetes Bild."},
+    "it": {"c.fps": "Fotogrammi al secondo", "fps.off": "50 (originale)", "fps.auto": "Auto (la frequenza dello schermo)", "fps.unl": "Illimitato (senza vsync)",
+           "l.fpshint": "Sopra 50, i fotogrammi intermedi vengono interpolati tra i passi del gioco, che mantiene la sua velocità. Con il rendering software ogni fotogramma intermedio costa quanto disegnarne uno."},
+    "nl": {"c.fps": "Beeldsnelheid", "fps.off": "50 (origineel)", "fps.auto": "Auto (de verversingsfrequentie van het scherm)", "fps.unl": "Onbeperkt (zonder vsync)",
+           "l.fpshint": "Boven 50 worden de tussenbeelden geïnterpoleerd tussen de stappen van het spel, dat zijn snelheid houdt. Met de softwarerenderer kost elk tussenbeeld evenveel als het tekenen van een beeld."},
+    "pt": {"c.fps": "Fotogramas por segundo", "fps.off": "50 (original)", "fps.auto": "Auto (a frequência do ecrã)", "fps.unl": "Ilimitado (sem vsync)",
+           "l.fpshint": "Acima de 50, as imagens intermédias são interpoladas entre os passos do jogo, que mantém a sua velocidade. Com o desenho por software cada imagem intermédia custa tanto como desenhar uma."},
+    "sv": {"c.fps": "Bildfrekvens", "fps.off": "50 (original)", "fps.auto": "Auto (skärmens uppdateringsfrekvens)", "fps.unl": "Obegränsad (utan vsync)",
+           "l.fpshint": "Över 50 interpoleras mellanbilderna mellan spelets steg; spelet behåller sin hastighet. Med mjukvarurenderaren kostar varje mellanbild lika mycket som att rita en bild."},
+    "da": {"c.fps": "Billedfrekvens", "fps.off": "50 (original)", "fps.auto": "Auto (skærmens opdateringshastighed)", "fps.unl": "Ubegrænset (uden vsync)",
+           "l.fpshint": "Over 50 interpoleres mellembillederne mellem spillets trin; spillet beholder sin hastighed. Med softwarerendereren koster hvert mellembillede lige så meget som at tegne et billede."},
+})

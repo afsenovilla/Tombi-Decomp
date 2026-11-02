@@ -70,7 +70,7 @@ void port_pacing_report(void) {
     }
 }
 int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
-int port_hz = 50; extern int port_fps60;                      /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
+int port_hz = 50; extern int port_hfr_fps;                     /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
 
 static void call_psx(void *fn) { ((void (*)(void))fn)(); }
 
@@ -410,8 +410,8 @@ void port_vblank(void) {
         vblank_n++;
         unsigned long long due = vblank_epoch_us + (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
         if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now;
-                                  if (port_fps60) { extern void port_fps60_wait(unsigned long long, unsigned long long, int); port_fps60_wait(due, period, 1); } }
-        else if (port_fps60) { extern void port_fps60_wait(unsigned long long, unsigned long long, int); port_fps60_wait(due, period, 1); port_prof_wait_us += port_time_us() - now; }
+                                  if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(due, period, 1); } }
+        else if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(due, period, 1); port_prof_wait_us += port_time_us() - now; }
         else if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; }
         {
             unsigned long long t = port_time_us();
@@ -435,6 +435,9 @@ void port_vblank(void) {
                 unsigned long long tot = t - t0, other = port_prof_draw_us + port_prof_wait_us + port_prof_present_us;
                 unsigned long long game = tot > other ? tot - other : 0;
                 char low[256]; port_low_second(low, sizeof low);
+                if (port_hfr_fps) {   /* --fps: the presents of this second, and how many of them were interpolated */
+                    extern void port_hfr_second(char *, int); size_t n = strlen(low); port_hfr_second(low + n, (int)(sizeof low - n));
+                }
                 port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu draw %llu.%llu present %llu.%llu wait %llu.%llu;%s\n",
                             (int)(nf * 100000000ull / tot / 100), (int)(nf * 100000000ull / tot % 100), port_frame, smp,
                             game / nf / 1000, game / nf / 100 % 10, port_prof_draw_us / nf / 1000, port_prof_draw_us / nf / 100 % 10,
@@ -445,7 +448,7 @@ void port_vblank(void) {
             }
         }
     }
-    else if (port_fps60) { extern void port_fps60_wait(unsigned long long, unsigned long long, int); port_fps60_wait(0, 20000, 0); }
+    else if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(0, 1000000ull / (unsigned)port_hz, 0); }
     port_frame++;
     if (port_in_game && game_start_frame < 0) game_start_frame = port_frame;
     for (int i = 0; i < n_pokes; i++)

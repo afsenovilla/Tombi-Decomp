@@ -130,7 +130,8 @@ int port_window_gl_start(void) {
     if (!win_hidden) {
         /* vsync: the swap blocks until the display's refresh; the pacing of shims/psyq.c is an absolute schedule,
            so its sleep shrinks by what the swap took (the fps line shows it as present) */
-        if (SDL_GL_SetSwapInterval(1) < 0) port_printf("[port2] vsync not available: %s\n", SDL_GetError());
+        extern int port_hfr_fps;   /* --fps unlimited: no vsync, the presents go as fast as they can */
+        if (SDL_GL_SetSwapInterval(port_hfr_fps == -2 ? 0 : 1) < 0) port_printf("[port2] vsync not available: %s\n", SDL_GetError());
     }
     return 0;
 }
@@ -437,7 +438,8 @@ static void window_frame_h(void *a) {
            on a window that carries its context would be a second device on the same window, on Windows a Direct3D
            one, and the picture would go to whichever surface the compositor shows last) */
         if (glctx) port_printf("[port2] note: an SDL_Renderer is created on the window that has the OpenGL context\n");
-        ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        extern int port_hfr_fps;
+        ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | (port_hfr_fps == -2 ? 0 : SDL_RENDERER_PRESENTVSYNC));
         if (!ren) ren = SDL_CreateRenderer(win, -1, 0);
         if (!ren) port_fatal("SDL_CreateRenderer: %s", SDL_GetError());
     }
@@ -473,7 +475,7 @@ int port_window_poll_pad(unsigned short *out) {
     return 1;
 }
 
-/* --fps60: the display's refresh rate (Hz), 0 = unknown (no window, or the driver does not say) */
+/* --fps auto: the display's refresh rate (Hz), 0 = unknown (no window, or the driver does not say) */
 static void refresh_h(void *a) {
     SDL_DisplayMode m;
     *(int *)a = !win || win_hidden || SDL_GetWindowDisplayMode(win, &m) < 0 ? 0 : m.refresh_rate > 0 && m.refresh_rate <= 360 ? m.refresh_rate : 0;

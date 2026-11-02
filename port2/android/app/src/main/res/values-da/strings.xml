@@ -20,7 +20,8 @@
     <string name="renderer_gl">OpenGL ES (eksperimentel)</string>
     <string name="opt_skipintro">Spring logoer og intro over</string>
     <string name="opt_hz60">60 Hz (NTSC-hastighed)</string>
-    <string name="opt_fps60">60 fps</string>
+    <string name="opt_fps">Billedfrekvens</string>
+    <string name="fps_unlimited">Ubegrænset</string>
     <string name="opt_showfps">Vis FPS</string>
     <string name="opt_inflives">Uendelige liv</string>
     <string name="opt_infhealth">Uendelig energi</string>

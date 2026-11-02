@@ -20,7 +20,8 @@
     <string name="renderer_gl">OpenGL ES (experimenteel)</string>
     <string name="opt_skipintro">Logo\'s en introfilm overslaan</string>
     <string name="opt_hz60">60 Hz (NTSC-snelheid)</string>
-    <string name="opt_fps60">60 fps</string>
+    <string name="opt_fps">Beeldsnelheid</string>
+    <string name="fps_unlimited">Onbeperkt</string>
     <string name="opt_showfps">FPS tonen</string>
     <string name="opt_inflives">Oneindig levens</string>
     <string name="opt_infhealth">Oneindige vitaliteit</string>

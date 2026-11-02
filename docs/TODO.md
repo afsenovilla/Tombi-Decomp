@@ -25,13 +25,15 @@
   overlay duplicates) and port the C; expect most game code to transfer, with differences in the text/font system
   (kana/kanji), the single-language file layout (no MAIN0-8) and older library revisions. Needs the user's disc image
   (kept out of the repo like the PAL one). Adapting the text editor to Japanese is a separate, larger task.
-- **[All platforms] High frame rates (90 / 120 / 144 FPS) at the original speed (port).** The game logic advances once per frame at
-  50 Hz (PAL), so uncapping simply speeds the game up (`--hz 60` = NTSC speed). Decouple drawing from logic: keep
-  the logic at 50 Hz and let the port draw in-between frames by interpolating the camera, 3D models (positions,
-  rotations, animation poses), sprites and 2D layers between the last two logic ticks, presenting at the display's
-  refresh rate. Handle the edge cases: objects spawned or removed this tick, teleports and camera cuts (no blend),
-  menus and message boxes (draw as-is), movies. Both renderers (software and GL), Android included; an option in
-  both launchers.
+- **[All platforms] High frame rates (90 / 120 / 144 FPS) at the original speed (port).** Done: `--fps
+  N|auto|unlimited` (docs/PORT.md "High frame rates"): the logic stays at 50 Hz, the presents run at the display's
+  refresh (auto), a cap or unlimited, the in-between ones re-drawn from the recorded draw list of the displayed frame
+  with every primitive blended towards where it was in the frame before (static / moved / animated sprites / streamed
+  backgrounds following the camera; new objects, scene changes, camera cuts, movies and the debug overlay not
+  blended), on the software and OpenGL renderers, PC and Android, with a *Frame rate* option in both launchers (default
+  50). Still open: the software renderer manages about one in-between frame per vblank on a slow CPU (a faster
+  rasteriser would lift that); a pre-projection variant (blending GTE inputs per object instead of screen positions)
+  would bend fast close-up rotations less but needs per-object tags through the game's draw code.
 - **[All platforms] Launcher language.** Done: Android *Options > Game > Launcher language* (Auto / nine languages,
   independent of the game language, applied without a restart; docs/PORT.md "Launcher language"), and both launchers
   translated into French, German, Italian, Dutch, Portuguese, Swedish and Danish (res/values-xx,

@@ -343,15 +343,16 @@ Plan:
 | libapi / BIOS | events, threads (`OpenTh/ChangeTh` ×6), critical sections, `SysEnqIntRP`, `FlushCache` | Done (coroutines, VSync event). |
 | libc | `memcpy` 51, `memset` 22, `sprintf`, `printf`, `rand` | Done (`shims/libc.c`); with a real libc, map onto it. |
 
-## 3. Timing and 60 fps
+## 3. Timing and high frame rates
 
 The game runs its logic in tasks woken by `ThreadTableRun` once per main-loop pass. The pass waits on the
 VBlank counter (`0x1F8001E8 < 0x1F8001EA`), so on PAL it runs at 50 Hz or 25 Hz.
 
 1. **M1: correct pacing (done).** Run the main loop at 50 Hz (PAL) or 60 Hz (NTSC timing option) from a host timer
    (`--realtime --hz 50|60`), with input sampled per VBlank. The game logic stays untouched.
-2. **M5: interpolated rendering at the display rate.** Keep the simulation at its native tick and render extra
-   frames in between:
+2. **M5: interpolated rendering at the display rate (done as `--fps`, see "High frame rates" below; it went the
+   screen-space way of the last-but-two point, on recorded draw lists, not the matrix hooks).** Keep the simulation
+   at its native tick and render extra frames in between (the original plan):
    - Snapshot what the renderer needs after each logic tick. These are object positions and rotations (TObj
      position/velocity fields, `objectsOverlap`/`AnimAdvance` users), the camera/section scroll
      (`initSectionCamera` state), and the 2D layer offsets.
@@ -440,7 +441,7 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   app's entry: *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
   with the chosen flags as `argv[1..]`, which `loader.c` puts after its defaults and before `files/args.txt` (still
   read, so it overrides). *Opciones* (SharedPreferences): `--lang` 0/5/6/7/8, `--aspect auto|4:3|16:9|21:9`,
-  `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps60`, `--show-fps`, infinite
+  `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps off|auto|60|90|120|144|unlimited` (*Gráficos*), `--show-fps`, infinite
   lives/health (the `tools/port_mods.py` pokes). *Disco*: the player picks their own disc image on the device
   (SAF `ACTION_OPEN_DOCUMENT`, `.bin`/`.iso`/`.chd` or `.cue`+`.bin`): read in place through the provider's file
   descriptor (`/proc/self/fd/N`; a `.chd` is recognised by its magic) or, for a stream-only provider, copied to the
@@ -625,7 +626,7 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 | M3 | SYSTEM overlays | decompile (or non-matching C) O?PTSUB0, D?SPSUB*, G?OVER, I?NFO*; MDEC + STR movies or skip | 3–6 weeks |
 | M4 | All areas | per-area symbol prefixing + overlay dispatch, fix register-carried calls and other ABI issues found by playing every area; correctness audit vs. an emulator (RAM diff per frame on the same inputs: compare the native build to PCSX/Duckstation traces) | 3–5 weeks |
 | M5 | Sound | software SPU + libsnd on the console's tick, XA audio of the movies (**done** in `port2/`, "Audio" below) | 2–3 weeks |
-| M6 | GL renderer + enhancements | GLES3/GL3 backend, internal resolution, widescreen, PGXP-style precision, **interpolated 60 fps** | 3–4 weeks |
+| M6 | GL renderer + enhancements | GLES3/GL3 backend, internal resolution, widescreen, PGXP-style precision, **interpolated high frame rates** (`--fps`, both renderers: done) | 3–4 weeks |
 | M7 | Android | SDL android project, armeabi-v7a (**APK builds in CI**, §4 "Status"; device testing pending), SAF disc import, touch controls; then the 64-bit pointer model for arm64 | 2 weeks (+3–4 weeks for 64-bit) |
 
 **Main blockers today:**
@@ -2447,6 +2448,104 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
 
+### High frame rates: `--fps N|auto|unlimited` (both renderers, PC and Android)
+
+The game logic keeps advancing once per vblank (50 Hz PAL; `--hz 60` = NTSC speed), so audio, physics and every timer
+are unchanged; only the *presents* get their own clock: `--fps auto` = the display's refresh rate (60 if unknown or
+headless), `--fps 60|90|120|144|N` = that many per second, `--fps unlimited` = as fast as they go with vsync off. 50 or
+less, or `off`, is the old one-present-per-vblank path (the default). `--fps60` (the earlier experimental OpenGL-only
+switch) is now `--fps auto`. Launchers: PC *Graphics* page, card *Frame rate* (50 (original) / Auto / 60 / 90 / 120 /
+144 / Unlimited); Android *Opciones → Gráficos → Frame rate* (same list; the old *60 fps* switch reads as Auto). The
+code is `port2/shims/hfr.inc` (included by `gpu.c`) plus the snapshot / work-target helpers at the end of `gpu_gl.c`.
+
+How it works:
+- **Recording.** While `--fps` is on, every operation the GP0 decoder hands to the backend is also appended to the
+  record of the current vblank, renderer-independent: polygons as whole packets (3 or 4 vertices), sprites, lines,
+  fills, VRAM copies, host uploads *with their pixels*, the `--widescreen` wide-plane fills / copies / uploads, each
+  with the GP0 state (drawing area, offset, blend mode, mask, texture window, plane) it was drawn with. A record starts
+  with a snapshot of VRAM and the wide plane: software, a copy of `vram[]`/`wvram[]` (1 MB, 3 MB with widescreen);
+  OpenGL, a GPU copy of the VRAM texture (and wide plane) per record slot. Four slots are kept.
+- **Which frame is on display.** The game flips right after the vblank (`FlipFrame`: `PutDispEnv` + `DrawOTag`), so the
+  pairing runs at the first present after it: the newest closed record that drew into the displayed area is the
+  displayed frame C; when it changes, it is paired with the frame displayed before it, P.
+- **Identity.** A primitive is "the same one" in P and C when its signature matches: kind, vertex count, flags, blend
+  mode, plane, texture page and CLUT, and the texture coordinates of every vertex (a sprite: also its size). Positions
+  are compared relative to the origin of each one's drawing area, so the two halves of the double buffer line up. The
+  game's C moves GTE results through ordinary memory before they reach a packet, so a tag on the GTE output would not
+  survive to the GPU (and models are instanced); the texture coordinates of a face are fixed by its model and are the
+  stable part. Untextured primitives match by kind/flags and position alone.
+- **Pairing** (about 50 µs a frame), in rounds of increasing distance so the closest candidate always wins: (1) same
+  signature at the same place (scenery that did not move, the HUD, text); (2) same signature within 2, 6, 16, 40
+  pixels, each vertex its own delta (3D faces turn and scale); (3) animated sprites (texture coordinates changed: a new
+  animation frame) by page / CLUT / kind and a similar size within 4, 24 pixels, moved by their centre. Primitives
+  whose texels were rewritten between P and C (a background streamed into a ring of texture columns as the camera
+  moves, as Baccus village does: the same u/v then shows a different picture) only match in place; when they moved,
+  they take the motion most of the other moved primitives share (the camera's). A primitive with no partner (it
+  appeared this frame) is drawn where it is now; one that disappeared is not drawn.
+- **No blend** for a frame where fewer than a quarter of the primitives found a partner (scene change, room load),
+  where more primitives jumped further than any round allows than moved (camera cut, a teleport of everything), where
+  nothing moved (no replay needed), for 24-bit frames (the movies), a blank display, while the `--debug-menu` overlay
+  is drawn, and when the display size or plane changed. The presents then show the frame as the game drew it.
+- **Replay.** A present at alpha (0 = P, 1 = C) replays C on its snapshot, each vertex at C + (P − C)·(1 − alpha), with
+  the textures, colours, uploads and everything else from C. Software: into a work copy that `vram`/`wvram` (now
+  pointers) are pointed at; OpenGL: into work targets that stand in for the VRAM texture / wide plane while the replay
+  runs. Either way the normal present path (`present_window`, the frame dumps) then shows it, so widescreen, the 4:3 /
+  square fit, `--show-fps` and the 24-bit path need nothing special. With `--internal-res` > 1 the OpenGL backend keeps
+  the sub-pixel part of the interpolated positions (`port_gpu_subpx`), so a camera moving 1 px per frame still glides
+  in half / quarter pixels; the software renderer and 1x work in whole pixels.
+- **Clock.** `port_vblank` (psyq.c) calls `port_hfr_wait` instead of its pacing sleep: presents at the chosen rate until
+  the next vblank is due, alpha from the time since the displayed frame came up over the time its predecessor was shown
+  (one vblank at full rate; up to 3 when the game draws at 25 or 16.7 fps). A present is not started when the last
+  replay's cost would push it past the vblank, so a slow machine gets fewer in-between frames, never a slower game.
+  Headless (no `--realtime`) runs use a virtual clock at the `--fps` rate. One logic frame of display latency is
+  inherent (the blend runs between the last two finished frames), the same as the old present-at-vblank path.
+- **The second-screen panel** (`--second-screen`) is its own window drawn from its own vblank hook: unaffected.
+
+Measured (this VM: Xeon 2.8 GHz, Mesa llvmpipe for OpenGL, i.e. the GPU work is on the CPU too; AREA00 scrolling):
+pairing 50-60 µs per new frame; a replay costs about what drawing the frame costs: software 5-9 ms (the frame itself
+takes 7-9 ms here), OpenGL on llvmpipe 2.5-4.7 ms (on a real GPU this is the CPU cost of re-submitting ~500 primitives,
+a fraction of a millisecond). Windowed under Xvfb at `--fps 120`: OpenGL 111-115 presents/s, 50.0 vblanks/s; software
+~50 presents/s (one in-between frame per vblank: the rasteriser is the limit on this VM; the game speed stays 50.0).
+The software rasteriser's edge functions were made incremental 32-bit (exactly the same pixels: 68 frame dumps of the
+AREA00 run byte-identical to master) and the run got ~25 % faster, which helps both paths.
+
+Smoothness, headless at `--fps 120` (2.4 presents per vblank), mean absolute difference between consecutive presents
+(cv = its coefficient of variation: 0 = perfectly even motion; "repeats" = presents identical to the one before):
+
+| scene | 50 fps shown at 120 Hz | `--fps 120` |
+|---|---|---|
+| AREA00 side-scrolling, walking right (soft and GL) | repeats 59 %, cv 1.20 | repeats 0 %, cv 0.32 |
+| AREA02 s3 top-down tunnel, walking | repeats 59 %, cv 1.22 | repeats 0 %, cv 0.69 |
+| AREA05 s0 Baccus village (3D, prerendered streamed background), walking diagonally, software 1x | repeats 59 %, cv 1.21 | repeats 21 %, cv 1.07 (the camera moves ~1 px a frame: no whole-pixel position in between) |
+| the same, OpenGL `--internal-res 2` | (same) | repeats 0 %, cv 0.34 |
+| AREA03 s0 dialogue with the event title flying in | repeats 59 %, cv 1.60 | repeats 0 %, cv 0.73 |
+| item menu, message box text | static: presented as drawn (the cursor move is blended) | |
+| synthetic camera cut (`PORT_HFR_TEST_CUT=3270:120`: every polygon from vblank 3270 on moved 120 px) | | detected, not blended: one jump, then blending resumes |
+| room load (debug select, AREA03 s0 loading screen → room) | | detected as scene changes, not blended |
+| boot logos / 24-bit frames | | presented as drawn (0 interpolated) |
+
+Test hooks: `--dump-presents DIR[:FROM:TO]` writes every present of vblanks FROM..TO (at the internal resolution on
+OpenGL with `--internal-res` > 1); `-v` prints each present's alpha, `-v -v` each pairing (static / moved / animated /
+with the camera / new / jumped); the exit line `[fps] ...` sums presents, costs and the pairing shares; `--show-fps`
+adds presents/s and the replay cost to the fps line. `PORT_HFR_NOBLEND=1` makes the same presents without the blend
+(for comparisons) and `PORT_HFR_TEST_CUT=FRAME:DX` moves every polygon by DX from FRAME on (a camera cut).
+
+Known limitations:
+- Screen-space blending: a polygon is moved linearly between its two projected positions; fast rotations close to
+  the camera bend slightly in between (true for any screen-space method; the game gives no pre-projection data that
+  survives to the GPU). Motion under one pixel per frame cannot be split at 1x (software renderer, or OpenGL at 1x).
+- Identity by texture coordinates: identical faces near each other (repeated tiles, several copies of a model) are
+  disambiguated only by distance; a fast object (> 40 px a frame) or one that changes texture page is drawn
+  unblended where it is now; an animated sprite changing size by more than a third is treated as new.
+- With the software renderer every in-between present re-rasterises the frame: it needs a CPU where a frame takes well
+  under 1000 / fps ms (here ~1 in-between frame per vblank). OpenGL is the renderer to use for 90-144 Hz.
+- OpenGL memory: four snapshots of the VRAM texture (and wide plane) at the internal resolution: 32 MB at 1x
+  (+wide 64 MB), 4x that at 2x internal resolution. A record that grows past 400,000 operations is not used.
+- One logic frame of latency (as before); render-to-texture effects are replayed from the newest frame, not blended.
+
+Recommendation: keep the default at 50 (off) for now and offer Auto as the suggested choice for OpenGL; the PC and
+Android launchers both default to 50.
+
 ### HD (plan; phase 1 prototyped): `--internal-res N`
 
 Three phases, all on the OpenGL backend only (the software renderer stays the reference and keeps 1x):
@@ -2604,7 +2703,7 @@ buttons held when it closes are kept from the game until released.
 
 Launcher modifiers that are safe live, and are in the menu: infinite vitality, infinite lives, AP, all events,
 `--cut-content` (next room). Not live (boot-time only): `--skip-intro`, `--hz`, the area select / title DEBUG
-entry, `--lang`, `--widescreen`, `--renderer`, `--fps60`, `--internal-res`.
+entry, `--lang`, `--widescreen`, `--renderer`, `--fps`, `--internal-res`.
 
 Hooks, all inert without the flag: `shims/pad.c` (input), `shims/gpu.c` `port_gpu_vblank` (the overlay: GP0-02
 style fills into the displayed frame before the present and the dump, so it shows on both renderers, in
@@ -2882,7 +2981,7 @@ a PC. Everything the PC launcher (`tools/port_launcher.py`, `tools/port_mods.py`
 | rebuilt cut towns (`civ_rebuild.py`, `civ_test_data.py`) | `civ_cache/maps`, `civ_cache/wfm`, `--civ-maps/--civ-wfm` | **not native yet** (only for the "Cut content" town buttons / `--civ-route`); same approach as `.tpatch` would work for the WFM banks, the maps need the generator in C |
 | button-prompt glyphs (`prompt_glyphs.py`, mod) | `prompts-*.tbtx` + `--patch-tex` | not native (optional mod) |
 | mods (`port_mods.py`) | flags only: `--skip-intro`, `--hz`, `--poke`, `--poke-every`, `--pad-script`, `--title-debug`, `--debug-menu`, `--civ-*` | already flags: any launcher can pass them |
-| window options | `--window --scale --renderer --aspect --internal-res --fps60 --lang --save-dir --texture-pack --fullscreen --show-fps` | already flags |
+| window options | `--window --scale --renderer --aspect --internal-res --fps --lang --save-dir --texture-pack --fullscreen --show-fps` | already flags |
 
 **CHD images.** `port2/shims/cd_chd.c` opens the `.chd` with libchdr, reads the CHT2 (or CHTR) track metadata and
 maps disc LBA n to CHD frame n of track 1 (plus its stored pregap when PGTYPE is `V...`); later tracks follow at their

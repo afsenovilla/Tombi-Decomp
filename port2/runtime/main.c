@@ -298,7 +298,7 @@ static int port_ws_resolve(void) {
 
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
-                "       [--renderer gl|soft] [--internal-res 1..4] [--fps60] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
+                "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
@@ -309,7 +309,9 @@ static int usage(const char *argv0) {
                 "  the default is a window (SDL2) paced at 50 Hz; --headless runs as fast as possible without one\n"
                 "  --renderer gl (default with a window) draws with OpenGL, soft with the software rasteriser (headless default)\n"
                 "  --internal-res N (OpenGL) renders at N x the PS1 resolution (1 = original); --dump-frames also writes hd_*.png\n"
-                "  --fps60 (OpenGL, experimental) presents frames interpolated between the 50 Hz logic steps\n"
+                "  --fps N|auto|unlimited presents N frames a second (auto: the display's refresh rate; unlimited: no vsync), the\n"
+                "  in-between ones interpolated between the 50 Hz logic steps; the game runs at its normal speed (both renderers;\n"
+                "  50 or off = one frame per vblank, the default; --fps60 = --fps auto)\n"
                 "  --dump-textures DIR writes every texture drawn as PNG; --texture-pack DIR (OpenGL) draws the PNGs of a pack\n"
                 "  instead (any integer scale; docs/PORT.md \"Texture packs\")\n", argv0);
     return 2;
@@ -942,7 +944,22 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--window")) headless = 0;
         else if (!strcmp(a, "--scale") && v) port_window_scale = atoi(argv[++i]);
         else if (!strcmp(a, "--fit")) { extern int port_window_fill; port_window_fill = 1; }
-        else if (!strcmp(a, "--fps60")) { extern int port_fps60; port_fps60 = 1; }
+        else if (!strcmp(a, "--fps60")) { extern int port_hfr_fps; port_hfr_fps = -1; }
+        else if (!strcmp(a, "--fps") && v) {
+            extern int port_hfr_fps; const char *f = argv[++i];
+            port_hfr_fps = !strcmp(f, "auto") ? -1 : !strcmp(f, "unlimited") ? -2 : !strcmp(f, "off") ? 0 : atoi(f);
+            if (port_hfr_fps > 0 && port_hfr_fps <= 50) port_hfr_fps = 0;      /* (the game's own rate: nothing to add) */
+            if (port_hfr_fps > 1000) port_hfr_fps = 1000;
+        }
+        else if (!strcmp(a, "--dump-presents") && v) {
+            extern const char *port_hfr_dump_dir; extern int port_hfr_dump_from, port_hfr_dump_to;
+            static char dbuf[512]; snprintf(dbuf, sizeof dbuf, "%s", argv[++i]);
+            char *c = strrchr(dbuf, ':');
+            if (c && c > dbuf && strchr(dbuf, ':') != c) {           /* DIR:FROM:TO */
+                *c = 0; port_hfr_dump_to = atoi(c + 1); c = strrchr(dbuf, ':'); *c = 0; port_hfr_dump_from = atoi(c + 1);
+            }
+            port_hfr_dump_dir = dbuf;
+        }
         else if (!strcmp(a, "--internal-res") && v) { extern int port_internal_res; port_internal_res = atoi(argv[++i]); if (port_internal_res < 1) port_internal_res = 1; if (port_internal_res > 4) port_internal_res = 4; }
         else if (!strcmp(a, "--renderer") && v) {
             extern int port_renderer;

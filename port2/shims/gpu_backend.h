@@ -35,7 +35,12 @@ typedef struct {
     int set_mask, check_mask;
     int wide;                       /* --widescreen: this primitive goes to the wide plane (gpu.c ws_begin), its x/clip in wide columns */
 } GpuState;
-extern GpuState port_gs;            /* the current GP0 E1..E6 state (gpu.c); the backends read it per primitive */
+extern GpuState port_gs;
+/* --fps replays (gpu.c hfr.inc): the sub-pixel part of the interpolated positions of the vertices of the primitive being
+   drawn (tri: a, b, c; rect: the corner; line: both ends), in pixels; only while port_gpu_subpx_on.  The OpenGL backend
+   adds them at internal resolutions above 1x; the software rasteriser works in whole pixels and ignores them. */
+extern float port_gpu_subpx[3][2];
+extern int port_gpu_subpx_on;            /* the current GP0 E1..E6 state (gpu.c); the backends read it per primitive */
 
 typedef struct {
     const char *name;

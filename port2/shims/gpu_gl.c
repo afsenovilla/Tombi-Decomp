@@ -250,7 +250,7 @@ static GLuint link(const char *vs, const char *fs, const char *what) {
 typedef struct { float x, y; u8 r, g, b, a; float u, v; u16 cx, cy, tx, ty; } GVtx;     /* 28 bytes */
 typedef struct { int semi, abr, tex, raw, twmx, twmy, twox, twoy, x1, y1, x2, y2, set_mask, check_mask, prim, wide;
                  unsigned rep; int rou, rov, rw, rh; } Key;     /* rep..: --texture-pack (PortTexRep), 0 = none */
-enum { OP_DRAW, OP_FILL, OP_COPY, OP_UPLOAD, OP_WSDOWN };   /* (the last two only in --fps60 records) */
+enum { OP_DRAW, OP_FILL, OP_COPY };
 #define MAX_SAMPLED 12
 typedef struct { int kind; Key key; int first, count; int r[6]; u16 col; int ns; short sr[MAX_SAMPLED][4]; } Op;   /* sr: VRAM rectangles the batch samples */
 
@@ -326,9 +326,6 @@ static void make_key(Key *k, int semi, int tex, int raw, int prim) {
 }
 static void key_rep(Key *k, const PortTexRep *r) { k->rep = r->gltex; k->rou = r->ou; k->rov = r->ov; k->rw = r->w; k->rh = r->h; }
 static void submit(void);
-static int rec_on;                  /* --fps60: the decoded primitives of this vblank are recorded (fps60 below) */
-static void rec_prim(const GVtx *v, int n, const Key *k);
-static void rec_hostop(int kind, int a, int b, int c, int d, int e, int f);
 /* x0..y1: the primitive's bounding box.  A textured semi-transparent batch is drawn in two passes (all its opaque
    texels, then all its semi-transparent ones), which reorders overlapping primitives of one batch: a later sprite's
    opaque texels ended under an earlier sprite's blended ones (the HUD "AP" label, raw semi-transparent glyphs
@@ -372,11 +369,13 @@ static void gl_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade,
     if (tex && tex->rep) key_rep(&k, tex->rep);
     int bx0 = a->x < b->x ? a->x : b->x, bx1 = a->x > b->x ? a->x : b->x, by0 = a->y < b->y ? a->y : b->y, by1 = a->y > b->y ? a->y : b->y;
     if (c->x < bx0) bx0 = c->x; if (c->x > bx1) bx1 = c->x; if (c->y < by0) by0 = c->y; if (c->y > by1) by1 = c->y;
-    GVtx *v = alloc_vtx(3, &k, tex, bx0, by0, bx1 + 1, by1 + 1);
-    set_vtx(v + 0, a->x + POLY_SHIFT, a->y + POLY_SHIFT, a->r, a->g, a->b, (float)a->u, (float)a->v, tex);
-    set_vtx(v + 1, b->x + POLY_SHIFT, b->y + POLY_SHIFT, b->r, b->g, b->b, (float)b->u, (float)b->v, tex);
-    set_vtx(v + 2, c->x + POLY_SHIFT, c->y + POLY_SHIFT, c->r, c->g, c->b, (float)c->u, (float)c->v, tex);
-    if (rec_on) rec_prim(v, 3, &k);
+    float sp[3][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 } };
+    int m = port_gpu_subpx_on && R > 1;          /* (a sub-pixel replay: the box grows by the pixel it may cross) */
+    if (m) memcpy(sp, port_gpu_subpx, sizeof sp);
+    GVtx *v = alloc_vtx(3, &k, tex, bx0 - m, by0 - m, bx1 + 1 + m, by1 + 1 + m);
+    set_vtx(v + 0, a->x + POLY_SHIFT + sp[0][0], a->y + POLY_SHIFT + sp[0][1], a->r, a->g, a->b, (float)a->u, (float)a->v, tex);
+    set_vtx(v + 1, b->x + POLY_SHIFT + sp[1][0], b->y + POLY_SHIFT + sp[1][1], b->r, b->g, b->b, (float)b->u, (float)b->v, tex);
+    set_vtx(v + 2, c->x + POLY_SHIFT + sp[2][0], c->y + POLY_SHIFT + sp[2][1], c->r, c->g, c->b, (float)c->u, (float)c->v, tex);
 }
 static void gl_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, int u0, int v0, int semi, int raw) {
     Key k;
@@ -387,10 +386,11 @@ static void gl_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, int 
     /* texel (u0 + i, v0 + j) for pixel (x + i, y + j): uv runs u0..u0 + w over the pixel span, truncated in the shader */
     float ua = (float)u0, ub = (float)(u0 + w), va = (float)v0, vb = (float)(v0 + h);
     float xa = (float)x, xb = (float)(x + w), ya = (float)y, yb = (float)(y + h);
-    GVtx *v = alloc_vtx(6, &k, tex, x, y, x + w, y + h);
+    int m = port_gpu_subpx_on && R > 1;
+    if (m) { xa += port_gpu_subpx[0][0]; xb += port_gpu_subpx[0][0]; ya += port_gpu_subpx[0][1]; yb += port_gpu_subpx[0][1]; }
+    GVtx *v = alloc_vtx(6, &k, tex, x - m, y - m, x + w + m, y + h + m);
     set_vtx(v + 0, xa, ya, r, g, b, ua, va, tex); set_vtx(v + 1, xb, ya, r, g, b, ub, va, tex); set_vtx(v + 2, xa, yb, r, g, b, ua, vb, tex);
     set_vtx(v + 3, xb, ya, r, g, b, ub, va, tex); set_vtx(v + 4, xb, yb, r, g, b, ub, vb, tex); set_vtx(v + 5, xa, yb, r, g, b, ua, vb, tex);
-    if (rec_on) rec_prim(v, 6, &k);
 }
 static void gl_line(int x0, int y0, u32 c0, int x1, int y1, u32 c1, int shade, int semi) {
     Key k;
@@ -404,7 +404,6 @@ static void gl_line(int x0, int y0, u32 c0, int x1, int y1, u32 c1, int shade, i
     set_vtx(v + 0, x0 + 0.5f, y0 + 0.5f, c0 & 255, (c0 >> 8) & 255, (c0 >> 16) & 255, 0, 0, 0);
     set_vtx(v + 1, x1 + 0.5f + ex, y1 + 0.5f + ey, c1 & 255, (c1 >> 8) & 255, (c1 >> 16) & 255, 0, 0, 0);
     if (len == 0) { v[1].x += 0.75f; }        /* a single point: a short horizontal line */
-    if (rec_on) rec_prim(v, 2, &k);
 }
 static void gl_fill(int x, int y, int w, int h, u16 c) {
     if (!gl_ready) return;
@@ -472,10 +471,8 @@ static void draw_op(const Op *op, int pass) {
     if (!k->wide) dirty_add(k->x1, k->y1, k->x2, k->y2);
     stat_draws++;
 }
-static void rec_append(void);
 static void submit(void) {
     if (!gl_ready || !n_ops) { n_vtx = n_ops = 0; return; }
-    if (rec_on) rec_append();
     bind_vram_fbo();
     p_glEnable(GL_SCISSOR_TEST);
     p_glUseProgram(prog);
@@ -552,7 +549,6 @@ static void gl_vram_written(int x, int y, int w, int h) {
     for (int j = 0; j < h; j++) memcpy(stage + j * w, vram + (y + j) * 1024 + x, (size_t)w * 2);
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
     upload_stage(x, y, w, h);
-    if (rec_on) rec_hostop(OP_UPLOAD, x, y, w, h, 0, 0);
 }
 static void gl_vram_read(int x, int y, int w, int h) {
     if (!gl_ready) return;
@@ -592,7 +588,6 @@ static void gl_ws_copy_down(int wx, int wy, int vx, int vy, int w, int h) {
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
     p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, vx * R, vy * R, wx * R, wy * R, w * R, h * R);
     bind_vram_fbo();
-    if (rec_on) rec_hostop(OP_WSDOWN, wx, wy, vx, vy, w, h);
 }
 static void gl_ws_upload(int wx, int wy, int w, int h, const u16 *src, int stride) {
     if (!gl_ready || !wide_fbo || w <= 0 || h <= 0) return;
@@ -601,7 +596,6 @@ static void gl_ws_upload(int wx, int wy, int w, int h, const u16 *src, int strid
     p_glBindTexture(GL_TEXTURE_2D, wide_tex);
     upload_stage(wx, wy, w, h);
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
-    if (rec_on) rec_hostop(OP_UPLOAD, wx, wy, w, h, 1, 0);
 }
 static void gl_ws_read(int wx, int wy, int w, int h, u16 *dst, int stride) {
     if (!gl_ready || !wide_fbo || w <= 0 || h <= 0) return;
@@ -756,55 +750,16 @@ int port_gl_frame_hd(gpu_u8 *rgb, int x, int y, int w, int h, int wide, int *ow,
     return 0;
 }
 
-/* ------------------------------------------------------------------ --fps60 (experimental): interpolated presents
-   Every vblank's list (the batched ops and their vertices, one entry per primitive with its signature) is recorded,
-   with a copy of VRAM (and the wide plane) taken before its first op.  At each vblank the record that drew the
-   displayed area is paired with the one displayed a vblank earlier: each primitive is matched to one of the earlier
-   frame (same signature: kind, state, texture page, CLUT and u/v; then a looser pass without u/v for animated sprites,
-   moved as a whole by its centroid), positions compared relative to the drawing area so the two buffers of the double
-   buffer line up.  A match that moved more than FPS60_JUMP pixels (a camera cut, a teleport, a wrong pairing) is not
-   interpolated.  A present at alpha (0 = the earlier frame, 1 = the displayed one) replays the displayed record on
-   work copies of the targets, every matched vertex moved back by (1 - alpha) of its delta, and shows that.  Only
-   when --fps60 is on; nothing here runs otherwise. */
-#define FPS60_JUMP 32.0f
-#define FPS60_JUMP_LOOSE 24.0f
-#define NREC 4
-typedef struct { int v0, n; float ox, oy; u32 sig, lsig; } RPrim;
-typedef struct {
-    unsigned id;                        /* 0 = being recorded / empty */
-    Op *ops; int nops, capops;
-    GVtx *v; int nv, capv;
-    RPrim *p; int np, capp;
-    float *d;                           /* per vertex: (earlier - this) x, y; valid for the displayed record of a pair */
-    GLuint snapV, snapVfbo, snapW, snapWfbo; int snapped;
-} Rec;
-static Rec recs[NREC];
-static int rc, replaying, f60_init, pair_ok;
-static unsigned rec_seq, d_cur;
-static int d_x, d_y, d_w, d_h, d_wide;
-static GLuint workV, workVfbo, workW, workWfbo;
-static void *grow(void *p, int *cap, int need, size_t sz) {
-    if (need <= *cap) return p;
-    int c = *cap ? *cap : 1024;
-    while (c < need) c *= 2;
-    p = SDL_realloc(p, (size_t)c * sz);
-    if (!p) port_fatal("fps60: out of memory");
-    *cap = c;
-    return p;
-}
-static u32 hmix(u32 h, u32 v) { return (h ^ v) * 16777619u; }
-static void rec_prim(const GVtx *v, int n, const Key *k) {
-    Rec *r = &recs[rc];
-    r->p = (RPrim *)grow(r->p, &r->capp, r->np + 1, sizeof(RPrim));
-    RPrim *p = &r->p[r->np++];
-    p->v0 = r->nv + (int)(v - vtx); p->n = n; p->ox = (float)k->x1; p->oy = (float)k->y1;
-    u32 h = 2166136261u;
-    h = hmix(h, (u32)n); h = hmix(h, (u32)(k->semi | k->abr << 1 | k->tex << 3 | k->raw << 5 | k->wide << 6)); h = hmix(h, (u32)k->prim);
-    h = hmix(h, (u32)v->cx | (u32)v->cy << 16); h = hmix(h, (u32)v->tx | (u32)v->ty << 16);
-    p->lsig = h;
-    if (k->tex) for (int i = 0; i < n; i++) h = hmix(h, (u32)(int)v[i].u | (u32)(int)v[i].v << 16);
-    p->sig = h;
-}
+/* ------------------------------------------------------------------ --fps: snapshots and work targets
+   gpu.c (hfr.inc) records every vblank's drawing operations and replays the displayed one with interpolated vertices
+   for the in-between presents.  The GL side only keeps copies of the VRAM texture (and the wide plane) as they were
+   when each record started (one per record slot), and the work targets a replay draws into: while a replay runs,
+   vram_tex / fbo (wide_tex / wide_fbo) are the work targets, so every backend function, the presents and the
+   readbacks see the replayed frame.  Nothing here runs without --fps. */
+#define HFR_SLOTS 4
+static GLuint snapV[HFR_SLOTS], snapVfbo[HFR_SLOTS], snapW[HFR_SLOTS], snapWfbo[HFR_SLOTS];
+static GLuint workV, workVfbo, workW, workWfbo, sv_tex, sv_fbo, sv_wtex, sv_wfbo;
+static int sv_dirty[5], hfr_swapped;
 static void new_target(int w, int h, GLuint *tex, GLuint *fb) {
     p_glGenTextures(1, tex);
     p_glBindTexture(GL_TEXTURE_2D, *tex);
@@ -825,203 +780,41 @@ static void copy_target(GLuint src_fb, GLuint dst_tex, int w, int h) {
     p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w * R, h * R);
     bound_wide = -1;
 }
-static void rec_append(void) {
-    Rec *r = &recs[rc];
-    if (!r->snapped) {
-        if (!r->snapV) new_target(1024, 512, &r->snapV, &r->snapVfbo);
-        copy_target(fbo, r->snapV, 1024, 512);
-        if (wide_fbo) { if (!r->snapW) new_target(2048, 512, &r->snapW, &r->snapWfbo); copy_target(wide_fbo, r->snapW, 2048, 512); }
-        p_glBindTexture(GL_TEXTURE_2D, vram_tex);
-        r->snapped = 1;
-    }
-    r->ops = (Op *)grow(r->ops, &r->capops, r->nops + n_ops, sizeof(Op));
-    r->v = (GVtx *)grow(r->v, &r->capv, r->nv + n_vtx, sizeof(GVtx));
-    for (int i = 0; i < n_ops; i++) { Op *o = &r->ops[r->nops++]; *o = ops[i]; if (o->kind == OP_DRAW) o->first += r->nv; }
-    memcpy(r->v + r->nv, vtx, (size_t)n_vtx * sizeof(GVtx));
-    r->nv += n_vtx;
-}
-static void rec_hostop(int kind, int a, int b, int c, int d, int e, int f) {
-    Rec *r = &recs[rc];
-    if (!r->snapped) return;             /* (before the snapshot: already in it) */
-    r->ops = (Op *)grow(r->ops, &r->capops, r->nops + 1, sizeof(Op));
-    Op *o = &r->ops[r->nops++];
-    memset(o, 0, sizeof *o);
-    o->kind = kind; o->r[0] = a; o->r[1] = b; o->r[2] = c; o->r[3] = d; o->r[4] = e; o->r[5] = f;
-}
-static Rec *rec_by_id(unsigned id) {
-    for (int i = 0; i < NREC; i++) if (id && recs[i].id == id) return &recs[i];
-    return 0;
-}
-/* the deltas of C's vertices towards the matching primitives of P */
-static void pair(Rec *C, Rec *P) {
-    enum { HB = 4096, SCAN = 64 };
-    static int head[HB], lhead[HB], *nx, *lnx, capn; static unsigned char *used, *done; static int capu, capd;
-    C->d = (float *)SDL_realloc(C->d, (size_t)(C->nv ? C->nv : 1) * 2 * sizeof(float));
-    if (!C->d) { pair_ok = 0; return; }
-    memset(C->d, 0, (size_t)C->nv * 2 * sizeof(float));
-    nx = (int *)grow(nx, &capn, P->np * 2 + 1, sizeof(int)); lnx = nx + P->np;
-    used = (unsigned char *)grow(used, &capu, P->np + 1, 1); memset(used, 0, (size_t)P->np);
-    done = (unsigned char *)grow(done, &capd, C->np + 1, 1); memset(done, 0, (size_t)C->np);
-    for (int i = 0; i < HB; i++) head[i] = lhead[i] = -1;
-    for (int i = P->np - 1; i >= 0; i--) {
-        u32 b = P->p[i].sig % HB, lb = P->p[i].lsig % HB;
-        nx[i] = head[b]; head[b] = i; lnx[i] = lhead[lb]; lhead[lb] = i;
-    }
-    int exact = 0, loose = 0;
-    for (int pass = 0; pass < 2; pass++)
-        for (int i = 0; i < C->np; i++) {
-            const RPrim *c = &C->p[i];
-            if (done[i]) continue;
-            const GVtx *cv = C->v + c->v0;
-            float ccx = 0, ccy = 0;
-            for (int k = 0; k < c->n; k++) { ccx += cv[k].x - c->ox; ccy += cv[k].y - c->oy; }
-            ccx /= c->n; ccy /= c->n;
-            int best = -1, scan = 0; float bd = pass ? FPS60_JUMP_LOOSE : FPS60_JUMP, bdx = 0, bdy = 0;
-            for (int j = pass ? lhead[c->lsig % HB] : head[c->sig % HB]; j >= 0 && scan < SCAN; j = pass ? lnx[j] : nx[j]) {
-                const RPrim *q = &P->p[j];
-                if (used[j] || q->n != c->n || (pass ? q->lsig != c->lsig : q->sig != c->sig)) continue;
-                scan++;
-                const GVtx *qv = P->v + q->v0;
-                float m = 0, qcx = 0, qcy = 0;
-                for (int k = 0; k < c->n; k++) {
-                    float dx = (qv[k].x - q->ox) - (cv[k].x - c->ox), dy = (qv[k].y - q->oy) - (cv[k].y - c->oy);
-                    qcx += qv[k].x - q->ox; qcy += qv[k].y - q->oy;
-                    if (!pass) { if (dx < 0) dx = -dx; if (dy < 0) dy = -dy; if (dx > m) m = dx; if (dy > m) m = dy; }
-                }
-                if (pass) {
-                    float dx = qcx / c->n - ccx, dy = qcy / c->n - ccy;
-                    m = dx < 0 ? -dx : dx; if ((dy < 0 ? -dy : dy) > m) m = dy < 0 ? -dy : dy;
-                    if (m < bd) { bdx = dx; bdy = dy; }
-                }
-                if (m < bd) { bd = m; best = j; if (m == 0) break; }
-            }
-            if (best < 0) continue;
-            used[best] = 1; done[i] = 1;
-            const RPrim *q = &P->p[best]; const GVtx *qv = P->v + q->v0;
-            for (int k = 0; k < c->n; k++) {
-                float *d = C->d + (size_t)(c->v0 + k) * 2;
-                if (pass) { d[0] = bdx; d[1] = bdy; }
-                else { d[0] = (qv[k].x - q->ox) - (cv[k].x - c->ox); d[1] = (qv[k].y - q->oy) - (cv[k].y - c->oy); }
-            }
-            if (pass) loose++; else exact++;
-        }
-    if (port_verbose > 1) port_printf("[fps60] frame %d: %d primitives, %d matched exactly, %d loosely (earlier frame %d)\n", port_frame, C->np, exact, loose, P->np);
-}
-/* gpu.c at every vblank: the displayed area (plain: not a 15-bit frame of ours: blank, 24-bit, ...) */
-int port_gl_fps60_vblank(int x, int y, int w, int h, int wide, int plain) {
-    if (!gl_ready) return 0;
-    if (!f60_init) {
-        f60_init = 1;
-        new_target(1024, 512, &workV, &workVfbo);
-        if (wide_fbo) new_target(2048, 512, &workW, &workWfbo);
-        p_glBindTexture(GL_TEXTURE_2D, vram_tex);
-        bind_vram_fbo();
-        port_printf("[gpu] OpenGL: --fps60: interpolated presents between the 50 Hz logic frames (experimental)\n");
-        rec_on = 1;
-        return 0;
-    }
+/* a record starts in slot: keep the targets as they are now */
+void port_gl_hfr_snap(int slot) {
+    if (!gl_ready || slot < 0 || slot >= HFR_SLOTS || hfr_swapped) return;
     submit();
-    if (recs[rc].nops) {                 /* close this vblank's record, start the next one */
-        recs[rc].id = ++rec_seq;
-        rc = (rc + 1) % NREC;
-        recs[rc].id = 0; recs[rc].nops = recs[rc].nv = recs[rc].np = 0; recs[rc].snapped = 0;
-    } else recs[rc].np = 0;
-    unsigned nd = 0;
-    if (!plain)
-        for (int i = 0; i < NREC; i++) {
-            const Rec *r = &recs[i];
-            if (!r->id || r->id <= nd) continue;
-            for (int j = 0; j < r->nops; j++) {
-                const Key *k = &r->ops[j].key;
-                if (r->ops[j].kind == OP_DRAW && k->wide == wide && k->x1 < x + w && k->x2 >= x && k->y1 < y + h && k->y2 >= y) { nd = r->id; break; }
-            }
-        }
-    Rec *C = rec_by_id(nd), *P = rec_by_id(d_cur);
-    pair_ok = 0;
-    if (C && P && C != P) { pair_ok = 1; pair(C, P); }
-    d_cur = nd; d_x = x; d_y = y; d_w = w; d_h = h; d_wide = wide;
-    return 0;
+    if (!snapV[slot]) new_target(1024, 512, &snapV[slot], &snapVfbo[slot]);
+    copy_target(fbo, snapV[slot], 1024, 512);
+    if (wide_fbo) { if (!snapW[slot]) new_target(2048, 512, &snapW[slot], &snapWfbo[slot]); copy_target(wide_fbo, snapW[slot], 2048, 512); }
+    p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+    bind_vram_fbo();
 }
-/* a present at alpha: the displayed record replayed on the work targets with interpolated vertices; 0 = nothing to
-   interpolate (the caller shows the displayed frame itself) */
-int port_gl_fps60_render(float alpha) {
-    Rec *C = rec_by_id(d_cur);
-    if (!gl_ready || !pair_ok || !C || alpha >= 0.999f) return 0;
-    float f = 1.0f - (alpha < 0 ? 0 : alpha);
+/* a replay of the record of slot begins: the work targets get its snapshot and stand in for the real ones; 0 = no snapshot */
+int port_gl_hfr_begin(int slot) {
+    if (!gl_ready || slot < 0 || slot >= HFR_SLOTS || !snapV[slot] || hfr_swapped || (wide_fbo && !snapW[slot])) return 0;
     submit();
-    GLuint sv_tex = vram_tex, sv_fbo = fbo, sv_wtex = wide_tex, sv_wfbo = wide_fbo;
-    int sv_dirty[5] = { dirty_any, dirty_x1, dirty_y1, dirty_x2, dirty_y2 };
-    copy_target(C->snapVfbo, workV, 1024, 512);
-    if (sv_wfbo && C->snapW) copy_target(C->snapWfbo, workW, 2048, 512);
-    rec_on = 0; replaying = 1;
+    if (!workV) new_target(1024, 512, &workV, &workVfbo);
+    if (wide_fbo && !workW) new_target(2048, 512, &workW, &workWfbo);
+    copy_target(snapVfbo[slot], workV, 1024, 512);
+    if (wide_fbo) copy_target(snapWfbo[slot], workW, 2048, 512);
+    sv_tex = vram_tex; sv_fbo = fbo; sv_wtex = wide_tex; sv_wfbo = wide_fbo;
+    sv_dirty[0] = dirty_any; sv_dirty[1] = dirty_x1; sv_dirty[2] = dirty_y1; sv_dirty[3] = dirty_x2; sv_dirty[4] = dirty_y2;
     vram_tex = workV; fbo = workVfbo;
-    if (sv_wfbo) { wide_tex = workW; wide_fbo = workWfbo; }
-    dirty_any = 0; bound_wide = -1;
-    for (int i = 0; i < C->nops; i++) {
-        const Op *o = &C->ops[i];
-        if (o->kind == OP_DRAW) {
-            if (n_vtx + o->count > MAX_VTX || n_ops >= MAX_OPS) submit();
-            Op *q = &ops[n_ops++]; *q = *o; q->first = n_vtx;
-            memcpy(vtx + n_vtx, C->v + o->first, (size_t)o->count * sizeof(GVtx));
-            const float *d = C->d + (size_t)o->first * 2;
-            for (int k = 0; k < o->count; k++) { vtx[n_vtx + k].x += d[2 * k] * f; vtx[n_vtx + k].y += d[2 * k + 1] * f; }
-            n_vtx += o->count;
-        } else if (o->kind == OP_FILL || o->kind == OP_COPY) {
-            if (n_ops >= MAX_OPS) submit();
-            ops[n_ops++] = *o;
-        } else if (o->kind == OP_UPLOAD) {       /* a host upload during the frame: taken from the live target */
-            submit();
-            int wd = o->r[4];
-            if (wd && !sv_wfbo) continue;
-            p_glBindFramebuffer(GL_FRAMEBUFFER, wd ? sv_wfbo : sv_fbo);
-            p_glBindTexture(GL_TEXTURE_2D, wd ? workW : workV);
-            p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, o->r[0] * R, o->r[1] * R, o->r[0] * R, o->r[1] * R, o->r[2] * R, o->r[3] * R);
-            bound_wide = -1; dirty_any = 1; dirty_x1 = 0; dirty_y1 = 0; dirty_x2 = 1023; dirty_y2 = 511;
-        } else if (o->kind == OP_WSDOWN && sv_wfbo) {
-            submit();
-            p_glBindFramebuffer(GL_FRAMEBUFFER, workWfbo);
-            p_glBindTexture(GL_TEXTURE_2D, workV);
-            p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, o->r[2] * R, o->r[3] * R, o->r[0] * R, o->r[1] * R, o->r[4] * R, o->r[5] * R);
-            bound_wide = -1;
-        }
-    }
-    submit();
-    vram_tex = sv_tex; fbo = sv_fbo; wide_tex = sv_wtex; wide_fbo = sv_wfbo;
-    dirty_any = sv_dirty[0]; dirty_x1 = sv_dirty[1]; dirty_y1 = sv_dirty[2]; dirty_x2 = sv_dirty[3]; dirty_y2 = sv_dirty[4];
-    replaying = 0; rec_on = 1;
+    if (wide_fbo) { wide_tex = workW; wide_fbo = workWfbo; }
+    dirty_any = 0; bound_wide = -1; hfr_swapped = 1;
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
     bind_vram_fbo();
     return 1;
 }
-/* the interpolated frame onto the window; 0 = no window */
-int port_gl_fps60_show(void) {
-    extern int port_window_fit_wide;
-    int W, H;
-    if (!present_begin(&W, &H)) return 0;
-    port_window_fit_wide = d_wide;
-    if (W > 0 && H > 0) {
-        if (d_wide) blit(workW, d_x / 2048.0f, d_y / 512.0f, (d_x + d_w) / 2048.0f, (d_y + d_h) / 512.0f, d_h, W, H);
-        else blit(workV, d_x / 1024.0f, d_y / 512.0f, (d_x + d_w) / 1024.0f, (d_y + d_h) / 512.0f, d_h, W, H);
-    }
-    port_window_fit_wide = 0;
-    overlay_swap(W, H);
-    bound_wide = -1;
-    return 1;
-}
-/* the interpolated frame as RGB8 at the PS1 resolution (the PORT_FPS60_DUMP test hook); 0 = done */
-int port_gl_fps60_read(gpu_u8 *rgb, int *w, int *h) {
-    if (!gl_ready) return -1;
-    p_glBindFramebuffer(GL_FRAMEBUFFER, d_wide ? workWfbo : workVfbo);
-    p_glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    p_glReadPixels(d_x * R, d_y * R, d_w * R, d_h * R, GL_RGBA, GL_UNSIGNED_BYTE, stage8);
-    for (int j = 0; j < d_h; j++) {
-        const u8 *s = stage8 + ((size_t)(j * R + R / 2) * d_w * R + R / 2) * 4;
-        for (int i = 0; i < d_w; i++, s += 4 * R)
-            for (int c = 0; c < 3; c++) { int k = (s[c] * 31 + 127) / 255; rgb[(j * d_w + i) * 3 + c] = (u8)(k << 3 | k >> 2); }
-    }
-    *w = d_w; *h = d_h;
-    bound_wide = -1; bind_vram_fbo();
-    return 0;
+void port_gl_hfr_end(void) {
+    if (!hfr_swapped) return;
+    submit();
+    vram_tex = sv_tex; fbo = sv_fbo; wide_tex = sv_wtex; wide_fbo = sv_wfbo;
+    dirty_any = sv_dirty[0]; dirty_x1 = sv_dirty[1]; dirty_y1 = sv_dirty[2]; dirty_x2 = sv_dirty[3]; dirty_y2 = sv_dirty[4];
+    hfr_swapped = 0; bound_wide = -1;
+    p_glBindTexture(GL_TEXTURE_2D, vram_tex);
+    bind_vram_fbo();
 }
 
 /* ------------------------------------------------------------------ start / stop */

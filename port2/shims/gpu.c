@@ -37,7 +37,9 @@ void port_texpack_copy(int sx, int sy, int dx, int dy, int w, int h);
 const PortTexRep *port_texpack_prim(const GpuTex *t, const GpuVtx *v, int n);
 const PortTexRep *port_texpack_box(const GpuTex *t, int u0, int v0, int u1, int v1);
 
-static u16 vram[512][1024];
+/* vram / wvram are pointers so that --fps (hfr.inc) can point them at a work copy while it replays a recorded frame */
+static u16 vram_store[512][1024];
+static u16 (*vram)[1024] = vram_store;
 static int gpu_prims, gpu_lists;
 int port_gpu_packets(void) { return gpu_prims; }
 unsigned port_ot_signature;          /* hash of the packets of the last DrawOTag (watchdog.c) */
@@ -62,7 +64,8 @@ void port_gpu_start(void) {
     }
     port_printf("[gpu] renderer: %s\n", port_gpu_be->name);
 }
-void port_gpu_stop(void) { if (gpu_started && port_gpu_be->stop) port_gpu_be->stop(); }
+void port_hfr_report(void);
+void port_gpu_stop(void) { port_hfr_report(); if (gpu_started && port_gpu_be->stop) port_gpu_be->stop(); }
 #define be port_gpu_be
 
 /* ------------------------------------------------------------------ GPU drawing state (GP0 E1..E6) */
@@ -98,8 +101,9 @@ static inline u16 blend(u16 bg, u16 fg, int mode) {
 int port_ws_cull;                    /* the game's screen-X culls widened by this (port_prelude.h PORT_WSX), = port_widescreen */
 int port_widescreen;                 /* extra columns on each side of a 320-wide frame; 0 = off (53 = 16:9, 120 = 21:9, 267 = 32:9) */
 #define WS_STRIDE 2048
-static u16 wvram[512][WS_STRIDE];
-static u16 *tgt = &vram[0][0];
+static u16 wvram_store[512][WS_STRIDE];
+static u16 (*wvram)[WS_STRIDE] = wvram_store;
+static u16 *tgt = &vram_store[0][0];
 static int tgt_stride = 1024;
 static void ws_fill(int x, int y, int w, int h, u16 c);
 static void ws_mirror_write(int x, int y, int w, int h);
@@ -167,16 +171,20 @@ static void soft_tri(const Vtx *a, const Vtx *b, const Vtx *c, int shade, const 
         bias[k] = topleft ? 0 : -1;
     }
     u16 flat = shade ? 0 : rgb24to15((u32)a->r | ((u32)a->g << 8) | ((u32)a->b << 16));
+    /* the edge functions are stepped along the row in 32-bit integers (the decoder limits a primitive to 1023 x 511, so
+       every product stays far below 2^31: the same values as computing each pixel's in 64 bits), and a row ends at the
+       first pixel past its inside span (the triangle is convex) */
+    int ex[3], ey[3];
+    for (int k = 0; k < 3; k++) { ex[k] = E[k][1]->x - E[k][0]->x; ey[k] = E[k][1]->y - E[k][0]->y; }
     for (int y = miny; y <= maxy; y++) {
-        for (int x = minx; x <= maxx; x++) {
-            int in = 1;
-            for (int k = 0; k < 3 && in; k++) {
-                long long e = (long long)(E[k][1]->x - E[k][0]->x) * (y - E[k][0]->y)
-                            - (long long)(E[k][1]->y - E[k][0]->y) * (x - E[k][0]->x);
-                /* with area > 0 every edge function is positive inside (cyclic cross products) */
-                if (e + bias[k] < 0) in = 0;
-            }
-            if (!in) continue;
+        int e0 = ex[0] * (y - E[0][0]->y) - ey[0] * (minx - E[0][0]->x) + bias[0];
+        int e1 = ex[1] * (y - E[1][0]->y) - ey[1] * (minx - E[1][0]->x) + bias[1];
+        int e2 = ex[2] * (y - E[2][0]->y) - ey[2] * (minx - E[2][0]->x) + bias[2];
+        int seen = 0;
+        for (int x = minx; x <= maxx; x++, e0 -= ey[0], e1 -= ey[1], e2 -= ey[2]) {
+            /* with area > 0 every edge function is positive inside (cyclic cross products) */
+            if ((e0 | e1 | e2) < 0) { if (seen) break; continue; }
+            seen = 1;
             float fx = (float)(x - a->x), fy = (float)(y - a->y);
             int r = a->r, g = a->g, bb = a->b;
             if (shade) {
@@ -252,17 +260,28 @@ const GpuBackend port_gpu_soft = { "software", soft_start, soft_nop, soft_tri, s
                                    soft_nop_rect, soft_nop_rect, soft_nop, soft_present, 0 };
 
 /* ================================================================== the decoder (shared by the backends) */
+/* --fps (hfr.inc): while hfr_rec is set, every drawing operation is also recorded for the interpolated presents */
+static int hfr_rec, hfr_overlay_frame = -1;
+static int hfr_test_cut_frame, hfr_test_cut_dx;   /* PORT_HFR_TEST_CUT=FRAME:DX (test hook, --fps only): every polygon from FRAME on moved by DX, a camera cut */
+static void hfr_poly(const Vtx *v, int nv, int shade, const GpuTex *t, int semi, int raw);
+static void hfr_rect(int x, int y, int w, int h, u32 col, const GpuTex *t, int u0, int v0, int semi, int raw);
+static void hfr_line(int x0, int y0, u32 c0, int x1, int y1, u32 c1, int shade, int semi);
+static void hfr_fill(int x, int y, int w, int h, u16 c, int wide);
+static void hfr_copy(int sx, int sy, int dx, int dy, int w, int h);
+static void hfr_upload(int x, int y, int w, int h, int wide);
+static void hfr_wsdown(int wx, int wy, int vx, int vy, int w, int h);
 static void tex_patch_pre(int x, int y, int w, int h);
 static void tex_patch_idle(void);
 static void fill(u32 col, u32 xy, u32 wh) {
     int x = xy & 0x3F0, y = (xy >> 16) & 0x1FF, w = ((wh & 0x3FF) + 15) & ~15, h = (wh >> 16) & 0x1FF;
-    if (w && h) { tex_patch_pre(x, y, w, h); if (port_texpack_on) port_texpack_write(x, y, w, h, 0); be->fill(x, y, w, h, rgb24to15(col)); ws_fill(x, y, w, h, rgb24to15(col)); }
+    if (w && h) { tex_patch_pre(x, y, w, h); if (port_texpack_on) port_texpack_write(x, y, w, h, 0); be->fill(x, y, w, h, rgb24to15(col)); if (hfr_rec) hfr_fill(x, y, w, h, rgb24to15(col), 0); ws_fill(x, y, w, h, rgb24to15(col)); }
 }
 static void copy(u32 s, u32 d, u32 wh) {
     int sx = s & 1023, sy = (s >> 16) & 511, dx = d & 1023, dy = (d >> 16) & 511;
     int w = ((wh & 0xFFFF) - 1) & 1023, h = (((wh >> 16) - 1) & 511); w++; h++;
     if (port_texpack_on) port_texpack_copy(sx, sy, dx, dy, w, h);
     be->copy(sx, sy, dx, dy, w, h);
+    if (hfr_rec) hfr_copy(sx, sy, dx, dy, w, h);
 }
 /* the GPU drops polygons and lines larger than 1023x511 (the distance between any two vertices) */
 static int too_big(const Vtx *v, int n) {
@@ -278,6 +297,7 @@ static void vram_write_rect(int x, int y, int w, int h, const u16 *s) {
     if (port_texpack_on) port_texpack_write(x, y, w, h, s);
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) & 511][(x + i) & 1023] = *s++;
     be->vram_written(x, y, w, h);
+    if (hfr_rec) hfr_upload(x, y, w, h, 0);
     ws_mirror_write(x, y, w, h);
 }
 
@@ -341,6 +361,7 @@ static void ws_end(void) {
 static void ws_sync_down(void) {
     if (!ws_drew) return;
     ws_drew = 0;
+    if (hfr_rec) hfr_wsdown(ws_base(ws_ax) + port_widescreen, ws_ay, ws_ax, ws_ay, 320, ws_ah);
     if (be->ws_copy_down) { be->ws_copy_down(ws_base(ws_ax) + port_widescreen, ws_ay, ws_ax, ws_ay, 320, ws_ah); return; }
     for (int j = 0; j < ws_ah; j++)
         memcpy(&vram[(ws_ay + j) & 511][ws_ax], &wvram[(ws_ay + j) & 511][ws_base(ws_ax) + port_widescreen], 320 * 2);
@@ -353,11 +374,11 @@ static void ws_mirror_write(int x, int y, int w, int h) {
             if (vx < ax || vx >= ax + 320 || vy < ay || vy >= ay + ah) continue;
             wvram[vy][ws_base(ax) + port_widescreen + vx - ax] = vram[vy][vx & 1023];
         }
-        if (be->ws_upload) {
-            int x1 = x > ax ? x : ax, x2 = x + w < ax + 320 ? x + w : ax + 320, y1 = y > ay ? y : ay, y2 = y + h < ay + ah ? y + h : ay + ah;
+        {   int x1 = x > ax ? x : ax, x2 = x + w < ax + 320 ? x + w : ax + 320, y1 = y > ay ? y : ay, y2 = y + h < ay + ah ? y + h : ay + ah;
             if (x1 < x2 && y1 < y2) {
                 int wx = ws_base(ax) + port_widescreen + x1 - ax;
-                be->ws_upload(wx, y1, x2 - x1, y2 - y1, &wvram[y1][wx], WS_STRIDE);
+                if (be->ws_upload) be->ws_upload(wx, y1, x2 - x1, y2 - y1, &wvram[y1][wx], WS_STRIDE);
+                if (hfr_rec) hfr_upload(wx, y1, x2 - x1, y2 - y1, 1);
             }
         }
     }
@@ -366,8 +387,9 @@ static void ws_mirror_write(int x, int y, int w, int h) {
 static void ws_fill(int x, int y, int w, int h, u16 c) {
     if (!port_widescreen || w < 320 || h < 200) return;
     for (int ax = x; ax + 320 <= x + w && ax + 320 <= 1024; ax += 320)
+    {   if (hfr_rec) hfr_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c, 1);
         if (be->ws_fill) be->ws_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c); else
-        for (int j = 0; j < h; j++) for (int i = 0; i < 320 + 2 * port_widescreen; i++) wvram[(y + j) & 511][ws_base(ax) + i] = c;
+        for (int j = 0; j < h; j++) for (int i = 0; i < 320 + 2 * port_widescreen; i++) wvram[(y + j) & 511][ws_base(ax) + i] = c; }
 }
 static void vertex(Vtx *o, u32 w) { o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; }
 static void color(Vtx *o, u32 c) { o->r = c & 255; o->g = (c >> 8) & 255; o->b = (c >> 16) & 255; }
@@ -482,6 +504,7 @@ static int gp0(const u32 *p, int n) {
         }
         if (tex && raw) shade = 0;
         if (ws_on && !tex && quad) ws_full_width_quad(v);
+        if (hfr_rec && hfr_test_cut_dx && port_frame >= hfr_test_cut_frame) for (int i = 0; i < nv; i++) v[i].x += hfr_test_cut_dx;
         {   int dx = 0, tile = 0, w = 0, x0 = 0, x1 = 0, sv[2], c;
             if (ws_layout_active()) {
                 int y0 = v[0].y;
@@ -494,6 +517,7 @@ static int gp0(const u32 *p, int n) {
                 int off = c ? -c * tile * w : dx;
                 if (c) ws_layout_clip(1, tile < 0 ? x0 - port_widescreen : x1, tile < 0 ? x0 : x1 + port_widescreen, sv);
                 for (int i = 0; i < nv; i++) v[i].x += off;
+                if (hfr_rec) hfr_poly(v, nv, shade, tex ? &t : 0, semi, raw);
                 if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
                 if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
                 for (int i = 0; i < nv; i++) v[i].x -= off;
@@ -514,7 +538,8 @@ static int gp0(const u32 *p, int n) {
             if (poly && (p[k] & 0xF000F000u) == 0x50005000u) break;
             vertex(&b, p[k++]);
             if (!(b.x - a.x > 1023 || a.x - b.x > 1023 || b.y - a.y > 511 || a.y - b.y > 511))
-                be->line(a.x, a.y, c0, b.x, b.y, c1, shade, semi);
+            {   be->line(a.x, a.y, c0, b.x, b.y, c1, shade, semi);
+                if (hfr_rec) hfr_line(a.x, a.y, c0, b.x, b.y, c1, shade, semi); }
             a = b; c0 = c1;
             if (!poly) break;
         }
@@ -547,11 +572,13 @@ static int gp0(const u32 *p, int n) {
             if (tile) for (int c = port_widescreen / w + 1; c >= 1; c--) {
                 ws_layout_clip(1, tile < 0 ? a.x - port_widescreen : a.x + w, tile < 0 ? a.x : a.x + w + port_widescreen, sv);
                 be->rect(a.x + c * tile * w, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
+                if (hfr_rec) hfr_rect(a.x + c * tile * w, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
                 ws_layout_clip(0, 0, 0, sv);
             }
             a.x += dx;
         }
-        if (w && h) be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
+        if (w && h) { be->rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw);
+                      if (hfr_rec) hfr_rect(a.x, a.y, w, h, p[0] & 0xFFFFFF, tex ? &t : 0, u, v, semi, raw); }
         return need;
     }
     switch (cmd) {
@@ -573,6 +600,7 @@ static int gp0(const u32 *p, int n) {
         for (int j = 0; j < h; j++) for (int q = 0; q < w; q++, i++) if (i < avail) vram[(y + j) & 511][(x + q) & 1023] = s[i];
         if (w && h && port_texpack_on) port_texpack_write(x, y, w, h, 0);
         if (w && h) be->vram_written(x, y, w, h);
+        if (w && h && hfr_rec) hfr_upload(x, y, w, h, 0);
         if (w && h) prompt_upload(x, y, w, h);
         return n;
     }
@@ -616,6 +644,7 @@ void *PutDrawEnv(void *env) {
     if (e[24] && gs.x2 >= gs.x1 && gs.y2 >= gs.y1)      /* isbg: clear the drawing area */
     {   u16 bg = rgb24to15((u32)e[25] | ((u32)e[26] << 8) | ((u32)e[27] << 16));
         be->fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg);
+        if (hfr_rec) hfr_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg, 0);
         ws_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg); }
     return env;
 }
@@ -790,6 +819,7 @@ int MoveImage(RECT *r, int x, int y) {
     tex_patch_pre(x & 1023, y & 511, r->w, r->h);
     if (port_texpack_on) port_texpack_copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     be->copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
+    if (hfr_rec) hfr_copy(r->x & 1023, r->y & 511, x & 1023, y & 511, r->w, r->h);
     return 0;
 }
 int ClearImage(RECT *r, u8 R, u8 G, u8 B) {
@@ -798,6 +828,7 @@ int ClearImage(RECT *r, u8 R, u8 G, u8 B) {
     tex_patch_pre(r->x & 1023, r->y & 511, r->w, r->h);
     if (port_texpack_on) port_texpack_write(r->x & 1023, r->y & 511, r->w, r->h, 0);
     be->fill(r->x & 1023, r->y & 511, r->w, r->h, c);
+    if (hfr_rec) hfr_fill(r->x & 1023, r->y & 511, r->w, r->h, c, 0);
     ws_fill(r->x & 1023, r->y & 511, r->w, r->h, c);
     return 0;
 }
@@ -828,6 +859,7 @@ static void ws_title_bg(u32 *ot) {
     if (gs.y1 + h > 512 || !(px = port_title_bg_pixels(w, h, port_widescreen))) return;
     for (int j = 0; j < h; j++) memcpy(&wvram[gs.y1 + j][bx], px + (size_t)j * w, (size_t)w * 2);
     if (be->ws_upload) be->ws_upload(bx, gs.y1, w, h, &wvram[gs.y1][bx], WS_STRIDE);
+    if (hfr_rec) hfr_upload(bx, gs.y1, w, h, 1);
 }
 /* --second-screen side map (runtime/panel_side.inc): when the panel asks, the frame as it stands once the far
    background (ordering table slots 0..99, drawn first: the area overlay's sky / scenery) is done, before the room;
@@ -1002,6 +1034,7 @@ int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c) {
     int W = d->w > 0 ? d->w : 320;
     if (cur_dispenv[0x11] || !disp_mask) return 0;
     if (w <= 0 || h <= 0) return 1;
+    hfr_overlay_frame = port_frame;
     if (ws_frame(d, W > 1024 ? 1024 : W, 0)) {
         int bx = ws_base(d->x & 1023) + port_widescreen + x, by = (d->y + y) & 511;
         if (be->ws_fill) be->ws_fill(bx, by, w, h, c);
@@ -1011,7 +1044,7 @@ int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c) {
 }
 void port_gpu_overlay_end(void) { if (be->list_end) be->list_end(); }
 static void path_for(char *buf, const char *kind) { snprintf(buf, 512, "%s/%s%06d.png", port_dump_dir, kind, port_frame); }
-/* the window present of the displayed frame (port_gpu_vblank, and --fps60 when it has no interpolated frame) */
+/* the window present of the displayed frame (port_gpu_vblank; --fps: every present, interpolated or not) */
 static void present_window(void) {
     {
         RECT *d = (RECT *)cur_dispenv;
@@ -1031,75 +1064,6 @@ static void present_window(void) {
     }
 }
 
-/* --fps60 (experimental, OpenGL): the game still runs one logic step per 50 Hz vblank; the presents happen on their
-   own clock (the monitor's refresh, or 60 Hz) while psyq.c's pacing waits, and show the last displayed frame
-   re-drawn with every primitive's vertices interpolated from where the matching primitive of the frame displayed
-   one vblank earlier was (gpu_gl.c "fps60").  One logic frame of extra display latency; menus, movies and static
-   screens repeat the displayed frame.  Off (the default): nothing below runs. */
-int port_fps60;
-extern int port_gl_fps60_vblank(int x, int y, int w, int h, int wide, int plain);
-extern int port_gl_fps60_render(float alpha);
-extern int port_gl_fps60_show(void);
-extern int port_gl_fps60_read(u8 *rgb, int *w, int *h);
-static void fps60_vblank(void) {
-    RECT *d = (RECT *)cur_dispenv;
-    int w = d->w > 0 ? d->w : 320, h = d->h > 0 ? d->h : 240, rgb24 = cur_dispenv[0x11], wide;
-    if (w > 1024) w = 1024; if (h > 512) h = 512;
-    wide = be->ws_present && ws_frame(d, w, rgb24);
-    if (wide) port_gl_fps60_vblank(ws_base(d->x & 1023), d->y & 511, 320 + 2 * port_widescreen, h, 1, !disp_mask);
-    else port_gl_fps60_vblank(d->x & 1023, d->y & 511, w, h, 0, rgb24 || !disp_mask);
-}
-static void fps60_present(double alpha) {
-    static const char *dump_dir; static int dump_from = -1, dump_to, dump_n;
-    int interp = port_gl_fps60_render((float)alpha);
-    if (port_window && (!interp || !port_gl_fps60_show())) present_window();
-    if (dump_from < 0) {      /* PORT_FPS60_DUMP=DIR:FROM:TO (test hook): every present during vblanks FROM..TO as present_N.png */
-        const char *e = getenv("PORT_FPS60_DUMP"); static char buf[400];
-        dump_from = 0;
-        if (e) { snprintf(buf, sizeof buf, "%s", e); char *c = strchr(buf, ':');
-                 if (c) { *c = 0; dump_dir = buf; sscanf(c + 1, "%d:%d", &dump_from, &dump_to); } }
-    }
-    if (dump_dir && port_frame >= dump_from && port_frame <= dump_to) {
-        char path[512]; int w, h;
-        if (!interp || port_gl_fps60_read(frame_rgb, &w, &h)) port_gpu_frame(frame_rgb, &w, &h);
-#ifdef _WIN32
-        _mkdir(dump_dir);
-#else
-        mkdir(dump_dir, 0777);
-#endif
-        snprintf(path, sizeof path, "%s/present_%06d.png", dump_dir, dump_n++);
-        write_png(path, frame_rgb, w, h);
-        port_printf("[fps60] %s: vblank %d alpha %.3f%s\n", path, port_frame, alpha, interp ? " (interpolated)" : "");
-    }
-}
-/* psyq.c port_vblank, in place of its pacing sleep: the presents due before the vblank at due_us (realtime: wall
-   clock, one per display refresh) or, unpaced (headless), on a virtual clock of 60 presents per 50 vblanks; alpha
-   runs from 0 at the previous vblank to 1 at this one */
-extern int port_window_refresh(void);
-void port_fps60_wait(unsigned long long due_us, unsigned long long period_us, int realtime) {
-    if (be != &port_gpu_gl) { if (realtime && due_us > port_time_us()) port_sleep_until_us(due_us); return; }
-    if (!realtime) {
-        static unsigned long long k, vb;
-        unsigned long long vdue = ++vb * 20000ull;
-        for (; k * 1000000ull / 60 < vdue; k++) fps60_present(1.0 - (double)(vdue - k * 1000000ull / 60) / 20000.0);
-        return;
-    }
-    static unsigned long long p, last;
-    unsigned long long P = 1000000ull / (unsigned)(port_window_refresh() > 0 ? port_window_refresh() : 60), now = port_time_us();
-    int n = 0;
-    if (!p || p + 4 * P < now || p > due_us + 2 * P) p = now;
-    while (p < due_us) {
-        if (p > port_time_us()) port_sleep_until_us(p);
-        double a = 1.0 - (double)(due_us - p) / (double)period_us;
-        fps60_present(a < 0 ? 0 : a);
-        n++; last = port_time_us();
-        p += P;
-        if (last > p + P) p = last;           /* the swap blocked for longer (vsync at a lower rate): follow it */
-    }
-    if (!n && port_time_us() > last + P) { fps60_present(1.0); last = port_time_us(); }
-    if (due_us > port_time_us()) port_sleep_until_us(due_us);
-}
-
 /* runtime/panel.c (--second-screen / --dump-panel): its PNG dumps */
 int port_gpu_write_png(const char *path, const u8 *rgb, int w, int h) { return write_png(path, rgb, w, h); }
 void port_mkdir(const char *dir) {
@@ -1110,10 +1074,13 @@ void port_mkdir(const char *dir) {
 #endif
 }
 
+extern int port_hz;
+#include "hfr.inc"
+
 void port_gpu_vblank(void) {
     { extern int port_debug_menu; extern void port_debug_draw(void); if (port_debug_menu) port_debug_draw(); }
     { extern int port_panel_on; extern void port_panel_vblank(void); if (port_panel_on) port_panel_vblank(); }
-    if (port_fps60 && be == &port_gpu_gl) fps60_vblank();
+    if (port_hfr_fps) hfr_vblank();         /* --fps: the presents happen in port_hfr_wait */
     else if (port_window) present_window();
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;
 #ifdef _WIN32

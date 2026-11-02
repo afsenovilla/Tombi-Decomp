@@ -517,6 +517,14 @@ i18n.add({
            "pc.pos": "Bottom (Xbox A)|Right (Xbox B)|Left (Xbox X)|Top (Xbox Y)", "pc.ok": "Use", "pc.cancel": "Cancel", "p.gen": "Generic"},
 })
 
+# --fps (docs/PORT.md "High frame rates"): the Graphics page's frame-rate card
+i18n.add({
+    "es": {"c.fps": "Imágenes por segundo", "fps.off": "50 (original)", "fps.auto": "Auto (la frecuencia de la pantalla)", "fps.unl": "Sin límite (sin vsync)",
+           "l.fpshint": "Por encima de 50, las imágenes intermedias se interpolan entre los pasos del juego, que mantiene su velocidad. Con el dibujado por software cada imagen intermedia cuesta lo que dibujar una."},
+    "en": {"c.fps": "Frame rate", "fps.off": "50 (original)", "fps.auto": "Auto (the display's refresh rate)", "fps.unl": "Unlimited (no vsync)",
+           "l.fpshint": "Above 50, the in-between frames are interpolated between the game's steps; the game keeps its speed. With the software renderer each in-between frame costs as much as drawing one."},
+})
+
 # the Controls page redesign: icons combobox, keyboard table, controller table (docs/PORT.md "Launcher")
 i18n.add({
     "es": {"l.showfps": "Mostrar FPS", "c.icons": "Iconos de botones", "c.keyboard": "Teclado", "b.restore": "Restaurar predeterminados",
@@ -1129,9 +1137,6 @@ class App:
         for n in (1, 2, 3):
             ttk.Radiobutton(seg, text="%dx" % n, variable=sv, value=n, style="Seg.Toolbutton", width=6).pack(side="left")
         ttk.Checkbutton(c, text=tr("l.fullscreen"), variable=self.var("fullscreen", tk.BooleanVar, False)).pack(anchor="w", pady=(10, 0))
-        # --fps60: frames interpolated between the 50 Hz logic steps (OpenGL only)
-        if self.experimental:
-            ttk.Checkbutton(c, text=tr("l.fps60"), variable=self.var("fps60", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
         # --show-fps: the on-screen counter (--log-fps 2 always logs the rate)
         ttk.Checkbutton(c, text=tr("l.showfps"), variable=self.var("show_fps", tk.BooleanVar, False)).pack(anchor="w", pady=(4, 0))
         o, c = self.card(grid, tr("c.aspect"))
@@ -1141,6 +1146,14 @@ class App:
         o.grid(row=1, column=1, sticky="nsew", padx=(6, 0), pady=(12, 0))
         self.ires_btns = self._radios(c, "internal_res", tk.IntVar, 1, [(tr("r.ires1") if n == 1 else "%dx" % n, n) for n in (1, 2, 3, 4)])
         self.ires_note = ttk.Label(c, text=tr("l.iresoff"), style="Muted.TLabel", wraplength=300, justify="left")
+        o, c = self.card(grid, tr("c.fps"))      # --fps: presents per second, interpolated (both renderers)
+        o.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=(12, 0))
+        seg = ttk.Frame(c)
+        seg.pack(anchor="w")
+        fv = self.var("fps", tk.StringVar, "auto" if self.s.get("fps60") and self.experimental else "off")
+        for text, val in ((tr("fps.off"), "off"), ("Auto", "auto"), ("60", "60"), ("90", "90"), ("120", "120"), ("144", "144"), (tr("fps.unl").split(" (")[0], "unlimited")):
+            ttk.Radiobutton(seg, text=text, variable=fv, value=val, style="Seg.Toolbutton").pack(side="left")
+        ttk.Label(c, text=tr("fps.auto") + " · " + tr("fps.unl") + ". " + tr("l.fpshint"), style="Muted.TLabel", wraplength=620, justify="left").pack(anchor="w", pady=(8, 0))
 
     def _build_controls(self, f):
         """Three cards: the button icons of the texts (--prompts, a combobox), the keyboard bindings (--keys, a table:
@@ -2087,8 +2100,9 @@ class App:
                "--aspect", s.get("aspect") if s.get("aspect") in ("square", "16:9", "21:9", "32:9", "auto") else "4:3"]
         if s.get("renderer") != "soft" and s.get("internal_res", 1) in (2, 3, 4):
             cmd += ["--internal-res", str(s["internal_res"])]
-        if s.get("renderer") != "soft" and s.get("fps60") and s.get("experimental"):
-            cmd += ["--fps60"]
+        fps = s.get("fps") or ("auto" if s.get("fps60") and s.get("experimental") else "off")
+        if fps != "off":                       # --fps: interpolated presents (both renderers; the old OpenGL-only 60 fps switch = auto)
+            cmd += ["--fps", str(fps)]
         if s.get("lang"):
             cmd += ["--lang", str(s["lang"])]
         if s.get("cut_content"):
