@@ -12,6 +12,7 @@ printed so they can be finished by hand.
 
   python3 tools/jp_autofix.py [--install] [--min 0.85] [--limit N] [--only ADDR[,ADDR]] [--show] [--emit DIR]
   python3 tools/jp_autofix.py --install-file FILE.c...    (hand-edited `--emit` files: checked, installed, deleted)
+  python3 tools/jp_autofix.py --pair prog:addr:size:palfile ... [--show] [--emit DIR] [--install]   (explicit pairs)
 Needs: build/slps01144/report.json and targets (tools/build_report.py --version slps01144), the PAL game files and
 config/symbol_addrs_*.txt (tools/gen_symbols.py)."""
 import difflib, glob, json, os, re, sys, tempfile
@@ -194,8 +195,68 @@ def try_fix(path, prog, text, maxrounds=60):
                     break
             if improved: break
         if not improved: break
+    # generic edits, each kept only when the diff shrinks: pad bits (0x10..0xf0 -> 0x1000..0xf000, JP pad masks),
+    # one statement deleted (stores, calls and flags the JP build lacks), two adjacent statements swapped
+    if r != "IDENTICAL":
+        t0, r0, b0 = text, r, best
+        text, r, best = generic_fix(path, prog, text, r, best)
+        if r != "IDENTICAL":  # the other order of edits suits other functions
+            t2, r2, b2 = generic_fix(path, prog, t0, r0, b0, delete_first=True)
+            if b2 < best: text, r, best = t2, r2, b2
     open(path, "w").write(text)
     return text, r
+
+
+STMT = re.compile(r"^(\s+)(?!(?:if|else|for|while|switch|case|default|do|return|break|continue|goto|\{|\}|#)\b)[^\n{}]*;\s*(//.*)?$")
+
+
+def statements(text):
+    """Line indexes of the simple statement lines of the body (one per line: stores, calls, assignments)."""
+    L = text.split("\n")
+    return [i for i, l in enumerate(L) if STMT.match(l) and not l.lstrip().startswith(("extern", "typedef", "static", "int ", "short ", "char ", "unsigned ", "void ", "TObj ", "//"))]
+
+
+def generic_fix(path, prog, text, r, best, budget=200, delete_first=False):
+    """Edits kept only when the diff shrinks, in order: pad bits, immediates, a statement moved up to three statements
+    away, one statement deleted (stores, calls and flags the JP build lacks)."""
+    def run(cand):
+        open(path, "w").write(cand)
+        r2 = check(path, prog)
+        return r2, (0 if r2 == "IDENTICAL" else (10 ** 6 if r2.startswith("ERROR") else len(diff_lines(r2))))
+    n = 0
+    while n < budget:
+        improved = False
+        cands = []
+        for m in re.finditer(r"(&\s*)0x([1-9a-fA-F][0-9a-fA-F]?)\b(?!00)", text):
+            cands.append(text[:m.start(2)] + "%s00" % m.group(2) + text[m.end(2):])
+        for old, new in dict.fromkeys(imm_pairs(r) or []):
+            delta = new - old
+            for s, e, v in literal_spots(text, old) + [s for s in all_literals(text) if s[2] != old and 0 < s[2] < 0x10000]:
+                nv = v + delta
+                if nv < 0 and not text[s:e].startswith("-"): continue
+                cands.append(text[:s] + fmt_like(text[s:e], nv) + text[e:])
+        L = text.split("\n")
+        st = statements(text)
+        for j, i in enumerate(st):
+            for d in (1, -1, 2, -2, 3, -3):
+                if not 0 <= j + d < len(st): continue
+                M = L[:]; line = M.pop(i)
+                M.insert(st[j + d] if d < 0 else st[j + d], line)
+                cands.append("\n".join(M))
+        # statements the JP build is known to lack first (vibration, shock flags, player ext bytes 0xa0.., load lists)
+        hot = re.compile(r"Vibration|\bbb0\b|b1a4|1f8001a4|0xa0\b|0xbe\b|0xbf\b|0xcd\b|0xce\b|0xd1\b|0xd5\b|0xd6\b|0xd7\b|GAME_PLAYER_MODE|queueSystemLoadList|FUN_8001f620|DAT_8009c933|\bba0\b|\bbbe\b|\bbcd\b|\bbce\b")
+        st2 = sorted(st, key=lambda i: 0 if hot.search(L[i]) else 1)
+        dels = ["\n".join(L[:i] + L[i + 1:]) for i in st2]
+        cands = (dels + cands) if delete_first else (cands + dels)
+        for cand in cands:
+            if cand == text: continue
+            r2, k = run(cand); n += 1
+            if k < best:
+                text, r, best, improved = cand, r2, k, True
+                break
+            if n >= budget: break
+        if not improved or r == "IDENTICAL": break
+    return text, r, best
 
 
 def install(prog, addr, size, jname, palfile, text, sources):
@@ -212,7 +273,8 @@ def install(prog, addr, size, jname, palfile, text, sources):
             hdr.insert(max([i + 1 for i, l in enumerate(hdr) if re.match(r"//\s*(FUNC|MATCHING|VERSION)\s", l)] or [len(hdr)]), vline)
         open(palfile, "w").write("\n".join(hdr) + "\n" + VS.join_branches(branches, pal))
         return palfile
-    d = "src" if prog == VER else "src/x%03d" % int(prog[1:])
+    from versions import pal_src_dir
+    d = pal_src_dir(VER, prog)
     name = jname if jname.endswith("_" + VER) else jname + "_" + VER
     out = "%s/%s.c" % (d, name)
     open(out, "w").write("// near-twin of PAL %s (tools/jp_autofix.py)\n" % os.path.basename(palfile)[:-2] + text)
@@ -260,11 +322,23 @@ def main():
     names = jp_names()
     tmp = tempfile.mkdtemp()
     done = []
-    for ratio, prog, addr, size, name, u in candidates(minr)[:lim]:
+    if "--pair" in argv:  # --pair prog:addr:size:palfile [...]: explicit pairs, no candidate search
+        class _U: pass
+        cands = []
+        for a in argv[argv.index("--pair") + 1:]:
+            if a.startswith("--"): break
+            prog, addr, size, pf = a.split(":")
+            u = _U(); u.file = os.path.abspath(pf)
+            cands.append((1.0, prog, int(addr, 16), int(size), "func_%08X" % int(addr, 16), u))
+    else:
+        cands = candidates(minr)[:lim]
+    for ratio, prog, addr, size, name, u in cands:
         if only and addr not in only: continue
         jname = names.get((prog, addr), (name,))[0]
         hdr, body = pal_text(u.file)
         if "INCLUDE_ASM" in body: continue
+        src = sources.get((prog, addr))
+        if src and "INCLUDE_ASM" not in open(src[0], errors="replace").read().split("#else")[0]: continue  # JP C exists (stale report)
         palname = os.path.basename(u.file)[:-2]
         text = jp_source(hdr, body, palname, jname, prog, addr, size)
         # the checker finds the target by the file name (JP symbol, with or without the version suffix)
@@ -277,7 +351,7 @@ def main():
             if do_install: print("   installed", install(prog, addr, size, jname, u.file, text, sources))
         elif show:
             print("\n".join("   " + l for l in r.split("\n")[:60]))
-        if emit and r != "IDENTICAL":
+        if emit:  # the best attempt (or the match, when --install was not given) for hand edits / --install-file
             os.makedirs(emit, exist_ok=True)
             open(os.path.join(emit, jname + ".c"), "w").write("// near-twin of PAL %s (tools/jp_autofix.py --emit; edit, then --install-file)\n" % palname + text)
     print("matched %d" % len(done))

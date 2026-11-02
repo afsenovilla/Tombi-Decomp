@@ -87,6 +87,19 @@ freely around struct-member stores), an inlined helper returning `unsigned char`
 and per-branch `o->step = n` stores are cross-jumped into one. `tools/jpcheck.py` strips branch targets, so a wrong branch
 destination (X18) only shows in the objdiff report.
 
+Autofix pass (2026-11, `tools/jp_autofix.py`): for every unmatched JP function, the closest PAL C function by masked
+words (or its symbol-table pair) is compiled for JP and diffed against the target with `tools/jpcheck.py --norm`, which
+now ignores relocation addends and PC16 relocs like objdiff and assembles the PAL scratchpad names as constants. Edits
+are then tried one at a time and kept when the diff shrinks: an immediate of the diff replaced in the C literals (and
+any literal shifted by the same delta: struct pads, offsets written as differences), pad masks `0x10..0xf0 ->
+0x1000..0xf000`, one statement moved up to three statements away, one statement deleted (vibration, shock flags, the
+player ext bytes 0xa0.., load lists: things the JP build lacks), in both orders. A match is installed as the
+`VERSION_SLPS_01144` branch of the shared file; `--emit DIR` writes the best attempt of the rest for hand edits and
+`--install-file` checks and installs them. The hand edits so far were of the same kinds plus: anim id switch labels
+(+14, +50), `o->step = n` per branch, a `(x & 0x40)` test instead of `== 0xff`, calls merged (`loadSoundSet(5)` for
+`loadSoundSet(3); queueSystemLoadList(5, 1)`), statement order (gcc 2.7 reorders scalar globals around struct members,
+so a scratchpad short spelled `((short*)&SPAD.iec + 1)[0]` or `D_xxxA[0]` stays in place while `D_1F8000EE` moves).
+
 What remains, by kind (for the paired functions with PAL C):
 - about 40 that differ in size from their PAL pair (edited code, not just offsets);
 - multi-function PAL files whose JP counterpart is split differently (other than the whole-file case below);
