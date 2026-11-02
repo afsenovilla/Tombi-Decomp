@@ -1,6 +1,74 @@
 // FUNC 8004dd8c 372 MAIN0
 // MATCHING 8004dd8c 372
+// VERSION SLPS_01144 slps01144 80018A6C 372
 // Ported from psx_tomba (boot.c, titleSequenceTask); MIT licence of the original project.
+#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144)
+#define SKIP_ASM
+#include "common.h"
+#include "game.h"
+typedef struct {
+    s16 x;
+    s16 y;
+    u8 u;
+    u8 v;
+    s16 w;
+    s16 h;
+    s16 tpage;
+    s16 clutX;
+    s16 clutY;
+} unk_80076E40;
+
+void func_80018A6C_slps01144(void)
+{
+    scratchpad* scratch = PSX_SCRATCH;
+    Task* task = *(Task**)scratch->currentTask;
+
+    u32 sp10[2];
+    u16 state;
+
+    *(s8* )&scratch->unk1D1 = 1;
+    *(s8* )&scratch->unk1D0 = 0;
+    sp10[0] = 0;
+    scratch->currentTask->titleScreenSelectedOption = 0;
+    while(true) {
+        *(u16* )0x1F8001F8 = *(u16* )(D_1F8000F8+0x100) + 1;
+        asm("");
+        updatePadInput();
+        task = CURRENT_TASK;
+        state = task->state0;
+        if ((state >= 3U) && (JOYPAD_STATE & 0x800) && (state != 4)) {
+            task->state0 = 4U;
+            task->state1 = 0;
+            task->state2 = 0;
+            sp10[0] = 1;
+            stopBgm(0);
+            if (MOVIE_PLAY_STATE != MOVIE_STATE_IDLE) {
+                MOVIE_SKIP_REQUEST = 1;
+            }
+        }
+        switch ((u16)(CURRENT_TASK)->state0) {
+            case 0:
+                bootLogoState(sp10);
+                break;
+            case 1:
+                bootLoadMovieResources();
+                break;
+            case 2:
+                func_8004E914();
+                break;
+            case 3:
+                bootPlayIntroMovie();
+                break;
+            case 4:
+                loopTitleScreen(sp10);
+                break;
+        }
+        sleepTask(1);
+    };
+}
+#endif
+#else
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -64,3 +132,4 @@ void titleSequenceTask(void)
         sleepTask(1);
     };
 }
+#endif
