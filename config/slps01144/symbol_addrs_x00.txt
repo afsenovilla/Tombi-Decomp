@@ -414,4 +414,4 @@ func_8013210C_slps01144 = 0x8013210C; // type:func size:0xA34  split from func_8
 func_801333FC = 0x801333FC; // type:func size:0x21C  split from func_801333FC (second body after a return)
 func_80133618_slps01144 = 0x80133618; // type:func size:0xC00  split from func_801333FC (second body after a return)
 func_80136650 = 0x80136650; // type:func size:0x11C  split from func_80136650 (second body after a return)
-func_8013676C_slps01144 = 0x8013676C; // type:func size:0x1C4  split from func_80136650 (second body after a return)
+func_8013676C_slps01144 = 0x8013676C; // type:func size:0x1D4  split from func_80136650 (second body after a return), its epilogue was the fake func_80136930

@@ -1,5 +1,98 @@
 // FUNC 801224c0 612 X000
 // MATCHING 801224c0 612
+// VERSION SLPS_01144 x00 801214B0 592
+#if defined(VERSION_SLPS_01144)
+#include "camera.h"
+#include "spad.h"
+#include "TOBJ.H"
+
+extern void *D_8013B208[];
+short GetClut(int x, int y);
+void ObjListPush_1F80022C(TObj *o);
+void freeObjectLayer7(TObj *o);
+
+static __inline__ void fin(TObj *o, short m)
+{
+    o->visible = 1;
+    { short k = o->w08 & 0x803f; o->w08 = k | m; }
+    o->timer--;
+    ObjListPush_1F80022C(o);
+}
+
+void func_801214B0(TObj *o)
+{
+    unsigned char t;
+    int m;
+    short n;
+    short pa;
+    short py;
+    short x;
+    t = o->b04;
+    switch (t) {
+    case 0:
+        o->w1e = 8;
+        o->w08 = GetClut(0xc0, 0x1e7);
+        o->b0d = 1;
+        o->anim = D_8013B208[0];
+        o->d3c = ((int*)&SPAD.i2d4)[0];
+        o->w22 = 0;
+        o->step = 0;
+        o->b0f = 2;
+        o->b04++;
+        o->timer = 0xf;
+        o->d30 = o->h->p.whole;
+        o->d34 = o->y.p.whole;
+        if (x >= 0x35d) break;
+        break;
+    case 1:
+        pa = (short)(o->d30 - ((short*)((char*)&SPAD.i174 + 2))[0]) >> 1;
+        py = (short)(o->d34 - ((unsigned short*)&SPAD.i174 + 3)[0]) >> 1;
+        o->a.p.whole = pa;
+        o->y.p.whole = py;
+        o->b.p.whole = 0;
+        m = o->w08 & 0x7fc0;
+        n = m;
+        o->y.p.whole -= (CAMERA_SCROLL.rotX >> 8) << 2;
+        o->a.p.whole -= CAMERA_SCROLL.rotY >> 10;
+        switch (o->step) {
+        case 0:
+            if (o->timer == 0) {
+                if (o->w22 == 6) {
+                    n = m - 0x40;
+                    o->w22--;
+                    o->step++;
+                } else {
+                    n = m + 0x40;
+                    o->w22++;
+                }
+                o->timer = 0xf;
+            }
+            break;
+        case 1:
+            if (o->timer == 0) {
+                if (o->w22 == 0) {
+                    n = m + 0x40;
+                    o->w22++;
+                    o->step--;
+                } else {
+                    n = m - 0x40;
+                    o->w22--;
+                }
+                o->timer = 0xf;
+            }
+            break;
+        }
+        fin(o, n);
+        break;
+    case 2:
+        o->b04 = t + 1;
+        break;
+    case 3:
+        freeObjectLayer7(o);
+        break;
+    }
+}
+#else
 #include "camera.h"
 #include "spad.h"
 #include "TOBJ.H"
@@ -91,3 +184,4 @@ void updateA00ColorCyclingBackdrop(TObj *o)
         break;
     }
 }
+#endif
