@@ -247,15 +247,24 @@ static void plank_text(int cx, int y, const char *s, int sel) { pa_text_ol(cx - 
 /* the HUD's pieces: page (320, 256) = SYSTEM/A00000.GAM, CLUT rows at (368, 480..) */
 #define HUD 320, 256
 static const u8 fruit_digit_u[10] = { 0, 8, 24, 40, 56, 72, 88, 104, 120, 0 };
+/* the number in the fruit (drawHudVitality's frame table): 0..7 in a row at v 120, 8 alone at (120, 128), 9..15 in a row
+   at v 136 and 16 alone at (112, 144), 16 wide each (two digits from 10 on); u, v of hp's cell, -1 when out of range */
+static int fruit_digit(int hp, int *u, int *v) {
+    if (hp < 0 || hp > 16) return -1;
+    if (hp <= 7) { *u = fruit_digit_u[hp]; *v = 120; } else if (hp == 8) { *u = 120; *v = 128; } else if (hp == 16) { *u = 112; *v = 144; } else { *u = 16 * (hp - 9); *v = 136; }
+    return 0;
+}
+/* the segments' CLUT row as drawHudVitality picks it: by the vitality (red when low), grey when empty */
+static int fruit_clut(int i, int hp) { return i >= hp ? 504 : hp < 3 ? 503 : hp < 5 ? 502 : hp < 7 ? 501 : 500; }
 static void fruit(int x, int y, int hp, int max) {   /* the vitality fruit: 4 segments a side, the number in the middle */
     static const u8 seg[4][4] = { {16, 152, 22, 33}, {32, 152, 14, 26}, {48, 152, 14, 13}, {64, 152, 22, 6} };
     if (max > 8) max = 8;
     for (int i = 0; i < max; i++) {
         int k = i & 3, right = i >= 4, sx = right ? 72 - seg[k][2] - 16 : seg[k][2];
-        pa_spr(x + sx, y + seg[k][3], HUD, seg[k][0], seg[k][1], 16, 16, 368, 502, (right ? PA_FLIPX : 0) | (i < hp ? 0 : PA_SHADE));
+        pa_spr(x + sx, y + seg[k][3], HUD, seg[k][0], seg[k][1], 16, 16, 368, fruit_clut(i, hp), right ? PA_FLIPX : 0);
     }
     pa_spr(x + 24, y + 16, HUD, 144, 200, 24, 24, 368, 483, 0);
-    if (hp >= 0 && hp <= 8) pa_spr(x + 28, y + 19, HUD, fruit_digit_u[hp], hp == 8 ? 116 : 120, 16, 16, 368, 489, 0);
+    { int u, v; if (!fruit_digit(hp, &u, &v)) pa_spr(x + 28, y + 19, HUD, u, v, 16, 16, 368, 489, 0); }
 }
 static void lives(int x, int y, int stored) {   /* drawHudLives shows GAME.playerLives - 1 (one or two digits) */
     int n = stored - 1;
