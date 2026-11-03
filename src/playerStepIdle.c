@@ -1,5 +1,261 @@
 // FUNC 800f1478 2252 X000
 // MATCHING 800f1478 2252
+// VERSION SLPS_01144 x00 800F13F0 1988
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+#include "raw7.h"
+extern unsigned char *PLAYER_HELD_OBJECT;
+extern unsigned char *BITTEN_OBJECT;
+extern unsigned char *PLAYER_EXT;
+extern unsigned short PAD_PRESSED;
+extern unsigned char TALK_POSE;
+extern unsigned char DAT_8009c93f;
+extern unsigned char DAT_1f8003ce;
+extern unsigned char GAME_PLAYER_MODE[];
+extern unsigned char DAT_8009c942;
+extern unsigned char DAT_800a60f8;
+extern unsigned char DAT_8009d004;
+extern int GAME_AREA00_EVENT_CONTROL;
+extern short GVARS_PLAYER_DRIFT_H;
+extern short GVARS_PLAYER_DRIFT_Y[];
+extern unsigned short JOYPAD_STATE, BUTTON_MASK_A, BUTTON_MASK_B, BUTTON_MASK_C, SPAWN_AXIS_SWAP;
+extern char D_80010A30[];
+extern void FUN_8001fe6c(TObj *);
+extern void FUN_8001fec0(TObj *);
+extern void playerSelectGroundAnim(TObj *);
+extern void playerAnimateTalkPose(TObj *);
+extern short playerIdleAnimUpdate(TObj *);
+extern void playerUpdateSpeedFromPad(TObj *);
+extern void setObjectSpeedPolar2(TObj *, int, int);
+extern void FUN_8001fce4(TObj *);
+extern int playerTryTalkToNpc(void);
+extern void playerTryAttack(TObj *, short);
+
+typedef struct { unsigned char pad[0x28]; unsigned short w28, w2a, w2c, w2e; } Q;
+#define PL ((Q *)PLAYER_EXT)
+
+#define YADJ(o)                                              \
+    if ((*(unsigned char*)((char*)&o->wac + 1)) == 0) {                                  \
+        if (o->subtype) {                                    \
+            if ((unsigned short)(o->wb0 + 5) >= 0xb)         \
+                o->y.raw += 0x50000;                         \
+            else                                             \
+                o->y.raw += 0x30000;                         \
+        } else {                                             \
+            if ((unsigned short)(o->wb0 + 5) >= 0xb)         \
+                o->y.raw += 0xc0000;                         \
+            else                                             \
+                o->y.raw += 0x80000;                         \
+        }                                                    \
+    }
+
+void func_800F13F0(TObj *o)
+{
+    unsigned char c;
+    unsigned char *p;
+    int t;
+
+    (*(unsigned char*)((char*)&o->da0 + 2)) = 0;
+    (*(unsigned char*)((char*)&o->da0 + 3)) = 0;
+    (*(unsigned char*)&o->wac) = 0;
+    c = 0;
+    if (*(volatile unsigned short *)&PAD_PRESSED & 0xa000) {
+        if (o->wb2 == 0) {
+            o->anim = D_80010A30;
+            FUN_8001fe6c(o);
+            PL->w2c = 999;
+            PL->w2e = 0xffff;
+            PL->w28 = 0xffff;
+            PL->w2a = 0xffff;
+            if (o->animFrame & 1)
+                o->h->raw += -0x10000;
+            else
+                o->h->raw += 0x10000;
+        } else {
+            playerSelectGroundAnim(o);
+        }
+        YADJ(o);
+        PLAYER_EXT[0x1e] = 0;
+        PLAYER_EXT[0x1f] = 0;
+        o->velX = 0;
+        o->step = 1;
+        o->state = 0;
+    } else {
+        switch (o->state) {
+        case 0:
+            U8(o, 0xc3) = 0;
+            o->velX = 0;
+            PL->w2e = 0xffff;
+            o->state++;
+        case 1:
+            c = playerIdleAnimUpdate(o);
+            if (!c) {
+                PL->w2e = 0xffff;
+                playerSelectGroundAnim(o);
+            }
+            FUN_8001fec0(o);
+            {
+                short u = o->wb0;
+                if (u < 0)
+                    o->wb6 = (short)((u << 2) + 0x100) & 0xff;
+                else if (u > 0)
+                    o->wb6 = (short)(u << 2) & 0xff;
+                else
+                    o->wb6 = 0;
+            }
+            playerUpdateSpeedFromPad(o);
+            if (o->velY > 0x400) {
+                (*(unsigned char*)&o->wac) = 1;
+                PLAYER_EXT[0x1e] = 0;
+                PLAYER_EXT[0x1f] = 0;
+                t = 0x10;
+                o->timer = 10;
+                o->d84 = 0;
+                if (o->animFrame & 1)
+                    t = 0xf0;
+                o->d88 = t;
+                o->d8c = 0;
+                o->step = 2;
+                o->state = 3;
+            }
+            YADJ(o);
+            if (!(JOYPAD_STATE & (BUTTON_MASK_B | BUTTON_MASK_C))) {
+                setObjectSpeedPolar2(o, o->wb6, o->wb2);
+                o->h->raw += GVARS_PLAYER_DRIFT_H << 8;
+                o->y.raw += GVARS_PLAYER_DRIFT_Y[0] << 8;
+                FUN_8001fce4(o);
+            }
+            break;
+        }
+    }
+
+    switch (c) {
+    case 4:
+        if (JOYPAD_STATE & BUTTON_MASK_C) {
+            o->b04 = 5;
+            o->step = 0x61;
+            o->state = 0;
+            o->wb2 = 0;
+            DAT_8009c93f = 1;
+            GAME_PLAYER_MODE[0] = 2;
+            DAT_8009c942 = 1;
+            o->visible = 1;
+            PLAYER_EXT[0x1e] = 0;
+            PLAYER_EXT[0x1f] = 0;
+            DAT_800a60f8 = 1;
+        }
+        break;
+    case 9:
+        if (JOYPAD_STATE & BUTTON_MASK_C) {
+            o->b04 = 1;
+            o->step = 0x3b;
+            o->state = 0;
+        }
+        break;
+    case 10:
+        if (JOYPAD_STATE & BUTTON_MASK_C) {
+            o->b04 = 1;
+            o->step = 0x3c;
+            o->state = 0;
+        }
+        break;
+    case 12:
+        if (JOYPAD_STATE & BUTTON_MASK_C) {
+            o->b04 = 5;
+            o->step = 0xb;
+            o->state = 6;
+        }
+        break;
+    default:
+        if (playerTryTalkToNpc() == 0)
+            playerTryAttack(o, 0);
+        break;
+    }
+
+    if (JOYPAD_STATE & BUTTON_MASK_B) {
+        o->ba4 = 0;
+        PLAYER_EXT[0x1e] = 0;
+        PLAYER_EXT[0x1f] = 0;
+        switch (c) {
+        case 0:
+            o->b9c = 1;
+            if ((GAME_AREA00_EVENT_CONTROL & 0x40) && (*(volatile unsigned short *)&PAD_PRESSED & BUTTON_MASK_A))
+                o->ba7 = 1;
+            o->b04 = 1;
+            o->step = 2;
+            o->state = 0;
+            break;
+        case 1:
+            o->b04 = 1;
+            o->step = 0x11;
+            o->state = 0;
+            break;
+        case 2: {
+            unsigned short hx = o->h->p.whole;
+            unsigned short k = SPAWN_AXIS_SWAP;
+            U16(o, 0xe2) = o->y.p.whole;
+            U16(o, 0xde) = hx;
+            if (k & 1)
+                U16(o, 0xe6) = (o->d->p.whole + 1) / 90 * 90;
+            else
+                U16(o, 0xe6) = (o->d->p.whole - 1) / 90 * 90;
+            o->b04 = 1;
+            o->step = 0x12;
+            o->state = 0;
+            break; }
+        case 5:
+            o->b04 = 1;
+            o->step = 0x28;
+            o->state = 0;
+            break;
+        case 6:
+            o->b04 = 1;
+            o->step = 0x29;
+            o->state = 0;
+            break;
+        case 8:
+            o->b04 = 1;
+            o->step = 0x3a;
+            o->state = 0;
+            break;
+        case 13:
+            o->b04 = 5;
+            o->step = 0x65;
+            o->state = 0;
+            DAT_8009d004 = 1;
+            break;
+        }
+    } else {
+        p = PLAYER_EXT;
+        if (p[0x1e] >= 0x1f) {
+            switch (c) {
+            case 3:
+                p[0x1e] = 0;
+                PLAYER_EXT[0x1f] = 0;
+                o->b04 = 1;
+                o->step = 0x20;
+                o->state = 0;
+                break;
+            case 11:
+                p[0x1e] = 0;
+                PLAYER_EXT[0x1f] = 0;
+                o->b04 = 5;
+                o->step = 0xb;
+                o->state = 0;
+                break;
+            }
+        } else if (p[0x1f] >= 0x1f) {
+            if (c == 7) {
+                p[0x1e] = 0;
+                PLAYER_EXT[0x1f] = 0;
+                o->b04 = 1;
+                o->step = 0x31;
+                o->state = 0;
+            }
+        }
+    }
+}
+#else
 #include "TOBJ.H"
 #include "raw7.h"
 extern unsigned char *PLAYER_HELD_OBJECT;
@@ -278,3 +534,4 @@ void playerStepIdle(TObj *o)
         }
     }
 }
+#endif

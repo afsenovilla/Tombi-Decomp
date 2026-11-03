@@ -1,5 +1,249 @@
 // FUNC 800ffec4 2244 X000
 // MATCHING 800ffec4 2244
+// VERSION SLPS_01144 x00 800FF590 1764
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+typedef struct {
+    unsigned char b0;
+    unsigned char p1[7];
+    unsigned char b8;
+    unsigned char p9[0x20 - 9];
+    short w20;
+    unsigned char p22[0x28 - 0x22];
+    unsigned short w28, w2a, w2c, w2e;
+} P800FFEC4;
+typedef struct {
+    unsigned char p0[0xc6];
+    unsigned char c6, c7;
+    unsigned char p8[0xcd - 0xc8];
+    unsigned char cd, ce;
+    unsigned char pf[0xd0 - 0xcf];
+    short d0;
+    unsigned char d2, d3;
+} X800FFEC4;
+#define X(o) ((X800FFEC4 *)(o))
+
+extern P800FFEC4 *PLAYER_EXT;
+extern unsigned char *PLAYER_HELD_OBJECT;
+extern unsigned char *BITTEN_OBJECT;
+extern int DAT_8009c934;
+extern int GAME[];
+extern unsigned char GVARS[], DAT_8009c93e, DAT_8009c93f, GVARS_USE_ITEM_PENDING[], GVARS_USE_ITEM_ID, DAT_8009c942;
+extern unsigned char GAME_PLAYER_MODE, GAME_BITTEN_JUMP_KIND, DAT_8009d2c3;
+extern unsigned char DAT_8009ce55, DAT_8009ce56, DAT_8009ce57, DAT_8009cee2, DAT_8009cf03, DAT_8009cdcc;
+extern unsigned char SLOPE_TILT_TABLE[];
+extern char DAT_80010748[];
+extern void FUN_800efc04(TObj *);
+extern void FUN_8001fe94(TObj *, int);
+extern void spawnColorBurst(int);
+extern void FUN_80026e0c(int, int);
+extern void FUN_80030b9c(int, int, int, int);
+extern void spawnPlayerPoolType12Object(void);
+
+#define SETANIM_IF(n) \
+    PLAYER_EXT->w2c = n; \
+    if (PLAYER_EXT->w2e != n) { \
+        PLAYER_EXT->w2c = n; \
+        FUN_800efc04(o); \
+        FUN_8001fe94(o, 0); \
+        PLAYER_EXT->w2e = PLAYER_EXT->w2c; \
+    }
+
+static __inline__ void sub(TObj *o)
+{
+    X(o)->c7 = 1;
+    o->b9d = 0;
+    X(o)->c6 = 0;
+    X(o)->d3 = 0;
+    PLAYER_EXT->b0 = 0;
+}
+
+static __inline__ void reset(TObj *o)
+{
+    if (*(unsigned char *)&o->wac >= 2) {
+        BITTEN_OBJECT = PLAYER_HELD_OBJECT;
+        PLAYER_HELD_OBJECT[4] = 2;
+        BITTEN_OBJECT[5] = 2;
+        BITTEN_OBJECT[6] = 0;
+    }
+    DAT_8009c934 = 0;
+    *(unsigned char *)&o->wac = 0;
+    sub(o);
+}
+
+void func_800FF590(TObj *o)
+{
+    short s;
+
+    switch (o->state) {
+    case 0:
+        o->ba4 = 0;
+        o->ba5 = 0;
+        o->ba7 = 0;
+        o->wb2 = 0;
+        o->velX = 0;
+        o->velY = 0;
+        PLAYER_EXT->w20 = 0;
+        o->w22 = 0;
+        *((unsigned char *)o + 0xa1) = 0;
+        reset(o);
+        PLAYER_EXT->b8 = 0;
+        o->b9c = 0;
+        o->visible = 1;
+        if ((GAME[0] & 0x3ffff) != 0x3000a) {
+            o->anim = DAT_80010748;
+            FUN_8001fe94(o, 0);
+            PLAYER_EXT->w2e = 0xffff;
+            PLAYER_EXT->w28 = 0xffff;
+            PLAYER_EXT->w2a = 0xffff;
+        }
+        o->state++;
+    case 1:
+        if (X(o)->d0 == 0) o->active = 1;
+        o->b04 = 1;
+        o->step = 0;
+        o->state = 0;
+        if ((GAME[0] & 0x3ffff) == 0x3000a) {
+            s = -0x3c0;
+            if (DAT_8009d2c3 & 0x40) s = -0x8c;
+            if (o->y.p.whole > s) {
+                o->b04 = 1;
+                o->step = 0x3e;
+                o->state = 0;
+            }
+        }
+        o->d8c = SLOPE_TILT_TABLE[o->wb0];
+        if (GVARS_USE_ITEM_PENDING[0] == 0) return;
+        X(o)->d2 = GVARS_USE_ITEM_ID;
+        switch (GVARS_USE_ITEM_ID) {
+        case 4:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            GVARS[0] = 3;
+            SETANIM_IF(0);
+            DAT_8009c93f = 1;
+            DAT_8009c942 = 1;
+            DAT_8009c93e = 1;
+            break;
+        case 0x7d:
+        case 0x75:
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
+            break;
+        case 3:
+            if (*(unsigned short *)GAME != 0) break;
+            SETANIM_IF(0);
+            DAT_8009c93f = 1;
+            DAT_8009c942 = 1;
+            DAT_8009c93e = 1;
+            break;
+        case 9:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            GAME_BITTEN_JUMP_KIND = 0;
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
+            break;
+        case 10:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            if (GAME[0] == 0x30001 && DAT_8009ce55 < 3) {
+                FUN_80030b9c(1, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            }
+            break;
+        case 0x12:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            if (GAME[0] != 1) break;
+            if (DAT_8009ce55 >= 2) break;
+            if ((unsigned short)(o->h->p.whole - 0x74b) >= 0xf0) break;
+            FUN_80030b9c(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            DAT_8009c93f = 1;
+            DAT_8009c942 = 1;
+            DAT_8009c93e = 1;
+            break;
+        case 5: case 0x7c: case 0x97: case 0x98:
+            o->b04 = 5;
+            o->step = 5;
+            o->substep = 1;
+            o->state = 0;
+            o->d64 = 1;
+            break;
+        case 7:
+            o->b04 = 5;
+            o->step = 5;
+            o->state = 0;
+            o->substep = 0;
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
+            o->d64 = 1;
+            break;
+        case 0x10:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            if (DAT_8009ce56 != 0xff) {
+                DAT_8009c942 = 1;
+                DAT_8009c93f = 1;
+                DAT_8009cee2 = 1;
+            }
+            break;
+        case 0x3c:
+            SETANIM_IF(0);
+            break;
+        case 0x11:
+            DAT_8009ce57 = 4;
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
+        case 0x3f: case 0x9a:
+        c3f:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            break;
+        case 0x14:
+            spawnPlayerPoolType12Object();
+            goto c3f;
+        case 0x8d:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            FUN_80026e0c(GVARS_USE_ITEM_ID, 1);
+            DAT_8009cf03 = 3;
+            break;
+        case 0xd: case 0x8a:
+            DAT_8009c93f = 1;
+            DAT_8009c942 = 1;
+            DAT_8009c93e = 1;
+            break;
+        case 0x5c:
+            SETANIM_IF(0);
+            DAT_8009c93f = 1;
+            DAT_8009c942 = 1;
+            break;
+        case 0xc:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            if (GAME[0] == 9 && DAT_8009cdcc != 0xff) {
+                FUN_80030b9c(0, o->a.p.whole, o->y.p.whole, o->b.p.whole);
+            }
+            break;
+        case 0xe:
+            o->ba4 = 0;
+            o->ba5 = 0;
+            o->b9c = 1;
+            o->visible = 1;
+            o->ba7 = 0;
+            o->active = 4;
+            o->d64 = 1;
+            o->wb2 = 0;
+            o->velX = 0;
+            o->velY = 0;
+            PLAYER_EXT->w20 = 0;
+            o->d8c = 0;
+            o->timer = 0x1e;
+            o->w22 = 0;
+            reset(o);
+            GAME_PLAYER_MODE = 3;
+            DAT_8009c93f = 1;
+            DAT_8009c942 = 1;
+            o->step = 0x30;
+            o->d8c = 0;
+            o->b04 = 1;
+            o->state = 2;
+            break;
+        }
+        break;
+    case 2:
+        break;
+    }
+}
+#else
 #include "TOBJ.H"
 typedef struct {
     unsigned char b0;
@@ -293,3 +537,4 @@ void playerStepUseItem(TObj *o)
         break;
     }
 }
+#endif
