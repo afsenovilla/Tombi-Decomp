@@ -1,5 +1,92 @@
 // FUNC 80137458 864 X000
 // MATCHING 80137458 864
+// VERSION SLPS_01144 x00 80135AC4 764
+#if defined(VERSION_SLPS_01144)
+#include "plx.h"
+#include "gvars.h"
+#include "player.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+extern unsigned char D_8009CE4A;
+extern short *PLAYER_H;
+extern signed char GAME_PLAYER_MODE;
+extern unsigned short BUTTON_MASK_A;
+extern unsigned short JOYPAD_STATE;
+extern unsigned char D_800A60F8;
+extern unsigned char D_8009D0A7;
+extern unsigned char D_8009CEBD;
+extern unsigned char D_8009D00D;
+extern unsigned char D_8009CFFB;
+
+short func_80135AC4(TObj *o)
+{
+    short n = 0;
+    unsigned char **p = (unsigned char **)((char *)o + 0x1c);
+
+    if (GAME.selectedSection == 0) {
+        if ((GAME.area00_eventControl & 0x40) == 0) {
+            if (PLAYER.obj.y.p.whole < -0x122 && PLAYER.obj.b69 != 0 && (unsigned short)((*(unsigned short **)&PLAYER.obj.h)[1] - 0x148) < 0x10 &&
+                (JOYPAD_STATE & *(unsigned short *)0x1F8003C8) != 0 && GVARS.useItemPending == 0) {
+                D_800A60F8 = 1;
+                ((unsigned char*)&GVARS.b42)[0] = 0;
+                *(short *)&o->anim = 1;
+                n = 1;
+            }
+            if (GAME.area00_eventControl & 0x20) {
+                if (D_8009CEBD == 0) {
+                    if (PLAYER.obj.y.p.whole < -0x110) {
+                        if ((*(unsigned char*)&PLAYER.obj.wac) == 3)
+                            goto l6ac;
+                        if (GVARS.useItemPending == 0)
+                            return n;
+                        if (GVARS.useItemId == 3) {
+                            ((unsigned char*)&GVARS.b42)[0] = 1;
+                            n++;
+                            D_800A60F8 = 1;
+                            *(short *)&o->anim = 0;
+                        }
+                    }
+                } else {
+                    if (PLAYER.obj.y.p.whole < -0x110 && PLAYER_H[1] < 0x17c && PLAYER.obj.b69 != 0) {
+                        ((unsigned char*)&GVARS.b42)[0] = 0;
+                        D_800A60F8 = 0;
+                        *(short *)&o->anim = 0;
+                        n++;
+                        if (GVARS.useItemPending != 0 && GVARS.useItemId == 3) {
+                            ((unsigned char*)&GVARS.b42)[0] = 1;
+                            D_800A60F8 = 1;
+                            *(short *)&o->anim = 0;
+                        }
+                    }
+                }
+            } else {
+                if (D_8009CEBD == 0) {
+                    if (PLAYER.obj.y.p.whole < -0x110 && (*(unsigned char*)&PLAYER.obj.wac) == 3) {
+                    l6ac:
+                        if ((*(unsigned char **)&PLX.p611c)[2] == 0x15) {
+                            n++;
+                            ((unsigned char*)&GVARS.b42)[0] = 0;
+                            D_800A60F8 = 0;
+                            *p = (*(unsigned char **)&PLX.p611c);
+                            *(short *)&o->anim = 0;
+                        }
+                    }
+                } else {
+                    if (PLAYER.obj.y.p.whole < -0x110 && PLAYER_H[1] < 0x17c && PLAYER.obj.b69 != 0) {
+                        n++;
+                        ((unsigned char*)&GVARS.b42)[0] = 0;
+                        D_800A60F8 = 0;
+                        *(short *)&o->anim = 0;
+                    }
+                }
+            }
+        } else {
+            o->b04 = 2;
+        }
+    }
+    return n;
+}
+#else
 #include "plx.h"
 #include "gvars.h"
 #include "player.h"
@@ -89,3 +176,4 @@ short charlesTalkCheck(TObj *o)
     }
     return n;
 }
+#endif

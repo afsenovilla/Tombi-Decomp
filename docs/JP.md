@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 70.60 % of code (1020476 of 1445372 bytes, 2568 of 3151 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 70.66 % of code (1021240 of 1445372 bytes, 2569 of 3151 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,11 +114,31 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
+Hand pass 3 (2026-11, 2533 -> 2569 functions, 68.66 % -> 70.66 %): the PAL C renamed for JP and diffed with
+`tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
+install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
+the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
+(`drawObjectSprite`, `Scaled`, `RotScaled`, `Rotated`, `PartsRotated3D`) drop the GTE flag test after RTPS and clip at
+`< 0xf1` / `< 0x141` (PAL `0x100` / `0x140`); `drawCategory3Objects` knows render kinds 0..18 only; `initDisplay` has an
+NTSC twin (`func_80016244`, 320x224, screen y 8) that `bootPlayIntroMovie` calls; JP checks the event flags
+`GAME.area00_eventControl & 0x20 / 0x40` where PAL reads `D_8009D0A7` / `D_8009CE4A == 0xff` (`charlesTalkCheck`,
+`updateA00Tornado`); `collidePlayerWithCat5Objects` inlines the per-object test; `drawHudVitality` reads the level from
+the sprite record (+0x52) instead of a parameter; `queueAreaSectionLists` has two list tables and starts the CD load
+thread itself; a few functions are the demo (`SLPM_80165`) version byte for byte and share its branch
+(`initHud`, `updateA00Tornado`: `#if defined(VERSION_SLPM_80165) || defined(VERSION_SLPS_01144)`); split pairs
+(`func_80135A20` = the event-flag stub, `func_80135A2C_slps01144` = the spawn body) get one JP-only file each;
+`COS_TABLE` is now named in the JP symbol table (`NEG_SIN_TABLE + 0x200`). A `jal`-target scan inside symbol ranges
+found nothing but data words, so no more merged functions that way.
+
 Left over with a known diff (`tools/jp_autofix.py --pair ... --show`): `func_8010D854` (swim spin: `li v0,62` scheduled
 before `sb zero,b69`), `func_80027D58` (increaseMaxHealth: the byte copies after the `sb`), `func_80115F54` (scroll
-controller: an `if` whose body compiles to nothing but keeps its branch), `func_8003F598`, `func_8001A108`,
-`func_8001A730`, `func_80106754`, `func_801043E0`, `func_8004BA68`, `func_80015FA8`, `func_80019A8C`, `func_8001A8CC`,
-`func_8003B688`, `func_800FEB14` and the nine `drawArea9Model*` JP engine variants (sizes differ from the four PAL ones).
+controller: an `if` whose body compiles to nothing but keeps its branch), `func_8001A8CC` (areaMode2Tick: the two
+`0x1F8001C6` reads must share one load without hoisting the address into `s0`), `func_80016E6C` (initGameConfig:
+`BUTTON_CONFIG_INDEX` load scheduled first), `func_8001AA90` (inventoryScreenHandler: `LOAD_COMPLETE_SYM = 0`
+scheduled last in case 4), `func_8010789C` (slide steer: `li v0,10` before the `k` address pair), `func_80101758`
+(updatePlayer: larger JP edits), `func_8003F598`, `func_8001A108`, `func_801043E0`, `func_8004BA68`, `func_80015FA8`,
+`func_80019A8C`, `func_8003B688`, `func_800FEB14` and the nine `drawArea9Model*` JP engine variants (sizes differ from
+the four PAL ones). `func_801230FC` (x14) is a data table marked as a function in the symbol table.
 
 What remains, by kind (for the paired functions with PAL C):
 - about 40 that differ in size from their PAL pair (edited code, not just offsets);
