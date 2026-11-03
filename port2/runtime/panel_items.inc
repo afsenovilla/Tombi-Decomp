@@ -318,22 +318,34 @@ static void it_confirm(int k) {
     if (item == 7 || item == 14) { it_warp = item; it_wsel = it_wtop = 0; return; }
     it_rq_item = item; it_rq = RQ_USE;
 }
+/* the destinations of Barón / the warp item, one thing per line as in the event list: the area (8 px) and under it the
+   room (16 px), both wrapped, never cut; rows of different heights, whole rows only, the selected one on screen */
+static int warp_row(const u8 *dd, int w, const char **an, const char **rn) {
+    int area = 0, sec = 0; dest_of(dd[0], dd[1], &area, &sec);
+    *an = place_area(area, sec); *rn = place_room(area, sec);
+    if (!*an) *an = "?";
+    return 4 + text_lines(8, w, 3, *an) * 10 + (*rn ? text_lines(16, w, 3, *rn) * 16 : 0);
+}
 static void it_page_warp(int x, int y, int w, int h) {
-    u8 d[81][3]; int n = it_dests(d); char b[96];
+    u8 d[81][3]; int n = it_dests(d), rh[81]; const char *an, *rn;
     window_(x, y, w, h);
     pa_text(x + 10, y + 6, 16, T("Where to?", "\xBF" "Ad\xF3nde?"), C_RED, C_REDE);
-    int ly = y + 26, vis = (h - 34) / IT_RH;
+    int ly = y + 26, avail = h - 34, tw = w - 24;
+    for (int i = 0; i < n; i++) rh[i] = warp_row(d[i], tw, &an, &rn);
     if (it_wsel >= n) it_wsel = n - 1; if (it_wsel < 0) it_wsel = 0;
-    if (it_wsel < it_wtop) it_wtop = it_wsel; if (it_wsel >= it_wtop + vis) it_wtop = it_wsel - vis + 1;
+    if (it_wtop > it_wsel) it_wtop = it_wsel; if (it_wtop < 0) it_wtop = 0;
+    for (;;) { int u = 0; for (int i = it_wtop; i <= it_wsel; i++) u += rh[i]; if (u <= avail || it_wtop >= it_wsel) break; it_wtop++; }
     if (!n) pa_text(x + 10, ly, 16, T("No place visited yet", "Ning\xFAn lugar visitado"), C_MUTED, C_EDGE);
-    for (int i = it_wtop; i < n && i < it_wtop + vis; i++, ly += IT_RH) {
-        int area = 0, sec = 0; dest_of(d[i][0], d[i][1], &area, &sec);
-        const char *an = place_area(area, sec), *rn = place_room(area, sec);
-        snprintf(b, sizeof b, "%s%s%s", an ? an : "?", rn ? " - " : "", rn ? rn : "");
-        if (i == it_wsel) pa_fill(x + 6, ly - 1, w - 12, IT_RH, C_SEL);
-        pa_text_fit(x + 12, ly, 16, w - 24, b, i == it_wsel ? C_WHITE : C_DARK, i == it_wsel ? C_SEL : C_EDGE);
-        hot(x + 6, ly - 1, w - 12, IT_RH, HS_ITOP + 0x10 + i);
+    int used = 0;
+    for (int i = it_wtop; i < n && used + rh[i] <= avail; used += rh[i], i++) {
+        int ry = ly + used, sel = i == it_wsel;
+        warp_row(d[i], tw, &an, &rn);
+        if (sel) pa_fill(x + 6, ry - 1, w - 12, rh[i] - 1, C_SEL);
+        int l = text_wrap(x + 12, ry, 8, tw, 10, 3, 0, an, sel ? C_WHITE : C_RED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
+        if (rn) text_wrap(x + 12, ry + l * 10, 16, tw, 16, 3, 0, rn, sel ? C_WHITE : C_DARK, sel ? C_SEL : C_EDGE);
+        hot(x + 6, ry - 1, w - 12, rh[i] - 1, HS_ITOP + 0x10 + i);
     }
+    if (it_wtop > 0) pa_text(x + w - 24, y + 6, 16, "^", C_DARK, C_EDGE);
 }
 /* ---- drawing: a showcase of the selected item on the left (its icon at 4x in a stone frame, name, category,
    description, one status line, Ordenar and the action plank), every item as a grid of icons on stone on the right,
