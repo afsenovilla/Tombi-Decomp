@@ -515,7 +515,7 @@ i18n.add({
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
 i18n.add({
-    "es": {"l.experimental": "Funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.cut": "Contenido recortado", "nav.log": "Registro",
+    "es": {"l.experimental": "Funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos y rendimiento", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.cut": "Contenido recortado", "nav.log": "Registro",
            "l.uilang": "Idioma del launcher", "l.starting": "Iniciando el juego...", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
            "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
            "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
@@ -531,7 +531,7 @@ i18n.add({
            "l.iresoff": "Solo con OpenGL: el dibujado por software usa siempre la resolución original.",
            "c.keys": "Teclado", "c.pad": "Mando", "c.mods": "Mods", 
            "c.cmd": "Línea de comandos", "c.log": "Últimas líneas del registro", "c.status": "Estado"},
-    "en": {"l.experimental": "Experimental features", "l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.cut": "Cut content", "nav.log": "Log",
+    "en": {"l.experimental": "Experimental features", "l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics & performance", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.cut": "Cut content", "nav.log": "Log",
            "l.uilang": "Launcher language", "l.starting": "Starting the game...", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
            "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
            "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
@@ -585,10 +585,12 @@ i18n.add({
 
 # --fps (docs/PORT.md "High frame rates"): the Graphics page's frame-rate card
 i18n.add({
-    "es": {"c.fps": "Imágenes por segundo", "fps.off": "50 (original)", "fps.auto": "Auto (la frecuencia de la pantalla)", "fps.unl": "Sin límite (sin vsync)",
-           "l.fpshint": "Por encima de 50, las imágenes intermedias se interpolan entre los pasos del juego, que mantiene su velocidad. Con el dibujado por software cada imagen intermedia cuesta lo que dibujar una."},
-    "en": {"c.fps": "Frame rate", "fps.off": "50 (original)", "fps.auto": "Auto (the display's refresh rate)", "fps.unl": "Unlimited (no vsync)",
-           "l.fpshint": "Above 50, the in-between frames are interpolated between the game's steps; the game keeps its speed. With the software renderer each in-between frame costs as much as drawing one."},
+    "es": {"c.perf": "Velocidad e imágenes por segundo", "c.fps": "Imágenes por segundo", "fps.off": "Igual que el juego", "fps.auto": "Auto (la frecuencia de la pantalla)", "fps.unl": "Sin límite (sin vsync)",
+           "l.speedhint": "La velocidad del juego. 50 Hz es la original PAL; 60 Hz juega como las versiones americana y japonesa (la misma lógica, 60 veces por segundo).",
+           "l.fpshint": "Por encima de la velocidad del juego, las imágenes intermedias se interpolan entre los pasos del juego, que mantiene su velocidad. Con el dibujado por software cada imagen intermedia cuesta lo que dibujar una."},
+    "en": {"c.perf": "Speed and frame rate", "c.fps": "Frame rate", "fps.off": "Same as the game", "fps.auto": "Auto (the display's refresh rate)", "fps.unl": "Unlimited (no vsync)",
+           "l.speedhint": "How fast the game runs. 50 Hz is the original PAL speed; 60 Hz plays like the US and Japanese versions (the same game logic, 60 times a second).",
+           "l.fpshint": "Above the game's speed, the in-between frames are interpolated between the game's steps; the game keeps its speed. With the software renderer each in-between frame costs as much as drawing one."},
 })
 
 # the Controls page redesign: icons combobox, keyboard table, controller table (docs/PORT.md "Launcher")
@@ -1851,10 +1853,8 @@ class App(QMainWindow):
         lay.addWidget(self.lang_cb)
         # text patch: none / the bundled one / another file (keys patch_on + patch; no path shown unless "other")
         self._patch_widget(cell(0, 1, tr("c.patch")))
-        # speed: segmented 50 / 60 Hz (the hz60 mod)
-        lay = cell(1, 0, tr("c.speed"))
-        lay.addWidget(self.segmented("hz60", bool, False, [("50 Hz (PAL)", False), ("60 Hz", True)], min_w=110))
-        lay = cell(1, 1, tr("c.quick"))
+        # (the speed, 50 / 60 Hz, is on the Graphics and performance page, next to the frame rate)
+        lay = cell(1, 0, tr("c.quick"))
         lay.addWidget(self.check("skipintro", tr("l.skipintro"), True))
         lay.addWidget(self.check("autostart", tr("l.autostart2"), False))
         f.addStretch(1)
@@ -2118,8 +2118,15 @@ class App(QMainWindow):
         self.ires_note = wrap_label(tr("l.iresoff"), "muted")
         c.addWidget(self.ires_note)
         c.addStretch(1)
-        c = self.card(None, tr("c.fps"))      # --fps: presents per second, interpolated (both renderers)
+        # performance: the game's speed (--hz 60, the hz60 mod) and the frame rate (--fps: presents per second,
+        # interpolated, both renderers) in one card, so it is clear which is which
+        c = self.card(None, tr("c.perf"))
         g.addWidget(c.frame, 2, 0, 1, 2)
+        t = QLabel(tr("c.speed")); t.setObjectName("cellTitle"); c.addWidget(t)
+        c.addWidget(self.segmented("hz60", bool, False, [("50 Hz (PAL)", False), ("60 Hz", True)], min_w=110))
+        c.addWidget(wrap_label(tr("l.speedhint"), "muted"))
+        c.addSpacing(10)
+        t = QLabel(tr("c.fps")); t.setObjectName("cellTitle"); c.addWidget(t)
         default = "auto" if self.s.get("fps60") and self.experimental else "off"
         c.addWidget(self.segmented("fps", str, default, [(tr("fps.off"), "off"), ("Auto", "auto"), ("60", "60"), ("90", "90"),
                                                          ("120", "120"), ("144", "144"), (tr("fps.unl").split(" (")[0], "unlimited")]))

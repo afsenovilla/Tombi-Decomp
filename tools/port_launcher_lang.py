@@ -111,7 +111,7 @@ FR = {
                     "graphisme du jeu de l'époque ; le logo, le menu et les textes restent les finaux (le logo « オレっ！トンバ » de cette "
                     "version n'est pas utilisé : on ne sait pas comment il était disposé). Rien de ce disque n'est inclus.",
     "l.earlytitle": "Titre précoce (optionnel) : dossier TOMBA du disque PrePre Vol. 8 (tools/prepre8.py extract) :",
-    "l.experimental": "Fonctions expérimentales", "l.fps60": "60 fps (expérimental)", "nav.play": "Jouer", "nav.gfx": "Graphismes",
+    "l.experimental": "Fonctions expérimentales", "l.fps60": "60 fps (expérimental)", "nav.play": "Jouer", "nav.gfx": "Graphismes et performances",
     "nav.controls": "Commandes", "nav.mods": "Patchs et mods", "nav.cut": "Contenu coupé", "nav.log": "Journal",
     "l.uilang": "Langue du launcher", "l.starting": "Lancement du jeu...", "c.disc": "Disque", "c.saves": "Sauvegardes", "c.game": "Langue du jeu",
     "c.patch": "Patch de texte", "c.speed": "Vitesse", "c.quick": "Options rapides", "l.skipintro": "Passer les logos et l'intro",
@@ -256,7 +256,7 @@ DE = {
                     "aus jener Zeit; Logo, Menü und Texte bleiben die endgültigen (das Logo „オレっ！トンバ“ dieser Version wird nicht "
                     "verwendet: wie es angeordnet war, ist unbekannt). Nichts von dieser Disc ist enthalten.",
     "l.earlytitle": "Früher Titel (optional): TOMBA-Ordner der Disc PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.experimental": "Experimentalfunktionen", "l.fps60": "60 fps (experimentell)", "nav.play": "Spielen", "nav.gfx": "Grafik",
+    "l.experimental": "Experimentalfunktionen", "l.fps60": "60 fps (experimentell)", "nav.play": "Spielen", "nav.gfx": "Grafik & Leistung",
     "nav.controls": "Steuerung", "nav.mods": "Patches und Mods", "nav.cut": "Entfernte Inhalte", "nav.log": "Protokoll",
     "l.uilang": "Launcher-Sprache", "l.starting": "Spiel wird gestartet...", "c.disc": "Disc", "c.saves": "Spielstände", "c.game": "Spielsprache",
     "c.patch": "Textpatch", "c.speed": "Geschwindigkeit", "c.quick": "Schnelloptionen", "l.skipintro": "Logos und Intro überspringen",
@@ -399,7 +399,7 @@ IT = {
                     "grafica del gioco di allora; il logo, il menu e i testi restano quelli finali (il logo «オレっ！トンバ» di quella "
                     "versione non viene usato: non si sa come fosse disposto). Di quel disco non è incluso nulla.",
     "l.earlytitle": "Titolo antico (facoltativo): cartella TOMBA del disco PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.experimental": "Funzioni sperimentali", "l.fps60": "60 fps (sperimentale)", "nav.play": "Gioca", "nav.gfx": "Grafica",
+    "l.experimental": "Funzioni sperimentali", "l.fps60": "60 fps (sperimentale)", "nav.play": "Gioca", "nav.gfx": "Grafica e prestazioni",
     "nav.controls": "Controlli", "nav.mods": "Patch e mod", "nav.cut": "Contenuti tagliati", "nav.log": "Registro",
     "l.uilang": "Lingua del launcher", "l.starting": "Avvio del gioco...", "c.disc": "Disco", "c.saves": "Salvataggi", "c.game": "Lingua del gioco",
     "c.patch": "Patch di testo", "c.speed": "Velocità", "c.quick": "Opzioni rapide", "l.skipintro": "Salta loghi e intro",
@@ -543,7 +543,7 @@ NL = {
                     "van toen; het logo, het menu en de teksten blijven de definitieve (het logo 'オレっ！トンバ' van die versie wordt "
                     "niet gebruikt: hoe het was opgemaakt is onbekend). Niets van die disc is meegeleverd.",
     "l.earlytitle": "Vroege titel (optioneel): TOMBA-map van de disc PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.experimental": "Experimentele functies", "l.fps60": "60 fps (experimenteel)", "nav.play": "Spelen", "nav.gfx": "Graphics",
+    "l.experimental": "Experimentele functies", "l.fps60": "60 fps (experimenteel)", "nav.play": "Spelen", "nav.gfx": "Graphics en prestaties",
     "nav.controls": "Besturing", "nav.mods": "Patches en mods", "nav.cut": "Geschrapte inhoud", "nav.log": "Logboek",
     "l.uilang": "Taal van de launcher", "l.starting": "Het spel wordt gestart...", "c.disc": "Disc", "c.saves": "Opgeslagen spellen", "c.game": "Taal van het spel",
     "c.patch": "Tekstpatch", "c.speed": "Snelheid", "c.quick": "Snelle opties", "l.skipintro": "Logo's en intro overslaan",
@@ -686,7 +686,7 @@ PT = {
                     "época; o logótipo, o menu e os textos continuam a ser os finais (o logótipo «オレっ！トンバ» dessa versão não é "
                     "usado: não se sabe como estava disposto). Nada desse disco é incluído.",
     "l.earlytitle": "Título antigo (opcional): pasta TOMBA do disco PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.experimental": "Funções experimentais", "l.fps60": "60 fps (experimental)", "nav.play": "Jogar", "nav.gfx": "Gráficos",
+    "l.experimental": "Funções experimentais", "l.fps60": "60 fps (experimental)", "nav.play": "Jogar", "nav.gfx": "Gráficos e desempenho",
     "nav.controls": "Controlos", "nav.mods": "Patches e mods", "nav.cut": "Conteúdo cortado", "nav.log": "Registo",
     "l.uilang": "Idioma do launcher", "l.starting": "A iniciar o jogo...", "c.disc": "Disco", "c.saves": "Jogos guardados", "c.game": "Idioma do jogo",
     "c.patch": "Patch de texto", "c.speed": "Velocidade", "c.quick": "Opções rápidas", "l.skipintro": "Saltar logótipos e introdução",
@@ -828,7 +828,7 @@ SV = {
                     "logotypen, menyn och texterna förblir de slutliga (den versionens logotyp ”オレっ！トンバ” används inte: hur den "
                     "var placerad är okänt). Ingenting från den skivan medföljer.",
     "l.earlytitle": "Tidig titel (valfritt): TOMBA-mappen från skivan PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.experimental": "Experimentfunktioner", "l.fps60": "60 fps (experimentell)", "nav.play": "Spela", "nav.gfx": "Grafik",
+    "l.experimental": "Experimentfunktioner", "l.fps60": "60 fps (experimentell)", "nav.play": "Spela", "nav.gfx": "Grafik och prestanda",
     "nav.controls": "Kontroller", "nav.mods": "Patchar och moddar", "nav.cut": "Bortklippt innehåll", "nav.log": "Logg",
     "l.uilang": "Launcherns språk", "l.starting": "Startar spelet...", "c.disc": "Skiva", "c.saves": "Sparade spel", "c.game": "Spelets språk",
     "c.patch": "Textpatch", "c.speed": "Hastighet", "c.quick": "Snabbval", "l.skipintro": "Hoppa över logotyper och intro",
@@ -970,7 +970,7 @@ DA = {
                     "logoet, menuen og teksterne forbliver de endelige (den versions logo »オレっ！トンバ« bruges ikke: hvordan det var "
                     "placeret, vides ikke). Intet fra den disk medfølger.",
     "l.earlytitle": "Tidlig titel (valgfrit): TOMBA-mappen fra disken PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.experimental": "Forsøgsfunktioner", "l.fps60": "60 fps (eksperimentel)", "nav.play": "Spil", "nav.gfx": "Grafik",
+    "l.experimental": "Forsøgsfunktioner", "l.fps60": "60 fps (eksperimentel)", "nav.play": "Spil", "nav.gfx": "Grafik og ydeevne",
     "nav.controls": "Styring", "nav.mods": "Patches og mods", "nav.cut": "Fjernet indhold", "nav.log": "Log",
     "l.uilang": "Launcherens sprog", "l.starting": "Starter spillet...", "c.disc": "Disk", "c.saves": "Gemte spil", "c.game": "Spillets sprog",
     "c.patch": "Tekstpatch", "c.speed": "Hastighed", "c.quick": "Hurtige indstillinger", "l.skipintro": "Spring logoer og intro over",
@@ -1015,20 +1015,20 @@ i18n.add({"fr": FR, "de": DE, "it": IT, "nl": NL, "pt": PT, "sv": SV, "da": DA})
 
 # --fps (the Graphics page's frame-rate card)
 i18n.add({
-    "fr": {"c.fps": "Images par seconde", "fps.off": "50 (d'origine)", "fps.auto": "Auto (la fréquence de l'écran)", "fps.unl": "Illimité (sans vsync)",
-           "l.fpshint": "Au-delà de 50, les images intermédiaires sont interpolées entre les étapes du jeu, qui garde sa vitesse. Avec le rendu logiciel, chaque image intermédiaire coûte autant que d'en dessiner une."},
-    "de": {"c.fps": "Bildrate", "fps.off": "50 (Original)", "fps.auto": "Auto (die Bildwiederholrate des Bildschirms)", "fps.unl": "Unbegrenzt (ohne VSync)",
-           "l.fpshint": "Über 50 werden die Zwischenbilder zwischen den Schritten des Spiels interpoliert; das Spiel behält seine Geschwindigkeit. Mit dem Software-Renderer kostet jedes Zwischenbild so viel wie ein gezeichnetes Bild."},
-    "it": {"c.fps": "Fotogrammi al secondo", "fps.off": "50 (originale)", "fps.auto": "Auto (la frequenza dello schermo)", "fps.unl": "Illimitato (senza vsync)",
-           "l.fpshint": "Sopra 50, i fotogrammi intermedi vengono interpolati tra i passi del gioco, che mantiene la sua velocità. Con il rendering software ogni fotogramma intermedio costa quanto disegnarne uno."},
-    "nl": {"c.fps": "Beeldsnelheid", "fps.off": "50 (origineel)", "fps.auto": "Auto (de verversingsfrequentie van het scherm)", "fps.unl": "Onbeperkt (zonder vsync)",
-           "l.fpshint": "Boven 50 worden de tussenbeelden geïnterpoleerd tussen de stappen van het spel, dat zijn snelheid houdt. Met de softwarerenderer kost elk tussenbeeld evenveel als het tekenen van een beeld."},
-    "pt": {"c.fps": "Fotogramas por segundo", "fps.off": "50 (original)", "fps.auto": "Auto (a frequência do ecrã)", "fps.unl": "Ilimitado (sem vsync)",
-           "l.fpshint": "Acima de 50, as imagens intermédias são interpoladas entre os passos do jogo, que mantém a sua velocidade. Com o desenho por software cada imagem intermédia custa tanto como desenhar uma."},
-    "sv": {"c.fps": "Bildfrekvens", "fps.off": "50 (original)", "fps.auto": "Auto (skärmens uppdateringsfrekvens)", "fps.unl": "Obegränsad (utan vsync)",
-           "l.fpshint": "Över 50 interpoleras mellanbilderna mellan spelets steg; spelet behåller sin hastighet. Med mjukvarurenderaren kostar varje mellanbild lika mycket som att rita en bild."},
-    "da": {"c.fps": "Billedfrekvens", "fps.off": "50 (original)", "fps.auto": "Auto (skærmens opdateringshastighed)", "fps.unl": "Ubegrænset (uden vsync)",
-           "l.fpshint": "Over 50 interpoleres mellembillederne mellem spillets trin; spillet beholder sin hastighed. Med softwarerendereren koster hvert mellembillede lige så meget som at tegne et billede."},
+    "fr": {"c.perf": "Vitesse et images par seconde", "l.speedhint": "La vitesse du jeu. 50 Hz est la vitesse PAL d'origine ; 60 Hz joue comme les versions américaine et japonaise (la même logique, 60 fois par seconde).", "c.fps": "Images par seconde", "fps.off": "Comme le jeu", "fps.auto": "Auto (la fréquence de l'écran)", "fps.unl": "Illimité (sans vsync)",
+           "l.fpshint": "Au-delà de la vitesse du jeu, les images intermédiaires sont interpolées entre les étapes du jeu, qui garde sa vitesse. Avec le rendu logiciel, chaque image intermédiaire coûte autant que d'en dessiner une."},
+    "de": {"c.perf": "Geschwindigkeit und Bildrate", "l.speedhint": "Wie schnell das Spiel läuft. 50 Hz ist die originale PAL-Geschwindigkeit; 60 Hz spielt wie die US- und die japanische Version (dieselbe Spiellogik, 60-mal pro Sekunde).", "c.fps": "Bildrate", "fps.off": "Wie das Spiel", "fps.auto": "Auto (die Bildwiederholrate des Bildschirms)", "fps.unl": "Unbegrenzt (ohne VSync)",
+           "l.fpshint": "Über der Spielgeschwindigkeit werden die Zwischenbilder zwischen den Schritten des Spiels interpoliert; das Spiel behält seine Geschwindigkeit. Mit dem Software-Renderer kostet jedes Zwischenbild so viel wie ein gezeichnetes Bild."},
+    "it": {"c.perf": "Velocità e fotogrammi al secondo", "l.speedhint": "La velocità del gioco. 50 Hz è la velocità PAL originale; 60 Hz gioca come le versioni americana e giapponese (la stessa logica, 60 volte al secondo).", "c.fps": "Fotogrammi al secondo", "fps.off": "Come il gioco", "fps.auto": "Auto (la frequenza dello schermo)", "fps.unl": "Illimitato (senza vsync)",
+           "l.fpshint": "Sopra la velocità del gioco, i fotogrammi intermedi vengono interpolati tra i passi del gioco, che mantiene la sua velocità. Con il rendering software ogni fotogramma intermedio costa quanto disegnarne uno."},
+    "nl": {"c.perf": "Snelheid en beeldsnelheid", "l.speedhint": "Hoe snel het spel loopt. 50 Hz is de originele PAL-snelheid; 60 Hz speelt zoals de Amerikaanse en Japanse versie (dezelfde spellogica, 60 keer per seconde).", "c.fps": "Beeldsnelheid", "fps.off": "Zoals het spel", "fps.auto": "Auto (de verversingsfrequentie van het scherm)", "fps.unl": "Onbeperkt (zonder vsync)",
+           "l.fpshint": "Boven de spelsnelheid worden de tussenbeelden geïnterpoleerd tussen de stappen van het spel, dat zijn snelheid houdt. Met de softwarerenderer kost elk tussenbeeld evenveel als het tekenen van een beeld."},
+    "pt": {"c.perf": "Velocidade e fotogramas por segundo", "l.speedhint": "A velocidade do jogo. 50 Hz é a velocidade PAL original; 60 Hz joga como as versões americana e japonesa (a mesma lógica, 60 vezes por segundo).", "c.fps": "Fotogramas por segundo", "fps.off": "Igual ao jogo", "fps.auto": "Auto (a frequência do ecrã)", "fps.unl": "Ilimitado (sem vsync)",
+           "l.fpshint": "Acima da velocidade do jogo, as imagens intermédias são interpoladas entre os passos do jogo, que mantém a sua velocidade. Com o desenho por software cada imagem intermédia custa tanto como desenhar uma."},
+    "sv": {"c.perf": "Hastighet och bildfrekvens", "l.speedhint": "Hur snabbt spelet går. 50 Hz är den ursprungliga PAL-hastigheten; 60 Hz spelar som den amerikanska och japanska versionen (samma spellogik, 60 gånger per sekund).", "c.fps": "Bildfrekvens", "fps.off": "Som spelet", "fps.auto": "Auto (skärmens uppdateringsfrekvens)", "fps.unl": "Obegränsad (utan vsync)",
+           "l.fpshint": "Över spelets hastighet interpoleras mellanbilderna mellan spelets steg; spelet behåller sin hastighet. Med mjukvarurenderaren kostar varje mellanbild lika mycket som att rita en bild."},
+    "da": {"c.perf": "Hastighed og billedfrekvens", "l.speedhint": "Hvor hurtigt spillet kører. 50 Hz er den oprindelige PAL-hastighed; 60 Hz spiller som den amerikanske og japanske version (samme spillogik, 60 gange i sekundet).", "c.fps": "Billedfrekvens", "fps.off": "Som spillet", "fps.auto": "Auto (skærmens opdateringshastighed)", "fps.unl": "Ubegrænset (uden vsync)",
+           "l.fpshint": "Over spillets hastighed interpoleres mellembillederne mellem spillets trin; spillet beholder sin hastighed. Med softwarerendereren koster hvert mellembillede lige så meget som at tegne et billede."},
 })
 
 
