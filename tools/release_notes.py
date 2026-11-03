@@ -9,7 +9,7 @@ its helpers. Commits that only touch docs, notes, CI or research tools are left 
 out: git's "This reverts commit X" line, a subject starting with "Revert", or a subject saying "revert ..." /
 "drop the ..." that names the earlier commit's subject. A body line "[skip changelog]" hides a commit.
 Also left out: work on the other versions' decomps (subjects starting "JP", "JP demo", "PrePre", "beta", "US": they edit
-shared src/ files under #if, nothing the PAL port runs; "README" and "docs" ones too), temporary commits ("TEMP" in the subject; a "; TEMP ..." tail is
+shared src/ files under #if, nothing the PAL port runs; "README" and "docs" ones too), temporary commits ("TEMP" or "trial" in the subject; a "; TEMP ..." tail is
 cut off), and a commit that hides / removes something a later commit of the same release brings back ("... back",
 "... again", "restore ..." sharing two words of 5+ letters with it).
 """
@@ -55,7 +55,7 @@ def main():
                     drop.add(c)
     OTHER = re.compile(r"^(JP|JP demo|PrePre ?8?|beta|US|SLPS|SLPM|PCPX|README|docs)\b[^:]*:", re.I)
     for h, s, b, _ in commits:
-        if OTHER.match(s) or re.match(r"^TEMP\b", s):
+        if OTHER.match(s) or re.match(r"^TEMP\b", s) or re.search(r"\btrial\b", s, re.I):
             drop.add(h)
     for i, (h, s, b, _) in enumerate(commits):          # hidden now, back later in the same release: neither happened
         if re.search(r"\b(hide|hides|hidden|remove|removes|removed|drop)\b", s, re.I):
