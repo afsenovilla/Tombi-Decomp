@@ -1,7 +1,284 @@
 // FUNC 8004eb08 2108 MAIN0
 // HEADERS tomba24
 // MATCHING 8004eb08 2108
+// VERSION SLPS_01144 slps01144 8001F574 2056
 // Portado de psx_tomba (main/system/cdfile.c, cdLoadTask); licencia MIT del proyecto original.
+#if defined(VERSION_SLPS_01144)
+// HEADERS tomba24
+#define SKIP_ASM
+#include "common.h"
+#include "game.h"
+
+#define CD_REQ   (*(u8**)0x1F800288)
+#define CD_HDR   (*(s16**)0x1F80028C)
+#define CD_DST   (*(u8**)0x1F800290)
+extern s32 D_1F800294;
+#define CD_NSEC  D_1F800294
+extern s32 D_1F80029C, D_1F8002A0;
+#define CD_HEAD  D_1F80029C
+#define CD_TAIL  D_1F8002A0
+#define CD_FLAGS (*(s32*)((u8*)CD_HDR + 0x10))
+
+extern int D_8009F0F0;                  /* retry counter (PAL D_8009C8B0) */
+extern int D_800A0F70[];                /* CD_QUEUE */
+extern u8 D_800725F4[];                 /* FILE_LINKS (8 bytes each) */
+extern int D_800725F8[];                /* FILE_LINK_SIZES = FILE_LINKS + 4 */
+extern int D_8009EF98[];                /* VAB headers of the loaded bank (PAL WVD_HEADERS) */
+extern int D_8009EE98[];                /* VAB bodies (PAL WVD_BODIES) */
+extern int D_80072398[];                /* SPU_BANK_ADDRS */
+extern void func_8001FD7C_slps01144(unsigned char, unsigned char *);
+extern void ThreadWaitFrames(int);
+
+void func_8001F574(void)
+{
+    RECT    rect;
+    u_char  param[40];
+    s32     i;
+    s32     r;
+    s32     base;
+    u8*     headTop;
+    u8*     bodyTop;
+    u8*     headCur;
+    u8*     bodyCur;
+    s32     nhead;
+    s32     nbody;
+    s32     tail;
+    s32     head;
+    s32     id;
+    s32     flags;
+    u32     spuAddr;
+    u32     len;
+    u8*     data;
+    u8*     entry;
+    s16*    hdr;
+    s16     vabId;
+
+    D_8009F0F0 = 0;
+    param[0] = CdlModeSpeed;
+    CURRENT_TASK->state0 = 0;
+    CURRENT_TASK->state1 = 0;
+    while (CdControl(CdlSetmode, param, 0) == 0) {
+    }
+
+    for (;;) {
+        switch ((u16)CURRENT_TASK->state0) {
+        case 0:
+            if (CD_HEAD == CD_TAIL) {
+                break;
+            }
+            CURRENT_TASK->state0 = (u16)CURRENT_TASK->state0 + 1;
+            break;
+
+        case 1:
+            entry = (u8*)(D_800A0F70 + CD_TAIL * 2);
+            hdr = *(s16**)entry;
+            id = ((LoadRecord*)hdr)->fileId;
+            CD_REQ = entry;
+            CD_HDR = hdr;
+            if (CdControl(CdlSetloc, D_800725F4 + (id * 8), 0) == 0) {
+                break;
+            }
+            CdControlF(CdlSeekL, 0);
+            CURRENT_TASK->state0 = (u16)CURRENT_TASK->state0 + 1;
+            break;
+
+        case 2:
+            r = CdSync(1, 0);
+            if (r == 2) {
+                flags = CD_FLAGS;
+                CD_NSEC = (u32)(D_800725F8[*CD_HDR * 2] + 0x7FF) >> 11;
+                switch (flags & 0xF) {
+                case LOAD_TYPE_STAGING:
+                case LOAD_TYPE_LZ_TO_RAM:
+                    if (CD_FLAGS & LOAD_TYPE_ALT_BUFFER) {
+                        CD_DST = (u8*)&LOAD_BUFFER_ALT;
+                    } else {
+                        CD_DST = LOAD_BUFFER;
+                    }
+                    break;
+                case LOAD_TYPE_LZ_TO_VRAM:
+                case LOAD_TYPE_RAW:
+                case LOAD_TYPE_RAW_4:
+                    CD_DST = *(u8**)(CD_REQ + 4);
+                    break;
+                }
+                CdReadyCallback(func_8001FD7C_slps01144);
+                if (CdControlF(CdlReadN, 0) == 0) {
+                    break;
+                }
+                CURRENT_TASK->state0 = (u16)CURRENT_TASK->state0 + 1;
+            } else if (r == 5) {
+                CURRENT_TASK->state0 = 1;
+                D_8009F0F0++;
+            }
+            break;
+
+        case 3:
+            if (CD_NSEC > 0) {
+                break;
+            }
+            r = CdSync(1, 0);
+            if (r == 2) {
+                if (CD_NSEC != 0) {
+                    CURRENT_TASK->state0 = 1;
+                    D_8009F0F0++;
+                } else {
+                    D_8009F0F0 = 0;
+                    CURRENT_TASK->state0 = (u16)CURRENT_TASK->state0 + 1;
+                }
+            } else if (r == 5) {
+                CURRENT_TASK->state0 = 1;
+                D_8009F0F0++;
+            }
+            break;
+
+        case 4:
+            switch ((u16)CURRENT_TASK->state1) {
+            case 0:
+                switch (CD_FLAGS & 0xF) {
+                case LOAD_TYPE_STAGING:
+                    switch (*((u8*)CD_HDR + 3) & 0xF0) {
+                    case LOAD_KIND_GRPX:
+                        CURRENT_TASK->state1 = 2;
+                        break;
+                    case LOAD_KIND_WVD:
+                        CURRENT_TASK->state1 = 5;
+                        break;
+                    }
+                    break;
+                case LOAD_TYPE_LZ_TO_VRAM:
+                    CURRENT_TASK->state1 = (u16)CURRENT_TASK->state1 + 1;
+                    break;
+                case LOAD_TYPE_RAW:
+                case LOAD_TYPE_RAW_4:
+                    if ((*((u8*)CD_HDR + 3) & 0xF0) == LOAD_KIND_WVD) {
+                        CURRENT_TASK->state1 = 5;
+                        break;
+                    }
+                    CURRENT_TASK->state1 = 0;
+                    CURRENT_TASK->state0 = (u16)CURRENT_TASK->state0 + 1;
+                    break;
+                case LOAD_TYPE_LZ_TO_RAM:
+                    CURRENT_TASK->state1 = 4;
+                    break;
+                }
+                break;
+
+            case 1:
+                if (CD_FLAGS & LOAD_TYPE_ALT_BUFFER) {
+                    lzDecompress(*(u8**)(CD_REQ + 4), (u8*)&LOAD_BUFFER_ALT);
+                } else {
+                    lzDecompress(*(u8**)(CD_REQ + 4), LOAD_BUFFER);
+                }
+                CURRENT_TASK->state1 = (u16)CURRENT_TASK->state1 + 1;
+
+            case 2:
+                rect.x = CD_HDR[4];
+                rect.y = CD_HDR[5];
+                rect.w = CD_HDR[6];
+                rect.h = CD_HDR[7];
+                if (CD_FLAGS & LOAD_TYPE_ALT_BUFFER) {
+                    LoadImage(&rect, (u_long*)&LOAD_BUFFER_ALT);
+                } else {
+                    LoadImage(&rect, (u_long*)LOAD_BUFFER);
+                }
+                CURRENT_TASK->state1 = (u16)CURRENT_TASK->state1 + 1;
+                break;
+
+            case 3:
+                CURRENT_TASK->state1 = 0;
+                CURRENT_TASK->state0 = (u16)CURRENT_TASK->state0 + 1;
+                break;
+
+            case 4:
+                if (CD_FLAGS & LOAD_TYPE_ALT_BUFFER) {
+                    lzDecompress((u8*)&LOAD_BUFFER_ALT, *(u8**)(CD_REQ + 4));
+                } else {
+                    lzDecompress(LOAD_BUFFER, *(u8**)(CD_REQ + 4));
+                }
+                CURRENT_TASK->state1 = 0;
+                CURRENT_TASK->state0 = (u16)CURRENT_TASK->state0 + 1;
+                break;
+
+            case 5:
+                data = *(u8**)(CD_REQ + 4);
+                headTop = data + *(s32*)data;
+                i = 0;
+                headCur = headTop;
+                bodyTop = data + *(s32*)(data + 4);
+                bodyCur = bodyTop;
+                head = *(s32*)headCur;
+                base = *((u8*)CD_HDR + 3) & 0xF;
+                nhead = ((u32)head >> 2) - 1;
+                tail = *(s32*)bodyTop;
+                nbody = ((u32)tail >> 2) - 1;
+
+                if (nhead > 0) {
+                    do {
+                        vabId = VAB_IDS[base + i];
+                        if (vabId != -1) {
+                            SsVabClose(vabId);
+                        }
+                        i++;
+                    } while (i < nhead);
+                }
+
+                i = 0;
+                if (nhead > 0) {
+                    do {
+                        D_8009EF98[base + i] = (s32)(headTop + *(s32*)headCur);
+                        headCur += 4;
+                        i++;
+                    } while (i < nhead);
+                }
+
+                i = 0;
+                if (nbody > 0) {
+                    do {
+                        D_8009EE98[base + i] = (s32)(bodyTop + *(s32*)bodyCur);
+                        bodyCur += 4;
+                        i++;
+                    } while (i < nbody);
+                }
+
+                spuAddr = D_80072398[CD_HDR[7] * 2];
+                i = 0;
+                if (nhead > 0) {
+                    do {
+                        if (i == (nhead - 1)) {
+                            len = (s32)(bodyTop + *(s32*)bodyCur) - D_8009EE98[base + i];
+                        } else {
+                            len = D_8009EE98[base + i + 1] - D_8009EE98[base + i];
+                        }
+                        SpuSetTransferStartAddr(spuAddr);
+                        SpuRead((u_char*)D_8009EE98[base + i], len);
+                        SpuIsTransferCompleted(1);
+                        VAB_IDS[base + i] = SsVabFakeHead((u_char*)D_8009EF98[base + i], -1, spuAddr);
+                        spuAddr += len;
+                        SsVabFakeBody(VAB_IDS[base + i]);
+                        i++;
+                    } while (i < nhead);
+                }
+                CURRENT_TASK->state1 = 0;
+                CURRENT_TASK->state0 = (u16)CURRENT_TASK->state0 + 1;
+                break;
+            }
+            break;
+
+        case 5:
+            CD_TAIL = (CD_TAIL + 1) & 0x7F;
+            if (CD_HEAD == CD_TAIL) {
+                LOAD_COMPLETE = 1;
+                exitTask();
+            } else {
+                CURRENT_TASK->state0 = 1;
+            }
+            break;
+        }
+        ThreadWaitFrames(1);
+    }
+}
+#else
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -1479,3 +1756,4 @@ void advanceAnimFrame(u8* self, s16 arg1);
 s32 tickAnimation(u8* self);
 
 s32 tickAnimationFixedRate(u8* self);
+#endif
