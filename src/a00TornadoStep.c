@@ -1,5 +1,187 @@
 // FUNC 80119988 1984 X000
 // MATCHING 80119988 1984
+// VERSION SLPS_01144 x00 80118B6C 1804
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gvars.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+struct V3 { int x, y, z; };
+typedef struct {
+    TObj o;
+    unsigned short c0, c2, c4, c6, c8, ca, cc, ce, d0, d2;
+} TObjE;
+extern short FUN_8001fe0c(int, int);
+extern short FUN_8001fe3c(int, int);
+extern void startPadVibration(int, int, int, int);
+extern void FUN_80026c50(int, int, int);
+extern short FUN_8001e4f0(int);
+extern void queueSfxKeyOff(int);
+extern int FUN_8001f9e0(void);
+extern void spawnA00Tornado(int, int, int, int);
+extern struct V3 PLAYER_H_COPY;
+extern struct V3 PLAYER_POS;
+extern Fix16 *PLAYER_D;
+extern unsigned char D_8009C939A[];
+#define D_8009C939 D_8009C939A[0]
+extern unsigned char D_8009C942A[];
+#define D_8009C942 D_8009C942A[0]
+extern unsigned char D_8009C93FA[];
+#define D_8009C93F D_8009C93FA[0]
+extern unsigned char PLAYER[];
+#define D_800A6038 PLAYER[0]
+extern unsigned char PLAYER_STATE;
+extern unsigned char PLAYER_SUBSTATE[];
+#define D_800A603D PLAYER_SUBSTATE[0]
+extern unsigned char PLAYER_STEP[];
+#define D_800A603E PLAYER_STEP[0]
+
+#define o (&e->o)
+void func_80118B6C(TObjE *e)
+{
+    TObj *p;
+    int i;
+    int t;
+    int k;
+
+    if (o->subtype == 0 || o->subtype == 2 || o->subtype == 6) {
+        o->wb4 = (o->wb4 + o->wba) & 0xff;
+        o->wb6 = (o->wb6 + o->wbc) & 0xff;
+        o->wb8 = (o->wb8 + *(short *)&o->bbe) & 0xff;
+        switch (o->step) {
+        case 0:
+            if (e->cc != 0) {
+                o->d38 += 0x10000;
+                if (--e->cc == 0) {
+                    e->cc = 0x78;
+                    e->d0 = o->d30 >> 16;
+                    e->d2 = o->d34 >> 16;
+                    o->step++;
+                }
+            }
+            break;
+        case 1:
+            o->d30 += (PLAYER_H_COPY.x - o->d30) >> 3;
+            o->d34 += (PLAYER_H_COPY.y - o->d34) >> 3;
+            o->d38 += (PLAYER_H_COPY.z - o->d38) >> 3;
+            if (e->c0 != 0) e->c0--;
+            if (e->c2 != 0) e->c2--;
+            if (e->c4 != 0) e->c4 -= 2;
+            if (--e->cc == 0) o->step++;
+            break;
+        case 2:
+            o->d30 += ((e->d0 << 16) - o->d30) >> 5;
+            o->d34 += ((e->d2 << 16) - o->d34) >> 5;
+            t = e->d0 << 16;
+            if (o->d30 >= t - 0x160000 && o->d30 <= t + 0x160000) {
+                D_8009C939 = 1;
+                o->wb4 = 0;
+                o->wb6 = 0;
+                o->wb8 = 0;
+                e->cc = 0x8c;
+                o->step++;
+            }
+            goto common;
+        case 3:
+            o->d30 += ((e->d0 << 16) - o->d30) / 8;
+            o->d34 += ((e->d2 << 16) - o->d34) / 8;
+            if (e->c0 < e->c6) e->c0 += 4;
+            if (e->c2 < e->c8) e->c2 += 2;
+            if (e->c4 < e->ca) e->c4 += 4;
+            if (--e->cc == 0) {
+                e->c0 = 0;
+                e->c2 = 0;
+                e->c4 = 0;
+                e->cc = 0x78;
+                D_8009C939 = 0;
+                o->step++;
+            }
+        common:
+            PLAYER_POS = *(struct V3 *)&o->a;
+            break;
+        case 4:
+            if (PLAYER_D->p.whole > 0) {
+                PLAYER_D->p.whole -= 4;
+            } else {
+                if (o->subtype == 0)
+                    FUN_80026c50(4, 1, 1);
+                SPAD.s1c6 = 0;
+                *(int *)PLAYER_D = 0;
+                D_800A6038 = 1;
+                PLAYER_STATE = 1;
+                GVARS.b30 = 2;
+                D_800A603D = 0;
+                D_800A603E = 0;
+                D_8009C942 = 0;
+                D_8009C93F = 0;
+                e->cc = 0x78;
+                e->d0 = 0;
+                o->step = 9;
+            }
+            *(struct V3 *)&o->d30 = PLAYER_H_COPY;
+            break;
+        case 5:
+            *(struct V3 *)&o->d30 = PLAYER_H_COPY;
+            if (GVARS.b30 == 4)
+                goto snd;
+            break;
+        case 6:
+            spawnA00Tornado(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+            spawnA00Tornado(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+            spawnA00Tornado(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+            spawnA00Tornado(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+            spawnA00Tornado(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+            spawnA00Tornado(o->h->p.whole, o->y.p.whole, o->d->p.whole, 2);
+        snd:
+            e->ce = FUN_8001e4f0(0x36);
+            o->step++;
+            break;
+        case 7:
+            e->cc = 300;
+            o->step++;
+        case 8:
+            e->c0 += (FUN_8001f9e0() & 3) - 1;
+            e->c2 += (FUN_8001f9e0() & 7) - 1;
+            e->c4 += FUN_8001f9e0() & 7;
+            o->d30 += (FUN_8001f9e0() & 3) << 16;
+            o->d34 -= ((FUN_8001f9e0() & 0xf) - 8) << 14;
+            o->d64 = (e->c4 << 6) + 0x1000;
+            break;
+        case 9:
+            *(struct V3 *)&o->d30 = PLAYER_H_COPY;
+            o->d64 -= 0x20;
+            if (--e->cc == 0) {
+                queueSfxKeyOff(e->ce);
+                o->step = 5;
+            }
+            break;
+        }
+        o->h->raw = o->d30;
+        o->y.raw = o->d34;
+        o->d->raw = o->d38;
+    } else {
+        p = (TObj *)o->d90;
+        {
+            TObj *d, *q;
+            i = 0;
+            d = o;
+            q = p;
+            do {
+                d->wb4 = q->wb4;
+                q = (TObj *)((short *)q + 1);
+                d = (TObj *)((short *)d + 1);
+            } while (++i < 12);
+        }
+        o->h->raw = p->d30;
+        o->y.raw = p->d34;
+        o->d->raw = p->d38;
+        o->d64 = p->d64;
+    }
+    o->h->raw += FUN_8001fe0c(o->wb4, (short)e->c0) << 16;
+    o->y.raw += FUN_8001fe3c(o->wb6, (short)e->c2) << 16;
+    o->d->raw += FUN_8001fe3c(o->wb8, (short)e->c4) << 16;
+}
+#else
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -190,3 +372,4 @@ void a00TornadoStep(TObjE *e)
     o->y.raw += FUN_8001fe3c(o->wb6, (short)e->c2) << 16;
     o->d->raw += FUN_8001fe3c(o->wb8, (short)e->c4) << 16;
 }
+#endif
