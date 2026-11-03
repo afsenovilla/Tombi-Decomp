@@ -325,7 +325,7 @@ def object_refs(stems):
 
 def load_fixes():
     out = {}
-    for l in open(os.path.join(ROOT, "port", "fixes.txt")):
+    for l in open(os.environ.get("PORT_FIXES_TXT") or os.path.join(ROOT, "port", "fixes.txt")):
         if not l.strip() or l.lstrip().startswith("#"): continue
         f, old, new = [x.strip() for x in l.rstrip("\n").split(" | ")]
         out.setdefault(f, []).append((old, new))

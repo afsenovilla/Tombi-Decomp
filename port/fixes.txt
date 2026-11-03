@@ -423,6 +423,15 @@ src/o0ptsub0/titleLogoDraw.c |     addTilePrim(&r, 0, 0, 1); |     { extern unsi
 src/showMessageBox.c | extern void openMessageBox(int a, int b, short *c, int d, int e); | extern void *openMessageBox(int a, int b, short *c, int d, int e);
 src/showMessageBox.c | void showMessageBox(int a, int b, short c, short d) | void *showMessageBox(int a, int b, short c, short d)
 src/showMessageBox.c | openMessageBox(a, b, s, 0, -1); | return openMessageBox(a, b, s, 0, -1);
+# The same for its two siblings: the script's message boxes (scriptOpShowMessageBox: o->d90) and the I0NFO scenes keep
+# the box they return.  The i386 build got it by luck (eax still held openMessageBox's result); the wasm2c / arm64 build
+# got 0 (AREA01's scripted box at frame ~1660 of the sweep script was never seen, and the room went on differently).
+src/showMessageBoxDirect.c | extern void openMessageBox(); | extern void *openMessageBox();
+src/showMessageBoxDirect.c | void showMessageBoxDirect(int a, int b, int c) | void *showMessageBoxDirect(int a, int b, int c)
+src/showMessageBoxDirect.c |     openMessageBox(a, b, c, 1, -1); |     return openMessageBox(a, b, c, 1, -1);
+src/showMessageBoxDirectTimed.c | extern void openMessageBox(int a, int b, int c, int d, int e); | extern void *openMessageBox(int a, int b, int c, int d, int e);
+src/showMessageBoxDirectTimed.c | void showMessageBoxDirectTimed(int a, int b, int c, short d) | void *showMessageBoxDirectTimed(int a, int b, int c, short d)
+src/showMessageBoxDirectTimed.c |     openMessageBox(a, b, c, 1, d); |     return openMessageBox(a, b, c, 1, d);
 # --cut-content (port_cut_content, opt-in; console build unchanged): text cut from the game that the Japanese release
 # still has (tools/jp_text.py). 1) AREA00 boatman scene: after his third line (7,2) a00Variant0EventScene
 # ends the scene; with the flag it first shows the three unused lines (7,3), (7,4), (7,5) (MFNT000 #162-164).
