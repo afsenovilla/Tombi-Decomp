@@ -306,7 +306,20 @@ enum { HS_PAGE = 0x100, HS_FILTER = 0x200, HS_ROW = 0x300, HS_BACK = 0x400, HS_P
 static struct { short x, y, w, h; int id; } hs[64]; static int nhs;
 static void hot(int x, int y, int w, int h, int id) { if (nhs < 64) { hs[nhs].x = (short)x; hs[nhs].y = (short)y; hs[nhs].w = (short)w; hs[nhs].h = (short)h; hs[nhs].id = id; nhs++; } }
 
+/* the header (stone, title plank, tabs, the pink page) is the same picture frame after frame: drawn once per title /
+   tab names / canvas size and copied afterwards (it was the dearest part of a frame: ~2.5 ms of pa_spr on the PC) */
+static void header_draw(const char *title);
 static void header(const char *title) {
+    static u32 *hc; static char hk[256]; static int hn; static struct { short x, y, w, h; int id; } hhs[64];
+    char k[256];
+    snprintf(k, sizeof k, "%d %d %d %d %d|%s|%s|%s|%s|%s", pa_cw, pa_ch, page, pa_ok, pa_font_ok, title, page_name(0), page_name(1), page_name(2), page_name(3));
+    if (hc && !strcmp(k, hk)) { memcpy(pa_cv, hc, (size_t)pa_cw * pa_ch * 4); memcpy(hs, hhs, sizeof hhs); nhs = hn; return; }
+    header_draw(title);
+    if (!hc) hc = malloc(CW_MAX * CH_MAX * 4);
+    if (!hc) return;
+    memcpy(hc, pa_cv, (size_t)pa_cw * pa_ch * 4); memcpy(hhs, hs, sizeof hhs); hn = nhs; strcpy(hk, k);
+}
+static void header_draw(const char *title) {
     int W = pa_cw;
     stone(0, 0, W, pa_ch);
     plank(0, 0, W);
@@ -652,6 +665,18 @@ static void script_step(void) {
 }
 
 static int frames;
+/* --show-fps / --log-fps: the panel's own cost on the game thread (it runs in port_gpu_vblank), a line every 50 renders:
+   ms per render (mean / worst), the side views composed and the side map tiles built (panel_side.inc) */
+static void panel_time_log(unsigned long long us) {
+    static unsigned long long sum, mx; static int n;
+    sum += us; if (us > mx) mx = us;
+    if (++n < 50) return;
+    char cd[160]; side_cache_desc(cd, sizeof cd);
+    port_printf("[panel] ms/render: mean %llu.%02llu max %llu.%02llu (%d renders, page %d; side map: %d views composed %llu.%02llu ms mean; cache %s)\n",
+                sum / n / 1000, sum / n / 10 % 100, mx / 1000, mx / 10 % 100, n, page, side_raster_n,
+                side_raster_n ? side_raster_us / side_raster_n / 1000 : 0, side_raster_n ? side_raster_us / side_raster_n / 10 % 100 : 0, cd);
+    sum = mx = 0; n = 0; side_raster_n = 0; side_raster_us = 0;
+}
 /* every vblank (shims/gpu.c port_gpu_vblank) while the panel is on */
 void panel_hud_update(void);      /* runtime/panel_hud.c: --hud-bottom */
 void port_panel_vblank(void) {
@@ -659,9 +684,13 @@ void port_panel_vblank(void) {
     int dump = port_panel_dump_dir && port_dump_every > 0 && port_frame % port_dump_every == 0;
     if (panel_script) script_step();
     if (hold_at == port_frame) { inq_push(1, 1, hold_x, hold_y); hold_at = -1; }
+    if (page == PAGE_SIDE) side_cache_work();   /* the side map's tiles, a slice every vblank (panel_side.inc) */
     if (!dump && (frames++ & 1)) return;   /* ~25 fps is plenty */
     inq_run();
-    render();
+    { extern int port_show_fps; extern unsigned long long port_time_us(void);
+      unsigned long long t0 = port_show_fps ? port_time_us() : 0;
+      render();
+      if (port_show_fps) panel_time_log(port_time_us() - t0); }
 #ifdef __ANDROID__
     if (dump) upscale();
 #else

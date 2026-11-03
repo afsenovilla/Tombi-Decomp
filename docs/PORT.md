@@ -3083,6 +3083,26 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   - Textures: the VRAM snapshot is checked every 25 frames (outside loading screens) over the pages / CLUTs the
     model samples and refreshed when they changed (sections stream their textures into the same slots: a stale
     snapshot drew another section's ground as blue noise).
+  - Picture cache (2026-11-03): the side view is no longer rasterised per frame. The panel runs on the game thread
+    (`port_gpu_vblank`; the wasm2c module has no threads), and each moved view cost a full raster: 5-9 ms per panel
+    frame when following Tomba / dragging, 16-30 ms at the middle zoom, on top of ~4 ms of chrome, every other vblank:
+    the "petardeo" on the AYN Thor. Now the room is drawn once per zoom into tiles of 64 x 64 view pixels and every
+    view is composed from them over the far background (~0.4 ms), the markers on top. Tiles are built on the game
+    thread in slices of at most 1.5 ms a vblank (resumable between polygons): the view's tiles nearest its centre
+    first, then a margin (half a view across, a quarter down), then the rest of the room while the cache is under
+    3/4 of 24 MB (least recently used tiles go past 24 MB; AREA01 s0 at the closest zoom: 1293 tiles, 10.5 MB, about
+    160 ms of slices on the PC). A tile not built yet shows the far background; after a zoom change the previous
+    picture (and its markers) stays until the new view's tiles are there, at most 2 s. Same picture as the live
+    raster: an image (model x world units per pixel) is anchored at the first view origin it was shown at and each
+    tile is that view's raster clipped to the tile, so the snapped zoom levels are pixel for pixel the old output at
+    any pan (checked on the PC against the old build, AREA01 s0 / AREA00 s0, panned at all three levels, i386 and
+    wasm2c); only the continuous pinch scales (not pixel perfect anyway) differ, at ~1 % of the pixels on texel and
+    polygon edges (float rounding of a translated origin). Texture refresh: tiles are keyed by the snapshot's
+    generation, so a refresh rebuilds the view's tiles while the previous ones stay on screen (checked by forcing a
+    refresh every 100 frames: same images). Not on disk: the textures come from live VRAM and the rebuild is cheap
+    and sliced. The page header (stone, tabs: ~2.5 ms of pa_spr) is drawn once per title / tab names / canvas
+    size and copied afterwards (every tab), and the map window draws only its rim (the view covers the inside). `--log-fps` / `--show-fps` print a `[panel] ms/render` line every 50 panel frames
+    (mean / max, views composed, tiles built and the build slices' time per vblank).
   - Markers: the events panel_eventmap.h places in the section (and the sections sharing its model), icons at 2x
     outlined (pending ones as a silhouette); Tomba's face at 2x at PLAYER x / y, flipped to the side he faces (PLAYER
     +0xA6: 0 left, 2 right). Views under 200 canvas pixels high (the Status tab's graph, the event page) draw them at 1x.
