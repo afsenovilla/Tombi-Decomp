@@ -651,3 +651,35 @@ src/d0spsub/subScreenDrawEventList.c | SUBSCREEN_DRAW_PARAMS.y = s->y - 8; | SUB
 src/d0spsub/subScreenDrawEventIcons.c | SUBSCREEN_DRAW_PARAMS.y = s->y; | SUBSCREEN_DRAW_PARAMS.y = SUBSCREEN_EVENT_SLOTS[0].y + (s->y - SUBSCREEN_EVENT_SLOTS[0].y) * 9 / 8;
 src/d0spsub3/subScreenDrawEventList.c | SUBSCREEN_DRAW_PARAMS.y = s->y - 8; | SUBSCREEN_DRAW_PARAMS.y = SUBSCREEN_EVENT_SLOTS[0].y + (s->y - SUBSCREEN_EVENT_SLOTS[0].y) * 9 / 8 - 8;
 src/d0spsub3/subScreenDrawEventIcons.c | SUBSCREEN_DRAW_PARAMS.y = s->y; | SUBSCREEN_DRAW_PARAMS.y = SUBSCREEN_EVENT_SLOTS[0].y + (s->y - SUBSCREEN_EVENT_SLOTS[0].y) * 9 / 8;
+# the warp / item popups (subScreenDrawPopupMenu, pri 1): a two-line name ("Ciudad de\ntodo principio") had its lines 8 px
+# apart, glyphs touching; 10 px apart, the first line 1 px higher so the pair keeps its centre in the 20-px entry
+src/d0spsub/subScreenDrawString.c | y = SUBSCREEN_DRAW_Y; | y = SUBSCREEN_DRAW_Y; if (pri == 1 && multiline) { unsigned short *q = str; while ((short)*q != -1) if ((short)*q++ == -3) { y -= 1; break; } }
+src/d0spsub/subScreenDrawString.c | y += 8; | y += pri == 1 ? 10 : 8;
+src/d0spsub3/subScreenDrawString.c | y = SUBSCREEN_DRAW_Y; | y = SUBSCREEN_DRAW_Y; if (pri == 1 && multiline) { unsigned short *q = str; while ((short)*q != -1) if ((short)*q++ == -3) { y -= 1; break; } }
+src/d0spsub3/subScreenDrawString.c | y += 8; | y += pri == 1 ? 10 : 8;
+#
+# Event list (Menu mode 2): the page counter ("1/ 14") and the page arrows ("<-L1", "R1->") sat on the foot line, over the
+# 10th row since the rows are 18 px apart (and R1 over a long 10th name even before); they go to the left column, under
+# the event counters: the counter on the next line, the arrows on the line below it (L1 left, R1 right), and they move
+# with the column in widescreen (port_ws_mark mode 1).  The game's own arrow loop (in the caller) finds an empty slot list
+# (its first slot's x set to -1 while the event list draws; restored for the item list).
+src/d0spsub/subScreenDrawPageNumber.c | subScreenDrawSprite(1); | subScreenDrawSprite(1); if (port_ev) port_ws_mark(port_p0, NEXT_PRIM, 1);
+src/d0spsub/subScreenDrawPageNumber.c | int t; | int t; extern char *NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int); char *port_p0 = NEXT_PRIM; int port_ev = *(short *)((char *)m + 0x12) == 2; Slot *port_a = (Slot *)((char *)SUBSCREEN_PAGE_FOOTER_SLOTS - 0x18); static Slot port_a0[2];
+src/d0spsub/subScreenDrawPageNumber.c | for (s = SUBSCREEN_PAGE_FOOTER_SLOTS; s->x != -1; s++) { | if (!port_a0[0].x) { port_a0[0] = port_a[0]; port_a0[1] = port_a[1]; } port_a[0].x = port_ev ? -1 : port_a0[0].x; if (port_ev) { int k; for (k = 0; k < 2; k++) { Slot *q = &port_a0[k]; if (q->idx == 0x16 ? m->page == 0 : m->page >= n - 1) continue; SUBSCREEN_DRAW_PARAMS.x = k ? 46 : 9; SUBSCREEN_DRAW_PARAMS.y = 232; SUBSCREEN_DRAW_PARAMS.w = m->w10 + q->dw; SUBSCREEN_DRAW_PARAMS.attr = 0x7C15; SUBSCREEN_DRAW_FRAME = m->icons[q->idx]; subScreenDrawSprite(1); port_ws_mark(port_p0, NEXT_PRIM, 1); } } for (s = SUBSCREEN_PAGE_FOOTER_SLOTS; s->x != -1; s++) {
+src/d0spsub/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.x = s->x; | SUBSCREEN_DRAW_PARAMS.x = s->x - (port_ev ? 166 : 0);
+src/d0spsub/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.y = s->y; | SUBSCREEN_DRAW_PARAMS.y = s->y - (port_ev ? 32 : 0);
+src/d0spsub3/subScreenDrawPageNumber.c | subScreenDrawSprite(1); | subScreenDrawSprite(1); if (port_ev) port_ws_mark(port_p0, NEXT_PRIM, 1);
+src/d0spsub3/subScreenDrawPageNumber.c | int t; | int t; extern char *NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int); char *port_p0 = NEXT_PRIM; int port_ev = *(short *)((char *)m + 0x12) == 2; Slot *port_a = (Slot *)((char *)SUBSCREEN_PAGE_FOOTER_SLOTS - 0x18); static Slot port_a0[2];
+src/d0spsub3/subScreenDrawPageNumber.c | for (s = SUBSCREEN_PAGE_FOOTER_SLOTS; s->x != -1; s++) { | if (!port_a0[0].x) { port_a0[0] = port_a[0]; port_a0[1] = port_a[1]; } port_a[0].x = port_ev ? -1 : port_a0[0].x; if (port_ev) { int k; for (k = 0; k < 2; k++) { Slot *q = &port_a0[k]; if (q->idx == 0x16 ? m->page == 0 : m->page >= n - 1) continue; SUBSCREEN_DRAW_PARAMS.x = k ? 46 : 9; SUBSCREEN_DRAW_PARAMS.y = 232; SUBSCREEN_DRAW_PARAMS.w = m->w10 + q->dw; SUBSCREEN_DRAW_PARAMS.attr = 0x7C15; SUBSCREEN_DRAW_FRAME = m->icons[q->idx]; subScreenDrawSprite(1); port_ws_mark(port_p0, NEXT_PRIM, 1); } } for (s = SUBSCREEN_PAGE_FOOTER_SLOTS; s->x != -1; s++) {
+src/d0spsub3/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.x = s->x; | SUBSCREEN_DRAW_PARAMS.x = s->x - (port_ev ? 166 : 0);
+src/d0spsub3/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.y = s->y; | SUBSCREEN_DRAW_PARAMS.y = s->y - (port_ev ? 32 : 0);
+#
+# --widescreen top tabs (Objetos / Evento / Estado / Mapa): the first one went with the left column to the wide left edge
+# and the other three stayed, leaving a wide stone gap after the first; the four stay together where the 4:3 frame has
+# them (port_ws_mark mode 0), centred under the bar, the stone wall continuing on both sides
+src/d0spsub/subScreenDrawTabs.c | extern void subScreenDrawSpriteFT4(int n); | extern void subScreenDrawSpriteFT4(int n); extern char *NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int);
+src/d0spsub/subScreenDrawTabs.c | int idx, mode; | int idx, mode; char *port_t0 = NEXT_PRIM;
+src/d0spsub/subScreenDrawTabs.c | SUBSCREEN_DRAW_FRAME = m->p48[id]; | SUBSCREEN_DRAW_FRAME = m->p48[id]; if (idx >= 4 && idx < 8) { subScreenDrawSprite(1); port_ws_mark(port_t0, NEXT_PRIM, 0); } else
+src/d0spsub3/subScreenDrawTabs.c | extern void subScreenDrawSpriteFT4(int n); | extern void subScreenDrawSpriteFT4(int n); extern char *NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int);
+src/d0spsub3/subScreenDrawTabs.c | int idx, mode; | int idx, mode; char *port_t0 = NEXT_PRIM;
+src/d0spsub3/subScreenDrawTabs.c | SUBSCREEN_DRAW_FRAME = m->p48[id]; | SUBSCREEN_DRAW_FRAME = m->p48[id]; if (idx >= 4 && idx < 8) { subScreenDrawSprite(1); port_ws_mark(port_t0, NEXT_PRIM, 0); } else

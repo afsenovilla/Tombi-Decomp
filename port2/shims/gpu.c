@@ -429,17 +429,19 @@ void port_ws_layout(int left_cut, int right_cut, int below, int boxes) {
 }
 static int ws_layout_active(void) { return ws_on && port_ws_layout_frame == port_frame - 1; }   /* (the ordering table built in one frame is drawn in the next) */
 /* primitive ranges the sub-screen code marks while it builds its ordering table (port/fixes.txt): the popup menus
-   (subScreenDrawPopupMenu: their text, cursor and balloon frame stay whole where the game put them, mode 0) and the
-   event list's counters at the foot of the left column (subScreenDrawEventCounters: they move with it, mode 1).
+   (subScreenDrawPopupMenu: their text, cursor and balloon frame stay whole where the game put them, mode 0), the top
+   tabs (subScreenDrawTabs: kept together where the 4:3 frame has them, mode 0) and the event list's counters, page
+   counter and page arrows at the foot of the left column (subScreenDrawEventCounters, subScreenDrawPageNumber: they
+   move with it, mode 1).
    Kept per frame parity: the ordering table built in one frame is drawn in the next. */
-static struct { const char *lo, *hi; int mode; } ws_marks[2][8];
+static struct { const char *lo, *hi; int mode; } ws_marks[2][16];
 static int ws_nmarks[2], ws_marks_frame[2];
 void port_ws_mark(const void *lo, const void *hi, int mode) {
     int b = port_frame & 1, k;
     if (ws_marks_frame[b] != port_frame) { ws_marks_frame[b] = port_frame; ws_nmarks[b] = 0; }
     for (k = 0; k < ws_nmarks[b]; k++)
         if (ws_marks[b][k].lo == (const char *)lo && ws_marks[b][k].mode == mode) { ws_marks[b][k].hi = hi; return; }
-    if (ws_nmarks[b] < 8) { ws_marks[b][k].lo = lo; ws_marks[b][k].hi = hi; ws_marks[b][k].mode = mode; ws_nmarks[b]++; }
+    if (ws_nmarks[b] < 16) { ws_marks[b][k].lo = lo; ws_marks[b][k].hi = hi; ws_marks[b][k].mode = mode; ws_nmarks[b]++; }
 }
 static int ws_mark_of(const void *pk) {        /* -1: not marked */
     int b = (port_frame - 1) & 1;
