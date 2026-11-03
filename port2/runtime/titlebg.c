@@ -27,7 +27,8 @@ const char *port_title_bg_path;
 
 /* the game's background rectangle (rows 8..247 of the 320-wide buffer) in image units: its left / top edge and
    its width / height as fractions of the image width / height */
-#define TB_Y0 8
+extern int port_ntsc;
+#define TB_Y0 (port_ntsc ? 0 : 8)    /* the NTSC picture draws the landscape 8 rows up (port/fixes.txt titleLogoDraw) */
 #define TB_H 240
 static const double TB_FW = 0.5624, TB_FX = (1 - 0.5624) / 2, TB_FY = 0.0, TB_FH = 1.0;
 

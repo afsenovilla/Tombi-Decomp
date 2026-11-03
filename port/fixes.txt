@@ -692,3 +692,108 @@ src/d0spsub/subScreenDrawTabs.c | SUBSCREEN_DRAW_FRAME = m->p48[id]; | SUBSCREEN
 src/d0spsub3/subScreenDrawTabs.c | extern void subScreenDrawSpriteFT4(int n); | extern void subScreenDrawSpriteFT4(int n); extern char *NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int);
 src/d0spsub3/subScreenDrawTabs.c | int idx, mode; | int idx, mode; char *port_t0 = NEXT_PRIM;
 src/d0spsub3/subScreenDrawTabs.c | SUBSCREEN_DRAW_FRAME = m->p48[id]; | SUBSCREEN_DRAW_FRAME = m->p48[id]; if (idx >= 4 && idx < 8) { subScreenDrawSprite(1); port_ws_mark(port_t0, NEXT_PRIM, 0); } else
+#
+# ---------------------------------------------------------------------------------------------------------------------
+# NTSC picture (port_ntsc: --hz 60 unless --picture pal; docs/PORT.md "60 Hz mode", "NTSC picture"): every value the PAL
+# build changed for its 320x256 screen takes the USA build's (SCUS-94236) value, PORT_NTSC(pal, us) (port_prelude.h).
+# Found with tools/ntsc_diff.py (USA function twins / alignments); the USA addresses are in the comments.
+# Display: 320x224 draw and display areas (USA initDisplay 0x80016C4C), 640x480 for the interlaced logo screens (0x80016DDC)
+src/initDisplay.c | 0x140, 0x100); | 0x140, PORT_NTSC(0x100, 0xe0));
+src/initDisplay.c | DAT_8009e356 = 0x100; | DAT_8009e356 = PORT_NTSC(0x100, 0xe0);
+src/initDisplay.c | DAT_8009f066 = 0x100; | DAT_8009f066 = PORT_NTSC(0x100, 0xe0);
+src/initWideDisplayEnv.c | 0x280, 0x200); | 0x280, PORT_NTSC(0x200, 0x1e0));
+src/initWideDisplayEnv.c | disp.screen.h = 0x100; | disp.screen.h = PORT_NTSC(0x100, 0xf0);
+# Screen centre (GTE geometry offset) y 128 -> 112 (USA initGraphics 0x80016AF4)
+src/initGraphics.c | FUN_80063fdc(0xa0, 0x80); | FUN_80063fdc(0xa0, PORT_NTSC(0x80, 0x70));
+# Camera: the view sits 120 lines (not 128) above the camera point (USA 0x80017734, 0x800177D8, 0x8002A0A0, 0x8004D7E0)
+src/resetCameraScratchDefaults.c | *(short *)0x1F8000F2 = -0x80; | *(short *)0x1F8000F2 = PORT_NTSC(-0x80, -0x78);
+src/initGameConfig.c | VIEW_CAMERA_Y = -128; | VIEW_CAMERA_Y = PORT_NTSC(-128, -120);
+src/computeCameraMatrix.c | o->w0c = CAMP->pos[4].raw + 0x800000; | o->w0c = CAMP->pos[4].raw + PORT_NTSC(0x800000, 0x780000);
+src/drawObjectModelCameraFixed.c | M.t[1] += 0x80; | M.t[1] += PORT_NTSC(0x80, 0x78);
+# How far above the camera's top limit Tombi may go (the top screen edge): 0x5C / 0x90 -> 0x54 / 0x88
+# (USA cameraClampAroundTarget 0x8002A240, updateCameraFollow 0x8002C7D8, cameraModeHandler6 0x8002CEF8, ObjCheckHeadCollision 0x80042F20)
+src/cameraClampAroundTarget.c | o->w30 - 0x5c | o->w30 - PORT_NTSC(0x5c, 0x54)
+src/cameraClampAroundTarget.c | o->w30 - 0x90 | o->w30 - PORT_NTSC(0x90, 0x88)
+src/updateCameraFollow.c | o->w30 - 0x5c | o->w30 - PORT_NTSC(0x5c, 0x54)
+src/updateCameraFollow.c | o->w30 - 0x90 | o->w30 - PORT_NTSC(0x90, 0x88)
+src/cameraModeHandler6.c | *(short *)&o->d30, 0x5c); | *(short *)&o->d30, PORT_NTSC(0x5c, 0x54));
+src/cameraModeHandler6.c | *(short *)&o->d30, 0x90); | *(short *)&o->d30, PORT_NTSC(0x90, 0x88));
+src/ObjCheckHeadCollision.c | CAMERA_SCROLL.minY - 0x90 | CAMERA_SCROLL.minY - PORT_NTSC(0x90, 0x88)
+# HUD lives counter y 240 -> 208 (USA drawHud 0x8004E468), full-screen fade height (0x8004FB54), event message y 160 ->
+# 144 (0x8001ECD8), loading sprite y 160 -> 128 (0x80023CE0)
+src/drawHud.c | drawHudLives(o, 0x18 - port_ws_cull, 0xf0); | drawHudLives(o, 0x18 - port_ws_cull, PORT_NTSC(0xf0, 0xd0));
+src/drawScreenFade.c | p->s1a = 0x100; | p->s1a = PORT_NTSC(0x100, 0xf0);
+src/printEventMessage.c | o->y.raw = 0xa00000; | o->y.raw = PORT_NTSC(0xa00000, 0x900000);
+src/drawLoadingSprites.c | FUN_80021478(0xc0, 0xa0, 0, 0, s); | FUN_80021478(0xc0, PORT_NTSC(0xa0, 0x80), 0, 0, s);
+# Info message (item names...) bottom row y 212 -> 180 (USA printInfoMessage 0x80031124)
+src/printInfoMessage.c | F14 = (0xd4 - (3 - INFO_MESSAGE_SLOT) * 20) << 16; | F14 = (PORT_NTSC(0xd4, 0xb4) - (3 - INFO_MESSAGE_SLOT) * 20) << 16;
+# Cut-scene overlay sprites: no 24-line drop and no black bars at y 0 / 240 (USA drawLetterboxOverlay 0x8004E244)
+src/drawLetterboxOverlay.c | p->y0 = o->y.p.whole + e->y + 0x18; | p->y0 = o->y.p.whole + e->y + PORT_NTSC(0x18, 0);
+src/drawLetterboxOverlay.c | addTilePrim(&r, 0, 0, 1); | if (!port_ntsc) addTilePrim(&r, 0, 0, 1);
+# Pause menu: the USA tables (0x8007ED10.., 0x8007ED98) are the PAL ones 16 lines up; dim rect 240 lines (0x8004F5A4)
+src/drawPauseMenu.c | t->h = 0x100; | t->h = PORT_NTSC(0x100, 0xf0);
+src/drawPauseMenu.c | y = e->y; | y = e->y - PORT_NTSC(0, 16);
+src/drawPauseMenu.c | k <<= 4; k += 0x58; | k <<= 4; k += PORT_NTSC(0x58, 0x48);
+src/drawPauseMenu.c | t->y0 = 0x78; | t->y0 = PORT_NTSC(0x78, 0x68);
+src/drawPauseMenu.c | p->y0 = D_80080404[mode].y + pt->dy; | p->y0 = D_80080404[mode].y - PORT_NTSC(0, 16) + pt->dy;
+# Title screen menu rows (USA loopTitleScreen 0x80019E68)
+src/loopTitleScreen.c | func_800E972C(0x30, 0xd0, 1); | func_800E972C(0x30, PORT_NTSC(0xd0, 0xc0), 1);
+src/loopTitleScreen.c | func_800E972C(0x38, 0xa0, 0); | func_800E972C(0x38, PORT_NTSC(0xa0, 0x90), 0);
+# Backdrop / parallax sprites: PAL drops them 24 (16) lines at spawn and the X006/X010/X014 ones follow scratch 0x186; the
+# USA overlays add nothing and follow 0x17A (X000 0x80122714, X001 0x80120F3C/0x801210CC, X004 0x8011D534, X006
+# 0x8011B894, X009 0x8011D16C, X010 0x8011AFC8/0x8011B1E8, X014 0x8011B02C)
+src/updateA00FarBackdropEast.c | o->y.p.whole += 0x180; | o->y.p.whole += PORT_NTSC(0x180, 0);
+src/x001/updateBackdropSprite.c | o->y.p.whole += 0x180; | o->y.p.whole += PORT_NTSC(0x180, 0);
+src/x001/updateParallaxBackdropSprite.c | o->y.p.whole += 0x180; | o->y.p.whole += PORT_NTSC(0x180, 0);
+src/x009/updateParallaxBackdropSprite.c | o->y.p.whole += 0x180; | o->y.p.whole += PORT_NTSC(0x180, 0);
+src/x004/updateStormBackdrop.c | o->y.p.whole += 0x40; | o->y.p.whole += PORT_NTSC(0x40, 0);
+src/x004/updateStormBackdrop.c | y = (short)(o->d34 - s - ((g >> 8) << 3)) >> 2; | y = (short)(o->d34 - s - ((g >> 8) << PORT_NTSC(3, 4))) >> 2;
+src/x006/updateParallaxBackdropSprite.c | o->y.p.whole += 0x60; | o->y.p.whole += PORT_NTSC(0x60, 0);
+src/x006/updateParallaxBackdropSprite.c | j = ((unsigned short*)&SPAD.s186)[0]; | j = port_ntsc ? SPAD.s17a : ((unsigned short*)&SPAD.s186)[0];
+src/x010/updateParallaxBackdropSprite.c | o->y.p.whole += 0x20; | o->y.p.whole += PORT_NTSC(0x20, 0);
+src/x010/updateParallaxBackdropSprite.c | y = b - ((unsigned short*)&SPAD.s186)[0] - | y = b - (port_ntsc ? SPAD.s17a : ((unsigned short*)&SPAD.s186)[0]) -
+src/x010/updateParallaxBackdropSpriteB.c | o->y.p.whole += 0x20; | o->y.p.whole += PORT_NTSC(0x20, 0);
+src/x010/updateParallaxBackdropSpriteB.c | cy = ((unsigned short*)&SPAD.s186)[0]; | cy = port_ntsc ? SPAD.s17a : ((unsigned short*)&SPAD.s186)[0];
+src/x010/updateParallaxBackdropSpriteB.c | ay -= (sc >> 8) << 3; | if (!port_ntsc) ay -= (sc >> 8) << 3;
+src/x014/updateParallaxBackdropSprite.c | o->y.p.whole += 0x60; | o->y.p.whole += PORT_NTSC(0x60, 0);
+src/x014/updateParallaxBackdropSprite.c | cy = ((unsigned short*)&SPAD.s186)[0]; | cy = port_ntsc ? SPAD.s17a : ((unsigned short*)&SPAD.s186)[0];
+# X006 / X009 camera matrices (USA 0x80116244, 0x80116BC0) and the race HUD's bottom row 240 -> 208 (0x8011BC90)
+src/x006/setupCameraMatrixFromObj.c | o->w0c = CAMP->pos[4].raw + 0x800000; | o->w0c = CAMP->pos[4].raw + PORT_NTSC(0x800000, 0x780000);
+src/x009/scrollFollowRotatingPlane.c | o->w0c = CAMP->pos[4].raw + 0x800000; | o->w0c = CAMP->pos[4].raw + PORT_NTSC(0x800000, 0x780000);
+src/x006/drawRaceHud.c | drawRaceHudGauge(p, 0, 0x88, 0xf0); | drawRaceHudGauge(p, 0, 0x88, PORT_NTSC(0xf0, 0xd0));
+src/x006/drawRaceHud.c | drawRaceHudLives(p, 0x18, 0xf0); | drawRaceHudLives(p, 0x18, PORT_NTSC(0xf0, 0xd0));
+# Title: no black band over the top 8 lines and the landscape / logo 8 lines up (the USA title has neither band nor
+# offset); "NEW GAME" carousel row 184 -> 168 and its arrows 184 -> 166 (USA OPTSUB00 0x800E9AF0 / 0x800E9D44)
+src/o0ptsub0/titleLogoDraw.c | addTilePrim(&r, 0, 0, 1); | if (!port_ntsc) addTilePrim(&r, 0, 0, 1);
+src/o0ptsub0/titleLogoDraw.c | titleDrawSpriteRecs(TITLE_LOGO_SPRITE_RECS, 0, -TITLE_LOGO_BOUNCE_OFFSET, 0); | titleDrawSpriteRecs(TITLE_LOGO_SPRITE_RECS, 0, -TITLE_LOGO_BOUNCE_OFFSET - PORT_NTSC(0, 8), 0);
+src/o0ptsub0/titleLogoDraw.c | titleDrawSpriteRecs(TITLE_LOGO_STATIC_SPRITE_RECS, 0, 0, 0); | titleDrawSpriteRecs(TITLE_LOGO_STATIC_SPRITE_RECS, 0, -PORT_NTSC(0, 8), 0);
+src/o0ptsub0/titleDrawMenuCarousel.c | m.y = 0xB8; | m.y = PORT_NTSC(0xB8, 0xA6);
+src/o0ptsub0/titleDrawCarouselGlyph.c | p->y0 = 0xB8; | p->y0 = PORT_NTSC(0xB8, 0xA8);
+src/o0ptsub0/titleDrawCarouselGlyph.c | p->y1 = 0xB8; | p->y1 = PORT_NTSC(0xB8, 0xA8);
+src/o0ptsub0/titleDrawCarouselGlyph.c | p->y2 = tbl[(short)ch].h + 0xB8; | p->y2 = tbl[(short)ch].h + PORT_NTSC(0xB8, 0xA8);
+# Options, screen adjust and button configuration screens: the USA layouts are the PAL ones 16 lines up (USA OPTSUB00
+# optionsMenuDrawText 0x800E9064, screenAdjustDrawText, buttonConfigDrawCursor 0x800E8F6C): the screens' drawers
+src/o0ptsub0/titleDrawSprite.c | D_1F800000.y0 = d->y; | D_1F800000.y0 = d->y - PORT_NTSC(0, 16);
+src/o0ptsub0/optionsDrawLabel.c | m.y = y; | m.y = y - PORT_NTSC(0, 16);
+src/o0ptsub0/optionsDrawLabelPal.c | m.y = y; | m.y = y - PORT_NTSC(0, 16);
+src/o0ptsub0/optionsDrawLabelPal2.c | m.y = y; | m.y = y - PORT_NTSC(0, 16);
+src/o0ptsub0/screenAdjustDrawNumber.c | m.y = y; | m.y = y - PORT_NTSC(0, 16);
+src/o0ptsub0/optionsMenuDrawCursor.c | D_1F800000.y0 = OPTIONS_CURSOR_RECTS_NO_ACTUATOR[sel - 4].y; | D_1F800000.y0 = OPTIONS_CURSOR_RECTS_NO_ACTUATOR[sel - 4].y - PORT_NTSC(0, 16);
+src/o0ptsub0/optionsMenuDrawCursor.c | sp->y0 = OPTIONS_CURSOR_RECTS[sel].y; | sp->y0 = OPTIONS_CURSOR_RECTS[sel].y - PORT_NTSC(0, 16);
+src/o0ptsub0/buttonConfigDrawCursor.c | D_1F800000.y0 = 0x4C; | D_1F800000.y0 = PORT_NTSC(0x4C, 0x3C);
+# Sub-screen (DSPSUB / DSPSUB3): Status page notes 152/168 -> 136/152 (USA subScreenDrawStatusNotes 0x800E9AB0), map
+# area / room names 216/232 -> 184/200 (0x800F0B8C, 0x800F0C98); the Status page itself: src/wip/d0spsub_func_800EFD6C.c
+src/d0spsub/subScreenDrawStatusNotes.c | SUBSCREEN_DRAW_PARAMS.y = 0x98; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(0x98, 0x88);
+src/d0spsub/subScreenDrawStatusNotes.c | SUBSCREEN_DRAW_PARAMS.y = 0xA8; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(0xA8, 0x98);
+src/d0spsub3/subScreenDrawStatusNotes.c | SUBSCREEN_DRAW_PARAMS.y = 0x98; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(0x98, 0x88);
+src/d0spsub3/subScreenDrawStatusNotes.c | SUBSCREEN_DRAW_PARAMS.y = 0xA8; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(0xA8, 0x98);
+src/d0spsub/subScreenMapDrawAreaName.c | SUBSCREEN_DRAW_PARAMS.y = 0xD8; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(0xD8, 0xB8);
+src/d0spsub/subScreenMapDrawRoomName.c | SUBSCREEN_DRAW_PARAMS.y = 0xE8; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(0xE8, 0xC8);
+# Status page "Next N" labels: the USA table is the PAL one 16 lines up, with the gauges (USA 0x800EB0E8)
+src/d0spsub/subScreenDrawGaugePercent.c | SUBSCREEN_DRAW_PARAMS.y = s->y; | SUBSCREEN_DRAW_PARAMS.y = s->y - PORT_NTSC(0, 16);
+src/d0spsub3/subScreenDrawGaugePercent.c | SUBSCREEN_DRAW_PARAMS.y = s->y; | SUBSCREEN_DRAW_PARAMS.y = s->y - PORT_NTSC(0, 16);
+# Movies: decoded into VRAM rows 256.. (PAL 272..: the 256-line display shows them 16 lines lower; USA moviePlayerTask 0x8001F1C0)
+src/moviePlayerTask.c | movieInitDecodeEnv(&MOVIE_DEC_ENV, 0x180, 0x110, 0x2c0, 0x110); | movieInitDecodeEnv(&MOVIE_DEC_ENV, 0x180, PORT_NTSC(0x110, 0x100), 0x2c0, PORT_NTSC(0x110, 0x100));
+# The PAL disc's placement records moved down for the 256-line screen take the USA disc's y as the game spawns an
+# object from one (port2/runtime/ntsc.c, table from tools/ntsc_apd.py)
+src/spawnObjectFromRecord.c | kind = e->b1 & 0x7f; | { extern void port_ntsc_apd_rec(void *); port_ntsc_apd_rec(e); } kind = e->b1 & 0x7f;

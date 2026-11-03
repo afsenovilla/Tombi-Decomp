@@ -10,6 +10,9 @@
 // Left: inside the loops the game's RTL order differs (loop 1: the x store precedes the y load, the attr store sits
 // between the w loads and the w store: try x/y/w/attr orders and the plain-vs-volatile attr form, 786-792 so far),
 // then the usual per-loop register names. The hoisted -1 (`end`) goes to s2 in the game's loops 2+ (not in loop 1).
+#ifndef PORT_NTSC
+#define PORT_NTSC(pal, us) (pal)   /* port2 (port_prelude.h): the USA value with the NTSC picture */
+#endif
 typedef struct {
     unsigned char state, b1, b2, b3;
     char p4[0xc];
@@ -97,13 +100,13 @@ void func_800EFD6C(void)
     case 0:
         HUD_STATE.w48 = 1;
         subScreenDrawTabs(m);
-        drawHudVitality(&HUD_STATE, 0xC0, 0x70, GAME_PLAYER_HEALTH);
+        drawHudVitality(&HUD_STATE, 0xC0, PORT_NTSC(0x70, 0x60), GAME_PLAYER_HEALTH);
         HUD_STATE.b74 = 0;
         HUD_STATE.b75 = 0;
         HUD_STATE.b76 = 0;
-        drawHudItemGauge(&HUD_STATE, 0, 0xE, 0x5E, 1);
-        drawHudItemGauge(&HUD_STATE, 1, 0xE, 0x6E, 1);
-        drawHudItemGauge(&HUD_STATE, 2, 0xE, 0x7E, 1);
+        drawHudItemGauge(&HUD_STATE, 0, 0xE, PORT_NTSC(0x5E, 0x4E), 1);
+        drawHudItemGauge(&HUD_STATE, 1, 0xE, PORT_NTSC(0x6E, 0x5E), 1);
+        drawHudItemGauge(&HUD_STATE, 2, 0xE, PORT_NTSC(0x7E, 0x6E), 1);
         subScreenDrawGaugePercent(m, 0);
         subScreenDrawGaugePercent(m, 1);
         subScreenDrawGaugePercent(m, 2);
@@ -112,7 +115,7 @@ void func_800EFD6C(void)
         Slot *s;
         for (s = D_8010922C; s->x != -1; s++) {
             D_8011113Cx = s->x;
-            D_8011113E = s->y;
+            D_8011113E = s->y - PORT_NTSC(0, 16);
             *(volatile unsigned short *)&D_8011113C.attr = 0x7C15;
             D_80111140 = m->w10 + s->dw;
             D_8011113C.font = D_800FFD98;
@@ -121,22 +124,22 @@ void func_800EFD6C(void)
         }
         }
         D_8011113C.x = 0xE8;
-        D_8011113E = 0x66;
+        D_8011113E = PORT_NTSC(0x66, 0x56);
         s = &D_80109208[GAME_BITTEN_JUMP_KIND];
         D_80111142 = 0x7892;
         D_80111140 = m->w10 + s->dw;
         D_80111144 = m->p54[D_80109228[GAME_BITTEN_JUMP_KIND]];
         subScreenDrawSprite(1);
         D_8011113Cx = s->x;
-        D_8011113E = s->y;
+        D_8011113E = s->y - PORT_NTSC(0, 16);
         D_80111142 = 0x7C15;
         D_80111140 = m->w10 + s->dw;
         D_80111144 = m->p58[s->idx];
         subScreenDrawSprite(1);
-        subScreenDrawDigitsSprite(&HUD_STATE, 0x132, 0x50);
-        drawHudLives(&HUD_STATE, 0x120, 0x6A);
+        subScreenDrawDigitsSprite(&HUD_STATE, 0x132, PORT_NTSC(0x50, 0x40));
+        drawHudLives(&HUD_STATE, 0x120, PORT_NTSC(0x6A, 0x5A));
         D_8011113C.x = 0x10;
-        D_8011113E = 0xC8;
+        D_8011113E = PORT_NTSC(0xC8, 0xB8);
         D_80111140 = m->w10 + 1;
         D_80111142 = 0x7C15;
         if (GAME == 9) D_8011114C = D_80108BC8[GAME_SELECTED_SECTION];
@@ -144,7 +147,7 @@ void func_800EFD6C(void)
         D_8011113C.font = D_800FFD98;
         subScreenDrawString(5, 0);
         D_8011113C.x = 0x10;
-        D_8011113E = 0xD8;
+        D_8011113E = PORT_NTSC(0xD8, 0xC8);
         D_8011113C.attr = 0x7C15;
         D_80111140 = m->w10 + 1;
         D_80111150 = D_800FFD98;
@@ -154,7 +157,7 @@ void func_800EFD6C(void)
         Slot *s;
         for (s = D_801091D0; s->x != -1; s++) {
             D_8011113Cx = s->x;
-            D_8011113E = s->y;
+            D_8011113E = s->y - PORT_NTSC(0, 16);
             D_8011113C.attr = 0x79D2;
             D_80111140 = m->w10 + s->dw;
             D_80111144 = m->p48[s->idx];

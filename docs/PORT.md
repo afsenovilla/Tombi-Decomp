@@ -164,7 +164,8 @@ vblank for tests. Verified headless: a save written from the save screen
 
 **Pacing: `--realtime`, `--hz 50|60`, `--show-fps`, `--stall FRAME:MS`.** One vblank every 1/hz s from the host
 clock (default 50, PAL; 60 gives NTSC timing: the game logic runs 20% faster, as on an NTSC console, which is the
-US/JP game's speed since PAL changed no game constant for 50 Hz: "60 Hz mode"). `--window`
+US/JP game's speed since PAL changed no game constant for 50 Hz: "60 Hz mode"; `--hz 60` also switches to the USA
+320x224 picture, `--picture pal|ntsc` overrides that: "NTSC picture"). `--window`
 implies `--realtime` and honours `--hz`. The schedule is absolute (`port_vblank` in `shims/psyq.c`): vblank n is
 due at `epoch + n/hz`, waited for with `port_sleep_until_us` (Linux: `clock_nanosleep` `TIMER_ABSTIME` to 200 µs
 before the deadline, then a spin on `clock_gettime`; Windows: `timeBeginPeriod(1)` at start, then `Sleep(1)` is
@@ -1084,7 +1085,7 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 | Mod | Port options | Notes |
 |---|---|---|
 | Skip intro logos/movies (default off) | `--skip-movies` | the movies play by default (`port2/`); `--play-movies` is accepted and does nothing |
-| 60 Hz | `--hz 60` | NTSC pacing (`--hz 50` otherwise) |
+| 60 Hz | `--hz 60` | NTSC pacing (`--hz 50` otherwise) and the NTSC picture (320x224, the USA layout; `--picture pal` keeps the PAL 320x256 one) |
 | Area select | `--poke 900:1F8001B4:1 --poke 1250:8009C960:A:2 --poke 1250:8009C962:S:2 --pad-script 1000:start,1300:circle:3` | area/section pickers from `ROOM_COUNTS` (names from README); rooms of `DOOR_ROOMS` are not offered |
 | Start with N AP | `--poke 1100:8009C96C:N:4` | `GAME.playerAP` (drawHudAP) |
 | Start with N lives | `--poke 1100:8009C980:N:1` | `GAME.playerLives` (drawHudLives) |
@@ -2707,8 +2708,73 @@ are the wall-clock "no game progress for 3 s" watchdog warnings in static scenes
 other, on frames that are identical. The sweep's AREA06 section 2 fault (frame 2804, `processObjectCollisions`, a
 call to X006 0x801194AC with no native code) is also the same at both rates: a port bug of its own, not timing.
 
-**Open.** Nothing in the game logic. The 256-line PAL picture stays (the port is not tied to a TV standard). A real
-NTSC console's 59.94 Hz is not reproduced (see above). The PAL-only logic fixes are kept on purpose.
+**Open.** Nothing in the game logic. A real NTSC console's 59.94 Hz is not reproduced (see above). The PAL-only logic
+fixes are kept on purpose. The picture follows the USA build: see "NTSC picture" below.
+
+#### NTSC picture: `--hz 60` draws the USA game's 320x224 screen
+
+**Why.** The PAL build draws 256 lines (320x256, screen centre y 128) where the USA build draws 224 (320x224, centre
+y 112), and a PAL TV stretches its 256 lines over the same 4:3 screen an NTSC TV fills with about 240: the same
+46-pixel Tombi is 46/256 of the picture height on PAL and 46/240 on NTSC, so the PAL game looks 6.7 % squashed
+("más retaco"), and every 2D element was moved down for the taller screen. Up to now the port showed the PAL 256-line
+picture at 4:3 in both modes. With `--hz 60` (or `--picture ntsc` at any rate; `--picture pal` keeps the old picture)
+the port now uses the USA build's value everywhere the PAL build changed it for the 256-line screen, through
+`PORT_NTSC(pal, us)` (`port2/include/port_prelude.h`, `port_ntsc` set in `runtime/main.c`) in `port/fixes.txt`
+(section "NTSC picture", each line names the USA function), plus `src/wip/d0spsub_func_800EFD6C.c` (the Status page
+draft) and `runtime/titlebg.c`. The console build is unchanged (port-only substitutions; the wip draft is not built).
+
+| What | PAL | USA / `--picture ntsc` |
+|---|---|---|
+| Draw / display areas (`initDisplay`), logo screens (`initWideDisplayEnv`) | 320x256, 640x512 | 320x224, 640x480 |
+| Screen centre (`initGraphics` geometry offset) | 160, 128 | 160, 112 |
+| Camera: view 128 / 120 lines above the camera point (`computeCameraMatrix`, `drawObjectModelCameraFixed`, scratch 0xF2 in `resetCameraScratchDefaults` / `initGameConfig`, X006 `setupCameraMatrixFromObj`, X009 `scrollFollowRotatingPlane`) | 128 | 120 |
+| How far above the camera's top Tombi may go (`cameraClampAroundTarget`, `updateCameraFollow`, `cameraModeHandler6`, `ObjCheckHeadCollision`) | 0x90 / 0x5C | 0x88 / 0x54 |
+| HUD lives row (`drawHud`, X006 `drawRaceHud`) | 240 | 208 |
+| Fade rectangle (`drawScreenFade`), pause dim (`drawPauseMenu`) | 256 | 240 |
+| Pause menu text / highlight / frame (`drawPauseMenu` and its tables) | | 16 lines up |
+| Info message rows (`printInfoMessage`), event message (`printEventMessage`), "Now Loading" (`drawLoadingSprites`) | 212, 160, 160 | 180, 144, 128 |
+| Cut-scene overlay (`drawLetterboxOverlay`) | +24 lines, black bars at 0 and 240 | no offset, no bars |
+| Backdrop / parallax sprites (X000 `updateA00FarBackdropEast`, X001, X004 `updateStormBackdrop`, X006, X009, X010, X014) | +24 (+16) lines at spawn, X006/X010/X014 follow scratch 0x186 | no offset, scratch 0x17A (X004: the USA vertical parallax shift) |
+| Title (`titleLogoDraw`, `loopTitleScreen`, carousel) | black band over the top 8 lines, landscape at 8, rows 160/208, carousel 184 | no band, landscape at 0, rows 144/192, carousel 168 (arrows 166) |
+| Options / screen adjust / button config (O0PTSUB0 drawers) | | 16 lines up |
+| Sub-screen: Status page (`func_800EFD6C`, notes, "Next N" labels), map area / room names | | 16 lines up; names 216/232 -> 184/200 |
+| Movies (`moviePlayerTask`) | VRAM rows 272.. | rows 256.. |
+
+The window shows the 224 lines as 224 of the 240 lines of a 4:3 NTSC screen (`port_window_fit`, `runtime/sdl.c`: a
+224-line frame is 320 wide, the window opens at 320x240 times the scale, with 8-line borders as on an NTSC TV); the
+OpenGL blit, `--widescreen` (426x224 at 16:9), `--fps` and `--internal-res` take the frame size as it is. Not changed
+(no visible effect or no USA counterpart): the off-screen culls (`y < 256` -> `y < 224` in the model / sprite
+drawers), the memory card screens (top-anchored, they fit), the item / event list spacing (text layout), the PAL
+top-down map strips, the logo screens' background grey, the sub-screen map's scroll position (the map settles
+lower than in the USA run; not traced yet).
+
+**Disc data.** The PAL disc also moved object placements: 126 distinct APD placement records (load-record kinds
+0x80..0x86, 21 blocks in 13 areas; mostly backdrop and scenery objects, 24 lines lower; AREA00 section 0-2 ones 44 /
+52) differ from the USA disc's only in their y word. `tools/ntsc_apd.py US_FS USA.bin -o port2/runtime/ntsc_apd.inc`
+lists them (numbers only: area, the eight PAL words, the USA y) and `port2/runtime/ntsc.c` gives a record the USA y
+when `spawnObjectFromRecord` spawns from it and it still holds exactly those PAL words. Checked: the candles of the
+elder's house (AREA00 section 3) are 10 px lower than in the USA run without it, within 1 px with it. AREA04
+sections 0/1 are left as they are (PAL reorders two records and adds three: content, not the screen). The player
+trace of the `tools/ntsc_check.py --port-script` run is identical with `--picture ntsc` and `--picture pal`.
+
+**Checked against the USA executable** (tools/psxemu running SCUS_942.36 from the USA disc, the same pad script as
+the port at `--hz 60`, frames aligned on Tombi's opening drop): the village opening frames are the same picture
+(best vertical offset 0 px; the remaining per-pixel differences are the emulator's undithered rasteriser), the first
+dialogue box, the Select popup, the Items page, the Status page and the map names line up, and Tombi standing is
+46 px tall (hair tip y 154 to the feet y 199) in both. The title matches the USA layout (the logo and landscape are
+the PAL art).
+
+**Timing of the opening scene.** Anchored on Tombi's first falling frame (port frame 1153 of the
+`--pad-script 1000:start:4` run, emulator frame 133 after START), the USA run and the port at `--hz 60` agree at
+every offset (`tools/psxemu` draws one frame ahead of the state it logs at times, so +-1): the picture fades in
+from +0 to about +20 with the straw-hat villager already up on his chimney, Tombi lands at +51 in both (y -52), the
+first dialogue box opens at +59/+60, its text runs at the same pace. The PAL logic of this scene is the USA logic
+frame for frame, and the room's objects only start once its CD loads are done: the port loads the room in 130
+frames, a real drive takes longer, but that shifts the scene as a whole, not the villager against Tombi. A JP
+(SLPS-01144) run was not possible (tools/psxemu has no HLE map for that executable), so a difference between JP and
+the USA/PAL builds in this scene is not ruled out. The music is the same in real time at 50 and 60 Hz (116 of 116
+note-ons of the title theme on the same sample offsets, `-v -v` logs): libsnd's `SsSetTickMode(SS_TICK60)` ticks
+the sequencer 60 times a second on both consoles (PAL: root counter 2; NTSC: VSync, 59.94), so PAL Tombi! never had slower music.
 
 ### HD (plan; phase 1 prototyped): `--internal-res N`
 

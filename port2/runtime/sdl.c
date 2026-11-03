@@ -73,18 +73,24 @@ void port_window_start(void) {
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
     }
     extern int port_widescreen;
-    int ww = (port_window_square ? 320 : 256 * 4 / 3) * port_window_scale;
+#ifndef PORT2_WASM_HOST
+    extern int port_ntsc;
+    int tvh = port_ntsc ? 240 : 256;       /* the NTSC picture: a 4:3 NTSC screen (240 lines, the game's 224 centred) */
+#else
+    int tvh = 256;
+#endif
+    int ww = (port_window_square ? 320 : tvh * 4 / 3) * port_window_scale;
     if (port_widescreen)        /* the same logical width port_window_fit uses, times the scale (scaling the rounded 4:3
                                    width came out a pixel short of k * lw, so the fit dropped to 1x) */
-        ww = (port_window_square ? 320 + 2 * port_widescreen : 256 * 4 * (320 + 2 * port_widescreen) / (3 * 320)) * port_window_scale;
+        ww = (port_window_square ? 320 + 2 * port_widescreen : tvh * 4 * (320 + 2 * port_widescreen) / (3 * 320)) * port_window_scale;
     win = SDL_CreateWindow("Tombi! (PC port)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
-                           256 * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
+                           tvh * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
                            (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     if (!win && want_gl) {
         port_printf("[port2] SDL_CreateWindow (OpenGL): %s; trying without\n", SDL_GetError());
         port_renderer = 0;
         win = SDL_CreateWindow("Tombi! (PC port)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
-                               256 * port_window_scale, SDL_WINDOW_RESIZABLE | (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+                               tvh * port_window_scale, SDL_WINDOW_RESIZABLE | (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     }
     if (!win) port_fatal("SDL_CreateWindow: %s", SDL_GetError());
     {   /* the taskbar / title bar icon */
@@ -103,7 +109,7 @@ void port_window_start(void) {
 #ifdef __ANDROID__
     android_pad_register();
 #endif
-    port_printf("[port2] window %dx%d (scale %d, %s)%s\n", ww, 256 * port_window_scale, port_window_scale, port_window_square ? "square pixels" : "4:3", dev ? ", audio 44.1 kHz (device pulls the mixer)" : "");
+    port_printf("[port2] window %dx%d (scale %d, %s)%s\n", ww, tvh * port_window_scale, port_window_scale, port_window_square ? "square pixels" : "4:3", dev ? ", audio 44.1 kHz (device pulls the mixer)" : "");
 }
 
 static void window_stop_h(void *u) {
@@ -408,8 +414,10 @@ int port_window_fill;            /* --fit: fill the screen with a non-integer sc
 #endif
 void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
     extern int port_widescreen;
-    int lw = port_window_square ? 320 : h * 4 / 3;
-    if (port_window_fit_wide) lw = port_window_square ? 320 + 2 * port_widescreen : h * 4 * (320 + 2 * port_widescreen) / (3 * 320);
+    /* the NTSC picture's 224 lines (--picture ntsc) are 224 of the 240 a 4:3 NTSC screen shows: 320 wide either way */
+    int tv = h == 224 ? 240 : h;
+    int lw = port_window_square ? 320 : tv * 4 / 3;
+    if (port_window_fit_wide) lw = port_window_square ? 320 + 2 * port_widescreen : tv * 4 * (320 + 2 * port_widescreen) / (3 * 320);
     int k = W / lw < H / h ? W / lw : H / h;
     float ow, oh;
     if (port_window_fill) k = 0;
