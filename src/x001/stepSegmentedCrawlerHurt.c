@@ -1,5 +1,84 @@
 // FUNC 80134944 700 X001
 // MATCHING 80134944 700
+// VERSION SLPS_01144 x01 8013321C 696
+#if defined(VERSION_SLPS_01144)
+#include "gvars.h"
+#include "TOBJ.H"
+
+extern short NEG_SIN_TABLE[];
+extern short COS_TABLE[];
+extern int ObjCullRegister(TObj *);
+extern void TileCollideAt(TObj *, int, int);
+extern void segmentedCrawlerFollowParent(TObj *);
+extern void segmentedCrawlerHit(TObj *);
+extern void segmentedCrawlerGrabbed(TObj *);
+extern void segmentedCrawlerDefeated(TObj *);
+extern void segmentedCrawlerHurtFlyOff(TObj *);
+
+void func_8013321C(TObj *o)
+{
+    TObj *e;
+
+    switch (o->step) {
+    case 0:
+        ObjCullRegister(o);
+        if (o->b0c == 0) {
+            if (o->w98 == 0) {
+                o->b04 = 2;
+                o->step = 5;
+                o->state = 0;
+            } else {
+                segmentedCrawlerHit(o);
+            }
+        } else {
+            segmentedCrawlerFollowParent(o);
+            o->d->raw = ((TObj *)o->d90)->d->raw;
+            o->h->raw = ((TObj *)o->d90)->h->raw;
+            o->h->raw -= COS_TABLE[*(unsigned char *)&o->d84] << 8;
+            if (o->b69) {
+                o->y.raw = ((TObj *)o->d90)->y.raw;
+                o->y.raw -= NEG_SIN_TABLE[*(unsigned char *)&((TObj *)*(int *)&o->wa8)->w74] << 8;
+            } else {
+                o->y.raw = ((TObj *)o->d90)->y.raw;
+                o->y.raw -= NEG_SIN_TABLE[*(unsigned char *)&o->d84] << 8;
+            }
+        }
+        break;
+    case 1:
+        ObjCullRegister(o);
+        segmentedCrawlerGrabbed(o);
+        break;
+    case 2:
+        if (ObjCullRegister(o) == 0) {
+            o->b04 = 3;
+            for (e = (TObj *)o->d94; e; e = (TObj *)e->d94) e->b04 = 3;
+            (*(short *)&(*(TObj **)&GVARS.p48)->b0a)--;
+        } else segmentedCrawlerDefeated(o);
+        break;
+    case 3:
+        ObjCullRegister(o);
+        break;
+    case 4:
+        o->b04 = 3;
+        (*(short *)&(*(TObj **)&GVARS.p48)->b0a)--;
+        {
+            TObj *q;
+        for (q = (TObj *)o->d90; q; q = (TObj *)q->d90) q->b04 = 3;
+        for (q = (TObj *)o->d94; q; q = (TObj *)q->d94) q->b04 = 3;
+        }
+        break;
+    case 5:
+        if (ObjCullRegister(o) == 0) {
+            o->b04 = 3;
+            for (e = (TObj *)o->d94; e; e = (TObj *)e->d94) e->b04 = 3;
+            (*(short *)&(*(TObj **)&GVARS.p48)->b0a)--;
+        } else {
+            segmentedCrawlerHurtFlyOff(o);
+        }
+        break;
+    }
+}
+#else
 #include "gvars.h"
 #include "TOBJ.H"
 
@@ -76,3 +155,4 @@ void stepSegmentedCrawlerHurt(TObj *o)
         break;
     }
 }
+#endif

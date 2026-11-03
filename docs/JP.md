@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 78.36 % of code (1132604 of 1445372 bytes, 2655 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 79.20 % of code (1144804 of 1445372 bytes, 2664 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2655 functions, 68.66 % -> 78.36 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2664 functions, 68.66 % -> 79.20 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -176,6 +176,15 @@ with `a = 16` hoisted, no `GV2.bb0` store), `updateChainSegmentEnemy` (`b6b != 0
 `updateHoodedOldMan` (no health branch, no `GAME_PLAYER_MODE == 3` tests, `BUTTON_MASK_C`, no `PLAYER_STATE = 5`
 resets, `GCD.bcdad = 0xff` instead of the health refill). tools/jp_autofix.py --pair on the mid-size pairs adds
 the rest.
+
+Next (78.36 % -> 79.20 %): `updateMotocrossBike` (no spawn-point branch), both `playerStepClingRotating` copies (pad
+masks, no anim-id switch, no timer/anim resets in the grab blocks, `PlayerSetAnimIfChanged(o, 0x25)` before the pad
+test, `ba4 = 0`, the release block with struct-member accesses so the `PLAYER_EXT` load hoists), `rewardItem`
+(`setEventComplete(EVENT_INEEDABOMB, 1)`, cross-jumped with the tear-jar case), `segmentedCrawlerContact`
+(`o + 0xd4 = e` before the impact effect), `stepSegmentedCrawlerHurt` (no tile probe, the d94 chain and the counter
+decrement in case 2, unconditional in case 5) and the tools/jp_autofix.py --pair matches `raceResult`,
+`func_80122404`, `playerStepRiseToLedge`. Left: `updateBlackCrow` (init block scheduling), `updateL8Type01Object`
+(JP keeps `b04` in `s1` and reuses it for the constants 1 and 2 after the equality branches).
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
 `a1`/`v1` instead of `t0`/`a3`, everything else matches), `func_80027D58` (increaseMaxHealth:

@@ -1,5 +1,120 @@
 // FUNC 801237e4 844 X001
 // MATCHING 801237e4 844
+// VERSION SLPS_01144 x01 80122404 772
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gv6.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+
+extern TObj *PLAYER_EXT;
+extern char MOVE_TABLE_1[];
+extern unsigned char GAME_PLAYER_MODE[];
+extern unsigned short TICK_COUNT;
+extern void playerSlideEntry(TObj *);
+extern void playerSlopeSlideUpdateAnim(TObj *);
+extern void playerDecelerateSpeedB(TObj *);
+extern void playerMoveByAngleSpeed(TObj *);
+extern void playerCheckGroundAndFall(TObj *);
+extern void startPadVibration(int, int, int, int);
+extern void spawnGroundDebris(int, int, int, int);
+extern void playerDecelerateIfFlag(TObj *);
+extern void setObjectSpeedPolar2(TObj *, int, int);
+extern void ObjApplyVelocity(TObj *);
+extern void playerSetSlopeTilt(TObj *, short);
+
+void func_80122404(TObj *o)
+{
+    switch (o->state) {
+    case 0:
+        playerSlideEntry(o);
+    case 1:
+        playerSlopeSlideUpdateAnim(o);
+        playerDecelerateSpeedB(o);
+        playerMoveByAngleSpeed(o);
+        if (o->bbe == 0) {
+            if (*(unsigned char *)&PLAYER_EXT->w08 == o->animFrame) {
+                o->b9c = 1;
+                o->d88 = -0x200;
+                o->ba4 = 0;
+                o->state = 2;
+            } else {
+                *(unsigned char *)&PLAYER_EXT->w08 = 0;
+                o->b9c = 0;
+                o->d88 = 0;
+                o->ba4 = 0;
+                o->step = 1;
+                o->state = 0;
+            }
+        } else if (o->ba6 >= 2) {
+            o->b9c = 1;
+            o->d88 = -0x100;
+            o->ba4 = 0;
+            if (o->ba6 & 6) {
+                o->wb2 = 0;
+                o->velH = 0;
+                o->velV = 0;
+                o->velX = 0;
+                o->velY = 0;
+            }
+            o->state = 2;
+        }
+        playerCheckGroundAndFall(o);
+        if (SPAD.s1fc & SPAD.s3c6) {
+            if (o->wb2 > 0x200) {
+                o->wb2 = 0x200;
+            }
+            if (o->wb2 < -0x200) {
+                o->wb2 = -0x200;
+            }
+            o->ba4 = 0;
+            o->b9c = 1;
+            if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&GV6.s70 & SPAD.s3c4)) {
+                o->ba7 = 1;
+            }
+            o->step = 2;
+            o->state = 0;
+        }
+        if (PLAYER_EXT->animTimer < 4) {
+            o->d8c = (-o->wb0 << 2) & 0xff;
+        }
+        if (o->ba4) {
+            if ((TICK_COUNT & 3) == 0) {
+            }
+            if ((TICK_COUNT & 7) == 0) {
+                spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
+            }
+        }
+        break;
+    case 2:
+        playerDecelerateIfFlag(o);
+        setObjectSpeedPolar2(o, o->wb6, o->wb2);
+        ObjApplyVelocity(o);
+        if (o->wb2 == 0) {
+            *(unsigned char *)&PLAYER_EXT->w08 = 0;
+            o->b9c = 0;
+            o->d88 = 0;
+            o->ba4 = 0;
+            o->step = 0;
+            o->state = 0;
+        }
+        if (o->bbe) {
+            o->movetab = MOVE_TABLE_1;
+            *(unsigned char *)&o->wac = 0;
+            o->d84 = 0;
+            o->d88 = 0;
+            o->d8c = 0;
+            o->velX = 0;
+            o->velY = 0;
+            o->b6b = 0;
+            o->state = 1;
+        }
+        playerCheckGroundAndFall(o);
+        break;
+    }
+    playerSetSlopeTilt(o, 1);
+}
+#else
 #include "spad.h"
 #include "gv6.h"
 #include "TOBJ.H"
@@ -117,3 +232,4 @@ void playerStepSlopeSlideB(TObj *o)
     }
     playerSetSlopeTilt(o, 1);
 }
+#endif
