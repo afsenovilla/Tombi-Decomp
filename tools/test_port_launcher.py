@@ -225,7 +225,7 @@ class TestLauncher(unittest.TestCase):
         self.assertFalse(self.w.editor_open())
 
     def test_import_save_same_name(self):
-        """Import save... of a save already on the card: the Replace / other card / Cancel question, then each answer"""
+        """Import save... of a save already on the card: the Replace / another slot / Cancel question, then each answer"""
         import save_import as SI
         import test_save_import as TS
         d = self.launcher("saveimp", {})
@@ -244,16 +244,18 @@ class TestLauncher(unittest.TestCase):
         self.assertEqual(asked, [])
         self.w._open_file = lambda *x: b
         self.w.import_save()                                   # Cancel: card unchanged
-        self.assertTrue(asked[-1].other_ok)
+        self.assertEqual(asked[-1].new_slot, "01")
         self.assertEqual(TS.save_bytes(open(card, "rb").read(), "BESCES-01331TOMBA-00"), TS.fake_save(slot=0, fill=1)[SI.FRAME:])
         answer[0] = "replace"
         self.w.import_save()
         self.assertEqual(TS.save_bytes(open(card, "rb").read(), "BESCES-01331TOMBA-00"), TS.fake_save(slot=0, fill=2)[SI.FRAME:])
         self.assertTrue(os.listdir(os.path.join(d, "backup")))
-        answer[0] = "other"
+        answer[0] = "slot"
         self.w.import_save()
-        c1 = open(os.path.join(d, "tombi_mc1.mcd"), "rb").read()
-        self.assertEqual(TS.save_bytes(c1, "BESCES-01331TOMBA-00"), TS.fake_save(slot=0, fill=2)[SI.FRAME:])
+        c = open(card, "rb").read()
+        self.assertEqual(TS.save_bytes(c, "BESCES-01331TOMBA-00"), TS.fake_save(slot=0, fill=2)[SI.FRAME:])
+        self.assertEqual(TS.save_bytes(c, "BESCES-01331TOMBA-01")[0x200:], TS.fake_save(slot=0, fill=2)[SI.FRAME + 0x200:])
+        self.assertFalse(os.path.exists(os.path.join(d, "tombi_mc1.mcd")))
 
 
 if __name__ == "__main__":

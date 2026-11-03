@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Import / export memory card saves for the native port's cards (tombi_mc0.mcd / tombi_mc1.mcd, raw 128 KB images,
-the same layout on PC and Android; port2/shims/card.c).  Used by the PC launcher (tools/port_launcher.py); the Android
+"""Import / export memory card saves for the native port's memory card (tombi_mc0.mcd, a raw 128 KB image, the same
+layout on PC and Android; port2/shims/card.c: the port emulates only memory card 1).  Used by the PC launcher (tools/port_launcher.py); the Android
 launcher has the same logic in SaveImport.java.
 
 Accepted inputs:
@@ -8,11 +8,12 @@ Accepted inputs:
                 .vgs/.mem (64-byte "VgsM" header)
   single saves: .mcs/.ps1/.mcb (128-byte directory frame + blocks), PS3 .psv ("\\0VSP", data at 0x84)
 A whole card replaces the target; a single save goes into free blocks of the target card.  A single save whose name
-is already on the card is refused (Conflict: the launchers ask Replace / the other card / Cancel) unless --overwrite:
-the old save is removed and the new one takes its blocks (any block count).  Before a card is written a copy goes to
+is already on the card is refused (Conflict: the launchers ask Replace / Save to another slot / Cancel) unless
+--overwrite: the old save is removed and the new one takes its blocks (any block count); or --new-slot: the save goes
+in under the first free slot name of the card (BESCES-01331TOMBA-00 -> -01 ..., the slot digits of its title too).  Before a card is written a copy goes to
 backup/ next to it (backup/tombi_mc0-YYYYMMDD-HHMMSS.mcd, the last 5 of each card kept).
 
-  python3 tools/save_import.py import FILE CARD.mcd [--overwrite]
+  python3 tools/save_import.py import FILE CARD.mcd [--overwrite | --new-slot]
   python3 tools/save_import.py export-save CARD.mcd SLOT_BLOCK OUT.mcs
 """
 import os, shutil, struct, sys, time
@@ -22,10 +23,33 @@ TOMBI_PRODUCTS = ("BESCES-01330", "BESCES-01331", "BASCUS-94236", "BISLPS-01144"
 BACKUP_KEEP = 5
 
 # GAME.selectedArea -> name (the same table as tools/tombi_save_editor.py AREAS and SaveImport.java)
-AREAS = {0: "Village of All Beginnings", 1: "Forest / Watch Tower", 2: "Caves / tunnels", 3: "Phoenix Mountain",
+AREAS_EN = {0: "Village of All Beginnings", 1: "Forest / Watch Tower", 2: "Caves / tunnels", 3: "Phoenix Mountain",
          4: "Trick Village area", 5: "Baccus Village", 6: "Dirt Motocross", 8: "Baccus Lake", 9: "Mushroom Village",
          10: "Deep Jungle", 11: "Lumberjack Town / Factory", 13: "Pig Island", 14: "Evil Pigs",
          16: "Stonetown / Clock Tower", 17: "Iron Town / Iron Castle", 18: "Civilization Town", 19: "Dwarf Village"}
+AREAS = AREAS_EN
+# Spanish: the names of the improved translation (patches/es_mejorada.tombipatch.json) as the game's Map screen and
+# the second screen give them (port2/runtime/panel.c room_names: D5SPSUB's map area names, through the map link of
+# the room GAME.selectedArea / GAME.section; area 14 = the Evil Pig rooms, their own table).  REGIONS_ES[i] = map area
+# name i (12 = area 14's first room); AREA_REGIONS_ES[area][section] = the region of each section (hex digit); a
+# section past the string, or with no map area, takes section 0's.  Same tables in SaveImport.java.
+REGIONS_ES = ("Ciudad de todo principio", "Bosque de enanos", "Bosque de setas", "Montaña del Fénix", "Ciudad Baco",
+              "Mansión encantada", "Jungla profunda", "Ciudad de civilización", "Ciudad de trucos",
+              "Ciudad de todo principio", "Motocross sucio", "Montaña del Fénix", "Área Cerdiablo uno")
+AREA_REGIONS_ES = {0: "000000", 1: "11111", 2: "111111", 3: "333333", 4: "55555555555555555555", 5: "4444", 6: "a",
+                   8: "5522", 9: "2222222", 10: "666866688", 11: "77777", 13: "10", 14: "c077739000",
+                   16: "7777777", 17: "77777777770", 18: "770", 19: "11b"}
+
+
+def area_name(area, section=0, es=True):
+    """the place of a save (GAME.selectedArea, GAME.section): the improved Spanish translation's map name, or the
+    English table; None for an unknown area"""
+    if not es:
+        return AREAS_EN.get(area)
+    r = AREA_REGIONS_ES.get(area)
+    if r is None:
+        return None
+    return REGIONS_ES[int(r[section] if 0 <= section < len(r) else r[0], 16)]
 
 
 class ImportError_(Exception):
@@ -104,8 +128,9 @@ def save_info(name, data, es=True):
     head = ("Ranura " if es else "Slot ") + slot if slot else name
     g = bytes(data[0x200:0xC00])
     if slot and bytes(data[:2]) == b"SC" and len(g) == 0xA00 and xor(g[:-1]) == g[-1]:
-        area, t = struct.unpack_from("<H", g, 0)[0], struct.unpack_from("<I", g, 8)[0]
-        parts = [head] + ([AREAS[area]] if area in AREAS else []) + ["%d:%02d h" % (t // 180000, t // 3000 % 60)]
+        area, sec, t = struct.unpack_from("<HH", g, 0) + struct.unpack_from("<I", g, 8)
+        a = area_name(area, sec, es)
+        parts = [head] + ([a] if a else []) + ["%d:%02d h" % (t // 180000, t // 3000 % 60)]
         return " · ".join(parts)
     t = title(data)
     return head + ("  " + t if t else "")
@@ -198,14 +223,32 @@ def backup(path, keep=BACKUP_KEEP):
     return bak
 
 
-def card_number(path):
-    """1 for tombi_mc0.mcd, 2 for tombi_mc1.mcd (the game's memory card 1 / 2)"""
-    return 2 if "mc1" in os.path.basename(path) else 1
+SLOTS = 15     # the game's slots 00..14 (the file name's last two digits; docs/SAVE_FORMAT.md)
 
 
-def other_card(path):
-    d, b = os.path.split(path)
-    return os.path.join(d, b.replace("mc0", "mc1") if "mc0" in b else b.replace("mc1", "mc0"))
+def free_slot(card, name, need=1):
+    """the first slot number (00..14) whose Tombi file name (name with its last two digits replaced) is not on the
+    card, as "NN", when the card also has `need` free blocks; else None"""
+    if not (is_tombi(name) and name[-2:].isdigit()) or len(free_blocks(card)) < need:
+        return None
+    for k in range(SLOTS):
+        if find_save(card, name[:-2] + "%02d" % k) is None:
+            return "%02d" % k
+    return None
+
+
+def renumber(frame, data, nn):
+    """the save as slot nn ("NN"): the file name's last two digits and, when they are fullwidth digits (Shift-JIS
+    0x824F + n), the slot number in the title (save +0x16, 2 characters; not covered by the checksum)"""
+    f, d = bytearray(frame), bytearray(data)
+    name = save_name(f)
+    nb = (name[:-2] + nn).encode("ascii")
+    f[10:30] = nb + bytes(20 - len(nb))
+    f[0x7F] = xor(f[:0x7F])
+    if all(d[0x16 + 2 * i] == 0x82 and 0x4F <= d[0x17 + 2 * i] <= 0x58 for i in range(2)):
+        for i in range(2):
+            d[0x17 + 2 * i] = 0x4F + int(nn[i])
+    return bytes(f), bytes(d)
 
 
 def read_card(path):
@@ -215,32 +258,26 @@ def read_card(path):
     return card
 
 
-def fits(path, frame, data):
-    """True if the save can go into the card at path as a new save (no save of that name, enough free blocks)"""
-    card = read_card(path)
-    return find_save(card, save_name(frame)) is None and len(free_blocks(card)) >= len(data) // BLOCK
-
-
 class Conflict(ImportError_):
-    """the target card already holds a save with the imported save's name: the caller asks (Replace / the other card
-    when other_ok / Cancel) and calls import_file again with overwrite=True or with dest=other_card(dest)"""
-    def __init__(self, dest, name, existing, incoming, other_ok):
-        self.dest, self.name, self.existing, self.incoming, self.other_ok = dest, name, existing, incoming, other_ok
-        ImportError_.__init__(self, "ya hay una partida «%s» en la tarjeta %d" % (existing, card_number(dest)))
+    """the card already holds a save with the imported save's name: the caller asks (Replace / Save to another slot
+    when new_slot / Cancel) and calls import_file again with overwrite=True or new_slot=True.  new_slot: the slot the
+    save would get ("NN", free_slot), None when the card has no room or no free slot"""
+    def __init__(self, dest, name, existing, incoming, new_slot):
+        self.dest, self.name, self.existing, self.incoming, self.new_slot = dest, name, existing, incoming, new_slot
+        ImportError_.__init__(self, "ya hay una partida «%s» en la tarjeta" % existing)
 
     def question(self, es=True):
         if es:
-            return ("Ya hay una partida «%s» en la tarjeta %d. ¿Reemplazarla?\n\nPartida importada: «%s»"
-                    % (self.existing, card_number(self.dest), self.incoming))
-        return ("Memory card %d already holds the save “%s”. Replace it?\n\nImported save: “%s”"
-                % (card_number(self.dest), self.existing, self.incoming))
+            return ("Ya hay una partida «%s» en la tarjeta. ¿Reemplazarla?\n\nPartida importada: «%s»" % (self.existing, self.incoming)
+                    + ("\n\nO guárdala en otra ranura: Ranura %s." % self.new_slot if self.new_slot else ""))
+        return ("The memory card already holds the save “%s”. Replace it?\n\nImported save: “%s”" % (self.existing, self.incoming)
+                + ("\n\nOr save it to another slot: Slot %s." % self.new_slot if self.new_slot else ""))
 
 
-def import_file(src, dest, overwrite=False, other=None, es=True):
+def import_file(src, dest, overwrite=False, new_slot=False, es=True):
     """import src into card file dest.  Returns (summary_lines, warnings).  A single save whose name is already on
-    the card raises Conflict unless overwrite (then the old save is removed and its blocks reused first).  The card is
-    copied into backup/ before it is written.  other: the card to offer instead (Conflict.other_ok; default
-    other_card(dest))."""
+    the card raises Conflict unless overwrite (then the old save is removed and its blocks reused first) or new_slot
+    (then it goes in as the first free slot, renumber).  The card is copied into backup/ before it is written."""
     raw = open(src, "rb").read()
     p = parse(raw, src)
     warn = []
@@ -261,18 +298,22 @@ def import_file(src, dest, overwrite=False, other=None, es=True):
     card = read_card(dest)
     old = find_save(card, name)
     prefer, replaced = (), None
-    if old is not None:
+    if old is not None and new_slot:
+        nn = free_slot(card, name, len(data) // BLOCK)
+        if nn is None:
+            raise ImportError_("no hay ninguna ranura libre en la tarjeta (o no hay sitio)")
+        frame, data = renumber(frame, data, nn)
+        name = save_name(frame)
+    elif old is not None:
         replaced = save_info(name, card[old * BLOCK:(old + 1) * BLOCK], es)
         if not overwrite:
-            o = other or other_card(dest)
-            raise Conflict(dest, name, replaced, save_info(name, data, es),
-                           os.path.abspath(o) != os.path.abspath(dest) and fits(o, frame, data))
+            raise Conflict(dest, name, replaced, save_info(name, data, es), free_slot(card, name, len(data) // BLOCK))
         prefer = delete_save(card, old)      # on the in-memory copy: the file is written only if all of it fits
     b = insert_save(card, frame, data, prefer)
     bak = backup(dest)
     with open(dest, "wb") as f:
         f.write(card)
-    lines = ["Partida importada en la tarjeta %d, bloque %d: %s" % (card_number(dest), b, save_info(name, data, es))]
+    lines = ["Partida importada en la tarjeta, bloque %d: %s" % (b, save_info(name, data, es))]
     if replaced:
         lines.append("Sustituye a «%s»%s" % (replaced, " (copia de la tarjeta: backup/%s)" % os.path.basename(bak)
                                                        if bak else ""))
@@ -300,13 +341,15 @@ def export_save(card, block):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
-    ow = "--overwrite" in a
-    a = [x for x in a if x != "--overwrite"]
+    ow, ns = "--overwrite" in a, "--new-slot" in a
+    a = [x for x in a if x not in ("--overwrite", "--new-slot")]
     if len(a) == 3 and a[0] == "import":
         try:
-            l, w = import_file(a[1], a[2], overwrite=ow)
+            l, w = import_file(a[1], a[2], overwrite=ow, new_slot=ns)
         except Conflict as e:
-            sys.exit(e.question() + "\n(--overwrite la sustituye; antes se copia la tarjeta en backup/)")
+            sys.exit(e.question() + "\n(--overwrite la sustituye" + (", --new-slot la guarda en la ranura %s" % e.new_slot
+                                                                     if e.new_slot else "")
+                     + "; antes se copia la tarjeta en backup/)")
         except (ImportError_, OSError) as e:
             sys.exit("error: %s" % e)
         print("\n".join(l + w))

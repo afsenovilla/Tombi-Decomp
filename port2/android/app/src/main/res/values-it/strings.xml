@@ -96,7 +96,7 @@
     <!-- Import save: the confirmation's button; a save with the same name already on the card (SaveImport.Conflict) -->
     <string name="save_import_go">Importa</string>
     <string name="save_replace">Sostituisci</string>
-    <string name="save_other_card">Salva sull\'altra card</string>
+    <string name="save_new_slot">Salva in un altro slot</string>
     <string name="cat_game">Gioco</string>
     <string name="cat_gfx">Grafica</string>
     <string name="cat_dual">Secondo schermo</string>

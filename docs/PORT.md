@@ -20,7 +20,7 @@ build/port/tombi --frames 500                   # from the repo root; reads game
 #            --no-interp --interp ADDR --trace-interp
 #            --window [--viewer PATH]   SDL2 window + keyboard/controller (needs build/port/tombi-view)
 #            --save FRAME:PATH --load PATH   save states (same binary)
-#            --save-dir DIR   memory cards tombi_mc0.mcd / tombi_mc1.mcd (default: next to the disc image)
+#            --save-dir DIR   memory card tombi_mc0.mcd (card 1 only; default: next to the disc image)
 #            --menu FRAME:N   debug: open menu screen N during gameplay (4 = save screen, 5 = load screen)
 #            -v -v prints every pad read ("[pad] frame F: game reads MASK"), -v -v -v the player x,y every vblank
 build/port/tombi --frames 3600 --dump-frames shots --dump-every 100 \
@@ -148,9 +148,18 @@ build/port/tombi --window                    # title -> new game with the keyboa
 build/port/tombi --window --load s.state     # from a save state
 ```
 
-**Memory cards (M1, done): `shims/card.c`.** Two 128 KB raw card images, `tombi_mc0.mcd` and `tombi_mc1.mcd`
-(the layout every emulator reads: 16 blocks of 8 KB, block 0 = header + directory), kept in memory and written
-through to `--save-dir` (default: the directory of the disc image). A missing file starts as a formatted card.
+**Memory card (M1, done): `shims/card.c`.** One 128 KB raw card image, `tombi_mc0.mcd` (the layout every emulator
+reads: 16 blocks of 8 KB, block 0 = header + directory), kept in memory and written through to `--save-dir`
+(default: the directory of the disc image). A missing file starts as a formatted card. Only memory card 1 is
+emulated: port 2 (`bu10:`, chan 0x10) answers as an empty slot (`_card_info`/`_card_load`/`_card_clear` raise the
+BIOS "timeout" event of both card classes, every file call on it fails), so the load / save screens go straight to
+card 1 (checked headless: Continue lists card 1's saves, the save screen's block list and "New block"). Older
+versions emulated a second card, `tombi_mc1.mcd`: when that file holds Tombi! saves, the first start merges them into
+card 1 (all or nothing: free blocks, a name card 1 already has goes in as the first free slot `TOMBA-NN` with the
+title's slot digits rewritten, a save identical to card 1's is skipped), after copying both cards to
+`backup/tombi_mcN-YYYYMMDD-HHMMSS.mcd`, then moves the file to `tombi_mc1.mcd.old` and logs `memory card 2 (...)
+merged into card 1: N saves copied`; when they do not fit, both files stay untouched and a warning is logged at each
+start. (The copy is not a `rename()`: the game's BIOS `rename` stub takes that name in the port's link.)
 The save/load screen (`D0SPSUB2`) uses the BIOS card file system, so the shim provides the BIOS event table
 (`OpenEvent`/`TestEvent`/`DeliverEvent`, the card being the only event source), `_card_info`/`_card_load`/
 `_card_clear` that complete at once by raising the "I/O end" event of both the SwCARD and HwCARD classes, and
@@ -1062,13 +1071,17 @@ platforms and readable by DuckStation/ePSXe (raw `.mcd`/`.mcr`). Import accepts 
 `.mcd/.mcr/.mc/.srm/.ddf/.ps/.bin` starting with `MC`, DexDrive `.gme`, `.vgs/.mem`), which replace the card, and
 single saves (`.mcs/.ps1/.mcb`, PS3 `.psv`), inserted into free blocks with new directory frames (link chain, XOR
 checksum); a non-Tombi product code only warns. A single save whose name (`BESCES-01331TOMBA-00`...) is already on the
-card asks *"Ya hay una partida «Ranura 00 · Baccus Village · 1:23 h» en la tarjeta 1. ¿Reemplazarla?"* (slot, the
-area Continue loads and the play time when the save's GAME block checks out; PS1 saves store no date): *Reemplazar*
-frees the old save's blocks and writes the new one there first (any block count; nothing is written if it does not
-fit), *Guardar en la otra tarjeta* (only when `tombi_mc1.mcd` has room and no save of that name) or *Cancelar*. Every
-write first copies the card to `backup/tombi_mcN-YYYYMMDD-HHMMSS.mcd` next to it (the last 5 of each card kept).
+card asks *"Ya hay una partida «Ranura 00 · Ciudad Baco · 1:23 h» en la tarjeta. ¿Reemplazarla? … O guárdala en otra
+ranura: Ranura 01."* (slot, the place Continue loads and the play time when the save's GAME block checks out; PS1
+saves store no date; in Spanish the place is the improved translation's Map screen name of the save's area and
+section, the same as the second screen's, otherwise an English area name): *Reemplazar* frees the old save's blocks
+and writes the new one there first (any block count; nothing is written if it does not fit), *Guardar en otra
+ranura* (only when the card has room and a free slot number: the save goes in as the first free
+`BESCES-01331TOMBA-NN`, with the slot digits of its title rewritten too, so the game's load screen lists it in that
+slot) or *Cancelar*. Every write first copies the card to `backup/tombi_mc0-YYYYMMDD-HHMMSS.mcd` next to it (the last
+5 kept).
 Export writes the whole card (default `tombi.mcd`); the PC launcher can also export one save as `.mcs`. Logic:
-`tools/save_import.py` (PC, also a CLI: `import FILE CARD [--overwrite]`; tests `tools/test_save_import.py`) and
+`tools/save_import.py` (PC, also a CLI: `import FILE CARD [--overwrite | --new-slot]`; tests `tools/test_save_import.py`) and
 `SaveImport.java` (Android); the launchers only, never while the game runs. The Android launcher's dialogs (this one,
 the results, the translation import) and the game's "back to the launcher?" question are `SelvaDialog.java`, drawn
 in the launcher's style (Lilita One / Nunito, pill buttons; D-pad + A, B = cancel, touch) instead of AlertDialogs.
@@ -1926,7 +1939,7 @@ Setloc-outside-the-disc check is unchanged.
 **Options.** `--data DIR` selects the folder (a missing `manifest.txt` is fatal with the hint to run
 `extract_data.py`); `--disc IMAGE` reads the image as before. With neither, the port tries `data/manifest.txt`
 in the current folder, then `data/` next to the executable (from `argv[0]`), then the old default
-`game/disc/Tombi.bin`. The memory cards go next to the data folder (its parent: the exe's folder or the cwd)
+`game/disc/Tombi.bin`. The memory card goes next to the data folder (its parent: the exe's folder or the cwd)
 when there is no `--save-dir` and no disc. Usage line: `tombi2 [--data DIR | --disc Tombi.bin|.cue|.iso] ...`.
 
 **Verification.** Extracted from `game/disc/Tombi.bin`, the standard test
