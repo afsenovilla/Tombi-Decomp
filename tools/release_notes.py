@@ -8,6 +8,10 @@ port2/ except port2/android/), the text patches (patches/), or the PC launcher a
 docs, notes, CI, research tools or the Android app are left out. A commit and the change that undoes it both drop
 out: git's "This reverts commit X" line, a subject starting with "Revert", or a subject saying "revert ..." /
 "drop the ..." that names the earlier commit's subject. A body line "[skip changelog]" hides a commit.
+Also left out: work on the other versions' decomps (subjects starting "JP", "JP demo", "PrePre", "beta", "US": they edit
+shared src/ files under #if, nothing the PAL port runs; "README", "docs", "Android" ones too), temporary commits ("TEMP" in the subject; a "; TEMP ..." tail is
+cut off), and a commit that hides / removes something a later commit of the same release brings back ("... back",
+"... again", "restore ..." sharing two words of 5+ letters with it).
 """
 import re, subprocess, sys
 
@@ -49,7 +53,18 @@ def main():
             for c, cs, *_ in commits:
                 if c != h and len(words & set(re.findall(r"[a-z]{5,}", cs.lower()))) >= 3 and cs.split(":")[0] == s.split(":")[0]:
                     drop.add(c)
-    out = [s for h, s, b, f in commits if h not in drop and any(SHIPS.match(x) for x in f)]
+    OTHER = re.compile(r"^(JP|JP demo|PrePre ?8?|beta|US|SLPS|SLPM|PCPX|README|docs|Android)\b[^:]*:", re.I)
+    for h, s, b, _ in commits:
+        if OTHER.match(s) or re.match(r"^TEMP\b", s):
+            drop.add(h)
+    for i, (h, s, b, _) in enumerate(commits):          # hidden now, back later in the same release: neither happened
+        if re.search(r"\b(hide|hides|hidden|remove|removes|removed|drop)\b", s, re.I):
+            w = set(re.findall(r"[a-z]{5,}", s.lower()))
+            for c, cs, *_ in commits[i + 1:]:
+                if re.search(r"\b(back|again|restore[sd]?)\b", cs, re.I) and len(w & set(re.findall(r"[a-z]{5,}", cs.lower()))) >= 2:
+                    drop.add(h)
+    tidy = lambda t: re.split(r";\s*TEMP\b", t)[0].strip()
+    out = [tidy(s) for h, s, b, f in commits if h not in drop and any(SHIPS.match(x) for x in f)]
     print("\n".join("- " + s for s in out[-150:]) if out else "- (no player-facing changes)")
 
 
