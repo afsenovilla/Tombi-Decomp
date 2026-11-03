@@ -279,12 +279,14 @@ compiled for every version**, and each version has its own splat configs, symbol
 
 ## Releases
 
-Releases of the PC port are published by `.github/workflows/release.yml` (Actions > "Publish release" > Run
-workflow, or automatically after a port build once master has >= 5 non-CI commits since the last release).
+Releases of the port are published by hand by `.github/workflows/release.yml` (Actions > "Publish release" > Run
+workflow, or `gh workflow run release.yml`) once the owner approves; there is no automatic release.
 
-- Versions are `vX.Y.Z`: tag `v0.0.N`, title "Tombi PC port 0.0.N", assets `tombi-port-0.0.N-windows-x64.exe`,
-  `tombi-port-0.0.N-linux-x64.tar.gz` (optionally `Tombi-Tools-0.0.N-...`). Each release bumps the patch of the
-  latest `v*` tag and is marked Latest; the notes list the commits since the previous `v*` tag.
+- Versions are `vX.Y.Z`: tag `v0.0.N`, title "Tombi port 0.0.N", one release for every platform: `tombi-port-0.0.N-windows-x64.exe`,
+  `tombi-port-0.0.N-linux-x64.tar.gz` and `tombi-port-0.0.N-android.apk` (one APK with both arm64-v8a, the 64-bit
+  wasm2c build, and armeabi-v7a; Android picks the one the device runs), optionally `Tombi-Tools-0.0.N-...`
+  (translation editor, graphics editor, assets extractor). Each release bumps the patch of the latest `v*` tag and is
+  marked Latest; the notes list the player-facing commits since the previous `v*` tag (`tools/release_notes.py`).
 - To bump the minor/major version run the workflow with the input `version` (e.g. `0.1.0`; must be `X.Y.Z` and
   greater than the latest): `gh workflow run release.yml -f version=0.1.0`. Later automatic releases continue
   from it (0.1.1, ...).
