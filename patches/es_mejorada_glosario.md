@@ -31,7 +31,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Directional button | botón de dirección | |
 | Exercise Routine | Ejercicio | |
 | Item (menú de Select: Item / Event / Status / Map) | Objetos (Objetos / Eventos / Estado / Mapa) | antes "Elmto": la tira de glifos del menú está llena y no tiene `O` ni `b`; el port las dibuja (`tools/pause_text.py`, clave `EXE/MAIN5.EXE` → `pause`). En plural, como Eventos (decisión del usuario); caben en el hueco de 8 bytes de cada entrada; el mismo término que "pantalla de objetos" y la pestaña *Objetos* del panel |
-| AP | PA | |
+| AP | AP | los puntos se quedan en AP, como los gráficos del HUD y de la lista de guardado (antes "PA"; también en la pista del evento *La caja AP*) |
 | Kokka birds | pájaros Kokka | |
 | Pig / ol' coot / geezer | vejete, vejestorio | registro coloquial |
 | Ha ha ha | ¡Ja, ja, ja! | con comas |
@@ -41,7 +41,7 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Funky Parasol | Sombrilla chula | antes "Sombrilla rara" |
 | Miner's Hat | Casco de minero | antes "Gorro (del) minero" |
 | 1 UP | Vida extra | antes "1 +" |
-| Tear Bottle | Tarro lágrimas | también en el título "Necesito un Tarro lágrimas" |
+| Tear Bottle | Tarro lágrimas | el título y la lista dicen *Dame el tarro de lágrimas*; la pista, "Consigue el Tarro lágrimas del Bonsugee amarillo." |
 | Red Fortune Teller | la Adivina Roja (título: *La adivina roja*) | es una mujer: cartel de su casa, panel y las demás lenguas (Wahrsagerin, devineresse, indovina); antes "el adivino rojo". El azul sí es *el adivino azul* |
 | Phoenix Mountain | Montaña del Fénix (título: *La Montaña del Fénix*) | como en los diálogos; antes "Montaña de Fénix" en el título |
 | Lava Caves | Cuevas de lava | antes "Cuevas lava" en el título (recortado para caber) |
@@ -53,6 +53,9 @@ game/disc/Tombi.bin patches/es_mejorada.tombipatch.json`.
 | Precious Treasure Chest? | *¿Un cofre del tesoro?* | antes "de tesoro" |
 | Pump Rocks | rocas acordeón, en minúscula (título: *Las rocas acordeón*) | el nombre del español original (se hunden al pisarlas); el parche había puesto "Rocas bombeo" |
 | Trick Village | Ciudad de trucos | antes "Ciudad trucos" en el título |
+| Tree of Knowledge / Wise Old Tree | Árbol del Saber (título y lista: *El Árbol del Saber lo sabe*; pista: "Visita al Árbol del Saber.") | como en todos los diálogos; antes "Árbol del Saber conoce" (recortado) y "Árbol sabio viejo" en la pista |
+| Tool (Power Up for Tools?!, evento 116) | arma (*¿¡Armas más fuertes!?*, pista "¿¡Tu arma se vuelve más fuerte!?") | antes "Útil/Útiles"; el japonés dice 道具が強くなる y los diálogos llaman "arma" al mangual, el bumerán...; "herramienta" cuando es de ladrón (pista del evento 125) |
+| slices of cheese (evento 47) | trozos de queso ("Reúne 10 trozos de queso y devuélveselos al coleccionista.") | antes "lonchas"; también en el diálogo del coleccionista ("Cuando reúnas diez trozos de queso, vuelve a verme.") |
 | Bronze / Silver / Gold Medal | *Quiero la medalla de bronce / de plata / de oro* | los tres títulos iguales; antes "Quiero el bronce", "Quiero la plata" |
 
 ## Mensajes de objeto y evento (sin concordancia de género)
@@ -85,13 +88,23 @@ El parche lleva `"freeTitles": true`: el port nativo coloca las letras de los t�
 (docs/PORT.md "Free-form event titles"), así que un título puede ser más largo que su lista de posiciones del disco y ya
 no hace falta recortarlo. En la consola (ISO) se ven solo las primeras letras (`check_text_patch.py` lo avisa). Títulos
 alargados o corregidos con esto: *Gas de flor de melocotón*, *Pista de motocross*, *Idioma Enano para novatos*,
-*Hacia la Montaña del Fénix...*, *Preparados, listos, ¡ya!*, *Hierbas curativas para Barón*, *El potencial de Barón*,
+*A la Montaña del Fénix...*, *Preparados, listos, ¡ya!*, *Hierbas para curar a Barón*, *El potencial de Barón*,
 *Una Bolsa Cerdo tormentosa*, *La Montaña del Fénix*, *Cuevas de lava*, *Los pantalones de Charles*, *¿Un cofre del
-tesoro?*, *Zumo de Fruta mortal*, *Planta un jardín de flores*, *La adivina roja*, *¿Un cuadro de la Gran llave?*,
-*El Cerdo de la Jungla profunda*, *Las rocas acordeón*, *Necesito un Tarro lágrimas*, *Ciudad de trucos*, *Comida para
-Gran pez*, *Quiero la medalla de bronce / de plata / de oro*. La lista de eventos del submenú (D5SPSUB/D5SPSUB3, que
-también usa el panel) sigue los títulos: *La Montaña del Fénix* tiene allí su propia cadena (`eventNames`), separada de la
-de los nombres de lugar, que dicen *Montaña del Fénix*.
+tesoro?*, *Zumo de Fruta mortal*, *Planta un jardín de flores*, *La adivina roja*, *¿Cuadro de la Gran llave?*,
+*Cerdo de la Jungla profunda*, *Las rocas acordeón*, *Dame el tarro de lágrimas*, *Ciudad de trucos*, *Un manjar para
+el Gran pez*, *Quiero la medalla de bronce / de plata / de oro*, *¡¿Echa un vistazo?!*, *¿Tesoros en la mansión?*,
+*La fuente rota*, *El señor de los cielos*, *¿Qué es un Funga?*, *El Árbol del Saber lo sabe*, *El Bosque de las 100
+flores*, *¿¡Armas más fuertes!?*, *¿El mejor llanto?*, *¿Qué se cuece?*, *Tobogán de hojas*.
+
+La lista de eventos del submenú (D5SPSUB/D5SPSUB3, que también usa el panel) dice lo mismo que los títulos (el salto de
+línea del título es un espacio en la lista), con `¡` y `¿` (la fuente de la lista los tiene: `tools/subscreen_text.py`
+los escribe). Cada nombre de evento va en `eventNames` (clave: la cadena del disco), así que no toca los nombres de
+objeto o lugar iguales: *La Montaña del Fénix* frente al lugar *Montaña del Fénix*, *Los pantalones de Charles* frente
+al objeto *Pantalones de Charles*, *Un manjar para el Gran pez* frente a *Comida para el Gran pez*. La lista muestra 27
+letras como mucho (fuente de 8 px desde x 103): por eso *A la Montaña del Fénix...*, *¿Cuadro de la Gran llave?*,
+*Cerdo de la Jungla profunda* y *Hierbas para curar a Barón*, también en los títulos. Las pistas de evento (el globo
+de "Ver" en la lista, banco WFM3 de D5SPSUB) se editan con `eventDescriptions`; el banco no puede crecer (lo siguen las
+cadenas de la lista), así que las pistas nuevas deben ocupar más o menos lo mismo que las del disco.
 
 ## Lista de lugares del archivo de guardado (SYSTEM/D5SPSUB2.BIN)
 

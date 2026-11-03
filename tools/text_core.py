@@ -589,9 +589,13 @@ class Project:
             names = spec.pop("itemNames", None)
             events = spec.pop("eventNames", None)
             places = spec.pop("placeNames", None)
+            descs = [(spec.pop(k, None), n) for k, n in (("eventDescriptions", 200), ("itemDescriptions", 205))]
             try:
                 data = files[path] if path in files else self.src.read_any(path)
                 new = data if mod is SS else mod.apply(data, spec)
+                for d, n in descs:
+                    if d:
+                        new = SS.apply_descriptions(new, d, n, self.pool())
                 if events:
                     new = SS.apply_event_names(new, events)
                 if names:

@@ -21,6 +21,14 @@ Edits (the "menus" section of a *.tombipatch.json, key "itemNames" under each of
                                   "itemNames", so an event name can differ from a place / item name with the same text
                                   ("Montaña de Fénix": the event "La Montaña del Fénix", the place "Montaña del Fénix")
 
+  "eventDescriptions": {"E": TEXT}  DnSPSUB only: the hint of event E shown in the balloon of the event list (dialogue E of
+  "itemDescriptions": {"I": TEXT}   the overlay's embedded WFM3 bank of 200 event hints; item I: the bank of 205 item texts
+                                  of "Ver", in DnSPSUB and DnSPSUB3). TEXT as in the WFM edits ({BOX w h}{MOVE 0 0}...
+                                  {WAIT}{CLEAR}); letters the bank lacks are borrowed from the disc's 16 px fonts. The bank
+                                  is rewritten in its own room (it cannot grow: the list strings follow it)
+
+  Glyphs above latin-1 + 74: "¡" 332, "ª" 333, "¿" 337 (the list font has them; "¿Qué es esto?").
+
   subscreen_text.py dump FILE.BIN      prints the strings
 """
 import struct, sys
@@ -30,12 +38,22 @@ class SubscreenError(Exception):
     pass
 
 
+EXTRA = {"\u00a1": 332, "\u00aa": 333, "\u00bf": 337}      # ¡ ª ¿
+EXTRA_CH = {g: c for c, g in EXTRA.items()}
+
+
+def _glyph_ch(x):
+    return "\n" if x == -3 else EXTRA_CH[x] if x in EXTRA_CH else chr(x - 140) if x < 267 else chr(x - 74)   # 267: Á (not DEL)
+
+
 def encode(text):
     out = []
     for c in text:
         o = ord(c)
         if c == "\n":
             out.append(-3)  # in-string line break
+        elif c in EXTRA:
+            out.append(EXTRA[c])
         elif 32 <= o < 0x80:
             out.append(o + 140)
         elif 0xC0 <= o <= 0xFF:
@@ -195,7 +213,7 @@ def apply_event_names(data, names):
 
 def decode_body(b):
     g = struct.unpack_from("<%dh" % (len(b) // 2), b)
-    return "".join("\n" if x == -3 else chr(x - 140) if x < 268 else chr(x - 74) for x in g if x != -1)
+    return "".join(_glyph_ch(x) for x in g if x != -1)
 
 
 def _repack(d, hits, new_body):
@@ -308,6 +326,84 @@ def apply_places(data, names):
     return bytes(d)
 
 
+def _prune_glyphs(w):
+    """The bank without the glyphs no dialogue draws (text words 0x8000 + n, corner icons 0xC000 | n): glyph table
+    rebuilt from the kept glyphs, words renumbered."""
+    import wfm_py as W
+    def walk(words, fn):
+        out, i = [], 0
+        while i < len(words):
+            v = words[i]
+            if v in W.CTRL:
+                na = W.CTRL[v][1]
+                out += words[i:i + 1 + na]
+                i += 1 + na
+                continue
+            out.append(fn(v))
+            i += 1
+        return out
+    ng, used = len(w.glyphs), set()
+    def mark(v):
+        if W.GLYPH_BASE <= v < W.GLYPH_BASE + ng:
+            used.add(v - W.GLYPH_BASE)
+        elif 0xC000 <= v < 0xF000 and (v & 0xFFF) < ng:
+            used.add(v & 0xFFF)
+        return v
+    for d in w.dialogues:
+        walk(d.words, mark)
+    keep = [i for i in range(ng) if i in used]
+    if len(keep) == ng:
+        return w
+    new = {o: n for n, o in enumerate(keep)}
+    def remap(v):
+        if W.GLYPH_BASE <= v < W.GLYPH_BASE + ng:
+            return W.GLYPH_BASE + new[v - W.GLYPH_BASE]
+        if 0xC000 <= v < 0xF000 and (v & 0xFFF) < ng:
+            return (v & 0xF000) | new[v & 0xFFF]
+        return v
+    for d in w.dialogues:
+        d.words = walk(d.words, remap)
+    w.glyphs = [w.glyphs[i] for i in keep]
+    base = 144 + 2 * len(w.glyphs)
+    w.glyph_ptrs, blob = [], b""
+    for g in w.glyphs:
+        w.glyph_ptrs.append(base + len(blob))
+        blob += g.raw()
+    w.glyph_blob = blob
+    return w
+
+
+def apply_descriptions(data, edits, n_dialogues, pool=None):
+    """eventDescriptions (n_dialogues 200) / itemDescriptions (205): dialogues of the embedded WFM3 bank re-encoded; the
+    bank is written back in its own room, zero padded."""
+    import wfm_py as W
+    d = bytearray(data)
+    for a, b in _wfm_spans(bytes(d)):
+        try:
+            w = W.decode(bytes(d[a:b]))
+        except Exception:      # noqa: BLE001
+            continue
+        if len(w.dialogues) != n_dialogues:
+            continue
+        for k, text in sorted(edits.items(), key=lambda kv: int(kv[0])):
+            i = int(k)
+            if not 0 <= i < n_dialogues:
+                raise SubscreenError("description %d: the bank has %d" % (i, n_dialogues))
+            dl = w.dialogues[i]
+            try:
+                dl.words = W.text_to_words(w, text, dl.font, pool)
+            except W.WfmError as ex:
+                raise SubscreenError("description %d: %s" % (i, ex))
+        new = W.encode(w)
+        if len(new) > b - a:
+            new = W.encode(_prune_glyphs(w))       # glyphs no text uses any more (the edited texts dropped them)
+        if len(new) > b - a:
+            raise SubscreenError("the description bank needs %d bytes, its room is %d" % (len(new), b - a))
+        d[a:b] = new + b"\0" * (b - a - len(new))
+        return bytes(d)
+    raise SubscreenError("no description bank of %d texts in this file" % n_dialogues)
+
+
 def _in_place(data, names, lenient=False):
     """Every copy of each OLD rewritten where it is. lenient: copies that are gone (repacked) or too small are skipped."""
     d = bytearray(data)
@@ -333,15 +429,14 @@ def dump(data):
     s, o = [], 0
     while o + 2 <= len(data):
         g = struct.unpack_from("<h", data, o)[0]
-        if 172 <= g < 267 or 266 <= g <= 329:
-            j = o
+        if 172 <= g <= 329 or g in EXTRA_CH:
             try:
                 e = _end(data, o)
             except SubscreenError:
                 break
             gl = struct.unpack_from("<%dh" % ((e - o) // 2), data, o)
-            if e - o >= 6 and all(172 <= x <= 329 for x in gl):
-                s.append((o, "".join(chr(x - 140) if x < 268 else chr(x - 74) for x in gl)))
+            if e - o >= 6 and all(172 <= x <= 329 or x in EXTRA_CH for x in gl):
+                s.append((o, "".join(_glyph_ch(x) for x in gl)))
                 o = e + 4
                 continue
         o += 2
