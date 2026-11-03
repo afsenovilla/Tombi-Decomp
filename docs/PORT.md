@@ -3282,6 +3282,14 @@ translation itself:
 3. Defensive, no visible effect in the runs: game C with `-ftrivial-auto-var-init=zero` (an uninitialised local is 0,
    not LLVM undef: `scriptOpShowMessageBox`'s case 8 reads half of an uninitialised V6), and no `signext` / `zeroext` /
    `noundef` (the callee re-extends short / char arguments as gcc does).
+4. *A short return read as int* (found on the AYN Thor, fixed 2026-11-03): with every `signext` dropped, a function
+   defined as returning `s16` handed back its raw 32-bit lane, and a caller whose prototype says `int` used it as is.
+   `getScrollOffsetX` computes `r - 0x14` as `r + 0xFFEC`; `a00LinkAreaModelBlocks` (`extern int`) added that to the
+   camera x, so whenever the AREA00 camera turned (Tombi grabbing the bending branch past the stone pillar, sec 0)
+   its block range was past the end and the frame had no scenery models: sky, sprites and objects only, for ~10
+   frames at a time. `apply_aliases.py` now keeps the return `signext` / `zeroext` of each *definition* (74): the
+   callee extends as the R3000, gcc and ARM do; call sites still lose theirs. The i386 / armeabi-v7a builds never
+   had it.
 
 **Checked** (2026-11-03): x86-64 wasm2c build vs i386 build, byte-identical dumped frames: the standard 6000-frame run
 `1000:start,1300:start,1600:cross` into AREA00 gameplay 240/240 (every 25th frame); the room sweep's pad script from the

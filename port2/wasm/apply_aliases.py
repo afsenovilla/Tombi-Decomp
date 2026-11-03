@@ -62,7 +62,24 @@ res = pat.sub(lambda m: "@" + rename[m.group(1)] if m.group(1) in rename else m.
 # (K&R prototypes, aliases with other prototypes: drawNowLoading's pulse index got the unextended word, the frame-1632
 # divergence).  Without the attributes the backend extends at the use, as gcc does.  `noundef` goes too: LLVM's
 # FixFunctionBitcasts passes undef for the arguments a short call omits (the i386 build reads whatever is there).
-res, n_ext = re.subn(r"\b(?:signext|zeroext|noundef) ", "", res)
+# The return attribute of a *definition* stays: with it the callee extends its short / char result itself, as the
+# R3000 (and gcc on i386, ARM's AAPCS) does.  Without it a caller that declares the function as returning int got
+# the raw 32-bit lane: getScrollOffsetX (s16) computes `r - 0x14` as r + 0xFFEC, and a00LinkAreaModelBlocks
+# (`extern int getScrollOffsetX(void)`) took that for a scroll of +65516: AREA00 lost its scenery models whenever the
+# camera turned (Tombi grabbing the bending branch).  Callers still re-extend (the call sites lose the attribute).
+lines = res.split("\n")
+n_ext = 0
+for i, l in enumerate(lines):
+    if l.startswith("define "):
+        at = l.find("@")
+        head, tail = l[:at], l[at:]
+        tail, k = re.subn(r"\b(?:signext|zeroext|noundef) ", "", tail)
+        head, k2 = re.subn(r"\bnoundef ", "", head)
+        lines[i] = head + tail; n_ext += k + k2
+    else:
+        lines[i], k = re.subn(r"\b(?:signext|zeroext|noundef) ", "", l); n_ext += k
+res = "\n".join(lines)
+n_ret = len(re.findall(r"(?m)^define [^@\n]*\b(?:signext|zeroext) ", res))
 # A function matched as void whose value a caller uses (the console's $v0 still held its last callee's result; the i386
 # build gets eax by luck, the wasm build gets 0): each needs a port/fixes.txt rule like showMessageBox's.  Listed here.
 voids = set(re.findall(r'^define [^@\n]*?\bvoid @([\w.$]+)\(', res, re.M))
@@ -72,5 +89,5 @@ for body in re.split(r"\n(?=define )", res):
         if m.group(2) in voids and re.search(re.escape(m.group(1)) + r"\b(?! =)", body[m.end():]): used.add(m.group(2))
 if used: print("apply_aliases: WARNING: the value of void functions is used (port/fixes.txt them): " + " ".join(sorted(used)))
 open(out_path, "w").write(res)
-print("apply_aliases: %d signext / zeroext / noundef attributes dropped" % n_ext)
+print("apply_aliases: %d signext / zeroext / noundef attributes dropped, %d definitions keep their return extension" % (n_ext, n_ret))
 print("apply_aliases: %d renames, %d data aliases, %d new declarations" % (len(rename), len(aliases), len(need)))
