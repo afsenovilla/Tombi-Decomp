@@ -1,5 +1,238 @@
 // FUNC 80102214 2036 X000
 // MATCHING 80102214 2036
+// VERSION SLPS_01144 x00 80101758 1924
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "plx.h"
+#include "gv6.h"
+#include "gvars.h"
+#include "TOBJ.H"
+extern unsigned short D_8009F200;
+#include "raw7.h"
+#include "gamestate.h"
+#include "player.h"
+typedef struct { char pad[0x2c]; unsigned short w2c; } G330;
+typedef struct { void *p[90]; } AnimTbl;
+extern G330 *PLAYER_EXT;
+extern AnimTbl PLAYER_ANIM_TABLE;
+extern short PLAYER_H_WHOLE[], PLAYER_Y_WHOLE[], PLAYER_D_WHOLE[];
+extern unsigned char PAD_BUFFERS;
+extern unsigned short D_8007A034, D_8007A036;
+extern signed char GAME_PLAYER_MODE;
+extern void *memcpy(void *, void *, int);
+extern void playerDecodePadInput(void);
+extern void playerInitMode(TObj *);
+extern void playerNormalModeDispatch(TObj *);
+extern void playerEventModeDispatch(TObj *);
+extern void playerStepHurtKnockback(TObj *);
+extern void playerStepHurtStun(TObj *);
+extern void playerStepHazardRespawn(TObj *);
+extern void playerStepDie(TObj *);
+extern void playerStepHurtSpin(TObj *);
+extern void playerStepPerchIdle(TObj *);
+extern void playerStepForcedHold(TObj *);
+extern void playerStepForcedJump(TObj *);
+extern void playerStepForcedLaunch(TObj *);
+extern void playerStepTossed(TObj *);
+extern void objCollideSideWalls(TObj *);
+extern void FUN_8001fe94(TObj *, int);
+
+typedef struct { void *p[74]; } AnimTblJ; /* JP: 74 anim entries (PAL 90) */
+#define RESET(o) \
+    { \
+        o->active = 3; \
+        (*(unsigned char*)((char*)&o->da0 + 1)) = 0; \
+        o->b04 = 2; \
+        o->step = 2; \
+        o->state = 2; \
+        o->substep = 0; \
+        o->timer = 0x78; \
+        PLAYER_EXT->w2c = 0x2f; \
+        *(AnimTblJ *)tp = *(AnimTblJ *)&PLAYER_ANIM_TABLE; \
+        o->anim = tp[PLAYER_EXT->w2c]; \
+        FUN_8001fe94(o, 1); \
+    }
+
+void func_80101758(TObj *o)
+{
+    unsigned char pad[8];
+    unsigned short b0, b1;
+    short f;
+    void *t[74];
+    void **tp;
+
+    memcpy(pad, &GV6.s70, 8);
+    b0 = *(unsigned short *)0x1F8001FC;
+    b1 = *(unsigned short *)0x1F8001FE;
+    U8(o, 0xd2) = 0;
+    if (GVARS.b3e) {
+        o->visible = 1;
+        return;
+    }
+    if (GVARS.b3f) {
+        *(volatile unsigned short *)&D_8009F200 = 0;
+        SPAD.s1fc = 0;
+        GV6.s74 = 0;
+        SPAD.s1fe = 0;
+    }
+    SPAD.b1d2 = 0;
+    U8(o, 0xc7) = 0;
+    switch (o->subtype) {
+    case 0:
+        if ((GAME.area00_eventControl & 0x40) && (*(volatile unsigned short *)&D_8009F200 & SPAD.s3c4) && o->step == 1)
+            U8(o, 0xc1) = 1;
+        else
+            U8(o, 0xc1) = o->ba7;
+        break;
+    case 1:
+        U8(o, 0xc1) = 1;
+        o->ba7 = 1;
+        (*(unsigned short*)&PLAYER.obj.w08) = D_8007A034;
+        PLX.s60fc = D_8007A036;
+        break;
+    case 2:
+        U8(o, 0xc1) = 1;
+        o->ba7 = 1;
+        (*(unsigned short*)&PLAYER.obj.w08) = D_8007A034;
+        PLX.s60fc = D_8007A036;
+        break;
+    }
+    {
+        signed char *k = &GAME_PLAYER_MODE;
+        if (*k >= 5) goto z;
+        if (*k < 3) {
+        z:
+            *k = 0;
+        }
+    }
+    switch (o->b04) {
+    case 0:
+        playerInitMode(o);
+        break;
+    case 1:
+        tp = t;
+        if (GVARS.hurtState) {
+            RESET(o);
+            break;
+        }
+        if (o->step != 0x30 && S16(o, 0xd0) > 0) {
+            if ((*(unsigned char*)((char*)&o->da0 + 3)) & 2) {
+                o->visible ^= 1;
+            } else if ((*(unsigned char*)((char*)&o->da0 + 2)) & 2) {
+                o->visible ^= 1;
+            } else {
+                S16(o, 0xd0) = S16(o, 0xd0) - 1;
+                o->visible = S16(o, 0xd0) & 1;
+                if (S16(o, 0xd0) <= 0) {
+                    o->active = 1;
+                    S16(o, 0xd0) = 0;
+                    o->visible = 1;
+                }
+            }
+        }
+        if (o->w22 > 0 && --o->w22 <= 0) {
+            o->active = 1;
+            o->visible = 1;
+        }
+        playerNormalModeDispatch(o);
+        break;
+    case 2:
+        if (S16(o, 0xd0) > 0) {
+            S16(o, 0xd0) = S16(o, 0xd0) - 1;
+            o->visible = S16(o, 0xd0) & 1;
+            if (S16(o, 0xd0) <= 0) {
+                o->active = 1;
+                S16(o, 0xd0) = 0;
+                o->visible = 1;
+            }
+        }
+        switch (o->step) {
+        case 0: playerStepHurtKnockback(o); break;
+        case 1: playerStepHurtStun(o); break;
+        case 2: playerStepHazardRespawn(o); break;
+        case 3: playerStepDie(o); break;
+        case 4: playerStepHurtSpin(o); break;
+        }
+        (*(unsigned char*)&o->wa8) = 0;
+        o->ba6 = 0;
+        f = 0;
+        if (o->b9e == 0 && o->b04 == 5) {
+            f = o->step == 0x40;
+            if (o->step == 0x65) f++;
+        }
+        if (f == 0) objCollideSideWalls(o);
+        break;
+    case 3:
+        o->b04 = 1;
+        break;
+    case 5:
+        tp = t;
+        if (GVARS.hurtState) {
+            RESET(o);
+            break;
+        }
+        if (o->w22 > 0 && --o->w22 <= 0) {
+            o->active = 1;
+            o->w22 = 0;
+            o->visible = 1;
+        }
+        playerEventModeDispatch(o);
+        break;
+    case 6:
+        tp = t;
+        if (GVARS.hurtState) {
+            RESET(o);
+            break;
+        }
+        if (o->w22 > 0 && --o->w22 <= 0) {
+            o->active = 1;
+            o->w22 = 0;
+            o->visible = 1;
+        }
+        switch (o->step) {
+        case 0:
+            playerStepPerchIdle(o);
+            break;
+        case 3:
+            o->animFrame &= 1;
+            playerStepForcedHold(o);
+            break;
+        case 4:
+            o->animFrame &= 1;
+            playerStepForcedJump(o);
+            break;
+        case 5:
+            o->animFrame &= 1;
+            playerStepForcedLaunch(o);
+            o->d8c = 0;
+            break;
+        case 6:
+            playerStepTossed(o);
+            break;
+        case 7:
+            o->d8c = 0;
+            playerStepForcedLaunch(o);
+            if (o->b69) {
+                o->b04 = 1;
+                o->step = 0;
+                o->state = 0;
+            }
+            break;
+        }
+        (*(unsigned char*)&o->wa8) = 0;
+        o->ba6 = 0;
+        if (o->b9e == 0) objCollideSideWalls(o);
+        break;
+    }
+    PLAYER_H_WHOLE[0] = o->h->p.whole;
+    PLAYER_Y_WHOLE[0] = o->y.p.whole;
+    PLAYER_D_WHOLE[0] = o->d->p.whole;
+    GAME.selectedPlane = o->d->p.whole / 90;
+    memcpy(&GV6.s70, pad, 8);
+    SPAD.s1fc = b0;
+    SPAD.s1fe = b1;
+}
+#else
 #include "spad.h"
 #include "plx.h"
 #include "gv6.h"
@@ -241,3 +474,4 @@ void updatePlayer(TObj *o)
     SPAD.s1fc = b0;
     SPAD.s1fe = b1;
 }
+#endif
