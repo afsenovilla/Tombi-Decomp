@@ -63,6 +63,8 @@ EXPORT(port_wasm_panel_touch) void port_wasm_panel_touch(int x, int y, int actio
 EXPORT(port_wasm_panel_key) void port_wasm_panel_key(int a) { port_panel_key(a); }
 EXPORT(port_wasm_panel_pinch) void port_wasm_panel_pinch(float f, int x, int y) { port_panel_pinch(f, x, y); }
 EXPORT(port_wasm_panel_size) void port_wasm_panel_size(int w, int h) { port_panel_size(w, h); }
+extern int port_panel_canvas_out;
+EXPORT(port_wasm_panel_canvas_out) void port_wasm_panel_canvas_out(int on) { port_panel_canvas_out = on; }
 extern const unsigned char *port_fps_overlay(int img_h, int *w, int *h, int *changed);
 /* out[0..2] = w, h, changed; returns the RGBA8 pixels (linear address) or 0 */
 EXPORT(port_wasm_fps_overlay) const unsigned char *port_wasm_fps_overlay(int img_h, int *out) { return port_fps_overlay(img_h, &out[0], &out[1], &out[2]); }

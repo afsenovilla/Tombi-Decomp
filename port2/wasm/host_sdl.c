@@ -26,6 +26,11 @@ void port_host_bridge_init(void) {
     PORT_WASM_BRIDGE_VARS(PORT_HV_SET)
     port_hv_port_prompt_src = (int (*)[4])vars[PORT_WASM_VAR_port_prompt_src];
     scratch = w2c_tombi_port_wasm_scratch(&inst);
+#ifdef __ANDROID__
+    /* the panel's picture goes to TombiActivity as the canvas (its ByteBuffer holds 960 x 960; the upscaled picture of a
+       large second screen did not fit, so nothing after the first frames was copied), touches come in canvas pixels */
+    w2c_tombi_port_wasm_panel_canvas_out(&inst, 1);
+#endif
 }
 /* the Android loader reads port_frame / port_exit_status / port_clean_exit (from its own threads too): NULL until the
    module is instantiated */
@@ -193,7 +198,7 @@ void w2c_port_port_panel_window_frame(PW, u32 rgba, u32 w, u32 h) {
     int n = pq_n, lw = lay_w, lh = lay_h, ls = lay_set; typeof(pq[0]) q[64]; memcpy(q, pq, sizeof pq[0] * (size_t)n);
     pq_n = 0; lay_set = 0;
     pthread_mutex_unlock(&pmtx);
-    /* (the picture is the canvas x its scale, as on the PC: the module's port_panel_touch / pinch divide by it) */
+    /* (the picture is the canvas, port_panel_canvas_out: TombiActivity scales it and sends touches in canvas pixels) */
     if (ls) w2c_tombi_port_wasm_panel_size(&inst, (u32)lw, (u32)lh);
     for (int i = 0; i < n; i++) {
         if (q[i].kind == 1) port_panel_touch(q[i].x, q[i].y, q[i].a);

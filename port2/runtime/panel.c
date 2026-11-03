@@ -616,9 +616,12 @@ static void inq_run(void) {
     INQ_UNLOCK();
 }
 /* PC window: mouse in window pixels (the canvas x pk), keys as IN_* */
-void port_panel_touch(int x, int y, int action) { inq_push(1, action, x / (pk ? pk : 1), y / (pk ? pk : 1)); }
+/* port_panel_canvas_out: the host shows the canvas itself and scales it (the wasm2c build on Android: TombiActivity's
+   Presentation takes canvas pixels, as the 32-bit build's n_frame gives them, and sends touches in canvas pixels) */
+int port_panel_canvas_out;
+void port_panel_touch(int x, int y, int action) { int k = pk && !port_panel_canvas_out ? pk : 1; inq_push(1, action, x / k, y / k); }
 void port_panel_key(int a) { inq_push(0, a, 0, 0); }
-void port_panel_pinch(float f, int x, int y) { int k = pk ? pk : 1; port_panel_pinch_canvas(f, x < 0 ? -1 : x / k, y < 0 ? -1 : y / k); }   /* PC: the mouse wheel */
+void port_panel_pinch(float f, int x, int y) { int k = pk && !port_panel_canvas_out ? pk : 1; port_panel_pinch_canvas(f, x < 0 ? -1 : x / k, y < 0 ? -1 : y / k); }   /* PC: the mouse wheel */
 /* --panel-input FRAME:ACTION,... (headless tests): up down left right ok back tabl tabr zoomout zoomin hide showhidden,
    tap@X@Y (canvas pixels), hold@X@Y (a long press), pinch@PERCENT@X@Y (a two-finger pinch: the distance ratio x 100),
    drag@X0@Y0@X1@Y1 (a swipe) */
@@ -672,7 +675,10 @@ void port_panel_vblank(void) {
         pthread_mutex_unlock(&mtx);
     }
 #else
-    if (port_panel_window) port_panel_window_frame((const unsigned char *)pix, pw, ph);
+    if (port_panel_window) {
+        if (port_panel_canvas_out) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
+        else port_panel_window_frame((const unsigned char *)pix, pw, ph);
+    }
 #endif
     if (dump) {
         static u8 *rgb; char path[512];
