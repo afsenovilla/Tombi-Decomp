@@ -181,18 +181,6 @@ static int it_in_use(int item) {
     return 0;
 }
 
-/* ---- layout styles (PORT_PANEL_ITEMS_STYLE, panel_items_alt.inc): 0 the touch grid, 1 game-like icon grid with
-   category tabs, 2 the Triangle screen's list, 3 big cards a page at a time */
-static int it_style = -1, it_tab;
-static int it_get_style(void) {
-    if (it_style < 0) { const char *s = getenv("PORT_PANEL_ITEMS_STYLE"); it_style = s ? atoi(s) : 0; if (it_style < 0 || it_style > 6) it_style = 0; }
-    return it_style;
-}
-static int it_tab_has(int t, int c) {
-    if (it_style == 4) return t == 0 || (t == 1 && c == 1) || (t == 2 && c == 2) || (t == 3 && c >= 3) || (t == 4 && c == 0);   /* Todo Armas Ropa Objetos Llaves */
-    return t == 0 || (t == 1 && c == 1) || (t == 2 && c == 2) || (t == 3 && (c == 0 || c == 3)) || (t == 4 && c >= 4);
-}
-static void it_filter(void);
 /* ---- the list: the inventory grouped as the menu's sort lays it out */
 static u8 it_items[256], it_icat[256]; static int it_n;
 static void it_build(void) {
@@ -209,7 +197,6 @@ static void it_build(void) {
         }
     }
     for (int i = 0; i < cnt; i++) { int it = G_INV_ITEM(i); if (have[it] == 1) { have[it] = 2; it_icat[it_n] = 5; it_items[it_n++] = (u8)it; } }
-    it_filter();   /* style 1: the category tab */
 }
 static const char *cat_name(int c) {
     switch (c) {
@@ -348,8 +335,78 @@ static void it_page_warp(int x, int y, int w, int h) {
         hot(x + 6, ly - 1, w - 12, IT_RH, HS_ITOP + 0x10 + i);
     }
 }
-static void page_items0(int play) {
-    int W = pa_cw, H = pa_ch, top = 56; char b[96];
+/* ---- drawing: a showcase of the selected item on the left (its icon at 4x in a stone frame, name, category,
+   description, one status line, Ordenar and the action plank), every item as a grid of icons on stone on the right,
+   scrolled by touch (drag / fling) and following the controller's cursor */
+/* the one status line: the last action's result for a while, else why the item cannot be used now (NULL: none) */
+static const char *it_status(int item, int *bad) {
+    if (it_msg_t && port_frame - it_msg_t < 200) { *bad = it_msg_bad; return it_msg; }
+    *bad = 1;
+    return it_reason(item);
+}
+static const char *it_act_name(int k, int item) {
+    return it_warp >= 0 ? T("Fly", "Volar") : it_icat[k] == 1 ? T("Equip", "Equipar") : it_icat[k] == 2 ? (it_in_use(item) ? T("Take off", "Quitar") : T("Wear", "Poner")) : T("Use", "Usar");
+}
+static int it_desc(int item, char *d, int n) {   /* the sub-screen's description, its line breaks as spaces */
+    if (!it_bank || pa_wfm_dialogue(it_bank, it_bank_n, rd16(it_bank, 0x12) + item, d, n) <= 0) { d[0] = 0; return 0; }
+    for (char *p = d; *p; p++) if (*p == '\n') *p = ' ';
+    return 1;
+}
+/* a plank button: st 0 normal (cream text), 1 ready (yellow), 2 not available (grey) */
+static void it_btn(int x, int y, int w, const char *s, int st, int id) {
+    plank(x, y, w); hot(x, y, w, 24, id);
+    pa_text_ol(x + w / 2 - pa_text_w(16, s) / 2, y + 4, 16, s, st == 1 ? C_YELLOW : st == 2 ? RGB(176, 160, 144) : C_WHITE, C_WOODE, C_DARK);
+}
+/* a tall plank (h >= 28): the game's 24-row plank cut in three, its top 14 and bottom 10 rows kept and its middle rows
+   (6..17, plain grain) tiled between them; the end grain pieces likewise.  No texel is scaled. */
+static void plank_h(int x, int y, int w, int h) {
+    static const struct { int v, n; } seg[3] = { {0, 14}, {6, 12}, {14, 10} };
+    int dy[3] = { y, y + 14, y + h - 10 }, dn[3] = { 14, h - 24, 10 };
+    for (int i = 0; i < 3; i++) {
+        pa_tile(x + 4, dy[i], w - 8, dn[i], SUB, 193, 128 + seg[i].v, 31, seg[i].n, 288, 481);
+        pa_tile(x, dy[i], 4, dn[i], SUB, 184, 128 + seg[i].v, 4, seg[i].n, 288, 481);
+        pa_tile(x + w - 9, dy[i], 9, dn[i], SUB, 224, 128 + seg[i].v, 9, seg[i].n, 288, 481);
+    }
+}
+/* the action: a plank twice as high, its label in the 24 px event-title letters when they have all of it (their own
+   colours; shaded when the item cannot be used now), else the 16 px font pixel doubled with the dark rim */
+#define IT_BIG 48
+static void it_btn_big(int x, int y, int w, const char *s, int st, int id) {
+    plank_h(x, y, w, IT_BIG); hot(x, y, w, IT_BIG, id);
+    if (pa_has_glyphs(24, s)) {
+        int tw = pa_text_w(24, s);
+        pa_text_scaled(x + w / 2 - tw / 2, y + (IT_BIG - 24) / 2, 24, s, C_WHITE, C_WOODE, 1, st == 2);
+    } else {
+        int tw = 2 * pa_text_w(16, s);
+        u32 o = pa_outline; pa_outline = C_DARK;
+        pa_text_scaled(x + w / 2 - tw / 2, y + (IT_BIG - 32) / 2, 16, s, st == 1 ? C_YELLOW : st == 2 ? RGB(176, 160, 144) : C_WHITE, C_WOODE, 2, 0);
+        pa_outline = o;
+    }
+}
+static void it_frame(int x, int y, int w, int h, int t, u32 c) { pa_fill(x, y, w, t, c); pa_fill(x, y + h - t, w, t, c); pa_fill(x, y, t, h, c); pa_fill(x + w - t, y, t, h, c); }
+static void it_selframe(int x, int y, int w, int h) {   /* the game's blinking yellow cursor frame */
+    it_frame(x - 1, y - 1, w + 2, h + 2, 1, C_DARK);
+    it_frame(x, y, w, h, 2, (port_frame >> 4) & 1 ? C_YELLOW : RGB(255, 168, 48));
+}
+/* the count: the HUD's digits on a red plate with a dark rim (right / bottom aligned) */
+static void it_badge_n(int rx, int by, int n) {
+    char d[8]; int nd = snprintf(d, sizeof d, "%d", n > 999 ? 999 : n), w = nd * 8 + 5, h = 13;
+    pa_fill(rx - w + 1, by - h, w - 2, h, C_DARK); pa_fill(rx - w, by - h + 1, w, h - 2, C_DARK);
+    pa_fill(rx - w + 1, by - h + 1, w - 2, h - 2, RGB(176, 40, 30)); pa_fill(rx - w + 2, by - h + 1, w - 4, 1, RGB(230, 110, 90));
+    for (int i = 0; i < nd; i++) pa_spr(rx - w + 3 + 8 * i, by - h + 3, HUD, 8 * (d[i] - '0'), 64, 8, 8, 368, 481, 0);
+}
+/* in use: 15 x 15, green, a thick white tick */
+static void it_badge_use(int x, int y) {
+    pa_fill(x + 2, y, 11, 15, C_DARK); pa_fill(x, y + 2, 15, 11, C_DARK); pa_fill(x + 1, y + 1, 13, 13, C_DARK);
+    pa_fill(x + 2, y + 1, 11, 13, RGB(56, 156, 56)); pa_fill(x + 1, y + 2, 13, 11, RGB(56, 156, 56)); pa_fill(x + 3, y + 1, 9, 2, RGB(120, 210, 110));
+    line(x + 3, y + 7, x + 6, y + 10, 2, C_WHITE); line(x + 6, y + 10, x + 11, y + 4, 2, C_WHITE);
+}
+static void it_badges(int x, int y, int s, int item) {   /* on an icon drawn at scale s at (x, y) */
+    if (it_in_use(item)) it_badge_use(x + 16 * s - 11, y - 4);
+    if (s3(S3_NCLUT)[item] & 0x80) it_badge_n(x + 16 * s + 4, y + 16 * s + 3, G_QTY(item));
+}
+static void page_items(int play) {
+    int W = pa_cw, H = pa_ch, top = 56; char b[200];
     if (!it_state) it_load();
     if (!play || it_state != 1) {
         window_(8, top, W - 16, H - top - 8);
@@ -358,94 +415,67 @@ static void page_items0(int play) {
     }
     it_build();
     if (it_sel >= it_n) it_sel = it_n - 1; if (it_sel < 0) it_sel = 0;
-    const char *gate = it_open_reason();
-    /* top row: the sort entry, then what is worn */
-    plank(8, top, 92); hot(8, top, 92, 24, HS_ITOP + 2); plank_text(54, top + 4, T("Sort", "Ordenar"), 0);
-    {
-        int x = 108;
-        for (int k = 0; k < it_n; k++) if (it_in_use(it_items[k]) && x < W - 30) { pa_item_icon(x, top + 4, it_items[k], PA_OUTLINE); x += 20; }
-        if (gate) pa_text_fit(x + 4, top + 4, 16, W - x - 12, gate, C_ORANGE, C_REDE);
+    int lw = 168, lx = 8, h = H - 8 - top, rx = lx + lw + 4, rw = W - 8 - rx;
+    /* the showcase */
+    window_(lx, top, lw, h);
+    int cx = lx + lw / 2;
+    frame_(cx - 41, top + 6, 82, 82);
+    stone(cx - 36, top + 11, 72, 72);
+    int bw = lw - 20, ay = top + h - 10 - IT_BIG, oy = ay - 28;
+    if (it_warp >= 0) it_btn(lx + 10, oy, bw, T("Cancel", "Cancelar"), 0, HS_ITOP + 4);
+    else it_btn(lx + 10, oy, bw, T("Sort", "Ordenar"), 0, HS_ITOP + 2);
+    if (it_n || it_warp >= 0) {
+        int item = it_warp >= 0 ? it_warp : it_items[it_sel], bad; const char *st = it_status(item, &bad), *why = it_reason(item);
+        pa_item_icon(cx - 32, top + 15, item, PA_X4 | PA_OUTLINE | (why ? PA_SHADE : 0));
+        if (it_warp < 0) { if (it_in_use(item)) it_badge_use(cx + 26, top + 8); if (s3(S3_NCLUT)[item] & 0x80) it_badge_n(cx + 40, top + 86, G_QTY(item)); }
+        int y = top + 92;
+        y += 17 * text_wrap(lx + 8, y, 16, lw - 16, 17, 2, 1, it_name(item, b, sizeof b), C_DARK, C_EDGE);
+        if (it_warp < 0) { ctext(cx, y, 16, cat_name(it_icat[it_sel]), C_MUTED, C_EDGE); y += 18; }
+        pa_fill(lx + 12, y + 1, lw - 24, 1, RGB(230, 200, 180)); y += 4;
+        int lim = oy - 4 - (st ? 2 : 0) * 15;
+        if (it_desc(item, b, sizeof b)) { int ml = (lim - y) / 15; if (ml > 0) text_wrap(lx + 10, y, 16, lw - 20, 15, ml, 0, b, C_MUTED8, C_EDGE); }
+        if (st) text_wrap(lx + 10, lim, 16, lw - 20, 15, 2, 0, st, bad ? C_RED : C_GREEN, C_REDE);
+        it_btn_big(lx + 10, ay, bw, it_act_name(it_sel, item), why ? 2 : 1, HS_ITOP + 3);
     }
-    int dh = 74, ly0 = top + 28, lh = H - 8 - dh - 4 - ly0;
-    if (it_warp >= 0) it_page_warp(8, ly0, W - 16, lh);
-    else {
-        window_(8, ly0, W - 16, lh);
-        /* a touch grid: icons at 3x (2x on a narrow canvas), the name under them, a header per category; scrolls
-           (drag / fling, the arrows, or follows the controller's cursor) */
-        int sc = W >= 400 ? 3 : 2, icon = 16 * sc, gap = 6, avail = W - 16 - 12 - 10;
-        int cols = avail / (icon + 64); if (cols < 2) cols = 2; if (cols > 6) cols = 6;
-        int cw = (avail - (cols - 1) * gap) / cols, ch = icon + 32, hh = 24;
-        int vx = 14, vy = ly0 + 6, vh = lh - 12, yy = 0, col = 0;
-        for (int k = 0; k < it_n; k++) {
-            if (!k || it_icat[k] != it_icat[k - 1]) { if (col) yy += ch + gap; col = 0; yy += hh; }
-            it_lc[k] = (short)col; it_ly[k] = (short)yy;
-            if (++col == cols) { col = 0; yy += ch + gap; }
-        }
-        int total = yy + (col ? ch : 0) + 4;
-        it_cols = cols; it_vx = vx; it_vy = vy; it_vw = avail; it_vh = vh;
-        if (it_follow && it_n) {   /* the controller moved the cursor: keep it in view */
-            int t = it_ly[it_sel] - (it_sel == 0 || it_icat[it_sel] != it_icat[it_sel - 1] ? hh : 0);
-            if (t < it_scroll) it_scroll = (float)t;
-            if (it_ly[it_sel] + ch > it_scroll + vh) it_scroll = (float)(it_ly[it_sel] + ch - vh);
-            it_follow = 0;
-        }
-        if (!it_drag) { it_scroll += it_vel; it_vel *= .9f; if (it_vel > -.3f && it_vel < .3f) it_vel = 0; }
-        float mx = total > vh ? (float)(total - vh) : 0;
-        if (it_scroll > mx) { it_scroll = mx; it_vel = 0; } if (it_scroll < 0) { it_scroll = 0; it_vel = 0; }
-        int so = (int)it_scroll;
-        int sx0 = pa_clip_x0, sy0 = pa_clip_y0, sx1 = pa_clip_x1, sy1 = pa_clip_y1;
-        pa_clip_x0 = vx; pa_clip_y0 = vy; pa_clip_x1 = vx + avail; pa_clip_y1 = vy + vh;
-        if (!it_n) pa_text(20, vy + 4, 16, T("No items", "Sin objetos"), C_MUTED, C_EDGE);
-        for (int k = 0; k < it_n; k++) {
-            int y = vy + it_ly[k] - so, x = vx + it_lc[k] * (cw + gap);
-            if (!k || it_icat[k] != it_icat[k - 1]) {
-                int hy = y - hh + 3; const char *cn = cat_name(it_icat[k]);
-                if (hy + hh > vy && hy < vy + vh) { pa_text(vx + 2, hy, 16, cn, C_RED, C_REDE); pa_fill(vx + 8 + pa_text_w(16, cn), hy + 9, avail - 12 - pa_text_w(16, cn), 1, C_EDGE); }
-            }
-            if (y + ch <= vy || y >= vy + vh) continue;
-            int item = it_items[k], ok = !it_reason(item), use = it_in_use(item), sel = k == it_sel;
-            if (sel) { pa_fill(x - 2, y - 2, cw + 4, ch + 4, RGB(250, 200, 60)); pa_fill(x, y, cw, ch, C_SEL); }
-            else { pa_fill(x, y, cw, ch, C_EDGE); pa_fill(x + 1, y + 1, cw - 2, ch - 2, use ? RGB(250, 214, 150) : RGB(250, 236, 226)); }
-            pa_item_icon(x + (cw - icon) / 2, y + 4, item, (ok ? 0 : PA_SHADE) | (sc == 3 ? PA_X3 : PA_X2));
-            const char *nm = it_name(item, b, sizeof b); char t[112];
-            if (s3(S3_NCLUT)[item] & 0x80) { snprintf(t, sizeof t, "%s x%d", nm, G_QTY(item)); nm = t; }
-            text_wrap(x + 3, y + icon + 8, 8, cw - 6, 10, 2, 1, nm, sel ? C_WHITE : ok ? C_MUTED8 : C_MUTED, sel ? C_SEL : RGB(230, 200, 190));
-            int hy0 = y < vy ? vy : y, hy1 = y + ch > vy + vh ? vy + vh : y + ch;
-            if (hy1 - hy0 > 8) hot(x, hy0, cw, hy1 - hy0, HS_ITEM + (k & 0xFF));
-        }
-        pa_clip_x0 = sx0; pa_clip_y0 = sy0; pa_clip_x1 = sx1; pa_clip_y1 = sy1;
-        if (total > vh) {   /* the scroll bar, with arrow hit areas at its ends */
-            int bx = W - 8 - 14, bh = vh * vh / total; if (bh < 20) bh = 20;
-            pa_fill(bx, vy, 6, vh, RGB(230, 200, 190));
-            pa_fill(bx, vy + (int)((vh - bh) * (it_scroll / mx)), 6, bh, C_RED);
-            hot(bx - 12, vy, 24, vh / 2, HS_ITOP); hot(bx - 12, vy + vh / 2, 24, vh - vh / 2, HS_ITOP + 1);
-        }
+    /* the grid: icons on stone, scrolled (drag / fling, the scroll bar's halves, or following the cursor) */
+    if (it_warp >= 0) { it_page_warp(rx, top, rw, h); return; }
+    stone(rx, top, rw, h);
+    frame_(rx, top, rw, h);
+    int cols = 3, ch = 62, vx = rx + 6, vy = top + 6, vw = rw - 12 - 6, vh = h - 12, cw = vw / cols, gx = vx + (vw - cols * cw) / 2;
+    for (int k = 0; k < it_n; k++) { it_lc[k] = (short)(k % cols); it_ly[k] = (short)(k / cols * ch); }
+    int total = (it_n + cols - 1) / cols * ch;
+    it_cols = cols; it_vx = vx; it_vy = vy; it_vw = vw; it_vh = vh;
+    if (it_follow && it_n) {   /* the controller moved the cursor: keep it in view */
+        if (it_ly[it_sel] < it_scroll) it_scroll = (float)it_ly[it_sel];
+        if (it_ly[it_sel] + ch > it_scroll + vh) it_scroll = (float)(it_ly[it_sel] + ch - vh);
+        it_follow = 0;
     }
-    /* the detail: the selected item, its description, why it is grey, the action */
-    int dy = H - 8 - dh;
-    window_(8, dy, W - 16, dh);
-    if (it_n) {
-        int item = it_warp >= 0 ? it_warp : it_items[it_sel]; const char *why = it_reason(item);
-        pa_item_icon(16, dy + 8, item, why ? PA_SHADE : 0);
-        pa_text_fit(38, dy + 7, 16, W - 150, it_name(item, b, sizeof b), C_DARK, C_EDGE);
-        char desc[200]; int ly = dy + 27;
-        if (it_bank && pa_wfm_dialogue(it_bank, it_bank_n, rd16(it_bank, 0x12) + item, desc, sizeof desc) > 0) {
-            for (char *p = desc, *e; *p && ly < dy + 27 + 20; p = e + (*e != 0), ly += 10) {
-                e = strchr(p, '\n'); if (!e) e = p + strlen(p);
-                char c = *e; *e = 0; pa_text_fit(16, ly, 8, W - 40, p, C_MUTED8, RGB(230, 200, 190)); *e = c;
-            }
-        }
-        const char *st = why ? why : NULL;
-        if (it_msg_t && port_frame - it_msg_t < 200) st = it_msg;
-        if (st) pa_text_fit(16, dy + dh - 21, 16, W - 140, st, st == it_msg ? (it_msg_bad ? C_RED : C_GREEN) : C_RED, C_REDE);
-        const char *act = it_warp >= 0 ? T("Fly", "Volar") : it_icat[it_sel] == 1 ? T("Equip", "Equipar") : it_icat[it_sel] == 2 ? (it_in_use(item) ? T("Take off", "Quitar") : T("Wear", "Poner")) : T("Use", "Usar");
-        int bw = 96, bx = W - 16 - bw;
-        plank(bx, dy + 8, bw); hot(bx, dy + 8, bw, 24, HS_ITOP + 3); plank_text(bx + bw / 2, dy + 12, act, !why);
-        if (it_warp >= 0) { plank(bx, dy + 38, bw); hot(bx, dy + 38, bw, 24, HS_ITOP + 4); plank_text(bx + bw / 2, dy + 42, T("Cancel", "Cancelar"), 0); }
+    if (!it_drag) { it_scroll += it_vel; it_vel *= .9f; if (it_vel > -.3f && it_vel < .3f) it_vel = 0; }
+    float mx = total > vh ? (float)(total - vh) : 0;
+    if (it_scroll > mx) { it_scroll = mx; it_vel = 0; } if (it_scroll < 0) { it_scroll = 0; it_vel = 0; }
+    int so = (int)it_scroll;
+    int sx0 = pa_clip_x0, sy0 = pa_clip_y0, sx1 = pa_clip_x1, sy1 = pa_clip_y1;
+    pa_clip_x0 = vx; pa_clip_y0 = vy; pa_clip_x1 = vx + vw; pa_clip_y1 = vy + vh;
+    for (int k = 0; k < it_n; k++) {
+        int x = gx + it_lc[k] * cw, y = vy + it_ly[k] - so;
+        if (y + ch <= vy || y >= vy + vh) continue;
+        int item = it_items[k], ok = !it_reason(item), sel = k == it_sel, ix = x + (cw - 48) / 2, iy = y + (ch - 48) / 2;
+        if (sel) { window_(ix - 7, iy - 7, 62, 62); it_selframe(ix - 7, iy - 7, 62, 62); }
+        pa_item_icon(ix, iy, item, PA_X3 | PA_OUTLINE | (ok ? 0 : PA_SHADE));
+        it_badges(ix, iy, 3, item);
+        int hy0 = y < vy ? vy : y, hy1 = y + ch > vy + vh ? vy + vh : y + ch;
+        if (hy1 - hy0 > 8) hot(x, hy0, cw, hy1 - hy0, HS_ITEM + (k & 0xFF));
+    }
+    pa_clip_x0 = sx0; pa_clip_y0 = sy0; pa_clip_x1 = sx1; pa_clip_y1 = sy1;
+    if (!it_n) pa_text_ol(vx + 6, vy + 6, 16, T("No items", "Sin objetos"), C_WHITE, C_WOODE, C_DARK);
+    if (total > vh) {   /* a thin scroll indicator on the grid's right edge; its halves page up / down */
+        int bx = rx + rw - 10, bh = vh * vh / total; if (bh < 16) bh = 16;
+        pa_fill(bx - 1, vy - 1, 5, vh + 2, C_DARK);
+        pa_fill(bx, vy, 3, vh, RGB(110, 84, 70));
+        pa_fill(bx, vy + (int)((vh - bh) * (it_scroll / mx)), 3, bh, C_YELLOW);
+        hot(bx - 8, vy, 14, vh / 2, HS_ITOP); hot(bx - 8, vy + vh / 2, 14, vh - vh / 2, HS_ITOP + 1);
     }
 }
-
-#include "panel_items_alt.inc"
 
 /* ---- input (panel_events.inc routes the tab's keys and touches here) */
 static void it_warp_go(void) {
@@ -478,9 +508,6 @@ static void items_hit(int id) {
     else if (k == 2) it_rq = RQ_SORT;
     else if (k == 3) { if (it_warp >= 0) it_warp_go(); else it_confirm(it_sel); }
     else if (k == 4) it_warp = -1;
-    else if (k >= 0xE0 && k < 0xE5) { it_tab = k - 0xE0; it_sel = 0; it_scroll = 0; it_vel = 0; }   /* style 1: category tabs */
-    else if (k >= 0xC0 && k < 0xE0) { it_sel = (k - 0xC0) * IT3_PAGE; if (it_sel >= it_n) it_sel = it_n - 1; }   /* page dots / numbers */
-    else if (k == 5 || k == 6) { it_sel = (it_sel / IT3_PAGE + (k == 5 ? -1 : 1)) * IT3_PAGE; if (it_sel >= it_n) it_sel = it_n - 1; if (it_sel < 0) it_sel = 0; }   /* style 3: pages */
     else if (k >= 0x10) { if (it_wsel == k - 0x10) it_warp_go(); else it_wsel = k - 0x10; }
 }
 void items_action_(int a) { items_action(a); }   /* named from panel_events.inc, which comes first */

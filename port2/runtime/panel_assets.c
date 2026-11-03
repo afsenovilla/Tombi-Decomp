@@ -302,6 +302,20 @@ static const Glyph *find_glyph(int k, int c) {
     return NULL;
 }
 static int space_w(int k) { return k == 0 ? 4 : k == 1 ? 5 : 10; }
+/* 1 when every letter of s has a glyph of its own in the h px font (the 24 px font does not borrow the 16 px one here) */
+int pa_has_glyphs(int h, const char *s) {
+    int k = hidx(h);
+    if (k < 0 || !pa_font_ok) return 0;
+    static const char *base = "AAAAAAACEEEEIIIIDNOOOOOxOUUUUYTsaaaaaaaceeeeiiiidnooooo/ouuuuyty";
+    for (; *s; s++) {
+        int c = (u8)*s;
+        if (c == ' ') continue;
+        if (glyphs[k][c].img || (c >= 'a' && c <= 'z' && glyphs[k][c - 32].img) || (c >= 'A' && c <= 'Z' && glyphs[k][c + 32].img) ||
+            (c >= 0xC0 && glyphs[k][(u8)base[c - 0xC0]].img)) continue;
+        return 0;
+    }
+    return 1;
+}
 int pa_text_w(int h, const char *s) {
     int k = hidx(h), w = 0;
     if (k < 0) return 0;
@@ -424,4 +438,25 @@ int pa_wfm_dialogue(const unsigned char *d, unsigned n, int idx, char *out, int 
     }
     out[k] = 0;
     return (int)k;
+}
+
+/* text drawn at an integer scale sc (1..4), optionally shaded (each colour halved, like PA_SHADE): the h px glyphs (and
+   their outline when pa_outline is set) rendered off the canvas at 1x, then every pixel put as an sc x sc block (pixel
+   doubled, never resampled).  Returns the end x. */
+int pa_text_scaled(int x, int y, int h, const char *s, u32 body, u32 edge, int sc, int shade) {
+    int w = pa_text_w(h, s) + 4, hh = h + 6;
+    if (w <= 4 || w > 512 || sc < 1 || sc > 4) return x;
+    static u32 buf[512 * 32];
+    u32 *cv = pa_cv; int cw = pa_cw, ch = pa_ch, c0 = pa_clip_x0, c1 = pa_clip_y0, c2 = pa_clip_x1, c3 = pa_clip_y1;
+    memset(buf, 0, sizeof buf);
+    pa_cv = buf; pa_cw = w; pa_ch = hh; pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = w; pa_clip_y1 = hh;
+    pa_text(2, 3, h, s, body, edge);
+    pa_cv = cv; pa_cw = cw; pa_ch = ch; pa_clip_x0 = c0; pa_clip_y0 = c1; pa_clip_x1 = c2; pa_clip_y1 = c3;
+    for (int j = 0; j < hh; j++) for (int i = 0; i < w; i++) {
+        u32 c = buf[j * w + i];
+        if (!(c >> 24)) continue;
+        if (shade) c = 0xFF000000u | ((c >> 1) & 0x7F7F7Fu);
+        pa_fill(x + sc * (i - 2), y + sc * (j - 3), sc, sc, c);
+    }
+    return x + sc * (w - 4);
 }
