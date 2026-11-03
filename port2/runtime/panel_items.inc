@@ -185,10 +185,13 @@ static int it_in_use(int item) {
    category tabs, 2 the Triangle screen's list, 3 big cards a page at a time */
 static int it_style = -1, it_tab;
 static int it_get_style(void) {
-    if (it_style < 0) { const char *s = getenv("PORT_PANEL_ITEMS_STYLE"); it_style = s ? atoi(s) : 0; if (it_style < 0 || it_style > 3) it_style = 0; }
+    if (it_style < 0) { const char *s = getenv("PORT_PANEL_ITEMS_STYLE"); it_style = s ? atoi(s) : 0; if (it_style < 0 || it_style > 6) it_style = 0; }
     return it_style;
 }
-static int it_tab_has(int t, int c) { return t == 0 || (t == 1 && c == 1) || (t == 2 && c == 2) || (t == 3 && (c == 0 || c == 3)) || (t == 4 && c >= 4); }
+static int it_tab_has(int t, int c) {
+    if (it_style == 4) return t == 0 || (t == 1 && c == 1) || (t == 2 && c == 2) || (t == 3 && c >= 3) || (t == 4 && c == 0);   /* Todo Armas Ropa Objetos Llaves */
+    return t == 0 || (t == 1 && c == 1) || (t == 2 && c == 2) || (t == 3 && (c == 0 || c == 3)) || (t == 4 && c >= 4);
+}
 static void it_filter(void);
 /* ---- the list: the inventory grouped as the menu's sort lays it out */
 static u8 it_items[256], it_icat[256]; static int it_n;
@@ -476,6 +479,7 @@ static void items_hit(int id) {
     else if (k == 3) { if (it_warp >= 0) it_warp_go(); else it_confirm(it_sel); }
     else if (k == 4) it_warp = -1;
     else if (k >= 0xE0 && k < 0xE5) { it_tab = k - 0xE0; it_sel = 0; it_scroll = 0; it_vel = 0; }   /* style 1: category tabs */
+    else if (k >= 0xC0 && k < 0xE0) { it_sel = (k - 0xC0) * IT3_PAGE; if (it_sel >= it_n) it_sel = it_n - 1; }   /* page dots / numbers */
     else if (k == 5 || k == 6) { it_sel = (it_sel / IT3_PAGE + (k == 5 ? -1 : 1)) * IT3_PAGE; if (it_sel >= it_n) it_sel = it_n - 1; if (it_sel < 0) it_sel = 0; }   /* style 3: pages */
     else if (k >= 0x10) { if (it_wsel == k - 0x10) it_warp_go(); else it_wsel = k - 0x10; }
 }

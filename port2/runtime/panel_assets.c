@@ -154,7 +154,7 @@ void pa_spr(int x, int y, int tx, int ty, int u, int v, int w, int h, int cx, in
         for (int k = 0; k < w * h; k++) { idx[k] &= 15; if (pa_drop_mask >> idx[k] & 1) vis[k] = 0; }
     }
     /* integer scale (PA_X2 / PA_X3, map markers): every texel, and the outline around them, an s x s block */
-    int sc = flags & PA_X3 ? 3 : flags & PA_X2 ? 2 : 1;
+    int sc = flags & PA_X4 ? 4 : flags & PA_X3 ? 3 : flags & PA_X2 ? 2 : 1;
     if (flags & PA_OUTLINE)
         for (int j = -1; j <= h; j++) for (int i = -1; i <= w; i++) {
             if (i >= 0 && j >= 0 && i < w && j < h && vis[j * w + i]) continue;

@@ -8,6 +8,7 @@
 #define PA_OUTLINE 16  /* 1 px dark outline around the opaque texels (game-style marker) */
 #define PA_X2 128      /* drawn at 2x (each texel a 2 x 2 block: map markers) */
 #define PA_X3 256      /* drawn at 3x */
+#define PA_X4 512      /* drawn at 4x */
 #define PA_CUTBOX 32   /* drop the texels of CLUT indices pa_cut_mask reachable from the rect border (a boxed icon) */
 extern unsigned pa_cut_mask, pa_drop_mask, pa_outline;
 extern int pa_ok, pa_font_ok;

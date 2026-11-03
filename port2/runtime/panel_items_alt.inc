@@ -10,9 +10,10 @@
  *   3  big cards: the detail on top, 5 x 2 cards with the icons at 3x a page at a time (the game's 10 per page), the
  *      sub-screen's pointing hand on the selected one, a button bar at the bottom (pages, Ordenar, the action). */
 
-#define IT3_PAGE 10
+static int it_pp = 10;   /* items per page (styles 3..6) */
+#define IT3_PAGE it_pp
 static void it_filter(void) {
-    if (it_get_style() != 1 || !it_tab) return;
+    if ((it_get_style() != 1 && it_get_style() != 4) || !it_tab) return;
     int n = 0;
     for (int k = 0; k < it_n; k++) if (it_tab_has(it_tab, it_icat[k])) { it_items[n] = it_items[k]; it_icat[n] = it_icat[k]; n++; }
     it_n = n;
@@ -205,6 +206,7 @@ static void page_items3(void) {
     int W = pa_cw, H = pa_ch, top = 56; char b[200];
     int dh = 76, by = H - 8 - 24, gy = top + dh + 4, gh = by - 4 - gy, cols = 5, rows = 2;
     int cw = (W - 16) / cols, ch = gh / rows, gx = 8 + (W - 16 - cols * cw) / 2;
+    it_pp = 10;
     int pages = (it_n + IT3_PAGE - 1) / IT3_PAGE, pg = it_n ? it_sel / IT3_PAGE : 0;
     if (pages < 1) pages = 1;
     it_cols = cols; it_vw = 0; it_vh = 0;   /* no drag scrolling: pages */
@@ -256,6 +258,8 @@ static void page_items3(void) {
     }
 }
 
+#include "panel_items_alt3.inc"
+
 static void page_items(int play) {
     int s = it_get_style();
     if (!s) { page_items0(play); return; }
@@ -263,5 +267,5 @@ static void page_items(int play) {
     if (!play || it_state != 1) { page_items0(play); return; }
     it_build();
     if (it_sel >= it_n) it_sel = it_n - 1; if (it_sel < 0) it_sel = 0;
-    if (s == 1) page_items1(); else if (s == 2) page_items2(); else page_items3();
+    if (s == 1) page_items1(); else if (s == 2) page_items2(); else if (s == 3) page_items3(); else page_items3v(s);
 }

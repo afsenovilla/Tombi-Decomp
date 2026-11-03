@@ -3142,6 +3142,12 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   count, inline category headers, the game's green bar) with the detail and the buttons at the side; 3 a detail card
   on top, 5 x 2 cards with 3x icons a page at a time (the game's 10 per page, the sub-screen's pointing hand), a bar of
   page / Ordenar / action planks. Each shows the name, the description (16 px) and one status line once.
+  Refinements of 3 (`runtime/panel_items_alt3.inc`): 4 (3a) tabs Todo / Armas / Ropa / Objetos / Llaves + Ordenar,
+  4 x 2 items (3x icon, the name under it in the 8 px game font), L1 / R1 and page dots, a detail window with the action
+  inside; 5 (3b) style 3 cleaned up: detail window (icon, name, description, status, action), 5 x 2 cards with the
+  blinking yellow frame, clear badges, one bottom row (Ordenar left, `<L1` *n de N* `R1>` centred); 6 (3c) a showcase on
+  the left (icon at 4x, `PA_X4`, in a stone frame, name, category, description, Ordenar, action) and a 3 x 4 grid of
+  icons on stone at the right with the pager on its bottom edge.
 - Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
 - `--hud-bottom` (Android launcher: *HUD en la pantalla inferior*, default on when a secondary display exists; it is
   passed only with the second screen): while the panel is on (PC / headless: always; Android: while the Presentation polls
