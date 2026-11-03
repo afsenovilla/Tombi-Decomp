@@ -174,20 +174,30 @@ class TestSaveImport(unittest.TestCase):
         check_card(self, self.c0)
 
     def test_area_names(self):
-        """Spanish: the improved translation's map names (by area and section); English: the English table"""
+        """Spanish / English: the map names of the improved translation / the English disc (by area and section)"""
         self.assertEqual(S.area_name(0), "Ciudad de todo principio")
         self.assertEqual(S.area_name(10, 3), "Ciudad de trucos")
         self.assertEqual(S.area_name(10, 30), "Jungla profunda")     # past the table: section 0's
         self.assertEqual(S.area_name(14, 0), "Área Cerdiablo uno")
         self.assertEqual(S.area_name(6, 2), "Motocross sucio")
         self.assertIsNone(S.area_name(7))
+        self.assertEqual(S.area_name(14, 6), "Bosque de setas")
+        # English: the English disc's map names (D0SPSUB, as the panel shows them with --lang 0)
         self.assertEqual(S.area_name(5, 0, es=False), "Baccus Village")
-        self.assertEqual(sorted(S.AREA_REGIONS_ES), sorted(S.AREAS_EN))
+        self.assertEqual(S.area_name(4, 3, es=False), "Haunted Mansion")
+        self.assertEqual(S.area_name(10, 3, es=False), "Trick Village")
+        self.assertEqual(S.area_name(11, 0, es=False), "Village of Civilization")
+        self.assertEqual(S.area_name(13, 0, es=False), "Dwarf Forest")
+        self.assertEqual(S.area_name(14, 0, es=False), "Evil Pig Area One")
+        self.assertEqual(S.area_name(14, 6, es=False), "Mushroom Forest")
+        self.assertEqual(S.area_name(19, 2, es=False), "Phoenix's Mountain")
+        self.assertIsNone(S.area_name(7, 0, es=False))
+        self.assertEqual(len(S.REGIONS_EN), len(S.REGIONS_ES))
         g = bytearray(fake_save(slot=3, area=10, minutes=61))
         struct.pack_into("<H", g, S.FRAME + 0x202, 7)
         g[S.FRAME + 0xBFF] = S.xor(g[S.FRAME + 0x200:S.FRAME + 0xBFF])
         self.assertEqual(S.save_info("BESCES-01331TOMBA-03", g[S.FRAME:]), "Ranura 03 · Ciudad de trucos · 1:01 h")
-        self.assertEqual(S.save_info("BESCES-01331TOMBA-03", g[S.FRAME:], es=False), "Slot 03 · Deep Jungle · 1:01 h")
+        self.assertEqual(S.save_info("BESCES-01331TOMBA-03", g[S.FRAME:], es=False), "Slot 03 · Trick Village · 1:01 h")
 
     def test_new_slot(self):
         """Save to another slot: the save goes in as the first free slot of the same card (file name and title digits),

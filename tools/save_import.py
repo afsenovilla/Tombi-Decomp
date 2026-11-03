@@ -22,34 +22,30 @@ CARD_SIZE, BLOCK, FRAME = 0x20000, 0x2000, 0x80
 TOMBI_PRODUCTS = ("BESCES-01330", "BESCES-01331", "BASCUS-94236", "BISLPS-01144")
 BACKUP_KEEP = 5
 
-# GAME.selectedArea -> name (the same table as tools/tombi_save_editor.py AREAS and SaveImport.java)
-AREAS_EN = {0: "Village of All Beginnings", 1: "Forest / Watch Tower", 2: "Caves / tunnels", 3: "Phoenix Mountain",
-         4: "Trick Village area", 5: "Baccus Village", 6: "Dirt Motocross", 8: "Baccus Lake", 9: "Mushroom Village",
-         10: "Deep Jungle", 11: "Lumberjack Town / Factory", 13: "Pig Island", 14: "Evil Pigs",
-         16: "Stonetown / Clock Tower", 17: "Iron Town / Iron Castle", 18: "Civilization Town", 19: "Dwarf Village"}
-AREAS = AREAS_EN
-# Spanish: the names of the improved translation (patches/es_mejorada.tombipatch.json) as the game's Map screen and
-# the second screen give them (port2/runtime/panel.c room_names: D5SPSUB's map area names, through the map link of
-# the room GAME.selectedArea / GAME.section; area 14 = the Evil Pig rooms, their own table).  REGIONS_ES[i] = map area
-# name i (12 = area 14's first room); AREA_REGIONS_ES[area][section] = the region of each section (hex digit); a
-# section past the string, or with no map area, takes section 0's.  Same tables in SaveImport.java.
+# The place of a save as the game's Map screen and the second screen name it (port2/runtime/panel.c room_names: the
+# map area names of D0SPSUB, through the map link of the room GAME.selectedArea / GAME.section; area 14 = the Evil Pig
+# rooms, their own table).  REGIONS_EN[i] / REGIONS_ES[i] = map area name i of the English disc / the improved Spanish
+# translation (patches/es_mejorada.tombipatch.json) (12 = area 14's first room); AREA_REGIONS[area][section] = the
+# region of each section (hex digit); a section past the string, or with no map area, takes section 0's.  Same tables
+# in SaveImport.java.
+REGIONS_EN = ("Village of All Beginnings", "Dwarf Forest", "Mushroom Forest", "Phoenix's Mountain", "Baccus Village",
+              "Haunted Mansion", "Deep Jungle", "Village of Civilization", "Trick Village",
+              "Village of All Beginnings", "Dirt Motocross", "Phoenix's Mountain", "Evil Pig Area One")
 REGIONS_ES = ("Ciudad de todo principio", "Bosque de enanos", "Bosque de setas", "Montaña del Fénix", "Ciudad Baco",
               "Mansión encantada", "Jungla profunda", "Ciudad de civilización", "Ciudad de trucos",
               "Ciudad de todo principio", "Motocross sucio", "Montaña del Fénix", "Área Cerdiablo uno")
-AREA_REGIONS_ES = {0: "000000", 1: "11111", 2: "111111", 3: "333333", 4: "55555555555555555555", 5: "4444", 6: "a",
-                   8: "5522", 9: "2222222", 10: "666866688", 11: "77777", 13: "10", 14: "c077739000",
-                   16: "7777777", 17: "77777777770", 18: "770", 19: "11b"}
+AREA_REGIONS = {0: "000000", 1: "11111", 2: "111111", 3: "333333", 4: "55555555555555555555", 5: "4444", 6: "a",
+                8: "5522", 9: "2222222", 10: "666866688", 11: "77777", 13: "10", 14: "c077732000",
+                16: "7777777", 17: "77777777770", 18: "770", 19: "11b"}
 
 
 def area_name(area, section=0, es=True):
-    """the place of a save (GAME.selectedArea, GAME.section): the improved Spanish translation's map name, or the
-    English table; None for an unknown area"""
-    if not es:
-        return AREAS_EN.get(area)
-    r = AREA_REGIONS_ES.get(area)
+    """the place of a save (GAME.selectedArea, GAME.section): the map name of the improved Spanish translation, or of
+    the English disc; None for an unknown area"""
+    r = AREA_REGIONS.get(area)
     if r is None:
         return None
-    return REGIONS_ES[int(r[section] if 0 <= section < len(r) else r[0], 16)]
+    return (REGIONS_ES if es else REGIONS_EN)[int(r[section] if 0 <= section < len(r) else r[0], 16)]
 
 
 class ImportError_(Exception):
