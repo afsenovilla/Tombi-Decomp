@@ -279,7 +279,7 @@ Rules:
 
 | Assumption | Count | Handling |
 |---|---|---|
-| Pointers stored in 32-bit fields (structs, tables in retail data, `int` casts) | pervasive | **Phase 1 (now): a 32-bit host** (i386 Linux/Windows, armeabi-v7a Android), so pointers are 32 bits wide as on the PS1. **Phase 2: 64-bit.** Keep all game memory in a 4 GB arena at a fixed base and replace pointer fields with 32-bit offsets (`PSXPTR(T)` macros in the headers, as PSY-Z does with `OT_TYPE`), or build with `-mx32` / an ILP32 ABI where available. Android Play requires arm64, so phase 2 is needed for the store, not for sideloading. |
+| Pointers stored in 32-bit fields (structs, tables in retail data, `int` casts) | pervasive | **Phase 1 (now): a 32-bit host** (i386 Linux/Windows, armeabi-v7a Android), so pointers are 32 bits wide as on the PS1. **64-bit (done, Android arm64-v8a): the wasm2c build** ("64-bit builds: wasm2c" below): the game is compiled to wasm32, whose linear memory is the 32-bit address space, and translated back to C for the 64-bit host; no source change. (The alternatives, `PSXPTR(T)` offset macros in the headers as PSY-Z does with `OT_TYPE`, or an ILP32 ABI, were not needed.) |
 | Hard-coded RAM addresses (`0x80xxxxxx` literals) | 4998 literals (0x8013: 1582, 0x8001: 832, 0x8012: 463, 0x8011: 384 ...); the 1032 `0x803Cxxxx` are constants, not addresses | RAM is mapped at its PS1 address (`MAP_FIXED`), so the literals stay valid. This is free on 32-bit Linux. On Windows use `VirtualAlloc` at 0x80000000 with `/LARGEADDRESSAWARE`. On Android, mmap at a fixed address is allowed but can collide; reserve early in `JNI_OnLoad`. |
 | Scratchpad 0x1F800000 (`SPAD`, `TASK_C`, ...) | 913 literals plus named externs | Mapped at its address (16 KB including the I/O page, which is plain memory). |
 | KUSEG / KSEG1 aliases (`ptr & 0xFFFFFF`, OT links) | e.g. `compactOrderingTable` | `gen_port.py` rewrites the game's KUSEG pointer masks to the KSEG0 view (`port_kuseg_mask`, see "Windows build": the mirror at 0x10000 is only a fallback). The same RAM object is mapped three times (memfd). Addresses below 0x10000 (BIOS area) are impossible, which is why `initTasks` reads the TCB table through `port_bios_tcb_table()` (fixes.txt). |
@@ -375,8 +375,8 @@ VBlank counter (`0x1F8001E8 < 0x1F8001EA`), so on PAL it runs at 50 Hz or 25 Hz.
 
 - Use SDL2's `android-project` template (Gradle + NDK, `SDL_main`). `port/CMakeLists.txt` becomes an
   `add_library(main SHARED ...)` target. Rendering uses GLES 3, audio the SDL callback (AAudio/OpenSL inside SDL).
-- The ABI is **armeabi-v7a first**, because it keeps the 32-bit pointer model of phase 1. On 32-bit ARM Linux,
-  mapping 0x80000000 works when reserved early. arm64-v8a needs phase 2 (§2.1).
+- Two ABIs in one APK: **armeabi-v7a** keeps the 32-bit pointer model of phase 1 natively; **arm64-v8a** is the wasm2c
+  build ("64-bit builds: wasm2c"), required on 64-bit-only devices (Snapdragon 8 Gen 3 and newer, AYN Odin 2).
 - Replace the signal-based SIGSEGV trampoline with load-time pointer translation, and use the host libc
   instead of the freestanding runtime.
 - **Assets come from the user's own disc.** A first-run screen uses the Storage Access Framework to pick a
@@ -384,7 +384,14 @@ VBlank counter (`0x1F8001E8 < 0x1F8001EA`), so on PAL it runs at 50 Hz or 25 Hz.
   the overlays, and copied or indexed into app storage. The APK ships no game data, no Sony SDK code and no
   BIOS. All Psy-Q functionality is reimplemented in `port/`.
 
-### Status (M7, phase 1: armeabi-v7a)
+### Status (M7: armeabi-v7a native, arm64-v8a wasm2c)
+
+**arm64-v8a** (2026-11-03): the APK carries `lib/arm64-v8a` (libtombi.so = the wasm2c build of the same generated game
+C + `port2/wasm/host*.c` + `runtime/sdl.c`, libmain.so = loader.c built for arm64, libSDL2.so, libtombidisc.so) next to
+`lib/armeabi-v7a`; the workflow runs `port2/wasm/build.py --until w2c` (clang-18, wasi-libc, cached WABT) before Gradle
+and the CMake `arm64-v8a` branch compiles `build/wasm/w2c` with the NDK. Android picks arm64 where the device has it.
+Details, checks and open points in "64-bit builds: wasm2c" (M3 section). What follows describes the armeabi-v7a build;
+the launcher, Java side, data extraction, saves and arguments are shared by both.
 
 Built by `.github/workflows/android-apk.yml` (push to `port2/**` or manual): the runner's SDK/NDK, SDL2 2.30.11 from
 its release source tarball, Gradle project `port2/android` around `port2/CMakeLists.txt` (`if(ANDROID)` branch).
@@ -479,7 +486,8 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   keystore), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`; otherwise it stays debug-signed.
   Never commit a keystore.
 - **PC builds unchanged**: same i386 disassembly, title smoke frames byte-identical, `--test-null` ok.
-- Not done yet: running on a device, the GLES path of `gpu_gl.c`,  touch overlay, arm64 (phase 2).
+- Not done yet: touch overlay; the arm64-v8a libraries have not run on a device yet (built in CI, the host code
+  checked on x86-64 and under qemu-aarch64).
   Roadmap: `notes/roadmap.md` "Android".
 
 ## 5. Inventory
@@ -628,7 +636,7 @@ Estimates are for one experienced developer and assume the decomp keeps its curr
 | M4 | All areas | per-area symbol prefixing + overlay dispatch, fix register-carried calls and other ABI issues found by playing every area; correctness audit vs. an emulator (RAM diff per frame on the same inputs: compare the native build to PCSX/Duckstation traces) | 3–5 weeks |
 | M5 | Sound | software SPU + libsnd on the console's tick, XA audio of the movies (**done** in `port2/`, "Audio" below) | 2–3 weeks |
 | M6 | GL renderer + enhancements | GLES3/GL3 backend, internal resolution, widescreen, PGXP-style precision, **interpolated high frame rates** (`--fps`, both renderers: done) | 3–4 weeks |
-| M7 | Android | SDL android project, armeabi-v7a (**APK builds in CI**, §4 "Status"; device testing pending), SAF disc import, touch controls; then the 64-bit pointer model for arm64 | 2 weeks (+3–4 weeks for 64-bit) |
+| M7 | Android | SDL android project, armeabi-v7a (**APK builds in CI**, §4 "Status"), SAF disc import, touch controls; arm64-v8a through the wasm2c build (in the same APK since 2026-11-03) | 2 weeks (+3–4 weeks for 64-bit) |
 
 **Main blockers today:**
 
@@ -3058,9 +3066,9 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
 3. The Psy-Q stubs hit at boot are down to `SetFogNear` (the SPU-init / tick-mode / reverb setters are
    `sound.c`'s now); `ScaleMatrix` is native since the room sweep (AREA00 section 5 draws with it); the other
    unreached ones stay stubs.
-4. 64-bit build: the OT links are 24-bit addresses, so the image must stay below 16 MB (`-Ttext-segment` /
-   `--image-base` + `port_check_layout`); a later phase replaces `port_otlink/port_otaddr` with an index into a
-   primitive arena and widens the pointer-holding words of the image.
+4. 64-bit build: done through wasm2c ("64-bit builds: wasm2c" below): the OT links stay 24-bit offsets because the
+   data image lies in the first 16 MB of the module's linear memory (`port_check_layout`; gen2 keeps the scratchpad and
+   I/O arrays in .data there).
 6. Windows: tested under wine only (frames identical, window shows the game); the first real-Windows run
    (build 2c9db85) booted and played AREA00 and hung silently at frame ~3300 while walking (no fault report,
    no exit; wine runs 4000 frames). The build after it carries the watchdog (above), re-reads the main thread's
@@ -3096,57 +3104,98 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
    `src/` (wip excluded), `include/`, `notes/*.csv` or `config/*.yaml` is newer than `build/full/*.full.ld`
    (`PORT_STALE_FULL=warn` turns it into a warning) and names the file and the command to run.
 
-### wasm32 spike: a 64-bit host with a 32-bit guest address space (`port2/wasm/`)
+### 64-bit builds: wasm2c (`port2/wasm/`; Android arm64-v8a)
 
 The game's structs and the retail data hold 32-bit pointers (2.1), so a native 64-bit build breaks layouts. The
-spike keeps the pointers 32-bit the way N64Recomp keeps a 32-bit guest: the same generated game C + runtime are
+64-bit build keeps the pointers 32-bit the way N64Recomp keeps a 32-bit guest: the same generated game C + runtime are
 compiled for **wasm32** (clang `--target=wasm32-wasi`, wasi-libc), translated back to portable C with **wasm2c**
-(WABT, pinned tag 1.0.36, cloned and built by the script) and compiled natively for x86-64 with a small host.
+(WABT, pinned tag 1.0.36, cloned and built by the script) and compiled natively with a small host. The module's
+linear memory is the game's 32-bit address space; every game pointer is a 32-bit offset into it, as on the PS1 and in
+the i386 / armeabi-v7a builds. This is what the APK's **arm64-v8a** libraries are (64-bit-only devices: Snapdragon 8
+Gen 3 and newer, the AYN Odin 2 ...); armeabi-v7a stays the native 32-bit build, both ABIs ship in one APK.
 
-    python3 port2/wasm/build.py -j 4          # -> build/wasm/tombi2w (x86-64, headless only); --from STEP resumes
+    python3 port2/wasm/build.py -j 4          # -> build/wasm/tombi2w (x86-64 Linux: SDL2 window, GL or soft, audio; or --headless)
+    python3 port2/wasm/build.py --until w2c   # -> build/wasm/w2c: module + wasm2c runtime, what the arm64-v8a CMake branch compiles
+    python3 port2/wasm/build.py --from native --headless-host --cc CC --native-flags "-O2 -static" --exe tombi2w-a64
+                                              # the same host without SDL/GL (headless_stubs.py), e.g. for qemu-aarch64
     build/wasm/tombi2w --headless --frames 1500 --dump-frames out --pad-script 1000:start
 
 Pipeline (`build.py`): `gen2.py sources` with `PORT2_ARCH=wasm` (the clang K&R fix-ups of the Android build) -> every
-game/runtime file to LLVM bitcode -> `gen2.py link` (llvm-nm; C dispatch thunks `gen/thunks.c` instead of
-`thunks.S`; wasi-libc's symbol list) -> `llvm-link` into one module -> `apply_aliases.py` (wasm-ld takes no linker
-script: `syms.ld`'s function aliases become renames, its region offsets GlobalAliases into `port_ram`) -> wasm-ld ->
-wasm2c (`--num-outputs`) -> `patch_w2c.py` -> native cc with `host.c`.
+game/runtime file (and libchdr) to LLVM bitcode -> `gen2.py link` (llvm-nm; C dispatch thunks `gen/thunks.c` instead of
+`thunks.S`; wasi-libc's symbol list; the GL imports of `gl_wasm.h` are not stubbed) -> `llvm-link` into one module ->
+`apply_aliases.py` (wasm-ld takes no linker script: `syms.ld`'s function aliases become renames, its region offsets
+GlobalAliases into `port_ram`; drops `signext` / `zeroext` / `noundef`, warns about void functions whose value is used)
+-> wasm-ld (linear memory 128 MB, growing to 1 GB) -> wasm2c (`--num-outputs 8`) -> `patch_w2c.py` -> native cc with
+the host files.
 
-How the hard parts were answered:
-- **Coroutines** (runtime/threads.c): no asyncify. wasm2c's output runs on the native C stack, so the BIOS-thread
-  switch is a host import (`port.ctx_switch`): `host.c` swaps native stacks with ucontext and the module's
-  `__stack_pointer` global (each coroutine's shadow stack is the top of its `stacks[]` slot). Zero cost in the game code.
-- **Null page** (lowmem.c's SIGSEGV emulation): wasm-ld `--global-base=65536` leaves nothing real below 64 KB and
-  `patch_w2c.py` makes `MEM_ADDR` add `port_ram`'s linear address to any effective address below 0x10000 (one
-  predictable branch per access). Same semantics as the i386 handler (the access hits the same byte of the BIOS area).
-- **Division by zero / INT_MIN/-1**: the wasm2c `DIV_S/REM_S/DIV_U/REM_U` macros give the R3000 results instead of trapping.
-- **Prototype mismatches** (K&R, calls with other arities, function pointers cast between types): one LLVM module,
-  so LLVM's FixFunctionBitcasts adapts what it can; the ~330 `*_bitcast_invalid` trap stubs it leaves are rewritten
-  by `patch_w2c.py` to call the function through the stub's own type, and `call_indirect`'s type check is dropped:
-  the native ABI (x86-64 SysV, AAPCS64: integer arguments in registers) tolerates the arity mismatch as i386 did.
-- **libc**: wasi-libc; `host.c` serves the WASI preview1 subset it imports (fd/path/clock/poll/proc_exit) onto POSIX,
-  one preopen "/" plus PWD so relative paths work. `wasm/wasm_compat.h` (force-included into the runtime) and
-  `wasm/rt_wasm.c` (stubs for lowmem.c, watchdog.c, sdl.c, gpu_gl.c) keep the shared runtime files unchanged except
-  two `#ifdef __wasm__` blocks (threads.c, psyq.c's memcpy prototype).
+The host (`host.c`, `host_sdl.c`, `host_gl.c`; one source for x86-64 Linux and arm64 Android):
+- **Coroutines** (runtime/threads.c): wasm2c's output runs on the native C stack, so the BIOS-thread switch is a host
+  import (`port.ctx_switch`): `host.c` swaps native stacks with a few lines of asm per architecture (x86-64 and AArch64:
+  callee-saved registers, x19-x29/lr/d8-d15 on arm64; bionic has no ucontext) and the module's `__stack_pointer` global
+  (each coroutine's shadow stack is the top of its `stacks[]` slot). Zero cost in the game code. `port_host_call` runs
+  SDL (JNI on Android) on the main native stack below its suspended frames, the contract of the 32-bit builds.
+- **SDL**: `runtime/sdl.c` is compiled for the host, unchanged except three `#ifndef PORT2_WASM_HOST` around its variable
+  definitions: `sdl_bridge.h` (force-included) turns every runtime variable it shares with the game (`bridge_vars.h`:
+  `port_renderer`, `port_widescreen`, `port_window*`, the prompt and pad variables, `port_frame` ...) into a load/store
+  through a pointer into linear memory, so its Android code (nativePadState / nativePadStick, rumble through Java,
+  controller mapping) runs as in the armeabi-v7a build. Its entry points are wasm imports of module `port`
+  (`wasm_compat.h`); the runtime functions it calls (log, fatal, quit, the panel's input, the fps overlay) are module
+  exports (`rt_wasm.c`). The **audio callback** (SDL's thread) pulls the mixer through a second instance that shares the
+  memory and the function table but has its own `__stack_pointer` (`patch_w2c.py` makes `call_indirect` pass the calling
+  instance); the game thread holds the device lock around its mixer calls as before.
+- **OpenGL / GLES**: `shims/gpu_gl.c` stays in the module; every GL call is an import (`gl_wasm.h`) that `host_gl.c`
+  serves with the entry points SDL_GL_GetProcAddress gives for the context sdl.c made (pointers are linear addresses, a
+  GLsync a handle). Internal resolution, widescreen, `--fps`/HFR fences, texture packs, prompts and overlays are the same
+  code as on the 32-bit builds.
+- **Android**: `port_main` is exported natively; `android/loader.c` (arm64) `dlopen`s libtombi.so without the low
+  reservation and reads `port_frame` / `port_exit_status` / `port_clean_exit` through `port_wasm_var_ptr`. The launcher's
+  "back to launcher" (`TombiActivity.quitToLauncher`) and the second-screen panel's JNI (`nativePanelFrame` ...) are on
+  the host side of the bridge (`host_sdl.c`); the panel's touches/keys are queued and handed to the module at its next
+  frame.
+- **Null page**: wasm-ld `--global-base=65536` leaves nothing real below 64 KB and `patch_w2c.py` makes `MEM_ADDR` add
+  `port_ram`'s linear address to any effective address below 0x10000 (one predictable branch per access). **Division by
+  zero / INT_MIN/-1**: the wasm2c `DIV_S/REM_S/DIV_U/REM_U` macros give the R3000 results. Out-of-bounds accesses hit
+  wasm2c's guard pages; no signal handler is installed (`WASM_RT_SKIP_SIGNAL_RECOVERY`), so a fault reaches the
+  loader's crash report as on the 32-bit build.
+- **Prototype mismatches** (K&R, calls with other arities, function pointers cast between types): one LLVM module, so
+  FixFunctionBitcasts adapts what it can; the ~330 `*_bitcast_invalid` trap stubs it leaves are rewritten by
+  `patch_w2c.py` to call the function through the stub's own type, and `call_indirect`'s type check is dropped.
+- **libc**: wasi-libc; `host.c` serves the WASI preview1 subset it imports onto POSIX (one preopen "/" plus PWD).
 
-Result (2026-10-31, x86-64, gcc -O2): the smoke run reaches the same state as the i386 build and **150 of 150 dumped
-frames are byte-identical** (and the logs match line for line); a 6000-frame run with
-`1000:start,1300:start,1600:cross` reaches AREA00 gameplay, but it is not identical to the i386 build from the same
-tree: every frame matches up to 1631, frame 1632 differs in 14 pixels of the "Now Loading" logo (the size pulse,
-`NEG_SIN_TABLE[s]` in drawNowLoadingSprite: the loading screen ran a different number of times), and the player's
-state differs later (both builds are deterministic run to run). Unexplained yet; suspects: a busy-wait the two
-compilers schedule differently around the CD/X000 load, ABI differences the wasm32 build exposes (clang's callee
-trusts the caller's extension of `short`/`char` arguments where i386 gcc re-extends; the forwarded
-`bitcast_invalid` calls pass unextended words; FixFunctionBitcasts passes undef/0 for missing arguments where i386
-read stack garbage), uninitialised locals, and `long long` alignment in structs (8 in wasm32 as on MIPS, 4 on i386).
-Headless speed: ~170 fps vs ~160 fps for the i386 build (uncapped, soft renderer) — the wasm2c path is not slower.
-Build: ~2.5 min bitcode + link, ~3 min native compile of the 23 MB of wasm2c C.
+**The "frame 1632 divergence" of the spike and what made the builds identical.** Three causes, none in the wasm2c
+translation itself:
+1. *x87 excess precision in the i386 build* (the 1632 one): the software rasteriser's attribute gradients
+   (`shims/gpu.c`, float) rounded differently with the x87's 80-bit intermediates; a few texels per frame of scaled or
+   textured primitives (the pulsing NOW LOADING logo first) moved. The runtime now uses SSE2 on i386 (`-msse2
+   -mfpmath=sse`) and no build contracts multiply-adds (`-ffp-contract=off`); the game state was never affected.
+2. *A void function whose value is used*: `showMessageBoxDirect` / `showMessageBoxDirectTimed` are matched as void but
+   the console's `$v0` still holds openMessageBox's box, which `scriptOpShowMessageBox` (o->d90) and the I0NFO scenes
+   keep. i386 had it by luck (eax), the wasm build got 0 and AREA01's room went on differently (port/fixes.txt now
+   returns it, as for showMessageBox; `apply_aliases.py` lists any other such function: none left).
+3. Defensive, no visible effect in the runs: game C with `-ftrivial-auto-var-init=zero` (an uninitialised local is 0,
+   not LLVM undef: `scriptOpShowMessageBox`'s case 8 reads half of an uninitialised V6), and no `signext` / `zeroext` /
+   `noundef` (the callee re-extends short / char arguments as gcc does).
 
-Not done (next steps): the SDL host shim (window/audio/pad as imports: sdl.c's ~15 entry points, the frame and the
-audio buffer are linear-memory pointers; ~1 day); the GL renderer (gpu_gl.c's calls as imports, or a host-side
-backend reading VRAM from linear memory; 1-2 days); arm64 Android (bionic has no ucontext: a 20-line AArch64
-switch in host.c, plus the SDL shim above; then an `arm64-v8a` Gradle/CMake variant compiling `build/wasm/w2c` +
-host; ~1-2 days); CMake integration instead of `build.py`; the save-state and watchdog paths (untested).
+**Checked** (2026-11-03): x86-64 wasm2c build vs i386 build, byte-identical dumped frames: the standard 6000-frame run
+`1000:start,1300:start,1600:cross` into AREA00 gameplay 240/240 (every 25th frame); the room sweep's pad script from the
+debug select in 17 rooms (areas 0 1 2 3 4 5 6 8 9 10 11 13 14 16 17 18 19) 72/72 each; GL window under xvfb (llvmpipe)
+24/24; soft window 22/22; `--renderer gl --internal-res 2 --widescreen 16:9 --lang 5 --fps 100 --show-fps
+--second-screen --dump-panel` 52/52 (game + panel); `--disc IMAGE.chd` 15/15. The AArch64 host (the same host.c,
+clang `--target=aarch64-linux-gnu`, headless, run under qemu-aarch64): 6000-frame run 240/240 and AREA01 / AREA10
+72/72 identical to the i386 build. Audio: through SDL's disk driver both builds' callbacks produce the same samples
+(identical for the first 324 MB of output, after which the device-paced interleaving differs). CI (android-apk.yml)
+builds the wasm2c step and an APK with lib/arm64-v8a and lib/armeabi-v7a (libtombi, libmain, libSDL2, libtombidisc
+each; arm64 libtombi.so ~14.5 MB). Not yet run on an Android device.
+Headless speed: ~170 fps vs ~160 fps for the i386 build (uncapped, soft renderer). Build: ~1 min bitcode, ~3-4 min
+native compile of the ~48 MB of wasm2c C.
+
+**A 64-bit PC build is now cheap**: `build/wasm/tombi2w` already is a working x86-64 Linux binary (SDL2 window, GL,
+audio, pad); a Windows x64 one would need host.c's WASI layer on the Windows API (or mingw's POSIX subset) and the x64
+switch for the Microsoft ABI (rdi/rsi/xmm6-15 callee-saved), not done.
+
+Not done (next): running the arm64 APK on a device (the JNI paths of `host_sdl.c` and sdl.c's Android code are compiled
+in CI only); CMake integration instead of `build.py` for the PC; the save-state and watchdog paths (stubs in
+`rt_wasm.c`: no `--save/--load`, no watchdog thread; the Android loader has its own watchdog).
 
 ## Standalone (no launcher) mode
 
