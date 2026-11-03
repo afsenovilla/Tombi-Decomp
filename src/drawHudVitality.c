@@ -1,5 +1,73 @@
 // FUNC 80058b18 528 MAIN0
 // MATCHING 80058b18 528
+// VERSION SLPS_01144 slps01144 8004BEFC 500
+#if defined(VERSION_SLPS_01144)
+#include "anim.h"
+typedef struct {
+    unsigned int tag;
+    unsigned char r0, g0, b0, code;
+    short x0, y0;
+    unsigned char u0, v0;
+    unsigned short clut;
+    short w, h;
+} SPRT;
+typedef struct {
+    char pad[0x18];
+    unsigned char *base;
+    short **tbl;
+} SPR;
+extern unsigned char GAME_PLAYER_MAX_HEALTH;
+extern SPRT *NEXT_PRIM;
+extern char *CURRENT_OT;
+extern unsigned short *PTR_DAT_800120a8[];
+extern void SetSprt(SPRT *p);
+extern void SetSemiTrans(SPRT *p, int abe);
+extern unsigned short GetClut(int x, int y);
+extern void AddPrim(void *ot, void *p);
+extern void drawSpriteFrameParts(SPR *s, int x, int y, int v);
+extern void AddDrawMode(int a, int b);
+
+#define n (*(short *)((char *)s + 0x52))
+void func_8004BEFC(SPR *s, short x, short y)
+{
+    int i = 0;
+    SPRT *p;
+    SprFrag *e;
+    int cy;
+
+    for (; i < GAME_PLAYER_MAX_HEALTH; i++) {
+        {
+            p = NEXT_PRIM;
+            e = (SprFrag *)(s->base + *(short *)(*(unsigned char *volatile *)&s->base + (*s->tbl[i] << 2) + 2));
+            SetSprt(p);
+            p->code |= 1;
+            SetSemiTrans(p, 0);
+            p->x0 = x + e->dx;
+            p->y0 = y + e->dy;
+            p->u0 = e->u;
+            p->v0 = e->v;
+            p->w = e->w;
+            p->h = e->h;
+            if (i < n) {
+                if (n < 3)
+                    p->clut = GetClut(0x170, 0x1f7);
+                else if (n < 5)
+                    p->clut = GetClut(0x170, 0x1f6);
+                else if (n < 7)
+                    p->clut = GetClut(0x170, 0x1f5);
+                else
+                    p->clut = GetClut(0x170, 0x1f4);
+            } else {
+                p->clut = GetClut(0x170, 0x1f8);
+            }
+            AddPrim(CURRENT_OT + 4, p);
+            NEXT_PRIM = NEXT_PRIM + 1;
+        }
+    }
+    drawSpriteFrameParts(s, (short)x, (short)y, *PTR_DAT_800120a8[n]);
+    AddDrawMode(0x15, 1);
+}
+#else
 #include "anim.h"
 typedef struct {
     unsigned int tag;
@@ -64,3 +132,4 @@ void drawHudVitality(SPR *s, short x, short y, unsigned short n)
     drawSpriteFrameParts(s, (short)x, (short)y, *PTR_DAT_800120a8[(short)n]);
     AddDrawMode(0x15, 1);
 }
+#endif
