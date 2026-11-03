@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "port_runtime.h"
 #include "panel_assets.h"
 #ifdef __ANDROID__
@@ -322,6 +323,79 @@ enum { HS_PAGE = 0x100, HS_FILTER = 0x200, HS_ROW = 0x300, HS_BACK = 0x400, HS_P
 static struct { short x, y, w, h; int id; } hs[64]; static int nhs;
 static void hot(int x, int y, int w, int h, int id) { if (nhs < 64) { hs[nhs].x = (short)x; hs[nhs].y = (short)y; hs[nhs].w = (short)w; hs[nhs].h = (short)h; hs[nhs].id = id; nhs++; } }
 
+/* ---------------------------------------------------------------- the one scroller of every long list (the events
+   lists, the items grid, the warp destinations): a vertical offset in canvas pixels that follows the finger pixel for
+   pixel, flings on release with inertia (speed measured over the frames drawn, friction per vblank: the same feel at
+   the panel's 30 fps or 60 fps), clamped at both ends (no overscroll), a thin indicator.  A touch moves it only once
+   it has gone SCR_SLOP pixels (a tap still selects / opens, a long press still pins); a touch on a moving list only
+   stops it.  The D-pad moves the selection and scr_show scrolls just enough to keep it visible.  Each list calls
+   scr_view while drawing (that registers its viewport for the touches of the next frames). */
+#define SCR_SLOP 8
+#define SCR_FRICTION .95f   /* speed kept per vblank (1/60 s) */
+typedef struct { float off, vel, prev, off0; int drag, ty0, stop, vx, vy, vw, vh, total, frame; } Scroll;
+static Scroll *scr_live[4]; static int nscr_live;   /* the lists drawn in the last render */
+static Scroll *scr_cur;                             /* the one the finger is on */
+static float scr_max(const Scroll *s) { return s->total > s->vh ? (float)(s->total - s->vh) : 0; }
+static void scr_clamp(Scroll *s) {
+    float mx = scr_max(s);
+    if (s->off > mx) { s->off = mx; s->vel = 0; }
+    if (s->off < 0) { s->off = 0; s->vel = 0; }
+}
+static void scr_reset(Scroll *s) { s->off = s->vel = s->prev = 0; s->drag = -1; }
+/* while drawing: the viewport and the content's height; steps the fling by the vblanks since the last frame drawn */
+static void scr_view(Scroll *s, int vx, int vy, int vw, int vh, int total) {
+    int n = port_frame - s->frame;
+    if (n < 1 || n > 6) n = s->frame ? 1 : 0;
+    s->frame = port_frame; s->vx = vx; s->vy = vy; s->vw = vw; s->vh = vh; s->total = total;
+    if (s->drag == 1) { if (n) s->vel = s->vel * .4f + (s->off - s->prev) / n * .6f; }   /* px per vblank, smoothed */
+    else if (s->drag < 0 || !s->drag)
+        for (int i = 0; i < n && s->vel; i++) { s->off += s->vel; s->vel *= SCR_FRICTION; if (s->vel > -.08f && s->vel < .08f) s->vel = 0; }
+    scr_clamp(s);
+    s->prev = s->off;
+    if (nscr_live < 4) scr_live[nscr_live++] = s;
+}
+/* the content rows y0..y1 in view (the D-pad's selection) */
+static void scr_show(Scroll *s, int y0, int y1) {
+    if (y1 - y0 > s->vh || y0 < s->off) s->off = (float)y0;
+    else if (y1 > s->off + s->vh) s->off = (float)(y1 - s->vh);
+    s->vel = 0; scr_clamp(s); s->prev = s->off;
+}
+static int scr_y(const Scroll *s) { return (int)(s->off + .5f); }   /* whole canvas pixels for drawing */
+static void scr_bar(const Scroll *s, int x) {   /* the thin indicator at x (3 px), only when the content overflows */
+    if (s->total <= s->vh) return;
+    int bh = s->vh * s->vh / s->total; if (bh < 16) bh = 16;
+    float mx = scr_max(s);
+    pa_fill(x - 1, s->vy - 1, 5, s->vh + 2, RGB(40, 24, 16));
+    pa_fill(x, s->vy, 3, s->vh, RGB(110, 84, 70));
+    pa_fill(x, s->vy + (int)((s->vh - bh) * (mx > 0 ? s->off / mx : 0)), 3, bh, RGB(255, 224, 96));
+}
+static int scr_busy(void) { for (int i = 0; i < nscr_live; i++) if (scr_live[i]->drag == 1 || scr_live[i]->vel) return 1; return 0; }
+/* a touch (0 down, 1 up, 2 move) in canvas pixels; 1: it was a drag (or stopped a fling), not a tap */
+static int scr_touch(int x, int y, int action) {
+    if (action == 0) {
+        scr_cur = NULL;
+        for (int i = 0; i < nscr_live; i++) {
+            Scroll *s = scr_live[i];
+            if (x < s->vx || y < s->vy || x >= s->vx + s->vw || y >= s->vy + s->vh) continue;
+            scr_cur = s; s->drag = 0; s->ty0 = y; s->off0 = s->off;
+            s->stop = s->vel > 1 || s->vel < -1; s->vel = 0;   /* a touch stops a fling (and is not a tap) */
+            break;
+        }
+        return 0;
+    }
+    Scroll *s = scr_cur;
+    if (!s) return 0;
+    if (action == 2) {
+        if (!s->drag && abs(y - s->ty0) > SCR_SLOP && s->total > s->vh) { s->drag = 1; s->ty0 = y; s->off0 = s->off; s->prev = s->off; }
+        if (s->drag == 1) { s->off = s->off0 - (y - s->ty0); scr_clamp(s); return 1; }
+        return 0;
+    }
+    int was = s->drag == 1 || s->stop;
+    if (s->drag != 1) s->vel = 0;
+    s->drag = -1; s->stop = 0; scr_cur = NULL;
+    return was;
+}
+
 /* the header (stone, title plank, tabs, the pink page) is the same picture frame after frame: drawn once per title /
    tab names / canvas size and copied afterwards (it was the dearest part of a frame: ~2.5 ms of pa_spr on the PC) */
 static void header_draw(const char *title);
@@ -500,7 +574,7 @@ static void render(void) {
     room_names(play, area, sec, link, &an, &rn);
     if (!play) an = T("Waiting for the game...", "Esperando a la partida...");
     else if (!an) { snprintf(ab, sizeof ab, T("Area %d", "\xC1rea %d"), area); an = ab; }
-    pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = pa_cw; pa_clip_y1 = pa_ch; nhs = 0;
+    pa_clip_x0 = pa_clip_y0 = 0; pa_clip_x1 = pa_cw; pa_clip_y1 = pa_ch; nhs = 0; nscr_live = 0;
     header(page == PAGE_MAP ? an : page_name(page));
     if (page == PAGE_MAP) page_map(play, link);
     else if (page == PAGE_EVENTS) page_events(play);
@@ -608,24 +682,29 @@ void port_panel_key(int a) { inq_push(0, a, 0, 0); }
 void port_panel_pinch(float f, int x, int y) { int k = pk && !port_panel_canvas_out ? pk : 1; port_panel_pinch_canvas(f, x < 0 ? -1 : x / k, y < 0 ? -1 : y / k); }   /* PC: the mouse wheel */
 /* --panel-input FRAME:ACTION,... (headless tests): up down left right ok back tabl tabr zoomout zoomin hide showhidden,
    tap@X@Y (canvas pixels), hold@X@Y (a long press), pinch@PERCENT@X@Y (a two-finger pinch: the distance ratio x 100),
-   drag@X0@Y0@X1@Y1 (a swipe) */
+   drag@X0@Y0@X1@Y1[@N] (a swipe over N vblanks, 8 by default) */
 static const char *panel_script;
 static int hold_x, hold_y, hold_at = -1;   /* hold@X@Y: the release, 40 frames later */
 void port_panel_input_script(const char *s) { panel_script = s; }
+static struct { int f, a, x, y; } sl[80]; static int nsl;   /* touches due at a later vblank (drag@) */
+static void script_later(int f, int a, int x, int y) { if (nsl < 80) { sl[nsl].f = f; sl[nsl].a = a; sl[nsl].x = x; sl[nsl].y = y; nsl++; } }
 static void script_step(void) {
+    for (int i = 0; i < nsl;) if (sl[i].f <= port_frame) { inq_push(1, sl[i].a, sl[i].x, sl[i].y); sl[i] = sl[--nsl]; } else i++;
     static const char *names[] = { "", "up", "down", "left", "right", "ok", "back", "tabl", "tabr", "zoomout", "zoomin", "hide", "showhidden", "pin" };
     for (const char *p = panel_script; p && *p;) {
         int f = atoi(p); const char *c = strchr(p, ':'), *e = strchr(p, ',');
         if (!c) break;
         if (f == port_frame) {
-            char a[24]; int n = (int)((e ? e : c + strlen(c)) - c - 1); if (n > 23) n = 23; memcpy(a, c + 1, n); a[n] = 0;
+            char a[48]; int n = (int)((e ? e : c + strlen(c)) - c - 1); if (n > 47) n = 47; memcpy(a, c + 1, n); a[n] = 0;
             int x, y;
             int pct, x1, y1;
             if (sscanf(a, "pinch@%d@%d@%d", &pct, &x, &y) == 3) port_panel_pinch_canvas(pct / 100.f, x, y);   /* pinch@PERCENT@X@Y */
-            else if (sscanf(a, "drag@%d@%d@%d@%d", &x, &y, &x1, &y1) == 4) {   /* drag@X0@Y0@X1@Y1: a quick swipe (8 moves, then up) */
+            else if (sscanf(a, "drag@%d@%d@%d@%d", &x, &y, &x1, &y1) == 4) {   /* drag@X0@Y0@X1@Y1[@N]: a swipe, a move every vblank for N (8), then up */
+                int nf = 8; const char *q = a; for (int k = 0; k < 5 && q; k++) q = strchr(q + 1, '@');
+                if (q && atoi(q + 1) > 0) nf = atoi(q + 1) > 60 ? 60 : atoi(q + 1);
                 inq_push(1, 0, x, y);
-                for (int k = 1; k <= 8; k++) inq_push(1, 2, x + (x1 - x) * k / 8, y + (y1 - y) * k / 8);
-                inq_push(1, 1, x1, y1);
+                for (int k = 1; k <= nf; k++) script_later(port_frame + k, 2, x + (x1 - x) * k / nf, y + (y1 - y) * k / nf);
+                script_later(port_frame + nf, 1, x1, y1);
             }
             else if (sscanf(a, "tap@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); inq_push(1, 1, x, y); }
             else if (sscanf(a, "hold@%d@%d", &x, &y) == 2) { inq_push(1, 0, x, y); hold_x = x; hold_y = y; hold_at = port_frame + 40; }
@@ -656,7 +735,7 @@ void port_panel_vblank(void) {
     if (panel_script) script_step();
     if (hold_at == port_frame) { inq_push(1, 1, hold_x, hold_y); hold_at = -1; }
     if (page == PAGE_SIDE) side_cache_work();   /* the side map's tiles, a slice every vblank (panel_side.inc) */
-    if (!dump && (frames++ & 1)) return;   /* ~25 fps is plenty */
+    if (!dump && (frames++ & 1) && !scr_busy()) return;   /* ~25 fps is plenty, every vblank while a list moves */
     inq_run();
     { extern int port_show_fps; extern unsigned long long port_time_us(void);
       unsigned long long t0 = port_show_fps ? port_time_us() : 0;

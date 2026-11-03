@@ -597,6 +597,17 @@ static void zoom_bar(int W) {   /* [<L1  -]  Zoom n/N  [+  R1>] */
     pa_text_ol(x + w1 + 10, y + 3, 16, n, C_YELLOW, C_WOODE, C_DARK);
 }
 
+/* "Ver en el mapa" (the event's detail page): the view centred on its marker, which hops for a few seconds.  The map tab
+   shows the room Tomba is in, so only the events placed there (or in a section sharing its model) can be shown. */
+static int map_focus_ev = -1, map_flash_ev = -1, map_flash_t;
+static int map_shows_event(int e) {
+    const PanelEventLoc *L = ev_loc(e);
+    if (!L || !in_gameplay() || G_AREA >= 20 || L->area != G_AREA || L->x == -32768 || ev_hidden_now(e)) return 0;
+    int sec = G_SECTION;
+    if (map_topdown()) return L->sec == sec;
+    return L->sec == sec || (side_area == G_AREA && L->sec < 31 && side_secs[L->sec] >= 0 && side_secs[L->sec] == side_secs[31]);
+}
+static void map_focus(int e) { if (map_shows_event(e)) map_focus_ev = e; }
 static void map_marks(int vx, int vy, int vh, float wx0, float wy0, float upp, int here, int area, int sec, int topdown) {
     int sc = mk_scale(vh);
 #define WX(x) (vx + (int)(((x) - wx0) / upp))
@@ -607,7 +618,8 @@ static void map_marks(int vx, int vy, int vh, float wx0, float wy0, float upp, i
         if (topdown ? L->sec != sec : !(L->sec == sec || (L->sec < 31 && side_secs[L->sec] >= 0 && side_secs[L->sec] == side_secs[31]))) continue;
         if (ev_hidden_now(L->ev)) continue;
         int st = ev_state(L->ev);
-        event_mark(WX(L->x), WY(L->y) + 3 * sc, L->ev, sc, st == F_PENDING ? PA_DIM : 0);
+        int hop = L->ev == map_flash_ev && port_frame - map_flash_t < 240 ? ((port_frame / 8) & 1) * 3 * sc : 0;
+        event_mark(WX(L->x), WY(L->y) + 3 * sc - hop, L->ev, sc, st == F_PENDING ? PA_DIM : 0);
     }
     if (here) {
         int tx = WX(P_X), ty = WY(P_Y), bob = ((port_frame / 10) & 1) * sc;
@@ -638,6 +650,14 @@ static void page_side(int play) {
         for (int j = 0; j < vh; j++) for (int i = 0; i < vw; i++) pa_put(vx + i, vy + j, view[j * vw + i]);
         pa_text(vx + 8, vy + 8, 16, T("Reading the map...", "Leyendo el mapa..."), C_DARK, C_EDGE);
         return;
+    }
+    if (map_focus_ev >= 0) {   /* centre the event (map_view puts Tomba a sixth of the view below the centre) */
+        const PanelEventLoc *L = ev_loc(map_focus_ev);
+        if (map_zoom == 0 && PANEL_MAP_ZOOMS > 1) map_set_zoom(1);
+        map_view(x0, y0, x1, y1, gw, !td, vw, vh, 1, P_X, P_Y, &wx0, &wy0, &upp);   /* (the levels of this view) */
+        float u = map_ulev[map_zoom] * map_zf;
+        map_panx = L->x - P_X; map_pany = L->y - P_Y + vh * u / 6;
+        map_flash_ev = map_focus_ev; map_flash_t = port_frame; map_focus_ev = -1;
     }
     map_view(x0, y0, x1, y1, gw, !td, vw, vh, 1, P_X, P_Y, &wx0, &wy0, &upp);
     map_upp_now = upp;
