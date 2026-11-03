@@ -4,18 +4,18 @@
   python3 tools/release_notes.py PREV_TAG SHA      prints "- subject" lines, oldest first
 
 A commit is listed when it touches something that ships in the PC build: the game / port sources (src/, port/,
-port2/ except port2/android/), the text patches (patches/), or the PC launcher and its helpers. Commits that only touch
-docs, notes, CI, research tools or the Android app are left out. A commit and the change that undoes it both drop
+port2/, the Android app included: the release ships the APK too), the text patches (patches/), or the PC launcher and
+its helpers. Commits that only touch docs, notes, CI or research tools are left out. A commit and the change that undoes it both drop
 out: git's "This reverts commit X" line, a subject starting with "Revert", or a subject saying "revert ..." /
 "drop the ..." that names the earlier commit's subject. A body line "[skip changelog]" hides a commit.
 Also left out: work on the other versions' decomps (subjects starting "JP", "JP demo", "PrePre", "beta", "US": they edit
-shared src/ files under #if, nothing the PAL port runs; "README", "docs", "Android" ones too), temporary commits ("TEMP" in the subject; a "; TEMP ..." tail is
+shared src/ files under #if, nothing the PAL port runs; "README" and "docs" ones too), temporary commits ("TEMP" in the subject; a "; TEMP ..." tail is
 cut off), and a commit that hides / removes something a later commit of the same release brings back ("... back",
 "... again", "restore ..." sharing two words of 5+ letters with it).
 """
 import re, subprocess, sys
 
-SHIPS = re.compile(r"^(src/|port/|patches/|port2/(?!android/)|tools/(port_launcher|save_import|prompt_custom|i18n|port_mods)\.py)")
+SHIPS = re.compile(r"^(src/|port/|patches/|port2/|tools/(port_launcher|save_import|prompt_custom|i18n|port_mods)\.py)")
 
 
 def git(*a):
@@ -53,7 +53,7 @@ def main():
             for c, cs, *_ in commits:
                 if c != h and len(words & set(re.findall(r"[a-z]{5,}", cs.lower()))) >= 3 and cs.split(":")[0] == s.split(":")[0]:
                     drop.add(c)
-    OTHER = re.compile(r"^(JP|JP demo|PrePre ?8?|beta|US|SLPS|SLPM|PCPX|README|docs|Android)\b[^:]*:", re.I)
+    OTHER = re.compile(r"^(JP|JP demo|PrePre ?8?|beta|US|SLPS|SLPM|PCPX|README|docs)\b[^:]*:", re.I)
     for h, s, b, _ in commits:
         if OTHER.match(s) or re.match(r"^TEMP\b", s):
             drop.add(h)

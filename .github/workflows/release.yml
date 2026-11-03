@@ -1,9 +1,10 @@
 name: Publish release
 
-# Publishes the newest green build of the native port (artifacts bin-<platform>-port of port2-exe) as ONE GitHub
-# Release with tombi-port-<ver>-windows-x64.exe and tombi-port-<ver>-linux-x64.tar.gz (tar keeps the executable bit);
+# Publishes the newest green build of the native port (artifacts bin-<platform>-port of port2-exe, tombi-port-android of
+# android-apk) as ONE GitHub Release with tombi-port-<ver>-windows-x64.exe, tombi-port-<ver>-linux-x64.tar.gz (tar keeps
+# the executable bit) and tombi-port-<ver>-android-armeabi-v7a.apk;
 # with the dispatch input "include tools" also Tombi-Tools-<ver>-windows-x64.zip / -linux-x64.tar.gz (tombi-text,
-# tombi-gfx, tombi-assets of assets-exe/gfx-exe/text-exe).  Versions: tag v0.0.N, title "Tombi PC port 0.0.N",
+# tombi-gfx, tombi-assets of assets-exe/gfx-exe/text-exe).  Versions: tag v0.0.N, title "Tombi port 0.0.N",
 # <ver> = 0.0.N; N = highest v0.0.* + 1 (auto releases bump the patch of the latest vX.Y.Z); the dispatch input
 # "version" (X.Y.Z, greater than the latest) overrides it, e.g. 0.1.0.  Old build-YYYYMMDD-<sha7> releases are dev
 # pre-releases (dispatch input migrate_dev=true retitles them "dev build YYYYMMDD-<sha7>", publishes nothing).  The build workflows only
@@ -69,7 +70,7 @@ jobs:
             n=$(gh api "repos/$R/compare/$PREV...$SHA" --jq '[.commits[] | .commit.message | split("\n")[0] | select(test("^(ci|dist)[:(]") | not)] | length')
           fi
           busy=0
-          for wf in port2-exe.yml; do
+          for wf in port2-exe.yml android-apk.yml; do
             for st in queued in_progress; do
               busy=$((busy + $(gh api "repos/$R/actions/workflows/$wf/runs?branch=master&status=$st" --jq .total_count)))
             done
@@ -95,6 +96,14 @@ jobs:
               echo "bin-$plat-$tool <- run $run"
             done
           done
+          # the Android APK of the newest green android-apk run (signed with the project key when the secrets exist)
+          run=""
+          for id in $(gh api "repos/$R/actions/workflows/android-apk.yml/runs?branch=master&status=success&per_page=20" --jq '.workflow_runs[].id'); do
+            if gh api "repos/$R/actions/runs/$id/artifacts" --jq '.artifacts[] | select(.expired | not) | .name' | grep -qx "tombi-port-android"; then run=$id; break; fi
+          done
+          [ -n "$run" ] || { echo "::error::no artifact tombi-port-android"; exit 1; }
+          gh run download "$run" -R "$R" -n tombi-port-android -D art/android
+          echo "tombi-port-android <- run $run"
           find art -type f | xargs ls -l
 
       - name: Package and publish
@@ -105,6 +114,7 @@ jobs:
           cp art/windows-port/tombi-port.exe "out/tombi-port-$VER-windows-x64.exe"
           mkdir pl && cp art/linux-port/tombi-port pl/ && chmod +x pl/tombi-port
           tar -C pl -czf "out/tombi-port-$VER-linux-x64.tar.gz" tombi-port
+          cp art/android/tombi-port-armeabi-v7a-debug.apk "out/tombi-port-$VER-android-armeabi-v7a.apk"
           if [ -d art/windows-text ]; then
             mkdir tw tl
             cp art/windows-assets/*.exe art/windows-gfx/*.exe art/windows-text/*.exe tw/
@@ -113,18 +123,19 @@ jobs:
             tar -C tl -czf "out/Tombi-Tools-$VER-linux-x64.tar.gz" .
           fi
           {
-            echo "Tombi PC port $VER (build of ${SHA::7})."; echo
+            echo "Tombi port $VER (build of ${SHA::7}): PC (Windows, Linux) and Android."; echo
             if [ -n "$PREV" ]; then echo "### Changes since $PREV"
               python3 tools/release_notes.py "$PREV" "$SHA"   # player-facing commits only (see the script)
             else echo "### Commit"; gh api "repos/$R/commits/$SHA" --jq '"- " + (.commit.message | split("\n")[0])'; fi
             echo; echo "### Assets"
             echo "- \`tombi-port-$VER-windows-x64.exe\`: native port with launcher (Windows)"
             echo "- \`tombi-port-$VER-linux-x64.tar.gz\`: \`tombi-port\` (Linux; the game is i386, see README)"
+            echo "- \`tombi-port-$VER-android-armeabi-v7a.apk\`: Android (32-bit ARM; needs 32-bit app support, Snapdragon 8 Gen 3 and newer cannot run it). No game data: pick your own PAL disc image (SCES-01331) in the app."
             [ -d tw ] && echo "- \`Tombi-Tools-$VER-windows-x64.zip\` / \`-linux-x64.tar.gz\`: $(cd tw && ls | tr '\n' ' ')"
             true
           } > notes.md
           cat notes.md
-          gh release create "v$VER" -R "$R" --target "$SHA" --title "Tombi PC port $VER" --latest --notes-file notes.md out/*
+          gh release create "v$VER" -R "$R" --target "$SHA" --title "Tombi port $VER" --latest --notes-file notes.md out/*
 
       - name: Move build-* releases to dev (pre-release, "dev build YYYYMMDD-<sha7>")
         if: steps.d.outputs.go == '1' || inputs.migrate_dev
