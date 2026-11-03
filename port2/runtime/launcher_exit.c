@@ -56,6 +56,10 @@ void port_launcher_quit(void) {
     /* the activity finishes on the UI thread; SDL_QUIT then reaches this thread's event pump (runtime/sdl.c) */
     if (!asked) { asked = 1; if (android_quit()) return; }
     else return;
+#elif defined(__wasm__)
+    /* port2/wasm: the native host does what the Android branch above does (host_sdl.c) */
+    if (!asked) { asked = 1; if (port_host_launcher_quit()) return; }
+    else return;
 #endif
     asked = 1;
     port_quit(0);

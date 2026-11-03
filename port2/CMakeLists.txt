@@ -18,6 +18,61 @@ project(tombi_port2 C ASM)
 
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(GEN ${CMAKE_CURRENT_BINARY_DIR}/gen)
+
+# Android arm64-v8a (docs/PORT.md "64-bit builds: wasm2c"): the game's structs hold 32-bit pointers, so the 64-bit build
+# is the wasm2c one: the same generated game C + runtime compiled to wasm32 and translated back to portable C by
+# port2/wasm/build.py --until w2c (run before Gradle; -DPORT2_W2C_DIR, default build/wasm/w2c), compiled here with the
+# native host (port2/wasm/host*.c: WASI subset, coroutines, GL imports) and runtime/sdl.c.  Same libraries as the
+# armeabi-v7a build: libtombi.so (entry port_main), libmain.so (loader.c), libSDL2.so, libtombidisc.so.
+if(ANDROID AND (ANDROID_ABI STREQUAL "arm64-v8a" OR CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a"))
+  set(PORT2_W2C_DIR ${ROOT}/build/wasm/w2c CACHE PATH "wasm2c output of port2/wasm/build.py --until w2c")
+  if(NOT EXISTS ${PORT2_W2C_DIR}/tombi.h)
+    message(FATAL_ERROR "arm64-v8a needs the wasm2c build first: python3 port2/wasm/build.py --until w2c (-DPORT2_W2C_DIR=${PORT2_W2C_DIR})")
+  endif()
+  set(PORT2_SDL2_SOURCE "" CACHE PATH "SDL2 source tree (Android)")
+  if(NOT EXISTS ${PORT2_SDL2_SOURCE}/include/SDL.h)
+    message(FATAL_ERROR "-DPORT2_SDL2_SOURCE must name an SDL2 source tree (SDL2-2.30.x)")
+  endif()
+  set(SDL_STATIC OFF CACHE BOOL "" FORCE)
+  set(SDL_SHARED ON CACHE BOOL "" FORCE)
+  set(SDL_TEST OFF CACHE BOOL "" FORCE)
+  add_subdirectory(${PORT2_SDL2_SOURCE} ${CMAKE_CURRENT_BINARY_DIR}/sdl2 EXCLUDE_FROM_ALL)
+  file(GLOB sdlhdrs ${PORT2_SDL2_SOURCE}/include/*.h)
+  file(COPY ${sdlhdrs} DESTINATION ${GEN}/sdlinc/SDL2)
+  file(GLOB PORT2_W2C_SRCS ${PORT2_W2C_DIR}/*.c)
+  set(W ${CMAKE_CURRENT_SOURCE_DIR}/wasm)
+  add_library(tombi2 SHARED ${PORT2_W2C_SRCS} ${W}/host.c ${W}/host_sdl.c ${W}/host_gl.c ${CMAKE_CURRENT_SOURCE_DIR}/runtime/sdl.c)
+  set_target_properties(tombi2 PROPERTIES OUTPUT_NAME tombi LINKER_LANGUAGE C)
+  target_include_directories(tombi2 PRIVATE ${PORT2_W2C_DIR} ${W} ${GEN}/sdlinc ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  target_compile_options(tombi2 PRIVATE -O2 -fPIC -fno-strict-aliasing -fwrapv -w)
+  target_compile_definitions(tombi2 PRIVATE WASM_RT_NONCONFORMING_UNCHECKED_STACK_EXHAUSTION=1 WASM_RT_SKIP_SIGNAL_RECOVERY=1
+                             WASM_RT_TRAP_HANDLER=port_w2c_trap)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/runtime/sdl.c PROPERTIES COMPILE_OPTIONS "-include;${W}/sdl_bridge.h")
+  target_link_options(tombi2 PRIVATE -Wl,-z,noexecstack)
+  target_link_libraries(tombi2 PRIVATE SDL2 log dl m)
+  find_program(PORT2_OBJCOPY NAMES llvm-objcopy HINTS ${ANDROID_TOOLCHAIN_ROOT}/bin ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin)
+  if(PORT2_OBJCOPY)
+    add_custom_command(TARGET tombi2 POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tombi2> ${CMAKE_CURRENT_BINARY_DIR}/libtombi.debug.so
+                       COMMAND ${PORT2_OBJCOPY} --strip-debug $<TARGET_FILE:tombi2>
+                       COMMENT "libtombi.so: symbol table kept, DWARF moved to libtombi.debug.so" VERBATIM)
+  endif()
+  add_library(main SHARED ${CMAKE_CURRENT_SOURCE_DIR}/android/loader.c)
+  target_include_directories(main PRIVATE ${GEN}/sdlinc)
+  target_link_libraries(main PRIVATE SDL2 log dl)
+  add_dependencies(main tombi2)
+  set(CHDR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libchdr)
+  add_library(port2chd OBJECT ${CHDR_DIR}/unity.c ${CHDR_DIR}/src/libchdr_codec_avhuff.c)
+  target_include_directories(port2chd PRIVATE ${CHDR_DIR}/include)
+  target_compile_definitions(port2chd PRIVATE ZSTD_DISABLE_ASM)
+  target_compile_options(port2chd PRIVATE -fPIC -O2 -w)
+  add_library(tombidisc SHARED ${CMAKE_CURRENT_SOURCE_DIR}/android/disccheck.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/cd_chd.c
+              $<TARGET_OBJECTS:port2chd>)
+  target_include_directories(tombidisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHDR_DIR}/include)
+  target_compile_definitions(tombidisc PRIVATE PORT_HAVE_CHD)
+  target_compile_options(tombidisc PRIVATE -O2 -fPIC)
+  return()
+endif()
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 if(ANDROID)
   # gen2.py for Android: ARM dispatch thunks, K&R declarations clang refuses, and the C library is bionic (the NDK
@@ -49,7 +104,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
 #    instruction set; position independent (a shared library), loaded below 16 MB by port2/android/loader.c.
 if(ANDROID)
   if(NOT CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v7a" AND NOT ANDROID_ABI STREQUAL "armeabi-v7a")
-    message(FATAL_ERROR "port2 needs a 32-bit target (armeabi-v7a); arm64-v8a needs the phase 2 pointer model (docs/PORT.md 2.1)")
+    message(FATAL_ERROR "port2's native build needs a 32-bit target (armeabi-v7a); arm64-v8a is the wasm2c build above")
   endif()
   set(PORT2_ARCH_FLAGS -marm -fPIC -fno-omit-frame-pointer)
 else()

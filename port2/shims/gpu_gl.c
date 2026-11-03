@@ -23,8 +23,12 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #endif
+#ifdef __wasm__
+#include "../wasm/gl_wasm.h"      /* port2/wasm (64-bit hosts): every GL call is an import the native host serves */
+#else
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+#endif
 #include "port_runtime.h"
 #include "gpu_backend.h"
 /* GLSL for "return port_prompt_clut[i]" over entries lo..hi-1, as nested ifs */
@@ -122,7 +126,12 @@ typedef gpu_u8 u8; typedef gpu_u16 u16; typedef gpu_u32 u32;
     X(void, glVertexAttribPointer, (GLuint, GLint, GLenum, GLboolean, GLsizei, const void *)) \
     X(void, glActiveTexture, (GLenum))
 
+#ifdef __wasm__
+/* the imports of gl_wasm.h, called directly (a constant pointer folds to a direct call); the host says what exists */
+#define GLF_DECL(ret, name, args) static ret (*const p_##name) args = name;
+#else
 #define GLF_DECL(ret, name, args) static ret (APIENTRY *p_##name) args;
+#endif
 GL_FUNCS(GLF_DECL)
 static void (APIENTRY *p_glTextureBarrier)(void);     /* optional: ARB/NV_texture_barrier */
 /* optional (GL 3.2 / ARB_sync / GLES 3): fences, so --fps knows when the GPU has finished an interpolated frame */
@@ -134,6 +143,18 @@ static void (APIENTRY *p_glDeleteSync)(void *);
     if (!p_##name) p_##name = (ret (APIENTRY *) args)SDL_GL_GetProcAddress(#name "EXT"); \
     if (!p_##name) p_##name = (ret (APIENTRY *) args)SDL_GL_GetProcAddress(#name "ARB"); \
     if (!p_##name) { port_printf("[gpu] OpenGL: no %s\n", #name); return -1; }
+#ifdef __wasm__
+#undef GLF_LOAD
+#define GLF_LOAD(ret, name, args) if (!port_gl_has(#name)) { port_printf("[gpu] OpenGL: no %s\n", #name); return -1; }
+#define SDL_GL_GetProcAddress(name) (port_gl_has(name) ? port_gl_import(name) : (void *)0)
+static void *port_gl_import(const char *name) {
+    if (!strcmp(name, "glTextureBarrier") || !strcmp(name, "glTextureBarrierNV")) return (void *)glTextureBarrier;
+    if (!strcmp(name, "glFenceSync")) return (void *)glFenceSync;
+    if (!strcmp(name, "glClientWaitSync")) return (void *)glClientWaitSync;
+    if (!strcmp(name, "glDeleteSync")) return (void *)glDeleteSync;
+    return 0;
+}
+#endif
 static int gl_load(void) {
     GL_FUNCS(GLF_LOAD)
     p_glTextureBarrier = (void (APIENTRY *)(void))SDL_GL_GetProcAddress("glTextureBarrier");

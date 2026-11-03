@@ -44,6 +44,19 @@
 #include <unwind.h>
 #include <SDL2/SDL.h>
 
+#if defined(__LP64__)
+/* arm64-v8a: libtombi.so is the wasm2c build (port2/wasm, docs/PORT.md "64-bit builds: wasm2c"): the game's 32-bit
+   address space is the module's linear memory, so no low reservation is needed; the runtime variables the loader
+   reads live there too (port_wasm_var_ptr, valid once port_main has instantiated the module) */
+#include "../wasm/bridge_vars.h"
+typedef Elf64_Ehdr ElfEhdr; typedef Elf64_Shdr ElfShdr; typedef Elf64_Sym ElfSym; typedef Elf64_Phdr ElfPhdr;
+#define ELF_CLASS ELFCLASS64
+#define ELF_ST_TYPE ELF64_ST_TYPE
+#else
+typedef ElfEhdr ElfEhdr; typedef ElfShdr ElfShdr; typedef ElfSym ElfSym; typedef ElfPhdr ElfPhdr;
+#define ELF_CLASS ELF_CLASS
+#define ELF_ST_TYPE ELF_ST_TYPE
+#endif
 #define PORT2_LOW_BASE 0x00100000ul
 #define PORT2_LOW_SIZE 0x02000000ul      /* 32 MB at least: libtombi.so is ~19 MB with its .bss; port_ram must end below 16 MB */
 #define TAG "tombi"
@@ -138,9 +151,16 @@ static int *frame_p;                                         /* libtombi's port_
    port_clean_exit or TombiActivity.nativeCleanExit; after it a fault or exit status while the process tears down is
    logged but not written as the "crashed" marker (the launcher's crash card is for abnormal ends only) */
 static int *clean_exit_p; static volatile int clean_exit;
-static int intentional(void) { return clean_exit || (clean_exit_p && *clean_exit_p); }
 JNIEXPORT void JNICALL Java_io_github_tombi_port_TombiActivity_nativeCleanExit(JNIEnv *env, jclass c) { (void)env; (void)c; clean_exit = 1; }
 static int *exit_status_p;                                   /* libtombi's port_exit_status (port_fatal / port_quit) */
+#if defined(__LP64__)
+static int *(*wasm_var)(int);                                /* libtombi's port_wasm_var_ptr (arm64: port2/wasm/host_sdl.c) */
+static int *wvar(int *p, int id) { return wasm_var ? wasm_var(id) : p; }
+#define frame_p wvar(frame_p, PORT_WASM_VAR_port_frame)
+#define exit_status_p wvar(exit_status_p, PORT_WASM_VAR_port_exit_status)
+#define clean_exit_p wvar(clean_exit_p, PORT_WASM_VAR_port_clean_exit)
+#endif
+static int intentional(void) { return clean_exit || (clean_exit_p && *clean_exit_p); }
 static pthread_t main_thread; static int main_thread_set;
 static volatile int in_crash;
 
@@ -153,22 +173,22 @@ static const char *signame(int s) {
    keepDebugSymbols, with the DWARF already removed by port2/CMakeLists.txt).  Mapped once after the load, read by
    the crash handler: dladdr only knows the exported names, and port_sym_near only the game functions, so a fault in
    the runtime was named after the nearest game function ("FUN_8005aa74+0x9098" for port_printf) */
-static const Elf32_Sym *st_sym; static unsigned st_n; static const char *st_str; static unsigned st_strsz;
+static const ElfSym *st_sym; static unsigned st_n; static const char *st_str; static unsigned st_strsz;
 static unsigned long st_base;
 static void symtab_load(const char *path, unsigned long base) {
     int fd = open(path, O_RDONLY | O_CLOEXEC); struct stat sb;
-    if (fd < 0 || fstat(fd, &sb) || sb.st_size < (off_t)sizeof(Elf32_Ehdr)) { if (fd >= 0) close(fd); return; }
+    if (fd < 0 || fstat(fd, &sb) || sb.st_size < (off_t)sizeof(ElfEhdr)) { if (fd >= 0) close(fd); return; }
     const unsigned char *f = mmap(0, (size_t)sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0); close(fd);
     if (f == MAP_FAILED) return;
-    size_t sz = (size_t)sb.st_size; const Elf32_Ehdr *eh = (const Elf32_Ehdr *)f;
-    if (memcmp(eh->e_ident, ELFMAG, SELFMAG) || eh->e_ident[EI_CLASS] != ELFCLASS32 || eh->e_shentsize != sizeof(Elf32_Shdr)
-        || eh->e_shoff + (size_t)eh->e_shnum * sizeof(Elf32_Shdr) > sz) { munmap((void *)f, sz); return; }
-    const Elf32_Shdr *sh = (const Elf32_Shdr *)(f + eh->e_shoff);
+    size_t sz = (size_t)sb.st_size; const ElfEhdr *eh = (const ElfEhdr *)f;
+    if (memcmp(eh->e_ident, ELFMAG, SELFMAG) || eh->e_ident[EI_CLASS] != ELF_CLASS || eh->e_shentsize != sizeof(ElfShdr)
+        || eh->e_shoff + (size_t)eh->e_shnum * sizeof(ElfShdr) > sz) { munmap((void *)f, sz); return; }
+    const ElfShdr *sh = (const ElfShdr *)(f + eh->e_shoff);
     for (unsigned i = 0; i < eh->e_shnum; i++) {
         if (sh[i].sh_type != SHT_SYMTAB || sh[i].sh_link >= eh->e_shnum) continue;
-        const Elf32_Shdr *ss = &sh[sh[i].sh_link];
+        const ElfShdr *ss = &sh[sh[i].sh_link];
         if (sh[i].sh_offset + sh[i].sh_size > sz || ss->sh_offset + ss->sh_size > sz) break;
-        st_sym = (const Elf32_Sym *)(f + sh[i].sh_offset); st_n = sh[i].sh_size / sizeof(Elf32_Sym);
+        st_sym = (const ElfSym *)(f + sh[i].sh_offset); st_n = sh[i].sh_size / sizeof(ElfSym);
         st_str = (const char *)(f + ss->sh_offset); st_strsz = ss->sh_size; st_base = base;
         tlog("libtombi.so symbol table: %u symbols", st_n);
         return;
@@ -180,8 +200,8 @@ static const char *symtab_near(unsigned long a, unsigned long *off) {
     if (!st_sym || a < st_base) return 0;
     unsigned long v = a - st_base, best = 0; const char *nm = 0;
     for (unsigned i = 1; i < st_n; i++) {
-        const Elf32_Sym *s = &st_sym[i];
-        if (ELF32_ST_TYPE(s->st_info) != STT_FUNC || s->st_shndx == SHN_UNDEF || s->st_name >= st_strsz) continue;
+        const ElfSym *s = &st_sym[i];
+        if (ELF_ST_TYPE(s->st_info) != STT_FUNC || s->st_shndx == SHN_UNDEF || s->st_name >= st_strsz) continue;
         unsigned long sv = s->st_value & ~1ul;
         if (sv <= v && (!nm || sv > best)) { best = sv; nm = st_str + s->st_name; }
     }
@@ -322,10 +342,10 @@ static unsigned long tombi_span(void) {
     char p[600]; snprintf(p, sizeof p, "%s/libtombi.so", lib_dir);
     int fd = open(p, O_RDONLY | O_CLOEXEC);
     if (fd < 0) { tlog("cannot open %s: %s (the APK's native libraries were not extracted?)", p, strerror(errno)); return 0; }
-    Elf32_Ehdr eh; unsigned long hi = 0; struct stat st; fstat(fd, &st);
-    if (pread(fd, &eh, sizeof eh, 0) == sizeof eh && !memcmp(eh.e_ident, ELFMAG, SELFMAG) && eh.e_ident[EI_CLASS] == ELFCLASS32) {
+    ElfEhdr eh; unsigned long hi = 0; struct stat st; fstat(fd, &st);
+    if (pread(fd, &eh, sizeof eh, 0) == sizeof eh && !memcmp(eh.e_ident, ELFMAG, SELFMAG) && eh.e_ident[EI_CLASS] == ELF_CLASS) {
         for (int i = 0; i < eh.e_phnum; i++) {
-            Elf32_Phdr ph;
+            ElfPhdr ph;
             if (pread(fd, &ph, sizeof ph, eh.e_phoff + (off_t)i * eh.e_phentsize) != sizeof ph) break;
             if (ph.p_type == PT_LOAD && ph.p_vaddr + ph.p_memsz > hi) hi = ph.p_vaddr + ph.p_memsz;
         }
@@ -413,8 +433,10 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     (void)vm; (void)reserved;
     open_log();
     install_fatal();
+#if !defined(__LP64__)
     reserve_low();
-    if (!low_base) tlog("JNI_OnLoad: NO low range reserved (%s); SDL_main will retry", low_err);
+#endif
+    if (!low_base && sizeof(void *) == 4) tlog("JNI_OnLoad: NO low range reserved (%s); SDL_main will retry", low_err);
     return JNI_VERSION_1_4;
 }
 
@@ -484,6 +506,15 @@ int SDL_main(int argc, char *argv[]) {
         tlog("disc %s: %lld bytes, readable (first bytes %02x %02x %02x %02x, read %ld)", disc, (long long)st.st_size, head[0], head[1], head[2], head[3], r);
     }
 
+#if defined(__LP64__)
+    tlog("dlopen(libtombi.so) (arm64: the wasm2c build, no low reservation)");
+    void *h = dlopen("libtombi.so", RTLD_NOW | RTLD_LOCAL);
+    if (!h) {
+        const char *e = dlerror();
+        snprintf(msg, sizeof msg, "Loading libtombi.so failed: %s", e ? e : "?");
+        return fail("Tombi!", msg);
+    }
+#else
     reserve_low();
     if (!low_base && low_stale_self) {
         /* our own previous instance still holds it (Android reused the ":game" process): not a real conflict. No
@@ -510,12 +541,18 @@ int SDL_main(int argc, char *argv[]) {
         log_maps((unsigned long)low_base, (unsigned long)low_base + low_size);
         return fail("Tombi!", msg);
     }
+#endif
     tombi_h = h;
     int (*port_main)(int, char **) = (int (*)(int, char **))dlsym(h, "port_main");
     sym_near = (const char *(*)(void *, unsigned long *))dlsym(h, "port_sym_near");
+#if defined(__LP64__)
+    wasm_var = (int *(*)(int))dlsym(h, "port_wasm_var_ptr");
+    if (!wasm_var) tlog("libtombi.so has no port_wasm_var_ptr");
+#else
     frame_p = (int *)dlsym(h, "port_frame");
     exit_status_p = (int *)dlsym(h, "port_exit_status");
     clean_exit_p = (int *)dlsym(h, "port_clean_exit");
+#endif
     { Dl_info di; if (port_main && dladdr((void *)port_main, &di)) {
         tlog("libtombi.so loaded at %p (port_main %p); port_frame %p", di.dli_fbase, (void *)port_main, (void *)frame_p);
         if (di.dli_fname) symtab_load(di.dli_fname, (unsigned long)di.dli_fbase);

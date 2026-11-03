@@ -647,7 +647,9 @@ def emit_data(outdir, amap, needed):
         n = (e - s + 3) // 4
         in_ram = 0x80000000 <= s < 0x80200000
         if path is None or not os.path.exists(path):
-            if not in_ram: blobs.append("unsigned int %s[%d] __attribute__((aligned(16))) = { 0 };   /* (.data, next to port_ram: below 16 MB) */" % (name, n))
+            # (wasm32: a zero-initialised array goes to .bss, after the runtime's big buffers, unless its section says .data)
+            sect = ' __attribute__((section(".data.%s")))' % name if os.environ.get("PORT2_ARCH") == "wasm" else ""
+            if not in_ram: blobs.append("unsigned int %s[%d] __attribute__((aligned(16)))%s = { 0 };   /* (.data, next to port_ram: below 16 MB) */" % (name, n, sect))
             continue
         data = open(path, "rb").read()[foff:foff + (e - s)]
         data += b"\0" * (n * 4 - len(data))
@@ -802,9 +804,12 @@ def link(outdir, nm, objlist):
     ovl_re = re.compile(r"(?:%s|X0\d\d)_\w" % sysovl.PROG_RE)
     thunk_aliases = 0
     libc_tramps = []
+    # wasm32 (port2/wasm): the GL entry points are imports the native host serves (port2/wasm/gl_wasm.h)
+    host_imports = set(re.findall(r"^PGL\([^,]+,\s*(\w+)", open(os.path.join(ROOT, "port2", "wasm", "gl_wasm.h")).read(), re.M)) \
+        if os.environ.get("PORT2_ARCH") == "wasm" else set()
     for n in sorted(undefined):
         # (SDL_: the host library; port_: the runtime, or the tables this step generates)
-        if n.startswith(("__", "_GLOBAL_OFFSET", "SDL_", "port_")) or n in libc or n in region_names: continue
+        if n.startswith(("__", "_GLOBAL_OFFSET", "SDL_", "port_")) or n in libc or n in region_names or n in host_imports: continue
         if n in ("etext", "edata", "end"): continue          # the linker's own (lowmem.c scans the stack up to etext)
         if n in asm_alias:
             ld.append("%s = %s;" % (n, asm_alias[n])); continue

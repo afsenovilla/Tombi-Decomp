@@ -1,7 +1,9 @@
 name: Native port (Android APK)
 
-# Builds the native-pointer port (port2/) for Android handhelds (armeabi-v7a, docs/PORT.md "4. Android"): SDL2's
-# android-project (port2/android, Gradle + NDK) around port2/CMakeLists.txt.  The runner's preinstalled Android SDK/NDK
+# Builds the native-pointer port (port2/) for Android handhelds (docs/PORT.md "4. Android"): SDL2's android-project
+# (port2/android, Gradle + NDK) around port2/CMakeLists.txt, ONE APK with both ABIs: armeabi-v7a (the native 32-bit
+# build) and arm64-v8a (the wasm2c build, docs/PORT.md "64-bit builds: wasm2c": the game compiled to wasm32 with clang +
+# wasi-libc, translated to C by WABT's wasm2c, compiled for arm64 with the NDK; 64-bit-only devices need it).  The runner's preinstalled Android SDK/NDK
 # are used; SDL2 is the pinned release source tarball from GitHub (never vendored).  Like port2-exe.yml, the generator
 # takes the retail addresses and the MAIN0/X000 image from the owner's own disc (GAME_FILES_URL secret), so the game
 # code in libtombi.so is built from that copy; the APK carries NO game data files (the player picks their own disc image
@@ -45,6 +47,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev ninja-build
+          # the arm64-v8a build's wasm32 step (port2/wasm/build.py): clang/lld/llvm 18, wasi-libc, the wasm32 builtins
+          sudo apt-get install -y clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32
+          echo "/usr/lib/llvm-18/bin" >> "$GITHUB_PATH"
           python3 -m pip install -r tools/requirements.txt
           python3 -m pip install --no-deps splat64==0.35.2
           python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
@@ -143,6 +148,34 @@ jobs:
             !build/full/tmp
           key: full-${{ steps.key.outputs.full }}
 
+      # WABT's wasm2c (pinned tag in port2/wasm/build.py), built once and cached: the binary and its runtime sources
+      - name: Restore wasm2c (WABT)
+        if: steps.fetch.outputs.ok == 'true'
+        id: wabt
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/wasm/wabt-build/wasm2c
+            build/wasm/wabt-src/wasm2c
+          key: wabt-1.0.36-ubuntu-24.04-v1
+
+      - name: wasm2c build of the game (arm64-v8a sources)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          python3 port2/wasm/build.py -j "$(nproc)" --until w2c
+          ls -l build/wasm/tombi2.wasm build/wasm/w2c
+          echo "PORT2_W2C_DIR=$PWD/build/wasm/w2c" >> "$GITHUB_ENV"
+
+      - name: Save wasm2c (WABT)
+        if: steps.fetch.outputs.ok == 'true' && steps.wabt.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/wasm/wabt-build/wasm2c
+            build/wasm/wabt-src/wasm2c
+          key: wabt-1.0.36-ubuntu-24.04-v1
+
       - name: SDL2 source (pinned release)
         if: steps.fetch.outputs.ok == 'true'
         run: |
@@ -190,10 +223,14 @@ jobs:
           APK=port2/android/app/build/outputs/apk/debug/app-debug.apk
           ls -l "$APK"
           unzip -l "$APK" | grep -E "\.so$"
+          # both ABIs, all four libraries each (a 64-bit-only device loads only lib/arm64-v8a)
+          for abi in armeabi-v7a arm64-v8a; do for l in libtombi.so libmain.so libSDL2.so libtombidisc.so; do
+            unzip -l "$APK" | grep -q " lib/$abi/$l\$" || { echo "::error::the APK has no lib/$abi/$l"; exit 1; }
+          done; done
           REP="$(find port2/android/app/.cxx -name report.txt -path '*gen*' | head -1)"
           [ -n "$REP" ] && head -12 "$REP"
           mkdir -p dist/android
-          cp "$APK" dist/android/tombi-port-armeabi-v7a-debug.apk
+          cp "$APK" dist/android/tombi-port-android-debug.apk
           # libtombi.so must take the C library's variables from bionic (a stub function named `stderr` made every
           # fprintf(stderr) fault in vfprintf: beta 35), and must keep its symbol table (the crash handler's names)
           unzip -o -q "$APK" lib/armeabi-v7a/libtombi.so -d "$RUNNER_TEMP/apklib"
@@ -203,10 +240,17 @@ jobs:
           readelf -W --dyn-syms "$SO" | grep -wE "stderr|stdout" || true
           readelf -S "$SO" | grep -q "\.symtab" || { echo "::error::libtombi.so in the APK has no symbol table"; exit 1; }
           # symbols for offline symbolization of a device crash (llvm-addr2line -fe libtombi.debug.so 0xOFFSET)
-          DBG="$(find port2/android/app/.cxx -name libtombi.debug.so | head -1)"
           mkdir -p dist/android/symbols
-          if [ -n "$DBG" ]; then cp "$DBG" dist/android/symbols/; fi
-          nm -n --defined-only "$SO" > dist/android/symbols/libtombi.map 2>/dev/null || true
+          for abi in armeabi-v7a arm64-v8a; do
+            DBG="$(find port2/android/app/.cxx -path "*$abi*" -name libtombi.debug.so | head -1)"
+            if [ -n "$DBG" ]; then cp "$DBG" "dist/android/symbols/libtombi-$abi.debug.so"; fi
+          done
+          nm -n --defined-only "$SO" > dist/android/symbols/libtombi-armeabi-v7a.map 2>/dev/null || true
+          unzip -o -q "$APK" lib/arm64-v8a/libtombi.so -d "$RUNNER_TEMP/apklib"
+          SO64="$RUNNER_TEMP/apklib/lib/arm64-v8a/libtombi.so"
+          file "$SO64"
+          readelf -W --dyn-syms "$SO64" | grep -wE "port_main|port_wasm_var_ptr" || { echo "::error::arm64 libtombi.so lacks port_main / port_wasm_var_ptr"; exit 1; }
+          nm -n --defined-only "$SO64" > dist/android/symbols/libtombi-arm64-v8a.map 2>/dev/null || true
           ls -l dist/android/symbols
           cp "$SDL2_SOURCE/LICENSE.txt" dist/android/SDL2-LICENSE.txt
           cp port2/android/app/src/main/assets/fonts/*-OFL.txt dist/android/
@@ -225,7 +269,7 @@ jobs:
           fi
           BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n1)"
           printf '%s' "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
-          A=dist/android/tombi-port-armeabi-v7a-debug.apk
+          A=dist/android/tombi-port-android-debug.apk
           "$BT/zipalign" -f -p 4 "$A" "$RUNNER_TEMP/aligned.apk"
           "$BT/apksigner" sign --ks "$RUNNER_TEMP/release.jks" --ks-key-alias "$KEY_ALIAS" \
             --ks-pass env:KS_PASS --key-pass env:KEY_PASS --out "$RUNNER_TEMP/signed.apk" "$RUNNER_TEMP/aligned.apk"
@@ -261,11 +305,11 @@ jobs:
         run: |
           N=${{ github.run_number }}; SHA=${{ github.sha }}; TAG="android-beta-$N"
           APK="tombi-port-android-beta-$N.apk"
-          mkdir out; cp art/tombi-port-armeabi-v7a-debug.apk "out/$APK"
+          mkdir out; cp art/tombi-port-android-debug.apk "out/$APK"
           if [ -f art/SIGNED.txt ]; then SIG="signed with the project release key"; else SIG="debug-signed: uninstall the old beta before installing a newer one"; fi
           {
             echo "**BETA $N** (build of ${SHA::7})."; echo
-            echo "- Android port of Tombi!, 32-bit ARM (armeabi-v7a). Needs a device with 32-bit app support (most current handhelds); Snapdragon 8 Gen 3 and newer cannot run it."
+            echo "- Android port of Tombi!, one APK for 64-bit ARM (arm64-v8a: 64-bit-only devices such as Snapdragon 8 Gen 3 and newer, AYN Odin 2) and 32-bit ARM (armeabi-v7a); Android picks the right one."
             echo "- No game data included and no PC needed: pick your own disc image (.bin/.cue/.iso/.chd of the PAL SCES-01331) on the device from the Selva launcher; it is checked (MAIN0.EXE sha1) and its files are extracted into app storage (about 500 MB, every file checked; a truncated or damaged image is refused with the reason)."
             echo "- New: crash reports without adb: if the game closes unexpectedly the launcher shows the last lines of the log with Copy report / Share / Export log (also Options > View last log). Disc > Delete data removes the extracted data (saves kept unless ticked)."
             echo "- Launcher options: language, improved Spanish translation toggle (applied in memory, natively), debug menu, cut content, aspect (automatic by default), renderer, 60 Hz, cheats."
@@ -275,5 +319,5 @@ jobs:
             echo "- Extra flags in \`files/args.txt\`. APK is $SIG."
             echo "- Please report results with the log (launcher: Options > View last log > Share / Export log)."
           } > notes.md
-          gh release create "$TAG" -R "$R" --target "$SHA" --title "Tombi! port – Android BETA $N (armeabi-v7a)" \
+          gh release create "$TAG" -R "$R" --target "$SHA" --title "Tombi! port – Android BETA $N (arm64-v8a + armeabi-v7a)" \
             --prerelease --latest=false --notes-file notes.md "out/$APK"

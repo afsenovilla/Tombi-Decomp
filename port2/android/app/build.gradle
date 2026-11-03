@@ -1,5 +1,6 @@
 // The app is SDL2's android-project (SDLActivity + SDL_main) around the CMake project of port2/:
-// libmain.so (port2/android/loader.c) loads the game, libtombi.so, below 16 MB (docs/PORT.md "4. Android").
+// libmain.so (port2/android/loader.c) loads the game, libtombi.so (armeabi-v7a: below 16 MB; arm64-v8a: the wasm2c build)
+// (docs/PORT.md "4. Android").
 plugins { id 'com.android.application' }
 
 def sdl2Source = project.findProperty('sdl2Source') ?: System.getenv('SDL2_SOURCE')
@@ -18,12 +19,16 @@ android {
         // every CI build a higher versionCode, so a newer beta installs over the old one (same signing key needed too)
         versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
         versionName "0.1.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
-        ndk { abiFilters 'armeabi-v7a' }   // phase 1 pointer model: 32-bit only (arm64 needs phase 2)
+        // both ABIs in one APK: armeabi-v7a is the native 32-bit build, arm64-v8a the wasm2c build (docs/PORT.md "64-bit
+        // builds: wasm2c"; needs port2/wasm/build.py --until w2c first, PORT2_W2C_DIR); 64-bit-only devices (Snapdragon 8
+        // Gen 3+, AYN Odin 2 ...) install it and load the arm64 libraries
+        ndk { abiFilters 'armeabi-v7a', 'arm64-v8a' }
         externalNativeBuild {
             cmake {
                 arguments "-DPORT2_SDL2_SOURCE=${sdl2Source}", '-DANDROID_STL=c++_static'
                 // the generator (port2/tools/gen2.py) runs on the host Python with tools/requirements.txt installed
                 if (System.getenv('PORT2_PYTHON')) arguments "-DPython3_EXECUTABLE=${System.getenv('PORT2_PYTHON')}"
+                if (System.getenv('PORT2_W2C_DIR')) arguments "-DPORT2_W2C_DIR=${System.getenv('PORT2_W2C_DIR')}"
                 targets 'main', 'tombi2', 'SDL2', 'tombidisc'
             }
         }

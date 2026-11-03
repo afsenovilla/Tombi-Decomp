@@ -59,4 +59,15 @@ for f in sorted(os.listdir(d)):
     c2 = stub_re.sub(fix, c)
     if c2 != c: open(fp, "w").write(c2)
 print("patch_w2c: %d bitcast_invalid stubs forward to their function" % nfix)
+# an indirect call passes the CALLING instance, not the one stored in the table entry: the host runs the audio
+# callback's mixer pull on a second instance (same memory and table, its own __stack_pointer; host.c), and the table
+# entries all name the first one.  (Imported functions in the table ignore their instance argument.)
+ind_re = re.compile(r"instance->w2c_T0\.data\[[^\]]+\]\.module_instance")
+nind = 0
+for f in sorted(os.listdir(d)):
+    if not f.endswith(".c"): continue
+    fp = os.path.join(d, f); c = open(fp).read()
+    c2, k = ind_re.subn("instance", c)
+    if k: open(fp, "w").write(c2); nind += k
+print("patch_w2c: %d indirect calls pass the calling instance" % nind)
 print("patch_w2c: tombi-impl.h patched (null page window, R3000 division, relaxed call_indirect)")

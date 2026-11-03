@@ -1,58 +1,119 @@
-/* Native host of the wasm2c-translated port2 (port2/wasm, the wasm32 spike): instantiates the module, serves its
- * imports and runs _start.
+/* Native host of the wasm2c-translated port2 (port2/wasm; docs/PORT.md "64-bit builds: wasm2c"): instantiates the
+ * module, serves its imports and runs _start.  The same file builds the x86-64 Linux binary (build/wasm/tombi2w) and
+ * the arm64-v8a Android libtombi.so (port_main, called by port2/android/loader.c).
  *   - WASI preview1 subset (what wasi-libc's stdio, open/stat/mkdir, clock and nanosleep use), straight onto
  *     POSIX.  One preopen, "/" = the host root; the host's working directory goes in as PWD and rt_wasm.c chdirs
  *     there, so relative paths (data/, game/, --dump-frames out) mean what they mean for the PC build.
- *   - port.ctx_switch: the BIOS-thread coroutines of runtime/threads.c.  The translated functions run on the
- *     native stack, so a switch is a native stack switch (ucontext) plus the module's __stack_pointer global (the
- *     shadow stack in linear memory, one per coroutine: the top of its stacks[] slot in threads.c).
+ *   - port.ctx_switch: the BIOS-thread coroutines of runtime/threads.c.  The translated functions run on the native
+ *     stack, so a switch is a native stack switch (a few lines of asm per architecture: bionic has no ucontext) plus
+ *     the module's __stack_pointer global (the shadow stack in linear memory, one per coroutine: the top of its
+ *     stacks[] slot in threads.c).
+ *   - port_host_call: SDL (JNI on Android) only ever runs on the main native stack, as in the 32-bit builds.
+ *   - the audio callback (SDL's thread) pulls the mixer through a second instance that shares the linear memory and
+ *     the function table but has its own __stack_pointer (patch_w2c.py makes call_indirect use the calling instance).
  * The module's linear memory holds every game pointer as a 32-bit offset, exactly as on the PS1 / the i386 build. */
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
 #include <time.h>
-#include <ucontext.h>
 #include <unistd.h>
-#include "tombi.h"
+#include "host.h"
 
 uint64_t port_w2c_low_base;          /* patch_w2c.py: the null-page window maps here (port_ram) */
-static w2c_tombi inst;
-#define MEM (inst.w2c_memory.data)
+w2c_tombi port_w2c_inst;
+static w2c_tombi ainst;              /* the audio callback's instance (host_sdl.c port_sound_pull) */
+#define inst port_w2c_inst
+#define MEM WMEM
 static inline uint8_t *P(u32 a) { return MEM + a; }
 static inline void W32(u32 a, u32 v) { memcpy(P(a), &v, 4); }
 static inline void W64(u32 a, u64 v) { memcpy(P(a), &v, 8); }
-static inline void W16(u32 a, u16 v) { memcpy(P(a), &v, 2); }
 static inline u32 R32(u32 a) { u32 v; memcpy(&v, P(a), 4); return v; }
+static pthread_t game_thread;
+int port_host_on_game_thread(void) { return pthread_equal(pthread_self(), game_thread); }
 
 /* ------------------------------------------------------------------------------------------- coroutines */
+/* port_w2c_switch(save, to): callee-saved registers on the old stack, *save = its sp, sp = to, restore, return.
+   port_w2c_call_on_stack(fn, arg, sp): fn(arg) with sp as the stack, back on the old one afterwards. */
+void port_w2c_switch(void **save, void *to);
+void port_w2c_call_on_stack(void (*fn)(void *), void *arg, void *sp);
+#if defined(__x86_64__)
+__asm__(".text\n.globl port_w2c_switch\n.type port_w2c_switch,@function\nport_w2c_switch:\n"
+        "\tpushq %rbp\n\tpushq %rbx\n\tpushq %r12\n\tpushq %r13\n\tpushq %r14\n\tpushq %r15\n"
+        "\tmovq %rsp, (%rdi)\n\tmovq %rsi, %rsp\n"
+        "\tpopq %r15\n\tpopq %r14\n\tpopq %r13\n\tpopq %r12\n\tpopq %rbx\n\tpopq %rbp\n\tret\n"
+        ".globl port_w2c_call_on_stack\n.type port_w2c_call_on_stack,@function\nport_w2c_call_on_stack:\n"
+        "\tpushq %rbp\n\tmovq %rsp, %rbp\n\tmovq %rdx, %rsp\n\tmovq %rdi, %rax\n\tmovq %rsi, %rdi\n\tcall *%rax\n"
+        "\tmovq %rbp, %rsp\n\tpopq %rbp\n\tret\n");
+#define CTX_WORDS 8          /* 6 registers, the return address, a fake return address of the entry */
+#define CTX_RET 6
+#elif defined(__aarch64__)
+/* AAPCS64: x19-x29, x30 (lr), d8-d15 are callee-saved: 176 bytes below the saved sp */
+__asm__(".text\n.globl port_w2c_switch\n.type port_w2c_switch,%function\nport_w2c_switch:\n"
+        "\tsub sp, sp, #176\n"
+        "\tstp x19, x20, [sp, #0]\n\tstp x21, x22, [sp, #16]\n\tstp x23, x24, [sp, #32]\n\tstp x25, x26, [sp, #48]\n"
+        "\tstp x27, x28, [sp, #64]\n\tstp x29, x30, [sp, #80]\n\tstp d8, d9, [sp, #96]\n\tstp d10, d11, [sp, #112]\n"
+        "\tstp d12, d13, [sp, #128]\n\tstp d14, d15, [sp, #144]\n"
+        "\tmov x2, sp\n\tstr x2, [x0]\n\tmov sp, x1\n"
+        "\tldp x19, x20, [sp, #0]\n\tldp x21, x22, [sp, #16]\n\tldp x23, x24, [sp, #32]\n\tldp x25, x26, [sp, #48]\n"
+        "\tldp x27, x28, [sp, #64]\n\tldp x29, x30, [sp, #80]\n\tldp d8, d9, [sp, #96]\n\tldp d10, d11, [sp, #112]\n"
+        "\tldp d12, d13, [sp, #128]\n\tldp d14, d15, [sp, #144]\n"
+        "\tadd sp, sp, #176\n\tret\n"
+        ".globl port_w2c_call_on_stack\n.type port_w2c_call_on_stack,%function\nport_w2c_call_on_stack:\n"
+        "\tstp x29, x30, [sp, #-16]!\n\tmov x29, sp\n\tmov sp, x2\n\tmov x3, x0\n\tmov x0, x1\n\tblr x3\n"
+        "\tmov sp, x29\n\tldp x29, x30, [sp], #16\n\tret\n");
+#define CTX_WORDS 22         /* 176 bytes */
+#define CTX_RET 11           /* the x30 slot */
+#else
+#error "port2/wasm/host.c: no coroutine switch for this architecture (x86-64 and AArch64 are done)"
+#endif
+
 #define NCTX 16
 #define NATIVE_STACK (8 << 20)
-static struct { ucontext_t uc; u32 key, ssp; void *stack; } ctx[NCTX];
+static struct { void *sp; u32 key, ssp; void *stack; } ctx[NCTX];
 static int cur_ctx, nctx = 1;            /* [0] = the main thread */
+static int on_host;                      /* port_host_call is running a function on the main stack */
 static void co_entry(void) { w2c_tombi_port_thread_entry_wasm(&inst); fprintf(stderr, "[wasm] coroutine returned\n"); exit(3); }
 void w2c_port_ctx_switch(struct w2c_port *unused, u32 save, u32 to) {
     (void)unused;
     int from = cur_ctx, n;
+    if (on_host) { fprintf(stderr, "[wasm] coroutine switch from a host call\n"); exit(3); }
     u32 *sp = w2c_tombi_0x5F_stack_pointer(&inst);
     ctx[from].ssp = *sp;
     W32(save, 0x80000000u | from);
     if (to & 0x80000000u) n = to & 0x7FFFFFFF;
-    else {                               /* a fresh coroutine: its shadow stack top; one host context per stack */
+    else {                               /* a fresh coroutine: its shadow stack top; one native stack per shadow stack */
         for (n = 1; n < nctx && ctx[n].key != to; n++) ;
-        if (n == nctx) { if (nctx == NCTX) { fprintf(stderr, "[wasm] out of contexts\n"); exit(3); } nctx++; ctx[n].key = to; ctx[n].stack = malloc(NATIVE_STACK); }
-        getcontext(&ctx[n].uc);
-        ctx[n].uc.uc_stack.ss_sp = ctx[n].stack; ctx[n].uc.uc_stack.ss_size = NATIVE_STACK; ctx[n].uc.uc_link = 0;
-        makecontext(&ctx[n].uc, co_entry, 0);
+        if (n == nctx) {
+            if (nctx == NCTX) { fprintf(stderr, "[wasm] out of contexts\n"); exit(3); }
+            nctx++; ctx[n].key = to;
+            ctx[n].stack = mmap(0, NATIVE_STACK, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            if (ctx[n].stack == MAP_FAILED) { fprintf(stderr, "[wasm] no memory for a coroutine stack\n"); exit(3); }
+        }
+        uintptr_t *top = (uintptr_t *)(((uintptr_t)ctx[n].stack + NATIVE_STACK) & ~(uintptr_t)15);
+        uintptr_t *s = top - CTX_WORDS;
+        memset(s, 0, CTX_WORDS * sizeof *s);
+        s[CTX_RET] = (uintptr_t)co_entry;
+        ctx[n].sp = s;
         ctx[n].ssp = to;
     }
     cur_ctx = n;
     *sp = ctx[n].ssp;
-    swapcontext(&ctx[from].uc, &ctx[n].uc);
+    port_w2c_switch(&ctx[from].sp, ctx[n].sp);
+}
+/* SDL (and through it JNI on Android) only runs on the thread's own stack: a call made from a coroutine runs below the
+   main thread's suspended frames (runtime/threads.c port_host_call, same contract) */
+void port_host_call(void (*fn)(void *), void *arg) {
+    if (cur_ctx == 0 || on_host) { fn(arg); return; }
+    on_host = 1;
+    port_w2c_call_on_stack(fn, arg, (void *)(((uintptr_t)ctx[0].sp - 256) & ~(uintptr_t)15));
+    on_host = 0;
 }
 
 /* ------------------------------------------------------------------------------------------- WASI */
@@ -139,16 +200,27 @@ WASI(poll_oneoff), u32 in, u32 outp, u32 n, u32 nev) {
 }
 WASI(sched_yield)) { return 0; }
 WASI(random_get), u32 buf, u32 len) { for (u32 i = 0; i < len; i++) P(buf)[i] = (u8)rand(); return 0; }
-void w2c_wasi__snapshot__preview1_proc_exit(struct w2c_wasi__snapshot__preview1 *u_, u32 code) { (void)u_; fflush(stdout); _exit((int)code); }
 
-/* wasm-rt-impl.c is built with -DWASM_RT_TRAP_HANDLER=port_w2c_trap: a trap (out-of-bounds access, unreachable,
-   a null table entry) is fatal and reported from whichever coroutine hit it */
-void port_w2c_trap(wasm_rt_trap_t t) {
-    fprintf(stderr, "[wasm] trap: %s (coroutine context %d)\n", wasm_rt_strerror(t), cur_ctx); fflush(stderr); _exit(4);
+static void exit_h(void *a) { exit(*(int *)a); }
+void w2c_wasi__snapshot__preview1_proc_exit(struct w2c_wasi__snapshot__preview1 *u_, u32 code) {
+    (void)u_; int c = (int)code; fflush(stdout); fflush(stderr);
+    port_host_call(exit_h, &c);          /* (exit handlers: SDL_Quit, the Android loader's at_exit) */
+    exit(c);
 }
 
-int main(int argc, char **argv) {
+/* wasm-rt-impl.c is built with -DWASM_RT_TRAP_HANDLER=port_w2c_trap: a trap (unreachable, a null table entry, an
+   out-of-bounds access with explicit bounds checks) is fatal and reported from whichever coroutine hit it */
+void port_w2c_trap(wasm_rt_trap_t t) {
+    fprintf(stderr, "[wasm] trap: %s (coroutine context %d)\n", wasm_rt_strerror(t), cur_ctx); fflush(stderr); abort();
+}
+
+/* the audio callback's instance: the same memory and table, its own shadow stack (rt_wasm.c audio_stack) */
+w2c_tombi *port_host_audio_instance(void) { return &ainst; }
+
+/* the game: argv as the PC build's.  Android: libmain.so (port2/android/loader.c) calls it on SDL's main thread. */
+__attribute__((visibility("default"))) int port_main(int argc, char **argv) {
     g_argc = argc; g_argv = argv;
+    game_thread = pthread_self();
     char cwd[4096]; if (!getcwd(cwd, sizeof cwd)) strcpy(cwd, "/");
     snprintf(pwd_env, sizeof pwd_env, "PWD=%s", cwd);
     for (int i = 0; i < 256; i++) fdmap[i] = -1;
@@ -156,6 +228,12 @@ int main(int argc, char **argv) {
     wasm_rt_init();
     wasm2c_tombi_instantiate(&inst, 0, 0);
     port_w2c_low_base = *w2c_tombi_port_ram(&inst);
+    ainst = inst;
+    *w2c_tombi_0x5F_stack_pointer(&ainst) = w2c_tombi_port_wasm_audio_stack_top(&inst) & ~15u;
+    port_host_bridge_init();
     w2c_tombi_0x5Fstart(&inst);
     return 0;
 }
+#ifndef __ANDROID__
+int main(int argc, char **argv) { return port_main(argc, argv); }
+#endif

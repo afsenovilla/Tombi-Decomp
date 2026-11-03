@@ -17,11 +17,13 @@
 #include "port_runtime.h"
 #include "../shims/gpu_backend.h"
 
+#ifndef PORT2_WASM_HOST   /* (port2/wasm: these live in the wasm module, port2/wasm/sdl_bridge.h) */
 int port_window;
-#include "icon_rgba.h"
 int port_window_scale = 2;
 int port_window_square = 0;                 /* 0: the 320x256 frame shows at 4:3 as on a PAL TV; 1: square pixels (5:4) */
 int port_window_fullscreen;        /* --fullscreen */
+#endif
+#include "icon_rgba.h"
 static SDL_Window *win;
 static SDL_Renderer *ren;
 static SDL_Texture *tex;
@@ -318,7 +320,9 @@ static void ctrl_update(void) {
 static void android_rumble(int small, int big);
 #endif
 /* --rumble N: intensity in percent (0..200, default 100; 0 = off), scaling both motors (clamped to full) */
+#ifndef PORT2_WASM_HOST   /* (port2/wasm: these live in the wasm module, port2/wasm/sdl_bridge.h) */
 int port_rumble_pct = 100;
+#endif
 static int rumble_scale(int v) { v = v * port_rumble_pct / 100; return v < 0 ? 0 : v > 255 ? 255 : v; }
 typedef struct { int small, big; } RumbleArgs;
 static void rumble_h(void *a) {
@@ -398,8 +402,10 @@ static void pump(void) {
 /* where the logical frame (320 wide whatever the mode, h lines) goes in a W x H output: 4:3 as a PAL TV shows
    256 lines (square pixels with port_window_square), the largest integer vertical scale that fits, centred;
    a smaller output gets the fit */
+#ifndef PORT2_WASM_HOST   /* (port2/wasm: these live in the wasm module, port2/wasm/sdl_bridge.h) */
 int port_window_fit_wide;        /* the frame being shown is a --widescreen one (320 + 2 * pad wide) */
 int port_window_fill;            /* --fit: fill the screen with a non-integer scale (keeps the aspect) */
+#endif
 void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
     extern int port_widescreen;
     int lw = port_window_square ? 320 : h * 4 / 3;
