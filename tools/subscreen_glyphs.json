@@ -1,0 +1,5329 @@
+{
+ "page": {
+  "file": "SYSTEM/A%d0301.000",
+  "file_number": "port --lang + 1",
+  "vram_x_words": 64,
+  "vram_y": 0,
+  "bpp": 4,
+  "near": 2,
+  "langs": {
+   "1": "en",
+   "2": "fr",
+   "3": "de",
+   "4": "it",
+   "5": "nl",
+   "6": "es",
+   "7": "pt",
+   "8": "sv",
+   "9": "da"
+  }
+ },
+ "fonts": {
+  "tab": {
+   "text_indices": [
+    1
+   ],
+   "gap": 1,
+   "pair_gap": 0,
+   "slots": {
+    "item": [
+     152,
+     56,
+     64,
+     24
+    ],
+    "event": [
+     152,
+     80,
+     64,
+     24
+    ],
+    "status": [
+     120,
+     104,
+     64,
+     24
+    ],
+    "exit": [
+     184,
+     104,
+     48,
+     24
+    ],
+    "map": [
+     120,
+     128,
+     64,
+     24
+    ]
+   },
+   "groups": [
+    [
+     "item"
+    ],
+    [
+     "event"
+    ],
+    [
+     "status"
+    ],
+    [
+     "exit"
+    ],
+    [
+     "map"
+    ]
+   ],
+   "glyphs": {
+    ".": {
+     "file": 6,
+     "lang": "es",
+     "slot": "item",
+     "index": 5,
+     "u": 207,
+     "v": 72,
+     "w": 2,
+     "h": 2,
+     "baseline": 73,
+     "advance": 3,
+     "seeds": [
+      [
+       207,
+       72
+      ]
+     ]
+    },
+    "A": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "event",
+     "index": 0,
+     "u": 161,
+     "v": 85,
+     "w": 9,
+     "h": 14,
+     "baseline": 97,
+     "advance": 10,
+     "seeds": [
+      [
+       163,
+       85
+      ]
+     ]
+    },
+    "E": {
+     "file": 6,
+     "lang": "es",
+     "slot": "item",
+     "index": 0,
+     "u": 163,
+     "v": 61,
+     "w": 9,
+     "h": 14,
+     "baseline": 73,
+     "advance": 10,
+     "seeds": [
+      [
+       169,
+       61
+      ]
+     ]
+    },
+    "H": {
+     "file": 9,
+     "lang": "da",
+     "slot": "event",
+     "index": 0,
+     "u": 159,
+     "v": 85,
+     "w": 8,
+     "h": 14,
+     "baseline": 97,
+     "advance": 8,
+     "seeds": [
+      [
+       159,
+       85
+      ]
+     ]
+    },
+    "I": {
+     "file": 1,
+     "lang": "en",
+     "slot": "item",
+     "index": 0,
+     "u": 164,
+     "v": 62,
+     "w": 7,
+     "h": 12,
+     "baseline": 73,
+     "advance": 8,
+     "seeds": [
+      [
+       167,
+       62
+      ]
+     ]
+    },
+    "K": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "map",
+     "index": 0,
+     "u": 130,
+     "v": 133,
+     "w": 11,
+     "h": 14,
+     "baseline": 145,
+     "advance": 12,
+     "seeds": [
+      [
+       130,
+       133
+      ]
+     ]
+    },
+    "M": {
+     "file": 1,
+     "lang": "en",
+     "slot": "map",
+     "index": 0,
+     "u": 134,
+     "v": 133,
+     "w": 12,
+     "h": 13,
+     "baseline": 145,
+     "advance": 13,
+     "seeds": [
+      [
+       143,
+       133
+      ]
+     ]
+    },
+    "O": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "item",
+     "index": 0,
+     "u": 161,
+     "v": 60,
+     "w": 10,
+     "h": 15,
+     "baseline": 73,
+     "advance": 11,
+     "seeds": [
+      [
+       164,
+       60
+      ]
+     ]
+    },
+    "S": {
+     "file": 1,
+     "lang": "en",
+     "slot": "status",
+     "index": 0,
+     "u": 127,
+     "v": 109,
+     "w": 9,
+     "h": 14,
+     "baseline": 121,
+     "advance": 10,
+     "seeds": [
+      [
+       132,
+       109
+      ]
+     ]
+    },
+    "a": {
+     "file": 9,
+     "lang": "da",
+     "slot": "event",
+     "index": 1,
+     "u": 167,
+     "v": 85,
+     "w": 11,
+     "h": 13,
+     "baseline": 97,
+     "advance": 11,
+     "seeds": [
+      [
+       168,
+       85
+      ]
+     ]
+    },
+    "b": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "item",
+     "index": 1,
+     "u": 172,
+     "v": 64,
+     "w": 10,
+     "h": 10,
+     "baseline": 73,
+     "advance": 10,
+     "seeds": [
+      [
+       172,
+       64
+      ]
+     ]
+    },
+    "c": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "event",
+     "index": 1,
+     "u": 171,
+     "v": 88,
+     "w": 8,
+     "h": 10,
+     "baseline": 97,
+     "advance": 8,
+     "seeds": [
+      [
+       173,
+       88
+      ]
+     ]
+    },
+    "d": {
+     "file": 9,
+     "lang": "da",
+     "slot": "event",
+     "index": 3,
+     "u": 186,
+     "v": 87,
+     "w": 9,
+     "h": 11,
+     "baseline": 97,
+     "advance": 10,
+     "seeds": [
+      [
+       193,
+       87
+      ]
+     ]
+    },
+    "e": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "item",
+     "index": 3,
+     "u": 188,
+     "v": 65,
+     "w": 8,
+     "h": 9,
+     "baseline": 73,
+     "advance": 8,
+     "seeds": [
+      [
+       191,
+       65
+      ]
+     ]
+    },
+    "f": {
+     "file": 9,
+     "lang": "da",
+     "slot": "exit",
+     "index": 1,
+     "u": 194,
+     "v": 111,
+     "w": 6,
+     "h": 11,
+     "baseline": 121,
+     "advance": 7,
+     "seeds": [
+      [
+       196,
+       111
+      ]
+     ]
+    },
+    "i": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "event",
+     "index": 3,
+     "u": 188,
+     "v": 86,
+     "w": 3,
+     "h": 12,
+     "baseline": 97,
+     "advance": 4,
+     "seeds": [
+      [
+       188,
+       86
+      ],
+      [
+       188,
+       89
+      ]
+     ]
+    },
+    "j": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "item",
+     "index": 2,
+     "u": 182,
+     "v": 62,
+     "w": 6,
+     "h": 13,
+     "baseline": 73,
+     "advance": 6,
+     "seeds": [
+      [
+       183,
+       62
+      ],
+      [
+       184,
+       65
+      ]
+     ]
+    },
+    "k": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "item",
+     "index": 4,
+     "u": 196,
+     "v": 65,
+     "w": 7,
+     "h": 9,
+     "baseline": 73,
+     "advance": 7,
+     "seeds": [
+      [
+       196,
+       65
+      ]
+     ]
+    },
+    "l": {
+     "file": 6,
+     "lang": "es",
+     "slot": "item",
+     "index": 1,
+     "u": 173,
+     "v": 62,
+     "w": 4,
+     "h": 12,
+     "baseline": 73,
+     "advance": 5,
+     "seeds": [
+      [
+       173,
+       62
+      ]
+     ]
+    },
+    "m": {
+     "file": 1,
+     "lang": "en",
+     "slot": "item",
+     "index": 3,
+     "u": 192,
+     "v": 65,
+     "w": 12,
+     "h": 9,
+     "baseline": 73,
+     "advance": 13,
+     "seeds": [
+      [
+       193,
+       65
+      ]
+     ]
+    },
+    "n": {
+     "file": 1,
+     "lang": "en",
+     "slot": "event",
+     "index": 3,
+     "u": 192,
+     "v": 89,
+     "w": 9,
+     "h": 9,
+     "baseline": 97,
+     "advance": 10,
+     "seeds": [
+      [
+       193,
+       89
+      ]
+     ]
+    },
+    "o": {
+     "file": 6,
+     "lang": "es",
+     "slot": "item",
+     "index": 4,
+     "u": 200,
+     "v": 65,
+     "w": 6,
+     "h": 9,
+     "baseline": 73,
+     "advance": 7,
+     "seeds": [
+      [
+       202,
+       65
+      ]
+     ]
+    },
+    "p": {
+     "file": 1,
+     "lang": "en",
+     "slot": "map",
+     "index": 2,
+     "u": 157,
+     "v": 137,
+     "w": 10,
+     "h": 12,
+     "baseline": 145,
+     "advance": 11,
+     "seeds": [
+      [
+       157,
+       137
+      ]
+     ]
+    },
+    "r": {
+     "file": 6,
+     "lang": "es",
+     "slot": "exit",
+     "index": 4,
+     "u": 218,
+     "v": 113,
+     "w": 6,
+     "h": 9,
+     "baseline": 121,
+     "advance": 7,
+     "seeds": [
+      [
+       218,
+       113
+      ]
+     ]
+    },
+    "s": {
+     "file": 6,
+     "lang": "es",
+     "slot": "status",
+     "index": 1,
+     "u": 139,
+     "v": 112,
+     "w": 7,
+     "h": 10,
+     "baseline": 121,
+     "advance": 7,
+     "seeds": [
+      [
+       141,
+       112
+      ]
+     ]
+    },
+    "t": {
+     "file": 6,
+     "lang": "es",
+     "slot": "item",
+     "index": 3,
+     "u": 191,
+     "v": 64,
+     "w": 8,
+     "h": 10,
+     "baseline": 73,
+     "advance": 9,
+     "seeds": [
+      [
+       194,
+       64
+      ]
+     ]
+    },
+    "u": {
+     "file": 1,
+     "lang": "en",
+     "slot": "status",
+     "index": 4,
+     "u": 164,
+     "v": 113,
+     "w": 7,
+     "h": 9,
+     "baseline": 121,
+     "advance": 8,
+     "seeds": [
+      [
+       164,
+       113
+      ]
+     ]
+    },
+    "v": {
+     "file": 1,
+     "lang": "en",
+     "slot": "event",
+     "index": 1,
+     "u": 171,
+     "v": 89,
+     "w": 9,
+     "h": 9,
+     "baseline": 97,
+     "advance": 10,
+     "seeds": [
+      [
+       178,
+       89
+      ]
+     ]
+    },
+    "x": {
+     "file": 1,
+     "lang": "en",
+     "slot": "exit",
+     "index": 1,
+     "u": 201,
+     "v": 112,
+     "w": 9,
+     "h": 9,
+     "baseline": 121,
+     "advance": 10,
+     "seeds": [
+      [
+       201,
+       112
+      ]
+     ]
+    },
+    "y": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "exit",
+     "index": 4,
+     "u": 216,
+     "v": 113,
+     "w": 8,
+     "h": 12,
+     "baseline": 121,
+     "advance": 8,
+     "seeds": [
+      [
+       222,
+       113
+      ]
+     ]
+    }
+   },
+   "labels": [
+    {
+     "file": 1,
+     "lang": "en",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Item",
+     "hash": "0x66e9e206",
+     "lines": [
+      {
+       "text": "Item",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "I",
+         "u": 164,
+         "v": 62,
+         "w": 7,
+         "h": 12,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           167,
+           62
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 172,
+         "v": 64,
+         "w": 8,
+         "h": 10,
+         "baseline": 73,
+         "advance": 9,
+         "seeds": [
+          [
+           175,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 181,
+         "v": 65,
+         "w": 9,
+         "h": 9,
+         "baseline": 73,
+         "advance": 11,
+         "seeds": [
+          [
+           185,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "m",
+         "u": 192,
+         "v": 65,
+         "w": 12,
+         "h": 9,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           193,
+           65
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 6,
+     "lang": "es",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Elmto.",
+     "hash": "0x30e7c66b",
+     "lines": [
+      {
+       "text": "Elmto.",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 163,
+         "v": 61,
+         "w": 9,
+         "h": 14,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           169,
+           61
+          ]
+         ]
+        },
+        {
+         "char": "l",
+         "u": 173,
+         "v": 62,
+         "w": 4,
+         "h": 12,
+         "baseline": 73,
+         "advance": 5,
+         "seeds": [
+          [
+           173,
+           62
+          ]
+         ]
+        },
+        {
+         "char": "m",
+         "u": 178,
+         "v": 65,
+         "w": 12,
+         "h": 9,
+         "baseline": 73,
+         "advance": 13,
+         "seeds": [
+          [
+           179,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 191,
+         "v": 64,
+         "w": 8,
+         "h": 10,
+         "baseline": 73,
+         "advance": 9,
+         "seeds": [
+          [
+           194,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 200,
+         "v": 65,
+         "w": 6,
+         "h": 9,
+         "baseline": 73,
+         "advance": 7,
+         "seeds": [
+          [
+           202,
+           65
+          ]
+         ]
+        },
+        {
+         "char": ".",
+         "u": 207,
+         "v": 72,
+         "w": 2,
+         "h": 2,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           207,
+           72
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 7,
+     "lang": "pt",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Item",
+     "hash": "0x66e9e206",
+     "lines": [
+      {
+       "text": "Item",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "I",
+         "u": 164,
+         "v": 62,
+         "w": 7,
+         "h": 12,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           167,
+           62
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 172,
+         "v": 64,
+         "w": 8,
+         "h": 10,
+         "baseline": 73,
+         "advance": 9,
+         "seeds": [
+          [
+           175,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 181,
+         "v": 65,
+         "w": 9,
+         "h": 9,
+         "baseline": 73,
+         "advance": 11,
+         "seeds": [
+          [
+           185,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "m",
+         "u": 192,
+         "v": 65,
+         "w": 12,
+         "h": 9,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           193,
+           65
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 8,
+     "lang": "sv",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Objekt",
+     "hash": "0x523a7f17",
+     "lines": [
+      {
+       "text": "Objekt",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 161,
+         "v": 60,
+         "w": 10,
+         "h": 15,
+         "baseline": 73,
+         "advance": 11,
+         "seeds": [
+          [
+           164,
+           60
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 172,
+         "v": 64,
+         "w": 10,
+         "h": 10,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           172,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 182,
+         "v": 62,
+         "w": 6,
+         "h": 13,
+         "baseline": 73,
+         "advance": 6,
+         "seeds": [
+          [
+           183,
+           62
+          ],
+          [
+           184,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 188,
+         "v": 65,
+         "w": 8,
+         "h": 9,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           191,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "k",
+         "u": 196,
+         "v": 65,
+         "w": 7,
+         "h": 9,
+         "baseline": 73,
+         "advance": 7,
+         "seeds": [
+          [
+           196,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 203,
+         "v": 64,
+         "w": 7,
+         "h": 10,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           205,
+           64
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 9,
+     "lang": "da",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Objekt",
+     "hash": "0x523a7f17",
+     "lines": [
+      {
+       "text": "Objekt",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 161,
+         "v": 60,
+         "w": 10,
+         "h": 15,
+         "baseline": 73,
+         "advance": 11,
+         "seeds": [
+          [
+           164,
+           60
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 172,
+         "v": 64,
+         "w": 10,
+         "h": 10,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           172,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 182,
+         "v": 62,
+         "w": 6,
+         "h": 13,
+         "baseline": 73,
+         "advance": 6,
+         "seeds": [
+          [
+           183,
+           62
+          ],
+          [
+           184,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 188,
+         "v": 65,
+         "w": 8,
+         "h": 9,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           191,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "k",
+         "u": 196,
+         "v": 65,
+         "w": 7,
+         "h": 9,
+         "baseline": 73,
+         "advance": 7,
+         "seeds": [
+          [
+           196,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 203,
+         "v": 64,
+         "w": 7,
+         "h": 10,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           205,
+           64
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 1,
+     "lang": "en",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Event",
+     "hash": "0x4dcbc50f",
+     "lines": [
+      {
+       "text": "Event",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 161,
+         "v": 85,
+         "w": 9,
+         "h": 14,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           167,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "v",
+         "u": 171,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           178,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 181,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 11,
+         "seeds": [
+          [
+           185,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 192,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           193,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 202,
+         "v": 88,
+         "w": 8,
+         "h": 10,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           205,
+           88
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 6,
+     "lang": "es",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Evento",
+     "hash": "0x2f6dac2d",
+     "lines": [
+      {
+       "text": "Evento",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 161,
+         "v": 85,
+         "w": 9,
+         "h": 14,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           167,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "v",
+         "u": 170,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           177,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 179,
+         "v": 89,
+         "w": 8,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           182,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 188,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           189,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 197,
+         "v": 88,
+         "w": 7,
+         "h": 10,
+         "baseline": 97,
+         "advance": 7,
+         "seeds": [
+          [
+           199,
+           88
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 204,
+         "v": 89,
+         "w": 6,
+         "h": 9,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           206,
+           89
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 7,
+     "lang": "pt",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Evento",
+     "hash": "0x2f6dac2d",
+     "lines": [
+      {
+       "text": "Evento",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 161,
+         "v": 85,
+         "w": 9,
+         "h": 14,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           167,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "v",
+         "u": 170,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           177,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 179,
+         "v": 89,
+         "w": 8,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           182,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 188,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           189,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 197,
+         "v": 88,
+         "w": 7,
+         "h": 10,
+         "baseline": 97,
+         "advance": 7,
+         "seeds": [
+          [
+           199,
+           88
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 204,
+         "v": 89,
+         "w": 6,
+         "h": 9,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           206,
+           89
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 8,
+     "lang": "sv",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Action",
+     "hash": "0xd58784f8",
+     "lines": [
+      {
+       "text": "Action",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "A",
+         "u": 161,
+         "v": 85,
+         "w": 9,
+         "h": 14,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           163,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "c",
+         "u": 171,
+         "v": 88,
+         "w": 8,
+         "h": 10,
+         "baseline": 97,
+         "advance": 8,
+         "seeds": [
+          [
+           173,
+           88
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 179,
+         "v": 88,
+         "w": 8,
+         "h": 10,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           182,
+           88
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 188,
+         "v": 86,
+         "w": 3,
+         "h": 12,
+         "baseline": 97,
+         "advance": 4,
+         "seeds": [
+          [
+           188,
+           86
+          ],
+          [
+           188,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 192,
+         "v": 89,
+         "w": 6,
+         "h": 9,
+         "baseline": 97,
+         "advance": 7,
+         "seeds": [
+          [
+           194,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 199,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           200,
+           89
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 9,
+     "lang": "da",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Handln.",
+     "hash": "0x3ebbf327",
+     "lines": [
+      {
+       "text": "Handln.",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "H",
+         "u": 159,
+         "v": 85,
+         "w": 8,
+         "h": 14,
+         "baseline": 97,
+         "advance": 8,
+         "seeds": [
+          [
+           159,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 167,
+         "v": 85,
+         "w": 11,
+         "h": 13,
+         "baseline": 97,
+         "advance": 11,
+         "seeds": [
+          [
+           168,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 178,
+         "v": 89,
+         "w": 8,
+         "h": 9,
+         "baseline": 97,
+         "advance": 8,
+         "seeds": [
+          [
+           179,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "d",
+         "u": 186,
+         "v": 87,
+         "w": 9,
+         "h": 11,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           193,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "l",
+         "u": 196,
+         "v": 87,
+         "w": 3,
+         "h": 11,
+         "baseline": 97,
+         "advance": 4,
+         "seeds": [
+          [
+           197,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 200,
+         "v": 89,
+         "w": 8,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           200,
+           89
+          ]
+         ]
+        },
+        {
+         "char": ".",
+         "u": 209,
+         "v": 96,
+         "w": 2,
+         "h": 2,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           209,
+           96
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 1,
+     "lang": "en",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Status",
+     "hash": "0x4a7197f4",
+     "lines": [
+      {
+       "text": "Status",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 127,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           132,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 137,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           140,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 146,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           152,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 155,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           158,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 164,
+         "v": 113,
+         "w": 7,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           164,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 172,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           174,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 6,
+     "lang": "es",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Estado",
+     "hash": "0xedce0fb7",
+     "lines": [
+      {
+       "text": "Estado",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 129,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           135,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 139,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": 7,
+         "seeds": [
+          [
+           141,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 146,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           149,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 155,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           161,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "d",
+         "u": 163,
+         "v": 110,
+         "w": 8,
+         "h": 12,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           167,
+           110
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 172,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           174,
+           113
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 7,
+     "lang": "pt",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Estado",
+     "hash": "0xedce0fb7",
+     "lines": [
+      {
+       "text": "Estado",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 129,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           135,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 139,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": 7,
+         "seeds": [
+          [
+           141,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 146,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           149,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 155,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           161,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "d",
+         "u": 163,
+         "v": 110,
+         "w": 8,
+         "h": 12,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           167,
+           110
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 172,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           174,
+           113
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 8,
+     "lang": "sv",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Status",
+     "hash": "0x4a7197f4",
+     "lines": [
+      {
+       "text": "Status",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 127,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           132,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 137,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           140,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 146,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           152,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 155,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           158,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 164,
+         "v": 113,
+         "w": 7,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           164,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 172,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           174,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 9,
+     "lang": "da",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Status",
+     "hash": "0x4a7197f4",
+     "lines": [
+      {
+       "text": "Status",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 127,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           132,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 137,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           140,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 146,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           152,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 155,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           158,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 164,
+         "v": 113,
+         "w": 7,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           164,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 172,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           174,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 1,
+     "lang": "en",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Exit",
+     "hash": "0x73c5c38a",
+     "lines": [
+      {
+       "text": "Exit",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 191,
+         "v": 108,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           197,
+           108
+          ]
+         ]
+        },
+        {
+         "char": "x",
+         "u": 201,
+         "v": 112,
+         "w": 9,
+         "h": 9,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           201,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 211,
+         "v": 112,
+         "w": 4,
+         "h": 9,
+         "baseline": 121,
+         "advance": 5,
+         "seeds": [
+          [
+           213,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 216,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           219,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 6,
+     "lang": "es",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Salir",
+     "hash": "0x485762d9",
+     "lines": [
+      {
+       "text": "Salir",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 191,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           196,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 201,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           207,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "l",
+         "u": 209,
+         "v": 110,
+         "w": 4,
+         "h": 12,
+         "baseline": 121,
+         "advance": 5,
+         "seeds": [
+          [
+           209,
+           110
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 214,
+         "v": 110,
+         "w": 3,
+         "h": 12,
+         "baseline": 121,
+         "advance": 4,
+         "seeds": [
+          [
+           214,
+           110
+          ],
+          [
+           214,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 218,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           218,
+           113
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 7,
+     "lang": "pt",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Sair",
+     "hash": "0x0584cf99",
+     "lines": [
+      {
+       "text": "Sair",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 193,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           198,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 203,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           209,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 212,
+         "v": 110,
+         "w": 3,
+         "h": 12,
+         "baseline": 121,
+         "advance": 4,
+         "seeds": [
+          [
+           212,
+           110
+          ],
+          [
+           212,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 216,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           216,
+           113
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 8,
+     "lang": "sv",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Avbryt",
+     "hash": "0xba4bd82e",
+     "lines": [
+      {
+       "text": "Avbryt",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "A",
+         "u": 184,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           186,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "v",
+         "u": 193,
+         "v": 113,
+         "w": 9,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           200,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 202,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": 7,
+         "seeds": [
+          [
+           202,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 209,
+         "v": 113,
+         "w": 7,
+         "h": 9,
+         "baseline": 121,
+         "advance": 7,
+         "seeds": [
+          [
+           211,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "y",
+         "u": 216,
+         "v": 113,
+         "w": 8,
+         "h": 12,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           222,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 224,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           227,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 9,
+     "lang": "da",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Afslut",
+     "hash": "0x7c319830",
+     "lines": [
+      {
+       "text": "Afslut",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "A",
+         "u": 185,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           187,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "f",
+         "u": 194,
+         "v": 111,
+         "w": 6,
+         "h": 11,
+         "baseline": 121,
+         "advance": 7,
+         "seeds": [
+          [
+           196,
+           111
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 201,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           203,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "l",
+         "u": 209,
+         "v": 111,
+         "w": 4,
+         "h": 11,
+         "baseline": 121,
+         "advance": 5,
+         "seeds": [
+          [
+           209,
+           111
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 214,
+         "v": 113,
+         "w": 7,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           214,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 222,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           225,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 1,
+     "lang": "en",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Map",
+     "hash": "0x851a0178",
+     "lines": [
+      {
+       "text": "Map",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "M",
+         "u": 134,
+         "v": 133,
+         "w": 12,
+         "h": 13,
+         "baseline": 145,
+         "advance": 13,
+         "seeds": [
+          [
+           143,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 147,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 10,
+         "seeds": [
+          [
+           153,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "p",
+         "u": 157,
+         "v": 137,
+         "w": 10,
+         "h": 12,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           157,
+           137
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 6,
+     "lang": "es",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Mapa",
+     "hash": "0x75752f8f",
+     "lines": [
+      {
+       "text": "Mapa",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "M",
+         "u": 132,
+         "v": 133,
+         "w": 12,
+         "h": 13,
+         "baseline": 145,
+         "advance": 13,
+         "seeds": [
+          [
+           141,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 145,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 9,
+         "seeds": [
+          [
+           151,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "p",
+         "u": 154,
+         "v": 137,
+         "w": 10,
+         "h": 12,
+         "baseline": 145,
+         "advance": 11,
+         "seeds": [
+          [
+           154,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 165,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           171,
+           137
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 7,
+     "lang": "pt",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Mapa",
+     "hash": "0x75752f8f",
+     "lines": [
+      {
+       "text": "Mapa",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "M",
+         "u": 132,
+         "v": 133,
+         "w": 12,
+         "h": 13,
+         "baseline": 145,
+         "advance": 13,
+         "seeds": [
+          [
+           141,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 145,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 9,
+         "seeds": [
+          [
+           151,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "p",
+         "u": 154,
+         "v": 137,
+         "w": 10,
+         "h": 12,
+         "baseline": 145,
+         "advance": 11,
+         "seeds": [
+          [
+           154,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 165,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           171,
+           137
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 8,
+     "lang": "sv",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Karta",
+     "hash": "0xc759b207",
+     "lines": [
+      {
+       "text": "Karta",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "K",
+         "u": 130,
+         "v": 133,
+         "w": 11,
+         "h": 14,
+         "baseline": 145,
+         "advance": 12,
+         "seeds": [
+          [
+           130,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 142,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 9,
+         "seeds": [
+          [
+           148,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 151,
+         "v": 137,
+         "w": 7,
+         "h": 9,
+         "baseline": 145,
+         "advance": 7,
+         "seeds": [
+          [
+           151,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 158,
+         "v": 136,
+         "w": 7,
+         "h": 10,
+         "baseline": 145,
+         "advance": 8,
+         "seeds": [
+          [
+           160,
+           136
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 166,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           172,
+           137
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 9,
+     "lang": "da",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Kort",
+     "hash": "0xf2bbfe4c",
+     "lines": [
+      {
+       "text": "Kort",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "K",
+         "u": 132,
+         "v": 133,
+         "w": 11,
+         "h": 14,
+         "baseline": 145,
+         "advance": 12,
+         "seeds": [
+          [
+           132,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 144,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 10,
+         "seeds": [
+          [
+           146,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 154,
+         "v": 137,
+         "w": 6,
+         "h": 9,
+         "baseline": 145,
+         "advance": 8,
+         "seeds": [
+          [
+           154,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 162,
+         "v": 136,
+         "w": 8,
+         "h": 10,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           165,
+           136
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "leaf": {
+   "text_indices": [
+    1
+   ],
+   "gap": 0,
+   "pair_gap": 0,
+   "slots": {
+    "use": [
+     40,
+     64,
+     56,
+     39
+    ],
+    "view": [
+     8,
+     104,
+     56,
+     39
+    ],
+    "sort": [
+     64,
+     104,
+     56,
+     39
+    ]
+   },
+   "groups": [
+    [
+     "use",
+     "view",
+     "sort"
+    ]
+   ],
+   "glyphs": {
+    "A": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "use",
+     "index": 0,
+     "u": 53,
+     "v": 72,
+     "w": 9,
+     "h": 11,
+     "baseline": 82,
+     "advance": 11,
+     "seeds": [
+      [
+       58,
+       72
+      ]
+     ]
+    },
+    "B": {
+     "file": 9,
+     "lang": "da",
+     "slot": "use",
+     "index": 0,
+     "u": 46,
+     "v": 71,
+     "w": 11,
+     "h": 14,
+     "baseline": 83,
+     "advance": 12,
+     "seeds": [
+      [
+       49,
+       71
+      ]
+     ]
+    },
+    "E": {
+     "file": 7,
+     "lang": "pt",
+     "slot": "sort",
+     "index": 0,
+     "u": 66,
+     "v": 115,
+     "w": 7,
+     "h": 15,
+     "baseline": 128,
+     "advance": 7,
+     "seeds": [
+      [
+       71,
+       115
+      ]
+     ]
+    },
+    "O": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "use",
+     "index": 3,
+     "u": 53,
+     "v": 84,
+     "w": 9,
+     "h": 10,
+     "baseline": 95,
+     "advance": 11,
+     "seeds": [
+      [
+       56,
+       84
+      ]
+     ]
+    },
+    "S": {
+     "file": 1,
+     "lang": "en",
+     "slot": "sort",
+     "index": 0,
+     "u": 71,
+     "v": 118,
+     "w": 9,
+     "h": 14,
+     "baseline": 130,
+     "advance": 11,
+     "seeds": [
+      [
+       76,
+       118
+      ]
+     ]
+    },
+    "U": {
+     "file": 1,
+     "lang": "en",
+     "slot": "use",
+     "index": 0,
+     "u": 52,
+     "v": 71,
+     "w": 11,
+     "h": 11,
+     "baseline": 81,
+     "advance": 11,
+     "seeds": [
+      [
+       55,
+       71
+      ]
+     ]
+    },
+    "V": {
+     "file": 1,
+     "lang": "en",
+     "slot": "view",
+     "index": 0,
+     "u": 15,
+     "v": 117,
+     "w": 11,
+     "h": 14,
+     "baseline": 130,
+     "advance": 12,
+     "seeds": [
+      [
+       15,
+       117
+      ]
+     ]
+    },
+    "a": {
+     "file": 6,
+     "lang": "es",
+     "slot": "use",
+     "index": 2,
+     "u": 68,
+     "v": 74,
+     "w": 7,
+     "h": 10,
+     "baseline": 83,
+     "advance": 7,
+     "seeds": [
+      [
+       70,
+       74
+      ]
+     ]
+    },
+    "b": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "use",
+     "index": 4,
+     "u": 64,
+     "v": 85,
+     "w": 8,
+     "h": 11,
+     "baseline": 95,
+     "advance": 8,
+     "seeds": [
+      [
+       64,
+       85
+      ]
+     ]
+    },
+    "c": {
+     "file": 7,
+     "lang": "pt",
+     "slot": "sort",
+     "index": 2,
+     "u": 82,
+     "v": 118,
+     "w": 7,
+     "h": 10,
+     "baseline": 128,
+     "advance": 7,
+     "seeds": [
+      [
+       85,
+       118
+      ]
+     ]
+    },
+    "d": {
+     "file": 6,
+     "lang": "es",
+     "slot": "sort",
+     "index": 2,
+     "u": 81,
+     "v": 119,
+     "w": 7,
+     "h": 10,
+     "baseline": 128,
+     "advance": 7,
+     "seeds": [
+      [
+       86,
+       119
+      ]
+     ]
+    },
+    "e": {
+     "file": 6,
+     "lang": "es",
+     "slot": "sort",
+     "index": 3,
+     "u": 88,
+     "v": 120,
+     "w": 7,
+     "h": 9,
+     "baseline": 128,
+     "advance": 8,
+     "seeds": [
+      [
+       91,
+       120
+      ]
+     ]
+    },
+    "g": {
+     "file": 9,
+     "lang": "da",
+     "slot": "use",
+     "index": 3,
+     "u": 77,
+     "v": 75,
+     "w": 9,
+     "h": 12,
+     "baseline": 83,
+     "advance": 9,
+     "seeds": [
+      [
+       79,
+       75
+      ]
+     ]
+    },
+    "h": {
+     "file": 7,
+     "lang": "pt",
+     "slot": "sort",
+     "index": 5,
+     "u": 105,
+     "v": 125,
+     "w": 1,
+     "h": 1,
+     "baseline": 128,
+     "advance": 1,
+     "seeds": [
+      [
+       105,
+       125
+      ]
+     ]
+    },
+    "i": {
+     "file": 1,
+     "lang": "en",
+     "slot": "use",
+     "index": 3,
+     "u": 47,
+     "v": 85,
+     "w": 5,
+     "h": 11,
+     "baseline": 95,
+     "advance": 7,
+     "seeds": [
+      [
+       49,
+       88
+      ],
+      [
+       50,
+       85
+      ]
+     ]
+    },
+    "j": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "use",
+     "index": 5,
+     "u": 72,
+     "v": 84,
+     "w": 8,
+     "h": 12,
+     "baseline": 95,
+     "advance": 8,
+     "seeds": [
+      [
+       78,
+       84
+      ],
+      [
+       78,
+       88
+      ]
+     ]
+    },
+    "k": {
+     "file": 9,
+     "lang": "da",
+     "slot": "use",
+     "index": 8,
+     "u": 74,
+     "v": 87,
+     "w": 6,
+     "h": 10,
+     "baseline": 96,
+     "advance": 6,
+     "seeds": [
+      [
+       74,
+       87
+      ]
+     ]
+    },
+    "l": {
+     "file": 6,
+     "lang": "es",
+     "slot": "use",
+     "index": 5,
+     "u": 58,
+     "v": 86,
+     "w": 2,
+     "h": 10,
+     "baseline": 95,
+     "advance": 3,
+     "seeds": [
+      [
+       58,
+       86
+      ]
+     ]
+    },
+    "m": {
+     "file": 1,
+     "lang": "en",
+     "slot": "use",
+     "index": 6,
+     "u": 74,
+     "v": 87,
+     "w": 12,
+     "h": 9,
+     "baseline": 95,
+     "advance": 12,
+     "seeds": [
+      [
+       75,
+       87
+      ]
+     ]
+    },
+    "n": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "use",
+     "index": 1,
+     "u": 64,
+     "v": 76,
+     "w": 7,
+     "h": 8,
+     "baseline": 82,
+     "advance": 7,
+     "seeds": [
+      [
+       64,
+       76
+      ]
+     ]
+    },
+    "o": {
+     "file": 6,
+     "lang": "es",
+     "slot": "use",
+     "index": 8,
+     "u": 76,
+     "v": 88,
+     "w": 9,
+     "h": 8,
+     "baseline": 95,
+     "advance": 9,
+     "seeds": [
+      [
+       76,
+       88
+      ]
+     ]
+    },
+    "r": {
+     "file": 6,
+     "lang": "es",
+     "slot": "use",
+     "index": 3,
+     "u": 75,
+     "v": 74,
+     "w": 11,
+     "h": 10,
+     "baseline": 83,
+     "advance": 11,
+     "seeds": [
+      [
+       78,
+       74
+      ]
+     ]
+    },
+    "s": {
+     "file": 1,
+     "lang": "en",
+     "slot": "use",
+     "index": 1,
+     "u": 63,
+     "v": 73,
+     "w": 6,
+     "h": 10,
+     "baseline": 81,
+     "advance": 8,
+     "seeds": [
+      [
+       66,
+       73
+      ]
+     ]
+    },
+    "t": {
+     "file": 6,
+     "lang": "es",
+     "slot": "use",
+     "index": 7,
+     "u": 71,
+     "v": 86,
+     "w": 5,
+     "h": 10,
+     "baseline": 95,
+     "advance": 5,
+     "seeds": [
+      [
+       73,
+       86
+      ]
+     ]
+    },
+    "u": {
+     "file": 9,
+     "lang": "da",
+     "slot": "use",
+     "index": 2,
+     "u": 66,
+     "v": 75,
+     "w": 10,
+     "h": 9,
+     "baseline": 83,
+     "advance": 11,
+     "seeds": [
+      [
+       69,
+       75
+      ]
+     ]
+    },
+    "v": {
+     "file": 8,
+     "lang": "sv",
+     "slot": "use",
+     "index": 2,
+     "u": 71,
+     "v": 75,
+     "w": 9,
+     "h": 8,
+     "baseline": 82,
+     "advance": 9,
+     "seeds": [
+      [
+       71,
+       75
+      ]
+     ]
+    },
+    "w": {
+     "file": 1,
+     "lang": "en",
+     "slot": "view",
+     "index": 3,
+     "u": 44,
+     "v": 120,
+     "w": 11,
+     "h": 11,
+     "baseline": 130,
+     "advance": 11,
+     "seeds": [
+      [
+       53,
+       120
+      ]
+     ]
+    }
+   },
+   "labels": [
+    {
+     "file": 1,
+     "lang": "en",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Use / item",
+     "hash": "0xf88e0897",
+     "lines": [
+      {
+       "text": "Use",
+       "baseline": 81,
+       "glyphs": [
+        {
+         "char": "U",
+         "u": 52,
+         "v": 71,
+         "w": 11,
+         "h": 11,
+         "baseline": 81,
+         "advance": 11,
+         "seeds": [
+          [
+           55,
+           71
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 63,
+         "v": 73,
+         "w": 6,
+         "h": 10,
+         "baseline": 81,
+         "advance": 8,
+         "seeds": [
+          [
+           66,
+           73
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 71,
+         "v": 73,
+         "w": 9,
+         "h": 9,
+         "baseline": 81,
+         "advance": null,
+         "seeds": [
+          [
+           75,
+           73
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "text": "item",
+       "baseline": 95,
+       "glyphs": [
+        {
+         "char": "i",
+         "u": 47,
+         "v": 85,
+         "w": 5,
+         "h": 11,
+         "baseline": 95,
+         "advance": 7,
+         "seeds": [
+          [
+           49,
+           88
+          ],
+          [
+           50,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 54,
+         "v": 86,
+         "w": 8,
+         "h": 10,
+         "baseline": 95,
+         "advance": 9,
+         "seeds": [
+          [
+           57,
+           86
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 63,
+         "v": 87,
+         "w": 9,
+         "h": 9,
+         "baseline": 95,
+         "advance": 11,
+         "seeds": [
+          [
+           67,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "m",
+         "u": 74,
+         "v": 87,
+         "w": 12,
+         "h": 9,
+         "baseline": 95,
+         "advance": null,
+         "seeds": [
+          [
+           75,
+           87
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 6,
+     "lang": "es",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Usar / elmto",
+     "hash": "0x14dae807",
+     "lines": [
+      {
+       "text": "Usar",
+       "baseline": 83,
+       "glyphs": [
+        {
+         "char": "U",
+         "u": 50,
+         "v": 72,
+         "w": 11,
+         "h": 11,
+         "baseline": 83,
+         "advance": 11,
+         "seeds": [
+          [
+           53,
+           72
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 61,
+         "v": 74,
+         "w": 6,
+         "h": 10,
+         "baseline": 83,
+         "advance": 7,
+         "seeds": [
+          [
+           64,
+           74
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 68,
+         "v": 74,
+         "w": 7,
+         "h": 10,
+         "baseline": 83,
+         "advance": 7,
+         "seeds": [
+          [
+           70,
+           74
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 75,
+         "v": 74,
+         "w": 11,
+         "h": 10,
+         "baseline": 83,
+         "advance": null,
+         "seeds": [
+          [
+           78,
+           74
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "text": "elmto",
+       "baseline": 95,
+       "glyphs": [
+        {
+         "char": "e",
+         "u": 48,
+         "v": 87,
+         "w": 9,
+         "h": 9,
+         "baseline": 95,
+         "advance": 10,
+         "seeds": [
+          [
+           52,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "l",
+         "u": 58,
+         "v": 86,
+         "w": 2,
+         "h": 10,
+         "baseline": 95,
+         "advance": 3,
+         "seeds": [
+          [
+           58,
+           86
+          ]
+         ]
+        },
+        {
+         "char": "m",
+         "u": 61,
+         "v": 87,
+         "w": 10,
+         "h": 9,
+         "baseline": 95,
+         "advance": 10,
+         "seeds": [
+          [
+           64,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 71,
+         "v": 86,
+         "w": 5,
+         "h": 10,
+         "baseline": 95,
+         "advance": 5,
+         "seeds": [
+          [
+           73,
+           86
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 76,
+         "v": 88,
+         "w": 9,
+         "h": 8,
+         "baseline": 95,
+         "advance": null,
+         "seeds": [
+          [
+           76,
+           88
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 7,
+     "lang": "pt",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Usar / item",
+     "hash": "0xb7e064b2",
+     "lines": [
+      {
+       "text": "Usar",
+       "baseline": 84,
+       "glyphs": [
+        {
+         "char": "U",
+         "u": 50,
+         "v": 73,
+         "w": 11,
+         "h": 11,
+         "baseline": 84,
+         "advance": 11,
+         "seeds": [
+          [
+           53,
+           73
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 61,
+         "v": 75,
+         "w": 6,
+         "h": 10,
+         "baseline": 84,
+         "advance": 7,
+         "seeds": [
+          [
+           64,
+           75
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 68,
+         "v": 75,
+         "w": 7,
+         "h": 10,
+         "baseline": 84,
+         "advance": 7,
+         "seeds": [
+          [
+           70,
+           75
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 75,
+         "v": 75,
+         "w": 11,
+         "h": 10,
+         "baseline": 84,
+         "advance": null,
+         "seeds": [
+          [
+           78,
+           75
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "text": "item",
+       "baseline": 95,
+       "glyphs": [
+        {
+         "char": "i",
+         "u": 47,
+         "v": 85,
+         "w": 5,
+         "h": 11,
+         "baseline": 95,
+         "advance": 7,
+         "seeds": [
+          [
+           49,
+           88
+          ],
+          [
+           50,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 54,
+         "v": 86,
+         "w": 8,
+         "h": 10,
+         "baseline": 95,
+         "advance": 9,
+         "seeds": [
+          [
+           57,
+           86
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 63,
+         "v": 87,
+         "w": 9,
+         "h": 9,
+         "baseline": 95,
+         "advance": 11,
+         "seeds": [
+          [
+           67,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "m",
+         "u": 74,
+         "v": 87,
+         "w": 12,
+         "h": 9,
+         "baseline": 95,
+         "advance": null,
+         "seeds": [
+          [
+           75,
+           87
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 8,
+     "lang": "sv",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Anv / Obj",
+     "hash": "0x5025bc01",
+     "lines": [
+      {
+       "text": "Anv",
+       "baseline": 82,
+       "glyphs": [
+        {
+         "char": "A",
+         "u": 53,
+         "v": 72,
+         "w": 9,
+         "h": 11,
+         "baseline": 82,
+         "advance": 11,
+         "seeds": [
+          [
+           58,
+           72
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 64,
+         "v": 76,
+         "w": 7,
+         "h": 8,
+         "baseline": 82,
+         "advance": 7,
+         "seeds": [
+          [
+           64,
+           76
+          ]
+         ]
+        },
+        {
+         "char": "v",
+         "u": 71,
+         "v": 75,
+         "w": 9,
+         "h": 8,
+         "baseline": 82,
+         "advance": null,
+         "seeds": [
+          [
+           71,
+           75
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "text": "Obj",
+       "baseline": 95,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 53,
+         "v": 84,
+         "w": 9,
+         "h": 10,
+         "baseline": 95,
+         "advance": 11,
+         "seeds": [
+          [
+           56,
+           84
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 64,
+         "v": 85,
+         "w": 8,
+         "h": 11,
+         "baseline": 95,
+         "advance": 8,
+         "seeds": [
+          [
+           64,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 72,
+         "v": 84,
+         "w": 8,
+         "h": 12,
+         "baseline": 95,
+         "advance": null,
+         "seeds": [
+          [
+           78,
+           84
+          ],
+          [
+           78,
+           88
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 9,
+     "lang": "da",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Brug / Objekt",
+     "hash": "0x05b6e6cc",
+     "lines": [
+      {
+       "text": "Brug",
+       "baseline": 83,
+       "glyphs": [
+        {
+         "char": "B",
+         "u": 46,
+         "v": 71,
+         "w": 11,
+         "h": 14,
+         "baseline": 83,
+         "advance": 12,
+         "seeds": [
+          [
+           49,
+           71
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 58,
+         "v": 74,
+         "w": 7,
+         "h": 10,
+         "baseline": 83,
+         "advance": 8,
+         "seeds": [
+          [
+           59,
+           74
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 66,
+         "v": 75,
+         "w": 10,
+         "h": 9,
+         "baseline": 83,
+         "advance": 11,
+         "seeds": [
+          [
+           69,
+           75
+          ]
+         ]
+        },
+        {
+         "char": "g",
+         "u": 77,
+         "v": 75,
+         "w": 9,
+         "h": 12,
+         "baseline": 83,
+         "advance": null,
+         "seeds": [
+          [
+           79,
+           75
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "text": "Objekt",
+       "baseline": 96,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 46,
+         "v": 86,
+         "w": 9,
+         "h": 10,
+         "baseline": 96,
+         "advance": 9,
+         "seeds": [
+          [
+           49,
+           86
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 55,
+         "v": 86,
+         "w": 6,
+         "h": 11,
+         "baseline": 96,
+         "advance": 6,
+         "seeds": [
+          [
+           55,
+           86
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 61,
+         "v": 85,
+         "w": 6,
+         "h": 14,
+         "baseline": 96,
+         "advance": 6,
+         "seeds": [
+          [
+           61,
+           90
+          ],
+          [
+           63,
+           85
+          ],
+          [
+           64,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 67,
+         "v": 88,
+         "w": 7,
+         "h": 9,
+         "baseline": 96,
+         "advance": 7,
+         "seeds": [
+          [
+           70,
+           88
+          ]
+         ]
+        },
+        {
+         "char": "k",
+         "u": 74,
+         "v": 87,
+         "w": 6,
+         "h": 10,
+         "baseline": 96,
+         "advance": 6,
+         "seeds": [
+          [
+           74,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 80,
+         "v": 87,
+         "w": 7,
+         "h": 10,
+         "baseline": 96,
+         "advance": null,
+         "seeds": [
+          [
+           80,
+           94
+          ],
+          [
+           82,
+           87
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 1,
+     "lang": "en",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "View",
+     "hash": "0xc042554c",
+     "lines": [
+      {
+       "text": "View",
+       "baseline": 130,
+       "glyphs": [
+        {
+         "char": "V",
+         "u": 15,
+         "v": 117,
+         "w": 11,
+         "h": 14,
+         "baseline": 130,
+         "advance": 12,
+         "seeds": [
+          [
+           15,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 27,
+         "v": 120,
+         "w": 5,
+         "h": 11,
+         "baseline": 130,
+         "advance": 6,
+         "seeds": [
+          [
+           29,
+           123
+          ],
+          [
+           30,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 33,
+         "v": 122,
+         "w": 9,
+         "h": 9,
+         "baseline": 130,
+         "advance": 11,
+         "seeds": [
+          [
+           37,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "w",
+         "u": 44,
+         "v": 120,
+         "w": 11,
+         "h": 11,
+         "baseline": 130,
+         "advance": null,
+         "seeds": [
+          [
+           53,
+           120
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 6,
+     "lang": "es",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "Ver",
+     "hash": "0xe7be961e",
+     "lines": [
+      {
+       "text": "Ver",
+       "baseline": 129,
+       "glyphs": [
+        {
+         "char": "V",
+         "u": 19,
+         "v": 116,
+         "w": 11,
+         "h": 14,
+         "baseline": 129,
+         "advance": 11,
+         "seeds": [
+          [
+           19,
+           116
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 30,
+         "v": 122,
+         "w": 9,
+         "h": 9,
+         "baseline": 129,
+         "advance": 11,
+         "seeds": [
+          [
+           34,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 41,
+         "v": 121,
+         "w": 7,
+         "h": 9,
+         "baseline": 129,
+         "advance": null,
+         "seeds": [
+          [
+           41,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 7,
+     "lang": "pt",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "Ver",
+     "hash": "0xe7be961e",
+     "lines": [
+      {
+       "text": "Ver",
+       "baseline": 129,
+       "glyphs": [
+        {
+         "char": "V",
+         "u": 19,
+         "v": 116,
+         "w": 11,
+         "h": 14,
+         "baseline": 129,
+         "advance": 11,
+         "seeds": [
+          [
+           19,
+           116
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 30,
+         "v": 122,
+         "w": 9,
+         "h": 9,
+         "baseline": 129,
+         "advance": 11,
+         "seeds": [
+          [
+           34,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 41,
+         "v": 121,
+         "w": 7,
+         "h": 9,
+         "baseline": 129,
+         "advance": null,
+         "seeds": [
+          [
+           41,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 8,
+     "lang": "sv",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "Visa",
+     "hash": "0x968ebda8",
+     "lines": [
+      {
+       "text": "Visa",
+       "baseline": 130,
+       "glyphs": [
+        {
+         "char": "V",
+         "u": 15,
+         "v": 117,
+         "w": 11,
+         "h": 14,
+         "baseline": 130,
+         "advance": 12,
+         "seeds": [
+          [
+           15,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 27,
+         "v": 120,
+         "w": 5,
+         "h": 11,
+         "baseline": 130,
+         "advance": 6,
+         "seeds": [
+          [
+           29,
+           123
+          ],
+          [
+           30,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 33,
+         "v": 121,
+         "w": 6,
+         "h": 10,
+         "baseline": 130,
+         "advance": 8,
+         "seeds": [
+          [
+           36,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 41,
+         "v": 120,
+         "w": 9,
+         "h": 10,
+         "baseline": 130,
+         "advance": null,
+         "seeds": [
+          [
+           43,
+           120
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 9,
+     "lang": "da",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "Vis",
+     "hash": "0xf510a640",
+     "lines": [
+      {
+       "text": "Vis",
+       "baseline": 129,
+       "glyphs": [
+        {
+         "char": "V",
+         "u": 21,
+         "v": 117,
+         "w": 11,
+         "h": 13,
+         "baseline": 129,
+         "advance": 13,
+         "seeds": [
+          [
+           21,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 34,
+         "v": 119,
+         "w": 2,
+         "h": 11,
+         "baseline": 129,
+         "advance": 5,
+         "seeds": [
+          [
+           34,
+           119
+          ],
+          [
+           34,
+           123
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 39,
+         "v": 120,
+         "w": 6,
+         "h": 10,
+         "baseline": 129,
+         "advance": null,
+         "seeds": [
+          [
+           42,
+           120
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 1,
+     "lang": "en",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "Sort",
+     "hash": "0x95526378",
+     "lines": [
+      {
+       "text": "Sort",
+       "baseline": 130,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 71,
+         "v": 118,
+         "w": 9,
+         "h": 14,
+         "baseline": 130,
+         "advance": 11,
+         "seeds": [
+          [
+           76,
+           118
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 82,
+         "v": 121,
+         "w": 9,
+         "h": 10,
+         "baseline": 130,
+         "advance": 10,
+         "seeds": [
+          [
+           85,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 92,
+         "v": 121,
+         "w": 9,
+         "h": 10,
+         "baseline": 130,
+         "advance": 10,
+         "seeds": [
+          [
+           93,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 102,
+         "v": 121,
+         "w": 8,
+         "h": 10,
+         "baseline": 130,
+         "advance": null,
+         "seeds": [
+          [
+           105,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 6,
+     "lang": "es",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "ordenar",
+     "hash": "0x5eec82e5",
+     "lines": [
+      {
+       "text": "ordenar",
+       "baseline": 128,
+       "glyphs": [
+        {
+         "char": "o",
+         "u": 66,
+         "v": 119,
+         "w": 8,
+         "h": 10,
+         "baseline": 128,
+         "advance": 8,
+         "seeds": [
+          [
+           69,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 74,
+         "v": 119,
+         "w": 6,
+         "h": 10,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           75,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "d",
+         "u": 81,
+         "v": 119,
+         "w": 7,
+         "h": 10,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           86,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 88,
+         "v": 120,
+         "w": 7,
+         "h": 9,
+         "baseline": 128,
+         "advance": 8,
+         "seeds": [
+          [
+           91,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 96,
+         "v": 121,
+         "w": 6,
+         "h": 8,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           96,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 103,
+         "v": 120,
+         "w": 6,
+         "h": 9,
+         "baseline": 128,
+         "advance": 6,
+         "seeds": [
+          [
+           104,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 109,
+         "v": 119,
+         "w": 7,
+         "h": 10,
+         "baseline": 128,
+         "advance": null,
+         "seeds": [
+          [
+           111,
+           119
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 7,
+     "lang": "pt",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "Escolhe",
+     "hash": "0x568bcbf6",
+     "lines": [
+      {
+       "text": "Escolhe",
+       "baseline": 128,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 66,
+         "v": 115,
+         "w": 7,
+         "h": 15,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           71,
+           115
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 73,
+         "v": 119,
+         "w": 9,
+         "h": 10,
+         "baseline": 128,
+         "advance": 9,
+         "seeds": [
+          [
+           79,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "c",
+         "u": 82,
+         "v": 118,
+         "w": 7,
+         "h": 10,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           85,
+           118
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 89,
+         "v": 117,
+         "w": 12,
+         "h": 12,
+         "baseline": 128,
+         "advance": 12,
+         "seeds": [
+          [
+           94,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "l",
+         "u": 101,
+         "v": 121,
+         "w": 4,
+         "h": 7,
+         "baseline": 128,
+         "advance": 4,
+         "seeds": [
+          [
+           101,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "h",
+         "u": 105,
+         "v": 125,
+         "w": 1,
+         "h": 1,
+         "baseline": 128,
+         "advance": 1,
+         "seeds": [
+          [
+           105,
+           125
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 106,
+         "v": 120,
+         "w": 7,
+         "h": 9,
+         "baseline": 128,
+         "advance": null,
+         "seeds": [
+          [
+           108,
+           120
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 8,
+     "lang": "sv",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "Sort",
+     "hash": "0x95526378",
+     "lines": [
+      {
+       "text": "Sort",
+       "baseline": 130,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 71,
+         "v": 118,
+         "w": 9,
+         "h": 14,
+         "baseline": 130,
+         "advance": 11,
+         "seeds": [
+          [
+           76,
+           118
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 82,
+         "v": 121,
+         "w": 9,
+         "h": 10,
+         "baseline": 130,
+         "advance": 10,
+         "seeds": [
+          [
+           85,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 92,
+         "v": 121,
+         "w": 9,
+         "h": 10,
+         "baseline": 130,
+         "advance": 10,
+         "seeds": [
+          [
+           93,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 102,
+         "v": 121,
+         "w": 8,
+         "h": 10,
+         "baseline": 130,
+         "advance": null,
+         "seeds": [
+          [
+           105,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 9,
+     "lang": "da",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "Sorter",
+     "hash": "0x0137bcec",
+     "lines": [
+      {
+       "text": "Sorter",
+       "baseline": 129,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 68,
+         "v": 117,
+         "w": 9,
+         "h": 14,
+         "baseline": 129,
+         "advance": 9,
+         "seeds": [
+          [
+           73,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 77,
+         "v": 120,
+         "w": 8,
+         "h": 10,
+         "baseline": 129,
+         "advance": 8,
+         "seeds": [
+          [
+           80,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 85,
+         "v": 120,
+         "w": 7,
+         "h": 10,
+         "baseline": 129,
+         "advance": 7,
+         "seeds": [
+          [
+           86,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 92,
+         "v": 120,
+         "w": 6,
+         "h": 10,
+         "baseline": 129,
+         "advance": 6,
+         "seeds": [
+          [
+           93,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 98,
+         "v": 122,
+         "w": 7,
+         "h": 9,
+         "baseline": 129,
+         "advance": 7,
+         "seeds": [
+          [
+           100,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 105,
+         "v": 121,
+         "w": 9,
+         "h": 9,
+         "baseline": 129,
+         "advance": null,
+         "seeds": [
+          [
+           106,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

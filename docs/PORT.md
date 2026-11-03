@@ -2481,10 +2481,16 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   `--lang 5` (Spanish graphics on: not with `--no-gfx-es`) and a MAIN5.EXE whose pause list holds "Objetos"
   (es_mejorada: a `--text-patch` in memory or, as the PC launcher does it, written into data/; the check used to read
   only the in-memory patch, so the launcher's Select and Triangle screens kept "Elmto."), the sub-screen texture's
-  "Elmto." tab and "Usar elmto" leaf become "Objetos" / "Usar objeto", rebuilt in VRAM from the texture itself (tab
-  font letters cut from the "Evento" / "Estado" tabs, b = their d mirrored, O and j drawn with the same 2-px brush; the
-  leaf line cleared with the "Ver" / "Ordenar" leaves and redrawn in the leaf font's white strokes); the texture is
-  recognised by FNV hashes of the two rects.  "Inventario" was not used: it does not fit the 64-px tab nor the leaf.
+  "Elmto." tab and "Usar elmto" leaf become "Objetos" / "Usar objeto", composed in VRAM from the original artist's
+  letters only, cut at run time from the pages of the other languages on the same disc (SYSTEM/A<n>0301.000, n =
+  --lang + 1): the tab's O b j e from the Swedish "Objekt", t o from "Elmto.", s from "Estado"; the leaf's b j from
+  the Swedish "Obj", e from "ordenar", t o from "elmto".  A letter carries its shaded edge (the texels near it that
+  differ from the plank / leaf behind the text, a picture recovered from the languages with no letter there); the old
+  text gives way to that picture, the new word keeps the original steps between letters that were neighbours and sits
+  on the old baseline, centred.  The glyph table (both fonts, every letter of the five PAL languages, coordinates only)
+  is `tools/subscreen_glyphs.json`, generated with `tools/subscreen_glyphs.py` (also `--atlas`: a PNG of every glyph
+  cut from your disc, for inspection) into `runtime/subscreen_glyphs.h`; the texture and each source label are
+  recognised by an FNV hash of its rect (any other data is left alone).  "Inventario" was not used: it does not fit the 64-px tab nor the leaf.
 
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
