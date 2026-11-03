@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 75.04 % of code (1084560 of 1445372 bytes, 2638 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 76.48 % of code (1105464 of 1445372 bytes, 2642 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2638 functions, 68.66 % -> 75.04 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2642 functions, 68.66 % -> 76.48 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -152,6 +152,18 @@ counts one more reference than `f & 0x7fff` before combine and moves `f` up the 
 local (`register ... asm`) pins a saved register when a parameter and a local take each other's `s` register
 (`openMessageBox`: `anim` in `$18`, `MovieDecodeFrame`: `dec` in `$17`), with an `asm("")` so the pinned value is
 not computed in place.
+
+The weapon code (75.04 % -> 76.48 %): `weapon0Swing`, `weapon5to7Swing`, `weapon8to9Swing` and `drawWeaponObject`
+match with JP edits. The trail-sprite spawns (`spawnWeaponTrailObjects`, `spawnWeaponHitDebris`) are gone and
+`func_800EF1C8(flag, x, y, z)` is called instead: once with 1 when the weapon starts its return and once with 0
+after the swing/return cases (in `weapon5to7Swing` after cases 0-3 and 6, which gcc cross-jumps into one call
+block, so the call sits after the `if` in each case, not in each branch). `weapon8to9Swing` calls `AnimAdvance`
+in the cancel branch and no longer mirrors `waa` into `d8c`; a store to `PLAYER.b9d` next to a call taking
+`&PLAYER` is spelled through the JP symbol (`D_800A7C15`) or gcc keeps `&PLAYER` in `a0` for both.
+`drawWeaponObject` switches on the JP anim ids (bases 180/183/186, 37/35/33 cases: `0xb4`, `0xbd`, `0xc0`,
+`0xcc-0xce`, `0xd5`, `0xd8`, ...) with the `>= 0xdb` fall-back, and projects without the GTE flag test.
+`l4Type16ObjectStep` (x01) keeps the per-segment flag inside the 52-byte segment record (offset 0x22, fields +12)
+instead of the object's flag bytes and needs the default `-O2 -G0`.
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
 `a1`/`v1` instead of `t0`/`a3`, everything else matches), `func_80027D58` (increaseMaxHealth:

@@ -1,5 +1,227 @@
 // FUNC 8011e524 2460 X001
 // MATCHING 8011e524 2460
+// VERSION SLPS_01144 x01 8011D410 2516
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+typedef struct {
+    unsigned char active, visible, type, subtype, b04, step, state, substep;
+    char p08[0x14 - 8];
+    short yf, yw;
+    char p18[0x34 - 0x18];
+    int d34;
+    char p38[0x68 - 0x38];
+    unsigned char b68, b69, b6a, b6b;
+    char p6c[0x70 - 0x6c];
+    short box2;
+    char p72[0x7e - 0x72];
+    short velY;
+    char p80[0x82 - 0x80];
+    unsigned short w82;
+    char p84[0x9c - 0x84];
+    unsigned char b9c;
+    char p9d[0xa0 - 0x9d];
+    int *da0;
+    unsigned char ba4;
+    unsigned char flags[0xb2 - 0xa5];
+    unsigned short wb2;
+} O;
+typedef struct {
+    char p0[0x16];
+    short w0a;
+    char p18[0x1e - 0x18];
+    short w12;
+    char p20[0x22 - 0x20];
+    short flag;
+    char p24[0x26 - 0x24];
+    short w1a;
+    char p28[0x2e - 0x28];
+    short w22;
+    char p30[0x34 - 0x30];
+} E;
+
+extern O PLAYER;
+extern void l4Type16BendSegments(O *);
+
+#define DV ((short)o->w82 >> 8)
+
+void func_8011D410(O *o, short n)
+{
+    int *q = o->da0;
+    short cnt;
+    E *e;
+
+    q++;
+    cnt = *q++;
+    if (n < 3 || n >= cnt) return;
+    if ((*(short*)((char*)&SPAD.iec + 2)) >= 0x4b1 && o->b6a != 0) {
+        o->b6a = 0;
+        o->step = 0;
+        do {
+            ((E *)q)->w0a = 0;
+            ((E *)q)->w12 = 0;
+            ((E *)q)->w1a = 5;
+            ((E *)q)->w22 = 5;
+            ((E *)q)->flag = 0;
+            q = (int *)((E *)q + 1);
+        } while (--cnt);
+    }
+    e = (E *)q + n;
+    o->b68 = 0;
+    if ((unsigned short)(PLAYER.yw + PLAYER.box2 - (o->yw + e->w0a)) < 0x19 && PLAYER.b9c != 1) {
+        PLAYER.yw = o->yw + e->w0a - PLAYER.box2;
+        PLAYER.yf = 0;
+        PLAYER.velY = 0;
+        PLAYER.b69 = 1;
+        o->b68 = 1;
+        o->b6b = n;
+    }
+    switch (o->step) {
+    case 0: {
+        short v;
+        if (o->b68 == 0) break;
+        v = (short)PLAYER.wb2 >> 8;
+        if (v == 0) break;
+        if (v > 0) {
+            if (v < 2) o->w82 = 0x100;
+            else if (v < 3) o->w82 = 0x200;
+            else o->w82 = 0x280;
+        } else {
+            if (v >= -1) o->w82 = 0x100;
+            else if (v >= -2) o->w82 = 0x180;
+            else if (v >= -3) o->w82 = 0x200;
+            else o->w82 = 0x280;
+        }
+        if (n < cnt >> 1) o->d34 = n * DV;
+        else o->d34 = (cnt - n) * DV;
+        o->b6a = 1;
+        o->step++;
+    }
+    case 1:
+        e = (E *)q + o->b6b;
+        switch (e->flag) {
+        case 0:
+            e->w0a += DV;
+            e->w12 += DV;
+            e->w1a += DV;
+            e->w22 += DV;
+            break;
+        case 1:
+            e->w0a = e->w12;
+            e->w1a = e->w22;
+            e->flag = 0;
+            break;
+        case 2:
+            e->w12 = e->w0a;
+            e->w22 = e->w1a;
+            e->flag = 0;
+            break;
+        }
+        if (e->w0a >= o->d34) o->step++;
+        if (PLAYER.b9c != 0) break;
+        PLAYER.yw = o->yw + e->w0a - PLAYER.box2;
+        break;
+    case 2:
+        e = (E *)q + o->b6b;
+        e->w0a -= DV;
+        e->w12 -= DV;
+        e->w1a -= DV;
+        e->w22 -= DV;
+        if (PLAYER.b9c == 0) PLAYER.yw -= DV;
+        if (e->w0a > 0) break;
+        o->step++;
+        break;
+    case 3:
+        if (o->b68) {
+            if (PLAYER.wb2 >> 8) o->step = 0;
+            else o->step++;
+        }
+        if (PLAYER.b9c) o->step = 8;
+        break;
+    case 4: {
+        short a;
+        n = o->b6b;
+        o->w82 -= 0x40;
+        a = DV;
+        if (a == 0) {
+            o->step = 7;
+        } else {
+            if (n < cnt >> 1) o->d34 = n * a;
+            else o->d34 = (cnt - n) * a;
+            o->step++;
+        }
+    }
+    case 5:
+        e = (E *)q + o->b6b;
+        e->w0a += DV;
+        e->w12 += DV;
+        e->w1a += DV;
+        e->w22 += DV;
+        if (e->w0a >= o->d34) o->step++;
+        if (PLAYER.b9c) o->step += 4;
+        else PLAYER.yw += DV;
+        if (PLAYER.wb2 >> 8) o->step = 0;
+        break;
+    case 6:
+        e = (E *)q + o->b6b;
+        e->w0a -= DV;
+        e->w12 -= DV;
+        e->w1a -= DV;
+        e->w22 -= DV;
+        if (e->w0a <= 0) o->step -= 2;
+        if (PLAYER.b9c) o->step += 4;
+        else PLAYER.yw -= DV;
+        if (PLAYER.wb2 >> 8) o->step = 0;
+        break;
+    case 7:
+        if (PLAYER.wb2 >> 8) o->step = 0;
+        if (PLAYER.b9c) o->step = 0xb;
+        break;
+    case 8: {
+        short a;
+        n = o->b6b;
+        o->w82 -= 0x40;
+        a = DV;
+        if (a == 0) {
+            o->step = 0xb;
+        } else {
+            if (n < cnt >> 1) o->d34 = n * a;
+            else o->d34 = (cnt - n) * a;
+            o->step++;
+        }
+    }
+    case 9:
+        e = (E *)q + o->b6b;
+        e->w0a += DV;
+        e->w12 += DV;
+        e->w1a += DV;
+        e->w22 += DV;
+        if (e->w0a >= o->d34) o->step++;
+        if (PLAYER.b9c) break;
+        o->step -= 4;
+        PLAYER.yw += DV;
+        break;
+    case 10:
+        e = (E *)q + o->b6b;
+        e->w0a -= DV;
+        e->w12 -= DV;
+        e->w1a -= DV;
+        e->w22 -= DV;
+        if (e->w0a <= 0) o->step -= 2;
+        if (PLAYER.b9c) break;
+        o->step -= 4;
+        PLAYER.yw -= DV;
+        break;
+    case 11:
+        if (o->b68 == 0) break;
+        o->w82 = 0x100;
+        if (n < cnt >> 1) o->d34 = n;
+        else o->d34 = cnt - n;
+        o->step = 1;
+        break;
+    }
+    l4Type16BendSegments(o);
+}
+#else
 #include "spad.h"
 typedef struct {
     unsigned char active, visible, type, subtype, b04, step, state, substep;
@@ -220,3 +442,4 @@ void l4Type16ObjectStep(O *o, short n)
     }
     l4Type16BendSegments(o);
 }
+#endif
