@@ -1,5 +1,62 @@
 // FUNC 8013a8cc 492 X001
 // MATCHING 8013a8cc 492
+// VERSION SLPS_01144 x01 80138E18 448
+#if defined(VERSION_SLPS_01144)
+#include "gcd.h"
+#include "gvars.h"
+#include "TOBJ.H"
+extern TObj PLAYER;
+extern TObj *PLAYER_MESSAGE_BOX;
+extern unsigned char D_800A60F8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
+extern TObj *showMessageBox(int, int, int, int);
+extern void playerSetAnimIfChangedAt(TObj *, int, int);
+extern void FUN_8003fd78(TObj *, int, int);
+
+void func_80138E18(TObj *o)
+{
+    TObj *e = *(TObj **)&o->category;
+    TObj *p;
+
+    switch (o->step) {
+    case 0:
+        GVARS.b42 = 1;
+        GVARS.b3f = 1;
+        PLAYER.animFrame = 0;
+        PLAYER.b04 = 5;
+        PLAYER.step = 100;
+        PLAYER.state = 0;
+        playerSetAnimIfChangedAt(&PLAYER, 2, 0);
+        o->step++;
+    case 1:
+        PLAYER.h->raw += 0x10000;
+        if (PLAYER.h->p.whole >= 0x279) {
+            e->animFrame = 0;
+            *(TObj **)((char *)&PLAYER + 0x90) = showMessageBox(2, 0x19, 0x80, 0x6c);
+            playerSetAnimIfChangedAt(&PLAYER, 0, 0);
+            o->step++;
+        }
+        break;
+    case 2:
+        p = PLAYER_MESSAGE_BOX;
+        if (p->b04 == 2) {
+            p->b04 = 3;
+            GVARS.playerLanded = 1;
+            GVARS.b3f = 0;
+            GVARS.b3e = 0;
+            GVARS.b42 = 0;
+            GCD.bcede = 1;
+            D_800A60F8 = 0;
+            PLAYER_STATE = 1;
+            PLAYER_SUBSTATE = 0;
+            PLAYER_STEP = 0;
+            e->subtype = 1;
+            o->step = 0;
+            o->state = 0;
+        }
+        break;
+    }
+}
+#else
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -56,3 +113,4 @@ void raceStartCountdown(TObj *o)
         break;
     }
 }
+#endif
