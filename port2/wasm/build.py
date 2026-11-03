@@ -95,7 +95,7 @@ if want("ir"):
     sh(["wasm-ld", "-o", os.path.join(OUT, "tombi2.wasm"), "/usr/lib/wasm32-wasi/crt1-command.o", os.path.join(OUT, "game.o"),
         "-L/usr/lib/wasm32-wasi", "-lc", "-lwasi-emulated-signal", rtlib,
         "--global-base=65536",          # nothing below 64 KB: the null-page window (patch_w2c.py redirects it into port_ram)
-        "-z", "stack-size=8388608", "--initial-memory=67108864", "--max-memory=67108864",
+        "-z", "stack-size=8388608", "--initial-memory=134217728", "--max-memory=1073741824",   # (grows: --internal-res buffers)
         "--export=port_thread_entry_wasm", "--export=port_ram", "--export=__stack_pointer"])
 # 5. wasm2c (WABT, pinned tag) and the patches of its output
 W2C = os.path.join(OUT, "wabt-build", "wasm2c")
