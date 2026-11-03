@@ -243,6 +243,6 @@ def mod_args(settings, out_dir=None):
 
 
 def default_settings():
-    return {"skipintro": True, "hz60": False, "areasel": False, "titledebug": False, "area": 0, "section": 0, "ap_on": False, "ap": 10000,
+    return {"skipintro": True, "hz60": True, "areasel": False, "titledebug": False, "area": 0, "section": 0, "ap_on": False, "ap": 10000,
             "lives_on": False, "lives": 5, "inflives": False, "infhealth": False, "events": False, "debugmenu": False, "keys_on": False,
             "keys": dict(DEFAULT_KEYS), "autostart": False, "prompts": "playstation", "civ_collision": False, "civ_route": False}

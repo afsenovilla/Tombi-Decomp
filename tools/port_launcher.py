@@ -340,6 +340,8 @@ def load_settings():
         s.update(json.load(open(settings_file(), encoding="utf-8")))
     except (OSError, ValueError):
         pass
+    if not s.get("hz60_default"):     # 60 Hz became the default: settings saved before (always with hz60) move to it once
+        s["hz60"], s["hz60_default"] = True, True
     return s
 
 
@@ -2127,7 +2129,7 @@ class App(QMainWindow):
         c = self.card(None, tr("c.perf"))
         g.addWidget(c.frame, 2, 0, 1, 2)
         t = QLabel(tr("c.speed")); t.setObjectName("cellTitle"); c.addWidget(t)
-        c.addWidget(self.segmented("hz60", bool, False, [("50 Hz (PAL)", False), ("60 Hz", True)], min_w=110))
+        c.addWidget(self.segmented("hz60", bool, True, [("50 Hz (PAL)", False), ("60 Hz", True)], min_w=110))
         c.addWidget(wrap_label(tr("l.speedhint"), "muted"))
         c.addSpacing(10)
         t = QLabel(tr("c.fps")); t.setObjectName("cellTitle"); c.addWidget(t)

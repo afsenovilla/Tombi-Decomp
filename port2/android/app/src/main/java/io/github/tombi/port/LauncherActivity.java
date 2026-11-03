@@ -287,7 +287,8 @@ public class LauncherActivity extends Activity {
         h[0] = (h[0] + dh + 360) % 360; h[1] = Math.max(0, Math.min(1, h[1] + ds / 100f)); h[2] = Math.max(0, Math.min(1, h[2] + dv / 100f));
         return Color.HSVToColor(h) & 0xFFFFFF;
     }
-    boolean flag(String k, boolean def) { return prefs.getBoolean(k, def); }
+    // 60 Hz (NTSC speed, the speed the game was made for) is the default; 50 Hz is the original PAL speed, slower
+    boolean flag(String k, boolean def) { return prefs.getBoolean(k, "hz60".equals(k) || def); }
     /* second screen panel (runtime/panel.c, TombiActivity): default on when the device has a secondary display */
     boolean hasSecondDisplay() {
         try {
