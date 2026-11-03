@@ -287,6 +287,27 @@ static void load_fonts(void) {
         for (int p = 0; p < n; p++) { int v = (g->img[p >> 1] >> ((p & 1) * 4)) & 15, q = n - 1 - p; img[q >> 1] |= (u8)(v << ((q & 1) * 4)); }
         glyphs[k][inv].w = g->w; glyphs[k][inv].h = g->h; glyphs[k][inv].img = img;
     }
+    /* the 8 px font's acute accents: the game draws them in its light edge shades, which vanish on the cream windows, its
+       i-acute has a smeared accent and u-acute is missing.  Its accented small letters sit one row lower than the plain
+       ones, the accent in rows 0-1: u-acute is built that way from u, i-acute from i on its own line (the accent in
+       place of the dot, so it lines up with the plain letters), and every acute gets a solid stroke. */
+    {   static const u8 acute[][2] = { {0xE1, 'a'}, {0xE9, 'e'}, {0xED, 'i'}, {0xF3, 'o'}, {0xFA, 'u'}, {0xC1, 'A'} };
+        static const u8 stroke[2][8] = { {0, 0, 0, 0, 1, 1, 2, 0}, {0, 0, 0, 1, 1, 2, 0, 0} };
+        for (unsigned a = 0; a < sizeof acute / sizeof acute[0]; a++) {
+            Glyph *g = &glyphs[0][acute[a][0]]; const Glyph *b = &glyphs[0][acute[a][1]];
+            int build = acute[a][0] == 0xED || acute[a][0] == 0xFA;
+            if (build ? !b->img || b->w != 8 || b->h != 8 : !g->img || g->w != 8 || g->h != 8) continue;
+            u8 *img = calloc(32, 1);
+            if (!img) continue;
+            for (int p = 16; p < 64; p++) {
+                int q = acute[a][1] == 'i' ? p : p - 8;   /* the i keeps its line (its dot row is where the accent goes) */
+                int v = build ? (p < 24 ? 0 : (b->img[q >> 1] >> ((q & 1) * 4)) & 15) : (g->img[p >> 1] >> ((p & 1) * 4)) & 15;
+                img[p >> 1] |= (u8)(v << ((p & 1) * 4));
+            }
+            for (int j = 0; j < 2; j++) for (int i = 0; i < 8; i++) img[(j * 8 + i) >> 1] |= (u8)(stroke[j][i] << ((i & 1) * 4));
+            g->w = 8; g->h = 8; g->img = img;
+        }
+    }
     int n8 = 0, n16 = 0, n24 = 0;
     for (int c = 0; c < 256; c++) { n8 += !!glyphs[0][c].img; n16 += !!glyphs[1][c].img; n24 += !!glyphs[2][c].img; }
     pa_font_ok = n16 > 40;

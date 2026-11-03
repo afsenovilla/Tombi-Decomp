@@ -3052,7 +3052,7 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   `port2/tools/gen_panel_events.py` from `tools/objects.py` room lists and the `setEventStarted` / `setEventComplete` call
   sites of `src/`; coverage per event in `docs/EVENTS_MAP.md`); unknown ones show *ubicación desconocida*.
   Hiding: *Ocultar* (the selected event; *Mostrar* when it is hidden), a long press (0.6 s) on its row, `H` in the PC
-  panel window, `--panel-input hide`; hidden events leave the lists, the Status tab's *En curso* box and the map markers
+  panel window, `--panel-input hide`; hidden events leave the lists, the Status tab's next goal and the map markers
   until *Ocultos: sí* (`V`, `showhidden`) lists them again, dimmed and marked *Oculto*. Kept in `panel_hidden.txt` next
   to the memory cards (`--save-dir`; Android `files/saves`), the event ids on one line. Event 0 *La pulsera del abuelo*
   is started by the intro and completed only by the ending's scene sequence (AREA13 s1, type 0x56, X013 op 7 arg 0,
@@ -3105,7 +3105,7 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
     (mean / max, views composed, tiles built and the build slices' time per vblank).
   - Markers: the events panel_eventmap.h places in the section (and the sections sharing its model), icons at 2x
     outlined (pending ones as a silhouette); Tomba's face at 2x at PLAYER x / y, flipped to the side he faces (PLAYER
-    +0xA6: 0 left, 2 right). Views under 200 canvas pixels high (the Status tab's graph, the event page) draw them at 1x.
+    +0xA6: 0 left, 2 right). Views under 200 canvas pixels high (the event page's graph) draw them at 1x.
   - Pixel perfect zoom: each level's scale is snapped to whole canvas pixels per world unit (1 / m) or whole world units
     per pixel (n; level 1 rounds up so the whole map fits): AREA05's picture (864 x 608) at 3 / 2 / 1 picture pixels per
     canvas pixel.
@@ -3147,14 +3147,19 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   and the D-pad / keys move the cursor with the grid following it. Headless: `--panel-input
   3060:tabr,3065:tabr,3070:tabr,3200:drag@290@300@290@150` scrolls it (the dump at 3300 shows the flung view); the
   other tabs' dumps are byte-identical to the previous build.
-- Status tab trial (2026-11-03, `runtime/panel_status.inc`): `PORT_PANEL_STATUS_STYLE=1..4` replaces the page (0 or unset:
-  the map graph page above, unchanged). 1 character sheet (fruit / lives / AP at 2x, equipment with names, progress
-  bars: events completed of the menu's list, in progress, regions revealed, items, the room); 2 "what next" (the room,
-  the in-progress events as cards: icon 2x, title, a here / this area / elsewhere plate, the room, the giver / hint;
-  tracked first, then this room by distance to Tomba, this area, other areas; a stats strip on stone); 3 dashboard
-  (2 x 2: vitality, equipped, progress, the next goal); 4 showcase like the item tab (Tomba's face 3x, fruit 2x, stats
-  and equipment on the left; on the right the completed count and bar over the in-progress cards, the first in the
-  blinking yellow frame, dragged / D-pad scrolled). Weapon / pants / accessories as `it_in_use` reads them.
+- Status tab (*Estado*, `runtime/panel_status.inc`; 2026-11-03, chosen among four rendered layouts, replacing the page
+  with the area's route graph): a 2 x 2 dashboard of cream windows. *Vitalidad*: the HUD's fruit at 2x, lives, AP.
+  *Equipado*: the weapon and the pants / suit (icons at 2x with names) and the accessories in use, as the item menu's
+  in-use marks read them (`it_in_use`). *Progreso*: events completed of the pause menu's list (the count in the HUD's
+  digits at 3x and a bar), regions revealed, items carried, play time. *Objetivo* (*Siguiendo* when tracked): the
+  first in-progress event in nearest-first order: icon, title, its place plate, where, who / what starts it.
+- Place plates (Status and the *En curso* list of the event tab): *Aquí* (green: the room Tomba is in), *Esta zona*
+  (orange: another room of this area, the room's name shown), *Otra zona* (brown: area - room), *Cualquiera* (used
+  from the item menu). The *En curso* list is sorted nearest first: tracked, this room (by distance to Tomba's x),
+  this area, other areas, anywhere, unknown, the grandfather's bracelet last; the other filters keep the menu's order.
+- 8 px font accents: the game draws its acute accents in the light edge shades (they vanished on the cream windows),
+  its i-acute is smeared and u-acute is missing; at load the acute letters get a solid 2-row stroke, i-acute is the i
+  with the accent in place of its dot, u-acute the u one row lower as the game's other accented letters.
 - Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
 - `--hud-bottom` (Android launcher: *HUD en la pantalla inferior*, default on when a secondary display exists; it is
   passed only with the second screen): while the panel is on (PC / headless: always; Android: while the Presentation polls
@@ -3174,11 +3179,10 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
 - Header: the area and room names of the game's own map screen (`MAP_AREA_NAMES[link.c]`, `MAP_ROOM_NAMES[link.c][link.d]`
   of the room's `MAP_LINKS` entry, `MAP_ROOM_LINK[area][section]`; AREA14 by section) and the play time.
 - Layout: the wooden title bar (area name), three tabs (Estado / Eventos / Mapa (Cenital in top-down sections)), pink page in a stone border, cream windows.
-- Status: the HUD's vitality fruit (segments = vitality / max, the number in the middle), lives, AP, play time, events seen.
-- Events in progress: SCRIPT_FLAGS 1..0xFE of ids 0..0x81 with their icons and names (`EVENT_NAME_STRINGS`).
-- Map: the game's map graph seen from above (x, z of `MAP_NODES`), the routes (`MAP_AREA_ROUTES`) of each region the player
-  has revealed (`D_8009D2C4[region]`) plus the current one, the room's link in pink with a marker on its middle (where
-  `subScreenMapInitMarker` puts the pause map's marker). Not drawn: the pause map's 3D terrain model, its icons.
+- Status: see *Status tab* above (vitality, equipment, progress, next goal).
+- Map graph (the event page's *Dónde*): the game's map graph seen from above (x, z of `MAP_NODES`), the routes
+  (`MAP_AREA_ROUTES`) of each region the player has revealed (`D_8009D2C4[region]`) plus the current one, the event's
+  room marked. Not drawn: the pause map's 3D terrain model, its icons.
 - The tables come from the user's disc at start: `SYSTEM/D0SPSUB.BIN` for the graph (MAIN0 addresses), `SYSTEM/DnSPSUB.BIN`
   (n = `--lang`) for the names: that file is linked elsewhere, so each pointer table is the run of overlay pointers of the
   same length nearest to MAIN0's (checked on all nine languages). Strings: the sub-screen glyph ids (`tools/subscreen_text.py`).

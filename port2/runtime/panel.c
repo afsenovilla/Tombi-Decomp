@@ -414,25 +414,6 @@ static int count_events(int *started, int *done) {
     if (started) *started = s; if (done) *done = d;
     return s + d;
 }
-static void draw_status(int x, int y, int w, int h) {
-    char b[48]; int ly = y + 10;
-    window_(x, y, w, h);
-    fruit(x + 8, ly - 4, G_HEALTH, G_MAXHEALTH);
-    lives(x + w - 44, ly + 8, G_LIVES);
-    { extern int panel_weapon_icon(int, int); panel_weapon_icon(x + w - 24, y + 104); }   /* runtime/panel_hud.c: the HUD weapon icon, right of the play time */
-    ly += 50;
-    ap_badge(x + 10, ly + 1); fmt_ap(b, sizeof b, G_AP); pa_text_fit(x + 46, ly, 16, w - 54, b, C_DARK, C_EDGE);
-    ly += 22;
-    u32 t = G_TIME / 50;
-    if (ly + 34 <= y + h) {
-        pa_text(x + 10, ly, 16, T("Time", "Tiempo"), C_RED, C_REDE);
-        snprintf(b, sizeof b, "%02u:%02u:%02u", t / 3600, t / 60 % 60, t % 60);
-        pa_text(x + 10, ly + 16, 16, b, C_DARK, C_EDGE);
-        ly += 40;
-    }
-    int s, d; count_events(&s, &d);
-    if (ly + 16 <= y + h - 6) { snprintf(b, sizeof b, T("Events %d", "Eventos %d"), s + d); pa_text(x + 10, ly, 16, b, C_DARK, C_EDGE); }
-}
 static const char *ev_title(int e, char *b, int n) {
     if (e >= 0 && e < EVENTS && ev_name[e]) return ev_name[e];
     snprintf(b, n, T("Event %d", "Evento %d"), e); return b;
@@ -442,48 +423,12 @@ static int ev_count(void) { return ev_norder ? ev_norder : EVENTS; }
 static int ev_id(int k) { return ev_norder ? ev_order[k] : k; }
 static int ev_hidden_now(int e);   /* panel_events.inc: hidden by the player (panel_hidden.txt) */
 static int ev_pins(int *ids);      /* panel_events.inc: the pinned events (panel_pins.txt), at most 4 */
-static void pin_mark(int x, int y, unsigned c);
-static void pin_row(int x, int y, int w, int e);
-static void draw_in_progress(int x, int y, int w, int h) {
-    char b[48]; int ids[EVENTS], n = 0, pins[4], np = ev_pins(pins);
-    if (np) {   /* the events the player follows: title, state, place and a hint, then what is left of the box for the rest */
-        int ph = 28 + np * 34; if (ph > h - 28) ph = h - 28;
-        window_(x, y, w, ph);
-        pin_mark(x + 10, y + 6, C_RED);
-        pa_text(x + 24, y + 6, 16, T("Tracking", "Seguimiento"), C_RED, C_REDE);
-        for (int i = 0; i < np && 24 + i * 34 + 32 <= ph; i++) pin_row(x + 8, y + 24 + i * 34, w - 16, pins[i]);
-        y += ph + 4; h -= ph + 4;
-    }
-    for (int k = 0; k < ev_count(); k++) { int e = ev_id(k), v = G_EVENT(e); int p = 0; for (int i = 0; i < np; i++) p |= pins[i] == e; if (v && v != 0xFF && !ev_hidden_now(e) && !p) ids[n++] = e; }
-    if (h < 30) return;
-    window_(x, y, w, h);
-    pa_text(x + 10, y + 6, 16, T("In progress", "En curso"), C_RED, C_REDE);
-    int ly = y + 24, lh = 20, max = (h - 30) / lh;
-    if (!n) { pa_text(x + 34, ly, 16, T("None right now", "Ninguno ahora mismo"), C_MUTED, C_EDGE); return; }
-    for (int i = 0; i < n && i < max; i++) {
-        if (i == max - 1 && n > max) { snprintf(b, sizeof b, T("+ %d more", "+ %d m\xE1s"), n - i); pa_text(x + 34, ly, 16, b, C_MUTED, C_EDGE); break; }
-        pa_event_icon(x + 8, ly + 1, ids[i], 0);
-        pa_text_fit(x + 36, ly, 16, w - 46, ev_title(ids[i], b, sizeof b), C_DARK, C_EDGE);
-        ly += lh;
-    }
-}
-
-static int page_status_alt(int play, int link);   /* panel_status.inc: PORT_PANEL_STATUS_STYLE 1..4 (trial) */
+static void page_status(void);   /* panel_status.inc: the 2 x 2 dashboard */
 static void page_map(int play, int link) {
-    int W = pa_cw, H = pa_ch, top = 56, g = 6;
-    if (page_status_alt(play, link)) return;
-    if (!play) { draw_map(8, top, W - 16, H - top - 8, -1); return; }
-    if (W >= H) {
-        int sw = W * 34 / 100, mw = W - 16 - sw - g, mh = (H - top - 8) * 56 / 100;
-        map_ev_marks = 1; draw_map(8, top, mw, mh, link); map_ev_marks = 0;
-        draw_status(8 + mw + g, top, sw, mh);
-        draw_in_progress(8, top + mh + g, W - 16, H - top - mh - g - 8);
-    } else {
-        int mh = (H - top - 8) * 42 / 100, sh = 150;
-        map_ev_marks = 1; draw_map(8, top, W - 16, mh, link); map_ev_marks = 0;
-        draw_status(8, top + mh + g, W - 16, sh);
-        draw_in_progress(8, top + mh + sh + 2 * g, W - 16, H - top - mh - sh - 2 * g - 8);
-    }
+    (void)link;
+    if (play) { page_status(); return; }
+    window_(8, 56, pa_cw - 16, pa_ch - 64);
+    pa_text(20, 70, 16, T("Waiting for the game...", "Esperando a la partida..."), C_MUTED, C_EDGE);
 }
 
 static void room_names(int play, int area, int sec, int link, const char **an, const char **rn) {

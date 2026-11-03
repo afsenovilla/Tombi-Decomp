@@ -87,9 +87,31 @@ static int ev_link_state(int link) {   /* the menu's events placed at this room 
     }
     return st;
 }
+/* how far an event is from Tomba: 0 this room, 1 this area, 2 another area, 3 anywhere (an item from the menu), 4 not
+   known; the grandfather's bracelet (event 0: in progress all game long) last */
+enum { D_HERE, D_AREA, D_AWAY, D_ANY, D_UNKNOWN, D_LAST = 6 };
+static int ev_dist(int e) {
+    const PanelEventLoc *L = ev_loc(e);
+    if (e == 0) return D_LAST;
+    if (!L) return D_UNKNOWN;
+    if (L->area == 254) return D_ANY;
+    if (L->area != G_AREA) return D_AWAY;
+    return L->sec == G_SECTION ? D_HERE : D_AREA;
+}
+static int ev_pinned(int e);
+/* nearest first (stable): the tracked ones, then this room by distance to Tomba (PLAYER x), this area, other areas */
+static void ev_near_sort(int *ids, int n) {
+    int px = (s16)G16(0x800A604Au), key[EVENTS];
+    for (int i = 0; i < n; i++) {
+        const PanelEventLoc *L = ev_loc(ids[i]); int d = ev_dist(ids[i]);
+        key[i] = ev_pinned(ids[i]) ? -1 : d * 100000 + (d == D_HERE ? (L->x == -32768 ? 99999 : abs(L->x - px) < 99999 ? abs(L->x - px) : 99999) : 0);
+    }
+    for (int i = 1; i < n; i++) for (int j = i; j > 0 && key[j] < key[j - 1]; j--) { int t = key[j]; key[j] = key[j - 1]; key[j - 1] = t; t = ids[j]; ids[j] = ids[j - 1]; ids[j - 1] = t; }
+}
 static int ev_list(int *ids) {
     int n = 0;
     for (int k = 0; k < ev_count(); k++) { int e = ev_id(k); if (ev_state(e) == ev_filter && (ev_norder || ev_name[e] || ev_loc(e)) && !ev_hidden_now(e)) ids[n++] = e; }
+    if (ev_filter == F_PROGRESS) ev_near_sort(ids, n);
     return n;
 }
 static const char *filter_name(int f) {
@@ -116,6 +138,35 @@ static const char *place_room(int area, int sec) {
     int l = area < 20 && sec < 24 ? roomlink[area][sec] : -1;
     return l >= 0 && links[l][2] < 12 && links[l][3] < 24 ? room_name[links[l][2]][links[l][3]] : NULL;
 }
+static const char *dist_name(int d) {
+    switch (d) {
+    case D_HERE: return T("Here", "Aqu\xED");
+    case D_AREA: return T("This area", "Esta zona");
+    case D_AWAY: return T("Elsewhere", "Otra zona");
+    case D_ANY: return T("Anywhere", "Cualquiera");
+    default: return NULL;
+    }
+}
+/* where an in-progress event is: a coloured plate (green here, orange this area, brown elsewhere) at (x, y), 12 high;
+   returns its width (0: none) */
+static int dist_plate(int x, int y, int e) {
+    int d = ev_dist(e); const char *s = dist_name(d);
+    if (!s) return 0;
+    int w = pa_text_w(8, s) + 8;
+    u32 c = d == D_HERE ? RGB(56, 140, 56) : d == D_AREA ? RGB(200, 110, 30) : RGB(130, 96, 80);
+    pa_fill(x, y, w, 12, C_DARK); pa_fill(x + 1, y + 1, w - 2, 10, c);
+    pa_text_ol(x + 4, y + 2, 8, s, C_WHITE, C_WOODE, 0);
+    return w;
+}
+/* the place of an event: "area - room", the room alone in the area Tomba is in */
+static void ev_place(int e, char *b, int n) {
+    const PanelEventLoc *L = ev_loc(e);
+    const char *ar = L ? place_area(L->area, L->sec) : NULL, *rm = L && L->area != 254 ? place_room(L->area, L->sec) : NULL;
+    if (rm && ar && !strcmp(rm, ar)) rm = NULL;
+    else if (rm && L->area == G_AREA) ar = NULL;
+    if (!ar && rm) { snprintf(b, n, "%s", rm); return; }
+    snprintf(b, n, "%s%s%s", ar ? ar : T("zone not extracted yet", "zona a\xFAn sin extraer"), rm ? " - " : "", rm ? rm : "");
+}
 static void pin_mark(int x, int y, unsigned c) {   /* a push pin, 10 x 14: round head, needle */
     pa_fill(x + 2, y, 7, 7, RGB(60, 20, 10)); pa_fill(x + 3, y + 1, 5, 5, c);
     pa_fill(x + 1, y + 6, 9, 2, RGB(60, 20, 10));
@@ -123,17 +174,6 @@ static void pin_mark(int x, int y, unsigned c) {   /* a push pin, 10 x 14: round
 }
 static const char *kind_name(int k), *ev_giver(int e);
 static const char *place_area(int area, int sec), *place_room(int area, int sec);
-static void pin_row(int x, int y, int w, int e) {   /* Status: a tracked event, two lines */
-    char b[160], t[96]; int st = ev_state(e);
-    const PanelEventLoc *L = ev_loc(e);
-    pa_event_icon(x, y + 4, e, st == F_PENDING ? PA_DIM : 0);
-    pa_text_fit(x + 28, y, 16, w - 30, st == F_PENDING ? "? ? ?" : ev_title(e, t, sizeof t), st == F_DONE ? C_GREEN : C_DARK, C_EDGE);
-    const char *ar = L ? place_area(L->area, L->sec) : NULL, *rm = L ? place_room(L->area, L->sec) : NULL;
-    const char *hint = st == F_PENDING ? NULL : ev_giver(e) ? ev_giver(e) : L ? kind_name(L->kind) : NULL;
-    snprintf(b, sizeof b, "%s  -  %s%s%s%s%s", state_name(st), ar ? ar : T("zone not extracted yet", "zona a\xFAn sin extraer"), rm ? ", " : "", rm ? rm : "",
-             hint ? "  -  " : "", hint ? hint : "");
-    text_wrap(x + 28, y + 16, 8, w - 30, 9, 2, 0, b, st == F_PROGRESS ? C_RED8 : C_MUTED8, RGB(230, 200, 190));
-}
 static const char *ev_giver(int e) {   /* panel_givers.h, in the panel's language */
     for (unsigned i = 0; i < sizeof panel_givers / sizeof panel_givers[0]; i++) if (panel_givers[i].ev == e) return T(panel_givers[i].en, panel_givers[i].es);
     return NULL;
@@ -179,10 +219,15 @@ static void event_list(void) {
         pa_event_icon(16, y + 5, e, pend ? PA_DIM : hid ? PA_SHADE : 0);
         pa_text_fit(46, y - 1, 16, W - 60 - (ev_pinned(e) ? 18 : 0), pend ? "? ? ?" : ev_title(e, b, sizeof b), sel ? C_WHITE : hid ? C_MUTED : st == F_DONE ? C_GREEN : C_DARK, sel ? RGB(60, 110, 50) : C_EDGE);
         const char *ar = L ? place_area(L->area, L->sec) : NULL;
-        snprintf(b, sizeof b, "%s%s  -  %s", hid ? T("Hidden - ", "Oculto - ") : "", state_name(st), ar ? ar : T("zone not extracted yet", "zona a\xFAn sin extraer"));
-        int tr = ev_pinned(e) ? 18 : 0;
+        int tr = ev_pinned(e) ? 18 : 0, pw = 0;
+        if (st == F_PROGRESS) {   /* in progress: where, as the plate and the place (the room, in this area) */
+            char pl[128];
+            pw = dist_plate(46, y + 15, e); if (pw) pw += 5;
+            ev_place(e, pl, sizeof pl);
+            snprintf(b, sizeof b, "%s%s", hid ? T("Hidden - ", "Oculto - ") : "", pl);
+        } else snprintf(b, sizeof b, "%s%s  -  %s", hid ? T("Hidden - ", "Oculto - ") : "", state_name(st), ar ? ar : T("zone not extracted yet", "zona a\xFAn sin extraer"));
         if (tr) pin_mark(W - 30, y + 2, sel ? C_WHITE : C_RED);
-        pa_text_fit(46, y + 16, 8, W - 60 - tr, b, sel ? C_WHITE : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
+        pa_text_fit(46 + pw, y + (st == F_PROGRESS ? 17 : 16), 8, W - 60 - tr - pw, b, sel ? C_WHITE : st == F_PROGRESS ? C_RED8 : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
     }
     int by = y0 + rows * rh + 4;
     snprintf(b, sizeof b, "%d / %d", n ? ev_sel + 1 : 0, n);
@@ -273,7 +318,6 @@ static void panel_action(int a) {
     if (page == PAGE_SIDE) { map_action(a); return; }
     if (page == PAGE_ITEMS) { void items_action_(int); items_action_(a); return; }
     if (page != PAGE_EVENTS && page != PAGE_MAP) return;
-    if (page == PAGE_MAP) { void st_action_(int); st_action_(a); }
     if (a == IN_SHOW_HIDDEN) { ev_show_hidden = !ev_show_hidden; ev_sel = ev_top = 0; return; }
     if (page != PAGE_EVENTS) return;
     if (ev_detail >= 0) { if (a == IN_BACK || a == IN_OK) ev_detail = -1; else if (a == IN_HIDE) ev_hide_toggle(ev_detail); else if (a == IN_PIN) ev_pin_toggle(ev_detail); return; }
@@ -314,7 +358,6 @@ static void panel_touch_canvas(int x, int y, int action) {   /* action: 0 down, 
     int id = -1;
     if (page == PAGE_SIDE && map_touch(x, y, action)) { touch_id = -1; return; }
     if (page == PAGE_ITEMS) { int items_touch_(int, int, int); if (items_touch_(x, y, action)) { touch_id = -1; return; } }
-    if (page == PAGE_MAP) { int st_touch_(int, int, int); if (st_touch_(x, y, action)) { touch_id = -1; return; } }
     for (int i = nhs - 1; i >= 0; i--) if (x >= hs[i].x && y >= hs[i].y && x < hs[i].x + hs[i].w && y < hs[i].y + hs[i].h) { id = hs[i].id; break; }
     if (action == 0) { touch_id = id; touch_t0 = port_frame; }
     else if (action == 1) { touch_long = port_frame - touch_t0 >= 30; if (id >= 0 && id == touch_id) panel_hit(id); touch_id = -1; touch_long = 0; }
