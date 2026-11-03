@@ -121,9 +121,9 @@ i18n.add({   # Edit save... (the save editor in a window of the launcher); the o
            "s.editopen": "Close the save editor before playing."},
 })
 i18n.add({   # Import save...: a save with the same name already on the card (save_import.Conflict)
-    "es": {"t.savedup": "Ya existe la partida", "b.savereplace": "Reemplazar", "b.saveother": "Guardar en la otra tarjeta",
+    "es": {"t.savedup": "Ya existe la partida", "b.savereplace": "Reemplazar", "b.saveslot": "Guardar en otra ranura",
            "b.savecancel": "Cancelar"},
-    "en": {"t.savedup": "Save already there", "b.savereplace": "Replace", "b.saveother": "Save to the other card",
+    "en": {"t.savedup": "Save already there", "b.savereplace": "Replace", "b.saveslot": "Save to another slot",
            "b.savecancel": "Cancel"},
 })
 
@@ -2725,8 +2725,8 @@ class App(QMainWindow):
                 choice = self.ask_save_conflict(c)
                 if choice is None:
                     return
-                if choice == "other":
-                    lines, warn = SI.import_file(p, SI.other_card(dest), es=i18n.current() == "es")
+                if choice == "slot":
+                    lines, warn = SI.import_file(p, dest, new_slot=True, es=i18n.current() == "es")
                 else:
                     lines, warn = SI.import_file(p, dest, overwrite=True, es=i18n.current() == "es")
         except (SI.ImportError_, OSError) as e:
@@ -2737,19 +2737,20 @@ class App(QMainWindow):
 
     def ask_save_conflict(self, c):
         """the card already holds a save with that name: Replace (the card is copied into backup/ first) / Save to
-        the other card (only when it has room and no save of that name) / Cancel -> "replace", "other" or None"""
+        another slot of the card (only when it has room and a free slot number: c.new_slot, named in the question) /
+        Cancel -> "replace", "slot" or None"""
         box = QMessageBox(self)
         box.setWindowTitle(tr("t.savedup"))
         box.setIcon(QMessageBox.Question)
         box.setText(c.question(i18n.current() == "es"))
         rep = box.addButton(tr("b.savereplace"), QMessageBox.AcceptRole)
-        oth = box.addButton(tr("b.saveother"), QMessageBox.ActionRole) if c.other_ok else None
+        oth = box.addButton(tr("b.saveslot"), QMessageBox.ActionRole) if c.new_slot else None
         can = box.addButton(tr("b.savecancel"), QMessageBox.RejectRole)
         box.setDefaultButton(can)
         box.setEscapeButton(can)
         box.exec()
         b = box.clickedButton()
-        return "replace" if b is rep else "other" if oth is not None and b is oth else None
+        return "replace" if b is rep else "slot" if oth is not None and b is oth else None
 
     def export_save(self):
         import save_import as SI

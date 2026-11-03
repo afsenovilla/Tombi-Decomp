@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests of tools/save_import.py on synthetic saves (no game data): import, same-name conflict, overwrite with the same
-and with a different block count, the other card, backups (last 5 kept), the CLI's --overwrite.  The resulting cards
+and with a different block count, another slot, backups (last 5 kept), the CLI's --overwrite.  The resulting cards
 are checked frame by frame (XORs, link chains, free blocks) and loaded with tools/tombi_save.py.
 
 Real cards can be used as the starting point too: TOMBI_TEST_CARDS=DIR (holding tombi_mc0.mcd / tombi_mc1.mcd) copies
@@ -22,7 +22,8 @@ def fake_save(slot=0, area=0, minutes=0, blocks=1, fill=0):
     f[10:30] = name; f[0x7F] = S.xor(f[:0x7F])
     d = bytearray(blocks * S.BLOCK)
     d[0:4] = b"SC\x11\x01"
-    t = ("ＴＯＭＢＩ！−Ｂ［%02d］　%03d：%02d" % (slot, minutes // 60, minutes % 60)).encode("shift_jis")
+    fw = lambda x: "".join(chr(0xFF10 + int(ch)) for ch in x)     # fullwidth digits, as the game writes them
+    t = ("ＴＯＭＢＩ！−Ｂ［%s］　%s：%s" % (fw("%02d" % slot), fw("%03d" % (minutes // 60)), fw("%02d" % (minutes % 60)))).encode("shift_jis")
     d[4:4 + len(t)] = t
     g = 0x200
     struct.pack_into("<H", d, g, area); struct.pack_into("<I", d, g + 8, minutes * 3000)
@@ -101,22 +102,22 @@ class TestSaveImport(unittest.TestCase):
         self.clear_slot0()
         a = self.mcs("a.mcs", slot=0, area=5, minutes=83, fill=1)
         lines, _ = S.import_file(a, self.c0)
-        self.assertIn("Ranura 00 · Baccus Village · 1:23 h", lines[0])
+        self.assertIn("Ranura 00 · Ciudad Baco · 1:23 h", lines[0])
         check_card(self, self.c0)
         b = self.mcs("b.mcs", slot=0, area=9, minutes=200, fill=2)
         with self.assertRaises(S.Conflict) as cm:
             S.import_file(b, self.c0)
         e = cm.exception
-        self.assertEqual((e.existing, e.incoming), ("Ranura 00 · Baccus Village · 1:23 h",
-                                                    "Ranura 00 · Mushroom Village · 3:20 h"))
-        self.assertIn("en la tarjeta 1. ¿Reemplazarla?", e.question())
-        self.assertIn("Memory card 1", e.question(es=False))
-        self.assertTrue(e.other_ok)                       # card 2 is empty or does not exist yet
+        self.assertEqual((e.existing, e.incoming), ("Ranura 00 · Ciudad Baco · 1:23 h",
+                                                    "Ranura 00 · Bosque de setas · 3:20 h"))
+        self.assertIn("en la tarjeta. ¿Reemplazarla?", e.question())
+        self.assertIn("The memory card already holds", e.question(es=False))
+        self.assertIsNotNone(e.new_slot)                  # the card has room and a free slot
         before = open(self.c0, "rb").read()
         blk = S.find_save(before, "BESCES-01331TOMBA-00")
         self.assertEqual(open(self.c0, "rb").read(), before)   # a refused import writes nothing
         lines, _ = S.import_file(b, self.c0, overwrite=True)
-        self.assertIn("Sustituye a «Ranura 00 · Baccus Village", lines[1])
+        self.assertIn("Sustituye a «Ranura 00 · Ciudad Baco", lines[1])
         c = check_card(self, self.c0)
         self.assertEqual(S.find_save(c, "BESCES-01331TOMBA-00"), blk)   # same place
         self.assertEqual(save_bytes(c, "BESCES-01331TOMBA-00"), fake_save(slot=0, area=9, minutes=200, fill=2)[S.FRAME:])
@@ -172,21 +173,74 @@ class TestSaveImport(unittest.TestCase):
         self.assertEqual(open(self.c0, "rb").read(), bytes(c))   # nothing written
         check_card(self, self.c0)
 
-    def test_other_card(self):
+    def test_area_names(self):
+        """Spanish: the improved translation's map names (by area and section); English: the English table"""
+        self.assertEqual(S.area_name(0), "Ciudad de todo principio")
+        self.assertEqual(S.area_name(10, 3), "Ciudad de trucos")
+        self.assertEqual(S.area_name(10, 30), "Jungla profunda")     # past the table: section 0's
+        self.assertEqual(S.area_name(14, 0), "Área Cerdiablo uno")
+        self.assertEqual(S.area_name(6, 2), "Motocross sucio")
+        self.assertIsNone(S.area_name(7))
+        self.assertEqual(S.area_name(5, 0, es=False), "Baccus Village")
+        self.assertEqual(sorted(S.AREA_REGIONS_ES), sorted(S.AREAS_EN))
+        g = bytearray(fake_save(slot=3, area=10, minutes=61))
+        struct.pack_into("<H", g, S.FRAME + 0x202, 7)
+        g[S.FRAME + 0xBFF] = S.xor(g[S.FRAME + 0x200:S.FRAME + 0xBFF])
+        self.assertEqual(S.save_info("BESCES-01331TOMBA-03", g[S.FRAME:]), "Ranura 03 · Ciudad de trucos · 1:01 h")
+        self.assertEqual(S.save_info("BESCES-01331TOMBA-03", g[S.FRAME:], es=False), "Slot 03 · Deep Jungle · 1:01 h")
+
+    def test_new_slot(self):
+        """Save to another slot: the save goes in as the first free slot of the same card (file name and title digits),
+        the original stays as it was, the card stays valid and tombi_save.py reads the new save"""
         self.clear_slot0()
-        a = self.mcs("a.mcs", slot=0, fill=1)
-        S.import_file(a, self.c0)
+        for k in (1, 2):
+            if os.path.exists(self.c0):
+                c = S.read_card(self.c0)
+                b = S.find_save(c, "BESCES-01331TOMBA-%02d" % k)
+                if b is not None:
+                    S.delete_save(c, b); open(self.c0, "wb").write(c)
+        S.import_file(self.mcs("a.mcs", slot=0, area=5, minutes=10, fill=1), self.c0)
+        S.import_file(self.mcs("s1.mcs", slot=1, fill=11), self.c0)
+        b = self.mcs("b.mcs", slot=0, area=9, minutes=20, fill=2)
         with self.assertRaises(S.Conflict) as cm:
+            S.import_file(b, self.c0)
+        self.assertEqual(cm.exception.new_slot, "02")
+        self.assertIn("Ranura 02", cm.exception.question())
+        self.assertIn("Slot 02", cm.exception.question(es=False))
+        before = open(self.c0, "rb").read()
+        lines, _ = S.import_file(b, self.c0, new_slot=True)
+        self.assertIn("Ranura 02 · Bosque de setas · 0:20 h", lines[0])
+        c = check_card(self, self.c0)
+        self.assertEqual(save_bytes(c, "BESCES-01331TOMBA-00"), save_bytes(before, "BESCES-01331TOMBA-00"))
+        self.assertEqual(save_bytes(c, "BESCES-01331TOMBA-01"), save_bytes(before, "BESCES-01331TOMBA-01"))
+        new = save_bytes(c, "BESCES-01331TOMBA-02")
+        exp = bytearray(fake_save(slot=0, area=9, minutes=20, fill=2)[S.FRAME:])
+        exp[0x16:0x1A] = "０２".encode("shift_jis")
+        self.assertEqual(new, bytes(exp))
+        self.assertIn("[02]", S.title(new))
+        s = [x for x in T.Card(self.c0).saves() if x.name == "BESCES-01331TOMBA-02"][0]
+        self.assertEqual((s.slot, s.get("area"), s.checksum_ok()), (2, 9, True))
+        self.assertTrue(os.listdir(os.path.join(self.saves, "backup")))
+        # CLI
+        r = subprocess.run([sys.executable, os.path.join(HERE, "save_import.py"), "import", b, self.c0, "--new-slot"],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("Ranura 03", r.stdout)
+        check_card(self, self.c0)
+
+    def test_new_slot_not_offered(self):
+        c = S.blank_card()
+        for k in range(15):
+            fs = fake_save(slot=k)
+            S.insert_save(c, fs[:S.FRAME], fs[S.FRAME:])
+        open(self.c0, "wb").write(c)
+        with self.assertRaises(S.Conflict) as cm:            # a full card: no room, no free slot
             S.import_file(self.mcs("b.mcs", slot=0, fill=2), self.c0)
-        self.assertTrue(cm.exception.other_ok)
-        self.assertEqual(S.other_card(self.c0), self.c1)
-        lines, _ = S.import_file(os.path.join(self.d, "b.mcs"), S.other_card(self.c0))
-        self.assertIn("tarjeta 2", lines[0])
-        check_card(self, self.c1)
-        # now both cards have slot 00: the other card is no longer offered
-        with self.assertRaises(S.Conflict) as cm:
-            S.import_file(self.mcs("c.mcs", slot=0, fill=3), self.c0)
-        self.assertFalse(cm.exception.other_ok)
+        self.assertIsNone(cm.exception.new_slot)
+        self.assertNotIn("otra ranura", cm.exception.question())
+        with self.assertRaises(S.ImportError_):
+            S.import_file(os.path.join(self.d, "b.mcs"), self.c0, new_slot=True)
+        self.assertEqual(open(self.c0, "rb").read(), bytes(c))
 
     def test_backups_keep_last_5(self):
         open(self.c0, "wb").write(S.blank_card())

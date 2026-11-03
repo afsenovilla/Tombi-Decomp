@@ -1062,13 +1062,17 @@ platforms and readable by DuckStation/ePSXe (raw `.mcd`/`.mcr`). Import accepts 
 `.mcd/.mcr/.mc/.srm/.ddf/.ps/.bin` starting with `MC`, DexDrive `.gme`, `.vgs/.mem`), which replace the card, and
 single saves (`.mcs/.ps1/.mcb`, PS3 `.psv`), inserted into free blocks with new directory frames (link chain, XOR
 checksum); a non-Tombi product code only warns. A single save whose name (`BESCES-01331TOMBA-00`...) is already on the
-card asks *"Ya hay una partida «Ranura 00 · Baccus Village · 1:23 h» en la tarjeta 1. ¿Reemplazarla?"* (slot, the
-area Continue loads and the play time when the save's GAME block checks out; PS1 saves store no date): *Reemplazar*
-frees the old save's blocks and writes the new one there first (any block count; nothing is written if it does not
-fit), *Guardar en la otra tarjeta* (only when `tombi_mc1.mcd` has room and no save of that name) or *Cancelar*. Every
-write first copies the card to `backup/tombi_mcN-YYYYMMDD-HHMMSS.mcd` next to it (the last 5 of each card kept).
+card asks *"Ya hay una partida «Ranura 00 · Ciudad Baco · 1:23 h» en la tarjeta. ¿Reemplazarla? … O guárdala en otra
+ranura: Ranura 01."* (slot, the place Continue loads and the play time when the save's GAME block checks out; PS1
+saves store no date; in Spanish the place is the improved translation's Map screen name of the save's area and
+section, the same as the second screen's, otherwise an English area name): *Reemplazar* frees the old save's blocks
+and writes the new one there first (any block count; nothing is written if it does not fit), *Guardar en otra
+ranura* (only when the card has room and a free slot number: the save goes in as the first free
+`BESCES-01331TOMBA-NN`, with the slot digits of its title rewritten too, so the game's load screen lists it in that
+slot) or *Cancelar*. Every write first copies the card to `backup/tombi_mc0-YYYYMMDD-HHMMSS.mcd` next to it (the last
+5 kept).
 Export writes the whole card (default `tombi.mcd`); the PC launcher can also export one save as `.mcs`. Logic:
-`tools/save_import.py` (PC, also a CLI: `import FILE CARD [--overwrite]`; tests `tools/test_save_import.py`) and
+`tools/save_import.py` (PC, also a CLI: `import FILE CARD [--overwrite | --new-slot]`; tests `tools/test_save_import.py`) and
 `SaveImport.java` (Android); the launchers only, never while the game runs. The Android launcher's dialogs (this one,
 the results, the translation import) and the game's "back to the launcher?" question are `SelvaDialog.java`, drawn
 in the launcher's style (Lilita One / Nunito, pill buttons; D-pad + A, B = cancel, touch) instead of AlertDialogs.

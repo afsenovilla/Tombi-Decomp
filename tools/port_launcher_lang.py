@@ -1055,3 +1055,14 @@ i18n.add({   # Edit save... (port_launcher.py App.edit_save)
            "s.editnoqt": "Editoren til gemte spil kræver PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "luk spillet, før du gemmer",
            "s.editopen": "Luk editoren til gemte spil, før du spiller."},
 })
+
+
+i18n.add({   # Import save...: a save with the same name already on the card (port_launcher.py App.ask_save_conflict)
+    "fr": {"t.savedup": "Sauvegarde déjà présente", "b.savereplace": "Remplacer", "b.saveslot": "Enregistrer dans un autre emplacement", "b.savecancel": "Annuler"},
+    "de": {"t.savedup": "Spielstand schon vorhanden", "b.savereplace": "Ersetzen", "b.saveslot": "Auf einem anderen Speicherplatz speichern", "b.savecancel": "Abbrechen"},
+    "it": {"t.savedup": "Salvataggio già presente", "b.savereplace": "Sostituisci", "b.saveslot": "Salva in un altro slot", "b.savecancel": "Annulla"},
+    "nl": {"t.savedup": "Opgeslagen spel bestaat al", "b.savereplace": "Vervangen", "b.saveslot": "In een ander slot opslaan", "b.savecancel": "Annuleren"},
+    "pt": {"t.savedup": "O jogo guardado já existe", "b.savereplace": "Substituir", "b.saveslot": "Guardar noutro espaço", "b.savecancel": "Cancelar"},
+    "sv": {"t.savedup": "Sparat spel finns redan", "b.savereplace": "Ersätt", "b.saveslot": "Spara på en annan plats", "b.savecancel": "Avbryt"},
+    "da": {"t.savedup": "Gemt spil findes allerede", "b.savereplace": "Erstat", "b.saveslot": "Gem på en anden plads", "b.savecancel": "Annuller"},
+})

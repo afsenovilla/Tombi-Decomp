@@ -668,8 +668,8 @@ public class LauncherActivity extends Activity {
     }
     boolean uiSpanish() { return getResources().getConfiguration().locale.getLanguage().equals("es"); }
 
-    /* Import save: a single save whose name is already on card 1 asks right away (replace it / save it to card 2 when
-     * that card has room and no save of that name / cancel); anything else asks the usual confirmation first */
+    /* Import save: a single save whose name is already on the card asks right away (replace it / save it to another
+     * slot of the card when it has room and a free slot number / cancel); anything else asks the usual confirmation first */
     void doSaveImport(final Uri u) {
         final byte[] raw;
         try {
@@ -685,24 +685,24 @@ public class LauncherActivity extends Activity {
         if (c != null) { askReplace(raw, c); return; }
         dialog(getString(R.string.save_import), getString(R.string.save_import_confirm),
                 new String[]{getString(R.string.save_import_go), getString(R.string.cancel)},
-                new Runnable[]{new Runnable() { public void run() { runSaveImport(raw, cardFile(), false); } }, null}, 1);
+                new Runnable[]{new Runnable() { public void run() { runSaveImport(raw, cardFile(), false, false); } }, null}, 1);
     }
     void askReplace(final byte[] raw, final SaveImport.Conflict c) {
         List<String> b = new ArrayList<>();
         List<Runnable> a = new ArrayList<>();
         b.add(getString(R.string.save_replace));
-        a.add(new Runnable() { public void run() { runSaveImport(raw, c.dest, true); } });
-        if (c.otherOk) {
-            b.add(getString(R.string.save_other_card));
-            a.add(new Runnable() { public void run() { runSaveImport(raw, SaveImport.otherCard(c.dest), false); } });
+        a.add(new Runnable() { public void run() { runSaveImport(raw, c.dest, true, false); } });
+        if (c.newSlot != null) {
+            b.add(getString(R.string.save_new_slot));
+            a.add(new Runnable() { public void run() { runSaveImport(raw, c.dest, false, true); } });
         }
         b.add(getString(R.string.cancel));
         a.add(null);
         dialog(getString(R.string.save_import), c.question(uiSpanish()), b.toArray(new String[0]), a.toArray(new Runnable[0]), b.size() - 1);
     }
-    void runSaveImport(byte[] raw, File dest, boolean overwrite) {
+    void runSaveImport(byte[] raw, File dest, boolean overwrite, boolean newSlot) {
         try {
-            SaveImport.Result r = SaveImport.importBytes(raw, dest, uiSpanish(), overwrite);
+            SaveImport.Result r = SaveImport.importBytes(raw, dest, uiSpanish(), overwrite, newSlot);
             StringBuilder sb = new StringBuilder();
             for (String l : r.lines) sb.append(l).append('\n');
             if (r.warn != null) sb.append('\n').append(r.warn);

@@ -12,10 +12,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/** Save import / export for the port's memory card (raw 128 KB tombi_mc0.mcd, the same layout as on PC; shims/card.c).
+/** Save import / export for the port's memory card (raw 128 KB tombi_mc0.mcd, the same layout as on PC; shims/card.c:
+ *  the port emulates only memory card 1).
  *  Mirrors tools/save_import.py: whole cards (raw .mcd/.mcr/..., DexDrive .gme, .vgs/.mem) replace the card; single
  *  saves (.mcs/.ps1/.mcb, PS3 .psv) go into free blocks with proper directory frames, and one whose name is already on
- *  the card raises Conflict (the launcher asks: replace it / the other card / cancel).  Every write first copies the
+ *  the card raises Conflict (the launcher asks: replace it / save it to another slot / cancel).  Every write first copies the
  *  card into saves/backup/ (the last 5 of each card kept). */
 final class SaveImport {
     static final int CARD = 0x20000, BLOCK = 0x2000, FRAME = 0x80;
@@ -117,22 +118,32 @@ final class SaveImport {
     static byte[] readFile(File f) throws IOException { FileInputStream in = new FileInputStream(f); try { return readAll(in, 1 << 20); } finally { in.close(); } }
     static void write(File f, byte[] d) throws IOException { FileOutputStream o = new FileOutputStream(f); try { o.write(d); } finally { o.close(); } }
 
-    /** card 1 = tombi_mc0.mcd, card 2 = tombi_mc1.mcd (the game's memory card 1 / 2) */
-    static int cardNumber(File f) { return f.getName().contains("mc1") ? 2 : 1; }
-    static File otherCard(File f) {
-        String n = f.getName();
-        return new File(f.getParentFile(), n.contains("mc0") ? n.replace("mc0", "mc1") : n.replace("mc1", "mc0"));
-    }
     static byte[] readCard(File f) throws IOException {
         byte[] c = f.exists() ? readFile(f) : null;
         return c == null || c.length != CARD || !at(c, 0, "MC") ? blankCard() : c;
     }
 
-    // GAME.selectedArea -> name (tools/save_import.py AREAS, tools/tombi_save_editor.py)
+    // GAME.selectedArea -> name (tools/save_import.py AREAS_EN, tools/tombi_save_editor.py)
     static final String[] AREAS = {"Village of All Beginnings", "Forest / Watch Tower", "Caves / tunnels", "Phoenix Mountain",
             "Trick Village area", "Baccus Village", "Dirt Motocross", null, "Baccus Lake", "Mushroom Village", "Deep Jungle",
             "Lumberjack Town / Factory", null, "Pig Island", "Evil Pigs", null, "Stonetown / Clock Tower",
             "Iron Town / Iron Castle", "Civilization Town", "Dwarf Village"};
+    // Spanish: the improved translation's names as the game's Map screen / the second screen give them (runtime/panel.c
+    // room_names: the map area of the room GAME.selectedArea / GAME.section).  REGIONS_ES[i] = map area name i (12 =
+    // area 14's first room); AREA_REGIONS_ES[area].charAt(section) = the region (hex digit); a section past the string
+    // takes section 0's.  The same tables as tools/save_import.py REGIONS_ES / AREA_REGIONS_ES.
+    static final String[] REGIONS_ES = {"Ciudad de todo principio", "Bosque de enanos", "Bosque de setas", "Montaña del Fénix",
+            "Ciudad Baco", "Mansión encantada", "Jungla profunda", "Ciudad de civilización", "Ciudad de trucos",
+            "Ciudad de todo principio", "Motocross sucio", "Montaña del Fénix", "Área Cerdiablo uno"};
+    static final String[] AREA_REGIONS_ES = {"000000", "11111", "111111", "333333", "55555555555555555555", "4444", "a", null,
+            "5522", "2222222", "666866688", "77777", null, "10", "c077739000", null, "7777777", "77777777770", "770", "11b"};
+    /** the place of a save: the improved Spanish translation's map name, or the English table; null if unknown */
+    static String areaName(int area, int section, boolean es) {
+        if (!es) return area < AREAS.length ? AREAS[area] : null;
+        String r = area < AREA_REGIONS_ES.length ? AREA_REGIONS_ES[area] : null;
+        if (r == null) return null;
+        return REGIONS_ES[Character.digit(section >= 0 && section < r.length() ? r.charAt(section) : r.charAt(0), 16)];
+    }
     /** one line naming a save for the user (as save_import.save_info): its slot and, when the game data parses (a
      *  Tombi! save whose GAME checksum is right, docs/SAVE_FORMAT.md), the area Continue loads and the play time;
      *  else its title.  d[o..] = the save's first block.  PS1 saves store no date. */
@@ -145,10 +156,11 @@ final class SaveImport {
             int x = 0;
             for (int i = 0; i < 0x9FF; i++) x ^= d[g + i];
             if ((byte) x == d[g + 0x9FF]) {
-                int area = u16(d, g);
+                int area = u16(d, g), sec = u16(d, g + 2);
                 long t = (u16(d, g + 8) | (long) u16(d, g + 10) << 16);
                 StringBuilder s = new StringBuilder(head);
-                if (area < AREAS.length && AREAS[area] != null) s.append(" · ").append(AREAS[area]);
+                String a = areaName(area, sec, es);
+                if (a != null) s.append(" · ").append(a);
                 s.append(" · ").append(t / 180000).append(':').append(String.format(Locale.ROOT, "%02d", t / 3000 % 60)).append(" h");
                 return s.toString();
             }
@@ -191,19 +203,45 @@ final class SaveImport {
         return bl;
     }
 
-    /** the target card already holds a save with the imported save's name: the launcher asks (Replace / the other
-     *  card when otherOk / Cancel) and imports again with overwrite or into otherCard(dest) */
+    static final int SLOTS = 15;   // the game's slots 00..14 (the file name's last two digits; docs/SAVE_FORMAT.md)
+    /** the first slot number (00..14) whose Tombi file name (nm with its last two digits replaced) is not on the card,
+     *  as "NN", when the card also has `need` free blocks; else null (save_import.free_slot) */
+    static String freeSlot(byte[] c, String nm, int need) {
+        if (!isTombi(nm) || nm.length() < 2 || !Character.isDigit(nm.charAt(nm.length() - 1))
+                || !Character.isDigit(nm.charAt(nm.length() - 2)) || free(c).size() < need) return null;
+        for (int k = 0; k < SLOTS; k++) {
+            String nn = String.format(Locale.ROOT, "%02d", k);
+            if (find(c, nm.substring(0, nm.length() - 2) + nn) < 0) return nn;
+        }
+        return null;
+    }
+    /** the save as slot nn: the file name's last two digits in frame and, when they are fullwidth digits (Shift-JIS
+     *  0x824F + n), the slot number in the title (data +0x16, 2 characters; not covered by the checksum).  In place. */
+    static void renumber(byte[] frame, byte[] data, String nn) {
+        String nm = name(frame, 0);
+        String nw = nm.substring(0, nm.length() - 2) + nn;
+        for (int i = 0; i < 20; i++) frame[10 + i] = i < nw.length() ? (byte) nw.charAt(i) : 0;
+        fixFrame(frame, 0);
+        boolean fw = true;
+        for (int i = 0; i < 2; i++) fw &= u8(data, 0x16 + 2 * i) == 0x82 && u8(data, 0x17 + 2 * i) >= 0x4F && u8(data, 0x17 + 2 * i) <= 0x58;
+        if (fw) for (int i = 0; i < 2; i++) data[0x17 + 2 * i] = (byte) (0x4F + nn.charAt(i) - '0');
+    }
+
+    /** the card already holds a save with the imported save's name: the launcher asks (Replace / Save to another slot
+     *  when newSlot != null / Cancel) and imports again with overwrite or newSlot.  newSlot: the slot the save would
+     *  get ("NN"), null when the card has no room or no free slot */
     static final class Conflict extends Fail {
-        final File dest; final String existing, incoming; final boolean otherOk;
-        Conflict(File dest, String existing, String incoming, boolean otherOk, boolean es) {
-            super(es ? "Ya hay una partida «" + existing + "» en la tarjeta " + cardNumber(dest)
-                     : "Memory card " + cardNumber(dest) + " already holds the save “" + existing + "”");
-            this.dest = dest; this.existing = existing; this.incoming = incoming; this.otherOk = otherOk;
+        final File dest; final String existing, incoming, newSlot;
+        Conflict(File dest, String existing, String incoming, String newSlot, boolean es) {
+            super(es ? "Ya hay una partida «" + existing + "» en la tarjeta"
+                     : "The memory card already holds the save “" + existing + "”");
+            this.dest = dest; this.existing = existing; this.incoming = incoming; this.newSlot = newSlot;
         }
         String question(boolean es) {
-            // no line break inside "tarjeta 1" (a no-break space)
-            return es ? "Ya hay una partida «" + existing + "» en la tarjeta " + cardNumber(dest) + ". ¿Reemplazarla?\n\nPartida importada: «" + incoming + "»"
-                      : "Memory card " + cardNumber(dest) + " already holds the save “" + existing + "”. Replace it?\n\nImported save: “" + incoming + "”";
+            return es ? "Ya hay una partida «" + existing + "» en la tarjeta. ¿Reemplazarla?\n\nPartida importada: «" + incoming + "»"
+                        + (newSlot != null ? "\n\nO guárdala en otra ranura: Ranura " + newSlot + "." : "")
+                      : "The memory card already holds the save “" + existing + "”. Replace it?\n\nImported save: “" + incoming + "”"
+                        + (newSlot != null ? "\n\nOr save it to another slot: Slot " + newSlot + "." : "");
         }
     }
 
@@ -211,24 +249,29 @@ final class SaveImport {
      *  overwrite (then the old save is removed and its blocks are reused first; any block count).  The card is copied
      *  into backup/ before it is written; nothing is written when the import fails. */
     static Result importBytes(byte[] raw, File dest, boolean es, boolean overwrite) throws Fail, IOException {
-        return importBytes(raw, dest, es, overwrite, false);
+        return importBytes(raw, dest, es, overwrite, false, false);
+    }
+    /** as importBytes; newSlot: a save whose name is already on the card goes in as the first free slot instead
+     *  (freeSlot, renumber) */
+    static Result importBytes(byte[] raw, File dest, boolean es, boolean overwrite, boolean newSlot) throws Fail, IOException {
+        return importBytes(raw, dest, es, overwrite, newSlot, false);
     }
     /** the Conflict importing raw into dest would raise (nothing is written), or null */
     static Conflict conflict(byte[] raw, File dest, boolean es) throws IOException {
-        try { importBytes(raw, dest, es, false, true); return null; }
+        try { importBytes(raw, dest, es, false, false, true); return null; }
         catch (Conflict c) { return c; }
         catch (Fail f) { return null; }
     }
     /** dry: only the checks (returns null instead of writing) */
-    private static Result importBytes(byte[] raw, File dest, boolean es, boolean overwrite, boolean dry) throws Fail, IOException {
+    private static Result importBytes(byte[] raw, File dest, boolean es, boolean overwrite, boolean newSlot, boolean dry) throws Fail, IOException {
         Result r = new Result();
         byte[] card = asCard(raw);
         if (card != null) {
             if (dry) return null;
             backup(dest);
             write(dest, card);
-            r.lines.add(es ? "Tarjeta completa importada en la tarjeta " + cardNumber(dest) + " (se guardó una copia de la anterior)"
-                           : "Whole card imported as memory card " + cardNumber(dest) + " (a copy of the old one was kept)");
+            r.lines.add(es ? "Tarjeta completa importada (se guardó una copia de la anterior)"
+                           : "Whole card imported (a copy of the old one was kept)");
             List<String> l = list(card);
             boolean any = false;
             for (String s : l) { r.lines.add(s); any |= isTombi(s); }
@@ -259,17 +302,14 @@ final class SaveImport {
         int old = find(c, nm);
         String replaced = null;
         List<Integer> prefer = new ArrayList<>();
-        if (old >= 0) {
+        if (old >= 0 && newSlot) {
+            String nn = freeSlot(c, nm, n);
+            if (nn == null) throw new Fail(es ? "No hay ninguna ranura libre en la tarjeta (o no hay sitio)" : "The memory card has no free slot (or no room)");
+            renumber(frame, data, nn);
+            nm = name(frame, 0);
+        } else if (old >= 0) {
             replaced = info(nm, c, old * BLOCK, es);
-            if (!overwrite) {
-                File o = otherCard(dest);
-                boolean otherOk = false;
-                if (!o.getName().equals(dest.getName())) {
-                    byte[] oc = readCard(o);
-                    otherOk = find(oc, nm) < 0 && free(oc).size() >= n;
-                }
-                throw new Conflict(dest, replaced, info(nm, data, 0, es), otherOk, es);
-            }
+            if (!overwrite) throw new Conflict(dest, replaced, info(nm, data, 0, es), freeSlot(c, nm, n), es);
             prefer = delete(c, old);          // in memory: the file is written only once the new save fits
         }
         if (dry) return null;
@@ -277,8 +317,8 @@ final class SaveImport {
         for (int b : prefer) if (fr.contains(b)) blocks.add(b);
         for (int b : fr) if (!blocks.contains(b)) blocks.add(b);
         if (blocks.size() < n)
-            throw new Fail(es ? "No hay sitio en la tarjeta " + cardNumber(dest) + ": hacen falta " + n + " bloques libres y hay " + blocks.size()
-                              : "No room on memory card " + cardNumber(dest) + ": " + n + " free blocks needed, " + blocks.size() + " available");
+            throw new Fail(es ? "No hay sitio en la tarjeta: hacen falta " + n + " bloques libres y hay " + blocks.size()
+                              : "No room on the memory card: " + n + " free blocks needed, " + blocks.size() + " available");
         for (int k = 0; k < n; k++) {
             int b = blocks.get(k), o = b * FRAME;
             byte[] f = k == 0 ? frame.clone() : new byte[FRAME];
@@ -291,7 +331,7 @@ final class SaveImport {
         }
         backup(dest);
         write(dest, c);
-        r.lines.add((es ? "Partida importada en la tarjeta " + cardNumber(dest) + ", bloque " : "Save imported into memory card " + cardNumber(dest) + ", block ")
+        r.lines.add((es ? "Partida importada en la tarjeta, bloque " : "Save imported into the memory card, block ")
                 + blocks.get(0) + ": " + info(nm, data, 0, es));
         if (replaced != null)
             r.lines.add(es ? "Sustituye a «" + replaced + "» (se guardó una copia de la tarjeta)"
