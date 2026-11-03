@@ -56,6 +56,7 @@ public class LauncherActivity extends Activity {
 
     SharedPreferences prefs;
     LauncherView view;
+    SelvaDialog dlg;
     volatile String importStatus;
 
     /* the launcher's own language (Options > Game > Launcher language), independent of the game language: "" = the
@@ -99,7 +100,11 @@ public class LauncherActivity extends Activity {
         prefs = getSharedPreferences("launcher", MODE_PRIVATE);
         applyUiLang();
         view = new LauncherView(this);
-        setContentView(view);
+        dlg = new SelvaDialog(this);   // the launcher's dialogs, drawn over the menus (no system AlertDialog)
+        android.widget.FrameLayout root = new android.widget.FrameLayout(this);
+        root.addView(view, new android.widget.FrameLayout.LayoutParams(-1, -1));
+        root.addView(dlg, new android.widget.FrameLayout.LayoutParams(-1, -1));
+        setContentView(root);
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
         view.requestFocus();
@@ -653,33 +658,61 @@ public class LauncherActivity extends Activity {
         }
     }
 
-    void saveDialog(String title, String msg) {
-        new android.app.AlertDialog.Builder(this).setTitle(title).setMessage(msg).setPositiveButton(android.R.string.ok, null).show();
+    /** a dialog in the launcher's style (SelvaDialog): buttons with their actions (null: just close), cancel = the
+     *  index B / Back chooses */
+    void dialog(String title, String msg, String[] btns, Runnable[] acts, int cancel) {
+        dlg.show(title, msg, btns, acts, cancel);
     }
+    void saveDialog(String title, String msg) {
+        dialog(title, msg, new String[]{"OK"}, new Runnable[]{null}, 0);
+    }
+    boolean uiSpanish() { return getResources().getConfiguration().locale.getLanguage().equals("es"); }
+
+    /* Import save: a single save whose name is already on card 1 asks right away (replace it / save it to card 2 when
+     * that card has room and no save of that name / cancel); anything else asks the usual confirmation first */
     void doSaveImport(final Uri u) {
-        final boolean es = getResources().getConfiguration().locale.getLanguage().equals("es");
-        new android.app.AlertDialog.Builder(this)
-            .setTitle(R.string.save_import)
-            .setMessage(R.string.save_import_confirm)
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(android.R.string.ok, new android.content.DialogInterface.OnClickListener() {
-                public void onClick(android.content.DialogInterface d, int w) {
-                    try {
-                        InputStream in = getContentResolver().openInputStream(u);
-                        if (in == null) throw new java.io.IOException("openInputStream");
-                        byte[] raw;
-                        try { raw = SaveImport.readAll(in, 4 << 20); } finally { in.close(); }
-                        SaveImport.Result r = SaveImport.importBytes(raw, cardFile(), es);
-                        StringBuilder sb = new StringBuilder();
-                        for (String l : r.lines) sb.append(l).append('\n');
-                        if (r.warn != null) sb.append('\n').append(r.warn);
-                        CrashLog.append(LauncherActivity.this, "launcher: save imported: " + r.lines.get(0));
-                        saveDialog(getString(R.string.save_import), sb.toString().trim());
-                    } catch (Exception e) {
-                        saveDialog(getString(R.string.save_import), getString(R.string.save_fail, String.valueOf(e.getMessage())));
-                    }
-                }
-            }).show();
+        final byte[] raw;
+        try {
+            InputStream in = getContentResolver().openInputStream(u);
+            if (in == null) throw new java.io.IOException("openInputStream");
+            try { raw = SaveImport.readAll(in, 4 << 20); } finally { in.close(); }
+        } catch (Exception e) {
+            saveDialog(getString(R.string.save_import), getString(R.string.save_fail, String.valueOf(e.getMessage())));
+            return;
+        }
+        SaveImport.Conflict c = null;
+        try { c = SaveImport.conflict(raw, cardFile(), uiSpanish()); } catch (Exception ignored) { }
+        if (c != null) { askReplace(raw, c); return; }
+        dialog(getString(R.string.save_import), getString(R.string.save_import_confirm),
+                new String[]{getString(R.string.save_import_go), getString(R.string.cancel)},
+                new Runnable[]{new Runnable() { public void run() { runSaveImport(raw, cardFile(), false); } }, null}, 1);
+    }
+    void askReplace(final byte[] raw, final SaveImport.Conflict c) {
+        List<String> b = new ArrayList<>();
+        List<Runnable> a = new ArrayList<>();
+        b.add(getString(R.string.save_replace));
+        a.add(new Runnable() { public void run() { runSaveImport(raw, c.dest, true); } });
+        if (c.otherOk) {
+            b.add(getString(R.string.save_other_card));
+            a.add(new Runnable() { public void run() { runSaveImport(raw, SaveImport.otherCard(c.dest), false); } });
+        }
+        b.add(getString(R.string.cancel));
+        a.add(null);
+        dialog(getString(R.string.save_import), c.question(uiSpanish()), b.toArray(new String[0]), a.toArray(new Runnable[0]), b.size() - 1);
+    }
+    void runSaveImport(byte[] raw, File dest, boolean overwrite) {
+        try {
+            SaveImport.Result r = SaveImport.importBytes(raw, dest, uiSpanish(), overwrite);
+            StringBuilder sb = new StringBuilder();
+            for (String l : r.lines) sb.append(l).append('\n');
+            if (r.warn != null) sb.append('\n').append(r.warn);
+            CrashLog.append(this, "launcher: save imported: " + r.lines.get(0));
+            saveDialog(getString(R.string.save_import), sb.toString().trim());
+        } catch (SaveImport.Conflict c) {
+            askReplace(raw, c);
+        } catch (Exception e) {
+            saveDialog(getString(R.string.save_import), getString(R.string.save_fail, String.valueOf(e.getMessage())));
+        }
     }
     void doSaveExport(Uri u) {
         try {
@@ -713,16 +746,19 @@ public class LauncherActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int code, KeyEvent e) {
+        if (dlg != null && dlg.showing()) return dlg.key(code, e.getRepeatCount());
         if (view.capture >= 0) return view.captureKey(code, e, true);
         return view.key(code) || super.onKeyDown(code, e);
     }
     @Override
     public boolean onKeyUp(int code, KeyEvent e) {
+        if (dlg != null && dlg.showing()) return true;
         if (view.capture >= 0 || view.swallowUp == code) return view.captureKey(code, e, false);
         return super.onKeyUp(code, e);
     }
     @Override
     public boolean onGenericMotionEvent(MotionEvent e) {
+        if (dlg != null && dlg.showing()) return true;
         if (view.capture >= 0 && view.captureMotion(e)) return true;
         if (e.getActionMasked() == MotionEvent.ACTION_SCROLL && view.wheel(e.getAxisValue(MotionEvent.AXIS_VSCROLL))) return true;
         return super.onGenericMotionEvent(e);

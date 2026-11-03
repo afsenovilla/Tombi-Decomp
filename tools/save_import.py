@@ -7,15 +7,25 @@ Accepted inputs:
   whole cards:  raw .mcd/.mcr/.mc/.srm/.ddf/.ps/.bin (131072 bytes, "MC"), DexDrive .gme (3904-byte header),
                 .vgs/.mem (64-byte "VgsM" header)
   single saves: .mcs/.ps1/.mcb (128-byte directory frame + blocks), PS3 .psv ("\\0VSP", data at 0x84)
-A whole card replaces the target (the old file kept as .bak); a single save goes into free blocks of the target card.
+A whole card replaces the target; a single save goes into free blocks of the target card.  A single save whose name
+is already on the card is refused (Conflict: the launchers ask Replace / the other card / Cancel) unless --overwrite:
+the old save is removed and the new one takes its blocks (any block count).  Before a card is written a copy goes to
+backup/ next to it (backup/tombi_mc0-YYYYMMDD-HHMMSS.mcd, the last 5 of each card kept).
 
-  python3 tools/save_import.py import FILE CARD.mcd
+  python3 tools/save_import.py import FILE CARD.mcd [--overwrite]
   python3 tools/save_import.py export-save CARD.mcd SLOT_BLOCK OUT.mcs
 """
 import os, shutil, struct, sys, time
 
 CARD_SIZE, BLOCK, FRAME = 0x20000, 0x2000, 0x80
 TOMBI_PRODUCTS = ("BESCES-01330", "BESCES-01331", "BASCUS-94236", "BISLPS-01144")
+BACKUP_KEEP = 5
+
+# GAME.selectedArea -> name (the same table as tools/tombi_save_editor.py AREAS and SaveImport.java)
+AREAS = {0: "Village of All Beginnings", 1: "Forest / Watch Tower", 2: "Caves / tunnels", 3: "Phoenix Mountain",
+         4: "Trick Village area", 5: "Baccus Village", 6: "Dirt Motocross", 8: "Baccus Lake", 9: "Mushroom Village",
+         10: "Deep Jungle", 11: "Lumberjack Town / Factory", 13: "Pig Island", 14: "Evil Pigs",
+         16: "Stonetown / Clock Tower", 17: "Iron Town / Iron Castle", 18: "Civilization Town", 19: "Dwarf Village"}
 
 
 class ImportError_(Exception):
@@ -86,6 +96,21 @@ def title(data):
         return ""
 
 
+def save_info(name, data, es=True):
+    """one line naming a save for the user: its slot and, when the game data parses (a Tombi! save whose GAME
+    checksum is right, docs/SAVE_FORMAT.md), the area Continue loads and the play time; else the save's title.
+    PS1 saves store no date."""
+    slot = name[-2:] if name[-2:].isdigit() and is_tombi(name) else ""
+    head = ("Ranura " if es else "Slot ") + slot if slot else name
+    g = bytes(data[0x200:0xC00])
+    if slot and bytes(data[:2]) == b"SC" and len(g) == 0xA00 and xor(g[:-1]) == g[-1]:
+        area, t = struct.unpack_from("<H", g, 0)[0], struct.unpack_from("<I", g, 8)[0]
+        parts = [head] + ([AREAS[area]] if area in AREAS else []) + ["%d:%02d h" % (t // 180000, t // 3000 % 60)]
+        return " · ".join(parts)
+    t = title(data)
+    return head + ("  " + t if t else "")
+
+
 def list_saves(card):
     out = []
     for i in range(1, 16):
@@ -95,44 +120,127 @@ def list_saves(card):
     return out
 
 
-def insert_save(card, frame, data):
-    """put a single save into free blocks of card (bytearray); returns the first block. Raises if no room/duplicate."""
+def chain(card, block):
+    """the blocks of the save that starts at block (following the directory frames' link field)"""
+    out, b = [], block
+    while 1 <= b <= 15 and b not in out:
+        out.append(b)
+        nxt = struct.unpack_from("<H", card, b * FRAME + 8)[0]
+        if nxt == 0xFFFF:
+            break
+        b = nxt + 1
+    return out
+
+
+def find_save(card, name):
+    """first block of the save called name, or None"""
+    for b, nm, _ in list_saves(card):
+        if nm == name:
+            return b
+    return None
+
+
+def free_blocks(card):
+    return [i for i in range(1, 16) if card[i * FRAME] in (0, 0xA0, 0xA1, 0xA2, 0xA3)]
+
+
+def delete_save(card, block):
+    """frees the save's blocks (directory frames back to the formatted 'free' state, data zeroed); returns them"""
+    blocks = chain(card, block)
+    for b in blocks:
+        f = bytearray(FRAME)
+        f[0] = 0xA0; f[8] = f[9] = 0xFF; f[0x7F] = xor(f[:0x7F])
+        card[b * FRAME:(b + 1) * FRAME] = f
+        card[b * BLOCK:(b + 1) * BLOCK] = bytes(BLOCK)
+    return blocks
+
+
+def insert_save(card, frame, data, prefer=()):
+    """put a single save into free blocks of card (bytearray), the blocks in prefer first (a replaced save goes where
+    the old one was); returns the first block.  Raises if no room / duplicate."""
     n = len(data) // BLOCK
     name = save_name(frame)
-    for _, nm, _ in list_saves(card):
-        if nm == name:
-            raise ImportError_("la tarjeta ya tiene una partida con el mismo nombre (%s)" % name)
-    free = [i for i in range(1, 16) if card[i * FRAME] in (0xA0, 0xA1, 0xA2, 0xA3) or card[i * FRAME] == 0]
+    if find_save(card, name) is not None:
+        raise ImportError_("la tarjeta ya tiene una partida con el mismo nombre (%s)" % name)
+    free = free_blocks(card)
+    free = [b for b in prefer if b in free] + [b for b in free if b not in prefer]
     if len(free) < n:
         raise ImportError_("no hay sitio en la tarjeta: hacen falta %d bloques libres y hay %d" % (n, len(free)))
     blocks = free[:n]
     for k, b in enumerate(blocks):
         f = bytearray(frame) if k == 0 else bytearray(FRAME)
         f[0] = 0x51 if k == 0 else (0x53 if k == n - 1 else 0x52)
-        if k == 0:
-            struct.pack_into("<I", f, 4, n * BLOCK)
-        if n == 1 or k == n - 1:
-            struct.pack_into("<H", f, 8, 0xFFFF)
-        else:
-            struct.pack_into("<H", f, 8, blocks[k + 1] - 1)
+        struct.pack_into("<I", f, 4, n * BLOCK if k == 0 else 0)
+        struct.pack_into("<H", f, 8, 0xFFFF if k == n - 1 else blocks[k + 1] - 1)
         f[0x7F] = xor(f[:0x7F])
         card[b * FRAME:(b + 1) * FRAME] = f
         card[b * BLOCK:(b + 1) * BLOCK] = data[k * BLOCK:(k + 1) * BLOCK]
     return blocks[0]
 
 
-def backup(path):
+def backup(path, keep=BACKUP_KEEP):
+    """a copy of the card in backup/ next to it (backup/tombi_mc0-YYYYMMDD-HHMMSS.mcd); only the newest `keep`
+    copies of that card are kept.  Returns the copy's path (None when there is no card yet)."""
     if not os.path.exists(path):
         return None
-    bak = path + ".bak"
-    if os.path.exists(bak):
-        bak = "%s.%s.bak" % (path, time.strftime("%Y%m%d-%H%M%S"))
-    shutil.copy2(path, bak)
+    d = os.path.join(os.path.dirname(os.path.abspath(path)), "backup")
+    os.makedirs(d, exist_ok=True)
+    stem, ext = os.path.splitext(os.path.basename(path))
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    bak, k = os.path.join(d, "%s-%s%s" % (stem, stamp, ext)), 2
+    while os.path.exists(bak):
+        bak, k = os.path.join(d, "%s-%s-%d%s" % (stem, stamp, k, ext)), k + 1
+    shutil.copyfile(path, bak)
+    mine = sorted((f for f in os.listdir(d) if f.startswith(stem + "-") and f.endswith(ext)),
+                  key=lambda f: (os.path.getmtime(os.path.join(d, f)), f))
+    for f in mine[:max(0, len(mine) - keep)]:
+        os.remove(os.path.join(d, f))
     return bak
 
 
-def import_file(src, dest):
-    """import src into card file dest. Returns (summary_lines, warnings)."""
+def card_number(path):
+    """1 for tombi_mc0.mcd, 2 for tombi_mc1.mcd (the game's memory card 1 / 2)"""
+    return 2 if "mc1" in os.path.basename(path) else 1
+
+
+def other_card(path):
+    d, b = os.path.split(path)
+    return os.path.join(d, b.replace("mc0", "mc1") if "mc0" in b else b.replace("mc1", "mc0"))
+
+
+def read_card(path):
+    card = bytearray(open(path, "rb").read()) if os.path.exists(path) else blank_card()
+    if len(card) != CARD_SIZE or card[:2] != b"MC":
+        card = blank_card()
+    return card
+
+
+def fits(path, frame, data):
+    """True if the save can go into the card at path as a new save (no save of that name, enough free blocks)"""
+    card = read_card(path)
+    return find_save(card, save_name(frame)) is None and len(free_blocks(card)) >= len(data) // BLOCK
+
+
+class Conflict(ImportError_):
+    """the target card already holds a save with the imported save's name: the caller asks (Replace / the other card
+    when other_ok / Cancel) and calls import_file again with overwrite=True or with dest=other_card(dest)"""
+    def __init__(self, dest, name, existing, incoming, other_ok):
+        self.dest, self.name, self.existing, self.incoming, self.other_ok = dest, name, existing, incoming, other_ok
+        ImportError_.__init__(self, "ya hay una partida «%s» en la tarjeta %d" % (existing, card_number(dest)))
+
+    def question(self, es=True):
+        if es:
+            return ("Ya hay una partida «%s» en la tarjeta %d. ¿Reemplazarla?\n\nPartida importada: «%s»"
+                    % (self.existing, card_number(self.dest), self.incoming))
+        return ("Memory card %d already holds the save “%s”. Replace it?\n\nImported save: “%s”"
+                % (card_number(self.dest), self.existing, self.incoming))
+
+
+def import_file(src, dest, overwrite=False, other=None, es=True):
+    """import src into card file dest.  Returns (summary_lines, warnings).  A single save whose name is already on
+    the card raises Conflict unless overwrite (then the old save is removed and its blocks reused first).  The card is
+    copied into backup/ before it is written.  other: the card to offer instead (Conflict.other_ok; default
+    other_card(dest))."""
     raw = open(src, "rb").read()
     p = parse(raw, src)
     warn = []
@@ -140,7 +248,7 @@ def import_file(src, dest):
         bak = backup(dest)
         with open(dest, "wb") as f:
             f.write(p[1])
-        lines = ["Tarjeta completa importada" + (" (copia de la anterior: %s)" % os.path.basename(bak) if bak else "")]
+        lines = ["Tarjeta completa importada" + (" (copia de la anterior: backup/%s)" % os.path.basename(bak) if bak else "")]
         saves = list_saves(p[1])
         lines += ["  %s  %s" % (n, t) for _, n, t in saves] or ["  (tarjeta vacía)"]
         if saves and not any(is_tombi(n) for _, n, _ in saves):
@@ -150,14 +258,25 @@ def import_file(src, dest):
     name = save_name(frame)
     if not is_tombi(name):
         warn.append("La partida (%s) no parece de Tombi!/Tomba!" % name)
-    card = bytearray(open(dest, "rb").read()) if os.path.exists(dest) else blank_card()
-    if len(card) != CARD_SIZE or card[:2] != b"MC":
-        card = blank_card()
-    b = insert_save(card, frame, data)
-    backup(dest)
+    card = read_card(dest)
+    old = find_save(card, name)
+    prefer, replaced = (), None
+    if old is not None:
+        replaced = save_info(name, card[old * BLOCK:(old + 1) * BLOCK], es)
+        if not overwrite:
+            o = other or other_card(dest)
+            raise Conflict(dest, name, replaced, save_info(name, data, es),
+                           os.path.abspath(o) != os.path.abspath(dest) and fits(o, frame, data))
+        prefer = delete_save(card, old)      # on the in-memory copy: the file is written only if all of it fits
+    b = insert_save(card, frame, data, prefer)
+    bak = backup(dest)
     with open(dest, "wb") as f:
         f.write(card)
-    return ["Partida importada en el bloque %d: %s  %s" % (b, name, title(data))], warn
+    lines = ["Partida importada en la tarjeta %d, bloque %d: %s" % (card_number(dest), b, save_info(name, data, es))]
+    if replaced:
+        lines.append("Sustituye a «%s»%s" % (replaced, " (copia de la tarjeta: backup/%s)" % os.path.basename(bak)
+                                                       if bak else ""))
+    return lines, warn
 
 
 def export_card(src, out):
@@ -173,13 +292,7 @@ def export_save(card, block):
     f = bytearray(card[block * FRAME:(block + 1) * FRAME])
     if f[0] != 0x51:
         raise ImportError_("no hay partida en el bloque %d" % block)
-    data, b, seen = b"", block, 0
-    while 1 <= b <= 15 and seen < 15:
-        data += bytes(card[b * BLOCK:(b + 1) * BLOCK]); seen += 1
-        nxt = struct.unpack_from("<H", card, b * FRAME + 8)[0]
-        if nxt == 0xFFFF:
-            break
-        b = nxt + 1
+    data = b"".join(bytes(card[b * BLOCK:(b + 1) * BLOCK]) for b in chain(card, block))
     struct.pack_into("<H", f, 8, 0xFFFF)
     f[0x7F] = xor(f[:0x7F])
     return bytes(f) + data
@@ -187,8 +300,16 @@ def export_save(card, block):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
+    ow = "--overwrite" in a
+    a = [x for x in a if x != "--overwrite"]
     if len(a) == 3 and a[0] == "import":
-        l, w = import_file(a[1], a[2]); print("\n".join(l + w))
+        try:
+            l, w = import_file(a[1], a[2], overwrite=ow)
+        except Conflict as e:
+            sys.exit(e.question() + "\n(--overwrite la sustituye; antes se copia la tarjeta en backup/)")
+        except (ImportError_, OSError) as e:
+            sys.exit("error: %s" % e)
+        print("\n".join(l + w))
     elif len(a) == 4 and a[0] == "export-save":
         open(a[3], "wb").write(export_save(open(a[1], "rb").read(), int(a[2])))
     else:

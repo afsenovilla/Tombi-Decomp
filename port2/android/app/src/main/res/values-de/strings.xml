@@ -89,10 +89,14 @@
     <string name="opt_prompts">Tastensymbole</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Generisch</item><item>AYN Thor (Regenbogen)</item><item>AYN Thor (schwarz)</item><item>AYN Thor (weiß)</item><item>Eigene</item></string-array>
     <string name="save_import">Spielstand importieren…</string>
-    <string name="save_import_confirm">Die Datei in die Memory Card importieren? Eine ganze Karte ersetzt die aktuelle (als .bak behalten); ein einzelner Spielstand kommt in einen freien Platz.</string>
+    <string name="save_import_confirm">Die Datei in die Memory Card importieren? Eine ganze Karte ersetzt die aktuelle (eine Sicherungskopie wird behalten); ein einzelner Spielstand kommt in einen freien Platz.</string>
     <string name="save_exported">Karte exportiert (tombi.mcd).</string>
     <string name="save_export">Spielstand exportieren…</string>
     <string name="save_fail">Fehlgeschlagen: %1$s</string>
+    <!-- Import save: the confirmation's button; a save with the same name already on the card (SaveImport.Conflict) -->
+    <string name="save_import_go">Importieren</string>
+    <string name="save_replace">Ersetzen</string>
+    <string name="save_other_card">Auf der anderen Karte speichern</string>
     <string name="cat_game">Spiel</string>
     <string name="cat_gfx">Grafik</string>
     <string name="cat_dual">Zweiter Bildschirm</string>

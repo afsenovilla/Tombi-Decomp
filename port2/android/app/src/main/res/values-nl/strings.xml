@@ -89,10 +89,14 @@
     <string name="opt_prompts">Knoppictogrammen</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Algemeen</item><item>AYN Thor (regenboog)</item><item>AYN Thor (zwart)</item><item>AYN Thor (wit)</item><item>Aangepast</item></string-array>
     <string name="save_import">Opgeslagen spel importeren…</string>
-    <string name="save_import_confirm">Het bestand in de memory card importeren? Een volledige kaart vervangt de huidige (bewaard als .bak); een los opgeslagen spel komt in een vrij vak.</string>
+    <string name="save_import_confirm">Het bestand in de memory card importeren? Een volledige kaart vervangt de huidige (er wordt een reservekopie bewaard); een los opgeslagen spel komt in een vrij vak.</string>
     <string name="save_exported">Kaart geëxporteerd (tombi.mcd).</string>
     <string name="save_export">Opgeslagen spel exporteren…</string>
     <string name="save_fail">Mislukt: %1$s</string>
+    <!-- Import save: the confirmation's button; a save with the same name already on the card (SaveImport.Conflict) -->
+    <string name="save_import_go">Importeren</string>
+    <string name="save_replace">Vervangen</string>
+    <string name="save_other_card">Op de andere kaart opslaan</string>
     <string name="cat_game">Spel</string>
     <string name="cat_gfx">Graphics</string>
     <string name="cat_dual">Tweede scherm</string>

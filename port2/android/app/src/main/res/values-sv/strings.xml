@@ -89,10 +89,14 @@
     <string name="opt_prompts">Knappikoner</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Allmän</item><item>AYN Thor (regnbåge)</item><item>AYN Thor (svart)</item><item>AYN Thor (vit)</item><item>Anpassad</item></string-array>
     <string name="save_import">Importera sparat spel…</string>
-    <string name="save_import_confirm">Importera filen till minneskortet? Ett helt kort ersätter det nuvarande (sparas som .bak); ett enskilt sparat spel läggs till på en ledig plats.</string>
+    <string name="save_import_confirm">Importera filen till minneskortet? Ett helt kort ersätter det nuvarande (en säkerhetskopia sparas); ett enskilt sparat spel läggs till på en ledig plats.</string>
     <string name="save_exported">Kortet har exporterats (tombi.mcd).</string>
     <string name="save_export">Exportera sparat spel…</string>
     <string name="save_fail">Misslyckades: %1$s</string>
+    <!-- Import save: the confirmation's button; a save with the same name already on the card (SaveImport.Conflict) -->
+    <string name="save_import_go">Importera</string>
+    <string name="save_replace">Ersätt</string>
+    <string name="save_other_card">Spara på det andra kortet</string>
     <string name="cat_game">Spel</string>
     <string name="cat_gfx">Grafik</string>
     <string name="cat_dual">Andra skärmen</string>
