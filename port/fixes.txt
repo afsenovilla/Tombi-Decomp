@@ -75,6 +75,9 @@ src/AnimLoadDuration.c | o->dur = o->a->v & 0x3fff; | o->dur = o->a ? o->a->v & 
 # always map that range: a partial mirror read the host's own data there and queued a garbage file id, which
 # ended in "CdRead failed at lba 218357")
 src/queueLoadList.c | int pending = 0; | int pending = 0; { extern int port_verbose; extern void port_printf(const char *, ...); if ((unsigned)e < 0x200000u) { if (port_verbose) port_printf("[port] queueLoadList(%p): KUSEG list read through KSEG0\n", e); e = (Rel *)((unsigned)e + 0x80000000u); } }
+# --lang: the next file of a list goes after the overlay it follows as composed (its MAIN0 twin, which may be longer than
+# the language's file the record sizes: the Map tab's data went over D7SPSUB's composed tail; lang.c port_lang_rel_size)
+src/queueLoadList.c | if ((e->type & 0xf0) != 0x10) base += e->size; | if ((e->type & 0xf0) != 0x10) { extern int port_lang_rel_size(int, void *, int); base += port_lang_rel_size(e->id, base, e->size); }
 # compactOrderingTable walks the ordering table through its 24-bit links (KUSEG pointers on the PS1; gen_port.py
 # rewrites the `& 0xFFFFFF` on `ot` to the KSEG0 view, port_kuseg_mask): compare the links with 24-bit pointers,
 # follow them through KSEG0 (the link store `*hole = (u_long)p` is masked by the generic rule)

@@ -1166,7 +1166,10 @@ int CdRead(int sectors, u32 *buf, int mode) {
         u8 *olo = (u8 *)port_x000_image;
         if (((u8 *)buf >= lo && (u8 *)buf < hi) && (cd_last_id >= 0 && cd_last_id < 20 || (u8 *)buf >= olo)) {
             int n = sectors * bytes; if ((u8 *)buf + n > hi) n = hi - (u8 *)buf;
-            if (port_lang && (u8 *)buf >= olo) port_lang_overlay_loaded(buf, n, cd_last_id);   /* the language's overlay over its MAIN0 twin */
+            if (port_lang && (u8 *)buf >= olo) {          /* the language's overlay over its MAIN0 twin, which may be longer than the read */
+                int c = port_lang_overlay_loaded(buf, n, cd_last_id);
+                if (c > n) n = c;
+            }
             port_relocate_overlay(buf, n);
         }
     }
