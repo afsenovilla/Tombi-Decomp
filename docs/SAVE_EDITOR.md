@@ -17,7 +17,7 @@ refused while the game runs. Hosting API: `host_in_qt(parent, card, lang, write_
 ## Use
 
 - **Open card** (or drop the file on the window): an emulator card (`.mcd`, `.mcr`, `.gme`, `.vgs`, `.mem`, `.mcs`)
-  or the native port's `tombi_mc0.mcd` / `tombi_mc1.mcd`. The saves appear on the left as cards (slot, place, play
+  or the native port's `tombi_mc0.mcd`. The saves appear on the left as cards (slot, place, play
   time, level, AP and the save's own memory card icon); click one to edit it.
 - **Game data** (optional): your own Tombi! PAL disc image (`.bin`/`.cue`/`.iso`) or extracted folder. Item and event
   names and the inventory item icons are then read from it at run time (nothing is cached or shipped); without it the

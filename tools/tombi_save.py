@@ -3,7 +3,7 @@
 checksum and write the card back (docs/SAVE_FORMAT.md has the layout, derived from D0SPSUB2: func_800E999C builds the
 save, memCardFileListStep writes / loads it, memCardStoreChecksum / memCardVerifyChecksum).
 
-Containers: raw 128 KB cards (.mcd .mcr .mc .srm .ps, the native port's tombi_mc0.mcd / tombi_mc1.mcd), DexDrive .gme
+Containers: raw 128 KB cards (.mcd .mcr .mc .srm .ps, the native port's tombi_mc0.mcd), DexDrive .gme
 (3904-byte header), .vgs/.mem (64-byte header), and single-save .mcs / .mcb (one directory frame + the blocks).
 Writing never touches the source unless asked: save() writes to a new path, or keeps PATH.bak when overwriting.
 
