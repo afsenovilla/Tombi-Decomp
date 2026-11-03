@@ -1653,7 +1653,7 @@ class App(QMainWindow):
         sl.addSpacing(16)
         self.nav = {}
         for n in PAGES:
-            b = QPushButton("%s   %s" % (NAV_GLYPHS[n], tr("nav." + n)))
+            b = QPushButton("%s   %s" % (NAV_GLYPHS[n], tr("nav." + n).replace("&", "&&")))   # & is a mnemonic marker in a QPushButton
             b.setObjectName("nav")
             b.setCheckable(True)
             b.setCursor(Qt.PointingHandCursor)
@@ -1661,6 +1661,13 @@ class App(QMainWindow):
             b.clicked.connect(lambda _=False, n=n: self.show_page(n))
             sl.addWidget(b)
             self.nav[n] = b
+        # wide enough for the longest page name in bold (the checked style), in any launcher language
+        bf = QFont(QApplication.font())            # the style sheet's nav font: 10.5 pt, 600 when checked
+        bf.setPointSizeF(10.5)
+        bf.setWeight(QFont.DemiBold)
+        fm = QFontMetricsF(bf)
+        need = max(fm.horizontalAdvance(b.text().replace("&&", "&")) for b in self.nav.values()) + 2 * 12 + 2 + 2 * 12 + 10
+        side.setFixedWidth(max(236, int(need)))
         sl.addStretch(1)
         # experimental features (texture dump / packs): hidden unless asked for
         self.experimental = bool(self.s.get("experimental"))
