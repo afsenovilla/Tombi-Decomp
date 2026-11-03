@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2569 functions, 68.66 % -> 70.66 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2576 functions, 68.66 % -> 71.13 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -125,7 +125,11 @@ NTSC twin (`func_80016244`, 320x224, screen y 8) that `bootPlayIntroMovie` calls
 `updateA00Tornado`); `collidePlayerWithCat5Objects` inlines the per-object test; `drawHudVitality` reads the level from
 the sprite record (+0x52) instead of a parameter; `queueAreaSectionLists` has two list tables and starts the CD load
 thread itself; a few functions are the demo (`SLPM_80165`) version byte for byte and share its branch
-(`initHud`, `updateA00Tornado`: `#if defined(VERSION_SLPM_80165) || defined(VERSION_SLPS_01144)`); split pairs
+(`initHud`, `updateA00Tornado`: `#if defined(VERSION_SLPM_80165) || defined(VERSION_SLPS_01144)`); the player step
+functions take the same rewrites every time (ext bytes 0xe0..0xe4 -> 0xd0..0xd4, `playerSetFallLean(o)` -> the inline
+bitten-jump tail, no `GV2.bb0` / vibration stores; a landing block split into `b69 == 1` / tile-collide branches that
+differ only by the `b0f = -8` store, the `BAC = 0` store before `AnimJump`; `updatePlayer` copies 74 anim entries and
+reads the pad halfword through the pinned `D_8009F200`); split pairs
 (`func_80135A20` = the event-flag stub, `func_80135A2C_slps01144` = the spawn body) get one JP-only file each;
 `COS_TABLE` is now named in the JP symbol table (`NEG_SIN_TABLE + 0x200`). A `jal`-target scan inside symbol ranges
 found nothing but data words, so no more merged functions that way.
