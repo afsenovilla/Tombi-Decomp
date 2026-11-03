@@ -3207,3 +3207,35 @@ identical; en_cut_content: 4/4). Frames of the opening dialogue, `--disc` + `--t
 **Android.** CI copies `patches/*.tombipatch.json` and `*.tpatch` into `assets/patches/`; the Selva launcher extracts
 them to `files/patches/` and passes `--disc`, `--text-patch files/patches/es_mejorada.tombipatch.json` (Spanish +
 toggle), `--patch-dir files/patches` (English + cut content), `--lang N`.
+
+### Your own translation file
+
+A player's translation made with the translation editor (`tools/text_editor.py`, `tombi-text`) is a `*.tombipatch.json`
+(our text only) plus the `.tpatch` compiled from it (`tools/tpatch_build.py`; the editor runs it from the player's own
+disc: `tpatch_build.build_from_disc` reads only the Form 1 files a text patch needs into a temporary folder,
+`slim_extract`, and `data_patch.apply(partial=True)`; the result is byte-identical to the build from a full `data/`:
+es_mejorada 626971 bytes, `cmp` equal, about 4 minutes for a whole translation). Fixed names, next to the game's executable:
+
+* `translation.tpatch` (or `translation.tombipatch.json`, which uses its `translation.tpatch` twin and refuses it when
+  compiled from another version of the JSON). `tombi2` looks in the current folder, then in the folder of its own
+  executable (`argv[0]`), and loads the first one found **before** every `--text-patch` (`runtime/main.c`
+  `open_translation_file`). `--no-translation-file` skips the search.
+* Priority: `shims/tpatch.c` gives each rebuilt file to the first patch that provides it; a later patch that rebuilds
+  any file already provided is skipped whole (`[tpatch] X skipped: FILE is already provided by translation.tpatch
+  (loaded first)`): half of two patches would mix WFMs with another patch's `MAINn.EXE` file tables. So the player's
+  translation wins over the improved translation that a launcher passes with `--text-patch`, in any language.
+  Check: `tools/test_translation_tool.py` (`PortTranslationFile`).
+* PC launcher: *Import translation…* (the *Text patch* card) copies the chosen `*.tombipatch.json` (and its `.tpatch`
+  twin when it sits beside it) or a `.tpatch` to those names next to `tombi-port` (the folder tombi2 runs in), and
+  selects the new choice *Your translation*; a translation file that appears or changes there is selected by itself
+  (it wins over the bundled improved translation until the player picks something else). With `data/`, the launcher
+  applies the JSON to `data/` like any text patch (`data_patch`) and passes `--no-translation-file`; with only the
+  `.tpatch`, or without `data/`, `data/` stays original and `tombi2` loads the file itself. Every other choice passes
+  `--no-translation-file`. The card says which translation is active.
+* Android: *Options → Data → Import translation…* (SAF `ACTION_OPEN_DOCUMENT`) checks the `TPCH` magic and copies the
+  file to `files/translation.tpatch` (a `.tombipatch.json` is refused with a hint: it must be compiled first);
+  `buildArgs` passes it as the first `--text-patch` (before es_mejorada, which tombi2 then skips). *Remove translation*
+  deletes it.
+* Verified (Linux, `--disc Tombi.bin --lang 5 --text-patch patches/es_mejorada.tombipatch.json`, the editor's
+  installed `translation.tpatch` next to `build/port2/tombi2`, AREA00/MFNT000S #128 changed): the opening dialogue
+  shows the edited line ("¡Hola, Tombi pelirrosa!"); with `--no-translation-file` it shows es_mejorada's.

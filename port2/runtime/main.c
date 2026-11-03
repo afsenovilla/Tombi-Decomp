@@ -257,9 +257,34 @@ void port_gfx_es_load(void);
 static const char *port_patch_dir;
 extern int port_cut_content, port_lang;
 int port_tpatch_load(const char *path);
+/* The player's own translation (docs/PORT.md "Your own translation file"): translation.tpatch (or translation.tombipatch.json
+   with its compiled translation.tpatch beside it), made with the text editor (tools/text_editor.py, "Install in the game"),
+   in the current folder or next to the executable.  It is loaded before every --text-patch, and tpatch.c skips a later
+   patch that rebuilds any of its files, so it takes priority over the improved translation a launcher passes.
+   --no-translation-file: not looked for (the PC launcher, which applies the JSON to data/ itself). */
+static int port_no_translation_file;
+static int open_translation_file(const char *argv0) {
+    static const char *names[2] = { "translation.tpatch", "translation.tombipatch.json" };
+    char dirs[2][1100] = { "", "" }; char buf[1200]; FILE *f;
+    int n = (int)strlen(argv0);
+    while (n > 0 && argv0[n - 1] != '/' && argv0[n - 1] != '\\') n--;
+    if (n > 0 && n < 1000) { memcpy(dirs[1], argv0, n); dirs[1][n] = 0; }
+    for (int d = 0; d < 2; d++) {
+        if (d == 1 && !dirs[1][0]) break;
+        for (int k = 0; k < 2; k++) {
+            snprintf(buf, sizeof buf, "%s%s", dirs[d], names[k]);
+            if (!(f = fopen(buf, "rb"))) continue;
+            fclose(f);
+            port_printf("[port2] translation file %s found: loaded first, it wins over other text patches\n", buf);
+            return port_tpatch_load(buf) > 0;
+        }
+    }
+    return 0;
+}
 static void open_text_patches(const char *argv0) {
+    int own = port_no_translation_file ? 0 : open_translation_file(argv0);
     for (int i = 0; i < port_text_patch_n; i++) port_tpatch_load(port_text_patches[i]);
-    if (port_text_patch_n || !port_cut_content || port_lang) return;
+    if (own || port_text_patch_n || !port_cut_content || port_lang) return;
     char buf[1200]; FILE *f;
     int n = (int)strlen(argv0);
     while (n > 0 && argv0[n - 1] != '/' && argv0[n - 1] != '\\') n--;
@@ -298,7 +323,7 @@ static int port_ws_resolve(void) {
 
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--crawler-patrol] [--log-anim [FILE]] [--log-anim-force CAT:TYPE,...] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
-                "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
+                "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
@@ -897,6 +922,7 @@ int main(int argc, char **argv) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : 0;
         if (!strcmp(a, "--disc") && v) port_disc_path = argv[++i];
         else if (!strcmp(a, "--data") && v) port_data_dir = argv[++i];
+        else if (!strcmp(a, "--no-translation-file")) port_no_translation_file = 1;
         else if (!strcmp(a, "--text-patch") && v) { if (port_text_patch_n < 8) port_text_patches[port_text_patch_n++] = argv[i + 1]; i++; }
         else if (!strcmp(a, "--patch-dir") && v) port_patch_dir = argv[++i];
         else if (!strcmp(a, "--cut-content")) port_cut_content = 1;

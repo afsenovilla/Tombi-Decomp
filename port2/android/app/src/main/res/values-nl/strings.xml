@@ -118,4 +118,10 @@
     <string name="pad_dpad">DPAD</string>
     <string name="pad_axis">As</string>
     <string name="pad_none">(geen)</string>
+    <string name="tr_import">Vertaling importeren…</string>
+    <string name="tr_remove">Vertaling verwijderen</string>
+    <string name="tr_removed">Vertaling verwijderd.</string>
+    <string name="tr_done">Vertaling geïmporteerd: %1$s.</string>
+    <string name="tr_json">Dit is het .tombipatch.json-bestand. Importeer translation.tpatch (tombi-text).</string>
+    <string name="tr_bad">Geen vertaalbestand (.tpatch).</string>
 </resources>

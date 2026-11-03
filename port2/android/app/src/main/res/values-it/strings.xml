@@ -118,4 +118,10 @@
     <string name="pad_dpad">DPAD</string>
     <string name="pad_axis">Asse</string>
     <string name="pad_none">(nessuno)</string>
+    <string name="tr_import">Importa traduzione…</string>
+    <string name="tr_remove">Rimuovi traduzione</string>
+    <string name="tr_removed">Traduzione rimossa.</string>
+    <string name="tr_done">Traduzione importata: %1$s.</string>
+    <string name="tr_json">Questo è il file .tombipatch.json. Importa invece translation.tpatch (tombi-text).</string>
+    <string name="tr_bad">Non è un file di traduzione (.tpatch).</string>
 </resources>

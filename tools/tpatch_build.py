@@ -18,6 +18,7 @@ sha1 of every source file and of every rebuilt file, so a different disc never g
 
   python3 tools/tpatch_build.py data/ patches/es_mejorada.tombipatch.json -o patches/es_mejorada.tpatch
   python3 tools/tpatch_build.py data/ patches/en_cut_content.tombipatch.json -o patches/en_cut_content.tpatch
+  python3 tools/tpatch_build.py Tombi.bin my.tombipatch.json -o my.tpatch      (from the disc image: slim_extract first)
 
 Format (little endian): "TPCH" u32 version=2, u32 n_sources, u32 n_entries, char json_sha1[40], u16 title_len, title
   source: u16 path_len, path, u32 size, u8 sha1[20]
@@ -254,7 +255,66 @@ def literal_kind(path, new, o):
     return "%s (file tables / our text)" % (path.split("/")[0] if path.upper().startswith("EXE/") else path.rsplit(".", 1)[-1].upper())
 
 
-def build(data_dir, patch_path, out, max_literal, work=None, log=print):
+SLIM_SKIP = ("MOVIE/", "SOUND/", "ZZZ/", X.BLOB_DIR + "/")     # never read by a text patch
+
+
+def slim_extract(image, out_dir, progress=None):
+    """A data/ folder (tools/extract_data.py layout, full manifest.txt) with only the Form 1 files a text patch reads (no
+    movies, sound, padding or raw blobs: ~190 MB instead of ~450): what build(..., partial=True) needs, from the player's
+    own disc image (.bin / .cue / .iso / .chd)."""
+    img = X.Image(X.bin_of_cue(image))
+    try:
+        entries, main0 = [], None
+        for path, lba, size in img.files():
+            n = (size + 2047) // 2048
+            raw = path.upper().endswith((".STR", ".XA")) or X.has_form2(img, lba, n)
+            entries.append((lba, n, 2352 if raw else 2048, n * 2352 if raw else size, path))
+            if path.upper() == "EXE/MAIN0.EXE":
+                main0 = (lba, size)
+        entries.sort()
+        prev, blobs = 0, []
+        for lba, n, _, _, _ in entries:
+            if lba > prev:
+                blobs.append((prev, lba - prev))
+            prev = max(prev, lba + n)
+        if prev < img.sectors:
+            blobs.append((prev, img.sectors - prev))
+        entries = sorted(entries + [(lba, n, 2352, n * 2352, "%s/%06d.raw" % (X.BLOB_DIR, lba)) for lba, n in blobs])
+        todo = [e for e in entries if e[2] == 2048 and not e[4].upper().startswith(SLIM_SKIP)]
+        for k, (lba, n, _, nbytes, path) in enumerate(todo):
+            dst = os.path.join(out_dir, *path.split("/"))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            with open(dst, "wb") as o:
+                o.write(img.user(lba, n)[:nbytes])
+            if progress:
+                progress(k + 1, len(todo), path)
+        sha = hashlib.sha1(img.user(main0[0], (main0[1] + 2047) // 2048)[:main0[1]]).hexdigest() if main0 else ""
+        X.write_manifest(out_dir, {"sectors": img.sectors, "main0_sha1": sha, "source": os.path.basename(image), "files": entries})
+    finally:
+        img.close()
+
+
+def _link_or_copy(src, dst):
+    """copytree helper: a hard link (data_patch writes every file it changes as a new file, the source stays untouched)."""
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copy2(src, dst)
+
+
+def build_from_disc(image, patch_path, out, max_literal=16384, log=print, progress=None):
+    """build() from a disc image: a slim extraction into a temporary folder first (deleted afterwards)."""
+    tmp = tempfile.mkdtemp(prefix="tpatch_disc_")
+    try:
+        d = os.path.join(tmp, "src")
+        log("reading the disc files a text patch needs from %s" % image)
+        slim_extract(image, d, progress)
+        build(d, patch_path, out, max_literal, os.path.join(tmp, "work"), log, partial=True)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def build(data_dir, patch_path, out, max_literal, work=None, log=print, partial=False):
     import data_patch as DP
     patch = json.load(open(patch_path, encoding="utf-8"))
     tmp = work or tempfile.mkdtemp(prefix="tpatch_")
@@ -262,8 +322,8 @@ def build(data_dir, patch_path, out, max_literal, work=None, log=print):
     if os.path.isdir(pd):
         shutil.rmtree(pd)
     log("copying %s -> %s" % (data_dir, pd))
-    shutil.copytree(data_dir, pd, ignore=shutil.ignore_patterns(DP.ORIG))
-    r = DP.apply(pd, patch_path, log=log)
+    shutil.copytree(data_dir, pd, ignore=shutil.ignore_patterns(DP.ORIG), copy_function=_link_or_copy)
+    r = DP.apply(pd, patch_path, log=log, partial=partial, gfx=bool(os.environ.get("TPATCH_WITH_GFX")))
     before, after = manifest_files(data_dir), manifest_files(pd)
     targets = [(p, open(os.path.join(pd, *p.split("/")), "rb").read(), after[p]) for p in r["files"]]
     gfx = os.path.join(pd, DP.GFX_TBTX)
@@ -361,13 +421,16 @@ def build(data_dir, patch_path, out, max_literal, work=None, log=print):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("data", help="pristine data/ folder (tools/extract_data.py) of the PAL disc SCES-01331")
+    ap.add_argument("data", help="pristine data/ folder (tools/extract_data.py) of the PAL disc SCES-01331, or the disc image itself")
     ap.add_argument("patch", help="*.tombipatch.json")
     ap.add_argument("-o", "--out", required=True)
     ap.add_argument("--max-literal", type=int, default=16384, help="largest literal total allowed per file")
     ap.add_argument("--work", help="keep the patched copy of data/ here (for tools/tpatch_check.py)")
     a = ap.parse_args()
-    build(a.data, a.patch, a.out, a.max_literal, a.work)
+    if os.path.isfile(a.data):
+        build_from_disc(a.data, a.patch, a.out, a.max_literal)
+    else:
+        build(a.data, a.patch, a.out, a.max_literal, a.work)
 
 
 if __name__ == "__main__":

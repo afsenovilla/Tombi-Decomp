@@ -100,10 +100,49 @@ class TestLauncher(unittest.TestCase):
                 d = self.launcher(name, c["cfg"], c.get("ui", "en"), c.get("data", False))
                 self.w.civ_play = c.get("civ_play")
                 norm = lambda l: [x.replace("\\", "/") if isinstance(x, str) else x for x in l]   # Windows paths
-                self.assertEqual(norm(self.args()), norm(subst(c["expect"], d)))
+                got = self.args()
+                # no translation.tombipatch.json / .tpatch installed: tombi2 is told not to look for one (it would load it)
+                self.assertIn("--no-translation-file", got)
+                got = [x for x in got if x != "--no-translation-file"]
+                self.assertEqual(norm(got), norm(subst(c["expect"], d)))
                 self.w.close()
                 self.w.deleteLater()
                 self.w = None
+
+    def test_import_translation(self):
+        """Import translation...: the file and its compiled twin get the fixed names next to the launcher, "Your translation"
+        is chosen, and tombi2 loads it by itself (no --no-translation-file) when data/ cannot take the JSON."""
+        src = os.path.join(self.tmp, "src")
+        os.makedirs(src)
+        js = os.path.join(src, "mine.tombipatch.json")
+        json.dump({"format": "tombi-text-patch", "version": 1, "title": "Mi traducción", "edits": {}}, open(js, "w", encoding="utf-8"))
+        open(os.path.join(src, "mine.tpatch"), "wb").write(b"TPCH" + bytes(60))
+        d = self.launcher("imp", {"disc": "", "lang": 5})
+        self.assertEqual(L.translation_files(d), (None, None))
+        self.w._open_file = lambda *a: js
+        self.w.import_translation()
+        j, t = L.translation_files(d)
+        self.assertTrue(j and t)
+        self.assertEqual(L.translation_title(d), "Mi traducción")
+        self.assertEqual(self.w._patch_mode(), "translation")
+        self.assertTrue(L.translation_native(self.w.s))
+        self.assertNotIn("--no-translation-file", self.args())
+        # the bundled improved translation chosen again: tombi2 must not pick the file up
+        self.w.s["patch"] = L.bundled_patch() or ""
+        self.assertNotEqual(self.w._patch_mode(), "translation")
+        self.assertIn("--no-translation-file", self.args())
+        # a .tpatch alone replaces the JSON (an older JSON would win over it)
+        tp = os.path.join(src, "other.tpatch")
+        open(tp, "wb").write(b"TPCH" + bytes(60))
+        L.import_translation(tp, d)
+        self.assertEqual(L.translation_files(d), (None, os.path.join(d, L.TRANSLATION_TPATCH)))
+        bad = os.path.join(src, "bad.tombipatch.json")
+        with open(bad, "w") as f:
+            f.write("{}")
+        with self.assertRaises(ValueError):
+            L.import_translation(bad, d)
+        L.remove_translation(d)
+        self.assertEqual(L.translation_files(d), (None, None))
 
     def test_settings_written_back(self):
         d = self.launcher("saved", {"keys_on": True, "keys": {"up": "W"}, "prompts_style": "thor_abxy", "rumble": "abc",

@@ -118,4 +118,10 @@
     <string name="pad_dpad">DPAD</string>
     <string name="pad_axis">Axel</string>
     <string name="pad_none">(ingen)</string>
+    <string name="tr_import">Importera översättning…</string>
+    <string name="tr_remove">Ta bort översättning</string>
+    <string name="tr_removed">Översättningen togs bort.</string>
+    <string name="tr_done">Översättning importerad: %1$s.</string>
+    <string name="tr_json">Det här är .tombipatch.json-filen. Importera translation.tpatch i stället (tombi-text).</string>
+    <string name="tr_bad">Ingen översättningsfil (.tpatch).</string>
 </resources>

@@ -10,7 +10,7 @@ image (the disc field is optional while data/ is valid for the same MAIN0.EXE).
   python3 tools/port_launcher.py             # from a checkout: uses build/port2-win/tombi2.exe (Windows) or build/port2/tombi2 (Linux)
   pyinstaller --onefile --windowed --name tombi-port ... tools/port_launcher.py   (.github/workflows/port2-exe.yml)
 """
-import hashlib, re, json, os, struct, subprocess, sys, threading
+import hashlib, re, json, os, shutil, struct, subprocess, sys, threading
 
 try:
     from PySide6.QtCore import Qt, QTimer, QObject, Signal, QEvent, QSize, QRectF, QPointF
@@ -258,6 +258,81 @@ def bundled_patch(name="es_mejorada.tombipatch.json"):
         return src
 
 
+# The player's own translation (tombi-text "Install in the game" / "Import translation..." below): fixed names next to the
+# launcher, the folder tombi2 runs in (cwd); tombi2 loads it by itself and it wins over the bundled improved translation
+# (docs/PORT.md "Your own translation file").  With data/ the launcher applies the JSON like any text patch.
+TRANSLATION_JSON = "translation.tombipatch.json"
+TRANSLATION_TPATCH = "translation.tpatch"
+
+
+def translation_files(d=None):
+    """(json, tpatch) of the installed translation in d (default app_dir()); None for a missing one."""
+    d = d or app_dir()
+    j, t = os.path.join(d, TRANSLATION_JSON), os.path.join(d, TRANSLATION_TPATCH)
+    return (j if os.path.isfile(j) else None), (t if os.path.isfile(t) else None)
+
+
+def translation_title(d=None):
+    """The title of the installed translation (from the JSON, else the .tpatch header), or None."""
+    j, t = translation_files(d)
+    try:
+        if j:
+            return json.load(open(j, encoding="utf-8")).get("title") or TRANSLATION_JSON
+        if t:
+            b = open(t, "rb").read(4096)
+            if b[:4] == b"TPCH":
+                n = struct.unpack_from("<H", b, 56)[0]
+                return b[58:58 + n].decode("utf-8", "replace") or TRANSLATION_TPATCH
+    except (OSError, ValueError, struct.error):
+        pass
+    return None
+
+
+def import_translation(src, d=None):
+    """Copies a translation file (*.tombipatch.json, with its compiled .tpatch twin when it sits beside it, or a .tpatch)
+    to the fixed names in d; returns the path the launcher selects. Raises ValueError for a file that is neither."""
+    d = d or app_dir()
+    j, t = os.path.join(d, TRANSLATION_JSON), os.path.join(d, TRANSLATION_TPATCH)
+    if src.lower().endswith(".tpatch"):
+        if open(src, "rb").read(4) != b"TPCH":
+            raise ValueError("not a .tpatch file (tools/tpatch_build.py)")
+        if os.path.abspath(src) != os.path.abspath(t):
+            shutil.copyfile(src, t)
+        if os.path.isfile(j):
+            os.remove(j)            # an older JSON would win over the new .tpatch
+        return t
+    try:
+        p = json.load(open(src, encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        raise ValueError(str(e))
+    if not isinstance(p, dict) or p.get("format") != "tombi-text-patch":
+        raise ValueError("not a Tombi translation file (*.tombipatch.json)")
+    if os.path.abspath(src) != os.path.abspath(j):
+        shutil.copyfile(src, j)
+    twin = src[:-len(".tombipatch.json")] + ".tpatch" if src.endswith(".tombipatch.json") else os.path.splitext(src)[0] + ".tpatch"
+    if os.path.isfile(twin):
+        if os.path.abspath(twin) != os.path.abspath(t):
+            shutil.copyfile(twin, t)
+    elif os.path.isfile(t):
+        os.remove(t)                # compiled from another JSON: tombi2 would refuse it anyway
+    return j
+
+
+def remove_translation(d=None):
+    for f in translation_files(d):
+        if f:
+            os.remove(f)
+
+
+def translation_native(s):
+    """True when tombi2 should load the installed translation by itself: chosen, and not applied to data/ by the launcher
+    (no data/, or only the compiled .tpatch was imported)."""
+    j, t = translation_files()
+    if not (s.get("patch_on") and (s.get("patch") or "") in (j or "", t or "") and (j or t)):
+        return False
+    return bool(t) and not (j and data_ready())
+
+
 def load_settings():
     s = M.default_settings()
     s.update({"disc": "", "savedir": "", "scale": 2, "fullscreen": False, "renderer": "gl", "patch_on": False, "patch": bundled_patch() or ""})
@@ -444,7 +519,14 @@ i18n.add({
            "l.uilang": "Idioma del launcher", "l.starting": "Iniciando el juego...", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
            "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
            "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
-           "p.custom": "Otro archivo...", "sum.window": "{0}x ventana", "sum.full": "pantalla completa",
+           "p.custom": "Otro archivo...", "p.translation": "Tu traducción (translation.tombipatch.json)",
+           "b.importtr": "Importar traducción…", "b.removetr": "Quitar traducción",
+           "q.removetr": "¿Borrar la traducción importada (translation.tombipatch.json / translation.tpatch) de la carpeta del juego?",
+           "l.tractive": "Traducción activa: «{0}» (en {1}). Tiene prioridad sobre la traducción mejorada incluida.",
+           "l.trinstalled": "Hay una traducción importada («{0}»): elígela arriba como «Tu traducción» para usarla.",
+           "l.trnone": "«Importar traducción…» copia un archivo de traducción (.tombipatch.json o .tpatch, hecho con tombi-text) junto al juego y lo activa.",
+           "s.trimported": "Traducción importada: «{0}» (copiada en {1}).", "s.trbad": "No es un archivo de traducción válido: {0}",
+           "sum.window": "{0}x ventana", "sum.full": "pantalla completa",
            "sum.ires": "{0}x interna", "c.renderer": "Dibujado", "c.window": "Ventana", "c.aspect": "Imagen", "c.ires": "Resolución interna",
            "l.iresoff": "Solo con OpenGL: el dibujado por software usa siempre la resolución original.",
            "c.keys": "Teclado", "c.pad": "Mando", "c.mods": "Mods", 
@@ -453,7 +535,14 @@ i18n.add({
            "l.uilang": "Launcher language", "l.starting": "Starting the game...", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
            "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
            "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
-           "p.custom": "Other file...", "sum.window": "{0}x window", "sum.full": "fullscreen",
+           "p.custom": "Other file...", "p.translation": "Your translation (translation.tombipatch.json)",
+           "b.importtr": "Import translation…", "b.removetr": "Remove translation",
+           "q.removetr": "Delete the imported translation (translation.tombipatch.json / translation.tpatch) from the game folder?",
+           "l.tractive": "Active translation: \"{0}\" (in {1}). It wins over the bundled improved translation.",
+           "l.trinstalled": "An imported translation is there (\"{0}\"): pick \"Your translation\" above to use it.",
+           "l.trnone": "\"Import translation…\" copies a translation file (.tombipatch.json or .tpatch, made with tombi-text) next to the game and selects it.",
+           "s.trimported": "Translation imported: \"{0}\" (copied to {1}).", "s.trbad": "Not a valid translation file: {0}",
+           "sum.window": "{0}x window", "sum.full": "fullscreen",
            "sum.ires": "{0}x internal", "c.renderer": "Renderer", "c.window": "Window", "c.aspect": "Picture", "c.ires": "Internal resolution",
            "l.iresoff": "OpenGL only: the software renderer always draws at the original resolution.",
            "c.keys": "Keyboard", "c.pad": "Controller", "c.mods": "Mods", 
@@ -939,6 +1028,8 @@ def build_command(s, civ_play=None):
     else:
         cmd += ["--patch-tex", gfx]
         note = "yes (%s)" % gfx
+    if not translation_native(s):
+        cmd += ["--no-translation-file"]      # tombi2 would load translation.tpatch from its cwd: only when it is the choice
     if s.get("savedir"):
         cmd += ["--save-dir", s["savedir"]]
     if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft" and s.get("experimental"):
@@ -1769,22 +1860,74 @@ class App(QMainWindow):
         f.addStretch(1)
 
     def _patch_mode(self):
-        """none / bundled / custom from the saved patch_on + patch (an old saved path to the bundled file -> bundled)."""
+        """none / bundled / translation / custom from the saved patch_on + patch (an old saved path to the bundled file ->
+        bundled; the installed translation.tombipatch.json / .tpatch -> translation)."""
         bp = bundled_patch()
         cur = (self.s.get("patch") or "").strip()
         if not self.s.get("patch_on"):
             return "none"
+        if cur and cur in [f for f in translation_files() if f]:
+            return "translation"
         if not cur or (bp and os.path.basename(cur) == os.path.basename(bp) and os.path.dirname(os.path.abspath(cur)).endswith("patches")):
             return "bundled" if bp else "none"
         return "custom"
 
+    def _translation_auto(self):
+        """A translation file that appeared (or changed) next to the launcher is selected: it wins over the bundled
+        improved translation until the player picks something else (that choice holds until the file changes again)."""
+        j, t = translation_files()
+        f = j or t
+        if not f:
+            if self._patch_mode() == "translation" or (self.s.get("patch") or "").endswith((TRANSLATION_JSON, TRANSLATION_TPATCH)):
+                self.s["patch_on"] = bool(bundled_patch()) and self.s.get("lang") == 5
+                self.s["patch"] = bundled_patch() or ""
+            return
+        st = os.stat(f)
+        stamp = [os.path.basename(f), st.st_size, int(st.st_mtime)]
+        if self.s.get("translation_seen") != stamp:
+            self.s["translation_seen"] = stamp
+            self.s["patch"], self.s["patch_on"] = f, True
+        elif self._patch_mode() == "translation" and self.s.get("patch") != f:
+            self.s["patch"] = f
+
+    def import_translation(self):
+        """Import translation...: the file is copied next to the launcher under the fixed name tombi2 looks for, and chosen."""
+        p = self._open_file(tr("b.importtr"), "Tombi translation (*.tombipatch.json *.tpatch);;All (*)")
+        if not p:
+            return
+        try:
+            f = import_translation(p)
+        except (OSError, ValueError) as e:
+            self.error(tr("s.trbad", e))
+            return
+        st = os.stat(f)
+        self.s["translation_seen"] = [os.path.basename(f), st.st_size, int(st.st_mtime)]
+        self.s["patch"], self.s["patch_on"] = f, True
+        save_settings(self.s)
+        self._sync_patch_choice()
+        self.say(tr("s.trimported", translation_title() or os.path.basename(f), app_dir()), "ok")
+
+    def remove_translation(self):
+        if QMessageBox.question(self, tr("b.removetr"), tr("q.removetr")) != QMessageBox.Yes:
+            return
+        try:
+            remove_translation()
+        except OSError as e:
+            self.error(str(e))
+            return
+        self._translation_auto()
+        save_settings(self.s)
+        self._sync_patch_choice()
+
     def _patch_widget(self, lay):
-        """Combobox None / Improved translation (bundled) / Other file...; the path + Browse only for "other"."""
+        """Combobox None / Improved translation (bundled) / Your translation / Other file...; the path + Browse only for
+        "other"; Import translation... / Remove and the line saying which translation is active."""
         self.v("patch_on", bool, False)
         self.v("patch", str, "")
         if self._patch_mode() == "bundled":        # migrate: the bundled file wherever this exe now lives
             self.s["patch"] = bundled_patch()
-        modes = ["none"] + (["bundled"] if bundled_patch() else []) + ["custom"]
+        self._translation_auto()
+        modes = ["none"] + (["bundled"] if bundled_patch() else []) + ["translation", "custom"]
         cb = QComboBox()
         lay.addWidget(cb)
         e = QLineEdit(self.s.get("patch") or "")
@@ -1796,15 +1939,30 @@ class App(QMainWindow):
         lay.addWidget(row)
         hint = wrap_label(tr("l.patchhint"), "muted")
         lay.addWidget(hint)
+        bi, br = QPushButton(tr("b.importtr")), QPushButton(tr("b.removetr"))
+        bi.clicked.connect(self.import_translation)
+        br.clicked.connect(self.remove_translation)
+        trow, tl = hbox(bi, br, margins=(0, 4, 0, 0))
+        tl.addStretch(1)
+        lay.addWidget(trow)
+        active = wrap_label("", "muted")
+        lay.addWidget(active)
+
+        def shown_modes():
+            spanish = self.s.get("lang") == 5
+            have = any(translation_files())
+            return [x for x in modes if (x != "bundled" or spanish) and (x != "translation" or have)]
 
         def chosen(i):
-            spanish = self.s.get("lang") == 5
-            m = [x for x in modes if x != "bundled" or spanish][i]
+            m = shown_modes()[i]
             if m == "none":
                 self.s["patch_on"] = False
             elif m == "bundled":
                 self.s["patch"] = bundled_patch() or ""
                 self.s["patch_on"] = True
+            elif m == "translation":
+                j, t = translation_files()
+                self.s["patch"], self.s["patch_on"] = j or t, True
             elif self._patch_mode() != "custom":
                 old = self.s.get("patch"), self.s.get("patch_on")
                 self.pick_patch()
@@ -1812,17 +1970,19 @@ class App(QMainWindow):
                     self.s["patch"], self.s["patch_on"] = old
             self._sync_patch_choice()
         cb.activated.connect(chosen)
-        self.patch_ui.append((cb, modes, row, hint, e))
+        self.patch_ui.append((cb, modes, row, hint, e, br, active))
         self._sync_patch_choice()
 
     def _sync_patch_choice(self):
         """Every patch combobox shown from the patch_on / patch settings."""
         m = self._patch_mode()
         spanish = self.s.get("lang") == 5
-        for cb, modes, row, hint, e in getattr(self, "patch_ui", []):
+        have = any(translation_files())
+        title = translation_title()
+        for cb, modes, row, hint, e, br, active in getattr(self, "patch_ui", []):
             try:
                 # the bundled Spanish translation only for the Spanish game (it does not touch the other languages)
-                shown = [x for x in modes if x != "bundled" or spanish]
+                shown = [x for x in modes if (x != "bundled" or spanish) and (x != "translation" or have)]
                 cb.blockSignals(True)
                 cb.clear()
                 cb.addItems([tr("p." + x) for x in shown])
@@ -1833,7 +1993,14 @@ class App(QMainWindow):
                     e.setText(self.s.get("patch") or "")
                     e.blockSignals(False)
                 row.setVisible(m == "custom")
-                hint.setVisible(m == "none" and spanish and "bundled" in modes)
+                hint.setVisible(m == "none" and spanish and "bundled" in modes and not have)
+                br.setVisible(have)
+                if m == "translation":
+                    active.setText(tr("l.tractive", title or "?", app_dir()))
+                elif have:
+                    active.setText(tr("l.trinstalled", title or "?"))
+                else:
+                    active.setText(tr("l.trnone"))
             except RuntimeError:
                 pass
 
@@ -2400,6 +2567,8 @@ class App(QMainWindow):
         d, s = data_dir(), self.s
         st = DP.status(d)
         want = s.get("patch_on") and (s.get("patch") or "").strip()
+        if want and self._patch_mode() == "translation" and not want.endswith(".json"):
+            want = ""        # only the compiled translation.tpatch: data/ stays original and tombi2 applies it in memory
         if want and str(s.get("lang")) != "5" and self._patch_mode() == "bundled":
             want = ""        # the bundled translation is for the Spanish game only: other languages play the original data
         if not want and s.get("cut_content") and str(s.get("lang") or 0) == "0":

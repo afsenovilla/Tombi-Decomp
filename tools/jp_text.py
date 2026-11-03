@@ -285,31 +285,28 @@ def flat(t):
     return re.sub(r"\s+", " ", t).strip()
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("disc")
-    ap.add_argument("out")
-    ap.add_argument("--pal")
-    ap.add_argument("--lang", default="S")
-    a = ap.parse_args()
-    os.makedirs(a.out, exist_ok=True)
-    if os.path.exists(os.path.join(a.out, "_copias.txt")):
-        os.remove(os.path.join(a.out, "_copias.txt"))
-    files = read_disc(a.disc)
+def align_disc(jp_disc, pal_disc=None, lang="S"):
+    """Decodes every WFM2 block of the JP disc and, with pal_disc, aligns each one with the PAL WFM of the same area (the
+    text editor tools/text_editor.py uses this to show the JP line of a PAL entry). Returns {"files", "decoder",
+    "containers": [{"name", "k", "tag", "texts", "nglyphs", "copy_of", "pal", "map"}], "solo", "stats", "pal_texts"}:
+    "pal" is the matched PAL file (e.g. AREA05/MFNT050S.WFM, SYSTEM/DSPSUB#1) or None, "map" {jp index: [pal index]}
+    ([] = no PAL counterpart)."""
+    files = read_disc(jp_disc)
     conts = containers(files)
     dec = Decoder()
-    pal = pal_wfms(a.pal, a.lang) if a.pal else {}
-    seen, solo, stats = {}, [], collections.Counter()
+    pal = pal_wfms(pal_disc, lang) if pal_disc else {}
+    seen, solo, stats, out = {}, [], collections.Counter(), []
     for name, k, glyphs, dl in conts:
         texts = [dec.text(glyphs, ws) for ws in dl]
         sig = hashlib.sha1(json.dumps(texts).encode()).hexdigest()
         tag = "%s_%d" % (name.replace("/", "_").rsplit(".", 1)[0], k)
         stats["containers"] += 1
         stats["dialogues"] += len(dl)
+        rec = {"name": name, "k": k, "tag": tag, "texts": texts, "nglyphs": len(glyphs), "copy_of": seen.get(sig),
+               "pal": None, "map": {}}
+        out.append(rec)
         if sig in seen:
             stats["duplicate containers"] += 1
-            with open(os.path.join(a.out, "_copias.txt"), "a", encoding="utf-8") as f:
-                f.write("%s = copia de %s\n" % (tag, seen[sig]))
             continue
         seen[sig] = tag
         # PAL counterpart: the WFM of the same area whose skeleton aligns best
@@ -326,7 +323,7 @@ def main():
             if "#" in pn:       # SYSTEM/DSPSUB: same file and block number first
                 m += len(dl) * (pn.split("#")[0] == name.rsplit(".", 1)[0]) + len(dl) * (pn.endswith("#%d" % k))
             if m > best:
-                best, match, ops = m, pn, sm.get_opcodes()
+                best, match = m, pn
         if match and best >= 0.5 * len(dl):
             ptexts = pal[match][1]
             pmap = align(dl, pal[match][0].dialogues)
@@ -340,15 +337,38 @@ def main():
                                  " / ".join(flat(ptexts[j]) for j in pmap[i])))
         else:
             match = None
+        rec["pal"], rec["map"] = match, pmap
         stats["matched containers" if match else "containers without PAL match"] += 1
-        with open(os.path.join(a.out, tag + ".txt"), "w", encoding="utf-8") as f:
+    return {"files": files, "decoder": dec, "containers": out, "solo": solo, "stats": stats,
+            "pal_texts": {n: t for n, (_, t) in pal.items()}}
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("disc")
+    ap.add_argument("out")
+    ap.add_argument("--pal")
+    ap.add_argument("--lang", default="S")
+    a = ap.parse_args()
+    os.makedirs(a.out, exist_ok=True)
+    if os.path.exists(os.path.join(a.out, "_copias.txt")):
+        os.remove(os.path.join(a.out, "_copias.txt"))
+    res = align_disc(a.disc, a.pal, a.lang)
+    files, dec, solo, stats = res["files"], res["decoder"], res["solo"], res["stats"]
+    for c in res["containers"]:
+        if c["copy_of"]:
+            with open(os.path.join(a.out, "_copias.txt"), "a", encoding="utf-8") as f:
+                f.write("%s = copia de %s\n" % (c["tag"], c["copy_of"]))
+            continue
+        match, pmap, texts = c["pal"], c["map"], c["texts"]
+        with open(os.path.join(a.out, c["tag"] + ".txt"), "w", encoding="utf-8") as f:
             f.write("# %s, bloque WFM2 %d: %d diálogos, %d glifos%s\n" % (
-                name, k, len(dl), len(glyphs), ", PAL: %s" % match if match else ""))
+                c["name"], c["k"], len(texts), c["nglyphs"], ", PAL: %s" % match if match else ""))
             for i, t in enumerate(texts):
                 f.write("\n## %d\n%s\n" % (i, t))
                 if match and pmap.get(i):
                     for j in pmap[i]:
-                        f.write("  [PAL %d] %s\n" % (j, flat(pal[match][1][j])))
+                        f.write("  [PAL %d] %s\n" % (j, flat(res["pal_texts"][match][j])))
     with open(os.path.join(a.out, "SYSTEM_DSPSUB_sjis.txt"), "w", encoding="utf-8") as f:
         for n, o, s in sjis_strings(files):
             f.write("%s 0x%05X %s\n" % (n, o, s))

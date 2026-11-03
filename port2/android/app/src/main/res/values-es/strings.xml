@@ -124,4 +124,10 @@
     <string name="pad_dpad">CRUCETA</string>
     <string name="pad_axis">Eje</string>
     <string name="pad_none">(sin asignar)</string>
+    <string name="tr_import">Importar traducción…</string>
+    <string name="tr_remove">Quitar traducción</string>
+    <string name="tr_removed">Traducción quitada.</string>
+    <string name="tr_done">Traducción importada: %1$s. Se usa en todos los idiomas y tiene prioridad sobre la traducción mejorada.</string>
+    <string name="tr_json">Este es el archivo .tombipatch.json. Importa el translation.tpatch compilado (tombi-text: «Instalar en el juego» o «Compilar para el juego»).</string>
+    <string name="tr_bad">No es un archivo de traducción (.tpatch hecho con tombi-text).</string>
 </resources>

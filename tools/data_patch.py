@@ -90,15 +90,17 @@ def _write(path, data):
     os.replace(path + ".part", path)
 
 
-def apply(data_dir, patch_path, disc=None, disc_hash=None, force=False, log=print):
+def apply(data_dir, patch_path, disc=None, disc_hash=None, force=False, log=print, partial=False, gfx=True):
     """Restores data/ and applies the patch. disc_hash (or disc, hashed here) is checked against the patch's original image.
+    partial: data_dir holds only the files a text patch reads (tools/tpatch_build.py slim_extract: no movies, no sound)
+    with the full manifest.  gfx=False: no Spanish redraws even when the patch asks (portGfx).
     Returns {"files", "applied", "problems", "moved", "title"}."""
     import text_core as C
     import text_patch as TP
     import cdfiles
     restore(data_dir)
     man = X.read_manifest(data_dir)
-    if not man or X.manifest_sha1(data_dir) is None:
+    if not man or (X.manifest_sha1(data_dir) is None and not partial):
         raise PatchError("data/ is not a complete extraction (manifest.txt)")
     if man["main0_sha1"] != X.MAIN0_SHA1 and not force:
         raise PatchError("data/ is not from the PAL disc SCES-01331 (MAIN0.EXE sha1 %s)" % man["main0_sha1"][:8])
@@ -174,7 +176,7 @@ def apply(data_dir, patch_path, disc=None, disc_hash=None, force=False, log=prin
         if ch or e in files:
             files[e] = new_bytes
     gfx = 0
-    if patch.get("portGfx") == "es":    # built from the pristine data (the files the patch touches are not read)
+    if patch.get("portGfx") == "es" and gfx:    # built from the pristine data (the files the patch touches are not read)
         import gfx_es
         gfx = gfx_es.build(data_dir, os.path.join(data_dir, GFX_TBTX), log=log)
     state = {"patch": os.path.abspath(patch_path), "sha1": file_sha1(patch_path), "title": patch.get("title") or "",

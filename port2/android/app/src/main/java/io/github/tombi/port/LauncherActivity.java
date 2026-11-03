@@ -50,7 +50,7 @@ public class LauncherActivity extends Activity {
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
     static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor", "thor-black", "thor-white", "custom"};   // button icons (--prompts); new ones appended: stored indices keep their meaning; custom last (pcSet)
-    static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5;
+    static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5, REQ_TRANSLATION = 6;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
 
@@ -333,11 +333,16 @@ public class LauncherActivity extends Activity {
         return patchAsset(TEXT_PATCH);
     }
 
+    /** the player's own translation (Options > Data > Import translation: a .tpatch made with tombi-text, docs/PORT.md
+        "Your own translation file"); passed first, tombi2 then skips a later text patch that rebuilds the same files */
+    File translationFile() { return new File(filesDir(), "translation.tpatch"); }
+
     String[] buildArgs() {
         List<String> a = new ArrayList<>();
         File disc = discFile();
         if (dataReady()) { a.add("--data"); a.add(dataDir().getAbsolutePath()); }   // extracted on the device
         else if (disc != null) { a.add("--disc"); a.add(disc.getAbsolutePath()); }  // an image copied by an older version
+        if (translationFile().isFile()) { a.add("--text-patch"); a.add(translationFile().getAbsolutePath()); }
         if (textPatchOn() && LANG_N[langIdx()] == 5) {
             File tp = textPatch();
             if (tp != null) { a.add("--text-patch"); a.add(tp.getAbsolutePath()); }
@@ -615,6 +620,38 @@ public class LauncherActivity extends Activity {
         try { startActivityForResult(i, REQ_SAVE_EXPORT); }
         catch (ActivityNotFoundException e) { Toast.makeText(this, String.valueOf(e.getMessage()), Toast.LENGTH_LONG).show(); }
     }
+    // ---- translation import (a .tpatch; the .tombipatch.json needs tools/tpatch_build.py on a PC first)
+    void pickTranslation() {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("*/*");
+        try { startActivityForResult(i, REQ_TRANSLATION); }
+        catch (ActivityNotFoundException e) { Toast.makeText(this, String.valueOf(e.getMessage()), Toast.LENGTH_LONG).show(); }
+    }
+    void doTranslationImport(Uri u) {
+        try {
+            InputStream in = getContentResolver().openInputStream(u);
+            if (in == null) throw new java.io.IOException("openInputStream");
+            byte[] raw;
+            try { raw = SaveImport.readAll(in, 32 << 20); } finally { in.close(); }
+            if (raw.length < 58 || raw[0] != 'T' || raw[1] != 'P' || raw[2] != 'C' || raw[3] != 'H') {
+                saveDialog(getString(R.string.tr_import), getString(raw.length > 0 && raw[0] == '{' ? R.string.tr_json : R.string.tr_bad));
+                return;
+            }
+            File f = translationFile(), tmp = new File(f.getPath() + ".part");
+            OutputStream o = new FileOutputStream(tmp);
+            try { o.write(raw); } finally { o.close(); }
+            if (!tmp.renameTo(f)) throw new java.io.IOException("rename " + tmp);
+            int tl = (raw[56] & 255) | (raw[57] & 255) << 8;
+            String title = new String(raw, 58, Math.max(0, Math.min(tl, raw.length - 58)), "UTF-8");
+            CrashLog.append(this, "launcher: translation imported: " + title);
+            saveDialog(getString(R.string.tr_import), getString(R.string.tr_done, title));
+            status(getString(R.string.tr_done, title));
+        } catch (Exception e) {
+            saveDialog(getString(R.string.tr_import), getString(R.string.save_fail, String.valueOf(e.getMessage())));
+        }
+    }
+
     void saveDialog(String title, String msg) {
         new android.app.AlertDialog.Builder(this).setTitle(title).setMessage(msg).setPositiveButton(android.R.string.ok, null).show();
     }
@@ -661,6 +698,7 @@ public class LauncherActivity extends Activity {
         if (req == REQ_EXPORT && res == RESULT_OK && data != null && data.getData() != null) { writeExport(data.getData()); return; }
         if (req == REQ_SAVE_IMPORT && res == RESULT_OK && data != null && data.getData() != null) { doSaveImport(data.getData()); return; }
         if (req == REQ_SAVE_EXPORT && res == RESULT_OK && data != null && data.getData() != null) { doSaveExport(data.getData()); return; }
+        if (req == REQ_TRANSLATION && res == RESULT_OK && data != null && data.getData() != null) { doTranslationImport(data.getData()); return; }
         if (req == REQ_DISC && res == RESULT_OK && data != null) {
             final List<Uri> uris = new ArrayList<>();
             if (data.getClipData() != null)
@@ -867,6 +905,10 @@ public class LauncherActivity extends Activity {
                 } else if (cat == CAT_DATA) {
                     items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
                     items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
+                    items.add(new Item(getString(R.string.tr_import), new Runnable() { public void run() { pickTranslation(); } }));
+                    if (translationFile().isFile())
+                        items.add(new Item(getString(R.string.tr_remove), new Runnable() { public void run() {
+                            translationFile().delete(); status(getString(R.string.tr_removed)); setScreen(screen); } }));
                     items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
                     items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
                         setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));

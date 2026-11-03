@@ -1,7 +1,9 @@
 name: Text editor (Windows exe)
 
-# Builds tools/text_editor.py (dialogue editor with live preview, see README) into a single Windows executable with
-# PyInstaller and uploads it as an artifact for release.yml (was dist/windows/tombi-text.exe).  The exe bundles the mkpsxiso/dumpsxiso release binaries
+# Builds tools/text_editor.py (the translation editor: every patchable text by category, original / improved / your text,
+# other languages and Japanese, live checks and box preview; Qt / PySide6) into a single Windows executable with
+# PyInstaller and uploads it as an artifact for release.yml (was dist/windows/tombi-text.exe).  It holds no game data:
+# everything is read from the player's disc at run time (patches/es_mejorada.tombipatch.json is our own text, bundled).  The exe bundles the mkpsxiso/dumpsxiso release binaries
 # (Lameguy64/mkpsxiso, GPL-2.0, see THIRD_PARTY_NOTICES.md) so that "Generar ISO" works without installing anything.
 on:
   push:
@@ -12,6 +14,19 @@ on:
       - tools/text_strings.py
       - tools/text_core.py
       - tools/text_patch.py
+      - tools/text_catalog.py
+      - tools/check_text_patch.py
+      - tools/tpatch_build.py
+      - tools/data_patch.py
+      - tools/extract_data.py
+      - tools/jp_text.py
+      - tools/jp_charmap.json
+      - tools/menu_text.py
+      - tools/memcard_text.py
+      - tools/pause_text.py
+      - tools/subscreen_text.py
+      - tools/load_lists.py
+      - patches/es_mejorada.tombipatch.json
       - tools/text_preview.py
       - tools/wfm_py.py
       - tools/title_layout.py
@@ -50,11 +65,12 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          python -m pip install pyinstaller pillow
+          python -m pip install pyinstaller pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
           pyinstaller --onefile --windowed --name tombi-text --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import text_core --hidden-import text_patch --hidden-import text_preview --hidden-import mkdisc --hidden-import cdfiles --hidden-import verb_order --paths tools \
-            --icon tools/icons/text.ico --add-data "tools/wfm_charmap.json;." --add-data "tools/icons/text.ico;icons" --add-data "tools/icons/text.png;icons" \
+            --hidden-import i18n --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import text_core --hidden-import text_patch --hidden-import text_preview --hidden-import mkdisc --hidden-import cdfiles --hidden-import verb_order --hidden-import text_catalog --hidden-import check_text_patch --hidden-import tpatch_build --hidden-import data_patch --hidden-import extract_data --hidden-import chd --hidden-import jp_text --hidden-import gam_py --hidden-import menu_text --hidden-import memcard_text --hidden-import pause_text --hidden-import subscreen_text --hidden-import load_lists --exclude-module tkinter --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf --paths tools \
+            --icon tools/icons/text.ico --add-data "tools/wfm_charmap.json;." --add-data "tools/jp_charmap.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" --add-data "tools/icons/text.ico;icons" --add-data "tools/icons/text.png;icons" \
             --add-binary "build/mk/mkpsxiso.exe;." --add-binary "build/mk/dumpsxiso.exe;." tools/text_editor.py
+          QT_QPA_PLATFORM=offscreen python -c "import sys; sys.path.insert(0, 'tools'); import text_editor, text_catalog, tpatch_build"
           mkdir -p dist/windows
           cp build/exe/tombi-text.exe dist/windows/tombi-text.exe
 
@@ -83,11 +99,11 @@ jobs:
 
       - name: Build
         run: |
-          python -c "import tkinter"
-          python -m pip install pyinstaller pillow
+          sudo apt-get install -y libxcb-cursor0 libegl1
+          python -m pip install pyinstaller pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
           pyinstaller --onefile --windowed --name tombi-text --distpath build/exe --workpath build/pyi --specpath . \
-            --hidden-import i18n --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import text_core --hidden-import text_patch --hidden-import text_preview --hidden-import mkdisc --hidden-import cdfiles --hidden-import verb_order --paths tools \
-             --add-data "tools/wfm_charmap.json:." --add-data "tools/icons/text.ico:icons" --add-data "tools/icons/text.png:icons" \
+            --hidden-import i18n --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import text_core --hidden-import text_patch --hidden-import text_preview --hidden-import mkdisc --hidden-import cdfiles --hidden-import verb_order --hidden-import text_catalog --hidden-import check_text_patch --hidden-import tpatch_build --hidden-import data_patch --hidden-import extract_data --hidden-import chd --hidden-import jp_text --hidden-import gam_py --hidden-import menu_text --hidden-import memcard_text --hidden-import pause_text --hidden-import subscreen_text --hidden-import load_lists --exclude-module tkinter --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf --paths tools \
+             --add-data "tools/wfm_charmap.json:." --add-data "tools/jp_charmap.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" --add-data "tools/icons/text.ico:icons" --add-data "tools/icons/text.png:icons" \
             --add-binary "build/mk/mkpsxiso:." --add-binary "build/mk/dumpsxiso:." tools/text_editor.py
           mkdir -p dist/linux
           cp build/exe/tombi-text dist/linux/tombi-text

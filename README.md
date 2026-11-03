@@ -334,7 +334,7 @@ config/slps01144/  splat configs and symbol tables of the Japanese release (conf
 | `tools/psxexe_info.py` | Prints the PS-X EXE header |
 | `tools/wfm.py` | Assets: WFM font/dialogue files <-> YAML + glyph PNGs, byte-exact round trip (369/369) through a [TombaTools](https://github.com/hansbonini/tombatools) fork |
 | `tools/wfm_py.py` | Assets: pure-Python WFM codec (no Go): dialogues as readable text with tags (`{NL} {CLEAR} {WAIT} {BOX w h} {PAUSE n} {COLOR n}`...), glyph table, byte-exact round trip on 369/369 files (`--check`); characters come from `tools/wfm_charmap.json` (bitmap hashes, made by `wfm_charmap_gen.py`) |
-| `tools/text_editor.py` | Text editor with live preview (tkinter; logic in `text_core.py`, `text_preview.py`): open the disc image, edit dialogues drawn with the game font in a mock box (x1/x2/x3, red warnings for lines too wide, too many lines, >128 glyphs), save/load JSON project, export/import TXT/JSON, **Generar/Aplicar parche** (text patch JSON or PPF3, `text_patch.py`), **Generar ISO** (re-encodes the WFM and runs `mkdisc.py --relayout`); Windows build `tombi-text.exe` (Releases) (bundles mkpsxiso) |
+| `tools/text_editor.py` | Translation editor (Qt/PySide6; catalog in `text_catalog.py`, checks of `check_text_patch.py`, box preview of `text_preview.py`): every text a translation patch can change by category (dialogues, signs, system messages, item names/descriptions, event titles/list names/hints, places, memory card, title/options and pause menus), disc original / improved translation / your text side by side, the other PAL languages and the aligned Japanese line (`jp_text.py`), live checks, **Install in the game** (compiles `translation.tpatch` with `tpatch_build.py` from your disc and copies it next to the game); Windows build `tombi-text.exe` (Releases) |
 | `tools/gfx_editor.py` | Graphics editor (tkinter; logic in `gfx_core.py`): open the disc image, browse screens, the `UiSpriteDef` table of MAIN0 (NOW / LOADING), VRAM pages per load list, WPP sprite frames and CLUT palettes with their real colours, rectangle overlay, export/import indexed PNG (RGB(A) PNG is quantised to the palette), palette editing (15 bit, shared-palette warning), undo, in-context preview, **composed room views** (tree node "Vista compuesta": every room as the game draws it + the sky/far background alone, captured on demand by running the game in `tools/psxemu` and cached in the user cache folder; needs the `.bin` image and numpy), save/load mod (`mods/<name>/mod.json` + PNG, the `mod.py` format), **Build ISO**; UI language selector (`i18n.py`); Windows build `tombi-gfx.exe` (Releases) (bundles mkpsxiso). Tests: `tools/test_gfx.py` |
 | `tools/tombi_save_editor.py` | Save editor (Qt/PySide6, PKHeX-style; library + CLI `tombi_save.py`, tests `test_tombi_save.py`): memory card images (.mcd/.mcr/.gme/.vgs/.mcs, the port's `tombi_mc0.mcd`), AP, vitality/HP, lives, exp levels, items/inventory, the 130 events (not started/started/completed, cut ones marked), play time, area; checksum rewritten, Save as / `.bak`. Names read at run time from your disc (English/Spanish/...). Format: [docs/SAVE_FORMAT.md](docs/SAVE_FORMAT.md), guide: [docs/SAVE_EDITOR.md](docs/SAVE_EDITOR.md); Windows build `TombiSaveEditor.exe` (artifact of `save-editor-exe.yml`). *Editor de partidas: AP, vida, objetos, eventos y tiempo de las partidas de la tarjeta de memoria.* |
 | `tools/gam_py.py` | Assets: pure-Python GAM encoder (the decoder is `area000.gam_unpack`), valid streams, original bytes kept for unchanged data; used by `mod.py` and the graphics editor so no Go is needed |
@@ -366,23 +366,21 @@ the image in `/tmp` and compares its SHA-1. Details in [notes/assets_tombatools.
 
 **Windows exes** (the port is `tombi-port-<ver>-windows-x64.exe` of the [latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), the tools are in `Tombi-Tools-<ver>-windows-x64.zip` of the releases that include them; older versions stay on the [Releases](https://github.com/afsenovilla/Tombi-Decomp/releases) page; `tombi-port.exe` is the native port with its launcher; built by GitHub Actions on every change, no Python needed; your own disc image is required, nothing of the game is inside them; the native port extracts it (`.bin`/`.cue`/`.iso`, or a MAME `.chd`: `tools/chd.py`) once into a `data/` folder and runs from that, see [docs/PORT.md](docs/PORT.md) "Running without the disc image"):
 - `tombi-assets.exe`: sprite/sound/video extractor (window with checkboxes).
-- `tombi-text.exe`: text editor. Open `Tombi.bin` (or the extracted folder), pick an area/file/dialogue in the tree (search box on top),
-  edit the text in the middle; the preview below redraws as you type with the game font at x1/x2/x3 and warns in red when a line is wider than the
-  box, a page has more lines than the box height allows, or a page exceeds 128 characters. `Ajustar caja` rewrites `{BOX w h}` to fit.
-  `Guardar/Cargar proyecto` keep your edits as JSON, `Exportar todo`/`Importar` use TXT or JSON, and `Generar ISO` writes a new `.bin`/`.cue`
-  (needs about 1.5 GB of free disk for its work folder; the first run dumps the original disc). Only characters that exist in the game fonts can
-  be typed (no `ü`, `:` or `%` in the PAL fonts): missing ones are borrowed from other files when possible, else the editor says so.
-  Opening a folder instead of the image, or running without the bundled mkpsxiso, writes just the patched `.WFM` files plus instructions.
-  **Patches to share fixes without distributing the game:** `Generar parche` saves either a *text patch* (`*.tombipatch.json`: only the edited
-  dialogues as `file -> {index: new text}`, plus the SHA-1/size of the original disc and the "verb first" option; tiny, readable, reviewable in a
-  diff, several can be merged) or a **PPF 3.0** of the `.bin` (rebuilds the disc and stores only the bytes that differ; for PPF-O-Matic/ApplyPPF
-  users; valid only for the exact original image, whose SHA-1 is in its description; PPF cannot shrink a file, the rebuilt image only grows).
-  `Aplicar parche` loads a text patch into the editor (warns if the disc is not the original) so you can review it and `Generar ISO`, or applies a
-  `.ppf` to an original image. Command line: `python tools/text_patch.py make|apply|merge|info` (`apply DISC.bin FIX.tombipatch.json -o OUT.bin`,
-  `--files-out DIR` to just write the patched files). For the native port use the launcher's **Text patch** option (or
-  `python tools/data_patch.py apply data FIX.tombipatch.json`): it patches the extracted `data/` reversibly (originals in
-  `data/.orig/`), updates `manifest.txt` and the file tables for files that grew; tombi-port.exe bundles
-  `patches/es_mejorada.tombipatch.json` (docs/PORT.md "Text patches in `data/`").
+- `tombi-text.exe`: **translation editor** (Spanish / English interface, light / dark theme). Open your `Tombi.bin` (or the extracted `data/`
+  folder) and start a *New translation* (from the disc text, or, in Spanish, from the bundled improved translation) or open one. The left tree
+  lists every text the patch system can change by category: dialogues (by area), signs, system messages, item names (dialogues and inventory)
+  and descriptions, event titles, event list names and hints, places (save list, travel list), memory card screen, title / options menus and
+  pause menus. Each entry shows the **disc original**, the **improved translation** and **your text** side by side; search and filters (only
+  changed, only untranslated, different from the improved one, with errors). *Other languages* shows the same entry in every language of the
+  disc; *Japanese* reads the Japanese disc (Ore! Tomba) and shows the JP line aligned with it, with the PAL English line as its translation
+  (`tools/jp_text.py`; JP lines with no PAL counterpart are a category of their own; no online service is used). While you type, the
+  validator checks the entry (missing glyphs, box overflow, lines/pages, control codes, room in the menus) and the box is drawn as the game draws
+  it. *Save* writes your `*.tombipatch.json`; **Install in the game…** compiles it into `translation.tpatch` (from your disc, a few minutes)
+  and copies `translation.tombipatch.json` + `translation.tpatch` next to the game's executable: the port loads it by itself and it wins over
+  the bundled improved translation (docs/PORT.md "Your own translation file"); the launcher's *Import translation…* does the same from any
+  folder, Android imports the `.tpatch` (Options → Data → Import translation). *More*: compile only, build a patched ISO (needs mkpsxiso,
+  bundled), export/import the dialogues as text. Command line of the patches: `python tools/text_patch.py make|apply|merge|info` (`make --ppf` for a PPF3),
+  `python tools/tpatch_build.py DISC.bin|data/ X.tombipatch.json -o X.tpatch`, `python tools/data_patch.py apply data X.tombipatch.json`.
 - `tombi-gfx.exe`: graphics editor. Open `Tombi.bin`; the tree on the left has Screens, Interface/HUD (the three plausible `UiSpriteDef`
   entries of MAIN0: 0 unused, 1 NOW, 2 LOADING), Pages by load list, Sprites (WPP frames) and Palettes (CLUT). The middle shows the page with the palette
   chosen in the right-hand list (x1..x8, optional sprite rectangles; click one or drag a region). `Export/Import PNG` work on the whole image or the

@@ -44,7 +44,9 @@ static void sha1(const unsigned char *p, unsigned n, unsigned char out[20]) {
 static void hex(const unsigned char *d, char *o) { static const char *x = "0123456789abcdef"; for (int i = 0; i < 20; i++) { o[2*i] = x[d[i] >> 4]; o[2*i+1] = x[d[i] & 15]; } o[40] = 0; }
 
 /* ---- the installed overlay */
-typedef struct { char path[64]; unsigned char *data; unsigned size; int nr; unsigned lba[4], sec[4]; } TpFile;
+typedef struct { char path[64]; unsigned char *data; unsigned size; int nr; unsigned lba[4], sec[4]; int from; } TpFile;
+/* the file each installed patch came from (log of the overlap rule below) */
+static char tp_names[16][160]; static int tp_npatches;
 static TpFile tp_files[512];
 static int tp_nfiles, tp_busy;      /* tp_busy: reading the sources (the original files, not the overlay) */
 int port_tpatch_count;              /* files served from text patches */
@@ -76,7 +78,7 @@ int port_tpatch_load(const char *arg) {
         port_printf("[tpatch] %s: %s\n", path, b ? "not a version 2 .tpatch (tools/tpatch_build.py)" : "cannot open (compile the JSON with tools/tpatch_build.py)");
         free(b); return -1;
     }
-    unsigned ns = u32(b + 8), ne = u32(b + 12), p = 16 + 40, i, k;
+    unsigned ns = u32(b + 8), ne = u32(b + 12), p = 16 + 40, i, k, skip = 0;
     if (jsha[0] && memcmp(b + 16, jsha, 40)) {
         port_printf("[tpatch] %s was compiled from another version of %s (sha1 %.12s, file %.12s): rebuild it with tools/tpatch_build.py\n", path, arg, (char *)b + 16, jsha);
         free(b); return -1;
@@ -102,6 +104,16 @@ int port_tpatch_load(const char *arg) {
         TpFile *f = &tp_files[tp_nfiles];
         unsigned pl = u16(b + p); unsigned char d[20];
         snprintf(f->path, sizeof f->path, "%.*s", (int)pl, (char *)b + p + 2); p += 2 + pl;
+        /* the first patch loaded owns its files: a later one that rebuilds any of them is skipped whole (a patch's files
+           and its MAINn.EXE tables belong together, half of two patches is never a consistent game).  open_text_patches
+           loads the player's own translation file first, so it wins over the improved translation passed by a launcher */
+        for (int j = 0; j < base; j++) if (!strcmp(tp_files[j].path, f->path)) {
+            port_printf("[tpatch] %s skipped: %s is already provided by %s (loaded first)\n", path, f->path,
+                        tp_files[j].from >= 0 && tp_files[j].from < 16 ? tp_names[tp_files[j].from] : "another patch");
+            skip = 1; ok = 0; break;
+        }
+        if (!ok) break;
+        f->from = tp_npatches < 16 ? tp_npatches : -1;
         f->size = u32(b + p); p += 4;
         const unsigned char *want = b + p; p += 20;
         f->nr = b[p++];
@@ -143,9 +155,11 @@ int port_tpatch_load(const char *arg) {
     free(src); free(ssz); free(b);
     if (!ok) {
         while (tp_nfiles > base) free(tp_files[--tp_nfiles].data);
-        port_printf("[tpatch] %s NOT applied: the game runs with the disc's own text\n", path);
+        if (!skip) port_printf("[tpatch] %s NOT applied: the game runs with the disc's own text\n", path);
         return -1;
     }
+    if (tp_npatches < 16) snprintf(tp_names[tp_npatches], sizeof tp_names[0], "%s", path);
+    tp_npatches++;
     port_tpatch_count = tp_nfiles;
     {   /* TOMBI_TPATCH_DUMP=DIR: write the rebuilt files (tools/tpatch_check.py compares them with the Python pipeline) */
         const char *dd = getenv("TOMBI_TPATCH_DUMP");

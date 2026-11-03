@@ -128,4 +128,10 @@
     <string name="pad_dpad">DPAD</string>
     <string name="pad_axis">Axis</string>
     <string name="pad_none">(none)</string>
+    <string name="tr_import">Import translation…</string>
+    <string name="tr_remove">Remove translation</string>
+    <string name="tr_removed">Translation removed.</string>
+    <string name="tr_done">Translation imported: %1$s. It is used in every language and wins over the improved translation.</string>
+    <string name="tr_json">This is the .tombipatch.json file. Import the compiled translation.tpatch instead (tombi-text: \"Install in the game\" or \"Compile for the game\").</string>
+    <string name="tr_bad">Not a translation file (.tpatch made with tombi-text).</string>
 </resources>

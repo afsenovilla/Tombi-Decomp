@@ -172,6 +172,8 @@ def _event_table(d, base):
     first event name (the string right after the "Habilidad" heading, dump index 3)."""
     strs = dump(d)
     first = next((o for i, (o, t) in enumerate(strs) if i and strs[i - 1][1] == "Habilidad"), None)
+    if first is None and len(strs) > 3:     # the other languages: the same place (after Experience / Status / Ability)
+        first = strs[3][0]
     if first is None:
         raise SubscreenError("event list not found")
     nw = len(d) // 4
@@ -426,22 +428,31 @@ def _in_place(data, names, lenient=False):
 
 
 def dump(data):
-    s, o = [], 0
-    while o + 2 <= len(data):
-        g = struct.unpack_from("<h", data, o)[0]
-        if 172 <= g <= 329 or g in EXTRA_CH:
-            try:
-                e = _end(data, o)
-            except SubscreenError:
+    """[(offset, text)] of the list-font strings (3+ glyphs then -3, -1).  Linear: the next terminator and the next
+    non-glyph word of every position are precomputed (the scan used to restart at each word)."""
+    import array, bisect
+    n = len(data) // 2
+    h = array.array("h", bytes(data[:2 * n]))
+    if sys.byteorder != "little":
+        h.byteswap()
+    ok = [172 <= x <= 329 or x in EXTRA_CH for x in h]
+    nxt_bad = [n] * (n + 1)
+    for i in range(n - 1, -1, -1):
+        nxt_bad[i] = nxt_bad[i + 1] if ok[i] else i
+    ends = [i for i in range(n - 1) if h[i] == -3 and h[i + 1] == -1]
+    s, i = [], 0
+    while i < n:
+        if ok[i]:
+            k = bisect.bisect_left(ends, i)
+            if k == len(ends):
                 break
-            gl = struct.unpack_from("<%dh" % ((e - o) // 2), data, o)
-            if e - o >= 6 and all(172 <= x <= 329 or x in EXTRA_CH for x in gl):
-                s.append((o, "".join(_glyph_ch(x) for x in gl)))
-                o = e + 4
+            e = ends[k]
+            if e - i >= 3 and nxt_bad[i] >= e:
+                s.append((2 * i, "".join(_glyph_ch(x) for x in h[i:e])))
+                i = e + 2
                 continue
-        o += 2
+        i += 1
     return s
-
 
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "dump":
