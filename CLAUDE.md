@@ -3,6 +3,12 @@
 Read this first in every session. The current state and the open tasks are in `docs/STATUS.md`; keep that file up
 to date as work lands (it is the hand-off between sessions).
 
+**First thing in a new cloud session:** run `bash tools/session_bootstrap.sh` (add `--wasm` when the task touches the
+Android arm64 / wasm2c build). It installs the packages and the PS1 toolchain, downloads the PAL disc from the
+`GAME_FILES_URL` environment variable, extracts `game/` and `data/`, builds the matching build and `build/port2/tombi2`
+and runs a smoke test (about 5 minutes plus the download). It skips whatever is already there. If `GAME_FILES_URL` is
+missing, tell the user to add it in the cloud environment's settings and start a new session.
+
 ## The project
 
 Tombi! (PAL, SCES-01331) decompilation plus everything built on it:
