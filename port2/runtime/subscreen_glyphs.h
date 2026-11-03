@@ -423,7 +423,7 @@ static const SubPick sub_picks[57] = {
     { 1, 'l', 143 },   /* es use #5 */
     { 1, 'm', 137 },   /* en use #6 */
     { 1, 'n', 156 },   /* sv use #1 */
-    { 1, 'o', 146 },   /* es use #8 */
+    { 1, 'o', 192 },   /* es sort #0 */
     { 1, 'r', 141 },   /* es use #3 */
     { 1, 's', 132 },   /* en use #1 */
     { 1, 't', 145 },   /* es use #7 */

@@ -5,7 +5,7 @@
  * original artist's letters only:
  *   - the same disc carries the page of every language, and the Swedish / Danish ones write "Objekt" on the tab and
  *     "Obj" / "Objekt" on the leaf: the tab's O b j e come from Swedish "Objekt", t o from Spanish "Elmto." itself, s
- *     from "Estado"; the leaf's b j from Swedish "Obj", e from Spanish "ordenar", t o from Spanish "elmto";
+ *     from "Estado"; the leaf's b j from Swedish "Obj", e from Spanish "ordenar", t from "elmto", o from "ordenar" (the "elmto" o touches its t);
  *   - a letter is its letter texels (the tab's dark red, the leaf's white) plus its edge: the texels within SUB_NEAR
  *     of it that differ from the plank / leaf behind the text.  That picture is the same in every language, so it is
  *     recovered texel by texel from the languages with no letter near (clean_group);

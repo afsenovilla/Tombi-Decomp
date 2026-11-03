@@ -66,13 +66,13 @@ FONTS = {
 # where one glyph of a character is preferred over the first one found: (font, char) -> (file number, slot, index in
 # label), chosen for the Spanish "Objetos" / "objeto" (subscreen_es.c), so that as many neighbours as possible keep
 # their original spacing: the tab's O b j e from Swedish "Objekt", t o from Spanish "Elmto.", s from "Estado"; the
-# leaf's b j from Swedish "Obj", e from Spanish "ordenar", t o from Spanish "elmto".
+# leaf's b j from Swedish "Obj", e o from Spanish "ordenar" (the "elmto" o touches its t), t from "elmto".
 PREFER = {
     ("tab", "O"): (8, "item", 0), ("tab", "b"): (8, "item", 1), ("tab", "j"): (8, "item", 2),
     ("tab", "e"): (8, "item", 3), ("tab", "k"): (8, "item", 4), ("tab", "t"): (6, "item", 3),
     ("tab", "o"): (6, "item", 4), ("tab", "s"): (6, "status", 1),
     ("leaf", "O"): (8, "use", 3), ("leaf", "b"): (8, "use", 4), ("leaf", "j"): (8, "use", 5),
-    ("leaf", "e"): (6, "sort", 3), ("leaf", "t"): (6, "use", 7), ("leaf", "o"): (6, "use", 8),
+    ("leaf", "e"): (6, "sort", 3), ("leaf", "t"): (6, "use", 7), ("leaf", "o"): (6, "sort", 0),
 }
 # labels whose letters run into each other across the lines (Danish "Brug": the g's tail touches "Objekt"): the
 # letters' rects, label-relative (x0, y0, x1, y1), in reading order
