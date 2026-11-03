@@ -72,7 +72,7 @@ def check(src, prog=None, norm=False, target=None):
         fm = re.search(r"//\s*FLAGS\s+(.*)", t)
         NC["build"](src, fm.group(1).strip() if fm else "-O2 -G0", d, inc)
         name = target or os.path.basename(src)[:-2]
-        tdir = "%s/build/slps01144/target/%s" % (ROOT, prog)
+        tdir = "%s/target/%s" % (os.environ.get("JP_TARGET_DIR") or ROOT + "/build/slps01144", prog)  # JP_TARGET_DIR: a copy of build/slps01144, usable while build_report rebuilds it
         tn = name if os.path.exists("%s/%s.o" % (tdir, name)) else name.replace("_slps01144", "")
         if not os.path.exists("%s/%s.o" % (tdir, tn)):
             return "NO TARGET %s/%s.o (run build_report --version slps01144)" % (tdir, tn)

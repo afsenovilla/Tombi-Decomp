@@ -1,5 +1,24 @@
 // FUNC 80016984 192 MAIN0
 // MATCHING 80016984 192
+// VERSION SLPS_01144 slps01144 80015FA8 172
+#if defined(VERSION_SLPS_01144)
+#include "globals.h"
+extern unsigned short FRAME_BUFFER_INDEX;
+extern char *CURRENT_OT, *prev;
+extern void PutDispEnv(void *), PutDrawEnv(void *), f(void *), DrawOTag(void *);
+void func_80015FA8(void)
+{
+    int n = FRAME_BUFFER_INDEX ^ 1;
+    int idx = (short)n * 0xd10;
+    FRAME_BUFFER_INDEX = n;
+    prev = CURRENT_OT;
+    CURRENT_OT = OT_FRAMEBUFFER + idx;
+    PutDispEnv(CURRENT_OT + 0xca0);
+    PutDrawEnv(CURRENT_OT + 0xcb4);
+    f(prev + 0xc9c);
+    DrawOTag(prev + 0xc9c);
+}
+#else
 #include "globals.h"
 extern unsigned short FRAME_BUFFER_INDEX;
 extern char *CURRENT_OT, *prev;
@@ -17,3 +36,4 @@ void FlipFrame(void)
     DrawOTag(prev + 0xc9c);
     ClearOTagR(CURRENT_OT, 0x328);
 }
+#endif
