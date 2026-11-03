@@ -88,34 +88,43 @@ void port_window_rumble(int small, int big); int port_window_refresh(void);
 void port_panel_window_frame(const unsigned char *rgba, int w, int h);
 
 #define PW struct w2c_port *u_
-void w2c_port_port_audio_lock(PW) { (void)u_; port_audio_lock(); }
-void w2c_port_port_audio_unlock(PW) { (void)u_; port_audio_unlock(); }
-u32 w2c_port_port_display_size(PW, u32 w, u32 h) { (void)u_; return (u32)port_display_size((int *)wptr(w), (int *)wptr(h)); }
-void w2c_port_port_window_start(PW) { (void)u_; port_window_start(); }
-void w2c_port_port_window_stop(PW) { (void)u_; port_window_stop(); }
-u32 w2c_port_port_window_gl_start(PW) {
-    (void)u_;
-    int r = port_window_gl_start();
-    if (r == 0 && port_host_gl_load() < 0) r = -1;
-    return (u32)r;
-}
-void w2c_port_port_window_gl_size(PW, u32 w, u32 h) { (void)u_; port_window_gl_size((int *)wptr(w), (int *)wptr(h)); }
-void w2c_port_port_window_gl_swap(PW) { (void)u_; port_window_gl_swap(); }
-void w2c_port_port_window_keys(PW, u32 s) { (void)u_; port_window_keys((const char *)wptr(s)); }
-void w2c_port_port_window_pad_map(PW, u32 s) {   /* (sdl.c keeps the pointer: a native copy) */
-    (void)u_; port_window_pad_map(strdup((const char *)wptr(s)));
-}
-void w2c_port_port_window_fit(PW, u32 W, u32 H, u32 h, u32 x, u32 y, u32 w, u32 hh) {
-    (void)u_; port_window_fit((int)W, (int)H, (int)h, (int *)wptr(x), (int *)wptr(y), (int *)wptr(w), (int *)wptr(hh));
-}
-void w2c_port_port_window_frame(PW, u32 rgb, u32 w, u32 h) { (void)u_; port_window_frame((const unsigned char *)wptr(rgb), (int)w, (int)h); }
-u32 w2c_port_port_window_poll_pad(PW, u32 out) {
-    (void)u_; unsigned short m = 0; int r = port_window_poll_pad(&m);
-    memcpy(WMEM + out, &m, 2);
-    return (u32)r;
-}
-void w2c_port_port_window_rumble(PW, u32 s, u32 b) { (void)u_; port_window_rumble((int)s, (int)b); }
-u32 w2c_port_port_window_refresh(PW) { (void)u_; return (u32)port_window_refresh(); }
+/* every entry point runs on the thread's own stack (host.c port_host_call): the module's main context lives on its
+   own 64 MB stack, and SDL calls Java on Android (SDL_getenv, the event pump, rumble...), which ART refuses (abort)
+   from a stack it does not know.  sdl.c already wraps some of these itself; port_host_call nests. */
+typedef struct { u32 a[8]; int r; } HArgs;
+#define THUNK(name, expr) static void name##_h(void *p) { HArgs *A = (HArgs *)p; (void)A; expr; }
+#define CALL(name, ...) ({ HArgs A_ = { { __VA_ARGS__ }, 0 }; port_host_call(name##_h, &A_); A_.r; })
+THUNK(lock, port_audio_lock())
+THUNK(unlock, port_audio_unlock())
+THUNK(dsize, A->r = port_display_size((int *)wptr(A->a[0]), (int *)wptr(A->a[1])))
+THUNK(wstart, port_window_start())
+THUNK(wstop, port_window_stop())
+THUNK(glstart, A->r = port_window_gl_start(); if (A->r == 0 && port_host_gl_load() < 0) A->r = -1)
+THUNK(glsize, port_window_gl_size((int *)wptr(A->a[0]), (int *)wptr(A->a[1])))
+THUNK(glswap, port_window_gl_swap())
+THUNK(keys, port_window_keys((const char *)wptr(A->a[0])))
+THUNK(padmap, port_window_pad_map(strdup((const char *)wptr(A->a[0]))))   /* (sdl.c keeps the pointer: a native copy) */
+THUNK(fit, port_window_fit((int)A->a[0], (int)A->a[1], (int)A->a[2], (int *)wptr(A->a[3]), (int *)wptr(A->a[4]),
+                           (int *)wptr(A->a[5]), (int *)wptr(A->a[6])))
+THUNK(frame, port_window_frame((const unsigned char *)wptr(A->a[0]), (int)A->a[1], (int)A->a[2]))
+THUNK(pad, unsigned short m = 0; A->r = port_window_poll_pad(&m); memcpy(WMEM + A->a[0], &m, 2))
+THUNK(rumble, port_window_rumble((int)A->a[0], (int)A->a[1]))
+THUNK(refresh, A->r = port_window_refresh())
+void w2c_port_port_audio_lock(PW) { (void)u_; CALL(lock, 0); }
+void w2c_port_port_audio_unlock(PW) { (void)u_; CALL(unlock, 0); }
+u32 w2c_port_port_display_size(PW, u32 w, u32 h) { (void)u_; return (u32)CALL(dsize, w, h); }
+void w2c_port_port_window_start(PW) { (void)u_; CALL(wstart, 0); }
+void w2c_port_port_window_stop(PW) { (void)u_; CALL(wstop, 0); }
+u32 w2c_port_port_window_gl_start(PW) { (void)u_; return (u32)CALL(glstart, 0); }
+void w2c_port_port_window_gl_size(PW, u32 w, u32 h) { (void)u_; CALL(glsize, w, h); }
+void w2c_port_port_window_gl_swap(PW) { (void)u_; CALL(glswap, 0); }
+void w2c_port_port_window_keys(PW, u32 s) { (void)u_; CALL(keys, s); }
+void w2c_port_port_window_pad_map(PW, u32 s) { (void)u_; CALL(padmap, s); }
+void w2c_port_port_window_fit(PW, u32 W, u32 H, u32 h, u32 x, u32 y, u32 w, u32 hh) { (void)u_; CALL(fit, W, H, h, x, y, w, hh); }
+void w2c_port_port_window_frame(PW, u32 rgb, u32 w, u32 h) { (void)u_; CALL(frame, rgb, w, h); }
+u32 w2c_port_port_window_poll_pad(PW, u32 out) { (void)u_; return (u32)CALL(pad, out); }
+void w2c_port_port_window_rumble(PW, u32 s, u32 b) { (void)u_; CALL(rumble, s, b); }
+u32 w2c_port_port_window_refresh(PW) { (void)u_; return (u32)CALL(refresh, 0); }
 
 #ifdef __ANDROID__
 #include <jni.h>
