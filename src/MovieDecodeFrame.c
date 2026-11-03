@@ -1,5 +1,77 @@
 // FUNC 8001d4b0 396 MAIN0
 // MATCHING 8001d4b0 396
+// VERSION SLPS_01144 slps01144 8001D414 368
+#if defined(VERSION_SLPS_01144)
+typedef unsigned long u_long;
+typedef unsigned short u_short;
+typedef struct { short x, y, w, h; } RECT;
+typedef struct {
+    u_long *vlcbuf[2];
+    int vlcid;
+    u_short *imgbuf[2];
+    int imgid;
+    RECT rect[2];
+    int rectid;
+    RECT slice;
+    int isdone;
+} DECENV;
+typedef struct {
+    u_short id;
+    u_short type;
+    u_short secCount;
+    u_short nSectors;
+    u_long frameCount;
+    u_long frameSize;
+    u_short width;
+    u_short height;
+} StHEADER;
+typedef struct { char p0[0x48]; short state0; short state1; short w4c; short w4e; char p50[0x68 - 0x50]; unsigned char loadGameSelected; } MTask;
+extern MTask *D_1F8001D4;
+#define TASK_C D_1F8001D4
+extern unsigned char D_1F8001CD;
+#define MOVIE_ID D_1F8001CD
+extern u_long StGetNext(u_long **addr, u_long **header);
+extern u_long StFreeRing(u_long *base);
+extern void DecDCTvlc(u_long *bs, u_long *buf);
+extern void CdMix(void *vol);
+extern void func_8001EF50(int);
+extern short D_80071D3C[];
+extern char D_80071D6C[];
+
+u_long func_8001D414(DECENV *dec_)
+{
+    u_long *addr;
+    StHEADER *sector;
+    u_long *next;
+    u_long r;
+    register DECENV *dec asm("$17") = dec_;
+    asm("");
+
+    r = StGetNext(&addr, (u_long **)&sector);
+    next = 0;
+    if (r == 0) {
+        if (sector->frameCount >= D_80071D3C[MOVIE_ID] - 3) {
+            TASK_C->state0 = 3;
+            CdMix(D_80071D6C);
+        }
+        if (MOVIE_ID == 0x15 && TASK_C->loadGameSelected == 0 && sector->frameCount > 14) {
+            func_8001EF50(0);
+            TASK_C->loadGameSelected = 1;
+        }
+        dec->rect[0].w = dec->rect[1].w = sector->width;
+        dec->rect[0].h = dec->rect[1].h = sector->height;
+        dec->slice.h = sector->height;
+        next = addr;
+    }
+    if (next == 0)
+        return 0;
+    dec->vlcid = 1 - dec->vlcid;
+    DecDCTvlc(next, dec->vlcbuf[dec->vlcid]);
+    StFreeRing(next);
+    TASK_C->w4e = 1;
+    return 1;
+}
+#else
 #include "TOBJ.H"
 #include "gametask.h"
 typedef unsigned long u_long;
@@ -73,3 +145,4 @@ u_long MovieDecodeFrame(DECENV *dec)
     DecDCTvlc(next, dec->vlcbuf[dec->vlcid]);
     return StFreeRing(next);
 }
+#endif
