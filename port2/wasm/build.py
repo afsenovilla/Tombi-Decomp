@@ -39,7 +39,9 @@ WCC = ["clang", "--target=wasm32-wasi", "-O2", "-w", "-funsigned-char", "-fwrapv
        "-fno-delete-null-pointer-checks", "-emit-llvm", "-Wno-error=implicit-function-declaration", "-Wno-error=int-conversion",
        "-Wno-error=incompatible-function-pointer-types", "-Wno-error=implicit-int", "-Wno-error=return-type"]
 GAME = WCC + ["-ftrivial-auto-var-init=zero", "-fno-builtin", "-DSKIP_ASM", "-D_LANGUAGE_C", "-DMIPSEL", "-DPORT2_WASM", "-I" + os.path.join(P2, "include"), "-I" + GEN]
-RT = WCC + ["-include", os.path.join(HERE, "wasm_compat.h"), "-I" + os.path.join(P2, "include"), "-I" + GEN]
+CHDR = os.path.join(P2, "third_party", "libchdr")        # .chd disc images, as in the CMake builds
+RT = WCC + ["-include", os.path.join(HERE, "wasm_compat.h"), "-I" + os.path.join(P2, "include"), "-I" + GEN,
+            "-I" + os.path.join(CHDR, "include"), "-DPORT_HAVE_CHD"]
 
 def compile_all(jobs):
     def run(j):
@@ -69,6 +71,8 @@ if want("compile"):
           if f.endswith(".c") and f not in RT_EXCLUDE]
     rt += [os.path.join(HERE, "rt_wasm.c"), os.path.join(GEN, "funcmap.c"), os.path.join(GEN, "build_id.c")]
     for s in rt: jobs.append((s, os.path.join(OBJ, "rt", os.path.basename(s)) + ".bc", RT))
+    for s in (os.path.join(CHDR, "unity.c"), os.path.join(CHDR, "src", "libchdr_codec_avhuff.c")):
+        jobs.append((s, os.path.join(OBJ, "chd", os.path.basename(s)) + ".bc", WCC + ["-DZSTD_DISABLE_ASM", "-I" + os.path.join(CHDR, "include")]))
     compile_all(jobs)
     with open(os.path.join(OBJ, "objects.txt"), "w") as f:
         for j in jobs: f.write(j[1] + "\n")
