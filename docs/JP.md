@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 76.48 % of code (1105464 of 1445372 bytes, 2642 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 78.36 % of code (1132604 of 1445372 bytes, 2655 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2642 functions, 68.66 % -> 76.48 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2655 functions, 68.66 % -> 78.36 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -164,6 +164,18 @@ in the cancel branch and no longer mirrors `waa` into `d8c`; a store to `PLAYER.
 `0xcc-0xce`, `0xd5`, `0xd8`, ...) with the `>= 0xdb` fall-back, and projects without the GTE flag test.
 `l4Type16ObjectStep` (x01) keeps the per-segment flag inside the 52-byte segment record (offset 0x22, fields +12)
 instead of the object's flag bytes and needs the default `-O2 -G0`.
+
+Overlay twins paired by callee overlap (76.48 % -> 78.36 %): `pigGateDiscoveryScene` (x02, 7.3 KB: the orbit
+advances by 1 and the sprites sit at `+0x90`, not `-(... + 0x60)`), `pigGateSevenFriendsScene` (no `GCD.bcfdb`
+store), `spawnPigGateSceneNpcs` (every group lowers by 0x12c), `treasureChestGuardTalk` (player reset
+unconditional), `purpleCrawlerHit` (no `cloneItemPickupObject`), `komaPigLeap` (anim ids -7, 60-frame timers,
+`active = 1`), `stepPuppyBaron` (no `D_800A609C` branch), `motocrossBikeJumpStepB` (pad mask), `animateArea9Palettes`
+(0x104 record, columns -0x50), `playerStepRideSeesaw` (x01: pad masks, ext fields -0x10, `playerSetFallLean` inlined
+with `a = 16` hoisted, no `GV2.bb0` store), `updateChainSegmentEnemy` (`b6b != 0xff`, no anim-frame stash),
+`updateA00L2Type2C` (`b9d & 2`, no `b9d = 0`, one exit sets `state = 0; substep = 6`) and the x00 copy of
+`updateHoodedOldMan` (no health branch, no `GAME_PLAYER_MODE == 3` tests, `BUTTON_MASK_C`, no `PLAYER_STATE = 5`
+resets, `GCD.bcdad = 0xff` instead of the health refill). tools/jp_autofix.py --pair on the mid-size pairs adds
+the rest.
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
 `a1`/`v1` instead of `t0`/`a3`, everything else matches), `func_80027D58` (increaseMaxHealth:
