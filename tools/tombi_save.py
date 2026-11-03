@@ -13,7 +13,9 @@ Writing never touches the source unless asked: save() writes to a new path, or k
   python3 tools/tombi_save.py roundtrip CARD                           (load -> write -> compare, byte-identical)
 
 Item / event names (optional) come from the user's own disc: names_from_disc(PATH_TO_BIN_OR_EXTRACTED_FOLDER, lang).
-Nothing of the game is stored here.
+Nothing of the game is stored here.  Item names are the sub-screen list's own (SYSTEM/DnSPSUB.BIN ITEM_NAME_STRINGS[
+ITEM_NAME_INDEX[id]], what the Items list shows for item id), not the AREA00 MFNT "got item" bank, which is not in id
+order (it skips Bucket, Telescope, Tear Jar...).
 """
 import os, shutil, struct, sys
 
@@ -62,6 +64,7 @@ INV_OFS, INV_COUNTER, INV_SORT = 0x844, 0x944, 0x946   # inventory.slots[256] (i
 PICKED_OFS = 0x34                         # areaNN_pickedItems[32] x 20 (picked-up item flags per area)
 POS_OFS = 0x954                           # player position copied at save time (3 x int)
 # ids marked cut in docs/CUT_CONTENT.md (no code gives / starts them)
+ITEM_USED = 160                           # ids 0..159: the sub-screen's ITEM_ICON_CLUTS / name tables (160+ = "Chick")
 UNUSED_ITEMS = {52, 57, 58, 59, 61, 90, 91, 97, 108, 109, 110, 111, 112, 113, 114, 119, 122, 123, 137, 140, 147}
 UNUSED_EVENTS = {6, 18, 45, 52, 59, 60, 61, 74, 76, 77, 83, 89}
 
@@ -284,9 +287,47 @@ def _clean(s):
     return " ".join(s.split())
 
 
-def names_from_disc(path, lang="B"):
+# DnSPSUB.BIN of each MFNT language letter (n = the MAINn.EXE language: 0 English .. 8 Dansk)
+SPSUB_LANG = {"B": 0, "F": 1, "G": 2, "I": 3, "H": 4, "S": 5, "P": 6, "W": 7, "D": 8}
+ITEM_NAME_INDEX_LEN = 200                 # ITEM_NAME_INDEX (u8[200], identity on the PAL disc), then ITEM_NAME_STRINGS
+
+
+def item_names(spsub):
+    """{id: name} of items 0..ITEM_USED-1 from a DnSPSUB.BIN / DnSPSUB3.BIN: ITEM_NAME_STRINGS[ITEM_NAME_INDEX[id]]
+    (PAL D0SPSUB 0x801096D4 / 0x8010979C, src/d0spsub/subScreenDrawItemNames.c), list-font glyph strings
+    (tools/subscreen_text.py)."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import subscreen_text as ST
+    d = bytes(spsub)
+    i = d.find(bytes(range(ITEM_USED)))
+    if i < 0:
+        raise SaveError("item name table not found")
+    base = ST._base(d, None)
+    out = {}
+    for k in range(ITEM_USED):
+        p = struct.unpack_from("<I", d, i + ITEM_NAME_INDEX_LEN + 4 * d[i + k])[0] - base
+        e = ST._strend(d, p)
+        g = struct.unpack_from("<%dh" % ((e - p) // 2 - 1), d, p)
+        out[k] = " ".join("".join(ST._glyph_ch(x) for x in g).split())
+    return out
+
+
+def patch_item_names(patch, lang):
+    """{old: new} list-name edits of a *.tombipatch.json for language lang (its "menus" / SYSTEM/DnSPSUB.BIN /
+    "itemNames"; e.g. patches/es_mejorada.tombipatch.json for "S": Bola -> Mangual).  {} when there are none."""
+    import json
+    try:
+        j = json.load(open(patch, encoding="utf-8"))
+        m = j.get("menus", {}).get("SYSTEM/D%dSPSUB.BIN" % SPSUB_LANG.get(lang, 0), {}).get("itemNames", {})
+    except (OSError, ValueError, AttributeError):
+        return {}
+    return {" ".join(o.split()): " ".join(n.split()) for o, n in m.items()}
+
+
+def names_from_disc(path, lang="B", patch=None):
     """{'items': {id: name}, 'events': {id: title}, 'untitled': set(ids)} read from the user's PAL disc image (.bin/.cue/
-    .iso) or extracted folder.  Raises on failure; nothing is cached on disk."""
+    .iso) or extracted folder.  patch: a *.tombipatch.json whose list-name edits for lang replace the item names (the
+    names the game shows with that text patch).  Raises on failure; nothing is cached on disk."""
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import text_core as C
     if path.lower().endswith(".cue"):
@@ -299,10 +340,10 @@ def names_from_disc(path, lang="B"):
     proj = C.Project(src)
     files = src.names()
     out = {"items": {}, "events": {}, "untitled": set()}
-    mf = [f for f in files if f.upper().endswith("AREA00/MFNT000%s.WFM" % lang)]
-    if mf:
-        for k in range(3, proj.count(mf[0])):
-            out["items"][k - 3] = _clean(proj.original(mf[0], k))
+    out["items"] = item_names(src.read_any("SYSTEM/D%dSPSUB.BIN" % SPSUB_LANG.get(lang, 0)))
+    if patch:
+        ren = patch_item_names(patch, lang)
+        out["items"] = {k: ren.get(v, v) for k, v in out["items"].items()}
     cf = [f for f in files if f.upper().endswith("CFNT999%s.WFM" % lang)]
     try:
         exe = src.read_any("EXE/MAIN0.EXE")

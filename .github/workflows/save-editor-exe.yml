@@ -14,6 +14,8 @@ on:
       - tools/test_tombi_save_editor.py
       - tools/save_editor_assets/**
       - tools/text_core.py
+      - tools/subscreen_text.py
+      - patches/es_mejorada.tombipatch.json
       - tools/wfm_py.py
       - tools/cdfiles.py
       - tools/i18n.py
@@ -51,8 +53,8 @@ jobs:
         run: |
           pyinstaller --onefile --windowed --name TombiSaveEditor --distpath build/exe --workpath build/pyi --specpath . \
             --paths tools --hidden-import tombi_save --hidden-import tombi_save_editor_lang --hidden-import text_core --hidden-import wfm_py --hidden-import cdfiles \
-            --hidden-import i18n --hidden-import text_strings --hidden-import title_layout --hidden-import verb_order --hidden-import menu_text --hidden-import memcard_text --add-data "tools/wfm_charmap.json;." \
-            --add-data "tools/save_editor_assets;save_editor_assets" \
+            --hidden-import i18n --hidden-import text_strings --hidden-import title_layout --hidden-import verb_order --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --add-data "tools/wfm_charmap.json;." \
+            --add-data "tools/save_editor_assets;save_editor_assets" --add-data "patches/es_mejorada.tombipatch.json;patches" \
             --exclude-module tkinter --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml \
             --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf \
             tools/tombi_save_editor.py

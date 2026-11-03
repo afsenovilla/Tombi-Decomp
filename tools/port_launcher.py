@@ -2773,7 +2773,10 @@ class App(QMainWindow):
         def closed():
             self.editor = None
         try:
-            self.editor = SE.host_in_qt(self, card, lang=i18n.current(), write_guard=guard, on_closed=closed)
+            # the active text patch: the editor shows its item names (Spanish improved translation: Mangual...)
+            tp = (self.s.get("patch") or "") if self.s.get("patch_on") else ""
+            self.editor = SE.host_in_qt(self, card, lang=i18n.current(), write_guard=guard, on_closed=closed,
+                                        text_patch=tp)
         except Exception as e:
             self.editor = None
             self.error(tr("s.saveerr", e))

@@ -22,7 +22,19 @@ refused while the game runs. Hosting API: `host_in_qt(parent, card, lang, write_
 - **Game data** (optional): your own Tombi! PAL disc image (`.bin`/`.cue`/`.iso`) or extracted folder. Item and event
   names and the inventory item icons are then read from it at run time (nothing is cached or shipped); without it the
   editor shows ids. The path is remembered in `~/.tombi_save_editor.json`. Misc > game text language picks the
-  language of those names (English, Español, Français, ...).
+  language of those names (English, Español, Français, ...). The item names are the ones the game's Items list shows
+  (`SYSTEM/D<n>SPSUB.BIN`, see docs/SAVE_FORMAT.md). **Item names of the improved translation** (Misc, on by default):
+  the list names of `patches/es_mejorada.tombipatch.json` (bundled) replace the disc's where the patch renames them
+  for that language (Spanish: Bola -> Mangual, Garfio-gancho -> Manguancho, Bumerang madera -> Bumerán de madera...).
+  Opened from the PC launcher, the default follows the launcher's text patch (its own names when one is on, the
+  disc's when "None").
+- **Item icons** are drawn exactly as the Items list does (`subScreenDrawItemGrid` -> `subScreenDrawItemIcon(id)`,
+  src/d0spsub): a 16 x 16 4 bpp sprite of the texture page at VRAM (192, 0) (`SYSTEM/A00300.000` words 64..127),
+  u = id % 15 * 16 + 8, v = id / 15 * 16 + 8, CLUT row `ITEM_ICON_CLUTS[id]` (D0SPSUB 0x80109C88; the same table in
+  every DnSPSUB / DnSPSUB3) of the block uploaded to (288, 480), column 304. No per-item frame or descriptor is used.
+  Checked pixel for pixel against the native port's Items list (`build/port2/tombi2 --headless --lang 5`, ids poked
+  into `0x8009D1A4` / count `0x8009D2A4`, Triangle) for 90 ids (0-39, 52/57-59/61/90/91/97/108/147, 60-69, 100-109,
+  130-139, 150-159): all identical except 64 (Pipe), which the port recolours on purpose (port/fixes.txt).
 - The language box (EN, ES, FR, DE, IT, NL, PT, SV, DA: the PC launcher's nine; en / es in the editor,
   the others in `tools/tombi_save_editor_lang.py`, a missing string falls back to English) switches the interface; the sun / moon button switches dark / light theme.
 - Tabs:

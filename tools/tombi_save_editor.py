@@ -67,6 +67,8 @@ UI = {
         "Tombi! disc image (.bin / .cue / .iso) — cancel to pick an extracted folder", "pickdir":
         "Extracted game folder (with AREA00, EXE)", "range": "{0} – {1}", "events_n": "{0} / {1}",
         "datahint": "Item icons and names come from your disc at run time; nothing is stored.",
+        "improved": "Item names of the improved translation", "improvedtip": "The list names the game shows with the "
+        "text patch (Spanish: patches/es_mejorada.tombipatch.json, \u00abTraducci\u00f3n mejorada\u00bb): Mangual, Manguancho...",
         "lv": "Lv", "sec": "Section", "spawn": "Spawn point", "area": "Area", "edit_ev": "event states",
         "edit_item": "item {0}", "tip_cycle": "Double-click a row to cycle its state",
         "item_n": "Item #{0}", "event_n": "Event #{0}", "busy": "Not saved: {0}",
@@ -101,7 +103,9 @@ UI = {
         "vida máxima ({0})", "quit": "¿Descartar los cambios sin guardar?", "quit2": "La tarjeta tiene cambios sin "
         "guardar.", "theme": "Tema claro / oscuro", "pickdata": "Imagen del disco de Tombi! (.bin / .cue / .iso) — "
         "cancela para elegir una carpeta extraída", "pickdir": "Carpeta del juego extraída (con AREA00, EXE)",
-        "range": "{0} – {1}", "events_n": "{0} / {1}", "datahint": "Los iconos y nombres se leen de tu disco al "
+        "range": "{0} – {1}", "events_n": "{0} / {1}", "improved": "Nombres de la traducción mejorada",
+        "improvedtip": "Los nombres de la lista que el juego muestra con el parche de texto («Traducción mejorada», "
+        "patches/es_mejorada.tombipatch.json): Mangual, Manguancho...", "datahint": "Los iconos y nombres se leen de tu disco al "
         "ejecutar; no se guarda nada.", "lv": "Nv", "sec": "Sección", "spawn": "Punto de aparición", "area": "Área",
         "edit_ev": "estados de eventos", "edit_item": "objeto {0}", "tip_cycle": "Doble clic en una fila cambia su estado",
         "item_n": "Objeto #{0}", "event_n": "Evento #{0}", "busy": "No guardado: {0}",
@@ -342,8 +346,13 @@ def save_icon(save):
 
 
 def item_icons(path):
-    """{item id: QImage 16 x 16} from the user's PAL disc (docs/CUT_CONTENT.md "Event and item icons",
-    tools/event_icons.py item_page): page SYSTEM/A00300.000, CLUT block and ITEM_ICON_CLUTS of SYSTEM/D0SPSUB.BIN."""
+    """{item id: QImage 16 x 16} from the user's PAL disc, exactly what the Items list draws (subScreenDrawItemGrid ->
+    subScreenDrawItemIcon(SUBSCREEN_ITEM_LIST[i]), the list being the inventory's item ids, src/d0spsub): a 16 x 16
+    4 bpp sprite, texture page (192, 0) = SYSTEM/A00300.000 words 64..127 (384-byte rows), u = id % 15 * 16 + 8,
+    v = id / 15 * 16 + 8, CLUT word ((ITEM_ICON_CLUTS[id] + 0x1E0) << 6) | 0x13 = row ITEM_ICON_CLUTS[id] (PAL
+    D0SPSUB 0x80109C88, the same 160 bytes in every DnSPSUB / DnSPSUB3) of the 48 x 31 block D0SPSUB uploads to
+    (288, 480) (file offset 0x98B8), column 304.  No per-item frame or descriptor is involved.  Checked pixel for pixel
+    against the native port's Items list (docs/SAVE_EDITOR.md).  item_icon_spec(id) gives the numbers."""
     import text_core as C
     if path.lower().endswith(".cue"):
         import re
@@ -353,20 +362,37 @@ def item_icons(path):
     src = C.Source(path)
     page = src.read_any("SYSTEM/A00300.000")
     dsp = src.read_any("SYSTEM/D0SPSUB.BIN")
-    clut = dsp[0x98B8:0x98B8 + 48 * 31 * 2]
-    cluts = dsp[0x80109C88 - 0x800E8028:][:160]
+    clut = dsp[ITEM_CLUT_BLOCK:ITEM_CLUT_BLOCK + 48 * 31 * 2]
+    cluts = dsp[ITEM_ICON_CLUTS - D0SPSUB_BASE:][:T.ITEM_USED]
     out = {}
-    for n in range(165):
-        row = cluts[n] if n < 160 else 0
-        pal = [bgr555(struct.unpack_from("<H", clut, (row * 48 + 16 + i) * 2)[0]) for i in range(16)]
-        u0, v0 = n % 15 * 16 + 8, n // 15 * 16 + 8
+    for n in range(T.ITEM_USED):
+        tpage, u0, v0, cw = item_icon_spec(n, cluts)
+        row = (cw >> 6) - 480
+        pal = [bgr555(struct.unpack_from("<H", clut, (row * 48 + (cw & 63) * 16 - 288 + i) * 2)[0]) for i in range(16)]
         img = QImage(16, 16, QImage.Format_ARGB32)
         for y in range(16):
             for x in range(16):
-                b = page[128 + (v0 + y) * 384 + (u0 + x) // 2]
+                b = page[(v0 + y) * 384 + 128 + (u0 + x) // 2]
                 img.setPixel(x, y, pal[b >> 4 * ((u0 + x) & 1) & 15])
         out[n] = img
     return out
+
+
+D0SPSUB_BASE, ITEM_ICON_CLUTS, ITEM_CLUT_BLOCK = 0x800E8028, 0x80109C88, 0x98B8   # PAL D0SPSUB load address, tables
+
+
+def item_icon_spec(n, cluts):
+    """(texture page (x, y) in VRAM, u, v, CLUT word) of the 16 x 16 sprite subScreenDrawItemIcon draws for item n;
+    cluts = ITEM_ICON_CLUTS (160 bytes)."""
+    return (192, 0), n % 15 * 16 + 8, n // 15 * 16 + 8, (cluts[n] + 0x1E0) << 6 | 0x13
+
+
+def bundled_patch(name="es_mejorada.tombipatch.json"):
+    """patches/<name>: bundled in the exe (PyInstaller --add-data) or in the checkout; None when absent."""
+    for root in (getattr(sys, "_MEIPASS", None), os.path.dirname(HERE)):
+        if root and os.path.isfile(os.path.join(root, "patches", name)):
+            return os.path.join(root, "patches", name)
+    return None
 
 
 def scaled(img, size):
@@ -644,10 +670,15 @@ class Editor(QMainWindow):
     CARD.YYYYmmdd-HHMMSS.bak instead of CARD.bak) and on_closed (called once when the window closes).  hosted: the
     style sheet and font go on this window only, not on the whole QApplication (the launcher keeps its own look)."""
 
-    def __init__(self, card=None, cfg=None, lang=None, write_guard=None, stamp_bak=False, on_closed=None, hosted=False):
+    def __init__(self, card=None, cfg=None, lang=None, write_guard=None, stamp_bak=False, on_closed=None, hosted=False,
+                 text_patch=None):
         super().__init__()
         self.hosted = hosted
+        # text_patch: the launcher's active text patch (a *.tombipatch.json, "" = none): its list names are shown by
+        # default.  None (standalone): the bundled improved translation, unless turned off (cfg "improved_names").
+        self.text_patch = text_patch
         self.cfg = load_cfg() if cfg is None else cfg
+        self.improved = bool(text_patch) if text_patch is not None else self.cfg.get("improved_names", True) is not False
         self.write_guard, self.stamp_bak, self.on_closed = write_guard, stamp_bak, on_closed
         if lang:
             self.lang = lang if lang in UI else "en"
@@ -686,6 +717,22 @@ class Editor(QMainWindow):
     def names_lang(self):
         n = self.cfg.get("names_lang")
         return n if n in T.LANGS else NAMES_LANG.get(self.lang, "B")
+
+    def names_patch(self):
+        """The *.tombipatch.json whose list names replace the disc's (None: the original names)."""
+        if not self.improved:
+            return None
+        if self.text_patch and self.text_patch.lower().endswith(".json") and os.path.isfile(self.text_patch):
+            return self.text_patch
+        return bundled_patch()
+
+    def set_improved(self, on):
+        self.improved = bool(on)
+        if self.text_patch is None:
+            self.cfg["improved_names"] = self.improved
+            self.save_cfg()
+        if self.data_path:
+            self.load_data(self.data_path)
 
     def save_cfg(self):
         try:
@@ -1130,8 +1177,7 @@ class Editor(QMainWindow):
             c.setParent(None)
             c.deleteLater()
         self.item_cards = {}
-        n = max(len(self.names["items"]), 0xAB)
-        for i in range(n):
+        for i in range(T.ITEM_USED):
             self.item_cards[i] = self.item_card(i)
         self.item_cols = 0
         self.layout_items()
@@ -1370,6 +1416,12 @@ class Editor(QMainWindow):
         self.names_cb.setCurrentIndex(list(T.LANGS).index(self.names_lang()))
         self.names_cb.currentIndexChanged.connect(self.set_names_lang)
         p3.lay.addWidget(self.names_cb)
+        self.improved_cb = QCheckBox(L["improved"])
+        self.improved_cb.setToolTip(L["improvedtip"])
+        self.improved_cb.setChecked(self.improved)
+        self.improved_cb.toggled.connect(self.set_improved)
+        self.improved_cb.setVisible(bool(bundled_patch() or self.text_patch))
+        p3.lay.addWidget(self.improved_cb)
         p3.lay.addWidget(label(L["datahint"], "hint", wrap=True))
         p4 = Panel(L["diag"], "info", t)
         self.diag = QPlainTextEdit()
@@ -1632,7 +1684,7 @@ class Editor(QMainWindow):
         self.progress["evdone"][1].setRange(0, tot)
         self.progress["evdone"][1].setValue(done)
         n_inv = len(s.inventory())
-        tot_i = max(len(self.names["items"]), 0xAB) - len(T.UNUSED_ITEMS)
+        tot_i = T.ITEM_USED - len(T.UNUSED_ITEMS)
         self.progress["itemsown"][0].setText(L["events_n"].format(n_inv, tot_i))
         self.progress["itemsown"][1].setRange(0, tot_i)
         self.progress["itemsown"][1].setValue(min(n_inv, tot_i))
@@ -1738,7 +1790,7 @@ class Editor(QMainWindow):
     def load_data(self, path, quiet=False):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
-            names = T.names_from_disc(path, self.names_lang())
+            names = T.names_from_disc(path, self.names_lang(), patch=self.names_patch())
             try:
                 icons = item_icons(path)
             except Exception:
@@ -1911,10 +1963,11 @@ def qt_problem():
     return _QT_OK or None
 
 
-def host_in_qt(parent=None, card=None, lang=None, write_guard=None, on_closed=None):
+def host_in_qt(parent=None, card=None, lang=None, write_guard=None, on_closed=None, text_patch=None):
     """Open the editor from a Qt program already running (the PC launcher, tools/port_launcher.py): its own top-level
     window kept above parent (transient for it), with its style sheet on itself only (hosted).  Overwriting the card
-    keeps a timestamped .bak.  Returns the Editor; on_closed() runs once when it closes."""
+    keeps a timestamped .bak.  text_patch: the launcher's active text patch ("" = none; its item names are shown by
+    default).  Returns the Editor; on_closed() runs once when it closes."""
     app = QApplication.instance()
     load_fonts(app)
 
@@ -1923,7 +1976,8 @@ def host_in_qt(parent=None, card=None, lang=None, write_guard=None, on_closed=No
             on_closed()
         w.deleteLater()
 
-    w = Editor(card, lang=lang, write_guard=write_guard, stamp_bak=True, on_closed=closed, hosted=True)
+    w = Editor(card, lang=lang, write_guard=write_guard, stamp_bak=True, on_closed=closed, hosted=True,
+               text_patch=text_patch)
     w.setWindowIcon(QIcon(w.logo_pixmap(64)))
     w.show()
     try:                                       # stays over the launcher, minimises with it (best effort)

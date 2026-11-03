@@ -78,7 +78,10 @@ The save list (`memCardReadDirectory`) reads only GAME +0x00..+0x7F: location = 
 | 0x954 | int x3 | player position at save time | |
 | 0x963 | u8 | purifiedAreas | |
 
-Item names: the user's disc, `AREA00/MFNT000<lang>.WFM` entry id+3. Event titles: `CFNT999<lang>.WFM` through the
+Item names: the user's disc, the sub-screen list's own table `ITEM_NAME_STRINGS[ITEM_NAME_INDEX[id]]` of
+`SYSTEM/D<n>SPSUB.BIN` (n = language 0..8; PAL D0SPSUB 0x801096D4 / 0x8010979C), ids 0..159. Not `AREA00/MFNT000<lang>.WFM`
+entry id+3: that bank is the "got item" messages and follows the ids only up to 9 (it has no Bucket, Telescope, Tear
+Jar...; id 12 would read "Wood Boomerang" instead of "Tear Jar"). Event titles: `CFNT999<lang>.WFM` through the
 200-byte table at MAIN0 0x80080410 (event id -> title index, 0xFF = untitled). Unused items / events: docs/CUT_CONTENT.md.
 
 ## Container formats read by tools/tombi_save.py
