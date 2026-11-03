@@ -90,9 +90,9 @@ static const char *it_open_reason(void) {
     if (SPAD8(0x3CE) | SPAD8(0x1CC) || SPAD16(0x1C6)) return T("The game is paused", "El juego est\xE1 en pausa");
     if (G8(0x8009C975u) != 0 && G8(0x8009C975u) != 0x10) return T("The screen is fading", "La pantalla est\xE1 en transici\xF3n");
     if (G8(0x8009CDA2u)) return T("Not available in this scene", "No disponible en esta escena");
-    if (!G8(0x8009C93Au)) return T("Tomba is not on the ground", "Tomba no est\xE1 en el suelo");
-    if (G8(0x8009D2B0u) != 1 || G8(0x8009C93Fu)) return T("Tomba is busy", "Tomba est\xE1 ocupado");
-    if (G8(0x800A5462u) != G8(0x8009D2B0u) && (G8(0x800A603Cu) != G8(0x8009D2B0u) || G8(0x800A603Du) >= 0x20)) return T("Tomba is busy", "Tomba est\xE1 ocupado");
+    if (!G8(0x8009C93Au)) return T("Tombi must be on the ground", "Tombi tiene que estar en el suelo");
+    if (G8(0x8009D2B0u) != 1 || G8(0x8009C93Fu)) return T("Tombi must stand still", "Tombi tiene que estar quieto");
+    if (G8(0x800A5462u) != G8(0x8009D2B0u) && (G8(0x800A603Cu) != G8(0x8009D2B0u) || G8(0x800A603Du) >= 0x20)) return T("Tombi must stand still", "Tombi tiene que estar quieto");
     if (SPAD8(0x1B8)) return T("Not available right now", "No disponible ahora");
     return NULL;
 }
