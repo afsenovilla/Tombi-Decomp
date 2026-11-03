@@ -57,5 +57,20 @@ for t, i in need.items():
 out += aliases
 pat = re.compile(r'@([A-Za-z_][\w$]*)(?![\w.$])')
 res = pat.sub(lambda m: "@" + rename[m.group(1)] if m.group(1) in rename else m.group(0), "\n".join(out))
+# The i386 build (gcc) re-extends a short / char argument or return value where it is used; clang's wasm32 code trusts
+# the other side's extension (`signext` / `zeroext`), and the game passes ints where the callee declares a short
+# (K&R prototypes, aliases with other prototypes: drawNowLoading's pulse index got the unextended word, the frame-1632
+# divergence).  Without the attributes the backend extends at the use, as gcc does.  `noundef` goes too: LLVM's
+# FixFunctionBitcasts passes undef for the arguments a short call omits (the i386 build reads whatever is there).
+res, n_ext = re.subn(r"\b(?:signext|zeroext|noundef) ", "", res)
+# A function matched as void whose value a caller uses (the console's $v0 still held its last callee's result; the i386
+# build gets eax by luck, the wasm build gets 0): each needs a port/fixes.txt rule like showMessageBox's.  Listed here.
+voids = set(re.findall(r'^define [^@\n]*?\bvoid @([\w.$]+)\(', res, re.M))
+used = set()
+for body in re.split(r"\n(?=define )", res):
+    for m in re.finditer(r'(%[\w.]+) = (?:tail |musttail |notail )?call [^@\n]*?\b(?:i\d+|ptr) (?:\([^)]*\) )?@([\w.$]+)\(', body):
+        if m.group(2) in voids and re.search(re.escape(m.group(1)) + r"\b(?! =)", body[m.end():]): used.add(m.group(2))
+if used: print("apply_aliases: WARNING: the value of void functions is used (port/fixes.txt them): " + " ".join(sorted(used)))
 open(out_path, "w").write(res)
+print("apply_aliases: %d signext / zeroext / noundef attributes dropped" % n_ext)
 print("apply_aliases: %d renames, %d data aliases, %d new declarations" % (len(rename), len(aliases), len(need)))

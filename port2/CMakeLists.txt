@@ -44,7 +44,7 @@ if(ANDROID AND (ANDROID_ABI STREQUAL "arm64-v8a" OR CMAKE_ANDROID_ARCH_ABI STREQ
   add_library(tombi2 SHARED ${PORT2_W2C_SRCS} ${W}/host.c ${W}/host_sdl.c ${W}/host_gl.c ${CMAKE_CURRENT_SOURCE_DIR}/runtime/sdl.c)
   set_target_properties(tombi2 PROPERTIES OUTPUT_NAME tombi LINKER_LANGUAGE C)
   target_include_directories(tombi2 PRIVATE ${PORT2_W2C_DIR} ${W} ${GEN}/sdlinc ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_compile_options(tombi2 PRIVATE -O2 -fPIC -fno-strict-aliasing -fwrapv -w)
+  target_compile_options(tombi2 PRIVATE -O2 -fPIC -fno-strict-aliasing -fwrapv -ffp-contract=off -w)
   target_compile_definitions(tombi2 PRIVATE WASM_RT_NONCONFORMING_UNCHECKED_STACK_EXHAUSTION=1 WASM_RT_SKIP_SIGNAL_RECOVERY=1
                              WASM_RT_TRAP_HANDLER=port_w2c_trap)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/runtime/sdl.c PROPERTIES COMPILE_OPTIONS "-include;${W}/sdl_bridge.h")
@@ -151,7 +151,13 @@ add_dependencies(port2rt port2_build_id)
 target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(port2rt PRIVATE ${CHDR_DIR}/include)
 target_compile_definitions(port2rt PRIVATE PORT_HAVE_CHD)
-target_compile_options(port2rt PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_RT_FLAGS} -O2 -Wall -Wno-unused-function)
+target_compile_options(port2rt PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_RT_FLAGS} -O2 -Wall -Wno-unused-function -ffp-contract=off)
+# the runtime's float math (the software rasteriser's attribute gradients, shims/gpu.c) rounds the same on every build:
+# IEEE single / double, no fused multiply-adds; on 32-bit x86 SSE2 instead of the x87's 80-bit intermediates (which
+# put a few texels per frame elsewhere than the ARM and the 64-bit wasm2c builds do)
+if(NOT ANDROID)
+  target_compile_options(port2rt PRIVATE -msse2 -mfpmath=sse)
+endif()
 # the Spanish redraws generator must round like Pillow / Python (byte-identical to tools/gfx_es): no fused multiply-adds,
 # and on 32-bit x86 SSE2 doubles instead of the x87's 80-bit intermediates
 if(ANDROID)

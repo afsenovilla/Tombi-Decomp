@@ -38,7 +38,7 @@ ENV = dict(os.environ, PORT2_ARCH="wasm")
 WCC = ["clang", "--target=wasm32-wasi", "-O2", "-w", "-funsigned-char", "-fwrapv", "-fno-strict-aliasing",
        "-fno-delete-null-pointer-checks", "-emit-llvm", "-Wno-error=implicit-function-declaration", "-Wno-error=int-conversion",
        "-Wno-error=incompatible-function-pointer-types", "-Wno-error=implicit-int", "-Wno-error=return-type"]
-GAME = WCC + ["-fno-builtin", "-DSKIP_ASM", "-D_LANGUAGE_C", "-DMIPSEL", "-DPORT2_WASM", "-I" + os.path.join(P2, "include"), "-I" + GEN]
+GAME = WCC + ["-ftrivial-auto-var-init=zero", "-fno-builtin", "-DSKIP_ASM", "-D_LANGUAGE_C", "-DMIPSEL", "-DPORT2_WASM", "-I" + os.path.join(P2, "include"), "-I" + GEN]
 RT = WCC + ["-include", os.path.join(HERE, "wasm_compat.h"), "-I" + os.path.join(P2, "include"), "-I" + GEN]
 
 def compile_all(jobs):
@@ -118,7 +118,7 @@ if want("w2c"):
         shutil.copy(os.path.join(wrt, f), os.path.join(w2, f))
 # 6. native: the translated module + wasm2c runtime + host (WASI subset, coroutines, imports, runtime/sdl.c with SDL2)
 HOST_SRCS = [os.path.join(HERE, f) for f in ("host.c", "host_sdl.c", "host_gl.c")]
-W2C_FLAGS = ["-fno-strict-aliasing", "-fwrapv", "-w", "-DWASM_RT_NONCONFORMING_UNCHECKED_STACK_EXHAUSTION=1",
+W2C_FLAGS = ["-fno-strict-aliasing", "-fwrapv", "-ffp-contract=off", "-w", "-DWASM_RT_NONCONFORMING_UNCHECKED_STACK_EXHAUSTION=1",
              "-DWASM_RT_SKIP_SIGNAL_RECOVERY=1", "-DWASM_RT_TRAP_HANDLER=port_w2c_trap"]
 if want("native"):
     w2 = os.path.join(OUT, "w2c")

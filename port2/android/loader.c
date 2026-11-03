@@ -50,12 +50,10 @@
    reads live there too (port_wasm_var_ptr, valid once port_main has instantiated the module) */
 #include "../wasm/bridge_vars.h"
 typedef Elf64_Ehdr ElfEhdr; typedef Elf64_Shdr ElfShdr; typedef Elf64_Sym ElfSym; typedef Elf64_Phdr ElfPhdr;
-#define ELF_CLASS ELFCLASS64
-#define ELF_ST_TYPE ELF64_ST_TYPE
+#define PORT_ELF_CLASS ELFCLASS64
 #else
-typedef ElfEhdr ElfEhdr; typedef ElfShdr ElfShdr; typedef ElfSym ElfSym; typedef ElfPhdr ElfPhdr;
-#define ELF_CLASS ELF_CLASS
-#define ELF_ST_TYPE ELF_ST_TYPE
+typedef Elf32_Ehdr ElfEhdr; typedef Elf32_Shdr ElfShdr; typedef Elf32_Sym ElfSym; typedef Elf32_Phdr ElfPhdr;
+#define PORT_ELF_CLASS ELFCLASS32
 #endif
 #define PORT2_LOW_BASE 0x00100000ul
 #define PORT2_LOW_SIZE 0x02000000ul      /* 32 MB at least: libtombi.so is ~19 MB with its .bss; port_ram must end below 16 MB */
@@ -181,7 +179,7 @@ static void symtab_load(const char *path, unsigned long base) {
     const unsigned char *f = mmap(0, (size_t)sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0); close(fd);
     if (f == MAP_FAILED) return;
     size_t sz = (size_t)sb.st_size; const ElfEhdr *eh = (const ElfEhdr *)f;
-    if (memcmp(eh->e_ident, ELFMAG, SELFMAG) || eh->e_ident[EI_CLASS] != ELF_CLASS || eh->e_shentsize != sizeof(ElfShdr)
+    if (memcmp(eh->e_ident, ELFMAG, SELFMAG) || eh->e_ident[EI_CLASS] != PORT_ELF_CLASS || eh->e_shentsize != sizeof(ElfShdr)
         || eh->e_shoff + (size_t)eh->e_shnum * sizeof(ElfShdr) > sz) { munmap((void *)f, sz); return; }
     const ElfShdr *sh = (const ElfShdr *)(f + eh->e_shoff);
     for (unsigned i = 0; i < eh->e_shnum; i++) {
@@ -201,7 +199,7 @@ static const char *symtab_near(unsigned long a, unsigned long *off) {
     unsigned long v = a - st_base, best = 0; const char *nm = 0;
     for (unsigned i = 1; i < st_n; i++) {
         const ElfSym *s = &st_sym[i];
-        if (ELF_ST_TYPE(s->st_info) != STT_FUNC || s->st_shndx == SHN_UNDEF || s->st_name >= st_strsz) continue;
+        if (((s->st_info) & 0xf) != STT_FUNC || s->st_shndx == SHN_UNDEF || s->st_name >= st_strsz) continue;
         unsigned long sv = s->st_value & ~1ul;
         if (sv <= v && (!nm || sv > best)) { best = sv; nm = st_str + s->st_name; }
     }
@@ -343,7 +341,7 @@ static unsigned long tombi_span(void) {
     int fd = open(p, O_RDONLY | O_CLOEXEC);
     if (fd < 0) { tlog("cannot open %s: %s (the APK's native libraries were not extracted?)", p, strerror(errno)); return 0; }
     ElfEhdr eh; unsigned long hi = 0; struct stat st; fstat(fd, &st);
-    if (pread(fd, &eh, sizeof eh, 0) == sizeof eh && !memcmp(eh.e_ident, ELFMAG, SELFMAG) && eh.e_ident[EI_CLASS] == ELF_CLASS) {
+    if (pread(fd, &eh, sizeof eh, 0) == sizeof eh && !memcmp(eh.e_ident, ELFMAG, SELFMAG) && eh.e_ident[EI_CLASS] == PORT_ELF_CLASS) {
         for (int i = 0; i < eh.e_phnum; i++) {
             ElfPhdr ph;
             if (pread(fd, &ph, sizeof ph, eh.e_phoff + (off_t)i * eh.e_phentsize) != sizeof ph) break;
