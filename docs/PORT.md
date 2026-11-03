@@ -2307,6 +2307,34 @@ q->a = ...`, y at +0x14 before a at +0x10) whose child `d94` is NULL; "X000+off"
 (`port_sym_near` reports areamap entries by the area's name). See the gdb notes in the commit for what the
 headless probes found.
 
+#### Svenska / Dansk Select screen: the twin that is two sectors longer than the read
+
+`--lang 7` / `--lang 8` crashed opening Select → Items (`D0SPSUB_subScreenDrawSprite+0x11` under
+`subScreenDrawTabs`) after `--lang: file 39: twin 168236 bytes, language 164336, read 165888: not composed`.
+The language's sub-screen overlay is *shorter* than its MAIN0 twin by whole sectors (D7SPSUB 164336 bytes = 81
+sectors, D8SPSUB 166356 = 82, D0SPSUB 168236 = 83), so the twin was refused as longer than the read and the
+language's overlay ran raw. Three fixes, all `--lang`-only:
+
+1. `port_lang_overlay_loaded` copies the twin whole as long as it fits the overlay region (refused only past the
+   region + one sector, or a language file longer than the read + one sector) and returns the bytes it composed;
+   `CdRead` relocates that many (the twin's length when longer than the read).
+2. A WFM3 bank left composed (the language's could not be put in place) that *measures longer than MAIN0's*
+   in place gets MAIN0's bank back (`twin_bank`): D8SPSUB's second bank (`D_800F7B78` = `D_1F8003A4`, 21336 bytes)
+   measured 71308 as a mix, so the relocator skipped every word after it as glyph codes (`D0SPSUB loaded: 0
+   function, 9 data pointers relocated`) and the tab sprite tables stayed retail addresses. The C reads banks
+   through `port_lang_item` (Bn), so the in-place copy only steers the relocator.
+3. `queueLoadList` places a list's next file at `base + record size`, the language's size: the Map tab's data
+   (the SYSTEM list: D?SPSUB, then the map) landed over the composed twin's last 3900 / 1880 bytes and
+   `drawObjectSpriteScaled` faulted. `port_lang_rel_size` (`port/fixes.txt`) answers the twin's size for a file
+   at the overlay start whose twin is longer, so the map loads at `0x80111154` as in English.
+
+The file tables of MAIN1..8 against MAIN0 (twin with more sectors than the language's file): MAIN7 17 files
+(39, 45, 50, 346, 377, 411, 472, 522, 591, 661, 772, 834, 857, 948, 1035, 1096, 1117), MAIN8 10, MAIN3 3, MAIN5 3
+(411, 772, 1096), MAIN1/2/4/6 none. Checked headless with `--lang 1..4, 7, 8` (debug select AREA01: Select →
+Items / Events / Status / Map, the Triangle item screen with a message, AREA02/04/06/09/13 with Select and
+Triangle): no `not composed`, no fault, no new stub (AREA06's `X006_area6ScriptOp` stub is there in English too;
+AREA17 section 0 crashes in every language, see above). English, Spanish and Portuguese frames are unchanged.
+
 ### Pointer audit and room sweep (`port2/tools/audit_pointers.py`, `port2/tools/sweep_areas.py`)
 
 Two tools check what open point 1 is about: the retail code pointers the game jumps through.

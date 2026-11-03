@@ -435,18 +435,34 @@ static int in_chunk(const Map *m, unsigned oa) {
     for (int k = 0; k < m->nc; k++) if (oa >= m->c[k].a && oa < m->c[k].a + m->c[k].len) return 1;
     return 0;
 }
+/* A bank left composed (the language's could not be put in place) is read through port_lang_item's Bn copy, but
+   the relocator measures it in place to skip its glyph codes: when the mix of MAIN0's and the language's bytes
+   measures longer than MAIN0's bank, the relocator skipped the words after it too.  D8SPSUB's second message
+   bank (D_800F7B78 = D_1F8003A4, 21336 bytes in MAIN0) measured 71308 composed: D0SPSUB's sprite and tab tables after it
+   stayed retail addresses (`D0SPSUB loaded: 0 function, 9 data pointers relocated`) and the Select screen
+   faulted in subScreenDrawSprite.  Such a bank gets MAIN0's bytes back in place. */
+static void twin_bank(const Map *m, unsigned char *img, unsigned size0, unsigned oa) {
+    unsigned la = wfm3_len(m->A + oa, m->na - oa);
+    if (!la || oa + la > size0) return;
+    unsigned lc = wfm3_len(img + oa, size0 - oa);
+    if (lc <= la) return;
+    memcpy(img + oa, m->A + oa, la);
+    port_printf("[port2]   --lang: WFM3 bank at %08x left composed measured %u bytes, MAIN0's %u: MAIN0's bank in place (the language's is read in Bn)\n", m->base_a + oa, lc, la);
+}
 static int named_blobs(const Map *m, unsigned char *img, unsigned size0, unsigned from) {
-    int n = 0;
+    int n = 0; unsigned done = 0;
     for (unsigned oa = from; oa + 12 <= m->na; oa += 4) {
         if (memcmp(m->A + oa, "WFM3", 4)) continue;
         long ob = a2b(m, oa);
-        if (ob < 0 || (unsigned)ob + 12 > m->nb || memcmp(m->B + ob, "WFM3", 4)) continue;
+        if (ob < 0 || (unsigned)ob + 12 > m->nb || memcmp(m->B + ob, "WFM3", 4)) { if (oa >= done) twin_bank(m, img, size0, oa); continue; }
         unsigned la = wfm3_len(m->A + oa, m->na - oa), lb = wfm3_len(m->B + ob, m->nb - (unsigned)ob);
-        if (!la || !lb || oa + lb > size0) continue;
+        if (!la || !lb || oa + lb > size0) { if (oa >= done) twin_bank(m, img, size0, oa); continue; }
         int ok = 1;
         for (unsigned o = oa + la; o < oa + lb; o += 4) if (in_chunk(m, o)) { ok = 0; break; }
-        if (!ok) { port_printf("[port2]   --lang: WFM3 bank at %08x: the language's (%u bytes, MAIN0's %u) would overrun a matched chunk: left composed\n", m->base_a + oa, lb, la); continue; }
+        if (!ok) { port_printf("[port2]   --lang: WFM3 bank at %08x: the language's (%u bytes, MAIN0's %u) would overrun a matched chunk: left composed\n", m->base_a + oa, lb, la);
+                   if (oa >= done) twin_bank(m, img, size0, oa); continue; }
         memcpy(img + oa, m->B + ob, lb);
+        if (oa + lb > done) done = oa + lb;
         if (port_verbose) port_printf("[port2]   --lang: WFM3 bank at %08x: the language's %u bytes in place (MAIN0's %u)\n", m->base_a + oa, lb, la);
         n++;
     }
@@ -643,7 +659,8 @@ extern const PortOvlCode *port_ovl_code_ranges(void);
 extern int port_ovl_in_ranges(const PortOvlCode *c, u32p a);
 
 /* After a CdRead of file `id` (the language's table) into the overlay region at dst: compose it over its MAIN0 twin.
-   Returns 1 when done (the relocator then runs on MAIN0-layout words). */
+   Returns the bytes to relocate when done (the read's, or the twin's when it is longer; the relocator then runs
+   on MAIN0-layout words), 0 when not composed. */
 int port_lang_overlay_loaded(void *dst, int bytes, int id) {
     if (!port_lang || getenv("PORT_LANG_RAW_OVL")) return 0;     /* diagnosis: the language's overlay as read, its words translated by the relocator */
     u32p base = PORT_OVL_BASE + (u32p)((unsigned char *)dst - (unsigned char *)port_x000_image);
@@ -657,8 +674,15 @@ int port_lang_overlay_loaded(void *dst, int bytes, int id) {
        360448, 40 more than the region holds, and the old test on the rounded size refused to compose X501: the
        language's overlay was then left raw, its pointers translated with the previous overlay's map, and AREA01
        crashed in drawObjectSpriteRotScaled on a sprite pointer of garbage) */
-    unsigned copy0 = size0 < (unsigned)bytes ? size0 : (unsigned)bytes;
-    if (size0 > (unsigned)bytes + 2048 || sizen > (unsigned)bytes + 2048) { port_printf("[port2] frame %d: --lang: file %d: twin %u bytes, language %u, read %d: not composed (the language's overlay is used raw: expect faults)\n", port_frame, id, size0, sizen, bytes); return 0; }
+    /* The twin may also be longer than the read by whole sectors: the language's file is shorter (Svenska's
+       D7SPSUB is 164336 bytes, 81 sectors, its MAIN0 twin D0SPSUB 168236, 83; Dansk's 166356, 82), the game
+       reads the language's sector count and MAIN0's code wants the twin's layout, so the twin is copied whole as
+       long as it fits the region (refused, the language's overlay stayed raw and the Select screen's Items tab
+       faulted in subScreenDrawSprite on a sprite table of the language's layout).  The caller relocates what
+       is returned, the twin's length when it is longer than the read. */
+    unsigned cap = PORT_OVL_END - PORT_OVL_BASE;         /* the region (a read is clipped to it) */
+    unsigned copy0 = size0 < cap ? size0 : cap;
+    if (size0 > cap + 2048 || sizen > (unsigned)bytes + 2048) { port_printf("[port2] frame %d: --lang: file %d: twin %u bytes, language %u, read %d: not composed (the language's overlay is used raw: expect faults)\n", port_frame, id, size0, sizen, bytes); return 0; }
     if (sizen > (unsigned)bytes) sizen = (unsigned)bytes;
     /* the map of this file: the one of its last load when the ring still holds it (the same alignment, the same
        spill and Bn: pointers the game kept from that load stay valid), else a new slot */
@@ -722,7 +746,19 @@ int port_lang_overlay_loaded(void *dst, int bytes, int id) {
                     PORT_OVL_BASE + ovl_delta + m->g[k].b, m->g[k].blen, m->g[k].refs ? " (pointed to)" : "");
     ovl_composed_pending = 1;
     /* twin and lang stay referenced by the map (A/B) until the slot is reused */
-    return 1;
+    return copy0 > (unsigned)bytes ? (int)((copy0 + 3) & ~3u) : bytes;
 }
 /* the relocator asks once per read whether the region was just composed (then its words are MAIN0-layout) */
 int port_lang_take_composed(void) { int c = ovl_composed_pending; ovl_composed_pending = 0; return c; }
+/* queueLoadList places a list's files one after the other (base += the record's size, port/fixes.txt): a record's
+   size is the language's file, but a file composed at the overlay start occupies its MAIN0 twin's bytes.  When the
+   twin is longer, the next file of the list went over its tail: the Select screen's Map tab (SYSTEM list of
+   D?SPSUB, then the map data) read the map into D0SPSUB's last 3900 bytes in Svenska (1880 in Dansk), its sprite
+   tables, and drawObjectSpriteScaled faulted.  The next file goes after the twin. */
+int port_lang_rel_size(int id, void *base, int size) {
+    if (!port_lang || base != (void *)port_x000_image || id < 0 || id >= LINKS_N || !main0_links) return size;
+    const unsigned char *e0 = main0_links + id * 8, *en = FILE_LINKS + id * 8;
+    if (link_lba(e0) == link_lba(en) || (unsigned)size != link_size(en)) return size;
+    unsigned size0 = link_size(e0);
+    return size0 > (unsigned)size && size0 <= PORT_OVL_END - PORT_OVL_BASE ? (int)size0 : size;
+}
