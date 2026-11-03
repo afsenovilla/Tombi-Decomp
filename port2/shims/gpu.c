@@ -1108,6 +1108,13 @@ extern int port_hz;
 void port_gpu_vblank(void) {
     { extern int port_debug_menu; extern void port_debug_draw(void); if (port_debug_menu) port_debug_draw(); }
     { extern int port_panel_on; extern void port_panel_vblank(void); if (port_panel_on) port_panel_vblank(); }
+    if (port_hfr_fps && !h_init && port_window && port_hfr_fps != -2 && hfr_rate() <= port_hz + 2) {
+        /* --fps N / auto at or below the logic rate (a 60 Hz display at --hz 60): no time between two vblanks to fill.
+           Interpolating there showed replayed / blended frames in place of real ones (movies flickered on an AYN Thor) */
+        port_printf("[gpu] --fps: the display runs at %d Hz, not above the game's %d Hz: one present per vblank (no interpolation)\n",
+                    hfr_rate(), port_hz);
+        port_hfr_fps = 0;
+    }
     if (port_hfr_fps) hfr_vblank();         /* --fps: the presents happen in port_hfr_wait */
     else if (port_window) present_window();
     if (!port_dump_dir || port_dump_every <= 0 || port_frame % port_dump_every) return;
