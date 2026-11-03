@@ -1,5 +1,45 @@
 // FUNC 8004e2d4 328 MAIN0
 // MATCHING 8004e2d4 328
+// VERSION SLPS_01144 slps01144 80018F7C 240
+#if defined(VERSION_SLPS_01144)
+typedef struct Th { char pad[0x48]; short a; unsigned short c; } Th;
+typedef struct { short x, y, w, h; } RECT;
+extern Th *TASK_C;
+extern char MOVIE_PLAY_STATE, MOVIE_ID;
+extern void SetDispMask(int);
+extern void initDisplay(int, int, int);
+extern void func_80016244(int, int, int);
+extern void ClearImage(RECT *, int, int, int);
+extern void ThreadCreate(int, void *);
+extern void MusicStopOrFadeIn(int);
+extern char LAB_8001d6a4[];
+
+void func_80018F7C(void)
+{
+    Th *t = TASK_C;
+    unsigned short c = t->c;
+    Th *u;
+    switch (c) {
+    case 0:
+        SetDispMask(0);
+        func_80016244(0, 0, 0);
+        MOVIE_PLAY_STATE = 1;
+        MOVIE_ID = 0;
+        u = TASK_C;
+        u->c = u->c + 1;
+        ThreadCreate(1, LAB_8001d6a4);
+        break;
+    case 1:
+        if (MOVIE_PLAY_STATE == 0) t->c = c + 1;
+        break;
+    case 2:
+        MusicStopOrFadeIn(0);
+        TASK_C->a = 4;
+        TASK_C->c = 0;
+        break;
+    }
+}
+#else
 typedef struct Th { char pad[0x48]; short a; unsigned short c; } Th;
 typedef struct { short x, y, w, h; } RECT;
 extern Th *TASK_C;
@@ -47,3 +87,4 @@ void bootPlayIntroMovie(void)
         break;
     }
 }
+#endif
