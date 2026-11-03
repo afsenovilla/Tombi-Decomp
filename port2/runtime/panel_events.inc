@@ -203,38 +203,62 @@ static void filters(int y) {
     }
 }
 
+/* one row of the list: the title (16 px) and under it the plate and the place (in progress) or the state and the area
+   (8 px), both wrapped, never cut: the place's next lines start under its first letter.  A row is 30 high with one
+   line of each, 16 more for each further title line and 10 for each further place line. */
+typedef struct { char t[96], p[160]; int pw, tr, tl, pl, h; } EvRow;
+static int dist_plate_w(int e) { const char *s = dist_name(ev_dist(e)); return s ? pa_text_w(8, s) + 8 : 0; }
+static void ev_row(int e, EvRow *R) {
+    int W = pa_cw, st = ev_state(e), hid = ev_hidden(e);
+    const PanelEventLoc *L = ev_loc(e);
+    const char *ar = L ? place_area(L->area, L->sec) : NULL;
+    char t[96];
+    R->tr = ev_pinned(e) ? 18 : 0; R->pw = 0;
+    snprintf(R->t, sizeof R->t, "%s", st == F_PENDING ? "? ? ?" : ev_title(e, t, sizeof t));
+    if (st == F_PROGRESS) {   /* in progress: where, as the plate and the place (the room, in this area) */
+        char pl[128];
+        R->pw = dist_plate_w(e); if (R->pw) R->pw += 5;
+        ev_place(e, pl, sizeof pl);
+        snprintf(R->p, sizeof R->p, "%s%s", hid ? T("Hidden - ", "Oculto - ") : "", pl);
+        char *d = NULL;   /* too long for one line: the room starts the next line ("area -" / "room") */
+        for (char *q = strstr(R->p + (strlen(R->p) - strlen(pl)), " - "); q; q = strstr(q + 1, " - ")) d = q;
+        if (d && text_lines(8, W - 60 - R->tr - R->pw, 2, R->p) > 1) d[2] = '\n';
+    } else snprintf(R->p, sizeof R->p, "%s%s  -  %s", hid ? T("Hidden - ", "Oculto - ") : "", state_name(st), ar ? ar : T("zone not extracted yet", "zona a\xFAn sin extraer"));
+    R->tl = text_lines(16, W - 60 - R->tr, 4, R->t);
+    R->pl = text_lines(8, W - 60 - R->tr - R->pw, 6, R->p);
+    R->h = 30 + (R->tl - 1) * 16 + (R->pl - 1) * 10;
+}
+static int ev_vis = 5;   /* rows on the page drawn last (the page up / down strips move by it) */
 static void event_list(void) {
-    int ids[EVENTS], n = ev_list(ids), W = pa_cw, H = pa_ch;
-    char b[96];
+    int ids[EVENTS], n = ev_list(ids), W = pa_cw, H = pa_ch, rh[EVENTS];
+    char b[96]; static EvRow R;
     filters(56);
-    int y0 = 84, rh = 30, rows = (H - y0 - 56) / rh;
-    window_(8, y0 - 2, W - 16, rows * rh + 24);
+    int y0 = 84, rows = (H - y0 - 56) / 30, avail = rows * 30;
+    window_(8, y0 - 2, W - 16, avail + 24);
+    for (int i = 0; i < n; i++) { ev_row(ids[i], &R); rh[i] = R.h; }
     if (ev_sel >= n) ev_sel = n - 1; if (ev_sel < 0) ev_sel = 0;
-    if (ev_sel < ev_top) ev_top = ev_sel; if (ev_sel >= ev_top + rows) ev_top = ev_sel - rows + 1;
-    if (ev_top > n - rows) ev_top = n - rows; if (ev_top < 0) ev_top = 0;
+    if (ev_top > ev_sel) ev_top = ev_sel; if (ev_top < 0) ev_top = 0;
+    /* whole rows only: the selected one on the page, and the last page full */
+    for (;;) { int u = 0; for (int i = ev_top; i <= ev_sel; i++) u += rh[i]; if (u <= avail || ev_top >= ev_sel) break; ev_top++; }
+    for (;;) { int u = 0; for (int i = ev_top - 1; i < n; i++) u += rh[i]; if (ev_top <= 0 || u > avail) break; ev_top--; }
     /* page up / down strips first: the rows registered after them win where they overlap (the top of row 1) */
-    hot(8, y0 - 2, W - 16, 20, HS_PREV); hot(8, y0 + rows * rh, W / 2, 24, HS_NEXT);
+    hot(8, y0 - 2, W - 16, 20, HS_PREV); hot(8, y0 + avail, W / 2, 24, HS_NEXT);
     if (!n) pa_text(20, y0 + 8, 16, T("No events here", "No hay eventos"), C_MUTED, C_EDGE);
-    for (int r = 0; r < rows && ev_top + r < n; r++) {
-        int e = ids[ev_top + r], y = y0 + 4 + r * rh, sel = ev_top + r == ev_sel, st = ev_state(e);
-        const PanelEventLoc *L = ev_loc(e);
-        if (sel) pa_fill(12, y - 2, W - 24, rh - 1, C_SEL);
-        hot(12, y - 2, W - 24, rh - 1, HS_ROW + ev_top + r);
-        int pend = st == F_PENDING, hid = ev_hidden(e);
+    int used = 0, r = ev_top;
+    for (; r < n && used + rh[r] <= avail; used += rh[r], r++) {
+        int e = ids[r], y = y0 + 4 + used, h = rh[r], sel = r == ev_sel, st = ev_state(e);
+        ev_row(e, &R);
+        if (sel) pa_fill(12, y - 2, W - 24, h - 1, C_SEL);
+        hot(12, y - 2, W - 24, h - 1, HS_ROW + r);
+        int pend = st == F_PENDING, hid = ev_hidden(e), py = y + (R.tl - 1) * 16;
         pa_event_icon(16, y + 5, e, pend ? PA_DIM : hid ? PA_SHADE : 0);
-        pa_text_fit(46, y - 1, 16, W - 60 - (ev_pinned(e) ? 18 : 0), pend ? "? ? ?" : ev_title(e, b, sizeof b), sel ? C_WHITE : hid ? C_MUTED : st == F_DONE ? C_GREEN : C_DARK, sel ? RGB(60, 110, 50) : C_EDGE);
-        const char *ar = L ? place_area(L->area, L->sec) : NULL;
-        int tr = ev_pinned(e) ? 18 : 0, pw = 0;
-        if (st == F_PROGRESS) {   /* in progress: where, as the plate and the place (the room, in this area) */
-            char pl[128];
-            pw = dist_plate(46, y + 15, e); if (pw) pw += 5;
-            ev_place(e, pl, sizeof pl);
-            snprintf(b, sizeof b, "%s%s", hid ? T("Hidden - ", "Oculto - ") : "", pl);
-        } else snprintf(b, sizeof b, "%s%s  -  %s", hid ? T("Hidden - ", "Oculto - ") : "", state_name(st), ar ? ar : T("zone not extracted yet", "zona a\xFAn sin extraer"));
-        if (tr) pin_mark(W - 30, y + 2, sel ? C_WHITE : C_RED);
-        pa_text_fit(46 + pw, y + (st == F_PROGRESS ? 17 : 16), 8, W - 60 - tr - pw, b, sel ? C_WHITE : st == F_PROGRESS ? C_RED8 : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
+        text_wrap(46, y - 1, 16, W - 60 - R.tr, 16, 4, 0, R.t, sel ? C_WHITE : hid ? C_MUTED : st == F_DONE ? C_GREEN : C_DARK, sel ? RGB(60, 110, 50) : C_EDGE);
+        if (st == F_PROGRESS) dist_plate(46, py + 15, e);
+        if (R.tr) pin_mark(W - 30, y + 2, sel ? C_WHITE : C_RED);
+        text_wrap(46 + R.pw, py + (st == F_PROGRESS ? 17 : 16), 8, W - 60 - R.tr - R.pw, 10, 6, 0, R.p, sel ? C_WHITE : st == F_PROGRESS ? C_RED8 : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
     }
-    int by = y0 + rows * rh + 4;
+    ev_vis = r - ev_top > 1 ? r - ev_top : 1;
+    int by = y0 + avail + 4;
     snprintf(b, sizeof b, T("%d of %d", "%d de %d"), n ? ev_sel + 1 : 0, n);   /* the 16 px font has no '/' */
     pa_text(W - 24 - pa_text_w(16, b), by, 16, b, C_DARK, C_EDGE);
     int s, d; count_events(&s, &d);
@@ -242,7 +266,7 @@ static void event_list(void) {
     pa_text(20, by + 4, 8, b, C_MUTED8, RGB(230, 200, 190));
     if (ev_top > 0) { pa_text(W - 40, y0 + 2, 16, "^", C_DARK, C_EDGE); }
     /* [Ocultar / Mostrar] the selected event   [Ocultos: no / s\xED (n)] */
-    int py = y0 - 2 + rows * rh + 28, pw2 = (W - 20) / 2, cur = n ? ids[ev_sel] : -1;
+    int py = y0 - 2 + avail + 28, pw2 = (W - 20) / 2, cur = n ? ids[ev_sel] : -1;
     plank(8, py, pw2); hot(8, py, pw2, 24, HS_FILTER + 8);
     plank_text(8 + pw2 / 2, py + 4, cur >= 0 && ev_hidden(cur) ? T("Show", "Mostrar") : T("Hide", "Ocultar"), 0);
     plank(W - 8 - pw2, py, pw2); hot(W - 8 - pw2, py, pw2, 24, HS_FILTER + 9);
@@ -255,19 +279,18 @@ static void event_detail(int e) {
     const PanelEventLoc *L = ev_loc(e);
     filters(56);
     /* title: the icon x2 and the 24 px event-title letters */
-    int y = 84;
-    window_(8, y, W - 16, 38);
-    hot(8, y, W - 16, 38, HS_BACK);
-    {   int cx0 = pa_clip_x0; (void)cx0;
-        /* icon scaled x2 by drawing it into the canvas twice as big */
-        int x0 = 16, y0 = y + 7;
-        pa_event_icon(x0, y0 + 4, e, pend ? PA_DIM : 0);
-        const char *t = pend ? "? ? ?" : ev_title(e, b, sizeof b);
+    int y = 84, th = 38;   /* the title box grows when the title needs more than two lines (never cut) */
+    const char *t = pend ? "? ? ?" : ev_title(e, b, sizeof b);
+    int tl = pa_text_w(16, t) <= W - 64 ? 1 : text_lines(16, W - 64, 5, t);
+    if (tl > 2) th = tl * 17 + 4;
+    window_(8, y, W - 16, th);
+    hot(8, y, W - 16, th, HS_BACK);
+    {   pa_event_icon(16, y + th / 2 - 8, e, pend ? PA_DIM : 0);
         if (pa_text_w(24, t) <= W - 60) pa_text(48, y + 7, 24, t, C_WHITE, C_DARK);
-        else if (pa_text_w(16, t) <= W - 64) pa_text(48, y + 11, 16, t, C_DARK, C_EDGE);
-        else text_wrap(48, y + 2, 16, W - 64, 17, 2, 0, t, C_DARK, C_EDGE);
+        else if (tl == 1) pa_text(48, y + 11, 16, t, C_DARK, C_EDGE);
+        else text_wrap(48, y + 2, 16, W - 64, 17, tl, 0, t, C_DARK, C_EDGE);
     }
-    y += 42;
+    y += th + 4;
     int ww = W * 58 / 100, wh = H - y - 70;
     if (wh < 110) wh = 110;
     /* where */
@@ -276,14 +299,15 @@ static void event_detail(int e) {
     const char *ar = L ? place_area(L->area, L->sec) : NULL, *rm = L ? place_room(L->area, L->sec) : NULL;
     if (ar) {
         snprintf(b, sizeof b, "%s%s%s", ar, rm ? "  -  " : "", rm ? rm : "");
-        int nl = text_wrap(16, y + 22, 8, ww - 20, 10, 3, 0, b, C_RED8, C_REDE);
+        if (rm && text_lines(8, ww - 20, 2, b) > 1) snprintf(b, sizeof b, "%s  -\n%s", ar, rm);   /* the room on its own line */
+        int nl = text_wrap(16, y + 22, 8, ww - 20, 10, 6, 0, b, C_RED8, C_REDE);
         int l = L->area < 20 && L->sec < 24 ? roomlink[L->area][L->sec] : -1;
         for (int s = 0; L->area < 20 && s < 24 && l < 0; s++) l = roomlink[L->area][s];   /* room not known: the area */
         map_mark_link = l; map_mark_ev = e;
         draw_map(12, y + 22 + nl * 10, ww - 8, wh - 26 - nl * 10, -1);
         map_mark_link = -1;
     } else {
-        text_wrap(16, y + 26, 16, ww - 20, 18, 3, 0, T("The zone of this event is not extracted from the game data yet", "La zona de este evento a\xFAn no se ha extra\xED""do de los datos del juego"), C_MUTED, C_EDGE);
+        text_wrap(16, y + 26, 16, ww - 20, 18, 5, 0, T("The zone of this event is not extracted from the game data yet", "La zona de este evento a\xFAn no se ha extra\xED""do de los datos del juego"), C_MUTED, C_EDGE);
     }
     /* who */
     int wx = 8 + ww + 6, wwid = W - 8 - wx;
@@ -291,7 +315,7 @@ static void event_detail(int e) {
     pa_text(wx + 8, y + 5, 16, T("Who", "Qui\xE9n"), C_DARK, C_EDGE);
     const char *kn = ev_giver(e) ? ev_giver(e) : L ? kind_name(L->kind) : NULL;
     if (kn && !pend) {
-        text_wrap(wx + 8, y + 26, 16, wwid - 16, 17, 2, 0, kn, C_DARK, C_EDGE);
+        text_wrap(wx + 8, y + 26, 16, wwid - 16, 17, 5, 0, kn, C_DARK, C_EDGE);
     } else pa_text(wx + 8, y + 26, 16, "? ? ?", C_MUTED, C_EDGE);
     face(wx + wwid - 34, y + wh - 34);
     /* state */
@@ -353,8 +377,8 @@ static void panel_hit(int id) {
         break;
     }
     case HS_BACK: ev_detail = -1; break;
-    case HS_PREV: ev_sel -= 5; break;
-    case HS_NEXT: ev_sel += 5; break;
+    case HS_PREV: ev_sel -= ev_vis; break;
+    case HS_NEXT: ev_sel += ev_vis; break;
     }
 }
 /* touch / click in canvas pixels: act on release over the target pressed */

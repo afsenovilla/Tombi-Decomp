@@ -444,15 +444,17 @@ static void room_names(int play, int area, int sec, int link, const char **an, c
 }
 
 /* word-wrapped text: lines of at most w pixels broken at spaces (a word longer than w is split), at most maxl lines
-   (the last one shrinks to fit only when the text runs past it); centred when center.  Returns the lines drawn. */
+   (the last one shrinks to fit only when the text runs past it); centred when center.  Returns the lines drawn
+   (wrap_dry: counted, nothing drawn). */
+static int wrap_dry;
 static int text_wrap(int x, int y, int h, int w, int lh, int maxl, int center, const char *s, unsigned body, unsigned edge) {
     char ln[256]; int n = 0;
     while (*s && n < maxl) {
         while (*s == ' ') s++;
-        int len = 0, brk = 0;
+        int len = 0, brk = 0, lw = 0;
         for (int i = 0; s[i] && s[i] != '\n' && i < 255; i++) {
-            memcpy(ln, s, i + 1); ln[i + 1] = 0;
-            if (pa_text_w(h, ln) > w) break;
+            char c1[2] = { s[i], 0 };
+            if ((lw += pa_text_w(h, c1)) > w) break;   /* the glyph widths add up (no kerning) */
             len = i + 1; if (s[i + 1] == ' ' || !s[i + 1] || s[i + 1] == '\n') brk = len;
         }
         if (!len) len = 1;
@@ -460,11 +462,16 @@ static int text_wrap(int x, int y, int h, int w, int lh, int maxl, int center, c
         if (n == maxl - 1 && s[take] && s[take] != '\n') take = (int)strlen(s) < 255 ? (int)strlen(s) : 255;   /* last line: all of the rest */
         memcpy(ln, s, take); ln[take] = 0;
         int tw = pa_text_w(h, ln); if (tw > w) tw = w;
-        pa_text_fit(center ? x + (w - tw) / 2 : x, y + n * lh, h, w, ln, body, edge);
+        if (!wrap_dry) pa_text_fit(center ? x + (w - tw) / 2 : x, y + n * lh, h, w, ln, body, edge);
         s += take; if (*s == '\n') s++;
         n++;
     }
     return n;
+}
+/* the lines text_wrap needs for s in w pixels (at most maxl) */
+static int text_lines(int h, int w, int maxl, const char *s) {
+    wrap_dry = 1; int n = text_wrap(0, 0, h, w, 0, maxl, 0, s, 0, 0); wrap_dry = 0;
+    return n ? n : 1;
 }
 #include "panel_events.inc"
 #include "panel_side.inc"
