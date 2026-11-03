@@ -3147,6 +3147,14 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   and the D-pad / keys move the cursor with the grid following it. Headless: `--panel-input
   3060:tabr,3065:tabr,3070:tabr,3200:drag@290@300@290@150` scrolls it (the dump at 3300 shows the flung view); the
   other tabs' dumps are byte-identical to the previous build.
+- Status tab trial (2026-11-03, `runtime/panel_status.inc`): `PORT_PANEL_STATUS_STYLE=1..4` replaces the page (0 or unset:
+  the map graph page above, unchanged). 1 character sheet (fruit / lives / AP at 2x, equipment with names, progress
+  bars: events completed of the menu's list, in progress, regions revealed, items, the room); 2 "what next" (the room,
+  the in-progress events as cards: icon 2x, title, a here / this area / elsewhere plate, the room, the giver / hint;
+  tracked first, then this room by distance to Tomba, this area, other areas; a stats strip on stone); 3 dashboard
+  (2 x 2: vitality, equipped, progress, the next goal); 4 showcase like the item tab (Tomba's face 3x, fruit 2x, stats
+  and equipment on the left; on the right the completed count and bar over the in-progress cards, the first in the
+  blinking yellow frame, dragged / D-pad scrolled). Weapon / pants / accessories as `it_in_use` reads them.
 - Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
 - `--hud-bottom` (Android launcher: *HUD en la pantalla inferior*, default on when a secondary display exists; it is
   passed only with the second screen): while the panel is on (PC / headless: always; Android: while the Presentation polls

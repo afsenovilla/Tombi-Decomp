@@ -468,8 +468,10 @@ static void draw_in_progress(int x, int y, int w, int h) {
     }
 }
 
+static int page_status_alt(int play, int link);   /* panel_status.inc: PORT_PANEL_STATUS_STYLE 1..4 (trial) */
 static void page_map(int play, int link) {
     int W = pa_cw, H = pa_ch, top = 56, g = 6;
+    if (page_status_alt(play, link)) return;
     if (!play) { draw_map(8, top, W - 16, H - top - 8, -1); return; }
     if (W >= H) {
         int sw = W * 34 / 100, mw = W - 16 - sw - g, mh = (H - top - 8) * 56 / 100;
@@ -517,6 +519,7 @@ static int text_wrap(int x, int y, int h, int w, int lh, int maxl, int center, c
 #include "panel_events.inc"
 #include "panel_side.inc"
 #include "panel_items.inc"
+#include "panel_status.inc"
 
 static void layout(void);
 int panel_loading_screen(void);   /* runtime/panel_hud.c: the game's NOW LOADING until gameplay */

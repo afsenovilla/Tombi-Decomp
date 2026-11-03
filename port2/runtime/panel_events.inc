@@ -273,6 +273,7 @@ static void panel_action(int a) {
     if (page == PAGE_SIDE) { map_action(a); return; }
     if (page == PAGE_ITEMS) { void items_action_(int); items_action_(a); return; }
     if (page != PAGE_EVENTS && page != PAGE_MAP) return;
+    if (page == PAGE_MAP) { void st_action_(int); st_action_(a); }
     if (a == IN_SHOW_HIDDEN) { ev_show_hidden = !ev_show_hidden; ev_sel = ev_top = 0; return; }
     if (page != PAGE_EVENTS) return;
     if (ev_detail >= 0) { if (a == IN_BACK || a == IN_OK) ev_detail = -1; else if (a == IN_HIDE) ev_hide_toggle(ev_detail); else if (a == IN_PIN) ev_pin_toggle(ev_detail); return; }
@@ -313,6 +314,7 @@ static void panel_touch_canvas(int x, int y, int action) {   /* action: 0 down, 
     int id = -1;
     if (page == PAGE_SIDE && map_touch(x, y, action)) { touch_id = -1; return; }
     if (page == PAGE_ITEMS) { int items_touch_(int, int, int); if (items_touch_(x, y, action)) { touch_id = -1; return; } }
+    if (page == PAGE_MAP) { int st_touch_(int, int, int); if (st_touch_(x, y, action)) { touch_id = -1; return; } }
     for (int i = nhs - 1; i >= 0; i--) if (x >= hs[i].x && y >= hs[i].y && x < hs[i].x + hs[i].w && y < hs[i].y + hs[i].h) { id = hs[i].id; break; }
     if (action == 0) { touch_id = id; touch_t0 = port_frame; }
     else if (action == 1) { touch_long = port_frame - touch_t0 >= 30; if (id >= 0 && id == touch_id) panel_hit(id); touch_id = -1; touch_long = 0; }
