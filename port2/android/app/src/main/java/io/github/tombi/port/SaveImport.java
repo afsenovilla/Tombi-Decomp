@@ -123,26 +123,24 @@ final class SaveImport {
         return c == null || c.length != CARD || !at(c, 0, "MC") ? blankCard() : c;
     }
 
-    // GAME.selectedArea -> name (tools/save_import.py AREAS_EN, tools/tombi_save_editor.py)
-    static final String[] AREAS = {"Village of All Beginnings", "Forest / Watch Tower", "Caves / tunnels", "Phoenix Mountain",
-            "Trick Village area", "Baccus Village", "Dirt Motocross", null, "Baccus Lake", "Mushroom Village", "Deep Jungle",
-            "Lumberjack Town / Factory", null, "Pig Island", "Evil Pigs", null, "Stonetown / Clock Tower",
-            "Iron Town / Iron Castle", "Civilization Town", "Dwarf Village"};
-    // Spanish: the improved translation's names as the game's Map screen / the second screen give them (runtime/panel.c
-    // room_names: the map area of the room GAME.selectedArea / GAME.section).  REGIONS_ES[i] = map area name i (12 =
-    // area 14's first room); AREA_REGIONS_ES[area].charAt(section) = the region (hex digit); a section past the string
-    // takes section 0's.  The same tables as tools/save_import.py REGIONS_ES / AREA_REGIONS_ES.
+    // The place of a save as the game's Map screen / the second screen name it (runtime/panel.c room_names: the map area
+    // of the room GAME.selectedArea / GAME.section).  REGIONS_EN / REGIONS_ES[i] = map area name i of the English disc
+    // (D0SPSUB) / the improved Spanish translation (12 = area 14's first room, "Evil Pig Area One");
+    // AREA_REGIONS[area].charAt(section) = the region (hex digit); a section past the string takes section 0's.  The
+    // same tables as tools/save_import.py REGIONS_EN / REGIONS_ES / AREA_REGIONS.
+    static final String[] REGIONS_EN = {"Village of All Beginnings", "Dwarf Forest", "Mushroom Forest", "Phoenix's Mountain",
+            "Baccus Village", "Haunted Mansion", "Deep Jungle", "Village of Civilization", "Trick Village",
+            "Village of All Beginnings", "Dirt Motocross", "Phoenix's Mountain", "Evil Pig Area One"};
     static final String[] REGIONS_ES = {"Ciudad de todo principio", "Bosque de enanos", "Bosque de setas", "Montaña del Fénix",
             "Ciudad Baco", "Mansión encantada", "Jungla profunda", "Ciudad de civilización", "Ciudad de trucos",
             "Ciudad de todo principio", "Motocross sucio", "Montaña del Fénix", "Área Cerdiablo uno"};
-    static final String[] AREA_REGIONS_ES = {"000000", "11111", "111111", "333333", "55555555555555555555", "4444", "a", null,
-            "5522", "2222222", "666866688", "77777", null, "10", "c077739000", null, "7777777", "77777777770", "770", "11b"};
-    /** the place of a save: the improved Spanish translation's map name, or the English table; null if unknown */
+    static final String[] AREA_REGIONS = {"000000", "11111", "111111", "333333", "55555555555555555555", "4444", "a", null,
+            "5522", "2222222", "666866688", "77777", null, "10", "c077732000", null, "7777777", "77777777770", "770", "11b"};
+    /** the place of a save: the map name of the improved Spanish translation, or of the English disc; null if unknown */
     static String areaName(int area, int section, boolean es) {
-        if (!es) return area < AREAS.length ? AREAS[area] : null;
-        String r = area < AREA_REGIONS_ES.length ? AREA_REGIONS_ES[area] : null;
+        String r = area >= 0 && area < AREA_REGIONS.length ? AREA_REGIONS[area] : null;
         if (r == null) return null;
-        return REGIONS_ES[Character.digit(section >= 0 && section < r.length() ? r.charAt(section) : r.charAt(0), 16)];
+        return (es ? REGIONS_ES : REGIONS_EN)[Character.digit(section >= 0 && section < r.length() ? r.charAt(section) : r.charAt(0), 16)];
     }
     /** one line naming a save for the user (as save_import.save_info): its slot and, when the game data parses (a
      *  Tombi! save whose GAME checksum is right, docs/SAVE_FORMAT.md), the area Continue loads and the play time;
