@@ -5,34 +5,30 @@ Update this file whenever something lands or a task is decided. Newest first.
 ## Last release
 
 v0.1.1 (build of 9cee5ef). After it, on master: vitality fruit numbers 8-16 and segment colours (2528f81), warp
-destinations one-per-line (620495c).
+destinations one-per-line (620495c), event detail page + shared touch scroller (c8529a5).
 
 ## In progress / open
 
-1. **Second-screen event detail page redesign + smooth touch scrolling everywhere** (was being done by an agent at
-   hand-off; check `git log` for a commit about "event detail" / "scroller"; if absent, redo it):
-   - Detail page: top window = event icon 3x in a stone frame + title in the 16 px font (wrapped) + state; "Dónde" =
-     place plate (Aquí / Esta zona / Otra zona) on its own line, then area (8 px) and room (16 px) lines, NO route
-     graph, a "Ver en el mapa" plank that opens the Map tab there; "Quién / Pista" only if it adds something (never
-     repeat the title); bottom: big planks Seguir/Dejar de seguir and Ocultar/Mostrar + small Volver; no keyboard
-     help text on Android; no corner Tombi face. Style like the Items page.
-   - ONE shared touch scroller for every long list (Events lists, warp destinations, Items grid, any other): pixel
-     precise finger following, fling with time-based inertia, clamped, thin indicator, tap vs drag threshold, long
-     press kept, D-pad keeps the selection visible, no paging; render the panel every vblank while scrolling.
-2. **NTSC picture (`--picture ntsc`, opt-in, experimental)**: top-down areas (AREA02/05/08/19) draw sprites/scenery
+1. **NTSC picture (`--picture ntsc`, opt-in, experimental)**: top-down areas (AREA02/05/08/19) draw sprites/scenery
    out of step and movies flicker. An agent found the cause for top-down rooms (USA map strips start at the visible
    tile row, PAL 24 rows above; USA camera limits table MAIN0 0x8007B680; sprite cull 0xF1) but had not committed.
    The default picture is PAL at 60 Hz, so this does not block releases.
-3. **SCES-01330 disc (FR/DE/IT/NL)**: secret `GAME_FILES_URL_SCES01330` exists (GitHub Actions + cloud env var). Plan:
+2. **SCES-01330 disc (FR/DE/IT/NL)**: secret `GAME_FILES_URL_SCES01330` exists (GitHub Actions + cloud env var). Plan:
    download in a fresh session, extend `tools/subscreen_glyphs.json` (tab/leaf font glyph table, coordinates only)
    with those four languages as a separate per-disc table.
-4. Known crashes, both builds, from the debug area select: AREA17 section 0 and an AREA10 room. Not investigated.
-5. `tools/port_mods.py` and the save editor keep hand-made English area names that disagree with the game's map
+3. Known crashes, both builds, from the debug area select: AREA17 section 0 and an AREA10 room. Not investigated.
+4. `tools/port_mods.py` and the save editor keep hand-made English area names that disagree with the game's map
    (area 4 is "Haunted Mansion" on the map). Save import already uses the map names (REGIONS_EN / REGIONS_ES).
-6. Trick Village Spanish name: user decision pending.
+5. Trick Village Spanish name: user decision pending.
 
 ## Recently done (context)
 
+- Panel (c8529a5): event detail page redone as the Items showcase (icon 3x on stone, title 16 px + state; Dónde =
+  plate / area / room lines + "Ver en el mapa" when the marker is in the loaded room (Map tab centred on it, zoom 2);
+  Quién only when it adds something, else Pista, else no window; planks Volver / Seguir / Ocultar; no route graph,
+  no face, no key help on Android). One shared scroller (`Scroll`, panel.c) for the Events lists, the Items grid and
+  the warp destinations: pixel drag, time-based fling, clamp, indicator, no paging; `drag@...@N` spreads a swipe
+  over N vblanks. The Map tab still only shows the loaded room (events elsewhere get no map plank).
 - Android arm64 support through wasm2c; SDL/JNI calls on the thread's own stack; panel canvas handed to Android
   unscaled; short/char returns sign-extended (fixed vanishing scenery at the bending branch).
 - `--fps auto` turns interpolation off when the display is not faster than the game (fixed movie flicker on 60 Hz

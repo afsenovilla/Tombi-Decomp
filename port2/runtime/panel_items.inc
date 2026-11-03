@@ -217,9 +217,9 @@ static const char *it_name(int item, char *b, int n) {
 enum { RQ_NONE, RQ_USE, RQ_WARP, RQ_SORT };
 static volatile int it_rq, it_rq_item, it_rq_dest;
 static short it_lc[256], it_ly[256];   /* grid column / y (list pixels) of each entry, from the last draw */
-static int it_cols = 2, it_vx, it_vy, it_vw, it_vh, it_follow, it_drag, it_dy0, it_dlast;
-static float it_scroll, it_vel, it_s0;
-static int it_sel, it_warp = -1, it_wsel, it_wtop;   /* it_warp: the item asking for a destination */
+static int it_cols = 2, it_follow, it_wfollow;
+static Scroll it_sc, it_wsc;   /* the grid, the destinations (panel.c scroller) */
+static int it_sel, it_warp = -1, it_wsel;   /* it_warp: the item asking for a destination */
 static char it_msg[96]; static int it_msg_t, it_msg_bad;
 static void it_say(int bad, const char *s) { snprintf(it_msg, sizeof it_msg, "%s", s); it_msg_t = port_frame; it_msg_bad = bad; }
 
@@ -310,16 +310,17 @@ void port_panel_tick(void) {
 
 /* ---- drawing */
 #define IT_RH 18
-enum { HS_ITEM = 0x700, HS_ITOP = 0x800 };   /* HS_ITOP + 0 up, 1 down, 2 sort, 3 action, 4 cancel, 0x10.. destinations */
+enum { HS_ITEM = 0x700, HS_ITOP = 0x800 };   /* HS_ITOP + 2 sort, 3 action, 4 cancel, 0x10.. destinations */
 static void it_confirm(int k) {
     if (k < 0 || k >= it_n) return;
     int item = it_items[k]; const char *why = it_reason(item);
     if (why) { it_say(1, why); return; }
-    if (item == 7 || item == 14) { it_warp = item; it_wsel = it_wtop = 0; return; }
+    if (item == 7 || item == 14) { it_warp = item; it_wsel = 0; scr_reset(&it_wsc); return; }
     it_rq_item = item; it_rq = RQ_USE;
 }
 /* the destinations of Barón / the warp item, one thing per line as in the event list: the area (8 px) and under it the
-   room (16 px), both wrapped, never cut; rows of different heights, whole rows only, the selected one on screen */
+   room (16 px), both wrapped, never cut; rows of different heights scrolled as one strip (drag / fling, cut at the
+   window's edges), the D-pad's selection kept on screen */
 static int warp_row(const u8 *dd, int w, const char **an, const char **rn) {
     int area = 0, sec = 0; dest_of(dd[0], dd[1], &area, &sec);
     *an = place_area(area, sec); *rn = place_room(area, sec);
@@ -330,22 +331,29 @@ static void it_page_warp(int x, int y, int w, int h) {
     u8 d[81][3]; int n = it_dests(d), rh[81]; const char *an, *rn;
     window_(x, y, w, h);
     pa_text(x + 10, y + 6, 16, T("Where to?", "\xBF" "Ad\xF3nde?"), C_RED, C_REDE);
-    int ly = y + 26, avail = h - 34, tw = w - 24;
+    int ly = y + 26, tw = w - 24;
     for (int i = 0; i < n; i++) rh[i] = warp_row(d[i], tw, &an, &rn);
     if (it_wsel >= n) it_wsel = n - 1; if (it_wsel < 0) it_wsel = 0;
-    if (it_wtop > it_wsel) it_wtop = it_wsel; if (it_wtop < 0) it_wtop = 0;
-    for (;;) { int u = 0; for (int i = it_wtop; i <= it_wsel; i++) u += rh[i]; if (u <= avail || it_wtop >= it_wsel) break; it_wtop++; }
+    int cy[82]; cy[0] = 0; for (int i = 0; i < n; i++) cy[i + 1] = cy[i] + rh[i];
+    int vy = ly - 2, vh = y + h - 8 - vy;
+    scr_view(&it_wsc, x + 6, vy, w - 12, vh, n ? cy[n] + 2 : 0);
+    if (it_wfollow && n) { scr_show(&it_wsc, cy[it_wsel], cy[it_wsel + 1] + 2); it_wfollow = 0; }
     if (!n) pa_text(x + 10, ly, 16, T("No place visited yet", "Ning\xFAn lugar visitado"), C_MUTED, C_EDGE);
-    int used = 0;
-    for (int i = it_wtop; i < n && used + rh[i] <= avail; used += rh[i], i++) {
-        int ry = ly + used, sel = i == it_wsel;
+    int so = scr_y(&it_wsc), rw = w - 12 - (it_wsc.total > vh ? 8 : 0);
+    int sx0 = pa_clip_x0, sy0 = pa_clip_y0, sx1 = pa_clip_x1, sy1 = pa_clip_y1;
+    pa_clip_x0 = x + 6; pa_clip_y0 = vy; pa_clip_x1 = x + w - 6; pa_clip_y1 = vy + vh;
+    for (int i = 0; i < n; i++) {
+        int ry = vy + 2 + cy[i] - so, sel = i == it_wsel;
+        if (ry + rh[i] <= vy || ry - 1 >= vy + vh) continue;
         warp_row(d[i], tw, &an, &rn);
-        if (sel) pa_fill(x + 6, ry - 1, w - 12, rh[i] - 1, C_SEL);
+        if (sel) pa_fill(x + 6, ry - 1, rw, rh[i] - 1, C_SEL);
         int l = text_wrap(x + 12, ry, 8, tw, 10, 3, 0, an, sel ? C_WHITE : C_RED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
         if (rn) text_wrap(x + 12, ry + l * 10, 16, tw, 16, 3, 0, rn, sel ? C_WHITE : C_DARK, sel ? C_SEL : C_EDGE);
-        hot(x + 6, ry - 1, w - 12, rh[i] - 1, HS_ITOP + 0x10 + i);
+        int hy0 = ry - 1 < vy ? vy : ry - 1, hy1 = ry - 2 + rh[i] > vy + vh ? vy + vh : ry - 2 + rh[i];
+        if (hy1 - hy0 > 6) hot(x + 6, hy0, rw, hy1 - hy0, HS_ITOP + 0x10 + i);
     }
-    if (it_wtop > 0) pa_text(x + w - 24, y + 6, 16, "^", C_DARK, C_EDGE);
+    pa_clip_x0 = sx0; pa_clip_y0 = sy0; pa_clip_x1 = sx1; pa_clip_y1 = sy1;
+    scr_bar(&it_wsc, x + w - 13);
 }
 /* ---- drawing: a showcase of the selected item on the left (its icon at 4x in a stone frame, name, category,
    description, one status line, Ordenar and the action plank), every item as a grid of icons on stone on the right,
@@ -456,16 +464,10 @@ static void page_items(int play) {
     int cols = 3, ch = 62, vx = rx + 6, vy = top + 6, vw = rw - 12 - 6, vh = h - 12, cw = vw / cols, gx = vx + (vw - cols * cw) / 2;
     for (int k = 0; k < it_n; k++) { it_lc[k] = (short)(k % cols); it_ly[k] = (short)(k / cols * ch); }
     int total = (it_n + cols - 1) / cols * ch;
-    it_cols = cols; it_vx = vx; it_vy = vy; it_vw = vw; it_vh = vh;
-    if (it_follow && it_n) {   /* the controller moved the cursor: keep it in view */
-        if (it_ly[it_sel] < it_scroll) it_scroll = (float)it_ly[it_sel];
-        if (it_ly[it_sel] + ch > it_scroll + vh) it_scroll = (float)(it_ly[it_sel] + ch - vh);
-        it_follow = 0;
-    }
-    if (!it_drag) { it_scroll += it_vel; it_vel *= .9f; if (it_vel > -.3f && it_vel < .3f) it_vel = 0; }
-    float mx = total > vh ? (float)(total - vh) : 0;
-    if (it_scroll > mx) { it_scroll = mx; it_vel = 0; } if (it_scroll < 0) { it_scroll = 0; it_vel = 0; }
-    int so = (int)it_scroll;
+    it_cols = cols;
+    scr_view(&it_sc, vx, vy, vw, vh, total);
+    if (it_follow && it_n) { scr_show(&it_sc, it_ly[it_sel], it_ly[it_sel] + ch); it_follow = 0; }   /* the controller moved the cursor */
+    int so = scr_y(&it_sc);
     int sx0 = pa_clip_x0, sy0 = pa_clip_y0, sx1 = pa_clip_x1, sy1 = pa_clip_y1;
     pa_clip_x0 = vx; pa_clip_y0 = vy; pa_clip_x1 = vx + vw; pa_clip_y1 = vy + vh;
     for (int k = 0; k < it_n; k++) {
@@ -480,13 +482,7 @@ static void page_items(int play) {
     }
     pa_clip_x0 = sx0; pa_clip_y0 = sy0; pa_clip_x1 = sx1; pa_clip_y1 = sy1;
     if (!it_n) pa_text_ol(vx + 6, vy + 6, 16, T("No items", "Sin objetos"), C_WHITE, C_WOODE, C_DARK);
-    if (total > vh) {   /* a thin scroll indicator on the grid's right edge; its halves page up / down */
-        int bx = rx + rw - 10, bh = vh * vh / total; if (bh < 16) bh = 16;
-        pa_fill(bx - 1, vy - 1, 5, vh + 2, C_DARK);
-        pa_fill(bx, vy, 3, vh, RGB(110, 84, 70));
-        pa_fill(bx, vy + (int)((vh - bh) * (it_scroll / mx)), 3, bh, C_YELLOW);
-        hot(bx - 8, vy, 14, vh / 2, HS_ITOP); hot(bx - 8, vy + vh / 2, 14, vh - vh / 2, HS_ITOP + 1);
-    }
+    scr_bar(&it_sc, rx + rw - 10);   /* the thin scroll indicator on the grid's right edge */
 }
 
 /* ---- input (panel_events.inc routes the tab's keys and touches here) */
@@ -497,7 +493,7 @@ static void it_warp_go(void) {
 }
 static void items_action(int a) {
     if (it_warp >= 0) {
-        if (a == IN_UP) it_wsel--; else if (a == IN_DOWN) it_wsel++;
+        if (a == IN_UP) { it_wsel--; it_wfollow = 1; } else if (a == IN_DOWN) { it_wsel++; it_wfollow = 1; }
         else if (a == IN_OK) it_warp_go(); else if (a == IN_BACK) it_warp = -1;
         return;
     }
@@ -510,35 +506,15 @@ static void items_action(int a) {
     }
     else if (a == IN_OK) it_confirm(it_sel);
     if (it_sel < 0) it_sel = 0; if (it_sel >= it_n) it_sel = it_n - 1;
-    it_follow = 1; it_vel = 0;
+    it_follow = 1;
 }
 static void items_hit(int id) {
     if ((id & ~0xFF) == HS_ITEM) { int k = id & 0xFF; if (k == it_sel) it_confirm(k); else it_sel = k; return; }
     int k = id - HS_ITOP;
-    if (k == 0) { it_scroll -= it_vh * .8f; it_vel = 0; }   /* a page of the grid (clamped when drawn) */
-    else if (k == 1) { it_scroll += it_vh * .8f; it_vel = 0; }
-    else if (k == 2) it_rq = RQ_SORT;
+    if (k == 2) it_rq = RQ_SORT;
     else if (k == 3) { if (it_warp >= 0) it_warp_go(); else it_confirm(it_sel); }
     else if (k == 4) it_warp = -1;
     else if (k >= 0x10) { if (it_wsel == k - 0x10) it_warp_go(); else it_wsel = k - 0x10; }
 }
 void items_action_(int a) { items_action(a); }   /* named from panel_events.inc, which comes first */
 void items_hit_(int id) { items_hit(id); }
-/* a drag in the grid scrolls it and flings on release (1: the touch was a drag, not a tap) */
-int items_touch_(int x, int y, int action) {
-    if (it_warp >= 0) return 0;
-    if (action == 0) {
-        it_drag = -1; it_vel = 0;
-        if (x >= it_vx && y >= it_vy && x < it_vx + it_vw && y < it_vy + it_vh) { it_drag = 0; it_dy0 = it_dlast = y; it_s0 = it_scroll; }
-        return 0;
-    }
-    if (it_drag < 0) return 0;
-    if (action == 2) {
-        if (!it_drag && abs(y - it_dy0) > 10) it_drag = 1;
-        if (it_drag) { it_scroll = it_s0 - (y - it_dy0); it_vel = it_vel * .5f + (it_dlast - y) * .5f; it_dlast = y; return 1; }
-        return 0;
-    }
-    int was = it_drag == 1; it_drag = -1;
-    if (!was) it_vel = 0;
-    return was;
-}

@@ -1,10 +1,10 @@
 /* Second screen panel: the event browser (included by panel.c).  Every event of the pause menu's Events list (SUBSCREEN_EVENT_ORDER, ids up to 0xBF, in its order) with its icon and
- * title from the user's disc, filtered by state (in progress 1..0xFE, done 0xFF, not started 0), and a detail page:
- * where (area / room names and the map graph with a marker on the room), who / what starts it, its state.  Where an
+ * title from the user's disc, filtered by state (in progress 1..0xFE, done 0xFF, not started 0), scrolled by touch as
+ * one strip (panel.c Scroll), and a detail page (event_detail: where, who / hint, Track / Hide).  Where an
  * event happens comes from panel_eventmap.h, generated from the decomp by port2/tools/gen_panel_events.py (ids and
  * coordinates only; docs/EVENTS_MAP.md lists the coverage); unknown places show "location unknown".
  * Input: touch (Android: nativePanelTouch from the Presentation), the mouse in the PC window, and the keyboard of the
- * PC window (arrows, Enter, Backspace, Q / E: tabs, H: hide / show the selected event, V: list the hidden ones).
+ * PC window (arrows, Enter, Backspace, Q / E: tabs, H: hide / show the selected event, P: track it, V: list the hidden ones).
  * Hidden events (the Ocultar plank, a long press on a row, H): left out of the lists, the Status tab's "in progress" box and
  * the map markers until "Ocultos: s\xED" lists them again (dimmed); kept in panel_hidden.txt next to the memory cards
  * (the event ids, one line). */
@@ -13,7 +13,7 @@
 
 enum { F_PROGRESS, F_DONE, F_PENDING, NFILTERS };
 static int map_action(int a), map_touch(int x, int y, int action); static void map_hit(int k);   /* panel_side.inc */
-static int ev_filter, ev_sel, ev_top, ev_detail = -1;
+static int ev_filter, ev_sel, ev_detail = -1;
 
 /* ---------------------------------------------------------------- hidden events (panel_hidden.txt) */
 static u8 ev_hid[EVENTS]; static int ev_hid_loaded, ev_show_hidden;
@@ -118,7 +118,7 @@ static const char *filter_name(int f) {
     return f == F_PROGRESS ? T("In progress", "En curso") : f == F_DONE ? T("Completed", "Completados") : T("Not started", "Pendientes");
 }
 static const char *state_name(int f) {
-    return f == F_PROGRESS ? T("In progress", "En curso") : f == F_DONE ? T("Completed", "Completado") : T("Not started", "Sin empezar");
+    return f == F_PROGRESS ? T("In progress", "En curso") : f == F_DONE ? T("Completed", "Completado") : T("Not started", "Pendiente");
 }
 /* the area name of the map screen for (area, section) */
 static const char *place_area(int area, int sec) {
@@ -229,43 +229,49 @@ static void ev_row(int e, EvRow *R) {
     R->pl = text_lines(8, W - 60 - R->tr, 6, R->p);
     R->h = 30 + (R->tl - 1) * 16 + (R->pl - 1) * 10 + (R->pw ? 11 : 0);
 }
-static int ev_vis = 5;   /* rows on the page drawn last (the page up / down strips move by it) */
+/* the list scrolls as one strip of rows (panel.c scroller): pixel for pixel under the finger, flung, the rows cut
+   cleanly at the window's edges; the D-pad moves the selection and the strip follows it */
+static Scroll ev_sc; static int ev_follow;
+static void ev_reset(void) { ev_sel = 0; scr_reset(&ev_sc); }
 static void event_list(void) {
-    int ids[EVENTS], n = ev_list(ids), W = pa_cw, H = pa_ch, rh[EVENTS];
+    int ids[EVENTS], n = ev_list(ids), W = pa_cw, H = pa_ch, ry[EVENTS + 1];
     char b[96]; static EvRow R;
     filters(56);
     int y0 = 84, rows = (H - y0 - 56) / 30, avail = rows * 30;
     window_(8, y0 - 2, W - 16, avail + 24);
-    for (int i = 0; i < n; i++) { ev_row(ids[i], &R); rh[i] = R.h; }
+    ry[0] = 0;
+    for (int i = 0; i < n; i++) { ev_row(ids[i], &R); ry[i + 1] = ry[i] + R.h; }
     if (ev_sel >= n) ev_sel = n - 1; if (ev_sel < 0) ev_sel = 0;
-    if (ev_top > ev_sel) ev_top = ev_sel; if (ev_top < 0) ev_top = 0;
-    /* whole rows only: the selected one on the page, and the last page full */
-    for (;;) { int u = 0; for (int i = ev_top; i <= ev_sel; i++) u += rh[i]; if (u <= avail || ev_top >= ev_sel) break; ev_top++; }
-    for (;;) { int u = 0; for (int i = ev_top - 1; i < n; i++) u += rh[i]; if (ev_top <= 0 || u > avail) break; ev_top--; }
-    /* page up / down strips first: the rows registered after them win where they overlap (the top of row 1) */
-    hot(8, y0 - 2, W - 16, 20, HS_PREV); hot(8, y0 + avail, W / 2, 24, HS_NEXT);
+    int vx = 12, vy = y0 + 1, vw = W - 24, vh = avail + 1;
+    scr_view(&ev_sc, vx, vy, vw, vh, n ? ry[n] + 2 : 0);
+    if (ev_follow && n) { scr_show(&ev_sc, ry[ev_sel], ry[ev_sel + 1] + 2); ev_follow = 0; }
     if (!n) pa_text(20, y0 + 8, 16, T("No events here", "No hay eventos"), C_MUTED, C_EDGE);
-    int used = 0, r = ev_top;
-    for (; r < n && used + rh[r] <= avail; used += rh[r], r++) {
-        int e = ids[r], y = y0 + 4 + used, h = rh[r], sel = r == ev_sel, st = ev_state(e);
+    int so = scr_y(&ev_sc), bar = ev_sc.total > vh, rw = W - 24 - (bar ? 8 : 0);
+    int cx0 = pa_clip_x0, cy0 = pa_clip_y0, cx1 = pa_clip_x1, cy1 = pa_clip_y1;
+    pa_clip_x0 = vx; pa_clip_y0 = vy; pa_clip_x1 = vx + vw; pa_clip_y1 = vy + vh;
+    for (int r = 0; r < n; r++) {
+        int top = vy + 1 + ry[r] - so, h = ry[r + 1] - ry[r];
+        if (top + h <= vy || top >= vy + vh) continue;
+        int e = ids[r], y = top + 2, sel = r == ev_sel, st = ev_state(e);
         ev_row(e, &R);
-        if (sel) pa_fill(12, y - 2, W - 24, h - 1, C_SEL);
-        hot(12, y - 2, W - 24, h - 1, HS_ROW + r);
+        if (sel) pa_fill(12, y - 2, rw, h - 1, C_SEL);
+        {   int hy0 = top < vy ? vy : top, hy1 = top + h - 1 > vy + vh ? vy + vh : top + h - 1;
+            if (hy1 - hy0 > 6) hot(12, hy0, rw, hy1 - hy0, HS_ROW + r); }
         int pend = st == F_PENDING, hid = ev_hidden(e), py = y + (R.tl - 1) * 16;
         pa_event_icon(16, y + 5, e, pend ? PA_DIM : hid ? PA_SHADE : 0);
         text_wrap(46, y - 1, 16, W - 60 - R.tr, 16, 4, 0, R.t, sel ? C_WHITE : hid ? C_MUTED : st == F_DONE ? C_GREEN : C_DARK, sel ? RGB(60, 110, 50) : C_EDGE);
         if (st == F_PROGRESS) dist_plate(46, py + 15, e);
-        if (R.tr) pin_mark(W - 30, y + 2, sel ? C_WHITE : C_RED);
+        if (R.tr) pin_mark(W - 30 - (bar ? 6 : 0), y + 2, sel ? C_WHITE : C_RED);
         text_wrap(46, py + (R.pw ? 28 : st == F_PROGRESS ? 17 : 16), 8, W - 60 - R.tr, 10, 6, 0, R.p, sel ? C_WHITE : st == F_PROGRESS ? C_RED8 : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
     }
-    ev_vis = r - ev_top > 1 ? r - ev_top : 1;
+    pa_clip_x0 = cx0; pa_clip_y0 = cy0; pa_clip_x1 = cx1; pa_clip_y1 = cy1;
+    scr_bar(&ev_sc, W - 19);
     int by = y0 + avail + 4;
     snprintf(b, sizeof b, T("%d of %d", "%d de %d"), n ? ev_sel + 1 : 0, n);   /* the 16 px font has no '/' */
     pa_text(W - 24 - pa_text_w(16, b), by, 16, b, C_DARK, C_EDGE);
     int s, d; count_events(&s, &d);
     snprintf(b, sizeof b, T("%d started, %d completed", "%d empezados, %d completados"), s + d, d);
     pa_text(20, by + 4, 8, b, C_MUTED8, RGB(230, 200, 190));
-    if (ev_top > 0) { pa_text(W - 40, y0 + 2, 16, "^", C_DARK, C_EDGE); }
     /* [Ocultar / Mostrar] the selected event   [Ocultos: no / s\xED (n)] */
     int py = y0 - 2 + avail + 28, pw2 = (W - 20) / 2, cur = n ? ids[ev_sel] : -1;
     plank(8, py, pw2); hot(8, py, pw2, 24, HS_FILTER + 8);
@@ -275,64 +281,127 @@ static void event_list(void) {
     plank_text(W - 8 - pw2 / 2, py + 4, b, ev_show_hidden);
 }
 
-static void event_detail(int e) {
-    char b[160]; int W = pa_cw, H = pa_ch, st = ev_state(e), pend = st == F_PENDING;
+/* the detail page, laid out as the Items page's showcase: a top window with the icon at 3x in a stone frame, the title
+   (16 px, wrapped) and the state under it; "Where" (the place plate, the area in 8 px, the room in 16 px, each on its
+   own line, and "Show on the map" when the map tab can show its marker); "Who" (the giver of panel_givers.h) or, when
+   that is unknown or only repeats the title, "Hint" (what starts it: a chest, an item, someone or something in the
+   place); and three planks twice as high: Back, Track / Stop tracking, Hide / Show.  Nothing is cut: every text wraps
+   and the windows take the height they need. */
+static void plank_h(int x, int y, int w, int h);                  /* panel_items.inc */
+static int map_shows_event(int e); static void map_focus(int e);  /* panel_side.inc */
+static int ev_same_text(const char *a, const char *b) {   /* b is a (case aside) or is inside it: it says nothing new */
+    int na = (int)strlen(a), nb = (int)strlen(b);
+    for (int i = 0; i + nb <= na; i++) {
+        int k = 0;
+        while (k < nb && tolower((unsigned char)a[i + k]) == tolower((unsigned char)b[k])) k++;
+        if (k == nb) return 1;
+    }
+    return 0;
+}
+static const char *kind_hint(int k) {   /* what starts an event, when no one is named for it (a scene says nothing) */
+    switch (k) {
+    case EK_NPC: return T("Someone in this place", "Alguien de este lugar");
+    case EK_CHEST: return T("A chest", "Un cofre");
+    case EK_ITEM: return T("An item", "Un objeto");
+    case EK_OBJECT: return T("Something in this place", "Algo de este lugar");
+    default: return NULL;
+    }
+}
+/* a plank twice as high: the label in the 24 px event-title letters when they have all of it and it fits (mode 0), else
+   the 16 px font pixel doubled (1), else 16 px, wrapped (2: never cut).  ev_plank_mode: the mode a label needs. */
+static int ev_plank_mode(int w, const char *s) { return pa_has_glyphs(24, s) && pa_text_w(24, s) <= w - 16 ? 0 : 2 * pa_text_w(16, s) <= w - 16 ? 1 : 2; }
+static void ev_plank(int x, int y, int w, int h, const char *s, int mode, int id) {
+    plank_h(x, y, w, h); hot(x, y, w, h, id);
+    u32 o = pa_outline; pa_outline = C_DARK;
+    if (mode < ev_plank_mode(w, s)) mode = ev_plank_mode(w, s);
+    if (!mode) { int tw = pa_text_w(24, s); pa_text_scaled(x + w / 2 - tw / 2, y + (h - 24) / 2, 24, s, C_WHITE, C_WOODE, 1, 0); }
+    else if (mode == 1) { int tw = 2 * pa_text_w(16, s); pa_text_scaled(x + w / 2 - tw / 2, y + (h - 32) / 2, 16, s, C_WHITE, C_WOODE, 2, 0); }
+    else { int nl = text_lines(16, w - 12, 3, s); text_wrap(x + 6, y + (h - nl * 16) / 2 + 1, 16, w - 12, 16, 3, 1, s, C_WHITE, C_WOODE); }
+    pa_outline = o;
+}
+/* "Where" in (x, y, w, h); h 0: only measures.  Returns the height it needs. */
+static int ev_where(int x, int y, int w, int h, int e) {
     const PanelEventLoc *L = ev_loc(e);
-    filters(56);
-    /* title: the icon x2 and the 24 px event-title letters */
-    int y = 84, th = 38;   /* the title box grows when the title needs more than two lines (never cut) */
+    int tw = w - 16, cy = y + 24, map = map_shows_event(e), plate = dist_name(ev_dist(e)) != NULL;
+    if (h) pa_text(x + 8, y + 5, 16, T("Where", "D\xF3nde"), C_RED, C_REDE);
+    if (plate) { if (h) dist_plate(x + 8, cy, e); cy += 16; }
+    const char *ar = L ? place_area(L->area, L->sec) : NULL, *rm = L && L->area != 254 ? place_room(L->area, L->sec) : NULL;
+    if (rm && ar && !strcmp(rm, ar)) rm = NULL;
+    wrap_dry = !h;
+    if (!ar && !rm) cy += 16 * text_wrap(x + 8, cy, 16, tw, 16, 6, 0, L ? T("Zone not extracted yet", "Zona a\xFAn sin extraer") : T("Not known yet where it happens", "A\xFAn no se sabe d\xF3nde ocurre"), C_MUTED, C_EDGE);
+    else if (ar && rm) {
+        cy += 10 * text_wrap(x + 8, cy, 8, tw, 10, 6, 0, ar, C_RED8, C_REDE) + 3;
+        cy += 16 * text_wrap(x + 8, cy, 16, tw, 16, 6, 0, rm, C_DARK, C_EDGE);
+    } else cy += 16 * text_wrap(x + 8, cy, 16, tw, 16, 6, 0, ar ? ar : rm, C_DARK, C_EDGE);
+    wrap_dry = 0;
+    if (h && map) {
+        int py = y + h - 8 - 24;
+        plank(x + 8, py, w - 16); hot(x + 8, py, w - 16, 24, HS_FILTER + 11);
+        plank_text(x + w / 2, py + 4, T("Show on the map", "Ver en el mapa"), 0);
+    }
+    return cy - y + 8 + (map ? 30 : 0);
+}
+static void event_detail(int e) {
+    char b[160]; int W = pa_cw, H = pa_ch, st = ev_state(e), pend = st == F_PENDING, pn = ev_pinned(e), hid = ev_hidden(e);
+    const PanelEventLoc *L = ev_loc(e);
+    int top = 56;
+    /* the top window: the icon x3 in a stone frame | the title, the state */
     const char *t = pend ? "? ? ?" : ev_title(e, b, sizeof b);
-    int tl = pa_text_w(16, t) <= W - 64 ? 1 : text_lines(16, W - 64, 5, t);
-    if (tl > 2) th = tl * 17 + 4;
-    window_(8, y, W - 16, th);
-    hot(8, y, W - 16, th, HS_BACK);
-    {   pa_event_icon(16, y + th / 2 - 8, e, pend ? PA_DIM : 0);
-        if (pa_text_w(24, t) <= W - 60) pa_text(48, y + 7, 24, t, C_WHITE, C_DARK);
-        else if (tl == 1) pa_text(48, y + 11, 16, t, C_DARK, C_EDGE);
-        else text_wrap(48, y + 2, 16, W - 64, 17, tl, 0, t, C_DARK, C_EDGE);
+    int tx = 16 + 62 + 10, tw = W - 18 - tx, tl = text_lines(16, tw, 6, t);
+    const char *sn = state_name(st), *hn = hid ? T("Hidden", "Oculto") : NULL;
+    int sw = pa_text_w(16, sn), hl = hn && sw + 16 + (pn ? 14 : 0) + pa_text_w(16, hn) > tw;   /* "Oculto" after the state, or under it */
+    int blk = tl * 17 + 3 + 16 + (hl ? 17 : 0), th = blk + 16 > 74 ? blk + 16 : 74;
+    window_(8, top, W - 16, th);
+    frame_(16, top + (th - 62) / 2, 62, 62); stone(21, top + (th - 62) / 2 + 5, 52, 52);
+    {   int iw = pa_event_icon_w(e), ih = pa_event_icon_h(e); if (iw <= 0) iw = 16; if (ih <= 0) ih = 16;
+        int sc = (iw > ih ? iw : ih) * 3 <= 52 ? 3 : 2;   /* 3x, 2x for the big ones (24 x 24): inside the stone */
+        pa_event_icon(47 - iw * sc / 2, top + th / 2 - ih * sc / 2, e, PA_OUTLINE | mk_flag(sc) | (pend ? PA_DIM : 0)); }
+    int ty = top + (th - blk) / 2;
+    text_wrap(tx, ty, 16, tw, 17, 6, 0, t, pend ? C_MUTED : C_DARK, C_EDGE);
+    ty += tl * 17 + 3;
+    pa_text(tx, ty, 16, sn, st == F_PROGRESS ? C_ORANGE : st == F_DONE ? C_GREEN : C_MUTED, C_REDE);
+    if (pn) pin_mark(tx + sw + 8, ty + 1, C_RED);   /* tracked: the list's red pin after the state */
+    if (hn) pa_text(hl ? tx : tx + sw + 16 + (pn ? 14 : 0), hl ? ty + 17 : ty, 16, hn, C_MUTED, C_EDGE);
+    /* the planks: Back (small), Track, Hide */
+    int bh = 48, by = H - 8 - bh, bk = W >= 400 ? 84 : 72, bw = (W - 16 - bk - 8) / 2;
+    const char *l1 = pn ? T("Stop tracking", "Dejar de seguir") : T("Track", "Seguir"), *l2 = hid ? T("Show", "Mostrar") : T("Hide", "Ocultar");
+    int m1 = ev_plank_mode(bw, l1), m2 = ev_plank_mode(bw, l2), md = m1 > m2 ? m1 : m2;   /* the pair in one style */
+    ev_plank(8, by, bk, bh, T("Back", "Volver"), 2, HS_BACK);
+    ev_plank(8 + bk + 4, by, bw, bh, l1, md, HS_FILTER + 10);
+    ev_plank(W - 8 - bw, by, bw, bh, l2, md, HS_FILTER + 8);
+    /* above them: the last message (4 events tracked already), else on the PC the keys when they fit one line */
+    int mb = by - 4;
+    if (pin_msg_t && port_frame - pin_msg_t < 150) {
+        int nl = text_lines(8, W - 32, 3, pin_msg);
+        mb -= nl * 10 + 4; text_wrap(16, mb + 2, 8, W - 32, 10, 3, 0, pin_msg, C_RED8, C_REDE);
     }
-    y += th + 4;
-    int ww = W * 58 / 100, wh = H - y - 70;
-    if (wh < 110) wh = 110;
-    /* where */
-    window_(8, y, ww, wh);
-    pa_text(16, y + 5, 16, T("Where", "D\xF3nde"), C_DARK, C_EDGE);
-    const char *ar = L ? place_area(L->area, L->sec) : NULL, *rm = L ? place_room(L->area, L->sec) : NULL;
-    if (ar) {
-        snprintf(b, sizeof b, "%s%s%s", ar, rm ? "  -  " : "", rm ? rm : "");
-        if (rm && text_lines(8, ww - 20, 2, b) > 1) snprintf(b, sizeof b, "%s  -\n%s", ar, rm);   /* the room on its own line */
-        int nl = text_wrap(16, y + 22, 8, ww - 20, 10, 6, 0, b, C_RED8, C_REDE);
-        int l = L->area < 20 && L->sec < 24 ? roomlink[L->area][L->sec] : -1;
-        for (int s = 0; L->area < 20 && s < 24 && l < 0; s++) l = roomlink[L->area][s];   /* room not known: the area */
-        map_mark_link = l; map_mark_ev = e;
-        draw_map(12, y + 22 + nl * 10, ww - 8, wh - 26 - nl * 10, -1);
-        map_mark_link = -1;
-    } else {
-        text_wrap(16, y + 26, 16, ww - 20, 18, 5, 0, T("The zone of this event is not extracted from the game data yet", "La zona de este evento a\xFAn no se ha extra\xED""do de los datos del juego"), C_MUTED, C_EDGE);
+#ifndef __ANDROID__
+    else {
+        const char *k = T("Backspace: back    P: track    H: hide", "Retroceso: volver    P: seguir    H: ocultar");
+        if (pa_text_w(8, k) <= W - 32) { mb -= 14; pa_text(16, mb + 3, 8, k, C_MUTED8, RGB(230, 200, 190)); }
     }
-    /* who */
-    int wx = 8 + ww + 6, wwid = W - 8 - wx;
-    window_(wx, y, wwid, wh);
-    pa_text(wx + 8, y + 5, 16, T("Who", "Qui\xE9n"), C_DARK, C_EDGE);
-    const char *kn = ev_giver(e) ? ev_giver(e) : L ? kind_name(L->kind) : NULL;
-    if (kn && !pend) {
-        text_wrap(wx + 8, y + 26, 16, wwid - 16, 17, 5, 0, kn, C_DARK, C_EDGE);
-    } else pa_text(wx + 8, y + 26, 16, "? ? ?", C_MUTED, C_EDGE);
-    face(wx + wwid - 34, y + wh - 34);
-    /* state */
-    int sy = y + wh + 4;
-    window_(8, sy, W - 16, H - sy - 6);
-    pa_text(16, sy + 6, 16, T("State", "Estado"), C_DARK, C_EDGE);
-    pa_text(16 + pa_text_w(16, T("State", "Estado")) + 16, sy + 6, 16, state_name(st), st == F_PROGRESS ? C_ORANGE : st == F_DONE ? C_GREEN : C_MUTED, C_REDE);
-    {   int bw = 124, bx = W - 16 - bw, pn = ev_pinned(e);
-        plank(bx, sy + 4, bw); hot(bx, sy + 4, bw, 24, HS_FILTER + 10);
-        plank_text(bx + bw / 2 + 8, sy + 8, pn ? T("Unpin", "Quitar") : T("Track", "Seguir"), pn);
-        pin_mark(bx + 12, sy + 9, pn ? C_YELLOW : C_WHITE);
-        if (ev_hidden(e)) pa_text(bx - 10 - pa_text_w(16, T("Hidden", "Oculto")), sy + 6, 16, T("Hidden", "Oculto"), C_MUTED, C_REDE);
-        if (pin_msg_t && port_frame - pin_msg_t < 150) text_wrap(16, sy + 26, 8, W - 32, 10, 2, 0, pin_msg, C_RED8, C_REDE);
+#endif
+    /* who gives it, unless that only repeats the title; else the hint (what starts it); else no window */
+    const char *who = pend ? NULL : ev_giver(e), *lab = T("Who", "Qui\xE9n");
+    if (who && ev_same_text(t, who)) who = NULL;
+    if (!who && !pend && L) { who = kind_hint(L->kind); lab = T("Hint", "Pista"); }
+    int my = top + th + 4, mh = mb - my;
+    if (!who) { window_(8, my, W - 16, mh); ev_where(8, my, W - 16, mh, e); return; }
+    if (W >= 400) {   /* side by side, unless "Where" would not fit its column */
+        int dw = (W - 16 - 4) * 56 / 100, ww = W - 16 - 4 - dw, wx = 8 + dw + 4;
+        if (ev_where(8, my, dw, 0, e) <= mh && 24 + text_lines(16, ww - 16, 9, who) * 16 + 6 <= mh) {
+            window_(8, my, dw, mh); ev_where(8, my, dw, mh, e);
+            window_(wx, my, ww, mh);
+            pa_text(wx + 8, my + 5, 16, lab, C_RED, C_REDE);
+            text_wrap(wx + 8, my + 24, 16, ww - 16, 16, 9, 0, who, C_DARK, C_EDGE);
+            return;
+        }
     }
-    if (!(pin_msg_t && port_frame - pin_msg_t < 150))
-        text_wrap(16, sy + 26, 8, W - 32, 10, (H - 6 - sy - 26) / 10, 0, T("Back: tap the title or press Backspace.  Hide / show: H.  Track: P, or a long press on its row in the list", "Volver: toca el t\xEDtulo o pulsa Retroceso.  Ocultar / mostrar: H.  Seguir: P, o mant\xE9n pulsada su fila en la lista"), C_MUTED8, RGB(230, 200, 190));
+    int wl = text_lines(16, W - 32, 6, who), wh = 24 + wl * 16 + 8, dh = mh - wh - 4;   /* one above the other */
+    window_(8, my, W - 16, dh); ev_where(8, my, W - 16, dh, e);
+    window_(8, my + dh + 4, W - 16, wh);
+    pa_text(16, my + dh + 9, 16, lab, C_RED, C_REDE);
+    text_wrap(16, my + dh + 28, 16, W - 32, 16, 6, 0, who, C_DARK, C_EDGE);
 }
 
 static void page_events(int play) {
@@ -348,16 +417,16 @@ static void panel_action(int a) {
     if (page == PAGE_SIDE) { map_action(a); return; }
     if (page == PAGE_ITEMS) { void items_action_(int); items_action_(a); return; }
     if (page != PAGE_EVENTS && page != PAGE_MAP) return;
-    if (a == IN_SHOW_HIDDEN) { ev_show_hidden = !ev_show_hidden; ev_sel = ev_top = 0; return; }
+    if (a == IN_SHOW_HIDDEN) { ev_show_hidden = !ev_show_hidden; ev_reset(); return; }
     if (page != PAGE_EVENTS) return;
     if (ev_detail >= 0) { if (a == IN_BACK || a == IN_OK) ev_detail = -1; else if (a == IN_HIDE) ev_hide_toggle(ev_detail); else if (a == IN_PIN) ev_pin_toggle(ev_detail); return; }
     int ids[EVENTS], n = ev_list(ids);
     if (a == IN_HIDE) { if (n && ev_sel < n) ev_hide_toggle(ids[ev_sel]); return; }
     if (a == IN_PIN) { if (n && ev_sel < n) ev_pin_toggle(ids[ev_sel]); return; }
-    if (a == IN_UP && ev_sel > 0) ev_sel--;
-    else if (a == IN_DOWN && ev_sel < n - 1) ev_sel++;
-    else if (a == IN_LEFT) { ev_filter = (ev_filter + NFILTERS - 1) % NFILTERS; ev_sel = ev_top = 0; }
-    else if (a == IN_RIGHT) { ev_filter = (ev_filter + 1) % NFILTERS; ev_sel = ev_top = 0; }
+    if (a == IN_UP && ev_sel > 0) { ev_sel--; ev_follow = 1; }
+    else if (a == IN_DOWN && ev_sel < n - 1) { ev_sel++; ev_follow = 1; }
+    else if (a == IN_LEFT) { ev_filter = (ev_filter + NFILTERS - 1) % NFILTERS; ev_reset(); }
+    else if (a == IN_RIGHT) { ev_filter = (ev_filter + 1) % NFILTERS; ev_reset(); }
     else if (a == IN_OK && n) ev_detail = ids[ev_sel];
 }
 static int touch_long;
@@ -371,15 +440,14 @@ static void panel_hit(int id) {
         if (k == 8) { panel_action(IN_HIDE); break; }
         if (k == 9) { panel_action(IN_SHOW_HIDDEN); break; }
         if (k == 10) { if (ev_detail >= 0) ev_pin_toggle(ev_detail); break; }
-        ev_filter = k; ev_sel = ev_top = 0; ev_detail = -1; break;
+        if (k == 11) { if (ev_detail >= 0) { map_focus(ev_detail); page = PAGE_SIDE; } break; }
+        ev_filter = k; ev_reset(); ev_detail = -1; break;
     case HS_ROW: {   /* a tap opens the event, a long press (0.6 s) pins / unpins it */
         int ids[EVENTS], n = ev_list(ids);
         if (k < n) { ev_sel = k; if (touch_long) ev_pin_toggle(ids[k]); else ev_detail = ids[k]; }
         break;
     }
     case HS_BACK: ev_detail = -1; break;
-    case HS_PREV: ev_sel -= ev_vis; break;
-    case HS_NEXT: ev_sel += ev_vis; break;
     }
 }
 /* touch / click in canvas pixels: act on release over the target pressed */
@@ -387,7 +455,7 @@ static int touch_id = -1, touch_t0;
 static void panel_touch_canvas(int x, int y, int action) {   /* action: 0 down, 1 up, 2 move */
     int id = -1;
     if (page == PAGE_SIDE && map_touch(x, y, action)) { touch_id = -1; return; }
-    if (page == PAGE_ITEMS) { int items_touch_(int, int, int); if (items_touch_(x, y, action)) { touch_id = -1; return; } }
+    if (scr_touch(x, y, action)) { touch_id = -1; return; }   /* a list dragged / flung (panel.c scroller) */
     for (int i = nhs - 1; i >= 0; i--) if (x >= hs[i].x && y >= hs[i].y && x < hs[i].x + hs[i].w && y < hs[i].y + hs[i].h) { id = hs[i].id; break; }
     if (action == 0) { touch_id = id; touch_t0 = port_frame; }
     else if (action == 1) { touch_long = port_frame - touch_t0 >= 30; if (id >= 0 && id == touch_id) panel_hit(id); touch_id = -1; touch_long = 0; }
