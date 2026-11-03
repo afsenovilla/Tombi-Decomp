@@ -229,6 +229,8 @@ Regenerated with `python3 tools/build_report.py --version slpm80165` then `pytho
 
 ## Versions
 
+Every known retail, demo and prototype disc (serials, dates, executable hashes): [wiki: List of builds](docs/wiki/Builds.md).
+
 | Version | Serial | Status |
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
