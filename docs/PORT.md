@@ -3147,7 +3147,8 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   inside; 5 (3b) style 3 cleaned up: detail window (icon, name, description, status, action), 5 x 2 cards with the
   blinking yellow frame, clear badges, one bottom row (Ordenar left, `<L1` *n de N* `R1>` centred); 6 (3c) a showcase on
   the left (icon at 4x, `PA_X4`, in a stone frame, name, category, description, Ordenar, action) and a 3 x 4 grid of
-  icons on stone at the right with the pager on its bottom edge.
+  icons on stone at the right with the pager on its bottom edge. In 4-6 the action plank is twice a plank high (48:
+  `plank_h`, the 24-row plank cut in three, its plain middle rows tiled, nothing scaled).
 - Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
 - `--hud-bottom` (Android launcher: *HUD en la pantalla inferior*, default on when a secondary display exists; it is
   passed only with the second screen): while the panel is on (PC / headless: always; Android: while the Presentation polls
