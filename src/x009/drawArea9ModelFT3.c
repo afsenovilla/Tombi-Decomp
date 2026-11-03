@@ -1,6 +1,7 @@
 // FUNC 8011f96c 480 X009
 // MATCHING 8011f96c 480
 // VERSION SLPS_01144 slps01144 80022B20 464
+// FLAGS.SLPS_01144 -O2 -G0 -fno-strength-reduce
 #if defined(VERSION_SLPS_01144)
 typedef struct {
     unsigned long tag;
