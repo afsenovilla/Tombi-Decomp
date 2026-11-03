@@ -253,7 +253,7 @@ static void open_game_data(const char *argv0) {
    (no launcher) mode").  As the PC launcher does: with --cut-content in English and no other text patch, the bundled
    en_cut_content.tpatch (English text of the cut lines) from --patch-dir, else patches/ in the cwd or next to the exe. */
 static const char *port_text_patches[8]; static int port_text_patch_n;
-static int port_gfx_es = 1;          /* --no-gfx-es: no native Spanish redraws (--lang 5) */
+int port_gfx_es = 1;          /* --no-gfx-es: no native Spanish redraws (--lang 5) */
 void port_gfx_es_load(void);
 static const char *port_patch_dir;
 extern int port_cut_content, port_lang;

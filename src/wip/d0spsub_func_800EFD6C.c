@@ -180,7 +180,7 @@ void func_800EFD6C(void)
     case 1:
         subScreenDrawTabs(m);
         if (D_8010A058 >= 0) subScreenDrawPopupMenu(m);
-        pages = (D_8009D2A4 + 9) / 10;
+        pages = (D_8009D2A4 + PORT_NTSC(9, 7)) / PORT_NTSC(10, 8);
         subScreenDrawItemGrid(m);
         subScreenDrawItemNames(m);
         if (pages >= 2) {
@@ -225,7 +225,7 @@ void func_800EFD6C(void)
             if (D_801086F0[j] != 0xFF && GAME_INVENTORY_SCREEN[D_801086F0[j]] != 0) last = j;
         }
         }
-        pages = (last + 10) / 10;
+        pages = (last + PORT_NTSC(10, 8)) / PORT_NTSC(10, 8);
         subScreenDrawEventIcons(m, last, 0xFF);
         subScreenDrawEventList(m);
         subScreenDrawEventCounters(m);

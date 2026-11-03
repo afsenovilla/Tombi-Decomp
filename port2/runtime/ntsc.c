@@ -28,3 +28,21 @@ void port_ntsc_apd_rec(void *rec) {
             return;
         }
 }
+
+/* The sub-screens (D0SPSUB Select / D0SPSUB3 Triangle item screen): the PAL overlays list 10 items / events a page,
+   rows 16 lines apart from y 72 (80), so the 10th row sits at 216 (224) and the page footer / arrows at 248: the
+   224-line picture cut the list's last row in half and hid the footer.  The USA overlays (SYSTEM/DSPSUB*.BIN) have the
+   same tables with 8 rows (their slot lists end after the 8th), the footer and the arrows at 216, and the pink list
+   backdrop at 112 instead of 128; the code pages by 8 (port/fixes.txt: page * PORT_NTSC(10, 8) ...).  Called from
+   subScreenUpdate (port/fixes.txt) as the menu opens; each change only applies to the PAL value, so a
+   second call (or another overlay's data) changes nothing.  Slots are { x, y, dw, idx }, ended by x == -1. */
+void port_ntsc_subscreen(short *item, short *event, short *arrows, short *footer, short *bg) {
+    short *t[2] = { item, event }, *f[2] = { arrows, footer };
+    int k, i;
+    if (!port_ntsc) return;
+    for (k = 0; k < 2; k++)                     /* 8 rows: the 9th slot (idx 8) becomes the end marker */
+        if (t[k] && t[k][8 * 4 + 3] == 8 && t[k][8 * 4] != -1 && t[k][9 * 4 + 3] == 9 && t[k][10 * 4] == -1) t[k][8 * 4] = -1;
+    for (k = 0; k < 2; k++)                     /* footer line 248 -> 216 */
+        for (i = 0; f[k] && i < 8 && f[k][i * 4] != -1; i++) if (f[k][i * 4 + 1] == 248) f[k][i * 4 + 1] = 216;
+    if (bg && bg[0] == 80 && bg[1] == 128 && bg[3] == 0) bg[1] = 112;   /* the pink backdrop's centre */
+}

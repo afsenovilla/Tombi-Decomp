@@ -2478,7 +2478,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   wallpaper (`memCardDrawBackground`) and the options checkerboard (`optionsDrawFrame`, also button config and screen
   adjust) are drawn again a screen to each side (the drawing area clips them).
 - **Spanish improved translation labels** (`runtime/subscreen_es.c`, hooked on every VRAM upload in `gpu.c`): with
-  `--lang 5` and a text patch whose MAIN5.EXE pause list holds "Objetos" (es_mejorada), the sub-screen texture's
+  `--lang 5` (Spanish graphics on: not with `--no-gfx-es`) and a MAIN5.EXE whose pause list holds "Objetos"
+  (es_mejorada: a `--text-patch` in memory or, as the PC launcher does it, written into data/; the check used to read
+  only the in-memory patch, so the launcher's Select and Triangle screens kept "Elmto."), the sub-screen texture's
   "Elmto." tab and "Usar elmto" leaf become "Objetos" / "Usar objeto", rebuilt in VRAM from the texture itself (tab
   font letters cut from the "Evento" / "Estado" tabs, b = their d mirrored, O and j drawn with the same 2-px brush; the
   leaf line cleared with the "Ver" / "Ordenar" leaves and redrawn in the leaf font's white strokes); the texture is
@@ -2738,13 +2740,14 @@ draft) and `runtime/titlebg.c`. The console build is unchanged (port-only substi
 | Title (`titleLogoDraw`, `loopTitleScreen`, carousel) | black band over the top 8 lines, landscape at 8, rows 160/208, carousel 184 | no band, landscape at 0, rows 144/192, carousel 168 (arrows 166) |
 | Options / screen adjust / button config (O0PTSUB0 drawers) | | 16 lines up |
 | Sub-screen: Status page (`func_800EFD6C`, notes, "Next N" labels), map area / room names | | 16 lines up; names 216/232 -> 184/200 |
+| Sub-screen item / event lists (D0SPSUB Select, D0SPSUB3 Triangle item screen: `subScreenItemListStep`, `subScreenDrawItemGrid` / `Names`, `subScreenMoveGridCursor`, event list...; slot tables patched as the menu opens, `port_ntsc_subscreen` in `runtime/ntsc.c`) | 10 rows a page (the 10th at 216 / 224), footer / arrows at 248, list backdrop at 128 | 8 rows a page, footer / arrows at 216, backdrop at 112 (the USA DSPSUB / DSPSUB3 tables); the port's event-page counter in the left column at 184, its arrows at 168 |
 | Movies (`moviePlayerTask`) | VRAM rows 272.. | rows 256.. |
 
 The window shows the 224 lines as 224 of the 240 lines of a 4:3 NTSC screen (`port_window_fit`, `runtime/sdl.c`: a
 224-line frame is 320 wide, the window opens at 320x240 times the scale, with 8-line borders as on an NTSC TV); the
 OpenGL blit, `--widescreen` (426x224 at 16:9), `--fps` and `--internal-res` take the frame size as it is. Not changed
 (no visible effect or no USA counterpart): the off-screen culls (`y < 256` -> `y < 224` in the model / sprite
-drawers), the memory card screens (top-anchored, they fit), the item / event list spacing (text layout), the PAL
+drawers), the memory card screens (top-anchored, they fit), the PAL
 top-down map strips, the logo screens' background grey, the sub-screen map's scroll position (the map settles
 lower than in the USA run; not traced yet).
 

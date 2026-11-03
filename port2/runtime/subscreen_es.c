@@ -10,14 +10,16 @@
  *     "Ordenar" leaves, which share the same leaf picture) and "objeto" is drawn in its place with the leaf font's
  *     white 2-px strokes.
  * Nothing is shipped: every pixel comes from the disc's texture or from the small stroke patterns below.  Only with
- * --lang 5 and a text patch whose MAIN5.EXE pause list holds "Objetos" (the improved translation); the texture is
+ * --lang 5 (Spanish graphics on: not with --no-gfx-es) and a MAIN5.EXE whose pause list holds "Objetos" (the improved
+ * translation, applied in memory with --text-patch or written into data/ by the PC launcher); the texture is
  * recognised by a hash of the two label rects, so any other data is left alone. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 extern int port_lang;
-extern unsigned char *port_tpatch_named(const char *path, unsigned *size);
+extern unsigned char *port_cd_read_named(const char *path, unsigned *size);
+extern int port_gfx_es;                        /* main.c: --no-gfx-es keeps the disc's sprites */
 extern void port_printf(const char *, ...);
 
 #define PX 64                                  /* texture page x (in 16-bit words), y 0 */
@@ -26,8 +28,10 @@ static int es_state = -1;                      /* -1 not checked, 0 off, 1 on */
 static int es_on(void) {
     if (es_state < 0) {
         static const unsigned char obj[7] = { 0x20, 0x21, 0x13, 0x0F, 0x1B, 0x17, 0x1A };   /* "Objetos" (tools/pause_text.py) */
-        unsigned n = 0; unsigned char *d = port_lang == 5 ? port_tpatch_named("EXE/MAIN5.EXE", &n) : 0;
-        if (getenv("PORT_SUBSCREEN_ES_LOG")) port_printf("[subscreen_es] MAIN5.EXE patched: %u bytes\n", n);
+        /* the MAIN5.EXE the game runs with: a --text-patch in memory, else data/ (the PC launcher writes its translation
+           into data/ itself and passes no --text-patch: reading only the in-memory patch left "Elmto." there), else the disc */
+        unsigned n = 0; unsigned char *d = port_lang == 5 && port_gfx_es ? port_cd_read_named("EXE/MAIN5.EXE", &n) : 0;
+        if (getenv("PORT_SUBSCREEN_ES_LOG")) port_printf("[subscreen_es] MAIN5.EXE: %u bytes\n", n);
         es_state = 0;
         for (unsigned i = 0; d && i + 8 <= n; i++) if (!memcmp(d + i, obj, 7) && (d[i + 7] == 0xFF || !d[i + 7])) { es_state = 1; break; }
         free(d);
@@ -132,10 +136,10 @@ void port_subscreen_es_upload(const unsigned short *vram, int x, int y, int w, i
     if (port_lang != 5) return;
     /* the whole page area holding the labels and their sources: words 66..90, lines 0x38..0x9f */
     if (x > PX + 2 || x + w < PX + 26 || y > 0x38 || y + h < 0xA0) return;
-    if (!es_on()) return;
     g_vram = vram;
     {   unsigned th = hash_rect(TAB_U, TAB_V, 64, 24), lh = hash_rect(LEAF_U, LEAF_V, LEAF_W, 39);
         if (getenv("PORT_SUBSCREEN_ES_LOG") && logged++ < 20) port_printf("[subscreen_es] upload %d,%d %dx%d: tab 0x%08x leaf 0x%08x\n", x, y, w, h, th, lh);
+        if ((th != TAB_HASH && lh != LEAF_HASH) || !es_on()) return;   /* MAIN5.EXE read once, when the page first shows up */
         if (th == TAB_HASH) fix_tab(write);
         if (lh == LEAF_HASH) fix_leaf(write);
     }

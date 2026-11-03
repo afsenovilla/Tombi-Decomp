@@ -797,3 +797,68 @@ src/moviePlayerTask.c | movieInitDecodeEnv(&MOVIE_DEC_ENV, 0x180, 0x110, 0x2c0, 
 # The PAL disc's placement records moved down for the 256-line screen take the USA disc's y as the game spawns an
 # object from one (port2/runtime/ntsc.c, table from tools/ntsc_apd.py)
 src/spawnObjectFromRecord.c | kind = e->b1 & 0x7f; | { extern void port_ntsc_apd_rec(void *); port_ntsc_apd_rec(e); } kind = e->b1 & 0x7f;
+#
+# NTSC picture, sub-screens (D0SPSUB Select / D0SPSUB3 Triangle item screen): the PAL overlays page the item and event
+# lists by 10 rows (the 10th at y 216 / 224: cut in half by the 224-line picture, the page footer at 248 hidden); the USA
+# overlays page by 8 (USA subScreenItemListStep / subScreenDrawItemGrid / subScreenMoveGridCursor ... 0x800EC89C.., *8,
+# (n + 7) / 8, +-8) with 8-slot tables, the footer / arrows at 216 and the pink backdrop at 112: the tables are patched
+# as the menu opens (runtime/ntsc.c port_ntsc_subscreen), the page size here; the Select draw is the wip draft
+src/d0spsub/subScreenUpdate.c | D_800A45F6 = -1; | D_800A45F6 = -1; { extern void port_ntsc_subscreen(short *, short *, short *, short *, short *); extern short SUBSCREEN_ITEM_SLOTS[], SUBSCREEN_EVENT_SLOTS[], D_80109BF8[], SUBSCREEN_PAGE_FOOTER_SLOTS[], D_80109C58[]; port_ntsc_subscreen(SUBSCREEN_ITEM_SLOTS, SUBSCREEN_EVENT_SLOTS, D_80109BF8, SUBSCREEN_PAGE_FOOTER_SLOTS, D_80109C58); }
+src/d0spsub/subScreenDrawItemGrid.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub/subScreenDrawItemNames.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub/subScreenDrawEventIcons.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub/subScreenDrawEventList.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub/subScreenItemListStep.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub/subScreenItemListStep.c | (D_8009D1A4.count + 9) / 10 | (D_8009D1A4.count + PORT_NTSC(9, 7)) / PORT_NTSC(10, 8)
+src/d0spsub/subScreenItemListStep.c | m->sel -= 10; | m->sel -= PORT_NTSC(10, 8);
+src/d0spsub/subScreenItemListStep.c | m->sel += 10; | m->sel += PORT_NTSC(10, 8);
+src/d0spsub/subScreenMoveGridCursor.c | m->sel % 10 | m->sel % PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveGridCursor.c | ) < 9 && | ) < PORT_NTSC(9, 7) &&
+src/d0spsub/subScreenMoveGridCursor.c | m->sel >= 10 | m->sel >= PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveGridCursor.c | m->sel -= 10; | m->sel -= PORT_NTSC(10, 8);
+src/d0spsub/subScreenMoveGridCursor.c | old + 10 | old + PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveGridCursor.c | m->sel / 10 | m->sel / PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveGridCursorN.c | m->sel % 10 | m->sel % PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveGridCursorN.c | ) < 9 && | ) < PORT_NTSC(9, 7) &&
+src/d0spsub/subScreenMoveGridCursorN.c | m->sel >= 10 | m->sel >= PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveGridCursorN.c | m->sel -= 10; | m->sel -= PORT_NTSC(10, 8);
+src/d0spsub/subScreenMoveGridCursorN.c | old + 10 | old + PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveGridCursorN.c | m->sel / 10 | m->sel / PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveEventCursor.c | m->sel % 10 | m->sel % PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveEventCursor.c | ) < 9 && | ) < PORT_NTSC(9, 7) &&
+src/d0spsub/subScreenMoveEventCursor.c | m->sel >= 10 | m->sel >= PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveEventCursor.c | m->sel -= 10; | m->sel -= PORT_NTSC(10, 8);
+src/d0spsub/subScreenMoveEventCursor.c | old + 10 | old + PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveEventCursor.c | m->sel / 10 | m->sel / PORT_NTSC(10, 8)
+src/d0spsub3/subScreenUpdate.c | m->w10 = 1; | m->w10 = 1; { extern void port_ntsc_subscreen(short *, short *, short *, short *, short *); extern short SUBSCREEN_ITEM_SLOTS__800FF3AC[], SUBSCREEN_EVENT_SLOTS__800FF354[], SUBSCREEN_PAGE_ARROW_SLOTS[], SUBSCREEN_PAGE_FOOTER_SLOTS__80100774[], D_801007BC[]; port_ntsc_subscreen(SUBSCREEN_ITEM_SLOTS__800FF3AC, SUBSCREEN_EVENT_SLOTS__800FF354, SUBSCREEN_PAGE_ARROW_SLOTS, SUBSCREEN_PAGE_FOOTER_SLOTS__80100774, D_801007BC); }
+src/d0spsub3/subScreenDrawItemGrid.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub3/subScreenDrawItemNames.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub3/subScreenDrawEventIcons.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub3/subScreenDrawEventList.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub3/subScreenItemListStep.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub3/subScreenItemListStep.c | (D_8009D1A4.count + 9) / 10 | (D_8009D1A4.count + PORT_NTSC(9, 7)) / PORT_NTSC(10, 8)
+src/d0spsub3/subScreenItemListStep.c | m->sel -= 10; | m->sel -= PORT_NTSC(10, 8);
+src/d0spsub3/subScreenItemListStep.c | m->sel += 10; | m->sel += PORT_NTSC(10, 8);
+src/d0spsub3/subScreenMoveGridCursor.c | m->sel % 10 | m->sel % PORT_NTSC(10, 8)
+src/d0spsub3/subScreenMoveGridCursor.c | ) < 9 && | ) < PORT_NTSC(9, 7) &&
+src/d0spsub3/subScreenMoveGridCursor.c | m->sel >= 10 | m->sel >= PORT_NTSC(10, 8)
+src/d0spsub3/subScreenMoveGridCursor.c | m->sel -= 10; | m->sel -= PORT_NTSC(10, 8);
+src/d0spsub3/subScreenMoveGridCursor.c | old + 10 | old + PORT_NTSC(10, 8)
+src/d0spsub3/subScreenMoveGridCursor.c | m->sel / 10 | m->sel / PORT_NTSC(10, 8)
+src/d0spsub3/subScreenMoveGridCursorN.c | m->sel % 10 | m->sel % PORT_NTSC(10, 8)
+src/d0spsub3/subScreenMoveGridCursorN.c | ) < 9 && | ) < PORT_NTSC(9, 7) &&
+src/d0spsub3/subScreenMoveGridCursorN.c | m->sel >= 10 | m->sel >= PORT_NTSC(10, 8)
+src/d0spsub3/subScreenMoveGridCursorN.c | m->sel -= 10; | m->sel -= PORT_NTSC(10, 8);
+src/d0spsub3/subScreenMoveGridCursorN.c | old + 10 | old + PORT_NTSC(10, 8)
+src/d0spsub3/subScreenMoveGridCursorN.c | m->sel / 10 | m->sel / PORT_NTSC(10, 8)
+src/d0spsub3/subScreenDrawItemPage.c | (D_8009D2A4 + 9) / 10 | (D_8009D2A4 + PORT_NTSC(9, 7)) / PORT_NTSC(10, 8)
+src/d0spsub/subScreenMoveEventCursor.c | (subScreenCountEvents() + 9) / 10 * 10 | (subScreenCountEvents() + PORT_NTSC(9, 7)) / PORT_NTSC(10, 8) * PORT_NTSC(10, 8)
+src/d0spsub/subScreenEventListStep.c | (subScreenCountEvents() + 9) / 10 | (subScreenCountEvents() + PORT_NTSC(9, 7)) / PORT_NTSC(10, 8)
+src/d0spsub/subScreenEventListStep.c | m->page * 10 | m->page * PORT_NTSC(10, 8)
+src/d0spsub/subScreenEventListStep.c | m->sel -= 10; | m->sel -= PORT_NTSC(10, 8);
+src/d0spsub/subScreenEventListStep.c | m->sel += 10; | m->sel += PORT_NTSC(10, 8);
+src/d0spsub/subScreenEventListStep.c | pages * 10 | pages * PORT_NTSC(10, 8)
+# the event list's page arrows in the left column (above): line 232 is off the 224-line picture; the counter goes to 184
+# (the footer's 216 - 32), the arrows above it
+src/d0spsub/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.y = 232; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(232, 168);
+src/d0spsub3/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.y = 232; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(232, 168);
