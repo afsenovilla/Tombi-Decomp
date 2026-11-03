@@ -181,6 +181,15 @@ static int it_in_use(int item) {
     return 0;
 }
 
+/* ---- layout styles (PORT_PANEL_ITEMS_STYLE, panel_items_alt.inc): 0 the touch grid, 1 game-like icon grid with
+   category tabs, 2 the Triangle screen's list, 3 big cards a page at a time */
+static int it_style = -1, it_tab;
+static int it_get_style(void) {
+    if (it_style < 0) { const char *s = getenv("PORT_PANEL_ITEMS_STYLE"); it_style = s ? atoi(s) : 0; if (it_style < 0 || it_style > 3) it_style = 0; }
+    return it_style;
+}
+static int it_tab_has(int t, int c) { return t == 0 || (t == 1 && c == 1) || (t == 2 && c == 2) || (t == 3 && (c == 0 || c == 3)) || (t == 4 && c >= 4); }
+static void it_filter(void);
 /* ---- the list: the inventory grouped as the menu's sort lays it out */
 static u8 it_items[256], it_icat[256]; static int it_n;
 static void it_build(void) {
@@ -197,6 +206,7 @@ static void it_build(void) {
         }
     }
     for (int i = 0; i < cnt; i++) { int it = G_INV_ITEM(i); if (have[it] == 1) { have[it] = 2; it_icat[it_n] = 5; it_items[it_n++] = (u8)it; } }
+    it_filter();   /* style 1: the category tab */
 }
 static const char *cat_name(int c) {
     switch (c) {
@@ -335,7 +345,7 @@ static void it_page_warp(int x, int y, int w, int h) {
         hot(x + 6, ly - 1, w - 12, IT_RH, HS_ITOP + 0x10 + i);
     }
 }
-static void page_items(int play) {
+static void page_items0(int play) {
     int W = pa_cw, H = pa_ch, top = 56; char b[96];
     if (!it_state) it_load();
     if (!play || it_state != 1) {
@@ -432,6 +442,8 @@ static void page_items(int play) {
     }
 }
 
+#include "panel_items_alt.inc"
+
 /* ---- input (panel_events.inc routes the tab's keys and touches here) */
 static void it_warp_go(void) {
     u8 d[81][3]; int n = it_dests(d);
@@ -463,6 +475,8 @@ static void items_hit(int id) {
     else if (k == 2) it_rq = RQ_SORT;
     else if (k == 3) { if (it_warp >= 0) it_warp_go(); else it_confirm(it_sel); }
     else if (k == 4) it_warp = -1;
+    else if (k >= 0xE0 && k < 0xE5) { it_tab = k - 0xE0; it_sel = 0; it_scroll = 0; it_vel = 0; }   /* style 1: category tabs */
+    else if (k == 5 || k == 6) { it_sel = (it_sel / IT3_PAGE + (k == 5 ? -1 : 1)) * IT3_PAGE; if (it_sel >= it_n) it_sel = it_n - 1; if (it_sel < 0) it_sel = 0; }   /* style 3: pages */
     else if (k >= 0x10) { if (it_wsel == k - 0x10) it_warp_go(); else it_wsel = k - 0x10; }
 }
 void items_action_(int a) { items_action(a); }   /* named from panel_events.inc, which comes first */

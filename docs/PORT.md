@@ -3135,6 +3135,13 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   3060:tabr,3065:tabr,3070:tabr,3150:right,3160:ok,3300:right,3310:ok,3400:right,3403:right,3406:right,3420:ok`
   equips the wooden boomerang (HUD icon, *Equipada Bumerang madera*), puts on the jumping pants and eats a lunchbox
   (vitality 1 -> 4). Without `--second-screen` / `--dump-panel` nothing runs (frames byte-identical).
+  Layout trial (2026-11-03, not chosen yet): `PORT_PANEL_ITEMS_STYLE=1|2|3` draws the tab in one of three alternative
+  layouts (`runtime/panel_items_alt.inc`; 0 / unset: the touch grid above), same data, checks and requests: 1 a dense
+  grid of 2x icons with category tabs (Todo / Armas / Ropa / Objetos / Varios) and Ordenar as planks, a blinking yellow
+  frame, in-use / count badges (the HUD's digits), a detail card; 2 the Triangle screen's list (dark window, icon, name,
+  count, inline category headers, the game's green bar) with the detail and the buttons at the side; 3 a detail card
+  on top, 5 x 2 cards with 3x icons a page at a time (the game's 10 per page, the sub-screen's pointing hand), a bar of
+  page / Ordenar / action planks. Each shows the name, the description (16 px) and one status line once.
 - Without the files (another disc version) the panel still runs with flat colours and no glyphs, and logs which file failed.
 - `--hud-bottom` (Android launcher: *HUD en la pantalla inferior*, default on when a secondary display exists; it is
   passed only with the second screen): while the panel is on (PC / headless: always; Android: while the Presentation polls
