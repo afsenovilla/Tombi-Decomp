@@ -203,9 +203,10 @@ static void filters(int y) {
     }
 }
 
-/* one row of the list: the title (16 px) and under it the plate and the place (in progress) or the state and the area
-   (8 px), both wrapped, never cut: the place's next lines start under its first letter.  A row is 30 high with one
-   line of each, 16 more for each further title line and 10 for each further place line. */
+/* one row of the list, one thing per line: the title (16 px); in progress, the plate (here / this area / elsewhere) on a
+   line of its own and the place under it, full width; else the state and the area (8 px).  Everything wraps, never cut.
+   A row is 30 high with one line of each, 11 more for the plate line, 16 for each further title line and 10 for each
+   further place line. */
 typedef struct { char t[96], p[160]; int pw, tr, tl, pl, h; } EvRow;
 static int dist_plate_w(int e) { const char *s = dist_name(ev_dist(e)); return s ? pa_text_w(8, s) + 8 : 0; }
 static void ev_row(int e, EvRow *R) {
@@ -217,16 +218,16 @@ static void ev_row(int e, EvRow *R) {
     snprintf(R->t, sizeof R->t, "%s", st == F_PENDING ? "? ? ?" : ev_title(e, t, sizeof t));
     if (st == F_PROGRESS) {   /* in progress: where, as the plate and the place (the room, in this area) */
         char pl[128];
-        R->pw = dist_plate_w(e); if (R->pw) R->pw += 5;
+        R->pw = dist_plate_w(e);   /* (only says whether there is a plate line: the place below it is full width) */
         ev_place(e, pl, sizeof pl);
         snprintf(R->p, sizeof R->p, "%s%s", hid ? T("Hidden - ", "Oculto - ") : "", pl);
         char *d = NULL;   /* too long for one line: the room starts the next line ("area -" / "room") */
         for (char *q = strstr(R->p + (strlen(R->p) - strlen(pl)), " - "); q; q = strstr(q + 1, " - ")) d = q;
-        if (d && text_lines(8, W - 60 - R->tr - R->pw, 2, R->p) > 1) d[2] = '\n';
+        if (d && text_lines(8, W - 60 - R->tr, 2, R->p) > 1) d[2] = '\n';
     } else snprintf(R->p, sizeof R->p, "%s%s  -  %s", hid ? T("Hidden - ", "Oculto - ") : "", state_name(st), ar ? ar : T("zone not extracted yet", "zona a\xFAn sin extraer"));
     R->tl = text_lines(16, W - 60 - R->tr, 4, R->t);
-    R->pl = text_lines(8, W - 60 - R->tr - R->pw, 6, R->p);
-    R->h = 30 + (R->tl - 1) * 16 + (R->pl - 1) * 10;
+    R->pl = text_lines(8, W - 60 - R->tr, 6, R->p);
+    R->h = 30 + (R->tl - 1) * 16 + (R->pl - 1) * 10 + (R->pw ? 11 : 0);
 }
 static int ev_vis = 5;   /* rows on the page drawn last (the page up / down strips move by it) */
 static void event_list(void) {
@@ -255,7 +256,7 @@ static void event_list(void) {
         text_wrap(46, y - 1, 16, W - 60 - R.tr, 16, 4, 0, R.t, sel ? C_WHITE : hid ? C_MUTED : st == F_DONE ? C_GREEN : C_DARK, sel ? RGB(60, 110, 50) : C_EDGE);
         if (st == F_PROGRESS) dist_plate(46, py + 15, e);
         if (R.tr) pin_mark(W - 30, y + 2, sel ? C_WHITE : C_RED);
-        text_wrap(46 + R.pw, py + (st == F_PROGRESS ? 17 : 16), 8, W - 60 - R.tr - R.pw, 10, 6, 0, R.p, sel ? C_WHITE : st == F_PROGRESS ? C_RED8 : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
+        text_wrap(46, py + (R.pw ? 28 : st == F_PROGRESS ? 17 : 16), 8, W - 60 - R.tr, 10, 6, 0, R.p, sel ? C_WHITE : st == F_PROGRESS ? C_RED8 : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
     }
     ev_vis = r - ev_top > 1 ? r - ev_top : 1;
     int by = y0 + avail + 4;
