@@ -259,6 +259,12 @@ public class TombiActivity extends SDLActivity {
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
         int code = e.getKeyCode();
+        if (quitDialog != null && quitDialog.showing() && e.getAction() != KeyEvent.ACTION_UP) {
+            if (e.getAction() == KeyEvent.ACTION_DOWN) { dialogKeys.add(code); quitDialog.key(code, e.getRepeatCount()); }
+            return true;
+        }
+        // the release of a key the dialog took (B / Back that closed it must not reopen it, A must not reach the game)
+        if (e.getAction() == KeyEvent.ACTION_UP && dialogKeys.remove(code)) return true;
         if (pad != null && !PadMap.systemKey(code) && PadMap.fromController(e.getDevice(), e.getSource())
                 && (e.getAction() == KeyEvent.ACTION_DOWN || e.getAction() == KeyEvent.ACTION_UP)) {
             if (e.getAction() == KeyEvent.ACTION_DOWN && e.getRepeatCount() == 0) padSeen("k" + code);
@@ -273,25 +279,32 @@ public class TombiActivity extends SDLActivity {
         return super.dispatchKeyEvent(e);
     }
     @Override
-    public void onBackPressed() { confirmQuit(); }
+    public void onBackPressed() {
+        if (quitDialog != null && quitDialog.showing()) quitDialog.cancel(); else confirmQuit();
+    }
 
     // ---- back to the launcher (--launcher-exit: runtime/launcher_exit.c; Back) ----
-    private android.app.AlertDialog quitDialog;
+    /* the question, drawn in the launcher's style (SelvaDialog) over the game's surface: while it is up the key
+       presses go to it (D-pad, A = choose, B / Back = No), the releases still reach the pad mapping so no button
+       stays held; the game keeps running behind it, as it did behind the old AlertDialog */
+    private SelvaDialog quitDialog;
+    private final java.util.HashSet<Integer> dialogKeys = new java.util.HashSet<>();
     private boolean spanish() {
         String[] a = getIntent() != null ? getIntent().getStringArrayExtra(EXTRA_ARGS) : null;
         if (a != null) for (int i = 0; i + 1 < a.length; i++) if ("--lang".equals(a[i])) return "5".equals(a[i + 1]);
         return java.util.Locale.getDefault().getLanguage().equals("es");
     }
     void confirmQuit() {
-        if (isFinishing() || (quitDialog != null && quitDialog.isShowing())) return;
+        if (isFinishing() || (quitDialog != null && quitDialog.showing())) return;
         boolean es = spanish();
-        quitDialog = new android.app.AlertDialog.Builder(this)
-                .setMessage(es ? "\u00bfVolver al launcher? (no se guarda la partida)" : "Return to the launcher? (the game is not saved)")
-                .setPositiveButton(es ? "S\u00ed" : "Yes", new android.content.DialogInterface.OnClickListener() {
-                    public void onClick(android.content.DialogInterface d, int w) { quitGame("Back"); } })
-                .setNegativeButton(es ? "No" : "No", null)
-                .create();
-        quitDialog.show();
+        if (quitDialog == null) {
+            quitDialog = new SelvaDialog(this);
+            addContentView(quitDialog, new android.view.ViewGroup.LayoutParams(-1, -1));
+        }
+        quitDialog.show(es ? "\u00bfVolver al launcher?" : "Back to the launcher?",
+                es ? "La partida no se guarda." : "The game is not saved.",
+                new String[]{es ? "S\u00ed" : "Yes", "No"},
+                new Runnable[]{new Runnable() { public void run() { quitGame("Back"); } }, null}, 1, 1);   // focus on No: a stray A (jump) never quits
     }
     /* the game finishes: onDestroy sends SDL_QUIT, the game ends the :game process with status 0 (port_quit) and
        LauncherActivity, under this one in the task, shows again */

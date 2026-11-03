@@ -1059,11 +1059,19 @@ re-enables Play and raises its window when the game exits).
 the save folder; Android: right column of *Opciones*). They work on the card the game uses, `tombi_mc0.mcd` (PC: the
 save folder, else next to the disc image / `data/`; Android: `files/saves/`), a raw 128 KB image identical on both
 platforms and readable by DuckStation/ePSXe (raw `.mcd`/`.mcr`). Import accepts whole cards (raw
-`.mcd/.mcr/.mc/.srm/.ddf/.ps/.bin` starting with `MC`, DexDrive `.gme`, `.vgs/.mem`), which replace the card (old file
-kept as `.bak`, timestamped if one exists), and single saves (`.mcs/.ps1/.mcb`, PS3 `.psv`), inserted into free blocks
-with new directory frames (link chain, XOR checksum); a non-Tombi product code only warns. Export writes the whole card
-(default `tombi.mcd`); the PC launcher can also export one save as `.mcs`. Logic: `tools/save_import.py` (PC, also a
-CLI) and `SaveImport.java` (Android); the launchers only, never while the game runs.
+`.mcd/.mcr/.mc/.srm/.ddf/.ps/.bin` starting with `MC`, DexDrive `.gme`, `.vgs/.mem`), which replace the card, and
+single saves (`.mcs/.ps1/.mcb`, PS3 `.psv`), inserted into free blocks with new directory frames (link chain, XOR
+checksum); a non-Tombi product code only warns. A single save whose name (`BESCES-01331TOMBA-00`...) is already on the
+card asks *"Ya hay una partida «Ranura 00 · Baccus Village · 1:23 h» en la tarjeta 1. ¿Reemplazarla?"* (slot, the
+area Continue loads and the play time when the save's GAME block checks out; PS1 saves store no date): *Reemplazar*
+frees the old save's blocks and writes the new one there first (any block count; nothing is written if it does not
+fit), *Guardar en la otra tarjeta* (only when `tombi_mc1.mcd` has room and no save of that name) or *Cancelar*. Every
+write first copies the card to `backup/tombi_mcN-YYYYMMDD-HHMMSS.mcd` next to it (the last 5 of each card kept).
+Export writes the whole card (default `tombi.mcd`); the PC launcher can also export one save as `.mcs`. Logic:
+`tools/save_import.py` (PC, also a CLI: `import FILE CARD [--overwrite]`; tests `tools/test_save_import.py`) and
+`SaveImport.java` (Android); the launchers only, never while the game runs. The Android launcher's dialogs (this one,
+the results, the translation import) and the game's "back to the launcher?" question are `SelvaDialog.java`, drawn
+in the launcher's style (Lilita One / Nunito, pill buttons; D-pad + A, B = cancel, touch) instead of AlertDialogs.
 
 **Edit save (PC launcher only).** *Editar partida… / Edit save…*, next to Import / Export, opens the save editor
 ([SAVE_EDITOR.md](SAVE_EDITOR.md), `tools/tombi_save_editor.py`) as a window of the launcher's own process on that same

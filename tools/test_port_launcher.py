@@ -224,6 +224,37 @@ class TestLauncher(unittest.TestCase):
         self.app.processEvents()
         self.assertFalse(self.w.editor_open())
 
+    def test_import_save_same_name(self):
+        """Import save... of a save already on the card: the Replace / other card / Cancel question, then each answer"""
+        import save_import as SI
+        import test_save_import as TS
+        d = self.launcher("saveimp", {})
+        self.w.s["savedir"] = d
+        card = os.path.join(d, "tombi_mc0.mcd")
+        a, b = os.path.join(d, "a.mcs"), os.path.join(d, "b.mcs")
+        open(a, "wb").write(TS.fake_save(slot=0, fill=1))
+        open(b, "wb").write(TS.fake_save(slot=0, fill=2))
+        shown, asked, answer = [], [], [None]
+        self.w.ask = lambda t: True
+        self.w.info = self.w.warning = lambda t: shown.append(t)
+        self.w.error = lambda t: self.fail(t)
+        self.w.ask_save_conflict = lambda c: asked.append(c) or answer[0]
+        self.w._open_file = lambda *x: a
+        self.w.import_save()
+        self.assertEqual(asked, [])
+        self.w._open_file = lambda *x: b
+        self.w.import_save()                                   # Cancel: card unchanged
+        self.assertTrue(asked[-1].other_ok)
+        self.assertEqual(TS.save_bytes(open(card, "rb").read(), "BESCES-01331TOMBA-00"), TS.fake_save(slot=0, fill=1)[SI.FRAME:])
+        answer[0] = "replace"
+        self.w.import_save()
+        self.assertEqual(TS.save_bytes(open(card, "rb").read(), "BESCES-01331TOMBA-00"), TS.fake_save(slot=0, fill=2)[SI.FRAME:])
+        self.assertTrue(os.listdir(os.path.join(d, "backup")))
+        answer[0] = "other"
+        self.w.import_save()
+        c1 = open(os.path.join(d, "tombi_mc1.mcd"), "rb").read()
+        self.assertEqual(TS.save_bytes(c1, "BESCES-01331TOMBA-00"), TS.fake_save(slot=0, fill=2)[SI.FRAME:])
+
 
 if __name__ == "__main__":
     unittest.main()

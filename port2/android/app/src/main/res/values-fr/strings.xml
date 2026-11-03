@@ -89,10 +89,14 @@
     <string name="opt_prompts">Icônes des boutons</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Générique</item><item>AYN Thor (arc-en-ciel)</item><item>AYN Thor (noir)</item><item>AYN Thor (blanc)</item><item>Personnalisé</item></string-array>
     <string name="save_import">Importer une sauvegarde…</string>
-    <string name="save_import_confirm">Importer le fichier dans la carte mémoire ? Une carte complète remplace la carte actuelle (conservée en .bak) ; une sauvegarde seule est ajoutée dans un emplacement libre.</string>
+    <string name="save_import_confirm">Importer le fichier dans la carte mémoire ? Une carte complète remplace la carte actuelle (une copie de sécurité est conservée) ; une sauvegarde seule est ajoutée dans un emplacement libre.</string>
     <string name="save_exported">Carte exportée (tombi.mcd).</string>
     <string name="save_export">Exporter la sauvegarde…</string>
     <string name="save_fail">Échec : %1$s</string>
+    <!-- Import save: the confirmation's button; a save with the same name already on the card (SaveImport.Conflict) -->
+    <string name="save_import_go">Importer</string>
+    <string name="save_replace">Remplacer</string>
+    <string name="save_other_card">Enregistrer sur l\'autre carte</string>
     <string name="cat_game">Jeu</string>
     <string name="cat_gfx">Graphismes</string>
     <string name="cat_dual">Second écran</string>

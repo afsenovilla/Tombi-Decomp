@@ -95,10 +95,14 @@
     <string name="opt_prompts">Iconos de botones</string>
     <string-array name="prompt_names"><item>Auto</item><item>PlayStation</item><item>Xbox</item><item>Nintendo</item><item>Genérico</item><item>AYN Thor (arcoíris)</item><item>AYN Thor (negro)</item><item>AYN Thor (blanco)</item><item>Personalizado</item></string-array>
     <string name="save_import">Importar partida…</string>
-    <string name="save_import_confirm">¿Importar el archivo en la tarjeta de memoria? Una tarjeta completa sustituye a la actual (se guarda como .bak); una partida suelta se añade en un hueco libre.</string>
+    <string name="save_import_confirm">¿Importar el archivo en la tarjeta de memoria? Una tarjeta completa sustituye a la actual (se guarda una copia de seguridad); una partida suelta se añade en un hueco libre (si ya hay una con el mismo nombre, se pregunta si reemplazarla).</string>
     <string name="save_exported">Tarjeta exportada (tombi.mcd).</string>
     <string name="save_export">Exportar partida…</string>
     <string name="save_fail">Error: %1$s</string>
+    <!-- Import save: the confirmation's button; a save with the same name already on the card (SaveImport.Conflict) -->
+    <string name="save_import_go">Importar</string>
+    <string name="save_replace">Reemplazar</string>
+    <string name="save_other_card">Guardar en la otra tarjeta</string>
     <string name="cat_game">Juego</string>
     <string name="cat_gfx">Gráficos</string>
     <string name="cat_dual">Segunda pantalla</string>

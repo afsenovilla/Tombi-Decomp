@@ -45,7 +45,7 @@ i18n.add({
     "es": {
         "l.lang": "Idioma del juego:",
         "title": "Tombi! - port nativo", "tab.play": "Jugar", "tab.mods": "Mods", "tab.controls": "Controles",
-        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:", "b.saveimp": "Importar partida…", "b.saveexp": "Exportar partida…", "s.saverun": "Cierra el juego antes de importar o exportar partidas.", "s.saveimpok": "Partida importada", "s.saveexpok": "Tarjeta exportada a {}", "s.saveerr": "No se pudo importar/exportar: {}", "s.saveask": "¿Importar este archivo en la tarjeta del port ({})?\nUna tarjeta completa sustituye a la actual (se guarda una copia .bak).", "s.saveexpq": "¿Exportar solo una partida como .mcs? (No = tarjeta completa .mcd)",
+        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:", "b.saveimp": "Importar partida…", "b.saveexp": "Exportar partida…", "s.saverun": "Cierra el juego antes de importar o exportar partidas.", "s.saveimpok": "Partida importada", "s.saveexpok": "Tarjeta exportada a {}", "s.saveerr": "No se pudo importar/exportar: {}", "s.saveask": "¿Importar este archivo en la tarjeta del port ({})?\nUna tarjeta completa sustituye a la actual (se guarda una copia en backup/).\nSi ya hay una partida con el mismo nombre, se pregunta si reemplazarla.", "s.saveexpq": "¿Exportar solo una partida como .mcs? (No = tarjeta completa .mcd)",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (llena la pantalla, experimental)",
@@ -78,7 +78,7 @@ i18n.add({
     "en": {
         "l.lang": "Game language:",
         "title": "Tombi! - native port", "tab.play": "Play", "tab.mods": "Mods", "tab.controls": "Controls",
-        "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):", "b.saveimp": "Import save…", "b.saveexp": "Export save…", "s.saverun": "Close the game before importing or exporting saves.", "s.saveimpok": "Save imported", "s.saveexpok": "Card exported to {}", "s.saveerr": "Import/export failed: {}", "s.saveask": "Import this file into the port's memory card ({})?\nA whole card replaces the current one (a .bak copy is kept).", "s.saveexpq": "Export a single save as .mcs? (No = whole card .mcd)",
+        "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):", "b.saveimp": "Import save…", "b.saveexp": "Export save…", "s.saverun": "Close the game before importing or exporting saves.", "s.saveimpok": "Save imported", "s.saveexpok": "Card exported to {}", "s.saveerr": "Import/export failed: {}", "s.saveask": "Import this file into the port's memory card ({})?\nA whole card replaces the current one (a copy is kept in backup/).\nIf a save with the same name is there, you are asked whether to replace it.", "s.saveexpq": "Export a single save as .mcs? (No = whole card .mcd)",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (fill the display, experimental)",
@@ -119,6 +119,12 @@ i18n.add({   # Edit save... (the save editor in a window of the launcher); the o
     "en": {"b.saveedit": "Edit save…", "s.editnocard": "There is no port memory card yet:\n{}\nPlay and save once (or import a save) before editing it.",
            "s.editnoqt": "The save editor needs PySide6 (pip install PySide6-Essentials): {}", "s.editrun": "close the game before saving",
            "s.editopen": "Close the save editor before playing."},
+})
+i18n.add({   # Import save...: a save with the same name already on the card (save_import.Conflict)
+    "es": {"t.savedup": "Ya existe la partida", "b.savereplace": "Reemplazar", "b.saveother": "Guardar en la otra tarjeta",
+           "b.savecancel": "Cancelar"},
+    "en": {"t.savedup": "Save already there", "b.savereplace": "Replace", "b.saveother": "Save to the other card",
+           "b.savecancel": "Cancel"},
 })
 
 
@@ -2713,12 +2719,37 @@ class App(QMainWindow):
             return
         try:
             os.makedirs(os.path.dirname(dest), exist_ok=True)
-            lines, warn = SI.import_file(p, dest)
+            try:
+                lines, warn = SI.import_file(p, dest, es=i18n.current() == "es")
+            except SI.Conflict as c:
+                choice = self.ask_save_conflict(c)
+                if choice is None:
+                    return
+                if choice == "other":
+                    lines, warn = SI.import_file(p, SI.other_card(dest), es=i18n.current() == "es")
+                else:
+                    lines, warn = SI.import_file(p, dest, overwrite=True, es=i18n.current() == "es")
         except (SI.ImportError_, OSError) as e:
             self.error(tr("s.saveerr", e))
             return
         (self.warning if warn else self.info)("\n".join(lines + warn))
         self.say(tr("s.saveimpok"), "ok")
+
+    def ask_save_conflict(self, c):
+        """the card already holds a save with that name: Replace (the card is copied into backup/ first) / Save to
+        the other card (only when it has room and no save of that name) / Cancel -> "replace", "other" or None"""
+        box = QMessageBox(self)
+        box.setWindowTitle(tr("t.savedup"))
+        box.setIcon(QMessageBox.Question)
+        box.setText(c.question(i18n.current() == "es"))
+        rep = box.addButton(tr("b.savereplace"), QMessageBox.AcceptRole)
+        oth = box.addButton(tr("b.saveother"), QMessageBox.ActionRole) if c.other_ok else None
+        can = box.addButton(tr("b.savecancel"), QMessageBox.RejectRole)
+        box.setDefaultButton(can)
+        box.setEscapeButton(can)
+        box.exec()
+        b = box.clickedButton()
+        return "replace" if b is rep else "other" if oth is not None and b is oth else None
 
     def export_save(self):
         import save_import as SI

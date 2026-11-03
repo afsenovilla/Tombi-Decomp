@@ -24,6 +24,7 @@ on:
       - tools/tombi_save_editor_lang.py
       - tools/save_editor_assets/**
       - tools/save_import.py
+      - tools/test_save_import.py
       - tools/extract_data.py
       - tools/chd.py
       - tools/data_patch.py
@@ -515,6 +516,7 @@ jobs:
           PYINSTALLER_COMPILE_BOOTLOADER=1 python -m pip install --no-binary pyinstaller "pyinstaller==6.11.1" pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
           QT_QPA_PLATFORM=offscreen python tools/test_tombi_save_editor.py
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
+          python tools/test_save_import.py
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --collect-all numpy --paths tools \
@@ -570,6 +572,7 @@ jobs:
           sudo apt-get install -y libegl1 libxkbcommon0 libfontconfig1
           python -m pip install pyinstaller pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
+          python tools/test_save_import.py
           echo "${GITHUB_SHA::7}" > build_id.txt
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --collect-all numpy --paths tools \
