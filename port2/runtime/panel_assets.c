@@ -347,6 +347,60 @@ static void load_fonts(void) {
             g->w = 8; g->h = 8; g->img = img;
         }
     }
+    /* accented capitals the fonts lack (8 px: A-acute with the improved translation, which moves the disc's one out of
+       its cell, E I O U-acute, N-tilde; 16 px: I-acute, N-tilde): built from the game's own capital as its accented
+       capitals are (the disc's 8 px A-acute, 16 px E O U-acute): the accent on top, the letter one row (8 px, then on
+       rows 2-7 like the accented small letters) or two rows (16 px, rows 4-13) shorter, a row where the letter is
+       straight dropped.  The accent: 8 px, the solid stroke above (the I's one column left, over its stem) or the
+       n-tilde's rows; 16 px, the rows of the game's own small accented letter (i-acute, n-tilde). */
+    {   static const struct { u8 ch, base, alt, small, drop8, drop16a, drop16b; } caps[] = {
+            {0xC1, 'A', 0, 0xE1, 3, 3, 12}, {0xC9, 'E', 0, 0xE9, 2, 3, 12}, {0xCD, 'I', 0, 0xED, 3, 3, 12},
+            {0xD3, 'O', '0', 0xF3, 3, 3, 12}, {0xDA, 'U', 0, 0xFA, 3, 3, 12}, {0xD1, 'N', 0, 0xF1, 3, 3, 12} };
+        static const u8 stroke[2][8] = { {0, 0, 0, 0, 1, 1, 2, 0}, {0, 0, 0, 1, 1, 2, 0, 0} };
+        for (int k = 0; k < 2; k++) for (unsigned a = 0; a < sizeof caps / sizeof caps[0]; a++) {
+            int h = k ? 16 : 8, top = k ? 4 : 2;
+            Glyph *g = &glyphs[k][caps[a].ch]; const Glyph *b = &glyphs[k][caps[a].base], *sm = &glyphs[k][caps[a].small];
+            if (g->img) continue;
+            if (!b->img && caps[a].alt) b = &glyphs[k][caps[a].alt];
+            if (!b->img || b->h != h || (k && (!sm->img || sm->w != b->w || sm->h != 16)) || (!k && b->w != 8)) continue;
+            if (!k && caps[a].ch == 0xD1 && (!sm->img || sm->w != 8 || sm->h != 8)) continue;
+            int w = b->w, n = w * h;
+            u8 *img = calloc((size_t)(n + 1) / 2, 1);
+            if (!img) continue;
+            #define PX(gl, x, y) (((gl)->img[((y) * w + (x)) >> 1] >> ((((y) * w + (x)) & 1) * 4)) & 15)
+            #define PUT(x, y, v) (img[((y) * w + (x)) >> 1] |= (u8)((v) << ((((y) * w + (x)) & 1) * 4)))
+            /* the letter: rows top .. h-1 (8 px) / 13 (16 px) take its rows 0..6 / 2..13 less the dropped ones */
+            for (int r = k ? 2 : 0, y = top; r < (k ? 14 : 7); r++) {
+                if (k ? r == caps[a].drop16a || r == caps[a].drop16b : r == caps[a].drop8) continue;
+                for (int x = 0; x < w; x++) PUT(x, y, PX(b, x, r));
+                y++;
+            }
+            /* the accent: rows 0-1 (8 px) / 2-3 (16 px) */
+            for (int j = 0; j < 2; j++) for (int x = 0; x < w; x++) {
+                int v;
+                if (k) v = PX(sm, x, 2 + j);
+                else if (caps[a].ch == 0xD1) v = PX(sm, x, j);
+                else { int sx = caps[a].ch == 0xCD ? x + 1 : x; v = sx < 8 ? stroke[j][sx] : 0; }
+                PUT(x, (k ? 2 : 0) + j, v);
+            }
+            #undef PX
+            #undef PUT
+            g->w = (u8)w; g->h = (u8)h; g->img = img;
+        }
+    }
+    /* a font with no 8 px hyphen (the English disc's): the 16 px one's bar on the 8 px font's hyphen row (3) */
+    if (!glyphs[0]['-'].img && glyphs[1]['-'].img && glyphs[1]['-'].h == 16) {
+        const Glyph *b = &glyphs[1]['-']; int w = b->w, row = -1;
+        for (int y = 0; y < 16 && row < 0; y++) for (int x = 0; x < w; x++) if ((b->img[(y * w + x) >> 1] >> (((y * w + x) & 1) * 4)) & 15) { row = y; break; }
+        u8 *img = row >= 0 ? calloc((size_t)(w * 8 + 1) / 2, 1) : NULL;
+        if (img) {
+            for (int x = 0; x < w; x++) {
+                int v = (b->img[(row * w + x) >> 1] >> (((row * w + x) & 1) * 4)) & 15, p = 3 * w + x;
+                img[p >> 1] |= (u8)(v << ((p & 1) * 4));
+            }
+            glyphs[0]['-'].w = (u8)w; glyphs[0]['-'].h = 8; glyphs[0]['-'].img = img;
+        }
+    }
     int n8 = 0, n16 = 0, n24 = 0;
     for (int c = 0; c < 256; c++) { n8 += !!glyphs[0][c].img; n16 += !!glyphs[1][c].img; n24 += !!glyphs[2][c].img; }
     pa_font_ok = n16 > 40;

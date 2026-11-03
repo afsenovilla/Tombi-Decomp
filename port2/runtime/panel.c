@@ -107,7 +107,9 @@ static char *ovl_string(const Ovl *o, u32 a) {
         if (g == -1) break;
         if (g == -3) { if (k && b[k - 1] != ' ') b[k++] = ' '; continue; }
         if (g <= 0) continue;
-        c = g == 332 ? 0xA1 : g == 337 ? 0xBF : g - 140 < 0x80 ? g - 140 : g - 74;   /* the opening marks sit past the Latin-1 range */
+        /* Latin-1 + 140 below 0x7F, + 74 from 267 = A-acute (not DEL: "Area Cerdiablo uno", "Arbol del Saber" lost their A); the
+           opening marks and the ordinal a sit past the Latin-1 range (tools/subscreen_text.py) */
+        c = g == 332 ? 0xA1 : g == 333 ? 0xAA : g == 337 ? 0xBF : g < 267 ? g - 140 : g - 74;
         if (c >= 32 && c < 256) b[k++] = (char)c;
     }
     while (k && b[k - 1] == ' ') k--;
