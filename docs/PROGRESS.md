@@ -93,7 +93,7 @@ figure in the summary counts each function once.
 - Data names: done by usage for MAIN0 (342 globals in `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM
   overlays (266: D0SPSUB 67, D0SPSUB2 51, D0SPSUB3 43, G0OVER 4, I0NFO 11, I0NFO2 46, I0NFO3 11, O0PTSUB0 33), applied to the sources with `tools/rename_data.py`. What is still spelled by
   address: animation scripts, elements of named pointer tables, field aliases and Psy-Q internals.
-- Other versions: the Japanese release (50.5 %) and demo (39.6 %) are paused at their shared-C state.
+- Other versions: the Japanese release (75 %, hand matching) and the demo (40.9 %, `tools/demo_sweep.py`) have their own README blocks.
 
 ## Plan
 

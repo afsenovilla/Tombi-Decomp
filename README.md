@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | Europe, Spanish (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, everything below |
 | Japan, *Ore! Tomba* (`SLPS_011.44`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPS_011.44&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPS_011.44&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPS_011.44&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | matching in progress, see [docs/JP.md](docs/JP.md) |
-| Japan demo, taikenban (`SLPM_801.65`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPM_801.65&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPM_801.65&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPM_801.65&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | shared C reuse, paused, see [docs/JPDEMO.md](docs/JPDEMO.md) |
+| Japan demo, taikenban (`SLPM_801.65`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPM_801.65&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPM_801.65&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPM_801.65&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | shared C reuse + automatic sweep (`tools/demo_sweep.py`), see [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Beta 1998-02-03 (`BETA_980203`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=BETA_980203&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=BETA_980203&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=BETA_980203&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | shared C reuse, see [docs/BETA_980203.md](docs/BETA_980203.md) |
 | PrePre 8 demo (`PCPX_960.84`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=PCPX_960.84&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=PCPX_960.84&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=PCPX_960.84&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | symbol pairing, see [docs/PREPRE8.md](docs/PREPRE8.md) |
 
@@ -64,7 +64,7 @@ dispatcher `func_800ED0C4` (now `subScreenItemListStep`) was matched by [michael
 functions keep a generic name (`notes/unnamed.json`; empty stubs are named `stubNop<addr>` / `stubFreeObj<addr>`). Data naming is done by usage for
 MAIN0 (342 globals, `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM overlays (266 in their
 `notes/data_names_<overlay>.csv`), applied with `tools/rename_data.py`; what is still spelled by address is animation
-scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release is active again (see "Japanese release progress"); the demo (39.6 %) is paused.
+scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release is active again (see "Japanese release progress"); the demo is swept automatically (see "Japanese demo progress").
 
 ## Target
 
@@ -214,13 +214,26 @@ offsets and the function or splat range that produced them.
 Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
 <!-- jp-progress:end -->
 
+## Japanese demo progress
+
+<!-- slpm80165-progress:start -->
+**Ore! Tomba demo (SLPM-80165): 40.87 % of the code matches byte for byte** (262276 of 641804 bytes, 1098 of 1832 functions).
+
+| Part | Code | Matching bytes | Functions | Matching |
+|---|---:|---:|---:|---|
+| SLPM_801.65: boot exe | 348752 B | 156428 B | 828 / 1309 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 44.9 % |
+| X00.BIN: shared object code | 293052 B | 105848 B | 270 / 523 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 36.1 % |
+
+Regenerated with `python3 tools/build_report.py --version slpm80165` then `python3 tools/progress_jp.py --version slpm80165`. `python3 tools/demo_sweep.py` installs the PAL / JP C that matches demo functions as is (see [docs/JPDEMO.md](docs/JPDEMO.md)).
+<!-- slpm80165-progress:end -->
+
 ## Versions
 
 | Version | Serial | Status |
 |---------|--------|--------|
 | Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
 | Ore! Tomba (Japan) | SLPS-01144 | split + shared C, matching in progress (figures in the table at the top and in "Japanese release progress"), see [docs/JP.md](docs/JP.md) |
-| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 39.6 % of code (objdiff), paused, see [docs/JPDEMO.md](docs/JPDEMO.md) |
+| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 40.9 % of code (objdiff; figures in "Japanese demo progress"), `tools/demo_sweep.py` installs what PAL / JP C matches as is, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Ore! Tomba beta 1998-02-03 (Japan) | SLPS-01144 (prototype) | split + shared C, 56.5 % of code, see [docs/BETA_980203.md](docs/BETA_980203.md) |
 | Tomba! PrePre 8 (Japan demo) | PCPX-96084 | split + symbol pairing, 17.1 % of code, see [docs/PREPRE8.md](docs/PREPRE8.md) |
 

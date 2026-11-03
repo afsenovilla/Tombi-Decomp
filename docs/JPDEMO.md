@@ -156,7 +156,7 @@ by `tools/xmatch.py --csv` + `tools/jpdemo_syms.py` (PAL names at demo addresses
 --version slpm80165` writes `build/slpm80165/report.json` (one unit per demo function), and the
 `report-jpdemo` CI job uploads it as `SLPM_801.65_report` for decomp.dev, from the `GAME_FILES_URL_JP_DEMO` secret.
 
-**C reuse (39.6 % of demo code, 1034 of 1832 functions):** the demo report compiles C for demo functions with the
+**C reuse (40.9 % of demo code, 1098 of 1832 functions; 39.6 % / 1034 before the sweep below):** the demo report compiles C for demo functions with the
 PAL toolchain (`tools/ncheck.py` build: same compiler, `// FLAGS`, `// CC`, `// AS gnu`, `// HEADERS` per file) and
 renames the object's function to the demo symbol, so objdiff matches it (relocations ignored; objects are not
 linked). Sources, by priority:
@@ -182,6 +182,36 @@ linked). Sources, by priority:
   demo game code: they cut the real function short (14 such rows).
 - `config/slpm80165/symbol_addrs_manual.txt` also names 31 X00 functions that splat merged into the previous one
   (`jr ra`, then a new stack frame; reached only through pointer tables).
+
+**Automatic sweep (`tools/demo_sweep.py`, 2026-11):** the reusable pass that raises the demo figure without hand
+work, runnable from CI after `build_report.py --version slpm80165` (and for `beta980203` / `pcpx96084` when their
+game files are present; it skips a version without a report). For every unmatched demo function with no demo C
+yet it compiles, for the demo (`-DVERSION_SLPM_80165`, scratchpad names as constants, like the report), every
+source that already matches the same function elsewhere: the PAL file of its symbol-table / `reuse.txt` pair (PAL
+body and the branches of the other versions, SLPS_01144 first), the JP-only twins of that PAL function
+(`src/[x0nn/]<name>_slps01144.c`), the PAL and JP functions of the same name, and, for the 848 splat `func_<addr>`
+functions that have no pair at all, the PAL C functions and the JP functions with version C of the same size whose
+masked words (`tools/xmatch.py`) are at least 90 % similar. Each body is tried with its file's flags and the common
+variants (`-O2 -G0`, `-O2 -G0 -fno-strength-reduce`) and compared strictly (`tools/jpcheck.py` dump: relocation
+addends ignored like objdiff, branch targets kept). A match is installed the way the versions share C: a symbol-table
+pair (`PAL <module> <addr>`, named after the PAL function only when the pair is sure: symbol-table pair or an
+identical masked body of 16 instructions or more, otherwise `func_<addr>_slpm80165`) when the PAL file as is
+builds it, a `reuse.txt` line when the table already names it, a `// VERSION` + `// FLAGS.SLPM_80165` header when
+only the flags differ, a `#if defined(VERSION_SLPM_80165)` branch of the PAL file when free, else a guarded
+`src/<name>_slpm80165.c`. `--fix` adds the slow `tools/jp_autofix.py` edits (literals shifted by the immediates of
+the diff, pad bits, a statement moved or deleted) on the best near candidate (size within 15 %, masked ratio 0.8 or
+more) of each function still unmatched. The run is idempotent (installed functions are skipped) and `--report`
+rebuilds the report; `--dry-run` only prints.
+
+First run: 1069 -> 1098 functions, 40.33 % -> 40.87 % (`build_report` of the same tree before and after; the 39.6 %
+above is the older stamp). 28 came from the exact pass (21 pairings of Psy-Q getters / GTE setters and
+`clampCameraYOffsetToObjBounds`, 7 JP-twin files: `StartRCnt`, `_padStopCom`, `a00TornadoStep`, `updateNpcCharles`
+and three JP-only helpers whose demo copies are byte for byte the JP ones), 1 from `--fix` (`func_80128D94`, the
+JP `func_80131EF4` with two literals shifted; 12 minutes for its 48 candidates). The ceiling is structural, not a
+tool gap: of the 690 unmatched demo functions, 606 have no same-size function in the whole C pool at even 50 %
+masked similarity and only 54 have a near-size one at 80 % or more (`--show` lists the residual diff line count),
+so the rest is edited early code (the 70 % / 79 % instruction-level difference measured above) that needs hand
+matching per function, as for the retail JP build.
 
 - **Plumbing (1-2 days):** add `config/slpm80165/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate

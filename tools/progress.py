@@ -367,7 +367,7 @@ def main():
     w("- Data names: done by usage for MAIN0 (%d globals in `notes/data_names_main0.csv`), X000 (%d) and the eight SYSTEM" % (dn["main0"], dn["x000"]))
     w("  overlays (%d: %s), applied to the sources with `tools/rename_data.py`. What is still spelled by" % (dn["sys"], dn["sys_detail"]))
     w("  address: animation scripts, elements of named pointer tables, field aliases and Psy-Q internals.")
-    w("- Other versions: the Japanese release (50.5 %) and demo (39.6 %) are paused at their shared-C state.")
+    w("- Other versions: the Japanese release (75 %, hand matching) and the demo (40.9 %, `tools/demo_sweep.py`) have their own README blocks.")
     w("")
     w("## Plan\n")
     w("1. Match every game function byte for byte (this report; five D0SPSUB* functions left, see above).")
