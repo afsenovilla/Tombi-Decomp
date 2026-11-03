@@ -107,12 +107,15 @@ void w2c_port_ctx_switch(struct w2c_port *unused, u32 save, u32 to) {
     *sp = ctx[n].ssp;
     port_w2c_switch(&ctx[from].sp, ctx[n].sp);
 }
-/* SDL (and through it JNI on Android) only runs on the thread's own stack: a call made from a coroutine runs below the
-   main thread's suspended frames (runtime/threads.c port_host_call, same contract) */
+/* SDL (and through it JNI on Android) only runs on the thread's own stack (runtime/threads.c port_host_call, same
+   contract).  The module's main context runs on a large stack of its own (port_main: the Android SDL thread's Java
+   stack is about 1 MB), so every host call from the module runs on the thread's real stack, below port_main's frame,
+   where nothing lives while the module runs. */
+static uintptr_t thread_sp;              /* the thread's own stack, below port_main's frame */
 void port_host_call(void (*fn)(void *), void *arg) {
-    if (cur_ctx == 0 || on_host) { fn(arg); return; }
+    if (on_host || !thread_sp) { fn(arg); return; }
     on_host = 1;
-    port_w2c_call_on_stack(fn, arg, (void *)(((uintptr_t)ctx[0].sp - 256) & ~(uintptr_t)15));
+    port_w2c_call_on_stack(fn, arg, (void *)thread_sp);
     on_host = 0;
 }
 
@@ -217,6 +220,8 @@ void port_w2c_trap(wasm_rt_trap_t t) {
 /* the audio callback's instance: the same memory and table, its own shadow stack (rt_wasm.c audio_stack) */
 w2c_tombi *port_host_audio_instance(void) { return &ainst; }
 
+__attribute__((noinline)) static uintptr_t below_sp(void) { volatile char c; return (uintptr_t)&c; }
+static void start_h(void *u) { (void)u; w2c_tombi_0x5Fstart(&inst); }
 /* the game: argv as the PC build's.  Android: libmain.so (port2/android/loader.c) calls it on SDL's main thread. */
 __attribute__((visibility("default"))) int port_main(int argc, char **argv) {
     g_argc = argc; g_argv = argv;
@@ -231,7 +236,13 @@ __attribute__((visibility("default"))) int port_main(int argc, char **argv) {
     ainst = inst;
     *w2c_tombi_0x5F_stack_pointer(&ainst) = w2c_tombi_port_wasm_audio_stack_top(&inst) & ~15u;
     port_host_bridge_init();
-    w2c_tombi_0x5Fstart(&inst);
+    {   /* _start on a 64 MB stack (reserved, committed as it is touched); host calls go back to this thread's own */
+        size_t sz = 64u << 20;
+        void *st = mmap(0, sz, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0);
+        if (st == MAP_FAILED) { w2c_tombi_0x5Fstart(&inst); return 0; }
+        thread_sp = (below_sp() - 1024) & ~(uintptr_t)15;   /* (below port_w2c_call_on_stack's own frame too) */
+        port_w2c_call_on_stack(start_h, 0, (void *)(((uintptr_t)st + sz) & ~(uintptr_t)15));
+    }
     return 0;
 }
 #ifndef __ANDROID__
