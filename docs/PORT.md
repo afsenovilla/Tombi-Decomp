@@ -164,8 +164,8 @@ vblank for tests. Verified headless: a save written from the save screen
 
 **Pacing: `--realtime`, `--hz 50|60`, `--show-fps`, `--stall FRAME:MS`.** One vblank every 1/hz s from the host
 clock (default 50, PAL; 60 gives NTSC timing: the game logic runs 20% faster, as on an NTSC console, which is the
-US/JP game's speed since PAL changed no game constant for 50 Hz: "60 Hz mode"; `--hz 60` also switches to the USA
-320x224 picture, `--picture pal|ntsc` overrides that: "NTSC picture"). `--window`
+US/JP game's speed since PAL changed no game constant for 50 Hz: "60 Hz mode"; the picture stays the PAL
+320x256 one; `--picture ntsc` opts into the experimental USA 320x224 picture: "NTSC picture"). `--window`
 implies `--realtime` and honours `--hz`. The schedule is absolute (`port_vblank` in `shims/psyq.c`): vblank n is
 due at `epoch + n/hz`, waited for with `port_sleep_until_us` (Linux: `clock_nanosleep` `TIMER_ABSTIME` to 200 µs
 before the deadline, then a spin on `clock_gettime`; Windows: `timeBeginPeriod(1)` at start, then `Sleep(1)` is
@@ -1085,7 +1085,7 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 | Mod | Port options | Notes |
 |---|---|---|
 | Skip intro logos/movies (default off) | `--skip-movies` | the movies play by default (`port2/`); `--play-movies` is accepted and does nothing |
-| 60 Hz | `--hz 60` | NTSC pacing (`--hz 50` otherwise) and the NTSC picture (320x224, the USA layout; `--picture pal` keeps the PAL 320x256 one) |
+| 60 Hz | `--hz 60` | NTSC pacing (`--hz 50` otherwise); the picture stays PAL 320x256 (`--picture ntsc`: the experimental USA 320x224 layout) |
 | Area select | `--poke 900:1F8001B4:1 --poke 1250:8009C960:A:2 --poke 1250:8009C962:S:2 --pad-script 1000:start,1300:circle:3` | area/section pickers from `ROOM_COUNTS` (names from README); rooms of `DOOR_ROOMS` are not offered |
 | Start with N AP | `--poke 1100:8009C96C:N:4` | `GAME.playerAP` (drawHudAP) |
 | Start with N lives | `--poke 1100:8009C980:N:1` | `GAME.playerLives` (drawHudLives) |
@@ -2713,7 +2713,11 @@ call to X006 0x801194AC with no native code) is also the same at both rates: a p
 **Open.** Nothing in the game logic. A real NTSC console's 59.94 Hz is not reproduced (see above). The PAL-only logic
 fixes are kept on purpose. The picture follows the USA build: see "NTSC picture" below.
 
-#### NTSC picture: `--hz 60` draws the USA game's 320x224 screen
+#### NTSC picture: `--picture ntsc` draws the USA game's 320x224 screen
+
+**Status: experimental, opt-in.** It was the default with `--hz 60` in 0.0.16 / 0.0.17 and was taken back: the
+top-down areas (AREA02, AREA05...) draw the backgrounds, static objects and characters out of step (sprites above
+the ground, duplicated background rows) and the movies flicker.
 
 **Why.** The PAL build draws 256 lines (320x256, screen centre y 128) where the USA build draws 224 (320x224, centre
 y 112), and a PAL TV stretches its 256 lines over the same 4:3 screen an NTSC TV fills with about 240: the same

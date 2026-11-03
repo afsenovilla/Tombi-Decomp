@@ -17,7 +17,7 @@
 typedef unsigned char u8; typedef unsigned short u16; typedef short s16; typedef unsigned int u32;
 
 int port_verbose;
-int port_ntsc;               /* the US build's 320x224 picture (--picture, default with --hz 60; port_prelude.h PORT_NTSC) */
+int port_ntsc;               /* the US build's 320x224 picture (--picture, port_prelude.h PORT_NTSC) */
 
 /* The log goes to stderr, unbuffered (setvbuf below, and an fflush after every write in case a CRT ignores it),
    so a hard kill loses nothing.  The watchdog's report must leave the process even when the game thread sits
@@ -919,7 +919,7 @@ int main(int argc, char **argv) {
     extern const char *port_audio_path, *port_save_dir; extern int port_skip_movies, port_show_fps, port_stall_frame, port_stall_ms;
     int headless = 0, test_null = 0;
     port_window = 1;
-    int picture = -1;                      /* --picture ntsc|pal (default: ntsc with --hz 60) */
+    int picture = -1;                      /* --picture ntsc|pal (default: pal; ntsc is experimental) */
     for (int i = 1; i < argc; i++) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : 0;
         if (!strcmp(a, "--disc") && v) port_disc_path = argv[++i];
@@ -1032,7 +1032,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--title-bg") && v) { extern const char *port_title_bg_path; port_title_bg_path = argv[++i]; }   /* widescreen: wide title background (runtime/titlebg.c) */
         else if (!strcmp(a, "--test-null")) test_null = 1;
         else if (!strcmp(a, "--hz") && v) { port_hz = atoi(argv[++i]); if (port_hz != 50 && port_hz != 60) return usage(argv[0]); }
-        else if (!strcmp(a, "--picture") && v) {   /* ntsc: the US 320x224 picture (default with --hz 60); pal: 320x256 */
+        else if (!strcmp(a, "--picture") && v) {   /* ntsc: the US 320x224 picture; pal: 320x256 */
             if (!strcmp(v, "ntsc")) picture = 1; else if (!strcmp(v, "pal")) picture = 0; else return usage(argv[0]);
             i++;
         }
@@ -1081,7 +1081,7 @@ int main(int argc, char **argv) {
         else return usage(argv[0]);
     }
     if (headless) port_window = 0;
-    port_ntsc = picture >= 0 ? picture : port_hz == 60;
+    port_ntsc = picture > 0;     /* opt-in (--picture ntsc): the PAL picture is the default at 50 and 60 Hz */
     if (port_ntsc) port_printf("[port2] NTSC picture: the US build's 320x224 screen (--picture pal for the PAL 320x256 one)\n");
     if (port_ws_auto) { extern int port_widescreen; port_widescreen = port_ws_resolve(); }
     { extern int port_widescreen, port_renderer, port_ws_cull;
