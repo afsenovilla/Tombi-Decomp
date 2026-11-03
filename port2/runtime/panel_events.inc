@@ -175,7 +175,12 @@ static void pin_mark(int x, int y, unsigned c) {   /* a push pin, 10 x 14: round
 static const char *kind_name(int k), *ev_giver(int e);
 static const char *place_area(int area, int sec), *place_room(int area, int sec);
 static const char *ev_giver(int e) {   /* panel_givers.h, in the panel's language */
-    for (unsigned i = 0; i < sizeof panel_givers / sizeof panel_givers[0]; i++) if (panel_givers[i].ev == e) return T(panel_givers[i].en, panel_givers[i].es);
+    for (unsigned i = 0; i < sizeof panel_givers / sizeof panel_givers[0]; i++) if (panel_givers[i].ev == e) {
+        const char *s = T(panel_givers[i].en, panel_givers[i].es);
+        if (es() && es_improved)
+            for (unsigned j = 0; j < sizeof panel_givers_mej / sizeof panel_givers_mej[0]; j++) if (!strcmp(s, panel_givers_mej[j].disc)) return panel_givers_mej[j].mej;
+        return s;
+    }
     return NULL;
 }
 static const char *kind_name(int k) {
@@ -230,7 +235,7 @@ static void event_list(void) {
         pa_text_fit(46 + pw, y + (st == F_PROGRESS ? 17 : 16), 8, W - 60 - tr - pw, b, sel ? C_WHITE : st == F_PROGRESS ? C_RED8 : C_MUTED8, sel ? RGB(60, 110, 50) : RGB(230, 200, 190));
     }
     int by = y0 + rows * rh + 4;
-    snprintf(b, sizeof b, "%d / %d", n ? ev_sel + 1 : 0, n);
+    snprintf(b, sizeof b, T("%d of %d", "%d de %d"), n ? ev_sel + 1 : 0, n);   /* the 16 px font has no '/' */
     pa_text(W - 24 - pa_text_w(16, b), by, 16, b, C_DARK, C_EDGE);
     int s, d; count_events(&s, &d);
     snprintf(b, sizeof b, T("%d started, %d completed", "%d empezados, %d completados"), s + d, d);

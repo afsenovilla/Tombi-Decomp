@@ -131,3 +131,19 @@ static const PanelGiver panel_givers[] = {
     {190, "El ladr\xF3n", "The thief"},   /* lostBossItemNpcTalk MFNT030 #255; desc 190 */
     {191, "El ladr\xF3n", "The thief"},   /* lostBossItemNpcTalk MFNT040 #229; desc 191 */
 };
+/* The improved Spanish translation (patches/es_mejorada.tombipatch.json, glossary es_mejorada_glosario.md) renames some
+   of these in its dialogues, titles and item names: while it is active (panel.c es_improved: the patched sub-screen
+   event list names event 16 "La caja AP") the panel says what its text says.  Disc name -> the translation's. */
+static const struct { const char *disc, *mej; } panel_givers_mej[] = {
+    {"Anciano sabio centenario", "Sabio Anciano centenario"},   /* MFNT001 #85 'el sabio Anciano centenario' */
+    {"Caja PA", "Caja AP"},                                     /* AP, as the HUD and the title "La caja AP" */
+    {"Pez potencia", "Pez ps\xEDquico"},                        /* item and dialogues */
+    {"Tobog\xE1n de hoja", "Tobog\xE1n de hojas"},              /* item and title */
+    {"Fuente de caridad", "Fuente de la caridad"},              /* MFNT010 dialogues */
+    {"El minero famoso", "El gran minero"},                     /* title 33 */
+    {"Cerradura peque\xF1""a", "Cerradurita"},                  /* title 51 'Una cerradurita!' and its dialogue */
+    {"Gran Cerradura", "Gran cerradura"},                       /* title 55 */
+    {"Arc\xF3n del tesoro milenario", "Cofre del tesoro milenario"},   /* glossary: chest = cofre (was arcon) */
+    {"La Sirena", "La sirena"},                                 /* 'La roca cantora de la sirena' */
+    {"La Bruja Mizuno", "La bruja Mizuno"},                     /* MFNT180 'La bruja Mizuno!' */
+};

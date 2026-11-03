@@ -89,6 +89,10 @@ static int nb_lo = 9999, nb_hi = -9999, nz_lo = 9999, nz_hi = -9999;
 /* names (latin-1, malloc'd; NULL = unknown) */
 static u8 ev_order[EVENTS]; static int ev_norder;   /* the menu's event ids in its order (from SUBSCREEN_EVENT_ORDER) */
 static char *ev_name[EVENTS], *area_name[12], *room_name[12][24], *a14_area[24], *a14_room[24], *item_name[256];
+/* 1 when the sub-screen tables come from the improved Spanish translation (its event 16 is "La caja AP", the disc's "La caja
+   PA"): applied in memory (--text-patch, translation.tpatch) or written into data/ by the PC launcher, the panel reads
+   them through port_cd_read_named like the game; this only switches the names the panel writes itself (panel_givers.h) */
+static int es_improved;
 
 static u32 rd32(const u8 *d, unsigned o) { return d[o] | d[o + 1] << 8 | d[o + 2] << 16 | (u32)d[o + 3] << 24; }
 static s16 rd16(const u8 *d, unsigned o) { return (s16)(d[o] | d[o + 1] << 8); }
@@ -208,8 +212,9 @@ static void load_tables(void) {
         if (in_ovl(&on, idx) && in_ovl(&on, idx + 199))
             for (int i = 0; i < 200; i++) item_name[i] = ovl_string(&on, RD(t + 4 * on.d[idx - on.base + i]));
     }
-    port_printf("[panel] tables read (%s): %d map nodes, event 3 \"%s\", area 0 \"%s\"\n", dn ? name : "SYSTEM/D0SPSUB.BIN", NNODES,
-                ev_name[3] ? ev_name[3] : "?", area_name[0] ? area_name[0] : "?");
+    es_improved = ev_name[16] && !strcmp(ev_name[16], "La caja AP");
+    port_printf("[panel] tables read (%s%s): %d map nodes, event 3 \"%s\", area 0 \"%s\"\n", dn ? name : "SYSTEM/D0SPSUB.BIN",
+                es_improved ? ", improved Spanish translation" : "", NNODES, ev_name[3] ? ev_name[3] : "?", area_name[0] ? area_name[0] : "?");
     free(d0); free(dn);
     loaded = 1;
 }

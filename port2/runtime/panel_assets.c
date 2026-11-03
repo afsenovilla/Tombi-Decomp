@@ -243,6 +243,50 @@ static void sha1(const u8 *m, unsigned n, u8 out[20]) {
     for (int i = 0; i < 20; i++) out[i] = (u8)(h[i / 4] >> (24 - 8 * (i % 4)));
 }
 static int hidx(int h) { return h == 8 ? 0 : h == 16 ? 1 : h == 24 ? 2 : -1; }
+static int charmap_exact(int h, int w, const u8 *img) {
+    u8 s[20]; sha1(img, (unsigned)(w * h + 1) / 2, s);
+    for (unsigned j = 0; j < sizeof panel_charmap / sizeof panel_charmap[0]; j++)
+        if (panel_charmap[j].h == h && panel_charmap[j].w == w && !memcmp(panel_charmap[j].sha, s, 6)) return panel_charmap[j].ch;
+    return -1;
+}
+/* The Latin-1 character of a WFM glyph bitmap (w x h, 4 bpp), -1 when not known.  The files of a text patch (the improved
+   Spanish translation: --text-patch, translation.tpatch, or data/ written by the PC launcher) move some glyphs inside their
+   cell (tools/wfm_py.py shift_glyphs: the 16 px ',' and u-acute dx pixels sideways, the 8 px accented letters one row up
+   by dropping the empty row under the accent), so their hashes are not the disc's: when there is no exact match the
+   move is undone (a sideways shift of up to 2 columns that loses no ink; an empty row put back at each place, the last
+   row being empty) and the disc glyph looked up again.  *norm (when not NULL) gets a malloc'd copy of the disc's bitmap
+   for a moved glyph (the panel draws its fonts as the disc has them, its own redrawn accents included), else NULL. */
+static int glyph_char(int h, int w, const u8 *img, u8 **norm) {
+    int c = charmap_exact(h, w, img), n = w * h, sz = (n + 1) / 2;
+    if (norm) *norm = NULL;
+    if (c >= 0 || n <= 0 || n > 64 * 32) return c;
+    u8 px[64 * 32], out[64 * 32];
+    u8 *pk = malloc((size_t)sz);
+    if (!pk) return -1;
+    for (int p = 0; p < n; p++) px[p] = (img[p >> 1] >> ((p & 1) * 4)) & 15;
+    for (int t = 0; t < 4 + h && c < 0; t++) {
+        memset(out, 0, (size_t)n);
+        if (t < 4) {   /* sideways by dx = 1, -1, 2, -2 (the glyph went -dx) */
+            static const int dxs[4] = { 1, -1, 2, -2 };
+            int dx = dxs[t], lost = 0;
+            for (int r = 0; r < h; r++) for (int x = 0; x < w; x++) {
+                int v = px[r * w + x], nx = x + dx;
+                if (nx < 0 || nx >= w) lost |= v; else out[r * w + nx] = (u8)v;
+            }
+            if (lost) continue;
+        } else {       /* an empty row put back at row t - 4, the rest one row lower */
+            int r0 = t - 4, last = 0;
+            for (int x = 0; x < w; x++) last |= px[(h - 1) * w + x];
+            if (last) break;
+            for (int r = 0; r < h; r++) if (r != r0) memcpy(out + r * w, px + (r < r0 ? r : r - 1) * w, (size_t)w);
+        }
+        memset(pk, 0, (size_t)sz);
+        for (int p = 0; p < n; p++) pk[p >> 1] |= (u8)(out[p] << ((p & 1) * 4));
+        c = charmap_exact(h, w, pk);
+    }
+    if (c >= 0 && norm) *norm = pk; else free(pk);
+    return c;
+}
 static void load_wfm(const char *name) {
     unsigned n; u8 *d = port_cd_read_named(name, &n);
     if (!d) return;
@@ -254,14 +298,9 @@ static void load_wfm(const char *name) {
         int h = (int)rd16(d, p + 2), w = (int)rd16(d, p + 4), k = hidx(h);
         unsigned sz = (unsigned)(w * h + 1) / 2;
         if (k < 0 || !w || w > 255 || p + 8 + sz > n) continue;
-        u8 s[20]; sha1(d + p + 8, sz, s);
-        for (unsigned j = 0; j < sizeof panel_charmap / sizeof panel_charmap[0]; j++) {
-            const PanelCharKey *c = &panel_charmap[j];
-            if (c->h == h && c->w == w && !memcmp(c->sha, s, 6)) {
-                if (!glyphs[k][c->ch].img) { glyphs[k][c->ch].w = (u8)w; glyphs[k][c->ch].h = (u8)h; glyphs[k][c->ch].img = d + p + 8; used++; }
-                break;
-            }
-        }
+        u8 *norm; int ch = glyph_char(h, w, d + p + 8, &norm);
+        if (ch >= 0 && !glyphs[k][ch].img) { glyphs[k][ch].w = (u8)w; glyphs[k][ch].h = (u8)h; glyphs[k][ch].img = norm ? norm : d + p + 8; used++; }
+        else free(norm);
     }
     if (used) font_blobs[nblobs++] = d; else free(d);
 }
@@ -450,11 +489,7 @@ int pa_wfm_dialogue(const unsigned char *d, unsigned n, int idx, char *out, int 
         unsigned gp = rd16(d, 144 + 2 * (v - 0x8000)), h, w, sz; int ch = '?';
         if (gp + 8 > n) continue;
         h = rd16(d, gp + 2); w = rd16(d, gp + 4); sz = (w * h + 1) / 2;
-        if (gp + 8 + sz <= n) {
-            u8 s[20]; sha1(d + gp + 8, sz, s);
-            for (unsigned j = 0; j < sizeof panel_charmap / sizeof panel_charmap[0]; j++)
-                if (panel_charmap[j].h == h && panel_charmap[j].w == w && !memcmp(panel_charmap[j].sha, s, 6)) { ch = panel_charmap[j].ch; break; }
-        }
+        if (gp + 8 + sz <= n) { int c = glyph_char((int)h, (int)w, d + gp + 8, NULL); if (c >= 0) ch = c; }
         out[k++] = (char)ch;
     }
     out[k] = 0;
