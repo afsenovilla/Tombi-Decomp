@@ -63,6 +63,7 @@ typedef struct {
     HPrim *p; int np, capp, built;
     float *d; int capd;             /* per vertex: (earlier - this), set when this record is the displayed one of a pair */
     u16 *snapV, *snapW;             /* software: vram / wvram when the record started */
+    short wr[8][5]; int nwr;        /* the rectangles its replay writes (x1 y1 x2 y2 wide), nwr < 0 = not worked out yet (OpenGL) */
 } HRec;
 #define HNREC 4
 #define HFR_MAX_OPS 400000
@@ -71,9 +72,20 @@ static int hcur, h_init, h_pair_ok, h_since, h_span = 1, h_block, h_gl;
 static unsigned hseq, h_disp, h_prev;
 static int hd_x, hd_y, hd_w, hd_h, hd_wide;
 static u16 *h_workV, *h_workW;
-static unsigned long long h_cost;   /* what a replay took lately (us, no swap): port_hfr_wait starts none that would end past the vblank */
+/* what the presents take (us), for port_hfr_wait, which starts none that would end past the next vblank: h_cost a replay
+   (OpenGL: until the GPU has finished it), h_pc a present (the swap); each the running mean plus twice the running mean
+   deviation (h_est), as TCP estimates a round trip */
+typedef struct { double m, d; } HEst;
+static HEst he_cost, he_pc;
+static unsigned long long h_cost, h_pc;
+static unsigned long long h_est(HEst *e, unsigned long long us) {
+    double x = (double)us, dv = x > e->m ? x - e->m : e->m - x;
+    if (e->m == 0 && e->d == 0) { e->m = x; e->d = x / 2; }
+    else { e->d += (dv - e->d) / 4; e->m += (x - e->m) / 8; }
+    return (unsigned long long)(e->m + 2 * e->d);
+}
 /* statistics (-v at exit, --dump-presents) */
-static unsigned long long hs_pair_us, hs_replay_us, hs_presents, hs_interp, hs_pairs, hs_cuts, hs_scene, hs_vblanks;
+static unsigned long long hs_pair_us, hs_replay_us, hs_presents, hs_interp, hs_pairs, hs_cuts, hs_scene, hs_vblanks, hs_late, hs_plain;
 static unsigned long long hs_static, hs_exact, hs_loose, hs_new;
 
 static void *h_grow(void *p, int *cap, int need, size_t sz) {
@@ -176,7 +188,7 @@ static HRec *h_by_id(unsigned id) {
 static void h_start(int i) {
     HRec *r = &hrec[i];
     hcur = i;
-    r->id = 0; r->bad = 0; r->nops = r->nv = r->nst = r->ndata = r->np = 0; r->built = 0;
+    r->id = 0; r->bad = 0; r->nops = r->nv = r->nst = r->ndata = r->np = 0; r->built = 0; r->nwr = -1;
     if (h_gl) { extern void port_gl_hfr_snap(int); port_gl_hfr_snap(i); return; }
     if (!r->snapV && !(r->snapV = (u16 *)malloc(sizeof vram_store))) port_fatal("--fps: out of memory");
     memcpy(r->snapV, vram_store, sizeof vram_store);
@@ -351,10 +363,61 @@ static int h_pair(HRec *C, HRec *P) {
 }
 
 /* ------------------------------------------------------------------ replay */
+/* the rectangles a replay of r writes (inclusive, clipped to the plane): drawing ops their drawing area, fills, copies and
+   uploads their destination; more than 8 are merged; nwr = -2 when one wraps around the plane (then: the whole plane) */
+static void h_wadd(HRec *r, int x1, int y1, int x2, int y2, int wide) {
+    int W = wide ? WS_STRIDE : 1024;
+    if (r->nwr == -2) return;
+    if (x1 < 0 || y1 < 0 || x2 >= W || y2 >= 512) { r->nwr = -2; return; }
+    if (x2 < x1 || y2 < y1) return;
+    for (int i = 0; i < r->nwr; i++) {
+        short *q = r->wr[i];
+        if (q[4] == wide && x1 >= q[0] && y1 >= q[1] && x2 <= q[2] && y2 <= q[3]) return;
+    }
+    if (r->nwr == 8) {   /* full: grow the one of the same plane that grows least */
+        int best = -1; long long ba = 0;
+        for (int i = 0; i < 8; i++) {
+            short *q = r->wr[i];
+            if (q[4] != wide) continue;
+            long long a = (long long)((x2 > q[2] ? x2 : q[2]) - (x1 < q[0] ? x1 : q[0]) + 1) * ((y2 > q[3] ? y2 : q[3]) - (y1 < q[1] ? y1 : q[1]) + 1)
+                          - (long long)(q[2] - q[0] + 1) * (q[3] - q[1] + 1);
+            if (best < 0 || a < ba) { best = i; ba = a; }
+        }
+        if (best < 0) { r->nwr = -2; return; }
+        short *q = r->wr[best];
+        if (x1 < q[0]) q[0] = (short)x1; if (y1 < q[1]) q[1] = (short)y1; if (x2 > q[2]) q[2] = (short)x2; if (y2 > q[3]) q[3] = (short)y2;
+        return;
+    }
+    short *q = r->wr[r->nwr++];
+    q[0] = (short)x1; q[1] = (short)y1; q[2] = (short)x2; q[3] = (short)y2; q[4] = (short)wide;
+}
+static void h_wrects(HRec *r) {
+    if (r->nwr != -1) return;
+    r->nwr = 0;
+    for (int i = 0; i < r->nops && r->nwr >= 0; i++) {
+        const HOp *o = &r->ops[i];
+        switch (o->kind) {
+        case H_POLY: case H_RECT: case H_LINE: {
+            const GpuState *st = &r->st[o->st]; int W = st->wide ? WS_STRIDE : 1024;
+            h_wadd(r, st->x1 < 0 ? 0 : st->x1, st->y1 < 0 ? 0 : st->y1, st->x2 >= W ? W - 1 : st->x2, st->y2 > 511 ? 511 : st->y2, st->wide);
+            break;
+        }
+        case H_FILL: h_wadd(r, o->a[0], o->a[1], o->a[0] + o->a[2] - 1, o->a[1] + o->a[3] - 1, o->wide); break;
+        case H_COPY: h_wadd(r, o->a[2], o->a[3], o->a[2] + o->a[4] - 1, o->a[3] + o->a[5] - 1, 0); break;
+        case H_UP: h_wadd(r, o->a[0], o->a[1], o->a[0] + o->a[2] - 1, o->a[1] + o->a[3] - 1, o->wide); break;
+        case H_WSDOWN: h_wadd(r, o->a[2], o->a[3], o->a[2] + o->a[4] - 1, o->a[3] + o->a[5] - 1, 0); break;
+        }
+    }
+}
 static int h_replay_begin(int slot) {
     if (!h_workV && !(h_workV = (u16 *)malloc(sizeof vram_store))) return 0;
     if (port_widescreen && !h_workW && !(h_workW = (u16 *)malloc(sizeof wvram_store))) return 0;
-    if (h_gl) { extern int port_gl_hfr_begin(int); if (!port_gl_hfr_begin(slot)) return 0; }
+    if (h_gl) {
+        extern int port_gl_hfr_begin(int, const short (*)[5], int);
+        HRec *r = &hrec[slot];
+        h_wrects(r);
+        if (!port_gl_hfr_begin(slot, (const short (*)[5])r->wr, r->nwr < 0 ? -1 : r->nwr)) return 0;
+    }
     else {
         if (!hrec[slot].snapV || (port_widescreen && !hrec[slot].snapW)) return 0;
         memcpy(h_workV, hrec[slot].snapV, sizeof vram_store);
@@ -492,22 +555,48 @@ static void hfr_sync(void) {
     h_block = hfr_overlay_frame >= port_frame - 1;
     hd_x = x; hd_y = y; hd_w = w; hd_h = h; hd_wide = wide;
 }
-/* one present at alpha (0 = the frame displayed before, 1 = the displayed one) */
-static void hfr_present(double alpha) {
-    static int dump_n;
-    HRec *C = h_by_id(h_disp);
-    int interp = 0;
+/* whether a present at alpha would be a blend (an interpolated frame) */
+static int hfr_can_blend(double alpha) {
     static int noblend = -1;      /* PORT_HFR_NOBLEND=1 (test hook): the same presents without the blend, for comparisons */
     if (noblend < 0) noblend = getenv("PORT_HFR_NOBLEND") != 0;
     int seen = !noblend && (port_window || (port_hfr_dump_dir && port_frame >= port_hfr_dump_from && port_frame <= port_hfr_dump_to));
-    if (h_pair_ok && !h_block && C && alpha < 0.999 && seen) {
+    return h_pair_ok && !h_block && h_by_id(h_disp) && alpha < 0.999 && seen;
+}
+/* what a swap took: with vsync it also waits for the display's refresh, which is not work, so then the least of about
+   the last second counts; without (unlimited) every one, rising at once and falling slowly */
+static void h_note_present(unsigned long long us) {
+    if (port_hfr_fps != -2) {
+        static unsigned long long mn = ~0ull, prev = ~0ull, t0;
+        unsigned long long now = port_time_us();
+        if (us < mn) mn = us;
+        if (now - t0 > 1000000ull) { prev = mn; mn = ~0ull; t0 = now; }
+        h_pc = prev < mn ? prev : mn;
+    } else h_pc = h_est(&he_pc, us);
+}
+/* one present at alpha (0 = the frame displayed before, 1 = the displayed one), a blend when blend is set; deadline
+   (OpenGL with fences, realtime): the replay's GPU work must be done by then, or the frame is dropped (returns 0)
+   rather than the swap waiting for it */
+static int hfr_present(double alpha, int blend, unsigned long long deadline) {
+    static int dump_n;
+    HRec *C = h_by_id(h_disp);
+    int interp = 0;
+    if (blend && C) {
         unsigned long long t0 = port_time_us();
-        if (h_replay_begin((int)(C - hrec))) { h_replay(C, (float)(1.0 - (alpha < 0 ? 0 : alpha))); interp = 1; }
-        h_cost = (h_cost * 3 + (port_time_us() - t0)) / 4;
-        hs_replay_us += port_time_us() - t0;
+        if (h_replay_begin((int)(C - hrec))) {
+            h_replay(C, (float)(1.0 - (alpha < 0 ? 0 : alpha))); interp = 1;
+            if (h_gl && deadline) {
+                extern int port_gl_hfr_fence(unsigned long long);
+                unsigned long long t = port_time_us();
+                if (!port_gl_hfr_fence(deadline > t ? deadline - t : 0)) interp = -1;   /* not finished in time */
+            }
+        }
+        unsigned long long c = port_time_us() - t0;
+        h_cost = h_est(&he_cost, c);
+        hs_replay_us += c;
+        if (interp < 0) { h_replay_end(); hs_late++; return 0; }
     }
     hs_presents++; hs_interp += interp;
-    if (port_window) present_window();
+    if (port_window) { unsigned long long t0 = port_time_us(); present_window(); h_note_present(port_time_us() - t0); }
     if (port_hfr_dump_dir && port_frame >= port_hfr_dump_from && port_frame <= port_hfr_dump_to) {
         char path[512]; int w, h;
         extern int port_internal_res;
@@ -522,6 +611,7 @@ static void hfr_present(double alpha) {
         if (port_verbose) port_printf("[fps] %s: vblank %d alpha %.3f%s\n", path, port_frame, alpha, interp ? " (interpolated)" : "");
     }
     if (interp) h_replay_end();
+    return 1;
 }
 static int hfr_rate(void) {
     extern int port_window_refresh(void);
@@ -531,7 +621,13 @@ static int hfr_rate(void) {
 }
 /* psyq.c port_vblank, in place of its pacing sleep: the presents due before the next vblank at due_us (realtime: wall
    clock; unpaced, headless: a virtual clock at the --fps rate, auto = 60 without a display); alpha runs from 0 to 1 over
-   the time the displayed frame's predecessor was shown (one vblank at the full logic rate) */
+   the time the displayed frame's predecessor was shown (one vblank at the full logic rate).
+   Realtime, the vblank comes first: the presents only fill the time before it.  A blend starts only when what a replay
+   and a swap take (h_cost, h_pc, plus a margin of about 1 ms) ends before due_us, and on OpenGL only once the GPU has finished the last
+   one (a fence: no glFinish, no readback); its swap waits for nothing past the deadline (the frame is dropped instead).
+   Every vblank still gets one present: when no blend fits, the newest frame as drawn (alpha 1, as without --fps), after
+   which nothing else is shown before the vblank (a blend would step back).  A slow GPU then falls back to the 50/60 Hz
+   presents instead of slowing the game down. */
 void port_hfr_wait(unsigned long long due_us, unsigned long long period_us, int realtime) {
     if (!h_init) { if (realtime && due_us > port_time_us()) port_sleep_until_us(due_us); return; }
     hfr_sync();
@@ -543,40 +639,58 @@ void port_hfr_wait(unsigned long long due_us, unsigned long long period_us, int 
         for (; (double)k * 1e6 / (double)rate < vdue; k++) {
             double frac = 1.0 - (vdue - (double)k * 1e6 / (double)rate) / (double)period_us;
             double a = (h_since + frac) / span;
-            hfr_present(a > 1 ? 1 : a);
+            if (a > 1) a = 1;
+            hfr_present(a, hfr_can_blend(a), 0);
         }
         return;
     }
     static unsigned long long p, last;
-    unsigned long long P = 1000000ull / (unsigned long long)hfr_rate(), now = port_time_us();
-    int n = 0;
+    unsigned long long P = 1000000ull / (unsigned long long)hfr_rate(), now = port_time_us(), margin = 500 + period_us / 32;
+    int n = 0, refused = 0;
+    double shown = -1;                        /* the alpha of the last present before this vblank */
     if (!p || p + 4 * P < now || p > due_us + 2 * P) p = now;
-    while (p < due_us) {
-        if (p > port_time_us()) port_sleep_until_us(p);
+    for (;;) {
         unsigned long long t = port_time_us();
-        if (n && t + h_cost > due_us) break;
-        double frac = 1.0 - (double)(due_us > t ? due_us - t : 0) / (double)period_us;
+        if (t >= due_us) break;
+        if (p > t) { port_sleep_until_us(p < due_us ? p : due_us); continue; }
+        double frac = 1.0 - (double)(due_us - t) / (double)period_us;
         double a = (h_since + (frac < 0 ? 0 : frac)) / span;
-        hfr_present(a > 1 ? 1 : a);
+        if (a > 1) a = 1;
+        int want = hfr_can_blend(a), blend = want && a > shown;
+        if (want && !blend) break;            /* the newest frame is up already */
+        if (blend) {
+            extern int port_gl_hfr_busy(void);
+            int busy = h_gl && port_gl_hfr_busy();
+            if (busy || t + h_cost + h_pc + margin > due_us) {
+                if (!busy && !refused++) { he_cost.m -= he_cost.m / 32; he_cost.d -= he_cost.d / 16; h_cost = (unsigned long long)(he_cost.m + 2 * he_cost.d); }   /* (so a slow spell does not keep the blends off for good) */
+                if (n) break;
+                blend = 0; a = 1; hs_plain++;
+            }
+        } else if (n && t + h_pc + margin > due_us) break;
+        if (!hfr_present(a, blend, blend ? due_us - h_pc - margin / 2 : 0)) continue;   /* dropped: what time is left */
         n++; last = port_time_us();
+        shown = blend ? a : 1.0;
         p += P;
         if (last > p + P) p = last;           /* the swap blocked for longer (vsync at a lower rate): follow it */
     }
-    if (!n && port_time_us() > last + P) { hfr_present(h_since + 1 >= span ? 1.0 : (h_since + 1) / span); last = port_time_us(); }
+    if (!n && (h_since == 0 || port_time_us() > last + P)) { hfr_present(1.0, 0, 0); last = port_time_us(); }
     if (due_us > port_time_us()) port_sleep_until_us(due_us);
 }
 /* the --show-fps line (psyq.c): presents and interpolated presents since the last call */
 void port_hfr_second(char *out, int n) {
     static unsigned long long p0, i0, r0;
-    unsigned long long p = hs_presents - p0, i = hs_interp - i0, r = hs_replay_us - r0;
-    snprintf(out, (size_t)n, " presents %llu/s (%llu interpolated, replay %llu.%llu ms each)", p, i, i ? r / i / 1000 : 0, i ? r / i / 100 % 10 : 0);
-    p0 = hs_presents; i0 = hs_interp; r0 = hs_replay_us;
+    static unsigned long long l0, f0;
+    unsigned long long p = hs_presents - p0, i = hs_interp - i0, r = hs_replay_us - r0, l = hs_late - l0, f = hs_plain - f0;
+    snprintf(out, (size_t)n, " presents %llu/s (%llu interpolated, replay %llu.%llu ms each; %llu vblanks without a blend in time, %llu dropped; "
+             "expected replay %llu.%llu swap %llu.%llu ms)", p, i, i ? r / i / 1000 : 0, i ? r / i / 100 % 10 : 0, f, l,
+             h_cost / 1000, h_cost / 100 % 10, h_pc / 1000, h_pc / 100 % 10);
+    p0 = hs_presents; i0 = hs_interp; r0 = hs_replay_us; l0 = hs_late; f0 = hs_plain;
 }
 void port_hfr_report(void) {
     if (!h_init || !hs_vblanks) return;
     unsigned long long c = hs_static + hs_exact + hs_loose + hs_new; if (!c) c = 1;
-    port_printf("[fps] %llu vblanks, %llu presents (%llu interpolated); pairing %llu us per new frame, replay %llu us per "
+    port_printf("[fps] %llu vblanks, %llu presents (%llu interpolated; %llu vblanks without a blend in time, %llu dropped); pairing %llu us per new frame, replay %llu us per "
                 "interpolated present; primitives: %llu%% static, %llu%% moved, %llu%% animated sprites, %llu%% new; %llu scene changes, %llu cuts not blended\n",
-                hs_vblanks, hs_presents, hs_interp, hs_pairs ? hs_pair_us / hs_pairs : 0, hs_interp ? hs_replay_us / hs_interp : 0,
+                hs_vblanks, hs_presents, hs_interp, hs_plain, hs_late, hs_pairs ? hs_pair_us / hs_pairs : 0, hs_interp ? hs_replay_us / hs_interp : 0,
                 hs_static * 100 / c, hs_exact * 100 / c, hs_loose * 100 / c, hs_new * 100 / c, hs_scene, hs_cuts);
 }

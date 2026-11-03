@@ -2525,8 +2525,19 @@ How it works:
   in half / quarter pixels; the software renderer and 1x work in whole pixels.
 - **Clock.** `port_vblank` (psyq.c) calls `port_hfr_wait` instead of its pacing sleep: presents at the chosen rate until
   the next vblank is due, alpha from the time since the displayed frame came up over the time its predecessor was shown
-  (one vblank at full rate; up to 3 when the game draws at 25 or 16.7 fps). A present is not started when the last
-  replay's cost would push it past the vblank, so a slow machine gets fewer in-between frames, never a slower game.
+  (one vblank at full rate; up to 3 when the game draws at 25 or 16.7 fps). The vblank comes first: an interpolated
+  present starts only when what a replay and a swap take (running mean + 2 × mean deviation of each, as TCP estimates a
+  round trip, plus ~1 ms) ends before the vblank is due, and on OpenGL only when the GPU has finished the previous one.
+  The replay's GPU time is measured with a fence (`glFenceSync` / `glClientWaitSync`, GL 3.2 / ARB_sync / GLES 3; no
+  `glFinish`, no readback); the swap of a replay the GPU has not finished by the deadline is not made (the frame is
+  dropped) rather than the swap waiting for it. Every vblank still gets one present: when no blend fits, the newest frame
+  as drawn (alpha 1, as without `--fps`), and nothing after it before the vblank (a blend would step back). A slow GPU
+  thus falls back to the 50/60 Hz presents, never a slower game. Up to v0.0.14 the first present of each vblank was
+  always a blend and only the replay's CPU submission time was counted: with a GPU-bound replay (an AMD integrated GPU
+  at `--internal-res 4`, the swap blocking on the GPU queue) the logic ran at 40-50 vblanks/s, with bimodal intervals
+  (many < 14 ms, many 25-45 ms). Also on OpenGL, when the work targets already hold the snapshot being replayed (every
+  present after the first of a frame), only the rectangles the record writes (its drawing areas, fill / copy / upload
+  destinations) are copied back from it instead of the whole VRAM (32 MB at 4x; the display area is about a seventh).
   Headless (no `--realtime`) runs use a virtual clock at the `--fps` rate. One logic frame of display latency is
   inherent (the blend runs between the last two finished frames), the same as the old present-at-vblank path.
 - **The second-screen panel** (`--second-screen`) is its own window drawn from its own vblank hook: unaffected.
@@ -2557,7 +2568,8 @@ Smoothness, headless at `--fps 120` (2.4 presents per vblank), mean absolute dif
 Test hooks: `--dump-presents DIR[:FROM:TO]` writes every present of vblanks FROM..TO (at the internal resolution on
 OpenGL with `--internal-res` > 1); `-v` prints each present's alpha, `-v -v` each pairing (static / moved / animated /
 with the camera / new / jumped); the exit line `[fps] ...` sums presents, costs and the pairing shares; `--show-fps`
-adds presents/s and the replay cost to the fps line. `PORT_HFR_NOBLEND=1` makes the same presents without the blend
+adds presents/s, the replay cost, the vblanks where no blend fitted, the dropped replays and the expected replay / swap
+times to the fps line. `PORT_HFR_NOBLEND=1` makes the same presents without the blend
 (for comparisons) and `PORT_HFR_TEST_CUT=FRAME:DX` moves every polygon by DX from FRAME on (a camera cut).
 
 Known limitations:

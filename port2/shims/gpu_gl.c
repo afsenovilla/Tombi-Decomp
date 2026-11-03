@@ -125,6 +125,10 @@ typedef gpu_u8 u8; typedef gpu_u16 u16; typedef gpu_u32 u32;
 #define GLF_DECL(ret, name, args) static ret (APIENTRY *p_##name) args;
 GL_FUNCS(GLF_DECL)
 static void (APIENTRY *p_glTextureBarrier)(void);     /* optional: ARB/NV_texture_barrier */
+/* optional (GL 3.2 / ARB_sync / GLES 3): fences, so --fps knows when the GPU has finished an interpolated frame */
+static void *(APIENTRY *p_glFenceSync)(GLenum, GLbitfield);
+static GLenum (APIENTRY *p_glClientWaitSync)(void *, GLbitfield, unsigned long long);
+static void (APIENTRY *p_glDeleteSync)(void *);
 #define GLF_LOAD(ret, name, args) \
     p_##name = (ret (APIENTRY *) args)SDL_GL_GetProcAddress(#name); \
     if (!p_##name) p_##name = (ret (APIENTRY *) args)SDL_GL_GetProcAddress(#name "EXT"); \
@@ -134,6 +138,18 @@ static int gl_load(void) {
     GL_FUNCS(GLF_LOAD)
     p_glTextureBarrier = (void (APIENTRY *)(void))SDL_GL_GetProcAddress("glTextureBarrier");
     if (!p_glTextureBarrier) p_glTextureBarrier = (void (APIENTRY *)(void))SDL_GL_GetProcAddress("glTextureBarrierNV");
+    {   /* (a GLX lookup returns an address for any name: the version or the extension decides) */
+        const char *v = (const char *)p_glGetString(GL_VERSION);
+        int es = v && !strncmp(v, "OpenGL ES ", 10), major = v ? SDL_atoi(v + (es ? 10 : 0)) : 0, minor = 0;
+        const char *dot = v ? strchr(v + (es ? 10 : 0), '.') : 0;
+        if (dot) minor = SDL_atoi(dot + 1);
+        if (es ? major >= 3 : major > 3 || (major == 3 && minor >= 2) || SDL_GL_ExtensionSupported("GL_ARB_sync")) {
+            p_glFenceSync = (void *(APIENTRY *)(GLenum, GLbitfield))SDL_GL_GetProcAddress("glFenceSync");
+            p_glClientWaitSync = (GLenum (APIENTRY *)(void *, GLbitfield, unsigned long long))SDL_GL_GetProcAddress("glClientWaitSync");
+            p_glDeleteSync = (void (APIENTRY *)(void *))SDL_GL_GetProcAddress("glDeleteSync");
+            if (!p_glFenceSync || !p_glClientWaitSync || !p_glDeleteSync) p_glFenceSync = 0;
+        }
+    }
     return 0;
 }
 
@@ -760,6 +776,8 @@ int port_gl_frame_hd(gpu_u8 *rgb, int x, int y, int w, int h, int wide, int *ow,
 static GLuint snapV[HFR_SLOTS], snapVfbo[HFR_SLOTS], snapW[HFR_SLOTS], snapWfbo[HFR_SLOTS];
 static GLuint workV, workVfbo, workW, workWfbo, sv_tex, sv_fbo, sv_wtex, sv_wfbo;
 static int sv_dirty[5], hfr_swapped;
+static unsigned snap_gen[HFR_SLOTS], snap_seq, work_gen;     /* work_gen: the snapshot the work targets hold, apart from what its replays drew */
+static void *hfr_fence;                                       /* the GPU work of the last replay */
 static void new_target(int w, int h, GLuint *tex, GLuint *fb) {
     p_glGenTextures(1, tex);
     p_glBindTexture(GL_TEXTURE_2D, *tex);
@@ -787,17 +805,33 @@ void port_gl_hfr_snap(int slot) {
     if (!snapV[slot]) new_target(1024, 512, &snapV[slot], &snapVfbo[slot]);
     copy_target(fbo, snapV[slot], 1024, 512);
     if (wide_fbo) { if (!snapW[slot]) new_target(2048, 512, &snapW[slot], &snapWfbo[slot]); copy_target(wide_fbo, snapW[slot], 2048, 512); }
+    snap_gen[slot] = ++snap_seq;
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
     bind_vram_fbo();
 }
-/* a replay of the record of slot begins: the work targets get its snapshot and stand in for the real ones; 0 = no snapshot */
-int port_gl_hfr_begin(int slot) {
+/* a replay of the record of slot begins: the work targets get its snapshot and stand in for the real ones; 0 = no snapshot.
+   wr: the n rectangles (x1 y1 x2 y2 wide, inclusive) the record's replay writes, n < 0 = not known.  When the work
+   targets already hold this snapshot (the presents before replayed the same record), only those rectangles are
+   copied back: at 4x internal resolution the whole VRAM is 32 MB, the display area about a seventh of it. */
+int port_gl_hfr_begin(int slot, const short (*wr)[5], int n) {
     if (!gl_ready || slot < 0 || slot >= HFR_SLOTS || !snapV[slot] || hfr_swapped || (wide_fbo && !snapW[slot])) return 0;
     submit();
-    if (!workV) new_target(1024, 512, &workV, &workVfbo);
-    if (wide_fbo && !workW) new_target(2048, 512, &workW, &workWfbo);
-    copy_target(snapVfbo[slot], workV, 1024, 512);
-    if (wide_fbo) copy_target(snapWfbo[slot], workW, 2048, 512);
+    if (!workV) { new_target(1024, 512, &workV, &workVfbo); work_gen = 0; }
+    if (wide_fbo && !workW) { new_target(2048, 512, &workW, &workWfbo); work_gen = 0; }
+    if (n >= 0 && work_gen && work_gen == snap_gen[slot]) {
+        for (int i = 0; i < n; i++) {
+            int wide = wr[i][4], x = wr[i][0], y = wr[i][1], w = wr[i][2] - x + 1, h = wr[i][3] - y + 1;
+            if (w <= 0 || h <= 0 || (wide && !wide_fbo)) continue;
+            p_glBindFramebuffer(GL_FRAMEBUFFER, wide ? snapWfbo[slot] : snapVfbo[slot]);
+            p_glBindTexture(GL_TEXTURE_2D, wide ? workW : workV);
+            p_glCopyTexSubImage2D(GL_TEXTURE_2D, 0, x * R, y * R, x * R, y * R, w * R, h * R);
+        }
+        bound_wide = -1;
+    } else {
+        copy_target(snapVfbo[slot], workV, 1024, 512);
+        if (wide_fbo) copy_target(snapWfbo[slot], workW, 2048, 512);
+        work_gen = n >= 0 ? snap_gen[slot] : 0;
+    }
     sv_tex = vram_tex; sv_fbo = fbo; sv_wtex = wide_tex; sv_wfbo = wide_fbo;
     sv_dirty[0] = dirty_any; sv_dirty[1] = dirty_x1; sv_dirty[2] = dirty_y1; sv_dirty[3] = dirty_x2; sv_dirty[4] = dirty_y2;
     vram_tex = workV; fbo = workVfbo;
@@ -816,15 +850,37 @@ void port_gl_hfr_end(void) {
     p_glBindTexture(GL_TEXTURE_2D, vram_tex);
     bind_vram_fbo();
 }
+/* after a replay: a fence behind its GPU work, then wait for it until timeout_us has passed (0 = only look).  1 = the GPU
+   has finished it, 0 = not yet (the fence stays: port_gl_hfr_busy), -1 = no fences on this context */
+int port_gl_hfr_fence(unsigned long long timeout_us) {
+    if (!gl_ready || !p_glFenceSync) return -1;
+    submit();
+    if (hfr_fence) p_glDeleteSync(hfr_fence);
+    hfr_fence = p_glFenceSync(0x9117 /* GL_SYNC_GPU_COMMANDS_COMPLETE */, 0);
+    if (!hfr_fence) return -1;
+    GLenum r = p_glClientWaitSync(hfr_fence, 1 /* GL_SYNC_FLUSH_COMMANDS_BIT */, timeout_us * 1000ull);
+    if (r == 0x911D /* GL_WAIT_FAILED */) { p_glDeleteSync(hfr_fence); hfr_fence = 0; return -1; }
+    if (r == 0x911B /* GL_TIMEOUT_EXPIRED */) return 0;
+    p_glDeleteSync(hfr_fence); hfr_fence = 0;
+    return 1;
+}
+/* 1 = the GPU is still on the last replay (its fence has not signalled) */
+int port_gl_hfr_busy(void) {
+    if (!gl_ready || !hfr_fence) return 0;
+    GLenum r = p_glClientWaitSync(hfr_fence, 0, 0);
+    if (r == 0x911B /* GL_TIMEOUT_EXPIRED */) return 1;
+    p_glDeleteSync(hfr_fence); hfr_fence = 0;
+    return 0;
+}
 
 /* ------------------------------------------------------------------ start / stop */
 static int gl_start(void) {
     if (port_window_gl_start() < 0) return -1;
     if (gl_load() < 0) return -1;
     const char *ren = (const char *)p_glGetString(GL_RENDERER), *ver = (const char *)p_glGetString(GL_VERSION);
-    port_printf("[gpu] OpenGL: %s, %s, GLSL %s%s\n", ren ? ren : "?", ver ? ver : "?",
+    port_printf("[gpu] OpenGL: %s, %s, GLSL %s%s%s\n", ren ? ren : "?", ver ? ver : "?",
                 p_glGetString(GL_SHADING_LANGUAGE_VERSION) ? (const char *)p_glGetString(GL_SHADING_LANGUAGE_VERSION) : "?",
-                p_glTextureBarrier ? ", texture barrier" : "");
+                p_glTextureBarrier ? ", texture barrier" : "", p_glFenceSync ? ", fences" : "");
     R = port_internal_res < 1 ? 1 : port_internal_res > 4 ? 4 : port_internal_res;
     {   GLint mx = 0; p_glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mx);
         while (R > 1 && 2048 * R > mx) R--;
@@ -906,6 +962,7 @@ static int gl_start(void) {
 }
 static void gl_stop(void) {
     if (!gl_ready) return;
+    if (hfr_fence) { p_glDeleteSync(hfr_fence); hfr_fence = 0; }
     if (port_verbose) port_printf("[gpu] OpenGL: %llu draw calls, %llu list operations, %llu texture barriers in %d frames\n", stat_draws, stat_ops, stat_barriers, port_frame);
     gl_ready = 0;
 }
