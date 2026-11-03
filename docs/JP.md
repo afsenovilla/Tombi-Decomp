@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 74.85 % of code (1081840 of 1445372 bytes, 2632 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 74.95 % of code (1083352 of 1445372 bytes, 2634 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2576 functions, 68.66 % -> 71.13 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2634 functions, 68.66 % -> 74.95 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -134,15 +134,34 @@ reads the pad halfword through the pinned `D_8009F200`); split pairs
 `COS_TABLE` is now named in the JP symbol table (`NEG_SIN_TABLE + 0x200`). A `jal`-target scan inside symbol ranges
 found nothing but data words, so no more merged functions that way.
 
-Left over with a known diff (`tools/jp_autofix.py --pair ... --show`): `func_8010D854` (swim spin: `li v0,62` scheduled
-before `sb zero,b69`), `func_80027D58` (increaseMaxHealth: the byte copies after the `sb`), `func_80115F54` (scroll
-controller: an `if` whose body compiles to nothing but keeps its branch), `func_8001A8CC` (areaMode2Tick: the two
-`0x1F8001C6` reads must share one load without hoisting the address into `s0`), `func_80016E6C` (initGameConfig:
-`BUTTON_CONFIG_INDEX` load scheduled first), `func_8001AA90` (inventoryScreenHandler: `LOAD_COMPLETE_SYM = 0`
-scheduled last in case 4), `func_8010789C` (slide steer: `li v0,10` before the `k` address pair), `func_80101758`
-(updatePlayer: larger JP edits), `func_8003F598`, `func_8001A108`, `func_801043E0`, `func_8004BA68`, `func_80015FA8`,
-`func_80019A8C`, `func_8003B688`, `func_800FEB14` and the nine `drawArea9Model*` JP engine variants (sizes differ from
-the four PAL ones). `func_801230FC` (x14) is a data table marked as a function in the symbol table.
+Later in the same pass (72.6 % -> 74.95 %): the big player steps (`playerStepIdle`, `Walk`, `UseItem`, `Jump`,
+`HurtKnockback`, `HazardRespawn`, `playerHandleHazardContact`) match once their JP edits are applied: no `substep`
+stores, no `cd`/`ce` bytes, no `GAME_PLAYER_MODE` resets, `GVARS.i34 = 0` before `wac = 0`, the landing code inlined
+in `playerStepJump` (no `playerLandFromJump` call), `getHazardDamage` case 1 ends with `r = 0` for area 0x3000a,
+pad masks byte-swapped, ext fields -0x10 and the 74-entry anim table; `cdLoadTask` seeks with `CdControlF(CdlSeekL)`
+and reads through `CdReadyCallback` + `CdlReadN` (no `CdRead`/`CdReadSync`, no `DrawSync` state), with the WVD head
+and body tables swapped; `updateHud` uses `DAT_8009c990[0x40c + i]` where PAL has `[0x40f]`; `drawHud` and
+`updateHud` need the default `-O2 -G0` (strength-reduced pointer walks), as do `cdLoadTask`, `drawMessageBox` and
+`getHazardDamage`. Compiler idioms that decided matches: a struct-member store does not block a scalar load from
+hoisting, so a global that must be read after such a store is spelled through an array alias (`D_xxxxA[0]`,
+`PLAYER_MESSAGE_BOXA[0]`); a scratchpad address used twice in one block is kept in a register by cse unless it is
+spelled as the `D_1F80xxxx` symbol (`cdLoadTask`, `MovieDecodeFrame`); two locals of equal priority take saved
+registers in declaration order (`cdLoadTask`: the pointers declared before `nhead`/`nbody`); `f - (f & 0x8000)`
+counts one more reference than `f & 0x7fff` before combine and moves `f` up the allocation order (`drawMessageBox`);
+`if (c) break;` before a `case` label keeps gcc from merging the case tree (`playerStepHurtKnockback`); a hard-register
+local (`register ... asm`) is computed in place, which the retail code never shows for the swapped pairs below.
+
+Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
+`a1`/`v1` instead of `t0`/`a3`, everything else matches), `func_8002E480` (openMessageBox: `i` and `anim` swap
+`s1`/`s2`), `func_8001D414` (MovieDecodeFrame: `next` and `dec` swap `s0`/`s1`), `func_80027D58` (increaseMaxHealth:
+the `andi` after the `sb`), `func_80016E6C` (initGameConfig: the `BUTTON_CONFIG_INDEX` load scheduled first),
+`func_8001A8CC` (areaMode2Tick), `func_8010D854` (swim spin), `func_8001CE50` (acquireSpriteSlot: JP masks with
+0xffffff and walks the slot table differently), the lit `modelDraw*` variants (JP lights in software, other argument
+layout) and the pairs whose JP twin is a different function (`rewardJewel`, `areaTransitionHandler`,
+`playerSelectGroundAnim`, `playerReleaseClingObject`, `updateEffectHitbox`, `spawnBreakPieces`, `updateFlashEffect`,
+`spawnGroundDebris`, `playerFloatDirFromPad`, `updateTreasureChestGuard`, `playerHurtTumbleGetUp`,
+`playerFlipOntoObjectPlace`, `updateEggShellPiece`, `l4Type03Step`). `func_801230FC` (x14) is a data table marked as a
+function in the symbol table; `func_80030CD0` was the tail of `func_80030A68` (now sized 0x274).
 
 What remains, by kind (for the paired functions with PAL C):
 - about 40 that differ in size from their PAL pair (edited code, not just offsets);
