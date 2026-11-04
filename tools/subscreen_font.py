@@ -67,7 +67,7 @@ def ink_of(table, pages, cleans, fn, ch):
             ink = max(comps, key=len)
         rows = MARKS[mark]
         top = min(y for _, y in ink); bottom = max(y for _, y in ink); x0 = min(x for x, _ in ink); x1 = max(x for x, _ in ink)
-        mx = x0 + (x1 - x0 + 1 - len(rows[0])) // 2 + (2 if mark == "cedilla" else 1)
+        mx = x0 + (x1 - x0 + 1 - len(rows[0])) // 2 + (2 if mark == "cedilla" else 1 + E.MARK_SHIFT.get(fn, {}).get(base, 0))
         my = bottom + 1 if mark == "cedilla" else top - 1 - len(rows)
         ink |= {(mx + x, my + y) for y, r in enumerate(rows) for x, c in enumerate(r) if c == "#"}
         return ink

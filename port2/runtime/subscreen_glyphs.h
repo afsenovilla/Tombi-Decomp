@@ -719,6 +719,9 @@ static const SubPick sub_picks[66] = {
 /* our own letters (not the disc's): ink bitmaps, the edge / rim added at run time; baseline = row index */
 typedef struct { unsigned char font; unsigned short ch; unsigned char w, h, baseline; unsigned short rows; } SubExtra;
 static const unsigned char sub_edge[2] = { 7, 2 };   /* the shaded edge (tab) / grey rim (leaf) palette index */
+/* marks above these letters sit this many texels right of the centred place */
+typedef struct { unsigned char font; char ch; signed char dx; } SubMarkShift;
+static const SubMarkShift sub_mark_shift[2] = { { 1, 'u', 3 }, { 1, 'U', 2 } };
 static const SubExtra sub_extra[70] = {
     { 0, 0x0030, 9, 13, 12, 0 },   /* tab 0 */
     { 0, 0x0031, 6, 13, 12, 13 },   /* tab 1 */

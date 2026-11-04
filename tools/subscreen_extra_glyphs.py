@@ -880,3 +880,5 @@ GRAVE = ("##..", ".##.", "..##")
 DIAERESIS = ("##..##", "##..##")
 TILDE = (".##..#", "#..##.")
 CEDILLA = (".##", "..#", "##.")          # placed under the letter (ç / Ç)
+# where a mark above a letter sits off centre: texels to the right of the centred place (the leaf's u / U lean left)
+MARK_SHIFT = {"leaf": {"u": 3, "U": 2}}

@@ -532,6 +532,10 @@ def write_header(table, path):
     L.append("typedef struct { unsigned char font; unsigned short ch; unsigned char w, h, baseline; unsigned short rows; } SubExtra;")
     L.append("static const unsigned char sub_edge[%d] = { %s };   /* the shaded edge (tab) / grey rim (leaf) palette index */" % (
         len(fonts), ", ".join(str(table["fonts"][fn].get("edge", 0)) for fn in fonts)))
+    L.append("/* marks above these letters sit this many texels right of the centred place */")
+    L.append("typedef struct { unsigned char font; char ch; signed char dx; } SubMarkShift;")
+    shifts = [(fi, ch, dx) for fi, fn in enumerate(fonts) for ch, dx in E.MARK_SHIFT.get(fn, {}).items()]
+    L.append("static const SubMarkShift sub_mark_shift[%d] = { %s };" % (max(1, len(shifts)), ", ".join("{ %d, '%s', %d }" % x for x in shifts) or "{ 0, 0, 0 }"))
     L.append("static const SubExtra sub_extra[%d] = {" % len(extras))
     L += extras + ["};"]
     L.append("static const unsigned short sub_extra_rows[%d] = {" % len(rows))

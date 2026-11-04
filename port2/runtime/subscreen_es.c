@@ -249,6 +249,8 @@ static int glyph_for(int font, unsigned ch, GTexel *g, int *w, int *gi) {
             const SubExtra *e = &sub_extra[mi];
             int mx = x0 + (x1 - x0 + 1 - e->w) / 2 + 1, my = mark == 0x327 ? bottom + 1 : top - 1 - e->h, m = n;
             if (mark == 0x327) mx = x0 + (x1 - x0 + 1 - e->w) / 2 + 2;   /* the cedilla hangs from the c's right end */
+            else for (unsigned k = 0; k < sizeof sub_mark_shift / sizeof *sub_mark_shift; k++)
+                if (sub_mark_shift[k].font == font && sub_mark_shift[k].ch == (char)base) mx += sub_mark_shift[k].dx;
             for (int y = 0; y < e->h; y++) for (int x = 0; x < e->w; x++) if (sub_extra_rows[e->rows + y] >> x & 1 && !gt_has(g, m, mx + x, my + y)) m = gt_add(g, m, mx + x, my + y, 1, 1);
             n = gt_edge(font, g, m);
         }
