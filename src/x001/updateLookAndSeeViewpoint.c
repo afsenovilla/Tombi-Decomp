@@ -1,5 +1,103 @@
 // FUNC 8011d73c 844 X001
 // MATCHING 8011d73c 844
+// VERSION SLPS_01144 x01 8011C690 732
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
+#include "player.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+extern char D_8001D5E0[];
+extern int ObjCullRegister(TObj *);
+extern void func_8001F050(int);
+extern void func_8001F2D0(void);
+extern void func_8001EAD0(void);
+extern void func_80016740(int, char *);
+extern void func_8001C988(int, int);
+extern void func_80017E0C(TObj *);
+void func_8011C690(TObj *o)
+{
+    switch (o->b04) {
+    case 0:
+        if (GCD.bcdba < 2) {
+            o->b04 = 2;
+            break;
+        }
+        o->a.raw = 0x10520000;
+        o->y.raw = 0xf9130000;
+        o->b.raw = 0x05400000;
+        o->active = 2;
+        o->d84 = 0;
+        o->d88 = 0;
+        o->d8c = 0;
+        o->b69 = 0;
+        o->b04++;
+        if (o->subtype == 1) o->step = 1;
+        else o->step = 0;
+        o->state = 0;
+        break;
+    case 1:
+        ObjCullRegister(o);
+        switch (o->step) {
+        case 0:
+            if (o->b69) {
+                o->step++;
+                o->state = 0;
+                o->b69 = 0;
+            }
+            break;
+        case 1:
+            switch (o->state) {
+            case 0:
+                func_8001F050(1);
+                PLAYER.obj.b04 = 5;
+                PLAYER.obj.step = 98;
+                GVARS.b3f = 1;
+                GAME.fadeScreenControl = 3;
+                o->state++;
+            case 1:
+                if (GAME.fadeScreenControl != 1) break;
+                func_8001F2D0();
+                SPAD.b1cc = 1;
+                if (GCD.bce40) SPAD.b1cd = 8;
+                else SPAD.b1cd = 5;
+                SPAD.s1c6 = 2;
+                func_80016740(1, D_8001D5E0);
+                o->state = 0;
+                o->step++;
+                break;
+            }
+            break;
+        case 2:
+            switch (o->state) {
+            case 0:
+                GAME.fadeScreenControl = 4;
+                func_8001EAD0();
+                o->state++;
+            case 1:
+                if (GAME.fadeScreenControl) break;
+                PLAYER.obj.wb2 = 0;
+                PLAYER.obj.b04 = 1;
+                PLAYER.obj.step = 0;
+                PLAYER.obj.state = 0;
+                GVARS.b3f = 0;
+                func_8001C988(0x16, 0);
+                o->step = 0;
+                break;
+            }
+            break;
+        }
+        break;
+    case 2:
+        o->b04++;
+        break;
+    case 3:
+        func_80017E0C(o);
+        break;
+    }
+}
+#else
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
@@ -112,3 +210,4 @@ void updateLookAndSeeViewpoint(TObj *o)
         break;
     }
 }
+#endif

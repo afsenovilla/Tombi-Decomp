@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 83.08 % of code (1178656 of 1418632 bytes, 2716 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 83.34 % of code (1182252 of 1418632 bytes, 2721 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2716 functions, 68.66 % -> 83.08 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2721 functions, 68.66 % -> 83.34 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -293,6 +293,17 @@ the case-82 if so the constant is hoisted) and case 120 takes the 200 timer; `pa
 Left: `playerStepRideSeesaw` x10 (2356 B): the PAL file is register-pinned throughout and the JP reads the seesaw
 record at +0x30 as shorts (`lh 48` instead of `lw 140`), a rewrite rather than an edit; `blackCrowFlyAround` (2904 B)
 likewise.
+
+Near misses of the earlier sweeps revisited (83.08 % -> 83.34 %): `updateLeafButterfly` (JP case 2 / step 0 does the
+event start inline: `b0f = -7`, anim, `d8c = 0`, `category |= 0x80`; step 1-2 start event 178 when GCD bce..57 == 1
+and bcfc..5c == 0), `playerStep3FArea10` (ext fields at -0x10, pad mask 0x4000, `if (b9e) break` after `b69 = 0`
+and no bitten-jump-kind switch), `updateLookAndSeeViewpoint` (step 0 only tests `b69`; the fade sequence sets the
+player to b04 5 / step 98 and `SPAD.b1cd = bce40 ? 8 : 5`; the end resets the player to b04 1 / step 0 / state 0),
+`gameplayTick` (no movie-skip block; an inventory-screen reset block when `GAME_INVENTORY_SCREEN == 0xff`, the
+screen byte through a barriered pointer, the three shorts and MENU_STATE as `[]` externs so the loads from the
+SPAD.p1d4 record stay ahead of the stores; `updateMainObjects` and two JP calls in the object pass) and
+`playerStepLaneShiftFall` (no area-10 start, no case 2, `playerSetFallLean` inlined with `d84 = 0` before the
+frame test and `timer = 10` after it, no `da0+2 = 0`, the `S16(o, 0xd0)` test).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in

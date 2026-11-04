@@ -1,5 +1,95 @@
 // FUNC 80108708 968 X000
 // MATCHING 80108708 968
+// VERSION SLPS_01144 x00 8010834C 760
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+#include "raw7.h"
+#include "gamestate.h"
+extern TObj *PLAYER_EXT;
+extern unsigned short SPAWN_AXIS_SWAP;
+extern void PlayerSetAnimIfChanged(TObj *, int);
+extern void AnimAdvance(TObj *);
+extern short probeFlaggedSegmentB(int, int, int);
+void func_8010834C(TObj *o)
+{
+    unsigned short f;
+    short r;
+    switch (o->state) {
+    case 0:
+        (*(unsigned char*)&PLAYER_EXT->w08) = o->active;
+        f = o->animFrame;
+        o->velX = 0x5a;
+        o->velY = -0x200;
+        o->active = 2;
+        o->d8c = 0;
+        o->b9c = 0;
+        (*(unsigned char*)&o->wac) = 0;
+        o->b9d = 0;
+        o->b9e = 0;
+        o->b9f = 0;
+        (*(unsigned char*)((char*)&o->wac + 1)) = 0;
+        o->b69 = 0;
+        (*(signed char*)&o->b0f) = -20;
+        (*(unsigned char*)((char*)&o->da0 + 2)) = 2;
+        o->animFrame = f & 1;
+        PlayerSetAnimIfChanged(o, 0x15);
+        o->state++;
+    case 1:
+        AnimAdvance(o);
+        if (SPAWN_AXIS_SWAP & 1) {
+            o->d->p.whole = o->d->p.whole - 5;
+        } else {
+            o->d->p.whole = o->d->p.whole + 5;
+        }
+        o->y.raw += o->velY << 8;
+        o->velX -= 5;
+        o->velY += 0x10;
+        if (o->velX == 0) {
+            (*(signed char*)&o->b0f) = -8;
+            PlayerSetAnimIfChanged(o, 0x16);
+            o->d->p.whole = (short)(o->d->p.whole / 90) * 90;
+            if (S16(o, 0xd0) != 0) {
+                o->active = 3;
+            } else {
+                o->active = 1;
+            }
+            {
+                int w = 2;
+                int a = 16;
+                unsigned short sf;
+                o->b9c = w;
+                o->wb2 = 0;
+                PLAYER_EXT->timer = 0;
+                sf = o->animFrame;
+                o->d84 = 0;
+                if (sf & 1)
+                    a = 0xf0;
+                o->timer = 10;
+                o->d88 = a;
+                o->d8c = 0;
+                o->b04 = 1;
+                o->step = w;
+                o->state = 3;
+            }
+        } else {
+            r = probeFlaggedSegmentB(o->h->p.whole, o->y.p.whole,
+                             (short)(o->d->p.whole + ((SPAWN_AXIS_SWAP & 1) ? -5 : 5)));
+            if (r != 0) {
+                (*(unsigned char*)&o->waa) = 1;
+                if (r == 1) {
+                    o->d->p.whole += (SPAWN_AXIS_SWAP & 1) ? -5 : 5;
+                    o->d->p.whole = (short)(o->d->p.whole / 90) * 90;
+                    (*(unsigned char*)((char*)&o->da0 + 2)) = 3;
+                    o->wb2 = 0;
+                    o->step = 0x15;
+                    o->state = 0;
+                }
+            }
+        }
+        break;
+    }
+}
+#else
 #include "TOBJ.H"
 #include "raw7.h"
 #include "gamestate.h"
@@ -95,3 +185,4 @@ void playerStepLaneShiftFall(TObj *o)
         break;
     }
 }
+#endif
