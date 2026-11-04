@@ -130,6 +130,21 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   (2642,-300,168); plus re-placed foliage (type 0x24), backdrop sprites (0x14) and climb props (0x0A). The handler
   tables are at exe 0x8006A3E8 (layer 4, 49 entries), 0x800679B8 (layer 2, 50) and 0x80069D64 (layer 3, 58).
   Not done: rendering those five sprites (the village SPR bank was not located; A006 is a 16-bit page).
+- Hyper PlayStation Re-mix No.12 (SLPM-80167, build 1997-09-22; secret / variable GAME_FILES_URL_HYPER12, 2026-11-04):
+  the missing link between PrePre 8 and the October demos. Same file layout as PrePre 8 (DATA000-004, TIM000-011,
+  PLAYER.WPP, single TOMBA.EXE with the test menus, PLAY DEMO / RANKING DEMO / TO BE CONTINUED) but already with WFM
+  text (DATA000: 64 dialogues + 16 event titles), the three sub-screen overlays (DSPSUB*.BIN) and a new COCKA.WPP
+  (82 frames: the Kokka bird; PrePre 8's "grey bird" is this). Load lists: 20-byte PrePre 8 records at exe file
+  0x681E0 (system) and 0x68604 (area 0): lists 1-3 village (DATA001, TIM004/005 + CLUT01-03), 4 the 2D interior
+  (TIM007 + DATA002 collision, still there), 5 the street (DATA003: WHM 2140 then WMD at +2140, 77 KB, 1137
+  polygons; PrePre 8 had 1001) and 6 the house (DATA004: WMD at +3420, 983 polygons; the pig sign of PrePre 8 is
+  gone). Renders made with tools/room.py + jpdemo_rooms.parse_wmd_demo from those lists (nothing committed).
+  Text: all 64 lines have a close JP retail twin except the place names and the 100 Year Old Man's two appraisal
+  lines (so the cut appraisal mechanic spans Sept-Nov 1997). The hungry monkey introduces himself as サンタ (Santa):
+  the Dengeki hint "Santa's stylish parasol" is the monkey, renamed Charles later. Kid at the pond: "can you swim?
+  the turtle helped you this time, beyond that door you must swim" (the swimming gate of the big puddle). Event
+  titles include 大きな水たまり？ (unused retail event 6), コッカタマゴの中身, オイラ泳げない…, かくれ里のヤン.
+  Code: xmatch 643 PAL functions in TOMBA.EXE (25 %). Not checked: whether rooms 5/6 are reachable in this build.
 - Game-file downloads (2026-11-04): every workflow and the bootstrap go through `tools/ci_download.sh`, which takes
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
