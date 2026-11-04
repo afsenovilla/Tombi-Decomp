@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 82.38 % of code (1168620 of 1418632 bytes, 2711 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 82.65 % of code (1172544 of 1418632 bytes, 2713 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2711 functions, 68.66 % -> 82.38 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2713 functions, 68.66 % -> 82.65 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -263,6 +263,21 @@ stores the max byte before the `andi`, ours after); the pad readers 80016960 / 8
 / `&D_8009F200` in a register across the function and reloads the other pad word by symbol); the flag bit test/set
 800219F0 / 80021A40 (`GAME + 52 + (GAME << 5)` table; retail materialises `&GAME` in a register); the libcard
 80064E1C / 80064E84 (frame 16 and a kept branch: probably an older SDK compiler).
+
+Two queue entries (82.38 % -> 82.65 %): `func_80101F30` (x00, 1620 B, the new JP player step called from case 0x39
+of `playerNormalModeDispatch`): a landing step written from the disassembly with the PAL steps as idiom reference
+(drift add, AnimAdvance, `PLAYER_EXT[8] = 1`, three helpers, anim 4; a bitten (`wac == 2`) exit, a `b69 == 1`
+landing and a `probeSidesAndApplyTileResponse(o, 4, 0)` landing, both with the velX damping by 208, the slope table
+`D_801145D4[wb0]`, the landing sfx guarded by `GCD.bcf06` / `GCD.bce61`, the bitten-jump-kind switch and the `bbe`
+flag dispatch to steps 16/23/27/30/31, then `func_80056C34` / `func_800EFDF8`). Matching needed: the drift words
+and the GCD bytes read through their structs (a scalar load gets hoisted above the neighbouring struct store),
+and in the `b69` landing the slope byte loaded into a temporary before `step = 1; state = 0`, the pad test into a
+variable, the `d8c` store after it and the `if` last (that keeps retail's `j` to the shared `beqz` with the store in
+the delay slot). `updateSceneSequence` (x02, 2304 B) matched at the first try as the PAL file without case 21 and
+without the max-health compare of case 0, with `func_80040940(q, 0, 0)` for the player and `DAT_1f8001fc &
+DAT_1f8003c8` for the pad. `weaponHitCat2Type08` stays two lines off: the structure (case 1 stores first, frame
+read last, shared `one - (t & 1)` with `one` kept in s2) is right, only the temporary's register differs (a0 / v0 for
+v1).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in

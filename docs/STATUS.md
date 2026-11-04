@@ -30,7 +30,7 @@ shared touch scroller for every long list, Windows tolower link fix.
    PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
-## Japanese decomp (SLPS-01144), hand pass 3 (82.38 %)
+## Japanese decomp (SLPS-01144), hand pass 3 (82.65 %)
 
 82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
@@ -77,17 +77,14 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
       8001E81C, 80027D58, pad readers 80016960/80020794, flag bits 800219F0/80021A40, x01 80131240, libcard
       80064E1C/E84. The rest of the band is libgte/libapi asm (RotMatrix*, ApplyMatrix*, OuterProduct*, SquareRoot0,
       _patch_*, start, __main, *_OBJ_* blobs, 8005851C BIOS stubs, 80061488).
-- [ ] x00 func_80101F30 (1620 B): new JP player step called from case 0x39 of playerNormalModeDispatch; nearest PAL
-      playerStepWalkIntoDepth (0.22 callee overlap). Decompile from scratch using the PAL step files as idiom reference.
 - [ ] x04 func_80124270 (2904 B) <- src/x004/blackCrowFlyAround.c (334 diff lines): JP drops the `w22` counters and
       the `% 40` timer; cases 1-4 need rewriting. The PAL file is full of matching hacks: keep them.
 - [ ] x03 func_80128CCC (2432 B) <- src/x003/masterOfTheSkiesScene.c (205 lines): case bodies reordered, extra
       player-position checks.
-- [ ] x02 func_8011794C (2304 B) <- src/x002/updateSceneSequence.c (34 lines but structural: 23 script opcodes
-      instead of 18, extra init in case 0).
 - [ ] x10 func_8011B4F8 (2356 B) <- src/x001/playerStepRideSeesaw.c (138 lines, another record layout).
 - [ ] x04 func_80121504 / x03 func_80122250 (1.8 KB each) <- komaPigLeap / updateA00L2Type2C siblings (~100 lines).
-- [ ] x00 func_801249EC weaponHitCat2Type08 (256 B, 2 lines left: where the shared tail starts; see docs/JP.md).
+- [ ] x00 func_801249EC weaponHitCat2Type08 (256 B): structure right, the temporary lands in a0/v0 instead of v1
+      (draft: scratch wip25/801249EC.c of this session; see docs/JP.md).
 - [ ] slps01144 func_80024B78 (5112 B) and func_80014D1C (4096 B): handwritten GTE routines (the lit modelDraw
       family); write them as C with the GTE macros of src/modelDrawG4Lit.c, instruction by instruction.
 - [ ] x04 func_80115FD0 (6472 B), x00 func_800F4CDC (5464 B), x10 func_8011DCC8 (3872 B): no PAL twin, from scratch.
