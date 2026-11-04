@@ -21,6 +21,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_PREPRE9 }}${{ secrets.GAME_FILES_URL_PREPRE8 }}${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}${{ secrets.GAME_FILES_URL_JP_DEMO }}${{ secrets.GAME_FILES_URL_BETA980203 }}${{ secrets.GAME_FILES_URL_JP }}${{ secrets.GAME_FILES_URL_USA }}${{ secrets.GAME_FILES_URL }}
+          scope: "${{ inputs.disc }}"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
