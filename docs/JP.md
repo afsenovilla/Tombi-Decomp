@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 82.65 % of code (1172544 of 1418632 bytes, 2713 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 83.08 % of code (1178656 of 1418632 bytes, 2716 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2713 functions, 68.66 % -> 82.65 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2716 functions, 68.66 % -> 83.08 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -278,6 +278,21 @@ without the max-health compare of case 0, with `func_80040940(q, 0, 0)` for the 
 DAT_1f8003c8` for the pad. `weaponHitCat2Type08` stays two lines off: the structure (case 1 stores first, frame
 read last, shared `one - (t & 1)` with `one` kept in s2) is right, only the temporary's register differs (a0 / v0 for
 v1).
+
+Three more queue entries (82.65 % -> 83.08 %): `komaPigLeap` x04 twin (1828 B): the JP switches on `state`, not
+`substep`; case 0 plays sfx 15, has no timer, sets `b9c = 1`, `wac = 0x29`, `b69 = 0`, `d8c = 0` and `animFrame = 1 -
+w7a` (the state increment goes into an int temporary behind an asm barrier before the frame expression, which puts
+retail's `lbu` first and keeps `addiu` ahead of the `subu`); cases 1-2 do not call AnimAdvanceWithBox; case 2's
+leap sets `active = 3`, `b9c = 1` written first so the shared constant 1 lands in the delay slot; case 5 sets
+`active = 1`, timers 360 / 120. Its x03 sibling (80122250) is the same file with wac 0x21 / 0x1b / 0x1a / 0x22-0x24
+and a `velV < -0x300` clamp after the `b9c = 1` test of the rebound. `masterOfTheSkiesScene` x03 twin (2432 B): case
+1 snaps PLAYER_H to the boss and plays anim 0x14 unconditionally, case 2 only waits and sets anim 0x15, cases 3-4 let
+the player fall (`y += velY << 8; velY += 0x10`) until velY > 0 / until 16 above the boss (the y read into a short,
+compared, then stored directly to `P.y.p.whole`), case 50 / 82 drop their timers (state stores inside both arms of
+the case-82 if so the constant is hoisted) and case 120 takes the 200 timer; `pad[16]` keeps the 64-byte frame.
+Left: `playerStepRideSeesaw` x10 (2356 B): the PAL file is register-pinned throughout and the JP reads the seesaw
+record at +0x30 as shorts (`lh 48` instead of `lw 140`), a rewrite rather than an edit; `blackCrowFlyAround` (2904 B)
+likewise.
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
