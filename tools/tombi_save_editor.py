@@ -14,6 +14,7 @@ import json, os, struct, sys, time, unicodedata
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import tombi_save as T  # noqa: E402
+import save_import  # noqa: E402
 
 from PySide6.QtCore import Qt, QSize, QRectF, QByteArray, QAbstractTableModel, QModelIndex, QSortFilterProxyModel, \
     QTimer, Signal  # noqa: E402
@@ -31,11 +32,9 @@ ASSETS = os.path.join(getattr(sys, "_MEIPASS", HERE), "save_editor_assets")
 CARD_FILTER = "Memory card (*.mcd *.mcr *.mc *.srm *.gme *.vgs *.mem *.mcs *.mcb *.ps *.ps1);;All files (*)"
 CARD_EXTS = (".mcd", ".mcr", ".mc", ".srm", ".gme", ".vgs", ".mem", ".mcs", ".mcb", ".ps", ".ps1")
 
-AREAS = {0: "Village of All Beginnings", 1: "Forest / Watch Tower", 2: "Caves / tunnels", 3: "Phoenix Mountain",
-         4: "Trick Village area", 5: "Baccus Village", 6: "Dirt Motocross", 7: "(7)", 8: "Baccus Lake",
-         9: "Mushroom Village", 10: "Deep Jungle", 11: "Lumberjack Town / Factory", 12: "(12)", 13: "Pig Island",
-         14: "Evil Pigs", 15: "(15)", 16: "Stonetown / Clock Tower", 17: "Iron Town / Iron Castle",
-         18: "Civilization Town", 19: "Dwarf Village"}
+# the disc areas by their map name (the game's own, English or the improved Spanish: save_import.REGIONS_*)
+def areas(es):
+    return {a: save_import.place_name(a, 0, es) for a in range(20) if save_import.area_name(a, 0, es)}
 
 # ---- strings ---------------------------------------------------------------------------------------------------
 UI = {
@@ -765,8 +764,11 @@ class Editor(QMainWindow):
         L = self.L
         return L["done"] if v == 255 else ("%s · %d" % (L["st"], v)) if v else L["ns"]
 
-    def area_name(self, a):
-        return AREAS.get(a, "(%d)" % a)
+    def area_name(self, a, section=None):
+        """the map's name of the area (its section when given), in the editor's language"""
+        es = self.lang == "es"
+        n = None if a is None else save_import.place_name(a, section, es) if section is not None else save_import.area_name(a, 0, es)
+        return n or "(%s)" % a
 
     # ---- layout
     def build(self):
@@ -1111,7 +1113,7 @@ class Editor(QMainWindow):
         al.setFixedWidth(118)
         r.addWidget(al, 0, 0)
         self.area_cb = QComboBox()
-        for a, n in AREAS.items():
+        for a, n in areas(self.lang == "es").items():
             self.area_cb.addItem("%02d  %s" % (a, n), a)
         self.area_cb.currentIndexChanged.connect(self.commit_area)
         r.addWidget(self.area_cb, 0, 1)
@@ -1645,7 +1647,7 @@ class Editor(QMainWindow):
     def fill_slot_card(self, c, s):
         L = self.L
         c.title.setText("%s %02d" % (L["slot"], s.slot))
-        c.loc.setText(self.area_name(s.get("area")))
+        c.loc.setText(self.area_name(s.get("area")))   # the card is narrow: the area alone; the Overview adds the room
         c.meta.setText("%s   ·   %s %d   ·   %s AP" % (fmt_time(s.get("time")), L["lv"], s.get("level"),
                                                      format(s.get("ap"), ",")))
 
@@ -1654,7 +1656,7 @@ class Editor(QMainWindow):
             return
         s, L, t = self.save, self.L, self.theme
         self.hero_icon.setPixmap(scaled(save_icon(s), 64))
-        self.hero_title.setText("%s %02d  ·  %s" % (L["slot"], s.slot, self.area_name(s.get("area"))))
+        self.hero_title.setText("%s %02d  ·  %s" % (L["slot"], s.slot, self.area_name(s.get("area"), s.get("section"))))
         self.hero_sub.setText(unicodedata.normalize("NFKC", s.title()).replace("\u2212", "-"))
         while self.hero_badges.count():
             it = self.hero_badges.takeAt(0)
@@ -1677,7 +1679,7 @@ class Editor(QMainWindow):
         st["hp"][0].setText("%d / %d" % (s.get("health"), s.get("max_health")))
         st["hp"][1].setText(FIELD_LABELS[self.lang]["golden_bowl"] + (" ✓" if s.get("golden_bowl") else " –"))
         st["location"][0].setText("%02d · %d" % (s.get("area"), s.get("section")))
-        st["location"][1].setText(self.area_name(s.get("area")))
+        st["location"][1].setText(self.area_name(s.get("area"), s.get("section")))
         done = sum(1 for i in range(T.EVENT_USED) if s.event(i) == 255 and i not in T.UNUSED_EVENTS)
         tot = T.EVENT_USED - len(T.UNUSED_EVENTS)
         self.progress["evdone"][0].setText(L["events_n"].format(done, tot))

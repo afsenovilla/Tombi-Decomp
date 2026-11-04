@@ -11,23 +11,21 @@ Addresses (PAL SCES-01331, include/tomba/game.h `gameConfig GAME` at 0x8009C960)
 import os
 
 import i18n
+import save_import
 
 # (area, sections) of the debug area select (tools/psxemu/rooms.py ROOM_COUNTS); the names from README
 ROOM_COUNTS = [(0, 6), (1, 5), (2, 6), (3, 6), (4, 20), (5, 4), (6, 3), (8, 4), (9, 7), (10, 9), (11, 5), (13, 2),
                (14, 8), (16, 7), (17, 11), (18, 3), (19, 3)]
-AREA_NAMES = {0: "Village of All Beginnings", 1: "Forest / Watch Tower (AREA01)", 2: "Caves / tunnels (AREA02)",
-              3: "Phoenix Mountain", 4: "Trick Village area (AREA04)", 5: "Baccus Village", 6: "Dirt Motocross",
-              8: "Baccus Lake", 9: "Mushroom Village", 10: "Deep Jungle",
-              11: "Civilization: Lumberjack Town / Factory", 13: "Pig Island", 14: "Evil Pigs",
-              16: "Civilization: Stonetown / Clock Tower", 17: "Civilization: Iron Town / Iron Castle",
-              18: "Civilization Town (hub)", 19: "Dwarf Village (Hidden Village)"}
-# areas 11/16/17/18 named after the retail text (docs/CIVILIZATION.md "Names"), not the README's "Village of ...";
 # section 0 of 11/16/17 is a cut town rebuilt playable in the port (--civ-town N, docs/CIVILIZATION.md "Playable towns")
 CIV_TOWNS = {11: "Lumberjack Town", 16: "Stonetown", 17: "Iron Town"}
+# the game's own map names (save_import.REGIONS_EN by section 0 of each area); the three Civilization areas share
+# "Village of Civilization", so their cut town's name tells them apart
+AREA_NAMES = {a: (save_import.place_name(a, 0, False) if a not in CIV_TOWNS else n + " (%s)" % CIV_TOWNS[a])
+              for a, n in save_import.area_names().items()}
 
 
 def area_label(a):
-    """The area select entry: number, name and, for the rebuilt cut towns, the i18n tag."""
+    """The area select entry: number and the map's name of the area."""
     return "%02d %s" % (a, AREA_NAMES.get(a, ""))
 # rooms with an empty load list cannot be entered from the debug select (tools/psxemu/rooms.py DOOR_ROOMS)
 DOOR_ROOMS = {(11, 0), (11, 3), (11, 4), (16, 0), (16, 1), (16, 2), (17, 0), (17, 6), (17, 7), (17, 8), (17, 9), (17, 10), (18, 0)}

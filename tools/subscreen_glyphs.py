@@ -23,7 +23,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PAGE_FILE = "SYSTEM/A%d0301.000"
 PAGE_X = 64                               # VRAM x of the page, in 16-bit words (y 0)
 LANG = {1: "en", 2: "fr", 3: "de", 4: "it", 5: "nl", 6: "es", 7: "pt", 8: "sv", 9: "da"}
-TABLE_LANGS = (1, 6, 7, 8, 9)             # the languages the PAL disc offers (English, Spanish, Portuguese, Swedish, Danish)
+TABLE_LANGS = (1, 2, 3, 4, 5, 6, 7, 8, 9)  # every page on the disc (1..4 are the boot menu's of SCES-01330; same files)
 NEAR = 2                                  # texels within NEAR (Chebyshev) of a letter belong to it (its shaded edge)
 
 # fonts: which palette indices are the letters, the rects ("slots") that share one background picture, the labels
@@ -40,11 +40,11 @@ FONTS = {
         },
         "groups": [["item"], ["event"], ["status"], ["exit"], ["map"]],
         "labels": {                       # slot -> {file number: text}
-            "item":   {1: "Item", 6: "Elmto.", 7: "Item", 8: "Objekt", 9: "Objekt"},
-            "event":  {1: "Event", 6: "Evento", 7: "Evento", 8: "Action", 9: "Handln."},
-            "status": {1: "Status", 6: "Estado", 7: "Estado", 8: "Status", 9: "Status"},
-            "exit":   {1: "Exit", 6: "Salir", 7: "Sair", 8: "Avbryt", 9: "Afslut"},
-            "map":    {1: "Map", 6: "Mapa", 7: "Mapa", 8: "Karta", 9: "Kort"},
+            "item":   {1: "Item", 2: "Objet", 3: "Objekt", 4: "Oggetti", 5: "Vrwerp.", 6: "Elmto.", 7: "Item", 8: "Objekt", 9: "Objekt"},
+            "event":  {1: "Event", 2: "Fait", 3: "Ereign.", 4: "Eventi", 5: "Event", 6: "Evento", 7: "Evento", 8: "Action", 9: "Handln."},
+            "status": {1: "Status", 2: "Etat", 3: "Status", 4: "Stato", 5: "Status", 6: "Estado", 7: "Estado", 8: "Status", 9: "Status"},
+            "exit":   {1: "Exit", 2: "Quitter", 3: "Beenden", 4: "Esci", 5: "Weg", 6: "Salir", 7: "Sair", 8: "Avbryt", 9: "Afslut"},
+            "map":    {1: "Map", 2: "Carte", 3: "Karte", 4: "Mappa", 5: "Kaart", 6: "Mapa", 7: "Mapa", 8: "Karta", 9: "Kort"},
         },
     },
     "leaf": {
@@ -57,9 +57,9 @@ FONTS = {
         },
         "groups": [["use", "view", "sort"]],   # the three buttons are one leaf picture
         "labels": {                       # two-line labels: "line1|line2"
-            "use":  {1: "Use|item", 6: "Usar|elmto", 7: "Usar|item", 8: "Anv|Obj", 9: "Brug|Objekt"},
-            "view": {1: "View", 6: "Ver", 7: "Ver", 8: "Visa", 9: "Vis"},
-            "sort": {1: "Sort", 6: "ordenar", 7: "Escolhe", 8: "Sort", 9: "Sorter"},
+            "use":  {1: "Use|item", 2: "Utiliser|Objet", 3: "Obj.|verw.", 4: "Usa", 5: "Gebruik", 6: "Usar|elmto", 7: "Usar|item", 8: "Anv|Obj", 9: "Brug|Objekt"},
+            "view": {1: "View", 2: "Vue", 3: "Ansicht", 4: "Guarda", 5: "Bekijk", 6: "Ver", 7: "Ver", 8: "Visa", 9: "Vis"},
+            "sort": {1: "Sort", 2: "Tri", 3: "Sort.", 4: "Ordina", 5: "Sorteer", 6: "ordenar", 7: "Escolhe", 8: "Sort", 9: "Sorter"},
         },
     },
 }
@@ -73,10 +73,14 @@ PREFER = {
     ("tab", "o"): (6, "item", 4), ("tab", "s"): (6, "status", 1),
     ("leaf", "O"): (8, "use", 3), ("leaf", "b"): (8, "use", 4), ("leaf", "j"): (8, "use", 5),
     ("leaf", "e"): (6, "sort", 3), ("leaf", "t"): (6, "use", 7), ("leaf", "o"): (6, "sort", 0),
+    ("leaf", "U"): (6, "use", 0), ("leaf", "s"): (6, "use", 1), ("leaf", "a"): (6, "use", 2), ("leaf", "r"): (6, "use", 3),   # "Usar" as the Spanish leaf writes it
 }
 # labels whose letters run into each other across the lines (Danish "Brug": the g's tail touches "Objekt"): the
 # letters' rects, label-relative (x0, y0, x1, y1), in reading order
 OVERRIDES = {
+    # Danish "Handln.": the H's right stem touches the a, so the column split gave it to the a
+    ("tab", 9, "event"): [[(7, 5, 18, 19)], [(18, 7, 26, 18)], [(26, 9, 35, 18)], [(35, 7, 43, 18)], [(44, 7, 47, 18)],
+                          [(47, 9, 55, 18)], [(55, 15, 58, 18)]],                          # H a n d l n .
     ("leaf", 9, "use"): [
         [(6, 7, 17, 21)], [(18, 10, 25, 20)], [(26, 11, 36, 20)], [(37, 10, 47, 23)],            # B r u g
         [(6, 22, 15, 32)], [(15, 22, 21, 33)], [(21, 21, 27, 35)], [(27, 23, 34, 33)],           # O b j e
