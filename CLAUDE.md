@@ -67,8 +67,8 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
   the file is a zip or a raw 2352-byte disc image. Extract with `tools/isoext.py`, except PrePre 8 (PCPX-96084), which
   only `tools/prepre8.py extract` can read (isoext crashes on that image).
 - `jp-sweep.yml` (manual, or a push to master touching JP C/config): runs `jp_autofix --install` and `demo_sweep` over
-  the JP builds and opens a PR on `jp-sweep/auto` when something matched; it never pushes to master. Opening the PR needs the repo setting Settings → Actions → General → "Allow GitHub Actions to create and
-  approve pull requests"; until it is on, the branch is pushed and the PR is opened by hand. `report.yml`
+  the JP builds and opens a PR on `jp-sweep/auto` when something matched; it never pushes to master. The repo setting "Allow GitHub Actions to create and approve pull requests" (Settings → Actions → General)
+  is on; without it the branch is pushed but the PR step fails. `report.yml`
   rebuilds the reports when `notes/report_stamp.txt` changes (`date -u > notes/report_stamp.txt`).
 - Cloud bootstrap also fetches the JP disc when `GAME_FILES_URL_JP` is set (step 3b) and builds
   `build/slps01144/report.json`.
