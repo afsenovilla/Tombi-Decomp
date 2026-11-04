@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 81.31 % of code (1153648 of 1418744 bytes, 2680 of 3096 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 81.86 % of code (1161324 of 1418744 bytes, 2682 of 3096 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2680 functions, 68.66 % -> 81.31 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2682 functions, 68.66 % -> 81.86 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -222,6 +222,13 @@ Masked-word pairing at a low threshold (jp_autofix.candidates(0.45), 81.27 % -> 
 (the 99.9 % unit, now exact), the x00 copy of `updateA00L2Type2C` (same edits as x04), `rewardGoldenBowl` and
 `rewardHeart` (no `GVARS_PLAYER_HURT_STATE` guard, like the demo), `cameraModeHandler6` (`< 4` only, limits
 0x54/0x88). Near: `weaponHitCat2Type08` (JP drops the clone-on-first-hit block; two lines of tail placement left).
+
+Opcode-signature pairing (opcode sequence only, size within 25 %) finds nothing above 0.7 for the ~190 unmatched
+mid-size functions: they are new code, not edited copies. The big functions with a twin (81.31 % -> 81.86 %):
+`playerHurtLandRecover` (no `bd1 == 1` anim variants, no cd/ce bytes, no landing block in the airborne branch, timer
+30, `d8c = 0` before `timer = 0x19`, no `bd1 = 0`) and `playerNormalModeDispatch` (pad masks, no cd/ce, no
+`GAME_PLAYER_MODE = 0`, case 3 lands unconditionally, a new case 0x39 = `dirA; func_80101F30; chk`, the 0x63 exit
+clears `D_8009EE58`; the `turn()` double store stays).
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
 `a1`/`v1` instead of `t0`/`a3`, everything else matches), `func_80027D58` (increaseMaxHealth:
