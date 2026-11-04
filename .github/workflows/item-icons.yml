@@ -45,7 +45,10 @@ jobs:
             if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
             if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
             mkdir -p "$RUNNER_TEMP/$2.d"; cd "$RUNNER_TEMP/$2.d"
-            curl -fsSL -o dl "$URL"
+            if printf '%s' "$URL" | grep -q 'mega\.nz/'; then   # a public MEGA link with its key: #...
+              command -v megadl >/dev/null || { sudo apt-get -qq update && sudo apt-get -qq install -y megatools >/dev/null; }
+              megadl --no-progress --path dl "$URL"
+            else curl -fsSL -o dl "$URL"; fi
             if [ "$(stat -c%s dl)" -lt 1000000 ]; then echo "::error::the download of $2 is $(stat -c%s dl) bytes, not a disc (Drive quota or a bad link): $(head -c 200 dl | tr -d '\n\r')"; exit 1; fi
             if unzip -tq dl >/dev/null 2>&1; then unzip -o -q dl -d x
             elif 7z t dl >/dev/null 2>&1; then 7z x -y -ox dl >/dev/null
