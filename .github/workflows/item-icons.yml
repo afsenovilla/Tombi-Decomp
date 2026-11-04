@@ -11,6 +11,10 @@ on:
         type: choice
         options: [PREPRE9, PREPRE8, DENGEKI_D5, JP_DEMO, BETA980203, JP, USA]
         default: PREPRE9
+      cells:
+        description: "Extra cells to look for, NAME=HEX,... (tools/item_icons_find.py --cells)"
+        type: string
+        default: ""
 
 jobs:
   icons:
@@ -61,7 +65,7 @@ jobs:
         run: |
           {
             echo "## GAME_FILES_URL_${{ inputs.disc }}: inventory item icons"; echo; echo '```'
-            python3 -I tools/item_icons_find.py "$RUNNER_TEMP/disc" --pal "$RUNNER_TEMP/pal" -o out --b64
+            python3 -I tools/item_icons_find.py "$RUNNER_TEMP/disc" --pal "$RUNNER_TEMP/pal" -o out --b64 --cells "${{ inputs.cells }}"
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
           rm -rf "$RUNNER_TEMP/disc" "$RUNNER_TEMP/pal"

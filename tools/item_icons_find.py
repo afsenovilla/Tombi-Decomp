@@ -4,7 +4,10 @@ retail PAL item page (SYSTEM/A00300.000 words 64..127, cell n at (n % 15 * 16 + 
 for in every file of the demo (GAM files unpacked too), at any page width, and the pages that hold them are drawn.
 Reads only; the PNGs it writes are disc graphics and never belong in the repo (CI keeps them as run artifacts).
 
-  python3 -I tools/item_icons_find.py DEMO_DIR [--pal game/disc/fs] [-o out] [--min-rows 12]
+  python3 -I tools/item_icons_find.py DEMO_DIR [--pal game/disc/fs] [-o out] [--min-rows 12] [--cells NAME=HEX,...]
+
+--cells looks for extra 16 x 16 cells too, given as the 128 bytes (256 hex digits) of their 16 rows, e.g. the cells of
+another demo's page no retail icon matched: handy to see whether an icon of one disc is on another.
 
 Prints one line per retail item (id, name, file, offset of the cell's first row, page width, rows that matched) and,
 per page found, writes out/<file>_<width>.png (the whole page, grey) and out/<file>_<width>_items.png (the matched
@@ -140,8 +143,15 @@ def main(argv):
     ap.add_argument("-o", "--out", default="out")
     ap.add_argument("--min-rows", type=int, default=12)
     ap.add_argument("--b64", action="store_true", help="print the labelled sheets as base64 too (for a CI log)")
+    ap.add_argument("--cells", default="", help="NAME=HEX,... extra cells to look for (128 bytes each)")
     a = ap.parse_args(argv)
     cells, pals, names = pal_cells(a.pal)
+    for k, spec in enumerate(x for x in a.cells.split(",") if x.strip()):
+        nm, hx = spec.split("=", 1)
+        b = bytes.fromhex(hx.strip())
+        cells[1000 + k] = [b[8 * y:8 * y + 8] for y in range(16)]
+        pals[1000 + k] = [(v * 17, v * 17, v * 17, 255 if v else 0) for v in range(16)]
+        names[1000 + k] = "cell " + nm.strip()
     hits, data = find(cells, demo_files(a.demo), a.min_rows)
     os.makedirs(a.out, exist_ok=True)
     print("retail item icons: %d; found on the disc: %d" % (len(cells), len(hits)))
