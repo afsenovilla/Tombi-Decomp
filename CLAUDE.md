@@ -65,7 +65,7 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
 ## CI and the game discs
 
 - Disc secrets: `GAME_FILES_URL` (PAL), `GAME_FILES_URL_JP` (SLPS-01144), `GAME_FILES_URL_JP_DEMO` (SLPM-80165),
-  `GAME_FILES_URL_BETA980203`, `GAME_FILES_URL_PREPRE8`. Each is a direct URL, a Drive share link or a bare Drive id;
+  `GAME_FILES_URL_BETA980203`, `GAME_FILES_URL_PREPRE8`. Each is a direct URL, a Drive share link, a bare Drive id or a public MEGA link with its key (megatools);
   the file is a zip or a raw 2352-byte disc image. Extract with `tools/isoext.py`, except PrePre 8 (PCPX-96084), which
   only `tools/prepre8.py extract` can read (isoext crashes on that image).
 - `jp-sweep.yml` (manual, or a push to master touching JP C/config): runs `jp_autofix --install` and `demo_sweep` over
