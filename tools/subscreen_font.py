@@ -17,9 +17,12 @@ import subscreen_glyphs as G
 import subscreen_extra_glyphs as E
 
 PX = 64                         # font units per texel
-ACCENTS = {"á": ("a", "acute"), "é": ("e", "acute"), "í": ("i", "acute"), "ó": ("o", "acute"), "ú": ("u", "acute"),
-           "Á": ("A", "acute"), "É": ("E", "acute"), "Í": ("I", "acute"), "Ó": ("O", "acute"), "Ú": ("U", "acute"),
-           "ñ": ("n", "tilde"), "Ñ": ("N", "tilde")}
+ACCENTS = {}
+for _m, _lo, _up in (("acute", "áéíóú", "ÁÉÍÓÚ"), ("grave", "àèìòù", "ÀÈÌÒÙ"), ("diaeresis", "äëïöü", "ÄËÏÖÜ")):
+    for _c, _b in zip(_lo + _up, "aeiouAEIOU"):
+        ACCENTS[_c] = (_b, _m)
+ACCENTS.update({"ñ": ("n", "tilde"), "Ñ": ("N", "tilde"), "ç": ("c", "cedilla"), "Ç": ("C", "cedilla")})
+MARKS = {"acute": E.ACUTE, "grave": E.GRAVE, "diaeresis": E.DIAERESIS, "tilde": E.TILDE, "cedilla": E.CEDILLA}
 NAMES = {"tab": ("Tombi Plank", "TombiPlank"), "leaf": ("Tombi Leaf", "TombiLeaf")}
 
 
@@ -49,7 +52,7 @@ def ink_of(table, pages, cleans, fn, ch):
         if ink is None:
             return None
         ink = set(ink)
-        if base in "ij":                     # the dot gives way to the mark
+        if base in "ij" and mark != "cedilla":   # the dot gives way to the mark
             comps = []
             pts = set(ink)
             while pts:
@@ -62,9 +65,10 @@ def ink_of(table, pages, cleans, fn, ch):
                                 pts.discard((x + dx, y + dy)); stack.append((x + dx, y + dy))
                 comps.append(comp)
             ink = max(comps, key=len)
-        rows = E.ACUTE if mark == "acute" else E.TILDE
-        top = min(y for _, y in ink); x0 = min(x for x, _ in ink); x1 = max(x for x, _ in ink)
-        mx = x0 + (x1 - x0 + 1 - len(rows[0])) // 2 + 1; my = top - 1 - len(rows)
+        rows = MARKS[mark]
+        top = min(y for _, y in ink); bottom = max(y for _, y in ink); x0 = min(x for x, _ in ink); x1 = max(x for x, _ in ink)
+        mx = x0 + (x1 - x0 + 1 - len(rows[0])) // 2 + (2 if mark == "cedilla" else 1)
+        my = bottom + 1 if mark == "cedilla" else top - 1 - len(rows)
         ink |= {(mx + x, my + y) for y, r in enumerate(rows) for x, c in enumerate(r) if c == "#"}
         return ink
     ink = disc_ink(table, pages, cleans, fn, ch)

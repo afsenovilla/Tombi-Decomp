@@ -522,7 +522,8 @@ def write_header(table, path):
     import subscreen_extra_glyphs as E
     extras, rows = [], []
     for fi, fn in enumerate(fonts):
-        items = list((E.TAB if fn == "tab" else E.LEAF).items()) + [("\u0301", (0, E.ACUTE)), ("\u0303", (0, E.TILDE))]
+        items = list((E.TAB if fn == "tab" else E.LEAF).items()) + [("\u0301", (0, E.ACUTE)), ("\u0300", (0, E.GRAVE)),
+                                                                     ("\u0308", (0, E.DIAERESIS)), ("\u0303", (0, E.TILDE)), ("\u0327", (0, E.CEDILLA))]
         for ch, (bl, bitmap) in items:
             w = len(bitmap[0])
             extras.append("    { %d, 0x%04X, %d, %d, %d, %d },   /* %s %s */" % (fi, ord(ch), w, len(bitmap), bl, len(rows), fn, ch if ord(ch) > 0x20 and ord(ch) < 0x300 else "mark"))

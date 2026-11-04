@@ -200,10 +200,17 @@ static int glyph_disc(int gi, GTexel *g) {
     for (int j = 0; j < m; j++) n = gt_add(g, n, gs->u + cut[j].x - sg->u, gs->v + cut[j].y - sg->baseline, cut[j].t, cut[j].letter);
     return n;
 }
-/* the base letter of an accented one (0 when it is not one) and its mark (U+0301 acute, U+0303 tilde) */
+/* the base letter of an accented one (0 when it is not one) and its mark: U+0301 acute, U+0300 grave, U+0308 diaeresis,
+   U+0303 tilde above it, U+0327 cedilla below it */
 static unsigned accent_base(unsigned ch, unsigned *mark) {
-    static const unsigned short tbl[][3] = { {0xE1, 'a', 0x301}, {0xE9, 'e', 0x301}, {0xED, 'i', 0x301}, {0xF3, 'o', 0x301}, {0xFA, 'u', 0x301},
-        {0xC1, 'A', 0x301}, {0xC9, 'E', 0x301}, {0xCD, 'I', 0x301}, {0xD3, 'O', 0x301}, {0xDA, 'U', 0x301}, {0xF1, 'n', 0x303}, {0xD1, 'N', 0x303} };
+    static const unsigned short tbl[][3] = {
+        {0xE1, 'a', 0x301}, {0xE9, 'e', 0x301}, {0xED, 'i', 0x301}, {0xF3, 'o', 0x301}, {0xFA, 'u', 0x301},
+        {0xC1, 'A', 0x301}, {0xC9, 'E', 0x301}, {0xCD, 'I', 0x301}, {0xD3, 'O', 0x301}, {0xDA, 'U', 0x301},
+        {0xE0, 'a', 0x300}, {0xE8, 'e', 0x300}, {0xEC, 'i', 0x300}, {0xF2, 'o', 0x300}, {0xF9, 'u', 0x300},
+        {0xC0, 'A', 0x300}, {0xC8, 'E', 0x300}, {0xCC, 'I', 0x300}, {0xD2, 'O', 0x300}, {0xD9, 'U', 0x300},
+        {0xE4, 'a', 0x308}, {0xEB, 'e', 0x308}, {0xEF, 'i', 0x308}, {0xF6, 'o', 0x308}, {0xFC, 'u', 0x308},
+        {0xC4, 'A', 0x308}, {0xCB, 'E', 0x308}, {0xCF, 'I', 0x308}, {0xD6, 'O', 0x308}, {0xDC, 'U', 0x308},
+        {0xF1, 'n', 0x303}, {0xD1, 'N', 0x303}, {0xE7, 'c', 0x327}, {0xC7, 'C', 0x327} };
     for (unsigned i = 0; i < sizeof tbl / sizeof *tbl; i++) if (tbl[i][0] == ch) { *mark = tbl[i][2]; return tbl[i][1]; }
     return 0;
 }
@@ -216,7 +223,7 @@ static int glyph_for(int font, unsigned ch, GTexel *g, int *w, int *gi) {
     if (base) {
         int mi = extra_of(font, mark), top = 99, x0 = 99, x1 = -99, dummy;
         if (mi < 0 || !(n = glyph_for(font, base, g, w, &dummy))) return 0;
-        if (base == 'i' || base == 'j') {          /* the dot gives way to the mark: keep the biggest ink piece only */
+        if ((base == 'i' || base == 'j') && mark != 0x327) {   /* the dot gives way to the mark: keep the biggest ink piece only */
             static unsigned char comp[GMAX]; int best = 0, bestn = 0, nc = 0;
             memset(comp, 0, sizeof comp);
             for (int i = 0; i < n; i++) {
@@ -237,9 +244,11 @@ static int glyph_for(int font, unsigned ch, GTexel *g, int *w, int *gi) {
             }
             { int m = 0; for (int i = 0; i < n; i++) if (g[i].t != 255) g[m++] = g[i]; n = m; }
         }
-        for (int i = 0; i < n; i++) if (g[i].letter) { if (g[i].y < top) top = g[i].y; if (g[i].x < x0) x0 = g[i].x; if (g[i].x > x1) x1 = g[i].x; }
-        {   const SubExtra *e = &sub_extra[mi];
-            int mx = x0 + (x1 - x0 + 1 - e->w) / 2 + 1, my = top - 1 - e->h, m = n;
+        {   int bottom = -99;
+            for (int i = 0; i < n; i++) if (g[i].letter) { if (g[i].y < top) top = g[i].y; if (g[i].y > bottom) bottom = g[i].y; if (g[i].x < x0) x0 = g[i].x; if (g[i].x > x1) x1 = g[i].x; }
+            const SubExtra *e = &sub_extra[mi];
+            int mx = x0 + (x1 - x0 + 1 - e->w) / 2 + 1, my = mark == 0x327 ? bottom + 1 : top - 1 - e->h, m = n;
+            if (mark == 0x327) mx = x0 + (x1 - x0 + 1 - e->w) / 2 + 2;   /* the cedilla hangs from the c's right end */
             for (int y = 0; y < e->h; y++) for (int x = 0; x < e->w; x++) if (sub_extra_rows[e->rows + y] >> x & 1 && !gt_has(g, m, mx + x, my + y)) m = gt_add(g, m, mx + x, my + y, 1, 1);
             n = gt_edge(font, g, m);
         }
