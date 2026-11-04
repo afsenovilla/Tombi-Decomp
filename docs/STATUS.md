@@ -33,6 +33,15 @@ with no PAL twin, to decompile from scratch. Demo SLPM-80165 at 40.87 % after `t
 sweepable in CI. Workflow per function: `tools/jpcheck.py --strict --norm`, `tools/jp_autofix.py --install-file`,
 `tools/build_report.py --version slps01144`, `tools/progress_jp.py`.
 
+### JP sweep workflow
+
+`.github/workflows/jp-sweep.yml`: on demand (workflow_dispatch) or when a push to master touches `src/**_slps01144.c`
+or the JP/demo configs. Fetches the five discs, builds the reports, runs `tools/jp_autofix.py --install` on SLPS-01144
+and `tools/demo_sweep.py --jobs 4` on the demos, and opens a PR (branch `jp-sweep/auto`) only when something was
+installed. First run failed on the PrePre 8 image: that disc needs `tools/prepre8.py extract`, not `isoext.py` (fixed).
+Review the PR by hand before merging (the installer criterion is `--strict --norm`, so a match is real, but the file
+placement may need a header fix).
+
 ### JP queue (one function per scheduled run; take the first open line, work it, then update this list)
 
 Each run: `bash tools/session_bootstrap.sh --no-wasm --no-build` (fetches `game_jp/` from `GAME_FILES_URL_JP` and builds

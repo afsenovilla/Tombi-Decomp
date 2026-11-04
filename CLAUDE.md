@@ -60,6 +60,18 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
   after the Windows exe and Android APK CI runs of the head commit are green. Release title "Tombi port X".
 - Disk in the cloud container is small: delete builds/dumps when done; agents in worktrees must clean up.
 
+## CI and the game discs
+
+- Disc secrets: `GAME_FILES_URL` (PAL), `GAME_FILES_URL_JP` (SLPS-01144), `GAME_FILES_URL_JP_DEMO` (SLPM-80165),
+  `GAME_FILES_URL_BETA980203`, `GAME_FILES_URL_PREPRE8`. Each is a direct URL, a Drive share link or a bare Drive id;
+  the file is a zip or a raw 2352-byte disc image. Extract with `tools/isoext.py`, except PrePre 8 (PCPX-96084), which
+  only `tools/prepre8.py extract` can read (isoext crashes on that image).
+- `jp-sweep.yml` (manual, or a push to master touching JP C/config): runs `jp_autofix --install` and `demo_sweep` over
+  the JP builds and opens a PR on `jp-sweep/auto` when something matched; it never pushes to master. `report.yml`
+  rebuilds the reports when `notes/report_stamp.txt` changes (`date -u > notes/report_stamp.txt`).
+- Cloud bootstrap also fetches the JP disc when `GAME_FILES_URL_JP` is set (step 3b) and builds
+  `build/slps01144/report.json`.
+
 ## Build / test cheatsheet
 
 - i386 port: `PORT_STALE_FULL=warn make -C build/port2 -j8` → `build/port2/tombi2`.
