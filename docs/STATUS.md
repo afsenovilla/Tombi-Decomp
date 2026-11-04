@@ -24,12 +24,10 @@ shared touch scroller for every long list, Windows tolower link fix.
    AREA17 section 0 segfaults in `spawnSectionObjectsAlt` (empty load list, one of the 13 `DOOR_ROOMS` of
    tools/psxemu/rooms.py that crash in the real game too). Not a port bug; only the door transition from a sibling
    room enters those. Note: `--poke` values are hex (area 10 = `A`, 17 = `11`), easy to get wrong.
-4. **Free text in the Select sub-screen's tab / leaf fonts** (the "Objetos" technique, for any word): the glyph table
-   now takes letters from all nine language pages (`tools/subscreen_glyphs.py`, TABLE_LANGS 1..9; the Danish
-   "Handln." H fixed by an override). Coverage after that: tab font 38 glyphs, missing D G J L N P R T U X Y Z h q z;
-   leaf font 30 glyphs, missing C D F H I J K L M N P Q R W X Y Z f p q x y z (plus every accent / ñ). The disc has
-   no more samples of these fonts; the missing letters must be composed from pieces of existing ones (coordinates)
-   or drawn new in the same style (our own pixels, not the disc's). User decision pending.
+4. **Free text in the Select sub-screen fonts**: done 2026-11-04 (docs/PORT.md "Free text in those fonts").
+   `--subscreen-labels` (port), the "Rótulos del menú Select" field of the PC launcher, our hand-drawn letters in
+   `tools/subscreen_extra_glyphs.py`, `tools/subscreen_font.py` (TTF of both fonts from the owner's disc). Checked on
+   PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
 ## Japanese decomp (SLPS-01144), hand pass 3

@@ -178,12 +178,14 @@ static int gt_add(GTexel *g, int n, int x, int y, int t, int letter) {
     if (n >= GMAX || x < -64 || x > 63 || y < -64 || y > 63) return n;
     g[n].x = (signed char)x; g[n].y = (signed char)y; g[n].t = (unsigned char)t; g[n].letter = (unsigned char)letter; return n + 1;
 }
-/* the shaded edge (tab: below and to the right) or the grey rim (leaf: the four neighbours) of our own ink */
+/* the shaded edge of our own tab ink (below and to the right, as the plank's letters are cut); the leaf's letters are
+   plain white (the disc's carry a few stray light texels, not a rim), so ours get nothing */
 static int gt_edge(int font, GTexel *g, int n) {
-    static const signed char tab_d[3][2] = { {1, 1}, {0, 1}, {1, 0} }, leaf_d[4][2] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
-    const signed char (*d)[2] = font == SUB_FONT_TAB ? tab_d : leaf_d; int nd = font == SUB_FONT_TAB ? 3 : 4, m = n;
-    for (int i = 0; i < n; i++) if (g[i].letter) for (int k = 0; k < nd; k++)
-        if (!gt_has(g, m, g[i].x + d[k][0], g[i].y + d[k][1])) m = gt_add(g, m, g[i].x + d[k][0], g[i].y + d[k][1], sub_edge[font], 0);
+    static const signed char tab_d[3][2] = { {1, 1}, {0, 1}, {1, 0} };
+    int m = n;
+    if (font != SUB_FONT_TAB) return n;
+    for (int i = 0; i < n; i++) if (g[i].letter) for (int k = 0; k < 3; k++)
+        if (!gt_has(g, m, g[i].x + tab_d[k][0], g[i].y + tab_d[k][1])) m = gt_add(g, m, g[i].x + tab_d[k][0], g[i].y + tab_d[k][1], sub_edge[font], 0);
     return m;
 }
 static int glyph_extra(int font, int ei, GTexel *g) {

@@ -4,7 +4,7 @@ hand in the style of the disc's (tools/subscreen_glyphs.py reads them into subsc
 them next to the disc's letters).  They are not game graphics: nothing here comes from the disc.
 
 A letter: (baseline row, rows of '#' ink / '.' blank), trimmed to its ink; the step to the next letter is its width + 1.
-The tab font's shaded edge and the leaf font's grey rim are added at run time like the disc letters carry them.
+The tab font's shaded edge is added at run time like the disc letters carry it; the leaf's letters are plain white.
 Accented letters are the base letter (the dot of i / j dropped) plus a mark (ACUTE, or TILDE for n) above it.
 Where to try them: python3 tools/subscreen_glyphs.py --data data --atlas /tmp/x/atlas.png shows every letter, these too."""
 
