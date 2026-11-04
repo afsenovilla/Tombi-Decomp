@@ -125,8 +125,22 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   has (secret spell, a dinner party feast, melting something to open a path, rolling down as a snowball, a hidden
   power that stops you moving, words that make something move, winning a prize, "a forgotten thing is a memory?",
   Santa's parasol, "what's that!? bananas"). AREA00/A006 #59/#64: the 100 Year Old Wise Man offers to appraise items
-  whose use you don't know (not in retail). To hunt beyond text (patrols, handlers) the disc has to be in the
-  container: GAME_FILES_URL_DENGEKI_D5 is a CI secret only, not an environment variable.
+  whose use you don't know (not in retail). `bash tools/disc_fetch.sh DENGEKI_D5` puts the disc in /dev/shm.
+- Dengeki D5 vs PAL, code and objects (2026-11-04, disc in /dev/shm/dengeki_d5, scripts kept out of the repo):
+  xmatch finds 735 PAL functions in TOMBA.EXE (31 % of its code, 111 identical) and 151 in AREA00/X00.BIN (overlay
+  base 0x800F4A48, from its jal targets). fn_vs_pal: the village NPC walkers are the retail ones (villagerNpcWalkPath
+  81 %, villagerNpcSpringMotion 78 %), so no other patrol system; the hooded old man handler (layer 3 type 0x15 in
+  this build, 2704 B) is only 48 % similar to updateHoodedOldMan. Load lists are the PrePre 8 layout (20-byte
+  records after the file table at exe 0x5D31C), no APD kinds: the object placement lists live inside D003.GAM
+  (= D103 = D203) at +0x481CC/+0x488DC/+0x490DC (rooms 0-2) and +0x4962C (area list), D302 +0x5CC, D503 +0x11784,
+  same 16-byte records as PAL. By bytes 300 of 422 PAL AREA00 records are there; by position the only objects PAL
+  does not place in the village: five layer 4 type 8 "static solid" sprites (handler at X00+0x28E60, the
+  cullObjectToDrawList(360) variant of updateStaticSolid; PAL emptied that slot) at (1021,-120)/(1117,-197)/
+  (1198,-251) in room 0 (sprite frames 46-48) and (2546,-476)/(2612,-370) in room 1 (frames 53-54); two layer 7
+  type 0 and four type 1 effects in room 0 (y 144 / 260); one flying bug (layer 2 type 0x27) in the area list at
+  (2642,-300,168); plus re-placed foliage (type 0x24), backdrop sprites (0x14) and climb props (0x0A). The handler
+  tables are at exe 0x8006A3E8 (layer 4, 49 entries), 0x800679B8 (layer 2, 50) and 0x80069D64 (layer 3, 58).
+  Not done: rendering those five sprites (the village SPR bank was not located; A006 is a 16-bit page).
 - Game-file downloads (2026-11-04): every workflow and the bootstrap go through `tools/ci_download.sh`, which takes
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
