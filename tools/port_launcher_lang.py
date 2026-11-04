@@ -7,6 +7,8 @@ import i18n
 from port_mods import EVENT_COUNT
 
 FR = {
+    "l.sublabels": 'Libellés du menu Select (jeu en espagnol)',
+    "l.sublabelshint": 'item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar : les onglets et les boutons-feuilles, dans le lettrage du disque (| coupe la ligne du bouton ; accents et ñ acceptés). Vide : Objetos / Usar objeto avec la traduction améliorée.',
     # port_mods.py
     "mod.skipintro": "Passer les logos et les vidéos d'introduction",
     "mod.skipintro.d": "Démarre sur l'écran titre sans les logos ni la vidéo d'ouverture (les vidéos de l'histoire sont toujours lues).",
@@ -154,6 +156,8 @@ FR = {
 }
 
 DE = {
+    "l.sublabels": 'Beschriftungen des Select-Menüs (Spiel auf Spanisch)',
+    "l.sublabelshint": 'item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar: die Reiter und die Blatt-Schaltflächen in der Schrift der Disc (| bricht die Zeile der Schaltfläche; Akzente und ñ erlaubt). Leer: Objetos / Usar objeto mit der verbesserten Übersetzung.',
     "mod.skipintro": "Intro-Logos und -Videos überspringen",
     "mod.skipintro.d": "Startet beim Titelbildschirm ohne die Logos und das Eröffnungsvideo (die Videos der Geschichte laufen weiterhin).",
     "mod.hz60": "60 Hz (NTSC-Geschwindigkeit)",
@@ -298,6 +302,8 @@ DE = {
 }
 
 IT = {
+    "l.sublabels": 'Etichette del menu Select (gioco in spagnolo)',
+    "l.sublabelshint": 'item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar: le schede e i pulsanti foglia, con le lettere del disco (| spezza la riga del pulsante; accenti e ñ ammessi). Vuoto: Objetos / Usar objeto con la traduzione migliorata.',
     "mod.skipintro": "Salta loghi e filmati iniziali",
     "mod.skipintro.d": "Avvia dalla schermata del titolo senza i loghi e il filmato d'apertura (i filmati della storia vengono comunque riprodotti).",
     "mod.hz60": "60 Hz (velocità NTSC)",
@@ -441,6 +447,8 @@ IT = {
 }
 
 NL = {
+    "l.sublabels": 'Opschriften van het Select-menu (spel in het Spaans)',
+    "l.sublabelshint": 'item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar: de tabbladen en de bladknoppen, in het letterwerk van de schijf (| breekt de regel van de knop; accenten en ñ toegestaan). Leeg: Objetos / Usar objeto met de verbeterde vertaling.',
     "mod.skipintro": "Logo's en introfilms overslaan",
     "mod.skipintro.d": "Start op het titelscherm zonder de logo's en de openingsfilm (de films van het verhaal worden nog wel afgespeeld).",
     "mod.hz60": "60 Hz (NTSC-snelheid)",
@@ -585,6 +593,8 @@ NL = {
 }
 
 PT = {
+    "l.sublabels": 'Rótulos do menu Select (jogo em espanhol)',
+    "l.sublabelshint": 'item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar: os separadores e os botões de folha, com as letras do próprio disco (| quebra a linha do botão; acentos e ñ permitidos). Vazio: Objetos / Usar objeto com a tradução melhorada.',
     "mod.skipintro": "Saltar logótipos e vídeos de introdução",
     "mod.skipintro.d": "Arranca no ecrã de título sem os logótipos nem o vídeo de abertura (os vídeos da história continuam a ser reproduzidos).",
     "mod.hz60": "60 Hz (velocidade NTSC)",
@@ -728,6 +738,8 @@ PT = {
 }
 
 SV = {
+    "l.sublabels": 'Etiketter i Select-menyn (spelet på spanska)',
+    "l.sublabelshint": 'item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar: flikarna och lövknapparna, med skivans egna bokstäver (| bryter knappens rad; accenter och ñ tillåts). Tomt: Objetos / Usar objeto med den förbättrade översättningen.',
     "mod.skipintro": "Hoppa över introns logotyper och filmer",
     "mod.skipintro.d": "Startar på titelskärmen utan logotyperna och öppningsfilmen (berättelsens filmer spelas fortfarande).",
     "mod.hz60": "60 Hz (NTSC-hastighet)",
@@ -870,6 +882,8 @@ SV = {
 }
 
 DA = {
+    "l.sublabels": 'Etiketter i Select-menuen (spillet på spansk)',
+    "l.sublabelshint": 'item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar: fanerne og bladknapperne med diskens egne bogstaver (| bryder knappens linje; accenter og ñ tilladt). Tomt: Objetos / Usar objeto med den forbedrede oversættelse.',
     "mod.skipintro": "Spring intrologoer og -film over",
     "mod.skipintro.d": "Starter på titelskærmen uden logoerne og åbningsfilmen (historiens film afspilles stadig).",
     "mod.hz60": "60 Hz (NTSC-hastighed)",

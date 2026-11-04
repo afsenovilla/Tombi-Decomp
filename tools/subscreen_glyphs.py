@@ -17,7 +17,7 @@ where that fails); the labels' split shows in --atlas.
 
 The JSON and the header hold coordinates only (and a checksum per source label, to recognise the right files); the
 glyph pixels are cut from the user's own disc at run time (port2/runtime/subscreen_es.c) and by --atlas."""
-import argparse, json, os, sys
+import argparse, collections, json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGE_FILE = "SYSTEM/A%d0301.000"
@@ -73,7 +73,9 @@ PREFER = {
     ("tab", "o"): (6, "item", 4), ("tab", "s"): (6, "status", 1),
     ("leaf", "O"): (8, "use", 3), ("leaf", "b"): (8, "use", 4), ("leaf", "j"): (8, "use", 5),
     ("leaf", "e"): (6, "sort", 3), ("leaf", "t"): (6, "use", 7), ("leaf", "o"): (6, "sort", 0),
-    ("leaf", "U"): (6, "use", 0), ("leaf", "s"): (6, "use", 1), ("leaf", "a"): (6, "use", 2), ("leaf", "r"): (6, "use", 3),   # "Usar" as the Spanish leaf writes it
+    ("leaf", "U"): (6, "use", 0), ("leaf", "s"): (6, "use", 1), ("leaf", "a"): (6, "use", 2),   # "Usar" as the Spanish leaf writes it
+    ("leaf", "r"): (6, "view", 2), ("leaf", "u"): (4, "view", 1), ("leaf", "n"): (3, "view", 1),   # clean cuts (the Spanish "Usar" r drags a piece of
+    # the a, the Dutch "Gebruik" letters touch); u from the Italian "Guarda", n from the German "Ansicht" (the user's picks)
 }
 # labels whose letters run into each other across the lines (Danish "Brug": the g's tail touches "Objekt"): the
 # letters' rects, label-relative (x0, y0, x1, y1), in reading order
@@ -392,6 +394,13 @@ def build(pages):
         table["fonts"][font] = {"text_indices": list(f["text"]), "gap": gap, "pair_gap": f["pair_gap"],
                                 "slots": {k: list(v) for k, v in f["slots"].items()}, "groups": f["groups"],
                                 "glyphs": dict(sorted(glyphs.items())), "labels": labels}
+    for fn, f in table["fonts"].items():     # the shaded edge / rim index our own letters get (subscreen_extra_glyphs.py)
+        cnt = collections.Counter()
+        for ch, g in f["glyphs"].items():
+            for (x, y), t in glyph_texels(pages[g["file"]], fn, g["slot"], g, cleans[(fn, g["slot"])]).items():
+                if t not in FONTS[fn]["text"]:
+                    cnt[t] += 1
+        f["edge"] = cnt.most_common(1)[0][0] if cnt else 0
     return table, cleans
 
 
@@ -498,7 +507,27 @@ def write_header(table, path):
     L.append("/* the font: one glyph per character (font, character, index in sub_glyphs) */")
     L.append("typedef struct { unsigned char font; char ch; unsigned short glyph; } SubPick;")
     L.append("static const SubPick sub_picks[%d] = {" % len(picks))
-    L += picks + ["};", "", "#endif", ""]
+    L += picks + ["};"]
+    # our own letters (tools/subscreen_extra_glyphs.py): rows of ink bits (bit x = column x), the marks as U+0301 / U+0303
+    sys.path.insert(0, HERE)
+    import subscreen_extra_glyphs as E
+    extras, rows = [], []
+    for fi, fn in enumerate(fonts):
+        items = list((E.TAB if fn == "tab" else E.LEAF).items()) + [("\u0301", (0, E.ACUTE)), ("\u0303", (0, E.TILDE))]
+        for ch, (bl, bitmap) in items:
+            w = len(bitmap[0])
+            extras.append("    { %d, 0x%04X, %d, %d, %d, %d },   /* %s %s */" % (fi, ord(ch), w, len(bitmap), bl, len(rows), fn, ch if ord(ch) > 0x20 and ord(ch) < 0x300 else "mark"))
+            rows += [sum(1 << x for x, c in enumerate(r) if c == "#") for r in bitmap]
+    L.append("/* our own letters (not the disc's): ink bitmaps, the edge / rim added at run time; baseline = row index */")
+    L.append("typedef struct { unsigned char font; unsigned short ch; unsigned char w, h, baseline; unsigned short rows; } SubExtra;")
+    L.append("static const unsigned char sub_edge[%d] = { %s };   /* the shaded edge (tab) / grey rim (leaf) palette index */" % (
+        len(fonts), ", ".join(str(table["fonts"][fn].get("edge", 0)) for fn in fonts)))
+    L.append("static const SubExtra sub_extra[%d] = {" % len(extras))
+    L += extras + ["};"]
+    L.append("static const unsigned short sub_extra_rows[%d] = {" % len(rows))
+    for i in range(0, len(rows), 12):
+        L.append("    " + " ".join("0x%04X," % r for r in rows[i:i + 12]))
+    L += ["};", "", "#endif", ""]
     open(path, "w").write("\n".join(L))
 
 

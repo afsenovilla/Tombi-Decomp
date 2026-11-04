@@ -2545,6 +2545,20 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   cut from your disc, for inspection) into `runtime/subscreen_glyphs.h`; the texture and each source label are
   recognised by an FNV hash of its rect (any other data is left alone).  "Inventario" was not used: it does not fit the 64-px tab nor the leaf.
 
+  **Free text in those fonts (2026-11-04).** `--subscreen-labels item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..`
+  rewrites any of the eight labels (the five tabs, the three leaf buttons; `|` breaks the leaf's two lines) with
+  `--lang 5`, UTF-8. The glyph table now takes letters from all nine language pages (38 tab letters, 30 leaf
+  letters), and the alphabet is completed by our own hand-drawn letters in the same style
+  (`tools/subscreen_extra_glyphs.py`: tab D G J L N P R T U X Y Z h q z, leaf C D F H I J K L M N P Q R W X Y Z f p
+  q x y z; ours, not the disc's, so they can live in the repo), the tab ones painted with the shaded edge the disc's
+  letters carry (the modal edge texel index of the disc letters: `sub_edge[]` in the generated header), the leaf
+  ones plain white like the disc's. á é í ó ú ñ
+  and their capitals are the base letter plus an acute / tilde mark above it (the dot of i / j dropped). Neighbours
+  of one source word keep their original step; other pairs step by the ink width plus one. A letter no font has
+  leaves every label as the disc writes it (logged). Without the option the item tab and the use leaf still follow
+  the improved translation's "Objetos". `tools/subscreen_font.py --data data -o DIR` builds the same lettering as
+  two TrueType fonts (Tombi Plank, Tombi Leaf; pixel outlines, ink only) on the owner's machine from their disc.
+
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
 

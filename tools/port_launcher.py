@@ -527,7 +527,8 @@ i18n.add({
     "es": {"l.experimental": "Funciones experimentales", "l.fps60": "60 fps (experimental)", "nav.play": "Jugar", "nav.gfx": "Gráficos y rendimiento", "nav.controls": "Controles", "nav.mods": "Parches y mods", "nav.cut": "Contenido recortado", "nav.log": "Registro",
            "l.uilang": "Idioma del launcher", "l.starting": "Iniciando el juego...", "c.disc": "Disco", "c.saves": "Partidas", "c.game": "Idioma del juego",
            "c.patch": "Parche de texto", "c.speed": "Velocidad", "c.quick": "Opciones rápidas", "l.skipintro": "Saltar logos e intro",
-           "l.autostart2": "Empezar partida automáticamente", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
+           "l.autostart2": "Empezar partida automáticamente", "l.sublabels": "Rótulos del menú Select (juego en español)",
+           "l.sublabelshint": "item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar: las pestañas y los botones de hoja, con las letras del propio disco (| parte la línea del botón; acentos y ñ permitidos). Vacío: Objetos / Usar objeto con la traducción mejorada.", "p.none": "Ninguno (texto original)", "l.patchhint": "Recomendado con el juego en español: Traducción mejorada (incluida).", "p.bundled": "Traducción mejorada (incluida)",
            "p.custom": "Otro archivo...", "p.translation": "Tu traducción (translation.tombipatch.json)",
            "b.importtr": "Importar traducción…", "b.removetr": "Quitar traducción",
            "q.removetr": "¿Borrar la traducción importada (translation.tombipatch.json / translation.tpatch) de la carpeta del juego?",
@@ -543,7 +544,8 @@ i18n.add({
     "en": {"l.experimental": "Experimental features", "l.fps60": "60 fps (experimental)", "nav.play": "Play", "nav.gfx": "Graphics & performance", "nav.controls": "Controls", "nav.mods": "Patches and mods", "nav.cut": "Cut content", "nav.log": "Log",
            "l.uilang": "Launcher language", "l.starting": "Starting the game...", "c.disc": "Disc", "c.saves": "Saves", "c.game": "Game language",
            "c.patch": "Text patch", "c.speed": "Speed", "c.quick": "Quick options", "l.skipintro": "Skip logos and intro",
-           "l.autostart2": "Start a new game automatically", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
+           "l.autostart2": "Start a new game automatically", "l.sublabels": "Select menu labels (game in Spanish)",
+           "l.sublabelshint": "item=Objetos,event=Eventos,status=Estado,exit=Salir,map=Mapa,use=Usar|objeto,view=Ver,sort=Ordenar: the tabs and the leaf buttons, in the disc's own lettering (| breaks the button's line; accents and ñ allowed). Empty: Objetos / Usar objeto with the improved translation.", "p.none": "None (original text)", "l.patchhint": "Recommended with the game in Spanish: Improved translation (bundled).", "p.bundled": "Improved translation (bundled)",
            "p.custom": "Other file...", "p.translation": "Your translation (translation.tombipatch.json)",
            "b.importtr": "Import translation…", "b.removetr": "Remove translation",
            "q.removetr": "Delete the imported translation (translation.tombipatch.json / translation.tpatch) from the game folder?",
@@ -1041,6 +1043,8 @@ def build_command(s, civ_play=None):
         cmd += ["--fps", str(fps)]
     if s.get("lang"):
         cmd += ["--lang", str(s["lang"])]
+    if str(s.get("lang")) == "5" and (s.get("subscreen_labels") or "").strip():
+        cmd += ["--subscreen-labels", s["subscreen_labels"].strip()]   # the Select tabs / leaf buttons, in the disc's lettering
     if s.get("cut_content"):
         cmd += ["--cut-content"]
         if s.get("early_title"):
@@ -1890,6 +1894,16 @@ class App(QMainWindow):
         lay.addWidget(t)
         lay.addWidget(self.check("skipintro", tr("l.skipintro"), True))
         lay.addWidget(self.check("autostart", tr("l.autostart2"), False))
+        # the Select sub-screen's labels (--subscreen-labels, Spanish only): item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..
+        t = QLabel(tr("l.sublabels"))
+        t.setToolTip(tr("l.sublabelshint"))
+        lay.addWidget(t)
+        e = QLineEdit(self.v("subscreen_labels", str, ""))
+        e.setPlaceholderText("item=Objetos,use=Usar|objeto")
+        e.setToolTip(tr("l.sublabelshint"))
+        e.textChanged.connect(lambda t: self.setv("subscreen_labels", t.strip()))
+        self.edits["subscreen_labels"] = e
+        lay.addWidget(e)
         # text patch: none / the bundled one / another file (keys patch_on + patch; no path shown unless "other")
         self._patch_widget(cell(0, 1, tr("c.patch")))
         # (the speed, 50 / 60 Hz, is on the Graphics and performance page, next to the frame rate)

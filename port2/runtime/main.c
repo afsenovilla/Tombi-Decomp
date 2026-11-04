@@ -324,10 +324,12 @@ static int port_ws_resolve(void) {
 
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--crawler-patrol] [--log-anim [FILE]] [--log-anim-force CAT:TYPE,...] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
-                "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--picture ntsc|pal] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
+                "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--picture ntsc|pal] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--subscreen-labels item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
+                "  --subscreen-labels KEY=TEXT,... writes the Select sub-screen's tabs (item event status exit map) and leaf buttons (use view\n"
+                "         sort; | breaks the leaf's line) with --lang 5, in the disc's own lettering plus our letters for the rest (docs/PORT.md)\n"
                 "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 1 Francais, 2 Deutsch, 3 Italiano, 4 Nederlands,\n"
                 "         5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk (every PAL disc carries all nine)\n"
                 "  --data DIR reads the game files extracted once from your disc by tools/extract_data.py (default: data/ in the\n"
@@ -1052,6 +1054,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--dump-audio") && v) port_audio_path = argv[++i];
         else if (!strcmp(a, "--gfx-es")) port_gfx_es = 1;
         else if (!strcmp(a, "--no-gfx-es")) port_gfx_es = 0;
+        else if (!strcmp(a, "--subscreen-labels") && v) { extern int port_subscreen_labels(const char *); if (!port_subscreen_labels(argv[++i])) return usage(argv[0]); }
         else if (!strcmp(a, "--skip-movies")) port_skip_movies = 1;
         else if (!strcmp(a, "--skip-intro")) port_skip_movies = 2;
         else if (!strcmp(a, "--play-movies")) port_skip_movies = 0;     /* (the default now; kept for old scripts) */
