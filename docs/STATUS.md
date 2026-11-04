@@ -81,6 +81,13 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 
 ## Recently done (context)
 
+- Map graph across builds (2026-11-04, `tools/map_tables.py` + `map-tables.yml` on the GAME_FILES_URL_* secrets):
+  PAL = USA = beta 1998-02-03: 65 nodes, 55 links, 115 route entries, node 41 (-269, -974, -40, in the sea west of
+  Mushroom Forest) referenced by nothing. JP retail: the same first 55 nodes and links; PAL/USA/beta add the
+  west-coast strip (nodes 55-63, region 10) and node 64 (region 7). PrePre Vol.8, PrePre Vol.9, Dengeki D5 and the
+  SLPM-80165 demo: no node table, no links table and no retail signature anywhere on the disc (their DSPSUB.BIN is
+  about 48 KB against 162 KB retail): the pause map graph did not exist yet in the 1997 demos.
+
 - Panel (c8529a5): event detail page redone as the Items showcase (icon 3x on stone, title 16 px + state; Dónde =
   plate / area / room lines + "Ver en el mapa" when the marker is in the loaded room (Map tab centred on it, zoom 2);
   Quién only when it adds something, else Pista, else no window; planks Volver / Seguir / Ocultar; no route graph,

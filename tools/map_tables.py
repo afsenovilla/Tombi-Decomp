@@ -126,8 +126,10 @@ def scan(path):
             # no parseable graph: say where the retail layout's first nodes or node 41 appear, if they do
             hits = [(k, d.find(v)) for k, v in (("retail nodes 0-1", SIGNATURE), ("node 41 coords", NODE41), ("retail links 0-2", LINKS_SIG)) if d.find(v) >= 0]
             runs = [(o, n) for o, n in find_nodes(d) if n >= 20]
-            lo, nl = find_links(d, 0, 256)          # any run of 20+ link-shaped records, whatever the nodes look like
+            lo, nl = find_links(d, 0, 256)          # any run of link-shaped records, whatever the nodes look like
             links = [tuple(d[lo + 6 * i:lo + 6 * i + 6]) for i in range(min(nl, 60))] if lo is not None else []
+            if nl < 30 or len({l[2] for l in links}) < 5:   # a real MAP_LINKS has many links over several areas
+                links = []
             if hits or runs or links:
                 found.append((name, dict(partial=True, hits=hits, runs=runs, link_off=lo, links=links, nodes_at=[struct.unpack_from("<3h", d, o + 8 * i) for o, n in runs[:1] for i in range(min(n, 70))])))
     return found
