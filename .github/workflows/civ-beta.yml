@@ -24,10 +24,7 @@ jobs:
           fetch() {  # $1 secret value, $2 out dir
             [ -n "$1" ] || { echo "::warning::secret for $2 not set"; return 0; }
             URL="$(printf '%s' "$1" | tr -d '\r\n"'"'"' ')"
-            ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
-            if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
-            if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
-            curl -fsSL -o "$RUNNER_TEMP/dl" "$URL"
+            bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/dl" 10000000
             mkdir -p "$RUNNER_TEMP/$2"
             if unzip -tq "$RUNNER_TEMP/dl" >/dev/null 2>&1; then
               unzip -o -q "$RUNNER_TEMP/dl" -d "$RUNNER_TEMP/$2"

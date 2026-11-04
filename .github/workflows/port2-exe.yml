@@ -140,12 +140,9 @@ jobs:
           fi
           URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
           URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"   # Dropbox share link -> direct download
-          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
-          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
-          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
           mkdir -p "$RUNNER_TEMP/disccache"
           if [ -s "$RUNNER_TEMP/disccache/game.bin" ]; then cp "$RUNNER_TEMP/disccache/game.bin" "$RUNNER_TEMP/game.dl"
-          else curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+          else bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/game.dl" 100000000
             [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ] || cp "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/disccache/game.bin"; fi
           if [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ]; then
             echo "::error::The port build needs the whole disc image (the generator reads every area and SYSTEM overlay)."; exit 1
@@ -336,12 +333,9 @@ jobs:
           fi
           URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
           URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"   # Dropbox share link -> direct download
-          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
-          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
-          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
           mkdir -p "$RUNNER_TEMP/disccache"
           if [ -s "$RUNNER_TEMP/disccache/game.bin" ]; then cp "$RUNNER_TEMP/disccache/game.bin" "$RUNNER_TEMP/game.dl"
-          else curl -fsSL -o "$RUNNER_TEMP/game.dl" "$URL"
+          else bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/game.dl" 100000000
             [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ] || cp "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/disccache/game.bin"; fi
           if [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ]; then
             echo "::error::The port build needs the whole disc image (the generator reads every area and SYSTEM overlay)."; exit 1
