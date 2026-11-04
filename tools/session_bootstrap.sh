@@ -78,9 +78,8 @@ if [ ! -s game_jp/SLPS_011.44 ] && [ -n "${GAME_FILES_URL_JP:-}" ]; then
   URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"
   T="$(mktemp -d)"
   bash tools/ci_download.sh "$URL" "$T/jp.dl" 100000000
-  mkdir -p "$T/jp"
-  if unzip -tq "$T/jp.dl" >/dev/null 2>&1; then unzip -o -q "$T/jp.dl" -d "$T/jp"
-  else python3 -I tools/isoext.py "$T/jp.dl" "$T/jp"; mkdir -p game_jp/disc; mv "$T/jp.dl" game_jp/disc/tomba_jp.bin; fi
+  bash tools/disc_unpack.sh "$T/jp.dl" "$T/jp"
+  if [ -s "$T/jp.img" ]; then mkdir -p game_jp/disc; mv "$T/jp.img" game_jp/disc/tomba_jp.bin; fi
   mkdir -p game_jp/SYSTEM
   cp "$(find "$T/jp" -iname SLPS_011.44 | head -1)" game_jp/SLPS_011.44
   for f in INFO2 X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
@@ -89,23 +88,17 @@ if [ ! -s game_jp/SLPS_011.44 ] && [ -n "${GAME_FILES_URL_JP:-}" ]; then
   rm -rf "$T"
   echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c --quiet - || { echo "game_jp/SLPS_011.44 is not the SLPS-01144 one"; exit 1; }
 fi
-# Demo / prototype discs (optional): GAME_FILES_URL_<NAME> for NAME in DENGEKI_D5 PREPRE9 JP_DEMO BETA980203 USA,
-# extracted to /dev/shm/<name>/fs (RAM, gone with the container; nothing is committed). PrePre 8 needs
-# tools/prepre8.py extract. The DENGEKI_D5 / PREPRE9 pages, text and code hunts (docs/STATUS.md) read from there.
-for NAME in DENGEKI_D5 PREPRE9 JP_DEMO BETA980203 USA; do
+# Demo / prototype discs (optional): GAME_FILES_URL_<NAME> for NAME in DENGEKI_D5 PREPRE9 PREPRE8 JP_DEMO BETA980203
+# USA, extracted to /dev/shm/<name>/fs, image at /dev/shm/<name>/disc.bin (RAM, gone with the container; nothing is
+# committed). tools/disc_unpack.sh takes any zip shape; PrePre 8 goes through tools/prepre8.py extract.
+for NAME in DENGEKI_D5 PREPRE9 PREPRE8 JP_DEMO BETA980203 USA; do
   V="GAME_FILES_URL_$NAME"; D="/dev/shm/$(printf '%s' "$NAME" | tr 'A-Z' 'a-z')"
   [ -n "${!V:-}" ] && [ ! -d "$D/fs" ] || continue
   log "3c/5 $NAME disc -> $D/fs"
   T="$(mktemp -d)"
   if bash tools/ci_download.sh "${!V}" "$T/dl" 10000000; then
-    mkdir -p "$T/x"
-    if unzip -tq "$T/dl" >/dev/null 2>&1; then unzip -o -q "$T/dl" -d "$T/x"
-    elif 7z t "$T/dl" >/dev/null 2>&1; then 7z x -y -o"$T/x" "$T/dl" >/dev/null
-    else mv "$T/dl" "$T/x/disc.bin"; fi
-    chmod -R u+rwX "$T/x"
-    IMG="$(find "$T/x" -type f \( -iname '*.bin' -o -iname '*.iso' -o -iname '*.img' \) -printf '%s %p\n' | sort -n | tail -1 | cut -d' ' -f2-)"
-    mkdir -p "$D/fs"
-    if [ -n "$IMG" ]; then python3 -I tools/isoext.py "$IMG" "$D/fs" && mv "$IMG" "$D/disc.bin"; else cp -r "$T/x"/. "$D/fs"; fi
+    KIND=""; [ "$NAME" = PREPRE8 ] && KIND=prepre8
+    bash tools/disc_unpack.sh "$T/dl" "$D/fs" $KIND && { [ -s "$D/fs.img" ] && mv "$D/fs.img" "$D/disc.bin"; true; }
   else echo "$NAME: download failed (see above); skipped"; fi
   rm -rf "$T"
 done
