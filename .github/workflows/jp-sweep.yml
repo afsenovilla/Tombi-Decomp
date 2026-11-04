@@ -57,12 +57,7 @@ jobs:
             [ -n "$1" ] || { echo "::warning::secret for $2 not set"; return 1; }
             URL="$(printf '%s' "$1" | tr -d '\r\n"'"'"' ')"
             tools/ci_download.sh "$URL" "$RUNNER_TEMP/$2.dl" 100000000
-            mkdir -p "$RUNNER_TEMP/$2"
-            if unzip -tq "$RUNNER_TEMP/$2.dl" >/dev/null 2>&1; then unzip -o -q "$RUNNER_TEMP/$2.dl" -d "$RUNNER_TEMP/$2"
-            elif [ "$(stat -c%s "$RUNNER_TEMP/$2.dl")" -gt 100000000 ]; then
-              if [ "$3" = prepre8 ]; then python3 -I tools/prepre8.py extract "$RUNNER_TEMP/$2.dl" "$RUNNER_TEMP/$2"
-              else python3 -I tools/isoext.py "$RUNNER_TEMP/$2.dl" "$RUNNER_TEMP/$2"; fi
-            else echo "::error::$2: neither a zip nor a disc image"; return 1; fi
+            bash tools/disc_unpack.sh "$RUNNER_TEMP/$2.dl" "$RUNNER_TEMP/$2" ${3:-} || return 1
             rm -f "$RUNNER_TEMP/$2.dl"
           }
           # PAL (the masked-word pairing of jp_autofix reads the PAL programs)
