@@ -14,15 +14,20 @@ if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
 if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
 ok() { unzip -tq "$OUT" >/dev/null 2>&1 || 7z t "$OUT" >/dev/null 2>&1 || [ "$(stat -c%s "$OUT" 2>/dev/null || echo 0)" -gt "$MIN" ]; }
 if printf '%s' "$URL" | grep -q 'mega\.nz/'; then
-  if ! command -v megadl >/dev/null; then
-    (command -v sudo >/dev/null && SUDO=sudo || SUDO=""; $SUDO apt-get -qq update && $SUDO apt-get -qq install -y megatools) >/dev/null 2>&1 \
-      || { echo "::error::megatools (megadl) is needed for a MEGA link and could not be installed"; exit 1; }
-  fi
+  # tools/mega_dl.py (MEGA API + AES-CTR in Python, works through an HTTPS proxy) first; megadl as the fallback
+  HERE="$(cd "$(dirname "$0")" && pwd)"
+  python3 -c "import cryptography" 2>/dev/null || python3 -m pip install -q cryptography >/dev/null 2>&1 || true
   for i in 1 2 3; do
-    rm -f "$OUT"; megadl --no-progress --path "$OUT" "$URL" && ok && exit 0
-    echo "::warning::attempt $i: megadl got $(stat -c%s "$OUT" 2>/dev/null || echo 0) bytes"; sleep $((20 * i))
+    rm -f "$OUT"
+    if python3 -I "$HERE/mega_dl.py" "$URL" "$OUT" 2>"$OUT.err"; then ok && exit 0; fi
+    if grep -q "509\|Bandwidth Limit" "$OUT.err"; then echo "::error::MEGA: transfer quota of this address exhausted for now (HTTP 509); try again in a few hours"; cat "$OUT.err" | tail -2; rm -f "$OUT.err"; exit 1; fi
+    tail -2 "$OUT.err"
+    if command -v megadl >/dev/null || { (command -v sudo >/dev/null && SUDO=sudo || SUDO=""; $SUDO apt-get -qq update && $SUDO apt-get -qq install -y megatools) >/dev/null 2>&1; }; then
+      rm -f "$OUT"; timeout 1800 megadl --no-progress --path "$OUT" "$URL" && ok && rm -f "$OUT.err" && exit 0
+    fi
+    echo "::warning::attempt $i: MEGA download got $(stat -c%s "$OUT" 2>/dev/null || echo 0) bytes"; sleep $((20 * i))
   done
-  exit 1
+  rm -f "$OUT.err"; exit 1
 fi
 for i in 1 2 3 4; do
   rm -f "$OUT"
