@@ -167,7 +167,13 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   **event 4 "Motocross Course" started from the village scroll controller** (Dengeki X00 0x80116730, 1456 B, 25 %
   like updateA00ScrollController): a state machine on the player position (0x1F80016A/16E) with the PrePre 8 room
   exits (x >= 1186, y >= -60; 1261..2630 / y < -149) and, high in the village (y < -1369, scroll word 0x1F800172
-  == 450, x < 2188, then a flag at 0x1F8001CC), setEventStarted(4, 0, 1). Retail starts 4 in AREA03 (X003). Event 5
+  == 450, x < 2188, then a flag at 0x1F8001CC), setEventStarted(4, 0, 1). Retail starts 4 in AREA03 (X003).
+  Follow-up: that top zone is the hut door (dispatchAreaInitB sub 4 at 1987,-1379) and sign sub 7 (2327,-1356), both
+  placed in PAL too; the trigger stops the BGM (0x8001E7D4 / 0x8001E724, SsSeqStop-like), creates a thread (task
+  0x8002CF40) and only then starts event 4: it is the demo's stand-in for the climb to Phoenix's Mountain, whose
+  area is not on the disc (the wise man's "this version ends here" lines; the TO BE CONTINUED card is drawn by
+  0x8001B904, reached through a table, no direct caller). Not a lost location. Dengeki hint 166 names the monkey
+  サンタ, confirming Santa = Charles. Event 5
   / 166 are completed in the same scenes as retail (a00DarkCloakedFigureScene, Charles talk) but by register there.
   Patrols: villagerNpcWalkPath / SpringMotion in the Dengeki are a different revision (word-aligned diff useless),
   not a constant tweak; no other movement code without a PAL counterpart was found. Map tables: none in any 1997 demo.
