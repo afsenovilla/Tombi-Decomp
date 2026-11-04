@@ -18,11 +18,12 @@ SUDO=""; [ "$(id -u)" = 0 ] || SUDO="sudo"
 J="$(nproc)"
 
 log "1/5 packages"
-if ! dpkg -s libsdl2-2.0-0:i386 >/dev/null 2>&1 || ! command -v cmake >/dev/null || ! command -v mipsel-linux-gnu-as >/dev/null; then
+if ! dpkg -s libsdl2-2.0-0:i386 >/dev/null 2>&1 || ! dpkg -s libgl1:i386 >/dev/null 2>&1 || ! command -v cmake >/dev/null || ! command -v mipsel-linux-gnu-as >/dev/null; then
   $SUDO dpkg --add-architecture i386
   $SUDO apt-get update -qq
+  # libgl1:i386 + the Mesa DRI drivers: the i386 port's OpenGL renderer under xvfb (--window --renderer gl, llvmpipe)
   $SUDO apt-get install -y -qq binutils-mipsel-linux-gnu libyaml-dev ninja-build cmake ccache gcc-multilib \
-    libsdl2-dev libsdl2-2.0-0:i386 patchelf xvfb unzip curl >/dev/null
+    libsdl2-dev libsdl2-2.0-0:i386 libgl1:i386 libgl1-mesa-dri:i386 libglx-mesa0:i386 patchelf xvfb unzip curl >/dev/null
 fi
 if [ "$WASM" = 1 ] && ! command -v clang-18 >/dev/null; then
   $SUDO apt-get install -y -qq clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 >/dev/null
