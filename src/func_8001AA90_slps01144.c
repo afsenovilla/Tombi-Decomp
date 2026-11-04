@@ -1,0 +1,353 @@
+// near-twin of PAL inventoryScreenHandler (tools/jp_autofix.py)
+// VERSION SLPS_01144 slps01144 8001AA90 904
+// FLAGS -O2 -G0 -fno-strength-reduce
+#if defined(VERSION_SLPS_01144)
+// VERSION SLPS_01144 slps01144 8001AA90 904
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gv6.h"
+#include "gamestate.h"
+typedef struct { short x, y, w, h; } RECT;
+typedef struct {
+    RECT clip; short ofs[2]; RECT tw; unsigned short tpage;
+    unsigned char dtd, dfe, isbg, r0, g0, b0;
+    unsigned long dr_env[16];
+} DRAWENV;
+typedef struct {
+    char p0[0x48];
+    short w48, w4a, w4c;
+    unsigned short w4e;
+    char p50[0x68 - 0x50];
+    unsigned char b68, b69, b6a;
+} G;
+extern G *TASK_C;
+extern unsigned char LOAD_COMPLETE_SYM;
+extern unsigned short D_1F8003BA;
+extern unsigned char DISPLAY_BUFFER_0_BG_R[], DISPLAY_BUFFER_0_BG_G[], DISPLAY_BUFFER_0_BG_B[], DISPLAY_BUFFER_1_BG_R[], DISPLAY_BUFFER_1_BG_G[], DISPLAY_BUFFER_1_BG_B[];
+extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
+extern short D_800A45EA;
+extern unsigned short D_800A45EAu;
+extern unsigned short AREA_VARIANT;
+extern char D_80077968[];
+extern char D_80077974[];
+extern char D_80077980[];
+extern char D_8007798C[];
+extern char D_80077998[];
+extern char D_800779C4[];
+extern char D_800779CC[];
+extern char D_800779D4[];
+extern char D_800779E0[];
+extern char D_800779E8[];
+extern char D_800779F4[];
+extern char D_80077A08[];
+extern char D_80077A14[];
+extern char D_80077A40[];
+extern char D_80077A44[];
+extern char D_80077A54[];
+extern char D_80077A64[];
+extern char D_80077A7C[];
+extern char D_80077A84[];
+static short *D_80077A8C[20] = {
+    (short *)D_80077968, (short *)D_80077974, (short *)D_80077980, (short *)D_8007798C,
+    (short *)D_80077998, (short *)D_800779C4, (short *)D_800779CC, (short *)D_800779D4,
+    (short *)D_800779E0, (short *)D_800779E8, (short *)D_800779F4, (short *)D_80077A08,
+    (short *)D_80077A14, (short *)D_80077A40, (short *)D_80077A44, (short *)D_80077968,
+    (short *)D_80077A54, (short *)D_80077A64, (short *)D_80077A7C, (short *)D_80077A84,
+};
+extern void SetDispMask(int);
+extern int StoreImage(RECT *, unsigned long *);
+extern int LoadImage(RECT *, unsigned long *);
+extern DRAWENV *GetDrawEnv(DRAWENV *);
+extern void EnterCriticalSection(void);
+extern void FlushCache(void);
+extern void ExitCriticalSection(void);
+extern void clearMenuParams(void);
+extern void inventoryScreenTick(void);
+extern void loadSoundSet(int);
+extern void queueSystemLoadList(int, int);
+extern void stopBgm(int);
+
+void func_8001AA90(void)
+{
+    DRAWENV env;
+    RECT r;
+    int n;
+    unsigned short s;
+    volatile unsigned short *k;
+
+    switch (TASK_C->w4e) {
+    case 0:
+        SPAD.b1cf = 1;
+        TASK_C->b6a = 0;
+        SetDispMask(0);
+        r.x = 0x120;
+        r.y = 0x1e0;
+        r.w = 0x30;
+        r.h = 0x1f;
+        StoreImage(&r, (unsigned long *)0x801FB000);
+        r.x = 0x80;
+        r.y = 0x1ff;
+        r.w = 0x100;
+        r.h = 1;
+        StoreImage(&r, (unsigned long *)0x801FBBA0);
+        GetDrawEnv(&env);
+        D_8009BC98 = env.r0;
+        D_8009BC9C = env.g0;
+        D_8009BCA0 = env.b0;
+        TASK_C->w4e++;
+        break;
+    case 1:
+        LOAD_COMPLETE_SYM = 0;
+        switch (D_800A45EA) {
+        case 0: case 1: case 2: case 6: n = 3; break;
+        case 4: n = 4; break;
+        case 7: n = 6; break;
+        case 3: n = 7; break;
+        default: goto next;
+        }
+        goto play;
+    case 2:
+        if (LOAD_COMPLETE_SYM == 0) break;
+        {
+            unsigned short *q = &D_800A45EAu;
+            s = *q;
+            clearMenuParams();
+            *q = s;
+        }
+        SetDispMask(1);
+        goto next;
+    case 3:
+        inventoryScreenTick();
+        if (SPAD.b1c2 != 0) {
+            k = &GV6.s70;
+            if ((*k & 0x800) && (*k & 8)) TASK_C->w4e = 6;
+        }
+        break;
+    case 4:
+        SetDispMask(0);
+        r.x = 0x120;
+        r.y = 0x1e0;
+        r.w = 0x30;
+        r.h = 0x1f;
+        LoadImage(&r, (unsigned long *)0x801FB000);
+        r.x = 0x80;
+        r.y = 0x1ff;
+        r.w = 0x100;
+        r.h = 1;
+        LoadImage(&r, (unsigned long *)0x801FBBA0);
+        DISPLAY_BUFFER_0_BG_R[0] = D_8009BC98;
+        DISPLAY_BUFFER_1_BG_R[0] = D_8009BC98;
+        DISPLAY_BUFFER_0_BG_G[0] = D_8009BC9C;
+        DISPLAY_BUFFER_0_BG_B[0] = D_8009BCA0;
+        DISPLAY_BUFFER_1_BG_G[0] = D_8009BC9C;
+        DISPLAY_BUFFER_1_BG_B[0] = D_8009BCA0;
+        n = D_80077A8C[GAME.selectedArea + AREA_VARIANT][GAME.selectedSection];
+    play:
+        LOAD_COMPLETE_SYM = 0;
+        loadSoundSet(n);
+    next:
+        TASK_C->w4e++;
+        break;
+    case 5:
+        if (LOAD_COMPLETE_SYM != 0) {
+            SetDispMask(1);
+            SPAD.s1c6 = 0;
+            TASK_C->w4c = SPAD.s3b8;
+            TASK_C->w4e = D_1F8003BA;
+        }
+        break;
+    case 6:
+        TASK_C->w4c = 8;
+        TASK_C->w4e = 0;
+        break;
+    }
+}
+#else
+#include "spad.h"
+#include "gv6.h"
+#include "gamestate.h"
+typedef struct { short x, y, w, h; } RECT;
+typedef struct {
+    RECT clip; short ofs[2]; RECT tw; unsigned short tpage;
+    unsigned char dtd, dfe, isbg, r0, g0, b0;
+    unsigned long dr_env[16];
+} DRAWENV;
+typedef struct {
+    char p0[0x48];
+    short w48, w4a, w4c;
+    unsigned short w4e;
+    char p50[0x68 - 0x50];
+    unsigned char b68, b69, b6a;
+} G;
+extern G *TASK_C;
+extern unsigned char LOAD_COMPLETE_SYM;
+extern unsigned short D_1F8003BA;
+extern unsigned char DISPLAY_BUFFER_0_BG_R[], DISPLAY_BUFFER_0_BG_G[], DISPLAY_BUFFER_0_BG_B[], DISPLAY_BUFFER_1_BG_R[], DISPLAY_BUFFER_1_BG_G[], DISPLAY_BUFFER_1_BG_B[];
+extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
+extern short D_800A45EA;
+extern unsigned short D_800A45EAu;
+extern unsigned short AREA_VARIANT;
+extern char D_80077968[];
+extern char D_80077974[];
+extern char D_80077980[];
+extern char D_8007798C[];
+extern char D_80077998[];
+extern char D_800779C4[];
+extern char D_800779CC[];
+extern char D_800779D4[];
+extern char D_800779E0[];
+extern char D_800779E8[];
+extern char D_800779F4[];
+extern char D_80077A08[];
+extern char D_80077A14[];
+extern char D_80077A40[];
+extern char D_80077A44[];
+extern char D_80077A54[];
+extern char D_80077A64[];
+extern char D_80077A7C[];
+extern char D_80077A84[];
+static short *D_80077A8C[20] = {
+    (short *)D_80077968, (short *)D_80077974, (short *)D_80077980, (short *)D_8007798C,
+    (short *)D_80077998, (short *)D_800779C4, (short *)D_800779CC, (short *)D_800779D4,
+    (short *)D_800779E0, (short *)D_800779E8, (short *)D_800779F4, (short *)D_80077A08,
+    (short *)D_80077A14, (short *)D_80077A40, (short *)D_80077A44, (short *)D_80077968,
+    (short *)D_80077A54, (short *)D_80077A64, (short *)D_80077A7C, (short *)D_80077A84,
+};
+extern void SetDispMask(int);
+extern int StoreImage(RECT *, unsigned long *);
+extern int LoadImage(RECT *, unsigned long *);
+extern DRAWENV *GetDrawEnv(DRAWENV *);
+extern void EnterCriticalSection(void);
+extern void FlushCache(void);
+extern void ExitCriticalSection(void);
+extern void clearMenuParams(void);
+extern void inventoryScreenTick(void);
+extern void queueSystemLoadList(int, int);
+extern void stopBgm(int);
+
+void func_8001AA90(void)
+{
+    DRAWENV env;
+    RECT r;
+    int n;
+    unsigned short s;
+    volatile unsigned short *k;
+
+    switch (TASK_C->w4e) {
+    case 0:
+        SPAD.b1cf = 1;
+        TASK_C->b6a = 0;
+        SetDispMask(0);
+        r.x = 0x120;
+        r.y = 0x1e0;
+        r.w = 0x30;
+        r.h = 0x1f;
+        StoreImage(&r, (unsigned long *)0x801FB000);
+        r.x = 0x80;
+        r.y = 0x1ff;
+        r.w = 0x100;
+        r.h = 1;
+        StoreImage(&r, (unsigned long *)0x801FBBA0);
+        GetDrawEnv(&env);
+        DISPLAY_BUFFER_0_BG_R[0] = 0xf8;
+        DISPLAY_BUFFER_0_BG_G[0] = 200;
+        DISPLAY_BUFFER_0_BG_B[0] = 0xc0;
+        DISPLAY_BUFFER_1_BG_B[0] = 0xc0;
+        DISPLAY_BUFFER_1_BG_G[0] = 200;
+        D_8009BC98 = env.r0;
+        D_8009BC9C = env.g0;
+        D_8009BCA0 = env.b0;
+        DISPLAY_BUFFER_1_BG_R[0] = 0xf8;
+        TASK_C->w4e++;
+        break;
+    case 1:
+        LOAD_COMPLETE_SYM = 0;
+        switch (D_800A45EA) {
+        case 0: case 1: case 2: case 6: n = 3; break;
+        case 4: n = 4; break;
+        case 5: n = 5; break;
+        case 7: n = 6; break;
+        case 3: n = 7; break;
+        default: goto next;
+        }
+        goto play;
+    case 2:
+        if (LOAD_COMPLETE_SYM == 0) break;
+        EnterCriticalSection();
+        FlushCache();
+        ExitCriticalSection();
+        {
+            unsigned short *q = &D_800A45EAu;
+            s = *q;
+            clearMenuParams();
+            *q = s;
+        }
+        SetDispMask(1);
+        goto next;
+    case 3:
+        inventoryScreenTick();
+        if (SPAD.b1c2 != 0) {
+            k = &GV6.s70;
+            if ((*k & 8) && (*k & 0x800)) TASK_C->w4e = 6;
+        }
+        break;
+    case 4:
+        SetDispMask(0);
+        r.x = 0x120;
+        r.y = 0x1e0;
+        r.w = 0x30;
+        r.h = 0x1f;
+        LoadImage(&r, (unsigned long *)0x801FB000);
+        r.x = 0x80;
+        r.y = 0x1ff;
+        r.w = 0x100;
+        r.h = 1;
+        LoadImage(&r, (unsigned long *)0x801FBBA0);
+        LOAD_COMPLETE_SYM = 0;
+        DISPLAY_BUFFER_0_BG_R[0] = D_8009BC98;
+        DISPLAY_BUFFER_1_BG_R[0] = D_8009BC98;
+        DISPLAY_BUFFER_0_BG_G[0] = D_8009BC9C;
+        DISPLAY_BUFFER_0_BG_B[0] = D_8009BCA0;
+        DISPLAY_BUFFER_1_BG_G[0] = D_8009BC9C;
+        DISPLAY_BUFFER_1_BG_B[0] = D_8009BCA0;
+        n = D_80077A8C[GAME.selectedArea + AREA_VARIANT][GAME.selectedSection];
+    play:
+        queueSystemLoadList(n, 1);
+    next:
+        TASK_C->w4e++;
+        break;
+    case 5:
+        if (LOAD_COMPLETE_SYM != 0) {
+            EnterCriticalSection();
+            FlushCache();
+            ExitCriticalSection();
+            SetDispMask(1);
+            SPAD.s1c6 = 0;
+            TASK_C->w4c = SPAD.s3b8;
+            TASK_C->w4e = D_1F8003BA;
+        }
+        break;
+    case 6:
+        TASK_C->w4c = 8;
+        TASK_C->w4e = 0;
+        break;
+    case 7:
+        GAME.areaTransition = 0;
+        GAME.keepBgm = 0;
+        stopBgm(0);
+        DISPLAY_BUFFER_0_BG_R[0] = 0;
+        DISPLAY_BUFFER_0_BG_G[0] = 0;
+        DISPLAY_BUFFER_0_BG_B[0] = 0;
+        DISPLAY_BUFFER_1_BG_R[0] = 0;
+        DISPLAY_BUFFER_1_BG_G[0] = 0;
+        DISPLAY_BUFFER_1_BG_B[0] = 0;
+        TASK_C->b68 = 1;
+        TASK_C->w48 = 1;
+        TASK_C->w4a = 1;
+        TASK_C->w4c = 0;
+        TASK_C->w4e = 0;
+        break;
+    }
+}
+#endif
+#endif

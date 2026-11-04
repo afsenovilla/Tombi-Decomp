@@ -21,6 +21,18 @@ destinations one-per-line (620495c), event detail page + shared touch scroller (
    (area 4 is "Haunted Mansion" on the map). Save import already uses the map names (REGIONS_EN / REGIONS_ES).
 5. Trick Village Spanish name: user decision pending.
 
+## Japanese decomp (SLPS-01144), hand pass 3
+
+81.31 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
+tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
+(scheduling/register puzzles: initGameConfig, updateL8Type01Object, updateParentFollowModel, drawBalloonFrame,
+weaponHitCat2Type08); (b) a better pairer for the ~190 unmatched functions of 200-1000 bytes (masked words at 0.45
+already swept: `scratchpad cand2`, rest are > 30 diff lines); (c) the structural big ones (updateSceneSequence,
+updateFrog, blackCrowFlyAround, masterOfTheSkiesScene, the x10 seesaw, komaPigState0); (d) 28 functions >= 2 KB
+with no PAL twin, to decompile from scratch. Demo SLPM-80165 at 40.87 % after `tools/demo_sweep.py`; BETA/PCPX only
+sweepable in CI. Workflow per function: `tools/jpcheck.py --strict --norm`, `tools/jp_autofix.py --install-file`,
+`tools/build_report.py --version slps01144`, `tools/progress_jp.py`.
+
 ## Recently done (context)
 
 - Panel (c8529a5): event detail page redone as the Items showcase (icon 3x on stone, title 16 px + state; Dónde =
