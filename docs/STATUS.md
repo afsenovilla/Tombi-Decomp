@@ -13,18 +13,13 @@ shared touch scroller for every long list, Windows tolower link fix.
    out of step and movies flicker. An agent found the cause for top-down rooms (USA map strips start at the visible
    tile row, PAL 24 rows above; USA camera limits table MAIN0 0x8007B680; sprite cull 0xF1) but had not committed.
    The default picture is PAL at 60 Hz, so this does not block releases.
-2. **FR/DE/IT/NL (the SCES-01330 disc)**: `GAME_FILES_URL_SCES01330` (Drive link; GitHub Actions + cloud env var)
-   is "Tombi! (Language set 1)" **Rev.0** (MAIN0 md5 3edd55b0, docs/BUILDS.md row 20), while the port's C is
-   SCES-01331 **Rev.1** (row 24). Findings (session of 2026-11-04): the nine sub-screen font pages
-   SYSTEM/A?0301.000 are byte-identical on both discs (the PAL disc already carries the FR/DE/IT/NL pages, so the
-   glyph-table plan needs no second disc; only `--lang 5` uses that table anyway). 824 of 2287 files differ
-   (every MAINn.EXE, every area overlay, SYS/LD*, D?SPSUB*, movies): Rev.0 vs Rev.1, not the language set. The port
-   on a `tools/extract_data.py` extraction of that disc segfaults at start with `--lang 0` and `--lang 1` (lang.c
-   does align MAIN1 with that disc's MAIN0: 57 chunks). A hybrid (Rev.1 data + the Rev.0 language files) is not a
-   drop-in either: MAINn's file table is read by LBA and the two discs' layouts differ. Options, user decision
-   pending: (a) a SCES-01330 Rev.1 dump (same MAIN0 as the port) would most likely work with lang.c as it is, as
-   `--lang 1..4`; (b) a "language pack" path: files resolved by name across a second data folder plus a check that
-   Rev.0 language overlays compose over the Rev.1 twins.
+2. **FR/DE/IT/NL**: done on 2026-11-04 (no second disc needed). The SCES-01330 Rev.1 dump in `GAME_FILES_URL_SCES01330`
+   is byte-identical to SCES-01331 Rev.1 except SYSTEM.CNF and the boot file name, so every PAL disc carries all
+   nine MAINn.EXE and `--lang 1..4` already ran (lang.c). Now exposed: port usage, PC launcher (list, flags,
+   launcher-language default), Android launcher (`LANG_N` appended). Checked on PC headless: in-game text in the
+   four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. Open: the panel's own
+   chrome is English for 1..4 (only en/es exist, `T()` in panel.c); the earlier Rev.0 dump crashed the port (its
+   code differs from Rev.1), so an SCES-01330 Rev.0 player would need the Rev.1 code: not supported.
 3. Debug area select crashes, checked 2026-11-04 (i386 build, 3000 frames each): AREA10 sections 0-8 all run clean;
    AREA17 section 0 segfaults in `spawnSectionObjectsAlt` (empty load list, one of the 13 `DOOR_ROOMS` of
    tools/psxemu/rooms.py that crash in the real game too). Not a port bug; only the door transition from a sibling

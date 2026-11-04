@@ -2049,8 +2049,12 @@ regeneration.
 ### Languages: `--lang N` (`port2/runtime/lang.c`)
 
 **The disc.** `SCES_013.31` is a language menu that boots one of `EXE/MAIN0.EXE` (English), `MAIN5` (Español),
-`MAIN6` (Português), `MAIN7` (Svenska), `MAIN8` (Dansk) (`MAIN1..4` are on the disc too, not in the menu:
-`--lang 1..4` accepts them). Every MAINn is the same program linked once with that language's data, so its code
+`MAIN6` (Português), `MAIN7` (Svenska), `MAIN8` (Dansk). `MAIN1..4` (Français, Deutsch, Italiano, Nederlands) are on
+the disc too, not in its menu: `--lang 1..4` plays them, and both launchers list all nine. The other PAL disc,
+SCES-01330 ("Language set 1", boot menu EN/FR/DE/IT/NL), is byte-identical to SCES-01331 of the same revision except
+SYSTEM.CNF and the boot file name (checked on Rev.1, 2026-11-04), so the port needs no second disc for those
+languages. The panel's own chrome (tab names, planks) stays English for 1..4; the names it shows come from that
+language's `D<n>SPSUB*` files. Every MAINn is the same program linked once with that language's data, so its code
 and data move: MAIN5 is linked 0x18 bytes earlier from `0x8004D824` on (its `printInfoMessage` is 24 bytes
 shorter) and 0x28 bytes later after its event-title tables (`0x80080330..`, 0x40 bytes bigger); its overlays
 (`X5NN`, `O5PTSUB0`, `D5SPSUB*`, `I5NFO*`, `G5OVER`) are linked at `0x800E8050` instead of `0x800E8028` (the
