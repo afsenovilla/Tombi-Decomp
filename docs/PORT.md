@@ -2558,6 +2558,9 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   leaves every label as the disc writes it (logged). Without the option the item tab and the use leaf still follow
   the improved translation's "Objetos". `tools/subscreen_font.py --data data -o DIR` builds the same lettering as
   two TrueType fonts (Tombi Plank, Tombi Leaf; pixel outlines, ink only) on the owner's machine from their disc.
+  Our letters also cover the digits, punctuation and the keyboard's symbols, the grave / diaeresis / cedilla marks
+  (à è ì ò ù, ä ë ï ö ü, ç and capitals), and replace the disc's leaf U / u (turned 8 degrees left: `REPLACE`);
+  marks above the leaf's u / U sit a few texels right (`MARK_SHIFT`). 130 characters per font.
 
 Launcher: Play tab, "Imagen" 16:9 / 21:9 / 32:9.  Remaining: some far backdrop layers still end near the 4:3 edges (sky
 colour in the top corners in AREA00), and any screen-space cull not matching the patterns above is untouched.
