@@ -21,7 +21,12 @@ for prog in sorted(os.listdir(R)):
         t = open(d + "/" + fn).read()
         ws = re.findall(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/", t)
         if not ws: continue
-        addr = int(ws[0][0], 16)
+        # unit start and byte size from every item line (.byte / .short lines carry no 8-digit word): build_report keys
+        # the skip on the first item's address, so the row must start where the splat file starts
+        items = re.findall(r"/\* [0-9A-F]+ ([0-9A-F]{8})(?: ([0-9A-F]+))? \*/", t)
+        addr = int(items[0][0], 16)
+        last = items[-1]
+        ulen = int(last[0], 16) + (len(last[1]) // 2 if last[1] else 1) - addr
         w = [int.from_bytes(bytes.fromhex(x[1]), "little") for x in ws]
         isptr = lambda x: 0x80000000 <= x < 0x80200000
         ptr = sum(1 for x in w if isptr(x))
@@ -31,11 +36,17 @@ for prog in sorted(os.listdir(R)):
         if (prog, addr) in c_addrs: continue
         if not jrra and not pro and (ptr or isid or t.startswith("dlabel")):
             if prog == "slps01144" and ptr * 2 < len(w): continue
-            rows.append((prog, addr, len(w) * 4, 0))
+            rows.append((prog, addr, ulen, 0))
         elif addr == 0x80115178 and prog != "slps01144":  # ID word + jump tables, then code: split at the first non-pointer word
             k = 1
             while k < len(w) and (isptr(w[k]) or w[k] == 0): k += 1
             if k >= 4 and k < len(w): rows.append((prog, addr, k * 4, len(w) * 4 - k * 4))
+        elif t.startswith("dlabel") and (isptr(w[0]) or w[0] < 0x100) and ulen == len(w) * 4:
+            # pointer / jump tables, then code (the X00 overlay head: entry table + jump tables, then the dispatch
+            # stubs): split at the first prologue when nearly everything before it is pointers or small words
+            k = next((i for i, x in enumerate(w) if (x >> 16) == 0x27BD and x & 0x8000), None)
+            if k and k * 4 >= 64 and sum(1 for x in w[:k] if isptr(x) or x < 0x100) * 10 >= k * 9:
+                rows.append((prog, addr, k * 4, len(w) * 4 - k * 4))
 tot = sum(r[2] for r in rows)
 print("%d units, %d bytes" % (len(rows), tot))
 if "--write" in sys.argv:
