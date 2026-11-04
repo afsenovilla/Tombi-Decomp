@@ -10,8 +10,9 @@ Reads only; the PNGs it writes are disc graphics and never belong in the repo (C
 another demo's page no retail icon matched: handy to see whether an icon of one disc is on another.
 
 Prints one line per retail item (id, name, file, offset of the cell's first row, page width, rows that matched) and,
-per page found, writes out/<file>_<width>.png (the whole page, grey) and out/<file>_<width>_items.png (the matched
-cells in their retail colours, labelled with the item id) plus the cells of that page no retail icon matched."""
+per page found, writes out/<file>_<width>.png (the whole page, grey) and out/<file>_<width>_items.png (every cell of
+that grid, labelled with the retail item id it matches or "?", in the disc's own colours when its ITEM_ICON_CLUTS table
+and colour block are found by their retail start, else in the retail colours of the same slot, else grey)."""
 import argparse, os, struct, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -29,10 +30,14 @@ def rgb(v):
     return ((v & 31) * 255 // 31, (v >> 5 & 31) * 255 // 31, (v >> 10 & 31) * 255 // 31, 0 if v == 0 else 255)
 
 
+PAL_SUB = None     # the retail D0SPSUB.BIN, for demo_cluts
+
+
 def pal_cells(fs):
     """{n: [16 rows of 8 bytes]} of the retail item icons, empty cells left out; and {n: 16 rgba} their palettes."""
+    global PAL_SUB
     pg = open(os.path.join(fs, "SYSTEM", "A00300.000"), "rb").read()
-    sub = open(os.path.join(fs, "SYSTEM", "D0SPSUB.BIN"), "rb").read()
+    sub = PAL_SUB = open(os.path.join(fs, "SYSTEM", "D0SPSUB.BIN"), "rb").read()
     cells, pals = {}, {}
     for n in range(160):
         u0, v0 = n % 15 * 16 + 8, n // 15 * 16 + 8
@@ -43,6 +48,32 @@ def pal_cells(fs):
             o = CLUT_BLOCK + (row * 48 + CLUT_COL) * 2
             pals[n] = [rgb(struct.unpack_from("<H", sub, o + 2 * i)[0]) for i in range(16)]
     return cells, pals, tombi_save.item_names(sub)
+
+
+def demo_cluts(data):
+    """The disc's own ITEM_ICON_CLUTS table and 16-colour rows, found by the retail ones: the table by its first 32 bytes
+    (the icon grid is laid out alike), the colour block by its first row.  {n: 16 rgba} for the table's length, or {}."""
+    tab = PAL_SUB[CLUTS_OFF:CLUTS_OFF + 32]
+    row0 = PAL_SUB[CLUT_BLOCK:CLUT_BLOCK + 96]
+    table = block = None
+    for rel, d in data.items():
+        i = d.find(tab)
+        if i >= 0 and table is None:
+            table, tfile = d[i:i + 200], rel
+        j = d.find(row0)
+        if j >= 0 and block is None:
+            block, bfile = d[j:j + 48 * 31 * 2], rel
+    if table is None or block is None:
+        print("disc CLUTs: table %s, colour block %s" % ("found" if table else "not found", "found" if block else "not found"))
+        return {}
+    print("disc CLUTs: table in %s, colour block in %s" % (tfile, bfile))
+    out = {}
+    for n in range(200):
+        o = (table[n] * 48 + CLUT_COL) * 2
+        if o + 32 > len(block):
+            break
+        out[n] = [rgb(struct.unpack_from("<H", block, o + 2 * i)[0]) for i in range(16)]
+    return out
 
 
 def demo_files(root):
@@ -87,7 +118,7 @@ def find(cells, files, min_rows):
     return hits, data
 
 
-def draw(out, rel, d, st, hits, cells, pals, names):
+def draw(out, rel, d, st, hits, cells, pals, names, disc_pals=None):
     from PIL import Image, ImageDraw
     tag = rel.replace(os.sep, "_").replace("~", "_unpacked")
     h = len(d) // st
@@ -107,6 +138,7 @@ def draw(out, rel, d, st, hits, cells, pals, names):
     # ones in their retail colours, labelled with the item id, the others (other art, or empty) in grey, labelled "?"
     order = sorted(mine, key=lambda n: (mine[n][1] // st, mine[n][1] % st))
     x0, y0 = min(mine[n][1] % st for n in order), min(mine[n][1] // st for n in order)
+    cols_on_page = 15
     x1, y1 = max(mine[n][1] % st for n in order), max(mine[n][1] // st for n in order)
     at = {(mine[n][1] % st, mine[n][1] // st): n for n in order}
     cells = []
@@ -122,7 +154,8 @@ def draw(out, rel, d, st, hits, cells, pals, names):
     grey = [(v * 17, v * 17, v * 17, 255 if v else 0) for v in range(16)]
     for k, (base, n) in enumerate(cells):
         cx, cy = k % cols * 20 * S + 2 * S, k // cols * 26 * S + 2 * S
-        P = pals[n] if n is not None else grey
+        g = (base // st - y0) // 16 * cols_on_page + (base % st - x0) // 8    # index on the disc's grid
+        P = disc_pals[g] if disc_pals and g in disc_pals else pals[n] if n is not None else grey
         for y in range(16):
             for x in range(16):
                 c = P[d[base + y * st + x // 2] >> 4 * (x & 1) & 15]
@@ -154,6 +187,7 @@ def main(argv):
         names[1000 + k] = "cell " + nm.strip()
     hits, data = find(cells, demo_files(a.demo), a.min_rows)
     os.makedirs(a.out, exist_ok=True)
+    disc_pals = demo_cluts(data)
     print("retail item icons: %d; found on the disc: %d" % (len(cells), len(hits)))
     for n in sorted(cells):
         if n in hits:
@@ -163,7 +197,7 @@ def main(argv):
             print("%3d %-28s -" % (n, names.get(n, "")))
     pages = sorted({(hh[0], hh[2]) for hh in hits.values()})
     for rel, st in pages:
-        order, other, path = draw(a.out, rel, data[rel], st, hits, cells, pals, names)
+        order, other, path = draw(a.out, rel, data[rel], st, hits, cells, pals, names, disc_pals)
         print("page %s (%d px wide): %d icons, in page order: %s" % (rel, st * 2, len(order), " ".join(str(n) for n in order)))
         print("  cells of that grid with other art: %s" % " ".join("+0x%X (%d, %d)" % (b, b % st * 2, b // st) for b in other))
         if a.b64:
