@@ -1,0 +1,74 @@
+# Where a demo / prototype disc (a GAME_FILES_URL_* secret) keeps the inventory item icons: every retail PAL icon cell
+# is looked for by its pixels in every file of the demo (tools/item_icons_find.py). The discs come from the secrets,
+# never committed; the job log and summary hold one line per item, the drawn pages are an artifact of the run.
+name: item-icons
+
+on:
+  workflow_dispatch:
+    inputs:
+      disc:
+        description: "Secret suffix (GAME_FILES_URL_<disc>) of the disc to search"
+        type: choice
+        options: [PREPRE9, PREPRE8, DENGEKI_D5, JP_DEMO, BETA980203, JP, USA]
+        default: PREPRE9
+      cells:
+        description: "Extra cells to look for, NAME=HEX,... (tools/item_icons_find.py --cells)"
+        type: string
+        default: ""
+
+jobs:
+  icons:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m pip install -q Pillow
+
+      - name: Fetch the disc and the PAL disc
+        env:
+          URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
+          URL_PREPRE9: ${{ secrets.GAME_FILES_URL_PREPRE9 }}
+          URL_DENGEKI_D5: ${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}
+          URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
+          URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
+          URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+          URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
+          URL_PAL: ${{ secrets.GAME_FILES_URL }}
+          DISC: ${{ inputs.disc }}
+        run: |
+          fetch() {  # $1 secret value, $2 name: the disc's files at $RUNNER_TEMP/$2
+            [ -n "$1" ] || { echo "::error::secret for $2 not set"; exit 1; }
+            URL="$(printf '%s' "$1" | tr -d '\r\n"'"'"' ')"
+            mkdir -p "$RUNNER_TEMP/$2.d"; cd "$RUNNER_TEMP/$2.d"
+            bash "$GITHUB_WORKSPACE/tools/ci_download.sh" "$URL" dl 10000000
+            if unzip -tq dl >/dev/null 2>&1; then unzip -o -q dl -d x
+            elif 7z t dl >/dev/null 2>&1; then 7z x -y -ox dl >/dev/null
+            else mkdir -p x; mv dl x/disc.bin; fi
+            chmod -R u+rwX x   # some archives carry read-only folders
+            rm -f dl
+            IMG="$(find x -type f \( -iname '*.bin' -o -iname '*.iso' -o -iname '*.img' \) -printf '%s %p\n' | sort -n | tail -1 | cut -d' ' -f2-)"
+            mkdir -p "$RUNNER_TEMP/$2"
+            if [ "$2" = disc ] && [ "$DISC" = PREPRE8 ]; then python3 -I "$GITHUB_WORKSPACE/tools/prepre8.py" extract "$IMG" "$RUNNER_TEMP/$2"
+            elif [ -n "$IMG" ]; then python3 -I "$GITHUB_WORKSPACE/tools/isoext.py" "$IMG" "$RUNNER_TEMP/$2"
+            else cp -r x/. "$RUNNER_TEMP/$2"; fi
+            cd "$GITHUB_WORKSPACE"; rm -rf "$RUNNER_TEMP/$2.d"
+          }
+          V="URL_$DISC"; fetch "${!V}" disc
+          fetch "$URL_PAL" pal
+          du -sh "$RUNNER_TEMP/disc" "$RUNNER_TEMP/pal"
+
+      - name: Find the icons
+        run: |
+          {
+            echo "## GAME_FILES_URL_${{ inputs.disc }}: inventory item icons"; echo; echo '```'
+            python3 -I tools/item_icons_find.py "$RUNNER_TEMP/disc" --pal "$RUNNER_TEMP/pal" -o out --b64 --cells "${{ inputs.cells }}"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          rm -rf "$RUNNER_TEMP/disc" "$RUNNER_TEMP/pal"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: item-icons-${{ inputs.disc }}
+          path: out

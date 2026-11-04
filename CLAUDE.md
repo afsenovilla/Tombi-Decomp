@@ -65,7 +65,7 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
 ## CI and the game discs
 
 - Disc secrets: `GAME_FILES_URL` (PAL), `GAME_FILES_URL_JP` (SLPS-01144), `GAME_FILES_URL_JP_DEMO` (SLPM-80165),
-  `GAME_FILES_URL_BETA980203`, `GAME_FILES_URL_PREPRE8`. Each is a direct URL, a Drive share link or a bare Drive id;
+  `GAME_FILES_URL_BETA980203`, `GAME_FILES_URL_PREPRE8`. Each is a direct URL, a Dropbox link, a Drive share link, a bare Drive id or a public MEGA link with its key (`https://mega.nz/file/ID#KEY`; all through `tools/ci_download.sh`, megatools);
   the file is a zip or a raw 2352-byte disc image. Extract with `tools/isoext.py`, except PrePre 8 (PCPX-96084), which
   only `tools/prepre8.py extract` can read (isoext crashes on that image).
 - `jp-sweep.yml` (manual, or a push to master touching JP C/config): runs `jp_autofix --install` and `demo_sweep` over
@@ -74,6 +74,8 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
   rebuilds the reports when `notes/report_stamp.txt` changes (`date -u > notes/report_stamp.txt`).
 - Cloud bootstrap also fetches the JP disc when `GAME_FILES_URL_JP` is set (step 3b) and builds
   `build/slps01144/report.json`.
+- Cloud bootstrap also extracts any demo disc whose `GAME_FILES_URL_<NAME>` is an environment variable (DENGEKI_D5,
+  PREPRE9, JP_DEMO, BETA980203, USA) to `/dev/shm/<name>/fs` (step 3c); `tools/event_icons.py` reads those paths.
 
 ## Build / test cheatsheet
 
