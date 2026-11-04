@@ -14,7 +14,9 @@ node / link / route tables against another overlay (the PAL one by default when 
 markdown summary (used by the map-tables workflow's job summary); nothing of the disc is written anywhere."""
 import os, struct, sys
 
-NODE_Y = (-1100, -800)          # map nodes sit at this height; route entries and other data do not
+NODE_Y = (-1200, -700)          # map nodes sit at this height; route entries and other data do not
+SIGNATURE = struct.pack("<8h", -233, -944, -284, 0, -185, -958, -266, 0)   # retail nodes 0 and 1
+NODE41 = struct.pack("<3h", -269, -974, -40)
 
 
 def nodes_at(d, o):
@@ -116,12 +118,28 @@ def scan(path):
         except OSError:
             continue
         a = analyse(d)
+        name = os.path.relpath(f, path) if os.path.isdir(path) else os.path.basename(f)
         if a:
-            found.append((os.path.relpath(f, path) if os.path.isdir(path) else os.path.basename(f), a))
+            found.append((name, a))
+        else:
+            # no parseable graph: say where the retail layout's first nodes or node 41 appear, if they do
+            hits = [(k, d.find(v)) for k, v in (("retail nodes 0-1", SIGNATURE), ("node 41 coords", NODE41)) if d.find(v) >= 0]
+            runs = [(o, n) for o, n in find_nodes(d) if n >= 20]
+            if hits or runs:
+                found.append((name, dict(partial=True, hits=hits, runs=runs, nodes_at=[struct.unpack_from("<3h", d, o + 8 * i) for o, n in runs[:1] for i in range(min(n, 70))])))
     return found
 
 
 def report(name, a, ref=None, dump=False):
+    if a.get("partial"):
+        out = [f"### {name} (no parseable graph)", ""]
+        for k, o in a["hits"]:
+            out.append(f"- {k} at file offset 0x{o:X}")
+        for o, n in a["runs"]:
+            out.append(f"- a run of {n} node-like records at 0x{o:X}, not followed by route lists")
+        if dump and a["nodes_at"]:
+            out.append("nodes: " + "; ".join(f"{i} {n}" for i, n in enumerate(a["nodes_at"])))
+        return "\n".join(out)
     out = [f"### {name}", "",
            f"- map graph at file offset 0x{a['off']:X}: **{len(a['nodes'])} nodes**, {len(a['links'])} links"
            + (f" (at 0x{a['link_off']:X})" if a['link_off'] is not None else " (links not found)")
