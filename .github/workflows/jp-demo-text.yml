@@ -1,0 +1,73 @@
+# The Japanese text of a 1997 demo / prototype disc (WFM1 blocks: item names, descriptions, event titles, dialogues),
+# dumped with tools/jpdemo_text.py and matched against the retail JP release (tools/jp_text.py, jp_charmap.json).
+# Discs come from secrets, never committed; the job summary gets the decoded text blocks that hold the item / event
+# tables and the lines with no close retail counterpart. The full dump is an artifact of the run.
+name: jp-demo-text
+
+on:
+  workflow_dispatch:
+    inputs:
+      disc:
+        description: "Secret suffix (GAME_FILES_URL_<disc>) of the demo disc"
+        type: choice
+        options: [PREPRE9, PREPRE8, DENGEKI_D5, JP_DEMO]
+        default: PREPRE9
+
+jobs:
+  text:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m pip install -q numpy Pillow
+
+      - name: Fetch the demo disc and the JP retail disc
+        env:
+          URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
+          URL_PREPRE9: ${{ secrets.GAME_FILES_URL_PREPRE9 }}
+          URL_DENGEKI_D5: ${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}
+          URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
+          URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+          DISC: ${{ inputs.disc }}
+        run: |
+          fetch() {  # $1 secret value, $2 name: the disc image at $RUNNER_TEMP/$2.bin
+            [ -n "$1" ] || { echo "::error::secret for $2 not set"; exit 1; }
+            URL="$(printf '%s' "$1" | tr -d '\r\n"'"'"' ')"
+            ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+            if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+            if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+            mkdir -p "$RUNNER_TEMP/$2.d"; cd "$RUNNER_TEMP/$2.d"
+            curl -fsSL -o dl "$URL"
+            if unzip -tq dl >/dev/null 2>&1; then unzip -o -q dl -d x
+            elif 7z t dl >/dev/null 2>&1; then 7z x -y -ox dl >/dev/null
+            else mkdir -p x; mv dl x/disc.bin; fi
+            IMG="$(find x -type f \( -iname '*.bin' -o -iname '*.iso' -o -iname '*.img' \) -printf '%s %p\n' | sort -n | tail -1 | cut -d' ' -f2-)"
+            [ -n "$IMG" ] || { echo "::error::no disc image in the download of $2"; exit 1; }
+            mv "$IMG" "$RUNNER_TEMP/$2.bin"; cd "$GITHUB_WORKSPACE"; rm -rf "$RUNNER_TEMP/$2.d"
+          }
+          V="URL_$DISC"; fetch "${!V}" demo
+          fetch "$URL_JP" jp
+          ls -la "$RUNNER_TEMP"/*.bin
+
+      - name: Dump and compare
+        run: |
+          python3 -I tools/jpdemo_text.py "$RUNNER_TEMP/demo.bin" out --jp "$RUNNER_TEMP/jp.bin" | tee dump.log
+          rm -f "$RUNNER_TEMP"/*.bin
+          {
+            echo "## GAME_FILES_URL_${{ inputs.disc }}: Japanese text blocks (WFM1)"; echo
+            echo '```'; cat dump.log; echo; head -1 out/*.txt; echo '```'; echo
+            for f in out/*.txt; do
+              [ "$(basename "$f")" = SOLO_DEMO.txt ] && continue
+              if grep -q "アイテム\|イベント" "$f"; then
+                echo "### $(basename "$f") (item / event table)"; echo '```'; head -400 "$f"; echo '```'; echo
+              fi
+            done
+            echo "### SOLO_DEMO.txt (no close retail counterpart)"; echo '```'; head -300 out/SOLO_DEMO.txt; echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jp-demo-text-${{ inputs.disc }}
+          path: out
