@@ -160,6 +160,17 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   0x8002DB00), but the PrePre 8 entry-record table (x, y, mode, area, room, entry) was not found in the same shape
   and func_8002816C has no masked twin, so reachability is likely but unverified (no emulator run).
   Discs now live in game_<name>/ (tools/disc_fetch.sh): /dev/shm is wiped when the idle container restarts.
+- Demo event triggers vs retail (2026-11-04): the demos' setEventStarted / setEventComplete are not masked twins of
+  PAL's (Dengeki 0x8001C25C / 0x8001C37C, Hyper 0x8001D414 / 0x8001D510, found through fn_vs_pal + the l3 wise-man
+  handler's calls). Ids with an immediate: Dengeki starts 2, 4, 8, 37, 166, 169, 182 and completes 2, 3, 5, 166;
+  Hyper completes 2, 5. Against every PAL immediate (MAIN0 + all overlays) the one trigger retail lacks is
+  **event 4 "Motocross Course" started from the village scroll controller** (Dengeki X00 0x80116730, 1456 B, 25 %
+  like updateA00ScrollController): a state machine on the player position (0x1F80016A/16E) with the PrePre 8 room
+  exits (x >= 1186, y >= -60; 1261..2630 / y < -149) and, high in the village (y < -1369, scroll word 0x1F800172
+  == 450, x < 2188, then a flag at 0x1F8001CC), setEventStarted(4, 0, 1). Retail starts 4 in AREA03 (X003). Event 5
+  / 166 are completed in the same scenes as retail (a00DarkCloakedFigureScene, Charles talk) but by register there.
+  Patrols: villagerNpcWalkPath / SpringMotion in the Dengeki are a different revision (word-aligned diff useless),
+  not a constant tweak; no other movement code without a PAL counterpart was found. Map tables: none in any 1997 demo.
 - Game-file downloads (2026-11-04): every workflow and the bootstrap go through `tools/ci_download.sh`, which takes
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
