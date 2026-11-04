@@ -56,6 +56,13 @@ Artifacts cannot be downloaded from the cloud container (the blob host is blocke
 Since 2026-11-04 the sweep commits straight to master (the user approves every PR by default, so PRs are skipped) (the installer criterion is `--strict --norm`, so a match is real, but the file
 placement may need a header fix).
 
+### Data naming (checked 2026-11-04, nothing to do)
+
+`tools/jp_globals.py --write` already gives every JP data address with a PAL name that name. The 148 raw `D_` globals of
+the JP-only files split as: 53 pins inside PAL blocks (GVARS/GAME/GCD/GV6/DISPLAY_BUFFERS/PLAYER_POS fields, kept as
+scalar externs on purpose: a struct access changes the address CSE and breaks the match; most of those fields are
+unnamed in PAL too, `b42`-style) and 95 with no PAL twin. Naming data does not change the match figure.
+
 ### JP queue (one function per scheduled run; take the first open line, work it, then update this list)
 
 Each run: `bash tools/session_bootstrap.sh --no-wasm --no-build` (fetches `game_jp/` from `GAME_FILES_URL_JP` and builds
