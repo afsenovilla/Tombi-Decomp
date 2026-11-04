@@ -23,7 +23,7 @@ shared touch scroller for every long list, Windows tolower link fix.
 
 ## Japanese decomp (SLPS-01144), hand pass 3
 
-81.86 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
+82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
 (scheduling/register puzzles: initGameConfig, updateL8Type01Object, updateParentFollowModel, drawBalloonFrame,
 weaponHitCat2Type08); (b) a better pairer for the ~190 unmatched functions of 200-1000 bytes (masked words at 0.45

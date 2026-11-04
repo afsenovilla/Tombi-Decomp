@@ -1,5 +1,314 @@
 // FUNC 80133474 3152 X000
 // MATCHING 80133474 3152
+// VERSION SLPS_01144 x00 8013210C 2612
+#if defined(VERSION_SLPS_01144)
+#include "gcd.h"
+#include "gvars.h"
+/* Case 5 states 1 and 6 are written out in full (a goto to the shared L400c tail made them identical
+ * call;call;j blocks that cross-jumping merged).
+ * D_8013B18C, D_800A607C, D_800A60C4 now use only their [0] array names.
+ * Debt: D_8009C984s / D_800A60xx scalars alias fields of D_8009C984 / PLAYER.
+ * Tried (debt2): D_8009C984s as [0]/pointer/temp forms keeps la+lw 0(reg) (score 8), all-scalar D_8009C984 465. */
+#include "TOBJ.H"
+#include "gamestate.h"
+typedef struct { signed char anim, z, ang, rad; } E4;
+typedef struct { char c[12]; } V12;
+extern TObj PLAYER;
+extern unsigned char PLAYER_VISIBLE, PLAYER_DRAW_DEPTH, PLAYER_STATE, PLAYER_SUBSTATE, D_800A60DA;
+extern unsigned short PLAYER_ANIM_FRAME;
+extern unsigned short *PLAYER_ANIM[];
+extern Fix16 *PLAYER_H;
+extern int D_800A609C;
+extern Fix16 *PLAYER_D[];
+extern int D_800A60C4a[];
+extern int GAME_AREA00_EVENT_CONTROL[];
+#define D_8009C984 GAME_AREA00_EVENT_CONTROL[0]
+extern int D_8009C984s;
+extern int D_1F8002D4[];
+extern void *FROG_ANIMS[];
+extern void *D_8013B188;
+extern void *D_8013B184a[];
+extern void *D_8013B18Ca[];
+extern signed char D_80011EB4[];
+extern E4 D_80011DAC[];
+extern char D_80077D30[], D_80077D3C[], D_80077D18[];
+extern int ObjCullRegister(TObj *);
+extern void AnimLoadDuration(TObj *);
+extern int AnimAdvance(TObj *);
+extern void applyFrameVelocityX(TObj *);
+extern void ObjListPush_1F80021C(TObj *);
+extern void freeObjectLayer2(TObj *);
+extern void frogStep0(TObj *);
+extern void frogHop(TObj *);
+extern void playerSetAnim(TObj *, int, int);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
+extern void addItemToInventory(int, int, int);
+extern void removeItemFromInventory(int, int);
+extern void showMessageBox(int, int, int, int);
+extern int MulCos(int a, int b);
+extern int MulNegSinScaled(int a, int b);
+extern void ObjSpawnType5(int, int, void *);
+extern void spawnFlashEffect(int, int, int, int);
+extern void despawnObjectOffscreen(TObj *);
+extern void printInfoMessage(int, int);
+extern short TileCollideAt(TObj *, short, short);
+
+void func_8013210C(TObj *o)
+{
+    switch (o->b04) {
+    case 0:
+        switch (o->step) {
+        case 0:
+            if (D_8009C984 & 6) {
+                o->b04 = 3;
+                break;
+            }
+            o->box0 = 8;
+            o->box1 = 0x10;
+            o->box2 = 0x18;
+            o->box3 = 0x20;
+            o->d8c = 0;
+            o->w1e = 0xb;
+            o->b0d = 0;
+            o->d3c = D_1F8002D4[0];
+            o->anim = D_8013B184a[0];
+            o->b0a = 2;
+            AnimLoadDuration(o);
+            o->step++;
+            break;
+        case 1:
+            o->visible = 0;
+            ObjListPush_1F80021C(o);
+            break;
+        }
+        break;
+    case 1:
+        if (ObjCullRegister(o)) {
+            switch (o->step) {
+            case 0:
+                frogStep0(o);
+                break;
+            case 1:
+                frogHop(o);
+                break;
+            }
+        }
+        break;
+    case 2:
+        ObjCullRegister(o);
+        switch (o->step) {
+        case 0:
+            D_8009C984 |= 2;
+            setEventStarted(3, 0, 0);
+            addItemToInventory(1, 1, 1);
+            o->step = 1;
+            break;
+        case 1:
+            AnimAdvance(o);
+            break;
+        case 2:
+            D_8009C984 &= ~2;
+            o->step = 5;
+            o->state = 0;
+            break;
+        case 3: {
+            E4 *e;
+            unsigned int t;
+            unsigned short u;
+            int ang;
+            o->visible = PLAYER_VISIBLE;
+            o->active = 2;
+            o->animFrame = PLAYER_ANIM_FRAME & 1;
+            o->category |= 0x80;
+            e = &D_80011DAC[D_80011EB4[*PLAYER_ANIM[0]]];
+            o->anim = FROG_ANIMS[e->anim];
+            if (o->animFrame & 1) {
+                u = D_800A60C4a[0] + 0x80 - e->ang;
+                t = u; t &= 0xff;
+            } else {
+                u = e->ang + D_800A60C4a[0];
+                t = u; t &= 0xff;
+            }
+            ang = t; asm("" : "=r"(ang) : "0"(ang));
+            o->h->p.whole = PLAYER_H->p.whole + MulCos(ang, e->rad);
+            o->y.p.whole = PLAYER.y.p.whole + MulNegSinScaled(ang, e->rad);
+            o->d->p.whole = PLAYER_D[0]->p.whole;
+            o->d8c = D_800A60C4a[0];
+            o->b0f = PLAYER_DRAW_DEPTH + (unsigned char)e->z;
+            if (PLAYER_STATE == 2) {
+                D_8009C984 &= ~2;
+                o->b04 = 2;
+                o->step = 5;
+                o->state = 0;
+            }
+            if (GAME.selectedArea != 0) break;
+            if (D_8009C984 & 4) break;
+            if (!(D_8009C984 & 2)) break;
+            if (D_800A609C != 0) {
+                o->b04 = 2;
+                o->step = 5;
+                o->state = 0;
+                break;
+            }
+            switch (GAME.selectedSection) {
+            case 2:
+                if (PLAYER_H->p.whole >= 0xa61) o->step = 6;
+                break;
+            case 5:
+                if (PLAYER_H->p.whole >= 0xbd) o->step = 4;
+                break;
+            }
+            break;
+        }
+        case 4:
+            switch (o->state) {
+            case 1:
+                goto L3ffc;
+            case 0:
+                o->active = 2;
+                o->animFrame = 0;
+                o->d8c = 0;
+                removeItemFromInventory(1, 1);
+                o->anim = D_8013B18Ca[0];
+                AnimLoadDuration(o);
+                o->movetab = D_80077D30;
+                o->velY = -0x280;
+                showMessageBox(5, 0, 0x100, 0x9c);
+                PLAYER.animFrame = 0;
+                GVARS.b3e = 1;
+                goto L4034;
+            case 2: {
+                V12 v;
+                AnimAdvance(o);
+                applyFrameVelocityX(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (o->y.p.whole < -0xef) break;
+                setEventComplete(3, 0);
+                v = *(V12 *)&o->a;
+                ObjSpawnType5(0x10, 0, &v);
+                ObjSpawnType5(0x10, 0, &v);
+                GVARS.b3e = 0;
+                o->b04 = 3;
+                spawnFlashEffect(1, o->a.p.whole, (short)(o->y.p.whole - 0x20), o->b.p.whole);
+                D_8009C984 = (D_8009C984 | 4) & ~2;
+                break;
+            }
+            }
+            break;
+        case 5:
+            if (o->visible == 0) o->b04 = 3;
+            switch (o->state) {
+            case 0:
+                o->d8c = 0;
+                o->active = 2;
+                o->anim = D_8013B18Ca[0];
+                AnimLoadDuration(o);
+                removeItemFromInventory(1, 1);
+                o->movetab = D_80077D3C;
+                o->animFrame = !(PLAYER.h->p.whole < o->h->p.whole);
+                o->velY = -0x400;
+                D_8009C984 &= ~2;
+                printInfoMessage(0x10, 2);
+                o->state++;
+            case 1:
+                applyFrameVelocityX(o);
+                AnimAdvance(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (o->velY <= 0) break;
+                o->state++;
+                break;
+            case 2:
+                applyFrameVelocityX(o);
+                AnimAdvance(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8) == 0) break;
+                o->anim = D_8013B188;
+                AnimLoadDuration(o);
+                goto L4034;
+            case 3:
+                applyFrameVelocityX(o);
+                AnimAdvance(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8) == 0) break;
+                goto L4034;
+            case 4:
+                if (AnimAdvance(o) == 0) break;
+                goto L4034;
+            case 5:
+                o->anim = FROG_ANIMS[0];
+                AnimLoadDuration(o);
+                o->movetab = D_80077D3C;
+                o->velY = -0x300;
+                o->animFrame = !(PLAYER.h->p.whole < o->h->p.whole);
+                despawnObjectOffscreen(o);
+                goto L4034;
+            case 6:
+                applyFrameVelocityX(o);
+                AnimAdvance(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (o->velY <= 0) break;
+                o->state++;
+                break;
+            case 7:
+                applyFrameVelocityX(o);
+                AnimAdvance(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8) == 0) break;
+                o->anim = FROG_ANIMS[0];
+                AnimLoadDuration(o);
+                o->state = 5;
+                break;
+            }
+            break;
+        case 6:
+            switch (o->state) {
+            case 1:
+                goto L3ffc;
+            case 0:
+                o->active = 2;
+                o->animFrame = 0;
+                o->anim = D_8013B18Ca[0];
+                AnimLoadDuration(o);
+                o->movetab = D_80077D18;
+                o->velY = -0x200;
+                removeItemFromInventory(1, 1);
+                D_8009C984 &= ~2;
+                showMessageBox(5, 1, 0x100, 0x9c);
+                goto L4034;
+            L3ffc:
+                AnimAdvance(o);
+                applyFrameVelocityX(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (o->velY <= 0) break;
+            L4034:
+                o->state++;
+                break;
+            case 2:
+                AnimAdvance(o);
+                applyFrameVelocityX(o);
+                o->y.raw += o->velY << 8;
+                o->velY += 0x20;
+                if (TileCollideAt(o, o->h->p.whole, o->y.p.whole) == 0) break;
+                o->b04 = 3;
+                break;
+            }
+            break;
+        }
+        break;
+    case 3:
+        freeObjectLayer2(o);
+        break;
+    }
+}
+#else
 #include "gcd.h"
 #include "gvars.h"
 /* Case 5 states 1 and 6 are written out in full (a goto to the shared L400c tail made them identical
@@ -350,3 +659,4 @@ void updateFrog(TObj *o)
         break;
     }
 }
+#endif
