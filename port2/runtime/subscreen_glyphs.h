@@ -705,7 +705,7 @@ static const SubPick sub_picks[68] = {
     { 1, 'h', 324 },   /* de view #5 */
     { 1, 'i', 243 },   /* en use #3 */
     { 1, 'j', 301 },   /* sv use #5 */
-    { 1, 'k', 278 },   /* nl use #6 */
+    { 1, 'k', 334 },   /* nl view #2 */
     { 1, 'l', 250 },   /* fr use #3 */
     { 1, 'm', 246 },   /* en use #6 */
     { 1, 'n', 320 },   /* de view #1 */
@@ -715,7 +715,7 @@ static const SubPick sub_picks[68] = {
     { 1, 't', 286 },   /* es use #7 */
     { 1, 'u', 327 },   /* it view #1 */
     { 1, 'v', 264 },   /* de use #4 */
-    { 1, 'w', 267 },   /* de use #7 */
+    { 1, 'w', 315 },   /* en view #3 */
 };
 /* our own letters (not the disc's): ink bitmaps, the edge / rim added at run time; baseline = row index */
 typedef struct { unsigned char font; unsigned short ch; unsigned char w, h, baseline; unsigned short rows; } SubExtra;
