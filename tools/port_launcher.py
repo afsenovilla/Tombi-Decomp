@@ -33,7 +33,8 @@ import prompt_custom as PC
 import extract_data as X
 import data_patch as DP
 
-MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 (.github/workflows/report.yml)
+MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 / SCES-01330 Rev 1 (August 1998; .github/workflows/report.yml)
+REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec"      # EXE/MAIN0.EXE of SCES-01331 / SCES-01330 Rev 0 (July 1998 build: other overlays, not supported)
 # the languages of the disc's boot menu: EXE/MAINn.EXE (tombi2 --lang N, docs/PORT.md "Languages")
 GAME_LANGS = [(0, "English"), (5, "Español"), (1, "Français"), (2, "Deutsch"), (3, "Italiano"), (4, "Nederlands"),
               (6, "Português"), (7, "Svenska"), (8, "Dansk")]   # the nine MAINn.EXE of the PAL disc (1..4 are not in its boot menu)
@@ -60,7 +61,8 @@ i18n.add({
         "s.nodisc": "Elige tu imagen del disco.", "s.checking": "Comprobando el disco...", "s.ok": "Disco compatible: {0}, MAIN0.EXE verificado (sha1).",
         "s.extracting": "Extrayendo el disco a {0}... {1}% ({2})", "s.dataok": "Datos del juego listos en {0} ({1} archivos): la imagen del disco ya no hace falta.",
         "s.extractfail": "No se pudo extraer el disco: {0}", "s.nodata": "Elige tu imagen del disco: se extrae una vez a la carpeta data/ y el juego ya no la necesita.",
-        "s.badsha": "Disco NO compatible: {0} (sha1 de MAIN0.EXE {1}). El port solo funciona con Tombi! PAL SCES-01331 Rev 1 (si es SCES-01331, será la Rev 0); puede fallar.",
+        "s.badsha": "Disco NO compatible: {0} (sha1 de MAIN0.EXE {1}). El port solo funciona con Tombi! PAL Rev 1 (SCES-01331 o SCES-01330, agosto de 1998); puede fallar.",
+        "s.rev0": "Disco Tombi! PAL Rev 0: {0} (build de julio de 1998). El port necesita la Rev 1 de agosto de 1998 (SCES-01331 o SCES-01330): la Rev 0 tiene otros overlays y no arranca.",
         "s.noexe": "No se encuentra EXE/MAIN0.EXE en la imagen: no es un disco de Tombi! PAL.", "s.notiso": "No es una imagen ISO9660: {0}",
         "s.running": "Jugando... (cerrar la ventana del juego termina)", "s.ended": "El juego terminó (código {0}). Registro: {1}",
         "s.nobin": "No se encuentra el binario del port ({0}). Compílalo (docs/PORT.md) o usa el exe distribuido.",
@@ -93,7 +95,8 @@ i18n.add({
         "s.nodisc": "Pick your disc image.", "s.checking": "Checking the disc...", "s.ok": "Compatible disc: {0}, MAIN0.EXE verified (sha1).",
         "s.extracting": "Extracting the disc into {0}... {1}% ({2})", "s.dataok": "Game data ready in {0} ({1} files): the disc image is no longer needed.",
         "s.extractfail": "Could not extract the disc: {0}", "s.nodata": "Pick your disc image: it is extracted once into the data/ folder and the game no longer needs it.",
-        "s.badsha": "NOT a compatible disc: {0} (MAIN0.EXE sha1 {1}). The port only runs Tombi! PAL SCES-01331 Rev 1 (an SCES-01331 here is Rev 0); it may fail.",
+        "s.badsha": "NOT a compatible disc: {0} (MAIN0.EXE sha1 {1}). The port only runs Tombi! PAL Rev 1 (SCES-01331 or SCES-01330, August 1998); it may fail.",
+        "s.rev0": "Tombi! PAL Rev 0 disc: {0} (July 1998 build). The port needs the August 1998 Rev 1 (SCES-01331 or SCES-01330): Rev 0 has other overlays and does not boot.",
         "s.noexe": "EXE/MAIN0.EXE not found in the image: not a Tombi! PAL disc.", "s.notiso": "Not an ISO9660 image: {0}",
         "s.running": "Playing... (closing the game window ends it)", "s.ended": "The game ended (code {0}). Log: {1}",
         "s.nobin": "Port binary not found ({0}). Build it (docs/PORT.md) or use the distributed exe.",
@@ -431,9 +434,10 @@ def extract_main0(image, out):
     return hashlib.sha1(data).hexdigest(), serial
 
 
-# serials of the other Tomba! releases (the port runs only SCES-01331)
-KNOWN_DISCS = {"SCES-01331": "Tombi! (PAL, Europa)",  # Rev 1 is the one the port is built from; Rev 0 has another MAIN0.EXE
-               "SCES-01330": "Tombi! (PAL)", "SCUS-94236": "Tomba! (USA)",
+# serials of the Tomba! releases (the port runs the PAL Rev 1 discs: SCES-01331 and SCES-01330 share MAIN0.EXE and every
+# game file of their revision; only SYSTEM.CNF and the boot file name differ. Rev 0 of either has other overlays.)
+KNOWN_DISCS = {"SCES-01331": "Tombi! (PAL, idiomas 2: EN DA PT ES SV)",
+               "SCES-01330": "Tombi! (PAL, idiomas 1: EN NL FR DE IT)", "SCUS-94236": "Tomba! (USA)",
                "SLPS-01144": "Ore no Tomba (Japón)", "SCUS-94454": "Tomba! 2 (USA)", "SCES-02005": "Tombi! 2 (PAL)"}
 
 
@@ -2860,7 +2864,7 @@ class App(QMainWindow):
             try:
                 sha, serial = extract_main0(image, os.path.join(app_dir(), "MAIN0.EXE"))
                 name = "%s %s" % (serial or "?", KNOWN_DISCS.get(serial, ""))
-                msg = tr("s.ok", name.strip()) if sha == MAIN0_SHA1 else tr("s.badsha", name.strip(), sha[:8])
+                msg = tr("s.ok", name.strip()) if sha == MAIN0_SHA1 else tr("s.rev0", name.strip()) if sha == REV0_SHA1 else tr("s.badsha", name.strip(), sha[:8])
             except (OSError, ValueError, struct.error) as e:
                 self.later(self.say, str(e), "bad")
                 return

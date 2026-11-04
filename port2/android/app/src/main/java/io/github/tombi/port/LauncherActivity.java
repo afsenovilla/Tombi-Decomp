@@ -52,6 +52,7 @@ public class LauncherActivity extends Activity {
     static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor", "thor-black", "thor-white", "custom"};   // button icons (--prompts); new ones appended: stored indices keep their meaning; custom last (pcSet)
     static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5, REQ_TRANSLATION = 6;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
+    static final String REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec";   // the July 1998 Rev 0 of SCES-01331 / SCES-01330: other overlays, not supported
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
 
     SharedPreferences prefs;
@@ -566,7 +567,7 @@ public class LauncherActivity extends Activity {
                     .putString("disc_info", v.substring(3) + (v.endsWith(CONTENT_SHA1) ? " (= reference PAL disc)" : "")).apply();
             phase = IDLE;
             result = ok ? 1 : -1;
-            status(ok ? getString(R.string.disc_ok) : getString(R.string.disc_badsha, sha));
+            status(ok ? getString(R.string.disc_ok) : REV0_SHA1.equals(sha) ? getString(R.string.disc_rev0) : getString(R.string.disc_badsha, sha));
         } catch (InterruptedException e) {
             deleteTree(tmp);
             phase = IDLE; result = -1;

@@ -36,9 +36,10 @@
     <string name="disc_pick">Välj skivavbild…</string>
     <string name="disc_copying">Kopierar skivan… %1$d MB</string>
     <string name="disc_checking">Kontrollerar skivan (SHA-1 för MAIN0.EXE)…</string>
-    <string name="disc_ok">Skivavbilden är kontrollerad (Tombi! PAL SCES-01331).</string>
+    <string name="disc_ok">Skivavbilden är kontrollerad (Tombi! PAL Rev 1: SCES-01331 eller SCES-01330).</string>
     <string name="disc_unverified">Skivavbilden är inte kontrollerad: den kanske inte fungerar.</string>
-    <string name="disc_badsha">INTE en kompatibel skiva (sha1 för MAIN0.EXE %1$s). Porten kör Tombi! PAL SCES-01331; det kan misslyckas.</string>
+    <string name="disc_badsha">INTE en kompatibel skiva (sha1 för MAIN0.EXE %1$s). Porten kör Tombi! PAL Rev 1 (SCES-01331 eller SCES-01330); det kan misslyckas.</string>
+    <string name="disc_rev0">Tombi! PAL Rev 0-skiva: (bygge från juli 1998). Porten behöver Rev 1 från augusti 1998 (SCES-01331 eller SCES-01330): Rev 0 har andra overlays och startar inte.</string>
     <string name="disc_nomain0">Ingen EXE/MAIN0.EXE i den avbilden (välj .bin, .iso eller .chd; för en .cue, välj även .bin).</string>
     <string name="disc_needbin">Välj .bin tillsammans med .cue.</string>
     <string name="disc_howto">Välj avbilden av din egen Tombi!-skiva (.bin, .iso, .chd eller .cue tillsammans med sin .bin): filerna packas upp i appens lagring (cirka 500 MB, kontrollerade fil för fil; själva avbilden sparas inte). Appen innehåller inga speldata.</string>

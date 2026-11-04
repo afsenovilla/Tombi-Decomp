@@ -30,7 +30,8 @@ import hashlib, os, struct, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # `python3 -I` (CI) leaves the script's folder out
 import chd
 
-MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331
+MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 / SCES-01330 Rev 1 (the port's build)
+REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec"      # the July 1998 Rev 0 of both serials: other overlays, the port does not run it
 MANIFEST = "manifest.txt"
 BLOB_DIR = "_disc"
 
@@ -260,7 +261,7 @@ def check(data_dir):
     covered = sum(n for _, n, _, _, _ in man["files"])
     print("%s: %d files, %d of %d sectors covered, MAIN0 sha1 %s%s" % (
         data_dir, len(man["files"]), covered, man["sectors"], man["main0_sha1"][:8],
-        " (SCES-01331)" if man["main0_sha1"] == MAIN0_SHA1 else " (NOT the PAL release)"))
+        " (PAL Rev 1)" if man["main0_sha1"] == MAIN0_SHA1 else " (PAL Rev 0: NOT supported, the port needs Rev 1)" if man["main0_sha1"] == REV0_SHA1 else " (NOT the PAL release)"))
     return 1 if bad or covered != man["sectors"] else 0
 
 
@@ -284,7 +285,7 @@ def main(argv):
     if not quiet:
         sys.stdout.write("\n")
     print("%s: %d files, %d sectors, MAIN0 sha1 %s%s" % (argv[2], len(man["files"]), man["sectors"], man["main0_sha1"][:8],
-                                                        "" if man["main0_sha1"] == MAIN0_SHA1 else " (NOT SCES-01331)"))
+                                                        "" if man["main0_sha1"] == MAIN0_SHA1 else " (PAL Rev 0: NOT supported, the port needs Rev 1)" if man["main0_sha1"] == REV0_SHA1 else " (NOT the PAL Rev 1 release)"))
     return 0
 
 
