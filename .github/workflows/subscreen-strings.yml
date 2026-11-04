@@ -1,0 +1,60 @@
+# The Select sub-screen texts (item / event names, places) of a demo / prototype disc held in a GAME_FILES_URL_*
+# secret, found by their encoding (tools/subscreen_strings.py). The disc comes from the secret, never committed; the
+# job summary holds the decoded strings and their offsets, nothing else leaves the runner.
+name: subscreen-strings
+
+on:
+  workflow_dispatch:
+    inputs:
+      disc:
+        description: "Secret suffix (GAME_FILES_URL_<disc>)"
+        type: choice
+        options: [PREPRE9, PREPRE8, DENGEKI_D5, JP_DEMO, BETA980203, JP, USA]
+        default: PREPRE9
+
+jobs:
+  strings:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch the disc
+        env:
+          URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
+          URL_PREPRE9: ${{ secrets.GAME_FILES_URL_PREPRE9 }}
+          URL_DENGEKI_D5: ${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}
+          URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
+          URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
+          URL_JP: ${{ secrets.GAME_FILES_URL_JP }}
+          URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
+          DISC: ${{ inputs.disc }}
+        run: |
+          V="URL_$DISC"; URL="${!V}"
+          if [ -z "$URL" ]; then echo "::error::GAME_FILES_URL_$DISC is not set."; exit 1; fi
+          URL="$(printf '%s' "$URL" | tr -d '\r\n"'"'"' ')"
+          ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+          if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+          if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+          mkdir -p "$RUNNER_TEMP/d"; cd "$RUNNER_TEMP/d"
+          curl -fsSL -o dl "$URL"
+          if unzip -tq dl >/dev/null 2>&1; then unzip -o -q dl -d x
+          elif 7z t dl >/dev/null 2>&1; then 7z x -y -ox dl >/dev/null
+          else mkdir -p x; mv dl x/disc.bin; fi
+          rm -f dl
+          IMG="$(find x -type f \( -iname '*.bin' -o -iname '*.iso' -o -iname '*.img' \) -printf '%s %p\n' | sort -n | tail -1 | cut -d' ' -f2-)"
+          mkdir -p "$RUNNER_TEMP/disc"
+          if [ -n "$IMG" ]; then python3 -I "$GITHUB_WORKSPACE/tools/isoext.py" "$IMG" "$RUNNER_TEMP/disc"; else cp -r x/. "$RUNNER_TEMP/disc"; fi
+          cd "$GITHUB_WORKSPACE"; rm -rf "$RUNNER_TEMP/d"
+          find "$RUNNER_TEMP/disc" -type f -iname '*SPSUB*' -printf '%s %p\n'
+
+      - name: Strings
+        run: |
+          {
+            echo "## GAME_FILES_URL_${{ inputs.disc }}: sub-screen strings"; echo; echo '```'
+            python3 -I tools/subscreen_strings.py "$RUNNER_TEMP/disc"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          rm -rf "$RUNNER_TEMP/disc"
