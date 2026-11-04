@@ -47,6 +47,7 @@ jobs:
             if unzip -tq dl >/dev/null 2>&1; then unzip -o -q dl -d x
             elif 7z t dl >/dev/null 2>&1; then 7z x -y -ox dl >/dev/null
             else mkdir -p x; mv dl x/disc.bin; fi
+            chmod -R u+rwX x   # some archives carry read-only folders
             IMG="$(find x -type f \( -iname '*.bin' -o -iname '*.iso' -o -iname '*.img' \) -printf '%s %p\n' | sort -n | tail -1 | cut -d' ' -f2-)"
             [ -n "$IMG" ] || { echo "::error::no disc image in the download of $2"; exit 1; }
             mv "$IMG" "$RUNNER_TEMP/$2.bin"; cd "$GITHUB_WORKSPACE"; rm -rf "$RUNNER_TEMP/$2.d"
