@@ -65,7 +65,7 @@ jobs:
               fi
             done
             echo "### SOLO_DEMO.txt (no close retail counterpart)"; echo '```'; head -300 out/SOLO_DEMO.txt; echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         with:
