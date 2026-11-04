@@ -710,10 +710,10 @@ static const SubPick sub_picks[68] = {
     { 1, 'm', 246 },   /* en use #6 */
     { 1, 'n', 297 },   /* sv use #1 */
     { 1, 'o', 376 },   /* es sort #0 */
-    { 1, 'r', 282 },   /* es use #3 */
+    { 1, 'r', 340 },   /* es view #2 */
     { 1, 's', 280 },   /* es use #1 */
     { 1, 't', 286 },   /* es use #7 */
-    { 1, 'u', 276 },   /* nl use #4 */
+    { 1, 'u', 317 },   /* fr view #1 */
     { 1, 'v', 264 },   /* de use #4 */
     { 1, 'w', 267 },   /* de use #7 */
 };
