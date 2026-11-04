@@ -24,7 +24,7 @@ if ! dpkg -s libsdl2-2.0-0:i386 >/dev/null 2>&1 || ! dpkg -s libgl1:i386 >/dev/n
   $SUDO apt-get update -qq
   # libgl1:i386 + the Mesa DRI drivers: the i386 port's OpenGL renderer under xvfb (--window --renderer gl, llvmpipe)
   $SUDO apt-get install -y -qq binutils-mipsel-linux-gnu libyaml-dev ninja-build cmake ccache gcc-multilib \
-    libsdl2-dev libsdl2-2.0-0:i386 libgl1:i386 libgl1-mesa-dri:i386 libglx-mesa0:i386 patchelf xvfb unzip curl >/dev/null
+    libsdl2-dev libsdl2-2.0-0:i386 libgl1:i386 libgl1-mesa-dri:i386 libglx-mesa0:i386 patchelf xvfb unzip curl p7zip-full megatools >/dev/null
 fi
 if [ "$WASM" = 1 ] && ! command -v clang-18 >/dev/null; then
   $SUDO apt-get install -y -qq clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 >/dev/null
@@ -48,9 +48,6 @@ if [ ! -s game/disc/Tombi.bin ]; then
   fi
   URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
   URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"
-  ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
-  if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
-  if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
   mkdir -p game/disc
   T="$(mktemp -d)"
   bash tools/ci_download.sh "$URL" "$T/game.dl" 100000000
@@ -79,9 +76,6 @@ log "3b/5 Japanese disc (optional: GAME_FILES_URL_JP)"
 if [ ! -s game_jp/SLPS_011.44 ] && [ -n "${GAME_FILES_URL_JP:-}" ]; then
   URL="$(printf '%s' "$GAME_FILES_URL_JP" | tr -d '\r\n"'"'"' ')"
   URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"
-  ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
-  if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
-  if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
   T="$(mktemp -d)"
   bash tools/ci_download.sh "$URL" "$T/jp.dl" 100000000
   mkdir -p "$T/jp"
