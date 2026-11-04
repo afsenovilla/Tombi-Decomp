@@ -51,7 +51,7 @@ jobs:
           GAME_FILES_URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
           GAME_FILES_URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
         run: |
-          fetch() {  # $1 secret value, $2 out dir under RUNNER_TEMP; a direct URL, a Drive share link or a bare Drive id; zip or disc image
+          fetch() {  # $1 secret value, $2 out dir under RUNNER_TEMP, $3 "prepre8" for the PrePre 8 extractor; a direct URL, a Drive share link or a bare Drive id; zip or disc image
             [ -n "$1" ] || { echo "::warning::secret for $2 not set"; return 1; }
             URL="$(printf '%s' "$1" | tr -d '\r\n"'"'"' ')"
             ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
@@ -60,7 +60,9 @@ jobs:
             tools/ci_download.sh "$URL" "$RUNNER_TEMP/$2.dl" 100000000
             mkdir -p "$RUNNER_TEMP/$2"
             if unzip -tq "$RUNNER_TEMP/$2.dl" >/dev/null 2>&1; then unzip -o -q "$RUNNER_TEMP/$2.dl" -d "$RUNNER_TEMP/$2"
-            elif [ "$(stat -c%s "$RUNNER_TEMP/$2.dl")" -gt 100000000 ]; then python3 -I tools/isoext.py "$RUNNER_TEMP/$2.dl" "$RUNNER_TEMP/$2"
+            elif [ "$(stat -c%s "$RUNNER_TEMP/$2.dl")" -gt 100000000 ]; then
+              if [ "$3" = prepre8 ]; then python3 -I tools/prepre8.py extract "$RUNNER_TEMP/$2.dl" "$RUNNER_TEMP/$2"
+              else python3 -I tools/isoext.py "$RUNNER_TEMP/$2.dl" "$RUNNER_TEMP/$2"; fi
             else echo "::error::$2: neither a zip nor a disc image"; return 1; fi
             rm -f "$RUNNER_TEMP/$2.dl"
           }
@@ -101,7 +103,7 @@ jobs:
             echo "1e69d1414dcca09fe360fe69337fc8e62968fda7  game_beta980203/SLPS_011.44" | sha1sum -c -
           fi
           # PrePre 8
-          if fetch "$GAME_FILES_URL_PREPRE8" prepre8; then
+          if fetch "$GAME_FILES_URL_PREPRE8" prepre8 prepre8; then
             mkdir -p game_prepre8
             cp "$(find "$RUNNER_TEMP/prepre8" -iname TOMBA.EXE | head -1)" game_prepre8/TOMBA.EXE
             echo "032d6f371b31085098b86aebbce465d30599293a  game_prepre8/TOMBA.EXE" | sha1sum -c -
