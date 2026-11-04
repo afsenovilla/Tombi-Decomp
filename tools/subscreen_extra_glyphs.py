@@ -245,7 +245,33 @@ TAB = {
     )),
 }
 
+# letters the disc has but drawn too slanted for free text: ours replace the disc's (REPLACE), the disc's U of the
+# Portuguese "Usar" and u of the Danish "Brug" turned 8 degrees left and tidied by hand
+REPLACE = {"leaf": "Uu"}
 LEAF = {
+    'U': (11, (
+        "..##.....##",
+        "..##.....##",
+        "..##....##.",
+        "..##....##.",
+        ".##.....##.",
+        ".##....##..",
+        ".##....##..",
+        "##....##...",
+        "###..###...",
+        ".######....",
+        "..####.....",
+    )),
+    'u': (7, (
+        "..##...",
+        "..##..#",
+        ".##..##",
+        "###..##",
+        "##...##",
+        "###.##.",
+        "######.",
+        ".####..",
+    )),
     'C': (11, (
         "....###..",
         "..#####..",

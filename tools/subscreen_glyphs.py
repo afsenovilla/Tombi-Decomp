@@ -75,7 +75,6 @@ PREFER = {
     ("leaf", "e"): (6, "sort", 3), ("leaf", "t"): (6, "use", 7), ("leaf", "o"): (6, "sort", 0),
     ("leaf", "s"): (6, "use", 1), ("leaf", "a"): (6, "use", 2),   # "sa" of "Usar" as the Spanish leaf writes it
     ("leaf", "k"): (5, "view", 2), ("leaf", "w"): (1, "view", 3),   # clean cuts: "Gebruik" / "verw." run their letters together
-    ("leaf", "U"): (7, "use", 0), ("leaf", "u"): (9, "use", 2),     # the most upright U (Portuguese "Usar") and u (Danish "Brug")
     ("leaf", "r"): (6, "view", 2), ("leaf", "u"): (4, "view", 1), ("leaf", "n"): (3, "view", 1),   # clean cuts (the Spanish "Usar" r drags a piece of
     # the a, the Dutch "Gebruik" letters touch); u from the Italian "Guarda", n from the German "Ansicht" (the user's picks)
 }
@@ -399,6 +398,11 @@ def build(pages):
         table["fonts"][font] = {"text_indices": list(f["text"]), "gap": gap, "pair_gap": f["pair_gap"],
                                 "slots": {k: list(v) for k, v in f["slots"].items()}, "groups": f["groups"],
                                 "glyphs": dict(sorted(glyphs.items())), "labels": labels}
+    sys.path.insert(0, HERE)
+    import subscreen_extra_glyphs as E
+    for fn, chars in E.REPLACE.items():      # letters ours replace (subscreen_extra_glyphs.py): out of the picks
+        for ch in chars:
+            table["fonts"][fn]["glyphs"].pop(ch, None)
     for fn, f in table["fonts"].items():     # the shaded edge / rim index our own letters get (subscreen_extra_glyphs.py)
         cnt = collections.Counter()
         for ch, g in f["glyphs"].items():
