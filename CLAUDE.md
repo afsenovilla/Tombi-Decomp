@@ -78,8 +78,9 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
   rebuilds the reports when `notes/report_stamp.txt` changes (`date -u > notes/report_stamp.txt`).
 - Cloud bootstrap also fetches the JP disc when `GAME_FILES_URL_JP` is set (step 3b) and builds
   `build/slps01144/report.json`.
-- Cloud bootstrap also extracts any demo disc whose `GAME_FILES_URL_<NAME>` is an environment variable (DENGEKI_D5,
-  PREPRE9, JP_DEMO, BETA980203, USA) to `/dev/shm/<name>/fs` (step 3c); `tools/event_icons.py` reads those paths.
+- The demo discs are never fetched by the bootstrap: `bash tools/disc_fetch.sh DENGEKI_D5` (PREPRE9, PREPRE8, JP_DEMO,
+  BETA980203, USA, SCES01330) extracts the one a task needs from its `GAME_FILES_URL_<NAME>` variable to
+  `/dev/shm/<name>/fs` (+ `disc.bin`), once per session; `tools/event_icons.py` reads those paths.
 
 ## Build / test cheatsheet
 
