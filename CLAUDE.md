@@ -66,7 +66,8 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
 - Headless run: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy build/port2/tombi2 --data data --headless ...`
   `--dump-frames DIR --dump-every N`, `--dump-vram`, `--pad-script FRAME:BUTTONS[:LEN]...`, `--poke FRAME:ADDR:VAL[:SIZE]`.
 - Debug area select: `--skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:AREA:2 --poke 1250:8009C962:SECTION:2
-  --pad-script 1000:start,1300:circle:3` (the Start at 1000 is needed).
+  --pad-script 1000:start,1300:circle:3` (the Start at 1000 is needed). `--poke` values are **hex**: AREA10 is `A`, AREA17
+  is `11`. The 13 `DOOR_ROOMS` of tools/psxemu/rooms.py (e.g. 17:0) crash from the select in the real game too.
 - Panel: `--second-screen --dump-panel DIR --panel-size 1240x1080 --panel-input FRAME:ACTION,...` (actions: up down
   left right ok back tabl tabr zoomout zoomin tap@X@Y hold@X@Y drag@X0@Y0@X1@Y1 pinch@P@X@Y). Spanish:
   `--lang 5 --text-patch patches/es_mejorada.tombipatch.json`.

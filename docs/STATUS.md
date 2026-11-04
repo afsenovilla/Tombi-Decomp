@@ -25,7 +25,10 @@ destinations one-per-line (620495c), event detail page + shared touch scroller (
    pending: (a) a SCES-01330 Rev.1 dump (same MAIN0 as the port) would most likely work with lang.c as it is, as
    `--lang 1..4`; (b) a "language pack" path: files resolved by name across a second data folder plus a check that
    Rev.0 language overlays compose over the Rev.1 twins.
-3. Known crashes, both builds, from the debug area select: AREA17 section 0 and an AREA10 room. Not investigated.
+3. Debug area select crashes, checked 2026-11-04 (i386 build, 3000 frames each): AREA10 sections 0-8 all run clean;
+   AREA17 section 0 segfaults in `spawnSectionObjectsAlt` (empty load list, one of the 13 `DOOR_ROOMS` of
+   tools/psxemu/rooms.py that crash in the real game too). Not a port bug; only the door transition from a sibling
+   room enters those. Note: `--poke` values are hex (area 10 = `A`, 17 = `11`), easy to get wrong.
 4. `tools/port_mods.py` and the save editor keep hand-made English area names that disagree with the game's map
    (area 4 is "Haunted Mansion" on the map). Save import already uses the map names (REGIONS_EN / REGIONS_ES).
 5. Trick Village Spanish name: user decision pending.
