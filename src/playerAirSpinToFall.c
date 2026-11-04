@@ -1,7 +1,72 @@
 // FUNC 800eec40 512 X000
 // MATCHING 800eec40 512
 // VERSION SLPS_01144 x00 800EEDFC 512
+// VERSION BETA_980203 x00 800F3768 512
 #if defined(VERSION_SLPS_01144)
+#include "gvars.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+extern char D_800112E0[];
+extern char D_80010AE8[];
+void AnimLoadDuration(TObj *o);
+void AnimJump(TObj *o, short n);
+
+void playerAirSpinToFall(TObj *o)
+{
+    switch (*(unsigned short *)o->anim) {
+    case 0x55:
+        break;
+    case 0x12c:
+    case 0x12d:
+    case 0x12e:
+        if (o->animFrame & 1) {
+            if (o->d8c > 0)
+                o->d8c = -o->d8c;
+            o->d8c -= 4;
+            if (o->d8c < -0x20)
+                o->d8c = -0x20;
+        } else {
+            if (o->d8c < 0)
+                o->d8c = -o->d8c;
+            o->d8c += 4;
+            if (o->d8c > 0x20)
+                o->d8c = 0x20;
+        }
+        return;
+    default:
+        if (o->animFrame & 1) {
+            if (o->d8c > 0x80)
+                o->d8c = (0x100 - o->d8c) & 0xff;
+            o->d8c = (o->d8c + 4) & 0xff;
+            if (o->d8c <= 0x40)
+                return;
+            if (GAME.selectedArea == 3 && GVARS.driftH != 0) {
+                o->anim = D_800112E0;
+                AnimLoadDuration(o);
+            } else {
+                o->anim = D_80010AE8;
+                AnimJump(o, 3);
+            }
+        } else {
+            if (o->d8c < 0x80)
+                o->d8c = (0x100 - o->d8c) & 0xff;
+            o->d8c = (o->d8c - 4) & 0xff;
+            if (o->d8c >= 0xc0)
+                return;
+            if (GAME.selectedArea == 3 && GVARS.driftH != 0) {
+                o->anim = D_800112E0;
+                AnimLoadDuration(o);
+            } else {
+                o->anim = D_80010AE8;
+                AnimJump(o, 3);
+            }
+        }
+        break;
+    }
+    o->d8c = 0;
+}
+#elif defined(VERSION_BETA_980203)
+// Beta version of PAL x000 800EEC40 (playerAirSpinToFall.c): SLPS_01144 branch of src/playerAirSpinToFall.c (0.977 masked) [-O2 -G0] (tools/demo_sweep.py)
 #include "gvars.h"
 #include "TOBJ.H"
 #include "gamestate.h"
