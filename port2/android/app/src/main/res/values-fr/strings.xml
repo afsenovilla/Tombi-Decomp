@@ -36,9 +36,10 @@
     <string name="disc_pick">Choisir l\'image du disque…</string>
     <string name="disc_copying">Copie du disque… %1$d Mo</string>
     <string name="disc_checking">Vérification du disque (SHA-1 de MAIN0.EXE)…</string>
-    <string name="disc_ok">Image du disque vérifiée (Tombi! PAL SCES-01331).</string>
+    <string name="disc_ok">Image du disque vérifiée (Tombi! PAL Rev 1 : SCES-01331 ou SCES-01330).</string>
     <string name="disc_unverified">Image du disque non vérifiée : elle risque de ne pas fonctionner.</string>
-    <string name="disc_badsha">Disque NON compatible (sha1 de MAIN0.EXE %1$s). Le port fonctionne avec Tombi! PAL SCES-01331 ; il risque d\'échouer.</string>
+    <string name="disc_badsha">Disque NON compatible (sha1 de MAIN0.EXE %1$s). Le port fonctionne avec Tombi! PAL Rev 1 (SCES-01331 ou SCES-01330) ; il risque d\'échouer.</string>
+    <string name="disc_rev0">Disque Tombi! PAL Rev 0 : (build de juillet 1998). Le port a besoin de la Rev 1 d\'août 1998 (SCES-01331 ou SCES-01330) : la Rev 0 a d\'autres overlays et ne démarre pas.</string>
     <string name="disc_nomain0">Aucun EXE/MAIN0.EXE dans cette image (choisissez le .bin, l\'.iso ou le .chd ; pour un .cue, sélectionnez aussi le .bin).</string>
     <string name="disc_needbin">Sélectionnez le .bin avec le .cue.</string>
     <string name="disc_howto">Choisissez l\'image de votre propre disque Tombi! (.bin, .iso, .chd, ou .cue avec son .bin) : ses fichiers sont extraits dans le stockage de l\'application (environ 500 Mo, vérifiés fichier par fichier ; l\'image elle-même n\'est pas conservée). L\'application ne contient aucune donnée du jeu.</string>

@@ -2053,7 +2053,12 @@ regeneration.
 the disc too, not in its menu: `--lang 1..4` plays them, and both launchers list all nine. The other PAL disc,
 SCES-01330 ("Language set 1", boot menu EN/FR/DE/IT/NL), is byte-identical to SCES-01331 of the same revision except
 SYSTEM.CNF and the boot file name (checked on Rev.1, 2026-11-04), so the port needs no second disc for those
-languages. The panel's own chrome (tab names, planks) stays English for 1..4; the names it shows come from that
+languages, and an SCES-01330 Rev.1 image is accepted like an SCES-01331 one (same MAIN0.EXE sha1). The July 1998
+**Rev.0** of either serial (MAIN0.EXE sha1 `118459ce...`, md5 `3edd55b0...`) is another build: 793 of its files differ
+from Rev.1 (every area overlay by 68-108 bytes, the I*NFO* and SYSTEM overlays, the load lists, the H/I/W/D/P/B texts),
+and the port's native code reads tables from the overlay files at Rev.1 addresses, so Rev.0 does not boot. The PC
+launcher, tools/extract_data.py and the Android app recognise a Rev.0 disc by that sha1 and say so (`s.rev0`,
+`disc_rev0`); running Rev.0 would be a second version target like JP or USA. The panel's own chrome (tab names, planks) stays English for 1..4; the names it shows come from that
 language's `D<n>SPSUB*` files. Every MAINn is the same program linked once with that language's data, so its code
 and data move: MAIN5 is linked 0x18 bytes earlier from `0x8004D824` on (its `printInfoMessage` is 24 bytes
 shorter) and 0x28 bytes later after its event-title tables (`0x80080330..`, 0x40 bytes bigger); its overlays
