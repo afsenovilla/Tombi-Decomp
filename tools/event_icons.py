@@ -29,6 +29,12 @@ import area000  # noqa: E402
 ROOT = os.path.dirname(HERE)
 FS = {"pal": os.path.join(ROOT, "game/disc/fs"), "usa": "/dev/shm/usa/fs", "jp": "/dev/shm/jp/fs",
       "beta": "/dev/shm/beta/fs", "jpdemo": "/dev/shm/jpdemo/fs", "pp8": "/dev/shm/pp8/TOMBA"}
+# tools/disc_fetch.sh puts the discs in game_<name>/fs; those win when present
+for _k, _d in (("usa", "game_usa/fs"), ("jp", "game_jp_disc/fs"), ("beta", "game_beta980203/fs"), ("jpdemo", "game_jp_demo/fs"),
+               ("pp8", "game_prepre8/fs/TOMBA"), ("dengeki", "game_dengeki_d5/fs/TOMBA"), ("pp9", "game_prepre9/fs/TOMBA"),
+               ("hyper12", "game_hyper12/fs/TOMBA")):
+    if os.path.isdir(os.path.join(ROOT, _d)):
+        FS[_k] = os.path.join(ROOT, _d)
 # CLUT overrides of subScreenDrawEventIcons, keyed by event (= ORDER value - 1)
 CLUT_FORCE = {0x56: 0x7D12, 0x57: 0x7D52, 0x58: 0x7D92, 0x74: 0x7DD2, 0x97: 0x7A93, 0x9D: 0x7AD3, 0x9F: 0x7B13, 0xA4: 0x7B53}
 # PAL anchors used to find the same tables on the other discs
