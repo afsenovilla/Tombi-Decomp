@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
+        with:
+          urls: ${{ secrets.GAME_FILES_URL }}${{ secrets.GAME_FILES_URL_BETA980203 }}${{ secrets.GAME_FILES_URL_JP_DEMO }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -25,12 +28,7 @@ jobs:
             [ -n "$1" ] || { echo "::warning::secret for $2 not set"; return 0; }
             URL="$(printf '%s' "$1" | tr -d '\r\n"'"'"' ')"
             bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/dl" 10000000
-            mkdir -p "$RUNNER_TEMP/$2"
-            if unzip -tq "$RUNNER_TEMP/dl" >/dev/null 2>&1; then
-              unzip -o -q "$RUNNER_TEMP/dl" -d "$RUNNER_TEMP/$2"
-            else
-              python3 -I tools/isoext.py "$RUNNER_TEMP/dl" "$RUNNER_TEMP/$2"
-            fi
+            bash tools/disc_unpack.sh "$RUNNER_TEMP/dl" "$RUNNER_TEMP/$2"
             rm -f "$RUNNER_TEMP/dl"
           }
           fetch "$GAME_FILES_URL" pal

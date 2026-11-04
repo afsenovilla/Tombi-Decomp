@@ -18,8 +18,10 @@ shared touch scroller for every long list, Windows tolower link fix.
    nine MAINn.EXE and `--lang 1..4` already ran (lang.c). Now exposed: port usage, PC launcher (list, flags,
    launcher-language default), Android launcher (`LANG_N` appended). Checked on PC headless: in-game text in the
    four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. Open: the panel's own
-   chrome is English for 1..4 (only en/es exist, `T()` in panel.c); the earlier Rev.0 dump crashed the port (its
-   code differs from Rev.1), so an SCES-01330 Rev.0 player would need the Rev.1 code: not supported.
+   chrome is English for 1..4 (only en/es exist, `T()` in panel.c). Rev.0 (July 1998 build of either serial;
+   the SCES-01330 zip now in R2 is Rev.0, MAIN0 md5 3edd55b0) is not supported: 793 files differ from Rev.1 and the
+   port reads overlay tables at Rev.1 addresses. Since 2026-11-04 the PC launcher, extract_data.py and the Android
+   app name a Rev.0 disc as such (sha1 118459ce), and the messages say Rev 1 of SCES-01331 or SCES-01330 is needed.
 3. Debug area select crashes, checked 2026-11-04 (i386 build, 3000 frames each): AREA10 sections 0-8 all run clean;
    AREA17 section 0 segfaults in `spawnSectionObjectsAlt` (empty load list, one of the 13 `DOOR_ROOMS` of
    tools/psxemu/rooms.py that crash in the real game too). Not a port bug; only the door transition from a sibling
@@ -122,8 +124,58 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   has (secret spell, a dinner party feast, melting something to open a path, rolling down as a snowball, a hidden
   power that stops you moving, words that make something move, winning a prize, "a forgotten thing is a memory?",
   Santa's parasol, "what's that!? bananas"). AREA00/A006 #59/#64: the 100 Year Old Wise Man offers to appraise items
-  whose use you don't know (not in retail). To hunt beyond text (patrols, handlers) the disc has to be in the
-  container: GAME_FILES_URL_DENGEKI_D5 is a CI secret only, not an environment variable.
+  whose use you don't know (not in retail). `bash tools/disc_fetch.sh DENGEKI_D5` puts the disc in /dev/shm.
+- Dengeki D5 vs PAL, code and objects (2026-11-04, disc in /dev/shm/dengeki_d5, scripts kept out of the repo):
+  xmatch finds 735 PAL functions in TOMBA.EXE (31 % of its code, 111 identical) and 151 in AREA00/X00.BIN (overlay
+  base 0x800F4A48, from its jal targets). fn_vs_pal: the village NPC walkers are the retail ones (villagerNpcWalkPath
+  81 %, villagerNpcSpringMotion 78 %), so no other patrol system; the hooded old man handler (layer 3 type 0x15 in
+  this build, 2704 B) is only 48 % similar to updateHoodedOldMan. Load lists are the PrePre 8 layout (20-byte
+  records after the file table at exe 0x5D31C), no APD kinds: the object placement lists live inside D003.GAM
+  (= D103 = D203) at +0x481CC/+0x488DC/+0x490DC (rooms 0-2) and +0x4962C (area list), D302 +0x5CC, D503 +0x11784,
+  same 16-byte records as PAL. By bytes 300 of 422 PAL AREA00 records are there; by position the only objects PAL
+  does not place in the village: five layer 4 type 8 "static solid" sprites (handler at X00+0x28E60, the
+  cullObjectToDrawList(360) variant of updateStaticSolid; PAL emptied that slot) at (1021,-120)/(1117,-197)/
+  (1198,-251) in room 0 (sprite frames 46-48) and (2546,-476)/(2612,-370) in room 1 (frames 53-54); two layer 7
+  type 0 and four type 1 effects in room 0 (y 144 / 260); one flying bug (layer 2 type 0x27) in the area list at
+  (2642,-300,168); plus re-placed foliage (type 0x24), backdrop sprites (0x14) and climb props (0x0A). The handler
+  tables are at exe 0x8006A3E8 (layer 4, 49 entries), 0x800679B8 (layer 2, 50) and 0x80069D64 (layer 3, 58).
+  Not done: rendering those five sprites (the village SPR bank was not located; A006 is a 16-bit page).
+- Hyper PlayStation Re-mix No.12 (SLPM-80167, build 1997-09-22; secret / variable GAME_FILES_URL_HYPER12, 2026-11-04):
+  the missing link between PrePre 8 and the October demos. Same file layout as PrePre 8 (DATA000-004, TIM000-011,
+  PLAYER.WPP, single TOMBA.EXE with the test menus, PLAY DEMO / RANKING DEMO / TO BE CONTINUED) but already with WFM
+  text (DATA000: 64 dialogues + 16 event titles), the three sub-screen overlays (DSPSUB*.BIN) and a new COCKA.WPP
+  (82 frames: the Kokka bird; PrePre 8's "grey bird" is this). Load lists: 20-byte PrePre 8 records at exe file
+  0x681E0 (system) and 0x68604 (area 0): lists 1-3 village (DATA001, TIM004/005 + CLUT01-03), 4 the 2D interior
+  (TIM007 + DATA002 collision, still there), 5 the street (DATA003: WHM 2140 then WMD at +2140, 77 KB, 1137
+  polygons; PrePre 8 had 1001) and 6 the house (DATA004: WMD at +3420, 983 polygons; the pig sign of PrePre 8 is
+  gone). Renders made with tools/room.py + jpdemo_rooms.parse_wmd_demo from those lists (nothing committed).
+  Text: all 64 lines have a close JP retail twin except the place names and the 100 Year Old Man's two appraisal
+  lines (so the cut appraisal mechanic spans Sept-Nov 1997). The hungry monkey introduces himself as サンタ (Santa):
+  the Dengeki hint "Santa's stylish parasol" is the monkey, renamed Charles later. Kid at the pond: "can you swim?
+  the turtle helped you this time, beyond that door you must swim" (the swimming gate of the big puddle). Event
+  titles include 大きな水たまり？ (unused retail event 6), コッカタマゴの中身, オイラ泳げない…, かくれ里のヤン.
+  Code: xmatch 643 PAL functions in TOMBA.EXE (25 %). Rooms 4/5 (lists 5/6): the PrePre 8 exit triggers (x >= 0x4A2
+  in room 0, 0x4EC..0xA46 in room 1, x < 0x51 / 0x29 back) are in the Hyper player controller too (0x8002D81C..
+  0x8002DB00), but the PrePre 8 entry-record table (x, y, mode, area, room, entry) was not found in the same shape
+  and func_8002816C has no masked twin, so reachability is likely but unverified (no emulator run).
+  Discs now live in game_<name>/ (tools/disc_fetch.sh): /dev/shm is wiped when the idle container restarts.
+- Demo event triggers vs retail (2026-11-04): the demos' setEventStarted / setEventComplete are not masked twins of
+  PAL's (Dengeki 0x8001C25C / 0x8001C37C, Hyper 0x8001D414 / 0x8001D510, found through fn_vs_pal + the l3 wise-man
+  handler's calls). Ids with an immediate: Dengeki starts 2, 4, 8, 37, 166, 169, 182 and completes 2, 3, 5, 166;
+  Hyper completes 2, 5. Against every PAL immediate (MAIN0 + all overlays) the one trigger retail lacks is
+  **event 4 "Motocross Course" started from the village scroll controller** (Dengeki X00 0x80116730, 1456 B, 25 %
+  like updateA00ScrollController): a state machine on the player position (0x1F80016A/16E) with the PrePre 8 room
+  exits (x >= 1186, y >= -60; 1261..2630 / y < -149) and, high in the village (y < -1369, scroll word 0x1F800172
+  == 450, x < 2188, then a flag at 0x1F8001CC), setEventStarted(4, 0, 1). Retail starts 4 in AREA03 (X003).
+  Follow-up: that top zone is the hut door (dispatchAreaInitB sub 4 at 1987,-1379) and sign sub 7 (2327,-1356), both
+  placed in PAL too; the trigger stops the BGM (0x8001E7D4 / 0x8001E724, SsSeqStop-like), creates a thread (task
+  0x8002CF40) and only then starts event 4: it is the demo's stand-in for the climb to Phoenix's Mountain, whose
+  area is not on the disc (the wise man's "this version ends here" lines; the TO BE CONTINUED card is drawn by
+  0x8001B904, reached through a table, no direct caller). Not a lost location. Dengeki hint 166 names the monkey
+  サンタ, confirming Santa = Charles. Event 5
+  / 166 are completed in the same scenes as retail (a00DarkCloakedFigureScene, Charles talk) but by register there.
+  Patrols: villagerNpcWalkPath / SpringMotion in the Dengeki are a different revision (word-aligned diff useless),
+  not a constant tweak; no other movement code without a PAL counterpart was found. Map tables: none in any 1997 demo.
 - Game-file downloads (2026-11-04): every workflow and the bootstrap go through `tools/ci_download.sh`, which takes
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.

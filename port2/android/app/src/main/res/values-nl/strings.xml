@@ -36,9 +36,10 @@
     <string name="disc_pick">Disc-image kiezen…</string>
     <string name="disc_copying">Disc kopiëren… %1$d MB</string>
     <string name="disc_checking">Disc controleren (SHA-1 van MAIN0.EXE)…</string>
-    <string name="disc_ok">Disc-image gecontroleerd (Tombi! PAL SCES-01331).</string>
+    <string name="disc_ok">Disc-image gecontroleerd (Tombi! PAL Rev 1: SCES-01331 of SCES-01330).</string>
     <string name="disc_unverified">Disc-image niet gecontroleerd: het werkt misschien niet.</string>
-    <string name="disc_badsha">GEEN compatibele disc (sha1 van MAIN0.EXE %1$s). De port draait Tombi! PAL SCES-01331; het kan mislukken.</string>
+    <string name="disc_badsha">GEEN compatibele disc (sha1 van MAIN0.EXE %1$s). De port draait Tombi! PAL Rev 1 (SCES-01331 of SCES-01330); het kan mislukken.</string>
+    <string name="disc_rev0">Tombi! PAL Rev 0-disc: (build van juli 1998). De port heeft de Rev 1 van augustus 1998 nodig (SCES-01331 of SCES-01330): Rev 0 heeft andere overlays en start niet.</string>
     <string name="disc_nomain0">Geen EXE/MAIN0.EXE in deze image (kies de .bin, .iso of .chd; selecteer bij een .cue ook de .bin).</string>
     <string name="disc_needbin">Selecteer de .bin samen met de .cue.</string>
     <string name="disc_howto">Kies de image van je eigen Tombi!-disc (.bin, .iso, .chd, of .cue samen met de .bin): de bestanden worden uitgepakt in de opslag van de app (ongeveer 500 MB, bestand voor bestand gecontroleerd; de image zelf wordt niet bewaard). De app bevat geen speldata.</string>

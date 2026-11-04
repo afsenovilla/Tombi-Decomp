@@ -64,18 +64,25 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
 
 ## CI and the game discs
 
-- Disc secrets: `GAME_FILES_URL` (PAL), `GAME_FILES_URL_JP` (SLPS-01144), `GAME_FILES_URL_JP_DEMO` (SLPM-80165),
-  `GAME_FILES_URL_BETA980203`, `GAME_FILES_URL_PREPRE8`. Each is a direct URL, a Dropbox link, a Drive share link, a bare Drive id or a public MEGA link with its key (`https://mega.nz/file/ID#KEY`; all through `tools/ci_download.sh`, MEGA via `tools/mega_dl.py`);
-  the file is a zip or a raw 2352-byte disc image. Extract with `tools/isoext.py`, except PrePre 8 (PCPX-96084), which
-  only `tools/prepre8.py extract` can read (isoext crashes on that image).
+- Disc secrets, one per disc, the same names as environment variables of the cloud container: `GAME_FILES_URL` (PAL
+  SCES-01331), `GAME_FILES_URL_SCES01330` (FR/DE/IT/NL), `GAME_FILES_URL_USA` (SCUS-94236), `GAME_FILES_URL_JP`
+  (SLPS-01144), `GAME_FILES_URL_JP_DEMO` (SLPM-80165), `GAME_FILES_URL_BETA980203`, `GAME_FILES_URL_PREPRE8`
+  (PCPX-96084), `GAME_FILES_URL_PREPRE9` (PCPX-96093), `GAME_FILES_URL_DENGEKI_D5` (SLPM-80186), `GAME_FILES_URL_HYPER12`
+  (SLPM-80167, Hyper PlayStation Re-mix No.12). The owner keeps the
+  zips in a Cloudflare R2 bucket (public dev URL, no egress quota); a direct URL, Dropbox, Drive or public MEGA link
+  works too (all through `tools/ci_download.sh`). The zip may hold the image inside a folder or the extracted files:
+  `tools/disc_unpack.sh` handles every shape (PrePre 8 through `tools/prepre8.py extract`). On Actions the downloads
+  stay in the cache (`.github/actions/disc-cache`), so a disc is fetched once per workflow and disc.
 - `jp-sweep.yml` (manual, or a push to master touching JP C/config): runs `jp_autofix --install` and `demo_sweep` over
   the JP builds and commits what matched straight to master (a push with GITHUB_TOKEN starts no other workflow, so the
   progress report runs on the next stamp push). `report.yml`
   rebuilds the reports when `notes/report_stamp.txt` changes (`date -u > notes/report_stamp.txt`).
 - Cloud bootstrap also fetches the JP disc when `GAME_FILES_URL_JP` is set (step 3b) and builds
   `build/slps01144/report.json`.
-- Cloud bootstrap also extracts any demo disc whose `GAME_FILES_URL_<NAME>` is an environment variable (DENGEKI_D5,
-  PREPRE9, JP_DEMO, BETA980203, USA) to `/dev/shm/<name>/fs` (step 3c); `tools/event_icons.py` reads those paths.
+- The demo discs are never fetched by the bootstrap: `bash tools/disc_fetch.sh DENGEKI_D5` (PREPRE9, PREPRE8, HYPER12,
+  JP_DEMO, BETA980203, USA, SCES01330) extracts the one a task needs from its `GAME_FILES_URL_<NAME>` variable to
+  `game_<name>/fs` (+ `disc.bin`, git-ignored; not /dev/shm, which the idle restarts of the container wipe), once
+  per container; `tools/event_icons.py` reads those paths.
 
 ## Build / test cheatsheet
 

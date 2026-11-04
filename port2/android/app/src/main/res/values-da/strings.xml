@@ -36,9 +36,10 @@
     <string name="disc_pick">Vælg diskaftryk…</string>
     <string name="disc_copying">Kopierer disken… %1$d MB</string>
     <string name="disc_checking">Kontrollerer disken (SHA-1 af MAIN0.EXE)…</string>
-    <string name="disc_ok">Diskaftrykket er kontrolleret (Tombi! PAL SCES-01331).</string>
+    <string name="disc_ok">Diskaftrykket er kontrolleret (Tombi! PAL Rev 1: SCES-01331 eller SCES-01330).</string>
     <string name="disc_unverified">Diskaftrykket er ikke kontrolleret: det virker måske ikke.</string>
-    <string name="disc_badsha">IKKE en kompatibel disk (sha1 af MAIN0.EXE %1$s). Porten kører Tombi! PAL SCES-01331; det kan mislykkes.</string>
+    <string name="disc_badsha">IKKE en kompatibel disk (sha1 af MAIN0.EXE %1$s). Porten kører Tombi! PAL Rev 1 (SCES-01331 eller SCES-01330); det kan mislykkes.</string>
+    <string name="disc_rev0">Tombi! PAL Rev 0-disk: (build fra juli 1998). Porten kræver Rev 1 fra august 1998 (SCES-01331 eller SCES-01330): Rev 0 har andre overlays og starter ikke.</string>
     <string name="disc_nomain0">Ingen EXE/MAIN0.EXE i det aftryk (vælg .bin, .iso eller .chd; for en .cue skal .bin også vælges).</string>
     <string name="disc_needbin">Vælg .bin sammen med .cue.</string>
     <string name="disc_howto">Vælg aftrykket af din egen Tombi!-disk (.bin, .iso, .chd eller .cue sammen med dens .bin): filerne pakkes ud i appens lager (omkring 500 MB, kontrolleret fil for fil; selve aftrykket gemmes ikke). Appen indeholder ingen spildata.</string>

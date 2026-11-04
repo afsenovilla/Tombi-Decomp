@@ -9,7 +9,7 @@ on:
       disc:
         description: "Secret suffix (GAME_FILES_URL_<disc>)"
         type: choice
-        options: [DENGEKI_D5, PREPRE8, JP_DEMO, BETA980203, JP, USA]
+        options: [DENGEKI_D5, PREPRE8, JP_DEMO, BETA980203, JP, USA, HYPER12]
         default: DENGEKI_D5
       prefix:
         description: "Only paths starting with this (empty = whole disc)"
@@ -20,11 +20,16 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}${{ secrets.GAME_FILES_URL_PREPRE8 }}${{ secrets.GAME_FILES_URL_JP_DEMO }}${{ secrets.GAME_FILES_URL_BETA980203 }}${{ secrets.GAME_FILES_URL_JP }}${{ secrets.GAME_FILES_URL_USA }}${{ secrets.GAME_FILES_URL_HYPER12 }}
+          scope: "${{ inputs.disc }}"
 
       - name: Fetch disc
         env:
           URL_DENGEKI_D5: ${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}
           URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
+          URL_HYPER12: ${{ secrets.GAME_FILES_URL_HYPER12 }}
           URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
           URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
           URL_JP: ${{ secrets.GAME_FILES_URL_JP }}

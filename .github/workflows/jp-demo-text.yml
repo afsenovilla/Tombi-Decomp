@@ -10,7 +10,7 @@ on:
       disc:
         description: "Secret suffix (GAME_FILES_URL_<disc>) of the demo disc"
         type: choice
-        options: [PREPRE9, PREPRE8, DENGEKI_D5, JP_DEMO]
+        options: [PREPRE9, PREPRE8, DENGEKI_D5, JP_DEMO, HYPER12]
         default: PREPRE9
 
 jobs:
@@ -18,6 +18,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_PREPRE8 }}${{ secrets.GAME_FILES_URL_PREPRE9 }}${{ secrets.GAME_FILES_URL_HYPER12 }}${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}${{ secrets.GAME_FILES_URL_JP_DEMO }}${{ secrets.GAME_FILES_URL_JP }}
+          scope: "${{ inputs.disc }}"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -27,6 +31,7 @@ jobs:
         env:
           URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
           URL_PREPRE9: ${{ secrets.GAME_FILES_URL_PREPRE9 }}
+          URL_HYPER12: ${{ secrets.GAME_FILES_URL_HYPER12 }}
           URL_DENGEKI_D5: ${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}
           URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
           URL_JP: ${{ secrets.GAME_FILES_URL_JP }}

@@ -304,8 +304,9 @@ The report and `docs/PROGRESS.md` count exactly the same bytes: both take their 
 `tools/units.py` (every matched source file as one unit, plus the csv functions no file covers), game code only
 (the Psy-Q library is left out unless `--with-sdk` is given) and every shared overlay function counted once, so
 the decomp.dev headline is the whole-game figure to the second decimal. The GitHub Actions workflow `.github/workflows/report.yml` runs it on every push; it
-needs a `GAME_FILES_URL` secret (and `GAME_FILES_URL_JP` / `GAME_FILES_URL_JP_DEMO` for the Japanese release / demo) pointing to your own disc image (or a zip with `MAIN0.EXE` and
-`AREA00/X000.BIN`, which limits the report to those two).
+needs a `GAME_FILES_URL` secret (and `GAME_FILES_URL_JP` / `GAME_FILES_URL_JP_DEMO` for the Japanese release / demo) pointing to your own disc image: a direct, Dropbox,
+Drive or MEGA link to the image or to a zip of it (`tools/ci_download.sh` + `tools/disc_unpack.sh`; the downloads stay in the Actions cache), or a zip with just `MAIN0.EXE` and
+`AREA00/X000.BIN`, which limits the report to those two.
 
 Units are marked `complete` (decomp.dev "fully linked", `complete_code`) when their object is linked into
 MAIN0.EXE / X000.BIN by `tools/build_full.py` and matches 100 % of its code. Overlay units are not (the overlays are not
