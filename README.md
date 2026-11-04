@@ -217,12 +217,12 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 ## Japanese demo progress
 
 <!-- slpm80165-progress:start -->
-**Ore! Tomba demo (SLPM-80165): 40.87 % of the code matches byte for byte** (262276 of 641804 bytes, 1098 of 1832 functions).
+**Ore! Tomba demo (SLPM-80165): 40.59 % of the code matches byte for byte** (260488 of 641804 bytes, 1097 of 1832 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
 | SLPM_801.65: boot exe | 348752 B | 156428 B | 828 / 1309 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 44.9 % |
-| X00.BIN: shared object code | 293052 B | 105848 B | 270 / 523 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 36.1 % |
+| X00.BIN: shared object code | 293052 B | 104060 B | 269 / 523 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 35.5 % |
 
 Regenerated with `python3 tools/build_report.py --version slpm80165` then `python3 tools/progress_jp.py --version slpm80165`. `python3 tools/demo_sweep.py` installs the PAL / JP C that matches demo functions as is (see [docs/JPDEMO.md](docs/JPDEMO.md)).
 <!-- slpm80165-progress:end -->
