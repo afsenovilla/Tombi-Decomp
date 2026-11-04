@@ -100,26 +100,37 @@ def draw(out, rel, d, st, hits, cells, pals, names):
         x, y = base % st * 2, base // st
         dr.rectangle([x - 1, y - 1, x + 16, y + 16], outline=(255, 0, 0))
     img.save(os.path.join(out, "%s_%d.png" % (tag, st * 2)))
-    # the matched cells, coloured and labelled, in the order of the demo page
+    # every cell of the grid the matched icons lie on (16 px steps from the first one), in page order: the matched
+    # ones in their retail colours, labelled with the item id, the others (other art, or empty) in grey, labelled "?"
     order = sorted(mine, key=lambda n: (mine[n][1] // st, mine[n][1] % st))
-    cols, S = 10, 3
-    sheet = Image.new("RGBA", (cols * 20 * S, ((len(order) + cols - 1) // cols) * 26 * S), (40, 40, 40, 255))
+    x0, y0 = min(mine[n][1] % st for n in order), min(mine[n][1] // st for n in order)
+    x1, y1 = max(mine[n][1] % st for n in order), max(mine[n][1] // st for n in order)
+    at = {(mine[n][1] % st, mine[n][1] // st): n for n in order}
+    cells = []
+    for y in range(y0, y1 + 1, 16):
+        for x in range(x0, x1 + 1, 8):
+            base = y * st + x
+            if (x, y) in at or any(d[base + yy * st:base + yy * st + 8].strip(b"\0") for yy in range(16)):
+                cells.append((base, at.get((x, y))))
+    cols, S = 15, 3
+    sheet = Image.new("RGBA", (cols * 20 * S, ((len(cells) + cols - 1) // cols) * 26 * S), (40, 40, 40, 255))
     sp = sheet.load()
     dr = ImageDraw.Draw(sheet)
-    for k, n in enumerate(order):
-        base = mine[n][1]
+    grey = [(v * 17, v * 17, v * 17, 255 if v else 0) for v in range(16)]
+    for k, (base, n) in enumerate(cells):
         cx, cy = k % cols * 20 * S + 2 * S, k // cols * 26 * S + 2 * S
+        P = pals[n] if n is not None else grey
         for y in range(16):
             for x in range(16):
-                v = d[base + y * st + x // 2] >> 4 * (x & 1) & 15
-                c = pals[n][v]
+                c = P[d[base + y * st + x // 2] >> 4 * (x & 1) & 15]
                 if c[3]:
                     for dy in range(S):
                         for dx in range(S):
                             sp[cx + x * S + dx, cy + y * S + dy] = c
-        dr.text((cx, cy + 16 * S + 1), str(n), fill=(255, 255, 255, 255))
-    sheet.save(os.path.join(out, "%s_%d_items.png" % (tag, st * 2)))
-    return order
+        dr.text((cx, cy + 16 * S + 1), str(n) if n is not None else "?", fill=(255, 255, 255, 255))
+    path = os.path.join(out, "%s_%d_items.png" % (tag, st * 2))
+    sheet.save(path)
+    return order, [base for base, n in cells if n is None], path
 
 
 def main(argv):
@@ -128,6 +139,7 @@ def main(argv):
     ap.add_argument("--pal", default=os.path.join(os.path.dirname(HERE), "game", "disc", "fs"))
     ap.add_argument("-o", "--out", default="out")
     ap.add_argument("--min-rows", type=int, default=12)
+    ap.add_argument("--b64", action="store_true", help="print the labelled sheets as base64 too (for a CI log)")
     a = ap.parse_args(argv)
     cells, pals, names = pal_cells(a.pal)
     hits, data = find(cells, demo_files(a.demo), a.min_rows)
@@ -141,8 +153,12 @@ def main(argv):
             print("%3d %-28s -" % (n, names.get(n, "")))
     pages = sorted({(hh[0], hh[2]) for hh in hits.values()})
     for rel, st in pages:
-        order = draw(a.out, rel, data[rel], st, hits, cells, pals, names)
+        order, other, path = draw(a.out, rel, data[rel], st, hits, cells, pals, names)
         print("page %s (%d px wide): %d icons, in page order: %s" % (rel, st * 2, len(order), " ".join(str(n) for n in order)))
+        print("  cells of that grid with other art: %s" % " ".join("+0x%X (%d, %d)" % (b, b % st * 2, b // st) for b in other))
+        if a.b64:
+            import base64
+            print("  %s as base64:\n%s" % (os.path.basename(path), base64.b64encode(open(path, "rb").read()).decode()))
     return 0
 
 
