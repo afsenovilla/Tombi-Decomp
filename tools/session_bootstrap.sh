@@ -88,20 +88,11 @@ if [ ! -s game_jp/SLPS_011.44 ] && [ -n "${GAME_FILES_URL_JP:-}" ]; then
   rm -rf "$T"
   echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c --quiet - || { echo "game_jp/SLPS_011.44 is not the SLPS-01144 one"; exit 1; }
 fi
-# Demo / prototype discs (optional): GAME_FILES_URL_<NAME> for NAME in DENGEKI_D5 PREPRE9 PREPRE8 JP_DEMO BETA980203
-# USA, extracted to /dev/shm/<name>/fs, image at /dev/shm/<name>/disc.bin (RAM, gone with the container; nothing is
-# committed). tools/disc_unpack.sh takes any zip shape; PrePre 8 goes through tools/prepre8.py extract.
-for NAME in DENGEKI_D5 PREPRE9 PREPRE8 JP_DEMO BETA980203 USA; do
-  V="GAME_FILES_URL_$NAME"; D="/dev/shm/$(printf '%s' "$NAME" | tr 'A-Z' 'a-z')"
-  [ -n "${!V:-}" ] && [ ! -d "$D/fs" ] || continue
-  log "3c/5 $NAME disc -> $D/fs"
-  T="$(mktemp -d)"
-  if bash tools/ci_download.sh "${!V}" "$T/dl" 10000000; then
-    KIND=""; [ "$NAME" = PREPRE8 ] && KIND=prepre8
-    bash tools/disc_unpack.sh "$T/dl" "$D/fs" $KIND && { [ -s "$D/fs.img" ] && mv "$D/fs.img" "$D/disc.bin"; true; }
-  else echo "$NAME: download failed (see above); skipped"; fi
-  rm -rf "$T"
-done
+# Demo / prototype discs: never fetched here (that is 2 GB on every new session). When a task needs one, run
+# `bash tools/disc_fetch.sh DENGEKI_D5` (or PREPRE9, PREPRE8, JP_DEMO, BETA980203, USA): it extracts the disc of
+# GAME_FILES_URL_<NAME> to /dev/shm/<name>/fs once per session. This only says which are available.
+AVAIL=""; for NAME in DENGEKI_D5 PREPRE9 PREPRE8 JP_DEMO BETA980203 USA; do V="GAME_FILES_URL_$NAME"; [ -n "${!V:-}" ] && AVAIL="$AVAIL $NAME"; done
+[ -z "$AVAIL" ] || log "3c/5 demo discs available on demand (tools/disc_fetch.sh):$AVAIL"
 
 if [ -s game_jp/SLPS_011.44 ] && [ ! -x /root/.cargo/bin/objdiff-cli ]; then   # the report tool of the JP decomp
   mkdir -p /root/.cargo/bin
