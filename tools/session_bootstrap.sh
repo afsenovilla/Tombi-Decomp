@@ -3,6 +3,7 @@
 #   1. system packages and Python modules (the same set as .github/workflows/port2-exe.yml's Linux job, plus PySide6,
 #      Pillow, numpy and xvfb for the launcher tests and renders)
 #   2. the PS1 toolchain for the matching build (tools/setup_native.sh: old-gcc, maspsx, PSY-Q headers)
+#   3b. the Japanese disc (SLPS-01144) from $GAME_FILES_URL_JP when set (game_jp/, for the JP decomp), then
 #   3. the PAL disc (SCES-01331) from $GAME_FILES_URL (a Google Drive / Dropbox / direct link of the owner's own copy,
 #      set as an environment variable of the cloud environment; never committed) -> game/disc/Tombi.bin, game/ files
 #   4. data/ (tools/extract_data.py), the matching build (tools/build_full.py) and the i386 port (build/port2)
@@ -69,6 +70,33 @@ if [ ! -s game/MAIN0.EXE ]; then                            # the retail files t
 fi
 echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c --quiet - || { echo "game/MAIN0.EXE is not the PAL SCES-01331 one"; exit 1; }
 
+log "3b/5 Japanese disc (optional: GAME_FILES_URL_JP)"
+# The Japanese retail disc (SLPS-01144) for the JP decomp (docs/JP.md): same link rules as GAME_FILES_URL, a raw
+# .bin (2352-byte sectors) or a zip of the extracted disc. Skipped when the variable is missing; never committed.
+if [ ! -s game_jp/SLPS_011.44 ] && [ -n "${GAME_FILES_URL_JP:-}" ]; then
+  URL="$(printf '%s' "$GAME_FILES_URL_JP" | tr -d '\r\n"'"'"' ')"
+  URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"
+  ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc\?.*id=)([A-Za-z0-9_-]+).*#\2#p')"
+  if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
+  if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
+  T="$(mktemp -d)"
+  bash tools/ci_download.sh "$URL" "$T/jp.dl" 100000000
+  mkdir -p "$T/jp"
+  if unzip -tq "$T/jp.dl" >/dev/null 2>&1; then unzip -o -q "$T/jp.dl" -d "$T/jp"
+  else python3 -I tools/isoext.py "$T/jp.dl" "$T/jp"; mkdir -p game_jp/disc; mv "$T/jp.dl" game_jp/disc/tomba_jp.bin; fi
+  mkdir -p game_jp/SYSTEM
+  cp "$(find "$T/jp" -iname SLPS_011.44 | head -1)" game_jp/SLPS_011.44
+  for f in INFO2 X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
+    s="$(find "$T/jp" -ipath "*SYSTEM/$f.BIN" | head -1)"; [ -n "$s" ] && cp "$s" "game_jp/SYSTEM/$f.BIN"
+  done
+  rm -rf "$T"
+  echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c --quiet - || { echo "game_jp/SLPS_011.44 is not the SLPS-01144 one"; exit 1; }
+fi
+if [ -s game_jp/SLPS_011.44 ] && [ ! -x /root/.cargo/bin/objdiff-cli ]; then   # the report tool of the JP decomp
+  mkdir -p /root/.cargo/bin
+  curl -fsSL -o /root/.cargo/bin/objdiff-cli https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64 && chmod +x /root/.cargo/bin/objdiff-cli
+fi
+
 log "4/5 data/"
 [ -s data/manifest.txt ] || python3 -I tools/extract_data.py game/disc/Tombi.bin data --quiet
 
@@ -82,6 +110,11 @@ PORT_STALE_FULL=warn make -C build/port2 -j"$J" 2>&1 | grep -E "error|Error" || 
 [ -x build/port2/tombi2 ] && echo "build/port2/tombi2 ready" || { echo "the port build failed"; exit 1; }
 if [ "$WASM" = 1 ]; then
   PORT_STALE_FULL=warn python3 port2/wasm/build.py -j "$J" >/dev/null && echo "build/wasm/tombi2w ready"
+fi
+if [ -s game_jp/SLPS_011.44 ] && [ ! -s build/slps01144/report.json ]; then
+  log "JP report (build/slps01144/report.json, ~5 min)"
+  [ -s config/symbol_addrs_x000.txt ] || python3 tools/gen_symbols.py >/dev/null
+  python3 tools/build_report.py --version slps01144 --objdiff /root/.cargo/bin/objdiff-cli >/dev/null 2>&1 && python3 tools/progress_jp.py | tail -1 || echo "the JP report failed: python3 tools/build_report.py --version slps01144 --objdiff /root/.cargo/bin/objdiff-cli"
 fi
 log "smoke test"
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout 120 build/port2/tombi2 --data data --headless --frames 300 >/dev/null 2>&1 \

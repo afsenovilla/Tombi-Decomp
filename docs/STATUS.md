@@ -33,6 +33,31 @@ with no PAL twin, to decompile from scratch. Demo SLPM-80165 at 40.87 % after `t
 sweepable in CI. Workflow per function: `tools/jpcheck.py --strict --norm`, `tools/jp_autofix.py --install-file`,
 `tools/build_report.py --version slps01144`, `tools/progress_jp.py`.
 
+### JP queue (one function per scheduled run; take the first open line, work it, then update this list)
+
+Each run: `bash tools/session_bootstrap.sh --no-wasm --no-build` (fetches `game_jp/` from `GAME_FILES_URL_JP` and builds
+`build/slps01144/report.json`), then on the chosen function: draft from the PAL twin (`tools/jp_autofix.py --pair
+prog:addr:size:palfile --emit DIR`, or copy the PAL C and add the `// near-twin of PAL <name>` /
+`// VERSION SLPS_01144 <prog> <addr> <size>` header), iterate with `python3 tools/jpcheck.py --norm DRAFT <prog>
+<jpname>` (branch targets: `--strict --norm`), install with `tools/jp_autofix.py --install-file`, rebuild the report,
+`tools/progress_jp.py`, update the progress line of docs/JP.md and this list, commit (explicit paths) and push.
+Stop after about 90 minutes on one function: write what was tried under "tried" and leave it for the next run.
+
+- [ ] x00 func_80101F30 (1620 B): new JP player step called from case 0x39 of playerNormalModeDispatch; nearest PAL
+      playerStepWalkIntoDepth (0.22 callee overlap). Decompile from scratch using the PAL step files as idiom reference.
+- [ ] x04 func_80124270 (2904 B) <- src/x004/blackCrowFlyAround.c (334 diff lines): JP drops the `w22` counters and
+      the `% 40` timer; cases 1-4 need rewriting. The PAL file is full of matching hacks: keep them.
+- [ ] x03 func_80128CCC (2432 B) <- src/x003/masterOfTheSkiesScene.c (205 lines): case bodies reordered, extra
+      player-position checks.
+- [ ] x02 func_8011794C (2304 B) <- src/x002/updateSceneSequence.c (34 lines but structural: 23 script opcodes
+      instead of 18, extra init in case 0).
+- [ ] x10 func_8011B4F8 (2356 B) <- src/x001/playerStepRideSeesaw.c (138 lines, another record layout).
+- [ ] x04 func_80121504 / x03 func_80122250 (1.8 KB each) <- komaPigLeap / updateA00L2Type2C siblings (~100 lines).
+- [ ] x00 func_801249EC weaponHitCat2Type08 (256 B, 2 lines left: where the shared tail starts; see docs/JP.md).
+- [ ] slps01144 func_80024B78 (5112 B) and func_80014D1C (4096 B): handwritten GTE routines (the lit modelDraw
+      family); write them as C with the GTE macros of src/modelDrawG4Lit.c, instruction by instruction.
+- [ ] x04 func_80115FD0 (6472 B), x00 func_800F4CDC (5464 B), x10 func_8011DCC8 (3872 B): no PAL twin, from scratch.
+
 ## Recently done (context)
 
 - Panel (c8529a5): event detail page redone as the Items showcase (icon 3x on stone, title 16 px + state; Dónde =
