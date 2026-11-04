@@ -74,7 +74,8 @@ PREFER = {
     ("leaf", "O"): (8, "use", 3), ("leaf", "b"): (8, "use", 4), ("leaf", "j"): (8, "use", 5),
     ("leaf", "e"): (6, "sort", 3), ("leaf", "t"): (6, "use", 7), ("leaf", "o"): (6, "sort", 0),
     ("leaf", "U"): (6, "use", 0), ("leaf", "s"): (6, "use", 1), ("leaf", "a"): (6, "use", 2),   # "Usar" as the Spanish leaf writes it
-    ("leaf", "r"): (6, "view", 2), ("leaf", "u"): (2, "view", 1),   # clean cuts: the Spanish "Usar" r drags a piece of the a, the Dutch "Gebruik" letters touch
+    ("leaf", "r"): (6, "view", 2), ("leaf", "u"): (4, "view", 1), ("leaf", "n"): (3, "view", 1),   # clean cuts (the Spanish "Usar" r drags a piece of
+    # the a, the Dutch "Gebruik" letters touch); u from the Italian "Guarda", n from the German "Ansicht" (the user's picks)
 }
 # labels whose letters run into each other across the lines (Danish "Brug": the g's tail touches "Objekt"): the
 # letters' rects, label-relative (x0, y0, x1, y1), in reading order
