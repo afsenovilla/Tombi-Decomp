@@ -94,6 +94,12 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   SLPM-80165 demo: no node table, no links table and no retail signature anywhere on the disc (their DSPSUB.BIN is
   about 48 KB against 162 KB retail): the pause map graph did not exist yet in the 1997 demos.
 
+- PrePre Vol.9 item / event text (2026-11-04, `jp-demo-text.yml`, disc PREPRE9, whole dump in the job log): the
+  1997 demo has no sub-screen name table; its item names live in the "<item>をつかった" ("used <item>") lines of
+  the WFM1 block 0 of AREA01/A008.GAM (AREA02/A003.GAM holds the same block), 37 items in retail order, and the
+  event titles in block 1 (30 titles, 18 glyphs of that block not in jp_charmap.json yet). Two items are not in
+  any retail build: ケガをしたコイヌ (injured puppy) and はやさレベル＋１ (speed level +1); the rest match JP retail.
+
 - Panel (c8529a5): event detail page redone as the Items showcase (icon 3x on stone, title 16 px + state; Dónde =
   plate / area / room lines + "Ver en el mapa" when the marker is in the loaded room (Map tab centred on it, zoom 2);
   Quién only when it adds something, else Pista, else no window; planks Volver / Seguir / Ocultar; no route graph,
