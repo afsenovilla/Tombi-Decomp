@@ -13,17 +13,25 @@ ID="$(printf '%s' "$URL" | sed -nE 's#.*drive\.google\.com/(file/d/|open\?id=|uc
 if [ -z "$ID" ] && ! printf '%s' "$URL" | grep -q '://'; then ID="$URL"; fi
 if [ -n "$ID" ]; then URL="https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t"; fi
 ok() { unzip -tq "$OUT" >/dev/null 2>&1 || 7z t "$OUT" >/dev/null 2>&1 || [ "$(stat -c%s "$OUT" 2>/dev/null || echo 0)" -gt "$MIN" ]; }
+# $DISC_CACHE (a folder; on Actions set by .github/actions/disc-cache): a copy of every download, named by the URL's
+# hash, so the same disc is fetched once. Hard links when the cache and OUT share a file system, a copy otherwise.
+CACHED=""
+if [ -n "${DISC_CACHE:-}" ]; then
+  mkdir -p "$DISC_CACHE"; CACHED="$DISC_CACHE/$(printf '%s' "$URL" | sha256sum | cut -c1-32).dl"
+  if [ -s "$CACHED" ]; then rm -f "$OUT"; ln "$CACHED" "$OUT" 2>/dev/null || cp "$CACHED" "$OUT"; ok && { echo "disc from cache"; exit 0; }; rm -f "$OUT"; fi
+fi
+keep() { [ -n "$CACHED" ] && { ln "$OUT" "$CACHED" 2>/dev/null || cp "$OUT" "$CACHED"; }; exit 0; }
 if printf '%s' "$URL" | grep -q 'mega\.nz/'; then
   # tools/mega_dl.py (MEGA API + AES-CTR in Python, works through an HTTPS proxy) first; megadl as the fallback
   HERE="$(cd "$(dirname "$0")" && pwd)"
   python3 -c "import cryptography" 2>/dev/null || python3 -m pip install -q cryptography >/dev/null 2>&1 || true
   for i in 1 2 3; do
     rm -f "$OUT"
-    if python3 -I "$HERE/mega_dl.py" "$URL" "$OUT" 2>"$OUT.err"; then ok && exit 0; fi
+    if python3 -I "$HERE/mega_dl.py" "$URL" "$OUT" 2>"$OUT.err"; then ok && rm -f "$OUT.err" && keep; fi
     if grep -q "509\|Bandwidth Limit" "$OUT.err"; then echo "::error::MEGA: transfer quota of this address exhausted for now (HTTP 509); try again in a few hours"; cat "$OUT.err" | tail -2; rm -f "$OUT.err"; exit 1; fi
     tail -2 "$OUT.err"
     if command -v megadl >/dev/null || { (command -v sudo >/dev/null && SUDO=sudo || SUDO=""; $SUDO apt-get -qq update && $SUDO apt-get -qq install -y megatools) >/dev/null 2>&1; }; then
-      rm -f "$OUT"; timeout 1800 megadl --no-progress --path "$OUT" "$URL" && ok && rm -f "$OUT.err" && exit 0
+      rm -f "$OUT"; timeout 1800 megadl --no-progress --path "$OUT" "$URL" && ok && rm -f "$OUT.err" && keep
     fi
     echo "::warning::attempt $i: MEGA download got $(stat -c%s "$OUT" 2>/dev/null || echo 0) bytes"; sleep $((20 * i))
   done
@@ -41,7 +49,7 @@ for i in 1 2 3 4; do
         "https://drive.usercontent.google.com/download?id=$id&export=download&confirm=t&uuid=$uuid" || true
     fi
   fi
-  ok && exit 0
+  ok && keep
   if grep -q 'Quota exceeded' "$OUT" 2>/dev/null; then echo "::error::Google Drive: download quota exceeded for this file (try later, or share it elsewhere, e.g. a MEGA link)"; exit 1; fi
   echo "::warning::attempt $i: got $(stat -c%s "$OUT" 2>/dev/null || echo 0) bytes, $(file -b "$OUT" 2>/dev/null | cut -c1-60)"
   sed -e 's/<[^>]*>/ /g' "$OUT" 2>/dev/null | tr -s ' \n' ' ' | cut -c1-400; echo

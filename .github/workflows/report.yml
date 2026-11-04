@@ -35,6 +35,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
+        with:
+          urls: ${{ secrets.GAME_FILES_URL }}
+          scope: "report"
 
       - uses: actions/setup-python@v5
         with:
@@ -113,6 +117,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_JP }}
+          scope: "report-jp"
 
       - uses: actions/setup-python@v5
         with:
@@ -183,6 +191,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_JP_DEMO }}${{ secrets.GAME_FILES_URL_PREPRE8 }}${{ secrets.GAME_FILES_URL_BETA980203 }}${{ secrets.GAME_FILES_URL_USA }}
+          scope: "report-jpdemo"
 
       - uses: actions/setup-python@v5
         with:

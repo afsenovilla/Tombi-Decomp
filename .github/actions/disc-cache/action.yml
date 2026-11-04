@@ -1,0 +1,30 @@
+# Keeps the game-file downloads of a job in the Actions cache so a disc is fetched from Drive / MEGA / Dropbox once
+# per workflow and disc, not on every run (entries live while used; GitHub drops them after 7 idle days or past the
+# repository's 10 GB). Pass the secret values of the discs the job uses, concatenated: they are only hashed into the
+# key, never printed. tools/ci_download.sh reads and fills $DISC_CACHE, which this action sets.
+name: disc-cache
+description: Actions cache for the GAME_FILES_URL* downloads of a job
+inputs:
+  urls:
+    description: The secret values of the discs this job downloads, concatenated (hashed into the cache key)
+    required: true
+  scope:
+    description: What this job downloads (e.g. the disc input), part of the key so each job keeps its own set
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - id: key
+      shell: bash
+      env:
+        URLS: ${{ inputs.urls }}
+        SCOPE: ${{ github.workflow }}-${{ inputs.scope }}
+      run: |
+        echo "key=discs-v1-$(printf '%s' "$SCOPE" | tr -c 'A-Za-z0-9_.-' '_')-$(printf '%s' "$URLS" | sha256sum | cut -c1-20)" >> "$GITHUB_OUTPUT"
+        echo "DISC_CACHE=$HOME/.disccache" >> "$GITHUB_ENV"
+        mkdir -p "$HOME/.disccache"
+    - uses: actions/cache@v4
+      with:
+        path: ~/.disccache
+        key: ${{ steps.key.outputs.key }}
