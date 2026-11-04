@@ -197,3 +197,5 @@ PLAYER_Y_FIX = 0x800A7B8C; // size:0x4 PAL 0x800A604C
 PLAYER_H = 0x800A7BB8; // size:0x4 PAL 0x800A6078
 PLAYER_MESSAGE_BOX = 0x800A7C08; // size:0x4 PAL 0x800A60C8
 // END jp_globals
+func_80138790_slps01144 = 0x80138790; // type:func size:0xD0
+func_80138130_slps01144 = 0x80138130; // type:func size:0xFC

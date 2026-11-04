@@ -30,7 +30,7 @@ shared touch scroller for every long list, Windows tolower link fix.
    PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
-## Japanese decomp (SLPS-01144), hand pass 3
+## Japanese decomp (SLPS-01144), hand pass 3 (82.27 %)
 
 82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
@@ -73,6 +73,11 @@ prog:addr:size:palfile --emit DIR`, or copy the PAL C and add the `// near-twin 
 `tools/progress_jp.py`, update the progress line of docs/JP.md and this list, commit (explicit paths) and push.
 Stop after about 90 minutes on one function: write what was tried under "tried" and leave it for the next run.
 
+- [ ] 64-256 B band, remaining C-able main functions (see docs/JP.md "The 64-256 byte band"): func_8002FD60,
+      func_80064BEC/C78/E1C/E84/F4C, func_8003E0EC, func_8001FD7C, func_80027D58, func_80061488, func_8001BC7C,
+      func_8001E2D4/388/458/528/81C, func_80038F70, func_80016960/ACC/B38, func_80020794, func_80024860,
+      func_8005851C, func_800219F0/A40; x01 80131240 left (store-flag tails). The rest of the band is libgte/libapi
+      asm (RotMatrix*, ApplyMatrix*, OuterProduct*, SquareRoot0, _patch_*, start, __main, *_OBJ_* blobs).
 - [ ] x00 func_80101F30 (1620 B): new JP player step called from case 0x39 of playerNormalModeDispatch; nearest PAL
       playerStepWalkIntoDepth (0.22 callee overlap). Decompile from scratch using the PAL step files as idiom reference.
 - [ ] x04 func_80124270 (2904 B) <- src/x004/blackCrowFlyAround.c (334 diff lines): JP drops the `w22` counters and

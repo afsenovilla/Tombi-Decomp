@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 82.04 % of code (1163936 of 1418744 bytes, 2683 of 3096 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 82.27 % of code (1167152 of 1418632 bytes, 2701 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2683 functions, 68.66 % -> 82.04 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2701 functions, 68.66 % -> 82.27 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -233,6 +233,22 @@ clears `D_8009EE58`; the `turn()` double store stays).
 item; no `w78` branch; no section-0 condition block; section 5 only tests `PLAYER_H`; the give-back state sets
 `GVARS.b3e`, completes event 3 before the spawns, clears `b3e`, sets `b04 = 3` and has no timer state; the angle is
 an int masked once and copied (`asm("" : "=r"(ang) : "0"(ang))` keeps the copy), with int trig prototypes.
+
+The 64-256 byte band (82.04 % -> 82.27 %, 18 functions): the eight x14 pig-shot contact handlers are the PAL ones
+without the `wac == 2` and `SPAD.b1a4` guards (one, 801230FC, is a table of durations and packed coordinates, now a
+data unit: tools/jp_data_units.py takes a return-less unit wedged between two data units); `playerFallIfHeadHit`
+inlines `playerSetFallLean` (timer store after the `animFrame & 1` test); `a04ItemTriggerCheck` has no
+`displayExpBar` test; `shuttlePlatformGrabProbe` compares `box0 - d` signed and reads the ext fields at -0x10;
+`playerInitAreaHook` sets `o->d60 = 1` instead of `GV2.bb0 = 0` and lands in step 0 / state 0; `drawRaceHudIfActive`
+tests the whole flag byte like the demo. New JP code written from the disassembly: x00 801106F8 / 80110748 (pad
+steer of velX / velY through a `volatile` pointer to the pad word plus a local copy of the argument, which gives the
+`lui/addiu/lhu 0(reg)` form and the `move v1,a0`), x01 80138790 / 80138130 (talk triggers: result variable, early
+`return 0` before the nested ifs, `SPAD.s1fc & SPAD.s3c8` in that order), x09 8011F470 (a chain of eight calls on
+the same two arguments), x03 80118B28 (decor sprite with anim 13, `b0d = 0x80`, `d64 = 0x2000`, AnimAdvance when
+culled in). Tried and left: x01 80131240 (216 B): gcc turns its `if (probe()) return 2; return 0;` tails into
+`sltu`/`sll` store-flags and cross-jumps the two probe calls, while retail keeps them as branches with a `move
+a0,s0` copy in the first one; tails as nested ifs, a result variable, argument copies and -O1 all stay 33-52 lines off.
+
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
 `a1`/`v1` instead of `t0`/`a3`, everything else matches), `func_80027D58` (increaseMaxHealth:

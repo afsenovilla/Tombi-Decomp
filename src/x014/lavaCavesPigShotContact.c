@@ -1,5 +1,33 @@
 // FUNC 8011ce64 200 X014
 // MATCHING 8011ce64 200
+// VERSION SLPS_01144 x14 8011A2B0 192
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "TOBJ.H"
+extern short boxesOverlap(TObj *, TObj *);
+extern void decreaseObjectTimer(TObj *, int);
+void func_8011A2B0(TObj *o, TObj *e)
+{
+    if (o->active & 2) return;
+    if (e->subtype == 0) return;
+    if (boxesOverlap(o, e) == 0) return;
+    e->b69 = 1;
+    e->active = 2;
+    e->b04 = 2;
+    e->step = 0;
+    e->state = 0;
+    o->active = 2;
+    o->animFrame = 1;
+    o->b04 = 2;
+    o->step = 0;
+    o->state = 0;
+    if (e->subtype == 1)
+        decreaseObjectTimer(o, 2);
+    else
+        decreaseObjectTimer(o, 1);
+    SPAD.s19e = 0;
+}
+#else
 #include "spad.h"
 #include "TOBJ.H"
 extern short boxesOverlap(TObj *, TObj *);
@@ -25,3 +53,4 @@ void lavaCavesPigShotContact(TObj *o, TObj *e)
     decreaseObjectTimer(o, 1);
     SPAD.s19e = 0;
 }
+#endif

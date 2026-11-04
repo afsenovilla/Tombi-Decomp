@@ -1,5 +1,36 @@
 // FUNC 8011f5d8 240 X004
 // MATCHING 8011f5d8 240
+// VERSION SLPS_01144 x04 8011E0E8 240
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "TOBJ.H"
+#include "raw7.h"
+void func_8011E0E8(TObj *o, TObj *p)
+{
+    short d;
+    int t;
+    if ((unsigned short)(p->box2 + (U16(o, 0xda) - (unsigned short)p->y.p.whole)) > p->box2) return;
+    t = U16(o, 0xd8) - (unsigned short)p->h->p.whole;
+    d = t;
+    if ((short)t > 0) {
+        if (!(o->animFrame & 1)) return;
+    } else {
+        if (o->animFrame & 1) return;
+        d = -t;
+    }
+    if (p->box0 - d > 0x10) return;
+    o->b9e = 9;
+    if (o->animFrame & 1) {
+        o->wb8 = p->box0;
+    } else {
+        o->wb8 = -p->box0;
+    }
+    o->wba = 10;
+    o->velY = 0;
+    SPAD.s19e = 0;
+    (*(TObj **)&SPAD.p3c0) = p;
+}
+#else
 #include "spad.h"
 #include "TOBJ.H"
 #include "raw7.h"
@@ -31,3 +62,4 @@ void shuttlePlatformGrabProbe(TObj *o, TObj *p)
     SPAD.s19e = 0;
     (*(TObj **)&SPAD.p3c0) = p;
 }
+#endif

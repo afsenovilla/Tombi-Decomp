@@ -1,5 +1,31 @@
 // FUNC 8011cf2c 196 X014
 // MATCHING 8011cf2c 196
+// VERSION SLPS_01144 x14 8011A370 160
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "TOBJ.H"
+extern short boxesOverlap(TObj *, TObj *);
+extern void decreaseObjectTimer(TObj *, int);
+void func_8011A370(TObj *o, TObj *e)
+{
+    if (!(o->active & 2) && boxesOverlap(o, e)) {
+        int oh, eh;
+        o->active = 2;
+        eh = e->h->p.whole;
+        oh = o->h->p.whole;
+        o->b04 = 2;
+        o->step = 0;
+        o->state = 0;
+        o->animFrame = oh < eh;
+        decreaseObjectTimer(o, 2);
+        e->active = 2;
+        e->b04 = 2;
+        e->step = 0;
+        e->state = 0;
+        SPAD.s19e = 0;
+    }
+}
+#else
 #include "spad.h"
 #include "TOBJ.H"
 extern short boxesOverlap(TObj *, TObj *);
@@ -24,3 +50,4 @@ void trickVillagePigShotBContact(TObj *o, TObj *e)
         SPAD.s19e = 0;
     }
 }
+#endif

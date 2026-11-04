@@ -8,6 +8,7 @@ import os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 R = ROOT + "/asm/slps01144"
 rows = []
+plain = []  # units with no return and no prologue that the rules above did not take (sandwich rule below)
 c_addrs = set()
 for dp, _, fs in os.walk(ROOT + "/src"):
     for f in fs:
@@ -34,6 +35,7 @@ for prog in sorted(os.listdir(R)):
         jrra = any(x == 0x03E00008 for x in w)
         isid = addr == 0x80115178 and prog != "slps01144" and len(w) == 1
         if (prog, addr) in c_addrs: continue
+        if not jrra and not pro: plain.append((prog, addr, ulen))
         if not jrra and not pro and (ptr or isid or t.startswith("dlabel")):
             if prog == "slps01144" and ptr * 2 < len(w): continue
             rows.append((prog, addr, ulen, 0))
@@ -47,6 +49,15 @@ for prog in sorted(os.listdir(R)):
             k = next((i for i, x in enumerate(w) if (x >> 16) == 0x27BD and x & 0x8000), None)
             if k and k * 4 >= 64 and sum(1 for x in w[:k] if isptr(x) or x < 0x100) * 10 >= k * 9:
                 rows.append((prog, addr, k * 4, len(w) * 4 - k * 4))
+# a unit with no return and no prologue wedged between two data units is a table too (x14 801230FC: durations and
+# packed coordinates, no pointer in it)
+ends = {(p, a + n) for p, a, n, rest in rows if not rest}
+starts = {(p, a) for p, a, n, rest in rows}
+have = {(p, a) for p, a, n, rest in rows}
+for prog, addr, ulen in plain:
+    if (prog, addr) not in have and (prog, addr) in ends and (prog, addr + ulen) in starts:
+        rows.append((prog, addr, ulen, 0))
+rows.sort()
 tot = sum(r[2] for r in rows)
 print("%d units, %d bytes" % (len(rows), tot))
 if "--write" in sys.argv:
