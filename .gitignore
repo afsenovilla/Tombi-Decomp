@@ -52,3 +52,9 @@ game_beta980203
 port2/android/app/src/main/assets/fonts/
 port2/android/app/src/main/assets/patches/
 game_usa
+# demo / prototype discs extracted by tools/disc_fetch.sh
+game_dengeki_d5
+game_prepre9
+game_hyper12
+game_sces01330
+game_jp_demo

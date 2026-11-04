@@ -81,7 +81,8 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
   `build/slps01144/report.json`.
 - The demo discs are never fetched by the bootstrap: `bash tools/disc_fetch.sh DENGEKI_D5` (PREPRE9, PREPRE8, HYPER12,
   JP_DEMO, BETA980203, USA, SCES01330) extracts the one a task needs from its `GAME_FILES_URL_<NAME>` variable to
-  `/dev/shm/<name>/fs` (+ `disc.bin`), once per session; `tools/event_icons.py` reads those paths.
+  `game_<name>/fs` (+ `disc.bin`, git-ignored; not /dev/shm, which the idle restarts of the container wipe), once
+  per container; `tools/event_icons.py` reads those paths.
 
 ## Build / test cheatsheet
 
