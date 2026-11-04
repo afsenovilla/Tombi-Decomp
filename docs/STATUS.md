@@ -109,6 +109,13 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   44 / 45 the 1,000 / 10,000 / 100-million-year keys and 52 / 61 Rain Essence / Iron, so those icons are older art
   of the same slots; no demo has any text about a cork or wine. Item 64 is described there as "a valve that doesn't
   leak". The disc's own ITEM_ICON_CLUTS are not found by the retail prefix (renders use the retail row of the slot).
+  Dengeki text (jp-demo-text, DENGEKI_D5): the event hint bank (A00014, 200 entries) is in retail event-id order up to
+  ~124 (later ids are "???"); hints at ids 26, 83, 87, 88, 112, 115, 120, 121, 172, 173 describe things no retail text
+  has (secret spell, a dinner party feast, melting something to open a path, rolling down as a snowball, a hidden
+  power that stops you moving, words that make something move, winning a prize, "a forgotten thing is a memory?",
+  Santa's parasol, "what's that!? bananas"). AREA00/A006 #59/#64: the 100 Year Old Wise Man offers to appraise items
+  whose use you don't know (not in retail). To hunt beyond text (patrols, handlers) the disc has to be in the
+  container: GAME_FILES_URL_DENGEKI_D5 is a CI secret only, not an environment variable.
 - Game-file downloads (2026-11-04): every workflow and the bootstrap go through `tools/ci_download.sh`, which takes
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
