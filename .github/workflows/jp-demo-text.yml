@@ -1,7 +1,7 @@
 # The Japanese text of a 1997 demo / prototype disc (WFM1 blocks: item names, descriptions, event titles, dialogues),
 # dumped with tools/jpdemo_text.py and matched against the retail JP release (tools/jp_text.py, jp_charmap.json).
-# Discs come from secrets, never committed; the job summary gets the decoded text blocks that hold the item / event
-# tables and the lines with no close retail counterpart. The full dump is an artifact of the run.
+# Discs come from secrets, never committed; the job log and summary get every decoded text block (item names show up in the
+# "...をつかった" lines) and the lines with no close retail counterpart. The full dump is an artifact of the run.
 name: jp-demo-text
 
 on:
@@ -60,12 +60,10 @@ jobs:
             echo '```'; cat dump.log; echo; head -1 out/*.txt; echo '```'; echo
             for f in out/*.txt; do
               [ "$(basename "$f")" = SOLO_DEMO.txt ] && continue
-              if grep -q "アイテム\|イベント" "$f"; then
-                echo "### $(basename "$f") (item / event table)"; echo '```'; head -400 "$f"; echo '```'; echo
-              fi
+              echo "### $(basename "$f")"; echo '```'; cat "$f"; echo '```'; echo
             done
             echo "### SOLO_DEMO.txt (no close retail counterpart)"; echo '```'; head -300 out/SOLO_DEMO.txt; echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         with:
