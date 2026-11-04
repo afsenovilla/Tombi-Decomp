@@ -61,7 +61,7 @@ jobs:
         run: |
           {
             echo "## GAME_FILES_URL_${{ inputs.disc }}: inventory item icons"; echo; echo '```'
-            python3 -I tools/item_icons_find.py "$RUNNER_TEMP/disc" --pal "$RUNNER_TEMP/pal" -o out
+            python3 -I tools/item_icons_find.py "$RUNNER_TEMP/disc" --pal "$RUNNER_TEMP/pal" -o out --b64
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
           rm -rf "$RUNNER_TEMP/disc" "$RUNNER_TEMP/pal"
