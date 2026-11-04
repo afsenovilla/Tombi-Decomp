@@ -19,11 +19,12 @@ SUDO=""; [ "$(id -u)" = 0 ] || SUDO="sudo"
 J="$(nproc)"
 
 log "1/5 packages"
-if ! dpkg -s libsdl2-2.0-0:i386 >/dev/null 2>&1 || ! command -v cmake >/dev/null || ! command -v mipsel-linux-gnu-as >/dev/null; then
+if ! dpkg -s libsdl2-2.0-0:i386 >/dev/null 2>&1 || ! dpkg -s libgl1:i386 >/dev/null 2>&1 || ! command -v cmake >/dev/null || ! command -v mipsel-linux-gnu-as >/dev/null; then
   $SUDO dpkg --add-architecture i386
   $SUDO apt-get update -qq
+  # libgl1:i386 + the Mesa DRI drivers: the i386 port's OpenGL renderer under xvfb (--window --renderer gl, llvmpipe)
   $SUDO apt-get install -y -qq binutils-mipsel-linux-gnu libyaml-dev ninja-build cmake ccache gcc-multilib \
-    libsdl2-dev libsdl2-2.0-0:i386 patchelf xvfb unzip curl >/dev/null
+    libsdl2-dev libsdl2-2.0-0:i386 libgl1:i386 libgl1-mesa-dri:i386 libglx-mesa0:i386 patchelf xvfb unzip curl >/dev/null
 fi
 if [ "$WASM" = 1 ] && ! command -v clang-18 >/dev/null; then
   $SUDO apt-get install -y -qq clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 >/dev/null
@@ -32,6 +33,8 @@ python3 -c "import spimdisasm, rabbitizer, yaml, PIL, numpy" 2>/dev/null || {
   python3 -m pip install -q -r tools/requirements.txt Pillow numpy
   python3 -m pip install -q --no-deps splat64==0.35.2
 }
+# splat imports its optional pylibyaml accelerator unconditionally; a stub keeps the C build out (same as CI).
+python3 -c "import pylibyaml" 2>/dev/null || python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
 python3 -c "import PySide6" 2>/dev/null || python3 -m pip install -q PySide6-Essentials || echo "(PySide6 not installed: launcher tests skipped)"
 
 log "2/5 PS1 toolchain"
@@ -102,7 +105,8 @@ log "4/5 data/"
 
 [ "$BUILD" = 1 ] || { log "done (--no-build)"; exit 0; }
 log "5/5 builds"
-if [ ! -d build/full ] || [ -n "$(find src include -newer build/full -name '*.[ch]' -print -quit 2>/dev/null)" ]; then
+# a failed earlier run leaves build/full half made: test the linker scripts build_full.py writes, not the directory
+if ! ls build/full/*.full.ld >/dev/null 2>&1 || [ -n "$(find src include -newer build/full -name '*.[ch]' -print -quit 2>/dev/null)" ]; then
   python3 tools/build_full.py -j "$J"
 fi
 [ -f build/port2/Makefile ] || cmake -S port2 -B build/port2 >/dev/null
