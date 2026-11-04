@@ -17,7 +17,6 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   sweep:
@@ -142,20 +141,12 @@ jobs:
           date -u > notes/report_stamp.txt
           git status --short -- src config README.md docs notes | tee "$GITHUB_STEP_SUMMARY"
 
-      - name: Pull request
+      - name: Commit to master
         if: env.changed != '0'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          add-paths: |
-            src/**
-            config/**
-            README.md
-            notes/report_stamp.txt
-          commit-message: "JP sweep: automatic matches (tools/jp_autofix.py, tools/demo_sweep.py)"
-          branch: jp-sweep/auto
-          delete-branch: true
-          title: "JP sweep: automatic matches"
-          body: |
-            Automatic run of tools/jp_autofix.py (SLPS-01144) and tools/demo_sweep.py (demos): every installed function
-            matched byte for byte against the disc. Reports and README regenerated; docs/JP.md / docs/JPDEMO.md progress
-            lines are not touched by the sweep. Review and merge; the progress report runs on the stamp push.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src config README.md notes/report_stamp.txt
+          git commit -m "JP sweep: automatic matches (tools/jp_autofix.py, tools/demo_sweep.py)" \
+            -m "Every installed function matched byte for byte against its disc. Reports and README regenerated; the docs/JP.md and docs/JPDEMO.md progress lines are not touched by the sweep."
+          for d in 2 4 8 16; do git pull --no-rebase -q origin master && git push origin HEAD:master && break || sleep $d; done
