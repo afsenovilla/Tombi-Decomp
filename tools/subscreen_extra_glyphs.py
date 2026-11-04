@@ -249,7 +249,7 @@ TAB = {
 # Portuguese "Usar" and u of the Danish "Brug" turned 8 degrees left and tidied by hand
 REPLACE = {"leaf": "Uu"}
 LEAF = {
-    'U': (11, (
+    'U': (10, (
         "..##.....##",
         "..##.....##",
         "..##....##.",

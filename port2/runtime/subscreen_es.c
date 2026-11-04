@@ -266,7 +266,7 @@ static int compose(int li, const char *text) {
     const SubLabel *l = &sub_labels[li]; const SubSlot *s = &sub_slots[l->slot];
     const int font = l->font;
     unsigned char (*cl)[MW] = clean_group(s->group);
-    const char *lines[2] = { text, 0 }; int nl = 1, lo = 255, hi = 0;
+    const char *lines[2] = { text, 0 }; int nl = 1, lo = 255, hi = 0, line1_bottom = -1;
     /* the old lines and their edges give way to the picture behind them */
     {   static Texel cut[MH * MW]; static unsigned char old[MH][MW];
         memset(old, 0, sizeof old);
@@ -294,7 +294,7 @@ static int compose(int li, const char *text) {
         xs[0] = 0;
         for (int i = 1; i < n; i++) {   /* neighbours in their source word keep their step, the rest step by width + the pair gap */
             int adj = gix[i] >= 0 && gix[i - 1] >= 0 && gix[i] == gix[i - 1] + 1 && sub_glyphs[gix[i]].label == sub_glyphs[gix[i - 1]].label && sub_glyphs[gix[i - 1]].advance >= 0;
-            xs[i] = xs[i - 1] + (adj ? sub_glyphs[gix[i - 1]].advance : gw[i - 1] + sub_fonts[font].pair_gap + (gix[i - 1] < 0 || gix[i] < 0));
+            xs[i] = xs[i - 1] + (adj ? sub_glyphs[gix[i - 1]].advance : gw[i - 1] + sub_fonts[font].pair_gap + 1);
         }
         /* the line's baseline: the label's own when it has that many lines, else the font's usual places */
         if (font == SUB_FONT_TAB) baseline = sub_lines[l->line].baseline;
@@ -302,11 +302,17 @@ static int compose(int li, const char *text) {
         else baseline = s->v + (nl == 1 ? 25 : ln == 0 ? 19 : 31);
         left = (font == SUB_FONT_TAB || l->nlines != nl ? 2 * s->u + s->w : lo + hi) / 2 - (xs[n - 1] + gw[n - 1]) / 2;
         if (left < s->u) left = s->u;
+        if (ln == 1) {   /* the leaf's second line: a row of air under the first (the j's dot, the l's top), 2 at most */
+            int top = 99;
+            for (int i = 0; i < n; i++) for (int j = 0; j < gn[i]; j++) if (gt[i][j].letter && gt[i][j].y < top) top = gt[i][j].y;
+            for (int k = 0; k < 2 && baseline + top <= line1_bottom + 1 && baseline + 3 < s->v + s->h; k++) baseline++;
+        }
         for (int pass = 0; pass < 2; pass++) for (int i = 0; i < n; i++) for (int j = 0; j < gn[i]; j++) {
             int u = left + xs[i] + gt[i][j].x, v = baseline + gt[i][j].y;
             if (gt[i][j].letter != pass || u < s->u || v < s->v || u >= s->u + s->w || v >= s->v + s->h) continue;
             if (!pass && is_text(font, tx(work, u, v))) continue;
             set_tx(work, u, v, gt[i][j].t);
+            if (ln == 0 && gt[i][j].letter && v > line1_bottom) line1_bottom = v;
         }
     }
     return 1;
