@@ -51,7 +51,8 @@ jobs:
           }
           V="URL_$DISC"; fetch "${!V}" disc || { echo "::error::GAME_FILES_URL_$DISC is not set."; exit 1; }
           fetch "$URL_PAL" pal || true
-          find "$RUNNER_TEMP/disc" -maxdepth 2 | head -40
+          echo "sub-screen overlays and executables on the disc:"
+          find "$RUNNER_TEMP/disc" -type f \( -iname '*SPSUB*' -o -iname 'DSP*' -o -iname '*.EXE' -o -iname 'S[LC]*_*.*' \) -printf '%s %p\n' | sort -k2 | head -60
 
       - name: Map tables
         run: |

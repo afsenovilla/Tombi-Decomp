@@ -17,6 +17,7 @@ import os, struct, sys
 NODE_Y = (-1200, -700)          # map nodes sit at this height; route entries and other data do not
 SIGNATURE = struct.pack("<8h", -233, -944, -284, 0, -185, -958, -266, 0)   # retail nodes 0 and 1
 NODE41 = struct.pack("<3h", -269, -974, -40)
+LINKS_SIG = bytes([0, 1, 0, 0, 4, 0, 1, 2, 0, 1, 4, 0, 2, 3, 0, 2, 6, 0])   # retail MAP_LINKS 0-2
 
 
 def nodes_at(d, o):
@@ -123,10 +124,12 @@ def scan(path):
             found.append((name, a))
         else:
             # no parseable graph: say where the retail layout's first nodes or node 41 appear, if they do
-            hits = [(k, d.find(v)) for k, v in (("retail nodes 0-1", SIGNATURE), ("node 41 coords", NODE41)) if d.find(v) >= 0]
+            hits = [(k, d.find(v)) for k, v in (("retail nodes 0-1", SIGNATURE), ("node 41 coords", NODE41), ("retail links 0-2", LINKS_SIG)) if d.find(v) >= 0]
             runs = [(o, n) for o, n in find_nodes(d) if n >= 20]
-            if hits or runs:
-                found.append((name, dict(partial=True, hits=hits, runs=runs, nodes_at=[struct.unpack_from("<3h", d, o + 8 * i) for o, n in runs[:1] for i in range(min(n, 70))])))
+            lo, nl = find_links(d, 0, 256)          # any run of 20+ link-shaped records, whatever the nodes look like
+            links = [tuple(d[lo + 6 * i:lo + 6 * i + 6]) for i in range(min(nl, 60))] if lo is not None else []
+            if hits or runs or links:
+                found.append((name, dict(partial=True, hits=hits, runs=runs, link_off=lo, links=links, nodes_at=[struct.unpack_from("<3h", d, o + 8 * i) for o, n in runs[:1] for i in range(min(n, 70))])))
     return found
 
 
@@ -137,6 +140,8 @@ def report(name, a, ref=None, dump=False):
             out.append(f"- {k} at file offset 0x{o:X}")
         for o, n in a["runs"]:
             out.append(f"- a run of {n} node-like records at 0x{o:X}, not followed by route lists")
+        if a["links"]:
+            out.append(f"- a run of link-shaped records at 0x{a['link_off']:X}: " + "; ".join(f"{i} {l}" for i, l in enumerate(a["links"])))
         if dump and a["nodes_at"]:
             out.append("nodes: " + "; ".join(f"{i} {n}" for i, n in enumerate(a["nodes_at"])))
         return "\n".join(out)
