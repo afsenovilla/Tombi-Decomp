@@ -46,8 +46,8 @@ public class LauncherActivity extends Activity {
     static final int BG = 0xff2f6b3a, CIRCLE_BL = 0xff275a31, CIRCLE_TR = 0xff3a7c45, ACCENT = 0xffff6aa8,
             ACCENT_SH = 0xff7a2e00, ACCENT_TEXT = 0xff4a1530, CREAM = 0xfffff8e6, CREAM_SH = 0xff1d4424,
             SUB = 0xffffe8a8, CHIP = 0x40000000;
-    static final int[] LANG_N = {0, 5, 6, 7, 8};
-    static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk"};
+    static final int[] LANG_N = {0, 5, 6, 7, 8, 1, 2, 3, 4};   // --lang; appended, stored indices keep their meaning
+    static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk", "Français", "Deutsch", "Italiano", "Nederlands"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
     static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor", "thor-black", "thor-white", "custom"};   // button icons (--prompts); new ones appended: stored indices keep their meaning; custom last (pcSet)
     static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5, REQ_TRANSLATION = 6;

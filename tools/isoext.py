@@ -4,10 +4,12 @@ Usage: python3 tools/isoext.py disc.bin out_dir"""
 import sys, os, struct
 img, out = sys.argv[1], sys.argv[2]
 f = open(img, "rb")
+f.seek(16 * 2352 + 25)
+SS, UO = (2352, 24) if f.read(5) == b"CD001" else (2048, 0)   # raw MODE2/2352 or a 2048-byte ISO
 def sec(n, cnt=1):
     b = b""
     for i in range(cnt):
-        f.seek((n + i) * 2352 + 24); b += f.read(2048)
+        f.seek((n + i) * SS + UO); b += f.read(2048)
     return b
 def walk(lba, size, path):
     d = sec(lba, (size + 2047) // 2048); i = 0
@@ -25,8 +27,14 @@ def walk(lba, size, path):
                     left = esz; n = elba
                     while left > 0:
                         # XA form2 (2324-byte) sectors: STR/XA streams; read raw user data per submode
-                        f.seek(n * 2352 + 16); sh = f.read(8); form2 = sh[2] & 0x20
+                        if SS == 2352:
+                            f.seek(n * 2352 + 16); sh = f.read(8)
+                            if len(sh) < 8: break          # the entry runs past the image (a truncated dump): keep what there is
+                            form2 = sh[2] & 0x20
+                        else:
+                            f.seek(n * 2048); form2 = 0
                         chunk = f.read(2324 if form2 else 2048)
+                        if not chunk: break
                         o.write(chunk[:min(left, len(chunk))] if not form2 else chunk); left -= 2048; n += 1
         i += l
 pvd = sec(16)

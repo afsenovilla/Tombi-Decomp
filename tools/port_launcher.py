@@ -35,10 +35,11 @@ import data_patch as DP
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 (.github/workflows/report.yml)
 # the languages of the disc's boot menu: EXE/MAINn.EXE (tombi2 --lang N, docs/PORT.md "Languages")
-GAME_LANGS = [(0, "English"), (5, "Español"), (6, "Português"), (7, "Svenska"), (8, "Dansk")]
+GAME_LANGS = [(0, "English"), (5, "Español"), (1, "Français"), (2, "Deutsch"), (3, "Italiano"), (4, "Nederlands"),
+              (6, "Português"), (7, "Svenska"), (8, "Dansk")]   # the nine MAINn.EXE of the PAL disc (1..4 are not in its boot menu)
 
 
-UI_TO_GAME_LANG = {"en": 0, "es": 5, "pt": 6, "sv": 7, "da": 8}
+UI_TO_GAME_LANG = {"en": 0, "fr": 1, "de": 2, "it": 3, "nl": 4, "es": 5, "pt": 6, "sv": 7, "da": 8}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 i18n.add({
@@ -970,6 +971,22 @@ def flag_pixmap(n, w=24, h=16):
         fill(w / 2 - 3, 0, w / 2 + 3, h, "white")
         fill(0, h / 2 - 2, w, h / 2 + 2, "#C8102E")
         fill(w / 2 - 2, 0, w / 2 + 2, h, "#C8102E")
+    elif n == 1:      # France
+        fill(0, 0, w / 3, h, "#0055A4")
+        fill(w / 3, 0, w * 2 / 3, h, "white")
+        fill(w * 2 / 3, 0, w, h, "#EF4135")
+    elif n == 2:      # Germany
+        fill(0, 0, w, h / 3, "black")
+        fill(0, h / 3, w, h * 2 / 3, "#DD0000")
+        fill(0, h * 2 / 3, w, h, "#FFCE00")
+    elif n == 3:      # Italy
+        fill(0, 0, w / 3, h, "#009246")
+        fill(w / 3, 0, w * 2 / 3, h, "white")
+        fill(w * 2 / 3, 0, w, h, "#CE2B37")
+    elif n == 4:      # Netherlands
+        fill(0, 0, w, h / 3, "#AE1C28")
+        fill(0, h / 3, w, h * 2 / 3, "white")
+        fill(0, h * 2 / 3, w, h, "#21468B")
     elif n == 5:      # Spain
         fill(0, 0, w, h, "#AA151B")
         fill(0, h / 4, w, h - h / 4, "#F1BF00")

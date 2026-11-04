@@ -13,10 +13,17 @@ shared touch scroller for every long list, Windows tolower link fix.
    out of step and movies flicker. An agent found the cause for top-down rooms (USA map strips start at the visible
    tile row, PAL 24 rows above; USA camera limits table MAIN0 0x8007B680; sprite cull 0xF1) but had not committed.
    The default picture is PAL at 60 Hz, so this does not block releases.
-2. **SCES-01330 disc (FR/DE/IT/NL)**: secret `GAME_FILES_URL_SCES01330` exists (GitHub Actions + cloud env var). Plan:
-   download in a fresh session, extend `tools/subscreen_glyphs.json` (tab/leaf font glyph table, coordinates only)
-   with those four languages as a separate per-disc table.
-3. Known crashes, both builds, from the debug area select: AREA17 section 0 and an AREA10 room. Not investigated.
+2. **FR/DE/IT/NL**: done on 2026-11-04 (no second disc needed). The SCES-01330 Rev.1 dump in `GAME_FILES_URL_SCES01330`
+   is byte-identical to SCES-01331 Rev.1 except SYSTEM.CNF and the boot file name, so every PAL disc carries all
+   nine MAINn.EXE and `--lang 1..4` already ran (lang.c). Now exposed: port usage, PC launcher (list, flags,
+   launcher-language default), Android launcher (`LANG_N` appended). Checked on PC headless: in-game text in the
+   four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. Open: the panel's own
+   chrome is English for 1..4 (only en/es exist, `T()` in panel.c); the earlier Rev.0 dump crashed the port (its
+   code differs from Rev.1), so an SCES-01330 Rev.0 player would need the Rev.1 code: not supported.
+3. Debug area select crashes, checked 2026-11-04 (i386 build, 3000 frames each): AREA10 sections 0-8 all run clean;
+   AREA17 section 0 segfaults in `spawnSectionObjectsAlt` (empty load list, one of the 13 `DOOR_ROOMS` of
+   tools/psxemu/rooms.py that crash in the real game too). Not a port bug; only the door transition from a sibling
+   room enters those. Note: `--poke` values are hex (area 10 = `A`, 17 = `11`), easy to get wrong.
 4. `tools/port_mods.py` and the save editor keep hand-made English area names that disagree with the game's map
    (area 4 is "Haunted Mansion" on the map). Save import already uses the map names (REGIONS_EN / REGIONS_ES).
 5. Trick Village Spanish name: user decision pending.
