@@ -39,6 +39,50 @@ AREA_REGIONS = {0: "000000", 1: "11111", 2: "111111", 3: "333333", 4: "555555555
                 16: "7777777", 17: "77777777770", 18: "770", 19: "11b"}
 
 
+# The map's room names (MAP_ROOM_NAMES by the room's map link, MAP_AREA14_ROOM_NAMES for area 14; tools/map_tables.py,
+# docs/STATUS.md 2026-11-04): ROOM_NAMES_*[AREA_ROOMS[area][section]], English disc / improved Spanish (the patch's
+# placeNames applied).  Every section of an area has an entry; the game shows the same name for sections that share
+# a map link (the mansion's interior rooms all read "East Side of Mansion").
+ROOM_NAMES_EN = ('Village of All Beginnings', 'Forest of All Beginnings', "100 Year Old Man's Hut", "Ol' Pond",
+                 'Forest of 100 Flowers', 'Wobbly Wharf', 'Watch Tower', 'Charity Square', 'Dwarf Village',
+                 'Stormy Mountain', 'Lava Caves', "Phoenix's Nest", 'North Side of Mansion', 'West Side of Mansion',
+                 'South Side of Mansion', 'East Side of Mansion', 'Baccus Village', 'Dirt Motocross',
+                 "The Mermaid's Singing Rock", 'Mushroom Forest', 'Mansion', 'Masakari Jungle', 'Masakari River',
+                 'Old Tree Hill', 'Trick Village', 'Lumberjack Factory', 'Evil Pig Area One', 'Evil Pig Area Two',
+                 'Evil Pig Area Three', 'Evil Pig Area Four', 'Evil Pig Area Five', 'Evil Pig Area Six',
+                 'Evil Pig Area Seven', 'Evil Pig Area Eight', 'Clock Tower', 'Iron Castle', 'The Y Crossing',
+                 'Hidden Village')
+ROOM_NAMES_ES = ('Ciudad de todo principio', 'Bosque de todo principio', 'Cabaña Anciano centenario',
+                 'Viejo estanque', 'Bosque de 100 flores', 'Muelle inestable', 'Torre de vigilancia',
+                 'Plaza de la caridad', 'Ciudad de enanos', 'Montaña tormentosa', 'Cuevas de lava', 'Nido de Fénix',
+                 'Norte de la mansión', 'Oeste de la mansión', 'Sur de la mansión', 'Este de la mansión',
+                 'Ciudad Baco', 'Motocross sucio', 'La roca de la sirena', 'Bosque de setas', 'Mansión',
+                 'Jungla Masakari', 'Río Masakari', 'Colina del árbol viejo', 'Ciudad de trucos', 'Serrería',
+                 'Área Cerdiablo uno', 'Área Cerdiablo dos', 'Área Cerdiablo tres', 'Área Cerdiablo cuatro',
+                 'Área Cerdiablo cinco', 'Área Cerdiablo seis', 'Área Cerdiablo siete', 'Área Cerdiablo ocho',
+                 'Torre reloj', 'Castillo de Hierro', 'Cruce en Y', 'Ciudad oculta')
+AREA_ROOMS = {0: [0, 1, 1, 2, 0, 3], 1: [4, 4, 5, 6, 7], 2: [8, 8, 8, 8, 8, 8], 3: [9, 9, 10, 11, 9, 9], 4: [12, 13, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15], 5: [16, 16, 16, 16], 6: [17, 18, 18], 8: [12, 12, 19, 20], 9: [19, 20, 20, 20, 20, 20, 20], 10: [21, 22, 23, 24, 21, 22, 23, 24, 24], 11: [25, 25, 25, 25, 25], 13: [7, 2], 14: [26, 27, 28, 29, 30, 31, 32, 33], 16: [34, 34, 34, 34, 34, 34, 34], 17: [35, 35, 35, 35, 35, 35, 35, 35, 36, 36, 0], 18: [36, 36, 0], 19: [8, 8, 37]}
+
+
+def room_name(area, section=0, es=True):
+    """the map's room name of a save's place, in the improved Spanish or the English disc; None for an unknown room"""
+    r = AREA_ROOMS.get(area)
+    if r is None or not (0 <= section < len(r)):
+        return None
+    return (ROOM_NAMES_ES if es else ROOM_NAMES_EN)[r[section]]
+
+
+def place_name(area, section=0, es=True):
+    """"area · room" of a save's place (the room only when it adds something); None for an unknown area"""
+    a, r = area_name(area, section, es), room_name(area, section, es)
+    return None if a is None else a if r is None or r == a else "%s · %s" % (a, r)
+
+
+def area_names(es=False):
+    """{disc area: map name of its section 0} for the tools' area lists (the game's own names, not hand-made ones)"""
+    return {a: area_name(a, 0, es) for a in sorted(AREA_REGIONS)}
+
+
 def area_name(area, section=0, es=True):
     """the place of a save (GAME.selectedArea, GAME.section): the map name of the improved Spanish translation, or of
     the English disc; None for an unknown area"""
