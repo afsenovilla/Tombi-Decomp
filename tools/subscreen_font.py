@@ -79,8 +79,8 @@ def outline(pen, ink):
         for a, b in zip(xs, xs[1:] + [None]):
             if b != a + 1:
                 runs.append((start, a)); start = b
-        for x0, x1 in runs:
-            l, r, bottom, top = x0 * PX, (x1 + 1) * PX, -(y + 1) * PX, -y * PX
+        for x0, x1 in runs:   # rows overlap by a hair so rasterisers draw no seam between them
+            l, r, bottom, top = x0 * PX, (x1 + 1) * PX, -(y + 1) * PX - 2, -y * PX + 2
             pen.moveTo((l, bottom)); pen.lineTo((l, top)); pen.lineTo((r, top)); pen.lineTo((r, bottom)); pen.closePath()
 
 

@@ -370,10 +370,10 @@
      "index": 1,
      "u": 172,
      "v": 64,
-     "w": 10,
+     "w": 8,
      "h": 10,
      "baseline": 73,
-     "advance": 10,
+     "advance": 8,
      "seeds": [
       [
        172,
@@ -498,12 +498,12 @@
      "lang": "sv",
      "slot": "item",
      "index": 2,
-     "u": 182,
+     "u": 180,
      "v": 62,
-     "w": 6,
+     "w": 8,
      "h": 13,
      "baseline": 73,
-     "advance": 6,
+     "advance": 8,
      "seeds": [
       [
        183,
@@ -522,10 +522,10 @@
      "index": 4,
      "u": 196,
      "v": 65,
-     "w": 7,
+     "w": 6,
      "h": 9,
      "baseline": 73,
-     "advance": 7,
+     "advance": 6,
      "seeds": [
       [
        196,
@@ -1549,10 +1549,10 @@
          "char": "b",
          "u": 172,
          "v": 64,
-         "w": 10,
+         "w": 8,
          "h": 10,
          "baseline": 73,
-         "advance": 10,
+         "advance": 8,
          "seeds": [
           [
            172,
@@ -1562,12 +1562,12 @@
         },
         {
          "char": "j",
-         "u": 182,
+         "u": 180,
          "v": 62,
-         "w": 6,
+         "w": 8,
          "h": 13,
          "baseline": 73,
-         "advance": 6,
+         "advance": 8,
          "seeds": [
           [
            183,
@@ -1598,10 +1598,10 @@
          "char": "k",
          "u": 196,
          "v": 65,
-         "w": 7,
+         "w": 6,
          "h": 9,
          "baseline": 73,
-         "advance": 7,
+         "advance": 6,
          "seeds": [
           [
            196,
@@ -1611,13 +1611,17 @@
         },
         {
          "char": "t",
-         "u": 203,
+         "u": 202,
          "v": 64,
-         "w": 7,
+         "w": 8,
          "h": 10,
          "baseline": 73,
          "advance": null,
          "seeds": [
+          [
+           202,
+           72
+          ],
           [
            205,
            64
@@ -5552,20 +5556,20 @@
      ]
     },
     "U": {
-     "file": 6,
-     "lang": "es",
+     "file": 7,
+     "lang": "pt",
      "slot": "use",
      "index": 0,
      "u": 50,
-     "v": 72,
+     "v": 73,
      "w": 11,
      "h": 11,
-     "baseline": 83,
+     "baseline": 84,
      "advance": 11,
      "seeds": [
       [
        53,
-       72
+       73
       ]
      ]
     },

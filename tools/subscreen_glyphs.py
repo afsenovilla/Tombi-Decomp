@@ -73,14 +73,18 @@ PREFER = {
     ("tab", "o"): (6, "item", 4), ("tab", "s"): (6, "status", 1),
     ("leaf", "O"): (8, "use", 3), ("leaf", "b"): (8, "use", 4), ("leaf", "j"): (8, "use", 5),
     ("leaf", "e"): (6, "sort", 3), ("leaf", "t"): (6, "use", 7), ("leaf", "o"): (6, "sort", 0),
-    ("leaf", "U"): (6, "use", 0), ("leaf", "s"): (6, "use", 1), ("leaf", "a"): (6, "use", 2),   # "Usar" as the Spanish leaf writes it
+    ("leaf", "s"): (6, "use", 1), ("leaf", "a"): (6, "use", 2),   # "sa" of "Usar" as the Spanish leaf writes it
     ("leaf", "k"): (5, "view", 2), ("leaf", "w"): (1, "view", 3),   # clean cuts: "Gebruik" / "verw." run their letters together
+    ("leaf", "U"): (7, "use", 0), ("leaf", "u"): (9, "use", 2),     # the most upright U (Portuguese "Usar") and u (Danish "Brug")
     ("leaf", "r"): (6, "view", 2), ("leaf", "u"): (4, "view", 1), ("leaf", "n"): (3, "view", 1),   # clean cuts (the Spanish "Usar" r drags a piece of
     # the a, the Dutch "Gebruik" letters touch); u from the Italian "Guarda", n from the German "Ansicht" (the user's picks)
 }
 # labels whose letters run into each other across the lines (Danish "Brug": the g's tail touches "Objekt"): the
 # letters' rects, label-relative (x0, y0, x1, y1), in reading order
 OVERRIDES = {
+    # Swedish "Objekt": the j's dot sits over the b and the column split gave it to the b
+    ("tab", 8, "item"): [[(9, 4, 19, 19)], [(20, 8, 28, 18)], [(28, 6, 36, 19)], [(36, 9, 44, 18)], [(44, 8, 50, 18)],
+                         [(50, 8, 58, 18)]],                                                  # O b j e k t
     # Danish "Handln.": the H's right stem touches the a, so the column split gave it to the a
     ("tab", 9, "event"): [[(7, 5, 18, 19)], [(18, 7, 26, 18)], [(26, 9, 35, 18)], [(35, 7, 43, 18)], [(44, 7, 47, 18)],
                           [(47, 9, 55, 18)], [(55, 15, 58, 18)]],                          # H a n d l n .
