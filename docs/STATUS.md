@@ -39,6 +39,11 @@ sweepable in CI. Workflow per function: `tools/jpcheck.py --strict --norm`, `too
 or the JP/demo configs. Fetches the five discs, builds the reports, runs `tools/jp_autofix.py --install` on SLPS-01144
 and `tools/demo_sweep.py --jobs 4` on the demos, and opens a PR (branch `jp-sweep/auto`) only when something was
 installed. First run failed on the PrePre 8 image: that disc needs `tools/prepre8.py extract`, not `isoext.py` (fixed).
+Second run (2026-11-04): SLPS-01144 0, SLPM-80165 0, beta 980203 +71, PrePre 8 +47, pushed to `jp-sweep/auto`; the
+PR step failed because the repo does not allow Actions to create PRs (Settings → Actions → General), so PR #3 was
+opened by hand. Open point: the CI demo report counts 1097 of 1832 functions, the local run of 7b8a7b3 counted 1098
+(one function of 1788 bytes); no demo source changed, so compare the two reports when the demo disc is at hand.
+Artifacts cannot be downloaded from the cloud container (the blob host is blocked by the proxy).
 Review the PR by hand before merging (the installer criterion is `--strict --norm`, so a match is real, but the file
 placement may need a header fix).
 
