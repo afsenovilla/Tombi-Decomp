@@ -91,7 +91,7 @@ fi
 # Demo / prototype discs: never fetched here (that is 2 GB on every new session). When a task needs one, run
 # `bash tools/disc_fetch.sh DENGEKI_D5` (or PREPRE9, PREPRE8, JP_DEMO, BETA980203, USA): it extracts the disc of
 # GAME_FILES_URL_<NAME> to /dev/shm/<name>/fs once per session. This only says which are available.
-AVAIL=""; for NAME in DENGEKI_D5 PREPRE9 PREPRE8 JP_DEMO BETA980203 USA; do V="GAME_FILES_URL_$NAME"; [ -n "${!V:-}" ] && AVAIL="$AVAIL $NAME"; done
+AVAIL=""; for NAME in DENGEKI_D5 PREPRE9 PREPRE8 HYPER12 JP_DEMO BETA980203 USA; do V="GAME_FILES_URL_$NAME"; [ -n "${!V:-}" ] && AVAIL="$AVAIL $NAME"; done
 [ -z "$AVAIL" ] || log "3c/5 demo discs available on demand (tools/disc_fetch.sh):$AVAIL"
 
 if [ -s game_jp/SLPS_011.44 ] && [ ! -x /root/.cargo/bin/objdiff-cli ]; then   # the report tool of the JP decomp

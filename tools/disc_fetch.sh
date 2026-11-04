@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fetch and extract one demo / prototype disc for this session, from its GAME_FILES_URL_<NAME> environment variable:
-#   bash tools/disc_fetch.sh DENGEKI_D5      (or PREPRE9, PREPRE8, JP_DEMO, BETA980203, USA, SCES01330)
+#   bash tools/disc_fetch.sh DENGEKI_D5      (or PREPRE9, PREPRE8, HYPER12, JP_DEMO, BETA980203, USA, SCES01330)
 # -> /dev/shm/<name>/fs (the files) and /dev/shm/<name>/disc.bin (the image). RAM only, gone with the container, never
 # committed. Does nothing when the disc is already there. tools/event_icons.py and the code hunts read these paths.
 set -eu
