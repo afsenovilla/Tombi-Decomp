@@ -423,3 +423,4 @@ func_80135A20 = 0x80135A20; // type:func size:0xC  split from func_80135A20 (sec
 func_80135A2C_slps01144 = 0x80135A2C; // type:func size:0x98  split from func_80135A20 (second body after a return)
 func_80135DC0 = 0x80135DC0; // type:func size:0x720  split from func_80135DC0 (second body after a return)
 func_801364E0_slps01144 = 0x801364E0; // type:func size:0xC  split from func_80135DC0 (second body after a return)
+func_800EB714 = 0x800EB714; // type:func size:0x180

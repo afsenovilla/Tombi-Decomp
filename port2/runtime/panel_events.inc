@@ -289,11 +289,13 @@ static void event_list(void) {
    and the windows take the height they need. */
 static void plank_h(int x, int y, int w, int h);                  /* panel_items.inc */
 static int map_shows_event(int e); static void map_focus(int e);  /* panel_side.inc */
+/* (no tolower: the game's own tolower (src/main0) and the C library's collide when the mingw build pulls both in) */
+static int lc_ascii(int c) { return c >= 'A' && c <= 'Z' ? c + 32 : c; }
 static int ev_same_text(const char *a, const char *b) {   /* b is a (case aside) or is inside it: it says nothing new */
     int na = (int)strlen(a), nb = (int)strlen(b);
     for (int i = 0; i + nb <= na; i++) {
         int k = 0;
-        while (k < nb && tolower((unsigned char)a[i + k]) == tolower((unsigned char)b[k])) k++;
+        while (k < nb && lc_ascii((unsigned char)a[i + k]) == lc_ascii((unsigned char)b[k])) k++;
         if (k == nb) return 1;
     }
     return 0;

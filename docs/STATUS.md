@@ -4,8 +4,8 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.1.1 (build of 9cee5ef). After it, on master: vitality fruit numbers 8-16 and segment colours (2528f81), warp
-destinations one-per-line (620495c), event detail page + shared touch scroller (c8529a5).
+v0.1.2 (build of b4d6406): vitality fruit numbers 8-16, warp destinations one per line, event detail page redone,
+shared touch scroller for every long list, Windows tolower link fix.
 
 ## In progress / open
 

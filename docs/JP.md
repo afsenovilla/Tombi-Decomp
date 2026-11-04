@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 79.66 % of code (1151384 of 1445372 bytes, 2676 of 3150 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 81.27 % of code (1152944 of 1418744 bytes, 2677 of 3096 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2676 functions, 68.66 % -> 79.66 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2677 functions, 68.66 % -> 81.27 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -198,6 +198,25 @@ swing, draw links, or `cullObjectToDrawListMargin(o, 64)`), `raceStartCountdown`
 0x10000; the message box is stored through `&PLAYER + 0x90` so gcc derives `&PLAYER` from it) and
 `komaPigDefeated` (x01: case 0 sets movetab/velV/b0a/animFrame/anim/b0f and marks the d90/d94 chains; the anim
 pointer is read into a local right after `state++`, before the stores).
+
+Data counted as code (79.66 % -> 81.16 %): tools/jp_data_units.py now keys each row on the splat file's first
+item (the `.byte`/`.short` lines before the first word made build_report miss `x02 8011B910`, `x05 80116998`,
+`x11 801188AC`, `x17 80118314`, `x18 801194AC` and `x00 80136940`: pointer/record tables with no instruction in
+them) and splits a table-then-code unit at its first prologue when nine words in ten before it are pointers or small
+constants: the X00 head (`800E9AF8`, 7196 bytes of entry and jump tables) is data and its 384-byte tail of dispatch
+stubs is the new `func_800EB714`. The code total drops from 1445372 to 1418744 bytes (3096 functions), the same
+treatment the PAL build gives its pointer tables in tools/units.py DATA.
+
+Scheduling leftovers (81.16 % -> 81.27 %): `updateBlackCrow` matches once its init block is written as the retail
+memory order with temporaries (`t = o->b04` and `sp = SPAD.i2dc` read first, `hp = o->h` after the `b0f` store,
+`yy = o->y` after `b04 = t + 1`, `hv = hp->p` and `dp = o->d` before the `wc6`/`wc4` stores, `dv = dp->p` before
+`wca`/`d64`, `wc8 = dv` last): with every access a struct member nothing may pass anything, so the source order is
+the instruction order. Tried and left: `initGameConfig` (the `BUTTON_CONFIG_INDEX` and `D_1F8001B3` loads sit after
+the `saveSlot` store whatever the source order, locals, volatile, scalar or struct accesses, or scheduler flags;
+JP also has `D_1F8000F2 = -120`, `saveSlot = 3` and `D_1F8001C8 = 0; D_1F800200 = 69` at the end),
+`updateL8Type01Object` (JP keeps `b04` in `s1` and reuses it for the constants 1 and 2 after the equality branches,
+while reloading `b04` for the increment), `updateParentFollowModel` (two induction pointers in the record loop) and
+`drawBalloonFrame` (tail x/y in `t0`/`a3`).
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
 `a1`/`v1` instead of `t0`/`a3`, everything else matches), `func_80027D58` (increaseMaxHealth:
