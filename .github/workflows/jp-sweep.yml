@@ -150,7 +150,6 @@ jobs:
             src/**
             config/**
             README.md
-            docs/**
             notes/report_stamp.txt
           commit-message: "JP sweep: automatic matches (tools/jp_autofix.py, tools/demo_sweep.py)"
           branch: jp-sweep/auto

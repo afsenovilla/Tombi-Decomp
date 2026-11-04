@@ -273,6 +273,7 @@ initPoolType32Object = 0x800318E0; // type:func size:0x74  PAL main0 0x8002EDDC
 spawnPoolType32At = 0x80031954; // type:func size:0xD0  PAL main0 0x8002EE50
 playerEffect4EStepE = 0x80031B0C; // type:func size:0x10C  PAL main0 0x8002F060
 playerEffect4EStepD = 0x80032240; // type:func size:0x274  PAL main0 0x8002F960
+func_800324B4_beta980203 = 0x800324B4; // type:func size:0x9C
 func_80032708_beta980203 = 0x80032708; // type:func size:0x16C
 spawnPlayerEffect4E = 0x80032874; // type:func size:0x90  PAL main0 0x8002FF20
 spawnPlayerEffect4EStep1 = 0x80032904; // type:func size:0x84  PAL main0 0x8002FFB0
