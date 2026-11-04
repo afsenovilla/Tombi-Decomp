@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 82.27 % of code (1167152 of 1418632 bytes, 2701 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 82.38 % of code (1168620 of 1418632 bytes, 2711 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2701 functions, 68.66 % -> 82.27 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2711 functions, 68.66 % -> 82.38 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -248,6 +248,21 @@ the same two arguments), x03 80118B28 (decor sprite with anim 13, `b0d = 0x80`, 
 culled in). Tried and left: x01 80131240 (216 B): gcc turns its `if (probe()) return 2; return 0;` tails into
 `sltu`/`sll` store-flags and cross-jumps the two probe calls, while retail keeps them as branches with a `move
 a0,s0` copy in the first one; tails as nested ifs, a result variable, argument copies and -O1 all stay 33-52 lines off.
+
+Main (slps01144) part of the band (82.27 % -> 82.38 %, 10 functions): `loadCurrentArea` without the list file, the
+section resources and the sound task start; two libcard inits (80064BEC / 80064C78: critical section, `_patch_card`,
+ChangeClearPAD(0), then a 4-argument setup and `D_8009BFE4 = 1`); the script opcode 80038F70 (`scriptOpCompareVar`'s
+`rd` and pc layout, writes `o->vars[dst]`); the CD sector callback 8001FD7C (`volatile` d294 only, written as
+`x = x - 1`, pointer p290 plain); two TIM uploads (80016ACC = the demo's func_8001619C, 80016B38 only the CLUT);
+object init 8002FD60 (`active = 1` written first, anim and d3c loaded into temporaries); 8003E0EC (item 8, event 169)
+and the twelve-call chain 80024860. Tried and left: the sound family 8001E2D4 / 8001E388 / 8001E458 / 8001E528
+(SfxPlay with `SoundFindFreeVoice`'s first loop inlined: everything matches except that retail puts the sfx id in
+s1 and the -1 in s2, ours the other way round; parameter types, -1 placement and an asm copy do not flip it) and
+8001E81C (JP-only key-on through SsUtKeyOnV); 80027D58 (`increaseMaxHealth` without the volatile reload: retail
+stores the max byte before the `andi`, ours after); the pad readers 80016960 / 80020794 (retail keeps `&D_800A1380`
+/ `&D_8009F200` in a register across the function and reloads the other pad word by symbol); the flag bit test/set
+800219F0 / 80021A40 (`GAME + 52 + (GAME << 5)` table; retail materialises `&GAME` in a register); the libcard
+80064E1C / 80064E84 (frame 16 and a kept branch: probably an older SDK compiler).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
