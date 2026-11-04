@@ -24,8 +24,12 @@ shared touch scroller for every long list, Windows tolower link fix.
    AREA17 section 0 segfaults in `spawnSectionObjectsAlt` (empty load list, one of the 13 `DOOR_ROOMS` of
    tools/psxemu/rooms.py that crash in the real game too). Not a port bug; only the door transition from a sibling
    room enters those. Note: `--poke` values are hex (area 10 = `A`, 17 = `11`), easy to get wrong.
-4. `tools/port_mods.py` and the save editor keep hand-made English area names that disagree with the game's map
-   (area 4 is "Haunted Mansion" on the map). Save import already uses the map names (REGIONS_EN / REGIONS_ES).
+4. **Free text in the Select sub-screen's tab / leaf fonts** (the "Objetos" technique, for any word): the glyph table
+   now takes letters from all nine language pages (`tools/subscreen_glyphs.py`, TABLE_LANGS 1..9; the Danish
+   "Handln." H fixed by an override). Coverage after that: tab font 38 glyphs, missing D G J L N P R T U X Y Z h q z;
+   leaf font 30 glyphs, missing C D F H I J K L M N P Q R W X Y Z f p q x y z (plus every accent / ñ). The disc has
+   no more samples of these fonts; the missing letters must be composed from pieces of existing ones (coordinates)
+   or drawn new in the same style (our own pixels, not the disc's). User decision pending.
 5. Trick Village Spanish name: user decision pending.
 
 ## Japanese decomp (SLPS-01144), hand pass 3
@@ -80,6 +84,10 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - [ ] x04 func_80115FD0 (6472 B), x00 func_800F4CDC (5464 B), x10 func_8011DCC8 (3872 B): no PAL twin, from scratch.
 
 ## Recently done (context)
+
+- Area names from the game's map in the area select (`port_mods.py`) and the save editor: `save_import.py`
+  ROOM_NAMES_EN/ES + AREA_ROOMS (every disc area / section -> map area and room, improved Spanish applied),
+  `place_name()`; the hand-made lists are gone (STATUS point 4 of 2026-11-03).
 
 - Map graph across builds (2026-11-04, `tools/map_tables.py` + `map-tables.yml` on the GAME_FILES_URL_* secrets):
   PAL = USA = beta 1998-02-03: 65 nodes, 55 links, 115 route entries, node 41 (-269, -974, -40, in the sea west of

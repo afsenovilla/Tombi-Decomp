@@ -76,11 +76,11 @@
    ],
    "glyphs": {
     ".": {
-     "file": 6,
-     "lang": "es",
+     "file": 5,
+     "lang": "nl",
      "slot": "item",
-     "index": 5,
-     "u": 207,
+     "index": 6,
+     "u": 210,
      "v": 72,
      "w": 2,
      "h": 2,
@@ -88,7 +88,7 @@
      "advance": 3,
      "seeds": [
       [
-       207,
+       210,
        72
       ]
      ]
@@ -111,6 +111,42 @@
       ]
      ]
     },
+    "B": {
+     "file": 3,
+     "lang": "de",
+     "slot": "exit",
+     "index": 0,
+     "u": 184,
+     "v": 109,
+     "w": 9,
+     "h": 14,
+     "baseline": 121,
+     "advance": 9,
+     "seeds": [
+      [
+       187,
+       109
+      ]
+     ]
+    },
+    "C": {
+     "file": 2,
+     "lang": "fr",
+     "slot": "map",
+     "index": 0,
+     "u": 130,
+     "v": 133,
+     "w": 11,
+     "h": 14,
+     "baseline": 145,
+     "advance": 12,
+     "seeds": [
+      [
+       134,
+       133
+      ]
+     ]
+    },
     "E": {
      "file": 6,
      "lang": "es",
@@ -129,6 +165,24 @@
       ]
      ]
     },
+    "F": {
+     "file": 2,
+     "lang": "fr",
+     "slot": "event",
+     "index": 0,
+     "u": 170,
+     "v": 84,
+     "w": 9,
+     "h": 15,
+     "baseline": 97,
+     "advance": 10,
+     "seeds": [
+      [
+       177,
+       84
+      ]
+     ]
+    },
     "H": {
      "file": 9,
      "lang": "da",
@@ -136,10 +190,10 @@
      "index": 0,
      "u": 159,
      "v": 85,
-     "w": 8,
+     "w": 11,
      "h": 14,
      "baseline": 97,
-     "advance": 8,
+     "advance": 11,
      "seeds": [
       [
        159,
@@ -166,8 +220,8 @@
      ]
     },
     "K": {
-     "file": 8,
-     "lang": "sv",
+     "file": 3,
+     "lang": "de",
      "slot": "map",
      "index": 0,
      "u": 130,
@@ -219,6 +273,24 @@
       ]
      ]
     },
+    "Q": {
+     "file": 2,
+     "lang": "fr",
+     "slot": "exit",
+     "index": 0,
+     "u": 185,
+     "v": 108,
+     "w": 10,
+     "h": 15,
+     "baseline": 121,
+     "advance": 11,
+     "seeds": [
+      [
+       188,
+       108
+      ]
+     ]
+    },
     "S": {
      "file": 1,
      "lang": "en",
@@ -237,21 +309,57 @@
       ]
      ]
     },
-    "a": {
-     "file": 9,
-     "lang": "da",
-     "slot": "event",
-     "index": 1,
-     "u": 167,
-     "v": 85,
-     "w": 11,
+    "V": {
+     "file": 5,
+     "lang": "nl",
+     "slot": "item",
+     "index": 0,
+     "u": 158,
+     "v": 62,
+     "w": 10,
      "h": 13,
-     "baseline": 97,
-     "advance": 11,
+     "baseline": 73,
+     "advance": 10,
      "seeds": [
       [
-       168,
-       85
+       158,
+       62
+      ]
+     ]
+    },
+    "W": {
+     "file": 5,
+     "lang": "nl",
+     "slot": "exit",
+     "index": 0,
+     "u": 189,
+     "v": 110,
+     "w": 15,
+     "h": 13,
+     "baseline": 122,
+     "advance": 15,
+     "seeds": [
+      [
+       189,
+       110
+      ]
+     ]
+    },
+    "a": {
+     "file": 2,
+     "lang": "fr",
+     "slot": "event",
+     "index": 1,
+     "u": 180,
+     "v": 89,
+     "w": 8,
+     "h": 9,
+     "baseline": 97,
+     "advance": 9,
+     "seeds": [
+      [
+       186,
+       89
       ]
      ]
     },
@@ -296,12 +404,12 @@
      "lang": "da",
      "slot": "event",
      "index": 3,
-     "u": 186,
+     "u": 187,
      "v": 87,
-     "w": 9,
+     "w": 8,
      "h": 11,
      "baseline": 97,
-     "advance": 10,
+     "advance": 9,
      "seeds": [
       [
        193,
@@ -345,25 +453,43 @@
       ]
      ]
     },
+    "g": {
+     "file": 4,
+     "lang": "it",
+     "slot": "item",
+     "index": 1,
+     "u": 170,
+     "v": 64,
+     "w": 8,
+     "h": 12,
+     "baseline": 73,
+     "advance": 8,
+     "seeds": [
+      [
+       175,
+       64
+      ]
+     ]
+    },
     "i": {
-     "file": 8,
-     "lang": "sv",
-     "slot": "event",
-     "index": 3,
-     "u": 188,
-     "v": 86,
+     "file": 4,
+     "lang": "it",
+     "slot": "item",
+     "index": 6,
+     "u": 206,
+     "v": 62,
      "w": 3,
      "h": 12,
-     "baseline": 97,
+     "baseline": 73,
      "advance": 4,
      "seeds": [
       [
-       188,
-       86
+       206,
+       62
       ],
       [
-       188,
-       89
+       206,
+       65
       ]
      ]
     },
@@ -480,38 +606,38 @@
      ]
     },
     "p": {
-     "file": 1,
-     "lang": "en",
-     "slot": "map",
-     "index": 2,
-     "u": 157,
-     "v": 137,
-     "w": 10,
+     "file": 5,
+     "lang": "nl",
+     "slot": "item",
+     "index": 5,
+     "u": 201,
+     "v": 65,
+     "w": 9,
      "h": 12,
-     "baseline": 145,
-     "advance": 11,
+     "baseline": 73,
+     "advance": 9,
      "seeds": [
       [
-       157,
-       137
+       201,
+       65
       ]
      ]
     },
     "r": {
-     "file": 6,
-     "lang": "es",
-     "slot": "exit",
-     "index": 4,
-     "u": 218,
-     "v": 113,
-     "w": 6,
+     "file": 5,
+     "lang": "nl",
+     "slot": "item",
+     "index": 1,
+     "u": 168,
+     "v": 65,
+     "w": 7,
      "h": 9,
-     "baseline": 121,
+     "baseline": 73,
      "advance": 7,
      "seeds": [
       [
-       218,
-       113
+       168,
+       65
       ]
      ]
     },
@@ -584,6 +710,24 @@
       [
        178,
        89
+      ]
+     ]
+    },
+    "w": {
+     "file": 5,
+     "lang": "nl",
+     "slot": "item",
+     "index": 2,
+     "u": 175,
+     "v": 65,
+     "w": 11,
+     "h": 9,
+     "baseline": 73,
+     "advance": 10,
+     "seeds": [
+      [
+       184,
+       65
       ]
      ]
     },
@@ -699,6 +843,477 @@
           [
            193,
            65
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 2,
+     "lang": "fr",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Objet",
+     "hash": "0xe783f591",
+     "lines": [
+      {
+       "text": "Objet",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 161,
+         "v": 60,
+         "w": 10,
+         "h": 15,
+         "baseline": 73,
+         "advance": 11,
+         "seeds": [
+          [
+           164,
+           60
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 172,
+         "v": 64,
+         "w": 9,
+         "h": 10,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           172,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 182,
+         "v": 62,
+         "w": 7,
+         "h": 13,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           184,
+           62
+          ],
+          [
+           185,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 190,
+         "v": 65,
+         "w": 9,
+         "h": 9,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           194,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 200,
+         "v": 64,
+         "w": 8,
+         "h": 10,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           203,
+           64
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 3,
+     "lang": "de",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Objekt",
+     "hash": "0xa7da83d1",
+     "lines": [
+      {
+       "text": "Objekt",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 161,
+         "v": 60,
+         "w": 10,
+         "h": 15,
+         "baseline": 73,
+         "advance": 11,
+         "seeds": [
+          [
+           164,
+           60
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 172,
+         "v": 64,
+         "w": 10,
+         "h": 10,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           172,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 182,
+         "v": 62,
+         "w": 6,
+         "h": 13,
+         "baseline": 73,
+         "advance": 6,
+         "seeds": [
+          [
+           183,
+           62
+          ],
+          [
+           184,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 188,
+         "v": 65,
+         "w": 8,
+         "h": 9,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           191,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "k",
+         "u": 196,
+         "v": 65,
+         "w": 7,
+         "h": 9,
+         "baseline": 73,
+         "advance": 7,
+         "seeds": [
+          [
+           196,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 203,
+         "v": 64,
+         "w": 7,
+         "h": 10,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           205,
+           64
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 4,
+     "lang": "it",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Oggetti",
+     "hash": "0x39e971be",
+     "lines": [
+      {
+       "text": "Oggetti",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 160,
+         "v": 60,
+         "w": 10,
+         "h": 15,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           163,
+           60
+          ]
+         ]
+        },
+        {
+         "char": "g",
+         "u": 170,
+         "v": 64,
+         "w": 8,
+         "h": 12,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           175,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "g",
+         "u": 178,
+         "v": 64,
+         "w": 8,
+         "h": 12,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           183,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 186,
+         "v": 65,
+         "w": 8,
+         "h": 9,
+         "baseline": 73,
+         "advance": 8,
+         "seeds": [
+          [
+           189,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 194,
+         "v": 64,
+         "w": 6,
+         "h": 10,
+         "baseline": 73,
+         "advance": 6,
+         "seeds": [
+          [
+           196,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 200,
+         "v": 64,
+         "w": 5,
+         "h": 10,
+         "baseline": 73,
+         "advance": 6,
+         "seeds": [
+          [
+           201,
+           64
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 206,
+         "v": 62,
+         "w": 3,
+         "h": 12,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           206,
+           62
+          ],
+          [
+           206,
+           65
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 5,
+     "lang": "nl",
+     "slot": "item",
+     "rect": [
+      152,
+      56,
+      64,
+      24
+     ],
+     "text": "Vrwerp.",
+     "hash": "0x4a9fc74f",
+     "lines": [
+      {
+       "text": "Vrwerp.",
+       "baseline": 73,
+       "glyphs": [
+        {
+         "char": "V",
+         "u": 158,
+         "v": 62,
+         "w": 10,
+         "h": 13,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           158,
+           62
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 168,
+         "v": 65,
+         "w": 7,
+         "h": 9,
+         "baseline": 73,
+         "advance": 7,
+         "seeds": [
+          [
+           168,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "w",
+         "u": 175,
+         "v": 65,
+         "w": 11,
+         "h": 9,
+         "baseline": 73,
+         "advance": 10,
+         "seeds": [
+          [
+           184,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 185,
+         "v": 65,
+         "w": 8,
+         "h": 9,
+         "baseline": 73,
+         "advance": 9,
+         "seeds": [
+          [
+           188,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 194,
+         "v": 65,
+         "w": 7,
+         "h": 9,
+         "baseline": 73,
+         "advance": 7,
+         "seeds": [
+          [
+           194,
+           65
+          ]
+         ]
+        },
+        {
+         "char": "p",
+         "u": 201,
+         "v": 65,
+         "w": 9,
+         "h": 12,
+         "baseline": 73,
+         "advance": 9,
+         "seeds": [
+          [
+           201,
+           65
+          ]
+         ]
+        },
+        {
+         "char": ".",
+         "u": 210,
+         "v": 72,
+         "w": 2,
+         "h": 2,
+         "baseline": 73,
+         "advance": null,
+         "seeds": [
+          [
+           210,
+           72
           ]
          ]
         }
@@ -1225,6 +1840,432 @@
      ]
     },
     {
+     "file": 2,
+     "lang": "fr",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Fait",
+     "hash": "0x047810b4",
+     "lines": [
+      {
+       "text": "Fait",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "F",
+         "u": 170,
+         "v": 84,
+         "w": 9,
+         "h": 15,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           177,
+           84
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 180,
+         "v": 89,
+         "w": 8,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           186,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 189,
+         "v": 86,
+         "w": 3,
+         "h": 12,
+         "baseline": 97,
+         "advance": 4,
+         "seeds": [
+          [
+           189,
+           86
+          ],
+          [
+           189,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 193,
+         "v": 88,
+         "w": 8,
+         "h": 10,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           196,
+           88
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 3,
+     "lang": "de",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Ereign.",
+     "hash": "0xbb749d3f",
+     "lines": [
+      {
+       "text": "Ereign.",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 162,
+         "v": 85,
+         "w": 9,
+         "h": 14,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           168,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 172,
+         "v": 89,
+         "w": 6,
+         "h": 9,
+         "baseline": 97,
+         "advance": 6,
+         "seeds": [
+          [
+           172,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 178,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           182,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 188,
+         "v": 86,
+         "w": 3,
+         "h": 12,
+         "baseline": 97,
+         "advance": 4,
+         "seeds": [
+          [
+           188,
+           86
+          ],
+          [
+           188,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "g",
+         "u": 192,
+         "v": 89,
+         "w": 8,
+         "h": 12,
+         "baseline": 97,
+         "advance": 8,
+         "seeds": [
+          [
+           197,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 200,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 11,
+         "seeds": [
+          [
+           201,
+           89
+          ]
+         ]
+        },
+        {
+         "char": ".",
+         "u": 211,
+         "v": 96,
+         "w": 2,
+         "h": 2,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           211,
+           96
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 4,
+     "lang": "it",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Eventi",
+     "hash": "0xf7ec2b81",
+     "lines": [
+      {
+       "text": "Eventi",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 161,
+         "v": 85,
+         "w": 9,
+         "h": 14,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           167,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "v",
+         "u": 170,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           177,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 179,
+         "v": 89,
+         "w": 8,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           182,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 188,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 9,
+         "seeds": [
+          [
+           189,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 197,
+         "v": 88,
+         "w": 7,
+         "h": 10,
+         "baseline": 97,
+         "advance": 8,
+         "seeds": [
+          [
+           199,
+           88
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 205,
+         "v": 86,
+         "w": 3,
+         "h": 12,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           205,
+           86
+          ],
+          [
+           205,
+           89
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 5,
+     "lang": "nl",
+     "slot": "event",
+     "rect": [
+      152,
+      80,
+      64,
+      24
+     ],
+     "text": "Event",
+     "hash": "0x4dcbc50f",
+     "lines": [
+      {
+       "text": "Event",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 161,
+         "v": 85,
+         "w": 9,
+         "h": 14,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           167,
+           85
+          ]
+         ]
+        },
+        {
+         "char": "v",
+         "u": 171,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           178,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 181,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 11,
+         "seeds": [
+          [
+           185,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 192,
+         "v": 89,
+         "w": 9,
+         "h": 9,
+         "baseline": 97,
+         "advance": 10,
+         "seeds": [
+          [
+           193,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 202,
+         "v": 88,
+         "w": 8,
+         "h": 10,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           205,
+           88
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
      "file": 6,
      "lang": "es",
      "slot": "event",
@@ -1582,10 +2623,10 @@
          "char": "H",
          "u": 159,
          "v": 85,
-         "w": 8,
+         "w": 11,
          "h": 14,
          "baseline": 97,
-         "advance": 8,
+         "advance": 11,
          "seeds": [
           [
            159,
@@ -1595,16 +2636,16 @@
         },
         {
          "char": "a",
-         "u": 167,
-         "v": 85,
-         "w": 11,
-         "h": 13,
+         "u": 170,
+         "v": 89,
+         "w": 8,
+         "h": 9,
          "baseline": 97,
-         "advance": 11,
+         "advance": 8,
          "seeds": [
           [
-           168,
-           85
+           176,
+           89
           ]
          ]
         },
@@ -1612,10 +2653,10 @@
          "char": "n",
          "u": 178,
          "v": 89,
-         "w": 8,
+         "w": 9,
          "h": 9,
          "baseline": 97,
-         "advance": 8,
+         "advance": 9,
          "seeds": [
           [
            179,
@@ -1625,12 +2666,12 @@
         },
         {
          "char": "d",
-         "u": 186,
+         "u": 187,
          "v": 87,
-         "w": 9,
+         "w": 8,
          "h": 11,
          "baseline": 97,
-         "advance": 10,
+         "advance": 9,
          "seeds": [
           [
            193,
@@ -1657,10 +2698,10 @@
          "char": "n",
          "u": 200,
          "v": 89,
-         "w": 8,
+         "w": 7,
          "h": 9,
          "baseline": 97,
-         "advance": 9,
+         "advance": 7,
          "seeds": [
           [
            200,
@@ -1670,13 +2711,17 @@
         },
         {
          "char": ".",
-         "u": 209,
+         "u": 207,
          "v": 96,
-         "w": 2,
+         "w": 3,
          "h": 2,
          "baseline": 97,
          "advance": null,
          "seeds": [
+          [
+           207,
+           96
+          ],
           [
            209,
            96
@@ -1690,6 +2735,405 @@
     {
      "file": 1,
      "lang": "en",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Status",
+     "hash": "0x4a7197f4",
+     "lines": [
+      {
+       "text": "Status",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 127,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           132,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 137,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           140,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 146,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           152,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 155,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           158,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 164,
+         "v": 113,
+         "w": 7,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           164,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 172,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           174,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 2,
+     "lang": "fr",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Etat",
+     "hash": "0x94bb02c4",
+     "lines": [
+      {
+       "text": "Etat",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 134,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           140,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 144,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           147,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 153,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           159,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 162,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           165,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 3,
+     "lang": "de",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Status",
+     "hash": "0x4a7197f4",
+     "lines": [
+      {
+       "text": "Status",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 127,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           132,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 137,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           140,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 146,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           152,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 155,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           158,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 164,
+         "v": 113,
+         "w": 7,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           164,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 172,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           174,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 4,
+     "lang": "it",
+     "slot": "status",
+     "rect": [
+      120,
+      104,
+      64,
+      24
+     ],
+     "text": "Stato",
+     "hash": "0xa1d7de7c",
+     "lines": [
+      {
+       "text": "Stato",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 130,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           135,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 140,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           143,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 149,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           155,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 158,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           161,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 167,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           169,
+           113
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 5,
+     "lang": "nl",
      "slot": "status",
      "rect": [
       120,
@@ -2324,6 +3768,413 @@
      ]
     },
     {
+     "file": 2,
+     "lang": "fr",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Quitter",
+     "hash": "0x766b1c47",
+     "lines": [
+      {
+       "text": "Quitter",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "Q",
+         "u": 185,
+         "v": 108,
+         "w": 10,
+         "h": 15,
+         "baseline": 121,
+         "advance": 11,
+         "seeds": [
+          [
+           188,
+           108
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 196,
+         "v": 113,
+         "w": 7,
+         "h": 9,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           196,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 204,
+         "v": 110,
+         "w": 3,
+         "h": 12,
+         "baseline": 121,
+         "advance": 3,
+         "seeds": [
+          [
+           204,
+           110
+          ],
+          [
+           204,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 207,
+         "v": 112,
+         "w": 5,
+         "h": 10,
+         "baseline": 121,
+         "advance": 5,
+         "seeds": [
+          [
+           208,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 212,
+         "v": 112,
+         "w": 5,
+         "h": 10,
+         "baseline": 121,
+         "advance": 5,
+         "seeds": [
+          [
+           213,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 217,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           220,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 226,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           226,
+           113
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 3,
+     "lang": "de",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Beenden",
+     "hash": "0xb4244d27",
+     "lines": [
+      {
+       "text": "Beenden",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "B",
+         "u": 184,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           187,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 193,
+         "v": 113,
+         "w": 10,
+         "h": 9,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           196,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 203,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": 6,
+         "seeds": [
+          [
+           203,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 209,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": 6,
+         "seeds": [
+          [
+           209,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "d",
+         "u": 215,
+         "v": 110,
+         "w": 7,
+         "h": 12,
+         "baseline": 121,
+         "advance": 7,
+         "seeds": [
+          [
+           216,
+           110
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 222,
+         "v": 113,
+         "w": 6,
+         "h": 9,
+         "baseline": 121,
+         "advance": 6,
+         "seeds": [
+          [
+           222,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 228,
+         "v": 113,
+         "w": 4,
+         "h": 9,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           228,
+           113
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 4,
+     "lang": "it",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Esci",
+     "hash": "0x266d9659",
+     "lines": [
+      {
+       "text": "Esci",
+       "baseline": 121,
+       "glyphs": [
+        {
+         "char": "E",
+         "u": 193,
+         "v": 109,
+         "w": 9,
+         "h": 14,
+         "baseline": 121,
+         "advance": 10,
+         "seeds": [
+          [
+           199,
+           109
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 203,
+         "v": 112,
+         "w": 7,
+         "h": 10,
+         "baseline": 121,
+         "advance": 8,
+         "seeds": [
+          [
+           205,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "c",
+         "u": 211,
+         "v": 112,
+         "w": 8,
+         "h": 10,
+         "baseline": 121,
+         "advance": 9,
+         "seeds": [
+          [
+           213,
+           112
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 220,
+         "v": 110,
+         "w": 3,
+         "h": 12,
+         "baseline": 121,
+         "advance": null,
+         "seeds": [
+          [
+           220,
+           110
+          ],
+          [
+           220,
+           113
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 5,
+     "lang": "nl",
+     "slot": "exit",
+     "rect": [
+      184,
+      104,
+      48,
+      24
+     ],
+     "text": "Weg",
+     "hash": "0xf090f2d3",
+     "lines": [
+      {
+       "text": "Weg",
+       "baseline": 122,
+       "glyphs": [
+        {
+         "char": "W",
+         "u": 189,
+         "v": 110,
+         "w": 15,
+         "h": 13,
+         "baseline": 122,
+         "advance": 15,
+         "seeds": [
+          [
+           189,
+           110
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 204,
+         "v": 113,
+         "w": 8,
+         "h": 9,
+         "baseline": 122,
+         "advance": 10,
+         "seeds": [
+          [
+           207,
+           113
+          ]
+         ]
+        },
+        {
+         "char": "g",
+         "u": 214,
+         "v": 112,
+         "w": 8,
+         "h": 12,
+         "baseline": 122,
+         "advance": null,
+         "seeds": [
+          [
+           219,
+           112
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
      "file": 6,
      "lang": "es",
      "slot": "exit",
@@ -2797,6 +4648,390 @@
      ]
     },
     {
+     "file": 2,
+     "lang": "fr",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Carte",
+     "hash": "0x2ab46730",
+     "lines": [
+      {
+       "text": "Carte",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "C",
+         "u": 130,
+         "v": 133,
+         "w": 11,
+         "h": 14,
+         "baseline": 145,
+         "advance": 12,
+         "seeds": [
+          [
+           134,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 142,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 9,
+         "seeds": [
+          [
+           148,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 151,
+         "v": 137,
+         "w": 7,
+         "h": 9,
+         "baseline": 145,
+         "advance": 7,
+         "seeds": [
+          [
+           151,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 158,
+         "v": 136,
+         "w": 7,
+         "h": 10,
+         "baseline": 145,
+         "advance": 7,
+         "seeds": [
+          [
+           160,
+           136
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 165,
+         "v": 137,
+         "w": 9,
+         "h": 9,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           169,
+           137
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 3,
+     "lang": "de",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Karte",
+     "hash": "0x47e1bcc5",
+     "lines": [
+      {
+       "text": "Karte",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "K",
+         "u": 130,
+         "v": 133,
+         "w": 11,
+         "h": 14,
+         "baseline": 145,
+         "advance": 12,
+         "seeds": [
+          [
+           130,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 142,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 9,
+         "seeds": [
+          [
+           148,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 151,
+         "v": 137,
+         "w": 7,
+         "h": 9,
+         "baseline": 145,
+         "advance": 7,
+         "seeds": [
+          [
+           151,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 158,
+         "v": 136,
+         "w": 7,
+         "h": 10,
+         "baseline": 145,
+         "advance": 7,
+         "seeds": [
+          [
+           160,
+           136
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 165,
+         "v": 137,
+         "w": 9,
+         "h": 9,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           169,
+           137
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 4,
+     "lang": "it",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Mappa",
+     "hash": "0xab53cfbb",
+     "lines": [
+      {
+       "text": "Mappa",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "M",
+         "u": 129,
+         "v": 133,
+         "w": 11,
+         "h": 13,
+         "baseline": 145,
+         "advance": 11,
+         "seeds": [
+          [
+           138,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 140,
+         "v": 137,
+         "w": 9,
+         "h": 9,
+         "baseline": 145,
+         "advance": 10,
+         "seeds": [
+          [
+           147,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "p",
+         "u": 150,
+         "v": 137,
+         "w": 10,
+         "h": 11,
+         "baseline": 145,
+         "advance": 10,
+         "seeds": [
+          [
+           150,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "p",
+         "u": 160,
+         "v": 137,
+         "w": 10,
+         "h": 11,
+         "baseline": 145,
+         "advance": 11,
+         "seeds": [
+          [
+           160,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 171,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           177,
+           137
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 5,
+     "lang": "nl",
+     "slot": "map",
+     "rect": [
+      120,
+      128,
+      64,
+      24
+     ],
+     "text": "Kaart",
+     "hash": "0xee4314c4",
+     "lines": [
+      {
+       "text": "Kaart",
+       "baseline": 145,
+       "glyphs": [
+        {
+         "char": "K",
+         "u": 130,
+         "v": 133,
+         "w": 11,
+         "h": 14,
+         "baseline": 145,
+         "advance": 12,
+         "seeds": [
+          [
+           130,
+           133
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 142,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 9,
+         "seeds": [
+          [
+           148,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 151,
+         "v": 137,
+         "w": 8,
+         "h": 9,
+         "baseline": 145,
+         "advance": 9,
+         "seeds": [
+          [
+           157,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 160,
+         "v": 137,
+         "w": 7,
+         "h": 9,
+         "baseline": 145,
+         "advance": 7,
+         "seeds": [
+          [
+           160,
+           137
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 167,
+         "v": 136,
+         "w": 7,
+         "h": 10,
+         "baseline": 145,
+         "advance": null,
+         "seeds": [
+          [
+           169,
+           136
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
      "file": 6,
      "lang": "es",
      "slot": "map",
@@ -3171,6 +5406,24 @@
     ]
    ],
    "glyphs": {
+    ".": {
+     "file": 3,
+     "lang": "de",
+     "slot": "use",
+     "index": 3,
+     "u": 78,
+     "v": 80,
+     "w": 2,
+     "h": 2,
+     "baseline": 82,
+     "advance": 2,
+     "seeds": [
+      [
+       78,
+       80
+      ]
+     ]
+    },
     "A": {
      "file": 8,
      "lang": "sv",
@@ -3225,6 +5478,24 @@
       ]
      ]
     },
+    "G": {
+     "file": 5,
+     "lang": "nl",
+     "slot": "use",
+     "index": 0,
+     "u": 42,
+     "v": 78,
+     "w": 9,
+     "h": 12,
+     "baseline": 90,
+     "advance": 9,
+     "seeds": [
+      [
+       46,
+       78
+      ]
+     ]
+    },
     "O": {
      "file": 8,
      "lang": "sv",
@@ -3261,21 +5532,39 @@
       ]
      ]
     },
-    "U": {
-     "file": 1,
-     "lang": "en",
-     "slot": "use",
+    "T": {
+     "file": 2,
+     "lang": "fr",
+     "slot": "sort",
      "index": 0,
-     "u": 52,
-     "v": 71,
+     "u": 78,
+     "v": 117,
      "w": 11,
      "h": 11,
-     "baseline": 81,
+     "baseline": 128,
      "advance": 11,
      "seeds": [
       [
-       55,
-       71
+       78,
+       117
+      ]
+     ]
+    },
+    "U": {
+     "file": 6,
+     "lang": "es",
+     "slot": "use",
+     "index": 0,
+     "u": 50,
+     "v": 72,
+     "w": 11,
+     "h": 11,
+     "baseline": 83,
+     "advance": 11,
+     "seeds": [
+      [
+       53,
+       72
       ]
      ]
     },
@@ -3334,37 +5623,37 @@
      ]
     },
     "c": {
-     "file": 7,
-     "lang": "pt",
-     "slot": "sort",
-     "index": 2,
-     "u": 82,
-     "v": 118,
+     "file": 3,
+     "lang": "de",
+     "slot": "view",
+     "index": 4,
+     "u": 37,
+     "v": 120,
      "w": 7,
-     "h": 10,
+     "h": 9,
      "baseline": 128,
      "advance": 7,
      "seeds": [
       [
-       85,
-       118
+       39,
+       120
       ]
      ]
     },
     "d": {
-     "file": 6,
-     "lang": "es",
-     "slot": "sort",
-     "index": 2,
-     "u": 81,
+     "file": 4,
+     "lang": "it",
+     "slot": "view",
+     "index": 4,
+     "u": 41,
      "v": 119,
      "w": 7,
-     "h": 10,
-     "baseline": 128,
+     "h": 11,
+     "baseline": 129,
      "advance": 7,
      "seeds": [
       [
-       86,
+       45,
        119
       ]
      ]
@@ -3406,20 +5695,20 @@
      ]
     },
     "h": {
-     "file": 7,
-     "lang": "pt",
-     "slot": "sort",
+     "file": 3,
+     "lang": "de",
+     "slot": "view",
      "index": 5,
-     "u": 105,
-     "v": 125,
-     "w": 1,
-     "h": 1,
+     "u": 44,
+     "v": 116,
+     "w": 7,
+     "h": 13,
      "baseline": 128,
-     "advance": 1,
+     "advance": 6,
      "seeds": [
       [
-       105,
-       125
+       44,
+       116
       ]
      ]
     },
@@ -3468,38 +5757,42 @@
      ]
     },
     "k": {
-     "file": 9,
-     "lang": "da",
+     "file": 5,
+     "lang": "nl",
      "slot": "use",
-     "index": 8,
-     "u": 74,
-     "v": 87,
-     "w": 6,
+     "index": 6,
+     "u": 81,
+     "v": 80,
+     "w": 10,
      "h": 10,
-     "baseline": 96,
-     "advance": 6,
+     "baseline": 90,
+     "advance": 10,
      "seeds": [
       [
-       74,
-       87
+       81,
+       80
+      ],
+      [
+       85,
+       80
       ]
      ]
     },
     "l": {
-     "file": 6,
-     "lang": "es",
+     "file": 2,
+     "lang": "fr",
      "slot": "use",
-     "index": 5,
-     "u": 58,
-     "v": 86,
+     "index": 3,
+     "u": 63,
+     "v": 72,
      "w": 2,
-     "h": 10,
-     "baseline": 95,
+     "h": 13,
+     "baseline": 84,
      "advance": 3,
      "seeds": [
       [
-       58,
-       86
+       64,
+       72
       ]
      ]
     },
@@ -3576,20 +5869,20 @@
      ]
     },
     "s": {
-     "file": 1,
-     "lang": "en",
+     "file": 6,
+     "lang": "es",
      "slot": "use",
      "index": 1,
-     "u": 63,
-     "v": 73,
+     "u": 61,
+     "v": 74,
      "w": 6,
      "h": 10,
-     "baseline": 81,
-     "advance": 8,
+     "baseline": 83,
+     "advance": 7,
      "seeds": [
       [
-       66,
-       73
+       64,
+       74
       ]
      ]
     },
@@ -3612,56 +5905,56 @@
      ]
     },
     "u": {
-     "file": 9,
-     "lang": "da",
+     "file": 5,
+     "lang": "nl",
      "slot": "use",
-     "index": 2,
-     "u": 66,
-     "v": 75,
-     "w": 10,
-     "h": 9,
-     "baseline": 83,
-     "advance": 11,
+     "index": 4,
+     "u": 71,
+     "v": 83,
+     "w": 7,
+     "h": 8,
+     "baseline": 90,
+     "advance": 7,
      "seeds": [
       [
-       69,
-       75
+       71,
+       83
       ]
      ]
     },
     "v": {
-     "file": 8,
-     "lang": "sv",
+     "file": 3,
+     "lang": "de",
      "slot": "use",
-     "index": 2,
-     "u": 71,
-     "v": 75,
+     "index": 4,
+     "u": 51,
+     "v": 86,
      "w": 9,
-     "h": 8,
-     "baseline": 82,
-     "advance": 9,
+     "h": 10,
+     "baseline": 96,
+     "advance": 8,
      "seeds": [
       [
-       71,
-       75
+       51,
+       86
       ]
      ]
     },
     "w": {
-     "file": 1,
-     "lang": "en",
-     "slot": "view",
-     "index": 3,
-     "u": 44,
-     "v": 120,
-     "w": 11,
-     "h": 11,
-     "baseline": 130,
-     "advance": 11,
+     "file": 3,
+     "lang": "de",
+     "slot": "use",
+     "index": 7,
+     "u": 68,
+     "v": 87,
+     "w": 14,
+     "h": 10,
+     "baseline": 96,
+     "advance": 14,
      "seeds": [
       [
-       53,
-       120
+       69,
+       87
       ]
      ]
     }
@@ -3796,6 +6089,598 @@
           [
            75,
            87
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 2,
+     "lang": "fr",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Utiliser / Objet",
+     "hash": "0x6599f029",
+     "lines": [
+      {
+       "text": "Utiliser",
+       "baseline": 84,
+       "glyphs": [
+        {
+         "char": "U",
+         "u": 46,
+         "v": 74,
+         "w": 9,
+         "h": 11,
+         "baseline": 84,
+         "advance": 9,
+         "seeds": [
+          [
+           49,
+           74
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 55,
+         "v": 74,
+         "w": 7,
+         "h": 11,
+         "baseline": 84,
+         "advance": 5,
+         "seeds": [
+          [
+           61,
+           74
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 60,
+         "v": 78,
+         "w": 2,
+         "h": 7,
+         "baseline": 84,
+         "advance": 3,
+         "seeds": [
+          [
+           60,
+           78
+          ]
+         ]
+        },
+        {
+         "char": "l",
+         "u": 63,
+         "v": 72,
+         "w": 2,
+         "h": 13,
+         "baseline": 84,
+         "advance": 3,
+         "seeds": [
+          [
+           64,
+           72
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 66,
+         "v": 74,
+         "w": 2,
+         "h": 11,
+         "baseline": 84,
+         "advance": 3,
+         "seeds": [
+          [
+           66,
+           74
+          ],
+          [
+           66,
+           78
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 69,
+         "v": 75,
+         "w": 10,
+         "h": 10,
+         "baseline": 84,
+         "advance": 10,
+         "seeds": [
+          [
+           72,
+           75
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 79,
+         "v": 78,
+         "w": 1,
+         "h": 1,
+         "baseline": 84,
+         "advance": 2,
+         "seeds": [
+          [
+           79,
+           78
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 81,
+         "v": 76,
+         "w": 6,
+         "h": 9,
+         "baseline": 84,
+         "advance": null,
+         "seeds": [
+          [
+           81,
+           76
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "text": "Objet",
+       "baseline": 97,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 48,
+         "v": 87,
+         "w": 7,
+         "h": 10,
+         "baseline": 97,
+         "advance": 7,
+         "seeds": [
+          [
+           51,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 55,
+         "v": 87,
+         "w": 10,
+         "h": 11,
+         "baseline": 97,
+         "advance": 8,
+         "seeds": [
+          [
+           57,
+           87
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 63,
+         "v": 86,
+         "w": 6,
+         "h": 14,
+         "baseline": 97,
+         "advance": 6,
+         "seeds": [
+          [
+           65,
+           86
+          ],
+          [
+           67,
+           90
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 69,
+         "v": 89,
+         "w": 7,
+         "h": 9,
+         "baseline": 97,
+         "advance": 7,
+         "seeds": [
+          [
+           72,
+           89
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 76,
+         "v": 88,
+         "w": 6,
+         "h": 10,
+         "baseline": 97,
+         "advance": null,
+         "seeds": [
+          [
+           77,
+           88
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 3,
+     "lang": "de",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Obj. / verw.",
+     "hash": "0x3150d630",
+     "lines": [
+      {
+       "text": "Obj.",
+       "baseline": 82,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 54,
+         "v": 73,
+         "w": 9,
+         "h": 10,
+         "baseline": 82,
+         "advance": 9,
+         "seeds": [
+          [
+           57,
+           73
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 63,
+         "v": 72,
+         "w": 9,
+         "h": 11,
+         "baseline": 82,
+         "advance": 9,
+         "seeds": [
+          [
+           63,
+           72
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 72,
+         "v": 70,
+         "w": 5,
+         "h": 13,
+         "baseline": 82,
+         "advance": 6,
+         "seeds": [
+          [
+           73,
+           70
+          ],
+          [
+           74,
+           74
+          ]
+         ]
+        },
+        {
+         "char": ".",
+         "u": 78,
+         "v": 80,
+         "w": 2,
+         "h": 2,
+         "baseline": 82,
+         "advance": null,
+         "seeds": [
+          [
+           78,
+           80
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "text": "verw.",
+       "baseline": 96,
+       "glyphs": [
+        {
+         "char": "v",
+         "u": 51,
+         "v": 86,
+         "w": 9,
+         "h": 10,
+         "baseline": 96,
+         "advance": 8,
+         "seeds": [
+          [
+           51,
+           86
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 59,
+         "v": 93,
+         "w": 2,
+         "h": 1,
+         "baseline": 96,
+         "advance": 2,
+         "seeds": [
+          [
+           59,
+           93
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 61,
+         "v": 88,
+         "w": 7,
+         "h": 9,
+         "baseline": 96,
+         "advance": 7,
+         "seeds": [
+          [
+           63,
+           88
+          ]
+         ]
+        },
+        {
+         "char": "w",
+         "u": 68,
+         "v": 87,
+         "w": 14,
+         "h": 10,
+         "baseline": 96,
+         "advance": 14,
+         "seeds": [
+          [
+           69,
+           87
+          ]
+         ]
+        },
+        {
+         "char": ".",
+         "u": 82,
+         "v": 88,
+         "w": 1,
+         "h": 1,
+         "baseline": 96,
+         "advance": null,
+         "seeds": [
+          [
+           82,
+           88
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 4,
+     "lang": "it",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Usa",
+     "hash": "0x31b720c2",
+     "lines": [
+      {
+       "text": "Usa",
+       "baseline": 89,
+       "glyphs": [
+        {
+         "char": "U",
+         "u": 52,
+         "v": 78,
+         "w": 11,
+         "h": 11,
+         "baseline": 89,
+         "advance": 11,
+         "seeds": [
+          [
+           55,
+           78
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 63,
+         "v": 80,
+         "w": 6,
+         "h": 10,
+         "baseline": 89,
+         "advance": 7,
+         "seeds": [
+          [
+           66,
+           80
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 70,
+         "v": 80,
+         "w": 9,
+         "h": 10,
+         "baseline": 89,
+         "advance": null,
+         "seeds": [
+          [
+           72,
+           80
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 5,
+     "lang": "nl",
+     "slot": "use",
+     "rect": [
+      40,
+      64,
+      56,
+      39
+     ],
+     "text": "Gebruik",
+     "hash": "0x0543321e",
+     "lines": [
+      {
+       "text": "Gebruik",
+       "baseline": 90,
+       "glyphs": [
+        {
+         "char": "G",
+         "u": 42,
+         "v": 78,
+         "w": 9,
+         "h": 12,
+         "baseline": 90,
+         "advance": 9,
+         "seeds": [
+          [
+           46,
+           78
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 51,
+         "v": 82,
+         "w": 8,
+         "h": 9,
+         "baseline": 90,
+         "advance": 8,
+         "seeds": [
+          [
+           54,
+           82
+          ]
+         ]
+        },
+        {
+         "char": "b",
+         "u": 59,
+         "v": 80,
+         "w": 8,
+         "h": 11,
+         "baseline": 90,
+         "advance": 8,
+         "seeds": [
+          [
+           59,
+           80
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 67,
+         "v": 81,
+         "w": 4,
+         "h": 10,
+         "baseline": 90,
+         "advance": 4,
+         "seeds": [
+          [
+           68,
+           81
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 71,
+         "v": 83,
+         "w": 7,
+         "h": 8,
+         "baseline": 90,
+         "advance": 7,
+         "seeds": [
+          [
+           71,
+           83
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 78,
+         "v": 84,
+         "w": 3,
+         "h": 6,
+         "baseline": 90,
+         "advance": 3,
+         "seeds": [
+          [
+           79,
+           84
+          ]
+         ]
+        },
+        {
+         "char": "k",
+         "u": 81,
+         "v": 80,
+         "w": 10,
+         "h": 10,
+         "baseline": 90,
+         "advance": null,
+         "seeds": [
+          [
+           81,
+           80
+          ],
+          [
+           85,
+           80
           ]
          ]
         }
@@ -4512,6 +7397,432 @@
      ]
     },
     {
+     "file": 2,
+     "lang": "fr",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "Vue",
+     "hash": "0xec6f60f7",
+     "lines": [
+      {
+       "text": "Vue",
+       "baseline": 129,
+       "glyphs": [
+        {
+         "char": "V",
+         "u": 20,
+         "v": 117,
+         "w": 11,
+         "h": 13,
+         "baseline": 129,
+         "advance": 10,
+         "seeds": [
+          [
+           21,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 30,
+         "v": 120,
+         "w": 10,
+         "h": 10,
+         "baseline": 129,
+         "advance": 11,
+         "seeds": [
+          [
+           33,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 41,
+         "v": 121,
+         "w": 8,
+         "h": 9,
+         "baseline": 129,
+         "advance": null,
+         "seeds": [
+          [
+           44,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 3,
+     "lang": "de",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "Ansicht",
+     "hash": "0x9229aa68",
+     "lines": [
+      {
+       "text": "Ansicht",
+       "baseline": 128,
+       "glyphs": [
+        {
+         "char": "A",
+         "u": 12,
+         "v": 117,
+         "w": 9,
+         "h": 12,
+         "baseline": 128,
+         "advance": 9,
+         "seeds": [
+          [
+           16,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 21,
+         "v": 121,
+         "w": 7,
+         "h": 8,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           22,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "s",
+         "u": 28,
+         "v": 120,
+         "w": 5,
+         "h": 9,
+         "baseline": 128,
+         "advance": 6,
+         "seeds": [
+          [
+           30,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 34,
+         "v": 118,
+         "w": 2,
+         "h": 11,
+         "baseline": 128,
+         "advance": 3,
+         "seeds": [
+          [
+           34,
+           118
+          ],
+          [
+           34,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "c",
+         "u": 37,
+         "v": 120,
+         "w": 7,
+         "h": 9,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           39,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "h",
+         "u": 44,
+         "v": 116,
+         "w": 7,
+         "h": 13,
+         "baseline": 128,
+         "advance": 6,
+         "seeds": [
+          [
+           44,
+           116
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 50,
+         "v": 119,
+         "w": 6,
+         "h": 10,
+         "baseline": 128,
+         "advance": null,
+         "seeds": [
+          [
+           52,
+           119
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 4,
+     "lang": "it",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "Guarda",
+     "hash": "0xd3aa2114",
+     "lines": [
+      {
+       "text": "Guarda",
+       "baseline": 129,
+       "glyphs": [
+        {
+         "char": "G",
+         "u": 14,
+         "v": 117,
+         "w": 7,
+         "h": 13,
+         "baseline": 129,
+         "advance": 7,
+         "seeds": [
+          [
+           17,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "u",
+         "u": 21,
+         "v": 122,
+         "w": 8,
+         "h": 8,
+         "baseline": 129,
+         "advance": 9,
+         "seeds": [
+          [
+           23,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 30,
+         "v": 121,
+         "w": 6,
+         "h": 9,
+         "baseline": 129,
+         "advance": 6,
+         "seeds": [
+          [
+           31,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 36,
+         "v": 120,
+         "w": 7,
+         "h": 10,
+         "baseline": 129,
+         "advance": 5,
+         "seeds": [
+          [
+           38,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "d",
+         "u": 41,
+         "v": 119,
+         "w": 7,
+         "h": 11,
+         "baseline": 129,
+         "advance": 7,
+         "seeds": [
+          [
+           45,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 48,
+         "v": 121,
+         "w": 7,
+         "h": 9,
+         "baseline": 129,
+         "advance": null,
+         "seeds": [
+          [
+           49,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 5,
+     "lang": "nl",
+     "slot": "view",
+     "rect": [
+      8,
+      104,
+      56,
+      39
+     ],
+     "text": "Bekijk",
+     "hash": "0xc045f9a7",
+     "lines": [
+      {
+       "text": "Bekijk",
+       "baseline": 130,
+       "glyphs": [
+        {
+         "char": "B",
+         "u": 13,
+         "v": 117,
+         "w": 11,
+         "h": 14,
+         "baseline": 130,
+         "advance": 11,
+         "seeds": [
+          [
+           17,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 24,
+         "v": 120,
+         "w": 9,
+         "h": 11,
+         "baseline": 130,
+         "advance": 9,
+         "seeds": [
+          [
+           31,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "k",
+         "u": 33,
+         "v": 122,
+         "w": 7,
+         "h": 9,
+         "baseline": 130,
+         "advance": 7,
+         "seeds": [
+          [
+           37,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 40,
+         "v": 120,
+         "w": 3,
+         "h": 12,
+         "baseline": 130,
+         "advance": 3,
+         "seeds": [
+          [
+           40,
+           120
+          ],
+          [
+           40,
+           124
+          ]
+         ]
+        },
+        {
+         "char": "j",
+         "u": 43,
+         "v": 120,
+         "w": 5,
+         "h": 13,
+         "baseline": 130,
+         "advance": 6,
+         "seeds": [
+          [
+           44,
+           120
+          ],
+          [
+           45,
+           124
+          ]
+         ]
+        },
+        {
+         "char": "k",
+         "u": 49,
+         "v": 119,
+         "w": 7,
+         "h": 12,
+         "baseline": 130,
+         "advance": null,
+         "seeds": [
+          [
+           50,
+           119
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
      "file": 6,
      "lang": "es",
      "slot": "view",
@@ -4871,6 +8182,413 @@
          "seeds": [
           [
            105,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 2,
+     "lang": "fr",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "Tri",
+     "hash": "0xe423d730",
+     "lines": [
+      {
+       "text": "Tri",
+       "baseline": 128,
+       "glyphs": [
+        {
+         "char": "T",
+         "u": 78,
+         "v": 117,
+         "w": 11,
+         "h": 11,
+         "baseline": 128,
+         "advance": 11,
+         "seeds": [
+          [
+           78,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 89,
+         "v": 119,
+         "w": 7,
+         "h": 10,
+         "baseline": 128,
+         "advance": 9,
+         "seeds": [
+          [
+           91,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 98,
+         "v": 117,
+         "w": 2,
+         "h": 12,
+         "baseline": 128,
+         "advance": null,
+         "seeds": [
+          [
+           98,
+           117
+          ],
+          [
+           98,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 3,
+     "lang": "de",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "Sort.",
+     "hash": "0xb732b738",
+     "lines": [
+      {
+       "text": "Sort.",
+       "baseline": 131,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 71,
+         "v": 118,
+         "w": 9,
+         "h": 14,
+         "baseline": 131,
+         "advance": 10,
+         "seeds": [
+          [
+           76,
+           118
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 81,
+         "v": 122,
+         "w": 9,
+         "h": 10,
+         "baseline": 131,
+         "advance": 10,
+         "seeds": [
+          [
+           84,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 91,
+         "v": 121,
+         "w": 7,
+         "h": 10,
+         "baseline": 131,
+         "advance": 8,
+         "seeds": [
+          [
+           92,
+           121
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 99,
+         "v": 121,
+         "w": 7,
+         "h": 10,
+         "baseline": 131,
+         "advance": 8,
+         "seeds": [
+          [
+           101,
+           121
+          ]
+         ]
+        },
+        {
+         "char": ".",
+         "u": 107,
+         "v": 129,
+         "w": 2,
+         "h": 2,
+         "baseline": 131,
+         "advance": null,
+         "seeds": [
+          [
+           107,
+           129
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 4,
+     "lang": "it",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "Ordina",
+     "hash": "0xd8734fb2",
+     "lines": [
+      {
+       "text": "Ordina",
+       "baseline": 128,
+       "glyphs": [
+        {
+         "char": "O",
+         "u": 70,
+         "v": 119,
+         "w": 8,
+         "h": 10,
+         "baseline": 128,
+         "advance": 8,
+         "seeds": [
+          [
+           73,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 78,
+         "v": 119,
+         "w": 6,
+         "h": 10,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           79,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "d",
+         "u": 85,
+         "v": 119,
+         "w": 7,
+         "h": 10,
+         "baseline": 128,
+         "advance": 8,
+         "seeds": [
+          [
+           90,
+           119
+          ]
+         ]
+        },
+        {
+         "char": "i",
+         "u": 93,
+         "v": 118,
+         "w": 2,
+         "h": 11,
+         "baseline": 128,
+         "advance": 3,
+         "seeds": [
+          [
+           93,
+           118
+          ],
+          [
+           93,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "n",
+         "u": 96,
+         "v": 123,
+         "w": 6,
+         "h": 7,
+         "baseline": 128,
+         "advance": 7,
+         "seeds": [
+          [
+           96,
+           123
+          ]
+         ]
+        },
+        {
+         "char": "a",
+         "u": 103,
+         "v": 121,
+         "w": 7,
+         "h": 9,
+         "baseline": 128,
+         "advance": null,
+         "seeds": [
+          [
+           104,
+           121
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "file": 5,
+     "lang": "nl",
+     "slot": "sort",
+     "rect": [
+      64,
+      104,
+      56,
+      39
+     ],
+     "text": "Sorteer",
+     "hash": "0x29727752",
+     "lines": [
+      {
+       "text": "Sorteer",
+       "baseline": 130,
+       "glyphs": [
+        {
+         "char": "S",
+         "u": 65,
+         "v": 117,
+         "w": 9,
+         "h": 14,
+         "baseline": 130,
+         "advance": 9,
+         "seeds": [
+          [
+           70,
+           117
+          ]
+         ]
+        },
+        {
+         "char": "o",
+         "u": 74,
+         "v": 120,
+         "w": 8,
+         "h": 10,
+         "baseline": 130,
+         "advance": 8,
+         "seeds": [
+          [
+           77,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 82,
+         "v": 120,
+         "w": 7,
+         "h": 10,
+         "baseline": 130,
+         "advance": 7,
+         "seeds": [
+          [
+           83,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "t",
+         "u": 89,
+         "v": 120,
+         "w": 6,
+         "h": 10,
+         "baseline": 130,
+         "advance": 6,
+         "seeds": [
+          [
+           90,
+           120
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 95,
+         "v": 122,
+         "w": 7,
+         "h": 9,
+         "baseline": 130,
+         "advance": 7,
+         "seeds": [
+          [
+           97,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "e",
+         "u": 102,
+         "v": 122,
+         "w": 7,
+         "h": 9,
+         "baseline": 130,
+         "advance": 7,
+         "seeds": [
+          [
+           104,
+           122
+          ]
+         ]
+        },
+        {
+         "char": "r",
+         "u": 109,
+         "v": 121,
+         "w": 7,
+         "h": 10,
+         "baseline": 130,
+         "advance": null,
+         "seeds": [
+          [
+           110,
            121
           ]
          ]
