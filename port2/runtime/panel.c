@@ -429,6 +429,13 @@ static void header_draw(const char *title) {
 
 static int map_mark_link = -1, map_mark_ev = -1;   /* the event browser's marker (a room link) */
 static int map_ev_marks;                            /* the Status page: mark the rooms of the started / completed events */
+int port_panel_orphans;                             /* --panel-orphans: draw the map nodes no link and no route refers to (disc leftovers) */
+static int orphan_node(int n) {                     /* node n is in no MAP_LINKS entry and in no region's route list */
+    if (nodes[n].x == 0 && nodes[n].z == 0) return 0;
+    for (int l = 0; l < NLINKS; l++) if (links[l][0] == n || links[l][1] == n) return 0;
+    for (int r = 0; r < 12; r++) for (int k = 0; k < nroutes[r]; k++) if (routes[r][k].a == n || (routes[r][k].type && routes[r][k].b == n)) return 0;
+    return 1;
+}
 static int ev_link_state(int link);                 /* panel_events.inc: 0 none, 1 an event in progress there, 2 all completed */
 static void draw_map(int x, int y, int w, int h, int link) {
     window_(x, y, w, h);
@@ -443,6 +450,10 @@ static void draw_map(int x, int y, int w, int h, int link) {
             Node *q = &nodes[ids[j]];
             if (q->x < x0) x0 = q->x; if (q->x > x1) x1 = q->x; if (q->z < z0) z0 = q->z; if (q->z > z1) z1 = q->z;
         }
+    }
+    if (port_panel_orphans) for (int n = 0; n < 65; n++) if (orphan_node(n)) {   /* 65: the real node table (the rest is other data) */
+        Node *q = &nodes[n];
+        if (q->x < x0) x0 = q->x; if (q->x > x1) x1 = q->x; if (q->z < z0) z0 = q->z; if (q->z > z1) z1 = q->z;
     }
     if (x1 < x0) { x0 = nb_lo; x1 = nb_hi; z0 = nz_lo; z1 = nz_hi; }
     if (x1 - x0 < 160) { int c = (x0 + x1) / 2; x0 = c - 80; x1 = c + 80; }
@@ -463,6 +474,11 @@ static void draw_map(int x, int y, int w, int h, int link) {
             if (routes[r][k].type == 1 && b >= 0 && b < NNODES && pass < 2) line(PX(a), PY(a), PX(b), PY(b), pass ? li : lo + li, pass ? C_WHITE : RGB(40, 60, 90));
             else if (routes[r][k].type == 0 && pass == 2) dot(PX(a), PY(a), 3 + sc, C_RED);
         }
+    }
+    if (port_panel_orphans) for (int n = 0; n < 65; n++) if (orphan_node(n)) {   /* a yellow dot with the node's number */
+        char num[8]; snprintf(num, sizeof num, "%d", n);
+        dot(PX(n), PY(n), 3 + sc, RGB(255, 220, 40));
+        pa_text(PX(n) + 5 + sc, PY(n) - 8 * sc, 8 * sc, num, RGB(255, 220, 40), C_EDGE);
     }
     if (map_ev_marks) for (int l = 0; l < NLINKS; l++) {   /* a dot per room with events: orange in progress, green completed */
         int st = ev_link_state(l), a = links[l][0], b = links[l][1];
@@ -515,6 +531,7 @@ static int ev_hidden_now(int e);   /* panel_events.inc: hidden by the player (pa
 static int ev_pins(int *ids);      /* panel_events.inc: the pinned events (panel_pins.txt), at most 4 */
 static void page_status(void);   /* panel_status.inc: the 2 x 2 dashboard */
 static void page_map(int play, int link) {
+    if (play && port_panel_orphans) { draw_map(8, 56, pa_cw - 16, pa_ch - 64, link); return; }   /* the old graph page, to see the orphan nodes */
     (void)link;
     if (play) { page_status(); return; }
     window_(8, 56, pa_cw - 16, pa_ch - 64);

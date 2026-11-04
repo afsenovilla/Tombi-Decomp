@@ -327,7 +327,7 @@ static int usage(const char *argv0) {
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--picture ntsc|pal] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
-                "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
+                "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--panel-orphans] [--trace-cd] [--save-dir DIR] [-v]\n"
                 "  --lang N plays in the language of EXE/MAINn.EXE: 0 English (default), 1 Francais, 2 Deutsch, 3 Italiano, 4 Nederlands,\n"
                 "         5 Espanol, 6 Portugues, 7 Svenska, 8 Dansk (every PAL disc carries all nine)\n"
                 "  --data DIR reads the game files extracted once from your disc by tools/extract_data.py (default: data/ in the\n"
@@ -945,6 +945,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--second-screen")) { extern int port_panel_on, port_panel_window; port_panel_on = port_panel_window = 1; }   /* runtime/panel.c */
         else if (!strcmp(a, "--dump-panel") && v) { extern int port_panel_on; extern const char *port_panel_dump_dir; port_panel_on = 1; port_panel_dump_dir = argv[++i]; }
         else if (!strcmp(a, "--panel-input") && v) { extern void port_panel_input_script(const char *); port_panel_input_script(argv[++i]); }
+        else if (!strcmp(a, "--panel-orphans")) { extern int port_panel_orphans; port_panel_orphans = 1; }   /* map nodes nothing refers to */
         else if (!strcmp(a, "--panel-size") && v) { extern void port_panel_size(int, int); int w = 0, h = 0; sscanf(argv[++i], "%dx%d", &w, &h); port_panel_size(w, h); }
         else if (!strcmp(a, "--title-debug")) port_title_debug = 1;   /* title carousel DEBUG entry: the area select */
         else if (!strcmp(a, "--launcher-exit")) port_launcher_exit = 1;   /* QUIT entries (title, pause menu): back to the launcher */
