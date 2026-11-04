@@ -32,7 +32,7 @@ shared touch scroller for every long list, Windows tolower link fix.
    PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
-## Japanese decomp (SLPS-01144), hand pass 3 (82.65 %)
+## Japanese decomp (SLPS-01144), hand pass 3 (83.08 %)
 
 82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
@@ -81,10 +81,8 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
       _patch_*, start, __main, *_OBJ_* blobs, 8005851C BIOS stubs, 80061488).
 - [ ] x04 func_80124270 (2904 B) <- src/x004/blackCrowFlyAround.c (334 diff lines): JP drops the `w22` counters and
       the `% 40` timer; cases 1-4 need rewriting. The PAL file is full of matching hacks: keep them.
-- [ ] x03 func_80128CCC (2432 B) <- src/x003/masterOfTheSkiesScene.c (205 lines): case bodies reordered, extra
-      player-position checks.
-- [ ] x10 func_8011B4F8 (2356 B) <- src/x001/playerStepRideSeesaw.c (138 lines, another record layout).
-- [ ] x04 func_80121504 / x03 func_80122250 (1.8 KB each) <- komaPigLeap / updateA00L2Type2C siblings (~100 lines).
+- [ ] x10 func_8011B4F8 (2356 B) <- src/x001/playerStepRideSeesaw.c: the PAL file is register-pinned and the JP reads
+      the seesaw record as shorts at +0x30 (`lh 48` for `lw 140`); needs a rewrite from the disassembly.
 - [ ] x00 func_801249EC weaponHitCat2Type08 (256 B): structure right, the temporary lands in a0/v0 instead of v1
       (draft: scratch wip25/801249EC.c of this session; see docs/JP.md).
 - [ ] slps01144 func_80024B78 (5112 B) and func_80014D1C (4096 B): handwritten GTE routines (the lit modelDraw
