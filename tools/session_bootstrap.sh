@@ -6,13 +6,13 @@
 #   3. the PAL disc (SCES-01331) from $GAME_FILES_URL (a Google Drive / Dropbox / direct link of the owner's own copy,
 #      set as an environment variable of the cloud environment; never committed) -> game/disc/Tombi.bin, game/ files
 #   4. data/ (tools/extract_data.py), the matching build (tools/build_full.py) and the i386 port (build/port2)
-#   5. optional: --wasm also installs the wasm2c toolchain and builds build/wasm/tombi2w (the arm64 code, ~5 min)
+#   5. the wasm2c toolchain and build/wasm/tombi2w (the Android arm64 code built for the PC, ~5 min; --no-wasm skips it)
 # Every step is skipped when its result is already there, so the script can be run again at any time.
-#   tools/session_bootstrap.sh [--wasm] [--no-build]
+#   tools/session_bootstrap.sh [--no-wasm] [--no-build]
 set -euo pipefail
 cd "$(dirname "$0")/.."
-WASM=0; BUILD=1
-for a in "$@"; do case "$a" in --wasm) WASM=1;; --no-build) BUILD=0;; *) echo "unknown option $a"; exit 2;; esac; done
+WASM=1; BUILD=1
+for a in "$@"; do case "$a" in --wasm) WASM=1;; --no-wasm) WASM=0;; --no-build) BUILD=0;; *) echo "unknown option $a"; exit 2;; esac; done
 log() { printf '\n== %s\n' "$*"; }
 SUDO=""; [ "$(id -u)" = 0 ] || SUDO="sudo"
 J="$(nproc)"
