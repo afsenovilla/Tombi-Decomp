@@ -13,9 +13,18 @@ destinations one-per-line (620495c), event detail page + shared touch scroller (
    out of step and movies flicker. An agent found the cause for top-down rooms (USA map strips start at the visible
    tile row, PAL 24 rows above; USA camera limits table MAIN0 0x8007B680; sprite cull 0xF1) but had not committed.
    The default picture is PAL at 60 Hz, so this does not block releases.
-2. **SCES-01330 disc (FR/DE/IT/NL)**: secret `GAME_FILES_URL_SCES01330` exists (GitHub Actions + cloud env var). Plan:
-   download in a fresh session, extend `tools/subscreen_glyphs.json` (tab/leaf font glyph table, coordinates only)
-   with those four languages as a separate per-disc table.
+2. **FR/DE/IT/NL (the SCES-01330 disc)**: `GAME_FILES_URL_SCES01330` (Drive link; GitHub Actions + cloud env var)
+   is "Tombi! (Language set 1)" **Rev.0** (MAIN0 md5 3edd55b0, docs/BUILDS.md row 20), while the port's C is
+   SCES-01331 **Rev.1** (row 24). Findings (session of 2026-11-04): the nine sub-screen font pages
+   SYSTEM/A?0301.000 are byte-identical on both discs (the PAL disc already carries the FR/DE/IT/NL pages, so the
+   glyph-table plan needs no second disc; only `--lang 5` uses that table anyway). 824 of 2287 files differ
+   (every MAINn.EXE, every area overlay, SYS/LD*, D?SPSUB*, movies): Rev.0 vs Rev.1, not the language set. The port
+   on a `tools/extract_data.py` extraction of that disc segfaults at start with `--lang 0` and `--lang 1` (lang.c
+   does align MAIN1 with that disc's MAIN0: 57 chunks). A hybrid (Rev.1 data + the Rev.0 language files) is not a
+   drop-in either: MAINn's file table is read by LBA and the two discs' layouts differ. Options, user decision
+   pending: (a) a SCES-01330 Rev.1 dump (same MAIN0 as the port) would most likely work with lang.c as it is, as
+   `--lang 1..4`; (b) a "language pack" path: files resolved by name across a second data folder plus a check that
+   Rev.0 language overlays compose over the Rev.1 twins.
 3. Known crashes, both builds, from the debug area select: AREA17 section 0 and an AREA10 room. Not investigated.
 4. `tools/port_mods.py` and the save editor keep hand-made English area names that disagree with the game's map
    (area 4 is "Haunted Mansion" on the map). Save import already uses the map names (REGIONS_EN / REGIONS_ES).
