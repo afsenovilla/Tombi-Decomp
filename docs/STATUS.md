@@ -144,7 +144,11 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   the Dengeki hint "Santa's stylish parasol" is the monkey, renamed Charles later. Kid at the pond: "can you swim?
   the turtle helped you this time, beyond that door you must swim" (the swimming gate of the big puddle). Event
   titles include 大きな水たまり？ (unused retail event 6), コッカタマゴの中身, オイラ泳げない…, かくれ里のヤン.
-  Code: xmatch 643 PAL functions in TOMBA.EXE (25 %). Not checked: whether rooms 5/6 are reachable in this build.
+  Code: xmatch 643 PAL functions in TOMBA.EXE (25 %). Rooms 4/5 (lists 5/6): the PrePre 8 exit triggers (x >= 0x4A2
+  in room 0, 0x4EC..0xA46 in room 1, x < 0x51 / 0x29 back) are in the Hyper player controller too (0x8002D81C..
+  0x8002DB00), but the PrePre 8 entry-record table (x, y, mode, area, room, entry) was not found in the same shape
+  and func_8002816C has no masked twin, so reachability is likely but unverified (no emulator run).
+  Discs now live in game_<name>/ (tools/disc_fetch.sh): /dev/shm is wiped when the idle container restarts.
 - Game-file downloads (2026-11-04): every workflow and the bootstrap go through `tools/ci_download.sh`, which takes
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
