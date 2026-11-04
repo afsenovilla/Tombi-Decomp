@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        disc: [PREPRE8, DENGEKI_D5, JP_DEMO, BETA980203, JP, USA]
+        disc: [PREPRE8, PREPRE9, DENGEKI_D5, JP_DEMO, BETA980203, JP, USA]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -23,6 +23,7 @@ jobs:
         env:
           URL_PAL: ${{ secrets.GAME_FILES_URL }}
           URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
+          URL_PREPRE9: ${{ secrets.GAME_FILES_URL_PREPRE9 }}
           URL_DENGEKI_D5: ${{ secrets.GAME_FILES_URL_DENGEKI_D5 }}
           URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
           URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
