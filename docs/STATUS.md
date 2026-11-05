@@ -32,7 +32,7 @@ shared touch scroller for every long list, Windows tolower link fix.
    PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
-## Japanese decomp (SLPS-01144), hand pass 3 (83.34 %)
+## Japanese decomp (SLPS-01144), hand pass 3 (83.38 %)
 
 82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
@@ -75,11 +75,7 @@ prog:addr:size:palfile --emit DIR`, or copy the PAL C and add the `// near-twin 
 `tools/progress_jp.py`, update the progress line of docs/JP.md and this list, commit (explicit paths) and push.
 Stop after about 90 minutes on one function: write what was tried under "tried" and leave it for the next run.
 
-- [ ] Written from the disassembly but not matching yet (drafts in the session scratchpad wip25/): x10 80119D9C (280 B,
-      object init/draw with `SPAD` 0x176/0x17a halves), slps01144 80043154 (292 B, a TObj variant of
-      probeFlaggedSegmentA writing SPAD 0x27e-0x284 and `ba1 = 2`), slps01144 8001B808 (328 B, loading-screen text
-      through the SPAD 0x1d4 record): in all three gcc keeps the scratchpad address in a register while retail
-      stores through `lui 0x1f80` immediates; a typed member access through spad.h is the next thing to try.
+- [ ] x10 80119D9C (280 B, object init/draw, JP-only): 30 lines off, case 0 store order (see docs/JP.md).
 - [ ] 64-256 B band leftovers (see docs/JP.md "tried and left"): sound family 8001E2D4/388/458/528 (s1/s2 swap),
       8001E81C, 80027D58, pad readers 80016960/80020794, flag bits 800219F0/80021A40, x01 80131240, libcard
       80064E1C/E84. The rest of the band is libgte/libapi asm (RotMatrix*, ApplyMatrix*, OuterProduct*, SquareRoot0,

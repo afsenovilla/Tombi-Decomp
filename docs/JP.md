@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 83.34 % of code (1182252 of 1418632 bytes, 2721 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 83.38 % of code (1182872 of 1418632 bytes, 2723 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2721 functions, 68.66 % -> 83.34 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2723 functions, 68.66 % -> 83.38 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -304,6 +304,14 @@ screen byte through a barriered pointer, the three shorts and MENU_STATE as `[]`
 SPAD.p1d4 record stay ahead of the stores; `updateMainObjects` and two JP calls in the object pass) and
 `playerStepLaneShiftFall` (no area-10 start, no case 2, `playerSetFallLean` inlined with `d84 = 0` before the
 frame test and `timer = 10` after it, no `da0+2 = 0`, the `S16(o, 0xd0)` test).
+
+Scratchpad globals in JP-only C (83.34 % -> 83.38 %): name them `D_1F80xxxx` (upper-case hex): jpcheck and
+build_report assemble those as constants, which gives retail's `lui 0x1f80; lw 468(reg)` form; a struct declared
+in the file or an address cast keeps the address in a register instead. With that, 8001B808 (loading-screen text:
+the SPAD 0x1d4 record reloaded through three differently named pointers, `w66 == 0` tested first) and 80043154 (the
+TObj variant of probeFlaggedSegmentA: `w` pinned to $5, `h` to $4, the field index `k` to $2 behind a memory
+barrier after the 0x284 store; returns 1 with `ba1 = 2` for field 13, else 0). x10 80119D9C stays at 30 lines
+(case 0 store order: retail keeps anim before b0f and d3c before b04, ours reorders them).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
