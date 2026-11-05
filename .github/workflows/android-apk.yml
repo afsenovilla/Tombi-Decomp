@@ -16,6 +16,7 @@ on:
       - port/tools/gen_port.py
       - port/fixes.txt
       - .github/workflows/android-apk.yml
+      - VERSION
   workflow_dispatch:
     inputs:
       publish:

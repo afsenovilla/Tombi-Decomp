@@ -2,13 +2,14 @@
 
 # Tombi! (Tomba!) decomp + native PC port
 
-| Version | Code | Data | Functions | Notes |
-|---|---|---|---|---|
-| Europe, Spanish (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, everything below |
-| Japan, *Ore! Tomba* (`SLPS_011.44`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPS_011.44&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPS_011.44&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPS_011.44&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | matching in progress, see [docs/JP.md](docs/JP.md) |
-| Japan demo, taikenban (`SLPM_801.65`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPM_801.65&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPM_801.65&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPM_801.65&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | shared C reuse + automatic sweep (`tools/demo_sweep.py`), see [docs/JPDEMO.md](docs/JPDEMO.md) |
-| Beta 1998-02-03 (`BETA_980203`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=BETA_980203&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=BETA_980203&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=BETA_980203&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | shared C reuse, see [docs/BETA_980203.md](docs/BETA_980203.md) |
-| PrePre 8 demo (`PCPX_960.84`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=PCPX_960.84&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=PCPX_960.84&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=PCPX_960.84&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | symbol pairing, see [docs/PREPRE8.md](docs/PREPRE8.md) |
+| Version | Progress (decomp.dev: code, data, functions) | Notes |
+|---|---|---|
+| Europe, language set 2 EN ES PT SV DA (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, everything below |
+| Europe, language set 1 EN FR DE IT NL (`SCES_013.30`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | same build as `SCES_013.31` (every game file byte-identical, only the boot menu differs); the port plays all nine languages from either disc |
+| Japan, *Ore! Tomba* (`SLPS_011.44`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPS_011.44&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPS_011.44&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPS_011.44&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | matching in progress, [docs/JP.md](docs/JP.md) |
+| Japan demo, taikenban (`SLPM_801.65`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPM_801.65&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPM_801.65&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPM_801.65&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | shared C + automatic sweep, [docs/JPDEMO.md](docs/JPDEMO.md) |
+| Beta 1998-02-03 (`BETA_980203`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=BETA_980203&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=BETA_980203&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=BETA_980203&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | shared C reuse, [docs/BETA_980203.md](docs/BETA_980203.md) |
+| PrePre 8 demo (`PCPX_960.84`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=PCPX_960.84&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=PCPX_960.84&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=PCPX_960.84&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | symbol pairing, [docs/PREPRE8.md](docs/PREPRE8.md) |
 
 [![Report](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml/badge.svg)](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml)
 [![Platform](https://img.shields.io/badge/platform-PlayStation-003791)](#target)
@@ -24,10 +25,16 @@ A **matching decompilation and native recompilation** of *Tombi!* (known as *Tom
   naming and documentation.
 - **Recompilation: the native PC port.** The same C is built as a native Windows/Linux program (`port2/`): OpenGL
   or software rendering, SDL2 controllers, the original music, voices and movies, saves, every language of the
-  disc, and a launcher with mods (`tombi-port-<ver>-windows-x64.exe` / `tombi-port-<ver>-linux-x64.tar.gz` of the [latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), see [docs/PORT.md](docs/PORT.md)). The game is
-  fully playable; you supply your own disc image (Tombi! PAL `SCES-01331` Rev 1), which the launcher extracts once.
+  disc (any of the nine from either PAL disc, see below), and a launcher with mods (`tombi-port-<ver>-windows-x64.exe` / `tombi-port-<ver>-linux-x64.tar.gz` of the [latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), see [docs/PORT.md](docs/PORT.md)). The game is
+  fully playable; you supply your own disc image (Tombi! PAL Rev 1, `SCES-01331` or `SCES-01330`), which the launcher extracts once.
+  **One disc, nine languages:** both PAL discs carry all nine `MAIN0..8` executables and their data; only their boot
+  menu differs (`SCES-01331` offers EN ES PT SV DA, `SCES-01330` EN FR DE IT NL). The port has no boot menu and starts
+  the language you pick (`--lang 0..8`, both launchers list all nine), so either disc gives you English, French,
+  German, Italian, Dutch, Spanish, Portuguese, Swedish and Danish.
 
-This repository targets the **European release** (`SCES-01331` Rev 1) and works function by function: every
+This repository targets the **European release** (`SCES-01331` Rev 1; `SCES-01330` Rev 1 is the same disc with the
+EN/FR/DE/IT/NL boot menu instead of EN/ES/PT/SV/DA, every game file byte-identical, so it is covered too; all nine
+languages are on both) and works function by function: every
 function in `src/` is verified to produce exactly the same instructions as the retail executable.
 
 > This repository contains no game data, executables, disc images or Sony SDK files.
@@ -49,7 +56,7 @@ function in `src/` is verified to produce exactly the same instructions as the r
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 90016 B of it (89.2 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
   other; those copies match automatically and are not added again (counting every copy separately gives 99.7 %).
-- Also tracked for MAIN0 + X000: 95.5 % of the code named by us, 67.3 % typed with the TObj structure.
+- Also tracked for MAIN0 + X000: 98.3 % of the code named by us, 67.3 % typed with the TObj structure.
 <!-- progress:end -->
 
 Per-program and per-area breakdown, pending work and what is not counted: [docs/PROGRESS.md](docs/PROGRESS.md).
@@ -70,7 +77,8 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals. Th
 
 | File | Description | SHA-1 |
 |------|-------------|-------|
-| `SCES_013.31` | Boot executable (PAL, Spanish) | `f6c383514e5d8367d2eed06400315cf6dd57ef6b` |
+| `SCES_013.31` | Boot executable (PAL; language menu EN ES PT SV DA = `MAIN0`, `MAIN5..8`) | `f6c383514e5d8367d2eed06400315cf6dd57ef6b` |
+| `SCES_013.30` | Boot executable of the other PAL disc (menu EN FR DE IT NL = `MAIN0`, `MAIN1..4`): the same program relinked 4 bytes earlier with that file list; the only file that differs between the two discs | `1d98c6595a49bd8063c906221df1eaa854964cb1` |
 | `EXE/MAIN0.EXE` | Game core, loaded at `0x80010000` | `bec8dc5f4116f5e497f2337eef8c523ff6dee8fc` |
 | `AREA00/X000.BIN` | Area overlay, AREA00 (Village of All Beginnings), loaded at `0x800E8028` | `ce168475f667f2ca8842eabad2aec829e301c5c5` |
 | `AREA01/X001.BIN` | Area overlay, AREA01 (also AREA07), loaded at `0x800E8028` | `923f812dcfd7da18ee0f7017e5b45a5e38ee3015` |
@@ -90,7 +98,7 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals. Th
 | `AREA18/X018.BIN` | Area overlay, AREA18 (Village of Civilization: Y Crossing), loaded at `0x800E8028` | `83eca42eb30944bb0c61056632b2ef7bb9891b34` |
 | `AREA19/X019.BIN` | Area overlay built for AREA19 (the dwarves: Dwarf Elder's Hut, Hidden Village), **never loaded** by the retail game: no file table lists it and AREA19 runs `AREA19/X002.BIN` (= AREA02's X002); see docs/CUT_CONTENT.md | `94060c10f7b6e3af1adc55a0c9cff4b81890988c` |
 
-The 17 area overlays (`X0nn.BIN`, Spanish; `X1nn`..`X8nn` are the other languages) are raw code blobs, all
+The 17 area overlays (`X0nn.BIN`, English; `X1nn`..`X8nn` are the other eight languages) are raw code blobs, all
 loaded at `0x800E8028`. Their first 188 KB (`0x800E8028`..`0x80115EA4`: header, ~300 shared object handlers and
 a data block) are byte-identical in every area; the rest is per-area code. X001..X019 are tracked like X000:
 boundaries in `notes/functions_x0nn.csv`, sources in `src/x0nn/` (`// FUNC addr size X0nn`), and functions
@@ -192,7 +200,7 @@ offsets and the function or splat range that produced them.
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 378336 B | 324672 B | 1104 / 1269 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 85.8 % |
+| SLPS_011.44: engine | 378308 B | 324836 B | 1117 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 85.9 % |
 | X00.BIN: shared object code | 300480 B | 286340 B | 490 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.3 % |
 | X01.BIN: area code | 151304 B | 129208 B | 216 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 85.4 % |
 | X02.BIN: area code | 25320 B | 24640 B | 33 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.3 % |
@@ -217,11 +225,11 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 ## Japanese demo progress
 
 <!-- slpm80165-progress:start -->
-**Ore! Tomba demo (SLPM-80165): 40.79 % of the code matches byte for byte** (261768 of 641804 bytes, 1103 of 1832 functions).
+**Ore! Tomba demo (SLPM-80165): 40.80 % of the code matches byte for byte** (261824 of 641804 bytes, 1104 of 1832 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPM_801.65: boot exe | 348752 B | 157260 B | 833 / 1309 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 45.1 % |
+| SLPM_801.65: boot exe | 348752 B | 157316 B | 834 / 1309 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 45.1 % |
 | X00.BIN: shared object code | 293052 B | 104508 B | 270 / 523 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 35.7 % |
 
 Regenerated with `python3 tools/build_report.py --version slpm80165` then `python3 tools/progress_jp.py --version slpm80165`. `python3 tools/demo_sweep.py` installs the PAL / JP C that matches demo functions as is (see [docs/JPDEMO.md](docs/JPDEMO.md)).
@@ -233,7 +241,8 @@ Every known retail, demo and prototype disc (serials, dates, executable hashes):
 
 | Version | Serial | Status |
 |---------|--------|--------|
-| Tombi! PAL (Spanish) | SCES-01331 | matching, everything above |
+| Tombi! PAL, language set 2 (EN ES PT SV DA) | SCES-01331 Rev 1 | matching, everything above; `MAIN0` (English) is the reference executable |
+| Tombi! PAL, language set 1 (EN FR DE IT NL) | SCES-01330 Rev 1 | same game files byte for byte, only the boot menu differs: covered by the same sources and reports |
 | Ore! Tomba (Japan) | SLPS-01144 | split + shared C, matching in progress (figures in the table at the top and in "Japanese release progress"), see [docs/JP.md](docs/JP.md) |
 | Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 40.9 % of code (objdiff; figures in "Japanese demo progress"), `tools/demo_sweep.py` installs what PAL / JP C matches as is, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Ore! Tomba beta 1998-02-03 (Japan) | SLPS-01144 (prototype) | split + shared C, 56.5 % of code, see [docs/BETA_980203.md](docs/BETA_980203.md) |
@@ -433,7 +442,7 @@ starting with `ci:`/`dist:`) since the last release.
 
 ## License
 
-Source code and documentation are released under the [MIT License](LICENSE).
+Source code and documentation are released under the [MIT License](LICENSE). The licence covers the source code and documentation of this repository only; it grants no rights to the game Tombi!/Tomba!, its data, or the Sony PSY-Q SDK. Third-party material is listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 Third-party material is listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Legal

@@ -18,7 +18,8 @@ android {
         targetSdk 34
         // every CI build a higher versionCode, so a newer beta installs over the old one (same signing key needed too)
         versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
-        versionName "0.1.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+        // the release number shown by the launcher: VERSION at the repo root (release.yml publishes that number)
+        versionName rootProject.file('../../VERSION').text.trim()
         // both ABIs in one APK: armeabi-v7a is the native 32-bit build, arm64-v8a the wasm2c build (docs/PORT.md "64-bit
         // builds: wasm2c"; needs port2/wasm/build.py --until w2c first, PORT2_W2C_DIR); 64-bit-only devices (Snapdragon 8
         // Gen 3+, AYN Odin 2 ...) install it and load the arm64 libraries

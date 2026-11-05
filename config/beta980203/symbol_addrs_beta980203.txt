@@ -116,6 +116,7 @@ SoundShutdown = 0x800209F4; // type:func size:0x30  PAL main0 0x8001F820
 func_80021274_beta980203 = 0x80021274; // type:func size:0x98
 func_8002130C_beta980203 = 0x8002130C; // type:func size:0x18
 enqueueCdRead = 0x80021324; // type:func size:0x40  PAL main0 0x8004F34C
+loadWssFile = 0x80021490; // type:func size:0x64  PAL main0 0x8004F38C
 ObjSetFacingToPlayer = 0x80021D74; // type:func size:0x3C  PAL main0 0x8001F8E4
 isObjectPastReferenceX = 0x80021DB0; // type:func size:0x1C  PAL main0 0x8001F920 identical
 playObjectSfx = 0x80021DCC; // type:func size:0x30  PAL main0 0x8001F93C

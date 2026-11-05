@@ -4,8 +4,11 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.1.2 (build of b4d6406): vitality fruit numbers 8-16, warp destinations one per line, event detail page redone,
-shared touch scroller for every long list, Windows tolower link fix.
+v0.1.3 (build of 47c4a28): Android launcher shows the release number; FR/DE/IT/NL languages and SCES-01330 disc,
+Select sub-screen labels, area names from the game's map. Previous: v0.1.2 (b4d6406).
+
+Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
+default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
 
 ## In progress / open
 
@@ -142,8 +145,8 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   has (secret spell, a dinner party feast, melting something to open a path, rolling down as a snowball, a hidden
   power that stops you moving, words that make something move, winning a prize, "a forgotten thing is a memory?",
   Santa's parasol, "what's that!? bananas"). AREA00/A006 #59/#64: the 100 Year Old Wise Man offers to appraise items
-  whose use you don't know (not in retail). `bash tools/disc_fetch.sh DENGEKI_D5` puts the disc in /dev/shm.
-- Dengeki D5 vs PAL, code and objects (2026-11-04, disc in /dev/shm/dengeki_d5, scripts kept out of the repo):
+  whose use you don't know (not in retail). `bash tools/disc_fetch.sh DENGEKI_D5` puts the disc in game_dengeki_d5/.
+- Dengeki D5 vs PAL, code and objects (2026-11-04, disc in game_dengeki_d5/ via disc_fetch.sh, scripts kept out of the repo):
   xmatch finds 735 PAL functions in TOMBA.EXE (31 % of its code, 111 identical) and 151 in AREA00/X00.BIN (overlay
   base 0x800F4A48, from its jal targets). fn_vs_pal: the village NPC walkers are the retail ones (villagerNpcWalkPath
   81 %, villagerNpcSpringMotion 78 %), so no other patrol system; the hooded old man handler (layer 3 type 0x15 in
@@ -197,6 +200,19 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - Game-file downloads (2026-11-04): every workflow and the bootstrap go through `tools/ci_download.sh`, which takes
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
+
+- psx_tomba cross-check (2026-11-05): their JP symbols gave us 29 names for generic `func_*` functions (files
+  renamed, e.g. `src/CdStatus_slps01144.c`) and 54 missing function symbols paired with PAL by name; on top of the
+  sweep's 85.03 % the JP report is 85.05 % (2779 of 3102 functions, +13). 23 naming disagreements kept on our side (notes/psx_tomba_jp_names.md).
+  Their overall progress is below ours (SDK 88 %, main 78 %, overlays 77 %); LICENSE claims MIT but the file 404s.
+  Our LICENSE is now the plain MIT text (the scope note moved to the README) so GitHub identifies it.
+
+- Bootstrap check (2026-11-05, a full run from a restarted container): two fixes. `tools/session_bootstrap.sh`
+  installed wasi-libc only when clang-18 was missing (the image ships clang-18 without it: every wasm file failed,
+  exit 0); now each piece of the wasm toolchain is checked, and a failed wasm build is reported in the log. And
+  `port2/wasm/patch_w2c.py` forwards a `.Lname_bitcast_invalid` stub to the function under its real wasm2c name
+  when `name` is only an alias (wasi-libc's ftello / fseeko are __ftello / __fseeko: `w2c_tombi_0x5F_ftello`); the
+  rebuilt build/wasm/tombi2w ran 600 headless frames. Python tests, the patch validator and the i386 smoke test pass.
 
 - PC window fit (2026-11-05): a window dragged to a size that is not within 1/16 of an integer multiple of the
   picture now gets the aspect-keeping fractional fit instead of floating at the integer scale inside borders
