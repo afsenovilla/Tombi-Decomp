@@ -4,8 +4,8 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.1.2 (build of b4d6406): vitality fruit numbers 8-16, warp destinations one per line, event detail page redone,
-shared touch scroller for every long list, Windows tolower link fix.
+v0.1.3 (build of 47c4a28): Android launcher shows the release number; FR/DE/IT/NL languages and SCES-01330 disc,
+Select sub-screen labels, area names from the game's map. Previous: v0.1.2 (b4d6406).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
