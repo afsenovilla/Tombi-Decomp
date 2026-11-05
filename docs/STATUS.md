@@ -18,10 +18,12 @@ shared touch scroller for every long list, Windows tolower link fix.
    nine MAINn.EXE and `--lang 1..4` already ran (lang.c). Now exposed: port usage, PC launcher (list, flags,
    launcher-language default), Android launcher (`LANG_N` appended). Checked on PC headless: in-game text in the
    four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. Open: the panel's own
-   chrome is English for 1..4 (only en/es exist, `T()` in panel.c). Rev.0 (July 1998 build of either serial;
-   the SCES-01330 zip now in R2 is Rev.0, MAIN0 md5 3edd55b0) is not supported: 793 files differ from Rev.1 and the
-   port reads overlay tables at Rev.1 addresses. Since 2026-11-04 the PC launcher, extract_data.py and the Android
-   app name a Rev.0 disc as such (sha1 118459ce), and the messages say Rev 1 of SCES-01331 or SCES-01330 is needed.
+   chrome is English for 1..4 (only en/es exist, `T()` in panel.c). Rev.0 (July 1998 build of either serial, MAIN0
+   md5 3edd55b0) is not supported: 793 files differ from Rev.1 and the port reads overlay tables at Rev.1 addresses.
+   Since 2026-11-04 the PC launcher, extract_data.py and the Android app name a Rev.0 disc as such (sha1 118459ce),
+   and the messages say Rev 1 of SCES-01331 or SCES-01330 is needed. The SCES-01330 zip in R2 is Rev.1 again
+   (2026-11-05): extracted with extract_data.py, the port ran 900 frames headless in French from it, launcher says
+   "Compatible disc: SCES-01330".
 3. Debug area select crashes, checked 2026-11-04 (i386 build, 3000 frames each): AREA10 sections 0-8 all run clean;
    AREA17 section 0 segfaults in `spawnSectionObjectsAlt` (empty load list, one of the 13 `DOOR_ROOMS` of
    tools/psxemu/rooms.py that crash in the real game too). Not a port bug; only the door transition from a sibling
@@ -195,6 +197,11 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - Game-file downloads (2026-11-04): every workflow and the bootstrap go through `tools/ci_download.sh`, which takes
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
+
+- PC window fit (2026-11-05): a window dragged to a size that is not within 1/16 of an integer multiple of the
+  picture now gets the aspect-keeping fractional fit instead of floating at the integer scale inside borders
+  (`port_window_fit`, sdl.c; `--fit` still forces the fractional fit always). Checked under Xvfb with xdotool: 682x512
+  window -> 682 px wide picture (2x), 953x1000 -> 953 wide, 700x520 -> 682 wide (still 2x, small borders).
 
 - Panel (c8529a5): event detail page redone as the Items showcase (icon 3x on stone, title 16 px + state; Dónde =
   plate / area / room lines + "Ver en el mapa" when the marker is in the loaded room (Map tab centred on it, zoom 2);
