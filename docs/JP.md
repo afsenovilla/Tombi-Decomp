@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 83.38 % of code (1182872 of 1418632 bytes, 2723 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 84.01 % of code (1191860 of 1418632 bytes, 2741 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2723 functions, 68.66 % -> 83.38 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2741 functions, 68.66 % -> 84.01 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -312,6 +312,22 @@ the SPAD 0x1d4 record reloaded through three differently named pointers, `w66 ==
 TObj variant of probeFlaggedSegmentA: `w` pinned to $5, `h` to $4, the field index `k` to $2 behind a memory
 barrier after the 0x284 store; returns 1 with `ba1 = 2` for field 13, else 0). x10 80119D9C stays at 30 lines
 (case 0 store order: retail keeps anim before b0f and d3c before b04, ours reorders them).
+
+Callee-overlap pairing rerun on the current unmatched list (scratch pair.py, score 1.0 and size within 25 %)
+and the plain PAL copies diffed strictly (83.38 % -> 84.01 %, 18 functions, each one or two lines): the talk
+functions of x04 (singingMinerRumor, mermaidSighting x3, mermaidNecklace, paintingSlotHint, lostTreasure pending)
+drop `animFrame = 1` at case 0, set `GVARS.b3e = 1` before the message box, use other message ids (7/8/9/10) and
+test only `GCD.bce3d`; `initTunnelDigger` moves the digger 32 left instead of to 0xc4d; `soakedPhoenixGuide
+Section1Scene` zeroes the player step (not 100) and falls at -0x300; the x03/x04 `blackCrowContact` twins read the
+bite target at -0x10 and have no `SPAD.b1a4` guard, the x03 one only on `r == 2` and only when `b->wb4` is set,
+storing `b->w7a = bh < ah` first thing in case 2; `wingedForkPigCheckCollide` has no `y < -0x46a` branch;
+`updateFlowerGardenEvent` sets b04 to 3 when nothing spawned (the result copied through an asm barrier for the
+`move v0,a0`); `wingedForkPigShotContact` / `burningFireContact` / `phoenixSpiritHintTalk` / `windblownMonkey
+RepeatTalk` lose the b1a4 guard, the `d1 = 1` byte, the player-facing frame or get the standard talk-end player
+reset; `updateL3Type3BObject` tests only `GCD.bcf06`; the x00 `playerStepSwimSpin` copy keeps two
+`playerSetAnim(o, 0x44, 0)` calls (the `velY < 0` exit skips `b69 = 0`); `wingedForkPigHit` leaps 16 and drops the
+clone on the landing (`t = hit(o); if (t || velV > 0x580)` keeps a single block). The JP-only files must name
+callees by their JP symbol (`func_80020DB4`, `probeSidesAndApplyTileResponse`), the PAL `FUN_` names do not link.
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in

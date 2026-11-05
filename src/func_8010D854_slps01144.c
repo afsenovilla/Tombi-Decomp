@@ -1,0 +1,90 @@
+// near-twin of PAL playerStepSwimSpin (tools/jp_autofix.py)
+// VERSION SLPS_01144 x00 8010D854 524
+// FLAGS -O2 -G0 -fno-strength-reduce
+#if defined(VERSION_SLPS_01144)
+/* volatile store of velY makes the later read reload it (game: lh + move copy) */
+#include "TOBJ.H"
+#include "raw7.h"
+extern TObj *PLAYER_EXT;
+extern int BITTEN_OBJECT;
+extern void PlayerSetAnimIfChanged(TObj *, int);
+extern short func_80020DB4(int, int);
+extern short probeSidesAndApplyTileResponse(TObj *, int, int);
+extern void playerSetAnim(TObj *, int, int);
+
+void func_8010D854(TObj *o)
+{
+    short r, w;
+    short v;
+    short u;
+    int d;
+
+    switch (o->state) {
+    case 0:
+        o->velY = 0x300;
+        o->b9c = 2;
+        (*(unsigned char*)&o->wac) = 1;
+        o->b69 = 0;
+        o->wb2 = 0x200;
+        U8(o, 0xca) = 0;
+        PlayerSetAnimIfChanged(o, 0x1d);
+        o->timer = 0x78;
+        o->state++;
+    case 1:
+        break;
+    default:
+        return;
+    }
+    d = o->d8c;
+    o->d8c = (o->animFrame & 1) ? d + 0x10 : d - 0x10;
+    r = func_80020DB4(o->wb6, o->wb2);
+    o->velH = r;
+    o->h->raw += r << 8;
+    o->y.raw += o->velY << 8;
+    w = o->wb2 - 0x10;
+    o->wb2 = w;
+    if (w < 0)
+        o->wb2 = 0;
+    *(volatile short *)&o->velY = o->velY - 0x10;
+    o->timer--;
+    if ((*(unsigned char*)&o->wac) == 2) {
+        BITTEN_OBJECT = S32(o, 0xd4);
+        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
+        o->ba7 = 0;
+        o->ba5 = 0;
+        o->step = 0x48;
+        o->state = 0;
+        o->substep = 0;
+        (*(unsigned char*)((char*)&o->waa + 1)) &= 0x7f;
+        return;
+    }
+    v = o->velY;
+    u = v;
+    if (v < 0) {
+        playerSetAnim(o, 0x44, 0);
+        o->b9c = 0;
+        (*(unsigned char*)&o->wac) = 0;
+        o->step = 0x3e;
+        o->state = 0;
+        return;
+    }
+    if (o->b69) {
+        o->velY = u - 0x10;
+        o->b69 = 0;
+        return;
+    }
+    if (probeSidesAndApplyTileResponse(o, 0, 0)) {
+        o->b69 = 0;
+        o->velY -= 0x10;
+        return;
+    }
+    if (o->timer > 0)
+        return;
+    playerSetAnim(o, 0x44, 0);
+    o->b69 = 0;
+    o->b9c = 0;
+    (*(unsigned char*)&o->wac) = 0;
+    o->step = 0x3e;
+    o->state = 0;
+}
+#endif

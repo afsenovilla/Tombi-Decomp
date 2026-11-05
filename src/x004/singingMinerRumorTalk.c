@@ -1,5 +1,103 @@
 // FUNC 8012c1a8 552 X004
 // MATCHING 8012c1a8 552
+// VERSION SLPS_01144 x04 8012A9BC 544
+#if defined(VERSION_SLPS_01144)
+#include "gcd.h"
+#include "gvars.h"
+#include "player.h"
+#include "TOBJ.H"
+
+extern void *D_801357B0[];
+extern char D_801359DC[];
+extern char D_801359F0[];
+extern char D_801359F8[];
+extern char D_80135A00[];
+extern char D_80135A08[];
+static void *D_801357B8[5] = {
+    D_801359DC, D_801359F0, D_801359F8, D_80135A00,
+    D_80135A08,
+};
+extern void *D_801357CC[];
+extern int showMessageBoxDirect(int, int, void *);
+extern void FUN_8001fe6c(TObj *);
+extern void AnimAdvance(TObj *);
+
+static __inline__ void setAnim(TObj *o, void *a)
+{
+    o->anim = a;
+    FUN_8001fe6c(o);
+}
+
+void func_8012A9BC(TObj *o)
+{
+    TObj *p;
+    int m, n;
+
+    switch (o->state) {
+    case 0:
+        o->b68 = 0;
+        if (((unsigned char*)&GCD.bce24)[0] != 0 && ((unsigned char*)&GCD.bce24)[0] != 0xff) {
+            o->state = 3;
+            o->wac = 0;
+            o->anim = D_801357B0[0];
+            break;
+        }
+        o->state++;
+        break;
+    case 1:
+        AnimAdvance(o);
+        if (o->b68 == 0) break;
+        m = 5;
+        n = 0xb;
+        goto talk;
+    case 2:
+        AnimAdvance(o);
+        p = (TObj *)o->d90;
+        if (p->b04 != 2) break;
+        p->b04 = 3;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->wac = 7;
+        o->anim = D_801357CC[0];
+        o->state = 0;
+        break;
+    case 3:
+        AnimAdvance(o);
+        if (o->b68 == 0) break;
+        m = 5;
+        n = 0xc;
+    talk:
+        o->state++;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->d90 = showMessageBoxDirect(m, n, &o->a);
+        o->wac = 2;
+        o->animFrame = o->b68 & 1;
+        setAnim(o, D_801357B8[0]);
+        break;
+    case 4:
+        AnimAdvance(o);
+        p = (TObj *)o->d90;
+        if (p->b04 != 2) break;
+        p->b04 = 3;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->wac = 0;
+        o->anim = D_801357B0[0];
+        o->state = 0;
+        break;
+    }
+}
+#else
 #include "gcd.h"
 #include "gvars.h"
 #include "player.h"
@@ -96,3 +194,4 @@ void singingMinerRumorTalk(TObj *o)
         break;
     }
 }
+#endif
