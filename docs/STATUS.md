@@ -198,6 +198,12 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
 
+- psx_tomba cross-check (2026-11-05): their JP symbols gave us 29 names for generic `func_*` functions (files
+  renamed, e.g. `src/CdStatus_slps01144.c`) and 54 missing function symbols paired with PAL by name; the JP report
+  stays at 82.04 % with 11 more matched functions. 23 naming disagreements kept on our side (notes/psx_tomba_jp_names.md).
+  Their overall progress is below ours (SDK 88 %, main 78 %, overlays 77 %); LICENSE claims MIT but the file 404s.
+  Our LICENSE is now the plain MIT text (the scope note moved to the README) so GitHub identifies it.
+
 - Bootstrap check (2026-11-05, a full run from a restarted container): two fixes. `tools/session_bootstrap.sh`
   installed wasi-libc only when clang-18 was missing (the image ships clang-18 without it: every wasm file failed,
   exit 0); now each piece of the wasm toolchain is checked, and a failed wasm build is reported in the log. And

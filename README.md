@@ -433,7 +433,7 @@ starting with `ci:`/`dist:`) since the last release.
 
 ## License
 
-Source code and documentation are released under the [MIT License](LICENSE).
+Source code and documentation are released under the [MIT License](LICENSE). The licence covers the source code and documentation of this repository only; it grants no rights to the game Tombi!/Tomba!, its data, or the Sony PSY-Q SDK. Third-party material is listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 Third-party material is listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Legal
