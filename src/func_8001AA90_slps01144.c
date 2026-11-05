@@ -23,37 +23,13 @@ typedef struct {
 extern G *TASK_C;
 extern unsigned char LOAD_COMPLETE_SYM;
 extern unsigned short D_1F8003BA;
-extern unsigned char DISPLAY_BUFFER_0_BG_R[], DISPLAY_BUFFER_0_BG_G[], DISPLAY_BUFFER_0_BG_B[], DISPLAY_BUFFER_1_BG_R[], DISPLAY_BUFFER_1_BG_G[], DISPLAY_BUFFER_1_BG_B[];
-extern unsigned char D_8009BC98, D_8009BC9C, D_8009BCA0;
-extern short D_800A45EA;
-extern unsigned short D_800A45EAu;
+extern unsigned char D_8009FF05[], D_8009FF06[], D_8009FF07[], D_800A0C15[], D_800A0C16[], D_800A0C17[]; /* display buffer bg r/g/b */
+extern unsigned char D_8009DB10, D_8009DB14, D_8009DB18;
+extern short D_800A6132;
+extern unsigned short D_8009F200;
+extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned short AREA_VARIANT;
-extern char D_80077968[];
-extern char D_80077974[];
-extern char D_80077980[];
-extern char D_8007798C[];
-extern char D_80077998[];
-extern char D_800779C4[];
-extern char D_800779CC[];
-extern char D_800779D4[];
-extern char D_800779E0[];
-extern char D_800779E8[];
-extern char D_800779F4[];
-extern char D_80077A08[];
-extern char D_80077A14[];
-extern char D_80077A40[];
-extern char D_80077A44[];
-extern char D_80077A54[];
-extern char D_80077A64[];
-extern char D_80077A7C[];
-extern char D_80077A84[];
-static short *D_80077A8C[20] = {
-    (short *)D_80077968, (short *)D_80077974, (short *)D_80077980, (short *)D_8007798C,
-    (short *)D_80077998, (short *)D_800779C4, (short *)D_800779CC, (short *)D_800779D4,
-    (short *)D_800779E0, (short *)D_800779E8, (short *)D_800779F4, (short *)D_80077A08,
-    (short *)D_80077A14, (short *)D_80077A40, (short *)D_80077A44, (short *)D_80077968,
-    (short *)D_80077A54, (short *)D_80077A64, (short *)D_80077A7C, (short *)D_80077A84,
-};
+extern short *D_8007156C[]; /* area -> section sound set table */
 extern void SetDispMask(int);
 extern int StoreImage(RECT *, unsigned long *);
 extern int LoadImage(RECT *, unsigned long *);
@@ -62,8 +38,8 @@ extern void EnterCriticalSection(void);
 extern void FlushCache(void);
 extern void ExitCriticalSection(void);
 extern void clearMenuParams(void);
-extern void inventoryScreenTick(void);
-extern void loadSoundSet(int);
+extern void func_8001AE18(void);
+extern void func_8002073C(int);
 extern void queueSystemLoadList(int, int);
 extern void stopBgm(int);
 
@@ -91,14 +67,14 @@ void func_8001AA90(void)
         r.h = 1;
         StoreImage(&r, (unsigned long *)0x801FBBA0);
         GetDrawEnv(&env);
-        D_8009BC98 = env.r0;
-        D_8009BC9C = env.g0;
-        D_8009BCA0 = env.b0;
+        D_8009DB10 = env.r0;
+        D_8009DB14 = env.g0;
+        D_8009DB18 = env.b0;
         TASK_C->w4e++;
         break;
     case 1:
         LOAD_COMPLETE_SYM = 0;
-        switch (D_800A45EA) {
+        switch (D_800A6132) {
         case 0: case 1: case 2: case 6: n = 3; break;
         case 4: n = 4; break;
         case 7: n = 6; break;
@@ -109,7 +85,7 @@ void func_8001AA90(void)
     case 2:
         if (LOAD_COMPLETE_SYM == 0) break;
         {
-            unsigned short *q = &D_800A45EAu;
+            unsigned short *q = (unsigned short *)&D_800A6132;
             s = *q;
             clearMenuParams();
             *q = s;
@@ -117,9 +93,9 @@ void func_8001AA90(void)
         SetDispMask(1);
         goto next;
     case 3:
-        inventoryScreenTick();
+        func_8001AE18();
         if (SPAD.b1c2 != 0) {
-            k = &GV6.s70;
+            k = &D_8009F200;
             if ((*k & 0x800) && (*k & 8)) TASK_C->w4e = 6;
         }
         break;
@@ -135,16 +111,16 @@ void func_8001AA90(void)
         r.w = 0x100;
         r.h = 1;
         LoadImage(&r, (unsigned long *)0x801FBBA0);
-        DISPLAY_BUFFER_0_BG_R[0] = D_8009BC98;
-        DISPLAY_BUFFER_1_BG_R[0] = D_8009BC98;
-        DISPLAY_BUFFER_0_BG_G[0] = D_8009BC9C;
-        DISPLAY_BUFFER_0_BG_B[0] = D_8009BCA0;
-        DISPLAY_BUFFER_1_BG_G[0] = D_8009BC9C;
-        DISPLAY_BUFFER_1_BG_B[0] = D_8009BCA0;
-        n = D_80077A8C[GAME.selectedArea + AREA_VARIANT][GAME.selectedSection];
+        D_8009FF05[0] = D_8009DB10;
+        D_800A0C15[0] = D_8009DB10;
+        D_8009FF06[0] = D_8009DB14;
+        D_8009FF07[0] = D_8009DB18;
+        D_800A0C16[0] = D_8009DB14;
+        D_800A0C17[0] = D_8009DB18;
+        n = D_8007156C[GAME.selectedArea + AREA_VARIANT][GAME_SELECTED_SECTION];
     play:
         LOAD_COMPLETE_SYM = 0;
-        loadSoundSet(n);
+        func_8002073C(n);
     next:
         TASK_C->w4e++;
         break;

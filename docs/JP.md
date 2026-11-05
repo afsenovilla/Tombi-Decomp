@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 84.19 % of code (1194304 of 1418632 bytes, 2746 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 84.28 % of code (1195556 of 1418632 bytes, 2748 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2746 functions, 68.66 % -> 84.19 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2748 functions, 68.66 % -> 84.28 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -348,6 +348,21 @@ step-dependent velV, wac 10, `b0a = 2`, `animFrame &= 1`, the box bytes from `D_
 frame into v0 before the constant 2 lands in v1) and `updateWingedForkPigShot` x03 (JP: anim 0 at init, sfx 115
 and `active = 2` on `b69`, back to step 0 on the anim end, the box halves from `D_80134E74 + w2 * 8` of the anim or
 of the subtype table; retail keeps w2 in v0 and the table base in v1).
+
+`acquireSpriteSlot` JP branch (692 B) and the x04 JP-only pusher `func_8011BF1C` (560 B, -> 84.28 %). The slot
+routine keeps the PAL code with strength reduction on (`-O2 -G0`), the five strips as `val[1] + (u16)(h / 5) * k`
+and the byte loop bound `w * (u16)(h / 5)`. The pusher (an object that shoves the player while `GVARS.playerLanded`
+is set: box 24/48/8/16, step 0 waits for `b69` then `velH = 0x200` and `GVARS.b3f = 1`, step 1 decays velH by 8 to
+128 and ends past h 177 with the standard player reset, state 18) needed two things: the spawn-point global read
+through a one-field struct (`D_8009E52A.pt`, else gcc hoists the `lhu` above the stores) and an empty `case 2:` in
+the step switch (the retail tree tests `== 1`, then `< 2`, then `!= 0`; without the third case gcc tests 0 first).
+
+Relocation names, not code: two JP files compiled identically under `jpcheck --norm` but the report had them at
+97.9 % / 99.9 % because the JP branch kept PAL symbol names that do not exist in the JP link (`FUN_8001e4f0`,
+`MOVE_TABLE_1/2`, the overlay anim tables `D_8013A1E0..`, `KOMA_PIG_ANIM_BOXES`, `DISPLAY_BUFFER_*`, `GV6.s70` for
+the raw `D_8009F200`, `GAME.selectedSection` for `GAME_SELECTED_SECTION`). `func_801275C8` and `func_8001AA90` now
+use the JP names; check a near-100 % report line with `jpcheck --strict` *without* `--norm` (the names are masked
+otherwise).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
