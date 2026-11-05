@@ -1,5 +1,62 @@
 // FUNC 80123e04 460 X000
 // MATCHING 80123e04 460
+// VERSION SLPS_01144 x00 80122B8C 484
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "TOBJ.H"
+typedef struct {
+    unsigned int tag;
+    unsigned char r0, g0, b0, code;
+    short x0, y0; unsigned short uv0, clut;
+    short x1, y1; unsigned short uv1, tpage;
+    short x2, y2; unsigned short uv2, pad1;
+    short x3, y3; unsigned short uv3, pad2;
+} PFT4;
+typedef struct { unsigned short uv0, p0, uv1, p1, uv2; unsigned char w, h; unsigned short uv3; signed char dx, dy; } Spr;
+extern long LZ_FILE_CTRL;
+extern int D_1F800074_v;
+extern int CURRENT_OT;
+extern char *D_1F800164;
+int projectActorPosition(TObj *o, void *a, void *b);
+void insertPrimWithBias(PFT4 *p, int a, int b, int c, int d);
+void func_80122B8C(TObj *o)
+{
+    Spr *s;
+    PFT4 *p;
+    int xy; short x, y;
+    s = (Spr *)(*(volatile int *)&o->d3c + ((short *)((char *)o->d3c + (*(unsigned short *)o->anim << 2)))[1]);
+    projectActorPosition(o, &LZ_FILE_CTRL, ((char*)&SPAD.i74));
+    xy = LZ_FILE_CTRL;
+    y = xy >> 16;
+    x = xy;
+    p = (*(PFT4 **)&SPAD.p164);
+    if (o->subtype == 0) {
+        p->code = 0x2d;
+    } else {
+        p->code = 0x2c;
+        p->r0 = o->wb6;
+        p->g0 = o->wb6;
+        p->b0 = o->wb6;
+        p->code |= 2;
+    }
+    p->uv0 = s->uv0;
+    p->uv1 = s->uv1;
+    p->uv2 = s->uv2;
+    p->uv3 = s->uv3;
+    p->tpage = o->w1e;
+    p->clut = o->w08;
+    p->x0 = x + s->dx - o->wb8;
+    p->y0 = y + s->dy - o->wba;
+    p->x1 = p->x0 + s->w + (unsigned short)o->wb8 * 2 - 1;
+    p->x2 = p->x0;
+    p->y1 = p->y0;
+    p->y2 = p->y0 + s->h + (unsigned short)o->wba * 2 - 1;
+    p->x3 = p->x1;
+    p->y3 = p->y2;
+    insertPrimWithBias(p, CURRENT_OT + 0x10, D_1F800074_v, (signed char)o->b0f, 0x9000000);
+    D_1F800164 += 0x28;
+}
+#else
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct {
@@ -49,3 +106,4 @@ void drawObjectProjectedSpriteB(TObj *o)
     insertPrimWithBias(p, CURRENT_OT + 0x10, D_1F800074_v, (signed char)o->b0f, 0x9000000);
     (*(PFT4 **)&SPAD.p164) = (PFT4 *)((char *)(*(PFT4 **)&SPAD.p164) + 0x28);
 }
+#endif
