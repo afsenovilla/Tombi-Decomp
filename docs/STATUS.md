@@ -79,6 +79,11 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
       object pointer (a3 in retail) and of the screen-origin halves differ (drafts wip25/80119D9C_b.c, 80118580.c).
 - [ ] x00 8010D854 (playerStepSwimSpin x00 copy, src/func_8010D854_slps01144.c): jpcheck and a full objdump diff say
       identical, the report says 99.96 % (one word): probably unit size / trailing alignment, check with objdiff-cli.
+- [ ] At one register / one scheduling spot each (drafts in the session scratchpad wip25/): x03 80126EC4
+      wingedForkPigDefeated (v_80126EC4_b.c: the frame read lands in v1, retail v0), x03 80123E68 pig shot
+      (v_80123E68_b.c: table base in v0, retail v1), x09 8012397C pickup object (v_8012397C_a.c: frame 32 vs 40 and
+      the `li 16` placement), x10/x14 updateA00FarBackdropWest copies, x01/x09/x06 updateA00FarBackdropEast copies
+      (8011FFFC.c: case 0 store order, 8011C2D8 w1e 9, 8011AA34 w1e 14 and anim by subtype).
 - [ ] Next pairs from the scratch pair.py run (66-140 lines, real rewrites): x10 8011ED78 wingedForkPigContact (extra
       wb4 / subtype / b9c tests), x03 80126EC4 wingedForkPigDefeated, x00 80119278 spawnA00Tornado (extra global test,
       a/y stores reordered), x14 8011631C updatePoolType67Object, x00 80122B8C drawObjectProjectedSpriteB (type 44/45
