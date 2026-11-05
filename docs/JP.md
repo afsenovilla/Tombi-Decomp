@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 84.15 % of code (1193820 of 1418632 bytes, 2745 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 84.19 % of code (1194304 of 1418632 bytes, 2746 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2745 functions, 68.66 % -> 84.15 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2746 functions, 68.66 % -> 84.19 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -340,6 +340,14 @@ its `li` precedes the first read); `drawObjectProjectedSpriteB` x00 (the project
 gives code 0x2d without the colour bytes, else 0x2c with them; x2 stored before y1; the prim pointer bumped through
 the scalar `D_1F800164`); and the x14 `updateA00PoolType11` (JP-only: w1e 1, b0d 0x80, timer 40, velH by frame,
 `a.raw += velH << 8` while `GVARS.b42` is clear, cases 2-3 free).
+
+`wingedForkPigContact` x10 twin (484 B, -> 84.19 %): two early exits to the hit block (`e->wb4 == 0` read
+unsigned and subtype < 2; or `b9c == 0`, subtype < 2 and `b04 == 1`), the r < 3 bite without `b69 = 0` / `w7a`,
+no `SPAD.b1a4` guard, case 2 without `b69 = 0`. Still at a register name each: `wingedForkPigDefeated` x03 (JP: no
+step-dependent velV, wac 10, `b0a = 2`, `animFrame &= 1`, the box bytes from `D_80134EAC[wac * 4]`; retail reads the
+frame into v0 before the constant 2 lands in v1) and `updateWingedForkPigShot` x03 (JP: anim 0 at init, sfx 115
+and `active = 2` on `b69`, back to step 0 on the anim end, the box halves from `D_80134E74 + w2 * 8` of the anim or
+of the subtype table; retail keeps w2 in v0 and the table base in v1).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
