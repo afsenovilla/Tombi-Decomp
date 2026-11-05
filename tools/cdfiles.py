@@ -4,7 +4,7 @@
 The game does not read the ISO directory: it seeks to (LBA, size) taken from an embedded table of 8-byte entries,
 `CdlLOC(min, sec, frame, 0)` in BCD (LBA + 150) followed by a u32 size (bytes; for MOVIE/*.STR sectors * 2336).
 The table starts at file offset 0x6E6F0 (vaddr 0x8007DEF0) in every MAINn; each executable has its own order and count.
-SCES_013.31 has no table (it finds EXE/MAINn.EXE by name).
+SCES_013.31 / SCES_013.30 have no table (they find EXE/MAINn.EXE by name: MAIN0 + MAIN5..8 / MAIN0 + MAIN1..4).
 
   tools/cdfiles.py dump EXE [--ref IMAGE]
         prints index, address, LBA, size and the resolved file name of every entry

@@ -305,7 +305,7 @@ def main():
     ]
     out = []
     w = out.append
-    w("# Tombi! decompilation progress (PAL Spanish, SCES_013.31)\n")
+    w("# Tombi! decompilation progress (PAL Rev 1, SCES-01331 / SCES-01330; MAIN0.EXE, the English build)\n")
     w("_Generated with `python tools/progress.py` (%s). Do not edit by hand._\n" % datetime.date.today().isoformat())
     og, om, on = (sum(d[k] for d in ovl.values()) for k in ("game", "matched", "n_matched"))
     summary = summary_lines(res, cov, ovl, tot, matching)
@@ -348,7 +348,7 @@ def main():
     w("figure in the summary counts each function once.\n")
     w("## What is NOT counted (the real denominator is larger)\n")
     w("- `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.")
-    w("- `SCES_013.31` (loader, 651 KB): almost all Psy-Q library; not analyzed.")
+    w("- `SCES_013.31` / `SCES_013.30` (the language-menu loaders, 651 KB, the only file that differs between the two PAL discs): almost all Psy-Q library; not analyzed.")
     w("- AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages, and so are the")
     w("  SYSTEM overlays of the variants 1..8 (D1SPSUB ... I8NFO3; only the variant 0 of MAIN0 is counted).")
     w("- Functions called only by an overlay that Ghidra does not recognize, and overlays not yet identified")

@@ -1,6 +1,6 @@
-# Tombi! decompilation progress (PAL Spanish, SCES_013.31)
+# Tombi! decompilation progress (PAL Rev 1, SCES-01331 / SCES-01330; MAIN0.EXE, the English build)
 
-_Generated with `python tools/progress.py` (2026-10-28). Do not edit by hand._
+_Generated with `python tools/progress.py` (2026-11-05). Do not edit by hand._
 
 ## Summary
 
@@ -8,16 +8,16 @@ _Generated with `python tools/progress.py` (2026-10-28). Do not edit by hand._
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
-| MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 100.0 % `[########################]` |
-| X000.BIN: AREA00 + object code reused by all areas | 313676 B | 312708 B | 99.7 % `[########################]` |
-| X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 100.0 % `[########################]` |
-| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 184340 B | 95.3 % `[#######################.]` |
-| **Whole game** | **1530244 B** | **1520132 B** | **99.34 %** `[########################]` |
+| MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X000.BIN: AREA00 + object code reused by all areas | 313676 B | 312708 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.7 % |
+| X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 184340 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.3 % |
+| **Whole game** | **1530244 B** | **1520132 B** | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 **99.34 %** |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 90016 B of it (89.2 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
   other; those copies match automatically and are not added again (counting every copy separately gives 99.7 %).
-- Also tracked for MAIN0 + X000: 95.5 % of the code named by us, 67.3 % typed with the TObj structure.
+- Also tracked for MAIN0 + X000: 98.3 % of the code named by us, 67.3 % typed with the TObj structure.
 
 "Game code" = functions inside the code of the analyzed programs, **excluding** those from
 Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 100904 bytes (906 functions).
@@ -26,8 +26,8 @@ Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 1009
 
 | Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library | Psy-Q matching |
 |---|---|---|---|---|---|---|
-| MAIN0.EXE (game core) | 286092 B (812 f) | 99.2 % | 45.2 % | 100.0 % (1239 f) | 100864 B | 89976 B (89.2 %) |
-| X000.BIN (AREA00 overlay) | 307596 B (588 f) | 92.1 % | 87.9 % | 99.7 % (529 f) | 40 B | 40 B (100.0 %) |
+| MAIN0.EXE (game core) | 286092 B (812 f) | 100.0 % | 45.2 % | 100.0 % (1239 f) | 100864 B | 89976 B (89.2 %) |
+| X000.BIN (AREA00 overlay) | 307596 B (588 f) | 96.8 % | 87.9 % | 99.7 % (529 f) | 40 B | 40 B (100.0 %) |
 
 ## Area overlays (X001..X019) and SYSTEM overlays
 
@@ -74,7 +74,7 @@ figure in the summary counts each function once.
 ## What is NOT counted (the real denominator is larger)
 
 - `MAIN1..8.EXE`: they share ~98 % of the code (`.text`) with MAIN0; they are treated as variants and not added.
-- `SCES_013.31` (loader, 651 KB): almost all Psy-Q library; not analyzed.
+- `SCES_013.31` / `SCES_013.30` (the language-menu loaders, 651 KB, the only file that differs between the two PAL discs): almost all Psy-Q library; not analyzed.
 - AREA07 and AREA12 reuse X001/X004, AREA15 has no code; X1nn..X8nn are other languages, and so are the
   SYSTEM overlays of the variants 1..8 (D1SPSUB ... I8NFO3; only the variant 0 of MAIN0 is counted).
 - Functions called only by an overlay that Ghidra does not recognize, and overlays not yet identified
@@ -84,11 +84,11 @@ figure in the summary counts each function once.
 ## Where things stand (October 2026)
 
 - Code: the whole-game figure of the summary above (2950 of 2955 functions). What does not match is five functions of the
-  memory card / sub-screen overlays (D0SPSUB func_800E89F8, subScreenItemListStep, func_800EFD6C; D0SPSUB2 func_800E999C;
-  D0SPSUB3 subScreenItemListStep, plus the D0SPSUB3 twin of func_800E89F8). Each has functionally equivalent C in `src/wip/`
+  memory card / sub-screen overlays (D0SPSUB func_800E89F8, func_800ED0C4, func_800EFD6C; D0SPSUB2 func_800E999C;
+  D0SPSUB3 func_800EC89C, plus the D0SPSUB3 twin of func_800E89F8). Each has functionally equivalent C in `src/wip/`
   whose header documents the remaining difference (register allocation and scheduler order only, the structure matches);
   [notes/remaining.md](../notes/remaining.md) lists them.
-- Function names: essentially complete; 111 functions keep a generic name (`notes/unnamed.json`: empty stubs, unreferenced
+- Function names: essentially complete; 0 functions keep a generic name (`notes/unnamed.json`: empty stubs, unreferenced
   code and event scenes nothing pins a behaviour to).
 - Data names: done by usage for MAIN0 (342 globals in `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM
   overlays (266: D0SPSUB 67, D0SPSUB2 51, D0SPSUB3 43, G0OVER 4, I0NFO 11, I0NFO2 46, I0NFO3 11, O0PTSUB0 33), applied to the sources with `tools/rename_data.py`. What is still spelled by
@@ -112,21 +112,21 @@ figure in the summary counts each function once.
 
 | Size | Address | Program |
 |---|---|---|
-| 1600 B | `801363e4` | X000.BIN |
-| 1272 B | `800ed258` | X000.BIN |
-| 1212 B | `800ed750` | X000.BIN |
-| 944 B | `8006b0ac` | MAIN0.EXE |
-| 812 B | `8011de84` | X000.BIN |
 | 796 B | `8011ccd8` | X000.BIN |
-| 744 B | `8012ff0c` | X000.BIN |
 | 732 B | `80117cbc` | X000.BIN |
 | 728 B | `8011ca00` | X000.BIN |
 | 672 B | `80122f54` | X000.BIN |
-| 656 B | `80122c10` | X000.BIN |
 | 640 B | `801180ac` | X000.BIN |
-| 636 B | `8006b7ec` | MAIN0.EXE |
-| 576 B | `80110cac` | X000.BIN |
 | 536 B | `80132bb8` | X000.BIN |
+| 432 B | `80132dd0` | X000.BIN |
+| 364 B | `8011eae8` | X000.BIN |
+| 332 B | `801213d0` | X000.BIN |
+| 296 B | `80118440` | X000.BIN |
+| 292 B | `8011dd48` | X000.BIN |
+| 268 B | `8011832c` | X000.BIN |
+| 248 B | `8011e688` | X000.BIN |
+| 220 B | `80116d50` | X000.BIN |
+| 196 B | `801237e4` | X000.BIN |
 
 ## How it is measured
 
