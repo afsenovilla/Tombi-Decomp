@@ -406,8 +406,8 @@ static void pump(void) {
 }
 
 /* where the logical frame (320 wide whatever the mode, h lines) goes in a W x H output: 4:3 as a PAL TV shows
-   256 lines (square pixels with port_window_square), the largest integer vertical scale that fits, centred;
-   a smaller output gets the fit */
+   256 lines (square pixels with port_window_square), the largest integer vertical scale when the output is within
+   1/16 of it (the launcher's own window sizes), else the largest fit that keeps the aspect, centred */
 #ifndef PORT2_WASM_HOST   /* (port2/wasm: these live in the wasm module, port2/wasm/sdl_bridge.h) */
 int port_window_fit_wide;        /* the frame being shown is a --widescreen one (320 + 2 * pad wide) */
 int port_window_fill;            /* --fit: fill the screen with a non-integer scale (keeps the aspect) */
@@ -421,6 +421,10 @@ void port_window_fit(int W, int H, int h, int *x, int *y, int *w, int *hh) {
     int k = W / lw < H / h ? W / lw : H / h;
     float ow, oh;
     if (port_window_fill) k = 0;
+    /* an integer scale only while the output is (nearly) that size: the launcher's 1x/2x/3x windows and displays that
+       happen to fit. A window the player has dragged bigger, or a display between two multiples, gets the fractional
+       fit instead of a picture floating in borders wider than 1/16 of it (keeps the aspect either way) */
+    else if (k >= 1 && ((W - lw * k) * 16 > lw * k || (H - h * k) * 16 > h * k)) k = 0;
     if (k >= 1) { ow = (float)(lw * k); oh = (float)(h * k); }
     else { float s = (float)W / lw < (float)H / h ? (float)W / lw : (float)H / h; ow = lw * s; oh = h * s; }
     *w = (int)(ow + 0.5f); *hh = (int)(oh + 0.5f); *x = (W - *w) / 2; *y = (H - *hh) / 2;

@@ -1,5 +1,56 @@
 // FUNC 8012a890 716 X003
 // MATCHING 8012a890 716
+// VERSION SLPS_01144 x03 80129804 368
+#if defined(VERSION_SLPS_01144)
+#include "gcd.h"
+#include "gvars.h"
+#include "TOBJ.H"
+
+extern unsigned char D_8009E4E8, D_8009E4E9;
+extern int ObjCullRegister(TObj *o);
+extern void freeObjectLayer2(TObj *o);
+extern void removeItemFromInventory(int, int);
+extern void func_8012964C_slps01144(TObj *o);
+extern void func_80128CCC(TObj *o);
+extern void func_80128ADC_slps01144(TObj *o, int);
+
+static __inline__ int chk(void)
+{
+    return D_8009E4E8 == 1 && D_8009E4E9 == 0x42;
+}
+
+void func_80129804(TObj *o)
+{
+    switch (o->b04) {
+    case 0:
+        func_8012964C_slps01144(o);
+        break;
+    case 1:
+        ObjCullRegister(o);
+        if (o->subtype) break;
+        switch (o->step) {
+        case 0:
+            if ((GCD.bd004 && GCD.bcdc7 == 0xff) || chk()) {
+                GCD.bd004 = 0;
+                if (GCD.bcdc7 != 0xff) removeItemFromInventory(0x42, 5);
+                o->step++;
+                o->state = 0;
+            }
+            break;
+        case 1:
+            func_80128CCC(o);
+            break;
+        }
+        break;
+    case 2:
+        func_80128ADC_slps01144(o, 7);
+        break;
+    case 3:
+        freeObjectLayer2(o);
+        break;
+    }
+}
+#else
 #include "gcd.h"
 #include "gvars.h"
 #include "player.h"
@@ -100,3 +151,4 @@ void updateMasterOfTheSkiesEvent(TObj *o)
         break;
     }
 }
+#endif

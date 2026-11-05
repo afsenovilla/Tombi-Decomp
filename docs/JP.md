@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 84.28 % of code (1195556 of 1418632 bytes, 2748 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 85.03 % of code (1206300 of 1418632 bytes, 2766 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2748 functions, 68.66 % -> 84.28 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2766 functions, 68.66 % -> 85.03 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -361,8 +361,23 @@ Relocation names, not code: two JP files compiled identically under `jpcheck --n
 97.9 % / 99.9 % because the JP branch kept PAL symbol names that do not exist in the JP link (`FUN_8001e4f0`,
 `MOVE_TABLE_1/2`, the overlay anim tables `D_8013A1E0..`, `KOMA_PIG_ANIM_BOXES`, `DISPLAY_BUFFER_*`, `GV6.s70` for
 the raw `D_8009F200`, `GAME.selectedSection` for `GAME_SELECTED_SECTION`). `func_801275C8` and `func_8001AA90` now
-use the JP names; check a near-100 % report line with `jpcheck --strict` *without* `--norm` (the names are masked
-otherwise).
+use the JP names, yet the report still lists them (97.9 % / 99.9 %, with x00 `func_8010D854` at 99.96 %) although
+`jpcheck --strict` without `--norm` shows only the target's own symbol spellings (`applyAnimVelocityX` for
+`func_80020A00`, the `jtbl_` names, `.rodata` offsets): objdiff compares something jpcheck does not (open).
+
+Contact and attack twins paired by callee names (scratch `pair4.py`: JP callee set translated to PAL names through
+the config comments, PAL file with the same callees and a size within 20 %), 84.28 % -> 85.03 %, the 85 % mark: the JP contact routines of
+the overlays drop the `SPAD.b1a4` guard and the `wb4 == 0` early-out, mark the hit object with `b0 = 4`, `b69 = 0`
+and (when `b3` is set) `w7a = w2e`, link it at `d4` (PAL `e4`), and set `b69 = 8` on a plain touch:
+`spikyLizardContact` x03 (plus a second x03 copy `func_8011E874` that returns when `b3 == 4`), `blackCrowContact`
+x04 copy `func_8011DB0C` and x10 copy `func_8011C464` (no `b69 = 8`, the facing goes to `w2e`), `redFlowerContact`
+x09, `komaPigContact` x01 (subtype 8 keeps the PAL item check). Event side: `updateMasterOfTheSkiesEvent` x03
+(case 2 is a call to the JP-only `func_80128ADC(o, 7)`: the shared "play movie `id`, then warp to area 10" tail
+that PAL inlines in each handler; `id` is an `int` cast to `short` only at the `cdSeekStream` call, else gcc copies
+a1 to a3 at entry), the five `evilPigAttack*` x14 (no `evilPigSetBoxByDirection` before the flash; Lava Caves
+spawns the shot in substep 0 and Trick Village drops the `selectedSection != 7` test), `updateEvilPigBoss` x14 (no
+hit stars), `updateRotatingPlane` x09 (no `ba4 = 0`), `updateSwimTeacher` x10 (no `GVARS.b3f = 1`), `komaPigIdle`
+x03 and x04 (no `movetab` in case 6; the x04 copy uses anim 10 in cases 6 and 10).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
