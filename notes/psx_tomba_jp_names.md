@@ -6,8 +6,8 @@ its LICENSE file was missing on that date). Cross-checked against `config/slps01
 - Same name on both sides: 525 functions. Imported: 29 renames of our generic `func_*` names and 54 functions our JP
   symbols lacked (mostly BIOS / libapi stubs, plus main, awardEventProgress, playSFX, loadWssFile, increaseMaxHealth,
   printInfoMessage), each paired with its PAL function by name (`PAL main0 0x...`, so jp_autofix can try the PAL C);
-  sizes from the PAL twin when the masked code matches, else by scanning to `jr $ra`. JP report unchanged at 82.04 %
-  (2694 of 3097 functions, +11). Dropped: `SsInitHot` (0x80066280) and `_patch_gte` (0x80061488), which we place at
+  sizes from the PAL twin when the masked code matches, else by scanning to `jr $ra`. JP report 85.03 -> 85.05 % (2779 of 3102
+  functions, +13; the 82 % figures seen while importing were a branch behind the sweep's matches). Dropped: `SsInitHot` (0x80066280) and `_patch_gte` (0x80061488), which we place at
   other addresses; `libgte_stamp` / `libapi_stamp`, which are strings, not functions.
 - Overlay symbol files (x00..x19) of psx_tomba hold no names we lack. Data symbols were not imported.
 - The USA build has no config here; nothing to import for it yet.

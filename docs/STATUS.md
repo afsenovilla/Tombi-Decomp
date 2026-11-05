@@ -199,8 +199,8 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   day; the owner moved PAL, JP and Dengeki to MEGA links.
 
 - psx_tomba cross-check (2026-11-05): their JP symbols gave us 29 names for generic `func_*` functions (files
-  renamed, e.g. `src/CdStatus_slps01144.c`) and 54 missing function symbols paired with PAL by name; the JP report
-  stays at 82.04 % with 11 more matched functions. 23 naming disagreements kept on our side (notes/psx_tomba_jp_names.md).
+  renamed, e.g. `src/CdStatus_slps01144.c`) and 54 missing function symbols paired with PAL by name; on top of the
+  sweep's 85.03 % the JP report is 85.05 % (2779 of 3102 functions, +13). 23 naming disagreements kept on our side (notes/psx_tomba_jp_names.md).
   Their overall progress is below ours (SDK 88 %, main 78 %, overlays 77 %); LICENSE claims MIT but the file 404s.
   Our LICENSE is now the plain MIT text (the scope note moved to the README) so GitHub identifies it.
 
