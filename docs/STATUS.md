@@ -196,6 +196,11 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
   direct / Dropbox / Drive / public MEGA links (megadl). Drive hit its quota on the PAL, JP and Dengeki files that
   day; the owner moved PAL, JP and Dengeki to MEGA links.
 
+- PC window fit (2026-11-05): a window dragged to a size that is not within 1/16 of an integer multiple of the
+  picture now gets the aspect-keeping fractional fit instead of floating at the integer scale inside borders
+  (`port_window_fit`, sdl.c; `--fit` still forces the fractional fit always). Checked under Xvfb with xdotool: 682x512
+  window -> 682 px wide picture (2x), 953x1000 -> 953 wide, 700x520 -> 682 wide (still 2x, small borders).
+
 - Panel (c8529a5): event detail page redone as the Items showcase (icon 3x on stone, title 16 px + state; Dónde =
   plate / area / room lines + "Ver en el mapa" when the marker is in the loaded room (Map tab centred on it, zoom 2);
   Quién only when it adds something, else Pista, else no window; planks Volver / Seguir / Ocultar; no route graph,
