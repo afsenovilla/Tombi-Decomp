@@ -5,11 +5,11 @@
 /* volatile store of velY makes the later read reload it (game: lh + move copy) */
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *D_8009DEE0;
+extern TObj *PLAYER_EXT;
 extern int BITTEN_OBJECT;
 extern void PlayerSetAnimIfChanged(TObj *, int);
-extern short func_80020DB4(int, int);
-extern short func_80040940(TObj *, int, int);
+extern short FUN_8001fe3c(int, int);
+extern short FUN_8003fd78(TObj *, int, int);
 extern void playerSetAnim(TObj *, int, int);
 
 void func_8010D854(TObj *o)
@@ -18,6 +18,7 @@ void func_8010D854(TObj *o)
     short v;
     short u;
     int d;
+    int t;
 
     switch (o->state) {
     case 0:
@@ -37,7 +38,7 @@ void func_8010D854(TObj *o)
     }
     d = o->d8c;
     o->d8c = (o->animFrame & 1) ? d + 0x10 : d - 0x10;
-    r = func_80020DB4(o->wb6, o->wb2);
+    r = FUN_8001fe3c(o->wb6, o->wb2);
     o->velH = r;
     o->h->raw += r << 8;
     o->y.raw += o->velY << 8;
@@ -49,7 +50,7 @@ void func_8010D854(TObj *o)
     o->timer--;
     if ((*(unsigned char*)&o->wac) == 2) {
         BITTEN_OBJECT = S32(o, 0xd4);
-        (*(unsigned char*)&D_8009DEE0->w08) = 0;
+        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
         o->ba7 = 0;
         o->ba5 = 0;
         o->step = 0x48;
@@ -62,18 +63,15 @@ void func_8010D854(TObj *o)
     u = v;
     if (v < 0) {
         playerSetAnim(o, 0x44, 0);
-        o->b9c = 0;
-        (*(unsigned char*)&o->wac) = 0;
-        o->step = 0x3e;
-        o->state = 0;
-        return;
+        t = 0x3e;
+        goto fin;
     }
     if (o->b69) {
         o->velY = u - 0x10;
         o->b69 = 0;
         return;
     }
-    if (func_80040940(o, 0, 0)) {
+    if (FUN_8003fd78(o, 0, 0)) {
         o->b69 = 0;
         o->velY -= 0x10;
         return;
@@ -81,10 +79,12 @@ void func_8010D854(TObj *o)
     if (o->timer > 0)
         return;
     playerSetAnim(o, 0x44, 0);
+    t = 0x3e;
     o->b69 = 0;
+fin:
     o->b9c = 0;
     (*(unsigned char*)&o->wac) = 0;
-    o->step = 0x3e;
+    o->step = t;
     o->state = 0;
 }
 #endif
