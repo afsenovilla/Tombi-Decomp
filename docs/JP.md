@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 85.03 % of code (1206300 of 1418632 bytes, 2766 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 85.60 % of code (1214372 of 1418632 bytes, 2772 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2766 functions, 68.66 % -> 85.03 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2772 functions, 68.66 % -> 85.60 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -378,6 +378,11 @@ a1 to a3 at entry), the five `evilPigAttack*` x14 (no `evilPigSetBoxByDirection`
 spawns the shot in substep 0 and Trick Village drops the `selectedSection != 7` test), `updateEvilPigBoss` x14 (no
 hit stars), `updateRotatingPlane` x09 (no `ba4 = 0`), `updateSwimTeacher` x10 (no `GVARS.b3f = 1`), `komaPigIdle`
 x03 and x04 (no `movetab` in case 6; the x04 copy uses anim 10 in cases 6 and 10).
+
+Parallel agent batch (85.03 % -> 85.60 %): six more near-twins, each a small JP edit: `bossRoomPlatformCaptureBoss` and
+`evilPigBossDefeated` x14 drop one call (`spawnBossCaptureEffectRing`, `spawnEvilPigHitStars`), `updateRedFlower` x09 drops two
+`active` stores, `playerStep25Area9` x09 uses the x0x100 pad masks and inlines `playerSetFallLean`, `updateWindblownMonkey` x03
+writes five player globals before the step change, and `updateFoodForFuelObject` x11 sets `d84/d88/d8c` once for every `b0c`.
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in

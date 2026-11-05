@@ -1,5 +1,233 @@
 // FUNC 80119b58 2368 X014
 // MATCHING 80119b58 2368
+// VERSION SLPS_01144 x14 801170C4 2348
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gv2.h"
+#include "gvars.h"
+#include "player.h"
+#include "TOBJ.H"
+typedef struct { unsigned char b0, b1, b2, b3, b4, b5, b6, b7; } S8;
+extern unsigned short GAME_SELECTED_SECTION[];
+static short D_80125C40[8] = {
+    0xc8, 0xcd, 0xd2, 0xd8, 0xdd, 0xe2, 0xe7, 0xe7,
+};
+static short D_80125C50[8] = {
+    0xc9, 0xce, 0xd3, 0xd9, 0xde, 0xe3, 0xe8, 0xe8,
+};
+extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
+extern unsigned char D_800A60D6;
+extern unsigned char D_800A4555;
+extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
+extern short D_8007A1F0[], COS_TABLE[];
+extern int CAMERA_TARGET_Y_FIX;
+extern int bossCaptureBossInReach(TObj *, S8 *);
+extern int bossCapturePullBoss(TObj *, S8 *);
+extern int bossCaptureBounceDirection(TObj *, unsigned char);
+extern void spawnBossCaptureEffectRing(TObj *, int, int, int);
+extern void FUN_8001e4f0(int);
+extern void FUN_8001fe6c(TObj *);
+extern int FUN_8001fec0(TObj *);
+extern void cdSeekStream(int);
+extern void FUN_8001f110(int);
+extern void FUN_80026e0c(int, int);
+
+#define turn(o, T)                                  \
+    {                                               \
+        int n = o->d8c;                             \
+        unsigned char d = (T) - n;                  \
+        if (d != 0) {                               \
+            if (d < 0x81) {                         \
+                if (d < 2) o->d8c = n + 1;          \
+                else o->d8c = n + 2;                \
+            } else {                                \
+                if (d < 0xff) o->d8c = n - 2;       \
+                else o->d8c = n - 1;                \
+            }                                       \
+            o->d8c = *(unsigned char *)&o->d8c;     \
+        }                                           \
+    }
+
+static __inline__ void setAnim(TObj *p, void *a)
+{
+    p->anim = a;
+    FUN_8001fe6c(p);
+}
+
+#define MOVE(o)                                                     \
+    o->velY = (o->velH * D_8007A1F0[o->wb0]) >> 12;                 \
+    o->velX = (o->velH * COS_TABLE[o->wb0]) >> 12;                 \
+    o->h->raw += o->velX << 8;                                      \
+    o->y.raw += o->velY << 8;
+
+#define ROT(o) o->wb0 = (unsigned char)bossCaptureBounceDirection(o, (unsigned short)o->wb0 >> 4) << 4
+
+#define MSG(o)                      \
+    if (D_800A60D6) {               \
+        D_800A60D6 = 0;             \
+        PLAYER.obj.b04 = 5;             \
+        PLAYER.obj.step = 0;             \
+        PLAYER.obj.state = 0;             \
+    }
+
+void func_801170C4(TObj *o)
+{
+    S8 *s = (*(S8 **)&GVARS.p48);
+    int v;
+    unsigned int u;
+
+    switch (o->state) {
+    case 0:
+        if (!bossCaptureBossInReach(o, s)) break;
+        FUN_8001e4f0(D_80125C40[GAME_SELECTED_SECTION[0]]);
+        o->velH = 0x500;
+        o->state++;
+        s->b0 = 2;
+        s->b4 = 2;
+        s->b5 = 4;
+        s->b6 = 0;
+        s->b7 = 0;
+        o->b6a = 1;
+        break;
+    case 1:
+        turn(o, *(unsigned char *)&o->d38);
+        if (!bossCapturePullBoss(o, s)) break;
+        o->b0b = 1;
+        o->b0f = 4;
+        o->state++;
+        GVARS.b3e = 0;
+        MSG(o);
+        s->b4 = 2;
+        s->b1 = 0;
+        s->b5 = 4;
+        s->b6 = 1;
+        o->ba5 = 0x40;
+        setAnim(o, D_80129F7C[0]);
+        break;
+    case 2:
+        u = o->ba5 + 2;
+        if (u >= 0x80) *(signed char *)&o->ba5 = -0x80;
+        else o->ba5 = u;
+        turn(o, *(unsigned char *)&o->d38);
+        if (FUN_8001fec0(o)) {
+            o->velH = 0x500;
+            *(signed char *)&o->ba5 = -0x80;
+            o->state++;
+            o->wb0 = (o->wb0 + 0x80) & 0xff;
+            setAnim(o, D_80129F8C[0]);
+        }
+        MSG(o);
+        break;
+    case 3:
+        MSG(o);
+        u = o->ba5 + 2;
+        if (u >= 0x100) *(signed char *)&o->ba5 = -1;
+        else o->ba5 = u;
+        FUN_8001fec0(o);
+        MOVE(o);
+        o->velH += 0x40;
+        if (o->velH > 0x1500) {
+            o->velH = 0x1500;
+            o->timer = 0x5a;
+            *(signed char *)&o->ba5 = -1;
+            o->state++;
+        }
+        ROT(o);
+        break;
+    case 4:
+        FUN_8001fec0(o);
+        MOVE(o);
+        ROT(o);
+        if (--o->timer == -1) o->state++;
+        break;
+    case 5:
+        {
+            short w = o->ba5 - 1;
+            if (w <= 0) o->ba5 = 0;
+            else o->ba5 = w;
+        }
+        FUN_8001fec0(o);
+        MOVE(o);
+        ROT(o);
+        o->velH -= 0x40;
+        if (o->velH < 0x400) {
+            o->state++;
+            if ((*(short*)((char*)&SPAD.i168 + 2)) > (*(short*)((char*)&SPAD.iec + 2))) v = -0x10;
+            else v = 0x10;
+            o->velH = (SPAD.i168 + v - o->h->raw) >> 15;
+            v = ((int*)&SPAD.i16c)[0];
+            o->timer = 0x80;
+            o->wb0 = 0x40;
+            *(signed char *)&o->b0f = -9;
+            {
+                int w = o->y.raw + 8;
+                v -= w;
+                o->velV = v >> 15;
+            }
+            cdSeekStream(D_80125684[GAME_SELECTED_SECTION[0]]);
+        }
+        break;
+    case 6:
+        {
+            short w = o->ba5 - 2;
+            if (w <= 0) o->ba5 = 0;
+            else o->ba5 = w;
+        }
+        turn(o, *(unsigned char *)&o->wb0);
+        FUN_8001fec0(o);
+        o->h->raw += o->velH << 8;
+        o->y.raw += o->velV << 8;
+        if (--o->timer == 0) {
+            o->timer = 0x3c;
+            o->ba5 = 0;
+            o->ba6 = 0;
+            o->ba7 = 1;
+            o->state++;
+        }
+        CAMERA_TARGET_Y_FIX = o->y.raw;
+        SPAD.i18c = o->h->raw;
+        break;
+    case 7:
+        u = o->ba5 + 2;
+        if (u >= 0x100) *(signed char *)&o->ba5 = -1;
+        else o->ba5 = u;
+        o->ba6 = o->ba5;
+        turn(o, *(unsigned char *)&o->wb0);
+        FUN_8001fec0(o);
+        if (--o->timer == 0) {
+            FUN_8001e4f0(D_80125C50[GAME_SELECTED_SECTION[0]]);
+            o->timer = 0x3c;
+            o->state++;
+            setAnim(o, D_80129F80[0]);
+        }
+        break;
+    case 8:
+        u = o->ba5 + 2;
+        if (u >= 0x100) {
+            o->anim = 0;
+            *(signed char *)&o->ba5 = -1;
+        } else o->ba5 = u;
+        o->ba6 = o->ba5;
+        if (--o->timer == -1) {
+            unsigned char *p;
+            o->state++;
+            o->anim = 0;
+            FUN_8001f110(1);
+            {
+                int n = D_80125C68[GAME_SELECTED_SECTION[0]];
+                p = &GV2.bc3;
+                D_800A4555 = 4;
+                *p |= 1 << n;
+            }
+            FUN_80026e0c(D_80125C60[GAME_SELECTED_SECTION[0]], 1);
+        }
+        break;
+    case 9:
+        o->anim = 0;
+        break;
+    }
+}
+#else
 #include "spad.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -226,3 +454,4 @@ void bossRoomPlatformCaptureBoss(TObj *o)
         break;
     }
 }
+#endif
