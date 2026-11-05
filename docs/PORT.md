@@ -1717,7 +1717,7 @@ Texel coordinates of polygons round to nearest like the software rasteriser.
 
 **Present.** With a window the backend blits the display area (`PutDispEnv` rectangle) from the VRAM texture
 onto the window with a textured quad: the logical frame is 320 pixels wide for every mode (a 512-wide mode shows
-at the same size, as the SDL path did), scaled to the largest integer multiple that fits the window and centred
+at the same size, as the SDL path did), scaled to the largest integer multiple when the window is within 1/16 of that size (the launcher's 1x/2x/3x windows), else to the largest aspect-keeping fit (a window dragged bigger fills it; before 2026-11-05 it kept the integer scale and floated in borders), and centred
 (a smaller window gets the fit); then `SDL_GL_SwapWindow`. Vsync is `SDL_GL_SetSwapInterval(1)`: the swap blocks
 until the display's refresh, and since the pacing of `shims/psyq.c` is an absolute schedule its sleep shrinks by
 what the swap took, so there is no double wait; the fps line shows the swap under `present` and the remainder
