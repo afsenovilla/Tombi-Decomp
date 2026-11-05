@@ -32,7 +32,7 @@ shared touch scroller for every long list, Windows tolower link fix.
    PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
-## Japanese decomp (SLPS-01144), hand pass 3 (84.28 %)
+## Japanese decomp (SLPS-01144), hand pass 3 (85.03 %)
 
 82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
@@ -42,7 +42,12 @@ already swept: `scratchpad cand2`, rest are > 30 diff lines); (c) the structural
 updateFrog, blackCrowFlyAround, masterOfTheSkiesScene, the x10 seesaw, komaPigState0); (d) 28 functions >= 2 KB
 with no PAL twin, to decompile from scratch. Demo SLPM-80165 at 40.87 % after `tools/demo_sweep.py`; BETA/PCPX only
 sweepable in CI. Workflow per function: `tools/jpcheck.py --strict --norm`, `tools/jp_autofix.py --install-file`,
-`tools/build_report.py --version slps01144`, `tools/progress_jp.py`.
+`tools/build_report.py --version slps01144`, `tools/progress_jp.py`. Pairing by callee names
+(`tools/jp_pair_callees.py`, 2026-11-05) finds twins the masked-word pairer missed (contacts, attacks, event
+handlers: 17 in one pass); a report line at 97-99.9 % that `jpcheck --norm` calls IDENTICAL is a PAL symbol name
+that does not exist in the JP link: run `jpcheck --strict` without `--norm` and use the JP names (raw `D_`/`func_`
+for overlay data and callees); three such lines (8001AA90, 8010D854, 801275C8) stay below 100 % after that, cause open. While `build_report` runs, `JP_TARGET_DIR=<copy of build/slps01144>` lets jpcheck
+use a copy of the target objects (copy them before starting the build).
 
 ### JP sweep workflow
 
