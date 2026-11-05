@@ -18,7 +18,8 @@ Item icons (src/d0spsub/subScreenDrawItemIcon.c): item n = 16 x 16 cell (n % 15 
   python3 -I tools/event_icons.py sheet DISC OUT.png     labelled sheet (events: frame / event ids; unused ones marked)
   python3 -I tools/event_icons.py compare OUT.png        icons of the demos / beta absent from the retail page, and
                                                          retail icons no event of any disc shows
-DISC: pal | usa | jp | beta | jpdemo | pp8   (paths: game/disc/fs, /dev/shm/{usa,jp,beta,jpdemo}/fs, /dev/shm/pp8/TOMBA)
+DISC: pal | usa | jp | beta | jpdemo | pp8 | dengeki | pp9 | hyper12   (paths: game/disc/fs and the game_<name>/fs folders of
+      tools/disc_fetch.sh; the old /dev/shm paths are the fallback)
 """
 import os, re, struct, sys
 
