@@ -54,7 +54,10 @@ jobs:
           SHA=$(gh api "repos/$R/commits/master" --jq .sha)
           PREV=$(gh api "repos/$R/releases?per_page=100" --jq '.[].tag_name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
           LAST=${PREV#v}; LAST=${LAST:-0.0.0}
-          IN="${{ inputs.version }}"; IN=${IN#v}
+          # VERSION (repo root) is the number baked into the Android launcher: the release uses it unless overridden
+          FILEVER=$(tr -d ' \r\n' < VERSION 2>/dev/null || true)
+          IN="${{ inputs.version }}"; IN=${IN#v}; IN=${IN:-$FILEVER}
+          [ -z "$FILEVER" ] || [ "$IN" = "$FILEVER" ] || echo "::warning::version $IN differs from VERSION ($FILEVER): the APK shows v$FILEVER"
           if [ -n "$IN" ]; then
             [[ "$IN" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::version '$IN' is not X.Y.Z"; exit 1; }
             [ "$IN" != "$LAST" ] && [ "$(printf '%s\n%s\n' "$LAST" "$IN" | sort -V | tail -n1)" = "$IN" ] || { echo "::error::version $IN must be greater than $LAST"; exit 1; }

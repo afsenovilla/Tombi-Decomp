@@ -7,6 +7,9 @@ Update this file whenever something lands or a task is decided. Newest first.
 v0.1.2 (build of b4d6406): vitality fruit numbers 8-16, warp destinations one per line, event detail page redone,
 shared touch scroller for every long list, Windows tolower link fix.
 
+Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
+default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
+
 ## In progress / open
 
 1. **NTSC picture (`--picture ntsc`, opt-in, experimental)**: top-down areas (AREA02/05/08/19) draw sprites/scenery
