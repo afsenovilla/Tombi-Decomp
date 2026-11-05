@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 84.01 % of code (1191860 of 1418632 bytes, 2741 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 84.06 % of code (1192556 of 1418632 bytes, 2742 of 3095 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2741 functions, 68.66 % -> 84.01 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2742 functions, 68.66 % -> 84.06 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -327,7 +327,11 @@ RepeatTalk` lose the b1a4 guard, the `d1 = 1` byte, the player-facing frame or g
 reset; `updateL3Type3BObject` tests only `GCD.bcf06`; the x00 `playerStepSwimSpin` copy keeps two
 `playerSetAnim(o, 0x44, 0)` calls (the `velY < 0` exit skips `b69 = 0`); `wingedForkPigHit` leaps 16 and drops the
 clone on the landing (`t = hit(o); if (t || velV > 0x580)` keeps a single block). The JP-only files must name
-callees by their JP symbol (`func_80020DB4`, `probeSidesAndApplyTileResponse`), the PAL `FUN_` names do not link.
+callees by their JP symbol (`func_80020DB4`, `probeSidesAndApplyTileResponse`), the PAL `FUN_` names do not link, and the x00 copies name the
+player record `D_8009DEE0` and the tile probe `func_80040940` (the x00 target keeps the raw names).
+`lostTreasureBossTalk` x04 twin: no timer after event 0x51 and no case 6. Left: the x10 / x14 copies of
+`updateA00FarBackdropWest` (80119D9C with w1e 8, anim [0] and a simplified case 1; 80118580 with w1e 13): retail keeps
+the object pointer in a3 and the two screen-origin halves in a1/a2, ours in a1/a2 and a0; pins do not flip it.
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in

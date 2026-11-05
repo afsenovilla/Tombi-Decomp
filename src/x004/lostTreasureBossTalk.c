@@ -1,5 +1,119 @@
 // FUNC 8012d198 788 X004
 // MATCHING 8012d198 788
+// VERSION SLPS_01144 x04 8012B994 696
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
+#include "player.h"
+#include "TOBJ.H"
+
+extern void *D_801357D8[], *D_801357DC[];
+extern char D_80135AB0[];
+extern char D_80135AC4[];
+extern char D_80135ACC[];
+extern char D_80135AD4[];
+extern char D_80135ADC[];
+extern char D_80135AE4[];
+extern char D_80135B04[];
+static void *D_801357E0[7] = {
+    D_80135AB0, D_80135AC4, D_80135ACC, D_80135AD4,
+    D_80135ADC, D_80135AE4, D_80135B04,
+};
+extern int showMessageBoxDirect(int, int, void *);
+extern void FUN_8001fe6c(TObj *);
+extern void AnimAdvance(TObj *);
+extern short FUN_80040278(TObj *, int, int);
+extern void setEventStarted(int, int, int);
+
+static __inline__ void setAnim(TObj *o, void *a)
+{
+    o->anim = a;
+    FUN_8001fe6c(o);
+}
+
+void func_8012B994(TObj *o)
+{
+    TObj *p;
+    int m, n;
+
+    switch (o->state) {
+    case 0:
+        if (GCD.bcdf5) {
+            o->b04 = 3;
+            break;
+        }
+        o->b68 = 0;
+        o->animFrame = 1;
+        if (((unsigned char*)&GCD.bce63)[0] == 0xff) o->state = 3;
+        else o->state = 1;
+        break;
+    case 1:
+        if (o->b68 == 0) break;
+        m = 5;
+        n = 2;
+        goto talk;
+    case 2:
+        AnimAdvance(o);
+        p = (TObj *)o->d90;
+        if (p->b04 != 2) break;
+        p->b04 = 3;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->wac = 0;
+        o->anim = D_801357D8[0];
+        o->state = 0;
+        break;
+    case 3:
+        if (o->b68 == 0) break;
+        m = 5;
+        n = 3;
+    talk:
+        o->state++;
+        ((unsigned char*)&GVARS.b3f)[0] = 1;
+        ((unsigned char*)&GVARS.b42)[0] = 1;
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 5;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->d90 = showMessageBoxDirect(m, n, &o->a);
+        o->wac = 2;
+        setAnim(o, D_801357E0[0]);
+        break;
+    case 4:
+        AnimAdvance(o);
+        p = (TObj *)o->d90;
+        if (p->b04 != 2) break;
+        p->b04 = 3;
+        o->wac = 1;
+        o->anim = D_801357DC[0];
+        FUN_8001fe6c(o);
+        o->state++;
+        break;
+    case 5:
+        AnimAdvance(o);
+        o->h->p.whole -= 2;
+        o->y.p.whole += 2;
+        FUN_80040278(o, o->h->p.whole, (short)(o->y.p.whole + 0x10));
+        if (o->h->p.whole < 10) {
+            setEventStarted(0x51, 0, 0);
+            o->state++;
+        }
+        break;
+    case 6:
+        ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
+        ((unsigned char*)&GVARS.b3f)[0] = 0;
+        ((unsigned char*)&GVARS.b42)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.step)[0] = 0;
+        ((unsigned char*)&PLAYER.obj.state)[0] = 0;
+        o->b04 = 3;
+        break;
+    }
+    if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x9f) PLAYER.obj.a.p.whole = 0x9e;
+}
+#else
 #include "spad.h"
 #include "gcd.h"
 #include "gvars.h"
@@ -116,3 +230,4 @@ void lostTreasureBossTalk(TObj *o)
     }
     if ((*(short*)((char*)&SPAD.i168 + 2)) >= 0x9f) PLAYER.obj.a.p.whole = 0x9e;
 }
+#endif

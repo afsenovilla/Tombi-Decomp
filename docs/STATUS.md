@@ -32,7 +32,7 @@ shared touch scroller for every long list, Windows tolower link fix.
    PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
-## Japanese decomp (SLPS-01144), hand pass 3 (84.01 %)
+## Japanese decomp (SLPS-01144), hand pass 3 (84.06 %)
 
 82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"

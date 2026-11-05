@@ -5,11 +5,11 @@
 /* volatile store of velY makes the later read reload it (game: lh + move copy) */
 #include "TOBJ.H"
 #include "raw7.h"
-extern TObj *PLAYER_EXT;
+extern TObj *D_8009DEE0;
 extern int BITTEN_OBJECT;
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern short func_80020DB4(int, int);
-extern short probeSidesAndApplyTileResponse(TObj *, int, int);
+extern short func_80040940(TObj *, int, int);
 extern void playerSetAnim(TObj *, int, int);
 
 void func_8010D854(TObj *o)
@@ -49,7 +49,7 @@ void func_8010D854(TObj *o)
     o->timer--;
     if ((*(unsigned char*)&o->wac) == 2) {
         BITTEN_OBJECT = S32(o, 0xd4);
-        (*(unsigned char*)&PLAYER_EXT->w08) = 0;
+        (*(unsigned char*)&D_8009DEE0->w08) = 0;
         o->ba7 = 0;
         o->ba5 = 0;
         o->step = 0x48;
@@ -73,7 +73,7 @@ void func_8010D854(TObj *o)
         o->b69 = 0;
         return;
     }
-    if (probeSidesAndApplyTileResponse(o, 0, 0)) {
+    if (func_80040940(o, 0, 0)) {
         o->b69 = 0;
         o->velY -= 0x10;
         return;
