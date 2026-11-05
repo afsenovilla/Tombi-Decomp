@@ -18,10 +18,12 @@ shared touch scroller for every long list, Windows tolower link fix.
    nine MAINn.EXE and `--lang 1..4` already ran (lang.c). Now exposed: port usage, PC launcher (list, flags,
    launcher-language default), Android launcher (`LANG_N` appended). Checked on PC headless: in-game text in the
    four languages, panel names from `D<n>SPSUB`. Not checked: the device, the Android build. Open: the panel's own
-   chrome is English for 1..4 (only en/es exist, `T()` in panel.c). Rev.0 (July 1998 build of either serial;
-   the SCES-01330 zip now in R2 is Rev.0, MAIN0 md5 3edd55b0) is not supported: 793 files differ from Rev.1 and the
-   port reads overlay tables at Rev.1 addresses. Since 2026-11-04 the PC launcher, extract_data.py and the Android
-   app name a Rev.0 disc as such (sha1 118459ce), and the messages say Rev 1 of SCES-01331 or SCES-01330 is needed.
+   chrome is English for 1..4 (only en/es exist, `T()` in panel.c). Rev.0 (July 1998 build of either serial, MAIN0
+   md5 3edd55b0) is not supported: 793 files differ from Rev.1 and the port reads overlay tables at Rev.1 addresses.
+   Since 2026-11-04 the PC launcher, extract_data.py and the Android app name a Rev.0 disc as such (sha1 118459ce),
+   and the messages say Rev 1 of SCES-01331 or SCES-01330 is needed. The SCES-01330 zip in R2 is Rev.1 again
+   (2026-11-05): extracted with extract_data.py, the port ran 900 frames headless in French from it, launcher says
+   "Compatible disc: SCES-01330".
 3. Debug area select crashes, checked 2026-11-04 (i386 build, 3000 frames each): AREA10 sections 0-8 all run clean;
    AREA17 section 0 segfaults in `spawnSectionObjectsAlt` (empty load list, one of the 13 `DOOR_ROOMS` of
    tools/psxemu/rooms.py that crash in the real game too). Not a port bug; only the door transition from a sibling
