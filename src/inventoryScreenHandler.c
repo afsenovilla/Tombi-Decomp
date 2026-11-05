@@ -1,6 +1,5 @@
 // FUNC 8001aeb4 1140 MAIN0
 // MATCHING 8001aeb4 1140
-// VERSION SLPS_01144 slps01144 8001AA90 904
 #if defined(VERSION_SLPS_01144)
 #include "spad.h"
 #include "gv6.h"

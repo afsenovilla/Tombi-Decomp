@@ -1,6 +1,5 @@
 // FUNC 8010dd8c 504 X000
 // MATCHING 8010dd8c 504
-// VERSION SLPS_01144 x00 8010D854 524
 #if defined(VERSION_SLPS_01144)
 /* volatile store of velY makes the later read reload it (game: lh + move copy) */
 #include "TOBJ.H"

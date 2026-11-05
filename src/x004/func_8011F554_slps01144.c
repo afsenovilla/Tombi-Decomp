@@ -3,7 +3,6 @@
 // FLAGS -O2 -G0 -fno-strength-reduce
 #if defined(VERSION_SLPS_01144)
 // VERSION SLPM_80165 x00 8011E9D4 1788
-// VERSION SLPS_01144 x00 801275C8 1788
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL x000 801288B8 (func_801288B8.c): 60-frame timers (PAL 30), sets active in step 5.
 #include "TOBJ.H"

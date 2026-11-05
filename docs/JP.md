@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 85.71 % of code (1215848 of 1418604 bytes, 2787 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 85.87 % of code (1218160 of 1418604 bytes, 2789 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2787 functions, 68.66 % -> 85.71 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2789 functions, 68.66 % -> 85.87 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -387,6 +387,11 @@ Second agent round (-> 85.71 %): `evilPigBossHit` x14 (no hit stars, two extra s
 `blackCrowPerched` x04 (no snap below 3 in the approach, `SPAD.s1c8` test inverted) match; `playerStepSwimSpin` x00
 (`velY < 0` path skips `b69 = 0`) is jpcheck-identical but still 99.96 % in objdiff; `initGameConfig` main is at 16 lines
 (drops several stores, `VIEW_CAMERA_Y = -120`, the seed stores move to the end; scheduling left).
+Duplicate `// VERSION` lines: when two src files carry the line for the same JP function, build_report builds only one of them
+(the last one it walks), so the JP-renamed rewrites of `func_801275C8` and `func_8010D854` were never built (the report kept an
+older copy with PAL names). Dropping the stale lines (and naming `MulCosDup`, `D_8009DEE0`, `func_80040940` for JP) took both to
+100 % (85.87 %). `jpcheck --norm` hides wrong callee names: check without `--norm` that every relocation name resolves in the JP
+map. `func_8001AA90` stays at 99.91 % (jump-table target offsets 8 bytes off).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
