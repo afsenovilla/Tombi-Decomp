@@ -1,7 +1,7 @@
 // VERSION SLPS_01144 slps01144 8005B940 16
 #if defined(VERSION_SLPS_01144)
 extern unsigned char D_80096882;
-unsigned char func_8005B940_slps01144(void)
+unsigned char GetGraphDebug_slps01144(void)
 {
     return D_80096882;
 }

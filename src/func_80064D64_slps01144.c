@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPS_01144)
 extern int D_8009DDB8, D_8009DDBC, D_8009DDC0, D_8009DDC4;
 extern void func_800584CC(void);
-extern void func_800584DC(void);
+extern void ExitCriticalSection(void);
 extern void func_80064E1C_slps01144(void);
 extern void func_80064E84_slps01144(void);
 extern void func_80064F14(int, int *);
@@ -22,7 +22,7 @@ int func_80064D64(void)
     D_8009DDC4 = 0;
     func_80064F14(1, p);
     func_80064F04(1, p);
-    func_800584DC();
+    ExitCriticalSection();
     return 1;
 }
 #endif

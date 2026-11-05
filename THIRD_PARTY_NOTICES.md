@@ -11,6 +11,8 @@ Used here:
   re-verified byte-for-byte against the PAL executable.
 - `notes/names_main0.csv` entries whose comment mentions `psx_tomba` — function names, mapped onto the PAL
   executable either by matching compiled bytes or by address alignment.
+- `config/slps01144/symbol_addrs_slps01144.txt` lines marked `psx_tomba name` — Japanese-build function names and
+  addresses taken from its `symbols/slps_011.44/` (2026-11-05; see notes/psx_tomba_jp_names.md).
 
 ## Other PSY-Q library decompilations (ports in `src/`, header line `Ported from <project> ...`)
 The functions below are copies of Sony's PSY-Q library objects as the PAL executable links them, re-verified
