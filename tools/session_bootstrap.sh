@@ -26,7 +26,9 @@ if ! dpkg -s libsdl2-2.0-0:i386 >/dev/null 2>&1 || ! dpkg -s libgl1:i386 >/dev/n
   $SUDO apt-get install -y -qq binutils-mipsel-linux-gnu libyaml-dev ninja-build cmake ccache gcc-multilib \
     libsdl2-dev libsdl2-2.0-0:i386 libgl1:i386 libgl1-mesa-dri:i386 libglx-mesa0:i386 patchelf xvfb unzip curl p7zip-full megatools >/dev/null
 fi
-if [ "$WASM" = 1 ] && ! command -v clang-18 >/dev/null; then
+# (checked piece by piece: an image can ship clang-18 without wasi-libc, and the wasm build then fails on every file)
+if [ "$WASM" = 1 ] && { ! command -v clang-18 >/dev/null || ! command -v wasm-ld-18 >/dev/null || [ ! -f /usr/lib/wasm32-wasi/crt1-command.o ] \
+     || [ ! -f /usr/lib/llvm-18/lib/clang/18/lib/wasi/libclang_rt.builtins-wasm32.a ]; }; then
   $SUDO apt-get install -y -qq clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32 >/dev/null
 fi
 python3 -c "import spimdisasm, rabbitizer, yaml, PIL, numpy" 2>/dev/null || {
@@ -112,7 +114,8 @@ fi
 PORT_STALE_FULL=warn make -C build/port2 -j"$J" 2>&1 | grep -E "error|Error" || true
 [ -x build/port2/tombi2 ] && echo "build/port2/tombi2 ready" || { echo "the port build failed"; exit 1; }
 if [ "$WASM" = 1 ]; then
-  PORT_STALE_FULL=warn python3 port2/wasm/build.py -j "$J" >/dev/null && echo "build/wasm/tombi2w ready"
+  if PORT_STALE_FULL=warn python3 port2/wasm/build.py -j "$J" >/tmp/wasm_build.log 2>&1; then echo "build/wasm/tombi2w ready"
+  else echo "WASM BUILD FAILED (see /tmp/wasm_build.log; the i386 port is unaffected):"; grep -m3 "error" /tmp/wasm_build.log; fi
 fi
 if [ -s game_jp/SLPS_011.44 ] && [ ! -s build/slps01144/report.json ]; then
   log "JP report (build/slps01144/report.json, ~5 min)"

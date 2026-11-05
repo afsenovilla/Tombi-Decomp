@@ -45,15 +45,25 @@ open(p, "w").write(s)
 # tolerates the mismatch as the i386 build does
 stub_re = re.compile(r"^(\w[\w ]*?) (w2c_tombi_0x2EL(\w+?)_bitcast_invalid(?:0x2E\d+)?)\(w2c_tombi\* instance((?:, \w+ var_p\d+)*)\) \{\n  FUNC_PROLOGUE;\n(?:  [^\n]*\n)*?  UNREACHABLE;\n(?:  [^\n]*\n)*?\}", re.M)
 nfix = 0
+# the functions the module defines (declared in tombi-impl.h): a stub's target may only exist under the name of
+# another export of the same function (wasi-libc's ftello is an alias of __ftello, which wasm2c names 0x5F_ftello)
+defined = set(re.findall(r"\b(w2c_tombi_\w+)\(w2c_tombi\*", s))
+def resolve(target):
+    for cand in ("w2c_tombi_" + target, "w2c_tombi_0x5F_" + target, "w2c_tombi_0x5F0x5F_" + target):
+        if cand in defined: return cand
+    tails = [n for n in defined if n.endswith("_" + target) and not n.endswith("_bitcast_invalid")]
+    if len(tails) == 1: return tails[0]
+    sys.exit("patch_w2c: no function for the stub target %s (candidates %s)" % (target, tails[:5]))
 for f in sorted(os.listdir(d)):
     if not f.endswith(".c"): continue
     fp = os.path.join(d, f); c = open(fp).read()
     def fix(m):
         global nfix
         ret, name, target, params = m.group(1), m.group(2), m.group(3), m.group(4)
+        target_fn = resolve(target)
         types = [x.strip().split()[0] for x in params.split(",") if x.strip()]
         names = [x.strip().split()[1] for x in params.split(",") if x.strip()]
-        call = "((%s (*)(w2c_tombi*%s))&w2c_tombi_%s)(instance%s)" % (ret.replace("static ", ""), "".join(", " + t for t in types), target, "".join(", " + n for n in names))
+        call = "((%s (*)(w2c_tombi*%s))&%s)(instance%s)" % (ret.replace("static ", ""), "".join(", " + t for t in types), target_fn, "".join(", " + n for n in names))
         nfix += 1
         return "%s %s(w2c_tombi* instance%s) {\n  %s%s;\n}" % (ret, name, params, "" if ret.endswith("void") else "return ", call)
     c2 = stub_re.sub(fix, c)
