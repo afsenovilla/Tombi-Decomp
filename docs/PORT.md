@@ -2048,6 +2048,10 @@ regeneration.
 
 ### Languages: `--lang N` (`port2/runtime/lang.c`)
 
+**One disc, nine languages.** Both PAL discs carry the nine `MAIN0..8` executables and every language's data; only
+the boot menu differs (SCES-01331: EN ES PT SV DA; SCES-01330: EN FR DE IT NL). The port has no boot menu: it starts the
+MAINn you choose, so a single image of either disc plays all nine languages.
+
 **The disc.** `SCES_013.31` is a language menu that boots one of `EXE/MAIN0.EXE` (English), `MAIN5` (Español),
 `MAIN6` (Português), `MAIN7` (Svenska), `MAIN8` (Dansk). `MAIN1..4` (Français, Deutsch, Italiano, Nederlands) are on
 the disc too, not in its menu: `--lang 1..4` plays them, and both launchers list all nine. The other PAL disc,
