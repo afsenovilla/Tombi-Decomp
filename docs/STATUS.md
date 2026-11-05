@@ -75,7 +75,14 @@ prog:addr:size:palfile --emit DIR`, or copy the PAL C and add the `// near-twin 
 `tools/progress_jp.py`, update the progress line of docs/JP.md and this list, commit (explicit paths) and push.
 Stop after about 90 minutes on one function: write what was tried under "tried" and leave it for the next run.
 
-- [ ] x10 80119D9C (280 B, object init/draw, JP-only): 30 lines off, case 0 store order (see docs/JP.md).
+- [ ] x10 80119D9C / x14 80118580 (copies of updateA00FarBackdropWest with w1e 8 / 13): only the register of the
+      object pointer (a3 in retail) and of the screen-origin halves differ (drafts wip25/80119D9C_b.c, 80118580.c).
+- [ ] x00 8010D854 (playerStepSwimSpin x00 copy, src/func_8010D854_slps01144.c): jpcheck and a full objdump diff say
+      identical, the report says 99.96 % (one word): probably unit size / trailing alignment, check with objdiff-cli.
+- [ ] Next pairs from the scratch pair.py run (66-140 lines, real rewrites): x10 8011ED78 wingedForkPigContact (extra
+      wb4 / subtype / b9c tests), x03 80126EC4 wingedForkPigDefeated, x00 80119278 spawnA00Tornado (extra global test,
+      a/y stores reordered), x14 8011631C updatePoolType67Object, x00 80122B8C drawObjectProjectedSpriteB (type 44/45
+      by subtype), x14 80116058 updateA00PoolType11, the three updateA00FarBackdropEast copies.
 - [ ] 64-256 B band leftovers (see docs/JP.md "tried and left"): sound family 8001E2D4/388/458/528 (s1/s2 swap),
       8001E81C, 80027D58, pad readers 80016960/80020794, flag bits 800219F0/80021A40, x01 80131240, libcard
       80064E1C/E84. The rest of the band is libgte/libapi asm (RotMatrix*, ApplyMatrix*, OuterProduct*, SquareRoot0,
