@@ -1,7 +1,41 @@
 // FUNC 8001e4f0 112 MAIN0
 // MATCHING 8001e4f0 112
+// VERSION BETA_980203 beta980203 8001F678 180
 // Ported from psx_tomba (sound.c, playSFX); MIT licence of the original project.
 // Debt: register asm on id (upstream too). Without it slot (5 refs/10 insns) outranks id (3/11) for s0; tried id as param, copy after the call, separate mask temp, pointer store, return slot, u32 id (all 20).
+// FLAGS.BETA_980203 -O2 -G0 -fno-strength-reduce
+#if defined(VERSION_BETA_980203)
+// Beta version of PAL main0 8001E4F0 (playSFX.c): JP C of src/func_8001E2D4_slps01144.c (playSFX) (1.000 masked) [-O2 -G0 -fno-strength-reduce] (tools/demo_sweep.py)
+extern int queueSoundCommand(int, int);
+extern unsigned short VOICE_SFX_ID[];
+extern unsigned char VOICE_KEY_STATUS[];
+extern short D_800A583E[];
+
+static inline int findVoice(void)
+{
+    int i = 0x17;
+    int m = -1;
+    short *p = D_800A583E;
+    do {
+        if (!VOICE_KEY_STATUS[i] && *p == m) return i;
+        i--;
+        p--;
+    } while (i >= 0x10);
+    return -1;
+}
+
+int playSFX(unsigned a)
+{
+    int v = findVoice();
+    if (v == -1) return -1;
+    {
+    unsigned b;
+    asm("" : "=r"(b) : "0"(a));
+    if (queueSoundCommand(a & 0x3ff, v) != -1) VOICE_SFX_ID[v] = b;
+    }
+    return v;
+}
+#else
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"
@@ -75,3 +109,4 @@ s32 playSFX(s32 arg)
     }
     return slot;
 }
+#endif
