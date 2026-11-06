@@ -343,6 +343,7 @@ weaponHitCat4Type02 = 0x801291B4; // type:func size:0xA4  PAL x000 0x80125984
 weaponHitCat4Type01 = 0x80129258; // type:func size:0x84  PAL x000 0x80125A28
 weaponHitCat2Type01 = 0x801292DC; // type:func size:0x170  PAL x000 0x80125AAC
 weaponHitCat2Type12 = 0x8012944C; // type:func size:0x68  PAL x000 0x80125C1C
+func_801294B4_beta980203 = 0x801294B4; // type:func size:0x100
 weaponHitCat2Type06 = 0x801295B4; // type:func size:0x18C  PAL x000 0x80125DA4
 playerContactCat2Type01 = 0x80129740; // type:func size:0xE0  PAL x000 0x80125F30
 playerContactCat2Type2B = 0x80129820; // type:func size:0xE8  PAL x000 0x80126010
