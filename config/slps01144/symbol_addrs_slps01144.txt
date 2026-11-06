@@ -1317,3 +1317,4 @@ DisableEvent = 0x8006F488; // type:func size:0xC  PAL main0 0x8007594C psx_tomba
 WaitEvent = 0x80070B90; // type:func size:0xC  PAL main0 0x80077054 psx_tomba name
 func_80023384_slps01144 = 0x80023384; // type:func size:0x1B0
 func_8001E910_slps01144 = 0x8001E910; // type:func size:0x100
+func_8002457C_slps01144 = 0x8002457C; // type:func size:0x2E4
