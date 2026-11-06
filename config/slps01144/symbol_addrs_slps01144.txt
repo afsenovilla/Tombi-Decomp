@@ -1315,3 +1315,4 @@ _SsVmGetSeqLVol = 0x8006D8AC; // type:func size:0x50  psx_tomba name
 _SsVmGetSeqRVol = 0x8006D8FC; // type:func size:0x50  psx_tomba name
 DisableEvent = 0x8006F488; // type:func size:0xC  PAL main0 0x8007594C psx_tomba name
 WaitEvent = 0x80070B90; // type:func size:0xC  PAL main0 0x80077054 psx_tomba name
+func_80023384_slps01144 = 0x80023384; // type:func size:0x1B0

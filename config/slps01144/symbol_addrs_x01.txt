@@ -200,3 +200,4 @@ PLAYER_MESSAGE_BOX = 0x800A7C08; // size:0x4 PAL 0x800A60C8
 func_80138790_slps01144 = 0x80138790; // type:func size:0xD0
 func_80138130_slps01144 = 0x80138130; // type:func size:0xFC
 func_8011D2F0_slps01144 = 0x8011D2F0; // type:func size:0x120
+func_8011FE6C_slps01144 = 0x8011FE6C; // type:func size:0x190

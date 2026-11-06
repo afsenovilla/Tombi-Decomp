@@ -146,3 +146,7 @@ GAME = 0x8009E508; // size:0x988 PAL 0x8009C960
 GAME_SELECTED_SECTION = 0x8009E50A; // size:0x2 PAL 0x8009C962
 GCD = 0x8009E8A8; // size:0x400 PAL 0x8009CD00
 // END jp_globals
+func_80117908_slps01144 = 0x80117908; // type:func size:0x144
+func_80116458_slps01144 = 0x80116458; // type:func size:0x168
+func_8011996C_slps01144 = 0x8011996C; // type:func size:0x168
+func_80117F94_slps01144 = 0x80117F94; // type:func size:0x16C

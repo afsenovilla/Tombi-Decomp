@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 86.07 % of code (1221040 of 1418604 bytes, 2800 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 86.37 % of code (1225224 of 1418604 bytes, 2811 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2800 functions, 68.66 % -> 86.07 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2811 functions, 68.66 % -> 86.37 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -396,6 +396,10 @@ JP-only round (-> 86.07 %, written from the retail disassembly, one file `func_A
 x00 800F26AC (landing helper), 801249EC (weapon hit, also built for x01); x03 8012AEC4; x14 8011A0AC, 80119F14 (contact
 reactions); x04 801279EC, 80115D9C / 80115EB4 (JP forms of checkScrollItemDoorA/B); x01 8011D2F0. Left: x10 80119D9C (twin of
 x04 80115D9C, object pointer in a1 instead of a3) and x14 80118580 (36 lines, same a1/a3 puzzle in case 0).
+Second JP-only round (-> 86.37 %): x04 8011E340 (weaponHit form, type-6 counter), 8011B39C, 80115BE4 (cameraModeHandler1
+form); x10 80117908, 80116458 (UV cycler), 8011996C (updateCollapsingBridge form), 80117F94 (rotatingWheelSpinStep form);
+x03 80131064; x01 8011FE6C; x09 80119758 (updateWaypointRide form); main 80023384 (modelDrawF3Lit form, inline vertices).
+Left: x03 8011EEBC (18 lines, b68 value in a0 vs v0).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
