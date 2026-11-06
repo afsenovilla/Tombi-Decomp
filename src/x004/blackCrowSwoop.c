@@ -1,5 +1,122 @@
 // FUNC 80126688 1480 X004
 // MATCHING 80126688 1480
+// VERSION SLPS_01144 x04 80124FEC 1076
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "player.h"
+#include "TOBJ.H"
+
+typedef struct {
+    TObj t;
+    unsigned short wc0, wc2, wc4, wc6, wc8, wca, wcc;
+} BX;
+typedef struct { short x, y; } P2;
+
+extern short *PLAYER_H;
+extern short PLAYER_Y;
+extern void *D_801305D4[], *D_80130604[], *D_80130608[], *D_80130620[];
+extern void func_80020DE4(TObj *);
+extern void func_8001E2D4(int);
+extern short func_80021704(P2, P2);
+extern short func_80020D54(int, short);
+extern short func_80020D24(int, short);
+extern short func_80041D94(TObj *, short, short);
+
+static __inline__ short wall(TObj *o)
+{
+    if (func_80041D94(o, o->h->p.whole + 0x20, o->y.p.whole + 0x18)) return 1;
+    if (func_80041D94(o, o->h->p.whole - 0x20, o->y.p.whole + 0x18)) return 1;
+    return 0;
+}
+
+#define o (&b->t)
+void func_80124FEC(BX *b)
+{
+    P2 p, q;
+
+    switch (o->substep) {
+    case 0:
+        if (o->h->p.whole >= PLAYER_H[1]) o->animFrame = 1;
+        else o->animFrame = 0;
+        o->w22 = 0x38;
+        o->wac = 0x14;
+        b->wcc = o->animFrame;
+        o->anim = D_80130620[0];
+        func_80020DE4(o);
+        if (b->wca) func_8001E2D4(0x13);
+        o->substep++;
+        break;
+    case 1:
+        if (--o->w22 != 0) break;
+        o->velV = -0x400;
+        o->w22 = 0x38;
+        o->velH = 0;
+        o->wac = 1;
+        o->anim = D_801305D4[0];
+        func_80020DE4(o);
+        o->substep++;
+        break;
+    case 2:
+        if (o->velV >= 0) {
+            o->w22 = 0x1e;
+            o->substep++;
+        }
+        o->velV += 0x20;
+        o->y.raw += o->velV << 8;
+        break;
+    case 3:
+        if (--o->w22 != 0) break;
+        o->w22 = 0x78;
+        o->wb6 = 0;
+        o->wac = 0xd;
+        o->anim = D_80130604[0];
+        func_80020DE4(o);
+        p.x = o->h->p.whole;
+        p.y = o->y.p.whole;
+        q.x = PLAYER_H[1];
+        q.y = PLAYER_Y;
+        *(short *)&o->bbe = func_80021704(p, q) + 0x100;
+        if (o->h->p.whole >= PLAYER_H[1]) o->animFrame = 1;
+        else o->animFrame = 0;
+        o->substep++;
+        break;
+    case 4:
+        o->h->raw += func_80020D54(*(unsigned short *)&o->bbe & 0xf8, o->wb6) << 8;
+        o->y.raw += func_80020D24(*(unsigned short *)&o->bbe & 0xf8, o->wb6) << 8;
+        if ((unsigned short)o->wb6 < 0x400) o->wb6 += 0x20;
+        if (--o->w22 != 0 && !wall(o)) break;
+        if (o->animFrame) {
+            o->velH = -0x300;
+        } else {
+            o->velH = 0x300;
+        }
+        o->velV = -0x400;
+        o->timer = 0x1e;
+        o->wac = 0xe;
+        o->anim = D_80130608[0];
+        func_80020DE4(o);
+        o->substep++;
+        break;
+    case 5:
+        o->h->raw += o->velH << 8;
+        o->y.raw += o->velV << 8;
+        if (--o->timer != 0) break;
+        o->active = 1;
+        o->timer = 1;
+        o->substep++;
+        break;
+    case 6:
+        if (--o->timer != 0) break;
+        if (b->wc4 < o->h->p.whole) o->animFrame = 0;
+        else o->animFrame = 1;
+        o->state = 3;
+        o->step = 0;
+        o->substep = 0;
+        o->wb4 = 1;
+        break;
+    }
+}
+#else
 #include "spad.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -120,3 +237,4 @@ void blackCrowSwoop(BX *b)
         break;
     }
 }
+#endif
