@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 89.73 % of code (1272864 of 1418604 bytes, 2871 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 90.12 % of code (1278468 of 1418604 bytes, 2876 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2871 functions, 68.66 % -> 89.73 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2876 functions, 68.66 % -> 90.12 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -431,6 +431,10 @@ Pairer round 5 (200-290 lines, -> 89.73 %): x06 motocrossBikeSetSpeed (no rumble
 x16 8011525C (updateAreaScroll form; keeps its old `func_8011525C` symbol: two names on one address make splat fail),
 x01 8011DDE4 (needs `-O2 -G0` without `-fno-strength-reduce`), x11 801169A8. Left at register level: x10 8011F240
 (41 lines), x04 80118990 / 80118720 / 80118B98 (UV animators, 60-208 lines).
+Pairer round 6 (290-420 lines, -> 90.12 %, the 90 % mark): x01 80123014 (collidePlayerWithTiltedBar form), 801245B0
+(segmentedCrawlerWeaponHit form, no item clone), x14 80117B54 (updateBossRoomPlatform form), x10 8012453C (10-state NPC
+script), x00 8010E500 (playerAirAccelerateX form, no `GV6.s10 == 7` branch, params read in place from `D_80114748`).
+Left at register level: main 8004CB14 (JP pause backdrop, not drawPauseMenu; 23 lines), x00 80120314 (31), x00 800F6874.
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
