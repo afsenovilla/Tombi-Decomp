@@ -204,3 +204,5 @@ func_8011FE6C_slps01144 = 0x8011FE6C; // type:func size:0x190
 func_80123880_slps01144 = 0x80123880; // type:func size:0x200
 func_80120F58_slps01144 = 0x80120F58; // type:func size:0x1C8
 func_8011DDE4_slps01144 = 0x8011DDE4; // type:func size:0x300
+func_80123014_slps01144 = 0x80123014; // type:func size:0x5E0
+func_801245B0_slps01144 = 0x801245B0; // type:func size:0x33C
