@@ -81,3 +81,4 @@ PLAYER_H = 0x800A7BB8; // size:0x4 PAL 0x800A6078
 func_80116058_slps01144 = 0x80116058; // type:func size:0x14C
 func_8011A0AC_slps01144 = 0x8011A0AC; // type:func size:0x12C
 func_80119F14_slps01144 = 0x80119F14; // type:func size:0x11C
+func_8011B8E0_slps01144 = 0x8011B8E0; // type:func size:0x1D0
