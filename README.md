@@ -196,22 +196,22 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 88.68 % of the code matches byte for byte** (1258048 of 1418604 bytes, 2852 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 89.25 % of the code matches byte for byte** (1266148 of 1418604 bytes, 2863 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 378308 B | 325524 B | 1119 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 86.0 % |
+| SLPS_011.44: engine | 378308 B | 327400 B | 1122 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 86.5 % |
 | X00.BIN: shared object code | 300480 B | 289164 B | 494 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.2 % |
-| X01.BIN: area code | 151304 B | 136560 B | 228 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.3 % |
+| X01.BIN: area code | 151304 B | 137096 B | 229 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.6 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X03.BIN: area code | 122684 B | 117428 B | 217 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.7 % |
-| X04.BIN: area code | 102832 B | 86336 B | 189 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 84.0 % |
+| X04.BIN: area code | 102832 B | 87444 B | 190 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 85.0 % |
 | X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X06.BIN: area code | 35844 B | 33812 B | 44 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.3 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X09.BIN: area code | 82896 B | 65352 B | 126 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 78.8 % |
-| X10.BIN: area code | 97636 B | 75264 B | 158 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 77.1 % |
-| X11.BIN: area code | 13856 B | 10708 B | 27 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 77.3 % |
+| X09.BIN: area code | 82896 B | 68824 B | 130 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 83.0 % |
+| X10.BIN: area code | 97636 B | 75848 B | 159 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 77.7 % |
+| X11.BIN: area code | 13856 B | 11232 B | 28 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩⬜⬜ 81.1 % |
 | X13.BIN: area code | 6336 B | 4140 B | 7 / 8 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 65.3 % |
 | X14.BIN: area code | 54472 B | 45800 B | 99 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 84.1 % |
 | X16.BIN: area code | 11688 B | 10852 B | 36 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 92.8 % |

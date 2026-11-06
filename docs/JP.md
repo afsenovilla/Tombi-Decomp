@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 88.68 % of code (1258048 of 1418604 bytes, 2852 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 89.25 % of code (1266148 of 1418604 bytes, 2863 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2852 functions, 68.66 % -> 88.68 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2863 functions, 68.66 % -> 89.25 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -422,6 +422,10 @@ Pairer round 3 (ratio >= 0.45, -> 88.68 %): x03 windblownMonkeyGiveUmbrella, ani
 x01 lostSeedKidTalk; x04 blackCrowSwoop; x09 801201B4 (JP-only); main 8001E910 (playSFXAndSetNote with the free-voice
 search inlined; own file, because jp_autofix keeps the PAL file's flags and this one needs `-fno-strength-reduce`).
 Left: main 80024300 (lit F3 draw, 26 lines, colour clamp registers).
+Pairer round 4 (120-200 diff lines, -> 89.25 %; half the pairs were wrong and rewritten from the disassembly): main
+areaTransitionHandler (cases 0-3 only), processObjectCollisions (collide loop -> one call), 8002457C (fade F4, JP-only);
+x01 updateCharlesEventObj; x04 8011A268 (stepAreaEventDoor form); x09 80119A4C, 80125484, 8011B69C (AP box form), 8011D21C;
+x10 8011A5D0; x11 80117AFC. Left: x11 80117260 (factoryBossIronCastleDoorTalk minus the anim loads, 10 lines, case 5 order).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
