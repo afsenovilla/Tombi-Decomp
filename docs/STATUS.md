@@ -37,7 +37,7 @@ default of release.yml; bump it before each release (it used to show 0.1.<CI run
    PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
-## Japanese decomp (SLPS-01144), hand pass 3 (91.09 %)
+## Japanese decomp (SLPS-01144), hand pass 3 (91.35 %)
 
 82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
@@ -102,7 +102,7 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
       8001E81C, 80027D58, pad readers 80016960/80020794, flag bits 800219F0/80021A40, x01 80131240, libcard
       80064E1C/E84. The rest of the band is libgte/libapi asm (RotMatrix*, ApplyMatrix*, OuterProduct*, SquareRoot0,
       _patch_*, start, __main, *_OBJ_* blobs, 8005851C BIOS stubs, 80061488).
-- [ ] x04 func_80124270 (2904 B) <- src/x004/blackCrowFlyAround.c (334 diff lines): JP drops the `w22` counters and
+- [x] x04 func_80124270: matched (redBirdStep3 form, see docs/JP.md "Inline pairer").
       the `% 40` timer; cases 1-4 need rewriting. The PAL file is full of matching hacks: keep them.
 - [ ] x10 func_8011B4F8 (2356 B) <- src/x001/playerStepRideSeesaw.c: the PAL file is register-pinned and the JP reads
       the seesaw record as shorts at +0x30 (`lh 48` for `lw 140`); needs a rewrite from the disassembly.

@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 91.09 % of code (1292140 of 1418604 bytes, 2886 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 91.35 % of code (1295932 of 1418604 bytes, 2888 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2886 functions, 68.66 % -> 91.09 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2888 functions, 68.66 % -> 91.35 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -453,6 +453,11 @@ x04 80118990 (UV byte-split animator): `register unsigned char st asm("a2") = o-
 reseeded from it found the copy `new_var2 = st` for `state = new_var2 + 1` (-> 91.02 %).
 x00 800F6874 (seesaw pivot, reads `D_800A0C7C`): `register TObj *g asm("a0")` plus a copy `new_var2 = g` for the
 case 20 switch, with case 31 back on `g` (permuter run, last two lines by hand) (-> 91.09 %).
+Inline pairer (`tools/jp_pair_insns.py --inline`, ~10 min: the PAL sequence with one callee spliced in at its jal, or
+the JP one with a JP callee spliced in; 29 new pairs at >= 0.55): x09 8011A288 (stepBucket with a shorter JP
+bucketFillWithWater inlined), x04 80124270 (redBirdStep3 with new constants and an inlined floor probe; it was not
+blackCrowFlyAround) (-> 91.35 %). PAL data names in agent drafts (`D_8013E70C` and the like) do not resolve in the JP
+link: rename them to the retail relocation names before installing.
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
