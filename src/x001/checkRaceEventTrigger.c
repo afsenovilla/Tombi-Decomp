@@ -1,5 +1,83 @@
 // FUNC 8013a664 616 X001
 // MATCHING 8013a664 616
+// VERSION SLPS_01144 x01 80138BEC 556
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gcd.h"
+#include "gvars.h"
+#include "TOBJ.H"
+
+extern TObj PLAYER;
+extern unsigned char D_800A60F8;
+extern signed char GAME_PLAYER_MODE;
+extern unsigned short JOYPAD_STATE, BUTTON_MASK_A;
+
+#define W24(o) (((unsigned short *)(o))[0x12])
+
+int func_80138BEC(TObj *o)
+{
+    TObj *q = *(TObj **)&o->category;
+    int r = 0;
+
+    switch (GCD.bce59) {
+    case 1:
+        switch (GCD.bcede) {
+        case 0:
+            if (PLAYER.h->p.whole >= 0x19b)
+                r = 1;
+            break;
+        case 1:
+            r = 1;
+            break;
+        case 2:
+            r = 1;
+            break;
+        }
+        break;
+    case 2:
+        if (PLAYER.b69 == 0)
+            break;
+        if ((unsigned short)(PLAYER.h->p.whole - q->h->p.whole + 0x20) >= 0x40)
+            break;
+        if ((unsigned short)(PLAYER.y.p.whole + 0x6d4) >= 4)
+            break;
+        if (W24(o) != 0) {
+            r = 1;
+            break;
+        }
+        if ((SPAD.s1fc & SPAD.s3c8)) {
+            GVARS.b42 = 1;
+            D_800A60F8 = 1;
+            r = 1;
+            W24(o) = 1;
+        }
+        break;
+    case 3:
+        if (PLAYER.b69 == 0)
+            break;
+        if ((unsigned short)(PLAYER.h->p.whole - q->h->p.whole + 0x20) >= 0x40)
+            break;
+        if (PLAYER.y.p.whole < -0x17c)
+            break;
+        if (W24(o) != 0) {
+            r = 1;
+            break;
+        }
+        if ((SPAD.s1fc & SPAD.s3c8)) {
+            r = 1;
+            GVARS.b42 = 1;
+            D_800A60F8 = 1;
+            GVARS.b3f = 1;
+            W24(o) = 1;
+        }
+        break;
+    case 0xff:
+        r = 1;
+        break;
+    }
+    return r;
+}
+#else
 #include "gcd.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -76,3 +154,4 @@ int checkRaceEventTrigger(TObj *o)
     }
     return r;
 }
+#endif

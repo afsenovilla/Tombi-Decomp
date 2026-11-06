@@ -1,5 +1,102 @@
 // FUNC 8013721c 676 X001
 // MATCHING 8013721c 676
+// VERSION SLPS_01144 x01 80135A00 568
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+#include "gcd.h"
+#include "player.h"
+#include "TOBJ.H"
+
+extern void *D_8013E700;
+extern char D_8013EA8C[];
+extern char D_8013EAB0[];
+extern char D_8013EAB8[];
+extern char D_8013EAC0[];
+extern char D_8013EAC8[];
+static void *D_8013E570[5] = {
+    D_8013EA8C, D_8013EAB0, D_8013EAB8, D_8013EAC0,
+    D_8013EAC8,
+};
+void AnimLoadDuration(TObj *o);
+void AnimAdvance(TObj *o);
+int ObjCullRegister(TObj *o);
+int Rand(void);
+void FUN_8001e5f4(int a, int b);
+void stepPuppyBaron(TObj *o);
+void addItemToInventory(int a, int b, int c);
+void freeObjectLayer2(TObj *o);
+
+void func_80135A00(TObj *o)
+{
+    int v;
+
+    switch (o->b04) {
+    case 0:
+        switch (o->subtype) {
+        case 0:
+            if (GCD.bceab == 0 || GCD.bceab >= 3) {
+                o->b04 = 3;
+                break;
+            }
+            o->box0 = 8;
+            o->box1 = 0x10;
+            o->box2 = 0x18;
+            o->box3 = 0x20;
+            o->d8c = 0;
+            o->w1e = 0xa;
+            o->b0d = 0;
+            o->category |= 0x80;
+            o->d3c = ((int*)&SPAD.i2d4)[0];
+            o->anim = D_8013E570[0];
+            o->b0a = 2;
+            AnimLoadDuration(o);
+            *(signed char *)&o->b0f = -10;
+            o->b04 = 1;
+            break;
+        case 1:
+            o->box0 = 8;
+            o->box1 = 0x10;
+            o->box2 = 0x18;
+            o->box3 = 0x20;
+            o->d8c = 0;
+            o->w1e = 0xa;
+            o->b0d = 0;
+            o->category |= 0x80;
+            o->d3c = ((int*)&SPAD.i2d4)[0];
+            o->anim = D_8013E700;
+            o->b0a = 2;
+            AnimLoadDuration(o);
+            o->b04 = 1;
+            if (GCD.bcead) {
+                o->b04 = 3;
+            }
+            break;
+        }
+        break;
+    case 1:
+        if (ObjCullRegister(o) && o->subtype == 0) {
+            AnimAdvance(o);
+        }
+        break;
+    case 2:
+        ObjCullRegister(o);
+        switch (o->subtype) {
+        case 0:
+            stepPuppyBaron(o);
+            break;
+        case 1:
+            addItemToInventory(10, 1, 1);
+            GCD.bcead = 1;
+            o->b04 = 3;
+            break;
+        }
+        break;
+    case 3:
+        freeObjectLayer2(o);
+        break;
+    }
+}
+#else
 #include "spad.h"
 #include "gcd.h"
 #include "player.h"
@@ -104,3 +201,4 @@ void updatePuppyBaron(TObj *o)
         break;
     }
 }
+#endif

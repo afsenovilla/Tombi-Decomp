@@ -1,5 +1,101 @@
 // FUNC 80121790 640 X001
 // MATCHING 80121790 640
+// VERSION SLPS_01144 x01 80120698 692
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+
+typedef struct { TObj o; unsigned char pc0[6]; unsigned char c6, c7; unsigned char pc8[0xb]; unsigned char e3; } TX;
+#define X(o) ((TX *)(o))
+extern TObj *PLAYER_EXT;
+extern void AnimAdvance(TObj *);
+extern void FUN_800eeb5c(TObj *, int);
+extern void playerSetAngleFromSlope(TObj *);
+extern void playerSetFallLean(TObj *);
+extern void playerCheckGroundAndFall(TObj *);
+
+#define LEAN(o) do { a_ = 0x10; (o)->timer = 10; (o)->d84 = 0; if ((o)->animFrame & 1) a_ = 0xf0; } while (0)
+static __inline__ short inc(unsigned char x)
+{
+    if (x < 0xff) return x + 1;
+    return x;
+}
+
+void func_80120698(TObj *o)
+{
+    int a_;
+    switch (o->state) {
+    case 0:
+        PLAYER_EXT->b0b = o->animFrame;
+        if (o->animFrame &= 1) {
+            if (o->wb2 > 0) {
+                o->wb2 = -o->wb2;
+            }
+        } else {
+            if (o->wb2 < 0) {
+                o->wb2 = -o->wb2;
+            }
+        }
+        *(unsigned char *)&o->wac = 0;
+        o->b9c = 0;
+        o->b6b = 0;
+        X(o)->c7 = 1;
+        o->b9d = 0;
+        X(o)->c6 = 0;
+        X(o)->e3 = 0;
+        o->d8c = 0;
+        o->velX = 0;
+        o->velY = 0x100;
+        PLAYER_EXT->active = 0;
+        o->ba4 = 1;
+        if ((o->bbe & 1) != o->animFrame) {
+            FUN_800eeb5c(o, 8);
+        } else {
+            FUN_800eeb5c(o, 0x11);
+        }
+        o->state++;
+    case 1:
+        o->b6b = inc(o->b6b);
+        AnimAdvance(o);
+        playerSetAngleFromSlope(o);
+        o->y.raw += o->velY << 8;
+        o->velY += 8;
+        switch (PLAYER_EXT->animTimer) {
+        case 8:
+            o->d8c = (o->animFrame & 1) ? 0x20 : 0xe0;
+            break;
+        case 0x11:
+            o->d8c = (o->animFrame & 1) ? 0x100 - (o->b6b >> 2) : o->b6b >> 2;
+            break;
+        }
+        if (o->bbe == 0) {
+            if (o->animFrame != (o->bbe & 1)) {
+                o->wb2 = 0;
+            }
+            o->ba4 = 0;
+            if (PLAYER_EXT->active == 0) {
+                *(unsigned char *)&o->wac = 1;
+                a_ = 0x10;
+                o->d84 = 0;
+                if (o->animFrame & 1) a_ = 0xf0;
+                o->timer = 10;
+                o->step = 2;
+            } else {
+                LEAN(o);
+                o->step = 4;
+            }
+            o->d88 = a_;
+            o->d8c = 0;
+            o->state = 3;
+        }
+        if (o->bbe & 2) {
+            o->step = 0x13;
+            o->state = 0;
+        }
+        playerCheckGroundAndFall(o);
+        break;
+    }
+}
+#else
 #include "TOBJ.H"
 
 typedef struct { TObj o; unsigned char pc0[6]; unsigned char c6, c7; unsigned char pc8[0x1b]; unsigned char e3; } TX;
@@ -86,3 +182,4 @@ void playerStepRideSlopeContact(TObj *o)
         break;
     }
 }
+#endif
