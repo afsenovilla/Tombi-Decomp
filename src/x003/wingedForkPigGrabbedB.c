@@ -1,5 +1,113 @@
 // FUNC 8012ef3c 760 X003
 // MATCHING 8012ef3c 760
+// VERSION SLPS_01144 x03 8012E104 848
+#if defined(VERSION_SLPS_01144)
+/* includes the csv piece 8012F220 (the shared epilogue) */
+#include "TOBJ.H"
+
+extern TObj PLAYER;
+extern char D_80077CD0[];
+extern void *D_8013A6C0[];
+extern char D_8013A89C[];
+extern char D_8013A8A4[];
+extern char D_8013A8E4[];
+extern char D_8013A8F4[];
+static void *D_8013A6C4[4] = {
+    D_8013A89C, D_8013A8A4, D_8013A8E4, D_8013A8F4,
+};
+extern int AnimAdvance(TObj *);
+extern void AnimLoadDuration(TObj *);
+extern void spawnItemNotification(int, int);
+extern void applyAnimVelocityX(TObj *, int);
+extern void applyFrameVelocityX(TObj *);
+extern int TileCollideAt(TObj *, int, int);
+extern void probeCollisionAtDepthA(TObj *, int, int);
+extern short probeWallAt(TObj *, short, short, short);
+static __inline__ void wingedForkPigCheckWall(TObj *o)
+{
+    short d;
+
+    if ((o->b9d & 2) && o->animFrame == (o->b9d & 1))
+        return;
+    if (o->animFrame & 1)
+        d = -16;
+    else
+        d = 16;
+    probeWallAt(o, o->h->p.whole + d, o->y.p.whole, o->animFrame);
+}
+
+void func_8012E104(TObj *o)
+{
+    switch (o->state) {
+    case 0:
+        o->b9c = 0;
+        spawnItemNotification(1, 6);
+        *(signed char *)&o->b0f = -7;
+        o->velV = 0x300;
+        o->movetab = D_80077CD0;
+        o->b68 = 0;
+        o->d8c = 0;
+        o->wac = 0xa;
+        o->state++;
+        o->anim = D_8013A6C0[0];
+        AnimLoadDuration(o);
+        applyAnimVelocityX(o, *(unsigned short *)&o->w7a);
+        break;
+    case 1:
+        o->state++;
+        o->velV -= 0x20;
+        o->y.raw += o->velV << 8;
+        if (o->b69 == 1 || (short)TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) o->b69 = 0;
+        applyAnimVelocityX(o, *(unsigned short *)&o->w7a);
+        break;
+    case 2:
+        o->state++;
+        PLAYER.state = 2;
+        *(unsigned char *)&PLAYER.wac = 3;
+        PLAYER.b9c = 0;
+    case 3:
+        o->velV -= 0x20;
+        if (o->velV < 0) o->state++;
+        o->y.raw += o->velV << 8;
+        if (o->b69 == 1 || (short)TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) o->b69 = 0;
+        AnimAdvance(o);
+        o->animFrame = PLAYER.animFrame & 1;
+        applyFrameVelocityX(o);
+        wingedForkPigCheckWall(o);
+        break;
+    case 4:
+        o->velV -= 0x20;
+        if (o->velV < -0x300) {
+            o->velV = -0x300;
+            o->state++;
+        }
+        o->y.raw += o->velV << 8;
+        probeCollisionAtDepthA(o, o->h->p.whole, (short)(o->y.p.whole - 0x20));
+        AnimAdvance(o);
+        o->animFrame = PLAYER.animFrame & 1;
+        applyFrameVelocityX(o);
+        wingedForkPigCheckWall(o);
+        break;
+    case 5:
+        o->ba7 += 2;
+        o->y.raw += (short)(((unsigned short *)NEG_SIN_TABLE)[o->ba7] << 2);
+        AnimAdvance(o);
+        o->animFrame = PLAYER.animFrame & 1;
+        applyFrameVelocityX(o);
+        wingedForkPigCheckWall(o);
+        break;
+    case 6:
+        o->animFrame = PLAYER.animFrame & 1;
+        o->wac = 0xb;
+        o->state++;
+        o->anim = D_8013A6C4[0];
+        AnimLoadDuration(o);
+        break;
+    case 7:
+        break;
+    }
+}
+#else
 /* includes the csv piece 8012F220 (the shared epilogue) */
 #include "TOBJ.H"
 
@@ -93,3 +201,4 @@ void wingedForkPigGrabbedB(TObj *o)
         break;
     }
 }
+#endif

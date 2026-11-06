@@ -1,5 +1,83 @@
 // FUNC 8012da68 580 X003
 // MATCHING 8012da68 580
+// VERSION SLPS_01144 x03 8012CB48 644
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+
+extern void AnimAdvance(TObj *);
+extern short probeWallAt(TObj *, short, short, short);
+static __inline__ int wingedForkPigCheckWall(TObj *o)
+{
+    short d;
+
+    if ((o->b9d & 2) && o->animFrame == (o->b9d & 1))
+        return 1;
+    if (o->animFrame & 1)
+        d = -16;
+    else
+        d = 16;
+    return probeWallAt(o, o->h->p.whole + d, o->y.p.whole, o->animFrame) != 0;
+}
+extern TObj *FUN_80018448(void);
+
+static __inline__ short past(TObj *o)
+{
+    short c;
+
+    if (o->animFrame & 1) c = o->a.p.whole < o->wb6;
+    else c = o->a.p.whole > o->wb8;
+    if (c) return 1;
+    return 0;
+}
+
+void func_8012CB48(TObj *o)
+{
+    TObj *e;
+
+    switch (o->state) {
+    case 0:
+        if (*(unsigned short *)&o->wb4) o->state = 1;
+        else o->state = 2;
+        break;
+    case 1:
+        if (--o->timer == -1) {
+            o->state = 3;
+            o->active = 3;
+        }
+    case 2:
+        if (o->animFrame) o->a.p.whole -= 2;
+        else o->a.p.whole += 2;
+        o->ba7 += 2;
+        o->y.raw += (short)(((unsigned short *)NEG_SIN_TABLE)[o->ba7] << 2);
+        AnimAdvance(o);
+        if (wingedForkPigCheckWall(o) || past(o)) o->animFrame = 1 - o->animFrame;
+        break;
+    case 3:
+        if (o->visible) {
+            e = FUN_80018448();
+            if (e) {
+                e->active = 2;
+                e->type = 0x43;
+                e->a.p.whole = o->a.p.whole;
+                e->y.p.whole = o->y.p.whole + 0x10;
+                e->b.p.whole = o->b.p.whole;
+            }
+        }
+        o->subtype = 1;
+        o->timer = 0x1c;
+        o->box0 = 0xc;
+        o->box1 = 0x1c;
+        o->box2 = 0xc;
+        o->anim = 0;
+        o->box3 = 0x18;
+        o->step = 0;
+        o->state = 0;
+        o->substep = 0;
+        o->velX = o->animFrame;
+        break;
+    }
+}
+#else
 #include "TOBJ.H"
 
 extern void AnimAdvance(TObj *);
@@ -64,3 +142,4 @@ void wingedForkPigFlyAcross(TObj *o)
         break;
     }
 }
+#endif

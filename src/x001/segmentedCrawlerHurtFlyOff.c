@@ -1,5 +1,74 @@
 // FUNC 80134674 720 X001
 // MATCHING 80134674 720
+// VERSION SLPS_01144 x01 80132F30 748
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+
+#define Q ((TObj *)o->d90)
+
+extern void *D_8013C868[];
+extern void *D_8013C8A8[];
+extern short COS_TABLE[], NEG_SIN_TABLE[];
+extern void FUN_8001e4f0(int);
+
+void func_80132F30(TObj *o)
+{
+    TObj *p;
+
+    switch (o->state) {
+    case 0:
+        for (p = (TObj *)o->d94; p != 0; p = (TObj *)p->d94) {
+            p->b04 = 2;
+            p->step = 5;
+            p->state = 0;
+        }
+        o->active = 2;
+        o->velH = -0x400;
+        o->velX = 0x10;
+        o->velY = 0x40;
+        o->velV = -0x400;
+        o->state++;
+        o->b0f -= 0x1e;
+        FUN_8001e4f0(0x54);
+        if (o->b0c == 0) {
+            o->d88 = (o->d88 + 0x80) & 0xff;
+            o->d84 = o->d88;
+            if ((unsigned int)(o->d88 - 0x40) < 0x80)
+                o->animFrame = 1;
+            else
+                o->animFrame = 0;
+            o->wac = ((o->d88 + 8) & 0xff) >> 4;
+            o->anim = D_8013C868[o->wac];
+        } else {
+            if ((o->animFrame = Q->animFrame) == 0)
+                o->d84 = (Q->d84 + 0x10) & 0xff;
+            else
+                o->d84 = (Q->d84 - 0x10) & 0xff;
+            o->h->raw = Q->h->raw;
+            o->y.raw = Q->y.raw;
+            o->d->raw = Q->d->raw;
+            o->h->raw -= COS_TABLE[(unsigned char)o->d84] * 192;
+            o->y.raw -= NEG_SIN_TABLE[(unsigned char)o->d84] * 192;
+            o->wac = ((o->d84 + 8) & 0xff) >> 4;
+            o->anim = D_8013C8A8[o->wac];
+        }
+        break;
+    case 1:
+        if (o->velH != 0) {
+            if (o->animFrame)
+                o->h->raw += o->velH << 8;
+            else
+                o->h->raw -= o->velH << 8;
+            o->velH += o->velX;
+        }
+        o->y.raw += o->velV << 8;
+        o->velV += o->velY;
+        if (o->velV > 0x400)
+            o->velV = 0x400;
+        break;
+    }
+}
+#else
 #include "TOBJ.H"
 
 #define Q ((TObj *)o->d90)
@@ -118,3 +187,4 @@ void segmentedCrawlerHurtFlyOff(TObj *o)
         break;
     }
 }
+#endif

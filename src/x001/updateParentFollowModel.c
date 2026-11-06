@@ -17,9 +17,9 @@ typedef struct {
 } P40;
 
 extern char MOVE_TABLE_0[];
-extern P40 MODEL_PRIM_BUFFERS[];
-extern void FUN_80018d2c(TObj *);
-extern void copyModelPrimGroups(int, P40 *);
+extern P40 D_800E58F8[];
+extern void func_80018300(TObj *);
+extern void func_80026B7C(int, P40 *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer8(TObj *);
 
@@ -46,7 +46,7 @@ void func_8013029C(TObj *o)
         if (p->visible == 0)
             break;
         o->visible = 1;
-        FUN_80018d2c(o);
+        func_80018300(o);
         o->a.p.whole = p->a.p.whole;
         o->y.p.whole = p->y.p.whole;
         o->b.p.whole = p->b.p.whole;
@@ -57,15 +57,15 @@ void func_8013029C(TObj *o)
         case 0:
             o->b0a = 0x12;
             o->d8c = 0;
-            *(P40 **)&o->wa8 = MODEL_PRIM_BUFFERS;
+            *(P40 **)&o->wa8 = D_800E58F8;
             o->velV = -0x400;
-            copyModelPrimGroups(o->da0, MODEL_PRIM_BUFFERS);
+            func_80026B7C(o->da0, D_800E58F8);
             o->timer = 60;
             o->step++;
         case 1:
-            e = MODEL_PRIM_BUFFERS;
+            e = D_800E58F8;
             k = 0;
-            q = (short *)((char *)MODEL_PRIM_BUFFERS + 18);
+            q = (short *)((char *)D_800E58F8 + 18);
             {
                 register int *dp asm("$4"); /* debt: game keeps the o->da0 pointer in a0 */
                 dp = (int *)o->da0;
