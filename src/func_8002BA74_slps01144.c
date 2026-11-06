@@ -1,4 +1,4 @@
-// VERSION SLPS_01144 slps01144 8002BA74 780
+// VERSION SLPS_01144 slps01144 8002BA74 904
 // FLAGS -O2 -G0 -fno-strength-reduce
 #if defined(VERSION_SLPS_01144)
 #include "gamestate.h"
