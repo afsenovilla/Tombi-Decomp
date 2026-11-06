@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 92.36 % of code (1310212 of 1418604 bytes, 2904 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 92.41 % of code (1310868 of 1418604 bytes, 2907 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -473,7 +473,9 @@ Then main 800200C4 (the JP queueLoadList: flag-tested skip prelude, no 0xf8 case
 Inline pairer at 0.40 (2026-11-06): playSFX (8001E2D4, the voice search inlined, `a` copied through an asm barrier),
 main 8002BA74 (a JP camera-controller variant with an extra state switch; its symbol size was 0x30C, the real one
 0x388, which cut the target short) and x10 80119B8C (parallax backdrop with a GAME_SELECTED_SECTION shift switch).
-Open, scheduling only: playSFXWithNote / 8001E458 / playSFXWithNoteAndVolume (one delay slot each), x10 80119D9C and
+The permuter then fixed the three playSFXWithNote / 8001E458 / playSFXWithNoteAndVolume (the last queueSoundCommand
+result held in an `unsigned` variable, the asm copy in a `do { } while (0)` with the call: the delay slot fills).
+Open, scheduling only: x10 80119D9C and
 x14 80118580 (case-0 loads hoisted above stores), printInfoMessage = 8002EDB0 (JP form, 54 register lines).
 
 
