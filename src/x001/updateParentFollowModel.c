@@ -1,5 +1,113 @@
 // FUNC 801319c8 732 X001
 // MATCHING 801319c8 732
+// VERSION SLPS_01144 x01 8013029C 740
+#if defined(VERSION_SLPS_01144)
+#include "spad.h"
+/* Matching debt: register asm("$4") for the o->da0 pointer before the loop (local-alloc gives v0; tried temp
+   vars, a shared d with the step-0 call, volatile/raw reads, statement permutations). */
+#include "TOBJ.H"
+
+typedef struct {
+    short x0, y0;
+    int c1;
+    short x1, y1;
+    int c2;
+    short x2, y2;
+    char pad[0x20 - 0x14];
+} P40;
+
+extern char MOVE_TABLE_0[];
+extern P40 MODEL_PRIM_BUFFERS[];
+extern void FUN_80018d2c(TObj *);
+extern void copyModelPrimGroups(int, P40 *);
+extern int FUN_800202b4(TObj *);
+extern void freeObjectLayer8(TObj *);
+
+void func_8013029C(TObj *o)
+{
+    TObj *p;
+    P40 *e;
+    short *q;
+    int n, k;
+
+    switch (o->b04) {
+    case 0:
+        p = (TObj *)o->d90;
+        o->movetab = MOVE_TABLE_0;
+        o->b04++;
+        o->a.p.whole = p->a.p.whole;
+        o->y.p.whole = p->y.p.whole;
+        o->b.p.whole = p->b.p.whole;
+        o->da0 = *(volatile int *)&SPAD.i334 + ((int *)*(volatile int *)&SPAD.i334)[11];
+        o->ba4 = 1;
+        break;
+    case 1:
+        p = (TObj *)o->d90;
+        if (p->visible == 0)
+            break;
+        o->visible = 1;
+        FUN_80018d2c(o);
+        o->a.p.whole = p->a.p.whole;
+        o->y.p.whole = p->y.p.whole;
+        o->b.p.whole = p->b.p.whole;
+        o->d8c = p->d8c;
+        break;
+    case 2:
+        switch (o->step) {
+        case 0:
+            o->b0a = 0x12;
+            o->d8c = 0;
+            *(P40 **)&o->wa8 = MODEL_PRIM_BUFFERS;
+            o->velV = -0x400;
+            copyModelPrimGroups(o->da0, MODEL_PRIM_BUFFERS);
+            o->timer = 60;
+            o->step++;
+        case 1:
+            e = MODEL_PRIM_BUFFERS;
+            k = 0;
+            q = (short *)((char *)MODEL_PRIM_BUFFERS + 18);
+            {
+                register int *dp asm("$4"); /* debt: game keeps the o->da0 pointer in a0 */
+                dp = (int *)o->da0;
+                n = dp[4];
+            }
+            do {
+                if (e->x0 < 0) {
+                    e->x0--;
+                    q[-5]--;
+                    q[-1]--;
+                    q[-8] += k >> 16;
+                    q[-4] += k >> 16;
+                    q[0] += k >> 16;
+                } else {
+                    e->x0++;
+                    q[-5]++;
+                    q[-1]++;
+                    q[-8] += k >> 16;
+                    q[-4] += k >> 16;
+                    q[0] += k >> 16;
+                }
+                k += 0x2000;
+                q += 16;
+                e++;
+            } while (--n != 0);
+            o->velV += 0x28;
+            if (o->velV > 0x400)
+                o->velV = 0x400;
+            o->y.raw += o->velV << 8;
+            if (o->timer >= 0x1e || ((SPAD.s1f8 + SPAD.i198) & 1))
+                FUN_800202b4(o);
+            if (--o->timer == -1)
+                o->b04++;
+            break;
+        }
+        break;
+    case 3:
+        freeObjectLayer8(o);
+        break;
+    }
+}
+#else
 #include "spad.h"
 /* Matching debt: register asm("$4") for the o->da0 pointer before the loop (local-alloc gives v0; tried temp
    vars, a shared d with the step-0 call, volatile/raw reads, statement permutations). */
@@ -103,3 +211,4 @@ void updateParentFollowModel(TObj *o)
         break;
     }
 }
+#endif
