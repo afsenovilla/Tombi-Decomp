@@ -196,25 +196,25 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 89.25 % of the code matches byte for byte** (1266148 of 1418604 bytes, 2863 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 89.73 % of the code matches byte for byte** (1272864 of 1418604 bytes, 2871 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
 | SLPS_011.44: engine | 378308 B | 327400 B | 1122 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 86.5 % |
 | X00.BIN: shared object code | 300480 B | 289164 B | 494 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.2 % |
-| X01.BIN: area code | 151304 B | 137096 B | 229 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.6 % |
+| X01.BIN: area code | 151304 B | 137864 B | 230 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 91.1 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X03.BIN: area code | 122684 B | 117428 B | 217 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.7 % |
+| X03.BIN: area code | 122684 B | 118380 B | 218 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.5 % |
 | X04.BIN: area code | 102832 B | 87444 B | 190 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 85.0 % |
 | X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X06.BIN: area code | 35844 B | 33812 B | 44 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.3 % |
+| X06.BIN: area code | 35844 B | 34800 B | 45 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.1 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X09.BIN: area code | 82896 B | 68824 B | 130 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 83.0 % |
+| X09.BIN: area code | 82896 B | 69480 B | 131 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 83.8 % |
 | X10.BIN: area code | 97636 B | 75848 B | 159 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 77.7 % |
-| X11.BIN: area code | 13856 B | 11232 B | 28 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩⬜⬜ 81.1 % |
+| X11.BIN: area code | 13856 B | 12124 B | 29 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 87.5 % |
 | X13.BIN: area code | 6336 B | 4140 B | 7 / 8 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 65.3 % |
-| X14.BIN: area code | 54472 B | 45800 B | 99 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 84.1 % |
-| X16.BIN: area code | 11688 B | 10852 B | 36 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 92.8 % |
+| X14.BIN: area code | 54472 B | 47424 B | 101 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 87.1 % |
+| X16.BIN: area code | 11688 B | 11688 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X17.BIN: area code | 12124 B | 10988 B | 27 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.6 % |
 | X18.BIN: area code | 16136 B | 14112 B | 29 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 87.5 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |

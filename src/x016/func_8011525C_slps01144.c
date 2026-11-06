@@ -30,7 +30,7 @@ extern void func_80028620(O *);
 extern int func_80027EA8(O *, int, int);
 extern void func_8002B2D4(O *);
 
-void func_8011525C_slps01144(O *o)
+void func_8011525C(O *o)
 {
     PL *p = &D_800A7B78;
 
