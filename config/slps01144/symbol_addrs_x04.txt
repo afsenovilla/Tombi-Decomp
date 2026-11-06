@@ -164,3 +164,6 @@ PLAYER_ANIM = 0x800A7B9C; // size:0x4 PAL 0x800A605C
 PLAYER_H = 0x800A7BB8; // size:0x4 PAL 0x800A6078
 // END jp_globals
 func_8011BF1C_slps01144 = 0x8011BF1C; // type:func size:0x230
+func_801279EC_slps01144 = 0x801279EC; // type:func size:0x13C
+func_80115D9C_slps01144 = 0x80115D9C; // type:func size:0x118
+func_80115EB4_slps01144 = 0x80115EB4; // type:func size:0x11C
