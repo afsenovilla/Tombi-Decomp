@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 90.75 % of code (1287440 of 1418604 bytes, 2880 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 90.84 % of code (1288692 of 1418604 bytes, 2881 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -114,7 +114,7 @@ split in `config/slps01144/symbol_addrs_*.txt` (`func_<addr>_slps01144 ... split
 scan (commits 8dd088d, 7a64b01): any instruction but `nop` following a `jr $ra` and its delay slot with no label in
 between. The remaining partial unit, `func_80030A68_slps01144` (76 %), reuses the PAL `playerEffect4EStepD` as is.
 
-Hand pass 3 (2026-11, 2533 -> 2880 functions, 68.66 % -> 90.75 %): the PAL C renamed for JP and diffed with
+Hand pass 3 (2026-11, 2533 -> 2881 functions, 68.66 % -> 90.84 %): the PAL C renamed for JP and diffed with
 `tools/jpcheck.py --norm` (seconds per function, no autofix run), then edited by hand; `--strict` before every
 install, since `--norm` masks branch targets and twice called a wrong control flow IDENTICAL (`bootPlayIntroMovie`:
 the JP case numbers differ, `drawCategory3Objects`: the retail jump table). New JP differences seen: the sprite drawers
@@ -439,6 +439,8 @@ Round 7 (-> 90.75 %): x00 800F4CDC (playerStepSpinOnObject, 5464 B: init store o
 8011B4FC (updateRopeChains, 2336 B: built without `-fno-strength-reduce`, one `ObjCullRegister` test), main 8002C070
 (updateL8Type01Object, fewer guards) and 8001E618 (playSFXWithPitchSlide, first free-voice loop inlined). The sweep had
 missed these main ones because their units carry `_slps01144` names: check them as `func_ADDR_slps01144`.
+Then main 8002B2D4 (cameraEventScrollHandler: no `disableSelectMenu` store, `D_80071694[nextArea]` decides stopBgm),
+90.84 %. main 8001D5E0 (moviePlayerTask: no DecDCTinSync / timeout / CdControlB loop) is at 8 lines (prologue order).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
