@@ -485,6 +485,10 @@ Open: x10 80115DB8 (register allocation in case 0/4), _SsVmSetVol (splat cut one
 Last round (2026-11-07): x00 80131A70, x14 8011B5A8, x09 801286E4, x10 80117378 and x10 801158B4, all JP-only and
 rewritten from the disassembly; three symbol sizes fixed (801158B4 ran over CdFlush). Open, scheduling only: x14
 8011FD98 (since matched by the permuter: `short f`, `d88 - -0x80`, a split d88 store), x10 8011BE2C (20 lines, case-2 load order). x09 80120CC4 and 80122168 since matched (permuter `char t`, an asm barrier on the loaded SPAD value; `chk()` written as an early return).
+A further hand round on the open five found no match: x10 8011BE2C (~20 lines, s1fc load after the BITTEN pointer
+in retail), x10 80119D9C / x14 80118580 (~30-36, `o` in a3 in retail: probably one more long-lived temp in case 0),
+main 8002EDB0 = printInfoMessage (~40) and x10 80115DB8 (40; its case 3/7 lacked `hi = lo + 10`, now fixed). Best
+drafts are kept outside the repo; all five are register allocation only.
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
