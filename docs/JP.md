@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 92.41 % of code (1310868 of 1418604 bytes, 2907 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 92.78 % of code (1316164 of 1418604 bytes, 2912 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -477,6 +477,11 @@ The permuter then fixed the three playSFXWithNote / 8001E458 / playSFXWithNoteAn
 result held in an `unsigned` variable, the asm copy in a `do { } while (0)` with the call: the delay slot fills).
 Open, scheduling only: x10 80119D9C and
 x14 80118580 (case-0 loads hoisted above stores), printInfoMessage = 8002EDB0 (JP form, 54 register lines).
+Next pairs (2026-11-07): main 80018818 (bootStartupTask without the logo states), main 8001FE6C (a synchronous CD
+load, not weaponHitCat2Type08), x09 8012908C and x11 80116348 / x10 801249FC (JP-only NPC talk handlers rewritten
+from the disassembly). Two symbol sizes were 4 bytes short (the last `nop` after `jr ra`), which objdiff scores
+as 99.6 %: check the size against the next symbol when a jpcheck-IDENTICAL function reports below 100.
+Open: x10 80115DB8 (register allocation in case 0/4), _SsVmSetVol (splat cut one 0x584 function in five).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
