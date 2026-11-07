@@ -40,3 +40,4 @@ MOVE_TABLE_0 = 0x800716C4; // size:0x18 PAL 0x80077CDC
 GCD = 0x8009E8A8; // size:0x400 PAL 0x8009CD00
 PLAYER_H = 0x800A7BB8; // size:0x4 PAL 0x800A6078
 // END jp_globals
+func_8011AA34_slps01144 = 0x8011AA34; // type:func size:0x18C
