@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 94.24 % of code (1336932 of 1418604 bytes, 2935 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 94.68 % of code (1343168 of 1418604 bytes, 2938 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -498,6 +498,8 @@ globals), x00 8010EC44 (playerUpdateSpeedFromPad without the PAD_INFO 7 branch),
 and x14 801155DC (updateSectionClearController; its size ran over CdFlush again). Open: x09 8011F65C (one addu
 operand order, 8 lines), main 8001CA50 (94 lines, loop-invariant hoist order). Also matched: x01 8011677C
 (selectArea1VisibleModels with 5 sections) and x10 80126728 (swimTeacherFloatTalk with JP text ids).
+Then x10 801259C4 (swimTeacherIntroTalk without the pad vibration), x18 80118854 (a JP-only Mizuno item turn-in
+talk) and x13 801162DC (updateSceneSequence at 60 Hz constants, the stats screen drawn with sprintf).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in

@@ -4,3 +4,4 @@ func_80115694_slps01144 = 0x80115694; // type:func size:0x348  PAL x013 0x801163
 func_801159DC_slps01144 = 0x801159DC; // type:func size:0x18  PAL x013 0x801166E0 identical
 func_801159F4_slps01144 = 0x801159F4; // type:func size:0x5E4  PAL x013 0x801166F8
 updateMightyFishFood = 0x80115FD8; // type:func size:0x304  PAL x013 0x80116CDC
+func_801162DC_slps01144 = 0x801162DC; // type:func size:0x894

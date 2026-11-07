@@ -196,7 +196,7 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 94.24 % of the code matches byte for byte** (1336932 of 1418604 bytes, 2935 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 94.68 % of the code matches byte for byte** (1343168 of 1418604 bytes, 2938 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
@@ -210,13 +210,13 @@ offsets and the function or splat range that produced them.
 | X06.BIN: area code | 35844 B | 35196 B | 46 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.2 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X09.BIN: area code | 82896 B | 79180 B | 142 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.5 % |
-| X10.BIN: area code | 97636 B | 85960 B | 167 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 88.0 % |
+| X10.BIN: area code | 97636 B | 87976 B | 168 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.1 % |
 | X11.BIN: area code | 13856 B | 13856 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X13.BIN: area code | 6336 B | 4140 B | 7 / 8 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 65.3 % |
+| X13.BIN: area code | 6336 B | 6336 B | 8 / 8 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X14.BIN: area code | 54472 B | 53596 B | 107 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.4 % |
 | X16.BIN: area code | 11688 B | 11688 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X17.BIN: area code | 12124 B | 12124 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X18.BIN: area code | 16136 B | 14112 B | 29 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 87.5 % |
+| X18.BIN: area code | 16136 B | 16136 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 
 Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
