@@ -196,12 +196,12 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 93.61 % of the code matches byte for byte** (1327944 of 1418604 bytes, 2928 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 94.09 % of the code matches byte for byte** (1334732 of 1418604 bytes, 2933 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
 | SLPS_011.44: engine | 378308 B | 339148 B | 1140 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 89.6 % |
-| X00.BIN: shared object code | 300480 B | 297380 B | 499 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.0 % |
+| X00.BIN: shared object code | 300480 B | 298892 B | 500 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.5 % |
 | X01.BIN: area code | 151304 B | 143876 B | 235 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.1 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X03.BIN: area code | 122684 B | 119960 B | 220 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.8 % |
@@ -209,13 +209,13 @@ offsets and the function or splat range that produced them.
 | X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X06.BIN: area code | 35844 B | 35196 B | 46 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.2 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X09.BIN: area code | 82896 B | 77644 B | 141 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 93.7 % |
+| X09.BIN: area code | 82896 B | 79180 B | 142 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.5 % |
 | X10.BIN: area code | 97636 B | 84832 B | 166 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 86.9 % |
 | X11.BIN: area code | 13856 B | 13856 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X13.BIN: area code | 6336 B | 4140 B | 7 / 8 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 65.3 % |
-| X14.BIN: area code | 54472 B | 50992 B | 105 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 93.6 % |
+| X14.BIN: area code | 54472 B | 53596 B | 107 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.4 % |
 | X16.BIN: area code | 11688 B | 11688 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X17.BIN: area code | 12124 B | 10988 B | 27 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.6 % |
+| X17.BIN: area code | 12124 B | 12124 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X18.BIN: area code | 16136 B | 14112 B | 29 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 87.5 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 
