@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 93.25 % of code (1322848 of 1418604 bytes, 2920 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 93.61 % of code (1327944 of 1418604 bytes, 2928 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -489,6 +489,10 @@ A further hand round on the open five found no match: x10 8011BE2C (~20 lines, s
 in retail), x10 80119D9C / x14 80118580 (~30-36, `o` in a3 in retail: probably one more long-lived temp in case 0),
 main 8002EDB0 = printInfoMessage (~40) and x10 80115DB8 (40; its case 3/7 lacked `hi = lo + 10`, now fixed). Best
 drafts are kept outside the repo; all five are register allocation only.
+JP-only batch (2026-11-07): x09 8011EAD4 / 8011EFD4 (GTE draw loops), x06 8011AA34, x01 8011FFFC, x09 8011C2D8
+(parallax backdrops with JP tables), x01 8011AD50 (nested state switch, empty `case 2:` labels), x14 8011E0B8
+(baccusVillagePigShotCheckLanded without the d38 guard), main 8001C2D8 (an older pause menu). Close but open:
+x00 80131858 (one register), x03 80126EC4 (35), x14 8011FB54 (60), x10 8011EF5C (103).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
