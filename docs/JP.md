@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 97.25 % of code (1375664 of 1414500 bytes, 2953 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 97.48 % of code (1378824 of 1414496 bytes, 2957 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -520,6 +520,10 @@ x03 80126EC4 (20). Since matched: x10 80119D9C / x14 80118580 (one joint `asm(""
 "1"(j))` after the two scratchpad loads keeps `o` live, so it gets a3), main 8002EDB0 printInfoMessage (one pointer
 q for three temps, `register char *base asm("$4")`, -1 in a variable, case -6 sums through short temps) and main
 800498AC drawBalloonFrame (PAL C with JP colours, no default case, `register short w asm("$9")`).
+Then x01 updateParentFollowModel (PAL loop form, no extra q pointer), x00 80120314 (one pointer for the header
+chain), main 8001D5E0 moviePlayerTask (MOVIE_DEC_ENV fields with no local pointer) and main 80024300 (`unsigned char
+r`). x06 8011DD3C is instruction-identical but scores 99.4 %: the next function starts after one padding nop that the
+target includes. Open: x03 80126EC4 (2 lines), main 80016E6C (18), main 800412B0 (101), x04 80118720 / 80118B98.
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in

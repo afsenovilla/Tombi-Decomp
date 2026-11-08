@@ -4,9 +4,9 @@
 #if defined(VERSION_SLPS_01144)
 #include "spad.h"
 #include "TOBJ.H"
-extern char MOVE_TABLE_2[];
-extern void *D_80122FB8[];
-extern void *D_80122FBC;
+extern char D_800716F4[];
+extern void *D_8011FBD4[];
+extern void *D_8011FBD8;
 extern char D_8012302C[];
 extern char D_8012303C[];
 extern char D_80123070[];
@@ -16,13 +16,9 @@ extern char D_801230CC[];
 extern char D_801230F0[];
 extern char D_80123118[];
 extern char D_80123134[];
-static void *D_80122FC4[9] = {
-    D_8012302C, D_8012303C, D_80123070, D_80123084,
-    D_801230A8, D_801230CC, D_801230F0, D_80123118,
-    D_80123134,
-};
-extern void FUN_8001fe6c(TObj *);
-extern int FUN_8001fec0(TObj *);
+extern void *D_8011FBE0[9];
+extern void func_80020DE4(TObj *);
+extern int func_80020E38(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void freeObjectLayer2(TObj *);
 extern void cullObjectToDrawList(TObj *, int);
@@ -49,12 +45,12 @@ void func_8011DD3C_slps01144(TObj *o)
         o->d8c = 0;
         setbox(o, 0x10, 0x20, 0x10, 0x20);
         o->d3c = ((int*)&SPAD.i2d0)[0];
-        o->anim = D_80122FB8[o->b0c];
-        FUN_8001fe6c(o);
+        o->anim = D_8011FBD4[o->b0c];
+        func_80020DE4(o);
         break;
     case 1:
         cullObjectToDrawList(o, 160);
-        FUN_8001fec0(o);
+        func_80020E38(o);
         break;
     case 2:
         cullObjectToDrawList(o, 160);
@@ -64,19 +60,19 @@ void func_8011DD3C_slps01144(TObj *o)
             o->b0f = 4;
             o->active = 2;
             o->velV = -0x400;
-            o->movetab = MOVE_TABLE_2;
+            o->movetab = D_800716F4;
             o->step++;
-            o->anim = D_80122FC4[0];
-            FUN_8001fe6c(o);
+            o->anim = D_8011FBE0[0];
+            func_80020DE4(o);
             break;
         case 1:
             if (o->velV > 0) {
-                o->anim = D_80122FBC;
-                FUN_8001fe6c(o);
+                o->anim = D_8011FBD8;
+                func_80020DE4(o);
                 o->step++;
             }
         case 2:
-            FUN_8001fec0(o);
+            func_80020E38(o);
             applyAnimVelocityX(o, 1 - o->animFrame);
             o->velV += 0x40;
             if (o->velV > 0x400)

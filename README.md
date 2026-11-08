@@ -196,18 +196,18 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 97.25 % of the code matches byte for byte** (1375664 of 1414500 bytes, 2953 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 97.48 % of the code matches byte for byte** (1378824 of 1414496 bytes, 2957 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 374204 B | 347936 B | 1144 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 93.0 % |
-| X00.BIN: shared object code | 300480 B | 299428 B | 501 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.6 % |
-| X01.BIN: area code | 151304 B | 150564 B | 238 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.5 % |
+| SLPS_011.44: engine | 374204 B | 349356 B | 1146 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 93.4 % |
+| X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
+| X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X03.BIN: area code | 122684 B | 122300 B | 221 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.7 % |
 | X04.BIN: area code | 102832 B | 98596 B | 194 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.9 % |
 | X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X06.BIN: area code | 35844 B | 35196 B | 46 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.2 % |
+| X06.BIN: area code | 35840 B | 35196 B | 46 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.2 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X09.BIN: area code | 82896 B | 82896 B | 144 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X10.BIN: area code | 97636 B | 92128 B | 170 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.4 % |
