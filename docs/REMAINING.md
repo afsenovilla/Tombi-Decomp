@@ -39,7 +39,8 @@ Game code, closest first:
 
 ## USA retail (SCUS-94236)
 
-Being added on 2026-11-08 (`docs/USA.md`). First figures after its automatic sweep go here.
+95.79 % (3071 of 3209 functions) after two automatic sweeps (`docs/USA.md`). The SYSTEM overlays (DSPSUB*, INFO*,
+OPTSUB00, GOVER) are not split yet. psx_tomba (hansbonini) is the USA decompilation to port from.
 
 ## Demos and prototypes
 
