@@ -1,5 +1,13 @@
 # Compiler (matching)
 
+> **UPDATE 2026-11-08: `bash tools/setup_psyq.sh` installs the reference toolchain in a fresh container** (wine32,
+> dosbox, and the Psy-Q binaries from the public archive decomp.me uses, github.com/mkst/esa, into /opt/psyq; never
+> committed). The CC1PSX that reproduces the game is the **Psy-Q 4.0** one of that archive (`/opt/psyq/cc40`,
+> matchcheck's default now): its "4.3", "4.4" and "4.6" CC1PSX give a different frame for ObjGravityStep. With it
+> 126 of 129 sampled MATCHING files pass matchcheck; the 3 others are `// AS gnu` pad-library files (GNU as, ncheck
+> only). matchcheck now preprocesses with the native old-gcc `cpp` (DOS CPPPSX only resolves 8.3 header names, so
+> gamestate.h and include/tomba/ were silently missing); `NATIVE_CPP=0` restores the DOS CPPPSX.
+
 > **UPDATE: the game's compiler is the `CC1PSX.EXE` from Psy-Q 4.3** (Win32, run under Wine).
 > With the 4.3 CC1PSX + ASPSX 2.86 (4.6), 263 functions match; the DOS CC1PSX 2.7.2.SN.1 we
 > used before had a different scheduler (prologue in a different order) and blocked dozens of functions.

@@ -21,10 +21,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PSYQ = os.environ.get("PSYQ_DIR", "/opt/psyq/new")
 WORK = os.environ.get("WORK", "/opt/psyq/w")
 _aw = os.environ.get("ASPSX_WINE", "/opt/psyq/46/BIN/ASPSX.EXE")
-_cc = os.environ.get("CC1_WINE", "/opt/psyq/cc43/CC1PSX.EXE")  # default: Psy-Q 4.3 (the game's compiler)
+# default: the Psy-Q 4.0 CC1PSX of tools/setup_psyq.sh (the public mkst/esa "4.3" CC1PSX does NOT reproduce the game:
+# no stack frame in ObjGravityStep); /opt/psyq/cc43 is the older local copy of these notes, kept as a fallback
+_cc = os.environ.get("CC1_WINE", "/opt/psyq/cc40/CC1PSX.EXE" if os.path.exists("/opt/psyq/cc40/CC1PSX.EXE")
+                     else "/opt/psyq/cc43/CC1PSX.EXE")
 CC1_WINE = _cc if (_cc != "0" and os.path.exists(_cc) and shutil.which("wine")) else None  # Win32 CC1PSX (Psy-Q 4.3+) via Wine instead of DOSBox
 CC_DEFAULT = "gcc-2.7.2"  # the game's compiler; files with `// CC <other>` were built with a newer one
 CC1_BY_CC = {"gcc-2.7.2": _cc, "gcc-2.8.1": os.environ.get("CC1_WINE_281", "/opt/psyq/cc44/CC1PSX.EXE")}
+_np = os.environ.get("NATIVE_CPP", "/opt/oldgcc/gcc-2.7.2-psx/cpp")  # NATIVE_CPP=0: DOS CPPPSX as before
+NATIVE_CPP = _np if (_np != "0" and os.path.exists(_np)) else None
 ASPSX_WINE = _aw if (_aw != "0" and os.path.exists(_aw) and shutil.which("wine")) else None
 GAME = os.path.join(ROOT, "game")
 IMAGES = {"MAIN0": ("MAIN0.EXE", "exe"), "X000": ("AREA00/X000.BIN", "raw")}
@@ -138,6 +143,13 @@ def main():
     if os.path.isdir(inc):
         for f in os.listdir(inc):
             if os.path.isfile(os.path.join(inc, f)): shutil.copy(os.path.join(inc, f), WORK + "/inc/" + f.upper())
+    ninc = WORK + "/ninc"  # header tree for the native preprocessor (both name cases, subfolders kept)
+    os.makedirs(ninc)
+    if os.path.isdir(inc):
+        for f in os.listdir(inc):
+            p = os.path.join(inc, f)
+            if os.path.isdir(p): shutil.copytree(p, os.path.join(ninc, f)); continue
+            for nm in {f, f.upper(), f.lower()}: shutil.copy(p, os.path.join(ninc, nm))
     pre = ["mount c %s" % os.path.dirname(WORK), "mount d %s" % PSYQ, "c:", "cd %s" % os.path.basename(WORK)]
     env = dict(os.environ, SDL_VIDEODRIVER="dummy", SDL_AUDIODRIVER="dummy", XDG_RUNTIME_DIR="/tmp")
     bat = []
@@ -159,8 +171,11 @@ def main():
             continue
         jobs.append((n, f, h, cc))
         wine_cc1 = CC1_WINE if cc == CC_DEFAULT else cc1_for(cc)
-        bat += [r"d:\CPPPSX.EXE -undef -D__GNUC__=2 -DMIPSEL -IC:\%s\INC F%d.C F%d.I" % (os.path.basename(WORK).upper(), n, n),
-                ] + ([] if wine_cc1 else [r"d:\CC1PSX.EXE -quiet %s F%d.I -o F%d.S" % (flags, n, n)]) + ([] if ASPSX_WINE else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
+        if NATIVE_CPP:  # DOS CPPPSX only finds 8.3 header names (gamestate.h, include/tomba/...): preprocess natively
+            subprocess.run([NATIVE_CPP, "-undef", "-D__GNUC__=2", "-DMIPSEL", "-I" + ninc, "-I" + ninc + "/tomba",
+                            "-D_LANGUAGE_C", "-DVERSION_SCES_01331", f, "%s/F%d.I" % (WORK, n)], check=True)
+        bat += ([] if NATIVE_CPP else [r"d:\CPPPSX.EXE -undef -D__GNUC__=2 -DMIPSEL -IC:\%s\INC F%d.C F%d.I" % (os.path.basename(WORK).upper(), n, n)]
+                ) + ([] if wine_cc1 else [r"d:\CC1PSX.EXE -quiet %s F%d.I -o F%d.S" % (flags, n, n)]) + ([] if ASPSX_WINE else [r"d:\ASPSX.EXE -q F%d.S -o F%d.OBJ" % (n, n)])
         if len(jobs) % CH == 0: flush()
     flush()
     for n, f, h, cc in jobs:
