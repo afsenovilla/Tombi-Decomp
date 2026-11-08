@@ -373,6 +373,72 @@ jobs:
           name: BETA_980203_report
           path: build/beta980203/report.json
 
+  # USA release (Tomba!, SCUS-94236). Separate decomp.dev version named after its boot executable: artifact
+  # SCUS_942.36_report. The image (raw .bin, 2352-byte sectors, or a zip with the extracted disc) comes from the
+  # GAME_FILES_URL_USA secret; never committed. Skipped when the secret or config/scus94236/ is missing. See docs/USA.md.
+  report-usa:
+    needs: check
+    if: needs.check.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_USA }}
+          scope: "report-usa"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch USA disc
+        id: fetch
+        env:
+          GAME_FILES_URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
+        run: |
+          if [ -z "$GAME_FILES_URL_USA" ]; then
+            echo "::notice::GAME_FILES_URL_USA secret not set; skipping the USA report."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ ! -f config/scus94236/scus94236.yaml ]; then
+            echo "::notice::config/scus94236 not set up; USA report skipped."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_USA" | tr -d '\r\n"'"'"' ')"
+          tools/ci_download.sh "$URL" "$RUNNER_TEMP/usa.dl" 100000000
+          bash tools/disc_unpack.sh "$RUNNER_TEMP/usa.dl" "$RUNNER_TEMP/usa"
+          mkdir -p game_usa/fs/SYSTEM
+          cp "$(find "$RUNNER_TEMP/usa" -iname SCUS_942.36 | head -1)" game_usa/fs/SCUS_942.36
+          echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
+          for f in X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
+            cp "$(find "$RUNNER_TEMP/usa" -ipath "*SYSTEM/$f.BIN" | head -1)" "game_usa/fs/SYSTEM/$f.BIN"
+          done
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Install toolchain
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev
+          python3 -m pip install -r tools/requirements.txt
+          python3 -m pip install --no-deps splat64==0.35.2
+          python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          sudo tools/setup_native.sh
+          mkdir -p "$RUNNER_TEMP/objdiff"
+          curl -fsSL -o "$RUNNER_TEMP/objdiff/objdiff-cli" https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
+          chmod +x "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Build USA report
+        if: steps.fetch.outputs.ok == 'true'
+        run: python3 tools/build_report.py --version scus94236 --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli"
+
+      - name: Upload USA report
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SCUS_942.36_report
+          path: build/scus94236/report.json
+
   # PS1 Classics (PSN) releases: NPJJ00566 (JP) and NPUJ94236 (USA). Each secret is a direct
   # download URL to a .zip with EBOOT.PBP + KEYS.BIN. Prints header info (disc id, TOC, block
   # index) and tries the experimental image extraction; see docs/PSN.md.

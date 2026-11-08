@@ -6,6 +6,7 @@
 |---|---|---|
 | Europe, language set 2 EN ES PT SV DA (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, everything below |
 | Europe, language set 1 EN FR DE IT NL (`SCES_013.30`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | same build as `SCES_013.31` (every game file byte-identical, only the boot menu differs); the port plays all nine languages from either disc |
+| USA, *Tomba!* (`SCUS_942.36`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCUS_942.36&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCUS_942.36&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCUS_942.36&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) | shared C reuse, [docs/USA.md](docs/USA.md) |
 | Japan, *Ore! Tomba* (`SLPS_011.44`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPS_011.44&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPS_011.44&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPS_011.44&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | matching in progress, [docs/JP.md](docs/JP.md) |
 | Japan demo, taikenban (`SLPM_801.65`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPM_801.65&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPM_801.65&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPM_801.65&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | shared C + automatic sweep, [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Beta 1998-02-03 (`BETA_980203`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=BETA_980203&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=BETA_980203&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=BETA_980203&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | shared C reuse, [docs/BETA_980203.md](docs/BETA_980203.md) |
@@ -222,6 +223,35 @@ offsets and the function or splat range that produced them.
 Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
 <!-- jp-progress:end -->
 
+## USA release progress
+
+<!-- scus94236-progress:start -->
+**Tomba! USA (SCUS-94236): 95.66 % of the code matches byte for byte** (1409588 of 1473596 bytes, 3049 of 3209 functions).
+
+| Part | Code | Matching bytes | Functions | Matching |
+|---|---:|---:|---:|---|
+| SCUS_942.36: engine | 395580 B | 353840 B | 1191 / 1328 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 89.4 % |
+| X00.BIN: shared object code | 313648 B | 307796 B | 525 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.1 % |
+| X01.BIN: area code | 154588 B | 151316 B | 241 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.9 % |
+| X02.BIN: area code | 25432 B | 24156 B | 33 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.0 % |
+| X03.BIN: area code | 122864 B | 120344 B | 217 / 220 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.9 % |
+| X04.BIN: area code | 105504 B | 103720 B | 197 / 199 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.3 % |
+| X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X06.BIN: area code | 36492 B | 36492 B | 48 / 48 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X09.BIN: area code | 83252 B | 83252 B | 145 / 145 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X10.BIN: area code | 100836 B | 100624 B | 175 / 176 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.8 % |
+| X11.BIN: area code | 15356 B | 14196 B | 29 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 92.4 % |
+| X13.BIN: area code | 8516 B | 6000 B | 12 / 13 | 🟩🟩🟩🟩🟩🟩🟩⬜⬜⬜ 70.5 % |
+| X14.BIN: area code | 62468 B | 58792 B | 120 / 125 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.1 % |
+| X16.BIN: area code | 11468 B | 11468 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X17.BIN: area code | 14064 B | 14064 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X18.BIN: area code | 16840 B | 16840 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+
+Regenerated with `python3 tools/build_report.py --version scus94236` then `python3 tools/progress_jp.py --version scus94236`. See [docs/USA.md](docs/USA.md).
+<!-- scus94236-progress:end -->
+
 ## Japanese demo progress
 
 <!-- slpm80165-progress:start -->
@@ -243,6 +273,7 @@ Every known retail, demo and prototype disc (serials, dates, executable hashes):
 |---------|--------|--------|
 | Tombi! PAL, language set 2 (EN ES PT SV DA) | SCES-01331 Rev 1 | matching, everything above; `MAIN0` (English) is the reference executable |
 | Tombi! PAL, language set 1 (EN FR DE IT NL) | SCES-01330 Rev 1 | same game files byte for byte, only the boot menu differs: covered by the same sources and reports |
+| Tomba! (USA) | SCUS-94236 | split + shared C, figures in "USA release progress", see [docs/USA.md](docs/USA.md) |
 | Ore! Tomba (Japan) | SLPS-01144 | split + shared C, matching in progress (figures in the table at the top and in "Japanese release progress"), see [docs/JP.md](docs/JP.md) |
 | Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 40.9 % of code (objdiff; figures in "Japanese demo progress"), `tools/demo_sweep.py` installs what PAL / JP C matches as is, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Ore! Tomba beta 1998-02-03 (Japan) | SLPS-01144 (prototype) | split + shared C, 56.5 % of code, see [docs/BETA_980203.md](docs/BETA_980203.md) |
@@ -260,6 +291,7 @@ compiled for every version**, and each version has its own splat configs, symbol
 |---------|------------------------|-------|-------------------------|-----|--------|
 | SCES-01331 (PAL, reference) | `sces01331` (default) | `VERSION_SCES_01331` | `config/*.yaml` | `asm/<prog>/` | `build/report.json` |
 | SLPS-01144 (Japan) | `slps01144` (`jp`) | `VERSION_SLPS_01144` | `config/slps01144/` | `asm/slps01144/<prog>/` | `build/slps01144/report.json` |
+| SCUS-94236 (USA) | `scus94236` (`usa`) | `VERSION_SCUS_94236` | `config/scus94236/` | `asm/scus94236/<prog>/` | `build/scus94236/report.json` |
 | SLPM-80165 (Japan demo) | `slpm80165` (`jpdemo`) | `VERSION_SLPM_80165` | `config/slpm80165/` | `asm/slpm80165/<prog>/` | `build/slpm80165/report.json` |
 
 - The C keeps the PAL names. `config/<serial>/symbol_addrs_<prog>.txt` maps PAL names to that version's addresses

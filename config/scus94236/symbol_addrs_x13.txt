@@ -1,0 +1,12 @@
+updateAreaScroll = 0x80115304; // type:func size:0x280  PAL x013 0x80115FB4
+cameraFollowPlayerClamped = 0x80115584; // type:func size:0x9C  PAL x013 0x80116234
+dispatchAreaScroll = 0x80115620; // type:func size:0xC8  PAL x013 0x801162D0
+a13CarryPlayerStep = 0x801156E8; // type:func size:0x348  PAL x013 0x80116398
+linkAreaModelBlock = 0x80115A30; // type:func size:0x18  PAL x013 0x801166E0 identical
+updateBackdropSpriteSet = 0x80115A48; // type:func size:0x5E4  PAL x013 0x801166F8
+updateMightyFishFood = 0x8011602C; // type:func size:0x304  PAL x013 0x80116CDC
+drawGameStats = 0x80116D04; // type:func size:0x198  PAL x013 0x801179B4
+drawStatsLabelGlyph = 0x80116E9C; // type:func size:0xC4  PAL x013 0x80117B4C identical
+drawStatsNumber = 0x80116F60; // type:func size:0x204  PAL x013 0x80117C10
+drawStatsPlayTime = 0x80117164; // type:func size:0x214  PAL x013 0x80117E14
+drawStatsDigit = 0x80117378; // type:func size:0xD0  PAL x013 0x80118028

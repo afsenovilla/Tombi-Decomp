@@ -2,14 +2,14 @@ name: JP sweep
 
 # Automatic matching sweep over the Japanese builds, no hand work: tools/jp_autofix.py (SLPS-01144: PAL C compiled for
 # JP with literals shifted, installed when it matches byte for byte) and tools/demo_sweep.py (SLPM-80165, BETA_980203,
-# PCPX-96084: existing PAL / JP C compiled for the demo, installed on a strict match). Discs come from the secrets,
+# PCPX-96084, SCUS-94236: existing PAL / JP C compiled for the version, installed on a strict match). Discs come from the secrets,
 # never committed. When something was installed, the reports and README are rebuilt and a pull request is opened for
 # review; nothing is pushed to master by this workflow. Runs on demand and after a push that lands JP C.
 on:
   workflow_dispatch:
   push:
     branches: [master]
-    paths: ['src/**_slps01144.c', 'config/slps01144/**', 'config/slpm80165/**', 'config/beta980203/**', 'config/pcpx96084/**']
+    paths: ['src/**_slps01144.c', 'config/slps01144/**', 'config/slpm80165/**', 'config/beta980203/**', 'config/pcpx96084/**', 'config/scus94236/**']
 
 concurrency:
   group: jp-sweep
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
         with:
-          urls: ${{ secrets.GAME_FILES_URL }}${{ secrets.GAME_FILES_URL_JP }}${{ secrets.GAME_FILES_URL_JP_DEMO }}${{ secrets.GAME_FILES_URL_BETA980203 }}${{ secrets.GAME_FILES_URL_PREPRE8 }}
+          urls: ${{ secrets.GAME_FILES_URL }}${{ secrets.GAME_FILES_URL_JP }}${{ secrets.GAME_FILES_URL_JP_DEMO }}${{ secrets.GAME_FILES_URL_BETA980203 }}${{ secrets.GAME_FILES_URL_PREPRE8 }}${{ secrets.GAME_FILES_URL_USA }}
 
       - uses: actions/setup-python@v5
         with:
@@ -52,6 +52,7 @@ jobs:
           GAME_FILES_URL_JP_DEMO: ${{ secrets.GAME_FILES_URL_JP_DEMO }}
           GAME_FILES_URL_BETA980203: ${{ secrets.GAME_FILES_URL_BETA980203 }}
           GAME_FILES_URL_PREPRE8: ${{ secrets.GAME_FILES_URL_PREPRE8 }}
+          GAME_FILES_URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
         run: |
           fetch() {  # $1 secret value, $2 out dir under RUNNER_TEMP, $3 "prepre8" for the PrePre 8 extractor; a direct URL, a Drive share link or a bare Drive id; zip or disc image
             [ -n "$1" ] || { echo "::warning::secret for $2 not set"; return 1; }
@@ -102,12 +103,21 @@ jobs:
             cp "$(find "$RUNNER_TEMP/prepre8" -iname TOMBA.EXE | head -1)" game_prepre8/TOMBA.EXE
             echo "032d6f371b31085098b86aebbce465d30599293a  game_prepre8/TOMBA.EXE" | sha1sum -c -
           fi
-          rm -rf "$RUNNER_TEMP"/pal "$RUNNER_TEMP"/jp "$RUNNER_TEMP"/jpdemo "$RUNNER_TEMP"/beta "$RUNNER_TEMP"/prepre8
+          # USA retail
+          if fetch "$GAME_FILES_URL_USA" usa; then
+            mkdir -p game_usa/fs/SYSTEM
+            cp "$(find "$RUNNER_TEMP/usa" -iname SCUS_942.36 | head -1)" game_usa/fs/SCUS_942.36
+            echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
+            for f in X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
+              cp "$(find "$RUNNER_TEMP/usa" -ipath "*SYSTEM/$f.BIN" | head -1)" "game_usa/fs/SYSTEM/$f.BIN"
+            done
+          fi
+          rm -rf "$RUNNER_TEMP"/pal "$RUNNER_TEMP"/jp "$RUNNER_TEMP"/jpdemo "$RUNNER_TEMP"/beta "$RUNNER_TEMP"/prepre8 "$RUNNER_TEMP"/usa
 
       - name: Reports before the sweep
         run: |
           python3 tools/gen_symbols.py >/dev/null
-          for v in slps01144 slpm80165 beta980203 pcpx96084; do
+          for v in slps01144 slpm80165 beta980203 pcpx96084 scus94236; do
             d="$(python3 -c "import sys; sys.path.insert(0,'tools'); import versions as V; print(V.VERSIONS['$v']['game'])")"
             [ -d "$d" ] || { echo "$v: no game files, skipped"; continue; }
             python3 tools/build_report.py --version "$v" --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli" | tail -1
@@ -126,7 +136,7 @@ jobs:
       - name: Reports after the sweep
         if: env.changed != '0'
         run: |
-          for v in slps01144 slpm80165 beta980203 pcpx96084; do
+          for v in slps01144 slpm80165 beta980203 pcpx96084 scus94236; do
             d="$(python3 -c "import sys; sys.path.insert(0,'tools'); import versions as V; print(V.VERSIONS['$v']['game'])")"
             [ -d "$d" ] || continue
             python3 tools/build_report.py --version "$v" --objdiff "$RUNNER_TEMP/objdiff/objdiff-cli" | tail -1

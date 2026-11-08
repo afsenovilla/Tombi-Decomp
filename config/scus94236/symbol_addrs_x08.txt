@@ -1,0 +1,1 @@
+updateAreaScroll = 0x801151F8; // type:func size:0xE4  PAL x008 0x80115EA8

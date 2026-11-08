@@ -1,6 +1,15 @@
 // FUNC 80068520 16 MAIN0
 // MATCHING 80068520 16
+// VERSION SCUS_94236 scus94236 80067F78 16
 // Portado de psx_tomba (psyq/libetc/intr.c, CheckCallback); licencia MIT del proyecto original.
+#if defined(VERSION_SCUS_94236)
+// USA version of PAL main0 80068520 (CheckCallback.c): JP C of src/CheckCallback_slps01144.c (CheckCallback_slps01144) (1.000 masked) [-O2 -G0] (tools/demo_sweep.py)
+extern unsigned short D_8009C00A;
+unsigned short CheckCallback(void)
+{
+    return D_8009C00A;
+}
+#else
 #define SKIP_ASM
 #include "common.h"
 
@@ -83,3 +92,4 @@ INCLUDE_RODATA("asm/scus_942.36/nonmatchings/psyq/libetc/intr", D_80016264);
 INCLUDE_RODATA("asm/scus_942.36/nonmatchings/psyq/libetc/intr", D_80016280);
 
 INCLUDE_RODATA("asm/scus_942.36/nonmatchings/psyq/libetc/intr", jtbl_80016290);
+#endif
