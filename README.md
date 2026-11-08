@@ -2,7 +2,33 @@
 
 # Tombi! (Tomba!) decomp + native PC port
 
-| Version | Progress (decomp.dev: code, data, functions) | Notes |
+[![Report](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml/badge.svg)](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml)
+[![Platform](https://img.shields.io/badge/platform-PlayStation-003791)](#for-contributors)
+[![Compiler](https://img.shields.io/badge/compiler-GCC%20%2B%20maspsx-orange)](#for-contributors)
+[![License](https://img.shields.io/github/license/afsenovilla/Tombi-Decomp)](LICENSE)
+
+A **matching decompilation** and **native port** of *Tombi!* (*Tomba!* in North America, *Ore! Tomba* in Japan) for
+the original PlayStation.
+
+- **Decompilation:** the game's code rewritten as C that compiles, with the original compiler, into the same machine
+  code as the disc. One source tree builds every release: PAL, USA, Japan and the demos.
+- **Native port:** the same C built as a Windows, Linux and Android program (`port2/`), with OpenGL or software
+  rendering, controllers, the original music, voices and movies, saves, all nine PAL languages and a launcher with
+  mods. You supply your own disc image.
+
+> This repository contains no game data, executables, disc images or Sony SDK files.
+> You need your own legally obtained copy of the game.
+
+## Play the port
+
+Download `tombi-port-<ver>-windows-x64.exe`, `-linux-x64.tar.gz` or `-android.apk` from the
+[latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest) and point the launcher at your disc image
+(Tombi! PAL Rev 1, `SCES-01331` or `SCES-01330`). Both PAL discs carry all nine languages (EN FR DE IT NL ES PT SV DA),
+so either one gives you every language. Details: [docs/PORT.md](docs/PORT.md).
+
+## Progress
+
+| Release | Progress (decomp.dev: code, data, functions) | Notes |
 |---|---|---|
 | Europe, language set 2 EN ES PT SV DA (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, everything below |
 | Europe, language set 1 EN FR DE IT NL (`SCES_013.30`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | same build as `SCES_013.31` (every game file byte-identical, only the boot menu differs); the port plays all nine languages from either disc |
@@ -12,36 +38,11 @@
 | Beta 1998-02-03 (`BETA_980203`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=BETA_980203&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=BETA_980203&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=BETA_980203&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | shared C reuse, [docs/BETA_980203.md](docs/BETA_980203.md) |
 | PrePre 8 demo (`PCPX_960.84`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=PCPX_960.84&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=PCPX_960.84&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=PCPX_960.84&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | symbol pairing, [docs/PREPRE8.md](docs/PREPRE8.md) |
 
-[![Report](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml/badge.svg)](https://github.com/afsenovilla/Tombi-Decomp/actions/workflows/report.yml)
-[![Platform](https://img.shields.io/badge/platform-PlayStation-003791)](#target)
-[![Compiler](https://img.shields.io/badge/compiler-GCC%20%2B%20maspsx-orange)](#how-matching-works)
-[![License](https://img.shields.io/github/license/afsenovilla/Tombi-Decomp)](LICENSE)
+Each release is counted on its own; one function is "done" when it compiles to exactly the bytes of that disc.
+What is left, closest first: [docs/REMAINING.md](docs/REMAINING.md).
 
-A **matching decompilation and native recompilation** of *Tombi!* (known as *Tomba!* in North America and
-*Ore! Tomba* in Japan) for the original PlayStation:
-
-- **Decompilation: finished.** The game's code is C source that compiles, with the game's original toolchain, into
-  byte-identical machine code (99.34 %: every function but three memory-card ones, which have functionally
-  equivalent C, see "Status" below). Work on the decompilation is considered complete; the remaining work is
-  naming and documentation.
-- **Recompilation: the native PC port.** The same C is built as a native Windows/Linux program (`port2/`): OpenGL
-  or software rendering, SDL2 controllers, the original music, voices and movies, saves, every language of the
-  disc (any of the nine from either PAL disc, see below), and a launcher with mods (`tombi-port-<ver>-windows-x64.exe` / `tombi-port-<ver>-linux-x64.tar.gz` of the [latest release](https://github.com/afsenovilla/Tombi-Decomp/releases/latest), see [docs/PORT.md](docs/PORT.md)). The game is
-  fully playable; you supply your own disc image (Tombi! PAL Rev 1, `SCES-01331` or `SCES-01330`), which the launcher extracts once.
-  **One disc, nine languages:** both PAL discs carry all nine `MAIN0..8` executables and their data; only their boot
-  menu differs (`SCES-01331` offers EN ES PT SV DA, `SCES-01330` EN FR DE IT NL). The port has no boot menu and starts
-  the language you pick (`--lang 0..8`, both launchers list all nine), so either disc gives you English, French,
-  German, Italian, Dutch, Spanish, Portuguese, Swedish and Danish.
-
-This repository targets the **European release** (`SCES-01331` Rev 1; `SCES-01330` Rev 1 is the same disc with the
-EN/FR/DE/IT/NL boot menu instead of EN/ES/PT/SV/DA, every game file byte-identical, so it is covered too; all nine
-languages are on both) and works function by function: every
-function in `src/` is verified to produce exactly the same instructions as the retail executable.
-
-> This repository contains no game data, executables, disc images or Sony SDK files.
-> You need your own legally obtained copy of the game and of the toolchain.
-
-## Status
+<details>
+<summary><b>PAL (reference): per part</b></summary>
 
 <!-- progress:start -->
 **Whole game: 99.68 % of the game's code matches byte for byte** (1525380 of 1530244 bytes).
@@ -63,167 +64,20 @@ function in `src/` is verified to produce exactly the same instructions as the r
 Per-program and per-area breakdown, pending work and what is not counted: [docs/PROGRESS.md](docs/PROGRESS.md).
 The table above is regenerated with `python3 tools/progress.py`.
 
-**Where things stand (October 2026).** The code is 99.40 % byte-matched: 2 952 of 2 955 functions. The three left are
-in the memory card overlays (D0SPSUB `func_800E89F8`, `func_800EFD6C`, D0SPSUB2 `func_800E999C`, plus the D0SPSUB3 twin
-of the first); each has functionally equivalent C in `src/wip/` whose header documents the remaining difference (register
-allocation and scheduler order, the structure matches), see [notes/remaining.md](notes/remaining.md). The D0SPSUB menu
+**What is left in PAL** is a few large memory-card sub-screen functions (D0SPSUB `func_800EFD6C`, D0SPSUB2
+`func_800E999C` and the D0SPSUB3 ones); each has functionally equivalent C in `src/wip/`, see
+[docs/REMAINING.md](docs/REMAINING.md). The D0SPSUB menu
 dispatcher `func_800ED0C4` (now `subScreenItemListStep`) was matched by [michaelm-afk](https://github.com/michaelm-afk) (PR #1) and its D0SPSUB3 twin
 `func_800EC89C` followed from the same idioms. Function naming is complete for MAIN0, X000, the SYSTEM overlays and the area overlays X001..X019: 0
 functions keep a generic name (`notes/unnamed.json`; empty stubs are named `stubNop<addr>` / `stubFreeObj<addr>`). Data naming is done by usage for
 MAIN0 (342 globals, `notes/data_names_main0.csv`), X000 (115) and the eight SYSTEM overlays (266 in their
 `notes/data_names_<overlay>.csv`), applied with `tools/rename_data.py`; what is still spelled by address is animation
-scripts, elements of named pointer tables, field aliases and Psy-Q internals. The Japanese release is active again (see "Japanese release progress"); the demo is swept automatically (see "Japanese demo progress").
+scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 
-## Target
+</details>
 
-| File | Description | SHA-1 |
-|------|-------------|-------|
-| `SCES_013.31` | Boot executable (PAL; language menu EN ES PT SV DA = `MAIN0`, `MAIN5..8`) | `f6c383514e5d8367d2eed06400315cf6dd57ef6b` |
-| `SCES_013.30` | Boot executable of the other PAL disc (menu EN FR DE IT NL = `MAIN0`, `MAIN1..4`): the same program relinked 4 bytes earlier with that file list; the only file that differs between the two discs | `1d98c6595a49bd8063c906221df1eaa854964cb1` |
-| `EXE/MAIN0.EXE` | Game core, loaded at `0x80010000` | `bec8dc5f4116f5e497f2337eef8c523ff6dee8fc` |
-| `AREA00/X000.BIN` | Area overlay, AREA00 (Village of All Beginnings), loaded at `0x800E8028` | `ce168475f667f2ca8842eabad2aec829e301c5c5` |
-| `AREA01/X001.BIN` | Area overlay, AREA01 (also AREA07), loaded at `0x800E8028` | `923f812dcfd7da18ee0f7017e5b45a5e38ee3015` |
-| `AREA02/X002.BIN` | Area overlay, AREA02 (AREA19 ships a copy), loaded at `0x800E8028` | `646aa8b5ad97f70b299b982b3260f9f731a142bb` |
-| `AREA03/X003.BIN` | Area overlay, AREA03 (Phoenix Mountain), loaded at `0x800E8028` | `440ae76f5012e3778b908743d7d030c350caf7d3` |
-| `AREA04/X004.BIN` | Area overlay, AREA04 (also AREA12), loaded at `0x800E8028` | `f01c882217efee45bf76aba54ee4fadfa6c25665` |
-| `AREA05/X005.BIN` | Area overlay, AREA05 (Baccus Village), loaded at `0x800E8028` | `0d2778c0d4b3e5b5dfc40fc46053e46d9d785b17` |
-| `AREA06/X006.BIN` | Area overlay, AREA06 (Dirt Motocross), loaded at `0x800E8028` | `1bd5b648feb75a580c14db6715e057cb035c1db1` |
-| `AREA08/X008.BIN` | Area overlay, AREA08 (Baccus Lake), loaded at `0x800E8028` | `5e098dccfd123af09967ca778c83223e8a21716d` |
-| `AREA09/X009.BIN` | Area overlay, AREA09 (Mushroom Village), loaded at `0x800E8028` | `1b44ea24890128c3d3789b0badb252135ba4dec1` |
-| `AREA10/X010.BIN` | Area overlay, AREA10 (Deep Jungle), loaded at `0x800E8028` | `5093e40399319f5987668bfb1d042713216d356e` |
-| `AREA11/X011.BIN` | Area overlay, AREA11 (Village of Civilization), loaded at `0x800E8028` | `016559470c5a253deb5a38f685ff312c39c2cb46` |
-| `AREA13/X013.BIN` | Area overlay, AREA13 (Pig Island), loaded at `0x800E8028` | `a4e8668eca85a32d6d0cdfa05ddffd6ad40bfbb0` |
-| `AREA14/X014.BIN` | Area overlay, AREA14 (Evil Pigs), loaded at `0x800E8028` | `4ee916eb3215ccae64773e1a9a547ab8dbcd1ff5` |
-| `AREA16/X016.BIN` | Area overlay, AREA16 (Village of Civilization: Clock Tower), loaded at `0x800E8028` | `7c93915bc943e8d9d8fa5d5efbd02f7e563650e4` |
-| `AREA17/X017.BIN` | Area overlay, AREA17 (Village of Civilization: Iron Tower), loaded at `0x800E8028` | `59c5964cbb4536bc62b1a65262d963fab1ad3d33` |
-| `AREA18/X018.BIN` | Area overlay, AREA18 (Village of Civilization: Y Crossing), loaded at `0x800E8028` | `83eca42eb30944bb0c61056632b2ef7bb9891b34` |
-| `AREA19/X019.BIN` | Area overlay built for AREA19 (the dwarves: Dwarf Elder's Hut, Hidden Village), **never loaded** by the retail game: no file table lists it and AREA19 runs `AREA19/X002.BIN` (= AREA02's X002); see docs/CUT_CONTENT.md | `94060c10f7b6e3af1adc55a0c9cff4b81890988c` |
-
-The 17 area overlays (`X0nn.BIN`, English; `X1nn`..`X8nn` are the other eight languages) are raw code blobs, all
-loaded at `0x800E8028`. Their first 188 KB (`0x800E8028`..`0x80115EA4`: header, ~300 shared object handlers and
-a data block) are byte-identical in every area; the rest is per-area code. X001..X019 are tracked like X000:
-boundaries in `notes/functions_x0nn.csv`, sources in `src/x0nn/` (`// FUNC addr size X0nn`), and functions
-identical to an already matched MAIN0/X000 function are generated by `tools/areas.py twins`.
-
-`MAIN0.EXE` corresponds to `SCUS_942.36` of the NTSC-U release (same functions, shifted addresses).
-See [notes/disc_layout.md](notes/disc_layout.md), [notes/memory_map_main0.md](notes/memory_map_main0.md)
-and [notes/overlays.md](notes/overlays.md).
-
-## How matching works
-
-Each function lives in its own file, `src/<Name>.c`, with a small header:
-
-```c
-// FUNC 8001fddc 48 MAIN0        address, size, program
-// MATCHING 8001fddc 48          added once the bytes match
-```
-
-Optional header lines: `// FLAGS -O2 -G0 ...` (compiler flags) and `// CC gcc-2.8.1` (compiler, by old-gcc release
-name; the default is `gcc-2.7.2`). A few MAIN0 library objects (0x8006xxxx) were built with the newer GCC 2.8.1
-(Psy-Q 4.4): `ncheck.py`, `build_full.py` and `build_report.py` compile those with `/opt/oldgcc/gcc-2.8.1-psx`, and
-`matchcheck.py` with Psy-Q 4.4 `CC1PSX.EXE` (`/opt/psyq/cc44/`).
-
-Two checkers compile the file and compare the result with the retail binary, masking relocations:
-
-| Tool | Toolchain | Use |
-|------|-----------|-----|
-| `tools/ncheck.py` | native `gcc-2.7.2-psx` cc1 + [maspsx](https://github.com/mkst/maspsx) + GNU `as` | fast iteration (seconds) |
-| `tools/matchcheck.py` | original PSY-Q 4.3 `CC1PSX.EXE` (Wine) + `CPPPSX` (DOSBox) + `ASPSX 2.86` | reference check |
-
-The game was built with the **PSY-Q 4.3 C compiler (GCC 2.7.2.SN.1)**; see
-[notes/compiler.md](notes/compiler.md). Practical recipes for reproducing GCC 2.7.2 output are collected
-in [notes/matching_guide.md](notes/matching_guide.md).
-
-## Getting started
-
-Requirements: Linux, Python 3, `binutils-mipsel-linux-gnu`. Optional: Wine + DOSBox and the PSY-Q SDK
-binaries for the reference checker; Ghidra 12.1.4 + JDK 21 for analysis.
-
-```bash
-# 1. Put your own game files in game/ (ignored by git)
-#    game/SCES_013.31, game/MAIN0.EXE, game/AREA00/X000.BIN
-
-# 2. Fast native toolchain (old-gcc + maspsx + binutils)
-tools/setup_native.sh
-
-# 3. Check one function, or all of them
-python3 tools/ncheck.py src/MulCos.c
-python3 tools/ncheck.py src/*.c
-python3 tools/ncheck.py src/x0*/*.c       # area overlays X001..X019
-
-# 4. Inspect a function: disassembly + Ghidra pseudo-C
-python3 tools/fn.py 8001fddc
-```
-
-Reference checker: copy `CC1PSX.EXE` (PSY-Q 4.3) to `/opt/psyq/cc43/` (and PSY-Q 4.4's to `/opt/psyq/cc44/` for the
-`// CC gcc-2.8.1` files), the DOS `CPPPSX.EXE` to
-`/opt/psyq/new/` and `ASPSX.EXE` 2.86 to `/opt/psyq/46/BIN/`, install `wine` and `dosbox`, then run
-`python3 tools/matchcheck.py src/<Name>.c`.
-
-## Full build
-
-`tools/build_full.py` links both programs from the matched C plus splat assembly for everything else and
-checks them against the retail files:
-
-```bash
-python3 tools/build_full.py          # splat split + compile src/*.c + link; prints SHA-1 and OK/FAIL
-python3 tools/build_full.py --no-split   # reuse the previous split (build/full/asm)
-```
-
-Run `tools/setup_native.sh` first (toolchain and the `include/tomba/psyq` headers; without them the files that
-include those headers are kept as asm, the output still matches). A full run takes about 1.5 minutes.
-
-Outputs: `build/MAIN0.EXE` (must equal `bec8dc5f…`), `build/X000.BIN` (must equal `ce168475…`) and the eight SYSTEM
-overlays (`O0PTSUB0.BIN`, `D0SPSUB.BIN`, `D0SPSUB2.BIN`, `D0SPSUB3.BIN`, `G0OVER.BIN`, `I0NFO.BIN`, `I0NFO2.BIN`, `I0NFO3.BIN`,
-SHA-1 checked the same way); work files
-in `build/full/` (linker scripts `*.full.ld`, maps, objects). On a mismatch it lists the first differing
-offsets and the function or splat range that produced them.
-
-- Each `src/*.c` replaces the splat lines in `[addr, addr+size)` of its `// FUNC` header (the header is the
-  truth, even when splat had cut that range into several functions).
-- String literals, jump tables and static data of a C file are linked at their original addresses (found from
-  the retail bytes of the instructions that reference them). Data a file merely *re-defines* (globals ported
-  from psx_tomba headers) is dropped in favour of the real data from splat, and every external symbol of a C
-  file gets its retail address (`PROVIDE` in the linker script, renamed when the name belongs to another
-  address, e.g. NTSC-named symbols).
-- X000 is linked at `0x800E8028`; MAIN0 symbols it uses are absolute (`build/full/undefined_*_auto.x000.txt`).
-- A file that does not compile or cannot be placed is reported as `WARN ... kept as asm` and the build still
-  links the retail assembly for it. Today 28 MAIN0 files stay as asm (`1124 of 1152 src files linked`): Psy-Q
-  library objects whose `.rodata` cannot be placed (several bases, or bytes that differ from the game) and
-  `FUN_80068ae4` (a BIOS stub whose inline `asm` ends in `.data`; it needs ASPSX). The output still matches.
-- Rules for new C files: a data table shared by several functions must be referenced as an `extern` symbol in
-  each file (it can only be linked once), and do not emit another function's data with `__asm__(".word")`.
-
-## Japanese release progress
-
-<!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 98.62 % of the code matches byte for byte** (1394956 of 1414496 bytes, 3034 of 3102 functions).
-
-| Part | Code | Matching bytes | Functions | Matching |
-|---|---:|---:|---:|---|
-| SLPS_011.44: engine | 374204 B | 360620 B | 1217 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.4 % |
-| X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
-| X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X03.BIN: area code | 122684 B | 122684 B | 222 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X04.BIN: area code | 102832 B | 99440 B | 195 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.7 % |
-| X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X06.BIN: area code | 35840 B | 35196 B | 46 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.2 % |
-| X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X09.BIN: area code | 82896 B | 82896 B | 144 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X10.BIN: area code | 97636 B | 95768 B | 174 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.1 % |
-| X11.BIN: area code | 13856 B | 13856 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X13.BIN: area code | 6336 B | 6336 B | 8 / 8 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X14.BIN: area code | 54472 B | 54472 B | 109 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X16.BIN: area code | 11688 B | 11688 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X17.BIN: area code | 12124 B | 12124 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X18.BIN: area code | 16136 B | 16136 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-
-Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
-<!-- jp-progress:end -->
-
-## USA release progress
+<details>
+<summary><b>USA (SCUS-94236): per part</b></summary>
 
 <!-- scus94236-progress:start -->
 **Tomba! USA (SCUS-94236): 99.12 % of the code matches byte for byte** (1460648 of 1473600 bytes, 3185 of 3218 functions).
@@ -252,7 +106,42 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 Regenerated with `python3 tools/build_report.py --version scus94236` then `python3 tools/progress_jp.py --version scus94236`. See [docs/USA.md](docs/USA.md).
 <!-- scus94236-progress:end -->
 
-## Japanese demo progress
+</details>
+
+<details>
+<summary><b>Japan (SLPS-01144): per part</b></summary>
+
+<!-- jp-progress:start -->
+**Ore! Tomba (SLPS-01144): 98.62 % of the code matches byte for byte** (1394956 of 1414496 bytes, 3034 of 3102 functions).
+
+| Part | Code | Matching bytes | Functions | Matching |
+|---|---:|---:|---:|---|
+| SLPS_011.44: engine | 374204 B | 360620 B | 1217 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.4 % |
+| X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
+| X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X03.BIN: area code | 122684 B | 122684 B | 222 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X04.BIN: area code | 102832 B | 99440 B | 195 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.7 % |
+| X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X06.BIN: area code | 35840 B | 35196 B | 46 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.2 % |
+| X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X09.BIN: area code | 82896 B | 82896 B | 144 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X10.BIN: area code | 97636 B | 95768 B | 174 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.1 % |
+| X11.BIN: area code | 13856 B | 13856 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X13.BIN: area code | 6336 B | 6336 B | 8 / 8 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X14.BIN: area code | 54472 B | 54472 B | 109 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X16.BIN: area code | 11688 B | 11688 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X17.BIN: area code | 12124 B | 12124 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X18.BIN: area code | 16136 B | 16136 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+
+Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
+<!-- jp-progress:end -->
+
+</details>
+
+<details>
+<summary><b>Japanese demo (SLPM-80165)</b></summary>
 
 <!-- slpm80165-progress:start -->
 **Ore! Tomba demo (SLPM-80165): 42.01 % of the code matches byte for byte** (269604 of 641804 bytes, 1132 of 1832 functions).
@@ -265,7 +154,10 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 Regenerated with `python3 tools/build_report.py --version slpm80165` then `python3 tools/progress_jp.py --version slpm80165`. `python3 tools/demo_sweep.py` installs the PAL / JP C that matches demo functions as is (see [docs/JPDEMO.md](docs/JPDEMO.md)).
 <!-- slpm80165-progress:end -->
 
-## Versions
+</details>
+
+<details>
+<summary><b>All versions and how they share code</b></summary>
 
 Every known retail, demo and prototype disc (serials, dates, executable hashes): [wiki: List of builds](docs/wiki/Builds.md).
 
@@ -318,23 +210,146 @@ compiled for every version**, and each version has its own splat configs, symbol
   shared tree, `asm <version>` adds the INCLUDE_ASM branches for the PAL files whose version counterpart is not
   matched yet. The PAL build is unaffected (it never defines the other macros).
 
-## Releases
+</details>
 
-Releases of the port are published by hand by `.github/workflows/release.yml` (Actions > "Publish release" > Run
-workflow, or `gh workflow run release.yml`) once the owner approves; there is no automatic release.
+## For contributors
 
-- Versions are `vX.Y.Z`: tag `v0.0.N`, title "Tombi port 0.0.N", one release for every platform: `tombi-port-0.0.N-windows-x64.exe`,
-  `tombi-port-0.0.N-linux-x64.tar.gz` and `tombi-port-0.0.N-android.apk` (one APK with both arm64-v8a, the 64-bit
-  wasm2c build, and armeabi-v7a; Android picks the one the device runs), optionally `Tombi-Tools-0.0.N-...`
-  (translation editor, graphics editor, assets extractor). Each release bumps the patch of the latest `v*` tag and is
-  marked Latest; the notes list the player-facing commits since the previous `v*` tag (`tools/release_notes.py`).
-- To bump the minor/major version run the workflow with the input `version` (e.g. `0.1.0`; must be `X.Y.Z` and
-  greater than the latest): `gh workflow run release.yml -f version=0.1.0`. Later automatic releases continue
-  from it (0.1.1, ...).
-- The old `build-YYYYMMDD-<sha7>` releases are kept as pre-releases titled "dev build YYYYMMDD-<sha7>"
-  (`gh workflow run release.yml -f migrate_dev=true` re-applies that without publishing anything).
+Start with [AGENTS.md](AGENTS.md) (how to check and install a function, compiler tricks) and [CLAUDE.md](CLAUDE.md) (project rules).
 
-## Progress report (objdiff / decomp.dev)
+<details>
+<summary><b>Getting started</b></summary>
+
+Requirements: Linux, Python 3, `binutils-mipsel-linux-gnu`. Optional: Wine + DOSBox and the PSY-Q SDK
+binaries for the reference checker; Ghidra 12.1.4 + JDK 21 for analysis.
+
+```bash
+# 1. Put your own game files in game/ (ignored by git)
+#    game/SCES_013.31, game/MAIN0.EXE, game/AREA00/X000.BIN
+
+# 2. Fast native toolchain (old-gcc + maspsx + binutils)
+tools/setup_native.sh
+
+# 3. Check one function, or all of them
+python3 tools/ncheck.py src/MulCos.c
+python3 tools/ncheck.py src/*.c
+python3 tools/ncheck.py src/x0*/*.c       # area overlays X001..X019
+
+# 4. Inspect a function: disassembly + Ghidra pseudo-C
+python3 tools/fn.py 8001fddc
+```
+
+Reference checker: copy `CC1PSX.EXE` (PSY-Q 4.3) to `/opt/psyq/cc43/` (and PSY-Q 4.4's to `/opt/psyq/cc44/` for the
+`// CC gcc-2.8.1` files), the DOS `CPPPSX.EXE` to
+`/opt/psyq/new/` and `ASPSX.EXE` 2.86 to `/opt/psyq/46/BIN/`, install `wine` and `dosbox`, then run
+`python3 tools/matchcheck.py src/<Name>.c`.
+
+</details>
+
+<details>
+<summary><b>Full build</b></summary>
+
+`tools/build_full.py` links both programs from the matched C plus splat assembly for everything else and
+checks them against the retail files:
+
+```bash
+python3 tools/build_full.py          # splat split + compile src/*.c + link; prints SHA-1 and OK/FAIL
+python3 tools/build_full.py --no-split   # reuse the previous split (build/full/asm)
+```
+
+Run `tools/setup_native.sh` first (toolchain and the `include/tomba/psyq` headers; without them the files that
+include those headers are kept as asm, the output still matches). A full run takes about 1.5 minutes.
+
+Outputs: `build/MAIN0.EXE` (must equal `bec8dc5f…`), `build/X000.BIN` (must equal `ce168475…`) and the eight SYSTEM
+overlays (`O0PTSUB0.BIN`, `D0SPSUB.BIN`, `D0SPSUB2.BIN`, `D0SPSUB3.BIN`, `G0OVER.BIN`, `I0NFO.BIN`, `I0NFO2.BIN`, `I0NFO3.BIN`,
+SHA-1 checked the same way); work files
+in `build/full/` (linker scripts `*.full.ld`, maps, objects). On a mismatch it lists the first differing
+offsets and the function or splat range that produced them.
+
+- Each `src/*.c` replaces the splat lines in `[addr, addr+size)` of its `// FUNC` header (the header is the
+  truth, even when splat had cut that range into several functions).
+- String literals, jump tables and static data of a C file are linked at their original addresses (found from
+  the retail bytes of the instructions that reference them). Data a file merely *re-defines* (globals ported
+  from psx_tomba headers) is dropped in favour of the real data from splat, and every external symbol of a C
+  file gets its retail address (`PROVIDE` in the linker script, renamed when the name belongs to another
+  address, e.g. NTSC-named symbols).
+- X000 is linked at `0x800E8028`; MAIN0 symbols it uses are absolute (`build/full/undefined_*_auto.x000.txt`).
+- A file that does not compile or cannot be placed is reported as `WARN ... kept as asm` and the build still
+  links the retail assembly for it. Today 28 MAIN0 files stay as asm (`1124 of 1152 src files linked`): Psy-Q
+  library objects whose `.rodata` cannot be placed (several bases, or bytes that differ from the game) and
+  `FUN_80068ae4` (a BIOS stub whose inline `asm` ends in `.data`; it needs ASPSX). The output still matches.
+- Rules for new C files: a data table shared by several functions must be referenced as an `extern` symbol in
+  each file (it can only be linked once), and do not emit another function's data with `__asm__(".word")`.
+
+</details>
+
+<details>
+<summary><b>How matching works</b></summary>
+
+Each function lives in its own file, `src/<Name>.c`, with a small header:
+
+```c
+// FUNC 8001fddc 48 MAIN0        address, size, program
+// MATCHING 8001fddc 48          added once the bytes match
+```
+
+Optional header lines: `// FLAGS -O2 -G0 ...` (compiler flags) and `// CC gcc-2.8.1` (compiler, by old-gcc release
+name; the default is `gcc-2.7.2`). A few MAIN0 library objects (0x8006xxxx) were built with the newer GCC 2.8.1
+(Psy-Q 4.4): `ncheck.py`, `build_full.py` and `build_report.py` compile those with `/opt/oldgcc/gcc-2.8.1-psx`, and
+`matchcheck.py` with Psy-Q 4.4 `CC1PSX.EXE` (`/opt/psyq/cc44/`).
+
+Two checkers compile the file and compare the result with the retail binary, masking relocations:
+
+| Tool | Toolchain | Use |
+|------|-----------|-----|
+| `tools/ncheck.py` | native `gcc-2.7.2-psx` cc1 + [maspsx](https://github.com/mkst/maspsx) + GNU `as` | fast iteration (seconds) |
+| `tools/matchcheck.py` | original PSY-Q 4.3 `CC1PSX.EXE` (Wine) + `CPPPSX` (DOSBox) + `ASPSX 2.86` | reference check |
+
+The game was built with the **PSY-Q 4.3 C compiler (GCC 2.7.2.SN.1)**; see
+[notes/compiler.md](notes/compiler.md). Practical recipes for reproducing GCC 2.7.2 output are collected
+in [notes/matching_guide.md](notes/matching_guide.md).
+
+</details>
+
+<details>
+<summary><b>Target files</b></summary>
+
+| File | Description | SHA-1 |
+|------|-------------|-------|
+| `SCES_013.31` | Boot executable (PAL; language menu EN ES PT SV DA = `MAIN0`, `MAIN5..8`) | `f6c383514e5d8367d2eed06400315cf6dd57ef6b` |
+| `SCES_013.30` | Boot executable of the other PAL disc (menu EN FR DE IT NL = `MAIN0`, `MAIN1..4`): the same program relinked 4 bytes earlier with that file list; the only file that differs between the two discs | `1d98c6595a49bd8063c906221df1eaa854964cb1` |
+| `EXE/MAIN0.EXE` | Game core, loaded at `0x80010000` | `bec8dc5f4116f5e497f2337eef8c523ff6dee8fc` |
+| `AREA00/X000.BIN` | Area overlay, AREA00 (Village of All Beginnings), loaded at `0x800E8028` | `ce168475f667f2ca8842eabad2aec829e301c5c5` |
+| `AREA01/X001.BIN` | Area overlay, AREA01 (also AREA07), loaded at `0x800E8028` | `923f812dcfd7da18ee0f7017e5b45a5e38ee3015` |
+| `AREA02/X002.BIN` | Area overlay, AREA02 (AREA19 ships a copy), loaded at `0x800E8028` | `646aa8b5ad97f70b299b982b3260f9f731a142bb` |
+| `AREA03/X003.BIN` | Area overlay, AREA03 (Phoenix Mountain), loaded at `0x800E8028` | `440ae76f5012e3778b908743d7d030c350caf7d3` |
+| `AREA04/X004.BIN` | Area overlay, AREA04 (also AREA12), loaded at `0x800E8028` | `f01c882217efee45bf76aba54ee4fadfa6c25665` |
+| `AREA05/X005.BIN` | Area overlay, AREA05 (Baccus Village), loaded at `0x800E8028` | `0d2778c0d4b3e5b5dfc40fc46053e46d9d785b17` |
+| `AREA06/X006.BIN` | Area overlay, AREA06 (Dirt Motocross), loaded at `0x800E8028` | `1bd5b648feb75a580c14db6715e057cb035c1db1` |
+| `AREA08/X008.BIN` | Area overlay, AREA08 (Baccus Lake), loaded at `0x800E8028` | `5e098dccfd123af09967ca778c83223e8a21716d` |
+| `AREA09/X009.BIN` | Area overlay, AREA09 (Mushroom Village), loaded at `0x800E8028` | `1b44ea24890128c3d3789b0badb252135ba4dec1` |
+| `AREA10/X010.BIN` | Area overlay, AREA10 (Deep Jungle), loaded at `0x800E8028` | `5093e40399319f5987668bfb1d042713216d356e` |
+| `AREA11/X011.BIN` | Area overlay, AREA11 (Village of Civilization), loaded at `0x800E8028` | `016559470c5a253deb5a38f685ff312c39c2cb46` |
+| `AREA13/X013.BIN` | Area overlay, AREA13 (Pig Island), loaded at `0x800E8028` | `a4e8668eca85a32d6d0cdfa05ddffd6ad40bfbb0` |
+| `AREA14/X014.BIN` | Area overlay, AREA14 (Evil Pigs), loaded at `0x800E8028` | `4ee916eb3215ccae64773e1a9a547ab8dbcd1ff5` |
+| `AREA16/X016.BIN` | Area overlay, AREA16 (Village of Civilization: Clock Tower), loaded at `0x800E8028` | `7c93915bc943e8d9d8fa5d5efbd02f7e563650e4` |
+| `AREA17/X017.BIN` | Area overlay, AREA17 (Village of Civilization: Iron Tower), loaded at `0x800E8028` | `59c5964cbb4536bc62b1a65262d963fab1ad3d33` |
+| `AREA18/X018.BIN` | Area overlay, AREA18 (Village of Civilization: Y Crossing), loaded at `0x800E8028` | `83eca42eb30944bb0c61056632b2ef7bb9891b34` |
+| `AREA19/X019.BIN` | Area overlay built for AREA19 (the dwarves: Dwarf Elder's Hut, Hidden Village), **never loaded** by the retail game: no file table lists it and AREA19 runs `AREA19/X002.BIN` (= AREA02's X002); see docs/CUT_CONTENT.md | `94060c10f7b6e3af1adc55a0c9cff4b81890988c` |
+
+The 17 area overlays (`X0nn.BIN`, English; `X1nn`..`X8nn` are the other eight languages) are raw code blobs, all
+loaded at `0x800E8028`. Their first 188 KB (`0x800E8028`..`0x80115EA4`: header, ~300 shared object handlers and
+a data block) are byte-identical in every area; the rest is per-area code. X001..X019 are tracked like X000:
+boundaries in `notes/functions_x0nn.csv`, sources in `src/x0nn/` (`// FUNC addr size X0nn`), and functions
+identical to an already matched MAIN0/X000 function are generated by `tools/areas.py twins`.
+
+`MAIN0.EXE` corresponds to `SCUS_942.36` of the NTSC-U release (same functions, shifted addresses).
+See [notes/disc_layout.md](notes/disc_layout.md), [notes/memory_map_main0.md](notes/memory_map_main0.md)
+and [notes/overlays.md](notes/overlays.md).
+
+</details>
+
+<details>
+<summary><b>Progress report (objdiff / decomp.dev)</b></summary>
 
 `tools/build_report.py` produces the [objdiff](https://github.com/encounter/objdiff) report that
 [decomp.dev](https://decomp.dev) displays: [splat](https://github.com/ethteck/splat) splits the retail
@@ -353,7 +368,10 @@ Units are marked `complete` (decomp.dev "fully linked", `complete_code`) when th
 MAIN0.EXE / X000.BIN by `tools/build_full.py` and matches 100 % of its code. Overlay units are not (the overlays are not
 yet linked from source), and no data is claimed: `.data`/`.rodata` still come from the retail binary via splat.
 
-## Repository layout
+</details>
+
+<details>
+<summary><b>Repository layout</b></summary>
 
 ```
 src/            matching C, one function per file (MAIN0 and X000)
@@ -372,7 +390,10 @@ game_jp/        your own Japanese disc files (ignored by git; game_jpdemo/ for t
 config/slps01144/  splat configs and symbol tables of the Japanese release (config/slpm80165/: the demo)
 ```
 
-## Tools
+</details>
+
+<details>
+<summary><b>Tools</b></summary>
 
 | Tool | Purpose |
 |------|---------|
@@ -465,6 +486,27 @@ window (Qt, 64-bit, bundled) needs the X11 cursor library many desktops already 
 `-f include_tools=true`, to add `Tombi-Tools-<ver>-windows-x64.zip` / `-linux-x64.tar.gz` with tombi-text,
 tombi-gfx and tombi-assets), or automatically after a port build once master has 5 non-CI commits (subject not
 starting with `ci:`/`dist:`) since the last release.
+
+</details>
+
+<details>
+<summary><b>Releases</b></summary>
+
+Releases of the port are published by hand by `.github/workflows/release.yml` (Actions > "Publish release" > Run
+workflow, or `gh workflow run release.yml`) once the owner approves; there is no automatic release.
+
+- Versions are `vX.Y.Z`: tag `v0.0.N`, title "Tombi port 0.0.N", one release for every platform: `tombi-port-0.0.N-windows-x64.exe`,
+  `tombi-port-0.0.N-linux-x64.tar.gz` and `tombi-port-0.0.N-android.apk` (one APK with both arm64-v8a, the 64-bit
+  wasm2c build, and armeabi-v7a; Android picks the one the device runs), optionally `Tombi-Tools-0.0.N-...`
+  (translation editor, graphics editor, assets extractor). Each release bumps the patch of the latest `v*` tag and is
+  marked Latest; the notes list the player-facing commits since the previous `v*` tag (`tools/release_notes.py`).
+- To bump the minor/major version run the workflow with the input `version` (e.g. `0.1.0`; must be `X.Y.Z` and
+  greater than the latest): `gh workflow run release.yml -f version=0.1.0`. Later automatic releases continue
+  from it (0.1.1, ...).
+- The old `build-YYYYMMDD-<sha7>` releases are kept as pre-releases titled "dev build YYYYMMDD-<sha7>"
+  (`gh workflow run release.yml -f migrate_dev=true` re-applies that without publishing anything).
+
+</details>
 
 ## Related projects
 
