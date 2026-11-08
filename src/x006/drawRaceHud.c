@@ -1,7 +1,33 @@
 // FUNC 8011bcac 148 X006
 // MATCHING 8011bcac 148
 // VERSION SLPS_01144 x06 8011AE2C 148
+// VERSION SCUS_94236 x06 8011AFF0 148
 #if defined(VERSION_SLPS_01144)
+// Japanese version of PAL x006 8011BCAC (x006/func_8011BCAC.c): 240 -> 208.
+#include "spad.h"
+typedef struct { char p0[0x14]; unsigned short w14; char p16[0x60 - 0x16]; } L;
+typedef struct { char p0[0x18]; int f18; } P;
+extern void FUN_8005f990(L *);
+extern void AddDrawMode(int, int);
+extern void func_8011BD40(P *, int, int);
+extern void func_8011C4AC(P *, int, int);
+extern void func_8011CC18(P *, int, int, int);
+extern void func_8011CD78(P *, int, int);
+
+void func_8011BCAC(P *p)
+{
+    L l;
+    FUN_8005f990(&l);
+    AddDrawMode(l.w14, 1);
+    p->f18 = SPAD.i2d4;
+    func_8011BD40(p, 0x10, 0x10);
+    func_8011C4AC(p, 0x10, 0x1a);
+    func_8011CC18(p, 0, 0x88, 0xd0);
+    p->f18 = SPAD.i2d8;
+    func_8011CD78(p, 0x18, 0xd0);
+}
+#elif defined(VERSION_SCUS_94236)
+// USA version of PAL x006 8011BCAC (drawRaceHud.c): SLPS_01144 branch of src/x006/drawRaceHud.c [-O2 -G0] (tools/demo_sweep.py)
 // Japanese version of PAL x006 8011BCAC (x006/func_8011BCAC.c): 240 -> 208.
 #include "spad.h"
 typedef struct { char p0[0x14]; unsigned short w14; char p16[0x60 - 0x16]; } L;
