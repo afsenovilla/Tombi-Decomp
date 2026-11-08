@@ -27,8 +27,7 @@ Game code, closest first:
 |---|---:|---|---|
 | main 8001AA90 | 904 B | 99.9 % | instruction-identical; jump-table naming only |
 | x06 8011DD3C | 644 B | 99.4 % | instruction-identical; the target includes one padding `nop` before the next function |
-| main 8001CA50 | 1024 B | 48 lines (flags -O2 -G0) | map-tile spawn loop; loop-invariant hoist order, frame 96 vs 104 |
-| x04 80118720 | 624 B | 32 lines | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
+| x04 80118720 | 624 B | 4 lines (case 0: `addiu a1,v1,26` scheduled before the hoisted li's) | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
 | x04 80117938 | 2768 B | ~300 lines | tile-grid visibility list, no PAL twin |
 | main 80024B78 | 5112 B | not started | hand-written GTE mesh renderer, no twin; write from scratch with the GTE macros of src/modelDrawG4Lit.c |
 | main 800249B8 | 448 B | 2 lines | GTE inline asm (the permuter cannot parse it) |
