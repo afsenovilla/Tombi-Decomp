@@ -23,6 +23,7 @@ topdownPlayerMainStep = 0x800EA1F0; // type:func size:0x420  PAL i0nfo2 0x800EAE
 overheadPlayerEventStep = 0x800EA610; // type:func size:0x288  PAL i0nfo 0x800E9CD8
 overheadPlayerHandler = 0x800EA898; // type:func size:0x1C4  PAL i0nfo 0x800E9F60
 overheadDrawRotatedSprite = 0x800EAA5C; // type:func size:0xA34  PAL i0nfo 0x800EA124
+func_800EB490_scus94236 = 0x800EB490; // type:func size:0x5C8  PAL i0nfo2 0x800EC148
 topdownSortDrawOrder = 0x800EC588; // type:func size:0x31C  PAL i0nfo2 0x800ED4D0
 overheadBuildVisibleTileList = 0x800EC8A4; // type:func size:0x1A8  PAL i0nfo 0x800EBEDC
 overheadMapObjHandler = 0x800ECB64; // type:func size:0x124  PAL i0nfo 0x800EC234
