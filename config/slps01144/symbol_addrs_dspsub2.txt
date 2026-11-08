@@ -1,0 +1,11 @@
+memCardReadFile = 0x800EA814; // type:func size:0xCC  PAL d0spsub2 0x800ECCC8
+memCardWriteFile = 0x800EA8E0; // type:func size:0xD4  PAL d0spsub2 0x800ECD94
+memCardWaitHwEvent = 0x800EA9B4; // type:func size:0x84  PAL d0spsub2 0x800ECE68
+memCardWaitSwEvent = 0x800EAA38; // type:func size:0x84  PAL d0spsub2 0x800ECEEC
+memCardClearHwEvents = 0x800EAABC; // type:func size:0x58  PAL d0spsub2 0x800ECF70
+memCardClearSwEvents = 0x800EAB14; // type:func size:0x58  PAL d0spsub2 0x800ECFC8
+memCardCloseEvents = 0x800EAB6C; // type:func size:0xA8  PAL d0spsub2 0x800ED020
+memCardStoreChecksum = 0x800EC358; // type:func size:0x40  PAL d0spsub2 0x800EA0D8 identical
+memCardVerifyChecksum = 0x800EC398; // type:func size:0x48  PAL d0spsub2 0x800EA118 identical
+memCardDrawModeTitle = 0x800ECE44; // type:func size:0x170  PAL d0spsub2 0x800EB0EC
+memCardDrawScrollArrow = 0x800EE090; // type:func size:0x1D8  PAL d0spsub2 0x800EC5A4

@@ -84,7 +84,7 @@ if [ ! -s game_jp/SLPS_011.44 ] && [ -n "${GAME_FILES_URL_JP:-}" ]; then
   if [ -s "$T/jp.img" ]; then mkdir -p game_jp/disc; mv "$T/jp.img" game_jp/disc/tomba_jp.bin; fi
   mkdir -p game_jp/SYSTEM
   cp "$(find "$T/jp" -iname SLPS_011.44 | head -1)" game_jp/SLPS_011.44
-  for f in INFO2 X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
+  for f in DSPSUB DSPSUB2 DSPSUB3 INFO INFO2 INFO3 OPTSUB00 X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
     s="$(find "$T/jp" -ipath "*SYSTEM/$f.BIN" | head -1)"; [ -n "$s" ] && cp "$s" "game_jp/SYSTEM/$f.BIN"
   done
   rm -rf "$T"

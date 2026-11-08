@@ -1,0 +1,39 @@
+# Japanese retail release (SLPS-01144), SYSTEM code overlay INFO2.BIN (PAL I0NFO2.BIN, config/i0nfo2.yaml).
+# Raw blob loaded at the overlay base 0x800E9AF8: ID word + entry table (data), code 0xAB0..0x1621C, then data.
+name: INFO2.BIN
+sha1: 15ea8894a028cdabdda577b32ddfd281e023f51b
+options:
+  basename: info2
+  target_path: game_jp/SYSTEM/INFO2.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slps01144/info2
+  src_path: build/slps01144/splat_src/info2
+  build_path: build/slps01144
+  asset_path: build/slps01144/assets
+  ld_script_path: build/slps01144/info2.ld
+  symbol_addrs_path:
+    - config/slps01144/symbol_addrs_info2.txt
+  undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.info2.txt
+  undefined_syms_auto_path: build/slps01144/undefined_syms_auto.info2.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: info2
+    type: code
+    start: 0x0
+    vram: 0x800E9AF8
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, bin, info2_header]
+      - [0xAB0, c, info2]
+      - [0x1621C, bin, info2_data]
+  - [0x1EAB4]

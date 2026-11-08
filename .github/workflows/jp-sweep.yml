@@ -78,7 +78,7 @@ jobs:
             mkdir -p game_jp/SYSTEM
             cp "$(find "$RUNNER_TEMP/jp" -iname SLPS_011.44 | head -1)" game_jp/SLPS_011.44
             echo "07d577698ad31ec1a69b9d7b80a7c3f90b650888  game_jp/SLPS_011.44" | sha1sum -c -
-            for f in X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
+            for f in X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19 DSPSUB DSPSUB2 DSPSUB3 INFO INFO2 INFO3 OPTSUB00; do
               cp "$(find "$RUNNER_TEMP/jp" -ipath "*SYSTEM/$f.BIN" | head -1)" "game_jp/SYSTEM/$f.BIN"
             done
             echo "jp=true" >> "$GITHUB_OUTPUT"
@@ -108,7 +108,7 @@ jobs:
             mkdir -p game_usa/fs/SYSTEM
             cp "$(find "$RUNNER_TEMP/usa" -iname SCUS_942.36 | head -1)" game_usa/fs/SCUS_942.36
             echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
-            for f in X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19; do
+            for f in X00 X01 X02 X03 X04 X05 X06 X08 X09 X10 X11 X13 X14 X16 X17 X18 X19 DSPSUB DSPSUB2 DSPSUB3 INFO INFO2 GOVER INFO3 OPTSUB00; do
               cp "$(find "$RUNNER_TEMP/usa" -ipath "*SYSTEM/$f.BIN" | head -1)" "game_usa/fs/SYSTEM/$f.BIN"
             done
           fi
