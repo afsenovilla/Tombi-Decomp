@@ -1,0 +1,39 @@
+# USA retail release (SCUS-94236), area overlay X03.BIN.
+# The first 0x2DE6C bytes are the X00.BIN code every overlay repeats (split in config/scus94236/x00.yaml); the area part
+# starts at 0x2DE6C (ID word + entry table, then code), load address 0x800E7388 for the whole file.
+name: X03.BIN
+sha1: 919e0a0e29a2811edaa448f38b191e87047083aa
+options:
+  basename: x03
+  target_path: game_usa/fs/SYSTEM/X03.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/scus94236/x03
+  src_path: build/scus94236/splat_src/x03
+  build_path: build/scus94236
+  asset_path: build/scus94236/assets
+  ld_script_path: build/scus94236/x03.ld
+  symbol_addrs_path:
+    - config/scus94236/symbol_addrs_x03.txt
+  undefined_funcs_auto_path: build/scus94236/undefined_funcs_auto.x03.txt
+  undefined_syms_auto_path: build/scus94236/undefined_syms_auto.x03.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - [0x0, bin, x03_shared]
+  - name: x03
+    type: code
+    start: 0x2DE6C
+    vram: 0x801151F4
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x2DE6C, c, x03]
+  - [0x52A9C]

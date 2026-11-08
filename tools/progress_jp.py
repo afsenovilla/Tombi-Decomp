@@ -2,9 +2,9 @@
 """README block for the Japanese release (SLPS-01144) and the demo builds: byte-matching progress per program from
 build/<ver>/report.json (tools/build_report.py --version <ver>). Rewrites the text between
 <!-- jp-progress:start --> and <!-- jp-progress:end --> in README.md (the release) or, with --version slpm80165 /
-beta980203 / pcpx96084, between <!-- <ver>-progress:start --> and <!-- <ver>-progress:end -->.
+beta980203 / pcpx96084 / scus94236, between <!-- <ver>-progress:start --> and <!-- <ver>-progress:end -->.
 
-  python3 tools/progress_jp.py [--version slps01144|slpm80165|beta980203|pcpx96084]"""
+  python3 tools/progress_jp.py [--version slps01144|slpm80165|beta980203|pcpx96084|scus94236]"""
 import json
 import os
 import re
@@ -16,7 +16,8 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 from versions import version_arg
 README = os.path.join(ROOT, "README.md")
 LABEL = {"slps01144": "SLPS_011.44: engine", "x00": "X00.BIN: shared object code", "slpm80165": "SLPM_801.65: boot exe",
-         "beta980203": "SLPS_011.44 (beta): boot exe", "tomba": "TOMBA.EXE: whole demo"}
+         "beta980203": "SLPS_011.44 (beta): boot exe", "tomba": "TOMBA.EXE: whole demo",
+         "scus94236": "SCUS_942.36: engine"}
 # headline, README marker, regenerate note, per version
 INFO = {
     "slps01144": ("Ore! Tomba (SLPS-01144)", "jp",
@@ -27,6 +28,7 @@ INFO = {
                   " (see [docs/JPDEMO.md](docs/JPDEMO.md))."),
     "beta980203": ("Tomba! beta 1998-02-03", "beta980203", " See [docs/BETA_980203.md](docs/BETA_980203.md)."),
     "pcpx96084": ("Tomba! PrePre 8 (PCPX-96084)", "pcpx96084", " See [docs/PREPRE8.md](docs/PREPRE8.md)."),
+    "scus94236": ("Tomba! USA (SCUS-94236)", "scus94236", " See [docs/USA.md](docs/USA.md)."),
 }
 
 
