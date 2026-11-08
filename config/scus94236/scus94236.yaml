@@ -1,0 +1,46 @@
+# USA retail release Tomba! (SCUS-94236), boot executable. See docs/USA.md.
+# Text range 0x800163B0..0x80076E38 (main, then up to the end of SpuGetAllKeysStatus), like config/slps01144/slps01144.yaml.
+name: SCUS_942.36
+sha1: 81cbc79f0230aeb4252e058039f47ac95a777f5a
+options:
+  basename: scus94236
+  target_path: game_usa/fs/SCUS_942.36
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/scus94236/scus94236
+  src_path: build/scus94236/splat_src/scus94236
+  build_path: build/scus94236
+  asset_path: build/scus94236/assets
+  ld_script_path: build/scus94236/scus94236.ld
+  symbol_addrs_path:
+    - config/scus94236/symbol_addrs_scus94236.txt
+    - config/scus94236/symbol_addrs_manual.txt
+  undefined_funcs_auto_path: build/scus94236/undefined_funcs_auto.scus94236.txt
+  undefined_syms_auto_path: build/scus94236/undefined_syms_auto.scus94236.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: header
+    type: header
+    start: 0x0
+  - name: scus94236
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x800, rodata, scus94236_rodata]
+      - [0x6BB0, c, scus94236]
+      - [0x67638, data, scus94236_data]
+  - [0x88800]

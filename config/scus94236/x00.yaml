@@ -1,0 +1,37 @@
+# USA retail release (SCUS-94236), shared overlay SYSTEM/X00.BIN.
+# Load address 0x800E7388 from jal targets on prologues (PAL X000: 0x800E8028, JP: 0x800E9AF8). Whole file.
+name: X00.BIN
+sha1: 2ba0d06824c940ab40c4c4031f3e3b8e9ead1b89
+options:
+  basename: x00
+  target_path: game_usa/fs/SYSTEM/X00.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/scus94236/x00
+  src_path: build/scus94236/splat_src/x00
+  build_path: build/scus94236
+  asset_path: build/scus94236/assets
+  ld_script_path: build/scus94236/x00.ld
+  symbol_addrs_path:
+    - config/scus94236/symbol_addrs_x00.txt
+  undefined_funcs_auto_path: build/scus94236/undefined_funcs_auto.x00.txt
+  undefined_syms_auto_path: build/scus94236/undefined_syms_auto.x00.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: x00
+    type: code
+    start: 0x0
+    vram: 0x800E7388
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, c, x00]
+  - [0x53F38]

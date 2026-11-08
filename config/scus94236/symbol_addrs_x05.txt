@@ -1,0 +1,16 @@
+updateAreaScroll = 0x80115234; // type:func size:0xFC  PAL x005 0x80115EE4
+updateBackdropSpriteSet = 0x80115330; // type:func size:0x1C8  PAL x005 0x80115FE0
+updateA05AnimDecoration = 0x801154F8; // type:func size:0x10C  PAL x005 0x801161A8
+wineMerchantTalk = 0x80115604; // type:func size:0x3DC  PAL x005 0x801162B4
+mansionKeyHintTalk = 0x801159E0; // type:func size:0x160  PAL x005 0x80116690
+townGuideTalk = 0x80115B40; // type:func size:0x19C  PAL x005 0x801167F0
+noticeBoardTownsfolkTalk = 0x80115CDC; // type:func size:0x1B8  PAL x005 0x8011698C
+wineKeeperTalk = 0x80115E94; // type:func size:0x1B4  PAL x005 0x80116B44
+safeMushroomHintTalk = 0x80116048; // type:func size:0x180  PAL x005 0x80116CF8
+stepBacoTownNpcTalk = 0x801161C8; // type:func size:0x1D8  PAL x005 0x80116E78
+initBacoTownNpc = 0x801163A0; // type:func size:0x154  PAL x005 0x80117050
+updateMermaid = 0x801164F4; // type:func size:0xA8  PAL x004 0x80129524
+spawnNpcSet09 = 0x8011659C; // type:func size:0x3CC  PAL x005 0x8011724C
+func_80116968_scus94236 = 0x80116968; // type:func size:0x8  PAL main0 0x80022154
+func_80116970_scus94236 = 0x80116970; // type:func size:0xC  PAL x000 0x80136A8C
+updateNpcSet20 = 0x8011697C; // type:func size:0x98  PAL x003 0x80133668

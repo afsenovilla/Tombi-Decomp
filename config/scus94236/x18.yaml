@@ -1,0 +1,39 @@
+# USA retail release (SCUS-94236), area overlay X18.BIN.
+# The first 0x2DE6C bytes are the X00.BIN code every overlay repeats (split in config/scus94236/x00.yaml); the area part
+# starts at 0x2DE6C (ID word + entry table, then code), load address 0x800E7388 for the whole file.
+name: X18.BIN
+sha1: de2078cc6d271dbbb94460f6896b570613306fab
+options:
+  basename: x18
+  target_path: game_usa/fs/SYSTEM/X18.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/scus94236/x18
+  src_path: build/scus94236/splat_src/x18
+  build_path: build/scus94236
+  asset_path: build/scus94236/assets
+  ld_script_path: build/scus94236/x18.ld
+  symbol_addrs_path:
+    - config/scus94236/symbol_addrs_x18.txt
+  undefined_funcs_auto_path: build/scus94236/undefined_funcs_auto.x18.txt
+  undefined_syms_auto_path: build/scus94236/undefined_syms_auto.x18.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - [0x0, bin, x18_shared]
+  - name: x18
+    type: code
+    start: 0x2DE6C
+    vram: 0x801151F4
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x2DE6C, c, x18]
+  - [0x34D80]

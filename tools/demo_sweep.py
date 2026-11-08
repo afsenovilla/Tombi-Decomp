@@ -54,8 +54,8 @@ import units as U
 import jpcheck
 from xmatch import mask
 
-DEMO_VERSIONS = ["slpm80165", "beta980203", "pcpx96084"]
-LABEL = {"slpm80165": "Demo", "beta980203": "Beta", "pcpx96084": "PrePre 8"}
+DEMO_VERSIONS = ["slpm80165", "beta980203", "pcpx96084", "scus94236"]
+LABEL = {"slpm80165": "Demo", "beta980203": "Beta", "pcpx96084": "PrePre 8", "scus94236": "USA"}
 FLAG_VARIANTS = ["-O2 -G0", "-O2 -G0 -fno-strength-reduce"]
 JP = "slps01144"
 SYM_RX = re.compile(r"(\w+) = 0x([0-9A-Fa-f]+); // type:func size:0x([0-9A-Fa-f]+)(?:\s+PAL (\w+) 0x([0-9A-Fa-f]+))?")
