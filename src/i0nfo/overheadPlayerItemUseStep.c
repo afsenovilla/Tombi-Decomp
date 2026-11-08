@@ -1,5 +1,128 @@
 // FUNC 800e9188 756 I0NFO
 // MATCHING 800e9188 756
+// VERSION SLPS_01144 info 800EA96C 756
+#if defined(VERSION_SLPS_01144)
+#include "TOBJ.H"
+#include "raw7.h"
+extern void overheadPlayerSetMoveAnim(TObj *o);
+extern void func_80026E0C(int item, int n);
+extern TObj *PLAYER_EXT;
+extern unsigned char D_8009C93F[];
+extern unsigned char GVARS_USE_ITEM_PENDING[];
+extern unsigned char D_8009C942[];
+extern unsigned char D_8009CE55;
+extern unsigned char D_8009CE57;
+extern unsigned char D_8009CF13;
+extern unsigned char GAME_PLAYER_MODE[];
+extern unsigned char GAME_BITTEN_JUMP_KIND;
+
+void overheadPlayerItemUseStep(TObj *o)
+{
+    switch (o->state) {
+    case 0:
+        o->ba4 = 0;
+        o->ba5 = 0;
+        o->ba7 = 0;
+        o->b9c = 0;
+        o->wb2 = 0;
+        o->velX = 0;
+        o->velY = 0;
+        U8(PLAYER_EXT, 8) = 0;
+        PLAYER_EXT->timer = 0;
+        o->d8c = 0;
+        S16(o, 0xD0) = 0;
+        o->w22 = 0;
+        o->animFrame |= 8;
+        overheadPlayerSetMoveAnim(o);
+        o->state++;
+    case 1:
+        o->b04 = 1;
+        o->step = 0;
+        o->state = 0;
+        if (GVARS_USE_ITEM_PENDING[0] == 0) break;
+        U8(o, 0xD2) = GVARS_USE_ITEM_PENDING[1];
+        switch (GVARS_USE_ITEM_PENDING[1]) {
+        case 0xF:
+            D_8009CE55 = 5;
+            func_80026E0C(GVARS_USE_ITEM_PENDING[1], 1);
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            break;
+        case 0x11:
+            D_8009CE57 = 4;
+            func_80026E0C(GVARS_USE_ITEM_PENDING[1], 1);
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            break;
+        case 0x9A:
+            D_8009CF13 = 0;
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            break;
+        case 9:
+            GAME_BITTEN_JUMP_KIND = 0;
+            goto clear;
+        case 5:
+        case 0x7C:
+        case 0x97:
+        case 0x98:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            o->b04 = 4;
+            o->step = 4;
+            o->state = 0;
+            o->substep = 1;
+            D_8009C93F[0] = 1;
+            D_8009C942[0] = 1;
+            GAME_PLAYER_MODE[0] = 3;
+            break;
+        case 7:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            o->b04 = 4;
+            o->step = 4;
+            o->state = 0;
+            o->substep = 0;
+            D_8009C93F[0] = 1;
+            D_8009C942[0] = 1;
+            GAME_PLAYER_MODE[0] = 3;
+            func_80026E0C(GVARS_USE_ITEM_PENDING[1], 1);
+            break;
+        case 0xE:
+            o->active = 4;
+            o->ba4 = 0;
+            o->ba5 = 0;
+            o->b9c = 1;
+            o->visible = 1;
+            o->ba7 = 0;
+            o->active = 4;
+            o->wb2 = 0;
+            o->velX = 0;
+            o->velY = 0;
+            PLAYER_EXT->timer = 0;
+            o->timer = 0x1E;
+            o->d8c = 0;
+            o->w22 = 0;
+            GAME_PLAYER_MODE[0] = 3;
+            D_8009C93F[0] = 1;
+            D_8009C942[0] = 1;
+            o->step = 0x30;
+            o->d8c = 0;
+            o->b04 = 1;
+            o->state = 2;
+            o->substep = 0;
+            break;
+        case 0x10:
+        case 1:
+        case 0xA:
+        case 0x9B:
+        case 0x12:
+        default:
+        clear:
+            GVARS_USE_ITEM_PENDING[0] = 0;
+            break;
+        }
+        break;
+    case 2:
+        break;
+    }
+}
+#else
 #include "TOBJ.H"
 #include "raw7.h"
 extern void overheadPlayerSetMoveAnim(TObj *o);
@@ -120,3 +243,4 @@ void overheadPlayerItemUseStep(TObj *o)
         break;
     }
 }
+#endif

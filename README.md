@@ -120,7 +120,7 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 <summary><b>Japan (SLPS-01144): per part</b></summary>
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 95.37 % of the code matches byte for byte** (1556360 of 1631952 bytes, 3399 of 3530 functions).
+**Ore! Tomba (SLPS-01144): 97.22 % of the code matches byte for byte** (1586664 of 1631952 bytes, 3462 of 3530 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
@@ -145,9 +145,9 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 | DSPSUB.BIN: SYSTEM overlay | 36084 B | 18856 B | 50 / 57 | 🟩🟩🟩🟩🟩⬜⬜⬜⬜⬜ 52.3 % |
 | DSPSUB2.BIN: SYSTEM overlay | 16180 B | 12968 B | 25 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩⬜⬜ 80.1 % |
 | DSPSUB3.BIN: SYSTEM overlay | 23588 B | 14120 B | 39 / 43 | 🟩🟩🟩🟩🟩🟨⬜⬜⬜⬜ 59.9 % |
-| INFO.BIN: SYSTEM overlay | 24752 B | 16932 B | 37 / 51 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 68.4 % |
-| INFO2.BIN: SYSTEM overlay | 87916 B | 73832 B | 157 / 191 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 84.0 % |
-| INFO3.BIN: SYSTEM overlay | 25480 B | 17080 B | 37 / 52 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 67.0 % |
+| INFO.BIN: SYSTEM overlay | 24752 B | 24752 B | 51 / 51 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| INFO2.BIN: SYSTEM overlay | 87916 B | 87916 B | 191 / 191 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| INFO3.BIN: SYSTEM overlay | 25480 B | 25480 B | 52 / 52 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | OPTSUB00.BIN: SYSTEM overlay | 3456 B | 3456 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 
 Regenerated with `python3 tools/build_report.py --version slps01144` then `python3 tools/progress_jp.py`. Analysis of JP-only code (Ghidra, PAL names ported by matching, functions with no PAL counterpart): [notes/jp_retail.md](notes/jp_retail.md).
