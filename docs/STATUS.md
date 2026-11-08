@@ -116,7 +116,10 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - PAL X000 at 100 % (2026-11-08): the A00_WOODEN_BRANCH_HANDLERS subtype 1/2 handlers func_80132BB8 / func_80132DD0
   (only port2/runtime/x000_handwritten.c had C for them), matched with the JP-round tricks (a `static __inline__`
   for the bend body moved the last register). Checked with tools/ncheck.py (no dosbox for matchcheck here). The
-  port's hand-written copies may now be redundant: not touched. Whole game 99.40 %; only D0SPSUB* and Psy-Q are left.
+  port's hand-written copies may now be redundant: not touched. Then D0SPSUB 800E89F8 (4280 B) matched with a
+  volatile asm copy of the `Pal *t` table pointer (hides its constant value from cse, which had swapped the addu
+  operands). Whole game 99.68 %; left: D0SPSUB 800EFD6C (786), D0SPSUB2 800E999C (178, h must outrank the block-copy
+  pointer), D0SPSUB3, and Psy-Q.
 
 - Area names from the game's map in the area select (`port_mods.py`) and the save editor: `save_import.py`
   ROOM_NAMES_EN/ES + AREA_ROOMS (every disc area / section -> map area and room, improved Spanish applied),

@@ -1,5 +1,8 @@
 // FUNC 800e89f8 4280 D0SPSUB
-// wip: score 6 (was 18). Fixed: the case 0x84 tail. The game's sched1 order there (lhu w08val; lhu wc4val; sh wc4;
+// MATCHING 800e89f8 4280
+// Matched 2026-11-08: `asm volatile("" : "=r"(t) : "0"(t))` after each `Pal *t = D_8007A024;` fixes the last
+// base+index addu operand order (left open in the notes below). Earlier notes:
+// (the case 0x84 tail: the game's sched1 order there (lhu w08val; lhu wc4val; sh wc4;
 // li 1; sb GCD; sh w08, the wc4 load ADJACENT to its store) is a scheduler stall: at that cycle nothing else is
 // ready because every earlier store of the block is a predecessor of the `D_8007A024[GAME.b30].a` load (in-struct,
 // varying address) -> the 0x3c/9 stores to D_8009CD98..9E must be IN-STRUCT (struct Cd98 D_8009CD98_s fields, not
@@ -300,7 +303,7 @@ int func_800E89F8(int item)
                 PLAYER.wc4 = D_8007A024[4].b;
             } else {
                 {
-                    Pal *t = D_8007A024;
+                    Pal *t = D_8007A024; asm volatile("" : "=r"(t) : "0"(t));
                     PLAYER.w08 = t->a;
                     t += GAME_PLAYER_MODE[3];
                     PLAYER.wc4 = t->b;
@@ -338,7 +341,7 @@ int func_800E89F8(int item)
                 PLAYER.wc4 = D_8007A024[4].b;
             } else {
                 {
-                    Pal *t = D_8007A024;
+                    Pal *t = D_8007A024; asm volatile("" : "=r"(t) : "0"(t));
                     PLAYER.w08 = t->a;
                     t += GAME_PLAYER_MODE[3];
                     PLAYER.wc4 = t->b;
@@ -376,7 +379,7 @@ int func_800E89F8(int item)
                 PLAYER.wc4 = D_8007A024[4].b;
             } else {
                 {
-                    Pal *t = D_8007A024;
+                    Pal *t = D_8007A024; asm volatile("" : "=r"(t) : "0"(t));
                     PLAYER.w08 = t->a;
                     t += GAME_PLAYER_MODE[3];
                     PLAYER.wc4 = t->b;
