@@ -510,7 +510,8 @@ and x01 8012C8CC (komaPigHit without func_8002B920). Open: x04 80117938 (no PAL 
 messages, vsprintf jump tables) that splat had split as code: the c subsegment now starts at 0x651C (main,
 0x80015D1C), which drops them from the code total. main 80024B78 is a hand-written GTE mesh renderer with no twin.
 main 80025F70 is subtractScaledVertices built without -fno-strength-reduce, with one count per loop and the dst
-offsets equal to src. Open: main 800498AC (drawBalloonFrame, 144 lines, registers of the tail arrow).
+offsets equal to src. Open: main 800498AC (drawBalloonFrame, 144 lines, registers of the tail arrow), main 80026B7C
+(48 lines after the permuter, the eighth copy loop uses t3/t4 where retail keeps v0/v1).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
