@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 96.42 % of code (1363888 of 1414500 bytes, 2944 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 96.64 % of code (1366972 of 1414500 bytes, 2945 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -509,6 +509,8 @@ and x01 8012C8CC (komaPigHit without func_8002B920). Open: x04 80117938 (no PAL 
 ~300 lines). The 0x1000 bytes at main 80014D1C were libc/libpress rodata (printf digit strings, MDEC_rest
 messages, vsprintf jump tables) that splat had split as code: the c subsegment now starts at 0x651C (main,
 0x80015D1C), which drops them from the code total. main 80024B78 is a hand-written GTE mesh renderer with no twin.
+main 80025F70 is subtractScaledVertices built without -fno-strength-reduce, with one count per loop and the dst
+offsets equal to src. Open: main 800498AC (drawBalloonFrame, 144 lines, registers of the tail arrow).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
