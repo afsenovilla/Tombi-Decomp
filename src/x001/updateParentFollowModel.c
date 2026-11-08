@@ -20,14 +20,13 @@ extern char MOVE_TABLE_0[];
 extern P40 D_800E58F8[];
 extern void func_80018300(TObj *);
 extern void func_80026B7C(int, P40 *);
-extern int FUN_800202b4(TObj *);
+extern int ObjCullRegister(TObj *);
 extern void freeObjectLayer8(TObj *);
 
 void func_8013029C(TObj *o)
 {
     TObj *p;
     P40 *e;
-    short *q;
     int n, k;
 
     switch (o->b04) {
@@ -65,7 +64,6 @@ void func_8013029C(TObj *o)
         case 1:
             e = D_800E58F8;
             k = 0;
-            q = (short *)((char *)D_800E58F8 + 18);
             {
                 register int *dp asm("$4"); /* debt: game keeps the o->da0 pointer in a0 */
                 dp = (int *)o->da0;
@@ -74,21 +72,20 @@ void func_8013029C(TObj *o)
             do {
                 if (e->x0 < 0) {
                     e->x0--;
-                    q[-5]--;
-                    q[-1]--;
-                    q[-8] += k >> 16;
-                    q[-4] += k >> 16;
-                    q[0] += k >> 16;
+                    e->x1--;
+                    e->x2--;
+                    e->y0 += k >> 16;
+                    e->y1 += k >> 16;
+                    e->y2 += k >> 16;
                 } else {
                     e->x0++;
-                    q[-5]++;
-                    q[-1]++;
-                    q[-8] += k >> 16;
-                    q[-4] += k >> 16;
-                    q[0] += k >> 16;
+                    e->x1++;
+                    e->x2++;
+                    e->y0 += k >> 16;
+                    e->y1 += k >> 16;
+                    e->y2 += k >> 16;
                 }
                 k += 0x2000;
-                q += 16;
                 e++;
             } while (--n != 0);
             o->velV += 0x28;
@@ -96,7 +93,7 @@ void func_8013029C(TObj *o)
                 o->velV = 0x400;
             o->y.raw += o->velV << 8;
             if (o->timer >= 0x1e || ((SPAD.s1f8 + SPAD.i198) & 1))
-                FUN_800202b4(o);
+                ObjCullRegister(o);
             if (--o->timer == -1)
                 o->b04++;
             break;
