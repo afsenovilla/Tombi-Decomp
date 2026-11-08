@@ -54,5 +54,6 @@ masked hash).
   vlc_size data words moved to data_units.txt | 99.22 % | 3199 / 3215 |
 | the last 8 game functions (PAL/JP twins with USA names; drawObjectSpriteRotScaled with the 0xe0 screen
   height) | 99.77 % | 3207 / 3215 |
+| libsnd `_SsContDataEntry` (0x430) and `_SsVmSetVol` (0x584) from psx_tomba, one function each in all versions | 99.94 % | 3209 / 3213 |
 
 What is left is mostly in the boot exe (83 %): functions that differ from PAL by more than the automatic edits.

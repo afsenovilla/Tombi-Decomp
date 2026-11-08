@@ -1,5 +1,8 @@
-// FUNC 8006c994 1044 MAIN0 (NOT matching: 143 words differ; frame 0xe0 vs 0xd8)
-// Written after the algorithm of eternal-silver-sssc-decomp SLUS_006.28/src/libsnd_cc_6.c (MIT, PSY-Q 4.5); this PAL libsnd revision loops over all tones for NRPN msb 16 (added here), field offsets per this exe.
+// FUNC 8006c994 1072 MAIN0
+// MATCHING 8006c994 1072
+// FLAGS -O2 -G0
+// HEADERS tomba26
+// Portado de psx_tomba (psyq/libsnd/cc_6.c, _SsContDataEntry); licencia MIT del proyecto original.
 #define SKIP_ASM
 #include "common.h"
 #include "libsnd_i.h"
@@ -7,15 +10,25 @@
 typedef struct { u8 pad[0x44]; void (*ccentry[20])(); } SsFCallEntry;
 extern SsFCallEntry SsFCALL;
 
-s32 _SsReadDeltaValue(s16, s16);
-s16 SsUtSetVagAtr(s16, s16, s16, VagAtr*);
 
-void _SsContDataEntry(s16 seq_no, s16 sep_no, u8 data)
+/**
+ * @brief Internal: handle MIDI controller 6 (data entry)
+ * 
+ * Depending on the pending parameter, sets the loop count, applies an RPN
+ * (pitch bend range, fine/coarse tuning) to the tones of the current
+ * program, or calls the NRPN handler that edits a VAB attribute.
+ * 
+ * @param seq_no SEQ/SEP access number
+ * @param sep_no SEQ number within the SEP (0 for a SEQ)
+ * @param data Controller data value
+ */
+void _SsContDataEntry(short seq_no, short sep_no, unsigned char data)
 {
-    struct SeqStruct *score;
+    struct SeqStruct* score;
     ProgAtr progAtr;
     VagAtr vagAtr;
     u8 channel;
+    u8 r;
     s32 i;
     s16 tune;
 
@@ -33,13 +46,16 @@ void _SsContDataEntry(s16 seq_no, s16 sep_no, u8 data)
                 SsUtGetVagAtr(score->unk4c, score->programs[channel], i, &vagAtr);
                 switch (score->unk13) {
                 case 0:
-                    vagAtr.pbmin = vagAtr.pbmax = data & 0x7F;
+                    r = data & 0x7F;
+                    vagAtr.pbmax = r;
+                    vagAtr.pbmin = r;
                     break;
                 case 1:
                     if (data < 0x40) {
                         tune = (data * 100 / 8192) * 8192;
                     }
-                    if (data > 0x40 && data < 0x80) {
+                    r = data - 0x41;
+                    if (r < 0x3F) {
                         tune = (data * 100 / 8192) * 8192;
                     } else {
                         tune = 0;

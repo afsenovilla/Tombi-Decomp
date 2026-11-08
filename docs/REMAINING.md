@@ -34,10 +34,9 @@ Game code, closest first:
 | main 800249B8 | 448 B | 2 lines | GTE inline asm (the permuter cannot parse it) |
 | main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |
 
-## USA retail (SCUS-94236): 99.77 %, every game function matches
+## USA retail (SCUS-94236): 99.94 %, every game function matches
 
-Left: Sony library code that Sony compiled from C: libsnd `_SsContDataEntry` / `_SsVmSetVol` (+ the two pieces
-func_8006C088 / func_80073818, see "Ready but not installed"), libsn `__main` / `__do_global_dtors`, libapi
+Left: Sony library code that Sony compiled from C: libsn `__main` / `__do_global_dtors`, libapi
 psyq_8005ba74 / psyq_8005bc10 (psx_tomba has them as C in src/psyq/libapi/func_8005B4CC.c).
 
 ## Demos and prototypes
@@ -47,7 +46,6 @@ push.
 
 ## Ready but not installed
 
-psx_tomba's libsnd C matches `_SsContDataEntry` (0x430) and `_SsVmSetVol` (0x584) in all three versions, and its
-func_80044B0C / func_80058E14 give the PAL twins func_800416B8 / func_8004AE7C. Installing them changes the PAL
-split (the CC_6_OBJ_* / VM_VOL_OBJ_* pieces merge into one function each) and the port has hand-written copies
-of the two PAL functions (port2/runtime/main0_handwritten.c): needs a port build check first.
+psx_tomba's func_80044B0C / func_80058E14 also give the PAL twins func_800416B8 / func_8004AE7C (C ready in the
+2026-11-08 session notes); the port has hand-written copies of both (port2/runtime/main0_handwritten.c): check
+the port build before adding PAL files for them.

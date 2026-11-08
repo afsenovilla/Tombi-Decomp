@@ -10,7 +10,7 @@
     "n_named": 1341,
     "n_unnamed": 59,
     "n_typed": 568,
-    "n_lib": 906,
+    "n_lib": 896,
     "excluded": 479,
     "unnamed_typed": 564
   },
@@ -21,7 +21,7 @@
       "named": 286092,
       "unnamed": 0,
       "typed": 129292,
-      "n_lib": 903,
+      "n_lib": 893,
       "n_named": 812,
       "n_unnamed": 0,
       "n_typed": 188,

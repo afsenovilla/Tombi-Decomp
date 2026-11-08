@@ -55,7 +55,7 @@ What is left, closest first: [docs/REMAINING.md](docs/REMAINING.md).
 | SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 188620 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.5 % |
 | **Whole game** | **1530244 B** | **1525380 B** | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 **99.68 %** |
 
-- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 90016 B of it (89.2 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
+- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 92500 B of it (91.7 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
   other; those copies match automatically and are not added again (counting every copy separately gives 99.8 %).
 - Also tracked for MAIN0 + X000: 98.3 % of the code named by us, 67.3 % typed with the TObj structure.
@@ -80,11 +80,11 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 <summary><b>USA (SCUS-94236): per part</b></summary>
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 99.77 % of the code matches byte for byte** (1470212 of 1473580 bytes, 3207 of 3215 functions).
+**Tomba! USA (SCUS-94236): 99.94 % of the code matches byte for byte** (1472696 of 1473580 bytes, 3209 of 3213 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SCUS_942.36: engine | 395564 B | 392196 B | 1326 / 1334 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.1 % |
+| SCUS_942.36: engine | 395564 B | 394680 B | 1328 / 1332 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.8 % |
 | X00.BIN: shared object code | 313648 B | 313648 B | 531 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X01.BIN: area code | 154588 B | 154588 B | 243 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25432 B | 25432 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
@@ -112,11 +112,11 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 <summary><b>Japan (SLPS-01144): per part</b></summary>
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 98.62 % of the code matches byte for byte** (1394956 of 1414496 bytes, 3034 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 98.79 % of the code matches byte for byte** (1397440 of 1414496 bytes, 3036 of 3092 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 374204 B | 360620 B | 1217 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.4 % |
+| SLPS_011.44: engine | 374204 B | 363104 B | 1219 / 1266 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.0 % |
 | X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
 | X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
