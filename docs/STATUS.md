@@ -113,6 +113,10 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - [ ] x04 func_80115FD0 (6472 B), x00 func_800F4CDC (5464 B), x10 func_8011DCC8 (3872 B): no PAL twin, from scratch.
 
 ## Recently done (context)
+- PAL X000 at 100 % (2026-11-08): the A00_WOODEN_BRANCH_HANDLERS subtype 1/2 handlers func_80132BB8 / func_80132DD0
+  (only port2/runtime/x000_handwritten.c had C for them), matched with the JP-round tricks (a `static __inline__`
+  for the bend body moved the last register). Checked with tools/ncheck.py (no dosbox for matchcheck here). The
+  port's hand-written copies may now be redundant: not touched. Whole game 99.40 %; only D0SPSUB* and Psy-Q are left.
 
 - Area names from the game's map in the area select (`port_mods.py`) and the save editor: `save_import.py`
   ROOM_NAMES_EN/ES + AREA_ROOMS (every disc area / section -> map area and room, improved Spanish applied),

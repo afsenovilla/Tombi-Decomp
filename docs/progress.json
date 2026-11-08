@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-05",
+  "date": "2026-11-08",
   "totals": {
     "lib": 100904,
     "named": 583884,
@@ -14,7 +14,7 @@
     "excluded": 479,
     "unnamed_typed": 564
   },
-  "matching_bytes": 592768,
+  "matching_bytes": 593736,
   "programs": {
     "MAIN0.EXE (nucleo del juego)": {
       "lib": 100864,
