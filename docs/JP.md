@@ -49,7 +49,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 96.64 % of code (1366972 of 1414500 bytes, 2945 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 96.88 % of code (1370384 of 1414500 bytes, 2948 of 3102 functions; README table)**, mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -511,7 +511,10 @@ messages, vsprintf jump tables) that splat had split as code: the c subsegment n
 0x80015D1C), which drops them from the code total. main 80024B78 is a hand-written GTE mesh renderer with no twin.
 main 80025F70 is subtractScaledVertices built without -fno-strength-reduce, with one count per loop and the dst
 offsets equal to src. Open: main 800498AC (drawBalloonFrame, 144 lines, registers of the tail arrow), main 80026B7C
-(48 lines after the permuter, the eighth copy loop uses t3/t4 where retail keeps v0/v1).
+(since matched: 11 unused `int uN = (int)p;` locals add pseudos, which lifts local-alloc's quantity limit so the
+movstrsi scratch registers of the 8-copy loop are no longer spilled to t3/t4). A stronger-model round also matched
+x00 80131858 (a pointer copy `q2 = q` in state 3 moves the state-1 temp to v1) and x09 8011F65C (`d + o->box2` with
+the unsigned short copy). Open: x10 8011BE2C (16 lines, local-alloc tie in case 2).
 
 
 Left over with a known diff: `func_800498AC` (drawBalloonFrame, 2608 bytes: the tail-sprite `x`/`y` land in
