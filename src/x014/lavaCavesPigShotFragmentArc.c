@@ -1,8 +1,9 @@
 // FUNC 80123aac 696 X014
 // MATCHING 80123aac 696
 // VERSION SLPS_01144 x14 80120D84 696
+// VERSION SCUS_94236 x14 80122DF0 696
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL x014 80123AAC (x014/func_80123AAC.c): 128 -> 120.
 #include "spad.h"
 #include "TOBJ.H"

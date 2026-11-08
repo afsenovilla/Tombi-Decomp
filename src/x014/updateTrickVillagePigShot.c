@@ -1,8 +1,9 @@
 // FUNC 801206c0 1428 X014
 // MATCHING 801206c0 1428
 // VERSION SLPS_01144 x14 8011D9D8 1428
+// VERSION SCUS_94236 x14 8011FA04 1428
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 #include "gvars.h"
 #include "TOBJ.H"
 

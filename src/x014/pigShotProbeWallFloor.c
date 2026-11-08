@@ -1,8 +1,9 @@
 // FUNC 80121b4c 444 X014
 // MATCHING 80121b4c 444
 // VERSION SLPS_01144 x14 8011EE54 444
+// VERSION SCUS_94236 x14 80120E90 444
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL x014 80121B4C (x014/pigShotProbeWallFloor.c): 128 -> 120.
 #include "TOBJ.H"
 

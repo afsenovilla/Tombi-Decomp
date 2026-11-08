@@ -1,8 +1,9 @@
 // FUNC 8012b2d4 2116 X001
 // MATCHING 8012b2d4 2116
 // VERSION SLPS_01144 x01 80129C08 2116
+// VERSION SCUS_94236 x01 8012A60C 2116
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL x001 8012B2D4 (x001/updatePurpleCrawler.c): 160 -> 152.
 #include "spad.h"
 #include "gcd.h"

@@ -1,8 +1,9 @@
 // FUNC 801240b8 212 X010
 // MATCHING 801240b8 212
 // VERSION SLPS_01144 x10 80122450 212
+// VERSION SCUS_94236 x10 801233D8 212
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL x010 801240B8 (x010/probeFloorOrWalls.c): 128 -> 120.
 #include "TOBJ.H"
 extern short TileCollideAt(TObj *, short, short);

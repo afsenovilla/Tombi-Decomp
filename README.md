@@ -226,24 +226,24 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 ## USA release progress
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 97.87 % of the code matches byte for byte** (1442280 of 1473600 bytes, 3155 of 3218 functions).
+**Tomba! USA (SCUS-94236): 99.12 % of the code matches byte for byte** (1460648 of 1473600 bytes, 3185 of 3218 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SCUS_942.36: engine | 395584 B | 384016 B | 1296 / 1337 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.1 % |
-| X00.BIN: shared object code | 313648 B | 307796 B | 525 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.1 % |
-| X01.BIN: area code | 154588 B | 151316 B | 241 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.9 % |
+| SCUS_942.36: engine | 395584 B | 387780 B | 1309 / 1337 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.0 % |
+| X00.BIN: shared object code | 313648 B | 311628 B | 530 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.4 % |
+| X01.BIN: area code | 154588 B | 154588 B | 243 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25432 B | 24156 B | 33 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.0 % |
-| X03.BIN: area code | 122864 B | 120344 B | 217 / 220 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.9 % |
-| X04.BIN: area code | 105504 B | 103720 B | 197 / 199 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.3 % |
+| X03.BIN: area code | 122864 B | 122864 B | 220 / 220 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| X04.BIN: area code | 105504 B | 104812 B | 198 / 199 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.3 % |
 | X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X06.BIN: area code | 36492 B | 36492 B | 48 / 48 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X09.BIN: area code | 83252 B | 83252 B | 145 / 145 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X10.BIN: area code | 100836 B | 100624 B | 175 / 176 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.8 % |
+| X10.BIN: area code | 100836 B | 100836 B | 176 / 176 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X11.BIN: area code | 15356 B | 14196 B | 29 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 92.4 % |
 | X13.BIN: area code | 8516 B | 8516 B | 13 / 13 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X14.BIN: area code | 62468 B | 58792 B | 120 / 125 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.1 % |
+| X14.BIN: area code | 62468 B | 62468 B | 125 / 125 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X16.BIN: area code | 11468 B | 11468 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X17.BIN: area code | 14064 B | 14064 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X18.BIN: area code | 16840 B | 16840 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |

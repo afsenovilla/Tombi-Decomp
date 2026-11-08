@@ -15,7 +15,7 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 | D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
 | Psy-Q library | 10.9 KB of 100.9 KB | 89.2 % | not counted in the game figure; sources ported from psx_tomba |
 
-## Japanese retail (SLPS-01144): 98.45 % (69 functions, ~22 KB)
+## Japanese retail (SLPS-01144): 98.62 % (68 functions, ~19.5 KB)
 
 The JP report counts the Psy-Q library too. The hand-written-asm part (libgte, BIOS stubs, start, setjmp) is in as
 top-level asm. Left from the library: the parts Sony compiled from C (libsnd _SsContDataEntry and the _SsVmSetVol
@@ -30,14 +30,13 @@ Game code, closest first:
 | main 8001CA50 | 1024 B | 48 lines (flags -O2 -G0) | map-tile spawn loop; loop-invariant hoist order, frame 96 vs 104 |
 | x04 80118720 | 624 B | 32 lines | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
 | x04 80117938 | 2768 B | ~300 lines | tile-grid visibility list, no PAL twin |
-| main 8002DA3C | 2424 B | ~680 lines | message-box object state machine, no PAL twin |
 | main 80024B78 | 5112 B | not started | hand-written GTE mesh renderer, no twin; write from scratch with the GTE macros of src/modelDrawG4Lit.c |
 | main 800249B8 | 448 B | 2 lines | GTE inline asm (the permuter cannot parse it) |
 | main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |
 
 ## USA retail (SCUS-94236)
 
-97.65 % (3154 of 3218 functions) after two automatic sweeps, the psx_tomba ports and the Psy-Q asm (`docs/USA.md`). The SYSTEM overlays (DSPSUB*, INFO*,
+99.12 % (3185 of 3218 functions) after two automatic sweeps, the psx_tomba ports and the Psy-Q asm (`docs/USA.md`). The SYSTEM overlays (DSPSUB*, INFO*,
 OPTSUB00, GOVER) are not split yet. psx_tomba (hansbonini) is the USA decompilation to port from.
 
 ## Demos and prototypes

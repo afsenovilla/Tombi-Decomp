@@ -1,8 +1,9 @@
 // FUNC 80124b78 1156 X003
 // MATCHING 80124b78 1156
 // VERSION SLPS_01144 x03 801239E4 1156
+// VERSION SCUS_94236 x03 80123EC8 1156
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL x003 80124B78 (x003/func_80124B78.c): 160 -> 152.
 #include "spad.h"
 #include "gvars.h"

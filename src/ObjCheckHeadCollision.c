@@ -1,8 +1,9 @@
 // FUNC 8003facc 196 MAIN0
 // MATCHING 8003facc 196
 // VERSION SLPS_01144 slps01144 8004069C 196
+// VERSION SCUS_94236 scus94236 80042F20 196
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL main0 8003FACC (ObjCheckHeadCollision.c): -144 -> -136.
 #include "TOBJ.H"
 short probeCollisionAtDepthA(TObj *o, short a, short b);

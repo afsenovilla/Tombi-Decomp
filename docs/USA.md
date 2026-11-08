@@ -48,5 +48,7 @@ masked hash).
 | second `demo_sweep.py --fix` after the JP Psy-Q asm files (24 more) | 95.79 % | 3071 / 3209 |
 | psx_tomba ports (35) + hand-written Psy-Q asm (64 functions in 50 files) | 97.47 % | 3152 / 3218 |
 | X13 updateSceneSequence (PAL file, `FPS` 60 for NTSC) | 97.65 % | 3154 / 3218 |
+| message box 8002FA24 (psx_tomba) + 30 near-100 % functions (15 reuse the JP branch, 15 USA files: NTSC screen
+  height = PAL - 8, pad struct one byte earlier, scratchpad bytes that are RAM globals in USA) | 99.12 % | 3185 / 3218 |
 
 What is left is mostly in the boot exe (83 %): functions that differ from PAL by more than the automatic edits.

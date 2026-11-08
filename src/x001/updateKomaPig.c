@@ -1,8 +1,9 @@
 // FUNC 8012efc4 1156 X001
 // MATCHING 8012efc4 1156
 // VERSION SLPS_01144 x01 8012D8A0 1156
+// VERSION SCUS_94236 x01 8012E2FC 1156
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL x001 8012EFC4 (x001/func_8012EFC4.c): 160 -> 152.
 #include "spad.h"
 #include "gvars.h"

@@ -1,8 +1,9 @@
 // FUNC 8011d7b0 220 X014
 // MATCHING 8011d7b0 220
 // VERSION SLPS_01144 x14 8011AB9C 220
+// VERSION SCUS_94236 x14 8011CAF4 220
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL x014 8011D7B0 (x014/func_8011D7B0.c): 128 -> 120.
 #include "TOBJ.H"
 extern short FUN_80040278(TObj *, short, short);

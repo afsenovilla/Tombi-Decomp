@@ -2,8 +2,9 @@
 // MATCHING 8002052c 172
 // VERSION SLPS_01144 slps01144 800214A4 172
 // VERSION SLPM_80165 slpm80165 80020C14 172
+// VERSION SCUS_94236 scus94236 800230BC 172
 #include "camera.h"
-#if defined(VERSION_SLPS_01144)
+#if defined(VERSION_SLPS_01144) || defined(VERSION_SCUS_94236)
 // Japanese version of PAL main0 8002052C (despawnObjectOffscreenMargin.c): 160 -> 152.
 #include "spad.h"
 #include "TOBJ.H"
