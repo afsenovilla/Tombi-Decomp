@@ -196,18 +196,18 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 97.25 % of the code matches byte for byte** (1375664 of 1414500 bytes, 2953 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 97.38 % of the code matches byte for byte** (1377404 of 1414496 bytes, 2955 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
 | SLPS_011.44: engine | 374204 B | 347936 B | 1144 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 93.0 % |
-| X00.BIN: shared object code | 300480 B | 299428 B | 501 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.6 % |
-| X01.BIN: area code | 151304 B | 150564 B | 238 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.5 % |
+| X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
+| X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X03.BIN: area code | 122684 B | 122300 B | 221 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.7 % |
 | X04.BIN: area code | 102832 B | 98596 B | 194 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.9 % |
 | X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X06.BIN: area code | 35844 B | 35196 B | 46 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.2 % |
+| X06.BIN: area code | 35840 B | 35196 B | 46 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.2 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X09.BIN: area code | 82896 B | 82896 B | 144 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X10.BIN: area code | 97636 B | 92128 B | 170 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.4 % |
@@ -225,12 +225,12 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 ## Japanese demo progress
 
 <!-- slpm80165-progress:start -->
-**Ore! Tomba demo (SLPM-80165): 41.52 % of the code matches byte for byte** (266488 of 641804 bytes, 1106 of 1832 functions).
+**Ore! Tomba demo (SLPM-80165): 41.68 % of the code matches byte for byte** (267488 of 641804 bytes, 1107 of 1832 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
 | SLPM_801.65: boot exe | 348752 B | 161980 B | 836 / 1309 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 46.4 % |
-| X00.BIN: shared object code | 293052 B | 104508 B | 270 / 523 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 35.7 % |
+| X00.BIN: shared object code | 293052 B | 105508 B | 271 / 523 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 36.0 % |
 
 Regenerated with `python3 tools/build_report.py --version slpm80165` then `python3 tools/progress_jp.py --version slpm80165`. `python3 tools/demo_sweep.py` installs the PAL / JP C that matches demo functions as is (see [docs/JPDEMO.md](docs/JPDEMO.md)).
 <!-- slpm80165-progress:end -->
