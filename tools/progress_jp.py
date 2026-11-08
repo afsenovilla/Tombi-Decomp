@@ -54,7 +54,7 @@ def block(r, ver="slps01144"):
            "| Part | Code | Matching bytes | Functions | Matching |", "|---|---:|---:|---:|---|"]
     for k, (c, mm, f, mf) in g.items():
         p = 100.0 * mm / c if c else 0.0
-        out.append("| %s | %d B | %d B | %d / %d | %s %.1f %% |" % (LABEL.get(k, k.upper() + ".BIN: area code"), c, mm, mf, f, bar(p), p))
+        out.append("| %s | %d B | %d B | %d / %d | %s %.1f %% |" % (LABEL.get(k, k.upper() + (".BIN: area code" if re.fullmatch(r"x\d\d", k) else ".BIN: SYSTEM overlay")), c, mm, mf, f, bar(p), p))
     out += ["", "Regenerated with `python3 tools/build_report.py --version %s` then `python3 tools/progress_jp.py%s`.%s"
             % (ver, "" if ver == "slps01144" else " --version " + ver, note)]
     return "\n".join(out)

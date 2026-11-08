@@ -28,8 +28,12 @@ def main():
     ver = version_arg(sys.argv)
     # file (as passed to xmatch) -> (symbol file, vram of xmatch offset 0, first offset of the program)
     TARGETS = {f: (prog, vram, start) for prog, (_, f, vram, start) in VERSIONS[ver]["progs"].items()}
-    out = {mod: [] for mod, _, _ in TARGETS.values()}
-    for r in csv.DictReader(open(sys.argv[1])):
+    # only the programs whose file is in the csv: a csv of some files (e.g. the USA SYSTEM overlays) leaves the
+    # symbol files of the others as they are
+    rows = list(csv.DictReader(open(sys.argv[1])))
+    seen_files = {os.path.basename(r["target"]) for r in rows}
+    out = {mod: [] for f, (mod, _, _) in TARGETS.items() if f in seen_files}
+    for r in rows:
         base = os.path.basename(r["target"])
         if base not in TARGETS: continue
         mod, vram, start = TARGETS[base]

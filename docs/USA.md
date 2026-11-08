@@ -11,7 +11,13 @@
   0x800E8028, JP 0x800E9AF8). Every `X<nn>.BIN` starts with the same 0x2DE6C bytes as `X00.BIN` (`USA_SHARED` in
   `tools/versions.py`); `config/scus94236/x<nn>.yaml` splits only the area part (vram 0x801151F4), so the shared code
   is counted once, in `x00`.
-- The SYSTEM overlays (`DSPSUB*`, `INFO*`, `OPTSUB00`, `GOVER`) are not split yet.
+- SYSTEM code overlays `DSPSUB.BIN`, `DSPSUB2`, `DSPSUB3`, `GOVER`, `INFO`, `INFO2`, `INFO3`, `OPTSUB00` (programs
+  `dspsub` .. `optsub00`, `USA_SYSOVL` in `tools/versions.py`, paired with PAL `d0spsub` .. `o0ptsub0` by `pal_prog`):
+  raw blobs at the same base 0x800E7388 (header pointers = PAL - 0xCA0). `config/scus94236/<prog>.yaml` splits header
+  (bin), code, trailing data (bin); code ranges DSPSUB 0x794-0x962C, DSPSUB2 0x20C-0x4E0C (the memory-card low-level
+  functions come first in USA), DSPSUB3 0x6EC-0x6820, GOVER 0x1C-0xC6C, INFO 0x1EC-0x6730, INFO2 0xAE8-0x16848, INFO3
+  0x454-0x6C84, OPTSUB00 0x38-0x1FC0. Symbols: `xmatch.py` on the SYSTEM files (it now also reads the PAL SYSTEM
+  symbols; run `tools/gen_symbols.py` first) + `jpdemo_syms.py`, which now rewrites only the programs in the csv.
 
 Symbols: PAL names at USA addresses (`tools/xmatch.py` + `tools/jpdemo_syms.py --version scus94236`), the task table
 hints in `symbol_addrs_manual.txt` (copied from JP), `data_units.txt` (`tools/jp_data_units.py --version scus94236`:
@@ -31,6 +37,9 @@ python3 tools/jp_data_units.py --version scus94236 --write
 python3 tools/jpdemo_reuse.py --version scus94236
 python3 tools/build_report.py --version scus94236 --objdiff /root/.cargo/bin/objdiff-cli --no-split
 python3 tools/demo_sweep.py --version scus94236 --report [--fix]
+# SYSTEM overlays only (keeps the other symbol files):
+python3 -I tools/xmatch.py game_usa/fs/SYSTEM/{DSPSUB,DSPSUB2,DSPSUB3,GOVER,INFO,INFO2,INFO3,OPTSUB00}.BIN --csv build/scus94236/xmatch_sys.csv
+python3 -I tools/jpdemo_syms.py build/scus94236/xmatch_sys.csv --version scus94236
 ```
 
 ## First figures (2026-11-08)
@@ -57,3 +66,18 @@ masked hash).
 | libsnd `_SsContDataEntry` (0x430) and `_SsVmSetVol` (0x584) from psx_tomba, one function each in all versions | 99.94 % | 3209 / 3213 |
 
 What is left is mostly in the boot exe (83 %): functions that differ from PAL by more than the automatic edits.
+
+## SYSTEM overlays (2026-11-08)
+
+| Step | Code | Functions |
+|---|---:|---:|
+| before (exe + X overlays only) | 99.94 % | 3209 / 3213 |
+| SYSTEM overlays added, PAL pairing from `symbol_addrs_<prog>.txt` | 96.93 % | 3589 / 3681 |
+| `reuse.txt` lines of the SYSTEM programs (`jpdemo_reuse.py`, only those lines appended) | 97.10 % | 3594 / 3681 |
+| `demo_sweep.py` (28 pairings) | 97.11 % | 3622 / 3681 |
+| `demo_sweep.py --fix` (7 more: 6 branches in PAL files, 1 USA file) | 97.52 % | 3629 / 3681 |
+
+Per overlay after the sweep: GOVER 100 %, INFO3 98.0 %, INFO2 96.5 %, INFO 87.8 %, DSPSUB3 66.3 %, DSPSUB 65.6 %,
+OPTSUB00 64.0 %, DSPSUB2 44.9 %. The 52 functions left are mostly the large sub-screen / memory-card / title drawing
+functions, where the English text layout differs from PAL by more than the jp_autofix edits; no PAL pair was found
+for many of them (splat `func_`), so they need hand work (PAL C as the starting point).

@@ -80,7 +80,7 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 <summary><b>USA (SCUS-94236): per part</b></summary>
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 99.94 % of the code matches byte for byte** (1472696 of 1473580 bytes, 3209 of 3213 functions).
+**Tomba! USA (SCUS-94236): 97.52 % of the code matches byte for byte** (1665392 of 1707684 bytes, 3629 of 3681 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
@@ -102,6 +102,14 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 | X17.BIN: area code | 14064 B | 14064 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X18.BIN: area code | 16840 B | 16840 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| DSPSUB.BIN: SYSTEM overlay | 36504 B | 23956 B | 45 / 59 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 65.6 % |
+| DSPSUB2.BIN: SYSTEM overlay | 19456 B | 8728 B | 22 / 31 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 44.9 % |
+| DSPSUB3.BIN: SYSTEM overlay | 24884 B | 16504 B | 36 / 46 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 66.3 % |
+| GOVER.BIN: SYSTEM overlay | 3152 B | 3152 B | 7 / 7 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| INFO.BIN: SYSTEM overlay | 25924 B | 22764 B | 48 / 52 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 87.8 % |
+| INFO2.BIN: SYSTEM overlay | 89440 B | 86296 B | 189 / 193 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.5 % |
+| INFO3.BIN: SYSTEM overlay | 26672 B | 26132 B | 52 / 53 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.0 % |
+| OPTSUB00.BIN: SYSTEM overlay | 8072 B | 5164 B | 21 / 27 | 🟩🟩🟩🟩🟩🟩🟨⬜⬜⬜ 64.0 % |
 
 Regenerated with `python3 tools/build_report.py --version scus94236` then `python3 tools/progress_jp.py --version scus94236`. See [docs/USA.md](docs/USA.md).
 <!-- scus94236-progress:end -->

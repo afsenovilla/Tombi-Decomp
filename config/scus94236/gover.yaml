@@ -1,0 +1,39 @@
+# USA retail release (SCUS-94236), SYSTEM code overlay GOVER.BIN (PAL G0OVER.BIN, config/g0over.yaml).
+# Raw blob loaded at the overlay base 0x800E7388: ID word + entry table (data), code 0x1C..0xC6C, then data.
+name: GOVER.BIN
+sha1: 0dc13a1ef2dfca024f623b7ff3fc33a2d60912b9
+options:
+  basename: gover
+  target_path: game_usa/fs/SYSTEM/GOVER.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/scus94236/gover
+  src_path: build/scus94236/splat_src/gover
+  build_path: build/scus94236
+  asset_path: build/scus94236/assets
+  ld_script_path: build/scus94236/gover.ld
+  symbol_addrs_path:
+    - config/scus94236/symbol_addrs_gover.txt
+  undefined_funcs_auto_path: build/scus94236/undefined_funcs_auto.gover.txt
+  undefined_syms_auto_path: build/scus94236/undefined_syms_auto.gover.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: gover
+    type: code
+    start: 0x0
+    vram: 0x800E7388
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, bin, gover_header]
+      - [0x1C, c, gover]
+      - [0xC6C, bin, gover_data]
+  - [0xCAC]

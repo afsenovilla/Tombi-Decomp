@@ -1,0 +1,39 @@
+# USA retail release (SCUS-94236), SYSTEM code overlay DSPSUB2.BIN (PAL D0SPSUB2.BIN, config/d0spsub2.yaml).
+# Raw blob loaded at the overlay base 0x800E7388: ID word + entry table (data), code 0x20C..0x4E0C, then data.
+name: DSPSUB2.BIN
+sha1: 631440078f95b983bcff158554b2e072df41a7e9
+options:
+  basename: dspsub2
+  target_path: game_usa/fs/SYSTEM/DSPSUB2.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/scus94236/dspsub2
+  src_path: build/scus94236/splat_src/dspsub2
+  build_path: build/scus94236
+  asset_path: build/scus94236/assets
+  ld_script_path: build/scus94236/dspsub2.ld
+  symbol_addrs_path:
+    - config/scus94236/symbol_addrs_dspsub2.txt
+  undefined_funcs_auto_path: build/scus94236/undefined_funcs_auto.dspsub2.txt
+  undefined_syms_auto_path: build/scus94236/undefined_syms_auto.dspsub2.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: dspsub2
+    type: code
+    start: 0x0
+    vram: 0x800E7388
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, bin, dspsub2_header]
+      - [0x20C, c, dspsub2]
+      - [0x4E0C, bin, dspsub2_data]
+  - [0xEF58]

@@ -1,0 +1,39 @@
+# USA retail release (SCUS-94236), SYSTEM code overlay INFO3.BIN (PAL I0NFO3.BIN, config/i0nfo3.yaml).
+# Raw blob loaded at the overlay base 0x800E7388: ID word + entry table (data), code 0x454..0x6C84, then data.
+name: INFO3.BIN
+sha1: c0073331fc635e077734b19cfc78b99d4e330e3b
+options:
+  basename: info3
+  target_path: game_usa/fs/SYSTEM/INFO3.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/scus94236/info3
+  src_path: build/scus94236/splat_src/info3
+  build_path: build/scus94236
+  asset_path: build/scus94236/assets
+  ld_script_path: build/scus94236/info3.ld
+  symbol_addrs_path:
+    - config/scus94236/symbol_addrs_info3.txt
+  undefined_funcs_auto_path: build/scus94236/undefined_funcs_auto.info3.txt
+  undefined_syms_auto_path: build/scus94236/undefined_syms_auto.info3.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: info3
+    type: code
+    start: 0x0
+    vram: 0x800E7388
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, bin, info3_header]
+      - [0x454, c, info3]
+      - [0x6C84, bin, info3_data]
+  - [0x9898]

@@ -1,0 +1,7 @@
+gameOverSetupCamera = 0x800E73A4; // type:func size:0x150  PAL g0over 0x800E8044
+gameOverSetupLighting = 0x800E74F4; // type:func size:0x164  PAL g0over 0x800E8194
+gameOverLetterFlyIn = 0x800E7658; // type:func size:0x10C  PAL g0over 0x800E82F8
+gameOverLetterStep = 0x800E7764; // type:func size:0x39C  PAL g0over 0x800E8404
+gameOverDrawLetters = 0x800E7B00; // type:func size:0x1DC  PAL g0over 0x800E87A0
+gameOverScreenTask = 0x800E7CDC; // type:func size:0x18C  PAL g0over 0x800E897C
+gameEndScreenTask = 0x800E7E68; // type:func size:0x18C  PAL g0over 0x800E8B08
