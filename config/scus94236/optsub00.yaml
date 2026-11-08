@@ -1,0 +1,39 @@
+# USA retail release (SCUS-94236), SYSTEM code overlay OPTSUB00.BIN (PAL O0PTSUB0.BIN, config/o0ptsub0.yaml).
+# Raw blob loaded at the overlay base 0x800E7388: ID word + entry table (data), code 0x38..0x1FC0, then data.
+name: OPTSUB00.BIN
+sha1: 50c4fc9ccc467e0d67c14eb8706d67c4f10fcd4c
+options:
+  basename: optsub00
+  target_path: game_usa/fs/SYSTEM/OPTSUB00.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/scus94236/optsub00
+  src_path: build/scus94236/splat_src/optsub00
+  build_path: build/scus94236
+  asset_path: build/scus94236/assets
+  ld_script_path: build/scus94236/optsub00.ld
+  symbol_addrs_path:
+    - config/scus94236/symbol_addrs_optsub00.txt
+  undefined_funcs_auto_path: build/scus94236/undefined_funcs_auto.optsub00.txt
+  undefined_syms_auto_path: build/scus94236/undefined_syms_auto.optsub00.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: optsub00
+    type: code
+    start: 0x0
+    vram: 0x800E7388
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, bin, optsub00_header]
+      - [0x38, c, optsub00]
+      - [0x1FC0, bin, optsub00_data]
+  - [0x300C]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Find matched PAL functions inside another build's code (demo/JP executables and overlays). Reads only; prints.
 
-Every PAL function with a size in config/symbol_addrs_<module>.txt (main0, x0nn) is turned into a masked word
+Every PAL function with a size in config/symbol_addrs_<module>.txt (main0, x0nn, SYSTEM overlays) is turned into a masked word
 sequence: j/jal targets, lui immediates and the 16-bit offset of loads/stores/addiu/ori whose base is not $sp are
 zeroed, so relocated addresses (and moved globals) do not matter. Each target file is scanned for the same masked
 sequence (longest functions first, no overlaps). A PS-X EXE is mapped from 0x800; other files from offset 0.
@@ -34,7 +34,8 @@ def words(b):
 def pal_funcs(repo):
     specs = [("main0", "game/MAIN0.EXE", 0x80010000, 0x800)]
     for f in sorted(os.listdir(os.path.join(repo, "config"))):
-        m = re.fullmatch(r"(x0\d\d)\.yaml", f)
+        # area overlays x0nn and the SYSTEM overlays of tools/sysovl.py (d0spsub*, g0over, i0nfo*, o0ptsub0)
+        m = re.fullmatch(r"(x0\d\d|d0spsub\d?|g0over|i0nfo\d?|o0ptsub0)\.yaml", f)
         if m:
             y = open(os.path.join(repo, "config", f)).read()
             tp = re.search(r"target_path:\s*(\S+)", y).group(1)

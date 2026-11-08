@@ -16,6 +16,9 @@ JP_OVL = 0x800E9AF8   # retail JP overlay base (jal targets on prologues, like t
 JP_SHARED = 0x2B680   # every JP X<nn>.BIN starts with these bytes of X00.BIN; the area part follows
 USA_OVL = 0x800E7388  # retail USA overlay base (jal targets on X00 prologues; PAL 0x800E8028)
 USA_SHARED = 0x2DE6C  # every USA X<nn>.BIN starts with these bytes of X00.BIN (like JP_SHARED)
+# USA SYSTEM code overlays (SYSTEM/<NAME>.BIN, loaded at USA_OVL) -> the PAL module of tools/sysovl.py they pair with
+USA_SYSOVL = {"dspsub": "d0spsub", "dspsub2": "d0spsub2", "dspsub3": "d0spsub3", "gover": "g0over",
+              "info": "i0nfo", "info2": "i0nfo2", "info3": "i0nfo3", "optsub00": "o0ptsub0"}
 
 REFERENCE = "sces01331"
 SERIALS = {"sces01331": "SCES_01331", "slps01144": "SLPS_01144", "slpm80165": "SLPM_80165", "pcpx96084": "PCPX_96084",
@@ -56,13 +59,16 @@ VERSIONS = {
         "progs": dict([("scus94236", ("SCUS_942.36", "SCUS_942.36", 0x80010000, 0)),
                        ("x00", ("X00.BIN (AREA00)", "X00.BIN", USA_OVL, 0))]
                       + [("x%02d" % n, ("X%02d.BIN (AREA%02d)" % (n, n), "X%02d.BIN" % n, USA_OVL, USA_SHARED))
-                         for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]),
+                         for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]
+                      # SYSTEM code overlays: raw blobs at the area overlay base (PAL's at 0x800E8028), see USA_SYSOVL
+                      + [(p, ("%s.BIN (SYSTEM)" % p.upper(), "%s.BIN" % p.upper(), USA_OVL, 0)) for p in USA_SYSOVL]),
     },
 }
 
 # PAL program whose src directory holds the shared C of a version program (main exe and X00 -> src/, xNN -> src/x0NN/)
 def pal_prog(ver, prog):
     if prog in ("slps01144", "slpm80165", "tomba", "beta980203", "scus94236"): return "main0"
+    if ver == "scus94236" and prog in USA_SYSOVL: return USA_SYSOVL[prog]
     return "x0" + prog[1:]
 
 
