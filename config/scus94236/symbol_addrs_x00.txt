@@ -528,3 +528,4 @@ updateA00Variant0Event = 0x80137298; // type:func size:0xB4  PAL x000 0x80137F54
 updateDarkCloakedFigureEvent = 0x8013734C; // type:func size:0xB0  PAL x000 0x80138008
 updateCharlesEventObj = 0x801373FC; // type:func size:0x160  PAL x000 0x801380B8
 updateA00UnlayeredType0D = 0x8013755C; // type:func size:0x204  PAL x000 0x80138218
+func_80101574_scus94236 = 0x80101574; // type:func size:0x7E4  PAL x000 0x80102214

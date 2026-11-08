@@ -80,22 +80,22 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 <summary><b>USA (SCUS-94236): per part</b></summary>
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 99.22 % of the code matches byte for byte** (1462084 of 1473580 bytes, 3199 of 3215 functions).
+**Tomba! USA (SCUS-94236): 99.77 % of the code matches byte for byte** (1470212 of 1473580 bytes, 3207 of 3215 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SCUS_942.36: engine | 395564 B | 389216 B | 1323 / 1334 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.4 % |
-| X00.BIN: shared object code | 313648 B | 311628 B | 530 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.4 % |
+| SCUS_942.36: engine | 395564 B | 392196 B | 1326 / 1334 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.1 % |
+| X00.BIN: shared object code | 313648 B | 313648 B | 531 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X01.BIN: area code | 154588 B | 154588 B | 243 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X02.BIN: area code | 25432 B | 24156 B | 33 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.0 % |
+| X02.BIN: area code | 25432 B | 25432 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X03.BIN: area code | 122864 B | 122864 B | 220 / 220 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X04.BIN: area code | 105504 B | 104812 B | 198 / 199 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.3 % |
+| X04.BIN: area code | 105504 B | 105504 B | 199 / 199 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X06.BIN: area code | 36492 B | 36492 B | 48 / 48 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X09.BIN: area code | 83252 B | 83252 B | 145 / 145 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X10.BIN: area code | 100836 B | 100836 B | 176 / 176 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X11.BIN: area code | 15356 B | 14196 B | 29 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 92.4 % |
+| X11.BIN: area code | 15356 B | 15356 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X13.BIN: area code | 8516 B | 8516 B | 13 / 13 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X14.BIN: area code | 62468 B | 62468 B | 125 / 125 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X16.BIN: area code | 11468 B | 11468 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |

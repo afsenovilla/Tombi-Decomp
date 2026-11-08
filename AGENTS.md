@@ -64,7 +64,10 @@ Shape / codegen:
 - Switches: empty `case N:` labels and the case order decide the jump table; read the table from the disc file.
 - Scratchpad: one `extern` per address (`D_1F8001C6`), or top-level `asm(".set NAME,0x1f8001xx");` absolute
   symbols, so every access reloads with its own `lui`; `lui/addiu` vs `lui/ori` depends on the form.
-- A global whose load gets hoisted above stores: a one-field struct, or `extern T X_[]; #define X X_[0]`.
+- A global whose load gets hoisted above stores: a one-field struct, or `extern T X_[]; #define X X_[0]` (or just
+  declare it as an array and write `X[0]`).
+- USA (NTSC) vs PAL: screen height 8 lower (0x80 -> 0x78, 0x100 -> 0xe0), play time in 60 Hz frames, PAL
+  scratchpad bytes that are RAM globals in USA; USA often equals the JP branch.
 - FLAGS: some JP main functions are built without `-fno-strength-reduce`.
 - Many "JP-only" functions are a PAL file almost as is (pad word `D_8009F200` with bits x0x100, wider windows,
   one dropped call, swapped sound ids): find the PAL twin by size and callees first.

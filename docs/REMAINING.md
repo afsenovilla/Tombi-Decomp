@@ -34,10 +34,11 @@ Game code, closest first:
 | main 800249B8 | 448 B | 2 lines | GTE inline asm (the permuter cannot parse it) |
 | main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |
 
-## USA retail (SCUS-94236)
+## USA retail (SCUS-94236): 99.77 %, every game function matches
 
-99.12 % (3185 of 3218 functions) after two automatic sweeps, the psx_tomba ports and the Psy-Q asm (`docs/USA.md`). The SYSTEM overlays (DSPSUB*, INFO*,
-OPTSUB00, GOVER) are not split yet. psx_tomba (hansbonini) is the USA decompilation to port from.
+Left: Sony library code that Sony compiled from C: libsnd `_SsContDataEntry` / `_SsVmSetVol` (+ the two pieces
+func_8006C088 / func_80073818, see "Ready but not installed"), libsn `__main` / `__do_global_dtors`, libapi
+psyq_8005ba74 / psyq_8005bc10 (psx_tomba has them as C in src/psyq/libapi/func_8005B4CC.c).
 
 ## Demos and prototypes
 

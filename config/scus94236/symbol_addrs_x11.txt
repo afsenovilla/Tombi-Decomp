@@ -27,3 +27,5 @@ spawnNpcSet1E = 0x80118CBC; // type:func size:0x1A4  PAL x011 0x801199F0
 func_80118E60_scus94236 = 0x80118E60; // type:func size:0x8  PAL main0 0x80022154
 func_80118E68_scus94236 = 0x80118E68; // type:func size:0xC  PAL x000 0x80136A8C
 updateNpcSet20 = 0x80118E74; // type:func size:0x98  PAL x003 0x80133668
+func_80116F84_scus94236 = 0x80116F84; // type:func size:0x268  PAL x011 0x80117C34
+func_801171EC_scus94236 = 0x801171EC; // type:func size:0x220  PAL x011 0x80117EF8

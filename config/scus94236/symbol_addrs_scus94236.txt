@@ -1326,3 +1326,6 @@ close = 0x8005B47C; // type:func size:0x10
 format = 0x8005B48C; // type:func size:0x10
 nextfile = 0x8005B49C; // type:func size:0x10
 erase = 0x8005B4AC; // type:func size:0xC
+func_80049994_scus94236 = 0x80049994; // type:func size:0x96C  PAL main0 0x80053B5C
+func_80052350_scus94236 = 0x80052350; // type:func size:0xDC
+func_80055A44_scus94236 = 0x80055A44; // type:func size:0x15C

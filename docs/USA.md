@@ -52,5 +52,7 @@ masked hash).
   height = PAL - 8, pad struct one byte earlier, scratchpad bytes that are RAM globals in USA) | 99.12 % | 3185 / 3218 |
 | library cleanup: one file per BIOS/libcard unit, FGO_01_OBJ_160, DecDCTvlc(Size), libcard patch; three PsyqStamp /
   vlc_size data words moved to data_units.txt | 99.22 % | 3199 / 3215 |
+| the last 8 game functions (PAL/JP twins with USA names; drawObjectSpriteRotScaled with the 0xe0 screen
+  height) | 99.77 % | 3207 / 3215 |
 
 What is left is mostly in the boot exe (83 %): functions that differ from PAL by more than the automatic edits.
