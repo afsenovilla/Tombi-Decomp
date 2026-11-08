@@ -41,6 +41,6 @@ segments:
     subalign: 4
     subsegments:
       - [0x800, rodata, slps01144_rodata]
-      - [0x551C, c, slps01144]
+      - [0x651C, c, slps01144]
       - [0x61C2C, data, slps01144_data]
   - [0x8E800]
