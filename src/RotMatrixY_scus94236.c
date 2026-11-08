@@ -1,0 +1,35 @@
+// VERSION SCUS_94236 scus94236 800640D4 100
+// AS.SCUS_94236 gnu
+#if defined(VERSION_SCUS_94236)
+// USA version: JP C of src/RotMatrixY_slps01144.c (RotMatrixY) [-O2 -G0] (tools/demo_sweep.py)
+__asm__(".set noreorder\n.set noat\n"
+".globl RotMatrixY\n.type RotMatrixY,@function\nRotMatrixY:\n"
+"	addu	$15,$4,$0\n"
+"	addu	$2,$5,$0\n"
+"	bgez	$15,LRotMatrixY_40\n"
+"	andi	$25,$15,0xfff\n"
+"	negu	$15,$15\n"
+"	bgez	$15,LRotMatrixY_1c\n"
+"	andi	$15,$15,0xfff\n"
+"LRotMatrixY_1c:\n"
+"	sll	$24,$15,0x2\n"
+"	lui	$25,%hi(D_80097334_scus94236)\n"
+"	addu	$25,$25,$24\n"
+"	lw	$25,%lo(D_80097334_scus94236)($25)\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$14,$25,0x10\n"
+"	sra	$9,$14,0x10\n"
+"	j	FGO_05_OBJ_64\n"
+"	sra	$8,$25,0x10\n"
+"LRotMatrixY_40:\n"
+"	sll	$24,$25,0x2\n"
+"	lui	$25,%hi(D_80097334_scus94236)\n"
+"	addu	$25,$25,$24\n"
+"	lw	$25,%lo(D_80097334_scus94236)($25)\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$24,$25,0x10\n"
+"	sra	$15,$24,0x10\n"
+"	negu	$9,$15\n"
+"	sra	$8,$25,0x10\n"
+".set at\n.set reorder\n");
+#endif
