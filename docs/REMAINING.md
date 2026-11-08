@@ -15,11 +15,9 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 | D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
 | Psy-Q library | 10.9 KB of 100.9 KB | 89.2 % | not counted in the game figure; sources ported from psx_tomba |
 
-## Japanese retail (SLPS-01144): 93.05 % with the SYSTEM overlays (98.91 % without; 3324 of 3530 functions)
+## Japanese retail (SLPS-01144): 95.37 % with the SYSTEM overlays (98.91 % without; 3399 of 3530 functions)
 
-The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08: INFO2 84 %, INFO/INFO3 ~68 %, OPTSUB00 41 %,
-DSPSUB* 12-14 % (Japanese text layout, far from PAL; xmatch pairs only 4-6 % of their bytes). 208 SYSTEM functions
-need hand work.
+The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08; a second pass the same day matched 75 more (DSPSUB/DSPSUB3 54, OPTSUB00 8 = all of it, DSPSUB2 13). Left there: INFO*, and DSPSUB2 func_800ECCE8 (5 lines, scheduling), func_800ED850 (92 lines, digit-block registers), func_800EBD14 (JP twin of PAL D0SPSUB2 800E999C); DSPSUB func_800EF370 (6 lines, a0/a2 swap), EA2BC/EA204 (twin of PAL 800E89F8), ItemListStep EE1B4/EDC50, MapStep EF9B0, F0D90 (twin of PAL 800EFD6C).
 
 The JP report counts the Psy-Q library too. The hand-written-asm part (libgte, BIOS stubs, start, setjmp) is in as
 top-level asm. Left from the library: the parts Sony compiled from C (libsnd _SsContDataEntry and the _SsVmSetVol

@@ -1,0 +1,103 @@
+// VERSION SLPS_01144 dspsub 800ED0DC 616
+#if defined(VERSION_SLPS_01144)
+// JP version of PAL d0spsub 800ebcb8 (subScreenDrawString.c): no multiline flag
+typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
+typedef struct {
+    unsigned addr: 24;
+    unsigned len: 8;
+    unsigned char r0, g0, b0, code;
+    short x0, y0;
+    unsigned char u0, v0;
+    unsigned short clut;
+    short w, h;
+} SPRT;
+typedef struct { short x, y, w, h; } RECT;
+typedef struct {
+    RECT clip;
+    short ofs[2];
+    RECT tw;
+    unsigned short tpage;
+    unsigned char dtd, dfe, isbg, r0, g0, b0;
+    unsigned long dr_env[17];
+} DRAWENV;
+typedef struct { unsigned char u, v, w, h, flag; } Glyph;
+#define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
+#define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
+#define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
+extern short D_80111408, D_8011140A, D_8011140C;
+extern unsigned short D_8011140E;
+extern unsigned short *D_80111418;
+extern Glyph *D_8011141C;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
+extern DRAWENV *GetDrawEnv(DRAWENV *env);
+extern void AddDrawMode(int tpage, int pri);
+
+void func_800ED0DC(int pri)
+{
+    DRAWENV env;
+    Glyph g;
+    SPRT *s = (SPRT *)0x1F800000;
+    SPRT *p;
+    unsigned short *str;
+    short x, y;
+    unsigned short c;
+    Glyph *font;
+    Glyph *gp;
+    GetDrawEnv(&env);
+    AddDrawMode(env.tpage, pri);
+    font = D_8011141C;
+    str = D_80111418;
+    x = D_80111408;
+    y = D_8011140A;
+    while ((short)(c = *str++) != -1) {
+        switch ((short)c) {
+        case -7:
+        case -5:
+        case -1:
+            break;
+        case -6:
+            str += 3;
+            break;
+        case -3:
+            y += 8;
+            x = D_80111408;
+            break;
+        default:
+            gp = (Glyph *)(((short)c * 5) + (unsigned long)font);
+            g.u = gp->u;
+            g.v = gp->v;
+            g.w = gp->w;
+            g.h = gp->h;
+            g.flag = gp->flag;
+            s->len = 4;
+            s->code = 0x64;
+            s->r0 = 0x80;
+            s->g0 = 0x80;
+            s->b0 = 0x80;
+            s->x0 = x;
+            if (g.flag == 0) {
+                if (g.w >= 0xB) s->y0 = y - 2;
+                else s->y0 = y;
+                s->u0 = g.u;
+                s->v0 = g.v;
+                x += g.w;
+            } else {
+                s->x0 = x - 0xA;
+                s->y0 = y - 0xA;
+                s->u0 = g.u;
+                s->v0 = g.v;
+            }
+            s->w = g.w;
+            s->h = g.h;
+            s->clut = D_8011140E;
+            p = NEXT_PRIM;
+            *p = *s;
+            addPrim(CURRENT_OT + pri, p);
+            NEXT_PRIM++;
+            break;
+        }
+    }
+    AddDrawMode(D_8011140C, pri);
+}
+#endif

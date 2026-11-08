@@ -15,3 +15,6 @@ subScreenCondHealthSettled = 0x800EFC40; // type:func size:0x20  PAL d0spsub 0x8
 subScreenCondNearType0A = 0x800EFC60; // type:func size:0x114  PAL d0spsub 0x800F1718
 subScreenCondRefreshingDrinkSpot = 0x800EFD84; // type:func size:0x6C  PAL d0spsub 0x800F183C
 subScreenCondFlag40 = 0x800EFDF0; // type:func size:0x18  PAL d0spsub 0x800F18A8
+subScreenCondFalse = 0x800EF554; // type:func size:0x8  PAL d0spsub 0x800F100C identical
+subScreenCondTrue = 0x800EF55C; // type:func size:0x8  PAL d0spsub 0x800F1014 identical
+subScreenCondNoWeapon = 0x800EFD74; // type:func size:0x10  PAL d0spsub 0x800F182C
