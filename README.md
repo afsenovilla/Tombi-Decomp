@@ -197,11 +197,11 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 98.23 % of the code matches byte for byte** (1389516 of 1414496 bytes, 3031 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 98.45 % of the code matches byte for byte** (1392532 of 1414496 bytes, 3033 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 374204 B | 355180 B | 1214 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.9 % |
+| SLPS_011.44: engine | 374204 B | 358196 B | 1216 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.7 % |
 | X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
 | X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
@@ -226,11 +226,11 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 ## USA release progress
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 97.47 % of the code matches byte for byte** (1436272 of 1473600 bytes, 3152 of 3218 functions).
+**Tomba! USA (SCUS-94236): 97.65 % of the code matches byte for byte** (1438936 of 1473600 bytes, 3154 of 3218 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SCUS_942.36: engine | 395584 B | 380524 B | 1294 / 1337 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.2 % |
+| SCUS_942.36: engine | 395584 B | 380672 B | 1295 / 1337 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.2 % |
 | X00.BIN: shared object code | 313648 B | 307796 B | 525 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.1 % |
 | X01.BIN: area code | 154588 B | 151316 B | 241 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.9 % |
 | X02.BIN: area code | 25432 B | 24156 B | 33 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.0 % |
@@ -242,7 +242,7 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 | X09.BIN: area code | 83252 B | 83252 B | 145 / 145 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X10.BIN: area code | 100836 B | 100624 B | 175 / 176 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.8 % |
 | X11.BIN: area code | 15356 B | 14196 B | 29 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 92.4 % |
-| X13.BIN: area code | 8516 B | 6000 B | 12 / 13 | 🟩🟩🟩🟩🟩🟩🟩⬜⬜⬜ 70.5 % |
+| X13.BIN: area code | 8516 B | 8516 B | 13 / 13 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X14.BIN: area code | 62468 B | 58792 B | 120 / 125 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.1 % |
 | X16.BIN: area code | 11468 B | 11468 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X17.BIN: area code | 14064 B | 14064 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |

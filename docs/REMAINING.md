@@ -15,7 +15,7 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 | D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
 | Psy-Q library | 10.9 KB of 100.9 KB | 89.2 % | not counted in the game figure; sources ported from psx_tomba |
 
-## Japanese retail (SLPS-01144): 98.23 % (71 functions, ~25 KB)
+## Japanese retail (SLPS-01144): 98.45 % (69 functions, ~22 KB)
 
 The JP report counts the Psy-Q library too. The hand-written-asm part (libgte, BIOS stubs, start, setjmp) is in as
 top-level asm. Left from the library: the parts Sony compiled from C (libsnd _SsContDataEntry and the _SsVmSetVol
@@ -28,10 +28,8 @@ Game code, closest first:
 | main 8001AA90 | 904 B | 99.9 % | instruction-identical; jump-table naming only |
 | x06 8011DD3C | 644 B | 99.4 % | instruction-identical; the target includes one padding `nop` before the next function |
 | main 8001CA50 | 1024 B | 48 lines (flags -O2 -G0) | map-tile spawn loop; loop-invariant hoist order, frame 96 vs 104 |
-| main 80055F2C | 1496 B | 4 lines (`li v0,2` / `li v1,16` placement) | PAL twin func_8004AE7C has no C (semantics in port2/runtime/main0_handwritten.c) |
 | x04 80118720 | 624 B | 32 lines | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
 | x04 80117938 | 2768 B | ~300 lines | tile-grid visibility list, no PAL twin |
-| main 80042280 | 1520 B | ~460 lines | PAL twin func_800416B8 has no C |
 | main 8002DA3C | 2424 B | ~680 lines | message-box object state machine, no PAL twin |
 | main 80024B78 | 5112 B | not started | hand-written GTE mesh renderer, no twin; write from scratch with the GTE macros of src/modelDrawG4Lit.c |
 | main 800249B8 | 448 B | 2 lines | GTE inline asm (the permuter cannot parse it) |
@@ -39,10 +37,17 @@ Game code, closest first:
 
 ## USA retail (SCUS-94236)
 
-97.47 % (3152 of 3218 functions) after two automatic sweeps, the psx_tomba ports and the Psy-Q asm (`docs/USA.md`). The SYSTEM overlays (DSPSUB*, INFO*,
+97.65 % (3154 of 3218 functions) after two automatic sweeps, the psx_tomba ports and the Psy-Q asm (`docs/USA.md`). The SYSTEM overlays (DSPSUB*, INFO*,
 OPTSUB00, GOVER) are not split yet. psx_tomba (hansbonini) is the USA decompilation to port from.
 
 ## Demos and prototypes
 
 `docs/JPDEMO.md`, `docs/BETA_980203.md`, `docs/PREPRE8.md`; the CI `jp-sweep.yml` installs what matches on every
 push.
+
+## Ready but not installed
+
+psx_tomba's libsnd C matches `_SsContDataEntry` (0x430) and `_SsVmSetVol` (0x584) in all three versions, and its
+func_80044B0C / func_80058E14 give the PAL twins func_800416B8 / func_8004AE7C. Installing them changes the PAL
+split (the CC_6_OBJ_* / VM_VOL_OBJ_* pieces merge into one function each) and the port has hand-written copies
+of the two PAL functions (port2/runtime/main0_handwritten.c): needs a port build check first.

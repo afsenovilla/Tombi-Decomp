@@ -10,3 +10,4 @@ drawStatsLabelGlyph = 0x80116E9C; // type:func size:0xC4  PAL x013 0x80117B4C id
 drawStatsNumber = 0x80116F60; // type:func size:0x204  PAL x013 0x80117C10
 drawStatsPlayTime = 0x80117164; // type:func size:0x214  PAL x013 0x80117E14
 drawStatsDigit = 0x80117378; // type:func size:0xD0  PAL x013 0x80118028
+updateSceneSequence = 0x80116330; // type:func size:0x9D4  PAL x013 0x80116FE0

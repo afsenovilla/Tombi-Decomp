@@ -1,6 +1,12 @@
 // FUNC 80116fe0 2516 X013
 // MATCHING 80116fe0 2516
+// VERSION SCUS_94236 x13 80116330 2516
 #include "spad.h"
+#if defined(VERSION_SCUS_94236)
+#define FPS 60 /* USA (NTSC): play time counted in 60 Hz frames */
+#else
+#define FPS 50
+#endif
 #include "gcd.h"
 #include "gv2.h"
 #include "gvars.h"
@@ -193,9 +199,9 @@ void updateSceneSequence(O *o)
             switch (o->step) {
             case 0:
                 t = (*(unsigned int*)&GAME.totalTimePlayed);
-                h = t / 180000;
+                h = t / (FPS * 3600);
                 D_8011A8C8 = 0;
-                D_8011A8C4 = t / 3000 - h * 60;
+                D_8011A8C4 = t / (FPS * 60) - h * 60;
                 D_8011A8C0 = h % 1000;
                 for (i = 0; i < 0x100; i++) {
                     if (i != 0x12 && SCRIPT_FLAGS[i]) D_8011A8C8++;
