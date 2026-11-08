@@ -15,12 +15,11 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 | D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
 | Psy-Q library | 10.9 KB of 100.9 KB | 89.2 % | not counted in the game figure; sources ported from psx_tomba |
 
-## Japanese retail (SLPS-01144): 97.81 % (139 functions, ~31 KB)
+## Japanese retail (SLPS-01144): 98.23 % (71 functions, ~25 KB)
 
-The JP report counts the Psy-Q library too: **most of the 130 open main-exe functions are Sony SDK code** (BIOS
-call stubs of 12-16 bytes, libgte matrix routines, libcard/libsnd/libpress pieces, `start`, `__main`, setjmp).
-Many of these should match from the PAL Psy-Q sources or psx_tomba with the right `// AS gnu` / FLAGS: that is the
-cheapest block left (a sweep over the 12-byte stubs alone is ~50 functions).
+The JP report counts the Psy-Q library too. The hand-written-asm part (libgte, BIOS stubs, start, setjmp) is in as
+top-level asm. Left from the library: the parts Sony compiled from C (libsnd _SsContDataEntry and the _SsVmSetVol
+pieces, __main, __do_global_dtors, _patch_card/_patch_card2, DecDCTvlc/DecDCTvlcSize, StopCARD2's merged target).
 
 Game code, closest first:
 
@@ -28,10 +27,9 @@ Game code, closest first:
 |---|---:|---|---|
 | main 8001AA90 | 904 B | 99.9 % | instruction-identical; jump-table naming only |
 | x06 8011DD3C | 644 B | 99.4 % | instruction-identical; the target includes one padding `nop` before the next function |
-| main 800412B0 | 496 B | ~100 lines | retail copies x (`move v1,a1`) and computes `andi t3,v1,7` from the copy |
-| main 8001CA50 | 1024 B | ~94-167 lines | map-tile spawn loop; loop-invariant hoist order, frame 96 vs 104 |
-| main 80055F2C | 1496 B | 160 lines | PAL twin func_8004AE7C has no C (semantics in port2/runtime/main0_handwritten.c) |
-| x04 80118720 / 80118B98 | 624 / 844 B | ~200 lines | siblings; case 0 iterates the original pointer while g is the copy |
+| main 8001CA50 | 1024 B | 48 lines (flags -O2 -G0) | map-tile spawn loop; loop-invariant hoist order, frame 96 vs 104 |
+| main 80055F2C | 1496 B | 4 lines (`li v0,2` / `li v1,16` placement) | PAL twin func_8004AE7C has no C (semantics in port2/runtime/main0_handwritten.c) |
+| x04 80118720 | 624 B | 32 lines | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
 | x04 80117938 | 2768 B | ~300 lines | tile-grid visibility list, no PAL twin |
 | main 80042280 | 1520 B | ~460 lines | PAL twin func_800416B8 has no C |
 | main 8002DA3C | 2424 B | ~680 lines | message-box object state machine, no PAL twin |

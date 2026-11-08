@@ -1,0 +1,37 @@
+// VERSION SLPS_01144 slps01144 80059E5C 104
+// FLAGS -O2 -G0
+// AS gnu
+#if defined(VERSION_SLPS_01144)
+__asm__(".set noreorder\n.set noat\n"
+".globl _patch_gte\n.type _patch_gte,@function\n_patch_gte:\n"
+"	lui	$1,%hi(D_8009DAD8)\n"
+"	sw	$31,%lo(D_8009DAD8)($1)\n"
+"	jal	EnterCriticalSection\n"
+"	sll	$0,$0,0x0\n"
+"	addiu	$10,$0,176\n"
+"	jalr	$10\n"
+"	addiu	$9,$0,86\n"
+"	lui	$10,%hi(D_80059EC4)\n"
+"	lui	$9,%hi(D_80059ED0)\n"
+"	lw	$2,24($2)\n"
+"	addiu	$10,$10,%lo(D_80059EC4)\n"
+"	addiu	$9,$9,%lo(D_80059ED0)\n"
+"L_patch_gte_30:\n"
+"	lw	$3,0($10)\n"
+"	addiu	$10,$10,4\n"
+"	addiu	$2,$2,4\n"
+"	bne	$10,$9,L_patch_gte_30\n"
+"	sw	$3,108($2)\n"
+"	jal	FlushCache\n"
+"	sll	$0,$0,0x0\n"
+"	jal	ExitCriticalSection\n"
+"	sll	$0,$0,0x0\n"
+"	lui	$31,%hi(D_8009DAD8)\n"
+"	lw	$31,%lo(D_8009DAD8)($31)\n"
+"	sll	$0,$0,0x0\n"
+"	jr	$31\n"
+"	sll	$0,$0,0x0\n"
+".globl D_80059EC4\n.type D_80059EC4,@function\nD_80059EC4:\n"
+".globl D_80059ED0\n.type D_80059ED0,@function\nD_80059ED0:\n"
+".set at\n.set reorder\n");
+#endif
