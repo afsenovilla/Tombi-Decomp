@@ -80,11 +80,11 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 <summary><b>USA (SCUS-94236): per part</b></summary>
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 99.12 % of the code matches byte for byte** (1460648 of 1473600 bytes, 3185 of 3218 functions).
+**Tomba! USA (SCUS-94236): 99.22 % of the code matches byte for byte** (1462084 of 1473580 bytes, 3199 of 3215 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SCUS_942.36: engine | 395584 B | 387780 B | 1309 / 1337 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.0 % |
+| SCUS_942.36: engine | 395564 B | 389216 B | 1323 / 1334 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.4 % |
 | X00.BIN: shared object code | 313648 B | 311628 B | 530 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.4 % |
 | X01.BIN: area code | 154588 B | 154588 B | 243 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25432 B | 24156 B | 33 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.0 % |
