@@ -15,7 +15,7 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 | D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
 | Psy-Q library | 10.9 KB of 100.9 KB | 89.2 % | not counted in the game figure; sources ported from psx_tomba |
 
-## Japanese retail (SLPS-01144): 97.48 % (145 functions, 35.7 KB)
+## Japanese retail (SLPS-01144): 97.81 % (139 functions, ~31 KB)
 
 The JP report counts the Psy-Q library too: **most of the 130 open main-exe functions are Sony SDK code** (BIOS
 call stubs of 12-16 bytes, libgte matrix routines, libcard/libsnd/libpress pieces, `start`, `__main`, setjmp).
@@ -28,10 +28,6 @@ Game code, closest first:
 |---|---:|---|---|
 | main 8001AA90 | 904 B | 99.9 % | instruction-identical; jump-table naming only |
 | x06 8011DD3C | 644 B | 99.4 % | instruction-identical; the target includes one padding `nop` before the next function |
-| x03 80126EC4 | 384 B | 2 lines | one `li v1,2` scheduled at the start of case 0 instead of after `lhu animFrame` |
-| x10 8011BE2C | 1108 B | 14 lines | tail: retail sum v1, box2 a1, s3c6 v0 (ours v0, a1, a2) |
-| main 80016E6C initGameConfig | 720 B | 18 lines | `lbu a0,0x1b3` + `li a1,1` group scheduled ~6 insns late |
-| x10 80115DB8 | 1216 B | 20 lines | first `(PX + 0x50) / 80` of cases 0/4: 0x6666 constant and sum in v0/v1 swapped |
 | main 800412B0 | 496 B | ~100 lines | retail copies x (`move v1,a1`) and computes `andi t3,v1,7` from the copy |
 | main 8001CA50 | 1024 B | ~94-167 lines | map-tile spawn loop; loop-invariant hoist order, frame 96 vs 104 |
 | main 80055F2C | 1496 B | 160 lines | PAL twin func_8004AE7C has no C (semantics in port2/runtime/main0_handwritten.c) |
