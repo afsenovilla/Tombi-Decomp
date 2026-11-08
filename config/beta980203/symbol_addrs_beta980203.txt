@@ -89,6 +89,7 @@ getEventState = 0x8001DB3C; // type:func size:0x14  PAL main0 0x8005AA60
 acquireSpriteSlot = 0x8001E1A0; // type:func size:0x298  PAL main0 0x8005B38C
 printEventMessage = 0x8001E438; // type:func size:0x310  PAL main0 0x8005B624
 func_8001E8B8_beta980203 = 0x8001E8B8; // type:func size:0x5C
+func_8001E914_beta980203 = 0x8001E914; // type:func size:0x310
 mdecSliceCallback = 0x8001EC24; // type:func size:0xFC  PAL main0 0x8001D9D8
 movieInitDecodeEnv = 0x8001ED20; // type:func size:0x64  PAL main0 0x8001DAD4
 updateSound = 0x8001EE24; // type:func size:0x410  PAL main0 0x8001DBDC
