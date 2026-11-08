@@ -1,0 +1,39 @@
+# Japanese retail release (SLPS-01144), SYSTEM code overlay DSPSUB2.BIN (PAL D0SPSUB2.BIN, config/d0spsub2.yaml).
+# Raw blob loaded at the overlay base 0x800E9AF8: ID word + string table (data), code 0x83C..0x4770, then data.
+name: DSPSUB2.BIN
+sha1: 02a1e11323929ed510570e3d9c5ecd8dd9ed385c
+options:
+  basename: dspsub2
+  target_path: game_jp/SYSTEM/DSPSUB2.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slps01144/dspsub2
+  src_path: build/slps01144/splat_src/dspsub2
+  build_path: build/slps01144
+  asset_path: build/slps01144/assets
+  ld_script_path: build/slps01144/dspsub2.ld
+  symbol_addrs_path:
+    - config/slps01144/symbol_addrs_dspsub2.txt
+  undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.dspsub2.txt
+  undefined_syms_auto_path: build/slps01144/undefined_syms_auto.dspsub2.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: dspsub2
+    type: code
+    start: 0x0
+    vram: 0x800E9AF8
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, bin, dspsub2_header]
+      - [0x83C, c, dspsub2]
+      - [0x4770, bin, dspsub2_data]
+  - [0x99BC]

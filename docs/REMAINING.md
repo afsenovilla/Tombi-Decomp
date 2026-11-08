@@ -15,7 +15,11 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 | D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
 | Psy-Q library | 10.9 KB of 100.9 KB | 89.2 % | not counted in the game figure; sources ported from psx_tomba |
 
-## Japanese retail (SLPS-01144): 98.62 % (68 functions, ~19.5 KB)
+## Japanese retail (SLPS-01144): 93.05 % with the SYSTEM overlays (98.91 % without; 3324 of 3530 functions)
+
+The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08: INFO2 84 %, INFO/INFO3 ~68 %, OPTSUB00 41 %,
+DSPSUB* 12-14 % (Japanese text layout, far from PAL; xmatch pairs only 4-6 % of their bytes). 208 SYSTEM functions
+need hand work.
 
 The JP report counts the Psy-Q library too. The hand-written-asm part (libgte, BIOS stubs, start, setjmp) is in as
 top-level asm. Left from the library: the parts Sony compiled from C (libsnd _SsContDataEntry and the _SsVmSetVol

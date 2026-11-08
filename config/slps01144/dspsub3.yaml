@@ -1,0 +1,39 @@
+# Japanese retail release (SLPS-01144), SYSTEM code overlay DSPSUB3.BIN (PAL D0SPSUB3.BIN, config/d0spsub3.yaml).
+# Raw blob loaded at the overlay base 0x800E9AF8: ID word + entry table (data), code 0x70C..0x6330, then data.
+name: DSPSUB3.BIN
+sha1: 51df511e0cf2b0cb6081241a0f8096763304d01b
+options:
+  basename: dspsub3
+  target_path: game_jp/SYSTEM/DSPSUB3.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slps01144/dspsub3
+  src_path: build/slps01144/splat_src/dspsub3
+  build_path: build/slps01144
+  asset_path: build/slps01144/assets
+  ld_script_path: build/slps01144/dspsub3.ld
+  symbol_addrs_path:
+    - config/slps01144/symbol_addrs_dspsub3.txt
+  undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.dspsub3.txt
+  undefined_syms_auto_path: build/slps01144/undefined_syms_auto.dspsub3.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: dspsub3
+    type: code
+    start: 0x0
+    vram: 0x800E9AF8
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, bin, dspsub3_header]
+      - [0x70C, c, dspsub3]
+      - [0x6330, bin, dspsub3_data]
+  - [0x15A9C]

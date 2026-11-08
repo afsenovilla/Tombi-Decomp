@@ -1,0 +1,9 @@
+titleDrawSpriteRecs = 0x800E9AFC; // type:func size:0x204  PAL o0ptsub0 0x800E8078
+bootLogoSetSpriteBase = 0x800EA048; // type:func size:0x18  PAL o0ptsub0 0x800E8A14
+bootLogoDraw = 0x800EA060; // type:func size:0x30  PAL o0ptsub0 0x800E8A2C
+titleLogoInitBounce = 0x800EA090; // type:func size:0x38  PAL o0ptsub0 0x800E8A5C
+optionsMenuDraw = 0x800EA19C; // type:func size:0x4C  PAL o0ptsub0 0x800E8B94
+buttonConfigMenuDraw = 0x800EA1E8; // type:func size:0x44  PAL o0ptsub0 0x800E8BE0
+titleDrawSprite = 0x800EA22C; // type:func size:0x1EC  PAL o0ptsub0 0x800E8C58
+buttonConfigDrawCursor = 0x800EA534; // type:func size:0xF8  PAL o0ptsub0 0x800E8FD8
+optionsDrawFrame = 0x800EA7F4; // type:func size:0x88  PAL o0ptsub0 0x800E96A4

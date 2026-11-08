@@ -1,0 +1,17 @@
+subScreenDrawEventCounters = 0x800EBBFC; // type:func size:0x30C  PAL d0spsub 0x800EA5E8
+subScreenDrawPageNumber = 0x800EC4E0; // type:func size:0x220  PAL d0spsub 0x800EAF28
+subScreenDrawItemIcon = 0x800ECB14; // type:func size:0x510  PAL d0spsub 0x800EB7A8
+subScreenClampTabCursor = 0x800ED7C0; // type:func size:0x34  PAL d0spsub3 0x800EC3BC
+subScreenCondPlayerH = 0x800EF564; // type:func size:0x108  PAL d0spsub 0x800F101C
+subScreenCondPlayerY = 0x800EF66C; // type:func size:0x104  PAL d0spsub 0x800F1124
+subScreenCondPlayerD = 0x800EF770; // type:func size:0x108  PAL d0spsub 0x800F1228
+subScreenCondArea = 0x800EF878; // type:func size:0x104  PAL d0spsub 0x800F1330
+subScreenCondSection = 0x800EF97C; // type:func size:0x104  PAL d0spsub 0x800F1434
+subScreenCondUnk6Is1 = 0x800EFA80; // type:func size:0x18  PAL d0spsub 0x800F1538
+subScreenCondFlag100 = 0x800EFA98; // type:func size:0x18  PAL d0spsub 0x800F1550
+subScreenCondEventFlag = 0x800EFAB0; // type:func size:0xC8  PAL d0spsub 0x800F1568
+subScreenCondFlag544 = 0x800EFB78; // type:func size:0xC8  PAL d0spsub 0x800F1630
+subScreenCondHealthSettled = 0x800EFC40; // type:func size:0x20  PAL d0spsub 0x800F16F8
+subScreenCondNearType0A = 0x800EFC60; // type:func size:0x114  PAL d0spsub 0x800F1718
+subScreenCondRefreshingDrinkSpot = 0x800EFD84; // type:func size:0x6C  PAL d0spsub 0x800F183C
+subScreenCondFlag40 = 0x800EFDF0; // type:func size:0x18  PAL d0spsub 0x800F18A8

@@ -19,6 +19,8 @@ USA_SHARED = 0x2DE6C  # every USA X<nn>.BIN starts with these bytes of X00.BIN (
 # USA SYSTEM code overlays (SYSTEM/<NAME>.BIN, loaded at USA_OVL) -> the PAL module of tools/sysovl.py they pair with
 USA_SYSOVL = {"dspsub": "d0spsub", "dspsub2": "d0spsub2", "dspsub3": "d0spsub3", "gover": "g0over",
               "info": "i0nfo", "info2": "i0nfo2", "info3": "i0nfo3", "optsub00": "o0ptsub0"}
+# JP SYSTEM code overlays (same names as USA, no GOVER on the JP disc), loaded at JP_OVL
+JP_SYSOVL = {p: m for p, m in USA_SYSOVL.items() if p != "gover"}
 
 REFERENCE = "sces01331"
 SERIALS = {"sces01331": "SCES_01331", "slps01144": "SLPS_01144", "slpm80165": "SLPM_80165", "pcpx96084": "PCPX_96084",
@@ -51,7 +53,9 @@ VERSIONS = {
         "progs": dict([("slps01144", ("SLPS_011.44", "SLPS_011.44", 0x80010000, 0)),
                        ("x00", ("X00.BIN (AREA00)", "X00.BIN", JP_OVL, 0))]
                       + [("x%02d" % n, ("X%02d.BIN (AREA%02d)" % (n, n), "X%02d.BIN" % n, JP_OVL, JP_SHARED))
-                         for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]),
+                         for n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19)]
+                      # SYSTEM code overlays: raw blobs at the area overlay base, see JP_SYSOVL
+                      + [(p, ("%s.BIN (SYSTEM)" % p.upper(), "%s.BIN" % p.upper(), JP_OVL, 0)) for p in JP_SYSOVL]),
     },
     # USA retail "Tomba!" (SCUS-94236): the JP layout (two-digit X<nn>.BIN, shared X00 prefix). See docs/USA.md.
     "scus94236": {
@@ -69,6 +73,7 @@ VERSIONS = {
 def pal_prog(ver, prog):
     if prog in ("slps01144", "slpm80165", "tomba", "beta980203", "scus94236"): return "main0"
     if ver == "scus94236" and prog in USA_SYSOVL: return USA_SYSOVL[prog]
+    if ver == "slps01144" and prog in JP_SYSOVL: return JP_SYSOVL[prog]
     return "x0" + prog[1:]
 
 

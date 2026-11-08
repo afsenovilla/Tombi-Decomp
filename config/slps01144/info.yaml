@@ -1,0 +1,39 @@
+# Japanese retail release (SLPS-01144), SYSTEM code overlay INFO.BIN (PAL I0NFO.BIN, config/i0nfo.yaml).
+# Raw blob loaded at the overlay base 0x800E9AF8: ID word + entry table (data), code 0x1B4..0x6264, then data.
+name: INFO.BIN
+sha1: 59adf89a7e9828da223ec4e019fee9e5303d96c1
+options:
+  basename: info
+  target_path: game_jp/SYSTEM/INFO.BIN
+  base_path: ../..
+  platform: psx
+  compiler: PSYQ
+  asm_path: asm/slps01144/info
+  src_path: build/slps01144/splat_src/info
+  build_path: build/slps01144
+  asset_path: build/slps01144/assets
+  ld_script_path: build/slps01144/info.ld
+  symbol_addrs_path:
+    - config/slps01144/symbol_addrs_info.txt
+  undefined_funcs_auto_path: build/slps01144/undefined_funcs_auto.info.txt
+  undefined_syms_auto_path: build/slps01144/undefined_syms_auto.info.txt
+  find_file_boundaries: False
+  disassemble_all: True
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  generate_asm_macros_files: False
+  subalign: 4
+  string_encoding: ASCII
+segments:
+  - name: info
+    type: code
+    start: 0x0
+    vram: 0x800E9AF8
+    align: 4
+    subalign: 4
+    subsegments:
+      - [0x0, bin, info_header]
+      - [0x1B4, c, info]
+      - [0x6264, bin, info_data]
+  - [0xA9B4]

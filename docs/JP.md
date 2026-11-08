@@ -46,10 +46,18 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
   not matched yet), and 4 JP-only files `src/[x0nn/]<name>_slps01144.c`. They were the 81 files of the former
   `src/jp/`, folded in by `tools/version_share.py fold`; `tools/version_share.py asm slps01144` writes the
   INCLUDE_ASM branches from a report.
+- **SYSTEM code overlays** `DSPSUB.BIN`, `DSPSUB2`, `DSPSUB3`, `INFO`, `INFO2`, `INFO3`, `OPTSUB00` (no GOVER on the
+  JP disc): programs `dspsub` .. `optsub00` (`JP_SYSOVL` in `tools/versions.py`, paired with PAL `d0spsub` ..
+  `o0ptsub0` by `pal_prog`), raw blobs at 0x800E9AF8. `config/slps01144/<prog>.yaml` splits header (bin), code,
+  trailing data (bin); code ranges DSPSUB 0x7C4-0x94B8, DSPSUB2 0x83C-0x4770 (string table first, no entry table),
+  DSPSUB3 0x70C-0x6330, INFO 0x1B4-0x6264, INFO2 0xAB0-0x1621C, INFO3 0x414-0x679C, OPTSUB00 0x4-0xD84 (no entry
+  table; much smaller than PAL O0PTSUB0). Symbols: `python3 tools/gen_symbols.py`, then `python3 -I tools/xmatch.py
+  game_jp/SYSTEM/{DSPSUB,DSPSUB2,DSPSUB3,INFO,INFO2,INFO3,OPTSUB00}.BIN --csv build/slps01144/xmatch_sys.csv` and
+  `python3 -I tools/jpdemo_syms.py build/slps01144/xmatch_sys.csv --version slps01144`.
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 98.91 % of code (1399116 of 1414496 bytes, 3038 of 3092 functions; README table)**, mostly PAL C reused as is, the rest from
+**Progress: 93.05 % of code (1518472 of 1631952 bytes, 3324 of 3530 functions; README table)** with the SYSTEM overlays (exe + X overlays alone: 98.91 %, 3038 of 3092), mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
@@ -546,3 +554,17 @@ What remains, by kind (for the paired functions with PAL C):
 
 Not linked yet: like the demo, the JP objects are compared by objdiff only; `tools/build_full.py` has no JP target.
 
+## SYSTEM overlays (2026-11-08)
+
+| Step | Code | Functions |
+|---|---:|---:|
+| before (exe + X overlays only) | 98.79 % | 3036 / 3092 |
+| SYSTEM overlays added, PAL pairing from `symbol_addrs_<prog>.txt` | 92.42 % | 3307 / 3530 |
+| `reuse.txt` lines of the SYSTEM programs (`jpdemo_reuse.py`, only those 276 lines appended) | 92.59 % | 3312 / 3530 |
+| `tools/jp_autofix.py --install` (10: 9 branches in PAL files, 1 JP file) | 92.94 % | 3322 / 3530 |
+
+Per overlay: INFO2 84.0 % (157/191), INFO 68.4 % (37/51), INFO3 67.0 % (37/52), OPTSUB00 41.0 % (8/16), DSPSUB2
+14.1 % (12/28), DSPSUB 13.9 % (20/57), DSPSUB3 11.8 % (15/43). The DSPSUB* sub-screens / memory card are far from PAL
+(Japanese text layout, xmatch finds only 4-6 % of their bytes); xmatch pairs most of JP DSPSUB3 with PAL D0SPSUB. The
+208 functions left need hand work; jp_autofix near misses: memCardProbe (3 lines), subScreenMapDrawRoomName (27),
+overheadBuildMapStrip in INFO and INFO2 (298).
