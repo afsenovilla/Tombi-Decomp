@@ -1,0 +1,35 @@
+// VERSION SLPM_80165 slpm80165 80059A34 100
+// AS.SLPM_80165 gnu
+#if defined(VERSION_SLPM_80165)
+// Demo version: JP C of src/RotMatrixX_slps01144.c (RotMatrixX) [-O2 -G0] (tools/demo_sweep.py)
+__asm__(".set noreorder\n.set noat\n"
+".globl RotMatrixX\n.type RotMatrixX,@function\nRotMatrixX:\n"
+"	addu	$15,$4,$0\n"
+"	addu	$2,$5,$0\n"
+"	bgez	$15,LRotMatrixX_44\n"
+"	andi	$25,$15,0xfff\n"
+"	negu	$15,$15\n"
+"	bgez	$15,LRotMatrixX_1c\n"
+"	andi	$15,$15,0xfff\n"
+"LRotMatrixX_1c:\n"
+"	sll	$24,$15,0x2\n"
+"	lui	$25,%hi(D_80097334_slpm80165)\n"
+"	addu	$25,$25,$24\n"
+"	lw	$25,%lo(D_80097334_slpm80165)($25)\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$14,$25,0x10\n"
+"	sra	$14,$14,0x10\n"
+"	negu	$9,$14\n"
+"	j	FGO_04_OBJ_64\n"
+"	sra	$8,$25,0x10\n"
+"LRotMatrixX_44:\n"
+"	sll	$24,$25,0x2\n"
+"	lui	$25,%hi(D_80097334_slpm80165)\n"
+"	addu	$25,$25,$24\n"
+"	lw	$25,%lo(D_80097334_slpm80165)($25)\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$24,$25,0x10\n"
+"	sra	$9,$24,0x10\n"
+"	sra	$8,$25,0x10\n"
+".set at\n.set reorder\n");
+#endif

@@ -1,0 +1,36 @@
+// VERSION SLPM_80165 slpm80165 80059808 104
+// AS.SLPM_80165 gnu
+#if defined(VERSION_SLPM_80165)
+// Demo version: JP C of src/FGO_01_OBJ_64_slps01144.c (FGO_01_OBJ_64) [-O2 -G0] (tools/demo_sweep.py)
+__asm__(".set noreorder\n.set noat\n"
+".globl FGO_01_OBJ_64\n.type FGO_01_OBJ_64,@function\nFGO_01_OBJ_64:\n"
+"	lh	$15,2($4)\n"
+"	sll	$0,$0,0x0\n"
+"	bgez	$15,LFGO_01_OBJ_64_44\n"
+"	andi	$25,$15,0xfff\n"
+"	negu	$15,$15\n"
+"	bgez	$15,LFGO_01_OBJ_64_1c\n"
+"	andi	$15,$15,0xfff\n"
+"LFGO_01_OBJ_64_1c:\n"
+"	sll	$24,$15,0x2\n"
+"	lui	$25,%hi(D_80097334_slpm80165)\n"
+"	addu	$25,$25,$24\n"
+"	lw	$25,%lo(D_80097334_slpm80165)($25)\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$12,$25,0x10\n"
+"	sra	$12,$12,0x10\n"
+"	negu	$14,$12\n"
+"	j	FGO_01_OBJ_CC\n"
+"	sra	$9,$25,0x10\n"
+"LFGO_01_OBJ_64_44:\n"
+"	sll	$24,$25,0x2\n"
+"	lui	$25,%hi(D_80097334_slpm80165)\n"
+"	addu	$25,$25,$24\n"
+"	lw	$25,%lo(D_80097334_slpm80165)($25)\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$14,$25,0x10\n"
+"	sra	$14,$14,0x10\n"
+"	negu	$12,$14\n"
+"	sra	$9,$25,0x10\n"
+".set at\n.set reorder\n");
+#endif

@@ -1,0 +1,35 @@
+// VERSION BETA_980203 beta980203 80062828 100
+// AS.BETA_980203 gnu
+#if defined(VERSION_BETA_980203)
+// Beta version: JP C of src/RotMatrixY_slps01144.c (RotMatrixY) [-O2 -G0] (tools/demo_sweep.py)
+__asm__(".set noreorder\n.set noat\n"
+".globl RotMatrixY\n.type RotMatrixY,@function\nRotMatrixY:\n"
+"	addu	$15,$4,$0\n"
+"	addu	$2,$5,$0\n"
+"	bgez	$15,LRotMatrixY_40\n"
+"	andi	$25,$15,0xfff\n"
+"	negu	$15,$15\n"
+"	bgez	$15,LRotMatrixY_1c\n"
+"	andi	$15,$15,0xfff\n"
+"LRotMatrixY_1c:\n"
+"	sll	$24,$15,0x2\n"
+"	lui	$25,%hi(D_80097334_beta980203)\n"
+"	addu	$25,$25,$24\n"
+"	lw	$25,%lo(D_80097334_beta980203)($25)\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$14,$25,0x10\n"
+"	sra	$9,$14,0x10\n"
+"	j	FGO_05_OBJ_64\n"
+"	sra	$8,$25,0x10\n"
+"LRotMatrixY_40:\n"
+"	sll	$24,$25,0x2\n"
+"	lui	$25,%hi(D_80097334_beta980203)\n"
+"	addu	$25,$25,$24\n"
+"	lw	$25,%lo(D_80097334_beta980203)($25)\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$24,$25,0x10\n"
+"	sra	$15,$24,0x10\n"
+"	negu	$9,$15\n"
+"	sra	$8,$25,0x10\n"
+".set at\n.set reorder\n");
+#endif
