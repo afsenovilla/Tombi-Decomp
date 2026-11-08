@@ -46,5 +46,6 @@ masked hash).
 | `demo_sweep.py` (131 installed: 104 pairings, 13 branches, 14 USA-only files) | 93.95 % | 3010 / 3209 |
 | `demo_sweep.py --fix` (39 more, PAL C edited by the tools/jp_autofix.py edits) | 95.66 % | 3049 / 3209 |
 | second `demo_sweep.py --fix` after the JP Psy-Q asm files (24 more) | 95.79 % | 3071 / 3209 |
+| psx_tomba ports (35) + hand-written Psy-Q asm (64 functions in 50 files) | 97.47 % | 3152 / 3218 |
 
 What is left is mostly in the boot exe (83 %): functions that differ from PAL by more than the automatic edits.
