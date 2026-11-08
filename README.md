@@ -196,7 +196,7 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 96.88 % of the code matches byte for byte** (1370384 of 1414500 bytes, 2948 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 96.92 % of the code matches byte for byte** (1370964 of 1414500 bytes, 2949 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
@@ -213,7 +213,7 @@ offsets and the function or splat range that produced them.
 | X10.BIN: area code | 97636 B | 91848 B | 169 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 94.1 % |
 | X11.BIN: area code | 13856 B | 13856 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X13.BIN: area code | 6336 B | 6336 B | 8 / 8 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X14.BIN: area code | 54472 B | 53596 B | 107 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.4 % |
+| X14.BIN: area code | 54472 B | 54176 B | 108 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.5 % |
 | X16.BIN: area code | 11688 B | 11688 B | 37 / 37 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X17.BIN: area code | 12124 B | 12124 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X18.BIN: area code | 16136 B | 16136 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
