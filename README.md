@@ -226,11 +226,11 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 ## USA release progress
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 95.79 % of the code matches byte for byte** (1411484 of 1473596 bytes, 3071 of 3209 functions).
+**Tomba! USA (SCUS-94236): 97.47 % of the code matches byte for byte** (1436272 of 1473600 bytes, 3152 of 3218 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SCUS_942.36: engine | 395580 B | 355736 B | 1213 / 1328 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 89.9 % |
+| SCUS_942.36: engine | 395584 B | 380524 B | 1294 / 1337 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.2 % |
 | X00.BIN: shared object code | 313648 B | 307796 B | 525 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.1 % |
 | X01.BIN: area code | 154588 B | 151316 B | 241 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.9 % |
 | X02.BIN: area code | 25432 B | 24156 B | 33 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.0 % |

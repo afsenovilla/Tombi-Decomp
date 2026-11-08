@@ -1,0 +1,364 @@
+#ifndef GAME_SYSTEM_H
+#define GAME_SYSTEM_H
+
+/* Tasks, scratchpad layout, joypad.
+   Part of game.h: include "game.h", not this file. */
+
+typedef enum {
+    JOY_SELECT   = 0x1,
+    JOY_L3       = 0x2,
+    JOY_R3       = 0x4,
+    JOY_START    = 0x8,
+    JOY_UP       = 0x10,
+    JOY_RIGHT    = 0x20,
+    JOY_DOWN     = 0x40,
+    JOY_LEFT     = 0x80,
+    JOY_L2       = 0x100,
+    JOY_R2       = 0x200,
+    JOY_L1       = 0x400,
+    JOY_R1       = 0x800,
+    JOY_TRIANGLE = 0x1000,
+    JOY_CIRCLE   = 0x2000,
+    JOY_CROSS    = 0x4000,
+    JOY_SQUARE   = 0x8000,
+} JOYPAD_BUTTONS;
+
+typedef struct { u16 frac; s16 whole; } FixParts;
+typedef union { s32 raw; FixParts p; } Fix16;
+
+typedef struct { Fix16 x, y, z; } Vec3Fix;
+
+typedef struct lz_t {
+    int size;
+    int offset;
+} lz_t;
+
+typedef struct TaskEntry {
+    int func;
+    int saved_reg_gp;
+} TaskEntry;
+
+typedef struct Task {
+    short status;
+    short sleepTimer;
+    int task_id;
+    int task_sp;
+    int task_func;
+    int task_gp;
+    volatile u_short unk14;
+    byte unk16;
+    byte unk17;
+    byte unk18;
+    byte unk19;
+    byte unk1a;
+    byte unk1b;
+    byte unk1c;
+    byte unk1d;
+    byte unk1e;
+    byte unk1f;
+    byte unk20;
+    byte unk21;
+    byte unk22;
+    byte unk23;
+    byte unk24;
+    byte unk25;
+    byte unk26;
+    byte unk27;
+    byte unk28;
+    byte unk29;
+    byte unk2a;
+    byte unk2b;
+    byte unk2c;
+    byte unk2d;
+    byte unk2e;
+    byte unk2f;
+    byte unk30;
+    byte unk31;
+    byte unk32;
+    byte unk33;
+    byte unk34;
+    byte unk35;
+    byte unk36;
+    byte unk37;
+    byte unk38;
+    byte unk39;
+    byte unk3a;
+    byte unk3b;
+    byte unk3c;
+    byte unk3d;
+    byte unk3e;
+    byte unk3f;
+    byte unk40;
+    byte unk41;
+    byte unk42;
+    byte unk43;
+    byte unk44;
+    byte unk45;
+    byte unk46;
+    byte unk47;
+    short state0;
+    u_short state1;
+    short state2;
+    union {
+        volatile u_short volatile_value;
+        u_short value;
+    } step;
+    byte unk50;
+    byte unk51;
+    byte unk52;
+    byte unk53;
+    byte unk54;
+    byte unk55;
+    byte unk56;
+    byte unk57;
+    u_short timer;
+    u_short unk5A;
+    u_short countdown;
+    u_short unk5E;
+    short unk60;
+    short unk62;
+    u_short unk64;
+    byte unk66;
+    byte unk67;
+    u_char loadGameSelected;
+    u_char titleScreenSelectedOption;
+    u_char unk6A;
+    u_char unk6B;
+    u_char unk6C;
+    u_char unk6D;
+    u_char unk6E;
+    u_char unk6F;
+} Task;
+
+typedef struct scratchpad {
+    /* 0x000 */ MATRIX workMatrix;
+    /* 0x020 */ MATRIX objectMatrix;
+    /* 0x040 */ VECTOR objectScale;
+    /* 0x050 */ DVECTOR screenXY;
+    /* 0x054 */ u8 pad054[0xC];
+    /* 0x060 */ SVECTOR workVecA;
+    /* 0x068 */ SVECTOR workVecB;
+    /* 0x070 */ lz_t lz;
+    /* 0x078 */ s32 spriteFragCount;
+    /* 0x07C */ u8 pad07C[0x10];
+    /* 0x08C */ union {
+        s32 gteFlag;
+        char* vertexCursor;
+    } gteWork;
+    /* 0x090 */ MATRIX parentMatrix;
+    /* 0x0B0 */ u8 pad0B0[0x10];
+    /* 0x0C0 */ MATRIX viewMatrix;
+    /* 0x0E0 */ Fix16 vrx;
+    /* 0x0E4 */ Fix16 vry;
+    /* 0x0E8 */ Fix16 vrz;
+    /* 0x0EC */ Fix16 vpx;
+    /* 0x0F0 */ Fix16 vpy;
+    /* 0x0F4 */ Fix16 vpz;
+    /* 0x0F8 */ MATRIX baseMatrix;
+    /* 0x118 */ LightEnv lighting;
+    /* 0x164 */ int nextprim;
+    /* 0x168 */ Vec3Fix cameraTarget;
+    /* 0x174 */ Vec3Fix cameraPos;
+    /* 0x180 */ Vec3Fix screenOrigin;
+    /* 0x18C */ s32 prevTargetX;
+    /* 0x190 */ s32 prevTargetY;
+    /* 0x194 */ u8 pad194[0x4];
+    /* 0x198 */ s32 updateIndex;
+    /* 0x19C */ s16 swapIndex;
+    /* 0x19E */ s16 listCounter;
+    /* 0x1A0 */ u8 unk1A0[4];
+    /* 0x1A4 */ u8 debugInvincible;
+    /* 0x1A5 */ u8 debugNoAreaUpdate;
+    /* 0x1A6 */ u8 pad1A6[0x5];
+    /* 0x1AB */ u8 debugGiveItems;
+    /* 0x1AC */ u8 pad1AC[0x2];
+    /* 0x1AE */ u8 unk1AE;
+    /* 0x1AF */ u8 pad1AF[0x4];
+    /* 0x1B3 */ u8 debugKeepInventory;
+    /* 0x1B4 */ u_char debug_mode_enabled;
+    /* 0x1B5 */ u8 pad1B5[0x3];
+    /* 0x1B8 */ u8 debugNoMenu;
+    /* 0x1B9 */ u8 pad1B9;
+    /* 0x1BA */ u8 debugNoSaveScreen;
+    /* 0x1BB */ u_char debugInfiniteLives;
+    /* 0x1BC */ u8 pad1BC[0x1];
+    /* 0x1BD */ u8 debugMoveDisplay;
+    /* 0x1BE */ u8 debugPauseStep;
+    /* 0x1BF */ u8 debugFreeze;
+    /* 0x1C0 */ u8 pad1C0[0x2];
+    /* 0x1C2 */ u_char debugSkipStep;
+    /* 0x1C3 */ u_char unk1C3;
+    /* 0x1C4 */ u_char unk1C4;
+    /* 0x1C5 */ u_char unk1C5;
+    /* 0x1C6 */ short drawFrozen;
+    /* 0x1C8 */ u_short axisSwap;
+    /* 0x1CA */ u_char unk1CA[2];
+    /* 0x1CC */ u_char moviePlayState;
+    /* 0x1CD */ u_char movieId;
+    /* 0x1CE */ u_char loadComplete;
+    /* 0x1CF */ u_char unk1CF;
+    /* 0x1D0 */ u_char inGame;
+    /* 0x1D1 */ u_char inTitle;
+    /* 0x1D2 */ u_char tileResponseActive;
+    /* 0x1D3 */ u_char movieSkipRequest;
+    /* 0x1D4 */ Task* currentTask;
+    /* 0x1D8 */ s32 vblankEvent;
+    /* 0x1DC */ short pendingState;
+    /* 0x1DE */ short pendingStep;
+    /* 0x1E0 */ int ot;
+    /* 0x1E4 */ void* prevOt;
+    /* 0x1E8 */ volatile u_short vblankCount;
+    /* 0x1EA */ short drawSyncId;
+    /* 0x1EC */ short useDrawSync;
+    /* 0x1EE */ short pauseToggle;
+    /* 0x1F0 */ short pauseFlags;
+    /* 0x1F2 */ short unk1F2;
+    /* 0x1F4 */ short frameBufferIndex;
+    /* 0x1F6 */ u_short frameCount;
+    /* 0x1F8 */ u_short activeFrameCount;
+    /* 0x1FA */ u_short joypadPressed;
+    /* 0x1FC */ u_short joypad_state;
+    /* 0x1FE */ u16 joypadReleased;
+    /* 0x200 */ int randomSeed;
+    /* 0x204 */ s32* freeWeaponObjects;
+    /* 0x208 */ void** freeActorObjects;
+    /* 0x20C */ s32* freeModelObjects;
+    /* 0x210 */ s32* freeAreaCtrlObjects;
+    /* 0x214 */ s32* freeFxObjects;
+    /* 0x218 */ s32* weaponDrawList;
+    /* 0x21C */ int actorDrawList;
+    /* 0x220 */ s32* effectDrawList;
+    /* 0x224 */ s32* areaDrawList;
+    /* 0x228 */ s32* itemDrawList;
+    /* 0x22C */ s32* fxDrawList;
+    /* 0x230 */ s32* modelDrawList;
+    /* 0x234 */ u8 pad234[0x2];
+    /* 0x236 */ u16 freeWeaponCount;
+    /* 0x238 */ short freeActorCount;
+    /* 0x23A */ u16 freeModelCount;
+    /* 0x23C */ u16 freeFxCount;
+    /* 0x23E */ u16 freeAreaCtrlCount;
+    /* 0x240 */ short fxDrawCount;
+    /* 0x242 */ short modelDrawCount;
+    /* 0x244 */ short weaponDrawCount;
+    /* 0x246 */ s16 actorDrawCount;
+    /* 0x248 */ short itemDrawCount;
+    /* 0x24A */ s16 effectDrawCount;
+    /* 0x24C */ u16 areaDrawCount;
+    /* 0x24E */ short weaponHeldCount;
+    /* 0x250 */ u16 actorHeldCount;
+    /* 0x252 */ s16 effectHeldCount;
+    /* 0x254 */ short areaHeldCount;
+    /* 0x256 */ short itemHeldCount;
+    /* 0x258 */ short modelHeldCount;
+    /* 0x25A */ short fxHeldCount;
+    /* 0x25C */ s32* weaponHeldList;
+    /* 0x260 */ void** actorHeldList;
+    /* 0x264 */ void** effectHeldList;
+    /* 0x268 */ void** areaHeldList;
+    /* 0x26C */ s32* itemHeldList;
+    /* 0x270 */ s32* fxHeldList;
+    /* 0x274 */ s32* modelHeldList;
+    /* 0x278 */ u16* collisionCursor;
+    /* 0x27C */ s16 hitWallAngle;
+    /* 0x27E */ s16 hitSlope;
+    /* 0x280 */ s16 hitFloorHeight;
+    /* 0x282 */ u16 hitFlags;
+    /* 0x284 */ s16 hitSurface;
+    /* 0x286 */ s16 doorSwingAngle;
+    /* 0x288 */ u8* cdRequest;
+    /* 0x28C */ s16* cdHeader;
+    /* 0x290 */ u8* cdDest;
+    /* 0x294 */ s32 cdSectorCount;
+    /* 0x298 */ s32 loadNextAddr;
+    /* 0x29C */ s32 cdQueueHead;
+    /* 0x2A0 */ s32 cdQueueTail;
+    /* 0x2A4 */ s32 loadSlots[5];
+    /* 0x2B8 */ int wssData[4];
+    /* 0x2C8 */ int sprData[16];
+    /* 0x308 */ int whmData[2];
+    /* 0x310 */ int fourData[8];
+    /* 0x330 */ int wmdData[6];
+    /* 0x348 */ int wppData[3];
+    /* 0x354 */ int wppTimPack;
+    /* 0x358 */ int apdData[16];
+    /* 0x398 */ int wfm3Data;
+    /* 0x39C */ u_short* eventData;
+    /* 0x3A0 */ u8 pad3A0[0x8];
+    /* 0x3A8 */ s16 vabIds[10];
+    /* 0x3BC */ s16 touchOffsetX;
+    /* 0x3BE */ u8 pad3BE[0x2];
+    /* 0x3C0 */ struct GameObject* touchedObject;
+    /* 0x3C4 */ u16 buttonAction;
+    /* 0x3C6 */ u16 buttonJump;
+    /* 0x3C8 */ u16 buttonAttack;
+    /* 0x3CA */ u16 buttonMenu;
+    /* 0x3CC */ u_char unk3CC;
+    /* 0x3CD */ u8 menuCloseMode;
+    /* 0x3CE */ u8 pauseMenuLock;
+    /* 0x3CF */ u8 pad3CF[0x1];
+    /* 0x3D0 */ s8 movieSkippable;
+    /* 0x3D1 */ u8 warpFadeActive;
+    /* 0x3D2 */ u_char loadedListFile;
+    /* 0x3D3 */ u_char loadedSoundSet;
+    /* 0x3D4 */ u8 pad3D4[0x6];
+    /* 0x3DA */ u16 unk3DA;
+    /* 0x3DC */ u8 pad3DC[0x24];
+} scratchpad;
+
+#define SPAD ((scratchpad *)PSX_SCRATCH)
+
+/* One of the two frame buffers at OT_FRAMEBUFFER: the ordering table and
+   the environments flipFrameBuffer hands to PutDispEnv / PutDrawEnv. */
+#define OT_LENGTH 0x328
+
+typedef struct {
+    /* 0x000 */ u_long  ot[OT_LENGTH];
+    /* 0xCA0 */ DISPENV disp;
+    /* 0xCB4 */ DRAWENV draw;
+} FrameBuffer; /* size: 0xD10 */
+
+
+/* View matrix plus camera rotation and position (scratchpad 0x0C0..0x0F7). */
+typedef struct ViewCamera {
+    MATRIX m;
+    Fix16 rot[3];
+    Fix16 pos[3];
+} ViewCamera;
+
+#endif
+
+/* Camera that follows the player (CAMERA_SCROLL, 0x84 bytes). */
+typedef struct CameraScroll {
+    /* 0x00 */ u8 active;
+    /* 0x01 */ u8 pad01[7];
+    /* 0x08 */ Vec3L pos;
+    /* 0x14 */ s32 velX;
+    /* 0x18 */ s32 velY;
+    /* 0x1C */ u8 pad1C[4];
+    /* 0x20 */ s32 rotX;
+    /* 0x24 */ s32 rotY;
+    /* 0x28 */ u8 pad28[4];
+    /* 0x2C */ s16 minX;
+    /* 0x2E */ s16 maxX;
+    /* 0x30 */ s16 minY;
+    /* 0x32 */ s16 maxY;
+    /* 0x34 */ s32 *targetX;
+    /* 0x38 */ s32 *targetZ;
+    /* 0x3C */ u8 pad3C;
+    /* 0x3D */ u8 settled;
+    /* 0x3E */ u8 rising;
+    /* 0x3F */ u8 pad3F[5];
+    /* 0x44 */ u16 edgeFlags;
+    /* 0x46 */ u8 pad46[6];
+    /* 0x4C */ u16 unk4C;
+    /* 0x4E */ u8 pad4E[0x1E];
+    /* 0x6C */ u8 tiltTimer;
+    /* 0x6D */ u8 pad6D;
+    /* 0x6E */ s8 tiltLevel;
+    /* 0x6F */ s8 tiltStep;
+    /* 0x70 */ u8 pad70[8];
+    /* 0x78 */ s32 rotXOffset;
+    /* 0x7C */ s32 rotYOffset;
+    /* 0x80 */ u8 pad80[4];
+} CameraScroll;

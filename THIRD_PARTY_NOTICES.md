@@ -7,8 +7,12 @@ Used here:
   "Add function matches, PsyQ matches, apply enums and rename functions"), plus its library-internal headers
   `libsnd_i.h` and `libspu_internal.h` (from `src/scus_942.36/psyq/libsnd/` and `libspu/`). Its PSY-Q SDK headers
   (`include/tomba/psyq/`, Sony copyright) are NOT stored here; `tools/setup_native.sh` fetches them locally.
+- `include/tomba26/` — its headers at commit d848c00 (2026-11-08), without `psyq/`; one change: `include_asm.h` also
+  skips its trailing `.include "include/macro.inc"` under `SKIP_ASM`. `include/padlocal_scus94236.h` — its
+  `src/psyq/libpad/padlocal.h` (USA libpad 4.2 layout) with typedefs added.
 - `src/*.c` files whose header says `Portado de psx_tomba` — functions ported from its C sources and
   re-verified byte-for-byte against the PAL executable.
+  The `src/**/*_scus94236.c` files with that header were verified against the USA executable.
 - `notes/names_main0.csv` entries whose comment mentions `psx_tomba` — function names, mapped onto the PAL
   executable either by matching compiled bytes or by address alignment.
 - `config/slps01144/symbol_addrs_slps01144.txt` lines marked `psx_tomba name` — Japanese-build function names and

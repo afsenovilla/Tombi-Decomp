@@ -1,0 +1,36 @@
+// VERSION SCUS_94236 scus94236 8005CED8 108
+// FLAGS -O2 -G0
+// AS gnu
+#if defined(VERSION_SCUS_94236)
+__asm__(".set noreorder\n.set noat\n"
+".globl _patch_card2\n.type _patch_card2,@function\n_patch_card2:\n"
+"	lui	$1,%hi(D_8009AFB0)\n"
+"	sw	$31,%lo(D_8009AFB0)($1)\n"
+"	jal	EnterCriticalSection\n"
+"	sll	$0,$0,0x0\n"
+"	addiu	$10,$0,176\n"
+"	jalr	$10\n"
+"	addiu	$9,$0,87\n"
+"	lw	$2,364($2)\n"
+"	lui	$10,%hi(func_8005CEA8_scus94236)\n"
+"	lui	$9,%hi(func_8005CEA8_scus94236)\n"
+"	lw	$3,2504($2)\n"
+"	addiu	$10,$10,%lo(func_8005CEA8_scus94236)\n"
+"	addiu	$9,$9,%lo(func_8005CEA8_scus94236+20)\n"
+"L_patch_card2_34:\n"
+"	lw	$3,2504($2)\n"
+"	lw	$8,0($10)\n"
+"	addiu	$10,$10,4\n"
+"	sw	$3,-4($10)\n"
+"	addiu	$2,$2,4\n"
+"	bne	$10,$9,L_patch_card2_34\n"
+"	sw	$8,2500($2)\n"
+"	jal	FlushCache\n"
+"	sll	$0,$0,0x0\n"
+"	lui	$31,%hi(D_8009AFB0)\n"
+"	lw	$31,%lo(D_8009AFB0)($31)\n"
+"	sll	$0,$0,0x0\n"
+"	jr	$31\n"
+"	sll	$0,$0,0x0\n"
+".set at\n.set reorder\n");
+#endif
