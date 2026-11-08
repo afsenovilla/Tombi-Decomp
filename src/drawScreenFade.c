@@ -2,6 +2,7 @@
 // MATCHING 80059d44 468
 // VERSION SLPS_01144 slps01144 8004CF38 448
 // VERSION SCUS_94236 scus94236 8004FB54 468
+// VERSION BETA_980203 beta980203 8004E814 468
 #if defined(VERSION_SLPS_01144)
 #if defined(VERSION_SLPS_01144)
 typedef struct { char p0[0xc]; unsigned char b0c, b0d, b0e, b0f, b10, b11, b12, b13; short s14, s16, s18, s1a; } P;
@@ -53,6 +54,56 @@ void func_8004CF38(unsigned char a)
 }
 #endif
 #elif defined(VERSION_SCUS_94236)
+// USA version of PAL main0 80059D44 (drawScreenFade.c): PAL C of src/drawScreenFade.c (1.000 masked), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+typedef struct { char p0[0xc]; unsigned char b0c, b0d, b0e, b0f, b10, b11, b12, b13; short s14, s16, s18, s1a; } P;
+extern P *NEXT_PRIM;
+extern int CURRENT_OT;
+extern unsigned char G3d1, GVARS_FADE_EFFECT;
+extern void FUN_80060008(void *, int, int, int, int), FUN_8005e580(int, void *), FUN_8005e634(void *, int);
+extern int FUN_8005efe4(void);
+
+void drawScreenFade(unsigned char a)
+{
+    P *p;
+    void *r;
+    int t, m;
+    r = NEXT_PRIM;
+    FUN_80060008(r, 0, 0, 0, 0);
+    FUN_8005e580(CURRENT_OT + 0x10, r);
+    p = NEXT_PRIM;
+    r = NEXT_PRIM = (P *)((char *)p + 0xc);
+    p->s18 = 0x140;
+    p->s1a = 0xf0;
+    p->b0f = 3;
+    p->s14 = 0;
+    p->s16 = 0;
+    p->b13 = 0x60;
+    FUN_8005e634(r, 1);
+    if (GVARS_FADE_EFFECT == 2) {
+        p->b10 = 0;
+        p->b11 = 0;
+    } else {
+        p->b10 = a;
+        p->b11 = a;
+    }
+    p->b12 = a;
+    FUN_8005e580(CURRENT_OT + 0x10, r);
+    r = NEXT_PRIM = (P *)((char *)NEXT_PRIM + 0x10);
+    if (G3d1 == 1 || (unsigned)(GVARS_FADE_EFFECT - 1) < 2) {
+        if (FUN_8005efe4() == 1) m = 0x80;
+        else if (FUN_8005efe4() == 2) m = 0x80;
+        else m = 0x20;
+    } else {
+        if (FUN_8005efe4() == 1) m = 0x100;
+        else if (FUN_8005efe4() == 2) m = 0x100;
+        else m = 0x40;
+    }
+    FUN_80060008(r, 0, 0, m, 0);
+    FUN_8005e580(CURRENT_OT + 0x10, r);
+    NEXT_PRIM = (P *)((char *)NEXT_PRIM + 0xc);
+}
+#elif defined(VERSION_BETA_980203)
+// Beta version of PAL main0 80059D44 (drawScreenFade.c): SCUS_94236 branch of src/drawScreenFade.c [-O2 -G0] (tools/demo_sweep.py)
 // USA version of PAL main0 80059D44 (drawScreenFade.c): PAL C of src/drawScreenFade.c (1.000 masked), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
 typedef struct { char p0[0xc]; unsigned char b0c, b0d, b0e, b0f, b10, b11, b12, b13; short s14, s16, s18, s1a; } P;
 extern P *NEXT_PRIM;
