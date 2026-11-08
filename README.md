@@ -197,11 +197,11 @@ offsets and the function or splat range that produced them.
 ## Japanese release progress
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 98.45 % of the code matches byte for byte** (1392532 of 1414496 bytes, 3033 of 3102 functions).
+**Ore! Tomba (SLPS-01144): 98.62 % of the code matches byte for byte** (1394956 of 1414496 bytes, 3034 of 3102 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 374204 B | 358196 B | 1216 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.7 % |
+| SLPS_011.44: engine | 374204 B | 360620 B | 1217 / 1276 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.4 % |
 | X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
 | X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
@@ -226,11 +226,11 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 ## USA release progress
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 97.65 % of the code matches byte for byte** (1438936 of 1473600 bytes, 3154 of 3218 functions).
+**Tomba! USA (SCUS-94236): 97.87 % of the code matches byte for byte** (1442280 of 1473600 bytes, 3155 of 3218 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SCUS_942.36: engine | 395584 B | 380672 B | 1295 / 1337 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 96.2 % |
+| SCUS_942.36: engine | 395584 B | 384016 B | 1296 / 1337 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.1 % |
 | X00.BIN: shared object code | 313648 B | 307796 B | 525 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.1 % |
 | X01.BIN: area code | 154588 B | 151316 B | 241 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.9 % |
 | X02.BIN: area code | 25432 B | 24156 B | 33 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 95.0 % |
