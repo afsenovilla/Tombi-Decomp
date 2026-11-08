@@ -34,7 +34,12 @@ Game code, closest first:
 | main 800249B8 | 448 B | 2 lines | GTE inline asm (the permuter cannot parse it) |
 | main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |
 
-## USA retail (SCUS-94236): 99.94 %, every game function matches
+## USA retail (SCUS-94236): 97.52 % with the SYSTEM overlays (3629 of 3681 functions)
+
+The boot exe and the area overlays X00..X19 match in every game function (4 Sony functions left, below). The SYSTEM
+overlays were added on 2026-11-08 at 87-100 % (GOVER, INFO*) and 45-66 % (DSPSUB*, OPTSUB00): their big drawing,
+memory-card and title/options functions differ from PAL in the English text layout and need hand work from the PAL
+C (docs/USA.md).
 
 Left: Sony library code that Sony compiled from C: libsn `__main` / `__do_global_dtors`, libapi
 psyq_8005ba74 / psyq_8005bc10 (psx_tomba has them as C in src/psyq/libapi/func_8005B4CC.c).
