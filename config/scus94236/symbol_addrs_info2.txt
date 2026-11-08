@@ -187,3 +187,6 @@ npcSet11SceneStep4 = 0x800FD410; // type:func size:0x438  PAL i0nfo2 0x800FE410
 stepNpcSet11 = 0x800FD848; // type:func size:0x2D4  PAL i0nfo2 0x800FE848
 func_800FDB1C_scus94236 = 0x800FDB1C; // type:func size:0xC  PAL i0nfo2 0x800FA5BC
 updateNpcSet11 = 0x800FDB28; // type:func size:0xA8  PAL i0nfo2 0x800FEB28
+overheadDrawMapLayers = 0x800EBA58; // type:func size:0x2F0  PAL i0nfo 0x800EB044
+overheadLoadMapTiles = 0x800EBD48; // type:func size:0x114  PAL i0nfo 0x800EB384
+overheadRefreshMap = 0x800ECA4C; // type:func size:0x118  PAL i0nfo 0x800EC084

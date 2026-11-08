@@ -1,0 +1,105 @@
+// VERSION SCUS_94236 dspsub2 800EB0DC 636
+#if defined(VERSION_SCUS_94236)
+// USA version of PAL d0spsub 800ebcb8 (subScreenDrawString.c)
+typedef struct { unsigned addr: 24; unsigned len: 8; } P_TAG;
+typedef struct {
+    unsigned addr: 24;
+    unsigned len: 8;
+    unsigned char r0, g0, b0, code;
+    short x0, y0;
+    unsigned char u0, v0;
+    unsigned short clut;
+    short w, h;
+} SPRT;
+typedef struct { short x, y, w, h; } RECT;
+typedef struct {
+    RECT clip;
+    short ofs[2];
+    RECT tw;
+    unsigned short tpage;
+    unsigned char dtd, dfe, isbg, r0, g0, b0;
+    unsigned long dr_env[17];
+} DRAWENV;
+typedef struct { unsigned char u, v, w, h, flag; } Glyph;
+#define setaddr(p, _addr) (((P_TAG *)(p))->addr = (unsigned long)(_addr))
+#define getaddr(p) (unsigned long)(((P_TAG *)(p))->addr)
+#define addPrim(ot, p) setaddr(p, getaddr(ot)), setaddr(ot, p)
+extern short SUBSCREEN_DRAW_PARAMS, SUBSCREEN_DRAW_Y, SUBSCREEN_DRAW_TPAGE;
+extern unsigned short SUBSCREEN_DRAW_CLUT;
+extern unsigned short *SUBSCREEN_DRAW_STR;
+extern Glyph *SUBSCREEN_DRAW_FONT;
+extern SPRT *NEXT_PRIM;
+extern unsigned long *CURRENT_OT;
+extern DRAWENV *GetDrawEnv(DRAWENV *env);
+extern void AddDrawMode(int tpage, int pri);
+
+void subScreenDrawString(int pri, int multiline)
+{
+    DRAWENV env;
+    Glyph g;
+    SPRT *s = (SPRT *)0x1F800000;
+    SPRT *p;
+    unsigned short *str;
+    short x, y;
+    unsigned short c;
+    Glyph *font;
+    Glyph *gp;
+    GetDrawEnv(&env);
+    AddDrawMode(env.tpage, pri);
+    font = SUBSCREEN_DRAW_FONT;
+    str = SUBSCREEN_DRAW_STR;
+    x = SUBSCREEN_DRAW_PARAMS;
+    y = SUBSCREEN_DRAW_Y;
+    while ((short)(c = *str++) != -1) {
+        switch ((short)c) {
+        case -7:
+        case -5:
+        case -1:
+            break;
+        case -6:
+            str += 3;
+            break;
+        case -3:
+            if (multiline) {
+                y += 9;
+                x = SUBSCREEN_DRAW_PARAMS;
+            }
+            break;
+        default:
+            gp = (Glyph *)(((short)c * 5) + (unsigned long)font);
+            g.u = gp->u;
+            g.v = gp->v;
+            g.w = gp->w;
+            g.h = gp->h;
+            g.flag = gp->flag;
+            s->len = 4;
+            s->code = 0x64;
+            s->r0 = 0x80;
+            s->g0 = 0x80;
+            s->b0 = 0x80;
+            s->x0 = x;
+            if (g.flag == 0) {
+                if (g.w >= 0xB) s->y0 = y - 2;
+                else s->y0 = y;
+                s->u0 = g.u;
+                s->v0 = g.v;
+                x += g.w;
+            } else {
+                s->x0 = x - 0xB;
+                s->y0 = y - 0xA;
+                s->u0 = g.u;
+                s->v0 = g.v;
+            }
+            s->w = g.w;
+            s->h = g.h;
+            s->clut = SUBSCREEN_DRAW_CLUT;
+            p = NEXT_PRIM;
+            *p = *s;
+            addPrim(CURRENT_OT + pri, p);
+            NEXT_PRIM++;
+            break;
+        }
+    }
+    AddDrawMode(SUBSCREEN_DRAW_TPAGE, pri);
+}
+#endif

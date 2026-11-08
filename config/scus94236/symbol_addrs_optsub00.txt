@@ -21,3 +21,7 @@ screenAdjustDrawNumber = 0x800E8A24; // type:func size:0x148  PAL o0ptsub0 0x800
 titleDrawString = 0x800E8B6C; // type:func size:0x30C  PAL o0ptsub0 0x800E99FC
 titleDrawMenuCarousel = 0x800E8E78; // type:func size:0x254  PAL o0ptsub0 0x800E9D08
 titleDrawCarouselGlyph = 0x800E90CC; // type:func size:0x27C  PAL o0ptsub0 0x800E9F5C
+screenAdjustMenuStep = 0x800E7A48; // type:func size:0x314  PAL o0ptsub0 0x800E8700
+titleLogoDraw = 0x800E7DDC; // type:func size:0xD4  PAL o0ptsub0 0x800E8A94
+buttonConfigDrawText = 0x800E8570; // type:func size:0x110  PAL o0ptsub0 0x800E9254
+screenAdjustDrawText = 0x800E8680; // type:func size:0x194  PAL o0ptsub0 0x800E950C

@@ -50,3 +50,4 @@ tunnelCheckSlideZone = 0x800EDC18; // type:func size:0x140  PAL i0nfo3 0x800EE8C
 tunnelControllerPickStep = 0x800EDD58; // type:func size:0x64  PAL i0nfo3 0x800EEA0C
 tunnelControllerStep = 0x800EDDBC; // type:func size:0x1A8  PAL i0nfo3 0x800EEA70
 updateNpcSet07 = 0x800EDF64; // type:func size:0xA8  PAL i0nfo2 0x800FA5C8
+tunnelClampPlayerToGates = 0x800E77DC; // type:func size:0x21C  PAL i0nfo3 0x800E847C

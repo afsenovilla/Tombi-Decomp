@@ -46,3 +46,6 @@ overheadItemSpotUpdate = 0x800ED488; // type:func size:0x254  PAL i0nfo 0x800EE2
 overheadItemSpotHandler = 0x800ED6DC; // type:func size:0x124  PAL i0nfo 0x800EE4C0
 overheadTalkSpotStep = 0x800ED800; // type:func size:0x1B8  PAL i0nfo 0x800EE5E4
 overheadTalkSpotHandler = 0x800ED9B8; // type:func size:0x100  PAL i0nfo 0x800EE79C
+overheadDrawMapLayers = 0x800EA3A4; // type:func size:0x2F0  PAL i0nfo 0x800EB044
+overheadLoadMapTiles = 0x800EA694; // type:func size:0x114  PAL i0nfo 0x800EB384
+overheadRefreshMap = 0x800EB328; // type:func size:0x128  PAL i0nfo 0x800EC084
