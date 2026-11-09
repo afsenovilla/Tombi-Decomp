@@ -231,7 +231,8 @@ jobs:
           grep -o "at PC 0x[0-9A-Fa-f]*" "$L" | awk '{print $3}' | sort | uniq -c | sort -rn | head -12 | while read n a; do
             echo "$n x $a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
           for a in $ADDRS; do echo "$a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
-          echo "== log.txt"; tail -60 shots/log.txt
+          echo "== log.txt (start)"; head -30 shots/log.txt
+          echo "== log.txt (end)"; tail -20 shots/log.txt
 
       # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
       - name: Screenshots in the log
@@ -239,7 +240,7 @@ jobs:
         run: |
           for t in 060 120 240; do
             f="shots/shot_$t.png"; [ -f "$f" ] || continue
-            convert "$f" -resize 50% -quality 70 "small_$t.jpg"
+            convert "$f" -trim +repage -quality 75 "small_$t.jpg"   # (the emulator window, full size)
             echo "=====BEGIN shot_$t====="; base64 -w 100 "small_$t.jpg"; echo "=====END shot_$t====="
           done
 
