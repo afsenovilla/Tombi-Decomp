@@ -1,9 +1,38 @@
 // FUNC 8004b57c 292 MAIN0
 // MATCHING 8004b57c 292
 // VERSION SLPS_01144 slps01144 8005662C 292
+// VERSION BETA_980203 beta980203 80057F6C 292
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x18]; short we8; short wea; } PO;
+extern short GRAB_POINT_OFFSET;
+
+int probeGrabPointInBoxA(PO *o, TObj *e)
+{
+    short d, ad, t;
+    if ((unsigned short)(o->t.d->p.whole - e->d->p.whole + 45) > 90)
+        return 0;
+    d = o->we8 - o->t.h->p.whole;
+    ad = d;
+    if (d < 0) ad = -d;
+    d = o->we8 - e->h->p.whole;
+    if (o->t.animFrame & 1) t = e->box0 + ad + d;
+    else t = e->box0 + d;
+    if ((unsigned short)t > e->box1 + ad)
+        return 0;
+    ad = e->box2 + (o->wea - e->y.p.whole);
+    if ((unsigned short)ad > e->box3)
+        return 0;
+    if (!(o->t.animFrame & 1))
+        GRAB_POINT_OFFSET = -e->box0;
+    else
+        GRAB_POINT_OFFSET = e->box1 - e->box0;
+    return 1;
+}
+#elif defined(VERSION_BETA_980203)
+// Beta version of PAL main0 8004B57C (probeGrabPointInBoxA.c): PAL C of src/probeGrabPointInBoxA.c, edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+#include "TOBJ.H"
+typedef struct { TObj t; char c0[0x1c]; short we8; short wea; } PO;
 extern short GRAB_POINT_OFFSET;
 
 int probeGrabPointInBoxA(PO *o, TObj *e)

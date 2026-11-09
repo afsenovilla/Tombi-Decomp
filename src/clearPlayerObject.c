@@ -2,6 +2,8 @@
 // MATCHING 80017d04 44
 // VERSION SLPS_01144 slps01144 800172D8 44
 // VERSION SLPM_80165 slpm80165 8001698C 44
+// VERSION PCPX_96084 tomba 80019A30 44
+// ASPSX.PCPX_96084 2.34
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL main0 80017D04 (clearPlayerObject.c): 376 -> 360.
 extern char PLAYER[];
@@ -19,6 +21,15 @@ extern void memset();
 void clearPlayerObject(void)
 {
     memset(PLAYER, 0, 0x164);
+}
+#elif defined(VERSION_PCPX_96084)
+// PrePre 8 version of PAL main0 80017D04 (clearPlayerObject.c): PAL C of src/clearPlayerObject.c (0.909 masked), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+extern char PLAYER[];
+extern void memset();
+
+void clearPlayerObject(void)
+{
+    memset(PLAYER, 0, 0x14c);
 }
 #else
 extern char PLAYER[];

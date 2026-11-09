@@ -1,5 +1,7 @@
 // FUNC 8011d670 872 X000
 // MATCHING 8011d670 872
+// VERSION PCPX_96084 tomba 8003B4D4 872
+// ASPSX.PCPX_96084 2.34
 #include "TOBJ.H"
 
 #define APPROACH(p, t, l) { unsigned short u = (p)->animFrame; if (u != (t)) { if (u < (l)) (p)->animFrame = u + 1; else (p)->animFrame = u - 1; } }

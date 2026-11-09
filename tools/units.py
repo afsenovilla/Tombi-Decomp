@@ -322,7 +322,7 @@ def version_source(src, serial, tmpdir):
     HEADERS, AS) replaces the file's `// D` line (value `default`: no such line), so a version branch can use other
     compiler options than the PAL code of the same file."""
     t = open(src, errors="replace").read()
-    for d in ("FLAGS", "CC", "HEADERS", "AS"):
+    for d in ("FLAGS", "CC", "HEADERS", "AS", "ASPSX"):
         m = re.search(r"^//\s*%s\.%s\s+(.*)$" % (d, serial), t, re.M)
         if not m: continue
         t = re.sub(r"(?m)^//\s*%s\s.*\n?" % d, "", t)

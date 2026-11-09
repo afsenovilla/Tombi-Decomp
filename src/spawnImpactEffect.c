@@ -1,5 +1,7 @@
 // FUNC 8001f96c 116 MAIN0
 // MATCHING 8001f96c 116
+// VERSION PCPX_96084 tomba 80017C14 116
+// ASPSX.PCPX_96084 2.34
 #include "raw7.h"
 extern char *ObjAlloc();
 void spawnImpactEffect(int a, int b, int c, int d)
