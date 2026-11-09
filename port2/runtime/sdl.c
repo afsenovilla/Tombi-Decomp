@@ -66,7 +66,7 @@ void port_window_start(void) {
        the button icons (shims/prompts.c) can name the printed label by position */
     SDL_SetHint("SDL_GAMECONTROLLER_USE_BUTTON_LABELS", "0");
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) port_fatal("SDL_Init: %s", SDL_GetError());
-    int want_gl = port_renderer != 0;
+    int want_gl = port_renderer != 0 && port_renderer != 2;   /* (2: --renderer pica, no GL context of its own) */
     if (want_gl) {        /* (the SDL_Renderer of the software path is made on first use, so a failed GL start can fall back) */
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
@@ -83,6 +83,9 @@ void port_window_start(void) {
     if (port_widescreen)        /* the same logical width port_window_fit uses, times the scale (scaling the rounded 4:3
                                    width came out a pixel short of k * lw, so the fit dropped to 1x) */
         ww = (port_window_square ? 320 + 2 * port_widescreen : tvh * 4 * (320 + 2 * port_widescreen) / (3 * 320)) * port_window_scale;
+#ifdef __3DS__
+    ww = 400; tvh = 240; port_window_scale = 1;   /* the top screen */
+#endif
     win = SDL_CreateWindow("Tombi! (PC port)", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww,
                            tvh * port_window_scale, SDL_WINDOW_RESIZABLE | (want_gl ? SDL_WINDOW_OPENGL : 0) |
                            (port_window_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
