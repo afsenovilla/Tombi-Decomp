@@ -695,7 +695,7 @@ the disc data (not seen in-game yet).
   vs USA/JP `D004`/`D104`) swaps counted collectibles 9 and 10, unlinks the decoration at depth 1260 (subtype 21 → 0)
   and adds a 3-part biting plant at (1077,-356,1260).
 - **JP memory card code accepts a development product code**: JP DSPSUB2 `memCardReadDirectory` (0x800EA490) takes
-  save names starting `BISLPS-01144` or `BISCPS-99999`; USA and PAL only their own.
+  save names starting `BISLPS-01144` or `BISCPS-99999`; USA and PAL only their own (details and implications: docs/SAVE_FORMAT.md).
 - Still to explain (JP vs USA placements): a JP-only spring pad in AREA03 sections 1/5 at (3264,-1538), backdrop
   sprite sets in AREA16 section 3, an extra scenery sprite in AREA09, extra pool objects / moved positions in
   AREA00/01, 22 objects USA added in AREA03 section 2, and JP's AREA12 copy differing a lot from USA's.

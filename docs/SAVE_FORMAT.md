@@ -20,6 +20,7 @@ A save takes **1 block**; the game writes 0xC00 bytes (the rest of the block is 
 | PAL SCES-01331 (Tombi!) | `BESCES-01331TOMBA-` (verified) |
 | USA SCUS-94236 (Tomba!) | `BASCUS-94236` (recognised; layout assumed the same, not verified) |
 | JP SLPS-01144 | `BISLPS-01144` (recognised; not verified) |
+| JP development code | `BISCPS-99999`: listed and loaded by the JP retail, never written (see below) |
 
 ## The 0xC00 bytes
 
@@ -89,3 +90,24 @@ Jar...; id 12 would read "Wood Boomerang" instead of "Tear Jar"). Event titles: 
 Raw 128 KB (`.mcd .mcr .mc .srm .ps`, the port's cards), DexDrive `.gme` (0xF40-byte header), `.vgs/.mem` (64-byte
 header), single-save `.mcs/.mcb/.ps1` (directory frame + blocks). The header / trailer bytes are kept, so an unedited
 card is written back byte-identical.
+
+## The JP retail also loads `BISCPS-99999` saves (2026-11-09)
+
+JP DSPSUB2 `memCardReadDirectory` (0x800EA490, `src/d0spsub2/func_800EA490_slps01144.c`) lists a card file when its
+name starts with either of two prefixes: `BISLPS-01144` (D_800E9B90) or `BISCPS-99999` (D_800E9BA0). The strings sit
+side by side at `SYSTEM/DSPSUB2.BIN` +0x98 / +0xA8; the save path at +0x720 is `BISLPS-01144` + `TOMBA-%02d`, the only
+name the game writes. USA (`BASCUS-94236`) and PAL (`BESCES-01331`) accept only their own code.
+
+SCPS-99999 is a placeholder product code (the 99999 number of an unassigned Sony title, "BI" = Japan region): saves
+made by an internal or pre-release Japanese build that still used it stay loadable in the retail game.
+
+Implications, checked:
+- **In the game**: such a save shows in the list and loads like any other (same 0xC00-byte layout and checksum: the
+  loader reads it with the same code); saving afterwards writes a new `BISLPS-01144TOMBA-nn` file, the old file is left
+  as is. The JP retail never creates a `BISCPS-99999` file, so only a card from a development build would have one.
+- **Which builds used it**: not verified. The JP demo (SLPM-80165) and the 1998-02-03 beta discs are not in this
+  container; their DSPSUB2 / memory-card code should be searched for the string (docs/JPDEMO.md lists a `MEMORY CARD :
+  ACCESS TEST` menu in the demo). If one of them writes `BISCPS-99999`, its saves load in the retail JP game.
+- **Port**: `port2/shims/card.c` (`tombi_name`) and `tools/save_import.py` already treat any name containing `TOMBA` as
+  a Tombi save, so such files are kept and merged. The save editor (`tools/tombi_save.py`) listed only the three retail
+  codes; `BISCPS-99999` is now in its `PRODUCTS` table so those saves are listed too.

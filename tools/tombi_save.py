@@ -29,7 +29,9 @@ GAME_COPY = 0x988         # bytes of GAME the game copies (the rest of the 0xA00
 
 # product codes of the save file names ("BESCES-01331TOMBA-00": region + code + "TOMBA-" + slot 00..14)
 PRODUCTS = {"BESCES-01331": "PAL (SCES-01331) Tombi!", "BASCUS-94236": "USA (SCUS-94236) Tomba!",
-            "BISLPS-01144": "JP (SLPS-01144) Ore no Tomba"}
+            "BISLPS-01144": "JP (SLPS-01144) Ore no Tomba",
+            # development product code: the JP retail lists and loads these too (never writes them), docs/SAVE_FORMAT.md
+            "BISCPS-99999": "JP development code (SCPS-99999, loaded by SLPS-01144)"}
 
 # ---- GAME fields (include/gamestate.h: offsets into GAME = save + 0x200) ------------------------------------------
 # name: (offset, struct fmt, min, max, description)
