@@ -3551,3 +3551,18 @@ package servers refuse the cloud container, so there is no libctru/citro3d build
   New 3DS with its ARM software GPU; check its licence before borrowing).
 - **Second screen.** The bottom screen (320x240 resistive touch) suits the panel, but panel.c is laid out for
   1240x1080 and needs its own small layout.
+- **Prior art** (read from the READMEs only, not from the code):
+  - [CTR-3D](https://github.com/zando95/CTR-3D) (Crash Team Racing, the PS1 decomp CTR-ModSDK, GPL-3) is the model to
+    follow: New 3DS only ("the original 3DS and 2DS do not have the CPU for it"), full speed by its README.  citro3d
+    renderer `platform/n3ds/native_renderer_3ds.c`: VRAM decoded on the CPU into RGBA cells keyed by page, palette
+    and VRAM-row freshness; the ordering table walked into GPU triangles, merged to ~20 draws a frame; OT order turned
+    into a depth test; semi-transparent primitives drawn twice (opaque with depth writes, then blended).  Game on
+    core 0, renderer worker on core 2, audio on core 3.  SPU voices on NDSP hardware channels 0-22, XA on 23
+    ("software mixing on the ARM11 is not fast enough to be the primary path").  Bottom screen: the map, replayed
+    from the UI primitives.  Its docs/3DS_PORT.md warns that Azahar hides the console's timing: fps only from hardware.
+  - [pcsx-rearmed-3ds](https://github.com/gammermanbob-droid/pcsx-rearmed-3ds) and the libretro core: software GPU
+    (Unai), many games at full speed on New 3DS; Old 3DS "just slower".
+  - [Silent-Hill-3ds-port](https://github.com/Latsfort/Silent-Hill-3ds-port): an Old 3DS shell only, the renderer not
+    written yet.
+  For Tombi the CTR-3D route applies: libctru host in place of SDL2, a citro3d `GpuBackend` (gpu_backend.h) with the
+  CPU texture cache, SPU voices on NDSP, New 3DS as the target.
