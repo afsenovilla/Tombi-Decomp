@@ -356,17 +356,29 @@ def symbol_addrs(prog):
     return out
 
 
+def data_names(prog):
+    """{name: address} of notes/data_names_<prog>.csv (the globals the data-naming rounds named; address,name,...)."""
+    p = os.path.join(ROOT, "notes", "data_names_%s.csv" % prog.lower())
+    out = {}
+    for l in (open(p) if os.path.exists(p) else ()):
+        m = re.match(r"([0-9a-fA-F]{8}),(\w+)", l)
+        if m: out.setdefault(m.group(2), int(m.group(1), 16))
+    return out
+
+
 def area_syms(prog):
     """{name: address} of an area overlay X0nn, as tools/ncheck.py resolves the names of src/x0nn/*.c: MAIN0's
     symbol files plus the overlay's own (config/symbol_addrs_x0nn.txt, notes/names_x0nn.csv, the names of
-    notes/functions_x0nn.csv and the functions src/x0nn/ defines)."""
+    notes/functions_x0nn.csv and notes/data_names_x0nn.csv, and the functions src/x0nn/ defines)."""
     syms, names = {}, {}
     for f in ("main0", prog.lower()):
         p = os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % f)
         for l in (open(p) if os.path.exists(p) else ()):
             m = re.match(r"\s*(\w+)\s*=\s*0x([0-9a-fA-F]+)", l)
             if m: syms[m.group(1)] = int(m.group(2), 16)
-        for csvf in ("names_%s.csv" % f,) + (("functions_%s.csv" % f,) if f != "main0" else ()):
+        # (data_names_x0nn.csv: the area's named globals, TREASURE_CHEST_GUARD_DEFS; without them the names were
+        # unknown here and gen2 stubbed them as functions: X003's initTreasureChestGuard read code bytes)
+        for csvf in ("names_%s.csv" % f,) + (("functions_%s.csv" % f, "data_names_%s.csv" % f) if f != "main0" else ()):
             p = os.path.join(ROOT, "notes", csvf)
             for l in (open(p) if os.path.exists(p) else ()):
                 m = re.match(r"([0-9a-fA-F]{8}),(?:\d+,)?(\w+)", l)
@@ -380,6 +392,12 @@ def area_syms(prog):
         if m: syms[f[:-2]] = int(m.group(1), 16)
     for k, a in names.items():
         if a is not None: syms.setdefault(k, a)
+    # a bare-letter alias of a named global (MOTOCROSS_COURSE_PATH_E, CEILING_DRIP_DROP_ANIMS_S: the D_8011F3F8e of
+    # before the data names, whose address the name gave): the matching build PROVIDEs it at the global's address
+    known = dict(data_names("main0")); known.update(syms)
+    for n, a in provides(prog).items():
+        m = re.match(r"(\w+)_[A-Za-z]$", n)
+        if m and n not in syms and known.get(m.group(1)) == a: syms[n] = a
     # X000's name for a function the area shares byte for byte at the same address: the area csv names such
     # a function after its first masked twin, which can be another function (X009's 0x800F4E9C is X000's
     # playerSetAnimPairB, named playerSetAnimPairA like 0x800F4E68 next to it, so neither name resolved and
@@ -606,7 +624,12 @@ def sources(outdir, progs, ovls=(), areas=()):
         if ovl:
             defs += "".join("#define %s %s_%s\n" % (n, prog, n) for n in sorted(ovl_names[prog])
                             if re.search(r"\b%s\b" % re.escape(n), src))
-        txt = volatile_aliases(txt)
+        def addr_of(n, ren=ren, area=area, prog=prog):
+            a = ren.get(n)
+            if a is None and area: a = asyms[prog].get(n)
+            if a is None: a = prov.get(prog, {}).get(n)
+            return canon.get(n) if a is None else a
+        txt = volatile_aliases(txt, addr_of)
         txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (defs, os.path.relpath(u.file, ROOT)) + txt
         hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:600], re.M)
         if hm and hm.group(1) != "tomba24": sys.exit("gen_port: unknown header set " + hm.group(1))
@@ -1212,15 +1235,22 @@ def write_tables(outdir, progs, ovls, areas, U, files, files24, files26, fmap, o
               % (len(vary), len(area_units), len(areamap)))
 
 
-def volatile_aliases(txt):
+def volatile_aliases(txt, addr_of=None):
     """One address under two data names in a file (D_1F80019E and its typed alias D_1F80019Es): gcc assumes distinct
     globals never alias, so a loop that decrements one and tests the other keeps the test in a register forever
     (playerTryTalkToNpc).  Every extern declaration of such names becomes volatile (both names, so the accesses keep
-    their order)."""
+    their order).  Named globals are grouped by the address addr_of(name) gives them (tools/rename_data.py made
+    D_1F80019E / D_1F80019Es LIST_COUNTER / LIST_COUNTER_S, or renamed only one of a pair): without it the data
+    names made playerTryTalkToNpc loop past its list again (signal 11 on Square in 40 rooms of the sweep)."""
     groups = {}
     for full, addr in re.findall(r"\b((?:D|DAT)_([0-9A-Fa-f]{8})\w*)\b", txt):
         if "__" in full: continue
         groups.setdefault(addr.upper(), set()).add(full)
+    if addr_of:
+        for n in set(re.findall(r"\b[A-Za-z_]\w*\b", " ".join(re.findall(r"^[ \t]*extern\b[^;{(]*;", txt, re.M)))):
+            if "__" in n or re.match(r"(?:D|DAT)_[0-9A-Fa-f]{8}", n): continue
+            a = addr_of(n)
+            if a is not None: groups.setdefault("%08X" % a, set()).add(n)
     names = set(n for g in groups.values() if len(g) > 1 for n in g)
     if not names: return txt
     def fix(m):
