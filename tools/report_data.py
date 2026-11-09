@@ -106,7 +106,8 @@ def target_asm(claims, game, vram, hdr, tmpdir):
     out = []
     for sec, (a, n) in sorted(claims.items()):
         b = os.path.join(tmpdir, "D_%08X.bin" % a)
-        open(b, "wb").write(game[hdr + a - vram:hdr + a - vram + n])
+        # a table the retail file ends inside of (build_full.analyse): the rest is bss, zeros
+        open(b, "wb").write((game[hdr + a - vram:hdr + a - vram + n] + bytes(n))[:n])
         out.append('\n.section %s, "a"\n.globl D_%08X\n.type D_%08X, @object\n.size D_%08X, %d\nD_%08X:\n.incbin "%s"\n'
                    % (sec, a, a, a, n, a, b))
     return "".join(out)

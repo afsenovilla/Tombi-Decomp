@@ -9,11 +9,11 @@
 typedef struct { unsigned char pad[0xf0]; } E;
 typedef struct { unsigned char pad[0xa]; unsigned short a; unsigned short c; unsigned short e; } H;
 extern H *PAD_SIO;
-extern int D_80098214;
+extern int D_80097578;
 extern int _padChanStart;
 extern int _padChanStop;
-extern int D_8009BF88[];
-extern int D_8009BF8C[];
+extern int D_8009B2F0[];
+extern int D_8009B2F4[];
 extern int _padIntExec;
 extern E *_padInfoDir;
 extern int _padSioState;
@@ -28,9 +28,9 @@ int _padVsyncHandler(void)
     if (PAD_SIO->a & 2) {
     }
     t = _padChanStart;
-    D_80098214 = 1;
-    if (t != 0 && D_8009BF88[0] < 150) D_8009BF88[0]++;
-    if (_padChanStop == 0 && D_8009BF8C[0] < 150) D_8009BF8C[0]++;
+    D_80097578 = 1;
+    if (t != 0 && D_8009B2F0[0] < 150) D_8009B2F0[0]++;
+    if (_padChanStop == 0 && D_8009B2F4[0] < 150) D_8009B2F4[0]++;
     if (_padIntExec != 0 && _padChanStart <= _padChanStop) {
         _padSioState = 0;
         _padSioChan = _padChanStart;

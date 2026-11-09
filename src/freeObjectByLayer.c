@@ -126,9 +126,15 @@ void freeObjectByLayer(s32* self)
 
 
 
+#if defined(VERSION_SCUS_94236)  /* the USA build stamp (same place, before the jump table below) */
+const char BUILD_DATE[] asm("D_80010000") = "98/3/22";
+
+const char BUILD_TIME[] asm("D_80010008") = "21:11";
+#else
 const char BUILD_DATE[] asm("D_80010000") = "98/8/26";
 
 const char BUILD_TIME[] asm("D_80010008") = "14:10";
+#endif
 
 void freeObjectByLayer(s32* self)
 {

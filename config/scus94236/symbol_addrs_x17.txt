@@ -28,3 +28,7 @@ spawnWaterfallElderHintSceneNpcs = 0x80117FBC; // type:func size:0x234  PAL x017
 waterfallElderHintScene = 0x801181F0; // type:func size:0x8A0  PAL x017 0x80118EA0
 func_80118A90_scus94236 = 0x80118A90; // type:func size:0xC  PAL x000 0x80136A8C
 updateWaterfallElderHintSceneObj = 0x80118A9C; // type:func size:0xC0  PAL x017 0x8011974C
+// BEGIN jp_globals (tools/jp_globals.py)
+GVARS_PLAYER_LANDED = 0x8009BCA2; // size:0x1 PAL 0x8009C93A
+GCD = 0x8009C068; // size:0x400 PAL 0x8009CD00
+// END jp_globals

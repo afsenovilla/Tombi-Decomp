@@ -14,7 +14,7 @@ typedef struct {
 extern DRM *DEBUG_NEXT_PRIM;
 extern PTAG *CURRENT_OT;
 extern int GetGraphType(void);
-extern void FUN_80021478(int a, int b, int c, int d, int e);
+extern void func_80024008(int a, int b, int c, int d, int e);
 extern void drawUiSprite(short x, short y, short c);
 extern void SetDrawMode(DRM *p, int dfe, int dtd, int tpage, void *tw);
 
@@ -25,7 +25,7 @@ void drawLoadingSprites(int c, short s)
     PTAG *ot;
     if (GetGraphType() != 1)
         GetGraphType();
-    FUN_80021478(0xc0, 0x80, 0, 0, s);
+    func_80024008(0xc0, 0x80, 0, 0, s);
     for (j = 0; j < 6; j++) {
         for (i = 0; i < 7; i++) {
             if ((i + j) & 1)

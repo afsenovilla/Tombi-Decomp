@@ -12,9 +12,9 @@ typedef struct {
 } Menu;
 typedef struct { short x, y, dw, idx; } Slot;
 extern Menu MENU_STATE;
-extern Slot SUBSCREEN_PAGE_ARROW_SLOTS[], D_801007BC[];
-extern void *D_800F5400[];
-extern unsigned short D_8009D2A4;
+extern Slot SUBSCREEN_PAGE_ARROW_SLOTS[], D_800FFAB4[];
+extern void *D_800F45A4[];
+extern unsigned short D_8009C60C;
 extern short SUBSCREEN_POPUP_CURSOR;
 extern short SUBSCREEN_DRAW_PARAMS[];
 extern short SUBSCREEN_DRAW_Y[];
@@ -36,7 +36,7 @@ void subScreenDrawItemPage(void)
     short end;
     subScreenDrawTabs(m);
     if (SUBSCREEN_POPUP_CURSOR >= 0) subScreenDrawPopupMenu(m);
-    pages = (D_8009D2A4 + 7) / 8;
+    pages = (D_8009C60C + 7) / 8;
     subScreenDrawItemGrid(m);
     subScreenDrawItemNames(m);
     if (pages >= 2) {
@@ -58,11 +58,11 @@ void subScreenDrawItemPage(void)
     }
     end = -1;
     SUBSCREEN_DRAW_CLUT = 0x7812;
-    for (s = D_801007BC; s->x != end; s++) {
+    for (s = D_800FFAB4; s->x != end; s++) {
         SUBSCREEN_DRAW_PARAMS[0] = s->x;
         SUBSCREEN_DRAW_Y[0] = s->y;
         SUBSCREEN_DRAW_TPAGE[0] = m->w10 + s->dw;
-        SUBSCREEN_DRAW_FRAME = D_800F5400[s->idx];
+        SUBSCREEN_DRAW_FRAME = D_800F45A4[s->idx];
         subScreenDrawSprite(3);
     }
 }

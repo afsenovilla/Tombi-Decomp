@@ -3,8 +3,8 @@
 // USA version of PAL d0spsub 800eca28 (subScreenMoveGridCursor.c)
 typedef struct { char p[0x14]; short row; char p16[8]; short sel; } Menu;
 extern unsigned short JOYPAD_STATE;
-extern unsigned short D_8009D2A4[];
-#define CNT D_8009D2A4[0]
+extern unsigned short D_8009C60C[];
+#define CNT D_8009C60C[0]
 extern void playSFX(int id);
 
 int subScreenMoveGridCursor(Menu *m)

@@ -29,3 +29,7 @@ witchMizunoCandyRecipeTalk = 0x80118A8C; // type:func size:0x8FC  PAL x018 0x801
 selectWitchMizunoTalkStep = 0x80119388; // type:func size:0x17C  PAL x018 0x8011A038
 initWitchMizuno = 0x80119504; // type:func size:0x178  PAL x018 0x8011A1B4
 updateWitchMizuno = 0x8011967C; // type:func size:0x174  PAL x018 0x8011A32C
+// BEGIN jp_globals (tools/jp_globals.py)
+GVARS_USE_ITEM_ID = 0x8009BCA9; // size:0x1 PAL 0x8009C941
+GCD = 0x8009C068; // size:0x400 PAL 0x8009CD00
+// END jp_globals

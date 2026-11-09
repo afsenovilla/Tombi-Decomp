@@ -5,9 +5,9 @@
 #include "TOBJ.H"
 
 typedef struct { void *p; } PP;
-extern PP D_8012BC00_scus94236;
-extern PP D_8012BBFC_scus94236;
-extern char D_800716E8_scus94236[];
+extern PP D_8012E230;
+extern PP D_8012E22C;
+extern char D_80077220[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void applyAnimVelocityX(TObj *, int);
@@ -34,7 +34,7 @@ void func_80125504_scus94236(TObj *o)
     case 0:
         o->state++;
         o->wac = 0;
-        o->anim = D_8012BC00_scus94236.p;
+        o->anim = D_8012E230.p;
         AnimLoadDuration(o);
         if ((*(TObj **)&o->wa8)->y.p.whole > o->y.p.whole)
             o->w74 = 0;
@@ -54,9 +54,9 @@ void func_80125504_scus94236(TObj *o)
         if (o->velV <= 0) {
             o->timer = 24;
             o->wac = 0;
-            o->anim = D_8012BBFC_scus94236.p;
+            o->anim = D_8012E22C.p;
             AnimLoadDuration(o);
-            o->movetab = D_800716E8_scus94236;
+            o->movetab = D_80077220;
             o->state++;
         }
         break;

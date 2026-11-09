@@ -68,6 +68,8 @@ in version branches.
 
 ## Stage U0: decomp prerequisites for USA (link proof and data symbols)
 
+**Done 2026-11-09** (docs/USA.md "Full link"): all 26 files sha1 OK, `units(ver)`, `jp_globals --version`, name audit.
+
 - **Goal**: `build/scus94236/full/` with byte-identical `SCUS_942.36`, `X00..X19.BIN` and the eight SYSTEM files
   (sha1-checked) plus `.full.ld` PROVIDE tables: the symbol source gen_port needs, and proof of every relocation.
 - **Changes**: `tools/jp_globals.py --version` (USA data names into `config/scus94236/`); `tools/units.py`

@@ -10,8 +10,8 @@
 // Code and all three switch tables were checked after linking, without masking.
 // Historical WIP diagnosis below records the pre-match allocator differences.
 // Historical WIP: score 20 (was 30), case-3 confirm block only. Fixed: `int x = D_80111128_v` (second extern name declared
-// volatile int; a plain scalar sinks to its first use) loads D_80111128 into a0 before the t lbus, and
-// `a = t[0]; D_80111134 = a; b = t[1];` keeps the first store between the two lbus. The `li 3` position: the 3 is
+// volatile int; a plain scalar sinks to its first use) loads D_801102F8 into a0 before the t lbus, and
+// `a = t[0]; D_80110304 = a; b = t[1];` keeps the first store between the two lbus. The `li 3` position: the 3 is
 // the SAME pseudo as t (`t = (unsigned char *)3; GAME_PLAYER_MODE = (int)t; PLAYER = (int)t;`): a 2-set pseudo is not a
 // "birthing" insn for sched1 (sched.c birthing_insn_p needs REG_N_SETS == 1), so `li 3` sinks to the earliest free
 // cycle = right after `lbu b,1(t)` (anti-dependence on t), exactly the game's spot, and the whole schedule now matches.
@@ -28,32 +28,32 @@ typedef struct { short next; unsigned char fn, a; short b, c; } Cond;
 typedef struct { unsigned char items[0x100]; unsigned short count, mode; } Inv;
 typedef struct { unsigned char b0, b1, b2, b3; } Obj;
 extern unsigned short JOYPAD_STATE;
-extern Inv D_8009D1A4;
-extern unsigned short D_8009D2A4;
-extern unsigned char D_8009D0A4[];
-extern unsigned char D_8009D0E6;
-extern unsigned short D_8009D2C4[];
-extern unsigned char D_8010A0C8[];
-extern unsigned char D_800FFD84[][5];
-extern unsigned char D_800FFC64[];
-extern unsigned char D_800FECE8[];
-extern Cond *D_800FFAF8[];
-extern int (*D_800FFBB0[])(int a, int b, int c);
-extern unsigned char *D_800FFC3C[];
-extern short D_80109D88[], D_80109D98[], D_80109DB0[];
-extern short D_8010A058, D_8010A05C, D_8010A060, D_8010A064;
-extern short D_8010A068[], D_8010A088[];
-extern unsigned char D_8010A200[];
-extern unsigned char D_8010A204;
-extern int D_80111128;
+extern Inv D_8009C50C;
+extern unsigned short D_8009C60C;
+extern unsigned char D_8009C40C[];
+extern unsigned char D_8009C44E;
+extern unsigned short D_8009C62C[];
+extern unsigned char D_80109298[];
+extern unsigned char D_800FEE30[][5];
+extern unsigned char D_800FED10[];
+extern unsigned char D_800FDD94[];
+extern Cond *D_800FEBA4[];
+extern int (*D_800FEC5C[])(int a, int b, int c);
+extern unsigned char *D_800FECE8[];
+extern short D_80108F58[], D_80108F68[], D_80108F80[];
+extern short D_80109228, D_8010922C, D_80109230, D_80109234;
+extern short D_80109238[], D_80109258[];
+extern unsigned char D_801093D0[];
+extern unsigned char D_801093D4;
+extern int D_801102F8;
 extern volatile int D_80111128_v;
-extern char D_80111134, D_80111138;
-extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
+extern char D_80110304, D_80110308;
+extern volatile short D_8009C0FC, D_8009C0FE, D_8009C108;
 extern volatile unsigned char GAME_PLAYER_MODE, PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID;
 extern int subScreenMoveTabCursor(Menu *m, int n);
 extern int subScreenMoveGridCursor(Menu *m);
 extern int subScreenMoveGridCursorN(Menu *m, int n);
-extern int func_800E89F8(int id);
+extern int func_800E7D58(int id);
 extern void subScreenOpenMessage(int kind, int add, int bank);
 extern void subScreenMessageStep(void *o, int a);
 extern Obj *allocObjectLayer2(void);
@@ -74,12 +74,12 @@ int subScreenItemListStep(Menu *m)
         m->page = 0;
         {
             int n;
-            for (n = 0; n < D_8009D1A4.count; n++) D_8010A0C8[n] = D_8009D1A4.items[n];
+            for (n = 0; n < D_8009C50C.count; n++) D_80109298[n] = D_8009C50C.items[n];
         }
         m->state++;
     case 1:
         if (subScreenMoveTabCursor(m, 1)) return 0;
-        pages = (D_8009D1A4.count + 7) / 8;
+        pages = (D_8009C50C.count + 7) / 8;
         if (JOYPAD_STATE & 0x400) {
             if (m->page > 0) {
                 playSFX(8);
@@ -96,51 +96,51 @@ int subScreenItemListStep(Menu *m)
         } else if (JOYPAD_STATE & 0x4008) {
             switch (m->cursor) {
             case 0:
-                if (D_8009D1A4.count) {
+                if (D_8009C50C.count) {
                     m->sel = m->page * 8;
                     m->state++;
                 }
                 break;
             case 1:
-                if (D_8009D1A4.count) {
+                if (D_8009C50C.count) {
                     m->state = 4;
                     m->sel = m->page * 8;
                 }
                 break;
             case 2:
-                md = D_8009D1A4.mode;
+                md = D_8009C50C.mode;
                 if (md & 0x8000) {
                     k = 0;
                     md &= 0x7FFF;
-                    D_8009D1A4.mode = md;
+                    D_8009C50C.mode = md;
                     {
                         for (j = 0; j < 5; j++) {
-                            int c = D_800FFD84[md][j];
+                            int c = D_800FEE30[md][j];
                             for (i = 0; i < 0x11E; i += 2) {
-                                if (D_800FFC64[i] == c && D_8009D0A4[D_800FFC64[i + 1]]) {
-                                    D_8009D1A4.items[k++] = D_800FFC64[i + 1];
+                                if (D_800FED10[i] == c && D_8009C40C[D_800FED10[i + 1]]) {
+                                    D_8009C50C.items[k++] = D_800FED10[i + 1];
                                 }
                             }
                         }
                     }
-                    { int n; for (n = 0; n < D_8009D2A4; n++) D_8010A0C8[n] = D_8009D1A4.items[n]; }
+                    { int n; for (n = 0; n < D_8009C60C; n++) D_80109298[n] = D_8009C50C.items[n]; }
                 } else {
-                    if (++D_8009D1A4.mode >= 4) {
-                        D_8009D1A4.mode = 0;
+                    if (++D_8009C50C.mode >= 4) {
+                        D_8009C50C.mode = 0;
                     }
                     k = 0;
                     {
-                        md = D_8009D1A4.mode;
+                        md = D_8009C50C.mode;
                         for (j2 = 0; j2 < 5; j2++) {
-                            int c = D_800FFD84[md][j2];
+                            int c = D_800FEE30[md][j2];
                             for (i2 = 0; i2 < 0x11E; i2 += 2) {
-                                if (D_800FFC64[i2] == c && D_8009D0A4[D_800FFC64[i2 + 1]]) {
-                                    D_8009D1A4.items[k++] = D_800FFC64[i2 + 1];
+                                if (D_800FED10[i2] == c && D_8009C40C[D_800FED10[i2 + 1]]) {
+                                    D_8009C50C.items[k++] = D_800FED10[i2 + 1];
                                 }
                             }
                         }
                     }
-                    { int n; for (n = 0; n < D_8009D2A4; n++) D_8010A0C8[n] = D_8009D1A4.items[n]; }
+                    { int n; for (n = 0; n < D_8009C60C; n++) D_80109298[n] = D_8009C50C.items[n]; }
                 }
                 break;
             case 4:
@@ -176,7 +176,7 @@ int subScreenItemListStep(Menu *m)
         return 0;
     case 2:
         if (subScreenMoveGridCursor(m)) return 0;
-        pages = (D_8009D1A4.count + 7) / 8;
+        pages = (D_8009C50C.count + 7) / 8;
         if (JOYPAD_STATE & 0x400) {
             if (m->page > 0) {
                 m->page--;
@@ -187,7 +187,7 @@ int subScreenItemListStep(Menu *m)
             if (m->page < pages - 1) {
                 m->page++;
                 m->sel += 8;
-                if (m->sel >= D_8009D1A4.count) m->sel = D_8009D1A4.count - 1;
+                if (m->sel >= D_8009C50C.count) m->sel = D_8009C50C.count - 1;
                 playSFX(8);
             }
         } else if (JOYPAD_STATE & 0x2000) {
@@ -197,34 +197,34 @@ int subScreenItemListStep(Menu *m)
         } else if ((JOYPAD_STATE & 0x4008) && m->cursor == 0) {
             Cond *c, *base;
             int r;
-            D_80111128 = D_8010A0C8[m->sel];
-            c = D_800FFAF8[D_800FECE8[D_80111128]];
+            D_801102F8 = D_80109298[m->sel];
+            c = D_800FEBA4[D_800FDD94[D_801102F8]];
             base = c;
             for (;;) {
-                r = D_800FFBB0[c->fn](c->a, c->b, c->c);
+                r = D_800FEC5C[c->fn](c->a, c->b, c->c);
                 if (c->next == -1) break;
                 if (r) c = base + c->next;
                 else c++;
             }
             if (r) {
-                if (D_80111128 == 7 || D_80111128 == 14) {
-                    D_8010A058 = 0;
+                if (D_801102F8 == 7 || D_801102F8 == 14) {
+                    D_80109228 = 0;
                     {
                     int n, z;
                     z = 0;
                     for (n = 0; n < 9; n++) {
-                        if (D_8009D2C4[n]) D_8010A068[z++] = n;
+                        if (D_8009C62C[n]) D_80109238[z++] = n;
                     }
-                    D_8010A05C = z;
+                    D_8010922C = z;
                     }
-                    D_8010A060 = -1;
+                    D_80109230 = -1;
                     SfxPlay2(10, 10);
                     m->sub = 0;
                     m->state++;
                 } else {
-                    switch (func_800E89F8(D_80111128)) {
+                    switch (func_800E7D58(D_801102F8)) {
                     case 1:
-                        printInfoMessage(D_80111128, 1);
+                        printInfoMessage(D_801102F8, 1);
                         return 1;
                     case 2:
                         return 1;
@@ -241,23 +241,23 @@ int subScreenItemListStep(Menu *m)
                 }
             } else {
                 short *q;
-                int x = D_80111128;
+                int x = D_801102F8;
                 int w;
-                for (q = D_80109D88; *q != -1; q++) {
+                for (q = D_80108F58; *q != -1; q++) {
                     if (x == *q) {
                         w = 0;
                         goto found;
                     }
                 }
-                for (q = D_80109D98; *q != -1; q++) {
+                for (q = D_80108F68; *q != -1; q++) {
                     if (x == *q) {
                         w = 1;
                         goto found;
                     }
                 }
-                for (q = D_80109DB0; *q != -1; q++) {
+                for (q = D_80108F80; *q != -1; q++) {
                     if (x == *q) {
-                        if (D_8009D0E6 < 5) w = 3;
+                        if (D_8009C44E < 5) w = 3;
                         else w = 2;
                         goto found;
                     }
@@ -265,7 +265,7 @@ int subScreenItemListStep(Menu *m)
                 w = 2;
             found:
                 subScreenOpenMessage(0, w, 2);
-                D_8010A204 = 0;
+                D_801093D4 = 0;
                 SfxPlay2(10, 10);
                 m->state = 6;
             }
@@ -274,68 +274,68 @@ int subScreenItemListStep(Menu *m)
     case 3:
         switch (m->sub) {
         case 0:
-            D_8010A060 = -1;
+            D_80109230 = -1;
             m->sub++;
         case 1:
             if (JOYPAD_STATE & 0x10) {
-                if (D_8010A058 > 0) {
-                    D_8010A058--;
+                if (D_80109228 > 0) {
+                    D_80109228--;
                     playSFX(8);
                 }
             } else if (JOYPAD_STATE & 0x40) {
-                if (D_8010A058 < D_8010A05C - 1) {
-                    D_8010A058++;
+                if (D_80109228 < D_8010922C - 1) {
+                    D_80109228++;
                     playSFX(8);
                 }
             } else if (JOYPAD_STATE & 0x2000) {
-                D_8010A058 = -1;
+                D_80109228 = -1;
                 SfxPlay2(0x1B, 0x1C);
                 m->state--;
             } else if (JOYPAD_STATE & 0x4008) {
                 unsigned short bits;
                 z = 0;
-                bits = D_8009D2C4[D_8010A068[D_8010A058]];
+                bits = D_8009C62C[D_80109238[D_80109228]];
                 for (n = 0; n < 9; n++) {
-                    if (bits & 1) D_8010A088[z++] = n;
+                    if (bits & 1) D_80109258[z++] = n;
                     bits >>= 1;
                 }
-                D_8010A064 = z;
-                D_8010A060 = 0;
+                D_80109234 = z;
+                D_80109230 = 0;
                 SfxPlay2(10, 10);
                 m->sub++;
             }
             break;
         case 2:
             if (JOYPAD_STATE & 0x10) {
-                if (D_8010A060 > 0) {
-                    D_8010A060--;
+                if (D_80109230 > 0) {
+                    D_80109230--;
                     playSFX(8);
                 }
             } else if (JOYPAD_STATE & 0x40) {
-                if (D_8010A060 < D_8010A064 - 1) {
-                    D_8010A060++;
+                if (D_80109230 < D_80109234 - 1) {
+                    D_80109230++;
                     playSFX(8);
                 }
             } else if (JOYPAD_STATE & 0x2000) {
-                D_8010A060 = -1;
+                D_80109230 = -1;
                 SfxPlay2(0x1B, 0x1C);
                 m->sub--;
             } else if (JOYPAD_STATE & 0x4008) {
                 unsigned char *tp;
                 int n;
-                int i1 = D_8010A068[D_8010A058], i2 = D_8010A088[D_8010A060];
+                int i1 = D_80109238[D_80109228], i2 = D_80109258[D_80109230];
                 int x = D_80111128_v;
-                tp = D_800FFC3C[i1] + i2 * 2;
+                tp = D_800FECE8[i1] + i2 * 2;
                 {
                 register unsigned char *t __asm__("$3") = tp;
                 int a = t[0];
                 register int b __asm__("$5");
-                D_80111134 = a;
+                D_80110304 = a;
                 b = t[1];
                 __asm__("" : : "r"(t));
-                D_8009CD94 = a;
+                D_8009C0FC = a;
                 PLAYER_SUBSTATE = 0x30;
-                D_8009CDA0 = 0;
+                D_8009C108 = 0;
                 t = (unsigned char *)3;
                 GAME_PLAYER_MODE = (int)t;
                 PLAYER_STATE = 1;
@@ -343,8 +343,8 @@ int subScreenItemListStep(Menu *m)
                 PLAYER = (int)t;
                 GVARS_USE_ITEM_PENDING = 1;
                 GVARS_USE_ITEM_ID = x;
-                D_80111138 = b;
-                D_8009CD96 = b;
+                D_80110308 = b;
+                D_8009C0FE = b;
                 }
                 if (x == 14) {
                     Obj *o = allocObjectLayer2();
@@ -358,7 +358,7 @@ int subScreenItemListStep(Menu *m)
                 } else {
                     printInfoMessage(7, 1);
                 }
-                D_8010A058 = -1;
+                D_80109228 = -1;
                 SfxPlay2(10, 10);
                 return 1;
             }
@@ -366,8 +366,8 @@ int subScreenItemListStep(Menu *m)
         }
         break;
     case 4:
-        if (subScreenMoveGridCursorN(m, D_8009D1A4.count)) return 0;
-        pages = (D_8009D1A4.count + 7) / 8;
+        if (subScreenMoveGridCursorN(m, D_8009C50C.count)) return 0;
+        pages = (D_8009C50C.count + 7) / 8;
         if (JOYPAD_STATE & 0x400) {
             if (m->page > 0) {
                 m->page--;
@@ -378,7 +378,7 @@ int subScreenItemListStep(Menu *m)
             if (m->page < pages - 1) {
                 m->page++;
                 m->sel += 8;
-                if (m->sel >= D_8009D1A4.count) m->sel = D_8009D1A4.count - 1;
+                if (m->sel >= D_8009C50C.count) m->sel = D_8009C50C.count - 1;
                 playSFX(8);
             }
         } else if (JOYPAD_STATE & 0x2000) {
@@ -386,19 +386,19 @@ int subScreenItemListStep(Menu *m)
             SfxPlay2(0x1B, 0x1C);
             m->state = 1;
         } else if (JOYPAD_STATE & 0x4008) {
-            subScreenOpenMessage(1, D_8010A0C8[m->sel], 2);
-            D_8010A204 = 0;
+            subScreenOpenMessage(1, D_80109298[m->sel], 2);
+            D_801093D4 = 0;
             SfxPlay2(10, 10);
             m->state++;
         }
         break;
     case 5:
-        subScreenMessageStep(D_8010A200, 2);
-        if (D_8010A204 == 2) m->state = 4;
+        subScreenMessageStep(D_801093D0, 2);
+        if (D_801093D4 == 2) m->state = 4;
         return 0;
     case 6:
-        subScreenMessageStep(D_8010A200, 2);
-        if (D_8010A204 == 2) m->state = 2;
+        subScreenMessageStep(D_801093D0, 2);
+        if (D_801093D4 == 2) m->state = 2;
         return 0;
     }
     return 0;
