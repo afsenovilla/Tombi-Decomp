@@ -11,7 +11,9 @@ a dispatch to port_missing, FATAL, a watchdog line, a non-zero exit.
 Usage: python3 port2/tools/sweep_areas.py [--exe build/port2/tombi2] [--frames N] [--jobs J] [--data DIR | --disc IMG]
                                         [--out DIR] [--pad SCRIPT] [AREA[:SECTION] ...]
   --out DIR keeps every room's log (sweep_AA_SS.log); the table goes to stdout (and DIR/sweep.txt).
-  AREA or AREA:SECTION restricts the sweep.  Exit status 1 when any room has a finding."""
+  AREA or AREA:SECTION restricts the sweep.  Exit status 1 when any room has a finding.
+  The version comes from the data folder's manifest (`serial`): a USA (SCUS-94236) folder pokes the USA GAME
+  (0x8009BCC8) and defaults to build/port2-scus94236/tombi2; the debug flag 1F8001B4 is the same scratch byte."""
 import os, re, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -25,17 +27,32 @@ PAD = ("1000:start,1300:circle:3,1500:right:300,1800:cross:3x8/40,2150:left:300,
 PATTERNS = [("fault", r"access violation|signal 1[01]|signal [4-8]|Segmentation fault|SIGSEGV|SIGILL|SIGBUS|FATAL"),
             ("nocode", r"no native code|without native code: [1-9]|calls into the overlay region without native code: [1-9]"),
             ("missing", r"dispatch .*port_missing"),
-            ("stub", r"\[port2\] stub: (?!FUN_800635e8\b)"),       # SetFogNear is the known Psy-Q stub (open point 3)
+            # SetFogNear is the known Psy-Q stub (open point 3); USA's SpuInit (a Psy-Q unit left to the shims, whose
+            # PAL C only calls the empty _SpuInit shim) is called once at boot
+            ("stub", r"\[port2\] stub: (?!FUN_800635e8\b|SpuInit \(frame 0\))"),
             ("watchdog", r"watchdog:"),
             ("unknown-ovl", r"unknown overlay"),
             ("bad-cd", r"CdRead failed|load record with that file id is garbage")]
 
 
-def run_room(exe, area, section, frames, data, disc, outdir, pad):
+# GAME.selectedArea of each version (selectedSection is the next halfword); default: PAL
+GAME_ADDR = {"SCES-01331": 0x8009C960, "SCUS-94236": 0x8009BCC8}
+
+
+def data_serial(data):
+    """the `serial` line of DATA/manifest.txt (tools/extract_data.py), None without one"""
+    try:
+        for l in open(os.path.join(data, "manifest.txt")):
+            if l.startswith("serial "): return l.split()[1]
+    except OSError: pass
+    return None
+
+
+def run_room(exe, area, section, frames, data, disc, outdir, pad, game=0x8009C960):
     # --skip-movies: with the opening movie playing, the title and the debug select come later and the
     # scripted Circle at 1300 misses the menu (the pokes of GAME.selectedArea/Section land at 1250 either way)
     cmd = [exe, "--headless", "--skip-movies", "--frames", str(frames), "--poke", "900:1F8001B4:1",
-           "--poke", "1250:8009C960:%X:2" % area, "--poke", "1250:8009C962:%X:2" % section, "--pad-script", pad]
+           "--poke", "1250:%08X:%X:2" % (game, area), "--poke", "1250:%08X:%X:2" % (game + 2, section), "--pad-script", pad]
     if data: cmd += ["--data", data]
     if disc: cmd += ["--disc", disc]
     t0 = time.time()
@@ -75,7 +92,7 @@ def run_room(exe, area, section, frames, data, disc, outdir, pad):
 
 def main():
     a = sys.argv[1:]
-    exe = os.path.join(ROOT, "build", "port2", "tombi2"); frames = 3600; jobs = 4; data = disc = outdir = None; pad = PAD
+    exe = None; frames = 3600; jobs = 4; data = disc = outdir = None; pad = PAD
     rooms = []
     while a:
         x = a.pop(0)
@@ -90,6 +107,10 @@ def main():
     if not data and not disc:
         for d in (os.path.join(ROOT, "data"), "data"):
             if os.path.isdir(d): data = d; break
+    serial = data_serial(data) if data else None
+    game = GAME_ADDR.get(serial, GAME_ADDR["SCES-01331"])
+    if exe is None:
+        exe = os.path.join(ROOT, "build", "port2-scus94236" if serial == "SCUS-94236" else "port2", "tombi2")
     sel = []
     for area, n in ROOM_COUNTS:
         for s in range(n):
@@ -98,7 +119,7 @@ def main():
             sel.append((area, s))
     if outdir: os.makedirs(outdir, exist_ok=True)
     with ThreadPoolExecutor(jobs) as ex:
-        res = list(ex.map(lambda r: run_room(exe, r[0], r[1], frames, data, disc, outdir, pad), sel))
+        res = list(ex.map(lambda r: run_room(exe, r[0], r[1], frames, data, disc, outdir, pad, game), sel))
     lines = ["area section overlay  last-frame  seconds  result"]
     bad = 0
     for area, s, ovl, last, secs, f in res:

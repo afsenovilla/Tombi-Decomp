@@ -143,6 +143,10 @@ the launcher's data folder (the same as U1 headless; no `--disc`).
 
 **Risk**: the panel is the largest item. **Effort**: 4-8 sessions (about half the panel).
 
+Done 2026-11-09 (docs/USA.md "Feature parity"): fixes.txt `@version` sections and the USA spellings (widescreen, HUD,
+title extras; `--launcher-exit` stays PAL-only), the USA room sweep 95/96 clean after six generator fixes, movies
+(100US / END_US) and audio, widescreen / GL / `--fps` render checks. Saves, debug menu and the panel: other work items.
+
 ## Stage J1: JP retail
 
 - Same pipeline with `slps01144` (data symbols already exist): full link, gen2, runtime header.

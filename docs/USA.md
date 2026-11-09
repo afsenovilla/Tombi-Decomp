@@ -240,6 +240,61 @@ infinite vitality / lives, unlock all events. Still PAL-only: `--title-debug` (t
 `titleDrawMenuCarousel_scus94236.c`, which the fixes.txt hook does not reach), `--cut-content`, `--civ-*`. The PC
 launcher keeps the USA card in `saves_usa/` (as Android's `files/saves_usa`).
 
+## Feature parity: fixes, room sweep, movies (stage U3, 2026-11-09)
+
+**fixes.txt per version.** A line `@version usa` (any `tools/versions.py` name or alias, several allowed; `@version
+all` ends the section) limits the fixes after it to that build (`gen_port.load_fixes`); the PAL fix set is the same
+dict as before (checked), and the PAL generated sources are unchanged (same lines; only the pre-existing order of
+`#define` lines varies between runs). The 27 audit warnings need nothing: the `PORT_NTSC(...)` picture fixes are what
+USA draws natively, `buttonConfigDrawCursor`'s width is `--lang 5`'s, the `< 0x141` culls are the JP / demo branches
+(USA spells `< 0x140`, which the PAL fixes reach). The audit cannot see PAL functions USA builds from another file (a
+`_scus94236.c` port or a JP twin): grepping the generated USA sources for the PAL fixes' old text found them. The
+`@version usa` section at the end of fixes.txt: widescreen HUD lives (y 208), the culls of the drawObjectSpriteRotScaled
+port (0x80049994), AREA01/09 wrapping and AREA06/10 parallax backdrops, the Select popup's `port_ws_mark`, the event
+title fly-in / fly-out (PAL `#ifdef PORT2` blocks of spawnEventTitle / l8Type01MoveStep), the `--title-bg` mark (USA
+has no black band: `runtime/titlebg.c` puts the landscape at row 0) and the `--title-debug` DEBUG carousel entry (the
+USA title font numbers letters from 'A' = 32, PAL 33: `PORT_TITLE_GLYPH_BASE`). `--launcher-exit` is PAL-only for now
+(its words are drawn with the PAL disc's pause / title glyphs).
+
+**Title "LDAI".** Not a bug: the carousel draws the entries off the front in perspective, 4 angle units a glyph, so
+"LOAD GAME" right of NEW GAME shows its first letters squeezed ("LDA]"); the PAL build draws the same, and rotated to
+the front it reads LOAD GAME.
+
+**Room sweep.** `port2/tools/sweep_areas.py` takes the version from the data folder's manifest (USA: GAME 0x8009BCC8,
+`build/port2-scus94236/tombi2`; the debug flag 1F8001B4 is the same byte). First USA sweep: 96 of 96 rooms with
+findings; after the generator fixes below: **95 of 96 clean**, AREA10 section 3 a watchdog line under four parallel
+jobs (clean alone; the PAL sweep had the same flake). PAL sweep of the same tree: 96 of 96 clean. Generator fixes
+(`sources_version` / `area_plan`, USA only):
+- two names of one address (LIST_COUNTER / LIST_COUNTER_S) were not made volatile (`volatile_aliases` had no
+  address resolver): playerTryTalkToNpc looped past its list on Square (30 rooms);
+- the arity of overlay / area / template definitions was looked up by the spelled name, not the native one
+  (I0NFO2_overheadPlayerHandler, probeGrabPointInBoxA built as B): dispatchScreenEffect passed no object to the
+  top-down player handlers (read 0x8009C963: AREA02 s0/s3, AREA05 s0/s2, AREA08 s0/s2, AREA19 s0/s2), and the
+  NULL-call faults of AREA01 s1/s3/s4, AREA02/19 s0, probeGrabPointInBoxB in AREA00 s1/s2;
+- an area's units start at its own code (AREA_OWN): the varying X00 prefix function playerAirSpinToFall (0x800EDFA0,
+  also I0NFO2's topdownActorPatrolHStep) had "no native code" in every area (60 rooms);
+- names X00's link gives to area functions (playerInitMode's FUN_801212a0 = X01 playerInitAreaHook) were linked as
+  X000 image data: calls into RAM through the fault handler (AREA10: thousands per run);
+- an area shares only X00's prefix: X00's own AREA00 functions made area data a function (X017
+  WATERFALL_HINT_NPC_DEFS at a00TornadoStep's address, linked to a thunk: AREA17 s2-s4 faulted);
+- a unit the full link kept as asm has no object: its area callees are now resolved from the version's symbols
+  (playerClingJumpRelease, sevenFriendsMemberSetAnim / SetAnim were stubs). Stubs 45 -> 42.
+Left: 156 emulated page-0 reads in playerPushOutOfObjectBox in 12 rooms (USA only; reads return 0, no fault), SpuInit
+called once at boot (a Psy-Q unit left to the shims; its PAL C only calls the empty `_SpuInit`, ignored by the sweep).
+`audit_pointers.py` runs on the USA gen (`PORT_VERSION=usa ... --gen build/port2-scus94236/gen`) but counts ~1340
+`label` words per area: the USA area code ranges (gen2 `ranges_X0nn`) hold the area's own units only, not the X00
+prefix, so the prefix's jump tables read as labels (harmless at run time, the sweep is clean).
+
+**Movies / audio.** Headless with movies on: LOGO.STR, OP_INST.STR (title attract), BOY.STR (new game), and through
+`--movie FRAME:ID` 100US.STR (id 3) and END_US.STR (id 20) decode with sound (`--dump-audio`: RMS 3000-9000 through
+each movie; gameplay BGM ~3300). The USA ids: 0 OP_INST, 1 BOY, 2 MIST, 3 100US, 4 MCC, 5 NOZOITE1, 6 SORA1, 7 SORA2,
+8 NOZOITE2, 9 MILLION, 10 HONOO2, 11 BUNMEI, 12 BUNMEI2, 13 HANA, 14 ARASHI, 15 MANTION, 16 BAKKASU, 17 JUNGLE,
+18 KARAKURI, 19 MABUTA, 20 END_US.
+
+**Renderers.** AREA00 (new game) and AREA03 s0 (debug select): software 4:3, `--widescreen 16:9` and OpenGL
+(`--internal-res 2 --widescreen 16:9`, Xvfb) look as PAL does (HUD at the wide edges, event title, message box);
+`--fps 120` headless: 2.0 presents per 60 Hz vblank (PAL 2.4 per 50 Hz), no repeated presents while walking.
+
 ## English text: USA vs PAL (2026-11-09)
 
 Same English script with a light Americanisation / copy-edit pass (compared bank by bank, dialogue by dialogue):
