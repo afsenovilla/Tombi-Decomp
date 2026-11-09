@@ -1,5 +1,7 @@
 // FUNC 80119584 112 X000
 // MATCHING 80119584 112
+// VERSION PCPX_96084 tomba 80031C60 112
+// ASPSX.PCPX_96084 2.34
 extern char *FUN_80018448();
 
 void a00L2Type06SpawnChild(int a, int x, int y, int z)

@@ -2,6 +2,9 @@
 // MATCHING 801260f8 160
 // VERSION SLPS_01144 x00 80124E40 160
 // VERSION SLPM_80165 x00 8011C298 160
+// VERSION PCPX_96084 tomba 8006CF5C 160
+// VERSION BETA_980203 x00 80129908 160
+// ASPSX.PCPX_96084 2.34
 #if defined(VERSION_SLPS_01144)
 // Japanese version of PAL x000 801260F8 (playerContactCat2Type12.c): 228 -> 212.
 extern short objectBoxOverlapSide(char *, unsigned char *);
@@ -41,6 +44,48 @@ void playerContactCat2Type12(char *o, unsigned char *p)
         p[6] = 0;
         p[0x69] = 0;
         *(unsigned char **)(o + 0xd0) = p;
+        o[0xac] = 2;
+    }
+}
+#elif defined(VERSION_PCPX_96084)
+// PrePre 8 version of PAL x000 801260F8 (playerContactCat2Type12.c): PAL C of src/playerContactCat2Type12.c (0.900 masked), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+extern short objectBoxOverlapSide(char *, unsigned char *);
+void playerContactCat2Type12(char *o, unsigned char *p)
+{
+    short s;
+    if (p[2] == 0x12 && p[4] == 0)
+        return;
+    s = objectBoxOverlapSide(o, p);
+    if (s == -1)
+        return;
+    if (s == 3 && o[0xa4] == 1) {
+        p[0] = 2;
+        p[4] = 2;
+        p[5] = 0;
+        p[6] = 0;
+        p[0x69] = 0;
+        *(unsigned char **)(o + 0xb8) = p;
+        o[0xa4] = 2;
+    }
+}
+#elif defined(VERSION_BETA_980203)
+// Beta version of PAL x000 801260F8 (playerContactCat2Type12.c): PAL C of src/playerContactCat2Type12.c, edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+extern short objectBoxOverlapSide(char *, unsigned char *);
+void playerContactCat2Type12(char *o, unsigned char *p)
+{
+    short s;
+    if (p[2] == 0x12 && p[4] == 0)
+        return;
+    s = objectBoxOverlapSide(o, p);
+    if (s == -1)
+        return;
+    if (s == 3 && o[0xac] == 1) {
+        p[0] = 2;
+        p[4] = 2;
+        p[5] = 0;
+        p[6] = 0;
+        p[0x69] = 0;
+        *(unsigned char **)(o + 0xd8) = p;
         o[0xac] = 2;
     }
 }

@@ -313,6 +313,12 @@ program `tomba` = TOMBA.EXE, game dir `game_prepre8/`, git-ignored). It is set u
   the PAL category 7 list, 0xE4-byte layer-1 objects, `setObjectSpeedPolar2` fields at +0x7C, `startAreaBgm(1)`).
   `closeTask` and `startTask` stay at 99.6 %: the only difference is the operand order of the `addu` that the
   assembler emits for a symbol+register load, which C cannot change.
+- **Older assembler (2026-11-09).** The PrePre 8 game code (0x80016D40..~0x80087000) loads every small constant with
+  `ori rX,$zero,N`, never `addiu` (thousands of `ori`, zero `addiu`; the Psy-Q library after it has `addiu`): the
+  `li` expansion of ASPSX before 2.50. `tools/ncheck.py` honours a `// ASPSX <version>` header line (maspsx
+  `--aspsx-version`), and `// ASPSX.PCPX_96084 2.34` sets it for this build only; `tools/demo_sweep.py` adds it to
+  every candidate whose target has `ori` loads and no `addiu` ones. With it, plain PAL C matched 40 functions at once
+  (`compactOrderingTable`, `AnimAdvance`, `spawnImpactEffect`, ...) and the scratchpad renames of `--fix` 35 more.
 - CI job `report-prepre8` (`.github/workflows/report.yml`) downloads the disc image from the
   **`GAME_FILES_URL_PREPRE8`** secret (raw data track .bin or a zip with TOMBA.EXE; Drive links handled like the
   demo job), extracts only `/TOMBA` with `tools/prepre8.py extract`, checks the TOMBA.EXE sha1

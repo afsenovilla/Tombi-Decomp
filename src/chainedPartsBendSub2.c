@@ -1,5 +1,7 @@
 // FUNC 8011d300 880 X000
 // MATCHING 8011d300 880
+// VERSION PCPX_96084 tomba 8003B164 880
+// ASPSX.PCPX_96084 2.34
 #include "TOBJ.H"
 
 #define TO80(x) if ((x)->animFrame != 0x80) { if ((x)->animFrame < 0x81) (x)->animFrame++; else (x)->animFrame--; }

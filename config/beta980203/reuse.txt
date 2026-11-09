@@ -1,0 +1,5 @@
+x00 800F2D64 x000 800EE25C  # dispatchAreaInitA (tools/demo_sweep.py)
+x00 800F3F88 x005 800EF460  # ObjApplyVelocity (tools/demo_sweep.py)
+x00 801152B8 x001 80111A50  # spawnPlayerEffect4E (tools/demo_sweep.py)
+x00 80115348 x006 80111AE0  # updateL4Type1BObject (tools/demo_sweep.py)
+x00 80118274 x000 80114A08  # updateLeafButterflyByArea (tools/demo_sweep.py)

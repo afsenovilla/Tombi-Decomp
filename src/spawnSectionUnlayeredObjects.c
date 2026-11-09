@@ -1,5 +1,7 @@
 // FUNC 8004bfe4 248 MAIN0
 // MATCHING 8004bfe4 248
+// VERSION PCPX_96084 tomba 8008299C 248
+// ASPSX.PCPX_96084 2.34
 extern unsigned short GAME;
 extern unsigned short GAME_SELECTED_SECTION;
 extern unsigned char **PTR_8007bee4[];

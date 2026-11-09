@@ -1,5 +1,66 @@
 // FUNC 800f6c34 332 X013
 // MATCHING 800f6c34 332
+// VERSION BETA_980203 x00 800FB250 328
+#if defined(VERSION_BETA_980203)
+// Beta version of PAL x013 800F6C34 (playerSwingHandlePad.c): PAL C of src/x013/playerSwingHandlePad.c (playerSwingHandlePad, twin score 1.078), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+#include "TOBJ.H"
+extern unsigned short PAD_PRESSED[];
+extern unsigned short BUTTON_MASK_B;
+extern unsigned char GAME_PLAYER_MODE;
+extern unsigned char *PLAYER_EXT;
+extern unsigned char *GRABBED_OBJECT;
+
+void playerSwingHandlePad(TObj *o)
+{
+    int a;
+    short s;
+    int s1;
+    unsigned short u;
+    Fix16 *h;
+    if (PAD_PRESSED[0] & BUTTON_MASK_B) {
+        PLAYER_EXT[9] = 0;
+        o->step = 0xb;
+        o->state = 0;
+        GRABBED_OBJECT[0x69] = 0;
+    }
+    if (PAD_PRESSED[0] & 0x10) {
+        PLAYER_EXT[9] = 0;
+        o->step = 0xb;
+        o->state = 0;
+        GRABBED_OBJECT[0x69] = 0;
+    }
+    if (PAD_PRESSED[0] & 0x40) {
+        PLAYER_EXT[9] = 0;
+        *(unsigned char *)&o->wac = 1;
+        u = o->animFrame;
+        h = o->h;
+        o->b9e = 0;
+        o->wb2 = 0;
+        o->velH = 0;
+        o->velV = 0;
+        o->d30 = 0;
+        o->d34 = 0;
+        o->velX = 0;
+        o->velY = 0;
+        s1 = h->p.whole;
+        if (u & 1)
+            s = s1 + 0xe;
+        else
+            s = s1 - 0xe;
+        h->p.whole = s;
+        a = 0x10;
+        o->timer = 10;
+        o->d84 = 0;
+        if (o->animFrame & 1)
+            a = 0xf0;
+        o->step = 2;
+        o->state = 3;
+        o->d88 = a;
+        o->d8c = 0;
+        GRABBED_OBJECT[0x69] = 0;
+    }
+}
+#else
 #include "TOBJ.H"
 extern unsigned short PAD_PRESSED[];
 extern unsigned short BUTTON_MASK_B;
@@ -58,3 +119,4 @@ void playerSwingHandlePad(TObj *o)
         GRABBED_OBJECT[0x69] = 0;
     }
 }
+#endif

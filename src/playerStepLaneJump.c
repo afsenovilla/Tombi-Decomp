@@ -1,6 +1,7 @@
 // FUNC 80109038 1116 X000
 // MATCHING 80109038 1116
 // VERSION SLPS_01144 x00 80108AD4 1188
+// VERSION BETA_980203 x00 8010CF5C 1116
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x10]; short we0; short we2; int de4; char e8[0xe]; short wf6; } PO;
@@ -114,6 +115,147 @@ void func_80108AD4(PO *o)
             AnimJump(o, 2);
             o->t.d->p.whole = o->wf6;
             o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
+            o->t.state = 3;
+        }
+        break;
+    case 3:
+        ObjGravityStep(o);
+        ObjAddVelY7E(o);
+        ObjTileCollide(o, 0, 0);
+        if (AnimAdvance(o)) {
+            if (o->we0) o->t.active = 3;
+            else o->t.active = 1;
+            *(signed char *)&o->t.b0f = -8;
+            o->t.ba5 = 0;
+            BA3(o) = 0;
+            o->t.b9c = 0;
+            BAC(o) = 0;
+            o->t.wb2 = 0;
+            o->t.velX = 0;
+            o->t.velY = 0;
+            o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
+            PLAYER_EXT->w20 = 0;
+            o->t.b04 = 1;
+            o->t.step = 0;
+            o->t.state = 0;
+        }
+        break;
+    }
+}
+#elif defined(VERSION_BETA_980203)
+// Beta version of PAL x000 80109038 (playerStepLaneJump.c): PAL C of src/playerStepLaneJump.c, edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+#include "TOBJ.H"
+typedef struct { TObj t; char c0[0x14]; short we0; short we2; int de4; char e8[0xe]; short wf6; } PO;
+typedef struct { char pad[0x20]; short w20; } P;
+extern P *PLAYER_EXT;
+extern int BITTEN_OBJECT;
+extern char PLAYER_LANE_JUMP_ANIM[];
+extern unsigned char SLOPE_TILT_TABLE[];
+extern int MulCos(int a, short b);
+extern void PlayerSetAnimIfChanged(PO *, int);
+extern void ObjGravityStep(PO *);
+extern void ObjAddVelY7E(PO *);
+extern int AnimAdvance(PO *);
+extern int ObjCheckHeadCollision(PO *);
+extern short ObjTileCollide(PO *, int, int);
+extern void SfxPlay3(int, int);
+extern void AnimJump(PO *, short);
+
+#define BA3(o) (((unsigned char *)&(o)->t.da0)[3])
+#define BAC(o) (*(unsigned char *)&(o)->t.wac)
+
+void playerStepLaneJump(PO *o)
+{
+    switch (o->t.state) {
+    case 0:
+        o->t.active = 3;
+        o->t.b9c = 1;
+        o->t.d8c = 0;
+        o->t.b69 = 0;
+        o->t.b9e = 0;
+        o->t.b69 = 0;
+        BAC(o) = 0;
+        o->t.wb0 = 0;
+        BA3(o) = 2;
+        o->t.wb6 = 0;
+        o->t.animFrame &= 1;
+        o->t.velX = MulCos(0, o->t.wb2);
+        o->t.velY = -0x570;
+        PLAYER_EXT->w20 = 5;
+        PlayerSetAnimIfChanged(o, 0x19);
+        if (*(unsigned short *)0x1F8001C8 & 1)
+            o->wf6 = (o->t.d->p.whole + 90) / 90 * 90;
+        else
+            o->wf6 = (o->t.d->p.whole - 90) / 90 * 90;
+        o->t.state = 1;
+    case 1:
+        ObjGravityStep(o);
+        ObjAddVelY7E(o);
+        AnimAdvance(o);
+        if (o->t.velY > 0) {
+            o->t.b9c = 2;
+            o->t.state = 2;
+        }
+        if (ObjCheckHeadCollision(o)) {
+            o->t.b9c = 2;
+            o->t.velY = 0;
+            o->t.velV = 0;
+            o->t.state = 2;
+        }
+        if (*(unsigned short *)0x1F8001C8 & 1) {
+            o->t.d->raw += 0x28000;
+            if (o->wf6 < o->t.d->p.whole) o->t.d->p.whole = o->wf6;
+        } else {
+            o->t.d->raw += -0x28000;
+            if (o->t.d->p.whole < o->wf6) o->t.d->p.whole = o->wf6;
+        }
+        break;
+    case 2:
+        o->t.wb0 = 0;
+        o->t.wb6 = 0;
+        ObjGravityStep(o);
+        if (*(unsigned short *)0x1F8001C8 & 1) {
+            o->t.d->raw += 0x28000;
+            if (o->wf6 < o->t.d->p.whole) {
+                o->t.d->p.whole = o->wf6;
+                if (BAC(o) == 0) BAC(o) = 1;
+            }
+        } else {
+            o->t.d->raw += -0x28000;
+            if (o->t.d->p.whole < o->wf6) {
+                o->t.d->p.whole = o->wf6;
+                if (BAC(o) == 0) BAC(o) = 1;
+            }
+        }
+        ObjAddVelY7E(o);
+        AnimAdvance(o);
+        if (BAC(o) == 2) {
+            BITTEN_OBJECT = o->de4;
+            if (o->we0) o->t.active = 3;
+            else o->t.active = 1;
+            *(signed char *)&o->t.b0f = -8;
+            o->t.b04 = 1;
+            BA3(o) = 0;
+            o->t.step = 0xe;
+            o->t.state = 0;
+        } else if (o->t.b69 == 1) {
+            *(signed char *)&o->t.b0f = -8;
+            SfxPlay3(0x1c, 0x7f);
+            BA3(o) = 1;
+            o->t.anim = PLAYER_LANE_JUMP_ANIM;
+            AnimJump(o, 2);
+            o->t.d->p.whole = o->wf6;
+            o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
+            BAC(o) = 0;
+            o->t.state = 3;
+        } else if (ObjTileCollide(o, 0, 0)) {
+            SfxPlay3(0x1c, 0x7f);
+            BA3(o) = 1;
+            o->t.anim = PLAYER_LANE_JUMP_ANIM;
+            AnimJump(o, 2);
+            o->t.d->p.whole = o->wf6;
+            o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
+            BAC(o) = 0;
             o->t.state = 3;
         }
         break;

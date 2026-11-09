@@ -1,5 +1,7 @@
 // FUNC 8004461c 192 MAIN0
 // MATCHING 8004461c 192
+// VERSION PCPX_96084 tomba 8006BB28 192
+// ASPSX.PCPX_96084 2.34
 typedef struct { char p0[2]; unsigned short s2; } H;
 typedef struct {
     char p0[0x16]; unsigned short s16;

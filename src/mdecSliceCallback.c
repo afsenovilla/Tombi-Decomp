@@ -1,6 +1,8 @@
 // FUNC 8001d9d8 252 MAIN0
 // MATCHING 8001d9d8 252
+// VERSION PCPX_96084 tomba 80022BFC 252
 // Ported from psx_tomba (movie.c, mdecSliceCallback); MIT licence of the original project.
+// ASPSX.PCPX_96084 2.34
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"

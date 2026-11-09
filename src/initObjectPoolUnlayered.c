@@ -1,5 +1,7 @@
 // FUNC 80017d30 164 MAIN0
 // MATCHING 80017d30 164
+// VERSION PCPX_96084 tomba 80019A5C 164
+// ASPSX.PCPX_96084 2.34
 extern unsigned char DAT_800a6268[];
 extern unsigned char DAT_800a6484[];
 extern unsigned char DAT_800b11b8[];

@@ -1,5 +1,7 @@
 // FUNC 80124a84 312 X000
 // MATCHING 80124a84 312
+// VERSION PCPX_96084 tomba 80069138 312
+// ASPSX.PCPX_96084 2.34
 #include "TOBJ.H"
 
 int landOnSlopedBoxTop(TObj *a, TObj *b)

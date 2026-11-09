@@ -1,5 +1,7 @@
 // FUNC 800ea168 184 X000
 // MATCHING 800ea168 184
+// VERSION PCPX_96084 tomba 800313BC 184
+// ASPSX.PCPX_96084 2.34
 typedef struct { char p0[4]; unsigned char b4, b5; char p1[0x2e - 6]; short s2e; } TO;
 extern void g1(TO *o);
 extern void g2(TO *o);
