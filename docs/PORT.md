@@ -1040,6 +1040,33 @@ report) and the exact command line. *Mods* and
 `build/port-win/tombi.exe` (Windows) or `build/port/tombi` (Linux); the PyInstaller exe carries `tombi.exe`,
 `tombi-view.exe` and `SDL2.dll` and unpacks them to its temporary folder on each run (PyInstaller onefile).
 
+**Game library** (docs/PORT_VERSIONS_PLAN.md stage U2, `tools/game_library.py`): the *Play* page starts with a card
+per disc the player added (*Añadir juego… / Add game…*, the last card; right click on a card: *Remove from the
+library…*, which offers to delete its extracted folder too). A disc is identified by its boot executable: the
+`BOOT` line of `SYSTEM.CNF` and that file's sha1 (the PAL discs boot SCES_013.31 / SCES_013.30, a loader of
+`EXE/MAIN0.EXE`: their sha1 is MAIN0's `bec8dc5f…`; USA `SCUS_942.36` `81cbc79f…`; JP `SLPS_011.44` `07d57769…`
+shows as recognised, "not supported yet", Play off; PAL Rev 0 likewise; another disc, e.g. Tomba! 2, is refused by
+name). Each game is extracted once into its own folder next to the launcher: the first PAL disc keeps `data/` (an
+older launcher's `data/` and disc path become the first entry, nothing is extracted again), the others
+`data-<serial>/` (`data-scus94236/`, `data-sces01330/`). Settings: `games` (`serial`, `sha1`, `image`, `data`) and
+`game` (the selected serial) in `tombi-port.json`; the other settings are shared. The card art is rebuilt from the
+player's own disc the first time (`library/<serial>/logo.png`, `title.png`, `scene.png`, never in the repo): the logo
+page and CLUT of the title list (PAL `SYSTEM/A00202.000` + `A00203.000`, USA/JP `A00012.000` + `A00013.000`) drawn
+with the title overlay's own sprite list (`TITLE_LOGO_SPRITE_RECS` of O0PTSUB0 / OPTSUB00: 16-byte records with the
+CLUT at 128,510, the list `titleLogoDraw` passes to `titleDrawSpriteRecs`), on the title landscape (A00200.GAM /
+A00010.GAM); a disc without them shows its name. Looks: `library_view` = `grid` (default: cards with the title
+screen, in as many columns as fit), `list` (rows with the logo) or `banner` (the selected game wide over the
+landscape, small logo cards under it); `TOMBI_LIBRARY_VIEW` forces one.
+
+Per version (`game_library.VERSIONS` `features`): PAL has everything; USA runs `tombi-pc-usa(.exe)` (checkout:
+`build/port2-scus94236[-win]/tombi2`) and has no game language (English only), no text patch / improved translation
+(the hook is `VERSIONS[...]["text_patches"]`, empty for USA/JP: a future retranslation goes there), no 50/60 Hz switch
+(60 Hz, no `--hz`), no *Cut content* page, no `--poke` mods / area select / title DEBUG / debug menu (PAL addresses),
+no button-icon styles (`--prompts` redraws the PAL fonts) and no texture dump (PAL layout); skip intro, autostart,
+keys, controller, renderer, window, aspect, fps and texture packs stay. The other versions always run from their data
+folder (no `--disc`). The save folder is shared by all games (one `tombi_mc0.mcd`; each release saves under its own product
+code, BESCES-01331 / BASCUS-94236; a USA save on that card has not been tried yet, U3).
+
 *Graphics* tab: renderer, window scale, fullscreen, aspect, internal resolution, and *Mostrar FPS / Show FPS*
 (default off: `--show-fps`, the on-screen counter; `--log-fps 2` is always passed so the rate goes to the log).
 
