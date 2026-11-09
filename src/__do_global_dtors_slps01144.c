@@ -1,0 +1,36 @@
+// VERSION SLPS_01144 slps01144 80065E98 104
+// FLAGS -O2 -G0
+// AS gnu
+#if defined(VERSION_SLPS_01144)
+__asm__(".set noreorder\n.set noat\n"
+".globl __do_global_dtors\n.type __do_global_dtors,@function\n__do_global_dtors:\n"
+"	lui	$8,%hi(D_8009D0F8)\n"
+"	lw	$8,%lo(D_8009D0F8)($8)\n"
+"	addiu	$29,$29,-16\n"
+"	sw	$16,4($29)\n"
+"	sw	$17,8($29)\n"
+"	sw	$31,12($29)\n"
+"	beq	$8,$0,L__do_global_dtors_50\n"
+"	sll	$0,$0,0x0\n"
+"	lui	$16,%hi(D_80010000)\n"
+"	addiu	$16,$16,%lo(D_80010000)\n"
+"	lui	$17,0x0\n"
+"	addiu	$17,$17,0\n"
+"	beq	$17,$0,L__do_global_dtors_50\n"
+"	sll	$0,$0,0x0\n"
+"L__do_global_dtors_38:\n"
+"	lw	$8,0($16)\n"
+"	addiu	$16,$16,4\n"
+"	jalr	$8\n"
+"	addiu	$17,$17,-1\n"
+"	bne	$17,$0,L__do_global_dtors_38\n"
+"	sll	$0,$0,0x0\n"
+"L__do_global_dtors_50:\n"
+"	lw	$31,12($29)\n"
+"	lw	$17,8($29)\n"
+"	lw	$16,4($29)\n"
+"	addiu	$29,$29,16\n"
+"	jr	$31\n"
+"	sll	$0,$0,0x0\n"
+".set at\n.set reorder\n");
+#endif

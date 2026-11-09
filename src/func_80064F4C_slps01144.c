@@ -1,0 +1,35 @@
+// VERSION SLPS_01144 slps01144 80064F4C 104
+// FLAGS -O2 -G0
+// AS gnu
+#if defined(VERSION_SLPS_01144)
+__asm__(".set noreorder\n.set noat\n"
+".globl func_80064F4C\n.type func_80064F4C,@function\nfunc_80064F4C:\n"
+"	lui	$1,%hi(D_8009DAF8)\n"
+"	sw	$31,%lo(D_8009DAF8)($1)\n"
+"	jal	EnterCriticalSection\n"
+"	sll	$0,$0,0x0\n"
+"	addiu	$10,$0,176\n"
+"	jalr	$10\n"
+"	addiu	$9,$0,87\n"
+"	lw	$2,364($2)\n"
+"	lui	$1,%hi(jtbl_8009DB00)\n"
+"	addi	$3,$2,2180\n"
+"	sw	$3,%lo(jtbl_8009DB00)($1)\n"
+"	lui	$1,%hi(jtbl_8009DB04)\n"
+"	addi	$3,$2,2196\n"
+"	addiu	$9,$0,11\n"
+"	sw	$3,%lo(jtbl_8009DB04)($1)\n"
+"Lfunc_80064F4C_3c:\n"
+"	addiu	$9,$9,-1\n"
+"	sw	$0,1428($2)\n"
+"	bne	$9,$0,Lfunc_80064F4C_3c\n"
+"	addiu	$2,$2,4\n"
+"	jal	FlushCache\n"
+"	sll	$0,$0,0x0\n"
+"	lui	$31,%hi(D_8009DAF8)\n"
+"	lw	$31,%lo(D_8009DAF8)($31)\n"
+"	sll	$0,$0,0x0\n"
+"	jr	$31\n"
+"	sll	$0,$0,0x0\n"
+".set at\n.set reorder\n");
+#endif

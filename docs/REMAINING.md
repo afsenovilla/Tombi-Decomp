@@ -18,9 +18,8 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 
 The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08; a second pass the same day matched 75 more (DSPSUB/DSPSUB3 54, OPTSUB00 8, DSPSUB2 13) and a third 65 (INFO, INFO2, INFO3: all of them). Left there: DSPSUB2 func_800ECCE8 (2 lines: `li a1,498` must stay in the jal delay slot), F0D90 (twin of PAL 800EFD6C).
 
-The JP report counts the Psy-Q library too. The hand-written-asm part (libgte, BIOS stubs, start, setjmp) is in as
-top-level asm. Left from the library: the parts Sony compiled from C (libsnd _SsContDataEntry and the _SsVmSetVol
-pieces, __main, __do_global_dtors, _patch_card/_patch_card2, DecDCTvlc/DecDCTvlcSize, StopCARD2's merged target).
+The JP report counts the Psy-Q library too; all of it is in now (the hand-written parts as top-level asm, the rest
+in C). Only 4 functions are left, all game code:
 
 Game code, closest first:
 
