@@ -183,7 +183,10 @@ if(NOT ANDROID AND NOT NINTENDO_3DS)
   target_compile_options(port2rt PRIVATE -msse2 -mfpmath=sse)
 endif()
 if(NINTENDO_3DS)
-  target_compile_options(port2rt PRIVATE -fpermissive)
+  # -fPIC: a .3dsx relocation is an offset inside the program image, so a constant "symbol + offset" that points
+  # outside it (port_ram - 0x80000000, folded from retail-address arithmetic) cannot be loaded; position-independent
+  # code takes the symbol from the GOT and adds the offset at run time (n3ds/check_3dsx.py checks the result)
+  target_compile_options(port2rt PRIVATE -fpermissive -fPIC)
 endif()
 # the Spanish redraws generator must round like Pillow / Python (byte-identical to tools/gfx_es): no fused multiply-adds,
 # and on 32-bit x86 SSE2 doubles instead of the x87's 80-bit intermediates
