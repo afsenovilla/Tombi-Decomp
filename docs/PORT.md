@@ -3523,3 +3523,31 @@ es_mejorada 626971 bytes, `cmp` equal, about 4 minutes for a whole translation).
 * Verified (Linux, `--disc Tombi.bin --lang 5 --text-patch patches/es_mejorada.tombipatch.json`, the editor's
   installed `translation.tpatch` next to `build/port2/tombi2`, AREA00/MFNT000S #128 changed): the opening dialogue
   shows the edited line ("¡Hola, Tombi pelirrosa!"); with `--no-translation-file` it shows es_mejorada's.
+
+## Nintendo 3DS (feasibility study, 2026-11-09)
+
+Not a port yet: measurements to decide whether one is worth doing. Not run on an emulator or a 3DS (devkitPro's
+package servers refuse the cloud container, so there is no libctru/citro3d build here).
+
+- **CPU code.** The 3DS is a 32-bit ARM11 (ARMv6K, VFPv2), so the native 32-bit pointer model applies as on
+  armeabi-v7a; no wasm2c.  All 3152 generated game sources (`PORT2_ARCH=arm gen2.py sources`) compile with Debian's
+  `arm-none-eabi-gcc` 13.2 at `-march=armv6k -mtune=mpcore -mfloat-abi=hard -mfpu=vfp -marm` and the game flags of
+  CMakeLists.txt, 0 errors, 1.4 MB of code.  The runtime/shims were not tried (they need libctru in place of SDL2).
+- **Memory layout.** 3DS homebrew loads at 0x00100000, the same base as the i386 link (`-Ttext-segment=0x100000`), so
+  the "image below 16 MB" rule holds for code and port_ram (0x385000 in the i386 build).  The image is ~21 MB with
+  bss (stacks, wvram_store, ops/vtx, frame_rgb ...): fits the 64 MB of an Old 3DS application, but the large render
+  buffers would have to move to the heap or shrink.  There are no signals: the null-page handler (lowmem.c) needs
+  another route (libctru's exception handler, or mapping page 0, which the 3DS kernel does not allow).
+- **CPU cost per frame** (callgrind, i386 build, headless, AREA 1:0 gameplay, frames 1400..2600, `--dump-audio` so the
+  SPU mixes): 31.8 M x86 instructions per frame, of which ~30.3 M are the software rasteriser (`soft_tri` 19 M,
+  `texel` 9 M, soft_rect / soft_fill / render 2 M).  Game logic + GTE + SPU + the rest: **~1.5 M per frame**.
+  Rough ARM11 estimate (x1.3 instructions, IPC ~0.5..0.7): game ~3..4 M cycles = ~13 ms on an Old 3DS (268 MHz),
+  ~4-5 ms on a New 3DS (804 MHz), inside the 20 ms of a 50 Hz frame.  The current rasteriser would be ~60..80 M
+  cycles: unplayable on Old, ~10-12 fps on New.
+- **Rendering is the work.** The PICA200 has no fragment shaders, so gpu_gl.c (CLUT lookup in the shader over a VRAM
+  texture) does not carry over; a citro3d backend needs a texture cache (texture page + CLUT decoded to RGBA on the
+  CPU, invalidated by VRAM writes and by drawing into sampled areas) and fixed-function blending for the four PS1
+  semi-transparency modes.  The alternative is a much faster software rasteriser (PCSX-ReARMed reaches full speed on
+  New 3DS with its ARM software GPU; check its licence before borrowing).
+- **Second screen.** The bottom screen (320x240 resistive touch) suits the panel, but panel.c is laid out for
+  1240x1080 and needs its own small layout.
