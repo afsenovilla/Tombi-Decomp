@@ -147,8 +147,11 @@ target_compile_options(game2_24 PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_GAME_FLAGS})
 # the runtime, the shims and the tables gen_port wrote at configure time (funcmap.c: retail address -> native
 # function, the overlay set, the areas and their signature words)
 file(GLOB PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/runtime/*.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/*.c)
-if(NINTENDO_3DS)   # the 3DS entry point (main: SD card paths, then the port's main as port_main)
-  list(APPEND PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/main_3ds.c)
+if(NINTENDO_3DS)   # the 3DS entry point (main: SD card paths, then the port's main as port_main); the citro3d renderer
+  list(APPEND PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/main_3ds.c ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica_c3d.c)
+  # its vertex shader (picasso), embedded as pica_vsh_shbin[] (pica_vsh_shbin.h)
+  ctr_add_shader_library(pica_vsh ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/pica.v.pica)
+  dkp_add_embedded_binary_library(pica_vsh_bin pica_vsh)
 endif()
 # build id (git short sha, "+" when the tree is modified): the first log line says which checkout the binary is from
 add_custom_command(OUTPUT ${GEN}/build_id.stamp
@@ -165,6 +168,10 @@ target_compile_definitions(port2chd PRIVATE ZSTD_DISABLE_ASM)
 target_compile_options(port2chd PRIVATE ${PORT2_ARCH_FLAGS} -O2 -w)
 add_library(port2rt OBJECT ${PORT2_RT} ${GEN}/funcmap.c ${GEN}/build_id.c)
 add_dependencies(port2rt port2_build_id)
+if(NINTENDO_3DS)
+  add_dependencies(port2rt pica_vsh_bin)
+  target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/.dkp-generated/pica_vsh_bin ${CMAKE_CURRENT_SOURCE_DIR}/shims)
+endif()
 target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(port2rt PRIVATE ${CHDR_DIR}/include)
 target_compile_definitions(port2rt PRIVATE PORT_HAVE_CHD)
@@ -248,7 +255,7 @@ endif()
 # 3. resolve the rest against the retail symbol table: data image (from the user's MAIN0.EXE/X000.BIN), aliases,
 #    stubs.  All three are generated into the build dir; data.c is game data and never leaves it.
 file(GENERATE OUTPUT ${GEN}/objects.txt
-     CONTENT "$<JOIN:$<TARGET_OBJECTS:game2>,\n>\n$<JOIN:$<TARGET_OBJECTS:game2_24>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2rt>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2chd>,\n>\n")
+     CONTENT "$<JOIN:$<TARGET_OBJECTS:game2>,\n>\n$<JOIN:$<TARGET_OBJECTS:game2_24>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2rt>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2chd>,\n>\n$<$<BOOL:${NINTENDO_3DS}>:$<JOIN:$<TARGET_OBJECTS:pica_vsh_bin>,\n>\n>")
 add_custom_command(OUTPUT ${GEN}/syms.ld ${GEN}/stubs.c ${GEN}/data.c ${GEN}/thunks.S ${GEN}/addrmap.c ${GEN}/report.txt
                    COMMAND ${PORT2_GEN_ENV} ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py link ${GEN} ${CMAKE_NM} ${GEN}/objects.txt
                    DEPENDS game2 game2_24 port2rt port2chd $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt>
@@ -302,6 +309,7 @@ if(WIN32)
                       -Wl,--stack,16777216 ${GEN}/syms.ld)
   target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
 elseif(NINTENDO_3DS)
+  target_sources(tombi2 PRIVATE $<TARGET_OBJECTS:pica_vsh_bin>)
   # 3dsx.specs (3DS.cmake) links the program at 0x00100000, the same base as the i386 build: the image is below 16 MB
   target_link_options(tombi2 PRIVATE ${GEN}/syms.ld)
   target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})

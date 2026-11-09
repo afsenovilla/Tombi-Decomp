@@ -3,7 +3,7 @@
  *   sdmc:/3ds/tombi/            the folder (made if missing; the current directory: saves and settings go here)
  *   sdmc:/3ds/tombi/data/       a folder of tools/extract_data.py, if present; otherwise
  *   sdmc:/3ds/tombi/<image>     the first .chd / .bin / .iso in the folder (the player's own disc image)
- *   sdmc:/3ds/tombi/args.txt    optional extra flags, separated by spaces or lines (e.g. --renderer pica --lang 5)
+ *   sdmc:/3ds/tombi/args.txt    optional extra flags, separated by spaces or lines (e.g. --lang 5, --renderer soft)
  *   sdmc:/3ds/tombi/log.txt     the log (stderr), rewritten on every start
  * Without a disc image the top screen says where to put it and the program waits for START. */
 #include <3ds.h>
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
         wait_message("Tombi! port\n\nNo disc image found.\nCopy your own Tombi! (PAL) disc image\n(.chd, .bin or .iso) to\n\n  " DIR_ "/\n\nand start again.");
         return 0;
     }
-    args[n++] = "--renderer"; args[n++] = "soft";
+    args[n++] = "--renderer"; args[n++] = "pica";   /* the GPU (n3ds/pica_c3d.c); args.txt "--renderer soft": the CPU */
     args[n++] = "--skip-movies";
     FILE *f = fopen(DIR_ "/args.txt", "r");
     if (f) {

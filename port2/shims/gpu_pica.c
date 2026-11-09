@@ -25,24 +25,15 @@
 #include "port_runtime.h"
 #include "gpu_backend.h"
 
-typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
+#include "gpu_pica.h"
 
-#define A_OPAQUE 0x80
-#define A_SEMI 0xFF
-enum { AT_OFF, AT_NOTZERO, AT_OPAQUE, AT_SEMI };
-typedef struct { float x, y, u, v; u8 r, g, b, a; } PV;
-typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2; } PState;   /* tex: slot or -1; blend: -1 or the PS1 mode */
-typedef struct {
-    void (*tex_upload)(int slot, const u32 *rgba);            /* 256 x 256 RGBA8 (r in the low byte) */
-    void (*tris)(const PState *s, const PV *v, int n);        /* n vertices, 3 per triangle */
-    void (*fill)(int x, int y, int w, int h, u32 rgba);
-    void (*read)(int x, int y, int w, int h, u32 *dst, int stride);
-    void (*write)(int x, int y, int w, int h, const u32 *src, int stride);
-} PicaDev;
+typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
+#define A_OPAQUE PICA_A_OPAQUE
+#define A_SEMI PICA_A_SEMI
+#define SLOTS PICA_SLOTS
 
 /* ================================================================== the reference device (CPU) */
 static u32 (*rt)[1024];                  /* the render target, 512 rows (allocated by pica_start: the image stays small) */
-#define SLOTS 32
 static u32 (*slot_px)[256 * 256];        /* SLOTS textures */
 static void ref_tex_upload(int slot, const u32 *rgba) { memcpy(slot_px[slot], rgba, 256 * 256 * 4); }
 static inline u8 sat(int v) { return v < 0 ? 0 : v > 255 ? 255 : (u8)v; }
@@ -120,8 +111,18 @@ static void ref_read(int x, int y, int w, int h, u32 *d, int stride) {
 static void ref_write(int x, int y, int w, int h, const u32 *s, int stride) {
     for (int j = 0; j < h; j++) memcpy(&rt[y + j][x], s + (size_t)j * stride, (size_t)w * 4);
 }
-static const PicaDev pd_ref = { ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write };
+static int ref_start(void) {
+    if (!rt) rt = calloc(512, sizeof *rt);
+    if (!slot_px) slot_px = malloc(SLOTS * sizeof *slot_px);
+    return rt && slot_px ? 0 : -1;
+}
+static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0 };
+#ifdef __3DS__
+extern const PicaDev pd_c3d;              /* port2/n3ds/pica_c3d.c */
+static const PicaDev *dev = &pd_c3d;
+#else
 static const PicaDev *dev = &pd_ref;
+#endif
 
 /* ================================================================== the core */
 static const GpuState *gs = &port_gs;
@@ -416,6 +417,9 @@ static void pica_stop(void) {
     port_printf("[gpu] pica: %llu batches, %llu triangles, %llu texture decodes, %llu read-backs (%llu for textures, %llu for the host: %llu pixels)\n",
                 st_batches, st_tris, st_decodes, st_readbacks, st_rb_tex, st_rb_host, st_rb_px);
 }
-static int pica_present(int dx, int dy, int dw, int dh, int masked) { (void)dx; (void)dy; (void)dw; (void)dh; (void)masked; return 0; }
+static int pica_present(int dx, int dy, int dw, int dh, int masked) {
+    flush();
+    return dev->present ? dev->present(dx, dy, dw, dh, masked) : 0;
+}
 const GpuBackend port_gpu_pica = { "pica (3DS model, CPU reference)", pica_start, pica_stop, pica_tri, pica_rect, pica_line, pica_fill,
                                    pica_copy, pica_vram_written, pica_vram_read, pica_list_end, pica_present, 0 };
