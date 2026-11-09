@@ -214,6 +214,9 @@ jobs:
           SD="$HOME/.local/share/azahar-emu/sdmc"
           mkdir -p "$SD/3ds/tombi" shots
           cp "$RUNNER_TEMP/disccache/game.bin" "$SD/3ds/tombi/tombi.bin"
+          # frame and VRAM dumps (runtime/main.c --dump-frames / --dump-vram) of what the 3DS renderer holds
+          echo "--dump-frames sdmc:/3ds/tombi/dump --dump-every 200 --dump-vram" > "$SD/3ds/tombi/args.txt"
+          mkdir -p "$SD/3ds/tombi/dump"
           ls -l app "$SD/3ds/tombi"
           export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
           Xvfb :99 -screen 0 1280x1024x24 & sleep 2
@@ -223,6 +226,12 @@ jobs:
           for i in $(seq 1 16); do sleep 15; import -window root "shots/shot_$(printf %03d $((i*15))).png" || true; done
           kill "$EMU" 2>/dev/null || true; sleep 2
           cp "$SD/3ds/tombi/log.txt" shots/log.txt 2>/dev/null || echo "(no log.txt)" > shots/log.txt
+          ls "$SD/3ds/tombi/dump" | head -40
+          for f in frame_000800 vram_000800 frame_001400 vram_001400; do
+            [ -f "$SD/3ds/tombi/dump/$f.png" ] || continue
+            convert "$SD/3ds/tombi/dump/$f.png" -quality 80 "dump_$f.jpg"
+            echo "=====BEGIN $f====="; base64 -w 100 "dump_$f.jpg"; echo "=====END $f====="
+          done
           echo "== windows"; xwininfo -root -tree | grep -v "has no name" | head -30 || true
           echo "== azahar.log"; grep -v -i "keysym\|xkbcomp" azahar.log | head -120
           echo "== azahar_log.txt"; find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" -exec grep -v "Config <Info>" {} \; 2>/dev/null | grep -i -E "loader|3dsx|error|critical|warning|tombi|svc|memory" | head -80
