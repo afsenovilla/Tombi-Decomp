@@ -26,7 +26,7 @@ CASES = {
     'defaults': {'cfg': {}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '60']},
     'defaults_es': {'cfg': {}, 'ui': 'es', 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--lang', '5', '--skip-intro', '--hz', '60']},
     'disc_only': {'cfg': {'disc': '{APP}/game.cue', 'savedir': '{APP}/saves'}, 'expect': ['--disc', '{APP}/game.cue', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--save-dir', '{APP}/saves', '--skip-intro', '--hz', '60']},
-    'everything': {'cfg': {'disc': '{APP}/tombi.bin', 'savedir': '{APP}/my saves', 'scale': 3, 'fullscreen': True, 'renderer': 'gl', 'internal_res': 4, 'aspect': '16:9', 'lang': 5, 'cut_content': True, 'early_title': '{APP}/TOMBA', 'texpack': '{APP}', 'experimental': True, 'show_fps': True, 'dualshock': True, 'rumble': 50, 'pad_map': {'cross': 'b', 'circle': 'a', 'start': 'guide', 'select': ''}, 'prompts_style': 'custom', 'prompt_colors': 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', 'keys_on': True, 'keys': {'cross': 'Space', 'circle': 'Return', 'up': 'W'}, 'areasel': True, 'area': 4, 'section': 7, 'ap_on': True, 'ap': 12345, 'lives_on': True, 'lives': 9, 'inflives': True, 'infhealth': True, 'events': True, 'debugmenu': True, 'titledebug': True, 'skipintro': False, 'hz60': True, 'autostart': True, 'civ_route': True, 'civ_collision': True, 'fps': '120'}, 'expect': ['--disc', '{APP}/tombi.bin', '--window', '--scale', '3', '--log-fps', '2', '--renderer', 'gl', '--aspect', '16:9', '--internal-res', '4', '--fps', '120', '--lang', '5', '--cut-content', '--early-title', '{APP}/TOMBA', '--save-dir', '{APP}/my saves', '--texture-pack', '{APP}', '--fullscreen', '--show-fps', '--dualshock', '--rumble', '50', '--pad-map', 'cross=b,circle=a,start=guide,select=', '--prompts', 'custom', '--prompt-colors', 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', '--hz', '60', '--poke', '900:1F8001B4:1', '--poke', '1250:8009C960:4:2', '--poke', '1250:8009C962:7:2', '--pad-script', '1000:start,1300:circle:3', '--title-debug', '--poke', 'g1:8009C96C:3039:4', '--poke', 'g1:8009C980:9:1', '--poke-every', '50:8009C980:63:1', '--poke-every', '1:8009C970:4:1', '--poke', 'g1:8009CDA4:FF:1x130', '--debug-menu', '--keys', 'up=W,cross=Space,circle=Return', '--civ-route', '--civ-maps', '{APP}/civ_cache/maps', '--civ-wfm', '{APP}/civ_cache/wfm', '--civ-collision']},
+    'everything': {'cfg': {'disc': '{APP}/tombi.bin', 'savedir': '{APP}/my saves', 'scale': 3, 'fullscreen': True, 'renderer': 'gl', 'internal_res': 4, 'aspect': '16:9', 'lang': 5, 'cut_content': True, 'early_title': '{APP}/TOMBA', 'texpack': '{APP}', 'experimental': True, 'show_fps': True, 'dualshock': True, 'rumble': 50, 'pad_map': {'cross': 'b', 'circle': 'a', 'start': 'guide', 'select': ''}, 'prompts_style': 'custom', 'prompt_colors': 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', 'keys_on': True, 'keys': {'cross': 'Space', 'circle': 'Return', 'up': 'W'}, 'areasel': True, 'area': 4, 'section': 7, 'ap_on': True, 'ap': 12345, 'lives_on': True, 'lives': 9, 'inflives': True, 'infhealth': True, 'events': True, 'debugmenu': True, 'titledebug': True, 'skipintro': False, 'hz60': True, 'autostart': True, 'civ_route': True, 'civ_collision': True, 'fps': '120'}, 'expect': ['--disc', '{APP}/tombi.bin', '--window', '--scale', '3', '--log-fps', '2', '--renderer', 'gl', '--aspect', '16:9', '--internal-res', '4', '--fps', '120', '--lang', '5', '--cut-content', '--early-title', '{APP}/TOMBA', '--save-dir', '{APP}/my saves', '--texture-pack', '{APP}', '--fullscreen', '--show-fps', '--dualshock', '--rumble', '50', '--pad-map', 'cross=b,circle=a,start=guide,select=', '--prompts', 'custom', '--prompt-colors', 'nintendo:ff0000/ffffff,00ff00/000000,0000ff/ffffff,ffff00/000000', '--hz', '60', '--poke', '900:IS_DEBUG_MODE_ENABLED:1', '--poke', '1250:GAME:4:2', '--poke', '1250:GAME+2:7:2', '--pad-script', '1000:start,1300:circle:3', '--title-debug', '--poke', 'g1:GAME+C:3039:4', '--poke', 'g1:GAME+20:9:1', '--poke-every', '50:GAME+20:63:1', '--poke-every', '1:GAME+10:4:1', '--poke', 'g1:SCRIPT_FLAGS:FF:1x130', '--debug-menu', '--keys', 'up=W,cross=Space,circle=Return', '--civ-route', '--civ-maps', '{APP}/civ_cache/maps', '--civ-wfm', '{APP}/civ_cache/wfm', '--civ-collision']},
     'soft_odd': {'cfg': {'renderer': 'soft', 'internal_res': 3, 'aspect': 'weird', 'prompts_style': 'thor_abxy', 'rumble': 'abc', 'fps': 'unlimited', 'texpack': '{APP}', 'experimental': False, 'scale': '1'}, 'expect': ['--disc', '', '--window', '--scale', '1', '--log-fps', '2', '--renderer', 'soft', '--aspect', '4:3', '--fps', 'unlimited', '--skip-intro', '--hz', '60']},
     'fps60_legacy': {'cfg': {'fps60': True, 'experimental': True}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--fps', 'auto', '--skip-intro', '--hz', '60']},
     'fps_auto': {'cfg': {'fps': 'auto', 'renderer': 'soft'}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'soft', '--aspect', '4:3', '--fps', 'auto', '--skip-intro', '--hz', '60']},
@@ -35,8 +35,8 @@ CASES = {
     'civ_town': {'cfg': {'civ_collision': True}, 'data': True, 'civ_play': 16, 'expect': ['--data', '{APP}/data', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '60', '--civ-town', '16', '--civ-maps', '{APP}/civ_cache/maps', '--civ-wfm', '{APP}/civ_cache/wfm', '--civ-collision']},
     'keys_default_on': {'cfg': {'keys_on': True, 'keys': {'up': 'Up'}, 'prompts_style': 'xbox', 'lang': '6', 'rumble': 0}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--lang', '6', '--rumble', '0', '--prompts', 'xbox', '--skip-intro', '--hz', '60']},
     'keys_off_custom': {'cfg': {'keys_on': False, 'keys': {'up': 'W'}, 'pad_map': {'up': 'foo', 'down': 'leftx-'}, 'prompts_style': 'generic'}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--pad-map', 'up=foo,down=leftx-', '--prompts', 'generic', '--skip-intro', '--hz', '60']},
-    'area_door': {'cfg': {'areasel': True, 'area': 17, 'section': 0, 'ap': 500, 'lives': 3}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '60', '--poke', '900:1F8001B4:1', '--poke', '1250:8009C960:11:2', '--poke', '1250:8009C962:1:2', '--pad-script', '1000:start,1300:circle:3']},
-    'area_bad': {'cfg': {'areasel': True, 'area': 99, 'section': 2}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '60', '--poke', '900:1F8001B4:1', '--poke', '1250:8009C960:0:2', '--poke', '1250:8009C962:2:2', '--pad-script', '1000:start,1300:circle:3']},
+    'area_door': {'cfg': {'areasel': True, 'area': 17, 'section': 0, 'ap': 500, 'lives': 3}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '60', '--poke', '900:IS_DEBUG_MODE_ENABLED:1', '--poke', '1250:GAME:11:2', '--poke', '1250:GAME+2:1:2', '--pad-script', '1000:start,1300:circle:3']},
+    'area_bad': {'cfg': {'areasel': True, 'area': 99, 'section': 2}, 'expect': ['--disc', '', '--window', '--scale', '2', '--log-fps', '2', '--renderer', 'gl', '--aspect', '4:3', '--skip-intro', '--hz', '60', '--poke', '900:IS_DEBUG_MODE_ENABLED:1', '--poke', '1250:GAME:0:2', '--poke', '1250:GAME+2:2:2', '--pad-script', '1000:start,1300:circle:3']},
 }
 
 
@@ -303,16 +303,24 @@ class TestLauncher(unittest.TestCase):
         self.assertEqual(len(self.w.tiles), 1)
 
     def test_usa_game_gets_its_own_options(self):
-        """USA: its own data folder and binary, no --lang / --hz / text patch / cut content / PAL-address mods / prompts,
-        no language box, no Cut content page; the portable options stay."""
+        """USA: its own data folder and binary, no --lang / --hz / text patch / cut content / title DEBUG / prompts,
+        no language box, no Cut content page; the portable options stay, the area select and debug menu included (their
+        pokes name the field: GAME, IS_DEBUG_MODE_ENABLED, resolved by the USA build)."""
         d = self.library("usa", "SCUS-94236")
         a = self.args()
         self.assertEqual(a[:2], ["--data", os.path.join(d, "data-scus94236")])
-        for flag in ("--lang", "--hz", "--cut-content", "--poke", "--debug-menu", "--title-debug", "--prompts",
+        for flag in ("--lang", "--hz", "--cut-content", "--title-debug", "--prompts",
                      "--subscreen-labels", "--patch-tex", "--civ-maps"):
             self.assertNotIn(flag, a)
         self.assertIn("--skip-intro", a)
-        self.assertEqual(a[a.index("--pad-script") + 1], "1000:start")      # autostart (the area select is PAL-only)
+        self.assertIn("--debug-menu", a)
+        self.assertEqual(a[a.index("--poke") + 1], "900:IS_DEBUG_MODE_ENABLED:1")
+        self.assertFalse([x for x in a if x[:1].isdigit() and ":800" in x])   # no raw PAL address
+        self.assertEqual(a[a.index("--pad-script") + 1], "1000:start,1300:circle:3")      # the area select
+        # its own memory card folder (saves_usa/, as files/saves_usa on Android), for the game and the save tools
+        self.assertEqual(a[a.index("--save-dir") + 1], os.path.join(d, "saves_usa"))
+        self.assertTrue(os.path.isdir(os.path.join(d, "saves_usa")))
+        self.assertEqual(self.w.card_file(), os.path.join(d, "saves_usa", "tombi_mc0.mcd"))
         exe = self.w.command()[0].replace("\\", "/")
         self.assertTrue(exe.endswith(("port2-scus94236/tombi2", "port2-scus94236-win/tombi2.exe", "tombi-pc-usa", "tombi-pc-usa.exe")), exe)
         self.assertFalse(hasattr(self.w, "lang_cb"))
@@ -326,6 +334,8 @@ class TestLauncher(unittest.TestCase):
         for flag in ("--lang", "--cut-content", "--poke", "--debug-menu", "--title-debug", "--prompts", "--subscreen-labels"):
             self.assertIn(flag, a)
         self.assertEqual(a[a.index("--hz") + 1], "50")
+        self.assertNotIn("--save-dir", a)                                 # PAL: the port's default card, as before
+        self.assertEqual(self.w.card_file(), os.path.join(d, "tombi_mc0.mcd"))
         self.assertFalse(self.w.nav["cut"].isHidden())
         self.assertEqual(json.load(open(os.path.join(d, "tombi-port.json")))["game"], "SCES-01331")
 

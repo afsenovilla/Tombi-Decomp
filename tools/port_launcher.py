@@ -153,8 +153,7 @@ i18n.add({   # the game library (tools/game_library.py); the other languages: po
            "q.removedata": "¿Borrar también los archivos extraídos?\n{0}\n(Se vuelven a extraer si añades el disco otra vez.)",
            "s.ok2": "Disco compatible: {0}, {1} verificado (sha1).", "s.pickgame": "Elige un juego de la biblioteca.",
            "s.noimage": "No se encuentra la imagen del disco: {0}", "l.speedntsc": "60 Hz: la velocidad de este juego (NTSC).",
-           "l.nomods": "Los trucos y las opciones de depuración escriben direcciones de la versión PAL: todavía no están "
-                       "disponibles para este juego."},
+           "l.nomods": "La entrada DEBUG del título solo existe en la versión PAL por ahora."},
     "en": {"c.library": "Games", "b.addgame": "Add game…",
            "l.library": "Add the image of each disc you own (.bin / .cue / .iso / .chd). It is recognised by its boot "
                         "executable and extracted once into a folder of its own; the logo comes from your own disc.",
@@ -174,7 +173,7 @@ i18n.add({   # the game library (tools/game_library.py); the other languages: po
            "q.removedata": "Delete the extracted files too?\n{0}\n(They are extracted again if you add the disc again.)",
            "s.ok2": "Compatible disc: {0}, {1} verified (sha1).", "s.pickgame": "Pick a game of the library.",
            "s.noimage": "Disc image not found: {0}", "l.speedntsc": "60 Hz: this game's own speed (NTSC).",
-           "l.nomods": "The cheats and debug options write PAL addresses: not available for this game yet."},
+           "l.nomods": "The title DEBUG entry is PAL-only for now."},
 })
 
 
@@ -243,6 +242,16 @@ def data_dir():
     """Where the selected game's disc is extracted once (tools/extract_data.py): data/ next to the launcher for the
     first PAL disc (as always), data-<serial>/ for the others; tombi2 reads it with --data."""
     return os.path.join(app_dir(), CURRENT.get("data") or "data")
+
+
+def version_save_dir(savedir):
+    """The folder of the selected game's memory card: the save folder as set (empty = the port's default, next to
+    data/) for PAL; the version's own subfolder of it for another release (game_library VERSIONS "save_sub": USA
+    saves_usa/, as files/saves_usa on Android), so each game keeps its own tombi_mc0.mcd.  "" = the port's default."""
+    sub = (GL.version_of(current_sha1()) or {}).get("save_sub") or ""
+    if not sub:
+        return savedir
+    return os.path.join(savedir or app_dir(), sub)
 
 
 def art_cache(serial):
@@ -1147,8 +1156,11 @@ def build_command(s, civ_play=None):
         note = "yes (%s)" % gfx
     if not translation_native(s):
         cmd += ["--no-translation-file"]      # tombi2 would load translation.tpatch from its cwd: only when it is the choice
-    if s.get("savedir"):
-        cmd += ["--save-dir", s["savedir"]]
+    sd = version_save_dir(s.get("savedir") or "")
+    if sd:
+        if sd != s.get("savedir"):         # (a version's own subfolder: the port does not create folders)
+            os.makedirs(sd, exist_ok=True)
+        cmd += ["--save-dir", sd]
     if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft" and s.get("experimental"):
         cmd += ["--texture-pack", s["texpack"]]
     if s.get("fullscreen"):
@@ -3089,10 +3101,10 @@ class App(QMainWindow):
         c = self.card(f, tr("c.mods"))
         c.addWidget(wrap_label(tr("l.modshelp"), "muted"))
         c.addSpacing(4)
-        if not has("pokes"):                                  # they write PAL addresses: not for this version yet
+        if not has("pokes"):                                  # only port_mods.PORTABLE_MODS in this version
             c.addWidget(wrap_label(tr("l.nomods"), "muted"))
         for mid, lk, dk, kind, _fn in M.MODS:
-            if mid in ("keys_on", "skipintro", "hz60") or not has("pokes"):
+            if mid in ("keys_on", "skipintro", "hz60") or not (has("pokes") or mid in M.PORTABLE_MODS):
                 continue      # on the Controls / Play pages
             box = QWidget()
             bl = QVBoxLayout(box)
@@ -3383,8 +3395,9 @@ class App(QMainWindow):
     def card_file(self):
         """the card the port uses (port2/shims/card.c: --save-dir, else next to the disc image / the data/ folder)"""
         self.collect()
-        d = self.s.get("savedir") or (os.path.dirname(data_dir()) if data_ready()
-                                      else os.path.dirname(bin_of_cue(self.s["disc"])) if self.s.get("disc") else app_dir())
+        d = version_save_dir(self.s.get("savedir") or "") or (
+            os.path.dirname(data_dir()) if data_ready()
+            else os.path.dirname(bin_of_cue(self.s["disc"])) if self.s.get("disc") else app_dir())
         return os.path.join(d, "tombi_mc0.mcd")
 
     def _save_busy(self):

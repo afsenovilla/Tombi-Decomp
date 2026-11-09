@@ -116,7 +116,7 @@ if(gen_rc)
 endif()
 include(${GEN}/sources.cmake)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-             ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py ${ROOT}/port/tools/gen_port.py ${ROOT}/port/fixes.txt
+             ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py ${ROOT}/port/tools/gen_port.py ${ROOT}/port/tools/portver.py ${ROOT}/port/fixes.txt
              ${PORT2_FULL_DIR}/${PORT2_FULL_EXE}.full.ld)
 
 # 2. phase 1 is a 32-bit build with the normal libc (the game's structs hold 32-bit pointers); the image is linked

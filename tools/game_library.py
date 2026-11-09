@@ -22,12 +22,13 @@ JP_SHA1 = "07d577698ad31ec1a69b9d7b80a7c3f90b650888"      # SLPS_011.44
 
 # What the launcher offers for a version (keys of FEATURES): the port options that read PAL addresses or the PAL
 # disc's files are PAL-only in the USA build (docs/USA.md "Native port": --lang, --text-patch, --picture ntsc,
-# --cut-content, --civ-test, the panel, the debug menu; the --poke mods use PAL addresses).
+# --cut-content, --civ-test, the panel, the title DEBUG entry).
 #   lang       the nine languages of the boot menu (--lang)
 #   patch      text patches / translations applied to data/ (--text-patch, the improved Spanish translation)
 #   hz         the 50 / 60 Hz switch (a PAL game; NTSC versions always run at 60)
 #   cut        the Cut content page (--cut-content, --early-title, the rebuilt towns)
-#   pokes      the cheats / area select / title DEBUG / debug menu mods (PAL addresses)
+#   pokes      every mod of tools/port_mods.py; without it only port_mods.PORTABLE_MODS (the cheats, area select and
+#              debug menu name their fields and run in the USA build too; title DEBUG and the 50/60 Hz switch do not)
 #   prompts    the button-icon styles (--prompts: redraws the PAL fonts' glyphs)
 #   texdump    "Dump all textures" (tools/dump_all_textures.py reads the PAL disc layout)
 PAL_FEATURES = frozenset(("lang", "patch", "hz", "cut", "pokes", "prompts", "texdump"))
@@ -36,21 +37,25 @@ USA_FEATURES = frozenset()
 # Every version the launcher knows. key: the boot executable's sha1.
 #   version    port version (port/tools/portver.py: PORT_VERSION; "" = PAL)
 #   binary     the port executable next to the launcher (+ .exe on Windows); build_dir: the checkout's CMake tree
+#   save_sub   the subfolder of the save folder holding this game's card (tombi_mc0.mcd): "" = the folder itself (PAL,
+#              as always); USA saves_usa, the same name as on Android (Library.java saveSub)
 #   text_patches  bundled per-version text patches (patches/<file>, tools/data_patch.py); the hook for future
 #                 retranslations of the USA / JP texts: none yet (the PAL one is the improved Spanish translation)
 #   art        (logo page, its CLUT, title landscape, its CLUT, the title overlay, the landscape's y on screen): files of
 #              the disc (see logo_sprites)
 VERSIONS = {
     PAL_SHA1: dict(key="pal", version="", title="Tombi!", region="PAL", serials=("SCES-01331", "SCES-01330"),
-                   supported=True, binary="tombi-pc", build_dir="port2", hz=50, features=PAL_FEATURES,
+                   supported=True, binary="tombi-pc", build_dir="port2", hz=50, features=PAL_FEATURES, save_sub="",
                    text_patches=("es_mejorada.tombipatch.json",),
                    art=("SYSTEM/A00202.000", "SYSTEM/A00203.000", "SYSTEM/A00200.GAM", "SYSTEM/A00201.000", "SYSTEM/O0PTSUB0.BIN", 8)),
     USA_SHA1: dict(key="usa", version="usa", title="Tomba!", region="USA", serials=("SCUS-94236",),
                    supported=True, binary="tombi-pc-usa", build_dir="port2-scus94236", hz=60, features=USA_FEATURES,
+                   save_sub="saves_usa",
                    text_patches=(),
                    art=("SYSTEM/A00012.000", "SYSTEM/A00013.000", "SYSTEM/A00010.GAM", "SYSTEM/A00011.000", "SYSTEM/OPTSUB00.BIN", 0)),
     JP_SHA1: dict(key="jp", version="jp", title="Ore no Tomba", region="Japan", serials=("SLPS-01144",),
                   supported=False, binary="tombi-pc-jp", build_dir="port2-slps01144", hz=60, features=frozenset(),
+                  save_sub="saves_jp",
                   text_patches=(),
                   art=("SYSTEM/A00012.000", "SYSTEM/A00013.000", "SYSTEM/A00010.GAM", "SYSTEM/A00011.000", "SYSTEM/OPTSUB00.BIN", 0)),
     PAL_REV0_SHA1: dict(key="pal-rev0", version=None, title="Tombi! (Rev 0)", region="PAL", serials=("SCES-01331", "SCES-01330"),

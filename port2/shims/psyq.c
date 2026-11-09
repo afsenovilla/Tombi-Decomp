@@ -89,7 +89,8 @@ int port_play_time_tick(void)
 static void call_psx(void *fn) { ((void (*)(void))fn)(); }
 
 /* --poke FRAME:ADDR:VALUE[:SIZE]: write RAM at the start of vblank FRAME (test setups, e.g. the debug area select
-   flag 0x1F8001B4); ADDR and VALUE in hex, SIZE 1, 2 or 4 bytes (default 1).
+   flag 0x1F8001B4); ADDR and VALUE in hex, SIZE 1, 2 or 4 bytes (default 1).  ADDR may also be NAME[+OFF]
+   (GAME+C, SCRIPT_FLAGS, IS_DEBUG_MODE_ENABLED: port_addr_of_name), the field's address in this build's release.
    --poke-every INTERVAL:ADDR:VALUE[:SIZE]: the same every INTERVAL vblanks (mods: infinite lives / vitality);
    stored as a negative frame.  A FRAME of gN counts from the first vblank of gameplay (the first area overlay load,
    after the new game's initGameConfig): the launcher's start-of-game mods, whenever the player starts. */
@@ -104,15 +105,41 @@ static u32 hexval(const char **p) {
         v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
     *p = h; return v;
 }
+/* the retail data names the --poke forms NAME[+OFF] accept: their address in the version this build runs
+   (gen/version/port_version.h, port/tools/portver.py), so a launcher's mods write the same field in every release */
+unsigned int port_addr_of_name(const char *n, int len) {
+    static const struct { const char *name; u32 addr; } names[] = {
+        {"GAME", PORT_A_GAME}, {"GVARS", PORT_A_GVARS}, {"PLAYER", PORT_A_PLAYER}, {"SCRIPT_FLAGS", PORT_A_SCRIPT_FLAGS},
+        {"IS_DEBUG_MODE_ENABLED", PORT_A_IS_DEBUG_MODE_ENABLED}};
+    for (unsigned i = 0; i < sizeof names / sizeof names[0]; i++)
+        if ((int)strlen(names[i].name) == len && !memcmp(names[i].name, n, len)) return names[i].addr;
+    return 0;
+}
+/* ADDR of a --poke: hex (8009C960), or NAME[+HEXOFF] (GAME+C) for a name of port_addr_of_name; *ok = 0 if unknown */
+static u32 poke_addr(const char **p, int *ok) {
+    const char *s = *p, *e = s; int named = 0;
+    while ((*e >= '0' && *e <= '9') || ((*e | 32) >= 'a' && (*e | 32) <= 'z') || *e == '_') {
+        if (((*e | 32) >= 'g' && (*e | 32) <= 'z' && !(e == s + 1 && *s == '0' && (*e | 32) == 'x')) || *e == '_') named = 1;
+        e++;
+    }
+    *ok = 1;
+    if (!named) return hexval(p);
+    u32 a = port_addr_of_name(s, (int)(e - s));
+    if (!a) { port_printf("[port] --poke: unknown name %.*s (ignored)\n", (int)(e - s), s); *ok = 0; }
+    if (*e == '+') { e++; a += hexval(&e); }
+    *p = e;
+    return a;
+}
 void port_poke_add_every(const char *s, int every) {
     if (n_pokes == 32) return;
-    int f = 0;
+    int f = 0, ok;
     pokes[n_pokes].ingame = !every && *s == 'g';
     if (pokes[n_pokes].ingame) s++;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
     pokes[n_pokes].frame = every ? -(f > 0 ? f : 1) : f;
-    pokes[n_pokes].addr = hexval(&s);
+    pokes[n_pokes].addr = poke_addr(&s, &ok);
+    if (!ok) return;
     if (*s++ != ':') return;
     pokes[n_pokes].value = hexval(&s);
     pokes[n_pokes].size = *s == ':' ? s[1] - '0' : 1;
