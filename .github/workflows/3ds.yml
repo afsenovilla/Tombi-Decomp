@@ -131,14 +131,20 @@ jobs:
       - name: Build tombi.3dsx (devkitARM container)
         if: steps.fetch.outputs.ok == 'true'
         run: |
-          docker run --rm -v "$PWD:/w" -w /w devkitpro/devkitarm:latest bash -ec '
-            echo "== image"; ls $DEVKITPRO; arm-none-eabi-gcc --version | head -1
-            dkp-pacman -Sy --noconfirm --needed 3ds-sdl
-            dkp-pacman -Q | grep -E "libctru|citro3d|3ds-sdl|devkitARM" || true
-            command -v python3 >/dev/null || { apt-get update -qq && apt-get install -y -qq python3 >/dev/null; }
-            command -v cmake >/dev/null || { apt-get update -qq && apt-get install -y -qq cmake >/dev/null; }
-            command -v ninja >/dev/null || { apt-get update -qq && apt-get install -y -qq ninja-build >/dev/null; }
+          docker run --rm -v "$PWD:/w" -w /w -e SDL2_VERSION=2.30.11 devkitpro/devkitarm:latest bash -ec '
+            dkp-pacman -Q | grep -E "libctru|citro3d|devkitARM" || true
+            apt-get update -qq && apt-get install -y -qq python3 cmake ninja-build binutils-mipsel-linux-gnu curl >/dev/null
             git config --global --add safe.directory /w || true
+            # SDL2 with its Nintendo 3DS backend (docs/README-n3ds.md), from the pinned release tarball (devkitPro
+            # packages only SDL 1.2 for the 3DS); installed into the portlibs folder, where CMakeLists.txt looks
+            mkdir -p /tmp/sdl && cd /tmp/sdl
+            curl -fsSL -o sdl.tar.gz "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz"
+            tar xzf sdl.tar.gz
+            cmake -S SDL2-${SDL2_VERSION} -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_TEST=OFF -DCMAKE_INSTALL_PREFIX=$DEVKITPRO/portlibs/3ds > /dev/null
+            cmake --build build -j "$(nproc)" > /dev/null && cmake --install build > /dev/null
+            ls $DEVKITPRO/portlibs/3ds/lib | grep -i sdl
+            cd /w
             cmake -S port2 -B build/n3ds -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release
             cmake --build build/n3ds -j "$(nproc)" -- -k 0 > build/n3ds/build.log 2>&1 || true
             grep -E "error|Error|FAILED|undefined reference|multiple definition" build/n3ds/build.log | head -200 || true
