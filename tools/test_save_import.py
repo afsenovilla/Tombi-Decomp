@@ -286,6 +286,32 @@ class TestSaveImport(unittest.TestCase):
         c = check_card(self, self.c0)
         self.assertEqual(save_bytes(c, "BESCES-01331TOMBA-00"), fake_save(slot=0, fill=2)[S.FRAME:])
 
+    def test_usa_save(self):
+        """a USA (SCUS-94236) save (test_tombi_save.fake_usa_card: 1/60 s play time, slot digits at +0x14): its play
+        time in the info line, and a new slot renumbers the title at the USA offset"""
+        import test_tombi_save as TT
+        card = TT.fake_usa_card(slot=0, time=60 * (2 * 3600 + 5 * 60), lives=4, level=2)
+        mcs = card[T.FRAME:2 * T.FRAME] + card[T.BLOCK:2 * T.BLOCK]
+        p = os.path.join(self.d, "usa.mcs")
+        open(p, "wb").write(mcs)
+        dest = os.path.join(self.d, "usa", "tombi_mc0.mcd")
+        os.makedirs(os.path.dirname(dest))
+        self.assertEqual(S.save_info("BASCUS-94236TOMBA-00", mcs[S.FRAME:], es=False),
+                         "Slot 00 · Village of All Beginnings · 2:05 h")
+        S.import_file(p, dest)
+        with self.assertRaises(S.Conflict) as cm:
+            S.import_file(p, dest)
+        self.assertEqual(cm.exception.new_slot, "01")
+        S.import_file(p, dest, new_slot=True)
+        c = check_card(self, dest)
+        new = save_bytes(c, "BASCUS-94236TOMBA-01")
+        exp = bytearray(mcs[S.FRAME:])
+        exp[0x14:0x18] = "０１".encode("shift_jis")
+        self.assertEqual(new, bytes(exp))
+        self.assertIn("[01]", S.title(new))
+        s = [x for x in T.Card(dest).saves() if x.name == "BASCUS-94236TOMBA-01"][0]
+        self.assertEqual((s.slot, s.hz, s.hms(), s.checksum_ok()), (1, 60, (2, 5, 0), True))
+
 
 if __name__ == "__main__":
     unittest.main()

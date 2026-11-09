@@ -21,6 +21,10 @@ import java.util.Locale;
 final class SaveImport {
     static final int CARD = 0x20000, BLOCK = 0x2000, FRAME = 0x80;
     static final String[] TOMBI = {"BESCES-01330", "BESCES-01331", "BASCUS-94236", "BISLPS-01144"};
+    /** per release (tools/save_import.py PRODUCT_HZ / PRODUCT_SLOT_OFS, docs/SAVE_FORMAT.md): play-time vblanks per
+     *  second (50 PAL, 60 USA / JP) and the title offset of the slot number (-1: not known) */
+    static int hz(String nm) { return nm.startsWith("BASCUS-94236") || nm.startsWith("BISLPS-01144") || nm.startsWith("BISCPS-99999") ? 60 : 50; }
+    static int slotOfs(String nm) { return nm.startsWith("BESCES-0133") ? 0x16 : nm.startsWith("BASCUS-94236") ? 0x14 : -1; }
 
     static class Fail extends Exception { Fail(String m) { super(m); } }
 
@@ -159,7 +163,8 @@ final class SaveImport {
                 StringBuilder s = new StringBuilder(head);
                 String a = areaName(area, sec, es);
                 if (a != null) s.append(" · ").append(a);
-                s.append(" · ").append(t / 180000).append(':').append(String.format(Locale.ROOT, "%02d", t / 3000 % 60)).append(" h");
+                int hz = hz(nm);
+                s.append(" · ").append(t / (3600L * hz)).append(':').append(String.format(Locale.ROOT, "%02d", t / (60L * hz) % 60)).append(" h");
                 return s.toString();
             }
         }
@@ -214,15 +219,17 @@ final class SaveImport {
         return null;
     }
     /** the save as slot nn: the file name's last two digits in frame and, when they are fullwidth digits (Shift-JIS
-     *  0x824F + n), the slot number in the title (data +0x16, 2 characters; not covered by the checksum).  In place. */
+     *  0x824F + n), the slot number in the title (data +0x16 PAL, +0x14 USA: slotOfs; 2 characters; not covered by the
+     *  checksum).  In place. */
     static void renumber(byte[] frame, byte[] data, String nn) {
         String nm = name(frame, 0);
         String nw = nm.substring(0, nm.length() - 2) + nn;
         for (int i = 0; i < 20; i++) frame[10 + i] = i < nw.length() ? (byte) nw.charAt(i) : 0;
         fixFrame(frame, 0);
-        boolean fw = true;
-        for (int i = 0; i < 2; i++) fw &= u8(data, 0x16 + 2 * i) == 0x82 && u8(data, 0x17 + 2 * i) >= 0x4F && u8(data, 0x17 + 2 * i) <= 0x58;
-        if (fw) for (int i = 0; i < 2; i++) data[0x17 + 2 * i] = (byte) (0x4F + nn.charAt(i) - '0');
+        int so = slotOfs(nm);
+        boolean fw = so >= 0;
+        for (int i = 0; i < 2 && fw; i++) fw = u8(data, so + 2 * i) == 0x82 && u8(data, so + 1 + 2 * i) >= 0x4F && u8(data, so + 1 + 2 * i) <= 0x58;
+        if (fw) for (int i = 0; i < 2; i++) data[so + 1 + 2 * i] = (byte) (0x4F + nn.charAt(i) - '0');
     }
 
     /** the card already holds a save with the imported save's name: the launcher asks (Replace / Save to another slot
