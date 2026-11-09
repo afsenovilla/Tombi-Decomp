@@ -4,10 +4,10 @@
 // Portado de psx_tomba (psyq/libetc/intr.c, CheckCallback); licencia MIT del proyecto original.
 #if defined(VERSION_SCUS_94236)
 // USA version of PAL main0 80068520 (CheckCallback.c): JP C of src/CheckCallback_slps01144.c (CheckCallback_slps01144) (1.000 masked) [-O2 -G0] (tools/demo_sweep.py)
-extern unsigned short D_8009C00A;
+extern unsigned short D_8009641A;
 unsigned short CheckCallback(void)
 {
-    return D_8009C00A;
+    return D_8009641A;
 }
 #else
 #define SKIP_ASM

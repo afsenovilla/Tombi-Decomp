@@ -2,9 +2,9 @@
 #if defined(VERSION_SCUS_94236)
 // USA version of PAL i0nfo3 800e847c (tunnelClampPlayerToGates.c)
 #include "TOBJ.H"
-extern unsigned char D_8009CE21;
-extern unsigned char D_8009CE24;
-extern unsigned char D_8009CE34;
+extern unsigned char D_8009C189;
+extern unsigned char D_8009C18C;
+extern unsigned char D_8009C19C;
 extern signed char GAME_PLAYER_MODE;
 
 #define X o->a.p.whole
@@ -20,7 +20,7 @@ void tunnelClampPlayerToGates(TObj *o)
   { extern int port_noclip; if (port_noclip) return; }   /* --noclip: no one-way gates */
 #endif
   {
-    if (((D_8009CE21 != 0xFF) && (o->a.p.whole >= 0x3B6)) && (o->a.p.whole < 0x3E9))
+    if (((D_8009C189 != 0xFF) && (o->a.p.whole >= 0x3B6)) && (o->a.p.whole < 0x3E9))
     {
       y = o->y.p.whole;
       t = y + 0x1A6;
@@ -36,7 +36,7 @@ void tunnelClampPlayerToGates(TObj *o)
         }
       }
     }
-    if (D_8009CE24 != 0xFF)
+    if (D_8009C18C != 0xFF)
     {
       xx = o->a.p.whole;
       if ((unsigned short)(xx - 0x30C) < 0x1F)
@@ -65,7 +65,7 @@ void tunnelClampPlayerToGates(TObj *o)
         }
       }
     }
-    if (D_8009CE34 == 0)
+    if (D_8009C19C == 0)
     {
       if ((o->a.p.whole >= 0x2FC) && (o->a.p.whole < 0x36F))
       {

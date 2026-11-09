@@ -92,3 +92,50 @@ for many of them (splat `func_`), so they need hand work (PAL C as the starting 
 | dspsub2 800E954C (PAL 800E999C port), both overheadBuildMapStrip (JP trick), libapi psyq_8005ba74/bc10 | 99.81 % | 3678 / 3681 |
 | libsn `__main` / `__do_global_dtors` (hand-written Sony asm, from the JP files) | 99.83 % | 3680 / 3681 |
 | dspsub 800EEE84 (twin of PAL D0SPSUB 800EFD6C) | **100 %** | **3681 / 3681** |
+
+## Full link (stage U0, 2026-11-09)
+
+`python3 tools/build_full.py --version usa -j 8` links all 26 USA files from the C (`build/scus94236/full/`, ~5 min) and
+checks them by sha1: `SCUS_942.36`, `X00.BIN` .. `X19.BIN` and the eight SYSTEM overlays are **byte-identical** to the
+disc (also `cmp`-checked against `game_usa/fs`), with `<prog>.full.ld` PROVIDE tables and `<prog>.map` like the PAL
+build. Each version function is placed at its USA address from the file `tools/units.py` `version_sources` gives it
+(the same resolution as the report; `units("scus94236")` lists them); an area overlay links its area part only, the
+X00 prefix comes from the X00 linked first. 3 651 of the 3 680 C units link (the rest are the same Psy-Q units the PAL
+link also keeps as asm: libgpu/libcd .rodata shared between files, `_SsVmPBVoice`, `playerStepClingRotating`,
+`pigGateDiscoveryScene`), plus 18 USA data files at odd addresses that cannot replace word lines (raw bytes, nothing
+to prove).
+
+The link infers every relocation from the retail bytes, so it proves the bytes and the address each name stands for;
+the **name audit** (`build/scus94236/full/<prog>.names.txt`) then says what the names mean:
+- `named`: a name the USA symbols give another address. Almost all are *template reuse*: one PAL file whose code has
+  the same shape builds several USA functions that call other targets (`playerPushOutOfObjectBoxThunk.c` for ~20 jal
+  thunks, `topdownActorHandler.c`, `bitingPlantSway.c`, `GetGraphType.c` / `CdSetDebug.c` for "return a global"). The
+  link PROVIDEs such a name renamed (`name__ADDR`) per object, so **the port generator must compile a shared file once
+  per USA unit and apply the per-object renames** (stage U1);
+- `raw (version C)` / `raw (shared C)`: D_/func_ names with another number (PAL/JP addresses). The USA-only files and
+  `#if defined(VERSION_SCUS_94236)` blocks were renamed to the USA addresses (234 names); what is left is in shared PAL
+  code or in `JP || USA` branches, where the PAL/JP name stays (a port must never resolve a D_ name by its number);
+- `unknown`: PAL names with no USA symbol (their USA address is the link's).
+
+Bugs the link found (all invisible to objdiff with `functionRelocDiffs: none`; each one would have been a USA port bug):
+- `start_scus94236.c`: the JP copy used one symbol for the bss start and `$gp` (USA 8009AFB0 / 80097FA8), and JP
+  addresses for the rest;
+- `freeObjectByLayer.c`: the build stamp before its jump table is "98/3/22" "21:11" in USA (PAL "98/8/26" "14:10");
+- `queueLoadList.c`: its table runs past the end of the USA exe (zeros, bss): build_full now places a data section
+  that ends past the file when those bytes are zeros (report_data pads the target the same way);
+- static tables of PAL C with PAL pointers or values, USA reads the retail table instead (extern at the USA address):
+  `initWeaponTrailSprite`, `spawnA00TornadoOrbiters`, `updateCharlesTalkScene` (other contents), x01
+  `updateChainSegmentEnemy`, x03 `phoenixSpiritHintWalkC`, x10 `updateSwimTeacher`, x14 `evilPigPlayAttackSfx` (sound
+  ids one higher in USA);
+- cross-area twins in `reuse.txt` that set another area's event flag (`evilPigBagPortalOpen` of x01 for x02/x03/x04/
+  x09/x10/x16: `GCD.bcf0b` instead of the area's own byte; `spawnNpcSet20` / `stepHidingSonTalk` / `updateHidingSon`
+  of x03 for x04/x10: `GCD.bcfcd` instead of `bcfcb` / `bcfcc`): 53 reuse pairs now take the program's own PAL module
+  (`tools/jpdemo_reuse.py` prefers it too);
+- dspsub2 `memCardWaitSwEvent` / `memCardClearSwEvents` were built from the PAL twin that waits on the other event
+  set (MEMCARD_SW_* instead of MEMCARD_HW_* in USA);
+- `_padIfSioRW` USA branch: PAL addresses of two libpad globals.
+
+USA data names: `python3 tools/jp_globals.py --version scus94236 --write` (286 data symbols of PAL BLOCKS and named
+globals, `// BEGIN jp_globals` blocks of `config/scus94236/symbol_addrs_*.txt`); the audit confirms them (2 000 more
+names agree). Open: `SCRIPT_FLAGS` (block rule 8009C10C, but the USA script flag ops read 8009C20C), `PLAYER_H` /
+`PLAYER_Y` in the sub-screen condition templates.

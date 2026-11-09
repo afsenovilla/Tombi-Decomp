@@ -46,3 +46,7 @@ collidePlayerCat5Cat2 = 0x8011D858; // type:func size:0x38  PAL x006 0x8011E514
 updateSceneSequence = 0x8011D890; // type:func size:0x684  PAL x006 0x8011E54C
 cullObjectWideWindow = 0x8011DF14; // type:func size:0x154  PAL x006 0x8011EBD0
 updatePitchforkPig = 0x8011E068; // type:func size:0x280  PAL x006 0x8011ED24
+// BEGIN jp_globals (tools/jp_globals.py)
+GVARS_PLAYER_LANDED = 0x8009BCA2; // size:0x1 PAL 0x8009C93A
+GCD = 0x8009C068; // size:0x400 PAL 0x8009CD00
+// END jp_globals

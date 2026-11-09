@@ -218,3 +218,11 @@ hidingSonTalk = 0x80133A18; // type:func size:0x5BC  PAL x003 0x801346C8
 stepHidingSonTalk = 0x80133FD4; // type:func size:0x74  PAL x003 0x80134C84
 initHidingSon = 0x80134048; // type:func size:0x168  PAL x003 0x80134CF8
 updateHidingSon = 0x801341B0; // type:func size:0x104  PAL x003 0x80134E60
+// BEGIN jp_globals (tools/jp_globals.py)
+MOVE_TABLE_0 = 0x800771FC; // size:0x18 PAL 0x80077CDC
+GCD = 0x8009C068; // size:0x400 PAL 0x8009CD00
+GV2 = 0x8009C608; // size:0x40 PAL 0x8009D2A0
+LOAD_BUFFER = 0x800A3348; // size:0x3D4 PAL 0x800A3FE0
+PLAYER_H = 0x800A53D8; // size:0x4 PAL 0x800A6078
+PLAYER_D = 0x800A53DC; // size:0x4 PAL 0x800A607C
+// END jp_globals

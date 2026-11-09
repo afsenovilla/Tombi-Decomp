@@ -5,7 +5,7 @@
 #include "tobj.h"
 #include "spad.h"
 
-extern void *D_8012DE58_scus94236;
+extern void *D_8013100C;
 void ObjListPush_1F80022C(TObj *o);
 void freeObjectLayer7(TObj *o);
 
@@ -19,7 +19,7 @@ void func_8011A538_scus94236(TObj *o)
         h = o->h;
         o->w1e = 8;
         o->b0d = 0;
-        o->anim = D_8012DE58_scus94236;
+        o->anim = D_8013100C;
         o->d3c = SPAD.i2d4;
         o->b0f = 3;
         nv = h->p.whole;

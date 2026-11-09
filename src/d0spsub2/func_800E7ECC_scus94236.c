@@ -10,7 +10,7 @@ typedef struct { char p0[0x10]; unsigned char f10, f11; char p12[0x5BC - 0x12]; 
 extern GS D_8009C960g;
 extern unsigned short JOYPAD_STATE;
 extern short D_1F8003D8;
-extern unsigned char D_8009C977[];
+extern unsigned char D_8009BCDF[];
 extern char GAME[];
 extern unsigned char GAME_PLAYER_HEALTH, GAME_PLAYER_MAX_HEALTH;
 extern unsigned char D_8009CF1C;
@@ -25,11 +25,11 @@ extern short MEMCARD_CURSOR_Y_TARGET, MEMCARD_CURSOR_Y, MEMCARD_LIST_SCROLL;
 extern short MEMCARD_FILE_ORDER[2][16];
 extern short MEMCARD_FILE_COUNT[];
 extern int MEMCARD_YESNO_CURSOR;
-extern Info D_800F74BA[2][15];
+extern Info D_800F608A[2][15];
 extern void SfxPlay2(int a, int b);
 extern void playSFX(int id);
 extern int erase(char *name);
-extern void func_800E999C(int slot);
+extern void func_800E954C(int slot);
 extern int memCardVerifyChecksum(void *p, int n);
 extern int memCardProbe(Card *c, int n);
 extern short memCardReadDirectory(Card *c, int n);
@@ -62,7 +62,7 @@ int memCardFileListStep(Menu *m, Card *c)
         MEMCARD_CURSOR_Y = MEMCARD_CURSOR_Y_TARGET;
         MEMCARD_LIST_SCROLL = MEMCARD_CURSOR_Y_TARGET - 0x28;
         if (MEMCARD_LIST_SCROLL < 0) MEMCARD_LIST_SCROLL = 0;
-        D_8009C977[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
+        D_8009BCDF[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
         m->sub = 2;
         break;
     case 1:
@@ -78,7 +78,7 @@ int memCardFileListStep(Menu *m, Card *c)
             }
         } else {
             for (i = 0; i < 15; i++) {
-                if (c->slot[i] >= 0 && D_800F74BA[m->card][i].x6 != -1) {
+                if (c->slot[i] >= 0 && D_800F608A[m->card][i].x6 != -1) {
                     MEMCARD_FILE_ORDER[m->card][n++] = i;
                 }
             }
@@ -93,11 +93,11 @@ int memCardFileListStep(Menu *m, Card *c)
                 }
             }
         }
-        if (D_8009C977[0] == 0xFF) {
+        if (D_8009BCDF[0] == 0xFF) {
             if (m->x1C) {
                 m->cursor = 0;
                 for (i = 0; i < MEMCARD_FILE_COUNT[m->card]; i++) {
-                    if (D_800F74BA[m->card][MEMCARD_FILE_ORDER[m->card][i]].x6 == -1) {
+                    if (D_800F608A[m->card][MEMCARD_FILE_ORDER[m->card][i]].x6 == -1) {
                         m->cursor = i;
                         break;
                     }
@@ -108,7 +108,7 @@ int memCardFileListStep(Menu *m, Card *c)
         } else {
             m->cursor = 0;
             for (i = 0; i < MEMCARD_FILE_COUNT[m->card]; i++) {
-                if ((unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][i]] == D_8009C977[0]) {
+                if ((unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][i]] == D_8009BCDF[0]) {
                     m->cursor = i;
                     break;
                 }
@@ -118,7 +118,7 @@ int memCardFileListStep(Menu *m, Card *c)
         MEMCARD_CURSOR_Y = MEMCARD_CURSOR_Y_TARGET;
         MEMCARD_LIST_SCROLL = MEMCARD_CURSOR_Y_TARGET - 0x28;
         if (MEMCARD_LIST_SCROLL < 0) MEMCARD_LIST_SCROLL = 0;
-        D_8009C977[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
+        D_8009BCDF[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
         m->sub++;
         break;
     case 2:
@@ -160,7 +160,7 @@ int memCardFileListStep(Menu *m, Card *c)
             }
             break;
         }
-        D_8009C977[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
+        D_8009BCDF[0] = c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]];
         if (btn & 0x2000) {
             SfxPlay2(0x1B, 0x1C);
             return -1;
@@ -169,7 +169,7 @@ int memCardFileListStep(Menu *m, Card *c)
             SfxPlay2(0xA, 0xA);
             MEMCARD_YESNO_CURSOR = 1;
             if (m->x1C) {
-                if (D_800F74BA[m->card][MEMCARD_FILE_ORDER[m->card][m->cursor]].x6 >= 0) m->sub = 4;
+                if (D_800F608A[m->card][MEMCARD_FILE_ORDER[m->card][m->cursor]].x6 >= 0) m->sub = 4;
                 else m->sub = 14;
             } else {
                 m->sub = 12;
@@ -227,7 +227,7 @@ int memCardFileListStep(Menu *m, Card *c)
         m->sub++;
         break;
     case 8:
-        func_800E999C((unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]]);
+        func_800E954C((unsigned char)c->slot[MEMCARD_FILE_ORDER[m->card][m->cursor]]);
         strcpy(MEMCARD_FILE_PATH, MEMCARD_PORT_PREFIXES_2[m->card]);
         strncat(MEMCARD_FILE_PATH, D_800E7468, 0xC);
         strncat(MEMCARD_FILE_PATH, MEMCARD_FILE_SUFFIX, 8);

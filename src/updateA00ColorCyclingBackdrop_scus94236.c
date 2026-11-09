@@ -5,7 +5,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013B208[];
+extern void *D_8013A550[];
 short GetClut(int x, int y);
 void ObjListPush_1F80022C(TObj *o);
 void freeObjectLayer7(TObj *o);
@@ -32,7 +32,7 @@ void updateA00ColorCyclingBackdrop(TObj *o)
         o->w1e = 8;
         o->w08 = GetClut(0xc0, 0x1e7);
         o->b0d = 1;
-        o->anim = D_8013B208[0];
+        o->anim = D_8013A550[0];
         o->d3c = ((int*)&SPAD.i2d4)[0];
         o->w22 = 0;
         o->step = 0;
