@@ -3,7 +3,7 @@
  *
  * Conventions (one orientation everywhere, so nothing is flipped): VRAM pixel (x, y) is texel column x, memory row y of
  * the render target (the PICA's row 0 is the first in memory and t = 0); the projection maps VRAM y = 0 to clip
- * y = -1, which the rasteriser writes to row 0.  The cache slots are swizzled on the CPU with texel (u, v) in row v, so
+ * y = +1, which the rasteriser writes to row 0.  The cache slots are swizzled on the CPU with texel (u, v) in row v, so
  * texture coordinates are u / 256, v / 256 and the VRAM's x / 1024, y / 512.  A read-back is a display transfer of the
  * render target (tiled -> linear, no flip): linear row y = VRAM row y.  At start-up a self test draws two marks and
  * reads them back; the log says whether the orientation holds.
@@ -47,7 +47,8 @@ static void end_and_wait(void) {   /* run what was recorded and wait for it: mem
 
 /* ---- state */
 static void proj_vram(void) {
-    C3D_Mtx m; Mtx_Ortho(&m, 0.0f, 1024.0f, 0.0f, 512.0f, 1.0f, -1.0f, true);
+    /* (the PICA writes clip y = +1 to memory row 0: the start-up self test reported FLIPPED with 0 .. 512 in Azahar) */
+    C3D_Mtx m; Mtx_Ortho(&m, 0.0f, 1024.0f, 512.0f, 0.0f, 1.0f, -1.0f, true);
     C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, u_proj, &m);
 }
 static void set_env(int textured, int mod) {
