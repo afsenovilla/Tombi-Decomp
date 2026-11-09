@@ -1,23 +1,18 @@
 // FUNC 800efd6c 3012 D0SPSUB
-// ph 2026-11-09: ncheck score 185 (matchcheck 156), was 659, frame 0x90 kept. A random search (ph/rs.py) over
-// the store-site alias form (plain extern / one-field struct asm alias / D_8011113C.field) and the order of
-// adjacent Text-global stores did it. Using D_8011113C.y/.w/.x in the later loops reaches 169 but shrinks the frame
-// to 0x80 (ph/d0spsub_func_800EFD6C.frame80.c). Left: loop 1 (game hoists D_801091C4 into s4, font via s2) and regs.
-// pg 2026-11-08: ncheck score 659 (was 786); ~111 normalized diff lines (was 339). Loop/sprite stores to the Text
-// globals go through one-field-struct aliases (`extern S16 Xs asm("D_8011113Cx")` etc.) at the sites a greedy search
-// picked: the struct type keeps the s->field loads after the stores like the game. Left: the constant attr/font
-// stores scheduled too early in loop 1 and the same y-store order in the later loops, then register names.
-// wip: score 786 (the old draft scored 529 with the WRONG frame: it saved s0-s5 in a 0x98 frame; now the prologue,
-// the 0x90 frame, s0-s4 and the first 0x138 bytes match, so the number is higher only because every later
-// register name shifted). What fixed the frame: (1) the Text struct D_8011113C must only be used for the fields the
-// game addresses through a base register (x at +0 for the three `x = 0xE8/0x10` stores after loop 1, attr at +6
-// and font at +0x14 inside loop 1: `sh v0,(s2); sw v0,0xe(s2)` is cse's related-value rewrite of font from the attr
-// address); y, w, img, D_8011114C are separate externs (D_8011113E, D_80111140, D_80111144, D_8011114C), otherwise
-// gcc keeps the struct base in an extra s-reg (s5) for the loops; (2) every loop's `Slot *s` is block-scoped (the
-// game uses s1/s2/s0 per loop), the function-scope `s` is only for the non-loop `&D_80109208[GAME_BITTEN_JUMP_KIND]` use.
-// Left: inside the loops the game's RTL order differs (loop 1: the x store precedes the y load, the attr store sits
-// between the w loads and the w store: try x/y/w/attr orders and the plain-vs-volatile attr form, 786-792 so far),
-// then the usual per-loop register names. The hoisted -1 (`end`) goes to s2 in the game's loops 2+ (not in loop 1).
+// MATCHING 800efd6c 3012
+// Matched 2026-11-09 (was score 185). Every block writes the Text globals at 0x8011113C in the same order: x, y, w,
+// attr, then str/img, then font. Three store forms, which sched and cse treat differently:
+// - `D_8011113C.field`: in-struct (keeps its place against the `s->` loads); cse rewrites a later field of the same
+//   symbol in the block as base+offset, so the first field written becomes the base register: loop 1 writes only
+//   attr and font this way (s2 = &attr, font at 14(s2)); `x = 0xE8` makes s2 = &x for `x = 0x10`. Where cse2 knows
+//   the base it folds the address back to an absolute store.
+// - one-field-struct aliases Xs/Ys/Ws (asm names of the real symbols): in-struct, but another symbol (no base).
+// - plain externs D_80111140/42/44/4C: not in struct, never ordered against the `s->` loads, so sched moves them.
+// Loop 2 (D_801091D0) stores attr through the plain extern: a struct form adds an address insn, loop.c then counts
+// 30 insns (over its threshold of 29 for a loop with a call) and stops hoisting 0x79D2 into s1.
+// Case 2: the 0xFF of the D_801086F0 scan is a variable, so subScreenDrawEventIcons(m, last, ff) reuses its a2.
+// HUD_STATE: the three bytes cleared in case 0 are +0x64..0x66 (the wip draft had +0x74, past the 0x68-byte block;
+// the byte compare masks relocated offsets, tools/ncheck.py cannot see it).
 #ifndef PORT_NTSC
 #define PORT_NTSC(pal, us) (pal)   /* port2 (port_prelude.h): the USA value with the NTSC picture */
 #endif
@@ -38,25 +33,16 @@ typedef struct { short x, y, w; unsigned short attr; int img, pC, str; void *fon
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { char p0[0xa]; unsigned char b0a; char p0b[0xf]; short zi; char p1c[0xb8]; } Sprite;
-typedef struct { char p0[0x48]; short w48; char p4a[0x2a]; unsigned char b74, b75, b76; } Hud;
+typedef struct { char p0[0x48]; short w48; char p4a[0x1a]; unsigned char b64, b65, b66; } Hud;
 typedef struct { char p0[0x12]; short rx; short p14; short ry; short p18; short rz; } Model;
 extern Menu MENU_STATE;
 extern Text D_8011113C;
-extern short D_8011113Cx;
-extern short D_8011113E;
 extern short D_80111140;
 extern unsigned short D_80111142;
 extern int D_80111144;
 extern int D_8011114C;
-extern void * D_80111150;
 typedef struct { short v; } S16;
-typedef struct { unsigned short v; } SU16;
-typedef struct { int v; } S32;
-extern S16 Xs asm("D_8011113Cx"), Ys asm("D_8011113E"), Ws asm("D_80111140");
-extern SU16 As asm("D_80111142");
-extern S32 Ss asm("D_8011114C"), Is asm("D_80111144");
-typedef struct { void *v; } SP;
-extern SP Fs asm("D_80111150");
+extern S16 Xs asm("D_8011113C"), Ys asm("D_8011113E"), Ws asm("D_80111140");
 extern Hud HUD_STATE;
 extern unsigned char GAME_PLAYER_HEALTH, GAME_BITTEN_JUMP_KIND;
 extern unsigned short GAME, GAME_SELECTED_SECTION, D_8009D2A4;
@@ -117,9 +103,9 @@ void func_800EFD6C(void)
         HUD_STATE.w48 = 1;
         subScreenDrawTabs(m);
         drawHudVitality(&HUD_STATE, 0xC0, PORT_NTSC(0x70, 0x60), GAME_PLAYER_HEALTH);
-        HUD_STATE.b74 = 0;
-        HUD_STATE.b75 = 0;
-        HUD_STATE.b76 = 0;
+        HUD_STATE.b64 = 0;
+        HUD_STATE.b65 = 0;
+        HUD_STATE.b66 = 0;
         drawHudItemGauge(&HUD_STATE, 0, 0xE, PORT_NTSC(0x5E, 0x4E), 1);
         drawHudItemGauge(&HUD_STATE, 1, 0xE, PORT_NTSC(0x6E, 0x5E), 1);
         drawHudItemGauge(&HUD_STATE, 2, 0xE, PORT_NTSC(0x7E, 0x6E), 1);
@@ -131,51 +117,51 @@ void func_800EFD6C(void)
         Slot *s;
         for (s = D_8010922C; s->x != -1; s++) {
             Xs.v = s->x;
-            D_8011113C.y = s->y - PORT_NTSC(0, 16);
-            As.v = 0x7C15;
+            Ys.v = s->y - PORT_NTSC(0, 16);
             Ws.v = m->w10 + s->dw;
-            D_8011113C.font = D_800FFD98;
+            D_8011113C.attr = 0x7C15;
             D_8011114C = D_801091C4[s->idx];
+            D_8011113C.font = D_800FFD98;
             subScreenDrawString(5, 1);
         }
         }
         D_8011113C.x = 0xE8;
         Ys.v = PORT_NTSC(0x66, 0x56);
         s = &D_80109208[GAME_BITTEN_JUMP_KIND];
-        As.v = 0x7892;
         D_80111140 = m->w10 + s->dw;
-        Is.v = m->p54[D_80109228[GAME_BITTEN_JUMP_KIND]];
+        D_80111142 = 0x7892;
+        D_80111144 = m->p54[D_80109228[GAME_BITTEN_JUMP_KIND]];
         subScreenDrawSprite(1);
-        D_8011113C.attr = 0x7C15;
         Xs.v = s->x;
         D_8011113C.y = s->y - PORT_NTSC(0, 16);
-        D_80111144 = m->p58[s->idx];
         D_8011113C.w = m->w10 + s->dw;
+        D_8011113C.attr = 0x7C15;
+        D_80111144 = m->p58[s->idx];
         subScreenDrawSprite(1);
         subScreenDrawDigitsSprite(&HUD_STATE, 0x132, PORT_NTSC(0x50, 0x40));
         drawHudLives(&HUD_STATE, 0x120, PORT_NTSC(0x6A, 0x5A));
         D_8011113C.x = 0x10;
-        Ws.v = m->w10 + 1;
         D_8011113C.y = PORT_NTSC(0xC8, 0xB8);
-        D_80111142 = 0x7C15;
+        Ws.v = m->w10 + 1;
+        D_8011113C.attr = 0x7C15;
         if (GAME == 9) D_8011114C = D_80108BC8[GAME_SELECTED_SECTION];
         else D_8011114C = D_80108B78[GAME];
         D_8011113C.font = D_800FFD98;
         subScreenDrawString(5, 0);
-        Ws.v = m->w10 + 1;
-        D_8011113C.font = D_800FFD98;
         D_8011113C.x = 0x10;
+        D_8011113C.y = PORT_NTSC(0xD8, 0xC8);
+        Ws.v = m->w10 + 1;
         D_8011113C.attr = 0x7C15;
         D_8011114C = D_80108E5C[GAME][GAME_SELECTED_SECTION];
-        D_8011113C.y = PORT_NTSC(0xD8, 0xC8);
+        D_8011113C.font = D_800FFD98;
         subScreenDrawString(5, 0);
         {
         Slot *s;
         for (s = D_801091D0; s->x != -1; s++) {
-            D_8011113Cx = s->x;
-            D_8011113C.attr = 0x79D2;
+            Xs.v = s->x;
             Ys.v = s->y - PORT_NTSC(0, 16);
             Ws.v = m->w10 + s->dw;
+            D_80111142 = 0x79D2;
             D_80111144 = m->p48[s->idx];
             subScreenDrawSprite(1);
         }
@@ -188,7 +174,7 @@ void func_800EFD6C(void)
             Xs.v = s->x;
             Ys.v = s->y;
             Ws.v = m->w10 + s->dw;
-            Is.v = D_800FE89C[s->idx];
+            D_80111144 = D_800FE89C[s->idx];
             subScreenDrawSprite(3);
         }
         }
@@ -208,10 +194,10 @@ void func_800EFD6C(void)
                 if ((s->idx == 0x16 && m->page == 0) || (s->idx == 0x17 && m->page >= pages - 1)) {
                     s++;
                 } else {
-                    D_80111142 = 0x7C15;
                     Xs.v = s->x;
                     Ys.v = s->y;
-                    D_8011113C.w = m->w10 + s->dw;
+                    Ws.v = m->w10 + s->dw;
+                    D_80111142 = 0x7C15;
                     D_80111144 = m->p58[s->idx];
                     subScreenDrawSprite(1);
                     s++;
@@ -227,7 +213,7 @@ void func_800EFD6C(void)
             Xs.v = s->x;
             Ys.v = s->y;
             Ws.v = m->w10 + s->dw;
-            Is.v = D_800FE89C[s->idx];
+            D_80111144 = D_800FE89C[s->idx];
             subScreenDrawSprite(3);
         }
         }
@@ -235,14 +221,15 @@ void func_800EFD6C(void)
     case 2:
         subScreenDrawTabs(m);
         {
+        int ff;
         int j;
         last = 0;
-        for (j = 0; j < 0x100; j++) {
-            if (D_801086F0[j] != 0xFF && GAME_INVENTORY_SCREEN[D_801086F0[j]] != 0) last = j;
-        }
+        for (j = 0, ff = 0xFF; j < 0x100; j++) {
+            if (D_801086F0[j] != ff && GAME_INVENTORY_SCREEN[D_801086F0[j]] != 0) last = j;
         }
         pages = (last + PORT_NTSC(10, 8)) / PORT_NTSC(10, 8);
-        subScreenDrawEventIcons(m, last, 0xFF);
+        subScreenDrawEventIcons(m, last, ff);
+        }
         subScreenDrawEventList(m);
         subScreenDrawEventCounters(m);
         if (pages >= 2) {
@@ -254,18 +241,18 @@ void func_800EFD6C(void)
                 if ((s->idx == 0x16 && m->page == 0) || (s->idx == 0x17 && m->page >= pages - 1)) {
                     s++;
                 } else {
-                    D_8011113Cx = s->x;
-                    Ws.v = m->w10 + s->dw;
+                    Xs.v = s->x;
                     Ys.v = s->y;
-                    D_8011113C.attr = 0x7C15;
-                    Is.v = m->p58[s->idx];
+                    Ws.v = m->w10 + s->dw;
+                    D_80111142 = 0x7C15;
+                    D_80111144 = m->p58[s->idx];
                     subScreenDrawSprite(1);
                     s++;
                 }
             }
             }
         }
-        As.v = 0x7812;
+        D_80111142 = 0x7812;
         end = -1;
         {
         Slot *s;
@@ -280,7 +267,7 @@ void func_800EFD6C(void)
         break;
     case 3:
         subScreenDrawTabs(m);
-        As.v = 0x7812;
+        D_80111142 = 0x7812;
         end = -1;
         {
         Slot *s;
@@ -288,7 +275,7 @@ void func_800EFD6C(void)
             Xs.v = s->x;
             Ys.v = s->y;
             Ws.v = m->w10 + s->dw;
-            Is.v = D_800FE89C[s->idx];
+            D_80111144 = D_800FE89C[s->idx];
             subScreenDrawSprite(3);
         }
         }

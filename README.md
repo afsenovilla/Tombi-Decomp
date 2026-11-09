@@ -45,19 +45,19 @@ What is left, closest first: [docs/REMAINING.md](docs/REMAINING.md).
 <summary><b>PAL (reference): per part</b></summary>
 
 <!-- progress:start -->
-**Whole game: 99.80 % of the game's code matches byte for byte** (1527232 of 1530244 bytes).
+**Whole game: 100.00 % of the game's code matches byte for byte** (1530244 of 1530244 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
 | MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X000.BIN: AREA00 + object code reused by all areas | 313676 B | 313676 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 190472 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.4 % |
-| **Whole game** | **1530244 B** | **1527232 B** | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 **99.80 %** |
+| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 193484 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| **Whole game** | **1530244 B** | **1530244 B** | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 **100.00 %** |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 100876 B of it (100.0 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 99.9 %).
+  other; those copies match automatically and are not added again (counting every copy separately gives 100.0 %).
 - Also tracked for MAIN0 + X000: 98.3 % of the code named by us, 67.3 % typed with the TObj structure.
 <!-- progress:end -->
 
@@ -80,7 +80,7 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 <summary><b>USA (SCUS-94236): per part</b></summary>
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 99.83 % of the code matches byte for byte** (1704732 of 1707688 bytes, 3680 of 3681 functions).
+**Tomba! USA (SCUS-94236): 100.00 % of the code matches byte for byte** (1707688 of 1707688 bytes, 3681 of 3681 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
@@ -102,7 +102,7 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 | X17.BIN: area code | 14064 B | 14064 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X18.BIN: area code | 16840 B | 16840 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| DSPSUB.BIN: SYSTEM overlay | 36504 B | 33548 B | 58 / 59 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 91.9 % |
+| DSPSUB.BIN: SYSTEM overlay | 36504 B | 36504 B | 59 / 59 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | DSPSUB2.BIN: SYSTEM overlay | 19456 B | 19456 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | DSPSUB3.BIN: SYSTEM overlay | 24884 B | 24884 B | 46 / 46 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | GOVER.BIN: SYSTEM overlay | 3152 B | 3152 B | 7 / 7 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |

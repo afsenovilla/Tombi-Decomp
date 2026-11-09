@@ -56,3 +56,4 @@ subScreenItemListStep = 0x800EC284; // type:func size:0xD18  PAL d0spsub 0x800ED
 subScreenEventListStep = 0x800ED160; // type:func size:0x334  PAL d0spsub 0x800EE028
 subScreenMapDrawAreaName = 0x800EFEEC; // type:func size:0x10C  PAL d0spsub 0x800F0E0C
 subScreenMapDrawRoomName = 0x800EFFF8; // type:func size:0xE8  PAL d0spsub 0x800F0F20
+func_800EEE84_scus94236 = 0x800EEE84; // type:func size:0xB8C  PAL d0spsub 0x800EFD6C
