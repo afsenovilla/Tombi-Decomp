@@ -13,19 +13,19 @@ typedef struct {
     void **anim;
 } T8012BD5C;
 
-extern T8012BD5C D_80135DD0[];
+extern T8012BD5C TREASURE_CHEST_GUARD_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
 void initTreasureChestGuard(TObj *o)
 {
-    o->box0 = D_80135DD0[o->subtype].b0;
-    o->box1 = D_80135DD0[o->subtype].b1;
-    o->box2 = D_80135DD0[o->subtype].b2;
-    o->box3 = D_80135DD0[o->subtype].b3;
-    o->w1e = D_80135DD0[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80135DD0[o->subtype].w6];
-    o->anim = D_80135DD0[o->subtype].anim[0];
+    o->box0 = TREASURE_CHEST_GUARD_DEFS[o->subtype].b0;
+    o->box1 = TREASURE_CHEST_GUARD_DEFS[o->subtype].b1;
+    o->box2 = TREASURE_CHEST_GUARD_DEFS[o->subtype].b2;
+    o->box3 = TREASURE_CHEST_GUARD_DEFS[o->subtype].b3;
+    o->w1e = TREASURE_CHEST_GUARD_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[TREASURE_CHEST_GUARD_DEFS[o->subtype].w6];
+    o->anim = TREASURE_CHEST_GUARD_DEFS[o->subtype].anim[0];
     AnimLoadDuration(o);
     o->b0a = 2;
     o->d8c = 0;
@@ -48,19 +48,19 @@ typedef struct {
     void **anim;
 } T8012BD5C;
 
-extern T8012BD5C D_80135DD0[];
+extern T8012BD5C TREASURE_CHEST_GUARD_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
 void initTreasureChestGuard(TObj *o)
 {
-    o->box0 = D_80135DD0[o->subtype].b0;
-    o->box1 = D_80135DD0[o->subtype].b1;
-    o->box2 = D_80135DD0[o->subtype].b2;
-    o->box3 = D_80135DD0[o->subtype].b3;
-    o->w1e = D_80135DD0[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80135DD0[o->subtype].w6];
-    o->anim = D_80135DD0[o->subtype].anim[0];
+    o->box0 = TREASURE_CHEST_GUARD_DEFS[o->subtype].b0;
+    o->box1 = TREASURE_CHEST_GUARD_DEFS[o->subtype].b1;
+    o->box2 = TREASURE_CHEST_GUARD_DEFS[o->subtype].b2;
+    o->box3 = TREASURE_CHEST_GUARD_DEFS[o->subtype].b3;
+    o->w1e = TREASURE_CHEST_GUARD_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[TREASURE_CHEST_GUARD_DEFS[o->subtype].w6];
+    o->anim = TREASURE_CHEST_GUARD_DEFS[o->subtype].anim[0];
     AnimLoadDuration(o);
     o->b0a = 2;
     o->d8c = 0;

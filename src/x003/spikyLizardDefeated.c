@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 typedef struct B { unsigned char c[4]; } B;
 extern char MOVE_TABLE_2[];
-extern B D_80135CB0[];
-extern void *D_80139500[];
+extern B SPIKY_LIZARD_ANIM_BOXES[];
+extern void *SPIKY_LIZARD_ANIMS[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void FUN_8001fe6c(TObj *);
 
@@ -27,8 +27,8 @@ void spikyLizardDefeated(TObj *o)
             o->wac = 4;
         else
             o->wac = 10;
-        o->anim = D_80139500[o->wac];
-        { unsigned char *p = D_80135CB0[o->wac].c;
+        o->anim = SPIKY_LIZARD_ANIMS[o->wac];
+        { unsigned char *p = SPIKY_LIZARD_ANIM_BOXES[o->wac].c;
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;

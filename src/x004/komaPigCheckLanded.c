@@ -12,7 +12,7 @@ typedef struct O {
     char p8[0xb6 - 0xb4]; short wb6;
 } O;
 extern short COLLISION_HIT_HEIGHT;
-extern unsigned short COLLISION_HIT_FLAGS, DAT_1f800284;
+extern unsigned short COLLISION_HIT_FLAGS, COLLISION_HIT_SURFACE;
 extern short FUN_80040278(O *, int, int);
 
 int komaPigCheckLanded(O *o)
@@ -37,7 +37,7 @@ int komaPigCheckLanded(O *o)
             if (v > 8) v = 8;
             if (COLLISION_HIT_HEIGHT < 0) v = -v;
             o->d8c = (-v) & 0xff;
-            s = DAT_1f800284;
+            s = COLLISION_HIT_SURFACE;
             o->wb2 = v;
             o->b9c = 0;
             u = COLLISION_HIT_FLAGS;

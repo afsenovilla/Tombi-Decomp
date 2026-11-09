@@ -5,8 +5,8 @@
 
 typedef struct { short w0; unsigned short w2; short w4; unsigned short w6; } AH;
 
-extern AH *D_8013DAE8[];
-extern unsigned char D_8013C800[];
+extern AH *KOMA_PIG_ANIMS[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern char MOVE_TABLE_2[];
 extern int Rand(void);
 extern void ObjSetFacingToPlayer(TObj *o);
@@ -62,8 +62,8 @@ void komaPigLeapAtPlayer(TObj *o)
         o->timer = 0x3c;
         o->wac = 1;
         o->substep++;
-        o->anim = D_8013DAE8[1];
-        p1 = &D_8013C800[((AH *)o->anim)->w2 * 4];
+        o->anim = KOMA_PIG_ANIMS[1];
+        p1 = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
         o->box0 = *p1++;
         o->box1 = *p1++;
         o->box2 = *p1++;
@@ -78,8 +78,8 @@ void komaPigLeapAtPlayer(TObj *o)
         o->movetab = MOVE_TABLE_2;
         o->wac = 0;
         o->substep++;
-        o->anim = D_8013DAE8[0];
-        p2 = &D_8013C800[((AH *)o->anim)->w2 * 4];
+        o->anim = KOMA_PIG_ANIMS[0];
+        p2 = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
         o->box0 = *p2++;
         o->box1 = *p2++;
         o->box2 = *p2++;

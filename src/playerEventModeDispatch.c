@@ -11,9 +11,9 @@
 extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
 extern unsigned char TALK_POSE;
-extern unsigned char D_1f8003ce;
+extern unsigned char PAUSE_MENU_LOCK;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void playerEventStepLandIdle(TObj *);
 extern void playerEventStepLaneJumpBack(TObj *);
 extern void playerEventStepSpawnChicks(TObj *);
@@ -123,11 +123,11 @@ void func_80101308(TObj *o)
         o->d8c = 0;
         break;
     case 0x62:
-        o->anim = D_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(o);
         o->step++;
     case 0x63:
-        o->anim = D_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(o);
         o->d8c = 0;
         break;
@@ -158,9 +158,9 @@ void func_80101308(TObj *o)
 extern TObj *PLAYER_EXT;
 extern unsigned char *BITTEN_OBJECT;
 extern unsigned char TALK_POSE;
-extern unsigned char D_1f8003ce;
+extern unsigned char PAUSE_MENU_LOCK;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void playerEventStepLandIdle(TObj *);
 extern void playerEventStepLaneJumpBack(TObj *);
 extern void playerEventStepSpawnChicks(TObj *);
@@ -270,11 +270,11 @@ void playerEventModeDispatch(TObj *o)
         o->d8c = 0;
         break;
     case 0x62:
-        o->anim = D_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(o);
         o->step++;
     case 0x63:
-        o->anim = D_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(o);
         o->d8c = 0;
         break;
@@ -283,7 +283,7 @@ void playerEventModeDispatch(TObj *o)
     case 0x65:
         if (TALK_POSE != 0) {
             playerAnimateTalkPose(o);
-        } else if (D_1f8003ce == 0 || *(unsigned short *)o->anim != 0) {
+        } else if (PAUSE_MENU_LOCK == 0 || *(unsigned short *)o->anim != 0) {
         anim:
             AnimAdvance(o);
         }

@@ -8,7 +8,7 @@ extern TObj PLAYER;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern unsigned short PLAYER_ANIM_FRAME;
 extern Fix16 *PLAYER_H;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern TObj *PLAYER_MESSAGE_BOX;
 extern unsigned char D_800A60F8;
 extern void AnimLoadDuration(TObj *o);
@@ -22,7 +22,7 @@ void puppyRumorTalk(TObj *o)
 
     switch (o->step) {
     case 0:
-        PLAYER.anim = D_80010748;
+        PLAYER.anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(&PLAYER);
         switch (GCD.bceab) {
         case 1:

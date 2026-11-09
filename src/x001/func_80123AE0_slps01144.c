@@ -4,7 +4,7 @@
 #define pushObjectOutOfObjectBoxC func_8004EDE8
 #define swingingRopeOverlapTest func_8012366C_slps01144
 #define decreaseObjectTimer func_8004D980
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 #include "spad.h"
 #include "TOBJ.H"
 
@@ -27,7 +27,7 @@ void func_80123AE0_slps01144(TObj *a, TObj *b)
         a->step = 0;
         a->state = 0;
         decreaseObjectTimer(a, 1);
-        D_1F80019E = 0;
+        LIST_COUNTER = 0;
     }
 }
 #endif

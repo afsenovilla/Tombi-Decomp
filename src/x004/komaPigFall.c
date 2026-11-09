@@ -8,7 +8,7 @@ extern int komaPigCheckLanded(TObj *);
 extern void func_8011FB1C(TObj *);
 extern TObj *FUN_80018448(void);
 extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
-extern unsigned char D_80130FD4[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *D_80133BD4[], *D_80133BD0[], *D_80133BD8[], *D_80133BB8[];
 
 #define SPAWN()                                         \
@@ -120,7 +120,7 @@ void komaPigFall(TObj *o)
                     unsigned short *b = D_80133BD8[0];
                     unsigned char *r;
                     o->anim = b;
-                    r = &D_80130FD4[b[1] * 4];
+                    r = &KOMA_PIG_ANIM_BOXES[b[1] * 4];
                     o->box0 = *r++;
                     o->box1 = *r++;
                     o->box2 = *r++;
@@ -143,7 +143,7 @@ void komaPigFall(TObj *o)
         o->substep++;
         o->anim = a = D_80133BB8[0];
     common:
-        p = &D_80130FD4[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

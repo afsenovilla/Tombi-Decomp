@@ -7,7 +7,7 @@ typedef struct { short w0, w2; } X;
 #define XS(o) ((X *)((char *)(o) + 0xb4))
 
 extern char MOVE_TABLE_1[];
-extern unsigned char D_80135CB0[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 extern void *D_80139520[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -56,7 +56,7 @@ static __inline__ int Ground(TObj *o)
     unsigned char *p; \
     x->w0 = 1; \
     *(volatile short *)&o->wac = 8; \
-    p = &D_80135CB0[o->wac * 4]; \
+    p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4]; \
     o->anim = D_80139520[0]; \
     o->box0 = *p++; \
     o->box1 = *p++; \

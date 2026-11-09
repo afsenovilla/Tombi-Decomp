@@ -18,9 +18,9 @@ typedef struct {
 } S;
 extern volatile int *PAD_INTR;
 extern volatile unsigned short *PAD_SIO;
-extern int D_800981F0;
-extern unsigned int D_8009C33C;
-extern unsigned int D_800A0A18;
+extern int _padSioState;
+extern unsigned int PAD_RC2_WAIT_START;
+extern unsigned int PAD_RC2_WAIT_LIMIT;
 extern void setRC2wait(int);
 extern int chkRC2wait(void);
 
@@ -44,22 +44,22 @@ int _padSioExchangeByte(S *s, int c)
     else PAD_SIO[7] = 0x22;
     while (!(*PAD_INTR & 0x80)) {
         t = *(volatile unsigned short *)0x1f801120;
-        if (t < D_8009C33C) {
+        if (t < PAD_RC2_WAIT_START) {
             if (*(volatile unsigned short *)0x1f801128 != 0) t = *(volatile unsigned short *)0x1f801128 + t;
             else t += 0x10000;
         }
         if (*(volatile unsigned short *)0x1f801124 & 0x200) {
-            if (t - D_8009C33C >= D_800A0A18) return -2;
+            if (t - PAD_RC2_WAIT_START >= PAD_RC2_WAIT_LIMIT) return -2;
         } else {
-            if ((t - D_8009C33C) >> 3 >= D_800A0A18) return -2;
+            if ((t - PAD_RC2_WAIT_START) >> 3 >= PAD_RC2_WAIT_LIMIT) return -2;
         }
     }
-    if (s->e8 != 8 && D_800981F0 == 2) {
+    if (s->e8 != 8 && _padSioState == 2) {
         setRC2wait(60);
         while (chkRC2wait() == 0);
     }
     *(volatile unsigned char *)PAD_SIO = c;
-    if (D_800981F0 == 3 && r == 0x80) {
+    if (_padSioState == 3 && r == 0x80) {
         volatile int *is = PAD_INTR;
         volatile unsigned short *j = PAD_SIO;
         *is = -129;

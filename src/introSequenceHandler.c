@@ -7,7 +7,7 @@
 // instead), skip with pad bit 0x800 (PAL 0x4008), states 0-5.
 typedef struct P { char p0[0x4a]; unsigned short w4a; unsigned short w4c; unsigned short w4e; } P;
 extern char *TASK_C;
-extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
+extern unsigned char IS_DEBUG_MODE_ENABLED, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
 extern unsigned short JOYPAD_STATE;
 extern int LOADING_SCREEN_STATE;
 extern unsigned char GAME_AREA_TRANSITION;
@@ -27,7 +27,7 @@ void introSequenceHandler(void)
     switch (*(unsigned short *)(TASK_C + 0x4c)) {
     case 0:
         func_80018254(D_800A2A18);
-        if (DAT_1f8001b4 != 0)
+        if (IS_DEBUG_MODE_ENABLED != 0)
             goto L7;
         LOADING_SCREEN_STATE = 0;
         LOAD_COMPLETE_SYM = 0;
@@ -65,7 +65,7 @@ void introSequenceHandler(void)
         p974 = &GAME_AREA_TRANSITION;
         *p974 = 1;
         *(unsigned short *)(TASK_C + 0x4c) = 1;
-        if (DAT_1f8001b4 != 0) {
+        if (IS_DEBUG_MODE_ENABLED != 0) {
             *(unsigned short *)(TASK_C + 0x4c) = 0;
             *p974 = 0;
         }
@@ -81,7 +81,7 @@ void introSequenceHandler(void)
 #if defined(VERSION_SLPS_01144)
 typedef struct P { char p0[0x4a]; unsigned short w4a; unsigned short w4c; unsigned short w4e; } P;
 extern char *TASK_C;
-extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
+extern unsigned char IS_DEBUG_MODE_ENABLED, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
 extern unsigned short JOYPAD_STATE;
 extern int LOADING_SCREEN_STATE;
 extern unsigned char GAME_AREA_TRANSITION;
@@ -98,7 +98,7 @@ void func_80019A8C_slps01144(void)
     unsigned char *p974;
     switch (*(unsigned short *)(TASK_C + 0x4c)) {
     case 0:
-        if (DAT_1f8001b4 != 0)
+        if (IS_DEBUG_MODE_ENABLED != 0)
             goto L5;
         LOADING_SCREEN_STATE = 0;
         LOAD_COMPLETE_SYM = 0;
@@ -135,7 +135,7 @@ void func_80019A8C_slps01144(void)
         p974 = &GAME_AREA_TRANSITION;
         *p974 = 1;
         *(unsigned short *)(TASK_C + 0x4c) = 1;
-        if (DAT_1f8001b4 != 0) {
+        if (IS_DEBUG_MODE_ENABLED != 0) {
             *(unsigned short *)(TASK_C + 0x4c) = 0;
             *p974 = 0;
         }
@@ -151,7 +151,7 @@ void func_80019A8C_slps01144(void)
 #else
 typedef struct P { char p0[0x4a]; unsigned short w4a; unsigned short w4c; unsigned short w4e; } P;
 extern char *TASK_C;
-extern unsigned char DAT_1f8001b4, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
+extern unsigned char IS_DEBUG_MODE_ENABLED, LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID, MOVIE_SKIP_REQUEST;
 extern unsigned short JOYPAD_STATE;
 extern int LOADING_SCREEN_STATE;
 extern unsigned char GAME_AREA_TRANSITION;
@@ -175,7 +175,7 @@ void introSequenceHandler(void)
             goto inc;
         return;
     case 2:
-        if (DAT_1f8001b4 != 0)
+        if (IS_DEBUG_MODE_ENABLED != 0)
             goto L7;
         LOADING_SCREEN_STATE = 0;
         LOAD_COMPLETE_SYM = 0;
@@ -213,7 +213,7 @@ void introSequenceHandler(void)
         p974 = &GAME_AREA_TRANSITION;
         *p974 = 1;
         *(unsigned short *)(TASK_C + 0x4c) = 1;
-        if (DAT_1f8001b4 != 0) {
+        if (IS_DEBUG_MODE_ENABLED != 0) {
             *(unsigned short *)(TASK_C + 0x4c) = 0;
             *p974 = 0;
         }

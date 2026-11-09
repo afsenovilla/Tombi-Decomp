@@ -10,19 +10,19 @@ typedef struct {
     void **anim;
 } T80118974;
 
-extern T80118974 D_80118D2C[];
+extern T80118974 JUICE_SELLER_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
 void initJuiceSeller(TObj *o)
 {
-    o->box0 = D_80118D2C[o->subtype].b0;
-    o->box1 = D_80118D2C[o->subtype].b1;
-    o->box2 = D_80118D2C[o->subtype].b2;
-    o->box3 = D_80118D2C[o->subtype].b3;
-    o->w1e = D_80118D2C[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80118D2C[o->subtype].w6];
-    o->anim = D_80118D2C[o->subtype].anim[(unsigned short)o->wb4];
+    o->box0 = JUICE_SELLER_DEFS[o->subtype].b0;
+    o->box1 = JUICE_SELLER_DEFS[o->subtype].b1;
+    o->box2 = JUICE_SELLER_DEFS[o->subtype].b2;
+    o->box3 = JUICE_SELLER_DEFS[o->subtype].b3;
+    o->w1e = JUICE_SELLER_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[JUICE_SELLER_DEFS[o->subtype].w6];
+    o->anim = JUICE_SELLER_DEFS[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     o->d8c = 0;
     o->b0d = 0;

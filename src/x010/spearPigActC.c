@@ -3,8 +3,8 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8012F3D4[];
-extern void *D_80132310[];
+extern unsigned char SPEAR_PIG_ANIM_BOXES[];
+extern void *SPEAR_PIG_ANIMS[];
 extern int UPDATE_OBJECT_INDEX;
 extern void FUN_8001f8e4(TObj *);
 extern void FUN_8001fe6c(TObj *);
@@ -13,14 +13,14 @@ extern void playSFX(int);
 extern short FUN_80040278(TObj *, short, short);
 
 #define SETBOX(o, n) { \
-    int b0 = D_8012F3D4[(n) * 4], b1 = D_8012F3D4[(n) * 4 + 1]; \
-    int b2 = D_8012F3D4[(n) * 4 + 2], b3 = D_8012F3D4[(n) * 4 + 3]; \
+    int b0 = SPEAR_PIG_ANIM_BOXES[(n) * 4], b1 = SPEAR_PIG_ANIM_BOXES[(n) * 4 + 1]; \
+    int b2 = SPEAR_PIG_ANIM_BOXES[(n) * 4 + 2], b3 = SPEAR_PIG_ANIM_BOXES[(n) * 4 + 3]; \
     o->wac = n; \
     o->box0 = b0; \
     o->box1 = b1; \
     o->box2 = b2; \
     o->box3 = b3; \
-    o->anim = D_80132310[n]; \
+    o->anim = SPEAR_PIG_ANIMS[n]; \
     FUN_8001fe6c(o); }
 
 static __inline__ void setAnim(TObj *o, void *a)
@@ -121,13 +121,13 @@ void spearPigActC(TObj *o)
             break;
         }
         i = o->wac;
-        b = &D_8012F3D4[i * 4];
+        b = &SPEAR_PIG_ANIM_BOXES[i * 4];
         o->box0 = *b++;
         o->box1 = *b++;
         o->box2 = b[0];
         o->box3 = b[1];
         o->wac = i;
-        setAnim(o, D_80132310[i]);
+        setAnim(o, SPEAR_PIG_ANIMS[i]);
         break;
     case 5:
         AnimAdvance(o);

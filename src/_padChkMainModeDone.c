@@ -1,6 +1,6 @@
 // FUNC 8006ad48 96 MAIN0
 // MATCHING 8006ad48 96
-extern void (*D_800981B0)(void);
+extern void (*_padFuncClrInfo)(void);
 
 int _padChkMainModeDone(unsigned char *p)
 {
@@ -10,7 +10,7 @@ int _padChkMainModeDone(unsigned char *p)
         }
         p[0x46] = 0xfe;
     } else {
-        D_800981B0();
+        _padFuncClrInfo();
     }
     return 0;
 }

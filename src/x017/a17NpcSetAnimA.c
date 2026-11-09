@@ -2,11 +2,11 @@
 // MATCHING 801171d0 84
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80119990[];
+extern AT WATERFALL_HINT_NPC_DEFS_ANIMS[];
 extern void FUN_8001fe94(TObj *, int);
 
 void a17NpcSetAnimA(TObj *o, unsigned short n, short t)
 {
-    o->anim = D_80119990[o->subtype].anims[n];
+    o->anim = WATERFALL_HINT_NPC_DEFS_ANIMS[o->subtype].anims[n];
     FUN_8001fe94(o, t);
 }

@@ -7,8 +7,8 @@
 #include "TOBJ.H"
 extern TObj *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char LAB_80010c50[];
-extern char LAB_80010748[];
+extern char PLAYER_HURT_ANIM[];
+extern char PLAYER_IDLE_ANIM[];
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
@@ -109,7 +109,7 @@ void playerStepPerchLeap(TObj *o)
             o->d88 -= 0x20;
             if (o->d88 < 0xa0) {
             turn:
-                o->anim = LAB_80010c50;
+                o->anim = PLAYER_HURT_ANIM;
                 FUN_8001fe94(o, 3);
                 o->d88 = 0x100;
                 o->timer = 0xc;
@@ -124,7 +124,7 @@ void playerStepPerchLeap(TObj *o)
         if (o->b69 || FUN_8003fd78(o, 0, 0)) {
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 4);
             o->d30 = 0;
             o->d34 = 0;
@@ -154,7 +154,7 @@ void playerStepPerchLeap(TObj *o)
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
             (*(unsigned char*)&o->waa) = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 4);
             o->d88 = 0;
             b = SLOPE_TILT_TABLE[o->wb0];
@@ -183,7 +183,7 @@ void playerStepPerchLeap(TObj *o)
             o->velX = 0;
             o->velY = 0;
             b = SLOPE_TILT_TABLE[o->wb0];
-            o->anim = LAB_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             o->d8c = b;
             FUN_8001fe6c(o);
             o->step = 0;
@@ -198,8 +198,8 @@ void playerStepPerchLeap(TObj *o)
 #include "TOBJ.H"
 extern TObj *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char LAB_80010c50[];
-extern char LAB_80010748[];
+extern char PLAYER_HURT_ANIM[];
+extern char PLAYER_IDLE_ANIM[];
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
@@ -300,7 +300,7 @@ void playerStepPerchLeap(TObj *o)
             o->d88 -= 0x20;
             if (o->d88 < 0xa0) {
             turn:
-                o->anim = LAB_80010c50;
+                o->anim = PLAYER_HURT_ANIM;
                 FUN_8001fe94(o, 3);
                 o->d88 = 0x100;
                 o->timer = 0xc;
@@ -315,7 +315,7 @@ void playerStepPerchLeap(TObj *o)
         if (o->b69 || FUN_8003fd78(o, 0, 0)) {
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 4);
             o->d30 = 0;
             o->d34 = 0;
@@ -345,7 +345,7 @@ void playerStepPerchLeap(TObj *o)
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
             (*(unsigned char*)&o->waa) = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 4);
             o->d88 = 0;
             b = SLOPE_TILT_TABLE[o->wb0];
@@ -374,7 +374,7 @@ void playerStepPerchLeap(TObj *o)
             o->velX = 0;
             o->velY = 0;
             b = SLOPE_TILT_TABLE[o->wb0];
-            o->anim = LAB_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             o->d8c = b;
             FUN_8001fe6c(o);
             o->step = 0;
@@ -387,8 +387,8 @@ void playerStepPerchLeap(TObj *o)
 #include "TOBJ.H"
 extern TObj *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char LAB_80010c50[];
-extern char LAB_80010748[];
+extern char PLAYER_HURT_ANIM[];
+extern char PLAYER_IDLE_ANIM[];
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
@@ -489,7 +489,7 @@ void playerStepPerchLeap(TObj *o)
             o->d88 -= 0x20;
             if (o->d88 < 0xa0) {
             turn:
-                o->anim = LAB_80010c50;
+                o->anim = PLAYER_HURT_ANIM;
                 FUN_8001fe94(o, 3);
                 o->d88 = 0x100;
                 o->timer = 0xc;
@@ -504,7 +504,7 @@ void playerStepPerchLeap(TObj *o)
         if (o->b69 || FUN_8003fd78(o, 0, 0)) {
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 4);
             o->d30 = 0;
             o->d34 = 0;
@@ -534,7 +534,7 @@ void playerStepPerchLeap(TObj *o)
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
             (*(unsigned char*)&o->waa) = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 4);
             o->d88 = 0;
             b = SLOPE_TILT_TABLE[o->wb0];
@@ -563,7 +563,7 @@ void playerStepPerchLeap(TObj *o)
             o->velX = 0;
             o->velY = 0;
             b = SLOPE_TILT_TABLE[o->wb0];
-            o->anim = LAB_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             o->d8c = b;
             FUN_8001fe6c(o);
             o->step = 0;

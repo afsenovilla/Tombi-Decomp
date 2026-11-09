@@ -9,7 +9,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_801311B8[];
+extern AT PAINTING_SLOT_HINT_NPC_DEFS_ANIMS[];
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -34,7 +34,7 @@ void func_80128480(TObj *o)
         ((unsigned char*)&GVARS.b3e)[0] = 1;
         v = *(V6 *)&o->a;
         *(volatile int *)&o->d90 = showMessageBoxDirect(2, 1, &v);
-        o->anim = D_801311B8[*(volatile unsigned char *)&o->subtype].anims[3];
+        o->anim = PAINTING_SLOT_HINT_NPC_DEFS_ANIMS[*(volatile unsigned char *)&o->subtype].anims[3];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -43,7 +43,7 @@ void func_80128480(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        o->anim = D_801311B8[o->subtype].anims[0];
+        o->anim = PAINTING_SLOT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[0];
         AnimJump(o, 0);
         o->state = 15;
         if (GCD.bcddc == 0) {
@@ -78,7 +78,7 @@ void func_80128480(TObj *o)
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_801311B8[];
+extern AT PAINTING_SLOT_HINT_NPC_DEFS_ANIMS[];
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -102,7 +102,7 @@ void paintingSlotHintTalk(TObj *o)
     case 1:
         v = *(V6 *)&o->a;
         *(volatile int *)&o->d90 = showMessageBoxDirect(2, 1, &v);
-        o->anim = D_801311B8[*(volatile unsigned char *)&o->subtype].anims[3];
+        o->anim = PAINTING_SLOT_HINT_NPC_DEFS_ANIMS[*(volatile unsigned char *)&o->subtype].anims[3];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -111,7 +111,7 @@ void paintingSlotHintTalk(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        o->anim = D_801311B8[o->subtype].anims[0];
+        o->anim = PAINTING_SLOT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[0];
         AnimJump(o, 0);
         o->state = 15;
         if (GCD.bcddc == 0) {

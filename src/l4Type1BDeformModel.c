@@ -35,8 +35,8 @@ extern int *DAT_1f800314pA[];
 #define DAT_1f800314p DAT_1f800314pA[0]
 extern int DAT_1f800314A[];
 #define DAT_1f800314 DAT_1f800314A[0]
-extern int *DAT_1f800310pA[];
-#define DAT_1f800310p DAT_1f800310pA[0]
+extern int *FOUR_DATA[];
+#define DAT_1f800310p FOUR_DATA[0]
 extern int DAT_1f800310A[];
 #define DAT_1f800310 DAT_1f800310A[0]
 extern char MODEL_PRIM_BUFFERS[];

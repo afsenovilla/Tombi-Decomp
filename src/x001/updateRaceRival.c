@@ -4,7 +4,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern void *D_8013E740[];
+extern void *RACE_RIVAL_ANIMS[];
 extern TObj PLAYER;
 void AnimLoadDuration(TObj *o);
 int ObjCullRegister(TObj *o);
@@ -42,7 +42,7 @@ void updateRaceRival(TObj *o)
         o->box3 = 0x30;
         o->b04++;
         o->wac = 0;
-        o->anim = D_8013E740[0];
+        o->anim = RACE_RIVAL_ANIMS[0];
         AnimLoadDuration(o);
         switch (GCD.bce59) {
         case 1:
@@ -82,7 +82,7 @@ void updateRaceRival(TObj *o)
             switch (o->step) {
             case 0:
                 if (o->state == 0) {
-                    o->anim = D_8013E740[0];
+                    o->anim = RACE_RIVAL_ANIMS[0];
                     AnimLoadDuration(o);
                     o->y.p.whole += 4;
                     if (TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) {

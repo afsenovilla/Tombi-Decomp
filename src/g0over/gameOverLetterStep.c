@@ -10,7 +10,7 @@ typedef struct {
     unsigned char r, g, b, p43;
     short s44, s46, s48;
 } OB;
-extern OB D_1F800118;
+extern OB LIGHTING;
 typedef struct { unsigned char r, g, b; } COL;
 extern COL D_1F800158;
 extern MATRIX D_1F800138;
@@ -100,15 +100,15 @@ void gameOverLetterStep(TObj *o, int hold)
                     SetBackColor(ob->r, ob->g, ob->b);
                 }
                 if (D_1F800138.m[0][0] > 0) {
-                    D_1F800118.cm.m[0][0] = D_1F800138.m[0][0] - 0x48;
-                    D_1F800118.cm.m[1][0] -= 0x48;
-                    D_1F800118.cm.m[2][0] -= 0x48;
+                    LIGHTING.cm.m[0][0] = D_1F800138.m[0][0] - 0x48;
+                    LIGHTING.cm.m[1][0] -= 0x48;
+                    LIGHTING.cm.m[2][0] -= 0x48;
                 } else {
-                    D_1F800118.cm.m[0][0] = 0;
-                    D_1F800118.cm.m[1][0] = 0;
-                    D_1F800118.cm.m[2][0] = 0;
+                    LIGHTING.cm.m[0][0] = 0;
+                    LIGHTING.cm.m[1][0] = 0;
+                    LIGHTING.cm.m[2][0] = 0;
                 }
-                SetColorMatrix(&D_1F800118.cm);
+                SetColorMatrix(&LIGHTING.cm);
             }
             break;
         }

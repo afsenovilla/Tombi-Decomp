@@ -1,9 +1,9 @@
 // near-twin of playerClingJumpRelease (PAL)
 // VERSION SLPS_01144 x10 8011A8C8 328
 #if defined(VERSION_SLPS_01144)
-extern unsigned short D_1F8001FC;
-extern unsigned short D_1F8003C4;
-extern unsigned short D_1F8003C6;
+extern unsigned short JOYPAD_STATE;
+extern unsigned short BUTTON_MASK_A;
+extern unsigned short BUTTON_MASK_B;
 extern unsigned int D_8009E52C;
 extern unsigned short D_8009F200;
 extern unsigned char D_8009EE5A;
@@ -23,7 +23,7 @@ void func_8011A8C8_slps01144(TObj *o)
     int e;
     Fix16 *h;
 
-    if (D_1F8001FC & D_1F8003C6) {
+    if (JOYPAD_STATE & BUTTON_MASK_B) {
         ((unsigned char *)&o->wa8)[1] = 0;
         if (D_8009EE5A - 5 < 3) GRABBED_OBJECT->active = 1;
         o->b9c = 1;
@@ -48,7 +48,7 @@ void func_8011A8C8_slps01144(TObj *o)
         e = h->p.whole;
         if (o->animFrame & 1) h->p.whole = e + 0x10; else h->p.whole = e - 0x10;
         if (D_8009E52C & 0x40) {
-            if (*(volatile unsigned short *)((unsigned short*)&D_8009F200) & D_1F8003C4) o->ba7 = 1;
+            if (*(volatile unsigned short *)((unsigned short*)&D_8009F200) & BUTTON_MASK_A) o->ba7 = 1;
         }
         PLAYER_EXT->b04 = 0;
         o->step = 2;

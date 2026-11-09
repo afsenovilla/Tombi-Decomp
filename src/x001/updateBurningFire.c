@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "gcd.h"
 #include "TOBJ.H"
-extern void **D_8013C97C[];
+extern void **BURNING_FIRE_ANIM_SETS[];
 extern void *D_8013E674, *D_8013E680;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -22,7 +22,7 @@ void updateBurningFire(TObj *o)
         o->b04++;
         o->w1e = 8;
         o->b0d = 0x80;
-        o->anim = D_8013C97C[o->subtype][0];
+        o->anim = BURNING_FIRE_ANIM_SETS[o->subtype][0];
         o->d3c = ((int*)&SPAD.i2d4)[0];
         o->box0 = 0xb;
         o->box1 = 0x16;
@@ -55,7 +55,7 @@ void updateBurningFire(TObj *o)
             n->b = o->b;
             n->w1e = 7;
             n->b0d = 0;
-            n->anim = D_8013C97C[n->subtype][0];
+            n->anim = BURNING_FIRE_ANIM_SETS[n->subtype][0];
             n->d3c = ((int*)&SPAD.i2d4)[0];
             n->box0 = 0xb;
             n->box1 = 0x16;

@@ -9,7 +9,7 @@ typedef struct {
     unsigned char r, g, b, p43;
     short s44, s46, s48;
 } OB;
-extern OB D_1F800118;
+extern OB LIGHTING;
 extern void getBaseMatrix(MATRIX *);
 extern void SetFarColor(int r, int g, int b);
 extern void SetBackColor(int r, int g, int b);
@@ -22,7 +22,7 @@ void gameOverSetupLighting(void)
 {
     SVECTOR v;
     VECTOR r;
-    OB *o = &D_1F800118;
+    OB *o = &LIGHTING;
     getBaseMatrix(&o->cm);
     o->cm.m[0][0] = 0x1000;
     o->cm.m[1][0] = 0x1000;

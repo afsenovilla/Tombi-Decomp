@@ -321,12 +321,12 @@ int func_800406E8(void *o, int x, int y) {
 /* func_800416B8 (0x5F0 bytes): wall probe against the slope list at *(u16 **)0x1F800278 (count, then records of
  * 4 halfwords: flags, y, dy, (rise << 8) | (span << 4) | start), for an object moving left (animFrame even: flags
  * 0x14 / 0x4004) or right (odd: 0x18 / 0x4008).  A wall record whose height covers y switches to the plane list
- * of the neighbouring column (getCollisionPlaneAt, or the per-object table D_8007B5AC[mode] when mode != -1; at
+ * of the neighbouring column (getCollisionPlaneAt, or the per-object table COLLISION_COLUMN_TABLE[mode] when mode != -1; at
  * most 7 hops).  A slope record pushes o->h (x) back onto the slope, sets the slope angle 0x1F80027C, and with a
  * rise (flags & 0xFF00) also steps o->y up by up to 8 pixels.  Returns 0 (clear), 1 (pushed) or 2 (stepped). */
 extern char *getCollisionPlaneAt(short x, short y);
 extern int angleFromDelta(int a, int b);
-extern u8 *D_8007B5AC[];
+extern u8 *COLLISION_COLUMN_TABLE[];
 static u16 *probe_column(void *o, int x, int mode, u8 *tbl) {
     if (mode != -1) {
         u8 *b = tbl + *(u16 *)(tbl + 8);
@@ -340,7 +340,7 @@ int func_800416B8(void *o, int x, int y, int mode) {
     u16 *p = SPAD(u16 *, 0x278);
     int n = (s16)*p;
     u16 yy = (u16)y, x0 = (u16)x;
-    u8 *tbl = D_8007B5AC[mode & 0xFF];
+    u8 *tbl = COLLISION_COLUMN_TABLE[mode & 0xFF];
     int hops = 0;
     mode = (s16)mode;
     SPAD(u16 *, 0x278) = p + 1;

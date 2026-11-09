@@ -4,7 +4,7 @@
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern unsigned short ONSCREEN_OBJECT_COUNT;
 extern short DAT_1f800246;
 extern unsigned short CAT2_OBJECT_COUNT;
@@ -45,7 +45,7 @@ static __inline__ short hit(TObj *a, TObj *b)
         return -1;
     if ((unsigned short)(((*(unsigned short*)&a->y.p.whole) - (*(unsigned short*)&b->y.p.whole)) + ((*(unsigned short*)&a->box2) + (*(unsigned short*)&b->box2))) > a->box3 + b->box3)
         return -1;
-    DAT_1f80019e = 0;
+    LIST_COUNTER = 0;
     if (dx < 0)
         return 0;
     return 1;
@@ -121,9 +121,9 @@ void collideWeaponsWithCat2Objects(void)
         if (!(a->active & 1) || a->ba5 == 0)
             continue;
         qq = CAT2_OBJECT_LIST;
-        for (DAT_1f80019e = CAT2_OBJECT_COUNT; DAT_1f80019e != 0;) {
+        for (LIST_COUNTER = CAT2_OBJECT_COUNT; LIST_COUNTER != 0;) {
             b = *qq++;
-            DAT_1f80019e--;
+            LIST_COUNTER--;
             if (!(b->active & 1))
                 continue;
             switch (b->type) {

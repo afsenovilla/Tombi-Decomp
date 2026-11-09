@@ -2,7 +2,7 @@
 // MATCHING 80118e70 288
 extern unsigned short GAME;
 extern unsigned short CAT2_OBJECT_COUNT_SAVED;
-extern short DAT_1f80019c;
+extern short SWAP_INDEX;
 typedef struct { unsigned int w; } W;
 extern unsigned char **CAT2_OBJECT_LIST_SAVED;
 
@@ -13,11 +13,11 @@ void a00SporeCloudStunPigs(unsigned char *o)
 
     if (GAME != 0)
         return;
-    DAT_1f80019c = CAT2_OBJECT_COUNT_SAVED;
+    SWAP_INDEX = CAT2_OBJECT_COUNT_SAVED;
     pp = CAT2_OBJECT_LIST_SAVED;
-    while (DAT_1f80019c != 0) {
+    while (SWAP_INDEX != 0) {
         e = *pp;
-        DAT_1f80019c--;
+        SWAP_INDEX--;
         pp++;
         if ((((W *)e)->w & 0xffff0000) == 0x1020000) {
             if ((*e & 1) == 0)

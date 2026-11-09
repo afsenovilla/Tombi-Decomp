@@ -7,7 +7,7 @@
 #define U8(p, o) (*(unsigned char *)((p) + (o)))
 #define S16(p, o) (*(short *)((p) + (o)))
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
-extern unsigned char DAT_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 extern short boxesOverlap(unsigned char *, unsigned char *);
 extern void setEventStarted(int, int, int);
 extern void decreaseObjectTimer(unsigned char *, int);
@@ -46,7 +46,7 @@ void func_801253F4(unsigned char *a, unsigned char *b)
 #define U8(p, o) (*(unsigned char *)((p) + (o)))
 #define S16(p, o) (*(short *)((p) + (o)))
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
-extern unsigned char DAT_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 extern short boxesOverlap(unsigned char *, unsigned char *);
 extern void setEventStarted(int, int, int);
 extern void decreaseObjectTimer(unsigned char *, int);
@@ -59,7 +59,7 @@ void burningFireContact(unsigned char *a, unsigned char *b)
         return;
     if (boxesOverlap(a, b) == 0)
         return;
-    if (DAT_1f8001a4 != 0)
+    if (DEBUG_INVINCIBLE != 0)
         return;
     if (a[0] & 2)
         return;

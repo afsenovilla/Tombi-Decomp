@@ -20,7 +20,7 @@ typedef struct {
 } Sub;
 typedef struct { short x, y, z, w; } E;
 
-extern char D_8011F3F8[];
+extern char MOTOCROSS_COURSE_PATH[];
 static char D_8011FEA0[968] = {
     0x49, 5, -0x42, -2, 0x18, 0x19, 0, 0, 0x51, 5, -0x50, -2, 0xd, 0x19, 0, 0,
     -0x77, 5, -0x57, -2, -0x52, 0x18, 0, 0, -0x5e, 5, -0x5d, -2, -0x69, 0x18, 0, 0,
@@ -117,7 +117,7 @@ static __inline__ void upd(TObj *o, Sub *t)
         if ((unsigned short)(o->animTimer - 0x35) < 0x19) SUB(o)->cc = 1;
         else SUB(o)->cc = 0;
         if (o->animTimer == 0x77) {
-            *(char **)&o->wa8 = D_8011F3F8;
+            *(char **)&o->wa8 = MOTOCROSS_COURSE_PATH;
             o->animTimer = 0xaa;
             t->c8 = 1;
         }
@@ -238,7 +238,7 @@ typedef struct {
 } Sub;
 typedef struct { short x, y, z, w; } E;
 
-extern char D_8011F3F8[];
+extern char MOTOCROSS_COURSE_PATH[];
 static char D_8011FEA0[968] = {
     0x49, 5, -0x42, -2, 0x18, 0x19, 0, 0, 0x51, 5, -0x50, -2, 0xd, 0x19, 0, 0,
     -0x77, 5, -0x57, -2, -0x52, 0x18, 0, 0, -0x5e, 5, -0x5d, -2, -0x69, 0x18, 0, 0,
@@ -335,7 +335,7 @@ static __inline__ void upd(TObj *o, Sub *t)
         if ((unsigned short)(o->animTimer - 0x35) < 0x19) SUB(o)->cc = 1;
         else SUB(o)->cc = 0;
         if (o->animTimer == 0x77) {
-            *(char **)&o->wa8 = D_8011F3F8;
+            *(char **)&o->wa8 = MOTOCROSS_COURSE_PATH;
             o->animTimer = 0xaa;
             t->c8 = 1;
         }

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { unsigned short x, y; } P2;
 extern P2 DAT_8007b610[];
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern int weaponOnHitGetResult(TObj *, TObj *, int);
 extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
@@ -62,5 +62,5 @@ void weaponHitCat4Type03(TObj *o, TObj *q)
         if ((q->category & 0x7f) == 4) s = 6;
         SfxPlay(s);
     }
-    DAT_1f80019e = 0;
+    LIST_COUNTER = 0;
 }

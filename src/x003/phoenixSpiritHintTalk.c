@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 typedef struct { char c[12]; } V12;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80135D84[];
+extern AT PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[];
 extern Fix16 *PLAYER_H[];
 extern void FUN_8001fe94(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -26,7 +26,7 @@ void func_80128474(TObj *o)
             GVARS.b42 = 1;
             b = *(V12 *)&o->a;
             o->d90 = showMessageBoxDirect(2, 0xf, &b);
-            o->anim = D_80135D84[o->subtype].anims[9];
+            o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[9];
             FUN_8001fe94(o, 0);
             PLAYER.obj.wb2 = 0;
             PLAYER.obj.b04 = 5;
@@ -40,7 +40,7 @@ void func_80128474(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 == 2) {
             p->b04 = 3;
-            o->anim = D_80135D84[o->subtype].anims[0];
+            o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[0];
             FUN_8001fe94(o, 0);
             GVARS.b3f = 0;
             GVARS.b42 = 0;
@@ -62,7 +62,7 @@ void func_80128474(TObj *o)
 #include "TOBJ.H"
 typedef struct { char c[12]; } V12;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80135D84[];
+extern AT PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[];
 extern Fix16 *PLAYER_H[];
 extern void FUN_8001fe94(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -81,7 +81,7 @@ void phoenixSpiritHintTalk(TObj *o)
             GVARS.b42 = 1;
             b = *(V12 *)&o->a;
             o->d90 = showMessageBoxDirect(2, 0xf, &b);
-            o->anim = D_80135D84[o->subtype].anims[9];
+            o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[9];
             FUN_8001fe94(o, 0);
             o->animFrame = o->b68 & 1;
             t = o->h->p.whole < *(short *)((char *)PLAYER_H[0] + 2);
@@ -98,7 +98,7 @@ void phoenixSpiritHintTalk(TObj *o)
         if (p->b04 == 2) {
             p->b04 = 3;
             o->animFrame = 1;
-            o->anim = D_80135D84[o->subtype].anims[0];
+            o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[0];
             FUN_8001fe94(o, 0);
             GVARS.b3f = 0;
             GVARS.b42 = 0;

@@ -7,8 +7,8 @@
 #include "player.h"
 #include "TOBJ.H"
 extern void *D_80012034[];
-extern void *D_80012268;
-extern unsigned char D_80079D3C[];
+extern void *IMPACT_EFFECT_ANIM;
+extern unsigned char IMPACT_EFFECT_SFX[];
 extern unsigned short PLAYER_Y[];
 extern int DAT_1f8002d8[];
 extern void AnimLoadDuration(TObj *);
@@ -37,7 +37,7 @@ void func_8002BE80(TObj *o)
         o->b04++;
         AnimLoadDuration(o);
         if (o->subtype == 2) {
-            playSFX(D_80079D3C[2]);
+            playSFX(IMPACT_EFFECT_SFX[2]);
         }
         break;
     case 1:
@@ -77,8 +77,8 @@ static void *D_80012034[5] = {
     D_800125D8, D_800122F8, D_80012338, D_80012628,
     D_800124B8,
 };
-extern void *D_80012268;
-extern unsigned char D_80079D3C[];
+extern void *IMPACT_EFFECT_ANIM;
+extern unsigned char IMPACT_EFFECT_SFX[];
 extern unsigned short PLAYER_Y[];
 extern int DAT_1f8002d8[];
 extern void AnimLoadDuration(TObj *);
@@ -107,7 +107,7 @@ void func_8002CA7C_slps01144(TObj *o)
         o->b04++;
         AnimLoadDuration(o);
         if (o->subtype == 2) {
-            playSFX(D_80079D3C[o->subtype]);
+            playSFX(IMPACT_EFFECT_SFX[o->subtype]);
         }
         break;
     case 1:
@@ -147,8 +147,8 @@ static void *D_80012034[5] = {
     D_800125D8, D_800122F8, D_80012338, D_80012628,
     D_800124B8,
 };
-extern void *D_80012268;
-extern unsigned char D_80079D3C[];
+extern void *IMPACT_EFFECT_ANIM;
+extern unsigned char IMPACT_EFFECT_SFX[];
 extern unsigned short PLAYER_Y[];
 extern int DAT_1f8002d8[];
 extern void AnimLoadDuration(TObj *);
@@ -179,8 +179,8 @@ void updateImpactEffect(TObj *o)
         if (o->subtype == 2) {
             o->b0d = 0x80;
             o->w1e = 0x13;
-            o->anim = D_80012268;
-            playSFX(D_80079D3C[o->subtype]);
+            o->anim = IMPACT_EFFECT_ANIM;
+            playSFX(IMPACT_EFFECT_SFX[o->subtype]);
         }
         break;
     case 1:

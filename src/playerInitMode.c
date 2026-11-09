@@ -56,7 +56,7 @@ extern unsigned short DAT_800a6040[];
 extern unsigned short DAT_800a60fc[];
 extern unsigned char DAT_8009c970, GAME_PLAYER_HEALTH[];
 extern int SPR_DATA[];
-extern char DAT_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern unsigned char DAT_8009cef8;
 extern unsigned short DAT_8009c960;
 extern unsigned int GAME;
@@ -144,7 +144,7 @@ void playerInitMode(TObj *o)
         o->w9a = DAT_8009c970;
         o->w98 = GAME_PLAYER_HEALTH[0];
         o->d3c = SPR_DATA[0];
-        o->anim = DAT_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         FUN_8001fe6c(o);
         o->step++;
         if (DAT_8009cef8) {
@@ -334,7 +334,7 @@ extern unsigned short DAT_800a6040[];
 extern unsigned short DAT_800a60fc[];
 extern unsigned char DAT_8009c970, GAME_PLAYER_HEALTH[];
 extern int SPR_DATA[];
-extern char DAT_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern unsigned char DAT_8009cef8;
 extern unsigned short DAT_8009c960;
 extern unsigned int GAME;
@@ -422,7 +422,7 @@ void playerInitMode(TObj *o)
         o->w9a = DAT_8009c970;
         o->w98 = GAME_PLAYER_HEALTH[0];
         o->d3c = SPR_DATA[0];
-        o->anim = DAT_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         FUN_8001fe6c(o);
         o->step++;
         if (DAT_8009cef8) {

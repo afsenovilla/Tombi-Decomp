@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char D_800A6066A[]; /* byte view of (*(short*)&PLAYER.obj.animFrame) (debt) */
-extern void *D_80134D38;
+extern unsigned char PLAYER_ANIM_FRAME[]; /* byte view of (*(short*)&PLAYER.obj.animFrame) (debt) */
+extern void *BITING_PLANT_ANIMS;
 
 void area4Type07StepD(TObj *o)
 {
@@ -34,7 +34,7 @@ void area4Type07StepD(TObj *o)
         o->b6a = 0;
     L58:
         o->b69 = 0;
-        o->b6b = D_800A6066A[0] & 1;
+        o->b6b = PLAYER_ANIM_FRAME[0] & 1;
         o->velH = 0x400;
         o->velX = 0x40;
         o->state++;
@@ -86,7 +86,7 @@ void area4Type07StepD(TObj *o)
         switch (o->subtype) {
         case 0:
             o->d8c = 0;
-            o->anim = D_80134D38;
+            o->anim = BITING_PLANT_ANIMS;
             o->b0a = 2;
             break;
         case 1:

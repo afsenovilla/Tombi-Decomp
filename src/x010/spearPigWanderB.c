@@ -3,9 +3,9 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern const unsigned char D_8012F3D4[];
-extern void *D_80132310[];
-extern unsigned char D_8012F474[], D_8012F484[];
+extern const unsigned char SPEAR_PIG_ANIM_BOXES[];
+extern void *SPEAR_PIG_ANIMS[];
+extern unsigned char SPEAR_PIG_RAND_TIMERS[], D_8012F484[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void FUN_8001f8e4(TObj *);
@@ -17,12 +17,12 @@ extern short probeWallAt(TObj *, short, short, short);
     {                                            \
         const unsigned char *p;                        \
         o->wac = K;                              \
-        p = &D_8012F3D4[(K) * 4];             \
+        p = &SPEAR_PIG_ANIM_BOXES[(K) * 4];             \
         o->box0 = p[0];                          \
         o->box1 = p[1];                          \
         o->box2 = p[2];                          \
         o->box3 = p[3];                          \
-        o->anim = D_80132310[K];            \
+        o->anim = SPEAR_PIG_ANIMS[K];            \
         AnimLoadDuration(o);                     \
     }
 
@@ -59,7 +59,7 @@ void spearPigWanderB(TObj *o)
         o->state++;
         FUN_8001f8e4(o);
         o->w7a = o->animFrame;
-        o->timer = D_8012F474[Rand() & 7];
+        o->timer = SPEAR_PIG_RAND_TIMERS[Rand() & 7];
         if (*(unsigned short *)&o->wb4) SETA(1)
         else SETA(0x16)
         break;

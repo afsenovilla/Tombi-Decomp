@@ -10,8 +10,8 @@ typedef struct {
 } G330;
 extern G330 *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char LAB_80010c50[];
-extern char LAB_80010748[];
+extern char PLAYER_HURT_ANIM[];
+extern char PLAYER_IDLE_ANIM[];
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
@@ -78,7 +78,7 @@ void playerStepTossed(TObj *o)
         if (o->animFrame & 1) {
             o->d88 += 0x20;
             if (o->d88 > 0x160) {
-                o->anim = LAB_80010c50;
+                o->anim = PLAYER_HURT_ANIM;
                 FUN_8001fe94(o, 0);
                 o->d88 = 0x100;
                 o->state++;
@@ -86,7 +86,7 @@ void playerStepTossed(TObj *o)
         } else {
             o->d88 -= 0x20;
             if (o->d88 < 0xa0) {
-                o->anim = LAB_80010c50;
+                o->anim = PLAYER_HURT_ANIM;
                 FUN_8001fe94(o, 0);
                 o->d88 = 0x100;
                 o->state++;
@@ -100,7 +100,7 @@ void playerStepTossed(TObj *o)
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
             (*(unsigned char*)&o->waa) = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 1);
             o->d88 = 0;
             b = SLOPE_TILT_TABLE[o->wb0];
@@ -126,7 +126,7 @@ void playerStepTossed(TObj *o)
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
             (*(unsigned char*)&o->waa) = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 1);
             ADJ(-12, 12);
         } else {
@@ -135,7 +135,7 @@ void playerStepTossed(TObj *o)
             FUN_8001e5f4(0x1c, 0x7f);
             o->b9c = 0;
             (*(unsigned char*)&o->waa) = 0;
-            o->anim = LAB_80010c50;
+            o->anim = PLAYER_HURT_ANIM;
             FUN_8001fe94(o, 1);
             ADJ(-12, 12);
         }
@@ -158,7 +158,7 @@ void playerStepTossed(TObj *o)
             o->timer = 0x46;
             o->d8c = SLOPE_TILT_TABLE[o->wb0];
             ADJ(10, -10);
-            o->anim = LAB_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             FUN_8001fe6c(o);
             o->b04 = 5;
             o->step = 1;

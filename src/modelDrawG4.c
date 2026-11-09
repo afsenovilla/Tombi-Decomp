@@ -38,7 +38,7 @@ extern unsigned long *CURRENT_OT;
 
 typedef struct { char pad[0xe]; unsigned char b0e; } O;
 typedef struct { long c[4]; } C4;
-extern C4 D_8007965C[];
+extern C4 MODEL_G4_COLORS[];
 
 char *modelDrawG4(O *o, long *f, char *vtx, unsigned long *ot)
 {
@@ -83,10 +83,10 @@ char *modelDrawG4(O *o, long *f, char *vtx, unsigned long *ot)
                                     p->c3 = f[3];
                                 } else {
                                     i = 0x12 - n;
-                                    p->c0 = D_8007965C[i].c[0];
-                                    p->c1 = D_8007965C[i].c[1];
-                                    p->c2 = D_8007965C[i].c[2];
-                                    p->c3 = D_8007965C[i].c[3];
+                                    p->c0 = MODEL_G4_COLORS[i].c[0];
+                                    p->c1 = MODEL_G4_COLORS[i].c[1];
+                                    p->c2 = MODEL_G4_COLORS[i].c[2];
+                                    p->c3 = MODEL_G4_COLORS[i].c[3];
                                 }
                                 NEXT_PRIM = NEXT_PRIM + 1;
                             }
@@ -137,7 +137,7 @@ extern unsigned long *CURRENT_OT;
 
 typedef struct { char pad[0xe]; unsigned char b0e; } O;
 typedef struct { long c[4]; } C4;
-extern C4 D_8007965C[];
+extern C4 MODEL_G4_COLORS[];
 
 char *modelDrawG4(O *o, long *f, char *vtx, unsigned long *ot)
 {
@@ -182,10 +182,10 @@ char *modelDrawG4(O *o, long *f, char *vtx, unsigned long *ot)
                                     p->c3 = f[3];
                                 } else {
                                     i = 0x12 - n;
-                                    p->c0 = D_8007965C[i].c[0];
-                                    p->c1 = D_8007965C[i].c[1];
-                                    p->c2 = D_8007965C[i].c[2];
-                                    p->c3 = D_8007965C[i].c[3];
+                                    p->c0 = MODEL_G4_COLORS[i].c[0];
+                                    p->c1 = MODEL_G4_COLORS[i].c[1];
+                                    p->c2 = MODEL_G4_COLORS[i].c[2];
+                                    p->c3 = MODEL_G4_COLORS[i].c[3];
                                 }
                                 NEXT_PRIM = NEXT_PRIM + 1;
                             }

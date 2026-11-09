@@ -8,8 +8,8 @@ extern unsigned char D_8006DDEF[];
 #include "TOBJ.H"
 
 extern TObj *allocObjectLayer5(void);
-extern unsigned char DAT_8007b084[];
-extern unsigned char *DAT_8007b14c[];
+extern unsigned char ITEM_INIT_INDEX[];
+extern unsigned char *ITEM_INIT_TABLE[];
 
 void func_80123E50(Fix16 *pos, unsigned char c, short vx)
 {
@@ -35,8 +35,8 @@ void func_80123E50(Fix16 *pos, unsigned char c, short vx)
 #include "TOBJ.H"
 
 extern TObj *allocObjectLayer5(void);
-extern unsigned char DAT_8007b084[];
-extern unsigned char *DAT_8007b14c[];
+extern unsigned char ITEM_INIT_INDEX[];
+extern unsigned char *ITEM_INIT_TABLE[];
 
 void spawnItemEffectFlyingItem(Fix16 *pos, unsigned char c, short vx)
 {
@@ -48,7 +48,7 @@ void spawnItemEffectFlyingItem(Fix16 *pos, unsigned char c, short vx)
     o->subtype = 0x13;
     o->b0c = 0x80;
     {
-        unsigned char c2 = DAT_8007b14c[DAT_8007b084[o->subtype]][3];
+        unsigned char c2 = ITEM_INIT_TABLE[ITEM_INIT_INDEX[o->subtype]][3];
         o->animFrame = 0;
         o->b6b = c;
         o->b0f = c2;

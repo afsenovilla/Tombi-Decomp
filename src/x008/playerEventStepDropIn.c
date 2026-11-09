@@ -10,8 +10,8 @@ extern void FUN_8001fd94(TObj *);
 extern void FUN_8003fd78(TObj *, int, int);
 extern void FUN_8001e5f4(int, int);
 extern TObj *PLAYER_EXT;
-extern char DAT_80010ae8[];
-extern char DAT_80010748[];
+extern char PLAYER_FALL_ANIM[];
+extern char PLAYER_IDLE_ANIM[];
 extern int GAME[];
 extern unsigned char DAT_8009c942;
 extern unsigned char DAT_8009c93f;
@@ -51,7 +51,7 @@ void playerEventStepDropIn(TObj *o)
         o->visible = 1;
         o->w22 = 0;
         playerReleaseBittenAndClearFlags(o);
-        o->anim = DAT_80010ae8;
+        o->anim = PLAYER_FALL_ANIM;
         FUN_8001fe94(o, 3);
         DAT_8009c942 = 1;
         DAT_8009c93f = 1;
@@ -82,7 +82,7 @@ void playerEventStepDropIn(TObj *o)
             o->velY = 0;
             o->active = 4;
             FUN_8003fd78(o, 4, 0);
-            o->anim = DAT_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             FUN_8001fe94(o, 0);
             FUN_8001e5f4(0x1c, 0x7f);
             o->state++;

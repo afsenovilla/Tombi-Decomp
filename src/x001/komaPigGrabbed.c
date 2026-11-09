@@ -5,11 +5,11 @@
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 extern char MOVE_TABLE_1[];
-extern B D_8013C800[];
-extern A *D_8013DAE8[];
+extern B KOMA_PIG_ANIM_BOXES[];
+extern A *KOMA_PIG_ANIMS[];
 extern unsigned char D_800A60E4[];
 extern short COLLISION_HIT_HEIGHT;
-extern short D_1F800284;
+extern short COLLISION_HIT_SURFACE;
 extern void spawnItemNotification(int, int);
 extern void applyFrameVelocityY(TObj *);
 extern void applyFrameVelocityX(TObj *);
@@ -37,7 +37,7 @@ static __inline__ int land(TObj *o)
         if (COLLISION_HIT_HEIGHT < 0) t = -t;
         o->d8c = -t & 0xff;
         o->wb2 = t;
-        w = D_1F800284;
+        w = COLLISION_HIT_SURFACE;
         o->wb6 = (-t << 2) & 0xff;
         o->b9c = 0;
         o->wae = w;
@@ -47,8 +47,8 @@ static __inline__ int land(TObj *o)
 }
 
 #define SETANIM(k) \
-    o->anim = D_8013DAE8[k]; \
-    { unsigned char *p; { B *t = D_8013C800; p = t[((A *)o->anim)->w2].c; } \
+    o->anim = KOMA_PIG_ANIMS[k]; \
+    { unsigned char *p; { B *t = KOMA_PIG_ANIM_BOXES; p = t[((A *)o->anim)->w2].c; } \
     o->box0 = *p++; \
     o->box1 = *p++; \
     o->box2 = *p; \
@@ -137,7 +137,7 @@ void komaPigGrabbed(TObj *o)
             o->wb2 = v;
             o->d8c = -v & 0xff;
             o->wb6 = (-v << 2) & 0xff;
-            o->wae = D_1F800284;
+            o->wae = COLLISION_HIT_SURFACE;
             o->b9c = 0;
             if (o->animFrame) {
                 if (o->wb2 < 0) {

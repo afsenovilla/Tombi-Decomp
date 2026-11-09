@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern unsigned short PLAYER_H_WHOLE[];
-extern unsigned char D_8013C7E0[], D_8013C7F0[];
+extern unsigned char PURPLE_CRAWLER_NEXT_STEP_TABLE_B[], PURPLE_CRAWLER_NEXT_STEP_TABLE[];
 extern int Rand(void);
 
 static __inline__ int outside(TObj *o, short *c)
@@ -35,8 +35,8 @@ void purpleCrawlerChooseStep(TObj *o)
         h = o->h;
         if ((unsigned short)(PLAYER_H_WHOLE[0] - h->p.whole + 0xf0) < 0x1e1
             && (unsigned short)((*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0xa0) < 0x141) {
-            if (o->ba7) o->step = D_8013C7E0[Rand() & 0xf];
-            else o->step = D_8013C7F0[Rand() & 0xf];
+            if (o->ba7) o->step = PURPLE_CRAWLER_NEXT_STEP_TABLE_B[Rand() & 0xf];
+            else o->step = PURPLE_CRAWLER_NEXT_STEP_TABLE[Rand() & 0xf];
             if (o->step == 0) o->step++;
             o->animFrame = (short)PLAYER_H_WHOLE[0] < o->h->p.whole;
         }

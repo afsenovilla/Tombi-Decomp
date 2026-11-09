@@ -23,7 +23,7 @@ typedef struct {
 /*0x38*/    int unk38;
 } ReadAttr_t;
 
-extern CdlCB D_80096F9C;
+extern CdlCB cdread_callback;
 extern volatile ReadAttr_t D_80096304;
 
 void cb_read(u_char arg0, u_char* arg1);
@@ -37,7 +37,7 @@ int CdRead(int sectors, u_long* buf, int mode);
 int CdReadSync(int mode, u_char* result);
 
 CdlCB CdReadCallback(CdlCB func) {
-    CdlCB prevFunc = D_80096F9C;
-    D_80096F9C = func;
+    CdlCB prevFunc = cdread_callback;
+    cdread_callback = func;
     return prevFunc;
 }

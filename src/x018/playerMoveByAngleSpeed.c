@@ -10,14 +10,14 @@ typedef struct TO {
     char p3[0xb6 - 0xb4];
     short w6;
 } TO;
-extern short VX, VY;
+extern short GVARS_PLAYER_DRIFT_H, GVARS_PLAYER_DRIFT_Y;
 extern void g(TO *o, int a, int b);
 extern void ObjApplyVelocity(TO *o);
 
 static __inline__ void add(TO *p)
 {
-    *p->h += VX << 8;
-    p->y += VY << 8;
+    *p->h += GVARS_PLAYER_DRIFT_H << 8;
+    p->y += GVARS_PLAYER_DRIFT_Y << 8;
 }
 
 void playerMoveByAngleSpeed(TO *o)

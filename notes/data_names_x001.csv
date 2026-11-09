@@ -1,0 +1,31 @@
+address,name,size,source
+8013c800,KOMA_PIG_ANIM_BOXES,,usage: u8[4] {box0 box1 box2 box3} per anim box index (anim w2) of the koma pig (AnimAdvanceWithBox / komaPig*); X000 80138fd8 layout refs=14
+8013dae8,KOMA_PIG_ANIMS,,usage: anim pointers by wac of the koma pig (komaPigIdle / Grabbed / Defeated / DropIn); X000 8013a160 layout refs=6
+8013c928,CHAIN_SEGMENT_ENEMY_DEFS,,usage: {u8 box0..3; u16 w1e; sprite idx; wac; void **anims}[subtype] updateChainSegmentEnemy copies at init (subtype 0 anims = KOMA_PIG_ANIMS) refs=17
+8013c730,BUCKET_DEFS,,usage: {box0..3 w1e ... anims}[subtype] updateBucket copies at init refs=7
+8013c6a4,SWINGING_ROPE_HEIGHT_PROFILES,,usage: u16 *[subtype]: per 8-unit drop the h offset of the rope surface (swingingRopeGrabProbe / ObjectCollision / OverlapTest) refs=5
+8013c44c,SPRING_VINE_STEP_HANDLERS,,usage: void (*[])(TObj *) indexed by o->step (stepSpringVine) refs=1
+8013c7b8,PURPLE_CRAWLER_IDLE_RAND_TABLE,,usage: u8[16] flags indexed by Rand() & 0xF in purpleCrawlerIdle refs=3
+8013c7c8,PURPLE_CRAWLER_RAND_TABLE,,usage: u8[16] flags indexed by Rand() & 0xF (purpleCrawlerIdle / Run / Jump / CrawlWall / CarryPlayer) refs=7
+8013c7d8,PURPLE_CRAWLER_WALK_RAND_TABLE,,usage: u8[8] flags indexed by Rand() & 7 (purpleCrawlerWalk / CrawlWall) refs=2
+8013c7e0,PURPLE_CRAWLER_NEXT_STEP_TABLE_B,,usage: u8[16] step numbers purpleCrawlerChooseStep picks by Rand() & 0xF when o->ba7 is set refs=1
+8013c7f0,PURPLE_CRAWLER_NEXT_STEP_TABLE,,usage: u8[16] step numbers purpleCrawlerChooseStep picks by Rand() & 0xF otherwise refs=1
+8013fc70,PURPLE_CRAWLER_ANIMS,,usage: anim pointers of the purple crawler indexed by wac (purpleCrawlerClimb / Hit); 8013FC74..8013FCCC are its entries refs=4
+8013f034,SEGMENTED_CRAWLER_ANIMS,,usage: anim pointers by wac of the segmented crawler (segmentedCrawlerMove / Grabbed / HurtFlyOff) refs=11
+8013f074,SEGMENTED_CRAWLER_GRABBED_ANIMS,,usage: anim pointers by wac while grabbed (segmentedCrawlerGrabbed) refs=11
+8013e5b0,LEAF_BURST_ANIMS,,usage: anim pointers by wac (updateLeafBurst) refs=1
+8013e5bc,SPRING_VINE_ANIMS,,usage: anim pointers of the spring vine (wac-indexed in springVineRopeStep1; [0] in Idle / RopeStep2 / RopeStep4 / updateSpringVine) refs=7
+8013e568,PUPPY_BARON_ANIMS,,usage: anim pointers of the held puppy (stepPuppyBaron indexes it by its script entry; spawnHeldPuppyBaron [0]) refs=12
+8013e710,CEILING_DRIP_DROP_ANIMS,,usage: anim pointers of the falling drop ([0] / [1] / [5] in stepCeilingDripDrop) refs=16
+8013c9ec,CEILING_DRIP_DROP_START_POSITIONS,,usage: {short x y z}[b0c]: start position of the drop (stepCeilingDripDrop) refs=6
+8013e754,RISING_PARTICLE_ANIMS,,usage: anim pointers by wac (initRisingParticle) refs=1
+8013e5cc,BLOCK_DEBRIS_ANIMS,,usage: anim pointers by subtype (updateBlockDebris) refs=1
+8013fa90,FLOWER_TOWER_KEEPER_ANIMS,,usage: anim pointers by wac (= b0c) of the flower tower keeper (updateFlowerTowerKeeper) refs=2
+8013c97c,BURNING_FIRE_ANIM_SETS,,usage: void **[subtype]: the anim list of each fire subtype ([subtype][0] in updateBurningFire) refs=2
+8013ca00,KOMA_PIG_SPAWNER_RAND_DELAYS,,usage: short[8] spawn delays (w08) picked by Rand() & 7 in updateKomaPigSpawner refs=2
+8013ca10,SEGMENTED_CRAWLER_SPAWN_POINTS,,usage: {short y x}[] spawn positions updateSegmentedCrawlerSpawner picks refs=2
+8013ca20,SEGMENTED_CRAWLER_SPAWNER_RAND_DELAYS,,usage: short[4] spawn delays (w08) picked by Rand() & 3 in updateSegmentedCrawlerSpawner refs=1
+8013c404,SCENERY_SPRITE_CLUT_X,,usage: short[subtype]: GetClut x of the scenery sprite (updateScenerySprite) refs=1
+8013c428,SCENERY_SPRITE_CLUT_Y,,usage: short[subtype]: GetClut y (+ b0c) of the scenery sprite; 0 = keep the clut (updateScenerySprite) refs=2
+8013c484,FLOWER_TOWER_BLOCKER_BOX,,usage: short[4] box0 / w / box2 / h of the flower tower blocker (updateFlowerTowerBlocker reads the 4 fields) refs=3
+8013e740,RACE_RIVAL_ANIMS,,usage: anim pointers of the race rival (8013E740..8013E750; [0] in WaitStart / IdleWander / Finish / updateRaceRival; +0xC Run / HopAway) refs=6

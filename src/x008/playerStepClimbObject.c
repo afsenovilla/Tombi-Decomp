@@ -25,7 +25,7 @@ extern int GAME;
 extern unsigned char GAME_PLAYER_MODE;
 extern unsigned short JOYPAD_STATE;
 extern unsigned short BUTTON_MASK_B;
-extern char DAT_80011148[];
+extern char PLAYER_CLIMB_OBJECT_ANIM[];
 extern void FUN_8001fe94(TObj *, int);
 extern void playerClimbFollowObject(TObj *);
 extern void FUN_800eeb5c(TObj *, int);
@@ -63,7 +63,7 @@ void playerStepClimbObject(TObj *o)
         o->velX = o->wb8;
         o->h->p.whole = GRABBED_OBJECT->h->p.whole + o->wb8;
         o->y.p.whole = GRABBED_OBJECT->y.p.whole + o->wba + 8;
-        o->anim = DAT_80011148;
+        o->anim = PLAYER_CLIMB_OBJECT_ANIM;
         FUN_8001fe94(o, 0);
         o->timer = 10;
         o->state++;
@@ -114,7 +114,7 @@ void playerStepClimbObject(TObj *o)
             else
                 t = v + 0xc;
             h->p.whole = t;
-            o->anim = DAT_80011148;
+            o->anim = PLAYER_CLIMB_OBJECT_ANIM;
             o->animFrame ^= 1;
             FUN_8001fe94(o, 0);
             o->timer = 10;

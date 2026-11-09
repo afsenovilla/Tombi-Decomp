@@ -8,7 +8,7 @@ extern unsigned char D_8013AA64[];
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } E8;
 extern unsigned char D_8013C47C[];
-extern void *D_8013E5AC, *D_8013E5BC;
+extern void *D_8013E5AC, *SPRING_VINE_ANIMS;
 extern int cullObjectToDrawListMargin(TObj *, int);
 extern void stepSpringVine(TObj *);
 extern void FUN_80018838(TObj *);
@@ -55,7 +55,7 @@ void func_80119198(TObj *o)
         case 2:
             o->b0f = 2;
             o->active = 2;
-            o->anim = D_8013E5BC;
+            o->anim = SPRING_VINE_ANIMS;
             p = (TObj *)o->d90;
             o->box0 = 4;
             o->box1 = 4;
@@ -136,7 +136,7 @@ void func_80119198(TObj *o)
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } E8;
 extern unsigned char D_8013C47C[];
-extern void *D_8013E5AC, *D_8013E5BC;
+extern void *D_8013E5AC, *SPRING_VINE_ANIMS;
 extern int cullObjectToDrawListMargin(TObj *, int);
 extern void stepSpringVine(TObj *);
 extern void FUN_80018838(TObj *);
@@ -184,7 +184,7 @@ void updateSpringVine(TObj *o)
         case 2:
             o->b0f = 2;
             o->active = 2;
-            o->anim = D_8013E5BC;
+            o->anim = SPRING_VINE_ANIMS;
             p = (TObj *)o->d90;
             o->box0 = 4;
             o->box1 = 4;

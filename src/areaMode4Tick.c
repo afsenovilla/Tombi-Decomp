@@ -3,7 +3,7 @@
 // VERSION SLPS_01144 slps01144 8001B3EC 304
 #if defined(VERSION_SLPS_01144)
 #include "globals.h"
-extern short FRAME_BUFFER_INDEX, G1c6;
+extern short FRAME_BUFFER_INDEX, DRAW_FROZEN;
 extern unsigned short TICK_COUNT;
 extern unsigned int NEXT_PRIM;
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec5e8(void);
@@ -15,23 +15,23 @@ void func_8001B3EC(void)
 {
     NEXT_PRIM = (unsigned int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
     FUN_8001ca58();
-    if (G1c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         TICK_COUNT = TICK_COUNT + 1;
         updateAreaScreenEffect();
-        if (G1c6 == 0) {
+        if (DRAW_FROZEN == 0) {
             tickAreaScript();
             FUN_8001d36c();
             updateObjectsUnlayered();
             FUN_800ec5e8();
         }
     }
-    if (G1c6 != 1)
+    if (DRAW_FROZEN != 1)
         updateInventoryOverlay();
-    if (G1c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         updateObjectsLayer8();
         updateObjectsLayer7();
     }
-    if (G1c6 != 2)
+    if (DRAW_FROZEN != 2)
         drawGameplayScene();
     else
         resetDrawLists();
@@ -39,7 +39,7 @@ void func_8001B3EC(void)
 }
 #else
 #include "globals.h"
-extern short FRAME_BUFFER_INDEX, G1c6;
+extern short FRAME_BUFFER_INDEX, DRAW_FROZEN;
 extern unsigned short TICK_COUNT;
 extern unsigned int NEXT_PRIM;
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec5e8(void);
@@ -51,26 +51,26 @@ void areaMode4Tick(void)
 {
     NEXT_PRIM = (unsigned int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
     FUN_8001ca58();
-    if (G1c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         TICK_COUNT = TICK_COUNT + 1;
         updateAreaScreenEffect();
-        if (G1c6 == 0) {
+        if (DRAW_FROZEN == 0) {
             tickAreaScript();
             FUN_8001d36c();
             updateObjectsUnlayered();
             FUN_800ec5e8();
         }
     }
-    if (G1c6 != 1)
+    if (DRAW_FROZEN != 1)
         updateInventoryOverlay();
-    if (G1c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         updateObjectsLayer8();
-        if (G1c6 == 0) {
+        if (DRAW_FROZEN == 0) {
             FUN_800ebc30();
             updateObjectsLayer7();
         }
     }
-    if (G1c6 != 2)
+    if (DRAW_FROZEN != 2)
         drawGameplayScene();
     else
         resetDrawLists();

@@ -7,8 +7,8 @@
 
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
-extern E12 D_80119C48[];
-extern short D_1F8001C6;
+extern E12 FACTORY_NPC_DEFS_ANIMS[];
+extern short DRAW_FROZEN;
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimLoadDuration(TObj *);
 
@@ -29,7 +29,7 @@ void factoryBossDontUseBombTalk(TObj *o)
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         v = *(V *)&o->a;
-        o->anim = D_80119C48[o->subtype].p[2];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[2];
         AnimLoadDuration(o);
         o->d90 = (int)showMessageBoxDirect(2, 0x11, &v);
         o->state++;
@@ -39,14 +39,14 @@ void factoryBossDontUseBombTalk(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        o->anim = D_80119C48[o->subtype].p[0];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[0];
         AnimLoadDuration(o);
         o->state++;
         break;
     case 2:
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

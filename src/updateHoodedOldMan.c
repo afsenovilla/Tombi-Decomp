@@ -54,8 +54,8 @@ extern unsigned char MOVIE_ID[];
 #define D_1F8001CD MOVIE_ID[0]
 extern unsigned char MOVIE_PLAY_STATE[];
 #define D_1F8001CC MOVIE_PLAY_STATE[0]
-extern short D_1F8001C6_[];
-#define D_1F8001C6 D_1F8001C6_[0]
+extern short DRAW_FROZEN[];
+#define D_1F8001C6 DRAW_FROZEN[0]
 extern short D_800A60EA_[];
 #define D_800A60EA D_800A60EA_[0]
 extern short PLAYER_ANIM_FRAME[];
@@ -491,8 +491,8 @@ extern unsigned char MOVIE_ID[];
 #define D_1F8001CD MOVIE_ID[0]
 extern unsigned char MOVIE_PLAY_STATE[];
 #define D_1F8001CC MOVIE_PLAY_STATE[0]
-extern short D_1F8001C6_[];
-#define D_1F8001C6 D_1F8001C6_[0]
+extern short DRAW_FROZEN[];
+#define D_1F8001C6 DRAW_FROZEN[0]
 extern short D_800A60EA_[];
 #define D_800A60EA D_800A60EA_[0]
 extern short PLAYER_ANIM_FRAME[];

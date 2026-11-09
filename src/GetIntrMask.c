@@ -35,7 +35,7 @@ struct intr {
 };
 extern struct intr* D_800974A0;
 int VSyncCallback(void (*func)());
-extern volatile u16* D_80098144;
+extern volatile u16* intr_imask;
 extern volatile s32* D_800974AC;
 void HookEntryInt(jmp_buf env);
 extern volatile u16* D_800974A4;
@@ -56,7 +56,7 @@ int RestartCallback(void);
 
 int CheckCallback();
 
-int GetIntrMask() { return *D_80098144; }
+int GetIntrMask() { return *intr_imask; }
 
 int SetIntrMask(int mask);
 

@@ -5,9 +5,9 @@
 #include "common.h"
 #include "psyq/libetc.h"
 
-extern volatile s32* D_800970A4;
-extern volatile s32* D_800970A8;
-extern volatile s32 D_800970AC; // HSync counter
+extern volatile s32* vsync_gpustat;
+extern volatile s32* vsync_rcnt1;
+extern volatile s32 Hcount; // HSync counter
 extern volatile s32 D_800970B0; 
 extern volatile s32 Vcount; // VSync counter
 
@@ -18,8 +18,8 @@ int VSync(int mode) {
     int v;
     int n;
 
-    syncFlag = *D_800970A4;
-    elapsed = (*D_800970A8 - D_800970AC) & 0xFFFF;
+    syncFlag = *vsync_gpustat;
+    elapsed = (*vsync_rcnt1 - Hcount) & 0xFFFF;
     if (mode < 0) {
         return Vcount;
     }
@@ -30,14 +30,14 @@ int VSync(int mode) {
     v = mode > 0 ? D_800970B0 - n + mode : D_800970B0;
     timeout = mode > 0 ? mode - n : 0;
     v_wait(v, timeout);
-    syncFlag = *D_800970A4;
+    syncFlag = *vsync_gpustat;
     v_wait(Vcount + 1, 1);
-    if (syncFlag & 0x400000 && (syncFlag ^ *D_800970A4) >= 0) {
+    if (syncFlag & 0x400000 && (syncFlag ^ *vsync_gpustat) >= 0) {
         do {
-        } while (!((syncFlag ^ *D_800970A4) & 0x80000000));
+        } while (!((syncFlag ^ *vsync_gpustat) & 0x80000000));
     }
     D_800970B0 = Vcount;
-    D_800970AC = *D_800970A8;
+    Hcount = *vsync_rcnt1;
     return elapsed;
 }
 

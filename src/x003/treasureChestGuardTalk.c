@@ -8,7 +8,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80135DD8[];
+extern AT TREASURE_CHEST_GUARD_DEFS_ANIMS[];
 extern unsigned char D_8009CE58[]; /* debt: second name for GCD.bce5d so chk() re-reads it */
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -22,7 +22,7 @@ extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ void setanim(TObj *o, int n)
 {
-    o->anim = D_80135DD8[o->subtype].anims[n];
+    o->anim = TREASURE_CHEST_GUARD_DEFS_ANIMS[o->subtype].anims[n];
     FUN_8001fe94(o, 0);
 }
 
@@ -178,7 +178,7 @@ void func_8012A66C(TObj *o)
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80135DD8[];
+extern AT TREASURE_CHEST_GUARD_DEFS_ANIMS[];
 extern unsigned char D_8009CE58[]; /* debt: second name for GCD.bce5d so chk() re-reads it */
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe94(TObj *, int);
@@ -192,7 +192,7 @@ extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ void setanim(TObj *o, int n)
 {
-    o->anim = D_80135DD8[o->subtype].anims[n];
+    o->anim = TREASURE_CHEST_GUARD_DEFS_ANIMS[o->subtype].anims[n];
     FUN_8001fe94(o, 0);
 }
 

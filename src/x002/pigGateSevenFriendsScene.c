@@ -14,7 +14,7 @@ extern void *D_8009F328;
 extern void *D_8009F32C;
 extern TObj PLAYER;
 extern short PLAYER_Y[];
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern int AnimAdvance(TObj *);
 extern TObj *showMessageBoxDirect(int, int, V6 *);
 extern void sevenFriendsSetAnim(TObj *, int, int);
@@ -177,7 +177,7 @@ void func_8011AFEC(TObj *o)
             break;
         }
         playerSetAnim(&PLAYER, 0x2b, 0);
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->w08 = 0x50;
         o->state++;
         break;
@@ -219,7 +219,7 @@ void func_8011AFEC(TObj *o)
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((unsigned char*)&GVARS.b3e)[0] = 0;
         PLAYER.wb2 = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->b0f = ((W24 *)o)->w24;
         PLAYER.b04 = 1;
         PLAYER.step = 0;
@@ -242,7 +242,7 @@ extern void *D_8009F328;
 extern void *D_8009F32C;
 extern TObj PLAYER;
 extern short PLAYER_Y[];
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern int AnimAdvance(TObj *);
 extern TObj *showMessageBoxDirect(int, int, V6 *);
 extern void sevenFriendsSetAnim(TObj *, int, int);
@@ -406,7 +406,7 @@ void pigGateSevenFriendsScene(TObj *o)
             break;
         }
         playerSetAnim(&PLAYER, 0x2b, 0);
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->w08 = 0x50;
         o->state++;
         break;
@@ -448,7 +448,7 @@ void pigGateSevenFriendsScene(TObj *o)
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((unsigned char*)&GVARS.b3e)[0] = 0;
         PLAYER.wb2 = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->b0f = ((W24 *)o)->w24;
         PLAYER.b04 = 1;
         PLAYER.step = 0;

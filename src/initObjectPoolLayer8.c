@@ -3,7 +3,7 @@
 extern char OBJECT_POOL_LAYER8[];
 extern char DAT_800b3c98[];
 extern char DAT_800a6264[];
-extern char DAT_800b3e24[];
+extern char CAT8_OBJECT_LIST_BUF[];
 extern char *FREE_OBJECTS_LAYER8;
 extern char *CAT8_OBJECT_LIST;
 extern char *CAT8_OBJECT_LIST_SAVED;
@@ -39,8 +39,8 @@ void initObjectPoolLayer8(void)
         q -= 0xd4;
     } while (i < 0x2d);
     FREE_OBJECT_COUNT_LAYER8 = 0x2d;
-    CAT8_OBJECT_LIST = DAT_800b3e24;
-    CAT8_OBJECT_LIST_SAVED = DAT_800b3e24;
+    CAT8_OBJECT_LIST = CAT8_OBJECT_LIST_BUF;
+    CAT8_OBJECT_LIST_SAVED = CAT8_OBJECT_LIST_BUF;
     CAT8_OBJECT_COUNT_SAVED = 0;
     CAT8_OBJECT_COUNT = 0;
     initSpriteSlots8();

@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 extern unsigned char D_8009E4EA, D_8009EE58;
-extern short D_1F8001C6; extern volatile short D_800A7C2A;
+extern short DRAW_FROZEN; extern volatile short D_800A7C2A;
 #include "player.h"
 extern void func_8001C88C(int, int, int);
 extern int func_8002E42C(int, int, V6 *);
@@ -56,7 +56,7 @@ void func_80116D24_slps01144(TObj *o)
         D_8009E4EA = 0;
         D_800A7C2A = 0;
         { unsigned short w = *(volatile unsigned short *)&o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = w; }
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

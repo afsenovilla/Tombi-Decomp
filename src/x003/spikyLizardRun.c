@@ -9,8 +9,8 @@ extern int Rand(void);
 extern short isObjectPastReferenceX(TObj *);
 extern void applyFrameVelocityXY(TObj *);
 extern int spikyLizardCheckWall(TObj *, short);
-extern void *D_80139500[];
-extern unsigned char D_80135CB0[];
+extern void *SPIKY_LIZARD_ANIMS[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 extern unsigned char D_80135D54[], D_80135D4C[];
 extern unsigned short D_80135D2C[];
 extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
@@ -18,8 +18,8 @@ extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
 static __inline__ void set(TObj *o)
 {
     unsigned char *p;
-    o->anim = D_80139500[o->wac];
-    p = &D_80135CB0[o->wac * 4];
+    o->anim = SPIKY_LIZARD_ANIMS[o->wac];
+    p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p;

@@ -10,7 +10,7 @@
    Debt pass: tried `two` var with one/two sets, goto/do/for loops, r[i] indexing, orders; -dg: r 7 refs/267 vs const 2 7 refs/524 (doubled), needs ~3 more weighted refs on 2. */
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 extern short playerPushOutOfObjectBox(TObj *, unsigned char *);
 extern void playerTouchCat2Type0E(TObj *, unsigned char *);
 extern void playerTouchCat2Type59(TObj *, unsigned char *);
@@ -72,10 +72,10 @@ void collidePlayerWithCat2Objects(TObj *o)
 
     if (GVARS.playerLanded == 0) return;
     r = (*(unsigned char ***)&SPAD.p21c);
-    D_1F80019E = SPAD.s246;
-    while (D_1F80019E != 0) {
+    LIST_COUNTER = SPAD.s246;
+    while (LIST_COUNTER != 0) {
         q = *r;
-        D_1F80019E = D_1F80019E - 1;
+        LIST_COUNTER = LIST_COUNTER - 1;
         r++;
         if (q[0] & 1) {
             switch (q[2]) {
@@ -106,7 +106,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                         { TObj *p = o; *(unsigned char **)((char *)p + 0xd4) = q; }
                         { TObj *p = o; *(unsigned char *)&p->wac = 2; }
                     }
-                    D_1F80019E = 0;
+                    LIST_COUNTER = 0;
                 }
                 break;
             case 3:
@@ -267,7 +267,7 @@ void collidePlayerWithCat2Objects(TObj *o)
    Debt pass: tried `two` var with one/two sets, goto/do/for loops, r[i] indexing, orders; -dg: r 7 refs/267 vs const 2 7 refs/524 (doubled), needs ~3 more weighted refs on 2. */
 #include "TOBJ.H"
 #include "gamestate.h"
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 extern short playerPushOutOfObjectBox(TObj *, unsigned char *);
 extern void playerTouchCat2Type0E(TObj *, unsigned char *);
 extern void playerTouchCat2Type59(TObj *, unsigned char *);
@@ -329,10 +329,10 @@ void collidePlayerWithCat2Objects(TObj *o)
 
     if (GVARS.playerLanded == 0) return;
     r = (*(unsigned char ***)&SPAD.p21c);
-    D_1F80019E = SPAD.s246;
-    while (D_1F80019E != 0) {
+    LIST_COUNTER = SPAD.s246;
+    while (LIST_COUNTER != 0) {
         q = *r;
-        D_1F80019E = D_1F80019E - 1;
+        LIST_COUNTER = LIST_COUNTER - 1;
         r++;
         if (q[0] & 1) {
             switch (q[2]) {
@@ -363,7 +363,7 @@ void collidePlayerWithCat2Objects(TObj *o)
                         { TObj *p = o; *(unsigned char **)((char *)p + 0xe4) = q; }
                         { TObj *p = o; *(unsigned char *)&p->wac = 2; }
                     }
-                    D_1F80019E = 0;
+                    LIST_COUNTER = 0;
                 }
                 break;
             case 3:

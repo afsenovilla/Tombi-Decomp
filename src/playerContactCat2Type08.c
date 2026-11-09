@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
 #include "raw7.h"
-extern unsigned char D_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 extern unsigned char PLAYER[];
 extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
@@ -81,7 +81,7 @@ void func_801251AC(TObj *a, TObj *b)
 #else
 #include "TOBJ.H"
 #include "raw7.h"
-extern unsigned char D_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 extern unsigned char PLAYER[];
 extern short objectBoxOverlapSideFacing(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
@@ -110,7 +110,7 @@ void playerContactCat2Type08(TObj *a, TObj *b)
         }
     case 0:
     case 3:
-        if (D_1f8001a4)
+        if (DEBUG_INVINCIBLE)
             return;
         if (b->active & 2)
             return;

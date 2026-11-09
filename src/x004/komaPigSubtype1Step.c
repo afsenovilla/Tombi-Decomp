@@ -28,7 +28,7 @@ static unsigned *D_80133C1C[18] = {
     (unsigned *)D_8013445C, (unsigned *)D_801341D0, (unsigned *)D_80133D58, (unsigned *)D_80133D60,
     (unsigned *)D_8013456C, (unsigned *)D_80134370,
 };
-extern unsigned char D_80130FD4[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int komaPigCheckLanded(TObj *);
@@ -83,7 +83,7 @@ void komaPigSubtype1Step(TObj *o)
     common:
         o->anim = a;
         {
-            unsigned char *pp = &D_80130FD4[a[1] * 4];
+            unsigned char *pp = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
             o->box0 = *pp++;
             o->box1 = *pp++;
             o->box2 = *pp++;

@@ -9,8 +9,8 @@ typedef struct S {
     unsigned short w16; char p2[0x40 - 0x18]; P *pos; P *pos2; char p3[0x68 - 0x48];
     unsigned char b68; char p4[0x6e - 0x69]; unsigned short w6e; char p5[2]; unsigned short w72;
 } S;
-extern unsigned short D_1F80019E;
-extern short D_1F80019Es;
+extern unsigned short LIST_COUNTER;
+extern short LIST_COUNTER_S;
 extern P *PLAYER_D;
 extern P *PLAYER_H;
 int playerTryTalkToNpc(void)
@@ -21,13 +21,13 @@ int playerTryTalkToNpc(void)
     unsigned int f;
     unsigned short h, w, d;
     unsigned short n = SPAD.s250;
-    D_1F80019E = n;
+    LIST_COUNTER = n;
     r = 0;
     if ((SPAD.s1fc & SPAD.s3c4) == 0) return 0;
     if (n != 0)
     do {
         p = list[0];
-        D_1F80019E--;
+        LIST_COUNTER--;
         list++;
         if (!(p->b0 & 2))
             continue;
@@ -64,9 +64,9 @@ int playerTryTalkToNpc(void)
             (*(int*)&PLAYER.obj.w5c) = 1;
             p->b68 = r;
             if (r != 0)
-                D_1F80019E = 0;
+                LIST_COUNTER = 0;
             break;
         }
-    } while (D_1F80019Es != 0);
+    } while (LIST_COUNTER_S != 0);
     return r;
 }

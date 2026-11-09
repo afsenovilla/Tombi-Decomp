@@ -13,7 +13,7 @@ typedef struct {
     void **anims;
 } Desc;
 typedef struct { short x, y, p0, p1; } ClutPos;
-extern unsigned char DAT_8007b084[];
+extern unsigned char ITEM_INIT_INDEX[];
 extern char D_8007A8F0[];
 extern char D_8007A904[];
 extern char D_8007A918[];
@@ -118,7 +118,7 @@ static Desc *DAT_8007b14c[81] = {
     (Desc *)D_8007AEE0, (Desc *)D_8007AEF4, (Desc *)D_8007AF08, (Desc *)D_8007AF1C,
     (Desc *)D_8007AF30,
 };
-extern ClutPos DAT_8007b2d4[];
+extern ClutPos ITEM_CLUT_POSITIONS[];
 extern unsigned char DAT_8009ce5b;
 extern unsigned char DAT_8009d0c1;
 extern unsigned char DAT_8009d0bc;
@@ -137,7 +137,7 @@ void func_8003D740(TObj *o)
     }
     o->b68 = 0;
     o->b69 = 0;
-    d = DAT_8007b14c[DAT_8007b084[o->subtype]];
+    d = DAT_8007b14c[ITEM_INIT_INDEX[o->subtype]];
     o->b0a = d->b0;
     o->w1e = d->b2;
     (*(signed char*)&o->b0f) = -9;
@@ -167,7 +167,7 @@ void func_8003D740(TObj *o)
         o->w08 = FUN_8005e420(d->cx, d->cy + (o->b0c & 0x7f));
         break;
     case 2:
-        o->w08 = FUN_8005e420(DAT_8007b2d4[o->b0c & 0x7f].x, DAT_8007b2d4[o->b0c & 0x7f].y);
+        o->w08 = FUN_8005e420(ITEM_CLUT_POSITIONS[o->b0c & 0x7f].x, ITEM_CLUT_POSITIONS[o->b0c & 0x7f].y);
     case 3:
         if (DAT_8009d0c1 == 0)
             v = 0;
@@ -200,7 +200,7 @@ typedef struct {
     void **anims;
 } Desc;
 typedef struct { short x, y, p0, p1; } ClutPos;
-extern unsigned char DAT_8007b084[];
+extern unsigned char ITEM_INIT_INDEX[];
 extern char D_8007A8F0[];
 extern char D_8007A904[];
 extern char D_8007A918[];
@@ -305,7 +305,7 @@ static Desc *DAT_8007b14c[81] = {
     (Desc *)D_8007AEE0, (Desc *)D_8007AEF4, (Desc *)D_8007AF08, (Desc *)D_8007AF1C,
     (Desc *)D_8007AF30,
 };
-extern ClutPos DAT_8007b2d4[];
+extern ClutPos ITEM_CLUT_POSITIONS[];
 extern unsigned char DAT_8009ce5b;
 extern unsigned char DAT_8009d0c1;
 extern unsigned char DAT_8009d0bc;
@@ -324,7 +324,7 @@ void initItemObject(TObj *o)
     }
     o->b68 = 0;
     o->b69 = 0;
-    d = DAT_8007b14c[DAT_8007b084[o->subtype]];
+    d = DAT_8007b14c[ITEM_INIT_INDEX[o->subtype]];
     o->b0a = d->b0;
     o->w1e = d->b2;
     (*(signed char*)&o->b0f) = -9;
@@ -354,7 +354,7 @@ void initItemObject(TObj *o)
         o->w08 = FUN_8005e420(d->cx, d->cy + (o->b0c & 0x7f));
         break;
     case 2:
-        o->w08 = FUN_8005e420(DAT_8007b2d4[o->b0c & 0x7f].x, DAT_8007b2d4[o->b0c & 0x7f].y);
+        o->w08 = FUN_8005e420(ITEM_CLUT_POSITIONS[o->b0c & 0x7f].x, ITEM_CLUT_POSITIONS[o->b0c & 0x7f].y);
         break;
     case 3:
         if (DAT_8009d0c1 == 0)

@@ -25,7 +25,7 @@ extern unsigned char D_80125CB8[];
 extern unsigned char D_80125CC8[];
 extern unsigned char D_80125D80[];
 extern unsigned short D_80125E10[];
-extern void (*D_80125CD8[])(TObj *);
+extern void (*EVIL_PIG_ATTACK_HANDLERS[])(TObj *);
 extern void ObjSetFacingToPlayer(TObj *);
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
@@ -91,7 +91,7 @@ void realEvilPigChooseAttack(TObj *o)
         }
     case 1:
         if (GAME_PLAYER_MODE == 3) break;
-        D_80125CD8[s->b](o);
+        EVIL_PIG_ATTACK_HANDLERS[s->b](o);
         if (s->b == 7) break;
         if (o->wac != 0x12) break;
         if (chk(o)) {

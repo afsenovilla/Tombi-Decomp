@@ -7,7 +7,7 @@
 typedef struct { int x, y, z; } V3;
 extern TObj *allocObjectLayer5();
 extern unsigned char D_8006DDEF[];
-extern unsigned char *D_8007B14C[];
+extern unsigned char *ITEM_INIT_TABLE[];
 void spawnItemLinked(TObj *o, short type, short sub, short *pos, short vh, short vv)
 {
     TObj *n = allocObjectLayer5();
@@ -31,8 +31,8 @@ void spawnItemLinked(TObj *o, short type, short sub, short *pos, short vh, short
 #include "TOBJ.H"
 typedef struct { int x, y, z; } V3;
 extern TObj *allocObjectLayer5();
-extern unsigned char D_8007B084[];
-extern unsigned char *D_8007B14C[];
+extern unsigned char ITEM_INIT_INDEX[];
+extern unsigned char *ITEM_INIT_TABLE[];
 void spawnItemLinked(TObj *o, short type, short sub, short *pos, short vh, short vv)
 {
     TObj *n = allocObjectLayer5();
@@ -41,7 +41,7 @@ void spawnItemLinked(TObj *o, short type, short sub, short *pos, short vh, short
         n->type = 3;
         n->subtype = type;
         n->b0c = sub | 0x80;
-        n->b0f = D_8007B14C[D_8007B084[type]][3];
+        n->b0f = ITEM_INIT_TABLE[ITEM_INIT_INDEX[type]][3];
         n->animFrame = 0;
         n->h->raw = pos[1] << 16;
         n->y.raw = pos[3] << 16;

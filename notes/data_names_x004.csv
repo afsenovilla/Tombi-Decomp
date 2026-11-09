@@ -1,0 +1,19 @@
+address,name,size,source
+80130fd4,KOMA_PIG_ANIM_BOXES,,usage: u8[4] box per anim box index of the koma pig (AnimAdvanceWithBox / komaPig*); X000 80138fd8 layout refs=15
+80133b5c,KOMA_PIG_ANIMS,,usage: anim pointers by wac of the koma pig (komaPigIdle / Grabbed / Hit) refs=10
+80131128,BLACK_CROW_RAND_STATES,,usage: short[16] next state picked by Rand() & 0xF (blackCrowFlyAround / Perch* / WatchPlayer) refs=5
+80131174,MERMAID_DEFS,,usage: {box; w1e; ...; anims}[subtype] initMermaid copies refs=7
+8013117c,MERMAID_DEFS_ANIMS,,usage: MERMAID_DEFS+8: the anims column (mermaidSetAnim / DivingLesson / NecklaceTalk / DivingOfferTalk) refs=29
+80131180,SCARED_GOLD_VOLUNTEER_DEFS,,usage: {box; w1e; ...; anims}[subtype] initScaredGoldVolunteer copies refs=7
+80131188,SCARED_GOLD_VOLUNTEER_DEFS_ANIMS,,usage: SCARED_GOLD_VOLUNTEER_DEFS+8: the anims column (scaredGoldVolunteerSetAnim / Talk) refs=2
+801311b0,PAINTING_SLOT_HINT_NPC_DEFS,,usage: {box; w1e; ...; anims}[subtype] initPaintingSlotHintNpc copies refs=7
+801311b8,PAINTING_SLOT_HINT_NPC_DEFS_ANIMS,,usage: PAINTING_SLOT_HINT_NPC_DEFS+8: the anims column (paintingSlotHintNpcSetAnim / Talk) refs=6
+801311c8,TOWN_HALL_WORKER_DEFS,,usage: {box; w1e; ...; anims}[subtype] initTownHallWorker copies refs=7
+801311d0,TOWN_HALL_WORKER_DEFS_ANIMS,,usage: TOWN_HALL_WORKER_DEFS+8: the anims column (townHallWorkerSetAnim / Talk) refs=3
+801314b4,UNBENDING_CABLE_NPC_DEFS,,usage: {box; w1e; ...; anims}[subtype] initUnbendingCableNpc copies refs=7
+801314bc,UNBENDING_CABLE_NPC_DEFS_ANIMS,,usage: UNBENDING_CABLE_NPC_DEFS+8: the anims column (unbendingCableTalk) refs=2
+801314c0,HIDING_SON_DEFS,,usage: {box; w1e; ...; anims}[subtype] initHidingSon copies refs=7
+801314c8,HIDING_SON_DEFS_ANIMS,,usage: HIDING_SON_DEFS+8: the anims column (hidingSonTalk) refs=11
+80131108,BITING_PLANT_BOXES,,usage: short[4] box per subtype of the biting plant (updateA04BitingPlant); X000 80139208 layout refs=1
+80134d38,BITING_PLANT_ANIMS,,usage: anim pointers by subtype of the biting plant (updateA04BitingPlant / area4Type07Step*); X000 8013b224 layout refs=3
+8013145c,BIG_KEY_PAINTING_PIECE_DEFS,,usage: per piece i the spawn record of the big key painting pieces (spawnBigKeyPaintingPieces / spawnBigKeyPiece / bigKeyPaintingCheckPiece) refs=3

@@ -15,8 +15,8 @@ typedef struct {
     char p5[0xa9 - 0x9f]; unsigned char ba9;
     char p6[0xd8 - 0xaa]; unsigned short se8; short sea;
 } TO;
-extern int D_1F8003C0;
-extern short D_1F80019E;
+extern int TOUCHED_OBJECT;
+extern short LIST_COUNTER;
 extern short probeCollisionAtDepthC(TO *, short, short);
 extern void playerGrabCat4Type01(TO *, unsigned char *), probeGrabObjectBoxOffset(TO *, unsigned char *), playerGrabCat4Type02(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
 extern void func_80126FE4(TO *, unsigned char *), playerGrabCat4Type06(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
@@ -33,7 +33,7 @@ int func_80056C34_slps01144(TO *o, unsigned char f)
     unsigned char *e;
 
     if (o->b9e != 0) return 0;
-    D_1F8003C0 = 0;
+    TOUCHED_OBJECT = 0;
     if (f) o->sea = o->s16 - 2;
     else o->sea = o->s16 - 8;
     d = 0x10;
@@ -43,8 +43,8 @@ int func_80056C34_slps01144(TO *o, unsigned char f)
         o->b9e = (r == 2) ? 5 : 6;
         if (o->s2e & 1) o->h40->s2 -= 0xc;
         else o->h40->s2 += 0xc;
-        D_1F8003C0++;
-        return D_1F8003C0;
+        TOUCHED_OBJECT++;
+        return TOUCHED_OBJECT;
     }
     switch (o->anim->s4) {
     case 0: n = 9; break;
@@ -56,11 +56,11 @@ int func_80056C34_slps01144(TO *o, unsigned char f)
     d = -n;
     if (!(o->s2e & 1)) d = n;
     q = (*(unsigned char ***)&SPAD.p268);
-    D_1F80019E = SPAD.s254;
+    LIST_COUNTER = SPAD.s254;
     o->se8 = o->h40->s2 + d;
-    while (D_1F80019E != 0) {
+    while (LIST_COUNTER != 0) {
         e = *q;
-        D_1F80019E--;
+        LIST_COUNTER--;
         q++;
         if (*e & 1) {
             switch (e[2]) {
@@ -123,12 +123,12 @@ int func_80056C34_slps01144(TO *o, unsigned char f)
             }
         }
     }
-    if (D_1F8003C0 == 0) {
+    if (TOUCHED_OBJECT == 0) {
         q = (*(unsigned char ***)&SPAD.p260);
-        D_1F80019E = SPAD.s250;
-        while (D_1F80019E != 0) {
+        LIST_COUNTER = SPAD.s250;
+        while (LIST_COUNTER != 0) {
             e = *q;
-            D_1F80019E--;
+            LIST_COUNTER--;
             q++;
             if (*e & 1) {
                 switch (e[2]) {
@@ -142,7 +142,7 @@ int func_80056C34_slps01144(TO *o, unsigned char f)
             }
         }
     }
-    return D_1F8003C0;
+    return TOUCHED_OBJECT;
 }
 #else
 #include "spad.h"
@@ -158,8 +158,8 @@ typedef struct {
     char p5[0xa9 - 0x9f]; unsigned char ba9;
     char p6[0xe8 - 0xaa]; unsigned short se8; short sea;
 } TO;
-extern int D_1F8003C0;
-extern short D_1F80019E;
+extern int TOUCHED_OBJECT;
+extern short LIST_COUNTER;
 extern short probeCollisionAtDepthC(TO *, short, short);
 extern void playerGrabCat4Type01(TO *, unsigned char *), probeGrabObjectBoxOffset(TO *, unsigned char *), playerGrabCat4Type02(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
 extern void func_80126FE4(TO *, unsigned char *), playerGrabCat4Type06(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
@@ -176,7 +176,7 @@ int playerProbeGrab(TO *o, unsigned char f)
     unsigned char *e;
 
     if (o->b9e != 0) return 0;
-    D_1F8003C0 = 0;
+    TOUCHED_OBJECT = 0;
     if (f) o->sea = o->s16 - 2;
     else o->sea = o->s16 - 8;
     d = 0x10;
@@ -186,8 +186,8 @@ int playerProbeGrab(TO *o, unsigned char f)
         o->b9e = (r == 2) ? 5 : 6;
         if (o->s2e & 1) o->h40->s2 -= 0xc;
         else o->h40->s2 += 0xc;
-        D_1F8003C0++;
-        return D_1F8003C0;
+        TOUCHED_OBJECT++;
+        return TOUCHED_OBJECT;
     }
     switch (o->anim->s4) {
     case 0: n = 9; break;
@@ -199,11 +199,11 @@ int playerProbeGrab(TO *o, unsigned char f)
     d = -n;
     if (!(o->s2e & 1)) d = n;
     q = (*(unsigned char ***)&SPAD.p268);
-    D_1F80019E = SPAD.s254;
+    LIST_COUNTER = SPAD.s254;
     o->se8 = o->h40->s2 + d;
-    while (D_1F80019E != 0) {
+    while (LIST_COUNTER != 0) {
         e = *q;
-        D_1F80019E--;
+        LIST_COUNTER--;
         q++;
         if (*e & 1) {
             switch (e[2]) {
@@ -266,12 +266,12 @@ int playerProbeGrab(TO *o, unsigned char f)
             }
         }
     }
-    if (D_1F8003C0 == 0) {
+    if (TOUCHED_OBJECT == 0) {
         q = (*(unsigned char ***)&SPAD.p260);
-        D_1F80019E = SPAD.s250;
-        while (D_1F80019E != 0) {
+        LIST_COUNTER = SPAD.s250;
+        while (LIST_COUNTER != 0) {
             e = *q;
-            D_1F80019E--;
+            LIST_COUNTER--;
             q++;
             if (*e & 1) {
                 switch (e[2]) {
@@ -285,6 +285,6 @@ int playerProbeGrab(TO *o, unsigned char f)
             }
         }
     }
-    return D_1F8003C0;
+    return TOUCHED_OBJECT;
 }
 #endif

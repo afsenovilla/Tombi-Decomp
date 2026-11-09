@@ -66,3 +66,9 @@ address,name,size,source
 80108b78,MAP_AREA14_AREA_NAMES,,usage: string pointer table of the area names shown in area 14 by section refs=1
 80108f8c,MAP_ROOM_NAMES,,usage: per area the string pointer table of its room names (subScreenMapDrawRoomName) refs=1
 80108ddc,MAP_AREA14_ROOM_NAMES,,usage: string pointer table of the area 14 room names by section refs=1
+80111128,SUBSCREEN_SELECTED_ITEM,,usage: int: item id SUBSCREEN_ITEM_LIST[sel] of the confirmed item (subScreenItemListStep) refs=11
+800f18e0,SUBSCREEN_CLUT_IMAGE,,usage: the 0x30x0x1F image subScreenUpdate / InitMenu LoadImage to (0x120; 0x1E0) refs=2
+800f24e0,SUBSCREEN_WFM3_2,,usage: WFM3 block (magic 'WFM3') subScreenUpdate / InitMenu store into D_1F8003A0 (WFM3_DATA[2]) refs=2
+800f7b78,SUBSCREEN_WFM3_3,,usage: WFM3 block subScreenUpdate / InitMenu store into D_1F8003A4 (WFM3_DATA[3]) refs=2
+80111104,SUBSCREEN_MAP_CAMERA_Y,,usage: short: VIEW_CAMERA.t[1] of the map page (0x30E at subScreenMapStep entry; func_800EFD6C) refs=2
+80111108,SUBSCREEN_MAP_CAMERA_Z,,usage: short: VIEW_CAMERA.t[2] - 1000 of the map page (0x64 at entry) refs=2

@@ -8,7 +8,7 @@ typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c942[], GAME_PLAYER_MODE;
 extern unsigned char D_8009D12F;
-extern AT3 D_80118D34[];
+extern AT3 JUICE_SELLER_DEFS_ANIMS[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -28,7 +28,7 @@ void juiceSellerTalk(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 0;
         PLAYER.state = 0;
-        o->anim = D_80118D34[o->subtype].p[2];
+        o->anim = JUICE_SELLER_DEFS_ANIMS[o->subtype].p[2];
         AnimJump(o, 0);
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
@@ -87,7 +87,7 @@ void juiceSellerTalk(TObj *o)
         SPAD.s1c6 = 0;
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
-        o->anim = D_80118D34[o->subtype].p[0];
+        o->anim = JUICE_SELLER_DEFS_ANIMS[o->subtype].p[0];
         AnimJump(o, 0);
         o->animFrame = o->wbc;
         PLAYER.b04 = 1;

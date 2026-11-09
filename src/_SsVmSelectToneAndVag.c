@@ -15,16 +15,16 @@ typedef struct SvmCur {
 } SvmCur;
 
 extern SvmCur D_8009F120;
-extern VagAtr *D_8009D68C;
+extern VagAtr *_svm_tn;
 
 u_char _SsVmSelectToneAndVag(u_char *tones, u_char *vags) {
     char i;
     u_char n = 0;
 
     for (i = 0; i < D_8009F120.tones; i++) {
-        if (D_8009D68C[i + D_8009F120.prog * 16].min <= D_8009F120.note &&
-            D_8009D68C[i + D_8009F120.prog * 16].max >= D_8009F120.note) {
-            vags[n] = D_8009D68C[i + D_8009F120.prog * 16].vag; /* port: dcb reads a byte, PAL lhu */
+        if (_svm_tn[i + D_8009F120.prog * 16].min <= D_8009F120.note &&
+            _svm_tn[i + D_8009F120.prog * 16].max >= D_8009F120.note) {
+            vags[n] = _svm_tn[i + D_8009F120.prog * 16].vag; /* port: dcb reads a byte, PAL lhu */
             tones[n++] = i;
         }
     }

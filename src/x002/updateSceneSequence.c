@@ -28,12 +28,12 @@ extern unsigned char D_800A7B7D_[];
 #define D_800A7B7D D_800A7B7D_[0]
 extern unsigned char D_800A7B7C_[];
 #define D_800A7B7C D_800A7B7C_[0]
-extern unsigned char D_1F8001CD_[];
-#define D_1F8001CD D_1F8001CD_[0]
-extern unsigned char D_1F8001CC_[];
-#define D_1F8001CC D_1F8001CC_[0]
-extern short D_1F8001C6_[];
-#define D_1F8001C6 D_1F8001C6_[0]
+extern unsigned char MOVIE_ID[];
+#define D_1F8001CD MOVIE_ID[0]
+extern unsigned char MOVIE_PLAY_STATE[];
+#define D_1F8001CC MOVIE_PLAY_STATE[0]
+extern short DRAW_FROZEN[];
+#define D_1F8001C6 DRAW_FROZEN[0]
 extern short D_800A7C2A_[];
 #define D_800A7C2A D_800A7C2A_[0]
 extern short D_800A7B8A_[];
@@ -309,18 +309,18 @@ void func_8011794C(TObj *o)
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short p0, x, p4, y, p8, z; } Pos;
-extern unsigned char D_8009C970_[];
-#define D_8009C970 D_8009C970_[0]
+extern unsigned char GAME_PLAYER_HEALTH[];
+#define D_8009C970 GAME_PLAYER_HEALTH[0]
 extern unsigned char D_8009C93F_[];
 #define D_8009C93F D_8009C93F_[0]
 extern unsigned char D_8009C93B_[];
 #define D_8009C93B D_8009C93B_[0]
-extern unsigned char D_8009C93A_[];
-#define D_8009C93A D_8009C93A_[0]
-extern unsigned char D_8009C975_[];
-#define D_8009C975 D_8009C975_[0]
-extern signed char D_8009D2B0_[];
-#define D_8009D2B0 D_8009D2B0_[0]
+extern unsigned char GVARS_PLAYER_LANDED[];
+#define D_8009C93A GVARS_PLAYER_LANDED[0]
+extern unsigned char GAME_FADE_SCREEN_CONTROL[];
+#define D_8009C975 GAME_FADE_SCREEN_CONTROL[0]
+extern signed char GAME_PLAYER_MODE[];
+#define D_8009D2B0 GAME_PLAYER_MODE[0]
 extern void *D_8011F868[], *D_8011F86C[], *D_8011F870[], *D_8011F874[];
 extern void *D_1F8002D4_[];
 #define D_1F8002D4 D_1F8002D4_[0]
@@ -329,26 +329,26 @@ extern short *D_8011C8E8[];
 extern Fix16 *PLAYER_H;
 extern unsigned short BUTTON_MASK_A, JOYPAD_STATE;
 extern TObj PLAYER;
-extern unsigned char D_800A603E_[];
-#define D_800A603E D_800A603E_[0]
-extern unsigned char D_800A603D_[];
-#define D_800A603D D_800A603D_[0]
-extern unsigned char D_800A603C_[];
-#define D_800A603C D_800A603C_[0]
-extern unsigned char D_1F8001CD_[];
-#define D_1F8001CD D_1F8001CD_[0]
-extern unsigned char D_1F8001CC_[];
-#define D_1F8001CC D_1F8001CC_[0]
-extern short D_1F8001C6_[];
-#define D_1F8001C6 D_1F8001C6_[0]
+extern unsigned char PLAYER_STEP[];
+#define D_800A603E PLAYER_STEP[0]
+extern unsigned char PLAYER_SUBSTATE[];
+#define D_800A603D PLAYER_SUBSTATE[0]
+extern unsigned char PLAYER_STATE[];
+#define D_800A603C PLAYER_STATE[0]
+extern unsigned char MOVIE_ID[];
+#define D_1F8001CD MOVIE_ID[0]
+extern unsigned char MOVIE_PLAY_STATE[];
+#define D_1F8001CC MOVIE_PLAY_STATE[0]
+extern short DRAW_FROZEN[];
+#define D_1F8001C6 DRAW_FROZEN[0]
 extern short D_800A60EA_[];
 #define D_800A60EA D_800A60EA_[0]
-extern short D_800A604A_[];
-#define D_800A604A D_800A604A_[0]
+extern short PLAYER_X[];
+#define D_800A604A PLAYER_X[0]
 extern short D_800A60D2_[];
 #define D_800A60D2 D_800A60D2_[0]
-extern short D_800A60D0_[];
-#define D_800A60D0 D_800A60D0_[0]
+extern short PLAYER_HEALTH[];
+#define D_800A60D0 PLAYER_HEALTH[0]
 extern void FUN_8001fe6c(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern int showMessageBox(int, int, int, int);

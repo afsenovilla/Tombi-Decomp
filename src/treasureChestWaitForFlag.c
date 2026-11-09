@@ -2,7 +2,7 @@
 // MATCHING 801129d0 528
 #include "TOBJ.H"
 extern unsigned short DAT_8009c960[];
-extern unsigned short DAT_8009c960b;
+extern unsigned short GAME_B;
 extern int GAME[];
 extern unsigned char DAT_8009d0aa;
 extern unsigned char DAT_8009d0c8;
@@ -16,7 +16,7 @@ extern void FUN_800202b4(TObj *);
 #define SETANIM(o) \
     o->wac = 1; \
     if (GAME[0] == 0x30009) o->anim = TREASURE_CHEST_A3S9_ANIM_SETS[o->b0c & 0x7f][1]; \
-    else o->anim = TREASURE_CHEST_ANIM_SETS[DAT_8009c960b * 4 + (o->b0c & 0x7f)][1]; \
+    else o->anim = TREASURE_CHEST_ANIM_SETS[GAME_B * 4 + (o->b0c & 0x7f)][1]; \
     FUN_8001fe6c(o);
 
 void treasureChestWaitForFlag(TObj *o)

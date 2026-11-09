@@ -10,7 +10,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8012F3C4[];
+extern AT TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[];
 extern unsigned char GAME_PLAYER_HEALTH, GAME_PLAYER_MAX_HEALTH;
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -23,7 +23,7 @@ extern void FUN_8001e4f0(int);
 
 static __inline__ void setanim(TObj *o, int n)
 {
-    o->anim = D_8012F3C4[o->subtype].anims[n];
+    o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[n];
     FUN_8001fe94(o, 0);
 }
 

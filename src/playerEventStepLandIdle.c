@@ -21,7 +21,7 @@ extern unsigned char SLOPE_TILT_TABLE[];
 extern unsigned char D_8009D2AF;
 extern unsigned char D_8009D2AFa[]; /* same global; the array read stays after the struct stores */
 extern char GAME[];
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern E *BITTEN_OBJECT;
 extern O *GRABBED_OBJECT;
 extern void AnimJump(O *, int);
@@ -46,7 +46,7 @@ static __inline__ void land(O *o)
     o->vy = 0;
     o->d8c = SLOPE_TILT_TABLE[o->hb0];
     PLAYER_EXT->h20 = 0;
-    o->anim = D_80010748;
+    o->anim = PLAYER_IDLE_ANIM;
     AnimJump(o, 0);
     PLAYER_EXT->h2e = 0xffff;
     PLAYER_EXT->h28 = 0xffff;
@@ -175,7 +175,7 @@ extern P *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern unsigned char D_8009D2AFa[]; /* same global; array read keeps it after the stores */
 extern unsigned char TALK_POSE;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern E *BITTEN_OBJECT;
 extern O *GRABBED_OBJECT;
 extern void AnimJump(O *, int);
@@ -200,7 +200,7 @@ static __inline__ void land(O *o)
     o->vy = 0;
     o->d8c = SLOPE_TILT_TABLE[o->hb0];
     PLAYER_EXT->h20 = 0;
-    o->anim = D_80010748;
+    o->anim = PLAYER_IDLE_ANIM;
     AnimJump(o, 0);
     PLAYER_EXT->h2e = 0xffff;
     PLAYER_EXT->h28 = 0xffff;
@@ -293,7 +293,7 @@ void playerEventStepLandIdle(O *o)
             playerAnimateTalkPose(o);
         } else {
             PLAYER_EXT->h2c = 0;
-            o->anim = D_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             AnimJump(o, 0);
         }
         if (o->b69 != 0)

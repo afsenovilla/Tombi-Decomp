@@ -10,7 +10,7 @@ typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[2]; unsigned short wc2; } TX;
 #define X(o) ((TX *)(o))
-extern E12 D_80135DF0[];
+extern E12 TUNNEL_DIGGER_DEFS_ANIMS[];
 extern unsigned char D_8009CDC5b; /* same byte as GCD.bcdc5: second name makes chk() reload it (game reloads; volatile does not match) */
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimJump(TObj *, int);
@@ -92,7 +92,7 @@ void tunnelDiggerTalk(TObj *o)
         o->velX = -0xa0;
         o->b69 = 0;
         o->state = 0x47;
-        o->anim = D_80135DF0[o->subtype].p[6];
+        o->anim = TUNNEL_DIGGER_DEFS_ANIMS[o->subtype].p[6];
         AnimJump(o, 0);
         break;
     case 71:
@@ -103,14 +103,14 @@ void tunnelDiggerTalk(TObj *o)
         break;
     case 72:
         setEventComplete(0x21, 0);
-        o->anim = D_80135DF0[o->subtype].p[4];
+        o->anim = TUNNEL_DIGGER_DEFS_ANIMS[o->subtype].p[4];
         AnimJump(o, 0);
     case 52:
         o->state = 0x7a;
         X(o)->wc2 = 0xfb;
         break;
     case 90:
-        o->anim = D_80135DF0[o->subtype].p[1];
+        o->anim = TUNNEL_DIGGER_DEFS_ANIMS[o->subtype].p[1];
         AnimJump(o, 0);
         o->state = 0x5b;
         break;
@@ -120,10 +120,10 @@ void tunnelDiggerTalk(TObj *o)
             break;
         p->b04 = 3;
         if (GCD.bcdc5 != 0xff) {
-            o->anim = D_80135DF0[o->subtype].p[5];
+            o->anim = TUNNEL_DIGGER_DEFS_ANIMS[o->subtype].p[5];
             AnimJump(o, 0);
         } else {
-            o->anim = D_80135DF0[o->subtype].p[4];
+            o->anim = TUNNEL_DIGGER_DEFS_ANIMS[o->subtype].p[4];
             AnimJump(o, 0);
         }
         goto next;

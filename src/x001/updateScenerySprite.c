@@ -2,8 +2,8 @@
 // MATCHING 80118c1c 396
 #include "spad.h"
 #include "TOBJ.H"
-extern short D_8013C428[];
-extern short D_8013C404[];
+extern short SCENERY_SPRITE_CLUT_Y[];
+extern short SCENERY_SPRITE_CLUT_X[];
 extern char D_8013E788[];
 extern char D_8013E78C[];
 extern char D_8013E790[];
@@ -35,9 +35,9 @@ void updateScenerySprite(TObj *o)
     case 0:
         o->w1e = 9;
         o->b0d = 0;
-        if (D_8013C428[o->subtype]) {
+        if (SCENERY_SPRITE_CLUT_Y[o->subtype]) {
             o->b0d = 1;
-            o->w08 = FUN_8005e420(D_8013C404[o->subtype], D_8013C428[o->subtype] + o->b0c);
+            o->w08 = FUN_8005e420(SCENERY_SPRITE_CLUT_X[o->subtype], SCENERY_SPRITE_CLUT_Y[o->subtype] + o->b0c);
         }
         o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = *D_8013C3C4[o->subtype];

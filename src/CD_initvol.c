@@ -36,13 +36,13 @@ extern int D_80096130[];
 extern const char* D_800961B0[];
 extern int D_80096230[]; // CD_COMATTR
 extern int D_80096294;
-extern volatile u_char* D_80096F50;
-extern volatile u_char* D_80096F54;
+extern volatile u_char* cd_reg1;
+extern volatile u_char* cd_reg2;
 extern volatile int* D_800962C0;
-extern void* D_80096F60;
+extern void* cd_spu;
 extern volatile CdlIntr D_800962C8; // CD_INTR
 extern void* D_800962CC[];
-extern volatile unsigned char* D_80096F4C;
+extern volatile unsigned char* cd_reg0;
 extern s32* D_800962E4;
 extern s32* D_800962E8;
 extern s32* D_800962EC;
@@ -50,7 +50,7 @@ extern s32* D_800962F0;
 extern volatile s32* D_800962F4;
 extern char D_8009B2A8[];
 extern char D_8009B2B0[];
-extern volatile u_char* D_80096F58;
+extern volatile u_char* cd_reg3;
 extern char D_8009B2B8[];
 extern int D_8009B2C0;
 extern int D_8009B2C4; // timeout
@@ -101,27 +101,27 @@ void CD_flush(void);
 int CD_initvol(void) {
     CdlATV vol;
     // 0x800962C4 + 0x1b8 = 0x8009647C (current main vol left).
-    if (*((volatile u16*)((u32)D_80096F60 + 0x1b8)) == 0 &&
-    *((volatile u16*)((u32)D_80096F60 + 0x1ba)) == 0) {
+    if (*((volatile u16*)((u32)cd_spu + 0x1b8)) == 0 &&
+    *((volatile u16*)((u32)cd_spu + 0x1ba)) == 0) {
         // 0x800962C4 + 0x180 = 0x80096444 (main vol left/right).
-        *((volatile u16*)((u32)D_80096F60 + 0x180)) = 0x3fff;
-        *((volatile u16*)((u32)D_80096F60 + 0x182)) = 0x3fff;
+        *((volatile u16*)((u32)cd_spu + 0x180)) = 0x3fff;
+        *((volatile u16*)((u32)cd_spu + 0x182)) = 0x3fff;
     }
     // 0x800962C4 + 0x1b0 = 0x80096474 (CD volume left/right).
-    *((volatile u16*)((u32)D_80096F60 + 0x1b0)) = 0x3fff;
-    *((volatile u16*)((u32)D_80096F60 + 0x1b2)) = 0x3fff;
+    *((volatile u16*)((u32)cd_spu + 0x1b0)) = 0x3fff;
+    *((volatile u16*)((u32)cd_spu + 0x1b2)) = 0x3fff;
     // Enable spu, unmute spu and enable cd audio.
-    *((volatile u16*)((u32)D_80096F60 + 0x1aa)) =
+    *((volatile u16*)((u32)cd_spu + 0x1aa)) =
     (1 << 15) | (1 << 14) | (1 << 0);
     vol.val0 = vol.val2 = 0x80;
     vol.val1 = vol.val3 = 0;
-    *D_80096F4C = 2;
-    *D_80096F54 = vol.val0;
-    *D_80096F58 = vol.val1;
-    *D_80096F4C = 3;
-    *D_80096F50 = vol.val2;
-    *D_80096F54 = vol.val3;
-    *D_80096F58 = 0x20;
+    *cd_reg0 = 2;
+    *cd_reg2 = vol.val0;
+    *cd_reg3 = vol.val1;
+    *cd_reg0 = 3;
+    *cd_reg1 = vol.val2;
+    *cd_reg2 = vol.val3;
+    *cd_reg3 = 0x20;
     return 0;
 }
 

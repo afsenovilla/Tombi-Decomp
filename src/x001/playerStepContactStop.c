@@ -8,7 +8,7 @@ extern TObj *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
 extern int GAME_AREA00_EVENT_CONTROL[];
 extern unsigned short JOYPAD_STATE, BUTTON_MASK_A, BUTTON_MASK_B;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void FUN_8001e4f0(int);
 extern void startPadVibration(int, int, int, int);
 extern void spawnGroundDebris(int, short, int, int);
@@ -45,7 +45,7 @@ void func_80120A8C(TObj *o)
     case 3:
         PLAYER_EXT->animFrame = 0xffff;
         PLAYER_EXT->animTimer = 0;
-        o->anim = D_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(o);
         o->wb2 = 0;
         o->ba4 = 0;
@@ -82,7 +82,7 @@ extern TObj *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
 extern int GAME_AREA00_EVENT_CONTROL[];
 extern unsigned short JOYPAD_STATE, BUTTON_MASK_A, BUTTON_MASK_B;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void FUN_8001e4f0(int);
 extern void startPadVibration(int, int, int, int);
 extern void spawnGroundDebris(int, short, int, int);
@@ -120,7 +120,7 @@ void playerStepContactStop(TObj *o)
     case 3:
         PLAYER_EXT->animFrame = 0xffff;
         PLAYER_EXT->animTimer = 0;
-        o->anim = D_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(o);
         o->wb2 = 0;
         o->ba4 = 0;

@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8012F3C4[];
+extern AT TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[];
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventComplete(int, int);
@@ -40,7 +40,7 @@ void tenThousandYearElderTalk(TObj *o)
     case 2:
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(5, 0, &v);
-        o->anim = D_8012F3C4[o->subtype].anims[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -48,7 +48,7 @@ void tenThousandYearElderTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8012F3C4[o->subtype].anims[0];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             setEventComplete(0x76, 0);
             o->timer = 0x12c;
@@ -59,7 +59,7 @@ void tenThousandYearElderTalk(TObj *o)
         if (--o->timer <= 0) {
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(5, 1, &v);
-            o->anim = D_8012F3C4[o->subtype].anims[2];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -68,7 +68,7 @@ void tenThousandYearElderTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8012F3C4[o->subtype].anims[0];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             setEventStarted(0x7e, 0, 0);
             o->timer = 0x12c;
@@ -79,7 +79,7 @@ void tenThousandYearElderTalk(TObj *o)
         if (--o->timer <= 0) {
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(5, 2, &v);
-            o->anim = D_8012F3C4[o->subtype].anims[2];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -88,7 +88,7 @@ void tenThousandYearElderTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8012F3C4[o->subtype].anims[0];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             o->state++;
         }
@@ -96,7 +96,7 @@ void tenThousandYearElderTalk(TObj *o)
     case 8:
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(5, 3, &v);
-        o->anim = D_8012F3C4[o->subtype].anims[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -104,7 +104,7 @@ void tenThousandYearElderTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8012F3C4[o->subtype].anims[0];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             GCD.bcf2e = 1;
             o->state = 0x1e;
@@ -113,7 +113,7 @@ void tenThousandYearElderTalk(TObj *o)
     case 15:
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(5, 4, &v);
-        o->anim = D_8012F3C4[o->subtype].anims[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -121,7 +121,7 @@ void tenThousandYearElderTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8012F3C4[o->subtype].anims[0];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             if (GCD.bce18 == 0) {
                 setEventStarted(0x74, 0, 0);
@@ -134,7 +134,7 @@ void tenThousandYearElderTalk(TObj *o)
         break;
     case 17:
         if (--o->timer <= 0) {
-            o->anim = D_8012F3C4[o->subtype].anims[0];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             o->state++;
         }
@@ -142,7 +142,7 @@ void tenThousandYearElderTalk(TObj *o)
     case 18:
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(5, 5, &v);
-        o->anim = D_8012F3C4[o->subtype].anims[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -150,7 +150,7 @@ void tenThousandYearElderTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8012F3C4[o->subtype].anims[0];
+            o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             GCD.bcf2f = 1;
             o->state = 0x1e;

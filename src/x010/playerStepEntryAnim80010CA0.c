@@ -4,7 +4,7 @@
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void func_8001e5f4(int a, int b);
 extern void func_8001fe94(TObj *o, int n);
-extern char DAT_80010ca0[];
+extern char PLAYER_VERTICAL_JUMP_ANIM[];
 
 void playerStepEntryAnim80010CA0(TObj *o)
 {
@@ -15,7 +15,7 @@ void playerStepEntryAnim80010CA0(TObj *o)
     *(char *)&o->wac = 0;
     func_8001e5f4(0x1c, 0x7f);
     *(signed char *)&o->b0f = -8;
-    o->anim = DAT_80010ca0;
+    o->anim = PLAYER_VERTICAL_JUMP_ANIM;
     func_8001fe94(o, 4);
     b = SLOPE_TILT_TABLE[o->wb0];
     o->state = o->state + 1;

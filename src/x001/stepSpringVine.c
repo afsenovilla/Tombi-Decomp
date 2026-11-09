@@ -2,7 +2,7 @@
 // MATCHING 8011a528 180
 #include "TOBJ.H"
 
-extern void (*D_8013C44C[])(TObj *);
+extern void (*SPRING_VINE_STEP_HANDLERS[])(TObj *);
 extern void springVineIdle();
 extern void springVineRopeStep1();
 extern void springVineRopeStep2();
@@ -19,7 +19,7 @@ void stepSpringVine(TObj *o)
     TObj *p;
 
     if (o->subtype != 0) return;
-    D_8013C44C[o->step](o);
+    SPRING_VINE_STEP_HANDLERS[o->step](o);
     D_8013C460[o->step]((TObj *)o->d94);
     ((TObj *)o->d94)->state = o->state;
     p = (TObj *)o->d94;

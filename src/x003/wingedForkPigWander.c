@@ -148,7 +148,7 @@ void func_8012CEF4(TObj *o)
 extern unsigned short D_80135E68[];
 extern unsigned char D_80135E60[];
 extern void *D_8013A69C[], *D_8013A6A8[], *D_8013A6B0[];
-extern void *D_8013A698[];
+extern void *WINGED_FORK_PIG_ANIMS[];
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -263,7 +263,7 @@ void wingedForkPigWander(TObj *o)
                 o->velX = f << 2;
                 o->wac = w;
                 o->state = st;
-                o->anim = D_8013A698[(short)w];
+                o->anim = WINGED_FORK_PIG_ANIMS[(short)w];
                 AnimLoadDuration(o);
             }
             break;

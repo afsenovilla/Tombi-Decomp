@@ -5,8 +5,8 @@
 #include "common.h"
 #include "psyq/libcd.h"
 
-extern volatile s8* D_80096FDC;
-extern volatile s8* D_80096FE8;
+extern volatile s8* c003_cd_reg0;
+extern volatile s8* c003_cd_reg3;
 extern CdlLOC D_8009B2D0;
 extern int D_8009B2D4;
 extern void (*D_8009C85C)(void);
@@ -21,8 +21,8 @@ void StUnSetRing(void)
     EnterCriticalSection();
     CdDataCallback(0);
     CdReadyCallback(0);
-    *D_80096FDC = 0;
-    *D_80096FE8 = 0;
+    *c003_cd_reg0 = 0;
+    *c003_cd_reg3 = 0;
     ExitCriticalSection();
 }
 

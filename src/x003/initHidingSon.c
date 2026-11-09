@@ -9,20 +9,20 @@ typedef struct {
     void **anim;
 } T80134CF8;
 
-extern T80134CF8 D_80136140[];
+extern T80134CF8 HIDING_SON_DEFS[];
 extern int SPR_DATA[];
 
 extern void AnimLoadDuration(TObj *);
 
 void initHidingSon(TObj *o)
 {
-    o->box0 = D_80136140[o->subtype].b0;
-    o->box1 = D_80136140[o->subtype].b1;
-    o->box2 = D_80136140[o->subtype].b2;
-    o->box3 = D_80136140[o->subtype].b3;
-    o->w1e = D_80136140[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80136140[o->subtype].w6];
-    o->anim = D_80136140[o->subtype].anim[(unsigned short)o->wb4];
+    o->box0 = HIDING_SON_DEFS[o->subtype].b0;
+    o->box1 = HIDING_SON_DEFS[o->subtype].b1;
+    o->box2 = HIDING_SON_DEFS[o->subtype].b2;
+    o->box3 = HIDING_SON_DEFS[o->subtype].b3;
+    o->w1e = HIDING_SON_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[HIDING_SON_DEFS[o->subtype].w6];
+    o->anim = HIDING_SON_DEFS[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     o->b0d = 1;
     o->w08 = 0x780a;

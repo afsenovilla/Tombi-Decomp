@@ -7,7 +7,7 @@
 #include "raw7.h"
 extern short FUN_8004461c(char *, char *);
 extern void FUN_800428c0(char *, char *);
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern void func_80020054(int, int, int, int);
 extern void func_8001E3D8(int);
 void weaponHitCat4Type02(char *a, char *b)
@@ -23,14 +23,14 @@ void weaponHitCat4Type02(char *a, char *b)
         } else {
             U16(b, 0x2e) = U16(a, 0x2e) & 1;
         }
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
     }
 }
 #else
 #include "raw7.h"
 extern short FUN_8004461c(char *, char *);
 extern void FUN_800428c0(char *, char *);
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 void weaponHitCat4Type02(char *a, char *b)
 {
     if (S32(b, 0x94) == 0 && FUN_8004461c(a, b) >= 0) {
@@ -44,7 +44,7 @@ void weaponHitCat4Type02(char *a, char *b)
                 v = U16(a, 0x2e) & 1;
             }
             U16(b, 0x2e) = v;
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
     }
 }

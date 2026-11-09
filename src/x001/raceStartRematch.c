@@ -7,7 +7,7 @@ extern TObj PLAYER;
 extern unsigned short PLAYER_ANIM_FRAME;
 extern TObj *PLAYER_MESSAGE_BOX;
 extern unsigned char D_800A60F8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 extern void playerSetAnimIfChangedAt(TObj *, int, int);
@@ -22,7 +22,7 @@ void raceStartRematch(TObj *o)
         GVARS.b3f = 1;
         GVARS.b3e = 1;
         GVARS.b42 = 1;
-        PLAYER.anim = D_80010748;
+        PLAYER.anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(&PLAYER);
         e->animFrame = 0;
         PLAYER_ANIM_FRAME = 0;

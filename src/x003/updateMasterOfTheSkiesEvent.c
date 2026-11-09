@@ -58,8 +58,8 @@ void func_80129804(TObj *o)
 #include "gamestate.h"
 
 extern unsigned char GVARS_USE_ITEM_ID, D_8009D094;
-extern unsigned char D_1F8003D0, MOVIE_PLAY_STATE, MOVIE_ID;
-extern short D_1F8001C6;
+extern unsigned char MOVIE_SKIPPABLE, MOVIE_PLAY_STATE, MOVIE_ID;
+extern short DRAW_FROZEN;
 extern TObj *TASK_C;
 extern char D_8001D6A4[];
 extern int ObjCullRegister(TObj *o);
@@ -120,14 +120,14 @@ void updateMasterOfTheSkiesEvent(TObj *o)
             case 1:
                 if (GAME.fadeScreenControl == 1) {
                     if (D_8009D094 == 0) {
-                        D_1F8003D0 = 0;
+                        MOVIE_SKIPPABLE = 0;
                         D_8009D094 = 1;
                     } else {
-                        D_1F8003D0 = 1;
+                        MOVIE_SKIPPABLE = 1;
                     }
                     MOVIE_PLAY_STATE = 1;
                     MOVIE_ID = 7;
-                    D_1F8001C6 = 2;
+                    DRAW_FROZEN = 2;
                     stopBgm(0);
                     ThreadCreate(1, D_8001D6A4);
                     o->step++;

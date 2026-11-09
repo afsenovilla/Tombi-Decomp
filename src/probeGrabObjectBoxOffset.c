@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x18]; short we8; short wea; } PO;
 typedef struct E { unsigned short a, b; } E;
-extern E DAT_8007b5e4[];
+extern E GRAB_OBJECT_BOX_OFFSETS[];
 
 void probeGrabObjectBoxOffset(PO *o, TObj *e)
 {
@@ -16,8 +16,8 @@ void probeGrabObjectBoxOffset(PO *o, TObj *e)
     if ((unsigned short)(o->t.d->p.whole - e->d->p.whole + 45) > 90)
         return;
     d = o->we8 - o->t.h->p.whole;
-    ox = DAT_8007b5e4[e->b0c].a;
-    oy = DAT_8007b5e4[e->b0c].b;
+    ox = GRAB_OBJECT_BOX_OFFSETS[e->b0c].a;
+    oy = GRAB_OBJECT_BOX_OFFSETS[e->b0c].b;
     ad = d;
     if (d < 0) ad = -d;
     d = o->we8 - (e->h->p.whole + ox);
@@ -41,7 +41,7 @@ void probeGrabObjectBoxOffset(PO *o, TObj *e)
 #include "TOBJ.H"
 typedef struct { TObj t; char c0[0x28]; short we8; short wea; } PO;
 typedef struct E { unsigned short a, b; } E;
-extern E DAT_8007b5e4[];
+extern E GRAB_OBJECT_BOX_OFFSETS[];
 
 void probeGrabObjectBoxOffset(PO *o, TObj *e)
 {
@@ -51,8 +51,8 @@ void probeGrabObjectBoxOffset(PO *o, TObj *e)
     if ((unsigned short)(o->t.d->p.whole - e->d->p.whole + 45) > 90)
         return;
     d = o->we8 - o->t.h->p.whole;
-    ox = DAT_8007b5e4[e->b0c].a;
-    oy = DAT_8007b5e4[e->b0c].b;
+    ox = GRAB_OBJECT_BOX_OFFSETS[e->b0c].a;
+    oy = GRAB_OBJECT_BOX_OFFSETS[e->b0c].b;
     ad = d;
     if (d < 0) ad = -d;
     d = o->we8 - (e->h->p.whole + ox);

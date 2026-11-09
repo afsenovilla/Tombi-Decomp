@@ -1,0 +1,5 @@
+address,name,size,source
+80118d14,CLOCK_TOWER_RESTORED_NPC_DEFS,,usage: {box; w1e; ...; anims}[subtype] initClockTowerRestoredNpc copies refs=7
+80118d1c,CLOCK_TOWER_RESTORED_NPC_DEFS_ANIMS,,usage: CLOCK_TOWER_RESTORED_NPC_DEFS+8: the anims column (clockTowerRestoredTalk) refs=2
+80118d2c,JUICE_SELLER_DEFS,,usage: {box; w1e; ...; anims}[subtype] initJuiceSeller copies refs=7
+80118d34,JUICE_SELLER_DEFS_ANIMS,,usage: JUICE_SELLER_DEFS+8: the anims column (juiceSellerTalk / SqueezeTalk; a16ActorSetAnimIfChanged) refs=7

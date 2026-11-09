@@ -3,7 +3,7 @@
 extern unsigned char OBJECT_POOL_LAYER7[];
 extern unsigned char DAT_800a4d74[];
 extern int DAT_800a4468[];
-extern char DAT_800a64f8[];
+extern char CAT7_OBJECT_LIST_BUF[];
 extern int *FREE_OBJECTS_LAYER7;
 extern short FREE_OBJECT_COUNT_LAYER7, CAT7_OBJECT_COUNT_SAVED, CAT7_OBJECT_COUNT;
 extern char *CAT7_OBJECT_LIST, *CAT7_OBJECT_LIST_SAVED;
@@ -27,8 +27,8 @@ void initObjectPoolLayer7(void)
         q -= 0x6c;
     }
     FREE_OBJECT_COUNT_LAYER7 = 10;
-    CAT7_OBJECT_LIST = DAT_800a64f8;
-    CAT7_OBJECT_LIST_SAVED = DAT_800a64f8;
+    CAT7_OBJECT_LIST = CAT7_OBJECT_LIST_BUF;
+    CAT7_OBJECT_LIST_SAVED = CAT7_OBJECT_LIST_BUF;
     CAT7_OBJECT_COUNT_SAVED = 0;
     CAT7_OBJECT_COUNT = 0;
 }

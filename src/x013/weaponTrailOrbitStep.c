@@ -4,8 +4,8 @@
 typedef struct T12 { void **p; int a, b; } T12;
 extern T12 WEAPON_TRAIL_DEFS_ANIMS[];
 extern unsigned char PLAYER_VISIBLE;
-extern unsigned char DAT_800a6047a[];
-#define DAT_800a6047 DAT_800a6047a[0]
+extern unsigned char PLAYER_DRAW_DEPTH[];
+#define DAT_800a6047 PLAYER_DRAW_DEPTH[0]
 extern void FUN_8001fe6c(TObj *);
 extern int func_8001fec0(TObj *o);
 extern int FUN_8001fe3c(short, short);

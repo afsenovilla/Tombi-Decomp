@@ -6,8 +6,8 @@ typedef struct B { unsigned char c[4]; } B;
 typedef struct { short w0, w2, w4, w6, w8; unsigned char bA, bB; short wC, wE; } X;
 extern char MOVE_TABLE_0[];
 extern char MOVE_TABLE_1[];
-extern B D_80135B30[];
-extern A *D_801386F8[];
+extern B KOMA_PIG_ANIM_BOXES[];
+extern A *KOMA_PIG_ANIMS[];
 extern void applyFrameVelocityX(TObj *);
 extern void komaPigCheckWall(TObj *);
 extern int komaPigCheckLanded(TObj *);
@@ -15,9 +15,9 @@ extern int AnimAdvanceWithBox(TObj *);
 extern TObj *ObjAlloc(void);
 
 #define SETANIM(k) \
-    { A *a = D_801386F8[k]; unsigned char *p; \
+    { A *a = KOMA_PIG_ANIMS[k]; unsigned char *p; \
     o->anim = a; \
-    p = D_80135B30[a->w2].c; \
+    p = KOMA_PIG_ANIM_BOXES[a->w2].c; \
     o->box0 = *p++; \
     o->box1 = *p++; \
     o->box2 = *p; \

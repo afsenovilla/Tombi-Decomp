@@ -2,11 +2,11 @@
 // MATCHING 801280c0 84
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8013117C[];
+extern AT MERMAID_DEFS_ANIMS[];
 extern void AnimJump(TObj *, short);
 
 void mermaidSetAnim(TObj *o, short n, short k)
 {
-    o->anim = D_8013117C[o->subtype].anims[n];
+    o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[n];
     AnimJump(o, k);
 }

@@ -2,8 +2,8 @@
 // MATCHING 80121bac 780
 #include "TOBJ.H"
 
-extern void *D_80131CC8[];
-extern unsigned short D_8012F378[];
+extern void *BITING_PLANT_ANIMS[];
+extern unsigned short BITING_PLANT_BOXES[];
 extern unsigned char PLAYER_DRAW_DEPTH;
 extern unsigned char PLAYER;
 extern int ObjCullRegister(TObj *);
@@ -33,8 +33,8 @@ void updateA10BitingPlant(TObj *o)
         o->animFrame = 1;
         o->b0d = 0;
         o->b0a = 2;
-        o->anim = D_80131CC8[o->subtype];
-        b = &D_8012F378[o->subtype * 4];
+        o->anim = BITING_PLANT_ANIMS[o->subtype];
+        b = &BITING_PLANT_BOXES[o->subtype * 4];
         o->d3c = ((struct { char pad[0x2d4]; int v; } *)0x1F800000)->v;
         o->box0 = *b++;
         o->box1 = *b++;

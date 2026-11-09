@@ -5,7 +5,7 @@
 #include "globals.h"
 extern int NEXT_PRIM;
 extern short FRAME_BUFFER_INDEX;
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern unsigned char MOVIE_PLAY_STATE;
 extern unsigned short TICK_COUNT;
 extern unsigned char GAME_INVENTORY_SCREEN, MENU_STATE[];
@@ -30,9 +30,9 @@ extern void func_8001DAF0(void);
 void func_8001A8CC(void)
 {
     NEXT_PRIM = (int)&LOAD_BUFFER_ALT[FRAME_BUFFER_INDEX * 0xc000] & 0xffffff;
-    if (DAT_1f8001c6 == 2) {
+    if (DRAW_FROZEN == 2) {
         if (MOVIE_PLAY_STATE == 0) {
-            DAT_1f8001c6 = 0;
+            DRAW_FROZEN = 0;
         }
     }
     func_8001C2D8();
@@ -55,11 +55,11 @@ void func_8001A8CC(void)
             DAT_1f8003ba = y;
         }
     }
-    if (DAT_1f8001c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         TICK_COUNT++;
         updateAreaScreenEffect();
         func_800272BC();
-        if (DAT_1f8001c6 == 0) {
+        if (DRAW_FROZEN == 0) {
             tickAreaScript();
             updateObjectsLayer7();
             updateMainObjects();
@@ -69,9 +69,9 @@ void func_8001A8CC(void)
             func_80052CF0();
         }
     }
-    if (DAT_1f8001c6 != 1)
+    if (DRAW_FROZEN != 1)
         updateInventoryOverlay();
-    if (DAT_1f8001c6 != 2)
+    if (DRAW_FROZEN != 2)
         func_80043A90();
     else
         resetDrawLists();
@@ -81,9 +81,9 @@ void func_8001A8CC(void)
 #include "globals.h"
 extern int NEXT_PRIM;
 extern short FRAME_BUFFER_INDEX;
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern unsigned char MOVIE_PLAY_STATE;
-extern unsigned char DAT_1f8003d0;
+extern unsigned char MOVIE_SKIPPABLE;
 extern unsigned char MOVIE_ID;
 extern unsigned short JOYPAD_STATE;
 extern unsigned char MOVIE_SKIP_REQUEST;
@@ -107,23 +107,23 @@ void gameplayTick(void)
 {
     unsigned char c;
     NEXT_PRIM = (int)&LOAD_BUFFER_ALT[FRAME_BUFFER_INDEX * 0xc000] & 0xffffff;
-    if (DAT_1f8001c6 == 2) {
+    if (DRAW_FROZEN == 2) {
         if (MOVIE_PLAY_STATE == 0) {
-            DAT_1f8001c6 = 0;
-        } else if (DAT_1f8003d0 == 1) {
+            DRAW_FROZEN = 0;
+        } else if (MOVIE_SKIPPABLE == 1) {
             c = MOVIE_ID;
             if ((c == 5 || (unsigned char)(c - 7) < 2) && (JOYPAD_STATE & 0x4008)) {
                 MOVIE_SKIP_REQUEST = 1;
-                DAT_1f8003d0 = 0;
+                MOVIE_SKIPPABLE = 0;
             }
         }
     }
     FUN_8001ca58();
-    if (DAT_1f8001c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         TICK_COUNT++;
         updateAreaScreenEffect();
         tickHud();
-        if (DAT_1f8001c6 == 0) {
+        if (DRAW_FROZEN == 0) {
             tickAreaScript();
             FUN_8001d36c();
             updateObjectsLayer7();
@@ -131,13 +131,13 @@ void gameplayTick(void)
             processObjectCollisions();
         }
     }
-    if (DAT_1f8001c6 != 1)
+    if (DRAW_FROZEN != 1)
         updateInventoryOverlay();
-    if (DAT_1f8001c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         callAreaModelLinkHook();
         updateObjectsLayer8();
     }
-    if (DAT_1f8001c6 != 2)
+    if (DRAW_FROZEN != 2)
         drawGameplayScene();
     else
         resetDrawLists();

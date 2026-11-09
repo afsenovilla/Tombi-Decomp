@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013A698[];
+extern void *WINGED_FORK_PIG_ANIMS[];
 extern signed char D_80135EA0[], D_80135EB0[];
 extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void AnimLoadDuration(TObj *);
@@ -39,7 +39,7 @@ void updateWingedForkPigShot(TObj *o)
             o->velH = 0x480;
             o->wac = 0x12;
         }
-        o->anim = D_8013A698[o->wac];
+        o->anim = WINGED_FORK_PIG_ANIMS[o->wac];
         AnimLoadDuration(o);
         break;
     case 1:

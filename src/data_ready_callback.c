@@ -8,25 +8,25 @@
 
 extern volatile s8* D_80096340;
 extern volatile s8* D_8009634C;
-extern CdlLOC D_8009BF68;
-extern int D_8009BF6C;
+extern CdlLOC previous_frame_location;
+extern int next_frameid;
 extern void (*ST_FUNC1)(void);
 extern int D_8009BC7C;
-extern int D_800A2264;
-extern int D_800A2268;
+extern int StRingIdx1;
+extern int StRingIdx2;
 extern StHEADER* ST_RING_ADDR;
 
 void StUnSetRing(void);
 
 void data_ready_callback(void)
 {
-    StHEADER* ptr = &ST_RING_ADDR[D_800A2268];
+    StHEADER* ptr = &ST_RING_ADDR[StRingIdx2];
     do {
         ptr->id = 2;
     } while(0);
-    D_8009BF68 = ptr->loc;
-    D_8009BF6C = ptr->frameCount;
-    D_800A2268 = D_800A2264;
+    previous_frame_location = ptr->loc;
+    next_frameid = ptr->frameCount;
+    StRingIdx2 = StRingIdx1;
     if (ST_FUNC1 != NULL) {
         ST_FUNC1();
     }

@@ -4,9 +4,9 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80050EA4 (FUN_80050ea4.c): no kind 0xd, no visibility test.
 typedef struct { char p0[1]; unsigned char vis; char p1[8]; unsigned char k; } O;
-extern short G1c6, G24e, G244;
+extern short DRAW_FROZEN, ONSCREEN_OBJECT_COUNT_SAVED, G244;
 extern unsigned short ONSCREEN_OBJECT_COUNT;
-extern O **G25c, **ONSCREEN_OBJECT_LIST;
+extern O **ONSCREEN_OBJECT_LIST_SAVED, **ONSCREEN_OBJECT_LIST;
 extern void FUN_80051088(O *), FUN_800532fc(O *), FUN_80054868(O *), FUN_80057470(O *);
 
 void FUN_80050ea4(void)
@@ -14,9 +14,9 @@ void FUN_80050ea4(void)
     int n;
     O **pp;
     O *o;
-    if (G1c6 != 0) {
-        n = G24e;
-        pp = G25c;
+    if (DRAW_FROZEN != 0) {
+        n = ONSCREEN_OBJECT_COUNT_SAVED;
+        pp = ONSCREEN_OBJECT_LIST_SAVED;
         if (n != 0) {
             do {
                 o = *pp++;
@@ -29,8 +29,8 @@ void FUN_80050ea4(void)
             } while (n != 0);
         }
     } else {
-        G24e = ONSCREEN_OBJECT_COUNT;
-        G25c = ONSCREEN_OBJECT_LIST;
+        ONSCREEN_OBJECT_COUNT_SAVED = ONSCREEN_OBJECT_COUNT;
+        ONSCREEN_OBJECT_LIST_SAVED = ONSCREEN_OBJECT_LIST;
         if (ONSCREEN_OBJECT_COUNT != 0) {
             do {
                 o = *ONSCREEN_OBJECT_LIST++;
@@ -46,9 +46,9 @@ void FUN_80050ea4(void)
 }
 #else
 typedef struct { char p0[1]; unsigned char vis; char p1[8]; unsigned char k; } O;
-extern short G1c6, G24e, G244;
+extern short DRAW_FROZEN, ONSCREEN_OBJECT_COUNT_SAVED, G244;
 extern unsigned short ONSCREEN_OBJECT_COUNT;
-extern O **G25c, **ONSCREEN_OBJECT_LIST;
+extern O **ONSCREEN_OBJECT_LIST_SAVED, **ONSCREEN_OBJECT_LIST;
 extern void drawWeaponObject(O *), drawObjectSpriteRotated(O *), drawObjectSprtTinted(O *), drawObjectModelRotated(O *);
 
 void drawCategory1Objects(void)
@@ -56,9 +56,9 @@ void drawCategory1Objects(void)
     int n;
     O **pp;
     O *o;
-    if (G1c6 != 0) {
-        n = G24e;
-        pp = G25c;
+    if (DRAW_FROZEN != 0) {
+        n = ONSCREEN_OBJECT_COUNT_SAVED;
+        pp = ONSCREEN_OBJECT_LIST_SAVED;
         if (n != 0) {
             do {
                 o = *pp++;
@@ -72,8 +72,8 @@ void drawCategory1Objects(void)
             } while (n != 0);
         }
     } else {
-        G24e = ONSCREEN_OBJECT_COUNT;
-        G25c = ONSCREEN_OBJECT_LIST;
+        ONSCREEN_OBJECT_COUNT_SAVED = ONSCREEN_OBJECT_COUNT;
+        ONSCREEN_OBJECT_LIST_SAVED = ONSCREEN_OBJECT_LIST;
         if (ONSCREEN_OBJECT_COUNT != 0) {
             do {
                 o = *ONSCREEN_OBJECT_LIST++;

@@ -2,7 +2,7 @@
 // MATCHING 80115fe0 456
 #include "spad.h"
 #include "TOBJ.H"
-extern void *D_8011A004[];
+extern void *A05_BACKDROP_SPRITE_SET_ANIMS[];
 extern short FUN_8005e420(int, int);
 extern void FUN_8001fe6c(TObj *);
 extern void FUN_8001fec0(TObj *);
@@ -25,21 +25,21 @@ void updateBackdropSpriteSet(TObj *o)
             o->b.p.whole = 0x82;
             o->b0f = 0;
             o->w1e = 4;
-            o->anim = D_8011A004[o->subtype];
+            o->anim = A05_BACKDROP_SPRITE_SET_ANIMS[o->subtype];
             break;
         case 1:
             o->b0d = 1;
             o->b.p.whole = 0x82;
             o->b0f = 0;
             o->w1e = 4;
-            o->anim = D_8011A004[o->subtype];
+            o->anim = A05_BACKDROP_SPRITE_SET_ANIMS[o->subtype];
             break;
         case 2:
             o->b0d = 1;
             o->b0f = 1;
             o->b.p.whole = 0;
             o->w1e = 4;
-            o->anim = D_8011A004[o->subtype];
+            o->anim = A05_BACKDROP_SPRITE_SET_ANIMS[o->subtype];
             break;
         }
         o->d3c = SPAD.i2d4;

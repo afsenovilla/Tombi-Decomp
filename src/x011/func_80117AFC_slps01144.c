@@ -8,7 +8,7 @@ extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
 extern unsigned char D_8009E4EA, D_8009EE58, D_800A7B7C, D_800A7B7D, D_800A7B7E;
 extern unsigned short D_800A7C2A;
-extern short D_1f8001c6;
+extern short DRAW_FROZEN;
 
 void func_80117AFC_slps01144(TObj *o)
 {
@@ -52,7 +52,7 @@ void func_80117AFC_slps01144(TObj *o)
         D_8009E4EA = 0;
         D_800A7C2A = 0;
         asm("");
-        D_1f8001c6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
         asm("");
         D_800A7B7C = 1;

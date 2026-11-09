@@ -13,8 +13,8 @@ typedef struct O { char p0[5]; unsigned char step; char p6[2]; int w08; int w0c;
   char p2[0x34-0x28]; int *d34; int *d38; char p3[0x78-0x3c]; int w78; int w7c; } O;
 extern CAM VIEW_CAMERA;
 #define CAMP (&VIEW_CAMERA)
-extern SVEC DAT_1f800060;
-extern SVEC DAT_1f800068;
+extern SVEC WORK_VEC_A;
+extern SVEC WORK_VEC_B;
 extern void getBaseMatrix(MAT *);
 extern void RotMatrixY(long, MAT *);
 extern void RotMatrixX(long, MAT *);
@@ -38,13 +38,13 @@ void scrollFollowRotatingPlane(O *o)
     CAMP->m.t[0] = -CAMP->pos[0].p.whole;
     CAMP->m.t[1] = -CAMP->pos[1].p.whole;
     CAMP->m.t[2] = -CAMP->pos[2].p.whole;
-    DAT_1f800060.vx = -CAMP->pos[3].p.whole;
-    DAT_1f800060.vy = -CAMP->pos[4].p.whole;
-    DAT_1f800060.vz = -CAMP->pos[5].p.whole;
-    ApplyMatrixSV(&CAMP->m, &DAT_1f800060, &DAT_1f800068);
-    CAMP->m.t[0] += DAT_1f800068.vx;
-    CAMP->m.t[1] += DAT_1f800068.vy;
-    CAMP->m.t[2] += DAT_1f800068.vz;
+    WORK_VEC_A.vx = -CAMP->pos[3].p.whole;
+    WORK_VEC_A.vy = -CAMP->pos[4].p.whole;
+    WORK_VEC_A.vz = -CAMP->pos[5].p.whole;
+    ApplyMatrixSV(&CAMP->m, &WORK_VEC_A, &WORK_VEC_B);
+    CAMP->m.t[0] += WORK_VEC_B.vx;
+    CAMP->m.t[1] += WORK_VEC_B.vy;
+    CAMP->m.t[2] += WORK_VEC_B.vz;
 }
 #elif defined(VERSION_SCUS_94236)
 // USA version of PAL x009 80116BD0 (scrollFollowRotatingPlane.c): SLPS_01144 branch of src/x009/scrollFollowRotatingPlane.c [-O2 -G0] (tools/demo_sweep.py)
@@ -58,8 +58,8 @@ typedef struct O { char p0[5]; unsigned char step; char p6[2]; int w08; int w0c;
   char p2[0x34-0x28]; int *d34; int *d38; char p3[0x78-0x3c]; int w78; int w7c; } O;
 extern CAM VIEW_CAMERA;
 #define CAMP (&VIEW_CAMERA)
-extern SVEC DAT_1f800060;
-extern SVEC DAT_1f800068;
+extern SVEC WORK_VEC_A;
+extern SVEC WORK_VEC_B;
 extern void getBaseMatrix(MAT *);
 extern void RotMatrixY(long, MAT *);
 extern void RotMatrixX(long, MAT *);
@@ -83,13 +83,13 @@ void scrollFollowRotatingPlane(O *o)
     CAMP->m.t[0] = -CAMP->pos[0].p.whole;
     CAMP->m.t[1] = -CAMP->pos[1].p.whole;
     CAMP->m.t[2] = -CAMP->pos[2].p.whole;
-    DAT_1f800060.vx = -CAMP->pos[3].p.whole;
-    DAT_1f800060.vy = -CAMP->pos[4].p.whole;
-    DAT_1f800060.vz = -CAMP->pos[5].p.whole;
-    ApplyMatrixSV(&CAMP->m, &DAT_1f800060, &DAT_1f800068);
-    CAMP->m.t[0] += DAT_1f800068.vx;
-    CAMP->m.t[1] += DAT_1f800068.vy;
-    CAMP->m.t[2] += DAT_1f800068.vz;
+    WORK_VEC_A.vx = -CAMP->pos[3].p.whole;
+    WORK_VEC_A.vy = -CAMP->pos[4].p.whole;
+    WORK_VEC_A.vz = -CAMP->pos[5].p.whole;
+    ApplyMatrixSV(&CAMP->m, &WORK_VEC_A, &WORK_VEC_B);
+    CAMP->m.t[0] += WORK_VEC_B.vx;
+    CAMP->m.t[1] += WORK_VEC_B.vy;
+    CAMP->m.t[2] += WORK_VEC_B.vz;
 }
 #else
 #include "spad.h"
@@ -102,8 +102,8 @@ typedef struct O { char p0[5]; unsigned char step; char p6[2]; int w08; int w0c;
   char p2[0x34-0x28]; int *d34; int *d38; char p3[0x78-0x3c]; int w78; int w7c; } O;
 extern CAM VIEW_CAMERA;
 #define CAMP (&VIEW_CAMERA)
-extern SVEC DAT_1f800060;
-extern SVEC DAT_1f800068;
+extern SVEC WORK_VEC_A;
+extern SVEC WORK_VEC_B;
 extern void getBaseMatrix(MAT *);
 extern void RotMatrixY(long, MAT *);
 extern void RotMatrixX(long, MAT *);
@@ -127,12 +127,12 @@ void scrollFollowRotatingPlane(O *o)
     CAMP->m.t[0] = -CAMP->pos[0].p.whole;
     CAMP->m.t[1] = -CAMP->pos[1].p.whole;
     CAMP->m.t[2] = -CAMP->pos[2].p.whole;
-    DAT_1f800060.vx = -CAMP->pos[3].p.whole;
-    DAT_1f800060.vy = -CAMP->pos[4].p.whole;
-    DAT_1f800060.vz = -CAMP->pos[5].p.whole;
-    ApplyMatrixSV(&CAMP->m, &DAT_1f800060, &DAT_1f800068);
-    CAMP->m.t[0] += DAT_1f800068.vx;
-    CAMP->m.t[1] += DAT_1f800068.vy;
-    CAMP->m.t[2] += DAT_1f800068.vz;
+    WORK_VEC_A.vx = -CAMP->pos[3].p.whole;
+    WORK_VEC_A.vy = -CAMP->pos[4].p.whole;
+    WORK_VEC_A.vz = -CAMP->pos[5].p.whole;
+    ApplyMatrixSV(&CAMP->m, &WORK_VEC_A, &WORK_VEC_B);
+    CAMP->m.t[0] += WORK_VEC_B.vx;
+    CAMP->m.t[1] += WORK_VEC_B.vy;
+    CAMP->m.t[2] += WORK_VEC_B.vz;
 }
 #endif

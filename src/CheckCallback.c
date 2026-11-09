@@ -30,7 +30,7 @@ struct Intr {
     jmp_buf env;
     s32 stack[0x400];
 };
-extern struct Intr D_800970B4;
+extern struct Intr intr_env;
 extern int VSyncCallback(void (*f)());
 struct intr {
     const char* ver;
@@ -63,7 +63,7 @@ int StopCallback(void);
 
 int RestartCallback(void);
 
-int CheckCallback() { return D_800970B4.isCbContext; }
+int CheckCallback() { return intr_env.isCbContext; }
 
 int GetIntrMask();
 

@@ -302,7 +302,7 @@ typedef struct { void **p; int pad[2]; } E12;
 typedef struct { TObj o; char pc0[2]; unsigned short wc2; } TX;
 #define X(o) ((TX *)(o))
 extern TObj PLAYER;
-extern E12 D_80135DC0[];
+extern E12 MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS_ANIMS[];
 extern unsigned char D_800A60D4[];
 extern short D_800A60EA[];
 extern int AnimAdvance(TObj *);
@@ -313,7 +313,7 @@ extern void setEventStarted(int, int, int);
 extern void setEventComplete(int, int);
 
 #define P PLAYER
-#define ANIM(k) D_80135DC0[o->subtype].p[k]
+#define ANIM(k) MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS_ANIMS[o->subtype].p[k]
 
 void masterOfTheSkiesScene(TObj *o)
 {

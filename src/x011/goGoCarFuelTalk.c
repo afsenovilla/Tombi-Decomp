@@ -6,12 +6,12 @@
 
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
-extern E12 D_80119C48[];
+extern E12 FACTORY_NPC_DEFS_ANIMS[];
 extern TObj PLAYER;
 extern signed char GAME_PLAYER_MODE[];
 extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
 extern short D_800A60EA[];
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimLoadDuration(TObj *);
 
@@ -46,7 +46,7 @@ void goGoCarFuelTalk(TObj *o)
         PLAYER_STEP[0] = 0;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
-        o->anim = D_80119C48[o->subtype].p[2];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[2];
         AnimLoadDuration(o);
         o->d90 = (int)showMessageBoxDirect(2, 0xa, &v);
         o->state++;
@@ -56,14 +56,14 @@ void goGoCarFuelTalk(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        o->anim = D_80119C48[o->subtype].p[0];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[0];
         AnimLoadDuration(o);
         o->state++;
         break;
     case 2:
         ((unsigned char*)&GVARS.b42)[0] = 0;
         D_800A60EA[0] = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
         PLAYER_STATE[0] = 1;
         PLAYER_SUBSTATE[0] = 0;

@@ -1,6 +1,6 @@
 // FUNC 800ee560 104 X000
 // MATCHING 800ee560 104
-// probably: player step entry: sfx (0x1c,0x7f), anim DAT_80010c50 sub-anim 4, clears motion, state 5; unreferenced (dead entry code)
+// probably: player step entry: sfx (0x1c,0x7f), anim PLAYER_HURT_ANIM sub-anim 4, clears motion, state 5; unreferenced (dead entry code)
 typedef struct O {
     char pad0[6];
     unsigned char state;
@@ -17,7 +17,7 @@ typedef struct O {
     char pad5[0xaa - 0x9d];
     char baa;
 } O;
-extern char DAT_80010c50[];
+extern char PLAYER_HURT_ANIM[];
 extern void FUN_8001e5f4();
 extern void FUN_8001fe94();
 
@@ -25,7 +25,7 @@ void playerStepEntrySfxAnim4State5(O *o)
 {
     FUN_8001e5f4(0x1c, 0x7f);
     o->b9c = 0;
-    o->anim = DAT_80010c50;
+    o->anim = PLAYER_HURT_ANIM;
     FUN_8001fe94(o, 4);
     o->d30 = 0;
     o->d34 = 0;

@@ -21,7 +21,7 @@ typedef struct {
 } S;
 typedef struct { int d0; int b8; int bc; } E;
 extern char MODEL_PRIM_BUFFERS[];
-extern int P_1F800334[], P_1F800318[], P_1F800314[], P_1F800310[];
+extern int P_1F800334[], P_1F800318[], P_1F800314[], FOUR_DATA[];
 extern void copyModelPrimGroups(int, int);
 extern void FUN_80024ea0(int, int, int);
 
@@ -60,7 +60,7 @@ int foodForFuelModelStepA(S *o)
         o->velH = 0x200;
         o->velV = 0;
         o->b0a = 0x12;
-        p = (int *)P_1F800310[0];
+        p = (int *)FOUR_DATA[0];
         a = o->da0;
         d = ((int*)&SPAD.i310)[0];
         common:

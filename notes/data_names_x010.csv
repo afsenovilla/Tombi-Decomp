@@ -1,0 +1,14 @@
+address,name,size,source
+8012f3d4,SPEAR_PIG_ANIM_BOXES,,usage: u8[4] box per anim of the spear pig (spearPig* / updateSpearPig; row 5 read through D_8012F3E8..EB) refs=28
+80132310,SPEAR_PIG_ANIMS,,usage: anim pointers of the spear pig indexed by n (spearPigActC / ChargeB / HitFall / JumpAttack / WanderB) refs=16
+8012f474,SPEAR_PIG_RAND_TIMERS,,usage: u8[8] timers picked by Rand() & 7 (spearPigChargeB / WanderB) refs=2
+8012f298,ZIPLINE_PART_HANDLERS,,usage: void (*[subtype])(TObj *) (updateZiplineParts) refs=1
+8012f2f8,TALL_PILLAR_HEIGHT_PROFILE,,usage: u16[]: per 8-unit drop the h offset of the pillar surface (tallPillarGrabProbe / ObjectCollision / PlayerCollision) refs=5
+8012f378,BITING_PLANT_BOXES,,usage: short[4] box per subtype of the biting plant (updateA10BitingPlant); X000 80139208 layout refs=1
+80131cc8,BITING_PLANT_ANIMS,,usage: anim pointers by subtype of the biting plant (updateA10BitingPlant / area10Type07*); X000 8013b224 layout refs=5
+8012f3b0,LOST_HAT_MAN_DEFS,,usage: {box; w1e; ...; anims}[subtype] initLostHatMan copies refs=7
+8012f3b8,LOST_HAT_MAN_DEFS_ANIMS,,usage: LOST_HAT_MAN_DEFS+8: the anims column (lostHatManTalk) refs=3
+8012f3bc,TEN_THOUSAND_YEAR_ELDER_DEFS,,usage: {box; w1e; ...; anims}[subtype] initTenThousandYearElder copies refs=7
+8012f3c4,TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS,,usage: TEN_THOUSAND_YEAR_ELDER_DEFS+8: the anims column (tenThousandYearElderTalk / BeadsTalk / SetAnim; powerFishCollectorTalk) refs=22
+8012f530,HIDING_SON_DEFS,,usage: {box; w1e; ...; anims}[subtype] initHidingSon copies refs=7
+8012f538,HIDING_SON_DEFS_ANIMS,,usage: HIDING_SON_DEFS+8: the anims column (hidingSonTalk) refs=5

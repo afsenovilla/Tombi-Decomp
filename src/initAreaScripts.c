@@ -3,7 +3,7 @@
 extern int AREA_SOUND_BANK_LOADED;
 extern unsigned short GAME;
 extern unsigned short GAME_SELECTED_SECTION;
-extern int DAT_1f8002b8;
+extern int WSS_DATA;
 extern int DAT_1f8002bc;
 extern char AREA_SCRIPT_CTX[];
 extern void scriptReset(char *);
@@ -23,14 +23,14 @@ void initAreaScripts(void)
     case 0:
         switch (GAME_SELECTED_SECTION) {
         case 0: case 1: case 2:
-            a = DAT_1f8002b8;
+            a = WSS_DATA;
             goto L;
         }
         return;
     case 1:
         switch (GAME_SELECTED_SECTION) {
         case 0: case 1: case 2: case 3: case 4:
-            a = DAT_1f8002b8;
+            a = WSS_DATA;
             goto L;
         }
         return;
@@ -40,7 +40,7 @@ void initAreaScripts(void)
             a = DAT_1f8002bc;
             goto L;
         case 1: case 2:
-            a = DAT_1f8002b8;
+            a = WSS_DATA;
             goto L;
         }
         return;

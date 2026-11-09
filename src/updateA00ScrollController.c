@@ -15,7 +15,7 @@ extern unsigned short GAME_SELECTED_SPAWN_POINT[];
 extern unsigned char A00_SCROLL_CONTROLLER_MODE_BY_SECTION[];
 extern Fn A00_SCROLL_CONTROLLER_HANDLERS[];
 extern short PLAYER_H_WHOLE, PLAYER_Y_WHOLE, PLAYER_D_WHOLE;
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern unsigned char MOVIE_PLAY_STATE, MOVIE_ID;
 extern S2 *PLAYER_H;
 extern char DAT_8001d6a4[];
@@ -210,7 +210,7 @@ void func_80115F54(TObj *o)
     case 11:
         if (GAME_FADE_SCREEN_CONTROL != 1) break;
         DAT_8009cda8 = 0xff;
-        DAT_1f8001c6 = 2;
+        DRAW_FROZEN = 2;
         FUN_8001f4bc();
         o->step++;
         MOVIE_PLAY_STATE = 1;
@@ -219,7 +219,7 @@ void func_80115F54(TObj *o)
         break;
     case 12:
         if (MOVIE_PLAY_STATE != 0) break;
-        DAT_1f8001c6 = 0;
+        DRAW_FROZEN = 0;
         GAME_FADE_SCREEN_CONTROL = 4;
         startAreaBgm();
         o->step++;
@@ -247,7 +247,7 @@ extern unsigned short GAME_SELECTED_SPAWN_POINT[];
 extern unsigned char A00_SCROLL_CONTROLLER_MODE_BY_SECTION[];
 extern Fn A00_SCROLL_CONTROLLER_HANDLERS[];
 extern short PLAYER_H_WHOLE, PLAYER_Y_WHOLE, PLAYER_D_WHOLE;
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern unsigned char MOVIE_PLAY_STATE, MOVIE_ID;
 extern int DAT_800a609c;
 extern S2 *PLAYER_H;
@@ -452,7 +452,7 @@ void updateA00ScrollController(TObj *o)
     case 11:
         if (GAME_FADE_SCREEN_CONTROL != 1) break;
         DAT_8009cda8 = 0xff;
-        DAT_1f8001c6 = 2;
+        DRAW_FROZEN = 2;
         FUN_8001f4bc();
         o->step++;
         MOVIE_PLAY_STATE = 1;
@@ -461,7 +461,7 @@ void updateA00ScrollController(TObj *o)
         break;
     case 12:
         if (MOVIE_PLAY_STATE != 0) break;
-        DAT_1f8001c6 = 0;
+        DRAW_FROZEN = 0;
         GAME_FADE_SCREEN_CONTROL = 4;
         startAreaBgm();
         o->step++;

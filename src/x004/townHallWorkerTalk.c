@@ -6,7 +6,7 @@
 typedef struct { short v[6]; } V6;
 typedef struct { Fix16 a, y, b; } V3;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_801311D0[];
+extern AT TOWN_HALL_WORKER_DEFS_ANIMS[];
 extern unsigned char PLAYER[];
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern short PLAYER_ANIM_FRAME;
@@ -33,7 +33,7 @@ void townHallWorkerTalk(TObj *o)
     case 1:
         *(V6 *)&v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(2, 0, (V6 *)&v);
-        o->anim = D_801311D0[o->subtype].anims[3];
+        o->anim = TOWN_HALL_WORKER_DEFS_ANIMS[o->subtype].anims[3];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -45,7 +45,7 @@ void townHallWorkerTalk(TObj *o)
         o->animFrame = 1;
         o->velH = 1;
         o->b6b = 0;
-        o->anim = D_801311D0[o->subtype].anims[2];
+        o->anim = TOWN_HALL_WORKER_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;

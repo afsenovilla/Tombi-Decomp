@@ -5,7 +5,7 @@
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
 extern unsigned short GAME;
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern void FUN_8011fa6c(void);
 extern int resolveHitResultE(TObj *, TObj *);
 extern void awardAPByArea(int, int, int, int);
@@ -51,6 +51,6 @@ void weaponHitCat2Type02(TObj *a, TObj *b)
                 b->state = 0;
             }
         }
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
     }
 }

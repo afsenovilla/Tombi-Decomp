@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern void *D_80134D38[];
-extern unsigned short D_80131108[];
+extern void *BITING_PLANT_ANIMS[];
+extern unsigned short BITING_PLANT_BOXES[];
 extern unsigned char PLAYER;
 extern int testGcdFlagBitBcefc(int);
 extern void cullObjectPerspective(TObj *);
@@ -47,8 +47,8 @@ void updateA04BitingPlant(TObj *o)
         o->animFrame = 1;
         o->b0d = 0;
         o->b0a = 2;
-        o->anim = D_80134D38[o->subtype];
-        b = &D_80131108[o->subtype * 4];
+        o->anim = BITING_PLANT_ANIMS[o->subtype];
+        b = &BITING_PLANT_BOXES[o->subtype * 4];
         o->d3c = ((struct { char pad[0x2d4]; int v; } *)0x1F800000)->v;
         o->box0 = *b++;
         o->box1 = *b++;

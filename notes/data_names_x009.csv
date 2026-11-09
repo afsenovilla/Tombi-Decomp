@@ -1,0 +1,11 @@
+address,name,size,source
+8012ac88,WAYPOINT_RIDE_PATH,,usage: {short x y z pad}[] waypoints of the ride (waypointRidePlace / Step / AdvanceSegment) refs=12
+8012aac0,ROTATING_PLANE_SPRITE_QUADS,,usage: {SVECTOR-ish v[4]}[frame]: the quad corners rotatingPlaneSpriteSetQuad copies by *anim refs=8
+8012a878,ROTATING_PLANE_CHILD_DEFS,,usage: {subtype ...; x y z}[idx]: the children spawnRotatingPlaneChild spawns refs=5
+8012abac,SCENERY_SPRITE_CLUT_X,,usage: short[subtype]: clut x of the scenery sprite (updateScenerySprite; w08 = (y << 6) | (x >> 4)) refs=1
+8012abb4,SCENERY_SPRITE_CLUT_Y,,usage: short[subtype]: clut y (+ b0c) of the scenery sprite (updateScenerySprite) refs=1
+8012b1b8,FLOWER_PLATFORM_DEFS,,usage: {box0..3 ...}[subtype] updateFlowerPlatform copies at init refs=4
+8012b23c,TEAR_JAR_DEFS,,usage: {box0..3; w1e ...; anims}[subtype] updateTearJar copies at init refs=7
+8012b2dc,FLOWER_TEARS_SEEKER_DEFS,,usage: {box; w1e; ...; anims}[subtype] initFlowerTearsSeeker copies refs=7
+8012b2e4,FLOWER_TEARS_SEEKER_DEFS_ANIMS,,usage: FLOWER_TEARS_SEEKER_DEFS+8: the anims column (flowerTearsSeekerTalk / Pace / WalkOff; npcSetAnim) refs=7
+8012b2cc,RED_FLOWER_RAND_TABLE,,usage: u8[8] flags indexed by Rand() & 7 (redFlowerHop / TurnToPlayer) refs=3

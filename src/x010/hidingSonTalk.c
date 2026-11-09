@@ -8,9 +8,9 @@
 
 typedef struct V { char c[12]; } V;
 typedef struct { void **p; int pad[2]; } E12;
-extern E12 D_8012F538[];
+extern E12 HIDING_SON_DEFS_ANIMS[];
 extern unsigned char D_8009D13E;
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -35,7 +35,7 @@ void hidingSonTalk(TObj *o)
         ((unsigned char*)&GCD.bcfcc)[0] = 1;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
-        o->anim = D_8012F538[o->subtype].p[1];
+        o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[1];
         AnimLoadDuration(o);
         if (GCD.bce3b == 1) {
             o->d90 = (int)showMessageBoxDirect(3, 0, &v);
@@ -53,7 +53,7 @@ void hidingSonTalk(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        o->anim = D_8012F538[o->subtype].p[0];
+        o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
         AnimLoadDuration(o);
         o->animFrame = 1;
         o->velX = -0x180;
@@ -76,7 +76,7 @@ void hidingSonTalk(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if (TileCollideAt(o, o->h->p.whole, o->y.p.whole)) {
-            o->anim = D_8012F538[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             o->velX = -0x180;
             o->velY = -0x600;
@@ -91,7 +91,7 @@ void hidingSonTalk(TObj *o)
 
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         c = &GCD.bcfca;
         o->animFrame = o->wbc;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
@@ -113,13 +113,13 @@ void hidingSonTalk(TObj *o)
             break;
         p->b04 = 3;
         if (D_8009D13E == 0) {
-            o->anim = D_8012F538[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(V *)&o->a;
             o->d90 = (int)showMessageBoxDirect(3, 2, &v);
             o->state = 0xb;
         } else {
-            o->anim = D_8012F538[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(V *)&o->a;
             o->d90 = (int)showMessageBoxDirect(3, 1, &v);

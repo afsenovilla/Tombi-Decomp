@@ -11,7 +11,7 @@ typedef struct {
 } Sub;
 
 extern AH *D_8013DAF0[], *D_8013DAF4[];
-extern unsigned char D_8013C800[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short D_8013C8E8[];
 extern char D_80077D30[];
 extern short FUN_8001fddc(short, int);
@@ -86,7 +86,7 @@ void komaPigMove(TObj *o)
         o->wac = 2;
         o->substep++;
         o->anim = D_8013DAF0[0];
-        p0 = &D_8013C800[((AH *)o->anim)->w2 * 4];
+        p0 = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
         o->box0 = *p0++;
         o->box1 = *p0++;
         o->box2 = *p0++;
@@ -155,7 +155,7 @@ void komaPigMove(TObj *o)
         o->wac = 3;
         o->substep++;
         o->anim = D_8013DAF4[0];
-        p1 = &D_8013C800[((AH *)o->anim)->w2 * 4];
+        p1 = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
         o->box0 = *p1++;
         o->box1 = *p1++;
         o->box2 = *p1++;

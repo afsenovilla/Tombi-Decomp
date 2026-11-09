@@ -5,7 +5,7 @@ typedef struct O { char pad0[6]; unsigned char n; char pad1[0x24-7]; void *fn; c
 extern D *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001fe6c(void);
-extern void FUN_80010748(void);
+extern void PLAYER_IDLE_ANIM(void);
 void playerStepEntryResetAnimNext(O *o)
 {
 PLAYER_EXT->a = 0;
@@ -18,7 +18,7 @@ o->s7e = 0;
 PLAYER_EXT->b = 0;
 PLAYER_EXT->c = 0;
 PLAYER_EXT->d = 0;
-o->fn = FUN_80010748;
+o->fn = PLAYER_IDLE_ANIM;
 FUN_8001fe6c();
 o->v8c = SLOPE_TILT_TABLE[o->sb0];
 o->n++;

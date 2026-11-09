@@ -2,7 +2,7 @@
 // MATCHING 8001c818 400
 typedef struct Th { char pad[0x48]; short a, b; unsigned short c; short d; char pad2[0x5c - 0x50]; short e; } Th;
 extern Th *TASK_C;
-extern char LOAD_COMPLETE_SYM, DAT_1f8001d0;
+extern char LOAD_COMPLETE_SYM, IN_GAME;
 extern unsigned short JOYPAD_STATE;
 extern void stopPadVibration(void);
 extern void MusicStopOrFadeIn(int);
@@ -53,7 +53,7 @@ void gameOverScreenState(void)
         t->b = 0;
         t->c = 0;
         t->d = 0;
-        DAT_1f8001d0 = 0;
+        IN_GAME = 0;
         setTask(LAB_8004dd8c);
         break;
     }

@@ -3,8 +3,8 @@
 #include "TOBJ.H"
 extern short probeGrabPointInBoxA(void);
 extern short GRAB_POINT_OFFSET;
-extern short DAT_1f80019e;
-extern TObj *DAT_1f8003c0;
+extern short LIST_COUNTER;
+extern TObj *TOUCHED_OBJECT;
 
 void playerGrabCat4Type02(TObj *a, TObj *b)
 {
@@ -12,10 +12,10 @@ void playerGrabCat4Type02(TObj *a, TObj *b)
         a->b9e = 4;
         a->wba = -3;
         a->velY = 0;
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
         a->wb8 = GRAB_POINT_OFFSET;
         b->b68 = 2;
-        DAT_1f8003c0 = b;
+        TOUCHED_OBJECT = b;
         b->animFrame = a->animFrame & 1;
     }
 }

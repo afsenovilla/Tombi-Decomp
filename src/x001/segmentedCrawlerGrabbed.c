@@ -5,7 +5,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013F034[], *D_8013F074[];
+extern void *SEGMENTED_CRAWLER_ANIMS[], *SEGMENTED_CRAWLER_GRABBED_ANIMS[];
 extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void func_80026BFC(int, int);
 extern void playSFX(int);
@@ -27,10 +27,10 @@ void func_8013294C(TObj *o)
     else o->animFrame = 0;
     if (o->b0c == 0) {
         o->wac = ((o->d84 + 8) & 0xff) >> 4;
-        o->anim = D_8013F034[o->wac];
+        o->anim = SEGMENTED_CRAWLER_ANIMS[o->wac];
     } else {
         o->wac = ((o->d84 + 8) & 0xff) >> 4;
-        o->anim = D_8013F074[o->wac];
+        o->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[o->wac];
     }
     p = o;
     for (e = (TObj *)p->d90; e; e = (TObj *)e->d90) {
@@ -43,10 +43,10 @@ void func_8013294C(TObj *o)
             e->y.raw += NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             if (e->b0c == 0) {
                 e->wac = ((e->d84 + 8) & 0xff) >> 4;
-                e->anim = D_8013F034[e->wac];
+                e->anim = SEGMENTED_CRAWLER_ANIMS[e->wac];
             } else {
                 e->wac = ((e->d84 + 8) & 0xff) >> 4;
-                e->anim = D_8013F074[e->wac];
+                e->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[e->wac];
             }
         } else {
             e->d84 = (p->d84 - k) & 0xff;
@@ -54,10 +54,10 @@ void func_8013294C(TObj *o)
             e->y.raw -= NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             if (e->b0c == 0) {
                 e->wac = ((-e->d84 - 8) & 0xff) >> 4;
-                e->anim = D_8013F034[e->wac];
+                e->anim = SEGMENTED_CRAWLER_ANIMS[e->wac];
             } else {
                 e->wac = ((-e->d84 - 8) & 0xff) >> 4;
-                e->anim = D_8013F074[e->wac];
+                e->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[e->wac];
             }
         }
         p = e;
@@ -72,13 +72,13 @@ void func_8013294C(TObj *o)
             e->h->raw -= COS_TABLE[e->d84] * 3 << 6;
             e->y.raw -= NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             e->wac = ((-e->d84 - 8) & 0xff) >> 4;
-            e->anim = D_8013F074[e->wac];
+            e->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[e->wac];
         } else {
             e->d84 = (p->d84 + k) & 0xff;
             e->h->raw += COS_TABLE[e->d84] * 3 << 6;
             e->y.raw += NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             e->wac = ((e->d84 + 8) & 0xff) >> 4;
-            e->anim = D_8013F074[e->wac];
+            e->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[e->wac];
         }
         p = e;
     }
@@ -87,7 +87,7 @@ void func_8013294C(TObj *o)
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013F034[], *D_8013F074[];
+extern void *SEGMENTED_CRAWLER_ANIMS[], *SEGMENTED_CRAWLER_GRABBED_ANIMS[];
 extern short COS_TABLE[], NEG_SIN_TABLE[];
 extern void func_80026BFC(int, int);
 extern void playSFX(int);
@@ -109,10 +109,10 @@ void segmentedCrawlerGrabbed(TObj *o)
     else o->animFrame = 0;
     if (o->b0c == 0) {
         o->wac = ((o->d84 + 8) & 0xff) >> 4;
-        o->anim = D_8013F034[o->wac];
+        o->anim = SEGMENTED_CRAWLER_ANIMS[o->wac];
     } else {
         o->wac = ((o->d84 + 8) & 0xff) >> 4;
-        o->anim = D_8013F074[o->wac];
+        o->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[o->wac];
     }
     p = o;
     for (e = (TObj *)p->d90; e; e = (TObj *)e->d90) {
@@ -125,10 +125,10 @@ void segmentedCrawlerGrabbed(TObj *o)
             e->y.raw += NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             if (e->b0c == 0) {
                 e->wac = ((e->d84 + 8) & 0xff) >> 4;
-                e->anim = D_8013F034[e->wac];
+                e->anim = SEGMENTED_CRAWLER_ANIMS[e->wac];
             } else {
                 e->wac = ((e->d84 + 8) & 0xff) >> 4;
-                e->anim = D_8013F074[e->wac];
+                e->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[e->wac];
             }
         } else {
             e->d84 = (p->d84 - k) & 0xff;
@@ -136,10 +136,10 @@ void segmentedCrawlerGrabbed(TObj *o)
             e->y.raw -= NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             if (e->b0c == 0) {
                 e->wac = ((-e->d84 - 8) & 0xff) >> 4;
-                e->anim = D_8013F034[e->wac];
+                e->anim = SEGMENTED_CRAWLER_ANIMS[e->wac];
             } else {
                 e->wac = ((-e->d84 - 8) & 0xff) >> 4;
-                e->anim = D_8013F074[e->wac];
+                e->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[e->wac];
             }
         }
         p = e;
@@ -154,13 +154,13 @@ void segmentedCrawlerGrabbed(TObj *o)
             e->h->raw -= COS_TABLE[e->d84] * 3 << 6;
             e->y.raw -= NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             e->wac = ((-e->d84 - 8) & 0xff) >> 4;
-            e->anim = D_8013F074[e->wac];
+            e->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[e->wac];
         } else {
             e->d84 = (p->d84 + k) & 0xff;
             e->h->raw += COS_TABLE[e->d84] * 3 << 6;
             e->y.raw += NEG_SIN_TABLE[(unsigned char)e->d84] * 3 << 6;
             e->wac = ((e->d84 + 8) & 0xff) >> 4;
-            e->anim = D_8013F074[e->wac];
+            e->anim = SEGMENTED_CRAWLER_GRABBED_ANIMS[e->wac];
         }
         p = e;
     }

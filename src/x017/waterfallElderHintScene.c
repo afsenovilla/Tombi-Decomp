@@ -10,7 +10,7 @@ extern TObj *SCRIPT_OBJECTS;
 extern TObj *D_8009F2DC;
 extern TObj PLAYER;
 extern unsigned char *PLAYER_EXT;
-extern char D_80010814[];
+extern char PLAYER_WALK_ANIM[];
 extern void FUN_8001d6a4();
 extern void FUN_8001fe6c(TObj *);
 extern void playerSetAnim(TObj *, int, int);
@@ -40,7 +40,7 @@ void waterfallElderHintScene(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 0x64;
         PLAYER.state = 0;
-        PLAYER.anim = D_80010814;
+        PLAYER.anim = PLAYER_WALK_ANIM;
         FUN_8001fe6c(&PLAYER);
         o->state++;
         break;
@@ -80,7 +80,7 @@ void waterfallElderHintScene(TObj *o)
     case 4:
         if (--o->w08 > 0) break;
         PLAYER.animFrame = 0;
-        PLAYER.anim = D_80010814;
+        PLAYER.anim = PLAYER_WALK_ANIM;
         FUN_8001fe6c(&PLAYER);
         PLAYER.b04 = 5;
         PLAYER.step = 0x64;

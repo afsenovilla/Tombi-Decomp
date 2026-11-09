@@ -73,7 +73,7 @@ void func_80132F30(TObj *o)
 
 #define Q ((TObj *)o->d90)
 
-extern void *D_8013F034[];
+extern void *SEGMENTED_CRAWLER_ANIMS[];
 extern char D_8013F290[];
 extern char D_8013F308[];
 extern char D_8013F300[];
@@ -157,7 +157,7 @@ void segmentedCrawlerHurtFlyOff(TObj *o)
             else
                 o->animFrame = 0;
             o->wac = ((o->d88 + 8) & 0xff) >> 4;
-            o->anim = D_8013F034[o->wac];
+            o->anim = SEGMENTED_CRAWLER_ANIMS[o->wac];
         } else {
             if ((o->animFrame = Q->animFrame) == 0)
                 o->d84 = (Q->d84 + 0x10) & 0xff;

@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
 
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern short CAT3_OBJECT_COUNT_SAVED, CAT3_OBJECT_COUNT;
 extern TObj **CAT3_OBJECT_LIST, **CAT3_OBJECT_LIST_SAVED;
 extern unsigned char PLAYER_TYPE;
@@ -40,7 +40,7 @@ void func_80048540(void)
     TObj **p;
     TObj *o;
 
-    if (DAT_1f8001c6 != 0) {
+    if (DRAW_FROZEN != 0) {
         n = CAT3_OBJECT_COUNT_SAVED;
         p = CAT3_OBJECT_LIST_SAVED;
         while (n != 0) {
@@ -110,7 +110,7 @@ void func_80048540(void)
 #else
 #include "TOBJ.H"
 
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern short CAT3_OBJECT_COUNT_SAVED, CAT3_OBJECT_COUNT;
 extern TObj **CAT3_OBJECT_LIST, **CAT3_OBJECT_LIST_SAVED;
 extern unsigned char PLAYER_TYPE;
@@ -146,7 +146,7 @@ void drawCategory3Objects(void)
     TObj **p;
     TObj *o;
 
-    if (DAT_1f8001c6 != 0) {
+    if (DRAW_FROZEN != 0) {
         n = CAT3_OBJECT_COUNT_SAVED;
         p = CAT3_OBJECT_LIST_SAVED;
         while (n != 0) {

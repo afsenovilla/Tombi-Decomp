@@ -7,9 +7,9 @@
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_80135CB0[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 extern unsigned char D_80135D5B[];
-extern void *D_80139500[];
+extern void *SPIKY_LIZARD_ANIMS[];
 extern void spawnItemNotification(int, int);
 extern void AnimLoadDuration(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -18,8 +18,8 @@ static __inline__ void setAnimN(TObj *o, short n)
 {
     unsigned char *p;
     o->wac = n;
-    o->anim = D_80139500[n];
-    p = &D_80135CB0[o->wac * 4];
+    o->anim = SPIKY_LIZARD_ANIMS[n];
+    p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p;
@@ -87,8 +87,8 @@ void func_80127D48(TObj *o)
         t = *(volatile unsigned char *)&o->state;
         *(volatile short *)&o->wac = 10;
         o->state = t + 1;
-        o->anim = D_80139500[10];
-        p = &D_80135CB0[o->wac * 4];
+        o->anim = SPIKY_LIZARD_ANIMS[10];
+        p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;
@@ -105,9 +105,9 @@ void func_80127D48(TObj *o)
 #include "player.h"
 #include "TOBJ.H"
 
-extern unsigned char D_80135CB0[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 extern unsigned char D_80135D5B[];
-extern void *D_80139500[];
+extern void *SPIKY_LIZARD_ANIMS[];
 extern void spawnItemNotification(int, int);
 extern void AnimLoadDuration(TObj *);
 extern short FUN_80040278(TObj *, short, short);
@@ -116,8 +116,8 @@ static __inline__ void setAnimN(TObj *o, short n)
 {
     unsigned char *p;
     o->wac = n;
-    o->anim = D_80139500[n];
-    p = &D_80135CB0[o->wac * 4];
+    o->anim = SPIKY_LIZARD_ANIMS[n];
+    p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p;
@@ -185,8 +185,8 @@ void spikyLizardGrabbed(TObj *o)
         t = *(volatile unsigned char *)&o->state;
         *(volatile short *)&o->wac = 10;
         o->state = t + 1;
-        o->anim = D_80139500[10];
-        p = &D_80135CB0[o->wac * 4];
+        o->anim = SPIKY_LIZARD_ANIMS[10];
+        p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;

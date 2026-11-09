@@ -8,12 +8,12 @@ typedef struct {
     int f4;
 } S8006F07C;
 
-extern volatile S8006F07C *D_800982C8;
-extern int D_800982D0[];
+extern volatile S8006F07C *_interruptReg;
+extern int _interruptMasks[];
 
 int func_80058660(int a)
 {
-    D_800982C8->f4 |= D_800982D0[a &= 0xffff];
+    _interruptReg->f4 |= _interruptMasks[a &= 0xffff];
     return a < 3;
 }
 #endif
@@ -23,12 +23,12 @@ typedef struct {
     int f4;
 } S8006F07C;
 
-extern S8006F07C *D_800982C8;
-extern int D_800982D0[];
+extern S8006F07C *_interruptReg;
+extern int _interruptMasks[];
 
 int StartRCnt(int a)
 {
-    D_800982C8->f4 |= D_800982D0[a &= 0xffff];
+    _interruptReg->f4 |= _interruptMasks[a &= 0xffff];
     return a < 3;
 }
 #endif

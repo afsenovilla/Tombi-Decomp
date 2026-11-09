@@ -22,7 +22,7 @@ extern unsigned char DAT_8009d0a4[];
 extern unsigned char DAT_8009c990;
 extern short DAT_800802dc[];
 extern short DAT_800802e4[];
-extern Col6 DAT_800802ec[];
+extern Col6 HUD_ITEM_GAUGE_COLORS[];
 extern void drawSpriteFrame(TObj *, int, int, int);
 extern void FUN_8005e74c(Sprt *);
 extern unsigned short FUN_8005e420(int, int);
@@ -63,7 +63,7 @@ void func_8004C0F0(TObj *o, int idx, short x, short y, short flag)
     r[1] = y + 2;
     r[2] = 0x3d;
     r[3] = 4;
-    addTilePrim(r, DAT_800802ec[idx].a, DAT_800802ec[idx].b, DAT_800802ec[idx].c);
+    addTilePrim(r, HUD_ITEM_GAUGE_COLORS[idx].a, HUD_ITEM_GAUGE_COLORS[idx].b, HUD_ITEM_GAUGE_COLORS[idx].c);
 }
 #else
 #include "TOBJ.H"
@@ -86,7 +86,7 @@ extern unsigned char DAT_8009d0a4[];
 extern unsigned char DAT_8009c990;
 extern short DAT_800802dc[];
 extern short DAT_800802e4[];
-extern Col6 DAT_800802ec[];
+extern Col6 HUD_ITEM_GAUGE_COLORS[];
 extern void drawSpriteFrame(TObj *, int, int, int);
 extern void FUN_8005e74c(Sprt *);
 extern unsigned short FUN_8005e420(int, int);
@@ -130,6 +130,6 @@ void drawHudItemGauge(TObj *o, int idx, short x, short y, short flag)
     r[1] = y + 2;
     r[2] = 0x3d;
     r[3] = 4;
-    addTilePrim(r, DAT_800802ec[idx].a, DAT_800802ec[idx].b, DAT_800802ec[idx].c);
+    addTilePrim(r, HUD_ITEM_GAUGE_COLORS[idx].a, HUD_ITEM_GAUGE_COLORS[idx].b, HUD_ITEM_GAUGE_COLORS[idx].c);
 }
 #endif

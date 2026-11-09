@@ -7,31 +7,31 @@
 #include "psyq/libcd.h"
 
 typedef char Result_t[8];
-extern volatile s32* D_8009705C;
-extern volatile s32* D_80097060;
-extern volatile s32* D_8009706C;
-extern volatile s32* D_8009707C;
-extern s32 D_80097094;
-extern volatile u16* D_8009BF70;
-extern s32 D_8009C334;
-extern s16 D_8009C90C;
+extern volatile s32* c011_cd_delay;
+extern volatile s32* c011_com_delay;
+extern volatile s32* c011_d1_chcr;
+extern volatile s32* c011_d3_chcr;
+extern s32 debug_cause;
+extern volatile u16* c011_header;
+extern s32 Stframe_no;
+extern s16 Stsector_offset;
 extern s32 ST_MODE;
-extern s32 D_8009C914;
+extern s32 StMode;
 extern void (*ST_FUNC2)(void);
-extern s32 D_8009D5F4;
+extern s32 StCHANNEL;
 extern s32 ST_START_FRAME;
 extern s32 D_8009F7E0;
-extern s32 D_800A2264;
-extern s32 D_800A2268;
-extern s32 D_800A3CC0;
+extern s32 StRingIdx1;
+extern s32 StRingIdx2;
+extern s32 StEmu_Addr;
 extern u32 ST_END_FRAME;
 extern s32 ST_MASK;
-extern u16* D_800A3F00;
+extern u16* StRingBase;
 extern StHEADER* ST_RING_ADDR;
-extern volatile u8* D_8009704C;
-extern volatile u8* D_80097054;
-extern volatile u8* D_80097058;
-extern bool D_8009D544;
+extern volatile u8* c011_cd_reg0;
+extern volatile u8* c011_cd_reg2;
+extern volatile u8* c011_cd_reg3;
+extern bool StCdIntrFlag;
 extern s32 ST_RING_SIZE;
 
 void StCdInterrupt(void) {
@@ -48,12 +48,12 @@ void StCdInterrupt(void) {
     if (GV6.ia0 == 1) {
         return;
     }
-    if ((ST_MODE != 0) && (*D_8009706C & 0x01000000)) {
-        D_8009D544 = true;
-        if (D_800A3CC0 != 0) {
+    if ((ST_MODE != 0) && (*c011_d1_chcr & 0x01000000)) {
+        StCdIntrFlag = true;
+        if (StEmu_Addr != 0) {
             D_8009F7E0++;
         }
-        D_80097094 = 1;
+        debug_cause = 1;
         return;
     }
     if (CdReady(1, &result) == CdlDiskError) {
@@ -62,161 +62,161 @@ void StCdInterrupt(void) {
     subroutine_arg8[1] = result[0];
     subroutine_arg8[2] = result[1];
     if (subroutine_arg8[1] & 4) {
-        D_80097094 = 3;
+        debug_cause = 3;
         return;
     }
-    D_8009BF70 = (u16*)&ST_RING_ADDR[D_800A2264];
-    if (D_8009BF70[0] != 0) {
-        if (D_800A3CC0 != 0) {
+    c011_header = (u16*)&ST_RING_ADDR[StRingIdx1];
+    if (c011_header[0] != 0) {
+        if (StEmu_Addr != 0) {
             D_8009F7E0++;
         }
-        D_80097094 = 4;
+        debug_cause = 4;
         return;
     }
-    *D_8009704C = 0;
-    *D_80097058 = 0;
-    *D_8009704C = 0;
-    *D_80097058 = 0x80;
-    *D_8009705C = 0x20943;
-    *D_80097060 = 0x1323;
-    if (D_8009C914 == 0) {
+    *c011_cd_reg0 = 0;
+    *c011_cd_reg3 = 0;
+    *c011_cd_reg0 = 0;
+    *c011_cd_reg3 = 0x80;
+    *c011_cd_delay = 0x20943;
+    *c011_com_delay = 0x1323;
+    if (StMode == 0) {
         var_v1 = (u8*)&subroutine_arg8[4];
         do {
-            *var_v1++ = *D_80097054;
+            *var_v1++ = *c011_cd_reg2;
         } while (var_v1 < &subroutine_arg8[6]);
         for (var_v1_2 = 0; var_v1_2 < 8; var_v1_2++) {
-            *D_80097054;
+            *c011_cd_reg2;
         }
     }
     var_t0 = 0x11000000;
-    if (D_800A3CC0 != 0) {
-        mem2mem(D_8009BF70, D_800A3CC0 + (D_8009F7E0 << 0xB), 8, 0);
+    if (StEmu_Addr != 0) {
+        mem2mem(c011_header, StEmu_Addr + (D_8009F7E0 << 0xB), 8, 0);
     } else {
-        dma_execute(3, D_8009BF70, 0, 8, var_t0, 0, 0);
+        dma_execute(3, c011_header, 0, 8, var_t0, 0, 0);
     }
-    while (*D_8009707C & 0x01000000) {
+    while (*c011_d3_chcr & 0x01000000) {
     }
-    ((StHEADER*)D_8009BF70)->loc = loc;
-    *D_8009705C = 0x20843;
-    *D_80097060 = 0x1325;
+    ((StHEADER*)c011_header)->loc = loc;
+    *c011_cd_delay = 0x20843;
+    *c011_com_delay = 0x1325;
     if ((ST_MASK == 1) && (ST_START_FRAME != 0)) {
-        if (ST_START_FRAME != D_8009BF70[4]) {
-            D_8009BF70[0] = 0;
-            if (D_800A3CC0 != 0) {
+        if (ST_START_FRAME != c011_header[4]) {
+            c011_header[0] = 0;
+            if (StEmu_Addr != 0) {
                 D_8009F7E0++;
             }
             return;
         }
         ST_MASK = 0;
     }
-    if ((D_8009BF70[0] != 0x160) || (((D_8009BF70[1] >> 0xA) & 0x1F) != GV6.i94)) {
-        if (D_800A3CC0 != 0) {
+    if ((c011_header[0] != 0x160) || (((c011_header[1] >> 0xA) & 0x1F) != GV6.i94)) {
+        if (StEmu_Addr != 0) {
             D_8009F7E0 = 0;
         } else {
-            D_8009BF70[0];
+            c011_header[0];
         }
-        D_80097094 = 5;
-        D_8009BF70[0] = 0;
+        debug_cause = 5;
+        c011_header[0] = 0;
         return;
     }
-    if ((D_8009C90C != D_8009BF70[2]) || ((D_8009C334 != 0) && (D_8009C334 != D_8009BF70[4]))) {
-        D_8009C334 = 0;
-        D_8009C90C = 0;
-        init_ring_status(D_800A2268, D_800A2264 - D_800A2268);
-        D_800A2264 = D_800A2268;
-        D_8009BF70[0] = 0;
-        if (D_800A3CC0 != 0) {
+    if ((Stsector_offset != c011_header[2]) || ((Stframe_no != 0) && (Stframe_no != c011_header[4]))) {
+        Stframe_no = 0;
+        Stsector_offset = 0;
+        init_ring_status(StRingIdx2, StRingIdx1 - StRingIdx2);
+        StRingIdx1 = StRingIdx2;
+        c011_header[0] = 0;
+        if (StEmu_Addr != 0) {
             D_8009F7E0++;
         }
-        D_80097094 = 6;
+        debug_cause = 6;
         return;
     }
-    if (D_8009BF70[2] == 0) {
-        D_8009C90C = 0;
-        D_8009C334 = D_8009BF70[4];
-        if ((ST_END_FRAME != 0) && (D_8009C334 >= ST_END_FRAME)) {
-            D_8009C334 = 0;
-            D_8009C90C = 0;
-            init_ring_status(D_800A2268, D_800A2264 - D_800A2268);
-            D_800A2264 = D_800A2268;
-            D_8009BF70[0] = 0;
+    if (c011_header[2] == 0) {
+        Stsector_offset = 0;
+        Stframe_no = c011_header[4];
+        if ((ST_END_FRAME != 0) && (Stframe_no >= ST_END_FRAME)) {
+            Stframe_no = 0;
+            Stsector_offset = 0;
+            init_ring_status(StRingIdx2, StRingIdx1 - StRingIdx2);
+            StRingIdx1 = StRingIdx2;
+            c011_header[0] = 0;
             ST_MASK = 1;
             if (ST_FUNC2 != NULL) {
                 ST_FUNC2();
             }
-            if (D_800A3CC0 != 0) {
+            if (StEmu_Addr != 0) {
                 D_8009F7E0++;
             }
-            D_80097094 = 7;
+            debug_cause = 7;
             return;
         }
-        if ((u32) (ST_RING_SIZE - D_800A2264 - 1) < D_8009BF70[3]) {
+        if ((u32) (ST_RING_SIZE - StRingIdx1 - 1) < c011_header[3]) {
             if (ST_END_FRAME == 0) {
-                D_8009BF70[0] = 1;
+                c011_header[0] = 1;
                 ST_MASK = 1;
                 if (ST_FUNC2 != NULL) {
                     ST_FUNC2();
                 }
-                if (D_800A3CC0 != 0) {
+                if (StEmu_Addr != 0) {
                     D_8009F7E0++;
                 }
-                D_80097094 = 8;
+                debug_cause = 8;
                 return;
             }
             if ((short)ST_RING_ADDR->id != 0) {
-                D_8009BF70[0] = 0;
-                if (D_800A3CC0 != 0) {
+                c011_header[0] = 0;
+                if (StEmu_Addr != 0) {
                     D_8009F7E0++;
                 }
-                D_80097094 = 9;
+                debug_cause = 9;
                 return;
             }
-            D_8009BF70[0] = 1;
+            c011_header[0] = 1;
             var_a1 = ST_RING_ADDR;
-            var_a0 = D_8009BF70;
-            D_800A2264 = 0;
+            var_a0 = c011_header;
+            StRingIdx1 = 0;
             for (var_v1_3 = 0; var_v1_3 < 8; var_v1_3++) {
                 *var_a1++ = *var_a0++;
             }
-            D_8009BF70 = ST_RING_ADDR;
+            c011_header = ST_RING_ADDR;
         }
-        D_800A2268 = D_800A2264;
+        StRingIdx2 = StRingIdx1;
     }
-    D_80097094 = 10;
-    D_8009C90C++;
-    D_800A3F00 = &ST_RING_ADDR[ST_RING_SIZE] + (D_800A2264 * 0x3F);
+    debug_cause = 10;
+    Stsector_offset++;
+    StRingBase = &ST_RING_ADDR[ST_RING_SIZE] + (StRingIdx1 * 0x3F);
     
     if (ST_MODE != 0) {
         var_t0 = 0x11000000;
-        *D_8009705C = 0x20943;
-        *D_80097060 = 0x1323;
+        *c011_cd_delay = 0x20943;
+        *c011_com_delay = 0x1323;
     } else {
-        *D_8009705C = 0x21020843;
+        *c011_cd_delay = 0x21020843;
         var_t0 = 0x11400100;
     }
-    if ((D_8009BF70[3] - 1) == D_8009BF70[2]) {
+    if ((c011_header[3] - 1) == c011_header[2]) {
         GV6.ia0 = 1;
-        if (D_800A3CC0 != 0) {
-            mem2mem(D_800A3F00, D_800A3CC0 + (D_8009F7E0 << 0xB) + 0x20, 0x1F8, 1);
+        if (StEmu_Addr != 0) {
+            mem2mem(StRingBase, StEmu_Addr + (D_8009F7E0 << 0xB) + 0x20, 0x1F8, 1);
             D_8009F7E0++;
         } else {
-            dma_execute(3, D_800A3F00, 0, 0x1F8, var_t0, 1, 0);
+            dma_execute(3, StRingBase, 0, 0x1F8, var_t0, 1, 0);
         }
-        D_8009C90C = 0;
-        D_8009C334 = 0;
-        GV6.i94 = D_8009D5F4;
+        Stsector_offset = 0;
+        Stframe_no = 0;
+        GV6.i94 = StCHANNEL;
     } else {
-        if (D_800A3CC0 != 0) {
-            mem2mem(D_800A3F00, D_800A3CC0 + (D_8009F7E0 << 0xB) + 0x20, 0x1F8, 0);
+        if (StEmu_Addr != 0) {
+            mem2mem(StRingBase, StEmu_Addr + (D_8009F7E0 << 0xB) + 0x20, 0x1F8, 0);
             D_8009F7E0++;
         } else {
-            dma_execute(3, D_800A3F00, 0, 0x1F8, var_t0, 0, 0);
+            dma_execute(3, StRingBase, 0, 0x1F8, var_t0, 0, 0);
         }
     }
-    *D_80097060 = 0x1325;
-    D_8009BF70[0] = 3;
-    D_800A2264 += 1;
-    if ((D_800A3CC0 != 0) && (GV6.ia0 != 0)) {
+    *c011_com_delay = 0x1325;
+    c011_header[0] = 3;
+    StRingIdx1 += 1;
+    if ((StEmu_Addr != 0) && (GV6.ia0 != 0)) {
         data_ready_callback();
     }
 }

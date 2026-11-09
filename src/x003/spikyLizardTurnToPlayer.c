@@ -2,8 +2,8 @@
 // MATCHING 80126b68 432
 #include "TOBJ.H"
 typedef struct B { unsigned char c[4]; } B;
-extern B D_80135CB0[];
-extern void *D_80139500[];
+extern B SPIKY_LIZARD_ANIM_BOXES[];
+extern void *SPIKY_LIZARD_ANIMS[];
 extern unsigned short D_80135D2C[];
 extern unsigned char D_80135D5B[];
 extern unsigned char D_80135D63[];
@@ -21,8 +21,8 @@ void spikyLizardTurnToPlayer(TObj *o)
         o->timer = D_80135D2C[Rand() & 7];
         o->substep++;
         o->wac = D_80135D5B[o->wb6];
-        o->anim = D_80139500[o->wac];
-        { unsigned char *p = D_80135CB0[o->wac].c;
+        o->anim = SPIKY_LIZARD_ANIMS[o->wac];
+        { unsigned char *p = SPIKY_LIZARD_ANIM_BOXES[o->wac].c;
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;
@@ -36,8 +36,8 @@ void spikyLizardTurnToPlayer(TObj *o)
             o->substep++;
             o->wac = D_80135D63[o->wb6];
             o->wb6 = 0;
-            o->anim = D_80139500[o->wac];
-            { unsigned char *p = D_80135CB0[o->wac].c;
+            o->anim = SPIKY_LIZARD_ANIMS[o->wac];
+            { unsigned char *p = SPIKY_LIZARD_ANIM_BOXES[o->wac].c;
             o->box0 = *p++;
             o->box1 = *p++;
             o->box2 = *p;

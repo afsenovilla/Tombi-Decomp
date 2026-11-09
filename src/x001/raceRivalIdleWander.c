@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { unsigned char b[8]; } C8;
 extern C8 D_80116258;
-extern void *D_8013E740, *D_8013E74C;
+extern void *RACE_RIVAL_ANIMS, *D_8013E74C;
 extern int Rand(void);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -19,7 +19,7 @@ void raceRivalIdleWander(TObj *o)
     case 1:
         switch (t.b[Rand() & 7]) {
         case 0:
-            o->anim = D_8013E740;
+            o->anim = RACE_RIVAL_ANIMS;
             AnimLoadDuration(o);
             o->timer = 0x1e;
             o->state = 2;

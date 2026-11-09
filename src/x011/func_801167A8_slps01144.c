@@ -3,10 +3,10 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 extern unsigned char D_8009E4EA, D_8009EE58;
-extern short D_1F8001C6; extern volatile short D_800A7C2A;
+extern short DRAW_FROZEN; extern volatile short D_800A7C2A;
 #include "player.h"
 extern unsigned char D_8009E4E8, D_8009E4E9;
-extern unsigned short D_800A7B8A, D_1F8001FC, D_1F8003C8;
+extern unsigned short D_800A7B8A, JOYPAD_STATE, BUTTON_MASK_C;
 typedef struct { short s0, s2; } S2;
 extern S2 *D_800A7BBC;
 extern int func_8002E42C(int, int, V6 *);
@@ -29,7 +29,7 @@ void func_801167A8_slps01144(TObj *o)
         }
         if ((unsigned short)(D_800A7B8A - 0x40) >= 0x20) break;
         if (D_800A7BBC->s2 != 0) break;
-        if (!(D_1F8001FC & D_1F8003C8)) break;
+        if (!(JOYPAD_STATE & BUTTON_MASK_C)) break;
         v = *(V6 *)&o->a;
         D_8009E4EA = 1;
         D_8009EE58 = 2;
@@ -51,7 +51,7 @@ void func_801167A8_slps01144(TObj *o)
         D_8009E4EA = 0;
         D_800A7C2A = 0;
         { unsigned short w = *(volatile unsigned short *)&o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = w; }
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

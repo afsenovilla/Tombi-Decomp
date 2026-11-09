@@ -6,7 +6,7 @@
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 #define G PLAYER_EXT
 extern unsigned char *PLAYER_EXT;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern unsigned char SLOPE_TILT_TABLE[];
 void playerSetJumpRiseVelocity(TObj *o);
 void PlayerSetAnimIfChanged(TObj *o, int a);
@@ -97,7 +97,7 @@ void playerStepForcedJump(TObj *o)
             *(short *)(G + 0x20) = 0;
             *(unsigned short *)(G + 0x2e) = 0xffff;
             *(short *)(G + 0x2c) = 0;
-            o->anim = D_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             AnimLoadDuration(o);
             o->d8c = SLOPE_TILT_TABLE[o->wb0];
             o->state = 4;

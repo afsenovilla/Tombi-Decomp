@@ -32,29 +32,29 @@ extern CdlLOC CD_POS;
 extern const char* CD_COMSTR[]; // CD_COMSTR
 extern const char* CD_INTSTR[];
 extern const char* D_800960B0[];
-extern int D_80096DCC[]; 
+extern int cd_com_ready[]; 
 extern const char* D_800961B0[];
 extern int CD_COMATTR[];
 extern int D_80096294;
-extern volatile u_char* D_80096F50;
-extern volatile u_char* D_80096F54;
+extern volatile u_char* cd_reg1;
+extern volatile u_char* cd_reg2;
 extern volatile int* D_800962C0;
 extern void* D_800962C4;
 extern volatile CdlIntr CD_INTR;
 extern void* D_800962CC[];
-extern volatile unsigned char* D_80096F4C;
+extern volatile unsigned char* cd_reg0;
 extern s32* D_800962E4;
 extern s32* D_800962E8;
 extern s32* D_800962EC;
 extern s32* D_800962F0;
 extern volatile s32* D_800962F4;
-extern char D_8009BF40[];
-extern char D_8009BF48[];
+extern char cd_result_sync[];
+extern char cd_result_ready[];
 extern volatile u_char* D_800962BC;
 extern char D_8009B2B8[];
-extern int D_8009BF58;
-extern int D_8009BF5C; // timeout
-extern char* D_8009BF60[];
+extern int cd_alarm;
+extern int cd_alarm_count; // timeout
+extern char* cd_alarm_func[];
 
 void CD_flush(void);
 void callback(void);
@@ -72,11 +72,11 @@ static inline void rescpy(void* _dst, void* _src) {
 }
 
 static inline int get_alarm(void) {
-    if ((D_8009BF58 < VSync(-1)) || D_8009BF5C++ > 0x3C0000) {
+    if ((cd_alarm < VSync(-1)) || cd_alarm_count++ > 0x3C0000) {
         puts("CD timeout: ");
         
         printf("%s:(%s) Sync=%s, Ready=%s\n",
-            D_8009BF60[0],
+            cd_alarm_func[0],
             CD_COMSTR[CD_COM],
             CD_INTSTR[CD_INTR.sync],
             CD_INTSTR[CD_INTR.ready]);
@@ -124,21 +124,21 @@ int CD_cw(u_char arg0, u_char* arg1, u_char* arg2, int arg3)
     }
     
     CD_INTR.sync = 0;
-    if (D_80096DCC[arg0] != 0) {
+    if (cd_com_ready[arg0] != 0) {
         CD_INTR.ready = 0;
     }
     
-    *D_80096F4C = 0;
-    for (i = 0; i < D_80096DCC[0x40 + arg0]; i++) {
-        *D_80096F54 = arg1[i];
+    *cd_reg0 = 0;
+    for (i = 0; i < cd_com_ready[0x40 + arg0]; i++) {
+        *cd_reg2 = arg1[i];
     }
     
     CD_COM = arg0;
-    *D_80096F50 = arg0;   
+    *cd_reg1 = arg0;   
     if (arg3 != 0) return 0;
-    D_8009BF58 = VSync(-1) + 0x3C0;
-    D_8009BF5C = 0;
-    D_8009BF60[0] = "CD_cw";
+    cd_alarm = VSync(-1) + 0x3C0;
+    cd_alarm_count = 0;
+    cd_alarm_func[0] = "CD_cw";
     
     while ( CD_INTR.sync == 0) {
         if (get_alarm() != 0) {
@@ -146,20 +146,20 @@ int CD_cw(u_char arg0, u_char* arg1, u_char* arg2, int arg3)
         }
         
         if (CheckCallback()) {
-            temp_s1 = D_80096F4C[0] & 3;
+            temp_s1 = cd_reg0[0] & 3;
             while (intr = getintr()) {
                 if (intr & 4 && CD_CBREADY != NULL) {
-                    CD_CBREADY(CD_INTR.ready, D_8009BF48);
+                    CD_CBREADY(CD_INTR.ready, cd_result_ready);
                 }
                 if (intr & 2 && CD_CBSYNC != NULL) {
-                    CD_CBSYNC(CD_INTR.sync, D_8009BF40);
+                    CD_CBSYNC(CD_INTR.sync, cd_result_sync);
                 }
             }
-            D_80096F4C[0] = temp_s1;
+            cd_reg0[0] = temp_s1;
         }
     }
 
-    rescpy(arg2, D_8009BF40);
+    rescpy(arg2, cd_result_sync);
 
     return CD_INTR.sync == 5 ? -1 : 0;
 }

@@ -5,7 +5,7 @@
 // USA version of PAL o0ptsub0 800E90D0 (optionsMenuDrawText.c): PAL C of src/o0ptsub0/optionsMenuDrawText.c (1.000 masked), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
 typedef struct { short x, y, u, v, w, h, cx, cy; } SprDef;
 extern SprDef OPTIONS_MENU_SPRITES[];
-extern unsigned short D_8009D612;
+extern unsigned short PAD_VIBRATION_ENABLED;
 extern short OPTIONS_PAD_HAS_ACTUATOR;
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
 extern void titleDrawSprite(SprDef *d, short tpage, unsigned char pri);
@@ -30,7 +30,7 @@ void optionsMenuDrawText(int sound, int vib)
     optionsDrawLabelPal2(0x60, 0xc0, 0x16);
     if (OPTIONS_PAD_HAS_ACTUATOR != 0) {
         optionsDrawLabel(0x50, 0x5c, 3);
-        optionsDrawLabel(0xB0, 0x5c, D_8009D612 + 0xB);
+        optionsDrawLabel(0xB0, 0x5c, PAD_VIBRATION_ENABLED + 0xB);
         optionsDrawLabel(0x50, 0x74, 4);
         optionsDrawLabel(0x50, 0x8c, 5);
     } else {
@@ -41,7 +41,7 @@ void optionsMenuDrawText(int sound, int vib)
 #else
 typedef struct { short x, y, u, v, w, h, cx, cy; } SprDef;
 extern SprDef OPTIONS_MENU_SPRITES[];
-extern unsigned short D_8009D612;
+extern unsigned short PAD_VIBRATION_ENABLED;
 extern short OPTIONS_PAD_HAS_ACTUATOR;
 extern unsigned short GetTPage(int tp, int abr, int x, int y);
 extern void titleDrawSprite(SprDef *d, short tpage, unsigned char pri);
@@ -66,7 +66,7 @@ void optionsMenuDrawText(int sound, int vib)
     optionsDrawLabelPal2(0x60, 0xD0, 0x16);
     if (OPTIONS_PAD_HAS_ACTUATOR != 0) {
         optionsDrawLabel(0x50, 0x6C, 3);
-        optionsDrawLabel(0xB0, 0x6C, D_8009D612 + 0xB);
+        optionsDrawLabel(0xB0, 0x6C, PAD_VIBRATION_ENABLED + 0xB);
         optionsDrawLabel(0x50, 0x84, 4);
         optionsDrawLabel(0x50, 0x9C, 5);
     } else {

@@ -4,13 +4,13 @@
 #define SKIP_ASM
 #include "common.h"
 
-extern void* D_8009225C;
+extern void* geom_saved_ra;
 void func_80064594();
 
 void InitGeom() {
     int status;
 
-    __asm__("sw $ra,%0; jal %1; nop; lw $ra,%0; nop;" : : "m"(D_8009225C), "i"(func_80064594));
+    __asm__("sw $ra,%0; jal %1; nop; lw $ra,%0; nop;" : : "m"(geom_saved_ra), "i"(func_80064594));
     __asm__("mfc0 %0,$12" : "=r"(status));
     status |= 0x40000000;
     __asm__("mtc0 %0,$12; nop" : : "r"(status));

@@ -5,7 +5,7 @@
 #include "common.h"
 #include "psyq/libcd.h"
 
-extern int D_800A2524;
+extern int StRingIdx3;
 extern StHEADER* ST_RING_ADDR;
 extern int ST_RING_SIZE;
 
@@ -27,6 +27,6 @@ u_long StFreeRing(u_long *base)
         temp_v0_2 = &ST_RING_ADDR[i+temp_a1];
         *(short*)temp_v0_2 = 0;
     }
-    D_800A2524 = i+temp_a1;
+    StRingIdx3 = i+temp_a1;
     return 0;
 }

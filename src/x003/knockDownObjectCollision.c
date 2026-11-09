@@ -3,13 +3,13 @@
 #include "TOBJ.H"
 extern short boxesOverlapSigned(TObj *, TObj *);
 extern int resolveHitResultA(TObj *, TObj *);
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 
 void knockDownObjectCollision(TObj *o, TObj *p)
 {
     if (boxesOverlapSigned(o, p) >= 0) {
         resolveHitResultA(o, p);
-        D_1F80019E = 0;
+        LIST_COUNTER = 0;
         p->animFrame = o->animFrame & 1;
     }
 }

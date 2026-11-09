@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8013117C[];
+extern AT MERMAID_DEFS_ANIMS[];
 extern TObj PLAYER;
 extern unsigned char D_8009CE1B;
 extern unsigned char D_800A60D9;
@@ -49,7 +49,7 @@ void mermaidDivingLesson(TObj *o)
         if (--o->timer <= 0) {
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 4, &v);
-            o->anim = D_8013117C[o->subtype].anims[2];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -67,7 +67,7 @@ void mermaidDivingLesson(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             playerSetAnim(&PLAYER, 0x44, 0);
             o->timer = 0x14;
@@ -84,7 +84,7 @@ void mermaidDivingLesson(TObj *o)
             PLAYER.d8c = 0xc0;
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 6, &v);
-            o->anim = D_8013117C[o->subtype].anims[2];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -93,7 +93,7 @@ void mermaidDivingLesson(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             o->state++;
         }
@@ -110,7 +110,7 @@ void mermaidDivingLesson(TObj *o)
             o->timer = 0x14;
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 7, &v);
-            o->anim = D_8013117C[o->subtype].anims[2];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -119,7 +119,7 @@ void mermaidDivingLesson(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             o->state++;
         }
@@ -222,7 +222,7 @@ void mermaidDivingLesson(TObj *o)
             PLAYER.state = 0;
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 8, &v);
-            o->anim = D_8013117C[o->subtype].anims[2];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -231,7 +231,7 @@ void mermaidDivingLesson(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             o->timer = 0x1e;
             o->state++;
@@ -241,7 +241,7 @@ void mermaidDivingLesson(TObj *o)
         if (--o->timer <= 0) {
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 9, &v);
-            o->anim = D_8013117C[o->subtype].anims[2];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -250,7 +250,7 @@ void mermaidDivingLesson(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             setEventStarted(0x77, 0, 0);
             o->timer = 0xc8;

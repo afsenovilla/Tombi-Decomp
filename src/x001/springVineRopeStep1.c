@@ -5,7 +5,7 @@
 
 typedef struct { short x, y, z, pad; } V8011AEFC;
 
-extern void *D_8013E5BC[];
+extern void *SPRING_VINE_ANIMS[];
 
 #define a ((V8011AEFC *)&o->wb4)
 #define b ((V8011AEFC *)&o->wbc)
@@ -123,5 +123,5 @@ void springVineRopeStep1(TObj *o)
         o->wac = 0;
         break;
     }
-    o->anim = D_8013E5BC[o->wac];
+    o->anim = SPRING_VINE_ANIMS[o->wac];
 }

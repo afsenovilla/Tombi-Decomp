@@ -47,14 +47,14 @@ extern s32* D_800962E4;
 extern s32* D_800962E8;
 extern s32* D_800962EC;
 extern s32* D_800962F0;
-extern volatile s32* D_80096F90;
+extern volatile s32* cd_d3_chcr;
 extern char D_8009B2A8[];
 extern char D_8009B2B0[];
 extern volatile u_char* D_800962BC;
 extern char D_8009B2B8[];
-extern int D_8009BF58;
-extern int D_8009BF5C; // timeout
-extern char* D_8009BF60[];
+extern int cd_alarm;
+extern int cd_alarm_count; // timeout
+extern char* cd_alarm_func[];
 
 void CD_flush(void);
 void callback(void);
@@ -72,11 +72,11 @@ static inline void rescpy(void* _dst, void* _src) {
 }
 
 static inline int get_alarm(void) {
-    if ((D_8009BF58 < VSync(-1)) || D_8009BF5C++ > 0x3C0000) {
+    if ((cd_alarm < VSync(-1)) || cd_alarm_count++ > 0x3C0000) {
         puts("CD timeout: ");
         
         printf("%s:(%s) Sync=%s, Ready=%s\n",
-            D_8009BF60[0],
+            cd_alarm_func[0],
             CD_COMSTR[CD_COM],
             CD_INTSTR[CD_INTR.sync],
             CD_INTSTR[CD_INTR.ready]);
@@ -109,14 +109,14 @@ int CD_init(void);
 int CD_datasync(int arg0) {
     int sync;
 
-    D_8009BF58 = VSync(-1) + 0x3C0;
-    D_8009BF5C = 0;
-    D_8009BF60[0] = "CD_datasync";    
+    cd_alarm = VSync(-1) + 0x3C0;
+    cd_alarm_count = 0;
+    cd_alarm_func[0] = "CD_datasync";    
     while (true) {
         if (get_alarm() != 0) {
             return -1;
         }
-        if (!(*D_80096F90 & 0x01000000)) {
+        if (!(*cd_d3_chcr & 0x01000000)) {
             sync = 0;
             break;
         }

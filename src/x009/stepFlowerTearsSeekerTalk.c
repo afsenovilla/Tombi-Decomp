@@ -5,7 +5,7 @@
 /* debt: register asm("$6") for the player pointer in pushR (without it gcc swaps a2/a3 with the box1 copy and the shared sh 2(a2) tail is not cross-jumped; score 75). */
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8012B2E4[];
+extern AT FLOWER_TEARS_SEEKER_DEFS_ANIMS[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern void flowerTearsSeekerPace(TObj *);
@@ -39,7 +39,7 @@ void stepFlowerTearsSeekerTalk(TObj *o)
             switch (o->state) {
             case 0:
                 o->animFrame = 1;
-                o->anim = D_8012B2E4[o->subtype].anims[24];
+                o->anim = FLOWER_TEARS_SEEKER_DEFS_ANIMS[o->subtype].anims[24];
                 AnimLoadDuration(o);
                 o->velX = -0x100;
                 o->velY = 0;

@@ -2,7 +2,7 @@
 // MATCHING 8001b9b0 324
 #include "globals.h"
 extern short FRAME_BUFFER_INDEX;
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern unsigned short TICK_COUNT;
 extern unsigned int NEXT_PRIM;
 extern void FUN_8001ca58(void);
@@ -22,25 +22,25 @@ void areaMode5Tick(void)
 {
     NEXT_PRIM = (unsigned int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
     FUN_8001ca58();
-    if (DAT_1f8001c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         TICK_COUNT = TICK_COUNT + 1;
         updateAreaScreenEffect();
-        if (DAT_1f8001c6 == 0) {
+        if (DRAW_FROZEN == 0) {
             FUN_8001d36c();
             updateObjectsUnlayered();
             FUN_800edeec();
         }
     }
-    if (DAT_1f8001c6 != 1)
+    if (DRAW_FROZEN != 1)
         updateInventoryOverlay();
-    if (DAT_1f8001c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         updateObjectsLayer8();
-        if (DAT_1f8001c6 == 0) {
+        if (DRAW_FROZEN == 0) {
             FUN_800ed4d0();
             updateObjectsLayer7();
         }
     }
-    if (DAT_1f8001c6 != 2)
+    if (DRAW_FROZEN != 2)
         drawGameplayScene();
     else
         resetDrawLists();

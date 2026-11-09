@@ -2,7 +2,7 @@
 // MATCHING 801213f0 324
 #include "spad.h"
 #include "TOBJ.H"
-extern unsigned short D_8012F2F8[];
+extern unsigned short TALL_PILLAR_HEIGHT_PROFILE[];
 extern int resolveHitResultA(TObj *, TObj *);
 
 void tallPillarObjectCollision(TObj *a, TObj *b)
@@ -16,7 +16,7 @@ void tallPillarObjectCollision(TObj *a, TObj *b)
     dz = a->y.p.whole - b->y.p.whole;
     t = dz + (b->box2 + a->box2);
     if ((unsigned short)t > a->box3 + b->box3) return;
-    p = D_8012F2F8;
+    p = TALL_PILLAR_HEIGHT_PROFILE;
     k = -dz;
     n = k - 0x18;
     if (n < 0) n = 0;

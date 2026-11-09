@@ -1,7 +1,7 @@
 // near-twin of sectionClearCameraFollow (PAL)
 // VERSION SLPS_01144 x14 801153F4 488
 #if defined(VERSION_SLPS_01144)
-extern int D_1F8000F0;
+extern int VIEW_CAMERA_Y_FIX;
 extern unsigned short D_8009F200;
 extern unsigned char D_8009E4E1, D_8009E4E7;
 #define PLAYER D_800A7B78
@@ -94,7 +94,7 @@ void func_801153F4_slps01144(TObj *o)
     if (D_8009E4E7 == 0 && p->b9e == 0 && (*(volatile unsigned short *)&D_8009F200 & 0xc))
         cameraScrollInputStep(o, 1);
     FUN_800274e4(o);
-    if ((*(short*)((char*)&D_1F8000F0 + 2)) > (*(short*)((char*)&o->d30 + 2))) D_1F8000F0 = (*(short*)((char*)&o->d30 + 2)) << 16;
+    if ((*(short*)((char*)&VIEW_CAMERA_Y_FIX + 2)) > (*(short*)((char*)&o->d30 + 2))) VIEW_CAMERA_Y_FIX = (*(short*)((char*)&o->d30 + 2)) << 16;
     cameraClampAroundTarget(o);
 }
 #endif

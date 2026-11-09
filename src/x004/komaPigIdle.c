@@ -5,11 +5,11 @@ typedef struct { unsigned char b0, b1; char p2[8]; unsigned char b0a, b0b; char 
 extern char MOVE_TABLE_1[];
 extern unsigned char D_80130FB4[];
 extern unsigned char D_80130FC4[];
-extern unsigned char D_80130FD4[];
-extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 komaPigState0) */
-extern unsigned short *D_80133B5C[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 */
-extern unsigned short *D_80133B5Cb[]; /* same table as D_80133B5C: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 komaPigState0) */
-extern unsigned short *D_80133B5C[], *D_80133B74[], *D_80133B78[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
+extern unsigned short *KOMA_PIG_ANIMS_B[]; /* same table as KOMA_PIG_ANIMS: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 komaPigState0) */
+extern unsigned short *KOMA_PIG_ANIMS[]; /* same table as KOMA_PIG_ANIMS: a second name keeps case 3 from being cross-jumped into case 4 */
+extern unsigned short *KOMA_PIG_ANIMS_B[]; /* same table as KOMA_PIG_ANIMS: a second name keeps case 3 from being cross-jumped into case 4 (as in X000 komaPigState0) */
+extern unsigned short *KOMA_PIG_ANIMS[], *D_80133B74[], *D_80133B78[];
 extern char D_80133D68[];
 extern char D_80133D8C[];
 extern char D_80133DB0[];
@@ -90,7 +90,7 @@ void komaPigIdle(TObj *o)
         x->b0 = 0;
         m = D_80130FC4[FUN_8001f9e0() & 0xf];
         o->wac = m;
-        a = D_80133B5Cb[m];
+        a = KOMA_PIG_ANIMS_B[m];
         goto common;
     case 4:
         applyFrameVelocityY(o);
@@ -116,7 +116,7 @@ void komaPigIdle(TObj *o)
         o->wac = 3;
         o->substep++;
         if (x->b0 == 1) o->wac = 5;
-        a = D_80133B5C[o->wac];
+        a = KOMA_PIG_ANIMS[o->wac];
         goto common;
     case 5:
         applyFrameVelocityY(o);
@@ -144,7 +144,7 @@ void komaPigIdle(TObj *o)
         o->b9d = 0;
         o->b9c = 0;
         o->substep++;
-        a = D_80133B5C[o->wac];
+        a = KOMA_PIG_ANIMS[o->wac];
         goto common;
     case 7:
         if (--o->timer == -1) {
@@ -184,7 +184,7 @@ void komaPigIdle(TObj *o)
         a = D_80133B84[0];
     common:
         o->anim = a;
-        p = &D_80130FD4[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

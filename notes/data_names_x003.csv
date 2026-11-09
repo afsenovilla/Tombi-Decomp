@@ -1,0 +1,21 @@
+address,name,size,source
+80135b30,KOMA_PIG_ANIM_BOXES,,usage: u8[4] box per anim box index of the koma pig (AnimAdvanceWithBox / komaPig*); X000 80138fd8 layout refs=16
+801386f8,KOMA_PIG_ANIMS,,usage: anim pointers by wac of the koma pig (komaPigIdle / Fall / Grabbed / Leap / Rest) refs=8
+80135cb0,SPIKY_LIZARD_ANIM_BOXES,,usage: u8[4] box per wac of the spiky lizard (spikyLizardIdle / Grabbed / Hit / Land / Defeated) refs=22
+80139500,SPIKY_LIZARD_ANIMS,,usage: anim pointers by wac of the spiky lizard refs=11
+8013a698,WINGED_FORK_PIG_ANIMS,,usage: anim pointers by wac of the winged fork pig (wingedForkPigChase / Wander / Throw / Defeated; updateWingedForkPigShot) refs=7
+8013589c,TRANSLUCENT_SPRITE_DRIFT_QUAD,,usage: short[8]: the 4 {x y} corners translucentSpriteDrift / DriftB copy into the quad refs=16
+80135d7c,PHOENIX_SPIRIT_HINT_NPC_DEFS,,usage: {u8 box0..3; u16 w1e; ...; void **anims}[subtype] initPhoenixSpiritHintNpc copies refs=8
+80135d84,PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS,,usage: PHOENIX_SPIRIT_HINT_NPC_DEFS+8: the anims column (npcSetAnim / phoenixSpiritHintEnter* / Leave*) refs=13
+80135db8,MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS,,usage: {box; w1e; ...; anims}[subtype] initMasterOfTheSkiesEventObj copies refs=8
+80135dc0,MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS_ANIMS,,usage: MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS+8: the anims column (masterOfTheSkiesScene) refs=1
+80135dc4,FUNGA_DWARF_DEFS,,usage: {box; w1e; ...; anims}[subtype] initFungaDwarf copies refs=7
+80135dcc,FUNGA_DWARF_DEFS_ANIMS,,usage: FUNGA_DWARF_DEFS+8: the anims column (fungaDwarfTalk) refs=1
+80135dd0,TREASURE_CHEST_GUARD_DEFS,,usage: {box; w1e; ...; anims}[subtype] initTreasureChestGuard copies refs=15
+80135dd8,TREASURE_CHEST_GUARD_DEFS_ANIMS,,usage: TREASURE_CHEST_GUARD_DEFS+8: the anims column (treasureChestGuardTalk) refs=3
+80135de8,TUNNEL_DIGGER_DEFS,,usage: {box; w1e; ...; anims}[subtype] initTunnelDigger copies refs=17
+80135df0,TUNNEL_DIGGER_DEFS_ANIMS,,usage: TUNNEL_DIGGER_DEFS+8: the anims column (tunnelDiggerTalk) refs=5
+80136140,HIDING_SON_DEFS,,usage: {box; w1e; ...; anims}[subtype] initHidingSon copies refs=7
+80136148,HIDING_SON_DEFS_ANIMS,,usage: HIDING_SON_DEFS+8: the anims column (hidingSonTalk) refs=5
+80138ec0,SPRING_PAD_ANIMS,,usage: anim pointers by subtype (updateSpringPad) refs=5
+80135c78,SPRING_PAD_ANIM_BOXES,,usage: u8[4] box per anim box index (anim w2) of the spring pad (updateSpringPad) refs=5

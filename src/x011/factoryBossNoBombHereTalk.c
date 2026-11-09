@@ -7,8 +7,8 @@ extern TObj PLAYER;
 extern unsigned char GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID;
 extern unsigned char DAT_8009c942[];
 extern unsigned char GAME_PLAYER_MODE;
-extern short D_1F8001C6;
-extern AT3 D_80119C48[];
+extern short DRAW_FROZEN;
+extern AT3 FACTORY_NPC_DEFS_ANIMS[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimLoadDuration(TObj *);
 
@@ -38,7 +38,7 @@ void factoryBossNoBombHereTalk(TObj *o)
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         v = *(B12 *)&o->a;
-        o->anim = D_80119C48[o->subtype].p[2];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[2];
         AnimLoadDuration(o);
         o->d90 = (int)showMessageBoxDirect(2, 0x10, &v);
         o->state++;
@@ -47,14 +47,14 @@ void factoryBossNoBombHereTalk(TObj *o)
         if (((TObj *)o->d90)->b04 != 2)
             break;
         ((TObj *)o->d90)->b04 = 3;
-        o->anim = D_80119C48[o->subtype].p[0];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[0];
         AnimLoadDuration(o);
         o->state++;
         break;
     case 2:
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
         PLAYER.b04 = 1;
         PLAYER.step = 0;

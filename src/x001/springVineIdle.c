@@ -5,7 +5,7 @@
 typedef struct { short x, y, z, pad; } SV;
 typedef struct { char p[0xb4]; SV v[4]; } TX;
 
-extern void *D_8013E5BC;
+extern void *SPRING_VINE_ANIMS;
 
 void springVineIdle(TObj *o)
 {
@@ -24,7 +24,7 @@ void springVineIdle(TObj *o)
     o->d88 = 0;
     o->w74 = 0;
     if (o->subtype) {
-        o->anim = D_8013E5BC;
+        o->anim = SPRING_VINE_ANIMS;
         p = (TObj *)o->d90;
         dy = p->y.p.whole - o->y.p.whole;
         dx = p->h->p.whole - o->h->p.whole;

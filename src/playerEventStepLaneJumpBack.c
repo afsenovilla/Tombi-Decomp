@@ -15,7 +15,7 @@ extern unsigned char GVARS_PLAYER_LANDED[];
 extern unsigned char DAT_8009ce61;
 extern unsigned char DAT_8009d119;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char DAT_80010e34[];
+extern char PLAYER_LANE_JUMP_ANIM[];
 extern int FUN_8001fddc(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void playSFXWithPitchSlide(int, int, int, int);
@@ -85,7 +85,7 @@ void func_80108F78(TObj *o)
             FUN_8001e5f4(0x1c, 0x7f);
             *(signed char *)&o->b0f = -8;
             OB(o, 0xa3) = 0;
-            o->anim = DAT_80010e34;
+            o->anim = PLAYER_LANE_JUMP_ANIM;
             FUN_8001fe94(o, 2);
             o->d->p.whole = WF6(o);
             o->d8c = SLOPE_TILT_TABLE[o->wb0];
@@ -93,7 +93,7 @@ void func_80108F78(TObj *o)
         } else if (FUN_8003fd78(o, 0, 0)) {
             FUN_8001e5f4(0x1c, 0x7f);
             OB(o, 0xa3) = 0;
-            o->anim = DAT_80010e34;
+            o->anim = PLAYER_LANE_JUMP_ANIM;
             FUN_8001fe94(o, 2);
             o->d->p.whole = WF6(o);
             o->d8c = SLOPE_TILT_TABLE[o->wb0];
@@ -140,7 +140,7 @@ extern unsigned char GVARS_PLAYER_LANDED[];
 extern unsigned char DAT_8009ce61;
 extern unsigned char DAT_8009d119;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char DAT_80010e34[];
+extern char PLAYER_LANE_JUMP_ANIM[];
 extern int FUN_8001fddc(int, int);
 extern void FUN_800eeb5c(TObj *, int);
 extern void playSFXWithPitchSlide(int, int, int, int);
@@ -209,7 +209,7 @@ void playerEventStepLaneJumpBack(TObj *o)
         if (o->b69 == 1 || FUN_8003fd78(o, 0, 0)) {
             FUN_8001e5f4(0x1c, 0x7f);
             OB(o, 0xa3) = 1;
-            o->anim = DAT_80010e34;
+            o->anim = PLAYER_LANE_JUMP_ANIM;
             FUN_8001fe94(o, 2);
             o->d->p.whole = WF6(o);
             o->d8c = SLOPE_TILT_TABLE[o->wb0];

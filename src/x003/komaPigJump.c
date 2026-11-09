@@ -7,7 +7,7 @@ extern void func_80120438(TObj *);
 extern int komaPigCheckLanded(TObj *);
 extern TObj *FUN_80018448(void);
 extern char MOVE_TABLE_0[];
-extern unsigned char D_80135B30[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *D_80138734[];
 extern unsigned short *D_80138738[];
 
@@ -80,7 +80,7 @@ void komaPigJump(TObj *o)
         a = D_80138738[0];
     common:
         o->anim = a;
-        p = &D_80135B30[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

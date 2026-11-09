@@ -15,9 +15,9 @@ typedef struct {
 typedef struct { short s[6]; } V;
 typedef struct { void **tbl; int x; int y; } E;
 
-extern E D_8011A564[];
+extern E WITCH_MIZUNO_DEFS_ANIMS[];
 extern unsigned char D_8009D132;
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern void FUN_8001fe94(P *, int);
 extern TObj *showMessageBoxDirect(int, int, V *);
 extern int AnimAdvance(P *);
@@ -27,7 +27,7 @@ extern void setEventComplete(int, int);
 static __inline__ void SetAnim(P *o, short n)
 {
     if (o->wd2 != n) {
-        o->o.anim = D_8011A564[o->o.subtype].tbl[n];
+        o->o.anim = WITCH_MIZUNO_DEFS_ANIMS[o->o.subtype].tbl[n];
         FUN_8001fe94(o, 0);
         o->wd2 = n;
     }
@@ -94,7 +94,7 @@ void witchMizunoCrystalBallsFoundTalk(P *o)
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->o.animFrame = o->o.wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         SetAnim(o, 1);
         PLAYER.obj.b04 = 1;
         PLAYER.obj.step = 0;

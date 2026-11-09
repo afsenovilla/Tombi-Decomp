@@ -6,10 +6,10 @@
 
 typedef struct { short w0; unsigned short w2; short w4; unsigned short w6; } AH;
 
-extern AH *D_8013DAE8[];
-extern unsigned char D_8013C800[];
+extern AH *KOMA_PIG_ANIMS[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern char D_80077D30[];
-extern short D_1F800284;
+extern short COLLISION_HIT_SURFACE;
 extern int isObjectInView(TObj *o);
 extern int ObjCullRegister(TObj *o);
 extern void applyFrameVelocityY(TObj *o);
@@ -36,7 +36,7 @@ static __inline__ int land(TObj *o, short *q)
         if (SPAD.s27e < 0) t = -t;
         o->d8c = -t & 0xff;
         o->wb2 = t;
-        o->wae = D_1F800284;
+        o->wae = COLLISION_HIT_SURFACE;
         q[1] = (-t << 2) & 0xff;
         o->b9c = 0;
         return 1;
@@ -64,7 +64,7 @@ static __inline__ int land2(TObj *o)
         if (SPAD.s27e < 0) t = -t;
         o->d8c = -t & 0xff;
         o->wb2 = t;
-        w = D_1F800284;
+        w = COLLISION_HIT_SURFACE;
         o->wb6 = (-t << 2) & 0xff;
         o->b9c = 0;
         o->wae = w;
@@ -98,8 +98,8 @@ void komaPigDropIn(TObj *o)
                 o->state++;
             }
         }
-        o->anim = D_8013DAE8[o->wac];
-        p = &D_8013C800[((AH *)o->anim)->w2 * 4];
+        o->anim = KOMA_PIG_ANIMS[o->wac];
+        p = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

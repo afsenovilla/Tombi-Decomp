@@ -8,7 +8,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_801314BC[];
+extern AT UNBENDING_CABLE_NPC_DEFS_ANIMS[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -32,7 +32,7 @@ void unbendingCableTalk(TObj *o)
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         o->d90 = showMessageBoxDirect(5, 0, &v);
-        o->anim = D_801314BC[o->subtype].anims[1];
+        o->anim = UNBENDING_CABLE_NPC_DEFS_ANIMS[o->subtype].anims[1];
         AnimLoadDuration(o);
         o->state++;
         break;
@@ -60,7 +60,7 @@ void unbendingCableTalk(TObj *o)
         SPAD.s1c6 = 0;
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        o->anim = D_801314BC[o->subtype].anims[0];
+        o->anim = UNBENDING_CABLE_NPC_DEFS_ANIMS[o->subtype].anims[0];
         AnimLoadDuration(o);
         o->animFrame = o->wbc;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;

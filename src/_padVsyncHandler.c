@@ -10,16 +10,16 @@ typedef struct { unsigned char pad[0xf0]; } E;
 typedef struct { unsigned char pad[0xa]; unsigned short a; unsigned short c; unsigned short e; } H;
 extern H *PAD_SIO;
 extern int D_80098214;
-extern int D_800981FC;
-extern int D_80098200;
+extern int _padChanStart;
+extern int _padChanStop;
 extern int D_8009BF88[];
 extern int D_8009BF8C[];
-extern int D_800981E4;
-extern E *D_800981E0;
-extern int D_800981F0;
-extern int D_800981EC;
-extern int D_800981F4;
-extern void (*D_800981AC)(int);
+extern int _padIntExec;
+extern E *_padInfoDir;
+extern int _padSioState;
+extern int _padSioChan;
+extern int _padTotalCurr;
+extern void (*_padFuncNextPort)(int);
 int _padInitSioMode(E *e);
 void padCommandStep(E *e);
 int _padVsyncHandler(void)
@@ -27,17 +27,17 @@ int _padVsyncHandler(void)
     int t;
     if (PAD_SIO->a & 2) {
     }
-    t = D_800981FC;
+    t = _padChanStart;
     D_80098214 = 1;
     if (t != 0 && D_8009BF88[0] < 150) D_8009BF88[0]++;
-    if (D_80098200 == 0 && D_8009BF8C[0] < 150) D_8009BF8C[0]++;
-    if (D_800981E4 != 0 && D_800981FC <= D_80098200) {
-        D_800981F0 = 0;
-        D_800981EC = D_800981FC;
-        if (_padInitSioMode(&D_800981E0[D_800981FC]) == 0) D_800981AC(0xffff);
-        D_800981F4 = 0;
-        while (D_800981EC <= D_80098200) {
-            padCommandStep(&D_800981E0[D_800981EC]);
+    if (_padChanStop == 0 && D_8009BF8C[0] < 150) D_8009BF8C[0]++;
+    if (_padIntExec != 0 && _padChanStart <= _padChanStop) {
+        _padSioState = 0;
+        _padSioChan = _padChanStart;
+        if (_padInitSioMode(&_padInfoDir[_padChanStart]) == 0) _padFuncNextPort(0xffff);
+        _padTotalCurr = 0;
+        while (_padSioChan <= _padChanStop) {
+            padCommandStep(&_padInfoDir[_padSioChan]);
         }
         PAD_SIO->e = 0x88;
     }
@@ -49,16 +49,16 @@ typedef struct { unsigned char pad[0xf0]; } E;
 typedef struct { unsigned char pad[0xa]; unsigned short a; unsigned short c; unsigned short e; } H;
 extern H *PAD_SIO;
 extern int D_80098214;
-extern int D_800981FC;
-extern int D_80098200;
+extern int _padChanStart;
+extern int _padChanStop;
 extern int D_8009BF88[];
 extern int D_8009BF8C[];
-extern int D_800981E4;
-extern E *D_800981E0;
-extern int D_800981F0;
-extern int D_800981EC;
-extern int D_800981F4;
-extern void (*D_800981AC)(int);
+extern int _padIntExec;
+extern E *_padInfoDir;
+extern int _padSioState;
+extern int _padSioChan;
+extern int _padTotalCurr;
+extern void (*_padFuncNextPort)(int);
 int _padInitSioMode(E *e);
 void padCommandStep(E *e);
 int _padVsyncHandler(void)
@@ -68,17 +68,17 @@ int _padVsyncHandler(void)
         PAD_SIO->a = 0;
         return 0;
     }
-    t = D_800981FC;
+    t = _padChanStart;
     D_80098214 = 1;
     if (t != 0 && D_8009BF88[0] < 150) D_8009BF88[0]++;
-    if (D_80098200 == 0 && D_8009BF8C[0] < 150) D_8009BF8C[0]++;
-    if (D_800981E4 != 0 && D_800981FC <= D_80098200) {
-        D_800981F0 = 0;
-        D_800981EC = D_800981FC;
-        if (_padInitSioMode(&D_800981E0[D_800981FC]) == 0) D_800981AC(0xffff);
-        D_800981F4 = 0;
-        while (D_800981EC <= D_80098200) {
-            padCommandStep(&D_800981E0[D_800981EC]);
+    if (_padChanStop == 0 && D_8009BF8C[0] < 150) D_8009BF8C[0]++;
+    if (_padIntExec != 0 && _padChanStart <= _padChanStop) {
+        _padSioState = 0;
+        _padSioChan = _padChanStart;
+        if (_padInitSioMode(&_padInfoDir[_padChanStart]) == 0) _padFuncNextPort(0xffff);
+        _padTotalCurr = 0;
+        while (_padSioChan <= _padChanStop) {
+            padCommandStep(&_padInfoDir[_padSioChan]);
         }
         PAD_SIO->e = 0x88;
     }

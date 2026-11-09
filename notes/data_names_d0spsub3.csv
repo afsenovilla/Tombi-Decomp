@@ -42,3 +42,6 @@ address,name,size,source
 800f5408,SUBSCREEN_TAB_FRAMES,,usage: menu p48: frame pointers of the tab sprites by tab id (D0SPSUB3 subScreenUpdate) refs=4
 800f54ac,SUBSCREEN_DIGIT_FRAMES,,usage: menu p5c: frame pointers 0..9 of the digit sprites refs=4
 8010075c,SUBSCREEN_PAGE_ARROW_SLOTS,,usage: Slot[] (-1 end) of the page arrows idx 0x16 (hidden on page 0) / 0x17 (hidden on the last page) of subScreenDrawItemPage refs=1
+800eea00,SUBSCREEN_CLUT_IMAGE,,twin of D0SPSUB 800f18e0 (same bytes; LoadImage to (0x120 0x1E0) in subScreenUpdate / InitMenu) refs=2
+800ef600,SUBSCREEN_WFM3_2,,twin of D0SPSUB 800f24e0 (same bytes; stored into D_1F8003A0) refs=2
+80100b64,SUBSCREEN_SELECTED_ITEM,,twin of D0SPSUB 80111128 (int: SUBSCREEN_ITEM_LIST[sel] in subScreenItemListStep) refs=9

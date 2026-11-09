@@ -69,7 +69,7 @@ typedef struct QueueItem {
     char padding[0x14 + 0x1C + 0x14];
 } QueueItem;
 
-extern s32 D_800918F0;
+extern s32 _gpucb;
 extern GPU* D_80091930;
 extern DEBUG GPU_INFO;
 static s32 D_800919B8[5] = {
@@ -135,7 +135,7 @@ int ResetGraph(int mode) {
     switch (mode & 7) {
     case 3:
     case 0:
-        printf("ResetGraph:jtb=%08x,env=%08x\n", &D_800918F0, &GPU_INFO);
+        printf("ResetGraph:jtb=%08x,env=%08x\n", &_gpucb, &GPU_INFO);
     case 5:
         GPU_memset(&GPU_INFO, 0, sizeof(DEBUG));
         ResetCallback();

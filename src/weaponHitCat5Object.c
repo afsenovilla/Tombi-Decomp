@@ -4,7 +4,7 @@
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
-extern unsigned short DAT_1f80019e;
+extern unsigned short LIST_COUNTER;
 extern void resolveHitResultD(TObj *, TObj *);
 extern TObj *FUN_80018448(void);
 
@@ -29,7 +29,7 @@ static __inline__ int spawn(TObj *a, TObj *b)
         o->d90 = (int)a;
         o->d94 = (int)b;
         b->active = 5;
-        b->h->p.whole = a->h->p.whole + (DAT_1f80019e & 3) * 4;
+        b->h->p.whole = a->h->p.whole + (LIST_COUNTER & 3) * 4;
         b->y.p.whole = a->y.p.whole;
         b->d->p.whole = a->d->p.whole;
         return 1;
@@ -61,6 +61,6 @@ void weaponHitCat5Object(TObj *a, TObj *b)
             }
             b->animFrame = v;
         }
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
     }
 }

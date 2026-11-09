@@ -7,7 +7,7 @@
 
 extern unsigned short PLAYER_X[];
 extern TObj PLAYER;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern Fix16 *PLAYER_H[];
 extern short PLAYER_Y[];
 extern TObj *D_8009F2EC[];
@@ -46,7 +46,7 @@ void stepLeafButterflySwarm(TObj *o)
         GVARS.b3f = 1;
         GVARS.b3e = 1;
         GVARS.b42 = 1;
-        PLAYER.anim = D_80010748;
+        PLAYER.anim = PLAYER_IDLE_ANIM;
         FUN_8001fe6c(&PLAYER);
         o->a.raw = e->h->raw;
         {

@@ -4,7 +4,7 @@
 extern unsigned short GAME;
 extern short GVARS_PLAYER_DRIFT_H, GVARS_PLAYER_DRIFT_Y;
 extern TObj *PLAYER_EXT;
-extern char DAT_80010ae8[];
+extern char PLAYER_FALL_ANIM[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
@@ -28,7 +28,7 @@ void playerJumpArea3Float(TObj *o)
             PLAYER_EXT->animFrame = PLAYER_EXT->animTimer;
         }
     } else {
-        o->anim = DAT_80010ae8;
+        o->anim = PLAYER_FALL_ANIM;
         FUN_8001fe94(o, 3);
     }
     FUN_8001fec0(o);

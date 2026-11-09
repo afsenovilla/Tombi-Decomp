@@ -33,7 +33,7 @@ struct intr {
     int (*restart)();
     short* unk1C;
 };
-extern struct intr* D_8009813C;
+extern struct intr* intr_table_ptr;
 int VSyncCallback(void (*func)());
 extern volatile u16* D_800974A8;
 extern volatile s32* D_800974AC;
@@ -44,7 +44,7 @@ int ResetCallback(void);
 
 void InterruptCallback(int arg0, void (*cb)(void));
 
-void DMACallback(void) { D_8009813C->cb(); }
+void DMACallback(void) { intr_table_ptr->cb(); }
 
 int VSyncCallback(void (*func)());
 

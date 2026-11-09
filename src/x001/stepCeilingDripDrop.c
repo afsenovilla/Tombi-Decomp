@@ -1,15 +1,15 @@
 // FUNC 80138550 1788 X001
 // MATCHING 80138550 1788
 #include "player.h"
-/* Debt: D_8013E710s is a second (scalar) name for D_8013E710[0]; the scalar load is hoisted above the
+/* Debt: CEILING_DRIP_DROP_ANIMS_S is a second (scalar) name for CEILING_DRIP_DROP_ANIMS[0]; the scalar load is hoisted above the
    struct stores in cases 0 and 6 as in the game. */
 #include "TOBJ.H"
 
 typedef struct { short z, y, x; } P3;
 
-extern P3 D_8013C9EC[];
-extern void *D_8013E710[];
-extern void *D_8013E710s;
+extern P3 CEILING_DRIP_DROP_START_POSITIONS[];
+extern void *CEILING_DRIP_DROP_ANIMS[];
+extern void *CEILING_DRIP_DROP_ANIMS_S;
 extern int D_1F8002D4a[];
 extern short COS_TABLE[], D_8007A1F0[];
 extern int Rand(void);
@@ -37,9 +37,9 @@ void stepCeilingDripDrop(TObj *o)
         o->b6a = 0;
         o->b69 = 0;
         o->b6b = 1;
-        o->a.raw = D_8013C9EC[o->b0c].x << 16;
-        o->y.raw = D_8013C9EC[o->b0c].y << 16;
-        o->b.raw = D_8013C9EC[o->b0c].z << 16;
+        o->a.raw = CEILING_DRIP_DROP_START_POSITIONS[o->b0c].x << 16;
+        o->y.raw = CEILING_DRIP_DROP_START_POSITIONS[o->b0c].y << 16;
+        o->b.raw = CEILING_DRIP_DROP_START_POSITIONS[o->b0c].z << 16;
         o->w1e = 7;
         *(signed char *)&o->b0f = -9;
         o->b0d = 0x80;
@@ -47,7 +47,7 @@ void stepCeilingDripDrop(TObj *o)
         o->d88 = 0;
         o->d8c = 0;
         o->d3c = D_1F8002D4a[0];
-        o->anim = D_8013E710s;
+        o->anim = CEILING_DRIP_DROP_ANIMS_S;
         AnimLoadDuration(o);
         o->timer = (Rand() & 0xff) + 1;
         o->step = 0;
@@ -58,7 +58,7 @@ void stepCeilingDripDrop(TObj *o)
         switch (o->step) {
         case 0:
             if (--o->timer == 0) {
-                o->anim = D_8013E710[1];
+                o->anim = CEILING_DRIP_DROP_ANIMS[1];
                 AnimLoadDuration(o);
                 o->b6a = 0;
                 o->active = 1;
@@ -67,7 +67,7 @@ void stepCeilingDripDrop(TObj *o)
             break;
         case 1:
             if (AnimAdvance(o)) {
-                o->anim = D_8013E710[5];
+                o->anim = CEILING_DRIP_DROP_ANIMS[5];
                 o->y.p.whole += 0x18;
                 AnimLoadDuration(o);
                 o->velY = 0;
@@ -81,14 +81,14 @@ void stepCeilingDripDrop(TObj *o)
             if (o->b6a && !PLAYER.obj.b69 && (*(unsigned char*)&PLAYER.obj.wac) < 2 && PLAYER.obj.b9c && (unsigned char)(PLAYER.obj.b9e - 5) >= 2)
                 PLAYER.obj.y.raw += o->velY << 8;
             if (o->b69) {
-                o->anim = D_8013E710[2];
+                o->anim = CEILING_DRIP_DROP_ANIMS[2];
                 AnimLoadDuration(o);
                 o->b69 = 0;
                 o->step++;
             } else if (TileCollideAt(o, o->h->p.whole, o->y.p.whole + 8)) {
                 o->d8c = 0;
                 o->active = 2;
-                o->anim = D_8013E710[6];
+                o->anim = CEILING_DRIP_DROP_ANIMS[6];
                 AnimLoadDuration(o);
                 o->velY = 0;
                 o->step = 6;
@@ -98,7 +98,7 @@ void stepCeilingDripDrop(TObj *o)
             if (o->b69) {
                 o->b69 = 0;
                 if ((unsigned)((o->d8c + 0x40) & 0xff) >= 0x81) {
-                    o->anim = D_8013E710[4];
+                    o->anim = CEILING_DRIP_DROP_ANIMS[4];
                     AnimLoadDuration(o);
                     o->w22 = 4;
                     o->step++;
@@ -107,11 +107,11 @@ void stepCeilingDripDrop(TObj *o)
                 if ((unsigned)s1 < 8) {
                     if (o->b6a) {
                         if (AnimAdvance(o)) {
-                            o->anim = D_8013E710[9];
+                            o->anim = CEILING_DRIP_DROP_ANIMS[9];
                             AnimLoadDuration(o);
                         }
                     } else {
-                        o->anim = D_8013E710[2];
+                        o->anim = CEILING_DRIP_DROP_ANIMS[2];
                     }
                 } else {
                     s1 = o->d8c;
@@ -132,17 +132,17 @@ void stepCeilingDripDrop(TObj *o)
                             PLAYER.obj.y.raw += (D_8007A1F0[s1] * -b) >> 4;
                         }
                         if (AnimAdvance(o)) {
-                            o->anim = D_8013E710[10];
+                            o->anim = CEILING_DRIP_DROP_ANIMS[10];
                             AnimLoadDuration(o);
                         }
                     } else {
-                        o->anim = D_8013E710[3];
+                        o->anim = CEILING_DRIP_DROP_ANIMS[3];
                     }
                     o->y.p.whole += 2;
                 }
                 AnimLoadDuration(o);
             } else {
-                o->anim = D_8013E710[4];
+                o->anim = CEILING_DRIP_DROP_ANIMS[4];
                 AnimLoadDuration(o);
                 o->w22 = 4;
                 o->step++;
@@ -150,7 +150,7 @@ void stepCeilingDripDrop(TObj *o)
             break;
         case 4:
             if (--o->w22 == 0) {
-                o->anim = D_8013E710[5];
+                o->anim = CEILING_DRIP_DROP_ANIMS[5];
                 AnimLoadDuration(o);
                 o->b6a = 0;
                 o->velY = 0;
@@ -161,17 +161,17 @@ void stepCeilingDripDrop(TObj *o)
         case 5:
             o->d8c = 0;
             o->active = 2;
-            o->anim = D_8013E710[6];
+            o->anim = CEILING_DRIP_DROP_ANIMS[6];
             AnimLoadDuration(o);
             o->velY = 0;
             o->step++;
         case 6:
             if (AnimAdvance(o)) {
-                o->a.raw = D_8013C9EC[o->b0c].x << 16;
-                o->y.raw = D_8013C9EC[o->b0c].y << 16;
-                o->b.raw = D_8013C9EC[o->b0c].z << 16;
+                o->a.raw = CEILING_DRIP_DROP_START_POSITIONS[o->b0c].x << 16;
+                o->y.raw = CEILING_DRIP_DROP_START_POSITIONS[o->b0c].y << 16;
+                o->b.raw = CEILING_DRIP_DROP_START_POSITIONS[o->b0c].z << 16;
                 o->d8c = 0;
-                o->anim = D_8013E710s;
+                o->anim = CEILING_DRIP_DROP_ANIMS_S;
                 AnimLoadDuration(o);
                 o->timer = (Rand() & 0xff) + 1;
                 o->step = 0;

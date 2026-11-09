@@ -1,0 +1,6 @@
+address,name,size,source
+8011c770,SEVEN_FRIENDS_NPC_DEFS,,usage: {u8 box0..3; u16 w1e; ...; void **anims}[subtype] initSevenFriendsNpc copies refs=7
+8011c778,SEVEN_FRIENDS_NPC_DEFS_ANIMS,,usage: SEVEN_FRIENDS_NPC_DEFS+8: the anims column (sevenFriendsSetAnim / GoodLuckTalk / WaitTalk) refs=5
+8011c984,PIG_GATE_SCENE_ACTORS,,usage: {flags frame wb4 w74..w7a wba wb8 x y z subtype b0c}[] (flags 0xFF end): the script objects spawnPigGateSceneNpcs spawns into SCRIPT_OBJECTS refs=5
+8011ca9c,PIG_GATE_SCENE_ACTORS_B,,usage: same layout as PIG_GATE_SCENE_ACTORS: the second list spawnPigGateSceneNpcs spawns while GCD.bce41 == 0 refs=5
+8011f860,A02_BACKDROP_SPRITE_ANIMS,,usage: anim pointers by b0c (updateBackdropSprite) refs=1

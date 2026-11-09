@@ -11,7 +11,7 @@ extern void drawHudAP(char *, int, int);
 extern void drawHudVitality(char *, int, int);
 extern void drawHudWeaponIcon(char *, int, int);
 extern void drawHudItemGauge(char *, int, int, int, int);
-extern Pt DAT_800802c8[];
+extern Pt HUD_ITEM_GAUGE_POS[];
 extern short DAT_800802d4[];
 extern unsigned char DAT_8009c990;
 extern char HUD_ITEM_GAUGE_TIMERS[];
@@ -28,9 +28,9 @@ void func_8004BA68(char *o)
     drawHudWeaponIcon(o, 0x48, 0x10);
     for (i = 0; i < 3; i++) {
         if (DAT_8009c990 == DAT_800802d4[i]) {
-            drawHudItemGauge(o, i, DAT_800802c8[i].x, DAT_800802c8[i].y, 0);
+            drawHudItemGauge(o, i, HUD_ITEM_GAUGE_POS[i].x, HUD_ITEM_GAUGE_POS[i].y, 0);
         } else if (HUD_ITEM_GAUGE_TIMERS[i] != 0) {
-            drawHudItemGauge(o, i, DAT_800802c8[i].x, DAT_800802c8[i].y, 1);
+            drawHudItemGauge(o, i, HUD_ITEM_GAUGE_POS[i].x, HUD_ITEM_GAUGE_POS[i].y, 1);
         }
     }
 }
@@ -44,7 +44,7 @@ extern void drawHudAP(char *, int, int);
 extern void drawHudVitality(char *, int, int, int);
 extern void drawHudWeaponIcon(char *, int, int);
 extern void drawHudItemGauge(char *, int, int, int, int);
-extern Pt DAT_800802c8[];
+extern Pt HUD_ITEM_GAUGE_POS[];
 extern short DAT_800802d4[];
 extern unsigned char DAT_8009c990;
 extern char HUD_ITEM_GAUGE_TIMERS[];
@@ -61,9 +61,9 @@ void drawHud(char *o)
     drawHudWeaponIcon(o, 0x48, 0x10);
     for (i = 0; i < 3; i++) {
         if (DAT_8009c990 == DAT_800802d4[i]) {
-            drawHudItemGauge(o, i, DAT_800802c8[i].x, DAT_800802c8[i].y, 0);
+            drawHudItemGauge(o, i, HUD_ITEM_GAUGE_POS[i].x, HUD_ITEM_GAUGE_POS[i].y, 0);
         } else if (HUD_ITEM_GAUGE_TIMERS[i] != 0) {
-            drawHudItemGauge(o, i, DAT_800802c8[i].x, DAT_800802c8[i].y, 1);
+            drawHudItemGauge(o, i, HUD_ITEM_GAUGE_POS[i].x, HUD_ITEM_GAUGE_POS[i].y, 1);
         }
     }
 }
@@ -76,7 +76,7 @@ extern void drawHudAP(char *, int, int);
 extern void drawHudVitality(char *, int, int, int);
 extern void drawHudWeaponIcon(char *, int, int);
 extern void drawHudItemGauge(char *, int, int, int, int);
-extern Pt DAT_800802c8[];
+extern Pt HUD_ITEM_GAUGE_POS[];
 extern short DAT_800802d4[];
 extern unsigned char DAT_8009c990;
 extern char HUD_ITEM_GAUGE_TIMERS[];
@@ -93,9 +93,9 @@ void drawHud(char *o)
     drawHudWeaponIcon(o, 0x48, 0x10);
     for (i = 0; i < 3; i++) {
         if (DAT_8009c990 == DAT_800802d4[i]) {
-            drawHudItemGauge(o, i, DAT_800802c8[i].x, DAT_800802c8[i].y, 0);
+            drawHudItemGauge(o, i, HUD_ITEM_GAUGE_POS[i].x, HUD_ITEM_GAUGE_POS[i].y, 0);
         } else if (HUD_ITEM_GAUGE_TIMERS[i] != 0) {
-            drawHudItemGauge(o, i, DAT_800802c8[i].x, DAT_800802c8[i].y, 1);
+            drawHudItemGauge(o, i, HUD_ITEM_GAUGE_POS[i].x, HUD_ITEM_GAUGE_POS[i].y, 1);
         }
     }
 }

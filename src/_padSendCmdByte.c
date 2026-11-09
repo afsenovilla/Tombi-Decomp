@@ -7,7 +7,7 @@ typedef struct {
     char pad38[4];
     unsigned char *p3c;
 } S;
-extern int (*D_800981B4)(S *, int);
+extern int (*_padFuncGetTxd)(S *, int);
 extern int _padSioExchangeByte(S *, int);
 
 int _padSendCmdByte(S *s)
@@ -15,7 +15,7 @@ int _padSendCmdByte(S *s)
     int r;
     int a = 0;
     if ((*s->p3c >> 4) == 8) a = s->b37 == 0;
-    r = _padSioExchangeByte(s, (unsigned char)D_800981B4(s, a));
+    r = _padSioExchangeByte(s, (unsigned char)_padFuncGetTxd(s, a));
     if (r == 0x5a || r == 0 || r < 0) return r;
     return -4;
 }

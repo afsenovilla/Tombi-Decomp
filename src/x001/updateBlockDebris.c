@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "raw7.h"
 
-extern void *D_8013E5CC[];
+extern void *BLOCK_DEBRIS_ANIMS[];
 extern void blockDebrisFly(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
@@ -24,7 +24,7 @@ void updateBlockDebris(TObj *o)
         o->w1e = 0xb;
         o->b0d = 0;
         o->d3c = ((int*)&SPAD.i2d4)[0];
-        o->anim = D_8013E5CC[o->subtype];
+        o->anim = BLOCK_DEBRIS_ANIMS[o->subtype];
         if (o->subtype == 2) {
             o->wb8 = -2;
             S16(o, 0xc8) = -2;

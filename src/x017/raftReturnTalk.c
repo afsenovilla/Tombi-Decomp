@@ -7,7 +7,7 @@ typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c942;
 extern unsigned char GAME_PLAYER_MODE;
-extern AT3 D_8011999C[];
+extern AT3 RAFT_RETURN_NPC_DEFS_ANIMS[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -26,7 +26,7 @@ void raftReturnTalk(TObj *o)
         PLAYER.b04 = 5;
         PLAYER.step = 0;
         PLAYER.state = 0;
-        o->anim = D_8011999C[o->subtype].p[2];
+        o->anim = RAFT_RETURN_NPC_DEFS_ANIMS[o->subtype].p[2];
         AnimJump(o, 0);
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
@@ -51,7 +51,7 @@ void raftReturnTalk(TObj *o)
         SPAD.s1c6 = 0;
         DAT_8009c942 = 0;
         PLAYER.wb2 = 0;
-        o->anim = D_8011999C[o->subtype].p[0];
+        o->anim = RAFT_RETURN_NPC_DEFS_ANIMS[o->subtype].p[0];
         AnimJump(o, 0);
         o->animFrame = o->wbc;
         PLAYER.b04 = 1;

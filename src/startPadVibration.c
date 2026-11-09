@@ -3,12 +3,12 @@
 typedef struct { char c[6]; } B;
 extern B DAT_80010238;
 extern char PAD_INFO[];
-extern unsigned short DAT_8009d612;
-extern unsigned short DAT_8009d614;
-extern unsigned char DAT_8009d614b;
+extern unsigned short PAD_VIBRATION_ENABLED;
+extern unsigned short PAD_ACT_BUFFER;
+extern unsigned char PAD_ACT_BUFFER_B;
 extern unsigned char DAT_8009d615;
-extern unsigned char DAT_8009d616;
-extern unsigned char DAT_8009d617;
+extern unsigned char PAD_VIBRATION_STATE;
+extern unsigned char PAD_VIBRATION_TIMER;
 extern void PadSetAct(unsigned char, void *, int, int);
 
 void startPadVibration(int a, int b, int c, int d)
@@ -17,11 +17,11 @@ void startPadVibration(int a, int b, int c, int d)
     char *p;
     buf = DAT_80010238;
     p = PAD_INFO;
-    if (DAT_8009d612 != 0 && DAT_8009d616 == 0 && DAT_8009d614 == 0) {
+    if (PAD_VIBRATION_ENABLED != 0 && PAD_VIBRATION_STATE == 0 && PAD_ACT_BUFFER == 0) {
         DAT_8009d615 = c;
-        DAT_8009d614b = b;
+        PAD_ACT_BUFFER_B = b;
         PadSetAct(a, p + 4, 2, d);
-        DAT_8009d617 = d;
-        DAT_8009d616 = 1;
+        PAD_VIBRATION_TIMER = d;
+        PAD_VIBRATION_STATE = 1;
     }
 }

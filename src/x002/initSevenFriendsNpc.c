@@ -3,20 +3,20 @@
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { unsigned char b0, b1, b2, b3; unsigned short w4; short idx; void **anims; } T12;
-extern T12 D_8011C770[];
+extern T12 SEVEN_FRIENDS_NPC_DEFS[];
 extern int SPR_DATA[];
 extern void FUN_8001fe6c(TObj *);
 extern short FUN_8005e420(int, int);
 
 void initSevenFriendsNpc(TObj *o)
 {
-    o->box0 = D_8011C770[o->subtype].b0;
-    o->box1 = D_8011C770[o->subtype].b1;
-    o->box2 = D_8011C770[o->subtype].b2;
-    o->box3 = D_8011C770[o->subtype].b3;
-    o->w1e = D_8011C770[o->subtype].w4;
-    o->d3c = SPR_DATA[D_8011C770[o->subtype].idx];
-    o->anim = D_8011C770[o->subtype].anims[(unsigned short)o->wb4];
+    o->box0 = SEVEN_FRIENDS_NPC_DEFS[o->subtype].b0;
+    o->box1 = SEVEN_FRIENDS_NPC_DEFS[o->subtype].b1;
+    o->box2 = SEVEN_FRIENDS_NPC_DEFS[o->subtype].b2;
+    o->box3 = SEVEN_FRIENDS_NPC_DEFS[o->subtype].b3;
+    o->w1e = SEVEN_FRIENDS_NPC_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[SEVEN_FRIENDS_NPC_DEFS[o->subtype].idx];
+    o->anim = SEVEN_FRIENDS_NPC_DEFS[o->subtype].anims[(unsigned short)o->wb4];
     FUN_8001fe6c(o);
     o->d8c = 0;
     o->b0d = 0;

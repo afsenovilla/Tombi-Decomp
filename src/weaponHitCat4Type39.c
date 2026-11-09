@@ -4,7 +4,7 @@
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
-extern unsigned short DAT_1f80019e;
+extern unsigned short LIST_COUNTER;
 extern int weaponOnHitGetResult(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void FUN_8001e4f0(int);
@@ -69,6 +69,6 @@ void weaponHitCat4Type39(TObj *a, TObj *b)
             spawnImpactEffect(1, a->a.p.whole, a->y.p.whole, a->b.p.whole);
             FUN_8001e4f0((b->category & 0x7f) == 4 ? 6 : 7);
         }
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
     }
 }

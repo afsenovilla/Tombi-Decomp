@@ -4,13 +4,13 @@
 // AS gnu
 /* pad object setup (libpad/padif.c family). Library code: GNU as fills the jr delay slot. */
 typedef struct { char p0[0x14]; void *f14; void *f18; char p1[4]; int f20; char p2[0x22]; unsigned char b46; } S;
-extern int (*D_800981C8)();
+extern int (*_padFuncChkEng)();
 extern void padSetCmdActAlign();
 extern void padResolveActAlign();
 
 int _padSetActAlign(S *s, int x)
 {
-    if (D_800981C8(s))
+    if (_padFuncChkEng(s))
         return 0;
     s->b46 = 1;
     s->f14 = padSetCmdActAlign;

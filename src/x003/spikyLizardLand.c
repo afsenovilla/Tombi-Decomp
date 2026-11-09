@@ -5,7 +5,7 @@
 extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern void *D_80139578;
-extern unsigned char D_80135CB0[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 
 void spikyLizardLand(TObj *o)
 {
@@ -21,7 +21,7 @@ void spikyLizardLand(TObj *o)
         o->wb6 = 0;
         o->substep++;
         o->anim = D_80139578;
-        p = &D_80135CB0[o->wac * 4];
+        p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

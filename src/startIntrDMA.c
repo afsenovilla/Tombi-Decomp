@@ -14,13 +14,13 @@ void DMA_memclr(int* ptr, int size);
 extern void InterruptCallback(int, void*);
 
 /* port: the INTR_DMA.OBJ data is defined by src/trapIntrDMA.c (PAL names) */
-extern volatile unsigned long* D_80098178; /* DMA Interrupt Register pointer */
-extern Callback D_8009817C[8];
+extern volatile unsigned long* dma_dicr; /* DMA Interrupt Register pointer */
+extern Callback dma_callbacks[8];
 extern unsigned long* D_8009819C;
 
 void* startIntrDMA(void) {
-    DMA_memclr(&D_8009817C, 8);
-    *D_80098178 = 0;
+    DMA_memclr(&dma_callbacks, 8);
+    *dma_dicr = 0;
     InterruptCallback(3, &trapIntrDMA);
     return &setIntrDMA;
 }

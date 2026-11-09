@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80118D1C[];
-extern short D_1F8001C6;
+extern AT CLOCK_TOWER_RESTORED_NPC_DEFS_ANIMS[];
+extern short DRAW_FROZEN;
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -28,7 +28,7 @@ void clockTowerRestoredTalk(TObj *o)
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         GV2.bb0 = 2;
         o->wbc = o->animFrame;
-        o->anim = D_80118D1C[o->subtype].anims[2];
+        o->anim = CLOCK_TOWER_RESTORED_NPC_DEFS_ANIMS[o->subtype].anims[2];
         AnimLoadDuration(o);
         o->animFrame = o->b68 & 1;
         o->d90 = showMessageBoxDirect(2, 0xc, &v);
@@ -39,7 +39,7 @@ void clockTowerRestoredTalk(TObj *o)
         q = (TObj *)o->d90;
         if (q->b04 != 2) break;
         q->b04 = 3;
-        o->anim = D_80118D1C[o->subtype].anims[0];
+        o->anim = CLOCK_TOWER_RESTORED_NPC_DEFS_ANIMS[o->subtype].anims[0];
         AnimLoadDuration(o);
         o->state = 9;
         break;
@@ -48,7 +48,7 @@ void clockTowerRestoredTalk(TObj *o)
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

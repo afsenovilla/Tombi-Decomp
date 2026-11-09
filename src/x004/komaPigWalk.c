@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 typedef struct { char p0; unsigned char b01; char p2[2]; short w04; char p6[4]; unsigned char b0a, b0b; char p0c[2]; short w0e; } X;
 extern char MOVE_TABLE_1[];
-extern unsigned char D_80130FD4[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned char D_80130FA4[];
 extern unsigned short *D_80133B98[], *D_80133B9C[];
 extern void ObjSetFacingToPlayer(TObj *);
@@ -21,7 +21,7 @@ extern int AnimAdvanceWithBox(TObj *);
         unsigned char *p; \
         a = T[0]; \
         o->anim = a; \
-        p = &D_80130FD4[a[1] * 4]; \
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4]; \
         o->box0 = *p++; \
         o->box1 = *p++; \
         o->box2 = p[0]; \

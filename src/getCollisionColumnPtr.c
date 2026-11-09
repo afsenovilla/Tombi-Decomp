@@ -1,11 +1,11 @@
 // FUNC 8003f1bc 68 MAIN0
 // MATCHING 8003f1bc 68
-extern char *D_8007B5AC[];
+extern char *COLLISION_COLUMN_TABLE[];
 char *getCollisionColumnPtr(short idx, unsigned char n)
 {
     char *p;
     int o;
-    p = D_8007B5AC[n];
+    p = COLLISION_COLUMN_TABLE[n];
     o = *(unsigned short *)(p + 8);
     p = p + o;
     o = *(unsigned short *)(p + (idx / 8 << 1));

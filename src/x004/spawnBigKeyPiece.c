@@ -3,13 +3,13 @@
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned short w0, w2, w4, w6, w8, wa, wc; } E;
-extern E D_8013145C[];
+extern E BIG_KEY_PAINTING_PIECE_DEFS[];
 extern unsigned short PLAYER_Y[];
 extern TObj *allocObjectLayer2(void);
 
 void spawnBigKeyPiece(short i, short flag)
 {
-    E *p = &D_8013145C[i];
+    E *p = &BIG_KEY_PAINTING_PIECE_DEFS[i];
     TObj *n = allocObjectLayer2();
     if (n == 0) return;
     n->active = 4;

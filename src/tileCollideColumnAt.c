@@ -5,7 +5,7 @@
 #include "TOBJ.H"
 
 extern unsigned short *COLLISION_SEG_PTR;
-extern unsigned short D_1F800280, COLLISION_HIT_FLAGS, D_1F800284;
+extern unsigned short COLLISION_HIT_TOP, COLLISION_HIT_FLAGS, COLLISION_HIT_SURFACE;
 extern unsigned short TILE_COL_SURFACE_Y;
 extern short D_8009BD6C, TILE_COL_COUNT, TILE_COL_TOP, TILE_COL_HEIGHT, TILE_COL_FLAGS, D_8009BD80;
 extern unsigned short D_8009BD84;
@@ -105,9 +105,9 @@ asm("" : "=r"(s) : "0"(s));
                 o->y.p.frac = 0;
                 o->y.p.whole += d;
                 (*(unsigned short*)&SPAD.s27e) = TILE_COL_HEIGHT;
-                D_1F800280 = TILE_COL_TOP;
+                COLLISION_HIT_TOP = TILE_COL_TOP;
                 COLLISION_HIT_FLAGS = TILE_COL_FLAGS;
-                D_1F800284 = (TILE_COL_FLAGS & 0xe00) >> 9;
+                COLLISION_HIT_SURFACE = (TILE_COL_FLAGS & 0xe00) >> 9;
                 return 1;
             }
         } else if ((short)d <= 0)

@@ -2,8 +2,8 @@
 // FLAGS -O2 -G0
 #if defined(VERSION_SLPS_01144)
 typedef struct { char p[0x60]; unsigned short w60; short w62; short w64; short w66; } Q;
-extern Q *D_1F8001D4;
-#define P1D4 D_1F8001D4
+extern Q *TASK_C;
+#define P1D4 TASK_C
 extern int LOADING_SCREEN_STATE;
 extern char D_80010210[];
 extern void drawDebugText(int, int, int, char *);

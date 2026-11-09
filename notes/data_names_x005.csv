@@ -1,0 +1,4 @@
+address,name,size,source
+801176c4,BACO_TOWN_NPC_DEFS,,usage: {box; w1e; ...; anims}[subtype] initBacoTownNpc copies refs=7
+801176cc,BACO_TOWN_NPC_DEFS_ANIMS,,usage: BACO_TOWN_NPC_DEFS+8: the anims column (wineMerchantTalk) refs=2
+8011a004,A05_BACKDROP_SPRITE_SET_ANIMS,,usage: anim pointers by subtype (updateBackdropSpriteSet) refs=3

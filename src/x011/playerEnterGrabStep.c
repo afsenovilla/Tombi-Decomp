@@ -8,7 +8,7 @@ typedef struct { TObj o; char p0[6]; unsigned char c6, c7; char p1[0xe3 - 0xc8];
 extern TObj *BITTEN_OBJECT;
 extern unsigned char *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern char D_80010C0C[];
+extern char PLAYER_CLIMB_BACK_ANIM[];
 extern void AnimLoadDuration(TObjX *o);
 extern void SfxPlay2(int a, int b);
 extern void SfxPlay3(int a, int b);
@@ -42,7 +42,7 @@ void playerEnterGrabStep(TObjX *x, short f)
         break;
     case 3:
         if ((unsigned short)(x->o.velX + 0x1c0) > 0x380) PLAYER_EXT[5] = 1;
-        x->o.anim = D_80010C0C;
+        x->o.anim = PLAYER_CLIMB_BACK_ANIM;
         AnimLoadDuration(x);
         x->o.b0f = 0;
         g = GRABBED_OBJECT;

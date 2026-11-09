@@ -18,7 +18,7 @@ static void *D_8013A6D4[11] = {
     D_8013A93C, D_8013A944, D_8013A94C, D_8013A954,
     D_8013A95C, D_8013A964, D_8013A96C,
 };
-extern void *D_8013A698[];
+extern void *WINGED_FORK_PIG_ANIMS[];
 extern int FUN_8001f9e0(void);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -91,7 +91,7 @@ void wingedForkPigThrow(TObj *o)
                 o->velX = (o->velX + o->velV) & 7;
                 o->wac = D_80135E78[o->velX];
             }
-            o->anim = D_8013A698[o->wac];
+            o->anim = WINGED_FORK_PIG_ANIMS[o->wac];
             AnimLoadDuration(o);
         }
         break;

@@ -3,8 +3,8 @@
 #if defined(VERSION_SLPS_01144)
 typedef struct S { char p[0x14]; short w14; unsigned short w16; } S;
 extern unsigned short *D_1F800278;
-extern short D_1F80027E, D_1F800280;
-extern unsigned short D_1F800282;
+extern short D_1F80027E, COLLISION_HIT_TOP;
+extern unsigned short COLLISION_HIT_FLAGS;
 #define COLLISION_SEG_PTR D_1F800278
 #define COLLISION_HIT_HEIGHT D_1F80027E
 int func_800412B0_slps01144(S *o, int x, unsigned short y)
@@ -51,8 +51,8 @@ int func_800412B0_slps01144(S *o, int x, unsigned short y)
         if ((short)d > 0) {
             o->w14 = 0;
             COLLISION_HIT_HEIGHT = b;
-            D_1F800280 = a;
-            D_1F800282 = fl;
+            COLLISION_HIT_TOP = a;
+            COLLISION_HIT_FLAGS = fl;
             o->w16 += d;
             return 1;
             do { } while (0);

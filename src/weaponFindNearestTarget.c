@@ -9,11 +9,11 @@
    sign extension can be dropped in the same label region. See notes/matching_guide.md (ninth batch). */
 #include "TOBJ.H"
 typedef struct P { short x, y; } P;
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern unsigned short DAT_1f80019eu;
 extern unsigned short CAT2_OBJECT_COUNT_SAVED;
 extern TObj **CAT2_OBJECT_LIST_SAVED;
-extern unsigned char DAT_8007a0a0[];
+extern unsigned char WEAPON_TARGET_BY_TYPE[];
 extern int angleBetweenPoints(P, P);
 
 
@@ -30,17 +30,17 @@ int weaponFindNearestTarget(TObj *o)
     short x;
 
     p = CAT2_OBJECT_LIST_SAVED;
-    DAT_1f80019e = CAT2_OBJECT_COUNT_SAVED;
+    LIST_COUNTER = CAT2_OBJECT_COUNT_SAVED;
     for (i = 0; i < 0x40; i++)
         list[i] = 0;
     n = 0;
-    if ((x = DAT_1f80019e) != 0) {
+    if ((x = LIST_COUNTER) != 0) {
         wx = 0x80;
         wy = 0x90;
         do {
         q = *p++;
-        DAT_1f80019e = x - 1;
-        if ((q->active & 1) && DAT_8007a0a0[q->type]) {
+        LIST_COUNTER = x - 1;
+        if ((q->active & 1) && WEAPON_TARGET_BY_TYPE[q->type]) {
             k = o->d->p.whole - q->d->p.whole + 0x2d;
             c = (unsigned short)k < 0x5a;
             if (o->animFrame & 1)
@@ -57,7 +57,7 @@ int weaponFindNearestTarget(TObj *o)
                 n++;
             }
         }
-        } while ((x = DAT_1f80019e) != 0);
+        } while ((x = LIST_COUNTER) != 0);
     }
     for (k = 0; k < n; k++) {
         m = k;

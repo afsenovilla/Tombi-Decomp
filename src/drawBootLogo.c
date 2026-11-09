@@ -23,7 +23,7 @@ typedef struct {
     short tpage;
     short cx, cy;
 } ENT;
-extern ENT DAT_800778f8[];
+extern ENT BOOT_LOGO_PARTS[];
 extern void *NEXT_PRIM;
 extern PTAG *CURRENT_OT;
 extern unsigned short GetClut(int x, int y);
@@ -33,7 +33,7 @@ extern void SetDrawMode(DRM *p, int dfe, int dtd, int tpage, void *tw);
 
 void drawBootLogo(unsigned char c, int dfe)
 {
-    ENT *e = DAT_800778f8;
+    ENT *e = BOOT_LOGO_PARTS;
     SPRT *s = (SPRT *)0x1f800000;
     SPRT *p;
     SPRT *q;

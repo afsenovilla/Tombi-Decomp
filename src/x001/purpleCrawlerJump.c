@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } S;
-extern unsigned char D_8013C7C8[];
+extern unsigned char PURPLE_CRAWLER_RAND_TABLE[];
 extern char MOVE_TABLE_1[];
 extern void *D_8013FC84;
 extern void *D_8013FC7C;
@@ -97,7 +97,7 @@ void purpleCrawlerJump(TObj *o)
         o->d8c = 0;
         if (o->w22)
             o->velV = -0x500;
-        else if (D_8013C7C8[Rand() & 0xf])
+        else if (PURPLE_CRAWLER_RAND_TABLE[Rand() & 0xf])
             o->velV = -0x500;
         else
             o->velV = -0x400;

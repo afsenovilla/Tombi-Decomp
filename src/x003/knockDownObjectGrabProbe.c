@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern short probeGrabPointInBoxB(TObj *, TObj *);
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 
 void knockDownObjectGrabProbe(TObj *o, TObj *p)
 {
@@ -15,7 +15,7 @@ void knockDownObjectGrabProbe(TObj *o, TObj *p)
         o->velY = 0;
         q = (TObj *)p->movetab;
         q->b69 = 1;
-        D_1F80019E = 0;
+        LIST_COUNTER = 0;
         (*(TObj **)&SPAD.p3c0) = p;
         q->animFrame = o->animFrame & 1;
     }

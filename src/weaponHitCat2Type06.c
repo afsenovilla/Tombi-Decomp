@@ -2,7 +2,7 @@
 // MATCHING 80125da4 396
 extern short FUN_8004461c(void *, void *);
 extern void spawnImpactEffect(int, int, int, int);
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 
 void weaponHitCat2Type06(unsigned char *o, unsigned char *p)
 {
@@ -20,7 +20,7 @@ void weaponHitCat2Type06(unsigned char *o, unsigned char *p)
             *(short *)(o + 0xa8) = 0x4ff;
             o[0xa5] = 0;
             o[0] = 2;
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
         break;
     case 1:
@@ -44,7 +44,7 @@ void weaponHitCat2Type06(unsigned char *o, unsigned char *p)
             *(short *)(o + 0xa8) = 0x4ff;
             o[0xa5] = 0;
             o[0] = 2;
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
         break;
     case 8:

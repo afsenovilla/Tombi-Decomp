@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "gvars.h"
 #include "TOBJ.H"
-extern void *D_8001226C;
+extern void *ITEM_GET_ICON_ANIM;
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void FUN_800202b4(TObj *);
@@ -19,7 +19,7 @@ void updateEvilPigHitStars(TObj *o)
     case 0:
         o->w1e = 0x14;
         o->b0d = 1;
-        o->anim = D_8001226C;
+        o->anim = ITEM_GET_ICON_ANIM;
         o->w08 = 0x7ed7;
         o->animFrame = 0;
         o->d3c = ((int*)&SPAD.i2d8)[0];

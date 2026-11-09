@@ -2,10 +2,10 @@
 // MATCHING 8006911c 248
 // CC gcc-2.8.1
 typedef struct C { int *tab; char p[0xe3-4]; unsigned char n; char p1; unsigned short s; } C;
-extern C *(*DAT_800981c0)(void);
+extern C *(*_padFuncPort2Info)(void);
 unsigned PadInfoMode(int unused, int k, int idx)
 {
-    C *c = DAT_800981c0();
+    C *c = _padFuncPort2Info();
     unsigned r;
     switch (k) {
     case 1: r = ((unsigned char *)c)[0xe8]; break;

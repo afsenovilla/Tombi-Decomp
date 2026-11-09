@@ -2,7 +2,7 @@
 // MATCHING 80126b50 272
 extern short pushObjectOutOfObjectBoxB(void);
 extern short pushObjectOutOfObjectX(unsigned char *, unsigned char *);
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 
 void pushObjectOutOfCat4Type01(unsigned char *a, unsigned char *b)
 {
@@ -41,5 +41,5 @@ tail:
     c[0x6b] = *(unsigned short *)(b + 0x2c);
     c[0x68] = a[0x68];
     a[0x68] = 0;
-    DAT_1f80019e = 0;
+    LIST_COUNTER = 0;
 }

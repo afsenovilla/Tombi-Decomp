@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 typedef struct { void **p; int x, y; } AT;
 extern signed char GAME_PLAYER_MODE;
-extern AT D_80119990[];
+extern AT WATERFALL_HINT_NPC_DEFS_ANIMS[];
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern void FUN_80026e0c(int, int);
@@ -21,7 +21,7 @@ void waterfallHintNpcWalkScene(TObj *o)
         PLAYER.obj.b04 = 5;
         PLAYER.obj.step = 0;
         PLAYER.obj.state = 0;
-        o->anim = D_80119990[o->subtype].p[1];
+        o->anim = WATERFALL_HINT_NPC_DEFS_ANIMS[o->subtype].p[1];
         FUN_8001fe94(o, 0);
         o->animFrame = 1;
         o->timer = 60;

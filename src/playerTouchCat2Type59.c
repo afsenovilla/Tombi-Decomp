@@ -5,7 +5,7 @@
 // Japanese version of PAL main0 80045800 (playerTouchCat2Type59.c): 228 -> 212.
 #include "TOBJ.H"
 extern unsigned char DAT_8009cdc7;
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 #define B(o, n) (((unsigned char *)(o))[n])
@@ -44,7 +44,7 @@ void playerTouchCat2Type59(TObj *o, TObj *e)
             B(o, 0xac) = 2;
             spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         }
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
     } else {
         if (o->h->p.whole > e->h->p.whole) {
             o->bbe = 8;
@@ -58,7 +58,7 @@ void playerTouchCat2Type59(TObj *o, TObj *e)
 #else
 #include "TOBJ.H"
 extern unsigned char DAT_8009cdc7;
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern short pushObjectOutOfObjectBoxA(TObj *, TObj *);
 extern void spawnImpactEffect(int, int, int, int);
 #define B(o, n) (((unsigned char *)(o))[n])
@@ -97,7 +97,7 @@ void playerTouchCat2Type59(TObj *o, TObj *e)
             B(o, 0xac) = 2;
             spawnImpactEffect(2, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         }
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
     } else {
         if (o->h->p.whole > e->h->p.whole) {
             o->bbe = 8;

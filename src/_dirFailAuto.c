@@ -5,7 +5,7 @@
 // FLAGS -O2 -G8
 #if defined(VERSION_SCUS_94236)
 // USA version of PAL main0 8006BE6C (_dirFailAuto.c): PAL C of src/_dirFailAuto.c (0.937 masked), edited (tools/jp_autofix.py edits) [-O2 -G8] (tools/demo_sweep.py)
-extern void (*DAT_800981b0)(unsigned char *);
+extern void (*_padFuncClrInfo)(unsigned char *);
 
 void _dirFailAuto(unsigned char *o)
 {
@@ -30,7 +30,7 @@ void _dirFailAuto(unsigned char *o)
         return;
     }
     if (o[0x49] != 0)
-        DAT_800981b0(o);
+        _padFuncClrInfo(o);
 tail:
     if (**(unsigned char **)(o + 0x3c) != 0xf3) {
         **(unsigned char **)(o + 0x30) = 0xff;
@@ -39,7 +39,7 @@ tail:
     }
 }
 #else
-extern void (*DAT_800981b0)(unsigned char *);
+extern void (*_padFuncClrInfo)(unsigned char *);
 
 void _dirFailAuto(unsigned char *o)
 {
@@ -64,7 +64,7 @@ void _dirFailAuto(unsigned char *o)
         return;
     }
     if (o[0x49] != 0)
-        DAT_800981b0(o);
+        _padFuncClrInfo(o);
 tail:
     if (**(unsigned char **)(o + 0x3c) != 0xf3) {
         **(unsigned char **)(o + 0x30) = 0xff;

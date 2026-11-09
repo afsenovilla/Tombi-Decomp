@@ -21,7 +21,7 @@ struct Intr {
     jmp_buf env;
     s32 stack[0x400];
 };
-extern struct Intr D_800970B4;
+extern struct Intr intr_env;
 extern int VSyncCallback(void (*f)());
 struct intr {
     const char* ver;
@@ -35,10 +35,10 @@ struct intr {
 };
 extern struct intr* D_800974A0;
 int VSyncCallback(void (*func)());
-extern volatile u16* D_80098144;
-extern volatile s32* D_80098148;
+extern volatile u16* intr_imask;
+extern volatile s32* intr_dpcr;
 void HookEntryInt(jmp_buf env);
-extern volatile u16* D_80098140;
+extern volatile u16* intr_istat;
 
 int ResetCallback(void);
 
@@ -69,17 +69,17 @@ INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/intr", trapIntr);
 INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libetc/intr", setIntr);
 
 u16* stopIntr(void) {
-    if (D_800970B4.unk0) {
+    if (intr_env.unk0) {
         EnterCriticalSection();
-        D_800970B4.D_800B5FFC[0x17] = *D_80098144;
-        D_800970B4.D_800B602C = *D_80098148;
-        *D_80098140 = *D_80098144 = 0;
-        *D_80098148 &= 0x77777777;
+        intr_env.D_800B5FFC[0x17] = *intr_imask;
+        intr_env.D_800B602C = *intr_dpcr;
+        *intr_istat = *intr_imask = 0;
+        *intr_dpcr &= 0x77777777;
         ResetEntryInt();
-        if (D_80098148 && D_80098148) {
+        if (intr_dpcr && intr_dpcr) {
         }
-        D_800970B4.unk0 = 0;
-        return &D_800970B4.unk0;
+        intr_env.unk0 = 0;
+        return &intr_env.unk0;
     }
     return NULL;
 }

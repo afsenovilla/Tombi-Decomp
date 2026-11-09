@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 
 typedef struct { void **p; int a, b; } T12;
-extern T12 D_80135D84[];
+extern T12 PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[];
 extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -13,7 +13,7 @@ void phoenixSpiritHintLeaveB(TObj *o)
     switch (o->state) {
     case 0:
         o->animFrame = 1;
-        o->anim = D_80135D84[o->subtype].p[1];
+        o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].p[1];
         AnimLoadDuration(o);
         o->velX = -0x300;
         o->velY = 0x300;

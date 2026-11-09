@@ -29,8 +29,8 @@ extern int *DAT_1f800318p;
 extern int DAT_1f800318;
 extern int *DAT_1f800314p;
 extern int DAT_1f800314;
-extern int *DAT_1f800310p;
-extern int DAT_1f800310;
+extern int *FOUR_DATA_P;
+extern int FOUR_DATA;
 extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
@@ -61,7 +61,7 @@ int motocrossBikeModelStepA(S *o)
         o->w7a = 0;
         break;
     case 1:
-        SETUP(DAT_1f800310p, DAT_1f800310);
+        SETUP(FOUR_DATA_P, FOUR_DATA);
         goto tail;
     case 2:
         o->velV -= o->velH;

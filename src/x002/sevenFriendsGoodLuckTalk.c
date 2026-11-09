@@ -11,8 +11,8 @@ typedef struct {
     char pad[0x12];
     unsigned short wd2;
 } TO2;
-extern AT D_8011C778[];
-extern short D_1F8001C6;
+extern AT SEVEN_FRIENDS_NPC_DEFS_ANIMS[];
+extern short DRAW_FROZEN;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
@@ -34,7 +34,7 @@ void sevenFriendsGoodLuckTalk(TO2 *o)
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         if (o->wd2 != 0) {
-            o->t.anim = D_8011C778[o->t.subtype].anims[0];
+            o->t.anim = SEVEN_FRIENDS_NPC_DEFS_ANIMS[o->t.subtype].anims[0];
             AnimJump(&o->t, 0);
             o->wd2 = 0;
         }
@@ -60,7 +60,7 @@ void sevenFriendsGoodLuckTalk(TO2 *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         if (o->wd2 != 0) {
-            o->t.anim = D_8011C778[o->t.subtype].anims[0];
+            o->t.anim = SEVEN_FRIENDS_NPC_DEFS_ANIMS[o->t.subtype].anims[0];
             AnimJump(&o->t, 0);
             o->wd2 = 0;
         }
@@ -73,7 +73,7 @@ void sevenFriendsGoodLuckTalk(TO2 *o)
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->t.animFrame = o->t.wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

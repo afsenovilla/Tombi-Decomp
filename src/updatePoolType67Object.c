@@ -2,7 +2,7 @@
 // MATCHING 8002c920 360
 #include "player.h"
 #include "TOBJ.H"
-extern void *D_800121F4[];
+extern void *POOL_TYPE67_ANIMS[];
 extern unsigned short PLAYER_Z[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -17,7 +17,7 @@ void updatePoolType67Object(TObj *o)
     switch (t) {
     case 0:
         if (o->step == 0) {
-            o->anim = D_800121F4[o->subtype];
+            o->anim = POOL_TYPE67_ANIMS[o->subtype];
             AnimLoadDuration(o);
             x = PLAYER.obj.a.p.whole;
             if (PLAYER.obj.animFrame & 1) {

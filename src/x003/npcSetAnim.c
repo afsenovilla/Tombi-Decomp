@@ -2,11 +2,11 @@
 // MATCHING 801289c8 84
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80135D84[];
+extern AT PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[];
 extern void AnimJump(TObj *, short);
 
 void npcSetAnim(TObj *o, short n, short k)
 {
-    o->anim = D_80135D84[o->subtype].anims[n];
+    o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[n];
     AnimJump(o, k);
 }

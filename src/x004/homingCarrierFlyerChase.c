@@ -7,7 +7,7 @@
 typedef struct { short x, y; } P;
 
 extern short COS_TABLE[], NEG_SIN_TABLE[];
-extern short D_1F80016Ex[], D_1F80016Ey[]; /* debt: two more names for (*(short*)((char*)&SPAD.i16c + 2)) keep both reloads after the stores */
+extern short PLAYER_Y_WHOLE[], D_1F80016Ey[]; /* debt: two more names for (*(short*)((char*)&SPAD.i16c + 2)) keep both reloads after the stores */
 extern void *D_80134D88;
 extern int angleBetweenPoints(P, P);
 extern int AnimAdvance(TObj *);
@@ -51,7 +51,7 @@ void homingCarrierFlyerChase(TObj *o)
         break;
     case 2:
         o->h->p.whole = (*(short*)((char*)&SPAD.i168 + 2));
-        o->y.p.whole = D_1F80016Ex[0];
+        o->y.p.whole = PLAYER_Y_WHOLE[0];
         if (D_1F80016Ey[0] < -0x82) {
             o->step = 2;
             o->state = 0;

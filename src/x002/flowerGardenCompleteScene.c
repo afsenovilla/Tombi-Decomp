@@ -8,7 +8,7 @@
 #include "gamestate.h"
 
 extern unsigned int D_8009C98C;
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern unsigned char D_8009C93FA[], D_8009C942A[];
 extern void setEventComplete(int, int);
 
@@ -42,7 +42,7 @@ void flowerGardenCompleteScene(TObj *o)
         D_8009C93FA[0] = 0;
         D_8009C942A[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->b0f = ((unsigned short *)o)[0x12];
         PLAYER.obj.b04 = 1;
         PLAYER.obj.step = 0;

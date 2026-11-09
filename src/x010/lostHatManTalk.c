@@ -8,7 +8,7 @@
 #include "gamestate.h"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8012F3B8[];
+extern AT LOST_HAT_MAN_DEFS_ANIMS[];
 extern unsigned char GVARS_USE_ITEM_PENDING;
 extern unsigned char D_8009CDF2a[];
 extern unsigned char D_8009D143;
@@ -102,7 +102,7 @@ void lostHatManTalk(TObj *o)
         o->state = 0x47;
         o->b69 = 0;
         o->timer = 200;
-        setAnim(o, D_8012F3B8[o->subtype].anims[1]);
+        setAnim(o, LOST_HAT_MAN_DEFS_ANIMS[o->subtype].anims[1]);
         setEventComplete(0x4e, 0);
         break;
     case 0x47:
@@ -114,7 +114,7 @@ void lostHatManTalk(TObj *o)
     case 0x49:
         break;
     case 0x5a:
-        o->anim = D_8012F3B8[o->subtype].anims[2];
+        o->anim = LOST_HAT_MAN_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state = 0x5b;
         break;
@@ -122,7 +122,7 @@ void lostHatManTalk(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        o->anim = D_8012F3B8[o->subtype].anims[0];
+        o->anim = LOST_HAT_MAN_DEFS_ANIMS[o->subtype].anims[0];
         AnimJump(o, 0);
         o->state = NEXT(o);
         break;

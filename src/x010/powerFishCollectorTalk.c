@@ -6,7 +6,7 @@
 typedef struct { char c[12]; } B12;
 typedef struct { void **p; int x, y; } AT3;
 
-extern AT3 D_8012F3C4[];
+extern AT3 TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void FUN_8001fe94(TObj *, int);
 extern void setEventStarted(int, int, int);
@@ -22,7 +22,7 @@ void powerFishCollectorTalk(TObj *o)
     case 2:
         v = *(B12 *)&o->a;
         o->d90 = (int)showMessageBoxDirect(5, 0xa, &v);
-        o->anim = D_8012F3C4[o->subtype].p[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state++;
         break;
@@ -46,14 +46,14 @@ void powerFishCollectorTalk(TObj *o)
         GVARS.b42 = 1;
         v = *(B12 *)&o->a;
         o->d90 = (int)showMessageBoxDirect(5, 0xb, &v);
-        o->anim = D_8012F3C4[o->subtype].p[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state = 15;
         break;
     case 7:
         v = *(B12 *)&o->a;
         o->d90 = (int)showMessageBoxDirect(5, 0xc, &v);
-        o->anim = D_8012F3C4[o->subtype].p[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state++;
         break;
@@ -78,7 +78,7 @@ void powerFishCollectorTalk(TObj *o)
             break;
         v = *(B12 *)&o->a;
         o->d90 = (int)showMessageBoxDirect(5, 0xd, &v);
-        o->anim = D_8012F3C4[o->subtype].p[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state++;
         break;
@@ -89,7 +89,7 @@ void powerFishCollectorTalk(TObj *o)
         p->b04 = 3;
         v = *(B12 *)&o->a;
         o->d90 = (int)showMessageBoxDirect(5, 0xe, &v);
-        o->anim = D_8012F3C4[o->subtype].p[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state = 15;
         break;
@@ -112,7 +112,7 @@ void powerFishCollectorTalk(TObj *o)
     case 13:
         v = *(B12 *)&o->a;
         o->d90 = (int)showMessageBoxDirect(5, 0xe, &v);
-        o->anim = D_8012F3C4[o->subtype].p[2];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].p[2];
         FUN_8001fe94(o, 0);
         o->state = 15;
         break;
@@ -123,7 +123,7 @@ void powerFishCollectorTalk(TObj *o)
         if (p->b04 != 2)
             break;
         p->b04 = 3;
-        o->anim = D_8012F3C4[o->subtype].p[0];
+        o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS_ANIMS[o->subtype].p[0];
         FUN_8001fe94(o, 0);
         PLAYER.obj.b04 = 1;
         GVARS.b3f = 0;

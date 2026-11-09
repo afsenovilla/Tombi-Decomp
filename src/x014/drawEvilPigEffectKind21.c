@@ -5,8 +5,8 @@
 #include "camera.h"
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
-extern MATRIX D_1f800000, D_1f800020;
-extern SVECTOR D_1f800068;
+extern MATRIX D_1f800000, OBJECT_MATRIX;
+extern SVECTOR WORK_VEC_B;
 extern long LZ_FILE_CTRL;
 extern char *NEXT_PRIM;
 extern void getBaseMatrix(MATRIX *);
@@ -41,15 +41,15 @@ void drawEvilPigEffectKind21(TObj *o)
     unsigned char *p;
     unsigned char *q;
 
-    getBaseMatrix(&D_1f800020);
-    FUN_8006481c(o->d8c, &D_1f800020);
-    FUN_800644dc(o->d84, &D_1f800020);
-    FUN_8006467c(o->d88, &D_1f800020);
-    D_1f800068.vx = o->a.p.whole;
-    D_1f800068.vy = o->y.p.whole;
-    D_1f800068.vz = o->b.p.whole;
-    FUN_8006395c(&VIEW_CAMERA.m, &D_1f800020, &D_1f800000);
-    FUN_80063bcc(&D_1f800068, D_1f800000.t);
+    getBaseMatrix(&OBJECT_MATRIX);
+    FUN_8006481c(o->d8c, &OBJECT_MATRIX);
+    FUN_800644dc(o->d84, &OBJECT_MATRIX);
+    FUN_8006467c(o->d88, &OBJECT_MATRIX);
+    WORK_VEC_B.vx = o->a.p.whole;
+    WORK_VEC_B.vy = o->y.p.whole;
+    WORK_VEC_B.vz = o->b.p.whole;
+    FUN_8006395c(&VIEW_CAMERA.m, &OBJECT_MATRIX, &D_1f800000);
+    FUN_80063bcc(&WORK_VEC_B, D_1f800000.t);
     D_1f800000.t[0] += VIEW_CAMERA.m.t[0];
     D_1f800000.t[1] += VIEW_CAMERA.m.t[1];
     D_1f800000.t[2] += VIEW_CAMERA.m.t[2];

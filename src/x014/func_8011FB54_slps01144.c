@@ -20,9 +20,9 @@ extern Pt D_801237FC[], D_8012387C[];
 extern O *ObjAlloc(void);
 extern int Rand(void);
 extern void playSFX(int);
-extern volatile unsigned short DAT_1f8000ee, DAT_1f8000f2;
-#define SPX DAT_1f8000ee
-#define SPY DAT_1f8000f2
+extern volatile unsigned short VIEW_CAMERA_X, VIEW_CAMERA_Y;
+#define SPX VIEW_CAMERA_X
+#define SPY VIEW_CAMERA_Y
 
 void func_8011FB54(O *o)
 {

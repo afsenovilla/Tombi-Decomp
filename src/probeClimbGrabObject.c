@@ -2,8 +2,8 @@
 // MATCHING 8004baa8 220
 // VERSION SLPS_01144 slps01144 80056B58 160
 #if defined(VERSION_SLPS_01144)
-extern int DAT_1f8003c0;
-extern short DAT_1f80019e;
+extern int TOUCHED_OBJECT;
+extern short LIST_COUNTER;
 extern unsigned short CAT4_OBJECT_COUNT_SAVED;
 extern unsigned char **CAT4_OBJECT_LIST_SAVED;
 extern void func_80056874_slps01144(void *, unsigned char *);
@@ -13,19 +13,19 @@ int func_80056B58(void *o)
 {
     unsigned char **q = CAT4_OBJECT_LIST_SAVED;
     unsigned char *p;
-    DAT_1f8003c0 = 0;
-    DAT_1f80019e = CAT4_OBJECT_COUNT_SAVED;
-    while (DAT_1f80019e != 0) {
+    TOUCHED_OBJECT = 0;
+    LIST_COUNTER = CAT4_OBJECT_COUNT_SAVED;
+    while (LIST_COUNTER != 0) {
         p = *q;
-        DAT_1f80019e = DAT_1f80019e - 1;
+        LIST_COUNTER = LIST_COUNTER - 1;
         q++;
         if (p[0] & 1) func_80056874_slps01144(o, p);
     }
-    return DAT_1f8003c0;
+    return TOUCHED_OBJECT;
 }
 #else
-extern int DAT_1f8003c0;
-extern short DAT_1f80019e;
+extern int TOUCHED_OBJECT;
+extern short LIST_COUNTER;
 
 extern unsigned short CAT4_OBJECT_COUNT_SAVED;
 extern unsigned char **CAT4_OBJECT_LIST_SAVED;
@@ -35,11 +35,11 @@ int probeClimbGrabObject(void *o)
 {
     unsigned char **q = CAT4_OBJECT_LIST_SAVED;
     unsigned char *p;
-    DAT_1f8003c0 = 0;
-    DAT_1f80019e = CAT4_OBJECT_COUNT_SAVED;
-    while (DAT_1f80019e != 0) {
+    TOUCHED_OBJECT = 0;
+    LIST_COUNTER = CAT4_OBJECT_COUNT_SAVED;
+    while (LIST_COUNTER != 0) {
         p = *q;
-        DAT_1f80019e = DAT_1f80019e - 1;
+        LIST_COUNTER = LIST_COUNTER - 1;
         q++;
         if (p[0] & 1) {
             switch (p[2]) {
@@ -48,6 +48,6 @@ int probeClimbGrabObject(void *o)
             }
         }
     }
-    return DAT_1f8003c0;
+    return TOUCHED_OBJECT;
 }
 #endif

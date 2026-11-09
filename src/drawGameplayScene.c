@@ -9,8 +9,8 @@ extern void FUN_80050544(void), FUN_80050ea4(void), FUN_80054f54(void), FUN_8005
 extern void drawCategory4Objects(void), drawCategory5Objects(void), FUN_80057d04(void), drawCategory8Objects(void);
 extern void FUN_80057edc(void), FUN_800597bc(void), FUN_8011bc34(void), drawHudIfShown(void);
 extern void FUN_80059d44(int);
-extern char DAT_1f800118[];
-extern short DAT_1f8001c6;
+extern char LIGHTING[];
+extern short DRAW_FROZEN;
 extern unsigned char GAME_FADE_SCREEN_CONTROL, GAME_FADE_SCREEN_AMOUNT;
 extern int GAME;
 
@@ -18,7 +18,7 @@ extern signed char D_8009B160;
 void drawGameplayScene(void)
 {
     int u;
-    FUN_80063e0c(DAT_1f800118);
+    FUN_80063e0c(LIGHTING);
     FUN_80050544();
     FUN_80050ea4();
     FUN_80054f54();
@@ -28,7 +28,7 @@ void drawGameplayScene(void)
     FUN_80057d04();
     drawCategory8Objects();
     FUN_80057edc();
-    if (DAT_1f8001c6 == 1 && D_8009B160 == 1)
+    if (DRAW_FROZEN == 1 && D_8009B160 == 1)
         FUN_800597bc();
     switch (GAME_FADE_SCREEN_CONTROL) {
     case 1:
@@ -56,8 +56,8 @@ extern void drawPlayer(void), drawCategory1Objects(void), drawCategory2Objects(v
 extern void drawCategory4Objects(void), drawCategory5Objects(void), drawAreaModelList(void), drawCategory8Objects(void);
 extern void drawCategory7Objects(void), drawPauseMenu(void), FUN_8011bc34(void), drawHudIfShown(void);
 extern void drawScreenFade(int);
-extern char DAT_1f800118[];
-extern short DAT_1f8001c6;
+extern char LIGHTING[];
+extern short DRAW_FROZEN;
 extern unsigned char GAME_FADE_SCREEN_CONTROL, GAME_FADE_SCREEN_AMOUNT;
 extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern signed char D_8009EE58;
@@ -65,7 +65,7 @@ extern signed char D_8009EE58;
 void func_80043A90(void)
 {
     int u;
-    FUN_80063e0c(DAT_1f800118);
+    FUN_80063e0c(LIGHTING);
     drawPlayer();
     drawCategory1Objects();
     drawCategory2Objects();
@@ -75,7 +75,7 @@ void func_80043A90(void)
     drawAreaModelList();
     drawCategory8Objects();
     drawCategory7Objects();
-    if (DAT_1f8001c6 == 1 && D_8009EE58 == 1)
+    if (DRAW_FROZEN == 1 && D_8009EE58 == 1)
         drawPauseMenu();
     switch (GAME_FADE_SCREEN_CONTROL) {
     case 1:
@@ -106,15 +106,15 @@ extern void drawPlayer(void), drawCategory1Objects(void), drawCategory2Objects(v
 extern void drawCategory4Objects(void), drawCategory5Objects(void), drawAreaModelList(void), drawCategory8Objects(void);
 extern void drawCategory7Objects(void), drawPauseMenu(void), FUN_8011bc34(void), drawHudIfShown(void);
 extern void drawScreenFade(int);
-extern char DAT_1f800118[];
-extern short DAT_1f8001c6;
+extern char LIGHTING[];
+extern short DRAW_FROZEN;
 extern unsigned char GAME_FADE_SCREEN_CONTROL, GAME_FADE_SCREEN_AMOUNT;
 extern int GAME;
 
 void drawGameplayScene(void)
 {
     int u;
-    FUN_80063e0c(DAT_1f800118);
+    FUN_80063e0c(LIGHTING);
     drawPlayer();
     drawCategory1Objects();
     drawCategory2Objects();
@@ -124,7 +124,7 @@ void drawGameplayScene(void)
     drawAreaModelList();
     drawCategory8Objects();
     drawCategory7Objects();
-    if (DAT_1f8001c6 == 1)
+    if (DRAW_FROZEN == 1)
         drawPauseMenu();
     switch (GAME_FADE_SCREEN_CONTROL) {
     case 1:

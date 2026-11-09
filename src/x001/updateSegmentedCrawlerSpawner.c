@@ -9,8 +9,8 @@ typedef struct { char pad[0xa]; short w0a; } W0AS;
 typedef struct { short x; short y; } XY;
 
 extern TObj *BAIT_OBJECT[];
-extern unsigned short D_8013CA20[];
-extern XY D_8013CA10[];
+extern unsigned short SEGMENTED_CRAWLER_SPAWNER_RAND_DELAYS[];
+extern XY SEGMENTED_CRAWLER_SPAWN_POINTS[];
 extern int Rand(void);
 extern TObj *allocObjectLayer2(void);
 extern void PoolFree_1F800210(TObj *);
@@ -30,7 +30,7 @@ void updateSegmentedCrawlerSpawner(TObj *o)
     case 1:
         if (W0A(o) < 2) {
             if (--o->w08 == -1) {
-                o->w08 = D_8013CA20[Rand() & 3];
+                o->w08 = SEGMENTED_CRAWLER_SPAWNER_RAND_DELAYS[Rand() & 3];
                 e = allocObjectLayer2();
                 if (e) {
                     e->active = 2;
@@ -39,8 +39,8 @@ void updateSegmentedCrawlerSpawner(TObj *o)
                     e->b0c = 0;
                     r = Rand() & 3;
                     e->a.raw = SPAD.iec;
-                    e->y.raw = D_8013CA10[r].y << 16;
-                    e->b.raw = D_8013CA10[r].x << 16;
+                    e->y.raw = SEGMENTED_CRAWLER_SPAWN_POINTS[r].y << 16;
+                    e->b.raw = SEGMENTED_CRAWLER_SPAWN_POINTS[r].x << 16;
                     W0A(BAIT_OBJECT[0])++;
                 }
             }

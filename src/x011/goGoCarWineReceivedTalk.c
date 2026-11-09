@@ -8,7 +8,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80119C48[];
+extern AT FACTORY_NPC_DEFS_ANIMS[];
 extern void AnimLoadDuration(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void addItemToInventory(int, int, int);
@@ -31,7 +31,7 @@ void goGoCarWineReceivedTalk(TObj *o)
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
-        o->anim = D_80119C48[o->subtype].anims[2];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].anims[2];
         AnimLoadDuration(o);
         o->d90 = showMessageBoxDirect(3, 7, &v);
         o->state++;
@@ -78,7 +78,7 @@ void goGoCarWineReceivedTalk(TObj *o)
             q->b0f = 0;
             q->animFrame = 0;
         }
-        o->anim = D_80119C48[o->subtype].anims[1];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].anims[1];
         AnimLoadDuration(o);
         o->state++;
         break;
@@ -91,7 +91,7 @@ void goGoCarWineReceivedTalk(TObj *o)
     case 6:
         if (--o->timer != -1) break;
         o->animFrame = 1;
-        o->anim = D_80119C48[o->subtype].anims[0];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].anims[0];
         AnimLoadDuration(o);
         o->timer = 0x20;
         o->velV = -0x280;

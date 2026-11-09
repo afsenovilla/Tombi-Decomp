@@ -5,7 +5,7 @@ typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { MATRIX m; short xl, x, yl, y, zl, z, rxl, rx, ryl, ry, rzl, rz; } CAMERA;
 extern void getBaseMatrix(MATRIX *);
 extern void ApplyMatrixSV(MATRIX *, SVECTOR *, SVECTOR *);
-extern SVECTOR D_1F800060, D_1F800068;
+extern SVECTOR WORK_VEC_A, WORK_VEC_B;
 extern CAMERA VIEW_CAMERA;
 
 void gameOverSetupCamera(void)
@@ -20,11 +20,11 @@ void gameOverSetupCamera(void)
     VIEW_CAMERA.m.t[0] = -VIEW_CAMERA.x;
     VIEW_CAMERA.m.t[1] = -VIEW_CAMERA.y;
     VIEW_CAMERA.m.t[2] = -VIEW_CAMERA.z;
-    D_1F800060.vx = -VIEW_CAMERA.rx;
-    D_1F800060.vy = -VIEW_CAMERA.ry;
-    D_1F800060.vz = -VIEW_CAMERA.rz;
-    ApplyMatrixSV(&VIEW_CAMERA.m, &D_1F800060, &D_1F800068);
-    VIEW_CAMERA.m.t[0] += D_1F800068.vx;
-    VIEW_CAMERA.m.t[1] += D_1F800068.vy;
-    VIEW_CAMERA.m.t[2] += D_1F800068.vz;
+    WORK_VEC_A.vx = -VIEW_CAMERA.rx;
+    WORK_VEC_A.vy = -VIEW_CAMERA.ry;
+    WORK_VEC_A.vz = -VIEW_CAMERA.rz;
+    ApplyMatrixSV(&VIEW_CAMERA.m, &WORK_VEC_A, &WORK_VEC_B);
+    VIEW_CAMERA.m.t[0] += WORK_VEC_B.vx;
+    VIEW_CAMERA.m.t[1] += WORK_VEC_B.vy;
+    VIEW_CAMERA.m.t[2] += WORK_VEC_B.vz;
 }

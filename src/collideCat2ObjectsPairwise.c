@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80048E68 (func_80048E68.c): type 7 shares the 0xe/0x10 handler.
 #define CNT (*(short *)0x1f800246)
-extern short IDX;
+extern short LIST_COUNTER;
 #define LST (*(unsigned char ***)0x1f80021c)
 extern unsigned char DAT_8007b6a4[];
 extern short func_80047F3C(void *, void *);
@@ -30,29 +30,29 @@ void func_80048E68(void)
         n--;
         if (o[0] != 2 && DAT_8007b6a4[o[2]] != 0) {
             r = LST;
-            IDX = CNT;
-            while (IDX != 0) {
+            LIST_COUNTER = CNT;
+            while (LIST_COUNTER != 0) {
                 q = *r;
-                IDX = IDX - 1;
+                LIST_COUNTER = LIST_COUNTER - 1;
                 r++;
                 if (q[0] != 2) {
                     switch (q[2]) {
                     case 4:
                         v = func_80047F3C(o, q);
-                        if (v != 0) IDX = 0;
+                        if (v != 0) LIST_COUNTER = 0;
                         break;
                     case 6:
                         v = pushObjectOutOfObjectX(o, q);
-                        if (v != 0) IDX = 0;
+                        if (v != 0) LIST_COUNTER = 0;
                         break;
                     case 7:
                         v = func_800482EC(o, q);
-                        if (v != 0) IDX = 0;
+                        if (v != 0) LIST_COUNTER = 0;
                         break;
                     case 0xe:
                     case 0x10:
                         v = func_800482EC(o, q);
-                        if (v != 0) IDX = 0;
+                        if (v != 0) LIST_COUNTER = 0;
                         break;
                     case 0x1c:
                         func_80121934(o);
@@ -68,7 +68,7 @@ void func_80048E68(void)
 }
 #else
 #define CNT (*(short *)0x1f800246)
-extern short IDX;
+extern short LIST_COUNTER;
 #define LST (*(unsigned char ***)0x1f80021c)
 extern unsigned char DAT_8007b6a4[];
 extern short pushCat2ObjectOutOfType04(void *, void *);
@@ -94,29 +94,29 @@ void collideCat2ObjectsPairwise(void)
         n--;
         if (o[0] != 2 && DAT_8007b6a4[o[2]] != 0) {
             r = LST;
-            IDX = CNT;
-            while (IDX != 0) {
+            LIST_COUNTER = CNT;
+            while (LIST_COUNTER != 0) {
                 q = *r;
-                IDX = IDX - 1;
+                LIST_COUNTER = LIST_COUNTER - 1;
                 r++;
                 if (q[0] != 2) {
                     switch (q[2]) {
                     case 4:
                         v = pushCat2ObjectOutOfType04(o, q);
-                        if (v != 0) IDX = 0;
+                        if (v != 0) LIST_COUNTER = 0;
                         break;
                     case 6:
                         v = pushObjectOutOfObjectX(o, q);
-                        if (v != 0) IDX = 0;
+                        if (v != 0) LIST_COUNTER = 0;
                         break;
                     case 7:
                         v = pushCat2ObjectOutOfType07(o, q);
-                        if (v != 0) IDX = 0;
+                        if (v != 0) LIST_COUNTER = 0;
                         break;
                     case 0xe:
                     case 0x10:
                         v = pushObjectOutOfObjectBoxB(o, q);
-                        if (v != 0) IDX = 0;
+                        if (v != 0) LIST_COUNTER = 0;
                         break;
                     case 0x1c:
                         func_80121934(o);

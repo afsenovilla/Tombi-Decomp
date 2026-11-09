@@ -16,11 +16,11 @@ typedef struct {
     unsigned char b70, b71, b72, b73;
     unsigned char b74, b75, b76, b77;
 } S;
-extern short DAT_1f800286;
+extern short DOOR_SWING_ANGLE;
 extern unsigned short D_8009C960_u;
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
 extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
-extern void (*D_80079AEC[])(S *);
+extern void (*CAMERA_MODE_HANDLERS[])(S *);
 extern int DAT_1f800174[];
 extern int DAT_1f800178[];
 extern int DAT_1f80017c[];
@@ -54,7 +54,7 @@ void updateCameraController(S *o)
         o->b75 = 0;
         o->b76 = 0;
         o->b77 = 0;
-        DAT_1f800286 = 0;
+        DOOR_SWING_ANGLE = 0;
         o->w58 = w;
         o->b4++;
         if ((*(int*)&GAME.selectedArea) == 6) {
@@ -73,11 +73,11 @@ void updateCameraController(S *o)
         }
         break;
     case 1:
-        D_80079AEC[D_8009C960_u](o);
+        CAMERA_MODE_HANDLERS[D_8009C960_u](o);
         computeCameraMatrix(o);
         goto tail;
     case 2:
-        D_80079AEC[D_8009C960_u](o);
+        CAMERA_MODE_HANDLERS[D_8009C960_u](o);
     tail:
         DAT_1f800174[0] = o->d8;
         t = o->dc;

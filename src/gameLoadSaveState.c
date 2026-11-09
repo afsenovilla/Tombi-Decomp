@@ -6,7 +6,7 @@
 typedef struct { char pad[0x48]; unsigned short w48, w4a, w4c, w4e; } S1d4;
 extern S1d4 *TASK_C;
 extern unsigned char LOAD_COMPLETE_SYM;
-extern unsigned char DAT_1f8001d0;
+extern unsigned char IN_GAME;
 extern short FRAME_BUFFER_INDEX;
 extern int NEXT_PRIM;
 extern short DAT_800a45ea;
@@ -65,7 +65,7 @@ void func_80019824(void)
         break;
     case 4:
         FUN_8001f110(0);
-        DAT_1f8001d0 = 0;
+        IN_GAME = 0;
         TASK_C->w48 = 1;
         TASK_C->w4a = 0;
         TASK_C->w4c = 0;
@@ -79,7 +79,7 @@ void func_80019824(void)
 typedef struct { char pad[0x48]; unsigned short w48, w4a, w4c, w4e; } S1d4;
 extern S1d4 *TASK_C;
 extern unsigned char LOAD_COMPLETE_SYM;
-extern unsigned char DAT_1f8001d0;
+extern unsigned char IN_GAME;
 extern short FRAME_BUFFER_INDEX;
 extern int NEXT_PRIM;
 extern short DAT_800a45ea;
@@ -140,7 +140,7 @@ void gameLoadSaveState(void)
         break;
     case 4:
         FUN_8001f110(0);
-        DAT_1f8001d0 = 0;
+        IN_GAME = 0;
         TASK_C->w48 = 1;
         TASK_C->w4a = 0;
         TASK_C->w4c = 0;

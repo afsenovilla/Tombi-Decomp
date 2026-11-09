@@ -6,13 +6,13 @@ typedef struct { short w0, w2, w4, w6, w8; } S;
 
 extern char MOVE_TABLE_0[];
 extern char D_80077CE8[];
-extern void *D_8013FC70[];
+extern void *PURPLE_CRAWLER_ANIMS[];
 extern void *D_8013FC74[];
 extern void *D_8013FC78[];
 extern void *D_8013FCC4[];
 extern void *D_8013FCC8[];
 extern short COLLISION_HIT_HEIGHT;
-extern short D_1F800284;
+extern short COLLISION_HIT_SURFACE;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void playSFX(int);
@@ -66,7 +66,7 @@ static __inline__ int land(TObj *o)
         o->b69 = 0;
         o->wba = 0;
         o->wb2 = COLLISION_HIT_HEIGHT;
-        o->wae = D_1F800284;
+        o->wae = COLLISION_HIT_SURFACE;
         o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
         return 1;
     }
@@ -109,7 +109,7 @@ void purpleCrawlerClimb(TObj *o)
                 o->wac = 0x16;
             }
         }
-        setAnim(o, D_8013FC70[o->wac]);
+        setAnim(o, PURPLE_CRAWLER_ANIMS[o->wac]);
         break;
     case 1:
         if (!AnimAdvance(o)) break;
@@ -242,7 +242,7 @@ void purpleCrawlerClimb(TObj *o)
                 if (FUN_80040278(o, o->h->p.whole, o->y.p.whole + 0x10)) {
                     o->wb2 = COLLISION_HIT_HEIGHT;
                     o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
-                    o->wae = D_1F800284;
+                    o->wae = COLLISION_HIT_SURFACE;
                     p->w6 = 0;
                     o->step = 1;
                     o->wac = 1;

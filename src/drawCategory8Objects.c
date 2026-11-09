@@ -7,7 +7,7 @@
 #define DAT_1f800242 SCR_240
 #define CAT8_OBJECT_COUNT_s DAT_1f800240
 #endif
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern short CAT8_OBJECT_COUNT_SAVED;
 extern int *CAT8_OBJECT_LIST_SAVED;
 extern int *DAT_1f800230;
@@ -22,7 +22,7 @@ void drawCategory8Objects(void)
     int n;
     int *p, *q;
     int x;
-    if (DAT_1f8001c6 != 0) {
+    if (DRAW_FROZEN != 0) {
         n = CAT8_OBJECT_COUNT_SAVED;
         p = CAT8_OBJECT_LIST_SAVED;
         while (n != 0) {

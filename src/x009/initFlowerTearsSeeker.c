@@ -9,20 +9,20 @@ typedef struct {
     void **anim;
 } T80129344;
 
-extern T80129344 D_8012B2DC[];
+extern T80129344 FLOWER_TEARS_SEEKER_DEFS[];
 extern int SPR_DATA[];
 
 extern void AnimLoadDuration(TObj *);
 
 void initFlowerTearsSeeker(TObj *o)
 {
-    o->box0 = D_8012B2DC[o->subtype].b0;
-    o->box1 = D_8012B2DC[o->subtype].b1;
-    o->box2 = D_8012B2DC[o->subtype].b2;
-    o->box3 = D_8012B2DC[o->subtype].b3;
-    o->w1e = D_8012B2DC[o->subtype].w4;
-    o->d3c = SPR_DATA[D_8012B2DC[o->subtype].w6];
-    o->anim = D_8012B2DC[o->subtype].anim[(unsigned short)o->wb4];
+    o->box0 = FLOWER_TEARS_SEEKER_DEFS[o->subtype].b0;
+    o->box1 = FLOWER_TEARS_SEEKER_DEFS[o->subtype].b1;
+    o->box2 = FLOWER_TEARS_SEEKER_DEFS[o->subtype].b2;
+    o->box3 = FLOWER_TEARS_SEEKER_DEFS[o->subtype].b3;
+    o->w1e = FLOWER_TEARS_SEEKER_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[FLOWER_TEARS_SEEKER_DEFS[o->subtype].w6];
+    o->anim = FLOWER_TEARS_SEEKER_DEFS[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     o->active = 10;
     o->b0d = 1;

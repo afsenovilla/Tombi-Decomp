@@ -9,20 +9,20 @@ typedef struct {
     void **anim;
 } T8011977C;
 
-extern T8011977C D_80119C40[];
+extern T8011977C FACTORY_NPC_DEFS[];
 extern int SPR_DATA[];
 extern short FUN_8005e420(int, int);
 extern void AnimLoadDuration(TObj *);
 
 void initFactoryNpc(TObj *o)
 {
-    o->box0 = D_80119C40[o->subtype].b0;
-    o->box1 = D_80119C40[o->subtype].b1;
-    o->box2 = D_80119C40[o->subtype].b2;
-    o->box3 = D_80119C40[o->subtype].b3;
-    o->w1e = D_80119C40[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80119C40[o->subtype].w6];
-    o->anim = D_80119C40[o->subtype].anim[(unsigned short)o->wb4];
+    o->box0 = FACTORY_NPC_DEFS[o->subtype].b0;
+    o->box1 = FACTORY_NPC_DEFS[o->subtype].b1;
+    o->box2 = FACTORY_NPC_DEFS[o->subtype].b2;
+    o->box3 = FACTORY_NPC_DEFS[o->subtype].b3;
+    o->w1e = FACTORY_NPC_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[FACTORY_NPC_DEFS[o->subtype].w6];
+    o->anim = FACTORY_NPC_DEFS[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     o->b0d = 1;
     o->d8c = 0;

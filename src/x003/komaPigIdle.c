@@ -7,8 +7,8 @@ typedef struct { unsigned char b0, b1; char p2[0xa - 2]; unsigned char b0a, b0b;
 extern char MOVE_TABLE_1[];
 extern unsigned char D_80135B10[];
 extern unsigned char D_80135B20[];
-extern B D_80135B30[];
-extern A *D_801386F8[];
+extern B KOMA_PIG_ANIM_BOXES[];
+extern A *KOMA_PIG_ANIMS[];
 extern int Rand(void);
 extern void SfxPlay2(int, int);
 extern void ObjSetFacingToPlayer(TObj *);
@@ -20,8 +20,8 @@ extern int komaPigCheckWall(TObj *);
 extern unsigned char enemyPickActionByPlayerDistance(TObj *);
 
 #define SETANIM(k) \
-    o->anim = D_801386F8[k]; \
-    { unsigned char *p; { B *t = D_80135B30; p = t[((A *)o->anim)->w2].c; } \
+    o->anim = KOMA_PIG_ANIMS[k]; \
+    { unsigned char *p; { B *t = KOMA_PIG_ANIM_BOXES; p = t[((A *)o->anim)->w2].c; } \
     o->box0 = *p++; \
     o->box1 = *p++; \
     o->box2 = *p; \

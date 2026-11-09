@@ -6,10 +6,10 @@
 #include "globals.h"
 extern short BGM_VAB_ID;
 extern unsigned short VAB_IDS[];
-extern unsigned char DAT_80078520[];
+extern unsigned char BGM_TRACK_DEFS[];
 extern unsigned char DAT_80078521[];
 extern unsigned long *SEQ_DATA[];
-extern short DAT_8007836c[];
+extern short BGM_TRACK_VOLUME[];
 extern void SsSeqStop(int);
 extern void SsSeqClose(int);
 extern int SsSeqOpen(unsigned long *, short);
@@ -26,9 +26,9 @@ int func_8001EF50(int n)
         BGM_SEQ_ID = -1;
     }
     BGM_VAB_ID = VAB_IDS[DAT_80078521[n * 4]];
-    BGM_SEQ_ID = SsSeqOpen(SEQ_DATA[DAT_80078520[n * 4]], BGM_VAB_ID);
+    BGM_SEQ_ID = SsSeqOpen(SEQ_DATA[BGM_TRACK_DEFS[n * 4]], BGM_VAB_ID);
     SsSetMVol(100, 100);
-    v = DAT_8007836c[n];
+    v = BGM_TRACK_VOLUME[n];
     SsSeqSetVol(BGM_SEQ_ID, v, v);
     BGM_FADE_ACTIVE = 0;
     SsSeqPlay(BGM_SEQ_ID, 1, 1);
@@ -40,10 +40,10 @@ int func_8001EF50(int n)
 #include "globals.h"
 extern short BGM_VAB_ID;
 extern unsigned short VAB_IDS[];
-extern unsigned char DAT_80078520[];
+extern unsigned char BGM_TRACK_DEFS[];
 extern unsigned char DAT_80078521[];
 extern unsigned long *SEQ_DATA[];
-extern short DAT_8007836c[];
+extern short BGM_TRACK_VOLUME[];
 extern void SsSeqStop(int);
 extern void SsSeqClose(int);
 extern int SsSeqOpen(unsigned long *, short);
@@ -60,11 +60,11 @@ int startBgmTrack(int n)
         BGM_SEQ_ID = -1;
     }
     BGM_VAB_ID = VAB_IDS[DAT_80078521[n * 4]];
-    BGM_SEQ_ID = SsSeqOpen(SEQ_DATA[DAT_80078520[n * 4]], BGM_VAB_ID);
+    BGM_SEQ_ID = SsSeqOpen(SEQ_DATA[BGM_TRACK_DEFS[n * 4]], BGM_VAB_ID);
     SsSetMVol(100, 100);
-    v = DAT_8007836c[n];
+    v = BGM_TRACK_VOLUME[n];
     SsSeqSetVol(BGM_SEQ_ID, v, v);
-    BGM_VOLUME = DAT_8007836c[n];
+    BGM_VOLUME = BGM_TRACK_VOLUME[n];
     BGM_FADE_ACTIVE = 0;
     SsSeqPlay(BGM_SEQ_ID, 1, 1);
     return 0;
@@ -74,10 +74,10 @@ int startBgmTrack(int n)
 #include "globals.h"
 extern short BGM_VAB_ID;
 extern unsigned short VAB_IDS[];
-extern unsigned char DAT_80078520[];
+extern unsigned char BGM_TRACK_DEFS[];
 extern unsigned char DAT_80078521[];
 extern unsigned long *SEQ_DATA[];
-extern short DAT_8007836c[];
+extern short BGM_TRACK_VOLUME[];
 extern void SsSeqStop(int);
 extern void SsSeqClose(int);
 extern int SsSeqOpen(unsigned long *, short);
@@ -94,11 +94,11 @@ int startBgmTrack(int n)
         BGM_SEQ_ID = -1;
     }
     BGM_VAB_ID = VAB_IDS[DAT_80078521[n * 4]];
-    BGM_SEQ_ID = SsSeqOpen(SEQ_DATA[DAT_80078520[n * 4]], BGM_VAB_ID);
+    BGM_SEQ_ID = SsSeqOpen(SEQ_DATA[BGM_TRACK_DEFS[n * 4]], BGM_VAB_ID);
     SsSetMVol(100, 100);
-    v = DAT_8007836c[n];
+    v = BGM_TRACK_VOLUME[n];
     SsSeqSetVol(BGM_SEQ_ID, v, v);
-    BGM_VOLUME = DAT_8007836c[n];
+    BGM_VOLUME = BGM_TRACK_VOLUME[n];
     BGM_MUTED = 0;
     BGM_FADE_ACTIVE = 0;
     SsSeqPlay(BGM_SEQ_ID, 1, 1);

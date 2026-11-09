@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8013117C[];
+extern AT MERMAID_DEFS_ANIMS[];
 extern unsigned char D_8009D138;
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -38,7 +38,7 @@ void func_80126AA0(TObj *o)
     case 2:
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(4, 1, &v);
-        o->anim = D_8013117C[o->subtype].anims[2];
+        o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -46,7 +46,7 @@ void func_80126AA0(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             setEventComplete(0x70, 0);
             o->timer = 0x12c;
@@ -57,7 +57,7 @@ void func_80126AA0(TObj *o)
         if (--o->timer <= 0) {
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 2, &v);
-            o->anim = D_8013117C[o->subtype].anims[2];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -66,7 +66,7 @@ void func_80126AA0(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             setEventStarted(0x99, 0, 0);
             o->timer = 0x12c;
@@ -79,7 +79,7 @@ void func_80126AA0(TObj *o)
     case 7:
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(4, 3, &v);
-        o->anim = D_8013117C[o->subtype].anims[2];
+        o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -87,7 +87,7 @@ void func_80126AA0(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             o->state = 0xf;
         }
@@ -113,7 +113,7 @@ void func_80126AA0(TObj *o)
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8013117C[];
+extern AT MERMAID_DEFS_ANIMS[];
 extern unsigned char D_8009D138;
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -143,7 +143,7 @@ void mermaidDivingOfferTalk(TObj *o)
     case 2:
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(4, 1, &v);
-        o->anim = D_8013117C[o->subtype].anims[2];
+        o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -151,7 +151,7 @@ void mermaidDivingOfferTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             setEventComplete(0x70, 0);
             o->timer = 0x12c;
@@ -162,7 +162,7 @@ void mermaidDivingOfferTalk(TObj *o)
         if (--o->timer <= 0) {
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(4, 2, &v);
-            o->anim = D_8013117C[o->subtype].anims[2];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
             AnimJump(o, 0);
             o->state++;
         }
@@ -171,7 +171,7 @@ void mermaidDivingOfferTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             setEventStarted(0x99, 0, 0);
             o->timer = 0x12c;
@@ -184,7 +184,7 @@ void mermaidDivingOfferTalk(TObj *o)
     case 7:
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(4, 3, &v);
-        o->anim = D_8013117C[o->subtype].anims[2];
+        o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -192,7 +192,7 @@ void mermaidDivingOfferTalk(TObj *o)
         e = (TObj *)o->d90;
         if (e->b04 == 2) {
             e->b04 = 3;
-            o->anim = D_8013117C[o->subtype].anims[0];
+            o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
             AnimJump(o, 0);
             o->state = 0xf;
         }

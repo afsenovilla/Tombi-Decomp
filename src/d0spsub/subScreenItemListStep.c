@@ -8,8 +8,8 @@
 // 0x800E8658 targets 0x800ED80C, not the return-0 path of the earlier WIP draft.
 // Code and all three switch tables were checked after linking, without masking.
 // Historical WIP diagnosis below records the pre-match allocator differences.
-// Historical WIP: score 20 (was 30), case-3 confirm block only. Fixed: `int x = D_80111128_v` (second extern name declared
-// volatile int; a plain scalar sinks to its first use) loads D_80111128 into a0 before the t lbus, and
+// Historical WIP: score 20 (was 30), case-3 confirm block only. Fixed: `int x = SUBSCREEN_SELECTED_ITEM_v` (second extern name declared
+// volatile int; a plain scalar sinks to its first use) loads SUBSCREEN_SELECTED_ITEM into a0 before the t lbus, and
 // `a = t[0]; D_80111134 = a; b = t[1];` keeps the first store between the two lbus. The `li 3` position: the 3 is
 // the SAME pseudo as t (`t = (unsigned char *)3; GAME_PLAYER_MODE = (int)t; PLAYER = (int)t;`): a 2-set pseudo is not a
 // "birthing" insn for sched1 (sched.c birthing_insn_p needs REG_N_SETS == 1), so `li 3` sinks to the earliest free
@@ -32,20 +32,20 @@ extern unsigned short D_8009D2A4;
 extern unsigned char D_8009D0A4[];
 extern unsigned char D_8009D0E6;
 extern unsigned short D_8009D2C4[];
-extern unsigned char D_8010A0C8[];
+extern unsigned char SUBSCREEN_ITEM_LIST[];
 extern unsigned char D_800FFD84[][5];
 extern unsigned char D_800FFC64[];
-extern unsigned char D_800FECE8[];
-extern Cond *D_800FFAF8[];
-extern int (*D_800FFBB0[])(int a, int b, int c);
+extern unsigned char ITEM_CONDITION_INDEX[];
+extern Cond *ITEM_CONDITION_SCRIPTS[];
+extern int (*SUBSCREEN_COND_OPS[])(int a, int b, int c);
 extern unsigned char *D_800FFC3C[];
 extern short D_80109D88[], D_80109D98[], D_80109DB0[];
-extern short D_8010A058, D_8010A05C, D_8010A060, D_8010A064;
-extern short D_8010A068[], D_8010A088[];
-extern unsigned char D_8010A200[];
-extern unsigned char D_8010A204;
-extern int D_80111128;
-extern volatile int D_80111128_v;
+extern short SUBSCREEN_POPUP_CURSOR, SUBSCREEN_POPUP_COUNT, SUBSCREEN_POPUP_SUB_CURSOR, SUBSCREEN_POPUP_SUB_COUNT;
+extern short SUBSCREEN_POPUP_ENTRIES[], SUBSCREEN_POPUP_SUB_ENTRIES[];
+extern unsigned char SUBSCREEN_MESSAGE_BOX[];
+extern unsigned char SUBSCREEN_MESSAGE_STATE;
+extern int SUBSCREEN_SELECTED_ITEM;
+extern volatile int SUBSCREEN_SELECTED_ITEM_v;
 extern char D_80111134, D_80111138;
 extern volatile short D_8009CD94, D_8009CD96, D_8009CDA0;
 extern volatile unsigned char GAME_PLAYER_MODE, PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID;
@@ -73,7 +73,7 @@ int subScreenItemListStep(Menu *m)
         m->page = 0;
         {
             int n;
-            for (n = 0; n < D_8009D1A4.count; n++) D_8010A0C8[n] = D_8009D1A4.items[n];
+            for (n = 0; n < D_8009D1A4.count; n++) SUBSCREEN_ITEM_LIST[n] = D_8009D1A4.items[n];
         }
         m->state++;
     case 1:
@@ -122,7 +122,7 @@ int subScreenItemListStep(Menu *m)
                             }
                         }
                     }
-                    { int n; for (n = 0; n < D_8009D2A4; n++) D_8010A0C8[n] = D_8009D1A4.items[n]; }
+                    { int n; for (n = 0; n < D_8009D2A4; n++) SUBSCREEN_ITEM_LIST[n] = D_8009D1A4.items[n]; }
                 } else {
                     if (++D_8009D1A4.mode >= 4) {
                         D_8009D1A4.mode = 0;
@@ -139,7 +139,7 @@ int subScreenItemListStep(Menu *m)
                             }
                         }
                     }
-                    { int n; for (n = 0; n < D_8009D2A4; n++) D_8010A0C8[n] = D_8009D1A4.items[n]; }
+                    { int n; for (n = 0; n < D_8009D2A4; n++) SUBSCREEN_ITEM_LIST[n] = D_8009D1A4.items[n]; }
                 }
                 break;
             case 4:
@@ -196,42 +196,42 @@ int subScreenItemListStep(Menu *m)
         } else if ((JOYPAD_STATE & 0x4008) && m->cursor == 0) {
             Cond *c, *base;
             int r;
-            D_80111128 = D_8010A0C8[m->sel];
-            c = D_800FFAF8[D_800FECE8[D_80111128]];
+            SUBSCREEN_SELECTED_ITEM = SUBSCREEN_ITEM_LIST[m->sel];
+            c = ITEM_CONDITION_SCRIPTS[ITEM_CONDITION_INDEX[SUBSCREEN_SELECTED_ITEM]];
             base = c;
             for (;;) {
-                r = D_800FFBB0[c->fn](c->a, c->b, c->c);
+                r = SUBSCREEN_COND_OPS[c->fn](c->a, c->b, c->c);
                 if (c->next == -1) break;
                 if (r) c = base + c->next;
                 else c++;
             }
             if (r) {
-                if (D_80111128 == 7 || D_80111128 == 14) {
-                    D_8010A058 = 0;
+                if (SUBSCREEN_SELECTED_ITEM == 7 || SUBSCREEN_SELECTED_ITEM == 14) {
+                    SUBSCREEN_POPUP_CURSOR = 0;
                     {
                     int n, z;
                     z = 0;
                     for (n = 0; n < 9; n++) {
-                        if (D_8009D2C4[n]) D_8010A068[z++] = n;
+                        if (D_8009D2C4[n]) SUBSCREEN_POPUP_ENTRIES[z++] = n;
                     }
-                    D_8010A05C = z;
+                    SUBSCREEN_POPUP_COUNT = z;
                     }
-                    D_8010A060 = -1;
+                    SUBSCREEN_POPUP_SUB_CURSOR = -1;
                     SfxPlay2(10, 10);
                     m->sub = 0;
                     m->state++;
                 } else {
-                    switch (func_800E89F8(D_80111128)) {
+                    switch (func_800E89F8(SUBSCREEN_SELECTED_ITEM)) {
                     case 1:
                         {
                             int n = 4;
-                            int a = D_80111128;
+                            int a = SUBSCREEN_SELECTED_ITEM;
                             if (a != 0x14 && a != 0x15 && a != 0x16 && a != 0x17
                                 && a != 0x1B && a != 0x21 && a != 0x22 && a != 0x20
                                 && a != 0x1C && a != 0x1D) {
                                 n = 1;
                                 if (a == 0x18) {
-                                    a = *(int *)((char *)&D_80111128 + 0);
+                                    a = *(int *)((char *)&SUBSCREEN_SELECTED_ITEM + 0);
                                     n = 4;
                                 }
                             }
@@ -253,7 +253,7 @@ int subScreenItemListStep(Menu *m)
                 }
             } else {
                 short *q;
-                int x = D_80111128;
+                int x = SUBSCREEN_SELECTED_ITEM;
                 int w;
                 for (q = D_80109D88; *q != -1; q++) {
                     if (x == *q) {
@@ -277,7 +277,7 @@ int subScreenItemListStep(Menu *m)
                 w = 2;
             found:
                 subScreenOpenMessage(0, w, 2);
-                D_8010A204 = 0;
+                SUBSCREEN_MESSAGE_STATE = 0;
                 SfxPlay2(10, 10);
                 m->state = 6;
             }
@@ -286,57 +286,57 @@ int subScreenItemListStep(Menu *m)
     case 3:
         switch (m->sub) {
         case 0:
-            D_8010A060 = -1;
+            SUBSCREEN_POPUP_SUB_CURSOR = -1;
             m->sub++;
         case 1:
             if (JOYPAD_STATE & 0x10) {
-                if (D_8010A058 > 0) {
-                    D_8010A058--;
+                if (SUBSCREEN_POPUP_CURSOR > 0) {
+                    SUBSCREEN_POPUP_CURSOR--;
                     playSFX(8);
                 }
             } else if (JOYPAD_STATE & 0x40) {
-                if (D_8010A058 < D_8010A05C - 1) {
-                    D_8010A058++;
+                if (SUBSCREEN_POPUP_CURSOR < SUBSCREEN_POPUP_COUNT - 1) {
+                    SUBSCREEN_POPUP_CURSOR++;
                     playSFX(8);
                 }
             } else if (JOYPAD_STATE & 0x2000) {
-                D_8010A058 = -1;
+                SUBSCREEN_POPUP_CURSOR = -1;
                 SfxPlay2(0x1B, 0x1C);
                 m->state--;
             } else if (JOYPAD_STATE & 0x4008) {
                 unsigned short bits;
                 z = 0;
-                bits = D_8009D2C4[D_8010A068[D_8010A058]];
+                bits = D_8009D2C4[SUBSCREEN_POPUP_ENTRIES[SUBSCREEN_POPUP_CURSOR]];
                 for (n = 0; n < 9; n++) {
-                    if (bits & 1) D_8010A088[z++] = n;
+                    if (bits & 1) SUBSCREEN_POPUP_SUB_ENTRIES[z++] = n;
                     bits >>= 1;
                 }
-                D_8010A064 = z;
-                D_8010A060 = 0;
+                SUBSCREEN_POPUP_SUB_COUNT = z;
+                SUBSCREEN_POPUP_SUB_CURSOR = 0;
                 SfxPlay2(10, 10);
                 m->sub++;
             }
             break;
         case 2:
             if (JOYPAD_STATE & 0x10) {
-                if (D_8010A060 > 0) {
-                    D_8010A060--;
+                if (SUBSCREEN_POPUP_SUB_CURSOR > 0) {
+                    SUBSCREEN_POPUP_SUB_CURSOR--;
                     playSFX(8);
                 }
             } else if (JOYPAD_STATE & 0x40) {
-                if (D_8010A060 < D_8010A064 - 1) {
-                    D_8010A060++;
+                if (SUBSCREEN_POPUP_SUB_CURSOR < SUBSCREEN_POPUP_SUB_COUNT - 1) {
+                    SUBSCREEN_POPUP_SUB_CURSOR++;
                     playSFX(8);
                 }
             } else if (JOYPAD_STATE & 0x2000) {
-                D_8010A060 = -1;
+                SUBSCREEN_POPUP_SUB_CURSOR = -1;
                 SfxPlay2(0x1B, 0x1C);
                 m->sub--;
             } else if (JOYPAD_STATE & 0x4008) {
                 unsigned char *tp;
                 int n;
-                int i1 = D_8010A068[D_8010A058], i2 = D_8010A088[D_8010A060];
-                int x = D_80111128_v;
+                int i1 = SUBSCREEN_POPUP_ENTRIES[SUBSCREEN_POPUP_CURSOR], i2 = SUBSCREEN_POPUP_SUB_ENTRIES[SUBSCREEN_POPUP_SUB_CURSOR];
+                int x = SUBSCREEN_SELECTED_ITEM_v;
                 tp = D_800FFC3C[i1] + i2 * 2;
                 {
                 register unsigned char *t __asm__("$3") = tp;
@@ -370,7 +370,7 @@ int subScreenItemListStep(Menu *m)
                 } else {
                     printInfoMessage(7, 1);
                 }
-                D_8010A058 = -1;
+                SUBSCREEN_POPUP_CURSOR = -1;
                 SfxPlay2(10, 10);
                 return 1;
             }
@@ -398,19 +398,19 @@ int subScreenItemListStep(Menu *m)
             SfxPlay2(0x1B, 0x1C);
             m->state = 1;
         } else if (JOYPAD_STATE & 0x4008) {
-            subScreenOpenMessage(1, D_8010A0C8[m->sel], 2);
-            D_8010A204 = 0;
+            subScreenOpenMessage(1, SUBSCREEN_ITEM_LIST[m->sel], 2);
+            SUBSCREEN_MESSAGE_STATE = 0;
             SfxPlay2(10, 10);
             m->state++;
         }
         break;
     case 5:
-        subScreenMessageStep(D_8010A200, 2);
-        if (D_8010A204 == 2) m->state = 4;
+        subScreenMessageStep(SUBSCREEN_MESSAGE_BOX, 2);
+        if (SUBSCREEN_MESSAGE_STATE == 2) m->state = 4;
         return 0;
     case 6:
-        subScreenMessageStep(D_8010A200, 2);
-        if (D_8010A204 == 2) m->state = 2;
+        subScreenMessageStep(SUBSCREEN_MESSAGE_BOX, 2);
+        if (SUBSCREEN_MESSAGE_STATE == 2) m->state = 2;
         return 0;
     }
     return 0;

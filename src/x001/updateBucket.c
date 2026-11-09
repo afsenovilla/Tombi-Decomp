@@ -7,7 +7,7 @@ typedef struct {
     short idx;
     void **tab;
 } Ent;
-extern Ent D_8013C730[];
+extern Ent BUCKET_DEFS[];
 extern int SPR_DATA[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -20,13 +20,13 @@ void updateBucket(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        o->box0 = D_8013C730[o->subtype].b0;
-        o->box1 = D_8013C730[o->subtype].b1;
-        o->box2 = D_8013C730[o->subtype].b2;
-        o->box3 = D_8013C730[o->subtype].b3;
-        o->w1e = D_8013C730[o->subtype].w1e;
-        o->d3c = SPR_DATA[D_8013C730[o->subtype].idx];
-        o->anim = *D_8013C730[o->subtype].tab;
+        o->box0 = BUCKET_DEFS[o->subtype].b0;
+        o->box1 = BUCKET_DEFS[o->subtype].b1;
+        o->box2 = BUCKET_DEFS[o->subtype].b2;
+        o->box3 = BUCKET_DEFS[o->subtype].b3;
+        o->w1e = BUCKET_DEFS[o->subtype].w1e;
+        o->d3c = SPR_DATA[BUCKET_DEFS[o->subtype].idx];
+        o->anim = *BUCKET_DEFS[o->subtype].tab;
         o->d8c = 0;
         o->b0d = 0;
         o->category |= 0x80;

@@ -8,7 +8,7 @@ extern short CAT2_OBJECT_COUNT;
 extern unsigned char **CAT2_OBJECT_LIST;
 extern unsigned short CAT5_OBJECT_COUNT;
 extern unsigned char **CAT5_OBJECT_LIST;
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern void collideCat2Type7Cat5Type0BPair(unsigned char *a, unsigned char *b);
 
 void FUN_800490ac(void)
@@ -24,9 +24,9 @@ void FUN_800490ac(void)
             n--;
             if ((o[0] & 3) && o[3] != 0 && o[2] == 7 && o[0xc] == 1 && o[0x69] == 0) {
                 qq = CAT5_OBJECT_LIST;
-                for (DAT_1f80019e = CAT5_OBJECT_COUNT; DAT_1f80019e != 0; ) {
+                for (LIST_COUNTER = CAT5_OBJECT_COUNT; LIST_COUNTER != 0; ) {
                     e = *qq++;
-                    DAT_1f80019e--;
+                    LIST_COUNTER--;
                     if ((e[0] & 3) && e[2] == 0xb) {
                         collideCat2Type7Cat5Type0BPair(o, e);
                         break;
@@ -42,7 +42,7 @@ extern short CAT2_OBJECT_COUNT;
 extern unsigned char **CAT2_OBJECT_LIST;
 extern unsigned short CAT5_OBJECT_COUNT;
 extern unsigned char **CAT5_OBJECT_LIST;
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern void collideCat2Type7Cat5Type0BPair(unsigned char *a, unsigned char *b);
 
 void collideCat2Type7WithCat5Type0B(void)
@@ -58,9 +58,9 @@ void collideCat2Type7WithCat5Type0B(void)
             n--;
             if ((o[0] & 3) && o[2] == 7 && o[3] != 0 && o[0xc] == 1 && o[0x69] == 0) {
                 qq = CAT5_OBJECT_LIST;
-                for (DAT_1f80019e = CAT5_OBJECT_COUNT; DAT_1f80019e != 0; ) {
+                for (LIST_COUNTER = CAT5_OBJECT_COUNT; LIST_COUNTER != 0; ) {
                     e = *qq++;
-                    DAT_1f80019e--;
+                    LIST_COUNTER--;
                     if ((e[0] & 3) && e[2] == 0xb) {
                         collideCat2Type7Cat5Type0BPair(o, e);
                         break;

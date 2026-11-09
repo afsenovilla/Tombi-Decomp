@@ -42,19 +42,19 @@ extern volatile int* D_800962C0;
 extern void* D_800962C4;
 extern volatile CdlIntr CD_INTR;
 extern void* D_800962CC[];
-extern volatile unsigned char* D_80096F4C;
+extern volatile unsigned char* cd_reg0;
 extern s32* D_800962E4;
 extern s32* D_800962E8;
 extern s32* D_800962EC;
 extern s32* D_800962F0;
 extern volatile s32* D_800962F4;
-extern char D_8009BF40[];
-extern char D_8009BF48[];
+extern char cd_result_sync[];
+extern char cd_result_ready[];
 extern volatile u_char* D_800962BC;
 extern char D_8009B2B8[];
-extern int D_8009BF58;
-extern int D_8009BF5C; // timeout
-extern char* D_8009BF60[];
+extern int cd_alarm;
+extern int cd_alarm_count; // timeout
+extern char* cd_alarm_func[];
 
 void CD_flush(void);
 void callback(void);
@@ -72,11 +72,11 @@ static inline void rescpy(void* _dst, void* _src) {
 }
 
 static inline int get_alarm(void) {
-    if ((D_8009BF58 < VSync(-1)) || D_8009BF5C++ > 0x3C0000) {
+    if ((cd_alarm < VSync(-1)) || cd_alarm_count++ > 0x3C0000) {
         puts("CD timeout: ");
         
         printf("%s:(%s) Sync=%s, Ready=%s\n",
-            D_8009BF60[0],
+            cd_alarm_func[0],
             CD_COMSTR[CD_COM],
             CD_INTSTR[CD_INTR.sync],
             CD_INTSTR[CD_INTR.ready]);
@@ -99,9 +99,9 @@ int CD_sync(int mode, unsigned char* result) {
     char com, s, r;
     char** name;
 
-    D_8009BF58 = VSync(-1) + 0x3C0;
-    D_8009BF5C = 0;
-    D_8009BF60[0] = "CD_sync";  
+    cd_alarm = VSync(-1) + 0x3C0;
+    cd_alarm_count = 0;
+    cd_alarm_func[0] = "CD_sync";  
 
     while (true) {
         if (get_alarm() != 0) {
@@ -109,24 +109,24 @@ int CD_sync(int mode, unsigned char* result) {
         }
 
         if (CheckCallback()) {
-            temp_s1 = D_80096F4C[0] & 3;
+            temp_s1 = cd_reg0[0] & 3;
 
             while (intr = getintr()) {
                 if (intr & 4 && CD_CBREADY != NULL) {
-                    CD_CBREADY(CD_INTR.ready, D_8009BF48);
+                    CD_CBREADY(CD_INTR.ready, cd_result_ready);
                 }
                 if (intr & 2 && CD_CBSYNC != NULL) {
-                    CD_CBSYNC(CD_INTR.sync, D_8009BF40);
+                    CD_CBSYNC(CD_INTR.sync, cd_result_sync);
                 }
             }
-            D_80096F4C[0] = temp_s1;
+            cd_reg0[0] = temp_s1;
         }
 
         sync = CD_INTR.sync;
         if (sync == 2 || sync == 5) {
             CD_INTR.sync = 2;
             dst = result;
-            src = D_8009BF40;
+            src = cd_result_sync;
             if (dst != NULL) {
                 for (i = 7; i != -1; i--) {
                     *dst++ = *src++;

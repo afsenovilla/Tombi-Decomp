@@ -10,19 +10,19 @@ typedef struct {
     void **anim;
 } T80117E9C;
 
-extern T80117E9C D_80119988[];
+extern T80117E9C WATERFALL_HINT_NPC_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
 void initWaterfallHintNpc(TObj *o)
 {
-    o->box0 = D_80119988[o->subtype].b0;
-    o->box1 = D_80119988[o->subtype].b1;
-    o->box2 = D_80119988[o->subtype].b2;
-    o->box3 = D_80119988[o->subtype].b3;
-    o->w1e = D_80119988[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80119988[o->subtype].w6];
-    o->anim = D_80119988[o->subtype].anim[(unsigned short)o->wb4];
+    o->box0 = WATERFALL_HINT_NPC_DEFS[o->subtype].b0;
+    o->box1 = WATERFALL_HINT_NPC_DEFS[o->subtype].b1;
+    o->box2 = WATERFALL_HINT_NPC_DEFS[o->subtype].b2;
+    o->box3 = WATERFALL_HINT_NPC_DEFS[o->subtype].b3;
+    o->w1e = WATERFALL_HINT_NPC_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[WATERFALL_HINT_NPC_DEFS[o->subtype].w6];
+    o->anim = WATERFALL_HINT_NPC_DEFS[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     o->d8c = 0;
     o->b0d = 0;

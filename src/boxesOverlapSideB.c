@@ -4,7 +4,7 @@
 #define U16(o, k) (*(unsigned short *)((char *)(o) + (k)))
 #define S16(o, k) (*(short *)((char *)(o) + (k)))
 #define PTR(o, k) (*(char **)((char *)(o) + (k)))
-extern unsigned short DAT_1f80019e;
+extern unsigned short LIST_COUNTER;
 int boxesOverlapSideB(TObj *a, TObj *b)
 {
     short dy; short sx; short ad; short dx;
@@ -20,7 +20,7 @@ int boxesOverlapSideB(TObj *a, TObj *b)
         if (c > a->box3 + b->box3)
             return -1;
     }
-    DAT_1f80019e = 0;
+    LIST_COUNTER = 0;
     ad = dx;
     if (dx < 0)
         dx = -dx;

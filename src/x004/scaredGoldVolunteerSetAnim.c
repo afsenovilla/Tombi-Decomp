@@ -3,13 +3,13 @@
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
-extern AT D_80131188[];
+extern AT SCARED_GOLD_VOLUNTEER_DEFS_ANIMS[];
 extern void AnimJump(TObj *, short);
 
 void scaredGoldVolunteerSetAnim(TObj *o, short n, short k)
 {
     if (n != ((TX *)o)->wd2) {
-        o->anim = D_80131188[o->subtype].anims[n];
+        o->anim = SCARED_GOLD_VOLUNTEER_DEFS_ANIMS[o->subtype].anims[n];
         AnimJump(o, k);
         ((TX *)o)->wd2 = n;
     }

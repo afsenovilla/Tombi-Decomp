@@ -37,7 +37,7 @@ typedef struct O {
 } O;
 typedef struct V { unsigned short h, v; } V;
 
-extern V D_8007B35C[];
+extern V ITEM_OBJECT_VEL_TABLE[];
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
 extern void (*REWARD_HANDLERS[])(O *);
 extern unsigned char D_8009CDAC;
@@ -125,8 +125,8 @@ void func_8003E988(O *o)
             if (o->b68 & 1) {
                 o->b68 = 0;
                 o->wb4 = 1;
-                o->velH = D_8007B35C[o->animFrame].h;
-                o->velV = D_8007B35C[o->animFrame].v;
+                o->velH = ITEM_OBJECT_VEL_TABLE[o->animFrame].h;
+                o->velV = ITEM_OBJECT_VEL_TABLE[o->animFrame].v;
             } else if (o->b69 & 1) {
                 o->b69 = 0;
                 if (o->velV <= 0x100) goto land;
@@ -221,7 +221,7 @@ typedef struct O {
 } O;
 typedef struct V { unsigned short h, v; } V;
 
-extern V D_8007B35C[];
+extern V ITEM_OBJECT_VEL_TABLE[];
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
 extern void (*REWARD_HANDLERS[])(O *);
 extern unsigned char D_8009CDAC;
@@ -310,8 +310,8 @@ void updateItemObject(O *o)
             if (o->b68 & 1) {
                 o->b68 = 0;
                 o->wb4 = 1;
-                o->velH = D_8007B35C[o->animFrame].h;
-                o->velV = D_8007B35C[o->animFrame].v;
+                o->velH = ITEM_OBJECT_VEL_TABLE[o->animFrame].h;
+                o->velV = ITEM_OBJECT_VEL_TABLE[o->animFrame].v;
             } else if (o->b69 & 1) {
                 o->b69 = 0;
                 if (o->velV <= 0x100) goto land;

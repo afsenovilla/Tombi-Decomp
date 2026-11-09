@@ -4,8 +4,8 @@
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
 extern short COLLISION_HIT_HEIGHT;
-extern unsigned char DAT_1f8001d2;
-extern unsigned short DAT_1f800284[], COLLISION_HIT_FLAGS[];
+extern unsigned char TILE_RESPONSE_ACTIVE;
+extern unsigned short COLLISION_HIT_SURFACE[], COLLISION_HIT_FLAGS[];
 typedef struct { char pad[0xa0]; unsigned char ba0; } XA0;
 #define BA0(o) (((XA0 *)(o))->ba0)
 
@@ -27,9 +27,9 @@ void func_80040760(TObj *o)
         a = -a;
     o->b69 = 1;
     w = COLLISION_HIT_FLAGS[0];
-    e = DAT_1f800284[0];
+    e = COLLISION_HIT_SURFACE[0];
     o->wb0 = a;
-    DAT_1f8001d2 = 1;
+    TILE_RESPONSE_ACTIVE = 1;
     hi = w >> 15;
     o->wae = e;
     m = (w >> 5) & 0xf;
@@ -64,8 +64,8 @@ void func_80040760(TObj *o)
 #else
 #include "TOBJ.H"
 extern short COLLISION_HIT_HEIGHT;
-extern unsigned char DAT_1f8001d2;
-extern unsigned short DAT_1f800284[], COLLISION_HIT_FLAGS[];
+extern unsigned char TILE_RESPONSE_ACTIVE;
+extern unsigned short COLLISION_HIT_SURFACE[], COLLISION_HIT_FLAGS[];
 typedef struct { char pad[0xa0]; unsigned char ba0; } XA0;
 #define BA0(o) (((XA0 *)(o))->ba0)
 
@@ -86,8 +86,8 @@ void applyCollisionTileResponse(TObj *o)
     if (COLLISION_HIT_HEIGHT < 0)
         a = -a;
     o->b69 = 1;
-    e = DAT_1f800284[0];
-    DAT_1f8001d2 = 1;
+    e = COLLISION_HIT_SURFACE[0];
+    TILE_RESPONSE_ACTIVE = 1;
     BA0(o) = 0;
     o->bbe = 0;
     w = COLLISION_HIT_FLAGS[0];

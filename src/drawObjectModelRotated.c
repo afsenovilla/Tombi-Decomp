@@ -7,8 +7,8 @@
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { long vx, vy, vz, pad; } VECTOR;
-extern MATRIX DAT_1f800000, DAT_1f800020, VIEW_CAMERA;
-extern SVECTOR DAT_1f800060, DAT_1f800068;
+extern MATRIX DAT_1f800000, OBJECT_MATRIX, VIEW_CAMERA;
+extern SVECTOR WORK_VEC_A, WORK_VEC_B;
 extern unsigned short SPAWN_AXIS_SWAP;
 extern int CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
@@ -22,25 +22,25 @@ extern void func_8003F160(TObj *, int);
 
 void FUN_80057470(TObj *o)
 {
-    getBaseMatrix(&DAT_1f800020);
+    getBaseMatrix(&OBJECT_MATRIX);
     switch (SPAWN_AXIS_SWAP & 1) {
     case 0:
-        DAT_1f800060.vx = o->d84;
-        DAT_1f800060.vy = o->d88;
-        DAT_1f800060.vz = o->d8c;
+        WORK_VEC_A.vx = o->d84;
+        WORK_VEC_A.vy = o->d88;
+        WORK_VEC_A.vz = o->d8c;
         break;
     case 1:
-        DAT_1f800060.vx = o->d8c;
-        DAT_1f800060.vy = o->d88;
-        DAT_1f800060.vz = o->d84;
+        WORK_VEC_A.vx = o->d8c;
+        WORK_VEC_A.vy = o->d88;
+        WORK_VEC_A.vz = o->d84;
         break;
     }
-    RotMatrix(&DAT_1f800060, &DAT_1f800020);
-    DAT_1f800068.vx = o->a.p.whole;
-    DAT_1f800068.vy = o->y.p.whole;
-    DAT_1f800068.vz = o->b.p.whole;
-    MulMatrix0(&VIEW_CAMERA, &DAT_1f800020, &DAT_1f800000);
-    ApplyRotMatrix(&DAT_1f800068, DAT_1f800000.t);
+    RotMatrix(&WORK_VEC_A, &OBJECT_MATRIX);
+    WORK_VEC_B.vx = o->a.p.whole;
+    WORK_VEC_B.vy = o->y.p.whole;
+    WORK_VEC_B.vz = o->b.p.whole;
+    MulMatrix0(&VIEW_CAMERA, &OBJECT_MATRIX, &DAT_1f800000);
+    ApplyRotMatrix(&WORK_VEC_B, DAT_1f800000.t);
     DAT_1f800000.t[0] += VIEW_CAMERA.t[0];
     DAT_1f800000.t[1] += VIEW_CAMERA.t[1];
     DAT_1f800000.t[2] += VIEW_CAMERA.t[2];
@@ -54,8 +54,8 @@ void FUN_80057470(TObj *o)
 typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { long vx, vy, vz, pad; } VECTOR;
-extern MATRIX DAT_1f800000, DAT_1f800020, VIEW_CAMERA;
-extern SVECTOR DAT_1f800060, DAT_1f800068;
+extern MATRIX DAT_1f800000, OBJECT_MATRIX, VIEW_CAMERA;
+extern SVECTOR WORK_VEC_A, WORK_VEC_B;
 extern unsigned short SPAWN_AXIS_SWAP;
 extern int CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
@@ -68,25 +68,25 @@ extern void drawModel(int, int, TObj *, int);
 
 void drawObjectModelRotated(TObj *o)
 {
-    getBaseMatrix(&DAT_1f800020);
+    getBaseMatrix(&OBJECT_MATRIX);
     switch (SPAWN_AXIS_SWAP & 1) {
     case 0:
-        DAT_1f800060.vx = o->d84;
-        DAT_1f800060.vy = o->d88;
-        DAT_1f800060.vz = o->d8c;
+        WORK_VEC_A.vx = o->d84;
+        WORK_VEC_A.vy = o->d88;
+        WORK_VEC_A.vz = o->d8c;
         break;
     case 1:
-        DAT_1f800060.vx = o->d8c;
-        DAT_1f800060.vy = o->d88;
-        DAT_1f800060.vz = o->d84;
+        WORK_VEC_A.vx = o->d8c;
+        WORK_VEC_A.vy = o->d88;
+        WORK_VEC_A.vz = o->d84;
         break;
     }
-    RotMatrix(&DAT_1f800060, &DAT_1f800020);
-    DAT_1f800068.vx = o->a.p.whole;
-    DAT_1f800068.vy = o->y.p.whole;
-    DAT_1f800068.vz = o->b.p.whole;
-    MulMatrix0(&VIEW_CAMERA, &DAT_1f800020, &DAT_1f800000);
-    ApplyRotMatrix(&DAT_1f800068, DAT_1f800000.t);
+    RotMatrix(&WORK_VEC_A, &OBJECT_MATRIX);
+    WORK_VEC_B.vx = o->a.p.whole;
+    WORK_VEC_B.vy = o->y.p.whole;
+    WORK_VEC_B.vz = o->b.p.whole;
+    MulMatrix0(&VIEW_CAMERA, &OBJECT_MATRIX, &DAT_1f800000);
+    ApplyRotMatrix(&WORK_VEC_B, DAT_1f800000.t);
     DAT_1f800000.t[0] += VIEW_CAMERA.t[0];
     DAT_1f800000.t[1] += VIEW_CAMERA.t[1];
     DAT_1f800000.t[2] += VIEW_CAMERA.t[2];

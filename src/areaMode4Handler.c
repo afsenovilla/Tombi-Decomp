@@ -7,9 +7,9 @@
 typedef struct G { char pad[0x4c]; unsigned short w4c, w4e; } G;
 extern G *TASK_C;
 extern int GAME_TOTAL_TIME_PLAYED[];
-extern unsigned char DAT_1f8001c2;
+extern unsigned char DEBUG_SKIP_STEP;
 extern volatile unsigned short PAD_PRESSED[];
-extern volatile unsigned short DAT_8009d674;
+extern volatile unsigned short PAD_PRESSED_PREV;
 extern unsigned short JOYPAD_STATE;
 extern unsigned char HUD_STATE;
 extern unsigned char DAT_1f8001cf;
@@ -59,7 +59,7 @@ void areaMode4Handler(void)
     case 1:
         GAME_TOTAL_TIME_PLAYED[0]++;
         areaMode4Tick();
-        if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 0x800) && (PAD_PRESSED[0] & 8))
+        if (DEBUG_SKIP_STEP != 0 && (PAD_PRESSED[0] & 0x800) && (PAD_PRESSED[0] & 8))
             TASK_C->w4e = 3;
         break;
     case 2:
@@ -82,9 +82,9 @@ void areaMode4Handler(void)
 typedef struct G { char pad[0x4c]; unsigned short w4c, w4e; } G;
 extern G *TASK_C;
 extern int GAME_TOTAL_TIME_PLAYED[];
-extern unsigned char DAT_1f8001c2;
+extern unsigned char DEBUG_SKIP_STEP;
 extern volatile unsigned short PAD_PRESSED[];
-extern volatile unsigned short DAT_8009d674;
+extern volatile unsigned short PAD_PRESSED_PREV;
 extern unsigned short JOYPAD_STATE;
 extern unsigned char HUD_STATE;
 extern unsigned char DAT_1f8001cf;
@@ -131,7 +131,7 @@ void func_8001AF3C(void)
     case 1:
         GAME_TOTAL_TIME_PLAYED[0]++;
         areaMode4Tick();
-        if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 0x800) && (PAD_PRESSED[0] & 8))
+        if (DEBUG_SKIP_STEP != 0 && (PAD_PRESSED[0] & 0x800) && (PAD_PRESSED[0] & 8))
             TASK_C->w4e = 3;
         break;
     case 2:
@@ -152,9 +152,9 @@ void func_8001AF3C(void)
 typedef struct G { char pad[0x4c]; unsigned short w4c, w4e; } G;
 extern G *TASK_C;
 extern int GAME_TOTAL_TIME_PLAYED[];
-extern unsigned char DAT_1f8001c2;
+extern unsigned char DEBUG_SKIP_STEP;
 extern volatile unsigned short PAD_PRESSED[];
-extern volatile unsigned short DAT_8009d674;
+extern volatile unsigned short PAD_PRESSED_PREV;
 extern unsigned short JOYPAD_STATE;
 extern unsigned char HUD_STATE;
 extern unsigned char DAT_1f8001cf;
@@ -197,9 +197,9 @@ void areaMode4Handler(void)
             *(short *)(q + 0x16) = 0;
             *(short *)(q + 0x1a) = 0;
         }
-        DAT_8009d674 = 0;
+        PAD_PRESSED_PREV = 0;
         JOYPAD_STATE = 0;
-        PAD_PRESSED[0] = DAT_8009d674;
+        PAD_PRESSED[0] = PAD_PRESSED_PREV;
         break;
     case 1:
 #ifdef PORT2
@@ -208,7 +208,7 @@ void areaMode4Handler(void)
         GAME_TOTAL_TIME_PLAYED[0]++;
 #endif
         areaMode4Tick();
-        if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 8) && (PAD_PRESSED[0] & 0x800))
+        if (DEBUG_SKIP_STEP != 0 && (PAD_PRESSED[0] & 8) && (PAD_PRESSED[0] & 0x800))
             TASK_C->w4e = 3;
         break;
     case 2:

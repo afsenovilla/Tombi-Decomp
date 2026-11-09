@@ -6,7 +6,7 @@ extern int resolveHitResultD(TObj *, TObj *);
 extern void cloneItemPickupObject(TObj *);
 extern void awardAPByArea(int, int, int, int);
 extern unsigned char PLAYER, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 
 void weaponHitCat2Type08(TObj *a, TObj *o)
 {
@@ -40,6 +40,6 @@ void weaponHitCat2Type08(TObj *a, TObj *o)
                 o->animFrame = 1 - (t & 1);
             }
         }
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
     }
 }

@@ -9,7 +9,7 @@ extern signed char GAME_PLAYER_MODE;
 extern unsigned char D_80125CA8[];
 extern unsigned char D_80125CB8[];
 extern unsigned char D_80125CC8[];
-extern void (*D_80125CD8[])(TObj *);
+extern void (*EVIL_PIG_ATTACK_HANDLERS[])(TObj *);
 extern void realEvilPigChooseAttack(TObj *);
 extern void ObjSetFacingToPlayer(TObj *);
 extern int Rand(void);
@@ -50,7 +50,7 @@ void evilPigBossAttack(TObj *o)
         o->state++;
     case 1:
         if (GAME_PLAYER_MODE != 3) {
-            D_80125CD8[((unsigned short*)&GAME.selectedSection)[0]](o);
+            EVIL_PIG_ATTACK_HANDLERS[((unsigned short*)&GAME.selectedSection)[0]](o);
         }
         break;
     case 2:

@@ -1,7 +1,7 @@
 // FUNC 8006efa8 156 MAIN0
 // MATCHING 8006efa8 156
 typedef struct { short s0, s2, s4, s6, s8, sa, sc, se; } E;
-extern E *TAB;
+extern E *_rootCounter0;
 
 int SetRCnt(unsigned short p, short v, unsigned int f)
 {
@@ -10,7 +10,7 @@ int SetRCnt(unsigned short p, short v, unsigned int f)
     volatile E *e;
     if (i >= 3)
         return 0;
-    e = (E *)((i << 4) + (int)TAB);
+    e = (E *)((i << 4) + (int)_rootCounter0);
     e->s4 = 0;
     e->s8 = v;
     if ((unsigned)i < 2) {
@@ -20,7 +20,7 @@ int SetRCnt(unsigned short p, short v, unsigned int f)
         if (!(f & 1)) r = 0x248;
     }
     if (f & 0x1000) r |= 0x10;
-    e = (E *)((i << 4) + (int)TAB);
+    e = (E *)((i << 4) + (int)_rootCounter0);
     e->s4 = r;
     return 1;
 }

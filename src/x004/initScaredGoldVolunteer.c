@@ -10,20 +10,20 @@ typedef struct {
     void **anim;
 } T80129914;
 
-extern T80129914 D_80131180[];
+extern T80129914 SCARED_GOLD_VOLUNTEER_DEFS[];
 extern int SPR_DATA[];
 extern short FUN_8005e420(int, int);
 extern void AnimLoadDuration(TObj *);
 
 void initScaredGoldVolunteer(TObj *o)
 {
-    o->box0 = D_80131180[o->subtype].b0;
-    o->box1 = D_80131180[o->subtype].b1;
-    o->box2 = D_80131180[o->subtype].b2;
-    o->box3 = D_80131180[o->subtype].b3;
-    o->w1e = D_80131180[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80131180[o->subtype].w6];
-    o->anim = D_80131180[o->subtype].anim[(unsigned short)o->wb4];
+    o->box0 = SCARED_GOLD_VOLUNTEER_DEFS[o->subtype].b0;
+    o->box1 = SCARED_GOLD_VOLUNTEER_DEFS[o->subtype].b1;
+    o->box2 = SCARED_GOLD_VOLUNTEER_DEFS[o->subtype].b2;
+    o->box3 = SCARED_GOLD_VOLUNTEER_DEFS[o->subtype].b3;
+    o->w1e = SCARED_GOLD_VOLUNTEER_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[SCARED_GOLD_VOLUNTEER_DEFS[o->subtype].w6];
+    o->anim = SCARED_GOLD_VOLUNTEER_DEFS[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     o->d8c = 0;
     o->b0d = 1;

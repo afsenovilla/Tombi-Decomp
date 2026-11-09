@@ -20,7 +20,7 @@ static char DAT_801396ca[98] = {
     0, 0, 0, 1, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1,
     0, 1, 0x68, 0, 0x68, 0, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -1, 0x7f,
 };
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern int showMessageBox(int, int, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -194,7 +194,7 @@ void func_80135DC0(TObj *o)
             X.step = 0;
             X.state = 0;
             X.b69 = 4;
-            X.anim = D_80010748;
+            X.anim = PLAYER_IDLE_ANIM;
             AnimLoadDuration(&X);
             DAT_8009cebd = 1;
             X.d90 = showMessageBox(4, 1, 0x80, 0x6c);
@@ -264,7 +264,7 @@ static char DAT_801396ca[98] = {
     0, 0, 0, 1, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1,
     0, 1, 0x68, 0, 0x68, 0, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -1, 0x7f,
 };
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern int showMessageBox(int, int, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -441,7 +441,7 @@ void updateCharlesTalkScene(TObj *o)
             X.step = 0;
             X.state = 0;
             X.b69 = 4;
-            X.anim = D_80010748;
+            X.anim = PLAYER_IDLE_ANIM;
             AnimLoadDuration(&X);
             DAT_8009cebd = 1;
             X.d90 = showMessageBox(4, 1, 0x80, 0x6c);

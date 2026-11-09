@@ -1,7 +1,7 @@
 // FUNC 800491f0 820 MAIN0
 // MATCHING 800491f0 820
 #if defined(VERSION_PCPX_96084) /* PrePre 8 scratchpad layout */
-#define D_1F80019E D_1F8002A6
+#define LIST_COUNTER D_1F8002A6
 #endif
 /* The outer list loop is a real do-while so the refs of the case-32 box test get loop depth 3 (goto loop = depth 2),
    which flips local-alloc's priority order (box/sum/andi chain before lim/slt and o-val/d) and gives the game's
@@ -11,7 +11,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 extern unsigned char D_8007B63C[];
 void pushObjectOutOfObjectFacing(TObj *o);
 void pushObjectOutOfCat4Type01(TObj *o);
@@ -51,10 +51,10 @@ void collideCat2WithCat4Objects(void)
         n--;
         if (o->active != 2 && D_8007B63C[o->type] != 0) {
         l2 = *(TObj ***)0x1F800224;
-        if ((D_1F80019E = *(unsigned short *)0x1F80024C) != 0)
+        if ((LIST_COUNTER = *(unsigned short *)0x1F80024C) != 0)
         do {
             e = *l2++;
-            D_1F80019E--;
+            LIST_COUNTER--;
             if (!(e->active & 1)) continue;
             switch (e->type) {
             case 0: two = 2; pushObjectOutOfObjectFacing(o); break;
@@ -99,7 +99,7 @@ void collideCat2WithCat4Objects(void)
             case 51: func_80121A40(o); break;
             case 30: func_8011FAE8(o); break;
             }
-        } while (D_1F80019E != 0);
+        } while (LIST_COUNTER != 0);
         }
     } while (n != 0);
 }

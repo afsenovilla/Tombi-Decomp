@@ -4,7 +4,7 @@
 /* JP spawnEventTitle; form from psx_tomba (main/game/event.c, REGION_JP), MIT. */
 typedef struct W { unsigned short unk0, unk2; } W;
 extern unsigned short D_800A7B8A, D_800A60A2, PLAYER_Y, GAME;
-extern unsigned short D_1F8000F2;
+extern unsigned short VIEW_CAMERA_Y;
 extern int *D_1F80033C;
 extern unsigned char *D_1F80039C;
 extern unsigned char *D_80071CE4[];
@@ -39,7 +39,7 @@ void func_8001CA50(int event_id, int completed, int duration, int state)
     if (event_id == 1) {
         duration = 1;
         x = D_800A7B8A - D_800A60A2;
-        y = PLAYER_Y - D_1F8000F2;
+        y = PLAYER_Y - VIEW_CAMERA_Y;
     }
     src = D_1F80039C;
     src += *(unsigned short *)(src + 8);

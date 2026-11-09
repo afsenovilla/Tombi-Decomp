@@ -10,19 +10,19 @@ typedef struct {
     void **anim;
 } T80126F48;
 
-extern T80126F48 D_8012F3BC[];
+extern T80126F48 TEN_THOUSAND_YEAR_ELDER_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
 void initTenThousandYearElder(TObj *o)
 {
-    o->box0 = D_8012F3BC[o->subtype].b0;
-    o->box1 = D_8012F3BC[o->subtype].b1;
-    o->box2 = D_8012F3BC[o->subtype].b2;
-    o->box3 = D_8012F3BC[o->subtype].b3;
-    o->w1e = D_8012F3BC[o->subtype].w4;
-    o->d3c = SPR_DATA[D_8012F3BC[o->subtype].w6];
-    o->anim = D_8012F3BC[o->subtype].anim[0];
+    o->box0 = TEN_THOUSAND_YEAR_ELDER_DEFS[o->subtype].b0;
+    o->box1 = TEN_THOUSAND_YEAR_ELDER_DEFS[o->subtype].b1;
+    o->box2 = TEN_THOUSAND_YEAR_ELDER_DEFS[o->subtype].b2;
+    o->box3 = TEN_THOUSAND_YEAR_ELDER_DEFS[o->subtype].b3;
+    o->w1e = TEN_THOUSAND_YEAR_ELDER_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[TEN_THOUSAND_YEAR_ELDER_DEFS[o->subtype].w6];
+    o->anim = TEN_THOUSAND_YEAR_ELDER_DEFS[o->subtype].anim[0];
     AnimLoadDuration(o);
     o->b0a = 2;
     o->d8c = 0;

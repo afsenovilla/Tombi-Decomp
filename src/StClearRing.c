@@ -6,22 +6,22 @@
 #include "common.h"
 #include "psyq/libcd.h"
 
-extern s32 D_8009C334;
-extern s16 D_8009C90C;
-extern s32 D_8009D544;
-extern s32 D_800A2264;
-extern s32 D_800A2268;
-extern s32 D_800A2524;
+extern s32 Stframe_no;
+extern s16 Stsector_offset;
+extern s32 StCdIntrFlag;
+extern s32 StRingIdx1;
+extern s32 StRingIdx2;
+extern s32 StRingIdx3;
 extern s32 ST_RING_SIZE;
 
 void StClearRing(void)
 {
-    D_800A2524 = 0;
-    D_800A2268 = 0;
-    D_800A2264 = 0;
+    StRingIdx3 = 0;
+    StRingIdx2 = 0;
+    StRingIdx1 = 0;
     GV6.ia0 = 0;
     init_ring_status(0, ST_RING_SIZE);
-    D_8009D544 = 0;
-    D_8009C90C = 0;
-    D_8009C334 = 0;
+    StCdIntrFlag = 0;
+    Stsector_offset = 0;
+    Stframe_no = 0;
 }

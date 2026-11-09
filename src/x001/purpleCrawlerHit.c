@@ -5,11 +5,11 @@
 #include "TOBJ.H"
 
 extern char MOVE_TABLE_2[];
-extern void *D_8013FC70[];
+extern void *PURPLE_CRAWLER_ANIMS[];
 extern void *D_8013FCBC[];
 extern void *D_8013FCC0[];
 extern short COLLISION_HIT_HEIGHT;
-extern short D_1F800284;
+extern short COLLISION_HIT_SURFACE;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -54,7 +54,7 @@ static __inline__ int land(TObj *o)
         o->b69 = 0;
         o->wba = 0;
         o->wb2 = COLLISION_HIT_HEIGHT;
-        o->wae = D_1F800284;
+        o->wae = COLLISION_HIT_SURFACE;
         o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
         return 1;
     }
@@ -80,7 +80,7 @@ void func_801294A8(TObj *o)
         o->state++;
         if (o->wac == 0xd || o->wac == 0x13) o->wac = 0xf;
         else o->wac = 0xd;
-        setAnim(o, D_8013FC70[o->wac]);
+        setAnim(o, PURPLE_CRAWLER_ANIMS[o->wac]);
         break;
     case 1:
         AnimAdvance(o);
@@ -162,11 +162,11 @@ void func_801294A8(TObj *o)
 #include "TOBJ.H"
 
 extern char MOVE_TABLE_2[];
-extern void *D_8013FC70[];
+extern void *PURPLE_CRAWLER_ANIMS[];
 extern void *D_8013FCBC[];
 extern void *D_8013FCC0[];
 extern short COLLISION_HIT_HEIGHT;
-extern short D_1F800284;
+extern short COLLISION_HIT_SURFACE;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -211,7 +211,7 @@ static __inline__ int land(TObj *o)
         o->b69 = 0;
         o->wba = 0;
         o->wb2 = COLLISION_HIT_HEIGHT;
-        o->wae = D_1F800284;
+        o->wae = COLLISION_HIT_SURFACE;
         o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
         return 1;
     }
@@ -237,7 +237,7 @@ void purpleCrawlerHit(TObj *o)
         o->state++;
         if (o->wac == 0xd || o->wac == 0x13) o->wac = 0xf;
         else o->wac = 0xd;
-        setAnim(o, D_8013FC70[o->wac]);
+        setAnim(o, PURPLE_CRAWLER_ANIMS[o->wac]);
         break;
     case 1:
         AnimAdvance(o);

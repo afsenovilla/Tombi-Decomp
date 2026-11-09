@@ -13,7 +13,7 @@ typedef struct { u16 u, v; } UV;
 #define setlen(p, _len) (((P_TAG *)(p))->len = (u8)(_len))
 #define setcode(p, _code) (((P_TAG *)(p))->code = (u8)(_code))
 extern SPRT *NEXT_PRIM;
-extern UV D_80118104[];
+extern UV GAME_STATS_DIGIT_UVS[];
 
 void drawStatsDigit(int i, short x, short y)
 {
@@ -28,8 +28,8 @@ void drawStatsDigit(int i, short x, short y)
     p->x0 = x;
     p->y0 = y;
     p->code &= ~2;
-    p->u0 = D_80118104[i].u;
-    p->v0 = D_80118104[i].v;
+    p->u0 = GAME_STATS_DIGIT_UVS[i].u;
+    p->v0 = GAME_STATS_DIGIT_UVS[i].v;
     p->w = 8;
     p->h = 0x10;
     p->clut = 0x7812;

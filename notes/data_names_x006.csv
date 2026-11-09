@@ -1,0 +1,3 @@
+address,name,size,source
+8011f3f8,MOTOCROSS_COURSE_PATH,,usage: {short x y z w}[]: the course points the bike follows by animTimer (motocrossBikeRide / JumpStepA / B store it in wa8) refs=18
+80122fb8,PITCHFORK_PIG_ANIMS,,usage: anim pointers by b0c (updatePitchforkPig) refs=1

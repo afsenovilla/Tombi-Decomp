@@ -42,6 +42,8 @@ import sysovl
 for _p, (_path, _sha, _code) in sysovl.SYSOVL.items():
     PROG[_p] = ("game/" + _path, sysovl.BASE, 0)
 SYSMODE = PROGMODE in sysovl.SYSOVL
+AREAMODE = PROGMODE in PROG and PROGMODE.startswith("X") and PROGMODE != "X000"
+if AREAMODE: inrange = lambda a: 0x80115EA4 <= a < 0x80200000   # below 0x80115EA4 every X0nn is byte-identical to X000 (its names)
 TWIN_CSV = os.path.join(ROOT, "notes", "data_names_d0spsub3.csv")
 OVL_ID = re.compile(r"\b(?:D|DAT|PTR)_(80[01][0-9a-fA-F]{5})\b")
 GAME = {}
@@ -73,7 +75,7 @@ for h in os.listdir(os.path.join(ROOT, "include", "tomba")):
             H.add(mm.group(1))
 changed = skipped = 0
 def walk():
-    if SYSMODE:
+    if SYSMODE or AREAMODE:
         dp = os.path.join(ROOT, "src", PROGMODE.lower()); yield dp, os.listdir(dp); return
     for dp, dn, fn in os.walk(os.path.join(ROOT, "src")): yield dp, fn
 twin_rows = []
@@ -119,7 +121,7 @@ def rename_twins(stem, used):
 
 for dp, fn in walk():
     rel = os.path.relpath(dp, os.path.join(ROOT, "src"))
-    if PROGMODE != "MAIN0" and not SYSMODE and rel != ".": continue   # overlay mode: src/*.c only, twins follow by identifier; never src/data
+    if PROGMODE != "MAIN0" and not SYSMODE and not AREAMODE and rel != ".": continue   # overlay mode: src/*.c only, twins follow by identifier; never src/data
     for f in sorted(fn):
         if not f.endswith((".c", ".h")): continue
         if "slpm80165" in f: continue   # demo sources: their addresses are the demo's, never rewritten
@@ -134,7 +136,7 @@ for dp, fn in walk():
             addr, size, prog = int(m.group(1), 16), int(m.group(2)), m.group(3).upper()
             stem = f[:-2]
             cands = [os.path.join(ROOT, "build", "full", "obj", stem + ".o")] if rel == "." else []
-            if SYSMODE: cands = [os.path.join(ROOT, "build", "full", "obj", "%s__%s.o" % (prog.lower(), stem))]
+            if SYSMODE or AREAMODE: cands = [os.path.join(ROOT, "build", "full", "obj", "%s__%s.o" % (prog.lower(), stem))]
             cands.append(os.path.join(ROOT, "build", "base", prog.lower(), stem + ".o"))
             for o in cands:
                 if os.path.exists(o) and prog in PROG:
@@ -148,8 +150,8 @@ for dp, fn in walk():
         for ident, a in sorted(idmap.items(), key=lambda x: -len(x[0])):
             nm = names.get(a)
             if not nm or not inrange(a) or nm == ident: continue
-            ma = re.match(r"((?:D|DAT|PTR)_[0-9a-fA-F]{8})(_\w+)$", ident)   # alias `D_xxx_a` of a D_xxx at the same address
-            if ma and idmap.get(ma.group(1)) == a: nm += ma.group(2)
+            ma = re.match(r"((?:D|DAT|PTR)_[0-9a-fA-F]{8})(_\w+|[a-z]\w*)$", ident)   # alias `D_xxx_a` / `D_xxxb` of a D_xxx at the same address
+            if ma and idmap.get(ma.group(1)) == a: nm += ma.group(2) if ma.group(2)[0] == "_" else "_" + ma.group(2).upper()
             local = re.search(r"\bextern\b[^;{}]*\b%s\b" % re.escape(ident), txt)
             if not local:
                 if ident in H: print("HDR ", path, ident, nm)   # declared by a header: rename it there by hand
@@ -164,7 +166,7 @@ for dp, fn in walk():
             changed += 1
             if not DRY: open(path, "w", errors="surrogateescape").write(new)
             if PROGMODE == "D0SPSUB" and f.endswith(".c"): rename_sys_twin(f[:-2], txt, used, idmap)
-            elif PROGMODE != "MAIN0" and not SYSMODE and f.endswith(".c"): rename_twins(f[:-2], used)
+            elif PROGMODE != "MAIN0" and not SYSMODE and not AREAMODE and f.endswith(".c"): rename_twins(f[:-2], used)
 if twin_rows:
     have = {int(r["address"], 16) for r in csv.DictReader(open(TWIN_CSV))} if os.path.exists(TWIN_CSV) else set()
     rows = sorted({r for r in twin_rows if r[0] not in have})

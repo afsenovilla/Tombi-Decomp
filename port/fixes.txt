@@ -146,25 +146,25 @@ src/loopTitleScreen.c | func_800E9D08(TASK_C->b6a, TASK_C->b69); | func_800E9D08
 # debug area select: place names (English, or Spanish with --lang 5) under the numbers; runtime/main.c port_debug_select_names
 src/displayDebugScreen.c | sprintf(&SPRINTF_BUFFER_MSG, "*"); | { extern void port_debug_select_names(int, int); port_debug_select_names(GAME.selectedArea, GAME.selectedSection); } sprintf(&SPRINTF_BUFFER_MSG, "*");
 # drawPauseMenu: its entry lists and glyph UV table (MAIN0 0x80080300..0x800803fc) changed size in MAINn (lang.c finds them through the code)
-src/drawPauseMenu.c | extern XY D_80080404[]; | extern XY D_80080404[]; extern void *port_lang_item(void *);
+src/drawPauseMenu.c | extern XY PAUSE_MENU_ORIGINS[]; | extern XY PAUSE_MENU_ORIGINS[]; extern void *port_lang_item(void *);
 src/drawPauseMenu.c | e = D_8008037c; | e = (ENT *)port_lang_item(D_8008037c);
 src/drawPauseMenu.c | e = D_8008039c; | e = (ENT *)port_lang_item(D_8008039c);
 src/drawPauseMenu.c | e = D_800803bc; | e = (ENT *)port_lang_item(D_800803bc);
 src/drawPauseMenu.c | e = D_800803dc; | e = (ENT *)port_lang_item(D_800803dc);
-src/drawPauseMenu.c | sp->u0 = D_80080300[c].u; | sp->u0 = ((UV *)port_lang_item(D_80080300))[c].u;
-src/drawPauseMenu.c | sp->v0 = D_80080300[c].v; | sp->v0 = ((UV *)port_lang_item(D_80080300))[c].v;
+src/drawPauseMenu.c | sp->u0 = PAUSE_MENU_SPRITE_UVS[c].u; | sp->u0 = ((UV *)port_lang_item(PAUSE_MENU_SPRITE_UVS))[c].u;
+src/drawPauseMenu.c | sp->v0 = PAUSE_MENU_SPRITE_UVS[c].v; | sp->v0 = ((UV *)port_lang_item(PAUSE_MENU_SPRITE_UVS))[c].v;
 # --lang 5: the Si/No boxes of the pause menu (SALIR "Salir juego?", CARGAR "Cargar juego?") are a fixed 96-px frame of 8x8
 # tiles and the Spanish question (8 px a glyph) runs over both sides: the frame grows to the text's span plus a 12-px
 # margin (border tiles shifted, interior tiles stretched), and "Salir juego?" reads "Salir del juego?" (glyph 0x0E = d)
 src/drawPauseMenu.c | extern char D_80012940[]; | extern char D_80012940[]; extern int port_lang, port_launcher_exit; static int port_es_tx0, port_es_tx1, port_es_fx0, port_es_fx1, port_es_dl, port_es_dr; static ENT *port_es_pause(ENT *e) { static const unsigned char old[] = { 0x1e, 0x0b, 0x0d, 0x14, 0x11, 0x19, 0x00, 0x13, 0x1c, 0x0f, 0x10, 0x17, 0x1f, 0xff }; static unsigned char salir[] = { 0x1e, 0x0b, 0x0d, 0x14, 0x11, 0x19, 0x00, 0x0e, 0x0f, 0x14, 0x00, 0x13, 0x1c, 0x0f, 0x10, 0x17, 0x1f, 0xff }; ENT *q; int i, x; port_es_tx0 = 0x7fff; port_es_tx1 = -0x7fff; for (q = e; q->x != -1; q++) { for (i = 0; i < 14 && q->s[i] == old[i]; i++); if (i == 14 && port_lang == 5) { q->s = salir; q->x -= 16; } for (i = 0, x = q->x; q->s[i] != 0xff; i++, x += 8) if (q->s[i]) { if (x < port_es_tx0) port_es_tx0 = x; if (x + 8 > port_es_tx1) port_es_tx1 = x + 8; } } return e; } static void port_es_frame(PT *pt, int n, XY o) { port_es_fx0 = 0x7fff; port_es_fx1 = -0x7fff; port_es_dl = port_es_dr = 0; if (port_es_tx1 < port_es_tx0) return; for (; n > 0; n--, pt++) { if (o.x + pt->dx < port_es_fx0) port_es_fx0 = o.x + pt->dx; if (o.x + pt->dx + pt->w > port_es_fx1) port_es_fx1 = o.x + pt->dx + pt->w; } if (port_es_fx1 - port_es_fx0 <= 16) return; if (port_es_fx0 + 12 > port_es_tx0) port_es_dl = port_es_fx0 + 12 - port_es_tx0; if (port_es_tx1 > port_es_fx1 - 12) port_es_dr = port_es_tx1 - (port_es_fx1 - 12); } static int port_es_map(int x) { int a = port_es_fx0 + 8, b = port_es_fx1 - 8; if (x <= a) return x - port_es_dl; if (x >= b) return x + port_es_dr; return a - port_es_dl + (x - a) * (b - a + port_es_dl + port_es_dr) / (b - a); } static void port_es_widen(short *x0, int *w) { int a = port_es_map(*x0), b = port_es_map(*x0 + *w); *x0 = a; *w = b - a; }
 src/drawPauseMenu.c | for (; e->x != -1; e++) { | e = port_es_pause(e); for (; e->x != -1; e++) {
-src/drawPauseMenu.c | pt = (PT *)(DAT_1f8002d8 + h[1]); | pt = (PT *)(DAT_1f8002d8 + h[1]); port_es_frame(pt, n, D_80080404[mode]);
+src/drawPauseMenu.c | pt = (PT *)(DAT_1f8002d8 + h[1]); | pt = (PT *)(DAT_1f8002d8 + h[1]); port_es_frame(pt, n, PAUSE_MENU_ORIGINS[mode]);
 src/drawPauseMenu.c |         w = pt->w; |         w = pt->w; if (port_es_dl || port_es_dr) port_es_widen(&p->x0, &w);
 # --lang 5: the Spanish glyph strip (32 cells at v 144 of the HUD page, all used) has no 'O' nor 'b', hence the disc's "Elmto";
 # a text patch may write "Objeto" with two more codes (tools/pause_text.py), drawn from the strip itself: 0x20 'O' = the
 # 'U' (0x0C) as it is from row 8 down, closed on top by its own rows 13..9 (one 1 px row each), 0x21 'b' = the 'd'
 # (0x0E) mirrored (one 1 px column each: a quad with u reversed sampled the 'a' next to it on OpenGL, a stray dot).  Without such a patch MAIN5 has no code >= 0x20 and nothing changes
-src/drawPauseMenu.c | extern char D_80012948[]; | extern char D_80012948[]; static void port_es_quad(int x0, int y0, int x1, int y1, int u0, int v0, int u1, int v1, unsigned short clut, int tp) { extern void AddPrim(void *, void *); FT4 *p = (FT4 *)NEXT_PRIM; ((unsigned char *)p)[3] = 9; p->code = 0x2d; p->r0 = p->g0 = p->b0 = 0x80; p->x0 = p->x2 = x0; p->x1 = p->x3 = x1; p->y0 = p->y1 = y0; p->y2 = p->y3 = y1; p->u0 = u0; p->v0 = v0; p->clut = clut; p->uv1 = (u1 & 0xff) + ((v0 & 0xff) << 8) + (tp << 16); p->uv2 = (u0 & 0xff) + ((v1 & 0xff) << 8); p->uv3 = (u1 & 0xff) + ((v1 & 0xff) << 8); AddPrim((void *)(CURRENT_OT + 4), p); NEXT_PRIM = NEXT_PRIM + 0x28; } static void port_es_glyph(int c, int x, int y) { extern void *port_lang_item(void *); extern unsigned short GetClut(int, int); extern int GetGraphType(void); UV *t = (UV *)port_lang_item(D_80080300); unsigned short clut = GetClut(0x160, 0x1e3); int tp = (GetGraphType() == 1 || GetGraphType() == 2) ? 0x24 : 0x14; if (c == 0x20) { int u = t[0x0c].u, v = t[0x0c].v, j; for (j = 0; j < 5; j++) port_es_quad(x, y + 3 + j, x + 8, y + 4 + j, u, v + 13 - j, u + 8, v + 14 - j, clut, tp); port_es_quad(x, y + 8, x + 8, y + 16, u, v + 8, u + 8, v + 16, clut, tp); } else if (c == 0x21) { int u = t[0x0e].u, v = t[0x0e].v, i; for (i = 0; i < 8; i++) port_es_quad(x + i, y, x + i + 1, y + 16, u + 7 - i, v, u + 8 - i, v + 16, clut, tp); } }
+src/drawPauseMenu.c | extern char D_80012948[]; | extern char D_80012948[]; static void port_es_quad(int x0, int y0, int x1, int y1, int u0, int v0, int u1, int v1, unsigned short clut, int tp) { extern void AddPrim(void *, void *); FT4 *p = (FT4 *)NEXT_PRIM; ((unsigned char *)p)[3] = 9; p->code = 0x2d; p->r0 = p->g0 = p->b0 = 0x80; p->x0 = p->x2 = x0; p->x1 = p->x3 = x1; p->y0 = p->y1 = y0; p->y2 = p->y3 = y1; p->u0 = u0; p->v0 = v0; p->clut = clut; p->uv1 = (u1 & 0xff) + ((v0 & 0xff) << 8) + (tp << 16); p->uv2 = (u0 & 0xff) + ((v1 & 0xff) << 8); p->uv3 = (u1 & 0xff) + ((v1 & 0xff) << 8); AddPrim((void *)(CURRENT_OT + 4), p); NEXT_PRIM = NEXT_PRIM + 0x28; } static void port_es_glyph(int c, int x, int y) { extern void *port_lang_item(void *); extern unsigned short GetClut(int, int); extern int GetGraphType(void); UV *t = (UV *)port_lang_item(PAUSE_MENU_SPRITE_UVS); unsigned short clut = GetClut(0x160, 0x1e3); int tp = (GetGraphType() == 1 || GetGraphType() == 2) ? 0x24 : 0x14; if (c == 0x20) { int u = t[0x0c].u, v = t[0x0c].v, j; for (j = 0; j < 5; j++) port_es_quad(x, y + 3 + j, x + 8, y + 4 + j, u, v + 13 - j, u + 8, v + 14 - j, clut, tp); port_es_quad(x, y + 8, x + 8, y + 16, u, v + 8, u + 8, v + 16, clut, tp); } else if (c == 0x21) { int u = t[0x0e].u, v = t[0x0e].v, i; for (i = 0; i < 8; i++) port_es_quad(x + i, y, x + i + 1, y + 16, u + 7 - i, v, u + 8 - i, v + 16, clut, tp); } }
 src/drawPauseMenu.c | if (c) { | if (c >= 0x40) port_lx_glyph(c, x, y); else if (c >= 0x20 && port_lang == 5) port_es_glyph(c, x, y); else if (c) {
 # --launcher-exit (runtime/launcher_exit.c): a 4th Start menu entry "back to the launcher" under LOAD (all languages; letters the
 # language's strip lacks are codes >= 0x40, drawn by port_lx_glyph), its Yes / No box as pause state 1F8003CD = 4 (the quit box's
@@ -172,12 +172,12 @@ src/drawPauseMenu.c | if (c) { | if (c >= 0x40) port_lx_glyph(c, x, y); else if 
 # the highlight bars of the pause / Select menus 6 px past the longest entry and the frames 12 px past it (all languages,
 # port only, with or without the flag)
 src/drawPauseMenu.c | void drawPauseMenu(void) | extern int port_lx_dy; extern void port_lx_glyph(int, int, int), port_lx_bar(short *, short *, int, int); extern void *port_lx_pause_list(void *), *port_lx_confirm_list(void *); extern void port_lx_frame(const void *, int, int), port_lx_vmap(short *, short *, short *, short *); void drawPauseMenu(void)
-src/drawPauseMenu.c | switch (DAT_1f8003cd) { | port_lx_dy = 0; switch (DAT_1f8003cd) { case 4: e = (ENT *)port_lx_confirm_list(port_lang_item(D_8008039c)); mode = 2; break;
+src/drawPauseMenu.c | switch (MENU_CLOSE_MODE) { | port_lx_dy = 0; switch (MENU_CLOSE_MODE) { case 4: e = (ENT *)port_lx_confirm_list(port_lang_item(D_8008039c)); mode = 2; break;
 src/drawPauseMenu.c | e = (ENT *)port_lang_item(D_8008037c); | e = (ENT *)port_lx_pause_list(port_lang_item(D_8008037c));
 src/drawPauseMenu.c | t->w = 0x50; | t->w = 0x50; port_lx_bar(&t->x0, &t->w, port_es_tx0, port_es_tx1);
 src/drawPauseMenu.c | t->w = 0x38; | t->w = 0x38; port_lx_bar(&t->x0, &t->w, port_es_tx0, port_es_tx1);
 src/drawPauseMenu.c | t->w = 0x58; | t->w = 0x58; port_lx_bar(&t->x0, &t->w, port_es_tx0, port_es_tx1);
-src/drawPauseMenu.c | n = h[0]; | n = h[0]; if (port_lx_dy) port_lx_frame(DAT_1f8002d8 + h[1], n, D_80080404[mode].y);
+src/drawPauseMenu.c | n = h[0]; | n = h[0]; if (port_lx_dy) port_lx_frame(DAT_1f8002d8 + h[1], n, PAUSE_MENU_ORIGINS[mode].y);
 src/drawPauseMenu.c | p->y3 = p->y2; | p->y3 = p->y2; if (port_lx_dy) port_lx_vmap(&p->y0, &p->y1, &p->y2, &p->y3);
 src/updatePauseMenu.c | void updatePauseMenu(void) { | extern int port_lx_on(void); extern void port_launcher_quit(void); void updatePauseMenu(void) {
 src/updatePauseMenu.c | if (val < 2) { | if (val < 2 + (port_lx_on() && *(u8*)0x1F8003CD == 1)) {
@@ -477,7 +477,7 @@ src/spawnSectionObjectsAlt.c | n = AREA_SECTION_COUNTS[GAME]; | { extern int por
 # props (layer 3: roofs, signs) index frames of a table that is lost, so they are not drawn at all; the residents (layer 2) are.
 src/i0nfo2/topdownDrawObjectSprite.c | *frm = *(unsigned short *)o->anim; | *frm = *(unsigned short *)o->anim; { extern int port_civ_test; if (port_civ_test && (GAME[0] == 11 || GAME[0] == 16 || GAME[0] == 17) && ((o->category & 0x7F) == 3 || *frm >= ((unsigned short *)*(volatile int *)&o->d3c)[1] / 4)) return; }
 # ... and its camera limits / start come from AREA08 s0 too (AREA11 s0's rows describe no picture)
-src/initSectionCamera.c | p = (short *)&D_80078B7C[GAME[0]][GAME_SELECTED_SECTION]; | { extern int port_civ_test; p = (short *)&D_80078B7C[GAME[0]][GAME_SELECTED_SECTION]; { extern int port_civ_on(int, int); extern short *port_civ_limits(short *); if (port_civ_on(GAME[0], GAME_SELECTED_SECTION)) p = port_civ_limits((short *)&D_80078B7C[8][0]); } }
+src/initSectionCamera.c | p = (short *)&SECTION_CAMERA_BOUNDS[GAME[0]][GAME_SELECTED_SECTION]; | { extern int port_civ_test; p = (short *)&SECTION_CAMERA_BOUNDS[GAME[0]][GAME_SELECTED_SECTION]; { extern int port_civ_on(int, int); extern short *port_civ_limits(short *); if (port_civ_on(GAME[0], GAME_SELECTED_SECTION)) p = port_civ_limits((short *)&SECTION_CAMERA_BOUNDS[8][0]); } }
 src/initSectionCamera.c | q = D_80079474[GAME[0]][GAME_SELECTED_SECTION]; | { extern int port_civ_test; q = D_80079474[GAME[0]][GAME_SELECTED_SECTION]; { extern int port_civ_on(int, int); extern short *port_civ_cam(short *); if (port_civ_on(GAME[0], GAME_SELECTED_SECTION)) q = port_civ_cam(D_80079474[8][0]); } }
 # The residents of set 0D wear the AREA08 villager (TOPDOWN_A08_ACTOR_DEFS[0]: its sprite table, page offset and anim
 # scripts are loaded); AREA11's own actor tables are lost, so its defs would index frames that do not exist here.
@@ -638,12 +638,12 @@ src/tickAnimationFixedRate.c | o->t = o->t - 1; | { extern int port_log_anim; ex
 #
 # --lang: the sub-screens' description banks (WFM3 inside DnSPSUB / DnSPSUB3) are read through the language's whole bank
 # (lang.c port_lang_item): the Spanish one is longer than MAIN0's and cannot always be copied in place over it
-src/d0spsub3/subScreenInitMenu.c | D_1F8003A0 = D_800EF600; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800EF600); }
-src/d0spsub3/subScreenUpdate.c | D_1F8003A0 = D_800EF600; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800EF600); }
-src/d0spsub/subScreenInitMenu.c | D_1F8003A0 = D_800F24E0; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800F24E0); }
-src/d0spsub/subScreenInitMenu.c | D_1F8003A4 = D_800F7B78; | { extern void *port_lang_item(void *); D_1F8003A4 = port_lang_item(D_800F7B78); }
-src/d0spsub/subScreenUpdate.c | D_1F8003A0 = D_800F24E0; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(D_800F24E0); }
-src/d0spsub/subScreenUpdate.c | D_1F8003A4 = D_800F7B78; | { extern void *port_lang_item(void *); D_1F8003A4 = port_lang_item(D_800F7B78); }
+src/d0spsub3/subScreenInitMenu.c | D_1F8003A0 = SUBSCREEN_WFM3_2; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(SUBSCREEN_WFM3_2); }
+src/d0spsub3/subScreenUpdate.c | D_1F8003A0 = SUBSCREEN_WFM3_2; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(SUBSCREEN_WFM3_2); }
+src/d0spsub/subScreenInitMenu.c | D_1F8003A0 = SUBSCREEN_WFM3_2; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(SUBSCREEN_WFM3_2); }
+src/d0spsub/subScreenInitMenu.c | D_1F8003A4 = SUBSCREEN_WFM3_3; | { extern void *port_lang_item(void *); D_1F8003A4 = port_lang_item(SUBSCREEN_WFM3_3); }
+src/d0spsub/subScreenUpdate.c | D_1F8003A0 = SUBSCREEN_WFM3_2; | { extern void *port_lang_item(void *); D_1F8003A0 = port_lang_item(SUBSCREEN_WFM3_2); }
+src/d0spsub/subScreenUpdate.c | D_1F8003A4 = SUBSCREEN_WFM3_3; | { extern void *port_lang_item(void *); D_1F8003A4 = port_lang_item(SUBSCREEN_WFM3_3); }
 #
 # --widescreen sub-screens (shims/gpu.c port_ws_mark): the popup menus stay whole where the game put them (their text shares
 # CLUT 0x7C15 and their balloon frame the quads of the wooden bars), and the event list's counters move with the left column
@@ -738,7 +738,7 @@ src/drawPauseMenu.c | t->h = 0x100; | t->h = PORT_NTSC(0x100, 0xf0);
 src/drawPauseMenu.c | y = e->y; | y = e->y - PORT_NTSC(0, 16);
 src/drawPauseMenu.c | k <<= 4; k += 0x58; | k <<= 4; k += PORT_NTSC(0x58, 0x48);
 src/drawPauseMenu.c | t->y0 = 0x78; | t->y0 = PORT_NTSC(0x78, 0x68);
-src/drawPauseMenu.c | p->y0 = D_80080404[mode].y + pt->dy; | p->y0 = D_80080404[mode].y - PORT_NTSC(0, 16) + pt->dy;
+src/drawPauseMenu.c | p->y0 = PAUSE_MENU_ORIGINS[mode].y + pt->dy; | p->y0 = PAUSE_MENU_ORIGINS[mode].y - PORT_NTSC(0, 16) + pt->dy;
 # Title screen menu rows (USA loopTitleScreen 0x80019E68)
 src/loopTitleScreen.c | func_800E972C(0x30, 0xd0, 1); | func_800E972C(0x30, PORT_NTSC(0xd0, 0xc0), 1);
 src/loopTitleScreen.c | func_800E972C(0x38, 0xa0, 0); | func_800E972C(0x38, PORT_NTSC(0xa0, 0x90), 0);

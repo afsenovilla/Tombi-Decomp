@@ -5,7 +5,7 @@
 #include "player.h"
 #include "TOBJ.H"
 typedef struct { unsigned short w0, w2, w4, w6, w8, wa, wc; } E;
-extern E D_8013145C[];
+extern E BIG_KEY_PAINTING_PIECE_DEFS[];
 extern unsigned short PLAYER_Y[];
 extern TObj *allocObjectLayer2(void);
 extern void FUN_80026e0c(int, int);
@@ -26,7 +26,7 @@ void bigKeyPaintingCheckPiece(TObj *o)
         c &= 0xff;
         if (c >= 0x33) break;
         if (c < 0x2e) break;
-        p = &D_8013145C[i];
+        p = &BIG_KEY_PAINTING_PIECE_DEFS[i];
         n = allocObjectLayer2();
         if (n) {
             n->active = 4;
