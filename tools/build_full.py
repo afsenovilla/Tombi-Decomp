@@ -43,7 +43,9 @@ the address the retail bytes give them.
 Usage: python3 tools/build_full.py [--version V] [--no-split] [-j N] [--asm-only] [--keep-going] [--only prog,prog]
   --no-split   reuse the previous splat output in build/full/asm
   --asm-only   ignore src/ (pure splat assembly: checks the asm path alone)
-Requirements: the same as tools/ncheck.py (tools/setup_native.sh) and splat 0.35.2 (tools/requirements.txt).
+Requirements: the same as tools/ncheck.py (tools/setup_native.sh, including include/tomba/psyq: refused without it)
+and splat 0.35.2 (tools/requirements.txt). The C files that did not compile (linked from asm) are listed in
+<out>/compile_failures.txt; port/tools/gen_port.py refuses a link with any.
 """
 import hashlib, os, re, shutil, struct, subprocess, sys, tempfile
 from multiprocessing import Pool
@@ -387,7 +389,7 @@ def compile_jobs(units, jobs):
     for u, r in zip(units, res):
         ok.append(u)
         if r is not None:
-            u["failed"] = True
+            u["failed"] = u["compile_error"] = True
             print("WARN %s does not compile, kept as asm: %s" % (u["src"], r.strip().splitlines()[-1] if r.strip() else "?"))
     return ok
 
@@ -868,13 +870,29 @@ def main():
         if not os.path.exists(P["game"]):
             if p in ("main0", "x000") or VER: sys.exit("missing %s (put your own game files in game/)" % P["game"])
             print("skip %s: missing %s (extracted disc tree game/disc/fs)" % (P["out"], P["game"])); del PROGS[p]
+    # the psx_tomba headers (`// HEADERS tomba24` / `tomba26` files include tomba/psyq/...) are not in the repo:
+    # without them every such file fails to compile and stays asm, the link still matches by sha1, and a native port
+    # generated from this link silently lacks those functions (USA: 611 files, 126 stubs, a crash at frame 0)
+    if "--asm-only" not in ARGS and not os.path.isdir(os.path.join(ROOT, "include", "tomba", "psyq")):
+        sys.exit("build_full: include/tomba/psyq is missing (the PSY-Q headers the psx_tomba files include): run "
+                 "sudo tools/setup_native.sh first (in a worktree: copy include/tomba/psyq from the main checkout)")
     if "--no-split" not in ARGS: split()
     units = [] if "--asm-only" in ARGS else compile_all()
+    # the C files that did not compile (kept as asm): port/tools/gen_port.py refuses a link that has any, since their
+    # functions would be missing from the port
+    failed = sorted(u["src"] for u in units if u.get("compile_error"))
+    os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, "compile_failures.txt"), "w") as f:
+        f.write("".join(s + "\n" for s in failed))
     allok = True
     for p in PROGS:
         out, game, order, ncfun, n = build_prog(p, [u for u in units if u["prog"] == p])
         allok &= report(p, out, game, order, ncfun, n)
         if VER: name_audit(p)
+    if failed:
+        print("WARNING: %d C files did not compile and were linked from asm (%s/compile_failures.txt): the bytes "
+              "match, but the native port refuses this link (it would lack their functions)"
+              % (len(failed), os.path.relpath(OUT, ROOT)))
     print("OK" if allok else "FAIL")
     sys.exit(0 if allok else 1)
 
