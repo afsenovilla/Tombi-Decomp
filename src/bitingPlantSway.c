@@ -1,5 +1,7 @@
 // FUNC 8012f1b4 116 X000
 // MATCHING 8012f1b4 116
+// VERSION PCPX_96084 tomba 8007AB94 116
+// ASPSX.PCPX_96084 2.34
 typedef struct O { char p0[3]; unsigned char t; char p1[2]; unsigned char s; char p2[0x94 - 7]; struct O *next; } O;
 extern void bitingPlantSwayStep(O *);
 extern void bitingPlantCopyParentAngle(O *);

@@ -101,7 +101,7 @@ def pal_text(path):
 
 
 def jp_source(hdr, body, palname, jname, prog, addr, size):
-    head = [l for l in hdr if re.match(r"//\s*(FLAGS|CC|HEADERS|AS)\b", l)]
+    head = [l for l in hdr if re.match(r"//\s*(FLAGS|CC|HEADERS|AS|ASPSX)\b", l)]
     body = re.sub(r"\b%s\b" % re.escape(palname), jname, body)
     return "\n".join(["// VERSION %s %s %08X %d" % (SERIAL, prog, addr, size)] + head +
                      ["#if defined(VERSION_%s)" % SERIAL, body.strip("\n"), "#endif", ""])

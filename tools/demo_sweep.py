@@ -12,7 +12,12 @@ unmatched and that has no hand-written C for this version yet, the candidate sou
   - for a function without a PAL pair (splat's func_<addr>, most of the unmatched code) or whose pair has no C, the
     PAL C functions and the JP retail functions with version C of the same size whose masked words (tools/xmatch.py:
     relocations and non-stack immediates ignored) are at least --min (0.9) similar, best three.
-Each only when its size equals the version function's size. Every candidate body is compiled (tools/ncheck.py chain
+  - the fuzzy twins of tools/demo_pair.py (default; --no-pairs skips them): the best-ranked functions with C of
+    every version (PAL, JP, USA and the demos themselves) by instruction skeleton, callees and call-graph neighbours,
+    any size, each with the body its own version builds it from (best PAIR_TOP rows);
+The candidates above the fuzzy twins only when their size equals the version function's size. A target that loads
+small constants with `ori` and never with `addiu` (the PrePre 8 game code: an older assembler) is compiled with
+`// ASPSX 2.34` (tools/ncheck.py), installed as `// ASPSX.<SERIAL> 2.34`. Every candidate body is compiled (tools/ncheck.py chain
 with -DVERSION_<SERIAL>, the PAL scratchpad names as constants, like build_report) with its file's own flags and the
 common variants (`-O2 -G0`, `-O2 -G0 -fno-strength-reduce`) and compared strictly against the splat target object
 (tools/jpcheck.py dump: relocation addends ignored like objdiff, branch targets kept). The first match is installed
@@ -30,14 +35,17 @@ Idempotent: an installed function is skipped on the next run (it has version C o
 report was rebuilt; a rebuilt report (--report) is what confirms the figures.
 
   python3 tools/demo_sweep.py [--version slpm80165[,beta980203,...]] [--dry-run] [--report] [--only ADDR[,ADDR]]
-                              [--limit N] [--jobs N] [--min 0.9] [--fix [--fix-min 0.8]] [--show]
+                              [--limit N] [--jobs N] [--min 0.9] [--no-pairs]
+                              [--fix [--fix-min 0.8] [--fix-max 40] [--budget MINUTES]] [--show]
   --version   versions to sweep (default: every demo version with a report; one without game files or report is skipped)
   --dry-run   print the matches, install nothing
   --report    rebuild build/<ver>/report.json after installing (tools/build_report.py --version <ver>)
-  --fix       slow second pass: the best near candidate of each function still unmatched (another size allowed, within
-              15 %, masked ratio >= --fix-min) goes through the tools/jp_autofix.py edits (literals shifted by the
-              immediates of the diff, pad bits, a statement moved or deleted), kept when the diff shrinks, installed
-              on a strict match; minutes per function, so not for CI
+  --fix       second pass: for each function still unmatched, its closest compiled candidate (at most --fix-max
+              changed lines; or, without one, the best near masked twin: size within 15 %, ratio >= --fix-min) goes
+              through scratchpad renames (a PAL scratchpad name the version keeps elsewhere becomes
+              `#define NAME D_1F80xxxx`, from the offsets of the diff) and the tools/jp_autofix.py edits (literals
+              shifted by the immediates of the diff, pad bits, a statement moved or deleted), each kept when the diff
+              shrinks, installed on a strict match; smallest diffs first, --budget minutes per version at most
   --show      print the diff line count of the best failed candidate per function
 Prints `MATCH <ver> <prog> <addr> <size> <name> <- <source> [<flags>]` per match, the install, and a summary per
 version. Exit status 0 always (CI use); the summary says what was installed."""
@@ -188,6 +196,20 @@ class Sweep:
         self.cache = {}
         self.pools = None
         self.images = {}
+        self._vtabs = {}
+        self.pal_by_file = {os.path.abspath(u.file): u for u in self.pal.values()}
+
+    def asm_dirs(self, key, size):
+        """Directives the version's target code asks for: `ASPSX 2.34` when it loads small constants with `ori`
+        (`li` of an older assembler: the PrePre 8 game code) and never with `addiu`."""
+        if key[0] not in self.images: self.images[key[0]] = image(self.ver, key[0])
+        img = self.images[key[0]]
+        if img is None: return {}
+        o = key[1] - img[1]
+        ws = struct.unpack("<%dI" % (size // 4), img[0][o:o + (size & ~3)]) if 0 <= o and o + size <= len(img[0]) else ()
+        ori = sum(1 for w in ws if w >> 26 == 0x0D and (w >> 21) & 31 == 0 and (w & 0xFFFF) < 0x8000)
+        addiu = sum(1 for w in ws if w >> 26 == 0x09 and (w >> 21) & 31 == 0 and (w & 0xFFFF) < 0x8000)
+        return {"ASPSX": "2.34"} if ori and not addiu else {}
 
     def read(self, path):
         if path not in self.cache:
@@ -302,6 +324,55 @@ class Sweep:
             else: jp_rows([row], how)
         return out
 
+    # ---- fuzzy twins (tools/demo_pair.py) ----
+    def map_version_names(self, body, src_ver):
+        """Names suffixed with another version (`foo_slps01144`, `func_<addr>_beta980203`) mapped to this version's
+        twin through the PAL pairs of both symbol tables; left as they are when there is none (they compile as
+        externs, and the report ignores relocation names)."""
+        if src_ver not in self._vtabs:
+            t = sym_table(src_ver) if src_ver in VERSIONS else {}
+            self._vtabs[src_ver] = {n: (mod, a) for k, (n, s, mod, a) in t.items() if mod}
+        tab = self._vtabs[src_ver]
+        for n in sorted(set(re.findall(r"\b\w+_%s\b" % src_ver, body))):
+            pp = tab.get(n)
+            if pp and pp in self.by_pair:
+                body = re.sub(r"\b%s\b" % re.escape(n), self.by_pair[pp][1], body)
+        return body
+
+    def pair_candidates(self, rows, seen=()):
+        """[{body, dirs, ...}] (same shape as candidates()) for the twin rows of tools/demo_pair.py: each row's body as
+        its own version builds it (its branch of the shared file, or the PAL body it pairs with)."""
+        out, seen = [], set(seen)
+        for row in rows:
+            path, rver = os.path.join(ROOT, row["path"]), row["ver"]
+            if not os.path.exists(path): continue
+            hdr, rest, branches, pal = self.read(path)
+            rser = VERSIONS[rver]["serial"] if rver in VERSIONS else None
+            br = dict(branches).get(rser) if rser else None
+            if br is not None:
+                body, dirs = unwrap(br, rser), file_dirs(hdr, rser)
+            else:
+                body = pal if pal is not None else (rest if not branches else None)
+                dirs = file_dirs(hdr, rser) if rser else file_dirs(hdr)
+            if not body or "INCLUDE_ASM" in body: continue
+            body = body.strip("\n")
+            if rver in VERSIONS and rver != self.ver: body = self.map_version_names(body, rver)
+            if JP != self.ver and "_%s" % JP in body: body = self.map_version_names(body, JP)
+            h = hashlib.sha1((body + repr(sorted(dirs.items()))).encode()).hexdigest()
+            if h in seen: continue
+            seen.add(h)
+            u = self.pal_by_file.get(os.path.abspath(path))
+            palname = u.name if u else (row["name"] if re.search(r"\b%s\s*\(" % re.escape(row["name"]), body) else None)
+            own = dirs.get("FLAGS", "-O2 -G0")
+            kind = "pal" if (u and br is None) else ("branch" if u else "jp")
+            out.append({"body": body, "dirs": dirs, "flags": [own] + [f for f in FLAG_VARIANTS if f != own],
+                        "origin": "%s C of %s (%s, twin score %.3f)" % ("PAL" if rver == "sces01331" else VERSIONS[rver]["serial"],
+                                                                         row["path"], row["name"], row["score"]),
+                        "palfile": u.file if u else None, "palname": palname, "kind": kind,
+                        "palpair": (u.prog.lower(), u.addr) if u else None, "own": own, "ratio": row["score"],
+                        "size": row["size"]})
+        return out
+
     # ---- install ----
     def users(self, path, key):
         return [k for k, (p, _) in self.sources.items() if os.path.abspath(p) == os.path.abspath(path) and k != key]
@@ -327,7 +398,7 @@ class Sweep:
             note = "// %s version: %s [%s] (tools/demo_sweep.py)" % (label, cand["origin"], flags)
         dirs = dict(cand["dirs"]); dirs["FLAGS"] = flags
         palfile = cand["palfile"]
-        if palfile and cand["kind"] == "pal" and flags == cand["own"]:
+        if palfile and cand["kind"] == "pal" and flags == cand["own"] and not cand.get("extra") and self.pal[cand["palpair"]].size == size:
             return self.pair(key, name, size, cand["palpair"]), "pairing"
         if palfile and not self.users(palfile, key):
             hdr, rest, branches, pal = self.read(palfile)
@@ -351,7 +422,9 @@ class Sweep:
         prog, addr = key
         used = {n for (p, a), (n, _, _, _) in self.table.items() if p == prog}
         sure = ratio is None or (ratio >= 1.0 and size >= 64)
-        name = palname if palname and palname not in used and sure else "func_%08X_%s" % (addr, self.ver)
+        # only a PAL name names it (a twin of another version keeps func_<addr>_<ver>: its name is that version's)
+        ok = palname and palpair and not re.search(r"_(%s)$" % "|".join(VERSIONS), palname)
+        name = palname if ok and palname not in used and sure else "func_%08X_%s" % (addr, self.ver)
         line = "%s = 0x%08X; // type:func size:0x%X%s\n" % (name, addr, size, "  PAL %s 0x%08X" % (palpair[0], palpair[1]) if palpair else "")
         p = self.sym_path(prog)
         lines = open(p).readlines() if os.path.exists(p) else []
@@ -412,8 +485,9 @@ class Sweep:
 
     def _version_only(self, key, name, size, dirs, body, palname, note):
         prog, addr = key
-        if palname and palname != name: body = re.sub(r"\b%s\b" % re.escape(palname), name, body)
-        body = note + "\n" + VS.suffix_names(body, self.ver)
+        # the body exactly as it was compiled and compared (a rename or a version suffix can break a name that a
+        # header declares; build_report gives the function the version symbol anyway)
+        body = note + "\n" + body
         fname = name if name.endswith("_" + self.ver) else name + "_" + self.ver
         d = pal_src_dir(self.ver, prog)
         path = os.path.join(d, fname + ".c")
@@ -454,6 +528,13 @@ def _same(a, b):
     return True
 
 
+def _ndiff(a, b):
+    """Changed lines of the aligned disassemblies (difflib), the distance the --fix pass starts from."""
+    rx = re.compile(r"^(j|b\w*)\t(.*?)\b(?:[0-9a-f]+|RELOC)$")
+    a, b = [rx.sub(r"\1\t\2", x) for x in a], [rx.sub(r"\1\t\2", x) for x in b]
+    return sum(max(i2 - i1, j2 - j1) for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes() if op != "equal")
+
+
 def _job(job):
     """(index, ok, detail): compiles one candidate body with one flag set and compares it with the target object."""
     i, serial, body, dirs, flags, target = job
@@ -468,7 +549,7 @@ def _job(job):
         NC["build"](src, flags, d, _W["inc"])
         a, b = _dump(d + "/a.o"), _dump(target)
         if _same(a, b): return i, True, 0
-        return i, False, sum(1 for x, y in zip(a, b) if x != y) + abs(len(a) - len(b))
+        return i, False, _ndiff(a, b)
     except subprocess.CalledProcessError as e:
         return i, False, "ERROR " + (e.stderr.decode() if isinstance(e.stderr, bytes) else str(e.stderr))[-120:].replace("\n", " ")
     except Exception as e:
@@ -504,15 +585,86 @@ def _check_file(path, serial, target, strict=False):
         shutil.rmtree(d, ignore_errors=True)
 
 
+SPAD_LINE = re.compile(r"^(\w+)\t(.*?)(-?\d+)(\((\w+)\))?$")
+
+
+def _spad_moves(a, b):
+    """[(our scratchpad address, target address)] of the line pairs that differ only in the offset of an access
+    based on a `lui rX,0x1f80` (a scratchpad variable the version keeps elsewhere)."""
+    out = []
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
+        if op != "replace" or i2 - i1 != j2 - j1: continue
+        for k in range(i2 - i1):
+            x, y = SPAD_LINE.match(a[i1 + k]), SPAD_LINE.match(b[j1 + k])
+            if not x or not y or x.group(1) != y.group(1) or x.group(2) != y.group(2) or x.group(4) != y.group(4): continue
+            base = x.group(5) or (x.group(2).rstrip(",").split(",")[-1] if x.group(1).startswith("addi") else None)
+            if not base: continue
+            for l in reversed(a[:i1 + k]):
+                if re.match(r"\w+\t%s," % re.escape(base), l):
+                    if l == "lui\t%s,0x1f80" % base:
+                        out.append((0x1F800000 + int(x.group(3)), 0x1F800000 + int(y.group(3))))
+                    break
+    return out
+
+
+def spad_fix(text, a, b, serial):
+    """The scratchpad names of the body that the version keeps elsewhere, renamed to the version's address
+    (`#define NAME D_1F80xxxx` before the includes; tools/units.py spad_set assembles every D_1F80xxxx)."""
+    moves = _spad_moves(a, b)
+    if not moves: return None
+    tab = {}
+    for l in BR._jpdemo_spad_set(text, serial).splitlines():
+        m = re.match(r"\s*\.set\s+(\w+),0x([0-9A-Fa-f]+)", l)
+        if m: tab[m.group(1)] = int(m.group(2), 16)
+    used = set(re.findall(r"\b\w+\b", text.split("#if defined(VERSION_%s)" % serial, 1)[-1]))
+    defs = {}
+    for ours, tgt in moves:
+        best = max(((ad, n) for n, ad in tab.items() if n in used and ad <= ours < ad + 0x100), default=None)
+        if not best: continue
+        n, new = best[1], best[0] + tgt - ours
+        if defs.setdefault(n, new) != new: return None
+    defs = {n: v for n, v in defs.items() if v != tab[n]}
+    if not defs: return None
+    head = "#if defined(VERSION_%s)\n" % serial
+    i = text.index(head) + len(head)
+    return text[:i] + "".join("#define %s D_%08X\n" % (n, v) for n, v in sorted(defs.items())) + text[i:]
+
+
+def _dumps(path, serial, target):
+    NC = _W["nc"]
+    NC["EXTRA_CPP"] = ["-DVERSION_" + serial, "-DSKIP_ASM"]
+    t = open(path, errors="replace").read()
+    fm = re.search(r"//\s*FLAGS\s+(.*)", t)
+    d = tempfile.mkdtemp()
+    try:
+        NC["EXTRA_AS"] = BR._jpdemo_spad_set(t, serial)
+        NC["build"](path, fm.group(1).strip() if fm else "-O2 -G0", d, _W["inc"])
+        return jpcheck.dump(d + "/a.o", True), jpcheck.dump(target, True)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 def _fix_job(job):
-    """(index, ok, text, diff lines): tools/jp_autofix.py edits (literals shifted, pad bits, statements moved or
-    deleted) on a near candidate until it matches the target, with the checker of this version."""
+    """(index, ok, text, diff lines): scratchpad renames (spad_fix) and the tools/jp_autofix.py edits (literals
+    shifted, pad bits, statements moved or deleted) on a near candidate until it matches the target, with the checker
+    of this version."""
     i, serial, text, prog, target = job
     import jp_autofix as JA
     JA.check = lambda path, prog, strict=False: _check_file(path, serial, target, strict)
     d = tempfile.mkdtemp()
     try:
         path = os.path.join(d, "fix.c")
+        for _ in range(2):
+            open(path, "w").write(text)
+            try: a, b = _dumps(path, serial, target)
+            except Exception: break
+            t2 = spad_fix(text, a, b, serial)
+            if not t2: break
+            open(path, "w").write(t2)
+            try: a2, b2 = _dumps(path, serial, target)
+            except Exception: break
+            if _ndiff(a2, b2) >= _ndiff(a, b): break
+            text = t2
         text, r = JA.try_fix(path, prog, text)
         if r == "IDENTICAL":
             open(path, "w").write(text)
@@ -524,9 +676,9 @@ def _fix_job(job):
         shutil.rmtree(d, ignore_errors=True)
 
 
-def fix_text(serial, key, size, cand):
+def fix_text(serial, key, size, cand, flags=None):
     """The standalone version source tools/jp_autofix.py edits: VERSION header, directives, guarded body."""
-    hdr = ["// VERSION %s %s %08X %d" % (serial, key[0], key[1], size), "// FLAGS " + cand["own"]]
+    hdr = ["// VERSION %s %s %08X %d" % (serial, key[0], key[1], size), "// FLAGS " + (flags or cand["own"])]
     hdr += ["// %s %s" % (k, v) for k, v in sorted(cand["dirs"].items()) if k != "FLAGS"]
     return "\n".join(hdr + ["#if defined(VERSION_%s)" % serial, cand["body"], "#endif", ""])
 
@@ -540,12 +692,48 @@ def include_dir():
     return inc
 
 
-def sweep(ver, install=True, only=None, limit=None, jobs=None, show=False, minr=0.9, fix=False, fixmin=0.8):
+def _pool_run(fn, jl, jobs, budget=None):
+    """Yields the results of fn over jl in worker processes; stops (pool terminated) once budget seconds passed."""
+    import time
+    t0 = time.time()
+    inc = include_dir()
+    try:
+        with Pool(jobs or os.cpu_count() or 4, initializer=_init, initargs=(inc,)) as pool:
+            for r in pool.imap_unordered(fn, jl, chunksize=4 if fn is _job else 1):
+                yield r
+                if budget and time.time() - t0 > budget:
+                    print("  time budget (%d s) spent, the remaining jobs are dropped" % budget, flush=True)
+                    pool.terminate(); break
+    finally:
+        shutil.rmtree(inc, ignore_errors=True)
+
+
+PAIR_TOP = 10   # tools/demo_pair.py twin rows compiled per function
+PAIRER = []     # one tools/demo_pair.py pool for every version of the run
+
+
+def pair_rows(ver):
+    """{(prog, addr): [twin rows]} of tools/demo_pair.py for the unmatched functions of a version (computed now)."""
+    import demo_pair as DP
+    try:
+        import numpy  # noqa: F401 (the prefilter of tools/demo_pair.py)
+    except ImportError:
+        print("%s: no numpy, fuzzy twins (tools/demo_pair.py) skipped" % ver); return {}
+    if not PAIRER: PAIRER.append(DP.Pairer(log=lambda s: print(s, flush=True)))
+    res = PAIRER[0].pair(ver)
+    os.makedirs("build/%s" % ver, exist_ok=True)
+    json.dump(res, open("build/%s/pairs.json" % ver, "w"), indent=0)
+    return {(k.split()[0], int(k.split()[1], 16)): v["cands"] for k, v in res.items()}
+
+
+def sweep(ver, install=True, only=None, limit=None, jobs=None, show=False, minr=0.9, fix=False, fixmin=0.8, pairs=True,
+          fixmax=40, budget=None):
     if not os.path.exists("build/%s/report.json" % ver):
         print("%s: no build/%s/report.json (python3 tools/build_report.py --version %s), skipped" % (ver, ver, ver))
         return None
     S = Sweep(ver, minr)
     um = unmatched(ver, S.table)
+    prs = pair_rows(ver) if pairs else {}
     work, skipped_c, no_cand, no_target = [], 0, 0, 0
     for key in sorted(um):
         if only and key[1] not in only: continue
@@ -555,6 +743,11 @@ def sweep(ver, install=True, only=None, limit=None, jobs=None, show=False, minr=
         if not os.path.exists(target) or not size: no_target += 1; continue
         if S.has_version_c(key): skipped_c += 1; continue
         cands = S.candidates(key, name, size, mod, addr)
+        seen = {hashlib.sha1((c["body"] + repr(sorted(c["dirs"].items()))).encode()).hexdigest() for c in cands}
+        cands += S.pair_candidates(prs.get(key, [])[:PAIR_TOP], seen)
+        ad = S.asm_dirs(key, size)
+        if ad:
+            cands = [dict(c, dirs=dict(c["dirs"], **ad), extra=True) if c["dirs"].get("AS") != "gnu" else c for c in cands]
         if not cands: no_cand += 1; continue
         work.append((key, name, size, cands, target))
         if limit and len(work) >= limit: break
@@ -565,28 +758,12 @@ def sweep(ver, install=True, only=None, limit=None, jobs=None, show=False, minr=
                 jl.append(((wi, ci, fi), S.serial, c["body"], c["dirs"], f, target))
     print("%s: %d unmatched functions, %d with candidates (%d compile jobs), %d with hand C, %d without a candidate, %d without target"
           % (ver, len(um), len(work), len(jl), skipped_c, no_cand, no_target), flush=True)
-    inc = include_dir()
     res = {}
-    try:
-        with Pool(jobs or os.cpu_count() or 4, initializer=_init, initargs=(inc,)) as pool:
-            for i, ok, det in pool.imap_unordered(_job, jl, chunksize=4):
-                res[i] = (ok, det)
-    finally:
-        shutil.rmtree(inc, ignore_errors=True)
+    for i, ok, det in _pool_run(_job, jl, jobs):
+        res[i] = (ok, det)
     matched, installed, kinds = [], [], {}
-    for wi, (key, name, size, cands, target) in enumerate(work):
-        hit = None
-        for ci, c in enumerate(cands):
-            for fi, f in enumerate(c["flags"]):
-                if res.get((wi, ci, fi), (False, None))[0]: hit = (c, f); break
-            if hit: break
-        if not hit:
-            if show:
-                best = min((r[1] for k, r in res.items() if k[0] == wi and not isinstance(r[1], str)), default=None)
-                errs = [r[1] for k, r in res.items() if k[0] == wi and isinstance(r[1], str)]
-                print("DIFF  %s %s %08X %5d %-40s best %s%s" % (ver, key[0], key[1], size, name, best, (" " + errs[0]) if best is None and errs else ""))
-            continue
-        c, f = hit
+
+    def do_install(key, name, size, c, f):
         matched.append(key)
         print("MATCH %s %s %08X %5d %-40s <- %s [%s]" % (ver, key[0], key[1], size, name, c["origin"], f), flush=True)
         if install:
@@ -594,15 +771,36 @@ def sweep(ver, install=True, only=None, limit=None, jobs=None, show=False, minr=
             kinds[kind] = kinds.get(kind, 0) + 1
             installed.append((key, name, p, kind))
             print("      installed (%s): %s" % (kind, os.path.relpath(p, ROOT)), flush=True)
+
+    near = {}  # wi -> (diff lines, ci, fi): the closest compiled candidate of a function left unmatched
+    for wi, (key, name, size, cands, target) in enumerate(work):
+        hit = None
+        for ci, c in enumerate(cands):
+            for fi, f in enumerate(c["flags"]):
+                if res.get((wi, ci, fi), (False, None))[0]: hit = (c, f); break
+            if hit: break
+        if hit:
+            do_install(key, name, size, *hit); continue
+        best = min(((r[1], k[1], k[2]) for k, r in res.items() if k[0] == wi and not isinstance(r[1], str)), default=None)
+        if best: near[wi] = best
+        if show:
+            errs = [r[1] for k, r in res.items() if k[0] == wi and isinstance(r[1], str)]
+            print("DIFF  %s %s %08X %5d %-40s best %s%s" % (ver, key[0], key[1], size, name, best and best[0],
+                  (" " + errs[0]) if best is None and errs else (" <- " + cands[best[1]]["origin"] if best else "")))
     print("%s: matched %d of %d tried; installed %d%s" % (ver, len(matched), len(work), len(installed),
           (" (" + ", ".join("%d %s" % (n, k) for k, n in sorted(kinds.items())) + ")") if kinds else ""), flush=True)
     nfix = 0
     if fix:
-        # near candidates (another size, masked ratio >= fixmin) edited by tools/jp_autofix.py until they match
+        # the closest compiled candidate of each function still unmatched (any size; or, without one, the best near
+        # masked twin) goes through the tools/jp_autofix.py edits until it matches; smallest diffs first
         fw = []
+        for wi, (d, ci, fi) in near.items():
+            key, name, size, cands, target = work[wi]
+            if d <= fixmax and size >= 16: fw.append((d, key, name, size, cands[ci], cands[ci]["flags"][fi], target))
+        done = {x[1] for x in fw} | set(matched)
         for key in sorted(um):
             if only and key[1] not in only: continue
-            if key in matched or S.has_version_c(key): continue
+            if key in done or S.has_version_c(key): continue
             uname, usize = um[key]
             name, size, mod, addr = S.table.get(key, (uname, usize, None, None))
             target = "build/%s/target/%s/%s.o" % (ver, key[0], uname)
@@ -611,29 +809,22 @@ def sweep(ver, install=True, only=None, limit=None, jobs=None, show=False, minr=
             if not rows: continue
             cands = S.candidates(key, name, size, mod, addr, rows=rows, exact=False)
             if not cands: continue
-            fw.append((key, name, size, cands[0], target))
-            if limit and len(fw) >= limit: break
-        jl = [(wi, S.serial, fix_text(S.serial, key, size, c), key[0], target) for wi, (key, name, size, c, target) in enumerate(fw)]
-        print("%s: --fix: %d near candidates (masked ratio >= %.2f, size within %d %%)" % (ver, len(jl), fixmin, FIX_SIZE * 100), flush=True)
-        inc = include_dir()
-        try:
-            with Pool(jobs or os.cpu_count() or 4, initializer=_init, initargs=(inc,)) as pool:
-                for wi, ok, text, det in pool.imap_unordered(_fix_job, jl):
-                    key, name, size, c, target = fw[wi]
-                    if not ok:
-                        if show: print("DIFF  %s %s %08X %5d %-40s fix of %s: %s" % (ver, key[0], key[1], size, name, c["origin"], det), flush=True)
-                        continue
-                    body = text.split("#if defined(VERSION_%s)\n" % S.serial, 1)[1].rsplit("#endif", 1)[0]
-                    c = dict(c, body=body.strip("\n"), kind="fix", origin=c["origin"] + ", edited (tools/jp_autofix.py edits)")
-                    matched.append(key); nfix += 1
-                    print("MATCH %s %s %08X %5d %-40s <- %s [%s]" % (ver, key[0], key[1], size, name, c["origin"], c["own"]), flush=True)
-                    if install:
-                        p, kind = S.install(key, name, size, c, c["own"])
-                        kinds[kind] = kinds.get(kind, 0) + 1
-                        installed.append((key, name, p, kind))
-                        print("      installed (%s): %s" % (kind, os.path.relpath(p, ROOT)), flush=True)
-        finally:
-            shutil.rmtree(inc, ignore_errors=True)
+            ad = S.asm_dirs(key, size)
+            c = dict(cands[0], dirs=dict(cands[0]["dirs"], **ad), extra=bool(ad)) if ad else cands[0]
+            fw.append((fixmax, key, name, size, c, c["own"], target))
+        fw.sort(key=lambda x: (x[0], x[3]))
+        if limit: fw = fw[:limit]
+        jl = [(wi, S.serial, fix_text(S.serial, key, size, c, f), key[0], target) for wi, (d, key, name, size, c, f, target) in enumerate(fw)]
+        print("%s: --fix: %d functions (closest candidate within %d diff lines, or a near masked twin)" % (ver, len(jl), fixmax), flush=True)
+        for wi, ok, text, det in _pool_run(_fix_job, jl, jobs, budget):
+            d, key, name, size, c, f, target = fw[wi]
+            if not ok:
+                if show: print("DIFF  %s %s %08X %5d %-40s fix of %s: %s -> %s" % (ver, key[0], key[1], size, name, c["origin"], d, det), flush=True)
+                continue
+            body = text.split("#if defined(VERSION_%s)\n" % S.serial, 1)[1].rsplit("#endif", 1)[0]
+            c = dict(c, body=body.strip("\n"), kind="fix", origin=c["origin"] + ", edited (tools/jp_autofix.py edits)")
+            nfix += 1
+            do_install(key, name, size, c, f)
         print("%s: --fix matched %d of %d; installed %d in all%s" % (ver, nfix, len(jl), len(installed),
               (" (" + ", ".join("%d %s" % (n, k) for k, n in sorted(kinds.items())) + ")") if kinds else ""), flush=True)
     return {"version": ver, "unmatched": len(um), "tried": len(work), "matched": len(matched), "installed": installed, "fixed": nfix}
@@ -658,6 +849,8 @@ def main():
     jobs = int(argv[argv.index("--jobs") + 1]) if "--jobs" in argv else None
     minr = float(argv[argv.index("--min") + 1]) if "--min" in argv else 0.9
     fixmin = float(argv[argv.index("--fix-min") + 1]) if "--fix-min" in argv else 0.8
+    fixmax = int(argv[argv.index("--fix-max") + 1]) if "--fix-max" in argv else 40
+    budget = float(argv[argv.index("--budget") + 1]) * 60 if "--budget" in argv else None
     if not vers:
         print("no demo version has a report (python3 tools/build_report.py --version slpm80165 first)"); return
     out = []
@@ -665,7 +858,7 @@ def main():
         if ver not in VERSIONS or ver == JP:
             print("%s is not a demo version (%s)" % (ver, ", ".join(DEMO_VERSIONS))); continue
         r = sweep(ver, install="--dry-run" not in argv, only=only, limit=limit, jobs=jobs, show="--show" in argv, minr=minr,
-                  fix="--fix" in argv, fixmin=fixmin)
+                  fix="--fix" in argv, fixmin=fixmin, pairs="--no-pairs" not in argv, fixmax=fixmax, budget=budget)
         if r and "--report" in argv and "--dry-run" not in argv and r["installed"]:
             r["measures"] = report(ver)
         if r: out.append(r)

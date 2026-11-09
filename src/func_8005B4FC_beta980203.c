@@ -1,0 +1,37 @@
+// VERSION BETA_980203 beta980203 8005B4FC 104
+// AS.BETA_980203 gnu
+#if defined(VERSION_BETA_980203)
+// Beta version: SCUS_94236 C of src/StopCARD2_scus94236.c (StopCARD2, twin score 1.000) [-O2 -G0] (tools/demo_sweep.py)
+__asm__(".set noreorder\n.set noat\n"
+".globl StopCARD2\n.type StopCARD2,@function\nStopCARD2:\n"
+"	addiu	$10,$0,176\n"
+"	jr	$10\n"
+"	addiu	$9,$0,76\n"
+"	sll	$0,$0,0x0\n"
+"	lui	$2,%hi(D_8005CDDC)\n"
+"	addiu	$2,$2,%lo(D_8005CDDC)\n"
+"	jr	$2\n"
+"	sll	$0,$0,0x0\n"
+"	sll	$0,$0,0x0\n"
+".globl D_8005CDDC\n.type D_8005CDDC,@function\nD_8005CDDC:\n"
+"	lw	$2,4212($3)\n"
+"	sll	$0,$0,0x0\n"
+"	andi	$2,$2,0x80\n"
+"	beq	$2,$0,LStopCARD2_60\n"
+"	sll	$0,$0,0x0\n"
+"LStopCARD2_38:\n"
+"	lw	$2,4164($3)\n"
+"	sll	$0,$0,0x0\n"
+"	andi	$2,$2,0x80\n"
+"	bne	$2,$0,LStopCARD2_38\n"
+"	sll	$0,$0,0x0\n"
+"	lui	$2,%hi(jtbl_8009AFB4_scus94236)\n"
+"	lw	$2,%lo(jtbl_8009AFB4_scus94236)($2)\n"
+"	sll	$0,$0,0x0\n"
+"	jr	$2\n"
+"	sll	$0,$0,0x0\n"
+"LStopCARD2_60:\n"
+"	jr	$31\n"
+"	sll	$0,$0,0x0\n"
+".set at\n.set reorder\n");
+#endif

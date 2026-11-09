@@ -1,5 +1,7 @@
 // FUNC 80120164 320 X000
 // MATCHING 80120164 320
+// VERSION PCPX_96084 tomba 80040148 320
+// ASPSX.PCPX_96084 2.34
 extern void a00L4Type18Idle(unsigned char *), a00L4Type18Active(unsigned char *), FUN_8001fe6c(unsigned char *), FUN_8001fec0(unsigned char *);
 extern short FUN_8001fdac(int, int);
 extern unsigned char *A00_L4_TYPE18_ANIMS;

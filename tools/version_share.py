@@ -38,7 +38,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 from versions import VERSIONS, canon, pal_src_dir
 
 DRY = "--dry-run" in sys.argv
-DIRECTIVES = ("FLAGS", "CC", "HEADERS", "AS")
+DIRECTIVES = ("FLAGS", "CC", "HEADERS", "AS", "ASPSX")
 _HDR = re.compile(r"^//\s*(?:VERSION\s+(\w+)|(JPDEMO|JP))\s+(\w+)\s+([0-9A-Fa-f]{8})\s+(\d+)\s*$")
 
 

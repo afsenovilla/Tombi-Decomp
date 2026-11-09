@@ -213,6 +213,35 @@ masked similarity and only 54 have a near-size one at 80 % or more (`--show` lis
 so the rest is edited early code (the 70 % / 79 % instruction-level difference measured above) that needs hand
 matching per function, as for the retail JP build.
 
+**Fuzzy twins + fix pass (2026-11-09).** `tools/demo_pair.py` ranks, for every unmatched function of a demo build, the
+closest functions that already have matching C in ANY version (PAL, JP retail, USA and the three demo builds
+themselves; about 18000 functions), by instruction skeleton (opcodes only: registers, immediates and relocated
+addresses ignored), callee overlap through the symbol-table pairs and call-graph neighbours (the k-th unknown callee
+of a version function paired with PAL is proposed as the twin of the PAL function's k-th callee). Any size; a
+hashed opcode 4-gram prefilter (numpy) keeps 60 per function before difflib; 45 s for a version; output
+`build/<ver>/pairs.json`. `tools/demo_sweep.py` now compiles the best 10 twin bodies (each as its own version
+builds it: its `#if defined(VERSION_<SERIAL>)` branch or the PAL body) next to the old candidates, and `--fix`
+starts from the closest compiled candidate of each function (at most `--fix-max` 40 changed lines, smallest
+first, `--budget` minutes per version) with two new edits before the `tools/jp_autofix.py` ones: scratchpad
+renames (a PAL scratchpad name the build keeps elsewhere becomes `#define NAME D_1F80xxxx`, read off the diff
+offsets) and, for PrePre 8, `// ASPSX 2.34` (docs/PREPRE8.md). CI (`jp-sweep.yml`) runs it with `--fix --budget 20`.
+Run of 2026-11-09 (exact + `--fix --budget 25`, reports before -> after, objdiff):
+
+| Build | functions | code |
+|---|---|---|
+| SLPM-80165 | 1153 -> 1160 of 1832 | 42.60 % -> 42.84 % |
+| BETA_980203 | 1503 -> 1602 of 1915 | 60.72 % -> 69.56 % |
+| PCPX-96084 | 543 -> 617 of 1424 | 17.89 % -> 20.29 % |
+
+Three installs that `jpcheck --strict --norm` called IDENTICAL scored 90-99.9 % in objdiff and were taken out: the
+checker's norm form writes every store through `$at` as `X(at)`, so a scratchpad store at another offset passes
+(open: compare `$at` stores of `lui at,0x1f80` literally). What blocks the rest, by the closest compiled candidate
+(diff of its disassembly against the target): SLPM-80165 is mostly far from every twin (early code rewritten);
+the beta is mostly structural (instructions added or removed: an inserted call, a removed check), the cheapest
+hand targets; PrePre 8 has 304 functions with no twin at all (debug/test code, unrolled renderers) and 221 far
+ones. The 12-byte Psy-Q syscall stubs of SLPM-80165 (`OpenEvent`, `CloseTh`, ...) miss only because splat gives
+them 16 bytes (the alignment `nop` after `jr`); a symbol size fix would take them.
+
 - **Plumbing (1-2 days):** add `config/slpm80165/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate
   `symbol_addrs_*` from `tools/xmatch.py --csv` (PAL names at demo addresses). Then extend `tools/build_full.py` and

@@ -1,5 +1,153 @@
 // FUNC 800f3f3c 1040 X014
 // MATCHING 800f3f3c 1040
+// VERSION BETA_980203 x00 800F86F0 1020
+#if defined(VERSION_BETA_980203)
+// Beta version of PAL x014 800F3F3C (playerStepAttackJump.c): PAL C of src/x014/playerStepAttackJump.c (playerStepAttackJump, twin score 0.924), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+#include "gv6.h"
+#include "gvars.h"
+#include "TOBJ.H"
+typedef struct {
+    TObj t;
+    unsigned char c0[3];
+    unsigned char c3;
+    unsigned char c4[2];
+    unsigned char c6;
+    unsigned char c7;
+    unsigned char c8;
+    unsigned char c9[0xd8 - 0xc9];
+    int e4;
+} P800F3F3C;
+
+typedef struct {
+    unsigned char b0;
+    unsigned char p1[6];
+    unsigned char b7;
+    unsigned char b8;
+    unsigned char p9[0x20 - 9];
+    unsigned short w20;
+    unsigned char p22[0x2c - 0x22];
+    unsigned short w2c;
+    unsigned short w2e;
+} Q800F3F3C;
+
+extern Q800F3F3C *PLAYER_EXT;
+extern int BITTEN_OBJECT;
+extern void playerSetJumpRiseVelocity(P800F3F3C *);
+extern void SfxPlay2(int, int);
+extern void playerUpdateSpeedFromPad(P800F3F3C *);
+extern void playerAirAccelerateX(P800F3F3C *);
+extern void ObjGravityStep(P800F3F3C *);
+extern void ObjAddVelY7E(P800F3F3C *);
+extern short TileCollideAt(P800F3F3C *, int, int);
+extern int ObjCheckHeadCollision(P800F3F3C *);
+extern void ObjSetAnimFromTable(P800F3F3C *);
+extern void AnimJump(P800F3F3C *, int);
+
+void playerStepAttackJump(P800F3F3C *o)
+{
+    switch (o->t.state) {
+    case 0:
+        o->t.b9e = 0;
+        o->t.b69 = 0;
+        o->t.b9c = 1;
+        *(unsigned char *)&o->t.da0 = 0;
+        o->t.b9e = 0;
+        *(unsigned char *)&o->t.waa = 0;
+        o->c3 = 0;
+        o->t.d8c = 0;
+        o->t.wb0 = 0;
+        o->t.wb6 = 0;
+        o->t.velX = 0;
+        PLAYER_EXT->w20 = 0;
+        PLAYER_EXT->b8 = 0;
+        playerSetJumpRiseVelocity(o);
+        SfxPlay2(2, 4);
+        o->t.state = 1;
+    case 1:
+        if (o->t.velY >= 0) {
+            PLAYER_EXT->b8 = 1;
+            o->t.state = 2;
+        }
+        if (*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C6) {
+            if (PLAYER_EXT->b8 != 0) goto common;
+            if (++PLAYER_EXT->w20 >= 0xe) {
+                PLAYER_EXT->b8 = 1;
+                o->t.state = 2;
+            }
+        } else {
+            PLAYER_EXT->b8 = 1;
+            if (PLAYER_EXT->w20 >= 5) {
+                o->t.state = 2;
+                goto common;
+            }
+            PLAYER_EXT->w20++;
+        }
+        playerSetJumpRiseVelocity(o);
+    case 2:
+    common:
+        o->t.h->raw += GVARS.driftH << 8;
+        o->t.y.raw += ((short*)&GVARS.driftY)[0] << 8;
+        playerUpdateSpeedFromPad(o);
+        playerAirAccelerateX(o);
+        o->t.h->raw += o->t.velX << 8;
+        ObjGravityStep(o);
+        ObjAddVelY7E(o);
+        if (*(unsigned char *)&o->t.wac == 2) {
+            BITTEN_OBJECT = o->e4;
+            PLAYER_EXT->b8 = 0;
+            o->t.ba5 = 0;
+            o->t.step = 0xe;
+            o->t.state = 0;
+            break;
+        }
+        TileCollideAt(o, o->t.h->p.whole, (short)(o->t.y.p.whole + 16));
+        if (ObjCheckHeadCollision(o)) {
+            PLAYER_EXT->b8 = 1;
+            PLAYER_EXT->b7 = o->t.animFrame;
+            o->t.b9c = 2;
+            o->t.timer = 10;
+            o->t.step = 4;
+            o->t.velY = 0;
+            *(unsigned char *)&o->t.wac = 1;
+            o->t.state = 3;
+        }
+        if (o->t.velY > 0) {
+            PLAYER_EXT->b8 = 1;
+            PLAYER_EXT->b7 = o->t.animFrame;
+            o->t.b9c = 2;
+            o->t.timer = 10;
+            o->t.step = 4;
+            o->t.velY = 0;
+            *(unsigned char *)&o->t.wac = 1;
+            o->t.state = 3;
+        } else if (PLAYER_EXT->b0 == 0 && o->c6 == 0) {
+            o->t.animFrame = (signed char)PLAYER_EXT->b7;
+            PLAYER_EXT->w2c = 4;
+            if (PLAYER_EXT->w2e != 4) {
+                PLAYER_EXT->w2c = 4;
+                ObjSetAnimFromTable(o);
+                AnimJump(o, 0);
+                PLAYER_EXT->w2e = PLAYER_EXT->w2c;
+            }
+            o->t.b9d = 0;
+            o->t.timer = 0;
+            o->t.d84 = 0;
+            o->t.d88 = (o->t.animFrame & 1) ? 0xf0 : 0x10;
+            o->t.d8c = 0;
+            o->t.step = 2;
+        }
+        if (o->c8) {
+            PLAYER_EXT->b8 = 0;
+            *(unsigned char *)&o->t.wac = 0;
+            o->t.ba7 = 0;
+            o->t.b9c = 0;
+            o->t.step = 0x32;
+            o->t.state = 0;
+        }
+        break;
+    }
+}
+#else
 #include "gv6.h"
 #include "gvars.h"
 #include "TOBJ.H"
@@ -147,3 +295,4 @@ void playerStepAttackJump(P800F3F3C *o)
         break;
     }
 }
+#endif

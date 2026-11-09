@@ -1,5 +1,7 @@
 // FUNC 8011aa30 224 X000
 // MATCHING 8011aa30 224
+// VERSION PCPX_96084 tomba 80033064 224
+// ASPSX.PCPX_96084 2.34
 #include "raw7.h"
 extern char *alloc();
 extern int rnd();

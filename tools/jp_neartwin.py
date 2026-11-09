@@ -93,8 +93,8 @@ def candidates(minr=0.85):
 
 
 def build_text(t, name, new, prog, addr, size):
-    head = [l for l in t.split("\n")[:12] if re.match(r"//\s*(FLAGS|CC|HEADERS|AS)\b", l)]
-    body = "\n".join(l for l in t.split("\n") if not re.match(r"//\s*(FUNC|MATCHING|VERSION|FLAGS|CC|HEADERS|AS)\b", l))
+    head = [l for l in t.split("\n")[:12] if re.match(r"//\s*(FLAGS|CC|HEADERS|AS|ASPSX)\b", l)]
+    body = "\n".join(l for l in t.split("\n") if not re.match(r"//\s*(FUNC|MATCHING|VERSION|FLAGS|CC|HEADERS|AS|ASPSX)\b", l))
     body = re.sub(r"\b%s\b" % re.escape(name), new, body)
     return "\n".join(["// near-twin of %s (PAL), tools/jp_neartwin.py" % name] + head + ["// VERSION SLPS_01144 %s %08X %d" % (prog, addr, size),
                      "#if defined(VERSION_SLPS_01144)", body.strip("\n"), "#endif", ""])

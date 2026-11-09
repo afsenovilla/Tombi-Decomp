@@ -89,6 +89,11 @@ use a copy of the target objects (copy them before starting the build).
 
 ### JP sweep workflow
 
+2026-11-09: `tools/demo_pair.py` (fuzzy twins from every version's C: opcode skeleton, callees, call graph) feeds
+`tools/demo_sweep.py`; `--fix` adds scratchpad renames and runs in CI with `--budget 20`; PrePre 8 game code needs
+`// ASPSX 2.34` (older assembler, `li` as `ori`). Demo figures and the residual-diff classes: docs/JPDEMO.md "Fuzzy
+twins + fix pass". Open: the sweep checker hides `$at` store offsets (3 false matches removed by hand).
+
 `.github/workflows/jp-sweep.yml`: on demand (workflow_dispatch) or when a push to master touches `src/**_slps01144.c`
 or the JP/demo configs. Fetches the five discs, builds the reports, runs `tools/jp_autofix.py --install` on SLPS-01144
 and `tools/demo_sweep.py --jobs 4` on the demos, and opens a PR (branch `jp-sweep/auto`) only when something was

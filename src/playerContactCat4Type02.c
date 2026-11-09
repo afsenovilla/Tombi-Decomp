@@ -1,5 +1,7 @@
 // FUNC 80124f3c 104 X000
 // MATCHING 80124f3c 104
+// VERSION PCPX_96084 tomba 8006AC1C 104
+// ASPSX.PCPX_96084 2.34
 extern short pushObjectOutOfObjectBoxC(void);
 void playerContactCat4Type02(int a, char *o)
 {
