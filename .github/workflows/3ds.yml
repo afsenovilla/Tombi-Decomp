@@ -160,7 +160,7 @@ jobs:
           name: tombi-3ds
           path: |
             build/n3ds/*.3dsx
-            build/n3ds/tombi2.elf
+            build/n3ds/tombi.elf
           if-no-files-found: warn
 
       - name: Upload build log

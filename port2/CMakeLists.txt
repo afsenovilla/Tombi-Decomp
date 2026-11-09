@@ -305,7 +305,11 @@ elseif(NINTENDO_3DS)
   # 3dsx.specs (3DS.cmake) links the program at 0x00100000, the same base as the i386 build: the image is below 16 MB
   target_link_options(tombi2 PRIVATE ${GEN}/syms.ld)
   target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
-  ctr_create_3dsx(tombi2)
+  # tombi.3dsx / tombi.elf, "Tombi!" in the Homebrew Launcher (libctru's default icon: no game graphics are shipped)
+  set_target_properties(tombi2 PROPERTIES OUTPUT_NAME tombi)
+  ctr_generate_smdh(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tombi.smdh NAME "Tombi!" DESCRIPTION "Native port (PAL disc)"
+                    AUTHOR "Tombi-Decomp")
+  ctr_create_3dsx(tombi2 SMDH ${CMAKE_CURRENT_BINARY_DIR}/tombi.smdh OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tombi.3dsx)
 else()
 target_link_options(tombi2 PRIVATE -m32 -no-pie -Wl,-Ttext-segment=0x100000 -Wl,-z,noexecstack ${GEN}/syms.ld)
 target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2} m pthread)
