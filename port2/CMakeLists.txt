@@ -15,6 +15,10 @@
 #   -> build/port2-win/tombi2.exe (needs SDL2.dll from the same SDL2 folder next to it)
 cmake_minimum_required(VERSION 3.16)
 project(tombi_port2 C ASM)
+if(NINTENDO_3DS)   # devkitARM's gcc defaults to C23 (bool / false keywords, f() without arguments): C17, as the other builds
+  set(CMAKE_C_STANDARD 17)
+  set(CMAKE_C_EXTENSIONS ON)
+endif()
 
 set(ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(GEN ${CMAKE_CURRENT_BINARY_DIR}/gen)
