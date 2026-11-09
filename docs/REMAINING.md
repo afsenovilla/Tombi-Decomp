@@ -1,4 +1,6 @@
-# What is left to match (2026-11-08)
+# What is left to match (2026-11-09)
+
+**PAL, USA and the JP retail are at 100 %.** What is left is in the demos and prototypes (below).
 
 Ordered from closest to farthest, per version. Best drafts of the open functions live outside the repo (session
 scratchpads); the notes below say what was tried, so the next attempt does not repeat it. How to check and install:
@@ -10,11 +12,10 @@ Every game function of every overlay matches; the Psy-Q library matches too (100
 has a source). The last one was D0SPSUB 800EFD6C: one store order (x, y, w, attr, str, font) in every block, and the
 store forms (one-field aliases vs plain externs) decide the scheduling against the `s->` loads.
 
-## Japanese retail (SLPS-01144): 99.71 % with the SYSTEM overlays (3527 of 3528 functions)
+## Japanese retail (SLPS-01144): 100 % with the SYSTEM overlays (3528 of 3528 functions, 2026-11-09)
 
-Everything matches, Psy-Q library included, except dspsub func_800F0D90 (4720 B). It is not a plain twin of PAL
-D0SPSUB 800EFD6C: 7 cases instead of 4, menu global D_800A6120, Text globals D_80111408..., 19 calls of the JP
-DrawSprite func_800EC9D8; it has to be written from the JP disassembly.
+The last one, dspsub func_800F0D90, was written from the JP disassembly (array-form externs keep the loads after
+the stores; case 1 is the code of DSPSUB3 func_800EF1AC).
 
 ## USA retail (SCUS-94236): 100 % with the SYSTEM overlays (3681 of 3681 functions, 2026-11-09)
 

@@ -30,3 +30,4 @@ MAP_ROOM_LINK = 0x80103AB8;
 MAP_MARKER_ANIM = 0x80104728;
 SUBSCREEN_MAP_LINK = 0x801113E8;
 func_800EF9B0 = 0x800EF9B0; // type:func size:0x974  PAL d0spsub subScreenMapStep 0x800EE9AC
+func_800F0D90 = 0x800F0D90; // type:func size:0x1270  PAL d0spsub 0x800EFD6C (reworked)

@@ -120,7 +120,7 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 <summary><b>Japan (SLPS-01144): per part</b></summary>
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 99.71 % of the code matches byte for byte** (1627216 of 1631936 bytes, 3527 of 3528 functions).
+**Ore! Tomba (SLPS-01144): 100.00 % of the code matches byte for byte** (1631936 of 1631936 bytes, 3528 of 3528 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
@@ -142,7 +142,7 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 | X17.BIN: area code | 12124 B | 12124 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X18.BIN: area code | 16136 B | 16136 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| DSPSUB.BIN: SYSTEM overlay | 36084 B | 31364 B | 56 / 57 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 86.9 % |
+| DSPSUB.BIN: SYSTEM overlay | 36084 B | 36084 B | 57 / 57 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | DSPSUB2.BIN: SYSTEM overlay | 16180 B | 16180 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | DSPSUB3.BIN: SYSTEM overlay | 23588 B | 23588 B | 43 / 43 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | INFO.BIN: SYSTEM overlay | 24752 B | 24752 B | 51 / 51 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
