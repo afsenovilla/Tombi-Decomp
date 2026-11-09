@@ -26,8 +26,6 @@ Game code, closest first:
 
 | Function | Size | State | Notes |
 |---|---:|---|---|
-| main 8001AA90 | 904 B | 99.9 % | instruction-identical; jump-table naming only |
-| x06 8011DD3C | 644 B | 99.4 % | instruction-identical; the target includes one padding `nop` before the next function |
 | x04 80118720 | 624 B | 2 lines (`addiu a1,v1,26` for `s = &f->flag` must come after the hoisted `li 208/255/1`; `st` pinned to $5 fixed the rest) | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
 | main 80024B78 | 5112 B | not started | hand-written GTE mesh renderer, no twin; write from scratch with the GTE macros of src/modelDrawG4Lit.c |
 | main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |

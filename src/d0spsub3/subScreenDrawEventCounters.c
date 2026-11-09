@@ -13,6 +13,16 @@ extern short SUBSCREEN_DRAW_PARAMS_a[], SUBSCREEN_DRAW_TPAGE_a[];
 extern unsigned char SCRIPT_FLAGS[];
 extern void subScreenDrawSprite(int n);
 
+#if defined(VERSION_SLPS_01144)
+#define EVC_Y 0x30
+#define EVC_ICON_X 0x26
+#define EVC_X2 0x30
+#else
+#define EVC_Y 0xC8
+#define EVC_ICON_X 0x20
+#define EVC_X2 0x28
+#endif
+
 void subScreenDrawEventCounters(Menu *m)
 {
     unsigned char d[3];
@@ -32,7 +42,7 @@ void subScreenDrawEventCounters(Menu *m)
         d[0] = h;
     }
     {
-        unsigned char *q; int k; short y = 0xC8;
+        unsigned char *q; int k; short y = EVC_Y;
         for (q = d, k = 0; k < 3; k++) {
             SUBSCREEN_DRAW_PARAMS = 8 + k * 10;
             SUBSCREEN_DRAW_Y[0] = y;
@@ -42,8 +52,8 @@ void subScreenDrawEventCounters(Menu *m)
             subScreenDrawSprite(1);
         }
     }
-    SUBSCREEN_DRAW_PARAMS_a[0] = 0x20;
-    SUBSCREEN_DRAW_Y[0] = 0xC8;
+    SUBSCREEN_DRAW_PARAMS_a[0] = EVC_ICON_X;
+    SUBSCREEN_DRAW_Y[0] = EVC_Y;
     SUBSCREEN_DRAW_TPAGE_a[0] = m->w10;
     SUBSCREEN_DRAW_Y[2] = 0x7C15;
     SUBSCREEN_DRAW_FRAME = m->p58[0x18];
@@ -63,9 +73,9 @@ void subScreenDrawEventCounters(Menu *m)
         d[0] = h;
     }
     {
-        unsigned char *q; int k; short y = 0xC8;
+        unsigned char *q; int k; short y = EVC_Y;
         for (q = d, k = 0; k < 3; k++) {
-            SUBSCREEN_DRAW_PARAMS = 0x28 + k * 10;
+            SUBSCREEN_DRAW_PARAMS = EVC_X2 + k * 10;
             SUBSCREEN_DRAW_Y[0] = y;
             SUBSCREEN_DRAW_TPAGE = m->w10;
             SUBSCREEN_DRAW_Y[2] = 0x7C15;

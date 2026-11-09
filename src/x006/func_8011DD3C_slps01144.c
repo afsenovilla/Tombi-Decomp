@@ -1,5 +1,5 @@
 // JP-only (x06), written from the disassembly
-// VERSION SLPS_01144 x06 8011DD3C 644
+// VERSION SLPS_01144 x06 8011DD3C 648
 // FLAGS -O2 -G0 -fno-strength-reduce
 #if defined(VERSION_SLPS_01144)
 #include "spad.h"

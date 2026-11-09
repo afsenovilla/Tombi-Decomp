@@ -81,7 +81,7 @@ void func_8001AA90(void)
         case 3: n = 7; break;
         default: goto next;
         }
-        goto play;
+        goto play2;
     case 2:
         if (LOAD_COMPLETE_SYM == 0) break;
         {
@@ -118,8 +118,9 @@ void func_8001AA90(void)
         D_800A0C16[0] = D_8009DB14;
         D_800A0C17[0] = D_8009DB18;
         n = D_8007156C[GAME.selectedArea + AREA_VARIANT][GAME_SELECTED_SECTION];
-    play:
+        asm volatile("");
         LOAD_COMPLETE_SYM = 0;
+    play2:
         func_8002073C(n);
     next:
         TASK_C->w4e++;

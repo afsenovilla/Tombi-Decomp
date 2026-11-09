@@ -111,7 +111,11 @@ void subScreenDrawItemIcon(int n, int sel, int flag, int nocheck)
                 T->b0 = 0;
             }
         }
+#if defined(VERSION_SLPS_01144)
+        T->w = 0x92;
+#else
         T->w = 0xF0;
+#endif
         T->h = 0x12;
         T->code |= 2;
         T->x0 = SUBSCREEN_DRAW_PARAMS.x - 1;
