@@ -586,7 +586,8 @@ def libc_symbols(nm):
         for lib in os.environ.get("PORT2_LIBC", "/usr/lib/wasm32-wasi/libc.a").split(":"):
             if not os.path.exists(lib): continue
             r = subprocess.run([nm, lib], capture_output=True, text=True).stdout
-            out |= set(l.split()[2] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] in "TWDBR")
+            kinds = "TWD" if os.environ.get("PORT2_ARCH") == "wasm" else "TWDBR"
+            out |= set(l.split()[2] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] in kinds)
         return out
     # PORT2_LIBC: the target's C library when it is not the host's i386 glibc (Android: the NDK sysroot's libc.so,
     # set by port2/CMakeLists.txt)
