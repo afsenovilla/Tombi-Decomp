@@ -29,16 +29,28 @@ jobs:
           if [ "$n" -gt 0 ] || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] || [ "$GITHUB_EVENT_NAME" = push ]; then c=true; else c=false; fi
           echo "changed=$c" >> "$GITHUB_OUTPUT"
 
+  # PAL: one decomp.dev version per disc. SCES-01330 (EN FR DE IT NL) carries the same game files byte for byte as
+  # SCES-01331 (only the boot menu differs), so the same sources give its own report, built from its own disc.
   report:
     needs: check
     if: needs.check.outputs.changed == 'true'
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - serial: SCES_013.31
+            secret: GAME_FILES_URL
+            scope: report
+          - serial: SCES_013.30
+            secret: GAME_FILES_URL_SCES01330
+            scope: report1330
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/disc-cache   # the discs stay in the Actions cache between runs
         with:
-          urls: ${{ secrets.GAME_FILES_URL }}
-          scope: "report"
+          urls: ${{ secrets[matrix.secret] }}
+          scope: ${{ matrix.scope }}
 
       - uses: actions/setup-python@v5
         with:
@@ -59,13 +71,13 @@ jobs:
       - name: Fetch game files
         id: fetch
         env:
-          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL }}
+          GAME_FILES_URL: ${{ secrets[matrix.secret] }}
         run: |
           # GAME_FILES_URL: direct download link to EITHER a zip with MAIN0.EXE and AREA00/X000.BIN (legacy; only the
           # MAIN0/X000 report is produced) OR a raw disc image (.bin, 2352-byte sectors) of your own copy of the game,
           # from which every area overlay is extracted. Never committed to the repository.
           if [ -z "$GAME_FILES_URL" ]; then
-            echo "::notice::GAME_FILES_URL secret not set; skipping the report."
+            echo "::notice::${{ matrix.secret }} secret not set; skipping the ${{ matrix.serial }} report."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           # Accepts a direct URL, a Google Drive share link (.../file/d/<ID>/view) or a bare Drive file ID.
@@ -98,7 +110,7 @@ jobs:
         if: steps.fetch.outputs.ok == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: SCES_013.31_report
+          name: ${{ matrix.serial }}_report
           path: build/report.json
 
   # Japanese release (Ore! Tomba, SLPS-01144). Same repo, separate decomp.dev version: artifact SLPS_011.44_report.

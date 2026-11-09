@@ -157,7 +157,8 @@ def defined_name(path, stem):
     if re.search(r"\b%s\s*\(" % re.escape(stem), t): return stem
     m = re.search(r"\.globl\s+(\w+)", t)                       # top-level asm body
     if m: return m.group(1)
-    names = re.findall(r"^[A-Za-z_][\w \t*]*?\b(\w+)\s*\([^;]*\)\s*(?:\n\s*)?\{", t, re.M)
+    names = re.findall(r"^([A-Za-z_][\w \t*]*?\b(\w+)\s*\([^;]*\)\s*(?:\n\s*)?\{)", t, re.M)
+    names = [n for head, n in names if not head.startswith("static")] or [n for head, n in names]  # skip static helpers
     return names[0] if names else stem
 
 

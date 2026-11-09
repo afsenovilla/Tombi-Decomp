@@ -443,6 +443,13 @@ def main():
             if data_only:
                 if not dclaims: continue
                 parts = []
+            # splat pairs a plain `addiu rX, rY, 0x20` after a non-relocated `lui 0x1f80` into a lone %lo(D_1F800020):
+            # with no %hi of that symbol in the function it is just a constant offset (our C emits the number)
+            def _lone_lo(body):
+                his = set(re.findall(r"%hi\((D_1F80[0-9A-F]{4})\)", body))
+                return re.sub(r"%lo\((D_1F80([0-9A-F]{4}))\)",
+                              lambda m: m.group(0) if m.group(1) in his else "0x" + m.group(2), body)
+            parts = [_lone_lo(p) for p in parts]
             with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
                 t.write('.include "macro.inc"\n.set noat\n.set noreorder\n.section .text\n' + "\n".join(parts) + extra)
             try:
