@@ -4,8 +4,9 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.1.3 (build of 47c4a28): Android launcher shows the release number; FR/DE/IT/NL languages and SCES-01330 disc,
-Select sub-screen labels, area names from the game's map. Previous: v0.1.2 (b4d6406).
+v0.2.0 (build of d124ae0, 2026-11-09): the three retail releases are 100 % matched; the port builds the matched
+D0SPSUB 800EFD6C (the old draft cleared 3 bytes past the HUD state) and X010 collidePlayerWithTiltedBar (the port
+dispatched that address to its static sabs() helper). Previous: v0.1.3 (47c4a28).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
