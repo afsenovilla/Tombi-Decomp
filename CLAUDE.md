@@ -36,6 +36,8 @@ Main references: `README.md`, `docs/PORT.md` (long; search it), `docs/STATUS.md`
   glue: reproduce with `build/wasm/tombi2w` (PC build of the same 64-bit code: `PORT_STALE_FULL=warn python3
   port2/wasm/build.py -j 8`, ~5 min). Ask for the app log (Opciones → Ver último log → Compartir) when needed.
 - Discord texts: English, plain paragraphs, under 2000 characters, never credit Folkin.
+- Reports (written reports, agents' reports, index/summary files of a task) are always in English; the chat replies
+  stay in Spanish.
 - Changelog and release notes: English.
 
 ## Hard rules

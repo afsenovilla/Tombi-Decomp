@@ -681,6 +681,14 @@ the disc data (not seen in-game yet).
   (USA `D307.GAM` 0x1E5C0, PAL `D306.GAM` 0x1E5E0): model and handler survive with nothing placing them. The
   collision map is walkable at every log cell, so they were decoration (log floors); a link with the graffiti-floor
   puzzle is a guess.
+  The section layout is the same in JP and PAL/USA (PAL and USA files byte-identical): same 240x168 collision grid
+  (136 of 40,320 cells differ, local wall edits; every log cell walkable in both), ~97 % of the backdrop polygons
+  shared, the 22 shared records (20 gates, 2 type 0x3F) at the same positions, the same five exits and eleven actors
+  (JP has a 12th at (495,-409)). Decisive: the floor mesh has a 24x20 / 28x20 tile cut exactly at each of the 25
+  distinct log positions (two JP records share (1076,-686)) **in both versions**, and PAL has no tile of that size
+  anywhere else: the PAL floor keeps the outlines of the removed logs. In JP each tile also carries a shadow quad
+  (octagon blob, page 14, UV 136..159 x 40..63, CLUT 0x79CF) that PAL dropped; the blob texture is still in PAL VRAM.
+  So the JP coordinates injected into PAL are the original positions (the shadows are missing).
 - **AREA00: five static solid blocks only in JP.** JP layer 4 type 0x08 is a static solid-model handler (X00
   0x8011D824, near-twin of `updateStaticSolid`); in USA/PAL the slot is the empty stub (`updateL4Type08Object`, PAL
   0x80030404, USA 0x80033858). JP records: a rising staircase of three in section 0 at (1021,-120), (1117,-197),
