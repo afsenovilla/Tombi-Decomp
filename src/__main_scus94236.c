@@ -1,0 +1,38 @@
+// VERSION SCUS_94236 scus94236 8006B634 112
+// FLAGS -O2 -G0
+// AS gnu
+#if defined(VERSION_SCUS_94236)
+__asm__(".set noreorder\n.set noat\n"
+".globl __main\n.type __main,@function\n__main:\n"
+"	lui	$8,%hi(D_800975B8)\n"
+"	lw	$8,%lo(D_800975B8)($8)\n"
+"	addiu	$29,$29,-16\n"
+"	sw	$16,4($29)\n"
+"	sw	$17,8($29)\n"
+"	sw	$31,12($29)\n"
+"	bne	$8,$0,L__main_58\n"
+"	ori	$8,$0,0x1\n"
+"	lui	$1,%hi(D_800975B8)\n"
+"	sw	$8,%lo(D_800975B8)($1)\n"
+"	lui	$16,%hi(D_80010000)\n"
+"	addiu	$16,$16,%lo(D_80010000)\n"
+"	lui	$17,0x0\n"
+"	addiu	$17,$17,0\n"
+"	beq	$17,$0,L__main_58\n"
+"	sll	$0,$0,0x0\n"
+"L__main_40:\n"
+"	lw	$8,0($16)\n"
+"	addiu	$16,$16,4\n"
+"	jalr	$8\n"
+"	addiu	$17,$17,-1\n"
+"	bne	$17,$0,L__main_40\n"
+"	sll	$0,$0,0x0\n"
+"L__main_58:\n"
+"	lw	$31,12($29)\n"
+"	lw	$17,8($29)\n"
+"	lw	$16,4($29)\n"
+"	addiu	$29,$29,16\n"
+"	jr	$31\n"
+"	sll	$0,$0,0x0\n"
+".set at\n.set reorder\n");
+#endif

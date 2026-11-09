@@ -28,10 +28,9 @@ Game code, closest first:
 | x04 80118720 | 624 B | 2 lines (`addiu a1,v1,26` for `s = &f->flag` must come after the hoisted `li 208/255/1`; `st` pinned to $5 fixed the rest) | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
 | main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |
 
-## USA retail (SCUS-94236): 99.81 % with the SYSTEM overlays (3678 of 3681 functions)
+## USA retail (SCUS-94236): 99.83 % with the SYSTEM overlays (3680 of 3681 functions)
 
-Every game function matches except dspsub 800EEE84 (2956 B, the USA twin of PAL D0SPSUB 800EFD6C, which is still
-open). Sony library: libsn `__main` / `__do_global_dtors` (compiled from C, not in psx_tomba).
+Everything matches except dspsub 800EEE84 (2956 B, the USA twin of PAL D0SPSUB 800EFD6C, which is still open).
 
 ## Demos and prototypes
 
