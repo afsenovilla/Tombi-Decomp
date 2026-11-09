@@ -3583,3 +3583,12 @@ package servers refuse the cloud container, so there is no libctru/citro3d build
   Per frame in AREA 1 gameplay: ~50 batches, ~240 triangles, ~1 texture decode, ~0.25 read-backs (16 pixels: the
   game reads a CLUT out of the frame it drew).  Not mapped: mask bits, dithering, the 24-bit display mode's
   present (read back as for the software renderer), --widescreen, --internal-res.
+- **First build (2026-11-09).** `.github/workflows/3ds.yml` builds `tombi2.3dsx` (artifact `tombi-3ds`, with the ELF for
+  addr2line) on pushes to master / claude/** touching port2: port2/CMakeLists.txt with devkitPro's 3DS.cmake in the
+  `devkitpro/devkitarm` image (devkitARM r68, gcc 16 with C17 forced, libctru 2.7.0, citro3d 1.7.1), SDL2 2.30.11 built
+  from its release source with its N3DS backend (devkitPro packages only SDL 1.2).  gen2.py reads newlib, libm,
+  libctru, citro3d and SDL2 as libraries (no stubs of their functions) and writes the overlay thunks without
+  movw/movt.  On the console: `sdmc:/3ds/tombi/` holds the player's disc image (.chd/.bin/.iso, or a data/ folder),
+  optional `args.txt` flags and `log.txt`; audio needs `sdmc:/3ds/dspfirm.cdc` (DSP1).  Not tried on hardware or
+  an emulator yet; first run: software renderer, movies skipped, no second screen.  Open risks: the user exception
+  handler (null-page accesses) needs a kernel that delivers user exceptions (Luma3DS does), the speed.
