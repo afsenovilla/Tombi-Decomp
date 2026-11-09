@@ -16,7 +16,7 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 
 ## Japanese retail (SLPS-01144): 98.24 % with the SYSTEM overlays (98.91 % without; 3467 of 3530 functions)
 
-The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08; a second pass the same day matched 75 more (DSPSUB/DSPSUB3 54, OPTSUB00 8, DSPSUB2 13) and a third 65 (INFO, INFO2, INFO3: all of them). Left there: DSPSUB2 func_800ECCE8 (2 lines: `li a1,498` must stay in the jal delay slot), MapStep EF9B0, F0D90 (twin of PAL 800EFD6C).
+The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08; a second pass the same day matched 75 more (DSPSUB/DSPSUB3 54, OPTSUB00 8, DSPSUB2 13) and a third 65 (INFO, INFO2, INFO3: all of them). Left there: DSPSUB2 func_800ECCE8 (2 lines: `li a1,498` must stay in the jal delay slot), F0D90 (twin of PAL 800EFD6C).
 
 The JP report counts the Psy-Q library too. The hand-written-asm part (libgte, BIOS stubs, start, setjmp) is in as
 top-level asm. Left from the library: the parts Sony compiled from C (libsnd _SsContDataEntry and the _SsVmSetVol
@@ -29,7 +29,6 @@ Game code, closest first:
 | main 8001AA90 | 904 B | 99.9 % | instruction-identical; jump-table naming only |
 | x06 8011DD3C | 644 B | 99.4 % | instruction-identical; the target includes one padding `nop` before the next function |
 | x04 80118720 | 624 B | 2 lines (`addiu a1,v1,26` for `s = &f->flag` must come after the hoisted `li 208/255/1`; `st` pinned to $5 fixed the rest) | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
-| x04 80117938 | 2768 B | ~300 lines | tile-grid visibility list, no PAL twin |
 | main 80024B78 | 5112 B | not started | hand-written GTE mesh renderer, no twin; write from scratch with the GTE macros of src/modelDrawG4Lit.c |
 | main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |
 
