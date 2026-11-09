@@ -349,11 +349,22 @@ def object_refs(stems):
     return out
 
 
-def load_fixes():
-    out = {}
+def load_fixes(ver=None):
+    """{src path: [(old, new)]} of port/fixes.txt for the version the port is generated for.  A line
+    `@version usa` (or several, `@version pal usa`; any tools/versions.py name or alias) makes the fixes after it
+    apply only to those versions, `@version all` ends the section; fixes outside a section apply to every version."""
+    import versions as V
+    ver = ver or PV.VER
+    out, only = {}, None
     for l in open(os.environ.get("PORT_FIXES_TXT") or os.path.join(ROOT, "port", "fixes.txt")):
         if not l.strip() or l.lstrip().startswith("#"): continue
+        if l.startswith("@version"):
+            names = l.split()[1:]
+            if not names: sys.exit("gen_port: port/fixes.txt: %r names no version" % l.strip())
+            only = None if names == ["all"] else {V.canon(n) for n in names}
+            continue
         f, old, new = [x.strip() for x in l.rstrip("\n").split(" | ")]
+        if only is not None and ver not in only: continue
         out.setdefault(f, []).append((old, new))
     return out
 
@@ -508,6 +519,13 @@ def area_plan(U, areas, ovls=()):
                 # thunk itself, and the dispatch would loop forever
                 nm = UN.defined_name(u.file, os.path.basename(u.file)[:-2])
                 compiled.append((p, u)); amap.append((p, u.addr, p + "_" + nm))
+        if not PV.PAL:
+            # another version's area units start at its own code (AREA_OWN; the X00 prefix is X000's, tools/units.py):
+            # a varying X000 function of the prefix (one a SYSTEM overlay also starts at: USA playerAirSpinToFall
+            # 0x800EDFA0, I0NFO2's topdownActorPatrolHStep) runs X000's code while this area is resident
+            have = set(a for q, a, n in amap if q == p)
+            for a, u in x0.items():
+                if a in vary and a < PV.AREA_OWN and a not in have and same(p, a, u.size): amap.append((p, a, None))
     return vary, compiled, amap
 
 
@@ -1061,8 +1079,16 @@ def sources_version(outdir, progs, ovls=(), areas=()):
             txt = txt.replace(old, new); whole = whole.replace(old, new)
         if name in dropped: print("gen_port: %s is MIPS asm only: needs a port shim" % name)
         nat = native[(prog, u.addr)]
-        ob = objs.get((PV.vprog(prog), u.addr), {"U": set(), "D": {}, "A": {}, "L": set()})
+        ob = objs.get((PV.vprog(prog), u.addr))
         psy = psyms[prog]
+        if ob is None:
+            # no linked object (the full link kept the unit as asm: X001/X010 playerStepClingRotating): the names it
+            # calls are the program's own symbols (its playerClingJumpRelease was a stub, not X001_playerClingJumpRelease)
+            ob = {"U": set(), "D": {}, "A": {}, "L": set()}
+            if kind != "base":
+                body = re.sub(r"/\*.*?\*/|//[^\n]*", "", txt, flags=re.S)
+                ob["U"] = {n for n in set(re.findall(r"\b([A-Za-z_]\w*)\s*\(", body))
+                           if n != name and n in psy and psy[n] in own.get(prog, {})}
         defs = {}
         if nat != name: defs[name] = nat
         if prog == "X000" and u.addr in vary: x000_native[u.addr] = nat
@@ -1109,7 +1135,16 @@ def sources_version(outdir, progs, ovls=(), areas=()):
                 defs[n] = "%s /* @%08X */" % (func_at[a], a); continue         # a function of MAIN0 / shared X000: by its own name
             defs[n] = "%s__%08X" % (n, a); renamed[defs[n]] = a; canon_prog[defs[n]] = prog
         dtxt = "".join("#define %s %s\n" % (n, t) for n, t in sorted(defs.items()))
-        txt = volatile_aliases(txt)
+        # the names this copy links (its renames, its object's references, then the version's tables): two names of
+        # one address (LIST_COUNTER / LIST_COUNTER_S) become volatile, or playerTryTalkToNpc loops past its list
+        def addr_of(n, defs=defs, refs=refs, psy=psy):
+            if n in defs:
+                m = re.search(r"__([0-9A-F]{8})$|@([0-9A-F]{8})", defs[n])
+                if m: return int(m.group(1) or m.group(2), 16)
+            if n in refs: return refs[n]
+            a = psy.get(n) if n != " local" else None
+            return effective(n) if a is None else a
+        txt = volatile_aliases(txt, addr_of)
         txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (dtxt, os.path.relpath(u.file, ROOT)) + txt
         hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:800], re.M)
         hs = hm.group(1) if hm else None
@@ -1125,18 +1160,24 @@ def sources_version(outdir, progs, ovls=(), areas=()):
     areamap = [(p, a, (own.get(p, {}).get(a) if n else None)) for p, a, n in areamap]
     # short calls (PORT_ARG): base programs together, each SYSTEM overlay and each area as its own group
     arity_addr = {}
+    def native_arity(texts, rev):
+        """{address: parameters} of the definitions of texts: a file defines the name it spells (overheadPlayerHandler)
+        and its header #defines it to the native name (I0NFO2_overheadPlayerHandler), whose address rev knows"""
+        out = {}
+        for f, t in texts.items():
+            hdr = t[:max(0, t.find("#line 1 "))]
+            ren = dict(re.findall(r"^#define (\w+) (\w+)", hdr, re.M))
+            for n, k in _global_defs({f: t}).items():
+                a = rev.get(ren.get(n, n))
+                if a is None: a = rev.get(n)
+                if a is not None and k > 0: out[a] = max(out.get(a, 0), k)
+        return out
     for prog, t in area_texts.items():
-        rev = {v: a for a, v in own.get(prog, {}).items()}
-        for n, k in _global_defs(t).items():
-            a = rev.get(n)
-            if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
+        for a, k in native_arity(t, {v: a for a, v in own.get(prog, {}).items()}).items():
+            arity_addr[a] = max(arity_addr.get(a, 0), k)
     ovl_arity = {}
     for prog, t in ovl_texts.items():
-        rev = {v: a for a, v in own.get(prog, {}).items()}
-        ovl_arity[prog] = {}
-        for n, k in _global_defs(t).items():
-            a = rev.get(n)
-            if a is not None and k > 0: ovl_arity[prog][a] = max(ovl_arity[prog].get(a, 0), k)
+        ovl_arity[prog] = native_arity(t, {v: a for a, v in own.get(prog, {}).items()})
         for a, k in ovl_arity[prog].items(): arity_addr[a] = max(arity_addr.get(a, 0), k)
     for n, k in _global_defs(out_texts).items():
         a = native_addr.get(n, canon.get(n))
@@ -1169,11 +1210,15 @@ def sources_version(outdir, progs, ovls=(), areas=()):
     # the overlay function starts: TITLE_MENU_GLYPHS, O0PTSUB0 data at 0x800E95E4, is X000's updateEggShellPiece)
     starts = {p: set(u.addr for u in U.get(p, [])) for p in allp}
     for p in areas: starts[p] |= starts.get("X000", set())
+    # X00's link names the area functions its code calls by address (playerInitMode's FUN_801212a0 = X01's
+    # playerInitAreaHook 0x801205D8): a function, reached through its dispatch thunk, not X000 image data
+    area_starts = set(u.addr for p in areas for u in U.get(p, []) if u.addr >= PV.AREA_OWN)
     with open(os.path.join(outdir, "symkind.txt"), "w") as f:
         for n, a in sorted(list(canon.items()) + list(renamed.items())):
             p = canon_prog.get(n)
             if p is None or (p == "MAIN0" and OVL_BASE <= a < OVL_END): continue
-            f.write("%s %s\n" % (n, "F" if a in starts.get(p, ()) or (p != "MAIN0" and a in starts["MAIN0"]) else "D"))
+            fn = a in starts.get(p, ()) or (p != "MAIN0" and a in starts["MAIN0"]) or (p == "X000" and a in area_starts)
+            f.write("%s %s\n" % (n, "F" if fn else "D"))
     write_tables(outdir, progs, ovls, areas, U, files, files24, files26, fmap, ovlmap, areamap, x000_native, vary,
                  canon, renamed, area_units)
 

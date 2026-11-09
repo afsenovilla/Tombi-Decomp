@@ -578,6 +578,8 @@ static const char *port_civ_maps_dir;
    area select instead of the story) and, with --civ-maps, --civ-test so sections 0 of AREA11/16/17 load the rebuilt
    towns; the launcher entry opens a Yes / No box (port_lx_title_open). */
 int port_title_debug, port_title_extra; unsigned char port_title_angles[2];
+/* the title font's glyph of an ASCII letter c is c - BASE: PAL 'A' = 33, USA 'A' = 32 (its TITLE_MENU_GLYPHS: NEW = 45 36 54) */
+#define PORT_TITLE_GLYPH_BASE (PORT_VERSION_PAL ? 32 : 33)
 extern int port_launcher_exit;
 static int port_title_quit_index = -1;   /* b69 of the QUIT entry, -1: none */
 /* the title font is ASCII: a letter with a diaeresis (Ä Ö Ü of a label) is its base letter, marked here, and
@@ -609,7 +611,7 @@ void port_title_debug_list(short **ps, unsigned char **ppal) {
         for (int j = 0; j < nw; j++) {
             w = last + 1; if (w > 0x37) w = 0x37;
             for (; k < w + 6; k++) list[k] = 0;
-            for (int i = 0; words[j][i]; i++) { int um, c = title_base((unsigned char)words[j][i], &um); last = k; title_umlaut[k] = (unsigned char)um; list[k++] = (short)(c - 32); pal[nz++] = 2; }
+            for (int i = 0; words[j][i]; i++) { int um, c = title_base((unsigned char)words[j][i], &um); last = k; title_umlaut[k] = (unsigned char)um; list[k++] = (short)(c - PORT_TITLE_GLYPH_BASE); pal[nz++] = 2; }
             {   /* the carousel draws its front 16 cells flat (titleDrawMenuCarousel: angle 0xE0..0x1F), the rest in perspective:
                    the word starts 6 cells in as OPTIONS does, or earlier for a long word so it ends inside (2 cells kept
                    for the left arrow) */
@@ -1096,6 +1098,8 @@ int main(int argc, char **argv) {
         port_printf("[port2] %s build: --lang, --text-patch, --picture ntsc, --cut-content and --civ-test are PAL-only (ignored)\n", PORT_VERSION_SERIAL);
         port_lang = 0; port_text_patch_n = 0; picture = 0; port_cut_content = 0; port_civ_test = 0; (void)port_panel_on;
     }
+    /* the back-to-launcher entries draw their words with the PAL disc's pause / title glyphs (runtime/launcher_exit.c) */
+    { extern int port_launcher_exit; if (port_launcher_exit) { port_printf("[port2] %s build: --launcher-exit is PAL-only for now (off)\n", PORT_VERSION_SERIAL); port_launcher_exit = 0; } }
     port_no_translation_file = 1;
     { extern int port_panel_on; if (port_panel_on) { port_printf("[port2] %s build: the second-screen panel is PAL-only for now (off)\n", PORT_VERSION_SERIAL); port_panel_on = 0; } }
 #endif
