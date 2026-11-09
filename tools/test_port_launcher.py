@@ -293,8 +293,9 @@ class TestLauncher(unittest.TestCase):
     def test_library_migrates_an_old_setup(self):
         """An older launcher's data/ (PAL) and disc path become the library's first game, data/ kept as it is."""
         d = self.launcher("migrate", {"disc": "{APP}/tombi.bin", "lang": 5}, data=True)
-        self.assertEqual(self.w.s["games"], [dict(serial="SCES-01331", sha1=L.MAIN0_SHA1, image=os.path.join(d, "tombi.bin"),
-                                                  data="data")])
+        games = [dict(g, image=os.path.normpath(g["image"])) for g in self.w.s["games"]]   # "{APP}/x" keeps a '/' on Windows
+        self.assertEqual(games, [dict(serial="SCES-01331", sha1=L.MAIN0_SHA1, image=os.path.normpath(os.path.join(d, "tombi.bin")),
+                                      data="data")])
         self.assertEqual(self.w.s["game"], "SCES-01331")
         self.assertEqual(L.data_dir(), os.path.join(d, "data"))
         self.assertEqual(json.load(open(os.path.join(d, "tombi-port.json")))["games"][0]["data"], "data")
