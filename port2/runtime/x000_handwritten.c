@@ -12,6 +12,7 @@
  * (d90, and d94 for the first one) edge pairs (wb6/wc6 for direction 2, wbe/wce for 3) by one; state 2 goes to
  * 3; state 3 counts w20 down and moves them back every 4th step, then returns to state 0. */
 #include "port_runtime.h"
+#if PORT_VERSION_PAL     /* PAL units translated by hand, bound by their PAL addresses (gen_port handwritten_port2_funcs) */
 
 typedef unsigned char u8; typedef short s16; typedef unsigned short u16; typedef unsigned int u32;
 #define F8(o, off)  (*(u8 *)((u8 *)(o) + (off)))
@@ -90,3 +91,4 @@ void func_8011DF60(void *o)
     extern void func_8011DF5C(void *);
     func_8011DF5C(o);
 }
+#endif   /* PORT_VERSION_PAL */

@@ -139,6 +139,7 @@ extern u16 D_8009F7F2;           /* pad 2 buttons (active low): debug screen off
 extern u8 D_800A2528[];
 extern void *D_8009D540;
 
+#if PORT_VERSION_PAL     /* PAL: main() (0x800163F4) is asm in the decomp; another version runs its matched C main */
 static void game_main(void) {
     u8 param[8];
     u16 *dispx, *dispy;
@@ -223,6 +224,8 @@ static void game_main(void) {
         }
     }
 }
+
+#endif
 
 /* ------------------------------------------------------------------ command line */
 const char *port_disc_path = 0;         /* --disc: the disc image (default game/disc/Tombi.bin when there is no data/) */
@@ -1084,6 +1087,18 @@ int main(int argc, char **argv) {
         else return usage(argv[0]);
     }
     if (headless) port_window = 0;
+#if !PORT_VERSION_PAL
+    /* another version (gen/version/port_version.h): the PAL-only features (the language overlays, the text patches,
+       the PAL->NTSC picture, the panel's tables, the cut-content and Civilization rebuilds) read PAL addresses and the
+       PAL disc's files: off, said once */
+    if (port_lang || port_text_patch_n || picture > 0 || port_cut_content || port_civ_test) {
+        extern int port_panel_on;
+        port_printf("[port2] %s build: --lang, --text-patch, --picture ntsc, --cut-content and --civ-test are PAL-only (ignored)\n", PORT_VERSION_SERIAL);
+        port_lang = 0; port_text_patch_n = 0; picture = 0; port_cut_content = 0; port_civ_test = 0; (void)port_panel_on;
+    }
+    port_no_translation_file = 1;
+    { extern int port_panel_on; if (port_panel_on) { port_printf("[port2] %s build: the second-screen panel is PAL-only for now (off)\n", PORT_VERSION_SERIAL); port_panel_on = 0; } }
+#endif
     port_ntsc = picture > 0;     /* opt-in (--picture ntsc): the PAL picture is the default at 50 and 60 Hz */
     if (port_ntsc) port_printf("[port2] NTSC picture: the US build's 320x224 screen (--picture pal for the PAL 320x256 one)\n");
     if (port_ws_auto) { extern int port_widescreen; port_widescreen = port_ws_resolve(); }
@@ -1116,6 +1131,7 @@ int main(int argc, char **argv) {
     /* --lang 5: the Spanish graphic redraws (CARGANDO, CARGAR / GUARDAR, VUELVE A INTENTARLO) built from the disc data
        (shims/gfx_es.c, the twin of tools/gfx_es) and loaded as --patch-tex rects; --no-gfx-es keeps the English sprites */
     if (port_lang == 5 && port_gfx_es) port_gfx_es_load();
+#if PORT_VERSION_PAL
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
     SPAD16(0x3D8) = 1;
     SPAD16(0x3DA) = 7;
@@ -1123,6 +1139,15 @@ int main(int argc, char **argv) {
     { extern int port_panel_on; extern void port_panel_init(void); if (port_panel_on) port_panel_init(); }   /* --second-screen: names and map graph from the disc */
     port_watchdog_start();     /* after SDL_Init: a slow driver start must not count as a hang */
     game_main();
+#else
+    port_watchdog_start();
+    {   /* the version's own main() (src/main_<serial>.c, matched C), renamed port_game_main by the generator; its
+           frame wait calls port_vblank (port/fixes.txt) */
+        extern void port_game_main(void);
+        port_printf("[port2] %s: entering the game's main()\n", PORT_VERSION_SERIAL);
+        port_game_main();
+    }
+#endif
     return 0;
 }
 
