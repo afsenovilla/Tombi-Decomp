@@ -221,6 +221,16 @@ jobs:
           cp "$SD/3ds/tombi/log.txt" shots/log.txt 2>/dev/null || echo "(no log.txt)" > shots/log.txt
           tail -40 azahar.log > shots/azahar_tail.log; tail -40 shots/log.txt
 
+      # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
+      - name: Screenshots in the log
+        if: always()
+        run: |
+          for t in 060 120 240; do
+            f="shots/shot_$t.png"; [ -f "$f" ] || continue
+            convert "$f" -resize 50% -quality 70 "small_$t.jpg"
+            echo "=====BEGIN shot_$t====="; base64 -w 100 "small_$t.jpg"; echo "=====END shot_$t====="
+          done
+
       - name: Upload screenshots and logs
         if: always()
         uses: actions/upload-artifact@v4
