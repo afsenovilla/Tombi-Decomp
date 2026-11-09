@@ -2,7 +2,8 @@ name: Publish release
 
 # Publishes the newest green build of the native port (artifacts bin-<platform>-port of port2-exe, tombi-port-android of
 # android-apk) as ONE GitHub Release with tombi-port-<ver>-windows-x64.exe, tombi-port-<ver>-linux-x64.tar.gz (tar keeps
-# the executable bit) and tombi-port-<ver>-android.apk (arm64-v8a + armeabi-v7a);
+# the executable bit) and tombi-port-<ver>-android.apk (arm64-v8a + armeabi-v7a); the PC launchers bundle the PAL game
+# (tombi-pc) and, when port2-exe had the GAME_FILES_URL_USA disc, the USA one (tombi-pc-usa; versions.txt says which);
 # with the dispatch input "include tools" also Tombi-Tools-<ver>-windows-x64.zip / -linux-x64.tar.gz (tombi-text,
 # tombi-gfx, tombi-assets of assets-exe/gfx-exe/text-exe).  Versions: tag v0.0.N, title "Tombi port 0.0.N",
 # <ver> = 0.0.N; N = highest v0.0.* + 1 (auto releases bump the patch of the latest vX.Y.Z); the dispatch input
@@ -135,8 +136,10 @@ jobs:
               python3 tools/release_notes.py "$PREV" "$SHA"   # player-facing commits only (see the script)
             else echo "### Commit"; gh api "repos/$R/commits/$SHA" --jq '"- " + (.commit.message | split("\n")[0])'; fi
             echo; echo "### Assets"
-            echo "- \`tombi-port-$VER-windows-x64.exe\`: native port with launcher (Windows)"
-            echo "- \`tombi-port-$VER-linux-x64.tar.gz\`: \`tombi-port\` (Linux; the game is i386, see README)"
+            # the games each PC bundle runs (versions.txt of port2-exe: pal, plus usa when GAME_FILES_URL_USA was set)
+            games() { if grep -qx usa "art/$1-port/versions.txt" 2>/dev/null; then echo "Tombi! PAL (SCES-01331 / SCES-01330) and Tomba! USA (SCUS-94236) discs"; else echo "Tombi! PAL discs (SCES-01331 / SCES-01330)"; fi; }
+            echo "- \`tombi-port-$VER-windows-x64.exe\`: native port with launcher (Windows): $(games windows)"
+            echo "- \`tombi-port-$VER-linux-x64.tar.gz\`: \`tombi-port\` (Linux; the game is i386, see README): $(games linux)"
             echo "- \`tombi-port-$VER-android.apk\`: Android, one APK for 64-bit ARM (arm64-v8a, including 64-bit-only devices such as Snapdragon 8 Gen 3 and newer) and 32-bit ARM (armeabi-v7a). No game data: pick your own PAL disc image (SCES-01331) in the app."
             [ -d tw ] && echo "- \`Tombi-Tools-$VER-windows-x64.zip\` / \`-linux-x64.tar.gz\`: $(cd tw && ls | tr '\n' ' ')"
             true
