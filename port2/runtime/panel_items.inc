@@ -435,33 +435,37 @@ static void page_items(int play) {
     }
     it_build();
     if (it_sel >= it_n) it_sel = it_n - 1; if (it_sel < 0) it_sel = 0;
-    int lw = 168, lx = 8, h = H - 8 - top, rx = lx + lw + 4, rw = W - 8 - rx;
+    /* small: the 320x240 canvas (the 3DS bottom screen): 2x icons, the 8 px font, the action a normal plank */
+    int sm = H < 280, lw = sm ? 150 : 168, lx = 8, h = H - 8 - top, rx = lx + lw + 4, rw = W - 8 - rx;
+    int fh = sm ? 8 : 16, lh = sm ? 10 : 15, isc = sm ? 2 : 4, fr = 16 * isc + 18;
     /* the showcase */
     window_(lx, top, lw, h);
     int cx = lx + lw / 2;
-    frame_(cx - 41, top + 6, 82, 82);
-    stone(cx - 36, top + 11, 72, 72);
-    int bw = lw - 20, ay = top + h - 10 - IT_BIG, oy = ay - 28;
-    if (it_warp >= 0) it_btn(lx + 10, oy, bw, T("Cancel", "Cancelar"), 0, HS_ITOP + 4);
-    else it_btn(lx + 10, oy, bw, T("Sort", "Ordenar"), 0, HS_ITOP + 2);
+    frame_(cx - fr / 2, top + 6, fr, fr);
+    stone(cx - fr / 2 + 5, top + 11, fr - 10, fr - 10);
+    /* small: Sort and the action share one row under the description */
+    int bw = lw - 20, ay = sm ? top + h - 8 - 24 : top + h - 10 - IT_BIG, oy = sm ? ay : ay - 28, sw = sm ? (bw - 4) / 2 : bw;
+    if (it_warp >= 0) it_btn(lx + 10, oy, sw, T("Cancel", "Cancelar"), 0, HS_ITOP + 4);
+    else it_btn(lx + 10, oy, sw, T("Sort", "Ordenar"), 0, HS_ITOP + 2);
     if (it_n || it_warp >= 0) {
         int item = it_warp >= 0 ? it_warp : it_items[it_sel], bad; const char *st = it_status(item, &bad), *why = it_reason(item);
-        pa_item_icon(cx - 32, top + 15, item, PA_X4 | PA_OUTLINE | (why ? PA_SHADE : 0));
-        if (it_warp < 0) { if (it_in_use(item)) it_badge_use(cx + 26, top + 8); if (s3(S3_NCLUT)[item] & 0x80) it_badge_n(cx + 40, top + 86, G_QTY(item)); }
-        int y = top + 92;
-        y += 17 * text_wrap(lx + 8, y, 16, lw - 16, 17, 2, 1, it_name(item, b, sizeof b), C_DARK, C_EDGE);
-        if (it_warp < 0) { ctext(cx, y, 16, cat_name(it_icat[it_sel]), C_MUTED, C_EDGE); y += 18; }
+        pa_item_icon(cx - 8 * isc, top + 15, item, (sm ? PA_X2 : PA_X4) | PA_OUTLINE | (why ? PA_SHADE : 0));
+        if (it_warp < 0) { if (it_in_use(item)) it_badge_use(cx + fr / 2 - 15, top + 8); if (s3(S3_NCLUT)[item] & 0x80) it_badge_n(cx + fr / 2 - 1, top + fr + 4, G_QTY(item)); }
+        int y = top + fr + 10;
+        y += (lh + 2) * text_wrap(lx + 8, y, fh, lw - 16, lh + 2, 2, 1, it_name(item, b, sizeof b), C_DARK, C_EDGE);
+        if (it_warp < 0) { ctext(cx, y, fh, cat_name(it_icat[it_sel]), sm ? C_MUTED8 : C_MUTED, C_EDGE); y += lh + 3; }
         pa_fill(lx + 12, y + 1, lw - 24, 1, RGB(230, 200, 180)); y += 4;
-        int lim = oy - 4 - (st ? 2 : 0) * 15;
-        if (it_desc(item, b, sizeof b)) { int ml = (lim - y) / 15; if (ml > 0) text_wrap(lx + 10, y, 16, lw - 20, 15, ml, 0, b, C_MUTED8, C_EDGE); }
-        if (st) text_wrap(lx + 10, lim, 16, lw - 20, 15, 2, 0, st, bad ? C_RED : C_GREEN, C_REDE);
-        it_btn_big(lx + 10, ay, bw, it_act_name(it_sel, item), why ? 2 : 1, HS_ITOP + 3);
+        int lim = oy - 4 - (st ? 2 : 0) * lh;
+        if (it_desc(item, b, sizeof b)) { int ml = (lim - y) / lh; if (ml > 0) text_wrap(lx + 10, y, fh, lw - 20, lh, ml, 0, b, C_MUTED8, C_EDGE); }
+        if (st) text_wrap(lx + 10, lim, fh, lw - 20, lh, 2, 0, st, bad ? (sm ? C_RED8 : C_RED) : C_GREEN, C_REDE);
+        if (sm) it_btn(lx + 10 + sw + 4, ay, bw - sw - 4, it_act_name(it_sel, item), why ? 2 : 1, HS_ITOP + 3);
+        else it_btn_big(lx + 10, ay, bw, it_act_name(it_sel, item), why ? 2 : 1, HS_ITOP + 3);
     }
     /* the grid: icons on stone, scrolled (drag / fling, the scroll bar's halves, or following the cursor) */
     if (it_warp >= 0) { it_page_warp(rx, top, rw, h); return; }
     stone(rx, top, rw, h);
     frame_(rx, top, rw, h);
-    int cols = 3, ch = 62, vx = rx + 6, vy = top + 6, vw = rw - 12 - 6, vh = h - 12, cw = vw / cols, gx = vx + (vw - cols * cw) / 2;
+    int cols = sm ? 2 : 3, ch = sm ? 44 : 62, gs = sm ? 32 : 48, vx = rx + 6, vy = top + 6, vw = rw - 12 - 6, vh = h - 12, cw = vw / cols, gx = vx + (vw - cols * cw) / 2;
     for (int k = 0; k < it_n; k++) { it_lc[k] = (short)(k % cols); it_ly[k] = (short)(k / cols * ch); }
     int total = (it_n + cols - 1) / cols * ch;
     it_cols = cols;
@@ -473,10 +477,10 @@ static void page_items(int play) {
     for (int k = 0; k < it_n; k++) {
         int x = gx + it_lc[k] * cw, y = vy + it_ly[k] - so;
         if (y + ch <= vy || y >= vy + vh) continue;
-        int item = it_items[k], ok = !it_reason(item), sel = k == it_sel, ix = x + (cw - 48) / 2, iy = y + (ch - 48) / 2;
-        if (sel) { window_(ix - 7, iy - 7, 62, 62); it_selframe(ix - 7, iy - 7, 62, 62); }
-        pa_item_icon(ix, iy, item, PA_X3 | PA_OUTLINE | (ok ? 0 : PA_SHADE));
-        it_badges(ix, iy, 3, item);
+        int item = it_items[k], ok = !it_reason(item), sel = k == it_sel, ix = x + (cw - gs) / 2, iy = y + (ch - gs) / 2;
+        if (sel) { int m = sm ? 6 : 7; window_(ix - m, iy - m, gs + 2 * m, gs + 2 * m); it_selframe(ix - m, iy - m, gs + 2 * m, gs + 2 * m); }
+        pa_item_icon(ix, iy, item, (sm ? PA_X2 : PA_X3) | PA_OUTLINE | (ok ? 0 : PA_SHADE));
+        it_badges(ix, iy, gs / 16, item);
         int hy0 = y < vy ? vy : y, hy1 = y + ch > vy + vh ? vy + vh : y + ch;
         if (hy1 - hy0 > 8) hot(x, hy0, cw, hy1 - hy0, HS_ITEM + (k & 0xFF));
     }
