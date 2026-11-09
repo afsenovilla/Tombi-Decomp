@@ -199,7 +199,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         C3D_TexSetFilter(&vram_tex, GPU_LINEAR, GPU_LINEAR);
         C3D_TexBind(0, &vram_tex);
         float X0 = 40, X1 = 360, Y0 = 0, Y1 = 240;   /* 320 x 240 */
-        float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = 1.0f - y / 512.0f, T1 = 1.0f - (y + h) / 512.0f;
+        float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = y / 512.0f, T1 = (y + h) / 512.0f;   /* (a render target: t = y / 512, seen in Azahar) */
         C3D_ImmDrawBegin(GPU_TRIANGLES);
         vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
         vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
@@ -226,6 +226,18 @@ static void self_test(void) {
     port_printf("[3ds] pica self test: (4,4) %08x (want %08x), (4,500) %08x (want %08x): %s\n", got[0], red, got[1], green,
                 got[0] == red && got[1] == green ? "ok" : got[0] == green && got[1] == red ? "FLIPPED" : "WRONG");
     c3d_fill(0, 0, 16, 16, 0); c3d_fill(0, 496, 16, 16, 0);
+    /* the primitive path: a flat quad at y 300..315 with the drawing area the whole VRAM, then with y 256..511;
+       read at y 304 (where it belongs) and at y 207 (511 - 304: mirrored) */
+    PV q[6] = { { 32, 300, 0, 0, 255, 0, 0, 255 }, { 48, 300, 0, 0, 255, 0, 0, 255 }, { 32, 316, 0, 0, 255, 0, 0, 255 },
+                { 48, 300, 0, 0, 255, 0, 0, 255 }, { 48, 316, 0, 0, 255, 0, 0, 255 }, { 32, 316, 0, 0, 255, 0, 0, 255 } };
+    for (int k = 0; k < 2; k++) {
+        PState st = { -1, 0, AT_OFF, -1, 0, k ? 256 : 0, 1023, 511 };
+        c3d_fill(0, 0, 1024, 512, 0);
+        c3d_tris(&st, q, 6);
+        unsigned a1, a2; c3d_read(40, 304, 1, 1, &a1, 1); c3d_read(40, 207, 1, 1, &a2, 1);
+        port_printf("[3ds] pica self test, triangles (drawing area y %d..511): at y 304 %08x, at y 207 %08x\n", k ? 256 : 0, a1, a2);
+    }
+    c3d_fill(0, 0, 1024, 512, 0);
 }
 static int c3d_start(void) {
     if (!C3D_Init(C3D_DEFAULT_CMDBUF_SIZE)) { port_printf("[3ds] pica: C3D_Init failed\n"); return -1; }
