@@ -116,7 +116,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
     C3D_ImmDrawBegin(GPU_TRIANGLES);
     for (int i = 0; i < n; i++) {
         /* +0.5: the PICA samples pixel centres, the PS1 integer positions */
-        vtx(v[i].x + 0.5f, v[i].y + 0.5f, v[i].u / 256.0f, v[i].v / 256.0f, v[i].r / 255.0f, v[i].g / 255.0f, v[i].b / 255.0f,
+        vtx(v[i].x + 0.5f, v[i].y + 0.5f, v[i].u / 256.0f, 1.0f - v[i].v / 256.0f, v[i].r / 255.0f, v[i].g / 255.0f, v[i].b / 255.0f,
             s->tex >= 0 ? 1.0f : 0.0f);   /* (untextured: alpha 0, bit 15 clear on a read-back) */
     }
     C3D_ImmDrawEnd();
@@ -157,10 +157,10 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
             C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
             set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
             C3D_TexBind(0, tp);
-            float X0 = x + i0, Y0 = y + j0, X1 = X0 + pw, Y1 = Y0 + ph, S1 = (float)pw / t.width, T1 = (float)ph / t.height;
+            float X0 = x + i0, Y0 = y + j0, X1 = X0 + pw, Y1 = Y0 + ph, S1 = (float)pw / t.width, T0 = 1.0f, T1 = 1.0f - (float)ph / t.height;
             C3D_ImmDrawBegin(GPU_TRIANGLES);
-            vtx(X0, Y0, 0, 0, 1, 1, 1, 1); vtx(X1, Y0, S1, 0, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
-            vtx(X1, Y0, S1, 0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
+            vtx(X0, Y0, 0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
+            vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
             C3D_ImmDrawEnd();
             st_writes++;
         }
@@ -199,7 +199,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         C3D_TexSetFilter(&vram_tex, GPU_LINEAR, GPU_LINEAR);
         C3D_TexBind(0, &vram_tex);
         float X0 = 40, X1 = 360, Y0 = 0, Y1 = 240;   /* 320 x 240 */
-        float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = y / 512.0f, T1 = (y + h) / 512.0f;
+        float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = 1.0f - y / 512.0f, T1 = 1.0f - (y + h) / 512.0f;
         C3D_ImmDrawBegin(GPU_TRIANGLES);
         vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
         vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
