@@ -1,0 +1,12 @@
+<!-- port2/android/render/render.py: Robolectric and JUnit for the launcher renders (a classpath only, nothing is built) -->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.tombi</groupId><artifactId>launcher-render</artifactId><version>1</version>
+  <repositories>
+    <repository><id>google</id><url>https://dl.google.com/android/maven2</url></repository>
+  </repositories>
+  <dependencies>
+    <dependency><groupId>org.robolectric</groupId><artifactId>robolectric</artifactId><version>4.14.1</version></dependency>
+    <dependency><groupId>junit</groupId><artifactId>junit</artifactId><version>4.13.2</version></dependency>
+  </dependencies>
+</project>

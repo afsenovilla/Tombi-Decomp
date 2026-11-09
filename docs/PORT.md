@@ -492,8 +492,12 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   `port2/android/game_libs.py --version usa` (armeabi-v7a: port2/CMakeLists.txt `-DPORT_VERSION=usa`; arm64-v8a:
   `port2/wasm/build.py --version usa --until w2c` + the CMake arm64 branch) into `app/src/main/jniLibs/<abi>/libtombi_usa.so`
   (git-ignored); without the secret the step is skipped and a USA disc shows *No incluido en esta versión de la app*.
-  The screens can be rendered on a PC with Robolectric's native graphics (Android's Skia) against the real
-  `LauncherActivity` (aapt2 + android-all from Maven, no SDK install).
+  **Renders on a PC**: `python3 port2/android/render/render.py OUT [--pal FS] [--usa FS] [--uilang 1]` draws the
+  real `LauncherActivity` with Robolectric's native graphics (Android's Skia) at 1920x1080 (the library in its three
+  looks, empty and with PAL / USA / Japan cards, the options per version, the disc screen, the dialog) and prints the
+  checks of `RenderTest` (migration, key / touch navigation, arguments per version); aapt2, android-all and Robolectric
+  come from Maven into `build/android-render` (~700 MB), no SDK install; `FS` = the `SYSTEM/` files of the player's
+  own disc for the logos.
 - **Launcher language.** *Opciones > Juego > Idioma del launcher*: Auto (the system's) / English / Español / Français /
   Deutsch / Italiano / Nederlands / Português / Svenska / Dansk (`res/values-xx/strings.xml`), saved as `uilang`,
   independent of the game language. Applied at once, without a restart: `LauncherActivity.getResources()` returns
