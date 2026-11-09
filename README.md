@@ -120,11 +120,11 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 <summary><b>Japan (SLPS-01144): per part</b></summary>
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 98.24 % of the code matches byte for byte** (1603188 of 1631952 bytes, 3467 of 3530 functions).
+**Ore! Tomba (SLPS-01144): 98.37 % of the code matches byte for byte** (1605380 of 1631952 bytes, 3470 of 3530 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 374204 B | 364780 B | 1221 / 1266 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.5 % |
+| SLPS_011.44: engine | 374204 B | 365228 B | 1222 / 1266 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.6 % |
 | X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
 | X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
@@ -142,8 +142,8 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 | X17.BIN: area code | 12124 B | 12124 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X18.BIN: area code | 16136 B | 16136 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| DSPSUB.BIN: SYSTEM overlay | 36084 B | 26384 B | 52 / 57 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 73.1 % |
-| DSPSUB2.BIN: SYSTEM overlay | 16180 B | 14572 B | 26 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.1 % |
+| DSPSUB.BIN: SYSTEM overlay | 36084 B | 26868 B | 53 / 57 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 74.5 % |
+| DSPSUB2.BIN: SYSTEM overlay | 16180 B | 15832 B | 27 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.8 % |
 | DSPSUB3.BIN: SYSTEM overlay | 23588 B | 21512 B | 41 / 43 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 91.2 % |
 | INFO.BIN: SYSTEM overlay | 24752 B | 24752 B | 51 / 51 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | INFO2.BIN: SYSTEM overlay | 87916 B | 87916 B | 191 / 191 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
