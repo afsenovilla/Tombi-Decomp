@@ -3,6 +3,8 @@
 The Japanese release is a second decomp.dev version built from the shared `src/` tree (see "How the versions
 share code" in the README): `--version slps01144` (alias `jp`), macro `VERSION_SLPS_01144`.
 
+> **100 % matched on 2026-11-09**: every function of the retail disc, SYSTEM overlays and Psy-Q library included.
+
 ## Inputs
 
 - Your own disc image, provided to CI through the `GAME_FILES_URL_JP` secret (raw `.bin`, 2352-byte sectors) and

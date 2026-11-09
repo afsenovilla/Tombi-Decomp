@@ -16,6 +16,12 @@ the original PlayStation.
   rendering, controllers, the original music, voices and movies, saves, all nine PAL languages and a launcher with
   mods. You supply your own disc image.
 
+> 🏆 **Milestone (2026-11-09): the three retail releases are fully matched.** Every function of PAL *Tombi!*
+> (SCES-01331), USA *Tomba!* (SCUS-94236) and Japanese *Ore! Tomba* (SLPS-01144) compiles back to exactly the bytes
+> of the disc: engine, all 20 area overlays, the SYSTEM overlays (menus, sub-screens, memory card, info screens) and
+> Sony's Psy-Q library code. PAL 1,530,244 / 1,530,244 B of game code, USA 3,681 / 3,681 functions, Japan 3,528 /
+> 3,528 functions. What is left is in the demos and prototypes ([docs/REMAINING.md](docs/REMAINING.md)).
+
 > This repository contains no game data, executables, disc images or Sony SDK files.
 > You need your own legally obtained copy of the game.
 
@@ -30,16 +36,16 @@ so either one gives you every language. Details: [docs/PORT.md](docs/PORT.md).
 
 | Release | Progress (decomp.dev: code, data, functions) | Notes |
 |---|---|---|
-| Europe, language set 2 EN ES PT SV DA (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, everything below |
+| Europe, language set 2 EN ES PT SV DA (`SCES_013.31`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | reference version, **100 %** |
 | Europe, language set 1 EN FR DE IT NL (`SCES_013.30`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCES_013.31&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCES_013.31&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCES_013.31&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCES_013.31) | same build as `SCES_013.31` (every game file byte-identical, only the boot menu differs); the port plays all nine languages from either disc |
-| USA, *Tomba!* (`SCUS_942.36`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCUS_942.36&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCUS_942.36&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCUS_942.36&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) | shared C reuse, [docs/USA.md](docs/USA.md) |
-| Japan, *Ore! Tomba* (`SLPS_011.44`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPS_011.44&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPS_011.44&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPS_011.44&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | matching in progress, [docs/JP.md](docs/JP.md) |
+| USA, *Tomba!* (`SCUS_942.36`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SCUS_942.36&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SCUS_942.36&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SCUS_942.36&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SCUS_942.36) | **100 %**, [docs/USA.md](docs/USA.md) |
+| Japan, *Ore! Tomba* (`SLPS_011.44`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPS_011.44&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPS_011.44&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPS_011.44&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPS_011.44) | **100 %**, [docs/JP.md](docs/JP.md) |
 | Japan demo, taikenban (`SLPM_801.65`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=SLPM_801.65&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=SLPM_801.65&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=SLPM_801.65&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/SLPM_801.65) | shared C + automatic sweep, [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Beta 1998-02-03 (`BETA_980203`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=BETA_980203&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=BETA_980203&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=BETA_980203&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/BETA_980203) | shared C reuse, [docs/BETA_980203.md](docs/BETA_980203.md) |
 | PrePre 8 demo (`PCPX_960.84`) | [![Code](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=code&version=PCPX_960.84&label=Code)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) [![Data](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=data&version=PCPX_960.84&label=Data)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) [![Functions](https://decomp.dev/afsenovilla/Tombi-Decomp.svg?mode=shield&measure=functions&version=PCPX_960.84&label=Functions)](https://decomp.dev/afsenovilla/Tombi-Decomp/PCPX_960.84) | symbol pairing, [docs/PREPRE8.md](docs/PREPRE8.md) |
 
 Each release is counted on its own; one function is "done" when it compiles to exactly the bytes of that disc.
-What is left, closest first: [docs/REMAINING.md](docs/REMAINING.md).
+The three retail releases are at 100 %; what is left (demos and prototypes): [docs/REMAINING.md](docs/REMAINING.md).
 
 <details>
 <summary><b>PAL (reference): per part</b></summary>
@@ -178,10 +184,10 @@ Every known retail, demo and prototype disc (serials, dates, executable hashes):
 
 | Version | Serial | Status |
 |---------|--------|--------|
-| Tombi! PAL, language set 2 (EN ES PT SV DA) | SCES-01331 Rev 1 | matching, everything above; `MAIN0` (English) is the reference executable |
+| Tombi! PAL, language set 2 (EN ES PT SV DA) | SCES-01331 Rev 1 | **100 % matched**; `MAIN0` (English) is the reference executable |
 | Tombi! PAL, language set 1 (EN FR DE IT NL) | SCES-01330 Rev 1 | same game files byte for byte, only the boot menu differs: covered by the same sources and reports |
-| Tomba! (USA) | SCUS-94236 | split + shared C, figures in "USA release progress", see [docs/USA.md](docs/USA.md) |
-| Ore! Tomba (Japan) | SLPS-01144 | split + shared C, matching in progress (figures in the table at the top and in "Japanese release progress"), see [docs/JP.md](docs/JP.md) |
+| Tomba! (USA) | SCUS-94236 | **100 % matched** (3681 / 3681 functions), see [docs/USA.md](docs/USA.md) |
+| Ore! Tomba (Japan) | SLPS-01144 | **100 % matched** (3528 / 3528 functions), see [docs/JP.md](docs/JP.md) |
 | Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 40.9 % of code (objdiff; figures in "Japanese demo progress"), `tools/demo_sweep.py` installs what PAL / JP C matches as is, see [docs/JPDEMO.md](docs/JPDEMO.md) |
 | Ore! Tomba beta 1998-02-03 (Japan) | SLPS-01144 (prototype) | split + shared C, 56.5 % of code, see [docs/BETA_980203.md](docs/BETA_980203.md) |
 | Tomba! PrePre 8 (Japan demo) | PCPX-96084 | split + symbol pairing, 17.1 % of code, see [docs/PREPRE8.md](docs/PREPRE8.md) |

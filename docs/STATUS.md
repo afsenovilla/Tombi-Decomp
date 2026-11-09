@@ -10,7 +10,7 @@ Select sub-screen labels, area names from the game's map. Previous: v0.1.2 (b4d6
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
 
-## Matching status (2026-11-09)
+## Matching status (2026-11-09): milestone, the three retail releases are 100 % matched
 
 | Version | Code | Functions | Left |
 |---|---:|---:|---|

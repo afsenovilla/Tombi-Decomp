@@ -1,5 +1,7 @@
 # USA release (Tomba!, SCUS-94236)
 
+> **100 % matched on 2026-11-09**: every function of the retail disc, SYSTEM overlays and Psy-Q library included.
+
 ## Matching target
 
 `--version scus94236` (alias `usa`, macro `VERSION_SCUS_94236`), `config/scus94236/`, decomp.dev version
