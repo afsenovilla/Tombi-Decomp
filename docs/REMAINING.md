@@ -12,7 +12,7 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 |---|---:|---|---|
 | D0SPSUB 800EFD6C | 3012 B | score 659 | best draft in the 2026-11-09 session scratchpad: the `s->field` loads must stay after the stores to the Text globals (one-field-struct aliases of the same symbols at chosen store sites helped); left: loop-1 attr/font store schedule, the y store in later loops, then registers. |
 | D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
-| Psy-Q library | 10.9 KB of 100.9 KB | 89.2 % | not counted in the game figure; sources ported from psx_tomba |
+| Psy-Q library | 100876 of 100904 B | 100 % (rounded) | not counted in the game figure; every Psy-Q unit has a source (2026-11-09: the last 87 ported from the JP/USA files) |
 
 ## Japanese retail (SLPS-01144): 98.24 % with the SYSTEM overlays (98.91 % without; 3467 of 3530 functions)
 

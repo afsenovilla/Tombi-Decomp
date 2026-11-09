@@ -14,7 +14,7 @@ _Generated with `python tools/progress.py` (2026-11-09). Do not edit by hand._
 | SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 190472 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.4 % |
 | **Whole game** | **1530244 B** | **1527232 B** | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 **99.80 %** |
 
-- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 92500 B of it (91.7 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
+- Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 100876 B of it (100.0 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
   other; those copies match automatically and are not added again (counting every copy separately gives 99.8 %).
 - Also tracked for MAIN0 + X000: 98.3 % of the code named by us, 67.3 % typed with the TObj structure.
@@ -26,7 +26,7 @@ Sony's library (Psy-Q), which Ghidra already identifies. Those are an extra 1009
 
 | Program | Game code | Named | Typed (TObj) | Matching | Psy-Q library | Psy-Q matching |
 |---|---|---|---|---|---|---|
-| MAIN0.EXE (game core) | 286092 B (812 f) | 100.0 % | 45.2 % | 100.0 % (1241 f) | 100864 B | 92460 B (91.7 %) |
+| MAIN0.EXE (game core) | 286092 B (812 f) | 100.0 % | 45.2 % | 100.0 % (1328 f) | 100864 B | 100836 B (100.0 %) |
 | X000.BIN (AREA00 overlay) | 307596 B (588 f) | 96.8 % | 87.9 % | 100.0 % (531 f) | 40 B | 40 B (100.0 %) |
 
 ## Area overlays (X001..X019) and SYSTEM overlays
