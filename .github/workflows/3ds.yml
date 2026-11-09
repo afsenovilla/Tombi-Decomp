@@ -197,7 +197,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb x11-utils imagemagick libgl1-mesa-dri libegl1 libopengl0 libgl1 libglx-mesa0 libvulkan1 mesa-vulkan-drivers libxkbcommon-x11-0 libxcb-cursor0 \
+          sudo apt-get install -y -qq xvfb x11-utils imagemagick libgl1-mesa-dri libegl1 libopengl0 libgl1 libglx-mesa0 libvulkan1 mesa-vulkan-drivers binutils-arm-none-eabi libxkbcommon-x11-0 libxcb-cursor0 \
                libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libfuse2 > /dev/null
           url=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/azahar-emu/azahar/releases/latest \
                 | python3 -c "import sys,json; a=[x['browser_download_url'] for x in json.load(sys.stdin)['assets'] if x['name'].lower().endswith('.appimage')]; print(a[0] if a else '')")
@@ -208,6 +208,8 @@ jobs:
           ls squashfs-root | head
 
       - name: Run in Azahar
+        env:
+          ADDRS: "0x003A5DC8 0x0039C9AC 0x00398AD0 0x002D6358"   # (a crash dialog's pc / lr, to name)
         run: |
           SD="$HOME/.local/share/azahar-emu/sdmc"
           mkdir -p "$SD/3ds/tombi" shots
@@ -224,6 +226,11 @@ jobs:
           echo "== windows"; xwininfo -root -tree | grep -v "has no name" | head -30 || true
           echo "== azahar.log"; grep -v -i "keysym\|xkbcomp" azahar.log | head -120
           echo "== azahar_log.txt"; find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" -exec grep -v "Config <Info>" {} \; 2>/dev/null | grep -i -E "loader|3dsx|error|critical|warning|tombi|svc|memory" | head -80
+          echo "== code addresses in the emulator's log"
+          L=$(find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" | head -1)
+          grep -o "at PC 0x[0-9A-Fa-f]*" "$L" | awk '{print $3}' | sort | uniq -c | sort -rn | head -12 | while read n a; do
+            echo "$n x $a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
+          for a in $ADDRS; do echo "$a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
           echo "== log.txt"; tail -60 shots/log.txt
 
       # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
