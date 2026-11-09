@@ -11,7 +11,6 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 | Function | Size | State | Notes |
 |---|---:|---|---|
 | D0SPSUB 800EFD6C | 3012 B | score 185 (matchcheck 156) | best draft `notes/drafts/d0spsub_func_800EFD6C_score185.c` (frame 0x90 and prologue match). Left: loop 1 keeps the `D_801091C4` base in s4 all loop, s2 as base for the attr/font stores, y/attr/w store order; then register names. Store forms were searched at random (keep the frame at 0x90: `D_8011113C.y/.w/.x` in later loops shrinks it to 0x80, a dead end). |
-| D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
 | Psy-Q library | 100876 of 100904 B | 100 % (rounded) | not counted in the game figure; every Psy-Q unit has a source (2026-11-09: the last 87 ported from the JP/USA files) |
 
 ## Japanese retail (SLPS-01144): 98.24 % with the SYSTEM overlays (98.91 % without; 3467 of 3530 functions)

@@ -57,7 +57,7 @@ What is left, closest first: [docs/REMAINING.md](docs/REMAINING.md).
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 100876 B of it (100.0 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 99.8 %).
+  other; those copies match automatically and are not added again (counting every copy separately gives 99.9 %).
 - Also tracked for MAIN0 + X000: 98.3 % of the code named by us, 67.3 % typed with the TObj structure.
 <!-- progress:end -->
 

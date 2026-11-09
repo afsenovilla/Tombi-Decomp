@@ -1,3 +1,2 @@
 prog,address,size,name,status,twin
-D0SPSUB3,800e8950,4280,func_800E8950,dup,D0SPSUB:800e89f8
 D0SPSUB,800efd6c,3012,func_800EFD6C,new,

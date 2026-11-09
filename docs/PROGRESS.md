@@ -16,7 +16,7 @@ _Generated with `python tools/progress.py` (2026-11-09). Do not edit by hand._
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 100876 B of it (100.0 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
-  other; those copies match automatically and are not added again (counting every copy separately gives 99.8 %).
+  other; those copies match automatically and are not added again (counting every copy separately gives 99.9 %).
 - Also tracked for MAIN0 + X000: 98.3 % of the code named by us, 67.3 % typed with the TObj structure.
 
 "Game code" = functions inside the code of the analyzed programs, **excluding** those from
@@ -61,12 +61,12 @@ I0NFO*, also at `0x800E8028`, sources in `src/<name>/`) are linked from source b
 | O0PTSUB0.BIN | SYSTEM | 8544 B | 27 | 100.0 % (27 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
 | D0SPSUB.BIN | SYSTEM | 37156 B | 59 | 91.9 % (58 f) | 0 B | 0 B | 0 B | 3012 B (1 f) |
 | D0SPSUB2.BIN | SYSTEM | 20004 B | 31 | 100.0 % (31 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
-| D0SPSUB3.BIN | SYSTEM | 25324 B | 46 | 83.1 % (45 f) | 0 B | 4280 B | 0 B | 0 B (0 f) |
+| D0SPSUB3.BIN | SYSTEM | 25324 B | 46 | 100.0 % (46 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
 | G0OVER.BIN | SYSTEM | 3152 B | 7 | 100.0 % (7 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
 | I0NFO.BIN | SYSTEM | 26248 B | 53 | 100.0 % (53 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
 | I0NFO2.BIN | SYSTEM | 90280 B | 196 | 100.0 % (196 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
 | I0NFO3.BIN | SYSTEM | 26692 B | 55 | 100.0 % (55 f) | 0 B | 0 B | 0 B | 0 B (0 f) |
-| **Total** | | 3814864 B | 7244 | 99.8 % (7242 f) | 0 B | 4280 B | 0 B | 3012 B (1 f) |
+| **Total** | | 3814864 B | 7244 | 99.9 % (7243 f) | 0 B | 0 B | 0 B | 3012 B (1 f) |
 
 The *Matching* column counts every copy, including the shared code matched through twins; the whole-game
 figure in the summary counts each function once.
