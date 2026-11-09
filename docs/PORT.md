@@ -2475,6 +2475,18 @@ clean, 87 entered; the build before that: "69 ok", not comparable, 52 of those r
   `updateLightsOutDarkness` and the middle of `motocrossBikeJumpStepB` in X006). Found with gdb watchpoints on
   `PLAYER.anim` and the pool's type bytes. A word of a data run is now data, never a thunk or a native function
   (`gen2.py` `emit_data`); `audit_pointers.py` `walk_main0` applies the same rule.
+- **The data-naming round of 145442a (61 of 96 rooms faulted; v0.2.0 96 clean).** Two generator gaps the D_<addr>
+  names had hidden, since gen_port read the address from the name. (1) `area_syms` never read
+  `notes/data_names_x0nn.csv`, so the 111 newly named area globals (`TREASURE_CHEST_GUARD_DEFS`, `SPEAR_PIG_ANIMS`,
+  ...) and their bare-letter aliases (`MOTOCROSS_COURSE_PATH_E`, the old `D_8011F3F8e`) were unknown and gen2
+  stubbed them as functions: the area code read stub code bytes as tables (`initTreasureChestGuard` in AREA03,
+  the X009 / X011 / X017 / X018 NPC setups, X014's handler tables). (2) `volatile_aliases` grouped only `D_`
+  names, so `LIST_COUNTER` / `LIST_COUNTER_S` (one scratchpad word, two types) lost their `volatile` and
+  `playerTryTalkToNpc` looped past its list on Square (40 rooms, frame 2490). Now the area csv is read, the
+  aliases are taken from the matching build's PROVIDEs, and `volatile_aliases` groups every extern by the
+  address the generator resolves for it (`port/tools/gen_port.py`). A stubbed `*_DEFS` / `*_ANIMS` name in
+  `build/port2/gen/stubs.c` is the sign of this class of bug: the psyq/bios stub list must hold only library
+  names (27 at v0.2.0).
 
 What the 32 rooms with findings had, and the root cause of each (all fixed in the generator or the runtime,
 never in generated output):
