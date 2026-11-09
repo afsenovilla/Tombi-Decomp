@@ -44,6 +44,8 @@ python3 -I tools/xmatch.py game_usa/fs/SYSTEM/{DSPSUB,DSPSUB2,DSPSUB3,GOVER,INFO
 python3 -I tools/jpdemo_syms.py build/scus94236/xmatch_sys.csv --version scus94236
 ```
 
+Data measure (90.88 %): docs/JP.md "Data measure" (same pipeline, `src/data/scus94236/`).
+
 ## First figures (2026-11-08)
 
 USA is much closer to PAL than JP is (xmatch: 61 % of the exe bytes and 85-91 % of every overlay pair with PAL by

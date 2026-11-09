@@ -1,0 +1,4 @@
+# Graphics that tools/version_data.py gen never writes as C (ship scripts, not pixels): <prog> <addr> <size>  # what
+# The WFM2/WFM3 banks are found by their magic and left out too. PAL leaves the same images out of src/data.
+dspsub 800F09B4 0xC00  # sub-screen menu image, LoadImage 0x30 x 0x1F 16 bpp (+ 0x60 bytes); PAL D0SPSUB 800F18E0
+dspsub3 800EDBA8 0xC00  # the same image in DSPSUB3; PAL D0SPSUB3 800EEA00

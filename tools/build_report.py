@@ -231,19 +231,43 @@ def jpdemo_base(progs, units, out_dir, ver="slpm80165"):
 
 
 def jpdemo_data(progs, units, addrs, out_dir, ver="slpm80165"):
-    """Data sections of the demo report, as for PAL (tools/report_data.py): claimed sections on the units with C,
-    the other non-code bytes of each program in a target-only <prog>/data unit."""
-    import report_data as RD
+    """Data sections of the version report, as for PAL (tools/report_data.py): claimed sections on the units with C;
+    then the PAL data files the version has too (tools/version_data.py: same bytes, pointers moved), then the version's
+    own data files (src/data/<ver>/<prog>/*.c, `// DATA addr size <ver>/<prog>`, written by tools/version_data.py gen);
+    the other non-code bytes of each program go in a target-only <prog>/data unit. The X00 code and data that every
+    area overlay repeats at its start (tools/versions.py, last field of a program) are X00's: counted once, in x00, like
+    the code. build/<ver>/data_rest.json lists the ranges left per program (input of tools/version_data.py gen)."""
+    import report_data as RD, version_data as VD
+    from versions import pal_prog
     dtmp = tempfile.mkdtemp()
     shutil.rmtree(out_dir + "/base_data", ignore_errors=True)
-    for prog in progs:
-        y = open("config/%s/%s.yaml" % (ver, prog)).read()
-        game = open(re.search(r"target_path:\s*(\S+)", y).group(1), "rb").read()
-        vram = int(re.search(r"vram:\s*(0x[0-9A-Fa-f]+)", y).group(1), 16)
-        hdr = 0x800 if "type: header" in y else 0
-        gbase = vram - hdr
-        code = [(a, a + n) for nm, (a, n) in addrs.items() if nm.startswith(prog + "/") and a is not None]
-        if hdr: code.append((gbase, vram))
+    mods = {p: pal_prog(ver, p) for p in progs}
+    pal_files = VD.compile_pal(sorted(set(mods.values())), out_dir + "/pal_data")
+    own_files = VD.compile_version(ver, progs, out_dir + "/ver_data")
+    maps, placed, rest_json = VD.Maps(ver), {}, {}
+    data_units = []
+
+    def data_unit(name, obj, info, game, gbase, prog):
+        """Target: the retail bytes of the placed section; base: the object relocated to the version's addresses."""
+        out = "%s/target/%s/data/%s.o" % (out_dir, prog, name)
+        dbase = "%s/base_data/%s/data/%s.o" % (out_dir, prog, name)
+        for f in (out, dbase): os.makedirs(os.path.dirname(f), exist_ok=True)
+        dclaims = RD.patch_base(obj, dbase, info)
+        with tempfile.NamedTemporaryFile("w", suffix=".s", delete=False) as t:
+            t.write('.include "macro.inc"\n.set noat\n.set noreorder\n' + RD.target_asm(dclaims, game, gbase, 0, dtmp))
+        try:
+            run(AS + [t.name, "-o", out])
+        except subprocess.CalledProcessError as er:
+            print("target data asm failed:", prog, name, er.stderr[:120]); return None
+        finally:
+            os.unlink(t.name)
+        data_units.append({"name": "%s/data/%s" % (prog, name), "target_path": out, "base_path": dbase,
+                           "metadata": {"progress_categories": [prog]}})
+        return [(b, b + m) for b, m in dclaims.values()]
+
+    for prog in sorted(progs, key=lambda p: mods[p] != "main0"):  # main exe first: overlay data points into it
+        game, gbase, excl = VD.prog_layout(ver, prog)
+        code = [(a, a + n) for nm, (a, n) in addrs.items() if nm.startswith(prog + "/") and a is not None] + excl
         claimed = []
         for u in units:
             if not u["name"].startswith(prog + "/"): continue
@@ -271,10 +295,30 @@ def jpdemo_data(progs, units, addrs, out_dir, ver="slpm80165"):
                 os.unlink(t.name)
             u["base_path"] = dbase
             claimed += [(b, b + m) for b, m in dclaims.values()]
+        nunit = sum(b - a for a, b in claimed)
+        # PAL data files found in this program
+        pl = VD.Placer(maps, mods[prog], prog, game, gbase, code + claimed, placed)
+        npal = 0
+        for path, stem, pa, size, obj, va, info, ninf in pl.run(pal_files.get(mods[prog], [])):
+            r = data_unit("D_%08X" % va, obj, info, game, gbase, prog)
+            if r: claimed += r; npal += size
+        # the version's own data files
+        nown = 0
+        for path, stem, va, size, obj in own_files.get(prog, []):
+            pl.busy = sorted(code + claimed)
+            why, info = pl.check_at(obj, va, size)
+            if why:
+                print("%s: %s not reported: %s" % (ver, os.path.relpath(path, ROOT), why)); continue
+            r = data_unit(stem, obj, info, game, gbase, prog)
+            if r: claimed += r; nown += size
         rest = "%s/target/%s/data.o" % (out_dir, prog)
         n = RD.rest_object(rest, game, gbase, 0, code, claimed, AS)
-        print("data %s: %d bytes claimed by C units, %d bytes left" % (prog, sum(b - a for a, b in claimed), n))
-        if n: units.append({"name": "%s/data" % prog, "target_path": rest, "metadata": {"progress_categories": [prog]}})
+        rest_json[prog] = VD.gaps(gbase, gbase + len(game), code + claimed)
+        print("data %s: %d bytes claimed by C units, %d by PAL data files, %d by version data files, %d bytes left"
+              % (prog, nunit, npal, nown, n))
+        if n: data_units.append({"name": "%s/data" % prog, "target_path": rest, "metadata": {"progress_categories": [prog]}})
+    units += data_units
+    json.dump(rest_json, open(out_dir + "/data_rest.json", "w"))
     for u in units: u.pop("size", None); u.pop("asm", None)
     shutil.rmtree(dtmp, ignore_errors=True)
 

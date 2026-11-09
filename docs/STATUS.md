@@ -24,6 +24,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Data bar of JP / USA** (2026-11-09): 0.94 % -> 83.74 % (JP), 0.97 % -> 90.88 % (USA); docs/JP.md "Data
+   measure". Fixed the overlay base of the version data claims, the X00 prefix of the area overlays counted once,
+   PAL data files reused where the version has them (tools/version_data.py), the rest as `src/data/<ver>/` files
+   (`version_data.py gen`). Left: the sub-screen image / WFM banks (assets, as in PAL). Open: pointers as symbols in
+   the generated files, per-array reuse of PAL files.
+
 1. **NTSC picture (`--picture ntsc`, opt-in, experimental)**: top-down areas (AREA02/05/08/19) draw sprites/scenery
    out of step and movies flicker. An agent found the cause for top-down rooms (USA map strips start at the visible
    tile row, PAL 24 rows above; USA camera limits table MAIN0 0x8007B680; sprite cull 0xF1) but had not committed.

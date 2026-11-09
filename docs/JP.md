@@ -570,3 +570,38 @@ Per overlay: INFO2 84.0 % (157/191), INFO 68.4 % (37/51), INFO3 67.0 % (37/52), 
 (Japanese text layout, xmatch finds only 4-6 % of their bytes); xmatch pairs most of JP DSPSUB3 with PAL D0SPSUB. The
 208 functions left need hand work; jp_autofix near misses: memCardProbe (3 lines), subScreenMapDrawRoomName (27),
 overheadBuildMapStrip in INFO and INFO2 (298).
+
+## Data measure (2026-11-09)
+
+The decomp.dev "Data" bar of the JP and USA reports is counted like PAL's (tools/report_data.py), in
+`build_report.jpdemo_data`:
+
+1. the data sections a unit's C places at their retail address (jump tables, constants, strings), as before. The
+   area overlays had none until now: the report took the vram of the area segment (0x80115178) as the address of
+   file offset 0, so every claim compared the wrong bytes;
+2. the X00 bytes every area overlay repeats at its start (`JP_SHARED` / `USA_SHARED`, identical to `X00.BIN`) are
+   left out of the overlays' data as they are of their code: they are X00's, counted once in `x00` (before, 16 copies
+   of them were 82 % of the JP data total);
+3. the PAL data files (`src/data/<PAL module>/*.c`, symbolic C) that the version has too: tools/version_data.py
+   compiles them, finds each section in the version's file with the relocated words masked (unique hit, or the shift of
+   its placed neighbours) and accepts it only when every pointer points at the version's address of its symbol
+   (version symbol name, PAL address carried over through placed data files or the function pairing; a symbol nobody
+   knows must resolve to one address in all its uses);
+4. the version's own data files, `src/data/<ver>/<prog>/D_<addr>.c` (`// DATA addr size <ver>/<prog>`), written by
+   `python3 tools/version_data.py --version <ver> gen` from `build/<ver>/data_rest.json` (the ranges the last report
+   left): the retail bytes as words, like the PAL "unclaimed range" files. The WFM2/WFM3 banks (found by their magic)
+   and `config/<ver>/data_assets.txt` (the sub-screen menu image of DSPSUB / DSPSUB3) are never written: ship
+   scripts, not pixels; they stay unmatched, as the same assets do in PAL.
+
+A version data file that later overlaps C (a new claim) is reported as `not reported` and left out; regenerate:
+report, delete `src/data/<ver>/<prog>/`, `version_data.py gen`, report again.
+
+| Version | Data before | after 1-3 | after 4 | left (assets; plus ~1 KB of JP unit claims that differ) |
+|---|---:|---:|---:|---|
+| JP SLPS-01144 | 0.94 % | 18.59 % | 83.74 % (525196 / 627172) | DSPSUB 64020, DSPSUB3 36880 |
+| USA SCUS-94236 | 0.97 % | 20.95 % | 90.88 % (715288 / 787092) | DSPSUB 46568, DSPSUB3 25236 |
+
+Code stays 100 % (3528 / 3528, 3681 / 3681). Open: the generated files are plain words; pointers as symbols (what
+the PAL animation-table files do) would make them relocatable. Most PAL tables differ from JP/USA by a few words
+(other text, moved fields), so the per-array reuse of PAL files (placing each array of a file on its own) would
+replace more of the generated words with symbolic C.
