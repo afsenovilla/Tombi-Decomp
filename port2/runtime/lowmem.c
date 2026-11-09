@@ -15,6 +15,8 @@
 #include <string.h>
 #ifdef _WIN32
 #include <windows.h>
+#elif defined(__3DS__)
+#include <stdlib.h>
 #else
 #include <signal.h>
 #include <sys/mman.h>

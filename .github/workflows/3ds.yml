@@ -1,0 +1,166 @@
+name: Native port (Nintendo 3DS)
+
+# Builds the native-pointer port (port2/) as a Nintendo 3DS homebrew program, tombi.3dsx (docs/PORT.md "Nintendo 3DS"):
+# port2/CMakeLists.txt with devkitPro's 3DS.cmake toolchain, inside devkitPro's own devkitARM container image (devkitARM,
+# libctru, citro3d; SDL2's 3DS port from its portlibs).  As in android-apk.yml the generator takes the retail
+# addresses and the MAIN0/X000 image from the owner's own disc (GAME_FILES_URL secret); the .3dsx carries NO game data
+# files (the player copies their own disc image to sdmc:/3ds/tombi/).
+on:
+  push:
+    branches: [master, "claude/**"]
+    paths:
+      - port2/**
+      - port/tools/gen_port.py
+      - port/fixes.txt
+      - .github/workflows/3ds.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n3ds-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  n3ds:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install toolchain (matching build)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev
+          python3 -m pip install -r tools/requirements.txt
+          python3 -m pip install --no-deps splat64==0.35.2
+          python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
+          sudo tools/setup_native.sh
+
+      - name: Restore disc image
+        id: disccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
+
+      - name: Fetch game files
+        id: fetch
+        env:
+          GAME_FILES_URL: ${{ secrets.GAME_FILES_URL2 || secrets.GAME_FILES_URL }}
+        run: |
+          if [ -z "$GAME_FILES_URL" ]; then
+            echo "::notice::GAME_FILES_URL secret not set; skipping the 3DS build."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL" | tr -d '\r\n"'"'"' ')"
+          URL="$(printf '%s' "$URL" | sed -E 's#(dropbox\.com/.*[?&])dl=0#\1dl=1#')"
+          mkdir -p "$RUNNER_TEMP/disccache"
+          if [ -s "$RUNNER_TEMP/disccache/game.bin" ]; then cp "$RUNNER_TEMP/disccache/game.bin" "$RUNNER_TEMP/game.dl"
+          else bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/game.dl" 100000000; fi
+          if [ "$(stat -c%s "$RUNNER_TEMP/game.dl")" -lt 100000000 ]; then
+            echo "::error::The port build needs the whole disc image."; exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/game"
+          python3 -I tools/isoext.py "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/game"
+          mkdir -p game/disc/fs
+          cp -r "$RUNNER_TEMP/game"/. game/disc/fs/
+          cp "$(find "$RUNNER_TEMP/game" -iname MAIN0.EXE | head -1)" game/MAIN0.EXE
+          for a in 00 01 02 03 04 05 06 08 09 10 11 13 14 16 17 18 19; do
+            f="$(find "$RUNNER_TEMP/game" -ipath "*AREA$a/X0$a.BIN" | head -1)"
+            mkdir -p "game/AREA$a"; cp "$f" "game/AREA$a/X0$a.BIN"
+          done
+          mkdir -p game/disc/fs/SYSTEM
+          for s in O0PTSUB0 D0SPSUB D0SPSUB2 D0SPSUB3 G0OVER I0NFO I0NFO2 I0NFO3; do
+            f="$(find "$RUNNER_TEMP/game" -ipath "*SYSTEM/$s.BIN" | head -1)"; cp "$f" "game/disc/fs/SYSTEM/$s.BIN"
+          done
+          [ -s "$RUNNER_TEMP/disccache/game.bin" ] || mv "$RUNNER_TEMP/game.dl" "$RUNNER_TEMP/disccache/game.bin"
+          rm -f "$RUNNER_TEMP/game.dl"
+          echo "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc  game/MAIN0.EXE" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Save disc image
+        if: steps.fetch.outputs.ok == 'true' && steps.disccache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
+
+      # build/full: the same exact-key cache as port2-exe.yml / android-apk.yml
+      - name: Cache key
+        id: key
+        run: echo "full=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore matching build
+        id: full
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/full
+            build/*.EXE
+            build/*.BIN
+            !build/full/tmp
+          key: full-${{ steps.key.outputs.full }}
+
+      - name: Matching build (retail addresses for the generator)
+        if: steps.fetch.outputs.ok == 'true' && steps.full.outputs.cache-hit != 'true'
+        run: python3 tools/build_full.py -j "$(nproc)"
+
+      - name: Touch restored matching build
+        if: steps.full.outputs.cache-hit == 'true'
+        run: find build/full -type f -exec touch {} +; touch build/*.EXE build/*.BIN 2>/dev/null || true
+
+      - name: Save matching build
+        if: steps.fetch.outputs.ok == 'true' && steps.full.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/full
+            build/*.EXE
+            build/*.BIN
+            !build/full/tmp
+          key: full-${{ steps.key.outputs.full }}
+
+      - name: Build tombi.3dsx (devkitARM container)
+        if: steps.fetch.outputs.ok == 'true'
+        run: |
+          docker run --rm -v "$PWD:/w" -w /w devkitpro/devkitarm:latest bash -ec '
+            echo "== image"; ls $DEVKITPRO; arm-none-eabi-gcc --version | head -1
+            dkp-pacman -Sy --noconfirm --needed 3ds-sdl
+            dkp-pacman -Q | grep -E "libctru|citro3d|3ds-sdl|devkitARM" || true
+            command -v python3 >/dev/null || { apt-get update -qq && apt-get install -y -qq python3 >/dev/null; }
+            command -v cmake >/dev/null || { apt-get update -qq && apt-get install -y -qq cmake >/dev/null; }
+            command -v ninja >/dev/null || { apt-get update -qq && apt-get install -y -qq ninja-build >/dev/null; }
+            git config --global --add safe.directory /w || true
+            cmake -S port2 -B build/n3ds -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release
+            cmake --build build/n3ds -j "$(nproc)" -- -k 0 > build/n3ds/build.log 2>&1 || true
+            grep -E "error|Error|FAILED|undefined reference|multiple definition" build/n3ds/build.log | head -200 || true
+            tail -5 build/n3ds/build.log
+            ls -l build/n3ds/*.3dsx
+          '
+          sudo chown -R "$(id -u):$(id -g)" build
+
+      - name: Upload tombi.3dsx
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tombi-3ds
+          path: |
+            build/n3ds/*.3dsx
+            build/n3ds/tombi2.elf
+          if-no-files-found: warn
+
+      - name: Upload build log
+        if: always() && steps.fetch.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tombi-3ds-build-log
+          path: build/n3ds/build.log
+          if-no-files-found: ignore

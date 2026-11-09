@@ -579,7 +579,8 @@ def libc_symbols(nm):
                 if len(w) == 3 and w[1] in "TWiDIR" and w[2].startswith("_") and not w[2].startswith("__imp_"): out.add(w[2][1:])
         out.add("atexit")      # defined in crt2.o, not in the libraries above
         return out
-    if os.environ.get("PORT2_ARCH") == "wasm":     # wasi-libc (port2/wasm): a static archive, no dynamic symbols
+    if os.environ.get("PORT2_ARCH") == "wasm" or os.environ.get("PORT2_LIBC", "").endswith(".a"):
+        # a static archive, no dynamic symbols: wasi-libc (port2/wasm), newlib (the 3DS build, port2/n3ds)
         r = subprocess.run([nm, os.environ.get("PORT2_LIBC", "/usr/lib/wasm32-wasi/libc.a")], capture_output=True, text=True).stdout
         return set(l.split()[2] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] in "TWD")
     # PORT2_LIBC: the target's C library when it is not the host's i386 glibc (Android: the NDK sysroot's libc.so,
@@ -870,12 +871,15 @@ def link(outdir, nm, objlist):
                              "{ return ((port_thunk_fn)port_resolve_call(0x%08X))(a, b, c, d, e, f, g, h); }\n" % (a, a))
             thunks_x86 = []
         elif os.environ.get("PORT2_ARCH") == "arm":
-            # 32-bit ARM (Android armeabi-v7a): keep r0-r3 (the arguments) and lr, ask the resolver, tail-jump
+            # 32-bit ARM (Android armeabi-v7a): keep r0-r3 (the arguments) and lr, ask the resolver, tail-jump.
+            # PORT2_ARMV6 (the 3DS's ARM11, ARMv6K: no movw / movt): the address from a literal pool after each thunk
+            v6 = bool(os.environ.get("PORT2_ARMV6"))
             f.write(".syntax unified\n.arm\n.align 2\n")
             for a in thunks:
+                load = ("  ldr r0, =0x%08X\n" % a) if v6 else ("  movw r0, #0x%04X\n  movt r0, #0x%04X\n" % (a & 0xFFFF, a >> 16))
                 f.write(".globl port_thunk_%08X\n.type port_thunk_%08X,%%function\nport_thunk_%08X:\n"
-                        "  push {r0, r1, r2, r3, r11, lr}\n  movw r0, #0x%04X\n  movt r0, #0x%04X\n  bl port_resolve_call\n"
-                        "  mov r12, r0\n  pop {r0, r1, r2, r3, r11, lr}\n  bx r12\n" % (a, a, a, a & 0xFFFF, a >> 16))
+                        "  push {r0, r1, r2, r3, r11, lr}\n%s  bl port_resolve_call\n"
+                        "  mov r12, r0\n  pop {r0, r1, r2, r3, r11, lr}\n  bx r12\n%s" % (a, a, a, load, "  .ltorg\n" if v6 else ""))
             for name, target in libc_tramps:
                 f.write(".globl %s\n.type %s,%%function\n%s:\n  b %s\n" % (name, name, name, target))
             thunks_x86 = []

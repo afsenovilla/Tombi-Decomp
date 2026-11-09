@@ -82,6 +82,11 @@ if(ANDROID)
   endif()
   set(PORT2_GEN_ENV ${CMAKE_COMMAND} -E env PORT2_ARCH=arm
       PORT2_LIBC=${CMAKE_SYSROOT}/usr/lib/arm-linux-androideabi/${ANDROID_PLATFORM_LEVEL}/libc.so)
+elseif(NINTENDO_3DS)
+  # Nintendo 3DS (port2/n3ds, docs/PORT.md "Nintendo 3DS"; devkitPro's 3DS.cmake toolchain): ARM11 = ARMv6K (no
+  # movw / movt in the thunks), newlib's static libc
+  set(PORT2_GEN_ENV ${CMAKE_COMMAND} -E env PORT2_ARCH=arm PORT2_ARMV6=1
+      PORT2_LIBC=$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libc.a)
 endif()
 
 # 1. filtered sources + address resolution (re-run on every configure)
@@ -107,6 +112,9 @@ if(ANDROID)
     message(FATAL_ERROR "port2's native build needs a 32-bit target (armeabi-v7a); arm64-v8a is the wasm2c build above")
   endif()
   set(PORT2_ARCH_FLAGS -marm -fPIC -fno-omit-frame-pointer)
+elseif(NINTENDO_3DS)
+  # (3DS.cmake adds -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft); A32 code for the null-page emulation
+  set(PORT2_ARCH_FLAGS -marm -fno-omit-frame-pointer)
 else()
 set(PORT2_ARCH_FLAGS -m32 -march=i686 -fno-pic -fno-pie -fno-omit-frame-pointer)
 endif()
@@ -120,6 +128,8 @@ set(PORT2_GAME_FLAGS -O1 -w -funsigned-char -fwrapv -fno-strict-aliasing -fno-de
 if(ANDROID)    # (the NDK's clang makes these errors by default; gcc warns, and -w silences them on the PC builds)
   list(APPEND PORT2_GAME_FLAGS -Wno-error=implicit-function-declaration -Wno-error=int-conversion
        -Wno-error=incompatible-function-pointer-types -Wno-error=implicit-int -Wno-error=return-type)
+elseif(NINTENDO_3DS)   # (gcc 14 and later make them errors too; -fpermissive turns them back into warnings)
+  list(APPEND PORT2_GAME_FLAGS -fpermissive)
 endif()
 
 add_library(game2 OBJECT ${PORT_GAME_SOURCES})
@@ -133,6 +143,9 @@ target_compile_options(game2_24 PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_GAME_FLAGS})
 # the runtime, the shims and the tables gen_port wrote at configure time (funcmap.c: retail address -> native
 # function, the overlay set, the areas and their signature words)
 file(GLOB PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/runtime/*.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/*.c)
+if(NINTENDO_3DS)   # the 3DS entry point (main: SD card paths, then the port's main as port_main)
+  list(APPEND PORT2_RT ${CMAKE_CURRENT_SOURCE_DIR}/n3ds/main_3ds.c)
+endif()
 # build id (git short sha, "+" when the tree is modified): the first log line says which checkout the binary is from
 add_custom_command(OUTPUT ${GEN}/build_id.stamp
                    COMMAND ${CMAKE_COMMAND} -DSRC=${ROOT} -DOUT=${GEN}/build_id.c -P ${ROOT}/port/cmake/build_id.cmake
@@ -155,12 +168,15 @@ target_compile_options(port2rt PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_RT_FLAGS} -O2
 # the runtime's float math (the software rasteriser's attribute gradients, shims/gpu.c) rounds the same on every build:
 # IEEE single / double, no fused multiply-adds; on 32-bit x86 SSE2 instead of the x87's 80-bit intermediates (which
 # put a few texels per frame elsewhere than the ARM and the 64-bit wasm2c builds do)
-if(NOT ANDROID)
+if(NOT ANDROID AND NOT NINTENDO_3DS)
   target_compile_options(port2rt PRIVATE -msse2 -mfpmath=sse)
+endif()
+if(NINTENDO_3DS)
+  target_compile_options(port2rt PRIVATE -fpermissive)
 endif()
 # the Spanish redraws generator must round like Pillow / Python (byte-identical to tools/gfx_es): no fused multiply-adds,
 # and on 32-bit x86 SSE2 doubles instead of the x87's 80-bit intermediates
-if(ANDROID)
+if(ANDROID OR NINTENDO_3DS)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shims/gfx_es.c PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-math-errno")
 else()
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shims/gfx_es.c PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-math-errno;-msse2;-mfpmath=sse")
@@ -183,6 +199,10 @@ if(ANDROID)
   file(COPY ${sdlhdrs} DESTINATION ${GEN}/sdlinc/SDL2)
   target_include_directories(port2rt PRIVATE ${GEN}/sdlinc)
   set(PORT2_SDL2 SDL2 log android dl m)
+elseif(NINTENDO_3DS)
+  # SDL2's 3DS port from devkitPro's portlibs (dkp-pacman -S 3ds-sdl): window (top screen), buttons, audio (ndsp)
+  target_include_directories(port2rt PRIVATE $ENV{DEVKITPRO}/portlibs/3ds/include)
+  set(PORT2_SDL2 -L$ENV{DEVKITPRO}/portlibs/3ds/lib -lSDL2 -lcitro3d -lctru -lm)
 elseif(WIN32)
   # -DPORT_SDL2_MINGW=DIR names the i686-w64-mingw32 folder of SDL2-devel-2.30.x-mingw.tar.gz (never vendored:
   # .github/workflows/port2-exe.yml downloads it); tombi2.exe needs its bin/SDL2.dll next to it
@@ -277,6 +297,11 @@ if(WIN32)
   target_link_options(tombi2 PRIVATE -m32 -mconsole -static-libgcc -Wl,--image-base,0x400000 -Wl,--disable-dynamicbase
                       -Wl,--stack,16777216 ${GEN}/syms.ld)
   target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
+elseif(NINTENDO_3DS)
+  # 3dsx.specs (3DS.cmake) links the program at 0x00100000, the same base as the i386 build: the image is below 16 MB
+  target_link_options(tombi2 PRIVATE ${GEN}/syms.ld)
+  target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
+  ctr_create_3dsx(tombi2)
 else()
 target_link_options(tombi2 PRIVATE -m32 -no-pie -Wl,-Ttext-segment=0x100000 -Wl,-z,noexecstack ${GEN}/syms.ld)
 target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2} m pthread)

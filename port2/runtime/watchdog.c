@@ -10,6 +10,8 @@
 #include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
+#elif defined(__3DS__)
+/* (no watchdog on the 3DS: no signals to interrupt the game thread with) */
 #else
 #include <pthread.h>
 #include <signal.h>
@@ -151,6 +153,8 @@ void port_watchdog_start(void) {
     HANDLE h = CreateThread(0, 65536, wd_main, 0, 0, 0);
     if (h) CloseHandle(h); else port_printf("[port2] watchdog: CreateThread failed (%lu)\n", GetLastError());
 }
+#elif defined(__3DS__)
+void port_watchdog_start(void) { (void)wd_tick; }
 #else
 static pthread_t game_thread;
 /* runs on the game thread, wherever it was interrupted (inside a lock or an fprintf too: hence the direct log path) */

@@ -26,7 +26,11 @@ int port_ntsc;               /* the US build's 320x224 picture (--picture, port_
    local buffer and written with the raw write / WriteFile of port_log_write_raw (host_win32.c on Windows). */
 volatile int port_log_direct;
 unsigned long port_log_direct_tid;
-#ifndef _WIN32
+#if defined(__3DS__)
+/* (newlib's stdio reaches the SD card through its devoptab, not through the game's Psy-Q `write` stub) */
+static int log_is_direct(void) { return port_log_direct > 0; }
+static void port_log_write_raw(const char *s, int n) { fwrite(s, 1, n, stderr); }
+#elif !defined(_WIN32)
 #include <unistd.h>
 #include <sys/syscall.h>
 static int log_is_direct(void) { return port_log_direct > 0; }
@@ -81,7 +85,7 @@ static void quit_h(void *a) {
 }
 void port_quit(int code) { port_host_call(quit_h, &code); exit(code); }
 
-#ifndef _WIN32    /* (Windows: runtime/host_win32.c) */
+#if !defined(_WIN32) && !defined(__3DS__)    /* (Windows: runtime/host_win32.c; 3DS: n3ds/main_3ds.c) */
 unsigned long long port_time_us(void) {
     struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
     return (unsigned long long)ts.tv_sec * 1000000ull + ts.tv_nsec / 1000;
@@ -913,6 +917,9 @@ void *port_cc_sign_next(void *obj) {
 #ifdef __ANDROID__
 /* Android: libtombi.so is a shared library loaded by the small libmain.so (port2/android/loader.c: SDL_main reserves
    the low address range, android_dlopen_ext()s this library into it and calls port_main with the PC flags) */
+#define main port_main
+#elif defined(__3DS__)
+/* Nintendo 3DS: port2/n3ds/main_3ds.c is the entry point (the SD card's paths, the log file) and calls this */
 #define main port_main
 #endif
 int main(int argc, char **argv) {

@@ -9,8 +9,10 @@
  * Division by zero: ARMv7-A without the integer divide extension calls __aeabi_idiv & co.; the definitions below
  * (bound inside libtombi.so by -Bsymbolic) give the R3000's result for a zero divisor (LO = rs < 0 ? 1 : -1, HI = rs;
  * unsigned: LO = 0xFFFFFFFF, HI = rs), otherwise the ordinary quotient. */
+#ifndef __3DS__
 #include <unistd.h>
 #include <sys/syscall.h>
+#endif
 
 /* (compiler-rt defines __aeabi_idiv/__aeabi_uidiv as aliases inside divsi3.S/udivsi3.S, so these cannot call
    __divsi3/__udivsi3 without pulling in a duplicate: plain shift-subtract division instead) */
@@ -43,9 +45,14 @@ unsigned long long __aeabi_uidivmod(unsigned a, unsigned b) {
 
 void port_dump_stack(unsigned long esp) {
     const unsigned long *sp = (const unsigned long *)esp;
+#ifdef __3DS__
+    const unsigned long lo = 0x00100000ul, hi = 0x01000000ul;   /* (the 3dsx is linked at 0x00100000; code is far below 16 MB) */
+#else
     extern char __ehdr_start[], etext[];      /* (lld's: the start of libtombi.so and the end of its text) */
+    const unsigned long lo = (unsigned long)__ehdr_start, hi = (unsigned long)etext;
+#endif
     for (int i = 0, n = 0; i < 512 && n < 12; i++)
-        if (sp[i] >= (unsigned long)__ehdr_start && sp[i] < (unsigned long)etext) {
+        if (sp[i] >= lo && sp[i] < hi) {
             unsigned long off; const char *nm = port_sym_near((void *)sp[i], &off);
             port_printf(" %08lx(%s+0x%lx)", sp[i], nm, off); n++;
         }
@@ -137,6 +144,48 @@ static int arm_low_emulate(unsigned long *r, unsigned long cpsr, unsigned long f
 
 /* the handlers in place before ours (android/loader.c's crash reporter, then debuggerd): a fault we cannot emulate
    goes back to them; returning re-executes the instruction, which faults again into the restored handler */
+#ifdef __3DS__
+/* Nintendo 3DS: no signals; libctru's user exception handler (threadOnException) gets the faulting thread's registers
+   (r0-r12, sp, lr, pc consecutive as in the ucontext above, then cpsr) and the fault address, on a stack of its own.
+   An emulated access resumes the thread through exc_resume: the condition flags back into the APSR, r0 and pc pushed
+   below the thread's own sp, r1-r12 / lr loaded, then pop {r0, pc} (interworking: bit 0 of pc selects Thumb). */
+#include <3ds.h>
+static unsigned char exc_stack[0x8000] __attribute__((aligned(8)));
+static ERRF_ExceptionData exc_data;
+__attribute__((naked, noreturn)) static void exc_resume(CpuRegisters *c) {
+    (void)c;
+    __asm__ volatile(
+        "ldr r1, [r0, #64]\n\tmsr APSR_nzcvq, r1\n\t"
+        "ldr lr, [r0, #56]\n\tldr r1, [r0, #52]\n\tldr r2, [r0, #60]\n\tldr r3, [r0]\n\t"
+        "str r2, [r1, #-4]\n\tstr r3, [r1, #-8]\n\tsub sp, r1, #8\n\t"
+        "add r0, r0, #4\n\tldm r0, {r1-r12}\n\tpop {r0, pc}\n");
+}
+static void exc_handler(ERRF_ExceptionInfo *e, CpuRegisters *c) {
+    unsigned long *r = (unsigned long *)c;
+    unsigned long eip = c->pc, fault = e->type == ERRF_EXCEPTION_PREFETCH_ABORT ? c->pc : e->far;
+    if (e->type == ERRF_EXCEPTION_PREFETCH_ABORT || e->type == ERRF_EXCEPTION_DATA_ABORT) {
+        void *fn = port_exec_from_ram(eip, fault);
+        if (fn) {
+            c->pc = (unsigned long)fn & ~1ul;
+            if ((unsigned long)fn & 1) c->cpsr |= 0x20; else c->cpsr &= ~0x20ul;
+            if (c->cpsr & 0x20) c->pc |= 1;
+            exc_resume(c);
+        }
+        if (e->type == ERRF_EXCEPTION_DATA_ABORT && eip != fault && fault < 0x10000ul && arm_low_emulate(r, c->cpsr, fault)) {
+            if (c->cpsr & 0x20) c->pc |= 1;
+            exc_resume(c);
+        }
+    }
+    unsigned long off; const char *nm = port_sym_near((void *)eip, &off);
+    port_printf("[port2] exception %d: pc=%08lx (%s+0x%lx) fault address=%08lx (frame %d); stack:", (int)e->type, eip, nm, off, fault, port_frame);
+    port_dump_stack(c->sp);
+    port_printf("\n");
+    port_low_report();
+    port_flush_log();
+    exit(3);
+}
+void port_lowmem_install(void) { threadOnException(exc_handler, exc_stack + sizeof exc_stack, &exc_data); }
+#else
 static struct sigaction prev_segv, prev_bus;
 static void chain_prev(int sig) {
     struct sigaction *p = sig == SIGBUS ? &prev_bus : &prev_segv;
@@ -174,3 +223,4 @@ void port_lowmem_install(void) {
     sa.sa_sigaction = on_segv; sa.sa_flags = SA_SIGINFO | SA_NODEFER | SA_ONSTACK;
     sigaction(SIGSEGV, &sa, &prev_segv); sigaction(SIGBUS, &sa, &prev_bus);
 }
+#endif   /* __3DS__ */
