@@ -319,6 +319,29 @@ program `tomba` = TOMBA.EXE, game dir `game_prepre8/`, git-ignored). It is set u
   `--aspsx-version`), and `// ASPSX.PCPX_96084 2.34` sets it for this build only; `tools/demo_sweep.py` adds it to
   every candidate whose target has `ori` loads and no `addiu` ones. With it, plain PAL C matched 40 functions at once
   (`compactOrderingTable`, `AnimAdvance`, `spawnImpactEffect`, ...) and the scratchpad renames of `--fix` 35 more.
+- **Same compiler as retail (2026-11-09).** Only the assembler is older; the C compiler is the retail one (native
+  old-gcc 2.7.2 = Psy-Q 4.0 CC1PSX). Test: the whole PrePre 8 report rebuilt with each compiler in place of cc1
+  (`OLDGCC=<dir>`; DOS CC1PSX through DOSBox, Win32 ones through Wine, wrapped as an old-gcc `cc1`; ASPSX 2.34
+  behaviour kept through maspsx):
+
+  | cc1 | matched code | functions |
+  |---|---|---|
+  | old-gcc 2.7.2 / Psy-Q 4.0 CC1PSX (Wine) | 20.29 % | 617 |
+  | Psy-Q 3.5 CC1PSX (DOS, GCC 2.6.0, ships ASPSX 2.34) / old-gcc 2.6.0 | 10.82 % | 476 |
+  | old-gcc 2.6.3 | 10.90 % | 477 |
+  | Psy-Q 3.6 CC1PSX (DOS, 2.7.2.SN.1, ships ASPSX 2.34) | 6.48 % | 406 |
+  | Psy-Q 4.1 CC1PSX (cygnus-2.7.2-970404) | 3.28 % | 283 |
+
+  No other compiler matches a single function that 2.7.2 does not (0 gained, 140-334 lost). Unbiased check on the
+  511 unmatched functions with candidates (`demo_sweep --dry-run --show` with each cc1): no new match, and the best
+  candidate's diff is larger with 2.6.0 for 182 functions (smaller for 17) and with the 3.6 CC1PSX for 193 (smaller
+  for 47). The near misses with 2.7.2 are source changes, not codegen: a struct field at another offset
+  (`updateChainedPartsObj` 0xA5 -> 0xA1, `pushObjectOutOfObjectX` 0x9D -> 0x69, `updateAnimProp` scratchpad 0x2D4 ->
+  0x15C), a byte field that is a halfword here (`spawnMushroomClusterDebris` +10), an unsigned char compare
+  (`testCollisionSegment`). The low score is the early source, not the toolchain. The 1998-02-03 beta answers the same:
+  2.7.2 69.56 % (1602 functions), 2.6.0 28.98 %, 3.6 CC1PSX 17.25 %, 4.1 CC1PSX 5.25 %.
+  The JP demo SLPM-80165 too: 2.7.2 42.84 % (1160), 2.6.0 20.85 %, 3.6 CC1PSX 12.88 %, 4.1 CC1PSX 5.58 % (0 gained
+  each time).
 - CI job `report-prepre8` (`.github/workflows/report.yml`) downloads the disc image from the
   **`GAME_FILES_URL_PREPRE8`** secret (raw data track .bin or a zip with TOMBA.EXE; Drive links handled like the
   demo job), extracts only `/TOMBA` with `tools/prepre8.py extract`, checks the TOMBA.EXE sha1
