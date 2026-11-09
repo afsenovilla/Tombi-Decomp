@@ -19,7 +19,7 @@ typedef struct {
 extern short DOOR_SWING_ANGLE;
 extern unsigned short PLAYER_ANIM_FRAME;
 extern short FRAME_BUFFER_INDEX, TICK_COUNT;
-extern int RAND_SEED;
+extern int GAME_RAND_SEED;
 extern unsigned char D_1F8003CC, D_1F8001AE;
 extern volatile unsigned short D_8009F200[], D_8009F202[];
 extern unsigned char D_8009FF05, D_8009FF06, D_8009FF07, D_800A0C15, D_800A0C16, D_800A0C17;
@@ -113,7 +113,7 @@ void func_8002BA74_slps01144(S *o)
             if (FRAME_BUFFER_INDEX == 0) {
                 D_1F8003CC = 1;
                 TICK_COUNT = 0;
-                RAND_SEED = 0x45;
+                GAME_RAND_SEED = 0x45;
                 o->b5++;
             }
             break;

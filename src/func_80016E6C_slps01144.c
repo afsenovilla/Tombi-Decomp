@@ -19,7 +19,7 @@ extern short D_8009D2A4;
 extern short DAT_1f8000ea;
 extern short VIEW_CAMERA_X;
 extern short VIEW_CAMERA_Y;
-extern int RAND_SEED;
+extern int GAME_RAND_SEED;
 extern short DAT_1f8001c8;
 extern short DAT_1f8000e2;
 extern short VIEW_CAMERA_ROT_Y;
@@ -124,6 +124,6 @@ void func_80016E6C_slps01144(void)
         }
     }
     DAT_1f8001c8 = 0;
-    RAND_SEED = 69;
+    GAME_RAND_SEED = 69;
 }
 #endif

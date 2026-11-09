@@ -18,7 +18,7 @@ extern short D_8009D2A4;
 extern short DAT_1f8000ea;
 extern short VIEW_CAMERA_X;
 extern short VIEW_CAMERA_Y;
-extern int RAND_SEED;
+extern int GAME_RAND_SEED;
 extern short DAT_1f8000e2;
 extern short VIEW_CAMERA_ROT_Y;
 extern short DAT_1f8000f6;
@@ -55,7 +55,7 @@ void initGameConfig(void)
     DAT_1f8000ea = -544;
     VIEW_CAMERA_X = 160;
     VIEW_CAMERA_Y = -120;
-    RAND_SEED = 69;
+    GAME_RAND_SEED = 69;
     DAT_1f8000e2 = 0;
     VIEW_CAMERA_ROT_Y = 0;
     DAT_1f8000f6 = 0;
