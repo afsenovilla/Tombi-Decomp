@@ -111,6 +111,15 @@ of every table; `gen_port.sources_version` is the version path (the PAL `sources
 
 ## Stage U2: launchers, CI, distribution
 
+**PC side and CI done 2026-11-09** (docs/PORT.md "Game library"): one launcher with a game library
+(`tools/game_library.py`: boot exe + sha1 identification, `data-<serial>/` per game, the old `data/` migrated as the
+first PAL entry, card art rebuilt from the player's disc through the title overlay's own logo sprite list, per-version
+options, `tombi-pc-usa` for USA, JP recognised but not supported, `text_patches` hook per version);
+`port2-exe.yml` builds `tombi-pc-usa(.exe)` next to the PAL game when `GAME_FILES_URL_USA` is set (disc-cache,
+`build_full.py --version usa`, `PORT_VERSION=usa`) and the launchers bundle it; `versions.txt` in the bin-*-port
+artifacts tells release.yml's notes which games a bundle runs. Open: Android (below), the USA exe only boots from
+the launcher's data folder (the same as U1 headless; no `--disc`).
+
 - **PC launcher** (`tools/port_launcher.py`): boot exe from `SYSTEM.CNF`, `{sha1: (serial, binary)}` table (PAL
   bec8dc5f…, USA 81cbc79f…, JP 07d57769…), `check_disc`/`data_ready` on `boot_sha1`, per-version binary; hide
   `--lang`, `--text-patch`, `--picture`, the 60 Hz switch for USA/JP.

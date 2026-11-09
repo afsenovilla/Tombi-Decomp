@@ -467,6 +467,37 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   (phases *Copiando / Comprobando / Extrayendo*, files done / total, Cancel with B; a truncated image or an unreadable
   sector fails with the reason). *Borrar datos…* (in-page confirmation) deletes `files/data`, the patches and caches,
   the saves only when ticked.
+- **Game library** (stage U2, `Library.java`). The launcher's home is *Tus juegos*: one card per disc added (logo,
+  name, region, serial, status), *Añadir juego*, then *¡A jugar!* / *Opciones* / *Salir*; the focused card is the
+  selected game (D-pad moves between cards and buttons by their position on screen; Start plays). Three looks,
+  *Opciones > Juego > Estilo de la biblioteca*: *Carrusel* (cards in a row, buttons beneath), *Lista* (default: rows on
+  the left, the selected game large on the right), *Portada* (the selected game's logo as the title, a tab per game).
+  A picked image is identified by its boot executable (`disccheck.c` `nativeIdentify`: SYSTEM.CNF `BOOT`, its SHA-1;
+  on the PAL discs `EXE/MAIN0.EXE`, which the boot exe loads): PAL SCES-01331 / SCES-01330 `bec8dc5f…` →
+  `libtombi.so`, USA SCUS-94236 `81cbc79f…` → `libtombi_usa.so`; Japan SLPS-01144 `07d57769…` is listed as recognised
+  but *Aún no compatible* (nothing extracted); an unknown disc or the PAL Rev 0 is refused with the reason. Each game
+  is extracted into its own `files/games/<serial>/data` (the manifest also carries `serial` / `boot` / `boot_sha1`, as
+  `tools/extract_data.py`, which `psyq.c` checks), its saves go to `files/saves` (PAL, as before) or
+  `files/saves_usa`; the loader takes `--game-lib` / `--save-sub` from the launcher (`loader.c`; the armeabi-v7a low
+  reservation is sized for the largest `libtombi*.so` of the APK). The card's logo is cut at run time from the
+  player's own data: the title's 8 bpp logo page and CLUT (`SYSTEM/A00202.000` + `A00203.000` PAL, `A00012.000` +
+  `A00013.000` USA; texels 8..247 x 0..111 plus the "!" piece 8..71 x 112..223 to its right, page row = logo row + 112
+  PAL / 88 USA) saved as `files/games/<id>/logo.png`; without it the name in the title font. Options per version: the
+  USA game gets no game language, translations, NTSC switch, second-screen panel, cut content, debug menu, button
+  icons, PAL cheats or save tools (all PAL-only in the port, docs/USA.md); `--aspect`, `--renderer`, `--fps`,
+  `--skip-intro`, DualShock and vibration stay. An install from before the library (`files/data`, or an image copied
+  by an older version) becomes the PAL entry on the first start (a rename). *Disco y datos* shows the selected game
+  (*Quitar este juego* removes its data and card, the saves stay). Build: the APK always has the PAL game; with the
+  `GAME_FILES_URL_USA` secret `android-apk.yml` also runs `tools/build_full.py --version usa` and
+  `port2/android/game_libs.py --version usa` (armeabi-v7a: port2/CMakeLists.txt `-DPORT_VERSION=usa`; arm64-v8a:
+  `port2/wasm/build.py --version usa --until w2c` + the CMake arm64 branch) into `app/src/main/jniLibs/<abi>/libtombi_usa.so`
+  (git-ignored); without the secret the step is skipped and a USA disc shows *No incluido en esta versión de la app*.
+  **Renders on a PC**: `python3 port2/android/render/render.py OUT [--pal FS] [--usa FS] [--uilang 1]` draws the
+  real `LauncherActivity` with Robolectric's native graphics (Android's Skia) at 1920x1080 (the library in its three
+  looks, empty and with PAL / USA / Japan cards, the options per version, the disc screen, the dialog) and prints the
+  checks of `RenderTest` (migration, key / touch navigation, arguments per version); aapt2, android-all and Robolectric
+  come from Maven into `build/android-render` (~700 MB), no SDK install; `FS` = the `SYSTEM/` files of the player's
+  own disc for the logos.
 - **Launcher language.** *Opciones > Juego > Idioma del launcher*: Auto (the system's) / English / Español / Français /
   Deutsch / Italiano / Nederlands / Português / Svenska / Dansk (`res/values-xx/strings.xml`), saved as `uilang`,
   independent of the game language. Applied at once, without a restart: `LauncherActivity.getResources()` returns
@@ -1039,6 +1070,33 @@ report) and the exact command line. *Mods* and
 *Controls* tabs: see "Mods" and below. Settings are saved in `tombi-port.json` next to the exe. From a checkout it runs
 `build/port-win/tombi.exe` (Windows) or `build/port/tombi` (Linux); the PyInstaller exe carries `tombi.exe`,
 `tombi-view.exe` and `SDL2.dll` and unpacks them to its temporary folder on each run (PyInstaller onefile).
+
+**Game library** (docs/PORT_VERSIONS_PLAN.md stage U2, `tools/game_library.py`): the *Play* page starts with a card
+per disc the player added (*Añadir juego… / Add game…*, the last card; right click on a card: *Remove from the
+library…*, which offers to delete its extracted folder too). A disc is identified by its boot executable: the
+`BOOT` line of `SYSTEM.CNF` and that file's sha1 (the PAL discs boot SCES_013.31 / SCES_013.30, a loader of
+`EXE/MAIN0.EXE`: their sha1 is MAIN0's `bec8dc5f…`; USA `SCUS_942.36` `81cbc79f…`; JP `SLPS_011.44` `07d57769…`
+shows as recognised, "not supported yet", Play off; PAL Rev 0 likewise; another disc, e.g. Tomba! 2, is refused by
+name). Each game is extracted once into its own folder next to the launcher: the first PAL disc keeps `data/` (an
+older launcher's `data/` and disc path become the first entry, nothing is extracted again), the others
+`data-<serial>/` (`data-scus94236/`, `data-sces01330/`). Settings: `games` (`serial`, `sha1`, `image`, `data`) and
+`game` (the selected serial) in `tombi-port.json`; the other settings are shared. The card art is rebuilt from the
+player's own disc the first time (`library/<serial>/logo.png`, `title.png`, `scene.png`, never in the repo): the logo
+page and CLUT of the title list (PAL `SYSTEM/A00202.000` + `A00203.000`, USA/JP `A00012.000` + `A00013.000`) drawn
+with the title overlay's own sprite list (`TITLE_LOGO_SPRITE_RECS` of O0PTSUB0 / OPTSUB00: 16-byte records with the
+CLUT at 128,510, the list `titleLogoDraw` passes to `titleDrawSpriteRecs`), on the title landscape (A00200.GAM /
+A00010.GAM); a disc without them shows its name. Looks: `library_view` = `grid` (cards with the title
+screen, in as many columns as fit), `list` (default: rows with the logo) or `banner` (the selected game wide over the
+landscape, small logo cards under it); `TOMBI_LIBRARY_VIEW` forces one.
+
+Per version (`game_library.VERSIONS` `features`): PAL has everything; USA runs `tombi-pc-usa(.exe)` (checkout:
+`build/port2-scus94236[-win]/tombi2`) and has no game language (English only), no text patch / improved translation
+(the hook is `VERSIONS[...]["text_patches"]`, empty for USA/JP: a future retranslation goes there), no 50/60 Hz switch
+(60 Hz, no `--hz`), no *Cut content* page, no `--poke` mods / area select / title DEBUG / debug menu (PAL addresses),
+no button-icon styles (`--prompts` redraws the PAL fonts) and no texture dump (PAL layout); skip intro, autostart,
+keys, controller, renderer, window, aspect, fps and texture packs stay. The other versions always run from their data
+folder (no `--disc`). The save folder is shared by all games (one `tombi_mc0.mcd`; each release saves under its own product
+code, BESCES-01331 / BASCUS-94236; a USA save on that card has not been tried yet, U3).
 
 *Graphics* tab: renderer, window scale, fullscreen, aspect, internal resolution, and *Mostrar FPS / Show FPS*
 (default off: `--show-fps`, the on-screen counter; `--log-fps 2` is always passed so the rate goes to the log).
@@ -3358,6 +3416,8 @@ Gen 3 and newer, the AYN Odin 2 ...); armeabi-v7a stays the native 32-bit build,
     python3 port2/wasm/build.py --from native --headless-host --cc CC --native-flags "-O2 -static" --exe tombi2w-a64
                                               # the same host without SDL/GL (headless_stubs.py), e.g. for qemu-aarch64
     build/wasm/tombi2w --headless --frames 1500 --dump-frames out --pad-script 1000:start
+    python3 port2/wasm/build.py --version usa --out build/wasm-usa   # the USA release (PORT_VERSION, docs/USA.md; needs
+                                              # tools/build_full.py --version usa): its VERSION_ macro, inc26, port_version.h
 
 Pipeline (`build.py`): `gen2.py sources` with `PORT2_ARCH=wasm` (the clang K&R fix-ups of the Android build) -> every
 game/runtime file (and libchdr) to LLVM bitcode -> `gen2.py link` (llvm-nm; C dispatch thunks `gen/thunks.c` instead of

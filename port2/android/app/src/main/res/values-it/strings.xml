@@ -129,4 +129,22 @@
     <string name="tr_done">Traduzione importata: %1$s.</string>
     <string name="tr_json">Questo è il file .tombipatch.json. Importa invece translation.tpatch (tombi-text).</string>
     <string name="tr_bad">Non è un file di traduzione (.tpatch).</string>
+    <!-- the game library (Library.java, stage U2) -->
+    <string name="lib_title">I tuoi giochi</string>
+    <string name="lib_add">Aggiungi gioco</string>
+    <string name="lib_add_sub">Immagine del tuo disco: .bin, .iso, .chd (o .cue con il suo .bin)</string>
+    <string name="lib_ready">Pronto per giocare</string>
+    <string name="lib_unsupported">Non ancora supportato</string>
+    <string name="lib_nolib">Non incluso in questa versione dell\'app</string>
+    <string name="lib_unsupported_long">%1$s è riconosciuto, ma il port non supporta ancora questa versione del gioco.</string>
+    <string name="lib_nolib_long">%1$s è riconosciuto, ma questa versione dell\'app non include la sua libreria di gioco.</string>
+    <string name="lib_empty">Aggiungi l\'immagine del tuo disco per iniziare. Ogni gioco viene verificato, estratto una volta e tenuto nella libreria.</string>
+    <string name="lib_style">Stile della libreria</string>
+    <string name="lib_remove">Rimuovi questo gioco</string>
+    <string name="lib_removed">%1$s rimosso dalla libreria (salvataggi conservati).</string>
+    <string name="lib_from">Disco: %1$s</string>
+    <string name="disc_unknown">Non è un disco Tombi! / Tomba! conosciuto (%1$s, sha1 dell\'eseguibile %2$s).</string>
+    <string name="disc_added">%1$s aggiunto ai tuoi giochi.</string>
+    <string-array name="lib_styles"><item>Carosello</item><item>Elenco</item><item>Copertina</item></string-array>
+    <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Giappone</item></string-array>
 </resources>

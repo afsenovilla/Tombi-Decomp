@@ -186,6 +186,100 @@ JNIEXPORT jstring JNICALL Java_io_github_tombi_port_LauncherActivity_nativeVerif
     return (*env)->NewStringUTF(env, res);
 }
 
+/* ---- which game the image is (the game library, LauncherActivity GameVersion): the boot executable SYSTEM.CNF names
+   (`BOOT = cdrom:\SCUS_942.36;1`) and its SHA-1, as tools/extract_data.py boot_exe.  On the PAL discs the boot exe
+   (SCES_013.31 / SCES_013.30) only loads EXE/MAIN0.EXE, the game: the game executable is MAIN0 there.  An open image. */
+typedef struct { char serial[16], boot[64], boot_sha1[41], main0_sha1[41]; } DiscId;
+static int sha1_extent(unsigned lba, unsigned size, char *hex) {
+    Sha1 s; sha1_init(&s);
+    unsigned left = size, done = 0;
+    for (unsigned l = lba; left > 0; l++) {
+        unsigned char b[2048]; unsigned n = left < 2048 ? left : 2048;
+        if (read_sector((int)l, b)) return -1;
+        sha1_update(&s, b, n); left -= n; done += n;
+        progress = (int)(1000ull * done / (size ? size : 1));
+    }
+    sha1_hex(&s, hex);
+    return 0;
+}
+/* path "EXE/MAIN0.EXE" (either slash) from the root directory: its extent */
+static int find_path(const unsigned char *pvd, const char *path, unsigned *elba, unsigned *esize) {
+    unsigned lba = le32(pvd + 158), size = le32(pvd + 166);
+    char part[64];
+    while (*path) {
+        int k = 0;
+        while (*path && *path != '/' && *path != '\\' && k < 63) part[k++] = *path++;
+        part[k] = 0;
+        while (*path == '/' || *path == '\\') path++;
+        if (!k) continue;
+        if (!find(lba, size, part, &lba, &size)) return 0;
+    }
+    *elba = lba; *esize = size;
+    return 1;
+}
+/* 0 = identified (some fields may be empty: no SYSTEM.CNF, no MAIN0), else res holds "err:..." */
+static int identify(DiscId *id, char *res, int rlen) {
+    memset(id, 0, sizeof *id);
+    unsigned char pvd[2048], cnf[4096]; unsigned cl, cs, bl, bs, ml, ms;
+    if (read_sector(16, pvd) || memcmp(pvd + 1, "CD001", 5)) { snprintf(res, rlen, "err:sector 16 is not an ISO9660 volume descriptor"); return -1; }
+    int have_main0 = find_path(pvd, "EXE/MAIN0.EXE", &ml, &ms);
+    if (have_main0 && sha1_extent(ml, ms, id->main0_sha1)) { snprintf(res, rlen, "err:read error in MAIN0.EXE"); return -1; }
+    if (find_path(pvd, "SYSTEM.CNF", &cl, &cs)) {
+        unsigned n = cs < sizeof cnf - 1 ? cs : sizeof cnf - 1;
+        for (unsigned s = 0; s * 2048 < n; s++) if (read_sector((int)(cl + s), cnf + s * 2048)) { snprintf(res, rlen, "err:SYSTEM.CNF unreadable"); return -1; }
+        cnf[n] = 0;
+        for (char *line = (char *)cnf; line && *line; ) {
+            char *nl = strpbrk(line, "\r\n"); if (nl) *nl = 0;
+            while (*line == ' ' || *line == '\t') line++;
+            if (!strncasecmp(line, "BOOT", 4)) {
+                char *v = strchr(line, '=');
+                if (v) {
+                    v++; while (*v == ' ' || *v == '\t') v++;
+                    char *c = strchr(v, ':'); if (c) v = c + 1;
+                    while (*v == '\\' || *v == '/') v++;
+                    int k = 0;
+                    while (v[k] && v[k] != ';' && v[k] != ' ' && v[k] != '\t' && k < (int)sizeof id->boot - 1) { id->boot[k] = v[k] == '\\' ? '/' : v[k]; k++; }
+                    id->boot[k] = 0;
+                }
+                break;
+            }
+            line = nl ? nl + 1 : NULL;
+        }
+    }
+    if (id->boot[0]) {   /* SCUS_942.36 -> SCUS-94236 */
+        const char *b = strrchr(id->boot, '/'); b = b ? b + 1 : id->boot;
+        char u[16]; int k = 0;
+        for (const char *p = b; *p && k < 15; p++) if (*p != '.') u[k++] = (char)(*p >= 'a' && *p <= 'z' ? *p - 32 : *p);
+        u[k] = 0;
+        if (k == 10 && u[4] == '_') snprintf(id->serial, sizeof id->serial, "%.4s-%s", u, u + 5);
+        if (have_main0 && !strncasecmp(b, "SCES_", 5)) { snprintf(id->boot, sizeof id->boot, "EXE/MAIN0.EXE"); memcpy(id->boot_sha1, id->main0_sha1, 41); }
+        else if (find_path(pvd, id->boot, &bl, &bs) && sha1_extent(bl, bs, id->boot_sha1)) { snprintf(res, rlen, "err:read error in %s", id->boot); return -1; }
+    } else if (have_main0) { snprintf(id->boot, sizeof id->boot, "EXE/MAIN0.EXE"); memcpy(id->boot_sha1, id->main0_sha1, 41); }
+    return 0;
+}
+/* "id:serial=<SCES-01331>;boot=<EXE/MAIN0.EXE>;sha1=<boot sha1>;main0=<MAIN0 sha1>" (empty fields: not found), or
+   "err:<reason>"; "err:noboot" when the image names no game executable at all */
+static const char *identify_image(const char *path, char *res, int rlen) {
+    progress = 0;
+    if (open_img(path, res, rlen)) return res;
+    DiscId id;
+    if (!identify(&id, res, rlen)) {
+        if (!id.boot_sha1[0]) snprintf(res, rlen, "err:noboot");
+        else snprintf(res, rlen, "id:serial=%s;boot=%s;sha1=%s;main0=%s", id.serial, id.boot, id.boot_sha1, id.main0_sha1);
+    }
+    close_img();
+    progress = 1000;
+    return res;
+}
+JNIEXPORT jstring JNICALL Java_io_github_tombi_port_LauncherActivity_nativeIdentify(JNIEnv *env, jclass cls, jstring jpath) {
+    (void)cls;
+    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
+    char res[400];
+    identify_image(path, res, sizeof res);
+    (*env)->ReleaseStringUTFChars(env, jpath, path);
+    return (*env)->NewStringUTF(env, res);
+}
+
 JNIEXPORT jstring JNICALL Java_io_github_tombi_port_LauncherActivity_nativeMain0Sha1(JNIEnv *env, jclass cls, jstring jpath) {
     (void)cls;
     const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
@@ -268,12 +362,15 @@ static const char *extract(const char *image, const char *out, char *res, int rl
     progress = 0; ex_cancel = 0; ex_done = 0; ex_total = 0; ex_err[0] = 0; nents = 0;
     if (open_img(image, res, rlen)) return res;
     unsigned char pvd[2048], *buf = NULL; char main0[41] = ""; Sha1 content; sha1_init(&content);
+    DiscId id;
     unsigned total_sectors = 0, done_sectors = 0, sectors;
     if (read_sector(16, pvd) || memcmp(pvd + 1, "CD001", 5)) { snprintf(res, rlen, "err:sector 16 is not an ISO9660 volume descriptor"); goto out; }
     vol_sectors = le32(pvd + 80);
     sectors = (unsigned)(img_size / (is_chd ? 2352 : sec_size));
     if (sectors < vol_sectors) { snprintf(res, rlen, "err:truncated image: %u of the volume's %u sectors (%lld bytes)", sectors, vol_sectors, (long long)img_size); goto out; }
     if (list_files(le32(pvd + 158), le32(pvd + 166), "", 0)) { snprintf(res, rlen, "err:%s", ex_err); goto out; }
+    if (identify(&id, res, rlen)) goto out;   /* the game version for the manifest (port2/shims/psyq.c checks boot_sha1) */
+    progress = 0;
     qsort(ents, (size_t)nents, sizeof *ents, ent_cmp);
     {   /* the sectors no file covers */
         unsigned prev = 0; int nf = nents;
@@ -332,6 +429,8 @@ static const char *extract(const char *image, const char *out, char *res, int rl
         const char *base = strrchr(image, '/');
         fprintf(m, "tombi-data 1\n# one-time extraction of the player's own disc for the native port (Android launcher, port2/android/disccheck.c)\n");
         fprintf(m, "sectors %u\nmain0_sha1 %s\nsource %s\n", sectors, main0, base ? base + 1 : image);
+        if (id.boot_sha1[0])   /* the game version (as tools/extract_data.py): serial, game executable, its sha1 */
+            fprintf(m, "serial %s\nboot %s\nboot_sha1 %s\n", id.serial[0] ? id.serial : "?", id.boot, id.boot_sha1);
         fprintf(m, "# file <lba> <sectors> <stored sector bytes> <file bytes> <path>\n");
         for (int i = 0; i < nents; i++) fprintf(m, "file %u %u %u %u %s\n", ents[i].lba, ents[i].n, ents[i].stored, ents[i].bytes, ents[i].path);
         if (fflush(m) || fsync(fileno(m))) { fclose(m); snprintf(res, rlen, "err:writing the manifest: %s", strerror(errno)); goto out; }
@@ -339,7 +438,8 @@ static const char *extract(const char *image, const char *out, char *res, int rl
         if (rename(mt, mp)) { snprintf(res, rlen, "err:rename the manifest: %s", strerror(errno)); goto out; }
     }
     { char hex[41]; sha1_hex(&content, hex);
-      snprintf(res, rlen, "ok:%d files, %u sectors (%u-byte source sectors%s), main0 %s, content sha1 %s", nents, sectors, is_chd ? 2352 : sec_size, is_chd ? ", chd" : "", main0[0] ? main0 : "-", hex); }
+      snprintf(res, rlen, "ok:%d files, %u sectors (%u-byte source sectors%s), main0 %s, %s %s %s, content sha1 %s", nents, sectors, is_chd ? 2352 : sec_size, is_chd ? ", chd" : "",
+               main0[0] ? main0 : "-", id.serial[0] ? id.serial : "?", id.boot[0] ? id.boot : "boot", id.boot_sha1[0] ? id.boot_sha1 : "-", hex); }
     goto out;
 oom:
     snprintf(res, rlen, "err:out of memory");

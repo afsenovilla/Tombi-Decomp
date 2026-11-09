@@ -40,9 +40,9 @@
     <string name="disc_unverified">Disc image not verified: it may fail.</string>
     <string name="disc_badsha">NOT a compatible disc (MAIN0.EXE sha1 %1$s). The port runs Tombi! PAL Rev 1 (SCES-01331 or SCES-01330); it may fail.</string>
     <string name="disc_rev0">Tombi! PAL Rev 0 disc (July 1998 build). The port needs the August 1998 Rev 1 (SCES-01331 or SCES-01330): Rev 0 has other overlays and does not boot.</string>
-    <string name="disc_nomain0">No EXE/MAIN0.EXE found in that image (pick the .bin, .iso or .chd; for a .cue select the .bin too).</string>
+    <string name="disc_nomain0">No game executable found in that image (SYSTEM.CNF; pick the .bin, .iso or .chd; for a .cue select the .bin too).</string>
     <string name="disc_needbin">Select the .bin together with the .cue.</string>
-    <string name="disc_howto">Pick the image of your own Tombi! disc (.bin, .iso, .chd, or .cue together with its .bin): its files are extracted into app storage (about 500 MB, checked file by file; the image itself is not kept). The app ships no game data.</string>
+    <string name="disc_howto">Pick the image of your own Tombi! / Tomba! disc (.bin, .iso, .chd, or .cue together with its .bin): its files are extracted into app storage (about 500 MB, checked file by file; the image itself is not kept). The app ships no game data.</string>
     <string name="disc_missing">No disc image picked: pick your disc.</string>
     <string name="cancel">Cancel</string>
     <string name="disc_cancelled">Copy cancelled: the partial files were deleted.</string>
@@ -139,4 +139,22 @@
     <string name="tr_done">Translation imported: %1$s. It is used in every language and wins over the improved translation.</string>
     <string name="tr_json">This is the .tombipatch.json file. Import the compiled translation.tpatch instead (tombi-text: \"Install in the game\" or \"Compile for the game\").</string>
     <string name="tr_bad">Not a translation file (.tpatch made with tombi-text).</string>
+    <!-- the game library (Library.java, stage U2) -->
+    <string name="lib_title">Your games</string>
+    <string name="lib_add">Add game</string>
+    <string name="lib_add_sub">Your own disc image: .bin, .iso, .chd (or .cue with its .bin)</string>
+    <string name="lib_ready">Ready to play</string>
+    <string name="lib_unsupported">Not supported yet</string>
+    <string name="lib_nolib">Not in this build of the app</string>
+    <string name="lib_unsupported_long">%1$s is recognised, but this version of the game is not supported by the port yet.</string>
+    <string name="lib_nolib_long">%1$s is recognised, but this build of the app does not include its game library.</string>
+    <string name="lib_empty">Add the image of your own disc to start. Each game is checked, extracted once and kept in your library.</string>
+    <string name="lib_style">Library style</string>
+    <string name="lib_remove">Remove this game</string>
+    <string name="lib_removed">%1$s removed from the library (saves kept).</string>
+    <string name="lib_from">Disc: %1$s</string>
+    <string name="disc_unknown">Not a known Tombi! / Tomba! disc (%1$s, game executable sha1 %2$s).</string>
+    <string name="disc_added">%1$s added to your games.</string>
+    <string-array name="lib_styles"><item>Carousel</item><item>List</item><item>Cover</item></string-array>
+    <string-array name="lib_regions"><item>Europe</item><item>USA</item><item>Japan</item></string-array>
 </resources>

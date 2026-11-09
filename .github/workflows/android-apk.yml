@@ -39,6 +39,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/disc-cache   # the USA disc stays in the Actions cache between runs (tools/disc_fetch.sh)
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_USA }}
+          scope: usa
 
       - uses: actions/setup-python@v5
         with:
@@ -182,6 +186,28 @@ jobs:
           tar xzf "$RUNNER_TEMP/sdlsrc/sdl.tar.gz" -C "$RUNNER_TEMP/sdlsrc"
           echo "SDL2_SOURCE=$RUNNER_TEMP/sdlsrc/SDL2-${SDL2_VERSION}" >> "$GITHUB_ENV"
 
+      # The USA release (SCUS-94236) as a second game library, libtombi_usa.so for both ABIs (docs/PORT_VERSIONS_PLAN.md
+      # U2, port2/android/game_libs.py): only with the GAME_FILES_URL_USA secret; without it the APK has the PAL game
+      # only (the launcher then lists a USA disc as recognised but not in this build).  The generator takes the USA
+      # addresses from its own matching build and the USA disc's files (game_usa/fs), as the PAL one does from game/.
+      - name: USA game library (libtombi_usa.so, both ABIs)
+        id: usa
+        if: steps.fetch.outputs.ok == 'true'
+        env:
+          GAME_FILES_URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
+        run: |
+          if [ -z "$GAME_FILES_URL_USA" ]; then
+            echo "::notice::GAME_FILES_URL_USA secret not set; the APK has the PAL game only."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          bash tools/disc_fetch.sh USA
+          echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
+          python3 tools/build_full.py --version usa -j "$(nproc)"
+          python3 port2/android/game_libs.py --version usa --sdl2 "$SDL2_SOURCE" --ndk "$ANDROID_NDK_LATEST_HOME" -j "$(nproc)"
+          ls -l port2/android/app/src/main/jniLibs/*/
+          rm -f game_usa/disc.bin
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-java@v4
         if: steps.fetch.outputs.ok == 'true'
         with:
@@ -222,7 +248,9 @@ jobs:
           ls -l "$APK"
           unzip -l "$APK" | grep -E "\.so$"
           # both ABIs, all four libraries each (a 64-bit-only device loads only lib/arm64-v8a)
-          for abi in armeabi-v7a arm64-v8a; do for l in libtombi.so libmain.so libSDL2.so libtombidisc.so; do
+          LIBS="libtombi.so libmain.so libSDL2.so libtombidisc.so"
+          [ "${{ steps.usa.outputs.ok }}" = "true" ] && LIBS="$LIBS libtombi_usa.so"   # the USA game library (game_libs.py)
+          for abi in armeabi-v7a arm64-v8a; do for l in $LIBS; do
             unzip -l "$APK" | grep -q " lib/$abi/$l\$" || { echo "::error::the APK has no lib/$abi/$l"; exit 1; }
           done; done
           REP="$(find port2/android/app/.cxx -name report.txt -path '*gen*' | head -1)"
@@ -242,6 +270,8 @@ jobs:
           for abi in armeabi-v7a arm64-v8a; do
             DBG="$(find port2/android/app/.cxx -path "*$abi*" -name libtombi.debug.so | head -1)"
             if [ -n "$DBG" ]; then cp "$DBG" "dist/android/symbols/libtombi-$abi.debug.so"; fi
+            DBG="build/android-usa/$abi/libtombi_usa.debug.so"
+            if [ -f "$DBG" ]; then cp "$DBG" "dist/android/symbols/libtombi_usa-$abi.debug.so"; fi
           done
           nm -n --defined-only "$SO" > dist/android/symbols/libtombi-armeabi-v7a.map 2>/dev/null || true
           unzip -o -q "$APK" lib/arm64-v8a/libtombi.so -d "$RUNNER_TEMP/apklib"

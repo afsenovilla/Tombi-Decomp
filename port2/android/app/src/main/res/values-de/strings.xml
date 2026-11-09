@@ -129,4 +129,22 @@
     <string name="tr_done">Übersetzung importiert: %1$s.</string>
     <string name="tr_json">Das ist die .tombipatch.json-Datei. Importiere stattdessen translation.tpatch (tombi-text).</string>
     <string name="tr_bad">Keine Übersetzungsdatei (.tpatch).</string>
+    <!-- the game library (Library.java, stage U2) -->
+    <string name="lib_title">Deine Spiele</string>
+    <string name="lib_add">Spiel hinzufügen</string>
+    <string name="lib_add_sub">Abbild deiner eigenen Disc: .bin, .iso, .chd (oder .cue mit ihrer .bin)</string>
+    <string name="lib_ready">Bereit zum Spielen</string>
+    <string name="lib_unsupported">Noch nicht unterstützt</string>
+    <string name="lib_nolib">Nicht in dieser App-Version</string>
+    <string name="lib_unsupported_long">%1$s wurde erkannt, aber diese Spielversion wird vom Port noch nicht unterstützt.</string>
+    <string name="lib_nolib_long">%1$s wurde erkannt, aber diese App-Version enthält seine Spielbibliothek nicht.</string>
+    <string name="lib_empty">Füge das Abbild deiner eigenen Disc hinzu. Jedes Spiel wird geprüft, einmal entpackt und in deiner Bibliothek behalten.</string>
+    <string name="lib_style">Bibliotheksstil</string>
+    <string name="lib_remove">Dieses Spiel entfernen</string>
+    <string name="lib_removed">%1$s aus der Bibliothek entfernt (Spielstände bleiben).</string>
+    <string name="lib_from">Disc: %1$s</string>
+    <string name="disc_unknown">Keine bekannte Tombi!/Tomba!-Disc (%1$s, SHA-1 der Programmdatei %2$s).</string>
+    <string name="disc_added">%1$s zu deinen Spielen hinzugefügt.</string>
+    <string-array name="lib_styles"><item>Karussell</item><item>Liste</item><item>Cover</item></string-array>
+    <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
 </resources>

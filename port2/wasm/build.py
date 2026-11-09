@@ -27,6 +27,8 @@ ap.add_argument("--until", dest="stop", default="native", help="last step")
 ap.add_argument("--headless-host", action="store_true", help="native step without SDL2/GL (headless_stubs.py), e.g. "
                 "--cc aarch64-linux-gnu-gcc --native-flags '-O2 -static' to run the arm64 host code under qemu-aarch64")
 ap.add_argument("--exe", default="tombi2w", help="native output name (in --out)")
+ap.add_argument("--version", default=os.environ.get("PORT_VERSION", ""), help="game version (port/tools/portver.py): empty "
+                "= PAL SCES-01331, usa = SCUS-94236 (needs tools/build_full.py --version usa); use its own --out")
 a = ap.parse_args()
 OUT = os.path.abspath(a.out); GEN = os.path.join(OUT, "gen"); OBJ = os.path.join(OUT, "obj")
 STEPS = ["sources", "compile", "link", "ir", "w2c", "native"]
@@ -34,13 +36,14 @@ def want(step): return STEPS.index(a.start) <= STEPS.index(step) <= STEPS.index(
 def sh(cmd, **kw):
     print("+", " ".join(cmd) if isinstance(cmd, list) and len(" ".join(cmd)) < 300 else str(cmd)[:300], flush=True)
     subprocess.run(cmd, check=True, **kw)
-ENV = dict(os.environ, PORT2_ARCH="wasm")
+ENV = dict(os.environ, PORT2_ARCH="wasm", PORT_VERSION=a.version)
 WCC = ["clang", "--target=wasm32-wasi", "-O2", "-w", "-funsigned-char", "-fwrapv", "-fno-strict-aliasing",
        "-fno-delete-null-pointer-checks", "-emit-llvm", "-Wno-error=implicit-function-declaration", "-Wno-error=int-conversion",
        "-Wno-error=incompatible-function-pointer-types", "-Wno-error=implicit-int", "-Wno-error=return-type"]
 GAME = WCC + ["-ftrivial-auto-var-init=zero", "-fno-builtin", "-DSKIP_ASM", "-D_LANGUAGE_C", "-DMIPSEL", "-DPORT2_WASM", "-I" + os.path.join(P2, "include"), "-I" + GEN]
 CHDR = os.path.join(P2, "third_party", "libchdr")        # .chd disc images, as in the CMake builds
 RT = WCC + ["-include", os.path.join(HERE, "wasm_compat.h"), "-I" + os.path.join(P2, "include"), "-I" + GEN,
+            "-I" + os.path.join(GEN, "version"),       # port_version.h (gen2.py: the version's layout, as the CMake build)
             "-I" + os.path.join(CHDR, "include"), "-DPORT_HAVE_CHD"]
 
 def compile_all(jobs):
@@ -63,10 +66,12 @@ if want("compile"):
     txt = open(os.path.join(GEN, "sources.cmake")).read()
     sets = {m.group(1): m.group(2).split() for m in re.finditer(r"set\((\w+)\s+([^)]*)\)", txt)}
     jobs = []
-    for key, inc in (("PORT_GAME_SOURCES", "inc"), ("PORT_GAME_SOURCES_T24", "inc24")):
+    # (another version: its VERSION_<SERIAL> macro picks the version's #if branches, and the psx_tomba header set inc26)
+    vdefs = ["-D" + d for d in sets.get("PORT_VERSION_DEFS", []) if d != "None"]   # (PAL: "None")
+    for key, inc in (("PORT_GAME_SOURCES", "inc"), ("PORT_GAME_SOURCES_T24", "inc24"), ("PORT_GAME_SOURCES_T26", "inc26")):
         for s in sets.get(key, []):
             jobs.append((s, os.path.join(OBJ, inc, os.path.relpath(s, GEN)) + ".bc",
-                         GAME + ["-I" + os.path.join(GEN, inc), "-I" + os.path.join(GEN, inc, "tomba")]))
+                         GAME + vdefs + ["-I" + os.path.join(GEN, inc), "-I" + os.path.join(GEN, inc, "tomba")]))
     rt = [os.path.join(P2, d, f) for d in ("runtime", "shims") for f in sorted(os.listdir(os.path.join(P2, d)))
           if f.endswith(".c") and f not in RT_EXCLUDE]
     rt += [os.path.join(HERE, "rt_wasm.c"), os.path.join(GEN, "funcmap.c"), os.path.join(GEN, "build_id.c")]

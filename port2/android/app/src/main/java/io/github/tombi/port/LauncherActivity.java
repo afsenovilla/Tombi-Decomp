@@ -35,8 +35,9 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The launcher shown before the game ("Selva" design, docs/PORT.md "4. Android"): main menu, options (persisted in
- * SharedPreferences, turned into port flags for TombiActivity), disc status with the disc image picker (SAF), quit.
+ * The launcher shown before the game ("Selva" design, docs/PORT.md "4. Android"): the game library as its home (one card
+ * per disc added, Library.java; three looks: carousel, list, cover), options (persisted in SharedPreferences, turned
+ * into port flags for TombiActivity, per game version), the selected game's disc screen with the image picker (SAF), quit.
  * Drawn on a Canvas in a 1280x720 virtual space scaled to the screen; gamepad (D-pad/A/B/Start) and touch.
  * Options > Controls / Button mapping: the 14 PS1 buttons and the panel's actions, each bound by pressing the controller
  * button / trigger / stick (PadMap; saved as "padmap", handed to TombiActivity as EXTRA_PADMAP).
@@ -56,6 +57,7 @@ public class LauncherActivity extends Activity {
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
 
     SharedPreferences prefs;
+    Library lib;          // the game library (Library.java): the discs added, the selected one
     LauncherView view;
     SelvaDialog dlg;
     volatile String importStatus;
@@ -99,6 +101,8 @@ public class LauncherActivity extends Activity {
         });
         super.onCreate(b);
         prefs = getSharedPreferences("launcher", MODE_PRIVATE);
+        lib = new Library(this, prefs);
+        try { lib.migrate(); } catch (Throwable t) { CrashLog.append(this, "launcher: library migration: " + CrashLog.stack(t)); }
         applyUiLang();
         view = new LauncherView(this);
         dlg = new SelvaDialog(this);   // the launcher's dialogs, drawn over the menus (no system AlertDialog)
@@ -313,11 +317,20 @@ public class LauncherActivity extends Activity {
         return f != null ? f : getFilesDir();
     }
 
-    File discFile() {
-        String d = prefs.getString("disc", null);
-        return d != null && new File(d).isFile() ? new File(d) : null;
+    // ---- the selected game of the library (Library.java) ----
+    Library.Game game() { return lib == null ? null : lib.selected(); }
+    Library.Version ver() { Library.Game g = game(); return g == null ? null : g.ver; }
+    /** the PAL game (or none yet): every option; another version shows only the options its port has (no languages,
+     *  translations, NTSC picture, panel, cut content, debug menu, PAL cheats, save tools) */
+    boolean palGame() { Library.Version v = ver(); return v == null || v.pal(); }
+    /** the version's game library is in this APK (libtombi_usa.so is only built when the CI has that disc) */
+    boolean libPresent(Library.Version v) {
+        if (v == null || v.lib == null) return false;
+        String d = getApplicationInfo().nativeLibraryDir;
+        return d == null || !new File(d).isDirectory() || new File(d, v.lib).isFile();
     }
-    boolean ready() { return dataReady() || discFile() != null; }
+    File discFile() { Library.Game g = game(); return g == null ? null : g.legacyDisc(); }
+    boolean ready() { Library.Game g = game(); return g != null && g.ready() && libPresent(g.ver); }
     boolean textPatchOn() { return flag("textpatch", LANG_N[langIdx()] == 5); }
 
     /** files/patches/<name>, (re)extracted from the APK's assets/patches (the files are small; copying each time keeps
@@ -347,8 +360,14 @@ public class LauncherActivity extends Activity {
     String[] buildArgs() {
         List<String> a = new ArrayList<>();
         File disc = discFile();
+        Library.Version v = ver();
         if (dataReady()) { a.add("--data"); a.add(dataDir().getAbsolutePath()); }   // extracted on the device
         else if (disc != null) { a.add("--disc"); a.add(disc.getAbsolutePath()); }  // an image copied by an older version
+        // the game library and saves folder of the version (loader.c; PAL: libtombi.so and files/saves as before)
+        a.add("--game-lib"); a.add(v != null && v.lib != null ? v.lib : "libtombi.so");
+        a.add("--save-sub"); a.add(v != null && v.saveSub != null ? v.saveSub : "saves");
+        a.add("--files-dir"); a.add(filesDir().getAbsolutePath());   // the loader's files dir (taken out before port_main)
+        if (!palGame()) return buildArgsOther(a);
         if (translationFile().isFile()) { a.add("--text-patch"); a.add(translationFile().getAbsolutePath()); }
         if (textPatchOn() && LANG_N[langIdx()] == 5) {
             File tp = textPatch();
@@ -370,7 +389,6 @@ public class LauncherActivity extends Activity {
         boolean panel = secondScreenOn() && hasSecondDisplay();
         if (panel) a.add("--second-screen");
         if (panel && hudBottomOn()) a.add("--hud-bottom");
-        a.add("--files-dir"); a.add(filesDir().getAbsolutePath());   // the loader's files dir (taken out before port_main)
         if (flag("dualshock", false)) a.add("--dualshock");
         a.add("--rumble"); a.add(String.valueOf(RUMBLE[rumbleIdx()]));   // runtime/sdl.c: vibration intensity
         a.add("--prompts"); a.add(PROMPTS[promptIdx()]);
@@ -382,6 +400,19 @@ public class LauncherActivity extends Activity {
         a.add("--fit");   // the game always fills the screen (aspect kept)
         if (flag("inflives", false)) { a.add("--poke-every"); a.add("50:8009C980:63:1"); }
         if (flag("infhealth", false)) { a.add("--poke-every"); a.add("1:8009C970:4:1"); }
+        return a.toArray(new String[0]);
+    }
+    /** another version (USA): English only and its own 60 Hz; the language, text, panel, NTSC picture, cut content,
+     *  debug menu, button icons and PAL cheat flags are PAL-only in the port (docs/USA.md "Native port") */
+    String[] buildArgsOther(List<String> a) {
+        a.add("--aspect"); a.add(ASPECTS[aspectIdx()]);
+        a.add("--renderer"); a.add(flag("gl", false) ? "gl" : "soft");
+        if (flag("dualshock", false)) a.add("--dualshock");
+        a.add("--rumble"); a.add(String.valueOf(RUMBLE[rumbleIdx()]));
+        if (flag("skipintro", false)) a.add("--skip-intro");
+        if (fpsIdx() > 0) { a.add("--fps"); a.add(FPS[fpsIdx()]); }
+        if (flag("showfps", false)) a.add("--show-fps");
+        a.add("--fit");
         return a.toArray(new String[0]);
     }
 
@@ -405,7 +436,13 @@ public class LauncherActivity extends Activity {
     }
 
     void play() {
+        Library.Game g = game();
+        if (g != null && g.ver != null && (!g.ver.supported() || !libPresent(g.ver))) {
+            saveDialog(versionName(g.ver), getString(g.ver.supported() ? R.string.lib_nolib_long : R.string.lib_unsupported_long, versionName(g.ver)));
+            return;
+        }
         if (!ready()) {
+            if (g == null) { view.setScreen(LauncherView.DISC); pickDisc(); return; }   // (the progress is drawn there)
             Toast.makeText(this, R.string.need_disc, Toast.LENGTH_LONG).show();
             view.setScreen(LauncherView.DISC);
             return;
@@ -416,6 +453,7 @@ public class LauncherActivity extends Activity {
         // markers (CrashLog): "running" until TombiActivity finishes cleanly; a stale "crashed" is cleared
         CrashLog.clearMarkers(this);
         CrashLog.writeMarker(this, CrashLog.RUNNING, "launcher " + version() + " " + System.currentTimeMillis() + "\n");
+        CrashLog.append(this, "launcher: playing " + g.serial + " (" + (g.ver != null ? g.ver.key : "?") + ")");
         killStaleGame();
         try {
             Intent i = new Intent(this, TombiActivity.class);
@@ -430,6 +468,12 @@ public class LauncherActivity extends Activity {
             CrashLog.writeMarker(this, CrashLog.CRASHED, "startActivity failed: " + t + "\n");
             view.setScreen(LauncherView.CRASH);
         }
+    }
+
+    /** "Tomba! (USA)" in the launcher's language */
+    String versionName(Library.Version v) {
+        if (v == null) return "?";
+        return v.title + " (" + getResources().getStringArray(R.array.lib_regions)[v.region] + ")";
     }
 
     String version() {
@@ -469,6 +513,9 @@ public class LauncherActivity extends Activity {
     }
     /** "sha1:<hex>" or "err:<reason>" ("err:nomain0"): port2/android/disccheck.c, the same for .bin/.iso/.chd */
     static native String nativeMain0Sha1(String path);
+    /** "id:serial=SCUS-94236;boot=SCUS_942.36;sha1=<boot exe sha1>;main0=<MAIN0.EXE sha1>" or "err:<reason>"
+     *  ("err:noboot": no game executable): which game the image is (Library.Version) */
+    static native String nativeIdentify(String path);
     static native int nativeCheckProgress();
     /** extracts the image into outDir for the port's --data mode (manifest.txt last): "ok:<summary>" or "err:<reason>" */
     static native String nativeExtract(String image, String outDir);
@@ -486,8 +533,8 @@ public class LauncherActivity extends Activity {
 
     /** The game's data, extracted on the device (docs/PORT.md "4. Android"): internal files/data with the manifest the
      *  port's --data mode reads; files/data.tmp while extracting (renamed when complete). */
-    File dataDir() { return new File(getFilesDir(), "data"); }
-    boolean dataReady() { return new File(dataDir(), "manifest.txt").isFile(); }
+    File dataDir() { Library.Game g = game(); return g != null ? g.data() : new File(getFilesDir(), "data"); }
+    boolean dataReady() { Library.Game g = game(); return g != null && g.extracted(); }
 
     /** The picked .bin/.iso/.chd (a .cue alongside is ignored: the data track is the image) is read in place through
      *  its file descriptor when the provider gives a real file, else copied to the cache first; then MAIN0.EXE's SHA-1,
@@ -497,7 +544,7 @@ public class LauncherActivity extends Activity {
         cancelImport = false; result = 0; copied = 0; copyTotal = -1;
         phase = CHECKING;
         status(null);
-        File tmpDir = new File(getCacheDir(), "import"), tmp = new File(getFilesDir(), "data.tmp");
+        File tmpDir = new File(getCacheDir(), "import"), tmp = new File(getFilesDir(), "data.tmp");   // (tmp: the game's data.tmp once known)
         deleteTree(tmpDir);
         List<android.os.ParcelFileDescriptor> fds = new ArrayList<>();
         try {
@@ -546,28 +593,48 @@ public class LauncherActivity extends Activity {
             if (!nativeOk) { fail(getString(R.string.disc_fail, "libtombidisc.so missing")); return; }
             phase = CHECKING;
             view.postInvalidate();
-            String r = nativeMain0Sha1(path);
-            CrashLog.append(this, "disc import: MAIN0.EXE: " + r);
-            String sha = r.startsWith("sha1:") ? r.substring(5) : null;
-            if (sha == null) { fail(r.equals("err:nomain0") ? getString(R.string.disc_nomain0) : getString(R.string.disc_fail, r.substring(4))); return; }
-            boolean ok = MAIN0_SHA1.equals(sha);
+            // which game (disccheck.c nativeIdentify): the boot executable SYSTEM.CNF names and its SHA-1
+            String r = nativeIdentify(path);
+            CrashLog.append(this, "disc import: identify: " + r);
+            if (!r.startsWith("id:")) { fail(r.equals("err:noboot") ? getString(R.string.disc_nomain0) : getString(R.string.disc_fail, r.substring(4))); return; }
+            java.util.Map<String, String> id = new java.util.HashMap<>();
+            for (String kv : r.substring(3).split(";")) { int e = kv.indexOf('='); if (e > 0) id.put(kv.substring(0, e), kv.substring(e + 1)); }
+            String sha = id.get("sha1"), main0 = id.get("main0"), serial = id.get("serial");
+            Library.Version v = Library.bySha1(sha);
+            if (serial == null || serial.isEmpty()) serial = v != null && v.pal() ? "SCES-01331" : "?";
+            if (v == null) {
+                if (REV0_SHA1.equals(main0)) { fail(getString(R.string.disc_rev0)); return; }
+                fail(getString(R.string.disc_unknown, serial, sha == null ? "?" : sha)); return;
+            }
+            if (!v.supported()) {   // recognised, no port of it yet (Japan): listed in the library, nothing extracted
+                lib.put(serial, v, name, "");
+                phase = IDLE; result = -1;
+                status(getString(R.string.lib_unsupported_long, versionName(v)));
+                return;
+            }
+            if (!libPresent(v)) { fail(getString(R.string.lib_nolib_long, versionName(v))); return; }
             if (cancelImport) throw new InterruptedException();
             phase = EXTRACTING;
             view.postInvalidate();
+            // its own folder: files/games/<serial>/data (data.tmp while extracting; renamed when complete)
+            File gdir = new File(lib.root(), Library.idOf(serial));
+            gdir.mkdirs();
+            tmp = new File(gdir, "data.tmp");
             deleteTree(tmp);
-            String v = nativeExtract(path, tmp.getAbsolutePath());
-            CrashLog.append(this, "disc import: extraction: " + v);
-            if (v.equals("err:cancelled")) throw new InterruptedException();
-            if (!v.startsWith("ok:")) { deleteTree(tmp); fail(getString(R.string.disc_damaged, v.startsWith("err:") ? v.substring(4) : v)); return; }
-            deleteTree(dataDir());
-            if (!tmp.renameTo(dataDir())) { deleteTree(tmp); fail(getString(R.string.disc_fail, "rename data.tmp")); return; }
-            File old = discFile();   // an image copied by an older version: no longer needed
-            if (old != null && "disc".equals(old.getParentFile().getName())) deleteTree(old.getParentFile());
-            prefs.edit().remove("disc").putBoolean("disc_ok", ok).putString("disc_name", name)
-                    .putString("disc_info", v.substring(3) + (v.endsWith(CONTENT_SHA1) ? " (= reference PAL disc)" : "")).apply();
+            String x = nativeExtract(path, tmp.getAbsolutePath());
+            CrashLog.append(this, "disc import: extraction: " + x);
+            if (x.equals("err:cancelled")) throw new InterruptedException();
+            if (!x.startsWith("ok:")) { deleteTree(tmp); fail(getString(R.string.disc_damaged, x.startsWith("err:") ? x.substring(4) : x)); return; }
+            File data = new File(gdir, "data");
+            deleteTree(data);
+            new File(gdir, "logo.png").delete();
+            if (!tmp.renameTo(data)) { deleteTree(tmp); fail(getString(R.string.disc_fail, "rename data.tmp")); return; }
+            if (v.pal()) deleteTree(new File(filesDir(), "disc"));   // an image copied by an older version: no longer needed
+            Library.Game g = lib.put(serial, v, name, x.substring(3) + (x.endsWith(CONTENT_SHA1) ? " (= reference PAL disc)" : ""));
+            try { Library.logo(g); } catch (Throwable t) { CrashLog.append(this, "disc import: logo: " + t); }
             phase = IDLE;
-            result = ok ? 1 : -1;
-            status(ok ? getString(R.string.disc_ok) : REV0_SHA1.equals(sha) ? getString(R.string.disc_rev0) : getString(R.string.disc_badsha, sha));
+            result = 1;
+            status(getString(R.string.disc_added, versionName(v)));
         } catch (InterruptedException e) {
             deleteTree(tmp);
             phase = IDLE; result = -1;
@@ -595,20 +662,34 @@ public class LauncherActivity extends Activity {
      *  when asked; the disc selection reset */
     void wipeData(boolean saves) {
         File fd = filesDir();
-        deleteTree(dataDir());
+        lib.removeAll();                                   // every game of the library (files/games)
+        deleteTree(new File(getFilesDir(), "data"));
         deleteTree(new File(getFilesDir(), "data.tmp"));
         deleteTree(new File(fd, "disc"));
         deleteTree(new File(fd, "patches"));
         File[] cache = getCacheDir().listFiles();
         if (cache != null) for (File c : cache) deleteTree(c);
         if (getExternalCacheDir() != null) { File[] ec = getExternalCacheDir().listFiles(); if (ec != null) for (File c : ec) deleteTree(c); }
-        if (saves) deleteTree(new File(fd, "saves"));
+        if (saves) for (Library.Version v : Library.VERSIONS) if (v.saveSub != null) deleteTree(new File(fd, v.saveSub));
         CrashLog.clearMarkers(this);
         prefs.edit().remove("disc").remove("disc_ok").remove("disc_info").remove("disc_name").apply();
         CrashLog.append(this, "launcher: data deleted (saves " + (saves ? "deleted" : "kept") + ")");
         result = 1;
         status(getString(saves ? R.string.disc_wiped_saves : R.string.disc_wiped));
     }
+
+    /** Disc screen: "Remove this game": its extracted data and card (the saves stay, files/saves*) */
+    void removeGame() {
+        Library.Game g = game();
+        if (g == null) return;
+        String nm = versionName(g.ver) + " · " + g.serial;
+        lib.remove(g.id);
+        CrashLog.append(this, "launcher: game removed from the library: " + g.serial);
+        result = 1;
+        status(getString(R.string.lib_removed, nm));
+    }
+    /** the library's look (Options > Game > Library style): 0 carousel, 1 list, 2 cover */
+    int libStyle() { return clamp(prefs.getInt("libstyle", 1), 3); }
 
     // ---- save import / export (SaveImport.java; the game's single card, files/saves/tombi_mc0.mcd) ----
     File cardFile() { File d = new File(filesDir(), "saves"); d.mkdirs(); return new File(d, "tombi_mc0.mcd"); }
@@ -772,6 +853,8 @@ public class LauncherActivity extends Activity {
         int check = -1;   // on/off option: 0/1, drawn as a tick box instead of a value
         int swatch = -1;  // a colour row (custom buttons): its RGB, drawn as a swatch next to the value
         boolean actFirst; // A / tap runs act (open the editor); left / right still adjust
+        int game = -1;    // the library: a game card (index in LauncherView.games)
+        boolean add, dim; // the library: the "Add game" card; a button that cannot act now (drawn faded)
         Item(String l, Runnable a) { label = l; act = a; }
     }
     interface Adjust { void by(int d); }
@@ -793,6 +876,7 @@ public class LauncherActivity extends Activity {
          *  the slop (8dp) is a tap. */
         float listScroll, listMax;
         boolean followFocus = true, dragging;
+        int downFocus = -1;                        // the focused item when the touch went down
         float downX, downY, lastY;
         final float slop = 8 * getResources().getDisplayMetrics().density;
         VelocityTracker vt;
@@ -817,6 +901,10 @@ public class LauncherActivity extends Activity {
             }
         }
         boolean discFromOptions;
+        List<Library.Game> games = new ArrayList<>();   // the library's cards (build, MAIN)
+        boolean mainFocusSet;
+        RectF[] drawn = new RectF[0];                   // the items' rectangles of the last frame (spatial navigation)
+        final java.util.HashMap<String, android.graphics.Bitmap> logos = new java.util.HashMap<>();
         List<String> logLines = new ArrayList<>();
         List<Item> items = new ArrayList<>();
         final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -861,6 +949,48 @@ public class LauncherActivity extends Activity {
 
         String onoff(boolean b) { return getString(b ? R.string.on : R.string.off); }
 
+        Item libStyleItem() {
+            final String[] st = getResources().getStringArray(R.array.lib_styles);
+            Item it = new Item(getString(R.string.lib_style), null);
+            it.value = st[libStyle()];
+            it.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("libstyle", (libStyle() + d + 3) % 3).apply(); } };
+            return it;
+        }
+
+        /** the library: focus on a card selects that game */
+        void focusMoved() {
+            if (screen != MAIN || focus < 0 || focus >= items.size()) return;
+            Item it = items.get(focus);
+            if (it.game >= 0 && it.game < games.size()) lib.select(games.get(it.game).id);
+        }
+        /** the library: the item nearest in direction (dx, dy) from the focused one, by the drawn rectangles; -1 none */
+        int spatial(int dx, int dy) {
+            if (drawn.length != items.size() || focus >= drawn.length) return -1;
+            RectF c = drawn[focus];
+            int best = -1; float bd = Float.MAX_VALUE;
+            for (int i = 0; i < drawn.length; i++) {
+                if (i == focus || drawn[i].isEmpty()) continue;
+                RectF r = drawn[i];
+                float vx = r.centerX() - c.centerX(), vy = r.centerY() - c.centerY();
+                float along = vx * dx + vy * dy, across = Math.abs(vx * dy) + Math.abs(vy * dx);
+                // in front, and overlapping the row / column more than off to the side
+                boolean overlap = dx != 0 ? r.bottom > c.top && r.top < c.bottom : r.right > c.left && r.left < c.right;
+                if (along <= 1) continue;
+                float d = along + across * (overlap ? 0.5f : 3f);
+                if (d < bd) { bd = d; best = i; }
+            }
+            return best;
+        }
+        android.graphics.Bitmap logoOf(Library.Game g) {
+            if (g == null) return null;
+            if (!logos.containsKey(g.id)) {
+                android.graphics.Bitmap b = null;
+                try { b = Library.logo(g); } catch (Throwable t) { CrashLog.append(LauncherActivity.this, "launcher: logo " + g.id + ": " + t); }
+                logos.put(g.id, b);
+            }
+            return logos.get(g.id);
+        }
+
         Item toggle(int label, final String key) {
             final Item it = new Item(getString(label), null);
             it.check = flag(key, false) ? 1 : 0;
@@ -870,22 +1000,41 @@ public class LauncherActivity extends Activity {
 
         void build() {
             items.clear();
-            if (screen == MAIN) {
+            if (screen == MAIN) {   // the library (drawLibrary): the game cards, "Add game", then the buttons
+                games = lib.games();
+                for (int i = 0; i < games.size(); i++) {
+                    final Library.Game g = games.get(i);
+                    Item it = new Item(versionName(g.ver), new Runnable() { public void run() { lib.select(g.id); play(); } });
+                    it.game = i;
+                    items.add(it);
+                }
+                Item ad = new Item(getString(R.string.lib_add), new Runnable() { public void run() { setScreen(DISC); pickDisc(); } });
+                ad.add = true;
+                items.add(ad);
                 Item a = new Item(getString(R.string.play), new Runnable() { public void run() { play(); } });
-                a.primary = true; items.add(a);
+                a.primary = true; a.dim = !ready(); items.add(a);
                 items.add(new Item(getString(R.string.options), new Runnable() { public void run() { setScreen(OPTIONS); } }));
-                items.add(new Item(getString(R.string.disc), new Runnable() { public void run() { setScreen(DISC); } }));
                 items.add(new Item(getString(R.string.quit), new Runnable() { public void run() { finish(); } }));
+                if (!mainFocusSet) { mainFocusSet = true; focus = games.size() + 1; }   // first time: on Play
             } else if (screen == OPTIONS) {   // category list, one column (drawOptions)
-                category(CAT_GAME, R.string.cat_game, LANG_NAME[langIdx()]);
+                category(CAT_GAME, R.string.cat_game, palGame() ? LANG_NAME[langIdx()] : "English");
                 category(CAT_GFX, R.string.cat_gfx, aspectName(aspectIdx()) + " · " + getString(flag("gl", false) ? R.string.renderer_gl_short : R.string.renderer_soft));
-                category(CAT_DUAL, R.string.cat_dual, onoff(secondScreenOn()));
+                if (palGame()) category(CAT_DUAL, R.string.cat_dual, onoff(secondScreenOn()));   // (the panel is PAL-only)
                 category(CAT_PAD, R.string.cat_pad, getResources().getStringArray(R.array.prompt_names)[promptIdx()]);
                 category(CAT_DATA, R.string.cat_data, null);
                 category(CAT_DEBUG, R.string.cat_debug, null);
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             } else if (screen == OPTCAT) {   // one category page, same row style (drawOptions)
-                if (cat == CAT_GAME) {
+                if (cat == CAT_GAME && !palGame()) {   // another version: English only, no text options
+                    items.add(libStyleItem());
+                    Item ul = new Item(getString(R.string.opt_uilang), null);
+                    ul.value = uiLangName(uiLangIdx());
+                    ul.adj = new Adjust() { public void by(int d) {
+                        prefs.edit().putInt("uilang", (uiLangIdx() + d + UI_LANGS.length) % UI_LANGS.length).apply();
+                        applyUiLang(); } };
+                    items.add(ul);
+                    items.add(toggle(R.string.opt_skipintro, "skipintro"));
+                } else if (cat == CAT_GAME) {
                     Item l = new Item(getString(R.string.opt_lang), null);
                     l.value = LANG_NAME[langIdx()];
                     l.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("lang", (langIdx() + d + LANG_N.length) % LANG_N.length).apply(); } };
@@ -902,6 +1051,7 @@ public class LauncherActivity extends Activity {
                     items.add(tpi);
                     items.add(toggle(R.string.opt_cut, "cut"));
                     items.add(toggle(R.string.opt_skipintro, "skipintro"));
+                    items.add(libStyleItem());
                 } else if (cat == CAT_GFX) {
                     Item as = new Item(getString(R.string.opt_aspect), null);
                     as.value = aspectName(aspectIdx());
@@ -911,7 +1061,7 @@ public class LauncherActivity extends Activity {
                     r.value = getString(flag("gl", false) ? R.string.renderer_gl : R.string.renderer_soft);
                     r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
                     items.add(r);
-                    items.add(toggle(R.string.opt_hz60, "hz60"));
+                    if (palGame()) items.add(toggle(R.string.opt_hz60, "hz60"));   // (USA: 60 Hz is its own speed)
                     Item fp = new Item(getString(R.string.opt_fps), null);
                     fp.value = fpsName(fpsIdx());
                     fp.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("fps", (fpsIdx() + d + FPS.length) % FPS.length).apply(); } };
@@ -935,11 +1085,17 @@ public class LauncherActivity extends Activity {
                         int n = (rumbleIdx() + d + RUMBLE.length) % RUMBLE.length;
                         prefs.edit().putInt("rumble", n).apply(); rumbleTest(); } };
                     items.add(rb);
+                    if (palGame()) {   // (the button icons are PAL-only in the port)
                     Item pr = new Item(getString(R.string.opt_prompts), null);   // --prompts (shims/prompts.c; TombiActivity resolves auto)
                     pr.value = getResources().getStringArray(R.array.prompt_names)[promptIdx()];
                     pr.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("prompts", (promptIdx() + d + PROMPTS.length) % PROMPTS.length).apply(); } };
                     items.add(pr);
                     items.add(new Item(getString(R.string.pc_open), new Runnable() { public void run() { setScreen(CUSTOM); } }));
+                    }
+                } else if (cat == CAT_DATA && !palGame()) {   // (save tools and translations: PAL only for now)
+                    items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
+                    items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
+                        setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
                 } else if (cat == CAT_DATA) {
                     items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
                     items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
@@ -951,9 +1107,11 @@ public class LauncherActivity extends Activity {
                     items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
                         setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
                 } else {
-                    items.add(toggle(R.string.opt_inflives, "inflives"));
-                    items.add(toggle(R.string.opt_infhealth, "infhealth"));
-                    items.add(toggle(R.string.opt_debug, "debugmenu"));
+                    if (palGame()) {   // (PAL addresses / PAL debug menu)
+                        items.add(toggle(R.string.opt_inflives, "inflives"));
+                        items.add(toggle(R.string.opt_infhealth, "infhealth"));
+                        items.add(toggle(R.string.opt_debug, "debugmenu"));
+                    }
                     items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
                 }
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTIONS); } }));
@@ -989,6 +1147,7 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.cancel), new Runnable() { public void run() { confirmWipe = false; focus = 0; } }));
             } else {
                 items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
+                if (game() != null) items.add(new Item(getString(R.string.lib_remove), new Runnable() { public void run() { removeGame(); } }));
                 items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() { confirmWipe = true; wipeSaves = false; focus = 0; } }));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(discFromOptions ? OPTCAT : MAIN); } }));
             }
@@ -1076,6 +1235,16 @@ public class LauncherActivity extends Activity {
         boolean key(int code) {
             build();
             int n = items.size();
+            if (screen == MAIN && (code == KeyEvent.KEYCODE_DPAD_UP || code == KeyEvent.KEYCODE_DPAD_DOWN
+                    || code == KeyEvent.KEYCODE_DPAD_LEFT || code == KeyEvent.KEYCODE_DPAD_RIGHT)) {
+                int dx = code == KeyEvent.KEYCODE_DPAD_LEFT ? -1 : code == KeyEvent.KEYCODE_DPAD_RIGHT ? 1 : 0;
+                int dy = code == KeyEvent.KEYCODE_DPAD_UP ? -1 : code == KeyEvent.KEYCODE_DPAD_DOWN ? 1 : 0;
+                int t = spatial(dx, dy);
+                if (t < 0 && dy != 0) t = (focus + n + dy) % n;   // (no rectangles yet, or at an edge: in list order)
+                if (t >= 0) { focus = t; focusMoved(); }
+                invalidate();
+                return true;
+            }
             switch (code) {
                 case KeyEvent.KEYCODE_DPAD_UP: focus = (focus + n - 1) % n; break;
                 case KeyEvent.KEYCODE_DPAD_DOWN: focus = (focus + 1) % n; break;
@@ -1127,7 +1296,8 @@ public class LauncherActivity extends Activity {
                 boolean flinging = !scroller.isFinished();
                 scroller.forceFinished(true);
                 downX = e.getX(); downY = lastY = e.getY(); dragging = flinging;   // a touch that stops a fling is no tap
-                if (hit >= 0 && !flinging) { focus = hit; invalidate(); }
+                downFocus = focus;
+                if (hit >= 0 && !flinging) { focus = hit; focusMoved(); invalidate(); }
                 return true;
             }
             if (act == MotionEvent.ACTION_MOVE) {
@@ -1157,6 +1327,8 @@ public class LauncherActivity extends Activity {
             if (act == MotionEvent.ACTION_UP && screen == COLOR) {   // a palette swatch
                 for (int k = 0; k < pcSw.length; k++) if (pcSw[k] != null && pcSw[k].contains(x, y)) { pcSet(pcEdit, PC_PALETTE[k]); invalidate(); return true; }
             }
+            // the library: a tap on another game's card only selects it; a tap on the selected card plays
+            if (act == MotionEvent.ACTION_UP && screen == MAIN && hit >= 0 && hit < items.size() && items.get(hit).game >= 0 && downFocus != hit) return true;
             if (act == MotionEvent.ACTION_UP && hit >= 0 && hit == focus) {
                 build();
                 if ((screen == OPTCAT || screen == CUSTOM || screen == COLOR) && hit < items.size()) {   // value button: left half = previous, right half = next
@@ -1231,34 +1403,33 @@ public class LauncherActivity extends Activity {
             c.save();
             c.translate(ox, oy);
             c.scale(s, s);
-            if (screen == MAIN) drawMain();
+            if (screen == MAIN) drawLibrary();
             else if (screen == OPTIONS || screen == OPTCAT) drawOptions();
             else if (screen == PADMAP) drawPadMap();
             else if (screen == CUSTOM || screen == COLOR) drawCustom();
             else if (screen == CRASH || screen == LOG) drawLog();
             else drawDisc();
             c.restore();
+            if (drawn.length != items.size()) drawn = new RectF[items.size()];
+            for (int i = 0; i < items.size(); i++) drawn[i] = new RectF(items.get(i).r);
         }
 
-        void drawMain() {
-            bigTitle("TOMBI!", 108, 170);
-            text(nunito, 20, SUB);
-            p.setLetterSpacing(3f / 20f);
-            canvas.drawText(getString(R.string.subtitle), 640, 214, p);
-            float y = 256;
-            for (int i = 0; i < items.size(); i++) {
-                Item it = items.get(i);
-                float hh = it.primary ? 78 : 62;
-                it.r.set(640 - 230, y, 640 + 230, y + hh);
-                boolean f = i == focus;
-                if (it.primary) pill(it.r, ACCENT, ACCENT_SH, 6, f);
-                else pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
-                text(nunito, it.primary ? 30 : 24, it.primary ? ACCENT_TEXT : BG);
-                drawFit(it.label, 640, it.r, it.r.width() - 40);
-                y += hh + (it.primary ? 6 : 5) + 16;
-            }
-            String[] chips = {LANG_NAME[langIdx()], aspectName(aspectIdx()),
-                    getString(flag("cut", false) ? R.string.chip_cut_on : R.string.chip_cut_off), version()};
+        // ---- the library (MAIN): three looks (Options > Game > Library style), the same items ----
+        void drawLibrary() {
+            int st = libStyle();
+            if (st == 1) drawLibList(); else if (st == 2) drawLibCover(); else drawLibCarousel();
+            drawChips();
+        }
+
+        /** the version / options chips along the bottom */
+        void drawChips() {
+            List<String> chips = new ArrayList<>();
+            if (palGame()) {
+                chips.add(LANG_NAME[langIdx()]);
+                chips.add(aspectName(aspectIdx()));
+                chips.add(getString(flag("cut", false) ? R.string.chip_cut_on : R.string.chip_cut_off));
+            } else { chips.add("English"); chips.add(aspectName(aspectIdx())); }
+            chips.add(version());
             text(nunito, 15, Color.WHITE);
             float pad = 18, gap = 12, total = -gap;
             for (String t : chips) total += p.measureText(t) + 2 * pad + gap;
@@ -1271,6 +1442,275 @@ public class LauncherActivity extends Activity {
                 p.setColor(Color.WHITE);
                 canvas.drawText(t, tmp.centerX(), midBase(tmp), p);
                 x += cw + gap;
+            }
+        }
+
+        Library.Game gameOf(Item it) { return it.game >= 0 && it.game < games.size() ? games.get(it.game) : null; }
+        boolean isSel(Library.Game g) { Library.Game s = game(); return g != null && s != null && g.id.equals(s.id); }
+        /** status line of a card: ready / no data / not supported / not in this APK */
+        String statusOf(Library.Game g) {
+            if (g.ver == null || !g.ver.supported()) return getString(R.string.lib_unsupported);
+            if (!libPresent(g.ver)) return getString(R.string.lib_nolib);
+            return g.ready() ? getString(R.string.lib_ready) : getString(R.string.disc_missing);
+        }
+        boolean okOf(Library.Game g) { return g.ready() && libPresent(g.ver); }
+
+        /** the game's logo (from the player's disc) fitted in r, centred; the name in the title font without one */
+        void drawLogo(Library.Game g, RectF r, boolean big) {
+            android.graphics.Bitmap b = logoOf(g);
+            if (b != null) {
+                float sc = Math.min(r.width() / b.getWidth(), r.height() / b.getHeight());
+                float w = b.getWidth() * sc, h = b.getHeight() * sc;
+                RectF d = new RectF(r.centerX() - w / 2, r.centerY() - h / 2, r.centerX() + w / 2, r.centerY() + h / 2);
+                Paint bp = new Paint();
+                bp.setFilterBitmap(sc < 1.5f);   // pixel art: sharp when enlarged
+                canvas.drawBitmap(b, null, d, bp);
+                return;
+            }
+            String t = g != null && g.ver != null ? g.ver.logoText : "?";
+            float size = big ? 96 : 48;
+            text(lilita, size, ACCENT_SH);
+            float w = p.measureText(t), max = r.width() - 8;
+            if (w > max) { size = size * max / w; p.setTextSize(size); }
+            float base = r.centerY() + size * 0.36f;
+            canvas.drawText(t, r.centerX(), base + size * 6 / 108, p);
+            p.setColor(ACCENT);
+            canvas.drawText(t, r.centerX(), base, p);
+        }
+
+        /** a ready / not-ready dot + text, left aligned at x (or centred when centre) */
+        void statusLine(Library.Game g, float x, float base, float maxW, boolean centre, int col) {
+            boolean ok = okOf(g);
+            String t = (ok ? "✓ " : "✗ ") + statusOf(g);
+            text(nunito, 16, ok ? col : ACCENT_SH);
+            p.setTextAlign(centre ? Paint.Align.CENTER : Paint.Align.LEFT);
+            drawFitAt(t, x, base, maxW);
+        }
+
+        /** the "Add game" card: dashed outline, a big plus, the label and the formats */
+        void addCard(Item it, boolean f, boolean wide) {
+            RectF r = it.r;
+            float rad = Math.min(26, r.height() / 2);
+            p.setStyle(Paint.Style.FILL); p.setColor(f ? 0x40ffffff : 0x20ffffff);
+            canvas.drawRoundRect(r, rad, rad, p);
+            p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(4); p.setColor(f ? Color.WHITE : CREAM);
+            p.setPathEffect(new android.graphics.DashPathEffect(new float[]{14, 10}, 0));
+            canvas.drawRoundRect(r, rad, rad, p);
+            p.setPathEffect(null); p.setStyle(Paint.Style.FILL);
+            if (wide) {   // a row: the plus on the left, the texts beside it
+                float cy = r.centerY(), cx = r.left + 52;
+                p.setColor(ACCENT); canvas.drawCircle(cx, cy, 26, p);
+                p.setColor(Color.WHITE); canvas.drawRect(cx - 13, cy - 3.5f, cx + 13, cy + 3.5f, p); canvas.drawRect(cx - 3.5f, cy - 13, cx + 3.5f, cy + 13, p);
+                text(nunito, 22, Color.WHITE); p.setTextAlign(Paint.Align.LEFT);
+                drawFitAt(it.label, r.left + 96, cy - 4, r.width() - 116);
+                text(nunito, 15, SUB); p.setTextAlign(Paint.Align.LEFT);
+                drawFitAt(getString(R.string.lib_add_sub), r.left + 96, cy + 20, r.width() - 116);
+                return;
+            }
+            float cx = r.centerX(), cy = r.top + r.height() * 0.38f, rr = Math.min(44, r.width() / 6);
+            p.setColor(ACCENT); canvas.drawCircle(cx, cy, rr, p);
+            p.setColor(Color.WHITE); canvas.drawRect(cx - rr / 2, cy - rr / 7, cx + rr / 2, cy + rr / 7, p); canvas.drawRect(cx - rr / 7, cy - rr / 2, cx + rr / 7, cy + rr / 2, p);
+            text(nunito, 22, Color.WHITE);
+            drawFitAt(it.label, cx, r.top + r.height() * 0.70f, r.width() - 30);
+            tp.setTypeface(nunito); tp.setTextSize(14); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
+            @SuppressWarnings("deprecation")
+            StaticLayout l = new StaticLayout(getString(R.string.lib_add_sub), tp, (int) (r.width() - 36), Layout.Alignment.ALIGN_CENTER, 1.05f, 0, false);
+            canvas.save(); canvas.translate(r.left + 18, r.top + r.height() * 0.76f); l.draw(canvas); canvas.restore();
+        }
+
+        /** a menu pill (Play / Options / Quit) in the launcher's style */
+        void button(Item it, boolean f, float size) {
+            if (it.primary) pill(it.r, it.dim ? 0xffc9a0b5 : ACCENT, ACCENT_SH, 6, f);
+            else pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
+            text(nunito, size, it.primary ? (it.dim ? 0xff6e4a5c : ACCENT_TEXT) : BG);
+            drawFit(it.label, it.r.centerX(), it.r, it.r.width() - 30);
+        }
+
+        /** a card's frame: cream, its shadow, the white focus ring, the accent edge on the selected game */
+        void cardFrame(RectF r, boolean f, boolean sel) {
+            float rad = 26;
+            if (f) {
+                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(5); p.setColor(Color.WHITE);
+                tmp.set(r.left - 9, r.top - 9, r.right + 9, r.bottom + 6 + 9);
+                canvas.drawRoundRect(tmp, rad + 8, rad + 8, p);
+                p.setStyle(Paint.Style.FILL);
+            }
+            p.setColor(CREAM_SH); tmp.set(r.left, r.top + 6, r.right, r.bottom + 6); canvas.drawRoundRect(tmp, rad, rad, p);
+            p.setColor(f ? Color.WHITE : CREAM); canvas.drawRoundRect(r, rad, rad, p);
+            if (sel) {
+                p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(5); p.setColor(ACCENT);
+                tmp.set(r.left + 2.5f, r.top + 2.5f, r.right - 2.5f, r.bottom - 2.5f);
+                canvas.drawRoundRect(tmp, rad - 2, rad - 2, p);
+                p.setStyle(Paint.Style.FILL);
+            }
+        }
+
+        /** a small rounded label (serial, region) at x (left), centred on cy; returns its right edge */
+        float tag(String t, float x, float cy, int bg, int fg) {
+            text(nunito, 14, fg); p.setTextAlign(Paint.Align.LEFT);
+            float w = p.measureText(t) + 20;
+            tmp.set(x, cy - 13, x + w, cy + 13);
+            p.setColor(bg); canvas.drawRoundRect(tmp, 13, 13, p);
+            p.setColor(fg); canvas.drawText(t, x + 10, midBase(tmp), p);
+            return x + w;
+        }
+
+        /** 0: Carousel. The cards in a row (the selected one lifted, the focused one ringed), Play / Options / Quit
+         *  beneath, side by side */
+        void drawLibCarousel() {
+            bigTitle(getString(R.string.lib_title), 52, 74);
+            List<Item> cards = new ArrayList<>(), btns = new ArrayList<>();
+            for (Item it : items) (it.game >= 0 || it.add ? cards : btns).add(it);
+            int n = cards.size();
+            float gap = 26, cw = Math.min(n == 1 ? 420 : 340, (1200 - (n - 1) * gap) / n), ch = games.isEmpty() ? 250 : 300, top = 116;
+            float x = 640 - (n * cw + (n - 1) * gap) / 2;
+            for (Item it : cards) {
+                int i = items.indexOf(it);
+                boolean f = i == focus;
+                Library.Game g = gameOf(it);
+                boolean sel = isSel(g);
+                float lift = sel ? -10 : 0;
+                it.r.set(x, top + lift, x + cw, top + ch + lift);
+                if (it.add) addCard(it, f, false);
+                else {
+                    cardFrame(it.r, f, sel);
+                    RectF lr = new RectF(it.r.left + 18, it.r.top + 18, it.r.right - 18, it.r.top + 160);
+                    drawLogo(g, lr, false);
+                    text(nunito, 22, BG);
+                    drawFitAt(versionName(g.ver), it.r.centerX(), it.r.top + 200, cw - 36);
+                    text(nunito, 14, BG);
+                    float tw = p.measureText(g.serial) + 20;
+                    tag(g.serial, it.r.centerX() - tw / 2, it.r.top + 228, 0x262f6b3a, BG);
+                    statusLine(g, it.r.centerX(), it.r.top + 270, cw - 36, true, 0xff2a7a3a);
+                }
+                x += cw + gap;
+            }
+            if (games.isEmpty()) {
+                tp.setTypeface(nunito); tp.setTextSize(18); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
+                wrapped(getString(R.string.lib_empty), 392);
+            }
+            // Play wide, Options and Quit beside it
+            float bw0 = 380, bw1 = 250, bw2 = 200, g2 = 22, y = 470;
+            float bx = 640 - (bw0 + bw1 + bw2 + 2 * g2) / 2;
+            float[] ws = {bw0, bw1, bw2};
+            for (int k = 0; k < btns.size() && k < 3; k++) {
+                Item it = btns.get(k);
+                it.r.set(bx, it.primary ? y : y + 8, bx + ws[k], it.primary ? y + 78 : y + 70);
+                button(it, items.indexOf(it) == focus, it.primary ? 30 : 24);
+                bx += ws[k] + g2;
+            }
+            text(nunito, 16, SUB);
+            Library.Game sg = game();
+            if (sg != null && sg.name != null && !sg.name.isEmpty()) drawFitAt(getString(R.string.lib_from, sg.name), 640, 600, 1100);
+        }
+
+        /** 1: List. One row per game on the left (logo, name, serial, status); the selected game large on the right with
+         *  Play / Options / Quit */
+        void drawLibList() {
+            text(lilita, 50, ACCENT_SH); p.setTextAlign(Paint.Align.LEFT);
+            canvas.drawText(getString(R.string.lib_title), 44, 81, p);
+            p.setColor(ACCENT); canvas.drawText(getString(R.string.lib_title), 44, 78, p);
+            List<Item> rows = new ArrayList<>(), btns = new ArrayList<>();
+            for (Item it : items) (it.game >= 0 || it.add ? rows : btns).add(it);
+            float top = 108, bottom = 630, gap = 16;
+            float rh = Math.min(116, (bottom - top - (rows.size() - 1) * gap) / Math.max(1, rows.size()));
+            float y = top;
+            for (Item it : rows) {
+                int i = items.indexOf(it);
+                boolean f = i == focus;
+                it.r.set(40, y, 640, y + rh);
+                if (it.add) addCard(it, f, true);
+                else {
+                    Library.Game g = gameOf(it);
+                    cardFrame(it.r, f, isSel(g));
+                    RectF lr = new RectF(it.r.left + 16, it.r.top + 12, it.r.left + 206, it.r.bottom - 12);
+                    drawLogo(g, lr, false);
+                    float tx = it.r.left + 226, tw = it.r.right - 20 - tx;
+                    text(nunito, 22, BG); p.setTextAlign(Paint.Align.LEFT);
+                    drawFitAt(versionName(g.ver), tx, it.r.top + rh * 0.36f, tw);
+                    float r2 = tag(g.serial, tx, it.r.top + rh * 0.58f, 0x262f6b3a, BG);
+                    statusLine(g, r2 + 12, it.r.top + rh * 0.58f + 6, it.r.right - 20 - r2 - 12, false, 0xff2a7a3a);
+                }
+                y += rh + gap;
+            }
+            // the selected game, large
+            RectF pane = new RectF(670, 108, 1240, 630);
+            p.setColor(CHIP); canvas.drawRoundRect(pane, 28, 28, p);
+            Library.Game g = game();
+            if (g != null) {
+                drawLogo(g, new RectF(pane.left + 30, pane.top + 22, pane.right - 30, pane.top + 200), true);
+                text(nunito, 26, Color.WHITE);
+                drawFitAt(versionName(g.ver), pane.centerX(), pane.top + 238, pane.width() - 40);
+                text(nunito, 16, SUB);
+                drawFitAt(g.serial + (g.name != null && !g.name.isEmpty() ? "  ·  " + g.name : ""), pane.centerX(), pane.top + 266, pane.width() - 40);
+            } else {
+                tp.setTypeface(nunito); tp.setTextSize(18); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
+                @SuppressWarnings("deprecation")
+                StaticLayout l = new StaticLayout(getString(R.string.lib_empty), tp, (int) pane.width() - 60, Layout.Alignment.ALIGN_CENTER, 1.1f, 0, false);
+                canvas.save(); canvas.translate(pane.left + 30, pane.top + 100); l.draw(canvas); canvas.restore();
+            }
+            float by = pane.top + 296;
+            for (Item it : btns) {
+                float h = it.primary ? 72 : 56;
+                it.r.set(pane.left + 60, by, pane.right - 60, by + h);
+                button(it, items.indexOf(it) == focus, it.primary ? 30 : 23);
+                by += h + 18;
+            }
+        }
+
+        /** 2: Cover. The selected game's logo large (as the title used to be), a tab per game under it, the menu as
+         *  before */
+        void drawLibCover() {
+            Library.Game g = game();
+            RectF lr = new RectF(290, 22, 990, 214);
+            if (g != null) drawLogo(g, lr, true);
+            else bigTitle("TOMBI!", 108, 160);
+            text(nunito, 18, SUB);
+            p.setLetterSpacing(2f / 18f);
+            canvas.drawText(g != null ? (versionName(g.ver) + "  ·  " + g.serial).toUpperCase(Locale.ROOT) : getString(R.string.subtitle), 640, 244, p);
+            p.setLetterSpacing(0);
+            List<Item> tabs = new ArrayList<>(), btns = new ArrayList<>();
+            for (Item it : items) (it.game >= 0 || it.add ? tabs : btns).add(it);
+            // the tabs: one pill per game (region + status mark), "+ Add game" last
+            text(nunito, 18, BG);
+            float gap = 14, total = -gap;
+            String[] lab = new String[tabs.size()];
+            for (int k = 0; k < tabs.size(); k++) {
+                Item it = tabs.get(k);
+                Library.Game tg = gameOf(it);
+                lab[k] = it.add ? "+  " + it.label : (okOf(tg) ? "" : "✗ ") + tg.ver.title + " · " + getResources().getStringArray(R.array.lib_regions)[tg.ver.region];
+                total += Math.min(300, p.measureText(lab[k]) + 48) + gap;
+            }
+            float x = 640 - total / 2, ty = 268;
+            for (int k = 0; k < tabs.size(); k++) {
+                Item it = tabs.get(k);
+                boolean f = items.indexOf(it) == focus, sel = !it.add && isSel(gameOf(it));
+                text(nunito, 18, BG);
+                float w = Math.min(300, p.measureText(lab[k]) + 48);
+                it.r.set(x, ty, x + w, ty + 46);
+                if (it.add) {
+                    p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(3); p.setColor(f ? Color.WHITE : CREAM);
+                    p.setPathEffect(new android.graphics.DashPathEffect(new float[]{10, 8}, 0));
+                    canvas.drawRoundRect(it.r, 23, 23, p);
+                    p.setPathEffect(null); p.setStyle(Paint.Style.FILL);
+                    text(nunito, 18, Color.WHITE);
+                } else {
+                    pill(it.r, sel ? ACCENT : f ? Color.WHITE : CREAM, sel ? ACCENT_SH : CREAM_SH, 4, f);
+                    text(nunito, 18, sel ? ACCENT_TEXT : BG);
+                }
+                drawFit(lab[k], it.r.centerX(), it.r, w - 24);
+                x += w + gap;
+            }
+            float y = games.isEmpty() ? 400 : 352;
+            for (Item it : btns) {
+                float hh = it.primary ? 78 : 62;
+                it.r.set(640 - 230, y, 640 + 230, y + hh);
+                button(it, items.indexOf(it) == focus, it.primary ? 30 : 24);
+                y += hh + (it.primary ? 6 : 5) + 16;
+            }
+            if (games.isEmpty()) {
+                tp.setTypeface(nunito); tp.setTextSize(17); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
+                wrapped(getString(R.string.lib_empty), 330);
             }
         }
 
@@ -1612,11 +2052,12 @@ public class LauncherActivity extends Activity {
         }
 
         void drawDisc() {
-            bigTitle(getString(R.string.disc), 60, 92);
+            Library.Game g = game();
+            bigTitle(g != null && g.ver != null ? versionName(g.ver) : getString(R.string.disc), 60, 92);
             File disc = discFile();
             boolean have = dataReady() || disc != null;
-            boolean ok = have && prefs.getBoolean("disc_ok", false);
-            String head = getString(!have ? R.string.disc_missing : ok ? R.string.disc_ok : R.string.disc_unverified);
+            boolean ok = g != null && okOf(g);
+            String head = g == null ? getString(R.string.disc_missing) : statusOf(g) + "  ·  " + g.serial;
             tmp.set(640 - 300, 124, 640 + 300, 164);
             p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
             canvas.drawRoundRect(tmp, 20, 20, p);
@@ -1624,7 +2065,7 @@ public class LauncherActivity extends Activity {
             drawFit((ok ? "✓  " : "✗  ") + head, 640, tmp, tmp.width() - 30);
             tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT);
             tp.setTextSize(16); tp.setColor(Color.WHITE);
-            if (dataReady()) wrapped(getString(R.string.disc_data, prefs.getString("disc_name", "?"), prefs.getString("disc_info", "")), 172);
+            if (have && g != null && dataReady()) wrapped(getString(R.string.disc_data, g.name == null || g.name.isEmpty() ? "?" : g.name, g.info == null ? "" : g.info), 172);
             else if (disc != null) wrapped(getString(R.string.disc_path, disc.getAbsolutePath()), 178);
             tp.setColor(SUB);
             wrapped(getString(R.string.disc_howto), 222);

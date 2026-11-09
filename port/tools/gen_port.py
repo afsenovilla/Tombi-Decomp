@@ -281,6 +281,26 @@ def check_full_fresh():
     lds = [f for f in lds if f.endswith(".full.ld")]
     if not lds: sys.exit("gen_port: %s has no *.full.ld: run python3 tools/build_full.py%s -j 4 first"
                          % (os.path.relpath(full, ROOT), "" if PV.PAL else " --version " + PV.VER))
+    # a matching build whose C partly fell back to asm (tools/build_full.py compile_failures.txt: most often the
+    # psx_tomba headers include/tomba/psyq were missing) still matches by sha1, but the port would lose those
+    # functions (USA: 126 stubs, dispatchTasks / openTask / initObjectPools among them, a crash at frame 0)
+    rel = os.path.relpath(full, ROOT)
+    if not os.path.isdir(os.path.join(ROOT, "include", "tomba", "psyq")):
+        sys.exit("gen_port: include/tomba/psyq is missing (the PSY-Q headers of the psx_tomba files): run sudo "
+                 "tools/setup_native.sh, then python3 tools/build_full.py%s -j 4 again"
+                 % ("" if PV.PAL else " --version " + PV.VER))
+    cf = os.path.join(full, "compile_failures.txt")
+    if not os.path.exists(cf):
+        print("WARNING: gen_port: %s has no compile_failures.txt (made by an older tools/build_full.py): cannot "
+              "check that all its C compiled; rebuild it if the port has unexpected stubs" % rel, file=sys.stderr)
+    else:
+        bad = [l.strip() for l in open(cf) if l.strip()]
+        if bad and os.environ.get("PORT_ALLOW_ASM_FALLBACK") != "1":
+            sys.exit("gen_port: %d C files of %s did not compile and were linked from asm (%s, first: %s); the port "
+                     "would lack their functions.  Fix the toolchain (sudo tools/setup_native.sh: old-gcc, maspsx, "
+                     "include/tomba/psyq) and run python3 tools/build_full.py%s -j 4 again "
+                     "(or PORT_ALLOW_ASM_FALLBACK=1 to build anyway)"
+                     % (len(bad), rel, os.path.relpath(cf, ROOT), bad[0], "" if PV.PAL else " --version " + PV.VER))
     built = min(os.path.getmtime(f) for f in lds)
     newest, newest_path = 0, None
     for d, exts in (("src", (".c", ".h", ".s")), ("include", (".h", ".inc")), ("notes", (".csv",)), ("config", (".yaml",))):

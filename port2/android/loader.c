@@ -37,6 +37,7 @@
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <sys/system_properties.h>
+#include <dirent.h>
 #include <sys/utsname.h>
 #include <time.h>
 #include <ucontext.h>
@@ -143,6 +144,7 @@ static void log_maps(unsigned long lo, unsigned long hi) {
 static const int fatal_sigs[] = { SIGSEGV, SIGBUS, SIGILL, SIGABRT, SIGFPE, SIGTRAP, SIGSYS };
 static struct sigaction old_act[65];
 static void *tombi_h;                                        /* libtombi.so, once loaded */
+static char game_lib[64] = "libtombi.so";                    /* the game library SDL_main loads (--game-lib) */
 static const char *(*sym_near)(void *, unsigned long *);     /* libtombi's port_sym_near: names of game functions */
 static int *frame_p;                                         /* libtombi's port_frame */
 /* an intentional end (the game's "back to the launcher", the Back dialog, the activity finishing): libtombi's
@@ -331,13 +333,8 @@ static unsigned long low_size = PORT2_LOW_SIZE;
 static char low_err[256];
 static char lib_dir[512];
 
-/* the span libtombi.so needs (its PT_LOAD segments, .bss included) read from the file next to libmain.so */
-static unsigned long tombi_span(void) {
-    Dl_info di;
-    if (!dladdr((void *)tombi_span, &di) || !di.dli_fname) { tlog("dladdr(libmain.so) failed: library dir unknown"); return 0; }
-    snprintf(lib_dir, sizeof lib_dir, "%s", di.dli_fname);
-    char *sl = strrchr(lib_dir, '/'); if (sl) *sl = 0;
-    char p[600]; snprintf(p, sizeof p, "%s/libtombi.so", lib_dir);
+/* the span one game library needs (its PT_LOAD segments, .bss included), read from the file */
+static unsigned long lib_span(const char *p) {
     int fd = open(p, O_RDONLY | O_CLOEXEC);
     if (fd < 0) { tlog("cannot open %s: %s (the APK's native libraries were not extracted?)", p, strerror(errno)); return 0; }
     ElfEhdr eh; unsigned long hi = 0; struct stat st; fstat(fd, &st);
@@ -349,7 +346,31 @@ static unsigned long tombi_span(void) {
         }
     } else tlog("%s is not a 32-bit ELF", p);
     close(fd);
-    tlog("libtombi.so: %s, %ld bytes on disk, load span %#lx (%.1f MB)", p, (long)st.st_size, hi, hi / 1048576.0);
+    tlog("%s: %ld bytes on disk, load span %#lx (%.1f MB)", p, (long)st.st_size, hi, hi / 1048576.0);
+    return hi;
+}
+/* the span the reservation needs: the largest of the game libraries next to libmain.so (libtombi.so for PAL,
+   libtombi_usa.so ...: one per game version, LauncherActivity GameVersion), as JNI_OnLoad runs before the launcher's
+   arguments say which one SDL_main will load */
+static unsigned long tombi_span(void) {
+    Dl_info di;
+    if (!dladdr((void *)tombi_span, &di) || !di.dli_fname) { tlog("dladdr(libmain.so) failed: library dir unknown"); return 0; }
+    snprintf(lib_dir, sizeof lib_dir, "%s", di.dli_fname);
+    char *sl = strrchr(lib_dir, '/'); if (sl) *sl = 0;
+    unsigned long hi = 0; int n = 0;
+    DIR *d = opendir(lib_dir);
+    if (d) {
+        struct dirent *e;
+        while ((e = readdir(d))) {
+            size_t l = strlen(e->d_name);
+            if (strncmp(e->d_name, "libtombi", 8) || l < 4 || strcmp(e->d_name + l - 3, ".so") || !strcmp(e->d_name, "libtombidisc.so")) continue;
+            char p[800]; snprintf(p, sizeof p, "%s/%s", lib_dir, e->d_name);
+            unsigned long h = lib_span(p); n++;
+            if (h > hi) hi = h;
+        }
+        closedir(d);
+    }
+    if (!n) { char p[600]; snprintf(p, sizeof p, "%s/libtombi.so", lib_dir); hi = lib_span(p); }
     return hi;
 }
 
@@ -468,19 +489,24 @@ int SDL_main(int argc, char *argv[]) {
     { char m[64]; snprintf(m, sizeof m, "pid %d\n", getpid()); marker("running", m); }
 
     /* the game's files dir (disc copy, saves, args.txt): the launcher's (--files-dir), else SDL's external one */
-    const char *files = NULL, *disc = NULL, *data = NULL;
+    const char *files = NULL, *disc = NULL, *data = NULL, *save_sub = "saves";
     for (int i = 1; argv && i + 1 < argc && argv[i]; i++) {
         if (!strcmp(argv[i], "--files-dir")) files = argv[i + 1];
         if (!strcmp(argv[i], "--disc")) disc = argv[i + 1];
         if (!strcmp(argv[i], "--data")) data = argv[i + 1];
+        /* the game version (LauncherActivity GameVersion): its library (libtombi.so = PAL, libtombi_usa.so ...) and
+           its own saves folder under the files dir; plain names only */
+        if (!strcmp(argv[i], "--game-lib") && !strncmp(argv[i + 1], "libtombi", 8) && !strchr(argv[i + 1], '/'))
+            snprintf(game_lib, sizeof game_lib, "%s", argv[i + 1]);
+        if (!strcmp(argv[i], "--save-sub") && argv[i + 1][0] && !strchr(argv[i + 1], '/') && argv[i + 1][0] != '.') save_sub = argv[i + 1];
     }
     if (!files) { files = SDL_AndroidGetExternalStoragePath(); tlog("no --files-dir: SDL external storage path %s", files ? files : "(null)"); }
     if (!files) { tlog("no external storage (%s): using the internal dir", SDL_GetError()); snprintf(filesbuf, sizeof filesbuf, "%s", log_dir); files = filesbuf; }
-    snprintf(saves, sizeof saves, "%s/saves", files);
+    snprintf(saves, sizeof saves, "%s/%s", files, save_sub);
     if (mkdir(files, 0755) != 0 && errno != EEXIST) tlog("mkdir %s: %s", files, strerror(errno));
     if (mkdir(saves, 0755) != 0 && errno != EEXIST) tlog("mkdir %s: %s", saves, strerror(errno));
     if (chdir(files) != 0) tlog("chdir %s: %s", files, strerror(errno));
-    tlog("files dir %s, saves %s", files, saves);
+    tlog("files dir %s, saves %s, game library %s", files, saves, game_lib);
 
     if (data) {   /* the launcher's extraction (LauncherActivity.importDisc, disccheck.c): data/manifest.txt */
         char mp[700]; snprintf(mp, sizeof mp, "%s/manifest.txt", data);
@@ -505,11 +531,11 @@ int SDL_main(int argc, char *argv[]) {
     }
 
 #if defined(__LP64__)
-    tlog("dlopen(libtombi.so) (arm64: the wasm2c build, no low reservation)");
-    void *h = dlopen("libtombi.so", RTLD_NOW | RTLD_LOCAL);
+    tlog("dlopen(%s) (arm64: the wasm2c build, no low reservation)", game_lib);
+    void *h = dlopen(game_lib, RTLD_NOW | RTLD_LOCAL);
     if (!h) {
         const char *e = dlerror();
-        snprintf(msg, sizeof msg, "Loading libtombi.so failed: %s", e ? e : "?");
+        snprintf(msg, sizeof msg, "Loading %s failed: %s", game_lib, e ? e : "?");
         return fail("Tombi!", msg);
     }
 #else
@@ -531,11 +557,11 @@ int SDL_main(int argc, char *argv[]) {
     ext.flags = ANDROID_DLEXT_RESERVED_ADDRESS;
     ext.reserved_addr = low_base;
     ext.reserved_size = low_size;
-    tlog("android_dlopen_ext(libtombi.so, RESERVED_ADDRESS %p +%#lx)", low_base, low_size);
-    void *h = android_dlopen_ext("libtombi.so", RTLD_NOW | RTLD_LOCAL, &ext);
+    tlog("android_dlopen_ext(%s, RESERVED_ADDRESS %p +%#lx)", game_lib, low_base, low_size);
+    void *h = android_dlopen_ext(game_lib, RTLD_NOW | RTLD_LOCAL, &ext);
     if (!h) {
         const char *e = dlerror();
-        snprintf(msg, sizeof msg, "Loading libtombi.so failed: %s", e ? e : "?");
+        snprintf(msg, sizeof msg, "Loading %s failed: %s", game_lib, e ? e : "?");
         log_maps((unsigned long)low_base, (unsigned long)low_base + low_size);
         return fail("Tombi!", msg);
     }
@@ -565,7 +591,7 @@ int SDL_main(int argc, char *argv[]) {
     /* the launcher's choices (LauncherActivity -> TombiActivity.getArguments(): SDL passes them as argv[1..]),
        without the loader's own --files-dir (port_main would stop at an unknown flag) */
     for (int i = 1; argv && i < argc && argv[i] && n < 60; i++) {
-        if (!strcmp(argv[i], "--files-dir")) { i++; continue; }
+        if (!strcmp(argv[i], "--files-dir") || !strcmp(argv[i], "--game-lib") || !strcmp(argv[i], "--save-sub")) { i++; continue; }
         args[n++] = argv[i];
     }
     {   /* files/args.txt: extra PC flags, whitespace separated (later flags override the defaults above) */

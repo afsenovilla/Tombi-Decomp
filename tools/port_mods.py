@@ -230,11 +230,18 @@ MODS = [
 ]
 
 
-def mod_args(settings, out_dir=None):
-    """All the port arguments of the enabled mods (a new-game pad script is added when no mod gives one)."""
+# the mods that do not depend on PAL addresses or the PAL speed (the USA build gets only these, tools/game_library.py;
+# the --poke ones write the PAL GAME struct 0x8009C960, --title-debug / --debug-menu are PAL hooks)
+PORTABLE_MODS = frozenset(("skipintro", "keys_on"))
+
+
+def mod_args(settings, out_dir=None, allowed=None):
+    """All the port arguments of the enabled mods (a new-game pad script is added when no mod gives one); allowed: the
+    mod ids to consider (None: all)."""
     out = []
     for _id, _l, _d, _k, fn in MODS:
-        out += fn(settings)
+        if allowed is None or _id in allowed:
+            out += fn(settings)
     if "--pad-script" not in out and settings.get("autostart", False):
         out += ["--pad-script", "%d:start" % F_START]
     return out

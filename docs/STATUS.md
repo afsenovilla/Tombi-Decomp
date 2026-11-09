@@ -30,8 +30,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    program, 14 relocation/data bugs of the USA C fixed (docs/USA.md "Full link"). **U1 done** (2026-11-09):
    `cmake -S port2 -B build/port2-scus94236 -DPORT_VERSION=usa` builds a USA tombi2 that runs the USA disc headless
    through the title, a new game and AREA00 gameplay (docs/USA.md "Native port"); the PAL build is unchanged
-   (generated files and frames identical). Next: U2 (launchers, CI matrix), then U3 (fixes.txt USA spellings listed by
-   the generator's branch audit, panel, saves).
+   (generated files and frames identical). A USA full link made without `include/tomba/psyq` silently kept 611
+   files as asm (port: 126 stubs, crash at frame 0); build_full now refuses that and gen_port refuses any link with
+   C that fell back to asm (docs/USA.md "Native port"). **U2 done** (2026-11-09): PC and Android launchers are a game
+   library (docs/PORT.md "Game library", `tools/game_library.py`, `Library.java`; `list` look by default, the user's
+   pick), USA runs `tombi-pc-usa` / `libtombi_usa.so`, port2-exe.yml and android-apk.yml build them when
+   `GAME_FILES_URL_USA` is set. Next: U3 (fixes.txt USA spellings listed by the generator's branch audit, panel, saves).
 
 0. **Data bar of JP / USA** (2026-11-09): 0.94 % -> 83.74 % (JP), 0.97 % -> 90.88 % (USA); docs/JP.md "Data
    measure". Fixed the overlay base of the version data claims, the X00 prefix of the area overlays counted once,

@@ -257,6 +257,249 @@ class TestLauncher(unittest.TestCase):
         self.assertEqual(TS.save_bytes(c, "BESCES-01331TOMBA-01")[0x200:], TS.fake_save(slot=0, fill=2)[SI.FRAME + 0x200:])
         self.assertFalse(os.path.exists(os.path.join(d, "tombi_mc1.mcd")))
 
+    # ---- the game library (tools/game_library.py)
+    def fake_data(self, d, name, sha, boot=None, serial=None):
+        """A complete one-file extraction in d/name whose manifest says it is the game with this sha1."""
+        dd = os.path.join(d, name)
+        os.makedirs(os.path.join(dd, "EXE"), exist_ok=True)
+        open(os.path.join(dd, "EXE", "MAIN0.EXE"), "wb").write(b"x" * 10)
+        lines = ["tombi-data 1", "main0_sha1 %s" % (sha if boot is None else "")]
+        if boot:
+            lines += ["serial %s" % serial, "boot %s" % boot, "boot_sha1 %s" % sha]
+        open(os.path.join(dd, "manifest.txt"), "w").write("\n".join(lines + ["file 0 0 0 10 EXE/MAIN0.EXE", ""]))
+        return dd
+
+    def library(self, name, game, extra=None):
+        """A launcher whose library holds PAL (data/), USA (data-scus94236/) and JP (no data), game selected."""
+        d = os.path.join(self.tmp, name)
+        os.makedirs(d)
+        self.fake_data(d, "data", L.MAIN0_SHA1)
+        self.fake_data(d, "data-scus94236", L.GL.USA_SHA1, "SCUS_942.36", "SCUS-94236")
+        games = [dict(serial="SCES-01331", sha1=L.MAIN0_SHA1, image="", data="data"),
+                 dict(serial="SCUS-94236", sha1=L.GL.USA_SHA1, image="", data="data-scus94236"),
+                 dict(serial="SLPS-01144", sha1=L.GL.JP_SHA1, image="", data="data-slps01144")]
+        cfg = dict({"games": games, "game": game, "lang": 5, "patch_on": True, "cut_content": True, "hz60": False,
+                    "areasel": True, "debugmenu": True, "prompts_style": "xbox", "titledebug": True, "skipintro": True,
+                    "autostart": True, "subscreen_labels": "item=Cosas", "hz60_default": True}, **(extra or {}))
+        with open(os.path.join(d, "tombi-port.json"), "w") as f:
+            json.dump(cfg, f)
+        L.app_dir = lambda: d
+        i18n.set_language("en", save=False)
+        self.w = L.App()
+        self.w.show()
+        self.app.processEvents()
+        return d
+
+    def test_library_migrates_an_old_setup(self):
+        """An older launcher's data/ (PAL) and disc path become the library's first game, data/ kept as it is."""
+        d = self.launcher("migrate", {"disc": "{APP}/tombi.bin", "lang": 5}, data=True)
+        games = [dict(g, image=os.path.normpath(g["image"])) for g in self.w.s["games"]]   # "{APP}/x" keeps a '/' on Windows
+        self.assertEqual(games, [dict(serial="SCES-01331", sha1=L.MAIN0_SHA1, image=os.path.normpath(os.path.join(d, "tombi.bin")),
+                                      data="data")])
+        self.assertEqual(self.w.s["game"], "SCES-01331")
+        self.assertEqual(L.data_dir(), os.path.join(d, "data"))
+        self.assertEqual(json.load(open(os.path.join(d, "tombi-port.json")))["games"][0]["data"], "data")
+        self.assertEqual(self.args()[:2], ["--data", os.path.join(d, "data")])
+        self.assertEqual(len(self.w.tiles), 1)
+
+    def test_usa_game_gets_its_own_options(self):
+        """USA: its own data folder and binary, no --lang / --hz / text patch / cut content / PAL-address mods / prompts,
+        no language box, no Cut content page; the portable options stay."""
+        d = self.library("usa", "SCUS-94236")
+        a = self.args()
+        self.assertEqual(a[:2], ["--data", os.path.join(d, "data-scus94236")])
+        for flag in ("--lang", "--hz", "--cut-content", "--poke", "--debug-menu", "--title-debug", "--prompts",
+                     "--subscreen-labels", "--patch-tex", "--civ-maps"):
+            self.assertNotIn(flag, a)
+        self.assertIn("--skip-intro", a)
+        self.assertEqual(a[a.index("--pad-script") + 1], "1000:start")      # autostart (the area select is PAL-only)
+        exe = self.w.command()[0].replace("\\", "/")
+        self.assertTrue(exe.endswith(("port2-scus94236/tombi2", "port2-scus94236-win/tombi2.exe", "tombi-pc-usa", "tombi-pc-usa.exe")), exe)
+        self.assertFalse(hasattr(self.w, "lang_cb"))
+        self.assertTrue(self.w.nav["cut"].isHidden())
+        self.assertEqual([t.d["selected"] for t in self.w.tiles], [False, True, False])
+        self.assertIn("60 Hz", self.w.summary.text())
+        # back to PAL: everything is there again, the settings untouched
+        self.w.select_game("SCES-01331")
+        a = self.args()
+        self.assertEqual(a[:2], ["--data", os.path.join(d, "data")])
+        for flag in ("--lang", "--cut-content", "--poke", "--debug-menu", "--title-debug", "--prompts", "--subscreen-labels"):
+            self.assertIn(flag, a)
+        self.assertEqual(a[a.index("--hz") + 1], "50")
+        self.assertFalse(self.w.nav["cut"].isHidden())
+        self.assertEqual(json.load(open(os.path.join(d, "tombi-port.json")))["game"], "SCES-01331")
+
+    def test_unsupported_game(self):
+        """JP: recognised (a card with its name), but Play is off and says why."""
+        self.library("jp", "SLPS-01144")
+        self.assertFalse(self.w.play_btn.isEnabled())
+        self.assertIn("Ore no Tomba", self.w.status_msg)
+        shown = []
+        self.w.error = shown.append
+        self.w.play()
+        self.assertTrue(shown and "does not run it yet" in shown[0])
+        self.assertIsNone(self.w.proc)
+
+    def test_add_disc_identified_and_extracted(self):
+        """Add game...: a disc image is identified by its SYSTEM.CNF boot exe (sha1), gets data-<serial>/, is extracted
+        and selected; another release (Tomba! 2) is refused."""
+        import unittest.mock
+        exe = b"PS-X EXE" + bytes(2040)
+        sha = __import__("hashlib").sha1(exe).hexdigest()
+        img = os.path.join(self.tmp, "usa.iso")
+        open(img, "wb").write(make_iso({"SYSTEM.CNF": b"BOOT = cdrom:\\SCUS_942.36;1\r\nTCB = 4\r\n", "SCUS_942.36": exe,
+                                        "SYSTEM/X00.BIN": b"overlay"}))
+        with unittest.mock.patch.dict(L.GL.VERSIONS, {sha: L.GL.VERSIONS[L.GL.USA_SHA1]}):
+            d = self.launcher("add", {}, data=True)            # (an older PAL data/ is there)
+            self.assertEqual([e["serial"] for e in self.w.entries()], ["SCES-01331"])
+            self.w.add_image(img, wait=True)
+            self.assertEqual([e["serial"] for e in self.w.entries()], ["SCES-01331", "SCUS-94236"])
+            e = self.w.cur_entry()
+            self.assertEqual((e["serial"], e["sha1"], e["data"], e["image"]), ("SCUS-94236", sha, "data-scus94236", img))
+            for _ in range(200):                              # check_disc, then the extraction thread
+                self.app.processEvents()
+                if L.GL.data_complete(os.path.join(d, "data-scus94236")) == sha and not self.w.extracting:
+                    break
+                __import__("time").sleep(0.02)
+            self.assertEqual(L.GL.data_complete(os.path.join(d, "data-scus94236")), sha)
+            self.assertEqual(open(os.path.join(d, "data-scus94236", "SYSTEM", "X00.BIN"), "rb").read(), b"overlay")
+            self.assertEqual(self.args()[:2], ["--data", os.path.join(d, "data-scus94236")])
+            self.assertEqual(self.w.game_status(e)[1], "ok")
+        # a disc of another game: not added
+        other = os.path.join(self.tmp, "t2.iso")
+        open(other, "wb").write(make_iso({"SYSTEM.CNF": b"BOOT = cdrom:\\SCUS_944.54;1\r\n", "SCUS_944.54": b"PS-X EXE2"}))
+        shown = []
+        self.w.error = shown.append
+        self.w.add_image(other, wait=True)
+        self.assertEqual(len(self.w.entries()), 2)
+        self.assertIn("Tomba! 2 (USA)", shown[0])
+
+    def test_remove_game(self):
+        d = self.library("rm", "SCUS-94236")
+        answers = [True, True]
+        self.w.ask = lambda t: answers.pop(0)
+        self.w.remove_game()
+        self.assertEqual([e["serial"] for e in self.w.entries()], ["SCES-01331", "SLPS-01144"])
+        self.assertFalse(os.path.exists(os.path.join(d, "data-scus94236")))
+        self.assertTrue(os.path.isdir(os.path.join(d, "data")))
+        self.assertEqual(self.w.s["game"], "SCES-01331")
+
+    def test_library_views(self):
+        """The three looks build (grid / list / banner) with a card per game and Add game."""
+        for view, n in (("grid", 3), ("list", 3), ("banner", 3)):
+            with self.subTest(view):
+                self.library("view_" + view, "SCES-01331", {"library_view": view})
+                self.assertEqual(len(self.w.tiles), n)
+                self.w.close()
+                self.w.deleteLater()
+                self.w = None
+
+
+def make_iso(files):
+    """A minimal cooked ISO9660 image (2048-byte sectors) holding files {"DIR/NAME": bytes}, one directory level."""
+    S = 2048
+    dirs = sorted({p.split("/")[0] for p in files if "/" in p})
+    root_files = sorted(p for p in files if "/" not in p)
+    lba = 18 + 1 + len(dirs)
+    place = {}
+    for p in sorted(files):
+        place[p] = lba
+        lba += max(1, (len(files[p]) + S - 1) // S)
+    total = lba
+
+    def rec(name, at, size, isdir):
+        n = name.encode()
+        r = bytearray(33 + len(n) + (1 - len(n) % 2))
+        r[0] = len(r)
+        r[2:10] = at.to_bytes(4, "little") + at.to_bytes(4, "big")
+        r[10:18] = size.to_bytes(4, "little") + size.to_bytes(4, "big")
+        r[25] = 2 if isdir else 0
+        r[28:32] = (1).to_bytes(2, "little") + (1).to_bytes(2, "big")
+        r[32] = len(n)
+        r[33:33 + len(n)] = n
+        return bytes(r)
+
+    def dir_sector(me, parent, entries):
+        b = rec("\0", me, S, True) + rec("\1", parent, S, True) + b"".join(entries)
+        return b.ljust(S, b"\0")
+    img = bytearray(total * S)
+    root = 18
+    ents = [rec(d, 19 + i, S, True) for i, d in enumerate(dirs)]
+    ents += [rec(p + ";1", place[p], len(files[p]), False) for p in root_files]
+    img[root * S:(root + 1) * S] = dir_sector(root, root, ents)
+    for i, d in enumerate(dirs):
+        sub = sorted(p for p in files if p.startswith(d + "/"))
+        img[(19 + i) * S:(20 + i) * S] = dir_sector(19 + i, root, [rec(p.split("/")[1] + ";1", place[p], len(files[p]), False) for p in sub])
+    pvd = bytearray(S)
+    pvd[0:6] = b"\x01CD001"
+    pvd[80:88] = total.to_bytes(4, "little") + total.to_bytes(4, "big")
+    pvd[156:190] = rec("\0", root, S, True)
+    img[16 * S:17 * S] = pvd
+    img[17 * S:17 * S + 6] = b"\xffCD001"
+    for p, data in files.items():
+        img[place[p] * S:place[p] * S + len(data)] = data
+    return bytes(img)
+
+
+class TestGameLibrary(unittest.TestCase):
+    """tools/game_library.py without Qt: identification, data folder names, the art from the overlay's sprite list."""
+
+    def test_describe(self):
+        import game_library as GL
+        pal = GL.describe("SCES_013.31", "1" * 40, GL.PAL_SHA1)
+        self.assertEqual((pal["serial"], pal["version"]["key"], pal["game_sha1"]), ("SCES-01331", "pal", GL.PAL_SHA1))
+        self.assertEqual(GL.describe("SCES_013.30", "2" * 40, GL.PAL_SHA1)["serial"], "SCES-01330")
+        usa = GL.describe("SCUS_942.36", GL.USA_SHA1)
+        self.assertEqual((usa["serial"], usa["version"]["binary"], usa["name"]), ("SCUS-94236", "tombi-pc-usa", "Tomba! (USA)"))
+        jp = GL.describe("SLPS_011.44", GL.JP_SHA1)
+        self.assertFalse(jp["version"]["supported"])
+        self.assertIsNone(GL.describe("SCUS_944.54", "3" * 40)["version"])
+        self.assertTrue(GL.has(GL.PAL_SHA1, "lang") and not GL.has(GL.USA_SHA1, "lang"))
+        self.assertEqual(GL.text_patches(GL.PAL_SHA1), ("es_mejorada.tombipatch.json",))
+        self.assertEqual(GL.text_patches(GL.USA_SHA1), ())          # the hook for a USA retranslation: none yet
+        self.assertEqual(GL.binary_name(GL.USA_SHA1, windows=True), "tombi-pc-usa.exe")
+
+    def test_data_names(self):
+        import game_library as GL
+        es = []
+        for serial, sha in (("SCUS-94236", GL.USA_SHA1), ("SCES-01331", GL.PAL_SHA1), ("SCES-01330", GL.PAL_SHA1)):
+            GL.add_entry(es, dict(serial=serial, game_sha1=sha), "/x/" + serial)
+        self.assertEqual([e["data"] for e in es], ["data-scus94236", "data", "data-sces01330"])
+        GL.add_entry(es, dict(serial="SCES-01331", game_sha1=GL.PAL_SHA1), "/y/again.cue")    # the same disc again
+        self.assertEqual(len(es), 3)
+        self.assertEqual(es[1]["image"], "/y/again.cue")
+
+    def test_logo_from_the_sprite_list(self):
+        """The logo is drawn as the title overlay draws it: its sprite records (CLUT 128,510) on the logo page."""
+        import struct
+        import game_library as GL
+
+        class Src:
+            def __init__(self, files):
+                self.files = files
+
+            def read(self, n):
+                return self.files[n]
+        page = bytearray(256 * 256)
+        for y in range(10, 20):
+            page[y * 256 + 5:y * 256 + 15] = b"\x01" * 10             # piece A: 10x10 at 5,10
+        for y in range(120, 125):
+            page[y * 256 + 0:y * 256 + 4] = b"\x02" * 4               # piece B: 4x5 at 0,120
+        clut = struct.pack("<256H", *([0, 0x001F, 0x7C00] + [0] * 253))
+        ovl = bytes(6) + GL.SPR.pack(16, 24, 5, 10, 10, 10, 0x84, 128, 510) + GL.SPR.pack(40, 24, 0, 120, 4, 5, 0x84, 128, 510) \
+            + struct.pack("<h", -1) + bytes(20)
+        land = b"GAM\0" + struct.pack("<I", 512 * 256) + (b"\0\0" + b"\x01" * 16) * (512 * 256 // 16)
+        src = Src({"SYSTEM/A00012.000": bytes(page), "SYSTEM/A00013.000": clut, "SYSTEM/OPTSUB00.BIN": ovl,
+                   "SYSTEM/A00010.GAM": land, "SYSTEM/A00011.000": clut})
+        w, h, rgba = GL.logo_rgba(src, GL.USA_SHA1)
+        self.assertEqual((w, h), (28, 10))                           # x 16..43, y 24..33
+        self.assertEqual(rgba[0:4], bytes((255, 0, 0, 255)))         # colour 1 = red (0x001F)
+        self.assertEqual(rgba[(0 * w + 24) * 4:(0 * w + 24) * 4 + 4], bytes((0, 0, 255, 255)))   # piece B at x 40
+        self.assertEqual(rgba[(0 * w + 12) * 4 + 3], 0)              # between the pieces: transparent
+        w, h, rgba = GL.title_rgba(src, GL.USA_SHA1)
+        self.assertEqual((w, h), (320, 240))
+        self.assertEqual(rgba[(24 * 320 + 16) * 4:(24 * 320 + 16) * 4 + 4], bytes((255, 0, 0, 255)))
+        self.assertEqual(rgba[0:4], bytes((255, 0, 0, 255)))         # the landscape: colour 1 everywhere
 
 if __name__ == "__main__":
     unittest.main()

@@ -143,11 +143,24 @@ names agree). Open: `SCRIPT_FLAGS` (block rule 8009C10C, but the USA script flag
 ## Native port (stage U1, 2026-11-09)
 
 ```
+sudo tools/setup_native.sh                                    # old-gcc, maspsx and include/tomba/psyq (required)
 python3 tools/build_full.py --version usa -j 8               # the symbol source (build/scus94236/full)
 python3 tools/extract_data.py game_usa/disc.bin data_usa      # the USA disc's data/ (manifest: serial, boot, boot_sha1)
 cmake -S port2 -B build/port2-scus94236 -DPORT_VERSION=usa && make -C build/port2-scus94236 -j8
 build/port2-scus94236/tombi2 --data data_usa --headless --skip-movies --frames 4500 --pad-script 1000:start,...
 ```
+
+The order relative to the PAL build does not matter (separate `build/scus94236/full` and `build/port2-scus94236`;
+checked: USA alone, and PAL `build_full` + PAL port first, then the USA steps, both give 45 stubs). Expected:
+`gen/report.txt` "stubs: 45", the full link prints no `does not compile` line. **The PSY-Q headers
+`include/tomba/psyq` must be there before `build_full.py`** (git-ignored, copied by `tools/setup_native.sh`; a new
+worktree does not have them: copy them from the main checkout). Without them the 28 `// HEADERS tomba26` files and
+every file that includes their headers (611 USA units) fail to compile and the link keeps them as asm: every sha1
+is still OK, but the port generated from that link lacks them (126 stubs: dispatchTasks, openTask, allocModelObject,
+initObjectPools, DRAW_ENV_1...; crash at frame 0 in SetDefDrawEnv from initDisplay). That was the "126 stubs" report
+of 2026-11-09 (a full link made without the headers, the port built after they were installed). Now
+`build_full.py` refuses to start without `include/tomba/psyq`, writes `<full>/compile_failures.txt`, and
+`port/tools/gen_port.py` refuses a full link listing any failed file (PAL too; `PORT_ALLOW_ASM_FALLBACK=1` overrides).
 
 `PORT_VERSION` (CMake cache variable, passed to the generator as an environment variable; empty = PAL, the default
 build, unchanged) selects `port/tools/portver.py`: it points `tools/units.py`, `tools/sysovl.py` and `tools/areas.py` at
