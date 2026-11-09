@@ -470,7 +470,7 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
 - **Game library** (stage U2, `Library.java`). The launcher's home is *Tus juegos*: one card per disc added (logo,
   name, region, serial, status), *Añadir juego*, then *¡A jugar!* / *Opciones* / *Salir*; the focused card is the
   selected game (D-pad moves between cards and buttons by their position on screen; Start plays). Three looks,
-  *Opciones > Juego > Estilo de la biblioteca*: *Carrusel* (default: cards in a row, buttons beneath), *Lista* (rows on
+  *Opciones > Juego > Estilo de la biblioteca*: *Carrusel* (cards in a row, buttons beneath), *Lista* (default: rows on
   the left, the selected game large on the right), *Portada* (the selected game's logo as the title, a tab per game).
   A picked image is identified by its boot executable (`disccheck.c` `nativeIdentify`: SYSTEM.CNF `BOOT`, its SHA-1;
   on the PAL discs `EXE/MAIN0.EXE`, which the boot exe loads): PAL SCES-01331 / SCES-01330 `bec8dc5f…` →
@@ -1085,8 +1085,8 @@ player's own disc the first time (`library/<serial>/logo.png`, `title.png`, `sce
 page and CLUT of the title list (PAL `SYSTEM/A00202.000` + `A00203.000`, USA/JP `A00012.000` + `A00013.000`) drawn
 with the title overlay's own sprite list (`TITLE_LOGO_SPRITE_RECS` of O0PTSUB0 / OPTSUB00: 16-byte records with the
 CLUT at 128,510, the list `titleLogoDraw` passes to `titleDrawSpriteRecs`), on the title landscape (A00200.GAM /
-A00010.GAM); a disc without them shows its name. Looks: `library_view` = `grid` (default: cards with the title
-screen, in as many columns as fit), `list` (rows with the logo) or `banner` (the selected game wide over the
+A00010.GAM); a disc without them shows its name. Looks: `library_view` = `grid` (cards with the title
+screen, in as many columns as fit), `list` (default: rows with the logo) or `banner` (the selected game wide over the
 landscape, small logo cards under it); `TOMBI_LIBRARY_VIEW` forces one.
 
 Per version (`game_library.VERSIONS` `features`): PAL has everything; USA runs `tombi-pc-usa(.exe)` (checkout:

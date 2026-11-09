@@ -689,7 +689,7 @@ public class LauncherActivity extends Activity {
         status(getString(R.string.lib_removed, nm));
     }
     /** the library's look (Options > Game > Library style): 0 carousel, 1 list, 2 cover */
-    int libStyle() { return clamp(prefs.getInt("libstyle", 0), 3); }
+    int libStyle() { return clamp(prefs.getInt("libstyle", 1), 3); }
 
     // ---- save import / export (SaveImport.java; the game's single card, files/saves/tombi_mc0.mcd) ----
     File cardFile() { File d = new File(filesDir(), "saves"); d.mkdirs(); return new File(d, "tombi_mc0.mcd"); }

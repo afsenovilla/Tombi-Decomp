@@ -1518,7 +1518,7 @@ def hbox(*widgets, spacing=8, margins=(0, 0, 0, 0), stretch_last=False):
     return w, lay
 
 
-LIBRARY_VIEW = "grid"       # the library's default look (setting "library_view": grid, list or banner)
+LIBRARY_VIEW = "list"       # the library's default look (setting "library_view": grid, list or banner)
 
 
 class TileGrid(QWidget):
