@@ -150,6 +150,7 @@ jobs:
             grep -E "error|Error|FAILED|undefined reference|multiple definition" build/n3ds/build.log | head -200 || true
             tail -5 build/n3ds/build.log
             ls -l build/n3ds/*.3dsx
+            python3 port2/n3ds/check_3dsx.py build/n3ds/tombi.3dsx build/n3ds/tombi.elf || true
           '
           sudo chown -R "$(id -u):$(id -g)" build
 
