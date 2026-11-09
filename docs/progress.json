@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-08",
+  "date": "2026-11-09",
   "totals": {
     "lib": 100904,
     "named": 583884,
@@ -329,17 +329,17 @@
     "D0SPSUB2": {
       "game": 20004,
       "n": 31,
-      "matched": 18152,
-      "n_matched": 30,
+      "matched": 20004,
+      "n_matched": 31,
       "piece": 0,
       "x000": 0,
       "dup": 0,
-      "new": 1852,
-      "n_new": 1,
+      "new": 0,
+      "n_new": 0,
       "uniq": 19784,
-      "uniq_matched": 17932,
+      "uniq_matched": 19784,
       "n_uniq": 29,
-      "n_uniq_matched": 28
+      "n_uniq_matched": 29
     },
     "D0SPSUB3": {
       "game": 25324,

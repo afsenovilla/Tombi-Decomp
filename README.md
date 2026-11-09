@@ -45,15 +45,15 @@ What is left, closest first: [docs/REMAINING.md](docs/REMAINING.md).
 <summary><b>PAL (reference): per part</b></summary>
 
 <!-- progress:start -->
-**Whole game: 99.68 % of the game's code matches byte for byte** (1525380 of 1530244 bytes).
+**Whole game: 99.80 % of the game's code matches byte for byte** (1527232 of 1530244 bytes).
 
 | Part | Code | Matching bytes | Matching |
 |---|---:|---:|---|
 | MAIN0.EXE: engine, shared by every area | 286644 B | 286644 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X000.BIN: AREA00 + object code reused by all areas | 313676 B | 313676 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X001..X019.BIN: code specific to the other areas | 736440 B | 736440 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 188620 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.5 % |
-| **Whole game** | **1530244 B** | **1525380 B** | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 **99.68 %** |
+| SYSTEM/*.BIN: options, sub-screens, game over, info screens | 193484 B | 190472 B | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.4 % |
+| **Whole game** | **1530244 B** | **1527232 B** | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 **99.80 %** |
 
 - Bytes of machine code in game functions, counted exactly like the objdiff report on decomp.dev (`tools/units.py` is the common list); Sony's Psy-Q library (100904 B) is not counted: 92500 B of it (91.7 %) also matches, from Psy-Q sources ported from psx_tomba and other decompilations (THIRD_PARTY_NOTICES.md), and is tracked apart.
 - Each function counts once. The 16 area overlays share about 4800 functions with MAIN0/X000 or with each
@@ -120,7 +120,7 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 <summary><b>Japan (SLPS-01144): per part</b></summary>
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 97.22 % of the code matches byte for byte** (1586664 of 1631952 bytes, 3462 of 3530 functions).
+**Ore! Tomba (SLPS-01144): 98.24 % of the code matches byte for byte** (1603188 of 1631952 bytes, 3467 of 3530 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
@@ -142,9 +142,9 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 | X17.BIN: area code | 12124 B | 12124 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X18.BIN: area code | 16136 B | 16136 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| DSPSUB.BIN: SYSTEM overlay | 36084 B | 18856 B | 50 / 57 | 🟩🟩🟩🟩🟩⬜⬜⬜⬜⬜ 52.3 % |
-| DSPSUB2.BIN: SYSTEM overlay | 16180 B | 12968 B | 25 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩⬜⬜ 80.1 % |
-| DSPSUB3.BIN: SYSTEM overlay | 23588 B | 14120 B | 39 / 43 | 🟩🟩🟩🟩🟩🟨⬜⬜⬜⬜ 59.9 % |
+| DSPSUB.BIN: SYSTEM overlay | 36084 B | 26384 B | 52 / 57 | 🟩🟩🟩🟩🟩🟩🟩🟨⬜⬜ 73.1 % |
+| DSPSUB2.BIN: SYSTEM overlay | 16180 B | 14572 B | 26 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.1 % |
+| DSPSUB3.BIN: SYSTEM overlay | 23588 B | 21512 B | 41 / 43 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 91.2 % |
 | INFO.BIN: SYSTEM overlay | 24752 B | 24752 B | 51 / 51 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | INFO2.BIN: SYSTEM overlay | 87916 B | 87916 B | 191 / 191 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | INFO3.BIN: SYSTEM overlay | 25480 B | 25480 B | 52 / 52 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |

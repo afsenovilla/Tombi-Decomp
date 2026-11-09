@@ -4,20 +4,19 @@ Ordered from closest to farthest, per version. Best drafts of the open functions
 scratchpads); the notes below say what was tried, so the next attempt does not repeat it. How to check and install:
 [AGENTS.md](../AGENTS.md). Per-round history: [docs/JP.md](JP.md), [docs/STATUS.md](STATUS.md).
 
-## PAL (SCES-01331): 99.68 % of game code (Psy-Q library counted apart)
+## PAL (SCES-01331): 99.80 % of game code (Psy-Q library counted apart)
 
 MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 
 | Function | Size | State | Notes |
 |---|---:|---|---|
-| D0SPSUB2 800E999C | 1852 B | score 178 | `src/wip/d0spsub2_func_800E999C.c`. Retail h = s0, slot = s1, and the 0x180 block copy runs on s0 itself; the copy destination is a fresh pseudo that gets a3 in ours. A global-alloc order problem: h must be allocated before the copy destination. Barriers on h fix the s0/s1 swap but break the B32 copy's v1 and the `lh D_1F8003D8` hoist. ~90 attempts and 4 permuter runs so far. |
-| D0SPSUB 800EFD6C | 3012 B | score 786 | `src/wip/d0spsub_func_800EFD6C.c`, registers shifted through most of the function; barely attempted. |
+| D0SPSUB 800EFD6C | 3012 B | score 659 | best draft in the 2026-11-09 session scratchpad: the `s->field` loads must stay after the stores to the Text globals (one-field-struct aliases of the same symbols at chosen store sites helped); left: loop-1 attr/font store schedule, the y store in later loops, then registers. |
 | D0SPSUB3 functions | up to 7292 B | open | see `notes/todo_areas.csv` |
 | Psy-Q library | 10.9 KB of 100.9 KB | 89.2 % | not counted in the game figure; sources ported from psx_tomba |
 
-## Japanese retail (SLPS-01144): 97.22 % with the SYSTEM overlays (98.91 % without; 3462 of 3530 functions)
+## Japanese retail (SLPS-01144): 98.24 % with the SYSTEM overlays (98.91 % without; 3467 of 3530 functions)
 
-The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08; a second pass the same day matched 75 more (DSPSUB/DSPSUB3 54, OPTSUB00 8, DSPSUB2 13) and a third 65 (INFO, INFO2, INFO3: all of them). Left there: DSPSUB2 func_800ECCE8 (5 lines, scheduling), func_800ED850 (92 lines, digit-block registers), func_800EBD14 (JP twin of PAL D0SPSUB2 800E999C); DSPSUB func_800EF370 (6 lines, a0/a2 swap), EA2BC/EA204 (twin of PAL 800E89F8), ItemListStep EE1B4/EDC50, MapStep EF9B0, F0D90 (twin of PAL 800EFD6C).
+The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08; a second pass the same day matched 75 more (DSPSUB/DSPSUB3 54, OPTSUB00 8, DSPSUB2 13) and a third 65 (INFO, INFO2, INFO3: all of them). Left there: DSPSUB2 func_800ECCE8 (5 lines, scheduling), func_800ED850 (92 lines, digit-block registers), DSPSUB func_800EF370 (6 lines, a0/a2 swap), MapStep EF9B0, F0D90 (twin of PAL 800EFD6C).
 
 The JP report counts the Psy-Q library too. The hand-written-asm part (libgte, BIOS stubs, start, setjmp) is in as
 top-level asm. Left from the library: the parts Sony compiled from C (libsnd _SsContDataEntry and the _SsVmSetVol

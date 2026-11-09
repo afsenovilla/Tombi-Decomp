@@ -1,17 +1,14 @@
 // FUNC 800e999c 1852 D0SPSUB2
-// wip: score 182 (was 359). Memory card save: builds the 0x2000 header (SAVE_DATA_BUFFER) and copies the game block.
-// Fixed: the play-time digits with the memCardDrawPlayTime idiom (hh = C968/180000 unsigned, h1 = hh % 1000 unsigned
-// then signed digit math, m = C968/3000 - hh*60; block-scoped h100/h10/m10/d4/d1/d2 with `h100 %= 10`), the
-// 2-digit values as `q10 = v / 10 (unsigned char); dg[1] = v % 10; dg[0] = q10 % 10`, and block-scoped loop
-// variables (`int i; for (i...) ... dg[i]`, index form) which put i in t1 like the game.
-// Left (registers only, structure matches): (1) s0/s1 swapped: the game ranks h (SAVE_DATA_BUFFER pointer) above the
-// `slot` parameter in global alloc (slot: 4 refs/57 insns beats h: 11 refs/476 here; `unsigned slot` fixes the
-// s-regs but the game's slot/10 is signed; `h += 0x80` before the B384 copy also fixes them (h -> s0) but then the
-// copy loop's dest is a3: in the game the dest pseudo of the 0x180 block_move_loop is s0 = h, i.e. it got h's
-// register by preference, so h must be allocated before that pseudo); (2) in the digit loops the game has
-// table -> t0, i -> t1, q -> t2 (ours q -> t0, table -> t2; 6-digit loop: game i t1/q t2, ours t2/t3 because
-// our hh%1000 temp takes t1 where the game has t3). Tried: *q++ forms with q/i in either order (198), pointer
-// dest (222), SJ **t table variable (210), reusing hh for %1000 (244/182), no h variable at all (369).
+// MATCHING 800e999c 1852
+// Memory card save: builds the 0x2000 header (SAVE_DATA_BUFFER) and copies the game block.
+// Matched 2026-11-08. What fixed the last registers:
+// (1) the digit loops: ONE function-scope `int i` and `unsigned char *p` shared by all four loops, `p = dg;` before
+//     each loop and `*D_800F66B4[*p++]` (the game keeps i in t1 and p in t2 in every loop);
+// (2) slot/h in s1/s0: `slot` copied through a barriered `register int t asm("$17")`, so h gets s0;
+// (3) the 0x180 block copy running on s0 itself: the two tail copies go through a barriered
+//     `register char *g asm("$16") = h` (the copy's dest pseudo then prefers s0), and the B384 index is read through
+//     a `const` alias of D_1F8003D8 (`asm("D_1F8003D8")`), so cse keeps the second load and sched hoists it above
+//     the B32 copy like the game.
 typedef struct { int d[3]; } B12;
 typedef struct { char c[2]; } SJ;
 typedef struct { char d[64]; } B64;
@@ -34,13 +31,18 @@ extern B32 *D_800F6A2C[];
 extern B384 *D_800F6A24[];
 extern SJ *D_800F66B4[];
 extern short D_1F8003D8;
+extern const short D_1F8003D8c asm("D_1F8003D8");
 extern void *memset(void *p, int c, int n);
 extern void memCardStoreChecksum(void *p, int n);
 
-void func_800E999C(int slot)
+void func_800E999C(int slot_)
 {
+    int slot;
     char *h = SAVE_DATA_BUFFER;
     unsigned char dg[5];
+    int i;
+    unsigned char *p;
+    { register int t asm("$17"); t = slot_; asm("" : "=r"(t) : "0"(t)); slot = t; }
     memset(h, 0, 0x2000);
     *(B12 *)D_8009D2B4 = *(B12 *)PLAYER_POS;
     GAME_SELECTED_SPAWN_POINT[0] = 0;
@@ -55,12 +57,11 @@ void func_800E999C(int slot)
     D_8009C992[0] = D_8009D612;
     *(B64 *)(h + 4) = *D_800F6A34[D_1F8003D8];
     {
-        int i;
         int s10 = slot / 10;
         dg[1] = slot % 10;
         dg[0] = s10 % 10;
-        for (i = 0; i < 2; i++) {
-            *(SJ *)&h[0x16 + i * 2] = *D_800F66B4[dg[i]];
+        p = dg; for (i = 0; i < 2; i++) {
+            *(SJ *)&h[0x16 + i * 2] = *D_800F66B4[*p++];
         }
     }
     {
@@ -83,32 +84,34 @@ void func_800E999C(int slot)
         }
     }
     {
-        int i; int k = 0;
-        for (i = 0; i < 6; i++) {
-            if (i != 3) *(SJ *)&h[0x1E + i * 2] = *D_800F66B4[dg[k++]];
+        p = dg; for (i = 0; i < 6; i++) {
+            if (i != 3) *(SJ *)&h[0x1E + i * 2] = *D_800F66B4[*p++];
         }
     }
     {
-        int i;
         unsigned char q10 = D_8009C980 / 10;
         dg[1] = D_8009C980 % 10;
         dg[0] = q10 % 10;
-        for (i = 0; i < 2; i++) {
-            *(SJ *)&h[0x30 + i * 2] = *D_800F66B4[dg[i]];
+        p = dg; for (i = 0; i < 2; i++) {
+            *(SJ *)&h[0x30 + i * 2] = *D_800F66B4[*p++];
         }
     }
     {
-        int i;
         unsigned char q10 = D_8009C973 / 10;
         dg[1] = D_8009C973 % 10;
         dg[0] = q10 % 10;
-        for (i = 0; i < 2; i++) {
-            *(SJ *)&h[0x40 + i * 2] = *D_800F66B4[dg[i]];
+        p = dg; for (i = 0; i < 2; i++) {
+            *(SJ *)&h[0x40 + i * 2] = *D_800F66B4[*p++];
         }
     }
     memset(h + 0x44, 0, 0x1C);
-    *(B32 *)(h + 0x60) = *D_800F6A2C[D_1F8003D8];
-    *(B384 *)(h + 0x80) = *D_800F6A24[D_1F8003D8];
+    {
+        register char *g asm("$16");
+        g = h;
+        asm("" : "=r"(g) : "0"(g));
+        *(B32 *)(g + 0x60) = *D_800F6A2C[D_1F8003D8];
+        *(B384 *)(g + 0x80) = *D_800F6A24[D_1F8003D8c];
+    }
     *(BGame *)D_800E2028 = *(BGame *)GAME;
     memCardStoreChecksum(D_800E2028, 0xA00);
 }
