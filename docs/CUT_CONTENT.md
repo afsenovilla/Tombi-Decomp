@@ -217,7 +217,7 @@ is cut content.** Nothing in this sweep is restorable as a feature.
 
 ### 2. Object handler slots no room places
 `tools/objects.py list --all-slots` (6533 records) against the MAIN0 handler tables. Unplaced slots that nothing spawns either (grep of
-`allocObjectLayerN` + `->type =`): layer 4 type 8 (`updateL4Type08Object`, empty), layer 8 type 7 (empty), layer 2 type 0x30 (`updateL2Type30Object`: per-area dispatcher to the I0NFO2 town scenery of areas 5/8/11/16/17/19; those rooms are the cut towns), layer 5 types 9/0xA (`updateL5Type09Item`, `updateL5Type0AItem`: item objects; spawned through `ObjSpawn` with a variable type, so not provably unused), layer 7 types 5/10/13 and layer 2/4 types 0x19, 0x2D, 0x2E, 0x45, 0x4C, 0x41 (`overheadActorHandler`, `topdownItemSpotHandler`, `topdownTalkSpotHandler`, `tunnelActorHandler`, `tunnelTalkSpotHandler`, `tunnelStaticObjHandler`: the AREA02 top-down / tunnel sections of I0NFO / I0NFO3, placed by those overlays' own section objects). **No unplaced handler with real content.** Layer 8 has no placement record at all (its two live handlers are spawned by code).
+`allocObjectLayerN` + `->type =`): layer 4 type 8 (`updateL4Type08Object`, empty), layer 8 type 7 (empty), layer 2 type 0x30 (`updateL2Type30Object`: per-area dispatcher to the I0NFO2 town scenery of areas 5/8/11/16/17/19; those rooms are the cut towns), layer 5 types 9/0xA (`updateL5Type09Item`, `updateL5Type0AItem`: item objects; spawned through `ObjSpawn` with a variable type, so not provably unused), layer 7 types 5/10/13 and layer 2/4 types 0x19, 0x2D, 0x2E, 0x45, 0x4C, 0x41 (`overheadActorHandler`, `topdownItemSpotHandler`, `topdownTalkSpotHandler`, `tunnelActorHandler`, `tunnelTalkSpotHandler`, `tunnelStaticObjHandler`: the AREA02 top-down / tunnel sections of I0NFO / I0NFO3; correction 2026-11-09: in retail only the JP disc places type 0x41, see "Placement records across PAL / USA / JP"). **No unplaced handler with real content.** Layer 8 has no placement record at all (its two live handlers are spawned by code).
 
 ### 3. Event ids
 Nothing to add to "Events with no PAL title (0xFF)" and "Unused events": the 19 unreferenced and the 6 Civilization-linked ids stand as listed.
@@ -667,3 +667,37 @@ tiles where the player had to step on or set the right ones. With digit tiles on
 consistent design is an equation or a sequence: e.g. the six numbers in rock order (or summed/combined, the five
 known sum to 223) give the tiles to step on, or each rock's number picks one of the ten symbols. The known values 2, 5,
 18, 59, 139 do not form an obvious series, and with one rock missing the intended answer cannot be recovered.
+
+## Placement records across PAL / USA / JP (2026-11-09)
+
+Every room's object placement records (APD blocks) compared between the three retail discs. Checked statically on
+the disc data (not seen in-game yet).
+
+- **AREA02 section 3 (top-down tunnels): 26 log props only in JP.** JP `AREA02/D307.GAM` (unpacked; model table
+  0x23224, placement block 0x23ECC, 48 records) places 26 layer 4 type 0x41 records (`tunnelStaticObjHandler`), all
+  model 6 at height 54: groups of three 24-28 px apart at (398-446,-1046), (471-527,-506), (612-660,-637) + (636,-668),
+  (1323-1379,-569), (1527-1575,-828), a row of six at y -722 (x 998-1118) and one at y -686 (x 1020-1076). Model 6 is
+  a half log (24 x 56). USA/PAL: the same block has 22 records and no type 0x41, but model 6 is still in the table
+  (USA `D307.GAM` 0x1E5C0, PAL `D306.GAM` 0x1E5E0): model and handler survive with nothing placing them. The
+  collision map is walkable at every log cell, so they were decoration (log floors); a link with the graffiti-floor
+  puzzle is a guess.
+- **AREA00: five static solid blocks only in JP.** JP layer 4 type 0x08 is a static solid-model handler (X00
+  0x8011D824, near-twin of `updateStaticSolid`); in USA/PAL the slot is the empty stub (`updateL4Type08Object`, PAL
+  0x80030404, USA 0x80033858). JP records: a rising staircase of three in section 0 at (1021,-120), (1117,-197),
+  (1198,-251), models 0x2E/0x2F/0x30, and two in section 1 at (2546,-476), (2612,-370), models 0x35/0x36. The models
+  are gone from USA/PAL (JP `AREA00/D003.GAM` model table 0x2F6DC: 85 entries, USA 79 at 0x2D914). They are
+  grass/hay-topped blocks. A sixth JP-only model is not accounted for yet.
+- **AREA00 section 2: a fourth swaying stone tower.** JP places a layer 4 type 0x01 chain, subtype 3, at
+  (2792,-298), 8 stone-block parts (models 3..10 like subtypes 0/1). PAL `updateA00L4Type01` still handles subtype 3
+  (child layer 2 type 2 subtype 7) and X000 `D_80138814[3]` = (2792,-377) is that tower's child spawn point, but PAL
+  places only subtypes 0-2: dead code and data in PAL.
+- **AREA04 sections 0/1: a PAL-only placement edit** (not cut content). USA and JP are identical; PAL (`D002`/`D102`
+  vs USA/JP `D004`/`D104`) swaps counted collectibles 9 and 10, unlinks the decoration at depth 1260 (subtype 21 → 0)
+  and adds a 3-part biting plant at (1077,-356,1260).
+- **JP memory card code accepts a development product code**: JP DSPSUB2 `memCardReadDirectory` (0x800EA490) takes
+  save names starting `BISLPS-01144` or `BISCPS-99999`; USA and PAL only their own.
+- Still to explain (JP vs USA placements): a JP-only spring pad in AREA03 sections 1/5 at (3264,-1538), backdrop
+  sprite sets in AREA16 section 3, an extra scenery sprite in AREA09, extra pool objects / moved positions in
+  AREA00/01, 22 objects USA added in AREA03 section 2, and JP's AREA12 copy differing a lot from USA's.
+- Checked, nothing new: USA/JP-only code (rewrites of existing features), event ids, files outside the file tables
+  (the same 31 on all three discs), event menu order and icons, debug strings.
