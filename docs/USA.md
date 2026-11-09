@@ -81,3 +81,10 @@ Per overlay after the sweep: GOVER 100 %, INFO3 98.0 %, INFO2 96.5 %, INFO 87.8 
 OPTSUB00 64.0 %, DSPSUB2 44.9 %. The 52 functions left are mostly the large sub-screen / memory-card / title drawing
 functions, where the English text layout differs from PAL by more than the jp_autofix edits; no PAL pair was found
 for many of them (splat `func_`), so they need hand work (PAL C as the starting point).
+
+| Hand passes (2026-11-08/09) | Code | Functions |
+|---|---:|---:|
+| SYSTEM hand pass (DSPSUB*, OPTSUB00, INFO*, from the PAL C) | 99.45 % | 3673 / 3681 |
+| dspsub2 800E954C (PAL 800E999C port), both overheadBuildMapStrip (JP trick), libapi psyq_8005ba74/bc10 | 99.81 % | 3678 / 3681 |
+| libsn `__main` / `__do_global_dtors` (hand-written Sony asm, from the JP files) | 99.83 % | 3680 / 3681 |
+| dspsub 800EEE84 (twin of PAL D0SPSUB 800EFD6C) | **100 %** | **3681 / 3681** |

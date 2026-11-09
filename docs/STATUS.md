@@ -10,6 +10,17 @@ Select sub-screen labels, area names from the game's map. Previous: v0.1.2 (b4d6
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
 
+## Matching status (2026-11-09)
+
+| Version | Code | Functions | Left |
+|---|---:|---:|---|
+| PAL SCES-01331 | 100 % of game code; Psy-Q library 100 % | all | nothing |
+| USA SCUS-94236 | 100 % | 3681 / 3681 | nothing |
+| JP SLPS-01144 | 99.71 % | 3527 / 3528 | dspsub func_800F0D90 (4720 B, written from the JP disassembly) |
+
+Details: docs/REMAINING.md. The last PAL function (D0SPSUB 800EFD6C) replaced a wip draft that the port built: that
+draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game clears +0x64..0x66.
+
 ## In progress / open
 
 1. **NTSC picture (`--picture ntsc`, opt-in, experimental)**: top-down areas (AREA02/05/08/19) draw sprites/scenery
@@ -37,7 +48,7 @@ default of release.yml; bump it before each release (it used to show 0.1.<CI run
    PC headless only. Not exposed in the Android launcher yet (the port option works there too).
 5. Trick Village Spanish name: user decision pending.
 
-## Japanese decomp (SLPS-01144), hand pass 3 + SYSTEM overlays (99.71 %; 98.91 % without SYSTEM)
+## Japanese decomp (SLPS-01144), hand pass 3 + SYSTEM overlays (99.71 %; 100 % without SYSTEM; left: dspsub func_800F0D90)
 
 82.04 % of the code (docs/JP.md has the method, the JP systematic differences and every leftover with what was
 tried). Pending, cheapest first: (a) `tools/jp_autofix.py` near misses in docs/JP.md "tried and left"
