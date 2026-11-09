@@ -398,12 +398,17 @@ public class LauncherActivity extends Activity {
         if (fpsIdx() > 0) { a.add("--fps"); a.add(FPS[fpsIdx()]); }
         if (flag("showfps", false)) a.add("--show-fps");
         a.add("--fit");   // the game always fills the screen (aspect kept)
-        if (flag("inflives", false)) { a.add("--poke-every"); a.add("50:8009C980:63:1"); }
-        if (flag("infhealth", false)) { a.add("--poke-every"); a.add("1:8009C970:4:1"); }
+        cheatArgs(a);
         return a.toArray(new String[0]);
     }
-    /** another version (USA): English only and its own 60 Hz; the language, text, panel, NTSC picture, cut content,
-     *  debug menu, button icons and PAL cheat flags are PAL-only in the port (docs/USA.md "Native port") */
+    /** the cheats (tools/port_mods.py): the --poke NAME+OFF forms, which each build resolves to its own release's GAME
+     *  (shims/psyq.c port_addr_of_name), so they are the same for PAL and USA */
+    void cheatArgs(List<String> a) {
+        if (flag("inflives", false)) { a.add("--poke-every"); a.add("50:GAME+20:63:1"); }
+        if (flag("infhealth", false)) { a.add("--poke-every"); a.add("1:GAME+10:4:1"); }
+    }
+    /** another version (USA): English only and its own 60 Hz; the language, text, panel, NTSC picture, cut content and
+     *  button icons are PAL-only in the port (docs/USA.md "Native port"); the debug menu and the cheats run in both */
     String[] buildArgsOther(List<String> a) {
         a.add("--aspect"); a.add(ASPECTS[aspectIdx()]);
         a.add("--renderer"); a.add(flag("gl", false) ? "gl" : "soft");
@@ -413,6 +418,8 @@ public class LauncherActivity extends Activity {
         if (fpsIdx() > 0) { a.add("--fps"); a.add(FPS[fpsIdx()]); }
         if (flag("showfps", false)) a.add("--show-fps");
         a.add("--fit");
+        if (flag("debugmenu", false)) a.add("--debug-menu");
+        cheatArgs(a);
         return a.toArray(new String[0]);
     }
 
@@ -691,8 +698,14 @@ public class LauncherActivity extends Activity {
     /** the library's look (Options > Game > Library style): 0 carousel, 1 list, 2 cover */
     int libStyle() { return clamp(prefs.getInt("libstyle", 1), 3); }
 
-    // ---- save import / export (SaveImport.java; the game's single card, files/saves/tombi_mc0.mcd) ----
-    File cardFile() { File d = new File(filesDir(), "saves"); d.mkdirs(); return new File(d, "tombi_mc0.mcd"); }
+    // ---- save import / export (SaveImport.java; the game's single card: files/saves/tombi_mc0.mcd, the USA game's in
+    //      files/saves_usa: Library.Version.saveSub, the folder the loader gets as --save-sub) ----
+    File cardFile() {
+        Library.Version v = ver();
+        File d = new File(filesDir(), v != null && v.saveSub != null ? v.saveSub : "saves");
+        d.mkdirs();
+        return new File(d, "tombi_mc0.mcd");
+    }
     void pickSaveImport() {
         Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
@@ -1092,7 +1105,9 @@ public class LauncherActivity extends Activity {
                     items.add(pr);
                     items.add(new Item(getString(R.string.pc_open), new Runnable() { public void run() { setScreen(CUSTOM); } }));
                     }
-                } else if (cat == CAT_DATA && !palGame()) {   // (save tools and translations: PAL only for now)
+                } else if (cat == CAT_DATA && !palGame()) {   // (translations: PAL only for now)
+                    items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
+                    items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
                     items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
                     items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
                         setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
@@ -1107,11 +1122,9 @@ public class LauncherActivity extends Activity {
                     items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
                         setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
                 } else {
-                    if (palGame()) {   // (PAL addresses / PAL debug menu)
-                        items.add(toggle(R.string.opt_inflives, "inflives"));
-                        items.add(toggle(R.string.opt_infhealth, "infhealth"));
-                        items.add(toggle(R.string.opt_debug, "debugmenu"));
-                    }
+                    items.add(toggle(R.string.opt_inflives, "inflives"));   // (named fields: every version, cheatArgs)
+                    items.add(toggle(R.string.opt_infhealth, "infhealth"));
+                    items.add(toggle(R.string.opt_debug, "debugmenu"));
                     items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
                 }
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTIONS); } }));

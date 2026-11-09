@@ -21,6 +21,77 @@ def fake_card():
     return bytes(c)
 
 
+def fake_usa_card(slot=2, time=0, lives=3, level=1):
+    """a USA (SCUS-94236) save as DSPSUB2 func_800E954C writes it: 'SC' 0x13 (3-frame icon), the one English title
+    template with its digits at the USA offsets (slot +0x14, hhh:mm +0x1C, P= +0x2E, Level +0x3E), time in 1/60 s"""
+    c = T._blank_card()
+    f = bytearray(T.FRAME)
+    f[0] = 0x51; struct.pack_into("<I", f, 4, T.BLOCK); f[8] = f[9] = 0xFF
+    f[10:30] = b"BASCUS-94236TOMBA-%02d" % slot; f[0x7F] = T.xor(f[:0x7F])
+    c[T.FRAME:2 * T.FRAME] = f
+    b = T.BLOCK
+    c[b:b + 4] = b"SC\x13\x01"
+    fw = lambda s: "".join(chr(0xFF10 + int(ch)) for ch in s)
+    hh, mm = time // 216000, time // 3600 % 60
+    title = ("ＴＯＭＢＡ！　［%s］　%s：%s　Ｐ＝%s　Ｌｅｖｅｌ%s" % (fw("%02d" % slot), fw("%03d" % hh), fw("%02d" % mm),
+                                                    fw("%02d" % lives), fw("%02d" % level))).encode("shift_jis")
+    c[b + 4:b + 4 + len(title)] = title
+    g = b + T.GAME_OFS
+    struct.pack_into("<I", c, g + 8, time)
+    c[g + 0x10] = c[g + 0x11] = 4; c[g + 0x20] = lives; c[g + 0x13] = level
+    c[g + T.GAME_LEN - 1] = T.xor(c[g:g + T.GAME_LEN - 1])
+    return bytes(c)
+
+
+class TestUsaSave(unittest.TestCase):
+    """USA saves (docs/SAVE_FORMAT.md "USA saves"): same GAME block, 60 Hz play time, other title offsets"""
+
+    def setUp(self):
+        self.d = tempfile.mkdtemp()
+        self.p = os.path.join(self.d, "usa.mcd")
+        open(self.p, "wb").write(fake_usa_card(slot=2, time=60 * (3600 + 23 * 60 + 5), lives=3, level=1))
+
+    def test_layout(self):
+        c = T.Card(self.p)
+        self.assertEqual(c.to_bytes(), c.orig)
+        s = c.saves()[0]
+        self.assertEqual((s.slot, s.region[:3], s.hz), (2, "USA", 60))
+        self.assertTrue(s.checksum_ok())
+        self.assertEqual(s.hms(), (1, 23, 5))
+        self.assertIn(" 1:23 ", s.summary())
+        self.assertEqual(T.layout("BESCES-01331TOMBA-00")["hz"], 50)
+        self.assertEqual(T.layout("BISLPS-01144TOMBA-00")["hz"], 60)
+
+    def test_edit_title(self):
+        c = T.Card(self.p)
+        s = c.saves()[0]
+        s.set("time", 60 * (12 * 3600 + 34 * 60)); s.set("lives", 9); s.set("level", 7)
+        out = os.path.join(self.d, "out.mcd")
+        c.save(out)
+        s2 = T.Card(out).saves()[0]
+        self.assertTrue(s2.checksum_ok())
+        # the title as the USA game writes it: the digits at +0x14 / +0x1C / +0x2E / +0x3E, the brackets and colon kept
+        self.assertEqual(s2.title(), "ＴＯＭＢＡ！　［０２］　０１２：３４　Ｐ＝０９　Ｌｅｖｅｌ０７")
+        self.assertEqual(open(out, "rb").read(), fake_usa_card(slot=2, time=60 * (12 * 3600 + 34 * 60), lives=9, level=7))
+        s2.set("time", T.time_max(60))                    # 999:59 at 60 Hz is allowed
+        with self.assertRaises(T.SaveError):
+            s2.set("time", T.time_max(60) + 1)
+
+    def test_jp_title_untouched(self):
+        """JP: 60 Hz, the title layout is not known: an edit keeps the title bytes"""
+        raw = bytearray(fake_usa_card())
+        raw[T.FRAME + 10:T.FRAME + 22] = b"BISLPS-01144"
+        raw[T.FRAME + 0x7F] = T.xor(raw[T.FRAME:T.FRAME + 0x7F])
+        p = os.path.join(self.d, "jp.mcd")
+        open(p, "wb").write(bytes(raw))
+        c = T.Card(p)
+        s = c.saves()[0]
+        before = s.header
+        s.set("time", 60 * 3600); s.set("lives", 5)
+        self.assertEqual(s.header, before)
+        self.assertEqual(s.hms(), (1, 0, 0))
+
+
 class TestSave(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()

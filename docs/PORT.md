@@ -483,9 +483,10 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   player's own data: the title's 8 bpp logo page and CLUT (`SYSTEM/A00202.000` + `A00203.000` PAL, `A00012.000` +
   `A00013.000` USA; texels 8..247 x 0..111 plus the "!" piece 8..71 x 112..223 to its right, page row = logo row + 112
   PAL / 88 USA) saved as `files/games/<id>/logo.png`; without it the name in the title font. Options per version: the
-  USA game gets no game language, translations, NTSC switch, second-screen panel, cut content, debug menu, button
-  icons, PAL cheats or save tools (all PAL-only in the port, docs/USA.md); `--aspect`, `--renderer`, `--fps`,
-  `--skip-intro`, DualShock and vibration stay. An install from before the library (`files/data`, or an image copied
+  USA game gets no game language, translations, NTSC switch, second-screen panel, cut content or button icons (all
+  PAL-only in the port, docs/USA.md); `--aspect`, `--renderer`, `--fps`, `--skip-intro`, DualShock, vibration, the
+  debug menu, infinite lives / vitality (`--poke-every 50:GAME+20:63:1`, `1:GAME+10:4:1`: named fields, the same for
+  both builds) and save import / export (on `files/saves_usa/tombi_mc0.mcd`) stay. An install from before the library (`files/data`, or an image copied
   by an older version) becomes the PAL entry on the first start (a rename). *Disco y datos* shows the selected game
   (*Quitar este juego* removes its data and card, the saves stay). Build: the APK always has the PAL game; with the
   `GAME_FILES_URL_USA` secret `android-apk.yml` also runs `tools/build_full.py --version usa` and
@@ -715,6 +716,9 @@ Done:
 - **Sound, first step**: `shims/sound.c` software SPU (ADPCM, ADSR, pitch, 24 voices) + high-level libsnd (VAB from
   SsVabFakeHead, SEQ sequencer, SsUtKeyOnV effects); `--dump-audio out.wav`. Title music matches tools/audio.py in pitch.
 - `--poke FRAME:ADDR:VALUE[:SIZE]` (debug area select: `--poke 900:1F8001B4:1`), `-v` prints area/section/player x,y.
+  port2 also takes `ADDR` as `NAME[+HEXOFF]` (`GAME+C`, `GAME+20`, `SCRIPT_FLAGS`, `PLAYER+98`, `GVARS`,
+  `IS_DEBUG_MODE_ENABLED`: `port_addr_of_name` in `shims/psyq.c`), resolved to the release the build runs
+  (`gen/version/port_version.h`); the launchers' mods use these, so they work in the USA build too.
 - The BIOS kernel area (KUSEG 0..0xFFFF) is mapped to the RAM object (page 0 needs root / mmap_min_addr 0), so NULL
   reads see zeros as on a PS1 (fixes area 0 section 3).
 
@@ -1092,11 +1096,15 @@ landscape, small logo cards under it); `TOMBI_LIBRARY_VIEW` forces one.
 Per version (`game_library.VERSIONS` `features`): PAL has everything; USA runs `tombi-pc-usa(.exe)` (checkout:
 `build/port2-scus94236[-win]/tombi2`) and has no game language (English only), no text patch / improved translation
 (the hook is `VERSIONS[...]["text_patches"]`, empty for USA/JP: a future retranslation goes there), no 50/60 Hz switch
-(60 Hz, no `--hz`), no *Cut content* page, no `--poke` mods / area select / title DEBUG / debug menu (PAL addresses),
-no button-icon styles (`--prompts` redraws the PAL fonts) and no texture dump (PAL layout); skip intro, autostart,
-keys, controller, renderer, window, aspect, fps and texture packs stay. The other versions always run from their data
-folder (no `--disc`). The save folder is shared by all games (one `tombi_mc0.mcd`; each release saves under its own product
-code, BESCES-01331 / BASCUS-94236; a USA save on that card has not been tried yet, U3).
+(60 Hz, no `--hz`), no *Cut content* page, no title DEBUG entry (its carousel hook is PAL-only), no button-icon styles
+(`--prompts` redraws the PAL fonts) and no texture dump (PAL layout); skip intro, autostart, keys, controller,
+renderer, window, aspect, fps, texture packs and the mods of `port_mods.PORTABLE_MODS` stay: area select, start AP /
+lives, infinite lives / vitality, unlock all events, debug menu (their `--poke`s name the field, `GAME+C`,
+`IS_DEBUG_MODE_ENABLED`..., and the port resolves it to its release; U3). The other versions always run from their data
+folder (no `--disc`). Each release has its own card (U3, as on Android): PAL `tombi_mc0.mcd` in the save folder (or the
+port's default, next to `data/`), USA `saves_usa/tombi_mc0.mcd` under the save folder (or next to the launcher),
+passed as `--save-dir` (`game_library.VERSIONS` `save_sub`; the launcher's save import / export / editor use the same
+card). The USA save layout is docs/SAVE_FORMAT.md "USA saves".
 
 *Graphics* tab: renderer, window scale, fullscreen, aspect, internal resolution, and *Mostrar FPS / Show FPS*
 (default off: `--show-fps`, the on-screen counter; `--log-fps 2` is always passed so the rate goes to the log).
@@ -1124,7 +1132,8 @@ re-enables Play and raises its window when the game exits).
 
 **Save import / export ("cross save").** *Importar partida… / Exportar partida…* in both launchers (PC: buttons under
 the save folder; Android: right column of *Opciones*). They work on the card the game uses, `tombi_mc0.mcd` (PC: the
-save folder, else next to the disc image / `data/`; Android: `files/saves/`), a raw 128 KB image identical on both
+save folder, else next to the disc image / `data/`, USA: its `saves_usa/` subfolder; Android: `files/saves/`, USA
+`files/saves_usa/`), a raw 128 KB image identical on both
 platforms and readable by DuckStation/ePSXe (raw `.mcd`/`.mcr`). Import accepts whole cards (raw
 `.mcd/.mcr/.mc/.srm/.ddf/.ps/.bin` starting with `MC`, DexDrive `.gme`, `.vgs/.mem`), which replace the card, and
 single saves (`.mcs/.ps1/.mcb`, PS3 `.psv`), inserted into free blocks with new directory frames (link chain, XOR
@@ -3108,17 +3117,17 @@ buttons held when it closes are kept from the game until released.
 | Line | What it does |
 |---|---|
 | Noclip (walls) | the player's wall push is skipped (`port/fixes.txt` wraps `pushOutOfWallSegments`); floors and gravity stay, section scroll limits stay |
-| Fly | `GVARS.b3e` (0x8009C93E, `updatePlayer` returns at once) is held; with the menu closed the d-pad moves Tomba in H / Y, L1/R1 in depth, Cross held = 4x; the camera follows; no collision |
-| Infinite vitality / Max AP / Infinite lives | memory writes every vblank (`GAME.playerHealth` = max, `PLAYER+0x98`; AP 99999999; lives 99) |
+| Fly | `GVARS.b3e` (PAL 0x8009C93E, `updatePlayer` returns at once) is held; with the menu closed the d-pad moves Tomba in H / Y, L1/R1 in depth, Cross held = 4x; the camera follows; no collision |
+| Infinite vitality / Max AP / Infinite lives | memory writes every vblank (`GAME.playerHealth` = max, `PLAYER+0x98` = `PLAYER_HEALTH` in gameplay only; AP 99999999; lives 99) |
 | Max vitality 16 | `GAME.playerMaxHealth` and health = 16 |
 | Give item N | `addItemToInventory(N, 1, 1)` from the game loop |
 | Equip weapon N | `GAME.playerEquips.weapon` = N |
-| Event N | X / Square / Circle: the progress byte `0x8009CDA4 + N` = 1 / 0xFF / 0 (any room). L1 / R1: the game's `setEventStarted` / `setEventComplete` (banner, AP, jingle) — **only events of the current area**: another area's title crashes in `acquireSpriteSlot`, exactly as `--title N:start` does |
+| Event N | X / Square / Circle: the progress byte `SCRIPT_FLAGS + N` (PAL 0x8009CDA4) = 1 / 0xFF / 0 (any room). L1 / R1: the game's `setEventStarted` / `setEventComplete` (banner, AP, jingle) — **only events of the current area**: another area's title crashes in `acquireSpriteSlot`, exactly as `--title N:start` does |
 | Complete all events | the 0x82 flag bytes = 0xFF (the launcher's "Unlock all events", live) |
-| Warp area / section / spawn, Warp now | `GAME.nextArea/nextSection/nextSpawnPoint` (0x8009CD94/96/A0) and the main task's mode 7 (area transition), as `raceOfferRematch` does; every `ROOM_COUNTS` room, the cut towns (AREA11/16/17) included; the `DOOR_ROOMS` (empty load lists) are refused |
+| Warp area / section / spawn, Warp now | `GAME.nextArea/nextSection/nextSpawnPoint` (GAME +0x434/+0x436/+0x440) and the main task's mode 7 (area transition), as `raceOfferRematch` does; every `ROOM_COUNTS` room, the cut towns (AREA11/16/17) included; the `DOOR_ROOMS` (empty load lists) are refused |
 | Info overlay | frame, measured vblank rate, area-section, player H/Y/depth, vitality, active cheats, and the player's wall hits (`WALL HIT r AT h,y`, the collision readout) |
 | Speed | normal / slow (each vblank ~2 periods: psyq.c re-anchors its schedule) / fast (`port_realtime` off: as fast as the host runs) |
-| Cut content | `port_cut_content` toggled live; it applies from the next room load |
+| Cut content | `port_cut_content` toggled live; it applies from the next room load (PAL build only: the line is not there in the USA build) |
 
 Launcher modifiers that are safe live, and are in the menu: infinite vitality, infinite lives, AP, all events,
 `--cut-content` (next room). Not live (boot-time only): `--skip-intro`, `--hz`, the area select / title DEBUG
@@ -3139,6 +3148,19 @@ Verified headless (soft renderer; the overlay also on OpenGL under xvfb and with
 - warp: AREA00 -> AREA01 section 0 and, with `--cut-content`, AREA11 section 1 (the cut town);
 - infinite vitality (a `--poke` of the health to 1 shows 4/4), give item 5, event flag set, event 3 started with
   its "Take Me Home" banner and +1000 AP; slow 300 frames 10.3 s (normal 6 s for the same part), fast 500 frames 2.8 s (10 s).
+
+**Every release (2026-11-09, stage U3).** The menu reads the retail data by name: `GAME`, `GVARS`, `PLAYER`,
+`SCRIPT_FLAGS` (plus field offsets, the same in every release) are `PORT_A_*` constants of the build's
+`gen/version/port_version.h`, which `port/tools/portver.py` takes from the version's full link (PAL GAME 0x8009C960 /
+PLAYER 0x800A6038, USA 0x8009BCC8 / 0x800A5398). The scratchpad (task pointer 0x1F8001D4, debug-select flag
+0x1F8001B4) has the same layout in both. The hooks it needs (`gameMainTask`, `pushOutOfWallSegments`,
+`displayDebugScreen`) apply to the USA files too. So the USA build runs it (Cut content line left out). Checked
+headless in the USA build: noclip, infinite vitality (a poke of the health to 1 shows 4/4), max AP, give item 5, warp
+AREA00 -> AREA01, fly (y -52 -> -252), complete all events, the info overlay. The player-object health write is now
+made in gameplay only: during a room load the USA game keeps load data where the player object is (PLAYER+0x98 read
+2992 / -21242 there), and writing it every vblank broke AREA01's effects (crash in `updateOneShotSpriteEffect`). PAL:
+the standard run, the same with `--debug-menu` unused, and a menu session (noclip, vitality, AP, item, warp) are
+byte-identical to the build before (apart from the overlay's fps figure).
 
 ### Second screen: `--second-screen`, `--dump-panel DIR` (port only, opt-in)
 
@@ -3163,6 +3185,8 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   not) is drawn opaque; map markers get a 1 px dark outline, Tomba's face drops its green box (CLUT 482 indices 2 3 5 6
   flooded from the border). Text pairs meet WCAG 4.5:1 (16 px) / 7:1 (8 px): dark text on cream, light text over
   wood / the side map with the game's 1 px dark outline (table in panel.c next to the colours).
+- Versions: the addresses come from `runtime/panel_addrs.h` (`port2/tools/gen_panel_addrs.py`, PAL and USA columns); the USA
+  build's files, text encoding and fonts are in docs/USA.md "Second-screen panel".
 - Text: the game's WFM fonts (`AREA00/MFNT000L.WFM`, `MFNT001L`, `AREAnn/MFNTnn0L` until the alphabet is complete: 8 / 16 px;
   `CFNT999L.WFM`: the 24 px event-title letters; L = the `--lang` letter B F G I H S P W D). A WFM glyph is a bitmap with no
   character code: each is named by the SHA-1 of its image through `runtime/panel_charmap.h` (hashes only, generated from

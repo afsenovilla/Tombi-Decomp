@@ -41,14 +41,14 @@ static void st_time(char *b, int n) { u32 t = G_TIME / 50; snprintf(b, n, "%02u:
 /* ---- what the page shows */
 static int st_weapon_item(void) {   /* the item of the equipped weapon (it_in_use's table), -1 none */
     static const short wi[10] = { 27, -1, -1, -1, -1, 21, 22, 23, 33, 34 };
-    int suit = G8(0x8009C990u), wp = G_WEAPON;
+    int suit = G8(PV_GAME_SUIT), wp = G_WEAPON;
     return (unsigned)(suit - 1) >= 2 && wp < 10 ? wi[wp] : -1;
 }
 static int st_pants_item(void) {   /* the pants worn, or the suit */
     static const short pi[4] = { 32, 29, 24, 28 };
-    int suit = G8(0x8009C990u);
+    int suit = G8(PV_GAME_SUIT);
     if (suit >= 1 && suit <= 3) return 97 + suit;
-    return G8(0x8009D090u) == 0xFF && G_PANTS < 4 ? pi[G_PANTS] : -1;
+    return G8(PV_GAME_PANTS_OK) == 0xFF && G_PANTS < 4 ? pi[G_PANTS] : -1;
 }
 static int st_accessories(int *ids) {   /* the other in-use marks of the item menu: umbrella, fish, jewels... */
     static const u8 acc[] = { 10, 12, 20, 96, 132 }; int n = 0;

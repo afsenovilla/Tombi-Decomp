@@ -18,7 +18,7 @@ A save takes **1 block**; the game writes 0xC00 bytes (the rest of the block is 
 | Version | File name prefix |
 |---|---|
 | PAL SCES-01331 (Tombi!) | `BESCES-01331TOMBA-` (verified) |
-| USA SCUS-94236 (Tomba!) | `BASCUS-94236` (recognised; layout assumed the same, not verified) |
+| USA SCUS-94236 (Tomba!) | `BASCUS-94236` (verified: see "USA saves" below; 1/60 s play time, other title offsets) |
 | JP SLPS-01144 | `BISLPS-01144` (recognised; not verified) |
 | JP development code | `BISCPS-99999`: listed and loaded by the JP retail, never written (see below) |
 
@@ -54,7 +54,7 @@ The save list (`memCardReadDirectory`) reads only GAME +0x00..+0x7F: location = 
 |---|---|---|---|
 | 0x000 | u16 | selectedArea | area the Continue loads (0..19) |
 | 0x002 | u16 | selectedSection | section of that area |
-| 0x008 | u32 | totalTimePlayed | vblanks (50 per second; 180000 = 1 h); title shows up to 999:59 |
+| 0x008 | u32 | totalTimePlayed | vblanks (50 per second PAL, 180000 = 1 h; 60 per second USA / JP); title shows up to 999:59 |
 | 0x00C | u32 | playerAP | AP; editor limit 9 999 999 |
 | 0x010 | u8 | playerHealth | overwritten with max health on load |
 | 0x011 | u8 | playerMaxHealth | vitality; `increaseMaxHealth`: up to 8, up to 16 when +0x71F != 0 |
@@ -84,6 +84,48 @@ Item names: the user's disc, the sub-screen list's own table `ITEM_NAME_STRINGS[
 entry id+3: that bank is the "got item" messages and follows the ids only up to 9 (it has no Bucket, Telescope, Tear
 Jar...; id 12 would read "Wood Boomerang" instead of "Tear Jar"). Event titles: `CFNT999<lang>.WFM` through the
 200-byte table at MAIN0 0x80080410 (event id -> title index, 0xFF = untitled). Unused items / events: docs/CUT_CONTENT.md.
+
+## USA saves (SCUS-94236, verified 2026-11-09)
+
+Checked field by field against the USA C (DSPSUB2: `func_800E954C_scus94236.c` builds the save,
+`func_800E7ECC_scus94236.c` = memCardFileListStep writes / loads it, `func_800E7714_scus94236.c` =
+memCardReadDirectory) and the USA symbols (`config/scus94236/symbol_addrs_*.txt`, whose `PAL 0x...` notes give the
+same offset from GAME for every GAME field: GAME_PLAYER_AP +0x0C, GAME_PLAYER_MAX_HEALTH +0x11, SCRIPT_FLAGS +0x444,
+SCRIPT_GLOBALS +0x544, LOADED_AREA +0x948, the equips +0x952 / +0x953...). The USA link also reuses the PAL C of
+addItemToInventory, increaseMaxHealth, setEventComplete... (`config/scus94236/reuse.txt`) with every sha1 OK, so the
+`GameState` offsets are the same. Then written and loaded in the native port's USA build (below).
+
+The same as PAL: the file name `BASCUS-94236TOMBA-nn`, 1 block, 0xC00 bytes written, the GAME block at +0x200 (0x988
+bytes from `GAME`, USA RAM 0x8009BCC8), zero to +0xBFE, the XOR checksum at +0xBFF over +0x200..+0xBFE
+(`memCardStoreChecksum(D_800E1388, 0xA00)`), zero +0x44..+0x5F, CLUT +0x60, bitmap +0x80 (0x180 bytes), the fields
+set before the copy (+0x22 = 0, +0x12 = 1, player position to +0x954, +0x986 / +0x984 / +0x985 / +0x32) and after a
+load (+0x10 = +0x11, +0x5BC = the current button config), the list's fields (area +0x00, section +0x02, time +0x08,
+AP +0x0C, level +0x13, lives +0x20, read from GAME +0x00..+0x7F).
+
+What differs:
+
+| | PAL | USA |
+|---|---|---|
+| play time unit (GAME +0x08) | 1/50 s (h = t / 180000, m = t / 3000) | **1/60 s** (h = t / 216000, m = t / 3600; also the list's `func_800EB87C`) |
+| header byte 2 | 0x11 (static icon) | **0x13** (the 3-frame animated icon) |
+| title template | per language (`D_800F6A34[lang]`) | one, `D_800E74F4`: `ＴＯＭＢＡ！　［００］　０００：００　Ｐ＝００　Ｌｅｖｅｌ０` |
+| title digit offsets | slot +0x16, time +0x1E / +0x20 / +0x22, `：`, +0x26 / +0x28, lives +0x30, level +0x40 | slot **+0x14**, time **+0x1C / +0x1E / +0x20**, `：`, **+0x24 / +0x26**, lives **+0x2E**, level **+0x3E** (its second digit at +0x40 replaces the template's last space) |
+| icon / CLUT source | `D_800F6A24[lang]` / `D_800F6A2C[lang]` | `D_800F544C` / `D_800F55CC` (one each) |
+
+JP (SLPS-01144): the play-time draw (`func_800ED850_slps01144`) also divides by 216000 / 3600 (1/60 s); its save
+builder is not decompiled, so its title offsets are not known (the tools leave a JP title as it is).
+
+The tools: `tools/tombi_save.py` `LAYOUTS` / `PRODUCT_LAYOUT` (time base and title digits per product code;
+`Save.hz`, `Save.hms()`, the 999:59 limit at the save's own rate), the save editor's play time, `tools/save_import.py`
+`PRODUCT_HZ` / `PRODUCT_SLOT_OFS` (the info line, "Save to another slot") and `SaveImport.java` (the same).
+
+**Checked in the port** (USA build, headless): a save from the save screen (`--menu 2000:4 --pad-script
+1000:start,1300:cross:3x45/30,2200:cross:3,2300:left,2400:cross:3`) creates `BASCUS-94236TOMBA-00` in `--save-dir`:
+header `SC 13 01`, title `ＴＯＭＢＡ！　［００］　０００：００　Ｐ＝０３　Ｌｅｖｅｌ０１`, time 871 (vblanks at 60 per second),
+checksum right, zero after GAME +0x988. Edited with `tombi_save.py set CARD 0 ap=12345 lives=7 level=4 time=299100`
+(1:23:05 at 60 Hz): the USA LOAD screen lists it as `01 Lv.4 :7 1:23 AP 12345 Village of All Beginnings`, and loading
+it (`--pad-script 1000:right,1050:cross,1450:cross:3,1600:left,1700:cross:3`) puts AP 12345, lives 7, level 4 and the
+time (counting on at 60 per second) back in GAME. Not checked: a save made on a real USA console.
 
 ## Container formats read by tools/tombi_save.py
 

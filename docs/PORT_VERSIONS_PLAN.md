@@ -134,11 +134,11 @@ the launcher's data folder (the same as U1 headless; no `--disc`).
 | Area | Work | Verify |
 |---|---|---|
 | Movies / XA | same shims; check `100US` / `END_US.STR` | intro frame dumps, `--dump-audio` |
-| Saves | `card.c:164` accepts `BASCUS-94236`; save editor / `tombi_save.py` / `save_import.py` assume 1/50 s play time: per-product time base; check the USA layout ("assumed the same" in SAVE_FORMAT.md) | headless save/load round trip; a real USA save if available |
+| Saves | **done 2026-11-09**: USA layout verified (1/60 s time, icon byte 0x13, title digits 2 bytes earlier; docs/SAVE_FORMAT.md "USA saves"), per-product time base in `tombi_save.py` / editor / `save_import.py` / `SaveImport.java`, USA card in `saves_usa/` on PC too | headless save/load round trip done; a real USA save not tried |
 | All rooms | `sweep_areas.py` / `audit_pointers.py` with a USA room table | 96-room sweep, no findings beyond `DOOR_ROOMS` |
 | fps, widescreen, HD, GL, texture packs | fixes from the U1 audit; texture-pack keys may differ | render comparisons with PAL |
-| Debug menu, cut content, noclip | symbol names instead of addresses | per-flag smoke runs |
-| Second-screen panel | `panel.c:153` reads `D0SPSUB.BIN` at PAL offsets; `panel_items.inc` / `panel_status.inc` / `panel_hud.c` / `panel_assets.c` use PAL addresses: per-version offset table from the USA symbols and xmatch | `--second-screen --dump-panel` |
+| Debug menu, cut content, noclip | **done 2026-11-09** for the debug menu, noclip, area select and the launcher cheats (`port_version.h` names, `--poke NAME+OFF`; docs/USA.md "U3 saves, debug menu, mods"); `--title-debug` and cut content stay PAL-only | per-flag smoke runs (done headless) |
+| Second-screen panel | **done 2026-11-09** (docs/USA.md "Second-screen panel"): `runtime/panel_addrs.h` from `port2/tools/gen_panel_addrs.py` (symbol + offset per version), USA files / text encoding / embedded WFM3 banks, `tools/wfm_charmap_usa.json` | `--second-screen --dump-panel`: all tabs AREA00 / AREA01, PAL PNGs identical |
 | Text features | `lang.c`, `tpatch.c`, `subscreen_es.c`, `gfx_es.c`, `prompts.c`, `--subscreen-labels` are PAL-only: off for USA | — |
 
 **Risk**: the panel is the largest item. **Effort**: 4-8 sessions (about half the panel).

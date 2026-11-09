@@ -55,7 +55,13 @@ extern unsigned int port_bios[], port_main0_image[], port_main0_bss[], port_x000
 #define PORT_OVL_END 0x80140000u
 #define PORT_AREA_OWN_CODE 0x80115EA4u   /* X0nn: first per-area function (the code before it is shared with X000) */
 #define PORT_A_GAME 0x8009C960u
+#define PORT_A_GVARS 0x8009C930u
+#define PORT_A_PLAYER 0x800A6038u
+#define PORT_A_SCRIPT_FLAGS 0x8009CDA4u
+#define PORT_A_IS_DEBUG_MODE_ENABLED 0x1F8001B4u
 #endif
+/* the retail address of a name of the table above ("GAME", "PLAYER", ...; shims/psyq.c), 0 if unknown */
+unsigned int port_addr_of_name(const char *name, int len);
 /* native pointer for a retail RAM / scratchpad address (runtime and debugging aids only; the game never does this) */
 void *port_ram_ptr(u32p addr);
 int port_is_ram_ptr(const void *p);

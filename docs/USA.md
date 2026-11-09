@@ -184,8 +184,8 @@ GAME 0x8009BCC8) for the runtime. `gen_port.sources_version` builds every USA un
   `runtime/main0_handwritten.c` / `x000_handwritten.c` (PAL units by PAL address) are PAL-only.
 
 Runtime: the data folder's boot sha1 decides; a folder of another known release is refused with a message naming the
-right build (both ways). `--lang`, `--text-patch`, `--picture ntsc`, `--cut-content`, `--civ-test` and the second-screen
-panel are PAL-only (ignored with a message). Default 60 Hz; the play time counts 1/60 s natively (port_play_time_tick
+right build (both ways). `--lang`, `--text-patch`, `--picture ntsc`, `--cut-content`, `--civ-test` are PAL-only (ignored
+with a message). The second-screen panel works (U3, below: "Second-screen panel"). Default 60 Hz; the play time counts 1/60 s natively (port_play_time_tick
 off).
 
 Checked (headless, i386): logos, title (NEW GAME / LOAD carousel), new game, AREA00: the 100 Year Old Wise Man's
@@ -196,7 +196,49 @@ the Windows / Android builds of USA.
 
 Open (U3): `port/fixes.txt` lines that only hit inactive branches are listed at generation (`fix_audit`, 27 for USA:
 widescreen culling 0x141, HUD position, the NTSC-picture emulation, which USA does not need); the runtime features
-with PAL addresses (panel, debug menu, animlog, lang); the launchers (U2).
+with PAL addresses (animlog, lang); the launchers (U2).
+
+### Second-screen panel (stage U3, 2026-11-09)
+
+`--second-screen` / `--dump-panel` work in the USA build (docs/PORT.md "Second screen"). What differs from PAL:
+- addresses: `port2/runtime/panel_addrs.h` (79 `PV_*` macros, a USA and a PAL column), written by
+  `port2/tools/gen_panel_addrs.py` from the PROVIDE tables of both full links as symbol + offset (GAME + 0x13, PLAYER +
+  0xA6, MAP_NODES, EVENT_NAME_STRINGS, SUBSCREEN_COND_OPS + 0xB4...); the PAL column must equal the addresses the panel
+  was written against, and `--check data game_usa/fs` compares the 14 tables that hold the same bytes on both discs
+  (map graph, menu order, item tables, NOW LOADING sprites, sine table): all equal. RAM moves by 0xC98 (GAME block) /
+  0xCA0 (objects), the sub-screen tables by 0xD08..0xF54;
+- files: `SYSTEM/DSPSUB.BIN`, `DSPSUB3.BIN`; one page `SYSTEM/A00014.000` at (64, 0) holds PAL's `A10301` + `A00300`
+  (item and event icons identical, the sub-screen font retouched); `A00003.GAM` = PAL `A10003.GAM`; NOW LOADING
+  `SYSTEM/A00030.000` (= PAL `A00900`); the sub-screen sprite table inside `AREA19/A003.GAM` (+0x509C unpacked,
+  tools/event_icons.py); the palette block at DSPSUB `SUBSCREEN_CLUT_IMAGE` (+0x962C);
+- text: the sub-screen strings use ASCII - 32 up to '?' (0 = space) and ASCII - 33 from 'A' (PAL: Latin-1 + 140); no
+  WFM files, the panel reads the WFM3 banks inside `AREA01/A008.GAM`, `AREA02/A003.GAM`, `AREA00/D003.GAM` (8 / 16 px
+  dialogue banks, the 24 px title bank); the retouched glyphs are named by `tools/wfm_charmap_usa.json` (57 hashes,
+  `tools/wfm_charmap_usa.py`: each USA bank against its PAL English twin, dialogue by dialogue), merged into
+  `runtime/panel_charmap.h` after the PAL ones. Same glyph counts as PAL English (76 / 73 / 60);
+- item tab: the 18 condition ops and the use handler are the USA natives (some built from another op's template:
+  `subScreenCondPlayerH__800ED4F0` is CondPlayerD, `func_800E89F8` the handler); English only (`--lang` is PAL-only),
+  the chrome says "Tomba".
+Checked headless (i386): every tab (Status, Events, Map, Items) in AREA00 s0 and AREA01 s0, the NOW LOADING mirror
+(identical to PAL), item use through the panel (Blackjack, Normal Pants: handler result 1), `--hud-bottom`. Against
+the PAL renders 0.1-0.4 % of the pixels differ (the retouched glyphs), AREA00's map 17 % (its far backdrop is the
+game's own NTSC frame). Top-down rooms (AREA05 s0, AREA02 s3; AREA02 s3 also without the panel) crash in the USA build
+(`I0NFO2/3_overheadPlayerHandler` reads PAL 0x8009C963: a USA fix, not the panel). Not checked: the device, the
+wasm2c / Android build of USA.
+
+
+**U3 saves, debug menu, mods (2026-11-09).** Saves: the USA save is the PAL layout with 1/60 s play time, a 3-frame
+icon (header byte 0x13) and the title digits 2 bytes earlier (docs/SAVE_FORMAT.md "USA saves"); the USA build writes
+`BASCUS-94236TOMBA-nn` from the save screen and loads it back (checked headless, also after editing it with
+`tools/tombi_save.py`), and the save tools read the time per product. Debug menu and mods: `port_version.h` now also
+names `GVARS`, `PLAYER`, `SCRIPT_FLAGS`, `IS_DEBUG_MODE_ENABLED` (from the version's full link), `runtime/debugmenu.c`
+uses them (GAME field offsets are the same in both releases), and `--poke` takes `NAME[+OFF]`; the launchers' mods
+write named fields. Working in the USA build (headless): `--debug-menu` (noclip, fly, vitality, AP, item, all events,
+warp, overlay; no Cut content line), the debug area select (`--poke 900:IS_DEBUG_MODE_ENABLED:1 --poke 1250:GAME:A:2
+--poke 1250:GAME+2:0:2 --pad-script 1000:start,1300:circle:3`: AREA10 with the port's place names), start AP / lives,
+infinite vitality / lives, unlock all events. Still PAL-only: `--title-debug` (the USA title carousel is
+`titleDrawMenuCarousel_scus94236.c`, which the fixes.txt hook does not reach), `--cut-content`, `--civ-*`. The PC
+launcher keeps the USA card in `saves_usa/` (as Android's `files/saves_usa`).
 
 ## English text: USA vs PAL (2026-11-09)
 

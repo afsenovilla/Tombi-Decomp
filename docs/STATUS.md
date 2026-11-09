@@ -35,7 +35,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    C that fell back to asm (docs/USA.md "Native port"). **U2 done** (2026-11-09): PC and Android launchers are a game
    library (docs/PORT.md "Game library", `tools/game_library.py`, `Library.java`; `list` look by default, the user's
    pick), USA runs `tombi-pc-usa` / `libtombi_usa.so`, port2-exe.yml and android-apk.yml build them when
-   `GAME_FILES_URL_USA` is set. Next: U3 (fixes.txt USA spellings listed by the generator's branch audit, panel, saves).
+   `GAME_FILES_URL_USA` is set. **U3 in progress** (2026-11-09): the second-screen panel (docs/USA.md "Second-screen
+   panel": `runtime/panel_addrs.h` per version; PAL panel PNGs identical), saves, debug menu, area select and the launcher
+   cheats (docs/USA.md "U3 saves, debug menu, mods") work in the USA build; next: fixes.txt USA spellings, top-down rooms.
 
 0. **Data bar of JP / USA** (2026-11-09): 0.94 % -> 83.74 % (JP), 0.97 % -> 90.88 % (USA); docs/JP.md "Data
    measure". Fixed the overlay base of the version data claims, the X00 prefix of the area overlays counted once,

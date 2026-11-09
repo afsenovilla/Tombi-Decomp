@@ -29,20 +29,23 @@ static char msg[48]; static int msg_t;
 enum { A_NONE, A_ITEM, A_EV_START, A_EV_DONE, A_WARP, A_ALL_EVENTS };
 static volatile int action, action_arg;
 
-/* game addresses (notes/data_names_main0.csv, include/tomba/game.h gameConfig) */
-#define PLAYER       PORT_M0(0x800A6038u)
-#define G_AREA       (*(u16 *)PORT_M0(0x8009C960u))
-#define G_SECTION    (*(u16 *)PORT_M0(0x8009C962u))
-#define G_AP         (*(u32 *)PORT_M0(0x8009C96Cu))
-#define G_HEALTH     (*(u8 *)PORT_M0(0x8009C970u))
-#define G_MAXHEALTH  (*(u8 *)PORT_M0(0x8009C971u))
-#define G_LIVES      (*(u8 *)PORT_M0(0x8009C980u))
-#define G_WEAPON     (*(u8 *)PORT_M0(0x8009D2B2u))
-#define G_NEXT_AREA  (*(u16 *)PORT_M0(0x8009CD94u))
-#define G_NEXT_SEC   (*(u16 *)PORT_M0(0x8009CD96u))
-#define G_NEXT_SPAWN (*(u16 *)PORT_M0(0x8009CDA0u))
-#define G_EVENT(i)   (*(u8 *)PORT_M0(0x8009CDA4u + (i)))
-#define GV_FREEZE    (*(u8 *)PORT_M0(0x8009C93Eu))   /* GVARS.b3e: updatePlayer returns at once (player kept visible) */
+/* game data (include/gamestate.h GAME, include/gvars.h GVARS): the addresses of the release this build runs
+   (port_version.h PORT_A_*, from the version's full link; PAL GAME 0x8009C960, USA 0x8009BCC8) plus the field
+   offsets, which are the same in every release (the USA link reuses the PAL C of addItemToInventory, setEventComplete...) */
+#define PLAYER       PORT_M0(PORT_A_PLAYER)
+#define G_(o, T)     (*(T *)PORT_M0(PORT_A_GAME + (o)))
+#define G_AREA       G_(0x000, u16)
+#define G_SECTION    G_(0x002, u16)
+#define G_AP         G_(0x00C, u32)
+#define G_HEALTH     G_(0x010, u8)
+#define G_MAXHEALTH  G_(0x011, u8)
+#define G_LIVES      G_(0x020, u8)
+#define G_WEAPON     G_(0x952, u8)
+#define G_NEXT_AREA  G_(0x434, u16)
+#define G_NEXT_SEC   G_(0x436, u16)
+#define G_NEXT_SPAWN G_(0x440, u16)
+#define G_EVENT(i)   (*(u8 *)PORT_M0(PORT_A_SCRIPT_FLAGS + (i)))
+#define GV_FREEZE    (*(u8 *)PORT_M0(PORT_A_GVARS + 0x0E))   /* GVARS.b3e: updatePlayer returns at once (player kept visible) */
 
 static const struct { int area, n; } rooms[] = {{0, 6}, {1, 5}, {2, 6}, {3, 6}, {4, 20}, {5, 4}, {6, 3}, {8, 4}, {9, 7},
     {10, 9}, {11, 5}, {13, 2}, {14, 8}, {16, 7}, {17, 11}, {18, 3}, {19, 3}};
@@ -76,6 +79,9 @@ static void say(const char *s) { snprintf(msg, sizeof msg, "%s", s); msg_t = 150
 /* ---- menu lines ---- */
 enum { L_NOCLIP, L_FLY, L_HP, L_AP, L_LIVES, L_MAXHP, L_ITEM, L_WEAPON, L_EVENT, L_ALLEV, L_AREA, L_SEC, L_SPAWN, L_WARP,
        L_OVERLAY, L_SPEED, L_CUT, L_COUNT };
+/* the lines of this build: --cut-content reads PAL addresses and is off in another release's build (main.c), so
+   its line (the last) is PAL-only */
+#define N_LINES (PORT_VERSION_PAL ? L_COUNT : L_CUT)
 static const char *onoff(int v) { return v ? "ON" : "OFF"; }
 static void line_text(int i, char *b, int n) {
     extern int port_cut_content;
@@ -164,7 +170,9 @@ void port_debug_pad(u16 *buttons) {
         *buttons = 0; return;
     }
     /* live cheats (memory only: safe from the vblank, like --poke-every) */
-    if (inf_hp) { if (G_MAXHEALTH < 4) G_MAXHEALTH = 4; G_HEALTH = G_MAXHEALTH; *(s16 *)(PLAYER + 0x98) = G_MAXHEALTH; }
+    /* (the player object's health, PLAYER_HEALTH, only in gameplay: while a room loads the USA game keeps load data
+       where the player object is, and a write there crashed AREA01's effects) */
+    if (inf_hp) { if (G_MAXHEALTH < 4) G_MAXHEALTH = 4; G_HEALTH = G_MAXHEALTH; if (in_gameplay()) *(s16 *)(PLAYER + 0x98) = G_MAXHEALTH; }
     if (inf_ap) G_AP = 99999999u;
     if (inf_lives) G_LIVES = 99;
     /* speed: realtime pacing off = as fast as the host runs; slow = one extra period of sleep per vblank */
@@ -173,8 +181,8 @@ void port_debug_pad(u16 *buttons) {
     if (speed == 1) port_sleep_us(2000000ull / (unsigned)port_hz + 1000);   /* late by more than a period: psyq.c re-anchors its schedule, so each vblank takes ~2 periods */
     if (menu_open) {
         if (press & 0x1008 && !(b & 0x0C00)) { menu_open = 0; swallow = b; *buttons = 0; return; }   /* Triangle / Start */
-        if (press & 0x0010) cursor = wrap(cursor - 1, L_COUNT);
-        if (press & 0x0040) cursor = wrap(cursor + 1, L_COUNT);
+        if (press & 0x0010) cursor = wrap(cursor - 1, N_LINES);
+        if (press & 0x0040) cursor = wrap(cursor + 1, N_LINES);
         if (press & 0x0080) adjust(cursor, (b & 0x0100) ? -10 : -1);   /* L2 held: steps of 10 */
         if (press & 0x0020) adjust(cursor, (b & 0x0100) ? 10 : 1);
         if (press & 0xEC00) activate(cursor, press);
@@ -273,10 +281,10 @@ void port_debug_draw(void) {
     if (msg_t > 0) text(4, 220, msg, yellow);
     if (menu_open) {
         int x0 = 20, y0 = 50, lh = 10;
-        port_gpu_overlay_fill(x0 - 4, y0 - 14, 288, L_COUNT * lh + 26, 0x0C63);
+        port_gpu_overlay_fill(x0 - 4, y0 - 14, 288, N_LINES * lh + 26, 0x0C63);
         text(x0, y0 - 11, "DEBUG MENU  X=OK  TRI=CLOSE  L2=x10", white);
-        if (cursor == L_EVENT) text(x0, y0 + L_COUNT * lh + 1, "L1/R1: GAME START/COMPLETE (THIS AREA)", grey);
-        for (int i = 0; i < L_COUNT; i++) {
+        if (cursor == L_EVENT) text(x0, y0 + N_LINES * lh + 1, "L1/R1: GAME START/COMPLETE (THIS AREA)", grey);
+        for (int i = 0; i < N_LINES; i++) {
             line_text(i, b, sizeof b);
             text(x0 + 8, y0 + i * lh, b, i == cursor ? yellow : (i == L_CUT ? grey : white));
             if (i == cursor) text(x0, y0 + i * lh, ">", yellow);
