@@ -138,7 +138,7 @@ the launcher's data folder (the same as U1 headless; no `--disc`).
 | All rooms | `sweep_areas.py` / `audit_pointers.py` with a USA room table | 96-room sweep, no findings beyond `DOOR_ROOMS` |
 | fps, widescreen, HD, GL, texture packs | fixes from the U1 audit; texture-pack keys may differ | render comparisons with PAL |
 | Debug menu, cut content, noclip | symbol names instead of addresses | per-flag smoke runs |
-| Second-screen panel | `panel.c:153` reads `D0SPSUB.BIN` at PAL offsets; `panel_items.inc` / `panel_status.inc` / `panel_hud.c` / `panel_assets.c` use PAL addresses: per-version offset table from the USA symbols and xmatch | `--second-screen --dump-panel` |
+| Second-screen panel | **done 2026-11-09** (docs/USA.md "Second-screen panel"): `runtime/panel_addrs.h` from `port2/tools/gen_panel_addrs.py` (symbol + offset per version), USA files / text encoding / embedded WFM3 banks, `tools/wfm_charmap_usa.json` | `--second-screen --dump-panel`: all tabs AREA00 / AREA01, PAL PNGs identical |
 | Text features | `lang.c`, `tpatch.c`, `subscreen_es.c`, `gfx_es.c`, `prompts.c`, `--subscreen-labels` are PAL-only: off for USA | — |
 
 **Risk**: the panel is the largest item. **Effort**: 4-8 sessions (about half the panel).

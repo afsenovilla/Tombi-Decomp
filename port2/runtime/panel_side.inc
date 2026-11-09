@@ -26,9 +26,9 @@ extern unsigned long long port_time_us(void);
 #ifndef PANEL_MAP_ZOOMS
 #define PANEL_MAP_ZOOMS 3
 #endif
-#define P_X ((s16)G16(0x800A604Au))
-#define P_Y ((s16)G16(0x800A604Eu))
-#define P_LEFT (G8(0x800A60DEu) == 0)  /* PLAYER +0xA6: the side he faces, 0 left, 2 right (measured) */
+#define P_X ((s16)G16(PV_PLAYER_X))
+#define P_Y ((s16)G16(PV_PLAYER_Y))
+#define P_LEFT (G8(PV_PLAYER_FACING) == 0)  /* PLAYER +0xA6: the side he faces, 0 left, 2 right (measured) */
 #define FACE_LEFT_FLIP 0               /* the sub-screen face sprite looks left */
 #define FACE_RIGHT_FLIP PA_FLIPX
 #define SIDE_GAME_W 440               /* world units across the game screen at Tomba's depth (zoom's last level) */

@@ -1089,15 +1089,14 @@ int main(int argc, char **argv) {
     if (headless) port_window = 0;
 #if !PORT_VERSION_PAL
     /* another version (gen/version/port_version.h): the PAL-only features (the language overlays, the text patches,
-       the PAL->NTSC picture, the panel's tables, the cut-content and Civilization rebuilds) read PAL addresses and the
-       PAL disc's files: off, said once */
+       the PAL->NTSC picture, the cut-content and Civilization rebuilds) read PAL addresses and the PAL disc's files:
+       off, said once.  The second-screen panel reads the version's own addresses (runtime/panel_addrs.h) and files */
     if (port_lang || port_text_patch_n || picture > 0 || port_cut_content || port_civ_test) {
         extern int port_panel_on;
         port_printf("[port2] %s build: --lang, --text-patch, --picture ntsc, --cut-content and --civ-test are PAL-only (ignored)\n", PORT_VERSION_SERIAL);
         port_lang = 0; port_text_patch_n = 0; picture = 0; port_cut_content = 0; port_civ_test = 0; (void)port_panel_on;
     }
     port_no_translation_file = 1;
-    { extern int port_panel_on; if (port_panel_on) { port_printf("[port2] %s build: the second-screen panel is PAL-only for now (off)\n", PORT_VERSION_SERIAL); port_panel_on = 0; } }
 #endif
     port_ntsc = picture > 0;     /* opt-in (--picture ntsc): the PAL picture is the default at 50 and 60 Hz */
     if (port_ntsc) port_printf("[port2] NTSC picture: the US build's 320x224 screen (--picture pal for the PAL 320x256 one)\n");
@@ -1140,6 +1139,7 @@ int main(int argc, char **argv) {
     port_watchdog_start();     /* after SDL_Init: a slow driver start must not count as a hang */
     game_main();
 #else
+    { extern int port_panel_on; extern void port_panel_init(void); if (port_panel_on) port_panel_init(); }   /* --second-screen: names and map graph from the disc */
     port_watchdog_start();
     {   /* the version's own main() (src/main_<serial>.c, matched C), renamed port_game_main by the generator; its
            frame wait calls port_vblank (port/fixes.txt) */
