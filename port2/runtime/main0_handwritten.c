@@ -14,6 +14,7 @@ typedef unsigned int u32; typedef int s32;
 #define F16(o, off) (*(u16 *)((u8 *)(o) + (off)))
 #define S16(o, off) (*(s16 *)((u8 *)(o) + (off)))
 #define F32(o, off) (*(u32 *)((u8 *)(o) + (off)))
+#if PORT_VERSION_PAL     /* PAL units translated by hand, bound by their PAL addresses (gen_port handwritten_port2_funcs) */
 
 extern void ApplyRotMatrix(void *, void *);
 extern u16 GetClut(int, int);
@@ -562,6 +563,7 @@ void func_8004AE7C(u8 *o) {
         return;
     }
 }
+#endif   /* PORT_VERSION_PAL: what follows (the widescreen helpers) is shared */
 
 /* --widescreen (port/fixes.txt, callAreaModelLinkHook): the per-area hook picks which 80-unit-wide blocks of the
  * area's background model (all already in RAM) are drawn this frame from the camera X (scratchpad 0x176,
@@ -600,7 +602,7 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
     if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7)) return;
     static u32 tmp[0x5b + 4];
     int d = 2 * port_ws_cull + 40;
-    u16 sec = *(volatile u16 *)PORT_M0(0x8009C962u);
+    u16 sec = *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2);     /* GAME.section */
     int a3 = game == 3 && (sec == 2 || sec == 3);
     for (int s = -1; s <= 1; s += 2) {
         s16 cam = SPAD(s16, 0x176); u16 ox = *origin_x;

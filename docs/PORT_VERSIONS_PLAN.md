@@ -82,6 +82,14 @@ in version branches.
 
 ## Stage U1: generator per version ("boots and reaches gameplay headless")
 
+**Done 2026-11-09** (docs/USA.md "Native port"): `build/port2-scus94236/tombi2` runs the USA disc headless through the
+logos, the title, a new game and AREA00 gameplay (dialogue, event title, HUD, walking, enemies); report: 0 unresolved
+literals, 45 stubs (PAL 148). The PAL build generates the same files and the same frames. Open: the 27 fixes.txt lines
+that only reach PAL branches (widescreen culling, HUD, NTSC-picture emulation; the generator lists them) need USA
+spellings (U3); the runtime features with PAL addresses (panel, debug menu, lang, animlog) are off in the USA build.
+As built: `port/tools/portver.py` maps the version's files onto the PAL program names instead of a `pal_prog` rename
+of every table; `gen_port.sources_version` is the version path (the PAL `sources()` is untouched).
+
 - **Goal**: `build/port2-scus94236/tombi2` boots `data/` extracted from the USA disc through logos, title, new game
   and AREA00 headless (`--skip-movies`).
 - **Generator**: `PORT_VERSION` (env / CMake, default PAL), output `build/port2-<ver>/gen`; game C with

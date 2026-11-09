@@ -139,3 +139,48 @@ USA data names: `python3 tools/jp_globals.py --version scus94236 --write` (286 d
 globals, `// BEGIN jp_globals` blocks of `config/scus94236/symbol_addrs_*.txt`); the audit confirms them (2 000 more
 names agree). Open: `SCRIPT_FLAGS` (block rule 8009C10C, but the USA script flag ops read 8009C20C), `PLAYER_H` /
 `PLAYER_Y` in the sub-screen condition templates.
+
+## Native port (stage U1, 2026-11-09)
+
+```
+python3 tools/build_full.py --version usa -j 8               # the symbol source (build/scus94236/full)
+python3 tools/extract_data.py game_usa/disc.bin data_usa      # the USA disc's data/ (manifest: serial, boot, boot_sha1)
+cmake -S port2 -B build/port2-scus94236 -DPORT_VERSION=usa && make -C build/port2-scus94236 -j8
+build/port2-scus94236/tombi2 --data data_usa --headless --skip-movies --frames 4500 --pad-script 1000:start,...
+```
+
+`PORT_VERSION` (CMake cache variable, passed to the generator as an environment variable; empty = PAL, the default
+build, unchanged) selects `port/tools/portver.py`: it points `tools/units.py`, `tools/sysovl.py` and `tools/areas.py` at
+the USA files under the PAL program names (MAIN0 = SCUS_942.36, X000 = SYSTEM/X00.BIN, X0nn = SYSTEM/Xnn.BIN,
+D0SPSUB = SYSTEM/DSPSUB.BIN, ...), takes the units from `units("scus94236")` (plus the `// VERSION` files without a
+symbol line: the message box 0x8002FA24) and the symbols from `build/scus94236/full`, and writes
+`gen/version/port_version.h` (overlay base 0x800E7388, first area function 0x801151F4, boot file and sha1, 60 Hz,
+GAME 0x8009BCC8) for the runtime. `gen_port.sources_version` builds every USA unit from its file, once per unit:
+- the branches of the other versions are blanked first (`strip_versions`, also in the headers), so the fixes, the
+  address resolver and the arity forwarding see only the USA code; the game C is compiled with `-DVERSION_SCUS_94236`;
+- each copy of a template file gets the names its linked object (`build/scus94236/full/obj/<prog>__<ADDR>.link.o`)
+  resolved: a name whose address is not the one the port links that name to becomes `name__ADDR`, or directly the
+  native function at that address (`/* @ADDR */` keeps the PORT_ARG forwarding by address); a second definition of a
+  name is `name__ADDR`, a template copy takes the USA function's own name (GetVideoMode from GetGraphType.c);
+- a D_ name is never resolved by its number unless that number is its USA address; the static tables a file defines
+  take the ELF's address, the scratchpad `.set`s (spad_remap applied) are one table;
+- Psy-Q: the PAL library files and the USA-only files from 0x8005B38C on are left to the shims (a library unit with no
+  name of its own takes the PAL name of its pair, e.g. SsSetAutoKeyOffMode); `symkind.txt` tells gen2's link which
+  names are data (TITLE_MENU_GLYPHS sits at an X000 function start);
+- main(): `src/main_scus94236.c` itself, renamed `port_game_main` (its frame wait calls `port_vblank`, port/fixes.txt);
+  `runtime/main0_handwritten.c` / `x000_handwritten.c` (PAL units by PAL address) are PAL-only.
+
+Runtime: the data folder's boot sha1 decides; a folder of another known release is refused with a message naming the
+right build (both ways). `--lang`, `--text-patch`, `--picture ntsc`, `--cut-content`, `--civ-test` and the second-screen
+panel are PAL-only (ignored with a message). Default 60 Hz; the play time counts 1/60 s natively (port_play_time_tick
+off).
+
+Checked (headless, i386): logos, title (NEW GAME / LOAD carousel), new game, AREA00: the 100 Year Old Wise Man's
+dialogue, event title, HUD, walking, scrolling, enemies; report 0 unresolved literals, 45 stubs (PAL 148), 1 stub call
+in 4500 frames (SpuInit). The PAL build generates the same files as before (report, syms.ld, data.c, funcmap.c, stubs.c
+identical) and its frames are byte-identical over 3000 frames. Not checked: other areas, movies, saves, sound output,
+the Windows / Android builds of USA.
+
+Open (U3): `port/fixes.txt` lines that only hit inactive branches are listed at generation (`fix_audit`, 27 for USA:
+widescreen culling 0x141, HUD position, the NTSC-picture emulation, which USA does not need); the runtime features
+with PAL addresses (panel, debug menu, animlog, lang); the launchers (U2).
