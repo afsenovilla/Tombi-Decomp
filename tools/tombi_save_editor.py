@@ -398,8 +398,8 @@ def scaled(img, size):
     return QPixmap.fromImage(img.scaled(size, size, Qt.KeepAspectRatio, Qt.FastTransformation))
 
 
-def fmt_time(vb):
-    t = vb // 50
+def fmt_time(vb, hz=50):
+    t = vb // hz          # vblanks: 50 per second PAL, 60 USA / JP (tombi_save.LAYOUTS)
     return "%d:%02d:%02d" % (t // 3600, t // 60 % 60, t % 60)
 
 
@@ -1499,9 +1499,9 @@ class Editor(QMainWindow):
         h, m, s = (x.value() for x in self.time_spins)
         sec = h * 3600 + m * 60 + s
         cur = self.save.get("time")
-        if cur // 50 == sec:
+        if cur // self.save.hz == sec:
             return
-        err = self.edit(self.L["time"], "f:time", lambda: self.save.set("time", sec * 50))
+        err = self.edit(self.L["time"], "f:time", lambda: self.save.set("time", sec * self.save.hz))
         self.time_err.setText(err or "")
         self.time_err.setVisible(bool(err))
 
@@ -1648,7 +1648,7 @@ class Editor(QMainWindow):
         L = self.L
         c.title.setText("%s %02d" % (L["slot"], s.slot))
         c.loc.setText(self.area_name(s.get("area")))   # the card is narrow: the area alone; the Overview adds the room
-        c.meta.setText("%s   ·   %s %d   ·   %s AP" % (fmt_time(s.get("time")), L["lv"], s.get("level"),
+        c.meta.setText("%s   ·   %s %d   ·   %s AP" % (fmt_time(s.get("time"), s.hz), L["lv"], s.get("level"),
                                                      format(s.get("ap"), ",")))
 
     def refresh_overview(self):
@@ -1668,7 +1668,7 @@ class Editor(QMainWindow):
             self.hero_badges.addWidget(label(txt, name))
         self.hero_badges.addStretch(1)
         st = self.stats
-        st["playtime"][0].setText(fmt_time(s.get("time")))
+        st["playtime"][0].setText(fmt_time(s.get("time"), s.hz))
         st["playtime"][1].setText("h:mm:ss")
         st["ap"][0].setText(format(s.get("ap"), ","))
         st["ap"][1].setText("max 9,999,999")
@@ -1700,7 +1700,7 @@ class Editor(QMainWindow):
             a = s.get("area")
             ix = self.area_cb.findData(a)
             self.area_cb.setCurrentIndex(max(ix, 0))
-            t = s.get("time") // 50
+            t = s.get("time") // s.hz
             for sp, v in zip(self.time_spins, (t // 3600, t // 60 % 60, t % 60)):
                 sp.setValue(v)
             self.time_err.hide()

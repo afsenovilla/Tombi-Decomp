@@ -196,7 +196,7 @@ the Windows / Android builds of USA.
 
 Open (U3): `port/fixes.txt` lines that only hit inactive branches are listed at generation (`fix_audit`, 27 for USA:
 widescreen culling 0x141, HUD position, the NTSC-picture emulation, which USA does not need); the runtime features
-with PAL addresses (debug menu, animlog, lang); the launchers (U2).
+with PAL addresses (animlog, lang); the launchers (U2).
 
 ### Second-screen panel (stage U3, 2026-11-09)
 
@@ -225,6 +225,20 @@ the PAL renders 0.1-0.4 % of the pixels differ (the retouched glyphs), AREA00's 
 game's own NTSC frame). Top-down rooms (AREA05 s0, AREA02 s3; AREA02 s3 also without the panel) crash in the USA build
 (`I0NFO2/3_overheadPlayerHandler` reads PAL 0x8009C963: a USA fix, not the panel). Not checked: the device, the
 wasm2c / Android build of USA.
+
+
+**U3 saves, debug menu, mods (2026-11-09).** Saves: the USA save is the PAL layout with 1/60 s play time, a 3-frame
+icon (header byte 0x13) and the title digits 2 bytes earlier (docs/SAVE_FORMAT.md "USA saves"); the USA build writes
+`BASCUS-94236TOMBA-nn` from the save screen and loads it back (checked headless, also after editing it with
+`tools/tombi_save.py`), and the save tools read the time per product. Debug menu and mods: `port_version.h` now also
+names `GVARS`, `PLAYER`, `SCRIPT_FLAGS`, `IS_DEBUG_MODE_ENABLED` (from the version's full link), `runtime/debugmenu.c`
+uses them (GAME field offsets are the same in both releases), and `--poke` takes `NAME[+OFF]`; the launchers' mods
+write named fields. Working in the USA build (headless): `--debug-menu` (noclip, fly, vitality, AP, item, all events,
+warp, overlay; no Cut content line), the debug area select (`--poke 900:IS_DEBUG_MODE_ENABLED:1 --poke 1250:GAME:A:2
+--poke 1250:GAME+2:0:2 --pad-script 1000:start,1300:circle:3`: AREA10 with the port's place names), start AP / lives,
+infinite vitality / lives, unlock all events. Still PAL-only: `--title-debug` (the USA title carousel is
+`titleDrawMenuCarousel_scus94236.c`, which the fixes.txt hook does not reach), `--cut-content`, `--civ-*`. The PC
+launcher keeps the USA card in `saves_usa/` (as Android's `files/saves_usa`).
 
 ## English text: USA vs PAL (2026-11-09)
 
