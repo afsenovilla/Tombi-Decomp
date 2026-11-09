@@ -221,7 +221,7 @@ jobs:
           cp "$SD/3ds/tombi/log.txt" shots/log.txt 2>/dev/null || echo "(no log.txt)" > shots/log.txt
           echo "== windows"; xwininfo -root -tree | grep -v "has no name" | head -30 || true
           echo "== azahar.log"; grep -v -i "keysym\|xkbcomp" azahar.log | head -120
-          echo "== azahar_log.txt"; find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" -exec tail -60 {} \; 2>/dev/null | head -80
+          echo "== azahar_log.txt"; find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" -exec grep -v "Config <Info>" {} \; 2>/dev/null | grep -i -E "loader|3dsx|error|critical|warning|tombi|svc|memory" | head -80
           echo "== log.txt"; tail -60 shots/log.txt
 
       # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
