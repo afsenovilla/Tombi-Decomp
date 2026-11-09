@@ -1182,6 +1182,10 @@ def sources_version(outdir, progs, ovls=(), areas=()):
     for n, k in _global_defs(out_texts).items():
         a = native_addr.get(n, canon.get(n))
         if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
+    # a template copy defines its file's name under the unit's native one (`#define probeGrabPointInBoxA
+    # probeGrabPointInBoxB`): its arity belongs to that address too (playerGrabCat4Type01 passed nothing)
+    for a, k in native_arity(out_texts, {n: a for n, a in native_addr.items()}).items():
+        arity_addr[a] = max(arity_addr.get(a, 0), k)
     def fallback_for(table, arity=arity_addr):
         def fb(n):
             a = table.get(n)
@@ -1209,7 +1213,9 @@ def sources_version(outdir, progs, ovls=(), areas=()):
     # function or data, by what the program that gave the name has at its address (gen2's link otherwise guesses from
     # the overlay function starts: TITLE_MENU_GLYPHS, O0PTSUB0 data at 0x800E95E4, is X000's updateEggShellPiece)
     starts = {p: set(u.addr for u in U.get(p, [])) for p in allp}
-    for p in areas: starts[p] |= starts.get("X000", set())
+    # an area shares X00's prefix only: the X00 functions from AREA_OWN on are AREA00's own (a00TornadoStep at
+    # 0x80118CD8 made X017's WATERFALL_HINT_NPC_DEFS a function, linked to its dispatch thunk)
+    for p in areas: starts[p] |= set(a for a in starts.get("X000", set()) if a < PV.AREA_OWN)
     # X00's link names the area functions its code calls by address (playerInitMode's FUN_801212a0 = X01's
     # playerInitAreaHook 0x801205D8): a function, reached through its dispatch thunk, not X000 image data
     area_starts = set(u.addr for p in areas for u in U.get(p, []) if u.addr >= PV.AREA_OWN)
