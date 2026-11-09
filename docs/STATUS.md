@@ -24,6 +24,9 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Port for the USA and JP discs**: staged plan in [docs/PORT_VERSIONS_PLAN.md](PORT_VERSIONS_PLAN.md) (U0 USA full
+   link proof → U1 USA boots headless → U2 launchers/CI → U3 parity → J1 JP → demos). Open questions for the user there.
+
 0. **Data bar of JP / USA** (2026-11-09): 0.94 % -> 83.74 % (JP), 0.97 % -> 90.88 % (USA); docs/JP.md "Data
    measure". Fixed the overlay base of the version data claims, the X00 prefix of the area overlays counted once,
    PAL data files reused where the version has them (tools/version_data.py), the rest as `src/data/<ver>/` files
