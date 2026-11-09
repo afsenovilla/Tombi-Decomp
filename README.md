@@ -120,11 +120,11 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 <summary><b>Japan (SLPS-01144): per part</b></summary>
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 99.04 % of the code matches byte for byte** (1616272 of 1631956 bytes, 3478 of 3530 functions).
+**Ore! Tomba (SLPS-01144): 99.35 % of the code matches byte for byte** (1621384 of 1631956 bytes, 3479 of 3530 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPS_011.44: engine | 374204 B | 366132 B | 1223 / 1266 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.8 % |
+| SLPS_011.44: engine | 374204 B | 371244 B | 1224 / 1266 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.2 % |
 | X00.BIN: shared object code | 300480 B | 300428 B | 502 / 507 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 100.0 % |
 | X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |

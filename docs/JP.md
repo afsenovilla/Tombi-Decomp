@@ -57,7 +57,7 @@ uses X01 and AREA12 uses X04, AREA19 also ships X02), plus `INFO*.BIN`, `DSPSUB*
 - `python3 tools/build_report.py --version slps01144` writes `build/slps01144/report.json`; CI job `report-jp`
   uploads it as `SLPS_011.44_report` from the `GAME_FILES_URL_JP` secret.
 
-**Progress: 99.04 % of code (1616272 of 1631956 bytes, 3478 of 3530 functions; README table)** with the SYSTEM overlays (exe + X overlays alone: 98.91 %, 3038 of 3092), mostly PAL C reused as is, the rest from
+**Progress: 99.35 % of code (1621384 of 1631956 bytes, 3479 of 3530 functions; README table)** with the SYSTEM overlays (exe + X overlays alone: 98.91 %, 3038 of 3092), mostly PAL C reused as is, the rest from
 the JP branches (PAL C with one to four literal constants changed and verified byte for byte, e.g. player struct
 offsets 0xE4 -> 0xD4, object stride 160 -> 152, sound pitch constants).
 
