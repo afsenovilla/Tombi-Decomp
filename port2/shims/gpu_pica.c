@@ -405,11 +405,9 @@ static void pica_copy(int sx, int sy, int dx, int dy, int w, int h) {
 }
 static void pica_list_end(void) { flush(); }
 static int pica_start(void) {
-    if (!rt) rt = calloc(512, sizeof *rt);
-    if (!slot_px) slot_px = malloc(SLOTS * sizeof *slot_px);
     if (!stage) stage = malloc(1024 * 512 * 4);
     if (!dec) dec = malloc(256 * 256 * 4);
-    if (!rt || !slot_px || !stage || !dec) return -1;
+    if (!stage || !dec || dev->start()) return -1;
     pica_vram_written(0, 0, 1024, 512);
     return 0;
 }
