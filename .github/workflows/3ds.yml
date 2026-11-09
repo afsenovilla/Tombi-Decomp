@@ -195,7 +195,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb x11-utils imagemagick libgl1-mesa-dri libegl1 libxkbcommon-x11-0 libxcb-cursor0 \
+          sudo apt-get install -y -qq xvfb x11-utils imagemagick libgl1-mesa-dri libegl1 libopengl0 libgl1 libglx-mesa0 libvulkan1 mesa-vulkan-drivers libxkbcommon-x11-0 libxcb-cursor0 \
                libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libfuse2 > /dev/null
           url=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/azahar-emu/azahar/releases/latest \
                 | python3 -c "import sys,json; a=[x['browser_download_url'] for x in json.load(sys.stdin)['assets'] if x['name'].lower().endswith('.appimage')]; print(a[0] if a else '')")
