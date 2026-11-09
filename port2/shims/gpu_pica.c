@@ -133,8 +133,6 @@ static inline u16 c32to15(u32 c) {
     return (u16)((((c & 255) * 31 + 127) / 255) | ((((c >> 8) & 255) * 31 + 127) / 255) << 5 | ((((c >> 16) & 255) * 31 + 127) / 255) << 10
                  | ((c >> 24) > A_OPAQUE ? 0x8000 : 0));   /* bit 15: A_SEMI (or a host word with it); A_OPAQUE texels clear it */
 }
-static inline u32 rgb24(u32 c) { return (c & 0xFFFFFF) | 0xFF000000u; }
-static inline u32 c15_drawn(u16 c) { return c15to32(c) & 0x00FFFFFFu; }   /* a fill's colour: the PS1 fill clears bit 15 */
 
 /* ---- VRAM pages: 16 x 2 of 64 x 256 words */
 static unsigned page_ver[2][16], ver_clock;
