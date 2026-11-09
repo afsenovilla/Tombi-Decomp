@@ -23,3 +23,4 @@ func_800ED348 = 0x800ED348; // type:func size:0x508
 func_800EDD3C = 0x800EDD3C; // type:func size:0x2B8
 func_800EDFF4 = 0x800EDFF4; // type:func size:0x9C
 func_800ED850 = 0x800ED850; // type:func size:0x4EC
+func_800ECCE8 = 0x800ECCE8; // type:func size:0x15C

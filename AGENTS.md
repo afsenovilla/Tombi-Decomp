@@ -59,6 +59,15 @@ Register allocation / scheduling (most of what is left everywhere):
   base and index of an addu, D0SPSUB 800E89F8).
 - `static __inline__` helpers instead of macros; `a && b` written as early returns.
 - `asm("" : "=r"(x) : "0"(x))` barriers: `"+r"` is NOT supported by gcc 2.7.
+- **Any asm stops the delay-slot filler** (reorg.c): an asm statement, even an empty barrier, between an insn and
+  its branch/jal or at the branch target leaves a `nop` in the slot. Retail fills a slot where ours has a nop: look
+  for asm near the branch first (JP dspsub2 800ECCE8, x10 8011C81C).
+- **cse reuses a constant register only in the same mode**: storing one of two equal char constants through an int
+  (`{ int k = 0x65; S->code = k; }`) makes a second `li`.
+- **sched1 breaks equal-priority ties by source order**, and loop-hoisted constants land just before the loop: set
+  them as explicit locals earlier to move them; a hard-register destination (`register T u asm("$2")`) is not
+  pulled down next to its consumer (x04 80118720).
+- A second barrier on a temp raises its global-alloc priority (refs/live length) and reshuffles the arg registers.
 
 Shape / codegen:
 - Switches: empty `case N:` labels and the case order decide the jump table; read the table from the disc file.

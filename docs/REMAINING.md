@@ -13,19 +13,11 @@ MAIN0, X000 and X001..X019 are at 100 %. Left (`notes/todo_areas.csv`):
 | D0SPSUB 800EFD6C | 3012 B | score 185 (matchcheck 156) | best draft `notes/drafts/d0spsub_func_800EFD6C_score185.c` (frame 0x90 and prologue match). Left: loop 1 keeps the `D_801091C4` base in s4 all loop, s2 as base for the attr/font stores, y/attr/w store order; then register names. Store forms were searched at random (keep the frame at 0x90: `D_8011113C.y/.w/.x` in later loops shrinks it to 0x80, a dead end). |
 | Psy-Q library | 100876 of 100904 B | 100 % (rounded) | not counted in the game figure; every Psy-Q unit has a source (2026-11-09: the last 87 ported from the JP/USA files) |
 
-## Japanese retail (SLPS-01144): 98.24 % with the SYSTEM overlays (98.91 % without; 3467 of 3530 functions)
+## Japanese retail (SLPS-01144): 99.71 % with the SYSTEM overlays (3527 of 3528 functions)
 
-The SYSTEM overlays (no GOVER on the JP disc) were added on 2026-11-08; a second pass the same day matched 75 more (DSPSUB/DSPSUB3 54, OPTSUB00 8, DSPSUB2 13) and a third 65 (INFO, INFO2, INFO3: all of them). Left there: DSPSUB2 func_800ECCE8 (2 lines: `li a1,498` must stay in the jal delay slot), F0D90 (twin of PAL 800EFD6C).
-
-The JP report counts the Psy-Q library too; all of it is in now (the hand-written parts as top-level asm, the rest
-in C). Only 4 functions are left, all game code:
-
-Game code, closest first:
-
-| Function | Size | State | Notes |
-|---|---:|---|---|
-| x04 80118720 | 624 B | 2 lines (`addiu a1,v1,26` for `s = &f->flag` must come after the hoisted `li 208/255/1`; `st` pinned to $5 fixed the rest) | retail loads q[-2] before q[0] in both inner cases; sibling 80118B98 matched with block-scoped pinned q pointers |
-| main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |
+Everything matches, Psy-Q library included, except dspsub func_800F0D90 (4720 B). It is not a plain twin of PAL
+D0SPSUB 800EFD6C: 7 cases instead of 4, menu global D_800A6120, Text globals D_80111408..., 19 calls of the JP
+DrawSprite func_800EC9D8; it has to be written from the JP disassembly.
 
 ## USA retail (SCUS-94236): 99.83 % with the SYSTEM overlays (3680 of 3681 functions)
 

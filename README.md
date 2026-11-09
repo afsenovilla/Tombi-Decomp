@@ -120,7 +120,7 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 <summary><b>Japan (SLPS-01144): per part</b></summary>
 
 <!-- jp-progress:start -->
-**Ore! Tomba (SLPS-01144): 99.54 % of the code matches byte for byte** (1624376 of 1631936 bytes, 3524 of 3528 functions).
+**Ore! Tomba (SLPS-01144): 99.71 % of the code matches byte for byte** (1627216 of 1631936 bytes, 3527 of 3528 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
@@ -129,12 +129,12 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 | X01.BIN: area code | 151304 B | 151304 B | 239 / 239 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25320 B | 25320 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X03.BIN: area code | 122684 B | 122684 B | 222 / 222 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X04.BIN: area code | 102832 B | 102208 B | 196 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.4 % |
+| X04.BIN: area code | 102832 B | 102832 B | 197 / 197 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X05.BIN: area code | 6112 B | 6112 B | 16 / 16 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X06.BIN: area code | 35844 B | 35844 B | 47 / 47 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X08.BIN: area code | 228 B | 228 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X09.BIN: area code | 82896 B | 82896 B | 144 / 144 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| X10.BIN: area code | 97636 B | 95768 B | 174 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 98.1 % |
+| X10.BIN: area code | 97636 B | 97636 B | 175 / 175 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X11.BIN: area code | 13856 B | 13856 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X13.BIN: area code | 6336 B | 6336 B | 8 / 8 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X14.BIN: area code | 54472 B | 54472 B | 109 / 109 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
@@ -143,7 +143,7 @@ Regenerated with `python3 tools/build_report.py --version scus94236` then `pytho
 | X18.BIN: area code | 16136 B | 16136 B | 30 / 30 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | DSPSUB.BIN: SYSTEM overlay | 36084 B | 31364 B | 56 / 57 | 🟩🟩🟩🟩🟩🟩🟩🟩🟨⬜ 86.9 % |
-| DSPSUB2.BIN: SYSTEM overlay | 16180 B | 15832 B | 27 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.8 % |
+| DSPSUB2.BIN: SYSTEM overlay | 16180 B | 16180 B | 28 / 28 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | DSPSUB3.BIN: SYSTEM overlay | 23588 B | 23588 B | 43 / 43 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | INFO.BIN: SYSTEM overlay | 24752 B | 24752 B | 51 / 51 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | INFO2.BIN: SYSTEM overlay | 87916 B | 87916 B | 191 / 191 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
