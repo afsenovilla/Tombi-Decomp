@@ -170,3 +170,62 @@ jobs:
           name: tombi-3ds-build-log
           path: build/n3ds/build.log
           if-no-files-found: ignore
+
+  # The .3dsx run in Azahar (a 3DS emulator; its Linux AppImage, the latest release) under Xvfb with Mesa's software
+  # OpenGL: screenshots of the emulator's window every 15 s and the program's sdmc:/3ds/tombi/log.txt, as an artifact.
+  # The emulator's speed and timing are not the console's: this checks that it starts and draws, not how fast.
+  emulate:
+    needs: n3ds
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: tombi-3ds
+          path: app
+
+      - name: Restore disc image
+        id: disccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/disccache
+          key: disc-pal-v1
+
+      - name: Azahar (latest release AppImage)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb imagemagick libgl1-mesa-dri libegl1 libxkbcommon-x11-0 libxcb-cursor0 \
+               libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-xkb1 libfuse2 > /dev/null
+          url=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/azahar-emu/azahar/releases/latest \
+                | python3 -c "import sys,json; a=[x['browser_download_url'] for x in json.load(sys.stdin)['assets'] if x['name'].lower().endswith('.appimage')]; print(a[0] if a else '')")
+          echo "AppImage: $url"
+          curl -fsSL -o azahar.AppImage "$url"
+          chmod +x azahar.AppImage
+          ./azahar.AppImage --appimage-extract > /dev/null
+          ls squashfs-root | head
+
+      - name: Run in Azahar
+        run: |
+          SD="$HOME/.local/share/azahar-emu/sdmc"
+          mkdir -p "$SD/3ds/tombi" shots
+          cp "$RUNNER_TEMP/disccache/game.bin" "$SD/3ds/tombi/tombi.bin"
+          ls -l app "$SD/3ds/tombi"
+          export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
+          Xvfb :99 -screen 0 1280x1024x24 & sleep 2
+          export DISPLAY=:99
+          (./squashfs-root/AppRun app/tombi.3dsx > azahar.log 2>&1 &)
+          for i in $(seq 1 16); do sleep 15; import -window root "shots/shot_$(printf %03d $((i*15))).png" || true; done
+          pkill -f squashfs-root/ || true
+          cp "$SD/3ds/tombi/log.txt" shots/log.txt 2>/dev/null || echo "(no log.txt)" > shots/log.txt
+          tail -40 azahar.log > shots/azahar_tail.log; tail -40 shots/log.txt
+
+      - name: Upload screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tombi-3ds-azahar
+          path: |
+            shots
+            azahar.log
+          if-no-files-found: ignore
