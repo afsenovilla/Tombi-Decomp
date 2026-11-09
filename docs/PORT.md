@@ -3567,3 +3567,19 @@ package servers refuse the cloud container, so there is no libctru/citro3d build
     written yet.
   For Tombi the CTR-3D route applies: libctru host in place of SDL2, a citro3d `GpuBackend` (gpu_backend.h) with the
   CPU texture cache, SPU voices on NDSP, New 3DS as the target.
+- **The renderer model (`--renderer pica`, shims/gpu_pica.c, 2026-11-09).** The PS1 GPU mapped onto what the PICA200
+  can do, written and checked on the PC before any 3DS code: a CPU texture cache (texture page + CLUT + texture window
+  decoded to 256x256 RGBA8, the alpha holding the texel class: transparent / opaque / semi-transparent), triangles
+  with a fixed-function state (texture replace or modulate x2, an EQUAL / NOTEQUAL alpha test on the classes, the
+  four PS1 blend modes as blend equations; textured semi-transparent primitives drawn twice), batched by state.  The
+  render target is the whole VRAM; vram[] is the CPU copy, kept in step by tracking the 16x1 cells the GPU drew
+  into (read back only when a texture or CLUT is decoded from them); fills and VRAM copies are done on vram[] and
+  written to the target.  Under it a "PicaDev" (texture upload, triangles with that state, fill, read, write): here
+  `pd_ref`, a CPU reference with the PICA's rules; a 3DS build implements it with citro3d.
+  Checked headless against `--renderer soft`, every 25th frame of 2900 in AREA 1, 2 and 5 (walk, jump): equal up
+  to 8-bit rounding (max 9/255 per channel; no pixel off by more than 16).  The one exception is AREA 1's tree top:
+  the game draws part of it with a CLUT and texture it rendered the frame before, and the result depends on wall
+  time (one `--stall 2400:500` changes it in the software renderer too), so a slower renderer differs there.
+  Per frame in AREA 1 gameplay: ~50 batches, ~240 triangles, ~1 texture decode, ~0.25 read-backs (16 pixels: the
+  game reads a CLUT out of the frame it drew).  Not mapped: mask bits, dithering, the 24-bit display mode's
+  present (read back as for the software renderer), --widescreen, --internal-res.

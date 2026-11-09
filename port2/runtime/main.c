@@ -1006,6 +1006,7 @@ int main(int argc, char **argv) {
             i++;
             if (!strcmp(argv[i], "gl") || !strcmp(argv[i], "opengl")) port_renderer = 1;
             else if (!strcmp(argv[i], "soft") || !strcmp(argv[i], "software")) port_renderer = 0;
+            else if (!strcmp(argv[i], "pica")) port_renderer = 2;    /* shims/gpu_pica.c: the 3DS renderer's model */
             else return usage(argv[0]);
         }
         else if (!strcmp(a, "--realtime")) port_realtime = 1;

@@ -66,8 +66,8 @@ typedef struct {
     int (*ws_present)(int wx, int wy, int w, int h);                            /* show a wide frame; 0 = not handled */
 } GpuBackend;
 
-extern const GpuBackend port_gpu_soft, port_gpu_gl;
+extern const GpuBackend port_gpu_soft, port_gpu_gl, port_gpu_pica;
 extern const GpuBackend *port_gpu_be;
-extern int port_renderer;           /* --renderer: 1 = gl (default), 0 = soft, -1 = not given (headless picks soft) */
+extern int port_renderer;           /* --renderer: 1 = gl (default), 0 = soft, 2 = pica (gpu_pica.c), -1 = not given (headless picks soft) */
 gpu_u16 *port_vram(void);           /* &vram[0][0], 1024 words per row */
 #endif

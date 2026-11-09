@@ -56,7 +56,8 @@ void port_gpu_start(void) {
     if (gpu_started) return;
     gpu_started = 1;
     int want_gl = port_renderer == 1 || (port_renderer < 0 && port_window);
-    if (want_gl && port_gpu_gl.start() == 0) port_gpu_be = &port_gpu_gl;
+    if (port_renderer == 2 && port_gpu_pica.start() == 0) port_gpu_be = &port_gpu_pica;
+    else if (want_gl && port_gpu_gl.start() == 0) port_gpu_be = &port_gpu_gl;
     else {
         if (want_gl) port_printf("[gpu] OpenGL renderer unavailable: using the software rasteriser\n");
         port_gpu_be = &port_gpu_soft;
