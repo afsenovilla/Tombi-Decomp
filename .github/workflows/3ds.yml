@@ -214,9 +214,10 @@ jobs:
           export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
           Xvfb :99 -screen 0 1280x1024x24 & sleep 2
           export DISPLAY=:99
-          (./squashfs-root/AppRun app/tombi.3dsx > azahar.log 2>&1 &)
+          ./squashfs-root/AppRun app/tombi.3dsx > azahar.log 2>&1 &
+          EMU=$!
           for i in $(seq 1 16); do sleep 15; import -window root "shots/shot_$(printf %03d $((i*15))).png" || true; done
-          pkill -f squashfs-root/ || true
+          kill "$EMU" 2>/dev/null || true; sleep 2
           cp "$SD/3ds/tombi/log.txt" shots/log.txt 2>/dev/null || echo "(no log.txt)" > shots/log.txt
           tail -40 azahar.log > shots/azahar_tail.log; tail -40 shots/log.txt
 
