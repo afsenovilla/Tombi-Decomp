@@ -3551,8 +3551,7 @@ package servers refuse the cloud container, so there is no libctru/citro3d build
   New 3DS with its ARM software GPU; check its licence before borrowing).
 - **Second screen.** The bottom screen (320x240 resistive touch) suits the panel. Since 2026-11-09 a canvas under 280
   rows has small layouts of the Status tab (page_status_small) and the Items tab (2x icons, 8 px font, Sort and the
-  action on one row); Events and Map already fitted. Larger panels render pixel-identical. Formerly panel.c was laid out for
-  1240x1080 and needs its own small layout.
+  action on one row); Events and Map already fitted. Larger panels render pixel-identical.
 - **Prior art** (read from the READMEs only, not from the code):
   - [CTR-3D](https://github.com/zando95/CTR-3D) (Crash Team Racing, the PS1 decomp CTR-ModSDK, GPL-3) is the model to
     follow: New 3DS only ("the original 3DS and 2DS do not have the CPU for it"), full speed by its README.  citro3d
