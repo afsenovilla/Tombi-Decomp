@@ -190,3 +190,4 @@ updateNpcSet11 = 0x800FDB28; // type:func size:0xA8  PAL i0nfo2 0x800FEB28
 overheadDrawMapLayers = 0x800EBA58; // type:func size:0x2F0  PAL i0nfo 0x800EB044
 overheadLoadMapTiles = 0x800EBD48; // type:func size:0x114  PAL i0nfo 0x800EB384
 overheadRefreshMap = 0x800ECA4C; // type:func size:0x118  PAL i0nfo 0x800EC084
+func_800EBE5C = 0x800EBE5C; // type:func size:0x72C  PAL i0nfo2 twin of overheadBuildMapStrip

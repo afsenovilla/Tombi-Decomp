@@ -33,15 +33,10 @@ Game code, closest first:
 | main 80024B78 | 5112 B | not started | hand-written GTE mesh renderer, no twin; write from scratch with the GTE macros of src/modelDrawG4Lit.c |
 | main _SsVmSetVol | 880 B | split | splat cut one 0x584 function into five pieces (`VM_VOL_OBJ_*`): fix the split first |
 
-## USA retail (SCUS-94236): 99.45 % with the SYSTEM overlays (3673 of 3681 functions)
+## USA retail (SCUS-94236): 99.81 % with the SYSTEM overlays (3678 of 3681 functions)
 
-The boot exe and the area overlays X00..X19 match in every game function (4 Sony functions left, below). The SYSTEM
-overlays were added on 2026-11-08 at 87-100 % (GOVER, INFO*) and 45-66 % (DSPSUB*, OPTSUB00): their big drawing,
-memory-card and title/options functions differ from PAL in the English text layout and need hand work from the PAL
-C (docs/USA.md).
-
-Left: Sony library code that Sony compiled from C: libsn `__main` / `__do_global_dtors`, libapi
-psyq_8005ba74 / psyq_8005bc10 (psx_tomba has them as C in src/psyq/libapi/func_8005B4CC.c).
+Every game function matches except dspsub 800EEE84 (2956 B, the USA twin of PAL D0SPSUB 800EFD6C, which is still
+open). Sony library: libsn `__main` / `__do_global_dtors` (compiled from C, not in psx_tomba).
 
 ## Demos and prototypes
 

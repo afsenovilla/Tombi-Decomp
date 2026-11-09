@@ -80,11 +80,11 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 <summary><b>USA (SCUS-94236): per part</b></summary>
 
 <!-- scus94236-progress:start -->
-**Tomba! USA (SCUS-94236): 99.45 % of the code matches byte for byte** (1698372 of 1707684 bytes, 3673 of 3681 functions).
+**Tomba! USA (SCUS-94236): 99.81 % of the code matches byte for byte** (1704516 of 1707688 bytes, 3678 of 3681 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SCUS_942.36: engine | 395564 B | 394680 B | 1328 / 1332 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.8 % |
+| SCUS_942.36: engine | 395568 B | 395352 B | 1330 / 1332 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 99.9 % |
 | X00.BIN: shared object code | 313648 B | 313648 B | 531 / 531 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X01.BIN: area code | 154588 B | 154588 B | 243 / 243 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X02.BIN: area code | 25432 B | 25432 B | 34 / 34 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
@@ -103,11 +103,11 @@ scripts, elements of named pointer tables, field aliases and Psy-Q internals.
 | X18.BIN: area code | 16840 B | 16840 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | X19.BIN: area code | 348 B | 348 B | 1 / 1 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | DSPSUB.BIN: SYSTEM overlay | 36504 B | 33548 B | 58 / 59 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 91.9 % |
-| DSPSUB2.BIN: SYSTEM overlay | 19456 B | 17656 B | 30 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩⬜ 90.7 % |
+| DSPSUB2.BIN: SYSTEM overlay | 19456 B | 19456 B | 31 / 31 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | DSPSUB3.BIN: SYSTEM overlay | 24884 B | 24884 B | 46 / 46 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | GOVER.BIN: SYSTEM overlay | 3152 B | 3152 B | 7 / 7 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
-| INFO.BIN: SYSTEM overlay | 25924 B | 24088 B | 51 / 52 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 92.9 % |
-| INFO2.BIN: SYSTEM overlay | 89440 B | 87604 B | 192 / 193 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟨 97.9 % |
+| INFO.BIN: SYSTEM overlay | 25924 B | 25924 B | 52 / 52 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
+| INFO2.BIN: SYSTEM overlay | 89440 B | 89440 B | 193 / 193 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | INFO3.BIN: SYSTEM overlay | 26672 B | 26672 B | 53 / 53 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 | OPTSUB00.BIN: SYSTEM overlay | 8072 B | 8072 B | 27 / 27 | 🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩 100.0 % |
 

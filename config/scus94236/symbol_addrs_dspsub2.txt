@@ -28,3 +28,4 @@ memCardDrawSlotSelect = 0x800EA448; // type:func size:0xDC  PAL d0spsub2 0x800EA
 memCardDrawParts = 0x800EA524; // type:func size:0x194  PAL d0spsub2 0x800EAA40
 memCardDrawMessage = 0x800EAD70; // type:func size:0x36C  PAL d0spsub2 0x800EB25C
 memCardDrawPlayTime = 0x800EB87C; // type:func size:0x3C8  PAL d0spsub2 0x800EBE6C
+func_800E954C = 0x800E954C; // type:func size:0x708  PAL d0spsub2 0x800E999C
