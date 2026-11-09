@@ -129,4 +129,22 @@
     <string name="tr_done">Oversættelse importeret: %1$s.</string>
     <string name="tr_json">Det er .tombipatch.json-filen. Importér translation.tpatch i stedet (tombi-text).</string>
     <string name="tr_bad">Ikke en oversættelsesfil (.tpatch).</string>
+    <!-- the game library (Library.java, stage U2) -->
+    <string name="lib_title">Dine spil</string>
+    <string name="lib_add">Tilføj spil</string>
+    <string name="lib_add_sub">Image af din egen disk: .bin, .iso, .chd (eller .cue med dens .bin)</string>
+    <string name="lib_ready">Klar til at spille</string>
+    <string name="lib_unsupported">Understøttes ikke endnu</string>
+    <string name="lib_nolib">Ikke med i denne version af appen</string>
+    <string name="lib_unsupported_long">%1$s er genkendt, men porten understøtter ikke denne version af spillet endnu.</string>
+    <string name="lib_nolib_long">%1$s er genkendt, men denne version af appen indeholder ikke dens spilbibliotek.</string>
+    <string name="lib_empty">Tilføj imaget af din egen disk for at begynde. Hvert spil kontrolleres, pakkes ud én gang og gemmes i dit bibliotek.</string>
+    <string name="lib_style">Bibliotekets stil</string>
+    <string name="lib_remove">Fjern dette spil</string>
+    <string name="lib_removed">%1$s fjernet fra biblioteket (gemte spil beholdes).</string>
+    <string name="lib_from">Disk: %1$s</string>
+    <string name="disc_unknown">Ikke en kendt Tombi!/Tomba!-disk (%1$s, sha1 for programfilen %2$s).</string>
+    <string name="disc_added">%1$s tilføjet til dine spil.</string>
+    <string-array name="lib_styles"><item>Karrusel</item><item>Liste</item><item>Forside</item></string-array>
+    <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
 </resources>

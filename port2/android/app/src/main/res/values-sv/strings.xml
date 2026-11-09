@@ -129,4 +129,22 @@
     <string name="tr_done">Översättning importerad: %1$s.</string>
     <string name="tr_json">Det här är .tombipatch.json-filen. Importera translation.tpatch i stället (tombi-text).</string>
     <string name="tr_bad">Ingen översättningsfil (.tpatch).</string>
+    <!-- the game library (Library.java, stage U2) -->
+    <string name="lib_title">Dina spel</string>
+    <string name="lib_add">Lägg till spel</string>
+    <string name="lib_add_sub">Avbild av din egen skiva: .bin, .iso, .chd (eller .cue med sin .bin)</string>
+    <string name="lib_ready">Redo att spela</string>
+    <string name="lib_unsupported">Stöds inte än</string>
+    <string name="lib_nolib">Ingår inte i den här versionen av appen</string>
+    <string name="lib_unsupported_long">%1$s känns igen, men porten stöder inte den här versionen av spelet än.</string>
+    <string name="lib_nolib_long">%1$s känns igen, men den här versionen av appen innehåller inte dess spelbibliotek.</string>
+    <string name="lib_empty">Lägg till avbilden av din egen skiva för att börja. Varje spel kontrolleras, packas upp en gång och sparas i ditt bibliotek.</string>
+    <string name="lib_style">Bibliotekets stil</string>
+    <string name="lib_remove">Ta bort det här spelet</string>
+    <string name="lib_removed">%1$s borttaget från biblioteket (sparade spel behålls).</string>
+    <string name="lib_from">Skiva: %1$s</string>
+    <string name="disc_unknown">Inte en känd Tombi!/Tomba!-skiva (%1$s, sha1 för programfilen %2$s).</string>
+    <string name="disc_added">%1$s lades till i dina spel.</string>
+    <string-array name="lib_styles"><item>Karusell</item><item>Lista</item><item>Omslag</item></string-array>
+    <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
 </resources>

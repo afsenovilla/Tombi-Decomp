@@ -467,6 +467,33 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   (phases *Copiando / Comprobando / Extrayendo*, files done / total, Cancel with B; a truncated image or an unreadable
   sector fails with the reason). *Borrar datos…* (in-page confirmation) deletes `files/data`, the patches and caches,
   the saves only when ticked.
+- **Game library** (stage U2, `Library.java`). The launcher's home is *Tus juegos*: one card per disc added (logo,
+  name, region, serial, status), *Añadir juego*, then *¡A jugar!* / *Opciones* / *Salir*; the focused card is the
+  selected game (D-pad moves between cards and buttons by their position on screen; Start plays). Three looks,
+  *Opciones > Juego > Estilo de la biblioteca*: *Carrusel* (default: cards in a row, buttons beneath), *Lista* (rows on
+  the left, the selected game large on the right), *Portada* (the selected game's logo as the title, a tab per game).
+  A picked image is identified by its boot executable (`disccheck.c` `nativeIdentify`: SYSTEM.CNF `BOOT`, its SHA-1;
+  on the PAL discs `EXE/MAIN0.EXE`, which the boot exe loads): PAL SCES-01331 / SCES-01330 `bec8dc5f…` →
+  `libtombi.so`, USA SCUS-94236 `81cbc79f…` → `libtombi_usa.so`; Japan SLPS-01144 `07d57769…` is listed as recognised
+  but *Aún no compatible* (nothing extracted); an unknown disc or the PAL Rev 0 is refused with the reason. Each game
+  is extracted into its own `files/games/<serial>/data` (the manifest also carries `serial` / `boot` / `boot_sha1`, as
+  `tools/extract_data.py`, which `psyq.c` checks), its saves go to `files/saves` (PAL, as before) or
+  `files/saves_usa`; the loader takes `--game-lib` / `--save-sub` from the launcher (`loader.c`; the armeabi-v7a low
+  reservation is sized for the largest `libtombi*.so` of the APK). The card's logo is cut at run time from the
+  player's own data: the title's 8 bpp logo page and CLUT (`SYSTEM/A00202.000` + `A00203.000` PAL, `A00012.000` +
+  `A00013.000` USA; texels 8..247 x 0..111 plus the "!" piece 8..71 x 112..223 to its right, page row = logo row + 112
+  PAL / 88 USA) saved as `files/games/<id>/logo.png`; without it the name in the title font. Options per version: the
+  USA game gets no game language, translations, NTSC switch, second-screen panel, cut content, debug menu, button
+  icons, PAL cheats or save tools (all PAL-only in the port, docs/USA.md); `--aspect`, `--renderer`, `--fps`,
+  `--skip-intro`, DualShock and vibration stay. An install from before the library (`files/data`, or an image copied
+  by an older version) becomes the PAL entry on the first start (a rename). *Disco y datos* shows the selected game
+  (*Quitar este juego* removes its data and card, the saves stay). Build: the APK always has the PAL game; with the
+  `GAME_FILES_URL_USA` secret `android-apk.yml` also runs `tools/build_full.py --version usa` and
+  `port2/android/game_libs.py --version usa` (armeabi-v7a: port2/CMakeLists.txt `-DPORT_VERSION=usa`; arm64-v8a:
+  `port2/wasm/build.py --version usa --until w2c` + the CMake arm64 branch) into `app/src/main/jniLibs/<abi>/libtombi_usa.so`
+  (git-ignored); without the secret the step is skipped and a USA disc shows *No incluido en esta versión de la app*.
+  The screens can be rendered on a PC with Robolectric's native graphics (Android's Skia) against the real
+  `LauncherActivity` (aapt2 + android-all from Maven, no SDK install).
 - **Launcher language.** *Opciones > Juego > Idioma del launcher*: Auto (the system's) / English / Español / Français /
   Deutsch / Italiano / Nederlands / Português / Svenska / Dansk (`res/values-xx/strings.xml`), saved as `uilang`,
   independent of the game language. Applied at once, without a restart: `LauncherActivity.getResources()` returns
@@ -3346,6 +3373,8 @@ Gen 3 and newer, the AYN Odin 2 ...); armeabi-v7a stays the native 32-bit build,
     python3 port2/wasm/build.py --from native --headless-host --cc CC --native-flags "-O2 -static" --exe tombi2w-a64
                                               # the same host without SDL/GL (headless_stubs.py), e.g. for qemu-aarch64
     build/wasm/tombi2w --headless --frames 1500 --dump-frames out --pad-script 1000:start
+    python3 port2/wasm/build.py --version usa --out build/wasm-usa   # the USA release (PORT_VERSION, docs/USA.md; needs
+                                              # tools/build_full.py --version usa): its VERSION_ macro, inc26, port_version.h
 
 Pipeline (`build.py`): `gen2.py sources` with `PORT2_ARCH=wasm` (the clang K&R fix-ups of the Android build) -> every
 game/runtime file (and libchdr) to LLVM bitcode -> `gen2.py link` (llvm-nm; C dispatch thunks `gen/thunks.c` instead of
