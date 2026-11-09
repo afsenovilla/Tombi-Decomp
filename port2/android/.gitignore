@@ -3,3 +3,5 @@ build/
 app/build/
 app/.cxx/
 local.properties
+# the game libraries of the other versions (game_libs.py), packed by Gradle; built, never committed
+app/src/main/jniLibs/
