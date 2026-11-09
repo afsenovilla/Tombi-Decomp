@@ -1,0 +1,17 @@
+// DATA 80010618 168 slps01144/slps01144
+// Data of SLPS01144 SLPS01144 that no C defines (yet): the bytes the report leaves (tools/version_data.py gen), as words
+// (bytes where the range is not word aligned). WFM3 banks and config/slps01144/data_assets.txt are left out.
+
+unsigned int data_80010618[42] = {
+    0x67616C66, 0x3025203D, 0x6431, 0x20746968,
+    0x20736F70, 0x25203D78, 0x643430, 0x20746968,
+    0x20736F70, 0x25203D79, 0x643430, 0x68206F6E,
+    0x20207469, 0x20202020, 0x20202020, 0x0,
+    0x20736F70, 0x25203D78, 0x643430, 0x20736F70,
+    0x25203D79, 0x643430, 0x20726964, 0x3025203D,
+    0x6431, 0x80030680, 0x800306B0, 0x800306E4,
+    0x800306F0, 0x80030724, 0x80030758, 0x80030884,
+    0x80030A40, 0x80030A40, 0x80030A40, 0x80030A40,
+    0x800308C8, 0x800308FC, 0x80030930, 0x80030964,
+    0x80030998, 0x800309CC,
+};
