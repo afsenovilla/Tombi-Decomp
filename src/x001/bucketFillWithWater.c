@@ -10,13 +10,13 @@
 #include "TOBJ.H"
 typedef struct { signed char anim, z, ang, rad; } E4;
 
-extern unsigned char D_800A6039A[];
-extern unsigned short D_800A6066A[];
-extern Fix16 * D_800A6078A[];
-extern unsigned short D_800A604EA[];
-extern Fix16 * D_800A607CA[];
+extern unsigned char PLAYER_VISIBLE[];
+extern unsigned short PLAYER_ANIM_FRAME[];
+extern Fix16 * PLAYER_H[];
+extern unsigned short PLAYER_Y[];
+extern Fix16 * PLAYER_D[];
 extern int D_800A60C4A[];
-extern unsigned char D_800A6047A[];
+extern unsigned char PLAYER_DRAW_DEPTH[];
 extern unsigned char D_8009C985;
 extern signed char D_80011EB4[];
 extern E4 D_80011E30[];
@@ -37,7 +37,7 @@ void func_8011E1EC(TObj *o)
     int x, y;
     unsigned short u;
 
-    o->visible = D_800A6039A[0];
+    o->visible = PLAYER_VISIBLE[0];
     switch (o->state) {
     case 0:
         c = D_8009C985 & 1;
@@ -73,13 +73,13 @@ void func_8011E1EC(TObj *o)
         }
         y = MulCos(c, e->rad);
         x = MulNegSinScaled(c, e->rad);
-        o->visible = D_800A6039A[0];
-        o->animFrame = D_800A6066A[0] & 1;
-        o->h->p.whole = D_800A6078A[0]->p.whole + y;
-        o->y.p.whole = D_800A604EA[0] + x;
-        o->d->p.whole = D_800A607CA[0]->p.whole;
+        o->visible = PLAYER_VISIBLE[0];
+        o->animFrame = PLAYER_ANIM_FRAME[0] & 1;
+        o->h->p.whole = PLAYER_H[0]->p.whole + y;
+        o->y.p.whole = PLAYER_Y[0] + x;
+        o->d->p.whole = PLAYER_D[0]->p.whole;
         o->d8c = D_800A60C4A[0];
-        o->b0f = D_800A6047A[0] + e->z;
+        o->b0f = PLAYER_DRAW_DEPTH[0] + e->z;
         o->category |= 0x80;
         AnimLoadDuration(o);
         break;
@@ -92,11 +92,11 @@ void func_8011E1EC(TObj *o)
             u = e->ang + D_800A60C4A[0];
             c = u; c &= 0xff;
         }
-        o->h->p.whole = D_800A6078A[0]->p.whole + MulCos(c, e->rad);
-        o->y.p.whole = D_800A604EA[0] + MulNegSinScaled(c, e->rad);
-        o->d->p.whole = D_800A607CA[0]->p.whole;
+        o->h->p.whole = PLAYER_H[0]->p.whole + MulCos(c, e->rad);
+        o->y.p.whole = PLAYER_Y[0] + MulNegSinScaled(c, e->rad);
+        o->d->p.whole = PLAYER_D[0]->p.whole;
         o->d8c = D_800A60C4A[0];
-        o->b0f = D_800A6047A[0] + e->z;
+        o->b0f = PLAYER_DRAW_DEPTH[0] + e->z;
         if (AnimAdvance(o)) {
             playSFX(9);
             {
@@ -135,13 +135,13 @@ void func_8011E1EC(TObj *o)
 #include "TOBJ.H"
 typedef struct { signed char anim, z, ang, rad; } E4;
 
-extern unsigned char D_800A6039A[];
-extern unsigned short D_800A6066A[];
-extern Fix16 * D_800A6078A[];
-extern unsigned short D_800A604EA[];
-extern Fix16 * D_800A607CA[];
+extern unsigned char PLAYER_VISIBLE[];
+extern unsigned short PLAYER_ANIM_FRAME[];
+extern Fix16 * PLAYER_H[];
+extern unsigned short PLAYER_Y[];
+extern Fix16 * PLAYER_D[];
 extern int D_800A60C4A[];
-extern unsigned char D_800A6047A[];
+extern unsigned char PLAYER_DRAW_DEPTH[];
 extern unsigned char D_8009C985;
 extern signed char D_80011EB4[];
 extern E4 D_80011E30[];
@@ -162,7 +162,7 @@ void bucketFillWithWater(TObj *o)
     int x, y;
     unsigned short u;
 
-    o->visible = D_800A6039A[0];
+    o->visible = PLAYER_VISIBLE[0];
     switch (o->state) {
     case 0:
         c = D_8009C985 & 1;
@@ -199,13 +199,13 @@ void bucketFillWithWater(TObj *o)
         }
         y = MulCos(c, e->rad);
         x = MulNegSinScaled(c, e->rad);
-        o->visible = D_800A6039A[0];
-        o->animFrame = D_800A6066A[0] & 1;
-        o->h->p.whole = D_800A6078A[0]->p.whole + y;
-        o->y.p.whole = D_800A604EA[0] + x;
-        o->d->p.whole = D_800A607CA[0]->p.whole;
+        o->visible = PLAYER_VISIBLE[0];
+        o->animFrame = PLAYER_ANIM_FRAME[0] & 1;
+        o->h->p.whole = PLAYER_H[0]->p.whole + y;
+        o->y.p.whole = PLAYER_Y[0] + x;
+        o->d->p.whole = PLAYER_D[0]->p.whole;
         o->d8c = D_800A60C4A[0];
-        o->b0f = D_800A6047A[0] + e->z;
+        o->b0f = PLAYER_DRAW_DEPTH[0] + e->z;
         o->category |= 0x80;
         AnimLoadDuration(o);
         break;
@@ -218,11 +218,11 @@ void bucketFillWithWater(TObj *o)
             u = e->ang + D_800A60C4A[0];
             c = u; c &= 0xff;
         }
-        o->h->p.whole = D_800A6078A[0]->p.whole + MulCos(c, e->rad);
-        o->y.p.whole = D_800A604EA[0] + MulNegSinScaled(c, e->rad);
-        o->d->p.whole = D_800A607CA[0]->p.whole;
+        o->h->p.whole = PLAYER_H[0]->p.whole + MulCos(c, e->rad);
+        o->y.p.whole = PLAYER_Y[0] + MulNegSinScaled(c, e->rad);
+        o->d->p.whole = PLAYER_D[0]->p.whole;
         o->d8c = D_800A60C4A[0];
-        o->b0f = D_800A6047A[0] + e->z;
+        o->b0f = PLAYER_DRAW_DEPTH[0] + e->z;
         if (AnimAdvance(o)) {
             playSFX(9);
             {

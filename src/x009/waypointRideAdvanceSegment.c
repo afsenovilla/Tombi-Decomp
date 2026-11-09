@@ -2,7 +2,7 @@
 // MATCHING 80119d2c 288
 typedef struct { short x, y, z, pad; } P8;
 typedef struct { short i, b6, b8, ba; int bc, c0; } X;
-extern P8 D_8012AC88[];
+extern P8 WAYPOINT_RIDE_PATH[];
 extern int SquareRoot0(int);
 extern short ratan2(int, int);
 
@@ -12,9 +12,9 @@ void waypointRideAdvanceSegment(char *o)
     int dx, dz, dy, d;
 
     for (;;) {
-        dx = D_8012AC88[x->i + 1].x - D_8012AC88[x->i].x;
-        dz = D_8012AC88[x->i + 1].z - D_8012AC88[x->i].z;
-        dy = D_8012AC88[x->i + 1].y - D_8012AC88[x->i].y;
+        dx = WAYPOINT_RIDE_PATH[x->i + 1].x - WAYPOINT_RIDE_PATH[x->i].x;
+        dz = WAYPOINT_RIDE_PATH[x->i + 1].z - WAYPOINT_RIDE_PATH[x->i].z;
+        dy = WAYPOINT_RIDE_PATH[x->i + 1].y - WAYPOINT_RIDE_PATH[x->i].y;
         d = SquareRoot0(dx * dx + dz * dz);
         if (d != 0) {
             x->c0 = d << 8;

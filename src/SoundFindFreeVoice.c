@@ -3,7 +3,7 @@
 #include "globals.h"
 extern short DAT_800a3cf6[];
 extern short DAT_8009c8ee[];
-extern unsigned char DAT_800780c4[];
+extern unsigned char SFX_TONE_TABLE[];
 extern unsigned char DAT_800780c5[];
 extern unsigned char *SFX_BANKS[];
 
@@ -24,7 +24,7 @@ int SoundFindFreeVoice(unsigned a)
     k = (a & 0xffff) * 2;
     q = DAT_8009c8ee;
     do {
-        if (*q >= (short)(SFX_BANKS[DAT_800780c4[k]] + (DAT_800780c5[k] << 3))[5])
+        if (*q >= (short)(SFX_BANKS[SFX_TONE_TABLE[k]] + (DAT_800780c5[k] << 3))[5])
             return i;
         i--;
         q--;

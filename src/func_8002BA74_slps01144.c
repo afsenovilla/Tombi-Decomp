@@ -16,10 +16,10 @@ typedef struct {
     unsigned char b70, b71, b72, b73;
     unsigned char b74, b75, b76, b77;
 } S;
-extern short DAT_1f800286;
+extern short DOOR_SWING_ANGLE;
 extern unsigned short PLAYER_ANIM_FRAME;
-extern short DAT_1f8001f4, DAT_1f8001f8;
-extern int DAT_1f800200;
+extern short FRAME_BUFFER_INDEX, TICK_COUNT;
+extern int RAND_SEED;
 extern unsigned char D_1F8003CC, D_1F8001AE;
 extern volatile unsigned short D_8009F200[], D_8009F202[];
 extern unsigned char D_8009FF05, D_8009FF06, D_8009FF07, D_800A0C15, D_800A0C16, D_800A0C17;
@@ -58,7 +58,7 @@ void func_8002BA74_slps01144(S *o)
         o->b75 = 0;
         o->b76 = 0;
         o->b77 = 0;
-        DAT_1f800286 = 0;
+        DOOR_SWING_ANGLE = 0;
         o->w58 = w;
         o->b4++;
         if ((*(int*)&GAME.selectedArea) == 6) {
@@ -110,15 +110,15 @@ void func_8002BA74_slps01144(S *o)
             if (D_8009F202[0] & 0x20) o->b5++;
             break;
         case 3:
-            if (DAT_1f8001f4 == 0) {
+            if (FRAME_BUFFER_INDEX == 0) {
                 D_1F8003CC = 1;
-                DAT_1f8001f8 = 0;
-                DAT_1f800200 = 0x45;
+                TICK_COUNT = 0;
+                RAND_SEED = 0x45;
                 o->b5++;
             }
             break;
         case 4:
-            if (DAT_1f8001f4 == 0) {
+            if (FRAME_BUFFER_INDEX == 0) {
                 D_1F8003CC = 0;
                 o->b5++;
             }

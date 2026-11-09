@@ -8,8 +8,8 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
-extern AT D_8011A564[];
-extern short D_1F8001C6;
+extern AT WITCH_MIZUNO_DEFS_ANIMS[];
+extern short DRAW_FROZEN;
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -19,7 +19,7 @@ extern void setEventComplete(int, int);
 static __inline__ void setanim(TObj *o, short n)
 {
     if (((TX *)o)->wd2 != n) {
-        o->anim = D_8011A564[o->subtype].anims[n];
+        o->anim = WITCH_MIZUNO_DEFS_ANIMS[o->subtype].anims[n];
         AnimJump(o, 0);
         ((TX *)o)->wd2 = n;
     }
@@ -92,7 +92,7 @@ void witchMizunoIntroTalk(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         setanim(o, 1);
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

@@ -5,7 +5,7 @@ typedef struct { TObj t; char c0[0x20]; short we0; short we2; int de4; char e8[0
 typedef struct { char pad[0x20]; short w20; } P;
 extern P *PLAYER_EXT;
 extern int BITTEN_OBJECT;
-extern char D_80010E34[];
+extern char PLAYER_LANE_JUMP_ANIM[];
 extern unsigned char SLOPE_TILT_TABLE[];
 extern int MulCos(int a, short b);
 extern void PlayerSetAnimIfChanged(PO *, int);
@@ -98,7 +98,7 @@ void playerStepLaneJump(PO *o)
             *(signed char *)&o->t.b0f = -8;
             SfxPlay3(0x1c, 0x7f);
             BA3(o) = 1;
-            o->t.anim = D_80010E34;
+            o->t.anim = PLAYER_LANE_JUMP_ANIM;
             AnimJump(o, 2);
             o->t.d->p.whole = o->wf6;
             o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];
@@ -107,7 +107,7 @@ void playerStepLaneJump(PO *o)
         } else if (ObjTileCollide(o, 0, 0)) {
             SfxPlay3(0x1c, 0x7f);
             BA3(o) = 1;
-            o->t.anim = D_80010E34;
+            o->t.anim = PLAYER_LANE_JUMP_ANIM;
             AnimJump(o, 2);
             o->t.d->p.whole = o->wf6;
             o->t.d8c = SLOPE_TILT_TABLE[o->t.wb0];

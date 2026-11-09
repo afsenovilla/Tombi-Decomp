@@ -5,7 +5,7 @@
 // Demo version of PAL main0 8003EDB0 (func_8003EDB0.c): handler index from a 20-byte item table.
 #include "TOBJ.H"
 typedef struct { unsigned short a, b; } VP;
-extern VP D_8007B380[];
+extern VP L5_TYPE0A_ITEM_VEL_TABLE[];
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
 extern void (*REWARD_HANDLERS[])(TObj *);
 extern void initItemObject(TObj *);
@@ -38,8 +38,8 @@ void func_8003EDB0(TObj *o)
         if (o->b68 & 1) {
             o->b68 = 0;
             o->wb4 = 1;
-            o->velH = D_8007B380[o->animFrame].a;
-            o->velV = D_8007B380[o->animFrame].b;
+            o->velH = L5_TYPE0A_ITEM_VEL_TABLE[o->animFrame].a;
+            o->velV = L5_TYPE0A_ITEM_VEL_TABLE[o->animFrame].b;
         } else if (o->b69 & 1) {
             o->b69 = 0;
             if (o->velV <= 0x100) {
@@ -80,7 +80,7 @@ void func_8003EDB0(TObj *o)
 #else
 #include "TOBJ.H"
 typedef struct { unsigned short a, b; } VP;
-extern VP D_8007B380[];
+extern VP L5_TYPE0A_ITEM_VEL_TABLE[];
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
 extern void (*REWARD_HANDLERS[])(TObj *);
 extern void initItemObject(TObj *);
@@ -113,8 +113,8 @@ void updateL5Type0AItem(TObj *o)
         if (o->b68 & 1) {
             o->b68 = 0;
             o->wb4 = 1;
-            o->velH = D_8007B380[o->animFrame].a;
-            o->velV = D_8007B380[o->animFrame].b;
+            o->velH = L5_TYPE0A_ITEM_VEL_TABLE[o->animFrame].a;
+            o->velV = L5_TYPE0A_ITEM_VEL_TABLE[o->animFrame].b;
         } else if (o->b69 & 1) {
             o->b69 = 0;
             if (o->velV <= 0x100) {

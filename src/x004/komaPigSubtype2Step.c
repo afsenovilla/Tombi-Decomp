@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern char MOVE_TABLE_1[];
-extern unsigned char D_80130FD4[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short *D_80133B98[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
@@ -24,7 +24,7 @@ void komaPigSubtype2Step(TObj *o)
         o->state++;
         a = D_80133B98[0];
         o->anim = a;
-        p = &D_80130FD4[a[1] * 4];
+        p = &KOMA_PIG_ANIM_BOXES[a[1] * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;

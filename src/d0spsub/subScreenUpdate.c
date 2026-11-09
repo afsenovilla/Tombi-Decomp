@@ -11,7 +11,7 @@ extern int SUBSCREEN_PAD_LAST, SUBSCREEN_PAD_REPEAT_TIMER;
 extern unsigned short PAD_PRESSED;
 extern unsigned short JOYPAD_STATE;
 extern void *D_1F8003A0, *D_1F8003A4;
-extern char D_800F18E0[], D_800F24E0[], D_800F7B78[];
+extern char SUBSCREEN_CLUT_IMAGE[], SUBSCREEN_WFM3_2[], SUBSCREEN_WFM3_3[];
 extern char SUBSCREEN_TAB_EXTRA_FRAMES[], D_800FE8E0[]; /* aliases of D_800FE8D8, D_800FE8E4 (no CSE) */
 extern char SUBSCREEN_TAB_FRAMES[], D_800FE8E4[], D_800FE8D8[], SUBSCREEN_DIGIT_FRAMES[], D_800FEC74[], D_800FE974[];
 extern void LoadImage(RECT *r, void *p);
@@ -32,9 +32,9 @@ int subScreenUpdate(void)
         r.y = 0x1E0;
         r.w = 0x30;
         r.h = 0x1F;
-        LoadImage(&r, D_800F18E0);
-        D_1F8003A0 = D_800F24E0;
-        D_1F8003A4 = D_800F7B78;
+        LoadImage(&r, SUBSCREEN_CLUT_IMAGE);
+        D_1F8003A0 = SUBSCREEN_WFM3_2;
+        D_1F8003A4 = SUBSCREEN_WFM3_3;
         D_800A4620 = SUBSCREEN_TAB_FRAMES;
         D_800A4624 = D_800FE8E4;
         D_800A4628 = D_800FE8D8;

@@ -8,7 +8,7 @@
 #include "TOBJ.H"
 extern int GetGraphType(void);
 extern short GetClut(int x, int y);
-extern char D_80012528[];
+extern char GRAB_SNOUT_ANIM[];
 extern short PLAYER_H_WHOLE[];
 extern unsigned short PLAYER_Y_WHOLE[];
 extern unsigned short PLAYER_D_WHOLE[];
@@ -31,7 +31,7 @@ void updateGrabSnout(TObj *o)
         o->b0d = 0x81;
         o->w08 = ((o->b0c + 0x1f1) << 6) | (0x160 >> 4);
         o->animFrame = 0;
-        o->anim = D_80012528;
+        o->anim = GRAB_SNOUT_ANIM;
         o->d3c = ((int*)&SPAD.i2d8)[0];
         o->d30 = PLAYER_H_WHOLE[0] << 16;
         o->y.p.whole = PLAYER_Y_WHOLE[0];
@@ -70,7 +70,7 @@ void updateGrabSnout(TObj *o)
 #include "TOBJ.H"
 extern int GetGraphType(void);
 extern short GetClut(int x, int y);
-extern char D_80012528[];
+extern char GRAB_SNOUT_ANIM[];
 extern short PLAYER_H_WHOLE[];
 extern unsigned short PLAYER_Y_WHOLE[];
 extern unsigned short PLAYER_D_WHOLE[];
@@ -93,7 +93,7 @@ void func_8002F43C(TObj *o)
         o->b0d = 0x81;
         o->w08 = GetClut(0x160, o->b0c + 0x1f1);
         o->animFrame = 0;
-        o->anim = D_80012528;
+        o->anim = GRAB_SNOUT_ANIM;
         o->d3c = ((int*)&SPAD.i2d8)[0];
         o->d30 = PLAYER_H_WHOLE[0] << 16;
         o->y.p.whole = PLAYER_Y_WHOLE[0];
@@ -131,7 +131,7 @@ void func_8002F43C(TObj *o)
 #include "TOBJ.H"
 extern int GetGraphType(void);
 extern short GetClut(int x, int y);
-extern char D_80012528[];
+extern char GRAB_SNOUT_ANIM[];
 extern short PLAYER_H_WHOLE[];
 extern unsigned short PLAYER_Y_WHOLE[];
 extern unsigned short PLAYER_D_WHOLE[];
@@ -154,7 +154,7 @@ void updateGrabSnout(TObj *o)
         o->b0d = 0x81;
         o->w08 = GetClut(0x160, o->b0c + 0x1f1);
         o->animFrame = 0;
-        o->anim = D_80012528;
+        o->anim = GRAB_SNOUT_ANIM;
         o->d3c = ((int*)&SPAD.i2d8)[0];
         o->d30 = PLAYER_H_WHOLE[0] << 16;
         o->y.p.whole = PLAYER_Y_WHOLE[0];

@@ -16,7 +16,7 @@ typedef struct O {
 } O;
 extern P *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char D_80010CA0[];
+extern char PLAYER_VERTICAL_JUMP_ANIM[];
 extern void *BITTEN_OBJECT;
 extern void AnimJump(O *, int);
 extern int AnimAdvance(O *);
@@ -112,7 +112,7 @@ void func_800F8378(O *o)
             o->bac = 0;
             SfxPlay3(0x1c, 0x7f);
             o->b0f = -8;
-            o->anim = D_80010CA0;
+            o->anim = PLAYER_VERTICAL_JUMP_ANIM;
             AnimJump(o, 4);
             o->d8c = SLOPE_TILT_TABLE[o->hb0];
             o->state++;
@@ -167,7 +167,7 @@ typedef struct O {
 } O;
 extern P *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char D_80010CA0[];
+extern char PLAYER_VERTICAL_JUMP_ANIM[];
 extern void *BITTEN_OBJECT;
 extern void AnimJump(O *, int);
 extern int AnimAdvance(O *);
@@ -264,7 +264,7 @@ void playerStepVerticalJump(O *o)
             o->bac = 0;
             SfxPlay3(0x1c, 0x7f);
             o->b0f = -8;
-            o->anim = D_80010CA0;
+            o->anim = PLAYER_VERTICAL_JUMP_ANIM;
             AnimJump(o, 4);
             o->d8c = SLOPE_TILT_TABLE[o->hb0];
             o->state++;

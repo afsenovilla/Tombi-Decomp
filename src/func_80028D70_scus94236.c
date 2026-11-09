@@ -103,7 +103,7 @@ typedef struct {
     unsigned long c2;
     u16 x2, y2;
 } PolyG3_26E48;
-extern char *volatile D_1F80008C_CharPtrVolatile asm("D_1F80008C");
+extern char *volatile D_1F80008C_CharPtrVolatile asm("MODEL_VERTEX_PTR");
 // INCLUDE_ASM("nonmatchings/main/render/ui", func_80027600);
 typedef struct {
     unsigned long tag;

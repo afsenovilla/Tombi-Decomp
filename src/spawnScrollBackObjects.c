@@ -3,7 +3,7 @@
 typedef struct { signed char f0; char p1; unsigned char f2; char p3[0xc]; unsigned char ff; } R;
 extern unsigned char DAT_8009c981;
 extern unsigned short GAME, GAME_SELECTED_SECTION;
-extern R ***DAT_8007b908[];
+extern R ***AREA_SECTION_SPAWN_LISTS[];
 extern short AREA_SECTION_COUNTS[];
 extern int testAreaFlagBit(int);
 extern void spawnObjectFromRecord(R *, int);
@@ -15,7 +15,7 @@ void spawnScrollBackObjects(signed char *o)
     short i;
     int s;
     if (DAT_8009c981 == 1 && o[0xe] > 0) {
-        tbl = DAT_8007b908[GAME];
+        tbl = AREA_SECTION_SPAWN_LISTS[GAME];
         for (r = *tbl[(GAME_SELECTED_SECTION - 1) & 7]; r->f2 < 0xff; r++)
             if (r->f0 < 0) spawnObjectFromRecord(r, -1);
         i = AREA_SECTION_COUNTS[GAME];

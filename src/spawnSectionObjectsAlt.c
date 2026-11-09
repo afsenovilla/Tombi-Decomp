@@ -7,7 +7,7 @@ typedef struct {
     unsigned char p[12];
     unsigned char f;
 } E4d;
-extern E4d ***DAT_8007b908[];
+extern E4d ***AREA_SECTION_SPAWN_LISTS[];
 extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern short AREA_SECTION_COUNTS[];
 extern void spawnObjectFromRecord(E4d *e, int k);
@@ -15,7 +15,7 @@ extern int testAreaFlagBit(int k);
 
 void spawnSectionObjectsAlt(void)
 {
-    E4d ***t = DAT_8007b908[GAME];
+    E4d ***t = AREA_SECTION_SPAWN_LISTS[GAME];
     E4d *e;
     short n;
     int k;

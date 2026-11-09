@@ -6,7 +6,7 @@
    as [0] arrays keep their loads after the struct stores. */
 #include "TOBJ.H"
 
-extern void *D_8013FA90[];
+extern void *FLOWER_TOWER_KEEPER_ANIMS[];
 extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);
 extern void freeObjectLayer2(TObj *);
@@ -33,7 +33,7 @@ void updateFlowerTowerKeeper(TObj *o)
         o->w98 = o->animFrame;
         o->b0d = 0;
         o->d3c = ((int*)&SPAD.i2f0)[0];
-        o->anim = D_8013FA90[o->wac = o->b0c];
+        o->anim = FLOWER_TOWER_KEEPER_ANIMS[o->wac = o->b0c];
         o->b6b = 0;
         if (((unsigned char*)&GCD.bcdbf)[0] != 0xff) break;
         if (o->b0c) {
@@ -41,7 +41,7 @@ void updateFlowerTowerKeeper(TObj *o)
             break;
         }
         o->wac = 10;
-        o->anim = D_8013FA90[10];
+        o->anim = FLOWER_TOWER_KEEPER_ANIMS[10];
         AnimLoadDuration(o);
         o->b6b = 1;
         break;

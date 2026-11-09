@@ -33,7 +33,7 @@ static short D_80131148[16] = {
     0, 0, 0, 0, 0, 1, 1, 1,
     1, 1, 2, 2, 2, 2, 2, 2,
 };
-extern unsigned short D_80131128[];
+extern unsigned short BLACK_CROW_RAND_STATES[];
 extern int Rand(void);
 extern void SfxPlay(int);
 extern void AnimLoadDuration(TObj *);
@@ -285,7 +285,7 @@ void blackCrowFlyAround(TObj *o)
         if ((unsigned short)(X(o)->wc6 - o->y.p.whole + 2) < 4) {
             if (probeFloorPlaneAt(o, o->h->p.whole, o->y.p.whole + 0x18)) {
                 o->wb4 = 0;
-                o->state = D_80131128[Rand() & 0xf];
+                o->state = BLACK_CROW_RAND_STATES[Rand() & 0xf];
                 o->substep = 0;
                 if (o->d->p.whole == (*(Fix16 **)&PLAYER.obj.d)->p.whole) {
                     register int t3 asm("$3");

@@ -9,8 +9,8 @@ typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c942[], GAME_PLAYER_MODE;
 extern unsigned char D_8009D13E;
-extern short D_1F8001C6;
-extern AT3 D_801314C8[];
+extern short DRAW_FROZEN;
+extern AT3 HIDING_SON_DEFS_ANIMS[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -36,7 +36,7 @@ void hidingSonTalk(TObj *o)
         ((unsigned char*)&GCD.bcfcb)[0] = 1;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
-        o->anim = D_801314C8[o->subtype].p[1];
+        o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[1];
         AnimLoadDuration(o);
         if (GCD.bce3b == 1) {
             o->d90 = (int)showMessageBoxDirect(2, 0xd, &v);
@@ -51,7 +51,7 @@ void hidingSonTalk(TObj *o)
         if (((TObj *)o->d90)->b04 != 2)
             break;
         ((TObj *)o->d90)->b04 = 3;
-        o->anim = D_801314C8[o->subtype].p[0];
+        o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
         AnimLoadDuration(o);
         o->animFrame = 1;
         o->velX = -0x180;
@@ -72,7 +72,7 @@ void hidingSonTalk(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if (FUN_80040278(o, o->h->p.whole, o->y.p.whole)) {
-            o->anim = D_801314C8[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             o->velX = -0x180;
             o->velY = -0x600;
@@ -84,7 +84,7 @@ void hidingSonTalk(TObj *o)
     case 9:
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
         c = &GCD.bcfca;
         PLAYER.b04 = 1;
@@ -102,13 +102,13 @@ void hidingSonTalk(TObj *o)
             break;
         ((TObj *)o->d90)->b04 = 3;
         if (D_8009D13E == 0) {
-            o->anim = D_801314C8[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(B12 *)&o->a;
             o->d90 = (int)showMessageBoxDirect(2, 0xf, &v);
             o->state = 11;
         } else {
-            o->anim = D_801314C8[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(B12 *)&o->a;
             o->d90 = (int)showMessageBoxDirect(2, 0xe, &v);
@@ -150,8 +150,8 @@ typedef struct { void **p; int x, y; } AT3;
 extern TObj PLAYER;
 extern unsigned char DAT_8009c942[], GAME_PLAYER_MODE;
 extern unsigned char D_8009D13E;
-extern short D_1F8001C6;
-extern AT3 D_801314C8[];
+extern short DRAW_FROZEN;
+extern AT3 HIDING_SON_DEFS_ANIMS[];
 extern TObj *showMessageBoxDirect(int, int, B12 *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -177,7 +177,7 @@ void hidingSonTalk(TObj *o)
         ((unsigned char*)&GCD.bcfcb)[0] = 1;
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
-        o->anim = D_801314C8[o->subtype].p[1];
+        o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[1];
         AnimLoadDuration(o);
         if (GCD.bce3b == 1) {
             o->d90 = (int)showMessageBoxDirect(2, 0xe, &v);
@@ -192,7 +192,7 @@ void hidingSonTalk(TObj *o)
         if (((TObj *)o->d90)->b04 != 2)
             break;
         ((TObj *)o->d90)->b04 = 3;
-        o->anim = D_801314C8[o->subtype].p[0];
+        o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
         AnimLoadDuration(o);
         o->animFrame = 1;
         o->velX = -0x180;
@@ -213,7 +213,7 @@ void hidingSonTalk(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if (FUN_80040278(o, o->h->p.whole, o->y.p.whole)) {
-            o->anim = D_801314C8[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             o->velX = -0x180;
             o->velY = -0x600;
@@ -225,7 +225,7 @@ void hidingSonTalk(TObj *o)
     case 9:
         DAT_8009c942[0] = 0;
         PLAYER.wb2 = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
         c = &GCD.bcfca;
         PLAYER.b04 = 1;
@@ -243,13 +243,13 @@ void hidingSonTalk(TObj *o)
             break;
         ((TObj *)o->d90)->b04 = 3;
         if (D_8009D13E == 0) {
-            o->anim = D_801314C8[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(B12 *)&o->a;
             o->d90 = (int)showMessageBoxDirect(2, 0x10, &v);
             o->state = 11;
         } else {
-            o->anim = D_801314C8[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(B12 *)&o->a;
             o->d90 = (int)showMessageBoxDirect(2, 0xf, &v);

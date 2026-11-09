@@ -10,7 +10,7 @@ extern unsigned char *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
 extern unsigned char TALK_POSE;
 extern unsigned char DAT_8009c93f;
-extern unsigned char DAT_1f8003ce;
+extern unsigned char PAUSE_MENU_LOCK;
 extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned char DAT_8009c942;
 extern unsigned char DAT_800a60f8;
@@ -264,7 +264,7 @@ extern unsigned char *PLAYER_EXT;
 extern unsigned short PAD_PRESSED;
 extern unsigned char TALK_POSE;
 extern unsigned char DAT_8009c93f;
-extern unsigned char DAT_1f8003ce;
+extern unsigned char PAUSE_MENU_LOCK;
 extern unsigned char GAME_PLAYER_MODE[];
 extern unsigned char DAT_8009c942;
 extern unsigned char DAT_800a60f8;
@@ -361,7 +361,7 @@ void playerStepIdle(TObj *o)
                 c = playerIdleAnimUpdate(o);
                 if (!c)
                     playerSelectGroundAnim(o);
-                if (*(unsigned short *)o->anim || (!DAT_8009c93f && !DAT_1f8003ce))
+                if (*(unsigned short *)o->anim || (!DAT_8009c93f && !PAUSE_MENU_LOCK))
                     FUN_8001fec0(o);
             }
             {

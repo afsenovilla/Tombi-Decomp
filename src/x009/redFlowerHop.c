@@ -9,7 +9,7 @@ extern int FUN_8001f9e0(void);
 extern short TileCollideAt(TObj *, short, short);
 extern char MOVE_TABLE_1[];
 extern void *D_8012EA40[];
-extern unsigned char D_8012B2CC[];
+extern unsigned char RED_FLOWER_RAND_TABLE[];
 
 static __inline__ short ground(TObj *o)
 {
@@ -47,7 +47,7 @@ void redFlowerHop(TObj *o)
         if (!o->visible) return;
         if (o->subtype & 0x80) {
             o->state++;
-            if (!D_8012B2CC[FUN_8001f9e0() & 7]) o->timer = 0x12c;
+            if (!RED_FLOWER_RAND_TABLE[FUN_8001f9e0() & 7]) o->timer = 0x12c;
             else o->timer = 0x1e0;
         } else {
             unsigned short t; short r;
@@ -55,7 +55,7 @@ void redFlowerHop(TObj *o)
             if (t >= 0xf1) r = 0;
             else { t = (*(unsigned short*)((char*)&SPAD.i16c + 2)) - o->y.p.whole + 0x50; r = t < 0xc9; }
             if (r) {
-            if (D_8012B2CC[FUN_8001f9e0() & 7]) o->timer = 0x78;
+            if (RED_FLOWER_RAND_TABLE[FUN_8001f9e0() & 7]) o->timer = 0x78;
             else o->timer = 0x3c;
             o->state++;
             }

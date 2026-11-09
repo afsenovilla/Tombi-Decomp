@@ -9,20 +9,20 @@ typedef struct {
     short idx;
     void **tab;
 } Ent;
-extern Ent D_80131174[];
+extern Ent MERMAID_DEFS[];
 extern int SPR_DATA[];
 extern void FUN_8001fe6c(TObj *);
 
 void initMermaid(TObj *o)
 {
     if (GCD.bce22) {
-        o->box0 = D_80131174[o->subtype].b0;
-        o->box1 = D_80131174[o->subtype].b1;
-        o->box2 = D_80131174[o->subtype].b2;
-        o->box3 = D_80131174[o->subtype].b3;
-        o->w1e = D_80131174[o->subtype].w1e;
-        o->d3c = SPR_DATA[D_80131174[o->subtype].idx];
-        o->anim = *D_80131174[o->subtype].tab;
+        o->box0 = MERMAID_DEFS[o->subtype].b0;
+        o->box1 = MERMAID_DEFS[o->subtype].b1;
+        o->box2 = MERMAID_DEFS[o->subtype].b2;
+        o->box3 = MERMAID_DEFS[o->subtype].b3;
+        o->w1e = MERMAID_DEFS[o->subtype].w1e;
+        o->d3c = SPR_DATA[MERMAID_DEFS[o->subtype].idx];
+        o->anim = *MERMAID_DEFS[o->subtype].tab;
         FUN_8001fe6c(o);
         o->b0d = 1;
         o->w08 = 0x7809;

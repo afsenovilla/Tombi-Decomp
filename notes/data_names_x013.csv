@@ -1,0 +1,6 @@
+address,name,size,source
+8011a8c0,GAME_STATS_PLAY_HOURS,,usage: int: play time hours % 1000 updateSceneSequence computes for drawGameStats refs=3
+8011a8c4,GAME_STATS_PLAY_MINUTES,,usage: int: play time minutes for drawGameStats refs=3
+8011a8c8,GAME_STATS_EVENTS_STARTED,,usage: int: count of SCRIPT_FLAGS != 0 (event 0x12 excluded) for drawGameStats refs=4
+8011a8cc,GAME_STATS_EVENTS_CLEARED,,usage: int: count of SCRIPT_FLAGS == 0xFF (event 0x12 excluded) for drawGameStats refs=4
+80118104,GAME_STATS_DIGIT_UVS,,usage: {u v}[digit] of the stats digits (drawStatsDigit) refs=2

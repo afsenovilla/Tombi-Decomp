@@ -3,14 +3,14 @@
 typedef struct { signed char active; char x; unsigned char type; char pad[12]; unsigned char b0f; } E;
 extern unsigned short GAME;
 extern unsigned short GAME_SELECTED_SECTION;
-extern E **DAT_8007b908[];
+extern E **AREA_SECTION_SPAWN_LISTS[];
 extern short AREA_SECTION_COUNTS[];
 extern void spawnObjectFromRecord(E *, int);
 extern int testAreaFlagBit(int);
 
 void spawnSectionObjects(void)
 {
-    E ***tab = (E ***)DAT_8007b908[GAME];
+    E ***tab = (E ***)AREA_SECTION_SPAWN_LISTS[GAME];
     E *p;
     unsigned char *q;
     short n;

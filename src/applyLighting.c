@@ -9,7 +9,7 @@ typedef struct {
     unsigned char r, g, b, p43;
     short s44, s46;
 } OB;
-extern MATRIX DAT_1f8000f8;
+extern MATRIX BASE_MATRIX;
 extern void SetFarColor(int r, int g, int b);
 extern void SetBackColor(int r, int g, int b);
 extern void SetColorMatrix(MATRIX *m);
@@ -25,7 +25,7 @@ void applyLighting(OB *o)
     SetFarColor(0xff, 0xff, 0xff);
     SetBackColor(o->r, o->g, o->b);
     SetColorMatrix(&o->cm);
-    o->m = DAT_1f8000f8;
+    o->m = BASE_MATRIX;
     FUN_800644dc(o->s44, o);
     FUN_8006467c(o->s46, o);
     v.vx = 0;

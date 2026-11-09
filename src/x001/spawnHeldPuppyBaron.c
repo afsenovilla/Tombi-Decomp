@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern void *D_8013E568;
+extern void *PUPPY_BARON_ANIMS;
 extern TObj *allocObjectLayer2(void);
 extern void AnimLoadDuration(TObj *);
 void spawnHeldPuppyBaron(unsigned char sub, short x, short y, short z)
@@ -22,7 +22,7 @@ void spawnHeldPuppyBaron(unsigned char sub, short x, short y, short z)
         o->b0d = 0;
         o->animFrame = t & 1;
         o->d3c = ((int*)&SPAD.i2d4)[0];
-        o->anim = D_8013E568;
+        o->anim = PUPPY_BARON_ANIMS;
         o->b0a = 2;
         AnimLoadDuration(o);
         o->b04 = 2;

@@ -13,24 +13,24 @@ typedef struct {
     void **anim;
 } T8012C68C;
 
-extern T8012C68C D_80135DE8[];
+extern T8012C68C TUNNEL_DIGGER_DEFS[];
 extern int SPR_DATA[];
 extern void AnimJump(TObj *, int);
 extern void AnimLoadDuration(TObj *);
 
 void func_8012B860(TObj *o)
 {
-    o->box0 = D_80135DE8[o->subtype].b0;
-    o->box1 = D_80135DE8[o->subtype].b1;
-    o->box2 = D_80135DE8[o->subtype].b2;
-    o->box3 = D_80135DE8[o->subtype].b3;
-    o->w1e = D_80135DE8[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80135DE8[o->subtype].w6];
+    o->box0 = TUNNEL_DIGGER_DEFS[o->subtype].b0;
+    o->box1 = TUNNEL_DIGGER_DEFS[o->subtype].b1;
+    o->box2 = TUNNEL_DIGGER_DEFS[o->subtype].b2;
+    o->box3 = TUNNEL_DIGGER_DEFS[o->subtype].b3;
+    o->w1e = TUNNEL_DIGGER_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[TUNNEL_DIGGER_DEFS[o->subtype].w6];
     if (((unsigned char*)&GCD.bcdc5)[0] != 0xff) {
-        o->anim = D_80135DE8[o->subtype].anim[5];
+        o->anim = TUNNEL_DIGGER_DEFS[o->subtype].anim[5];
         AnimJump(o, 0);
     } else {
-        o->anim = D_80135DE8[o->subtype].anim[4];
+        o->anim = TUNNEL_DIGGER_DEFS[o->subtype].anim[4];
         AnimJump(o, 0);
         o->h->p.whole -= 32;
     }
@@ -55,24 +55,24 @@ typedef struct {
     void **anim;
 } T8012C68C;
 
-extern T8012C68C D_80135DE8[];
+extern T8012C68C TUNNEL_DIGGER_DEFS[];
 extern int SPR_DATA[];
 extern void AnimJump(TObj *, int);
 extern void AnimLoadDuration(TObj *);
 
 void initTunnelDigger(TObj *o)
 {
-    o->box0 = D_80135DE8[o->subtype].b0;
-    o->box1 = D_80135DE8[o->subtype].b1;
-    o->box2 = D_80135DE8[o->subtype].b2;
-    o->box3 = D_80135DE8[o->subtype].b3;
-    o->w1e = D_80135DE8[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80135DE8[o->subtype].w6];
+    o->box0 = TUNNEL_DIGGER_DEFS[o->subtype].b0;
+    o->box1 = TUNNEL_DIGGER_DEFS[o->subtype].b1;
+    o->box2 = TUNNEL_DIGGER_DEFS[o->subtype].b2;
+    o->box3 = TUNNEL_DIGGER_DEFS[o->subtype].b3;
+    o->w1e = TUNNEL_DIGGER_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[TUNNEL_DIGGER_DEFS[o->subtype].w6];
     if (((unsigned char*)&GCD.bcdc5)[0] != 0xff) {
-        o->anim = D_80135DE8[o->subtype].anim[5];
+        o->anim = TUNNEL_DIGGER_DEFS[o->subtype].anim[5];
         AnimJump(o, 0);
     } else {
-        o->anim = D_80135DE8[o->subtype].anim[4];
+        o->anim = TUNNEL_DIGGER_DEFS[o->subtype].anim[4];
         AnimJump(o, 0);
         o->h->p.whole = 0xc4d;
     }

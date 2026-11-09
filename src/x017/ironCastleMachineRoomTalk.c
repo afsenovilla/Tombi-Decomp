@@ -7,8 +7,8 @@
 #include "TOBJ.H"
 typedef struct { char c[12]; } V12;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80119990[];
-extern short D_1F8001C6;
+extern AT WATERFALL_HINT_NPC_DEFS_ANIMS[];
+extern short DRAW_FROZEN;
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fec0(TObj *);
 extern int showMessageBoxDirect(int, int, V12 *);
@@ -30,7 +30,7 @@ void ironCastleMachineRoomTalk(TObj *o)
             ((unsigned char*)&PLAYER.obj.state)[0] = 0;
             o->wbc = o->animFrame;
             o->animFrame = o->b68 & 1;
-            o->anim = D_80119990[o->subtype].anims[2];
+            o->anim = WATERFALL_HINT_NPC_DEFS_ANIMS[o->subtype].anims[2];
             FUN_8001fe94(o, 0);
             o->d90 = showMessageBoxDirect(2, 0x2c, &b);
             o->state++;
@@ -47,12 +47,12 @@ void ironCastleMachineRoomTalk(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 == 2) {
             p->b04 = 3;
-            o->anim = D_80119990[o->subtype].anims[0];
+            o->anim = WATERFALL_HINT_NPC_DEFS_ANIMS[o->subtype].anims[0];
             FUN_8001fe94(o, 0);
             ((unsigned char*)&GVARS.b42)[0] = 0;
             ((short*)&PLAYER.obj.wb2)[0] = 0;
             o->timer = 4;
-            D_1F8001C6 = 0;
+            DRAW_FROZEN = 0;
             if (((unsigned char*)&GCD.bce0a)[0] == 0) {
                 setEventStarted(0x66, 1, 1);
                 o->timer = 0xc8;
@@ -67,9 +67,9 @@ void ironCastleMachineRoomTalk(TObj *o)
     case 9:
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
-        o->anim = D_80119990[o->subtype].anims[0];
+        o->anim = WATERFALL_HINT_NPC_DEFS_ANIMS[o->subtype].anims[0];
         FUN_8001fe94(o, 0);
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

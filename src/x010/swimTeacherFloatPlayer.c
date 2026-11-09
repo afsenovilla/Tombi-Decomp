@@ -5,8 +5,8 @@
 #include "TOBJ.H"
 
 extern short NEG_SIN_TABLE[];
-extern Fix16 *D_800A6078x[];
-#define D_800A6078 D_800A6078x[0]
+extern Fix16 *PLAYER_H[];
+#define D_800A6078 PLAYER_H[0]
 extern void playSFX(int);
 
 void swimTeacherFloatPlayer(TObj *o, int n)

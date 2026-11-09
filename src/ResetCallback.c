@@ -33,14 +33,14 @@ struct intr {
     int (*restart)();
     short* unk1C;
 };
-extern struct intr* D_8009813C;
+extern struct intr* intr_table_ptr;
 int VSyncCallback(void (*func)());
 extern volatile u16* D_800974A8;
 extern volatile s32* D_800974AC;
 void HookEntryInt(jmp_buf env);
 extern volatile u16* D_800974A4;
 
-int ResetCallback(void) { return D_8009813C->start(); }
+int ResetCallback(void) { return intr_table_ptr->start(); }
 
 void InterruptCallback(int arg0, void (*cb)(void));
 

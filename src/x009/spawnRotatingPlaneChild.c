@@ -5,7 +5,7 @@ typedef struct {
     unsigned char subtype, b0c, frame, pad;
     short x, y;
 } E;
-extern E D_8012A878[];
+extern E ROTATING_PLANE_CHILD_DEFS[];
 extern TObj *allocObjectLayer2(void);
 
 TObj *spawnRotatingPlaneChild(TObj *o, int idx)
@@ -16,13 +16,13 @@ TObj *spawnRotatingPlaneChild(TObj *o, int idx)
     p->active = 1;
     p->b1d = 0;
     p->type = 0x1c;
-    p->subtype = D_8012A878[idx].subtype;
-    p->b0c = D_8012A878[idx].b0c;
+    p->subtype = ROTATING_PLANE_CHILD_DEFS[idx].subtype;
+    p->b0c = ROTATING_PLANE_CHILD_DEFS[idx].b0c;
     p->b0a = 0;
-    p->animFrame = D_8012A878[idx].frame;
+    p->animFrame = ROTATING_PLANE_CHILD_DEFS[idx].frame;
     p->b0f = 0;
-    p->a.raw = D_8012A878[idx].x << 16;
-    p->y.raw = D_8012A878[idx].y << 16;
+    p->a.raw = ROTATING_PLANE_CHILD_DEFS[idx].x << 16;
+    p->y.raw = ROTATING_PLANE_CHILD_DEFS[idx].y << 16;
     p->b.raw = 0xb400000;
     if (p->animFrame == 1) {
         p->d30 = p->a.raw - o->a.raw;

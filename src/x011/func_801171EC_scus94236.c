@@ -10,7 +10,7 @@ extern unsigned char D_8009BCAA[];
 extern signed char D_8009C618[];
 extern unsigned char D_800A539C[], D_800A539D[], D_800A539E[];
 extern short D_800A544A[];
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern void func_800229FC(TObj *);
 extern int func_800307AC(int, int, V6 *);
 
@@ -55,7 +55,7 @@ void func_801171EC(TObj *o)
         D_8009BCAA[0] = 0;
         D_800A544A[0] = 0;
         o->animFrame = o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         D_800A539C[0] = 1;
         D_800A539D[0] = 0;
         D_800A539E[0] = 0;

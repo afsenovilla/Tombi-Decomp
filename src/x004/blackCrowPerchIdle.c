@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void *D_801345DC[];
-extern unsigned short D_80131128[];
+extern unsigned short BLACK_CROW_RAND_STATES[];
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 
@@ -22,7 +22,7 @@ void blackCrowPerchIdle(TObj *o)
         o->substep++;
     case 1:
         if (--o->timer) break;
-        o->state = D_80131128[Rand() & 0xf];
+        o->state = BLACK_CROW_RAND_STATES[Rand() & 0xf];
         o->substep = 0;
         if (o->d->p.whole == (*(Fix16 **)&PLAYER.obj.d)->p.whole) {
             dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole + 0x30;

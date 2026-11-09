@@ -12,7 +12,7 @@ extern int showMessageBoxDirect(int, int, void *);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern void setEventComplete(int, int);
-extern AT D_801176CC[];
+extern AT BACO_TOWN_NPC_DEFS_ANIMS[];
 
 void wineMerchantTalk(TObj *o)
 {
@@ -77,7 +77,7 @@ void wineMerchantTalk(TObj *o)
             ((unsigned char *)o->d90)[4] = 3;
             o->animFrame = 1;
             o->active = 4;
-            o->anim = D_801176CC[o->subtype].p[1];
+            o->anim = BACO_TOWN_NPC_DEFS_ANIMS[o->subtype].p[1];
             AnimLoadDuration(o);
             o->state++;
         }
@@ -104,7 +104,7 @@ void wineMerchantTalk(TObj *o)
     case 5:
         if (((unsigned char *)o->d90)[4] == 2) {
             ((unsigned char *)o->d90)[4] = 3;
-            o->anim = D_801176CC[o->subtype].p[0];
+            o->anim = BACO_TOWN_NPC_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             setEventComplete(0x31, 0);
             o->state++;

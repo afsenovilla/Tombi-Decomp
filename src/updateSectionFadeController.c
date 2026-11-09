@@ -8,9 +8,9 @@ typedef struct {
     unsigned char c975; unsigned char c976; char p977[0x963 - 0x17]; unsigned char d2c3;
 } G;
 extern G GAME;
-extern unsigned char *D_8007C178[];
-extern unsigned char *D_8007C1A8;
-extern unsigned char D_1F8003D1;
+extern unsigned char *SECTION_FADE_TABLES[];
+extern unsigned char *AREA4_SECTION_FADE_TABLE_ALT;
+extern unsigned char WARP_FADE_ACTIVE;
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
 extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 void func_8005804C(TObj *o)
@@ -21,8 +21,8 @@ void func_8005804C(TObj *o)
     case 0:
         GAME.c975 = 1;
         GAME.c976 = 0;
-        p = D_8007C178[GAME.c960];
-        if (GAME.c960 == 4 && (GAME.d2c3 & 8)) p = D_8007C1A8;
+        p = SECTION_FADE_TABLES[GAME.c960];
+        if (GAME.c960 == 4 && (GAME.d2c3 & 8)) p = AREA4_SECTION_FADE_TABLE_ALT;
         p += GAME.c962 * 4;
         r = *p++;
         g = *p;
@@ -75,9 +75,9 @@ typedef struct {
     unsigned char c975; unsigned char c976; char p977[0x963 - 0x17]; unsigned char d2c3;
 } G;
 extern G GAME;
-extern unsigned char *D_8007C178[];
-extern unsigned char *D_8007C1A8;
-extern unsigned char D_1F8003D1;
+extern unsigned char *SECTION_FADE_TABLES[];
+extern unsigned char *AREA4_SECTION_FADE_TABLE_ALT;
+extern unsigned char WARP_FADE_ACTIVE;
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
 extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 void updateSectionFadeController(TObj *o)
@@ -88,8 +88,8 @@ void updateSectionFadeController(TObj *o)
     case 0:
         GAME.c975 = 1;
         GAME.c976 = 0;
-        p = D_8007C178[GAME.c960];
-        if (GAME.c960 == 4 && (GAME.d2c3 & 8)) p = D_8007C1A8;
+        p = SECTION_FADE_TABLES[GAME.c960];
+        if (GAME.c960 == 4 && (GAME.d2c3 & 8)) p = AREA4_SECTION_FADE_TABLE_ALT;
         p += GAME.c962 * 4;
         r = *p++;
         g = *p;
@@ -111,7 +111,7 @@ void updateSectionFadeController(TObj *o)
         GAME.c975 = 2;
         GAME.c976 += 8;
         if (GAME.c976 != 0) break;
-        if (D_1F8003D1 == 1) D_1F8003D1 = 0;
+        if (WARP_FADE_ACTIVE == 1) WARP_FADE_ACTIVE = 0;
         GAME.c975 = 0;
         o->b04++;
         break;

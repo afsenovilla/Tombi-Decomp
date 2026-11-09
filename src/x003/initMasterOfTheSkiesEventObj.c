@@ -11,20 +11,20 @@ typedef struct {
     void **anim;
 } T8012A6D8;
 
-extern T8012A6D8 D_80135DB8[];
+extern T8012A6D8 MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
 void initMasterOfTheSkiesEventObj(TObj *o)
 {
-    o->box0 = D_80135DB8[o->subtype].b0;
-    o->box1 = D_80135DB8[o->subtype].b1;
-    o->box2 = D_80135DB8[o->subtype].b2;
-    o->box3 = D_80135DB8[o->subtype].b3;
-    o->w1e = D_80135DB8[o->subtype].w4;
-    o->d3c = SPR_DATA[D_80135DB8[o->subtype].w6];
-    if (((unsigned char*)&GCD.bcdc7)[0] != 0xff) o->anim = D_80135DB8[o->subtype].anim[1];
-    else o->anim = D_80135DB8[o->subtype].anim[2];
+    o->box0 = MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[o->subtype].b0;
+    o->box1 = MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[o->subtype].b1;
+    o->box2 = MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[o->subtype].b2;
+    o->box3 = MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[o->subtype].b3;
+    o->w1e = MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[o->subtype].w6];
+    if (((unsigned char*)&GCD.bcdc7)[0] != 0xff) o->anim = MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[o->subtype].anim[1];
+    else o->anim = MASTER_OF_THE_SKIES_EVENT_OBJ_DEFS[o->subtype].anim[2];
     AnimLoadDuration(o);
     o->b0a = 2;
     o->d8c = 0;

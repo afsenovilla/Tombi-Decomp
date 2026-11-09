@@ -85,7 +85,7 @@ extern volatile s32* DMA2_CHCR;
 extern volatile s32* DMA2_MADR;
 extern volatile s32* DMA2_BCR;
 extern volatile s32* DPCR;
-extern volatile s32 D_80091A2C;
+extern volatile s32 _qlog;
 extern volatile s32 D_80091A30;
 extern volatile s32 D_80091A34;
 extern volatile s32 GPU_QIN;
@@ -482,7 +482,7 @@ s32 get_alarm(void) {
         *GPU_STATUS;
         printf("GPU timeout:que=%d,stat=%08x,chcr=%08x,madr=%08x,",
                GPU_QIN - GPU_QOUT & 0x3F, *GPU_STATUS, *DMA1_CHCR, *DMA1_MADR);
-        p = &D_80091A2C;
+        p = &_qlog;
         a1 = *p;
         printf("func=(%08x)(%08x,%08x)\n", a1, D_80091A30, D_80091A34);
         intrMask = SetIntrMask(0);

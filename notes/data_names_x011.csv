@@ -1,0 +1,3 @@
+address,name,size,source
+80119c40,FACTORY_NPC_DEFS,,usage: {box; w1e; ...; anims}[subtype] initFactoryNpc copies refs=7
+80119c48,FACTORY_NPC_DEFS_ANIMS,,usage: FACTORY_NPC_DEFS+8: the anims column every factory NPC talk reads (bonsugeeResearcher* / factoryBoss* ...) refs=31

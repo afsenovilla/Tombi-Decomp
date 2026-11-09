@@ -4,16 +4,16 @@
 typedef struct { short m[3][3]; int t[3]; } MATRIX;
 extern MATRIX M;
 extern MATRIX VIEW_CAMERA;
-extern short SV[3];
+extern short WORK_VEC_A[3];
 extern void MulMatrix0(void *, void *, void *), SetRotMatrix(void *), ApplyRotMatrix(void *, void *), SetTransMatrix(void *), f1(int, int, void *, int, int);
 extern char *CURRENT_OT;
 void drawObjectModelOwnMatrixVtx(char *o)
 {
-    SV[0] = U16(o, 0x12);
-    SV[1] = U16(o, 0x16);
-    SV[2] = U16(o, 0x1a);
+    WORK_VEC_A[0] = U16(o, 0x12);
+    WORK_VEC_A[1] = U16(o, 0x16);
+    WORK_VEC_A[2] = U16(o, 0x1a);
     MulMatrix0(&VIEW_CAMERA, o + 0x48, &M);
-    ApplyRotMatrix(SV, &M.t[0]);
+    ApplyRotMatrix(WORK_VEC_A, &M.t[0]);
     M.t[0] += VIEW_CAMERA.t[0];
     M.t[1] += VIEW_CAMERA.t[1];
     M.t[2] += VIEW_CAMERA.t[2];

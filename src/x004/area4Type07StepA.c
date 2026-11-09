@@ -6,7 +6,7 @@
 typedef struct { short x, y, z, pad; } V3S;
 
 extern void *D_80134D44[];
-extern void *D_80134D38[];
+extern void *BITING_PLANT_ANIMS[];
 extern unsigned short SPAWN_AXIS_SWAP;
 extern void playSFX(int);
 
@@ -110,7 +110,7 @@ void area4Type07StepA(TObj *o)
             c->y -= o->velV >> 10;
             d->y -= o->velV >> 10;
             if (o->velV >= 0x200)
-                o->anim = D_80134D38[o->subtype];
+                o->anim = BITING_PLANT_ANIMS[o->subtype];
             if (o->d34 - o->y.p.whole < 25)
                 o->state = 3;
         }

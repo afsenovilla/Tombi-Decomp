@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 typedef struct { unsigned short b0, b1, b2, b3, w1e; short k; void **anims; } T16;
-extern T16 D_8012B23C[];
+extern T16 TEAR_JAR_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -15,13 +15,13 @@ void updateTearJar(TObj *o)
 {
     switch (o->b04) {
     case 0:
-        o->box0 = D_8012B23C[o->subtype].b0;
-        o->box1 = D_8012B23C[o->subtype].b1;
-        o->box2 = D_8012B23C[o->subtype].b2;
-        o->box3 = D_8012B23C[o->subtype].b3;
-        o->w1e = D_8012B23C[o->subtype].w1e;
-        o->d3c = SPR_DATA[D_8012B23C[o->subtype].k];
-        o->anim = *D_8012B23C[o->subtype].anims;
+        o->box0 = TEAR_JAR_DEFS[o->subtype].b0;
+        o->box1 = TEAR_JAR_DEFS[o->subtype].b1;
+        o->box2 = TEAR_JAR_DEFS[o->subtype].b2;
+        o->box3 = TEAR_JAR_DEFS[o->subtype].b3;
+        o->w1e = TEAR_JAR_DEFS[o->subtype].w1e;
+        o->d3c = SPR_DATA[TEAR_JAR_DEFS[o->subtype].k];
+        o->anim = *TEAR_JAR_DEFS[o->subtype].anims;
         o->d8c = 0;
         o->b0d = 0;
         o->category |= 0x80;

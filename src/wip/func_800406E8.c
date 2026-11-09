@@ -5,7 +5,7 @@
 typedef struct S { char p[0x14]; short w14; unsigned short w16; } S;
 extern unsigned short *COLLISION_SEG_PTR;
 extern short COLLISION_HIT_HEIGHT;
-extern short D_1F800280;
+extern short COLLISION_HIT_TOP;
 int func_800406E8(S *o, short x, short y)
 {
     char pad;
@@ -43,7 +43,7 @@ int func_800406E8(S *o, short x, short y)
         if ((short)d > 0) {
             o->w14 = 0;
             COLLISION_HIT_HEIGHT = b;
-            D_1F800280 = a;
+            COLLISION_HIT_TOP = a;
             (*(short*)&SPAD.s282) = fl;
             o->w16 += d;
             return 1;

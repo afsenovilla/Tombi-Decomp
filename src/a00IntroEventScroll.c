@@ -11,7 +11,7 @@
 typedef struct { char pad[0x12]; short w12; char p14[2]; short w16; char p18[0x2e - 0x18]; short w2e; } G6038;
 extern G6038 PLAYER;
 extern unsigned char GAME_AREA00_INTRO_PHASE, D_8009C933;
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern unsigned char MOVIE_PLAY_STATE, MOVIE_ID;
 extern void updateCameraFollow(TObj *);
 extern void updateCameraScroll(TObj *);
@@ -122,7 +122,7 @@ void func_80115AD0(TObj *o)
         } else {
             GAME_AREA00_INTRO_PHASE = 3;
             GVARS.b30 = 0;
-            D_1F8001C6 = 2;
+            DRAW_FROZEN = 2;
             FUN_8001f4bc();
             o->state++;
             MOVIE_PLAY_STATE = 1;
@@ -133,7 +133,7 @@ void func_80115AD0(TObj *o)
     case 5:
         if (MOVIE_PLAY_STATE == 0) {
             o->animFrame = 0x52e;
-            D_1F8001C6 = 0;
+            DRAW_FROZEN = 0;
             *(int *)o->d34 = 0x52e0000;
             o->y.raw = 0;
             ((unsigned char*)&GAME.fadeScreenControl)[0] = 4;
@@ -158,7 +158,7 @@ void func_80115AD0(TObj *o)
 typedef struct { char pad[0x12]; short w12; char p14[2]; short w16; char p18[0x2e - 0x18]; short w2e; } G6038;
 extern G6038 PLAYER;
 extern unsigned char GAME_AREA00_INTRO_PHASE, D_8009C933;
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern unsigned char MOVIE_PLAY_STATE, MOVIE_ID;
 extern void updateCameraFollow(TObj *);
 extern void updateCameraScroll(TObj *);
@@ -284,7 +284,7 @@ void a00IntroEventScroll(TObj *o)
         } else {
             GAME_AREA00_INTRO_PHASE = 3;
             GVARS.b30 = 0;
-            D_1F8001C6 = 2;
+            DRAW_FROZEN = 2;
             FUN_8001f4bc();
             o->state++;
             MOVIE_PLAY_STATE = 1;
@@ -295,7 +295,7 @@ void a00IntroEventScroll(TObj *o)
     case 5:
         if (MOVIE_PLAY_STATE == 0) {
             o->animFrame = 0x52e;
-            D_1F8001C6 = 0;
+            DRAW_FROZEN = 0;
             *(int *)o->d34 = 0x52e0000;
             o->y.raw = 0;
             ((unsigned char*)&GAME.fadeScreenControl)[0] = 4;

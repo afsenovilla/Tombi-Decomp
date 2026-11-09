@@ -17,7 +17,7 @@ typedef struct {
 } P80119F5C;
 
 #include "camera.h"
-extern P80119F5C D_8012AC88[];
+extern P80119F5C WAYPOINT_RIDE_PATH[];
 extern unsigned char PLAYER[];
 extern void waypointRideAdvanceSegment(TObj *);
 extern void waypointRidePlace(TObj *);
@@ -84,10 +84,10 @@ void waypointRideStep(TObj *o)
         x->w2 = 0x400;
         x->w0 = 2;
         x->d8 = 0;
-        o->a.p.whole = D_8012AC88[2].x;
+        o->a.p.whole = WAYPOINT_RIDE_PATH[2].x;
 
-        o->y.p.whole = D_8012AC88[x->w0].y - 8;
-        o->b.p.whole = D_8012AC88[x->w0].z;
+        o->y.p.whole = WAYPOINT_RIDE_PATH[x->w0].y - 8;
+        o->b.p.whole = WAYPOINT_RIDE_PATH[x->w0].z;
         waypointRideAdvanceSegment(o);
         break;
     found:

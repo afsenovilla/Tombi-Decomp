@@ -85,7 +85,7 @@ extern volatile s32* DMA2_CHCR;
 extern volatile s32* DMA2_MADR;
 extern volatile s32* DMA2_BCR;
 extern volatile s32* DPCR;
-extern volatile s32 D_80091A2C;
+extern volatile s32 _qlog;
 extern volatile s32 D_80091A30;
 extern volatile s32 D_80091A34;
 extern volatile s32 GPU_QIN;
@@ -488,7 +488,7 @@ s32 _addque2(void (*arg0)(s32*, s32), s32* arg1, s32 arg2, s32 arg3)
         do {
         } while ((*GPU_STATUS & 0x04000000)==0);
         arg0(arg1, arg3);
-        *(&D_80091A2C) = arg0;
+        *(&_qlog) = arg0;
         D_80091A30 = arg1;
         D_80091A34 = arg3;
         SetIntrMask(D_80091A44);

@@ -32,7 +32,7 @@ void playerContactCat2Type2B(unsigned char *o, unsigned char *s)
 // Demo version of PAL x000 80126010 (playerContactCat2Type2B.c): attached object at +0xd0 (PAL +0xe4); the grab also needs
 // scratchpad byte 0x1F8001A4 clear.
 extern short FUN_80043464(void);
-extern unsigned char D_1F8001A4;
+extern unsigned char DEBUG_INVINCIBLE;
 
 void playerContactCat2Type2B(unsigned char *o, unsigned char *s)
 {
@@ -47,7 +47,7 @@ void playerContactCat2Type2B(unsigned char *o, unsigned char *s)
             s[0x69] = 0;
             *(unsigned char **)(o + 0xd0) = s;
             o[0xac] = 2;
-        } else if (D_1F8001A4 == 0 && (s[0] & 2) == 0 && (o[0] & 2) == 0 && o[0x9c] == 0 && r < 2) {
+        } else if (DEBUG_INVINCIBLE == 0 && (s[0] & 2) == 0 && (o[0] & 2) == 0 && o[0x9c] == 0 && r < 2) {
             o[0] = 2;
             o[4] = 1;
             *(short *)(o + 0x2e) = r;

@@ -12,11 +12,11 @@ void DMA_memclr(int* ptr, int size);
 
 extern char* D_800162A8[];
 extern char* D_800162C4[];
-extern volatile unsigned long* D_80098178;
+extern volatile unsigned long* dma_dicr;
 static Callback D_8009817C[8] = {
     0,
 };
-extern unsigned long* D_8009819C;
+extern unsigned long* dma_madr;
 
 void* startIntrDMA(void);
 
@@ -24,20 +24,20 @@ void trapIntrDMA(void) {
     u32 mask;
     int i;
 
-    while((mask = ((u32) *D_80098178 >> 24) & 0x7f) != 0) {
+    while((mask = ((u32) *dma_dicr >> 24) & 0x7f) != 0) {
         for (i = 0; mask != 0 && i < 7; i++, mask >>= 1) {
             if (mask & 1) {
-                *D_80098178 &= (0xffffff | (1 << (i + 24)));
+                *dma_dicr &= (0xffffff | (1 << (i + 24)));
                 if (D_8009817C[i] != 0) {
                      D_8009817C[i]();
                 }
             }
         }
     }
-    if (((*D_80098178 & 0xFF000000) == 0x80000000) || (*D_80098178 & 0x8000)) {
-        printf(D_800162A8, *D_80098178);
+    if (((*dma_dicr & 0xFF000000) == 0x80000000) || (*dma_dicr & 0x8000)) {
+        printf(D_800162A8, *dma_dicr);
         for (i = 0; i < 7; i++) {
-            printf(D_800162C4, i, D_8009819C[4 * i]);
+            printf(D_800162C4, i, dma_madr[4 * i]);
         }
     }
 }

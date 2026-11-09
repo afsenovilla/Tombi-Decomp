@@ -7,10 +7,10 @@ typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; 
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0xd4 - 0x48]; } S2;
 typedef struct { unsigned char act; char p01[0xf]; char a10[8]; char a18[0x28]; void *p40; void *p44; char rest[0x6c - 0x48]; } S3;
 extern unsigned short SPAWN_AXIS_SWAP;
-extern short D_1f80019c;
+extern short SWAP_INDEX;
 extern char PLAYER[];
 extern void *PLAYER_H, *PLAYER_D;
-extern S1 D_800B1478[];
+extern S1 OBJECT_POOL_LAYER1[];
 extern S2 OBJECT_POOL[];
 extern S3 OBJECT_POOL_LAYER7[];
 void setPlayerAxisPointers(void)
@@ -33,8 +33,8 @@ void setPlayerAxisPointers(void)
         CAMERA_SCROLL.targetZ = ((char*)&SPAD.iec);
         CAMERA_SCROLL.targetX = ((char*)&SPAD.iec) + 8;
     }
-    e1 = D_800B1478;
-    for (D_1f80019c = 0; D_1f80019c < 4; D_1f80019c++, e1++) {
+    e1 = OBJECT_POOL_LAYER1;
+    for (SWAP_INDEX = 0; SWAP_INDEX < 4; SWAP_INDEX++, e1++) {
         if (e1->act) {
             if (!(SPAWN_AXIS_SWAP & 1)) {
                 e1->p40 = e1->a10;
@@ -46,7 +46,7 @@ void setPlayerAxisPointers(void)
         }
     }
     e2 = OBJECT_POOL;
-    for (D_1f80019c = 0; D_1f80019c < 200; D_1f80019c++, e2++) {
+    for (SWAP_INDEX = 0; SWAP_INDEX < 200; SWAP_INDEX++, e2++) {
         if (e2->act) {
             if (!(SPAWN_AXIS_SWAP & 1)) {
                 e2->p40 = e2->a10;
@@ -58,7 +58,7 @@ void setPlayerAxisPointers(void)
         }
     }
     e3 = OBJECT_POOL_LAYER7;
-    for (D_1f80019c = 0; D_1f80019c < 10; D_1f80019c++, e3++) {
+    for (SWAP_INDEX = 0; SWAP_INDEX < 10; SWAP_INDEX++, e3++) {
         if (e3->act) {
             if (!(SPAWN_AXIS_SWAP & 1)) {
                 e3->p40 = e3->a10;

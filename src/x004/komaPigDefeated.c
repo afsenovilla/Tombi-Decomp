@@ -4,7 +4,7 @@
 typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
 typedef struct B { unsigned char c[4]; } B;
 extern char MOVE_TABLE_2[];
-extern B D_80130FD4[];
+extern B KOMA_PIG_ANIM_BOXES[];
 extern A *D_80133BF4[];
 extern void applyAnimVelocityX(TObj *, unsigned short);
 
@@ -20,7 +20,7 @@ void komaPigDefeated(TObj *o)
         o->wac = 0x26;
         o->state++;
         o->anim = D_80133BF4[0];
-        { unsigned char *p; { B *t = D_80130FD4; p = t[((A *)o->anim)->w2].c; }
+        { unsigned char *p; { B *t = KOMA_PIG_ANIM_BOXES; p = t[((A *)o->anim)->w2].c; }
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;

@@ -38,19 +38,19 @@ extern int D_80096230[]; // CD_COMATTR
 extern int D_80096294;
 extern volatile u_char* D_800962B4;
 extern volatile u_char* D_800962B8;
-extern volatile int* D_80096F5C;
+extern volatile int* cd_com_delay;
 extern void* D_800962C4;
 extern volatile CdlIntr D_800962C8; // CD_INTR
 extern void* D_800962CC[];
-extern volatile unsigned char* D_80096F4C;
-extern s32* D_80096F80;
-extern s32* D_80096F84;
-extern s32* D_80096F88;
-extern s32* D_80096F8C;
-extern volatile s32* D_80096F90;
+extern volatile unsigned char* cd_reg0;
+extern s32* cd_delay;
+extern s32* cd_dpcr;
+extern s32* cd_d3_madr;
+extern s32* cd_d3_bcr;
+extern volatile s32* cd_d3_chcr;
 extern char D_8009B2A8[];
 extern char D_8009B2B0[];
-extern volatile u_char* D_80096F58;
+extern volatile u_char* cd_reg3;
 extern char D_8009B2B8[];
 extern int D_8009B2C0;
 extern int D_8009B2C4; // timeout
@@ -109,17 +109,17 @@ int CD_init(void);
 int CD_datasync(int arg0);
 
 int CD_getsector(int arg0, int arg1) {
-    *D_80096F4C = 0;
-    *D_80096F58 = 0x80;
-    *D_80096F80 = 0x20943;
-    *D_80096F5C = 0x1323;
-    *D_80096F84 |= 0x8000;
-    *D_80096F88 = arg0;
-    *D_80096F8C = arg1 | 0x10000;
-    while (!(*D_80096F4C & 0x40)){};
-    *D_80096F90 = 0x11000000;
-    while (*D_80096F90 & 0x01000000){};
-    *D_80096F5C = 0x1325;
+    *cd_reg0 = 0;
+    *cd_reg3 = 0x80;
+    *cd_delay = 0x20943;
+    *cd_com_delay = 0x1323;
+    *cd_dpcr |= 0x8000;
+    *cd_d3_madr = arg0;
+    *cd_d3_bcr = arg1 | 0x10000;
+    while (!(*cd_reg0 & 0x40)){};
+    *cd_d3_chcr = 0x11000000;
+    while (*cd_d3_chcr & 0x01000000){};
+    *cd_com_delay = 0x1325;
     return 0;
 }
 

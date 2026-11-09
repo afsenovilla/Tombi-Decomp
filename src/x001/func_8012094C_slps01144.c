@@ -1,9 +1,9 @@
 // near-twin of playerContactStopCheckJump (PAL)
 // VERSION SLPS_01144 x01 8012094C 320
 #if defined(VERSION_SLPS_01144)
-extern unsigned short D_1F8001FC;
-extern unsigned short D_1F8003C4;
-extern unsigned short D_1F8003C6;
+extern unsigned short JOYPAD_STATE;
+extern unsigned short BUTTON_MASK_A;
+extern unsigned short BUTTON_MASK_B;
 #define PLAYER_EXT D_8009DEE0
 #define playerSelectGroundAnim func_800EFBEC
 #define playSFX func_8001E2D4
@@ -34,14 +34,14 @@ void func_8012094C_slps01144(PL *o)
             o->o.state = 0;
         }
     }
-    if (D_1F8001FC & D_1F8003C6) {
+    if (JOYPAD_STATE & BUTTON_MASK_B) {
         playSFX(0x3e);
         spawnGroundDebris(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);
         spawnGroundDebris(o->o.h->p.whole, o->o.y.p.whole, o->o.d->p.whole, 0);
         o->o.b9c = 1;
         o->o.b04 = 1;
         o->o.y.p.whole -= 8;
-        if ((GAME_AREA00_EVENT_CONTROL[0] & 0x40) && (PAD_PRESSED[0] & D_1F8003C4)) o->o.ba7 = 1;
+        if ((GAME_AREA00_EVENT_CONTROL[0] & 0x40) && (PAD_PRESSED[0] & BUTTON_MASK_A)) o->o.ba7 = 1;
         o->o.step = 2;
         o->o.state = 0;
     }

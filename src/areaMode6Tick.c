@@ -1,7 +1,7 @@
 // FUNC 8001bcd8 324 MAIN0
 // MATCHING 8001bcd8 324
 #include "globals.h"
-extern short FRAME_BUFFER_INDEX, G1c6;
+extern short FRAME_BUFFER_INDEX, DRAW_FROZEN;
 extern unsigned short TICK_COUNT;
 extern unsigned int NEXT_PRIM;
 extern void FUN_8001ca58(void), updateAreaScreenEffect(void), FUN_8001d36c(void), updateObjectsUnlayered(void), FUN_800ec26c(void);
@@ -12,24 +12,24 @@ void areaMode6Tick(void)
 {
     NEXT_PRIM = (unsigned int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
     FUN_8001ca58();
-    if (G1c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         TICK_COUNT = TICK_COUNT + 1;
         updateAreaScreenEffect();
-        if (G1c6 == 0) {
+        if (DRAW_FROZEN == 0) {
             FUN_8001d36c();
             updateObjectsUnlayered();
             FUN_800ec26c();
         }
     }
-    if (G1c6 != 1)
+    if (DRAW_FROZEN != 1)
         updateInventoryOverlay();
-    if (G1c6 == 0) {
+    if (DRAW_FROZEN == 0) {
         callAreaModelLinkHook();
         updateObjectsLayer8();
-        if (G1c6 == 0)
+        if (DRAW_FROZEN == 0)
             updateObjectsLayer7();
     }
-    if (G1c6 != 2)
+    if (DRAW_FROZEN != 2)
         drawGameplayScene();
     else
         resetDrawLists();

@@ -7,16 +7,16 @@
    luid right before the pad lhu; `d` is a 3-set int per axis (global pseudo: v1 in the first axis because the
    pad value is live in v0, v0 in the second); the dead `a = 0` after the last use stops cse from reusing `a` for
    the `c < 0x80` test (cse follows the two beqz around the j blocks) without emitting code; without it the test
-   compiles to `sltiu v0,a0,0x80` (`-fno-cse-follow-jumps` would do the same). The DAT_8009d674 store written
+   compiles to `sltiu v0,a0,0x80` (`-fno-cse-follow-jumps` would do the same). The PAD_PRESSED_PREV store written
    first puts the lhu of DAT_800a6114 before the lbu (no second extern name needed). */
 typedef struct { char p0[9]; unsigned char b9; } G;
 extern unsigned char DAT_8009d618;
 extern G PAD_INFO;
 extern unsigned short PAD_PRESSED;
-extern volatile unsigned short DAT_8009d674;
+extern volatile unsigned short PAD_PRESSED_PREV;
 extern unsigned short DAT_800a6114;
 extern unsigned short JOYPAD_STATE;
-extern unsigned short DAT_1f8001fe;
+extern unsigned short JOYPAD_RELEASED;
 
 #define AXIS(v, c, a, hi, lo) ({                                  \
     int d;                                                      \
@@ -42,7 +42,7 @@ void playerDecodePadInput(void)
     unsigned int a1, a2;
     volatile unsigned short *pad;
     G *g = &PAD_INFO;
-    DAT_8009d674 = DAT_800a6114;
+    PAD_PRESSED_PREV = DAT_800a6114;
     c1 = DAT_8009d618;
     DAT_8009d618 = 0;
     m = *(volatile unsigned short *)&PAD_PRESSED & 0xff0f;
@@ -54,7 +54,7 @@ void playerDecodePadInput(void)
     m |= AXIS(g->b9, c2, a2, 0x10, 0x40);
     pad = &PAD_PRESSED;
     *pad = m;
-    JOYPAD_STATE = *pad & ~DAT_8009d674;
-    DAT_1f8001fe = DAT_8009d674 & ~*pad;
+    JOYPAD_STATE = *pad & ~PAD_PRESSED_PREV;
+    JOYPAD_RELEASED = PAD_PRESSED_PREV & ~*pad;
     DAT_800a6114 = *pad;
 }

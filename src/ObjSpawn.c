@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 extern TObj *allocObjectLayer5(void);
 extern unsigned char DAT_8007b368[];
-extern unsigned char DAT_8007b084[];
-extern unsigned char *DAT_8007b14c[];
+extern unsigned char ITEM_INIT_INDEX[];
+extern unsigned char *ITEM_INIT_TABLE[];
 extern unsigned short SPAWN_AXIS_SWAP;
 extern Fix16 *PLAYER_H[];
 extern unsigned char D_8006DDEF[];
@@ -88,8 +88,8 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
 #include "TOBJ.H"
 extern TObj *allocObjectLayer5(void);
 extern unsigned char DAT_8007b368[];
-extern unsigned char DAT_8007b084[];
-extern unsigned char *DAT_8007b14c[];
+extern unsigned char ITEM_INIT_INDEX[];
+extern unsigned char *ITEM_INIT_TABLE[];
 extern unsigned short SPAWN_AXIS_SWAP;
 extern Fix16 *PLAYER_H[];
 extern Fix16 PLAYER_Y_FIX[];
@@ -108,7 +108,7 @@ void ObjSpawn(int type, short sub, short flag, Fix16 *pos, short vx, short vy)
     o->subtype = sub;
     o->active = c;
     o->b0c = flag | 0x80;
-    { unsigned char c2 = DAT_8007b14c[DAT_8007b084[sub]][3];
+    { unsigned char c2 = ITEM_INIT_TABLE[ITEM_INIT_INDEX[sub]][3];
     o->animFrame = 0;
     o->b0f = c2; }
     o->h->raw = pos[0].p.whole << 16;

@@ -3,10 +3,10 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8013C7B8[], D_8013C7C8[];
+extern unsigned char PURPLE_CRAWLER_IDLE_RAND_TABLE[], PURPLE_CRAWLER_RAND_TABLE[];
 extern char D_80077CE8[];
 extern void *D_8013FCB0[], *D_8013FCB8[];
-extern short COLLISION_HIT_HEIGHT, D_1F800284;
+extern short COLLISION_HIT_HEIGHT, COLLISION_HIT_SURFACE;
 extern unsigned int FUN_8001f9e0(void);
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001fec0(TObj *);
@@ -21,7 +21,7 @@ void purpleCrawlerIdle(TObj *o)
     case 0:
         o->b9c = 0;
         o->wb0 = 0;
-        if (D_8013C7B8[FUN_8001f9e0() & 0xf])
+        if (PURPLE_CRAWLER_IDLE_RAND_TABLE[FUN_8001f9e0() & 0xf])
             o->timer = 0x180;
         else
             o->timer = 0xc0;
@@ -48,7 +48,7 @@ void purpleCrawlerIdle(TObj *o)
                 o->wba = 0;
                 t = COLLISION_HIT_HEIGHT;
                 o->wb2 = t;
-                o->wae = D_1F800284;
+                o->wae = COLLISION_HIT_SURFACE;
                 o->d8c = -(t << 2) & 0xff;
             }
         }
@@ -70,19 +70,19 @@ void purpleCrawlerIdle(TObj *o)
             switch (o->w98) {
             case 0:
             case 1:
-                if (D_8013C7B8[FUN_8001f9e0() & 0xf])
+                if (PURPLE_CRAWLER_IDLE_RAND_TABLE[FUN_8001f9e0() & 0xf])
                     o->step = 3;
                 else
                     o->step = 1;
                 break;
             case 2:
-                if (D_8013C7C8[FUN_8001f9e0() & 0xf])
+                if (PURPLE_CRAWLER_RAND_TABLE[FUN_8001f9e0() & 0xf])
                     o->step = 1;
                 else
                     o->step = 3;
                 break;
             case 3:
-                if (D_8013C7B8[FUN_8001f9e0() & 0xf])
+                if (PURPLE_CRAWLER_IDLE_RAND_TABLE[FUN_8001f9e0() & 0xf])
                     o->step = 1;
                 else
                     o->step = 3;

@@ -1,13 +1,13 @@
 // FUNC 80049524 824 MAIN0
 // MATCHING 80049524 824
 #if defined(VERSION_PCPX_96084) /* PrePre 8 scratchpad layout */
-#define D_1F80019E D_1F8002A6
+#define LIST_COUNTER D_1F8002A6
 #endif
 #include "spad.h"
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 void pushObjectOutOfObjectFacing(TObj *o, TObj *e);
 void pushObjectOutOfCat4Type01(TObj *o, TObj *e);
 void pushObjectOutOfCat4Type02(TObj *o, TObj *e);
@@ -52,9 +52,9 @@ void collideCat5WithCat4Objects(void)
         if (!(o->active & 1))
             continue;
         qq = (*(TObj ***)&SPAD.p224);
-        for (D_1F80019E = SPAD.s24c; D_1F80019E != 0; ) {
+        for (LIST_COUNTER = SPAD.s24c; LIST_COUNTER != 0; ) {
             e = *qq++;
-            D_1F80019E--;
+            LIST_COUNTER--;
             if (!(e->active & 1))
                 continue;
             switch (e->type) {

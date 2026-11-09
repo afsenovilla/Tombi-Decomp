@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_8013C7C8[];
+extern unsigned char PURPLE_CRAWLER_RAND_TABLE[];
 extern char D_80077D00[], MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern void *D_8013FC74[];
 extern unsigned int FUN_8001f9e0(void);
@@ -30,11 +30,11 @@ void purpleCrawlerRun(TObj *o)
             o->movetab = D_80077D00;
             o->timer = 500;
         } else {
-            if (D_8013C7C8[FUN_8001f9e0() & 0xf])
+            if (PURPLE_CRAWLER_RAND_TABLE[FUN_8001f9e0() & 0xf])
                 o->movetab = MOVE_TABLE_1;
             else
                 o->movetab = D_80077D00;
-            if (D_8013C7C8[FUN_8001f9e0() & 0xf])
+            if (PURPLE_CRAWLER_RAND_TABLE[FUN_8001f9e0() & 0xf])
                 o->timer = 0x78;
             else
                 o->timer = 0x3c;

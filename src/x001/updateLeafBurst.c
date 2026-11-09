@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013E5B0[];
+extern void *LEAF_BURST_ANIMS[];
 extern TObj *ObjAlloc(void);
 extern int FUN_8001f9e0(void);
 extern int ObjCullRegister(TObj *);
@@ -48,7 +48,7 @@ void updateLeafBurst(TObj *o)
             o->b0a = 2;
             o->b0d = 0;
             *(signed char *)&o->b0f = -10;
-            o->anim = D_8013E5B0[o->wac];
+            o->anim = LEAF_BURST_ANIMS[o->wac];
             o->d3c = ((int*)&SPAD.i2d4)[0];
             o->step = 0;
             o->b04++;

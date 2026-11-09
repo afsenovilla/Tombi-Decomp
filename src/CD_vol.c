@@ -36,13 +36,13 @@ extern int D_80096130[];
 extern const char* D_800961B0[];
 extern int D_80096230[]; // CD_COMATTR
 extern int D_80096294;
-extern volatile u_char* D_80096F50;
-extern volatile u_char* D_80096F54;
+extern volatile u_char* cd_reg1;
+extern volatile u_char* cd_reg2;
 extern volatile int* D_800962C0;
 extern void* D_800962C4;
 extern volatile CdlIntr D_800962C8; // CD_INTR
 extern void* D_800962CC[];
-extern volatile unsigned char* D_80096F4C;
+extern volatile unsigned char* cd_reg0;
 extern s32* D_800962E4;
 extern s32* D_800962E8;
 extern s32* D_800962EC;
@@ -50,7 +50,7 @@ extern s32* D_800962F0;
 extern volatile s32* D_800962F4;
 extern char D_8009B2A8[];
 extern char D_8009B2B0[];
-extern volatile u_char* D_80096F58;
+extern volatile u_char* cd_reg3;
 extern char D_8009B2B8[];
 extern int D_8009B2C0;
 extern int D_8009B2C4; // timeout
@@ -96,13 +96,13 @@ int CD_cw(u_char arg0, u_char* arg1, u_char* arg2, int arg3);
 
 int CD_vol(CdlATV* vol)
 {
-    *D_80096F4C = 2;
-    *D_80096F54 = vol->val0;
-    *D_80096F58 = vol->val1;
-    *D_80096F4C = 3;
-    *D_80096F50 = vol->val2;
-    *D_80096F54 = vol->val3;
-    *D_80096F58 = 0x20;
+    *cd_reg0 = 2;
+    *cd_reg2 = vol->val0;
+    *cd_reg3 = vol->val1;
+    *cd_reg0 = 3;
+    *cd_reg1 = vol->val2;
+    *cd_reg2 = vol->val3;
+    *cd_reg3 = 0x20;
     return 0;
 }
 

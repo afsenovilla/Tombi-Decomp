@@ -15,7 +15,7 @@ static A *D_80133B5C[6] = {
     (A *)D_80133EBC, (A *)D_80133F3C, (A *)D_80133FCC, (A *)D_8013405C,
     (A *)D_80134084, (A *)D_801340AC,
 };
-extern B D_80130FD4[];
+extern B KOMA_PIG_ANIM_BOXES[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int komaPigCheckLanded(TObj *);
@@ -31,7 +31,7 @@ void komaPigSubtype0Step(TObj *o)
         o->state++;
         o->wac = D_801310E8[o->b0c];
         o->anim = D_80133B5C[o->wac];
-        { B *t = D_80130FD4; p = t[((A *)o->anim)->w2].c; }
+        { B *t = KOMA_PIG_ANIM_BOXES; p = t[((A *)o->anim)->w2].c; }
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;

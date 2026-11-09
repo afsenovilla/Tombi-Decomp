@@ -49,14 +49,14 @@ typedef struct {
    (ResetCallback ... GetIntrMask) is in libetc_intr_1.c; SetIntrMask and the statics
    startIntr, trapIntr, setIntr, stopIntr, restartIntr, memclr are here. */
 
-/* intrEnv (0x1068 bytes at D_800970B4) */
+/* intrEnv (0x1068 bytes at intr_env) */
 
 /* the callback table (0x20 bytes at 0x800B7910) that D_800B7930 (pCallbacks) points to;
    the API functions call through it */
 
-extern IntrEnv D_800970B4;          /* intrEnv */
+extern IntrEnv intr_env;          /* intrEnv */
 extern volatile u16 *D_800B7934;    /* i_stat: 0x1F801070, I_STAT */
-extern volatile u16 *D_80098144;    /* i_mask: 0x1F801074, I_MASK */
+extern volatile u16 *intr_imask;    /* i_mask: 0x1F801074, I_MASK */
 extern volatile s32 *D_800B793C;    
 /* libetc SetIntrMask (INTR.OBJ): store a new I_MASK and return the old one. Built by
    the object's own recipe since i_mask is declared as the SDK has it (volatile); the
@@ -130,18 +130,18 @@ IntrHandler func_80095014(s32 irq, IntrHandler handler)
     IntrHandler prev;
     s32 mask;
 
-    prev = D_800970B4.handlers[irq];
-    if (handler != prev && D_800970B4.interruptsInitialized) {
-        mask = *D_80098144;
-        *D_80098144 = 0;
+    prev = intr_env.handlers[irq];
+    if (handler != prev && intr_env.interruptsInitialized) {
+        mask = *intr_imask;
+        *intr_imask = 0;
         if (handler != 0) {
-            D_800970B4.handlers[irq] = handler;
+            intr_env.handlers[irq] = handler;
             mask |= 1 << irq;
-            D_800970B4.enabledInterruptsMask |= 1 << irq;
+            intr_env.enabledInterruptsMask |= 1 << irq;
         } else {
-            D_800970B4.handlers[irq] = 0;
+            intr_env.handlers[irq] = 0;
             mask &= ~(1 << irq);
-            D_800970B4.enabledInterruptsMask &= ~(1 << irq);
+            intr_env.enabledInterruptsMask &= ~(1 << irq);
         }
         if (irq == 0) {
             ChangeClearPAD(handler == 0);
@@ -156,7 +156,7 @@ IntrHandler func_80095014(s32 irq, IntrHandler handler)
         if (irq == 6) {
             ChangeClearRCnt(2, handler == 0);
         }
-        *D_80098144 = mask;
+        *intr_imask = mask;
     }
     return prev;
 }

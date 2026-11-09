@@ -6,8 +6,8 @@
 extern TObj *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
 extern unsigned char DAT_801152e8[];
-extern char D_80010C50[];
-extern char D_80010748[];
+extern char PLAYER_HURT_ANIM[];
+extern char PLAYER_IDLE_ANIM[];
 extern void PlayerSetAnimIfChanged(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
@@ -81,7 +81,7 @@ void playerStep27Area9(TObj *o)
             o->d88 -= 0x20;
             if (o->d88 >= 0xa0) goto skip;
         }
-        o->anim = D_80010C50;
+        o->anim = PLAYER_HURT_ANIM;
         AnimJump(o, 3);
         o->d88 = 0x100;
         o->timer = 0xc;
@@ -118,7 +118,7 @@ void playerStep27Area9(TObj *o)
             if (o->b69 || tileCollideColumnAtX(o, dx, dy, p->subtype)) {
                 SfxPlay3(0x1c, 0x7f);
                 o->b9c = 0;
-                o->anim = D_80010C50;
+                o->anim = PLAYER_HURT_ANIM;
                 AnimJump(o, 4);
                 (*(unsigned char*)&o->waa) = 0;
                 o->d88 = 0;
@@ -142,7 +142,7 @@ void playerStep27Area9(TObj *o)
             o->velX = 0;
             o->velY = 0;
             (*(unsigned char*)&o->waa) = 0;
-            o->anim = D_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             AnimLoadDuration(o);
             o->d8c = DAT_801152e8[o->wb0];
             o->step = 0;

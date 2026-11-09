@@ -9,7 +9,7 @@
 extern short objectBoxOverlapSideFacing(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
 extern void spawnImpactEffect(int, int, int, int);
-extern unsigned char DAT_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 
 void func_8011F04C(unsigned char *a, unsigned char *b)
 {

@@ -7,7 +7,7 @@ extern unsigned short PLAYER_ANIM_FRAME;
 extern short PLAYER_VEL_Y;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern void *D_8013FC88[], *D_8013FC8C[], *D_8013FCCC[];
-extern unsigned char D_8013C7C8[];
+extern unsigned char PURPLE_CRAWLER_RAND_TABLE[];
 extern int AnimAdvance(TObj *);
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
@@ -76,7 +76,7 @@ void purpleCrawlerCarryPlayer(TObj *o)
         break;
     case 5:
         o->state++;
-        if (D_8013C7C8[Rand() & 0xf]) o->timer = 0x50;
+        if (PURPLE_CRAWLER_RAND_TABLE[Rand() & 0xf]) o->timer = 0x50;
         else o->timer = 0x32;
         o->wac = 0x17;
         o->anim = D_8013FCCC[0];

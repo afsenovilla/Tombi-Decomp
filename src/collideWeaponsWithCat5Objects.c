@@ -2,7 +2,7 @@
 // MATCHING 80045d98 360
 typedef struct { unsigned char act, p1, type; char p[0xa2]; unsigned char ba5; } O;
 extern short ONSCREEN_OBJECT_COUNT, CAT5_OBJECT_COUNT, G19e;
-extern unsigned short G19eu;
+extern unsigned short LIST_COUNTER;
 extern O **ONSCREEN_OBJECT_LIST;
 extern unsigned char **CAT5_OBJECT_LIST;
 extern void weaponHitCat5Object(O *, unsigned char *);
@@ -27,7 +27,7 @@ void collideWeaponsWithCat5Objects(void)
                 G19e = v;
                 if (v != 0) do {
                     b = *q;
-                    G19eu--;
+                    LIST_COUNTER--;
                     q++;
                     switch (s2) {
                     case 0:

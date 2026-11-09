@@ -3,7 +3,7 @@
 #include "player.h"
 #include "TOBJ.H"
 extern void *D_801345E0[0];
-extern unsigned short D_80131128[];
+extern unsigned short BLACK_CROW_RAND_STATES[];
 extern void FUN_8001fe6c(TObj *);
 extern int FUN_8001f9e0(void);
 extern void playSFX(int);
@@ -29,7 +29,7 @@ void blackCrowPerchCaw(TObj *o)
             o->w22 = 0x2e;
         }
         if (--o->timer == 0) {
-            o->state = D_80131128[FUN_8001f9e0() & 0xf];
+            o->state = BLACK_CROW_RAND_STATES[FUN_8001f9e0() & 0xf];
             o->substep = 0;
             if (o->d->p.whole == (*(Fix16 **)&PLAYER.obj.d)->p.whole) {
                 dy = (*(unsigned short*)&PLAYER.obj.y.p.whole) - o->y.p.whole;

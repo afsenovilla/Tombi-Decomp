@@ -1,0 +1,5 @@
+address,name,size,source
+80119988,WATERFALL_HINT_NPC_DEFS,,usage: {box; w1e; ...; anims}[subtype] initWaterfallHintNpc copies refs=7
+80119990,WATERFALL_HINT_NPC_DEFS_ANIMS,,usage: WATERFALL_HINT_NPC_DEFS+8: the anims column (a17NpcSetAnimA; waterfallElderHintTalk; pigGateFavorTalk ...) refs=12
+80119994,RAFT_RETURN_NPC_DEFS,,usage: {box; w1e; ...; anims}[subtype] initRaftReturnNpc copies refs=7
+8011999c,RAFT_RETURN_NPC_DEFS_ANIMS,,usage: RAFT_RETURN_NPC_DEFS+8: the anims column (a17NpcSetAnimB; raftReturnTalk) refs=3

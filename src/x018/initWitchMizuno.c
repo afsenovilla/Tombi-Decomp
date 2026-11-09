@@ -10,19 +10,19 @@ typedef struct {
     void **anim;
 } T8011A1B4;
 
-extern T8011A1B4 D_8011A55C[];
+extern T8011A1B4 WITCH_MIZUNO_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
 void initWitchMizuno(TObj *o)
 {
-    o->box0 = D_8011A55C[o->subtype].b0;
-    o->box1 = D_8011A55C[o->subtype].b1;
-    o->box2 = D_8011A55C[o->subtype].b2;
-    o->box3 = D_8011A55C[o->subtype].b3;
-    o->w1e = D_8011A55C[o->subtype].w4;
-    o->d3c = SPR_DATA[D_8011A55C[o->subtype].w6];
-    o->anim = D_8011A55C[o->subtype].anim[(unsigned short)o->wb4];
+    o->box0 = WITCH_MIZUNO_DEFS[o->subtype].b0;
+    o->box1 = WITCH_MIZUNO_DEFS[o->subtype].b1;
+    o->box2 = WITCH_MIZUNO_DEFS[o->subtype].b2;
+    o->box3 = WITCH_MIZUNO_DEFS[o->subtype].b3;
+    o->w1e = WITCH_MIZUNO_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[WITCH_MIZUNO_DEFS[o->subtype].w6];
+    o->anim = WITCH_MIZUNO_DEFS[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     o->b0d = 1;
     o->w08 = 0x780c;

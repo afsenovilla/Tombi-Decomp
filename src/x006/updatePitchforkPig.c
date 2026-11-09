@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 extern char MOVE_TABLE_2[];
-extern void *D_80122FB8[];
+extern void *PITCHFORK_PIG_ANIMS[];
 extern void *D_80122FBC;
 extern char D_8012302C[];
 extern char D_8012303C[];
@@ -47,7 +47,7 @@ void updatePitchforkPig(TObj *o)
         o->d8c = 0;
         setbox(o, 0x10, 0x20, 0x10, 0x20);
         o->d3c = ((int*)&SPAD.i2d0)[0];
-        o->anim = D_80122FB8[o->b0c];
+        o->anim = PITCHFORK_PIG_ANIMS[o->b0c];
         FUN_8001fe6c(o);
         break;
     case 1:

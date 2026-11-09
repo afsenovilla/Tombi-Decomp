@@ -1,0 +1,3 @@
+address,name,size,source
+80125684,A14_SECTION_STREAM_IDS,,usage: u8[section]: cdSeekStream id (bossRoomPlatformCaptureBoss) and SPAD.b1cd (updateSectionClearController) refs=4
+80125cd8,EVIL_PIG_ATTACK_HANDLERS,,usage: void (*[section])(TObj *): the evil pig attack of the current section (evilPigBossAttack / realEvilPigChooseAttack) refs=2

@@ -1,7 +1,7 @@
 // FUNC 800745b8 20 MAIN0
 // MATCHING 800745b8 20
-extern short D_8009D5FC;
+extern short _svm_stereo_mono;
 void SsSetMono(void)
 {
-    D_8009D5FC = 1;
+    _svm_stereo_mono = 1;
 }

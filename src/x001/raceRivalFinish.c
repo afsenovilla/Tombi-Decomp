@@ -5,7 +5,7 @@
 /* size 604: the csv piece 801312E4 (20 B) is this function's epilogue. */
 #include "TOBJ.H"
 
-extern void *D_8013E740[];
+extern void *RACE_RIVAL_ANIMS[];
 extern void *D_8013E74C[];
 extern void *D_8013E750[];
 extern short FUN_80040278(TObj *, short, short);
@@ -39,7 +39,7 @@ void raceRivalFinish(TObj *o)
         o->timer = 10;
         o->wac = 0;
         o->state++;
-        o->anim = D_8013E740[0];
+        o->anim = RACE_RIVAL_ANIMS[0];
         AnimLoadDuration(o);
     case 1:
         if (--o->timer == -1) {
@@ -70,7 +70,7 @@ void raceRivalFinish(TObj *o)
         o->wac = 0;
         o->d8c = o->d84;
         o->state++;
-        setAnim(o, D_8013E740[0]);
+        setAnim(o, RACE_RIVAL_ANIMS[0]);
         { unsigned char *c = &GCD.bcedf; *c = *c + 0xfe; }
         break;
     case 5:

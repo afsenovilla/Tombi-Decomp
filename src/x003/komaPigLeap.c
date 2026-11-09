@@ -172,8 +172,8 @@ typedef struct { unsigned char b0, b1; unsigned short w2; short w4; } X;
 extern char MOVE_TABLE_0[];
 extern char MOVE_TABLE_1[];
 extern char MOVE_TABLE_2[];
-extern B D_80135B30[];
-extern A *D_801386F8[];
+extern B KOMA_PIG_ANIM_BOXES[];
+extern A *KOMA_PIG_ANIMS[];
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
@@ -181,8 +181,8 @@ extern int AnimAdvanceWithBox(TObj *);
 extern int komaPigCheckLanded(TObj *);
 
 #define SETANIM(k) \
-    o->anim = D_801386F8[k]; \
-    { unsigned char *p; { B *t = D_80135B30; p = t[((A *)o->anim)->w2].c; } \
+    o->anim = KOMA_PIG_ANIMS[k]; \
+    { unsigned char *p; { B *t = KOMA_PIG_ANIM_BOXES; p = t[((A *)o->anim)->w2].c; } \
     o->box0 = *p++; \
     o->box1 = *p++; \
     o->box2 = *p; \

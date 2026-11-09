@@ -1,12 +1,12 @@
 // VERSION SLPS_01144 slps01144 80043154 292
 // FLAGS -O2 -G0
 #if defined(VERSION_SLPS_01144)
-extern unsigned short *D_1F800278;
-extern short D_1F80027E, D_1F800280, D_1F800284;
-extern unsigned short D_1F800282;
+extern unsigned short *COLLISION_SEG_PTR;
+extern short COLLISION_HIT_HEIGHT, COLLISION_HIT_TOP, COLLISION_HIT_SURFACE;
+extern unsigned short COLLISION_HIT_FLAGS;
 #include "TOBJ.H"
 extern short *getCollisionPlaneAt(int a, int b);
-#define SEG D_1F800278
+#define SEG COLLISION_SEG_PTR
 int func_80043154(TObj *o)
 {
     short n;
@@ -27,12 +27,12 @@ int func_80043154(TObj *o)
         h = *SEG++;
         SEG++;
         if ((short)(x0 + h - y) <= 0) {
-            D_1F800284 = (w & 0xe00) >> 9;
+            COLLISION_HIT_SURFACE = (w & 0xe00) >> 9;
             asm("" ::: "memory");
             k = (w >> 5) & 0xf;
-            D_1F80027E = h;
-            D_1F800280 = x0;
-            D_1F800282 = w;
+            COLLISION_HIT_HEIGHT = h;
+            COLLISION_HIT_TOP = x0;
+            COLLISION_HIT_FLAGS = w;
             if (k == 13) {
                 *((unsigned char *)o + 0xa1) = 2;
                 return 1;

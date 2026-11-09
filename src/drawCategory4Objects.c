@@ -5,7 +5,7 @@
 #define CAT4_OBJECT_COUNT D_1F8002E0
 #define DAT_1f80024c D_1F8002E0
 #endif
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern short CAT4_OBJECT_COUNT_SAVED;
 extern short DAT_1f80024c;
 extern unsigned short CAT4_OBJECT_COUNT;
@@ -15,7 +15,7 @@ extern void drawObject(int *o);
 
 void drawCategory4Objects(void)
 {
-    if (DAT_1f8001c6 != 0) {
+    if (DRAW_FROZEN != 0) {
         int n = CAT4_OBJECT_COUNT_SAVED;
         int **p = CAT4_OBJECT_LIST_SAVED;
         for (; n != 0; n--) {

@@ -4,7 +4,7 @@ typedef struct S { char pad[0x24]; void *anim; char pad2[0x8c - 0x28]; int v; } 
 extern unsigned short GAME;
 extern short GVARS_PLAYER_DRIFT_H;
 extern char DAT_800112e0[];
-extern char DAT_80010ae8[];
+extern char PLAYER_FALL_ANIM[];
 extern void func_8001fe6c(S *s);
 extern void func_8001fe94(S *s, int n);
 
@@ -14,7 +14,7 @@ void playerSetIdleAnimByArea(S *s)
         s->anim = DAT_800112e0;
         func_8001fe6c(s);
     } else {
-        s->anim = DAT_80010ae8;
+        s->anim = PLAYER_FALL_ANIM;
         func_8001fe94(s, 3);
     }
     s->v = 0;

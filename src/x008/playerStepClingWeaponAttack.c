@@ -21,7 +21,7 @@ typedef struct {
 } TO;
 extern PO *GRABBED_OBJECT;
 extern PO *PLAYER_EXT;
-extern char D_80010F10[], D_80010F30[], D_80010F50[], D_80010D68[];
+extern char D_80010F10[], D_80010F30[], D_80010F50[], PLAYER_CROUCH_ANIM[];
 extern void setWeaponAimFromPadKeepFacing(void);
 extern void AnimLoadDuration(TO *);
 extern void spawnWeaponObject(TO *, int);
@@ -131,7 +131,7 @@ void playerStepClingWeaponAttack(TO *o)
             *(unsigned char *)GRABBED_OBJECT = 3;
             break;
         }
-        o->anim = D_80010D68;
+        o->anim = PLAYER_CROUCH_ANIM;
         AnimJump(o, 0);
         o->b9d = 0;
         switch (GRABBED_OBJECT->b2) {

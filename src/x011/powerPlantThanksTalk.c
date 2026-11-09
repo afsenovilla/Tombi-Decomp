@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80119C48[];
-extern short D_1F8001C6;
+extern AT FACTORY_NPC_DEFS_ANIMS[];
+extern short DRAW_FROZEN;
 extern void AnimLoadDuration(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
@@ -28,7 +28,7 @@ void powerPlantThanksTalk(TObj *o)
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         v = *(V6 *)&o->a;
-        o->anim = D_80119C48[o->subtype].anims[2];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].anims[2];
         AnimLoadDuration(o);
         o->d90 = showMessageBoxDirect(2, 4, &v);
         o->state++;
@@ -45,7 +45,7 @@ void powerPlantThanksTalk(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        o->anim = D_80119C48[o->subtype].anims[0];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].anims[0];
         AnimLoadDuration(o);
         setEventStarted(0x4f, 0, 0);
         o->timer = 0x168;
@@ -57,7 +57,7 @@ void powerPlantThanksTalk(TObj *o)
     case 4:
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

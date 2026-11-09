@@ -6,8 +6,8 @@ typedef struct { short m[3][3]; long t[3]; } MATRIX;
 typedef struct { short vx, vy, vz, pad; } SVECTOR;
 typedef struct { TObj o; char pad[0x14]; } GObj; /* 0xD4 bytes */
 extern GObj OBJECT_POOL[];
-extern MATRIX D_1F800000, D_1F800020;
-extern SVECTOR D_1F800060, D_1F800068;
+extern MATRIX D_1F800000, OBJECT_MATRIX;
+extern SVECTOR WORK_VEC_A, WORK_VEC_B;
 extern char *CURRENT_OT;
 extern void getBaseMatrix(MATRIX *);
 extern MATRIX *RotMatrix(SVECTOR *, MATRIX *);
@@ -30,16 +30,16 @@ void gameOverDrawLetters(void)
     i = 0;
     do {
         o = &OBJECT_POOL[i].o;
-        getBaseMatrix(&D_1F800020);
-        D_1F800060.vx = o->d84;
-        D_1F800060.vy = o->d88;
-        D_1F800060.vz = o->d8c;
-        RotMatrix(&D_1F800060, &D_1F800020);
-        D_1F800068.vx = o->a.p.whole;
-        D_1F800068.vy = o->y.p.whole;
-        D_1F800068.vz = o->b.p.whole;
-        MulMatrix0(&VIEW_CAMERA.m, &D_1F800020, &D_1F800000);
-        ApplyRotMatrix(&D_1F800068, D_1F800000.t);
+        getBaseMatrix(&OBJECT_MATRIX);
+        WORK_VEC_A.vx = o->d84;
+        WORK_VEC_A.vy = o->d88;
+        WORK_VEC_A.vz = o->d8c;
+        RotMatrix(&WORK_VEC_A, &OBJECT_MATRIX);
+        WORK_VEC_B.vx = o->a.p.whole;
+        WORK_VEC_B.vy = o->y.p.whole;
+        WORK_VEC_B.vz = o->b.p.whole;
+        MulMatrix0(&VIEW_CAMERA.m, &OBJECT_MATRIX, &D_1F800000);
+        ApplyRotMatrix(&WORK_VEC_B, D_1F800000.t);
         D_1F800000.t[0] += VIEW_CAMERA.m.t[0];
         D_1F800000.t[1] += VIEW_CAMERA.m.t[1];
         D_1F800000.t[2] += VIEW_CAMERA.m.t[2];

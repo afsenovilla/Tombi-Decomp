@@ -11,7 +11,7 @@ typedef struct {
     short w1c, w1e, w20;
 } O;
 
-extern unsigned short D_8013CA00[];
+extern unsigned short KOMA_PIG_SPAWNER_RAND_DELAYS[];
 extern short PLAYER_Y_WHOLE[];
 extern int Rand(void);
 extern TObj *allocObjectLayer2(void);
@@ -28,7 +28,7 @@ void updateKomaPigSpawner(O *o)
         o->w1c = 0;
         o->w1e = 0;
         o->w20 = 0;
-        o->w08 = D_8013CA00[Rand() & 7];
+        o->w08 = KOMA_PIG_SPAWNER_RAND_DELAYS[Rand() & 7];
         if (((unsigned char*)&GCD.bcdb5)[0]) o->b04++;
         else o->b04 = 3;
         break;
@@ -43,7 +43,7 @@ void updateKomaPigSpawner(O *o)
                 if (--o->w08 != -1) break;
                 o->w1e = 0;
             }
-            o->w08 = D_8013CA00[Rand() & 7];
+            o->w08 = KOMA_PIG_SPAWNER_RAND_DELAYS[Rand() & 7];
             e = allocObjectLayer2();
             if (e) {
                 e->active = 2;

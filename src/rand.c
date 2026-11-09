@@ -13,11 +13,11 @@ extern void (*D_8006F59C[])();
 
 void *memset(u_char *p, u_char c, int n);
 
-extern u_long D_8009BDD0;
+extern u_long RAND_SEED;
 
 int rand(void) {
-    D_8009BDD0 = D_8009BDD0 * 0x41C64E6D + 12345;
-    return (D_8009BDD0 >> 16) & 0x7FFF;
+    RAND_SEED = RAND_SEED * 0x41C64E6D + 12345;
+    return (RAND_SEED >> 16) & 0x7FFF;
 }
 
 void srand(unsigned int seed);

@@ -10,19 +10,19 @@ typedef struct {
     void **anim;
 } T80116F7C;
 
-extern T80116F7C D_8011A4B0[];
+extern T80116F7C JUICE_MAN_DEFS[];
 extern int SPR_DATA[];
 extern void AnimLoadDuration(TObj *);
 
 void initJuiceManJoinFight(TObj *o)
 {
-    o->box0 = D_8011A4B0[o->subtype].b0;
-    o->box1 = D_8011A4B0[o->subtype].b1;
-    o->box2 = D_8011A4B0[o->subtype].b2;
-    o->box3 = D_8011A4B0[o->subtype].b3;
-    o->w1e = D_8011A4B0[o->subtype].w4;
-    o->d3c = SPR_DATA[D_8011A4B0[o->subtype].w6];
-    o->anim = D_8011A4B0[o->subtype].anim[(unsigned short)o->wb4];
+    o->box0 = JUICE_MAN_DEFS[o->subtype].b0;
+    o->box1 = JUICE_MAN_DEFS[o->subtype].b1;
+    o->box2 = JUICE_MAN_DEFS[o->subtype].b2;
+    o->box3 = JUICE_MAN_DEFS[o->subtype].b3;
+    o->w1e = JUICE_MAN_DEFS[o->subtype].w4;
+    o->d3c = SPR_DATA[JUICE_MAN_DEFS[o->subtype].w6];
+    o->anim = JUICE_MAN_DEFS[o->subtype].anim[(unsigned short)o->wb4];
     AnimLoadDuration(o);
     *(signed char *)&o->b0f = -4;
     o->d8c = 0;

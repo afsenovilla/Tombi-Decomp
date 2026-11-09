@@ -11,7 +11,7 @@ extern unsigned short D_800A6066x[]; /* second name for PLAYER_ANIM_FRAME: force
 extern TObj *PLAYER_MESSAGE_BOX[];
 extern Fix16 *PLAYER_H;
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 typedef struct { char p[0x4c]; short w4c, w4e; } SC;
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
@@ -26,7 +26,7 @@ void raceOfferRematch(TObj *o)
         GVARS.b3f = 1;
         GVARS.b3e = 1;
         GVARS.b42 = 1;
-        PLAYER.anim = D_80010748;
+        PLAYER.anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(&PLAYER);
         PLAYER_ANIM_FRAME = 0;
         e->b04 = 1;

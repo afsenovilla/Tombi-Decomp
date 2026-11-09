@@ -28,7 +28,7 @@ typedef struct {
     unsigned short uv3;
 } Face;
 extern MATRIX D_1F800000;
-extern SVECTOR D_1F800060;
+extern SVECTOR WORK_VEC_A;
 extern long LZ_FILE_CTRL;
 extern PolyFT4 *NEXT_PRIM;
 extern char *CURRENT_OT;
@@ -77,11 +77,11 @@ void drawObjectSpriteQuad(TObj *o)
     char *v0, *v1, *v2, *v3;
 
     getBaseMatrix(&D_1F800000);
-    D_1F800060.vx = o->a.p.whole;
-    D_1F800060.vy = o->y.p.whole;
-    D_1F800060.vz = o->b.p.whole;
+    WORK_VEC_A.vx = o->a.p.whole;
+    WORK_VEC_A.vy = o->y.p.whole;
+    WORK_VEC_A.vz = o->b.p.whole;
     SetRotMatrix(&VIEW_CAMERA.m);
-    ApplyRotMatrix(&D_1F800060, D_1F800000.t);
+    ApplyRotMatrix(&WORK_VEC_A, D_1F800000.t);
     D_1F800000.t[0] += VIEW_CAMERA.m.t[0];
     D_1F800000.t[1] += VIEW_CAMERA.m.t[1];
     D_1F800000.t[2] += VIEW_CAMERA.m.t[2];
@@ -146,7 +146,7 @@ typedef struct {
     unsigned short uv3;
 } Face;
 extern MATRIX D_1F800000;
-extern SVECTOR D_1F800060;
+extern SVECTOR WORK_VEC_A;
 extern long LZ_FILE_CTRL;
 extern PolyFT4 *NEXT_PRIM;
 extern char *CURRENT_OT;
@@ -195,11 +195,11 @@ void drawObjectSpriteQuad(TObj *o)
     char *v0, *v1, *v2, *v3;
 
     getBaseMatrix(&D_1F800000);
-    D_1F800060.vx = o->a.p.whole;
-    D_1F800060.vy = o->y.p.whole;
-    D_1F800060.vz = o->b.p.whole;
+    WORK_VEC_A.vx = o->a.p.whole;
+    WORK_VEC_A.vy = o->y.p.whole;
+    WORK_VEC_A.vz = o->b.p.whole;
     SetRotMatrix(&VIEW_CAMERA.m);
-    ApplyRotMatrix(&D_1F800060, D_1F800000.t);
+    ApplyRotMatrix(&WORK_VEC_A, D_1F800000.t);
     D_1F800000.t[0] += VIEW_CAMERA.m.t[0];
     D_1F800000.t[1] += VIEW_CAMERA.m.t[1];
     D_1F800000.t[2] += VIEW_CAMERA.m.t[2];
@@ -263,7 +263,7 @@ typedef struct {
     unsigned short uv3;
 } Face;
 extern MATRIX D_1F800000;
-extern SVECTOR D_1F800060;
+extern SVECTOR WORK_VEC_A;
 extern long LZ_FILE_CTRL;
 extern PolyFT4 *NEXT_PRIM;
 extern char *CURRENT_OT;
@@ -312,11 +312,11 @@ void drawObjectSpriteQuad(TObj *o)
     char *v0, *v1, *v2, *v3;
 
     getBaseMatrix(&D_1F800000);
-    D_1F800060.vx = o->a.p.whole;
-    D_1F800060.vy = o->y.p.whole;
-    D_1F800060.vz = o->b.p.whole;
+    WORK_VEC_A.vx = o->a.p.whole;
+    WORK_VEC_A.vy = o->y.p.whole;
+    WORK_VEC_A.vz = o->b.p.whole;
     SetRotMatrix(&VIEW_CAMERA.m);
-    ApplyRotMatrix(&D_1F800060, D_1F800000.t);
+    ApplyRotMatrix(&WORK_VEC_A, D_1F800000.t);
     D_1F800000.t[0] += VIEW_CAMERA.m.t[0];
     D_1F800000.t[1] += VIEW_CAMERA.m.t[1];
     D_1F800000.t[2] += VIEW_CAMERA.m.t[2];
@@ -379,7 +379,7 @@ typedef struct {
     unsigned short uv3;
 } Face;
 extern MATRIX D_1F800000;
-extern SVECTOR D_1F800060;
+extern SVECTOR WORK_VEC_A;
 extern long LZ_FILE_CTRL;
 extern PolyFT4 *NEXT_PRIM;
 extern char *CURRENT_OT;
@@ -428,11 +428,11 @@ void drawObjectSpriteQuad(TObj *o)
     char *v0, *v1, *v2, *v3;
 
     getBaseMatrix(&D_1F800000);
-    D_1F800060.vx = o->a.p.whole;
-    D_1F800060.vy = o->y.p.whole;
-    D_1F800060.vz = o->b.p.whole;
+    WORK_VEC_A.vx = o->a.p.whole;
+    WORK_VEC_A.vy = o->y.p.whole;
+    WORK_VEC_A.vz = o->b.p.whole;
     SetRotMatrix(&VIEW_CAMERA.m);
-    ApplyRotMatrix(&D_1F800060, D_1F800000.t);
+    ApplyRotMatrix(&WORK_VEC_A, D_1F800000.t);
     D_1F800000.t[0] += VIEW_CAMERA.m.t[0];
     D_1F800000.t[1] += VIEW_CAMERA.m.t[1];
     D_1F800000.t[2] += VIEW_CAMERA.m.t[2];

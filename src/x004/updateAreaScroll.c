@@ -71,12 +71,12 @@ static E8 *D_801305DC[20] = {
     (E8 *)D_8013058C, (E8 *)D_80130594, (E8 *)D_801305A4, (E8 *)D_801305B4,
     (E8 *)D_801305BC, (E8 *)D_801305C4, (E8 *)D_801305CC, (E8 *)D_801305D4,
 };
-extern signed char D_8009D2B0x[];
-#define D_8009D2B0 D_8009D2B0x[0]
-extern unsigned char D_8009C982b;
-extern short D_1F80016Ax[], D_1F80016Ex[];
+extern signed char GAME_PLAYER_MODE[];
+#define D_8009D2B0 GAME_PLAYER_MODE[0]
+extern unsigned char GAME_SELECTED_SPAWN_POINT;
+extern short D_1F80016Ax[], PLAYER_Y_WHOLE[];
 #define PLAYER_H_WHOLE D_1F80016Ax[0]
-#define D_1F80016E D_1F80016Ex[0]
+#define D_1F80016E PLAYER_Y_WHOLE[0]
 extern short D_1F8000F2x[];
 #define VIEW_CAMERA_Y D_1F8000F2x[0]
 extern unsigned int stepScrollReturnY(O *);
@@ -95,7 +95,7 @@ extern void checkScrollItemDoorB(O *);
 extern void checkScrollItemDoorA(O *);
 
 #define XU (*(unsigned short *)&D_1F80016Ax[0])
-#define ZU (*(unsigned short *)&D_1F80016Ex[0])
+#define ZU (*(unsigned short *)&PLAYER_Y_WHOLE[0])
 
 #define T1(n) \
     if (tryStartItemInteraction(o, 1, n)) { \
@@ -484,7 +484,7 @@ void updateAreaScroll(O *o)
             break;
         case 14:
             if (D_1F80016E < -0xfa) {
-                T1(D_8009C982b & 1);
+                T1(GAME_SELECTED_SPAWN_POINT & 1);
             }
             break;
         case 4:

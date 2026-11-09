@@ -5,14 +5,14 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **p; int a, b; } T12;
-extern T12 D_80136148[];
+extern T12 HIDING_SON_DEFS_ANIMS[];
 extern TObj PLAYER;
 #define P PLAYER
 extern unsigned char D_8009D13E;
 extern signed char GAME_PLAYER_MODE[];
 extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE;
 extern short D_800A60EA[];
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -41,7 +41,7 @@ void hidingSonTalk(TObj *o)
         ((unsigned char*)&GCD.bcfcd)[0] = 1;
         o->wbc = o->animFrame;
         o->animFrame = 1;
-        o->anim = D_80136148[o->subtype].p[1];
+        o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[1];
         AnimLoadDuration(o);
         if (GCD.bce3b == s) {
             o->d90 = showMessageBoxDirect(5, 0, &v);
@@ -57,7 +57,7 @@ void hidingSonTalk(TObj *o)
         TObj *p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        o->anim = D_80136148[o->subtype].p[0];
+        o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
         AnimLoadDuration(o);
         o->velX = -0x180;
         o->velY = -0x400;
@@ -78,7 +78,7 @@ void hidingSonTalk(TObj *o)
         o->y.raw += o->velY << 8;
         o->velY += 0x40;
         if (FUN_80040278(o, o->h->p.whole, o->y.p.whole)) {
-            o->anim = D_80136148[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             o->velX = -0x180;
             o->velY = -0x400;
@@ -92,7 +92,7 @@ void hidingSonTalk(TObj *o)
         D_800A60EA[0] = 0;
         o->animFrame = o->wbc;
         { unsigned char *c = &GCD.bcfca; *c = *c + 1; }
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->b68 = 0;
         o->step = 0;
         o->state = 0;
@@ -104,13 +104,13 @@ void hidingSonTalk(TObj *o)
         if (p->b04 != 2) break;
         p->b04 = 3;
         if (D_8009D13E == 0) {
-            o->anim = D_80136148[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(5, 2, &v);
             o->state = 11;
         } else {
-            o->anim = D_80136148[o->subtype].p[0];
+            o->anim = HIDING_SON_DEFS_ANIMS[o->subtype].p[0];
             AnimLoadDuration(o);
             v = *(V6 *)&o->a;
             o->d90 = showMessageBoxDirect(5, 1, &v);

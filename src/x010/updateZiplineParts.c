@@ -16,7 +16,7 @@ static void *D_80131C8C[8] = {
     D_80131E2C, D_80131E3C, D_80131E44, D_80131E4C,
     D_80131E34, D_80131E54, D_80131E5C, D_80131ED8,
 };
-extern Fn D_8012F298[];
+extern Fn ZIPLINE_PART_HANDLERS[];
 extern void AnimLoadDuration(TObj *);
 extern int ObjCullRegister(TObj *);
 extern void ObjListPush_1F800224(TObj *);
@@ -41,7 +41,7 @@ void updateZiplineParts(TObj *o)
         } else {
             ObjCullRegister(o);
         }
-        D_8012F298[o->subtype](o);
+        ZIPLINE_PART_HANDLERS[o->subtype](o);
         o->b69 = 0;
         break;
     case 2:

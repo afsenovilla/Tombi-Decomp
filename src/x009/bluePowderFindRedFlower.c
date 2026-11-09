@@ -2,7 +2,7 @@
 // MATCHING 8011a6a0 320
 #include "spad.h"
 #include "TOBJ.H"
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 extern TObj PLAYER;
 
 int bluePowderFindRedFlower(TObj *o)
@@ -11,12 +11,12 @@ int bluePowderFindRedFlower(TObj *o)
     TObj *pl = &PLAYER;
     TObj *n;
 
-    if ((D_1F80019E = SPAD.s250) == 0)
+    if ((LIST_COUNTER = SPAD.s250) == 0)
         goto out;
 loop:
     {
         n = *list++;
-        D_1F80019E--;
+        LIST_COUNTER--;
         if (!(n->active & 1))
             goto next;
         if (n->type != 0xa)
@@ -36,7 +36,7 @@ loop:
         return 1;
     }
 next:
-    if (D_1F80019E != 0)
+    if (LIST_COUNTER != 0)
         goto loop;
 out:
     return 0;

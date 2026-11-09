@@ -2,7 +2,7 @@
 // VERSION SLPS_01144 x01 80125514 244
 #if defined(VERSION_SLPS_01144)
 extern unsigned char D_8009EA58;
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 #define pushObjectOutOfObjectBoxA func_8004E654
 #define decreaseObjectTimer func_8004D980
 #include "spad.h"
@@ -30,7 +30,7 @@ void func_80125514_slps01144(TObj *o, TObj *p)
         o->step = 0;
         o->state = 0;
         decreaseObjectTimer(o, 1);
-        D_1F80019E = 0;
+        LIST_COUNTER = 0;
     } else if (U8(o, 0xc3) != 0) {
         p->b6a = o->ba6;
     }

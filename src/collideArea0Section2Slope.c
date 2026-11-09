@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPS_01144)
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
-extern unsigned char DAT_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 extern void decreaseObjectTimer(TObj *, int);
 
 void func_801254A4(TObj *o)
@@ -28,7 +28,7 @@ void func_801254A4(TObj *o)
                         o->bbe = 9;
                         o->wb0 = -2;
                         o->b69 = 1;
-                    if (DAT_1f8001a4 != 0) return;
+                    if (DEBUG_INVINCIBLE != 0) return;
                         return;
                     }
                     o->active = 2;
@@ -56,7 +56,7 @@ void func_801254A4(TObj *o)
 #endif
 #else
 #include "TOBJ.H"
-extern unsigned char DAT_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 extern void decreaseObjectTimer(TObj *, int);
 
 void collideArea0Section2Slope(TObj *o)
@@ -82,7 +82,7 @@ void collideArea0Section2Slope(TObj *o)
                         o->b69 = 1;
                         return;
                     }
-                    if (DAT_1f8001a4 != 0) return;
+                    if (DEBUG_INVINCIBLE != 0) return;
                     o->active = 2;
                     o->animFrame = 1;
                     o->b04 = 2;
@@ -95,7 +95,7 @@ void collideArea0Section2Slope(TObj *o)
     }
     if (o->d->p.whole < 0x5b && o->h->p.whole >= 0xc35 && (unsigned short)(-0x23f - o->y.p.whole) < 0xfb) {
         o->h->p.whole = 0xc35;
-        if (!(o->active & 2) && DAT_1f8001a4 == 0) {
+        if (!(o->active & 2) && DEBUG_INVINCIBLE == 0) {
             o->active = 2;
             o->animFrame = 1;
             o->b04 = 2;

@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013A698[];
+extern void *WINGED_FORK_PIG_ANIMS[];
 extern short COS_TABLE[];
 extern short isObjectPastReferenceX(TObj *o);
 extern int AnimAdvance(TObj *o);
@@ -36,7 +36,7 @@ void wingedForkPigChase(TObj *o)
             o->wac = 6;
             o->state++;
         }
-        o->anim = D_8013A698[o->wac];
+        o->anim = WINGED_FORK_PIG_ANIMS[o->wac];
         AnimLoadDuration(o);
         break;
     case 1:
@@ -47,7 +47,7 @@ void wingedForkPigChase(TObj *o)
             o->state++;
             o->animFrame = 1 - o->animFrame;
             o->velX = o->animFrame << 2;
-            o->anim = D_8013A698[3];
+            o->anim = WINGED_FORK_PIG_ANIMS[3];
             AnimLoadDuration(o);
         }
         break;
@@ -71,7 +71,7 @@ void wingedForkPigChase(TObj *o)
             if (o->animFrame) o->velX = 3;
             else o->velX = 1;
         }
-        o->anim = D_8013A698[o->wac];
+        o->anim = WINGED_FORK_PIG_ANIMS[o->wac];
         AnimLoadDuration(o);
         break;
     case 4:

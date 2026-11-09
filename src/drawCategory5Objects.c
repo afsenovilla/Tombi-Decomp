@@ -1,7 +1,7 @@
 // FUNC 800571a8 224 MAIN0
 // MATCHING 800571a8 224
 // FLAGS -O2 -G0 -fno-schedule-insns
-extern short DAT_1f8001c6, CAT5_OBJECT_COUNT_SAVED;
+extern short DRAW_FROZEN, CAT5_OBJECT_COUNT_SAVED;
 extern unsigned *CAT5_OBJECT_LIST_SAVED;
 extern short CAT5_OBJECT_COUNT; extern unsigned *CAT5_OBJECT_LIST;
 extern void drawObject(unsigned);
@@ -12,7 +12,7 @@ void drawCategory5Objects(void)
     unsigned *p, *q;
     unsigned x;
     short s;
-    if (DAT_1f8001c6 != 0) {
+    if (DRAW_FROZEN != 0) {
         n = CAT5_OBJECT_COUNT_SAVED;
         p = CAT5_OBJECT_LIST_SAVED;
         if (n != 0) {

@@ -35,10 +35,10 @@ typedef struct { char p[0x4a]; short w4a, w4c, w4e; } Q;
 extern PL PLAYER;
 extern CMD *D_801181FC[];
 extern XY D_80118200[];
-extern unsigned char D_8009C975x[];
-#define D_8009C975 D_8009C975x[0]
+extern unsigned char GAME_FADE_SCREEN_CONTROL[];
+#define D_8009C975 GAME_FADE_SCREEN_CONTROL[0]
 extern unsigned char SCRIPT_FLAGS[];
-extern int D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC;
+extern int GAME_STATS_PLAY_HOURS, GAME_STATS_PLAY_MINUTES, GAME_STATS_EVENTS_STARTED, GAME_STATS_EVENTS_CLEARED;
 extern char D_8001D6A4[];
 extern void playerSetAnim(PL *, int, int);
 extern O *showMessageBox(int, int, int, int);
@@ -200,19 +200,19 @@ void updateSceneSequence(O *o)
             case 0:
                 t = (*(unsigned int*)&GAME.totalTimePlayed);
                 h = t / (FPS * 3600);
-                D_8011A8C8 = 0;
-                D_8011A8C4 = t / (FPS * 60) - h * 60;
-                D_8011A8C0 = h % 1000;
+                GAME_STATS_EVENTS_STARTED = 0;
+                GAME_STATS_PLAY_MINUTES = t / (FPS * 60) - h * 60;
+                GAME_STATS_PLAY_HOURS = h % 1000;
                 for (i = 0; i < 0x100; i++) {
-                    if (i != 0x12 && SCRIPT_FLAGS[i]) D_8011A8C8++;
+                    if (i != 0x12 && SCRIPT_FLAGS[i]) GAME_STATS_EVENTS_STARTED++;
                 }
-                D_8011A8CC = 0;
+                GAME_STATS_EVENTS_CLEARED = 0;
                 for (i = 0; i < 0x100; i++) {
-                    if (i != 0x12 && SCRIPT_FLAGS[i] == 0xff) D_8011A8CC++;
+                    if (i != 0x12 && SCRIPT_FLAGS[i] == 0xff) GAME_STATS_EVENTS_CLEARED++;
                 }
                 o->step++;
             case 1:
-                drawGameStats(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
+                drawGameStats(GAME_STATS_PLAY_HOURS, GAME_STATS_PLAY_MINUTES, GAME_STATS_EVENTS_STARTED, GAME_STATS_EVENTS_CLEARED);
                 if (!(SPAD.s1fc & 0x6008)) break;
                 if (GCD.bce48 == 0xff && GCD.bcdcb == 0xff && GV2.sda != 0 && GCD.bce0b == 0xff) {
                     D_8009C975 = 3;
@@ -295,7 +295,7 @@ void updateSceneSequence(O *o)
                 o->step++;
                 break;
             case 11:
-                drawGameStats(D_8011A8C0, D_8011A8C4, D_8011A8C8, D_8011A8CC);
+                drawGameStats(GAME_STATS_PLAY_HOURS, GAME_STATS_PLAY_MINUTES, GAME_STATS_EVENTS_STARTED, GAME_STATS_EVENTS_CLEARED);
             case 10:
                 if (D_8009C975 != 1) break;
                 o->wb6++;

@@ -4,7 +4,7 @@
 #define SKIP_ASM
 #include "common.h"
 
-extern int D_800981A0;
+extern int VIDEO_MODE;
 int StartPAD(void);
 extern int EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
@@ -89,8 +89,8 @@ extern void (*D_80097514)(padPort*);
 extern padPort D_8009B3A0[];
 
 long SetVideoMode(long mode) {
-    long prev = D_800981A0;
-    D_800981A0 = mode;
+    long prev = VIDEO_MODE;
+    VIDEO_MODE = mode;
     return prev;
 }
 

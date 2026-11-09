@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 typedef struct { short x, y, z, pad; } P4;
 
-extern void *D_8011CA48[];
-extern short D_8011A4A0[];
+extern void *DRIFTING_CLOUD_ANIMS[];
+extern short DRIFTING_CLOUD_QUAD[];
 extern void FUN_80018ca4(TObj *);
 extern void FUN_800187e4(TObj *);
 
@@ -24,7 +24,7 @@ void updateDriftingCloud(TObj *o)
         o->w1e = 0xb;
         o->w08 = 0x7c0c;
         o->d3c = ((int*)&SPAD.i2d0)[0];
-        o->anim = D_8011CA48[o->b0c];
+        o->anim = DRIFTING_CLOUD_ANIMS[o->b0c];
         break;
     case 1:
         o->visible = 1;
@@ -33,17 +33,17 @@ void updateDriftingCloud(TObj *o)
         switch (u) {
         case 0:
             o->step = u + 1;
-            PT(o)[0].x = D_8011A4A0[0];
-            PT(o)[0].y = D_8011A4A0[1];
+            PT(o)[0].x = DRIFTING_CLOUD_QUAD[0];
+            PT(o)[0].y = DRIFTING_CLOUD_QUAD[1];
             PT(o)[0].z = 0;
-            PT(o)[1].x = D_8011A4A0[2];
-            PT(o)[1].y = D_8011A4A0[3];
+            PT(o)[1].x = DRIFTING_CLOUD_QUAD[2];
+            PT(o)[1].y = DRIFTING_CLOUD_QUAD[3];
             PT(o)[1].z = 0;
-            PT(o)[2].x = D_8011A4A0[4];
-            PT(o)[2].y = D_8011A4A0[5];
+            PT(o)[2].x = DRIFTING_CLOUD_QUAD[4];
+            PT(o)[2].y = DRIFTING_CLOUD_QUAD[5];
             PT(o)[2].z = 0;
-            PT(o)[3].x = D_8011A4A0[6];
-            PT(o)[3].y = D_8011A4A0[7];
+            PT(o)[3].x = DRIFTING_CLOUD_QUAD[6];
+            PT(o)[3].y = DRIFTING_CLOUD_QUAD[7];
             PT(o)[3].z = 0;
             break;
         case 1:

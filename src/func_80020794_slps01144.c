@@ -9,8 +9,8 @@ extern volatile unsigned short D_800A1380[];
 extern volatile unsigned short D_800A1382;
 extern unsigned short D_8009F180;
 extern unsigned short D_800A137A;
-extern unsigned short D_1F8001FC;
-extern unsigned short D_1F8001FE;
+extern unsigned short JOYPAD_STATE;
+extern unsigned short JOYPAD_RELEASED;
 
 void func_80020794(void)
 {
@@ -18,9 +18,9 @@ void func_80020794(void)
     D_8009F206 = D_8009F202;
     D_8009F200[0] = D_800A1380[0];
     D_8009F202 = D_800A1382;
-    D_1F8001FC = D_8009F200[0] & ~D_8009F204;
+    JOYPAD_STATE = D_8009F200[0] & ~D_8009F204;
     D_8009F180 = D_8009F202 & ~D_8009F206;
-    D_1F8001FE = D_8009F204 & ~D_8009F200[0];
+    JOYPAD_RELEASED = D_8009F204 & ~D_8009F200[0];
     D_800A137A = D_8009F206 & ~D_8009F202;
 }
 #endif

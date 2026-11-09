@@ -9,7 +9,7 @@
 #include "TOBJ.H"
 
 extern char D_80077D3C[];
-extern unsigned char D_80135CB0[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 extern void *D_80139510;
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -33,7 +33,7 @@ void func_8012724C(TObj *o)
         o->d8c = 0;
         o->state++;
         o->anim = D_80139510;
-        b = &D_80135CB0[o->wac * 4];
+        b = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
         o->box0 = *b++;
         o->box1 = *b++;
         o->box2 = *b++;
@@ -63,7 +63,7 @@ void func_8012724C(TObj *o)
 #include "TOBJ.H"
 
 extern char D_80077D3C[];
-extern unsigned char D_80135CB0[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 extern void *D_80139510;
 extern void FUN_8001fe6c(TObj *);
 extern void AnimAdvance(TObj *);
@@ -87,7 +87,7 @@ void spikyLizardSubtype3Step(TObj *o)
         o->d8c = 0;
         o->state++;
         o->anim = D_80139510;
-        b = &D_80135CB0[o->wac * 4];
+        b = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
         o->box0 = *b++;
         o->box1 = *b++;
         o->box2 = *b++;

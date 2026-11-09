@@ -2,7 +2,7 @@
 // MATCHING 80021fac 152
 #include "TOBJ.H"
 typedef struct B32 { int w[8]; } B32;
-extern B32 DAT_1f8000f8;
+extern B32 BASE_MATRIX;
 extern void applyLighting(void);
 
 void initLighting(TObj *o)
@@ -10,7 +10,7 @@ void initLighting(TObj *o)
     *(short *)&o->d = 0x638;
     *((short *)&o->d + 1) = 0x800;
     o->w48 = 0;
-    *(B32 *)&o->timer = DAT_1f8000f8;
+    *(B32 *)&o->timer = BASE_MATRIX;
     o->timer = 0xd00;
     *((short *)&o->anim + 1) = 0xd00;
     o->animTimer = 0xd00;

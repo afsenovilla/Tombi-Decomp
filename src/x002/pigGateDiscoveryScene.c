@@ -24,7 +24,7 @@ typedef struct {
 extern TObj PLAYER;
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
 extern unsigned short TICK_COUNT;
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern TObj *ObjAlloc(void);
 extern int MulCos(short, short);
 extern int MulNegSinScaled(short, short);
@@ -309,7 +309,7 @@ void func_80119388(Ctl *o)
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((unsigned char*)&GVARS.b3e)[0] = 0;
         PLAYER.wb2 = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->b0f = o->w24;
         PLAYER.b04 = 1;
         PLAYER.step = 0;
@@ -342,7 +342,7 @@ typedef struct {
 extern TObj PLAYER;
 extern TObj *SCRIPT_OBJECTS, *D_8009F2DC, *D_8009F2F8, *D_8009F328;
 extern unsigned short TICK_COUNT;
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern TObj *ObjAlloc(void);
 extern int MulCos(short, short);
 extern int MulNegSinScaled(short, short);
@@ -627,7 +627,7 @@ void pigGateDiscoveryScene(Ctl *o)
         ((unsigned char*)&GVARS.b3f)[0] = 0;
         ((unsigned char*)&GVARS.b3e)[0] = 0;
         PLAYER.wb2 = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->b0f = o->w24;
         PLAYER.b04 = 1;
         PLAYER.step = 0;

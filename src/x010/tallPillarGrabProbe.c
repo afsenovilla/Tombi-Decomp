@@ -17,7 +17,7 @@ typedef struct {
     unsigned short e8;
     unsigned short ea;
 } P;
-extern unsigned short D_8012F2F8[];
+extern unsigned short TALL_PILLAR_HEIGHT_PROFILE[];
 
 void tallPillarGrabProbe(P *o, TObj *e)
 {
@@ -35,7 +35,7 @@ void tallPillarGrabProbe(P *o, TObj *e)
     d = -e->d34 + o->ea;
     h = d + e->d38;
     if ((unsigned short)h > e->d38) return;
-    h = D_8012F2F8[(short)-d >> 3];
+    h = TALL_PILLAR_HEIGHT_PROFILE[(short)-d >> 3];
     b0 = (unsigned short)e->box0;
     d = (unsigned short)e->h->p.whole + h;
     c = b0 + (o->e8 - d);
@@ -76,7 +76,7 @@ typedef struct {
     unsigned short e8;
     unsigned short ea;
 } P;
-extern unsigned short D_8012F2F8[];
+extern unsigned short TALL_PILLAR_HEIGHT_PROFILE[];
 
 void tallPillarGrabProbe(P *o, TObj *e)
 {
@@ -94,7 +94,7 @@ void tallPillarGrabProbe(P *o, TObj *e)
     d = -e->d34 + o->ea;
     h = d + e->d38;
     if ((unsigned short)h > e->d38) return;
-    h = D_8012F2F8[(short)-d >> 3];
+    h = TALL_PILLAR_HEIGHT_PROFILE[(short)-d >> 3];
     b0 = (unsigned short)e->box0;
     d = (unsigned short)e->h->p.whole + h;
     c = b0 + (o->e8 - d);

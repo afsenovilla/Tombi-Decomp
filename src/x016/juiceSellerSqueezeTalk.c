@@ -8,7 +8,7 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
 typedef struct { TObj o; char pc0[0xd2 - 0xc0]; unsigned short wd2; } TX;
-extern AT D_80118D34[];
+extern AT JUICE_SELLER_DEFS_ANIMS[];
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -32,7 +32,7 @@ void juiceSellerSqueezeTalk(TObj *o)
         o->d90 = showMessageBoxDirect(2, 0x11, &v);
         n = o->animFrame + 2;
         if (n != ((TX *)o)->wd2) {
-            o->anim = D_80118D34[o->subtype].anims[n];
+            o->anim = JUICE_SELLER_DEFS_ANIMS[o->subtype].anims[n];
             AnimJump(o, 0);
             ((TX *)o)->wd2 = n;
         }
@@ -48,7 +48,7 @@ void juiceSellerSqueezeTalk(TObj *o)
         o->animFrame ^= 1;
         v = *(V6 *)&o->a;
         o->d90 = showMessageBoxDirect(2, 0x12, &v);
-        o->anim = D_80118D34[o->subtype].anims[5];
+        o->anim = JUICE_SELLER_DEFS_ANIMS[o->subtype].anims[5];
         AnimJump(o, 0);
         o->timer = 0x78;
         o->state = 2;
@@ -64,7 +64,7 @@ void juiceSellerSqueezeTalk(TObj *o)
         q3->b04 = 3; }
         o->animFrame = o->b68 & 1;
         v = *(V6 *)&o->a;
-        o->anim = D_80118D34[o->subtype].anims[2];
+        o->anim = JUICE_SELLER_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->d90 = showMessageBoxDirect(2, 0x13, &v);
         o->state++;
@@ -82,7 +82,7 @@ void juiceSellerSqueezeTalk(TObj *o)
         GVARS.b42 = 0;
         GVARS.useItemPending = 0;
         PLAYER.obj.wb2 = 0;
-        o->anim = D_80118D34[o->subtype].anims[0];
+        o->anim = JUICE_SELLER_DEFS_ANIMS[o->subtype].anims[0];
         AnimJump(o, 0);
         removeItemFromInventory(3, 1);
         o->animFrame = o->wbc;

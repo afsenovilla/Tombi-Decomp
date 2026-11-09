@@ -2,7 +2,7 @@
 // MATCHING 800ed7ec 424
 #include "TOBJ.H"
 extern unsigned short D_800A4678[];
-extern short D_800B1320[];
+extern short CAT3_OBJECT_LIST_BUF[];
 
 void topdownBuildVisibleTileList(TObj *o)
 {
@@ -23,18 +23,18 @@ void topdownBuildVisibleTileList(TObj *o)
     r = 0;
     do {
         t = x + (y + r) * D_800A4678[0];
-        D_800B1320[k++] = t;
-        D_800B1320[k++] = t + 1;
-        D_800B1320[k++] = t + 2;
-        D_800B1320[k++] = t + 3;
-        D_800B1320[k++] = t + 4;
-        D_800B1320[k++] = t + 5;
-        D_800B1320[k++] = t + 6;
-        D_800B1320[k++] = t + 7;
-        D_800B1320[k++] = t + 8;
-        D_800B1320[k++] = t + 9;
-        D_800B1320[k++] = t + 10;
-        D_800B1320[k++] = t + 11;
+        CAT3_OBJECT_LIST_BUF[k++] = t;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 1;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 2;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 3;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 4;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 5;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 6;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 7;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 8;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 9;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 10;
+        CAT3_OBJECT_LIST_BUF[k++] = t + 11;
         r++;
     } while (r < 10);
 }

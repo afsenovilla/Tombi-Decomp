@@ -10,7 +10,7 @@ typedef struct O {
     struct O *d94;
 } O;
 extern short objectsOverlap();
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 
 void collideCat2Type7Cat5Type0BPair(O *o, unsigned char *p)
 {
@@ -29,6 +29,6 @@ void collideCat2Type7Cat5Type0BPair(O *o, unsigned char *p)
         p[4] = 2;
         p[5] = 1;
         p[6] = 0;
-        DAT_1f80019e = 0;
+        LIST_COUNTER = 0;
     }
 }

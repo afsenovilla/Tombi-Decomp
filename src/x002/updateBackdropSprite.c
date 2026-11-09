@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 extern void *D_1F8002D4[];
-extern void *D_8011F860[];
+extern void *A02_BACKDROP_SPRITE_ANIMS[];
 extern short GetClut(int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
@@ -28,7 +28,7 @@ void updateBackdropSprite(TObj *o)
             o->w08 = GetClut(0x130, 0x1e0);
             o->w1e = 6;
         }
-        o->anim = D_8011F860[o->b0c];
+        o->anim = A02_BACKDROP_SPRITE_ANIMS[o->b0c];
         o->d3c = (int)D_1F8002D4[0];
         AnimLoadDuration(o);
         break;

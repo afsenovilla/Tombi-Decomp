@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 extern short COS_TABLE[], NEG_SIN_TABLE[];
-extern void *D_8013F034[];
+extern void *SEGMENTED_CRAWLER_ANIMS[];
 extern void *D_8013F064[];
 extern void AnimLoadDuration(TObj *);
 extern void func_80132A3C(TObj *);
@@ -16,7 +16,7 @@ extern int func_80132964(TObj *);
     o->h->raw += (COS_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
     o->y.raw += (NEG_SIN_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
     o->wac = ((o->d88 + 8) & 0xff) >> 4; \
-    o->anim = D_8013F034[o->wac];
+    o->anim = SEGMENTED_CRAWLER_ANIMS[o->wac];
 
 #define TURN3() \
     switch (o->substep) { \
@@ -226,7 +226,7 @@ void func_80132B64(TObj *o)
 #include "TOBJ.H"
 
 extern short COS_TABLE[], NEG_SIN_TABLE[];
-extern void *D_8013F034[];
+extern void *SEGMENTED_CRAWLER_ANIMS[];
 extern void *D_8013F064[];
 extern void AnimLoadDuration(TObj *);
 extern void segmentedCrawlerWiggle(TObj *);
@@ -236,7 +236,7 @@ extern int segmentedCrawlerCheckWall(TObj *);
     o->h->raw += (COS_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
     o->y.raw += (NEG_SIN_TABLE[*(unsigned char *)&o->d88] * o->velH) >> 4; \
     o->wac = ((o->d88 + 8) & 0xff) >> 4; \
-    o->anim = D_8013F034[o->wac];
+    o->anim = SEGMENTED_CRAWLER_ANIMS[o->wac];
 
 #define TURN3() \
     switch (o->substep) { \

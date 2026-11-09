@@ -22,7 +22,7 @@ extern char GAME[];
 extern int D_8009D2B4[], PLAYER_POS[];
 extern short GAME_SELECTED_SPAWN_POINT[];
 extern char D_8009C972[], D_8009D2E4[], D_8009D2E5[], D_8009D2E6[], D_8009C992[];
-extern unsigned short BUTTON_CONFIG_INDEX, D_8009D612;
+extern unsigned short BUTTON_CONFIG_INDEX, PAD_VIBRATION_ENABLED;
 extern unsigned char D_8009D67C, D_8009F0E8;
 extern unsigned int GAME_TOTAL_TIME_PLAYED;
 extern unsigned char D_8009C980, D_8009C973;
@@ -54,7 +54,7 @@ void func_800E999C(int slot_)
     D_8009D2E6[0] = BUTTON_CONFIG_INDEX;
     D_8009D2E4[0] = D_8009D67C;
     D_8009D2E5[0] = D_8009F0E8;
-    D_8009C992[0] = D_8009D612;
+    D_8009C992[0] = PAD_VIBRATION_ENABLED;
     *(B64 *)(h + 4) = *D_800F6A34[D_1F8003D8];
     {
         int s10 = slot / 10;

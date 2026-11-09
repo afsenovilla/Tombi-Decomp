@@ -19,7 +19,7 @@ extern unsigned char PLAYER_DRAW_DEPTH[];
 extern int D_800A609C[];
 extern R4 D_80011E04[];
 extern signed char D_80011EB4[];
-extern void *D_8013E568[];
+extern void *PUPPY_BARON_ANIMS[];
 extern char D_80077D3C[];
 extern unsigned char D_8009CEAB[];
 extern void AnimLoadDuration(TObj *);
@@ -60,7 +60,7 @@ void func_80135378(TObj *o)
         *(signed char *)&o->b0f = -7;}
         asm("");
         r = &D_80011E04[D_80011EB4[*PLAYER_ANIM]];
-        o->anim = D_8013E568[r->a];
+        o->anim = PUPPY_BARON_ANIMS[r->a];
         if (r->a == 6) {
             o->animFrame ^= 1;
         }
@@ -117,7 +117,7 @@ void func_80135378(TObj *o)
         case 0:
             o->active = 2;
             D_8009CEAB[0] = 2;
-            o->anim = D_8013E568[0];
+            o->anim = PUPPY_BARON_ANIMS[0];
             AnimLoadDuration(o);
             o->movetab = D_80077D3C;
             o->velY = -0x400;
@@ -138,7 +138,7 @@ void func_80135378(TObj *o)
             o->y.raw += o->velY << 8;
             o->velY += 0x20;
             if (TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x20))) {
-                o->anim = D_8013E568[0];
+                o->anim = PUPPY_BARON_ANIMS[0];
                 AnimLoadDuration(o);
                 o->state++;
             }
@@ -158,7 +158,7 @@ void func_80135378(TObj *o)
             }
             break;
         case 5:
-            o->anim = D_8013E568[0];
+            o->anim = PUPPY_BARON_ANIMS[0];
             AnimLoadDuration(o);
             o->movetab = D_80077D3C;
             o->velY = -0x300;
@@ -181,7 +181,7 @@ void func_80135378(TObj *o)
             o->y.raw += o->velY << 8;
             o->velY += 0x20;
             if (TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) {
-                o->anim = D_8013E568[0];
+                o->anim = PUPPY_BARON_ANIMS[0];
                 AnimLoadDuration(o);
                 o->state = 5;
             }
@@ -221,7 +221,7 @@ extern unsigned char PLAYER_DRAW_DEPTH[];
 extern int D_800A609C[];
 extern R4 D_80011E04[];
 extern signed char D_80011EB4[];
-extern void *D_8013E568[];
+extern void *PUPPY_BARON_ANIMS[];
 extern char D_80077D3C[];
 extern unsigned char D_8009CEAB[];
 extern void AnimLoadDuration(TObj *);
@@ -262,7 +262,7 @@ void stepPuppyBaron(TObj *o)
         *(signed char *)&o->b0f = -7;}
         asm("");
         r = &D_80011E04[D_80011EB4[*PLAYER_ANIM]];
-        o->anim = D_8013E568[r->a];
+        o->anim = PUPPY_BARON_ANIMS[r->a];
         if (r->a == 6) {
             o->animFrame ^= 1;
         }
@@ -331,7 +331,7 @@ void stepPuppyBaron(TObj *o)
         case 0:
             o->active = 2;
             D_8009CEAB[0] = 2;
-            o->anim = D_8013E568[0];
+            o->anim = PUPPY_BARON_ANIMS[0];
             AnimLoadDuration(o);
             o->movetab = D_80077D3C;
             o->velY = -0x400;
@@ -352,7 +352,7 @@ void stepPuppyBaron(TObj *o)
             o->y.raw += o->velY << 8;
             o->velY += 0x20;
             if (TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x20))) {
-                o->anim = D_8013E568[0];
+                o->anim = PUPPY_BARON_ANIMS[0];
                 AnimLoadDuration(o);
                 o->state++;
             }
@@ -372,7 +372,7 @@ void stepPuppyBaron(TObj *o)
             }
             break;
         case 5:
-            o->anim = D_8013E568[0];
+            o->anim = PUPPY_BARON_ANIMS[0];
             AnimLoadDuration(o);
             o->movetab = D_80077D3C;
             o->velY = -0x300;
@@ -395,7 +395,7 @@ void stepPuppyBaron(TObj *o)
             o->y.raw += o->velY << 8;
             o->velY += 0x20;
             if (TileCollideAt(o, o->h->p.whole, (short)(o->y.p.whole + 0x10))) {
-                o->anim = D_8013E568[0];
+                o->anim = PUPPY_BARON_ANIMS[0];
                 AnimLoadDuration(o);
                 o->state = 5;
             }

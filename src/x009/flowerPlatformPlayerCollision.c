@@ -22,7 +22,7 @@ typedef struct O {
     unsigned char baa;
 } O;
 
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 extern short columnPushOutOfWall(O *, short, short, int, unsigned char);
 extern short columnProbeA(O *, short, short, unsigned char);
 extern short tileCollideColumnAtX(O *, short, short, int);
@@ -89,7 +89,7 @@ void flowerPlatformPlayerCollision(O *o, O *e)
             if (columnProbeA(o, sx, sy, e->subtype) || columnProbeA(o, sx, sy, e->subtype)) {
             hit:
                 if (o->velY < 0) o->velY = 0;
-                D_1F80019E = 0;
+                LIST_COUNTER = 0;
                 return;
             }
             if (tileCollideColumnAtX(o, sx, d + o->box2, e->subtype)) goto hit2;
@@ -102,6 +102,6 @@ void flowerPlatformPlayerCollision(O *o, O *e)
 hit2:
     applyCollisionTileResponse(o);
     o->h->whole += e->velX;
-    D_1F80019E = 0;
+    LIST_COUNTER = 0;
     o->velY = 0;
 }

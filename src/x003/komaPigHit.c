@@ -7,7 +7,7 @@ typedef struct { unsigned char b4, b5; unsigned short b6; short b8; } Q;
 
 extern char MOVE_TABLE_2[], MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern unsigned short *D_8013877C[], *D_80138764[], *D_80138760[], *D_80138780[], *D_80138784[], *D_80138788[];
-extern unsigned char D_80135B30[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern void FUN_8001e4f0(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern short probeWallAt(TObj *, short, short, short);
@@ -20,7 +20,7 @@ extern void cloneItemPickupObject(TObj *);
         unsigned short *a = tbl[0];                                  \
         o->anim = a;                                                 \
         {                                                            \
-            unsigned char *pp = &D_80135B30[a[1] * 4];               \
+            unsigned char *pp = &KOMA_PIG_ANIM_BOXES[a[1] * 4];               \
             o->box0 = *pp++;                                         \
             o->box1 = *pp++;                                         \
             o->box2 = *pp;                                           \

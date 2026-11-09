@@ -11,9 +11,9 @@
 typedef struct { short a, x, y, z, sub; } Q;
 typedef struct { char p[0xd2]; short wd2; } E;
 
-extern unsigned char D_8012F3D4[];
+extern unsigned char SPEAR_PIG_ANIM_BOXES[];
 extern unsigned char D_8012F3E8, D_8012F3E9, D_8012F3EA, D_8012F3EB;
-extern void *D_80132310[];
+extern void *SPEAR_PIG_ANIMS[];
 extern void *D_8013237C[];
 extern unsigned short D_8012F49C[];
 extern int ObjCullRegister(TObj *);
@@ -84,7 +84,7 @@ void updateSpearPig(TObj *o)
             o->b0d = 0;
             {
                 int t = ((int*)&SPAD.i2d0)[0];
-                void *a = D_80132310[0];
+                void *a = SPEAR_PIG_ANIMS[0];
                 o->d3c = t;
                 o->anim = a;
             }
@@ -230,7 +230,7 @@ void updateSpearPig(TObj *o)
             if ((short)n >= 0) {
                 k = (short)n;
                 k *= 4;
-                p = (unsigned char *)D_8012F3D4 + k;
+                p = (unsigned char *)SPEAR_PIG_ANIM_BOXES + k;
                 goto set;
             }
         } else if (o->w9a == 0) {
@@ -246,7 +246,7 @@ void updateSpearPig(TObj *o)
             o->box3 = D_8012F3EB;
             o->wac = 5;
             o->d30 = hx;
-            o->anim = D_80132310[5];
+            o->anim = SPEAR_PIG_ANIMS[5];
             AnimLoadDuration(o);
         } else {
             AnimAdvance(o);
@@ -258,7 +258,7 @@ void updateSpearPig(TObj *o)
             o->y.p.whole = yy + 2;
             if (o->b69 == 1 || FUN_80040278(o, o->h->p.whole, (short)(yy + 0x1c))) o->b69 = 0;
             if (--o->w9a == 0) {
-                p = (unsigned char *)D_8012F3D4;
+                p = (unsigned char *)SPEAR_PIG_ANIM_BOXES;
                 n = o->d34;
                 o->b68 = 0;
                 k = n << 16;
@@ -273,7 +273,7 @@ void updateSpearPig(TObj *o)
                 o->box2 = c;
                 o->box3 = *p++;
                 o->wac = n;
-                o->anim = *(void **)((char *)D_80132310 + k);
+                o->anim = *(void **)((char *)SPEAR_PIG_ANIMS + k);
                 AnimLoadDuration(o);
             }
         }
@@ -293,17 +293,17 @@ void updateSpearPig(TObj *o)
                 o->state++;
                 o->b9c = 0;
                 {
-                    int b0 = D_8012F3D4[3 * 4 + 0];
-                    int b1 = D_8012F3D4[3 * 4 + 1];
-                    int b2 = D_8012F3D4[3 * 4 + 2];
-                    int b3 = D_8012F3D4[3 * 4 + 3];
+                    int b0 = SPEAR_PIG_ANIM_BOXES[3 * 4 + 0];
+                    int b1 = SPEAR_PIG_ANIM_BOXES[3 * 4 + 1];
+                    int b2 = SPEAR_PIG_ANIM_BOXES[3 * 4 + 2];
+                    int b3 = SPEAR_PIG_ANIM_BOXES[3 * 4 + 3];
                     o->wac = 3;
                     o->box0 = b0;
                     o->box1 = b1;
                     o->box2 = b2;
                     o->box3 = b3;
                 }
-                o->anim = D_80132310[3];
+                o->anim = SPEAR_PIG_ANIMS[3];
                 AnimLoadDuration(o);
                 o->box2 = 0xc;
                 o->box3 = 0x26;
@@ -362,9 +362,9 @@ void updateSpearPig(TObj *o)
 typedef struct { short a, x, y, z, sub; } Q;
 typedef struct { char p[0xd2]; short wd2; } E;
 
-extern unsigned char D_8012F3D4[];
+extern unsigned char SPEAR_PIG_ANIM_BOXES[];
 extern unsigned char D_8012F3E8, D_8012F3E9, D_8012F3EA, D_8012F3EB;
-extern void *D_80132310[];
+extern void *SPEAR_PIG_ANIMS[];
 extern void *D_8013237C[];
 extern unsigned short D_8012F49C[];
 extern int ObjCullRegister(TObj *);
@@ -435,7 +435,7 @@ void updateSpearPig(TObj *o)
             o->b0d = 0;
             {
                 int t = ((int*)&SPAD.i2d0)[0];
-                void *a = D_80132310[0];
+                void *a = SPEAR_PIG_ANIMS[0];
                 o->d3c = t;
                 o->anim = a;
             }
@@ -581,7 +581,7 @@ void updateSpearPig(TObj *o)
             if ((short)n >= 0) {
                 k = (short)n;
                 k *= 4;
-                p = (unsigned char *)D_8012F3D4 + k;
+                p = (unsigned char *)SPEAR_PIG_ANIM_BOXES + k;
                 goto set;
             }
         } else if (o->w9a == 0) {
@@ -597,7 +597,7 @@ void updateSpearPig(TObj *o)
             o->box3 = D_8012F3EB;
             o->wac = 5;
             o->d30 = hx;
-            o->anim = D_80132310[5];
+            o->anim = SPEAR_PIG_ANIMS[5];
             AnimLoadDuration(o);
         } else {
             AnimAdvance(o);
@@ -609,7 +609,7 @@ void updateSpearPig(TObj *o)
             o->y.p.whole = yy + 2;
             if (o->b69 == 1 || FUN_80040278(o, o->h->p.whole, (short)(yy + 0x1c))) o->b69 = 0;
             if (--o->w9a == 0) {
-                p = (unsigned char *)D_8012F3D4;
+                p = (unsigned char *)SPEAR_PIG_ANIM_BOXES;
                 n = o->d34;
                 o->b68 = 0;
                 k = n << 16;
@@ -624,7 +624,7 @@ void updateSpearPig(TObj *o)
                 o->box2 = c;
                 o->box3 = *p++;
                 o->wac = n;
-                o->anim = *(void **)((char *)D_80132310 + k);
+                o->anim = *(void **)((char *)SPEAR_PIG_ANIMS + k);
                 AnimLoadDuration(o);
             }
         }
@@ -644,17 +644,17 @@ void updateSpearPig(TObj *o)
                 o->state++;
                 o->b9c = 0;
                 {
-                    int b0 = D_8012F3D4[3 * 4 + 0];
-                    int b1 = D_8012F3D4[3 * 4 + 1];
-                    int b2 = D_8012F3D4[3 * 4 + 2];
-                    int b3 = D_8012F3D4[3 * 4 + 3];
+                    int b0 = SPEAR_PIG_ANIM_BOXES[3 * 4 + 0];
+                    int b1 = SPEAR_PIG_ANIM_BOXES[3 * 4 + 1];
+                    int b2 = SPEAR_PIG_ANIM_BOXES[3 * 4 + 2];
+                    int b3 = SPEAR_PIG_ANIM_BOXES[3 * 4 + 3];
                     o->wac = 3;
                     o->box0 = b0;
                     o->box1 = b1;
                     o->box2 = b2;
                     o->box3 = b3;
                 }
-                o->anim = D_80132310[3];
+                o->anim = SPEAR_PIG_ANIMS[3];
                 AnimLoadDuration(o);
                 o->box2 = 0xc;
                 o->box3 = 0x26;

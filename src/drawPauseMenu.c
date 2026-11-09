@@ -14,11 +14,11 @@ typedef struct { short x, y; } XY;
 extern char *NEXT_PRIM;
 extern int CURRENT_OT;
 extern char *DAT_1f8002d8;
-extern unsigned char DAT_1f8003cd;
+extern unsigned char MENU_CLOSE_MODE;
 extern unsigned char GAME_INVENTORY_SCREEN[];
 extern ENT D_8008037c[], D_8008039c[], D_800803bc[], D_800803dc[];
-extern UV D_80080300[];
-extern XY D_80080404[];
+extern UV PAUSE_MENU_SPRITE_UVS[];
+extern XY PAUSE_MENU_ORIGINS[];
 extern char D_80012940[];
 extern char D_80012948[];
 extern char D_80012950[];
@@ -53,7 +53,7 @@ void drawPauseMenu(void)
     int w;
     int k;
 
-    switch (DAT_1f8003cd) {
+    switch (MENU_CLOSE_MODE) {
     case 0:
         e = D_800803dc;
         mode = 1;
@@ -100,8 +100,8 @@ void drawPauseMenu(void)
                 SetSemiTrans(sp, 0);
                 sp->x0 = x;
                 sp->y0 = y;
-                sp->u0 = D_80080300[c].u;
-                sp->v0 = D_80080300[c].v;
+                sp->u0 = PAUSE_MENU_SPRITE_UVS[c].u;
+                sp->v0 = PAUSE_MENU_SPRITE_UVS[c].v;
                 sp->w = 8;
                 sp->h = 0x10;
                 sp->clut = GetClut(0x160, 0x1e3);
@@ -176,8 +176,8 @@ void drawPauseMenu(void)
         p->uv2 = pt->uv2;
         p->uv3 = pt->uv3;
         *(short *)((char *)p + 0x16) = 0x14;
-        p->x0 = D_80080404[mode].x + pt->dx;
-        p->y0 = D_80080404[mode].y + pt->dy;
+        p->x0 = PAUSE_MENU_ORIGINS[mode].x + pt->dx;
+        p->y0 = PAUSE_MENU_ORIGINS[mode].y + pt->dy;
         w = pt->w;
         p->x2 = p->x0;
         p->x1 = p->x0 + w;

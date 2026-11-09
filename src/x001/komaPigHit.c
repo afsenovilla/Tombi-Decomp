@@ -20,7 +20,7 @@ static AH *D_8013DB1C[5] = {
     (AH *)D_8013DCC4, (AH *)D_8013DBF0, (AH *)D_8013DCE8, (AH *)D_8013DCF0,
     (AH *)D_8013DD18,
 };
-extern unsigned char D_8013C800[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern char MOVE_TABLE_2[], MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern void playSFX(int);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -31,7 +31,7 @@ extern int func_8012BB18(TObj *);
 
 #define SETANIM(A) { unsigned char *pv; \
     o->anim = (A)[0]; \
-    pv = &D_8013C800[((AH *)o->anim)->w2 * 4]; \
+    pv = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4]; \
     o->box0 = *pv++; \
     o->box1 = *pv++; \
     o->box2 = *pv++; \

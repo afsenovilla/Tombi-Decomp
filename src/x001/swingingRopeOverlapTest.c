@@ -2,7 +2,7 @@
 // MATCHING 80124c20 532
 #include "TOBJ.H"
 
-extern unsigned short *D_8013C6A4[];
+extern unsigned short *SWINGING_ROPE_HEIGHT_PROFILES[];
 
 int swingingRopeOverlapTest(TObj *a, TObj *b)
 {
@@ -17,7 +17,7 @@ int swingingRopeOverlapTest(TObj *a, TObj *b)
     if ((unsigned short)t > a->box3 + b->box3) return 0;
     n = -d;
     k = n - 0x18;
-    p = D_8013C6A4[b->subtype];
+    p = SWINGING_ROPE_HEIGHT_PROFILES[b->subtype];
     if (k < 0) k = 0;
     t = p[k >> 3];
     dx = a->h->p.whole - (b->h->p.whole + t);

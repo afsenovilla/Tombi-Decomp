@@ -61,11 +61,11 @@ extern void func_800EF7BC(Sprite *s);
 extern void playSFX(int id);
 extern void playSFXWithNote(int a, int b);
 extern Save D_1F8000C0;
-extern unsigned short D_1F8001FC;
+extern unsigned short JOYPAD_STATE;
 extern volatile int D_1F8002EC;
 extern char *D_1F800344;
 #define VIEW_CAMERA D_1F8000C0
-#define PAD D_1F8001FC
+#define PAD JOYPAD_STATE
 #define BANK D_1F8002EC
 #define P344 (*(char * volatile *)&D_1F800344)
 

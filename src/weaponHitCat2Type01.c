@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short FUN_8004461c(TObj *a, TObj *b);
 extern void spawnImpactEffect(int a, int b, int c, int d);
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 
 void weaponHitCat2Type01(TObj *o, TObj *p)
 {
@@ -18,7 +18,7 @@ void weaponHitCat2Type01(TObj *o, TObj *p)
             o->wa8 = 0x4ff;
             o->ba5 = 0;
             o->active = 2;
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
         break;
     case 1:
@@ -40,14 +40,14 @@ void weaponHitCat2Type01(TObj *o, TObj *p)
             o->wa8 = 0x4ff;
             o->ba5 = 0;
             o->active = 2;
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
         break;
     case 10:
         if (o->subtype != 2) {
             o->b6a = 1;
             o->active = 2;
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
         break;
     case 2:

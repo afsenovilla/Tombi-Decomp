@@ -11,7 +11,7 @@ typedef struct {
 
 extern T80019244 *TASK_C;
 #define P TASK_C
-extern unsigned char D_1F8001D1, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
+extern unsigned char IN_TITLE, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
 extern short FRAME_BUFFER_INDEX, FRAME_COUNT;
 
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
@@ -46,7 +46,7 @@ void bootStartupTask(void)
     DISPLAY_BUFFER_1_BG_R = 0;
     DISPLAY_BUFFER_1_BG_G = 0;
     DISPLAY_BUFFER_1_BG_B = 0;
-    D_1F8001D1 = 0;
+    IN_TITLE = 0;
     SPAD.b1d0 = 0;
     BUTTON_CONFIG_INDEX = 0;
     D_8009D67C = 1;
@@ -133,7 +133,7 @@ void bootStartupTask(void)
                 if (--p->w5a == 0) {
                     SetDispMask(0);
                     initDisplay(0, 0, 0);
-                    D_1F8001D1 = 0;
+                    IN_TITLE = 0;
                     FRAME_COUNT = 0;
                     P->w48 = 0;
                     P->w4a = 0;

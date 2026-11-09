@@ -6,9 +6,9 @@ extern short FUN_80040278(TObj *, int, int);
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int Rand(void);
-extern void *D_80139500[];
+extern void *SPIKY_LIZARD_ANIMS[];
 extern void *D_80139570;
-extern unsigned char D_80135CB0[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 extern unsigned char D_80135D54[];
 
 static __inline__ void fall(TObj *o)
@@ -45,8 +45,8 @@ void spikyLizardIdle(TObj *o)
         o->timer = D_80135D54[Rand() & 7];
         if (o->wb4 != 0) o->wac = 7;
         else o->wac = 0x1e;
-        o->anim = D_80139500[o->wac];
-        p = &D_80135CB0[o->wac * 4];
+        o->anim = SPIKY_LIZARD_ANIMS[o->wac];
+        p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;
@@ -72,7 +72,7 @@ void spikyLizardIdle(TObj *o)
         o->substep++;
         o->wac = 0x1c;
         o->anim = D_80139570;
-        p = &D_80135CB0[o->wac * 4];
+        p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

@@ -49,14 +49,14 @@ typedef struct {
    (ResetCallback ... GetIntrMask) is in libetc_intr_1.c; SetIntrMask and the statics
    startIntr, trapIntr, setIntr, stopIntr, restartIntr, memclr are here. */
 
-/* intrEnv (0x1068 bytes at D_800970B4) */
+/* intrEnv (0x1068 bytes at intr_env) */
 
 /* the callback table (0x20 bytes at 0x800B7910) that D_800B7930 (pCallbacks) points to;
    the API functions call through it */
 
-extern IntrEnv D_800970B4;          /* intrEnv */
-extern volatile u16 *D_80098140;    /* i_stat: 0x1F801070, I_STAT */
-extern volatile u16 *D_80098144;    /* i_mask: 0x1F801074, I_MASK */
+extern IntrEnv intr_env;          /* intrEnv */
+extern volatile u16 *intr_istat;    /* i_stat: 0x1F801070, I_STAT */
+extern volatile u16 *intr_imask;    /* i_mask: 0x1F801074, I_MASK */
 extern volatile s32 *D_800B793C;    
 /* libetc SetIntrMask (INTR.OBJ): store a new I_MASK and return the old one. Built by
    the object's own recipe since i_mask is declared as the SDK has it (volatile); the
@@ -94,7 +94,7 @@ long long startIntrDMA();            /* startIntrDMA: a MARKED SPELLING, see fun
 IntrEnv *func_80094D6C(void);
 
 /* lib_g0: func_80094E44 */
-extern s32 D_8009814C;                      /* trapIntr's own count (INTR.OBJ .data+0x10F0): passes in a row that ended with an interrupt still pending */
+extern s32 intr_timeout;                      /* trapIntr's own count (INTR.OBJ .data+0x10F0): passes in a row that ended with an interrupt still pending */
 extern char D_80016270[];                   /* "unexpected interrupt(%04x)\n" */
 extern char D_8001628C[];                   /* "intr timeout(%04x:%04x)\n" */
 s32 printf();
@@ -106,10 +106,10 @@ s32 printf();
    enabledInterruptsMask & I_STAT & I_MASK is non-zero, walks the bits from 0 up (at most
    11): acknowledges each set bit (I_STAT = ~(1 << i)) and calls its handler if there is
    one. Then, if I_STAT & I_MASK still has a bit (an interrupt nobody handles), it counts
-   the pass in D_8009814C; past 0x800 such passes in a row it prints "intr timeout",
+   the pass in intr_timeout; past 0x800 such passes in a row it prints "intr timeout",
    clears the count and zeroes I_STAT. A clean pass clears the count. Last it clears
    inInterrupt and returns from the exception.
-   It carries lib_g0 because the object was built -G0: `D_8009814C++` keeps the scalar's
+   It carries lib_g0 because the object was built -G0: `intr_timeout++` keeps the scalar's
    address in a register (lui / addiu, lw 0(r), sw 0(r)) beside direct stores of the same
    symbol, which cse does only when the symbol is not small data (at -G8 109/116 with
    the sized scalar and 104 with an unsized array; 116/116 at -G0). */
@@ -118,31 +118,31 @@ void func_80094E44(void)
     s32 i;
     u16 mask;
 
-    if (!D_800970B4.interruptsInitialized) {
-        printf(D_80016270, *D_80098140);
+    if (!intr_env.interruptsInitialized) {
+        printf(D_80016270, *intr_istat);
         ReturnFromException();
     }
-    D_800970B4.inInterrupt = 1;
-    while ((mask = (D_800970B4.enabledInterruptsMask & *D_80098140) & *D_80098144) != 0) {
+    intr_env.inInterrupt = 1;
+    while ((mask = (intr_env.enabledInterruptsMask & *intr_istat) & *intr_imask) != 0) {
         for (i = 0; mask && i < 11; ++i, mask >>= 1) {
             if (mask & 1) {
-                *D_80098140 = ~(1 << i);
-                if (D_800970B4.handlers[i] != 0) {
-                    D_800970B4.handlers[i]();
+                *intr_istat = ~(1 << i);
+                if (intr_env.handlers[i] != 0) {
+                    intr_env.handlers[i]();
                 }
             }
         }
     }
-    if (*D_80098140 & *D_80098144) {
-        if (D_8009814C++ > 0x800) {
-            printf(D_8001628C, *D_80098140, *D_80098144);
-            D_8009814C = 0;
-            *D_80098140 = 0;
+    if (*intr_istat & *intr_imask) {
+        if (intr_timeout++ > 0x800) {
+            printf(D_8001628C, *intr_istat, *intr_imask);
+            intr_timeout = 0;
+            *intr_istat = 0;
         }
     } else {
-        D_8009814C = 0;
+        intr_timeout = 0;
     }
-    D_800970B4.inInterrupt = 0;
+    intr_env.inInterrupt = 0;
     ReturnFromException();
 }
 

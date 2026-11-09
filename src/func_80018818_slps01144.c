@@ -12,7 +12,7 @@ typedef struct {
 
 extern T80019244 *TASK_C;
 #define P TASK_C
-extern unsigned char D_1F8001D1, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
+extern unsigned char IN_TITLE, LOAD_COMPLETE_SYM, D_1F8001C4, D_1F8001C5;
 extern short FRAME_BUFFER_INDEX;
 
 extern unsigned char D_8009FF05, D_8009FF06, D_8009FF07;
@@ -42,7 +42,7 @@ void func_80018818_slps01144(void)
     D_800A0C15 = 0;
     D_800A0C16 = 0;
     D_800A0C17 = 0;
-    D_1F8001D1 = 0;
+    IN_TITLE = 0;
     SPAD.b1d0 = 0;
     BUTTON_CONFIG_INDEX = 0;
     D_8009F20C = 1;

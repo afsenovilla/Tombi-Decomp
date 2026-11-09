@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern unsigned char *D_8007C178[];
+extern unsigned char *SECTION_FADE_TABLES[];
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
 extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 
@@ -17,7 +17,7 @@ void updateLightsOutDarkness(TObj *o)
 
     switch (o->b04) {
     case 0:
-        p = D_8007C178[GAME.selectedArea] + GAME.selectedSection * 4;
+        p = SECTION_FADE_TABLES[GAME.selectedArea] + GAME.selectedSection * 4;
         r = *p++;
         g = p[0];
         b = p[1];

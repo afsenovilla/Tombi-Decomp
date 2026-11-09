@@ -4,12 +4,12 @@
 #if defined(VERSION_SLPS_01144)
 typedef struct Th { char pad[0x4c]; short b; unsigned short c; } Th;
 extern Th *TASK_C;
-extern char DAT_1f8001c2, DAT_1f8001cf;
+extern char DEBUG_SKIP_STEP, DAT_1f8001cf;
 extern unsigned short JOYPAD_STATE;
 extern int GAME_TOTAL_TIME_PLAYED[];
 extern unsigned char GAME_KEEP_BGM;
 extern int GAME;
-extern volatile unsigned short PAD_PRESSED[], DAT_8009d674;
+extern volatile unsigned short PAD_PRESSED[], PAD_PRESSED_PREV;
 extern char HUD_STATE;
 extern char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B, DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 extern void InitSubsystems(void);
@@ -47,7 +47,7 @@ void func_8001A730(void)
         GAME_TOTAL_TIME_PLAYED[0] = GAME_TOTAL_TIME_PLAYED[0] + 1;
 #endif
         FUN_8001acdc();
-        if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 0x800) != 0 && (PAD_PRESSED[0] & 8) != 0)
+        if (DEBUG_SKIP_STEP != 0 && (PAD_PRESSED[0] & 0x800) != 0 && (PAD_PRESSED[0] & 8) != 0)
             TASK_C->c = 2;
         break;
     case 2:
@@ -65,12 +65,12 @@ void func_8001A730(void)
 #else
 typedef struct Th { char pad[0x4c]; short b; unsigned short c; } Th;
 extern Th *TASK_C;
-extern char DAT_1f8001c2, DAT_1f8001cf;
+extern char DEBUG_SKIP_STEP, DAT_1f8001cf;
 extern unsigned short JOYPAD_STATE;
 extern int GAME_TOTAL_TIME_PLAYED[];
 extern unsigned char GAME_KEEP_BGM;
 extern int GAME;
-extern volatile unsigned short PAD_PRESSED[], DAT_8009d674;
+extern volatile unsigned short PAD_PRESSED[], PAD_PRESSED_PREV;
 extern char HUD_STATE;
 extern char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B, DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
 extern void InitSubsystems(void);
@@ -102,7 +102,7 @@ void areaMode2Handler(void)
         u = TASK_C;
         JOYPAD_STATE = 0;
         u->c = u->c + 1;
-        PAD_PRESSED[0] = DAT_8009d674 = 0;
+        PAD_PRESSED[0] = PAD_PRESSED_PREV = 0;
         break;
     case 1:
 #ifdef PORT2
@@ -111,7 +111,7 @@ void areaMode2Handler(void)
         GAME_TOTAL_TIME_PLAYED[0] = GAME_TOTAL_TIME_PLAYED[0] + 1;
 #endif
         FUN_8001acdc();
-        if (DAT_1f8001c2 != 0 && (PAD_PRESSED[0] & 8) != 0 && (PAD_PRESSED[0] & 0x800) != 0)
+        if (DEBUG_SKIP_STEP != 0 && (PAD_PRESSED[0] & 8) != 0 && (PAD_PRESSED[0] & 0x800) != 0)
             TASK_C->c = 2;
         break;
     case 2:

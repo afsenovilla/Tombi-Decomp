@@ -9,7 +9,7 @@
 #include "gamestate.h"
 #include "gametask.h"
 
-extern int *D_80079A48[];
+extern int *CAMERA_SPAWN_POINT_TABLE[];
 extern short VIEW_CAMERA_ROT_Y;
 extern TObj PLAYER;
 extern void updateCameraFollow(void);
@@ -79,7 +79,7 @@ void cameraEventScrollHandler(TObj *o)
         done = done & r1;
         goto tail;
     case 1:
-        (*(int*)&o->b68) = (int)((char *)D_80079A48[GAME.selectedArea][GAME.selectedSection] + GAME.selectedSpawnPoint * 8);
+        (*(int*)&o->b68) = (int)((char *)CAMERA_SPAWN_POINT_TABLE[GAME.selectedArea][GAME.selectedSection] + GAME.selectedSpawnPoint * 8);
         o->substep = 0;
         o->state++;
         o->w4c = *(unsigned short *)(*(int*)&o->b68);
@@ -215,7 +215,7 @@ void cameraEventScrollHandler(TObj *o)
 #include "gamestate.h"
 #include "gametask.h"
 
-extern int *D_80079A48[];
+extern int *CAMERA_SPAWN_POINT_TABLE[];
 extern short VIEW_CAMERA_ROT_Y;
 extern TObj PLAYER;
 extern void updateCameraFollow(void);
@@ -285,7 +285,7 @@ void cameraEventScrollHandler(TObj *o)
         done = done & r1;
         goto tail;
     case 1:
-        (*(int*)&o->b68) = (int)((char *)D_80079A48[GAME.selectedArea][GAME.selectedSection] + GAME.selectedSpawnPoint * 8);
+        (*(int*)&o->b68) = (int)((char *)CAMERA_SPAWN_POINT_TABLE[GAME.selectedArea][GAME.selectedSection] + GAME.selectedSpawnPoint * 8);
         o->substep = 0;
         o->state++;
         o->w4c = *(unsigned short *)(*(int*)&o->b68);

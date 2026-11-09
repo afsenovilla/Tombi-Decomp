@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8012B2E4[];
+extern AT FLOWER_TEARS_SEEKER_DEFS_ANIMS[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *, short, short);
@@ -13,7 +13,7 @@ void flowerTearsSeekerPace(TObj *o)
     switch (o->state) {
     case 0:
         o->animFrame = 1;
-        o->anim = D_8012B2E4[o->subtype].anims[0x18];
+        o->anim = FLOWER_TEARS_SEEKER_DEFS_ANIMS[o->subtype].anims[0x18];
         AnimLoadDuration(o);
         o->velX = -0x100;
         o->velY = 0;
@@ -28,7 +28,7 @@ void flowerTearsSeekerPace(TObj *o)
         break;
     case 2:
         o->animFrame = 0;
-        o->anim = D_8012B2E4[o->subtype].anims[0x18];
+        o->anim = FLOWER_TEARS_SEEKER_DEFS_ANIMS[o->subtype].anims[0x18];
         AnimLoadDuration(o);
         o->velX = 0x100;
         o->velY = 0;

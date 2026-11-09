@@ -8,7 +8,7 @@ typedef struct {
     short b4, b6, b8, ba, bc, be, c0, c2, c4, c6, c8, ca, cc, ce, d0;
 } E;
 
-extern void *D_8013E5BC;
+extern void *SPRING_VINE_ANIMS;
 
 void springVineRopeStep4(TObj *o)
 {
@@ -19,7 +19,7 @@ void springVineRopeStep4(TObj *o)
         short dy, dx;
         o->state++;
         *(short *)((char *)o + 0xac) = 0;
-        o->anim = D_8013E5BC;
+        o->anim = SPRING_VINE_ANIMS;
         p = (TObj *)o->d90;
         dy = p->y.p.whole - o->y.p.whole;
         dx = p->h->p.whole - o->h->p.whole;

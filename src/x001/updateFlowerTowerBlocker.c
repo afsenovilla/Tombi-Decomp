@@ -6,7 +6,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned short D_8013C484[], D_8013C486[], D_8013C488[], D_8013C48A[];
+extern unsigned short FLOWER_TOWER_BLOCKER_BOX[], D_8013C486[], D_8013C488[], D_8013C48A[];
 extern void cullObjectToDrawList(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
@@ -15,7 +15,7 @@ void func_8011C158(TObj *o)
 
     switch (o->b04) {
     case 0:
-        o->box0 = -D_8013C484[0];
+        o->box0 = -FLOWER_TOWER_BLOCKER_BOX[0];
         o->box1 = o->box0 + D_8013C486[0];
         o->box2 = -D_8013C488[0];
         o->box3 = o->box2 + D_8013C48A[0];
@@ -47,7 +47,7 @@ void func_8011C158(TObj *o)
 #include "gcd.h"
 #include "TOBJ.H"
 
-extern unsigned short D_8013C484[], D_8013C486[], D_8013C488[], D_8013C48A[];
+extern unsigned short FLOWER_TOWER_BLOCKER_BOX[], D_8013C486[], D_8013C488[], D_8013C48A[];
 extern void cullObjectToDrawList(TObj *, int);
 extern void ObjFreeDup(TObj *);
 
@@ -56,7 +56,7 @@ void updateFlowerTowerBlocker(TObj *o)
 
     switch (o->b04) {
     case 0:
-        o->box0 = -D_8013C484[0];
+        o->box0 = -FLOWER_TOWER_BLOCKER_BOX[0];
         o->box1 = o->box0 + D_8013C486[0];
         o->box2 = -D_8013C488[0];
         o->box3 = o->box2 + D_8013C48A[0];

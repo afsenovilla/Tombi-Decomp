@@ -108,7 +108,7 @@ static short DAT_80077f10[22] = {
     0xb6, 0xe3, 0xe6, 0xe3, 0x9d, 0xe7, 0xe8, 0xe8,
     0xe8, 0xe8, 0xe8, 0x13c, 0x3b6, 0x5e,
 };
-extern char DAT_80077f0c[];
+extern char MOVIE_CD_ATTENUATION[];
 
 static __inline__ u_long *strNext(DECENV *dec)
 {
@@ -121,7 +121,7 @@ static __inline__ u_long *strNext(DECENV *dec)
     }
     if (sector->frameCount >= DAT_80077f10[MOVIE_ID] - 3) {
         TASK_C->state0 = 3;
-        CdMix(DAT_80077f0c);
+        CdMix(MOVIE_CD_ATTENUATION);
     }
     if (MOVIE_ID == 0x15 && TASK_C->loadGameSelected == 0 && sector->frameCount > 14) {
         startBgmTrack(0);

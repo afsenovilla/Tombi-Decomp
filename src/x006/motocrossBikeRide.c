@@ -28,8 +28,8 @@ typedef struct { short x, y, z, w; } E;
 #include "camera.h"
 extern short D_800A457E;
 extern volatile unsigned short PAD_PRESSED[];
-extern char D_8011FEA0[], D_8011F3F8[];
-extern E D_8011F3F8e[];
+extern char D_8011FEA0[], MOTOCROSS_COURSE_PATH[];
+extern E MOTOCROSS_COURSE_PATH_E[];
 extern unsigned short D_8011F3E8[];
 extern void *D_801229A8[], *D_801229CC[], *D_801229E0[];
 extern short VIEW_CAMERA_X[];
@@ -73,7 +73,7 @@ static __inline__ void upd(TObj *o, Sub *t)
         if ((unsigned short)(o->animTimer - 0x35) < 0x19) SUB(o)->cc = 1;
         else SUB(o)->cc = 0;
         if (o->animTimer == 0x77) {
-            *(char **)&o->wa8 = D_8011F3F8;
+            *(char **)&o->wa8 = MOTOCROSS_COURSE_PATH;
             o->animTimer = 0xaa;
             t->c8 = 1;
         }
@@ -170,10 +170,10 @@ void func_80118AD8(TObj *o)
         t->c8 = 0;
         o->animTimer = 0;
         o->velH = 0;
-        *(char **)&o->wa8 = D_8011F3F8;
-        o->a.p.whole = D_8011F3F8e[o->animTimer].x;
-        o->y.p.whole = D_8011F3F8e[o->animTimer].y - 0x20;
-        o->b.p.whole = D_8011F3F8e[o->animTimer].z;
+        *(char **)&o->wa8 = MOTOCROSS_COURSE_PATH;
+        o->a.p.whole = MOTOCROSS_COURSE_PATH_E[o->animTimer].x;
+        o->y.p.whole = MOTOCROSS_COURSE_PATH_E[o->animTimer].y - 0x20;
+        o->b.p.whole = MOTOCROSS_COURSE_PATH_E[o->animTimer].z;
         PLAYER_H_WHOLE[0] = o->a.p.whole;
         PLAYER_Y_WHOLE[0] = o->y.p.whole;
         (*(short*)((char*)&SPAD.i170 + 2)) = o->b.p.whole;
@@ -338,8 +338,8 @@ typedef struct { short x, y, z, w; } E;
 #include "camera.h"
 extern short D_800A457E;
 extern volatile unsigned short PAD_PRESSED[];
-extern char D_8011FEA0[], D_8011F3F8[];
-extern E D_8011F3F8e[];
+extern char D_8011FEA0[], MOTOCROSS_COURSE_PATH[];
+extern E MOTOCROSS_COURSE_PATH_E[];
 extern unsigned short D_8011F3E8[];
 extern void *D_801229A8[], *D_801229CC[], *D_801229E0[];
 extern short VIEW_CAMERA_X[];
@@ -383,7 +383,7 @@ static __inline__ void upd(TObj *o, Sub *t)
         if ((unsigned short)(o->animTimer - 0x35) < 0x19) SUB(o)->cc = 1;
         else SUB(o)->cc = 0;
         if (o->animTimer == 0x77) {
-            *(char **)&o->wa8 = D_8011F3F8;
+            *(char **)&o->wa8 = MOTOCROSS_COURSE_PATH;
             o->animTimer = 0xaa;
             t->c8 = 1;
         }
@@ -480,10 +480,10 @@ void motocrossBikeRide(TObj *o)
         t->c8 = 0;
         o->animTimer = 0;
         o->velH = 0;
-        *(char **)&o->wa8 = D_8011F3F8;
-        o->a.p.whole = D_8011F3F8e[o->animTimer].x;
-        o->y.p.whole = D_8011F3F8e[o->animTimer].y - 0x20;
-        o->b.p.whole = D_8011F3F8e[o->animTimer].z;
+        *(char **)&o->wa8 = MOTOCROSS_COURSE_PATH;
+        o->a.p.whole = MOTOCROSS_COURSE_PATH_E[o->animTimer].x;
+        o->y.p.whole = MOTOCROSS_COURSE_PATH_E[o->animTimer].y - 0x20;
+        o->b.p.whole = MOTOCROSS_COURSE_PATH_E[o->animTimer].z;
         PLAYER_H_WHOLE[0] = o->a.p.whole;
         PLAYER_Y_WHOLE[0] = o->y.p.whole;
         (*(short*)((char*)&SPAD.i170 + 2)) = o->b.p.whole;

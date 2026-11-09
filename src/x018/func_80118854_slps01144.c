@@ -11,7 +11,7 @@ extern unsigned char D_8009EE58, D_8009E4E6, D_8009E4E7, D_8009E4E8, D_8009E4E9,
 extern unsigned char D_800A7B7C, D_800A7B7D, D_800A7B7E;
 extern unsigned char D_8009EB98[];
 extern short D_800A7C2A;
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -164,7 +164,7 @@ void func_80118854_slps01144(TObj *o)
         D_800A7C2A = 0;
         asm volatile("" ::: "memory");
         { unsigned short t = o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = t; }
         asm volatile("" ::: "memory");
         D_800A7B7C = 1;

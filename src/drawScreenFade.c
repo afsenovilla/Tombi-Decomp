@@ -8,7 +8,7 @@
 typedef struct { char p0[0xc]; unsigned char b0c, b0d, b0e, b0f, b10, b11, b12, b13; short s14, s16, s18, s1a; } P;
 extern P *NEXT_PRIM;
 extern int CURRENT_OT;
-extern unsigned char G3d1, GVARS_FADE_EFFECT;
+extern unsigned char WARP_FADE_ACTIVE, GVARS_FADE_EFFECT;
 extern void FUN_80060008(void *, int, int, int, int), FUN_8005e580(int, void *), FUN_8005e634(void *, int);
 extern int FUN_8005efe4(void);
 
@@ -58,7 +58,7 @@ void func_8004CF38(unsigned char a)
 typedef struct { char p0[0xc]; unsigned char b0c, b0d, b0e, b0f, b10, b11, b12, b13; short s14, s16, s18, s1a; } P;
 extern P *NEXT_PRIM;
 extern int CURRENT_OT;
-extern unsigned char G3d1, GVARS_FADE_EFFECT;
+extern unsigned char WARP_FADE_ACTIVE, GVARS_FADE_EFFECT;
 extern void FUN_80060008(void *, int, int, int, int), FUN_8005e580(int, void *), FUN_8005e634(void *, int);
 extern int FUN_8005efe4(void);
 
@@ -89,7 +89,7 @@ void drawScreenFade(unsigned char a)
     p->b12 = a;
     FUN_8005e580(CURRENT_OT + 0x10, r);
     r = NEXT_PRIM = (P *)((char *)NEXT_PRIM + 0x10);
-    if (G3d1 == 1 || (unsigned)(GVARS_FADE_EFFECT - 1) < 2) {
+    if (WARP_FADE_ACTIVE == 1 || (unsigned)(GVARS_FADE_EFFECT - 1) < 2) {
         if (FUN_8005efe4() == 1) m = 0x80;
         else if (FUN_8005efe4() == 2) m = 0x80;
         else m = 0x20;
@@ -108,7 +108,7 @@ void drawScreenFade(unsigned char a)
 typedef struct { char p0[0xc]; unsigned char b0c, b0d, b0e, b0f, b10, b11, b12, b13; short s14, s16, s18, s1a; } P;
 extern P *NEXT_PRIM;
 extern int CURRENT_OT;
-extern unsigned char G3d1, GVARS_FADE_EFFECT;
+extern unsigned char WARP_FADE_ACTIVE, GVARS_FADE_EFFECT;
 extern void FUN_80060008(void *, int, int, int, int), FUN_8005e580(int, void *), FUN_8005e634(void *, int);
 extern int FUN_8005efe4(void);
 
@@ -139,7 +139,7 @@ void drawScreenFade(unsigned char a)
     p->b12 = a;
     FUN_8005e580(CURRENT_OT + 0x10, r);
     r = NEXT_PRIM = (P *)((char *)NEXT_PRIM + 0x10);
-    if (G3d1 == 1 || (unsigned)(GVARS_FADE_EFFECT - 1) < 2) {
+    if (WARP_FADE_ACTIVE == 1 || (unsigned)(GVARS_FADE_EFFECT - 1) < 2) {
         if (FUN_8005efe4() == 1) m = 0x80;
         else if (FUN_8005efe4() == 2) m = 0x80;
         else m = 0x20;
@@ -156,7 +156,7 @@ void drawScreenFade(unsigned char a)
 typedef struct { char p0[0xc]; unsigned char b0c, b0d, b0e, b0f, b10, b11, b12, b13; short s14, s16, s18, s1a; } P;
 extern P *NEXT_PRIM;
 extern int CURRENT_OT;
-extern unsigned char G3d1, GVARS_FADE_EFFECT;
+extern unsigned char WARP_FADE_ACTIVE, GVARS_FADE_EFFECT;
 extern void FUN_80060008(void *, int, int, int, int), FUN_8005e580(int, void *), FUN_8005e634(void *, int);
 extern int FUN_8005efe4(void);
 
@@ -187,7 +187,7 @@ void drawScreenFade(unsigned char a)
     p->b12 = a;
     FUN_8005e580(CURRENT_OT + 0x10, r);
     r = NEXT_PRIM = (P *)((char *)NEXT_PRIM + 0x10);
-    if (G3d1 == 1 || (unsigned)(GVARS_FADE_EFFECT - 1) < 2) {
+    if (WARP_FADE_ACTIVE == 1 || (unsigned)(GVARS_FADE_EFFECT - 1) < 2) {
         if (FUN_8005efe4() == 1) m = 0x80;
         else if (FUN_8005efe4() == 2) m = 0x80;
         else m = 0x20;

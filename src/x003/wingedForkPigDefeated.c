@@ -4,7 +4,7 @@
 extern void applyAnimVelocityX(TObj *, unsigned short);
 extern void AnimLoadDuration(TObj *);
 extern char MOVE_TABLE_2[];
-extern void *D_8013A698[];
+extern void *WINGED_FORK_PIG_ANIMS[];
 
 void wingedForkPigDefeated(TObj *o)
 {
@@ -23,7 +23,7 @@ void wingedForkPigDefeated(TObj *o)
         o->state++;
         if (o->subtype == 0) o->wac = 0x1c;
         else o->wac = 0xb;
-        o->anim = D_8013A698[o->wac];
+        o->anim = WINGED_FORK_PIG_ANIMS[o->wac];
         AnimLoadDuration(o);
         break;
     case 1:

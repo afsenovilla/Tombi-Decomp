@@ -26,8 +26,8 @@ extern volatile int D_8009BCDC;
 extern unsigned char MOVIE_SKIP_REQUEST;
 extern T *TASK_C;
 extern short FRAME_BUFFER_INDEX;
-extern char D_80077F0C[];
-extern unsigned char D_80077F3C[];
+extern char MOVIE_CD_ATTENUATION[];
+extern unsigned char MOVIE_FILE_ID_INDEX[];
 extern E8 FILE_LINKS[];
 extern void CdMix(void *);
 extern void movieInitDecodeEnv(M *, int, int, int, int);
@@ -54,12 +54,12 @@ void moviePlayerTask(void)
     for (;;) {
         if (MOVIE_SKIP_REQUEST == 1) {
             TASK_C->w48 = 3;
-            CdMix(D_80077F0C);
+            CdMix(MOVIE_CD_ATTENUATION);
         }
         switch (TASK_C->w48) {
         case 0:
             movieInitDecodeEnv(&MOVIE_DEC_ENV, 0x180, 0x110, 0x2c0, 0x110);
-            startMovieStream(&FILE_LINKS[MOVIE_FILE_IDS[D_80077F3C[SPAD.b1cd]]]);
+            startMovieStream(&FILE_LINKS[MOVIE_FILE_IDS[MOVIE_FILE_ID_INDEX[SPAD.b1cd]]]);
             TASK_C->w48++;
             while (MovieDecodeFrame(&MOVIE_DEC_ENV) == -1)
                 ;

@@ -14,7 +14,7 @@ typedef struct {
 } Sub;
 
 extern AH *D_8013DB00[], *D_8013DB04[], *D_8013DB08[], *D_8013DB0C[];
-extern unsigned char D_8013C800[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern unsigned short D_8013C8E8[];
 extern char MOVE_TABLE_1[];
 extern void spawnItemNotification(int, int);
@@ -74,7 +74,7 @@ void komaPigGrabbedB(TObj *o)
         o->wac = 7;
         o->state++;
         o->anim = D_8013DB04[0];
-        p0 = &D_8013C800[((AH *)o->anim)->w2 * 4];
+        p0 = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
         o->box0 = *p0++;
         o->box1 = *p0++;
         o->box2 = *p0++;
@@ -155,7 +155,7 @@ void komaPigGrabbedB(TObj *o)
         if (o->velH < 0x150) {
             o->wac = 8;
             o->anim = D_8013DB08[0];
-            p1 = &D_8013C800[((AH *)o->anim)->w2 * 4];
+            p1 = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
             o->box0 = *p1++;
             o->box1 = *p1++;
             o->box2 = *p1++;
@@ -171,7 +171,7 @@ void komaPigGrabbedB(TObj *o)
         o->movetab = MOVE_TABLE_1;
         o->wac = 6;
         o->anim = D_8013DB00[0];
-        p2 = &D_8013C800[((AH *)o->anim)->w2 * 4];
+        p2 = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
         o->box0 = *p2++;
         o->box1 = *p2++;
         o->box2 = *p2++;
@@ -185,7 +185,7 @@ void komaPigGrabbedB(TObj *o)
     case 7:
         o->wac = 9;
         o->anim = D_8013DB0C[0];
-        p3 = &D_8013C800[((AH *)o->anim)->w2 * 4];
+        p3 = &KOMA_PIG_ANIM_BOXES[((AH *)o->anim)->w2 * 4];
         o->box0 = *p3++;
         o->box1 = *p3++;
         o->box2 = *p3++;

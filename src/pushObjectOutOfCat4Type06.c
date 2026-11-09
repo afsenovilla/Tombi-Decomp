@@ -7,12 +7,12 @@
 #define B(o, n) (((unsigned char *)(o))[n])
 short pushObjectOutOfObjectFacingB(TObj *o, TObj *e);
 
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 void pushObjectOutOfCat4Type06(TObj *o, TObj *e)
 {
     short sx, dx, w, a, t; int dy; int d; unsigned short u;
     if (e->subtype != 2) {
-        if (pushObjectOutOfObjectFacingB(o, e)) D_1F80019E = 0;
+        if (pushObjectOutOfObjectFacingB(o, e)) LIST_COUNTER = 0;
         return;
     }
     if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b)
@@ -39,7 +39,7 @@ void pushObjectOutOfCat4Type06(TObj *o, TObj *e)
                 return;
             o->h->p.whole = e->h->p.whole + dx;
             B(o, 0x9d) = 2;
-            D_1F80019E = 0;
+            LIST_COUNTER = 0;
             return;
         }
     }
@@ -49,7 +49,7 @@ void pushObjectOutOfCat4Type06(TObj *o, TObj *e)
         o->y.p.whole = e->y.p.whole - (e->box2 + (o->box3 - o->box2));
         o->y.p.frac = 0;
         o->b69 = 1;
-        D_1F80019E = 0;
+        LIST_COUNTER = 0;
         return;
     }
     if (o->category == 2 && *(unsigned short *)&o->b04 == 0x102)

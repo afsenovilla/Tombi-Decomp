@@ -8,10 +8,10 @@
 // Japanese version of PAL main0 80016B50 (initGraphics.c): 128 -> 112.
 #include "globals.h"
 typedef struct { short x, y, w, h; } R;
-extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
+extern short BASE_MATRIX, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
 extern short B0e2, VIEW_CAMERA_ROT_Y, B0ea, VIEW_CAMERA_X, VIEW_CAMERA_Y, B0f6;
-extern char VIEW_CAMERA[], C118[];
+extern char VIEW_CAMERA[], LIGHTING[];
 extern short FRAME_BUFFER_INDEX;
 extern void *CURRENT_OT;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
@@ -22,7 +22,7 @@ void initGraphics(void)
     R r;
     FUN_80063fdc(0xa0, 0x70);
     FUN_80063ffc(0x220);
-    A0f8 = 0x1000;
+    BASE_MATRIX = 0x1000;
     A0fa = 0;
     A0fc = 0;
     A0fe = 0;
@@ -41,7 +41,7 @@ void initGraphics(void)
     VIEW_CAMERA_X = 0;
     VIEW_CAMERA_Y = 0;
     B0f6 = 0;
-    initLighting(C118);
+    initLighting(LIGHTING);
     initDisplay(0x60, 0x97, 0xff);
     r.w = 0x400;
     r.x = 0;
@@ -58,10 +58,10 @@ void initGraphics(void)
 // 0x80, 0x328).
 #include "globals.h"
 typedef struct { short x, y, w, h; } R;
-extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
+extern short BASE_MATRIX, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
 extern short B0e2, VIEW_CAMERA_ROT_Y, B0ea, VIEW_CAMERA_X, VIEW_CAMERA_Y, B0f6;
-extern char VIEW_CAMERA[], C118[];
+extern char VIEW_CAMERA[], LIGHTING[];
 extern short FRAME_BUFFER_INDEX;
 extern void *CURRENT_OT;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
@@ -72,7 +72,7 @@ void initGraphics(void)
     R r;
     FUN_80063fdc(0xa0, 0x70);
     FUN_80063ffc(0x220);
-    A0f8 = 0x1000;
+    BASE_MATRIX = 0x1000;
     A0fa = 0;
     A0fc = 0;
     A0fe = 0;
@@ -91,7 +91,7 @@ void initGraphics(void)
     VIEW_CAMERA_X = 0;
     VIEW_CAMERA_Y = 0;
     B0f6 = 0;
-    initLighting(C118);
+    initLighting(LIGHTING);
     initDisplay(0x60, 0x97, 0xff);
     r.w = 0x400;
     r.x = 0;
@@ -108,10 +108,10 @@ void initGraphics(void)
 // Japanese version of PAL main0 80016B50 (initGraphics.c): 128 -> 112.
 #include "globals.h"
 typedef struct { short x, y, w, h; } R;
-extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
+extern short BASE_MATRIX, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
 extern short B0e2, VIEW_CAMERA_ROT_Y, B0ea, VIEW_CAMERA_X, VIEW_CAMERA_Y, B0f6;
-extern char VIEW_CAMERA[], C118[];
+extern char VIEW_CAMERA[], LIGHTING[];
 extern short FRAME_BUFFER_INDEX;
 extern void *CURRENT_OT;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
@@ -122,7 +122,7 @@ void initGraphics(void)
     R r;
     FUN_80063fdc(0xa0, 0x70);
     FUN_80063ffc(0x220);
-    A0f8 = 0x1000;
+    BASE_MATRIX = 0x1000;
     A0fa = 0;
     A0fc = 0;
     A0fe = 0;
@@ -141,7 +141,7 @@ void initGraphics(void)
     VIEW_CAMERA_X = 0;
     VIEW_CAMERA_Y = 0;
     B0f6 = 0;
-    initLighting(C118);
+    initLighting(LIGHTING);
     initDisplay(0x60, 0x97, 0xff);
     r.w = 0x400;
     r.x = 0;
@@ -158,10 +158,10 @@ void initGraphics(void)
 // Japanese version of PAL main0 80016B50 (initGraphics.c): 128 -> 112.
 #include "globals.h"
 typedef struct { short x, y, w, h; } R;
-extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
+extern short BASE_MATRIX, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
 extern short B0e2, VIEW_CAMERA_ROT_Y, B0ea, VIEW_CAMERA_X, VIEW_CAMERA_Y, B0f6;
-extern char VIEW_CAMERA[], C118[];
+extern char VIEW_CAMERA[], LIGHTING[];
 extern short FRAME_BUFFER_INDEX;
 extern void *CURRENT_OT;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
@@ -172,7 +172,7 @@ void initGraphics(void)
     R r;
     FUN_80063fdc(0xa0, 0x70);
     FUN_80063ffc(0x220);
-    A0f8 = 0x1000;
+    BASE_MATRIX = 0x1000;
     A0fa = 0;
     A0fc = 0;
     A0fe = 0;
@@ -191,7 +191,7 @@ void initGraphics(void)
     VIEW_CAMERA_X = 0;
     VIEW_CAMERA_Y = 0;
     B0f6 = 0;
-    initLighting(C118);
+    initLighting(LIGHTING);
     initDisplay(0x60, 0x97, 0xff);
     r.w = 0x400;
     r.x = 0;
@@ -206,10 +206,10 @@ void initGraphics(void)
 #else
 #include "globals.h"
 typedef struct { short x, y, w, h; } R;
-extern short A0f8, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
+extern short BASE_MATRIX, A0fa, A0fc, A0fe, A100, A102, A104, A106, A108;
 extern int A114, A110, A10c;
 extern short B0e2, VIEW_CAMERA_ROT_Y, B0ea, VIEW_CAMERA_X, VIEW_CAMERA_Y, B0f6;
-extern char VIEW_CAMERA[], C118[];
+extern char VIEW_CAMERA[], LIGHTING[];
 extern short FRAME_BUFFER_INDEX;
 extern void *CURRENT_OT;
 extern void FUN_80063fdc(int, int), FUN_80063ffc(int), getBaseMatrix(char *), initLighting(char *);
@@ -220,7 +220,7 @@ void initGraphics(void)
     R r;
     FUN_80063fdc(0xa0, 0x80);
     FUN_80063ffc(0x220);
-    A0f8 = 0x1000;
+    BASE_MATRIX = 0x1000;
     A0fa = 0;
     A0fc = 0;
     A0fe = 0;
@@ -239,7 +239,7 @@ void initGraphics(void)
     VIEW_CAMERA_X = 0;
     VIEW_CAMERA_Y = 0;
     B0f6 = 0;
-    initLighting(C118);
+    initLighting(LIGHTING);
     initDisplay(0x60, 0x97, 0xff);
     r.w = 0x400;
     r.x = 0;

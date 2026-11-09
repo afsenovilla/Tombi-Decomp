@@ -3,7 +3,7 @@
 #include "gcd.h"
 #include "TOBJ.H"
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80135D84[];
+extern AT PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern short TileCollideAt(TObj *o, short x, short y);
@@ -15,7 +15,7 @@ void phoenixSpiritHintEnterB(TObj *o)
     switch (o->state) {
     case 0:
         o->animFrame = 1;
-        o->anim = D_80135D84[o->subtype].anims[1];
+        o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[1];
         AnimLoadDuration(o);
         o->velX = -0x200;
         o->velY = 0x800;
@@ -23,7 +23,7 @@ void phoenixSpiritHintEnterB(TObj *o)
     case 1:
         AnimAdvance(o);
         if (GCD.bceef) {
-            o->anim = D_80135D84[o->subtype].anims[1];
+            o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[1];
             AnimLoadDuration(o);
             o->state++;
         }

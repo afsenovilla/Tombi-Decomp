@@ -7,7 +7,7 @@ extern P2 GAME;
 extern unsigned short AREA_VARIANT;
 extern unsigned short D_8009E52A;
 extern unsigned short LOADED_AREA, LOADED_SECTION, LOADED_SPAWN_POINT;
-extern unsigned short DAT_1f8001de, DAT_1f8001dc;
+extern unsigned short PENDING_STEP, PENDING_STATE;
 extern unsigned char *D_80071644[];
 extern int resolveAreaVariant(void);
 extern void func_8001FFFC(int a, int b, int c);
@@ -21,10 +21,10 @@ void func_8001BC7C(unsigned short p)
     idx = GAME.a + AREA_VARIANT;
     c = D_80071644[idx][GAME.b];
     LOADED_SECTION = GAME.b;
-    DAT_1f8001de = 0;
+    PENDING_STEP = 0;
     LOADED_AREA = GAME.a;
     LOADED_SPAWN_POINT = D_8009E52A;
-    DAT_1f8001dc = c;
+    PENDING_STATE = c;
     func_8001FFFC(idx, GAME.b, (short)(p | u));
     loadAreaSoundBank();
 }
@@ -34,7 +34,7 @@ extern P2 GAME;
 extern unsigned short AREA_VARIANT;
 extern unsigned short GAME_SELECTED_SPAWN_POINT;
 extern unsigned short LOADED_AREA, LOADED_SECTION, LOADED_SPAWN_POINT;
-extern unsigned short DAT_1f8001de, DAT_1f8001dc;
+extern unsigned short PENDING_STEP, PENDING_STATE;
 extern unsigned char GAME_KEEP_BGM;
 extern unsigned char *PTR_80077b64[];
 extern int FUN_8001beec(void);
@@ -52,11 +52,11 @@ void loadCurrentArea(unsigned short p)
     u = FUN_8001beec() & 0xff;
     idx = GAME.a + AREA_VARIANT;
     c = PTR_80077b64[idx][GAME.b];
-    DAT_1f8001de = 0;
+    PENDING_STEP = 0;
     LOADED_AREA = GAME.a;
     LOADED_SECTION = GAME.b;
     LOADED_SPAWN_POINT = GAME_SELECTED_SPAWN_POINT;
-    DAT_1f8001dc = c;
+    PENDING_STATE = c;
     loadAreaListFile(idx);
     if (loadAreaSectionResources((short)p) != -1)
         GAME_KEEP_BGM = 2;

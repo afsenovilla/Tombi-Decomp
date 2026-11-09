@@ -6,7 +6,7 @@
 #define PTR(p, o) (*(unsigned char **)((p) + (o)))
 extern short objectBoxOverlapSideFacing(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
-extern unsigned char DAT_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 
 void flyingBugContact(unsigned char *a, unsigned char *b)
 {
@@ -29,7 +29,7 @@ void flyingBugContact(unsigned char *a, unsigned char *b)
     case 0:
     case 3:
         if ((b[0] & 2) == 0) {
-            if (DAT_1f8001a4 == 0 && (a[0] & 2) == 0) {
+            if (DEBUG_INVINCIBLE == 0 && (a[0] & 2) == 0) {
                 int ah, bh;
                 bh = S16(PTR(b, 0x40), 2);
                 ah = S16(PTR(a, 0x40), 2);

@@ -12,7 +12,7 @@ extern unsigned char D_800A4553[];
 extern int CAMERA_TARGET_H_FIX;
 extern int CAMERA_TARGET_Y_FIX;
 extern char MOVE_TABLE_1[], MOVE_TABLE_0[];
-extern B D_80135B30[];
+extern B KOMA_PIG_ANIM_BOXES[];
 extern char D_80138A0C[];
 extern char D_80138A8C[];
 extern char D_80138B1C[];
@@ -31,7 +31,7 @@ extern void setEventStarted(int, int, int);
 
 #define SETANIM(k) \
     o->anim = D_801386F8[k]; \
-    { unsigned char *p; { B *t = D_80135B30; p = t[((A *)o->anim)->w2].c; } \
+    { unsigned char *p; { B *t = KOMA_PIG_ANIM_BOXES; p = t[((A *)o->anim)->w2].c; } \
     o->box0 = *p++; \
     o->box1 = *p++; \
     o->box2 = *p; \

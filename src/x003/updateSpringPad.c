@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; } A;
 typedef struct B { unsigned short c[4]; } B;
-extern A *D_80138EC0[];
-extern B D_80135C78[];
+extern A *SPRING_PAD_ANIMS[];
+extern B SPRING_PAD_ANIM_BOXES[];
 extern int FUN_800202b4(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe6c(TObj *);
@@ -35,7 +35,7 @@ void func_80123E68(TObj *o)
                     FUN_8001e4f0(0x73);
                     o->active = 2;
                     o->step++;
-                    o->anim = D_80138EC0[o->subtype];
+                    o->anim = SPRING_PAD_ANIMS[o->subtype];
                     FUN_8001fe6c(o);
                 }
                 break;
@@ -48,8 +48,8 @@ void func_80123E68(TObj *o)
                 }
                 break;
             }
-            if (o->anim) p = D_80135C78[((A *)o->anim)->w2].c;
-            else p = D_80135C78[D_80138EC0[o->subtype]->w2].c;
+            if (o->anim) p = SPRING_PAD_ANIM_BOXES[((A *)o->anim)->w2].c;
+            else p = SPRING_PAD_ANIM_BOXES[SPRING_PAD_ANIMS[o->subtype]->w2].c;
             o->box0 = *p++;
             o->box1 = *p++;
             o->box2 = *p;
@@ -68,8 +68,8 @@ void func_80123E68(TObj *o)
 #include "TOBJ.H"
 typedef struct A { short w0; unsigned short w2; } A;
 typedef struct B { unsigned short c[4]; } B;
-extern A *D_80138EC0[];
-extern B D_80135C78[];
+extern A *SPRING_PAD_ANIMS[];
+extern B SPRING_PAD_ANIM_BOXES[];
 extern int FUN_800202b4(TObj *);
 extern int FUN_8001fec0(TObj *);
 extern void FUN_8001fe6c(TObj *);
@@ -98,7 +98,7 @@ void updateSpringPad(TObj *o)
                     FUN_8001e4f0(0x73);
                     o->active = 2;
                     o->step++;
-                    o->anim = D_80138EC0[o->subtype];
+                    o->anim = SPRING_PAD_ANIMS[o->subtype];
                     FUN_8001fe6c(o);
                 }
                 break;
@@ -111,8 +111,8 @@ void updateSpringPad(TObj *o)
                 }
                 break;
             }
-            if (o->anim) p = D_80135C78[((A *)o->anim)->w2].c;
-            else p = D_80135C78[D_80138EC0[o->subtype]->w2].c;
+            if (o->anim) p = SPRING_PAD_ANIM_BOXES[((A *)o->anim)->w2].c;
+            else p = SPRING_PAD_ANIM_BOXES[SPRING_PAD_ANIMS[o->subtype]->w2].c;
             o->box0 = *p++;
             o->box1 = *p++;
             o->box2 = *p;

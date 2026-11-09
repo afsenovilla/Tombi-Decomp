@@ -69,7 +69,7 @@ void func_8011E5F0(unsigned char *a, unsigned char *b)
 extern short objectBoxOverlapSideFacing(unsigned char *, unsigned char *);
 extern void decreaseObjectTimer(unsigned char *, int);
 extern void spawnImpactEffect(int, int, int, int);
-extern unsigned char DAT_1f8001a4;
+extern unsigned char DEBUG_INVINCIBLE;
 
 void spikyLizardContact(unsigned char *a, unsigned char *b)
 {
@@ -95,7 +95,7 @@ void spikyLizardContact(unsigned char *a, unsigned char *b)
     case 3:
     common:
         if ((b[0] & 2) == 0) {
-            if (DAT_1f8001a4 == 0 && (a[0] & 2) == 0) {
+            if (DEBUG_INVINCIBLE == 0 && (a[0] & 2) == 0) {
                 int ah, bh;
                 a[0] = 2;
                 bh = S16(PTR(b, 0x40), 2);

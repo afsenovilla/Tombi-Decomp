@@ -25,8 +25,8 @@ extern int *DAT_1f800318p;
 extern int DAT_1f800318;
 extern int *DAT_1f800314p;
 extern int DAT_1f800314;
-extern int *DAT_1f800310p;
-extern int DAT_1f800310;
+extern int *FOUR_DATA_P;
+extern int FOUR_DATA;
 extern char MODEL_PRIM_BUFFERS[];
 extern void copyModelPrimGroups(int, int);
 extern void subtractScaledVertices(int, int, int);
@@ -93,8 +93,8 @@ int motocrossBikeModelStepB(S *o)
         o->substep++;
         o->velV = 0;
         o->b0a = 0x16;
-        p = DAT_1f800310p;
-        q = DAT_1f800310;
+        p = FOUR_DATA_P;
+        q = FOUR_DATA;
     tail:
         q += p[1];
         o->dc4 = (int)MODEL_PRIM_BUFFERS;

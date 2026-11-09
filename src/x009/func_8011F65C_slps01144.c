@@ -23,7 +23,7 @@ typedef struct O {
     unsigned char baa;
 } O;
 
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 extern short func_801206A0_slps01144(O *, short, short, int, unsigned char);
 extern short func_8012073C_slps01144(O *, short, short, unsigned char);
 extern short func_8012082C_slps01144(O *, short, short, unsigned char);
@@ -67,11 +67,11 @@ void func_8011F65C_slps01144(O *o, O *e)
             if (func_8012082C_slps01144(o, sx, d + o->box2, e->subtype)) {
                 func_80040760(o);
                 o->h->whole += e->velX;
-                D_1F80019E = 0;
+                LIST_COUNTER = 0;
                 o->velY = 0;
             } else if (func_8012073C_slps01144(o, sx, d2 - 0xc, e->subtype)) {
                 if (o->velY < 0) o->velY = 0;
-                D_1F80019E = 0;
+                LIST_COUNTER = 0;
             }
         }
         if (c && func_801206A0_slps01144(o, a, d + 8, 0, e->subtype)) o->ba6 = 2;
@@ -82,11 +82,11 @@ void func_8011F65C_slps01144(O *o, O *e)
             if (func_8012082C_slps01144(o, sx, d + o->box2, e->subtype)) {
                 func_80040760(o);
                 o->h->whole += e->velX;
-                D_1F80019E = 0;
+                LIST_COUNTER = 0;
                 o->velY = 0;
             } else if (func_8012073C_slps01144(o, sx, d2 - 0xc, e->subtype)) {
                 if (o->velY < 0) o->velY = 0;
-                D_1F80019E = 0;
+                LIST_COUNTER = 0;
             }
         }
         if (c && func_801206A0_slps01144(o, b, d + 8, 1, e->subtype)) o->ba6 = 3;
@@ -97,13 +97,13 @@ void func_8011F65C_slps01144(O *o, O *e)
             if (func_8012082C_slps01144(o, sx, d + o->box2, e->subtype) || func_8012082C_slps01144(o, x2, d + o->box2, e->subtype)) {
                 func_80040760(o);
                 o->h->whole += e->velX;
-                D_1F80019E = 0;
+                LIST_COUNTER = 0;
                 o->velY = 0;
             } else {
                 sy = d2 - 0xc;
                 if (func_8012073C_slps01144(o, sx, sy, e->subtype) || func_8012073C_slps01144(o, sx, sy, e->subtype)) {
                     if (o->velY < 0) o->velY = 0;
-                    D_1F80019E = 0;
+                    LIST_COUNTER = 0;
                 }
             }
             if (c) {

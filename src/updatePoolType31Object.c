@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern short COS_TABLE[];
 extern short NEG_SIN_TABLE[];
-extern void *D_80012204;
+extern void *POOL_TYPE31_ANIM;
 extern unsigned short TICK_COUNT;
 extern int UPDATE_OBJECT_INDEX;
 extern TObj *ObjAlloc(void);
@@ -26,7 +26,7 @@ static __inline__ void setup(TObj *p)
     p->b0d = 1;
     p->w08 = ((p->b0c + 0x1fc) << 6) | 0x17;
     p->d3c = ((struct { char pad[0x2d8]; int v; } *)0x1F800000)->v;
-    p->anim = D_80012204;
+    p->anim = POOL_TYPE31_ANIM;
     AnimLoadDuration(p);
 }
 

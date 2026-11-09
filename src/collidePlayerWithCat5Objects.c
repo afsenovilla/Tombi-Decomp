@@ -10,7 +10,7 @@ typedef struct {
     char p2[0x6a - 0x48]; char b6a; char b6b; unsigned short s6c; short s6e; unsigned short s70; short s72;
     char p3[0xb4 - 0x74]; unsigned short sb4;
 } TO;
-extern short D_1f80019e;
+extern short LIST_COUNTER;
 extern unsigned short CAT5_OBJECT_COUNT;
 extern TO **CAT5_OBJECT_LIST;
 static __inline__ short hit(TO *a, TO *b)
@@ -39,10 +39,10 @@ void func_80052BA8(TO *o)
     TO *p;
     if (GVARS.hurtState != 0) return;
     pp = CAT5_OBJECT_LIST;
-    D_1f80019e = CAT5_OBJECT_COUNT;
-    while (D_1f80019e != 0) {
+    LIST_COUNTER = CAT5_OBJECT_COUNT;
+    while (LIST_COUNTER != 0) {
         p = *pp++;
-        D_1f80019e -= 1;
+        LIST_COUNTER -= 1;
         if (p->t0 & 3) {
             one(o, p);
         }
@@ -52,7 +52,7 @@ void func_80052BA8(TO *o)
 #include "gvars.h"
 #include "TOBJ.H"
 extern signed char GAME_PLAYER_MODE;
-extern short D_1f80019e;
+extern short LIST_COUNTER;
 extern unsigned short CAT5_OBJECT_COUNT;
 extern unsigned char **CAT5_OBJECT_LIST;
 extern void collidePlayerWithCat5Object(TObj *o, unsigned char *p);
@@ -63,10 +63,10 @@ void collidePlayerWithCat5Objects(TObj *o)
     if (GVARS.hurtState != 0) return;
     if (GAME_PLAYER_MODE == 3) return;
     pp = CAT5_OBJECT_LIST;
-    D_1f80019e = CAT5_OBJECT_COUNT;
-    while (D_1f80019e != 0) {
+    LIST_COUNTER = CAT5_OBJECT_COUNT;
+    while (LIST_COUNTER != 0) {
         p = *pp++;
-        D_1f80019e -= 1;
+        LIST_COUNTER -= 1;
         if (*p & 3) {
             collidePlayerWithCat5Object(o, p);
         }

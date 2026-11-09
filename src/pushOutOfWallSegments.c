@@ -6,7 +6,7 @@
 extern unsigned short *getCollisionPlaneAt(int, int);
 extern unsigned short *COLLISION_SEG_PTR;
 extern unsigned short COLLISION_HIT_FLAGS;
-extern unsigned char *D_8007B5AC;
+extern unsigned char *COLLISION_COLUMN_TABLE;
 #define D COLLISION_SEG_PTR
 
 int pushOutOfWallSegments(TObj *o, int x_, int y_, int fl_)
@@ -92,7 +92,7 @@ asm("" : "=r"(sx) : "0"(sx));
                 return ret;
             { int w3 = fl & 0xff00; register int w5 asm("$5") = w3; if (w3 != 0xff00) { asm("" :: "r"(w5));
 asm("" : "=r"(x) : "0"(x));
-                t = D_8007B5AC;
+                t = COLLISION_COLUMN_TABLE;
                 t += *(unsigned short *)(t + 8);
                 { int i2 = ((short)x / 8) * 2; register unsigned int o2 asm("$3") = *(unsigned short *)(t + i2); register unsigned short *p asm("$2") = (unsigned short *)(t + o2); D = p; }
             } else {

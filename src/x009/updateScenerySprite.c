@@ -2,8 +2,8 @@
 // MATCHING 8011976c 368
 #include "spad.h"
 #include "TOBJ.H"
-extern unsigned short D_8012ABB4[];
-extern unsigned short D_8012ABAC[];
+extern unsigned short SCENERY_SPRITE_CLUT_Y[];
+extern unsigned short SCENERY_SPRITE_CLUT_X[];
 extern void **D_8012ABA0[];
 extern int cullObjectToDrawListMargin(TObj *, int);
 extern void ObjFree(TObj *);
@@ -17,7 +17,7 @@ void updateScenerySprite(TObj *o)
         o->b04++;
         o->w1e = 10;
         o->b0d = 1;
-        o->w08 = ((D_8012ABB4[o->subtype] + o->b0c) << 6) | ((D_8012ABAC[o->subtype] >> 4) & 0x3f);
+        o->w08 = ((SCENERY_SPRITE_CLUT_Y[o->subtype] + o->b0c) << 6) | ((SCENERY_SPRITE_CLUT_X[o->subtype] >> 4) & 0x3f);
         o->d3c = ((int*)&SPAD.i2d4)[0];
         o->anim = *D_8012ABA0[o->subtype];
         v = *(unsigned char *)&o->box0 >> 4;

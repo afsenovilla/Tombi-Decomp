@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 
 typedef struct { int *p; int pad[2]; } E12;
-extern E12 D_80135D84[];
+extern E12 PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[];
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 short MulNegSinScaled(int a, int b);
@@ -20,7 +20,7 @@ void phoenixSpiritHintLeaveC(TObj *o)
         o->velY = -0x10;
         o->d34 = o->y.raw;
         ((unsigned char*)&GVARS.b39)[0] = 1;
-        o->anim = (void *)D_80135D84[o->subtype].p[5];
+        o->anim = (void *)PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].p[5];
         AnimLoadDuration(o);
         o->state++;
     case 1:

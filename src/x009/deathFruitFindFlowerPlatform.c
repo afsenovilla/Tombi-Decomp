@@ -2,7 +2,7 @@
 // MATCHING 8011ecc8 392
 #include "spad.h"
 #include "TOBJ.H"
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 extern short testCollisionSegmentsAtX(TObj *, short, short, unsigned char);
 
 int deathFruitFindFlowerPlatform(TObj *o)
@@ -11,12 +11,12 @@ int deathFruitFindFlowerPlatform(TObj *o)
     TObj *e;
     short u;
 
-    if ((D_1F80019E = SPAD.s254) == 0)
+    if ((LIST_COUNTER = SPAD.s254) == 0)
         goto out;
 loop:
     {
         e = *list++;
-        D_1F80019E--;
+        LIST_COUNTER--;
         if (!(e->active & 1))
             goto next;
         if (e->type != 0x1c)
@@ -36,7 +36,7 @@ loop:
             return 1;}
     }
 next:
-    if (D_1F80019E != 0)
+    if (LIST_COUNTER != 0)
         goto loop;
 out:
     return 0;

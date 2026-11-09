@@ -6,7 +6,7 @@
 
 typedef struct { short b0, b1, b2, b3; } B4;
 
-extern B4 D_8012B1B8[];
+extern B4 FLOWER_PLATFORM_DEFS[];
 extern void cullObjectToDrawList(TObj *, short);
 extern void ObjFreeDup(TObj *o);
 extern void followParentRotation(TObj *o);
@@ -21,10 +21,10 @@ void updateFlowerPlatform(TObj *o)
         switch (o->step) {
         case 0:
             o->step++;
-            o->box0 = D_8012B1B8[o->subtype].b0;
-            o->box1 = D_8012B1B8[o->subtype].b1;
-            o->box2 = D_8012B1B8[o->subtype].b2;
-            o->box3 = D_8012B1B8[o->subtype].b3;
+            o->box0 = FLOWER_PLATFORM_DEFS[o->subtype].b0;
+            o->box1 = FLOWER_PLATFORM_DEFS[o->subtype].b1;
+            o->box2 = FLOWER_PLATFORM_DEFS[o->subtype].b2;
+            o->box3 = FLOWER_PLATFORM_DEFS[o->subtype].b3;
             break;
         case 1:
             o->b04++;

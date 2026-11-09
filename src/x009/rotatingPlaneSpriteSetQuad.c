@@ -10,20 +10,20 @@ typedef struct {
 } P;
 typedef struct { short v[8]; } E;
 
-extern E D_8012AAC0[];
+extern E ROTATING_PLANE_SPRITE_QUADS[];
 
 void rotatingPlaneSpriteSetQuad(P *o)
 {
-    o->sv[0].vx = D_8012AAC0[*o->anim].v[0];
-    o->sv[0].vy = D_8012AAC0[*o->anim].v[1];
+    o->sv[0].vx = ROTATING_PLANE_SPRITE_QUADS[*o->anim].v[0];
+    o->sv[0].vy = ROTATING_PLANE_SPRITE_QUADS[*o->anim].v[1];
     o->sv[0].vz = 0;
-    o->sv[1].vx = D_8012AAC0[*o->anim].v[2];
-    o->sv[1].vy = D_8012AAC0[*o->anim].v[3];
+    o->sv[1].vx = ROTATING_PLANE_SPRITE_QUADS[*o->anim].v[2];
+    o->sv[1].vy = ROTATING_PLANE_SPRITE_QUADS[*o->anim].v[3];
     o->sv[1].vz = 0;
-    o->sv[2].vx = D_8012AAC0[*o->anim].v[4];
-    o->sv[2].vy = D_8012AAC0[*o->anim].v[5];
+    o->sv[2].vx = ROTATING_PLANE_SPRITE_QUADS[*o->anim].v[4];
+    o->sv[2].vy = ROTATING_PLANE_SPRITE_QUADS[*o->anim].v[5];
     o->sv[2].vz = 0;
-    o->sv[3].vx = D_8012AAC0[*o->anim].v[6];
-    o->sv[3].vy = D_8012AAC0[*o->anim].v[7];
+    o->sv[3].vx = ROTATING_PLANE_SPRITE_QUADS[*o->anim].v[6];
+    o->sv[3].vy = ROTATING_PLANE_SPRITE_QUADS[*o->anim].v[7];
     o->sv[3].vz = 0;
 }

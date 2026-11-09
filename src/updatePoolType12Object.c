@@ -5,7 +5,7 @@ static char D_80014744[32] = {
     0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 2, 0,
     2, 0, 0, 0, 0, 0, 2, 0, 3, 0, 0, 0, 0, 0, 2, -0x80,
 };
-extern char D_8001473C[];
+extern char POOL_TYPE12_ANIM[];
 extern void AnimLoadDuration(TObj *);
 extern void ObjCullRegister(TObj *);
 extern void ObjFree(TObj *);
@@ -25,7 +25,7 @@ void updatePoolType12Object(TObj *o)
             o->state = 0;
             break;
         case 1:
-            o->anim = D_8001473C;
+            o->anim = POOL_TYPE12_ANIM;
             AnimLoadDuration(o);
             o->b04 = 1;
             o->step = 1;

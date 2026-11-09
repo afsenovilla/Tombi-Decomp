@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short h; short v; } VT;
-extern VT D_8007B374[];
+extern VT L5_TYPE09_ITEM_VEL_TABLE[];
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
 extern void rewardNone();
 extern void rewardItem();
@@ -71,8 +71,8 @@ void func_8003F598(TObj *o)
                 o->velV += 0x20;
             if (o->b68 & 1) {
                 o->b68 = 0;
-                o->velH = D_8007B374[o->animFrame].h;
-                o->velV = D_8007B374[o->animFrame].v;
+                o->velH = L5_TYPE09_ITEM_VEL_TABLE[o->animFrame].h;
+                o->velV = L5_TYPE09_ITEM_VEL_TABLE[o->animFrame].v;
             } else if (o->b69 & 1) {
                 o->b69 = 0;
                 if (o->velV <= 0x100) {
@@ -98,8 +98,8 @@ void func_8003F598(TObj *o)
         case 1:
             if (o->b68 & 1) {
                 o->b68 = 0;
-                o->velH = D_8007B374[o->animFrame].h;
-                o->velV = D_8007B374[o->animFrame].v;
+                o->velH = L5_TYPE09_ITEM_VEL_TABLE[o->animFrame].h;
+                o->velV = L5_TYPE09_ITEM_VEL_TABLE[o->animFrame].v;
                 o->step = 0;
             }
             break;
@@ -125,7 +125,7 @@ void func_8003F598(TObj *o)
 #include "TOBJ.H"
 #include "gamestate.h"
 typedef struct { short h; short v; } VT;
-extern VT D_8007B374[];
+extern VT L5_TYPE09_ITEM_VEL_TABLE[];
 extern unsigned char REWARD_HANDLER_BY_SUBTYPE[];
 extern void rewardNone();
 extern void rewardItem();
@@ -190,8 +190,8 @@ void updateL5Type09Item(TObj *o)
                 o->velV += 0x20;
             if (o->b68 & 1) {
                 o->b68 = 0;
-                o->velH = D_8007B374[o->animFrame].h;
-                o->velV = D_8007B374[o->animFrame].v;
+                o->velH = L5_TYPE09_ITEM_VEL_TABLE[o->animFrame].h;
+                o->velV = L5_TYPE09_ITEM_VEL_TABLE[o->animFrame].v;
             } else if (o->b69 & 1) {
                 o->b69 = 0;
                 if (o->velV <= 0x100) {
@@ -219,8 +219,8 @@ void updateL5Type09Item(TObj *o)
         case 1:
             if (o->b68 & 1) {
                 o->b68 = 0;
-                o->velH = D_8007B374[o->animFrame].h;
-                o->velV = D_8007B374[o->animFrame].v;
+                o->velH = L5_TYPE09_ITEM_VEL_TABLE[o->animFrame].h;
+                o->velV = L5_TYPE09_ITEM_VEL_TABLE[o->animFrame].v;
                 o->step = 0;
             }
             break;

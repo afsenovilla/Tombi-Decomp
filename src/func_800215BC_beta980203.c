@@ -18,12 +18,12 @@ typedef struct { Rel *e; char *base; } RelLog;
 extern char *SEQ_DATA[];
 extern char *LOAD_SLOTS[];
 extern char *SPR_DATA[];
-extern char *D_1f800310[];
+extern char *FOUR_DATA[];
 extern char *WMD_DATA[];
 extern char *WPP_DATA[];
 extern char *WHM_DATA[];
 extern char *APD_DATA[];
-extern char *D_1f8002b8[];
+extern char *WSS_DATA[];
 extern char *WFM3_DATA[];
 extern int CD_QUEUE_HEAD;
 extern char *LOAD_NEXT_ADDR;
@@ -75,14 +75,14 @@ int func_800215BC_beta980203(Rel *e, int unused, char *base)
             switch (t & 0xf0) {
             case 0x00: case 0x10: case 0x20: break;
             case 0x30: SPR_DATA[lo] = base; break;
-            case 0x40: D_1f800310[lo] = base; break;
+            case 0x40: FOUR_DATA[lo] = base; break;
             case 0x50: WMD_DATA[lo] = base; break;
             case 0x60: WPP_DATA[lo] = base; break;
             case 0x70: WHM_DATA[lo] = base; break;
             case 0x80: APD_DATA[lo] = base; break;
             case 0x90: case 0xa0: break;
             case 0xb0: SEQ_DATA[lo] = base; break;
-            case 0xc0: D_1f8002b8[lo] = base; break;
+            case 0xc0: WSS_DATA[lo] = base; break;
             case 0xd0: WFM3_DATA[lo] = base; break;
             }
             if ((e->type & 0xf0) == 0x90) base += D_8007239C_beta980203[e->pad2 * 2];
@@ -95,7 +95,7 @@ int func_800215BC_beta980203(Rel *e, int unused, char *base)
                 switch (t & 0xf0) {
                 case 0x00: case 0x10: case 0x20: break;
                 case 0x30: SPR_DATA[lo] = base; break;
-                case 0x40: D_1f800310[lo] = base; break;
+                case 0x40: FOUR_DATA[lo] = base; break;
                 case 0x50: WMD_DATA[lo] = base; break;
                 case 0x60: WPP_DATA[lo] = base; break;
                 case 0x70: WHM_DATA[lo] = base; break;
@@ -103,7 +103,7 @@ int func_800215BC_beta980203(Rel *e, int unused, char *base)
                 case 0x90: D_8009EE98_beta980203[lo] = base; break;
                 case 0xa0: D_8009EF98_beta980203[lo] = base; break;
                 case 0xb0: SEQ_DATA[lo] = base; break;
-                case 0xc0: D_1f8002b8[lo] = base; break;
+                case 0xc0: WSS_DATA[lo] = base; break;
                 case 0xd0: WFM3_DATA[lo] = base; break;
                 }
                 if ((e->type & 0xf0) == 0x90) base += D_8007239C_beta980203[e->pad2 * 2];

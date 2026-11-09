@@ -3,8 +3,8 @@
 // VERSION SLPS_01144 slps01144 8002C808 1064
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
-extern void *D_8001226C;
-extern void **D_80079D34[];
+extern void *ITEM_GET_ICON_ANIM;
+extern void **ITEM_GET_ICON_ANIMS[];
 extern unsigned char D_8009C942[];
 extern int D_8009C954[];
 extern unsigned short GAME[];
@@ -57,7 +57,7 @@ void func_8002C808(TObj *o)
         o->animFrame = 1;
         o->b0d = 0;
         o->b0a = 0;
-        o->anim = *D_80079D34[o->b0c];
+        o->anim = *ITEM_GET_ICON_ANIMS[o->b0c];
         o->d3c = SPAD->w;
         o->a.p.whole = SPAD->x;
         o->y.p.whole = SPAD->y.s.hi - 0x1e;
@@ -100,8 +100,8 @@ void func_8002C808(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern void *D_8001226C;
-extern void **D_80079D34[];
+extern void *ITEM_GET_ICON_ANIM;
+extern void **ITEM_GET_ICON_ANIMS[];
 extern unsigned char D_8009C942[];
 extern int D_8009C954[];
 extern unsigned short GAME[];
@@ -151,7 +151,7 @@ void updateItemGetIcon(TObj *o)
             o->b0d = 1;
             o->w08 = 0x7ed7;
             o->animFrame = 0;
-            o->anim = D_8001226C;
+            o->anim = ITEM_GET_ICON_ANIM;
             o->d3c = SPAD->w;
             o->b04++;
             o->timer = 0x78;
@@ -166,7 +166,7 @@ void updateItemGetIcon(TObj *o)
         o->animFrame = 1;
         o->b0d = 0;
         o->b0a = 0;
-        o->anim = *D_80079D34[o->b0c];
+        o->anim = *ITEM_GET_ICON_ANIMS[o->b0c];
         o->d3c = SPAD->w;
         o->a.p.whole = SPAD->x;
         o->y.p.whole = SPAD->y.s.hi - 0x1e;

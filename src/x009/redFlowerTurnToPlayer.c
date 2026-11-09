@@ -13,7 +13,7 @@ extern int Rand(void);
 extern void *D_8012E9F8[];
 extern void *D_8012EA00[];
 extern void *D_8012EA40[];
-extern unsigned char D_8012B2CC[];
+extern unsigned char RED_FLOWER_RAND_TABLE[];
 extern char MOVE_TABLE_1[];
 
 static __inline__ short ground(TObj *o)
@@ -129,7 +129,7 @@ void redFlowerTurnToPlayer(TObj *o)
     case 6:
         ObjSetFacingToPlayer(o);
         if (o->subtype & 0x80) {
-            if (D_8012B2CC[Rand() & 7]) {
+            if (RED_FLOWER_RAND_TABLE[Rand() & 7]) {
                 o->timer = 0x78;
             } else {
                 o->timer = 0x3c;

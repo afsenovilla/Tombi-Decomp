@@ -24,9 +24,9 @@ static Fn D_8012568C[7] = {
 static short D_801256A8[8] = {
     0x1e, 0x6f, 0x7c, 0x22, 0x50, 0x55, 0x36, 0xa0,
 };
-extern unsigned char D_80125684[];
+extern unsigned char A14_SECTION_STREAM_IDS[];
 extern unsigned char D_8009C93Fx[];
-extern unsigned short D_1F8000F2x[];
+extern unsigned short VIEW_CAMERA_Y[];
 extern void D_8001D6A4(void);
 extern unsigned int stepScrollReturnY(TObj *);
 extern unsigned int stepScrollClearX(TObj *);
@@ -92,7 +92,7 @@ void updateSectionClearController(TObj *o)
             (*(unsigned short*)&SPAD.s1c6) = 2;
             SoundStopAll();
             SPAD.b1cc = 1;
-            SPAD.b1cd = D_80125684[GAME.selectedSection];
+            SPAD.b1cd = A14_SECTION_STREAM_IDS[GAME.selectedSection];
             ThreadCreate(1, D_8001D6A4);
             o->step++;
         }
@@ -142,7 +142,7 @@ void updateSectionClearController(TObj *o)
         break;
     case 12:
         o->w52 = ((Fix16 *)o->d34)->p.whole;
-        S16(o, 0x54) = D_1F8000F2x[0];
+        S16(o, 0x54) = VIEW_CAMERA_Y[0];
         o->step++;
         o->w48 = 0x78;
         spawnSectionClearEffect();

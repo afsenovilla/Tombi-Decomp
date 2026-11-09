@@ -109,7 +109,7 @@ extern s32 D_800B7BE0;          /* _spu_mem_mode_unitM: the unit's mask (7) */
 /* func_8009E86C */
 s32 _spu_FgetRXXa(s32 offset, s32 mode);
 
-extern volatile s32 *D_800988F4;    /* SPU.OBJ .data+0x10, static: -> 0x1F8010F0, DPCR */
+extern volatile s32 *dma_dpcr;    /* SPU.OBJ .data+0x10, static: -> 0x1F8010F0, DPCR */
 
 /* libspu _spu_FsetPCR(flag) (SPU.OBJ): set DMA channel 4's priority in DPCR (bits
    16-18): the three bits are cleared, then 3 is written when flag is set, 5 when it is
@@ -117,11 +117,11 @@ extern volatile s32 *D_800988F4;    /* SPU.OBJ .data+0x10, static: -> 0x1F8010F0
 /* func_8009E8A8 */
 void _spu_FsetPCR(s32 flag)
 {
-    *D_800988F4 &= 0xFFF8FFFF;
+    *dma_dpcr &= 0xFFF8FFFF;
     if (flag != 0) {
-        *D_800988F4 |= 0x30000;
+        *dma_dpcr |= 0x30000;
     } else {
-        *D_800988F4 |= 0x50000;
+        *dma_dpcr |= 0x50000;
     }
 }
 

@@ -4,7 +4,7 @@
 extern TObj *PLAYER_EXT[];
 extern unsigned char SLOPE_TILT_TABLE[];
 extern void FUN_8001fe6c(TObj *o);
-extern char LAB_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 
 void playerStepEntryResetAnimState4(TObj *o)
 {
@@ -20,7 +20,7 @@ void playerStepEntryResetAnimState4(TObj *o)
     p->animFrame = 0xffff;
     p->timer = 0;
     p->animTimer = 0;
-    o->anim = LAB_80010748;
+    o->anim = PLAYER_IDLE_ANIM;
     FUN_8001fe6c(o);
     o->d8c = SLOPE_TILT_TABLE[o->wb0];
     o->state = 4;

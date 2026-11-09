@@ -42,14 +42,14 @@ extern volatile int* D_800962C0;
 extern void* D_800962C4;
 extern volatile CdlIntr CD_INTR;
 extern void* D_800962CC[];
-extern volatile unsigned char* D_80096F4C;
+extern volatile unsigned char* cd_reg0;
 extern s32* D_800962E4;
 extern s32* D_800962E8;
 extern s32* D_800962EC;
 extern s32* D_800962F0;
 extern volatile s32* D_800962F4;
-extern char D_8009BF40[];
-extern char D_8009BF48[];
+extern char cd_result_sync[];
+extern char cd_result_ready[];
 extern volatile u_char* D_800962BC;
 extern char D_8009B2B8[];
 extern int D_8009B2C0;
@@ -116,15 +116,15 @@ void callback(void) {
     int intr;
     int temp_s1;
     
-    temp_s1 = D_80096F4C[0] & 3;
+    temp_s1 = cd_reg0[0] & 3;
 
     while (intr = getintr()) {
         if (intr & 4 && CD_CBREADY != NULL) {
-            CD_CBREADY(CD_INTR.ready, D_8009BF48);
+            CD_CBREADY(CD_INTR.ready, cd_result_ready);
         }
         if (intr & 2 && CD_CBSYNC != NULL) {
-            CD_CBSYNC(CD_INTR.sync, D_8009BF40);
+            CD_CBSYNC(CD_INTR.sync, cd_result_sync);
         }
     }
-    D_80096F4C[0] = temp_s1;
+    cd_reg0[0] = temp_s1;
 }

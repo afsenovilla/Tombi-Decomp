@@ -12,8 +12,8 @@ extern void FUN_8001fe6c(TObj *);
 extern TObj *allocObjectLayer5(void);
 extern void setEventStarted(int, int, int);
 extern signed char GAME_PLAYER_MODE;
-extern short D_1F8001C6;
-extern AT D_80119C48[];
+extern short DRAW_FROZEN;
+extern AT FACTORY_NPC_DEFS_ANIMS[];
 
 void goGoCarMechanicTalk(TObj *o)
 {
@@ -36,7 +36,7 @@ void goGoCarMechanicTalk(TObj *o)
         o->wbc = o->animFrame;
         o->animFrame = o->b68 & 1;
         v = *(B12 *)&o->a;
-        o->anim = D_80119C48[o->subtype].p[1];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[1];
         FUN_8001fe6c(o);
         o->d90 = showMessageBoxDirect(2, 6, &v);
         o->state++;
@@ -44,7 +44,7 @@ void goGoCarMechanicTalk(TObj *o)
     case 1:
         if (((unsigned char *)o->d90)[4] != 2) break;
         ((unsigned char *)o->d90)[4] = 3;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = 1;
@@ -57,14 +57,14 @@ void goGoCarMechanicTalk(TObj *o)
             q->b0f = 0;
             q->animFrame = 0;
         }
-        o->anim = D_80119C48[o->subtype].p[0];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[0];
         FUN_8001fe6c(o);
         o->state = 2;
         break;
     case 2:
         if (GCD.bd082 != 1) break;
         v = *(B12 *)&o->a;
-        o->anim = D_80119C48[o->subtype].p[2];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[2];
         FUN_8001fe6c(o);
         o->d90 = showMessageBoxDirect(2, 7, &v);
         o->state++;
@@ -105,14 +105,14 @@ void goGoCarMechanicTalk(TObj *o)
     case 8:
         if (((unsigned char *)o->d90)[4] != 2) break;
         ((unsigned char *)o->d90)[4] = 3;
-        o->anim = D_80119C48[o->subtype].p[0];
+        o->anim = FACTORY_NPC_DEFS_ANIMS[o->subtype].p[0];
         FUN_8001fe6c(o);
         o->state++;
         break;
     case 9:
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         o->animFrame = o->wbc;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;

@@ -1,11 +1,11 @@
 // FUNC 800ef760 800 X002
 // MATCHING 800ef760 800
 #include "TOBJ.H"
-extern char D_80010748[];
-extern char D_80010814[];
-extern char D_80010888[];
-extern char D_8001090C[];
-extern char D_800111E0[];
+extern char PLAYER_IDLE_ANIM[];
+extern char PLAYER_WALK_ANIM[];
+extern char PLAYER_JOG_ANIM[];
+extern char PLAYER_RUN_ANIM[];
+extern char PLAYER_CROUCH_WALK_ANIM[];
 extern void AnimLoadDuration(TObj *);
 extern void AnimJump(TObj *, int);
 
@@ -15,7 +15,7 @@ void playerGroundAnimTransition(TObj *o, unsigned short k)
 
     switch (k) {
     case 0:
-        o->anim = D_80010748;
+        o->anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(o);
         return;
     case 1:
@@ -64,7 +64,7 @@ void playerGroundAnimTransition(TObj *o, unsigned short k)
             r = 13;
             break;
         }
-        o->anim = D_80010814;
+        o->anim = PLAYER_WALK_ANIM;
         break;
     case 2:
         switch (*(unsigned short *)o->anim) {
@@ -131,7 +131,7 @@ void playerGroundAnimTransition(TObj *o, unsigned short k)
             r = 15;
             break;
         }
-        o->anim = D_80010888;
+        o->anim = PLAYER_JOG_ANIM;
         break;
     case 3:
         switch (*(unsigned short *)o->anim) {
@@ -200,7 +200,7 @@ void playerGroundAnimTransition(TObj *o, unsigned short k)
             r = 15;
             break;
         }
-        o->anim = D_8001090C;
+        o->anim = PLAYER_RUN_ANIM;
         break;
     case 33:
         switch (*(unsigned short *)o->anim) {
@@ -229,7 +229,7 @@ void playerGroundAnimTransition(TObj *o, unsigned short k)
             r = 0;
             break;
         }
-        o->anim = D_800111E0;
+        o->anim = PLAYER_CROUCH_WALK_ANIM;
         break;
     default:
         return;

@@ -12,7 +12,7 @@ extern volatile int Vcount;
 extern int* D_800974D8;
 void setIntrVSync(int index, void (*callback)(void));
 
-extern void (*D_80098150[8])(void);
+extern void (*vb_callbacks[8])(void);
 
 void* startIntrVSync(void);
 
@@ -20,8 +20,8 @@ void trapIntrVSync(void);
 
 void setIntrVSync(int index, void (*callback)(void))
 {
-    if (callback != D_80098150[index]) {
-        D_80098150[index] = callback;
+    if (callback != vb_callbacks[index]) {
+        vb_callbacks[index] = callback;
     }
 }
 

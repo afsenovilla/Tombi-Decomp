@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 
 typedef struct { int *p; int pad[2]; } E12;
-extern E12 D_80135D84[];
+extern E12 PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[];
 void AnimLoadDuration(TObj *o);
 void AnimAdvance(TObj *o);
 short TileCollideAt(TObj *o, int x, int y);
@@ -16,14 +16,14 @@ void phoenixSpiritHintEnterA(TObj *o)
     switch (o->state) {
     case 0:
         o->animFrame = 1;
-        o->anim = (void *)D_80135D84[o->subtype].p[1];
+        o->anim = (void *)PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].p[1];
         AnimLoadDuration(o);
         o->velX = -0x200;
         o->velY = 0x800;
         o->state++;
     case 1:
         if (GCD.bceef) {
-            o->anim = (void *)D_80135D84[o->subtype].p[1];
+            o->anim = (void *)PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].p[1];
             AnimLoadDuration(o);
             o->state++;
         }

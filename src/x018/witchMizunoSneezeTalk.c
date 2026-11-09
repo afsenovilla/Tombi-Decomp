@@ -7,8 +7,8 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8011A564[];
-extern short D_1F8001C6;
+extern AT WITCH_MIZUNO_DEFS_ANIMS[];
+extern short DRAW_FROZEN;
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -19,7 +19,7 @@ extern void setEventStarted(int, int, int);
 static __inline__ void setanim(TObj *o, short n)
 {
     if (WD2(o) != n) {
-        o->anim = D_8011A564[o->subtype].anims[n];
+        o->anim = WITCH_MIZUNO_DEFS_ANIMS[o->subtype].anims[n];
         FUN_8001fe94(o, 0);
         WD2(o) = n;
     }
@@ -69,7 +69,7 @@ void witchMizunoSneezeTalk(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

@@ -7,7 +7,7 @@
 #include "gamestate.h"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80135DCC[];
+extern AT FUNGA_DWARF_DEFS_ANIMS[];
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 extern void setEventStarted(int, int, int);
@@ -19,7 +19,7 @@ extern short FUN_80040278(TObj *, short, short);
 
 static __inline__ void setanim(TObj *o, int n)
 {
-    o->anim = D_80135DCC[o->subtype].anims[n];
+    o->anim = FUNGA_DWARF_DEFS_ANIMS[o->subtype].anims[n];
     FUN_8001fe94(o, 0);
 }
 

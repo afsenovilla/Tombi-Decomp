@@ -8,7 +8,7 @@
 
 #include "gamestate.h"
 extern TObj PLAYER;
-extern void *D_80131CC8;
+extern void *BITING_PLANT_ANIMS;
 
 void func_80122BB4(TObj *o)
 {
@@ -77,7 +77,7 @@ void func_80122BB4(TObj *o)
     case 4:
         switch (o->subtype) {
         case 0:
-            o->anim = D_80131CC8;
+            o->anim = BITING_PLANT_ANIMS;
             o->d8c = 0;
             o->b0a = 2;
             break;
@@ -110,7 +110,7 @@ void func_80122BB4(TObj *o)
 
 #include "gamestate.h"
 extern TObj PLAYER;
-extern void *D_80131CC8;
+extern void *BITING_PLANT_ANIMS;
 
 void area10Type07StepDPart(TObj *o)
 {
@@ -184,7 +184,7 @@ void area10Type07StepDPart(TObj *o)
     case 4:
         switch (o->subtype) {
         case 0:
-            o->anim = D_80131CC8;
+            o->anim = BITING_PLANT_ANIMS;
             o->d8c = 0;
             o->b0a = 2;
             break;

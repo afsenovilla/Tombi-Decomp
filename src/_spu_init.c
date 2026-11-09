@@ -20,7 +20,7 @@ typedef void (*SpuTransferCallbackProc)(void);
    SpuUnion`): the registers by name, or as 0x100 16-bit words for the functions that are
    handed a register number. SpuRXX is libspu_spu_1.c's. */
 extern SpuUnion *D_800988E4;        /* _spu_RXX -> 0x1F801C00 */
-extern volatile s32 *D_800988F4;            /* SPU.OBJ .data+0x10, static: -> 0x1F8010F0, DPCR */
+extern volatile s32 *dma_dpcr;            /* SPU.OBJ .data+0x10, static: -> 0x1F8010F0, DPCR */
 extern u16 D_800988FC;                      /* _spu_tsa */
 extern s32 D_80098900;                      /* _spu_transMode */
 extern s32 D_80098904;                      /* _spu_addrMode */
@@ -31,7 +31,7 @@ extern s32 D_80098914;                      /* _spu_mem_mode_unitM */
 extern s32 D_80098918;                      /* _spu_inTransfer */
 extern volatile SpuTransferCallbackProc D_8009891C;    /* _spu_transferCallback */
 extern volatile SpuIRQCallbackProc D_80098920;         /* _spu_IRQCallback */
-extern u8 D_80098924[];                     /* SPU.OBJ .data+0x40, static: sixteen bytes of 7 */
+extern u8 _spu_dummy[];                     /* SPU.OBJ .data+0x40, static: sixteen bytes of 7 */
 extern volatile u16 D_8009D5E0[];           /* _spu_RQ[10] */
 extern char D_8001636C[];                   /* "SPU:T/O [%s]\n" */
 extern char D_8001637C[];                   /* "wait (reset)" */
@@ -48,7 +48,7 @@ s32 printf(const char *, ...);
    7), the transfer control word 4, reverb volume 0, key off for all 24
    voices, reverb-on mask 0 and the ten words of the register queue _spu_RQ.
    Cold only: FM and noise masks and CD / external volume 0, the sixteen
-   dummy bytes D_80098924 written to SPU RAM 0x1000 by I/O (_spu_tsa = 0x200,
+   dummy bytes _spu_dummy written to SPU RAM 0x1000 by I/O (_spu_tsa = 0x200,
    _spu_FwriteByIO), every voice given volume 0, pitch 0x3FFF, start address
    0x200 and ADSR 0, then keyed on and, four _spu_Fw1ts later, off, with four
    more to finish.  Last _spu_inTransfer = 1 (idle), SPUCNT = 0xC000 (enable,
@@ -60,7 +60,7 @@ s32 _spu_init(s32 bHot)
     s32 i;
     u32 n;
 
-    *D_800988F4 |= 0xB0000;
+    *dma_dpcr |= 0xB0000;
     D_800988E4->rxx.main_vol.left = 0;
     D_800988E4->rxx.main_vol.right = 0;
     D_800988E4->rxx.spucnt = 0;
@@ -101,7 +101,7 @@ s32 _spu_init(s32 bHot)
         D_800988E4->rxx.ex_vol.left = 0;
         D_800988E4->rxx.ex_vol.right = 0;
         D_800988FC = 0x200;
-        func_8009E0F8(D_80098924, 0x10);
+        func_8009E0F8(_spu_dummy, 0x10);
         for (i = 0; i < 24; i++) {
             D_800988E4->rxx.voice[i].volume.left = 0;
             D_800988E4->rxx.voice[i].volume.right = 0;

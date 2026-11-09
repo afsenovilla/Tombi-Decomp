@@ -7,7 +7,7 @@
 extern void FUN_8001e5f4(int, int);
 extern void FUN_8001fe94(void *, int);
 extern char DAT_801152e8[];
-extern char LAB_80010c50[];
+extern char PLAYER_HURT_ANIM[];
 
 void playerStepEntryAnim1ShiftY(char *o)
 {
@@ -17,7 +17,7 @@ void playerStepEntryAnim1ShiftY(char *o)
     FUN_8001e5f4(0x1c, 0x7f);
     o[0x9c] = 0;
     o[0xaa] = 0;
-    *(char **)(o + 0x24) = LAB_80010c50;
+    *(char **)(o + 0x24) = PLAYER_HURT_ANIM;
     FUN_8001fe94(o, 1);
     c = *(unsigned short *)(o + 0x2e) & 1;
     h = *(short **)(o + 0x40);
@@ -36,7 +36,7 @@ static char DAT_801152e8[36] = {
     -0x30, 0, 0, 0, 0x60, 0x58, 0x50, 0x48, 0x40, 0x38, 0x30, 0x28, 0x20, 0x18, 0x10, 0xc,
     8, 4,
 };
-extern char LAB_80010c50[];
+extern char PLAYER_HURT_ANIM[];
 
 void playerStepEntryAnim1ShiftY(char *o)
 {
@@ -46,7 +46,7 @@ void playerStepEntryAnim1ShiftY(char *o)
     FUN_8001e5f4(0x1c, 0x7f);
     o[0x9c] = 0;
     o[0xaa] = 0;
-    *(char **)(o + 0x24) = LAB_80010c50;
+    *(char **)(o + 0x24) = PLAYER_HURT_ANIM;
     FUN_8001fe94(o, 1);
     c = *(unsigned short *)(o + 0x2e) & 1;
     h = *(short **)(o + 0x40);

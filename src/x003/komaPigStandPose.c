@@ -5,8 +5,8 @@ typedef struct A { short w0; unsigned short w2; unsigned short w4; unsigned shor
 typedef struct B { unsigned char c[4]; } B;
 extern char MOVE_TABLE_1[];
 extern unsigned char D_80135C5C[];
-extern A *D_801386F8[];
-extern B D_80135B30[];
+extern A *KOMA_PIG_ANIMS[];
+extern B KOMA_PIG_ANIM_BOXES[];
 extern int AnimAdvanceWithBox(TObj *);
 extern void applyFrameVelocityY(TObj *);
 extern int komaPigCheckLanded(TObj *);
@@ -21,8 +21,8 @@ void komaPigStandPose(TObj *o)
         o->b69 = 0;
         o->state++;
         o->wac = D_80135C5C[o->b0c];
-        o->anim = D_801386F8[o->wac];
-        { B *t = D_80135B30; p = t[((A *)o->anim)->w2].c; }
+        o->anim = KOMA_PIG_ANIMS[o->wac];
+        { B *t = KOMA_PIG_ANIM_BOXES; p = t[((A *)o->anim)->w2].c; }
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p;

@@ -12,7 +12,7 @@ typedef struct O {
     char *d90;
 } O;
 extern char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP, DAT_8009c942, DAT_8009c93f;
-extern short DAT_1f8001c6, DAT_800a60ea;
+extern short DRAW_FROZEN, DAT_800a60ea;
 extern int DAT_800a6094;
 extern void FUN_8001fec0();
 
@@ -32,7 +32,7 @@ void playerEventWaitMessageClose(O *o)
     if (o->d90[4] == 2) {
         o->d90[4] = 3;
         PLAYER_STATE = 1;
-        DAT_1f8001c6 = 0;
+        DRAW_FROZEN = 0;
         DAT_8009c942 = 0;
         DAT_800a60ea = 0;
         PLAYER_SUBSTATE = 0;

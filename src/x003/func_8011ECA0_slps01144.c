@@ -2,7 +2,7 @@
 // VERSION SLPS_01144 x03 8011ECA0 192
 #if defined(VERSION_SLPS_01144)
 #define objectBoxOverlapSide func_8004E858
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 #include "spad.h"
 #include "TOBJ.H"
 extern short objectBoxOverlapSide(TObj *, TObj *);
@@ -29,6 +29,6 @@ void func_8011ECA0_slps01144(TObj *p, TObj *o)
         p->velX = 0x180;
         p->velY = -0x980;
     }
-    D_1F80019E = 0;
+    LIST_COUNTER = 0;
 }
 #endif

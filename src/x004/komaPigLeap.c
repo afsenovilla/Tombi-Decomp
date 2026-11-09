@@ -2,7 +2,7 @@
 // MATCHING 80120a7c 1776
 #include "TOBJ.H"
 typedef struct { short w0; unsigned short w2; unsigned short w4; unsigned short w6; } A;
-extern unsigned char D_80130FD4[];
+extern unsigned char KOMA_PIG_ANIM_BOXES[];
 extern A *D_80133BDC[], *D_80133BE0[], *D_80133BE4[], *D_80133C04[], *D_80133C08[], *D_80133C0C[];
 extern char MOVE_TABLE_2[], MOVE_TABLE_1[], MOVE_TABLE_0[];
 extern void FUN_8001e4f0(int);
@@ -16,7 +16,7 @@ static __inline__ void setanimbox(TObj *o, A *a)
     unsigned char *p;
 
     o->anim = a;
-    p = D_80130FD4 + a->w2 * 4;
+    p = KOMA_PIG_ANIM_BOXES + a->w2 * 4;
     o->box0 = *p++;
     o->box1 = *p++;
     o->box2 = *p;

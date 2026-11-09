@@ -5,7 +5,7 @@
 typedef struct { unsigned short w0, w2, w4, w6, w8, wa, wc; } E;
 typedef struct { unsigned short w0, w2, w4, w6, w8, wa; } F;
 extern F D_801314A4;
-extern E D_8013145C[];
+extern E BIG_KEY_PAINTING_PIECE_DEFS[];
 extern TObj *allocObjectLayer2(void);
 
 void spawnBigKeyPaintingPieces(void)
@@ -29,7 +29,7 @@ void spawnBigKeyPaintingPieces(void)
     }
     for (i = 0; i < 5; i++) {
         if (((unsigned char*)&GCD.bcf24)[i] == 0) continue;
-        p = &D_8013145C[i];
+        p = &BIG_KEY_PAINTING_PIECE_DEFS[i];
         n = allocObjectLayer2();
         if (n == 0) continue;
         n->active = 4;

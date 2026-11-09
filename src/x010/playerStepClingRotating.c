@@ -25,7 +25,7 @@ typedef struct {
 } G330;
 extern G330 *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern void FUN_80010d68();
+extern void PLAYER_CROUCH_ANIM();
 extern void FUN_80010dac();
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -82,7 +82,7 @@ void playerStepClingRotating(TObj *o)
         o->velX = o->wb8;
         PLAYER_EXT->w10 = GRABBED_OBJECT->h->p.whole + o->wb8;
         PLAYER_EXT->w12 = GRABBED_OBJECT->y.p.whole + o->wba;
-        o->anim = (void *)FUN_80010d68;
+        o->anim = (void *)PLAYER_CROUCH_ANIM;
         AnimJump(o, 0);
         o->timer = 10;
         o->state++;
@@ -102,7 +102,7 @@ void playerStepClingRotating(TObj *o)
             case 0x14b:
                 break;
             default:
-                o->anim = (void *)FUN_80010d68;
+                o->anim = (void *)PLAYER_CROUCH_ANIM;
                 AnimJump(o, 0);
                 PLAYER_EXT->w2e = 0xffff;
                 PLAYER_EXT->w28 = 0xffff;
@@ -191,7 +191,7 @@ void playerStepClingRotating(TObj *o)
             o->wb8 = o->velX - o->wb2;
             ORBIT(o);
         }
-        o->anim = (void *)FUN_80010d68;
+        o->anim = (void *)PLAYER_CROUCH_ANIM;
         AnimJump(o, 0);
         o->velY = 0;
         o->d84 = 0;

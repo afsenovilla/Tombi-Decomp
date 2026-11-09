@@ -1,7 +1,7 @@
 // FUNC 801210e4 496 X010
 // MATCHING 801210e4 496
 #include "TOBJ.H"
-extern unsigned short D_8012F2F8[];
+extern unsigned short TALL_PILLAR_HEIGHT_PROFILE[];
 
 void tallPillarPlayerCollision(TObj *a, TObj *b)
 {
@@ -14,7 +14,7 @@ void tallPillarPlayerCollision(TObj *a, TObj *b)
     dz = a->y.p.whole - b->y.p.whole;
     t = dz + (b->box2 + a->box2);
     if ((unsigned short)t > a->box3 + b->box3) return;
-    p = D_8012F2F8;
+    p = TALL_PILLAR_HEIGHT_PROFILE;
     k = -dz;
     n = k - 0x18;
     if (n < 0) n = 0;

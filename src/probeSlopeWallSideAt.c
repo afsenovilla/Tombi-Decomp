@@ -2,7 +2,7 @@
 // MATCHING 80041240 576
 /* debt: volatile read of c keeps lhu (stops combine turning cs = (short)c into lh). */
 extern unsigned short *COLLISION_SEG_PTR;
-extern unsigned short D_1F800284;
+extern unsigned short COLLISION_HIT_SURFACE;
 extern short *getCollisionPlaneAt(int, int);
 
 typedef struct O { char pad[0x44]; short *h; } O;
@@ -58,7 +58,7 @@ int probeSlopeWallSideAt(O *o, short x, short y)
             if (cs < k) break;
             if (k < 0) continue;
         }
-        D_1F800284 = (a & 0xe00) >> 9;
+        COLLISION_HIT_SURFACE = (a & 0xe00) >> 9;
         if (a & 0x10) {
             if (a & 4) return 1;
             return (a >> 2) & 2;

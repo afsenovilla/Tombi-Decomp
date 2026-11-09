@@ -24,7 +24,7 @@ extern TObj *GRABBED_OBJECT;
 extern unsigned char GAME_PLAYER_MODE;
 extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned short PAD_PRESSED;
-extern void FUN_80010d68();
+extern void PLAYER_CROUCH_ANIM();
 extern void FUN_80010dac();
 extern void FUN_8001fe94(TObj *, int);
 extern int FUN_8001fec0(TObj *);
@@ -107,7 +107,7 @@ void playerStepClingToObject(TObj *o)
         o->velX = o->wb8;
         PLAYER_EXT->w10 = GRABBED_OBJECT->h->p.whole + o->wb8;
         PLAYER_EXT->w12 = GRABBED_OBJECT->y.p.whole + o->wba;
-        o->anim = (void *)FUN_80010d68;
+        o->anim = (void *)PLAYER_CROUCH_ANIM;
         FUN_8001fe94(o, 0);
         o->timer = 10;
         o->state++;
@@ -176,7 +176,7 @@ void playerStepClingToObject(TObj *o)
             o->wb8 = o->velX - o->wb2;
             SETPOS(o);
         }
-        o->anim = (void *)FUN_80010d68;
+        o->anim = (void *)PLAYER_CROUCH_ANIM;
         FUN_8001fe94(o, 0);
         o->velY = 0;
         o->d84 = 0;

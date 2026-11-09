@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8013E740[];
+extern void *RACE_RIVAL_ANIMS[];
 extern short FUN_80040278(TObj *, short, short);
 extern void AnimLoadDuration(TObj *);
 
@@ -27,7 +27,7 @@ void raceRivalWaitStart(TObj *o)
         o->d8c = 0;
         o->wb0 = 0;
         o->wac = 0;
-        o->anim = D_8013E740[0];
+        o->anim = RACE_RIVAL_ANIMS[0];
         AnimLoadDuration(o);
     case 1:
         o->y.p.whole += 4;

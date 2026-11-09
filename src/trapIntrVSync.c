@@ -12,7 +12,7 @@ extern volatile int Vcount;
 extern int* D_800974D8;
 void setIntrVSync(int index, void (*callback)(void));
 
-extern void (*D_80098150[8])(void);
+extern void (*vb_callbacks[8])(void);
 
 void* startIntrVSync(void);
 
@@ -21,7 +21,7 @@ void trapIntrVSync(void) {
     s32 i;
 
     i = 0;
-    cb = D_80098150;
+    cb = vb_callbacks;
     Vcount += 1;
     (void)Vcount;
     do {

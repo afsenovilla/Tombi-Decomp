@@ -27,7 +27,7 @@ typedef struct {
 } G330;
 extern G330 *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern void FUN_80010d68();
+extern void PLAYER_CROUCH_ANIM();
 extern void FUN_80010dac();
 extern void AnimJump(TObj *, int);
 extern int AnimAdvance(TObj *);
@@ -85,7 +85,7 @@ void func_8011AA10(TObj *o)
         o->velX = o->wb8;
         PLAYER_EXT->w10 = GRABBED_OBJECT->h->p.whole + o->wb8;
         PLAYER_EXT->w12 = GRABBED_OBJECT->y.p.whole + o->wba;
-        o->anim = (void *)FUN_80010d68;
+        o->anim = (void *)PLAYER_CROUCH_ANIM;
         AnimJump(o, 0);
         o->timer = 10;
         o->state++;
@@ -98,7 +98,7 @@ void func_8011AA10(TObj *o)
         AnimAdvance(o);
         pad = &GV6.s70;
         if (!(*pad & 0x5000)) {
-            o->anim = (void *)FUN_80010d68;
+            o->anim = (void *)PLAYER_CROUCH_ANIM;
             AnimJump(o, 0);
             PLAYER_EXT->w2e = 0xffff;
             PLAYER_EXT->w28 = 0xffff;
@@ -182,7 +182,7 @@ void func_8011AA10(TObj *o)
             o->wb8 = o->velX - o->wb2;
             ORBIT(o);
         }
-        o->anim = (void *)FUN_80010d68;
+        o->anim = (void *)PLAYER_CROUCH_ANIM;
         AnimJump(o, 0);
         o->velY = 0;
         o->d84 = 0;
@@ -215,7 +215,7 @@ typedef struct {
 typedef struct L { unsigned char active; char p[0x94 - 1]; struct L *next; } L;
 extern P *PLAYER_EXT;
 extern TObj *GRABBED_OBJECT;
-extern void FUN_80010d68();
+extern void PLAYER_CROUCH_ANIM();
 extern void FUN_80010dac();
 extern void SfxPlay3(int, int);
 extern void SfxPlay2(int, int);
@@ -301,7 +301,7 @@ void playerStepClingRotating(TObj *o)
         r2->w10 = g2->h->p.whole + o->wb8;
         r2->w12 = g2->y.p.whole + o->wba;
         }
-        o->anim = (void *)FUN_80010d68;
+        o->anim = (void *)PLAYER_CROUCH_ANIM;
         AnimJump(o, 0);
         o->timer = 10;
         o->state++;
@@ -321,7 +321,7 @@ void playerStepClingRotating(TObj *o)
             case 0x14b:
                 break;
             default:
-                o->anim = (void *)FUN_80010d68;
+                o->anim = (void *)PLAYER_CROUCH_ANIM;
                 AnimJump(o, 0);
                 {
                     P *q = PLAYER_EXT;
@@ -407,7 +407,7 @@ void playerStepClingRotating(TObj *o)
             else o->wb8 = o->velX - o->wb2;
             orbit2(o, g4->d8c);
             __asm__ volatile("");
-            o->anim = (void *)FUN_80010d68;
+            o->anim = (void *)PLAYER_CROUCH_ANIM;
             AnimJump(o, 0);
             o->state = 1;
             o->velY = 0;

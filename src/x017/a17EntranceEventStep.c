@@ -8,8 +8,8 @@
 
 extern TObj PLAYER;
 extern unsigned char D_800A60E0, D_8009C939, GVARS_PLAYER_LANDED;
-extern unsigned char D_800A603CA[], D_800A603DA[], D_800A603EA[], TALK_POSE[], D_8009C939A[];
-extern short D_1F8000EEA[], D_1F8000F2A[];
+extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[], TALK_POSE[], D_8009C939A[];
+extern short VIEW_CAMERA_X[], VIEW_CAMERA_Y[];
 extern void FUN_8001e5f4(int, int);
 extern unsigned int FUN_8001f9e0(void);
 extern void playerSetAnim(TObj *, int, int);
@@ -33,13 +33,13 @@ void a17EntranceEventStep(TObj *o)
             break;
         if (GCD.bd007 != 0)
             break;
-        D_800A603CA[0] = 5;
-        D_800A603DA[0] = 100;
-        D_800A603EA[0] = 0;
+        PLAYER_STATE[0] = 5;
+        PLAYER_SUBSTATE[0] = 100;
+        PLAYER_STEP[0] = 0;
         TALK_POSE[0] = 2;
         o->w08 = 30;
-        o->a.raw = D_1F8000EEA[0];
-        o->y.raw = D_1F8000F2A[0];
+        o->a.raw = VIEW_CAMERA_X[0];
+        o->y.raw = VIEW_CAMERA_Y[0];
         D_8009C939A[0] = 1;
         FUN_8001e5f4(0x28, 0x7f);
         o->state = 3;
@@ -56,7 +56,7 @@ void a17EntranceEventStep(TObj *o)
         k = 4;
         *s = o->a.raw - k + (int)(FUN_8001f9e0() & 7);
         k = 2;
-        D_1F8000F2A[0] = o->y.raw - k + (int)(FUN_8001f9e0() & 3);
+        VIEW_CAMERA_Y[0] = o->y.raw - k + (int)(FUN_8001f9e0() & 3);
         if (--o->w08 > 0)
             break;
         TALK_POSE[0] = 0;

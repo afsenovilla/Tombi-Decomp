@@ -3,7 +3,7 @@
 #include "gv6.h"
 #include "gamestate.h"
 extern unsigned char HUD_STATE;
-extern volatile unsigned short D_8009D674;
+extern volatile unsigned short PAD_PRESSED_PREV;
 
 extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
 extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
@@ -45,8 +45,8 @@ void cutsceneAreaHandler(void)
             *(short *)(e + 0x16) = 0;
             *(short *)(e + 0x1a) = 0;
         }
-        D_8009D674 = 0;
-        t = D_8009D674;
+        PAD_PRESSED_PREV = 0;
+        t = PAD_PRESSED_PREV;
         *(unsigned short *)0x1F8001FC = 0;
         *(volatile unsigned short *)&GV6.s70 = t;
         break;

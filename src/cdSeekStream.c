@@ -17,14 +17,14 @@ void func_8001D584(short a)
 #endif
 #else
 #include "globals.h"
-extern unsigned char DAT_80077f3c[];
+extern unsigned char MOVIE_FILE_ID_INDEX[];
 extern char FILE_LINKS[];
 extern int CdControl(int, void *, void *);
 extern int CdControlF(int, void *);
 
 void cdSeekStream(short a)
 {
-    if (CdControl(2, FILE_LINKS + MOVIE_FILE_IDS[DAT_80077f3c[a]] * 8, 0) != 0)
+    if (CdControl(2, FILE_LINKS + MOVIE_FILE_IDS[MOVIE_FILE_ID_INDEX[a]] * 8, 0) != 0)
         CdControlF(0x15, 0);
 }
 #endif

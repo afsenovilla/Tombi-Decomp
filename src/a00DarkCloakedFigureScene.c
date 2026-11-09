@@ -12,7 +12,7 @@ extern unsigned char DAT_8009c93e, DAT_8009c93f, DAT_8009c942;
 extern unsigned char GAME_PLAYER_MODE;
 extern int DAT_8009c984;
 extern int GAME_AREA00_EVENT_CONTROL[];
-extern char DAT_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 extern void setEventStarted(int, int, int);
@@ -35,7 +35,7 @@ void a00DarkCloakedFigureScene(TObj *o)
         PLAYER.step = 0;
         PLAYER.state = 0;
         GAME_PLAYER_MODE = 0;
-        PLAYER.anim = DAT_80010748;
+        PLAYER.anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(&PLAYER);
         o->step++;
         break;

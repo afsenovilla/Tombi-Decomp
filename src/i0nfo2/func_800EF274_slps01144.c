@@ -3,7 +3,7 @@
 #if defined(VERSION_SLPS_01144)
 #include "TOBJ.H"
 extern TObj **CAT2_OBJECT_LIST;
-extern short D_1F80019E, CAT2_OBJECT_COUNT;
+extern short LIST_COUNTER, CAT2_OBJECT_COUNT;
 extern void topdownResolveNpcContact(unsigned char *s, TObj *o);
 extern unsigned char D_8009E4E2, D_8009E4EA[];
 extern unsigned char D_800A7B78[];
@@ -30,9 +30,9 @@ void func_800EF274(void)
     if (D_8009E4E2 != 0) {
         list = CAT2_OBJECT_LIST;
         D_800A7BE1 = 0;
-        for (D_1F80019E = CAT2_OBJECT_COUNT; D_1F80019E != 0; ) {
+        for (LIST_COUNTER = CAT2_OBJECT_COUNT; LIST_COUNTER != 0; ) {
             o = *list;
-            D_1F80019E--;
+            LIST_COUNTER--;
             list++;
             if (o->active & 1) {
                 switch (o->type) {

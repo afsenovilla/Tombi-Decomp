@@ -3,10 +3,10 @@
 // CC gcc-2.8.1
 typedef struct { unsigned char n; char p[3]; unsigned char *v; } E;
 typedef struct { char p[8]; E *e; char q[0xea - 0xc]; unsigned char n; } T;
-extern T *(*D_800981C0)();
+extern T *(*_padFuncPort2Info)();
 int PadInfoComb(int a, int i, int j)
 {
-    T *t = D_800981C0();
+    T *t = _padFuncPort2Info();
     E *e;
     if (i < 0) return t->n;
     if (i < t->n) {

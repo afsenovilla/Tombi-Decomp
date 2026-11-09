@@ -40,7 +40,7 @@ extern s8 _spu_dummy[16];
 void _spu_FwaitFs(void);
 extern s32 _spu_mem_mode;
 extern s32 _spu_mem_mode_unit;
-extern volatile s32* D_800988F8;
+extern volatile s32* spu_delay;
 
 int _spu_init(int bHot);
 
@@ -67,7 +67,7 @@ INCLUDE_ASM("asm/scus_942.36/nonmatchings/psyq/libspu/spu", _spu_FsetPCR);
 void _spu_FsetDelayW(void);
 
 void _spu_FsetDelayR(void) {
-    *D_800988F8 = (*D_800988F8 & 0xF0FFFFFF) | 0x22000000;
+    *spu_delay = (*spu_delay & 0xF0FFFFFF) | 0x22000000;
 }
 
 void _spu_FwaitFs(void);

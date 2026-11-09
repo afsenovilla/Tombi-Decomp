@@ -7,7 +7,7 @@
 #include "TOBJ.H"
 typedef struct { unsigned short b0, b1, b2, b3, w1e, wac; int idx; void **anims; } E20;
 typedef struct { Fix16 a, y, b; } FV;
-extern E20 D_8013C928[];
+extern E20 CHAIN_SEGMENT_ENEMY_DEFS[];
 extern int SPR_DATA[];
 static char D_8013C94A[50] = {
     0, 0, -0x24, -0x1b, 0x13, -0x80, 1, 1, 0, 0x10, 0, 0, 1, 1, 0, 0x10,
@@ -35,14 +35,14 @@ void func_8012DD24(TObj *o)
     case 0:
         o->b04++;
         o->b0d = 0;
-        o->box0 = D_8013C928[o->subtype].b0;
-        o->box1 = D_8013C928[o->subtype].b1;
-        o->box2 = D_8013C928[o->subtype].b2;
-        o->box3 = D_8013C928[o->subtype].b3;
-        o->w1e = D_8013C928[o->subtype].w1e;
-        o->d3c = SPR_DATA[D_8013C928[o->subtype].idx];
-        o->wac = D_8013C928[o->subtype].wac;
-        o->anim = D_8013C928[o->subtype].anims[o->wac];
+        o->box0 = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].b0;
+        o->box1 = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].b1;
+        o->box2 = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].b2;
+        o->box3 = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].b3;
+        o->w1e = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].w1e;
+        o->d3c = SPR_DATA[CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].idx];
+        o->wac = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].wac;
+        o->anim = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].anims[o->wac];
         AnimLoadDuration(o);
         if (o->d94)
             o->active = 3;
@@ -140,7 +140,7 @@ void func_8012DD24(TObj *o)
 #include "TOBJ.H"
 typedef struct { unsigned short b0, b1, b2, b3, w1e, wac; int idx; void **anims; } E20;
 typedef struct { Fix16 a, y, b; } FV;
-extern E20 D_8013C928[];
+extern E20 CHAIN_SEGMENT_ENEMY_DEFS[];
 extern int SPR_DATA[];
 static char D_8013C94A[50] = {
     0, 0, -0x24, -0x1b, 0x13, -0x80, 1, 1, 0, 0x10, 0, 0, 1, 1, 0, 0x10,
@@ -170,14 +170,14 @@ void updateChainSegmentEnemy(TObj *o)
         o->b6b = o->animFrame;
         o->animFrame = 0;
         o->b0d = 0;
-        o->box0 = D_8013C928[o->subtype].b0;
-        o->box1 = D_8013C928[o->subtype].b1;
-        o->box2 = D_8013C928[o->subtype].b2;
-        o->box3 = D_8013C928[o->subtype].b3;
-        o->w1e = D_8013C928[o->subtype].w1e;
-        o->d3c = SPR_DATA[D_8013C928[o->subtype].idx];
-        o->wac = D_8013C928[o->subtype].wac;
-        o->anim = D_8013C928[o->subtype].anims[o->wac];
+        o->box0 = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].b0;
+        o->box1 = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].b1;
+        o->box2 = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].b2;
+        o->box3 = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].b3;
+        o->w1e = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].w1e;
+        o->d3c = SPR_DATA[CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].idx];
+        o->wac = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].wac;
+        o->anim = CHAIN_SEGMENT_ENEMY_DEFS[o->subtype].anims[o->wac];
         AnimLoadDuration(o);
         if (o->d94)
             o->active = 3;

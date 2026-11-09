@@ -4,7 +4,7 @@
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 8003BE14 (updateItemPickupAnim.c): no subtype 13 exception.
 #include "TOBJ.H"
-extern unsigned char DAT_8007a138[];
+extern unsigned char ITEM_PICKUP_SFX[];
 extern char MOVE_TABLE_2[], MOVE_TABLE_0[];
 extern void SfxPlay(int);
 extern void awardAPByArea(int, int, int, int);
@@ -16,7 +16,7 @@ void updateItemPickupAnim(TObj *o)
     short s;
     switch (o->state) {
     case 0:
-        SfxPlay(DAT_8007a138[o->subtype]);
+        SfxPlay(ITEM_PICKUP_SFX[o->subtype]);
         awardAPByArea(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         o->b0b = 1;
         o->b0f = 4;
@@ -47,7 +47,7 @@ void updateItemPickupAnim(TObj *o)
 }
 #else
 #include "TOBJ.H"
-extern unsigned char DAT_8007a138[];
+extern unsigned char ITEM_PICKUP_SFX[];
 extern char MOVE_TABLE_2[], MOVE_TABLE_0[];
 extern void SfxPlay(int);
 extern void awardAPByArea(int, int, int, int);
@@ -59,7 +59,7 @@ void updateItemPickupAnim(TObj *o)
     short s;
     switch (o->state) {
     case 0:
-        SfxPlay(DAT_8007a138[o->subtype]);
+        SfxPlay(ITEM_PICKUP_SFX[o->subtype]);
         awardAPByArea(500, o->a.p.whole, o->y.p.whole, o->b.p.whole);
         o->ba5 = 0;
         if (o->subtype != 0xd) {

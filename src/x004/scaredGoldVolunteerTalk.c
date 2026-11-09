@@ -6,8 +6,8 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_80131188[];
-extern short D_1F8001C6;
+extern AT SCARED_GOLD_VOLUNTEER_DEFS_ANIMS[];
+extern short DRAW_FROZEN;
 extern unsigned char D_8009CFDD, D_8009CFF7;
 extern void AnimJump(TObj *, int);
 extern void AnimAdvance(TObj *);
@@ -19,7 +19,7 @@ extern void printInfoMessage(int, int);
 static __inline__ void setanim(TObj *o, short n)
 {
     if (WD2(o) != n) {
-        o->anim = D_80131188[o->subtype].anims[n];
+        o->anim = SCARED_GOLD_VOLUNTEER_DEFS_ANIMS[o->subtype].anims[n];
         AnimJump(o, 0);
         WD2(o) = n;
     }
@@ -65,7 +65,7 @@ void scaredGoldVolunteerTalk(TObj *o)
         ((unsigned char*)&GVARS.b3e)[0] = 0;
         ((short*)&PLAYER.obj.wb2)[0] = 0;
         o->animFrame = o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         ((unsigned char*)&PLAYER.obj.b04)[0] = 1;
         ((unsigned char*)&PLAYER.obj.step)[0] = 0;
         ((unsigned char*)&PLAYER.obj.state)[0] = 0;

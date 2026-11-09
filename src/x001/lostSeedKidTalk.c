@@ -172,7 +172,7 @@ extern unsigned char PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 
 /* halfword view of o->anim (+0x24): an in-struct store, so it does not depend on the raw PLAYER_EXT store */
 typedef struct { char pad[0x24]; unsigned short a; } AnimH;
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void AnimLoadDuration(TObj *);
 extern TObj *showMessageBox(int, int, int, int);
 extern void FUN_8001fce4(TObj *);
@@ -190,7 +190,7 @@ void lostSeedKidTalk(TObj *o)
         GVARS.b3f = 1;
         GVARS.b3e = 1;
         GVARS.b42 = 1;
-        P.anim = D_80010748;
+        P.anim = PLAYER_IDLE_ANIM;
         AnimLoadDuration(&P);
         e->step = 1;
         e->state = 0;

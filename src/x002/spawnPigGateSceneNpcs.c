@@ -17,7 +17,7 @@ typedef struct {
 } E;
 typedef struct { short x, y, z, sub; } E8;
 
-extern E D_8011C984[], D_8011CA9C[];
+extern E PIG_GATE_SCENE_ACTORS[], PIG_GATE_SCENE_ACTORS_B[];
 extern E8 D_8011C93C[];
 extern TObj *SCRIPT_OBJECTS[], *D_8009F378[], *D_8009F328[], *D_8009F2E0[];
 extern TObj *allocObjectLayer2(void);
@@ -31,7 +31,7 @@ void func_80118CB8(TObj *o)
     TObj *p;
     TObj *q;
 
-    for (i = 0, e = D_8011C984; e->flags != 0xff; e = &D_8011C984[++i]) {
+    for (i = 0, e = PIG_GATE_SCENE_ACTORS; e->flags != 0xff; e = &PIG_GATE_SCENE_ACTORS[++i]) {
         p = allocObjectLayer2();
         if (p == 0) continue;
         p->active = 3;
@@ -66,7 +66,7 @@ void func_80118CB8(TObj *o)
         for (i = 0; i < 6; i++) D_8009F2E0[i]->y.p.whole -= 0x140;
     }
     if (GCD.bce41 == 0) {
-        for (i = 0, e = D_8011CA9C; e->flags != 0xff; e = &D_8011CA9C[++i]) {
+        for (i = 0, e = PIG_GATE_SCENE_ACTORS_B; e->flags != 0xff; e = &PIG_GATE_SCENE_ACTORS_B[++i]) {
             p = allocObjectLayer2();
             if (p == 0) continue;
             p->active = 2;
@@ -144,7 +144,7 @@ typedef struct {
 } E;
 typedef struct { short x, y, z, sub; } E8;
 
-extern E D_8011C984[], D_8011CA9C[];
+extern E PIG_GATE_SCENE_ACTORS[], PIG_GATE_SCENE_ACTORS_B[];
 extern E8 D_8011C93C[];
 extern TObj *SCRIPT_OBJECTS[], *D_8009F378[], *D_8009F328[], *D_8009F2E0[];
 extern TObj *allocObjectLayer2(void);
@@ -158,7 +158,7 @@ void spawnPigGateSceneNpcs(TObj *o)
     TObj *p;
     TObj *q;
 
-    for (i = 0, e = D_8011C984; e->flags != 0xff; e = &D_8011C984[++i]) {
+    for (i = 0, e = PIG_GATE_SCENE_ACTORS; e->flags != 0xff; e = &PIG_GATE_SCENE_ACTORS[++i]) {
         p = allocObjectLayer2();
         if (p == 0) continue;
         p->active = 3;
@@ -193,7 +193,7 @@ void spawnPigGateSceneNpcs(TObj *o)
         for (i = 0; i < 6; i++) D_8009F2E0[i]->y.p.whole -= 0x140;
     }
     if (GCD.bce41 == 0) {
-        for (i = 0, e = D_8011CA9C; e->flags != 0xff; e = &D_8011CA9C[++i]) {
+        for (i = 0, e = PIG_GATE_SCENE_ACTORS_B; e->flags != 0xff; e = &PIG_GATE_SCENE_ACTORS_B[++i]) {
             p = allocObjectLayer2();
             if (p == 0) continue;
             p->active = 2;

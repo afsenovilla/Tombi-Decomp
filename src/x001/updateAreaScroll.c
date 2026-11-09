@@ -26,8 +26,8 @@ extern Fn D_80079A98[];
 extern unsigned char D_800A60DA, D_800A60E0, D_800A60D8, PLAYER_STATE, PLAYER_SUBSTATE, PLAYER_STEP;
 extern signed char GAME_PLAYER_MODE;
 extern unsigned short PLAYER_ANIM_FRAME;
-extern S2 *D_800A6078x[];
-#define D_800A6078 D_800A6078x[0]
+extern S2 *PLAYER_H[];
+#define D_800A6078 PLAYER_H[0]
 extern short PLAYER_H_WHOLE, PLAYER_Y_WHOLE, PLAYER_D_WHOLE;
 extern unsigned int stepScrollReturnY(O *);
 extern unsigned int stepScrollClearX(O *);

@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 #include "gamestate.h"
 extern char D_800112E0[];
-extern char D_80010AE8[];
+extern char PLAYER_FALL_ANIM[];
 void AnimLoadDuration(TObj *o);
 void AnimJump(TObj *o, short n);
 
@@ -41,7 +41,7 @@ void playerAirSpinToFall(TObj *o)
                 o->anim = D_800112E0;
                 AnimLoadDuration(o);
             } else {
-                o->anim = D_80010AE8;
+                o->anim = PLAYER_FALL_ANIM;
                 AnimJump(o, 3);
             }
         } else {
@@ -54,7 +54,7 @@ void playerAirSpinToFall(TObj *o)
                 o->anim = D_800112E0;
                 AnimLoadDuration(o);
             } else {
-                o->anim = D_80010AE8;
+                o->anim = PLAYER_FALL_ANIM;
                 AnimJump(o, 3);
             }
         }

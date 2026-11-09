@@ -25,7 +25,7 @@ extern short D_1F8001C6_[];
 #define D_1F8001C6 D_1F8001C6_[0]
 extern short D_800A7C2A_[];
 #define D_800A7C2A D_800A7C2A_[0]
-extern G *D_1F8001D4;
+extern G *TASK_C;
 extern void func_8001D584(int);
 extern void func_8001F050(int);
 extern void func_80016740(int, void *);
@@ -84,7 +84,7 @@ void func_80123744_slps01144(TObj *o, int id)
             break;
         }
     case 10:
-        t = D_1F8001D4;
+        t = TASK_C;
         GAME.nextArea = 10;
         GAME.nextSection = 0;
         GAME.nextSpawnPoint = 0;

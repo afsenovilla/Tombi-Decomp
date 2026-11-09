@@ -3,13 +3,13 @@
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct { short w0, w2, w4, w6, w8; } S;
-extern unsigned char D_8013C7C8[];
-extern unsigned char D_8013C7D8[];
+extern unsigned char PURPLE_CRAWLER_RAND_TABLE[];
+extern unsigned char PURPLE_CRAWLER_WALK_RAND_TABLE[];
 extern char D_80077CE8[];
 extern char MOVE_TABLE_1[];
 extern void *D_8013FC74[];
 extern short COLLISION_HIT_HEIGHT;
-extern short D_1F800284;
+extern short COLLISION_HIT_SURFACE;
 extern short COS_TABLE[];
 extern short D_8007A1F0[];
 extern int Rand(void);
@@ -54,7 +54,7 @@ static __inline__ int land(TObj *o)
         o->b69 = 0;
         o->wba = 0;
         o->wb2 = COLLISION_HIT_HEIGHT;
-        o->wae = D_1F800284;
+        o->wae = COLLISION_HIT_SURFACE;
         o->d8c = (-COLLISION_HIT_HEIGHT << 2) & 0xff;
         return 1;
     }
@@ -68,11 +68,11 @@ void purpleCrawlerWalk(TObj *o)
     switch (o->state) {
     case 0:
         o->b9c = 0;
-        if (D_8013C7C8[Rand() & 0xf])
+        if (PURPLE_CRAWLER_RAND_TABLE[Rand() & 0xf])
             o->movetab = D_80077CE8;
         else
             o->movetab = MOVE_TABLE_1;
-        if (D_8013C7D8[Rand() & 7]) {
+        if (PURPLE_CRAWLER_WALK_RAND_TABLE[Rand() & 7]) {
             o->timer = 300;
             o->ba7 = 0;
         } else {

@@ -11,7 +11,7 @@ extern char D_80134704[];
 static void *D_801345BC[4] = {
     D_801346A8, D_801346EC, D_801346F8, D_80134704,
 };
-extern unsigned short D_80131128[];
+extern unsigned short BLACK_CROW_RAND_STATES[];
 extern void AnimLoadDuration(TObj *);
 extern int Rand(void);
 
@@ -60,7 +60,7 @@ void blackCrowWatchPlayer(TObj *o)
             o->state = 0;
             o->substep = 0;
         } else {
-            o->state = D_80131128[Rand() & 0xf];
+            o->state = BLACK_CROW_RAND_STATES[Rand() & 0xf];
             o->substep = 0;
         }
         break;

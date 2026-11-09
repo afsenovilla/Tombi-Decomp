@@ -3,7 +3,7 @@
 #if defined(VERSION_SLPS_01144)
 extern unsigned char D_8009E4E2;
 extern unsigned char D_8009E4F4[4];
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 #define spawnImpactEffect func_800208E4
 #include "spad.h"
 #include "gvars.h"
@@ -43,7 +43,7 @@ void func_8011D534_slps01144(TObj *o, TObj *e)
         if (p->wd0 < 0) {
             p->wd0 = 0;
         }
-        D_1F80019E = 0;
+        LIST_COUNTER = 0;
     }
 }
 #endif

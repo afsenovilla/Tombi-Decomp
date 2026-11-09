@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned short *D_8013C6A4[];
+extern unsigned short *SWINGING_ROPE_HEIGHT_PROFILES[];
 extern int resolveHitResultA(TObj *, TObj *);
 
 void swingingRopeObjectCollision(TObj *a, TObj *b)
@@ -18,7 +18,7 @@ void swingingRopeObjectCollision(TObj *a, TObj *b)
     t = dz + (b->box2 + a->box2);
     if ((unsigned short)t > a->box3 + b->box3) return;
     n = -dz - 0x18;
-    p = D_8013C6A4[b->subtype];
+    p = SWINGING_ROPE_HEIGHT_PROFILES[b->subtype];
     if (n < 0) n = 0;
     t = p[n >> 3];
     if ((unsigned short)(a->h->p.whole - (b->h->p.whole + t) + (b->box0 + a->box0)) > b->box1 + a->box1) return;

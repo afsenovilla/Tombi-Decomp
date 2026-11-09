@@ -4,8 +4,8 @@
 #include "TOBJ.H"
 typedef struct { TObj t; char pad[0xec - 0xc0]; } E;
 extern TObj PLAYER;
-extern E D_800B1478[];
-extern short D_1F80019C;
+extern E OBJECT_POOL_LAYER1[];
+extern short SWAP_INDEX;
 extern int isObjectInView(TObj *);
 extern void spawnLeafShakeLeaves(int, int, int);
 extern void SfxPlay2(int, int);
@@ -61,8 +61,8 @@ void updateA00LeafShakeTrigger(TObj *o)
                     Act(o);
                 }
             } else {
-                e = D_800B1478;
-                for (D_1F80019C = 0; D_1F80019C < 4; D_1F80019C++, e++) {
+                e = OBJECT_POOL_LAYER1;
+                for (SWAP_INDEX = 0; SWAP_INDEX < 4; SWAP_INDEX++, e++) {
                     if (e->t.active == 1 && Hit(o, &e->t)) {
                         spawnLeafShakeLeaves(e->t.a.p.whole, e->t.y.p.whole, e->t.b.p.whole);
                         Act(o);

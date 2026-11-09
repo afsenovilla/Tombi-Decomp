@@ -3,7 +3,7 @@
 #include "TOBJ.H"
 extern unsigned char D_1F8001A5;
 extern TObj **CAT2_OBJECT_LIST;
-extern short D_1F80019E, CAT2_OBJECT_COUNT;
+extern short LIST_COUNTER, CAT2_OBJECT_COUNT;
 extern void tunnelResolveNpcContact(unsigned char *s, TObj *o);
 extern unsigned char GVARS_PLAYER_LANDED, D_8009C942[];
 extern unsigned char PLAYER[];
@@ -31,9 +31,9 @@ void tunnelPlayerNpcCollision(void)
         if (GVARS_PLAYER_LANDED != 0) {
             list = CAT2_OBJECT_LIST;
             D_800A60A1 = 0;
-            for (D_1F80019E = CAT2_OBJECT_COUNT; D_1F80019E != 0; ) {
+            for (LIST_COUNTER = CAT2_OBJECT_COUNT; LIST_COUNTER != 0; ) {
                 o = *list;
-                D_1F80019E--;
+                LIST_COUNTER--;
                 list++;
                 if (o->active & 1) {
                     switch (o->type) {

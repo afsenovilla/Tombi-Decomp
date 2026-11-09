@@ -3,8 +3,8 @@
 #include "spad.h"
 #include "TOBJ.H"
 typedef struct B { unsigned char c[4]; } B;
-extern B D_8012F3D4[];
-extern void *D_80132310[];
+extern B SPEAR_PIG_ANIM_BOXES[];
+extern void *SPEAR_PIG_ANIMS[];
 extern unsigned char D_8012F494[];
 extern void playSFX(int);
 extern void AnimLoadDuration(TObj *);
@@ -20,13 +20,13 @@ static __inline__ void setAnim(TObj *o, void *a)
 }
 
 #define SETANIM(k) \
-    { unsigned char a0 = D_8012F3D4[k].c[0], a1 = D_8012F3D4[k].c[1], a2 = D_8012F3D4[k].c[2], a3 = D_8012F3D4[k].c[3]; \
+    { unsigned char a0 = SPEAR_PIG_ANIM_BOXES[k].c[0], a1 = SPEAR_PIG_ANIM_BOXES[k].c[1], a2 = SPEAR_PIG_ANIM_BOXES[k].c[2], a3 = SPEAR_PIG_ANIM_BOXES[k].c[3]; \
     o->wac = k; \
     o->box0 = a0; \
     o->box1 = a1; \
     o->box2 = a2; \
     o->box3 = a3; \
-    setAnim(o, D_80132310[k]); }
+    setAnim(o, SPEAR_PIG_ANIMS[k]); }
 
 static __inline__ short land(TObj *o)
 {

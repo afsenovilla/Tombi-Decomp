@@ -2,7 +2,7 @@
 // MATCHING 8001e76c 464
 #include "globals.h"
 extern unsigned short PITCH_SLIDE_VOICE;
-extern unsigned char DAT_800780c4[];
+extern unsigned char SFX_TONE_TABLE[];
 extern unsigned char *SFX_BANKS[];
 extern unsigned short VAB_IDS[];
 extern short VOICE_SFX_ID[];
@@ -29,7 +29,7 @@ int playSFXWithPitchSlide(unsigned p1, unsigned p2, unsigned p3, unsigned p4)
     }
     sv = p1; asm("" : "=r"(sv) : "0"(sv));
     idx = (sv & 0xffff) * 2;
-    q = SFX_BANKS[DAT_800780c4[idx]] + DAT_800780c4[idx + 1] * 8;
+    q = SFX_BANKS[SFX_TONE_TABLE[idx]] + SFX_TONE_TABLE[idx + 1] * 8;
     PITCH_SLIDE_VAB = VAB_IDS[q[0]];
     PITCH_SLIDE_PROG = q[1];
     t = q[3];

@@ -8,7 +8,7 @@
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8013117C[];
+extern AT MERMAID_DEFS_ANIMS[];
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 
@@ -35,7 +35,7 @@ void func_801268A4(TObj *o)
             o->d90 = showMessageBoxDirect(4, 3, &v);
         else
             o->d90 = showMessageBoxDirect(4, 0, &v);
-        o->anim = D_8013117C[o->subtype].anims[2];
+        o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -43,7 +43,7 @@ void func_801268A4(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        o->anim = D_8013117C[o->subtype].anims[0];
+        o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -69,7 +69,7 @@ void func_801268A4(TObj *o)
 #include "TOBJ.H"
 typedef struct { short v[6]; } V6;
 typedef struct { void **anims; int a; int b; } AT;
-extern AT D_8013117C[];
+extern AT MERMAID_DEFS_ANIMS[];
 extern void AnimJump(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
 
@@ -95,7 +95,7 @@ void mermaidNecklaceTalk(TObj *o)
             o->d90 = showMessageBoxDirect(4, 3, &v);
         else
             o->d90 = showMessageBoxDirect(4, 0, &v);
-        o->anim = D_8013117C[o->subtype].anims[2];
+        o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[2];
         AnimJump(o, 0);
         o->state++;
         break;
@@ -103,7 +103,7 @@ void mermaidNecklaceTalk(TObj *o)
         p = (TObj *)o->d90;
         if (p->b04 != 2) break;
         p->b04 = 3;
-        o->anim = D_8013117C[o->subtype].anims[0];
+        o->anim = MERMAID_DEFS_ANIMS[o->subtype].anims[0];
         AnimJump(o, 0);
         o->state++;
         break;

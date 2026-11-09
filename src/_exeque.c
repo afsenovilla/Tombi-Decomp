@@ -85,7 +85,7 @@ extern volatile s32* DMA2_CHCR;
 extern volatile s32* DMA2_MADR;
 extern volatile s32* DMA2_BCR;
 extern volatile s32* DPCR;
-extern volatile s32 D_80091A2C;
+extern volatile s32 _qlog;
 extern volatile s32 D_80091A30;
 extern volatile s32 D_80091A34;
 extern volatile s32 GPU_QIN;
@@ -486,7 +486,7 @@ s32 _exeque(void)
                 GPU_QITEM[GPU_QOUT].unk4,
                 GPU_QITEM[GPU_QOUT].unk8
             );
-            *(&D_80091A2C) = GPU_QITEM[GPU_QOUT].unk0;
+            *(&_qlog) = GPU_QITEM[GPU_QOUT].unk0;
             D_80091A30 = GPU_QITEM[GPU_QOUT].unk4;
             D_80091A34 = GPU_QITEM[GPU_QOUT].unk8;
             GPU_QOUT = GPU_QOUT + 1 & 0x3F;

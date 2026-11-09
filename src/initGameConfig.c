@@ -11,8 +11,8 @@
    inside the 0xff stores' range makes the 255 pseudo overlap the 3 pseudo so it gets v1; sched2 then emits the
    free stores in source order (ties by luid). */
 extern unsigned short BUTTON_CONFIG_INDEX;
-extern unsigned char DAT_1f8001b3;
-extern unsigned char DAT_1f8001ab;
+extern unsigned char DEBUG_KEEP_INVENTORY;
+extern unsigned char DEBUG_GIVE_ITEMS;
 extern short D_8009D2A4;
 extern short DAT_1f8000ea;
 extern short VIEW_CAMERA_X;
@@ -23,9 +23,9 @@ extern short VIEW_CAMERA_ROT_Y;
 extern short DAT_1f8000f6;
 extern unsigned char LOADED_SOUND_SET;
 extern unsigned char D_8009C972;
-extern unsigned char DAT_1f8003ce;
+extern unsigned char PAUSE_MENU_LOCK;
 extern short SPAWN_AXIS_SWAP;
-extern unsigned char DAT_1f8003d1;
+extern unsigned char WARP_FADE_ACTIVE;
 extern unsigned short AREA_VARIANT;
 extern unsigned char D_8009C973;
 extern unsigned char SCRIPT_FLAGS;
@@ -66,9 +66,9 @@ void initGameConfig(void)
     GAME.saveSlot = 255;
     GCD.bd090 = 255;
     GCD.bcf1c = BUTTON_CONFIG_INDEX;
-    DAT_1f8003ce = 0;
+    PAUSE_MENU_LOCK = 0;
     SPAWN_AXIS_SWAP = 0;
-    DAT_1f8003d1 = 0;
+    WARP_FADE_ACTIVE = 0;
     AREA_VARIANT = 0;
     (*(short*)&GAME.selectedSection) = 0;
     GAME.inventoryScreen = 0;
@@ -81,8 +81,8 @@ void initGameConfig(void)
     GCD.scfd0 = 1498;
     GCD.scfd2 = 1593;
     GCD.scfd4 = 1681;
-    if (DAT_1f8001b3 == 0) {
-        if (DAT_1f8001ab != 0) {
+    if (DEBUG_KEEP_INVENTORY == 0) {
+        if (DEBUG_GIVE_ITEMS != 0) {
             D_8009D1A4 = 27;
             D_8009D1A5 = 33;
             D_8009D1A6 = 34;

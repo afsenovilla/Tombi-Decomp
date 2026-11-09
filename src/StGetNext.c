@@ -5,23 +5,23 @@
 #include "common.h"
 #include "psyq/libcd.h"
 
-extern s32 D_800A2524;
+extern s32 StRingIdx3;
 extern s32 ST_END_FRAME;
 extern StHEADER* ST_RING_ADDR;
 extern volatile s32 ST_RING_SIZE;
 
 u_long StGetNext(u_long** addr, u_long** header) {
-    volatile StHEADER* ptr = &ST_RING_ADDR[D_800A2524];
+    volatile StHEADER* ptr = &ST_RING_ADDR[StRingIdx3];
     if (ptr->id == 1) {
-        D_800A2524 = 0;
+        StRingIdx3 = 0;
         if (ST_END_FRAME != 0) {
             ptr->id = 0;
         }
-        ptr = &ST_RING_ADDR[D_800A2524];
+        ptr = &ST_RING_ADDR[StRingIdx3];
     }
     if (ptr->id == 2) {
         ptr->id = 4;
-        *addr = &ST_RING_ADDR[ST_RING_SIZE] + (D_800A2524 * 0x3F);
+        *addr = &ST_RING_ADDR[ST_RING_SIZE] + (StRingIdx3 * 0x3F);
         *header = ptr;
         return 0;
     } else {

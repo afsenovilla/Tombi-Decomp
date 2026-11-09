@@ -1,7 +1,7 @@
 // FUNC 800eb4c8 1896 I0NFO
 // MATCHING 800eb4c8 1896
 #include "TOBJ.H"
-extern unsigned short D_800B1320[];
+extern unsigned short CAT3_OBJECT_LIST_BUF[];
 extern unsigned short D_800A4678[];
 extern unsigned long *D_800A4680;
 
@@ -26,7 +26,7 @@ void overheadBuildMapStrip(unsigned char type, unsigned long *d)
     case 3: mode = 3; rows = 0x20; idx = 0x64; break;
     case 4: mode = 4; rows = 0x20; idx = 0x68; break;
     }
-    v = D_800B1320[idx];
+    v = CAT3_OBJECT_LIST_BUF[idx];
     w = D_800A4678[0];
     stride = w * 8;
     s = D_800A4680;

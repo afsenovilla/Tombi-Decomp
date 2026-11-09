@@ -3,11 +3,11 @@
 // FLAGS -O2 -G0
 // AS gnu
 /* setRC2wait (libpad/waitrc2.c). Library code: GNU as fills the `lui at` / `sw lo(at)` delay slot. */
-extern int DAT_800a0a18;
-extern int DAT_8009c33c;
+extern int PAD_RC2_WAIT_LIMIT;
+extern int PAD_RC2_WAIT_START;
 void setRC2wait(int a)
 {
     int t = *(volatile unsigned short *)0x1f801120;
-    DAT_800a0a18 = a;
-    DAT_8009c33c = t;
+    PAD_RC2_WAIT_LIMIT = a;
+    PAD_RC2_WAIT_START = t;
 }

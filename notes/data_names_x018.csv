@@ -1,0 +1,7 @@
+address,name,size,source
+8011a4b0,JUICE_MAN_DEFS,,usage: {box; w1e; ...; anims}[subtype] initJuiceManJoinFight copies refs=7
+8011a4b8,JUICE_MAN_DEFS_ANIMS,,usage: JUICE_MAN_DEFS+8: the anims column (juiceManSetAnim / JoinFightTalk) refs=2
+8011a55c,WITCH_MIZUNO_DEFS,,usage: {box; w1e; ...; anims}[subtype] initWitchMizuno copies refs=7
+8011a564,WITCH_MIZUNO_DEFS_ANIMS,,usage: WITCH_MIZUNO_DEFS+8: the anims column (witchMizuno*Talk) refs=11
+8011a4a0,DRIFTING_CLOUD_QUAD,,usage: short[8]: the 4 {x y} corners updateDriftingCloud copies into the quad refs=8
+8011ca48,DRIFTING_CLOUD_ANIMS,,usage: anim pointers by b0c (updateDriftingCloud) refs=1

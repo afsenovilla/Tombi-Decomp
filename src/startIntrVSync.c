@@ -14,9 +14,9 @@
 #include "psyq/libetc.h"
 #include "psyq/kernel.h"
 typedef void (*Callback)();     /* libetc INTR_VB.OBJ: a vertical-blank callback */
-extern Callback D_80098150[8];          /* INTR_VB.OBJ .data+0: the vertical-blank callback slots */
+extern Callback vb_callbacks[8];          /* INTR_VB.OBJ .data+0: the vertical-blank callback slots */
 extern volatile s32 D_80098170;         /* Vcount (INTR_VB.OBJ .data+0x20): the vertical-blank count */
-extern volatile u_long *D_80098174;     /* INTR_VB.OBJ .data+0x24: -> root counter 1's mode register (0x1F801114) */
+extern volatile u_long *vb_rcnt1_mode;     /* INTR_VB.OBJ .data+0x24: -> root counter 1's mode register (0x1F801114) */
 void func_800953C0(void);                               /* trapIntrVSync (libetc_intr_vb_2.c) */
 Callback setIntrVSync(int index, Callback callback);   /* setIntrVSync (libetc_intr_vb_2.c) */
 void func_80095458(s32 *, s32);                         /* memclr (libetc_intr_vb_2.c) */
@@ -31,9 +31,9 @@ Callback InterruptCallback(s32 irq, Callback f);
 /* func_80095368 */
 void *startIntrVSync(void)
 {
-    *D_80098174 = 0x107; /* port: 0x100 in PSY-Q 4.5 (eternal-silver); PAL Tombi has 0x107 */
+    *vb_rcnt1_mode = 0x107; /* port: 0x100 in PSY-Q 4.5 (eternal-silver); PAL Tombi has 0x107 */
     D_80098170 = 0;
-    func_80095458((s32 *)D_80098150, 8);
+    func_80095458((s32 *)vb_callbacks, 8);
     InterruptCallback(0, func_800953C0);
     return setIntrVSync;
 }

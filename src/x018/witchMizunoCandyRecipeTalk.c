@@ -6,13 +6,13 @@
 typedef struct { short v[6]; } V6;
 typedef struct { void **p; int a, b; } T12;
 typedef struct { char p[0xd2]; unsigned short wd2; } E;
-extern T12 D_8011A564[];
+extern T12 WITCH_MIZUNO_DEFS_ANIMS[];
 extern TObj PLAYER;
 #define P PLAYER
 extern signed char GAME_PLAYER_MODE[];
 extern unsigned char PLAYER_STATE[], PLAYER_SUBSTATE[], PLAYER_STEP[];
 extern short D_800A60EA[];
-extern short D_1F8001C6;
+extern short DRAW_FROZEN;
 extern int AnimAdvance(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern int showMessageBoxDirect(int, int, V6 *);
@@ -25,7 +25,7 @@ extern void FUN_80026c50(int, int, int);
 static __inline__ void setanim(TObj *o, short n)
 {
     if (WD2(o) != n) {
-        o->anim = D_8011A564[o->subtype].p[n];
+        o->anim = WITCH_MIZUNO_DEFS_ANIMS[o->subtype].p[n];
         FUN_8001fe94(o, 0);
         WD2(o) = n;
     }
@@ -182,7 +182,7 @@ void witchMizunoCandyRecipeTalk(TObj *o)
         ((unsigned char*)&GVARS.b42)[0] = 0;
         D_800A60EA[0] = 0;
         o->animFrame = o->wbc;
-        D_1F8001C6 = 0;
+        DRAW_FROZEN = 0;
         PLAYER_STATE[0] = 1;
         PLAYER_SUBSTATE[0] = 0;
         PLAYER_STEP[0] = 0;

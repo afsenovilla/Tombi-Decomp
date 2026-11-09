@@ -6,7 +6,7 @@
 // Japanese version of PAL main0 80045684 (playerTouchCat2Type0E.c): 228 -> 212.
 extern short pushObjectOutOfObjectBoxA(unsigned char *, unsigned char *);
 extern void spawnImpactEffect(int, int, int, int);
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 
 #define U(p, o) (*(unsigned short *)((p) + (o)))
 #define S(p, o) (*(short *)((p) + (o)))
@@ -42,7 +42,7 @@ void playerTouchCat2Type0E(unsigned char *a, unsigned char *b)
             *(unsigned char **)(a + 0xd4) = b;
             a[0xac] = 2;
             spawnImpactEffect(2, S(a, 0x12), S(a, 0x16), S(a, 0x1a));
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
     }
 }
@@ -51,7 +51,7 @@ void playerTouchCat2Type0E(unsigned char *a, unsigned char *b)
 // +0xd0 (PAL +0xe4).
 extern short FUN_80043260(unsigned char *, unsigned char *);
 extern void FUN_8001f96c(int, int, int, int);
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 
 #define U(p, o) (*(unsigned short *)((p) + (o)))
 #define S(p, o) (*(short *)((p) + (o)))
@@ -87,14 +87,14 @@ void FUN_80045684(unsigned char *a, unsigned char *b)
             *(unsigned char **)(a + 0xd0) = b;
             a[0xac] = 2;
             FUN_8001f96c(2, S(a, 0x12), S(a, 0x16), S(a, 0x1a));
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
     }
 }
 #else
 extern short pushObjectOutOfObjectBoxA(unsigned char *, unsigned char *);
 extern void spawnImpactEffect(int, int, int, int);
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 
 #define U(p, o) (*(unsigned short *)((p) + (o)))
 #define S(p, o) (*(short *)((p) + (o)))
@@ -130,7 +130,7 @@ void playerTouchCat2Type0E(unsigned char *a, unsigned char *b)
             *(unsigned char **)(a + 0xe4) = b;
             a[0xac] = 2;
             spawnImpactEffect(2, S(a, 0x12), S(a, 0x16), S(a, 0x1a));
-            DAT_1f80019e = 0;
+            LIST_COUNTER = 0;
         }
     }
 }

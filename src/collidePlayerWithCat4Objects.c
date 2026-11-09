@@ -7,7 +7,7 @@
 extern void func_8004E654_slps01144(TObj *, TObj *);
 #include "gamestate.h"
 
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 void playerPushOutOfObjectBox(TObj *o, TObj *e);
 void playerContactCat4Type01(TObj *o, TObj *e);
 void playerContactCat4Type02(TObj *o, TObj *e);
@@ -67,9 +67,9 @@ void func_80051F44(TObj *o)
     TObj *e;
 
     pp = (*(TObj ***)&SPAD.p224);
-    for (D_1F80019E = SPAD.s24c; D_1F80019E != 0; ) {
+    for (LIST_COUNTER = SPAD.s24c; LIST_COUNTER != 0; ) {
         e = *pp++;
-        D_1F80019E--;
+        LIST_COUNTER--;
         if (!(e->active & 1))
             continue;
         switch (e->type) {
@@ -157,7 +157,7 @@ void func_80051F44(TObj *o)
 #include "TOBJ.H"
 #include "gamestate.h"
 
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 void playerPushOutOfObjectBox(TObj *o, TObj *e);
 void playerContactCat4Type01(TObj *o, TObj *e);
 void playerContactCat4Type02(TObj *o, TObj *e);
@@ -217,9 +217,9 @@ void collidePlayerWithCat4Objects(TObj *o)
     TObj *e;
 
     pp = (*(TObj ***)&SPAD.p224);
-    for (D_1F80019E = SPAD.s24c; D_1F80019E != 0; ) {
+    for (LIST_COUNTER = SPAD.s24c; LIST_COUNTER != 0; ) {
         e = *pp++;
-        D_1F80019E--;
+        LIST_COUNTER--;
         if (!(e->active & 1))
             continue;
         switch (e->type) {

@@ -23,7 +23,7 @@ static s32 _svm_envx_hist[0x10];
 static u32 _ss_spu_vm_rec[0x20];
 #endif
 
-extern u16* D_800982E8; /* port: VM_NO1.OBJ static pointer -> 0x1F801C00, PAL address from the retail lui/lw */
+extern u16* _svm_sreg; /* port: VM_NO1.OBJ static pointer -> 0x1F801C00, PAL address from the retail lui/lw */
 /* port: the pitch table static of vmanager.c is not used by vmNoiseOn and is defined elsewhere in PAL */
 
 extern s16 _svm_vcf;
@@ -53,7 +53,7 @@ void vmNoiseOn(u8 arg0) {
     u16 cnd;
     u32 temp;
 
-    cnd = D_800982E8[0x1AA / 2];
+    cnd = _svm_sreg[0x1AA / 2];
 
     voll_t = score->unk74 * 0x81;
     volr_t = score->unk76 * 0x81;
@@ -95,7 +95,7 @@ void vmNoiseOn(u8 arg0) {
 
     cnd &= ~0x3F00;
     cnd |= ((_svm_cur.field_2_note - _svm_cur.field_10_centre) & 0x3F) << 8;
-    D_800982E8[0x1AA / 2] = cnd;
+    _svm_sreg[0x1AA / 2] = cnd;
 
     _svm_sreg_buf[arg0 * 8 + 0] = voll;
     _svm_sreg_buf[arg0 * 8 + 1] = volr;
@@ -127,8 +127,8 @@ void vmNoiseOn(u8 arg0) {
         _svm_orev2 &= ~bitsUpper;
     }
 
-    D_800982E8[0x194 / 2] = bitsLower;
-    D_800982E8[0x196 / 2] = bitsUpper;
+    _svm_sreg[0x194 / 2] = bitsLower;
+    _svm_sreg[0x196 / 2] = bitsUpper;
 }
 
 void vmNoiseOn2(u8 voice, u16 arg1, u16 arg2, u16 arg3, u16 arg4);

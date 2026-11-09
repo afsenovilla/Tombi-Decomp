@@ -1,7 +1,7 @@
 // FUNC 80054f54 544 MAIN0
 // MATCHING 80054f54 544
 #include "TOBJ.H"
-extern short DAT_1f8001c6;
+extern short DRAW_FROZEN;
 extern short CAT2_OBJECT_COUNT_SAVED;
 extern TObj **CAT2_OBJECT_LIST_SAVED;
 extern unsigned short DAT_1f800246;
@@ -19,7 +19,7 @@ void drawCategory2Objects(void)
     int n;
     TObj **p;
     TObj *o;
-    if (DAT_1f8001c6 != 0) {
+    if (DRAW_FROZEN != 0) {
         n = CAT2_OBJECT_COUNT_SAVED;
         p = CAT2_OBJECT_LIST_SAVED;
         while (n != 0) {

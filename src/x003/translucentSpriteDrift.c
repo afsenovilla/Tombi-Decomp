@@ -8,7 +8,7 @@ typedef struct {
     short b4, b6, b8, ba, bc, be, c0, c2, c4, c6, c8, ca, cc, ce, d0;
 } E;
 
-extern short D_8013589C[];
+extern short TRANSLUCENT_SPRITE_DRIFT_QUAD[];
 extern short SCREEN_ORIGIN_X[];
 extern int Rand(void);
 
@@ -25,17 +25,17 @@ void translucentSpriteDrift(TObj *o)
         o->step++;
         o->velX = 0x300;
         o->timer = 0x78;
-        e->b4 = D_8013589C[0];
-        e->b6 = D_8013589C[1];
+        e->b4 = TRANSLUCENT_SPRITE_DRIFT_QUAD[0];
+        e->b6 = TRANSLUCENT_SPRITE_DRIFT_QUAD[1];
         e->b8 = 0;
-        e->bc = D_8013589C[2];
-        e->be = D_8013589C[3];
+        e->bc = TRANSLUCENT_SPRITE_DRIFT_QUAD[2];
+        e->be = TRANSLUCENT_SPRITE_DRIFT_QUAD[3];
         e->c0 = 0;
-        e->c4 = D_8013589C[4];
-        e->c6 = D_8013589C[5];
+        e->c4 = TRANSLUCENT_SPRITE_DRIFT_QUAD[4];
+        e->c6 = TRANSLUCENT_SPRITE_DRIFT_QUAD[5];
         e->c8 = 0;
-        e->cc = D_8013589C[6];
-        e->ce = D_8013589C[7];
+        e->cc = TRANSLUCENT_SPRITE_DRIFT_QUAD[6];
+        e->ce = TRANSLUCENT_SPRITE_DRIFT_QUAD[7];
         e->d0 = 0;
         o->a.raw = (SCREEN_ORIGIN_X[0] - 0xa0) << 16;
         { short r = (Rand() & 7) * 24 + 0x10; o->y.raw = ((*(short*)&SPAD.s186) - r) << 16; }

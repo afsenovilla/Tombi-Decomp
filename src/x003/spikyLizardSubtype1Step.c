@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern unsigned char D_80135CB0[];
+extern unsigned char SPIKY_LIZARD_ANIM_BOXES[];
 extern void *D_80139578;
 extern char MOVE_TABLE_0[];
 extern void AnimLoadDuration(TObj *);
@@ -20,7 +20,7 @@ void spikyLizardSubtype1Step(TObj *o)
         o->wac = 0x1e;
         o->state++;
         o->anim = D_80139578;
-        p = &D_80135CB0[o->wac * 4];
+        p = &SPIKY_LIZARD_ANIM_BOXES[o->wac * 4];
         o->box0 = *p++;
         o->box1 = *p++;
         o->box2 = *p++;

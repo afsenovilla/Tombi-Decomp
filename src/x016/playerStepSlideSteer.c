@@ -6,7 +6,7 @@
 #define B(o, k) (*(unsigned char *)((char *)(o) + (k)))
 extern unsigned char *PLAYER_EXT;
 extern int GRABBED_OBJECT;
-extern char D_80010AE8[];
+extern char PLAYER_FALL_ANIM[];
 void playerSetAngleFromSlope(TObj *o);
 void playerSetAnim(TObj *o, int a, int b);
 void playerAccelerateDownhill(TObj *o);
@@ -100,7 +100,7 @@ void playerStepSlideSteer(TObj *o)
                 k = &GV6.s70;
                 if (*k & 0x80) o->animFrame = 1;
                 if (*k & 0x20) o->animFrame = 0;
-                o->anim = D_80010AE8;
+                o->anim = PLAYER_FALL_ANIM;
                 AnimJump(o, 3);
                 o->step = 2;
                 o->state = 3;

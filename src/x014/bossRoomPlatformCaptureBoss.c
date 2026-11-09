@@ -15,7 +15,7 @@ static short D_80125C40[8] = {
 static short D_80125C50[8] = {
     0xc9, 0xce, 0xd3, 0xd9, 0xde, 0xe3, 0xe8, 0xe8,
 };
-extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
+extern unsigned char D_80125C60[], D_80125C68[], A14_SECTION_STREAM_IDS[];
 extern unsigned char D_800A60D6;
 extern unsigned char D_800A4555;
 extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
@@ -164,7 +164,7 @@ void func_801170C4(TObj *o)
                 v -= w;
                 o->velV = v >> 15;
             }
-            cdSeekStream(D_80125684[GAME_SELECTED_SECTION[0]]);
+            cdSeekStream(A14_SECTION_STREAM_IDS[GAME_SELECTED_SECTION[0]]);
         }
         break;
     case 6:
@@ -241,7 +241,7 @@ static short D_80125C40[8] = {
 static short D_80125C50[8] = {
     0xc9, 0xce, 0xd3, 0xd9, 0xde, 0xe3, 0xe8, 0xe8,
 };
-extern unsigned char D_80125C60[], D_80125C68[], D_80125684[];
+extern unsigned char D_80125C60[], D_80125C68[], A14_SECTION_STREAM_IDS[];
 extern unsigned char D_800A60D6;
 extern unsigned char D_800A4555;
 extern void *D_80129F7C[], *D_80129F80[], *D_80129F8C[];
@@ -390,7 +390,7 @@ void bossRoomPlatformCaptureBoss(TObj *o)
                 v -= w;
                 o->velV = v >> 15;
             }
-            cdSeekStream(D_80125684[GAME_SELECTED_SECTION[0]]);
+            cdSeekStream(A14_SECTION_STREAM_IDS[GAME_SELECTED_SECTION[0]]);
         }
         break;
     case 6:

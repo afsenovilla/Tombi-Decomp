@@ -32,7 +32,7 @@ extern unsigned char GVARS[], DAT_8009c93e, DAT_8009c93f, GVARS_USE_ITEM_PENDING
 extern unsigned char GAME_PLAYER_MODE, GAME_BITTEN_JUMP_KIND, DAT_8009d2c3;
 extern unsigned char DAT_8009ce55, DAT_8009ce56, DAT_8009ce57, DAT_8009cee2, DAT_8009cf03, DAT_8009cdcc;
 extern unsigned char SLOPE_TILT_TABLE[];
-extern char DAT_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void spawnColorBurst(int);
@@ -94,7 +94,7 @@ void playerStepUseItem(TObj *o)
         o->visible = 1;
         sub(o);
         if ((GAME[0] & 0x3ffff) != 0x3000a) {
-            o->anim = DAT_80010748;
+            o->anim = PLAYER_IDLE_ANIM;
             FUN_8001fe94(o, 0);
             PLAYER_EXT->w2e = 0xffff;
             PLAYER_EXT->w28 = 0xffff;

@@ -4,7 +4,7 @@ typedef struct FP { unsigned short frac; short whole; } FP;
 typedef struct O { unsigned char b0; char p0[0x10-1]; FP a; FP y; FP b; unsigned char b1c; char p1[0x40-0x1d];
   FP *h; FP *d; char p2[0x68-0x48]; unsigned char b68; char p3; unsigned char b6a; char p4;
   short box0, box1, box2, box3; char p5[42]; unsigned char b9e, b9f; char p6[0xa8-0xa0]; short wa8; } O;
-extern short DAT_1f80019e;
+extern short LIST_COUNTER;
 extern int weaponOnHitGetResult(O *, O *);
 extern void spawnImpactEffect(int, int, int, int);
 extern void SfxPlay(int);
@@ -19,7 +19,7 @@ static __inline__ short hit(O *a, O *b)
         return -1;
     if ((unsigned short)((a->y.whole - b->y.whole) + (a->box2 + b->box2)) > a->box3 + b->box3)
         return -1;
-    DAT_1f80019e = 0;
+    LIST_COUNTER = 0;
     if (d < 0)
         return 0;
     return 1;

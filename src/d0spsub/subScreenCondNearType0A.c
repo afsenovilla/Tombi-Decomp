@@ -2,7 +2,7 @@
 // MATCHING 800f1718 276
 #include "TOBJ.H"
 extern TObj PLAYER;
-extern short D_1F80019E;
+extern short LIST_COUNTER;
 extern unsigned short CAT2_OBJECT_COUNT_SAVED;
 extern TObj **CAT2_OBJECT_LIST_SAVED;
 
@@ -11,9 +11,9 @@ int subScreenCondNearType0A(void)
     TObj **list = CAT2_OBJECT_LIST_SAVED;
     TObj *o;
     TObj *pl = &PLAYER;
-    for (D_1F80019E = CAT2_OBJECT_COUNT_SAVED; D_1F80019E != 0;) {
+    for (LIST_COUNTER = CAT2_OBJECT_COUNT_SAVED; LIST_COUNTER != 0;) {
         o = *list;
-        D_1F80019E--;
+        LIST_COUNTER--;
         list++;
         if (o->active & 1) {
             if (o->type == 0xA) {

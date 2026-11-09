@@ -9,7 +9,7 @@ extern P *PLAYER_EXT;
 extern unsigned char SLOPE_TILT_TABLE[];
 extern unsigned char DAT_8009d2af;
 extern unsigned char GVARS_PLAYER_LANDED;
-extern char LAB_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void FUN_8001fe94(O *, int);
 
 void playerEventLandReset(O *o)
@@ -29,7 +29,7 @@ void playerEventLandReset(O *o)
     o->vy = 0;
     o->d8c = SLOPE_TILT_TABLE[i];
     p->h20 = 0;
-    o->anim = LAB_80010748;
+    o->anim = PLAYER_IDLE_ANIM;
     FUN_8001fe94(o, 0);
     p = PLAYER_EXT;
     p->h2e = 0xffff;

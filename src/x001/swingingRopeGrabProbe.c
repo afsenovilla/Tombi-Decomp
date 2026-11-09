@@ -17,8 +17,8 @@ typedef struct {
     unsigned short e8;
     unsigned short ea;
 } P;
-extern short D_1F80019E;
-extern unsigned short *D_8013C6A4[];
+extern short LIST_COUNTER;
+extern unsigned short *SWINGING_ROPE_HEIGHT_PROFILES[];
 
 void swingingRopeGrabProbe(P *o, TObj *e)
 {
@@ -35,7 +35,7 @@ void swingingRopeGrabProbe(P *o, TObj *e)
     dy = o->ea - dy;
     h = dy + e->d38;
     if ((unsigned short)h > e->d38) return;
-    h = D_8013C6A4[t][(short)-dy >> 3];
+    h = SWINGING_ROPE_HEIGHT_PROFILES[t][(short)-dy >> 3];
     b0 = (unsigned short)e->box0;
     c = o->e8 - ((unsigned short)e->h->p.whole + h); c2 = c; c = b0 + c2;
     e->d30 = (short)h;
@@ -47,7 +47,7 @@ void swingingRopeGrabProbe(P *o, TObj *e)
     o->t.h->p.whole = x + ((unsigned short)e->h->p.whole + h);
     o->t.b9e = 7;
     o->t.wb8 = x;
-    D_1F80019E = 0;
+    LIST_COUNTER = 0;
     (*(TObj **)&SPAD.p3c0) = e;
     o->t.wba = o->t.y.p.whole - e->y.p.whole;
     o->t.velY = 0;
@@ -72,8 +72,8 @@ typedef struct {
     unsigned short e8;
     unsigned short ea;
 } P;
-extern short D_1F80019E;
-extern unsigned short *D_8013C6A4[];
+extern short LIST_COUNTER;
+extern unsigned short *SWINGING_ROPE_HEIGHT_PROFILES[];
 
 void swingingRopeGrabProbe(P *o, TObj *e)
 {
@@ -90,7 +90,7 @@ void swingingRopeGrabProbe(P *o, TObj *e)
     dy = o->ea - dy;
     h = dy + e->d38;
     if ((unsigned short)h > e->d38) return;
-    h = D_8013C6A4[t][(short)-dy >> 3];
+    h = SWINGING_ROPE_HEIGHT_PROFILES[t][(short)-dy >> 3];
     b0 = (unsigned short)e->box0;
     c = o->e8 - ((unsigned short)e->h->p.whole + h); c2 = c; c = b0 + c2;
     e->d30 = (short)h;
@@ -102,7 +102,7 @@ void swingingRopeGrabProbe(P *o, TObj *e)
     o->t.h->p.whole = x + ((unsigned short)e->h->p.whole + h);
     o->t.b9e = 7;
     o->t.wb8 = x;
-    D_1F80019E = 0;
+    LIST_COUNTER = 0;
     (*(TObj **)&SPAD.p3c0) = e;
     o->t.wba = o->t.y.p.whole - e->y.p.whole;
     o->t.velY = 0;

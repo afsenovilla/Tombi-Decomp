@@ -7,7 +7,7 @@
 // Japanese version of PAL main0 8002C73C (updatePoolType66Object.c): -40 -> -36.
 #include "player.h"
 #include "TOBJ.H"
-extern char D_80014764[];
+extern char POOL_TYPE66_ANIM[];
 extern unsigned short PLAYER_STATE[];
 extern Fix16 *PLAYER_H[];
 extern void AnimLoadDuration(TObj *o);
@@ -20,7 +20,7 @@ void updatePoolType66Object(TObj *o)
     switch (s) {
     case 0:
         if (o->step != 0) break;
-        o->anim = D_80014764;
+        o->anim = POOL_TYPE66_ANIM;
         AnimLoadDuration(o);
         o->a.p.whole = (*(unsigned short*)&PLAYER.obj.a.p.whole);
         if (PLAYER_STATE[0] == 0x405) {
@@ -65,7 +65,7 @@ void updatePoolType66Object(TObj *o)
 // D_800893C8[4] while following.
 #include "player.h"
 #include "TOBJ.H"
-extern char D_80014764[];
+extern char POOL_TYPE66_ANIM[];
 extern unsigned short PLAYER_STATE[];
 extern Fix16 *PLAYER_H[];
 extern void AnimLoadDuration(TObj *o);
@@ -79,7 +79,7 @@ void func_8002C73C(TObj *o)
     switch (s) {
     case 0:
         if (o->step != 0) break;
-        o->anim = D_80014764;
+        o->anim = POOL_TYPE66_ANIM;
         AnimLoadDuration(o);
         o->a.p.whole = (*(unsigned short*)&PLAYER.obj.a.p.whole);
         if (((short*)&PLAYER.obj.y.p.whole)[0] < -0xf1 && PLAYER_H[0]->p.whole >= 0xf3) {
@@ -123,7 +123,7 @@ void func_8002C73C(TObj *o)
 // Japanese version of PAL main0 8002C73C (updatePoolType66Object.c): -40 -> -36.
 #include "player.h"
 #include "TOBJ.H"
-extern char D_80014764[];
+extern char POOL_TYPE66_ANIM[];
 extern unsigned short PLAYER_STATE[];
 extern Fix16 *PLAYER_H[];
 extern void AnimLoadDuration(TObj *o);
@@ -136,7 +136,7 @@ void updatePoolType66Object(TObj *o)
     switch (s) {
     case 0:
         if (o->step != 0) break;
-        o->anim = D_80014764;
+        o->anim = POOL_TYPE66_ANIM;
         AnimLoadDuration(o);
         o->a.p.whole = (*(unsigned short*)&PLAYER.obj.a.p.whole);
         if (PLAYER_STATE[0] == 0x405) {
@@ -179,7 +179,7 @@ void updatePoolType66Object(TObj *o)
 #else
 #include "player.h"
 #include "TOBJ.H"
-extern char D_80014764[];
+extern char POOL_TYPE66_ANIM[];
 extern unsigned short PLAYER_STATE[];
 extern Fix16 *PLAYER_H[];
 extern void AnimLoadDuration(TObj *o);
@@ -192,7 +192,7 @@ void updatePoolType66Object(TObj *o)
     switch (s) {
     case 0:
         if (o->step != 0) break;
-        o->anim = D_80014764;
+        o->anim = POOL_TYPE66_ANIM;
         AnimLoadDuration(o);
         o->a.p.whole = (*(unsigned short*)&PLAYER.obj.a.p.whole);
         if (PLAYER_STATE[0] == 0x405) {

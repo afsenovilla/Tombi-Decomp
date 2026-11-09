@@ -3,12 +3,12 @@
 typedef struct { char c[6]; } B;
 extern B DAT_80010238;
 extern char PAD_INFO[];
-extern unsigned short DAT_8009d612;
-extern unsigned short DAT_8009d614;
-extern unsigned char DAT_8009d614b;
+extern unsigned short PAD_VIBRATION_ENABLED;
+extern unsigned short PAD_ACT_BUFFER;
+extern unsigned char PAD_ACT_BUFFER_B;
 extern unsigned char DAT_8009d615;
-extern unsigned char DAT_8009d616;
-extern unsigned char DAT_8009d617;
+extern unsigned char PAD_VIBRATION_STATE;
+extern unsigned char PAD_VIBRATION_TIMER;
 extern void PadSetAct();
 extern int PadGetState(int);
 extern void PadSetActAlign(int, void *);
@@ -19,12 +19,12 @@ void updatePadVibration(void)
     char *p;
     buf = DAT_80010238;
     p = PAD_INFO;
-    if (DAT_8009d612 == 0)
+    if (PAD_VIBRATION_ENABLED == 0)
         return;
-    switch (DAT_8009d616) {
+    switch (PAD_VIBRATION_STATE) {
     case 0:
-        if (DAT_8009d614 != 0) {
-            DAT_8009d614b = 0;
+        if (PAD_ACT_BUFFER != 0) {
+            PAD_ACT_BUFFER_B = 0;
             DAT_8009d615 = 0;
             PadSetAct(0, p + 4, 2);
         }
@@ -34,24 +34,24 @@ void updatePadVibration(void)
     case 1:
         if (PadGetState(0) == 6) {
             PadSetActAlign(0, &buf);
-            DAT_8009d616 = 2;
+            PAD_VIBRATION_STATE = 2;
         }
         break;
     case 2:
-        if (DAT_8009d617 != 0) {
-            DAT_8009d617--;
+        if (PAD_VIBRATION_TIMER != 0) {
+            PAD_VIBRATION_TIMER--;
         } else {
-            DAT_8009d614b = 0;
+            PAD_ACT_BUFFER_B = 0;
             DAT_8009d615 = 0;
             PadSetAct(0, p + 4, 2);
-            DAT_8009d617 = 0;
-            DAT_8009d616 = 3;
+            PAD_VIBRATION_TIMER = 0;
+            PAD_VIBRATION_STATE = 3;
         }
         break;
     case 3:
         if (PadGetState(0) == 6) {
             PadSetActAlign(0, &buf);
-            DAT_8009d616 = 0;
+            PAD_VIBRATION_STATE = 0;
         }
         break;
     }

@@ -5,14 +5,14 @@
 
 typedef struct { short x, y, z, pad; } SV;
 #define V(o) ((SV *)((char *)(o) + 0xb4))
-extern void *D_8013E5BC;
+extern void *SPRING_VINE_ANIMS;
 
 void springVineRopeStep2(TObj *o)
 {
     switch (o->state) {
     case 0:
         o->state++;
-        o->anim = D_8013E5BC;
+        o->anim = SPRING_VINE_ANIMS;
     {
         TObj *e = (TObj *)o->d90;
         short dy = e->y.p.whole - o->y.p.whole;

@@ -23,7 +23,7 @@ extern P800FC414 *PLAYER_EXT;
 extern unsigned char D_8009C960b[];
 extern unsigned char SLOPE_TILT_TABLE[];
 extern char MOVE_TABLE_1[];
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
@@ -258,7 +258,7 @@ void func_800FC074(TObj *o)
                     }
                 } else {
                 reset:
-                    o->anim = D_80010748;
+                    o->anim = PLAYER_IDLE_ANIM;
                     FUN_8001fe6c(o);
                     o->step = 0;
                     o->state = 0;
@@ -326,7 +326,7 @@ extern P800FC414 *PLAYER_EXT;
 extern unsigned char D_8009C960b[];
 extern unsigned char SLOPE_TILT_TABLE[];
 extern char MOVE_TABLE_1[];
-extern char D_80010748[];
+extern char PLAYER_IDLE_ANIM[];
 extern void FUN_800efc04(TObj *);
 extern void FUN_8001fe94(TObj *, int);
 extern void FUN_8001fe6c(TObj *);
@@ -582,7 +582,7 @@ void playerHurtLandRecover(TObj *o)
                     }
                 } else {
                 reset:
-                    o->anim = D_80010748;
+                    o->anim = PLAYER_IDLE_ANIM;
                     FUN_8001fe6c(o);
                     o->step = 0;
                     o->state = 0;

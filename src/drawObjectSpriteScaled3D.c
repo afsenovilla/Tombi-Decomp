@@ -27,7 +27,7 @@ typedef struct {
     unsigned char u3, v3; unsigned short pad3;
 } PolyFT4;
 typedef struct { short vx, vy, vz, pad; } SVec;
-extern SVec D_1F800060;
+extern SVec WORK_VEC_A;
 extern long LZ_FILE_CTRL;
 extern char VIEW_CAMERA[];
 extern PolyFT4 *NEXT_PRIM;
@@ -42,7 +42,7 @@ extern void SetSemiTrans(PolyFT4 *, int);
 #define gte_stszotz(r0) __asm__ volatile ("mfc2 $12, $19;nop;sra $12, $12, 2;sw $12, 0( %0 )" : : "r"(r0) : "$12", "memory")
 static __inline__ int project(void)
 {
-    gte_ldv0(&D_1F800060);
+    gte_ldv0(&WORK_VEC_A);
     gte_rtps();
     gte_stsxy(&LZ_FILE_CTRL);
     gte_stszotz(&SPAD.i74);
@@ -76,12 +76,12 @@ void func_8004A2DC(TObj *o)
     short u;
     unsigned char v;
 
-    D_1F800060.vx = o->a.p.whole;
-    D_1F800060.vy = o->y.p.whole;
+    WORK_VEC_A.vx = o->a.p.whole;
+    WORK_VEC_A.vy = o->y.p.whole;
     if ((*(int*)&GAME.selectedArea) == 0x10005)
-        D_1F800060.vz = o->b.p.whole >> 2;
+        WORK_VEC_A.vz = o->b.p.whole >> 2;
     else
-        D_1F800060.vz = o->b.p.whole;
+        WORK_VEC_A.vz = o->b.p.whole;
     SetRotMatrix(((char*)&SPAD.bc0));
     SetTransMatrix(VIEW_CAMERA);
     if (project()) return;
@@ -138,7 +138,7 @@ typedef struct {
     unsigned char u3, v3; unsigned short pad3;
 } PolyFT4;
 typedef struct { short vx, vy, vz, pad; } SVec;
-extern SVec D_1F800060;
+extern SVec WORK_VEC_A;
 extern long LZ_FILE_CTRL;
 extern char VIEW_CAMERA[];
 extern PolyFT4 *NEXT_PRIM;
@@ -153,7 +153,7 @@ extern void SetSemiTrans(PolyFT4 *, int);
 #define gte_stszotz(r0) __asm__ volatile ("mfc2 $12, $19;nop;sra $12, $12, 2;sw $12, 0( %0 )" : : "r"(r0) : "$12", "memory")
 static __inline__ int project(void)
 {
-    gte_ldv0(&D_1F800060);
+    gte_ldv0(&WORK_VEC_A);
     gte_rtps();
     gte_stflg(&SPAD.i8c);
     if (SPAD.i8c < 0) return 1;
@@ -187,12 +187,12 @@ void drawObjectSpriteScaled3D(TObj *o)
     short u;
     unsigned char v;
 
-    D_1F800060.vx = o->a.p.whole;
-    D_1F800060.vy = o->y.p.whole;
+    WORK_VEC_A.vx = o->a.p.whole;
+    WORK_VEC_A.vy = o->y.p.whole;
     if ((*(int*)&GAME.selectedArea) == 0x10005 && *(unsigned short *)&TASK_C->mode != 3)
-        D_1F800060.vz = o->b.p.whole >> 2;
+        WORK_VEC_A.vz = o->b.p.whole >> 2;
     else
-        D_1F800060.vz = o->b.p.whole;
+        WORK_VEC_A.vz = o->b.p.whole;
     SetRotMatrix(((char*)&SPAD.bc0));
     SetTransMatrix(VIEW_CAMERA);
     if (project()) return;

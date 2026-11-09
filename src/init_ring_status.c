@@ -16,12 +16,12 @@
 #include "psyq/libcd.h"
 #include "psyq/libetc.h"
 #include "psyq/kernel.h"
-extern s32 D_800A3F04;
+extern s32 ST_RING_ADDR;
 extern void (*D_800E9570)(), (*D_800E9574)();
 
 /* libcd init_ring_status(start, count) (C_008.OBJ; the name is sotn-decomp's c_008.c):
    mark count ring headers from index start free: the first word (id and type) of each
-   32-byte header of the ring StRingAddr (D_800A3F04) = 0. StClearRing's worker.
+   32-byte header of the ring StRingAddr (ST_RING_ADDR) = 0. StClearRing's worker.
    MARKED SPELLING: the header is addressed `StRingAddr + ((i + start) << 5)` on the
    integer ring base, as in StFreeRing and StGetNext of this TU; sotn-decomp's
    `*(s32 *)&ring[i + start]` on a StHEADER pointer scores 10/13 (operand order of the
@@ -32,6 +32,6 @@ void init_ring_status(s32 start, u32 count)
     s32 i;
 
     for (i = 0; i < count; i++) {
-        *(s32 *)(D_800A3F04 + ((i + start) << 5)) = 0;
+        *(s32 *)(ST_RING_ADDR + ((i + start) << 5)) = 0;
     }
 }

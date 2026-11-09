@@ -3,7 +3,7 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_80132310[];
+extern void *SPEAR_PIG_ANIMS[];
 extern int Rand(void);
 extern void AnimLoadDuration(TObj *);
 extern void AnimAdvance(TObj *);
@@ -27,7 +27,7 @@ void updateShieldSpearPig(TObj *o)
         o->wac = 0x1e;
         o->b0d = 0;
         o->d3c = ((int*)&SPAD.i2d0)[0];
-        o->anim = D_80132310[o->wac];
+        o->anim = SPEAR_PIG_ANIMS[o->wac];
         AnimLoadDuration(o);
         break;
     case 1:

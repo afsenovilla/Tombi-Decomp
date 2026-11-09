@@ -7,13 +7,13 @@
 typedef struct { short vx, vy, vz, pad; } SV;
 typedef struct { char p[0xb4]; SV v[4]; } OX;
 
-extern short D_8013589C[];
+extern short TRANSLUCENT_SPRITE_DRIFT_QUAD[];
 extern short SCREEN_ORIGIN_X[];
 extern unsigned int FUN_8001f9e0(void);
 
 #define V(o) (((OX *)(o))->v)
 
-#define INITV(o) { V(o)[0].vx = D_8013589C[0]; V(o)[0].vy = D_8013589C[1]; V(o)[0].vz = 0; V(o)[1].vx = D_8013589C[2]; V(o)[1].vy = D_8013589C[3]; V(o)[1].vz = 0; V(o)[2].vx = D_8013589C[4]; V(o)[2].vy = D_8013589C[5]; V(o)[2].vz = 0; V(o)[3].vx = D_8013589C[6]; V(o)[3].vy = D_8013589C[7]; V(o)[3].vz = 0; }
+#define INITV(o) { V(o)[0].vx = TRANSLUCENT_SPRITE_DRIFT_QUAD[0]; V(o)[0].vy = TRANSLUCENT_SPRITE_DRIFT_QUAD[1]; V(o)[0].vz = 0; V(o)[1].vx = TRANSLUCENT_SPRITE_DRIFT_QUAD[2]; V(o)[1].vy = TRANSLUCENT_SPRITE_DRIFT_QUAD[3]; V(o)[1].vz = 0; V(o)[2].vx = TRANSLUCENT_SPRITE_DRIFT_QUAD[4]; V(o)[2].vy = TRANSLUCENT_SPRITE_DRIFT_QUAD[5]; V(o)[2].vz = 0; V(o)[3].vx = TRANSLUCENT_SPRITE_DRIFT_QUAD[6]; V(o)[3].vy = TRANSLUCENT_SPRITE_DRIFT_QUAD[7]; V(o)[3].vz = 0; }
 
 void translucentSpriteDriftB(TObj *o)
 {

@@ -9,7 +9,7 @@ extern unsigned char PLAYER_VISIBLE;
 extern unsigned char PLAYER_SUBSTATE;
 extern short PLAYER_VEL_Y;
 extern unsigned char DAT_800a60d4;
-extern void *DAT_8001473c;
+extern void *POOL_TYPE12_ANIM;
 extern void *DAT_80014740;
 extern unsigned short *PLAYER_ANIM[];
 extern int DAT_800a60c4;
@@ -30,12 +30,12 @@ void poolType12FollowPlayerStep(TObj *o)
     o->d8c = 0;
     o->visible = PLAYER_VISIBLE;
     if (PLAYER_SUBSTATE == 2 && PLAYER_VEL_Y >= -0xc7 && DAT_800a60d4 != 0) {
-        o->anim = DAT_8001473c;
+        o->anim = POOL_TYPE12_ANIM;
         FUN_8001fe6c(o);
         if (PLAYER_VEL_Y > 0 && *PLAYER_ANIM[0] == 0x55)
             o->d8c = DAT_800a60c4;
     } else if (PLAYER_SUBSTATE == 4 && PLAYER_VEL_Y >= -0xc7) {
-        o->anim = DAT_8001473c;
+        o->anim = POOL_TYPE12_ANIM;
         FUN_8001fe6c(o);
         if (PLAYER_VEL_Y > 0)
             o->d8c = DAT_800a60c4;
@@ -61,7 +61,7 @@ extern unsigned char PLAYER_VISIBLE;
 extern unsigned char PLAYER_SUBSTATE;
 extern short PLAYER_VEL_Y;
 extern unsigned char DAT_800a60d4;
-extern void *DAT_8001473c;
+extern void *POOL_TYPE12_ANIM;
 extern void *DAT_80014740;
 extern unsigned short *PLAYER_ANIM[];
 extern int DAT_800a60c4;
@@ -82,12 +82,12 @@ void poolType12FollowPlayerStep(TObj *o)
     o->d8c = 0;
     o->visible = PLAYER_VISIBLE;
     if (PLAYER_SUBSTATE == 2 && PLAYER_VEL_Y >= -0xc7 && DAT_800a60d4 != 0) {
-        o->anim = DAT_8001473c;
+        o->anim = POOL_TYPE12_ANIM;
         FUN_8001fe6c(o);
         if (PLAYER_VEL_Y > 0 && *PLAYER_ANIM[0] == 0x55)
             o->d8c = DAT_800a60c4;
     } else if (PLAYER_SUBSTATE == 4 && PLAYER_VEL_Y >= -0xc7) {
-        o->anim = DAT_8001473c;
+        o->anim = POOL_TYPE12_ANIM;
         FUN_8001fe6c(o);
         if (PLAYER_VEL_Y > 0)
             o->d8c = DAT_800a60c4;
@@ -111,7 +111,7 @@ extern unsigned char PLAYER_VISIBLE;
 extern unsigned char PLAYER_SUBSTATE;
 extern short PLAYER_VEL_Y;
 extern unsigned char DAT_800a60d4;
-extern void *DAT_8001473c;
+extern void *POOL_TYPE12_ANIM;
 extern void *DAT_80014740;
 extern unsigned short *PLAYER_ANIM[];
 extern int DAT_800a60c4;
@@ -132,12 +132,12 @@ void poolType12FollowPlayerStep(TObj *o)
     o->d8c = 0;
     o->visible = PLAYER_VISIBLE;
     if (PLAYER_SUBSTATE == 2 && PLAYER_VEL_Y >= -0xc7 && DAT_800a60d4 != 0) {
-        o->anim = DAT_8001473c;
+        o->anim = POOL_TYPE12_ANIM;
         FUN_8001fe6c(o);
         if (PLAYER_VEL_Y > 0 && *PLAYER_ANIM[0] == 0x47)
             o->d8c = DAT_800a60c4;
     } else if (PLAYER_SUBSTATE == 4 && PLAYER_VEL_Y >= -0xc7) {
-        o->anim = DAT_8001473c;
+        o->anim = POOL_TYPE12_ANIM;
         FUN_8001fe6c(o);
         if (PLAYER_VEL_Y > 0)
             o->d8c = DAT_800a60c4;
