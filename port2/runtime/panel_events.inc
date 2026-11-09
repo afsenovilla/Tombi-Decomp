@@ -101,7 +101,7 @@ static int ev_dist(int e) {
 static int ev_pinned(int e);
 /* nearest first (stable): the tracked ones, then this room by distance to Tomba (PLAYER x), this area, other areas */
 static void ev_near_sort(int *ids, int n) {
-    int px = (s16)G16(0x800A604Au), key[EVENTS];
+    int px = (s16)G16(PV_PLAYER_X), key[EVENTS];
     for (int i = 0; i < n; i++) {
         const PanelEventLoc *L = ev_loc(ids[i]); int d = ev_dist(ids[i]);
         key[i] = ev_pinned(ids[i]) ? -1 : d * 100000 + (d == D_HERE ? (L->x == -32768 ? 99999 : abs(L->x - px) < 99999 ? abs(L->x - px) : 99999) : 0);

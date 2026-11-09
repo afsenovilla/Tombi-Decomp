@@ -16,6 +16,7 @@
 #include <string.h>
 #include "port_runtime.h"
 #include "panel_assets.h"
+#include "panel_addrs.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
@@ -28,7 +29,7 @@ extern int port_panel_window;
 
 /* gameplay: a game runs (play time), the dispatcher is in gameplay and no loading screen is drawn */
 int panel_in_play(void) {
-    if (*(u32 *)PORT_M0(0x8009C968u) == 0) return 0;
+    if (*(u32 *)PORT_M0(PV_GAME_TIME) == 0) return 0;
     if (port_frame - port_loading_frame < 4) return 0;
     if (port_frame - port_game_state_frame < 4 && port_game_state != 1) return 0;
     return 1;
@@ -55,7 +56,7 @@ static u32 nl_col(int cx, int cy, int i) {
     return 0xFF000000u | b << 16 | g << 8 | r;
 }
 /* entry n of the game's sprite table {u16 u, v, w, h; s16 clutX, clutY} (0x800787F0: 0, 1 tiles; 2 NOW LOADING) */
-static void def(int n, int *d) { for (int i = 0; i < 6; i++) d[i] = *(short *)PORT_M0(0x800787F0u + 12 * n + 2 * i); }
+static void def(int n, int *d) { for (int i = 0; i < 6; i++) d[i] = *(short *)PORT_M0(PV_UI_SPRITES + 12 * n + 2 * i); }
 /* the sprite drawn into the rect (x0, y0)-(x1, y1) (a POLY_FT4 for the logo, nearest neighbour), 0x0000 texels skipped */
 static void nl_spr(int n, int x0, int y0, int x1, int y1) {
     int d[6]; u32 pal[16];
@@ -71,9 +72,9 @@ static void nl_spr(int n, int x0, int y0, int x1, int y1) {
 int panel_loading_screen(void) {
     if (panel_in_play()) return 0;
     if (!nl_state) {
-        unsigned n; nl = pa_read("SYSTEM/A00900.000", &n);
+        unsigned n; nl = pa_read(PA_F_NOW_LOADING, &n);
         nl_state = nl && n >= 64 * 72 * 2 ? 1 : -1;
-        if (nl_state < 0) port_printf("[panel] SYSTEM/A00900.000 not readable: no loading screen on the panel\n");
+        if (nl_state < 0) port_printf("[panel] %s not readable: no loading screen on the panel\n", PA_F_NOW_LOADING);
     }
     if (nl_state < 0) return 0;
     int W = pa_cw, H = pa_ch, c = port_frame / 15 & 1, s = port_frame * 12 & 255;
@@ -85,7 +86,7 @@ int panel_loading_screen(void) {
     /* drawNowLoadingSprite(0xC0, 0xA0, 0, ..): pad = (u32)NEG_SIN_TABLE[s] >> 11 as a short; the logo keeps the game's
        distance to the bottom right corner of its 320 x 240 screen */
     int d[6]; def(2, d);
-    short pad = (short)((u32)(int)*(short *)PORT_M0(0x8007A3F0u + 2 * s) >> 11);
+    short pad = (short)((u32)(int)*(short *)PORT_M0(PV_NEG_SIN_TABLE + 2 * s) >> 11);
     int x = W - (320 - 0xC0), y = H - (240 - 0xA0);
     nl_spr(2, x - pad, y - pad, x + d[2] + pad, y + d[3] + pad);
     return 1;
@@ -100,7 +101,7 @@ static u8 *gptr(u32 v) {
 /* the sprite frame `frame` of the HUD object's bank (HUD_STATE +0x18), its parts {u, v, clut, .., w, h, .., dx, dy, ..}
    from the texture page tp (0x14: 256, 256; 0x15: 320, 256), as drawSpriteFrameParts draws it at (x, y) */
 static void hud_frame(int x, int y, u32 pfr, int tp, int clut, int one) {
-    u8 *bank = gptr(*(u32 *)PORT_M0(0x800B1410u + 0x18)), *pf = gptr(*(u32 *)PORT_M0(pfr));
+    u8 *bank = gptr(*(u32 *)PORT_M0(PV_HUD_STATE + 0x18)), *pf = gptr(*(u32 *)PORT_M0(pfr));
     if (!bank || !pf) return;
     int f = *(u16 *)pf, n = *(short *)(bank + 4 * f), off = *(short *)(bank + 4 * f + 2);
     if (one) n = 1;
@@ -113,13 +114,13 @@ static void hud_frame(int x, int y, u32 pfr, int tp, int clut, int one) {
 }
 /* the equipped weapon's HUD icon with (x, y) where the HUD puts it (0x48, 0x10 on its screen); 0: no icon */
 int panel_weapon_icon(int x, int y) {
-    switch (*PORT_M0(0x8009D2B2u)) {
-    case 0: hud_frame(x, y, 0x800121B8u, 0x14, 0, 0); return 1;
-    case 5: hud_frame(x, y, 0x800121CCu, 0x15, 0, 0); return 1;
-    case 6: hud_frame(x, y, 0x800121D0u, 0x15, 0, 0); return 1;
-    case 7: hud_frame(x, y, 0x800121D4u, 0x15, 0, 0); return 1;
-    case 8: hud_frame(x, y, 0x800121B0u, 0x14, 0, 0); return 1;
-    case 9: hud_frame(x, y, 0x800121B4u, 0x14, 0x7E14, 1); return 1;
+    switch (*PORT_M0(PV_GAME_WEAPON)) {
+    case 0: hud_frame(x, y, PV_HUD_FRAME_0, 0x14, 0, 0); return 1;
+    case 5: hud_frame(x, y, PV_HUD_FRAME_5, 0x15, 0, 0); return 1;
+    case 6: hud_frame(x, y, PV_HUD_FRAME_6, 0x15, 0, 0); return 1;
+    case 7: hud_frame(x, y, PV_HUD_FRAME_7, 0x15, 0, 0); return 1;
+    case 8: hud_frame(x, y, PV_HUD_FRAME_8, 0x14, 0, 0); return 1;
+    case 9: hud_frame(x, y, PV_HUD_FRAME_9, 0x14, 0x7E14, 1); return 1;
     }
     return 0;
 }

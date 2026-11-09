@@ -3163,6 +3163,8 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   not) is drawn opaque; map markers get a 1 px dark outline, Tomba's face drops its green box (CLUT 482 indices 2 3 5 6
   flooded from the border). Text pairs meet WCAG 4.5:1 (16 px) / 7:1 (8 px): dark text on cream, light text over
   wood / the side map with the game's 1 px dark outline (table in panel.c next to the colours).
+- Versions: the addresses come from `runtime/panel_addrs.h` (`port2/tools/gen_panel_addrs.py`, PAL and USA columns); the USA
+  build's files, text encoding and fonts are in docs/USA.md "Second-screen panel".
 - Text: the game's WFM fonts (`AREA00/MFNT000L.WFM`, `MFNT001L`, `AREAnn/MFNTnn0L` until the alphabet is complete: 8 / 16 px;
   `CFNT999L.WFM`: the 24 px event-title letters; L = the `--lang` letter B F G I H S P W D). A WFM glyph is a bitmap with no
   character code: each is named by the SHA-1 of its image through `runtime/panel_charmap.h` (hashes only, generated from

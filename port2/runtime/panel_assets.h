@@ -33,4 +33,18 @@ int pa_has_glyphs(int h, const char *s);
 int pa_text_scaled(int x, int y, int h, const char *s, unsigned body, unsigned edge, int sc, int shade);   /* pixel blocks */
 int pa_text_fit(int x, int y, int h, int w, const char *s, unsigned body, unsigned edge);
 int pa_wfm_dialogue(const unsigned char *wfm, unsigned n, int idx, char *out, int max);
+/* the version's files (PORT_VERSION_USA from port_runtime.h): the sub-screen overlays; USA has one English set */
+#if PORT_VERSION_USA
+#define PA_F_SUB  "SYSTEM/DSPSUB.BIN"
+#define PA_F_SUB3 "SYSTEM/DSPSUB3.BIN"
+#define PA_F_NOW_LOADING "SYSTEM/A00030.000"   /* the same bytes as PAL A00900 */
+#define PA_F_SPRITES "AREA19/A003.GAM"           /* the sub-screen sprite table (load kind 0x39) inside it, unpacked: */
+#define PA_SPRITES_OFF 0x509C                    /* tools/event_icons.py finds it there */
+#else
+#define PA_F_SUB  "SYSTEM/D0SPSUB.BIN"
+#define PA_F_SUB3 "SYSTEM/D0SPSUB3.BIN"
+#define PA_F_NOW_LOADING "SYSTEM/A00900.000"
+#define PA_F_SPRITES "AREA19/A103.GAM"
+#define PA_SPRITES_OFF 0
+#endif
 #endif
