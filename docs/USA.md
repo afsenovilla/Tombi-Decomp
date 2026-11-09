@@ -184,3 +184,23 @@ the Windows / Android builds of USA.
 Open (U3): `port/fixes.txt` lines that only hit inactive branches are listed at generation (`fix_audit`, 27 for USA:
 widescreen culling 0x141, HUD position, the NTSC-picture emulation, which USA does not need); the runtime features
 with PAL addresses (panel, debug menu, animlog, lang); the launchers (U2).
+
+## English text: USA vs PAL (2026-11-09)
+
+Same English script with a light Americanisation / copy-edit pass (compared bank by bank, dialogue by dialogue):
+
+- **Dialogue**: 5,317 dialogues in 21 banks on each disc, same count and index order (PAL `MFNTnnnB.WFM` = USA WFM3
+  banks embedded in the area GAM/.000 files and `SYSTEM/DSPSUB*.BIN`). 5,243 identical (same glyph-id word streams),
+  37 only Tombi→Tomba and UK→US spelling (favour, rumour, honour, catalogue...), 12 line/box/page breaks only (or with
+  spelling), 21 real wording changes ("local travel bureau"→"local visitors' bureau", "you woke up!"→"you found me!",
+  USA fixes PAL's "You're wire broke?"). No PAL-only or USA-only dialogue.
+- **Event titles**: 9 reworded ("Rusty Steel Car"→"Rusty Iron Car", "The Greatest Smile!"→"The World's Greatest
+  Smile!", ...). Item names identical; 24 PAL place names broken over two lines, not in USA.
+- **Memory card screen** reworded ("No Tombi saves found"→"No block found for Tomba!", ...). Pause menu strings
+  byte-identical (only y differs). Title/options text the same, other glyph numbering.
+- **Fonts**: the same font retouched for USA (8 px 67/67 identical, 16 px dialogue 59/81, 24 px title 21/58), and the
+  menus / sub-screens / memory card use other glyph numberings: no text file is byte-identical.
+
+For translations: PAL English is enough as the source of every line (1:1 by bank and index); only ~80 lines and the 9
+titles differ if a translation should follow USA wording. Building text for the USA disc needs its own encoder (banks
+inside GAM, USA glyph bitmaps and numbering, NTSC positions).
