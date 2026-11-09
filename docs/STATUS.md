@@ -4,9 +4,9 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.2.0 (build of d124ae0, 2026-11-09): the three retail releases are 100 % matched; the port builds the matched
-D0SPSUB 800EFD6C (the old draft cleared 3 bytes past the HUD state) and X010 collidePlayerWithTiltedBar (the port
-dispatched that address to its static sabs() helper). Previous: v0.1.3 (47c4a28).
+v0.3.0 (build of 5da1fc8, 2026-11-09): game library launchers (PC and Android, list look by default) and the USA
+disc (SCUS-94236) as a second game, experimental (tested headless on PC only: sweep 95/96, panel, saves, debug menu,
+movies); the area-crash fix after the global renames. Previous: v0.2.0 (d124ae0).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
