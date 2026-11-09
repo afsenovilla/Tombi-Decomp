@@ -105,9 +105,19 @@ Implications, checked:
 - **In the game**: such a save shows in the list and loads like any other (same 0xC00-byte layout and checksum: the
   loader reads it with the same code); saving afterwards writes a new `BISLPS-01144TOMBA-nn` file, the old file is left
   as is. The JP retail never creates a `BISCPS-99999` file, so only a card from a development build would have one.
-- **Which builds used it**: not verified. The JP demo (SLPM-80165) and the 1998-02-03 beta discs are not in this
-  container; their DSPSUB2 / memory-card code should be searched for the string (docs/JPDEMO.md lists a `MEMORY CARD :
-  ACCESS TEST` menu in the demo). If one of them writes `BISCPS-99999`, its saves load in the retail JP game.
+- **Which builds used it** (every Tombi disc in the CI secrets checked, 2026-11-09):
+  - **Hyper PlayStation Re-mix No.12 (SLPM-80167), Tomba demo**: its `TOMBA/SYSTEM/DSPSUB2.BIN` holds only `bu10:`,
+    `bu00:`, `TOMBA-%02d` and `BISCPS-99999` (+0x04..+0x20): the demo **writes and reads** `BISCPS-99999TOMBA-nn`.
+    So saves made with that demo are listed and loaded by the JP retail. Not checked: whether the demo's GAME
+    layout is the retail one (a demo save could load with values the retail game reads differently), and whether
+    the demo lets the player reach the save screen.
+  - **Beta 1998-02-03**: `SYSTEM/DSPSUB2.BIN` is already the retail scheme (reads `BISLPS-01144` and
+    `BISCPS-99999` at +0x98/+0xA8, writes `BISLPS-01144` at +0xF0).
+  - **PrePre Vol. 9 (PCPX-96093) and Hyper 12 `TOMBA.EXE`**: `BISCPS-99999` sits next to `bu00:`/`bu10:` in the boot
+    executable, with the debug menu's `MEMORY CARD : ACCESS TEST` (the test menu's card code; not traced further).
+  - **JP demo SLPM-80165**: no DSPSUB2 and no product code anywhere: it cannot save.
+  - So the second prefix is the development code the pre-release builds saved with, kept in the retail reader so
+    those saves (in practice, Hyper 12 demo saves) still load.
 - **Port**: `port2/shims/card.c` (`tombi_name`) and `tools/save_import.py` already treat any name containing `TOMBA` as
   a Tombi save, so such files are kept and merged. The save editor (`tools/tombi_save.py`) listed only the three retail
   codes; `BISCPS-99999` is now in its `PRODUCTS` table so those saves are listed too.
