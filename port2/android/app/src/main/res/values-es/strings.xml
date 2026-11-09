@@ -39,9 +39,9 @@
     <string name="disc_unverified">Imagen del disco sin verificar: puede fallar.</string>
     <string name="disc_badsha">Disco NO compatible (sha1 de MAIN0.EXE %1$s). El port funciona con Tombi! PAL Rev 1 (SCES-01331 o SCES-01330); puede fallar.</string>
     <string name="disc_rev0">Disco Tombi! PAL Rev 0 (build de julio de 1998). El port necesita la Rev 1 de agosto de 1998 (SCES-01331 o SCES-01330): la Rev 0 tiene otros overlays y no arranca.</string>
-    <string name="disc_nomain0">No hay EXE/MAIN0.EXE en esa imagen (elige el .bin, .iso o .chd; con un .cue selecciona también el .bin).</string>
+    <string name="disc_nomain0">No hay ejecutable del juego en esa imagen (SYSTEM.CNF; elige el .bin, .iso o .chd; con un .cue selecciona también el .bin).</string>
     <string name="disc_needbin">Selecciona el .bin junto con el .cue.</string>
-    <string name="disc_howto">Elige la imagen de tu propio disco de Tombi! (.bin, .iso, .chd, o el .cue junto con su .bin): sus archivos se extraen al almacenamiento de la app (unos 500 MB, comprobados uno a uno; la imagen no se guarda). La app no incluye datos del juego.</string>
+    <string name="disc_howto">Elige la imagen de tu propio disco de Tombi! / Tomba! (.bin, .iso, .chd, o el .cue junto con su .bin): sus archivos se extraen al almacenamiento de la app (unos 500 MB, comprobados uno a uno; la imagen no se guarda). La app no incluye datos del juego.</string>
     <string name="disc_missing">No hay imagen del disco: elige tu disco.</string>
     <string name="cancel">Cancelar</string>
     <string name="disc_cancelled">Copia cancelada: se han borrado los archivos a medias.</string>
@@ -135,4 +135,22 @@
     <string name="tr_done">Traducción importada: %1$s. Se usa en todos los idiomas y tiene prioridad sobre la traducción mejorada.</string>
     <string name="tr_json">Este es el archivo .tombipatch.json. Importa el translation.tpatch compilado (tombi-text: «Instalar en el juego» o «Compilar para el juego»).</string>
     <string name="tr_bad">No es un archivo de traducción (.tpatch hecho con tombi-text).</string>
+    <!-- the game library (Library.java, stage U2) -->
+    <string name="lib_title">Tus juegos</string>
+    <string name="lib_add">Añadir juego</string>
+    <string name="lib_add_sub">Imagen de tu propio disco: .bin, .iso, .chd (o .cue con su .bin)</string>
+    <string name="lib_ready">Listo para jugar</string>
+    <string name="lib_unsupported">Aún no compatible</string>
+    <string name="lib_nolib">No incluido en esta versión de la app</string>
+    <string name="lib_unsupported_long">%1$s está reconocido, pero el port aún no es compatible con esta versión del juego.</string>
+    <string name="lib_nolib_long">%1$s está reconocido, pero esta versión de la app no incluye su biblioteca de juego.</string>
+    <string name="lib_empty">Añade la imagen de tu propio disco para empezar. Cada juego se comprueba, se extrae una vez y queda en tu biblioteca.</string>
+    <string name="lib_style">Estilo de la biblioteca</string>
+    <string name="lib_remove">Quitar este juego</string>
+    <string name="lib_removed">%1$s quitado de la biblioteca (partidas guardadas conservadas).</string>
+    <string name="lib_from">Disco: %1$s</string>
+    <string name="disc_unknown">No es un disco conocido de Tombi! / Tomba! (%1$s, sha1 del ejecutable %2$s).</string>
+    <string name="disc_added">%1$s añadido a tus juegos.</string>
+    <string-array name="lib_styles"><item>Carrusel</item><item>Lista</item><item>Portada</item></string-array>
+    <string-array name="lib_regions"><item>Europa</item><item>EE. UU.</item><item>Japón</item></string-array>
 </resources>

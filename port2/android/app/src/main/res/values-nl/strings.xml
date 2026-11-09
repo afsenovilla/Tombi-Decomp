@@ -129,4 +129,22 @@
     <string name="tr_done">Vertaling geïmporteerd: %1$s.</string>
     <string name="tr_json">Dit is het .tombipatch.json-bestand. Importeer translation.tpatch (tombi-text).</string>
     <string name="tr_bad">Geen vertaalbestand (.tpatch).</string>
+    <!-- the game library (Library.java, stage U2) -->
+    <string name="lib_title">Jouw games</string>
+    <string name="lib_add">Game toevoegen</string>
+    <string name="lib_add_sub">Image van je eigen disc: .bin, .iso, .chd (of .cue met de .bin)</string>
+    <string name="lib_ready">Klaar om te spelen</string>
+    <string name="lib_unsupported">Nog niet ondersteund</string>
+    <string name="lib_nolib">Niet in deze versie van de app</string>
+    <string name="lib_unsupported_long">%1$s is herkend, maar deze versie van het spel wordt nog niet ondersteund door de port.</string>
+    <string name="lib_nolib_long">%1$s is herkend, maar deze versie van de app bevat de spelbibliotheek niet.</string>
+    <string name="lib_empty">Voeg de image van je eigen disc toe om te beginnen. Elk spel wordt gecontroleerd, één keer uitgepakt en bewaard in je bibliotheek.</string>
+    <string name="lib_style">Stijl van de bibliotheek</string>
+    <string name="lib_remove">Deze game verwijderen</string>
+    <string name="lib_removed">%1$s uit de bibliotheek verwijderd (opgeslagen spellen blijven).</string>
+    <string name="lib_from">Disc: %1$s</string>
+    <string name="disc_unknown">Geen bekende Tombi!/Tomba!-disc (%1$s, sha1 van het programma %2$s).</string>
+    <string name="disc_added">%1$s toegevoegd aan je games.</string>
+    <string-array name="lib_styles"><item>Carrousel</item><item>Lijst</item><item>Omslag</item></string-array>
+    <string-array name="lib_regions"><item>Europa</item><item>VS</item><item>Japan</item></string-array>
 </resources>
