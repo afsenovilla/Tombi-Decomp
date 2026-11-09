@@ -581,8 +581,13 @@ def libc_symbols(nm):
         return out
     if os.environ.get("PORT2_ARCH") == "wasm" or os.environ.get("PORT2_LIBC", "").endswith(".a"):
         # a static archive, no dynamic symbols: wasi-libc (port2/wasm), newlib (the 3DS build, port2/n3ds)
-        r = subprocess.run([nm, os.environ.get("PORT2_LIBC", "/usr/lib/wasm32-wasi/libc.a")], capture_output=True, text=True).stdout
-        return set(l.split()[2] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] in "TWD")
+        # (PORT2_LIBC may name several archives, ':'-separated: the 3DS build adds libctru, SDL2, citro3d, libm)
+        out = set()
+        for lib in os.environ.get("PORT2_LIBC", "/usr/lib/wasm32-wasi/libc.a").split(":"):
+            if not os.path.exists(lib): continue
+            r = subprocess.run([nm, lib], capture_output=True, text=True).stdout
+            out |= set(l.split()[2] for l in r.split("\n") if len(l.split()) == 3 and l.split()[1] in "TWDBR")
+        return out
     # PORT2_LIBC: the target's C library when it is not the host's i386 glibc (Android: the NDK sysroot's libc.so,
     # set by port2/CMakeLists.txt)
     for p in ([os.environ["PORT2_LIBC"]] if os.environ.get("PORT2_LIBC") else []) + ["/usr/lib32/libc.so.6", "/usr/lib/i386-linux-gnu/libc.so.6", "/lib32/libc.so.6"]:

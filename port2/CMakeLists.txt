@@ -90,7 +90,7 @@ elseif(NINTENDO_3DS)
   # Nintendo 3DS (port2/n3ds, docs/PORT.md "Nintendo 3DS"; devkitPro's 3DS.cmake toolchain): ARM11 = ARMv6K (no
   # movw / movt in the thunks), newlib's static libc
   set(PORT2_GEN_ENV ${CMAKE_COMMAND} -E env PORT2_ARCH=arm PORT2_ARMV6=1
-      PORT2_LIBC=$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libc.a)
+      PORT2_LIBC=$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libc.a:$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libm.a:$ENV{DEVKITPRO}/libctru/lib/libctru.a:$ENV{DEVKITPRO}/libctru/lib/libcitro3d.a:$ENV{DEVKITPRO}/portlibs/3ds/lib/libSDL2.a)
 endif()
 
 # 1. filtered sources + address resolution (re-run on every configure)
