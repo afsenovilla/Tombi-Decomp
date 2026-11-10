@@ -666,13 +666,26 @@ jobs:
           # which must fall back to the software rasteriser, not fail)
           build/win-bin/tombi-pc.exe --headless --renderer gl --frames 100 --disc nonexistent.bin 2>&1 | grep -i 'renderer\|opengl' || true
 
+      # the Python environment (PyInstaller with its bootloader built from source, PySide6, numpy) kept across runs:
+      # installing it was most of this job's time
+      - name: Cache the Python environment
+        id: venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-launcher-win-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+
       - name: Build tombi-port.exe
         shell: bash
         run: |
+          python -m venv .venv
+          source .venv/Scripts/activate
           # PyInstaller's prebuilt Windows bootloader is what antivirus / browser scanners flag (false positives that
           # come and go with each release): build the bootloader here from source (MSVC on the runner), pinned version
           # PySide6-Essentials: the launcher is Qt, and the save editor (tools/tombi_save_editor.py) opens inside it (Edit save...)
-          PYINSTALLER_COMPILE_BOOTLOADER=1 python -m pip install --no-binary pyinstaller "pyinstaller==6.11.1" pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
+          if [ "${{ steps.venv.outputs.cache-hit }}" != "true" ]; then
+            PYINSTALLER_COMPILE_BOOTLOADER=1 python -m pip install --no-binary pyinstaller "pyinstaller==6.11.1" pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
+          fi
           QT_QPA_PLATFORM=offscreen python tools/test_tombi_save_editor.py
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
           python tools/test_save_import.py
@@ -763,6 +776,13 @@ jobs:
           key: apt-launcher-linux-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
           restore-keys: apt-launcher-linux-v1-
 
+      - name: Cache the Python environment
+        id: venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-launcher-linux-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+
       - name: Build tombi-port (Linux)
         run: |
           mkdir -p "$RUNNER_TEMP/apt-cache/partial"
@@ -777,7 +797,11 @@ jobs:
           # player's system, README); the offscreen tests need EGL / xkbcommon
           sudo apt-get $APT_CACHE install -y libegl1 libxkbcommon0 libfontconfig1
           sudo chown -R "$USER" "$RUNNER_TEMP/apt-cache"
-          python -m pip install pyinstaller pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
+          python -m venv .venv
+          source .venv/bin/activate
+          if [ "${{ steps.venv.outputs.cache-hit }}" != "true" ]; then
+            python -m pip install pyinstaller pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
+          fi
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
           python tools/test_save_import.py
           echo "${GITHUB_SHA::7}" > build_id.txt
