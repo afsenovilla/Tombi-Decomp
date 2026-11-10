@@ -357,6 +357,29 @@ program `tomba` = TOMBA.EXE, game dir `game_prepre8/`, git-ignored). It is set u
     `char pad[0];` reproduces it;
   - scratchpad words written through `$at`: check with `jpcheck` without `--norm` (or the report), `--norm` hides
     the offset of `sw rX,N(at)`.
+- **Hand pass round 3, second part (2026-11-10): 982 -> 997 functions, 31.62 -> 32.34 %.** Near misses of round 2
+  and closest twins (`tools/demo_pair.py`). What fixed the last diffs:
+  - a plain scalar global stored after stores through `ptr[i]` is moved above them by sched (gcc 2.7 assumes a
+    fixed scalar and a varying "in struct" address never alias); a one-field struct global keeps the retail order
+    (`func_800996B4`, the `_svm_cur` voice of the voice reset). When splat named every field address of a table
+    (`D_800DDB96`, `D_800DDB98`, ...), declare one array of 0x34-byte structs per field symbol;
+  - `if (p == d) { T *q = p; ...}` with `q` block-scoped keeps the `move s0,v0` copy; reusing `d` lets cse apply the
+    jump equivalence and drop it (`func_80022128`);
+  - a `goto` loop has no loop notes, so loop.c does not hoist a constant that retail reloads each pass (`0x900`
+    pad test, `func_8001FBC0`); the hoisted `1` then has to be an explicit variable, compared through `if`/`goto`
+    (a `switch` case label is a constant);
+  - `{ int m = y * cols; m += x; x = m; }` gives `addu x,prod,x` where `x += y * cols` gives `addu x,x,prod`;
+  - an `unsigned char` first parameter moves its `move s4,a0` copy after the other three in the prologue;
+  - a constant that retail keeps in `v1` from the switch dispatch delay slot: `register int k asm("$3") = 6;` plus a
+    barrier (`func_80079B68`, the chick handler);
+  - reorg steals `li v0,1` from the common tail into delay slots unless the tail starts with the loads: read the
+    operands into locals before `o->visible = 1` (`func_80040E24`);
+  - an asm barrier on a copy right after its assignment (`dx = d; asm(... dx)`) swaps the two registers; at the
+    branch target it would also leave a `nop` (`func_800182F4`);
+  - `return 0` written as `break` to a shared `return 0` when retail ends in one `move v0,zero`.
+  Still open (diff lines): `func_8006BA14` 29 (sum register of the second box test), `func_8003E360` 35 (the
+  constant 8 in v1), `func_800360C0` 69 (store/reload order of +0xA0/+0xA6), `func_8007D4B0` 38, `func_8006EFB4`
+  58 (different tail), `func_80031914` 66.
 - CI job `report-prepre8` (`.github/workflows/report.yml`) downloads the disc image from the
   **`GAME_FILES_URL_PREPRE8`** secret (raw data track .bin or a zip with TOMBA.EXE; Drive links handled like the
   demo job), extracts only `/TOMBA` with `tools/prepre8.py extract`, checks the TOMBA.EXE sha1
