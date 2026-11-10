@@ -47,17 +47,29 @@ static void set_ir(int lm) {
     IR3 = clampf(MAC3, lo, 0x7FFF, 1u << 22);
 }
 
+static inline s32 clamp32(s32 v, s32 lo, s32 hi, u32 flag) {
+    if (v < lo) { FLAG |= flag; return lo; }
+    if (v > hi) { FLAG |= flag; return hi; }
+    return v;
+}
+/* floor((a + b + c) / 4096) of three 32-bit products, in 32 bits (their sum does not fit) */
+static inline s32 sum3_12(s32 a, s32 b, s32 c) {
+    return (a >> 12) + (b >> 12) + (c >> 12) + (((a & 0xFFF) + (b & 0xFFF) + (c & 0xFFF)) >> 12);
+}
+/* (the rotation's products are 16 x 16 bits: 32-bit multiplies, and the translation, a multiple of 4096 once shifted,
+   is added after the sum's own shift: the same values as the 64-bit sums, a third of the game's time on an Old 3DS) */
 static void rtp(int n, int last) {
-    s16 r[3][3]; mat(0, r);
-    s64 x = VX(n), y = VY(n), z = VZ(n);
-    s64 m1 = ((s64)C[5] << 12) + r[0][0] * x + r[0][1] * y + r[0][2] * z;
-    s64 m2 = ((s64)C[6] << 12) + r[1][0] * x + r[1][1] * y + r[1][2] * z;
-    s64 m3 = ((s64)C[7] << 12) + r[2][0] * x + r[2][1] * y + r[2][2] * z;
-    MAC1 = (s32)(m1 >> 12); MAC2 = (s32)(m2 >> 12); MAC3 = (s32)(m3 >> 12);
-    set_ir(0);
+    s32 x = VX(n), y = VY(n), z = VZ(n);
+    s64 m1 = (s64)C[5] + sum3_12(M16LO(0) * x, M16HI(0) * y, M16LO(1) * z);
+    s64 m2 = (s64)C[6] + sum3_12(M16HI(1) * x, M16LO(2) * y, M16HI(2) * z);
+    s64 m3 = (s64)C[7] + sum3_12(M16LO(3) * x, M16HI(3) * y, M16LO(4) * z);
+    MAC1 = (s32)m1; MAC2 = (s32)m2; MAC3 = (s32)m3;
+    IR1 = clamp32(MAC1, -0x8000, 0x7FFF, 1u << 24);
+    IR2 = clamp32(MAC2, -0x8000, 0x7FFF, 1u << 23);
+    IR3 = clamp32(MAC3, -0x8000, 0x7FFF, 1u << 22);
     /* SZ FIFO */
     D[16] = D[17]; D[17] = D[18]; D[18] = D[19];
-    D[19] = clampf(m3 >> 12, 0, 0xFFFF, 1u << 18);
+    D[19] = clampf(m3, 0, 0xFFFF, 1u << 18);
     u32 h = (u16)C[26], sz = (u32)D[19];
     u32 q;
     if (sz * 2 <= h) { q = 0x1FFFF; FLAG |= 1u << 17; }
