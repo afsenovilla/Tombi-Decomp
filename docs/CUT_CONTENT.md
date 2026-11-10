@@ -58,6 +58,7 @@ logo.
 
 | Find | Why |
 |---|---|
+| **Top-down Charity Wings glide** (JP demo SLPM-80165 / PrePre 9): Tomba frames 77-79 with the arm raised + the feather item sprite, no script left | section "Lost: the top-down Charity Wings glide" below; `tools/wings_glide.py` rebuilds the GIF from the demo disc | restorable in the port only as a reconstruction (spin order and timing are ours) from the demo disc files |
 | Civilization towns (AREA11/16/17/18 top-down sections) | Owned by docs/CIVILIZATION.md (`--civ-test`): code in I0NFO2 is complete, but the sections' load lists are empty and their map / SPR / palette files are on no disc. 63 lines (class B*). |
 | Growing golden flower frames (AREA02 SPR 0x3B f27-32) | The rectangles they point at are empty in PAL VRAM: the art is not on the disc. |
 | Tunnel glyph sheet: Maya-style numerals 1-9 (dots and bars), shell/eye 0, "=" 10, ten boxed 24x24 symbols (sun, bird, moon, framed star, bow, crossed arrows, gear, ring of small rings, grid, mound) | `AREA02/B301.000` (GRPX 256x256 words at VRAM (768,0), AREA02 section 3 = top-down tunnels), 4 bpp at (832,72) 240x72 (page 13, u 0..239, v 72..143), CLUT `AREA02/CLUT04` row 22 col 7 = (240,502), word 0x7D8F. Same pixels in US and PAL (identical file) and JP (different file, same block); not in any `SYSTEM/` reload copy, not in the PrePre8 data, beta disc not checked (not local). No static reference found: the CLUT word occurs nowhere in AREA02 code/data, and no part of the tunnel SPR banks (D305) samples v 72..143. **Checked in the port: never drawn.** `--dump-draws` over 13 headless runs from the debug select into AREA02 section 3 (walks covering player x 982..1677, y -80..-729 of the tunnel network, the exit into AREA01 section 3, and `D_800A60A3` poked to 1/3/4 to force the alternative backdrop sets of `tunnelSelectBackdropPieces`): 5508 distinct textured primitives in section 3, none sample page 13 at v 72..143 (page-13 use there is only v 0..56 and 146..158) and none use CLUT (240,502). `tunnelSelectBackdropPieces` (I0NFO3) only picks backdrop piece pointers (table entries 0..20 by camera x, or entry 0x5C/0x60 for `D_800A60A3`), so it cannot reach the block by itself. **Full sweep with `--noclip`** (port debug flag, docs/PORT.md): five headless serpentine walks over the whole section (player x 90..1750, the clamp of the section, i.e. past the x<0x99 exits; y -157..-1567, past the map's -0x540 and the lowest exit at -0x4FE; rows 118 px apart, camera x 199..1400+ so all 21 backdrop strips, camera y down from its top clamp -52), one per backdrop value `D_800A60A3` = 0..4 forced inside `tunnelSelectBackdropPieces` (a `--poke-every` of 0x800A60A3 does not stick: the hook read 0 every frame, so the earlier 1/3/4 runs most likely drew the default set): 2318 distinct textured primitives with the default set (0 and 4), 202 with 1/2 (entry 0x5C), 212 with 3 (entry 0x60); page 13 again only at v 0..55 and 146..157, no CLUT (240,502). With `--noclip` the trigger tiles and exits are off, so tunnel event scenes are not part of this sweep (the earlier 13 runs covered the reachable ones). **Backdrop data decoded:** the RAM block `tunnelSelectBackdropPieces` reads (0x1DC40 bytes, header of 24 piece offsets 0x64..0x1DC40) is a list of textured polys (CLUT word, tpage word, colour+GP0 code 0x24/0x2C, then x,y,z,u,v per vertex): 882 polys, tpages 0x0C/0x0D/0x0E/0x4D, 16 CLUTs (0x784E..0x7DCF), none 0x7D8F; page 13 only at v 0..31 and 144..159. **Static re-check:** 0x7D8F as a 16-bit word is absent from MAIN0 and every overlay except one false hit (X010 0x37608 is `j 0x8011F63C`); the tpage-13 4 bpp + UV pattern (hi 0x000D/2D/4D/6D, v 72..143, u<240) and GP0 0xE1 page-13 words hit only MIPS instructions in MAIN0/X001/X006; the AREA02 file hits (B001/B101/B200 GRPX pixels, D004/D304 compressed streams) are not references. No reference found. Unused art of a cut symbol/number puzzle; layout, code and the Japanese hint text (a cut "graffiti floor" contraption with dot-and-bar base-20 numerals): see "Tunnel glyph sheet (AREA02/B301): layout, code and text" below. |
@@ -820,6 +821,37 @@ The 84 frames these scripts use are exactly the new frames no table reaches; the
 - Demo frames 77-85, 89 and 96-97 are in no player script of the demo (the exe block above is the only player table;
   the script tables inside the AREA08 overlay `INFO.BIN` belong to the area's NPCs and index their own sprite sets, so
   they say nothing about Tomba's frames). They are unused top-down art, like the side-view orphans, with no script.
+
+### Lost: the top-down Charity Wings glide (JP demo), rebuilt (2026-11-10)
+
+How it was put together, step by step, so it can be redone (`tools/wings_glide.py` does all of it from the demo disc):
+
+1. **The Tomba frames.** The demo's overhead set (`AREA08/D002.000` +0x3FA28, 106 frames; SPR parts `AREA08/D003.GAM`
+   table at +0; palette rows 0/1 of `AREA08/CLUT01.GAM`) has frames 77, 78, 79 with the right arm raised overhead: in
+   no table and in no player script of the demo, and not in retail (retail's 127-frame set redrew the item moves as
+   65-74 and 126). Rendered with each part's own CLUT row like the side view (two parts per frame, torso and legs).
+2. **The feather.** Retail draws the Charity Wings item from the resident item table (`SPR_DATA[4]`, kind 0x34, PAL
+   `SYS/LD0SYS.BIN` record of AREA00 list 0): item descriptor 7 (`tools/sprclut.py items`) -> anim set 0x80012214 ->
+   scripts 0x80012834 (frame 159, static, 24x24) and 0x8001283C (frames 160, 161, 162, the flap, 1 tick each), CLUT
+   word 0x7AD6 = VRAM (352,491), i.e. row 11 of the item palette block (`SYSTEM/A10004.000` at (352,480)). The texels
+   were cut from the retail VRAM (`vram.cut_part` with tpage base 0x14), packed back to 4 bpp rows and searched byte for
+   byte in every demo file at every page width: found in the JP demo's `SYSTEM/A00000.GAM` (unpacked, 512 px wide
+   page) and in PrePre 9's `TOMBA/A00002.GAM` (256 px wide; = `AREA01/A005.GAM`, `AREA02/A001.GAM`) at the same page
+   coordinates: 159 at (224,104), 160 at (200,80), 161 at (216,64). Retail's 162 (24x16) is not in either demo. The
+   palette row 11 is byte-identical in retail, the JP demo (`SYSTEM/A00002.000`) and PrePre 9 (`TOMBA/A00003.000`):
+   white, five light blues, three quill browns, a blue-grey.
+3. **Pinning the feather to the hand.** Measured from the pixels: the raised hand's topmost opaque pixel (right third
+   of the sprite) is at (22,2) in frame 77 and (22,1) in 78 and 79; the feather's quill end is the lowest opaque pixel
+   of each feather frame ((2,22) in 159, (2,14) in 160, (7,14) in 161). The quill end goes 1 px above the hand's top
+   pixel (the user's call, after trying 2 px inside and 0).
+4. **The rotor.** The three feather frames read as phases of one turn: 159 flat, 160 angled, 161 edge-on; mirroring
+   160 and 159 gives the other half (retail's missing 162 is exactly the mirrored 160). Cycle of 8 phases at 70 ms;
+   Tomba cycles 77-78-79-78 at half that rate; the figure floats +-2 px (sine over 32 steps). The spin order, the
+   timings and the float are ours: the demo leaves no script for this sequence.
+
+What is from the disc: every pixel, the hand and quill positions, the palette. What is a reconstruction: the spin
+order, the speeds, the float. Output of the tool: `wings_glide_x5.gif`, `wings_glide_1x.gif`, `wings_glide_steps.png`
+and the three feather PNGs (never committed).
 
 ### The other sprite tables of the JP demo (enemies, NPCs, HUD)
 
