@@ -133,7 +133,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .sdl3ds
-          key: sdl3ds-2.30.11-v1
+          key: sdl3ds-2.30.11-v2
 
       - name: Build tombi.3dsx (devkitARM container)
         if: steps.fetch.outputs.ok == 'true'
@@ -148,6 +148,11 @@ jobs:
             mkdir -p /tmp/sdl && cd /tmp/sdl
             curl -fsSL -o sdl.tar.gz "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz"
             tar xzf sdl.tar.gz
+            # SDL 2.30 puts its audio thread on the system core (core 1, 30 % of its time): an Old 3DS cannot mix there
+            # (60 % of the samples in the log of one); upstream changed it in 2026 ("n3ds: Don't put audio thread in system
+            # core on Old 3DS systems").  The same here: core 1 only on a New 3DS.
+            sed -i "s|^        cpu = 1;|        { bool n3 = false; APT_CheckNew3DS(\&n3); if (n3) cpu = 1; }|" SDL2-${SDL2_VERSION}/src/thread/n3ds/SDL_systhread.c
+            grep -n "APT_CheckNew3DS" SDL2-${SDL2_VERSION}/src/thread/n3ds/SDL_systhread.c
             cmake -S SDL2-${SDL2_VERSION} -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release \
                   -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_TEST=OFF -DCMAKE_INSTALL_PREFIX=$DEVKITPRO/portlibs/3ds > /dev/null
             cmake --build build -j "$(nproc)" > /dev/null && cmake --install build > /dev/null
