@@ -33,6 +33,12 @@ concurrency:
 
 env:
   SDL2_VERSION: "2.30.11"
+  # ccache for the NDK builds (game_libs.py's CMake and Gradle's externalNativeBuild inherit the environment)
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+  CCACHE_MAXSIZE: 1G
+  CCACHE_COMPRESS: "1"
+  CMAKE_C_COMPILER_LAUNCHER: ccache
+  CMAKE_CXX_COMPILER_LAUNCHER: ccache
 
 jobs:
   apk:
@@ -53,7 +59,7 @@ jobs:
       - name: Install toolchain (matching build + generator)
         run: |
           sudo apt-get update
-          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev ninja-build
+          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev ninja-build ccache
           # the arm64-v8a build's wasm32 step (port2/wasm/build.py): clang/lld/llvm 18, wasi-libc, the wasm32 builtins
           sudo apt-get install -y clang-18 lld-18 llvm-18 wasi-libc libclang-rt-18-dev-wasm32
           echo "/usr/lib/llvm-18/bin" >> "$GITHUB_PATH"
@@ -119,7 +125,12 @@ jobs:
           key: disc-pal-v1
       - name: Cache key
         id: key
-        run: echo "full=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "full=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
+          # the USA matching build: the same key as port2-exe.yml (one cache for both workflows)
+          echo "fullusa=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/units.py', 'tools/versions.py', 'tools/version_data.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
+          # the finished USA libraries (both ABIs): everything that feeds the generator, wasm2c and the NDK build
+          echo "usalibs=v1-${SDL2_VERSION}-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'port/**', 'port2/wasm/**', 'port2/runtime/**', 'port2/CMakeLists.txt', 'port2/cmake/**', 'port2/android/game_libs.py', 'tools/**', 'VERSION') }}" >> "$GITHUB_OUTPUT"
 
       - name: Restore matching build
         id: full
@@ -192,6 +203,35 @@ jobs:
       # U2, port2/android/game_libs.py): only with the GAME_FILES_URL_USA secret; without it the APK has the PAL game
       # only (the launcher then lists a USA disc as recognised but not in this build).  The generator takes the USA
       # addresses from its own matching build and the USA disc's files (game_usa/fs), as the PAL one does from game/.
+      - name: Restore ccache
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: .ccache
+          key: ccache-android-${{ github.sha }}
+          restore-keys: ccache-android-
+
+      # The finished USA libraries of the same sources (cache hit = the whole step below is skipped)
+      - name: Restore the USA game libraries
+        id: usalibs
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            port2/android/app/src/main/jniLibs/*/libtombi_usa.so
+            build/android-usa/*/libtombi_usa.debug.so
+          key: usalibs-${{ steps.key.outputs.usalibs }}
+
+      - name: Restore USA matching build
+        id: fullusa
+        if: steps.fetch.outputs.ok == 'true' && steps.usalibs.outputs.cache-hit != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/scus94236/full
+            !build/scus94236/full/tmp
+          key: fullusa-${{ steps.key.outputs.fullusa }}
+
       - name: USA game library (libtombi_usa.so, both ABIs)
         id: usa
         if: steps.fetch.outputs.ok == 'true'
@@ -202,13 +242,39 @@ jobs:
             echo "::notice::GAME_FILES_URL_USA secret not set; the APK has the PAL game only."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
+          if [ "${{ steps.usalibs.outputs.cache-hit }}" = "true" ]; then
+            echo "USA libraries restored from the cache (usalibs-${{ steps.key.outputs.usalibs }})"
+            ls -l port2/android/app/src/main/jniLibs/*/
+            echo "ok=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
           bash tools/disc_fetch.sh USA
           echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
-          python3 tools/build_full.py --version usa -j "$(nproc)"
+          if [ "${{ steps.fullusa.outputs.cache-hit }}" = "true" ]; then find build/scus94236/full -type f -exec touch {} +
+          else python3 tools/build_full.py --version usa -j "$(nproc)"; fi
+          ccache -z || true
           python3 port2/android/game_libs.py --version usa --sdl2 "$SDL2_SOURCE" --ndk "$ANDROID_NDK_LATEST_HOME" -j "$(nproc)"
+          ccache -s || true
           ls -l port2/android/app/src/main/jniLibs/*/
           rm -f game_usa/disc.bin
           echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Save USA matching build
+        if: steps.usa.outputs.ok == 'true' && steps.usalibs.outputs.cache-hit != 'true' && steps.fullusa.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/scus94236/full
+            !build/scus94236/full/tmp
+          key: fullusa-${{ steps.key.outputs.fullusa }}
+
+      - name: Save the USA game libraries
+        if: steps.usa.outputs.ok == 'true' && steps.usalibs.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            port2/android/app/src/main/jniLibs/*/libtombi_usa.so
+            build/android-usa/*/libtombi_usa.debug.so
+          key: usalibs-${{ steps.key.outputs.usalibs }}
 
       - uses: actions/setup-java@v4
         if: steps.fetch.outputs.ok == 'true'
@@ -245,7 +311,9 @@ jobs:
         if: steps.fetch.outputs.ok == 'true'
         run: |
           export PORT2_PYTHON="$(command -v python3)"
+          ccache -z || true
           gradle -p port2/android assembleDebug --no-daemon --stacktrace -Psdl2Source="$SDL2_SOURCE"
+          ccache -s || true
           APK=port2/android/app/build/outputs/apk/debug/app-debug.apk
           ls -l "$APK"
           unzip -l "$APK" | grep -E "\.so$"
@@ -286,6 +354,13 @@ jobs:
           cp port2/android/app/src/main/assets/fonts/*-OFL.txt dist/android/
 
       # Optional release signing; without the four secrets the APK stays debug-signed.  Never commit a keystore.
+      - name: Save ccache
+        if: steps.fetch.outputs.ok == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .ccache
+          key: ccache-android-${{ github.sha }}
+
       - name: Sign with the release keystore (optional)
         if: steps.fetch.outputs.ok == 'true'
         env:
