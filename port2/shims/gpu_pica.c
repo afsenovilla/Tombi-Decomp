@@ -250,7 +250,13 @@ static void sync_pages(int x, int y, int w, int h) {
     if (w <= 0 || h <= 0) return;
     if (nbulk) bulk_resolve(x, y, w, h);
     int any = 0;   /* (most textures: no page of theirs drawn into, nothing to scan) */
-    for (int pj = y >> 8; pj <= (y + h - 1) >> 8; pj++) for (int pi = x >> 6; pi <= (x + w - 1) >> 6; pi++) any |= page_drawn[pj][pi];
+    for (int pj = y >> 8; pj <= (y + h - 1) >> 8; pj++) for (int pi = x >> 6; pi <= (x + w - 1) >> 6; pi++) {
+        if (!page_drawn[pj][pi]) continue;
+        /* a flag can outlive its cells (a fill cleaned them): look at the whole page once and drop it then */
+        int left = 0;
+        for (int j = pj * 256; j < pj * 256 + 256 && !left; j++) left = cell_drawn[j][pi * 4] | cell_drawn[j][pi * 4 + 1] | cell_drawn[j][pi * 4 + 2] | cell_drawn[j][pi * 4 + 3];
+        if (left) any = 1; else page_drawn[pj][pi] = 0;
+    }
     if (!any) return;
     for (int j = y >> CSH; j <= (y + h - 1) >> CSH; j++)
         for (int i = x >> 4; i <= (x + w - 1) >> 4; i++) {
@@ -457,16 +463,7 @@ static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
     p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 255;
 }
 /* emit n vertices (a triangle or two) with the state the primitive needs: textured semi-transparent ones twice */
-unsigned long long pica_emit_us, pica_slot_us;   /* (time in emit() and in its tex_slot(): n3ds/pica_c3d.c logs them) */
-static void emit1(const PV *v0, int n, const GpuTex *tex, int semi, int raw);
 static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
-#ifdef __3DS__
-    unsigned long long q0 = port_time_us(); emit1(v0, n, tex, semi, raw); pica_emit_us += port_time_us() - q0;
-#else
-    emit1(v0, n, tex, semi, raw);
-#endif
-}
-static void emit1(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
     PState s = base_state();
     PV vv[6]; const PV *v = v0;
     if (tex) {
@@ -478,13 +475,7 @@ static void emit1(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
         }
         /* (the far edge kept when it is in the page: a magnified sprite's last pixels can sample it) */
         if (u1 > 255 && u0 < 256) u1 = 255; if (w1 > 255 && w0 < 256) w1 = 255;
-#ifdef __3DS__
-        unsigned long long q0 = port_time_us();
-#endif
         int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by), ax, ay;
-#ifdef __3DS__
-        pica_slot_us += port_time_us() - q0;
-#endif
         pica_slot_pos(slot, &ax, &ay);
         s.tex = pica_slot_atlas(slot); s.mod = !raw;
         for (int i = 0; i < n; i++) { vv[i] = v0[i]; vv[i].u += (float)(ax - bx); vv[i].v += (float)(ay - by); }
@@ -588,7 +579,15 @@ static void put_rect(int x, int y, int w, int h) {   /* vram[] -> the target, in
 static void pica_fill(int x, int y, int w, int h, u16 c) {
     u16 *vram = port_vram();
     flush();
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[((y + j) & 511) * 1024 + ((x + i) & 1023)] = c;
+    /* a fill inside a noted drawing area (the frame's clear): vram[] is stale there anyway and stays marked so, the
+       device alone fills (82000 words a frame otherwise, for nothing) */
+    for (int i = 0; i < nbulk; i++)
+        if (x >= bulk[i].x1 && y >= bulk[i].y1 && x + w - 1 <= bulk[i].x2 && y + h - 1 <= bulk[i].y2) { dev->fill(x, y, w, h, c15to32(c)); return; }
+    for (int j = 0; j < h; j++) {
+        u16 *row = &vram[((y + j) & 511) * 1024];
+        if (x >= 0 && x + w <= 1024) { u16 *d = row + x; for (int i = 0; i < w; i++) d[i] = c; }
+        else for (int i = 0; i < w; i++) row[(x + i) & 1023] = c;
+    }
     /* the device fills the same rectangle (its colour converts back to exactly c): no upload of the words */
     for (int j = 0; j < h; ) {
         int yy = (y + j) & 511, hh = h - j < 512 - yy ? h - j : 512 - yy;

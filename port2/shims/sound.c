@@ -178,13 +178,15 @@ static int rev_delay, rev_feedback;
 static int rev_in_l, rev_in_r, rev_cnt, rev_out_l, rev_out_r, rev_prev_l, rev_prev_r;
 
 static int rev_rd(int units, int back) {          /* sample at the register address (8-byte units), `back` samples earlier */
-    long long a = ((long long)rev_pos + (long long)units * 8 - (long long)back * 2) % (long long)rev_bytes;
-    if (a < 0) a += rev_bytes;
+    /* (32 bits hold it: 16-bit units, a position inside the buffer; and it is nearly always in range already: the
+       64-bit modulo this was is a library call on 32-bit ARM, ten of them a sample) */
+    int a = (int)rev_pos + units * 8 - back * 2;
+    if ((unsigned)a >= rev_bytes) { a %= (int)rev_bytes; if (a < 0) a += (int)rev_bytes; }
     return rev_buf[a >> 1];
 }
 static void rev_wr(int units, int val) {
-    long long a = ((long long)rev_pos + (long long)units * 8) % (long long)rev_bytes;
-    if (a < 0) a += rev_bytes;
+    int a = (int)rev_pos + units * 8;
+    if ((unsigned)a >= rev_bytes) { a %= (int)rev_bytes; if (a < 0) a += (int)rev_bytes; }
     rev_buf[a >> 1] = val > 32767 ? 32767 : val < -32768 ? -32768 : val;
 }
 #define RV(i) ((int)(s16)rev[i])
