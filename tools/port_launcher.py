@@ -538,6 +538,20 @@ def build_id():
 BUILD_ID = build_id()
 
 
+def app_version():
+    """Release number (VERSION at the repo root, bundled next to build_id.txt by port2-exe.yml)."""
+    for d in (getattr(sys, "_MEIPASS", None), ROOT):
+        if d and os.path.isfile(os.path.join(d, "VERSION")):
+            v = open(os.path.join(d, "VERSION"), encoding="utf-8", errors="replace").read().strip()
+            if v:
+                return v
+    return ""
+
+
+APP_VERSION = app_version()
+VERSION_TAG = ("v" + APP_VERSION + " · " if APP_VERSION else "") + "build " + BUILD_ID
+
+
 def icon_file(name):
     """A file of tools/icons: bundled under icons/ by port2-exe.yml (--add-data ...;icons), else the checkout's."""
     for d in ([os.path.join(sys._MEIPASS, "icons")] if getattr(sys, "_MEIPASS", None) else []) + [os.path.join(ROOT, "tools", "icons")]:
@@ -2037,7 +2051,7 @@ class App(QMainWindow):
             self._extracting(self.ext_pct)
 
     def _build(self, check=True):
-        self.setWindowTitle(tr("title") + "  [build " + BUILD_ID + "]")
+        self.setWindowTitle(tr("title") + "  [" + VERSION_TAG + "]")
         self.edits = {}
         root = QWidget()
         root.setObjectName("root")
@@ -2111,7 +2125,7 @@ class App(QMainWindow):
         cb.activated.connect(chosen)
         sl.addWidget(cb)
         sl.addSpacing(10)
-        bl = QLabel("build " + BUILD_ID)
+        bl = QLabel(VERSION_TAG)
         bl.setObjectName("build")
         sl.addWidget(bl)
         grid.addWidget(side, 0, 0, 2, 1)
