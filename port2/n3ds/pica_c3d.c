@@ -108,7 +108,8 @@ static void c3d_tex_upload(int slot, const unsigned *rgba) {
 /* ---- primitives */
 static void c3d_tris(const PState *s, const PV *v, int n) {
     begin();
-    C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, s->y1, s->x2 + 1, s->y2 + 1);
+    /* the scissor counts rows from the other edge than the projection (the self test: an area of y 256..511 drew nothing) */
+    C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, 511 - s->y2, s->x2 + 1, 512 - s->y1);
     set_env(s->tex >= 0, s->mod);
     set_atest(s->atest);
     set_blend(s->blend);
