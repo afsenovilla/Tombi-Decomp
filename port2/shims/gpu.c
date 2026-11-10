@@ -931,7 +931,7 @@ void DrawOTag(u32 *ot) {
 #ifdef __3DS__
     extern int pica_prof_on; extern unsigned long long pica_prof[6], port_ticks(void); extern unsigned pica_prof_n;
     pica_prof_on = !skip && (gpu_lists & 15) == 0;
-    unsigned long long prof_t0 = pica_prof_on ? port_ticks() : 0;
+    unsigned long long prof_t0 = port_ticks();
 #endif
     if (port_frameskip) { fs_mark(gs.x1, gs.y1, skip); port_frames_skipped += (unsigned)skip; }
     while (n < 200000) {
@@ -957,7 +957,13 @@ void DrawOTag(u32 *ot) {
         p = (u32 *)next;                     /* a native pointer: the whole data image sits below 16 MB */
     }
 #ifdef __3DS__
-    if (pica_prof_on) { be->list_end(); pica_prof[0] += port_ticks() - prof_t0; pica_prof_n++; pica_prof_on = 0; }
+    {   /* every table: its whole time, drawn and skipped apart (pica_ot[0..1] ticks, [2..3] counts) */
+        extern unsigned long long pica_ot[4];
+        be->list_end();
+        unsigned long long dt = port_ticks() - prof_t0;
+        pica_ot[skip ? 1 : 0] += dt; pica_ot[skip ? 3 : 2]++;
+        if (pica_prof_on) { pica_prof[0] += dt; pica_prof_n++; pica_prof_on = 0; }
+    }
 #endif
     gpu_prims += n;
     ws_sync_down();

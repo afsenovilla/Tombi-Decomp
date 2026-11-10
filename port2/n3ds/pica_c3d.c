@@ -316,6 +316,10 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
                 port_printf("[3ds] profile of %u ordering tables, ms each: packets %.2f (of which emit %.2f: clip %.2f, texture %.2f, device %.2f)\n",
                             pica_prof_n, pica_prof[0] * k, pica_prof[1] * k, pica_prof[2] * k, pica_prof[3] * k, pica_prof[4] * k);
             }
+            { extern unsigned long long pica_ot[4]; double q = 1000.0 / SYSCLOCK_ARM11;
+              port_printf("[3ds] ordering tables: %llu drawn, %.2f ms each; %llu skipped, %.2f ms each\n", pica_ot[2], pica_ot[2] ? pica_ot[0] * q / pica_ot[2] : 0.0,
+                          pica_ot[3], pica_ot[3] ? pica_ot[1] * q / pica_ot[3] : 0.0);
+              memset(pica_ot, 0, sizeof pica_ot); }
             memset(pica_prof, 0, sizeof pica_prof); pica_prof_n = 0;
         }
         n_up = n_rd = n_wait = 0; pica_decode_us = 0;

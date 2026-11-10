@@ -290,6 +290,15 @@ static void pica_vram_read(int x, int y, int w, int h) {
     clip_rect(&x, &y, &w, &h);
     if (w <= 0 || h <= 0) return;
     flush();
+    {   /* vram[] is what the game wrote unless the GPU drew into the rectangle since: only then is the target read.
+           (The game stores the CLUT rows it is about to fade and loads them back afterwards; on a console the
+           target's copy of those rows was not what had been written, and the ground came back transparent.) */
+        int drawn = 0;
+        for (int i = 0; i < nbulk && !drawn; i++) drawn = !(x > bulk[i].x2 || x + w - 1 < bulk[i].x1 || y > bulk[i].y2 || y + h - 1 < bulk[i].y1);
+        for (int j = y; j < y + h && !drawn; j++) for (int i = x >> 4; i <= (x + w - 1) >> 4 && !drawn; i++) drawn = cell_drawn[j][i];
+        if (!drawn) return;
+    }
+    if (nbulk) bulk_resolve(x, y, w, h);
     read_back(x, y, w, h);
     cells_clean(x, y, w, h);
     st_rb_host++; st_rb_px += (unsigned long long)w * h;
@@ -472,6 +481,7 @@ static int clip_on = -1;
 /* profiling on the 3DS (n3ds/pica_c3d.c logs it): one ordering table in sixteen is timed, in system ticks:
    [0] its packets, [1] emit(), [2] the clipping, [3] the texture look-up, [4] the device's triangles */
 int pica_prof_on; unsigned long long pica_prof[6]; unsigned pica_prof_n;
+unsigned long long pica_ot[4];   /* (shims/gpu.c DrawOTag: ticks in drawn / skipped tables, and how many of each) */
 #ifdef __3DS__
 extern unsigned long long port_ticks(void);
 #define PT() (pica_prof_on ? port_ticks() : 0)
