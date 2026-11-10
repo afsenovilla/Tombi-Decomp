@@ -735,7 +735,11 @@ void port_panel_vblank(void) {
     if (panel_script) script_step();
     if (hold_at == port_frame) { inq_push(1, 1, hold_x, hold_y); hold_at = -1; }
     if (page == PAGE_SIDE) side_cache_work();   /* the side map's tiles, a slice every vblank (panel_side.inc) */
+#ifdef __3DS__   /* (the 3DS draws the panel on its CPU, inside the 60 Hz frame: every fourth vblank, ~15 fps) */
+    if (!dump && (frames++ & 3) && !scr_busy()) return;
+#else
     if (!dump && (frames++ & 1) && !scr_busy()) return;   /* ~25 fps is plenty, every vblank while a list moves */
+#endif
     inq_run();
     { extern int port_show_fps; extern unsigned long long port_time_us(void);
       unsigned long long t0 = port_show_fps ? port_time_us() : 0;
