@@ -17,6 +17,7 @@
 #include <citro3d.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "port_runtime.h"
 #include "gpu_pica.h"
 #include "pica_vsh_shbin.h"
@@ -383,6 +384,53 @@ static void self_test(void) {
         c3d_fill(0, 0, 1024, 512, 0);
     }
 }
+/* What the GPU of this machine really draws: a pattern through every path (fill, host write, triangles, the drawing
+   area), read back whole and saved as sdmc:/3ds/tombi/gputest.bmp, once at the start.  An emulator and a console
+   disagree on details no log line has pinned down; the picture shows them all at once.
+   On a dark blue fill, in cells of 128 x 64 from (0,0): at +16,+16 a fill of colour 0 (8 x 8); at +32,+16 a red fill;
+   at +48,+16 a white host write; at +64,+16 green triangles; at +80,+16 a green triangle pair with a drawing area of
+   that cell's 4 x 4 centre only.  Row 448..: a yellow fill 1024 x 2 at y 448, a white write 256 x 2 at 0,456. */
+static void gpu_test_picture(void) {
+    unsigned *buf = malloc(1024 * 512 * 4);
+    if (!buf) return;
+    static unsigned blk[256 * 2];
+    c3d_fill(0, 0, 1024, 512, 0xFF400000u);
+    for (int cy = 0; cy < 7; cy++) for (int cx = 0; cx < 8; cx++) {
+        int x = cx * 128, y = cy * 64 + 16;
+        c3d_fill(x + 16, y, 8, 8, 0);
+        c3d_fill(x + 32, y, 8, 8, 0xFF0000FFu);
+        for (int k = 0; k < 64; k++) blk[k] = 0xFFFFFFFFu;
+        c3d_write(x + 48, y, 8, 8, blk, 8);
+        for (int k = 0; k < 2; k++) {
+            float X = x + 64 + 16 * k, Y = y;
+            PV m[6] = { { X, Y, 0, 0, 0, 255, 0, 255 }, { X + 8, Y, 0, 0, 0, 255, 0, 255 }, { X, Y + 8, 0, 0, 0, 255, 0, 255 },
+                        { X + 8, Y, 0, 0, 0, 255, 0, 255 }, { X + 8, Y + 8, 0, 0, 0, 255, 0, 255 }, { X, Y + 8, 0, 0, 0, 255, 0, 255 } };
+            PState st = { -1, 0, AT_OFF, -1, 0, 0, 1023, 511 };
+            if (k) { st.x1 = (int)X + 2; st.y1 = (int)Y + 2; st.x2 = (int)X + 5; st.y2 = (int)Y + 5; }
+            c3d_tris(&st, m, 6);
+        }
+    }
+    c3d_fill(0, 448, 1024, 2, 0xFF00FFFFu);
+    for (int k = 0; k < 512; k++) blk[k] = 0xFFFFFFFFu;
+    c3d_write(0, 456, 256, 2, blk, 256);
+    c3d_read(0, 0, 1024, 512, buf, 1024);
+    FILE *f = fopen("sdmc:/3ds/tombi/gputest.bmp", "wb");
+    if (f) {
+        unsigned char h[54] = { 'B', 'M' };
+        unsigned size = 54 + 1024 * 512 * 3, w = 1024, hh = 512;
+        memcpy(h + 2, &size, 4); h[10] = 54; h[14] = 40; memcpy(h + 18, &w, 4); memcpy(h + 22, &hh, 4); h[26] = 1; h[28] = 24;
+        fwrite(h, 1, 54, f);
+        static unsigned char row[1024 * 3];
+        for (int y = 511; y >= 0; y--) {   /* (a BMP's rows run upwards) */
+            for (int x = 0; x < 1024; x++) { unsigned c = buf[y * 1024 + x]; row[3 * x] = (unsigned char)(c >> 16); row[3 * x + 1] = (unsigned char)(c >> 8); row[3 * x + 2] = (unsigned char)c; }
+            fwrite(row, 1, sizeof row, f);
+        }
+        fclose(f);
+        port_printf("[3ds] pica: gputest.bmp written\n");
+    }
+    free(buf);
+    c3d_fill(0, 0, 1024, 512, 0);
+}
 static int c3d_start(void) {
     if (!C3D_Init(C3D_DEFAULT_CMDBUF_SIZE)) { port_printf("[3ds] pica: C3D_Init failed\n"); return -1; }
     if (!C3D_TexInitVRAM(&vram_tex, 1024, 512, GPU_RGBA8)) { port_printf("[3ds] pica: no VRAM for the render target\n"); return -1; }
@@ -433,6 +481,7 @@ static int c3d_start(void) {
     proj_vram();
     port_printf("[3ds] pica: citro3d renderer, top screen format %d\n", scr_fmt);
     self_test();
+    gpu_test_picture();
     return 0;
 }
 const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present };
