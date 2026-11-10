@@ -35,6 +35,7 @@ import prompt_custom as PC
 import extract_data as X
 import data_patch as DP
 import game_library as GL
+import disc_archive as DA
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 / SCES-01330 Rev 1 (August 1998; .github/workflows/report.yml)
 REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec"      # EXE/MAIN0.EXE of SCES-01331 / SCES-01330 Rev 0 (July 1998 build: other overlays, not supported)
@@ -50,7 +51,7 @@ i18n.add({
     "es": {
         "l.lang": "Idioma del juego:",
         "title": "Tombi! - port nativo", "tab.play": "Jugar", "tab.mods": "Mods", "tab.controls": "Controles",
-        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:", "b.saveimp": "Importar partida…", "b.saveexp": "Exportar partida…", "s.saverun": "Cierra el juego antes de importar o exportar partidas.", "s.saveimpok": "Partida importada", "s.saveexpok": "Tarjeta exportada a {}", "s.saveerr": "No se pudo importar/exportar: {}", "s.saveask": "¿Importar este archivo en la tarjeta del port ({})?\nUna tarjeta completa sustituye a la actual (se guarda una copia en backup/).\nSi ya hay una partida con el mismo nombre, se pregunta si reemplazarla.", "s.saveexpq": "¿Exportar solo una partida como .mcs? (No = tarjeta completa .mcd)",
+        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd / .zip / .7z; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:", "b.saveimp": "Importar partida…", "b.saveexp": "Exportar partida…", "s.saverun": "Cierra el juego antes de importar o exportar partidas.", "s.saveimpok": "Partida importada", "s.saveexpok": "Tarjeta exportada a {}", "s.saveerr": "No se pudo importar/exportar: {}", "s.saveask": "¿Importar este archivo en la tarjeta del port ({})?\nUna tarjeta completa sustituye a la actual (se guarda una copia en backup/).\nSi ya hay una partida con el mismo nombre, se pregunta si reemplazarla.", "s.saveexpq": "¿Exportar solo una partida como .mcs? (No = tarjeta completa .mcd)",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (llena la pantalla, experimental)",
@@ -84,7 +85,7 @@ i18n.add({
     "en": {
         "l.lang": "Game language:",
         "title": "Tombi! - native port", "tab.play": "Play", "tab.mods": "Mods", "tab.controls": "Controls",
-        "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):", "b.saveimp": "Import save…", "b.saveexp": "Export save…", "s.saverun": "Close the game before importing or exporting saves.", "s.saveimpok": "Save imported", "s.saveexpok": "Card exported to {}", "s.saveerr": "Import/export failed: {}", "s.saveask": "Import this file into the port's memory card ({})?\nA whole card replaces the current one (a copy is kept in backup/).\nIf a save with the same name is there, you are asked whether to replace it.", "s.saveexpq": "Export a single save as .mcs? (No = whole card .mcd)",
+        "l.disc": "Disc image (.bin / .cue / .iso / .chd / .zip / .7z; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):", "b.saveimp": "Import save…", "b.saveexp": "Export save…", "s.saverun": "Close the game before importing or exporting saves.", "s.saveimpok": "Save imported", "s.saveexpok": "Card exported to {}", "s.saveerr": "Import/export failed: {}", "s.saveask": "Import this file into the port's memory card ({})?\nA whole card replaces the current one (a copy is kept in backup/).\nIf a save with the same name is there, you are asked whether to replace it.", "s.saveexpq": "Export a single save as .mcs? (No = whole card .mcd)",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (fill the display, experimental)",
@@ -133,9 +134,92 @@ i18n.add({   # Import save...: a save with the same name already on the card (sa
     "en": {"t.savedup": "Save already there", "b.savereplace": "Replace", "b.saveslot": "Save to another slot",
            "b.savecancel": "Cancel"},
 })
+i18n.add({   # a disc inside a .zip / .7z (tools/disc_archive.py), or a file that is no disc image
+    "es": {"s.unpacking": "Descomprimiendo {0}… {1} %",
+           "s.a.notimage": "«{0}» no es una imagen de disco de PlayStation. Elige la imagen de tu disco: .bin (con su .cue), .iso, .chd, o un .zip / .7z que la contenga.",
+           "s.a.rar": "«{0}» es un archivo .rar, y el lanzador no puede abrirlo. Descomprímelo antes (o usa un .zip / .7z) y elige la imagen del disco.",
+           "s.a.noimage": "«{0}» no contiene ninguna imagen de disco (.bin, .iso, .img o .chd).",
+           "s.a.nested": "«{0}» contiene otro archivo comprimido, no una imagen de disco. Descomprímelo antes y elige la imagen.",
+           "s.a.files": "«{0}» contiene los archivos sueltos del disco ({1}), no su imagen. El juego necesita la imagen completa: .bin con su .cue, .iso o .chd (también dentro de un .zip / .7z).",
+           "s.a.cue": "«{0}» contiene el .cue, pero no la pista de datos que nombra ({1}).",
+           "s.a.bad": "No se puede leer «{0}»: {1}. Descomprímelo y elige la imagen del disco.",
+           "s.a.space": "No hay espacio libre suficiente para descomprimir «{0}»: hacen falta {1} MB, hay {2} MB."},
+    "en": {"s.unpacking": "Unpacking {0}… {1} %",
+           "s.a.notimage": "“{0}” is not a PlayStation disc image. Pick the image of your disc: .bin (with its .cue), .iso, .chd, or a .zip / .7z holding one.",
+           "s.a.rar": "“{0}” is a .rar archive, which the launcher cannot open. Extract it first (or use a .zip / .7z) and pick the disc image.",
+           "s.a.noimage": "“{0}” holds no disc image (.bin, .iso, .img or .chd).",
+           "s.a.nested": "“{0}” holds another archive, not a disc image. Extract it first and pick the image.",
+           "s.a.files": "“{0}” holds the disc’s loose files ({1}), not its image. The game needs the whole image: .bin with its .cue, .iso or .chd (inside a .zip / .7z too).",
+           "s.a.cue": "“{0}” holds the .cue sheet but not the data track it names ({1}).",
+           "s.a.bad": "“{0}” cannot be read: {1}. Extract it and pick the disc image.",
+           "s.a.space": "Not enough free space to unpack “{0}”: {1} MB needed, {2} MB free."},
+    "fr": {"s.unpacking": "Décompression de {0}… {1} %",
+           "s.a.notimage": "« {0} » n'est pas une image de disque PlayStation. Choisissez l'image de votre disque : .bin (avec son .cue), .iso, .chd, ou un .zip / .7z qui la contient.",
+           "s.a.rar": "« {0} » est une archive .rar, que le lanceur ne sait pas ouvrir. Décompressez-la d'abord (ou utilisez un .zip / .7z) et choisissez l'image du disque.",
+           "s.a.noimage": "« {0} » ne contient aucune image de disque (.bin, .iso, .img ou .chd).",
+           "s.a.nested": "« {0} » contient une autre archive, pas une image de disque. Décompressez-la d'abord et choisissez l'image.",
+           "s.a.files": "« {0} » contient les fichiers du disque ({1}), pas son image. Le jeu a besoin de l'image complète : .bin avec son .cue, .iso ou .chd (aussi dans un .zip / .7z).",
+           "s.a.cue": "« {0} » contient le .cue, mais pas la piste de données qu'il désigne ({1}).",
+           "s.a.bad": "Impossible de lire « {0} » : {1}. Décompressez-le et choisissez l'image du disque.",
+           "s.a.space": "Pas assez d'espace libre pour décompresser « {0} » : {1} Mo nécessaires, {2} Mo libres."},
+    "de": {"s.unpacking": "{0} wird entpackt… {1} %",
+           "s.a.notimage": "„{0}“ ist kein PlayStation-Disc-Image. Wähle das Image deiner Disc: .bin (mit ihrer .cue), .iso, .chd oder ein .zip / .7z, das es enthält.",
+           "s.a.rar": "„{0}“ ist ein .rar-Archiv, das der Launcher nicht öffnen kann. Entpacke es zuerst (oder nimm ein .zip / .7z) und wähle das Disc-Image.",
+           "s.a.noimage": "„{0}“ enthält kein Disc-Image (.bin, .iso, .img oder .chd).",
+           "s.a.nested": "„{0}“ enthält ein weiteres Archiv, kein Disc-Image. Entpacke es zuerst und wähle das Image.",
+           "s.a.files": "„{0}“ enthält die einzelnen Dateien der Disc ({1}), nicht ihr Image. Das Spiel braucht das ganze Image: .bin mit ihrer .cue, .iso oder .chd (auch in einem .zip / .7z).",
+           "s.a.cue": "„{0}“ enthält die .cue, aber nicht den Datentrack, den sie nennt ({1}).",
+           "s.a.bad": "„{0}“ kann nicht gelesen werden: {1}. Entpacke es und wähle das Disc-Image.",
+           "s.a.space": "Nicht genug freier Speicher zum Entpacken von „{0}“: {1} MB nötig, {2} MB frei."},
+    "it": {"s.unpacking": "Decompressione di {0}… {1} %",
+           "s.a.notimage": "«{0}» non è un'immagine di disco PlayStation. Scegli l'immagine del tuo disco: .bin (con il suo .cue), .iso, .chd, oppure un .zip / .7z che la contiene.",
+           "s.a.rar": "«{0}» è un archivio .rar, che il launcher non sa aprire. Estrailo prima (o usa un .zip / .7z) e scegli l'immagine del disco.",
+           "s.a.noimage": "«{0}» non contiene nessuna immagine di disco (.bin, .iso, .img o .chd).",
+           "s.a.nested": "«{0}» contiene un altro archivio, non un'immagine di disco. Estrailo prima e scegli l'immagine.",
+           "s.a.files": "«{0}» contiene i file sciolti del disco ({1}), non la sua immagine. Il gioco ha bisogno dell'immagine completa: .bin con il suo .cue, .iso o .chd (anche dentro un .zip / .7z).",
+           "s.a.cue": "«{0}» contiene il .cue, ma non la traccia dati che indica ({1}).",
+           "s.a.bad": "Impossibile leggere «{0}»: {1}. Estrailo e scegli l'immagine del disco.",
+           "s.a.space": "Spazio libero insufficiente per decomprimere «{0}»: servono {1} MB, liberi {2} MB."},
+    "nl": {"s.unpacking": "{0} uitpakken… {1} %",
+           "s.a.notimage": "‘{0}’ is geen PlayStation-disc-image. Kies de image van je disc: .bin (met de .cue), .iso, .chd, of een .zip / .7z waarin die zit.",
+           "s.a.rar": "‘{0}’ is een .rar-archief, dat de launcher niet kan openen. Pak het eerst uit (of gebruik een .zip / .7z) en kies de disc-image.",
+           "s.a.noimage": "‘{0}’ bevat geen disc-image (.bin, .iso, .img of .chd).",
+           "s.a.nested": "‘{0}’ bevat nog een archief, geen disc-image. Pak het eerst uit en kies de image.",
+           "s.a.files": "‘{0}’ bevat de losse bestanden van de disc ({1}), niet de image. De game heeft de hele image nodig: .bin met de .cue, .iso of .chd (ook in een .zip / .7z).",
+           "s.a.cue": "‘{0}’ bevat de .cue, maar niet het datatrack dat die noemt ({1}).",
+           "s.a.bad": "‘{0}’ kan niet worden gelezen: {1}. Pak het uit en kies de disc-image.",
+           "s.a.space": "Niet genoeg vrije ruimte om ‘{0}’ uit te pakken: {1} MB nodig, {2} MB vrij."},
+    "pt": {"s.unpacking": "A descomprimir {0}… {1} %",
+           "s.a.notimage": "«{0}» não é uma imagem de disco de PlayStation. Escolhe a imagem do teu disco: .bin (com o seu .cue), .iso, .chd, ou um .zip / .7z que a contenha.",
+           "s.a.rar": "«{0}» é um arquivo .rar, que o lançador não consegue abrir. Descomprime-o primeiro (ou usa um .zip / .7z) e escolhe a imagem do disco.",
+           "s.a.noimage": "«{0}» não contém nenhuma imagem de disco (.bin, .iso, .img ou .chd).",
+           "s.a.nested": "«{0}» contém outro arquivo comprimido, não uma imagem de disco. Descomprime-o primeiro e escolhe a imagem.",
+           "s.a.files": "«{0}» contém os ficheiros soltos do disco ({1}), não a sua imagem. O jogo precisa da imagem completa: .bin com o seu .cue, .iso ou .chd (também dentro de um .zip / .7z).",
+           "s.a.cue": "«{0}» contém o .cue, mas não a pista de dados que ele indica ({1}).",
+           "s.a.bad": "Não é possível ler «{0}»: {1}. Descomprime-o e escolhe a imagem do disco.",
+           "s.a.space": "Não há espaço livre suficiente para descomprimir «{0}»: são precisos {1} MB, há {2} MB."},
+    "sv": {"s.unpacking": "Packar upp {0}… {1} %",
+           "s.a.notimage": "”{0}” är ingen PlayStation-skivavbild. Välj avbilden av din skiva: .bin (med sin .cue), .iso, .chd eller en .zip / .7z som innehåller den.",
+           "s.a.rar": "”{0}” är ett .rar-arkiv, som startprogrammet inte kan öppna. Packa upp det först (eller använd en .zip / .7z) och välj skivavbilden.",
+           "s.a.noimage": "”{0}” innehåller ingen skivavbild (.bin, .iso, .img eller .chd).",
+           "s.a.nested": "”{0}” innehåller ett annat arkiv, ingen skivavbild. Packa upp det först och välj avbilden.",
+           "s.a.files": "”{0}” innehåller skivans lösa filer ({1}), inte dess avbild. Spelet behöver hela avbilden: .bin med sin .cue, .iso eller .chd (även i en .zip / .7z).",
+           "s.a.cue": "”{0}” innehåller .cue-filen men inte dataspåret den anger ({1}).",
+           "s.a.bad": "”{0}” kan inte läsas: {1}. Packa upp den och välj skivavbilden.",
+           "s.a.space": "Inte tillräckligt med ledigt utrymme för att packa upp ”{0}”: {1} MB behövs, {2} MB ledigt."},
+    "da": {"s.unpacking": "Pakker {0} ud… {1} %",
+           "s.a.notimage": "“{0}” er ikke et PlayStation-diskaftryk. Vælg aftrykket af din disk: .bin (med dens .cue), .iso, .chd eller en .zip / .7z, der indeholder det.",
+           "s.a.rar": "“{0}” er et .rar-arkiv, som starteren ikke kan åbne. Pak det ud først (eller brug en .zip / .7z) og vælg diskaftrykket.",
+           "s.a.noimage": "“{0}” indeholder intet diskaftryk (.bin, .iso, .img eller .chd).",
+           "s.a.nested": "“{0}” indeholder et andet arkiv, ikke et diskaftryk. Pak det ud først og vælg aftrykket.",
+           "s.a.files": "“{0}” indeholder diskens løse filer ({1}), ikke dens aftryk. Spillet skal bruge hele aftrykket: .bin med dens .cue, .iso eller .chd (også i en .zip / .7z).",
+           "s.a.cue": "“{0}” indeholder .cue-filen, men ikke det datanummer, den nævner ({1}).",
+           "s.a.bad": "“{0}” kan ikke læses: {1}. Pak det ud og vælg diskaftrykket.",
+           "s.a.space": "Ikke nok ledig plads til at pakke “{0}” ud: {1} MB kræves, {2} MB ledigt."},
+})
 i18n.add({   # the game library (tools/game_library.py); the other languages: port_launcher_lang.py
     "es": {"c.library": "Juegos", "b.addgame": "Añadir juego…",
-           "l.library": "Añade la imagen de cada disco que tengas (.bin / .cue / .iso / .chd). Se reconoce por su ejecutable de "
+           "l.library": "Añade la imagen de cada disco que tengas (.bin / .cue / .iso / .chd / .zip / .7z). Se reconoce por su ejecutable de "
                         "arranque y se extrae una vez a su propia carpeta; el logotipo sale de tu propio disco.",
            "l.addgame": "Tombi! PAL o Tomba! USA",
            "c.options": "Opciones del juego", "l.onlylang": "{0} (el único idioma de este disco)",
@@ -155,7 +239,7 @@ i18n.add({   # the game library (tools/game_library.py); the other languages: po
            "s.noimage": "No se encuentra la imagen del disco: {0}", "l.speedntsc": "60 Hz: la velocidad de este juego (NTSC).",
            "l.nomods": "La entrada DEBUG del título solo existe en la versión PAL por ahora."},
     "en": {"c.library": "Games", "b.addgame": "Add game…",
-           "l.library": "Add the image of each disc you own (.bin / .cue / .iso / .chd). It is recognised by its boot "
+           "l.library": "Add the image of each disc you own (.bin / .cue / .iso / .chd / .zip / .7z). It is recognised by its boot "
                         "executable and extracted once into a folder of its own; the logo comes from your own disc.",
            "l.addgame": "Tombi! PAL or Tomba! USA",
            "c.options": "Game options", "l.onlylang": "{0} (the only language of this disc)",
@@ -1112,6 +1196,11 @@ def flag_pixmap(n, w=24, h=16):
             if i < 6:
                 fill(0, h * (2 * i + 1) / 13, w, h * (2 * i + 2) / 13, "white")
         fill(0, 0, w * 0.42, h * 7 / 13, "#3C3B6E")
+    elif n == 10:     # Japan (the Japanese disc)
+        fill(0, 0, w, h, "white")
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor("#BC002D"))
+        p.drawEllipse(QPointF(w / 2, h / 2), h * 0.3, h * 0.3)
     p.setPen(QPen(QColor(0, 0, 0, 60), 0.6))
     p.setBrush(Qt.NoBrush)
     p.drawRect(QRectF(0.3, 0.3, w - 0.6, h - 0.6))
@@ -1652,9 +1741,27 @@ class GameTile(QAbstractButton):
             p.drawPixmap(QRectF(r.x() + (r.width() - w) / 2, r.y() + (r.height() - h) / 2, w, h), pm, QRectF(pm.rect()))
             return
         p.setPen(QColor(color))
-        f = self._font(max(10.0, r.height() / 3.2), QFont.Black)
+        text = self.d.get("short") or self.d.get("title") or "?"
+        size = max(10.0, r.height() / 3.2)
+        f = self._font(size, QFont.Black)
+        width = QFontMetricsF(f).horizontalAdvance(text)
+        if width > r.width() * 0.92:          # one line, like the art: shrink a long name (オレっ！トンバ) to fit
+            f = self._font(max(6.0, size * r.width() * 0.92 / width), QFont.Black)
         p.setFont(f)
-        p.drawText(r, Qt.AlignCenter | Qt.TextWordWrap, self.d.get("short") or self.d.get("title") or "?")
+        p.drawText(r, Qt.AlignCenter, text)
+
+    _flag_cache = {}
+
+    def _flags(self, p, x, y, h=11):
+        """the disc's languages as small drawn flags in a row from x, centred on y; returns the right end"""
+        w = round(h * 1.5)
+        for n in self.d.get("flags") or ():
+            pm = GameTile._flag_cache.get((n, w, h))
+            if pm is None:
+                pm = GameTile._flag_cache[(n, w, h)] = flag_pixmap(n, w, h)
+            p.drawPixmap(QPointF(x, y - h / 2), pm)
+            x += w + 4
+        return x
 
     def _status(self, p, x, y, t, color_text):
         dot = DOT.get(self.d.get("level"), DOT["info"])
@@ -1714,9 +1821,10 @@ class GameTile(QAbstractButton):
             p.setFont(self._fit(self.d["title"], 10.5, r.width() - 24, QFont.DemiBold))
             p.drawText(QPointF(r.x() + 12, y), self.d["title"])
             p.setPen(QColor(t["muted"]))
-            for i, line in enumerate(self.d.get("sub", "").split("  ·  ")[:2]):     # serial, then the disc's languages
-                p.setFont(self._fit(line, 8.5, r.width() - 24))
-                p.drawText(QPointF(r.x() + 12, y + 18 + 15 * i), line)
+            line = self.d.get("sub", "")                                           # the serial, then the disc's languages (flags)
+            p.setFont(self._fit(line, 8.5, r.width() - 24))
+            p.drawText(QPointF(r.x() + 12, y + 18), line)
+            self._flags(p, r.x() + 12, y + 29, 10)
             self._status(p, r.x() + 12, y + 52, t, t["muted"])
             p.setBrush(Qt.NoBrush)
             p.setPen(QPen(edge, 2.6 if sel else 1.2))
@@ -1735,7 +1843,9 @@ class GameTile(QAbstractButton):
             p.drawText(QPointF(x, r.y() + 28), self.d["title"])
             p.setPen(QColor(t["muted"]))
             p.setFont(self._font(9))
-            p.drawText(QPointF(x, r.y() + 48), self.d.get("sub", ""))
+            sub = self.d.get("sub", "")
+            p.drawText(QPointF(x, r.y() + 48), sub)
+            self._flags(p, x + QFontMetricsF(self._font(9)).horizontalAdvance(sub) + 10, r.y() + 44, 11)
             self._status(p, x, r.y() + 66, t, t["muted"])
             if sel:
                 self._check(p, QPointF(r.right() - 22, r.center().y()), t)
@@ -1747,7 +1857,7 @@ class GameTile(QAbstractButton):
             p.setPen(QColor(t["muted"]))
             p.setFont(self._font(8))
             dot = DOT.get(self.d.get("level"), DOT["info"])
-            label = self.d.get("sub", "").split("  ·  ")[0]
+            label = self.d.get("sub", "")
             fm = QFontMetricsF(self._font(8))
             w = fm.horizontalAdvance(label) + 13
             x0 = r.center().x() - w / 2
@@ -1776,7 +1886,9 @@ class GameTile(QAbstractButton):
             p.drawText(QPointF(r.x() + 20, r.bottom() - 40), self.d["title"])
             p.setFont(self._font(9.5))
             p.setPen(QColor(255, 255, 255, 220))
-            p.drawText(QPointF(r.x() + 20, r.bottom() - 18), self.d.get("sub", ""))
+            sub = self.d.get("sub", "")
+            p.drawText(QPointF(r.x() + 20, r.bottom() - 18), sub)
+            self._flags(p, r.x() + 20 + QFontMetricsF(self._font(9.5)).horizontalAdvance(sub) + 10, r.bottom() - 22, 12)
             fm = QFontMetricsF(self._font(9))
             sw = fm.horizontalAdvance(self.d.get("status", "")) + 34
             pill = QRectF(r.right() - 16 - sw, r.bottom() - 40, sw, 26)
@@ -2370,18 +2482,19 @@ class App(QMainWindow):
         self.s["disc"] = e.get("image") or ""
 
     def game_name(self, e):
-        """"Tombi! (PAL)", "Tomba! (USA)", "Ore no Tomba (Japan)": the card's title."""
+        """"Tombi! (PAL)", "Tomba! (USA)", "Ore! Tomba (Japan)": the card's title."""
         v = GL.version_of(e.get("sha1"))
         if not v:
             return os.path.basename(bin_of_cue(e.get("image") or "")) or "?"
         return "%s (%s)" % (v["title"], tr("rg." + v["region"]))
 
     def game_sub(self, e):
-        """"SCES-01331 · EN ES PT SV DA": serial and the languages of that disc."""
-        parts = [e.get("serial") or tr("lib.unchecked")]
-        if GL.DISC_LANGS.get(e.get("serial")):
-            parts.append(GL.DISC_LANGS[e["serial"]])
-        return "  ·  ".join(parts)
+        """"SCES-01331": the serial (the disc's languages are drawn as flags beside it: game_flags)."""
+        return e.get("serial") or tr("lib.unchecked")
+
+    def game_flags(self, e):
+        """the flag_pixmap indices of the disc's languages (game_library.DISC_FLAGS)"""
+        return GL.DISC_FLAGS.get(e.get("serial"), [])
 
     def game_status(self, e):
         """(text, level) of a library entry: ready / to extract / image missing / not supported yet."""
@@ -2413,7 +2526,7 @@ class App(QMainWindow):
             try:
                 if GL.data_complete(data) == sha:
                     src = GL.DirSource(data)
-                elif img and os.path.isfile(img):
+                elif img and os.path.isfile(img) and not DA.is_archive(img):
                     src = GL.ImageSource(img)
                 if src is not None:
                     GL.make_art(src, sha, d)
@@ -2433,7 +2546,7 @@ class App(QMainWindow):
     def _tile_data(self, e):
         text, level = self.game_status(e)
         return dict(serial=e.get("serial", ""), title=self.game_name(e), short=(GL.version_of(e.get("sha1")) or {}).get("title") or self.game_name(e),
-                    sub=self.game_sub(e), status=text, level=level, art=self.game_art(e),
+                    sub=self.game_sub(e), flags=self.game_flags(e), status=text, level=level, art=self.game_art(e),
                     selected=e is self.cur_entry())
 
     def _library_view(self):
@@ -2494,7 +2607,7 @@ class App(QMainWindow):
         self.rebuild()
 
     def add_game(self):
-        p = self._open_file(tr("b.addgame"), "Disc image (*.bin *.cue *.iso *.img *.chd);;All (*)")
+        p = self._open_file(tr("b.addgame"), "Disc image (*.bin *.cue *.iso *.img *.chd *.zip *.7z);;All (*)")
         if p:
             self.add_image(p)
 
@@ -2508,10 +2621,30 @@ class App(QMainWindow):
 
         def work():
             try:
-                info = GL.identify_image(bin_of_cue(p))
+                img = self.disc_image(p)
+                info = GL.identify_image(img)
+            except DA.ArchiveError as e:
+                self.drop_unpacked(p)
+                self.later(self.archive_error, p, e)
+                return
             except (OSError, ValueError, struct.error) as e:
+                self.drop_unpacked(p)
                 self.later(self.say, tr("s.notiso", "%s (%s)" % (os.path.basename(p), e)), "bad")
                 return
+            if info["version"] and img != p:
+                # a disc from a .zip / .7z: cut the card art now, while the unpacked image exists (a game that is not
+                # extracted, such as the Japanese one, has nothing else to cut it from later)
+                src = None
+                try:
+                    src = GL.ImageSource(img)
+                    GL.make_art(src, info["game_sha1"], art_cache(info["serial"]))
+                except (OSError, ValueError, KeyError, struct.error):
+                    pass
+                finally:
+                    if src is not None:
+                        src.close()
+            if not (info["version"] and info["version"]["supported"]):
+                self.drop_unpacked(p)        # (nothing to extract: the temporary image goes now)
             self.later(self._added, p, info)
         if wait:
             work()
@@ -2521,6 +2654,68 @@ class App(QMainWindow):
 
     def app_events(self):
         QApplication.processEvents()
+
+    # ---- a disc inside a .zip / .7z (tools/disc_archive.py): unpacked once next to the launcher (.unpack/), used by
+    # the identification and the extraction that follows, then deleted
+    def disc_image(self, p, progress=True):
+        """The image to read for the picked file p: p itself (a .cue: its .bin), or for an archive the image inside it,
+        unpacked into .unpack/ (once: kept until drop_unpacked). Raises DA.ArchiveError (a .rar, a file that is no disc
+        image, an archive without one ...)."""
+        k = DA.kind(p)
+        if k == "notimage":
+            raise DA.ArchiveError("notimage", "%s is not a disc image" % os.path.basename(p))
+        if k not in ("zip", "7z", "rar"):
+            return bin_of_cue(p)
+        if not hasattr(self, "_unpacked"):
+            self._unpacked = {}
+        t = self._unpacked.get(p)
+        if t and os.path.isfile(t):
+            return t
+        last = [-1]
+
+        def prog(done, total):
+            pct = done * 100 // max(1, total)
+            if progress and pct != last[0]:
+                last[0] = pct
+                self.later(self.say, tr("s.unpacking", os.path.basename(p), pct), "busy")
+        t = DA.extract_image(p, os.path.join(app_dir(), ".unpack"), prog)
+        self._unpacked[p] = t
+        return t
+
+    def drop_unpacked(self, p):
+        """deletes the image disc_image unpacked from the archive p (and .unpack/ when empty)"""
+        t = getattr(self, "_unpacked", {}).pop(p, None)
+        if t:
+            try:
+                os.remove(t)
+            except OSError:
+                pass
+        try:
+            os.rmdir(os.path.join(app_dir(), ".unpack"))
+        except OSError:
+            pass
+
+    def archive_error(self, p, e):
+        """the message of a DA.ArchiveError, in the launcher's language"""
+        nm = os.path.basename(p)
+        if e.code == "files":
+            lo = getattr(e, "loose", None) or {}
+            v = GL.version_of(lo.get("sha1"))
+            what = ("%s (%s)" % (v["title"], tr("rg." + v["region"]))) if v else (lo.get("serial") or "?")
+            msg = tr("s.a.files", nm, what)
+        elif e.code == "cue":
+            msg = tr("s.a.cue", nm, getattr(e, "track", "?"))
+        elif e.code == "space":
+            msg = tr("s.a.space", nm, getattr(e, "need", 0) >> 20, getattr(e, "free", 0) >> 20)
+        elif e.code == "bad":
+            msg = tr("s.a.bad", nm, str(e))
+        elif e.code in ("notimage", "rar", "noimage", "nested"):
+            msg = tr("s.a." + e.code, nm)
+        else:
+            msg = str(e)
+        self.say(msg, "bad")
+        if e.code != "cancelled":
+            self.error(msg)
 
     def _added(self, p, info):
         if not info["version"]:
@@ -3538,28 +3733,41 @@ class App(QMainWindow):
         the one-time extraction into its data folder when that is not complete. A thread (wait=True: here, the tests)."""
         self.collect()
         e = self.cur_entry()
-        image = bin_of_cue((e or {}).get("image") or self.s.get("disc") or "")
+        picked = (e or {}).get("image") or self.s.get("disc") or ""
+        image = bin_of_cue(picked)
         if not image or self.extracting:
             return
+        archive = DA.is_archive(picked)
+        if archive and GL.data_complete(data_dir()) and GL.data_complete(data_dir()) == (e or {}).get("sha1"):
+            return                               # extracted already: the archive is not unpacked again
         self.say(tr("s.checking"), "busy")
 
         def work():
+            img = image
             try:
-                info = GL.identify_image(image)
+                if archive:
+                    img = self.disc_image(picked)
+                info = GL.identify_image(img)
                 if info["game_sha1"] in (MAIN0_SHA1, REV0_SHA1):     # tombi2 --disc (PAL) checks MAIN0.EXE next to the launcher
-                    extract_main0(image, os.path.join(app_dir(), "MAIN0.EXE"))
+                    extract_main0(img, os.path.join(app_dir(), "MAIN0.EXE"))
+            except DA.ArchiveError as ex:
+                self.drop_unpacked(picked)
+                self.later(self.archive_error, picked, ex)
+                return
             except (OSError, ValueError, struct.error) as ex:
+                self.drop_unpacked(picked)
                 self.later(self.say, str(ex), "bad")
                 return
-            self.later(self._checked, e, image, info)
+            self.later(self._checked, e, img, info, picked if archive else None)
         if wait:
             work()
             QApplication.processEvents()
         else:
             threading.Thread(target=work, daemon=True).start()
 
-    def _checked(self, e, image, info):
-        """check_disc's answer, on the GUI thread: the message, the entry updated, the extraction started."""
+    def _checked(self, e, image, info, archive=None):
+        """check_disc's answer, on the GUI thread: the message, the entry updated, the extraction started (archive: the
+        .zip / .7z the image was unpacked from; that copy is deleted when the extraction ends or is not needed)."""
         sha, v = info["game_sha1"], info["version"]
         name = ("%s %s" % (info["serial"] or "?", info["name"])).strip()
         if sha == MAIN0_SHA1:
@@ -3571,7 +3779,7 @@ class App(QMainWindow):
         elif v:
             msg, lvl = tr("l.unsupported", name), "bad"
         else:
-            msg, lvl = tr("s.notgame", os.path.basename(image), info["serial"] or "?", info["name"] or tr("lib.unknown")), "bad"
+            msg, lvl = tr("s.notgame", os.path.basename(archive or image), info["serial"] or "?", info["name"] or tr("lib.unknown")), "bad"
         if e is not None and e in self.entries() and v:
             before = (e.get("serial"), e.get("sha1"), e.get("data"))
             self._identified(e, info)
@@ -3579,9 +3787,13 @@ class App(QMainWindow):
                 self.rebuild(check=False)
         self.say(msg, lvl)
         if not (v and v["supported"]) or self.extracting:
+            if archive:
+                self.drop_unpacked(archive)
             return
         ddir = data_dir()
         if GL.data_complete(ddir) == sha:
+            if archive:
+                self.drop_unpacked(archive)
             return
         # the one-time extraction into the data folder (again when it was made from another disc)
         self.extracting = True
@@ -3605,6 +3817,9 @@ class App(QMainWindow):
                 self.later(self.say, tr("s.dataok", ddir, len(man["files"])), "ok")
             except (OSError, ValueError, struct.error) as ex:
                 self.later(self.say, tr("s.extractfail", ex), "bad")
+            finally:
+                if archive:
+                    self.drop_unpacked(archive)
             self.later(self._extracting, None)
         threading.Thread(target=work, daemon=True).start()
 

@@ -467,6 +467,15 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   (phases *Copiando / Comprobando / Extrayendo*, files done / total, Cancel with B; a truncated image or an unreadable
   sector fails with the reason). *Borrar datos…* (in-page confirmation) deletes `files/data`, the patches and caches,
   the saves only when ticked.
+  **Archives** (`DiscArchive.java`, `port2/android/un7z.c`): the picked file is recognised by its first bytes. A `.zip`
+  is streamed (`ZipInputStream`, any provider) and a `.7z` read in place (or copied to the cache first) by the LZMA
+  SDK's 7z reader (`port2/third_party/lzma-7z`, public domain) with a streamed LZMA/LZMA2 decode of the block holding
+  the image; the image inside (any folder; the `.cue`'s data track, else the largest `.bin`/`.img`/`.iso`/`.chd`) goes
+  to `cache/import` after a free-space check (twice its size: it, then its files), phase *Descomprimiendo*, then is
+  identified and extracted as a picked image and deleted. An archive of the disc's loose files (`SYSTEM.CNF`, no
+  image: the game reads by sector number) is identified and refused naming the game; `.rar`, a file that is no disc
+  image, an archive without an image or a `.cue` without its track each get their own message. The add flow has its
+  own Disc screen (*Añadir juego* + the file name), so an error belongs to the file, not to the selected game.
 - **Game library** (stage U2, `Library.java`). The launcher's home is *Tus juegos*: one card per disc added (logo,
   name, region, serial, status), *Añadir juego*, then *¡A jugar!* / *Opciones* / *Salir*; the focused card is the
   selected game (D-pad moves between cards and buttons by their position on screen; Start plays). Three looks,
@@ -480,9 +489,13 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   `tools/extract_data.py`, which `psyq.c` checks), its saves go to `files/saves` (PAL, as before) or
   `files/saves_usa`; the loader takes `--game-lib` / `--save-sub` from the launcher (`loader.c`; the armeabi-v7a low
   reservation is sized for the largest `libtombi*.so` of the APK). The card's logo is cut at run time from the
-  player's own data: the title's 8 bpp logo page and CLUT (`SYSTEM/A00202.000` + `A00203.000` PAL, `A00012.000` +
-  `A00013.000` USA; texels 8..247 x 0..111 plus the "!" piece 8..71 x 112..223 to its right, page row = logo row + 112
-  PAL / 88 USA) saved as `files/games/<id>/logo.png`; without it the name in the title font. Options per version: the
+  player's own disc as the PC launcher does (`tools/game_library.py` `logo_sprites`, `Library.cutLogo`): the title
+  overlay's sprite list `TITLE_LOGO_SPRITE_RECS` (the records with the CLUT at 128,510, up to x = -1) drawn from the
+  8 bpp logo page with its CLUT (`SYSTEM/A00202.000` + `A00203.000` + `O0PTSUB0.BIN` PAL, `A00012.000` + `A00013.000`
+  + `OPTSUB00.BIN` USA and Japan), saved as `files/games/<id>/logo.png`; without it the name in the title font. The
+  Japanese disc is not extracted, so its three files are read straight from the image when it is added
+  (`disccheck.c` `nativeReadFiles`: .bin / .iso / .chd, also the temp image of a .zip / .7z before it is deleted);
+  a Japanese card added by an older version shows the name until the disc is added again. Options per version: the
   USA game gets no game language, translations, NTSC switch, second-screen panel, cut content or button icons (all
   PAL-only in the port, docs/USA.md); `--aspect`, `--renderer`, `--fps`, `--skip-intro`, DualShock, vibration, the
   debug menu, infinite lives / vitality (`--poke-every 50:GAME+20:63:1`, `1:GAME+10:4:1`: named fields, the same for
@@ -493,12 +506,12 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   `port2/android/game_libs.py --version usa` (armeabi-v7a: port2/CMakeLists.txt `-DPORT_VERSION=usa`; arm64-v8a:
   `port2/wasm/build.py --version usa --until w2c` + the CMake arm64 branch) into `app/src/main/jniLibs/<abi>/libtombi_usa.so`
   (git-ignored); without the secret the step is skipped and a USA disc shows *No incluido en esta versión de la app*.
-  **Renders on a PC**: `python3 port2/android/render/render.py OUT [--pal FS] [--usa FS] [--uilang 1]` draws the
+  **Renders on a PC**: `python3 port2/android/render/render.py OUT [--pal FS] [--usa FS] [--jp IMAGE] [--uilang 1]` draws the
   real `LauncherActivity` with Robolectric's native graphics (Android's Skia) at 1920x1080 (the library in its three
   looks, empty and with PAL / USA / Japan cards, the options per version, the disc screen, the dialog) and prints the
   checks of `RenderTest` (migration, key / touch navigation, arguments per version); aapt2, android-all and Robolectric
   come from Maven into `build/android-render` (~700 MB), no SDK install; `FS` = the `SYSTEM/` files of the player's
-  own disc for the logos.
+  own disc for the logos, `IMAGE` = the Japanese disc image (its logo read from it by the PC build of `disccheck.c`).
 - **Launcher language.** *Opciones > Juego > Idioma del launcher*: Auto (the system's) / English / Español / Français /
   Deutsch / Italiano / Nederlands / Português / Svenska / Dansk (`res/values-xx/strings.xml`), saved as `uilang`,
   independent of the game language. Applied at once, without a restart: `LauncherActivity.getResources()` returns
@@ -1091,7 +1104,12 @@ with the title overlay's own sprite list (`TITLE_LOGO_SPRITE_RECS` of O0PTSUB0 /
 CLUT at 128,510, the list `titleLogoDraw` passes to `titleDrawSpriteRecs`), on the title landscape (A00200.GAM /
 A00010.GAM); a disc without them shows its name. Looks: `library_view` = `grid` (cards with the title
 screen, in as many columns as fit), `list` (default: rows with the logo) or `banner` (the selected game wide over the
-landscape, small logo cards under it); `TOMBI_LIBRARY_VIEW` forces one.
+landscape, small logo cards under it); `TOMBI_LIBRARY_VIEW` forces one. The disc's languages are drawn as small flags
+beside the serial (`game_library.DISC_FLAGS`, `flag_pixmap`; Android `Library.flagsOf`). *Add game…* also takes a `.zip`
+or `.7z` (`tools/disc_archive.py`: zipfile, and a small 7z reader on the standard library's `lzma`/`zlib`/`bz2`): the
+image inside is unpacked once into `.unpack/` next to the launcher, identified, extracted and deleted; the same
+messages as Android for loose files, `.rar` and the rest. `tools/extract_data.py` and `tools/game_library.py` take an
+archive on the command line too.
 
 Per version (`game_library.VERSIONS` `features`): PAL has everything; USA runs `tombi-pc-usa(.exe)` (checkout:
 `build/port2-scus94236[-win]/tombi2`) and has no game language (English only), no text patch / improved translation

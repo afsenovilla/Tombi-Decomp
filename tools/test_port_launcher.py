@@ -343,7 +343,7 @@ class TestLauncher(unittest.TestCase):
         """JP: recognised (a card with its name), but Play is off and says why."""
         self.library("jp", "SLPS-01144")
         self.assertFalse(self.w.play_btn.isEnabled())
-        self.assertIn("Ore no Tomba", self.w.status_msg)
+        self.assertIn("オレっ！トンバ", self.w.status_msg)
         shown = []
         self.w.error = shown.append
         self.w.play()
@@ -384,6 +384,64 @@ class TestLauncher(unittest.TestCase):
         self.assertEqual(len(self.w.entries()), 2)
         self.assertIn("Tomba! 2 (USA)", shown[0])
 
+    def test_add_disc_from_archives(self):
+        """Add game... with a .zip / .7z: the image inside (in a folder; the .cue's data track among several .bin) is
+        unpacked next to the launcher, identified, extracted, and the copy deleted; a zip of the loose files, a .rar, a
+        file that is no disc image, an archive without an image get their own message (with the file's name)."""
+        import unittest.mock, zipfile
+        exe = b"PS-X EXE" + bytes(2040)
+        sha = __import__("hashlib").sha1(exe).hexdigest()
+        files = {"SYSTEM.CNF": b"BOOT = cdrom:\\SCUS_942.36;1\r\nTCB = 4\r\n", "SCUS_942.36": exe, "SYSTEM/X00.BIN": b"overlay"}
+        iso = make_iso(files).ljust(5 << 20, b"\0")             # (an image is at least 4 MB)
+        other = bytes(6 << 20)                                   # a larger second "track" that is not the data track
+        z1 = os.path.join(self.tmp, "Tomba (folder).zip")
+        with zipfile.ZipFile(z1, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("Tomba! (USA)/Tomba! (USA) (Track 1).bin", iso)
+            z.writestr("Tomba! (USA)/Tomba! (USA) (Track 2).bin", other)
+            z.writestr("Tomba! (USA)/Tomba! (USA).cue", 'FILE "Tomba! (USA) (Track 1).bin" BINARY\r\n  TRACK 01 MODE2/2352\r\n')
+        z2 = os.path.join(self.tmp, "Tomba.7z")
+        open(z2, "wb").write(make_7z({"Tomba/Tomba.cue": b'FILE "TOMBA.BIN" BINARY\n', "Tomba/TOMBA.BIN": iso, "Tomba/readme.txt": b"hi"}))
+        loose = os.path.join(self.tmp, "loose files.zip")
+        with zipfile.ZipFile(loose, "w") as z:
+            for k, v in files.items():
+                z.writestr("disc/" + k, v)
+        with unittest.mock.patch.dict(L.GL.VERSIONS, {sha: L.GL.VERSIONS[L.GL.USA_SHA1]}):
+            for arc in (z1, z2):
+                with self.subTest(os.path.basename(arc)):
+                    d = self.launcher("arc" + os.path.splitext(arc)[1][1:], {}, data=True)
+                    shown = []
+                    self.w.error = shown.append
+                    self.w.add_image(arc, wait=True)
+                    self.assertEqual(shown, [])
+                    e = self.w.cur_entry()
+                    self.assertEqual((e["serial"], e["sha1"], e["data"], e["image"]), ("SCUS-94236", sha, "data-scus94236", arc))
+                    for _ in range(300):
+                        self.app.processEvents()
+                        if L.GL.data_complete(os.path.join(d, "data-scus94236")) == sha and not self.w.extracting:
+                            break
+                        __import__("time").sleep(0.02)
+                    self.assertEqual(L.GL.data_complete(os.path.join(d, "data-scus94236")), sha)
+                    self.assertEqual(open(os.path.join(d, "data-scus94236", "SYSTEM", "X00.BIN"), "rb").read(), b"overlay")
+                    self.assertFalse(os.path.exists(os.path.join(d, ".unpack")))      # the unpacked copy is gone
+                    self.assertEqual(self.w.game_status(e)[1], "ok")
+            # what cannot be added: each says why, with the file's name, and nothing is added
+            rar = os.path.join(self.tmp, "Tomba.rar")
+            open(rar, "wb").write(b"Rar!\x1a\x07\x00" + bytes(100))
+            junk = os.path.join(self.tmp, "notes.bin")
+            open(junk, "wb").write(os.urandom(1 << 16))
+            empty = os.path.join(self.tmp, "readme.zip")
+            with zipfile.ZipFile(empty, "w") as z:
+                z.writestr("readme.txt", "hello")
+            for f, want in ((loose, "loose files (Tomba! (USA))"), (rar, ".rar archive"), (junk, "not a PlayStation disc image"),
+                            (empty, "holds no disc image")):
+                with self.subTest(os.path.basename(f)):
+                    n = len(self.w.entries())
+                    shown = []
+                    self.w.error = shown.append
+                    self.w.add_image(f, wait=True)
+                    self.assertEqual(len(self.w.entries()), n)
+                    self.assertTrue(shown and os.path.basename(f) in shown[0] and want in shown[0], shown)
+
     def test_remove_game(self):
         d = self.library("rm", "SCUS-94236")
         answers = [True, True]
@@ -403,6 +461,28 @@ class TestLauncher(unittest.TestCase):
                 self.w.close()
                 self.w.deleteLater()
                 self.w = None
+
+
+def make_7z(files):
+    """A minimal .7z (one solid LZMA2 folder, names in UTF-16) holding files {"DIR/NAME": bytes}, as 7-Zip writes it."""
+    import lzma, struct, zlib
+
+    def num(v):                                   # 7z NUMBER: the 9-byte form is enough here
+        return b"\xff" + struct.pack("<Q", v)
+    names = sorted(files)
+    data = b"".join(files[n] for n in names)
+    packed = lzma.compress(data, format=lzma.FORMAT_RAW, filters=[dict(id=lzma.FILTER_LZMA2, dict_size=1 << 24)])
+    h = bytearray(b"\x01\x04")                                       # Header, MainStreamsInfo
+    h += b"\x06" + num(0) + num(1) + b"\x09" + num(len(packed)) + b"\x00"            # PackInfo
+    h += b"\x07\x0b" + num(1) + b"\x00" + num(1) + b"\x21\x21\x01\x14"               # one folder: LZMA2, dict 2^24 (props 20)
+    h += b"\x0c" + num(len(data)) + b"\x00"
+    h += b"\x08\x0d" + num(len(names)) + b"\x09" + b"".join(num(len(files[n])) for n in names[:-1]) + b"\x00"   # SubStreams
+    h += b"\x00"
+    nm = b"\x00" + b"".join(n.encode("utf-16-le") + b"\0\0" for n in names)
+    h += b"\x05" + num(len(names)) + b"\x11" + num(len(nm)) + nm + b"\x00"           # FilesInfo: names
+    h += b"\x00"
+    start = struct.pack("<QQI", len(packed), len(h), zlib.crc32(h))
+    return b"7z\xbc\xaf\x27\x1c\x00\x04" + struct.pack("<I", zlib.crc32(start)) + start + packed + bytes(h)
 
 
 def make_iso(files):

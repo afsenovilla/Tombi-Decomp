@@ -952,7 +952,7 @@ int port_cd_open_data(const char *dir) {
     {   static const struct { const char *sha1, *serial, *name; } known[] = {
             {"bec8dc5f4116f5e497f2337eef8c523ff6dee8fc", "SCES-01331", "Tombi! (PAL)"},
             {"81cbc79f0230aeb4252e058039f47ac95a777f5a", "SCUS-94236", "Tomba! (USA)"},
-            {"07d577698ad31ec1a69b9d7b80a7c3f90b650888", "SLPS-01144", "Ore no Tomba (Japan)"}};
+            {"07d577698ad31ec1a69b9d7b80a7c3f90b650888", "SLPS-01144", "Ore! Tomba (Japan)"}};
         for (int i = 0; i < (int)(sizeof known / sizeof known[0]); i++)
             if (!strcmp(boot_sha, known[i].sha1) && strcmp(known[i].sha1, PORT_BOOT_SHA1))
                 port_fatal("%s holds the disc %s %s, but this build of the port runs %s only (its executable %s): use the "

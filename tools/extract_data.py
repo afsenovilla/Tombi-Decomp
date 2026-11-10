@@ -2,7 +2,7 @@
 """One-time extraction of the player's own Tombi! disc into a `data/` folder the native port (port2/, tombi2) reads
 at runtime instead of the disc image (docs/PORT.md "Running without the disc image: data/").
 
-  python3 tools/extract_data.py <disc.bin|.cue|.iso|.chd> <data_dir> [--quiet]
+  python3 tools/extract_data.py <disc.bin|.cue|.iso|.chd|.zip|.7z> <data_dir> [--quiet]   (an archive: tools/disc_archive.py)
   python3 tools/extract_data.py --check <data_dir>            # verifies the manifest against the files (exit 1 if not)
 
 The game never reads the ISO9660 directory: it seeks to (LBA, size) pairs from its own file table (tools/cdfiles.py),
@@ -25,7 +25,7 @@ Manifest (text, one entry per line, sorted by LBA; `#` comments):
 
 Importable: extract(image, out_dir, progress=None) -> manifest dict; manifest_sha1(out_dir) -> sha1 or None.
 """
-import hashlib, os, struct, sys
+import hashlib, os, shutil, struct, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # `python3 -I` (CI) leaves the script's folder out
 import chd
@@ -34,7 +34,7 @@ MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of S
 REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec"      # the July 1998 Rev 0 of both serials: other overlays, the port does not run it
 # the game executables of the other releases (the boot exe of SYSTEM.CNF): {sha1: (serial, release)}
 VERSION_OF = {"81cbc79f0230aeb4252e058039f47ac95a777f5a": ("SCUS-94236", "Tomba! (USA)"),
-              "07d577698ad31ec1a69b9d7b80a7c3f90b650888": ("SLPS-01144", "Ore no Tomba (Japan)")}
+              "07d577698ad31ec1a69b9d7b80a7c3f90b650888": ("SLPS-01144", "Ore! Tomba (Japan)")}
 MANIFEST = "manifest.txt"
 BLOB_DIR = "_disc"
 
@@ -325,7 +325,23 @@ def main(argv):
             last[0] = pct
             sys.stdout.write("\r%3d%%  %s%s" % (pct, path, " " * 30))
             sys.stdout.flush()
-    man = extract(argv[1], argv[2], progress)
+    image, tmp = argv[1], None
+    import disc_archive as DA
+    if DA.kind(image) in ("zip", "7z", "rar"):     # the image inside a .zip / .7z, unpacked beside out_dir, then deleted
+        tmp = os.path.join(os.path.dirname(os.path.abspath(argv[2])) or ".", ".unpack-" + os.path.basename(os.path.abspath(argv[2])))
+        try:
+            image = DA.extract_image(image, tmp, None if quiet else lambda d, t: progress(d, t, "unpacking " + os.path.basename(argv[1])))
+        except DA.ArchiveError as e:
+            shutil.rmtree(tmp, ignore_errors=True)
+            print("\n%s" % e)
+            return 1
+        if not quiet:
+            sys.stdout.write("\n")
+    try:
+        man = extract(image, argv[2], progress)
+    finally:
+        if tmp:
+            shutil.rmtree(tmp, ignore_errors=True)
     if not quiet:
         sys.stdout.write("\n")
     print("%s: %d files, %d sectors, MAIN0 sha1 %s%s" % (argv[2], len(man["files"]), man["sectors"], man["main0_sha1"][:8],

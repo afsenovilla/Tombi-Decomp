@@ -29,6 +29,7 @@ on:
       - tools/test_save_import.py
       - tools/extract_data.py
       - tools/game_library.py
+      - tools/disc_archive.py
       - tools/versions.py
       - tools/chd.py
       - tools/data_patch.py
@@ -655,7 +656,7 @@ jobs:
           USA=(); for f in build/win-bin/tombi-pc-usa.exe build/linux-bin/tombi-pc-usa; do
             if [ -f "$f" ]; then USA=(--add-binary "$f$SEP."); fi; done
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . "${USA[@]}" \
-            --hidden-import game_library \
+            --hidden-import game_library --hidden-import disc_archive \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --collect-all numpy --paths tools \
             --hidden-import save_import --hidden-import tombi_save --hidden-import tombi_save_editor --hidden-import tombi_save_editor_lang --add-data "tools/save_editor_assets;save_editor_assets" \
             --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf \
@@ -722,7 +723,7 @@ jobs:
           USA=(); for f in build/win-bin/tombi-pc-usa.exe build/linux-bin/tombi-pc-usa; do
             if [ -f "$f" ]; then USA=(--add-binary "$f$SEP."); fi; done
           pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . "${USA[@]}" \
-            --hidden-import game_library \
+            --hidden-import game_library --hidden-import disc_archive \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --collect-all numpy --paths tools \
             --hidden-import save_import --hidden-import tombi_save --hidden-import tombi_save_editor --hidden-import tombi_save_editor_lang --add-data "tools/save_editor_assets:save_editor_assets" \
             --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf \

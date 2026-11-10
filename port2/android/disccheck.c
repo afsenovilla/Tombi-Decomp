@@ -8,6 +8,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <ctype.h>
+#include <strings.h>
 #include "port_chd.h"
 
 static volatile int progress;            /* 0..1000 while hashing (nativeCheckProgress) */
@@ -292,6 +294,52 @@ JNIEXPORT jint JNICALL Java_io_github_tombi_port_LauncherActivity_nativeCheckPro
     (void)env; (void)cls; return progress;
 }
 
+/* ---- a few files straight from the image (the card's logo of a game the launcher does not extract: Library.logo,
+   the logo page, its CLUT and the title overlay; tools/game_library.py ImageSource): one open of the image (a .chd
+   too), each path ("SYSTEM/OPTSUB00.BIN", either slash, any case) found from the root directory and read as 2048-byte
+   user data.  byte[][] of paths.length, null where the file is missing, unreadable or over 4 MB; null when the image
+   does not open or is not ISO9660. */
+#define READ_MAX (4u << 20)
+static unsigned char *read_file(const unsigned char *pvd, const char *path, unsigned *len) {
+    unsigned lba, size;
+    if (!find_path(pvd, path, &lba, &size) || size > READ_MAX) return NULL;
+    unsigned char *b = malloc(size ? size : 1), s[2048];
+    if (!b) return NULL;
+    for (unsigned o = 0; o < size; o += 2048) {
+        if (read_sector((int)(lba + o / 2048), s)) { free(b); return NULL; }
+        memcpy(b + o, s, size - o < 2048 ? size - o : 2048);
+    }
+    *len = size;
+    return b;
+}
+JNIEXPORT jobjectArray JNICALL Java_io_github_tombi_port_LauncherActivity_nativeReadFiles(JNIEnv *env, jclass cls, jstring jimg, jobjectArray jpaths) {
+    (void)cls;
+    const char *im = (*env)->GetStringUTFChars(env, jimg, NULL);
+    char res[300];
+    unsigned char pvd[2048];
+    jobjectArray out = NULL;
+    if (open_img(im, res, sizeof res)) { (*env)->ReleaseStringUTFChars(env, jimg, im); return NULL; }
+    if (!read_sector(16, pvd) && !memcmp(pvd + 1, "CD001", 5)) {
+        jsize n = (*env)->GetArrayLength(env, jpaths);
+        out = (*env)->NewObjectArray(env, n, (*env)->FindClass(env, "[B"), NULL);
+        for (jsize i = 0; out && i < n; i++) {
+            jstring jp = (jstring)(*env)->GetObjectArrayElement(env, jpaths, i);
+            if (!jp) continue;
+            const char *p = (*env)->GetStringUTFChars(env, jp, NULL);
+            unsigned len = 0; unsigned char *b = read_file(pvd, p, &len);
+            (*env)->ReleaseStringUTFChars(env, jp, p);
+            (*env)->DeleteLocalRef(env, jp);
+            if (!b) continue;
+            jbyteArray a = (*env)->NewByteArray(env, (jsize)len);
+            if (a) { (*env)->SetByteArrayRegion(env, a, 0, (jsize)len, (const jbyte *)b); (*env)->SetObjectArrayElement(env, out, i, a); (*env)->DeleteLocalRef(env, a); }
+            free(b);
+        }
+    }
+    close_img();
+    (*env)->ReleaseStringUTFChars(env, jimg, im);
+    return out;
+}
+
 /* ---- extraction into a data/ folder for the port's --data mode (the same layout and manifest as
    tools/extract_data.py, docs/PORT.md "Running without the disc image: data/"): every ISO9660 file as 2048-byte user
    data, the files holding Mode 2 Form 2 sectors (the MOVIE .STR files, XA) as raw 2352-byte sectors, the sectors no file
@@ -462,3 +510,6 @@ JNIEXPORT jint JNICALL Java_io_github_tombi_port_LauncherActivity_nativeExtractC
     (void)env; (void)cls; return (jint)((ex_done & 0xFFFF) << 16 | (ex_total & 0xFFFF));
 }
 JNIEXPORT void JNICALL Java_io_github_tombi_port_LauncherActivity_nativeCancel(JNIEnv *env, jclass cls) { (void)env; (void)cls; ex_cancel = 1; }
+
+/* .7z: the disc image inside an archive (LauncherActivity.importDisc) */
+#include "un7z.c"
