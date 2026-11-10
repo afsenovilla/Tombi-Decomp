@@ -40,7 +40,7 @@ static unsigned long long tk_last, tk_frame, tk_upload, tk_write, tk_read, tk_pa
 #define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / TK_N)
 static unsigned long long n_up, n_rd, n_wait;
 static short rd_log[4][4];   /* the first read-backs since the last log line */
-extern unsigned long long pica_decode_us;
+extern unsigned long long pica_decode_us, pica_emit_us, pica_slot_us;
 
 /* ---- the frame */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
@@ -284,7 +284,9 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         port_printf("[3ds] pica: per frame %.2f texture uploads (%.2f waited for the GPU; decoding %.2f ms), %.2f read-backs\n",
                     (double)n_up / TK_N, (double)n_wait / TK_N, pica_decode_us / 1000.0 / TK_N, (double)n_rd / TK_N);
         for (unsigned i = 0; i < 4 && i < n_rd; i++) port_printf("[3ds] pica: read-back %d,%d %dx%d\n", rd_log[i][0], rd_log[i][1], rd_log[i][2], rd_log[i][3]);
-        n_up = n_rd = n_wait = 0; pica_decode_us = 0;
+        port_printf("[3ds] pica: per frame %.2f ms in the core's primitives (their texture look-ups and the device: %.2f, of the total)\n",
+                    pica_emit_us / 1000.0 / TK_N, pica_slot_us / 1000.0 / TK_N);
+        n_up = n_rd = n_wait = 0; pica_decode_us = 0; pica_emit_us = pica_slot_us = 0;
         port_printf("[3ds] pica: %llu frames, %llu syncs, %llu host writes; ms per frame: %.2f total, %.2f draws, %.2f texture uploads, "
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
                     st_frames, st_syncs, st_writes, TK_MS(tk_frame), TK_MS(tk_draw), TK_MS(tk_upload), TK_MS(tk_write), TK_MS(tk_read),

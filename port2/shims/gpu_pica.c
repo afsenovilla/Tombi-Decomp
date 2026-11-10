@@ -160,9 +160,11 @@ static unsigned blocks_ver(int x, int y, int w, int h) {   /* the newest version
     for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) if (blk_ver[j][i] > v) v = blk_ver[j][i];
     return v;
 }
+static unsigned drawn_epoch;             /* moves when a cell or an area is newly marked drawn */
 static void pages_drawn(int x1, int y1, int x2, int y2) {   /* (inclusive pixel bounds) */
     if (x1 < 0) x1 = 0; if (y1 < 0) y1 = 0; if (x2 > 1023) x2 = 1023; if (y2 > 511) y2 = 511;
     if (x1 > x2 || y1 > y2) return;
+    drawn_epoch++;
     for (int j = y1 >> CSH; j <= y2 >> CSH; j++) memset(&cell_drawn[j][x1 >> 4], 1, (size_t)((x2 >> 4) - (x1 >> 4) + 1));
     for (int j = y1 >> 8; j <= y2 >> 8; j++) for (int i = x1 >> 6; i <= x2 >> 6; i++) page_drawn[j][i] = 1;
 }
@@ -187,6 +189,7 @@ static int bulk_area(void) {   /* 1: the drawing area is noted, the primitive ne
         }
     for (int i = 0; i < nbulk; i++) if (bulk[i].x1 == gs->x1 && bulk[i].y1 == gs->y1 && bulk[i].x2 == gs->x2 && bulk[i].y2 == gs->y2) return 1;
     if (nbulk == 4) { pages_drawn(bulk[0].x1, bulk[0].y1, bulk[0].x2, bulk[0].y2); memmove(&bulk[0], &bulk[1], 3 * sizeof bulk[0]); nbulk = 3; }
+    drawn_epoch++;
     bulk[nbulk].x1 = gs->x1; bulk[nbulk].y1 = gs->y1; bulk[nbulk].x2 = gs->x2; bulk[nbulk].y2 = gs->y2; nbulk++;
     return 1;
 }
@@ -361,8 +364,17 @@ extern unsigned long long port_time_us(void);
 unsigned long long pica_decode_us;   /* (time in decode(): n3ds/pica_c3d.c logs it) */
 /* the slot of the block that holds texels u0..u1 x v0..v1 (inclusive) of the texture: the smallest of the 64 / 128 /
    256 blocks that does; *obx, *oby: the block's origin */
+/* the last answer: runs of primitives read the same block (a tile map, a line of text, a sprite's parts), and
+   nothing has to be looked at again while neither vram[] nor the drawn cells have changed */
+static struct { int ok, tx, ty, depth, cx, cy, tw, bx, by, z, slot; unsigned ver, epoch; } memo;
 static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, int *oby) {
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
+    if (memo.ok && memo.ver == ver_clock && memo.epoch == drawn_epoch && memo.tx == t->tx && memo.ty == t->ty && memo.depth == t->depth
+        && memo.tw == tw && (t->depth == 2 || (memo.cx == t->cx && memo.cy == t->cy))
+        && u0 >= memo.bx && v0 >= memo.by && u1 < memo.bx + memo.z && v1 < memo.by + memo.z) {
+        *obx = memo.bx; *oby = memo.by; slots[memo.slot].used = ++use_clock;
+        return memo.slot;
+    }
     int z = 256, bx = 0, by = 0;
     if (u0 >= 0 && v0 >= 0 && u1 < 256 && v1 < 256) {
         /* origins on a grid of half the size: any primitive up to 32 texels fits a 64 block, up to 64 a 128 one */
@@ -390,12 +402,12 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     unsigned long long was = 0;   /* the slot's last use, by this block or the one it replaces */
     if (i >= 0) {
         Slot *s = &slots[i];
-        if (s->checked == ver_clock + 1) { s->used = ++use_clock; return i; }   /* (nothing in vram[] changed since) */
+        if (s->checked == ver_clock + 1) { s->used = ++use_clock; goto found; }   /* (nothing in vram[] changed since) */
         v = tex_ver(t, tw, bx, by, z);
-        if (s->ver >= v) { s->checked = ver_clock + 1; s->used = ++use_clock; return i; }
+        if (s->ver >= v) { s->checked = ver_clock + 1; s->used = ++use_clock; goto found; }
         { int x2, y2, w2, h2; tex_rect(t, tw, bx, by, z, &x2, &y2, &w2, &h2);
           if (blocks_ver(x2, y2, w2, h2) <= s->tver && clut_hash(t) == s->chash) {   /* only the CLUT was written, the same */
-              s->ver = v; s->checked = ver_clock + 1; s->used = ++use_clock; return i;
+              s->ver = v; s->checked = ver_clock + 1; s->used = ++use_clock; goto found;
           } }
         was = s->used;   /* (stale: decoded again in its slot) */
     } else {
@@ -406,6 +418,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
             if (!slots[k].live) { i = k; break; }
             if (slots[k].used < slots[i].used) i = k;
         }
+        if (memo.slot == i) memo.ok = 0;
         if (slots[i].live) {   /* out of its chain */
             Slot *o = &slots[i];
             int ocx = o->cx, ocy = o->cy;
@@ -429,6 +442,9 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     st_decodes++;
     slots[i].ver = v; slots[i].checked = ver_clock + 1; slots[i].used = ++use_clock;
     slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t);
+found:
+    memo.ok = 1; memo.tx = t->tx; memo.ty = t->ty; memo.depth = t->depth; memo.cx = t->cx; memo.cy = t->cy; memo.tw = tw;
+    memo.bx = bx; memo.by = by; memo.z = z; memo.slot = i; memo.ver = ver_clock; memo.epoch = drawn_epoch;
     return i;
 }
 
@@ -441,7 +457,16 @@ static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
     p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 255;
 }
 /* emit n vertices (a triangle or two) with the state the primitive needs: textured semi-transparent ones twice */
+unsigned long long pica_emit_us, pica_slot_us;   /* (time in emit() and in its tex_slot(): n3ds/pica_c3d.c logs them) */
+static void emit1(const PV *v0, int n, const GpuTex *tex, int semi, int raw);
 static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
+#ifdef __3DS__
+    unsigned long long q0 = port_time_us(); emit1(v0, n, tex, semi, raw); pica_emit_us += port_time_us() - q0;
+#else
+    emit1(v0, n, tex, semi, raw);
+#endif
+}
+static void emit1(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
     PState s = base_state();
     PV vv[6]; const PV *v = v0;
     if (tex) {
@@ -453,7 +478,13 @@ static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
         }
         /* (the far edge kept when it is in the page: a magnified sprite's last pixels can sample it) */
         if (u1 > 255 && u0 < 256) u1 = 255; if (w1 > 255 && w0 < 256) w1 = 255;
+#ifdef __3DS__
+        unsigned long long q0 = port_time_us();
+#endif
         int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by), ax, ay;
+#ifdef __3DS__
+        pica_slot_us += port_time_us() - q0;
+#endif
         pica_slot_pos(slot, &ax, &ay);
         s.tex = pica_slot_atlas(slot); s.mod = !raw;
         for (int i = 0; i < n; i++) { vv[i] = v0[i]; vv[i].u += (float)(ax - bx); vv[i].v += (float)(ay - by); }
@@ -502,6 +533,7 @@ static void tri_drawn(const PV *v) {
             else { long long d = -ey, m = -n; long long q = m >= 0 ? (m + d - 1) / d : -((-m) / d); long long c = (x[k] + q) >> 4; if (c > lo) lo = c; }
         }
         if (lo > hi) continue;
+        drawn_epoch++;
         memset(&cell_drawn[cy][lo], 1, (size_t)(hi - lo + 1));
         for (long long pi = lo >> 2; pi <= hi >> 2; pi++) page_drawn[cy >> 8][pi] = 1;
     }
