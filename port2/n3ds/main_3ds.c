@@ -90,10 +90,12 @@ static int choose_image(char *out, size_t cap) {
             } else { snprintf(out, cap, "%s%s", cur, ent[sel].name); ok = 1; break; }
         }
         if (redraw) {
-            if (sel < top) top = sel; if (sel >= top + 22) top = sel - 21;
+            if (sel < top) top = sel; if (sel >= top + 20) top = sel - 19;
             /* (fprintf: the program's own printf is the game's, shims/libc.c, which only logs) */
-            fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - choose your disc image\n%.48s\n\n", cur);
-            for (int i = top; i < nent && i < top + 22; i++) fprintf(stdout, "%c %.44s%s\n", i == sel ? '>' : ' ', ent[i].name, ent[i].dir ? "/" : "");
+            fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - no disc image found\n"
+                            "Copy your Tombi! (PAL) disc image (.bin, .iso or\n.chd) to the SD card, folder /3ds/tombi/\n"
+                            "or choose it here:  %.28s\n\n", cur);
+            for (int i = top; i < nent && i < top + 20; i++) fprintf(stdout, "%c %.44s%s\n", i == sel ? '>' : ' ', ent[i].name, ent[i].dir ? "/" : "");
             if (!nent) fprintf(stdout, " (no folders or .chd / .bin / .iso here)\n");
             fprintf(stdout, "\x1b[28;1HA: open / choose   B: back   START: exit");
             fflush(stdout);
