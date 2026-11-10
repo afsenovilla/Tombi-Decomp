@@ -3601,3 +3601,10 @@ package servers refuse the cloud container, so there is no libctru/citro3d build
   -fPIC, check_3dsx.py fails the build otherwise), libsysbase as a library for gen2 (opendir), --renderer pica made no
   GL window.  Azahar does not fault on unmapped low addresses (it logs them), so the null-page handler is only
   exercised on hardware.  Not done: the bottom screen (panel), movies, audio on the DSP (SDL's ndsp needs dspfirm.cdc).
+- **Speed and the bottom screen (2026-11-10).** The panel (loading mirror, then the tabs) is on the bottom screen at
+  320x240 (n3ds/pica_c3d.c draws its canvas; touches through hidTouchRead).  Three measure / fix rounds in Azahar
+  (the fps line now splits panel and sound out): 9 -> 19 vblank/s (integer division by CLZ steps: the ARM11 has no
+  divide and the port's __aeabi_idiv looped 32 times), -> 25 (no per-pixel division in the panel: stepped sprite
+  scale, / 255 by shifts), -> 50, full PAL speed (the loading mirror's tiled background cached; no upscale when the
+  host shows the canvas).  Then ms/frame: game 2.5, draw ~5, panel ~4.4, sound ~3.4.  Panel dumps byte-identical
+  through all of it.  Azahar's timing is not the console's: hardware numbers still to come.
