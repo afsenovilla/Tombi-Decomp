@@ -343,7 +343,7 @@ class TestLauncher(unittest.TestCase):
         """JP: recognised (a card with its name), but Play is off and says why."""
         self.library("jp", "SLPS-01144")
         self.assertFalse(self.w.play_btn.isEnabled())
-        self.assertIn("Ore no Tomba", self.w.status_msg)
+        self.assertIn("Ore! Tomba", self.w.status_msg)
         shown = []
         self.w.error = shown.append
         self.w.play()

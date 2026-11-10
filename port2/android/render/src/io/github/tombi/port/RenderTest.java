@@ -201,7 +201,7 @@ public class RenderTest {
             .putString("g.sces01331.info", "1108 files, 209358 sectors (2352-byte source sectors), main0 bec8dc5f…")
             .putString("g.scus94236.ver", "usa").putString("g.scus94236.serial", "SCUS-94236").putString("g.scus94236.name", "Tomba! (USA).chd")
             .putString("g.scus94236.info", "1112 files, 119130 sectors (2352-byte source sectors, chd), SCUS-94236 SCUS_942.36 81cbc79f…")
-            .putString("g.slps01144.ver", "jp").putString("g.slps01144.serial", "SLPS-01144").putString("g.slps01144.name", "Ore no Tomba.bin")
+            .putString("g.slps01144.ver", "jp").putString("g.slps01144.serial", "SLPS-01144").putString("g.slps01144.name", "Ore! Tomba.bin")
             .commit();
         ActivityController<LauncherActivity> c = Robolectric.buildActivity(LauncherActivity.class).setup();
         LauncherActivity a = c.get();
@@ -255,7 +255,7 @@ public class RenderTest {
         a.result = 1; a.importStatus = a.getString(R.string.disc_added, "Tomba! (EE. UU.)");
         shot(a, "disc_usa_added");
         prefs.edit().putString("game", "slps01144").commit();
-        a.result = -1; a.importStatus = a.getString(R.string.lib_unsupported_long, "Ore no Tomba (Japón)");
+        a.result = -1; a.importStatus = a.getString(R.string.lib_unsupported_long, "Ore! Tomba (Japón)");
         shot(a, "disc_jp");
         // the dialog when Play is pressed on the Japanese game
         a.view.setScreen(LauncherActivity.LauncherView.MAIN);

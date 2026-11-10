@@ -34,7 +34,7 @@ MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of S
 REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec"      # the July 1998 Rev 0 of both serials: other overlays, the port does not run it
 # the game executables of the other releases (the boot exe of SYSTEM.CNF): {sha1: (serial, release)}
 VERSION_OF = {"81cbc79f0230aeb4252e058039f47ac95a777f5a": ("SCUS-94236", "Tomba! (USA)"),
-              "07d577698ad31ec1a69b9d7b80a7c3f90b650888": ("SLPS-01144", "Ore no Tomba (Japan)")}
+              "07d577698ad31ec1a69b9d7b80a7c3f90b650888": ("SLPS-01144", "Ore! Tomba (Japan)")}
 MANIFEST = "manifest.txt"
 BLOB_DIR = "_disc"
 

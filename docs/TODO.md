@@ -24,7 +24,7 @@
   be longer than the lists). Still open for the console: a modified MAIN0 (`spawnEventTitle` reading the same tail)
   that the text editor puts in the ISO; until then the console shows the first letters of a longer title
   (`check_text_patch.py` warns). Same idea for other text limits once more code is clean.
-- **Japanese version (Ore no Tomba).** Next project: a matching decomp of the Japanese release reusing the PAL work.
+- **Japanese version (Ore! Tomba).** Next project: a matching decomp of the Japanese release reusing the PAL work.
   Split its executable(s), then auto-match functions against the PAL sources by masked byte hashes (as done for the
   overlay duplicates) and port the C; expect most game code to transfer, with differences in the text/font system
   (kana/kanji), the single-language file layout (no MAIN0-8) and older library revisions. Needs the user's disc image

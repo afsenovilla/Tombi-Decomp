@@ -2477,7 +2477,7 @@ class App(QMainWindow):
         self.s["disc"] = e.get("image") or ""
 
     def game_name(self, e):
-        """"Tombi! (PAL)", "Tomba! (USA)", "Ore no Tomba (Japan)": the card's title."""
+        """"Tombi! (PAL)", "Tomba! (USA)", "Ore! Tomba (Japan)": the card's title."""
         v = GL.version_of(e.get("sha1"))
         if not v:
             return os.path.basename(bin_of_cue(e.get("image") or "")) or "?"
