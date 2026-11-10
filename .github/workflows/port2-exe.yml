@@ -114,13 +114,26 @@ jobs:
         with:
           python-version: "3.12"
 
+      # apt downloads kept across runs (the Azure Ubuntu mirror is at times very slow: the i386 SDL / LLVM set alone
+      # took 30 min on 2026-11-10); apt skips a .deb already in the cache directory
+      - name: Cache apt downloads
+        if: steps.bin.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/apt-cache
+          key: apt-game-win-${{ runner.os }}-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+          restore-keys: apt-game-win-${{ runner.os }}-v1-
+
       - name: Install toolchain
         if: steps.bin.outputs.cache-hit != 'true'
         run: |
+          mkdir -p "$RUNNER_TEMP/apt-cache/partial"
+          export APT_CACHE="-o Dir::Cache::archives=$RUNNER_TEMP/apt-cache"
           sudo apt-get update
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake ccache gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
+          sudo apt-get $APT_CACHE install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake ccache gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
+          sudo chown -R "$USER" "$RUNNER_TEMP/apt-cache"
           python3 -m pip install -r tools/requirements.txt
           python3 -m pip install --no-deps splat64==0.35.2
           python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
@@ -370,13 +383,26 @@ jobs:
         with:
           python-version: "3.12"
 
+      # apt downloads kept across runs (the Azure Ubuntu mirror is at times very slow: the i386 SDL / LLVM set alone
+      # took 30 min on 2026-11-10); apt skips a .deb already in the cache directory
+      - name: Cache apt downloads
+        if: steps.bin.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/apt-cache
+          key: apt-game-linux-${{ runner.os }}-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+          restore-keys: apt-game-linux-${{ runner.os }}-v1-
+
       - name: Install toolchain
         if: steps.bin.outputs.cache-hit != 'true'
         run: |
+          mkdir -p "$RUNNER_TEMP/apt-cache/partial"
+          export APT_CACHE="-o Dir::Cache::archives=$RUNNER_TEMP/apt-cache"
           sudo apt-get update
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake ccache gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
+          sudo apt-get $APT_CACHE install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake ccache gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
+          sudo chown -R "$USER" "$RUNNER_TEMP/apt-cache"
           python3 -m pip install -r tools/requirements.txt
           python3 -m pip install --no-deps splat64==0.35.2
           python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
@@ -703,17 +729,27 @@ jobs:
           name: tombi-port-game-linux
           path: build/linux-bin
 
+      - name: Cache apt downloads
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/apt-cache
+          key: apt-launcher-linux-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+          restore-keys: apt-launcher-linux-v1-
+
       - name: Build tombi-port (Linux)
         run: |
+          mkdir -p "$RUNNER_TEMP/apt-cache/partial"
+          APT_CACHE="-o Dir::Cache::archives=$RUNNER_TEMP/apt-cache"
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y libc6:i386 libsdl2-2.0-0:i386   # (Ubuntu's libSDL2 links ALSA/Pulse/X11 directly: the user needs this too, README)
+          sudo apt-get $APT_CACHE install -y libc6:i386 libsdl2-2.0-0:i386   # (Ubuntu's libSDL2 links ALSA/Pulse/X11 directly: the user needs this too, README)
           chmod +x build/linux-bin/tombi-pc
           build/linux-bin/tombi-pc --headless --test-null
           if [ -f build/linux-bin/tombi-pc-usa ]; then chmod +x build/linux-bin/tombi-pc-usa; build/linux-bin/tombi-pc-usa --headless --test-null; fi
           # the launcher is Qt (PySide6-Essentials, as on Windows; its xcb platform plugin needs libxcb-cursor0 on the
           # player's system, README); the offscreen tests need EGL / xkbcommon
-          sudo apt-get install -y libegl1 libxkbcommon0 libfontconfig1
+          sudo apt-get $APT_CACHE install -y libegl1 libxkbcommon0 libfontconfig1
+          sudo chown -R "$USER" "$RUNNER_TEMP/apt-cache"
           python -m pip install pyinstaller pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
           python tools/test_save_import.py
