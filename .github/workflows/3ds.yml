@@ -128,6 +128,13 @@ jobs:
             !build/full/tmp
           key: full-${{ steps.key.outputs.full }}
 
+      # (SDL2 for the 3DS takes a third of the container step to build: kept between runs)
+      - name: Restore SDL2 (3DS)
+        uses: actions/cache@v4
+        with:
+          path: .sdl3ds
+          key: sdl3ds-2.30.11-v1
+
       - name: Build tombi.3dsx (devkitARM container)
         if: steps.fetch.outputs.ok == 'true'
         run: |
@@ -137,12 +144,15 @@ jobs:
             git config --global --add safe.directory /w || true
             # SDL2 with its Nintendo 3DS backend (docs/README-n3ds.md), from the pinned release tarball (devkitPro
             # packages only SDL 1.2 for the 3DS); installed into the portlibs folder, where CMakeLists.txt looks
+            if [ -f /w/.sdl3ds/lib/libSDL2.a ]; then cp -r /w/.sdl3ds/. $DEVKITPRO/portlibs/3ds/; else
             mkdir -p /tmp/sdl && cd /tmp/sdl
             curl -fsSL -o sdl.tar.gz "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz"
             tar xzf sdl.tar.gz
             cmake -S SDL2-${SDL2_VERSION} -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release \
                   -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_TEST=OFF -DCMAKE_INSTALL_PREFIX=$DEVKITPRO/portlibs/3ds > /dev/null
             cmake --build build -j "$(nproc)" > /dev/null && cmake --install build > /dev/null
+            mkdir -p /w/.sdl3ds && cmake --install /tmp/sdl/build --prefix /w/.sdl3ds > /dev/null
+            fi
             ls $DEVKITPRO/portlibs/3ds/lib | grep -i sdl
             cd /w
             cmake -S port2 -B build/n3ds -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release
@@ -153,7 +163,7 @@ jobs:
             ls -l build/n3ds/*.3dsx
             python3 port2/n3ds/check_3dsx.py build/n3ds/tombi.3dsx build/n3ds/tombi.elf $DEVKITARM/bin/arm-none-eabi-nm
           '
-          sudo chown -R "$(id -u):$(id -g)" build
+          sudo chown -R "$(id -u):$(id -g)" build .sdl3ds
 
       # tombi.cia: the same ELF installed as a HOME Menu title (makerom, port2/n3ds/tombi.rsf).  makerom and bannertool
       # are not in devkitPro's packages: their latest releases.  The banner is generated (a title on a gradient, a
@@ -256,7 +266,7 @@ jobs:
           export DISPLAY=:99
           ./squashfs-root/AppRun "$PWD/app/tombi.3dsx" > azahar.log 2>&1 &
           EMU=$!
-          for i in $(seq 1 16); do sleep 15; import -window root "shots/shot_$(printf %03d $((i*15))).png" || true; done
+          for i in $(seq 1 9); do sleep 15; import -window root "shots/shot_$(printf %03d $((i*15))).png" || true; done
           kill "$EMU" 2>/dev/null || true; sleep 2
           cp "$SD/3ds/tombi/log.txt" shots/log.txt 2>/dev/null || echo "(no log.txt)" > shots/log.txt
           ls "$SD/3ds/tombi/dump" | head -40
@@ -292,13 +302,13 @@ jobs:
           mv "$SD/3ds/tombi/tombi.bin" "$SD/tombi_away.bin"; rm -f "$SD/3ds/tombi/disc.txt"
           ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_nodisc.log 2>&1 &
           EMU=$!
-          sleep 30; import -window root shots/nodisc_030.png || true
+          sleep 15; import -window root shots/nodisc_030.png || true
           kill "$EMU" 2>/dev/null || true; sleep 2
           convert shots/nodisc_030.png -trim +repage -quality 75 small_nodisc.jpg && { echo "=====BEGIN shot_nodisc====="; base64 -w 100 small_nodisc.jpg; echo "=====END shot_nodisc====="; }
           mv "$SD/tombi_away.bin" "$SD/3ds/tombi/tombi.bin"
           ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_cci.log 2>&1 &
           EMU=$!
-          sleep 60; import -window root shots/cci_060.png || true
+          sleep 35; import -window root shots/cci_060.png || true
           kill "$EMU" 2>/dev/null || true; sleep 2
           echo "== azahar_cci.log"; grep -v -i "keysym\|xkbcomp" azahar_cci.log | head -60
           L=$(find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" | head -1)
@@ -314,7 +324,7 @@ jobs:
       - name: Screenshots in the log
         if: always()
         run: |
-          for t in 060 120 240; do
+          for t in 060 090 135; do
             f="shots/shot_$t.png"; [ -f "$f" ] || continue
             convert "$f" -trim +repage -quality 75 "small_$t.jpg"   # (the emulator window, full size)
             echo "=====BEGIN shot_$t====="; base64 -w 100 "small_$t.jpg"; echo "=====END shot_$t====="
