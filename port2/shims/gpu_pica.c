@@ -319,7 +319,7 @@ static void pica_vram_read(int x, int y, int w, int h) {
 /* ---- the texture cache */
 /* a slot: the block (bx, by, size z, texels of the page) of a page + CLUT + texture window.
    checked: ver_clock + 1 when it was last found valid */
-typedef struct { int tx, ty, depth, cx, cy, tw, bx, by; unsigned ver, checked, tver, chash, updated; unsigned long long used; short live, next; } Slot;
+typedef struct { int tx, ty, depth, cx, cy, tw, bx, by; unsigned ver, checked, tver, chash, updated, synced; unsigned long long used; short live, next; } Slot;
 static Slot slots[SLOTS];
 static short hhead[256];                 /* slots by key (chains through Slot.next), -1 ends */
 static int hinit;
@@ -414,9 +414,6 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     }
     *obx = bx; *oby = by;
     int cx = t->depth == 2 ? 0 : t->cx, cy = t->depth == 2 ? 0 : t->cy;
-    int x, y, w, h; tex_rect(t, tw, bx, by, z, &x, &y, &w, &h);
-    sync_pages(x, y, w, h);
-    if (t->depth < 2 && t->cy != PORT_CLUT_Y) sync_pages(t->cx, t->cy, t->depth ? 256 : 16, 1);
     if (!hinit) { memset(hhead, -1, sizeof hhead); hinit = 1; }
     unsigned hk = ((unsigned)(t->tx >> 6) * 7 + (unsigned)(t->ty >> 8) * 3 + (unsigned)cx * 13 + (unsigned)cy * 31 + (unsigned)(bx >> 5) * 5
                    + (unsigned)(by >> 5) * 17 + (unsigned)z + (unsigned)tw * 11 + (unsigned)t->depth) & 255;
@@ -426,6 +423,12 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
         if (s->tx == t->tx && s->ty == t->ty && s->depth == t->depth && s->tw == tw && s->cx == cx && s->cy == cy
             && s->bx == bx && s->by == by && pica_slot_size(i) == z) break;
     }
+    /* found valid, and nothing was written to vram[] or newly drawn since: nothing to read back or to compare
+       (primitives that alternate between two textures miss the memo every time) */
+    if (i >= 0 && slots[i].checked == ver_clock + 1 && slots[i].synced == drawn_epoch + 1) { slots[i].used = ++use_clock; goto found; }
+    int x, y, w, h; tex_rect(t, tw, bx, by, z, &x, &y, &w, &h);
+    sync_pages(x, y, w, h);
+    if (t->depth < 2 && t->cy != PORT_CLUT_Y) sync_pages(t->cx, t->cy, t->depth ? 256 : 16, 1);
     unsigned v;
     unsigned long long was = 0;   /* the slot's last use, by this block or the one it replaces */
     if (i >= 0) {
@@ -483,6 +486,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     slots[i].ver = v; slots[i].checked = ver_clock + 1; slots[i].used = ++use_clock;
     slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t); slots[i].updated = present_no;
 found:
+    slots[i].synced = drawn_epoch + 1;
     memo.ok = 1; memo.tx = t->tx; memo.ty = t->ty; memo.depth = t->depth; memo.cx = t->cx; memo.cy = t->cy; memo.tw = tw;
     memo.bx = bx; memo.by = by; memo.z = z; memo.slot = i; memo.ver = ver_clock; memo.epoch = drawn_epoch;
     return i;
@@ -497,10 +501,11 @@ static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
     p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 0;   /* (a: what an untextured pixel's alpha is, bit 15 clear) */
 }
 /* emit n vertices (a triangle or two) with the state the primitive needs: textured semi-transparent ones twice */
-/* Clipping to the drawing area, here and not left to the device's scissor: a PICA200 does not clip in x / y, and a
-   console draws nothing of a triangle with a vertex on or past the target's right edge (x = 1024; gputest.bmp: the
-   full-width fills missing, an 8 x 8 mark at x 952 right) where Azahar draws it.  The second frame buffer ends at that
-   edge, and sprites cross it.  The far bounds stop short of the edge, past the last pixel's centre.
+/* Clipping, here: a PICA200 does not clip in x / y, and a console draws nothing of a triangle with a vertex on or
+   past the target's right edge (x = 1024; gputest.bmp: the full-width fills missing, an 8 x 8 mark at x 952 right)
+   where Azahar draws it.  The second frame buffer ends at that edge, and sprites cross it.  So triangles are cut to
+   the target (the far bounds short of the edge, past the last pixel's centre); the drawing area inside it is the
+   device's scissor (cutting to the area itself sent a fifth of a scene's triangles through the clipper).
    On by default on the 3DS; PICA_CLIP=1 in the environment tries it on the reference device. */
 static int clip_on = -1;
 /* profiling on the 3DS (n3ds/pica_c3d.c logs it): one ordering table in sixteen is timed, in system ticks:
@@ -534,24 +539,25 @@ static int clip_poly(const PV *in, int n, PV *out, int axis, float bound, int ke
     }
     return m;
 }
-/* the triangles of v[0..n) inside the drawing area into out (15 vertices a triangle at most); the count */
+/* the triangles of v[0..n) inside the target into out (15 vertices a triangle at most); the count.  The drawing area
+   is the device's scissor; what the CPU must cut is what a PICA200 cannot be given: a vertex outside the target */
+#define CLIP_X2 1023.4f
+#define CLIP_Y2 511.4f
 static int clip_tris(const PV *v, int n, PV *out) {
-    float X1 = (float)gs->x1, Y1 = (float)gs->y1;
-    float X2 = gs->x2 + 1 > 1023 ? 1023.4f : (float)(gs->x2 + 1), Y2 = gs->y2 + 1 > 511 ? 511.4f : (float)(gs->y2 + 1);
+    const float X1 = 0.0f, Y1 = 0.0f, X2 = CLIP_X2, Y2 = CLIP_Y2;
     int m = 0;
     for (int t = 0; t + 2 < n; t += 3) {
         const PV *q = &v[t];
-        int in = 1;
-        for (int i = 0; i < 3; i++) if (q[i].x < X1 || q[i].x > X2 || q[i].y < Y1 || q[i].y > Y2) in = 0;
-        if (in) { out[m++] = q[0]; out[m++] = q[1]; out[m++] = q[2]; continue; }
-        if ((q[0].x < X1 && q[1].x < X1 && q[2].x < X1) || (q[0].x > X2 && q[1].x > X2 && q[2].x > X2) ||
-            (q[0].y < Y1 && q[1].y < Y1 && q[2].y < Y1) || (q[0].y > Y2 && q[1].y > Y2 && q[2].y > Y2)) continue;
-        PV a[8], b[8]; int k;
-        k = clip_poly(q, 3, a, 0, X1, 0);
-        k = clip_poly(a, k, b, 0, X2, 1);
-        k = clip_poly(b, k, a, 1, Y1, 0);
-        k = clip_poly(a, k, b, 1, Y2, 1);
-        for (int i = 1; i + 1 < k; i++) { out[m++] = b[0]; out[m++] = b[i]; out[m++] = b[i + 1]; }
+        int l = 0, r = 0, u = 0, d = 0;   /* vertices past each bound */
+        for (int i = 0; i < 3; i++) { l += q[i].x < X1; r += q[i].x > X2; u += q[i].y < Y1; d += q[i].y > Y2; }
+        if (!(l | r | u | d)) { out[m++] = q[0]; out[m++] = q[1]; out[m++] = q[2]; continue; }
+        if (l == 3 || r == 3 || u == 3 || d == 3) continue;
+        PV a[8], b[8]; const PV *in = q; PV *o = a; int k = 3;
+        if (l) { k = clip_poly(in, k, o, 0, X1, 0); in = o; o = o == a ? b : a; }
+        if (r) { k = clip_poly(in, k, o, 0, X2, 1); in = o; o = o == a ? b : a; }
+        if (u) { k = clip_poly(in, k, o, 1, Y1, 0); in = o; o = o == a ? b : a; }
+        if (d) { k = clip_poly(in, k, o, 1, Y2, 1); in = o; o = o == a ? b : a; }
+        for (int i = 1; i + 1 < k; i++) { out[m++] = in[0]; out[m++] = in[i]; out[m++] = in[i + 1]; }
     }
     return m;
 }
@@ -657,10 +663,9 @@ static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shad
         const GpuVtx *q = shade ? p[i] : a;
         put(&v[i], p[i]->x, p[i]->y, q->r, q->g, q->b, p[i]->u, p[i]->v);
     }
-    {   /* (the far bounds as clip_tris: a vertex may sit one past the area's last pixel, short of the target's edge) */
-        int X2 = gs->x2 + 1 > 1023 ? 1023 : gs->x2 + 1, Y2 = gs->y2 + 1 > 511 ? 511 : gs->y2 + 1;
-        if (a->x >= gs->x1 && b->x >= gs->x1 && c->x >= gs->x1 && a->x <= X2 && b->x <= X2 && c->x <= X2
-            && a->y >= gs->y1 && b->y >= gs->y1 && c->y >= gs->y1 && a->y <= Y2 && b->y <= Y2 && c->y <= Y2 && bulk_in()) {
+    {   /* (inside the target: clip_tris would pass it whole) */
+        if ((unsigned)a->x <= 1023u && (unsigned)b->x <= 1023u && (unsigned)c->x <= 1023u
+            && (unsigned)a->y <= 511u && (unsigned)b->y <= 511u && (unsigned)c->y <= 511u && bulk_in()) {
             int u0 = a->u, u1 = u0, w0 = a->v, w1 = w0;
             if (b->u < u0) u0 = b->u; if (b->u > u1) u1 = b->u; if (c->u < u0) u0 = c->u; if (c->u > u1) u1 = c->u;
             if (b->v < w0) w0 = b->v; if (b->v > w1) w1 = b->v; if (c->v < w0) w0 = c->v; if (c->v > w1) w1 = c->v;
@@ -676,8 +681,7 @@ static void pica_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, in
     PV v[6];
     put(&v[0], x, y, r, g, b, u0, v0); put(&v[1], x + w, y, r, g, b, u0 + w, v0); put(&v[2], x, y + h, r, g, b, u0, v0 + h);
     v[3] = v[1]; put(&v[4], x + w, y + h, r, g, b, u0 + w, v0 + h); v[5] = v[2];
-    {   int X2 = gs->x2 + 1 > 1023 ? 1023 : gs->x2 + 1, Y2 = gs->y2 + 1 > 511 ? 511 : gs->y2 + 1;
-        if (w >= 0 && h >= 0 && x >= gs->x1 && y >= gs->y1 && x + w <= X2 && y + h <= Y2 && bulk_in()) {
+    {   if (w >= 0 && h >= 0 && x >= 0 && y >= 0 && x + w <= 1023 && y + h <= 511 && bulk_in()) {
             emit_in(v, 6, tex, semi, raw, u0, v0, u0 + w, v0 + h);
             return;
         }
