@@ -1,0 +1,70 @@
+// VERSION BETA_980203 beta980203 800256DC 420
+#if defined(VERSION_BETA_980203)
+// Beta version: avsz/stotz before the screen test (y < 0xf1, x < 0x141), colours copied before the OT range check
+// USA version of PAL main0 800232E4 (modelDrawF3.c): PAL C of src/modelDrawF3.c (0.972 masked), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+typedef struct {
+    unsigned long tag;
+    unsigned long c0;
+    unsigned short x0, y0;
+    unsigned short x1, y1;
+    unsigned short x2, y2;
+} PolyF3;
+
+extern PolyF3 *NEXT_PRIM;
+extern long LZ_FILE_CTRL;
+extern char *MODEL_VERTEX_PTR;
+extern unsigned long *CURRENT_OT;
+
+#define gte_ldv3c(r0) __asm__ volatile ("lwc2 $0, 0( %0 );lwc2 $1, 4( %0 );lwc2 $2, 8( %0 );lwc2 $3, 12( %0 );lwc2 $4, 16( %0 );lwc2 $5, 20( %0 )" : : "r"(r0))
+#define gte_rtpt() __asm__ volatile ("nop;nop;.word 0x4a280030")
+#define gte_stflg(r0) __asm__ volatile ("cfc2 $12, $31;nop;sw $12, 0( %0 )" : : "r"(r0) : "$12", "memory")
+#define gte_nclip() __asm__ volatile ("nop;nop;.word 0x4b400006")
+#define gte_stopz(r0) __asm__ volatile ("swc2 $24, 0( %0 )" : : "r"(r0) : "memory")
+#define gte_stsxy3_f3(r0) __asm__ volatile ("swc2 $12, 8( %0 );swc2 $13, 12( %0 );swc2 $14, 16( %0 )" : : "r"(r0) : "memory")
+#define gte_avsz3() __asm__ volatile ("nop;nop;.word 0x4b58002d")
+#define gte_stotz(r0) __asm__ volatile ("swc2 $7, 0( %0 )" : : "r"(r0) : "memory")
+
+char *modelDrawF3(long *f, char *vtx, unsigned long *ot)
+{
+    long otz;
+    int n;
+    PolyF3 *p;
+    unsigned long len;
+    unsigned long t;
+
+    n = *f++;
+    if (n != 0) {
+        len = 0x4000000;
+        do {
+            p = NEXT_PRIM;
+            gte_ldv3c(vtx + 4);
+            gte_rtpt();
+            gte_stflg(&LZ_FILE_CTRL);
+            if (LZ_FILE_CTRL >= 0) {
+                gte_nclip();
+                gte_stopz(&LZ_FILE_CTRL);
+                if (LZ_FILE_CTRL > 0) {
+                    gte_avsz3();
+                    gte_stotz(&otz);
+                    gte_stsxy3_f3(p);
+                    if ((p->y0 < 0xf1 || p->y1 < 0xf1 || p->y2 < 0xf1) &&
+                        (p->x0 < 0x141 || p->x1 < 0x141 || p->x2 < 0x141)) {
+                        *(unsigned long *)((char *)p + 4) = *f;
+                        otz = (otz << 2) + (long)ot;
+                        if ((unsigned long)(otz - (long)CURRENT_OT) < 0xca0) {
+                            t = *(unsigned long *)otz;
+                            *(unsigned long *)otz = (unsigned long)p;
+                            p->tag = t | len;
+                            NEXT_PRIM = NEXT_PRIM + 1;
+                        }
+                    }
+                }
+            }
+            f += 10;
+            vtx += 0x28;
+        } while (--n != 0);
+    }
+    MODEL_VERTEX_PTR = vtx;
+    return (char *)f;
+}
+#endif
