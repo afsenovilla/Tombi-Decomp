@@ -905,3 +905,25 @@ model table is at `D003.GAM` unpacked +0x30A78 (87 entries).
 
 Conclusion: the lift / pull mechanic was programmed with its timing and then removed before PrePre 9; the object it
 used is in none of the demo's data. Only the frames and these scripts remain.
+
+### VRAM sweep of the two demo discs: texture pages, retail filtered out (2026-11-10)
+
+Every texture page of the JP demo (25 pages, load records at `SLPM_801.65` +0x5C258) and of PrePre 9 (38 pages,
+`TOMBA.EXE` +0x64A5C) was placed in VRAM from the demo's own load lists, hashed in 8x8 / 16x16 texel blocks against
+every retail PAL page (and retail JP and the other demo as extra references), and the texels no SPR part (every table
+found by shape, every tpage base) and no model polygon samples were kept. Code-drawn primitives with fixed UVs (HUD,
+sub-screen, title, text) are not modelled, so on those pages "unsampled" alone proves nothing. Throw-away scripts, not
+committed. What came out as art retail does not have:
+
+| Disc, page | Find | Palette | Status |
+|---|---|---|---|
+| PrePre 9 `TOMBA/AREA02/B000.GAM` (0,0)-(512,170); byte-identical copies in the sub-screen pages `A00061`/`A00064`/`A00067`/`A00069` | **An unused dwarf sprite sheet**: about 24 poses of the forest dwarf (idle, walk, kick, knocked back), six 36x40 robed, bearded elders (front / side / back), five pennants on poles, two small dark silhouettes. 0 % sampled by any Pre9 part or polygon; 5-25 % block matches with PAL/JP (noise level). | The retail forest dwarfs (AREA01 list 1, SPR 0x32) use CLUT 0x7C13 / 0x7C53 / 0x7C93 / 0x7CD3 = `CLUT01` rows 16-19 col 11 (pink, tan, light tan, green); the same four rows are in Pre9 `TOMBA/AREA01/CLUT01.GAM` and colour the sheet exactly like the retail dwarfs. | Cut art: an SPR-page version of the dwarfs retail only keeps as WPP / the AREA01 table. |
+| JP demo `SYSTEM/A00012.000` (10,67) 28x36 | A small full-body Tomba (pink hair, green shorts) on the sub-screen page, next to the マップ label. Not in PAL, JP retail or Pre9 (3-4 % block matches). Probably the extra-life icon of the demo's sub-screen, drawn by DSPSUB code (not modelled); the user notes retail's extra-life icon differs. | `SYSTEM/DSPCLUT.TIM` row 9 col 0. | Demo-only sub-screen art. |
+| JP demo `SYSTEM/A00007.000` (8 bpp, 64x256 words at (0,256), CLUT `A00006.000`) | Eight strips of Japanese text: the demo's start-up disclaimer ("this software is under development, unexpected bugs may occur... the disc cannot be exchanged"). | `A00006.000` | Demo-only. |
+
+Not new, after checking: the Pre9 scarf runner in `TOMBA/AREA01/B001.GAM` (255,118), two 35x43 frames of a running
+figure with a red cap, goggles and a brown scarf (`CLUT01` row 0 col 11) is the thief who is in the retail game (user
+identification; the frames are retouched / on another page there, so the block match is low); the demo-only item icons
+(slots 34, 36, 44, 45, 52, 61, listed above); the Japanese title logo, faces, kanji font and sub-screen labels (all in
+retail JP); the feather, the Evil Pig trident and the logs (sampled, or in retail JP). JP AREA00/AREA08 room pages, the
+Pre9 AREA01 object atlases and AREA02 room pages hold no other unreferenced art. USA and SCES-01330 discs not checked.
