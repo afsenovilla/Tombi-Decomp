@@ -62,9 +62,16 @@ static void nl_spr(int n, int x0, int y0, int x1, int y1) {
     def(n, d);
     if (d[2] <= 0 || d[3] <= 0 || x1 <= x0 || y1 <= y0) return;
     for (int i = 0; i < 16; i++) pal[i] = nl_col(d[4], d[5], i);
-    for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) {
-        u32 c = pal[nl_px(d[0] + (x - x0) * d[2] / (x1 - x0), d[1] + (y - y0) * d[3] / (y1 - y0))];
-        if (c) pa_put(x, y, c);
+    /* u = d0 + (x - x0) * d2 / D stepped along the row (quotient and remainder carried: the same integers as the
+       division, which the 3DS's ARM11 does in software); v once per row */
+    int D = x1 - x0, qs = d[2] / D, rs = d[2] % D;
+    for (int y = y0; y < y1; y++) {
+        int v = d[1] + (y - y0) * d[3] / (y1 - y0), u = d[0], r = 0;
+        for (int x = x0; x < x1; x++) {
+            u32 c = pal[nl_px(u, v)];
+            if (c) pa_put(x, y, c);
+            u += qs; r += rs; if (r >= D) { r -= D; u++; }
+        }
     }
 }
 /* the loading screen on the canvas; 0 when the panel shows the game (or the file is missing) */

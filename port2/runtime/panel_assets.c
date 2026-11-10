@@ -119,8 +119,11 @@ void pa_blend(int x, int y, u32 c, int a) {
     u32 *p = &pa_cv[y * pa_cw + x];
     if (a >= 255) { *p = c | 0xFF000000u; return; }
     u32 d = *p;
-    u32 r = ((c & 0xFF) * a + (d & 0xFF) * (255 - a)) / 255, g = ((c >> 8 & 0xFF) * a + (d >> 8 & 0xFF) * (255 - a)) / 255,
-        bb = ((c >> 16 & 0xFF) * a + (d >> 16 & 0xFF) * (255 - a)) / 255;
+    /* x / 255 for x <= 255 * 255 as (x + 1 + (x >> 8)) >> 8: exact over that range, no division (the 3DS has none) */
+    #define DIV255(x) (((x) + 1 + ((x) >> 8)) >> 8)
+    u32 r = DIV255((c & 0xFF) * a + (d & 0xFF) * (255 - a)), g = DIV255((c >> 8 & 0xFF) * a + (d >> 8 & 0xFF) * (255 - a)),
+        bb = DIV255((c >> 16 & 0xFF) * a + (d >> 16 & 0xFF) * (255 - a));
+    #undef DIV255
     *p = 0xFF000000u | bb << 16 | g << 8 | r;
 }
 void pa_fill(int x, int y, int w, int h, u32 c) { for (int j = y; j < y + h; j++) for (int i = x; i < x + w; i++) pa_put(i, j, c); }
