@@ -208,6 +208,11 @@ static void cbind_defaults(void) {
     }
     cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 1, P_L2);    /* (L2 / R2 were not read at all before) */
     cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 1, P_R2);
+#ifdef __3DS__
+    /* the Circle Pad moves as the d-pad does (the console's main stick; the game is digital) */
+    cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_LEFTX, 2, P_LEFT); cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_LEFTX, 1, P_RIGHT);
+    cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_LEFTY, 2, P_UP); cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_LEFTY, 1, P_DOWN);
+#endif
 }
 /* --pad-map ps1=src[+src],...: src = an SDL controller button or axis name ("rightshoulder", "lefttrigger", "leftx-"),
    bN (raw joystick button), aN+ / aN- (raw axis), hN.M (raw hat N, direction mask M: 1 up 2 right 4 down 8 left) */
