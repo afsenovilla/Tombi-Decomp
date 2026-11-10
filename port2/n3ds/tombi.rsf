@@ -183,7 +183,6 @@ AccessControlInfo:
     KernelSetState: 124
     QueryProcessMemory: 125
   InterruptNumbers:
-  SystemCallAccess2:
 
 SystemControlInfo:
   SaveDataSize: 0KB
