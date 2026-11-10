@@ -59,7 +59,6 @@ int main(int argc, char **argv) {
     mkdir(DIR_, 0777);
     chdir(DIR_);
     if (!freopen(DIR_ "/log.txt", "w", stderr)) { /* (no SD card: the log goes nowhere) */ }
-    { extern int n3ds_dspfirm(void); n3ds_dspfirm(); }   /* the sound's DSP firmware, from the console's Home Menu (n3ds/dspfirm.c) */
     static char image[512], extra[2048];
     static char *args[64];
     int n = 0;
