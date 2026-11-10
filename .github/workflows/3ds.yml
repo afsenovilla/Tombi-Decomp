@@ -149,8 +149,8 @@ jobs:
             curl -fsSL -o sdl.tar.gz "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz"
             tar xzf sdl.tar.gz
             # SDL 2.30 puts its audio thread on the system core (core 1, 30 % of its time): an Old 3DS cannot mix there
-            # (60 % of the samples in the log of one); upstream changed it in 2026 ("n3ds: Don't put audio thread in system
-            # core on Old 3DS systems").  The same here: core 1 only on a New 3DS.
+            # (60 % of the samples in the log of one); upstream changed it in 2026.  The same here: core 1 only on a New 3DS.
+            # (No apostrophes in this script: it is inside single quotes.)
             sed -i "s|^        cpu = 1;|        { bool n3 = false; APT_CheckNew3DS(\&n3); if (n3) cpu = 1; }|" SDL2-${SDL2_VERSION}/src/thread/n3ds/SDL_systhread.c
             grep -n "APT_CheckNew3DS" SDL2-${SDL2_VERSION}/src/thread/n3ds/SDL_systhread.c
             cmake -S SDL2-${SDL2_VERSION} -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=$DEVKITPRO/cmake/3DS.cmake -DCMAKE_BUILD_TYPE=Release \
