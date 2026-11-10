@@ -675,7 +675,8 @@ i18n.add({
                            "el paisaje del título es el de esa versión (roca-torre y río) en vez del final. Eso es arte real del juego "
                            "de entonces; el logo, el menú y los textos siguen siendo los finales (el logo «オレっ！トンバ» de esa versión "
                            "no se usa: no sabemos cómo se montaba). No se incluye nada de ese disco.",
-           "l.earlytitle": "Título temprano (opcional): carpeta TOMBA del disco PrePre Vol. 8 (tools/prepre8.py extract):"},
+           "l.earlytitle": "Título temprano (opcional): carpeta TOMBA del disco PrePre Vol. 8 (tools/prepre8.py extract):",
+           "l.wingsglide": "Planeo con las Alas de la caridad en las zonas cenitales (opcional): carpeta del disco de la demo japonesa SLPM-80165 extraído (con AREA08/D002.000):"},
     "en": {"l.cutcontent": "Enable cut content",
            "i.cutcontent": "Text that was removed from the game and found in the Japanese release (Ore! Tomba). "
                            "Four pieces are enabled:\n\n"
@@ -703,7 +704,8 @@ i18n.add({
                            "title landscape is that build's (rock spire and river) instead of the final one. That is real game art of the "
                            "time; the logo, menu and text stay the final ones (that build's 'オレっ！トンバ' logo is not used: how it was "
                            "laid out is unknown). Nothing from that disc is included.",
-           "l.earlytitle": "Early title (optional): TOMBA folder of the PrePre Vol. 8 disc (tools/prepre8.py extract):"},
+           "l.earlytitle": "Early title (optional): TOMBA folder of the PrePre Vol. 8 disc (tools/prepre8.py extract):",
+           "l.wingsglide": "Charity Wings glide in the top-down areas (optional): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):"},
 })
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
@@ -1245,6 +1247,8 @@ def build_command(s, civ_play=None):
         cmd += ["--cut-content"]
         if s.get("early_title"):
             cmd += ["--early-title", s["early_title"]]
+        if s.get("wings_glide"):
+            cmd += ["--wings-glide", s["wings_glide"]]
     gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
     if not lang:
         note = "no (%s: English only)" % (GL.version_of(current_sha1()) or {}).get("region", "?")
@@ -3391,6 +3395,8 @@ class App(QMainWindow):
         c.addSpacing(8)
         c.addWidget(wrap_label(tr("l.earlytitle"), "muted"))
         c.addWidget(self.browse_row("early_title", self.pick_early_title))           # --early-title (port2/runtime/titlebg.c)
+        c.addWidget(wrap_label(tr("l.wingsglide"), "muted"))
+        c.addWidget(self.browse_row("wings_glide", self.pick_wings_glide))           # --wings-glide (port2/runtime/wings.c)
         c = self.card(f, tr("cut.c.towns"))                  # docs/CIVILIZATION.md "Playable towns"
         d = wrap_label(tr("cut.towns.d"), "muted")
         row, rl = hbox(d, self.info_button(tr("cut.c.towns"), tr("cut.towns.i")), spacing=4)
@@ -3550,6 +3556,11 @@ class App(QMainWindow):
         p = self._pick_dir()
         if p:
             self.set_edit("early_title", p)
+
+    def pick_wings_glide(self):
+        p = self._pick_dir()
+        if p:
+            self.set_edit("wings_glide", p)
 
     def texture_dump_dir(self):
         return os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")

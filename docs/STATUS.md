@@ -30,6 +30,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Wings glide in the port (2026-11-10)**: `--cut-content --wings-glide JPDEMO_DIR` (PC launcher: Cut content page)
+   plays the JP demo's cut top-down Charity Wings animation (frames 77-79 + the feather item sprite spinning) in the
+   wings exit of top-down areas (`port2/runtime/wings.c`, hooks in port/fixes.txt, docs/PORT.md). Checked headless in
+   AREA08 s0 only; not on the device, Android launcher not wired. The full link (`tools/build_full.py`) had to be
+   rebuilt first: a stale build/full made the port crash at frame 0 (initGlobalState).
+
 0. **PrePre Vol.9 Tombi animations (2026-11-10)**: the demo's player frame table (TOMBA/AREA01/A007.000 = AREA02/D105.000,
    379 frames) holds 106 frames retail (AREA00/A004.000, 358) never got: 173 identical, 100 retouched, 106 new. Its player
    animation table (TOMBA/X01.BIN +0x380) has 56 ids against retail's 90, the same id is the same move in both (41 equal,

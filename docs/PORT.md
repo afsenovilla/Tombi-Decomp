@@ -3063,6 +3063,25 @@ MDEC movies are not textures here (the intro landscape is a movie). A replacemen
 blended. Changing a texture's pixels by a sub-upload keeps the larger upload's key for boxes outside the changed part.
 Debug: `TEXPACK_LOG=1` prints uploads, invalidations and unkeyed boxes.
 
+### `--cut-content --wings-glide JPDEMO_DIR`: the Japanese demo's top-down Charity Wings glide (2026-11-10)
+
+Lost content restored as a reconstruction (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide"): using the
+Charity Wings in a top-down area runs I0NFO2 `topdownPlayerDropExitStep` (Tomba rises 20 ticks, fade, room left).
+With the option, `port2/runtime/wings.c` swaps the player's sprite tables for that step: a three-frame copy of the
+demo's overhead Tomba (frames 77-79, arm raised; WPP data from `JPDEMO_DIR/AREA08/D002.000` +0x3FA28, SPR parts from
+`AREA08/D003.GAM` unpacked with the game's own `lzDecompress`) as `WPP_DATA[2]` / the player's `d3c`, with a port
+script (frames 0 1 2 1, 8 ticks each), and draws the Charity Wings item sprite of retail's resident item table (frames
+159-161, CLUT 0x7AD6) as one more POLY_FT4 after the player's parts, one ordering-table slot nearer, turning like a
+rotor (8 phases, 2 ticks each, the mirrored phases by swapping u). The quill end sits 1 px above the hand's top pixel
+(hand at (22,2)/(22,1)/(22,1) of the frames, quill ends (2,22)/(2,14)/(7,14)). Hooks: `port_wings_begin` at
+`topdownPlayerDropExitStep` state 0 (substep 0 = the wings), `port_wings_draw` at the end of
+`topdownDrawRotatedSprite` (port/fixes.txt). Tables are restored when the step ends; after a room load (which
+replaces both) nothing is written back. Launcher: *Cut content* page, folder field under the early title. The demo
+files are the user's own extraction, nothing is shipped; without the folder the step is the retail one. Checked
+headless in AREA08 section 0 (debug select 8:0, the dialogue dismissed, the item use started with the pokes the
+panel's warp path uses: PLAYER+4..6 = 1, 0x30, 0 and GVARS_USE_ITEM_PENDING/ID = 1, 7): Tomba rises with the feather
+spinning in the raised hand through the fade. Not tested on the device (PC headless only); Android launcher not wired.
+
 ### `--cut-content`: signs (notice board, extra save point) and the sign box fix
 
 `--cut-content` (launcher: *Cut content* page) now also makes the AREA05 notice board readable and adds the AREA06

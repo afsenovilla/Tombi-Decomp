@@ -926,3 +926,8 @@ src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0xD0; | m.x = port_title_
 src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x64; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x0 - 8 - (unsigned char)TITLE_FONT[*(short *)TITLE_ARROW_LEFT_STRING * 5 + 2] : 0x64;
 src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x70; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x0 - 8 - (unsigned char)TITLE_FONT[*(short *)TITLE_ARROW_LEFT_STRING * 5 + 2] : 0x70;
 @version all
+# --wings-glide (runtime/wings.c): the Japanese demo's cut top-down Charity Wings glide. The wings item use in a
+# top-down area runs topdownPlayerDropExitStep (substep 0); the port swaps the player's frame tables there and draws
+# the feather after the player's parts (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide")
+src/i0nfo2/topdownPlayerDropExitStep.c |         o->timer = 0x14; |         o->timer = 0x14; { extern void port_wings_begin(void *); port_wings_begin(o); }
+src/i0nfo2/topdownDrawRotatedSprite.c |     } while (--*n); |     } while (--*n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, *x, *y, otz); }
