@@ -941,3 +941,10 @@ src/i0nfo3/tunnelDrawRotatedSprite.c |     } while (--*n); |     } while (--*n);
 src/i0nfo2/topdownPlayerLandStep.c |         topdownPlayerSetMoveAnim(o); |         topdownPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }
 src/i0nfo/overheadPlayerLandStep.c |         overheadPlayerSetMoveAnim(o); |         overheadPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }
 src/i0nfo3/tunnelPlayerLandStep.c |         tunnelPlayerSetMoveAnim(o); |         tunnelPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }
+# the side view (PrePre 9 frames 282-284, the orphan script 0x800124A8: kneeling, fist raised overhead): the wings use
+# runs playerEventStepRiseFadeOut (substep 0), the arrival playerEventStepDropIn; the retail air spin must not set the
+# anim meanwhile; the feather is drawn after the player's parts in drawPlayerSpriteDefault
+src/playerEventStepRiseFadeOut.c |         o->timer = 0x1e; |         o->timer = 0x1e; { extern void port_wings_side_begin(void *); port_wings_side_begin(o); }
+src/playerEventStepRiseFadeOut.c |         playerAirSpinToFall(o); |         { extern int port_wings_side_active(void *); if (!port_wings_side_active(o)) playerAirSpinToFall(o); }
+src/playerEventStepDropIn.c |         o->anim = PLAYER_FALL_ANIM; |         o->anim = PLAYER_FALL_ANIM; { extern void port_wings_side_land(void *); port_wings_side_land(o); }
+src/drawPlayerSpriteDefault.c |     } while (--n); |     } while (--n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, x, y, SPAD.i74); }

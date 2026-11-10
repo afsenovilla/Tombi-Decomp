@@ -3084,7 +3084,14 @@ drop from the sky into the destination area, the same glide down until the feet 
 arrival from above in every overhead area, which the wings flight is), `port_wings_draw` at the end of
 `topdownDrawRotatedSprite`; the same three hooks in the other two overhead engines, I0NFO (AREA02 s0, the Dwarf
 Village: `overheadPlayer*Step`, `overheadDrawRotatedSprite`) and I0NFO3 (the tunnels: `tunnelPlayer*Step`,
-`tunnelDrawRotatedSprite`) (port/fixes.txt). The tables are restored once the player leaves the step they were set in. Tables are restored when the step ends; after a room load (which
+`tunnelDrawRotatedSprite`) (port/fixes.txt). The tables are restored once the player leaves the step they were set in.
+**Side view** (2026-11-10): the same for the side-view player, with PrePre 9's orphan script 0x800124A8 (frames 282-284
+of `PRE9_DIR/TOMBA/AREA01/A007.000`, parts of `TOMBA/AREA01/A008.GAM` +0x14A0: kneeling with the fist raised overhead,
+10 ticks per frame, 282 283 284 283; the user's pick among the 20 orphan scripts): `port_wings_side_begin` at
+`playerEventStepRiseFadeOut` state 0 (substep 0 = the wings), `port_wings_side_land` at `playerEventStepDropIn` state 0,
+the retail air spin (`playerAirSpinToFall`) skipped while it runs, `port_wings_draw` at the end of
+`drawPlayerSpriteDefault` (WPP slot 0; the facing bit of the frame index mirrors the hand like the drawer does; fist top
+at (20,7) / (21,7) / (13,7)). `wings.c` keeps the two sets in one table (`SETS[]`). Tables are restored when the step ends; after a room load (which
 replaces both) nothing is written back. Launcher: *Cut content* page, own card with its checkbox and two disc-image
 fields (JP demo, PrePre 9;
 .bin/.cue/.iso/.chd, or inside a .zip/.7z like the game's); picking one checks the serial (SLPM-80165 / PCPX-96093)
