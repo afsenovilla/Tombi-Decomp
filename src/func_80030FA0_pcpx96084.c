@@ -3,7 +3,7 @@
 // ASPSX.PCPX_96084 2.34
 #if defined(VERSION_PCPX_96084)
 // PrePre 8 version of PAL x000 80118D8C (src/spawnMushroomClusterDebris.c): +0xA is a halfword here.
-extern char *func_8001A464(void);
+extern char *func_8001A464_pcpx96084(void);
 
 void func_80030FA0_pcpx96084(char *o, short b, short c, int d)
 {
@@ -14,7 +14,7 @@ void func_80030FA0_pcpx96084(char *o, short b, short c, int d)
     char *n;
     unsigned short t;
     do {
-        n = func_8001A464();
+        n = func_8001A464_pcpx96084();
         if (n != 0) {
             n[0] = 1;
             n[2] = 2;
