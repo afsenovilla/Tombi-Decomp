@@ -178,7 +178,10 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           "$RUNNER_TEMP/ctr/$MAKEROM" -f cia -o build/n3ds/tombi.cia -elf build/n3ds/tombi.elf -rsf port2/n3ds/tombi.rsf \
                   -icon build/n3ds/tombi.smdh -banner "$RUNNER_TEMP/ctr/banner.bnr" -exefslogo -target t
-          ls -l build/n3ds/tombi.cia
+          # tombi.cci: the same title as a cartridge image, for emulators that load .cci/.3ds and not .cia
+          "$RUNNER_TEMP/ctr/$MAKEROM" -f cci -o build/n3ds/tombi.cci -elf build/n3ds/tombi.elf -rsf port2/n3ds/tombi.rsf \
+                  -icon build/n3ds/tombi.smdh -banner "$RUNNER_TEMP/ctr/banner.bnr" -exefslogo -target t
+          ls -l build/n3ds/tombi.cia build/n3ds/tombi.cci
 
       - name: Upload tombi.3dsx
         if: steps.fetch.outputs.ok == 'true'
@@ -188,6 +191,7 @@ jobs:
           path: |
             build/n3ds/*.3dsx
             build/n3ds/*.cia
+            build/n3ds/*.cci
             build/n3ds/tombi.elf
           if-no-files-found: warn
 
