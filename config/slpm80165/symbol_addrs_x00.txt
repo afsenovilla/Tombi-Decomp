@@ -46,6 +46,7 @@ func_8010DD0C_slpm80165 = 0x8010DD0C; // type:func size:0x154  PAL x000 0x80113B
 func_8010DE68_slpm80165 = 0x8010DE68; // type:func size:0x270  PAL x000 0x80113CC8
 func_8010E7E4_slpm80165 = 0x8010E7E4; // type:func size:0x30  PAL x000 0x8011465C
 func_8010E814_slpm80165 = 0x8010E814; // type:func size:0x204  PAL x000 0x8011468C
+func_8010FD38 = 0x8010FD38; // type:func size:0x1A0  demo-only play-time limit (splat cut it at 0x8010FE8C)
 func_80111150_slpm80165 = 0x80111150; // type:func size:0x1D4  PAL x000 0x80118638
 func_80111324_slpm80165 = 0x80111324; // type:func size:0x190  PAL x000 0x8011880C
 func_801114B4_slpm80165 = 0x801114B4; // type:func size:0x224  PAL x000 0x8011899C

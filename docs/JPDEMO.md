@@ -258,8 +258,53 @@ differences that came up again and again (worth trying first on the next functio
   `% 8`;
 - splat cut the tail of a few library functions into separate "functions" (`SquareRoot0` +8, `ApplyMatrixLV` +12):
   the PAL size in `symbol_addrs_slpm80165.txt` puts them back; a jal target in the middle of
-  `a00Variant0EventSpawn` (0x8012A618) still splits that one (open);
-- three addresses (0x8003A770, 0x8004B50C, 0x80116F94) still have two `// VERSION SLPM_80165` lines in `src/`.
+  `a00Variant0EventSpawn` (0x8012A618) split that one until round 3 gave it its size in `symbol_addrs_x00.txt`;
+- round 2 left three addresses (0x8003A770, 0x8004B50C, 0x80116F94) with two `// VERSION SLPM_80165` lines in
+  `src/`; round 3 removed the duplicates (one VERSION line per address again).
+
+**Hand pass, round 3 (2026-11-10): 1315 -> 1381 of 1717 functions, 50.29 % -> 55.13 % of code** (after the
+round's first commit, a6df66c, which had taken it from 50.11 %; the function count drops by one:
+`func_8010FD38`, the demo's play-time limit, got its real size; splat had cut it at 0x8010FE8C).
+From `tools/demo_pair.py` twins again, this time with the PrePre 8 and beta builds in the pool (their game dirs
+must be linked into a worktree, or `demo_pair.py` skips them and the closest twins of the front-end code are
+missing). New demo-wide differences, worth trying first:
+- **PrePre 8 twins of the front end are often the demo function with other offsets**: text windows with the PAL
+  CLUT position (0x170, 0x1F0; PrePre 8 0x3F0, 0x1F8), the task pointer and its flags in the scratchpad
+  (0x1F8001D4, 0x1F8001CC/CD/D0/D3; PrePre 8 RAM), object bytes +0xA5 (PrePre 8 +0xA1) and +0xD4/+0xD6 (PrePre 8
+  +0xBC/+0xBE);
+- `playerMoveByAngleSpeed(o)` is `func_800202FC(o, o->wb6, o->wb2)` + the drift (`D_8009A7F4`/`F6` << 8 added to
+  h / y) + `func_800203CC(o)` (stick to ground) in the demo, written out in the step;
+- no slope tilt (`SLOPE_TILT_TABLE[o->wb0]` into +0x8C) when a step ends, no `startPadVibration`, no
+  `GVARS.i34 = 0`, fixed button bits 0x40 / 0x80 and d-pad bits 0x8000 / 0x2000 / 0xF000 (all three already in
+  round 2, they keep coming back); the player fields from +0xD0 are 8 below the beta's (link +0xD0, PAL +0xE4);
+- the screen test of the flat-shaded mesh renderers (`func_8002388C`, `func_80023B08`) comes after the colour, with an
+  OT window of 0x814 bytes (JP 0xCA0);
+- **cross-jumping**: where retail has one call with its argument load left in each path (`li a0,10` in a `j` delay
+  slot and again before the `jal`), the source called the function once per path (`func_80026854`,
+  `func_800E9A28`, `func_800ED5FC`); an `if (x == 0) o->f = A; else o->f = B;` gives the single store with the
+  value in `v0` where a ternary picks another register;
+- the strict + norm compare of `demo_sweep._check_file` drops the targets of `j` instructions that carry a
+  relocation: a goto-shaped mismatch (a jump to the end instead of to a shared tail) shows only in the objdiff report
+  (99.9 %). A diff of the raw `objdump -d` instruction text (relocation addends aside) catches it before the
+  report;
+- globals that splat names field by field (`D_800A2A1C`, `D_800A2A46`, ...) need one extern per field only for the
+  relocation names; objdiff runs with `functionRelocDiffs: none`, so instruction identity is what counts.
+- about twenty functions had no usable twin and were written from the demo code: the front-end task loop
+  `func_80018BBC` and its modes (`func_80019384`, `func_80018D8C`, movie `func_80018EC8`), the gameplay task
+  `func_8001A7F0` (it ends the area when the play-time limit `func_8010FD38` runs out), pad input, BGM open /
+  restore, reward handlers, weapon hits. Small demo-only helpers are often inlined into the player steps as they
+  are: the air spin `func_800EC084` is `playerAirSpinToFall` of `func_80105FD4` (as a `static __inline__`);
+- more codegen details that decided a match: an empty `case 2: break;` turns a two-case switch into retail's
+  compare tree; `(*p)++` and `*p = *p + 1` schedule differently; `x + 0xff` where retail adds 255 to a byte;
+  the Psy-Q bitfield form of `setlen` / `addPrim` (`P_TAG` with `addr:24, len:8`) for primitive code
+  (`func_8004829C`); a `register T *p asm("$4")` for a pointer retail keeps in `a0`.
+
+Open near misses (drafted, not installed): `func_8001A9EC` (gameplay frame, 16 lines: the scheduler moves
+the inventory-flag store ahead of the task pointer load), `func_800194D0` (game task loop, the same store order),
+`func_800182E0` (text grid put, register allocation), the camera clamp of `func_8002796C` / `func_8002A02C` /
+`func_8002A43C` (register allocation of the same three-line clamp), `func_8011BDA0_slpm80165` (s0 / s1
+swapped), and `func_8010FED8_slpm80165` (still cut in three by splat at 0x801100D0 and 0x801102E4; needs its size,
+0x470, and C for the whole function).
 
 - **Plumbing (1-2 days):** add `config/slpm80165/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate

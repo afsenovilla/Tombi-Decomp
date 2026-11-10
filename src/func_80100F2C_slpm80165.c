@@ -1,0 +1,177 @@
+// VERSION SLPM_80165 x00 80100F2C 1564
+// FLAGS -O2 -G0
+#if defined(VERSION_SLPM_80165)
+// Demo version of playerStepSlopeSlide (src/playerStepSlopeSlide_beta980203.c): field +0xE3 at +0xCF (beta +0xD7),
+// the move by angle and speed takes them as arguments and the drift is added here, no slope tilt on leaving,
+// fixed button bits (0x40, 0x80) and d-pad bits 0x8000 / 0x2000.
+#include "gv6.h"
+#include "gvars.h"
+#include "TOBJ.H"
+#include "gamestate.h"
+extern unsigned char *PLAYER_EXT;
+extern char MOVE_TABLE_2[];
+extern unsigned char GAME_PLAYER_MODE[];
+extern unsigned short TICK_COUNT;
+extern unsigned char SLOPE_TILT_TABLE[];
+extern void playerSlopeSlideUpdateAnim(TObj *);
+extern void playerSlopeSlideAccelerate(TObj *);
+extern void playerMoveAt(TObj *, int, int) asm("func_800202FC");
+extern void playerStickToGround(TObj *) asm("func_800203CC");
+extern void playerCheckGroundAndFall(TObj *);
+extern void startPadVibration(int, int, int, int);
+extern void spawnGroundDebris(int, int, int, int);
+extern void applyFrameVelocityX(TObj *);
+extern int FUN_8001fec0(TObj *);
+
+extern short FUN_8003fd78(TObj *, int, int);
+
+
+extern struct DemoAnimExt { char pad[0x2c]; unsigned short timer, frame; } *demoAnimExt asm("PLAYER_EXT");
+extern void demoAnimReset(void *) asm("func_800EDA04");
+extern void demoAnimRestart(void *) asm("func_80020554");
+static __inline__ void demoSetAnim(void *o, unsigned short anim)
+{
+    struct DemoAnimExt *p = demoAnimExt;
+    p->timer = anim;
+    if (p->frame != anim) {
+        demoAnimReset(o);
+        demoAnimRestart(o);
+        demoAnimExt->frame = demoAnimExt->timer;
+    }
+}
+
+void func_80100F2C(TObj *o)
+{
+    unsigned char *g;
+    unsigned char b;
+
+    switch (o->state) {
+    case 0:
+        ((unsigned char *)o)[0xc7] = 1;
+        o->b9d = 0;
+        ((unsigned char *)o)[0xc6] = 0;
+        ((unsigned char *)o)[0xcf] = 0;
+        PLAYER_EXT[0] = 0;
+        o->movetab = MOVE_TABLE_2;
+        *(unsigned char *)&o->wac = 0;
+        o->b6b = 0;
+        o->ba4 = 0;
+        o->d84 = 0;
+        o->d88 = 0;
+        o->d8c = 0;
+        PLAYER_EXT[8] = o->bbe & 1;
+        if (PLAYER_EXT[8] == 0) {
+            if (o->wb2 < -0x144) o->wb2 = -0x144;
+        } else {
+            if (o->wb2 > 0x144) o->wb2 = 0x144;
+        }
+        o->state = 1;
+        o->animFrame = o->bbe & 1;
+    case 1:
+        playerSlopeSlideUpdateAnim(o);
+        playerSlopeSlideAccelerate(o);
+        playerMoveAt(o, o->wb6, o->wb2);
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
+        playerStickToGround(o);
+        if (o->bbe == 0) {
+            g = PLAYER_EXT;
+            if (g[8] == o->animFrame) goto L;
+            g[8] = 0;
+            o->b9c = 0;
+            o->d88 = 0;
+            o->ba4 = 0;
+            o->step = 1;
+            o->state = 0;
+        } else if (o->ba6 >= 2) {
+        L:
+            o->b9c = 1;
+            o->d88 = -0x100;
+            o->ba4 = 0;
+            if (o->ba6 & 6) {
+                o->wb2 = 0;
+                o->velH = 0;
+                o->velV = 0;
+                o->velX = 0;
+                o->velY = 0;
+            }
+            o->state = 2;
+        }
+        playerCheckGroundAndFall(o);
+        if (*(unsigned short *)0x1F8001FC & 0x40) {
+            if (o->wb2 > 0x200) o->wb2 = 0x200;
+            if (o->wb2 < -0x200) o->wb2 = -0x200;
+            o->ba4 = 0;
+            o->b9c = 1;
+            if (((int*)&GAME.area00_eventControl)[0] & 0x40) {
+                if (*(volatile unsigned short *)&GV6.s70 & 0x80) {
+                    o->ba7 = 1;
+                }
+            }
+            o->step = 2;
+            o->state = 0;
+        }
+        if (*(unsigned short *)(PLAYER_EXT + 0x2c) < 4) {
+            o->d8c = (-o->wb0 << 2) & 0xff;
+        }
+        if (o->ba4) {
+            if ((TICK_COUNT & 0xf) == 0) spawnGroundDebris(o->h->p.whole, o->y.p.whole, o->d->p.whole, 0);
+        }
+        break;
+    case 2:
+        if (o->b6b + 0x20 < 0x100) o->b6b = o->b6b + 0x20; else o->b6b = 0xff;
+        o->h->raw += ((short*)&GVARS.driftH)[0] << 8;
+        o->y.raw += ((short*)&GVARS.driftY)[0] << 8;
+        applyFrameVelocityX(o);
+        FUN_8001fec0(o);
+        o->d8c = (o->animFrame & 1) ? 0x100 - (o->b6b >> 2) : o->b6b >> 2;
+        o->y.raw += o->d88 << 8;
+        o->d88 += 0x20;
+        if (o->d88 > 0) {
+            o->timer = 4;
+            o->state = 3;
+        }
+        break;
+    case 3:
+        if (--o->timer == 0) {
+            o->b9c = 2;
+            demoSetAnim(o, 0x12);
+            o->state++;
+        }
+        break;
+    case 4:
+
+        if (o->b6b - 0x20 < 0) o->b6b = 0; else o->b6b -= 0x20;
+        applyFrameVelocityX(o);
+        o->d8c = (o->animFrame & 1) ? 0x100 - (o->b6b >> 2) : o->b6b >> 2;
+        o->y.raw += o->d88 << 8;
+        o->d88 += 0x20;
+        if (FUN_8003fd78(o, 0, 0)) {
+            if (FUN_8001fec0(o)) {
+                o->ba7 = 0;
+                PLAYER_EXT[8] = 0;
+                o->b9c = 0;
+                o->d88 = 0;
+                o->ba4 = 0;
+                if (((o->animFrame & 1) ? (*(volatile unsigned short *)&GV6.s70 & 0x8000) : (*(volatile unsigned short *)&GV6.s70 & 0x2000)) == 0) o->wb2 = 0;
+                o->step = 0;
+                o->state = 0;
+            }
+            if (*(unsigned short *)0x1F8001FC & 0x40) {
+                if (o->wb2 > 0x200) o->wb2 = 0x200;
+                if (o->wb2 < -0x200) o->wb2 = -0x200;
+                o->b9c = 1;
+                o->ba4 = 0;
+                if (((int*)&GAME.area00_eventControl)[0] & 0x40) {
+                    if (*(volatile unsigned short *)&GV6.s70 & 0x80) {
+                        o->ba7 = 1;
+                    }
+                }
+                o->step = 2;
+                o->state = 0;
+            }
+        }
+        break;
+    }
+}
+#endif
