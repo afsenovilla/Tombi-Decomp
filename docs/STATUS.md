@@ -31,6 +31,20 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **PrePre Vol.9 Tombi animations (2026-11-10)**: the demo's player frame table (TOMBA/AREA01/A007.000 = AREA02/D105.000,
+   379 frames) holds 106 frames retail (AREA00/A004.000, 358) never got: 173 identical, 100 retouched, 106 new. Its player
+   animation table (TOMBA/X01.BIN +0x380) has 56 ids against retail's 90, the same id is the same move in both (41 equal,
+   5 retouched, 5 replaced: id 49 somersault -> roll land, id 33 dive-to-crouch -> crouch walk, id 37, idle/crouch
+   single-frame -> animated). **20 orphan scripts** survive in TOMBA.EXE data (0x80011A50..0x800125E8, same region as the
+   player scripts, nothing points at them): lift (112-114 / 115-120 / 121-124, three chained scripts), pull (255-258),
+   punches (195-203), carry-walk (269-276, 277-281), 264-268, 238-240, 241-245, 298-300, 304-306, 317-320 + 321-326 loop,
+   339-340, all `hold` ends with real tick counts. The lifted / pulled object is not in the demo: every AREA01/AREA02
+   placement record of Pre9 has a retail twin at the same position (types renumbered, e.g. Pre9 L4 13 = retail L4 7), the
+   texture pages differ from retail's only by retouches, and the log of A002 (4 rotation frames) is in retail AREA01 too.
+   Pre8's PLAYER.WPP (313 frames, older art, palette in TOMBA.EXE +0x989A8) shares no frame with Pre9 or retail and has no
+   script table (NPC tables only). Scratch scripts of the session were not kept; tools/anim.py got the CLUT row 16/17 fix.
+
+
 0. **Port for the USA and JP discs**: staged plan in [docs/PORT_VERSIONS_PLAN.md](PORT_VERSIONS_PLAN.md) (U0 USA full
    link proof → U1 USA boots headless → U2 launchers/CI → U3 parity → J1 JP → demos). Open questions for the user there.
    **U0 done** (2026-11-09): `tools/build_full.py --version usa` links all 26 USA files byte-identical, name audit per
