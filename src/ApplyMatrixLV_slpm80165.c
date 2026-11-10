@@ -1,7 +1,8 @@
-// VERSION SLPM_80165 slpm80165 80058FC4 340
+// VERSION SLPM_80165 slpm80165 80058FC4 352
 // AS.SLPM_80165 gnu
 #if defined(VERSION_SLPM_80165)
-// Demo version: JP C of src/ApplyMatrixLV_slps01144.c (ApplyMatrixLV) [-O2 -G0] (tools/demo_sweep.py)
+// Demo version: JP C of src/ApplyMatrixLV_slps01144.c (ApplyMatrixLV) [-O2 -G0] (tools/demo_sweep.py), with the
+// three-instruction tail that splat had cut off as func_80059118
 __asm__(".set noreorder\n.set noat\n"
 ".globl ApplyMatrixLV\n.type ApplyMatrixLV,@function\nApplyMatrixLV:\n"
 "	lw	$8,0($4)\n"
@@ -101,5 +102,8 @@ __asm__(".set noreorder\n.set noat\n"
 "	addu	$10,$10,$13\n"
 "	sw	$8,0($6)\n"
 "	sw	$9,4($6)\n"
+"	sw	$10,8($6)\n"
+"	jr	$31\n"
+"	addu	$2,$6,$0\n"
 ".set at\n.set reorder\n");
 #endif

@@ -1,7 +1,8 @@
-// VERSION SLPM_80165 slpm80165 80058E24 124
+// VERSION SLPM_80165 slpm80165 80058E24 132
 // AS.SLPM_80165 gnu
 #if defined(VERSION_SLPM_80165)
-// Demo version: JP C of src/SquareRoot0_slps01144.c (SquareRoot0) [-O2 -G0] (tools/demo_sweep.py)
+// Demo version: JP C of src/SquareRoot0_slps01144.c (SquareRoot0) [-O2 -G0] (tools/demo_sweep.py), with the
+// `return 0` tail that PAL keeps inside the function (splat had cut it off as func_80058EA0)
 __asm__(".set noreorder\n.set noat\n"
 ".globl SquareRoot0\n.type SquareRoot0,@function\nSquareRoot0:\n"
 "	mtc2	$4,$30\n"
@@ -9,7 +10,7 @@ __asm__(".set noreorder\n.set noat\n"
 "	sll	$0,$0,0x0\n"
 "	mfc2	$2,$31\n"
 "	addiu	$1,$0,32\n"
-"	beq	$2,$1,func_80060294_slpm80165\n"
+"	beq	$2,$1,LSquareRoot0_7c\n"
 "	sll	$0,$0,0x0\n"
 "	andi	$8,$2,0x1\n"
 "	addiu	$10,$0,-2\n"
@@ -37,5 +38,8 @@ __asm__(".set noreorder\n.set noat\n"
 "	srl	$2,$13,0xc\n"
 "	jr	$31\n"
 "	sll	$0,$0,0x0\n"
+"LSquareRoot0_7c:\n"
+"	jr	$31\n"
+"	addiu	$2,$0,0\n"
 ".set at\n.set reorder\n");
 #endif
