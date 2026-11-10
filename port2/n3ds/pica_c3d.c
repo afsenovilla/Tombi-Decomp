@@ -28,7 +28,7 @@ static C3D_Tex panel_tex;                 /* the bottom screen's panel (runtime/
 static int panel_w, panel_h;
 static shaderProgram_s prog;
 static DVLB_s *vsh;
-static int u_proj, in_frame, scr_fmt;
+static int u_proj, u_tsc, in_frame, scr_fmt;
 static int vb_n, last_ok;                 /* (the vertex buffer's fill and the state cache, below) */
 static unsigned frame_no;
 static unsigned *lin;                     /* 1024 x 512 linear words: read-backs */
@@ -111,17 +111,29 @@ static void set_atest(int at) {
    in a row, from the start again once the frame has been waited for).  Immediate-mode draws between buffer draws
    reached a console's GPU with their attributes mixed up (a fill of 0 read back as 00800080), which Azahar does not
    show: the host writes, fills and the screens' quads are six vertices in the buffer like the rest. */
-typedef struct { float x, y, z, s, t, r, g, b, a; } CV;
+/* A vertex is the backend's PV, 20 bytes, and the GPU reads it as it is (pica.v.pica does the arithmetic the CPU did
+   for each one: 36 bytes of floats written per vertex, a third of a drawn frame's time on an Old 3DS).  The backend
+   builds its batches in this buffer (c3d_vbuf), so a batch is drawn where it lies. */
 #define VB_MAX 32768
-static CV *vb;
+#define POS_OFF (0.5f - 1.0f / 64.0f)   /* (what the shader adds to a position) */
+static PV *vb;
 static int quad0;
+static float tsc_x, tsc_y;
+static void set_tscale(float x, float y) {   /* texels -> texture coordinates (pica.v.pica) */
+    if (x == tsc_x && y == tsc_y) return;
+    tsc_x = x; tsc_y = y;
+    C3D_FVUnifSet(GPU_VERTEX_SHADER, u_tsc, x, -y, 1.0f / 255.0f, 1.0f / 255.0f);
+}
+/* a vertex of the device's own quads: the position as it is to be, s, t the texture coordinate, the colour 0..1
+   (call set_tscale(1, 1) for them) */
 static void vtx(float x, float y, float s, float t, float r, float g, float b, float a) {
-    CV *d = vb + vb_n++;
-    d->x = x; d->y = y; d->z = 0.5f; d->s = s; d->t = t; d->r = r; d->g = g; d->b = b; d->a = a;
+    PV *d = vb + vb_n++;
+    d->x = x - POS_OFF; d->y = y - POS_OFF; d->u = s; d->v = 1.0f - t;
+    d->r = (u8)(r * 255.0f + 0.5f); d->g = (u8)(g * 255.0f + 0.5f); d->b = (u8)(b * 255.0f + 0.5f); d->a = (u8)(a * 255.0f + 0.5f);
 }
 #define EDGE_X 1023.9f   /* (past the last pixel's centre, short of the target's edge) */
 #define EDGE_Y 511.9f
-#define QUAD_BEGIN() (quad0 = vb_n)
+#define QUAD_BEGIN() (set_tscale(1.0f, 1.0f), quad0 = vb_n)
 #define QUAD_END() C3D_DrawArrays(GPU_TRIANGLES, quad0, vb_n - quad0)
 
 /* ---- textures: RGBA8 words (red low) -> the PICA's texel word (red high), 8x8 tiles in Morton order */
@@ -166,29 +178,37 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
     begin();
     if (vb_n + n > VB_MAX - 256) { end_and_wait(); begin(); }
-    if (!last_ok || memcmp(s, &last_st, sizeof *s)) {
+    {   /* only what differs from the last batch's state is set (a semi-transparent textured primitive is two batches
+           that differ in the alpha test and the blend alone) */
+        const int all = !last_ok;
+        const PState *l = &last_st;
         /* the scissor counts rows from the other edge than the projection (the self test: an area of y 256..511 drew nothing) */
-        C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, 511 - s->y2, s->x2 + 1, 512 - s->y1);
-        set_env(s->tex >= 0, s->mod);
-        set_atest(s->atest);
-        set_blend(s->blend);
-        if (s->tex >= 0) C3D_TexBind(0, &atlas_tex[s->tex]);
+        if (all || s->x1 != l->x1 || s->y1 != l->y1 || s->x2 != l->x2 || s->y2 != l->y2)
+            C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, 511 - s->y2, s->x2 + 1, 512 - s->y1);
+        if (all || (s->tex >= 0) != (l->tex >= 0) || s->mod != l->mod) set_env(s->tex >= 0, s->mod);
+        if (all || s->atest != l->atest) set_atest(s->atest);
+        if (all || s->blend != l->blend) set_blend(s->blend);
+        if (s->tex >= 0 && (all || s->tex != l->tex)) {
+            C3D_TexBind(0, &atlas_tex[s->tex]);
+            set_tscale(1.0f / (float)PICA_ATLAS, s->tex == 1 ? 2.0f / (float)PICA_ATLAS : 1.0f / (float)PICA_ATLAS);
+        }
         last_st = *s; last_ok = 1;
     }
-    const float ts = 1.0f / (float)PICA_ATLAS, tt = s->tex == 1 ? 2.0f / (float)PICA_ATLAS : ts, k = 1.0f / 255.0f;
-    const float al = s->tex >= 0 ? 1.0f : 0.0f;   /* (untextured: alpha 0, bit 15 clear on a read-back) */
-    CV *d = vb + vb_n;
-    for (int i = 0; i < n; i++, d++) {
-        /* +0.5: the PICA samples pixel centres, the PS1 integer positions.  In y a hair less: the target's rows run
-           against the PICA's y, so an edge exactly on the centres takes the row below instead of the one above
-           (the self test: a mark at row 64 filled rows 65..72, in Azahar and on a console alike) */
-        d->x = v[i].x + (0.5f - 1.0f / 64.0f); d->y = v[i].y + (0.5f - 1.0f / 64.0f);   /* (x too: a console left a column undrawn between two sprites side by side, their shared edge on the centres) */ d->z = 0.5f; d->s = v[i].u * ts; d->t = 1.0f - v[i].v * tt;
-        d->r = v[i].r * k; d->g = v[i].g * k; d->b = v[i].b * k; d->a = al;
-    }
+    /* the vertices are in the buffer already when the backend built the batch there (c3d_vbuf) and the frame was not
+       ended since.  The position's + 0.5 (the PICA samples pixel centres, the PS1 integer positions), a hair less in
+       both axes (an edge exactly on the centres takes the row below, and a console left a column undrawn between two
+       sprites side by side), is the shader's; an untextured vertex's alpha is 0 (bit 15 clear on a read-back) */
+    if (v != vb + vb_n) memmove(vb + vb_n, v, (size_t)n * sizeof *v);
     C3D_DrawArrays(GPU_TRIANGLES, vb_n, n);
     vb_n += n;
     { extern int pica_prof_on; extern unsigned long long pica_prof[6]; if (pica_prof_on) pica_prof[4] += svcGetSystemTick() - t0; }
     tk_draw += svcGetSystemTick() - t0;
+}
+/* where the backend builds its next batch: the free end of the vertex buffer (at least 2048 vertices of it) */
+static PV *c3d_vbuf(int *room) {
+    if (vb_n > VB_MAX - 2048 - 256) { end_and_wait(); begin(); }
+    *room = VB_MAX - 256 - vb_n;
+    return vb + vb_n;
 }
 /* the staging texture, its memory from the arena: w x h rounded up to powers of two (>= 8).  (One C3D_Tex for all:
    citro3d keeps the pointer of the bound texture, and the draw has copied its fields into the command list) */
@@ -501,11 +521,12 @@ static int c3d_start(void) {
     shaderProgramSetVsh(&prog, &vsh->DVLE[0]);
     C3D_BindProgram(&prog);
     u_proj = shaderInstanceGetUniformLocation(prog.vertexShader, "projection");
+    u_tsc = shaderInstanceGetUniformLocation(prog.vertexShader, "tscale");
     C3D_AttrInfo *ai = C3D_GetAttrInfo();
     AttrInfo_Init(ai);
-    AttrInfo_AddLoader(ai, 0, GPU_FLOAT, 3);   /* v0 position */
-    AttrInfo_AddLoader(ai, 1, GPU_FLOAT, 2);   /* v1 texcoord */
-    AttrInfo_AddLoader(ai, 2, GPU_FLOAT, 4);   /* v2 colour */
+    AttrInfo_AddLoader(ai, 0, GPU_FLOAT, 2);           /* v0 position (PV x, y) */
+    AttrInfo_AddLoader(ai, 1, GPU_FLOAT, 2);           /* v1 texels (u, v) */
+    AttrInfo_AddLoader(ai, 2, GPU_UNSIGNED_BYTE, 4);   /* v2 colour */
     vb = linearAlloc(VB_MAX * sizeof *vb);
     if (!vb) { port_printf("[3ds] pica: no vertex buffer\n"); return -1; }
     C3D_BufInfo *bi = C3D_GetBufInfo();
@@ -520,7 +541,7 @@ static int c3d_start(void) {
     gpu_test_picture();
     return 0;
 }
-const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present };
+const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf };
 #endif
 
 /* ---- a worker thread for the panel's renders (runtime/panel.c): on another core where there is one (New 3DS: core 2;

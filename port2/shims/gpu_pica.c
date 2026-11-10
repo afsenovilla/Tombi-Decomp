@@ -119,7 +119,7 @@ static int ref_start(void) {
     for (int i = 0; i < 2; i++) if (!atlas[i]) atlas[i] = calloc(PICA_ATLAS, sizeof *atlas[i]);
     return rt && atlas[0] && atlas[1] ? 0 : -1;
 }
-static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0 };
+static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0, 0 };
 #ifdef __3DS__
 extern const PicaDev pd_c3d;              /* port2/n3ds/pica_c3d.c */
 static const PicaDev *dev = &pd_c3d;
@@ -179,7 +179,9 @@ static int nbulk;
    has its primitives' cells found one by one for a while, or each read would mark, and read back, the whole area */
 static struct { int x1, y1, x2, y2, until; } hot[4];
 static int nhot;
+static struct { int x1, y1, x2, y2, ok; } bulk_memo;   /* the last area bulk_area() found noted (bulk_in) */
 static int bulk_area(void) {   /* 1: the drawing area is noted, the primitive needs no cells */
+    bulk_memo.ok = 0;
     int w = gs->x2 - gs->x1 + 1, h = gs->y2 - gs->y1 + 1;
     if (w < 256 || w > 640 || h < 200 || h > 256) return 0;
     for (int i = 0; i < nhot; i++)
@@ -187,15 +189,22 @@ static int bulk_area(void) {   /* 1: the drawing area is noted, the primitive ne
             if (port_frame < hot[i].until) return 0;
             hot[i] = hot[--nhot]; break;
         }
-    for (int i = 0; i < nbulk; i++) if (bulk[i].x1 == gs->x1 && bulk[i].y1 == gs->y1 && bulk[i].x2 == gs->x2 && bulk[i].y2 == gs->y2) return 1;
+    for (int i = 0; i < nbulk; i++) if (bulk[i].x1 == gs->x1 && bulk[i].y1 == gs->y1 && bulk[i].x2 == gs->x2 && bulk[i].y2 == gs->y2) goto noted;
     if (nbulk == 4) { pages_drawn(bulk[0].x1, bulk[0].y1, bulk[0].x2, bulk[0].y2); memmove(&bulk[0], &bulk[1], 3 * sizeof bulk[0]); nbulk = 3; }
     drawn_epoch++;
     bulk[nbulk].x1 = gs->x1; bulk[nbulk].y1 = gs->y1; bulk[nbulk].x2 = gs->x2; bulk[nbulk].y2 = gs->y2; nbulk++;
+noted:
+    bulk_memo.x1 = gs->x1; bulk_memo.y1 = gs->y1; bulk_memo.x2 = gs->x2; bulk_memo.y2 = gs->y2; bulk_memo.ok = 1;
     return 1;
+}
+/* (the same answer without the search while the drawing area is the one last found noted) */
+static inline int bulk_in(void) {
+    return (bulk_memo.ok && bulk_memo.x1 == gs->x1 && bulk_memo.y1 == gs->y1 && bulk_memo.x2 == gs->x2 && bulk_memo.y2 == gs->y2) || bulk_area();
 }
 static void bulk_resolve(int x, int y, int w, int h) {   /* the noted areas this rectangle touches become cells */
     for (int i = 0; i < nbulk; i++) {
         if (x > bulk[i].x2 || x + w - 1 < bulk[i].x1 || y > bulk[i].y2 || y + h - 1 < bulk[i].y1) continue;
+        bulk_memo.ok = 0;
         pages_drawn(bulk[i].x1, bulk[i].y1, bulk[i].x2, bulk[i].y2);
         if (nhot == 4) nhot = 3;
         hot[nhot].x1 = bulk[i].x1; hot[nhot].y1 = bulk[i].y1; hot[nhot].x2 = bulk[i].x2; hot[nhot].y2 = bulk[i].y2;
@@ -207,8 +216,8 @@ static void bulk_resolve(int x, int y, int w, int h) {   /* the noted areas this
 /* ---- the batch: triangles with one state */
 #define MAX_PV 6144
 static unsigned long long use_clock, batch_clock, frame_clock;   /* slot uses: now, at the last flush, at the last present */
-static PV bv[MAX_PV];
-static int nbv;
+static PV bv_own[MAX_PV], *bv = bv_own;   /* (or the device's memory: PicaDev.vbuf) */
+static int nbv, bv_room = MAX_PV;
 static PState bst;
 static unsigned long long st_batches, st_tris, st_decodes, st_readbacks, st_rb_tex, st_rb_host, st_rb_px;
 static void flush(void) {
@@ -218,7 +227,9 @@ static void flush(void) {
     nbv = 0; batch_clock = use_clock;
 }
 static PV *batch(const PState *s, int n) {
-    if (nbv && (nbv + n > MAX_PV || memcmp(s, &bst, sizeof *s))) flush();
+    if (nbv && (nbv + n > bv_room || s->tex != bst.tex || s->mod != bst.mod || s->atest != bst.atest || s->blend != bst.blend
+                || s->x1 != bst.x1 || s->y1 != bst.y1 || s->x2 != bst.x2 || s->y2 != bst.y2)) flush();
+    if (!nbv && dev->vbuf) bv = dev->vbuf(&bv_room);
     bst = *s;
     PV *p = bv + nbv; nbv += n;
     return p;
@@ -483,7 +494,7 @@ static PState base_state(void) {
     return s;
 }
 static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
-    p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 255;
+    p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 0;   /* (a: what an untextured pixel's alpha is, bit 15 clear) */
 }
 /* emit n vertices (a triangle or two) with the state the primitive needs: textured semi-transparent ones twice */
 /* Clipping to the drawing area, here and not left to the device's scissor: a PICA200 does not clip in x / y, and a
@@ -581,6 +592,22 @@ static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
     s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, n), v, n * sizeof *v);
     PA(1, pt);
 }
+/* the common primitive: wholly inside the drawing area, so nothing to clip, and its vertices go to the batch once
+   (the same triangles as emit() makes of it).  v is changed.  u0..w1: the texels it reads (its vertices' bounds) */
+static void emit_in(PV *v, int n, const GpuTex *tex, int semi, int raw, int u0, int w0, int u1, int w1) {
+    PState s = base_state();
+    if (!tex) { s.blend = semi ? gs->abr : -1; memcpy(batch(&s, n), v, n * sizeof *v); return; }
+    int bx, by, ax, ay;
+    if (u1 > 255 && u0 < 256) u1 = 255; if (w1 > 255 && w0 < 256) w1 = 255;
+    int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by);
+    pica_slot_pos(slot, &ax, &ay);
+    s.tex = pica_slot_atlas(slot); s.mod = !raw;
+    float du = (float)(ax - bx), dv = (float)(ay - by);
+    for (int i = 0; i < n; i++) { v[i].u += du; v[i].v += dv; }
+    if (!semi) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); return; }
+    s.atest = AT_OPAQUE; memcpy(batch(&s, n), v, n * sizeof *v);
+    s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, n), v, n * sizeof *v);
+}
 static void bbox_drawn(const PV *v, int n) {
     if (bulk_area()) return;
     float x1 = v[0].x, y1 = v[0].y, x2 = x1, y2 = y1;
@@ -630,6 +657,17 @@ static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shad
         const GpuVtx *q = shade ? p[i] : a;
         put(&v[i], p[i]->x, p[i]->y, q->r, q->g, q->b, p[i]->u, p[i]->v);
     }
+    {   /* (the far bounds as clip_tris: a vertex may sit one past the area's last pixel, short of the target's edge) */
+        int X2 = gs->x2 + 1 > 1023 ? 1023 : gs->x2 + 1, Y2 = gs->y2 + 1 > 511 ? 511 : gs->y2 + 1;
+        if (a->x >= gs->x1 && b->x >= gs->x1 && c->x >= gs->x1 && a->x <= X2 && b->x <= X2 && c->x <= X2
+            && a->y >= gs->y1 && b->y >= gs->y1 && c->y >= gs->y1 && a->y <= Y2 && b->y <= Y2 && c->y <= Y2 && bulk_in()) {
+            int u0 = a->u, u1 = u0, w0 = a->v, w1 = w0;
+            if (b->u < u0) u0 = b->u; if (b->u > u1) u1 = b->u; if (c->u < u0) u0 = c->u; if (c->u > u1) u1 = c->u;
+            if (b->v < w0) w0 = b->v; if (b->v > w1) w1 = b->v; if (c->v < w0) w0 = c->v; if (c->v > w1) w1 = c->v;
+            emit_in(v, 3, tex, semi, raw, u0, w0, u1, w1);
+            return;
+        }
+    }
     tri_drawn(v);
     emit(v, 3, tex, semi, raw);
 }
@@ -638,6 +676,12 @@ static void pica_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, in
     PV v[6];
     put(&v[0], x, y, r, g, b, u0, v0); put(&v[1], x + w, y, r, g, b, u0 + w, v0); put(&v[2], x, y + h, r, g, b, u0, v0 + h);
     v[3] = v[1]; put(&v[4], x + w, y + h, r, g, b, u0 + w, v0 + h); v[5] = v[2];
+    {   int X2 = gs->x2 + 1 > 1023 ? 1023 : gs->x2 + 1, Y2 = gs->y2 + 1 > 511 ? 511 : gs->y2 + 1;
+        if (w >= 0 && h >= 0 && x >= gs->x1 && y >= gs->y1 && x + w <= X2 && y + h <= Y2 && bulk_in()) {
+            emit_in(v, 6, tex, semi, raw, u0, v0, u0 + w, v0 + h);
+            return;
+        }
+    }
     bbox_drawn(v, 6);
     emit(v, 6, tex, semi, raw);
 }

@@ -39,5 +39,8 @@ typedef struct {
     void (*read)(int x, int y, int w, int h, unsigned *dst, int stride);
     void (*write)(int x, int y, int w, int h, const unsigned *src, int stride);
     int (*present)(int x, int y, int w, int h, int masked);               /* show the display area; 0 = not handled */
+    /* optional: memory of the device's for the next batch (*room vertices of it): tris() then gets that pointer and
+       has nothing to copy.  Asked before each batch; valid until that batch's tris() */
+    PV *(*vbuf)(int *room);
 } PicaDev;
 #endif
