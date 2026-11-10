@@ -663,6 +663,7 @@ callObjectInteraction = 0x80052854; // type:func size:0x20  PAL main0 0x80045B8C
 collideWeaponsWithCat5Objects = 0x80052874; // type:func size:0x168  PAL main0 0x80045D98
 collideWeaponsWithCat2Objects = 0x800529DC; // type:func size:0x710  PAL main0 0x80045F00
 collideWeaponsWithCat4Objects = 0x800530EC; // type:func size:0x748  PAL main0 0x80046610
+collidePlayerWithCat4Objects = 0x80053834; // type:func size:0x6C0  PAL main0 0x80046D58
 collidePlayerWithCat2Objects = 0x80053EF4; // type:func size:0x5B8  PAL main0 0x80047484
 func_800544AC_beta980203 = 0x800544AC; // type:func size:0x15C
 func_80054608_beta980203 = 0x80054608; // type:func size:0x258
