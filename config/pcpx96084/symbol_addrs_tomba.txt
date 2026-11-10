@@ -1,5 +1,6 @@
 func_800170DC_pcpx96084 = 0x800170DC; // type:func size:0x20
 func_800170FC_pcpx96084 = 0x800170FC; // type:func size:0x38
+func_800172D8_pcpx96084 = 0x800172D8; // type:func size:0x184
 func_800175DC_pcpx96084 = 0x800175DC; // type:func size:0x7C  PAL main0 0x80016FC0
 initTasks = 0x80017658; // type:func size:0x4C  PAL main0 0x8001703C
 startTask = 0x80017778; // type:func size:0x5C  PAL main0 0x8001715C

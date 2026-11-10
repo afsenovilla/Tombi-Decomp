@@ -1,5 +1,6 @@
 setDrawSyncParams = 0x8001572C; // type:func size:0x18  PAL main0 0x80016A44 identical
 func_800157BC_slpm80165 = 0x800157BC; // type:func size:0x158  PAL main0 0x80016B50
+func_80015914_slpm80165 = 0x80015914; // type:func size:0x184
 compactOrderingTable = 0x80015C18; // type:func size:0x7C  PAL main0 0x80016FC0
 initTasks = 0x80015C94; // type:func size:0x4C  PAL main0 0x8001703C identical
 ThreadTableRun = 0x80015CE0; // type:func size:0xD4  PAL main0 0x80017088
