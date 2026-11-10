@@ -53,7 +53,7 @@ VERSIONS = {
                    save_sub="saves_usa",
                    text_patches=(),
                    art=("SYSTEM/A00012.000", "SYSTEM/A00013.000", "SYSTEM/A00010.GAM", "SYSTEM/A00011.000", "SYSTEM/OPTSUB00.BIN", 0)),
-    JP_SHA1: dict(key="jp", version="jp", title="Ore! Tomba", region="Japan", serials=("SLPS-01144",),
+    JP_SHA1: dict(key="jp", version="jp", title="オレっ！トンバ", region="Japan", serials=("SLPS-01144",),
                   supported=False, binary="tombi-pc-jp", build_dir="port2-slps01144", hz=60, features=frozenset(),
                   save_sub="saves_jp",
                   text_patches=(),
@@ -69,7 +69,7 @@ DISC_LANGS = {"SCES-01331": "EN ES PT SV DA", "SCES-01330": "EN FR DE IT NL", "S
 # 8 DA, 9 US, 10 JP), drawn beside the serial on the library's cards
 DISC_FLAGS = {"SCES-01331": [0, 5, 6, 7, 8], "SCES-01330": [0, 1, 2, 3, 4], "SCUS-94236": [9], "SLPS-01144": [10]}
 # other Tomba releases a player might add by mistake
-OTHER_DISCS = {"SCUS-94454": "Tomba! 2 (USA)", "SCES-02005": "Tombi! 2 (PAL)", "SLPM-80165": "Ore! Tomba (Japan, demo)"}
+OTHER_DISCS = {"SCUS-94454": "Tomba! 2 (USA)", "SCES-02005": "Tombi! 2 (PAL)", "SLPM-80165": "オレっ！トンバ (Japan, demo)"}
 
 
 def version_of(sha1):

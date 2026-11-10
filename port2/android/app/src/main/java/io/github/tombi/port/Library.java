@@ -45,7 +45,7 @@ final class Library {
                     "SYSTEM/A00202.000", "SYSTEM/A00203.000", 112),
         new Version("usa", "81cbc79f0230aeb4252e058039f47ac95a777f5a", "Tomba!", "TOMBA!", 1, "libtombi_usa.so", "saves_usa",
                     "SYSTEM/A00012.000", "SYSTEM/A00013.000", 88),
-        new Version("jp", "07d577698ad31ec1a69b9d7b80a7c3f90b650888", "Ore! Tomba", "ORE! TOMBA", 2, null, null, null, null, 0),
+        new Version("jp", "07d577698ad31ec1a69b9d7b80a7c3f90b650888", "オレっ！トンバ", "オレっ！トンバ", 2, null, null, null, null, 0),
     };
     static final String PAL_REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec";   // July 1998 Rev 0: other overlays
 
