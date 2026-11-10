@@ -1,0 +1,116 @@
+// VERSION BETA_980203 x00 80108620 808
+#if defined(VERSION_BETA_980203)
+// Beta version: PAL playerStepBitten.c: field 0xe3 at 0xd7, startPadVibration(0, 0x41, 0x40, 10) (PAL 0, 0, 0xff, 4).
+typedef struct P { short x; short y; } P;
+typedef struct S {
+    unsigned char b00, b01, type, b03, b04, step, state, substep; char p0[0xf - 8];
+    unsigned char b0f; char p1[2]; short x; char p2[2]; unsigned short y; char p3[2]; short z; char p4[0x20 - 0x1c];
+    short timer; char p5[0x2e - 0x22]; unsigned short frame; char p6[0x40 - 0x30];
+    P *h; char p7[0x69 - 0x44]; unsigned char b69, b6a; char p8[0x70 - 0x6b]; unsigned short w70; char p9[0x7e - 0x72];
+    short velY; char pa[0x8c - 0x80]; int d8c; char pb[0x9d - 0x90]; unsigned char b9d; char pc[0xb0 - 0x9e];
+    short wb0, wb2, wb4, wb6, wb8, wba; char pd[0xc6 - 0xbc]; unsigned char bc6, bc7; char pe[0xd7 - 0xc8]; unsigned char be3;
+} S;
+extern S *PLAYER_EXT;
+extern S *BITTEN_OBJECT;
+extern void ObjCheckHeadCollision(S *);
+extern void spawnImpactEffect(int, int, int, int);
+extern void PlayerSetAnimIfChanged(S *, int);
+extern void startPadVibration(int, int, int, int);
+extern void playerBiteHoldType02(S *), playerBiteHoldType03(S *), playerBiteHoldType04(S *), playerBiteHoldGeneric(S *), playerBiteHoldType0B(S *);
+extern void playerBiteHoldType0E(S *), playerBiteHoldType15(S *), playerBiteHoldType18(S *);
+void playerStepBitten(S *o)
+{
+    if (o->state == 0) {
+        PLAYER_EXT->frame = 0xff;
+        PLAYER_EXT->timer = 0;
+        o->bc7 = 1;
+        o->b9d = 0;
+        o->bc6 = 0;
+        o->be3 = 0;
+        o->timer = 0;
+        o->wb2 = 0;
+        o->wb6 = 0;
+        o->wb0 = 0;
+        o->d8c = 0;
+        o->frame &= 1;
+        PLAYER_EXT->b00 = 0;
+        switch (BITTEN_OBJECT->type) {
+        case 0x1f:
+            o->d8c = 0;
+            BITTEN_OBJECT->d8c = 0;
+            o->y = BITTEN_OBJECT->y - BITTEN_OBJECT->w70;
+            ObjCheckHeadCollision(o);
+            BITTEN_OBJECT->y = o->y + BITTEN_OBJECT->w70;
+            break;
+        case 0x3: case 0x12: case 0x2b:
+            o->wba = 0;
+            o->d8c = 0;
+            BITTEN_OBJECT->d8c = 0;
+            o->b69 = 0;
+            BITTEN_OBJECT->b0f = o->b0f + 1;
+            spawnImpactEffect(2, o->x, (short)o->y, o->z);
+            break;
+        case 0x4: case 0x29:
+            o->d8c = 0;
+            BITTEN_OBJECT->b0f = o->b0f + 1;
+            BITTEN_OBJECT->frame = 1;
+            o->h->y = BITTEN_OBJECT->h->y;
+            o->y = BITTEN_OBJECT->y - BITTEN_OBJECT->w70;
+            break;
+        case 0x8: case 0x1e:
+            o->d8c = 0;
+            BITTEN_OBJECT->state = 2;
+        case 0x0: case 0xa:
+            o->y = BITTEN_OBJECT->y - BITTEN_OBJECT->w70;
+            ObjCheckHeadCollision(o);
+            BITTEN_OBJECT->y = o->y + BITTEN_OBJECT->w70;
+        case 0x28:
+            BITTEN_OBJECT->b0f = o->b0f + 1;
+            o->velY = 0x100;
+            break;
+        case 0xe:
+            PlayerSetAnimIfChanged(o, 0xd);
+            break;
+        case 0x42:
+            break;
+        }
+        PlayerSetAnimIfChanged(o, 0xd);
+        o->substep = 0;
+        startPadVibration(0, 0x41, 0x40, 10);
+        o->state++;
+    } else {
+        switch (BITTEN_OBJECT->type) {
+        case 0x2: case 0x21:
+            playerBiteHoldType02(o);
+            break;
+        case 0x3: case 0x12: case 0x2b:
+            playerBiteHoldType03(o);
+            break;
+        case 0x29:
+            if (BITTEN_OBJECT->b6a == 1) {
+                playerBiteHoldType0E(o);
+                break;
+            }
+        case 0x4:
+            playerBiteHoldType04(o);
+            break;
+        case 0x0: case 0x8: case 0xa: case 0x13: case 0x1a: case 0x1e: case 0x1f: case 0x27: case 0x28:
+        case 0x38: case 0x3a: case 0x3b: case 0x3c: case 0x3d: case 0x3e: case 0x3f: case 0x40: case 0x41: case 0x42:
+            playerBiteHoldGeneric(o);
+            break;
+        case 0xb: case 0x1c:
+            playerBiteHoldType0B(o);
+            break;
+        case 0xe:
+            playerBiteHoldType0E(o);
+            break;
+        case 0x15:
+            playerBiteHoldType15(o);
+            break;
+        case 0x18:
+            playerBiteHoldType18(o);
+            break;
+        }
+    }
+}
+#endif
