@@ -2,7 +2,7 @@
 // FLAGS -O2 -G0
 // AS gnu
 #if defined(VERSION_PCPX_96084)
-// SN host-file call, break 0x105 (one argument); -1 on failure.
+// SN host-file call, break 0x105 (arguments already in a1..a3, called by the chunked transfer at 800950F0); -1 on failure.
 __asm__(".set noreorder\n.set noat\n"
 ".globl func_800951B0_pcpx96084\n.type func_800951B0_pcpx96084,@function\nfunc_800951B0_pcpx96084:\n"
 "\tbreak	0,0x105\n"
