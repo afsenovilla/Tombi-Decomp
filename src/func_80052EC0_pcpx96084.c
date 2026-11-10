@@ -2,7 +2,7 @@
 // FLAGS -O2 -G0
 // ASPSX.PCPX_96084 2.34
 #if defined(VERSION_PCPX_96084)
-extern void func_800420E8(unsigned char *);
+extern void func_800420E8_pcpx96084(unsigned char *);
 extern int func_800180D8_pcpx96084(void *);
 
 void func_80052EC0_pcpx96084(unsigned char *o)
@@ -11,7 +11,7 @@ void func_80052EC0_pcpx96084(unsigned char *o)
     case 0:
         o[6]++;
     case 1:
-        func_800420E8(o);
+        func_800420E8_pcpx96084(o);
         func_800180D8_pcpx96084(o);
         if (!(*(unsigned short *)(o + 46) & 8)) {
             o[5] = 1;
