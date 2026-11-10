@@ -638,6 +638,38 @@ def extract_disc_files(image, names, out_dir):
     return serial, missing
 
 
+def extract_archive_files(path, names, out_dir):
+    """The loose disc files inside a .zip / .7z (no image): the members whose path ends with DIR/NAME are copied into
+    out_dir; returns (serial from SYSTEM.CNF when the archive holds one, missing names).  Raises DA.ArchiveError."""
+    a = DA.Archive(path)
+    try:
+        mem = [n for n, _s in a.members()]
+        pick, missing = {}, []
+        for n in names:
+            hit = [m for m in mem if m.upper().replace("\\", "/").endswith("/" + n.upper()) or m.upper() == n.upper()]
+            if hit:
+                pick[min(hit, key=len)] = n
+            else:
+                missing.append(n)
+        cnf = sorted((m for m in mem if m.upper().replace("\\", "/").split("/")[-1] == "SYSTEM.CNF"), key=lambda m: m.count("/"))[:1]
+        bufs = {m: [] for m in list(pick) + cnf}
+        if bufs:
+            a.read_members(list(bufs), lambda m, b: bufs[m].append(b))
+        for m, n in pick.items():
+            dst = os.path.join(out_dir, *n.split("/"))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            with open(dst, "wb") as o:
+                o.write(b"".join(bufs[m]))
+        serial = None
+        if cnf:
+            m = re.search(r"([A-Z]{4})[_-](\d{3})\.?(\d{2})", b"".join(bufs[cnf[0]]).decode("latin-1").upper())
+            if m:
+                serial = "%s-%s%s" % m.groups()
+        return serial, missing
+    finally:
+        a.close()
+
+
 def wings_dir(key):
     return os.path.join(app_dir(), ".wings", key)
 
@@ -3660,8 +3692,16 @@ class App(QMainWindow):
             self.app_events()
             try:
                 try:
-                    image = self.disc_image(p)
-                    got, missing = extract_disc_files(image, names, wings_dir(disc))
+                    try:
+                        image = self.disc_image(p)
+                    except DA.ArchiveError as e:
+                        if e.code != "files":
+                            raise
+                        image = None            # the archive holds the disc's loose files: take them as they are
+                    if image:
+                        got, missing = extract_disc_files(image, names, wings_dir(disc))
+                    else:
+                        got, missing = extract_archive_files(p, names, wings_dir(disc))
                 finally:
                     self.drop_unpacked(p)
                 if got != serial or missing:

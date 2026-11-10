@@ -3084,7 +3084,8 @@ replaces both) nothing is written back. Launcher: *Cut content* page, own card w
 fields (JP demo, PrePre 9;
 .bin/.cue/.iso/.chd, or inside a .zip/.7z like the game's); picking one checks the serial (SLPM-80165 / PCPX-96093)
 and pulls just the files above out of the image into `.wings/jpdemo/` and `.wings/pre9/` next to the launcher
-(`extract_disc_files`, the same ISO walk as `extract_main0`), with a status line under each field (checked and ready, or
+(`extract_disc_files`, the same ISO walk as `extract_main0`; a .zip/.7z of the disc's loose files works too, its
+members are taken as they are by `extract_archive_files`), with a status line under each field (checked and ready, or
 why not; a path typed in is checked on Enter); the folders are passed only when the checkbox is on and both are there. The
 files are the user's own discs, nothing is shipped; without them the step is the retail one. The early-title folder field was removed from the launcher (the
 `--early-title` option stays in the port). Checked
