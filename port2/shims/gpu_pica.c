@@ -137,7 +137,7 @@ static inline u16 c32to15(u32 c) {
 
 /* ---- VRAM pages: 16 x 2 of 64 x 256 words */
 static unsigned page_ver[2][16], ver_clock;
-#define CSH 0                         /* cells are 16 x (1 << CSH) pixels */
+#define CSH 0                         /* cells are 16 x (1 << CSH) pixels (tri_drawn assumes 0) */
 static u8 cell_drawn[512 >> CSH][64];   /* cells the GPU drew into since their last read-back: vram[] is stale there */
 static u8 page_drawn[2][16];            /* pages with a cell_drawn set (may stay set after its cells are clean) */
 static void pages_of(int x, int y, int w, int h, int *px0, int *py0, int *px1, int *py1) {
@@ -363,17 +363,21 @@ static void tri_drawn(const PV *v) {
     if (x1 < gs->x1) x1 = gs->x1; if (y1 < gs->y1) y1 = gs->y1; if (x2 > gs->x2) x2 = gs->x2; if (y2 > gs->y2) y2 = gs->y2;
     if (x1 < 0) x1 = 0; if (y1 < 0) y1 = 0; if (x2 > 1023) x2 = 1023; if (y2 > 511) y2 = 511;
     if (x1 > x2 || y1 > y2) return;
-    for (int cj = y1 >> CSH; cj <= y2 >> CSH; cj++) for (int ci = x1 >> 4; ci <= x2 >> 4; ci++) {
-        int out = 0;
-        for (int k = 0; k < 3 && !out; k++) {   /* inside: (q1 - q0) x (p - q0) >= 0; outside an edge when all 4 corners are < 0 */
-            int k1 = (k + 1) % 3, ex = x[k1] - x[k], ey = y[k1] - y[k], neg = 0;
-            for (int c = 0; c < 4; c++) {
-                long long px = ci * 16 + (c & 1) * 15, py = (cj << CSH) + (c >> 1) * ((1 << CSH) - 1);
-                if ((long long)ex * (py - y[k]) - (long long)ey * (px - x[k]) < 0) neg++;
-            }
-            out = neg == 4;
+    /* per row (cells are 16 x 1, CSH 0), each edge allows px >= L (ey < 0) or px <= R (ey > 0), px a cell's corner:
+       a cell [16 ci, 16 ci + 15] is outside an edge when both its corners are, so the cells kept are
+       ci >= floor(L / 16) and ci <= floor(R / 16) over the three edges; the same cells as testing every corner */
+    for (int cy = y1; cy <= y2; cy++) {
+        long long lo = x1 >> 4, hi = x2 >> 4;
+        for (int k = 0; k < 3 && lo <= hi; k++) {   /* inside: (q1 - q0) x (p - q0) >= 0 */
+            int k1 = (k + 1) % 3; long long ex = x[k1] - x[k], ey = y[k1] - y[k], n = ex * (cy - y[k]);
+            if (!ey) { if (n < 0) lo = hi + 1; continue; }
+            /* ey > 0: px - x0 <= n / ey (floor); ey < 0: px - x0 >= n / ey (ceil) */
+            if (ey > 0) { long long q = n >= 0 ? n / ey : -((-n + ey - 1) / ey); long long c = (x[k] + q) >> 4; if (c < hi) hi = c; }
+            else { long long d = -ey, m = -n; long long q = m >= 0 ? (m + d - 1) / d : -((-m) / d); long long c = (x[k] + q) >> 4; if (c > lo) lo = c; }
         }
-        if (!out) { cell_drawn[cj][ci] = 1; page_drawn[(cj << CSH) >> 8][ci >> 2] = 1; }
+        if (lo > hi) continue;
+        memset(&cell_drawn[cy][lo], 1, (size_t)(hi - lo + 1));
+        for (long long pi = lo >> 2; pi <= hi >> 2; pi++) page_drawn[cy >> 8][pi] = 1;
     }
 }
 static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade, const GpuTex *tex, int semi, int raw) {
