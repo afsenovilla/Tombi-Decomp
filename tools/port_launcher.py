@@ -2631,6 +2631,18 @@ class App(QMainWindow):
                 self.drop_unpacked(p)
                 self.later(self.say, tr("s.notiso", "%s (%s)" % (os.path.basename(p), e)), "bad")
                 return
+            if info["version"] and img != p:
+                # a disc from a .zip / .7z: cut the card art now, while the unpacked image exists (a game that is not
+                # extracted, such as the Japanese one, has nothing else to cut it from later)
+                src = None
+                try:
+                    src = GL.ImageSource(img)
+                    GL.make_art(src, info["game_sha1"], art_cache(info["serial"]))
+                except (OSError, ValueError, KeyError, struct.error):
+                    pass
+                finally:
+                    if src is not None:
+                        src.close()
             if not (info["version"] and info["version"]["supported"]):
                 self.drop_unpacked(p)        # (nothing to extract: the temporary image goes now)
             self.later(self._added, p, info)
