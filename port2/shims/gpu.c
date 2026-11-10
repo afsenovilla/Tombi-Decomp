@@ -930,7 +930,7 @@ void DrawOTag(u32 *ot) {
     const int skip = port_frameskip && port_skip_draw;
 #ifdef __3DS__
     extern int pica_prof_on; extern unsigned long long pica_prof[6], port_ticks(void); extern unsigned pica_prof_n;
-    { static unsigned drawn; pica_prof_on = !skip && (++drawn % 7) == 0; }   /* (a drawn table in seven: the skips come in runs of three, a count of all tables only caught the light ones) */
+    { static unsigned drawn; pica_prof_on = !skip && (++drawn % 29) == 0; }   /* (a drawn table in seven: the skips come in runs of three, a count of all tables only caught the light ones) */
     unsigned long long prof_t0 = port_ticks();
 #endif
     if (port_frameskip) { fs_mark(gs.x1, gs.y1, skip); port_frames_skipped += (unsigned)skip; }

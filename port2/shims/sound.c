@@ -348,8 +348,9 @@ static void mix_voices(s16 *out, int n) {
             int s = a + (((b - a) * fr) >> 12);
             s = (s * v->env_level) >> 15;
             accl[i] += (s * vl) >> 14; accr[i] += (s * vr) >> 14;
-            env_step(v);
-            if (half) env_step(v);
+            /* (an envelope that is waiting only counts down: nothing else in env_step changes then) */
+            if (v->env_wait > half) v->env_wait -= 1 + half;
+            else { env_step(v); if (half) env_step(v); }
             counter += step;
             while (counter >= 28 << 12 && v->env_phase != ENV_OFF) {
                 u8 fl = spu_ram[(v->cur & (SPU_RAM_SIZE - 16)) + 1];

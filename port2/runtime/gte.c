@@ -57,7 +57,13 @@ static void rtp(int n, int last) {
     u32 h = (u16)C[26], sz = (u32)D[19];
     u32 q;
     if (sz * 2 <= h) { q = 0x1FFFF; FLAG |= 1u << 17; }
-    else { q = (u32)((((s64)h << 17) / sz + 1) >> 1); if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; } }
+    else {
+        /* (h << 17) / sz with 32-bit divisions (h < 2 sz, both 16 bits: the quotient has 18): a 64-bit division is a
+           long library call on the 3DS's ARM11, once a vertex */
+        u32 a = (h << 16) / sz, rem = (h << 16) - a * sz, d = 2 * a + (2 * rem >= sz);
+        q = (d + 1) >> 1;
+        if (q > 0x1FFFF) { q = 0x1FFFF; FLAG |= 1u << 17; }
+    }
     s64 sx = ((s64)C[24] + (s64)IR1 * q) >> 16;
     s64 sy = ((s64)C[25] + (s64)IR2 * q) >> 16;
     D[12] = D[13]; D[13] = D[14];
