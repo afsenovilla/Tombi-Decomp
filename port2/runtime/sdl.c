@@ -126,6 +126,12 @@ void port_window_start(void) {
       want.freq = port_sound_half ? 22050 : 44100; want.samples = port_sound_half ? 512 : 1024; }
     want.format = AUDIO_S16SYS; want.channels = 2; want.callback = audio_cb;
     dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+#ifdef __3DS__
+    {   /* an Old 3DS (--audio-half): the mixer on its own thread on the second core (shims/sound.c, n3ds/pica_c3d.c) */
+        extern int port_sound_half; extern void port_sound_mixer_run(void); extern int port_n3ds_thread_core1(void (*)(void));
+        if (dev && port_sound_half) port_n3ds_thread_core1(port_sound_mixer_run);
+    }
+#endif
     if (dev) { port_sound_pulled(1); SDL_PauseAudioDevice(dev, 0); }
     else port_printf("[port2] no audio device: %s (the mixer runs per vblank, without output)\n", SDL_GetError());
     for (int i = 0; i < SDL_NumJoysticks(); i++)

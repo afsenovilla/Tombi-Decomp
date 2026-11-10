@@ -327,6 +327,7 @@ int port_sound_xa_stats(int *underruns) { *underruns = xa_underruns; return xa_s
    every voice steps twice per sample (pitch, envelope), the reverb, 22050 Hz as on the console, runs on each one, and
    the device is opened at 22050 Hz.  Half the work a second for the top octave. */
 int port_sound_half;
+int port_sound_dry;                      /* --audio-dry: no reverb (an Old 3DS: a good part of the mixer's time) */
 static void mix(s16 *out, int n) {
     const int half = port_sound_half;
     for (int i = 0; i < n; i++) {
@@ -361,7 +362,7 @@ static void mix(s16 *out, int n) {
             if (half) xa_next(&cl, &cr);
             if (!cd_muted) { l += (cl * cd_l) >> 15; r += (cr * cd_r) >> 15; }
         }
-        if (rev_on) {
+        if (rev_on && !port_sound_dry) {
             rev_in_l += wl; rev_in_r += wr;
             if (half) {
                 rev_step(clamp16(rev_in_l), clamp16(rev_in_r));
@@ -868,10 +869,42 @@ static void render(s16 *dst, int n) {
     }
 }
 void port_sound_pulled(int on) { pulled = on; }
+/* A mixer thread (the Old 3DS: n3ds/pica_c3d.c starts it on the second core): it keeps a ring of mixed samples ahead of
+   the device, a piece at a time under the device lock, and the device's callback only copies.  The callback runs on
+   the game's core there, and mixing in it took 11 ms of every 16.7. */
+#define RING 4096                                   /* frames, a power of two */
+static s16 ring[2 * RING];
+static volatile unsigned ring_w, ring_r;
+static volatile int mixer_thread;
+static unsigned long long ring_under;               /* frames the callback found missing */
+unsigned long long port_sound_underruns(void) { unsigned long long n = ring_under; ring_under = 0; return n; }
+void port_sound_mixer_run(void) {                   /* (never returns) */
+    extern void port_sleep_us(unsigned long long);
+    static s16 piece[2 * 128];
+    mixer_thread = 1;
+    for (;;) {
+        if (ring_w - ring_r > 1024u) { port_sleep_us(2000); continue; }   /* (~46 ms ahead at 22050 Hz) */
+        LOCK();
+        render(piece, 128);
+        UNLOCK();
+        unsigned w = ring_w;
+        for (int i = 0; i < 128; i++) { ring[2 * ((w + i) & (RING - 1))] = piece[2 * i]; ring[2 * ((w + i) & (RING - 1)) + 1] = piece[2 * i + 1]; }
+        ring_w = w + 128;
+        port_sleep_us(100);                         /* (the game thread may be waiting for the lock) */
+    }
+}
 int port_sound_pull(short *dst, int frames) {       /* the audio device's callback (holds the device lock) */
     extern unsigned long long port_time_us(void), port_prof_sound_us; extern void port_audio_yield(void);
     unsigned long long t0 = port_time_us();
     int done = 0;
+    if (mixer_thread) {
+        unsigned r = ring_r, have = ring_w - r, n = have < (unsigned)frames ? have : (unsigned)frames;
+        for (unsigned i = 0; i < n; i++) { dst[2 * i] = ring[2 * ((r + i) & (RING - 1))]; dst[2 * i + 1] = ring[2 * ((r + i) & (RING - 1)) + 1]; }
+        ring_r = r + n;
+        if (n < (unsigned)frames) { memset(dst + 2 * n, 0, (size_t)(frames - (int)n) * 4); ring_under += (unsigned)frames - n; }
+        port_prof_sound_us += port_time_us() - t0;
+        return frames;
+    }
     while (frames > 0) {
 #ifdef __3DS__
         int k = frames < 128 ? frames : 128;   /* (short pieces: the game thread gets the lock between them) */

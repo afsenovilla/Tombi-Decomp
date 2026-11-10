@@ -307,6 +307,8 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         port_printf("[3ds] pica: per frame %.2f texture uploads (%.2f waited for the GPU; decoding %.2f ms), %.2f read-backs\n",
                     (double)n_up / TK_N, (double)n_wait / TK_N, pica_decode_us / 1000.0 / TK_N, (double)n_rd / TK_N);
         for (unsigned i = 0; i < 4 && i < n_rd; i++) port_printf("[3ds] pica: read-back %d,%d %dx%d\n", rd_log[i][0], rd_log[i][1], rd_log[i][2], rd_log[i][3]);
+        { extern unsigned long long port_sound_underruns(void); unsigned long long u = port_sound_underruns();
+          if (u) port_printf("[3ds] sound: the mixer thread was %llu samples short in these %d presents\n", u, TK_N); }
         { extern unsigned long long port_frames_skipped; static unsigned long long last;
           port_printf("[3ds] frameskip: %llu ordering tables not drawn in these %d presents\n", port_frames_skipped - last, TK_N); last = port_frames_skipped; }
         {   /* the sampled ordering tables' time (shims/gpu.c, shims/gpu_pica.c), in ms per sampled table */
@@ -522,7 +524,7 @@ int port_n3ds_worker_start(void (*job)(void)) {
     wk_job = job;
     s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
     bool n3 = false; APT_CheckNew3DS(&n3);
-    APT_SetAppCpuTimeLimit(50);           /* (the second core of an Old 3DS: half of it) */
+    APT_SetAppCpuTimeLimit(80);           /* (the second core of an Old 3DS: the most the system grants) */
     static const int cores[] = { 2, 1, -2 };
     Thread t = 0; int c = n3 ? 0 : 1, used = 0;
     for (; c < 3 && !t; c++) { t = threadCreate(wk_main, 0, 256 * 1024, prio + 1, cores[c], false); used = cores[c]; }
@@ -545,4 +547,16 @@ void port_n3ds_audio_thread_boost(void) {
     s32 mine = 0x30; svcGetThreadPriority(&mine, CUR_THREAD_HANDLE);
     Result r = mine >= main_prio ? svcSetThreadPriority(CUR_THREAD_HANDLE, main_prio > 0x19 ? main_prio - 1 : main_prio) : 0;
     port_printf("[3ds] audio thread: priority %ld, the main thread's %ld%s\n", (long)mine, (long)main_prio, mine >= main_prio ? (R_SUCCEEDED(r) ? ": raised above it" : ": could not be raised") : "");
+}
+
+/* a thread on the second core for the sound mixer of an Old 3DS (runtime/sdl.c), above the panel's worker */
+static void (*c1_fn)(void);
+static void c1_main(void *arg) { (void)arg; c1_fn(); }
+int port_n3ds_thread_core1(void (*fn)(void)) {
+    s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
+    APT_SetAppCpuTimeLimit(80);
+    c1_fn = fn;
+    Thread t = threadCreate(c1_main, 0, 64 * 1024, prio, 1, false);
+    port_printf("[3ds] sound mixer thread on core 1: %s\n", t ? "started" : "none (the callback mixes)");
+    return t != 0;
 }

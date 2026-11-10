@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
     args[n++] = "--renderer"; args[n++] = "pica";   /* the GPU (n3ds/pica_c3d.c); args.txt "--renderer soft": the CPU */
     { bool n3 = false; APT_CheckNew3DS(&n3);   /* (an Old 3DS decodes a movie at 3 frames a second: none there) */
       args[n++] = n3 ? "--logo-only" : "--skip-movies";
-      if (!n3) args[n++] = "--audio-half";          /* (its second core cannot mix 44100 samples a second: 22050 there) */
+      if (!n3) { args[n++] = "--audio-half"; args[n++] = "--audio-dry"; }          /* (its second core cannot mix 44100 samples a second: 22050 there) */
       args[n++] = "--frameskip"; }                  /* (behind its clock, the port draws fewer frames, the game keeps its speed) */   /* (New 3DS: the developer's logo plays, a 6.7 s movie, the others are skipped) */
     /* 60 Hz: the 3DS's screens refresh at ~60 Hz (50 on them repeats every fifth frame), and it is the US / NTSC game
        speed (the PAL build kept the US logic, docs/PORT.md "60 Hz mode"); args.txt "--hz 50" for the PAL speed */
