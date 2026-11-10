@@ -91,10 +91,12 @@ static int choose_image(char *out, size_t cap) {
         }
         if (redraw) {
             if (sel < top) top = sel; if (sel >= top + 22) top = sel - 21;
-            printf("\x1b[2J\x1b[1;1HTombi! port - choose your disc image\n%.48s\n\n", cur);
-            for (int i = top; i < nent && i < top + 22; i++) printf("%c %.44s%s\n", i == sel ? '>' : ' ', ent[i].name, ent[i].dir ? "/" : "");
-            if (!nent) printf(" (no folders or .chd / .bin / .iso here)\n");
-            printf("\x1b[28;1HA: open / choose   B: back   START: exit");
+            /* (fprintf: the program's own printf is the game's, shims/libc.c, which only logs) */
+            fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - choose your disc image\n%.48s\n\n", cur);
+            for (int i = top; i < nent && i < top + 22; i++) fprintf(stdout, "%c %.44s%s\n", i == sel ? '>' : ' ', ent[i].name, ent[i].dir ? "/" : "");
+            if (!nent) fprintf(stdout, " (no folders or .chd / .bin / .iso here)\n");
+            fprintf(stdout, "\x1b[28;1HA: open / choose   B: back   START: exit");
+            fflush(stdout);
             redraw = 0;
         }
         gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
