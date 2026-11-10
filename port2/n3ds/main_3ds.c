@@ -5,7 +5,8 @@
  *   sdmc:/3ds/tombi/<image>     the first .chd / .bin / .iso in the folder (the player's own disc image)
  *   sdmc:/3ds/tombi/args.txt    optional extra flags, separated by spaces or lines (e.g. --lang 5, --renderer soft)
  *   sdmc:/3ds/tombi/log.txt     the log (stderr), rewritten on every start
- * Without a disc image the top screen says where to put it and the program waits for START. */
+ *   sdmc:/3ds/tombi/disc.txt    the image chosen in the chooser, anywhere on the card
+ * Without an image there, the top screen lists the card's folders to choose one from (SELECT held at the start: always). */
 #include <3ds.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,16 +41,66 @@ static int find_image(char *out, size_t cap) {
     }
     return 0;
 }
-static void wait_message(const char *msg) {
+/* ---- the disc image chooser: a list of the SD card's folders and disc images on the top screen.  Shown when no image
+   is in the port's folder and none was chosen before (the choice is kept in disc.txt), or with SELECT held at the
+   start.  In an emulator the "SD card" is the emulator's own sdmc folder: the image only has to be somewhere in it. */
+#define MAX_ENT 400
+typedef struct { char name[96]; int dir; } Ent;
+static Ent ent[MAX_ENT];
+static int nent;
+static int ent_cmp(const void *a, const void *b) {   /* folders first, then by name */
+    const Ent *x = a, *y = b;
+    return x->dir != y->dir ? y->dir - x->dir : strcasecmp(x->name, y->name);
+}
+static void list_dir(const char *path) {
+    nent = 0;
+    DIR *d = opendir(path);
+    if (!d) return;
+    struct dirent *e;
+    while ((e = readdir(d)) && nent < MAX_ENT) {
+        if (e->d_name[0] == '.' || strlen(e->d_name) >= sizeof ent[0].name) continue;
+        int dir = e->d_type == DT_DIR;
+        if (!dir && !has_ext(e->d_name, ".chd") && !has_ext(e->d_name, ".bin") && !has_ext(e->d_name, ".iso") && !has_ext(e->d_name, ".img")) continue;
+        strcpy(ent[nent].name, e->d_name); ent[nent].dir = dir; nent++;
+    }
+    closedir(d);
+    qsort(ent, (size_t)nent, sizeof ent[0], ent_cmp);
+}
+static int choose_image(char *out, size_t cap) {
+    static char cur[400] = "sdmc:/";
+    int sel = 0, top = 0, redraw = 1, ok = 0;
     gfxInitDefault();
     consoleInit(GFX_TOP, NULL);
-    printf("%s\n\nPress START to exit.\n", msg);
+    list_dir(cur);
     while (aptMainLoop()) {
         hidScanInput();
-        if (hidKeysDown() & KEY_START) break;
+        u32 k = hidKeysDown() | (hidKeysDownRepeat() & (KEY_UP | KEY_DOWN));
+        if (k & KEY_START) break;
+        if ((k & KEY_DOWN) && sel + 1 < nent) { sel++; redraw = 1; }
+        if ((k & KEY_UP) && sel > 0) { sel--; redraw = 1; }
+        if (k & KEY_RIGHT) { sel = sel + 20 < nent ? sel + 20 : nent ? nent - 1 : 0; redraw = 1; }
+        if (k & KEY_LEFT) { sel = sel > 20 ? sel - 20 : 0; redraw = 1; }
+        if ((k & KEY_B) && strlen(cur) > 6) {   /* up a folder */
+            char *q = cur + strlen(cur) - 1; *q = 0; q = strrchr(cur, '/'); q[1] = 0;
+            list_dir(cur); sel = top = 0; redraw = 1;
+        }
+        if ((k & KEY_A) && nent) {
+            if (ent[sel].dir) {
+                if (strlen(cur) + strlen(ent[sel].name) + 2 < sizeof cur) { strcat(cur, ent[sel].name); strcat(cur, "/"); list_dir(cur); sel = top = 0; redraw = 1; }
+            } else { snprintf(out, cap, "%s%s", cur, ent[sel].name); ok = 1; break; }
+        }
+        if (redraw) {
+            if (sel < top) top = sel; if (sel >= top + 22) top = sel - 21;
+            printf("\x1b[2J\x1b[1;1HTombi! port - choose your disc image\n%.48s\n\n", cur);
+            for (int i = top; i < nent && i < top + 22; i++) printf("%c %.44s%s\n", i == sel ? '>' : ' ', ent[i].name, ent[i].dir ? "/" : "");
+            if (!nent) printf(" (no folders or .chd / .bin / .iso here)\n");
+            printf("\x1b[28;1HA: open / choose   B: back   START: exit");
+            redraw = 0;
+        }
         gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
     }
     gfxExit();
+    return ok;
 }
 
 int main(int argc, char **argv) {
@@ -65,10 +116,22 @@ int main(int argc, char **argv) {
     args[n++] = "tombi";
     struct stat st;
     if (stat(DIR_ "/data/manifest.txt", &st) == 0) { args[n++] = "--data"; args[n++] = DIR_ "/data"; }
-    else if (find_image(image, sizeof image)) { args[n++] = "--disc"; args[n++] = image; }
     else {
-        wait_message("Tombi! port\n\nNo disc image found.\nCopy your own Tombi! (PAL) disc image\n(.chd, .bin or .iso) to\n\n  " DIR_ "/\n\nand start again.");
-        return 0;
+        /* the image chosen before (disc.txt), else one in the port's folder, else the chooser; SELECT held: the chooser */
+        int have = 0, ask = 0;
+        svcSleepThread(50000000); hidScanInput(); ask = (hidKeysHeld() & KEY_SELECT) != 0;
+        FILE *df = ask ? 0 : fopen(DIR_ "/disc.txt", "r");
+        if (df) {
+            if (fgets(image, sizeof image, df)) { image[strcspn(image, "\r\n")] = 0; have = image[0] && stat(image, &st) == 0; }
+            fclose(df);
+        }
+        if (!have && !ask) have = find_image(image, sizeof image);
+        if (!have) {
+            if (!choose_image(image, sizeof image)) return 0;
+            df = fopen(DIR_ "/disc.txt", "w");
+            if (df) { fprintf(df, "%s\n", image); fclose(df); }
+        }
+        args[n++] = "--disc"; args[n++] = image;
     }
     args[n++] = "--renderer"; args[n++] = "pica";   /* the GPU (n3ds/pica_c3d.c); args.txt "--renderer soft": the CPU */
     args[n++] = "--skip-movies";
