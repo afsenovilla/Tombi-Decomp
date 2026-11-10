@@ -615,7 +615,7 @@ def extract_main0(image, out):
 # ---- the demo discs of the Charity Wings glide (--cut-content --wings-glide / --wings-pre9, port2/runtime/wings.c):
 # the launcher pulls just these files out of the user's images into .wings/<key>/ and passes the folders to the port
 WINGS_DISCS = {"jpdemo": ("SLPM-80165", ["AREA08/D002.000", "AREA08/D003.GAM", "SYSTEM/A00000.GAM"]),
-               "pre9": ("PCPX-96093", ["TOMBA/A00002.GAM"])}
+               "pre9": ("PCPX-96093", ["TOMBA/A00002.GAM", "TOMBA/AREA01/A007.000", "TOMBA/AREA01/A008.GAM"])}
 
 
 def extract_disc_files(image, names, out_dir):
@@ -3687,6 +3687,8 @@ class App(QMainWindow):
         lb = self.wings_lbl.get(key)
         ready = all(os.path.isfile(os.path.join(wings_dir(disc), *n.split("/"))) for n in names)
         msg, level = "", "muted"
+        if not ready and not extract and p and os.path.isfile(p):
+            extract = True          # the image is still there but a file is missing (a newer build needs more): redo it
         if extract and p and os.path.isfile(p):
             self.say(tr("s.wingsbusy", os.path.basename(p)), "busy")
             self.app_events()

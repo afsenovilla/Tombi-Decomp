@@ -321,7 +321,7 @@ public class LauncherActivity extends Activity {
     }
 
     // ---- the Charity Wings glide: the files it needs from the two demo discs, pulled out of the player's images ----
-    static final String[][] WINGS_FILES = {{"AREA08/D002.000", "AREA08/D003.GAM", "SYSTEM/A00000.GAM"}, {"TOMBA/A00002.GAM"}};
+    static final String[][] WINGS_FILES = {{"AREA08/D002.000", "AREA08/D003.GAM", "SYSTEM/A00000.GAM"}, {"TOMBA/A00002.GAM", "TOMBA/AREA01/A007.000", "TOMBA/AREA01/A008.GAM"}};
     static final String[] WINGS_SERIAL = {"SLPM-80165", "PCPX-96093"};
     volatile String[] wingsStatus = new String[2];   // while checking an image (shown as the row's value)
     File wingsDir(int which) { return new File(new File(filesDir(), "wings"), which == 0 ? "jpdemo" : "pre9"); }

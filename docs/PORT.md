@@ -3095,7 +3095,9 @@ at (20,7) / (21,7) / (13,7)). `wings.c` keeps the two sets in one table (`SETS[]
 replaces both) nothing is written back. Launcher: *Cut content* page, own card with its checkbox and two disc-image
 fields (JP demo, PrePre 9;
 .bin/.cue/.iso/.chd, or inside a .zip/.7z like the game's); picking one checks the serial (SLPM-80165 / PCPX-96093)
-and pulls just the files above out of the image into `.wings/jpdemo/` and `.wings/pre9/` next to the launcher
+and pulls just the files above (JP demo: `AREA08/D002.000`, `AREA08/D003.GAM`, `SYSTEM/A00000.GAM`; PrePre 9:
+`TOMBA/A00002.GAM`, `TOMBA/AREA01/A007.000`, `TOMBA/AREA01/A008.GAM`) out of the image into `.wings/jpdemo/` and
+`.wings/pre9/` next to the launcher (a file missing from an older extraction is pulled again at start when the image is still there)
 (`extract_disc_files`, the same ISO walk as `extract_main0`; a .zip/.7z of the disc's loose files works too, its
 members are taken as they are by `extract_archive_files`), with a status line under each field (checked and ready, or
 why not; a path typed in is checked on Enter); the folders are passed only when the checkbox is on and both are there.
