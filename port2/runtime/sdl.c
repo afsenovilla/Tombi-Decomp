@@ -354,6 +354,9 @@ void port_window_rumble(int small, int big) {
 
 static void pump_h(void *u) { (void)u; pump(); }
 static void pump(void) {
+#ifdef __3DS__   /* the bottom screen's touches to the panel (n3ds/pica_c3d.c) */
+    { extern void port_n3ds_touch(void); port_n3ds_touch(); }
+#endif
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         switch (e.type) {
@@ -521,6 +524,9 @@ static void panel_window_frame_h(void *a) {
     SDL_UpdateWindowSurface(pwin);
 }
 void port_panel_window_frame(const unsigned char *rgba, int w, int h) {
+#ifdef __3DS__   /* the bottom screen, through the citro3d renderer (n3ds/pica_c3d.c) */
+    { extern void port_n3ds_panel(const unsigned char *, int, int); port_n3ds_panel(rgba, w, h); return; }
+#endif
     if (!win || pwin_closed) return;
     FrameArgs a = { rgba, w, h }; port_host_call(panel_window_frame_h, &a);
 }

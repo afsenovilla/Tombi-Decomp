@@ -22,7 +22,9 @@
 #include "pica_vsh_shbin.h"
 
 static C3D_Tex vram_tex, slot_tex[PICA_SLOTS];
-static C3D_RenderTarget *vram_rt, *top_rt;
+static C3D_RenderTarget *vram_rt, *top_rt, *bot_rt;
+static C3D_Tex panel_tex;                 /* the bottom screen's panel (runtime/panel.c), 512 x 256, its canvas in the corner */
+static int panel_w, panel_h;
 static shaderProgram_s prog;
 static DVLB_s *vsh;
 static int u_proj, in_frame, scr_fmt;
@@ -206,6 +208,19 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
         C3D_ImmDrawEnd();
     }
+    if (bot_rt && panel_w) {   /* the bottom screen: the panel's canvas, 1:1 (320 x 240) */
+        C3D_RenderTargetClear(bot_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
+        C3D_FrameDrawOn(bot_rt);
+        Mtx_OrthoTilt(&m, 0.0f, 320.0f, 240.0f, 0.0f, 1.0f, -1.0f, true);
+        C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, u_proj, &m);
+        set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
+        C3D_TexBind(0, &panel_tex);
+        float X1 = panel_w, Y1 = panel_h, S1 = panel_w / 512.0f, T1 = 1.0f - panel_h / 256.0f;
+        C3D_ImmDrawBegin(GPU_TRIANGLES);
+        vtx(0, 0, 0, 1, 1, 1, 1, 1); vtx(X1, 0, S1, 1, 1, 1, 1, 1); vtx(0, Y1, 0, T1, 1, 1, 1, 1);
+        vtx(X1, 0, S1, 1, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(0, Y1, 0, T1, 1, 1, 1, 1);
+        C3D_ImmDrawEnd();
+    }
     C3D_FrameEnd(GX_CMDLIST_FLUSH);
     in_frame = 0;
     C3D_TexSetFilter(&vram_tex, GPU_NEAREST, GPU_NEAREST);
@@ -215,6 +230,26 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     if (st_frames % 600 == 0)
         port_printf("[3ds] pica: %llu frames, %llu syncs, %llu host writes\n", st_frames, st_syncs, st_writes);
     return 1;
+}
+
+/* ---- the bottom screen: the panel's canvas (runtime/sdl.c port_panel_window_frame) and its touches */
+void port_n3ds_panel(const unsigned char *rgba, int w, int h) {
+    if (!bot_rt || w <= 0 || h <= 0) return;
+    if (w > 320) w = 320; if (h > 240) h = 240;
+    begin();   /* (waits for the frames submitted before: the last present sampled this texture) */
+    const unsigned *src = (const unsigned *)rgba; unsigned *d = panel_tex.data;
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) d[tiled(i, j, 512)] = pix(src[j * w + i]) | 0xFF;
+    GSPGPU_FlushDataCache(d, 512 * 256 * 4);
+    panel_w = w; panel_h = h;
+}
+void port_n3ds_touch(void) {
+    extern void port_panel_touch(int, int, int);
+    static int down, lx, ly;
+    if (hidKeysHeld() & KEY_TOUCH) {
+        touchPosition p; hidTouchRead(&p);
+        port_panel_touch(p.px, p.py, down ? 2 : 0);
+        down = 1; lx = p.px; ly = p.py;
+    } else if (down) { port_panel_touch(lx, ly, 1); down = 0; }
 }
 
 /* ---- start-up */
@@ -257,6 +292,14 @@ static int c3d_start(void) {
         C3D_TexSetFilter(&slot_tex[i], GPU_NEAREST, GPU_NEAREST);
         C3D_TexSetWrap(&slot_tex[i], GPU_REPEAT, GPU_REPEAT);
     }
+    bot_rt = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, -1);
+    if (bot_rt && C3D_TexInit(&panel_tex, 512, 256, GPU_RGBA8)) {
+        C3D_TexSetFilter(&panel_tex, GPU_NEAREST, GPU_NEAREST);
+        C3D_RenderTargetSetOutput(bot_rt, GFX_BOTTOM, GFX_LEFT,
+                                  GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) |
+                                  GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(gfxGetScreenFormat(GFX_BOTTOM)) |
+                                  GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
+    } else { port_printf("[3ds] pica: no bottom screen target: no panel\n"); bot_rt = 0; }
     lin = linearAlloc(1024 * 512 * 4);
     arena = linearAlloc(ARENA_BYTES);
     if (!lin || !arena) { port_printf("[3ds] pica: no linear memory\n"); return -1; }

@@ -59,6 +59,7 @@ int main(int argc, char **argv) {
     mkdir(DIR_, 0777);
     chdir(DIR_);
     if (!freopen(DIR_ "/log.txt", "w", stderr)) { /* (no SD card: the log goes nowhere) */ }
+    { extern int n3ds_dspfirm(void); n3ds_dspfirm(); }   /* the sound's DSP firmware, from the console's Home Menu (n3ds/dspfirm.c) */
     static char image[512], extra[2048];
     static char *args[64];
     int n = 0;
@@ -72,6 +73,10 @@ int main(int argc, char **argv) {
     }
     args[n++] = "--renderer"; args[n++] = "pica";   /* the GPU (n3ds/pica_c3d.c); args.txt "--renderer soft": the CPU */
     args[n++] = "--skip-movies";
+    /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
+       NOW LOADING until gameplay, then status / events / map / items, by touch */
+    args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240";
+    { extern int port_panel_canvas_out; port_panel_canvas_out = 1; }
     FILE *f = fopen(DIR_ "/args.txt", "r");
     if (f) {
         size_t len = fread(extra, 1, sizeof extra - 1, f); extra[len] = 0; fclose(f);
