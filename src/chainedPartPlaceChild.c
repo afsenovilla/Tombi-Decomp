@@ -2,11 +2,6 @@
 // MATCHING 8011de84 812
 // probably: chained-object part placement (chainedPartPlaceChild/DF5C/E028/E0EC: child d94 on the angle animFrame, radius ba5, sine tables D_8007A1F0/A208); table at 80138B80
 // VERSION SLPS_01144 x00 8011CE64 812
-// VERSION SLPM_80165 x00 80116F94 220
-#if defined(VERSION_SLPM_80165)
-#include "include_asm.h"
-INCLUDE_ASM_V("x00/nonmatchings/x00", func_80116F94_slpm80165);
-#else
 typedef struct {
     char pad0[0x10];
     int a;          /* +0x10 */
@@ -98,4 +93,3 @@ void func_8011E0EC(O *o)
     o->box0 = o->box1 = o->box1;
     o->box3 = o->velX + (s < 0 ? -s >> 16 : s >> 16);
 }
-#endif
