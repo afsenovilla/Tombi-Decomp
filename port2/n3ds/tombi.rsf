@@ -24,7 +24,6 @@ AccessControlInfo:
   DescVersion             : 2
   ReleaseKernelMajor      : "02"
   ReleaseKernelMinor      : "33"
-  UseExtSaveData          : false
   FileSystemAccess:
     - DirectSdmc
   IoAccessControl:
@@ -49,13 +48,6 @@ AccessControlInfo:
   MemoryType              : Application
   SystemMode              : 64MB
   HandleTableSize         : 0x200
-  SystemSaveDataId1       : 0x00000000
-  SystemSaveDataId2       : 0x00000000
-  OtherUserSaveDataId1    : 0x00000
-  OtherUserSaveDataId2    : 0x00000
-  OtherUserSaveDataId3    : 0x00000
-  ExtSaveDataId           : 0x00000
-  ExtSaveDataNumber       : 0x00000
   ServiceAccessControl:
     - APT:U
     - ac:u
