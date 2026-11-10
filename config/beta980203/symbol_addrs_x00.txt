@@ -125,6 +125,7 @@ playerReleaseBittenAirborne = 0x80100640; // type:func size:0xD8  PAL x000 0x800
 updatePlayerHealth = 0x80100718; // type:func size:0x88  PAL x000 0x800FC104
 playerClampClimbTop = 0x801007A0; // type:func size:0xB4  PAL x000 0x800FC18C
 playerHurtCheckFastFall = 0x80100854; // type:func size:0x1D0  PAL x004 0x800FC240
+playerHurtLandRecover = 0x80100A24; // type:func size:0xE84  PAL x003 0x800FC414
 playerStepHurtKnockback = 0x801018A8; // type:func size:0x600  PAL x000 0x800FD358
 playerStepHurtStun = 0x80101EA8; // type:func size:0x5C0  PAL x000 0x800FDB7C
 playerStepHazardRespawn = 0x80102468; // type:func size:0x4D4  PAL x000 0x800FE13C
