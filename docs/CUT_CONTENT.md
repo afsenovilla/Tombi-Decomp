@@ -802,5 +802,25 @@ The 84 frames these scripts use are exactly the new frames no table reaches; the
   20 orphan scripts sit in `SLPM_801.65` (0x800109A4..0x8001153C), still unreferenced. So nothing changed for Tombi
   between PrePre 9 and that demo; the new retail frames and ids came later.
 
+### Top-down Tomba (the overhead sprite set), demo vs retail
+
+- Demo table: `AREA08/D002.000` +0x3FA28 in SLPM-80165 (= PrePre 9 `AREA02/D005.000`, byte-identical), **106** frames,
+  SPR in `AREA08/D003.GAM`, CLUT rows 0/1. Retail: 127 frames (`AREA19/D204.000`, `AREA02/D004.000`, `AREA05/D005.000`,
+  `AREA08/D103.000`; the sets differ per area). By md5 / silhouette against every retail table: 67 identical, 17
+  retouched, **22 in no retail table**: 25-29, 31-35, 77-85, 89, 96-97. Retail frames 106-126 (item held overhead,
+  crouch, throw / raise in three directions, scream) are later additions.
+- Demo player animation block, `SLPM_801.65` 0x80010800 (retail: MAIN0 `MAP_PLAYER_*` 0x800106B4, 37 pointers): **21
+  pointers** = idle 5 (one held frame each, 101-105: the demo idle does not animate), walk 5 (frames 0-24, identical
+  scripts to retail), button-A walk 5 (demo frames 37-76 by 8; retail renumbered them to 25-64), then only **two action
+  sets of three directions**: 25/26, 27/28, 29/30 (6 ticks then a 60-tick hold: raise the arms and keep them up, the
+  demo's item pick-up) and 31/32, 33/34, 35/36 (16/16, hold). Retail has eight action sets after the walks (item raise
+  126/65, 70/67, 71/69; 72-74; 75-83 in pairs; 84-86 holds; the two look-around idles 87-104; 105-110; 111-125).
+  So the demo frames 25-35 are the **first drawing of the item pick-up**, redrawn in retail as 65-74 / 126; they were
+  used in the demo, not orphaned.
+- Demo frames 77-85 and 96-99 are reached only from actor-style tables in the AREA08 overlay `INFO.BIN` (load address
+  0x800EE110, tables +0x71A0 entries 12-15 and +0x7280 entries 26-28, four-frame loops), i.e. Tomba driven as a scene
+  actor; retail's I0NFO2 actor tables (+0x1AF78, 96 entries) keep the same scripts in their first 46 entries but point
+  at retail's renumbered frames. Frame 89 is in no table of the demo.
+
 Conclusion: the lift / pull mechanic was programmed with its timing and then removed before PrePre 9; the object it
 used is in none of the demo's data. Only the frames and these scripts remain.
