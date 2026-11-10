@@ -105,3 +105,9 @@ zlib licence. Not stored in the repo: `.github/workflows/port2-exe.yml` download
 and links `port2/runtime/sdl.c` (tombi2.exe) against it; `SDL2.dll`, unmodified, is bundled inside `tombi-port.exe` (release asset)
 (the native port's launcher, docs/PORT.md) next to our `tombi.exe` / `tombi-view.exe`. Its licence text travels with
 the artifact as `SDL2-LICENSE.txt`. No game data is bundled: the player supplies their own disc image.
+
+## LZMA SDK — https://www.7-zip.org/sdk.html
+Public domain (Igor Pavlov). The C sources of the 7z container reader and its decoders (7-Zip 26.02's `C/` folder) are
+in `port2/third_party/lzma-7z/` (`VENDORED.txt`) and built into the Android app's `libtombidisc.so`, which reads the
+disc image inside a `.7z` the player adds (`port2/android/un7z.c`). The PC launcher reads `.7z` with Python's own
+`lzma` module (`tools/disc_archive.py`).

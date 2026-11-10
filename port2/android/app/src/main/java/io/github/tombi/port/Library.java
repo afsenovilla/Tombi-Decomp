@@ -49,6 +49,15 @@ final class Library {
     };
     static final String PAL_REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec";   // July 1998 Rev 0: other overlays
 
+    /** the disc's languages as flags (LauncherView.drawFlag: 0 UK, 1 FR, 2 DE, 3 IT, 4 NL, 5 ES, 6 PT, 7 SV, 8 DA, 9 US, 10 JP;
+     *  tools/game_library.py DISC_FLAGS) */
+    static int[] flagsOf(String serial) {
+        if ("SCES-01331".equals(serial)) return new int[]{0, 5, 6, 7, 8};
+        if ("SCES-01330".equals(serial)) return new int[]{0, 1, 2, 3, 4};
+        if ("SCUS-94236".equals(serial)) return new int[]{9};
+        if ("SLPS-01144".equals(serial)) return new int[]{10};
+        return new int[0];
+    }
     static Version bySha1(String s) { for (Version v : VERSIONS) if (v.sha1.equalsIgnoreCase(s)) return v; return null; }
     static Version byKey(String k) { for (Version v : VERSIONS) if (v.key.equals(k)) return v; return null; }
 

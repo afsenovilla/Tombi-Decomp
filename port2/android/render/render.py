@@ -108,6 +108,7 @@ jh = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(shutil.which(
 try:
     sh(["gcc", "-O2", "-shared", "-fPIC", "-I" + jh, "-I" + os.path.join(jh, "linux"), "-I" + os.path.join(ROOT, "port2", "include"),
         os.path.join(ROOT, "port2", "android", "disccheck.c"), os.path.join(ROOT, "port2", "shims", "cd_chd.c"),
+        os.path.join(ROOT, "port2", "third_party", "lzma-7z", "lzma7z.c"),
         "-o", os.path.join(native, "libtombidisc.so")])
 except (subprocess.CalledProcessError, OSError) as e:
     print("no PC libtombidisc.so (%s): the import stops before the disc check" % e)

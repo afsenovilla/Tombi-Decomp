@@ -25,8 +25,9 @@ import java.util.zip.ZipInputStream;
  * needs, and deleted by the caller after the extraction.  The same shapes as tools/disc_unpack.sh (the CI's game zips):
  * the image in a folder with its .cue, or a zip of the disc's extracted files.  The latter cannot be played (the game
  * reads the disc by sector number, which the loose files have lost), but it is identified (SYSTEM.CNF BOOT and that
- * file's SHA-1, MAIN0.EXE on the PAL discs) so the message can name the game.  .7z / .rar are recognised by their
- * magic and refused with a message (no decoder in the app).
+ * file's SHA-1, MAIN0.EXE on the PAL discs) so the message can name the game.  A .7z needs random access (its index
+ * is at the end): it is read in place (or copied to the cache) by port2/android/un7z.c, whose answer fromNative()
+ * turns into the same Result.  A .rar is recognised by its magic and refused with a message (no decoder in the app).
  */
 final class DiscArchive {
     static final int IMAGE = 0, ZIP = 1, SEVENZ = 2, RAR = 3, CUE = 4, NOT_IMAGE = 5;
@@ -153,16 +154,44 @@ final class DiscArchive {
         for (Map.Entry<String, File> me : images.entrySet()) if (!me.getKey().equals(pick)) me.getValue().delete();
         if (pick != null) { r.image = images.get(pick); r.entry = pick; r.imageBytes = r.image.length(); return r; }
         if (cueFile != null) r.cueMissing = cueFile;
-        if (cnf != null) {
-            r.looseFiles = true;
-            String boot = bootOf(cnf);
-            if (boot != null) {
-                String b = boot.substring(boot.lastIndexOf('/') + 1).toUpperCase(Locale.ROOT);
-                r.serial = serialOf(b);
-                if (b.startsWith("SCES_") && exeSha.containsKey("MAIN0.EXE")) { r.boot = "EXE/MAIN0.EXE"; r.bootSha1 = exeSha.get("MAIN0.EXE"); }
-                else { r.boot = boot; r.bootSha1 = exeSha.get(b); }
-            }
+        loose(r, cnf, exeSha);
+        return r;
+    }
+
+    /** the loose files of a disc: the game executable SYSTEM.CNF names and its SHA-1 (MAIN0.EXE on the PAL discs) */
+    static void loose(Result r, String cnf, Map<String, String> exeSha) {
+        if (cnf == null) return;
+        r.looseFiles = true;
+        String boot = bootOf(cnf);
+        if (boot == null) return;
+        String b = boot.substring(boot.lastIndexOf('/') + 1).toUpperCase(Locale.ROOT);
+        r.serial = serialOf(b);
+        if (b.startsWith("SCES_") && exeSha.containsKey("MAIN0.EXE")) { r.boot = "EXE/MAIN0.EXE"; r.bootSha1 = exeSha.get("MAIN0.EXE"); }
+        else { r.boot = boot; r.bootSha1 = exeSha.get(b); }
+    }
+
+    /** the answer of LauncherActivity.nativeUn7z (port2/android/un7z.c: "ok\n" + lines) as a Result; dir = its outDir */
+    static Result fromNative(String s, File dir) {
+        Result r = new Result();
+        Map<String, String> exe = new HashMap<>();
+        String cnf = null;
+        for (String l : s.split("\n")) {
+            if (l.startsWith("image ")) {
+                int t = l.indexOf('\t');
+                r.image = new File(dir, t > 0 ? l.substring(6, t) : l.substring(6));
+                r.entry = t > 0 ? l.substring(t + 1) : r.image.getName();
+                r.imageBytes = r.image.length();
+            } else if (l.startsWith("cue ")) r.cueMissing = l.substring(4);
+            else if (l.equals("cnf")) {
+                byte[] b = Library.readAll(new File(dir, "SYSTEM.CNF"), 1 << 16);   // (its whole length, at most 64 KB)
+                cnf = b == null ? "" : new String(b, java.nio.charset.StandardCharsets.ISO_8859_1);
+            } else if (l.startsWith("exe ")) {
+                String[] p = l.split(" ");
+                if (p.length >= 3) exe.put(p[1].toUpperCase(Locale.ROOT).replace(";1", ""), p[2]);
+            } else if (l.equals("nested")) r.archiveInside = true;
+            else if (l.startsWith("entries ")) try { r.entries = Integer.parseInt(l.substring(8).trim()); } catch (NumberFormatException ignored) { }
         }
+        if (r.image == null) loose(r, cnf, exe);
         return r;
     }
 

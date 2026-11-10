@@ -1182,6 +1182,11 @@ def flag_pixmap(n, w=24, h=16):
             if i < 6:
                 fill(0, h * (2 * i + 1) / 13, w, h * (2 * i + 2) / 13, "white")
         fill(0, 0, w * 0.42, h * 7 / 13, "#3C3B6E")
+    elif n == 10:     # Japan (the Japanese disc)
+        fill(0, 0, w, h, "white")
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor("#BC002D"))
+        p.drawEllipse(QPointF(w / 2, h / 2), h * 0.3, h * 0.3)
     p.setPen(QPen(QColor(0, 0, 0, 60), 0.6))
     p.setBrush(Qt.NoBrush)
     p.drawRect(QRectF(0.3, 0.3, w - 0.6, h - 0.6))
@@ -1726,6 +1731,19 @@ class GameTile(QAbstractButton):
         p.setFont(f)
         p.drawText(r, Qt.AlignCenter | Qt.TextWordWrap, self.d.get("short") or self.d.get("title") or "?")
 
+    _flag_cache = {}
+
+    def _flags(self, p, x, y, h=11):
+        """the disc's languages as small drawn flags in a row from x, centred on y; returns the right end"""
+        w = round(h * 1.5)
+        for n in self.d.get("flags") or ():
+            pm = GameTile._flag_cache.get((n, w, h))
+            if pm is None:
+                pm = GameTile._flag_cache[(n, w, h)] = flag_pixmap(n, w, h)
+            p.drawPixmap(QPointF(x, y - h / 2), pm)
+            x += w + 4
+        return x
+
     def _status(self, p, x, y, t, color_text):
         dot = DOT.get(self.d.get("level"), DOT["info"])
         p.setPen(Qt.NoPen)
@@ -1784,9 +1802,10 @@ class GameTile(QAbstractButton):
             p.setFont(self._fit(self.d["title"], 10.5, r.width() - 24, QFont.DemiBold))
             p.drawText(QPointF(r.x() + 12, y), self.d["title"])
             p.setPen(QColor(t["muted"]))
-            for i, line in enumerate(self.d.get("sub", "").split("  ·  ")[:2]):     # serial, then the disc's languages
-                p.setFont(self._fit(line, 8.5, r.width() - 24))
-                p.drawText(QPointF(r.x() + 12, y + 18 + 15 * i), line)
+            line = self.d.get("sub", "")                                           # the serial, then the disc's languages (flags)
+            p.setFont(self._fit(line, 8.5, r.width() - 24))
+            p.drawText(QPointF(r.x() + 12, y + 18), line)
+            self._flags(p, r.x() + 12, y + 29, 10)
             self._status(p, r.x() + 12, y + 52, t, t["muted"])
             p.setBrush(Qt.NoBrush)
             p.setPen(QPen(edge, 2.6 if sel else 1.2))
@@ -1805,7 +1824,9 @@ class GameTile(QAbstractButton):
             p.drawText(QPointF(x, r.y() + 28), self.d["title"])
             p.setPen(QColor(t["muted"]))
             p.setFont(self._font(9))
-            p.drawText(QPointF(x, r.y() + 48), self.d.get("sub", ""))
+            sub = self.d.get("sub", "")
+            p.drawText(QPointF(x, r.y() + 48), sub)
+            self._flags(p, x + QFontMetricsF(self._font(9)).horizontalAdvance(sub) + 10, r.y() + 44, 11)
             self._status(p, x, r.y() + 66, t, t["muted"])
             if sel:
                 self._check(p, QPointF(r.right() - 22, r.center().y()), t)
@@ -1817,7 +1838,7 @@ class GameTile(QAbstractButton):
             p.setPen(QColor(t["muted"]))
             p.setFont(self._font(8))
             dot = DOT.get(self.d.get("level"), DOT["info"])
-            label = self.d.get("sub", "").split("  ·  ")[0]
+            label = self.d.get("sub", "")
             fm = QFontMetricsF(self._font(8))
             w = fm.horizontalAdvance(label) + 13
             x0 = r.center().x() - w / 2
@@ -1846,7 +1867,9 @@ class GameTile(QAbstractButton):
             p.drawText(QPointF(r.x() + 20, r.bottom() - 40), self.d["title"])
             p.setFont(self._font(9.5))
             p.setPen(QColor(255, 255, 255, 220))
-            p.drawText(QPointF(r.x() + 20, r.bottom() - 18), self.d.get("sub", ""))
+            sub = self.d.get("sub", "")
+            p.drawText(QPointF(r.x() + 20, r.bottom() - 18), sub)
+            self._flags(p, r.x() + 20 + QFontMetricsF(self._font(9.5)).horizontalAdvance(sub) + 10, r.bottom() - 22, 12)
             fm = QFontMetricsF(self._font(9))
             sw = fm.horizontalAdvance(self.d.get("status", "")) + 34
             pill = QRectF(r.right() - 16 - sw, r.bottom() - 40, sw, 26)
@@ -2447,11 +2470,12 @@ class App(QMainWindow):
         return "%s (%s)" % (v["title"], tr("rg." + v["region"]))
 
     def game_sub(self, e):
-        """"SCES-01331 · EN ES PT SV DA": serial and the languages of that disc."""
-        parts = [e.get("serial") or tr("lib.unchecked")]
-        if GL.DISC_LANGS.get(e.get("serial")):
-            parts.append(GL.DISC_LANGS[e["serial"]])
-        return "  ·  ".join(parts)
+        """"SCES-01331": the serial (the disc's languages are drawn as flags beside it: game_flags)."""
+        return e.get("serial") or tr("lib.unchecked")
+
+    def game_flags(self, e):
+        """the flag_pixmap indices of the disc's languages (game_library.DISC_FLAGS)"""
+        return GL.DISC_FLAGS.get(e.get("serial"), [])
 
     def game_status(self, e):
         """(text, level) of a library entry: ready / to extract / image missing / not supported yet."""
@@ -2503,7 +2527,7 @@ class App(QMainWindow):
     def _tile_data(self, e):
         text, level = self.game_status(e)
         return dict(serial=e.get("serial", ""), title=self.game_name(e), short=(GL.version_of(e.get("sha1")) or {}).get("title") or self.game_name(e),
-                    sub=self.game_sub(e), status=text, level=level, art=self.game_art(e),
+                    sub=self.game_sub(e), flags=self.game_flags(e), status=text, level=level, art=self.game_art(e),
                     selected=e is self.cur_entry())
 
     def _library_view(self):

@@ -533,6 +533,11 @@ public class LauncherActivity extends Activity {
     static native String nativeExtract(String image, String outDir);
     static native int nativeExtractCount();   // files done << 16 | files total
     static native void nativeCancel();
+    /** the disc image of a .7z into outDir (port2/android/un7z.c): "ok\n" + "image FILE\tPATH" / "cnf" / "exe NAME SHA1" /
+     *  "cue TRACK" / "nested" lines, or "err:<reason>" ("err:space:NEED:FREE", "err:cancelled") */
+    static native String nativeUn7z(String archive, String outDir);
+    static native long nativeUnpackBytes(int which);   // 0: bytes written, 1: the image's size
+    volatile boolean native7z;                          // UNZIPPING a .7z: the progress comes from un7z.c
 
     void requestCancel() { cancelImport = true; if (nativeOk) try { nativeCancel(); } catch (Throwable ignored) { } }
 
@@ -578,7 +583,7 @@ public class LauncherActivity extends Activity {
             }
             int kind = DiscArchive.kind(head, hn, name);
             CrashLog.append(this, "disc import: kind " + kind + " (" + hn + " head bytes)");
-            if (kind == DiscArchive.SEVENZ || kind == DiscArchive.RAR) { fail(getString(R.string.disc_archive, name)); return; }
+            if (kind == DiscArchive.RAR) { fail(getString(R.string.disc_archive, name)); return; }
             if (kind == DiscArchive.NOT_IMAGE) { fail(getString(R.string.disc_notimage, name)); return; }
             if (kind == DiscArchive.CUE) { fail(getString(R.string.disc_needbin)); return; }
             long free = getFilesDir().getUsableSpace(), need = (size > 0 ? size : 700L << 20) + (64L << 20);
@@ -602,15 +607,7 @@ public class LauncherActivity extends Activity {
                 }
                 CrashLog.append(this, "disc import: zip: " + zr.entries + " entries, image " + zr.entry + " (" + zr.imageBytes + " bytes)"
                     + (zr.looseFiles ? ", loose files: boot " + zr.boot + " " + zr.bootSha1 : "") + (zr.cueMissing != null ? ", cue names " + zr.cueMissing : ""));
-                if (zr.image == null) {
-                    if (zr.looseFiles) {
-                        Library.Version lv = zr.bootSha1 != null ? Library.bySha1(zr.bootSha1) : null;
-                        String what = lv != null ? versionName(lv) : zr.serial != null ? zr.serial : "?";
-                        fail(getString(R.string.disc_zip_files, name, what));
-                    } else if (zr.cueMissing != null) fail(getString(R.string.disc_zip_cue, name, zr.cueMissing));
-                    else fail(getString(zr.archiveInside ? R.string.disc_zip_nested : R.string.disc_zip_noimage, name));
-                    return;
-                }
+                if (zr.image == null) { noImage(zr, name); return; }
                 path = zr.image.getAbsolutePath();
                 shown = name + " › " + zr.entry.substring(zr.entry.lastIndexOf('/') + 1);
             }
@@ -628,7 +625,7 @@ public class LauncherActivity extends Activity {
                 phase = COPYING; copyTotal = size;
                 tmpDir.mkdirs();
                 String low = name.toLowerCase(Locale.ROOT);
-                File t = new File(tmpDir, "image" + (low.endsWith(".chd") ? ".chd" : low.endsWith(".iso") ? ".iso" : ".bin"));
+                File t = new File(tmpDir, kind == DiscArchive.SEVENZ ? "archive.7z" : "image" + (low.endsWith(".chd") ? ".chd" : low.endsWith(".iso") ? ".iso" : ".bin"));
                 InputStream in = getContentResolver().openInputStream(img);
                 if (in == null) throw new Exception(name);
                 FileOutputStream out = new FileOutputStream(t);
@@ -646,6 +643,25 @@ public class LauncherActivity extends Activity {
                 path = t.getAbsolutePath();
             }
             if (!nativeOk) { fail(getString(R.string.disc_add_fail, "libtombidisc.so missing")); return; }
+            if (kind == DiscArchive.SEVENZ) {   // the image inside the .7z, written to the cache (un7z.c: the LZMA SDK, streamed)
+                phase = UNZIPPING; native7z = true; copied = 0; copyTotal = -1;
+                view.postInvalidate();
+                File o7 = new File(tmpDir, "7z");
+                o7.mkdirs();
+                String u;
+                try { u = nativeUn7z(path, o7.getAbsolutePath()); } finally { native7z = false; }
+                CrashLog.append(this, "disc import: 7z: " + u.replace('\n', ' ').replace('\t', ' '));
+                if (u.equals("err:cancelled")) throw new InterruptedException();
+                if (u.startsWith("err:space:")) {
+                    String[] sp = u.split(":");
+                    fail(getString(R.string.disc_space, Long.parseLong(sp[2]) >> 20, Long.parseLong(sp[3]) >> 20)); return;
+                }
+                if (!u.startsWith("ok")) { fail(getString(R.string.disc_zip_bad, name, u.startsWith("err:") ? u.substring(4) : u)); return; }
+                DiscArchive.Result zr = DiscArchive.fromNative(u, o7);
+                if (zr.image == null) { noImage(zr, name); return; }
+                path = zr.image.getAbsolutePath();
+                shown = name + " › " + zr.entry.substring(zr.entry.lastIndexOf('/') + 1);
+            }
             phase = CHECKING;
             view.postInvalidate();
             // which game (disccheck.c nativeIdentify): the boot executable SYSTEM.CNF names and its SHA-1
@@ -713,6 +729,15 @@ public class LauncherActivity extends Activity {
     }
 
     void fail(String msg) { phase = IDLE; result = -1; status(msg); CrashLog.append(this, "disc import failed: " + msg); }
+    /** an archive without a disc image: why, naming the archive (and the game, for its loose files) */
+    void noImage(DiscArchive.Result zr, String name) {
+        if (zr.looseFiles) {
+            Library.Version lv = zr.bootSha1 != null ? Library.bySha1(zr.bootSha1) : null;
+            String what = lv != null ? versionName(lv) : zr.serial != null ? zr.serial : "?";
+            fail(getString(R.string.disc_zip_files, name, what));
+        } else if (zr.cueMissing != null) fail(getString(R.string.disc_zip_cue, name, zr.cueMissing));
+        else fail(getString(zr.archiveInside ? R.string.disc_zip_nested : R.string.disc_zip_noimage, name));
+    }
 
     static void deleteTree(File f) {
         if (f == null || !f.exists()) return;
@@ -1625,6 +1650,71 @@ public class LauncherActivity extends Activity {
         }
 
         /** a small rounded label (serial, region) at x (left), centred on cy; returns its right edge */
+        /** a small drawn flag (no image files): 0 UK, 1 FR, 2 DE, 3 IT, 4 NL, 5 ES, 6 PT, 7 SV, 8 DA, 9 US, 10 JP, as the
+         *  PC launcher's flag_pixmap; w = 1.5 h, top-left at x, y */
+        void drawFlag(int n, float x, float y, float h) {
+            float w = h * 1.5f;
+            p.setStyle(Paint.Style.FILL);
+            canvas.save();
+            canvas.clipRect(x, y, x + w, y + h);
+            switch (n) {
+                case 0:   // United Kingdom (simplified)
+                    box(x, y, w, h, 0, 0, 1, 1, 0xff012169);
+                    p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(h * 0.19f); p.setColor(Color.WHITE);
+                    canvas.drawLine(x, y, x + w, y + h, p); canvas.drawLine(x + w, y, x, y + h, p);
+                    p.setStrokeWidth(h * 0.07f); p.setColor(0xffC8102E);
+                    canvas.drawLine(x, y, x + w, y + h, p); canvas.drawLine(x + w, y, x, y + h, p);
+                    p.setStyle(Paint.Style.FILL);
+                    box(x, y, w, h, 0, 0.31f, 1, 0.69f, Color.WHITE); box(x, y, w, h, 0.375f, 0, 0.625f, 1, Color.WHITE);
+                    box(x, y, w, h, 0, 0.375f, 1, 0.625f, 0xffC8102E); box(x, y, w, h, 0.417f, 0, 0.583f, 1, 0xffC8102E);
+                    break;
+                case 1: vert(x, y, w, h, 0xff0055A4, Color.WHITE, 0xffEF4135); break;
+                case 2: horiz(x, y, w, h, 0xff000000, 0xffDD0000, 0xffFFCE00); break;
+                case 3: vert(x, y, w, h, 0xff009246, Color.WHITE, 0xffCE2B37); break;
+                case 4: horiz(x, y, w, h, 0xffAE1C28, Color.WHITE, 0xff21468B); break;
+                case 5: box(x, y, w, h, 0, 0, 1, 1, 0xffAA151B); box(x, y, w, h, 0, 0.25f, 1, 0.75f, 0xffF1BF00); break;
+                case 6:
+                    box(x, y, w, h, 0, 0, 0.4f, 1, 0xff006600); box(x, y, w, h, 0.4f, 0, 1, 1, 0xffFF0000);
+                    p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(h * 0.1f); p.setColor(0xffFFE000);
+                    canvas.drawCircle(x + w * 0.4f, y + h / 2, h / 4, p); p.setStyle(Paint.Style.FILL);
+                    break;
+                case 7: nordic(x, y, w, h, 0xff006AA7, 0xffFECC02); break;
+                case 8: nordic(x, y, w, h, 0xffC8102E, Color.WHITE); break;
+                case 9:
+                    for (int i = 0; i < 13; i++) box(x, y, w, h, 0, i / 13f, 1, (i + 1) / 13f, i % 2 == 0 ? 0xffB22234 : Color.WHITE);
+                    box(x, y, w, h, 0, 0, 0.42f, 7 / 13f, 0xff3C3B6E);
+                    break;
+                case 10:
+                    box(x, y, w, h, 0, 0, 1, 1, Color.WHITE);
+                    p.setColor(0xffBC002D); canvas.drawCircle(x + w / 2, y + h / 2, h * 0.3f, p);
+                    break;
+                default: box(x, y, w, h, 0, 0, 1, 1, 0xff888888);
+            }
+            canvas.restore();
+            p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1); p.setColor(0x3c000000);
+            canvas.drawRect(x + 0.5f, y + 0.5f, x + w - 0.5f, y + h - 0.5f, p);
+            p.setStyle(Paint.Style.FILL);
+        }
+        void box(float x, float y, float w, float h, float x0, float y0, float x1, float y1, int c) {
+            p.setColor(c); canvas.drawRect(x + w * x0, y + h * y0, x + w * x1, y + h * y1, p);
+        }
+        void vert(float x, float y, float w, float h, int a, int b, int c) {
+            box(x, y, w, h, 0, 0, 1 / 3f, 1, a); box(x, y, w, h, 1 / 3f, 0, 2 / 3f, 1, b); box(x, y, w, h, 2 / 3f, 0, 1, 1, c);
+        }
+        void horiz(float x, float y, float w, float h, int a, int b, int c) {
+            box(x, y, w, h, 0, 0, 1, 1 / 3f, a); box(x, y, w, h, 0, 1 / 3f, 1, 2 / 3f, b); box(x, y, w, h, 0, 2 / 3f, 1, 1, c);
+        }
+        void nordic(float x, float y, float w, float h, int bg, int cross) {
+            box(x, y, w, h, 0, 0, 1, 1, bg); box(x, y, w, h, 0, 0.4f, 1, 0.6f, cross); box(x, y, w, h, 0.29f, 0, 0.46f, 1, cross);
+        }
+        /** the disc's languages as flags in a row from x, centred on cy; returns the right end (x when none) */
+        float flags(Library.Game g, float x, float cy, float h) {
+            int[] f = Library.flagsOf(g.serial);
+            for (int n : f) { drawFlag(n, x, cy - h / 2, h); x += h * 1.5f + 5; }
+            return f.length > 0 ? x - 5 : x;
+        }
+        float flagsWidth(Library.Game g, float h) { int n = Library.flagsOf(g.serial).length; return n == 0 ? 0 : n * (h * 1.5f + 5) - 5; }
+
         float tag(String t, float x, float cy, int bg, int fg) {
             text(nunito, 14, fg); p.setTextAlign(Paint.Align.LEFT);
             float w = p.measureText(t) + 20;
@@ -1658,8 +1748,9 @@ public class LauncherActivity extends Activity {
                     text(nunito, 22, BG);
                     drawFitAt(versionName(g.ver), it.r.centerX(), it.r.top + 200, cw - 36);
                     text(nunito, 14, BG);
-                    float tw = p.measureText(g.serial) + 20;
-                    tag(g.serial, it.r.centerX() - tw / 2, it.r.top + 228, 0x262f6b3a, BG);
+                    float tw = p.measureText(g.serial) + 20, fw = flagsWidth(g, 15), all = tw + (fw > 0 ? 10 + fw : 0);
+                    float tr = tag(g.serial, it.r.centerX() - all / 2, it.r.top + 228, 0x262f6b3a, BG);
+                    flags(g, tr + 10, it.r.top + 228, 15);
                     statusLine(g, it.r.centerX(), it.r.top + 270, cw - 36, true, 0xff2a7a3a);
                 }
                 x += cw + gap;
@@ -1708,6 +1799,7 @@ public class LauncherActivity extends Activity {
                     text(nunito, 22, BG); p.setTextAlign(Paint.Align.LEFT);
                     drawFitAt(versionName(g.ver), tx, it.r.top + rh * 0.36f, tw);
                     float r2 = tag(g.serial, tx, it.r.top + rh * 0.58f, 0x262f6b3a, BG);
+                    if (flagsWidth(g, 15) > 0) r2 = flags(g, r2 + 10, it.r.top + rh * 0.58f, 15);
                     statusLine(g, r2 + 12, it.r.top + rh * 0.58f + 6, it.r.right - 20 - r2 - 12, false, 0xff2a7a3a);
                 }
                 y += rh + gap;
@@ -1721,7 +1813,11 @@ public class LauncherActivity extends Activity {
                 text(nunito, 26, Color.WHITE);
                 drawFitAt(versionName(g.ver), pane.centerX(), pane.top + 218, pane.width() - 40);
                 text(nunito, 16, SUB);
-                drawFitAt(g.serial + (g.name != null && !g.name.isEmpty() ? "  ·  " + g.name : ""), pane.centerX(), pane.top + 246, pane.width() - 40);
+                // the serial and the disc's languages (flags) on one line (the file it came from: the Disc screen)
+                float sw = p.measureText(g.serial), fw = flagsWidth(g, 16), all = sw + (fw > 0 ? 14 + fw : 0);
+                p.setTextAlign(Paint.Align.LEFT);
+                canvas.drawText(g.serial, pane.centerX() - all / 2, pane.top + 248, p);
+                if (fw > 0) flags(g, pane.centerX() - all / 2 + sw + 14, pane.top + 242, 16);
             } else {
                 tp.setTypeface(nunito); tp.setTextSize(18); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
                 @SuppressWarnings("deprecation")
@@ -2058,6 +2154,7 @@ public class LauncherActivity extends Activity {
         /** Selva pill bar: dark track, accent fill with its shadow edge (as the buttons), phase / % / MB labels. */
         void progressBar(int ph, float top) {
             long done = copied, tot = copyTotal;
+            if (ph == UNZIPPING && native7z && nativeOk) { done = nativeUnpackBytes(0); tot = nativeUnpackBytes(1); }
             float frac;
             if (ph == CHECKING || ph == EXTRACTING) frac = nativeOk ? Math.max(0, Math.min(1, nativeCheckProgress() / 1000f)) : 0;   // (UNZIPPING: bytes of the zip)
             else frac = tot > 0 ? Math.min(1f, done / (float) tot) : 0;

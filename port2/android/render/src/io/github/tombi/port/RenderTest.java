@@ -217,6 +217,17 @@ public class RenderTest {
             a.view.focus = indexOfPlay(a);
             shot(a, "lib" + st + "_jp");
         }
+        // four discs (PAL SCES-01331 and SCES-01330, USA, Japan): their languages as flags beside the serial
+        game(app, "sces01330", pal, "SYSTEM/A00202.000", "SYSTEM/A00203.000");
+        prefs.edit().putString("games", "sces01331,sces01330,scus94236,slps01144").putString("g.sces01330.ver", "pal")
+            .putString("g.sces01330.serial", "SCES-01330").putString("g.sces01330.name", "Tombi! (Europe) (En,Fr,De,It,Nl).bin").commit();
+        for (int st = 0; st < 2; st++) {
+            prefs.edit().putInt("libstyle", st).putString("game", "sces01331").commit();
+            a.view.setScreen(LauncherActivity.LauncherView.MAIN);
+            a.view.focus = indexOfPlay(a);
+            shot(a, "lib" + st + "_four");
+        }
+        prefs.edit().putString("games", "sces01331,scus94236,slps01144").commit();
         // the options of the USA game (no languages / translations / panel) and of the PAL one
         prefs.edit().putInt("libstyle", 0).putString("game", "scus94236").commit();
         a.view.setScreen(LauncherActivity.LauncherView.OPTIONS); a.view.focus = 0;

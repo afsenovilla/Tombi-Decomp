@@ -67,6 +67,7 @@ if(ANDROID AND (ANDROID_ABI STREQUAL "arm64-v8a" OR CMAKE_ANDROID_ARCH_ABI STREQ
   target_compile_definitions(port2chd PRIVATE ZSTD_DISABLE_ASM)
   target_compile_options(port2chd PRIVATE -fPIC -O2 -w)
   add_library(tombidisc SHARED ${CMAKE_CURRENT_SOURCE_DIR}/android/disccheck.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/cd_chd.c
+              ${CMAKE_CURRENT_SOURCE_DIR}/third_party/lzma-7z/lzma7z.c
               $<TARGET_OBJECTS:port2chd>)
   target_include_directories(tombidisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHDR_DIR}/include)
   target_compile_definitions(tombidisc PRIVATE PORT_HAVE_CHD)
@@ -298,6 +299,7 @@ if(ANDROID)
   add_dependencies(main tombi2)
   # libtombidisc.so: the launcher's disc check (MAIN0.EXE sha1 of a .bin/.iso/.chd), loaded in the launcher process
   add_library(tombidisc SHARED ${CMAKE_CURRENT_SOURCE_DIR}/android/disccheck.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/cd_chd.c
+              ${CMAKE_CURRENT_SOURCE_DIR}/third_party/lzma-7z/lzma7z.c
               $<TARGET_OBJECTS:port2chd>)
   target_include_directories(tombidisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHDR_DIR}/include)
   target_compile_definitions(tombidisc PRIVATE PORT_HAVE_CHD)

@@ -42,7 +42,7 @@
     <string name="disc_rev0">Disco Tombi! PAL Rev 0: (build de julho de 1998). O port precisa da Rev 1 de agosto de 1998 (SCES-01331 ou SCES-01330): a Rev 0 tem outros overlays e não arranca.</string>
     <string name="disc_nomain0">Não há EXE/MAIN0.EXE nesta imagem (escolhe o .bin, .iso ou .chd; para um .cue seleciona também o .bin).</string>
     <string name="disc_needbin">Seleciona o .bin juntamente com o .cue.</string>
-    <string name="disc_howto">Escolhe a imagem do teu próprio disco do Tombi! (.bin, .iso, .chd, .cue com o seu .bin, ou um .zip que a contenha): os ficheiros são extraídos para o armazenamento da app (cerca de 500 MB, verificados ficheiro a ficheiro; a imagem não é guardada). A app não inclui dados do jogo.</string>
+    <string name="disc_howto">Escolhe a imagem do teu próprio disco do Tombi! (.bin, .iso, .chd, .cue com o seu .bin, ou um .zip / .7z que a contenha): os ficheiros são extraídos para o armazenamento da app (cerca de 500 MB, verificados ficheiro a ficheiro; a imagem não é guardada). A app não inclui dados do jogo.</string>
     <string name="disc_missing">Nenhuma imagem do disco escolhida: escolhe o teu disco.</string>
     <string name="cancel">Cancelar</string>
     <string name="disc_cancelled">Cópia cancelada: os ficheiros parciais foram apagados.</string>
@@ -132,7 +132,7 @@
     <!-- the game library (Library.java, stage U2) -->
     <string name="lib_title">Os teus jogos</string>
     <string name="lib_add">Adicionar jogo</string>
-    <string name="lib_add_sub">Imagem do teu próprio disco: .bin, .iso, .chd, .zip (ou .cue com o seu .bin)</string>
+    <string name="lib_add_sub">Imagem do teu próprio disco: .bin, .iso, .chd, .zip, .7z (ou .cue com o seu .bin)</string>
     <string name="lib_ready">Pronto a jogar</string>
     <string name="lib_unsupported">Ainda não suportado</string>
     <string name="lib_nolib">Não incluído nesta versão da app</string>
@@ -148,11 +148,11 @@
     <string name="disc_phase_unzip">A descomprimir…</string>
     <string name="disc_adding">A adicionar: %1$s</string>
     <string name="disc_add_fail">Não foi possível adicionar o jogo: %1$s</string>
-    <string name="disc_notimage">«%1$s» não é uma imagem de disco de PlayStation. Escolhe a imagem do teu disco: .bin (com o seu .cue), .iso, .chd, ou um .zip que a contenha.</string>
-    <string name="disc_archive">«%1$s» é um arquivo .7z ou .rar, que a app não consegue abrir. Descomprime-o primeiro (ou usa um .zip) e escolhe a imagem do disco.</string>
+    <string name="disc_notimage">«%1$s» não é uma imagem de disco de PlayStation. Escolhe a imagem do teu disco: .bin (com o seu .cue), .iso, .chd, ou um .zip / .7z que a contenha.</string>
+    <string name="disc_archive">«%1$s» é um arquivo .rar, que a app não consegue abrir. Descomprime-o primeiro (ou usa um .zip / .7z) e escolhe a imagem do disco.</string>
     <string name="disc_zip_noimage">«%1$s» não contém nenhuma imagem de disco (.bin, .iso, .img ou .chd).</string>
     <string name="disc_zip_nested">«%1$s» contém outro arquivo comprimido, não uma imagem de disco. Descomprime-o primeiro e escolhe a imagem (ou um .zip com ela).</string>
-    <string name="disc_zip_files">«%1$s» contém os ficheiros soltos do disco (%2$s), não a sua imagem. O jogo precisa da imagem completa: .bin com o seu .cue, .iso ou .chd (também dentro de um .zip).</string>
+    <string name="disc_zip_files">«%1$s» contém os ficheiros soltos do disco (%2$s), não a sua imagem. O jogo precisa da imagem completa: .bin com o seu .cue, .iso ou .chd (também dentro de um .zip / .7z).</string>
     <string name="disc_zip_cue">«%1$s» contém o .cue, mas não a pista de dados que ele indica (%2$s).</string>
     <string name="disc_zip_bad">Não é possível ler «%1$s» (zip danificado, ou comprimido com um método que a app não conhece: %2$s). Descomprime-o e escolhe a imagem do disco.</string>
     <string-array name="lib_styles"><item>Carrossel</item><item>Lista</item><item>Capa</item></string-array>
