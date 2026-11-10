@@ -4,9 +4,8 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.3.0 (build of 5da1fc8, 2026-11-09): game library launchers (PC and Android, list look by default) and the USA
-disc (SCUS-94236) as a second game, experimental (tested headless on PC only: sweep 95/96, panel, saves, debug menu,
-movies); the area-crash fix after the global renames. Previous: v0.2.0 (d124ae0).
+v0.3.1 (build of 66a8281, 2026-11-10): .zip / .7z disc images in both launchers, language flags on the cards, Disco and
+home layout fixes, the Japanese card title オレっ！トンバ, release number in the PC launcher. Previous: v0.3.0 (5da1fc8).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
