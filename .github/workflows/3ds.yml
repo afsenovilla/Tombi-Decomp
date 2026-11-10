@@ -155,6 +155,31 @@ jobs:
           '
           sudo chown -R "$(id -u):$(id -g)" build
 
+      # tombi.cia: the same ELF installed as a HOME Menu title (makerom, port2/n3ds/tombi.rsf).  makerom and bannertool
+      # are not in devkitPro's packages: their latest releases.  The banner is generated (a title on a gradient, a
+      # second of silence): no game art is shipped.
+      - name: Build tombi.cia
+        if: steps.fetch.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get install -y -qq imagemagick fonts-dejavu-core > /dev/null
+          mkdir -p "$RUNNER_TEMP/ctr" && cd "$RUNNER_TEMP/ctr"
+          asset() { curl -fsSL -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$1/releases/latest" \
+                    | python3 -c "import sys,json,re; a=[x['browser_download_url'] for x in json.load(sys.stdin)['assets'] if re.search(sys.argv[1], x['name'], re.I)]; print(a[0] if a else '')" "$2"; }
+          u=$(asset 3DSGuy/Project_CTR 'makerom.*ubuntu.*\.zip$'); echo "makerom: $u"; curl -fsSL -o makerom.zip "$u"; unzip -oq makerom.zip -d makerom
+          u=$(asset Epicpkmn11/bannertool 'bannertool.*\.zip$'); echo "bannertool: $u"; curl -fsSL -o bannertool.zip "$u"; unzip -oq bannertool.zip -d bannertool
+          MAKEROM=$(find makerom -type f -name makerom | head -1); BANNERTOOL=$(find bannertool -type f -path "*linux-x86_64*" -name bannertool | head -1)
+          chmod +x "$MAKEROM" "$BANNERTOOL"
+          convert -size 256x128 gradient:'#7ec8ff'-'#2a6fd0' -font DejaVu-Sans-Bold -pointsize 56 -fill white -stroke '#1b3f7a' \
+                  -strokewidth 3 -gravity center -annotate 0 'Tombi!' banner.png
+          python3 -c "import wave; w=wave.open('silence.wav','wb'); w.setnchannels(2); w.setsampwidth(2); w.setframerate(32000); w.writeframes(bytes(4*32000)); w.close()"
+          "$BANNERTOOL" makebanner -i banner.png -a silence.wav -o banner.bnr
+          cd "$GITHUB_WORKSPACE"
+          "$RUNNER_TEMP/ctr/$MAKEROM" -f cia -o build/n3ds/tombi.cia -elf build/n3ds/tombi.elf -rsf port2/n3ds/tombi.rsf \
+                  -icon build/n3ds/tombi.smdh -banner "$RUNNER_TEMP/ctr/banner.bnr" -exefslogo -target t
+          ls -l build/n3ds/tombi.cia
+
       - name: Upload tombi.3dsx
         if: steps.fetch.outputs.ok == 'true'
         uses: actions/upload-artifact@v4
@@ -162,6 +187,7 @@ jobs:
           name: tombi-3ds
           path: |
             build/n3ds/*.3dsx
+            build/n3ds/*.cia
             build/n3ds/tombi.elf
           if-no-files-found: warn
 
