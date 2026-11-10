@@ -546,8 +546,11 @@ static int gp0(const u32 *p, int n) {
                 if (c) ws_layout_clip(1, tile < 0 ? x0 - port_widescreen : x1, tile < 0 ? x0 : x1 + port_widescreen, sv);
                 for (int i = 0; i < nv; i++) v[i].x += off;
                 if (hfr_rec) hfr_poly(v, nv, shade, tex ? &t : 0, semi, raw);
-                if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
-                if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
+                if (quad && be->quad && !too_big(v, 3) && !too_big(v + 1, 3) && be->quad(v, shade, tex ? &t : 0, semi, raw)) ;
+                else {
+                    if (!too_big(v, 3)) be->tri(&v[0], &v[1], &v[2], shade, tex ? &t : 0, semi, raw);
+                    if (quad && !too_big(v + 1, 3)) be->tri(&v[1], &v[2], &v[3], shade, tex ? &t : 0, semi, raw);
+                }
                 for (int i = 0; i < nv; i++) v[i].x -= off;
                 if (c) ws_layout_clip(0, 0, 0, sv);
             }

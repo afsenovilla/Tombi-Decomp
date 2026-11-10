@@ -611,6 +611,14 @@ static void emit_in(PV *v, int n, const GpuTex *tex, int semi, int raw, int u0, 
     float du = (float)(ax - bx), dv = (float)(ay - by);
     for (int i = 0; i < n; i++) { v[i].u += du; v[i].v += dv; }
     if (!semi) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); return; }
+    if (n == 6 && v[3].x == v[1].x && v[3].y == v[1].y && v[4].x == v[2].x && v[4].y == v[2].y) {
+        /* a quad's two triangles in the PS1's order, each whole before the next (a folded quad's overlap) */
+        for (int i = 0; i < 6; i += 3) {
+            s.atest = AT_OPAQUE; s.blend = -1; memcpy(batch(&s, 3), v + i, 3 * sizeof *v);
+            s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, 3), v + i, 3 * sizeof *v);
+        }
+        return;
+    }
     s.atest = AT_OPAQUE; memcpy(batch(&s, n), v, n * sizeof *v);
     s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, n), v, n * sizeof *v);
 }
@@ -675,6 +683,29 @@ static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shad
     }
     tri_drawn(v);
     emit(v, 3, tex, semi, raw);
+}
+/* a quad inside the target, its drawing area noted: one texture look-up and one batch entry for its two triangles */
+static int pica_quad(const GpuVtx *g, int shade, const GpuTex *tex, int semi, int raw) {
+    if ((unsigned)(g[0].x | g[1].x | g[2].x | g[3].x) > 1023u || (unsigned)(g[0].y | g[1].y | g[2].y | g[3].y) > 511u || !bulk_in()) return 0;
+    PV v[6];
+    put(&v[0], g[0].x, g[0].y, g[0].r, g[0].g, g[0].b, g[0].u, g[0].v);
+    put(&v[1], g[1].x, g[1].y, g[1].r, g[1].g, g[1].b, g[1].u, g[1].v);
+    put(&v[2], g[2].x, g[2].y, g[2].r, g[2].g, g[2].b, g[2].u, g[2].v);
+    put(&v[4], g[3].x, g[3].y, g[3].r, g[3].g, g[3].b, g[3].u, g[3].v);
+    if (!shade) {   /* (a flat triangle has its first vertex's colour: as pica_tri) */
+        v[2].r = v[0].r; v[2].g = v[0].g; v[2].b = v[0].b;
+        v[3] = v[1]; v[5] = v[2];
+        v[1].r = v[0].r; v[1].g = v[0].g; v[1].b = v[0].b;
+        v[4].r = v[3].r; v[4].g = v[3].g; v[4].b = v[3].b; v[5].r = v[3].r; v[5].g = v[3].g; v[5].b = v[3].b;
+        { PV t = v[4]; v[4] = v[5]; v[5] = t; }   /* -> (1, 2, 3) */
+    } else { v[3] = v[1]; v[5] = v[4]; v[4] = v[2]; }
+    int u0 = g[0].u, u1 = u0, w0 = g[0].v, w1 = w0;
+    for (int i = 1; i < 4; i++) {
+        if (g[i].u < u0) u0 = g[i].u; if (g[i].u > u1) u1 = g[i].u;
+        if (g[i].v < w0) w0 = g[i].v; if (g[i].v > w1) w1 = g[i].v;
+    }
+    emit_in(v, 6, tex, semi, raw, u0, w0, u1, w1);
+    return 1;
 }
 static void pica_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, int u0, int v0, int semi, int raw) {
     int r = col & 255, g = (col >> 8) & 255, b = (col >> 16) & 255;
@@ -772,4 +803,4 @@ static int pica_present(int dx, int dy, int dw, int dh, int masked) {
     return dev->present ? dev->present(dx, dy, dw, dh, masked) : 0;
 }
 const GpuBackend port_gpu_pica = { "pica (3DS model, CPU reference)", pica_start, pica_stop, pica_tri, pica_rect, pica_line, pica_fill,
-                                   pica_copy, pica_vram_written, pica_vram_read, pica_list_end, pica_present, 0 };
+                                   pica_copy, pica_vram_written, pica_vram_read, pica_list_end, pica_present, .quad = pica_quad };

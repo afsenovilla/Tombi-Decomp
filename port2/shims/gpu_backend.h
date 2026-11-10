@@ -64,6 +64,9 @@ typedef struct {
     void (*ws_upload)(int wx, int wy, int w, int h, const gpu_u16 *src, int stride);
     void (*ws_read)(int wx, int wy, int w, int h, gpu_u16 *dst, int stride);
     int (*ws_present)(int wx, int wy, int w, int h);                            /* show a wide frame; 0 = not handled */
+    /* optional (null: two tri calls): the quad v[0..3] as the triangles (0, 1, 2) and (1, 2, 3) in one go; 0 = not
+       taken, the decoder then draws the two triangles */
+    int (*quad)(const GpuVtx *v, int shade, const GpuTex *tex, int semi, int raw);
 } GpuBackend;
 
 extern const GpuBackend port_gpu_soft, port_gpu_gl, port_gpu_pica;
