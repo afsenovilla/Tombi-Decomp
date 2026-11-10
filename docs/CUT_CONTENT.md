@@ -821,5 +821,19 @@ The 84 frames these scripts use are exactly the new frames no table reaches; the
   the script tables inside the AREA08 overlay `INFO.BIN` belong to the area's NPCs and index their own sprite sets, so
   they say nothing about Tomba's frames). They are unused top-down art, like the side-view orphans, with no script.
 
-Conclusion: the lift / pull mechanic was programmed with its timing and then removed before PrePre 9; the object it
+### The other sprite tables of the JP demo (enemies, NPCs, HUD)
+
+`tools/find_unused_gfx.py OUT --jp game_jp_demo/disc.bin --areas 0,8 --skip-vram` pairs every SPR table of the demo
+with a PAL table by shape and compares the 16-byte part records frame by frame. Demo tables: AREA00/A006.GAM (379 Tomba,
+10, 194, 267, 83, 11 frames), AREA00/D503.GAM (18), AREA08/A003.GAM (168, 153), AREA08/D003.GAM (106 top-down Tomba,
+431 top-down NPCs, 17, 8). Result: the 431-frame top-down NPC table is PAL's AR02 SPR 3B minus its last 6 frames, the
+194-frame table (PAL SPR 32) differs in 3 frames, the 267-frame one (PAL SPR 33, 290) in 6, the 163/153-frame ones
+(PAL SPR 39, 267) in 52/43 and AREA08's 168-frame one (PAL SPR 34, 289) in 28; but rendered from the demo's own VRAM
+(area pages placed as PAL does, SYSTEM atlases tried at (64,0) with `vram.infer_base`) every one of those frames is an
+empty rectangle, i.e. placeholder frames, and the tool's own "new images" of them are flat blocks. The 83-frame table
+has no PAL twin: the localized HUD / text strip. So apart from Tomba (side view and top-down, above) the demo's sprite
+tables hold no art that retail lacks; the differences are retail's additions (PAL-only frames listed in the tool's
+INDICE.txt: e.g. SPR 34 frames 192-252, SPR 3A 70-126).
+
+ with its timing and then removed before PrePre 9; the object it
 used is in none of the demo's data. Only the frames and these scripts remain.
