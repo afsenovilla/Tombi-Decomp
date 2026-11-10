@@ -154,7 +154,7 @@
     <string name="disc_zip_nested">„%1$s“ enthält ein weiteres Archiv, kein Disc-Image. Entpacke es zuerst und wähle das Image (oder ein .zip davon).</string>
     <string name="disc_zip_files">„%1$s“ enthält die einzelnen Dateien der Disc (%2$s), nicht ihr Image. Das Spiel braucht das ganze Image: .bin mit ihrer .cue, .iso oder .chd (auch in einem .zip / .7z).</string>
     <string name="disc_zip_cue">„%1$s“ enthält die .cue, aber nicht den Datentrack, den sie nennt (%2$s).</string>
-    <string name="disc_zip_bad">„%1$s“ kann nicht gelesen werden (beschädigtes Zip oder eine Kompressionsmethode, die die App nicht kennt: %2$s). Entpacke es und wähle das Disc-Image.</string>
+    <string name="disc_zip_bad">„%1$s“ kann nicht gelesen werden (beschädigtes Archiv oder eine Kompressionsmethode, die die App nicht kennt: %2$s). Entpacke es und wähle das Disc-Image.</string>
     <string-array name="lib_styles"><item>Karussell</item><item>Liste</item><item>Cover</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
 </resources>

@@ -154,7 +154,7 @@
     <string name="disc_zip_nested">«%1$s» contiene un altro archivio, non un\'immagine di disco. Estrailo prima e scegli l\'immagine (o un .zip che la contiene).</string>
     <string name="disc_zip_files">«%1$s» contiene i file sciolti del disco (%2$s), non la sua immagine. Il gioco ha bisogno dell\'immagine completa: .bin con il suo .cue, .iso o .chd (anche dentro un .zip / .7z).</string>
     <string name="disc_zip_cue">«%1$s» contiene il .cue, ma non la traccia dati che indica (%2$s).</string>
-    <string name="disc_zip_bad">Impossibile leggere «%1$s» (zip danneggiato, o compresso con un metodo che l\'app non conosce: %2$s). Estrailo e scegli l\'immagine del disco.</string>
+    <string name="disc_zip_bad">Impossibile leggere «%1$s» (archivio danneggiato, o compresso con un metodo che l\'app non conosce: %2$s). Estrailo e scegli l\'immagine del disco.</string>
     <string-array name="lib_styles"><item>Carosello</item><item>Elenco</item><item>Copertina</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Giappone</item></string-array>
 </resources>

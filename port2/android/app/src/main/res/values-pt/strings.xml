@@ -154,7 +154,7 @@
     <string name="disc_zip_nested">«%1$s» contém outro arquivo comprimido, não uma imagem de disco. Descomprime-o primeiro e escolhe a imagem (ou um .zip com ela).</string>
     <string name="disc_zip_files">«%1$s» contém os ficheiros soltos do disco (%2$s), não a sua imagem. O jogo precisa da imagem completa: .bin com o seu .cue, .iso ou .chd (também dentro de um .zip / .7z).</string>
     <string name="disc_zip_cue">«%1$s» contém o .cue, mas não a pista de dados que ele indica (%2$s).</string>
-    <string name="disc_zip_bad">Não é possível ler «%1$s» (zip danificado, ou comprimido com um método que a app não conhece: %2$s). Descomprime-o e escolhe a imagem do disco.</string>
+    <string name="disc_zip_bad">Não é possível ler «%1$s» (arquivo danificado, ou comprimido com um método que a app não conhece: %2$s). Descomprime-o e escolhe a imagem do disco.</string>
     <string-array name="lib_styles"><item>Carrossel</item><item>Lista</item><item>Capa</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>EUA</item><item>Japão</item></string-array>
 </resources>

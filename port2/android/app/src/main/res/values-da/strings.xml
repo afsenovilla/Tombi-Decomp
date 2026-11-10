@@ -154,7 +154,7 @@
     <string name="disc_zip_nested">“%1$s” indeholder et andet arkiv, ikke et diskaftryk. Pak det ud først og vælg aftrykket (eller en .zip af det).</string>
     <string name="disc_zip_files">“%1$s” indeholder diskens løse filer (%2$s), ikke dens aftryk. Spillet skal bruge hele aftrykket: .bin med dens .cue, .iso eller .chd (også i en .zip / .7z).</string>
     <string name="disc_zip_cue">“%1$s” indeholder .cue-filen, men ikke det datanummer, den nævner (%2$s).</string>
-    <string name="disc_zip_bad">“%1$s” kan ikke læses (beskadiget zip eller en komprimeringsmetode, appen ikke kender: %2$s). Pak det ud og vælg diskaftrykket.</string>
+    <string name="disc_zip_bad">“%1$s” kan ikke læses (beskadiget arkiv eller en komprimeringsmetode, appen ikke kender: %2$s). Pak det ud og vælg diskaftrykket.</string>
     <string-array name="lib_styles"><item>Karrusel</item><item>Liste</item><item>Forside</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
 </resources>

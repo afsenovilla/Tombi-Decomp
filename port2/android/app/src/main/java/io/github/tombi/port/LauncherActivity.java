@@ -1746,12 +1746,15 @@ public class LauncherActivity extends Activity {
                     RectF lr = new RectF(it.r.left + 18, it.r.top + 18, it.r.right - 18, it.r.top + 160);
                     drawLogo(g, lr, false);
                     text(nunito, 22, BG);
-                    drawFitAt(versionName(g.ver), it.r.centerX(), it.r.top + 200, cw - 36);
+                    drawFitAt(versionName(g.ver), it.r.centerX(), it.r.top + 196, cw - 36);
                     text(nunito, 14, BG);
-                    float tw = p.measureText(g.serial) + 20, fw = flagsWidth(g, 15), all = tw + (fw > 0 ? 10 + fw : 0);
-                    float tr = tag(g.serial, it.r.centerX() - all / 2, it.r.top + 228, 0x262f6b3a, BG);
-                    flags(g, tr + 10, it.r.top + 228, 15);
-                    statusLine(g, it.r.centerX(), it.r.top + 270, cw - 36, true, 0xff2a7a3a);
+                    float tw = p.measureText(g.serial) + 20;
+                    tag(g.serial, it.r.centerX() - tw / 2, it.r.top + 220, 0x262f6b3a, BG);
+                    // the disc's languages: a row of flags under the serial (as small as the card needs)
+                    float fh = 14;
+                    while (fh > 8 && flagsWidth(g, fh) > cw - 36) fh -= 1;
+                    flags(g, it.r.centerX() - flagsWidth(g, fh) / 2, it.r.top + 248, fh);
+                    statusLine(g, it.r.centerX(), it.r.top + 282, cw - 36, true, 0xff2a7a3a);
                 }
                 x += cw + gap;
             }

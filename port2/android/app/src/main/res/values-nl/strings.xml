@@ -154,7 +154,7 @@
     <string name="disc_zip_nested">‘%1$s’ bevat nog een archief, geen disc-image. Pak het eerst uit en kies de image (of een .zip ervan).</string>
     <string name="disc_zip_files">‘%1$s’ bevat de losse bestanden van de disc (%2$s), niet de image. De game heeft de hele image nodig: .bin met de .cue, .iso of .chd (ook in een .zip / .7z).</string>
     <string name="disc_zip_cue">‘%1$s’ bevat de .cue, maar niet het datatrack dat die noemt (%2$s).</string>
-    <string name="disc_zip_bad">‘%1$s’ kan niet worden gelezen (beschadigde zip, of een compressiemethode die de app niet kent: %2$s). Pak het uit en kies de disc-image.</string>
+    <string name="disc_zip_bad">‘%1$s’ kan niet worden gelezen (beschadigd archief, of een compressiemethode die de app niet kent: %2$s). Pak het uit en kies de disc-image.</string>
     <string-array name="lib_styles"><item>Carrousel</item><item>Lijst</item><item>Omslag</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>VS</item><item>Japan</item></string-array>
 </resources>

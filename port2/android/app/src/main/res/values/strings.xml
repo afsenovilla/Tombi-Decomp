@@ -164,7 +164,7 @@
     <string name="disc_zip_nested">“%1$s” holds another archive, not a disc image. Extract it first and pick the image (or a .zip of it).</string>
     <string name="disc_zip_files">“%1$s” holds the disc’s loose files (%2$s), not its image. The game needs the whole image: .bin with its .cue, .iso or .chd (inside a .zip / .7z too).</string>
     <string name="disc_zip_cue">“%1$s” holds the .cue sheet but not the data track it names (%2$s).</string>
-    <string name="disc_zip_bad">“%1$s” cannot be read (a damaged zip, or a compression method the app does not know: %2$s). Extract it and pick the disc image.</string>
+    <string name="disc_zip_bad">“%1$s” cannot be read (a damaged archive, or a compression method the app does not know: %2$s). Extract it and pick the disc image.</string>
     <string-array name="lib_styles"><item>Carousel</item><item>List</item><item>Cover</item></string-array>
     <string-array name="lib_regions"><item>Europe</item><item>USA</item><item>Japan</item></string-array>
 </resources>

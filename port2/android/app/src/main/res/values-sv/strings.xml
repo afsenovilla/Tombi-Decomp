@@ -154,7 +154,7 @@
     <string name="disc_zip_nested">”%1$s” innehåller ett annat arkiv, ingen skivavbild. Packa upp det först och välj avbilden (eller en .zip av den).</string>
     <string name="disc_zip_files">”%1$s” innehåller skivans lösa filer (%2$s), inte dess avbild. Spelet behöver hela avbilden: .bin med sin .cue, .iso eller .chd (även i en .zip / .7z).</string>
     <string name="disc_zip_cue">”%1$s” innehåller .cue-filen men inte dataspåret den anger (%2$s).</string>
-    <string name="disc_zip_bad">”%1$s” kan inte läsas (skadad zip eller en komprimeringsmetod som appen inte känner till: %2$s). Packa upp den och välj skivavbilden.</string>
+    <string name="disc_zip_bad">”%1$s” kan inte läsas (skadat arkiv eller en komprimeringsmetod som appen inte känner till: %2$s). Packa upp den och välj skivavbilden.</string>
     <string-array name="lib_styles"><item>Karusell</item><item>Lista</item><item>Omslag</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
 </resources>

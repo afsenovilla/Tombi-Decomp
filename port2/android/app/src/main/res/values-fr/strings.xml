@@ -154,7 +154,7 @@
     <string name="disc_zip_nested">« %1$s » contient une autre archive, pas une image de disque. Décompressez-la d\'abord et choisissez l\'image (ou un .zip de celle-ci).</string>
     <string name="disc_zip_files">« %1$s » contient les fichiers du disque (%2$s), pas son image. Le jeu a besoin de l\'image complète : .bin avec son .cue, .iso ou .chd (aussi dans un .zip / .7z).</string>
     <string name="disc_zip_cue">« %1$s » contient le .cue, mais pas la piste de données qu\'il désigne (%2$s).</string>
-    <string name="disc_zip_bad">Impossible de lire « %1$s » (zip endommagé, ou méthode de compression inconnue de l\'application : %2$s). Décompressez-le et choisissez l\'image du disque.</string>
+    <string name="disc_zip_bad">Impossible de lire « %1$s » (archive endommagée, ou méthode de compression inconnue de l\'application : %2$s). Décompressez-le et choisissez l\'image du disque.</string>
     <string-array name="lib_styles"><item>Carrousel</item><item>Liste</item><item>Couverture</item></string-array>
     <string-array name="lib_regions"><item>Europe</item><item>États-Unis</item><item>Japon</item></string-array>
 </resources>
