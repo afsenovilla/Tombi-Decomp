@@ -957,3 +957,7 @@ func_80081F78_pcpx96084 = 0x80081F78; // type:func size:0x108
 func_8008020C_pcpx96084 = 0x8008020C; // type:func size:0x108
 func_80082080_pcpx96084 = 0x80082080; // type:func size:0x114
 func_800252F4_pcpx96084 = 0x800252F4; // type:func size:0x10C
+func_800233FC_pcpx96084 = 0x800233FC; // type:func size:0x118
+func_8003C014_pcpx96084 = 0x8003C014; // type:func size:0x118
+func_80035ED8_pcpx96084 = 0x80035ED8; // type:func size:0x118
+func_80022E14_pcpx96084 = 0x80022E14; // type:func size:0x120
