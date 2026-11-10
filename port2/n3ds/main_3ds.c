@@ -103,6 +103,23 @@ static int choose_image(char *out, size_t cap) {
     return ok;
 }
 
+/* Sound in an emulator: libctru's ndsp (SDL's audio) loads the DSP firmware from sdmc:/3ds/dspfirm.cdc, a file a console
+   that runs homebrew has and an emulator's SD folder does not.  Azahar / Citra emulate the DSP themselves (HLE) and do
+   not run the firmware: there, without the file, ndsp is given an empty component (a DSP1 header with no segments).
+   The emulator is told apart by its own svcGetSystemInfo type (0x20000: an error on a console), so a console without
+   the file still reports it missing instead of waiting for a DSP that never answers. */
+static void dsp_component_for_emulators(void) {
+    struct stat st;
+    if (stat("sdmc:/3ds/dspfirm.cdc", &st) == 0) return;
+    s64 is_emu = 0;
+    if (R_FAILED(svcGetSystemInfo(&is_emu, 0x20000, 0)) || !is_emu) return;
+    static u8 comp[0x300];
+    memcpy(comp + 0x100, "DSP1", 4);
+    comp[0x104] = 0x00; comp[0x105] = 0x03;   /* (the size: the header alone) */
+    ndspUseComponent(comp, sizeof comp, 0xFF, 0xFF);
+    fprintf(stderr, "[3ds] no dspfirm.cdc, an emulator: ndsp gets an empty DSP component\n");
+}
+
 int main(int argc, char **argv) {
     (void)argc; (void)argv;
     osSetSpeedupEnable(true);                  /* New 3DS: 804 MHz and the L2 cache */
@@ -110,6 +127,7 @@ int main(int argc, char **argv) {
     mkdir(DIR_, 0777);
     chdir(DIR_);
     if (!freopen(DIR_ "/log.txt", "w", stderr)) { /* (no SD card: the log goes nowhere) */ }
+    dsp_component_for_emulators();
     static char image[512], extra[2048];
     static char *args[64];
     int n = 0;
