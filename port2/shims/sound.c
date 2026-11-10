@@ -320,7 +320,12 @@ void port_sound_cd_mute(int mute) { cd_muted = mute; }
 int port_sound_xa_stats(int *underruns) { *underruns = xa_underruns; return xa_sectors; }
 
 /* ------------------------------------------------------------------------------------------- mixer */
+/* --audio-half (an Old 3DS, whose second core cannot mix 44100 samples a second): one sample out for two of the SPU's:
+   every voice steps twice per sample (pitch, envelope), the reverb, 22050 Hz as on the console, runs on each one, and
+   the device is opened at 22050 Hz.  Half the work a second for the top octave. */
+int port_sound_half;
 static void mix(s16 *out, int n) {
+    const int half = port_sound_half;
     for (int i = 0; i < n; i++) {
         int l = 0, r = 0, wl = 0, wr = 0;
         for (int k = 0; k < NVOICES; k++) {
@@ -334,7 +339,8 @@ static void mix(s16 *out, int n) {
             l += sl; r += sr;
             if (rev_voices & (1u << k)) { wl += sl; wr += sr; }
             env_step(v);
-            v->counter += v->pitch;
+            if (half) env_step(v);
+            v->counter += v->pitch << half;
             while (v->counter >= 28 << 12 && v->env_phase != ENV_OFF) {
                 u8 fl = spu_ram[(v->cur & (SPU_RAM_SIZE - 16)) + 1];
                 v->counter -= 28 << 12;
@@ -349,11 +355,16 @@ static void mix(s16 *out, int n) {
         if (xa_w != xa_r || xa_primed) {
             int cl, cr;
             xa_next(&cl, &cr);
+            if (half) xa_next(&cl, &cr);
             if (!cd_muted) { l += (cl * cd_l) >> 15; r += (cr * cd_r) >> 15; }
         }
         if (rev_on) {
             rev_in_l += wl; rev_in_r += wr;
-            if (++rev_cnt == 2) {
+            if (half) {
+                rev_step(clamp16(rev_in_l), clamp16(rev_in_r));
+                rev_in_l = rev_in_r = 0;
+                l += rev_out_l; r += rev_out_r;
+            } else if (++rev_cnt == 2) {
                 rev_prev_l = rev_out_l; rev_prev_r = rev_out_r;
                 rev_step(clamp16(rev_in_l / 2), clamp16(rev_in_r / 2));
                 rev_in_l = rev_in_r = 0; rev_cnt = 0;
@@ -375,8 +386,8 @@ static void wav_header(u8 *h, u32 data) {
     static const u8 t[44] = { 'R','I','F','F',0,0,0,0,'W','A','V','E','f','m','t',' ',16,0,0,0,1,0,2,0,
                               0x44,0xAC,0,0, 0x10,0xB1,2,0, 4,0,16,0, 'd','a','t','a',0,0,0,0 };
     for (int i = 0; i < 44; i++) h[i] = t[i];
-    u32 riff = data + 36;
-    for (int i = 0; i < 4; i++) { h[4 + i] = riff >> (8 * i); h[40 + i] = data >> (8 * i); }
+    u32 riff = data + 36, rate = RATE >> port_sound_half, bps = rate * 4;
+    for (int i = 0; i < 4; i++) { h[4 + i] = riff >> (8 * i); h[40 + i] = data >> (8 * i); h[24 + i] = rate >> (8 * i); h[28 + i] = bps >> (8 * i); }
 }
 void port_audio_close(void) {
     LOCK();
@@ -841,32 +852,41 @@ static void wav_out(const s16 *buf, int n) {
 }
 /* n stereo frames of audio time: the sequencer ticks every TICK_SAMPLES of them */
 static void render(s16 *dst, int n) {
-    samples_second += n;
+    samples_second += n << port_sound_half;
     while (n > 0) {
         if (tick_left <= 0) {
             for (int i = 0; i < NSEQ; i++) if (seqs[i].used && seqs[i].playing) seq_tick(i, &seqs[i]);
-            tick_left += TICK_SAMPLES;
+            tick_left += TICK_SAMPLES >> port_sound_half;
         }
         int k = n < tick_left ? n : tick_left;
         mix(dst, k);
         wav_out(dst, k);
-        dst += 2 * k; n -= k; tick_left -= k; samples_total += k;
+        dst += 2 * k; n -= k; tick_left -= k; samples_total += k << port_sound_half;
     }
 }
 void port_sound_pulled(int on) { pulled = on; }
 int port_sound_pull(short *dst, int frames) {       /* the audio device's callback (holds the device lock) */
+    extern unsigned long long port_time_us(void), port_prof_sound_us; extern void port_audio_yield(void);
+    unsigned long long t0 = port_time_us();
     int done = 0;
     while (frames > 0) {
+#ifdef __3DS__
+        int k = frames < 128 ? frames : 128;   /* (short pieces: the game thread gets the lock between them) */
+#else
         int k = frames < 2048 ? frames : 2048;
+#endif
         render(out, k);
         memcpy(dst, out, k * 4);
         dst += 2 * k; frames -= k; done += k;
+        if (frames > 0) port_audio_yield();
     }
+    port_prof_sound_us += port_time_us() - t0;       /* (the fps line's "sound": here the callback's time, on its thread) */
     return done;
 }
 void port_sound_vblank(void) {                       /* no device: 44100/hz samples per vblank, whatever the wall clock does */
     if (pulled) return;
     int n = RATE / port_hz + (port_frame % port_hz < RATE % port_hz);
+    n >>= port_sound_half;
     while (n > 0) {
         int k = n < 2048 ? n : 2048;
         render(out, k);

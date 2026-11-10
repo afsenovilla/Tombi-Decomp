@@ -46,8 +46,21 @@ static void ctrl_opened(void);
 /* the audio device pulls the mixer (shims/sound.c): audio time is what the device consumes, so the sequencer's
    tempo cannot depend on the game thread's pace; the game thread's calls into the mixer take the device lock */
 static void audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pull((short *)stream, len / 4); }
-void port_audio_lock(void) { if (dev) SDL_LockAudioDevice(dev); }
+/* (lock_wanted: the game thread is waiting for the lock.  The 3DS's audio thread shares a throttled core and holds
+   the lock for a whole callback, tens of milliseconds there: port_audio_yield, between the callback's pieces,
+   lets the game thread in) */
+static volatile int lock_wanted;
+void port_audio_lock(void) { if (dev) { lock_wanted++; SDL_LockAudioDevice(dev); lock_wanted--; } }
 void port_audio_unlock(void) { if (dev) SDL_UnlockAudioDevice(dev); }
+void port_audio_yield(void) {
+#ifdef __3DS__
+    if (dev && lock_wanted) {
+        SDL_UnlockAudioDevice(dev);
+        for (int i = 0; i < 20 && lock_wanted; i++) SDL_Delay(1);
+        SDL_LockAudioDevice(dev);
+    }
+#endif
+}
 
 /* the desktop size of display 0 (--widescreen auto); 0 = ok */
 int port_display_size(int *w, int *h) {
@@ -103,7 +116,9 @@ void port_window_start(void) {
     }
     SDL_AudioSpec want, have;
     SDL_zero(want);
-    want.freq = 44100; want.format = AUDIO_S16SYS; want.channels = 2; want.samples = 1024; want.callback = audio_cb;
+    { extern int port_sound_half;
+      want.freq = port_sound_half ? 22050 : 44100; want.samples = port_sound_half ? 512 : 1024; }
+    want.format = AUDIO_S16SYS; want.channels = 2; want.callback = audio_cb;
     dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
     if (dev) { port_sound_pulled(1); SDL_PauseAudioDevice(dev, 0); }
     else port_printf("[port2] no audio device: %s (the mixer runs per vblank, without output)\n", SDL_GetError());

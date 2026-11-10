@@ -413,6 +413,7 @@ void port_test_message_add(const char *s) {
 }
 void port_poke_reset(void) { n_pokes = 0; dump_ram_path = 0; menu_frame = 0; title_frame = 0; movie_frame = 0; item_frame = 0; msg_frame = 0; }
 void port_vblank(void) {
+    { extern int port_frameskip, port_skip_draw; if (port_frameskip == 2) port_skip_draw = port_frame & 1; }   /* (--frameskip test: every other frame) */
     if (port_stall_frame && port_frame + 1 == port_stall_frame) port_sleep_us((unsigned long long)port_stall_ms * 1000);
     if (port_realtime) {
         /* absolute schedule from one epoch (no relative sleeps: their rounding would accumulate into a faster or
@@ -423,10 +424,17 @@ void port_vblank(void) {
         if (!vblank_epoch_us) { vblank_epoch_us = now; vblank_n = 0; }
         vblank_n++;
         unsigned long long due = vblank_epoch_us + (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz;
+        {   /* --frameskip: behind the clock, the next frame is not drawn (three in a row at most); then the
+               schedule is only given up when four periods late, or the frames skipped would win nothing back */
+            extern int port_frameskip, port_skip_draw; static int run;
+            if (port_frameskip == 1) { if (now > due + period / 8 && run < 3) { port_skip_draw = 1; run++; } else { port_skip_draw = 0; run = 0; } }
+            if (port_frameskip == 1 && now <= due + 4 * period) { if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; } goto paced; }
+        }
         if (now > due + period) { vblank_epoch_us = now - (unsigned long long)vblank_n * 1000000ull / (unsigned)port_hz; due = now;
                                   if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(due, period, 1); } }
         else if (port_hfr_fps) { extern void port_hfr_wait(unsigned long long, unsigned long long, int); port_hfr_wait(due, period, 1); port_prof_wait_us += port_time_us() - now; }
         else if (due > now) { port_sleep_until_us(due); port_prof_wait_us += port_time_us() - now; }
+    paced:
         {
             unsigned long long t = port_time_us();
             if (!vb_total_t0) vb_total_t0 = t;

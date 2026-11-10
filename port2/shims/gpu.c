@@ -903,6 +903,23 @@ static void sky_grab(void) {
     be->vram_read(gs.x1, gs.y1, w, h);
     port_panel_sky_take(&vram[0][0], gs.x1, gs.y1, w, h);
 }
+/* --frameskip (the 3DS's default: an Old 3DS cannot draw 60 frames a second): when the game is behind its clock
+   (shims/psyq.c port_vblank sets port_skip_draw, at most three frames in a row) an ordering table's primitives are not
+   drawn, only its environment / image packets taken; the buffer it would have filled is not shown when the game
+   flips to it, so the screen keeps the last drawn frame.  The game's logic keeps its 60 Hz. */
+int port_frameskip, port_skip_draw;
+unsigned long long port_frames_skipped;
+static struct { int x, y, skipped; } fs_buf[4];
+static int fs_n;
+static void fs_mark(int x, int y, int skipped) {
+    for (int i = 0; i < fs_n; i++) if (fs_buf[i].x == x && fs_buf[i].y == y) { fs_buf[i].skipped = skipped; return; }
+    if (fs_n == 4) { memmove(&fs_buf[0], &fs_buf[1], 3 * sizeof fs_buf[0]); fs_n = 3; }
+    fs_buf[fs_n].x = x; fs_buf[fs_n].y = y; fs_buf[fs_n].skipped = skipped; fs_n++;
+}
+static int fs_skipped(int x, int y) {
+    for (int i = 0; i < fs_n; i++) if (fs_buf[i].x == x && fs_buf[i].y == y) return fs_buf[i].skipped;
+    return 0;
+}
 void DrawOTag(u32 *ot) {
     { extern const char *port_title_bg_path; if (port_title_bg_path && port_widescreen) ws_title_bg(ot); }
     u32 *p = ot; int n = 0, sky = port_panel_sky_req ? 1 : 0;
@@ -910,6 +927,8 @@ void DrawOTag(u32 *ot) {
     unsigned long long t0 = port_time_us();
     tex_patch_idle();
     gpu_lists++;
+    const int skip = port_frameskip && port_skip_draw;
+    if (port_frameskip) { fs_mark(gs.x1, gs.y1, skip); port_frames_skipped += (unsigned)skip; }
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
         n++;
@@ -923,7 +942,7 @@ void DrawOTag(u32 *ot) {
                 for (u32 k = 1; k <= len; k++) port_printf(" %08x", p[k]);
                 port_printf("\n");
             }
-            packet(p + 1, len);
+            if (!skip || (p[1] >> 24) >= 0x80) packet(p + 1, len);   /* (0x80..: image moves / loads, the environment) */
             for (u32 k = 1; k <= len; k++) h = h * 16777619u ^ p[k];     /* the watchdog's "same picture every frame" test */
         }
         if (next == 0xFFFFFF) break;
@@ -1079,6 +1098,7 @@ static void present_window(void) {
         RECT *d = (RECT *)cur_dispenv;
         int w = d->w > 0 ? d->w : 320, h = d->h > 0 ? d->h : 240;
         if (w > 1024) w = 1024; if (h > 512) h = 512;
+        if (port_frameskip && fs_skipped(d->x & 1023, d->y & 511)) return;   /* (a buffer whose frame was not drawn) */
         /* the GL backend blits the display area itself; the software one goes through RGB24 and an SDL_Renderer;
            the 24-bit mode (MDEC movies) is read out as RGB24 on both and shown by the backend's present_rgb when it
            has one (GL: its own texture; an SDL_Renderer on the GL window would be a second device on it) */
