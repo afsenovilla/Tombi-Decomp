@@ -139,6 +139,7 @@ static inline u16 c32to15(u32 c) {
 static unsigned page_ver[2][16], ver_clock;
 #define CSH 0                         /* cells are 16 x (1 << CSH) pixels */
 static u8 cell_drawn[512 >> CSH][64];   /* cells the GPU drew into since their last read-back: vram[] is stale there */
+static u8 page_drawn[2][16];            /* pages with a cell_drawn set (may stay set after its cells are clean) */
 static void pages_of(int x, int y, int w, int h, int *px0, int *py0, int *px1, int *py1) {
     *px0 = (x & 1023) >> 6; *px1 = ((x & 1023) + w - 1) >> 6; *py0 = (y & 511) >> 8; *py1 = ((y & 511) + h - 1) >> 8;
     if (*px1 > 15) *px1 = 15; if (*py1 > 1) *py1 = 1;
@@ -151,6 +152,7 @@ static void pages_drawn(int x1, int y1, int x2, int y2) {   /* (inclusive pixel 
     if (x1 < 0) x1 = 0; if (y1 < 0) y1 = 0; if (x2 > 1023) x2 = 1023; if (y2 > 511) y2 = 511;
     if (x1 > x2 || y1 > y2) return;
     for (int j = y1 >> CSH; j <= y2 >> CSH; j++) memset(&cell_drawn[j][x1 >> 4], 1, (size_t)((x2 >> 4) - (x1 >> 4) + 1));
+    for (int j = y1 >> 8; j <= y2 >> 8; j++) for (int i = x1 >> 6; i <= x2 >> 6; i++) page_drawn[j][i] = 1;
 }
 
 /* ---- the batch: triangles with one state */
@@ -196,6 +198,9 @@ static void cells_clean(int x, int y, int w, int h) {
 static void sync_pages(int x, int y, int w, int h) {
     clip_rect(&x, &y, &w, &h);
     if (w <= 0 || h <= 0) return;
+    int any = 0;   /* (most textures: no page of theirs drawn into, nothing to scan) */
+    for (int pj = y >> 8; pj <= (y + h - 1) >> 8; pj++) for (int pi = x >> 6; pi <= (x + w - 1) >> 6; pi++) any |= page_drawn[pj][pi];
+    if (!any) return;
     for (int j = y >> CSH; j <= (y + h - 1) >> CSH; j++)
         for (int i = x >> 4; i <= (x + w - 1) >> 4; i++) {
             if (!cell_drawn[j][i]) continue;
@@ -205,6 +210,9 @@ static void sync_pages(int x, int y, int w, int h) {
             if (port_verbose) port_printf("[gpu] pica: texture read-back %d,%d %dx%d (frame %d)\n", i * 16, j << CSH, (k - i + 1) * 16, 1 << CSH, port_frame);
             i = k;
         }
+    /* the pages this rectangle covers whole have no drawn cell left */
+    for (int pj = y >> 8; pj <= (y + h - 1) >> 8; pj++) for (int pi = x >> 6; pi <= (x + w - 1) >> 6; pi++)
+        if (x <= pi * 64 && x + w >= pi * 64 + 64 && y <= pj * 256 && y + h >= pj * 256 + 256) page_drawn[pj][pi] = 0;
 }
 static void clip_rect(int *x, int *y, int *w, int *h) {
     *x &= 1023; *y &= 511;
@@ -365,7 +373,7 @@ static void tri_drawn(const PV *v) {
             }
             out = neg == 4;
         }
-        if (!out) cell_drawn[cj][ci] = 1;
+        if (!out) { cell_drawn[cj][ci] = 1; page_drawn[(cj << CSH) >> 8][ci >> 2] = 1; }
     }
 }
 static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade, const GpuTex *tex, int semi, int raw) {
