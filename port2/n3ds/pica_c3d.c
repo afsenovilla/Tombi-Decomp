@@ -28,6 +28,7 @@ static int panel_w, panel_h;
 static shaderProgram_s prog;
 static DVLB_s *vsh;
 static int u_proj, in_frame, scr_fmt;
+static int vb_n, last_ok;                 /* (the vertex buffer's fill and the state cache, below) */
 static unsigned frame_no;
 static unsigned *lin;                     /* 1024 x 512 linear words: read-backs */
 #define ARENA_BYTES (2u << 20)
@@ -51,7 +52,7 @@ static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted bef
 static void end_and_wait(void) {   /* run what was recorded and wait for it: memory may be reused afterwards */
     if (in_frame) { C3D_FrameEnd(GX_CMDLIST_FLUSH); in_frame = 0; }
     C3D_FrameBegin(0); C3D_FrameEnd(GX_CMDLIST_FLUSH);   /* (C3D_FrameBegin waits for the queue of the frame before) */
-    arena_off = 0; frame_no++; st_syncs++;
+    arena_off = 0; frame_no++; st_syncs++; vb_n = 0; last_ok = 0;
 }
 
 /* ---- state */
@@ -60,7 +61,9 @@ static void proj_vram(void) {
     C3D_Mtx m; Mtx_Ortho(&m, 0.0f, 1024.0f, 512.0f, 0.0f, 1.0f, -1.0f, true);
     C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, u_proj, &m);
 }
+static int last_ok;
 static void set_env(int textured, int mod) {
+    last_ok = 0;
     C3D_TexEnv *e = C3D_GetTexEnv(0);
     C3D_TexEnvInit(e);
     if (!textured) {
@@ -78,6 +81,7 @@ static void set_env(int textured, int mod) {
     }
 }
 static void set_blend(int mode) {
+    last_ok = 0;
     switch (mode) {
     case 0:  C3D_BlendingColor(0x80000000u);  /* 0.5 B + 0.5 F */
              C3D_AlphaBlend(GPU_BLEND_ADD, GPU_BLEND_ADD, GPU_CONSTANT_ALPHA, GPU_CONSTANT_ALPHA, GPU_ONE, GPU_ZERO); break;
@@ -89,6 +93,7 @@ static void set_blend(int mode) {
     }
 }
 static void set_atest(int at) {
+    last_ok = 0;
     if (at == AT_NOTZERO) C3D_AlphaTest(true, GPU_NOTEQUAL, 0);
     else if (at == AT_OPAQUE) C3D_AlphaTest(true, GPU_EQUAL, PICA_A_OPAQUE);
     else if (at == AT_SEMI) C3D_AlphaTest(true, GPU_EQUAL, PICA_A_SEMI);
@@ -130,23 +135,35 @@ static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
 }
 
 /* ---- primitives */
+/* triangles go through a vertex buffer (linear memory the GPU reads when the frame runs: a frame's vertices in a row,
+   from the start again once the frame has been waited for), and state is only set when it changes */
+typedef struct { float x, y, z, s, t, r, g, b, a; } CV;
+#define VB_MAX 32768
+static CV *vb; static int vb_n;
+static PState last_st;                       /* (last_ok 0: something else set state since) */
 static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
     begin();
-    /* the scissor counts rows from the other edge than the projection (the self test: an area of y 256..511 drew nothing) */
-    C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, 511 - s->y2, s->x2 + 1, 512 - s->y1);
-    set_env(s->tex >= 0, s->mod);
-    set_atest(s->atest);
-    set_blend(s->blend);
-    if (s->tex >= 0) C3D_TexBind(0, &atlas_tex[s->tex]);
-    const float ts = 1.0f / (float)PICA_ATLAS, tt = s->tex == 1 ? 2.0f / (float)PICA_ATLAS : ts;
-    C3D_ImmDrawBegin(GPU_TRIANGLES);
-    for (int i = 0; i < n; i++) {
-        /* +0.5: the PICA samples pixel centres, the PS1 integer positions */
-        vtx(v[i].x + 0.5f, v[i].y + 0.5f, v[i].u * ts, 1.0f - v[i].v * tt, v[i].r / 255.0f, v[i].g / 255.0f, v[i].b / 255.0f,
-            s->tex >= 0 ? 1.0f : 0.0f);   /* (untextured: alpha 0, bit 15 clear on a read-back) */
+    if (vb_n + n > VB_MAX) { end_and_wait(); begin(); }
+    if (!last_ok || memcmp(s, &last_st, sizeof *s)) {
+        /* the scissor counts rows from the other edge than the projection (the self test: an area of y 256..511 drew nothing) */
+        C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, 511 - s->y2, s->x2 + 1, 512 - s->y1);
+        set_env(s->tex >= 0, s->mod);
+        set_atest(s->atest);
+        set_blend(s->blend);
+        if (s->tex >= 0) C3D_TexBind(0, &atlas_tex[s->tex]);
+        last_st = *s; last_ok = 1;
     }
-    C3D_ImmDrawEnd();
+    const float ts = 1.0f / (float)PICA_ATLAS, tt = s->tex == 1 ? 2.0f / (float)PICA_ATLAS : ts, k = 1.0f / 255.0f;
+    const float al = s->tex >= 0 ? 1.0f : 0.0f;   /* (untextured: alpha 0, bit 15 clear on a read-back) */
+    CV *d = vb + vb_n;
+    for (int i = 0; i < n; i++, d++) {
+        /* +0.5: the PICA samples pixel centres, the PS1 integer positions */
+        d->x = v[i].x + 0.5f; d->y = v[i].y + 0.5f; d->z = 0.5f; d->s = v[i].u * ts; d->t = 1.0f - v[i].v * tt;
+        d->r = v[i].r * k; d->g = v[i].g * k; d->b = v[i].b * k; d->a = al;
+    }
+    C3D_DrawArrays(GPU_TRIANGLES, vb_n, n);
+    vb_n += n;
     tk_draw += svcGetSystemTick() - t0;
 }
 /* the staging texture, its memory from the arena: w x h rounded up to powers of two (>= 8).  (One C3D_Tex for all:
@@ -258,7 +275,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     C3D_TexSetFilter(&vram_tex, GPU_NEAREST, GPU_NEAREST);
     proj_vram();
     frame_no++; st_frames++;
-    arena_off = 0;   /* (the next C3D_FrameBegin waits for this frame: the arena is free then) */
+    arena_off = 0; vb_n = 0; last_ok = 0;   /* (the next C3D_FrameBegin waits for this frame: the arena is free then) */
     u64 t1 = svcGetSystemTick();
     tk_present += t1 - t0;
     if (tk_last) tk_frame += t1 - tk_last;
@@ -366,6 +383,11 @@ static int c3d_start(void) {
     AttrInfo_AddLoader(ai, 0, GPU_FLOAT, 3);   /* v0 position */
     AttrInfo_AddLoader(ai, 1, GPU_FLOAT, 2);   /* v1 texcoord */
     AttrInfo_AddLoader(ai, 2, GPU_FLOAT, 4);   /* v2 colour */
+    vb = linearAlloc(VB_MAX * sizeof *vb);
+    if (!vb) { port_printf("[3ds] pica: no vertex buffer\n"); return -1; }
+    C3D_BufInfo *bi = C3D_GetBufInfo();
+    BufInfo_Init(bi);
+    BufInfo_Add(bi, vb, sizeof *vb, 3, 0x210);
     C3D_DepthTest(false, GPU_ALWAYS, GPU_WRITE_COLOR);
     C3D_CullFace(GPU_CULL_NONE);
     proj_vram();
