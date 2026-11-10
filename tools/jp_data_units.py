@@ -11,8 +11,8 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 from versions import VERSIONS, version_arg
 VER = version_arg(sys.argv, "slps01144")
 SER = VERSIONS[VER]["serial"]
-_, _, _ovl, _shared = VERSIONS[VER]["progs"]["x01"]
-IDW = _ovl + _shared  # area ID word (JP 0x80115178)
+_x01 = VERSIONS[VER]["progs"].get("x01")  # none in the beta (X00 only): no area ID word to look for
+IDW = _x01[2] + _x01[3] if _x01 else -1  # area ID word (JP 0x80115178)
 R = ROOT + "/asm/" + VER
 rows = []
 plain = []  # units with no return and no prologue that the rules above did not take (sandwich rule below)

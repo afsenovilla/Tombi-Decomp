@@ -1,3 +1,4 @@
+updateL8Type00Object = 0x800EF750; // type:func size:0xB4  PAL x000 0x800E9DC0
 updatePoolType00ByArea = 0x800EF804; // type:func size:0xDC  PAL x000 0x800E9E98
 awardAPByArea = 0x800EF8E0; // type:func size:0x1F4  PAL x000 0x800E9F74
 updatePoolType04Object = 0x800EFAD4; // type:func size:0xB8  PAL x000 0x800EA168
