@@ -28,7 +28,8 @@ extern char *CURRENT_OT;
 extern void lzDecompress(unsigned char *, unsigned char *);
 extern void AnimLoadDuration(void *);
 
-const char *port_wings_dir;
+const char *port_wings_dir;        /* --wings-glide: the extracted JP demo (Tomba frames 77-79) */
+const char *port_wings_pre9_dir;   /* --wings-pre9: the extracted PrePre Vol. 9 (the feather page) */
 
 #define O_B04(o) (((unsigned char *)(o))[0x04])
 #define O_STEP(o) (((unsigned char *)(o))[0x05])
@@ -42,6 +43,11 @@ const char *port_wings_dir;
 #define WPP_FILE "AREA08/D002.000"
 #define WPP_TABLE_OFF 0x3FA28
 #define SPR_FILE "AREA08/D003.GAM"
+#define PRE9_FEATHER_PAGE "TOMBA/A00002.GAM"    /* 4 bpp, 256 px wide, 256 rows: the resident item page of PrePre 9 */
+#define JP_FEATHER_PAGE "SYSTEM/A00000.GAM"    /* the same page in the JP demo, 512 px wide; must hold the same feather */
+/* feather frames on that page (page px): x, y, w, h; retail keeps them at the same place of tpage 0x14 (VRAM 256,256) */
+static const int FEATHER_RECT[3][4] = {{224, 104, 24, 24}, {200, 80, 24, 16}, {216, 64, 16, 16}};
+static unsigned char feather_px[3][24 * 24 / 2];
 static const int FRAMES[3] = {77, 78, 79};
 static const int HAND_Y[3] = {2, 1, 1};              /* top of the raised hand in each frame (x = 22) */
 #define HAND_X 22
@@ -57,9 +63,9 @@ static int tried, active, ticks;
 static void *saved_wpp, *player;
 static int saved_d3c;
 
-static unsigned char *read_file(const char *name, long *len) {
+static unsigned char *read_file(const char *dir, const char *name, long *len) {
     char p[1024]; FILE *f; unsigned char *b;
-    snprintf(p, sizeof p, "%s/%s", port_wings_dir, name);
+    snprintf(p, sizeof p, "%s/%s", dir, name);
     f = fopen(p, "rb");
     if (!f) { port_printf("wings: cannot open %s\n", p); return 0; }
     fseek(f, 0, SEEK_END); *len = ftell(f); fseek(f, 0, SEEK_SET);
@@ -72,14 +78,49 @@ static unsigned char *read_file(const char *name, long *len) {
 static unsigned int u32(const unsigned char *p) { return p[0] | p[1] << 8 | p[2] << 16 | p[3] << 24; }
 static void put32(unsigned char *p, unsigned int v) { p[0] = v; p[1] = v >> 8; p[2] = v >> 16; p[3] = v >> 24; }
 
+/* unpacks a GAM page file; 0 if not a GAM or not the expected size */
+static unsigned char *read_page(const char *dir, const char *name, unsigned int want) {
+    unsigned char *gam, *pg; long gl; unsigned int size;
+    gam = read_file(dir, name, &gl);
+    if (!gam) return 0;
+    if (gl < 8 || memcmp(gam, "GAM", 3)) { port_printf("wings: %s/%s is not a GAM file\n", dir, name); free(gam); return 0; }
+    size = u32(gam + 4);
+    if (size != want) { port_printf("wings: %s/%s unpacks to %u bytes, expected %u\n", dir, name, size, want); free(gam); return 0; }
+    pg = malloc(size + 1024);          /* a copy run can overshoot the size by up to 255 bytes */
+    memset(pg, 0, size + 1024);
+    lzDecompress(gam, pg);
+    free(gam);
+    return pg;
+}
+
+/* the three feather frames, cut from the PrePre 9 page and checked against the JP demo's copy; 1 when ready */
+static int load_feather(void) {
+    unsigned char *p9, *jp; int i, y, ok = 1;
+    p9 = read_page(port_wings_pre9_dir, PRE9_FEATHER_PAGE, 128 * 256);
+    if (!p9) return 0;
+    jp = read_page(port_wings_dir, JP_FEATHER_PAGE, 256 * 256);
+    if (!jp) { free(p9); return 0; }
+    for (i = 0; i < 3; i++) {
+        int x0 = FEATHER_RECT[i][0], y0 = FEATHER_RECT[i][1], w = FEATHER_RECT[i][2] / 2, h = FEATHER_RECT[i][3];
+        for (y = 0; y < h; y++) {
+            memcpy(feather_px[i] + y * w, p9 + (y0 + y) * 128 + x0 / 2, w);
+            if (memcmp(feather_px[i] + y * w, jp + (y0 + y) * 256 + x0 / 2, w)) ok = 0;
+        }
+    }
+    free(p9); free(jp);
+    if (!ok) port_printf("wings: the feather of %s differs from the JP demo's: not the PrePre 9 / SLPM-80165 pages?\n", PRE9_FEATHER_PAGE);
+    return ok;
+}
+
 /* builds the three-frame WPP table and SPR table from the demo files; 1 when ready */
 static int load(void) {
     unsigned char *wpp, *gam, *spr; long wl, gl; unsigned int n, i, total, size;
     unsigned char *t; unsigned int off[4];
     if (tried) return wpp_table != 0;
     tried = 1;
-    if (!port_wings_dir) return 0;
-    wpp = read_file(WPP_FILE, &wl);
+    if (!port_wings_dir || !port_wings_pre9_dir) { port_printf("wings: both --wings-glide JPDEMO_DIR and --wings-pre9 PRE9_DIR are needed\n"); return 0; }
+    if (!load_feather()) return 0;
+    wpp = read_file(port_wings_dir, WPP_FILE, &wl);
     if (!wpp) return 0;
     if (wl < WPP_TABLE_OFF + 8) { port_printf("wings: %s is too short\n", WPP_FILE); free(wpp); return 0; }
     t = wpp + WPP_TABLE_OFF;
@@ -97,12 +138,12 @@ static int load(void) {
     }
     for (i = 0; i < 4; i++) put32(wpp_table + 4 + 4 * i, off[i]);
     free(wpp);
-    gam = read_file(SPR_FILE, &gl);
+    gam = read_file(port_wings_dir, SPR_FILE, &gl);
     if (!gam) { free(wpp_table); wpp_table = 0; return 0; }
     if (gl < 8 || memcmp(gam, "GAM", 3)) { port_printf("wings: %s is not a GAM file\n", SPR_FILE); free(gam); free(wpp_table); wpp_table = 0; return 0; }
     size = u32(gam + 4);
-    spr = malloc(size + 64);
-    memset(spr, 0, size + 64);
+    spr = malloc(size + 1024);
+    memset(spr, 0, size + 1024);
     lzDecompress(gam, spr);
     free(gam);
     /* SPR table: u16 parts, u16 offset per frame; a part is 16 bytes */
@@ -128,7 +169,7 @@ static int load(void) {
         }
         { unsigned int a = (unsigned int)(unsigned long)script; memcpy(&script[16], &a, 4); }
     }
-    port_printf("wings: demo glide frames loaded from %s\n", port_wings_dir);
+    port_printf("wings: demo glide frames loaded from %s, feather from %s\n", port_wings_dir, port_wings_pre9_dir);
     return 1;
 }
 
@@ -137,6 +178,15 @@ void port_wings_begin(void *o) {
     if (!port_cut_content || !port_wings_dir || O_SUBSTEP(o) != 0) return;
     if (!load()) return;
     if (active) return;
+    {   /* the feather texels of the PrePre 9 page over retail's (tpage 0x14 = VRAM 256,256; same place, 4 bpp) */
+        typedef struct { short x, y, w, h; } R;
+        extern int LoadImage(void *, unsigned *);
+        int i;
+        for (i = 0; i < 3; i++) {
+            R r = {256 + FEATHER_RECT[i][0] / 4, 256 + FEATHER_RECT[i][1], FEATHER_RECT[i][2] / 4, FEATHER_RECT[i][3]};
+            LoadImage(&r, (unsigned *)feather_px[i]);
+        }
+    }
     saved_wpp = WPP_DATA[2]; saved_d3c = O_D3C(o);
     WPP_DATA[2] = (char *)wpp_table;
     O_D3C(o) = (int)(unsigned long)spr_table;

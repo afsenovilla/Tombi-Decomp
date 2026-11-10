@@ -113,8 +113,8 @@ FR = {
                     "le paysage du titre est celui de cette version (rocher en flèche et rivière) au lieu du final. C'est du vrai "
                     "graphisme du jeu de l'époque ; le logo, le menu et les textes restent les finaux (le logo « オレっ！トンバ » de cette "
                     "version n'est pas utilisé : on ne sait pas comment il était disposé). Rien de ce disque n'est inclus.",
-    "l.earlytitle": "Titre précoce (optionnel) : dossier TOMBA du disque PrePre Vol. 8 (tools/prepre8.py extract) :",
-    "l.wingsglide": "Charity Wings glide in the top-down areas (optional): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingspre9": "... and folder of the extracted PrePre Vol. 9 disc (PCPX-96093) (holding TOMBA/A00002.GAM):",
     "l.experimental": "Fonctions expérimentales", "l.fps60": "60 fps (expérimental)", "nav.play": "Jouer", "nav.gfx": "Graphismes et performances",
     "nav.controls": "Commandes", "nav.mods": "Patchs et mods", "nav.cut": "Contenu coupé", "nav.log": "Journal",
     "l.uilang": "Langue du launcher", "l.starting": "Lancement du jeu...", "c.disc": "Disque", "c.saves": "Sauvegardes", "c.game": "Langue du jeu",
@@ -262,8 +262,8 @@ DE = {
                     "ist die Titellandschaft die dieser Version (Felsnadel und Fluss) statt der endgültigen. Das ist echte Spielgrafik "
                     "aus jener Zeit; Logo, Menü und Texte bleiben die endgültigen (das Logo „オレっ！トンバ“ dieser Version wird nicht "
                     "verwendet: wie es angeordnet war, ist unbekannt). Nichts von dieser Disc ist enthalten.",
-    "l.earlytitle": "Früher Titel (optional): TOMBA-Ordner der Disc PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.wingsglide": "Charity Wings glide in the top-down areas (optional): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingspre9": "... and folder of the extracted PrePre Vol. 9 disc (PCPX-96093) (holding TOMBA/A00002.GAM):",
     "l.experimental": "Experimentalfunktionen", "l.fps60": "60 fps (experimentell)", "nav.play": "Spielen", "nav.gfx": "Grafik & Leistung",
     "nav.controls": "Steuerung", "nav.mods": "Patches und Mods", "nav.cut": "Entfernte Inhalte", "nav.log": "Protokoll",
     "l.uilang": "Launcher-Sprache", "l.starting": "Spiel wird gestartet...", "c.disc": "Disc", "c.saves": "Spielstände", "c.game": "Spielsprache",
@@ -409,8 +409,8 @@ IT = {
                     "paesaggio del titolo è quello di quella versione (guglia di roccia e fiume) invece di quello finale. È vera "
                     "grafica del gioco di allora; il logo, il menu e i testi restano quelli finali (il logo «オレっ！トンバ» di quella "
                     "versione non viene usato: non si sa come fosse disposto). Di quel disco non è incluso nulla.",
-    "l.earlytitle": "Titolo antico (facoltativo): cartella TOMBA del disco PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.wingsglide": "Charity Wings glide in the top-down areas (optional): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingspre9": "... and folder of the extracted PrePre Vol. 9 disc (PCPX-96093) (holding TOMBA/A00002.GAM):",
     "l.experimental": "Funzioni sperimentali", "l.fps60": "60 fps (sperimentale)", "nav.play": "Gioca", "nav.gfx": "Grafica e prestazioni",
     "nav.controls": "Controlli", "nav.mods": "Patch e mod", "nav.cut": "Contenuti tagliati", "nav.log": "Registro",
     "l.uilang": "Lingua del launcher", "l.starting": "Avvio del gioco...", "c.disc": "Disco", "c.saves": "Salvataggi", "c.game": "Lingua del gioco",
@@ -557,8 +557,8 @@ NL = {
                     "titellandschap dat van die versie (rotspiek en rivier) in plaats van het definitieve. Dat is echte spelgrafiek "
                     "van toen; het logo, het menu en de teksten blijven de definitieve (het logo 'オレっ！トンバ' van die versie wordt "
                     "niet gebruikt: hoe het was opgemaakt is onbekend). Niets van die disc is meegeleverd.",
-    "l.earlytitle": "Vroege titel (optioneel): TOMBA-map van de disc PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.wingsglide": "Charity Wings glide in the top-down areas (optional): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingspre9": "... and folder of the extracted PrePre Vol. 9 disc (PCPX-96093) (holding TOMBA/A00002.GAM):",
     "l.experimental": "Experimentele functies", "l.fps60": "60 fps (experimenteel)", "nav.play": "Spelen", "nav.gfx": "Graphics en prestaties",
     "nav.controls": "Besturing", "nav.mods": "Patches en mods", "nav.cut": "Geschrapte inhoud", "nav.log": "Logboek",
     "l.uilang": "Taal van de launcher", "l.starting": "Het spel wordt gestart...", "c.disc": "Disc", "c.saves": "Opgeslagen spellen", "c.game": "Taal van het spel",
@@ -704,8 +704,8 @@ PT = {
                     "a paisagem do título é a dessa versão (agulha de rocha e rio) em vez da final. É arte verdadeira do jogo da "
                     "época; o logótipo, o menu e os textos continuam a ser os finais (o logótipo «オレっ！トンバ» dessa versão não é "
                     "usado: não se sabe como estava disposto). Nada desse disco é incluído.",
-    "l.earlytitle": "Título antigo (opcional): pasta TOMBA do disco PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.wingsglide": "Charity Wings glide in the top-down areas (optional): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingspre9": "... and folder of the extracted PrePre Vol. 9 disc (PCPX-96093) (holding TOMBA/A00002.GAM):",
     "l.experimental": "Funções experimentais", "l.fps60": "60 fps (experimental)", "nav.play": "Jogar", "nav.gfx": "Gráficos e desempenho",
     "nav.controls": "Controlos", "nav.mods": "Patches e mods", "nav.cut": "Conteúdo cortado", "nav.log": "Registo",
     "l.uilang": "Idioma do launcher", "l.starting": "A iniciar o jogo...", "c.disc": "Disco", "c.saves": "Jogos guardados", "c.game": "Idioma do jogo",
@@ -850,8 +850,8 @@ SV = {
                     "den versionens (klippspira och flod) i stället för det slutliga. Det är riktig spelgrafik från den tiden; "
                     "logotypen, menyn och texterna förblir de slutliga (den versionens logotyp ”オレっ！トンバ” används inte: hur den "
                     "var placerad är okänt). Ingenting från den skivan medföljer.",
-    "l.earlytitle": "Tidig titel (valfritt): TOMBA-mappen från skivan PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.wingsglide": "Charity Wings glide in the top-down areas (optional): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingspre9": "... and folder of the extracted PrePre Vol. 9 disc (PCPX-96093) (holding TOMBA/A00002.GAM):",
     "l.experimental": "Experimentfunktioner", "l.fps60": "60 fps (experimentell)", "nav.play": "Spela", "nav.gfx": "Grafik och prestanda",
     "nav.controls": "Kontroller", "nav.mods": "Patchar och moddar", "nav.cut": "Bortklippt innehåll", "nav.log": "Logg",
     "l.uilang": "Launcherns språk", "l.starting": "Startar spelet...", "c.disc": "Skiva", "c.saves": "Sparade spel", "c.game": "Spelets språk",
@@ -996,8 +996,8 @@ DA = {
                     "titlens landskab den versions (klippespir og flod) i stedet for det endelige. Det er ægte spilgrafik fra dengang; "
                     "logoet, menuen og teksterne forbliver de endelige (den versions logo »オレっ！トンバ« bruges ikke: hvordan det var "
                     "placeret, vides ikke). Intet fra den disk medfølger.",
-    "l.earlytitle": "Tidlig titel (valgfrit): TOMBA-mappen fra disken PrePre Vol. 8 (tools/prepre8.py extract):",
-    "l.wingsglide": "Charity Wings glide in the top-down areas (optional): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
+    "l.wingspre9": "... and folder of the extracted PrePre Vol. 9 disc (PCPX-96093) (holding TOMBA/A00002.GAM):",
     "l.experimental": "Forsøgsfunktioner", "l.fps60": "60 fps (eksperimentel)", "nav.play": "Spil", "nav.gfx": "Grafik og ydeevne",
     "nav.controls": "Styring", "nav.mods": "Patches og mods", "nav.cut": "Fjernet indhold", "nav.log": "Log",
     "l.uilang": "Launcherens sprog", "l.starting": "Starter spillet...", "c.disc": "Disk", "c.saves": "Gemte spil", "c.game": "Spillets sprog",
