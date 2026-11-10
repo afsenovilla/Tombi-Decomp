@@ -48,6 +48,7 @@ logo.
 | PrePre8 grey bird enemy | TIM000 (~16 poses); candidate type 15, `func_8003D40C` in TOMBA.EXE. | No PAL AI matched; decoration or gallery only. Hard for gameplay. |
 | PrePre8 15 sound samples | JOCHU 1, 5, 11, 12, 19-21, 23-25, 27; S_AREA01 0, 25, 28, 29. | Easy to bank; no evidence of where they played. |
 | PrePre8 OPTION MODE / enemy viewer | 0x800854B4 (`OPTION MODE`, music/sound/CD/memory-card tests), 0x80083D88 (`enemy=%01d`), dead code in that build. | Port-only re-implementation; PAL has no such code. |
+| PrePre9 Tombi animations retail dropped (lift, pull, punches, somersault, carry-walk...) | PCPX-96093 `TOMBA/AREA01/A007.000` (379 frames, 106 not in retail) + 20 orphan scripts in `TOMBA/TOMBA.EXE` 0x80011A50..0x800125E8 with their tick counts (section "PrePre Vol. 9" below). | Gallery / port-only: the frames and SPR parts are on the demo disc (read at run time like the Pre8 title), the scripts give the timing, but no state code and no object they act on survive in Pre9 (placements, pages and code checked: nothing demo-only), so a mechanic cannot be rebuilt. |
 | GoGoCart cacti / sign (AREA06) | VRAM of `A001.GAM` (577,256), (516,256), (581,348); no SPR part nor model polygon; D004.000 has 60 models and `a06AddModelsBySection` uses all 60. | New sprite parts and placement: ours. |
 | AREA17 B201 page (backpack man, strap-shirt big man, bald old man, helmet walker; side view) | **Not a cut-content finding: withdrawn.** The user reports the backpack man in the final game. The same 192 x 256 page is loaded, byte-identical, by AREA10 s0 (B002, VRAM x 384) and s4 (B403, x 640), AREA16 s5/s6 (B501, B601), AREA17 s2/s5 (B201, B501) and AREA18 s1 (B101). Our static checks find no reference to its figures: no SPR table frame of any area list whose parts bound one of them, no WPP bank holding their pixels, no 16-byte part record pointing at them. These checks miss code-built primitives and other drawing paths, so "no static reference" here does not mean unused. The retail section, SPR id and address are not known yet. The B201 page renders with a real palette: AREA11/CLUT02 row 36 (same row in AREA17/CLUT03, AREA17/CLUT06, AREA18/CLUT02; the Male Lumberjack Town Resident's row) colours its side-view man with a backpack exactly like TCRF's colour sprite (all 14 colours in that row; silhouette close, not pixel-exact, TCRF's frame differs). Our identification. | Find the drawing path (dynamic capture in AREA10 s0/s4 or AREA17 s2) before calling any frame unused. |
 | AREA19's own overlay `X019.BIN` (and `X119`..`X819`) | On the disc (`SYSTEM/` and `AREA19/`, 190,180 B, sha1 `94060c10...`) but **never loaded**: none of the nine file tables lists it (notes/cdfiles.md), and AREA19's load lists name `AREA19/X002.BIN`, byte-identical to AREA02's `X002.BIN` (sha1 `646aa8b5...`). JP does the same: AREA19 ships `X02.BIN` and `X19.BIN`, its lists name only `X02`. So the purified village runs AREA02's code; X019 is a separate, dead AREA19 build. | Study what X019 does differently from X002 (its area part, from 0x80115EA4); a port switch to run it would be ours. Unknown cost. |
@@ -709,3 +710,91 @@ the disc data (not seen in-game yet).
   AREA00/01, 22 objects USA added in AREA03 section 2, and JP's AREA12 copy differing a lot from USA's.
 - Checked, nothing new: USA/JP-only code (rewrites of existing features), event ids, files outside the file tables
   (the same 31 on all three discs), event menu order and icons, debug strings.
+
+## PrePre Vol. 9 (PCPX-96093): Tombi animations and art retail does not have (2026-11-10)
+
+Everything below was recomputed from the two discs (PrePre 9 extracted with `tools/disc_fetch.sh PREPRE9`, PAL in
+`game/disc/fs`); the scratch scripts were not committed, the method is described so it can be redone with tools/anim.py,
+tools/wpp.py, tools/vram.py and tools/area000.py.
+
+### Frames
+
+- Pre9 player frame table: `TOMBA/AREA01/A007.000` (byte-identical to `TOMBA/AREA02/D105.000`), WPP table of **379**
+  frames, SPR parts in `AREA01/A008.GAM` (unpacked +0x14A0, 379 frames), palette rows 0/1 of `AREA01/CLUT01.GAM`.
+  Retail: `AREA00/A004.000`, 358 frames.
+- Compared by md5 of the decoded frame, then by silhouette overlap (bounding-box aligned, >= 0.90 = retouched):
+  **173 identical, 100 retouched, 106 new** (not in retail at all; also checked against all 41 WPP tables of every
+  retail area, 13,017 frames: no match).
+- New frames, runs: 72, 98, 109, 112-124, 138-140, 177-179, 195-203, 219-228, 237-242, 245, 255-258, 264-292,
+  298-300, 304-306, 317-326, 331, 334-340, 375.
+- Retail frames 265-357 (idle breathing, roll land, victory pose, the later additions) do not exist in Pre9.
+
+### Player animation table, paired by id
+
+Pre9's table is in `TOMBA/X01.BIN` +0x380: **56 ids** (retail: 90 in X0nn +0x3DC). The same id is the same move in both
+builds (the state code selects ids), so pairing by id is exact. Mean silhouette overlap of the two sequences aligned in time:
+
+| id | retail name | Pre9 | retail | verdict |
+|---:|---|---|---|---|
+| 0, 19 | idle | one held frame (0) | 10 frames: 0 for 360 ticks, then 269-275 look-around loop | retail animated it |
+| 5 | crouch | 6 frames | 8 frames | changed |
+| 33 | crouch walk | dive to crouch 331-338 (6 new frames) | different move | **replaced** |
+| 37 | anim_37 | shrug 177-179 (new) | different pose | **replaced** |
+| 49 | roll land | somersault 219-228 (10 new frames) | roll land 169-178 | **replaced** |
+| 1, 15, 48, 54, 55 | walk, jump alt, get up, 54, get up slow | | | retouched (0.85-0.97) |
+| the other 41 | | | | same (>= 0.97) |
+
+Ids 56-89 exist only in retail.
+
+### Orphan player scripts in TOMBA.EXE
+
+Brute scan of the exe data for 8-byte animation entries (tools/anim.py format) that use the new frames. **20 scripts** sit in
+the player-script region (0x80011928..0x8001271C, between the 56 referenced ones); nothing points at them: no data word in
+TOMBA.EXE, X01.BIN, X02.BIN, DSPSUB*.BIN or INFO.BIN, no lui/addiu pair. They were dropped from the table before Pre9
+(1997-11) and the data stayed. Ticks are game ticks (40 ms); every one ends in `hold` (last frame kept, caller signalled),
+the shape of retail's multi-stage actions.
+
+| script (vram) | frames / ticks | end | reading of the pose |
+|---|---|---|---|
+| 0x80011A50 | 112/12 113/8 114/16 | hold | lift, part 1: crouch and grab (long holds) |
+| 0x80011ECC | 115/7 116/9 117/10 118/7 119/9 120/10 | hold | lift, part 2: raise to the chest / overhead |
+| 0x80011EFC | 121/6 122/5 123/4 124/5 | hold | lift, part 3: lower / put down |
+| 0x800123B8 | 255/10 256/6 257/10 258/14 | hold | pull something with both hands, held on the last tug |
+| 0x80012178 / 0x80012198 / 0x800121B8 | 195-197, 198-200, 201-203 (6 ticks each, ping-pong) | hold | three punch / strike poses with the leg raised |
+| 0x80012400 | 264/2 265/2 266/3 267/4 268/60 | hold | fast wind-up, 60-tick hold |
+| 0x80012428 | 269-276, 10-12 ticks each | hold | slow heavy walk (carrying?) |
+| 0x80012468 | 277-281 ping-pong, 7-11 ticks | hold | strain / rock back and forth |
+| 0x800124A8 | 282/10 283/10 284/10 283/10 | hold | |
+| 0x800124C8 | 285-292, 5-8 ticks | hold | flip with kicks |
+| 0x80012308 | 238/32 239/8 240/24 239/10 | hold | lying down, two long holds |
+| 0x80012328 | 241/6 242/1 243/2 244/3 245/4 244/1 243/1 242/1 | hold | scream / shiver |
+| 0x80011FAC | 138/10 139/8 140/10 139/8 | hold | arms up, seen from behind |
+| 0x80012530 | 298/10 299/10 300/10 299/10 | hold | |
+| 0x80012550 | 304/20 305/8 306/14 305/8 | hold | guard pose |
+| 0x800125C8 | 317/3 318/4 319/5 320/6 | hold | crouched with dotted effect boxes (charge?) |
+| 0x800125E8 | 321/14 322/10 323/9 324/14 325/10 326/8 | loop | hunched walk, follows 317-320 |
+| 0x80011B80 | 339/32 340/60 | hold | |
+
+The 84 frames these scripts use are exactly the new frames no table reaches; the demo cannot play them.
+
+### What was checked for the object they act on (nothing demo-only found)
+
+- **Placement records** (APD 16-byte records, PAL format, `AREA01/D004.GAM` = `D104.GAM`, 315 records / 164 world
+  positions; `AREA02/D008.GAM` + `D106.GAM`, 9): matched to retail AREA01 / AREA02 by position. Types are renumbered
+  between the builds (Pre9 L4 type 13 at (2876,-300,-45) is retail L4 type 7 `updateAreaMechanisms` at the same spot),
+  so the match is by coordinates: 8 Pre9 records have no retail object within 24 units, all known objects moved a few
+  units (two scenery sprites, three items, one chest) plus one L2 type 13 at (4187,-378,618) whose handler
+  (X01.BIN +0x2E8F8, overlay base 0x800ED548) is a four-state stub that only calls two exe functions. AREA02 is
+  identical record for record.
+- **Texture pages**: `AREA01/A002.GAM` (objects: chests, barrels, pots, arrow sign, a rolling log in 4 views at page
+  x 768-880, y 220-240) differs from retail's `AREA01/A002.GAM` in 21 regions, all retouches; the log is in retail
+  AREA01 and AREA07 too. `AREA01/B000.GAM` 3 retouches (the slanted two-pronged trident at (208,192) / (208,216) is the
+  Koma pig's); `AREA02/B001.000` identical, `B003.000` 140 texels. `A001` / `A003` of Pre9 are 4x the retail size
+  (retail reorganised them) and `AREA01/A005`, `AREA02/A003` have no retail counterpart: not comparable 1:1.
+- **Pre8** (PCPX-96084) `TOMBA/AREA00/PLAYER.WPP`: 313 frames of older, smaller art (24-32 px wide, one palette at
+  TOMBA.EXE +0x989A8, uploaded to VRAM (0,480)); no frame identical to Pre9 or retail (21 / 19 similar by silhouette);
+  its script tables in the exe only cover NPC frames (<= 87), Tombi is animated by code. Pre8 has back-flips, a
+  head-first fall and a spinning kick (frames 96-111, 115-125, 208-223) that neither Pre9 nor retail keep.
+
+Conclusion: the lift / pull mechanic was programmed with its timing and then removed before PrePre 9; the object it
+used is in none of the demo's data. Only the frames and these scripts remain.
