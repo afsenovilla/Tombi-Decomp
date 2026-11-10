@@ -397,3 +397,22 @@ static int c3d_start(void) {
 }
 const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present };
 #endif
+
+/* ---- a worker thread for the panel's renders (runtime/panel.c): on another core where there is one (New 3DS: core 2;
+   the Old 3DS's second core with the time the system grants), else under the main thread, in the time it sleeps */
+static LightEvent wk_go;
+static void (*wk_job)(void);
+static void wk_main(void *arg) { (void)arg; for (;;) { LightEvent_Wait(&wk_go); wk_job(); } }
+int port_n3ds_worker_start(void (*job)(void)) {
+    LightEvent_Init(&wk_go, RESET_ONESHOT);
+    wk_job = job;
+    s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
+    bool n3 = false; APT_CheckNew3DS(&n3);
+    APT_SetAppCpuTimeLimit(50);           /* (the second core of an Old 3DS: half of it) */
+    static const int cores[] = { 2, 1, -2 };
+    Thread t = 0; int c = n3 ? 0 : 1, used = 0;
+    for (; c < 3 && !t; c++) { t = threadCreate(wk_main, 0, 256 * 1024, prio + 1, cores[c], false); used = cores[c]; }
+    port_printf("[3ds] panel render thread: %s (core %d)\n", t ? "started" : "none", used);
+    return t != 0;
+}
+void port_n3ds_worker_go(void) { LightEvent_Signal(&wk_go); }

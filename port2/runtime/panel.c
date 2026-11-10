@@ -728,25 +728,14 @@ static void panel_time_log(unsigned long long us) {
     sum = mx = 0; n = 0; side_raster_n = 0; side_raster_us = 0;
 }
 #ifdef __3DS__
-#include <3ds.h>
-static LightEvent pw_go;
+/* the worker thread that draws the panel (n3ds/pica_c3d.c has the thread: libctru's headers define u32 too) */
+int port_n3ds_worker_start(void (*job)(void));   /* 1: a thread runs job() after each port_n3ds_worker_go() */
+void port_n3ds_worker_go(void);
 static volatile int pw_state;            /* 0 idle, 1 rendering, 2 a canvas is ready */
-static void pw_main(void *arg) {
-    (void)arg;
-    for (;;) { LightEvent_Wait(&pw_go); render(); pw_state = 2; }
-}
+static void pw_job(void) { render(); pw_state = 2; }
 static int n3ds_worker_ok(void) {
     static int st;                        /* 0 not tried, 1 running, -1 none */
-    if (st) return st > 0;
-    LightEvent_Init(&pw_go, RESET_ONESHOT);
-    s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
-    bool n3 = false; APT_CheckNew3DS(&n3);
-    APT_SetAppCpuTimeLimit(50);           /* (the second core of an Old 3DS: half of it) */
-    static const int cores[] = { 2, 1, -2 };
-    Thread t = 0; int c = n3 ? 0 : 1;
-    for (; c < 3 && !t; c++) t = threadCreate(pw_main, 0, 256 * 1024, prio + 1, cores[c], false);
-    st = t ? 1 : -1;
-    port_printf("[panel] 3DS render thread: %s (core %d)\n", t ? "started" : "none", t ? cores[c - 1] : 0);
+    if (!st) st = port_n3ds_worker_start(pw_job) ? 1 : -1;
     return st > 0;
 }
 #endif
@@ -772,10 +761,10 @@ void port_panel_vblank(void) {
             if (port_panel_window) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
             pw_state = 0;
         }
-        if (pw_state == 0 && (!(frames++ & 3) || scr_busy())) { inq_run(); pw_state = 1; LightEvent_Signal(&pw_go); }
+        if (pw_state == 0 && (!(frames++ & 3) || scr_busy())) { inq_run(); pw_state = 1; port_n3ds_worker_go(); }
         return;
     }
-    while (pw_state == 1) svcSleepThread(1000000);   /* (a dump, or no worker: here, as everywhere else) */
+    { extern void port_sleep_us(unsigned long long); while (pw_state == 1) port_sleep_us(1000); }   /* (a dump, or no worker: here, as everywhere else) */
     pw_state = 0;
     if (!dump && (frames++ & 3) && !scr_busy()) return;
 #else
