@@ -262,7 +262,7 @@ differences that came up again and again (worth trying first on the next functio
 - round 2 left three addresses (0x8003A770, 0x8004B50C, 0x80116F94) with two `// VERSION SLPM_80165` lines in
   `src/`; round 3 removed the duplicates (one VERSION line per address again).
 
-**Hand pass, round 3 (2026-11-10): 1315 -> 1360 of 1717 functions, 50.29 % -> 54.20 % of code** (after the
+**Hand pass, round 3 (2026-11-10): 1315 -> 1381 of 1717 functions, 50.29 % -> 55.13 % of code** (after the
 round's first commit, a6df66c, which had taken it from 50.11 %; the function count drops by one:
 `func_8010FD38`, the demo's play-time limit, got its real size; splat had cut it at 0x8010FE8C).
 From `tools/demo_pair.py` twins again, this time with the PrePre 8 and beta builds in the pool (their game dirs
@@ -289,11 +289,22 @@ missing). New demo-wide differences, worth trying first:
   report;
 - globals that splat names field by field (`D_800A2A1C`, `D_800A2A46`, ...) need one extern per field only for the
   relocation names; objdiff runs with `functionRelocDiffs: none`, so instruction identity is what counts.
+- about twenty functions had no usable twin and were written from the demo code: the front-end task loop
+  `func_80018BBC` and its modes (`func_80019384`, `func_80018D8C`, movie `func_80018EC8`), the gameplay task
+  `func_8001A7F0` (it ends the area when the play-time limit `func_8010FD38` runs out), pad input, BGM open /
+  restore, reward handlers, weapon hits. Small demo-only helpers are often inlined into the player steps as they
+  are: the air spin `func_800EC084` is `playerAirSpinToFall` of `func_80105FD4` (as a `static __inline__`);
+- more codegen details that decided a match: an empty `case 2: break;` turns a two-case switch into retail's
+  compare tree; `(*p)++` and `*p = *p + 1` schedule differently; `x + 0xff` where retail adds 255 to a byte;
+  the Psy-Q bitfield form of `setlen` / `addPrim` (`P_TAG` with `addr:24, len:8`) for primitive code
+  (`func_8004829C`); a `register T *p asm("$4")` for a pointer retail keeps in `a0`.
 
 Open near misses (drafted, not installed): `func_8001A9EC` (gameplay frame, 16 lines: the scheduler moves
-the inventory-flag store ahead of the task pointer load), `func_800182E0` (text grid put, register allocation), the
-camera clamp pair `func_8002796C` / `func_8002A02C` (register allocation), and `func_8010FED8_slpm80165` (still cut
-in three by splat at 0x801100D0 and 0x801102E4; needs its size, 0x470, and C for the whole function).
+the inventory-flag store ahead of the task pointer load), `func_800194D0` (game task loop, the same store order),
+`func_800182E0` (text grid put, register allocation), the camera clamp of `func_8002796C` / `func_8002A02C` /
+`func_8002A43C` (register allocation of the same three-line clamp), `func_8011BDA0_slpm80165` (s0 / s1
+swapped), and `func_8010FED8_slpm80165` (still cut in three by splat at 0x801100D0 and 0x801102E4; needs its size,
+0x470, and C for the whole function).
 
 - **Plumbing (1-2 days):** add `config/slpm80165/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate
