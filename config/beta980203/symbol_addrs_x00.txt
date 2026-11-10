@@ -318,6 +318,7 @@ a00BackdropSpritesStep4 = 0x8011E4D8; // type:func size:0x140  PAL x000 0x8011AC
 updateA00BackdropSprites = 0x8011E618; // type:func size:0x33C  PAL x000 0x8011AD98
 updateA00PoolType16 = 0x8011E954; // type:func size:0x10C  PAL x000 0x8011B0D4
 updateA00PoolType17 = 0x8011EA60; // type:func size:0x108  PAL x000 0x8011B1E0
+updateA00PoolType24 = 0x8011EB68; // type:func size:0x1BC  PAL x000 0x8011B2E8
 a00UnlayeredType0DShowMessage = 0x8011ED24; // type:func size:0x12C  PAL x000 0x8011B4B0
 a00TutorialHintJumpMessage = 0x8011EE50; // type:func size:0x104  PAL x000 0x8011B5DC
 updateA00TutorialHint = 0x8011EF54; // type:func size:0x110  PAL x000 0x8011B6E0
