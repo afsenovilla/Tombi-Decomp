@@ -1,0 +1,118 @@
+// VERSION BETA_980203 beta980203 80031DF8 1096
+#if defined(VERSION_BETA_980203)
+// Beta version: PAL playerEffect4EStepC.c without the pad vibration.
+#include "plx.h"
+#include "TOBJ.H"
+typedef struct { short w0; short w2; } P;
+typedef struct { void **tab; int a; int b; } AT;
+extern AT PLAYER_EFFECT_4E_ANIM_TABLE[];
+extern unsigned short TICK_COUNT;
+extern TObj PLAYER;
+extern P *D_800A6078, *D_800A607C;
+extern void AnimLoadDuration(TObj *);
+extern int AnimAdvance(TObj *);
+extern void startPadVibration(int, int, int, int);
+extern short MulCos(int, int);
+extern int MulNegSinScaled(int, int);
+
+void playerEffect4EStepC(TObj *o)
+{
+    unsigned char v;
+    int t;
+    switch (o->state) {
+    case 0:
+        switch (o->b0c) {
+        case 5:
+            o->d84 = 0;
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[5];
+            break;
+        case 6:
+            o->d84 = 0x56;
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[6];
+            break;
+        case 7:
+            o->d84 = 0xab;
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[7];
+            break;
+        case 8:
+            o->d84 = 0x2c;
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[5];
+            break;
+        case 9:
+            o->d84 = 0x7f;
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[6];
+            break;
+        case 10:
+            o->d84 = 0xd4;
+            o->anim = PLAYER_EFFECT_4E_ANIM_TABLE[o->subtype].tab[7];
+            break;
+        }
+        AnimLoadDuration(o);
+        o->d88 = 0;
+        o->timer = 0xb4;
+        o->state++;
+    case 1:
+        o->timer--;
+        o->visible = PLAYER.visible;
+        if (o->timer >= 0x3d) {
+            if (o->b6b < 0x7f)
+                v = o->b6b + 8;
+            else
+                v = o->b6b;
+        } else if (o->timer < 0) {
+            if (PLX.s6118 > 0) PLAYER.active = 3; else PLAYER.active = 1;
+            PLX.b6104 = 3;
+            o->b6b = 0;
+            o->b04 = 2;
+            goto anim;
+        } else {
+            if (o->b6b)
+                v = o->b6b - 2;
+            else
+                v = 0;
+        }
+        o->b6b = v;
+    anim:
+        AnimAdvance(o);
+        switch (o->b0c) {
+        case 0:
+            o->h->p.whole = PLAYER.h->p.whole;
+            o->y.p.whole = PLAYER.y.p.whole - 8;
+            o->d->p.whole = PLAYER.d->p.whole;
+            break;
+        case 5:
+            o->h->p.whole = PLAYER.h->p.whole + MulCos(*(short *)&o->d84, 8);
+            o->y.p.whole = PLAYER.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 28) - 8);
+            o->d->p.whole = PLAYER.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            break;
+        case 6:
+            o->h->p.whole = PLAYER.h->p.whole + MulCos(*(short *)&o->d84, 16);
+            o->y.p.whole = PLAYER.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 16) - 8);
+            o->d->p.whole = PLAYER.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            break;
+        case 7:
+            o->h->p.whole = PLAYER.h->p.whole + MulCos(*(short *)&o->d84, 24);
+            o->y.p.whole = PLAYER.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 8) - 8);
+            o->d->p.whole = PLAYER.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            break;
+        case 8:
+            o->h->p.whole = PLAYER.h->p.whole + MulCos(*(short *)&o->d84, 4);
+            o->y.p.whole = PLAYER.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 24) - 8);
+            o->d->p.whole = PLAYER.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            break;
+        case 9:
+            o->h->p.whole = PLAYER.h->p.whole + MulCos(*(short *)&o->d84, 20);
+            o->y.p.whole = PLAYER.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 20) - 8);
+            o->d->p.whole = PLAYER.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            break;
+        case 10:
+            o->h->p.whole = PLAYER.h->p.whole + MulCos(*(short *)&o->d84, 28);
+            o->y.p.whole = PLAYER.y.p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 12) - 8);
+            o->d->p.whole = PLAYER.d->p.whole + (short)(MulNegSinScaled(*(short *)&o->d84, 4) - 4);
+            break;
+        }
+        o->d84 = (o->d84 + 0x10) & 0xff;
+        break;
+    }
+}
+#endif

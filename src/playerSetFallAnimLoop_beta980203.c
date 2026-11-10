@@ -1,0 +1,29 @@
+// VERSION BETA_980203 x00 800FAD3C 196
+#if defined(VERSION_BETA_980203)
+// Beta version: PAL x008 playerSetFallAnimLoop.c: keeps the velocities and PLAYER_EXT->b8.
+#include "TOBJ.H"
+typedef struct { char pad[8]; unsigned char b8; char pad2[0x2c - 9]; short cur; unsigned short prev; } Cam;
+extern Cam *PLAYER_EXT;
+extern void FUN_800efc04(TObj *);
+extern void FUN_8001fe94(TObj *, int);
+
+void playerSetFallAnimLoop(TObj *o)
+{
+    Cam *p = PLAYER_EXT;
+    p->cur = 4;
+    if (p->prev != 4) {
+        p->cur = 4;
+        FUN_800efc04(o);
+        FUN_8001fe94(o, 1);
+        PLAYER_EXT->prev = PLAYER_EXT->cur;
+    }
+    *(unsigned char *)&o->wac = 1;
+    o->b9c = 2;
+    o->timer = 10;
+    o->d84 = 0;
+    o->d88 = (o->animFrame & 1) ? 0xf0 : 0x10;
+    o->d8c = (o->animFrame & 1) ? 0x18 : 0xe8;
+    o->step = 2;
+    o->state = 3;
+}
+#endif
