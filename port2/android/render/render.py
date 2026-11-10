@@ -2,11 +2,14 @@
 """Real renders of the Android launcher on a PC, without the Android SDK: the app's own LauncherActivity / Library code
 drawn by Robolectric's native graphics (Android's Skia, the same Canvas the device uses) into PNGs at 1920x1080.
 
-  python3 port2/android/render/render.py OUT_DIR [--pal FS] [--usa FS] [--uilang N]
+  python3 port2/android/render/render.py OUT_DIR [--pal FS] [--usa FS] [--uilang N] [--discs DIR] [--test NAME]
 
   FS: a folder with the SYSTEM/ files of the player's own disc (game_usa/fs, an extracted PAL disc ...): the cards'
   logos are cut from it as on the device; without it the cards show the names.  --uilang: LauncherActivity.UI_LANGS
-  index (default 2 = Español, 1 = English).  The PNGs and what RenderTest prints (migration, key / touch navigation,
+  index (default 2 = Español, 1 = English).  --discs: a folder of files to add as the player would pick them (disc
+  images, .zip files ...: RenderTest.addFlow, in name order), with the real disc check: port2/android/disccheck.c built
+  for the PC (gcc + the JDK's jni.h, no .chd) and loaded by the launcher as on the device.  --test: one test method
+  (render, migrateAndKeys, addFlow).  The PNGs and what RenderTest prints (migration, key / touch navigation,
   the arguments per version) are the result.
 
 Needs java + javac (17+), mvn and network access to Maven Central (its Google mirror) and Google's Maven: aapt2
@@ -21,6 +24,7 @@ ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDe
 ap.add_argument("out")
 ap.add_argument("--pal"); ap.add_argument("--usa")
 ap.add_argument("--uilang", default="2")
+ap.add_argument("--discs"); ap.add_argument("--test")
 ap.add_argument("--work", default=os.path.join(ROOT, "build", "android-render"))
 a = ap.parse_args()
 W = os.path.abspath(a.work); os.makedirs(W, exist_ok=True)
@@ -98,11 +102,30 @@ srcs += glob.glob(os.path.join(HERE, "src", "io", "github", "tombi", "port", "*.
 classes = os.path.join(W, "classes"); shutil.rmtree(classes, ignore_errors=True); os.makedirs(classes)
 sh(["javac", "-nowarn", "-source", "8", "-target", "8", "-cp", os.pathsep.join(cp + [plain]), "-d", classes] + srcs)
 
+# the launcher's disc check (libtombidisc.so) for the PC: the import runs as on the device
+native = os.path.join(W, "native"); os.makedirs(native, exist_ok=True)
+jh = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(shutil.which("javac")))), "include")
+try:
+    sh(["gcc", "-O2", "-shared", "-fPIC", "-I" + jh, "-I" + os.path.join(jh, "linux"), "-I" + os.path.join(ROOT, "port2", "include"),
+        os.path.join(ROOT, "port2", "android", "disccheck.c"), os.path.join(ROOT, "port2", "shims", "cd_chd.c"),
+        "-o", os.path.join(native, "libtombidisc.so")])
+except (subprocess.CalledProcessError, OSError) as e:
+    print("no PC libtombidisc.so (%s): the import stops before the disc check" % e)
+
 # 4. the renders
 os.makedirs(a.out, exist_ok=True)
-props = ["-Drobolectric.offline=true", "-Drobolectric.dependency.dir=" + deps, "-Dout=" + os.path.abspath(a.out), "-Duilang=" + a.uilang]
+props = ["-Djava.library.path=" + native, "-Drobolectric.offline=true", "-Drobolectric.dependency.dir=" + deps, "-Dout=" + os.path.abspath(a.out), "-Duilang=" + a.uilang]
 if a.pal: props.append("-Dpal=" + os.path.abspath(a.pal))
 if a.usa: props.append("-Dusa=" + os.path.abspath(a.usa))
-r = subprocess.run(["java"] + props + ["-cp", os.pathsep.join([classes, os.path.join(W, "cfg")] + cp + [plain]),
-                                       "org.junit.runner.JUnitCore", "io.github.tombi.port.RenderTest"])
+if a.discs: props.append("-Ddiscs=" + os.path.abspath(a.discs))
+cpath = os.pathsep.join([classes, os.path.join(W, "cfg")] + cp + [plain])
+if a.test:   # one method (JUnitCore runs whole classes)
+    open(os.path.join(W, "One.java"), "w").write(
+        "public class One { public static void main(String[] a) { org.junit.runner.Result r = new org.junit.runner.JUnitCore().run("
+        "org.junit.runner.Request.method(io.github.tombi.port.RenderTest.class, a[0])); for (org.junit.runner.notification.Failure f : "
+        "r.getFailures()) System.out.println(f.getTrace()); System.out.println(r.wasSuccessful() ? \"OK\" : \"FAILED\"); System.exit(r.wasSuccessful() ? 0 : 1); } }\n")
+    sh(["javac", "-nowarn", "-cp", cpath, "-d", classes, os.path.join(W, "One.java")])
+    r = subprocess.run(["java"] + props + ["-cp", cpath, "One", a.test])
+else:
+    r = subprocess.run(["java"] + props + ["-cp", cpath, "org.junit.runner.JUnitCore", "io.github.tombi.port.RenderTest"])
 sys.exit(r.returncode)

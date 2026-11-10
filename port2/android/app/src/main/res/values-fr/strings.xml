@@ -42,7 +42,7 @@
     <string name="disc_rev0">Disque Tombi! PAL Rev 0 : (build de juillet 1998). Le port a besoin de la Rev 1 d\'août 1998 (SCES-01331 ou SCES-01330) : la Rev 0 a d\'autres overlays et ne démarre pas.</string>
     <string name="disc_nomain0">Aucun EXE/MAIN0.EXE dans cette image (choisissez le .bin, l\'.iso ou le .chd ; pour un .cue, sélectionnez aussi le .bin).</string>
     <string name="disc_needbin">Sélectionnez le .bin avec le .cue.</string>
-    <string name="disc_howto">Choisissez l\'image de votre propre disque Tombi! (.bin, .iso, .chd, ou .cue avec son .bin) : ses fichiers sont extraits dans le stockage de l\'application (environ 500 Mo, vérifiés fichier par fichier ; l\'image elle-même n\'est pas conservée). L\'application ne contient aucune donnée du jeu.</string>
+    <string name="disc_howto">Choisissez l\'image de votre propre disque Tombi! (.bin, .iso, .chd, .cue avec son .bin, ou un .zip qui la contient) : ses fichiers sont extraits dans le stockage de l\'application (environ 500 Mo, vérifiés fichier par fichier ; l\'image elle-même n\'est pas conservée). L\'application ne contient aucune donnée du jeu.</string>
     <string name="disc_missing">Aucune image de disque choisie : choisissez votre disque.</string>
     <string name="cancel">Annuler</string>
     <string name="disc_cancelled">Copie annulée : les fichiers partiels ont été supprimés.</string>
@@ -132,7 +132,7 @@
     <!-- the game library (Library.java, stage U2) -->
     <string name="lib_title">Vos jeux</string>
     <string name="lib_add">Ajouter un jeu</string>
-    <string name="lib_add_sub">Image de votre propre disque : .bin, .iso, .chd (ou .cue avec son .bin)</string>
+    <string name="lib_add_sub">Image de votre propre disque : .bin, .iso, .chd, .zip (ou .cue avec son .bin)</string>
     <string name="lib_ready">Prêt à jouer</string>
     <string name="lib_unsupported">Pas encore pris en charge</string>
     <string name="lib_nolib">Absent de cette version de l\'app</string>
@@ -145,6 +145,16 @@
     <string name="lib_from">Disque : %1$s</string>
     <string name="disc_unknown">Disque Tombi! / Tomba! inconnu (%1$s, sha1 de l\'exécutable %2$s).</string>
     <string name="disc_added">%1$s ajouté à vos jeux.</string>
+    <string name="disc_phase_unzip">Décompression…</string>
+    <string name="disc_adding">Ajout : %1$s</string>
+    <string name="disc_add_fail">Impossible d\'ajouter le jeu : %1$s</string>
+    <string name="disc_notimage">« %1$s » n\'est pas une image de disque PlayStation. Choisissez l\'image de votre disque : .bin (avec son .cue), .iso, .chd, ou un .zip qui la contient.</string>
+    <string name="disc_archive">« %1$s » est une archive .7z ou .rar, que l\'application ne sait pas ouvrir. Décompressez-la d\'abord (ou utilisez un .zip) et choisissez l\'image du disque.</string>
+    <string name="disc_zip_noimage">« %1$s » ne contient aucune image de disque (.bin, .iso, .img ou .chd).</string>
+    <string name="disc_zip_nested">« %1$s » contient une autre archive, pas une image de disque. Décompressez-la d\'abord et choisissez l\'image (ou un .zip de celle-ci).</string>
+    <string name="disc_zip_files">« %1$s » contient les fichiers du disque (%2$s), pas son image. Le jeu a besoin de l\'image complète : .bin avec son .cue, .iso ou .chd (aussi dans un .zip).</string>
+    <string name="disc_zip_cue">« %1$s » contient le .cue, mais pas la piste de données qu\'il désigne (%2$s).</string>
+    <string name="disc_zip_bad">Impossible de lire « %1$s » (zip endommagé, ou méthode de compression inconnue de l\'application : %2$s). Décompressez-le et choisissez l\'image du disque.</string>
     <string-array name="lib_styles"><item>Carrousel</item><item>Liste</item><item>Couverture</item></string-array>
     <string-array name="lib_regions"><item>Europe</item><item>États-Unis</item><item>Japon</item></string-array>
 </resources>

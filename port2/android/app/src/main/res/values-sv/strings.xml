@@ -42,7 +42,7 @@
     <string name="disc_rev0">Tombi! PAL Rev 0-skiva: (bygge från juli 1998). Porten behöver Rev 1 från augusti 1998 (SCES-01331 eller SCES-01330): Rev 0 har andra overlays och startar inte.</string>
     <string name="disc_nomain0">Ingen EXE/MAIN0.EXE i den avbilden (välj .bin, .iso eller .chd; för en .cue, välj även .bin).</string>
     <string name="disc_needbin">Välj .bin tillsammans med .cue.</string>
-    <string name="disc_howto">Välj avbilden av din egen Tombi!-skiva (.bin, .iso, .chd eller .cue tillsammans med sin .bin): filerna packas upp i appens lagring (cirka 500 MB, kontrollerade fil för fil; själva avbilden sparas inte). Appen innehåller inga speldata.</string>
+    <string name="disc_howto">Välj avbilden av din egen Tombi!-skiva (.bin, .iso, .chd, .cue tillsammans med sin .bin, eller en .zip som innehåller den): filerna packas upp i appens lagring (cirka 500 MB, kontrollerade fil för fil; själva avbilden sparas inte). Appen innehåller inga speldata.</string>
     <string name="disc_missing">Ingen skivavbild vald: välj din skiva.</string>
     <string name="cancel">Avbryt</string>
     <string name="disc_cancelled">Kopieringen avbröts: de ofullständiga filerna togs bort.</string>
@@ -132,7 +132,7 @@
     <!-- the game library (Library.java, stage U2) -->
     <string name="lib_title">Dina spel</string>
     <string name="lib_add">Lägg till spel</string>
-    <string name="lib_add_sub">Avbild av din egen skiva: .bin, .iso, .chd (eller .cue med sin .bin)</string>
+    <string name="lib_add_sub">Avbild av din egen skiva: .bin, .iso, .chd, .zip (eller .cue med sin .bin)</string>
     <string name="lib_ready">Redo att spela</string>
     <string name="lib_unsupported">Stöds inte än</string>
     <string name="lib_nolib">Ingår inte i den här versionen av appen</string>
@@ -145,6 +145,16 @@
     <string name="lib_from">Skiva: %1$s</string>
     <string name="disc_unknown">Inte en känd Tombi!/Tomba!-skiva (%1$s, sha1 för programfilen %2$s).</string>
     <string name="disc_added">%1$s lades till i dina spel.</string>
+    <string name="disc_phase_unzip">Packar upp…</string>
+    <string name="disc_adding">Lägger till: %1$s</string>
+    <string name="disc_add_fail">Spelet kunde inte läggas till: %1$s</string>
+    <string name="disc_notimage">”%1$s” är ingen PlayStation-skivavbild. Välj avbilden av din skiva: .bin (med sin .cue), .iso, .chd eller en .zip som innehåller den.</string>
+    <string name="disc_archive">”%1$s” är ett .7z- eller .rar-arkiv, som appen inte kan öppna. Packa upp det först (eller använd en .zip) och välj skivavbilden.</string>
+    <string name="disc_zip_noimage">”%1$s” innehåller ingen skivavbild (.bin, .iso, .img eller .chd).</string>
+    <string name="disc_zip_nested">”%1$s” innehåller ett annat arkiv, ingen skivavbild. Packa upp det först och välj avbilden (eller en .zip av den).</string>
+    <string name="disc_zip_files">”%1$s” innehåller skivans lösa filer (%2$s), inte dess avbild. Spelet behöver hela avbilden: .bin med sin .cue, .iso eller .chd (även i en .zip).</string>
+    <string name="disc_zip_cue">”%1$s” innehåller .cue-filen men inte dataspåret den anger (%2$s).</string>
+    <string name="disc_zip_bad">”%1$s” kan inte läsas (skadad zip eller en komprimeringsmetod som appen inte känner till: %2$s). Packa upp den och välj skivavbilden.</string>
     <string-array name="lib_styles"><item>Karusell</item><item>Lista</item><item>Omslag</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
 </resources>

@@ -42,7 +42,7 @@
     <string name="disc_rev0">Tombi! PAL Rev 0-disc: (build van juli 1998). De port heeft de Rev 1 van augustus 1998 nodig (SCES-01331 of SCES-01330): Rev 0 heeft andere overlays en start niet.</string>
     <string name="disc_nomain0">Geen EXE/MAIN0.EXE in deze image (kies de .bin, .iso of .chd; selecteer bij een .cue ook de .bin).</string>
     <string name="disc_needbin">Selecteer de .bin samen met de .cue.</string>
-    <string name="disc_howto">Kies de image van je eigen Tombi!-disc (.bin, .iso, .chd, of .cue samen met de .bin): de bestanden worden uitgepakt in de opslag van de app (ongeveer 500 MB, bestand voor bestand gecontroleerd; de image zelf wordt niet bewaard). De app bevat geen speldata.</string>
+    <string name="disc_howto">Kies de image van je eigen Tombi!-disc (.bin, .iso, .chd, .cue samen met de .bin, of een .zip waarin die zit): de bestanden worden uitgepakt in de opslag van de app (ongeveer 500 MB, bestand voor bestand gecontroleerd; de image zelf wordt niet bewaard). De app bevat geen speldata.</string>
     <string name="disc_missing">Geen disc-image gekozen: kies je disc.</string>
     <string name="cancel">Annuleren</string>
     <string name="disc_cancelled">Kopiëren geannuleerd: de onvolledige bestanden zijn verwijderd.</string>
@@ -132,7 +132,7 @@
     <!-- the game library (Library.java, stage U2) -->
     <string name="lib_title">Jouw games</string>
     <string name="lib_add">Game toevoegen</string>
-    <string name="lib_add_sub">Image van je eigen disc: .bin, .iso, .chd (of .cue met de .bin)</string>
+    <string name="lib_add_sub">Image van je eigen disc: .bin, .iso, .chd, .zip (of .cue met de .bin)</string>
     <string name="lib_ready">Klaar om te spelen</string>
     <string name="lib_unsupported">Nog niet ondersteund</string>
     <string name="lib_nolib">Niet in deze versie van de app</string>
@@ -145,6 +145,16 @@
     <string name="lib_from">Disc: %1$s</string>
     <string name="disc_unknown">Geen bekende Tombi!/Tomba!-disc (%1$s, sha1 van het programma %2$s).</string>
     <string name="disc_added">%1$s toegevoegd aan je games.</string>
+    <string name="disc_phase_unzip">Uitpakken…</string>
+    <string name="disc_adding">Toevoegen: %1$s</string>
+    <string name="disc_add_fail">Kan de game niet toevoegen: %1$s</string>
+    <string name="disc_notimage">‘%1$s’ is geen PlayStation-disc-image. Kies de image van je disc: .bin (met de .cue), .iso, .chd, of een .zip waarin die zit.</string>
+    <string name="disc_archive">‘%1$s’ is een .7z- of .rar-archief, dat de app niet kan openen. Pak het eerst uit (of gebruik een .zip) en kies de disc-image.</string>
+    <string name="disc_zip_noimage">‘%1$s’ bevat geen disc-image (.bin, .iso, .img of .chd).</string>
+    <string name="disc_zip_nested">‘%1$s’ bevat nog een archief, geen disc-image. Pak het eerst uit en kies de image (of een .zip ervan).</string>
+    <string name="disc_zip_files">‘%1$s’ bevat de losse bestanden van de disc (%2$s), niet de image. De game heeft de hele image nodig: .bin met de .cue, .iso of .chd (ook in een .zip).</string>
+    <string name="disc_zip_cue">‘%1$s’ bevat de .cue, maar niet het datatrack dat die noemt (%2$s).</string>
+    <string name="disc_zip_bad">‘%1$s’ kan niet worden gelezen (beschadigde zip, of een compressiemethode die de app niet kent: %2$s). Pak het uit en kies de disc-image.</string>
     <string-array name="lib_styles"><item>Carrousel</item><item>Lijst</item><item>Omslag</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>VS</item><item>Japan</item></string-array>
 </resources>

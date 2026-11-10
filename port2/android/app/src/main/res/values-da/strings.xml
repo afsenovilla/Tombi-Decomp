@@ -42,7 +42,7 @@
     <string name="disc_rev0">Tombi! PAL Rev 0-disk: (build fra juli 1998). Porten kræver Rev 1 fra august 1998 (SCES-01331 eller SCES-01330): Rev 0 har andre overlays og starter ikke.</string>
     <string name="disc_nomain0">Ingen EXE/MAIN0.EXE i det aftryk (vælg .bin, .iso eller .chd; for en .cue skal .bin også vælges).</string>
     <string name="disc_needbin">Vælg .bin sammen med .cue.</string>
-    <string name="disc_howto">Vælg aftrykket af din egen Tombi!-disk (.bin, .iso, .chd eller .cue sammen med dens .bin): filerne pakkes ud i appens lager (omkring 500 MB, kontrolleret fil for fil; selve aftrykket gemmes ikke). Appen indeholder ingen spildata.</string>
+    <string name="disc_howto">Vælg aftrykket af din egen Tombi!-disk (.bin, .iso, .chd, .cue sammen med dens .bin, eller en .zip, der indeholder det): filerne pakkes ud i appens lager (omkring 500 MB, kontrolleret fil for fil; selve aftrykket gemmes ikke). Appen indeholder ingen spildata.</string>
     <string name="disc_missing">Intet diskaftryk valgt: vælg din disk.</string>
     <string name="cancel">Annuller</string>
     <string name="disc_cancelled">Kopieringen blev annulleret: de ufuldstændige filer er slettet.</string>
@@ -132,7 +132,7 @@
     <!-- the game library (Library.java, stage U2) -->
     <string name="lib_title">Dine spil</string>
     <string name="lib_add">Tilføj spil</string>
-    <string name="lib_add_sub">Image af din egen disk: .bin, .iso, .chd (eller .cue med dens .bin)</string>
+    <string name="lib_add_sub">Image af din egen disk: .bin, .iso, .chd, .zip (eller .cue med dens .bin)</string>
     <string name="lib_ready">Klar til at spille</string>
     <string name="lib_unsupported">Understøttes ikke endnu</string>
     <string name="lib_nolib">Ikke med i denne version af appen</string>
@@ -145,6 +145,16 @@
     <string name="lib_from">Disk: %1$s</string>
     <string name="disc_unknown">Ikke en kendt Tombi!/Tomba!-disk (%1$s, sha1 for programfilen %2$s).</string>
     <string name="disc_added">%1$s tilføjet til dine spil.</string>
+    <string name="disc_phase_unzip">Pakker ud…</string>
+    <string name="disc_adding">Tilføjer: %1$s</string>
+    <string name="disc_add_fail">Spillet kunne ikke tilføjes: %1$s</string>
+    <string name="disc_notimage">“%1$s” er ikke et PlayStation-diskaftryk. Vælg aftrykket af din disk: .bin (med dens .cue), .iso, .chd eller en .zip, der indeholder det.</string>
+    <string name="disc_archive">“%1$s” er et .7z- eller .rar-arkiv, som appen ikke kan åbne. Pak det ud først (eller brug en .zip) og vælg diskaftrykket.</string>
+    <string name="disc_zip_noimage">“%1$s” indeholder intet diskaftryk (.bin, .iso, .img eller .chd).</string>
+    <string name="disc_zip_nested">“%1$s” indeholder et andet arkiv, ikke et diskaftryk. Pak det ud først og vælg aftrykket (eller en .zip af det).</string>
+    <string name="disc_zip_files">“%1$s” indeholder diskens løse filer (%2$s), ikke dens aftryk. Spillet skal bruge hele aftrykket: .bin med dens .cue, .iso eller .chd (også i en .zip).</string>
+    <string name="disc_zip_cue">“%1$s” indeholder .cue-filen, men ikke det datanummer, den nævner (%2$s).</string>
+    <string name="disc_zip_bad">“%1$s” kan ikke læses (beskadiget zip eller en komprimeringsmetode, appen ikke kender: %2$s). Pak det ud og vælg diskaftrykket.</string>
     <string-array name="lib_styles"><item>Karrusel</item><item>Liste</item><item>Forside</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
 </resources>
