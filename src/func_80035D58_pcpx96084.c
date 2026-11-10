@@ -6,7 +6,7 @@
 #include "TOBJ.H"
 extern void func_80018550(TObj *);
 extern int func_800180D8_pcpx96084(TObj *);
-extern void func_80022FC8(int, int, int);
+extern void func_80022FC8_pcpx96084(int, int, int);
 extern void func_8001A87C_pcpx96084(TObj *);
 
 void updateFlashEffect(TObj *o)
@@ -32,7 +32,7 @@ void updateFlashEffect(TObj *o)
             case 1:
                 switch (o->state) {
                 case 0:
-                    func_80022FC8(0, 0xe, 4);
+                    func_80022FC8_pcpx96084(0, 0xe, 4);
                     o->state++;
                     break;
                 case 1:
@@ -44,7 +44,7 @@ void updateFlashEffect(TObj *o)
             case 2:
                 switch (o->state) {
                 case 0:
-                    func_80022FC8(0, 0xe, 0);
+                    func_80022FC8_pcpx96084(0, 0xe, 0);
                     o->state++;
                     break;
                 case 1:
