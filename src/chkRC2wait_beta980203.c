@@ -1,4 +1,4 @@
-// VERSION BETA_980203 beta980203 80069C0C 148
+// VERSION BETA_980203 beta980203 80069C0C 152
 #if defined(VERSION_BETA_980203)
 // Beta version: PAL chkRC2wait.c with one non-volatile read of the max register (address held in v1), no cross-jump of the two adds (asm).
 #define PAD_RC2_WAIT_START D_800A1E1C
