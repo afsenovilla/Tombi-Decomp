@@ -43,14 +43,11 @@ static unsigned long long n_up, n_rd, n_wait;
 static short rd_log[4][4];   /* the first read-backs since the last log line */
 extern unsigned long long pica_decode_us;
 
-/* Written memory out of the CPU's cache before the GPU reads it.  The kernel call, not GSPGPU_FlushDataCache: that one
-   is a request to the gsp service, a round trip between processes each time, and a texture upload makes one per
-   tile row (2.5 ms an upload on an Old 3DS, most of a drawn frame's time).  The service is the fallback. */
-static void dcache_flush(const void *p, u32 size) {
-    static int direct = 1;
-    if (direct && R_FAILED(svcFlushProcessDataCache(CUR_PROCESS_HANDLE, (u32)p, size))) { direct = 0; port_printf("[3ds] pica: no svcFlushProcessDataCache: flushing through gsp\n"); }
-    if (!direct) GSPGPU_FlushDataCache(p, size);
-}
+/* Written memory out of the CPU's cache before the GPU reads it: a request to the gsp service, a round trip between
+   processes each time, so as few as can be (a texture upload made one per tile row, 2.5 ms an upload on an Old 3DS: one
+   for the block's whole span now).  The kernel's own call (svcFlushProcessDataCache) was tried instead: a console drew
+   the panel's texture in torn bands and then stopped in a kernel exception. */
+static void dcache_flush(const void *p, u32 size) { GSPGPU_FlushDataCache(p, size); }
 
 /* ---- the frame */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
@@ -151,8 +148,11 @@ static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
             t[16] = pix(s[4]); t[17] = pix(s[5]); t[20] = pix(s[6]); t[21] = pix(s[7]);
         }
     }
-    for (int r = 0; r < z >> 3; r++)   /* (a tile row of the slot: z / 8 tiles in a run) */
-        dcache_flush(base + ((((ay >> 3) + r) * (PICA_ATLAS >> 3)) + (ax >> 3)) * 64, (unsigned)(z >> 3) * 64 * 4);
+    {   /* (the slot's tile rows are a whole atlas row apart: from its first tile to its last, in one request) */
+        unsigned *first = base + (((ay >> 3) * (PICA_ATLAS >> 3)) + (ax >> 3)) * 64;
+        unsigned *last = base + ((((ay >> 3) + (z >> 3) - 1) * (PICA_ATLAS >> 3)) + (ax >> 3) + (z >> 3)) * 64;
+        dcache_flush(first, (u32)((char *)last - (char *)first));
+    }
     tk_upload += svcGetSystemTick() - t0;
 }
 
