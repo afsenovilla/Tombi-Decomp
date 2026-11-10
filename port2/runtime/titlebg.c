@@ -107,8 +107,7 @@ static void et_apply(void) {
     LoadImage(&c, (unsigned *)et_pal);
 }
 static void port_early_title_frame(void) {
-    extern int port_cut_content;
-    if (!port_early_title_dir || !port_cut_content || !et_load()) return;
+    if (!port_early_title_dir || !et_load()) return;      /* its own option, not tied to --cut-content */
     if (port_frame - et_frame > 2) et_apply();       /* first title frame (again after the game reloaded A00200) */
     et_frame = port_frame;
 }

@@ -3063,9 +3063,10 @@ MDEC movies are not textures here (the intro landscape is a movie). A replacemen
 blended. Changing a texture's pixels by a sub-upload keeps the larger upload's key for boxes outside the changed part.
 Debug: `TEXPACK_LOG=1` prints uploads, invalidations and unkeyed boxes.
 
-### `--cut-content --wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR`: the Japanese demo's top-down Charity Wings glide (2026-11-10)
+### `--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR`: the Japanese demo's top-down Charity Wings glide (2026-11-10)
 
-Lost content restored as a reconstruction (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide"): using the
+Lost content restored as a reconstruction (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide"), its own
+switch (it does not need `--cut-content`): using the
 Charity Wings in a top-down area runs I0NFO2 `topdownPlayerDropExitStep` (Tomba rises 20 ticks, fade, room left).
 With the option, `port2/runtime/wings.c` swaps the player's sprite tables for that step: a three-frame copy of the
 demo's overhead Tomba (frames 77-79, arm raised; WPP data from `JPDEMO_DIR/AREA08/D002.000` +0x3FA28, SPR parts from
@@ -3079,15 +3080,27 @@ rotor (8 phases, 2 ticks each, the mirrored phases by swapping u). The quill end
 (hand at (22,2)/(22,1)/(22,1) of the frames, quill ends (2,22)/(2,14)/(7,14)). Hooks: `port_wings_begin` at
 `topdownPlayerDropExitStep` state 0 (substep 0 = the wings), `port_wings_draw` at the end of
 `topdownDrawRotatedSprite` (port/fixes.txt). Tables are restored when the step ends; after a room load (which
-replaces both) nothing is written back. Launcher: *Cut content* page, two disc-image fields (JP demo, PrePre 9;
+replaces both) nothing is written back. Launcher: *Cut content* page, own card with its checkbox and two disc-image
+fields (JP demo, PrePre 9;
 .bin/.cue/.iso/.chd, or inside a .zip/.7z like the game's); picking one checks the serial (SLPM-80165 / PCPX-96093)
 and pulls just the files above out of the image into `.wings/jpdemo/` and `.wings/pre9/` next to the launcher
-(`extract_disc_files`, the same ISO walk as `extract_main0`); the folders are passed only when both are there. The
+(`extract_disc_files`, the same ISO walk as `extract_main0`), with a status line under each field (checked and ready, or
+why not; a path typed in is checked on Enter); the folders are passed only when the checkbox is on and both are there. The
 files are the user's own discs, nothing is shipped; without them the step is the retail one. The early-title folder field was removed from the launcher (the
 `--early-title` option stays in the port). Checked
 headless in AREA08 section 0 (debug select 8:0, the dialogue dismissed, the item use started with the pokes the
 panel's warp path uses: PLAYER+4..6 = 1, 0x30, 0 and GVARS_USE_ITEM_PENDING/ID = 1, 7): Tomba rises with the feather
 spinning in the raised hand through the fade. Not tested on the device (PC headless only); Android launcher not wired.
+
+### `--cut-content[=LIST]`: one switch per item (2026-11-10)
+
+`port_cut_content` is a bit mask: `--cut-content=boatman,letter,board,berries,bubble,titles` picks items (1 boatman's
+extra lines, 2 the AREA03 letter sign, 4 the AREA05 notice board + extra save points, 8 silver / golden berries, 16 the
+big "?" bubble, 32 the event titles PAL left empty); `--cut-content` alone is every item (0xFF), `all` too. Each hook
+in port/fixes.txt and runtime/main.c tests its own bit; the debug menu toggle sets 0 / 0xFF. The PC launcher's *Cut
+content* page shows one checkbox per item (`cut_i_<name>` settings; a settings file saved with the old single switch
+on means every item) and passes the plain switch when all are on. The early title (`--early-title`) and the wings glide
+(`--wings-glide`) no longer need `--cut-content`.
 
 ### `--cut-content`: signs (notice board, extra save point) and the sign box fix
 

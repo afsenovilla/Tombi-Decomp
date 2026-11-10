@@ -435,15 +435,16 @@ src/showMessageBoxDirect.c |     openMessageBox(a, b, c, 1, -1); |     return op
 src/showMessageBoxDirectTimed.c | extern void openMessageBox(int a, int b, int c, int d, int e); | extern void *openMessageBox(int a, int b, int c, int d, int e);
 src/showMessageBoxDirectTimed.c | void showMessageBoxDirectTimed(int a, int b, int c, short d) | void *showMessageBoxDirectTimed(int a, int b, int c, short d)
 src/showMessageBoxDirectTimed.c |     openMessageBox(a, b, c, 1, d); |     return openMessageBox(a, b, c, 1, d);
-# --cut-content (port_cut_content, opt-in; console build unchanged): text cut from the game that the Japanese release
+# --cut-content[=boatman,letter,board,berries,bubble,titles] (port_cut_content, a bit per item: 1 2 4 8 16 32, --cut-content alone = all;
+# opt-in; console build unchanged): text cut from the game that the Japanese release
 # still has (tools/jp_text.py). 1) AREA00 boatman scene: after his third line (7,2) a00Variant0EventScene
 # ends the scene; with the flag it first shows the three unused lines (7,3), (7,4), (7,5) (MFNT000 #162-164).
-src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if (port_cut_content && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
+src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if ((port_cut_content & 1) && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
 src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc_boatman; port_cc_boatman = 0; }
 # 2) AREA03 letter (MFNT030 #208 = sign text (1,1), no sign shows it): next to the save-point sign of Phoenix Mountain
 # (subtype 25, AREA03 sections 0/4, x 440) spawn a sign of subtype 27 (D_80079EBC[27] = (1,1)) 40 px to its left (read with Up there, like the post).
 src/updateL4Type1AObject.c | void updateL4Type1AObject(O *o) | extern char *allocObjectLayer4(void); static void port_cc_letter(O *o) { extern int port_verbose; extern void port_printf(const char *, ...); char *n = allocObjectLayer4(); int i; if (!n) return; for (i = 0; i < 0x20; i++) n[i] = ((char *)o)[i]; n[3] = 27; n[4] = 0; n[0x2e] = ((char *)o)[0x2e]; n[0x6b] = ((char *)o)[0x6b]; *(int *)(n + 0xa0) = *(int *)((char *)o + 0xa0); n[0xa4] = ((char *)o)[0xa4]; *(int *)(n + 0x10) -= 40 << 16; if (port_verbose) port_printf("[port] --cut-content: AREA03 letter sign spawned at x %d\n", *(short *)(n + 0x12)); } void updateL4Type1AObject(O *o)
-src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; extern void port_cc_sign(void *, int, int); if (port_cut_content && o->subtype == 25 && GAME[0] == 3) port_cc_letter(o); if (port_cut_content) port_cc_sign(o, GAME[0], GAME[1]); } o->box0 = 4;
+src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; extern void port_cc_sign(void *, int, int); if ((port_cut_content & 2) && o->subtype == 25 && GAME[0] == 3) port_cc_letter(o); if (port_cut_content & 4) port_cc_sign(o, GAME[0], GAME[1]); } o->box0 = 4;
 # 2b) AREA05 notice board (MFNT050 (1,5) MISSING MOUSE, (1,7) ADVENTURER WANTED, (1,6) CONGRATULATIONS): spawnNpcSet09 (X005,
 # table D_80117AC8[GCD.bceed]) does place the board's sign in section 1, subtype 19 (-> 20 once the baby mouse is back,
 # -> 35 after event 50), at (28,-144) depth 90 next to the townsfolk who mentions it, but nothing Tombi can stand on is
@@ -464,7 +465,7 @@ src/initItemObject.c | switch (d->b6) { | { extern int port_cc_drop_take(void *)
 # (spawnItemPickupObject is only ever called with 0, the "!" of a new event). Trigger: in the I0NFO2 top-down actors,
 # the repeat line (2,3) shown when Tombi talks to someone again who has nothing new to say gets the "?" over his head.
 # Purely cosmetic (the icon object only rises, waits and frees itself; it is skipped while another icon is up).
-src/i0nfo2/topdownActorOpenDialogue.c | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); { extern int port_cut_content; extern void spawnItemPickupObject(int); if (port_cut_content) spawnItemPickupObject(1); }
+src/i0nfo2/topdownActorOpenDialogue.c | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); { extern int port_cut_content; extern void spawnItemPickupObject(int); if (port_cut_content & 16) spawnItemPickupObject(1); }
 # 5) --civ-test (dev, port only): the cut top-down town AREA11 section 0 (docs/CIVILIZATION.md) has an empty load list.
 # Queue a stand-in list instead (AREA08 s0's records: its picture, cell map, sprite tables, APD and I0NFO2), so the
 # town's own code (topdownSectionStepC, NPC set 0D, topdownA11Actor*) runs over the Baccus Lake map.
@@ -558,7 +559,7 @@ src/spawnEventTitle.c | done = 0; | done = 0; { extern int port_civ_on(int, int)
 # --lang spill (outside RAM), so only NULL is refused.  Events with no title link (0xFF) get a rebuilt one
 # With --cut-content also everywhere: 0x53 -> text 126 and 22 titles translated from JP (tools/port_event_titles.py).
 # (port_civ_title in port2/shims/psyq.c: 0x4C = CFNT999 text 90 "The Black Water", others the dummy text sized right).
-src/spawnEventTitle.c | p = tbl[event_id]; | p = tbl[event_id]; { extern int port_civ_on(int, int); extern s8 *port_civ_title(int, u8 **, s8 *); extern int port_cut_content, port_civ_title_civ; port_civ_title_civ = port_civ_on(GAME.selectedArea, GAME.selectedSection); if ((port_civ_title_civ || port_cut_content) && !(p = port_civ_title(event_id, &src, p))) return; }
+src/spawnEventTitle.c | p = tbl[event_id]; | p = tbl[event_id]; { extern int port_civ_on(int, int); extern s8 *port_civ_title(int, u8 **, s8 *); extern int port_cut_content, port_civ_title_civ; port_civ_title_civ = port_civ_on(GAME.selectedArea, GAME.selectedSection); if ((port_civ_title_civ || (port_cut_content & 32)) && !(p = port_civ_title(event_id, &src, p))) return; }
 #
 # Item 64 (Pipe / "Valvula") inventory icon: ITEM_ICON_CLUTS[64] = 1, the all-grey sub-screen row (retail PAL and JP
 # alike, so the grey wheel is the original's), while the pickup in AREA08 is the brown wooden wheel (SPR_DATA[3] frame 2,

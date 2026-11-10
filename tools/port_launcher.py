@@ -697,7 +697,11 @@ def icon_file(name):
 # ---------------------------------------------------------------------------------------------- window
 # --cut-content (port/fixes.txt): text cut from the game, recovered from the Japanese release
 i18n.add({
-    "es": {"l.cutcontent": "Activar contenido recortado",
+    "es": {"l.cutcontent": "Contenido recortado: elige qué restaurar",
+           "l.cut.boatman": "El barquero (AREA00): sus tres frases que faltan", "l.cut.letter": "La carta de Ciudad Baco en la Montaña del Fénix (AREA03): segundo cartel junto al de guardar",
+           "l.cut.board": "El tablón de anuncios de Ciudad Baco (AREA05), legible desde el suelo, y el punto de guardado «La roca de la sirena» (AREA06)",
+           "l.cut.berries": "Bayas plateadas y doradas en lo que sueltan enemigos y cofres (2 de vida)", "l.cut.bubble": "El bocadillo grande «?» al repetir una conversación (escenas desde arriba)",
+           "l.cut.titles": "Títulos de evento que la versión PAL dejó vacíos (de la versión japonesa)",
            "i.cutcontent": "Textos que se quitaron del juego y que se han encontrado en la versión japonesa (Ore! Tomba). "
                            "Se activan cuatro:\n\n"
                            "• El barquero de la Ciudad de todo principio (AREA00): en el estanque al que llegas sobre la tortuga, "
@@ -718,16 +722,17 @@ i18n.add({
                            "La frecuencia de las bayas y el momento del «?» los hemos elegido nosotros: el juego tiene el "
                            "código y los gráficos, pero no dice cuándo debían salir.\n\n"
                            "Los textos están en español con el parche «Traducción mejorada»; en los demás idiomas, o sin el parche, "
-                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content).\n\n"
-                           "Opcional, pantalla de título temprana: si indicas la carpeta con los ficheros TOMBA del disco «PrePre Vol. 8» "
-                           "(PCPX-96084, una demo japonesa de junio de 1997; extraídos de tu propio disco con tools/prepre8.py extract), "
-                           "el paisaje del título es el de esa versión (roca-torre y río) en vez del final. Eso es arte real del juego "
-                           "de entonces; el logo, el menú y los textos siguen siendo los finales (el logo «オレっ！トンバ» de esa versión "
-                           "no se usa: no sabemos cómo se montaba). No se incluye nada de ese disco.",
-           "l.wingsglide": "Planeo con las Alas de la caridad en las zonas cenitales (opcional, hacen falta los dos discos): imagen de la demo japonesa SLPM-80165 (.bin / .cue / .iso / .chd / .zip / .7z; solo se extraen 3 archivos):",
-           "l.wingspre9": "... e imagen del disco PrePre Vol. 9 (PCPX-96093; se extrae 1 archivo):",
-           "s.wingsok": "{0}: es el disco {1}, {2} archivo(s) extraídos.", "s.wingsbad": "{0} no es el disco {1} (serie {2}; archivos que faltan: {3}).", "s.wingsfail": "No se pudo leer {0}: {1}"},
-    "en": {"l.cutcontent": "Enable cut content",
+                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content).",
+           "l.wingsglide": "Imagen de la demo japonesa SLPM-80165 (.bin / .cue / .iso / .chd / .zip / .7z; solo se extraen 3 archivos):",
+           "l.wingspre9": "Imagen del disco PrePre Vol. 9 (PCPX-96093; se extrae 1 archivo):",
+           "cut.c.wings": "Animación perdida: planeo con las Alas de la caridad", "l.wingson": "Activar el planeo de la demo japonesa",
+           "cut.wings.d": "En las zonas cenitales, al usar las Alas de la caridad, Tomba sube con la pluma girando en la mano (frames de la demo japonesa + pluma de la PrePre 9; reconstrucción, ver docs/CUT_CONTENT.md). Hacen falta las dos imágenes; se comprueban y se extraen 4 archivos la primera vez.",
+           "s.wingsok": "{0}: disco {1} comprobado, {2} archivo(s) extraídos y listos.", "s.wingsbad": "{0} no es el disco {1} (serie {2}; archivos que faltan: {3}).", "s.wingsfail": "No se pudo leer {0}: {1}", "s.wingsbusy": "Comprobando {0} y extrayendo sus archivos...", "s.wingsnofile": "No existe: {0}", "s.wingsnotyet": "Sin comprobar: elige la imagen con Elegir... o pulsa Intro en el campo."},
+    "en": {"l.cutcontent": "Cut content: pick what to restore",
+           "l.cut.boatman": "The boatman (AREA00): his three missing lines", "l.cut.letter": "The Baccus Village letter at Phoenix Mountain (AREA03): a second sign next to the save sign",
+           "l.cut.board": "The Baccus Village notice board (AREA05), readable from the ground, and the \"Mermaid's rock\" save point (AREA06)",
+           "l.cut.berries": "Silver and golden berries in enemy and chest drops (2 HP)", "l.cut.bubble": "The big \"?\" bubble when a talk repeats (top-down scenes)",
+           "l.cut.titles": "Event titles the PAL release left empty (from the Japanese release)",
            "i.cutcontent": "Text that was removed from the game and found in the Japanese release (Ore! Tomba). "
                            "Four pieces are enabled:\n\n"
                            "• The boatman in the Village of All Beginnings (AREA00): at the pond you reach on the turtle, after his "
@@ -748,15 +753,12 @@ i18n.add({
                            "How often the berries show up and when the '?' appears are our choice: the game has the code and the "
                            "graphics but never says when they were meant to appear.\n\n"
                            "The texts are in Spanish with the 'Improved translation' patch; in the other languages, or without the "
-                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied.\n\n"
-                           "Optional early title screen: if you point to the folder with the TOMBA files of the 'PrePre Vol. 8' disc "
-                           "(PCPX-96084, a Japanese demo from June 1997; extracted from your own disc with tools/prepre8.py extract), the "
-                           "title landscape is that build's (rock spire and river) instead of the final one. That is real game art of the "
-                           "time; the logo, menu and text stay the final ones (that build's 'オレっ！トンバ' logo is not used: how it was "
-                           "laid out is unknown). Nothing from that disc is included.",
-           "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): image of the Japanese demo SLPM-80165 (.bin / .cue / .iso / .chd / .zip / .7z; only 3 files are extracted):",
-           "l.wingspre9": "... and image of the PrePre Vol. 9 disc (PCPX-96093; 1 file is extracted):",
-           "s.wingsok": "{0}: disc {1}, {2} file(s) extracted.", "s.wingsbad": "{0} is not disc {1} (serial {2}; missing files: {3}).", "s.wingsfail": "Could not read {0}: {1}"},
+                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied.",
+           "l.wingsglide": "Image of the Japanese demo SLPM-80165 (.bin / .cue / .iso / .chd / .zip / .7z; only 3 files are extracted):",
+           "l.wingspre9": "Image of the PrePre Vol. 9 disc (PCPX-96093; 1 file is extracted):",
+           "cut.c.wings": "Lost animation: Charity Wings glide", "l.wingson": "Enable the Japanese demo's glide",
+           "cut.wings.d": "In the top-down areas, using the Charity Wings makes Tomba rise with the feather spinning in the raised hand (frames of the Japanese demo + the feather of PrePre 9; a reconstruction, see docs/CUT_CONTENT.md). Both images are needed; they are checked and 4 files extracted the first time.",
+           "s.wingsok": "{0}: disc {1} checked, {2} file(s) extracted and ready.", "s.wingsbad": "{0} is not disc {1} (serial {2}; missing files: {3}).", "s.wingsfail": "Could not read {0}: {1}", "s.wingsbusy": "Checking {0} and extracting its files...", "s.wingsnofile": "Not found: {0}", "s.wingsnotyet": "Not checked yet: pick the image with Browse... or press Enter in the field."},
 })
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
@@ -1105,6 +1107,8 @@ QFrame#card QLabel, QFrame#card QCheckBox, QFrame#card QRadioButton { background
 #cellTitle { font-weight: 600; }
 #muted { color: %(muted)s; }
 #warn { color: %(warn)s; }
+#okText { color: #1e9e4a; }
+#badText { color: #d13438; }
 #busyText { color: %(dot_busy)s; }
 #accentText { color: %(accent)s; }
 #nameSel { color: %(accent)s; font-weight: 600; }
@@ -1274,6 +1278,24 @@ def window_icon():
     return QIcon()
 
 
+CUT_ITEMS = ["boatman", "letter", "board", "berries", "bubble", "titles"]     # --cut-content=LIST items (port/fixes.txt, runtime/main.c)
+
+
+def cut_items(s):
+    """The cut-content items switched on: the per-item keys of the pick list; settings saved before the list had one
+    switch (cut_content), which meant every item."""
+    if any(("cut_i_" + k) in s for k in CUT_ITEMS):
+        return [k for k in CUT_ITEMS if s.get("cut_i_" + k)]
+    return list(CUT_ITEMS) if s.get("cut_content") else []
+
+
+def cut_args(s):
+    items = cut_items(s)
+    if not items:
+        return []
+    return ["--cut-content"] if len(items) == len(CUT_ITEMS) else ["--cut-content=" + ",".join(items)]
+
+
 def build_command(s, civ_play=None):
     """The tombi-pc command line for the settings s (and a rebuilt town button's civ_play, never saved); returns
     (cmd, gfx_note), gfx_note telling the log why the Spanish redraws (--patch-tex) are or are not passed."""
@@ -1294,11 +1316,12 @@ def build_command(s, civ_play=None):
         cmd += ["--lang", str(s["lang"])]
     if lang and str(s.get("lang")) == "5" and (s.get("subscreen_labels") or "").strip():
         cmd += ["--subscreen-labels", s["subscreen_labels"].strip()]   # the Select tabs / leaf buttons, in the disc's lettering
-    if has("cut") and s.get("cut_content"):
-        cmd += ["--cut-content"]
+    if has("cut"):
+        cmd += cut_args(s)                                            # the pick list (all items = the plain switch)
+    if has("cut") and s.get("wings_on"):
         wd = wings_dirs(s)                                            # both demo discs are needed
         if wd:
-            cmd += ["--wings-glide", wd[0], "--wings-pre9", wd[1]]
+            cmd += ["--wings-glide", wd[0], "--wings-pre9", wd[1]]    # its own switch, not part of --cut-content
     gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
     if not lang:
         note = "no (%s: English only)" % (GL.version_of(current_sha1()) or {}).get("region", "?")
@@ -3436,17 +3459,30 @@ class App(QMainWindow):
     def _build_cut(self, f):
         """The "Cut content" page: the --cut-content switch, the wings glide and the rebuilt towns (one button each)."""
         c = self.card(f, tr("cut.c.text"))
-        row, _ = hbox(self.check("cut_content", tr("l.cutcontent"), False),          # --cut-content (port/fixes.txt)
-                      self.info_button(tr("l.cutcontent"), tr("i.cutcontent")), None, spacing=4)
+        row, _ = hbox(QLabel(tr("l.cutcontent")), self.info_button(tr("l.cutcontent"), tr("i.cutcontent")), None, spacing=4)
         c.addWidget(row)
-        d = wrap_label(tr("cut.text.d"), "muted")
+        c.addWidget(wrap_label(tr("cut.text.d"), "muted"))
+        c.addSpacing(4)
+        on = set(cut_items(self.s))                               # one switch per item (--cut-content=LIST, port/fixes.txt)
+        for k in CUT_ITEMS:
+            self.s.setdefault("cut_i_" + k, k in on)
+            c.addWidget(self.check("cut_i_" + k, tr("l.cut." + k), k in on))
+        c = self.card(f, tr("cut.c.wings"))                   # the lost Charity Wings glide (docs/CUT_CONTENT.md), its own switch
+        c.addWidget(self.check("wings_on", tr("l.wingson"), False))
+        d = wrap_label(tr("cut.wings.d"), "muted")
         d.setContentsMargins(28, 0, 0, 0)
         c.addWidget(d)
-        c.addSpacing(8)
-        c.addWidget(wrap_label(tr("l.wingsglide"), "muted"))
-        c.addWidget(self.browse_row("wings_glide", lambda: self.pick_wings("wings_glide", "jpdemo")))   # --wings-glide (port2/runtime/wings.c)
-        c.addWidget(wrap_label(tr("l.wingspre9"), "muted"))
-        c.addWidget(self.browse_row("wings_pre9", lambda: self.pick_wings("wings_pre9", "pre9")))      # --wings-pre9
+        c.addSpacing(6)
+        self.wings_lbl = {}
+        for key, disc, text in (("wings_glide", "jpdemo", "l.wingsglide"), ("wings_pre9", "pre9", "l.wingspre9")):
+            c.addWidget(wrap_label(tr(text), "muted"))
+            c.addWidget(self.browse_row(key, lambda key=key, disc=disc: self.pick_wings(key, disc)))   # --wings-glide / --wings-pre9 (port2/runtime/wings.c)
+            self.edits[key].editingFinished.connect(lambda key=key, disc=disc: self.wings_check(key, disc, extract=True))
+            lb = wrap_label("", "muted")
+            lb.setContentsMargins(28, 0, 0, 0)
+            c.addWidget(lb)
+            self.wings_lbl[key] = lb
+            self.wings_check(key, disc)
         c = self.card(f, tr("cut.c.towns"))                  # docs/CIVILIZATION.md "Playable towns"
         d = wrap_label(tr("cut.towns.d"), "muted")
         row, rl = hbox(d, self.info_button(tr("cut.c.towns"), tr("cut.towns.i")), spacing=4)
@@ -3560,7 +3596,7 @@ class App(QMainWindow):
             want = ""        # only the compiled translation.tpatch: data/ stays original and tombi2 applies it in memory
         if want and str(s.get("lang")) != "5" and self._patch_mode() == "bundled":
             want = ""        # the bundled translation is for the Spanish game only: other languages play the original data
-        if not want and s.get("cut_content") and str(s.get("lang") or 0) == "0":
+        if not want and set(cut_items(s)) & {"boatman", "letter", "board"} and str(s.get("lang") or 0) == "0":
             # --cut-content in English: the English text of the cut lines (data/ holds one patch at a time; with another
             # text patch chosen that one wins and the cut lines show the disc's filler)
             want = bundled_patch("en_cut_content.tombipatch.json") or ""
@@ -3607,27 +3643,52 @@ class App(QMainWindow):
         """A demo disc image of the wings glide: the files WINGS_DISCS[disc] are pulled out of it into .wings/<disc>/
         (an archive is unpacked first, like the game's), after checking the disc's serial."""
         p = self._open_file(tr("l." + key.replace("_", "")), "Disc image (*.bin *.cue *.iso *.img *.chd *.zip *.7z);;All (*)")
-        if not p:
-            return
+        if p:
+            self.set_edit(key, p)
+            self.wings_check(key, disc, extract=True)
+
+    def wings_check(self, key, disc, extract=False):
+        """The line under a wings field: extracted and ready, or why not; extract=True pulls the files out of the image
+        in the field first (Browse..., or a path typed in)."""
         serial, names = WINGS_DISCS[disc]
-        try:
+        p = (self.s.get(key) or "").strip()
+        lb = self.wings_lbl.get(key)
+        ready = all(os.path.isfile(os.path.join(wings_dir(disc), *n.split("/"))) for n in names)
+        msg, level = "", "muted"
+        if extract and p and os.path.isfile(p):
+            self.say(tr("s.wingsbusy", os.path.basename(p)), "busy")
+            self.app_events()
             try:
-                image = self.disc_image(p)
-                got, missing = extract_disc_files(image, names, wings_dir(disc))
-            finally:
-                self.drop_unpacked(p)
-        except DA.ArchiveError as e:
-            self.archive_error(p, e)
-            return
-        except (OSError, ValueError) as e:
-            self.say(tr("s.wingsfail", os.path.basename(p), e), "bad")
-            return
-        if got != serial or missing:
-            shutil.rmtree(wings_dir(disc), ignore_errors=True)
-            self.say(tr("s.wingsbad", os.path.basename(p), serial, got or "?", ", ".join(missing) or "-"), "bad")
-            return
-        self.set_edit(key, p)
-        self.say(tr("s.wingsok", os.path.basename(p), serial, len(names)), "ok")
+                try:
+                    image = self.disc_image(p)
+                    got, missing = extract_disc_files(image, names, wings_dir(disc))
+                finally:
+                    self.drop_unpacked(p)
+                if got != serial or missing:
+                    shutil.rmtree(wings_dir(disc), ignore_errors=True)
+                    msg = tr("s.wingsbad", os.path.basename(p), serial, got or "?", ", ".join(missing) or "-")
+                    level = "bad"
+                else:
+                    ready = True
+            except DA.ArchiveError as e:
+                self.archive_error(p, e)
+                msg, level = self.status_msg, "bad"
+            except (OSError, ValueError) as e:
+                msg, level = tr("s.wingsfail", os.path.basename(p), e), "bad"
+        if not msg:
+            if ready and p:
+                msg, level = tr("s.wingsok", os.path.basename(p), serial, len(names)), "ok"
+            elif p and not os.path.isfile(p):
+                msg, level = tr("s.wingsnofile", p), "bad"
+            elif p:
+                msg, level = tr("s.wingsnotyet"), "bad"
+        if level != "muted":
+            self.say(msg, level)
+        if lb is not None:
+            lb.setText(("✓ " if level == "ok" else "✗ " if level == "bad" else "") + msg)
+            lb.setObjectName({"ok": "okText", "bad": "badText"}.get(level, "muted"))
+            lb.style().unpolish(lb)
+            lb.style().polish(lb)
 
     def texture_dump_dir(self):
         return os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")

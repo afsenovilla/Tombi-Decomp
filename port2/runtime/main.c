@@ -838,15 +838,31 @@ int port_civ_list(void) {
     return (int)(long)port_civ_buf;
 }
 int port_noclip;          /* --noclip: research only; I0NFO3 tunnels (AREA02 s3): no walls, gates, pushes, slide zones, triggers, exits */
-int port_cut_content;     /* --cut-content: opt-in cut text recovered from the Japanese release (port/fixes.txt) */
+int port_cut_content;     /* --cut-content[=LIST]: opt-in cut content (port/fixes.txt), a bit per item: 1 boatman (AREA00 extra lines),
+                             2 letter (AREA03 sign), 4 board (AREA05 notice board + extra save points), 8 berries (silver / golden),
+                             16 bubble (big "?"), 32 titles (event titles PAL left empty); --cut-content alone = all (0xFF) */
+int port_cut_content_parse(const char *list) {
+    static const struct { const char *name; int bit; } items[] = {{"boatman", 1}, {"letter", 2}, {"board", 4}, {"berries", 8}, {"bubble", 16}, {"titles", 32}, {"all", 0xFF}};
+    int mask = 0; const char *p = list;
+    while (*p) {
+        const char *e = p; size_t i, n; int hit = 0;
+        while (*e && *e != ',') e++;
+        n = (size_t)(e - p);
+        for (i = 0; i < sizeof items / sizeof items[0]; i++)
+            if (n == strlen(items[i].name) && !strncmp(p, items[i].name, n)) { mask |= items[i].bit; hit = 1; }
+        if (!hit && n) port_printf("[port] --cut-content: unknown item '%.*s' (boatman, letter, board, berries, bubble, titles, all)\n", (int)n, p);
+        p = *e ? e + 1 : e;
+    }
+    return mask;
+}
 int port_cc_boatman = 3;  /* AREA00 boatman: extra lines (7,3..5) still to show */
 /* --cut-content berries: objects spawnItemFromEntry made (table drops) that initItemObject has not set up yet */
 static void *port_cc_drops[16];
 static unsigned port_cc_drop_n, port_cc_rng = 0x7a3b1c9u;
-void port_cc_drop_mark(void *o) { if (port_cut_content) port_cc_drops[port_cc_drop_n++ & 15] = o; }
+void port_cc_drop_mark(void *o) { if (port_cut_content & 8) port_cc_drops[port_cc_drop_n++ & 15] = o; }
 int port_cc_drop_take(void *o) {
     int i;
-    for (i = 0; i < 16; i++) if (port_cc_drops[i] == o) { port_cc_drops[i] = 0; return port_cut_content; }
+    for (i = 0; i < 16; i++) if (port_cc_drops[i] == o) { port_cc_drops[i] = 0; return port_cut_content & 8; }
     return 0;
 }
 /* fruit drop colour: 1/32 gold (b0c 3), 4/32 = 1/8 silver (b0c 2), else plain (0); own LCG, game RNG untouched */
@@ -899,7 +915,7 @@ void port_cc_sign(void *obj, int area, int section) {
 }
 void port_cc_sign_text(void *obj, int area, int bceed, int ev49, unsigned short *text, unsigned short *opt) {
     unsigned char *o = obj;
-    if (!port_cut_content) return;
+    if (!(port_cut_content & 4)) return;
     if (o[3] >= 0x40) { *text = port_cc_saves[o[3] - 0x40].k; *opt = port_cc_saves[o[3] - 0x40].line; return; }
     if (area == 5 && o[3] == 20 && bceed == 2 && ev49 == 0) {
         /* the baby mouse is back and the pump notice was never read: CONGRATULATIONS (1,6) first, then (1,7) */
@@ -909,7 +925,7 @@ void port_cc_sign_text(void *obj, int area, int bceed, int ev49, unsigned short 
 }
 void *port_cc_sign_next(void *obj) {
     extern void *showMessageBox(short, short, int, int);
-    if (!port_cut_content || obj != port_cc_chain_obj) return 0;
+    if (!(port_cut_content & 4) || obj != port_cc_chain_obj) return 0;
     port_cc_chain_obj = 0;
     { void *m = showMessageBox(port_cc_chain_k, port_cc_chain_l, 0xa0, 0x8c);
       if (port_verbose) port_printf("[port] --cut-content: notice board continues with (%d,%d) box %p\n", port_cc_chain_k, port_cc_chain_l, m);
@@ -934,7 +950,8 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--no-translation-file")) port_no_translation_file = 1;
         else if (!strcmp(a, "--text-patch") && v) { if (port_text_patch_n < 8) port_text_patches[port_text_patch_n++] = argv[i + 1]; i++; }
         else if (!strcmp(a, "--patch-dir") && v) port_patch_dir = argv[++i];
-        else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
+        else if (!strcmp(a, "--cut-content")) port_cut_content = 0xFF;
+        else if (!strncmp(a, "--cut-content=", 14)) port_cut_content = port_cut_content_parse(a + 14);   /* a comma list of items */
         else if (!strcmp(a, "--noclip")) port_noclip = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
         else if (!strcmp(a, "--log-anim")) {   /* runtime/animlog.c: animation-script pointers and drawn frames, optional summary FILE */

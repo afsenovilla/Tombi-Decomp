@@ -20,7 +20,6 @@
 #include <string.h>
 
 extern int port_printf(const char *, ...);
-extern int port_cut_content;
 extern char *WPP_DATA[];          /* scratchpad: WPP_DATA[2] = the top-down player's frame table (uploadSpriteFrameToVram) */
 extern char *SPR_DATA[];          /* SPR_DATA[4] = the resident item / HUD sprite table (initItemObject) */
 extern void *NEXT_PRIM;
@@ -175,7 +174,7 @@ static int load(void) {
 
 /* topdownPlayerDropExitStep, state 0 (after the retail animation was set): take over when it is the Charity Wings */
 void port_wings_begin(void *o) {
-    if (!port_cut_content || !port_wings_dir || O_SUBSTEP(o) != 0) return;
+    if (!port_wings_dir || O_SUBSTEP(o) != 0) return;     /* its own option, not tied to --cut-content */
     if (!load()) return;
     if (active) return;
     {   /* the feather texels of the PrePre 9 page over retail's (tpage 0x14 = VRAM 256,256; same place, 4 bpp) */

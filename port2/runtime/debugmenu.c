@@ -148,7 +148,7 @@ static void activate(int i, u16 press) {
         action = A_WARP; break;
     case L_OVERLAY: overlay = !overlay; break;
     case L_SPEED: speed = (speed + 1) % 3; break;
-    case L_CUT: port_cut_content = !port_cut_content; break;
+    case L_CUT: port_cut_content = port_cut_content ? 0 : 0xFF; break;
     }
 }
 
