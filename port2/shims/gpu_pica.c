@@ -391,7 +391,18 @@ static void pica_fill(int x, int y, int w, int h, u16 c) {
     u16 *vram = port_vram();
     flush();
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[((y + j) & 511) * 1024 + ((x + i) & 1023)] = c;
-    put_rect(x, y, w, h);
+    /* the device fills the same rectangle (its colour converts back to exactly c): no upload of the words */
+    for (int j = 0; j < h; ) {
+        int yy = (y + j) & 511, hh = h - j < 512 - yy ? h - j : 512 - yy;
+        for (int i = 0; i < w; ) {
+            int xx = (x + i) & 1023, ww = w - i < 1024 - xx ? w - i : 1024 - xx;
+            dev->fill(xx, yy, ww, hh, c15to32(c));
+            pages_bump(xx, yy, ww, hh);
+            cells_clean(xx, yy, ww, hh);
+            i += ww;
+        }
+        j += hh;
+    }
 }
 static void pica_copy(int sx, int sy, int dx, int dy, int w, int h) {
     static u16 *tmp;

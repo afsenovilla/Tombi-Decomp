@@ -33,6 +33,9 @@ static unsigned *lin;                     /* 1024 x 512 linear words: read-backs
 #define ARENA_BYTES (2u << 20)
 static unsigned char *arena; static unsigned arena_off;
 static unsigned long long st_syncs, st_writes, st_frames;
+/* where a frame's time goes (system ticks; the log line every 600 frames gives milliseconds per frame) */
+static unsigned long long tk_last, tk_frame, tk_upload, tk_write, tk_read, tk_panel, tk_present, tk_draw;
+#define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / 600.0)
 
 /* ---- the frame */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
@@ -102,13 +105,16 @@ static inline unsigned tiled(int x, int y, int w) { return ((y >> 3) * (w >> 3) 
 static void c3d_tex_upload(int slot, const unsigned *rgba) {
     begin();                                                  /* the frames before have finished */
     if (slot_used[slot] == frame_no) { end_and_wait(); begin(); }   /* the open frame samples this slot */
+    u64 t0 = svcGetSystemTick();
     unsigned *d = slot_tex[slot].data;
     for (int v = 0; v < 256; v++) for (int u = 0; u < 256; u++) d[tiled(u, v, 256)] = pix(rgba[v * 256 + u]);
     GSPGPU_FlushDataCache(d, 256 * 256 * 4);
+    tk_upload += svcGetSystemTick() - t0;
 }
 
 /* ---- primitives */
 static void c3d_tris(const PState *s, const PV *v, int n) {
+    u64 t0 = svcGetSystemTick();
     begin();
     /* the scissor counts rows from the other edge than the projection (the self test: an area of y 256..511 drew nothing) */
     C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, 511 - s->y2, s->x2 + 1, 512 - s->y1);
@@ -123,6 +129,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
             s->tex >= 0 ? 1.0f : 0.0f);   /* (untextured: alpha 0, bit 15 clear on a read-back) */
     }
     C3D_ImmDrawEnd();
+    tk_draw += svcGetSystemTick() - t0;
 }
 /* the staging texture, its memory from the arena: w x h rounded up to powers of two (>= 8).  (One C3D_Tex for all:
    citro3d keeps the pointer of the bound texture, and the draw has copied its fields into the command list) */
@@ -147,6 +154,7 @@ static int stage_tex(C3D_Tex *t, int w, int h) {
     return 0;
 }
 static void c3d_write(int x, int y, int w, int h, const unsigned *src, int stride) {
+    u64 t0 = svcGetSystemTick();
     for (int j0 = 0; j0 < h; j0 += 256)   /* (in pieces of at most 256 x 256: the arena) */
         for (int i0 = 0; i0 < w; i0 += 256) {
             int pw = w - i0 < 256 ? w - i0 : 256, ph = h - j0 < 256 ? h - j0 : 256;
@@ -167,6 +175,7 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
             C3D_ImmDrawEnd();
             st_writes++;
         }
+    tk_write += svcGetSystemTick() - t0;
 }
 static void c3d_fill(int x, int y, int w, int h, unsigned c) {
     begin();
@@ -180,6 +189,7 @@ static void c3d_fill(int x, int y, int w, int h, unsigned c) {
     C3D_ImmDrawEnd();
 }
 static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
+    u64 t0 = svcGetSystemTick();
     end_and_wait();
     C3D_SyncDisplayTransfer((u32 *)vram_tex.data, GX_BUFFER_DIM(1024, 512), (u32 *)lin, GX_BUFFER_DIM(1024, 512),
                             GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) |
@@ -187,10 +197,12 @@ static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
                             GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
     GSPGPU_InvalidateDataCache(lin, 1024 * 512 * 4);
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) dst[j * stride + i] = pix(lin[(y + j) * 1024 + x + i]);
+    tk_read += svcGetSystemTick() - t0;
 }
 
 /* ---- the top screen: the display area, 4:3 at the screen's height, centred */
 static int c3d_present(int x, int y, int w, int h, int masked) {
+    u64 t0 = svcGetSystemTick();
     begin();
     C3D_RenderTargetClear(top_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
     C3D_FrameDrawOn(top_rt);
@@ -227,8 +239,17 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     proj_vram();
     frame_no++; st_frames++;
     arena_off = 0;   /* (the next C3D_FrameBegin waits for this frame: the arena is free then) */
-    if (st_frames % 600 == 0)
-        port_printf("[3ds] pica: %llu frames, %llu syncs, %llu host writes\n", st_frames, st_syncs, st_writes);
+    u64 t1 = svcGetSystemTick();
+    tk_present += t1 - t0;
+    if (tk_last) tk_frame += t1 - tk_last;
+    tk_last = t1;
+    if (st_frames % 600 == 0) {
+        port_printf("[3ds] pica: %llu frames, %llu syncs, %llu host writes; ms per frame: %.2f total, %.2f draws, %.2f texture uploads, "
+                    "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
+                    st_frames, st_syncs, st_writes, TK_MS(tk_frame), TK_MS(tk_draw), TK_MS(tk_upload), TK_MS(tk_write), TK_MS(tk_read),
+                    TK_MS(tk_panel), TK_MS(tk_present));
+        tk_frame = tk_draw = tk_upload = tk_write = tk_read = tk_panel = tk_present = 0;
+    }
     return 1;
 }
 
@@ -236,11 +257,17 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
 void port_n3ds_panel(const unsigned char *rgba, int w, int h) {
     if (!bot_rt || w <= 0 || h <= 0) return;
     if (w > 320) w = 320; if (h > 240) h = 240;
+    /* only when the canvas changed (the panel redraws at ~25 fps, mostly the same picture) */
+    static unsigned last[320 * 240]; static int lw, lh;
+    if (w == lw && h == lh && !memcmp(last, rgba, (size_t)w * h * 4)) return;
+    u64 t0 = svcGetSystemTick();
+    memcpy(last, rgba, (size_t)w * h * 4); lw = w; lh = h;
     begin();   /* (waits for the frames submitted before: the last present sampled this texture) */
     const unsigned *src = (const unsigned *)rgba; unsigned *d = panel_tex.data;
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) d[tiled(i, j, 512)] = pix(src[j * w + i]) | 0xFF;
     GSPGPU_FlushDataCache(d, 512 * 256 * 4);
     panel_w = w; panel_h = h;
+    tk_panel += svcGetSystemTick() - t0;
 }
 void port_n3ds_touch(void) {
     extern void port_panel_touch(int, int, int);
