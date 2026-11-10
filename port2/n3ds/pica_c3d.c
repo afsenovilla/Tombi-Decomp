@@ -35,7 +35,10 @@ static unsigned char *arena; static unsigned arena_off;
 static unsigned long long st_syncs, st_writes, st_frames;
 /* where a frame's time goes (system ticks; the log line every 600 frames gives milliseconds per frame) */
 static unsigned long long tk_last, tk_frame, tk_upload, tk_write, tk_read, tk_panel, tk_present, tk_draw;
-#define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / 600.0)
+#define TK_N 120   /* frames per log line */
+#define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / TK_N)
+static unsigned long long n_up, n_rd, n_wait;
+extern unsigned long long pica_decode_us;
 
 /* ---- the frame */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
@@ -103,9 +106,10 @@ static inline unsigned morton(int x, int y) {
 }
 static inline unsigned tiled(int x, int y, int w) { return ((y >> 3) * (w >> 3) + (x >> 3)) * 64 + morton(x & 7, y & 7); }
 static void c3d_tex_upload(int slot, const unsigned *rgba) {
-    begin();                                                  /* the frames before have finished */
-    if (slot_used[slot] == frame_no) { end_and_wait(); begin(); }   /* the open frame samples this slot */
     u64 t0 = svcGetSystemTick();
+    begin();                                                  /* the frames before have finished */
+    if (slot_used[slot] == frame_no) { end_and_wait(); begin(); n_wait++; }   /* the open frame samples this slot */
+    n_up++;
     unsigned *d = slot_tex[slot].data;
     for (int v = 0; v < 256; v++) for (int u = 0; u < 256; u++) d[tiled(u, v, 256)] = pix(rgba[v * 256 + u]);
     GSPGPU_FlushDataCache(d, 256 * 256 * 4);
@@ -190,6 +194,7 @@ static void c3d_fill(int x, int y, int w, int h, unsigned c) {
 }
 static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
     u64 t0 = svcGetSystemTick();
+    n_rd++;
     end_and_wait();
     C3D_SyncDisplayTransfer((u32 *)vram_tex.data, GX_BUFFER_DIM(1024, 512), (u32 *)lin, GX_BUFFER_DIM(1024, 512),
                             GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) |
@@ -243,7 +248,10 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     tk_present += t1 - t0;
     if (tk_last) tk_frame += t1 - tk_last;
     tk_last = t1;
-    if (st_frames % 600 == 0) {
+    if (st_frames % TK_N == 0) {
+        port_printf("[3ds] pica: per frame %.2f texture uploads (%.2f waited for the GPU; decoding %.2f ms), %.2f read-backs\n",
+                    (double)n_up / TK_N, (double)n_wait / TK_N, pica_decode_us / 1000.0 / TK_N, (double)n_rd / TK_N);
+        n_up = n_rd = n_wait = 0; pica_decode_us = 0;
         port_printf("[3ds] pica: %llu frames, %llu syncs, %llu host writes; ms per frame: %.2f total, %.2f draws, %.2f texture uploads, "
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
                     st_frames, st_syncs, st_writes, TK_MS(tk_frame), TK_MS(tk_draw), TK_MS(tk_upload), TK_MS(tk_write), TK_MS(tk_read),

@@ -261,6 +261,8 @@ static void decode(const GpuTex *t, int tw) {
         dec[v0 * 256 + u0] = !c ? 0 : (c15to32(c) & 0x00FFFFFFu) | ((u32)(c & 0x8000 ? A_SEMI : A_OPAQUE) << 24);
     }
 }
+extern unsigned long long port_time_us(void);
+unsigned long long pica_decode_us;   /* (time in decode(): n3ds/pica_c3d.c logs it) */
 static int tex_slot(const GpuTex *t) {
     int x, y, w;
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
@@ -280,7 +282,9 @@ static int tex_slot(const GpuTex *t) {
     }
 load:
     if (nbv && bst.tex == lru) flush();   /* the pending batch samples the slot about to change */
+    unsigned long long t0 = port_time_us();
     decode(t, tw);
+    pica_decode_us += port_time_us() - t0;
     dev->tex_upload(lru, dec);
     st_decodes++;
     slots[lru] = (Slot){ t->tx, t->ty, t->depth, t->cx, t->cy, tw, v, ++use_clock, 1 };
