@@ -598,7 +598,7 @@ def sources(outdir, progs, ovls=(), areas=()):
         if ovl:
             defs += "".join("#define %s %s_%s\n" % (n, prog, n) for n in sorted(ovl_names[prog])
                             if re.search(r"\b%s\b" % re.escape(n), src))
-        txt = volatile_aliases(txt)
+        txt = volatile_aliases(txt, lambda n, _p=prog: asyms.get(_p, {}).get(n) or canon.get(n))
         txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (defs, os.path.relpath(u.file, ROOT)) + txt
         hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:600], re.M)
         if hm and hm.group(1) != "tomba24": sys.exit("gen_port: unknown header set " + hm.group(1))
@@ -759,15 +759,22 @@ def sources(outdir, progs, ovls=(), areas=()):
               % (len(vary), len(area_units), len(areamap)))
 
 
-def volatile_aliases(txt):
-    """One address under two data names in a file (D_1F80019E and its typed alias D_1F80019Es): gcc assumes distinct
-    globals never alias, so a loop that decrements one and tests the other keeps the test in a register forever
-    (playerTryTalkToNpc).  Every extern declaration of such names becomes volatile (both names, so the accesses keep
-    their order)."""
+def volatile_aliases(txt, addr_of=None):
+    """One address under two data names in a file (D_1F80019E and its typed alias D_1F80019Es; since the globals were
+    named, LIST_COUNTER and LIST_COUNTER_S): gcc assumes distinct globals never alias, so a loop that decrements one
+    and tests the other keeps the test in a register forever (playerTryTalkToNpc).  Every extern declaration of such
+    names becomes volatile (both names, so the accesses keep their order).  addr_of: a name's address or None (the
+    names with no address in them)."""
     groups = {}
     for full, addr in re.findall(r"\b((?:D|DAT)_([0-9A-Fa-f]{8})\w*)\b", txt):
         if "__" in full: continue
         groups.setdefault(addr.upper(), set()).add(full)
+    if addr_of:
+        for decl in re.findall(r"^[ \t]*extern\b[^;{(]*;", txt, flags=re.M):
+            for n in set(re.findall(r"\b[A-Za-z_]\w*\b", decl)):
+                if "__" in n or re.match(r"(?:D|DAT)_[0-9A-Fa-f]{8}", n): continue
+                ad = addr_of(n)
+                if ad is not None: groups.setdefault("%08X" % ad, set()).add(n)
     names = set(n for g in groups.values() if len(g) > 1 for n in g)
     if not names: return txt
     def fix(m):
