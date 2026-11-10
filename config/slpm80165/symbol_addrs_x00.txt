@@ -159,6 +159,7 @@ func_8012995C_slpm80165 = 0x8012995C; // type:func size:0xCC  PAL x000 0x801340C
 func_80129A28_slpm80165 = 0x80129A28; // type:func size:0x178  PAL x000 0x80134190
 func_80129F48_slpm80165 = 0x80129F48; // type:func size:0x2C0  PAL x000 0x801346C0
 func_8012A208_slpm80165 = 0x8012A208; // type:func size:0x21C
+func_8012A4A0_slpm80165 = 0x8012A4A0; // type:func size:0x1A8  PAL x000 0x801361E4
 func_8012A648_slpm80165 = 0x8012A648; // type:func size:0x20  PAL x000 0x801363C4
 func_8012ACF4_slpm80165 = 0x8012ACF4; // type:func size:0x128  PAL x000 0x80136A98
 func_8012BFC8_slpm80165 = 0x8012BFC8; // type:func size:0xB4  PAL x000 0x80137F54
