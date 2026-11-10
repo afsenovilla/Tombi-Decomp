@@ -1067,6 +1067,7 @@ _padStopCom = 0x800679F8; // type:func size:0x44  PAL main0 0x80069880
 func_80067A3C_beta980203 = 0x80067A3C; // type:func size:0x214
 func_80067C50_beta980203 = 0x80067C50; // type:func size:0xC8
 _padSioRW = 0x80067D18; // type:func size:0x1D4
+_padSioExchangeByte = 0x80067EEC; // type:func size:0x22C  PAL main0 0x80069EF8
 _padClrIntSio0 = 0x80068118; // type:func size:0x90  PAL main0 0x8006A170
 sioWaitRxReady = 0x800681A8; // type:func size:0x28  PAL main0 0x8006A200
 SysEnqIntRP = 0x800681D0; // type:func size:0xC  PAL main0 0x8006A234
