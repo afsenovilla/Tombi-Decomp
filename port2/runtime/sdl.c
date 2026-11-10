@@ -197,7 +197,15 @@ static void cbind_defaults(void) {
         { SDL_CONTROLLER_BUTTON_X, P_SQUARE }, { SDL_CONTROLLER_BUTTON_Y, P_TRI }, { SDL_CONTROLLER_BUTTON_LEFTSHOULDER, P_L1 },
         { SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, P_R1 }, { SDL_CONTROLLER_BUTTON_START, P_START }, { SDL_CONTROLLER_BUTTON_BACK, P_SELECT } };
     ncbind = 0;
-    for (unsigned i = 0; i < sizeof d / sizeof d[0]; i++) cbind_add(CB_BUTTON, d[i].b, 0, d[i].m);
+    for (unsigned i = 0; i < sizeof d / sizeof d[0]; i++) {
+        unsigned short m = d[i].m;
+#ifdef __3DS__
+        /* SDL's A / B / X / Y are the 3DS's own letters, and Nintendo's sit where the other pair does on a PlayStation
+           pad: bound by place (B, the lower one, is cross; A circle; Y square; X triangle) */
+        m = m == P_CROSS ? P_CIRCLE : m == P_CIRCLE ? P_CROSS : m == P_SQUARE ? P_TRI : m == P_TRI ? P_SQUARE : m;
+#endif
+        cbind_add(CB_BUTTON, d[i].b, 0, m);
+    }
     cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 1, P_L2);    /* (L2 / R2 were not read at all before) */
     cbind_add(CB_AXIS, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 1, P_R2);
 }
