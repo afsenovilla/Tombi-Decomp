@@ -111,7 +111,17 @@ static void c3d_tex_upload(int slot, const unsigned *rgba) {
     if (slot_used[slot] == frame_no) { end_and_wait(); begin(); n_wait++; }   /* the open frame samples this slot */
     n_up++;
     unsigned *d = slot_tex[slot].data;
-    for (int v = 0; v < 256; v++) for (int u = 0; u < 256; u++) d[tiled(u, v, 256)] = pix(rgba[v * 256 + u]);
+    /* 8x8 tiles, Morton order inside: one tile row of source rows at a time */
+    static unsigned char my[8]; if (!my[1]) for (int i = 0; i < 8; i++) my[i] = (unsigned char)morton(0, i);
+    for (int v = 0; v < 256; v++) {
+        unsigned *drow = d + (v >> 3) * 32 * 64 + my[v & 7];
+        const unsigned *s = rgba + v * 256;
+        for (int tx = 0; tx < 32; tx++, s += 8) {
+            unsigned *t = drow + tx * 64;
+            t[0] = pix(s[0]); t[1] = pix(s[1]); t[4] = pix(s[2]); t[5] = pix(s[3]);
+            t[16] = pix(s[4]); t[17] = pix(s[5]); t[20] = pix(s[6]); t[21] = pix(s[7]);
+        }
+    }
     GSPGPU_FlushDataCache(d, 256 * 256 * 4);
     tk_upload += svcGetSystemTick() - t0;
 }

@@ -177,8 +177,13 @@ static u32 *stage;                       /* 1024 x 512 */
 static void read_back(int x, int y, int w, int h) {   /* the target's rectangle into vram[] */
     u16 *vram = port_vram();
     dev->read(x, y, w, h, stage, w);
-    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) vram[(y + j) * 1024 + x + i] = c32to15(stage[j * w + i]);
-    pages_bump(x, y, w, h);
+    int changed = 0;
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
+        u16 c = c32to15(stage[j * w + i]), *p = &vram[(y + j) * 1024 + x + i];
+        changed |= *p ^ c; *p = c;
+    }
+    /* (vram[] unchanged: the textures decoded from these pages are still right, keep them) */
+    if (changed) pages_bump(x, y, w, h);
     st_readbacks++;
 }
 static void clip_rect(int *x, int *y, int *w, int *h);
@@ -243,8 +248,27 @@ static unsigned tex_ver(const GpuTex *t, int *x, int *y, int *w) {   /* the newe
     }
     return v;
 }
+static inline u32 texel(u16 c) { return !c ? 0 : (c15to32(c) & 0x00FFFFFFu) | ((u32)(c & 0x8000 ? A_SEMI : A_OPAQUE) << 24); }
 static void decode(const GpuTex *t, int tw) {
     const u16 *vram = port_vram();
+    if (!tw && t->cy != PORT_CLUT_Y && (t->depth == 2 || t->cx + (t->depth ? 256 : 16) <= 1024)) {
+        /* the usual case (no texture window, a CLUT in vram[] that does not wrap): the CLUT converted once, whole
+           words of indices at a time; the same texels as the general loop below */
+        static u32 clut[256];
+        if (t->depth < 2) for (int i = 0; i < (t->depth ? 256 : 16); i++) clut[i] = texel(vram[t->cy * 1024 + t->cx + i]);
+        for (int v = 0; v < 256; v++) {
+            const u16 *row = &vram[((t->ty + v) & 511) * 1024];
+            u32 *d = &dec[v * 256];
+            if (t->depth == 0) for (int k = 0; k < 64; k++) {
+                u16 w = row[(t->tx + k) & 1023];
+                d[0] = clut[w & 15]; d[1] = clut[(w >> 4) & 15]; d[2] = clut[(w >> 8) & 15]; d[3] = clut[w >> 12]; d += 4;
+            } else if (t->depth == 1) for (int k = 0; k < 128; k++) {
+                u16 w = row[(t->tx + k) & 1023];
+                d[0] = clut[w & 255]; d[1] = clut[w >> 8]; d += 2;
+            } else for (int k = 0; k < 256; k++) d[k] = texel(row[(t->tx + k) & 1023]);
+        }
+        return;
+    }
     int twmx = tw & 31, twmy = (tw >> 5) & 31, twox = (tw >> 10) & 31, twoy = (tw >> 15) & 31;
     for (int v0 = 0; v0 < 256; v0++) for (int u0 = 0; u0 < 256; u0++) {
         int u = (u0 & ~(twmx * 8)) | ((twox & twmx) * 8), v = (v0 & ~(twmy * 8)) | ((twoy & twmy) * 8);
@@ -258,7 +282,7 @@ static void decode(const GpuTex *t, int tw) {
             int i = (w >> ((u & 1) * 8)) & 255;
             c = t->cy == PORT_CLUT_Y ? port_prompt_clut[(t->cx + (i & 15)) % (PORT_CLUT_ROWS * 16)] : vram[t->cy * 1024 + ((t->cx + i) & 1023)];
         } else c = vram[((t->ty + v) & 511) * 1024 + ((t->tx + u) & 1023)];
-        dec[v0 * 256 + u0] = !c ? 0 : (c15to32(c) & 0x00FFFFFFu) | ((u32)(c & 0x8000 ? A_SEMI : A_OPAQUE) << 24);
+        dec[v0 * 256 + u0] = texel(c);
     }
 }
 extern unsigned long long port_time_us(void);
