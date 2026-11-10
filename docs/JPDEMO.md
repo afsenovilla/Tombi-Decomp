@@ -257,8 +257,8 @@ differences that came up again and again (worth trying first on the next functio
   commands even with no free voice; the collision slope tests take a `short` first argument and use a signed
   `% 8`;
 - splat cut the tail of a few library functions into separate "functions" (`SquareRoot0` +8, `ApplyMatrixLV` +12):
-  the PAL size in `symbol_addrs_slpm80165.txt` puts them back, and the 4-byte jal targets in the middle of
-  `a00Variant0EventSpawn` (0x8012A618) still split it (open);
+  the PAL size in `symbol_addrs_slpm80165.txt` puts them back; a jal target in the middle of
+  `a00Variant0EventSpawn` (0x8012A618) still splits that one (open);
 - three addresses (0x8003A770, 0x8004B50C, 0x80116F94) still have two `// VERSION SLPM_80165` lines in `src/`.
 
 - **Plumbing (1-2 days):** add `config/slpm80165/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
