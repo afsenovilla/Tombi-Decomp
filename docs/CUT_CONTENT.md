@@ -835,5 +835,41 @@ has no PAL twin: the localized HUD / text strip. So apart from Tomba (side view 
 tables hold no art that retail lacks; the differences are retail's additions (PAL-only frames listed in the tool's
 INDICE.txt: e.g. SPR 34 frames 192-252, SPR 3A 70-126).
 
- with its timing and then removed before PrePre 9; the object it
+### Items and placed objects of the JP demo that retail does not have (2026-11-10)
+
+Items (`tools/item_icons_find.py game_jp_demo/fs`, `tools/jpdemo_text.py game_jp_demo/disc.bin OUT --jp
+game_jp/disc/tomba_jp.bin`, retail JP text from `tools/jp_text.py`):
+
+- Icon page `SYSTEM/A00012.000` (1536 px wide, grid from x 512): 64 slots, 58 retail icons found. Slots **34, 36, 44,
+  45, 52, 61** carry icons retail never used (the corkscrew / curly key / bottle / powder / rocks set already seen in
+  Dengeki D5 and PrePre 9) while their description entries are the placeholders アイテム０３４.., and slot **24** is a
+  grey pod icon described as 魔ブタを封じこめる たいせつな ふくろ ("the precious bag that seals an Evil Pig"): one generic
+  bag before the seven coloured ones (37-43, present too). Description bank `SYSTEM/A00013.000` (201 entries, retail id
+  order): 11 entries reworded against retail JP (ids 0, 6, 9-14, 24, 26, 27).
+- Item names in the demo's "used X" messages that appear nowhere in the retail JP text: はやさレベル＋１ (Speed Level +1),
+  ケガをしたコイヌ (Injured Puppy: the early Baron), みえないカガミ (Invisible Mirror), バンクの実 (Bunk Fruit; retail: Bunk
+  Flower), ワライダケ / ナキダケ (laughing / weeping mushroom under other names), ライフゲージかくだい (Life gauge expand;
+  retail keeps only ぞうか). グルドカ / グルピン / ドカピン / ケモノダッシュ / アルコール / エサねんりょう exist in retail JP.
+- No feather object: the only feather is the Charity Wings item (icon 7, めぐみの羽根), used in the demo as in retail.
+
+Placed objects: the demo keeps its APD records inside the room containers (`AREA00/D003.GAM` +0x481CC.., `D302.GAM`,
+`D402.GAM`, `D503.GAM`; 403 distinct records) like the retail JP disc (`AREA00/D003.GAM` etc., 426). Compared record by
+record with retail JP (same layer, type, subtype, x, y, z) the demo-only ones are:
+
+| where | record | note |
+|---|---|---|
+| section 2 (3020,-512) | layer 5 type 4 subtype 14 = **Baron lying in the world as a pick-up** (flag 44) | retail gives Baron through the event; no retail disc places item 14 |
+| section 5 (2642,-300,168) | layer 2 type 39, sprite set 5, flag 47 | no retail disc places an L2 type 39 in AREA00; in PAL the L2 slot 39 is not a handler |
+| room 3 (120,-56) | layer 3 type 21 | PAL slot 21 of layer 3 is not a handler |
+| room 5 (2670 / 2600,-395,907) | layer 4 type 7 subtype 8, models 1 / 2 | area-mechanism variant 8, unplaced in retail |
+| section 0 (1200,-36,204) | five layer 4 type 27 records, models 0x4C..0x50 at one point | a five-model sequence (`updateL4Type1BObject` in PAL) retail does not place |
+| section 0 / 1 | 12 layer 2 type 1 objects in rows (x 230-558, 2014-2038), L4 type 26 subtype 3 (800,-40), L4 type 0 subtypes 5-6 (room 1), Chick at (2023,-345) | small enemies / fixtures / an item retail moved or removed |
+
+Caveat: type numbers are the demo's; its handler tables were not matched against retail's, so a "type not placed in
+retail" can also be a renumbered type (as with PrePre 9's L4 13 = retail L4 7). The static solid blocks (L4 type 8) and
+the fourth stone tower (L4 type 1 subtype 3) the demo places are also in retail JP (see "Placement records across
+PAL / USA / JP") and are not listed here. Not rendered: `tools/model_view.py obj` needs the PAL load lists; the demo's
+model table is at `D003.GAM` unpacked +0x30A78 (87 entries).
+
+Conclusion: the lift / pull mechanic was programmed with its timing and then removed before PrePre 9; the object it
 used is in none of the demo's data. Only the frames and these scripts remain.
