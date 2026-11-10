@@ -928,7 +928,16 @@ src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x64; | m.x = port_title_
 src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x70; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x0 - 8 - (unsigned char)TITLE_FONT[*(short *)TITLE_ARROW_LEFT_STRING * 5 + 2] : 0x70;
 @version all
 # --wings-glide (runtime/wings.c): the Japanese demo's cut top-down Charity Wings glide. The wings item use in a
-# top-down area runs topdownPlayerDropExitStep (substep 0); the port swaps the player's frame tables there and draws
+# top-down area runs topdownPlayerDropExitStep (substep 0; overheadPlayerDropExitStep / tunnelPlayerDropExitStep in I0NFO / I0NFO3); the port swaps the player's frame tables there and draws
 # the feather after the player's parts (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide")
 src/i0nfo2/topdownPlayerDropExitStep.c |         o->timer = 0x14; |         o->timer = 0x14; { extern void port_wings_begin(void *); port_wings_begin(o); }
 src/i0nfo2/topdownDrawRotatedSprite.c |     } while (--*n); |     } while (--*n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, *x, *y, otz); }
+# the same step and drawer in the other two overhead engines: I0NFO (AREA02 s0, the Dwarf Village) and I0NFO3 (the tunnels)
+src/i0nfo/overheadPlayerDropExitStep.c |         o->timer = 0x1E; |         o->timer = 0x1E; { extern void port_wings_begin(void *); port_wings_begin(o); }
+src/i0nfo/overheadDrawRotatedSprite.c |     } while (--*n); |     } while (--*n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, *x, *y, otz); }
+src/i0nfo3/tunnelPlayerDropExitStep.c |         o->timer = 0x1E; |         o->timer = 0x1E; { extern void port_wings_begin(void *); port_wings_begin(o); }
+src/i0nfo3/tunnelDrawRotatedSprite.c |     } while (--*n); |     } while (--*n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, *x, *y, otz); }
+# and the landing in the destination area (the player drops from the sky, *PlayerLandStep state 0): the same glide down
+src/i0nfo2/topdownPlayerLandStep.c |         topdownPlayerSetMoveAnim(o); |         topdownPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }
+src/i0nfo/overheadPlayerLandStep.c |         overheadPlayerSetMoveAnim(o); |         overheadPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }
+src/i0nfo3/tunnelPlayerLandStep.c |         tunnelPlayerSetMoveAnim(o); |         tunnelPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }

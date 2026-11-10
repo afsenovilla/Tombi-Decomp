@@ -3078,8 +3078,12 @@ byte for byte against the JP demo's copy `SYSTEM/A00000.GAM`, 512 px wide) over 
 POLY_FT4 after the player's parts, one ordering-table slot nearer, turning like a
 rotor (8 phases, 2 ticks each, the mirrored phases by swapping u). The quill end sits 1 px above the hand's top pixel
 (hand at (22,2)/(22,1)/(22,1) of the frames, quill ends (2,22)/(2,14)/(7,14)). Hooks: `port_wings_begin` at
-`topdownPlayerDropExitStep` state 0 (substep 0 = the wings), `port_wings_draw` at the end of
-`topdownDrawRotatedSprite` (port/fixes.txt). Tables are restored when the step ends; after a room load (which
+`topdownPlayerDropExitStep` state 0 (substep 0 = the wings), `port_wings_land` at `topdownPlayerLandStep` state 0 (the
+drop from the sky into the destination area, the same glide down until the feet touch the ground; that step is the
+arrival from above in every overhead area, which the wings flight is), `port_wings_draw` at the end of
+`topdownDrawRotatedSprite`; the same three hooks in the other two overhead engines, I0NFO (AREA02 s0, the Dwarf
+Village: `overheadPlayer*Step`, `overheadDrawRotatedSprite`) and I0NFO3 (the tunnels: `tunnelPlayer*Step`,
+`tunnelDrawRotatedSprite`) (port/fixes.txt). The tables are restored once the player leaves the step they were set in. Tables are restored when the step ends; after a room load (which
 replaces both) nothing is written back. Launcher: *Cut content* page, own card with its checkbox and two disc-image
 fields (JP demo, PrePre 9;
 .bin/.cue/.iso/.chd, or inside a .zip/.7z like the game's); picking one checks the serial (SLPM-80165 / PCPX-96093)
@@ -3089,9 +3093,9 @@ members are taken as they are by `extract_archive_files`), with a status line un
 why not; a path typed in is checked on Enter); the folders are passed only when the checkbox is on and both are there. The
 files are the user's own discs, nothing is shipped; without them the step is the retail one. The early-title folder field was removed from the launcher (the
 `--early-title` option stays in the port). Checked
-headless in AREA08 section 0 (debug select 8:0, the dialogue dismissed, the item use started with the pokes the
-panel's warp path uses: PLAYER+4..6 = 1, 0x30, 0 and GVARS_USE_ITEM_PENDING/ID = 1, 7): Tomba rises with the feather
-spinning in the raised hand through the fade. Not tested on the device (PC headless only); Android launcher not wired.
+headless in AREA08 section 0 and AREA02 section 0 (debug select 8:0 / 2:0, the dialogue dismissed, the item use started
+with the pokes the panel's warp path uses: PLAYER+4..6 = 1, 0x30, 0 and GVARS_USE_ITEM_PENDING/ID = 1, 7): Tomba rises
+with the feather spinning in the raised hand through the fade, and drops into the next room the same way. Not tested on the device (PC headless only); Android launcher not wired.
 
 ### `--cut-content[=LIST]`: one switch per item (2026-11-10)
 

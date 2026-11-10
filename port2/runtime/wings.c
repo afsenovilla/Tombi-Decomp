@@ -172,9 +172,23 @@ static int load(void) {
     return 1;
 }
 
+static void start(void *o);
+static int want_b04, want_step;     /* the player step the glide belongs to: tables restored once it moves on */
+
 /* topdownPlayerDropExitStep, state 0 (after the retail animation was set): take over when it is the Charity Wings */
 void port_wings_begin(void *o) {
     if (!port_wings_dir || O_SUBSTEP(o) != 0) return;     /* its own option, not tied to --cut-content */
+    start(o);
+}
+
+/* topdownPlayerLandStep, state 0: the arrival in the next overhead area (the drop from the sky after the flight) gets
+   the same glide until the feet touch the ground */
+void port_wings_land(void *o) {
+    if (!port_wings_dir) return;
+    start(o);
+}
+
+static void start(void *o) {
     if (!load()) return;
     if (active) return;
     {   /* the feather texels of the PrePre 9 page over retail's (tpage 0x14 = VRAM 256,256; same place, 4 bpp) */
@@ -191,7 +205,7 @@ void port_wings_begin(void *o) {
     O_D3C(o) = (int)(unsigned long)spr_table;
     O_ANIM(o) = script;
     AnimLoadDuration(o);
-    active = 1; ticks = 0; player = o;
+    active = 1; ticks = 0; player = o; want_b04 = O_B04(o); want_step = O_STEP(o);
 }
 
 static void restore(void *o) {
@@ -215,7 +229,7 @@ void port_wings_draw(void *o, int x, int y, int z) {
     int cur, ph, ff, mirror, w, h, u0, v0, dx, dy, hx, hy, qx, qy, fx, fy, flip, d;
     unsigned char *part, *fe; PolyFT4 *p; unsigned int *ot, v;
     if (!active || o != player) return;
-    if (O_B04(o) != 4 || O_STEP(o) != 4 || WPP_DATA[2] != (char *)wpp_table) { restore(o); return; }
+    if (O_B04(o) != want_b04 || O_STEP(o) != want_step || WPP_DATA[2] != (char *)wpp_table) { restore(o); return; }
     cur = *(unsigned short *)O_ANIM(o);                 /* our frame 0..2 */
     if (cur > 2) cur = 0;
     ph = (ticks / TICKS_PER_PHASE) % 8; ticks++;
