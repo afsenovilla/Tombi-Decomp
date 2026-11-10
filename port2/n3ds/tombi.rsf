@@ -3,7 +3,7 @@
 BasicInfo:
   Title                   : "Tombi"
   ProductCode             : "CTR-H-TOMB"
-  Logo                    : None       # (no boot splash: straight into the port)
+  Logo                    : Homebrew   # (a console refuses to start the title without a logo: "SD card was removed")
 
 RomFs:
   # (none: the game's files come from the player's own disc image on the SD card)
