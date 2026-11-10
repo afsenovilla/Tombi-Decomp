@@ -401,7 +401,23 @@ def main(argv):
     if os.path.isdir(p):
         info, src = identify_data(p), DirSource(p)
     else:
+        import disc_archive as DA, shutil, tempfile
+        if DA.kind(p) in ("zip", "7z", "rar"):          # the image inside a .zip / .7z (unpacked to a temporary folder)
+            tmp = tempfile.mkdtemp(prefix="tombi-unpack-")
+            try:
+                p = DA.extract_image(p, tmp)
+                info, src = identify_image(p), ImageSource(p)
+                return _report(argv, p, info, src)
+            except DA.ArchiveError as e:
+                print(e)
+                return 1
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
         info, src = identify_image(p), ImageSource(p)
+    return _report(argv, p, info, src)
+
+
+def _report(argv, p, info, src):
     if not info:
         print("%s: no data manifest" % p)
         return 1
