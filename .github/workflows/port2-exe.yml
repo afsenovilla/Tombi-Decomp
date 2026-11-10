@@ -734,24 +734,18 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: tombi-port-windows
           path: out
-      - name: Publish the "dev" pre-release
+      - name: Put the Windows launcher into the "dev" pre-release
         env:
           GH_TOKEN: ${{ github.token }}
           R: ${{ github.repository }}
         run: |
           (cd out && zip -9 -q -r ../Tombi-port-dev-windows-x64.zip .)
-          SHA7=${GITHUB_SHA::7}; DAY=$(date -u +%Y%m%d)
-          SUBJECT=$(gh api "repos/$R/commits/$GITHUB_SHA" --jq .commit.message | head -n1)
-          gh release delete dev -R "$R" --yes --cleanup-tag 2>/dev/null || true
-          gh release create dev -R "$R" --prerelease --latest=false --target "$GITHUB_SHA" \
-            --title "dev build $DAY-$SHA7" \
-            --notes "Automatic build of master at $SHA7 ($DAY): $SUBJECT. Windows launcher + game; unpack and run tombi-port.exe. Not a release: the latest versioned release is the stable one." \
-            Tombi-port-dev-windows-x64.zip
-          echo "https://github.com/$R/releases/download/dev/Tombi-port-dev-windows-x64.zip"
+          tools/ci_dev_release.sh Tombi-port-dev-windows-x64.zip "Windows launcher + game"
 
   launcher-linux:
     needs: game-linux
