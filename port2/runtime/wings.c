@@ -58,7 +58,10 @@ static const int PHASE[8][2] = {{0, 0}, {1, 0}, {2, 0}, {1, 1}, {0, 1}, {1, 1}, 
 
 /* the three-frame copies: static, so they sit in the executable's data (below 16 MB) like every table the game reads
    through its 24-bit-addressed packets; a malloc'd table (above 16 MB on Windows) faulted in unpackSpriteFrame */
-static unsigned char wpp_table_buf[4 * 4 + 4 + 3 * 1024], spr_table_buf[4 * 3 + 16 * 3 * 8];
+/* the WPP table keeps the demo's 106 entries (an index the player still holds when the tables are swapped, e.g. 14
+   at the landing, must stay inside it): entries 77-79 are the three frames, every other one an empty frame */
+#define WPP_N 106
+static unsigned char wpp_table_buf[4 + 4 * (WPP_N + 1) + 3 * 1024], spr_table_buf[4 * WPP_N + 16 * 3 * 8];
 static unsigned char *wpp_table, *spr_table;
 static unsigned short script[8 * 4 + 2];        /* 4 entries of 8 bytes + a 4-byte jump back */
 static int tried, active, ticks;
@@ -128,18 +131,22 @@ static int load(void) {
     t = wpp + WPP_TABLE_OFF;
     n = u32(t);
     if (n != 106) { port_printf("wings: %s +0x%X holds %u frames, expected 106 (not the SLPM-80165 demo?)\n", WPP_FILE, WPP_TABLE_OFF, n); free(wpp); return 0; }
-    total = 4 * 4 + 4;
+    total = 4 + 4 * (WPP_N + 1);
     for (i = 0; i < 3; i++) total += u32(t + 4 + 4 * (FRAMES[i] + 1)) - u32(t + 4 + 4 * FRAMES[i]);
     if (total > sizeof wpp_table_buf) { port_printf("wings: frames 77-79 of %s are %u bytes, more than expected\n", WPP_FILE, total); free(wpp); return 0; }
     wpp_table = wpp_table_buf;
-    put32(wpp_table, 3);
-    off[0] = 4 * 4 + 4;
+    put32(wpp_table, WPP_N);
+    off[0] = 4 + 4 * (WPP_N + 1);
     for (i = 0; i < 3; i++) {
         unsigned int a = u32(t + 4 + 4 * FRAMES[i]), b = u32(t + 4 + 4 * (FRAMES[i] + 1));
         memcpy(wpp_table + off[i], t + a, b - a);
         off[i + 1] = off[i] + (b - a);
     }
-    for (i = 0; i < 4; i++) put32(wpp_table + 4 + 4 * i, off[i]);
+    /* entry k = its frame's start, entry k+1 its end: 77, 78, 79 are the three frames; every other entry points at
+       off[0], so a stale index decodes as an empty frame (off[0]..off[0]), never as garbage */
+    for (i = 0; i <= WPP_N; i++) put32(wpp_table + 4 + 4 * i, off[0]);
+    put32(wpp_table + 4 + 4 * FRAMES[0], off[0]); put32(wpp_table + 4 + 4 * FRAMES[1], off[1]);
+    put32(wpp_table + 4 + 4 * FRAMES[2], off[2]); put32(wpp_table + 4 + 4 * (FRAMES[2] + 1), off[3]);
     free(wpp);
     gam = read_file(port_wings_dir, SPR_FILE, &gl);
     if (!gam) { wpp_table = 0; return 0; }
@@ -150,15 +157,17 @@ static int load(void) {
     lzDecompress(gam, spr);
     free(gam);
     /* SPR table: u16 parts, u16 offset per frame; a part is 16 bytes */
-    total = 4 * 3;
+    total = 4 * WPP_N;
     for (i = 0; i < 3; i++) total += 16 * (spr[4 * FRAMES[i]] | spr[4 * FRAMES[i] + 1] << 8);
     if (total > sizeof spr_table_buf) { port_printf("wings: the SPR parts of frames 77-79 are %u bytes, more than expected\n", total); free(spr); wpp_table = 0; return 0; }
     spr_table = spr_table_buf;
+    memset(spr_table, 0, 4 * WPP_N);          /* every other entry: no parts */
     {
-        unsigned int o = 4 * 3;
+        unsigned int o = 4 * WPP_N;
         for (i = 0; i < 3; i++) {
-            unsigned int cnt = spr[4 * FRAMES[i]] | spr[4 * FRAMES[i] + 1] << 8, src = spr[4 * FRAMES[i] + 2] | spr[4 * FRAMES[i] + 3] << 8;
-            spr_table[4 * i] = cnt; spr_table[4 * i + 1] = cnt >> 8; spr_table[4 * i + 2] = o; spr_table[4 * i + 3] = o >> 8;
+            int k = FRAMES[i];
+            unsigned int cnt = spr[4 * k] | spr[4 * k + 1] << 8, src = spr[4 * k + 2] | spr[4 * k + 3] << 8;
+            spr_table[4 * k] = cnt; spr_table[4 * k + 1] = cnt >> 8; spr_table[4 * k + 2] = o; spr_table[4 * k + 3] = o >> 8;
             memcpy(spr_table + o, spr + src, 16 * cnt);
             o += 16 * cnt;
         }
@@ -166,7 +175,7 @@ static int load(void) {
     free(spr);
     /* the animation script: frames 0 1 2 1, 8 ticks each, then jump back */
     {
-        static const unsigned short seq[4] = {0, 1, 2, 1};
+        static const unsigned short seq[4] = {77, 78, 79, 78};   /* the demo's own frame numbers (the table keeps them) */
         for (i = 0; i < 4; i++) {
             script[4 * i] = seq[i]; script[4 * i + 1] = 0; script[4 * i + 2] = 0;
             script[4 * i + 3] = 8 | (i == 3 ? 0x4000 : 0);
@@ -209,6 +218,7 @@ static void start(void *o) {
     WPP_DATA[2] = (char *)wpp_table;
     O_D3C(o) = (int)(unsigned long)spr_table;
     O_ANIM(o) = script;
+    O_ANIMFRAME(o) = FRAMES[0];        /* the index the next upload reads: one of ours, not the retail set's */
     AnimLoadDuration(o);
     active = 1; ticks = 0; player = o; want_b04 = O_B04(o); want_step = O_STEP(o);
 }
@@ -235,12 +245,12 @@ void port_wings_draw(void *o, int x, int y, int z) {
     unsigned char *part, *fe; PolyFT4 *p; unsigned int *ot, v;
     if (!active || o != player) return;
     if (O_B04(o) != want_b04 || O_STEP(o) != want_step || WPP_DATA[2] != (char *)wpp_table) { restore(o); return; }
-    cur = *(unsigned short *)O_ANIM(o);                 /* our frame 0..2 */
-    if (cur > 2) cur = 0;
+    cur = *(unsigned short *)O_ANIM(o) - FRAMES[0];     /* the script's frame 77..79 -> 0..2 */
+    if (cur < 0 || cur > 2) cur = 0;
     ph = (ticks / TICKS_PER_PHASE) % 8; ticks++;
     ff = PHASE[ph][0]; mirror = PHASE[ph][1];
     /* the raised hand on screen: torso part of our frame (part 0: dx, dy at +14/+15; w at +10) */
-    part = spr_table + (spr_table[4 * cur + 2] | spr_table[4 * cur + 3] << 8);
+    part = spr_table + (spr_table[4 * FRAMES[cur] + 2] | spr_table[4 * FRAMES[cur] + 3] << 8);
     dx = (signed char)part[14]; dy = (signed char)part[15]; w = part[10];
     flip = (unsigned)((O_ANIMFRAME(o) & 7) - 3) < 3;      /* topdownDrawRotatedSprite mirrors facings 3, 4, 5 */
     hx = flip ? x - (dx + w) + (w - 1 - HAND_X) : x + dx + HAND_X;
