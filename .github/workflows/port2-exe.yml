@@ -726,27 +726,6 @@ jobs:
             dist/windows/versions.txt
           retention-days: 90
 
-  # Rolling dev build: every green Windows launcher of master replaces the pre-release tagged "dev", so the newest exe is
-  # always at https://github.com/afsenovilla/Tombi-Decomp/releases/download/dev/Tombi-port-dev-windows-x64.zip (no
-  # GitHub login, unlike the artifacts). Versioned releases stay by hand (release.yml).
-  dev-release:
-    needs: launcher
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: tombi-port-windows
-          path: out
-      - name: Put the Windows launcher into the "dev" pre-release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          R: ${{ github.repository }}
-        run: |
-          (cd out && zip -9 -q -r ../Tombi-port-dev-windows-x64.zip .)
-          tools/ci_dev_release.sh Tombi-port-dev-windows-x64.zip "Windows launcher + game"
-
   launcher-linux:
     needs: game-linux
     if: needs.game-linux.outputs.ok == 'true'

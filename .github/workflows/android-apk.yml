@@ -315,30 +315,6 @@ jobs:
           path: dist/android
           retention-days: 14
 
-  # Rolling dev build: the APK of every green build of master goes into the pre-release tagged "dev" (shared with the
-  # Windows launcher of port2-exe.yml, tools/ci_dev_release.sh): fixed link
-  # https://github.com/afsenovilla/Tombi-Decomp/releases/download/dev/Tombi-port-dev-android.apk
-  dev-release:
-    needs: apk
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.apk.outputs.ok == 'true'
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
-      R: ${{ github.repository }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: tombi-port-android
-          path: art
-      - name: Put the APK into the "dev" pre-release
-        run: |
-          cp art/tombi-port-android-debug.apk Tombi-port-dev-android.apk
-          if [ -f art/SIGNED.txt ]; then L="Android APK, signed with the project key"; else L="Android APK, debug-signed"; fi
-          tools/ci_dev_release.sh Tombi-port-dev-android.apk "$L"
-
   publish:
     # BETA pre-release (never "Latest": the normal v0.0.N releases come from release.yml)
     if: inputs.publish == true
