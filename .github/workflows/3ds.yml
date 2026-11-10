@@ -174,7 +174,7 @@ jobs:
           # the banner (what the HOME Menu shows above the icon): the game's own title logo, read from the disc of this
           # build (tools/n3ds_banner_logo.py; the owner's exception to "no game graphics": only in the built title)
           python3 "$GITHUB_WORKSPACE/tools/n3ds_banner_logo.py" "$GITHUB_WORKSPACE/game/disc/fs" logo.png
-          convert -size 256x128 gradient:'#7ec8ff'-'#2a6fd0' \( logo.png -resize 244x116 \) -gravity center -composite banner.png
+          convert -size 256x128 xc:none \( logo.png -resize 256x128 \) -gravity center -composite PNG32:banner.png   # (as large as it fits, nothing behind it)
           python3 -c "import wave; w=wave.open('silence.wav','wb'); w.setnchannels(2); w.setsampwidth(2); w.setframerate(32000); w.writeframes(bytes(4*32000)); w.close()"
           "$BANNERTOOL" makebanner -i banner.png -a silence.wav -o banner.bnr
           cd "$GITHUB_WORKSPACE"
