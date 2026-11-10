@@ -58,12 +58,13 @@ static const int PHASE[8][2] = {{0, 0}, {1, 0}, {2, 0}, {1, 1}, {0, 1}, {1, 1}, 
 
 /* the three-frame copies: static, so they sit in the executable's data (below 16 MB) like every table the game reads
    through its 24-bit-addressed packets; a malloc'd table (above 16 MB on Windows) faulted in unpackSpriteFrame */
-/* the WPP table keeps the demo's 106 entries (an index the player still holds when the tables are swapped, e.g. 14
-   at the landing, must stay inside it): entries 77-79 are the three frames, every other one a copy of frame 77 (a
-   frame must be whole: the drawer walks the parts with a do/while, so an entry with no parts runs off the table) */
-#define WPP_N 106
-static unsigned char wpp_table_buf[4 + 4 * (WPP_N + 1) + WPP_N * 1024], spr_table_buf[4 * WPP_N + 16 * 3 * 8];
+/* the swapped tables are the area's own retail tables (every object drawn from WPP slot 2 keeps its frames: Baron,
+   the player's other indexes) with the three demo frames appended after the last entry; the script uses those */
+#define WPP_MAX (256 * 1024)
+#define SPR_MAX (64 * 1024)
+static unsigned char wpp_table_buf[WPP_MAX], spr_table_buf[SPR_MAX];
 static unsigned char *wpp_table, *spr_table;
+static int loaded, base_frame;              /* base_frame: the retail table's count = our first frame's index */
 static unsigned short script[8 * 4 + 2];        /* 4 entries of 8 bytes + a 4-byte jump back */
 static int tried, active, ticks;
 static void *saved_wpp, *player;
@@ -118,11 +119,12 @@ static int load_feather(void) {
     return ok;
 }
 
-/* builds the three-frame WPP table and SPR table from the demo files; 1 when ready */
+/* reads the three demo frames (WPP bytes and SPR parts) once; 1 when ready */
+static unsigned char demo_wpp[3][1024], demo_parts[3][16 * 8]; static unsigned int demo_wpp_len[3], demo_part_n[3];
 static int load(void) {
-    unsigned char *wpp, *gam, *spr; long wl, gl; unsigned int n, i, total, size;
-    unsigned char *t; unsigned int off[4];
-    if (tried) return wpp_table != 0;
+    unsigned char *wpp, *gam, *spr; long wl, gl; unsigned int n, i, size;
+    unsigned char *t;
+    if (tried) return loaded;
     tried = 1;
     if (!port_wings_dir || !port_wings_pre9_dir) { port_printf("wings: both --wings-glide JPDEMO_DIR and --wings-pre9 PRE9_DIR are needed\n"); return 0; }
     if (!load_feather()) return 0;
@@ -132,58 +134,83 @@ static int load(void) {
     t = wpp + WPP_TABLE_OFF;
     n = u32(t);
     if (n != 106) { port_printf("wings: %s +0x%X holds %u frames, expected 106 (not the SLPM-80165 demo?)\n", WPP_FILE, WPP_TABLE_OFF, n); free(wpp); return 0; }
-    for (i = 0; i < 3; i++) if (u32(t + 4 + 4 * (FRAMES[i] + 1)) - u32(t + 4 + 4 * FRAMES[i]) > 1024) {
-        port_printf("wings: frame %d of %s is bigger than expected\n", FRAMES[i], WPP_FILE); free(wpp); return 0; }
-    wpp_table = wpp_table_buf;
-    put32(wpp_table, WPP_N);
-    {   /* entry k = its frame's start, entry k+1 its end: frames 77-79 at their places, frame 77 everywhere else */
-        unsigned int o = 4 + 4 * (WPP_N + 1);
-        for (i = 0; i < WPP_N; i++) {
-            int k = i >= FRAMES[0] && i <= FRAMES[2] ? i : FRAMES[0];
-            unsigned int a = u32(t + 4 + 4 * k), b = u32(t + 4 + 4 * (k + 1));
-            put32(wpp_table + 4 + 4 * i, o);
-            memcpy(wpp_table + o, t + a, b - a);
-            o += b - a;
-        }
-        put32(wpp_table + 4 + 4 * WPP_N, o);
-        (void)off; (void)total;
+    for (i = 0; i < 3; i++) {
+        unsigned int a = u32(t + 4 + 4 * FRAMES[i]), b = u32(t + 4 + 4 * (FRAMES[i] + 1));
+        if (b - a > sizeof demo_wpp[0] || b > (unsigned)(wl - WPP_TABLE_OFF)) { port_printf("wings: frame %d of %s is bigger than expected\n", FRAMES[i], WPP_FILE); free(wpp); return 0; }
+        memcpy(demo_wpp[i], t + a, b - a); demo_wpp_len[i] = b - a;
     }
     free(wpp);
     gam = read_file(port_wings_dir, SPR_FILE, &gl);
-    if (!gam) { wpp_table = 0; return 0; }
-    if (gl < 8 || memcmp(gam, "GAM", 3)) { port_printf("wings: %s is not a GAM file\n", SPR_FILE); free(gam); wpp_table = 0; return 0; }
+    if (!gam) return 0;
+    if (gl < 8 || memcmp(gam, "GAM", 3)) { port_printf("wings: %s is not a GAM file\n", SPR_FILE); free(gam); return 0; }
     size = u32(gam + 4);
     spr = malloc(size + 1024);
     memset(spr, 0, size + 1024);
     lzDecompress(gam, spr);
     free(gam);
     /* SPR table: u16 parts, u16 offset per frame; a part is 16 bytes */
-    total = 4 * WPP_N;
-    for (i = 0; i < 3; i++) total += 16 * (spr[4 * FRAMES[i]] | spr[4 * FRAMES[i] + 1] << 8);
-    if (total > sizeof spr_table_buf) { port_printf("wings: the SPR parts of frames 77-79 are %u bytes, more than expected\n", total); free(spr); wpp_table = 0; return 0; }
-    spr_table = spr_table_buf;
-    {
-        unsigned int o = 4 * WPP_N;
-        for (i = 0; i < 3; i++) {
-            int k = FRAMES[i];
-            unsigned int cnt = spr[4 * k] | spr[4 * k + 1] << 8, src = spr[4 * k + 2] | spr[4 * k + 3] << 8;
-            spr_table[4 * k] = cnt; spr_table[4 * k + 1] = cnt >> 8; spr_table[4 * k + 2] = o; spr_table[4 * k + 3] = o >> 8;
-            memcpy(spr_table + o, spr + src, 16 * cnt);
-            o += 16 * cnt;
-        }
-        for (i = 0; i < WPP_N; i++) if (i < FRAMES[0] || i > FRAMES[2]) memcpy(spr_table + 4 * i, spr_table + 4 * FRAMES[0], 4);   /* frame 77's parts */
+    for (i = 0; i < 3; i++) {
+        int k = FRAMES[i];
+        unsigned int cnt = spr[4 * k] | spr[4 * k + 1] << 8, src = spr[4 * k + 2] | spr[4 * k + 3] << 8;
+        if (cnt > 8 || src + 16 * cnt > size) { port_printf("wings: the SPR parts of frame %d are not as expected\n", k); free(spr); return 0; }
+        memcpy(demo_parts[i], spr + src, 16 * cnt); demo_part_n[i] = cnt;
     }
     free(spr);
-    /* the animation script: frames 0 1 2 1, 8 ticks each, then jump back */
+    loaded = 1;
+    port_printf("wings: demo glide frames loaded from %s, feather from %s\n", port_wings_dir, port_wings_pre9_dir);
+    return 1;
+}
+
+/* the area's retail tables (WPP_DATA[2] and the player's part table) copied with the three demo frames appended;
+   the script then plays base_frame .. base_frame+2; 0 when they do not fit */
+static int compose(void *o) {
+    unsigned char *rw = (unsigned char *)WPP_DATA[2], *rs = (unsigned char *)(unsigned long)O_D3C(o);
+    unsigned int n, i, total, send = 0, o2;
+    if (!rw || !rs) return 0;
+    n = u32(rw);
+    if (n == 0 || n > 1024) return 0;
+    total = u32(rw + 4 + 4 * n);                /* the retail table's end offset = its size */
+    if (total < 4 + 4 * (n + 1) || total + 12 + demo_wpp_len[0] + demo_wpp_len[1] + demo_wpp_len[2] > WPP_MAX) return 0;
+    /* WPP: header with n + 3 entries, every retail frame moved by 12 bytes (the three new header words), ours after */
+    put32(wpp_table_buf, n + 3);
+    for (i = 0; i <= n; i++) put32(wpp_table_buf + 4 + 4 * i, u32(rw + 4 + 4 * i) + 12);
+    memcpy(wpp_table_buf + 4 + 4 * (n + 1) + 12, rw + 4 + 4 * (n + 1), total - (4 + 4 * (n + 1)));
+    o2 = total + 12;
+    for (i = 0; i < 3; i++) {
+        put32(wpp_table_buf + 4 + 4 * (n + i), o2);
+        memcpy(wpp_table_buf + o2, demo_wpp[i], demo_wpp_len[i]);
+        o2 += demo_wpp_len[i];
+    }
+    put32(wpp_table_buf + 4 + 4 * (n + 3), o2);
+    /* SPR: n entries of (u16 parts, u16 offset); the parts after the last entry's parts */
+    for (i = 0; i < n; i++) {
+        unsigned int cnt = rs[4 * i] | rs[4 * i + 1] << 8, off = rs[4 * i + 2] | rs[4 * i + 3] << 8;
+        if (off + 16 * cnt > send) send = off + 16 * cnt;
+    }
+    if (send < 4 * n || send + 12 + 16 * (demo_part_n[0] + demo_part_n[1] + demo_part_n[2]) > SPR_MAX || send + 12 > 0xFFFF) return 0;
+    for (i = 0; i < n; i++) {   /* every offset moved by 12 (the three new entries) */
+        unsigned int cnt = rs[4 * i] | rs[4 * i + 1] << 8, off = (rs[4 * i + 2] | rs[4 * i + 3] << 8) + 12;
+        spr_table_buf[4 * i] = cnt; spr_table_buf[4 * i + 1] = cnt >> 8; spr_table_buf[4 * i + 2] = off; spr_table_buf[4 * i + 3] = off >> 8;
+    }
+    memcpy(spr_table_buf + 4 * n + 12, rs + 4 * n, send - 4 * n);
+    o2 = send + 12;
+    for (i = 0; i < 3; i++) {
+        spr_table_buf[4 * (n + i)] = demo_part_n[i]; spr_table_buf[4 * (n + i) + 1] = 0;
+        spr_table_buf[4 * (n + i) + 2] = o2; spr_table_buf[4 * (n + i) + 3] = o2 >> 8;
+        memcpy(spr_table_buf + o2, demo_parts[i], 16 * demo_part_n[i]);
+        o2 += 16 * demo_part_n[i];
+    }
+    base_frame = n;
+    wpp_table = wpp_table_buf; spr_table = spr_table_buf;
+    /* the animation script: our frames 0 1 2 1, 8 ticks each, then jump back */
     {
-        static const unsigned short seq[4] = {77, 78, 79, 78};   /* the demo's own frame numbers (the table keeps them) */
+        static const unsigned short seq[4] = {0, 1, 2, 1};
         for (i = 0; i < 4; i++) {
-            script[4 * i] = seq[i]; script[4 * i + 1] = 0; script[4 * i + 2] = 0;
+            script[4 * i] = n + seq[i]; script[4 * i + 1] = 0; script[4 * i + 2] = 0;
             script[4 * i + 3] = 8 | (i == 3 ? 0x4000 : 0);
         }
         { unsigned int a = (unsigned int)(unsigned long)script; memcpy(&script[16], &a, 4); }
     }
-    port_printf("wings: demo glide frames loaded from %s, feather from %s\n", port_wings_dir, port_wings_pre9_dir);
     return 1;
 }
 
@@ -215,11 +242,12 @@ static void start(void *o) {
             LoadImage(&r, (unsigned *)feather_px[i]);
         }
     }
+    if (!compose(o)) { port_printf("wings: the area's tables could not be extended\n"); return; }
     saved_wpp = WPP_DATA[2]; saved_d3c = O_D3C(o);
     WPP_DATA[2] = (char *)wpp_table;
     O_D3C(o) = (int)(unsigned long)spr_table;
     O_ANIM(o) = script;
-    O_ANIMFRAME(o) = FRAMES[0];        /* the index the next upload reads: one of ours, not the retail set's */
+    O_ANIMFRAME(o) = base_frame;       /* the index the next upload reads: one of ours */
     AnimLoadDuration(o);
     active = 1; ticks = 0; player = o; want_b04 = O_B04(o); want_step = O_STEP(o);
 }
@@ -246,12 +274,12 @@ void port_wings_draw(void *o, int x, int y, int z) {
     unsigned char *part, *fe; PolyFT4 *p; unsigned int *ot, v;
     if (!active || o != player) return;
     if (O_B04(o) != want_b04 || O_STEP(o) != want_step || WPP_DATA[2] != (char *)wpp_table) { restore(o); return; }
-    cur = *(unsigned short *)O_ANIM(o) - FRAMES[0];     /* the script's frame 77..79 -> 0..2 */
+    cur = *(unsigned short *)O_ANIM(o) - base_frame;    /* the script's frame -> 0..2 */
     if (cur < 0 || cur > 2) cur = 0;
     ph = (ticks / TICKS_PER_PHASE) % 8; ticks++;
     ff = PHASE[ph][0]; mirror = PHASE[ph][1];
     /* the raised hand on screen: torso part of our frame (part 0: dx, dy at +14/+15; w at +10) */
-    part = spr_table + (spr_table[4 * FRAMES[cur] + 2] | spr_table[4 * FRAMES[cur] + 3] << 8);
+    part = spr_table + (spr_table[4 * (base_frame + cur) + 2] | spr_table[4 * (base_frame + cur) + 3] << 8);
     dx = (signed char)part[14]; dy = (signed char)part[15]; w = part[10];
     flip = (unsigned)((O_ANIMFRAME(o) & 7) - 3) < 3;      /* topdownDrawRotatedSprite mirrors facings 3, 4, 5 */
     hx = flip ? x - (dx + w) + (w - 1 - HAND_X) : x + dx + HAND_X;

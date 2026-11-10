@@ -3068,10 +3068,11 @@ Debug: `TEXPACK_LOG=1` prints uploads, invalidations and unkeyed boxes.
 Lost content restored as a reconstruction (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide"), its own
 switch (it does not need `--cut-content`): using the
 Charity Wings in a top-down area runs I0NFO2 `topdownPlayerDropExitStep` (Tomba rises 20 ticks, fade, room left).
-With the option, `port2/runtime/wings.c` swaps the player's sprite tables for that step: a three-frame copy of the
-demo's overhead Tomba (frames 77-79, arm raised; WPP data from `JPDEMO_DIR/AREA08/D002.000` +0x3FA28, SPR parts from
-`AREA08/D003.GAM` unpacked with the game's own `lzDecompress`) as `WPP_DATA[2]` / the player's `d3c`, with a port
-script (frames 0 1 2 1, 8 ticks each), uploads the feather texels of the PrePre Vol. 9 resident item page
+With the option, `port2/runtime/wings.c` swaps the player's sprite tables for that step: copies of the area's own
+retail tables (`WPP_DATA[2]` and the player's `d3c`) with the three demo frames appended after the last entry (frames
+77-79 of the demo's overhead Tomba, arm raised; WPP data from `JPDEMO_DIR/AREA08/D002.000` +0x3FA28, SPR parts from
+`AREA08/D003.GAM` unpacked with the game's own `lzDecompress`), so every other object drawn from WPP slot 2 (Baron
+riding along, the player's own other indexes) keeps its frames, with a port script (our frames 0 1 2 1, 8 ticks each), uploads the feather texels of the PrePre Vol. 9 resident item page
 (`PRE9_DIR/TOMBA/A00002.GAM`, 4 bpp 256 px wide, frames at (224,104) 24x24, (200,80) 24x16, (216,64) 16x16; checked
 byte for byte against the JP demo's copy `SYSTEM/A00000.GAM`, 512 px wide) over retail's at the same place of tpage
 0x14 (VRAM 256,256), and draws them through retail's resident item table (frames 159-161, CLUT 0x7AD6) as one more
