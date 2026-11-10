@@ -36,7 +36,7 @@ static unsigned long long vblank_epoch_us;   /* absolute schedule: vblank n is d
 static unsigned vblank_n;
 int port_stall_frame, port_stall_ms;             /* --stall FRAME:MS (test hook): sleep MS ms before that vblank */
 int port_show_fps;                              /* --show-fps: log the measured vblank rate every second; 2: with a histogram of the inter-vblank intervals */
-unsigned long long port_prof_wait_us, port_prof_present_us;   /* the fps line's breakdown (port_prof_draw_us: gpu.c) */
+unsigned long long port_prof_wait_us, port_prof_present_us, port_prof_panel_us, port_prof_sound_us;   /* the fps line's breakdown (port_prof_draw_us: gpu.c) */
 static unsigned vb_hist[12];                    /* ms buckets: <10,10-14,15-17,18-19,20-21,22-24,25-29,30-39,40-59,60-99,100-199,>=200 */
 static unsigned long long vb_last_us, vb_max_us;
 static unsigned long long vb_total_n, vb_total_t0;
@@ -452,11 +452,14 @@ void port_vblank(void) {
                 if (port_hfr_fps) {   /* --fps: the presents of this second, and how many of them were interpolated */
                     extern void port_hfr_second(char *, int); size_t n = strlen(low); port_hfr_second(low + n, (int)(sizeof low - n));
                 }
-                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu draw %llu.%llu present %llu.%llu wait %llu.%llu;%s\n",
+                /* (the present's part of the panel, --second-screen, and the sound mixer, inside game, are also given on their own) */
+                game = game > port_prof_sound_us ? game - port_prof_sound_us : 0;
+                port_printf("[port] fps: %d.%02d vblank/s (frame %d, %d audio samples/s) ms/frame: game %llu.%llu draw %llu.%llu present %llu.%llu (panel %llu.%llu) sound %llu.%llu wait %llu.%llu;%s\n",
                             (int)(nf * 100000000ull / tot / 100), (int)(nf * 100000000ull / tot % 100), port_frame, smp,
                             game / nf / 1000, game / nf / 100 % 10, port_prof_draw_us / nf / 1000, port_prof_draw_us / nf / 100 % 10,
-                            port_prof_present_us / nf / 1000, port_prof_present_us / nf / 100 % 10, port_prof_wait_us / nf / 1000, port_prof_wait_us / nf / 100 % 10, low);
-                port_prof_draw_us = port_prof_wait_us = port_prof_present_us = 0;
+                            port_prof_present_us / nf / 1000, port_prof_present_us / nf / 100 % 10, port_prof_panel_us / nf / 1000, port_prof_panel_us / nf / 100 % 10,
+                            port_prof_sound_us / nf / 1000, port_prof_sound_us / nf / 100 % 10, port_prof_wait_us / nf / 1000, port_prof_wait_us / nf / 100 % 10, low);
+                port_prof_draw_us = port_prof_wait_us = port_prof_present_us = port_prof_panel_us = port_prof_sound_us = 0;
                 if (port_show_fps >= 2) vb_hist_print("this second");
                 t0 = t; n0 = port_frame;
             }
@@ -491,7 +494,7 @@ void port_vblank(void) {
     if (vsync_cb) call_psx((void *)vsync_cb);
     /* sound first: with both pipes on, a player that interleaves audio and video by timestamp finds the
        audio of this vblank already buffered while it reads the (larger) video frame */
-    port_sound_vblank();
+    { unsigned long long t0 = port_time_us(); port_sound_vblank(); port_prof_sound_us += port_time_us() - t0; }
     { unsigned long long t0 = port_time_us(); port_gpu_vblank(); port_prof_present_us += port_time_us() - t0; }
     {   /* -v: report area / section changes and (every 50 frames) where the player is */
         static int last = -1;

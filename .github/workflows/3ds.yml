@@ -215,7 +215,7 @@ jobs:
           mkdir -p "$SD/3ds/tombi" shots
           cp "$RUNNER_TEMP/disccache/game.bin" "$SD/3ds/tombi/tombi.bin"
           # frame and VRAM dumps (runtime/main.c --dump-frames / --dump-vram) of what the 3DS renderer holds
-          echo "--dump-frames sdmc:/3ds/tombi/dump --dump-every 200 --dump-vram" > "$SD/3ds/tombi/args.txt"
+          echo "--log-fps" > "$SD/3ds/tombi/args.txt"
           mkdir -p "$SD/3ds/tombi/dump"
           ls -l app "$SD/3ds/tombi"
           export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
@@ -242,6 +242,7 @@ jobs:
           for a in $ADDRS; do echo "$a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
           echo "== log.txt (start)"; head -30 shots/log.txt
           echo "== log.txt (end)"; tail -20 shots/log.txt
+          echo "== fps"; grep "\[port\] fps" shots/log.txt | sed -n "5~10p" | head -12
 
       # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
       - name: Screenshots in the log

@@ -1108,7 +1108,8 @@ extern int port_hz;
 
 void port_gpu_vblank(void) {
     { extern int port_debug_menu; extern void port_debug_draw(void); if (port_debug_menu) port_debug_draw(); }
-    { extern int port_panel_on; extern void port_panel_vblank(void); if (port_panel_on) port_panel_vblank(); }
+    { extern int port_panel_on; extern void port_panel_vblank(void); extern unsigned long long port_prof_panel_us;
+      if (port_panel_on) { unsigned long long t0 = port_time_us(); port_panel_vblank(); port_prof_panel_us += port_time_us() - t0; } }
     if (port_hfr_fps && !h_init && port_window && port_hfr_fps != -2 && hfr_rate() <= port_hz + 2) {
         /* --fps N / auto at or below the logic rate (a 60 Hz display at --hz 60): no time between two vblanks to fill.
            Interpolating there showed replayed / blended frames in place of real ones (movies flickered on an AYN Thor) */
