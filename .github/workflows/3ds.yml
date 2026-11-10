@@ -171,7 +171,7 @@ jobs:
           u=$(asset Epicpkmn11/bannertool 'bannertool.*\.zip$'); echo "bannertool: $u"; curl -fsSL -o bannertool.zip "$u"; unzip -oq bannertool.zip -d bannertool
           MAKEROM=$(find makerom -type f -name makerom | head -1); BANNERTOOL=$(find bannertool -type f -path "*linux-x86_64*" -name bannertool | head -1)
           chmod +x "$MAKEROM" "$BANNERTOOL"
-          convert -size 256x128 gradient:'#7ec8ff'-'#2a6fd0' -font DejaVu-Sans-Bold -pointsize 44 -fill white -stroke '#1b3f7a' \
+          convert -size 256x128 gradient:'#7ec8ff'-'#2a6fd0' -font DejaVu-Sans-Bold -pointsize 34 -fill white -stroke '#1b3f7a' \
                   -strokewidth 3 -gravity east -annotate +14+0 'Tombi!' \
                   \( "$GITHUB_WORKSPACE/port2/n3ds/icon.png" -filter point -resize 96x96 \) -gravity west -geometry +10+0 -composite banner.png
           python3 -c "import wave; w=wave.open('silence.wav','wb'); w.setnchannels(2); w.setsampwidth(2); w.setframerate(32000); w.writeframes(bytes(4*32000)); w.close()"
