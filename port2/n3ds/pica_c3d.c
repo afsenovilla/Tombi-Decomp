@@ -533,7 +533,9 @@ int port_n3ds_worker_start(void (*job)(void)) {
     wk_job = job;
     s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
     bool n3 = false; APT_CheckNew3DS(&n3);
-    APT_SetAppCpuTimeLimit(30);           /* (the second core of an Old 3DS: a share that leaves the system's services there their time) */
+    /* the system core's share: an Old 3DS's panel worker gets 30 % (more starved the system's services there: the SD
+       card, gsp); a New 3DS has SDL's audio thread there and mixes 44100 samples a second in 50 % (Azahar) */
+    APT_SetAppCpuTimeLimit(n3 ? 50 : 30);
     static const int cores[] = { 2, 1, -2 };
     Thread t = 0; int c = n3 ? 0 : 1, used = 0;
     for (; c < 3 && !t; c++) { t = threadCreate(wk_main, 0, 256 * 1024, prio + 1, cores[c], false); used = cores[c]; }
