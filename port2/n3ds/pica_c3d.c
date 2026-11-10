@@ -200,7 +200,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         C3D_TexSetFilter(&vram_tex, GPU_LINEAR, GPU_LINEAR);
         C3D_TexBind(0, &vram_tex);
         float X0 = 40, X1 = 360, Y0 = 0, Y1 = 240;   /* 320 x 240 */
-        float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = y / 512.0f, T1 = (y + h) / 512.0f;   /* (a render target: t = y / 512, seen in Azahar) */
+        float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = 1.0f - y / 512.0f, T1 = 1.0f - (y + h) / 512.0f;
         C3D_ImmDrawBegin(GPU_TRIANGLES);
         vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
         vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
