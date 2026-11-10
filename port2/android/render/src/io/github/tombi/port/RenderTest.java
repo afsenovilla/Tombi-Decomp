@@ -164,7 +164,7 @@ public class RenderTest {
             String[] left = new File(a.getCacheDir(), "import").list();
             System.out.println("ADD " + f.getName() + " (" + (System.currentTimeMillis() - t0) / 1000 + " s): result " + a.result + ", adding " + a.adding
                 + ", status: " + a.importStatus + "\n    games " + prefs.getString("games", "") + ", selected " + (g == null ? "-" : g.id + " name=" + g.name)
-                + ", manifest serial " + mserial + " source " + msrc + ", cache left " + (left == null ? "none" : java.util.Arrays.toString(left)));
+                + ", manifest serial " + mserial + " source " + msrc + ", logo.png " + (g != null && g.logoFile().isFile()) + ", cache left " + (left == null ? "none" : java.util.Arrays.toString(left)));
             a.view.focus = 0;
             shot(a, "add_" + f.getName().replaceAll("[^A-Za-z0-9]+", "_"));
         }
@@ -212,6 +212,9 @@ public class RenderTest {
         }
         ActivityController<LauncherActivity> c = Robolectric.buildActivity(LauncherActivity.class).setup();
         LauncherActivity a = c.get();
+        // each card's logo.png as the launcher cached it (to compare with tools/game_library.py --art)
+        for (Library.Game g : a.lib.games())
+            if (Library.logo(g) != null) copy(g.logoFile(), new File(System.getProperty("out"), "logo_" + g.id + ".png"));
         for (int st = 0; st < 3; st++) {
             prefs.edit().putInt("libstyle", st).putString("game", "sces01331").commit();
             a.view.setScreen(LauncherActivity.LauncherView.MAIN);
