@@ -1,4 +1,4 @@
-// VERSION BETA_980203 x00 8011A560 2168
+// VERSION BETA_980203 x00 8011A560 2172
 #if defined(VERSION_BETA_980203)
 // Beta version: PAL updateA00ScrollController.c without the GAME_PLAYER_MODE test of step 10; DRAW_FROZEN is the scratchpad word D_1F8001C6.
 #include "TOBJ.H"
