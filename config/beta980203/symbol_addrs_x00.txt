@@ -92,6 +92,7 @@ playerStepWeaponAttack = 0x800F8C50; // type:func size:0x96C  PAL x014 0x800F44B
 playerSetAnimPairA = 0x800F95BC; // type:func size:0x34  PAL x000 0x800F4E68
 playerSetAnimPairB = 0x800F95F0; // type:func size:0x34  PAL x000 0x800F4E9C
 playerSpinPlaceAndAccelerate = 0x800F9624; // type:func size:0x144  PAL x000 0x800F4ED0
+func_800F9768_beta980203 = 0x800F9768; // type:func size:0x3C
 playerSetFallAnimLoop = 0x800FAD3C; // type:func size:0xC4  PAL x008 0x800F66E4
 playerStepSpinRelease = 0x800FAE00; // type:func size:0x450  PAL x008 0x800F67BC
 playerSwingHandlePad = 0x800FB250; // type:func size:0x148  PAL x013 0x800F6C34

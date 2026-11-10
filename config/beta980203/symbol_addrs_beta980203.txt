@@ -361,6 +361,7 @@ updateL4Type1BObject = 0x80033428; // type:func size:0x60  PAL main0 0x80030AFC
 dispatchEffectByVariant = 0x80033488; // type:func size:0x40  PAL main0 0x80030B5C
 spawnEffectObject = 0x800334C8; // type:func size:0x10C  PAL main0 0x80030B9C
 dispatchAreaEffectB = 0x800335D4; // type:func size:0xB0  PAL main0 0x80030CA8
+func_80033684_beta980203 = 0x80033684; // type:func size:0xF4
 updateObjectsLayer7 = 0x80033778; // type:func size:0x94  PAL main0 0x80030F38
 updateScrollAnchoredEffect = 0x8003380C; // type:func size:0x104  PAL main0 0x80030FCC
 updateAreaScreenEffect = 0x80033910; // type:func size:0x184  PAL main0 0x800310D0
