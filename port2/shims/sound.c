@@ -328,8 +328,59 @@ int port_sound_xa_stats(int *underruns) { *underruns = xa_underruns; return xa_s
    the device is opened at 22050 Hz.  Half the work a second for the top octave. */
 int port_sound_half;
 int port_sound_dry;                      /* --audio-dry: no reverb (an Old 3DS: a good part of the mixer's time) */
+/* The same mix a voice at a time (no reverb to feed: --audio-dry, or the reverb off): each voice runs its n samples in
+   a row into two sums, then the CD audio and the master volume per sample.  The sums are what mix() adds up sample by
+   sample, so the output is the same; a voice's fields stay in the cache and its loop is short, which is most of the
+   mixer's time on the 3DS's ARM11. */
+static void mix_voices(s16 *out, int n) {
+    static int accl[2048], accr[2048];
+    const int half = port_sound_half;
+    memset(accl, 0, (size_t)n * sizeof accl[0]); memset(accr, 0, (size_t)n * sizeof accr[0]);
+    for (int k = 0; k < NVOICES; k++) {
+        Voice *v = &voices[k];
+        if (v->env_phase == ENV_OFF) continue;
+        const int step = v->pitch << half, vl = v->vol_l, vr = v->vol_r;
+        int counter = v->counter, prev = v->prev;
+        const s16 *buf = v->buf;
+        for (int i = 0; i < n; i++) {
+            int idx = counter >> 12, fr = counter & 0xFFF;
+            int a = idx == 0 ? prev : buf[idx - 1], b = buf[idx];
+            int s = a + (((b - a) * fr) >> 12);
+            s = (s * v->env_level) >> 15;
+            accl[i] += (s * vl) >> 14; accr[i] += (s * vr) >> 14;
+            env_step(v);
+            if (half) env_step(v);
+            counter += step;
+            while (counter >= 28 << 12 && v->env_phase != ENV_OFF) {
+                u8 fl = spu_ram[(v->cur & (SPU_RAM_SIZE - 16)) + 1];
+                counter -= 28 << 12;
+                prev = buf[27];
+                if (fl & 1) {                         /* loop end: jump to the loop address, or stop */
+                    v->cur = v->loop;
+                    if (!(fl & 2)) { v->env_phase = ENV_OFF; v->env_level = 0; v->owner = -1; break; }
+                } else v->cur = (v->cur + 16) & (SPU_RAM_SIZE - 1);
+                decode_block(v);
+            }
+            if (v->env_phase == ENV_OFF) break;
+        }
+        v->counter = counter; v->prev = prev;
+    }
+    for (int i = 0; i < n; i++) {
+        int l = accl[i], r = accr[i];
+        if (xa_w != xa_r || xa_primed) {
+            int cl, cr;
+            xa_next(&cl, &cr);
+            if (half) xa_next(&cl, &cr);
+            if (!cd_muted) { l += (cl * cd_l) >> 15; r += (cr * cd_r) >> 15; }
+        }
+        l = (l * main_l) >> 14; r = (r * main_r) >> 14;
+        out[2 * i] = l > 32767 ? 32767 : l < -32768 ? -32768 : l;
+        out[2 * i + 1] = r > 32767 ? 32767 : r < -32768 ? -32768 : r;
+    }
+}
 static void mix(s16 *out, int n) {
     const int half = port_sound_half;
+    if ((port_sound_dry || !rev_on) && n <= 2048) { mix_voices(out, n); return; }
     for (int i = 0; i < n; i++) {
         int l = 0, r = 0, wl = 0, wr = 0;
         for (int k = 0; k < NVOICES; k++) {

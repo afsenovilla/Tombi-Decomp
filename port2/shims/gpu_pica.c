@@ -308,7 +308,7 @@ static void pica_vram_read(int x, int y, int w, int h) {
 /* ---- the texture cache */
 /* a slot: the block (bx, by, size z, texels of the page) of a page + CLUT + texture window.
    checked: ver_clock + 1 when it was last found valid */
-typedef struct { int tx, ty, depth, cx, cy, tw, bx, by; unsigned ver, checked, tver, chash; unsigned long long used; short live, next; } Slot;
+typedef struct { int tx, ty, depth, cx, cy, tw, bx, by; unsigned ver, checked, tver, chash, updated; unsigned long long used; short live, next; } Slot;
 static Slot slots[SLOTS];
 static short hhead[256];                 /* slots by key (chains through Slot.next), -1 ends */
 static int hinit;
@@ -382,6 +382,8 @@ unsigned long long pica_decode_us;   /* (time in decode(): n3ds/pica_c3d.c logs 
 /* the last answer: runs of primitives read the same block (a tile map, a line of text, a sprite's parts), and
    nothing has to be looked at again while neither vram[] nor the drawn cells have changed */
 static struct { int ok, tx, ty, depth, cx, cy, tw, bx, by, z, slot; unsigned ver, epoch; } memo;
+int pica_lazy_clut;
+static unsigned present_no;
 static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, int *oby) {
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
     if (memo.ok && memo.ver == ver_clock && memo.epoch == drawn_epoch && memo.tx == t->tx && memo.ty == t->ty && memo.depth == t->depth
@@ -421,8 +423,20 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
         v = tex_ver(t, tw, bx, by, z);
         if (s->ver >= v) { s->checked = ver_clock + 1; s->used = ++use_clock; goto found; }
         { int x2, y2, w2, h2; tex_rect(t, tw, bx, by, z, &x2, &y2, &w2, &h2);
-          if (blocks_ver(x2, y2, w2, h2) <= s->tver && clut_hash(t) == s->chash) {   /* only the CLUT was written, the same */
-              s->ver = v; s->checked = ver_clock + 1; s->used = ++use_clock; goto found;
+          if (blocks_ver(x2, y2, w2, h2) <= s->tver) {
+              if (clut_hash(t) == s->chash) {   /* only the CLUT was written, the same */
+                  s->ver = v; s->checked = ver_clock + 1; s->used = ++use_clock; goto found;
+              }
+              /* --lazy-clut N (an Old 3DS): a palette animated every frame costs a decode and an upload of every
+                 block that uses it, 4 ms a page there and three pages a frame in the first village.  The block keeps
+                 its colours for N presents, and one such block a present is redone (none waits more than 3 N). */
+              if (pica_lazy_clut) {
+                  static unsigned at, done;
+                  unsigned age = present_no - s->updated;
+                  if (at != present_no) { at = present_no; done = 0; }
+                  if (age < (unsigned)pica_lazy_clut || (done && age < 3u * (unsigned)pica_lazy_clut)) { s->used = ++use_clock; goto found; }
+                  done++;
+              }
           } }
         was = s->used;   /* (stale: decoded again in its slot) */
     } else {
@@ -456,7 +470,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     dev->tex_upload(i, dec, was > frame_clock);
     st_decodes++;
     slots[i].ver = v; slots[i].checked = ver_clock + 1; slots[i].used = ++use_clock;
-    slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t);
+    slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t); slots[i].updated = present_no;
 found:
     memo.ok = 1; memo.tx = t->tx; memo.ty = t->ty; memo.depth = t->depth; memo.cx = t->cx; memo.cy = t->cy; memo.tw = tw;
     memo.bx = bx; memo.by = by; memo.z = z; memo.slot = i; memo.ver = ver_clock; memo.epoch = drawn_epoch;
@@ -706,7 +720,7 @@ static void pica_stop(void) {
 }
 static int pica_present(int dx, int dy, int dw, int dh, int masked) {
     flush();
-    frame_clock = use_clock;
+    frame_clock = use_clock; present_no++;
     return dev->present ? dev->present(dx, dy, dw, dh, masked) : 0;
 }
 const GpuBackend port_gpu_pica = { "pica (3DS model, CPU reference)", pica_start, pica_stop, pica_tri, pica_rect, pica_line, pica_fill,

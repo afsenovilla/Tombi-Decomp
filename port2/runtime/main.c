@@ -1068,6 +1068,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--logo-only")) port_skip_movies = 3;       /* (the 3DS's default: n3ds/main_3ds.c) */
         else if (!strcmp(a, "--audio-half")) { extern int port_sound_half; port_sound_half = 1; }   /* (shims/sound.c: an Old 3DS) */
         else if (!strcmp(a, "--audio-dry")) { extern int port_sound_dry; port_sound_dry = 1; }
+        else if (!strcmp(a, "--lazy-clut") && i + 1 < argc) { extern int pica_lazy_clut; pica_lazy_clut = atoi(argv[++i]); }   /* (shims/gpu_pica.c) */
         else if (!strcmp(a, "--frameskip")) { extern int port_frameskip; port_frameskip = 1; if (i + 1 < argc && !strcmp(argv[i + 1], "test")) { port_frameskip = 2; i++; } }
         else if (!strcmp(a, "--play-movies")) port_skip_movies = 0;     /* (the default now; kept for old scripts) */
         else if (!strcmp(a, "--poke") && v) port_poke_add(argv[++i]);

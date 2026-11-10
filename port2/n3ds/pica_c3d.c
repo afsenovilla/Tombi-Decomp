@@ -43,6 +43,15 @@ static unsigned long long n_up, n_rd, n_wait;
 static short rd_log[4][4];   /* the first read-backs since the last log line */
 extern unsigned long long pica_decode_us;
 
+/* Written memory out of the CPU's cache before the GPU reads it.  The kernel call, not GSPGPU_FlushDataCache: that one
+   is a request to the gsp service, a round trip between processes each time, and a texture upload makes one per
+   tile row (2.5 ms an upload on an Old 3DS, most of a drawn frame's time).  The service is the fallback. */
+static void dcache_flush(const void *p, u32 size) {
+    static int direct = 1;
+    if (direct && R_FAILED(svcFlushProcessDataCache(CUR_PROCESS_HANDLE, (u32)p, size))) { direct = 0; port_printf("[3ds] pica: no svcFlushProcessDataCache: flushing through gsp\n"); }
+    if (!direct) GSPGPU_FlushDataCache(p, size);
+}
+
 /* ---- the frame */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
     if (in_frame) return;
@@ -143,7 +152,7 @@ static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
         }
     }
     for (int r = 0; r < z >> 3; r++)   /* (a tile row of the slot: z / 8 tiles in a run) */
-        GSPGPU_FlushDataCache(base + ((((ay >> 3) + r) * (PICA_ATLAS >> 3)) + (ax >> 3)) * 64, (unsigned)(z >> 3) * 64 * 4);
+        dcache_flush(base + ((((ay >> 3) + r) * (PICA_ATLAS >> 3)) + (ax >> 3)) * 64, (unsigned)(z >> 3) * 64 * 4);
     tk_upload += svcGetSystemTick() - t0;
 }
 
@@ -151,7 +160,7 @@ static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
 /* (state is only set when it changes) */
 /* the GPU reads the vertices from memory, not through the CPU's cache: written out before the frame is submitted (a
    console drew torn sprites, some vertices still the frame before's; an emulator has no cache to show it) */
-static void vb_flush(void) { if (vb_n) GSPGPU_FlushDataCache(vb, (u32)vb_n * sizeof *vb); }
+static void vb_flush(void) { if (vb_n) dcache_flush(vb, (u32)vb_n * sizeof *vb); }
 static PState last_st;                       /* (last_ok 0: something else set state since) */
 static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
@@ -213,7 +222,7 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
             C3D_Tex t = *tp;
             unsigned *d = t.data;
             for (int j = 0; j < ph; j++) for (int i = 0; i < pw; i++) d[tiled(i, j, t.width)] = pix(src[(j0 + j) * stride + i0 + i]);
-            GSPGPU_FlushDataCache(d, (unsigned)t.width * t.height * 4);
+            dcache_flush(d, (unsigned)t.width * t.height * 4);
             if (vb_n + 6 > VB_MAX - 64) end_and_wait();
             begin();
             C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
@@ -346,7 +355,7 @@ void port_n3ds_panel(const unsigned char *rgba, int w, int h) {
     begin();   /* (waits for the frames submitted before: the last present sampled this texture) */
     const unsigned *src = (const unsigned *)rgba; unsigned *d = panel_tex.data;
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) d[tiled(i, j, 512)] = pix(src[j * w + i]) | 0xFF;
-    GSPGPU_FlushDataCache(d, 512 * 256 * 4);
+    dcache_flush(d, 512 * 256 * 4);
     panel_w = w; panel_h = h;
     tk_panel += svcGetSystemTick() - t0;
 }
@@ -524,7 +533,7 @@ int port_n3ds_worker_start(void (*job)(void)) {
     wk_job = job;
     s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
     bool n3 = false; APT_CheckNew3DS(&n3);
-    APT_SetAppCpuTimeLimit(80);           /* (the second core of an Old 3DS: the most the system grants) */
+    APT_SetAppCpuTimeLimit(30);           /* (the second core of an Old 3DS: a share that leaves the system's services there their time) */
     static const int cores[] = { 2, 1, -2 };
     Thread t = 0; int c = n3 ? 0 : 1, used = 0;
     for (; c < 3 && !t; c++) { t = threadCreate(wk_main, 0, 256 * 1024, prio + 1, cores[c], false); used = cores[c]; }
