@@ -435,6 +435,7 @@ komaPigState1 = 0x8012D3C8; // type:func size:0x404  PAL x000 0x80129BB0
 komaPigState0 = 0x8012D7CC; // type:func size:0x6F0  PAL x000 0x80129FB4
 komaPigDefeated = 0x8012DEBC; // type:func size:0x17C  PAL x000 0x8012A6A4
 komaPigGrabbed = 0x8012E038; // type:func size:0x5FC  PAL x000 0x8012A820
+komaPigHit = 0x8012E634; // type:func size:0x7BC  PAL x000 0x8012AE1C
 komaPigSubtype00Step = 0x8012EDF0; // type:func size:0x4C4  PAL x000 0x8012B5D0
 komaPigSubtype02Step = 0x8012F2B4; // type:func size:0x834  PAL x000 0x8012BA94
 komaPigSubtype03Step = 0x8012FAE8; // type:func size:0x2D0  PAL x000 0x8012C2C8
