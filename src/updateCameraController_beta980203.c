@@ -1,0 +1,105 @@
+// VERSION BETA_980203 beta980203 8002CFC8 596
+#if defined(VERSION_BETA_980203)
+// Beta version: door angle in the scratchpad; after every step, while D_1F8001C4 is 1, pad bits 8 and 1 toggle D_1F8001A4 and D_1F8001BB (debug)
+#include "gamestate.h"
+#include "player.h"
+typedef struct {
+    unsigned char b0, b1, b2, b3, b4, b5, b6, b7;
+    int d8;
+    int dc;
+    int d10;
+    char p14[0x3c - 0x14];
+    unsigned char b3c, b3d, b3e, b3f;
+    char p40[0x58 - 0x40];
+    unsigned short w58;
+    char p5a[0x6c - 0x5a];
+    unsigned char b6c, b6d, b6e, b6f;
+    unsigned char b70, b71, b72, b73;
+    unsigned char b74, b75, b76, b77;
+} S;
+extern short D_1F800286;
+#define DOOR_SWING_ANGLE D_1F800286
+extern unsigned char D_1F8001C4, D_1F8001A4, D_1F8001BB;
+extern unsigned short D_800A30BC;
+extern unsigned short D_8009C960_u;
+extern unsigned char DISPLAY_BUFFER_0_BG_R, DISPLAY_BUFFER_0_BG_G, DISPLAY_BUFFER_0_BG_B;
+extern unsigned char DISPLAY_BUFFER_1_BG_R, DISPLAY_BUFFER_1_BG_G, DISPLAY_BUFFER_1_BG_B;
+extern void (*CAMERA_MODE_HANDLERS[])(S *);
+extern int DAT_1f800174[];
+extern int DAT_1f800178[];
+extern int DAT_1f80017c[];
+extern int DAT_1f800180;
+extern int DAT_1f800184[];
+extern int DAT_1f8000e4;
+extern void SetGeomScreen(int);
+extern void computeCameraMatrix(S *);
+
+void updateCameraController(S *o)
+{
+    unsigned short w;
+    int t;
+
+    switch (o->b4) {
+    case 0:
+        o->b3c = 0;
+        o->b3d = 0;
+        o->b3e = 0;
+        w = PLAYER.obj.animFrame;
+        o->b3 = 0;
+        o->b70 = 0;
+        o->b71 = 0;
+        o->b72 = 0;
+        o->b73 = 0;
+        o->b6c = 10;
+        o->b6d = 0;
+        o->b6e = 0;
+        o->b6f = 0;
+        o->b74 = 0;
+        o->b75 = 0;
+        o->b76 = 0;
+        o->b77 = 0;
+        DOOR_SWING_ANGLE = 0;
+        o->w58 = w;
+        o->b4++;
+        if ((*(int*)&GAME.selectedArea) == 6) {
+            o->b4 = 2;
+            SetGeomScreen(0x220);
+        } else if ((*(int*)&GAME.selectedArea) == 0x60009) {
+            o->b4 = 2;
+            DISPLAY_BUFFER_0_BG_R = 0;
+            DISPLAY_BUFFER_0_BG_G = 0;
+            DISPLAY_BUFFER_0_BG_B = 0;
+            DISPLAY_BUFFER_1_BG_R = 0;
+            DISPLAY_BUFFER_1_BG_G = 0;
+            DISPLAY_BUFFER_1_BG_B = 0;
+        } else {
+            SetGeomScreen(0x220);
+        }
+        break;
+    case 1:
+        CAMERA_MODE_HANDLERS[D_8009C960_u](o);
+        computeCameraMatrix(o);
+        goto tail;
+    case 2:
+        CAMERA_MODE_HANDLERS[D_8009C960_u](o);
+    tail:
+        DAT_1f800174[0] = o->d8;
+        t = o->dc;
+        DAT_1f800178[0] = t;
+        DAT_1f80017c[0] = o->d10;
+        DAT_1f800184[0] = DAT_1f8000e4 + t;
+        DAT_1f800180 = o->d8;
+        break;
+    }
+    if (D_1F8001C4 == 1) {
+        if (D_800A30BC & 8) {
+            unsigned char *p = &D_1F8001A4;
+            *p = 1 - *p;
+        }
+        if (D_800A30BC & 1) {
+            unsigned char *p = &D_1F8001BB;
+            *p = 1 - *p;
+        }
+    }
+}
+#endif

@@ -1,6 +1,6 @@
 // VERSION SLPM_80165 slpm80165 8005D730 80
 #if defined(VERSION_SLPM_80165)
-// Demo version: PCPX_96084 C of src/func_80093E34_pcpx96084.c (func_80093E34_pcpx96084, twin score 0.900) [-O2 -G0] (tools/demo_sweep.py)
+// Demo version: PCPX_96084 C of src/func_80093E34_pcpx96084.c (func_80093E34_pcpx96084, twin score 1.000) [-O2 -G0] (tools/demo_sweep.py)
 extern int D_800E07AC;
 extern int D_800CCB94;
 extern void ResetCallback(void);

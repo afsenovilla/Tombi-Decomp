@@ -1,0 +1,25 @@
+// VERSION PCPX_96084 tomba 80025C98 164
+// FLAGS -O2 -G0
+// ASPSX.PCPX_96084 2.34
+#if defined(VERSION_PCPX_96084)
+// Points the nine table pointers at their rodata tables and sets the ready flag.
+extern char D_80010490[], D_80010304[], D_8001033C[], D_80010324[], D_80010330[], D_8001034C[], D_800103A4[],
+    D_80010430[], D_800103D0[];
+extern char *D_800DE5EC, *D_800DE614, *D_800DE618, *D_800DE61C, *D_800DE620, *D_800DE624, *D_800DE628, *D_800DE62C,
+    *D_800DE630;
+extern short D_800DE5E4;
+
+void func_80025C98_pcpx96084(void)
+{
+    D_800DE5EC = D_80010490;
+    D_800DE614 = D_80010304;
+    D_800DE618 = D_8001033C;
+    D_800DE61C = D_80010324;
+    D_800DE620 = D_80010330;
+    D_800DE624 = D_8001034C;
+    D_800DE628 = D_800103A4;
+    D_800DE62C = D_80010430;
+    D_800DE630 = D_800103D0;
+    D_800DE5E4 = 1;
+}
+#endif
