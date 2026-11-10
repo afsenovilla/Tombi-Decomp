@@ -57,9 +57,13 @@ static void end_and_wait(void) {   /* run what was recorded and wait for it: mem
 }
 
 /* ---- state */
+static float y_shift;
 static void proj_vram(void) {
     /* (the PICA writes clip y = +1 to memory row 0: the start-up self test reported FLIPPED with 0 .. 512 in Azahar) */
-    C3D_Mtx m; Mtx_Ortho(&m, 0.0f, 1024.0f, 512.0f, 0.0f, 1.0f, -1.0f, true);
+    /* y_shift: found by the start-up self test.  A console samples a row half a pixel away from where Azahar does
+       (a mark drawn at row 64 came out at row 65), so there the geometry is moved up by that, and a little more to
+       keep the edges off the sample points */
+    C3D_Mtx m; Mtx_Ortho(&m, 0.0f, 1024.0f, 512.0f + y_shift, y_shift, 1.0f, -1.0f, true);
     C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, u_proj, &m);
 }
 static int last_ok;
@@ -100,11 +104,20 @@ static void set_atest(int at) {
     else if (at == AT_SEMI) C3D_AlphaTest(true, GPU_EQUAL, PICA_A_SEMI);
     else C3D_AlphaTest(false, GPU_ALWAYS, 0);
 }
+/* Every triangle goes through the vertex buffer (linear memory the GPU reads when the frame runs: a frame's vertices
+   in a row, from the start again once the frame has been waited for).  Immediate-mode draws between buffer draws
+   reached a console's GPU with their attributes mixed up (a fill of 0 read back as 00800080), which Azahar does not
+   show: the host writes, fills and the screens' quads are six vertices in the buffer like the rest. */
+typedef struct { float x, y, z, s, t, r, g, b, a; } CV;
+#define VB_MAX 32768
+static CV *vb;
+static int quad0;
 static void vtx(float x, float y, float s, float t, float r, float g, float b, float a) {
-    C3D_ImmSendAttrib(x, y, 0.5f, 0.0f);
-    C3D_ImmSendAttrib(s, t, 0.0f, 0.0f);
-    C3D_ImmSendAttrib(r, g, b, a);
+    CV *d = vb + vb_n++;
+    d->x = x; d->y = y; d->z = 0.5f; d->s = s; d->t = t; d->r = r; d->g = g; d->b = b; d->a = a;
 }
+#define QUAD_BEGIN() (quad0 = vb_n)
+#define QUAD_END() C3D_DrawArrays(GPU_TRIANGLES, quad0, vb_n - quad0)
 
 /* ---- textures: RGBA8 words (red low) -> the PICA's texel word (red high), 8x8 tiles in Morton order */
 static inline unsigned pix(unsigned c) { return (c << 24) | ((c << 8) & 0xFF0000u) | ((c >> 8) & 0xFF00u) | (c >> 24); }
@@ -136,11 +149,7 @@ static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
 }
 
 /* ---- primitives */
-/* triangles go through a vertex buffer (linear memory the GPU reads when the frame runs: a frame's vertices in a row,
-   from the start again once the frame has been waited for), and state is only set when it changes */
-typedef struct { float x, y, z, s, t, r, g, b, a; } CV;
-#define VB_MAX 32768
-static CV *vb; static int vb_n;
+/* (state is only set when it changes) */
 /* the GPU reads the vertices from memory, not through the CPU's cache: written out before the frame is submitted (a
    console drew torn sprites, some vertices still the frame before's; an emulator has no cache to show it) */
 static void vb_flush(void) { if (vb_n) GSPGPU_FlushDataCache(vb, (u32)vb_n * sizeof *vb); }
@@ -148,7 +157,7 @@ static PState last_st;                       /* (last_ok 0: something else set s
 static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
     begin();
-    if (vb_n + n > VB_MAX) { end_and_wait(); begin(); }
+    if (vb_n + n > VB_MAX - 256) { end_and_wait(); begin(); }
     if (!last_ok || memcmp(s, &last_st, sizeof *s)) {
         /* the scissor counts rows from the other edge than the projection (the self test: an area of y 256..511 drew nothing) */
         C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, 511 - s->y2, s->x2 + 1, 512 - s->y1);
@@ -203,15 +212,16 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
             unsigned *d = t.data;
             for (int j = 0; j < ph; j++) for (int i = 0; i < pw; i++) d[tiled(i, j, t.width)] = pix(src[(j0 + j) * stride + i0 + i]);
             GSPGPU_FlushDataCache(d, (unsigned)t.width * t.height * 4);
+            if (vb_n + 6 > VB_MAX - 64) end_and_wait();
             begin();
             C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
             set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
             C3D_TexBind(0, tp);
             float X0 = x + i0, Y0 = y + j0, X1 = X0 + pw, Y1 = Y0 + ph, S1 = (float)pw / t.width, T0 = 1.0f, T1 = 1.0f - (float)ph / t.height;
-            C3D_ImmDrawBegin(GPU_TRIANGLES);
+            QUAD_BEGIN();
             vtx(X0, Y0, 0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
             vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
-            C3D_ImmDrawEnd();
+            QUAD_END();
             st_writes++;
         }
     tk_write += svcGetSystemTick() - t0;
@@ -222,10 +232,10 @@ static void c3d_fill(int x, int y, int w, int h, unsigned c) {
     set_env(0, 0); set_atest(AT_OFF); set_blend(-1);
     float r = (c & 255) / 255.0f, g = ((c >> 8) & 255) / 255.0f, b = ((c >> 16) & 255) / 255.0f, a = (c >> 24) / 255.0f;
     float X0 = x, Y0 = y, X1 = x + w, Y1 = y + h;
-    C3D_ImmDrawBegin(GPU_TRIANGLES);
+    QUAD_BEGIN();
     vtx(X0, Y0, 0, 0, r, g, b, a); vtx(X1, Y0, 0, 0, r, g, b, a); vtx(X0, Y1, 0, 0, r, g, b, a);
     vtx(X1, Y0, 0, 0, r, g, b, a); vtx(X1, Y1, 0, 0, r, g, b, a); vtx(X0, Y1, 0, 0, r, g, b, a);
-    C3D_ImmDrawEnd();
+    QUAD_END();
 }
 static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
     u64 t0 = svcGetSystemTick();
@@ -256,10 +266,10 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         C3D_TexBind(0, &vram_tex);
         float X0 = 40, X1 = 360, Y0 = 0, Y1 = 240;   /* 320 x 240 */
         float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = 1.0f - y / 512.0f, T1 = 1.0f - (y + h) / 512.0f;
-        C3D_ImmDrawBegin(GPU_TRIANGLES);
+        QUAD_BEGIN();
         vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
         vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
-        C3D_ImmDrawEnd();
+        QUAD_END();
     }
     if (bot_rt && panel_w) {   /* the bottom screen: the panel's canvas, 1:1 (320 x 240) */
         C3D_RenderTargetClear(bot_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
@@ -269,10 +279,10 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
         C3D_TexBind(0, &panel_tex);
         float X1 = panel_w, Y1 = panel_h, S1 = panel_w / 512.0f, T1 = 1.0f - panel_h / 256.0f;
-        C3D_ImmDrawBegin(GPU_TRIANGLES);
+        QUAD_BEGIN();
         vtx(0, 0, 0, 1, 1, 1, 1, 1); vtx(X1, 0, S1, 1, 1, 1, 1, 1); vtx(0, Y1, 0, T1, 1, 1, 1, 1);
         vtx(X1, 0, S1, 1, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(0, Y1, 0, T1, 1, 1, 1, 1);
-        C3D_ImmDrawEnd();
+        QUAD_END();
     }
     vb_flush();
     C3D_FrameEnd(GX_CMDLIST_FLUSH);
@@ -352,6 +362,7 @@ static void self_test(void) {
        and lower edges were not drawn) */
     static const short mk[4][2] = { { 64, 64 }, { 952, 64 }, { 64, 440 }, { 952, 440 } };
     static unsigned whole[16 * 16];
+    for (int round = 0, low = 0; round < 2; round++) {
     for (int pass = 0; pass < 2; pass++) {
         for (int i = 0; i < 4; i++) {
             float x = mk[i][0], y = mk[i][1];
@@ -371,8 +382,14 @@ static void self_test(void) {
             for (int k = 0; k < 256; k++) if ((whole[k] & 0x00FFFFFFu) == 0x0000FF00u) { if (fx < 0) { fx = k & 15; fy = k >> 4; } n++; }
             port_printf("[3ds] pica self test, %s mark at %d,%d: %d pixels, first at %d,%d%s\n", pass ? "write" : "triangle", mk[i][0], mk[i][1], n,
                         fx < 0 ? -1 : mk[i][0] - 4 + fx, fy < 0 ? -1 : mk[i][1] - 4 + fy, n == 64 && fx == 4 && fy == 4 ? "" : "  <-- NOT WHERE IT BELONGS");
+            if (!pass && n && fy == 5) low++;
         }
         c3d_fill(0, 0, 1024, 512, 0);
+    }
+    if (round || low < 4) break;
+    end_and_wait();
+    y_shift = 0.5f + 1.0f / 64.0f; proj_vram();
+    port_printf("[3ds] pica self test: triangles land a row low: rows shifted by %.3f, the marks again\n", y_shift);
     }
 }
 static int c3d_start(void) {
