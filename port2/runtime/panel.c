@@ -727,6 +727,29 @@ static void panel_time_log(unsigned long long us) {
                 side_raster_n ? side_raster_us / side_raster_n / 1000 : 0, side_raster_n ? side_raster_us / side_raster_n / 10 % 100 : 0, cd);
     sum = mx = 0; n = 0; side_raster_n = 0; side_raster_us = 0;
 }
+#ifdef __3DS__
+#include <3ds.h>
+static LightEvent pw_go;
+static volatile int pw_state;            /* 0 idle, 1 rendering, 2 a canvas is ready */
+static void pw_main(void *arg) {
+    (void)arg;
+    for (;;) { LightEvent_Wait(&pw_go); render(); pw_state = 2; }
+}
+static int n3ds_worker_ok(void) {
+    static int st;                        /* 0 not tried, 1 running, -1 none */
+    if (st) return st > 0;
+    LightEvent_Init(&pw_go, RESET_ONESHOT);
+    s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
+    bool n3 = false; APT_CheckNew3DS(&n3);
+    APT_SetAppCpuTimeLimit(50);           /* (the second core of an Old 3DS: half of it) */
+    static const int cores[] = { 2, 1, -2 };
+    Thread t = 0; int c = n3 ? 0 : 1;
+    for (; c < 3 && !t; c++) t = threadCreate(pw_main, 0, 256 * 1024, prio + 1, cores[c], false);
+    st = t ? 1 : -1;
+    port_printf("[panel] 3DS render thread: %s (core %d)\n", t ? "started" : "none", t ? cores[c - 1] : 0);
+    return st > 0;
+}
+#endif
 /* every vblank (shims/gpu.c port_gpu_vblank) while the panel is on */
 void panel_hud_update(void);      /* runtime/panel_hud.c: --hud-bottom */
 void port_panel_vblank(void) {
@@ -734,8 +757,26 @@ void port_panel_vblank(void) {
     int dump = port_panel_dump_dir && port_dump_every > 0 && port_frame % port_dump_every == 0;
     if (panel_script) script_step();
     if (hold_at == port_frame) { inq_push(1, 1, hold_x, hold_y); hold_at = -1; }
+#ifdef __3DS__
+    if (page == PAGE_SIDE && pw_state != 1) side_cache_work();   /* (not under a render in the worker thread) */
+#else
     if (page == PAGE_SIDE) side_cache_work();   /* the side map's tiles, a slice every vblank (panel_side.inc) */
-#ifdef __3DS__   /* (the 3DS draws the panel on its CPU, inside the 60 Hz frame: every fourth vblank, ~15 fps) */
+#endif
+#ifdef __3DS__
+    /* The 3DS draws the panel on its CPU (~50 ms a render in the emulator, three 60 Hz frames): a worker thread does it,
+       on another core where there is one (New 3DS; the Old 3DS's second core with the time the system grants), else in
+       the time the main thread sleeps.  The main thread only takes input and starts a render while the worker is
+       idle, and hands the finished canvas to the bottom screen: at most a render every fourth vblank. */
+    if (!dump && n3ds_worker_ok()) {
+        if (pw_state == 2) {
+            if (port_panel_window) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
+            pw_state = 0;
+        }
+        if (pw_state == 0 && (!(frames++ & 3) || scr_busy())) { inq_run(); pw_state = 1; LightEvent_Signal(&pw_go); }
+        return;
+    }
+    while (pw_state == 1) svcSleepThread(1000000);   /* (a dump, or no worker: here, as everywhere else) */
+    pw_state = 0;
     if (!dump && (frames++ & 3) && !scr_busy()) return;
 #else
     if (!dump && (frames++ & 1) && !scr_busy()) return;   /* ~25 fps is plenty, every vblank while a list moves */
