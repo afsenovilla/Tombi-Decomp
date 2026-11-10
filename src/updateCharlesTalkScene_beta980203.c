@@ -1,0 +1,259 @@
+// VERSION BETA_980203 x00 8013AEFC 1936
+#if defined(VERSION_BETA_980203)
+// Beta version: PAL updateCharlesTalkScene.c with the step-2 item effect placed at the player (x - 32) instead of the other object.
+#include "TOBJ.H"
+typedef struct { TObj o; unsigned char bc0; } BigObj;
+extern BigObj PLAYER;
+#define X PLAYER.o
+extern unsigned char DAT_8009c93e, DAT_8009c93f, GVARS_USE_ITEM_PENDING, GVARS_USE_ITEM_ID, DAT_8009c942;
+extern unsigned char DAT_8009cebd, DAT_8009d0a7, GAME_PLAYER_MODE, DAT_8009ce4a, DAT_8009d00d, BUTTON_CONFIG_INDEX;
+extern int GAME_AREA00_EVENT_CONTROL;
+extern unsigned char DAT_8009d00dA[];
+extern unsigned char *PLAYER_EXT;
+extern void *NPC_CHARLES_ANIMS, *PTR_8013ac18, *PTR_8013ac20, *PTR_8013ac24, *PTR_8013ac2c;
+static char DAT_801396ca[98] = {
+    8, 3, 0, 0x12, 0, 0, -0x7d, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 1, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1, 0, 0, 0, 0,
+    0x68, 0, 0, 1, -0x80, 0, -1, 1, 0, 0, -0x79, 0, 0, 0, 0, 1,
+    0, 0, 0, 1, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1,
+    0, 1, 0x68, 0, 0x68, 0, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -1, 0x7f,
+};
+extern char PLAYER_IDLE_ANIM[];
+extern int showMessageBox(int, int, int, int);
+extern void AnimLoadDuration(TObj *);
+extern int AnimAdvance(TObj *);
+extern void setEventStarted(int, int, int);
+extern void setEventComplete(int, int);
+extern void applyItemEffect(void *, void *, int, int, int);
+extern void FUN_80026e0c(int, int);
+extern void printInfoMessage(int, int);
+extern void FUN_8001e4f0(int);
+
+#define CEBD (*(volatile unsigned char *)&DAT_8009cebd)
+
+static __inline__ short chk(void)
+{
+    short r = 0;
+    if (DAT_8009d0a7 != 0 && GVARS_USE_ITEM_PENDING != 0)
+        r = GVARS_USE_ITEM_ID == 3;
+    return r;
+}
+static __inline__ int chk2(void)
+{
+    int r = 0;
+    if (DAT_8009d0a7 != 0) {
+        r = 0;
+        if (GVARS_USE_ITEM_PENDING != 0)
+            r = GVARS_USE_ITEM_ID == 3;
+    }
+    return r;
+}
+
+void updateCharlesTalkScene(TObj *o)
+{
+    TObj *p = *(TObj **)&o->category;
+    short buf[6];
+    int f;
+
+    switch (o->step) {
+    case 0:
+        DAT_8009c93f = 1;
+        if (*(unsigned short *)&o->anim != 0) {
+            PLAYER.bc0 = 1;
+            DAT_8009cebd = 1;
+            o->step = 3;
+            break;
+        }
+        if (chk()) {
+            X.animFrame = 1;
+            DAT_8009cebd = 2;
+            DAT_8009c93e = 1;
+            X.b04 = 1;
+            X.step = 0;
+            X.state = 0;
+            GAME_PLAYER_MODE = 0;
+            X.d90 = showMessageBox(4, 2, 0x80, 0x6c);
+            p->anim = PTR_8013ac20;
+            AnimLoadDuration(p);
+            p->b04 = 2;
+            p->step = 4;
+            p->state = 0;
+        } else {
+            DAT_8009cebd = 0;
+            X.d90 = showMessageBox(4, 0, 0x80, 0x6c);
+        }
+        o->step++;
+        break;
+    case 1:
+        AnimAdvance(p);
+        if (((TObj *)X.d90)->b04 != 2)
+            break;
+        switch (DAT_8009cebd) {
+        case 0:
+            ((TObj *)X.d90)->b04 = 3;
+            p->b04 = 2;
+            p->step = 1;
+            p->state = 0;
+            X.animFrame = 1;
+            X.b04 = 6;
+            X.step = 5;
+            X.state = 0;
+            PLAYER_EXT[9] = 10;
+            X.wb2 = 0;
+            X.velH = 0;
+            X.velV = 0;
+            X.velX = 0xc0;
+            X.b69 = 0;
+            DAT_8009cebd = 1;
+            o->step = 3;
+            break;
+        case 1:
+            ((TObj *)X.d90)->b04 = 3;
+            p->anim = PTR_8013ac18;
+            AnimLoadDuration(p);
+            p->active = 1;
+            p->b04 = 1;
+            p->step = 0;
+            p->state = 0;
+            if (DAT_8009ce4a == 0) {
+                setEventStarted(0xa6, 0, 0);
+                o->w08 = 300;
+                o->step = 6;
+                o->state = 0;
+                o->substep = 0;
+                break;
+            }
+            DAT_8009cebd = 0;
+            X.animFrame = 1;
+            X.b04 = 1;
+            X.step = 0;
+            X.state = 0;
+            X.velX = 0;
+            X.velY = 0;
+            X.b69 = 1;
+            PLAYER_EXT[9] = 0;
+            o->step = 0;
+            o->state = 0;
+            goto clear;
+        case 2:
+            ((TObj *)X.d90)->b04 = 3;
+            buf[1] = X.a.p.whole - 0x20;
+            buf[3] = X.y.p.whole;
+            buf[5] = X.b.p.whole;
+            applyItemEffect(DAT_801396ca, buf, 0, 0, 1);
+            X.b04 = 5;
+            X.step = 0;
+            X.state = 0;
+            p->active = 1;
+            DAT_8009cebd = 3;
+            FUN_80026e0c(3, 1);
+            o->w08 = 0x50;
+            o->step = 4;
+            if (DAT_8009d00dA[0] != 0)
+                o->step = 7;
+            break;
+        case 3:
+            ((TObj *)X.d90)->b04 = 3;
+            CEBD = 4;
+            CEBD = BUTTON_CONFIG_INDEX + 4;
+            p->anim = PTR_8013ac2c;
+            AnimLoadDuration(p);
+            o->step = 4;
+            break;
+        case 4: case 5: case 6: case 7: case 8: case 9:
+            ((TObj *)X.d90)->b04 = 3;
+            p->anim = NPC_CHARLES_ANIMS;
+            AnimLoadDuration(p);
+            CEBD = 10;
+            CEBD = BUTTON_CONFIG_INDEX + 10;
+            o->step = 4;
+            break;
+        case 10: case 11: case 12: case 13: case 14: case 15:
+            ((TObj *)X.d90)->b04 = 3;
+            setEventComplete(0xa6, 0);
+            o->step = 5;
+            if (DAT_8009d00d == 0)
+                printInfoMessage(0xc, 3);
+            p->b04 = 2;
+            p->step = 3;
+            p->state = 0;
+            o->w08 = 0x50;
+            break;
+        }
+        break;
+    case 3:
+        AnimAdvance(p);
+        if (X.b69 != 0) {
+            p->active = 1;
+            p->anim = PTR_8013ac24;
+            AnimLoadDuration(p);
+            p->b04 = 2;
+            p->step = 4;
+            p->state = 0;
+            X.animFrame = 1;
+            X.b04 = 5;
+            X.step = 0;
+            X.state = 0;
+            X.b69 = 4;
+            X.anim = PLAYER_IDLE_ANIM;
+            AnimLoadDuration(&X);
+            DAT_8009cebd = 1;
+            X.d90 = showMessageBox(4, 1, 0x80, 0x6c);
+            o->step = 1;
+        }
+        break;
+    case 4:
+        if (o->w08 == 10)
+            FUN_8001e4f0(9);
+        if (--o->w08 > 0)
+            break;
+        X.d90 = showMessageBox(4, DAT_8009cebd, 0x80, 0x6c);
+        o->step = 1;
+        break;
+    case 5:
+        if (--o->w08 > 0)
+            break;
+        DAT_8009d00d = 0;
+        X.b04 = 1;
+        X.step = 0;
+        X.state = 0;
+        DAT_8009c942 = 0;
+        PLAYER.bc0 = 0;
+        DAT_8009c93e = 0;
+        DAT_8009c93f = 0;
+        { unsigned char *c = &DAT_8009cebd; *c = *c + 1; }
+        o->b04 = 2;
+        GVARS_USE_ITEM_PENDING = 0;
+        GAME_AREA00_EVENT_CONTROL |= 0x40;
+        break;
+    case 6:
+        if (--o->w08 > 0)
+            break;
+        X.animFrame = 1;
+        X.b04 = 1;
+        X.step = 0;
+        X.state = 0;
+        X.velX = 0;
+        X.velY = 0;
+        X.b69 = 1;
+        o->step = 0;
+        o->state = 0;
+        DAT_8009cebd = 0;
+    clear:
+        *(short *)&o->anim = 0;
+        PLAYER.bc0 = 0;
+        DAT_8009c93f = 0;
+        DAT_8009c942 = 0;
+        DAT_8009c93e = 0;
+        break;
+    case 7:
+        if (o->w08 == 10)
+            FUN_8001e4f0(9);
+        if (--o->w08 > 0)
+            break;
+        X.d90 = showMessageBox(4, 3, 0x80, 0x6c);
+        o->step = 1;
+        break;
+    }
+}
+#endif
