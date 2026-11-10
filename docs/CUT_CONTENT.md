@@ -817,10 +817,9 @@ The 84 frames these scripts use are exactly the new frames no table reaches; the
   126/65, 70/67, 71/69; 72-74; 75-83 in pairs; 84-86 holds; the two look-around idles 87-104; 105-110; 111-125).
   So the demo frames 25-35 are the **first drawing of the item pick-up**, redrawn in retail as 65-74 / 126; they were
   used in the demo, not orphaned.
-- Demo frames 77-85 and 96-99 are reached only from actor-style tables in the AREA08 overlay `INFO.BIN` (load address
-  0x800EE110, tables +0x71A0 entries 12-15 and +0x7280 entries 26-28, four-frame loops), i.e. Tomba driven as a scene
-  actor; retail's I0NFO2 actor tables (+0x1AF78, 96 entries) keep the same scripts in their first 46 entries but point
-  at retail's renumbered frames. Frame 89 is in no table of the demo.
+- Demo frames 77-85, 89 and 96-97 are in no player script of the demo (the exe block above is the only player table;
+  the script tables inside the AREA08 overlay `INFO.BIN` belong to the area's NPCs and index their own sprite sets, so
+  they say nothing about Tomba's frames). They are unused top-down art, like the side-view orphans, with no script.
 
 Conclusion: the lift / pull mechanic was programmed with its timing and then removed before PrePre 9; the object it
 used is in none of the demo's data. Only the frames and these scripts remain.
