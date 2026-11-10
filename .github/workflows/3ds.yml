@@ -287,6 +287,14 @@ jobs:
           export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
           Xvfb :98 -screen 0 1280x1024x24 & sleep 2
           export DISPLAY=:98
+          # first without a disc image: the chooser (n3ds/main_3ds.c) must be on the top screen
+          mv "$SD/3ds/tombi/tombi.bin" "$SD/tombi_away.bin"; rm -f "$SD/3ds/tombi/disc.txt"
+          ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_nodisc.log 2>&1 &
+          EMU=$!
+          sleep 30; import -window root shots/nodisc_030.png || true
+          kill "$EMU" 2>/dev/null || true; sleep 2
+          convert shots/nodisc_030.png -trim +repage -quality 75 small_nodisc.jpg && { echo "=====BEGIN shot_nodisc====="; base64 -w 100 small_nodisc.jpg; echo "=====END shot_nodisc====="; }
+          mv "$SD/tombi_away.bin" "$SD/3ds/tombi/tombi.bin"
           ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_cci.log 2>&1 &
           EMU=$!
           sleep 60; import -window root shots/cci_060.png || true
