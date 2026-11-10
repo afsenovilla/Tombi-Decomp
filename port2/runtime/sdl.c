@@ -45,7 +45,13 @@ static void ctrl_opened(void);
 
 /* the audio device pulls the mixer (shims/sound.c): audio time is what the device consumes, so the sequencer's
    tempo cannot depend on the game thread's pace; the game thread's calls into the mixer take the device lock */
-static void audio_cb(void *ud, Uint8 *stream, int len) { (void)ud; port_sound_pull((short *)stream, len / 4); }
+static void audio_cb(void *ud, Uint8 *stream, int len) {
+    (void)ud;
+#ifdef __3DS__
+    { extern void port_n3ds_audio_thread_boost(void); port_n3ds_audio_thread_boost(); }   /* (n3ds/pica_c3d.c) */
+#endif
+    port_sound_pull((short *)stream, len / 4);
+}
 /* (lock_wanted: the game thread is waiting for the lock.  The 3DS's audio thread shares a throttled core and holds
    the lock for a whole callback, tens of milliseconds there: port_audio_yield, between the callback's pieces,
    lets the game thread in) */

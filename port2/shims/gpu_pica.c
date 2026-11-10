@@ -469,6 +469,17 @@ static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
    edge, and sprites cross it.  The far bounds stop short of the edge, past the last pixel's centre.
    On by default on the 3DS; PICA_CLIP=1 in the environment tries it on the reference device. */
 static int clip_on = -1;
+/* profiling on the 3DS (n3ds/pica_c3d.c logs it): one ordering table in sixteen is timed, in system ticks:
+   [0] its packets, [1] emit(), [2] the clipping, [3] the texture look-up, [4] the device's triangles */
+int pica_prof_on; unsigned long long pica_prof[6]; unsigned pica_prof_n;
+#ifdef __3DS__
+extern unsigned long long port_ticks(void);
+#define PT() (pica_prof_on ? port_ticks() : 0)
+#define PA(i, t) do { if (pica_prof_on) pica_prof[i] += port_ticks() - (t); } while (0)
+#else
+#define PT() 0
+#define PA(i, t) do { (void)(t); } while (0)
+#endif
 static int clip_poly(const PV *in, int n, PV *out, int axis, float bound, int keep_less) {
     int m = 0;
     for (int i = 0; i < n; i++) {
@@ -520,7 +531,8 @@ static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
 #endif
     }
     const PV *orig = v0; int norig = n;
-    if (clip_on) { n = clip_tris(v0, n, cl); if (!n) return; v0 = cl; }
+    unsigned long long pt = PT(), pc = pt;
+    if (clip_on) { n = clip_tris(v0, n, cl); PA(2, pc); if (!n) { PA(1, pt); return; } v0 = cl; }
     v = v0;
     if (tex) {
         /* the texels the primitive reads: its vertices' bounds */
@@ -531,16 +543,19 @@ static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
         }
         /* (the far edge kept when it is in the page: a magnified sprite's last pixels can sample it) */
         if (u1 > 255 && u0 < 256) u1 = 255; if (w1 > 255 && w0 < 256) w1 = 255;
+        unsigned long long px = PT();
         int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by), ax, ay;
+        PA(3, px);
         pica_slot_pos(slot, &ax, &ay);
         s.tex = pica_slot_atlas(slot); s.mod = !raw;
         for (int i = 0; i < n; i++) { vv[i] = v0[i]; vv[i].u += (float)(ax - bx); vv[i].v += (float)(ay - by); }
         v = vv;
     }
-    if (!tex) { s.blend = semi ? gs->abr : -1; memcpy(batch(&s, n), v, n * sizeof *v); return; }
-    if (!semi) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); return; }
+    if (!tex) { s.blend = semi ? gs->abr : -1; memcpy(batch(&s, n), v, n * sizeof *v); PA(1, pt); return; }
+    if (!semi) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); PA(1, pt); return; }
     s.atest = AT_OPAQUE; memcpy(batch(&s, n), v, n * sizeof *v);
     s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, n), v, n * sizeof *v);
+    PA(1, pt);
 }
 static void bbox_drawn(const PV *v, int n) {
     if (bulk_area()) return;

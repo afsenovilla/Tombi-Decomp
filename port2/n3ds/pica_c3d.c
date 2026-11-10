@@ -178,6 +178,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
     }
     C3D_DrawArrays(GPU_TRIANGLES, vb_n, n);
     vb_n += n;
+    { extern int pica_prof_on; extern unsigned long long pica_prof[6]; if (pica_prof_on) pica_prof[4] += svcGetSystemTick() - t0; }
     tk_draw += svcGetSystemTick() - t0;
 }
 /* the staging texture, its memory from the arena: w x h rounded up to powers of two (>= 8).  (One C3D_Tex for all:
@@ -308,6 +309,15 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         for (unsigned i = 0; i < 4 && i < n_rd; i++) port_printf("[3ds] pica: read-back %d,%d %dx%d\n", rd_log[i][0], rd_log[i][1], rd_log[i][2], rd_log[i][3]);
         { extern unsigned long long port_frames_skipped; static unsigned long long last;
           port_printf("[3ds] frameskip: %llu ordering tables not drawn in these %d presents\n", port_frames_skipped - last, TK_N); last = port_frames_skipped; }
+        {   /* the sampled ordering tables' time (shims/gpu.c, shims/gpu_pica.c), in ms per sampled table */
+            extern unsigned long long pica_prof[6]; extern unsigned pica_prof_n;
+            if (pica_prof_n) {
+                double k = 1000.0 / SYSCLOCK_ARM11 / pica_prof_n;
+                port_printf("[3ds] profile of %u ordering tables, ms each: packets %.2f (of which emit %.2f: clip %.2f, texture %.2f, device %.2f)\n",
+                            pica_prof_n, pica_prof[0] * k, pica_prof[1] * k, pica_prof[2] * k, pica_prof[3] * k, pica_prof[4] * k);
+            }
+            memset(pica_prof, 0, sizeof pica_prof); pica_prof_n = 0;
+        }
         n_up = n_rd = n_wait = 0; pica_decode_us = 0;
         port_printf("[3ds] pica: %llu frames, %llu syncs, %llu host writes; ms per frame: %.2f total, %.2f draws, %.2f texture uploads, "
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
@@ -490,6 +500,7 @@ static int c3d_start(void) {
     C3D_CullFace(GPU_CULL_NONE);
     proj_vram();
     port_printf("[3ds] pica: citro3d renderer, top screen format %d\n", scr_fmt);
+    port_n3ds_main_thread();
     self_test();
     gpu_test_picture();
     return 0;
@@ -515,3 +526,19 @@ int port_n3ds_worker_start(void (*job)(void)) {
     return t != 0;
 }
 void port_n3ds_worker_go(void) { LightEvent_Signal(&wk_go); }
+
+/* ---- for the rest of the port: the raw tick counter (profiling), and the audio thread's priority.  SDL's audio thread
+   runs the mixer in its callback at the main thread's priority or below: on an Old 3DS, where the game leaves no idle
+   time, it only got the scraps and produced 60 % of the samples.  The first callback raises its own thread above the
+   main one (runtime/sdl.c audio_cb): the mixer's two milliseconds a frame are taken when the DSP needs them. */
+unsigned long long port_ticks(void) { return svcGetSystemTick(); }
+static s32 main_prio = -1;
+void port_n3ds_main_thread(void) { svcGetThreadPriority(&main_prio, CUR_THREAD_HANDLE); }
+void port_n3ds_audio_thread_boost(void) {
+    static int done;
+    if (done || main_prio < 0) return;
+    done = 1;
+    s32 mine = 0x30; svcGetThreadPriority(&mine, CUR_THREAD_HANDLE);
+    Result r = mine >= main_prio ? svcSetThreadPriority(CUR_THREAD_HANDLE, main_prio > 0x19 ? main_prio - 1 : main_prio) : 0;
+    port_printf("[3ds] audio thread: priority %ld, the main thread's %ld%s\n", (long)mine, (long)main_prio, mine >= main_prio ? (R_SUCCEEDED(r) ? ": raised above it" : ": could not be raised") : "");
+}

@@ -928,6 +928,11 @@ void DrawOTag(u32 *ot) {
     tex_patch_idle();
     gpu_lists++;
     const int skip = port_frameskip && port_skip_draw;
+#ifdef __3DS__
+    extern int pica_prof_on; extern unsigned long long pica_prof[6], port_ticks(void); extern unsigned pica_prof_n;
+    pica_prof_on = !skip && (gpu_lists & 15) == 0;
+    unsigned long long prof_t0 = pica_prof_on ? port_ticks() : 0;
+#endif
     if (port_frameskip) { fs_mark(gs.x1, gs.y1, skip); port_frames_skipped += (unsigned)skip; }
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
@@ -948,6 +953,9 @@ void DrawOTag(u32 *ot) {
         if (next == 0xFFFFFF) break;
         p = (u32 *)next;                     /* a native pointer: the whole data image sits below 16 MB */
     }
+#ifdef __3DS__
+    if (pica_prof_on) { be->list_end(); pica_prof[0] += port_ticks() - prof_t0; pica_prof_n++; pica_prof_on = 0; }
+#endif
     gpu_prims += n;
     ws_sync_down();
     port_ot_signature = h * 31u + (unsigned)n;
