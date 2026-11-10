@@ -247,7 +247,7 @@ jobs:
           cp "$RUNNER_TEMP/disccache/game.bin" "$SD/3ds/tombi/tombi.bin"
           # frame and VRAM dumps (runtime/main.c --dump-frames / --dump-vram) of what the 3DS renderer holds
           # gameplay measured too: the debug area select into AREA 1, then walking right (as in CLAUDE.md's cheatsheet)
-          echo "--log-fps --poke 900:1F8001B4:1 --poke 1250:8009C960:0:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:3000" > "$SD/3ds/tombi/args.txt"
+          echo "--log-fps --skip-movies --poke 900:1F8001B4:1 --poke 1250:8009C960:0:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:3000" > "$SD/3ds/tombi/args.txt"
           mkdir -p "$SD/3ds/tombi/dump"
           ls -l app "$SD/3ds/tombi"
           export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
@@ -282,7 +282,7 @@ jobs:
         if: always()
         run: |
           SD="$HOME/.local/share/azahar-emu/sdmc"
-          rm -f "$SD/3ds/tombi/log.txt"; echo "--log-fps" > "$SD/3ds/tombi/args.txt"
+          rm -f "$SD/3ds/tombi/log.txt"; echo "--log-fps -v" > "$SD/3ds/tombi/args.txt"   # (the defaults: the logo movie plays)
           L=$(find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" | head -1); [ -n "$L" ] && : > "$L"
           export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
           Xvfb :98 -screen 0 1280x1024x24 & sleep 2
@@ -306,6 +306,7 @@ jobs:
             echo "$n x $a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
           echo "== log.txt of the .cci run"; head -30 "$SD/3ds/tombi/log.txt" 2>/dev/null || echo "(no log.txt: the program did not get to its main)"
           grep "\[port\] fps" "$SD/3ds/tombi/log.txt" 2>/dev/null | tail -3
+          grep "st: stream" "$SD/3ds/tombi/log.txt" 2>/dev/null | head -4
           convert shots/cci_060.png -trim +repage -quality 75 small_cci.jpg && { echo "=====BEGIN shot_cci====="; base64 -w 100 small_cci.jpg; echo "=====END shot_cci====="; }
 
       # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
