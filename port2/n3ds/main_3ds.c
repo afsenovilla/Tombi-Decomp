@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
         args[n++] = "--disc"; args[n++] = image;
     }
     args[n++] = "--renderer"; args[n++] = "pica";   /* the GPU (n3ds/pica_c3d.c); args.txt "--renderer soft": the CPU */
-    args[n++] = "--skip-movies";
+    args[n++] = "--logo-only";                      /* the developer's logo plays (a 6.7 s movie); the other movies are skipped */
     /* 60 Hz: the 3DS's screens refresh at ~60 Hz (50 on them repeats every fifth frame), and it is the US / NTSC game
        speed (the PAL build kept the US logic, docs/PORT.md "60 Hz mode"); args.txt "--hz 50" for the PAL speed */
     args[n++] = "--hz"; args[n++] = "60";

@@ -26,6 +26,12 @@ AccessControlInfo:
   ReleaseKernelMinor      : "33"
   FileSystemAccess:
     - DirectSdmc
+  # the memory a title must ask for (a .3dsx gets it from the Homebrew Launcher): without the DSP's, ndsp's first
+  # write to it is a data abort on a console (an emulator maps it anyway)
+  IORegisterMapping:
+    - 1ff00000-1ff7ffff          # DSP memory
+  MemoryMapping:
+    - 1f000000-1f5fffff:r        # VRAM
   IoAccessControl:
   IdealProcessor          : 0
   AffinityMask            : 1
