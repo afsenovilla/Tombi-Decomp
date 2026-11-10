@@ -933,3 +933,6 @@ func_80029018_pcpx96084 = 0x80029018; // type:func size:0xD4
 func_80052160_pcpx96084 = 0x80052160; // type:func size:0xD4
 func_800207CC = 0x800207CC; // type:func size:0xDC
 func_80024CD4_pcpx96084 = 0x80024CD4; // type:func size:0xD8
+func_8006809C_pcpx96084 = 0x8006809C; // type:func size:0xDC
+func_80025A94_pcpx96084 = 0x80025A94; // type:func size:0xDC
+func_80023318_pcpx96084 = 0x80023318; // type:func size:0xE4
