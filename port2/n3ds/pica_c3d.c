@@ -49,8 +49,9 @@ static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted bef
     C3D_FrameDrawOn(vram_rt);
     in_frame = 1;
 }
+static void vb_flush(void);
 static void end_and_wait(void) {   /* run what was recorded and wait for it: memory may be reused afterwards */
-    if (in_frame) { C3D_FrameEnd(GX_CMDLIST_FLUSH); in_frame = 0; }
+    if (in_frame) { vb_flush(); C3D_FrameEnd(GX_CMDLIST_FLUSH); in_frame = 0; }
     C3D_FrameBegin(0); C3D_FrameEnd(GX_CMDLIST_FLUSH);   /* (C3D_FrameBegin waits for the queue of the frame before) */
     arena_off = 0; frame_no++; st_syncs++; vb_n = 0; last_ok = 0;
 }
@@ -140,6 +141,9 @@ static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
 typedef struct { float x, y, z, s, t, r, g, b, a; } CV;
 #define VB_MAX 32768
 static CV *vb; static int vb_n;
+/* the GPU reads the vertices from memory, not through the CPU's cache: written out before the frame is submitted (a
+   console drew torn sprites, some vertices still the frame before's; an emulator has no cache to show it) */
+static void vb_flush(void) { if (vb_n) GSPGPU_FlushDataCache(vb, (u32)vb_n * sizeof *vb); }
 static PState last_st;                       /* (last_ok 0: something else set state since) */
 static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
@@ -270,6 +274,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         vtx(X1, 0, S1, 1, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(0, Y1, 0, T1, 1, 1, 1, 1);
         C3D_ImmDrawEnd();
     }
+    vb_flush();
     C3D_FrameEnd(GX_CMDLIST_FLUSH);
     in_frame = 0;
     C3D_TexSetFilter(&vram_tex, GPU_NEAREST, GPU_NEAREST);
@@ -342,6 +347,33 @@ static void self_test(void) {
         port_printf("[3ds] pica self test, triangles (drawing area y %d..511): at y 304 %08x, at y 207 %08x\n", k ? 256 : 0, a1, a2);
     }
     c3d_fill(0, 0, 1024, 512, 0);
+    /* where things land: 8 x 8 marks near the target's corners through the triangle path, then the same through the
+       host-write path; the whole target read back and each mark's place logged (a console showed a frame whose right
+       and lower edges were not drawn) */
+    static const short mk[4][2] = { { 64, 64 }, { 952, 64 }, { 64, 440 }, { 952, 440 } };
+    static unsigned whole[16 * 16];
+    for (int pass = 0; pass < 2; pass++) {
+        for (int i = 0; i < 4; i++) {
+            float x = mk[i][0], y = mk[i][1];
+            if (!pass) {
+                PV m[6] = { { x, y, 0, 0, 0, 255, 0, 255 }, { x + 8, y, 0, 0, 0, 255, 0, 255 }, { x, y + 8, 0, 0, 0, 255, 0, 255 },
+                            { x + 8, y, 0, 0, 0, 255, 0, 255 }, { x + 8, y + 8, 0, 0, 0, 255, 0, 255 }, { x, y + 8, 0, 0, 0, 255, 0, 255 } };
+                PState st = { -1, 0, AT_OFF, -1, 0, 0, 1023, 511 };
+                c3d_tris(&st, m, 6);
+            } else {
+                static unsigned blk[64]; for (int k = 0; k < 64; k++) blk[k] = 0xFF00FF00u;
+                c3d_write(mk[i][0], mk[i][1], 8, 8, blk, 8);
+            }
+        }
+        for (int i = 0; i < 4; i++) {   /* a 16 x 16 window around each mark: its first marked pixel */
+            c3d_read(mk[i][0] - 4, mk[i][1] - 4, 16, 16, whole, 16);
+            int fx = -1, fy = -1, n = 0;
+            for (int k = 0; k < 256; k++) if ((whole[k] & 0x00FFFFFFu) == 0x0000FF00u) { if (fx < 0) { fx = k & 15; fy = k >> 4; } n++; }
+            port_printf("[3ds] pica self test, %s mark at %d,%d: %d pixels, first at %d,%d%s\n", pass ? "write" : "triangle", mk[i][0], mk[i][1], n,
+                        fx < 0 ? -1 : mk[i][0] - 4 + fx, fy < 0 ? -1 : mk[i][1] - 4 + fy, n == 64 && fx == 4 && fy == 4 ? "" : "  <-- NOT WHERE IT BELONGS");
+        }
+        c3d_fill(0, 0, 1024, 512, 0);
+    }
 }
 static int c3d_start(void) {
     if (!C3D_Init(C3D_DEFAULT_CMDBUF_SIZE)) { port_printf("[3ds] pica: C3D_Init failed\n"); return -1; }
