@@ -51,7 +51,7 @@ public class LauncherActivity extends Activity {
     static final String[] LANG_NAME = {"English", "Español", "Português", "Svenska", "Dansk", "Français", "Deutsch", "Italiano", "Nederlands"};
     static final String[] ASPECTS = {"auto", "4:3", "16:9", "21:9"};
     static final String[] PROMPTS = {"auto", "playstation", "xbox", "nintendo", "generic", "thor", "thor-black", "thor-white", "custom"};   // button icons (--prompts); new ones appended: stored indices keep their meaning; custom last (pcSet)
-    static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5, REQ_TRANSLATION = 6;
+    static final int REQ_DISC = 2, REQ_EXPORT = 3, REQ_SAVE_IMPORT = 4, REQ_SAVE_EXPORT = 5, REQ_TRANSLATION = 6, REQ_WINGS_JP = 7, REQ_WINGS_P9 = 8;
     static final String MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc";   // EXE/MAIN0.EXE of SCES-01331
     static final String REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec";   // the July 1998 Rev 0 of SCES-01331 / SCES-01330: other overlays, not supported
     static final String TEXT_PATCH = "es_mejorada.tombipatch.json";
@@ -303,6 +303,148 @@ public class LauncherActivity extends Activity {
     }
     // 60 Hz (NTSC speed, the speed the game was made for) is the default; 50 Hz is the original PAL speed, slower
     boolean flag(String k, boolean def) { return prefs.getBoolean(k, "hz60".equals(k) || def); }
+
+    // ---- cut content: one switch per item (port/fixes.txt, --cut-content=LIST; the PC launcher's CUT_ITEMS) ----
+    static final String[] CUT_ITEMS = {"boatman", "letter", "board", "berries", "bubble", "titles"};
+    static final int[] CUT_LABELS = {R.string.cut_boatman, R.string.cut_letter, R.string.cut_board, R.string.cut_berries, R.string.cut_bubble, R.string.cut_titles};
+    /** the items switched on; settings saved with the old single switch ("cut") meant every item */
+    List<String> cutItems() {
+        if (prefs.contains("cut") && !prefs.contains("cut_boatman")) {
+            boolean on = flag("cut", false);
+            SharedPreferences.Editor e = prefs.edit();
+            for (String k : CUT_ITEMS) e.putBoolean("cut_" + k, on);
+            e.remove("cut").apply();
+        }
+        List<String> on = new ArrayList<>();
+        for (String k : CUT_ITEMS) if (flag("cut_" + k, false)) on.add(k);
+        return on;
+    }
+
+    // ---- the Charity Wings glide: the files it needs from the two demo discs, pulled out of the player's images ----
+    static final String[][] WINGS_FILES = {{"AREA08/D002.000", "AREA08/D003.GAM", "SYSTEM/A00000.GAM"}, {"TOMBA/A00002.GAM"}};
+    static final String[] WINGS_SERIAL = {"SLPM-80165", "PCPX-96093"};
+    volatile String[] wingsStatus = new String[2];   // while checking an image (shown as the row's value)
+    File wingsDir(int which) { return new File(new File(filesDir(), "wings"), which == 0 ? "jpdemo" : "pre9"); }
+    boolean wingsReady(int which) {
+        for (String n : WINGS_FILES[which]) if (!new File(wingsDir(which), n).isFile()) return false;
+        return true;
+    }
+    /** the row's value: busy, the checked image's name, or "not set" */
+    String wingsValue(int which) {
+        if (wingsStatus[which] != null) return wingsStatus[which];
+        if (wingsReady(which)) return getString(R.string.wings_ok, prefs.getString("wings_name" + which, "?"), WINGS_FILES[which].length);
+        return getString(R.string.wings_notset);
+    }
+    void pickWings(int which) {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("*/*");
+        try { startActivityForResult(i, which == 0 ? REQ_WINGS_JP : REQ_WINGS_P9); }
+        catch (ActivityNotFoundException e) { status(getString(R.string.disc_nosaf)); }
+    }
+    /** Reads the files WINGS_FILES[which] out of the picked image (.bin/.iso/.chd, inside a .zip/.7z, or a .zip of the
+     *  disc's loose files) into files/wings/<disc>/ after checking the disc's serial (SYSTEM.CNF); runs on its own thread. */
+    void wingsImport(Uri u, final int which) {
+        final String name = displayName(u);
+        wingsStatus[which] = getString(R.string.wings_busy);
+        if (view != null) view.postInvalidate();
+        File tmpDir = new File(getCacheDir(), "wings-import");
+        deleteTree(tmpDir);
+        tmpDir.mkdirs();
+        android.os.ParcelFileDescriptor pfd = null;
+        String msg;
+        try {
+            byte[] head = new byte[DiscArchive.headBytes()]; int hn = 0;
+            try (InputStream hin = getContentResolver().openInputStream(u)) {
+                int r0;
+                while (hin != null && hn < head.length && (r0 = hin.read(head, hn, head.length - hn)) > 0) hn += r0;
+            }
+            int kind = DiscArchive.kind(head, hn, name);
+            CrashLog.append(this, "wings import " + which + ": " + name + ", kind " + kind);
+            String path = null, serial = null;
+            java.util.Map<String, byte[]> got = null;
+            if (kind == DiscArchive.RAR || kind == DiscArchive.NOT_IMAGE) { msg = getString(R.string.disc_notimage, name); throw new Exception(msg); }
+            if (kind == DiscArchive.ZIP) {
+                DiscArchive.Result zr;
+                try (InputStream zin = getContentResolver().openInputStream(u)) {
+                    if (zin == null) throw new java.io.FileNotFoundException(name);
+                    zr = DiscArchive.unzip(zin, tmpDir, 64L << 20, null);
+                }
+                if (zr.image != null) path = zr.image.getAbsolutePath();
+                else if (zr.looseFiles) {   // the disc's files as they are: take the ones needed straight from the zip
+                    try (InputStream zin = getContentResolver().openInputStream(u)) {
+                        got = DiscArchive.members(zin, WINGS_FILES[which]);
+                    }
+                    serial = zr.serial;
+                } else { msg = getString(R.string.disc_zip_bad, name, "no disc image"); throw new Exception(msg); }
+            } else {
+                try {
+                    pfd = getContentResolver().openFileDescriptor(u, "r");
+                    if (pfd != null && pfd.getStatSize() > 0) path = "/proc/self/fd/" + pfd.getFd();
+                } catch (Throwable t) { CrashLog.append(this, "wings import: no file descriptor (" + t + "): copying"); }
+                if (path == null) {   // a stream only: copied to the cache
+                    long size = sizeOf(u), free = getCacheDir().getUsableSpace();
+                    if (free < (size > 0 ? size : 700L << 20) + (64L << 20)) { msg = getString(R.string.disc_space, (size > 0 ? size : 700L << 20) >> 20, free >> 20); throw new Exception(msg); }
+                    File t = new File(tmpDir, kind == DiscArchive.SEVENZ ? "archive.7z" : "image.bin");
+                    try (InputStream in = getContentResolver().openInputStream(u); FileOutputStream out = new FileOutputStream(t)) {
+                        if (in == null) throw new java.io.FileNotFoundException(name);
+                        byte[] buf = new byte[1 << 18]; int n;
+                        while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                    }
+                    path = t.getAbsolutePath();
+                }
+                if (kind == DiscArchive.SEVENZ) {
+                    if (!nativeOk) throw new Exception("libtombidisc.so missing");
+                    File o7 = new File(tmpDir, "7z");
+                    o7.mkdirs();
+                    String r7 = nativeUn7z(path, o7.getAbsolutePath());
+                    CrashLog.append(this, "wings import: 7z: " + r7.replace('\n', ' '));
+                    DiscArchive.Result zr = r7.startsWith("ok") ? DiscArchive.fromNative(r7, o7) : null;
+                    if (zr == null || zr.image == null) { msg = getString(R.string.wings_7z, name); throw new Exception(msg); }
+                    path = zr.image.getAbsolutePath();
+                }
+            }
+            if (got == null) {   // an image: its ISO9660 files by path (disccheck.c)
+                if (!nativeOk) throw new Exception("libtombidisc.so missing");
+                String[] want = new String[WINGS_FILES[which].length + 1];
+                System.arraycopy(WINGS_FILES[which], 0, want, 0, WINGS_FILES[which].length);
+                want[want.length - 1] = "SYSTEM.CNF";
+                byte[][] rd = nativeReadFiles(path, want);
+                if (rd == null) { msg = getString(R.string.disc_notimage, name); throw new Exception(msg); }
+                got = new java.util.HashMap<>();
+                for (int i = 0; i < WINGS_FILES[which].length; i++) if (rd[i] != null) got.put(WINGS_FILES[which][i], rd[i]);
+                byte[] cnf = rd[want.length - 1];
+                if (cnf != null) serial = DiscArchive.serialOf(DiscArchive.bootOf(new String(cnf, "ISO-8859-1")));
+            }
+            List<String> missing = new ArrayList<>();
+            for (String n : WINGS_FILES[which]) if (got.get(n) == null) missing.add(n);
+            CrashLog.append(this, "wings import " + which + ": serial " + serial + ", missing " + missing);
+            if (!WINGS_SERIAL[which].equals(serial)) { msg = getString(R.string.wings_bad, name, WINGS_SERIAL[which], serial == null ? "?" : serial); throw new Exception(msg); }
+            if (!missing.isEmpty()) { msg = getString(R.string.wings_missing, name, android.text.TextUtils.join(", ", missing)); throw new Exception(msg); }
+            File dir = wingsDir(which);
+            deleteTree(dir);
+            for (String n : WINGS_FILES[which]) {
+                File f = new File(dir, n);
+                f.getParentFile().mkdirs();
+                try (FileOutputStream o = new FileOutputStream(f)) { o.write(got.get(n)); }
+            }
+            prefs.edit().putString("wings_name" + which, name).apply();
+            msg = null;
+        } catch (Exception e) {
+            msg = e.getMessage() != null && !e.getMessage().isEmpty() ? e.getMessage() : String.valueOf(e);
+            CrashLog.append(this, "wings import " + which + " failed: " + e);
+        } finally {
+            if (pfd != null) try { pfd.close(); } catch (Exception ignored) { }
+            deleteTree(tmpDir);
+        }
+        wingsStatus[which] = null;
+        final String fm = msg;
+        runOnUiThread(new Runnable() { public void run() {
+            if (fm != null) saveDialog(getString(which == 0 ? R.string.wings_jp : R.string.wings_p9), fm);
+            else Toast.makeText(LauncherActivity.this, getString(R.string.wings_ok, name, WINGS_FILES[which].length), Toast.LENGTH_LONG).show();
+            if (view != null) view.invalidate();
+        } });
+    }
     /* second screen panel (runtime/panel.c, TombiActivity): default on when the device has a secondary display */
     boolean hasSecondDisplay() {
         try {
@@ -383,10 +525,17 @@ public class LauncherActivity extends Activity {
         if (LANG_N[langIdx()] == 5) a.add("--gfx-es");
         a.add("--aspect"); a.add(ASPECTS[aspectIdx()]);
         a.add("--renderer"); a.add(flag("gl", false) ? "gl" : "soft");
-        if (flag("cut", false)) {
-            a.add("--cut-content");
+        List<String> cut = cutItems();   // the pick list (--cut-content=LIST; every item = the plain switch)
+        if (!cut.isEmpty()) {
+            a.add(cut.size() == CUT_ITEMS.length ? "--cut-content" : "--cut-content=" + android.text.TextUtils.join(",", cut));
             // English cut lines: tombi2 picks en_cut_content.tpatch from --patch-dir by itself (as the PC launcher does)
-            if (LANG_N[langIdx()] == 0 && patchAsset("en_cut_content.tpatch") != null) { a.add("--patch-dir"); a.add(new File(filesDir(), "patches").getAbsolutePath()); }
+            if (LANG_N[langIdx()] == 0 && (cut.contains("boatman") || cut.contains("letter") || cut.contains("board"))
+                    && patchAsset("en_cut_content.tpatch") != null) { a.add("--patch-dir"); a.add(new File(filesDir(), "patches").getAbsolutePath()); }
+        }
+        // the lost Charity Wings glide (runtime/wings.c): its own switch, the files of the two demo discs (wingsImport)
+        if (flag("wings", false) && wingsReady(0) && wingsReady(1)) {
+            a.add("--wings-glide"); a.add(wingsDir(0).getAbsolutePath());
+            a.add("--wings-pre9"); a.add(wingsDir(1).getAbsolutePath());
         }
         if (flag("debugmenu", false)) a.add("--debug-menu");
         // the panel only with the option on AND a secondary display present now (off: no Presentation, no HUD move)
@@ -916,6 +1065,11 @@ public class LauncherActivity extends Activity {
         if (req == REQ_SAVE_IMPORT && res == RESULT_OK && data != null && data.getData() != null) { doSaveImport(data.getData()); return; }
         if (req == REQ_SAVE_EXPORT && res == RESULT_OK && data != null && data.getData() != null) { doSaveExport(data.getData()); return; }
         if (req == REQ_TRANSLATION && res == RESULT_OK && data != null && data.getData() != null) { doTranslationImport(data.getData()); return; }
+        if ((req == REQ_WINGS_JP || req == REQ_WINGS_P9) && res == RESULT_OK && data != null && data.getData() != null) {
+            final Uri wu = data.getData(); final int which = req == REQ_WINGS_JP ? 0 : 1;
+            new Thread(new Runnable() { public void run() { wingsImport(wu, which); } }, "tombi-wings").start();
+            return;
+        }
         if (req == REQ_DISC && (res != RESULT_OK || data == null) && phase == IDLE && importStatus == null) {   // picker closed
             adding = false;
             if (addFromLib && view != null) view.setScreen(LauncherView.MAIN);
@@ -974,7 +1128,7 @@ public class LauncherActivity extends Activity {
         final RectF[] pcSw = new RectF[PC_PALETTE.length];
         /* Options = a list of categories; OPTCAT = the page of category `cat` (CAT_GAME..CAT_DEBUG).
          *  discFromOptions = the Disc screen was opened from an Options page (B/Back return there) */
-        static final int CAT_GAME = 0, CAT_GFX = 1, CAT_DUAL = 2, CAT_PAD = 3, CAT_DATA = 4, CAT_DEBUG = 5;
+        static final int CAT_GAME = 0, CAT_GFX = 1, CAT_DUAL = 2, CAT_PAD = 3, CAT_DATA = 4, CAT_DEBUG = 5, CAT_CUT = 6;
         int screen = MAIN, focus = 0, cat = CAT_GAME;
         int[] lastFocus = new int[9];
         /* Scrolling list (only the pad-mapping list overflows now; the 1280x720 canvas is scaled to fit any screen,
@@ -1131,6 +1285,7 @@ public class LauncherActivity extends Activity {
                 category(CAT_GFX, R.string.cat_gfx, aspectName(aspectIdx()) + " · " + getString(flag("gl", false) ? R.string.renderer_gl_short : R.string.renderer_soft));
                 if (palGame()) category(CAT_DUAL, R.string.cat_dual, onoff(secondScreenOn()));   // (the panel is PAL-only)
                 category(CAT_PAD, R.string.cat_pad, getResources().getStringArray(R.array.prompt_names)[promptIdx()]);
+                if (palGame()) category(CAT_CUT, R.string.cat_cut, cutItems().size() + "/" + CUT_ITEMS.length + (flag("wings", false) ? " · " + getString(R.string.opt_wings_short) : ""));
                 category(CAT_DATA, R.string.cat_data, null);
                 category(CAT_DEBUG, R.string.cat_debug, null);
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
@@ -1159,9 +1314,19 @@ public class LauncherActivity extends Activity {
                     tpi.check = textPatchOn() ? 1 : 0;
                     tpi.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("textpatch", !textPatchOn()).apply(); } };
                     items.add(tpi);
-                    items.add(toggle(R.string.opt_cut, "cut"));
                     items.add(toggle(R.string.opt_skipintro, "skipintro"));
                     items.add(libStyleItem());
+                } else if (cat == CAT_CUT) {   // one switch per item (cutItems), then the lost wings glide and its two discs
+                    cutItems();
+                    for (int k = 0; k < CUT_ITEMS.length; k++) items.add(toggle(CUT_LABELS[k], "cut_" + CUT_ITEMS[k]));
+                    items.add(toggle(R.string.opt_wings, "wings"));
+                    for (int w = 0; w < 2; w++) {
+                        final int which = w;
+                        Item wi = new Item(getString(w == 0 ? R.string.wings_jp : R.string.wings_p9), new Runnable() { public void run() {
+                            if (wingsStatus[which] == null) pickWings(which); } });
+                        wi.value = wingsValue(w);
+                        items.add(wi);
+                    }
                 } else if (cat == CAT_GFX) {
                     Item as = new Item(getString(R.string.opt_aspect), null);
                     as.value = aspectName(aspectIdx());
@@ -1540,7 +1705,8 @@ public class LauncherActivity extends Activity {
             if (palGame()) {
                 chips.add(LANG_NAME[langIdx()]);
                 chips.add(aspectName(aspectIdx()));
-                chips.add(getString(flag("cut", false) ? R.string.chip_cut_on : R.string.chip_cut_off));
+                int nc = cutItems().size();
+                chips.add(nc == 0 ? getString(R.string.chip_cut_off) : getString(R.string.chip_cut_on) + " " + nc + "/" + CUT_ITEMS.length);
             } else { chips.add("English"); chips.add(aspectName(aspectIdx())); }
             chips.add(version());
             text(nunito, 15, Color.WHITE);
@@ -1988,7 +2154,7 @@ public class LauncherActivity extends Activity {
         }
 
         void drawOptions() {
-            int[] catNames = {R.string.cat_game, R.string.cat_gfx, R.string.cat_dual, R.string.cat_pad, R.string.cat_data, R.string.cat_debug};
+            int[] catNames = {R.string.cat_game, R.string.cat_gfx, R.string.cat_dual, R.string.cat_pad, R.string.cat_data, R.string.cat_debug, R.string.cat_cut};
             bigTitle(screen == OPTIONS ? getString(R.string.options) : getString(catNames[cat]), 50, 66);
             // one column, no scrolling: rows (at most 72 tall incl. a 12 gap) between 100 and 640; the help text
             // has its own band below (650..712), so it never overlaps a button

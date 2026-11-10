@@ -3090,7 +3090,11 @@ fields (JP demo, PrePre 9;
 and pulls just the files above out of the image into `.wings/jpdemo/` and `.wings/pre9/` next to the launcher
 (`extract_disc_files`, the same ISO walk as `extract_main0`; a .zip/.7z of the disc's loose files works too, its
 members are taken as they are by `extract_archive_files`), with a status line under each field (checked and ready, or
-why not; a path typed in is checked on Enter); the folders are passed only when the checkbox is on and both are there. The
+why not; a path typed in is checked on Enter); the folders are passed only when the checkbox is on and both are there.
+Android launcher: Options > *Cut content* (new category: one tick per cut-content item, the glide switch and the two
+image rows; picking an image reads the files it needs through disccheck.c `nativeReadFiles`, or a .zip of loose files
+through `DiscArchive.members`, into files/wings/<disc>/ after the serial check; the APK's arm64 game is the same
+runtime/wings.c through wasm2c). The
 files are the user's own discs, nothing is shipped; without them the step is the retail one. The early-title folder field was removed from the launcher (the
 `--early-title` option stays in the port). Checked
 headless in AREA08 section 0 and AREA02 section 0 (debug select 8:0 / 2:0, the dialogue dismissed, the item use started

@@ -159,6 +159,30 @@ final class DiscArchive {
     }
 
     /** the loose files of a disc: the game executable SYSTEM.CNF names and its SHA-1 (MAIN0.EXE on the PAL discs) */
+    /** A zip of the disc's loose files: the members whose path ends with one of `wanted` (DIR/NAME, case-insensitive),
+     *  read whole (they are small) -> {wanted name: bytes}; streamed once, nothing written. */
+    static Map<String, byte[]> members(InputStream raw, String[] wanted) throws IOException {
+        Map<String, byte[]> out = new HashMap<>();
+        if (raw == null) return out;
+        try (ZipInputStream z = new ZipInputStream(raw)) {
+            ZipEntry e;
+            while ((e = z.getNextEntry()) != null) {
+                if (e.isDirectory()) continue;
+                String path = e.getName().replace('\\', '/').toUpperCase(Locale.ROOT);
+                for (String w : wanted) {
+                    String wu = w.toUpperCase(Locale.ROOT);
+                    if ((path.equals(wu) || path.endsWith("/" + wu)) && !out.containsKey(w)) {
+                        java.io.ByteArrayOutputStream b = new java.io.ByteArrayOutputStream();
+                        byte[] buf = new byte[1 << 16]; int n;
+                        while ((n = z.read(buf)) > 0) { b.write(buf, 0, n); if (b.size() > (64 << 20)) throw new IOException("member too large: " + w); }
+                        out.put(w, b.toByteArray());
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
     static void loose(Result r, String cnf, Map<String, String> exeSha) {
         if (cnf == null) return;
         r.looseFiles = true;

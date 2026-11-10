@@ -33,7 +33,7 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 0. **Wings glide in the port (2026-11-10)**: `--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR` (its own switch, no `--cut-content` needed; PC launcher: Cut content page, own card with checkbox and the two demo disc images, the needed files are extracted into .wings/; the early-title field was removed from the launcher). `--cut-content` is now a pick list: `--cut-content=boatman,letter,board,berries,bubble,titles` (bits 1..32 in `port_cut_content`), the plain switch = all; the launcher shows one checkbox per item
    plays the JP demo's cut top-down Charity Wings animation (frames 77-79 + the feather item sprite spinning) in the
    wings exit and the landing of the three overhead engines (I0NFO2 Baccus Village / the pier, I0NFO Dwarf Village, I0NFO3 tunnels) (`port2/runtime/wings.c`, hooks in port/fixes.txt, docs/PORT.md). Checked headless in
-   AREA08 s0 only; not on the device, Android launcher not wired. The full link (`tools/build_full.py`) had to be
+   AREA08 s0 and AREA02 s0; Android launcher wired (Options > Cut content, 2026-11-10, built by CI only, not run on the device yet). The full link (`tools/build_full.py`) had to be
    rebuilt first: a stale build/full made the port crash at frame 0 (initGlobalState).
 
 0. **PrePre Vol.9 Tombi animations (2026-11-10)**: the demo's player frame table (TOMBA/AREA01/A007.000 = AREA02/D105.000,
