@@ -3091,7 +3091,10 @@ and pulls just the files above out of the image into `.wings/jpdemo/` and `.wing
 (`extract_disc_files`, the same ISO walk as `extract_main0`; a .zip/.7z of the disc's loose files works too, its
 members are taken as they are by `extract_archive_files`), with a status line under each field (checked and ready, or
 why not; a path typed in is checked on Enter); the folders are passed only when the checkbox is on and both are there.
-Android launcher: Options > *Cut content* (new category: one tick per cut-content item, the glide switch and the two
+Android launcher: Options reorganised into six categories by topic (2026-11-10: *Game* with language, translation,
+intro and the cheats; *Cut content*; *Picture and screen* = graphics + second screen; *Controls*; *Disc and saves*;
+*Launcher and debug* with the launcher language, library style, debug menu and log; `LauncherView.optCats` /
+`optGroups` / `group`, one method per row group). *Cut content* (one tick per cut-content item, the glide switch and the two
 image rows; picking an image reads the files it needs through disccheck.c `nativeReadFiles`, or a .zip of loose files
 through `DiscArchive.members`, into files/wings/<disc>/ after the serial check; the APK's arm64 game is the same
 runtime/wings.c through wasm2c). The

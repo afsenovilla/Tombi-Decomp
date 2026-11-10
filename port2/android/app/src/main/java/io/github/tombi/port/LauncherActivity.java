@@ -1126,9 +1126,9 @@ public class LauncherActivity extends Activity {
          *  (pcEdit = 2 * position + 0 disc / 1 letter): R G B, H S V, a palette of swatches */
         int pcEdit;
         final RectF[] pcSw = new RectF[PC_PALETTE.length];
-        /* Options = a list of categories; OPTCAT = the page of category `cat` (CAT_GAME..CAT_DEBUG).
+        /* Options = a list of categories (optCats); OPTCAT = the page of category `cat`.
          *  discFromOptions = the Disc screen was opened from an Options page (B/Back return there) */
-        static final int CAT_GAME = 0, CAT_GFX = 1, CAT_DUAL = 2, CAT_PAD = 3, CAT_DATA = 4, CAT_DEBUG = 5, CAT_CUT = 6;
+        static final int CAT_GAME = 0, CAT_PAD = 3, CAT_CUT = 6;   // (1, 2, 4, 5: the old Graphics / Second screen / Data / Debug ids)
         int screen = MAIN, focus = 0, cat = CAT_GAME;
         int[] lastFocus = new int[9];
         /* Scrolling list (only the pad-mapping list overflows now; the 1280x720 canvas is scaled to fit any screen,
@@ -1280,7 +1280,7 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.options), new Runnable() { public void run() { setScreen(OPTIONS); } }));
                 items.add(new Item(getString(R.string.quit), new Runnable() { public void run() { finish(); } }));
                 if (!mainFocusSet) { mainFocusSet = true; focus = games.size() + 1; }   // first time: on Play
-            } else if (screen == OPTIONS) {   // category list, one column (drawOptions); the layout: optLayout()
+            } else if (screen == OPTIONS) {   // category list, one column (drawOptions): optCats
                 for (int c : optCats()) category(c, catName(c), catSummary(c));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
             } else if (screen == OPTCAT) {   // one category page, same row style (drawOptions): its groups (optGroups)
@@ -1396,58 +1396,38 @@ public class LauncherActivity extends Activity {
         }
 
         /** a row of the Options list: opens page c (focus on its first row) */
-        // ---- the options, as groups of rows (one method per group) laid out in categories by optLayout() ----
-        static final int CAT_LAUNCHER = 7, CAT_IMAGE = 8, CAT_LAUNCHDBG = 9, CAT_DISC = 10;
-        /* 0: by topic (8 categories: Game, Cut content, Graphics, Second screen, Controls, Disc and saves, Launcher,
-           Cheats and debug); 1: compact (6: Game with the cheats, Cut content, Picture and screen, Controls, Saves and
-           data, Launcher); 2: six by topic (Game with the cheats, Cut content, Picture and screen, Controls, Disc and
-           saves, Launcher and debug) */
-        int optLayout() { return prefs.getInt("optlayout", 0); }
+        // ---- the options, as groups of rows (one method per group) in six categories by topic ----
+        static final int CAT_LAUNCHDBG = 7, CAT_IMAGE = 8, CAT_DISC = 9;
+        /* Game (language, translation, intro, cheats), Cut content, Picture and screen (graphics + second screen),
+           Controls, Disc and saves, Launcher and debug (launcher language, library style, debug menu, log) */
         int[] optCats() {
-            boolean pal = palGame();
-            switch (optLayout()) {
-                case 1: return pal ? new int[]{CAT_GAME, CAT_CUT, CAT_IMAGE, CAT_PAD, CAT_DATA, CAT_LAUNCHER}
-                                   : new int[]{CAT_GAME, CAT_IMAGE, CAT_PAD, CAT_DATA, CAT_LAUNCHER};
-                case 2: return pal ? new int[]{CAT_GAME, CAT_CUT, CAT_IMAGE, CAT_PAD, CAT_DISC, CAT_LAUNCHDBG}
-                                   : new int[]{CAT_GAME, CAT_IMAGE, CAT_PAD, CAT_DISC, CAT_LAUNCHDBG};
-                default: return pal ? new int[]{CAT_GAME, CAT_CUT, CAT_GFX, CAT_DUAL, CAT_PAD, CAT_DISC, CAT_LAUNCHER, CAT_DEBUG}
-                                    : new int[]{CAT_GAME, CAT_GFX, CAT_PAD, CAT_DISC, CAT_LAUNCHER, CAT_DEBUG};
-            }
+            return palGame() ? new int[]{CAT_GAME, CAT_CUT, CAT_IMAGE, CAT_PAD, CAT_DISC, CAT_LAUNCHDBG}
+                             : new int[]{CAT_GAME, CAT_IMAGE, CAT_PAD, CAT_DISC, CAT_LAUNCHDBG};
         }
         String[] optGroups(int c) {
-            int l = optLayout();
             switch (c) {
-                case CAT_GAME: return l == 1 ? new String[]{"lang", "textpatch", "skipintro", "cheats", "debugmenu"}
-                                    : l == 2 ? new String[]{"lang", "textpatch", "translation", "skipintro", "cheats"}
-                                             : new String[]{"lang", "textpatch", "translation", "skipintro"};
+                case CAT_GAME: return new String[]{"lang", "textpatch", "translation", "skipintro", "cheats"};
                 case CAT_CUT: return new String[]{"cut"};
-                case CAT_GFX: return new String[]{"gfx"};
-                case CAT_DUAL: return new String[]{"dual"};
                 case CAT_IMAGE: return new String[]{"gfx", "dual"};
                 case CAT_PAD: return new String[]{"pad"};
                 case CAT_DISC: return new String[]{"saves", "disc"};
-                case CAT_DATA: return new String[]{"disc", "saves", "translation"};
-                case CAT_LAUNCHER: return l == 1 ? new String[]{"uilang", "libstyle", "viewlog"} : new String[]{"uilang", "libstyle"};
-                case CAT_LAUNCHDBG: return new String[]{"uilang", "libstyle", "debugmenu", "viewlog"};
-                default: return new String[]{"cheats", "debugmenu", "viewlog"};   // CAT_DEBUG
+                default: return new String[]{"uilang", "libstyle", "debugmenu", "viewlog"};   // CAT_LAUNCHDBG
             }
         }
         int catName(int c) {
             switch (c) {
-                case CAT_GAME: return R.string.cat_game; case CAT_CUT: return R.string.cat_cut; case CAT_GFX: return R.string.cat_gfx;
-                case CAT_DUAL: return R.string.cat_dual; case CAT_IMAGE: return R.string.cat_image; case CAT_PAD: return R.string.cat_pad;
-                case CAT_DISC: return R.string.cat_disc; case CAT_DATA: return R.string.cat_data; case CAT_LAUNCHER: return R.string.cat_launcher;
-                case CAT_LAUNCHDBG: return R.string.cat_launchdbg; default: return R.string.cat_debug;
+                case CAT_GAME: return R.string.cat_game; case CAT_CUT: return R.string.cat_cut; case CAT_IMAGE: return R.string.cat_image;
+                case CAT_PAD: return R.string.cat_pad; case CAT_DISC: return R.string.cat_disc; default: return R.string.cat_launchdbg;
             }
         }
         String catSummary(int c) {
             switch (c) {
                 case CAT_GAME: return palGame() ? LANG_NAME[langIdx()] : "English";
                 case CAT_CUT: return cutItems().size() + "/" + CUT_ITEMS.length + (flag("wings", false) ? " · " + getString(R.string.opt_wings_short) : "");
-                case CAT_GFX: case CAT_IMAGE: return aspectName(aspectIdx()) + " · " + getString(flag("gl", false) ? R.string.renderer_gl_short : R.string.renderer_soft);
-                case CAT_DUAL: return onoff(secondScreenOn());
+                case CAT_IMAGE: return aspectName(aspectIdx()) + " · " + getString(flag("gl", false) ? R.string.renderer_gl_short : R.string.renderer_soft)
+                    + (palGame() && secondScreenOn() ? " · " + getString(R.string.cat_dual) : "");
                 case CAT_PAD: return getResources().getStringArray(R.array.prompt_names)[promptIdx()];
-                case CAT_LAUNCHER: case CAT_LAUNCHDBG: return uiLangName(uiLangIdx());
+                case CAT_LAUNCHDBG: return uiLangName(uiLangIdx());
                 default: return null;
             }
         }
