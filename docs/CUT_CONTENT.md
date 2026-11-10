@@ -796,5 +796,11 @@ The 84 frames these scripts use are exactly the new frames no table reaches; the
   its script tables in the exe only cover NPC frames (<= 87), Tombi is animated by code. Pre8 has back-flips, a
   head-first fall and a spinning kick (frames 96-111, 115-125, 208-223) that neither Pre9 nor retail keep.
 
+- **JP demo SLPM-80165** (`GAME_FILES_URL_JP_DEMO`, checked 2026-11-10): `AREA00/A005.000` = Pre9's 379-frame table
+  byte for byte, followed by a second table of 83 frames that is already identical to retail's second table of
+  `AREA00/A004.000`; the player table (`AREA00/X00.BIN` +0x3A8) has the same 56 ids with the same scripts, and the same
+  20 orphan scripts sit in `SLPM_801.65` (0x800109A4..0x8001153C), still unreferenced. So nothing changed for Tombi
+  between PrePre 9 and that demo; the new retail frames and ids came later.
+
 Conclusion: the lift / pull mechanic was programmed with its timing and then removed before PrePre 9; the object it
 used is in none of the demo's data. Only the frames and these scripts remain.
