@@ -547,8 +547,10 @@ def bin_of_cue(path):
     return path
 
 
-def extract_main0(image, out):
-    """EXE/MAIN0.EXE from the ISO9660 directory of a raw (2352) or cooked (2048) image (or a .chd) -> out; returns its sha1."""
+def iso_dir(image):
+    """The ISO9660 directory of a raw (2352) or cooked (2048) image (or a .chd): (f, sec, found, serial) with
+    found = {"DIR/NAME": (lba, size)} (upper case, no ';1') and serial the boot file of SYSTEM.CNF (SCES-01331...).
+    Raises ValueError(s.notiso) when the image is no ISO; the caller closes f."""
     f = X.open_image(image)
     f.seek(16 * 2352 + 25)
     raw = f.read(5) == b"CD001"
@@ -587,21 +589,68 @@ def extract_main0(image, out):
                 found[(pre + nm.split(";")[0]).upper()] = (elba, esz)
     root = pvd[156:190]
     walk(struct.unpack("<I", root[2:6])[0], struct.unpack("<I", root[10:14])[0], "")
-    if "EXE/MAIN0.EXE" not in found:
-        f.close()
-        raise ValueError(tr("s.noexe"))
     serial = None                   # the boot file named by SYSTEM.CNF: BOOT = cdrom:\\SCES_013.31;1 -> SCES-01331
     if "SYSTEM.CNF" in found:
         lba, size = found["SYSTEM.CNF"]
         m = re.search(r"([A-Z]{4})[_-](\d{3})\.?(\d{2})", sec(lba)[:size].decode("latin-1").upper())
         if m:
             serial = "%s-%s%s" % m.groups()
+    return f, sec, found, serial
+
+
+def extract_main0(image, out):
+    """EXE/MAIN0.EXE from the ISO9660 directory of a raw (2352) or cooked (2048) image (or a .chd) -> out; returns its sha1."""
+    f, sec, found, serial = iso_dir(image)
+    if "EXE/MAIN0.EXE" not in found:
+        f.close()
+        raise ValueError(tr("s.noexe"))
     lba, size = found["EXE/MAIN0.EXE"]
     data = sec(lba, (size + 2047) // 2048)[:size]
     f.close()
     with open(out, "wb") as o:
         o.write(data)
     return hashlib.sha1(data).hexdigest(), serial
+
+
+# ---- the demo discs of the Charity Wings glide (--cut-content --wings-glide / --wings-pre9, port2/runtime/wings.c):
+# the launcher pulls just these files out of the user's images into .wings/<key>/ and passes the folders to the port
+WINGS_DISCS = {"jpdemo": ("SLPM-80165", ["AREA08/D002.000", "AREA08/D003.GAM", "SYSTEM/A00000.GAM"]),
+               "pre9": ("PCPX-96093", ["TOMBA/A00002.GAM"])}
+
+
+def extract_disc_files(image, names, out_dir):
+    """Copies the files names (DIR/NAME) of the image into out_dir; returns (serial, missing names)."""
+    f, sec, found, serial = iso_dir(image)
+    missing = []
+    try:
+        for n in names:
+            if n.upper() not in found:
+                missing.append(n)
+                continue
+            lba, size = found[n.upper()]
+            data = sec(lba, (size + 2047) // 2048)[:size]
+            dst = os.path.join(out_dir, *n.split("/"))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            with open(dst, "wb") as o:
+                o.write(data)
+    finally:
+        f.close()
+    return serial, missing
+
+
+def wings_dir(key):
+    return os.path.join(app_dir(), ".wings", key)
+
+
+def wings_dirs(s):
+    """(jpdemo folder, pre9 folder) for --wings-glide / --wings-pre9 when both images are set and their files were
+    extracted, else None."""
+    if not (s.get("wings_glide") and s.get("wings_pre9")):
+        return None
+    for k, (_serial, names) in WINGS_DISCS.items():
+        if not all(os.path.isfile(os.path.join(wings_dir(k), *n.split("/"))) for n in names):
+            return None
+    return wings_dir("jpdemo"), wings_dir("pre9")
 
 
 # (the releases the launcher knows, their names and options: tools/game_library.py VERSIONS / OTHER_DISCS)
@@ -675,8 +724,9 @@ i18n.add({
                            "el paisaje del título es el de esa versión (roca-torre y río) en vez del final. Eso es arte real del juego "
                            "de entonces; el logo, el menú y los textos siguen siendo los finales (el logo «オレっ！トンバ» de esa versión "
                            "no se usa: no sabemos cómo se montaba). No se incluye nada de ese disco.",
-           "l.wingsglide": "Planeo con las Alas de la caridad en las zonas cenitales (opcional, hacen falta los dos discos): carpeta de la demo japonesa SLPM-80165 extraída (con AREA08/D002.000):",
-           "l.wingspre9": "... y carpeta del disco PrePre Vol. 9 (PCPX-96093) extraído (con TOMBA/A00002.GAM):"},
+           "l.wingsglide": "Planeo con las Alas de la caridad en las zonas cenitales (opcional, hacen falta los dos discos): imagen de la demo japonesa SLPM-80165 (.bin / .cue / .iso / .chd / .zip / .7z; solo se extraen 3 archivos):",
+           "l.wingspre9": "... e imagen del disco PrePre Vol. 9 (PCPX-96093; se extrae 1 archivo):",
+           "s.wingsok": "{0}: es el disco {1}, {2} archivo(s) extraídos.", "s.wingsbad": "{0} no es el disco {1} (serie {2}; archivos que faltan: {3}).", "s.wingsfail": "No se pudo leer {0}: {1}"},
     "en": {"l.cutcontent": "Enable cut content",
            "i.cutcontent": "Text that was removed from the game and found in the Japanese release (Ore! Tomba). "
                            "Four pieces are enabled:\n\n"
@@ -704,8 +754,9 @@ i18n.add({
                            "title landscape is that build's (rock spire and river) instead of the final one. That is real game art of the "
                            "time; the logo, menu and text stay the final ones (that build's 'オレっ！トンバ' logo is not used: how it was "
                            "laid out is unknown). Nothing from that disc is included.",
-           "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): folder of the extracted Japanese demo disc SLPM-80165 (holding AREA08/D002.000):",
-           "l.wingspre9": "... and folder of the extracted PrePre Vol. 9 disc (PCPX-96093) (holding TOMBA/A00002.GAM):"},
+           "l.wingsglide": "Charity Wings glide in the top-down areas (optional, both discs are needed): image of the Japanese demo SLPM-80165 (.bin / .cue / .iso / .chd / .zip / .7z; only 3 files are extracted):",
+           "l.wingspre9": "... and image of the PrePre Vol. 9 disc (PCPX-96093; 1 file is extracted):",
+           "s.wingsok": "{0}: disc {1}, {2} file(s) extracted.", "s.wingsbad": "{0} is not disc {1} (serial {2}; missing files: {3}).", "s.wingsfail": "Could not read {0}: {1}"},
 })
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
@@ -1245,8 +1296,9 @@ def build_command(s, civ_play=None):
         cmd += ["--subscreen-labels", s["subscreen_labels"].strip()]   # the Select tabs / leaf buttons, in the disc's lettering
     if has("cut") and s.get("cut_content"):
         cmd += ["--cut-content"]
-        if s.get("wings_glide") and s.get("wings_pre9"):          # both demo discs are needed
-            cmd += ["--wings-glide", s["wings_glide"], "--wings-pre9", s["wings_pre9"]]
+        wd = wings_dirs(s)                                            # both demo discs are needed
+        if wd:
+            cmd += ["--wings-glide", wd[0], "--wings-pre9", wd[1]]
     gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
     if not lang:
         note = "no (%s: English only)" % (GL.version_of(current_sha1()) or {}).get("region", "?")
@@ -3392,9 +3444,9 @@ class App(QMainWindow):
         c.addWidget(d)
         c.addSpacing(8)
         c.addWidget(wrap_label(tr("l.wingsglide"), "muted"))
-        c.addWidget(self.browse_row("wings_glide", self.pick_wings_glide))           # --wings-glide (port2/runtime/wings.c)
+        c.addWidget(self.browse_row("wings_glide", lambda: self.pick_wings("wings_glide", "jpdemo")))   # --wings-glide (port2/runtime/wings.c)
         c.addWidget(wrap_label(tr("l.wingspre9"), "muted"))
-        c.addWidget(self.browse_row("wings_pre9", self.pick_wings_pre9))             # --wings-pre9
+        c.addWidget(self.browse_row("wings_pre9", lambda: self.pick_wings("wings_pre9", "pre9")))      # --wings-pre9
         c = self.card(f, tr("cut.c.towns"))                  # docs/CIVILIZATION.md "Playable towns"
         d = wrap_label(tr("cut.towns.d"), "muted")
         row, rl = hbox(d, self.info_button(tr("cut.c.towns"), tr("cut.towns.i")), spacing=4)
@@ -3551,15 +3603,31 @@ class App(QMainWindow):
             return False
 
 
-    def pick_wings_glide(self):
-        p = self._pick_dir()
-        if p:
-            self.set_edit("wings_glide", p)
-
-    def pick_wings_pre9(self):
-        p = self._pick_dir()
-        if p:
-            self.set_edit("wings_pre9", p)
+    def pick_wings(self, key, disc):
+        """A demo disc image of the wings glide: the files WINGS_DISCS[disc] are pulled out of it into .wings/<disc>/
+        (an archive is unpacked first, like the game's), after checking the disc's serial."""
+        p = self._open_file(tr("l." + key.replace("_", "")), "Disc image (*.bin *.cue *.iso *.img *.chd *.zip *.7z);;All (*)")
+        if not p:
+            return
+        serial, names = WINGS_DISCS[disc]
+        try:
+            try:
+                image = self.disc_image(p)
+                got, missing = extract_disc_files(image, names, wings_dir(disc))
+            finally:
+                self.drop_unpacked(p)
+        except DA.ArchiveError as e:
+            self.archive_error(p, e)
+            return
+        except (OSError, ValueError) as e:
+            self.say(tr("s.wingsfail", os.path.basename(p), e), "bad")
+            return
+        if got != serial or missing:
+            shutil.rmtree(wings_dir(disc), ignore_errors=True)
+            self.say(tr("s.wingsbad", os.path.basename(p), serial, got or "?", ", ".join(missing) or "-"), "bad")
+            return
+        self.set_edit(key, p)
+        self.say(tr("s.wingsok", os.path.basename(p), serial, len(names)), "ok")
 
     def texture_dump_dir(self):
         return os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")
