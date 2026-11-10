@@ -246,7 +246,7 @@ jobs:
           cp "$RUNNER_TEMP/disccache/game.bin" "$SD/3ds/tombi/tombi.bin"
           # frame and VRAM dumps (runtime/main.c --dump-frames / --dump-vram) of what the 3DS renderer holds
           # gameplay measured too: the debug area select into AREA 1, then walking right (as in CLAUDE.md's cheatsheet)
-          echo "--log-fps --poke 900:1F8001B4:1 --poke 1250:8009C960:1:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:3000" > "$SD/3ds/tombi/args.txt"
+          echo "--log-fps --poke 900:1F8001B4:1 --poke 1250:8009C960:0:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:3000" > "$SD/3ds/tombi/args.txt"
           mkdir -p "$SD/3ds/tombi/dump"
           ls -l app "$SD/3ds/tombi"
           export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb

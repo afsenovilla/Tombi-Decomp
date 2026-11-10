@@ -34,13 +34,16 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
 /* ================================================================== the reference device (CPU) */
 static u32 (*rt)[1024];                  /* the render target, 512 rows (allocated by pica_start: the image stays small) */
-static u32 (*slot_px)[256 * 256];        /* SLOTS textures */
-static void ref_tex_upload(int slot, const u32 *rgba) { memcpy(slot_px[slot], rgba, 256 * 256 * 4); }
+static u32 (*atlas[2])[PICA_ATLAS];      /* the texture atlases (both PICA_ATLAS squared here) */
+static void ref_tex_upload(int slot, const u32 *rgba, int busy) {
+    int z = pica_slot_size(slot), ax, ay; pica_slot_pos(slot, &ax, &ay); (void)busy;
+    for (int j = 0; j < z; j++) memcpy(&atlas[pica_slot_atlas(slot)][ay + j][ax], rgba + j * z, (size_t)z * 4);
+}
 static inline u8 sat(int v) { return v < 0 ? 0 : v > 255 ? 255 : (u8)v; }
 static inline void ref_frag(const PState *s, int x, int y, int r, int g, int b, int u, int v) {
     u32 c = 0xFF000000u | (u32)r | ((u32)g << 8) | ((u32)b << 16);
     if (s->tex >= 0) {
-        u32 t = slot_px[s->tex][(v & 255) * 256 + (u & 255)];
+        u32 t = atlas[s->tex][v & (PICA_ATLAS - 1)][u & (PICA_ATLAS - 1)];
         int a = t >> 24;
         if (s->atest == AT_NOTZERO && !a) return;
         if (s->atest == AT_OPAQUE && a != A_OPAQUE) return;
@@ -113,8 +116,8 @@ static void ref_write(int x, int y, int w, int h, const u32 *s, int stride) {
 }
 static int ref_start(void) {
     if (!rt) rt = calloc(512, sizeof *rt);
-    if (!slot_px) slot_px = malloc(SLOTS * sizeof *slot_px);
-    return rt && slot_px ? 0 : -1;
+    for (int i = 0; i < 2; i++) if (!atlas[i]) atlas[i] = calloc(PICA_ATLAS, sizeof *atlas[i]);
+    return rt && atlas[0] && atlas[1] ? 0 : -1;
 }
 static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0 };
 #ifdef __3DS__
@@ -136,17 +139,26 @@ static inline u16 c32to15(u32 c) {
 }
 
 /* ---- VRAM pages: 16 x 2 of 64 x 256 words */
-static unsigned page_ver[2][16], ver_clock;
+/* versions of vram[] by 16x16 block (a CLUT animated every frame then only costs the textures that use it, not every
+   texture of its 64x256 page) */
+static unsigned blk_ver[32][64], ver_clock;
 #define CSH 0                         /* cells are 16 x (1 << CSH) pixels (tri_drawn assumes 0) */
 static u8 cell_drawn[512 >> CSH][64];   /* cells the GPU drew into since their last read-back: vram[] is stale there */
 static u8 page_drawn[2][16];            /* pages with a cell_drawn set (may stay set after its cells are clean) */
-static void pages_of(int x, int y, int w, int h, int *px0, int *py0, int *px1, int *py1) {
-    *px0 = (x & 1023) >> 6; *px1 = ((x & 1023) + w - 1) >> 6; *py0 = (y & 511) >> 8; *py1 = ((y & 511) + h - 1) >> 8;
-    if (*px1 > 15) *px1 = 15; if (*py1 > 1) *py1 = 1;
-}
 static void pages_bump(int x, int y, int w, int h) {
-    int a, b, c, d; pages_of(x, y, w, h, &a, &b, &c, &d);
-    for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) page_ver[j][i] = ++ver_clock;
+    x &= 1023; y &= 511;
+    int a = x >> 4, b = y >> 4, c = (x + w - 1) >> 4, d = (y + h - 1) >> 4;
+    if (c > 63) c = 63; if (d > 31) d = 31;
+    ++ver_clock;
+    for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) blk_ver[j][i] = ver_clock;
+}
+static unsigned blocks_ver(int x, int y, int w, int h) {   /* the newest version in a rectangle */
+    x &= 1023; y &= 511;
+    int a = x >> 4, b = y >> 4, c = (x + w - 1) >> 4, d = (y + h - 1) >> 4;
+    if (c > 63) c = 63; if (d > 31) d = 31;
+    unsigned v = 0;
+    for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) if (blk_ver[j][i] > v) v = blk_ver[j][i];
+    return v;
 }
 static void pages_drawn(int x1, int y1, int x2, int y2) {   /* (inclusive pixel bounds) */
     if (x1 < 0) x1 = 0; if (y1 < 0) y1 = 0; if (x2 > 1023) x2 = 1023; if (y2 > 511) y2 = 511;
@@ -155,8 +167,43 @@ static void pages_drawn(int x1, int y1, int x2, int y2) {   /* (inclusive pixel 
     for (int j = y1 >> 8; j <= y2 >> 8; j++) for (int i = x1 >> 6; i <= x2 >> 6; i++) page_drawn[j][i] = 1;
 }
 
+/* Primitives drawn with a screen-sized drawing area (nearly all of them) only note that area: finding the cells each
+   one covers costs more than everything else the backend does per primitive, and those cells only matter when a
+   texture, a CLUT or a copy later reads from the area, which marks all of it then (more than was drawn, so at worst
+   a read-back of pixels vram[] already had). */
+static struct { int x1, y1, x2, y2; } bulk[4];
+static int nbulk;
+/* an area something read from (a CLUT or a texture inside a frame buffer: a debug-select scene does it every frame)
+   has its primitives' cells found one by one for a while, or each read would mark, and read back, the whole area */
+static struct { int x1, y1, x2, y2, until; } hot[4];
+static int nhot;
+static int bulk_area(void) {   /* 1: the drawing area is noted, the primitive needs no cells */
+    int w = gs->x2 - gs->x1 + 1, h = gs->y2 - gs->y1 + 1;
+    if (w < 256 || w > 640 || h < 200 || h > 256) return 0;
+    for (int i = 0; i < nhot; i++)
+        if (hot[i].x1 == gs->x1 && hot[i].y1 == gs->y1 && hot[i].x2 == gs->x2 && hot[i].y2 == gs->y2) {
+            if (port_frame < hot[i].until) return 0;
+            hot[i] = hot[--nhot]; break;
+        }
+    for (int i = 0; i < nbulk; i++) if (bulk[i].x1 == gs->x1 && bulk[i].y1 == gs->y1 && bulk[i].x2 == gs->x2 && bulk[i].y2 == gs->y2) return 1;
+    if (nbulk == 4) { pages_drawn(bulk[0].x1, bulk[0].y1, bulk[0].x2, bulk[0].y2); memmove(&bulk[0], &bulk[1], 3 * sizeof bulk[0]); nbulk = 3; }
+    bulk[nbulk].x1 = gs->x1; bulk[nbulk].y1 = gs->y1; bulk[nbulk].x2 = gs->x2; bulk[nbulk].y2 = gs->y2; nbulk++;
+    return 1;
+}
+static void bulk_resolve(int x, int y, int w, int h) {   /* the noted areas this rectangle touches become cells */
+    for (int i = 0; i < nbulk; i++) {
+        if (x > bulk[i].x2 || x + w - 1 < bulk[i].x1 || y > bulk[i].y2 || y + h - 1 < bulk[i].y1) continue;
+        pages_drawn(bulk[i].x1, bulk[i].y1, bulk[i].x2, bulk[i].y2);
+        if (nhot == 4) nhot = 3;
+        hot[nhot].x1 = bulk[i].x1; hot[nhot].y1 = bulk[i].y1; hot[nhot].x2 = bulk[i].x2; hot[nhot].y2 = bulk[i].y2;
+        hot[nhot++].until = port_frame + 120;
+        memmove(&bulk[i], &bulk[i + 1], (size_t)(nbulk - i - 1) * sizeof bulk[0]); nbulk--; i--;
+    }
+}
+
 /* ---- the batch: triangles with one state */
 #define MAX_PV 6144
+static unsigned long long use_clock, batch_clock, frame_clock;   /* slot uses: now, at the last flush, at the last present */
 static PV bv[MAX_PV];
 static int nbv;
 static PState bst;
@@ -165,7 +212,7 @@ static void flush(void) {
     if (!nbv) return;
     dev->tris(&bst, bv, nbv);
     st_batches++; st_tris += nbv / 3;
-    nbv = 0;
+    nbv = 0; batch_clock = use_clock;
 }
 static PV *batch(const PState *s, int n) {
     if (nbv && (nbv + n > MAX_PV || memcmp(s, &bst, sizeof *s))) flush();
@@ -198,6 +245,7 @@ static void cells_clean(int x, int y, int w, int h) {
 static void sync_pages(int x, int y, int w, int h) {
     clip_rect(&x, &y, &w, &h);
     if (w <= 0 || h <= 0) return;
+    if (nbulk) bulk_resolve(x, y, w, h);
     int any = 0;   /* (most textures: no page of theirs drawn into, nothing to scan) */
     for (int pj = y >> 8; pj <= (y + h - 1) >> 8; pj++) for (int pi = x >> 6; pi <= (x + w - 1) >> 6; pi++) any |= page_drawn[pj][pi];
     if (!any) return;
@@ -240,87 +288,148 @@ static void pica_vram_read(int x, int y, int w, int h) {
 }
 
 /* ---- the texture cache */
-typedef struct { int tx, ty, depth, cx, cy, tw; unsigned ver; unsigned long long used; int live; } Slot;
+/* a slot: the block (bx, by, size z, texels of the page) of a page + CLUT + texture window.
+   checked: ver_clock + 1 when it was last found valid */
+typedef struct { int tx, ty, depth, cx, cy, tw, bx, by; unsigned ver, checked, tver, chash; unsigned long long used; short live, next; } Slot;
 static Slot slots[SLOTS];
-static unsigned long long use_clock;
+static short hhead[256];                 /* slots by key (chains through Slot.next), -1 ends */
+static int hinit;
 static u32 *dec;                         /* 256 x 256 */
-static unsigned tex_ver(const GpuTex *t, int *x, int *y, int *w) {   /* the newest version of the pages the texture reads */
-    int pw = t->depth == 0 ? 64 : t->depth == 1 ? 128 : 256;
-    *x = t->tx; *y = t->ty; *w = pw;
-    unsigned v = 0; int a, b, c, d;
-    pages_of(t->tx, t->ty, pw, 256, &a, &b, &c, &d);
-    for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) if (page_ver[j][i] > v) v = page_ver[j][i];
+/* the vram[] rectangle a block's texels come from (the whole page with a texture window: it maps texels elsewhere) */
+static void tex_rect(const GpuTex *t, int tw, int bx, int by, int z, int *x, int *y, int *w, int *h) {
+    int sh = t->depth == 0 ? 2 : t->depth == 1 ? 1 : 0;
+    if (tw) { *x = t->tx; *y = t->ty; *w = 256 >> sh; *h = 256; }
+    else { *x = t->tx + (bx >> sh); *y = t->ty + by; *w = z >> sh; *h = z; }
+}
+static unsigned tex_ver(const GpuTex *t, int tw, int bx, int by, int z) {   /* the newest version of what the block reads */
+    int x, y, w, h; tex_rect(t, tw, bx, by, z, &x, &y, &w, &h);
+    unsigned v = blocks_ver(x, y, w, h);
     if (t->depth < 2 && t->cy != PORT_CLUT_Y) {
-        pages_of(t->cx, t->cy, t->depth ? 256 : 16, 1, &a, &b, &c, &d);
-        for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) if (page_ver[j][i] > v) v = page_ver[j][i];
+        unsigned c = blocks_ver(t->cx, t->cy, t->depth ? 256 : 16, 1);
+        if (c > v) v = c;
     }
     return v;
 }
+/* a CLUT rewritten every frame with the same colours (the game uploads its palettes whole) must not cost a decode
+   of every texture that uses it: a slot also keeps the version of its texels alone and a hash of its CLUT */
+static unsigned clut_hash(const GpuTex *t) {
+    if (t->depth == 2 || t->cy == PORT_CLUT_Y) return 0;
+    const u16 *vram = port_vram();
+    unsigned h = 2166136261u;
+    for (int i = 0, n = t->depth ? 256 : 16; i < n; i++) h = (h ^ vram[t->cy * 1024 + ((t->cx + i) & 1023)]) * 16777619u;
+    return h;
+}
 static inline u32 texel(u16 c) { return !c ? 0 : (c15to32(c) & 0x00FFFFFFu) | ((u32)(c & 0x8000 ? A_SEMI : A_OPAQUE) << 24); }
-static void decode(const GpuTex *t, int tw) {
+static void decode(const GpuTex *t, int tw, int bx, int by, int z) {   /* the block into dec[], z x z */
     const u16 *vram = port_vram();
     if (!tw && t->cy != PORT_CLUT_Y && (t->depth == 2 || t->cx + (t->depth ? 256 : 16) <= 1024)) {
         /* the usual case (no texture window, a CLUT in vram[] that does not wrap): the CLUT converted once, whole
            words of indices at a time; the same texels as the general loop below */
         static u32 clut[256];
         if (t->depth < 2) for (int i = 0; i < (t->depth ? 256 : 16); i++) clut[i] = texel(vram[t->cy * 1024 + t->cx + i]);
-        for (int v = 0; v < 256; v++) {
-            const u16 *row = &vram[((t->ty + v) & 511) * 1024];
-            u32 *d = &dec[v * 256];
-            if (t->depth == 0) for (int k = 0; k < 64; k++) {
-                u16 w = row[(t->tx + k) & 1023];
+        for (int v = 0; v < z; v++) {
+            const u16 *row = &vram[((t->ty + by + v) & 511) * 1024];
+            u32 *d = &dec[v * z];
+            if (t->depth == 0) for (int k = 0; k < z / 4; k++) {
+                u16 w = row[(t->tx + bx / 4 + k) & 1023];
                 d[0] = clut[w & 15]; d[1] = clut[(w >> 4) & 15]; d[2] = clut[(w >> 8) & 15]; d[3] = clut[w >> 12]; d += 4;
-            } else if (t->depth == 1) for (int k = 0; k < 128; k++) {
-                u16 w = row[(t->tx + k) & 1023];
+            } else if (t->depth == 1) for (int k = 0; k < z / 2; k++) {
+                u16 w = row[(t->tx + bx / 2 + k) & 1023];
                 d[0] = clut[w & 255]; d[1] = clut[w >> 8]; d += 2;
-            } else for (int k = 0; k < 256; k++) d[k] = texel(row[(t->tx + k) & 1023]);
+            } else for (int k = 0; k < z; k++) d[k] = texel(row[(t->tx + bx + k) & 1023]);
         }
         return;
     }
     int twmx = tw & 31, twmy = (tw >> 5) & 31, twox = (tw >> 10) & 31, twoy = (tw >> 15) & 31;
-    for (int v0 = 0; v0 < 256; v0++) for (int u0 = 0; u0 < 256; u0++) {
+    for (int j = 0; j < z; j++) for (int i = 0; i < z; i++) {
+        int u0 = bx + i, v0 = by + j;
         int u = (u0 & ~(twmx * 8)) | ((twox & twmx) * 8), v = (v0 & ~(twmy * 8)) | ((twoy & twmy) * 8);
         u16 c;
         if (t->depth == 0) {
             u16 w = vram[((t->ty + v) & 511) * 1024 + ((t->tx + (u >> 2)) & 1023)];
-            int i = (w >> ((u & 3) * 4)) & 15;
-            c = t->cy == PORT_CLUT_Y ? port_prompt_clut[(t->cx + i) % (PORT_CLUT_ROWS * 16)] : vram[t->cy * 1024 + ((t->cx + i) & 1023)];
+            int k = (w >> ((u & 3) * 4)) & 15;
+            c = t->cy == PORT_CLUT_Y ? port_prompt_clut[(t->cx + k) % (PORT_CLUT_ROWS * 16)] : vram[t->cy * 1024 + ((t->cx + k) & 1023)];
         } else if (t->depth == 1) {
             u16 w = vram[((t->ty + v) & 511) * 1024 + ((t->tx + (u >> 1)) & 1023)];
-            int i = (w >> ((u & 1) * 8)) & 255;
-            c = t->cy == PORT_CLUT_Y ? port_prompt_clut[(t->cx + (i & 15)) % (PORT_CLUT_ROWS * 16)] : vram[t->cy * 1024 + ((t->cx + i) & 1023)];
+            int k = (w >> ((u & 1) * 8)) & 255;
+            c = t->cy == PORT_CLUT_Y ? port_prompt_clut[(t->cx + (k & 15)) % (PORT_CLUT_ROWS * 16)] : vram[t->cy * 1024 + ((t->cx + k) & 1023)];
         } else c = vram[((t->ty + v) & 511) * 1024 + ((t->tx + u) & 1023)];
-        dec[v0 * 256 + u0] = texel(c);
+        dec[j * z + i] = texel(c);
     }
 }
 extern unsigned long long port_time_us(void);
 unsigned long long pica_decode_us;   /* (time in decode(): n3ds/pica_c3d.c logs it) */
-static int tex_slot(const GpuTex *t) {
-    int x, y, w;
+/* the slot of the block that holds texels u0..u1 x v0..v1 (inclusive) of the texture: the smallest of the 64 / 128 /
+   256 blocks that does; *obx, *oby: the block's origin */
+static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, int *oby) {
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
-    sync_pages(t->tx, t->ty, t->depth == 0 ? 64 : t->depth == 1 ? 128 : 256, 256);
-    if (t->depth < 2 && t->cy != PORT_CLUT_Y) sync_pages(t->cx, t->cy, t->depth ? 256 : 16, 1);
-    unsigned v = tex_ver(t, &x, &y, &w);
-    int lru = 0;
-    for (int i = 0; i < SLOTS; i++) {
-        Slot *s = &slots[i];
-        if (s->live && s->tx == t->tx && s->ty == t->ty && s->depth == t->depth && s->tw == tw
-            && (t->depth == 2 || (s->cx == t->cx && s->cy == t->cy))) {
-            if (s->ver >= v) { s->used = ++use_clock; return i; }
-            lru = i; goto load;     /* the same texture, stale: reuse its slot */
+    int z = 256, bx = 0, by = 0;
+    if (u0 >= 0 && v0 >= 0 && u1 < 256 && v1 < 256) {
+        /* origins on a grid of half the size: any primitive up to 32 texels fits a 64 block, up to 64 a 128 one */
+        for (int c = 64; c < 256; c *= 2) {
+            int ox = u0 & ~(c / 2 - 1), oy = v0 & ~(c / 2 - 1);
+            if (ox + c > 256) ox = 256 - c; if (oy + c > 256) oy = 256 - c;
+            if (u1 < ox + c && v1 < oy + c) { z = c; bx = ox; by = oy; break; }
         }
-        if (!s->live || s->used < slots[lru].used) lru = i;
-        if (!s->live) break;
     }
-load:
-    if (nbv && bst.tex == lru) flush();   /* the pending batch samples the slot about to change */
+    *obx = bx; *oby = by;
+    int cx = t->depth == 2 ? 0 : t->cx, cy = t->depth == 2 ? 0 : t->cy;
+    int x, y, w, h; tex_rect(t, tw, bx, by, z, &x, &y, &w, &h);
+    sync_pages(x, y, w, h);
+    if (t->depth < 2 && t->cy != PORT_CLUT_Y) sync_pages(t->cx, t->cy, t->depth ? 256 : 16, 1);
+    if (!hinit) { memset(hhead, -1, sizeof hhead); hinit = 1; }
+    unsigned hk = ((unsigned)(t->tx >> 6) * 7 + (unsigned)(t->ty >> 8) * 3 + (unsigned)cx * 13 + (unsigned)cy * 31 + (unsigned)(bx >> 5) * 5
+                   + (unsigned)(by >> 5) * 17 + (unsigned)z + (unsigned)tw * 11 + (unsigned)t->depth) & 255;
+    int i;
+    for (i = hhead[hk]; i >= 0; i = slots[i].next) {
+        Slot *s = &slots[i];
+        if (s->tx == t->tx && s->ty == t->ty && s->depth == t->depth && s->tw == tw && s->cx == cx && s->cy == cy
+            && s->bx == bx && s->by == by && pica_slot_size(i) == z) break;
+    }
+    unsigned v;
+    unsigned long long was = 0;   /* the slot's last use, by this block or the one it replaces */
+    if (i >= 0) {
+        Slot *s = &slots[i];
+        if (s->checked == ver_clock + 1) { s->used = ++use_clock; return i; }   /* (nothing in vram[] changed since) */
+        v = tex_ver(t, tw, bx, by, z);
+        if (s->ver >= v) { s->checked = ver_clock + 1; s->used = ++use_clock; return i; }
+        { int x2, y2, w2, h2; tex_rect(t, tw, bx, by, z, &x2, &y2, &w2, &h2);
+          if (blocks_ver(x2, y2, w2, h2) <= s->tver && clut_hash(t) == s->chash) {   /* only the CLUT was written, the same */
+              s->ver = v; s->checked = ver_clock + 1; s->used = ++use_clock; return i;
+          } }
+        was = s->used;   /* (stale: decoded again in its slot) */
+    } else {
+        int a = z == 256 ? 0 : z == 128 ? PICA_N256 : PICA_N256 + PICA_N128;
+        int n = z == 256 ? PICA_N256 : z == 128 ? PICA_N128 : PICA_N64;
+        i = a;
+        for (int k = a; k < a + n; k++) {
+            if (!slots[k].live) { i = k; break; }
+            if (slots[k].used < slots[i].used) i = k;
+        }
+        if (slots[i].live) {   /* out of its chain */
+            Slot *o = &slots[i];
+            int ocx = o->cx, ocy = o->cy;
+            unsigned ok = ((unsigned)(o->tx >> 6) * 7 + (unsigned)(o->ty >> 8) * 3 + (unsigned)ocx * 13 + (unsigned)ocy * 31 + (unsigned)(o->bx >> 5) * 5
+                           + (unsigned)(o->by >> 5) * 17 + (unsigned)z + (unsigned)o->tw * 11 + (unsigned)o->depth) & 255;
+            short *q = &hhead[ok];
+            while (*q >= 0 && *q != i) q = &slots[*q].next;
+            if (*q == i) *q = o->next;
+        }
+        v = tex_ver(t, tw, bx, by, z);
+        was = slots[i].live ? slots[i].used : 0;
+        slots[i] = (Slot){ .tx = t->tx, .ty = t->ty, .depth = t->depth, .cx = cx, .cy = cy, .tw = tw, .bx = bx, .by = by, .live = 1, .next = hhead[hk] };
+        hhead[hk] = (short)i;
+    }
+    if (nbv && was > batch_clock) flush();   /* the pending batch samples the slot about to change */
+    if (port_verbose > 1) port_printf("[gpu] DEC %s z%d tex %d,%d d%d clut %d,%d b %d,%d tw %x (frame %d)\n", slots[i].ver ? "stale" : "new", z, t->tx, t->ty, t->depth, t->cx, t->cy, bx, by, tw, port_frame);
     unsigned long long t0 = port_time_us();
-    decode(t, tw);
+    decode(t, tw, bx, by, z);
     pica_decode_us += port_time_us() - t0;
-    dev->tex_upload(lru, dec);
+    dev->tex_upload(i, dec, was > frame_clock);
     st_decodes++;
-    slots[lru] = (Slot){ t->tx, t->ty, t->depth, t->cx, t->cy, tw, v, ++use_clock, 1 };
-    return lru;
+    slots[i].ver = v; slots[i].checked = ver_clock + 1; slots[i].used = ++use_clock;
+    slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t);
+    return i;
 }
 
 /* ---- primitives */
@@ -332,15 +441,31 @@ static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
     p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 255;
 }
 /* emit n vertices (a triangle or two) with the state the primitive needs: textured semi-transparent ones twice */
-static void emit(const PV *v, int n, const GpuTex *tex, int semi, int raw) {
+static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
     PState s = base_state();
-    if (tex) { s.tex = tex_slot(tex); s.mod = !raw; }
+    PV vv[6]; const PV *v = v0;
+    if (tex) {
+        /* the texels the primitive reads: its vertices' bounds */
+        int u0 = (int)v0[0].u, u1 = u0, w0 = (int)v0[0].v, w1 = w0, bx, by;
+        for (int i = 1; i < n; i++) {
+            int u = (int)v0[i].u, w = (int)v0[i].v;
+            if (u < u0) u0 = u; if (u > u1) u1 = u; if (w < w0) w0 = w; if (w > w1) w1 = w;
+        }
+        /* (the far edge kept when it is in the page: a magnified sprite's last pixels can sample it) */
+        if (u1 > 255 && u0 < 256) u1 = 255; if (w1 > 255 && w0 < 256) w1 = 255;
+        int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by), ax, ay;
+        pica_slot_pos(slot, &ax, &ay);
+        s.tex = pica_slot_atlas(slot); s.mod = !raw;
+        for (int i = 0; i < n; i++) { vv[i] = v0[i]; vv[i].u += (float)(ax - bx); vv[i].v += (float)(ay - by); }
+        v = vv;
+    }
     if (!tex) { s.blend = semi ? gs->abr : -1; memcpy(batch(&s, n), v, n * sizeof *v); return; }
     if (!semi) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); return; }
     s.atest = AT_OPAQUE; memcpy(batch(&s, n), v, n * sizeof *v);
     s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, n), v, n * sizeof *v);
 }
 static void bbox_drawn(const PV *v, int n) {
+    if (bulk_area()) return;
     float x1 = v[0].x, y1 = v[0].y, x2 = x1, y2 = y1;
     for (int i = 1; i < n; i++) {
         if (v[i].x < x1) x1 = v[i].x; if (v[i].x > x2) x2 = v[i].x;
@@ -353,6 +478,7 @@ static void bbox_drawn(const PV *v, int n) {
 /* the cells a triangle covers: those of its bounding box not wholly outside one of its edges (a thin
    diagonal sliver would otherwise mark a whole box, and a later texture or CLUT in it would be read back for nothing) */
 static void tri_drawn(const PV *v) {
+    if (bulk_area()) return;
     int x[3], y[3];
     for (int i = 0; i < 3; i++) { x[i] = (int)v[i].x; y[i] = (int)v[i].y; }
     long long area = (long long)(x[1] - x[0]) * (y[2] - y[0]) - (long long)(x[2] - x[0]) * (y[1] - y[0]);
@@ -468,6 +594,7 @@ static void pica_stop(void) {
 }
 static int pica_present(int dx, int dy, int dw, int dh, int masked) {
     flush();
+    frame_clock = use_clock;
     return dev->present ? dev->present(dx, dy, dw, dh, masked) : 0;
 }
 const GpuBackend port_gpu_pica = { "pica (3DS model, CPU reference)", pica_start, pica_stop, pica_tri, pica_rect, pica_line, pica_fill,

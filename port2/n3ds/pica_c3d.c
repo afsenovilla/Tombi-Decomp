@@ -21,14 +21,14 @@
 #include "gpu_pica.h"
 #include "pica_vsh_shbin.h"
 
-static C3D_Tex vram_tex, slot_tex[PICA_SLOTS];
+static C3D_Tex vram_tex, atlas_tex[2];   /* the texture cache: 1024 x 1024 and 1024 x 512 (shims/gpu_pica.h) */
 static C3D_RenderTarget *vram_rt, *top_rt, *bot_rt;
 static C3D_Tex panel_tex;                 /* the bottom screen's panel (runtime/panel.c), 512 x 256, its canvas in the corner */
 static int panel_w, panel_h;
 static shaderProgram_s prog;
 static DVLB_s *vsh;
 static int u_proj, in_frame, scr_fmt;
-static unsigned frame_no, slot_used[PICA_SLOTS];
+static unsigned frame_no;
 static unsigned *lin;                     /* 1024 x 512 linear words: read-backs */
 #define ARENA_BYTES (2u << 20)
 static unsigned char *arena; static unsigned arena_off;
@@ -38,6 +38,7 @@ static unsigned long long tk_last, tk_frame, tk_upload, tk_write, tk_read, tk_pa
 #define TK_N 120   /* frames per log line */
 #define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / TK_N)
 static unsigned long long n_up, n_rd, n_wait;
+static short rd_log[4][4];   /* the first read-backs since the last log line */
 extern unsigned long long pica_decode_us;
 
 /* ---- the frame */
@@ -105,24 +106,26 @@ static inline unsigned morton(int x, int y) {
     return (x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) | ((x & 4) << 2) | ((y & 4) << 3);
 }
 static inline unsigned tiled(int x, int y, int w) { return ((y >> 3) * (w >> 3) + (x >> 3)) * 64 + morton(x & 7, y & 7); }
-static void c3d_tex_upload(int slot, const unsigned *rgba) {
+static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
     u64 t0 = svcGetSystemTick();
     begin();                                                  /* the frames before have finished */
-    if (slot_used[slot] == frame_no) { end_and_wait(); begin(); n_wait++; }   /* the open frame samples this slot */
+    if (busy) { end_and_wait(); begin(); n_wait++; }          /* the open frame samples this slot */
     n_up++;
-    unsigned *d = slot_tex[slot].data;
     /* 8x8 tiles, Morton order inside: one tile row of source rows at a time */
     static unsigned char my[8]; if (!my[1]) for (int i = 0; i < 8; i++) my[i] = (unsigned char)morton(0, i);
-    for (int v = 0; v < 256; v++) {
-        unsigned *drow = d + (v >> 3) * 32 * 64 + my[v & 7];
-        const unsigned *s = rgba + v * 256;
-        for (int tx = 0; tx < 32; tx++, s += 8) {
+    int z = pica_slot_size(slot), ax, ay; pica_slot_pos(slot, &ax, &ay);
+    unsigned *base = atlas_tex[pica_slot_atlas(slot)].data;
+    for (int v = 0; v < z; v++) {
+        unsigned *drow = base + (((ay + v) >> 3) * (PICA_ATLAS >> 3) + (ax >> 3)) * 64 + my[v & 7];
+        const unsigned *s = rgba + v * z;
+        for (int tx = 0; tx < z >> 3; tx++, s += 8) {
             unsigned *t = drow + tx * 64;
             t[0] = pix(s[0]); t[1] = pix(s[1]); t[4] = pix(s[2]); t[5] = pix(s[3]);
             t[16] = pix(s[4]); t[17] = pix(s[5]); t[20] = pix(s[6]); t[21] = pix(s[7]);
         }
     }
-    GSPGPU_FlushDataCache(d, 256 * 256 * 4);
+    for (int r = 0; r < z >> 3; r++)   /* (a tile row of the slot: z / 8 tiles in a run) */
+        GSPGPU_FlushDataCache(base + ((((ay >> 3) + r) * (PICA_ATLAS >> 3)) + (ax >> 3)) * 64, (unsigned)(z >> 3) * 64 * 4);
     tk_upload += svcGetSystemTick() - t0;
 }
 
@@ -135,11 +138,12 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
     set_env(s->tex >= 0, s->mod);
     set_atest(s->atest);
     set_blend(s->blend);
-    if (s->tex >= 0) { C3D_TexBind(0, &slot_tex[s->tex]); slot_used[s->tex] = frame_no; }
+    if (s->tex >= 0) C3D_TexBind(0, &atlas_tex[s->tex]);
+    const float ts = 1.0f / (float)PICA_ATLAS, tt = s->tex == 1 ? 2.0f / (float)PICA_ATLAS : ts;
     C3D_ImmDrawBegin(GPU_TRIANGLES);
     for (int i = 0; i < n; i++) {
         /* +0.5: the PICA samples pixel centres, the PS1 integer positions */
-        vtx(v[i].x + 0.5f, v[i].y + 0.5f, v[i].u / 256.0f, 1.0f - v[i].v / 256.0f, v[i].r / 255.0f, v[i].g / 255.0f, v[i].b / 255.0f,
+        vtx(v[i].x + 0.5f, v[i].y + 0.5f, v[i].u * ts, 1.0f - v[i].v * tt, v[i].r / 255.0f, v[i].g / 255.0f, v[i].b / 255.0f,
             s->tex >= 0 ? 1.0f : 0.0f);   /* (untextured: alpha 0, bit 15 clear on a read-back) */
     }
     C3D_ImmDrawEnd();
@@ -204,6 +208,7 @@ static void c3d_fill(int x, int y, int w, int h, unsigned c) {
 }
 static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
     u64 t0 = svcGetSystemTick();
+    if (n_rd < 4) { rd_log[n_rd][0] = (short)x; rd_log[n_rd][1] = (short)y; rd_log[n_rd][2] = (short)w; rd_log[n_rd][3] = (short)h; }
     n_rd++;
     end_and_wait();
     C3D_SyncDisplayTransfer((u32 *)vram_tex.data, GX_BUFFER_DIM(1024, 512), (u32 *)lin, GX_BUFFER_DIM(1024, 512),
@@ -261,6 +266,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     if (st_frames % TK_N == 0) {
         port_printf("[3ds] pica: per frame %.2f texture uploads (%.2f waited for the GPU; decoding %.2f ms), %.2f read-backs\n",
                     (double)n_up / TK_N, (double)n_wait / TK_N, pica_decode_us / 1000.0 / TK_N, (double)n_rd / TK_N);
+        for (unsigned i = 0; i < 4 && i < n_rd; i++) port_printf("[3ds] pica: read-back %d,%d %dx%d\n", rd_log[i][0], rd_log[i][1], rd_log[i][2], rd_log[i][3]);
         n_up = n_rd = n_wait = 0; pica_decode_us = 0;
         port_printf("[3ds] pica: %llu frames, %llu syncs, %llu host writes; ms per frame: %.2f total, %.2f draws, %.2f texture uploads, "
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
@@ -332,10 +338,12 @@ static int c3d_start(void) {
                               GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) |
                               GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(scr_fmt) |
                               GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
-    for (int i = 0; i < PICA_SLOTS; i++) {
-        if (!C3D_TexInit(&slot_tex[i], 256, 256, GPU_RGBA8)) { port_printf("[3ds] pica: texture slot %d failed\n", i); return -1; }
-        C3D_TexSetFilter(&slot_tex[i], GPU_NEAREST, GPU_NEAREST);
-        C3D_TexSetWrap(&slot_tex[i], GPU_REPEAT, GPU_REPEAT);
+    for (int i = 0; i < 2; i++) {
+        int h = i ? PICA_ATLAS / 2 : PICA_ATLAS;
+        if (!C3D_TexInit(&atlas_tex[i], PICA_ATLAS, (u16)h, GPU_RGBA8)) { port_printf("[3ds] pica: texture atlas %d failed\n", i); return -1; }
+        C3D_TexSetFilter(&atlas_tex[i], GPU_NEAREST, GPU_NEAREST);
+        C3D_TexSetWrap(&atlas_tex[i], GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
+        memset(atlas_tex[i].data, 0, (size_t)PICA_ATLAS * h * 4);
     }
     bot_rt = C3D_RenderTargetCreate(240, 320, GPU_RB_RGBA8, -1);
     if (bot_rt && C3D_TexInit(&panel_tex, 512, 256, GPU_RGBA8)) {

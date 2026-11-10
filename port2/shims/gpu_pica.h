@@ -6,15 +6,34 @@
 
 #define PICA_A_OPAQUE 0x80                 /* texel alpha classes: drawn, bit 15 clear */
 #define PICA_A_SEMI 0xFF                   /*                      drawn, bit 15 set (semi-transparent when the primitive is) */
-#define PICA_SLOTS 32                      /* texture cache slots, 256 x 256 each */
+/* texture cache slots: square blocks of a texture page + CLUT, in three sizes (a sprite's primitives rarely need more
+   than a 64 x 64 block of their page, and an area uses many more page + CLUT pairs than whole pages fit in memory),
+   in two atlases, so a change of texture seldom ends a batch of triangles:
+   atlas 0 (1024 x 1024): N128 slots of 128 x 128 in its upper half, N64 of 64 x 64 in its lower half;
+   atlas 1 (1024 x 512): N256 slots of 256 x 256.  Slots are numbered 256s first, then 128s, then 64s. */
+#define PICA_ATLAS 1024                    /* (both atlases' width; atlas 1 is half as tall) */
+#define PICA_N256 8
+#define PICA_N128 32
+#define PICA_N64 128
+#define PICA_SLOTS (PICA_N256 + PICA_N128 + PICA_N64)
+static inline int pica_slot_size(int slot) { return slot < PICA_N256 ? 256 : slot < PICA_N256 + PICA_N128 ? 128 : 64; }
+static inline int pica_slot_atlas(int slot) { return slot < PICA_N256; }
+static inline void pica_slot_pos(int slot, int *x, int *y) {   /* its corner in its atlas */
+    if (slot < PICA_N256) { *x = (slot & 3) * 256; *y = (slot >> 2) * 256; return; }
+    slot -= PICA_N256;
+    if (slot < PICA_N128) { *x = (slot & 7) * 128; *y = (slot >> 3) * 128; return; }
+    slot -= PICA_N128;
+    *x = (slot & 15) * 64; *y = 512 + (slot >> 4) * 64;
+}
 enum { AT_OFF, AT_NOTZERO, AT_OPAQUE, AT_SEMI };   /* alpha test: off, alpha != 0, == PICA_A_OPAQUE, == PICA_A_SEMI */
-typedef struct { float x, y, u, v; unsigned char r, g, b, a; } PV;
-/* tex: slot or -1; mod: texture x colour x 2 (else the texture, raw); blend: -1 or the PS1 mode 0..3;
+typedef struct { float x, y, u, v; unsigned char r, g, b, a; } PV;   /* u, v: texels of the atlas */
+/* tex: the atlas (0, 1) or -1; mod: texture x colour x 2 (else the texture, raw); blend: -1 or the PS1 mode 0..3;
    x1..y2: the drawing area (inclusive) */
 typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2; } PState;
 typedef struct {
     int (*start)(void);                                                    /* 0 = ready */
-    void (*tex_upload)(int slot, const unsigned *rgba);                   /* 256 x 256 */
+    /* a slot's texels (pica_slot_size(slot) squared); busy: triangles since the last present sample this slot */
+    void (*tex_upload)(int slot, const unsigned *rgba, int busy);
     void (*tris)(const PState *s, const PV *v, int n);                    /* n vertices, 3 per triangle */
     void (*fill)(int x, int y, int w, int h, unsigned rgba);
     void (*read)(int x, int y, int w, int h, unsigned *dst, int stride);
