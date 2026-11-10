@@ -744,7 +744,7 @@ void port_panel_vblank(void) {
 #ifdef __ANDROID__
     if (dump) upscale();
 #else
-    upscale();
+    { extern int port_panel_canvas_out; if (dump || !port_panel_canvas_out) upscale(); }   /* (the 3DS shows the canvas itself) */
 #endif
 #ifdef __ANDROID__
     if (port_panel_window) {

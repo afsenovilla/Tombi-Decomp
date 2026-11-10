@@ -84,10 +84,23 @@ int panel_loading_screen(void) {
     }
     if (nl_state < 0) return 0;
     int W = pa_cw, H = pa_ch, c = port_frame / 15 & 1, s = port_frame * 12 & 255;
-    pa_fill(0, 0, W, H, 0xFF000000u);
-    for (int j = 0; j * 48 < H; j++) for (int i = 0; i * 48 < W; i++) {
-        int k = (i + j) & 1 ? 1 - c : c;
-        nl_spr(k, i * 48, j * 48, i * 48 + 48, j * 48 + 48);
+    /* the tiled background has two states (c) and changes with nothing else but the canvas size and the two tiles'
+       CLUT colours: each is drawn once into a cache and copied in after that (the 3DS draws the panel on its CPU) */
+    static u32 *bg[2], bg_pal[2][2][16]; static int bg_w, bg_h, bg_ok[2];
+    u32 pal[2][16]; int dd[6];
+    for (int k = 0; k < 2; k++) { def(k, dd); for (int i = 0; i < 16; i++) pal[k][i] = nl_col(dd[4], dd[5], i); }
+    if (bg_w != W || bg_h != H) {
+        for (int k = 0; k < 2; k++) { free(bg[k]); bg[k] = malloc((size_t)W * H * 4); bg_ok[k] = 0; }
+        bg_w = W; bg_h = H;
+    }
+    if (bg_ok[c] && !memcmp(bg_pal[c], pal, sizeof pal)) memcpy(pa_cv, bg[c], (size_t)W * H * 4);
+    else {
+        pa_fill(0, 0, W, H, 0xFF000000u);
+        for (int j = 0; j * 48 < H; j++) for (int i = 0; i * 48 < W; i++) {
+            int k = (i + j) & 1 ? 1 - c : c;
+            nl_spr(k, i * 48, j * 48, i * 48 + 48, j * 48 + 48);
+        }
+        if (bg[c]) { memcpy(bg[c], pa_cv, (size_t)W * H * 4); memcpy(bg_pal[c], pal, sizeof pal); bg_ok[c] = 1; }
     }
     /* drawNowLoadingSprite(0xC0, 0xA0, 0, ..): pad = (u32)NEG_SIN_TABLE[s] >> 11 as a short; the logo keeps the game's
        distance to the bottom right corner of its 320 x 240 screen */
