@@ -57,13 +57,9 @@ static void end_and_wait(void) {   /* run what was recorded and wait for it: mem
 }
 
 /* ---- state */
-static float y_shift;
 static void proj_vram(void) {
     /* (the PICA writes clip y = +1 to memory row 0: the start-up self test reported FLIPPED with 0 .. 512 in Azahar) */
-    /* y_shift: found by the start-up self test.  A console samples a row half a pixel away from where Azahar does
-       (a mark drawn at row 64 came out at row 65), so there the geometry is moved up by that, and a little more to
-       keep the edges off the sample points */
-    C3D_Mtx m; Mtx_Ortho(&m, 0.0f, 1024.0f, 512.0f + y_shift, y_shift, 1.0f, -1.0f, true);
+    C3D_Mtx m; Mtx_Ortho(&m, 0.0f, 1024.0f, 512.0f, 0.0f, 1.0f, -1.0f, true);
     C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, u_proj, &m);
 }
 static int last_ok;
@@ -171,8 +167,10 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
     const float al = s->tex >= 0 ? 1.0f : 0.0f;   /* (untextured: alpha 0, bit 15 clear on a read-back) */
     CV *d = vb + vb_n;
     for (int i = 0; i < n; i++, d++) {
-        /* +0.5: the PICA samples pixel centres, the PS1 integer positions */
-        d->x = v[i].x + 0.5f; d->y = v[i].y + 0.5f; d->z = 0.5f; d->s = v[i].u * ts; d->t = 1.0f - v[i].v * tt;
+        /* +0.5: the PICA samples pixel centres, the PS1 integer positions.  In y a hair less: the target's rows run
+           against the PICA's y, so an edge exactly on the centres takes the row below instead of the one above
+           (the self test: a mark at row 64 filled rows 65..72, in Azahar and on a console alike) */
+        d->x = v[i].x + 0.5f; d->y = v[i].y + (0.5f - 1.0f / 64.0f); d->z = 0.5f; d->s = v[i].u * ts; d->t = 1.0f - v[i].v * tt;
         d->r = v[i].r * k; d->g = v[i].g * k; d->b = v[i].b * k; d->a = al;
     }
     C3D_DrawArrays(GPU_TRIANGLES, vb_n, n);
@@ -362,7 +360,6 @@ static void self_test(void) {
        and lower edges were not drawn) */
     static const short mk[4][2] = { { 64, 64 }, { 952, 64 }, { 64, 440 }, { 952, 440 } };
     static unsigned whole[16 * 16];
-    for (int round = 0, low = 0; round < 2; round++) {
     for (int pass = 0; pass < 2; pass++) {
         for (int i = 0; i < 4; i++) {
             float x = mk[i][0], y = mk[i][1];
@@ -382,14 +379,8 @@ static void self_test(void) {
             for (int k = 0; k < 256; k++) if ((whole[k] & 0x00FFFFFFu) == 0x0000FF00u) { if (fx < 0) { fx = k & 15; fy = k >> 4; } n++; }
             port_printf("[3ds] pica self test, %s mark at %d,%d: %d pixels, first at %d,%d%s\n", pass ? "write" : "triangle", mk[i][0], mk[i][1], n,
                         fx < 0 ? -1 : mk[i][0] - 4 + fx, fy < 0 ? -1 : mk[i][1] - 4 + fy, n == 64 && fx == 4 && fy == 4 ? "" : "  <-- NOT WHERE IT BELONGS");
-            if (!pass && n && fy == 5) low++;
         }
         c3d_fill(0, 0, 1024, 512, 0);
-    }
-    if (round || low < 4) break;
-    end_and_wait();
-    y_shift = 0.5f + 1.0f / 64.0f; proj_vram();
-    port_printf("[3ds] pica self test: triangles land a row low: rows shifted by %.3f, the marks again\n", y_shift);
     }
 }
 static int c3d_start(void) {
