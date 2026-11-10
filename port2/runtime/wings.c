@@ -225,10 +225,18 @@ static int compose(void *o, Set *st) {
 
 static int want_b04, want_step;     /* the player step the glide belongs to: tables restored once it moves on */
 
+static void restore(void *o);
 static void start(void *o, Set *st) {
     if (!port_wings_dir || !port_wings_pre9_dir) return;     /* its own option, not tied to --cut-content */
     if (!load_set(st)) return;
-    if (active) return;
+    if (active) {
+        /* a glide whose step ended without a draw of ours (the player not drawn, a room load): let it go */
+        if (o == player && O_B04(o) == want_b04 && O_STEP(o) == want_step) return;
+        port_printf("wings: a stale %s glide (b04 %d step %d) released\n", cur ? cur->name : "?", want_b04, want_step);
+        restore(player);
+    }
+    port_printf("wings: %s glide at b04 %d step %d state %d sub %d\n", st->name, O_B04(o), O_STEP(o),
+                ((unsigned char *)o)[6], O_SUBSTEP(o));
     {   /* the feather texels of the PrePre 9 page over retail's (tpage 0x14 = VRAM 256,256; same place, 4 bpp) */
         typedef struct { short x, y, w, h; } R;
         extern int LoadImage(void *, unsigned *);
@@ -255,7 +263,10 @@ void port_wings_begin(void *o) { if (O_SUBSTEP(o) == 0) start(o, &SETS[0]); }
    the same glide until the feet touch the ground */
 void port_wings_land(void *o) { start(o, &SETS[0]); }
 /* the side view: playerEventStepRiseFadeOut state 0 (substep 0 = the wings), playerEventStepDropIn state 0 */
-void port_wings_side_begin(void *o) { if (O_SUBSTEP(o) == 0) start(o, &SETS[1]); }
+void port_wings_side_begin(void *o) {
+    if (O_SUBSTEP(o) == 0) start(o, &SETS[1]);
+    else port_printf("wings: the rise is not the Charity Wings (sub %d)\n", O_SUBSTEP(o));
+}
 void port_wings_side_land(void *o) { start(o, &SETS[1]); }
 /* playerEventStepRiseFadeOut: while our glide runs, the retail air spin (playerAirSpinToFall) must not set the anim */
 int port_wings_side_active(void *o) { return active && o == player && cur == &SETS[1]; }
