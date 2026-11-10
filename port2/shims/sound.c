@@ -181,11 +181,14 @@ static int rev_rd(int units, int back) {          /* sample at the register addr
     /* (32 bits hold it: 16-bit units, a position inside the buffer; and it is nearly always in range already: the
        64-bit modulo this was is a library call on 32-bit ARM, ten of them a sample) */
     int a = (int)rev_pos + units * 8 - back * 2;
+    /* (one wrap nearly always: a division is a library call on the 3DS's ARM11, a dozen of them a reverb cycle) */
+    if (a >= (int)rev_bytes) a -= (int)rev_bytes; else if (a < 0) a += (int)rev_bytes;
     if ((unsigned)a >= rev_bytes) { a %= (int)rev_bytes; if (a < 0) a += (int)rev_bytes; }
     return rev_buf[a >> 1];
 }
 static void rev_wr(int units, int val) {
     int a = (int)rev_pos + units * 8;
+    if (a >= (int)rev_bytes) a -= (int)rev_bytes; else if (a < 0) a += (int)rev_bytes;
     if ((unsigned)a >= rev_bytes) { a %= (int)rev_bytes; if (a < 0) a += (int)rev_bytes; }
     rev_buf[a >> 1] = val > 32767 ? 32767 : val < -32768 ? -32768 : val;
 }

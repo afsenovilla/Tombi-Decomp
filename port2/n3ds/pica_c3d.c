@@ -113,6 +113,8 @@ static void vtx(float x, float y, float s, float t, float r, float g, float b, f
     CV *d = vb + vb_n++;
     d->x = x; d->y = y; d->z = 0.5f; d->s = s; d->t = t; d->r = r; d->g = g; d->b = b; d->a = a;
 }
+#define EDGE_X 1023.9f   /* (past the last pixel's centre, short of the target's edge) */
+#define EDGE_Y 511.9f
 #define QUAD_BEGIN() (quad0 = vb_n)
 #define QUAD_END() C3D_DrawArrays(GPU_TRIANGLES, quad0, vb_n - quad0)
 
@@ -217,6 +219,10 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
             set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
             C3D_TexBind(0, tp);
             float X0 = x + i0, Y0 = y + j0, X1 = X0 + pw, Y1 = Y0 + ph, S1 = (float)pw / t.width, T0 = 1.0f, T1 = 1.0f - (float)ph / t.height;
+            /* (no vertex on the target's far edges: a console draws nothing of such a triangle, see shims/gpu_pica.c
+               clip_tris; the texture coordinate cut by as much) */
+            if (X1 > EDGE_X) { S1 *= (EDGE_X - X0) / (X1 - X0); X1 = EDGE_X; }
+            if (Y1 > EDGE_Y) { T1 = T0 + (T1 - T0) * (EDGE_Y - Y0) / (Y1 - Y0); Y1 = EDGE_Y; }
             QUAD_BEGIN();
             vtx(X0, Y0, 0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
             vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, 0, T1, 1, 1, 1, 1);
@@ -231,6 +237,8 @@ static void c3d_fill(int x, int y, int w, int h, unsigned c) {
     set_env(0, 0); set_atest(AT_OFF); set_blend(-1);
     float r = (c & 255) / 255.0f, g = ((c >> 8) & 255) / 255.0f, b = ((c >> 16) & 255) / 255.0f, a = (c >> 24) / 255.0f;
     float X0 = x, Y0 = y, X1 = x + w, Y1 = y + h;
+    if (X1 > EDGE_X) X1 = EDGE_X;
+    if (Y1 > EDGE_Y) Y1 = EDGE_Y;
     QUAD_BEGIN();
     vtx(X0, Y0, 0, 0, r, g, b, a); vtx(X1, Y0, 0, 0, r, g, b, a); vtx(X0, Y1, 0, 0, r, g, b, a);
     vtx(X1, Y0, 0, 0, r, g, b, a); vtx(X1, Y1, 0, 0, r, g, b, a); vtx(X0, Y1, 0, 0, r, g, b, a);

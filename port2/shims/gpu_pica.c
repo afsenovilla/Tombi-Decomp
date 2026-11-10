@@ -463,14 +463,70 @@ static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
     p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 255;
 }
 /* emit n vertices (a triangle or two) with the state the primitive needs: textured semi-transparent ones twice */
+/* Clipping to the drawing area, here and not left to the device's scissor: a PICA200 does not clip in x / y, and a
+   console draws nothing of a triangle with a vertex on or past the target's right edge (x = 1024; gputest.bmp: the
+   full-width fills missing, an 8 x 8 mark at x 952 right) where Azahar draws it.  The second frame buffer ends at that
+   edge, and sprites cross it.  The far bounds stop short of the edge, past the last pixel's centre.
+   On by default on the 3DS; PICA_CLIP=1 in the environment tries it on the reference device. */
+static int clip_on = -1;
+static int clip_poly(const PV *in, int n, PV *out, int axis, float bound, int keep_less) {
+    int m = 0;
+    for (int i = 0; i < n; i++) {
+        const PV *a = &in[i], *b = &in[(i + 1) % n];
+        float da = (axis ? a->y : a->x) - bound, db = (axis ? b->y : b->x) - bound;
+        int ia = keep_less ? da <= 0 : da >= 0, ib = keep_less ? db <= 0 : db >= 0;
+        if (ia) out[m++] = *a;
+        if (ia != ib) {
+            float t = da / (da - db);
+            PV *o = &out[m++];
+            o->x = a->x + (b->x - a->x) * t; o->y = a->y + (b->y - a->y) * t;
+            o->u = a->u + (b->u - a->u) * t; o->v = a->v + (b->v - a->v) * t;
+            o->r = (u8)(a->r + (b->r - a->r) * t + 0.5f); o->g = (u8)(a->g + (b->g - a->g) * t + 0.5f);
+            o->b = (u8)(a->b + (b->b - a->b) * t + 0.5f); o->a = a->a;
+            if (axis) o->y = bound; else o->x = bound;
+        }
+    }
+    return m;
+}
+/* the triangles of v[0..n) inside the drawing area into out (15 vertices a triangle at most); the count */
+static int clip_tris(const PV *v, int n, PV *out) {
+    float X1 = (float)gs->x1, Y1 = (float)gs->y1;
+    float X2 = gs->x2 + 1 > 1023 ? 1023.4f : (float)(gs->x2 + 1), Y2 = gs->y2 + 1 > 511 ? 511.4f : (float)(gs->y2 + 1);
+    int m = 0;
+    for (int t = 0; t + 2 < n; t += 3) {
+        const PV *q = &v[t];
+        int in = 1;
+        for (int i = 0; i < 3; i++) if (q[i].x < X1 || q[i].x > X2 || q[i].y < Y1 || q[i].y > Y2) in = 0;
+        if (in) { out[m++] = q[0]; out[m++] = q[1]; out[m++] = q[2]; continue; }
+        if ((q[0].x < X1 && q[1].x < X1 && q[2].x < X1) || (q[0].x > X2 && q[1].x > X2 && q[2].x > X2) ||
+            (q[0].y < Y1 && q[1].y < Y1 && q[2].y < Y1) || (q[0].y > Y2 && q[1].y > Y2 && q[2].y > Y2)) continue;
+        PV a[8], b[8]; int k;
+        k = clip_poly(q, 3, a, 0, X1, 0);
+        k = clip_poly(a, k, b, 0, X2, 1);
+        k = clip_poly(b, k, a, 1, Y1, 0);
+        k = clip_poly(a, k, b, 1, Y2, 1);
+        for (int i = 1; i + 1 < k; i++) { out[m++] = b[0]; out[m++] = b[i]; out[m++] = b[i + 1]; }
+    }
+    return m;
+}
 static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
     PState s = base_state();
-    PV vv[6]; const PV *v = v0;
+    PV cl[30], vv[30]; const PV *v;
+    if (clip_on < 0) {
+#ifdef __3DS__
+        clip_on = 1;
+#else
+        clip_on = getenv("PICA_CLIP") != 0;
+#endif
+    }
+    const PV *orig = v0; int norig = n;
+    if (clip_on) { n = clip_tris(v0, n, cl); if (!n) return; v0 = cl; }
+    v = v0;
     if (tex) {
         /* the texels the primitive reads: its vertices' bounds */
-        int u0 = (int)v0[0].u, u1 = u0, w0 = (int)v0[0].v, w1 = w0, bx, by;
-        for (int i = 1; i < n; i++) {
-            int u = (int)v0[i].u, w = (int)v0[i].v;
+        int u0 = (int)orig[0].u, u1 = u0, w0 = (int)orig[0].v, w1 = w0, bx, by;
+        for (int i = 1; i < norig; i++) {
+            int u = (int)orig[i].u, w = (int)orig[i].v;
             if (u < u0) u0 = u; if (u > u1) u1 = u; if (w < w0) w0 = w; if (w > w1) w1 = w;
         }
         /* (the far edge kept when it is in the page: a magnified sprite's last pixels can sample it) */
