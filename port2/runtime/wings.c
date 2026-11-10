@@ -59,9 +59,10 @@ static const int PHASE[8][2] = {{0, 0}, {1, 0}, {2, 0}, {1, 1}, {0, 1}, {1, 1}, 
 /* the three-frame copies: static, so they sit in the executable's data (below 16 MB) like every table the game reads
    through its 24-bit-addressed packets; a malloc'd table (above 16 MB on Windows) faulted in unpackSpriteFrame */
 /* the WPP table keeps the demo's 106 entries (an index the player still holds when the tables are swapped, e.g. 14
-   at the landing, must stay inside it): entries 77-79 are the three frames, every other one an empty frame */
+   at the landing, must stay inside it): entries 77-79 are the three frames, every other one a copy of frame 77 (a
+   frame must be whole: the drawer walks the parts with a do/while, so an entry with no parts runs off the table) */
 #define WPP_N 106
-static unsigned char wpp_table_buf[4 + 4 * (WPP_N + 1) + 3 * 1024], spr_table_buf[4 * WPP_N + 16 * 3 * 8];
+static unsigned char wpp_table_buf[4 + 4 * (WPP_N + 1) + WPP_N * 1024], spr_table_buf[4 * WPP_N + 16 * 3 * 8];
 static unsigned char *wpp_table, *spr_table;
 static unsigned short script[8 * 4 + 2];        /* 4 entries of 8 bytes + a 4-byte jump back */
 static int tried, active, ticks;
@@ -131,22 +132,22 @@ static int load(void) {
     t = wpp + WPP_TABLE_OFF;
     n = u32(t);
     if (n != 106) { port_printf("wings: %s +0x%X holds %u frames, expected 106 (not the SLPM-80165 demo?)\n", WPP_FILE, WPP_TABLE_OFF, n); free(wpp); return 0; }
-    total = 4 + 4 * (WPP_N + 1);
-    for (i = 0; i < 3; i++) total += u32(t + 4 + 4 * (FRAMES[i] + 1)) - u32(t + 4 + 4 * FRAMES[i]);
-    if (total > sizeof wpp_table_buf) { port_printf("wings: frames 77-79 of %s are %u bytes, more than expected\n", WPP_FILE, total); free(wpp); return 0; }
+    for (i = 0; i < 3; i++) if (u32(t + 4 + 4 * (FRAMES[i] + 1)) - u32(t + 4 + 4 * FRAMES[i]) > 1024) {
+        port_printf("wings: frame %d of %s is bigger than expected\n", FRAMES[i], WPP_FILE); free(wpp); return 0; }
     wpp_table = wpp_table_buf;
     put32(wpp_table, WPP_N);
-    off[0] = 4 + 4 * (WPP_N + 1);
-    for (i = 0; i < 3; i++) {
-        unsigned int a = u32(t + 4 + 4 * FRAMES[i]), b = u32(t + 4 + 4 * (FRAMES[i] + 1));
-        memcpy(wpp_table + off[i], t + a, b - a);
-        off[i + 1] = off[i] + (b - a);
+    {   /* entry k = its frame's start, entry k+1 its end: frames 77-79 at their places, frame 77 everywhere else */
+        unsigned int o = 4 + 4 * (WPP_N + 1);
+        for (i = 0; i < WPP_N; i++) {
+            int k = i >= FRAMES[0] && i <= FRAMES[2] ? i : FRAMES[0];
+            unsigned int a = u32(t + 4 + 4 * k), b = u32(t + 4 + 4 * (k + 1));
+            put32(wpp_table + 4 + 4 * i, o);
+            memcpy(wpp_table + o, t + a, b - a);
+            o += b - a;
+        }
+        put32(wpp_table + 4 + 4 * WPP_N, o);
+        (void)off; (void)total;
     }
-    /* entry k = its frame's start, entry k+1 its end: 77, 78, 79 are the three frames; every other entry points at
-       off[0], so a stale index decodes as an empty frame (off[0]..off[0]), never as garbage */
-    for (i = 0; i <= WPP_N; i++) put32(wpp_table + 4 + 4 * i, off[0]);
-    put32(wpp_table + 4 + 4 * FRAMES[0], off[0]); put32(wpp_table + 4 + 4 * FRAMES[1], off[1]);
-    put32(wpp_table + 4 + 4 * FRAMES[2], off[2]); put32(wpp_table + 4 + 4 * (FRAMES[2] + 1), off[3]);
     free(wpp);
     gam = read_file(port_wings_dir, SPR_FILE, &gl);
     if (!gam) { wpp_table = 0; return 0; }
@@ -161,7 +162,6 @@ static int load(void) {
     for (i = 0; i < 3; i++) total += 16 * (spr[4 * FRAMES[i]] | spr[4 * FRAMES[i] + 1] << 8);
     if (total > sizeof spr_table_buf) { port_printf("wings: the SPR parts of frames 77-79 are %u bytes, more than expected\n", total); free(spr); wpp_table = 0; return 0; }
     spr_table = spr_table_buf;
-    memset(spr_table, 0, 4 * WPP_N);          /* every other entry: no parts */
     {
         unsigned int o = 4 * WPP_N;
         for (i = 0; i < 3; i++) {
@@ -171,6 +171,7 @@ static int load(void) {
             memcpy(spr_table + o, spr + src, 16 * cnt);
             o += 16 * cnt;
         }
+        for (i = 0; i < WPP_N; i++) if (i < FRAMES[0] || i > FRAMES[2]) memcpy(spr_table + 4 * i, spr_table + 4 * FRAMES[0], 4);   /* frame 77's parts */
     }
     free(spr);
     /* the animation script: frames 0 1 2 1, 8 ticks each, then jump back */
