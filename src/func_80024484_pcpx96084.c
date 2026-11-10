@@ -8,13 +8,13 @@ extern unsigned short D_801FC0E0;
 extern short D_800E2B30;
 extern void func_800240BC(int);
 extern void func_800235D4(void);
-extern void func_80017818(int, void (*)(void));
+extern void ThreadCreate(int, void (*)(void));
 
 void func_80024484_pcpx96084(int a)
 {
     func_800240BC(D_800AFDD8[a]);
     D_800E2B30 = 0;
     if (D_801FC0E0 == 0)
-        func_80017818(2, func_800235D4);
+        ThreadCreate(2, func_800235D4);
 }
 #endif

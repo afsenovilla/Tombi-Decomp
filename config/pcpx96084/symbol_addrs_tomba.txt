@@ -1,6 +1,7 @@
 func_800175DC_pcpx96084 = 0x800175DC; // type:func size:0x7C  PAL main0 0x80016FC0
 initTasks = 0x80017658; // type:func size:0x4C  PAL main0 0x8001703C
 startTask = 0x80017778; // type:func size:0x5C  PAL main0 0x8001715C
+ThreadCreate = 0x80017818; // type:func size:0x80  PAL main0 0x800171B8
 ThreadWaitFrames = 0x80017898; // type:func size:0x34  PAL main0 0x80017238
 exitTask = 0x800178CC; // type:func size:0x50  PAL main0 0x8001726C
 closeTask = 0x8001791C; // type:func size:0x6C  PAL main0 0x800172BC

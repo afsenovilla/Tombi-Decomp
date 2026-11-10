@@ -5,6 +5,12 @@ D_801FD804 = 0x801FD804; // ignore:True
 D_801FD808 = 0x801FD808; // ignore:True
 D_801FD80C = 0x801FD80C; // ignore:True
 D_801FD810 = 0x801FD810; // ignore:True
+// PrePre 8 task table (0x801FC000): literal addresses too (ThreadCreate, startTask, closeTask).
+D_801FC000 = 0x801FC000; // ignore:True
+D_801FC004 = 0x801FC004; // ignore:True
+D_801FC008 = 0x801FC008; // ignore:True
+D_801FC00C = 0x801FC00C; // ignore:True
+D_801FC010 = 0x801FC010; // ignore:True
 // Scratchpad (0x1F800000-0x1F8003FF): never symbolized, so the target keeps literal addresses everywhere; the
 // demo report assembles the C side's scratchpad symbols as constants (config/slpm80165/spad.txt, build_report).
 D_1F800000 = 0x1F800000; // ignore:True
