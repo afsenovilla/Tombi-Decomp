@@ -242,6 +242,25 @@ hand targets; PrePre 8 has 304 functions with no twin at all (debug/test code, u
 ones. The 12-byte Psy-Q syscall stubs of SLPM-80165 (`OpenEvent`, `CloseTh`, ...) miss only because splat gives
 them 16 bytes (the alignment `nop` after `jr`); a symbol size fix would take them.
 
+**Hand pass, round 2 (2026-11-10): 1272 -> 1313 of 1719 functions, 48.06 % -> 50.11 % of code.** From the closest
+twins of `build/slpm80165/pairs.json`, each draft compiled against the demo target and fixed by hand. Demo-wide
+differences that came up again and again (worth trying first on the next function):
+- small player helpers written inline in the x00 player steps: `PlayerSetAnimIfChanged` (demo form in
+  `src/func_800EC020_slpm80165.c`), `setFacingFromPad` with the d-pad bits 0x2000 / 0x8000 (PAL 0x20 / 0x80) and
+  `playerSetAngleFromSlope`; as `static __inline__` helpers they give the same code as the hand-inlined body;
+- `playerSetFallLean` is not called: the demo clears +0x8C instead; fixed buttons (0x40, 0x80) where PAL reads
+  `BUTTON_MASK_*`; the object byte +0xE3 is +0xCF;
+- the CD file table has 24-byte entries (names included), the second display environment is at +0x2090
+  (PAL +0xD10), and the work vector / camera matrix of the actor projection live in the scratchpad (0x1F800060 /
+  0x1F8000C0);
+- the four voice-allocating sound helpers search all 24 voices, store the sound id on the way and queue the
+  commands even with no free voice; the collision slope tests take a `short` first argument and use a signed
+  `% 8`;
+- splat cut the tail of a few library functions into separate "functions" (`SquareRoot0` +8, `ApplyMatrixLV` +12):
+  the PAL size in `symbol_addrs_slpm80165.txt` puts them back; a jal target in the middle of
+  `a00Variant0EventSpawn` (0x8012A618) still splits that one (open);
+- three addresses (0x8003A770, 0x8004B50C, 0x80116F94) still have two `// VERSION SLPM_80165` lines in `src/`.
+
 - **Plumbing (1-2 days):** add `config/slpm80165/{slpm80165,x00,dspsub,dspsub3,optsub00}.yaml`. The exe is a normal
   PS-X EXE at 0x80010000; the overlays use the bases above, to be confirmed in an emulator. Generate
   `symbol_addrs_*` from `tools/xmatch.py --csv` (PAL names at demo addresses). Then extend `tools/build_full.py` and

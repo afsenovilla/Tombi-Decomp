@@ -8,7 +8,7 @@
 #include "common.h"
 #include "game.h"
 extern void func_8001FE40(void);
-extern void func_80020000(void);
+extern void func_80020000_pcpx96084(void);
 extern void func_80021238(void);
 extern void func_80021300(void);
 
@@ -17,7 +17,7 @@ void gameStateDispatcher(void)
 {
     switch (TASK_C->state1) {
     case 0: func_8001FE40(); break;
-    case 1: func_80020000(); break;
+    case 1: func_80020000_pcpx96084(); break;
     case 2: func_80021238(); break;
     case 3: func_80021300(); break;
     }

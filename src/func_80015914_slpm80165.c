@@ -1,7 +1,8 @@
 // VERSION SLPM_80165 slpm80165 80015914 388
-// HEADERS.SLPM_80165 tomba26
+// FLAGS -O2 -G0
+// HEADERS tomba26
 #if defined(VERSION_SLPM_80165)
-// Demo version: BETA_980203 C of src/initDisplay_beta980203.c (initDisplay, twin score 1.100), edited (tools/jp_autofix.py edits) [-O2 -G0] (tools/demo_sweep.py)
+// Demo version of initDisplay (src/initDisplay_beta980203.c).
 // Beta version: screen rectangle (0, 8, 256, 224) set at once. // Portado de psx_tomba (main/main.c, initDisplay); licencia MIT del proyecto original.
 #ifndef SKIP_ASM
 #define SKIP_ASM
