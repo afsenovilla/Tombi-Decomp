@@ -1285,7 +1285,16 @@ static int st_deliver(void) {
  * movies their 15 frames per second (10 sectors per frame) */
 void port_st_vblank(void) {
     if (!st_active || !st_ring || st_ended) return;
+#ifdef __3DS__
+    {   /* by the clock, not by the vblank: the decoder takes more than a vblank's time there, and a movie fed per
+           vblank would play in slow motion (6.7 s of logo in 16); late frames are dropped, as the drive drops them */
+        static unsigned long long last; unsigned long long now = port_time_us(), dt = last && now - last < 200000 ? now - last : 1000000ull / (unsigned)port_hz;
+        last = now;
+        st_budget += (int)(((cd_mode & 0x80) ? 150 : 75) * dt * (unsigned)port_hz / 1000000ull);
+    }
+#else
     st_budget += (cd_mode & 0x80) ? 150 : 75;         /* sectors per second: 75 at single speed, 150 at double */
+#endif
     int cap = port_hz * st_ring_n;                     /* a full ring's worth at most: the drive would have dropped the rest */
     if (st_budget > cap) st_budget = cap;
     while (st_budget >= port_hz && !st_ended) {
