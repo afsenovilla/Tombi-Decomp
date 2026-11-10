@@ -18,6 +18,13 @@ default of release.yml; bump it before each release (it used to show 0.1.<CI run
 | PAL SCES-01331 | 100 % of game code; Psy-Q library 100 % | all | nothing |
 | USA SCUS-94236 | 100 % | 3681 / 3681 | nothing |
 | JP SLPS-01144 | 100 % | 3528 / 3528 | nothing |
+| JP demo SLPM-80165 | 55.13 % | 1381 / 1717 | hand passes (docs/JPDEMO.md) |
+| Beta 980203 | 92.35 % | 1800 / 1837 | hand passes (docs/BETA_980203.md) |
+| PrePre 8 PCPX-96084 | 32.34 % | 997 / 1425 | hand passes (docs/PREPRE8.md); same compiler as retail, ASPSX 2.34 |
+
+Demo work 2026-11-10: tools/demo_pair.py (fuzzy twins over every version's C) + demo_sweep --fix in CI, then three
+rounds of hand passes per demo. Checked at the end: PAL full link (26 sha1 OK), reports PAL/JP/USA 100 %, PAL port
+sweep 96/96 clean, Python tests, CI exe + APK green.
 
 Details: docs/REMAINING.md. The last PAL function (D0SPSUB 800EFD6C) replaced a wip draft that the port built: that
 draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game clears +0x64..0x66.

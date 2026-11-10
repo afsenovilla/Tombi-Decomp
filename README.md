@@ -165,12 +165,12 @@ Regenerated with `python3 tools/build_report.py --version slps01144` then `pytho
 <summary><b>Japanese demo (SLPM-80165)</b></summary>
 
 <!-- slpm80165-progress:start -->
-**Ore! Tomba demo (SLPM-80165): 48.13 % of the code matches byte for byte** (308864 of 641792 bytes, 1273 of 1721 functions).
+**Ore! Tomba demo (SLPM-80165): 55.13 % of the code matches byte for byte** (353824 of 641796 bytes, 1381 of 1717 functions).
 
 | Part | Code | Matching bytes | Functions | Matching |
 |---|---:|---:|---:|---|
-| SLPM_801.65: boot exe | 348740 B | 197556 B | 993 / 1198 | 🟩🟩🟩🟩🟩🟨⬜⬜⬜⬜ 56.6 % |
-| X00.BIN: shared object code | 293052 B | 111308 B | 280 / 523 | 🟩🟩🟩🟨⬜⬜⬜⬜⬜⬜ 38.0 % |
+| SLPM_801.65: boot exe | 348744 B | 213740 B | 1049 / 1196 | 🟩🟩🟩🟩🟩🟩⬜⬜⬜⬜ 61.3 % |
+| X00.BIN: shared object code | 293052 B | 140084 B | 332 / 521 | 🟩🟩🟩🟩🟨⬜⬜⬜⬜⬜ 47.8 % |
 
 Regenerated with `python3 tools/build_report.py --version slpm80165` then `python3 tools/progress_jp.py --version slpm80165`. `python3 tools/demo_sweep.py` installs the PAL / JP C that matches demo functions as is (see [docs/JPDEMO.md](docs/JPDEMO.md)).
 <!-- slpm80165-progress:end -->
@@ -188,9 +188,9 @@ Every known retail, demo and prototype disc (serials, dates, executable hashes):
 | Tombi! PAL, language set 1 (EN FR DE IT NL) | SCES-01330 Rev 1 | same game files byte for byte, only the boot menu differs: covered by the same sources and reports |
 | Tomba! (USA) | SCUS-94236 | **100 % matched** (3681 / 3681 functions), see [docs/USA.md](docs/USA.md) |
 | Ore! Tomba (Japan) | SLPS-01144 | **100 % matched** (3528 / 3528 functions), see [docs/JP.md](docs/JP.md) |
-| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 40.9 % of code (objdiff; figures in "Japanese demo progress"), `tools/demo_sweep.py` installs what PAL / JP C matches as is, see [docs/JPDEMO.md](docs/JPDEMO.md) |
-| Ore! Tomba beta 1998-02-03 (Japan) | SLPS-01144 (prototype) | split + shared C, 56.5 % of code, see [docs/BETA_980203.md](docs/BETA_980203.md) |
-| Tomba! PrePre 8 (Japan demo) | PCPX-96084 | split + symbol pairing, 17.1 % of code, see [docs/PREPRE8.md](docs/PREPRE8.md) |
+| Ore! Tomba demo (Japan, taikenban) | SLPM-80165 | split + shared C, 55.1 % of code (objdiff; figures in "Japanese demo progress"), `tools/demo_sweep.py` installs what PAL / JP C matches as is, see [docs/JPDEMO.md](docs/JPDEMO.md) |
+| Ore! Tomba beta 1998-02-03 (Japan) | SLPS-01144 (prototype) | split + shared C, 92.3 % of code, see [docs/BETA_980203.md](docs/BETA_980203.md) |
+| Tomba! PrePre 8 (Japan demo) | PCPX-96084 | split + symbol pairing, 32.3 % of code, see [docs/PREPRE8.md](docs/PREPRE8.md) |
 
 All versions live in this repository and appear on decomp.dev as versions of one project: the CI uploads one
 `<serial>_report` artifact per version.
