@@ -9,6 +9,51 @@ void port_gte_mtc2(int reg, unsigned long v);
 unsigned long port_gte_mfc2(int reg);
 void port_gte_ctc2(int reg, unsigned long v);
 unsigned long port_gte_cfc2(int reg);
+#ifdef __3DS__
+/* The 3DS: the register moves in line (the game makes ~7700 of them a frame, each a call into runtime/gte.c: with the
+   register number a constant, one of these is a store or a load).  The same code as port_gte_mtc2 / mfc2 / ctc2 / cfc2. */
+extern int port_gte_D[32], port_gte_C[32];
+extern unsigned int port_gte_FLAG;
+static inline __attribute__((always_inline)) void port_gte_mtc2_i(int r, unsigned long v) {
+    int *D = port_gte_D;
+    switch (r) {
+    case 15: D[12] = D[13]; D[13] = D[14]; D[14] = (int)v; D[15] = (int)v; break;
+    case 7: case 16: case 17: case 18: case 19: D[r] = (int)(v & 0xFFFF); break;
+    case 8: case 9: case 10: case 11: D[r] = (short)v; break;
+    case 28: D[28] = (int)(v & 0x7FFF);
+        D[9] = (v & 0x1F) << 7; D[10] = ((v >> 5) & 0x1F) << 7; D[11] = ((v >> 10) & 0x1F) << 7; break;
+    case 30: { D[30] = (int)v; int x = (int)v; unsigned u = x < 0 ? ~(unsigned)x : (unsigned)x; int n = 0;
+        while (n < 32 && !(u & 0x80000000u)) { u <<= 1; n++; } D[31] = n; break; }
+    case 29: case 31: break;
+    default: D[r] = (int)v;
+    }
+}
+static inline __attribute__((always_inline)) unsigned long port_gte_mfc2_i(int r) {
+    int *D = port_gte_D;
+    switch (r) {
+    case 1: case 3: case 5: case 8: case 9: case 10: case 11: return (unsigned long)(int)(short)D[r];
+    case 7: case 16: case 17: case 18: case 19: return (unsigned short)D[r];
+    case 15: return (unsigned)D[14];
+    case 28: case 29: {
+        int r5 = D[9] >> 7, g5 = D[10] >> 7, b5 = D[11] >> 7;
+        r5 = r5 < 0 ? 0 : r5 > 31 ? 31 : r5; g5 = g5 < 0 ? 0 : g5 > 31 ? 31 : g5; b5 = b5 < 0 ? 0 : b5 > 31 ? 31 : b5;
+        return (unsigned)(r5 | (g5 << 5) | (b5 << 10));
+    }
+    default: return (unsigned)D[r];
+    }
+}
+static inline __attribute__((always_inline)) void port_gte_ctc2_i(int r, unsigned long v) {
+    if (r == 31) { port_gte_FLAG = v & 0x7FFFF000u; if (port_gte_FLAG & 0x7F87E000u) port_gte_FLAG |= 0x80000000u; return; }
+    if (r == 4 || r == 12 || r == 20 || r == 26 || r == 27 || r == 29 || r == 30) v = (unsigned long)(int)(short)v;
+    if (r == 26) v &= 0xFFFF;
+    port_gte_C[r] = (int)v;
+}
+static inline __attribute__((always_inline)) unsigned long port_gte_cfc2_i(int r) { return r == 31 ? port_gte_FLAG : (unsigned)port_gte_C[r]; }
+#define port_gte_mtc2(r, v) port_gte_mtc2_i(r, v)
+#define port_gte_mfc2(r) port_gte_mfc2_i(r)
+#define port_gte_ctc2(r, v) port_gte_ctc2_i(r, v)
+#define port_gte_cfc2(r) port_gte_cfc2_i(r)
+#endif
 #define PORT_GTE_UNSUPPORTED(ins) port_gte_unsupported(ins)
 void port_gte_unsupported(const char *ins);
 void *port_bios_tcb_table(void);

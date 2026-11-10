@@ -7,9 +7,13 @@
 
 typedef int s32; typedef unsigned int u32; typedef short s16; typedef unsigned short u16; typedef long long s64;
 
-static s32 D[32];   /* data registers */
-static s32 C[32];   /* control registers */
-static u32 FLAG;
+/* (not static: the 3DS build's game code reads and writes the registers in line, include/port_prelude.h) */
+s32 port_gte_D[32];   /* data registers */
+s32 port_gte_C[32];   /* control registers */
+u32 port_gte_FLAG;
+#define D port_gte_D
+#define C port_gte_C
+#define FLAG port_gte_FLAG
 
 #define VX(n) ((s16)(D[(n) * 2] & 0xFFFF))
 #define VY(n) ((s16)((u32)D[(n) * 2] >> 16))
