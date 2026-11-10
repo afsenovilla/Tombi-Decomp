@@ -536,10 +536,19 @@ static int c3d_start(void) {
     C3D_CullFace(GPU_CULL_NONE);
     proj_vram();
     port_printf("[3ds] pica: citro3d renderer, top screen format %d\n", scr_fmt);
+    c3d_up = 1;
     port_n3ds_main_thread();
     self_test();
     gpu_test_picture();
     return 0;
+}
+/* the way out (runtime/sdl.c): the open frame ended and waited for, citro3d closed */
+static int c3d_up;
+void port_n3ds_gpu_fini(void) {
+    if (!c3d_up) return;
+    c3d_up = 0;
+    end_and_wait();
+    C3D_Fini();
 }
 const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf };
 #endif
