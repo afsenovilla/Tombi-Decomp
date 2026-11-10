@@ -65,6 +65,9 @@ VERSIONS = {
 # the boot menu languages of each PAL disc (SCES-01331: EXE/MAIN0 + MAIN5..8, SCES-01330: MAIN0 + MAIN1..4); the port
 # runs all nine from either disc (they share every game file of their revision)
 DISC_LANGS = {"SCES-01331": "EN ES PT SV DA", "SCES-01330": "EN FR DE IT NL", "SCUS-94236": "EN", "SLPS-01144": "JA"}
+# the same as flags (port_launcher.flag_pixmap / LauncherActivity flags: 0 UK, 1 FR, 2 DE, 3 IT, 4 NL, 5 ES, 6 PT, 7 SV,
+# 8 DA, 9 US, 10 JP), drawn beside the serial on the library's cards
+DISC_FLAGS = {"SCES-01331": [0, 5, 6, 7, 8], "SCES-01330": [0, 1, 2, 3, 4], "SCUS-94236": [9], "SLPS-01144": [10]}
 # other Tomba releases a player might add by mistake
 OTHER_DISCS = {"SCUS-94454": "Tomba! 2 (USA)", "SCES-02005": "Tombi! 2 (PAL)", "SLPM-80165": "Ore no Tomba (Japan, demo)"}
 
@@ -401,7 +404,23 @@ def main(argv):
     if os.path.isdir(p):
         info, src = identify_data(p), DirSource(p)
     else:
+        import disc_archive as DA, shutil, tempfile
+        if DA.kind(p) in ("zip", "7z", "rar"):          # the image inside a .zip / .7z (unpacked to a temporary folder)
+            tmp = tempfile.mkdtemp(prefix="tombi-unpack-")
+            try:
+                p = DA.extract_image(p, tmp)
+                info, src = identify_image(p), ImageSource(p)
+                return _report(argv, p, info, src)
+            except DA.ArchiveError as e:
+                print(e)
+                return 1
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
         info, src = identify_image(p), ImageSource(p)
+    return _report(argv, p, info, src)
+
+
+def _report(argv, p, info, src):
     if not info:
         print("%s: no data manifest" % p)
         return 1

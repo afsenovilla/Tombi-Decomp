@@ -61,6 +61,10 @@ public class LauncherActivity extends Activity {
     LauncherView view;
     SelvaDialog dlg;
     volatile String importStatus;
+    /** the Disc screen shows the add flow (a disc being picked / added: its file name, its progress and its error), not
+     *  the selected game; addName = the picked file; addFromLib = opened by "Add game" (a cancelled picker goes back) */
+    volatile boolean adding, addFromLib;
+    volatile String addName;
 
     /* the launcher's own language (Options > Game > Launcher language), independent of the game language: "" = the
      * system's, else one of the translations in res/values-xx.  Applied without a restart: getResources() hands out
@@ -449,7 +453,7 @@ public class LauncherActivity extends Activity {
             return;
         }
         if (!ready()) {
-            if (g == null) { view.setScreen(LauncherView.DISC); pickDisc(); return; }   // (the progress is drawn there)
+            if (g == null) { view.setScreen(LauncherView.DISC); addFromLib = true; pickDisc(); return; }   // (the progress is drawn there)
             Toast.makeText(this, R.string.need_disc, Toast.LENGTH_LONG).show();
             view.setScreen(LauncherView.DISC);
             return;
@@ -490,6 +494,7 @@ public class LauncherActivity extends Activity {
 
     // ---- SAF disc picker ----
     void pickDisc() {
+        adding = true; addName = null; importStatus = null; result = 0;
         Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
         i.setType("*/*");
@@ -506,7 +511,7 @@ public class LauncherActivity extends Activity {
     }
 
     // ---- import state (written by the "tombi-disc" thread, drawn by the view at ~10 Hz while busy) ----
-    static final int IDLE = 0, COPYING = 1, CHECKING = 2, EXTRACTING = 3;
+    static final int IDLE = 0, COPYING = 1, CHECKING = 2, EXTRACTING = 3, UNZIPPING = 4;
     /* nativeExtract's content SHA-1 (every ISO9660 file as stored in data/, by LBA) for a raw .bin of the reference PAL disc */
     static final String CONTENT_SHA1 = "33d5f861ed02909236e9887376d80deaadbd234f";
     volatile int phase = IDLE;
@@ -528,6 +533,11 @@ public class LauncherActivity extends Activity {
     static native String nativeExtract(String image, String outDir);
     static native int nativeExtractCount();   // files done << 16 | files total
     static native void nativeCancel();
+    /** the disc image of a .7z into outDir (port2/android/un7z.c): "ok\n" + "image FILE\tPATH" / "cnf" / "exe NAME SHA1" /
+     *  "cue TRACK" / "nested" lines, or "err:<reason>" ("err:space:NEED:FREE", "err:cancelled") */
+    static native String nativeUn7z(String archive, String outDir);
+    static native long nativeUnpackBytes(int which);   // 0: bytes written, 1: the image's size
+    volatile boolean native7z;                          // UNZIPPING a .7z: the progress comes from un7z.c
 
     void requestCancel() { cancelImport = true; if (nativeOk) try { nativeCancel(); } catch (Throwable ignored) { } }
 
@@ -549,6 +559,7 @@ public class LauncherActivity extends Activity {
      *  files/data.  Cancel (B / "Cancel") stops and deletes the partial files. */
     void importDisc(List<Uri> uris) {
         cancelImport = false; result = 0; copied = 0; copyTotal = -1;
+        adding = true; addName = null;
         phase = CHECKING;
         status(null);
         File tmpDir = new File(getCacheDir(), "import"), tmp = new File(getFilesDir(), "data.tmp");   // (tmp: the game's data.tmp once known)
@@ -561,12 +572,46 @@ public class LauncherActivity extends Activity {
                 if (!nm.toLowerCase(Locale.ROOT).endsWith(".cue") && img == null) { img = u; name = nm; }
             }
             if (img == null) { fail(getString(R.string.disc_needbin)); return; }
+            addName = name;
             long size = sizeOf(img);
             CrashLog.append(this, "disc import: " + name + " (" + (size >= 0 ? size + " bytes" : "size unknown") + "), " + uris.size() + " file(s) picked");
+            // what it is (DiscArchive.kind: its first bytes): an image, a .zip holding one, a .7z / .rar, something else
+            byte[] head = new byte[DiscArchive.headBytes()]; int hn = 0;
+            try (InputStream hin = getContentResolver().openInputStream(img)) {
+                int r0;
+                while (hin != null && hn < head.length && (r0 = hin.read(head, hn, head.length - hn)) > 0) hn += r0;
+            }
+            int kind = DiscArchive.kind(head, hn, name);
+            CrashLog.append(this, "disc import: kind " + kind + " (" + hn + " head bytes)");
+            if (kind == DiscArchive.RAR) { fail(getString(R.string.disc_archive, name)); return; }
+            if (kind == DiscArchive.NOT_IMAGE) { fail(getString(R.string.disc_notimage, name)); return; }
+            if (kind == DiscArchive.CUE) { fail(getString(R.string.disc_needbin)); return; }
             long free = getFilesDir().getUsableSpace(), need = (size > 0 ? size : 700L << 20) + (64L << 20);
-            if (free < need) { fail(getString(R.string.disc_space, need >> 20, free >> 20)); return; }
-            String path = null;
-            try {
+            if (kind != DiscArchive.ZIP && free < need) { fail(getString(R.string.disc_space, need >> 20, free >> 20)); return; }
+            String path = null, shown = name;
+            if (kind == DiscArchive.ZIP) {   // the image inside, written to the cache (the ISO reader needs random access)
+                phase = UNZIPPING; copyTotal = size; copied = 0;
+                view.postInvalidate();
+                DiscArchive.Result zr;
+                try (InputStream zin = getContentResolver().openInputStream(img)) {
+                    if (zin == null) throw new java.io.FileNotFoundException(name);
+                    zr = DiscArchive.unzip(zin, tmpDir, 64L << 20, new DiscArchive.Progress() {
+                        public void read(long n) { copied = n; }
+                        public boolean cancelled() { return cancelImport; }
+                    });
+                } catch (DiscArchive.SpaceException x) {
+                    fail(getString(R.string.disc_space, x.needMb, x.freeMb)); return;
+                } catch (java.util.zip.ZipException x) {
+                    CrashLog.append(this, "disc import: zip: " + x);
+                    fail(getString(R.string.disc_zip_bad, name, String.valueOf(x.getMessage()))); return;
+                }
+                CrashLog.append(this, "disc import: zip: " + zr.entries + " entries, image " + zr.entry + " (" + zr.imageBytes + " bytes)"
+                    + (zr.looseFiles ? ", loose files: boot " + zr.boot + " " + zr.bootSha1 : "") + (zr.cueMissing != null ? ", cue names " + zr.cueMissing : ""));
+                if (zr.image == null) { noImage(zr, name); return; }
+                path = zr.image.getAbsolutePath();
+                shown = name + " › " + zr.entry.substring(zr.entry.lastIndexOf('/') + 1);
+            }
+            if (path == null) try {
                 android.os.ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(img, "r");
                 if (pfd != null) {
                     fds.add(pfd);
@@ -580,7 +625,7 @@ public class LauncherActivity extends Activity {
                 phase = COPYING; copyTotal = size;
                 tmpDir.mkdirs();
                 String low = name.toLowerCase(Locale.ROOT);
-                File t = new File(tmpDir, "image" + (low.endsWith(".chd") ? ".chd" : low.endsWith(".iso") ? ".iso" : ".bin"));
+                File t = new File(tmpDir, kind == DiscArchive.SEVENZ ? "archive.7z" : "image" + (low.endsWith(".chd") ? ".chd" : low.endsWith(".iso") ? ".iso" : ".bin"));
                 InputStream in = getContentResolver().openInputStream(img);
                 if (in == null) throw new Exception(name);
                 FileOutputStream out = new FileOutputStream(t);
@@ -597,13 +642,37 @@ public class LauncherActivity extends Activity {
                 if (size >= 0 && got != size) { fail(getString(R.string.disc_short, name, got, size)); return; }
                 path = t.getAbsolutePath();
             }
-            if (!nativeOk) { fail(getString(R.string.disc_fail, "libtombidisc.so missing")); return; }
+            if (!nativeOk) { fail(getString(R.string.disc_add_fail, "libtombidisc.so missing")); return; }
+            if (kind == DiscArchive.SEVENZ) {   // the image inside the .7z, written to the cache (un7z.c: the LZMA SDK, streamed)
+                phase = UNZIPPING; native7z = true; copied = 0; copyTotal = -1;
+                view.postInvalidate();
+                File o7 = new File(tmpDir, "7z");
+                o7.mkdirs();
+                String u;
+                try { u = nativeUn7z(path, o7.getAbsolutePath()); } finally { native7z = false; }
+                CrashLog.append(this, "disc import: 7z: " + u.replace('\n', ' ').replace('\t', ' '));
+                if (u.equals("err:cancelled")) throw new InterruptedException();
+                if (u.startsWith("err:space:")) {
+                    String[] sp = u.split(":");
+                    fail(getString(R.string.disc_space, Long.parseLong(sp[2]) >> 20, Long.parseLong(sp[3]) >> 20)); return;
+                }
+                if (!u.startsWith("ok")) { fail(getString(R.string.disc_zip_bad, name, u.startsWith("err:") ? u.substring(4) : u)); return; }
+                DiscArchive.Result zr = DiscArchive.fromNative(u, o7);
+                if (zr.image == null) { noImage(zr, name); return; }
+                path = zr.image.getAbsolutePath();
+                shown = name + " › " + zr.entry.substring(zr.entry.lastIndexOf('/') + 1);
+            }
             phase = CHECKING;
             view.postInvalidate();
             // which game (disccheck.c nativeIdentify): the boot executable SYSTEM.CNF names and its SHA-1
             String r = nativeIdentify(path);
             CrashLog.append(this, "disc import: identify: " + r);
-            if (!r.startsWith("id:")) { fail(r.equals("err:noboot") ? getString(R.string.disc_nomain0) : getString(R.string.disc_fail, r.substring(4))); return; }
+            if (!r.startsWith("id:")) {
+                fail(r.equals("err:noboot") ? getString(R.string.disc_nomain0)
+                     : r.startsWith("err:sector 16") ? getString(R.string.disc_notimage, name)
+                     : getString(R.string.disc_add_fail, r.substring(4)));
+                return;
+            }
             java.util.Map<String, String> id = new java.util.HashMap<>();
             for (String kv : r.substring(3).split(";")) { int e = kv.indexOf('='); if (e > 0) id.put(kv.substring(0, e), kv.substring(e + 1)); }
             String sha = id.get("sha1"), main0 = id.get("main0"), serial = id.get("serial");
@@ -614,7 +683,8 @@ public class LauncherActivity extends Activity {
                 fail(getString(R.string.disc_unknown, serial, sha == null ? "?" : sha)); return;
             }
             if (!v.supported()) {   // recognised, no port of it yet (Japan): listed in the library, nothing extracted
-                lib.put(serial, v, name, "");
+                lib.put(serial, v, shown, "");
+                adding = false;
                 phase = IDLE; result = -1;
                 status(getString(R.string.lib_unsupported_long, versionName(v)));
                 return;
@@ -635,10 +705,11 @@ public class LauncherActivity extends Activity {
             File data = new File(gdir, "data");
             deleteTree(data);
             new File(gdir, "logo.png").delete();
-            if (!tmp.renameTo(data)) { deleteTree(tmp); fail(getString(R.string.disc_fail, "rename data.tmp")); return; }
+            if (!tmp.renameTo(data)) { deleteTree(tmp); fail(getString(R.string.disc_add_fail, "rename data.tmp")); return; }
             if (v.pal()) deleteTree(new File(filesDir(), "disc"));   // an image copied by an older version: no longer needed
-            Library.Game g = lib.put(serial, v, name, x.substring(3) + (x.endsWith(CONTENT_SHA1) ? " (= reference PAL disc)" : ""));
+            Library.Game g = lib.put(serial, v, shown, x.substring(3) + (x.endsWith(CONTENT_SHA1) ? " (= reference PAL disc)" : ""));
             try { Library.logo(g); } catch (Throwable t) { CrashLog.append(this, "disc import: logo: " + t); }
+            adding = false;
             phase = IDLE;
             result = 1;
             status(getString(R.string.disc_added, versionName(v)));
@@ -650,7 +721,7 @@ public class LauncherActivity extends Activity {
         } catch (Throwable e) {
             deleteTree(tmp);
             CrashLog.append(this, "disc import: " + CrashLog.stack(e));
-            fail(getString(R.string.disc_fail, String.valueOf(e.getMessage())));
+            fail(getString(R.string.disc_add_fail, String.valueOf(e.getMessage())));
         } finally {
             for (android.os.ParcelFileDescriptor f : fds) try { f.close(); } catch (Throwable ignored) { }
             deleteTree(tmpDir);
@@ -658,6 +729,15 @@ public class LauncherActivity extends Activity {
     }
 
     void fail(String msg) { phase = IDLE; result = -1; status(msg); CrashLog.append(this, "disc import failed: " + msg); }
+    /** an archive without a disc image: why, naming the archive (and the game, for its loose files) */
+    void noImage(DiscArchive.Result zr, String name) {
+        if (zr.looseFiles) {
+            Library.Version lv = zr.bootSha1 != null ? Library.bySha1(zr.bootSha1) : null;
+            String what = lv != null ? versionName(lv) : zr.serial != null ? zr.serial : "?";
+            fail(getString(R.string.disc_zip_files, name, what));
+        } else if (zr.cueMissing != null) fail(getString(R.string.disc_zip_cue, name, zr.cueMissing));
+        else fail(getString(zr.archiveInside ? R.string.disc_zip_nested : R.string.disc_zip_noimage, name));
+    }
 
     static void deleteTree(File f) {
         if (f == null || !f.exists()) return;
@@ -828,6 +908,12 @@ public class LauncherActivity extends Activity {
         if (req == REQ_SAVE_IMPORT && res == RESULT_OK && data != null && data.getData() != null) { doSaveImport(data.getData()); return; }
         if (req == REQ_SAVE_EXPORT && res == RESULT_OK && data != null && data.getData() != null) { doSaveExport(data.getData()); return; }
         if (req == REQ_TRANSLATION && res == RESULT_OK && data != null && data.getData() != null) { doTranslationImport(data.getData()); return; }
+        if (req == REQ_DISC && (res != RESULT_OK || data == null) && phase == IDLE && importStatus == null) {   // picker closed
+            adding = false;
+            if (addFromLib && view != null) view.setScreen(LauncherView.MAIN);
+            if (view != null) view.invalidate();
+            return;
+        }
         if (req == REQ_DISC && res == RESULT_OK && data != null) {
             final List<Uri> uris = new ArrayList<>();
             if (data.getClipData() != null)
@@ -949,10 +1035,12 @@ public class LauncherActivity extends Activity {
             padStatus = null; capture = -1;
             lastFocus[screen] = focus;
             if (sc == DISC) discFromOptions = screen == OPTCAT;
+            if (phase == IDLE && (sc != DISC || screen != DISC)) { importStatus = null; result = 0; }   // a new visit: no old message
+            if (phase == IDLE && sc != DISC) { adding = false; addFromLib = false; }
+            if (phase == IDLE && sc == DISC && screen != DISC) { adding = false; addFromLib = false; }
             screen = sc;
             focus = lastFocus[sc];
             listScroll = 0; followFocus = true; scroller.forceFinished(true);
-            if (sc != DISC && phase == IDLE) { importStatus = null; result = 0; }
             if (sc == CRASH || sc == LOG) {
                 try { logLines = CrashLog.tail(LauncherActivity.this, 40); } catch (Throwable t) { logLines = new ArrayList<>(); }
                 focus = 0;
@@ -1021,7 +1109,7 @@ public class LauncherActivity extends Activity {
                     it.game = i;
                     items.add(it);
                 }
-                Item ad = new Item(getString(R.string.lib_add), new Runnable() { public void run() { setScreen(DISC); pickDisc(); } });
+                Item ad = new Item(getString(R.string.lib_add), new Runnable() { public void run() { setScreen(DISC); addFromLib = true; pickDisc(); } });
                 ad.add = true;
                 items.add(ad);
                 Item a = new Item(getString(R.string.play), new Runnable() { public void run() { play(); } });
@@ -1158,6 +1246,9 @@ public class LauncherActivity extends Activity {
                 sv.adj = new Adjust() { public void by(int d) { wipeSaves = !wipeSaves; } };
                 items.add(sv);
                 items.add(new Item(getString(R.string.cancel), new Runnable() { public void run() { confirmWipe = false; focus = 0; } }));
+            } else if (adding) {   // the add flow: pick (again) or back
+                items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
+                items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(discFromOptions ? OPTCAT : MAIN); } }));
             } else {
                 items.add(new Item(getString(R.string.disc_pick), new Runnable() { public void run() { pickDisc(); } }));
                 if (game() != null) items.add(new Item(getString(R.string.lib_remove), new Runnable() { public void run() { removeGame(); } }));
@@ -1559,6 +1650,71 @@ public class LauncherActivity extends Activity {
         }
 
         /** a small rounded label (serial, region) at x (left), centred on cy; returns its right edge */
+        /** a small drawn flag (no image files): 0 UK, 1 FR, 2 DE, 3 IT, 4 NL, 5 ES, 6 PT, 7 SV, 8 DA, 9 US, 10 JP, as the
+         *  PC launcher's flag_pixmap; w = 1.5 h, top-left at x, y */
+        void drawFlag(int n, float x, float y, float h) {
+            float w = h * 1.5f;
+            p.setStyle(Paint.Style.FILL);
+            canvas.save();
+            canvas.clipRect(x, y, x + w, y + h);
+            switch (n) {
+                case 0:   // United Kingdom (simplified)
+                    box(x, y, w, h, 0, 0, 1, 1, 0xff012169);
+                    p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(h * 0.19f); p.setColor(Color.WHITE);
+                    canvas.drawLine(x, y, x + w, y + h, p); canvas.drawLine(x + w, y, x, y + h, p);
+                    p.setStrokeWidth(h * 0.07f); p.setColor(0xffC8102E);
+                    canvas.drawLine(x, y, x + w, y + h, p); canvas.drawLine(x + w, y, x, y + h, p);
+                    p.setStyle(Paint.Style.FILL);
+                    box(x, y, w, h, 0, 0.31f, 1, 0.69f, Color.WHITE); box(x, y, w, h, 0.375f, 0, 0.625f, 1, Color.WHITE);
+                    box(x, y, w, h, 0, 0.375f, 1, 0.625f, 0xffC8102E); box(x, y, w, h, 0.417f, 0, 0.583f, 1, 0xffC8102E);
+                    break;
+                case 1: vert(x, y, w, h, 0xff0055A4, Color.WHITE, 0xffEF4135); break;
+                case 2: horiz(x, y, w, h, 0xff000000, 0xffDD0000, 0xffFFCE00); break;
+                case 3: vert(x, y, w, h, 0xff009246, Color.WHITE, 0xffCE2B37); break;
+                case 4: horiz(x, y, w, h, 0xffAE1C28, Color.WHITE, 0xff21468B); break;
+                case 5: box(x, y, w, h, 0, 0, 1, 1, 0xffAA151B); box(x, y, w, h, 0, 0.25f, 1, 0.75f, 0xffF1BF00); break;
+                case 6:
+                    box(x, y, w, h, 0, 0, 0.4f, 1, 0xff006600); box(x, y, w, h, 0.4f, 0, 1, 1, 0xffFF0000);
+                    p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(h * 0.1f); p.setColor(0xffFFE000);
+                    canvas.drawCircle(x + w * 0.4f, y + h / 2, h / 4, p); p.setStyle(Paint.Style.FILL);
+                    break;
+                case 7: nordic(x, y, w, h, 0xff006AA7, 0xffFECC02); break;
+                case 8: nordic(x, y, w, h, 0xffC8102E, Color.WHITE); break;
+                case 9:
+                    for (int i = 0; i < 13; i++) box(x, y, w, h, 0, i / 13f, 1, (i + 1) / 13f, i % 2 == 0 ? 0xffB22234 : Color.WHITE);
+                    box(x, y, w, h, 0, 0, 0.42f, 7 / 13f, 0xff3C3B6E);
+                    break;
+                case 10:
+                    box(x, y, w, h, 0, 0, 1, 1, Color.WHITE);
+                    p.setColor(0xffBC002D); canvas.drawCircle(x + w / 2, y + h / 2, h * 0.3f, p);
+                    break;
+                default: box(x, y, w, h, 0, 0, 1, 1, 0xff888888);
+            }
+            canvas.restore();
+            p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1); p.setColor(0x3c000000);
+            canvas.drawRect(x + 0.5f, y + 0.5f, x + w - 0.5f, y + h - 0.5f, p);
+            p.setStyle(Paint.Style.FILL);
+        }
+        void box(float x, float y, float w, float h, float x0, float y0, float x1, float y1, int c) {
+            p.setColor(c); canvas.drawRect(x + w * x0, y + h * y0, x + w * x1, y + h * y1, p);
+        }
+        void vert(float x, float y, float w, float h, int a, int b, int c) {
+            box(x, y, w, h, 0, 0, 1 / 3f, 1, a); box(x, y, w, h, 1 / 3f, 0, 2 / 3f, 1, b); box(x, y, w, h, 2 / 3f, 0, 1, 1, c);
+        }
+        void horiz(float x, float y, float w, float h, int a, int b, int c) {
+            box(x, y, w, h, 0, 0, 1, 1 / 3f, a); box(x, y, w, h, 0, 1 / 3f, 1, 2 / 3f, b); box(x, y, w, h, 0, 2 / 3f, 1, 1, c);
+        }
+        void nordic(float x, float y, float w, float h, int bg, int cross) {
+            box(x, y, w, h, 0, 0, 1, 1, bg); box(x, y, w, h, 0, 0.4f, 1, 0.6f, cross); box(x, y, w, h, 0.29f, 0, 0.46f, 1, cross);
+        }
+        /** the disc's languages as flags in a row from x, centred on cy; returns the right end (x when none) */
+        float flags(Library.Game g, float x, float cy, float h) {
+            int[] f = Library.flagsOf(g.serial);
+            for (int n : f) { drawFlag(n, x, cy - h / 2, h); x += h * 1.5f + 5; }
+            return f.length > 0 ? x - 5 : x;
+        }
+        float flagsWidth(Library.Game g, float h) { int n = Library.flagsOf(g.serial).length; return n == 0 ? 0 : n * (h * 1.5f + 5) - 5; }
+
         float tag(String t, float x, float cy, int bg, int fg) {
             text(nunito, 14, fg); p.setTextAlign(Paint.Align.LEFT);
             float w = p.measureText(t) + 20;
@@ -1590,11 +1746,15 @@ public class LauncherActivity extends Activity {
                     RectF lr = new RectF(it.r.left + 18, it.r.top + 18, it.r.right - 18, it.r.top + 160);
                     drawLogo(g, lr, false);
                     text(nunito, 22, BG);
-                    drawFitAt(versionName(g.ver), it.r.centerX(), it.r.top + 200, cw - 36);
+                    drawFitAt(versionName(g.ver), it.r.centerX(), it.r.top + 196, cw - 36);
                     text(nunito, 14, BG);
                     float tw = p.measureText(g.serial) + 20;
-                    tag(g.serial, it.r.centerX() - tw / 2, it.r.top + 228, 0x262f6b3a, BG);
-                    statusLine(g, it.r.centerX(), it.r.top + 270, cw - 36, true, 0xff2a7a3a);
+                    tag(g.serial, it.r.centerX() - tw / 2, it.r.top + 220, 0x262f6b3a, BG);
+                    // the disc's languages: a row of flags under the serial (as small as the card needs)
+                    float fh = 14;
+                    while (fh > 8 && flagsWidth(g, fh) > cw - 36) fh -= 1;
+                    flags(g, it.r.centerX() - flagsWidth(g, fh) / 2, it.r.top + 248, fh);
+                    statusLine(g, it.r.centerX(), it.r.top + 282, cw - 36, true, 0xff2a7a3a);
                 }
                 x += cw + gap;
             }
@@ -1642,6 +1802,7 @@ public class LauncherActivity extends Activity {
                     text(nunito, 22, BG); p.setTextAlign(Paint.Align.LEFT);
                     drawFitAt(versionName(g.ver), tx, it.r.top + rh * 0.36f, tw);
                     float r2 = tag(g.serial, tx, it.r.top + rh * 0.58f, 0x262f6b3a, BG);
+                    if (flagsWidth(g, 15) > 0) r2 = flags(g, r2 + 10, it.r.top + rh * 0.58f, 15);
                     statusLine(g, r2 + 12, it.r.top + rh * 0.58f + 6, it.r.right - 20 - r2 - 12, false, 0xff2a7a3a);
                 }
                 y += rh + gap;
@@ -1651,23 +1812,31 @@ public class LauncherActivity extends Activity {
             p.setColor(CHIP); canvas.drawRoundRect(pane, 28, 28, p);
             Library.Game g = game();
             if (g != null) {
-                drawLogo(g, new RectF(pane.left + 30, pane.top + 22, pane.right - 30, pane.top + 200), true);
+                drawLogo(g, new RectF(pane.left + 30, pane.top + 22, pane.right - 30, pane.top + 184), true);
                 text(nunito, 26, Color.WHITE);
-                drawFitAt(versionName(g.ver), pane.centerX(), pane.top + 238, pane.width() - 40);
+                drawFitAt(versionName(g.ver), pane.centerX(), pane.top + 218, pane.width() - 40);
                 text(nunito, 16, SUB);
-                drawFitAt(g.serial + (g.name != null && !g.name.isEmpty() ? "  ·  " + g.name : ""), pane.centerX(), pane.top + 266, pane.width() - 40);
+                // the serial and the disc's languages (flags) on one line (the file it came from: the Disc screen)
+                float sw = p.measureText(g.serial), fw = flagsWidth(g, 16), all = sw + (fw > 0 ? 14 + fw : 0);
+                p.setTextAlign(Paint.Align.LEFT);
+                canvas.drawText(g.serial, pane.centerX() - all / 2, pane.top + 248, p);
+                if (fw > 0) flags(g, pane.centerX() - all / 2 + sw + 14, pane.top + 242, 16);
             } else {
                 tp.setTypeface(nunito); tp.setTextSize(18); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
                 @SuppressWarnings("deprecation")
                 StaticLayout l = new StaticLayout(getString(R.string.lib_empty), tp, (int) pane.width() - 60, Layout.Alignment.ALIGN_CENTER, 1.1f, 0, false);
                 canvas.save(); canvas.translate(pane.left + 30, pane.top + 100); l.draw(canvas); canvas.restore();
             }
-            float by = pane.top + 296;
+            // Play / Options / Quit at the pane's bottom, inset from it as much as from its sides (the device report: they
+            // touched the edge); the button's shadow (5) inside the inset
+            float inset = 48, bgap = 14, bsum = -bgap;
+            for (Item it : btns) bsum += (it.primary ? 68 : 54) + bgap;
+            float by = pane.bottom - inset - 5 - bsum;
             for (Item it : btns) {
-                float h = it.primary ? 72 : 56;
-                it.r.set(pane.left + 60, by, pane.right - 60, by + h);
+                float h = it.primary ? 68 : 54;
+                it.r.set(pane.left + inset, by, pane.right - inset, by + h);
                 button(it, items.indexOf(it) == focus, it.primary ? 30 : 23);
-                by += h + 18;
+                by += h + bgap;
             }
         }
 
@@ -1714,16 +1883,21 @@ public class LauncherActivity extends Activity {
                 drawFit(lab[k], it.r.centerX(), it.r, w - 24);
                 x += w + gap;
             }
-            float y = games.isEmpty() ? 400 : 352;
+            float y = 352;
+            if (games.isEmpty()) {
+                tp.setTypeface(nunito); tp.setTextSize(17); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
+                y = Math.max(y, 330 + wrapped(getString(R.string.lib_empty), 330) + 18);
+            }
+            // the menu: its bottom (with the shadow) at most 30 above the chips (650)
+            float bstep = 16, bsum = -bstep;
+            for (Item it : btns) bsum += (it.primary ? 78 + 6 : 62 + 5) + bstep;
+            if (y + bsum > 620) { bstep = Math.max(8, bstep - (y + bsum - 620) / Math.max(1, btns.size() - 1)); bsum = -bstep; for (Item it : btns) bsum += (it.primary ? 78 + 6 : 62 + 5) + bstep; }
+            if (y + bsum > 620) y = 620 - bsum;
             for (Item it : btns) {
                 float hh = it.primary ? 78 : 62;
                 it.r.set(640 - 230, y, 640 + 230, y + hh);
                 button(it, items.indexOf(it) == focus, it.primary ? 30 : 24);
-                y += hh + (it.primary ? 6 : 5) + 16;
-            }
-            if (games.isEmpty()) {
-                tp.setTypeface(nunito); tp.setTextSize(17); tp.setColor(SUB); tp.setTextAlign(Paint.Align.LEFT);
-                wrapped(getString(R.string.lib_empty), 330);
+                y += hh + (it.primary ? 6 : 5) + bstep;
             }
         }
 
@@ -1968,22 +2142,27 @@ public class LauncherActivity extends Activity {
             }
         }
 
-        void wrapped(String t, float top) {
+        /** t wrapped (never cut) in a centred column 900 wide from top; returns its height */
+        float wrapped(String t, float top) { return wrapped(t, top, 900); }
+        float wrapped(String t, float top, int width) {
             @SuppressWarnings("deprecation")
-            StaticLayout l = new StaticLayout(t, tp, 900, Layout.Alignment.ALIGN_CENTER, 1.1f, 0, false);
+            StaticLayout l = new StaticLayout(t, tp, width, Layout.Alignment.ALIGN_CENTER, 1.1f, 0, false);
             canvas.save();
-            canvas.translate(640 - 450, top);
+            canvas.translate(640 - width / 2f, top);
             l.draw(canvas);
             canvas.restore();
+            return l.getHeight();
         }
 
         /** Selva pill bar: dark track, accent fill with its shadow edge (as the buttons), phase / % / MB labels. */
         void progressBar(int ph, float top) {
             long done = copied, tot = copyTotal;
+            if (ph == UNZIPPING && native7z && nativeOk) { done = nativeUnpackBytes(0); tot = nativeUnpackBytes(1); }
             float frac;
-            if (ph == CHECKING || ph == EXTRACTING) frac = nativeOk ? Math.max(0, Math.min(1, nativeCheckProgress() / 1000f)) : 0;
+            if (ph == CHECKING || ph == EXTRACTING) frac = nativeOk ? Math.max(0, Math.min(1, nativeCheckProgress() / 1000f)) : 0;   // (UNZIPPING: bytes of the zip)
             else frac = tot > 0 ? Math.min(1f, done / (float) tot) : 0;
-            String label = getString(ph == EXTRACTING ? R.string.disc_phase_extract : ph == CHECKING ? R.string.disc_phase_check : R.string.disc_phase_copy);
+            String label = getString(ph == EXTRACTING ? R.string.disc_phase_extract : ph == CHECKING ? R.string.disc_phase_check
+                                     : ph == UNZIPPING ? R.string.disc_phase_unzip : R.string.disc_phase_copy);
             text(nunito, 20, Color.WHITE);
             p.setTextAlign(Paint.Align.LEFT);
             canvas.drawText(label, 640 - 300, top + 6, p);
@@ -2007,7 +2186,7 @@ public class LauncherActivity extends Activity {
                 if (tmp.width() > 0) canvas.drawRoundRect(tmp, 3, 3, p);
             }
             text(nunito, 17, SUB);
-            String mb = ph == EXTRACTING ? extractDetail() : ph == CHECKING ? "MAIN0.EXE (SHA-1)"
+            String mb = ph == EXTRACTING ? extractDetail() : ph == CHECKING ? "SYSTEM.CNF · BOOT (SHA-1)"
                     : tot > 0 ? (done >> 20) + " / " + (tot >> 20) + " MB" : (done >> 20) + " MB";
             canvas.drawText(mb, 640, top + 78, p);
         }
@@ -2017,18 +2196,21 @@ public class LauncherActivity extends Activity {
             return getString(R.string.disc_extract_files, (c >>> 16) & 0xFFFF, c & 0xFFFF);
         }
 
-        void resultBox(boolean ok, String msg, float top) {
-            tmp.set(640 - 320, top, 640 + 320, top + 80);
+        /** the result of an import / a removal: a tinted box as tall as its wrapped text; returns its bottom */
+        float resultBox(boolean ok, String msg, float top) {
+            tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT); tp.setTextSize(18); tp.setColor(Color.WHITE);
+            @SuppressWarnings("deprecation")
+            StaticLayout l = new StaticLayout((ok ? "✓  " : "✗  ") + msg, tp, 680, Layout.Alignment.ALIGN_CENTER, 1.05f, 0, false);
+            tmp.set(640 - 370, top, 640 + 370, top + Math.max(64, l.getHeight() + 28));
             p.setStyle(Paint.Style.FILL);
             p.setColor(ok ? 0x5527c25a : 0x55ff3a5c);
             canvas.drawRoundRect(tmp, 22, 22, p);
-            tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT); tp.setTextSize(18); tp.setColor(Color.WHITE);
-            @SuppressWarnings("deprecation")
-            StaticLayout l = new StaticLayout((ok ? "✓  " : "✗  ") + msg, tp, 600, Layout.Alignment.ALIGN_CENTER, 1.05f, 0, false);
+            float bottom = tmp.bottom;
             canvas.save();
-            canvas.translate(640 - 300, tmp.centerY() - l.getHeight() / 2f);
+            canvas.translate(640 - 340, tmp.centerY() - l.getHeight() / 2f);
             l.draw(canvas);
             canvas.restore();
+            return bottom;
         }
 
         /* the crash card / the last log: title, the last 40 lines (monospace), the four buttons in a row */
@@ -2064,34 +2246,56 @@ public class LauncherActivity extends Activity {
             }
         }
 
+        /** the Disc screen: the selected game (its status, where its data came from) or, while adding a disc, the file
+         *  being added; the help; the progress / result; the buttons.  One column: each block is wrapped (never cut) and
+         *  starts below the previous one, the buttons below them all (closer together when the column is long). */
         void drawDisc() {
-            Library.Game g = game();
-            bigTitle(g != null && g.ver != null ? versionName(g.ver) : getString(R.string.disc), 60, 92);
-            File disc = discFile();
-            boolean have = dataReady() || disc != null;
-            boolean ok = g != null && okOf(g);
-            String head = g == null ? getString(R.string.disc_missing) : statusOf(g) + "  ·  " + g.serial;
-            tmp.set(640 - 300, 124, 640 + 300, 164);
-            p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
-            canvas.drawRoundRect(tmp, 20, 20, p);
-            text(nunito, 19, ok ? SUB : ACCENT);
-            drawFit((ok ? "✓  " : "✗  ") + head, 640, tmp, tmp.width() - 30);
+            Library.Game g = adding ? null : game();
+            bigTitle(adding ? getString(R.string.lib_add) : g != null && g.ver != null ? versionName(g.ver) : getString(R.string.disc), 60, 92);
+            float y = 124;
+            if (adding) {   // the file being added (its name: the error below belongs to it, not to the selected game)
+                String nm = addName;
+                text(nunito, 19, Color.WHITE);
+                String t = nm != null ? getString(R.string.disc_adding, nm) : getString(R.string.lib_add_sub);
+                tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT); tp.setTextSize(19); tp.setColor(nm != null ? Color.WHITE : SUB);
+                @SuppressWarnings("deprecation")
+                StaticLayout l = new StaticLayout(t, tp, 860, Layout.Alignment.ALIGN_CENTER, 1.05f, 0, false);
+                tmp.set(640 - 450, y, 640 + 450, y + Math.max(40, l.getHeight() + 14));
+                p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
+                canvas.drawRoundRect(tmp, 20, 20, p);
+                canvas.save(); canvas.translate(640 - 430, tmp.centerY() - l.getHeight() / 2f); l.draw(canvas); canvas.restore();
+                y = tmp.bottom + 12;
+            } else {
+                File disc = discFile();
+                boolean ok = g != null && okOf(g);
+                String head = g == null ? getString(R.string.disc_missing) : statusOf(g) + "  ·  " + g.serial;
+                tmp.set(640 - 300, y, 640 + 300, y + 40);
+                p.setColor(CHIP); p.setStyle(Paint.Style.FILL);
+                canvas.drawRoundRect(tmp, 20, 20, p);
+                text(nunito, 19, ok ? SUB : ACCENT);
+                drawFit((ok ? "✓  " : "✗  ") + head, 640, tmp, tmp.width() - 30);
+                y = tmp.bottom + 10;
+                tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT);
+                tp.setTextSize(14); tp.setColor(0xd0ffffff);
+                if (g != null && dataReady()) y += wrapped(getString(R.string.disc_data, g.name == null || g.name.isEmpty() ? "?" : g.name, g.info == null ? "" : g.info), y, 1060) + 12;
+                else if (disc != null) y += wrapped(getString(R.string.disc_path, disc.getAbsolutePath()), y, 1060) + 12;
+            }
             tp.setTypeface(nunito); tp.setTextAlign(Paint.Align.LEFT);
-            tp.setTextSize(16); tp.setColor(Color.WHITE);
-            if (have && g != null && dataReady()) wrapped(getString(R.string.disc_data, g.name == null || g.name.isEmpty() ? "?" : g.name, g.info == null ? "" : g.info), 172);
-            else if (disc != null) wrapped(getString(R.string.disc_path, disc.getAbsolutePath()), 178);
-            tp.setColor(SUB);
-            wrapped(getString(R.string.disc_howto), 222);
+            tp.setTextSize(16); tp.setColor(SUB);
+            y += wrapped(getString(R.string.disc_howto), y, 1000) + 16;
             int ph = phase;
-            if (ph != IDLE) { progressBar(ph, 300); postInvalidateDelayed(100); }   // ~10 Hz while busy
-            else if (result != 0 && importStatus != null) resultBox(result > 0, importStatus, 300);
-            else if (importStatus != null) { tp.setColor(Color.WHITE); tp.setTextSize(18); wrapped(importStatus, 330); }
-            if (confirmWipe) { tp.setColor(ACCENT); tp.setTextSize(18); wrapped(getString(R.string.disc_wipe_confirm), 300); }
-            float y = items.size() > 2 ? 384 : 400, bh = items.size() > 2 ? 52 : 58;
-            for (int i = 0; i < items.size(); i++) {
+            if (ph != IDLE) { progressBar(ph, y + 6); y += 92; postInvalidateDelayed(100); }   // ~10 Hz while busy
+            else if (result != 0 && importStatus != null) y = resultBox(result > 0, importStatus, y) + 14;
+            else if (importStatus != null) { tp.setColor(Color.WHITE); tp.setTextSize(18); y += wrapped(importStatus, y) + 14; }
+            if (confirmWipe) { tp.setColor(ACCENT); tp.setTextSize(18); y += wrapped(getString(R.string.disc_wipe_confirm), y) + 14; }
+            // the buttons: from y (at least 384 as before), the spacing shrinks to fit above the bottom edge
+            int n = items.size();
+            float top = Math.max(y, n > 2 ? 384 : 400), bh = n > 2 ? 52 : 58, step = bh + 19;
+            if (n > 0 && top + (n - 1) * step + bh > 708) { step = Math.max(bh + 6, (708 - top - bh) / Math.max(1, n - 1)); if (top + (n - 1) * step + bh > 708) top = 708 - (n - 1) * step - bh; }
+            for (int i = 0; i < n; i++) {
                 Item it = items.get(i);
                 boolean f = i == focus;
-                it.r.set(640 - 260, y, 640 + 260, y + bh);
+                it.r.set(640 - 260, top + i * step, 640 + 260, top + i * step + bh);
                 pill(it.r, f ? Color.WHITE : CREAM, CREAM_SH, 5, f);
                 text(nunito, 22, BG);
                 if (it.value == null) drawFit(it.label, 640, it.r, it.r.width() - 40);
@@ -2099,7 +2303,6 @@ public class LauncherActivity extends Activity {
                     p.setTextAlign(Paint.Align.LEFT); canvas.drawText(it.label, it.r.left + 26, midBase(it.r), p);
                     p.setTextAlign(Paint.Align.RIGHT); canvas.drawText("‹  " + it.value + "  ›", it.r.right - 26, midBase(it.r), p);
                 }
-                y += bh + 5 + 14;
             }
         }
     }

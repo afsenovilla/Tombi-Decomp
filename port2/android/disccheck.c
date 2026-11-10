@@ -8,6 +8,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <ctype.h>
+#include <strings.h>
 #include "port_chd.h"
 
 static volatile int progress;            /* 0..1000 while hashing (nativeCheckProgress) */
@@ -462,3 +464,6 @@ JNIEXPORT jint JNICALL Java_io_github_tombi_port_LauncherActivity_nativeExtractC
     (void)env; (void)cls; return (jint)((ex_done & 0xFFFF) << 16 | (ex_total & 0xFFFF));
 }
 JNIEXPORT void JNICALL Java_io_github_tombi_port_LauncherActivity_nativeCancel(JNIEnv *env, jclass cls) { (void)env; (void)cls; ex_cancel = 1; }
+
+/* .7z: the disc image inside an archive (LauncherActivity.importDisc) */
+#include "un7z.c"
