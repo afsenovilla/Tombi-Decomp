@@ -3592,3 +3592,12 @@ package servers refuse the cloud container, so there is no libctru/citro3d build
   optional `args.txt` flags and `log.txt`; audio needs `sdmc:/3ds/dspfirm.cdc` (DSP1).  Not tried on hardware or
   an emulator yet; first run: software renderer, movies skipped, no second screen.  Open risks: the user exception
   handler (null-page accesses) needs a kernel that delivers user exceptions (Luma3DS does), the speed.
+- **The GPU renderer runs (2026-11-10).** `--renderer pica` with the citro3d device (n3ds/pica_c3d.c) is the 3DS
+  default.  In Azahar (CI job `emulate`: Xvfb + Mesa, frame / VRAM dumps through args.txt, printed in the job log) the
+  title screen draws correctly and the VRAM matches the PC's; ~9x more frames than the software renderer in the same
+  emulated time.  Orientations found with the start-up self test and the dumps: the projection maps VRAM y = 0 to
+  clip +1; the scissor counts rows from the other edge (y' = 511 - y); textures are sampled with t = 1 - row / height
+  (cache slots, staging writes and the render target alike).  Fixed on the way: .3dsx relocations (the runtime is
+  -fPIC, check_3dsx.py fails the build otherwise), libsysbase as a library for gen2 (opendir), --renderer pica made no
+  GL window.  Azahar does not fault on unmapped low addresses (it logs them), so the null-page handler is only
+  exercised on hardware.  Not done: the bottom screen (panel), movies, audio on the DSP (SDL's ndsp needs dspfirm.cdc).
