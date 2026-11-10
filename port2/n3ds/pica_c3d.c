@@ -173,7 +173,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
         /* +0.5: the PICA samples pixel centres, the PS1 integer positions.  In y a hair less: the target's rows run
            against the PICA's y, so an edge exactly on the centres takes the row below instead of the one above
            (the self test: a mark at row 64 filled rows 65..72, in Azahar and on a console alike) */
-        d->x = v[i].x + 0.5f; d->y = v[i].y + (0.5f - 1.0f / 64.0f); d->z = 0.5f; d->s = v[i].u * ts; d->t = 1.0f - v[i].v * tt;
+        d->x = v[i].x + (0.5f - 1.0f / 64.0f); d->y = v[i].y + (0.5f - 1.0f / 64.0f);   /* (x too: a console left a column undrawn between two sprites side by side, their shared edge on the centres) */ d->z = 0.5f; d->s = v[i].u * ts; d->t = 1.0f - v[i].v * tt;
         d->r = v[i].r * k; d->g = v[i].g * k; d->b = v[i].b * k; d->a = al;
     }
     C3D_DrawArrays(GPU_TRIANGLES, vb_n, n);

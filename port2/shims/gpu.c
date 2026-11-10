@@ -947,7 +947,10 @@ void DrawOTag(u32 *ot) {
                 for (u32 k = 1; k <= len; k++) port_printf(" %08x", p[k]);
                 port_printf("\n");
             }
-            if (!skip || (p[1] >> 24) >= 0x80) packet(p + 1, len);   /* (0x80..: image moves / loads, the environment) */
+            /* (skipping: still taken are 0x80.. (image moves / loads, the environment) and whatever is drawn with a
+               drawing area that is not a screen's: the game fades palettes by drawing over their CLUT rows, and a
+               fade-in whose frame was skipped left the ground's textures transparent on an Old 3DS) */
+            if (!skip || (p[1] >> 24) >= 0x80 || gs.x2 - gs.x1 < 255 || gs.y2 - gs.y1 < 199) packet(p + 1, len);
             for (u32 k = 1; k <= len; k++) h = h * 16777619u ^ p[k];     /* the watchdog's "same picture every frame" test */
         }
         if (next == 0xFFFFFF) break;
