@@ -660,7 +660,7 @@ jobs:
             --hidden-import save_import --hidden-import tombi_save --hidden-import tombi_save_editor --hidden-import tombi_save_editor_lang --add-data "tools/save_editor_assets;save_editor_assets" \
             --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf \
             --exclude-module tkinter --exclude-module _tkinter \
-            --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "tools/icons/ps1_pad.png;icons" --add-data "build_id.txt;." \
+            --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "tools/icons/ps1_pad.png;icons" --add-data "build_id.txt;." --add-data "VERSION;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
             --add-data "tools/wfm_charmap.json;." --add-data "tools/civ_rebuild_layout.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" --add-data "patches/en_cut_content.tombipatch.json;patches" \
             --add-binary "build/win-bin/tombi-pc.exe;." --add-binary "build/win-bin/SDL2.dll;." \
@@ -727,7 +727,7 @@ jobs:
             --hidden-import save_import --hidden-import tombi_save --hidden-import tombi_save_editor --hidden-import tombi_save_editor_lang --add-data "tools/save_editor_assets:save_editor_assets" \
             --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf \
             --exclude-module tkinter --exclude-module _tkinter \
-            --add-data "tools/icons/launcher.ico:icons" --add-data "tools/icons/launcher.png:icons" --add-data "tools/icons/ps1_pad.png:icons" --add-data "build_id.txt:." \
+            --add-data "tools/icons/launcher.ico:icons" --add-data "tools/icons/launcher.png:icons" --add-data "tools/icons/ps1_pad.png:icons" --add-data "build_id.txt:." --add-data "VERSION:." \
             --add-data "port/assets/prompts/manifest.json:port/assets/prompts" \
             --add-data "tools/wfm_charmap.json:." --add-data "tools/civ_rebuild_layout.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" --add-data "patches/en_cut_content.tombipatch.json:patches" \
             --add-binary "build/linux-bin/tombi-pc:." --add-binary "build/linux-bin/libSDL2-2.0.so.0:." \
