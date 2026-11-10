@@ -23,9 +23,9 @@
     <string name="opt_wings_short">glide</string>
     <string name="wings_jp">Japanese demo image (SLPM-80165)</string>
     <string name="wings_p9">PrePre Vol. 9 image (PCPX-96093)</string>
-    <string name="wings_notset">not set: tap to pick the image (.bin/.cue/.iso/.chd, .zip/.7z)</string>
+    <string name="wings_notset">not set: tap to pick the image</string>
     <string name="wings_busy">checking the image…</string>
-    <string name="wings_ok">%1$s: checked, %2$d file(s) ready</string>
+    <string name="wings_ok">%1$s: ready (%2$d files)</string>
     <string name="wings_bad">%1$s is not disc %2$s (serial %3$s)</string>
     <string name="wings_missing">%1$s: files not found on the disc: %2$s</string>
     <string name="wings_7z">%1$s: the .7z holds no disc image (a .7z of loose files is not supported: use the image or a .zip)</string>
@@ -121,6 +121,10 @@
     <string name="cat_pad">Steuerung</string>
     <string name="cat_data">Spielstände und Daten</string>
     <string name="cat_debug">Cheats und Debug</string>
+    <string name="cat_launcher">Launcher</string>
+    <string name="cat_image">Picture and screen</string>
+    <string name="cat_launchdbg">Launcher and debug</string>
+    <string name="cat_disc">Disc and saves</string>
     <string name="pc_open">Tasten anpassen…</string>
     <string name="pc_title">Tasten anpassen</string>
     <string name="pc_preset">Ausgehend von</string>

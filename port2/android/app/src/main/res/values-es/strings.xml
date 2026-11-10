@@ -22,9 +22,9 @@
     <string name="opt_wings_short">planeo</string>
     <string name="wings_jp">Imagen de la demo japonesa (SLPM-80165)</string>
     <string name="wings_p9">Imagen de la PrePre Vol. 9 (PCPX-96093)</string>
-    <string name="wings_notset">sin elegir: toca para elegir la imagen (.bin/.cue/.iso/.chd, .zip/.7z)</string>
+    <string name="wings_notset">sin elegir: toca para elegir la imagen</string>
     <string name="wings_busy">comprobando la imagen…</string>
-    <string name="wings_ok">%1$s: comprobado, %2$d archivo(s) listos</string>
+    <string name="wings_ok">%1$s: listo (%2$d archivos)</string>
     <string name="wings_bad">%1$s no es el disco %2$s (serie %3$s)</string>
     <string name="wings_missing">%1$s: archivos que no están en el disco: %2$s</string>
     <string name="wings_7z">%1$s: el .7z no contiene una imagen de disco (un .7z de archivos sueltos no vale: usa la imagen o un .zip)</string>
@@ -127,6 +127,10 @@
     <string name="cat_pad">Controles</string>
     <string name="cat_data">Partidas y datos</string>
     <string name="cat_debug">Trucos y depuración</string>
+    <string name="cat_launcher">Launcher</string>
+    <string name="cat_image">Imagen y pantalla</string>
+    <string name="cat_launchdbg">Launcher y depuración</string>
+    <string name="cat_disc">Disco y partidas</string>
     <string name="pc_open">Personalizar botones…</string>
     <string name="pc_title">Personalizar botones</string>
     <string name="pc_preset">Partir de</string>

@@ -1280,115 +1280,11 @@ public class LauncherActivity extends Activity {
                 items.add(new Item(getString(R.string.options), new Runnable() { public void run() { setScreen(OPTIONS); } }));
                 items.add(new Item(getString(R.string.quit), new Runnable() { public void run() { finish(); } }));
                 if (!mainFocusSet) { mainFocusSet = true; focus = games.size() + 1; }   // first time: on Play
-            } else if (screen == OPTIONS) {   // category list, one column (drawOptions)
-                category(CAT_GAME, R.string.cat_game, palGame() ? LANG_NAME[langIdx()] : "English");
-                category(CAT_GFX, R.string.cat_gfx, aspectName(aspectIdx()) + " · " + getString(flag("gl", false) ? R.string.renderer_gl_short : R.string.renderer_soft));
-                if (palGame()) category(CAT_DUAL, R.string.cat_dual, onoff(secondScreenOn()));   // (the panel is PAL-only)
-                category(CAT_PAD, R.string.cat_pad, getResources().getStringArray(R.array.prompt_names)[promptIdx()]);
-                if (palGame()) category(CAT_CUT, R.string.cat_cut, cutItems().size() + "/" + CUT_ITEMS.length + (flag("wings", false) ? " · " + getString(R.string.opt_wings_short) : ""));
-                category(CAT_DATA, R.string.cat_data, null);
-                category(CAT_DEBUG, R.string.cat_debug, null);
+            } else if (screen == OPTIONS) {   // category list, one column (drawOptions); the layout: optLayout()
+                for (int c : optCats()) category(c, catName(c), catSummary(c));
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(MAIN); } }));
-            } else if (screen == OPTCAT) {   // one category page, same row style (drawOptions)
-                if (cat == CAT_GAME && !palGame()) {   // another version: English only, no text options
-                    items.add(libStyleItem());
-                    Item ul = new Item(getString(R.string.opt_uilang), null);
-                    ul.value = uiLangName(uiLangIdx());
-                    ul.adj = new Adjust() { public void by(int d) {
-                        prefs.edit().putInt("uilang", (uiLangIdx() + d + UI_LANGS.length) % UI_LANGS.length).apply();
-                        applyUiLang(); } };
-                    items.add(ul);
-                    items.add(toggle(R.string.opt_skipintro, "skipintro"));
-                } else if (cat == CAT_GAME) {
-                    Item l = new Item(getString(R.string.opt_lang), null);
-                    l.value = LANG_NAME[langIdx()];
-                    l.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("lang", (langIdx() + d + LANG_N.length) % LANG_N.length).apply(); } };
-                    items.add(l);
-                    Item ul = new Item(getString(R.string.opt_uilang), null);   // the launcher's own language (applyUiLang)
-                    ul.value = uiLangName(uiLangIdx());
-                    ul.adj = new Adjust() { public void by(int d) {
-                        prefs.edit().putInt("uilang", (uiLangIdx() + d + UI_LANGS.length) % UI_LANGS.length).apply();
-                        applyUiLang(); } };
-                    items.add(ul);
-                    Item tpi = new Item(getString(R.string.opt_textpatch), null);
-                    tpi.check = textPatchOn() ? 1 : 0;
-                    tpi.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("textpatch", !textPatchOn()).apply(); } };
-                    items.add(tpi);
-                    items.add(toggle(R.string.opt_skipintro, "skipintro"));
-                    items.add(libStyleItem());
-                } else if (cat == CAT_CUT) {   // one switch per item (cutItems), then the lost wings glide and its two discs
-                    cutItems();
-                    for (int k = 0; k < CUT_ITEMS.length; k++) items.add(toggle(CUT_LABELS[k], "cut_" + CUT_ITEMS[k]));
-                    items.add(toggle(R.string.opt_wings, "wings"));
-                    for (int w = 0; w < 2; w++) {
-                        final int which = w;
-                        Item wi = new Item(getString(w == 0 ? R.string.wings_jp : R.string.wings_p9), new Runnable() { public void run() {
-                            if (wingsStatus[which] == null) pickWings(which); } });
-                        wi.value = wingsValue(w);
-                        items.add(wi);
-                    }
-                } else if (cat == CAT_GFX) {
-                    Item as = new Item(getString(R.string.opt_aspect), null);
-                    as.value = aspectName(aspectIdx());
-                    as.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("aspect", (aspectIdx() + d + ASPECTS.length) % ASPECTS.length).apply(); } };
-                    items.add(as);
-                    Item r = new Item(getString(R.string.opt_renderer), null);
-                    r.value = getString(flag("gl", false) ? R.string.renderer_gl : R.string.renderer_soft);
-                    r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
-                    items.add(r);
-                    if (palGame()) items.add(toggle(R.string.opt_hz60, "hz60"));   // (USA: 60 Hz is its own speed)
-                    Item fp = new Item(getString(R.string.opt_fps), null);
-                    fp.value = fpsName(fpsIdx());
-                    fp.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("fps", (fpsIdx() + d + FPS.length) % FPS.length).apply(); } };
-                    items.add(fp);
-                    items.add(toggle(R.string.opt_showfps, "showfps"));
-                } else if (cat == CAT_DUAL) {
-                    Item ss = new Item(getString(R.string.opt_secondscreen), null);
-                    ss.check = secondScreenOn() ? 1 : 0;
-                    ss.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("secondscreen", !secondScreenOn()).apply(); } };
-                    items.add(ss);
-                    Item hb = new Item(getString(R.string.opt_hudbottom), null);
-                    hb.check = hudBottomOn() ? 1 : 0;
-                    hb.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("hudbottom", !hudBottomOn()).apply(); } };
-                    items.add(hb);
-                } else if (cat == CAT_PAD) {
-                    items.add(new Item(getString(R.string.opt_padmap), new Runnable() { public void run() { setScreen(PADMAP); } }));
-                    items.add(toggle(R.string.opt_dualshock, "dualshock"));   // --dualshock (shims/pad.c)
-                    Item rb = new Item(getString(R.string.opt_rumble), null);   // --rumble (runtime/sdl.c)
-                    rb.value = rumbleName(rumbleIdx());
-                    rb.adj = new Adjust() { public void by(int d) {   // wraps like the other value rows (A / tap steps up)
-                        int n = (rumbleIdx() + d + RUMBLE.length) % RUMBLE.length;
-                        prefs.edit().putInt("rumble", n).apply(); rumbleTest(); } };
-                    items.add(rb);
-                    if (palGame()) {   // (the button icons are PAL-only in the port)
-                    Item pr = new Item(getString(R.string.opt_prompts), null);   // --prompts (shims/prompts.c; TombiActivity resolves auto)
-                    pr.value = getResources().getStringArray(R.array.prompt_names)[promptIdx()];
-                    pr.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("prompts", (promptIdx() + d + PROMPTS.length) % PROMPTS.length).apply(); } };
-                    items.add(pr);
-                    items.add(new Item(getString(R.string.pc_open), new Runnable() { public void run() { setScreen(CUSTOM); } }));
-                    }
-                } else if (cat == CAT_DATA && !palGame()) {   // (translations: PAL only for now)
-                    items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
-                    items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
-                    items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
-                    items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
-                        setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
-                } else if (cat == CAT_DATA) {
-                    items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
-                    items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
-                    items.add(new Item(getString(R.string.tr_import), new Runnable() { public void run() { pickTranslation(); } }));
-                    if (translationFile().isFile())
-                        items.add(new Item(getString(R.string.tr_remove), new Runnable() { public void run() {
-                            translationFile().delete(); status(getString(R.string.tr_removed)); setScreen(screen); } }));
-                    items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
-                    items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
-                        setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
-                } else {
-                    items.add(toggle(R.string.opt_inflives, "inflives"));   // (named fields: every version, cheatArgs)
-                    items.add(toggle(R.string.opt_infhealth, "infhealth"));
-                    items.add(toggle(R.string.opt_debug, "debugmenu"));
-                    items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
-                }
+            } else if (screen == OPTCAT) {   // one category page, same row style (drawOptions): its groups (optGroups)
+                for (String g : optGroups(cat)) group(g);
                 items.add(new Item(getString(R.string.back), new Runnable() { public void run() { setScreen(OPTIONS); } }));
             } else if (screen == PADMAP) {
                 PadMap pm = new PadMap(prefs.getString("padmap", ""));
@@ -1500,6 +1396,158 @@ public class LauncherActivity extends Activity {
         }
 
         /** a row of the Options list: opens page c (focus on its first row) */
+        // ---- the options, as groups of rows (one method per group) laid out in categories by optLayout() ----
+        static final int CAT_LAUNCHER = 7, CAT_IMAGE = 8, CAT_LAUNCHDBG = 9, CAT_DISC = 10;
+        /* 0: by topic (8 categories: Game, Cut content, Graphics, Second screen, Controls, Disc and saves, Launcher,
+           Cheats and debug); 1: compact (6: Game with the cheats, Cut content, Picture and screen, Controls, Saves and
+           data, Launcher); 2: six by topic (Game with the cheats, Cut content, Picture and screen, Controls, Disc and
+           saves, Launcher and debug) */
+        int optLayout() { return prefs.getInt("optlayout", 0); }
+        int[] optCats() {
+            boolean pal = palGame();
+            switch (optLayout()) {
+                case 1: return pal ? new int[]{CAT_GAME, CAT_CUT, CAT_IMAGE, CAT_PAD, CAT_DATA, CAT_LAUNCHER}
+                                   : new int[]{CAT_GAME, CAT_IMAGE, CAT_PAD, CAT_DATA, CAT_LAUNCHER};
+                case 2: return pal ? new int[]{CAT_GAME, CAT_CUT, CAT_IMAGE, CAT_PAD, CAT_DISC, CAT_LAUNCHDBG}
+                                   : new int[]{CAT_GAME, CAT_IMAGE, CAT_PAD, CAT_DISC, CAT_LAUNCHDBG};
+                default: return pal ? new int[]{CAT_GAME, CAT_CUT, CAT_GFX, CAT_DUAL, CAT_PAD, CAT_DISC, CAT_LAUNCHER, CAT_DEBUG}
+                                    : new int[]{CAT_GAME, CAT_GFX, CAT_PAD, CAT_DISC, CAT_LAUNCHER, CAT_DEBUG};
+            }
+        }
+        String[] optGroups(int c) {
+            int l = optLayout();
+            switch (c) {
+                case CAT_GAME: return l == 1 ? new String[]{"lang", "textpatch", "skipintro", "cheats", "debugmenu"}
+                                    : l == 2 ? new String[]{"lang", "textpatch", "translation", "skipintro", "cheats"}
+                                             : new String[]{"lang", "textpatch", "translation", "skipintro"};
+                case CAT_CUT: return new String[]{"cut"};
+                case CAT_GFX: return new String[]{"gfx"};
+                case CAT_DUAL: return new String[]{"dual"};
+                case CAT_IMAGE: return new String[]{"gfx", "dual"};
+                case CAT_PAD: return new String[]{"pad"};
+                case CAT_DISC: return new String[]{"saves", "disc"};
+                case CAT_DATA: return new String[]{"disc", "saves", "translation"};
+                case CAT_LAUNCHER: return l == 1 ? new String[]{"uilang", "libstyle", "viewlog"} : new String[]{"uilang", "libstyle"};
+                case CAT_LAUNCHDBG: return new String[]{"uilang", "libstyle", "debugmenu", "viewlog"};
+                default: return new String[]{"cheats", "debugmenu", "viewlog"};   // CAT_DEBUG
+            }
+        }
+        int catName(int c) {
+            switch (c) {
+                case CAT_GAME: return R.string.cat_game; case CAT_CUT: return R.string.cat_cut; case CAT_GFX: return R.string.cat_gfx;
+                case CAT_DUAL: return R.string.cat_dual; case CAT_IMAGE: return R.string.cat_image; case CAT_PAD: return R.string.cat_pad;
+                case CAT_DISC: return R.string.cat_disc; case CAT_DATA: return R.string.cat_data; case CAT_LAUNCHER: return R.string.cat_launcher;
+                case CAT_LAUNCHDBG: return R.string.cat_launchdbg; default: return R.string.cat_debug;
+            }
+        }
+        String catSummary(int c) {
+            switch (c) {
+                case CAT_GAME: return palGame() ? LANG_NAME[langIdx()] : "English";
+                case CAT_CUT: return cutItems().size() + "/" + CUT_ITEMS.length + (flag("wings", false) ? " · " + getString(R.string.opt_wings_short) : "");
+                case CAT_GFX: case CAT_IMAGE: return aspectName(aspectIdx()) + " · " + getString(flag("gl", false) ? R.string.renderer_gl_short : R.string.renderer_soft);
+                case CAT_DUAL: return onoff(secondScreenOn());
+                case CAT_PAD: return getResources().getStringArray(R.array.prompt_names)[promptIdx()];
+                case CAT_LAUNCHER: case CAT_LAUNCHDBG: return uiLangName(uiLangIdx());
+                default: return null;
+            }
+        }
+        /** the rows of one group (the PAL-only ones left out for another version: docs/USA.md "Native port") */
+        void group(String g) {
+            boolean pal = palGame();
+            if (g.equals("lang") && pal) {
+                Item l = new Item(getString(R.string.opt_lang), null);
+                l.value = LANG_NAME[langIdx()];
+                l.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("lang", (langIdx() + d + LANG_N.length) % LANG_N.length).apply(); } };
+                items.add(l);
+            } else if (g.equals("uilang")) {   // the launcher's own language (applyUiLang)
+                Item ul = new Item(getString(R.string.opt_uilang), null);
+                ul.value = uiLangName(uiLangIdx());
+                ul.adj = new Adjust() { public void by(int d) {
+                    prefs.edit().putInt("uilang", (uiLangIdx() + d + UI_LANGS.length) % UI_LANGS.length).apply();
+                    applyUiLang(); } };
+                items.add(ul);
+            } else if (g.equals("textpatch") && pal) {
+                Item tpi = new Item(getString(R.string.opt_textpatch), null);
+                tpi.check = textPatchOn() ? 1 : 0;
+                tpi.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("textpatch", !textPatchOn()).apply(); } };
+                items.add(tpi);
+            } else if (g.equals("translation") && pal) {   // (translations: PAL only for now)
+                items.add(new Item(getString(R.string.tr_import), new Runnable() { public void run() { pickTranslation(); } }));
+                if (translationFile().isFile())
+                    items.add(new Item(getString(R.string.tr_remove), new Runnable() { public void run() {
+                        translationFile().delete(); status(getString(R.string.tr_removed)); setScreen(screen); } }));
+            } else if (g.equals("skipintro")) {
+                items.add(toggle(R.string.opt_skipintro, "skipintro"));
+            } else if (g.equals("libstyle")) {
+                items.add(libStyleItem());
+            } else if (g.equals("cut") && pal) {   // one switch per item (cutItems), then the lost wings glide and its two discs
+                cutItems();
+                for (int k = 0; k < CUT_ITEMS.length; k++) items.add(toggle(CUT_LABELS[k], "cut_" + CUT_ITEMS[k]));
+                items.add(toggle(R.string.opt_wings, "wings"));
+                for (int w = 0; w < 2; w++) {
+                    final int which = w;
+                    Item wi = new Item(getString(w == 0 ? R.string.wings_jp : R.string.wings_p9), new Runnable() { public void run() {
+                        if (wingsStatus[which] == null) pickWings(which); } });
+                    wi.sub = wingsValue(w);   // (an action row with its status on the right, like a category's summary)
+                    items.add(wi);
+                }
+            } else if (g.equals("gfx")) {
+                Item as = new Item(getString(R.string.opt_aspect), null);
+                as.value = aspectName(aspectIdx());
+                as.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("aspect", (aspectIdx() + d + ASPECTS.length) % ASPECTS.length).apply(); } };
+                items.add(as);
+                Item r = new Item(getString(R.string.opt_renderer), null);
+                r.value = getString(flag("gl", false) ? R.string.renderer_gl : R.string.renderer_soft);
+                r.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("gl", !flag("gl", false)).apply(); } };
+                items.add(r);
+                if (pal) items.add(toggle(R.string.opt_hz60, "hz60"));   // (USA: 60 Hz is its own speed)
+                Item fp = new Item(getString(R.string.opt_fps), null);
+                fp.value = fpsName(fpsIdx());
+                fp.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("fps", (fpsIdx() + d + FPS.length) % FPS.length).apply(); } };
+                items.add(fp);
+                items.add(toggle(R.string.opt_showfps, "showfps"));
+            } else if (g.equals("dual") && pal) {   // (the panel is PAL-only)
+                Item ss = new Item(getString(R.string.opt_secondscreen), null);
+                ss.check = secondScreenOn() ? 1 : 0;
+                ss.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("secondscreen", !secondScreenOn()).apply(); } };
+                items.add(ss);
+                Item hb = new Item(getString(R.string.opt_hudbottom), null);
+                hb.check = hudBottomOn() ? 1 : 0;
+                hb.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("hudbottom", !hudBottomOn()).apply(); } };
+                items.add(hb);
+            } else if (g.equals("pad")) {
+                items.add(new Item(getString(R.string.opt_padmap), new Runnable() { public void run() { setScreen(PADMAP); } }));
+                items.add(toggle(R.string.opt_dualshock, "dualshock"));   // --dualshock (shims/pad.c)
+                Item rb = new Item(getString(R.string.opt_rumble), null);   // --rumble (runtime/sdl.c)
+                rb.value = rumbleName(rumbleIdx());
+                rb.adj = new Adjust() { public void by(int d) {   // wraps like the other value rows (A / tap steps up)
+                    int n = (rumbleIdx() + d + RUMBLE.length) % RUMBLE.length;
+                    prefs.edit().putInt("rumble", n).apply(); rumbleTest(); } };
+                items.add(rb);
+                if (pal) {   // (the button icons are PAL-only in the port)
+                    Item pr = new Item(getString(R.string.opt_prompts), null);   // --prompts (shims/prompts.c; TombiActivity resolves auto)
+                    pr.value = getResources().getStringArray(R.array.prompt_names)[promptIdx()];
+                    pr.adj = new Adjust() { public void by(int d) { prefs.edit().putInt("prompts", (promptIdx() + d + PROMPTS.length) % PROMPTS.length).apply(); } };
+                    items.add(pr);
+                    items.add(new Item(getString(R.string.pc_open), new Runnable() { public void run() { setScreen(CUSTOM); } }));
+                }
+            } else if (g.equals("saves")) {
+                items.add(new Item(getString(R.string.save_import), new Runnable() { public void run() { pickSaveImport(); } }));
+                items.add(new Item(getString(R.string.save_export), new Runnable() { public void run() { pickSaveExport(); } }));
+            } else if (g.equals("disc")) {
+                items.add(new Item(getString(R.string.opt_disc), new Runnable() { public void run() { setScreen(DISC); } }));
+                items.add(new Item(getString(R.string.disc_wipe), new Runnable() { public void run() {
+                    setScreen(DISC); confirmWipe = true; wipeSaves = false; focus = 0; } }));
+            } else if (g.equals("cheats")) {
+                items.add(toggle(R.string.opt_inflives, "inflives"));   // (named fields: every version, cheatArgs)
+                items.add(toggle(R.string.opt_infhealth, "infhealth"));
+            } else if (g.equals("debugmenu")) {
+                items.add(toggle(R.string.opt_debug, "debugmenu"));
+            } else if (g.equals("viewlog")) {
+                items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
+            }
+        }
+
         void category(final int c, int label, String sub) {
             Item it = new Item(getString(label), new Runnable() { public void run() {
                 cat = c; setScreen(OPTCAT); focus = 0; } });
@@ -2154,8 +2202,7 @@ public class LauncherActivity extends Activity {
         }
 
         void drawOptions() {
-            int[] catNames = {R.string.cat_game, R.string.cat_gfx, R.string.cat_dual, R.string.cat_pad, R.string.cat_data, R.string.cat_debug, R.string.cat_cut};
-            bigTitle(screen == OPTIONS ? getString(R.string.options) : getString(catNames[cat]), 50, 66);
+            bigTitle(screen == OPTIONS ? getString(R.string.options) : getString(catName(cat)), 50, 66);
             // one column, no scrolling: rows (at most 72 tall incl. a 12 gap) between 100 and 640; the help text
             // has its own band below (650..712), so it never overlaps a button
             float top = 100, bottom = 640, rowH = Math.min(72, (bottom - top + 12) / Math.max(1, items.size())), bh = rowH - 12;

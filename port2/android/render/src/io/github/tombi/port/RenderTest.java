@@ -251,6 +251,21 @@ public class RenderTest {
         shot(a, "opt_pal");
         a.view.cat = LauncherActivity.LauncherView.CAT_GAME; a.view.setScreen(LauncherActivity.LauncherView.OPTCAT); a.view.focus = 0;
         shot(a, "opt_pal_game");
+        for (int lay = 0; lay < 3; lay++) {   // the three layouts of the options (optLayout): the list and the Game page
+            prefs.edit().putInt("optlayout", lay).commit();
+            a.view.setScreen(LauncherActivity.LauncherView.OPTIONS); a.view.focus = 0;
+            shot(a, "optlay" + lay);
+            a.view.cat = LauncherActivity.LauncherView.CAT_GAME; a.view.setScreen(LauncherActivity.LauncherView.OPTCAT); a.view.focus = 0;
+            shot(a, "optlay" + lay + "_game");
+        }
+        prefs.edit().putInt("optlayout", 0).commit();
+        int[] cats = {LauncherActivity.LauncherView.CAT_GFX, LauncherActivity.LauncherView.CAT_DUAL, LauncherActivity.LauncherView.CAT_PAD,
+                      LauncherActivity.LauncherView.CAT_DATA, LauncherActivity.LauncherView.CAT_DEBUG, LauncherActivity.LauncherView.CAT_CUT};
+        String[] catNames = {"gfx", "dual", "pad", "data", "debug", "cut"};
+        for (int ci = 0; ci < cats.length; ci++) {   // every category page of the PAL game
+            a.view.cat = cats[ci]; a.view.setScreen(LauncherActivity.LauncherView.OPTCAT); a.view.focus = 0;
+            shot(a, "opt_pal_" + catNames[ci]);
+        }
         // the game screen (Disc) of the PAL game: the long status of a real extraction (the device report: it overlapped
         // the help paragraph)
         prefs.edit().putString("game", "sces01331").putString("g.sces01331.info",
