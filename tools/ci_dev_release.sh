@@ -12,7 +12,7 @@ if ! gh release view dev -R "$R" >/dev/null 2>&1; then
 fi
 gh release upload dev -R "$R" --clobber "$FILE"
 LINE="- $NAME ($LABEL): master $SHA7, $DAY: $SUBJECT"
-BODY=$(gh release view dev -R "$R" --json body --jq .body | grep -v "^- $NAME (" || true)
-printf '%s\n%s\n' "$BODY" "$LINE" | sed '/^$/N;/^\n$/D' > "$RUNNER_TEMP/dev_notes.md"
+BODY=$(gh release view dev -R "$R" --json body --jq .body | grep "^- " | grep -v "^- $NAME (" || true)
+printf '%s\n\n%s\n%s\n' "$HEAD_NOTE" "$BODY" "$LINE" | sed '/^$/N;/^\n$/D' > "$RUNNER_TEMP/dev_notes.md"
 gh release edit dev -R "$R" --prerelease --latest=false --title "dev build ($DAY, $SHA7)" --notes-file "$RUNNER_TEMP/dev_notes.md"
 echo "https://github.com/$R/releases/download/dev/$NAME"
