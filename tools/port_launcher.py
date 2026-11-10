@@ -1741,9 +1741,14 @@ class GameTile(QAbstractButton):
             p.drawPixmap(QRectF(r.x() + (r.width() - w) / 2, r.y() + (r.height() - h) / 2, w, h), pm, QRectF(pm.rect()))
             return
         p.setPen(QColor(color))
-        f = self._font(max(10.0, r.height() / 3.2), QFont.Black)
+        text = self.d.get("short") or self.d.get("title") or "?"
+        size = max(10.0, r.height() / 3.2)
+        f = self._font(size, QFont.Black)
+        width = QFontMetricsF(f).horizontalAdvance(text)
+        if width > r.width() * 0.92:          # one line, like the art: shrink a long name (オレっ！トンバ) to fit
+            f = self._font(max(6.0, size * r.width() * 0.92 / width), QFont.Black)
         p.setFont(f)
-        p.drawText(r, Qt.AlignCenter | Qt.TextWordWrap, self.d.get("short") or self.d.get("title") or "?")
+        p.drawText(r, Qt.AlignCenter, text)
 
     _flag_cache = {}
 
