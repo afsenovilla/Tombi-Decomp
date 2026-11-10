@@ -275,6 +275,30 @@ jobs:
           echo "== log.txt (end)"; tail -20 shots/log.txt
           echo "== fps"; grep "\[port\] fps" shots/log.txt | sed -n "5~10p" | head -12
 
+      # the cartridge image and the installable title are the same ELF in another container (makerom): started too,
+      # since a .cci is what some emulator front ends (Android) load
+      - name: Run tombi.cci in Azahar
+        if: always()
+        run: |
+          SD="$HOME/.local/share/azahar-emu/sdmc"
+          rm -f "$SD/3ds/tombi/log.txt"; echo "--log-fps" > "$SD/3ds/tombi/args.txt"
+          L=$(find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" | head -1); [ -n "$L" ] && : > "$L"
+          export LIBGL_ALWAYS_SOFTWARE=1 QT_QPA_PLATFORM=xcb
+          Xvfb :98 -screen 0 1280x1024x24 & sleep 2
+          export DISPLAY=:98
+          ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_cci.log 2>&1 &
+          EMU=$!
+          sleep 60; import -window root shots/cci_060.png || true
+          kill "$EMU" 2>/dev/null || true; sleep 2
+          echo "== azahar_cci.log"; grep -v -i "keysym\|xkbcomp" azahar_cci.log | head -60
+          L=$(find "$HOME/.local/share/azahar-emu" -name "*.txt" -path "*log*" | head -1)
+          echo "== emulator log"; grep -v "Config <Info>" "$L" | grep -i -E "loader|ncch|error|critical|warning|svc|memory|unmapped|exception" | head -60
+          echo "== code addresses"; grep -o "at PC 0x[0-9A-Fa-f]*" "$L" | awk '{print $3}' | sort | uniq -c | sort -rn | head -8 | while read n a; do
+            echo "$n x $a $(arm-none-eabi-addr2line -f -s -e app/tombi.elf $a | tr '\n' ' ')"; done
+          echo "== log.txt of the .cci run"; head -30 "$SD/3ds/tombi/log.txt" 2>/dev/null || echo "(no log.txt: the program did not get to its main)"
+          grep "\[port\] fps" "$SD/3ds/tombi/log.txt" 2>/dev/null | tail -3
+          convert shots/cci_060.png -trim +repage -quality 75 small_cci.jpg && { echo "=====BEGIN shot_cci====="; base64 -w 100 small_cci.jpg; echo "=====END shot_cci====="; }
+
       # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
       - name: Screenshots in the log
         if: always()
