@@ -5,6 +5,7 @@ updatePoolType04Object = 0x800EFAD4; // type:func size:0xB8  PAL x000 0x800EA168
 initPoolType04Sprite = 0x800EFB8C; // type:func size:0x64  PAL x000 0x800EA220
 updateEggShellPiece = 0x800EFBF0; // type:func size:0x2C0  PAL x000 0x800EA284
 spawnPoolType05Ring = 0x800EFEB0; // type:func size:0x138  PAL x000 0x800EA544
+updateGroundDebris = 0x800EFFE8; // type:func size:0x56C  PAL x000 0x800EA67C
 spawnGroundDebris = 0x800F0554; // type:func size:0x1DC  PAL x000 0x800EAE0C
 updateKomaPigDustPuff = 0x800F0730; // type:func size:0x1D4  PAL x000 0x800EB0C8
 eventObjAnimStep800EB29C = 0x800F0904; // type:func size:0xF8  PAL x000 0x800EB29C
