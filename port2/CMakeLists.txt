@@ -127,7 +127,14 @@ if(WIN32)
   # C99 printf (%lld) from mingw's own stdio for the runtime only: the game's printf must stay the shim of libc.c
   set(PORT2_RT_FLAGS -D__USE_MINGW_ANSI_STDIO=1)
 endif()
-set(PORT2_GAME_FLAGS -O1 -w -funsigned-char -fwrapv -fno-strict-aliasing -fno-delete-null-pointer-checks
+# The game's own C at -O1 everywhere but the 3DS: its ARM11 (268 MHz on an Old 3DS) spends 10 ms a frame in it at -O1.
+# -O2 gave the same frames and sound on the PC over the debug-select runs (PORT2_GAME_OPT=-O2 tries it elsewhere).
+if(NINTENDO_3DS)
+  set(PORT2_GAME_OPT "-O2" CACHE STRING "optimisation level of the game's C")
+else()
+  set(PORT2_GAME_OPT "-O1" CACHE STRING "optimisation level of the game's C")
+endif()
+set(PORT2_GAME_FLAGS ${PORT2_GAME_OPT} -w -funsigned-char -fwrapv -fno-strict-aliasing -fno-delete-null-pointer-checks
     -fno-builtin -DSKIP_ASM -D_LANGUAGE_C -DMIPSEL)
 if(ANDROID)    # (the NDK's clang makes these errors by default; gcc warns, and -w silences them on the PC builds)
   list(APPEND PORT2_GAME_FLAGS -Wno-error=implicit-function-declaration -Wno-error=int-conversion
