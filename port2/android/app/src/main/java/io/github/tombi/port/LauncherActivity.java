@@ -537,7 +537,10 @@ public class LauncherActivity extends Activity {
      *  "cue TRACK" / "nested" lines, or "err:<reason>" ("err:space:NEED:FREE", "err:cancelled") */
     static native String nativeUn7z(String archive, String outDir);
     static native long nativeUnpackBytes(int which);   // 0: bytes written, 1: the image's size
-    volatile boolean native7z;                          // UNZIPPING a .7z: the progress comes from un7z.c
+    /** files of the image by path ("SYSTEM/OPTSUB00.BIN"), read straight from it (.bin / .iso / .chd): one byte[] per
+     *  path, null where missing; null when the image is not readable (Library.logoFromImage) */
+    static native byte[][] nativeReadFiles(String image, String[] paths);
+    volatile boolean native7z;                         // UNZIPPING a .7z: the progress comes from un7z.c
 
     void requestCancel() { cancelImport = true; if (nativeOk) try { nativeCancel(); } catch (Throwable ignored) { } }
 
@@ -683,7 +686,12 @@ public class LauncherActivity extends Activity {
                 fail(getString(R.string.disc_unknown, serial, sha == null ? "?" : sha)); return;
             }
             if (!v.supported()) {   // recognised, no port of it yet (Japan): listed in the library, nothing extracted
-                lib.put(serial, v, shown, "");
+                Library.Game jg = lib.put(serial, v, shown, "");
+                // its card's logo from the image itself, now (a .zip / .7z's temp image is deleted when this returns)
+                try {
+                    jg.logoFile().delete();
+                    CrashLog.append(this, "disc import: logo from the image: " + (Library.logoFromImage(jg, path) != null));
+                } catch (Throwable t) { CrashLog.append(this, "disc import: logo: " + t); }
                 adding = false;
                 phase = IDLE; result = -1;
                 status(getString(R.string.lib_unsupported_long, versionName(v)));
@@ -1084,7 +1092,8 @@ public class LauncherActivity extends Activity {
         }
         android.graphics.Bitmap logoOf(Library.Game g) {
             if (g == null) return null;
-            if (!logos.containsKey(g.id)) {
+            // (a card without one is asked again once its logo.png exists: the disc added again while the launcher runs)
+            if (!logos.containsKey(g.id) || logos.get(g.id) == null && g.logoFile().isFile()) {
                 android.graphics.Bitmap b = null;
                 try { b = Library.logo(g); } catch (Throwable t) { CrashLog.append(LauncherActivity.this, "launcher: logo " + g.id + ": " + t); }
                 logos.put(g.id, b);

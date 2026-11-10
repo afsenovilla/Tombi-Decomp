@@ -2,11 +2,12 @@
 """Real renders of the Android launcher on a PC, without the Android SDK: the app's own LauncherActivity / Library code
 drawn by Robolectric's native graphics (Android's Skia, the same Canvas the device uses) into PNGs at 1920x1080.
 
-  python3 port2/android/render/render.py OUT_DIR [--pal FS] [--usa FS] [--uilang N] [--discs DIR] [--test NAME]
+  python3 port2/android/render/render.py OUT_DIR [--pal FS] [--usa FS] [--jp IMAGE] [--uilang N] [--discs DIR] [--test NAME]
 
   FS: a folder with the SYSTEM/ files of the player's own disc (game_usa/fs, an extracted PAL disc ...): the cards'
-  logos are cut from it as on the device; without it the cards show the names.  --uilang: LauncherActivity.UI_LANGS
-  index (default 2 = Español, 1 = English).  --discs: a folder of files to add as the player would pick them (disc
+  logos are cut from it as on the device; without it the cards show the names.  IMAGE: the Japanese disc image (not
+  extracted: its logo is read from the image by the PC build of disccheck.c, as when it is added).  --uilang:
+  LauncherActivity.UI_LANGS index (default 2 = Español, 1 = English).  --discs: a folder of files to add as the player would pick them (disc
   images, .zip files ...: RenderTest.addFlow, in name order), with the real disc check: port2/android/disccheck.c built
   for the PC (gcc + the JDK's jni.h, no .chd) and loaded by the launcher as on the device.  --test: one test method
   (render, migrateAndKeys, addFlow).  The PNGs and what RenderTest prints (migration, key / touch navigation,
@@ -22,7 +23,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); APP = os.path.join(os.path.di
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 ap.add_argument("out")
-ap.add_argument("--pal"); ap.add_argument("--usa")
+ap.add_argument("--pal"); ap.add_argument("--usa"); ap.add_argument("--jp")
 ap.add_argument("--uilang", default="2")
 ap.add_argument("--discs"); ap.add_argument("--test")
 ap.add_argument("--work", default=os.path.join(ROOT, "build", "android-render"))
@@ -118,6 +119,7 @@ os.makedirs(a.out, exist_ok=True)
 props = ["-Djava.library.path=" + native, "-Drobolectric.offline=true", "-Drobolectric.dependency.dir=" + deps, "-Dout=" + os.path.abspath(a.out), "-Duilang=" + a.uilang]
 if a.pal: props.append("-Dpal=" + os.path.abspath(a.pal))
 if a.usa: props.append("-Dusa=" + os.path.abspath(a.usa))
+if a.jp: props.append("-Djp=" + os.path.abspath(a.jp))
 if a.discs: props.append("-Ddiscs=" + os.path.abspath(a.discs))
 cpath = os.pathsep.join([classes, os.path.join(W, "cfg")] + cp + [plain])
 if a.test:   # one method (JUnitCore runs whole classes)
