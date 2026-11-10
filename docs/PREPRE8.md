@@ -342,6 +342,21 @@ program `tomba` = TOMBA.EXE, game dir `game_prepre8/`, git-ignored). It is set u
   2.7.2 69.56 % (1602 functions), 2.6.0 28.98 %, 3.6 CC1PSX 17.25 %, 4.1 CC1PSX 5.25 %.
   The JP demo SLPM-80165 too: 2.7.2 42.84 % (1160), 2.6.0 20.85 %, 3.6 CC1PSX 12.88 %, 4.1 CC1PSX 5.58 % (0 gained
   each time).
+- **Hand pass (2026-11-10): 617 -> 787 functions, 20.29 -> 23.13 %.** What it took:
+  - the 43 BIOS A0/B0/C0 trampolines (0x8008744C.., 0x800881CC.., 0x80094214..) had no symbol, so splat cut them
+    with the alignment `nop` (16 bytes) and nothing matched; named with their PAL names and 12-byte sizes (PAL pairs)
+    they match the PAL `// AS gnu` files. Same fix for `GetGp`, `SetGeomScreen`, `FGO_04/05_OBJ_64`;
+  - the task table (0x801FC000) is addressed with literal constants: `D_801FC000..D_801FC010` are `ignore:True` in
+    `symbol_addrs_manual.txt` (the old assembler expands `lw r, CONST(reg)` as `lui at; addu at,reg,at`, which a
+    symbol cannot give), which brought `closeTask`/`startTask` from 99.6 % to 100 % and matched `ThreadCreate`;
+  - the current task pointer is the RAM global `D_800DE0B0` (PAL `TASK_C` at 0x1F8001D4);
+  - object fields after +0x98 sit lower than in PAL (PAL +0x9C/+0xA6/+0xB0/+0xBE -> +0x98/+0xA2/+0xA8/+0xB6), the
+    axis swap flag is the whole halfword at 0x1F800128, the pools and allocators keep their counters/free lists at
+    0x1F8002C4.. / 0x1F8002E4..;
+  - an 8-byte stack frame with nothing saved (the allocators, a byte copy) comes from an unused local array:
+    `char pad[0];` reproduces it;
+  - scratchpad words written through `$at`: check with `jpcheck` without `--norm` (or the report), `--norm` hides
+    the offset of `sw rX,N(at)`.
 - CI job `report-prepre8` (`.github/workflows/report.yml`) downloads the disc image from the
   **`GAME_FILES_URL_PREPRE8`** secret (raw data track .bin or a zip with TOMBA.EXE; Drive links handled like the
   demo job), extracts only `/TOMBA` with `tools/prepre8.py extract`, checks the TOMBA.EXE sha1
