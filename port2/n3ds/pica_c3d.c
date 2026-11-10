@@ -29,6 +29,7 @@ static int panel_w, panel_h;
 static shaderProgram_s prog;
 static DVLB_s *vsh;
 static int u_proj, u_tsc, in_frame, scr_fmt;
+static int c3d_up;                        /* citro3d is running (port_n3ds_gpu_fini) */
 static int vb_n, last_ok;                 /* (the vertex buffer's fill and the state cache, below) */
 static unsigned frame_no;
 static unsigned *lin;                     /* 1024 x 512 linear words: read-backs */
@@ -543,7 +544,6 @@ static int c3d_start(void) {
     return 0;
 }
 /* the way out (runtime/sdl.c): the open frame ended and waited for, citro3d closed */
-static int c3d_up;
 void port_n3ds_gpu_fini(void) {
     if (!c3d_up) return;
     c3d_up = 0;
