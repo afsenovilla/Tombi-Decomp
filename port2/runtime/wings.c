@@ -56,7 +56,10 @@ static const int QUILL[3][2] = {{2, 22}, {2, 14}, {7, 14}};
 static const int PHASE[8][2] = {{0, 0}, {1, 0}, {2, 0}, {1, 1}, {0, 1}, {1, 1}, {2, 0}, {1, 0}};
 #define TICKS_PER_PHASE 2
 
-static unsigned char *wpp_table, *spr_table;   /* the three-frame copies */
+/* the three-frame copies: static, so they sit in the executable's data (below 16 MB) like every table the game reads
+   through its 24-bit-addressed packets; a malloc'd table (above 16 MB on Windows) faulted in unpackSpriteFrame */
+static unsigned char wpp_table_buf[4 * 4 + 4 + 3 * 1024], spr_table_buf[4 * 3 + 16 * 3 * 8];
+static unsigned char *wpp_table, *spr_table;
 static unsigned short script[8 * 4 + 2];        /* 4 entries of 8 bytes + a 4-byte jump back */
 static int tried, active, ticks;
 static void *saved_wpp, *player;
@@ -127,7 +130,8 @@ static int load(void) {
     if (n != 106) { port_printf("wings: %s +0x%X holds %u frames, expected 106 (not the SLPM-80165 demo?)\n", WPP_FILE, WPP_TABLE_OFF, n); free(wpp); return 0; }
     total = 4 * 4 + 4;
     for (i = 0; i < 3; i++) total += u32(t + 4 + 4 * (FRAMES[i] + 1)) - u32(t + 4 + 4 * FRAMES[i]);
-    wpp_table = malloc(total);
+    if (total > sizeof wpp_table_buf) { port_printf("wings: frames 77-79 of %s are %u bytes, more than expected\n", WPP_FILE, total); free(wpp); return 0; }
+    wpp_table = wpp_table_buf;
     put32(wpp_table, 3);
     off[0] = 4 * 4 + 4;
     for (i = 0; i < 3; i++) {
@@ -138,8 +142,8 @@ static int load(void) {
     for (i = 0; i < 4; i++) put32(wpp_table + 4 + 4 * i, off[i]);
     free(wpp);
     gam = read_file(port_wings_dir, SPR_FILE, &gl);
-    if (!gam) { free(wpp_table); wpp_table = 0; return 0; }
-    if (gl < 8 || memcmp(gam, "GAM", 3)) { port_printf("wings: %s is not a GAM file\n", SPR_FILE); free(gam); free(wpp_table); wpp_table = 0; return 0; }
+    if (!gam) { wpp_table = 0; return 0; }
+    if (gl < 8 || memcmp(gam, "GAM", 3)) { port_printf("wings: %s is not a GAM file\n", SPR_FILE); free(gam); wpp_table = 0; return 0; }
     size = u32(gam + 4);
     spr = malloc(size + 1024);
     memset(spr, 0, size + 1024);
@@ -148,7 +152,8 @@ static int load(void) {
     /* SPR table: u16 parts, u16 offset per frame; a part is 16 bytes */
     total = 4 * 3;
     for (i = 0; i < 3; i++) total += 16 * (spr[4 * FRAMES[i]] | spr[4 * FRAMES[i] + 1] << 8);
-    spr_table = malloc(total);
+    if (total > sizeof spr_table_buf) { port_printf("wings: the SPR parts of frames 77-79 are %u bytes, more than expected\n", total); free(spr); wpp_table = 0; return 0; }
+    spr_table = spr_table_buf;
     {
         unsigned int o = 4 * 3;
         for (i = 0; i < 3; i++) {
