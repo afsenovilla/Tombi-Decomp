@@ -1,0 +1,16 @@
+/* The 7z reader of the Android launcher (port2/android/un7z.c, included by disccheck.c): the LZMA SDK's C sources,
+   one translation unit (port2/CMakeLists.txt adds this file to libtombidisc.so).  See VENDORED.txt. */
+#include "7zArcIn.c"
+#include "7zBuf.c"
+#include "7zCrc.c"
+#include "7zCrcOpt.c"
+#include "7zDec.c"
+#include "7zStream.c"
+#include "CpuArch.c"
+#include "LzmaDec.c"
+#include "Lzma2Dec.c"
+#include "Bcj2.c"
+#include "Bra.c"
+#include "Bra86.c"
+#include "BraIA64.c"
+#include "Delta.c"

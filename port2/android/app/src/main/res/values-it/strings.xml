@@ -42,7 +42,7 @@
     <string name="disc_rev0">Disco Tombi! PAL Rev 0: (build di luglio 1998). Il port richiede la Rev 1 di agosto 1998 (SCES-01331 o SCES-01330): la Rev 0 ha altri overlay e non si avvia.</string>
     <string name="disc_nomain0">Nessun EXE/MAIN0.EXE in questa immagine (scegli il .bin, l\'.iso o il .chd; per un .cue seleziona anche il .bin).</string>
     <string name="disc_needbin">Seleziona il .bin insieme al .cue.</string>
-    <string name="disc_howto">Scegli l\'immagine del tuo disco di Tombi! (.bin, .iso, .chd, oppure .cue insieme al suo .bin): i file vengono estratti nella memoria dell\'app (circa 500 MB, verificati file per file; l\'immagine non viene conservata). L\'app non contiene dati del gioco.</string>
+    <string name="disc_howto">Scegli l\'immagine del tuo disco di Tombi! (.bin, .iso, .chd, .cue insieme al suo .bin, oppure un .zip / .7z che la contiene): i file vengono estratti nella memoria dell\'app (circa 500 MB, verificati file per file; l\'immagine non viene conservata). L\'app non contiene dati del gioco.</string>
     <string name="disc_missing">Nessuna immagine del disco scelta: scegli il tuo disco.</string>
     <string name="cancel">Annulla</string>
     <string name="disc_cancelled">Copia annullata: i file parziali sono stati eliminati.</string>
@@ -132,7 +132,7 @@
     <!-- the game library (Library.java, stage U2) -->
     <string name="lib_title">I tuoi giochi</string>
     <string name="lib_add">Aggiungi gioco</string>
-    <string name="lib_add_sub">Immagine del tuo disco: .bin, .iso, .chd (o .cue con il suo .bin)</string>
+    <string name="lib_add_sub">Immagine del tuo disco: .bin, .iso, .chd, .zip, .7z (o .cue con il suo .bin)</string>
     <string name="lib_ready">Pronto per giocare</string>
     <string name="lib_unsupported">Non ancora supportato</string>
     <string name="lib_nolib">Non incluso in questa versione dell\'app</string>
@@ -145,6 +145,16 @@
     <string name="lib_from">Disco: %1$s</string>
     <string name="disc_unknown">Non è un disco Tombi! / Tomba! conosciuto (%1$s, sha1 dell\'eseguibile %2$s).</string>
     <string name="disc_added">%1$s aggiunto ai tuoi giochi.</string>
+    <string name="disc_phase_unzip">Decompressione…</string>
+    <string name="disc_adding">Aggiunta: %1$s</string>
+    <string name="disc_add_fail">Impossibile aggiungere il gioco: %1$s</string>
+    <string name="disc_notimage">«%1$s» non è un\'immagine di disco PlayStation. Scegli l\'immagine del tuo disco: .bin (con il suo .cue), .iso, .chd, oppure un .zip / .7z che la contiene.</string>
+    <string name="disc_archive">«%1$s» è un archivio .rar, che l\'app non sa aprire. Estrailo prima (o usa un .zip / .7z) e scegli l\'immagine del disco.</string>
+    <string name="disc_zip_noimage">«%1$s» non contiene nessuna immagine di disco (.bin, .iso, .img o .chd).</string>
+    <string name="disc_zip_nested">«%1$s» contiene un altro archivio, non un\'immagine di disco. Estrailo prima e scegli l\'immagine (o un .zip che la contiene).</string>
+    <string name="disc_zip_files">«%1$s» contiene i file sciolti del disco (%2$s), non la sua immagine. Il gioco ha bisogno dell\'immagine completa: .bin con il suo .cue, .iso o .chd (anche dentro un .zip / .7z).</string>
+    <string name="disc_zip_cue">«%1$s» contiene il .cue, ma non la traccia dati che indica (%2$s).</string>
+    <string name="disc_zip_bad">Impossibile leggere «%1$s» (archivio danneggiato, o compresso con un metodo che l\'app non conosce: %2$s). Estrailo e scegli l\'immagine del disco.</string>
     <string-array name="lib_styles"><item>Carosello</item><item>Elenco</item><item>Copertina</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Giappone</item></string-array>
 </resources>

@@ -131,6 +131,54 @@ public class RenderTest {
         c.pause().stop().destroy();
     }
 
+    /** "Add game" with real picked files (-Ddiscs=DIR: each file of DIR in name order, as a file:// document; the
+     *  disc check is the real disccheck.c when render.py could build it for the PC, see --native): the result, the
+     *  library and the Disc screen after each.  Without -Ddiscs only the add screens (picking, unzipping) are drawn. */
+    @Test
+    public void addFlow() throws Exception {
+        Application app = RuntimeEnvironment.getApplication();
+        SharedPreferences prefs = app.getSharedPreferences("launcher", 0);
+        prefs.edit().putInt("uilang", Integer.parseInt(System.getProperty("uilang", "2"))).putInt("libstyle", 1).commit();
+        ActivityController<LauncherActivity> c = Robolectric.buildActivity(LauncherActivity.class).setup();
+        LauncherActivity a = c.get();
+        System.out.println("native disc check: " + LauncherActivity.nativeOk);
+        a.view.setScreen(LauncherActivity.LauncherView.MAIN);
+        a.view.setScreen(LauncherActivity.LauncherView.DISC); a.addFromLib = true; a.pickDisc();
+        shot(a, "add_0_picking");
+        a.addName = "Tomba! (USA).zip"; a.phase = LauncherActivity.UNZIPPING; a.copied = 120L << 20; a.copyTotal = 190L << 20;
+        shot(a, "add_0_unzipping");
+        a.phase = LauncherActivity.IDLE;
+        String dir = System.getProperty("discs");
+        File[] picks = dir == null ? new File[0] : new File(dir).listFiles();
+        if (picks == null) picks = new File[0];
+        java.util.Arrays.sort(picks);
+        for (File f : picks) {
+            a.view.setScreen(LauncherActivity.LauncherView.MAIN);
+            a.view.setScreen(LauncherActivity.LauncherView.DISC); a.addFromLib = true; a.pickDisc();
+            long t0 = System.currentTimeMillis();
+            a.importDisc(java.util.Collections.singletonList(android.net.Uri.fromFile(f)));
+            Library.Game g = a.game();
+            String man = g == null ? null : Library.readSmall(new File(g.data(), "manifest.txt"));
+            String mserial = null, msrc = null;
+            if (man != null) for (String l : man.split("\n")) { if (l.startsWith("serial ")) mserial = l.substring(7); if (l.startsWith("source ")) msrc = l.substring(7); }
+            String[] left = new File(a.getCacheDir(), "import").list();
+            System.out.println("ADD " + f.getName() + " (" + (System.currentTimeMillis() - t0) / 1000 + " s): result " + a.result + ", adding " + a.adding
+                + ", status: " + a.importStatus + "\n    games " + prefs.getString("games", "") + ", selected " + (g == null ? "-" : g.id + " name=" + g.name)
+                + ", manifest serial " + mserial + " source " + msrc + ", cache left " + (left == null ? "none" : java.util.Arrays.toString(left)));
+            a.view.focus = 0;
+            shot(a, "add_" + f.getName().replaceAll("[^A-Za-z0-9]+", "_"));
+        }
+        if (picks.length > 0) {
+            for (int st = 0; st < 3; st++) {
+                prefs.edit().putInt("libstyle", st).commit();
+                a.view.setScreen(LauncherActivity.LauncherView.MAIN);
+                a.view.focus = indexOfPlay(a);
+                shot(a, "add_lib" + st + "_after");
+            }
+        }
+        c.pause().stop().destroy();
+    }
+
     @Test
     public void render() throws Exception {
         Application app = RuntimeEnvironment.getApplication();
@@ -153,7 +201,7 @@ public class RenderTest {
             .putString("g.sces01331.info", "1108 files, 209358 sectors (2352-byte source sectors), main0 bec8dc5f…")
             .putString("g.scus94236.ver", "usa").putString("g.scus94236.serial", "SCUS-94236").putString("g.scus94236.name", "Tomba! (USA).chd")
             .putString("g.scus94236.info", "1112 files, 119130 sectors (2352-byte source sectors, chd), SCUS-94236 SCUS_942.36 81cbc79f…")
-            .putString("g.slps01144.ver", "jp").putString("g.slps01144.serial", "SLPS-01144").putString("g.slps01144.name", "Ore no Tomba.bin")
+            .putString("g.slps01144.ver", "jp").putString("g.slps01144.serial", "SLPS-01144").putString("g.slps01144.name", "Ore! Tomba.bin")
             .commit();
         ActivityController<LauncherActivity> c = Robolectric.buildActivity(LauncherActivity.class).setup();
         LauncherActivity a = c.get();
@@ -169,6 +217,17 @@ public class RenderTest {
             a.view.focus = indexOfPlay(a);
             shot(a, "lib" + st + "_jp");
         }
+        // four discs (PAL SCES-01331 and SCES-01330, USA, Japan): their languages as flags beside the serial
+        game(app, "sces01330", pal, "SYSTEM/A00202.000", "SYSTEM/A00203.000");
+        prefs.edit().putString("games", "sces01331,sces01330,scus94236,slps01144").putString("g.sces01330.ver", "pal")
+            .putString("g.sces01330.serial", "SCES-01330").putString("g.sces01330.name", "Tombi! (Europe) (En,Fr,De,It,Nl).bin").commit();
+        for (int st = 0; st < 2; st++) {
+            prefs.edit().putInt("libstyle", st).putString("game", "sces01331").commit();
+            a.view.setScreen(LauncherActivity.LauncherView.MAIN);
+            a.view.focus = indexOfPlay(a);
+            shot(a, "lib" + st + "_four");
+        }
+        prefs.edit().putString("games", "sces01331,scus94236,slps01144").commit();
         // the options of the USA game (no languages / translations / panel) and of the PAL one
         prefs.edit().putInt("libstyle", 0).putString("game", "scus94236").commit();
         a.view.setScreen(LauncherActivity.LauncherView.OPTIONS); a.view.focus = 0;
@@ -182,13 +241,21 @@ public class RenderTest {
         shot(a, "opt_pal");
         a.view.cat = LauncherActivity.LauncherView.CAT_GAME; a.view.setScreen(LauncherActivity.LauncherView.OPTCAT); a.view.focus = 0;
         shot(a, "opt_pal_game");
+        // the game screen (Disc) of the PAL game: the long status of a real extraction (the device report: it overlapped
+        // the help paragraph)
+        prefs.edit().putString("game", "sces01331").putString("g.sces01331.info",
+            "1108 files, 209358 sectors (2352-byte source sectors), main0 bec8dc5f4116f5e497f2337eef8c523ff6dee8fc, SCES-01331 "
+            + "EXE/MAIN0.EXE bec8dc5f4116f5e497f2337eef8c523ff6dee8fc, content sha1 33d5f861ed02909236e9887376d80deaadbd234f (= reference PAL disc)").commit();
+        a.result = 0; a.importStatus = null;
+        a.view.setScreen(LauncherActivity.LauncherView.DISC); a.view.focus = 0;
+        shot(a, "disc_pal");
         // the game screen (Disc) of the USA game after adding it, and the Japanese one
         prefs.edit().putString("game", "scus94236").commit();
         a.view.setScreen(LauncherActivity.LauncherView.DISC); a.view.focus = 0;
         a.result = 1; a.importStatus = a.getString(R.string.disc_added, "Tomba! (EE. UU.)");
         shot(a, "disc_usa_added");
         prefs.edit().putString("game", "slps01144").commit();
-        a.result = -1; a.importStatus = a.getString(R.string.lib_unsupported_long, "Ore no Tomba (Japón)");
+        a.result = -1; a.importStatus = a.getString(R.string.lib_unsupported_long, "Ore! Tomba (Japón)");
         shot(a, "disc_jp");
         // the dialog when Play is pressed on the Japanese game
         a.view.setScreen(LauncherActivity.LauncherView.MAIN);

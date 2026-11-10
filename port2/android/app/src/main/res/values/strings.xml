@@ -42,7 +42,7 @@
     <string name="disc_rev0">Tombi! PAL Rev 0 disc (July 1998 build). The port needs the August 1998 Rev 1 (SCES-01331 or SCES-01330): Rev 0 has other overlays and does not boot.</string>
     <string name="disc_nomain0">No game executable found in that image (SYSTEM.CNF; pick the .bin, .iso or .chd; for a .cue select the .bin too).</string>
     <string name="disc_needbin">Select the .bin together with the .cue.</string>
-    <string name="disc_howto">Pick the image of your own Tombi! / Tomba! disc (.bin, .iso, .chd, or .cue together with its .bin): its files are extracted into app storage (about 500 MB, checked file by file; the image itself is not kept). The app ships no game data.</string>
+    <string name="disc_howto">Pick the image of your own Tombi! / Tomba! disc (.bin, .iso, .chd, .cue together with its .bin, or a .zip / .7z holding one): its files are extracted into app storage (about 500 MB, checked file by file; the image itself is not kept). The app ships no game data.</string>
     <string name="disc_missing">No disc image picked: pick your disc.</string>
     <string name="cancel">Cancel</string>
     <string name="disc_cancelled">Copy cancelled: the partial files were deleted.</string>
@@ -142,7 +142,7 @@
     <!-- the game library (Library.java, stage U2) -->
     <string name="lib_title">Your games</string>
     <string name="lib_add">Add game</string>
-    <string name="lib_add_sub">Your own disc image: .bin, .iso, .chd (or .cue with its .bin)</string>
+    <string name="lib_add_sub">Your own disc image: .bin, .iso, .chd, .zip, .7z (or .cue with its .bin)</string>
     <string name="lib_ready">Ready to play</string>
     <string name="lib_unsupported">Not supported yet</string>
     <string name="lib_nolib">Not in this build of the app</string>
@@ -155,6 +155,16 @@
     <string name="lib_from">Disc: %1$s</string>
     <string name="disc_unknown">Not a known Tombi! / Tomba! disc (%1$s, game executable sha1 %2$s).</string>
     <string name="disc_added">%1$s added to your games.</string>
+    <string name="disc_phase_unzip">Unzipping…</string>
+    <string name="disc_adding">Adding: %1$s</string>
+    <string name="disc_add_fail">Could not add the game: %1$s</string>
+    <string name="disc_notimage">“%1$s” is not a PlayStation disc image. Pick the image of your disc: .bin (with its .cue), .iso, .chd, or a .zip / .7z holding one.</string>
+    <string name="disc_archive">“%1$s” is a .rar archive, which the app cannot open. Extract it first (or use a .zip / .7z) and pick the disc image.</string>
+    <string name="disc_zip_noimage">“%1$s” holds no disc image (.bin, .iso, .img or .chd).</string>
+    <string name="disc_zip_nested">“%1$s” holds another archive, not a disc image. Extract it first and pick the image (or a .zip of it).</string>
+    <string name="disc_zip_files">“%1$s” holds the disc’s loose files (%2$s), not its image. The game needs the whole image: .bin with its .cue, .iso or .chd (inside a .zip / .7z too).</string>
+    <string name="disc_zip_cue">“%1$s” holds the .cue sheet but not the data track it names (%2$s).</string>
+    <string name="disc_zip_bad">“%1$s” cannot be read (a damaged archive, or a compression method the app does not know: %2$s). Extract it and pick the disc image.</string>
     <string-array name="lib_styles"><item>Carousel</item><item>List</item><item>Cover</item></string-array>
     <string-array name="lib_regions"><item>Europe</item><item>USA</item><item>Japan</item></string-array>
 </resources>
