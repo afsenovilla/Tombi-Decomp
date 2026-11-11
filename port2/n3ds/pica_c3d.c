@@ -543,11 +543,14 @@ static int c3d_start(void) {
     gpu_test_picture();
     return 0;
 }
-/* the way out (runtime/sdl.c): the open frame ended and waited for, citro3d closed */
+/* the way out (runtime/sdl.c): citro3d closed */
 void port_n3ds_gpu_fini(void) {
     if (!c3d_up) return;
     c3d_up = 0;
-    end_and_wait();
+    /* (nothing is submitted or waited for here: when the game is closed from the Home menu or with the power button
+       the system has taken the GPU back, and the wait for the open frame never returned: a console froze at this
+       step.  The frame begun and not ended holds nothing the GPU was given) */
+    in_frame = 0;
     C3D_Fini();
 }
 const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf };

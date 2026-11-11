@@ -151,6 +151,7 @@ static void window_stop_h(void *u) {
        its command queue and interrupt handlers, is closed before SDL takes the screens away under it) */
     { extern void port_n3ds_gpu_fini(void); extern void port_flush_log(void);
       port_printf("[3ds] quit: renderer\n"); port_flush_log(); port_n3ds_gpu_fini();
+      port_printf("[3ds] quit: renderer closed\n"); port_flush_log();
       port_printf("[3ds] quit: audio\n"); port_flush_log();
       if (dev) { port_sound_pulled(0); SDL_CloseAudioDevice(dev); } dev = 0;
       port_printf("[3ds] quit: SDL\n"); port_flush_log();
