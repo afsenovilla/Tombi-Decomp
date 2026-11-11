@@ -350,6 +350,12 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
           port_printf("[3ds] frameskip: %llu ordering tables not drawn in these %d presents\n", port_frames_skipped - last, TK_N); last = port_frames_skipped; }
         {   /* the sampled ordering tables' time (shims/gpu.c, shims/gpu_pica.c), in ms per sampled table */
             extern unsigned long long pica_prof[6]; extern unsigned pica_prof_n;
+            {   extern unsigned long long pica_cnt[8], pica_ot[4];
+                static unsigned long long lastc[8]; unsigned long long d[8], nt = pica_ot[2] ? pica_ot[2] : 1;
+                for (int i = 0; i < 8; i++) { d[i] = pica_cnt[i] - lastc[i]; lastc[i] = pica_cnt[i]; }
+                port_printf("[3ds] pica: a drawn table: %llu quads and %llu triangles by the short path, %llu triangles by the general one, %llu rectangles, %llu line pixels, %llu texture look-ups past the memo\n",
+                            d[0] / nt, d[1] / nt, d[2] / nt, d[3] / nt, d[4] / nt, d[5] / nt);
+            }
             if (pica_prof_n) {
                 double k = 1000.0 / SYSCLOCK_ARM11 / pica_prof_n;
                 /* (the decoder alone and with the backend are dry passes over the table's primitives before it is drawn) */
@@ -445,6 +451,33 @@ static void self_test(void) {
             port_printf("[3ds] pica self test, %s mark at %d,%d: %d pixels, first at %d,%d%s\n", pass ? "write" : "triangle", mk[i][0], mk[i][1], n,
                         fx < 0 ? -1 : mk[i][0] - 4 + fx, fy < 0 ? -1 : mk[i][1] - 4 + fy, n == 64 && fx == 4 && fy == 4 ? "" : "  <-- NOT WHERE IT BELONGS");
         }
+        c3d_fill(0, 0, 1024, 512, 0);
+    }
+    {   /* does the GPU clip a triangle that goes past a side of the target?  One across each side, a vertex far outside
+           (a PS1 coordinate's reach); two pixels inside it must be drawn and one beside it left alone.  The backend cuts
+           on the CPU the sides that fail (shims/gpu_pica.c pica_gpu_clips); a console drew nothing of a quad with
+           vertices exactly on the right edge, which is why it cut them all so far. */
+        static const struct { short v[3][2], in[2][2], out[2]; } t[4] = {
+            { { { -1100, 100 }, { 40, 100 }, { 40, 140 } }, { { 20, 110 }, { 2, 105 } }, { 60, 110 } },
+            { { { 100, -1100 }, { 140, 40 }, { 100, 40 } }, { { 110, 20 }, { 105, 2 } }, { 150, 20 } },
+            { { { 1000, 100 }, { 2100, 100 }, { 1000, 140 } }, { { 1010, 105 }, { 1020, 102 } }, { 990, 105 } },
+            { { { 100, 480 }, { 100, 1600 }, { 140, 480 } }, { { 105, 490 }, { 102, 508 } }, { 150, 490 } } };
+        extern int pica_gpu_clips;
+        PState st = { -1, 0, AT_OFF, -1, 0, 0, 1023, 511 };
+        int sides = 0;
+        for (int i = 0; i < 4; i++) {
+            PV m[3]; unsigned g[3];
+            c3d_fill(0, 0, 1024, 512, 0);
+            for (int k = 0; k < 3; k++) { PV z = { t[i].v[k][0], t[i].v[k][1], 0, 0, 0, 255, 0, 255 }; m[k] = z; }
+            c3d_tris(&st, m, 3);
+            c3d_read(t[i].in[0][0], t[i].in[0][1], 1, 1, &g[0], 1); c3d_read(t[i].in[1][0], t[i].in[1][1], 1, 1, &g[1], 1);
+            c3d_read(t[i].out[0], t[i].out[1], 1, 1, &g[2], 1);
+            int ok = (g[0] & 0x00FFFFFFu) == 0x0000FF00u && (g[1] & 0x00FFFFFFu) == 0x0000FF00u && (g[2] & 0x00FFFFFFu) == 0;
+            if (ok) sides |= 1 << i;
+            port_printf("[3ds] pica self test, a triangle across the %s side: %08x %08x inside, %08x beside: %s\n",
+                        (const char *[]){ "left", "upper", "right", "lower" }[i], g[0], g[1], g[2], ok ? "the GPU clips it" : "NOT drawn right: cut on the CPU");
+        }
+        pica_gpu_clips = sides;
         c3d_fill(0, 0, 1024, 512, 0);
     }
 }

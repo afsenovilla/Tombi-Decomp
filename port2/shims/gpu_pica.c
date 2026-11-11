@@ -33,6 +33,8 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 #define SLOTS PICA_SLOTS
 
 /* ================================================================== the reference device (CPU) */
+extern unsigned long long pica_cnt[8];
+extern int pica_gpu_clips;
 static u32 (*rt)[1024];                  /* the render target, 512 rows (allocated by pica_start: the image stays small) */
 static u32 (*atlas[3])[PICA_ATLAS];      /* the texture atlases (both PICA_ATLAS squared here) */
 static void ref_tex_upload(int slot, const u32 *rgba, int busy) {
@@ -117,6 +119,7 @@ static void ref_write(int x, int y, int w, int h, const u32 *s, int stride) {
 static int ref_start(void) {
     if (!rt) rt = calloc(512, sizeof *rt);
     for (int i = 0; i < 3; i++) if (!atlas[i]) atlas[i] = calloc(PICA_ATLAS, sizeof *atlas[i]);
+    if (getenv("PICA_GPU_CLIPS")) pica_gpu_clips = atoi(getenv("PICA_GPU_CLIPS"));   /* (the sides a 3DS's probe would report: 15 = all) */
     pica_n128x = getenv("PICA_NO128X") ? 0 : PICA_N128X;   /* (PICA_NO128X: a device without the third atlas) */
     return rt && atlas[0] && atlas[1] ? 0 : -1;
 }
@@ -442,6 +445,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
         *obx = memo.bx; *oby = memo.by; slots[memo.slot].used = ++use_clock;
         return memo.slot;
     }
+    pica_cnt[5]++;
     int z = 256, bx = 0, by = 0;
     if (u0 >= 0 && v0 >= 0 && u1 < 256 && v1 < 256) {
         /* origins on a grid of half the size: any primitive up to 32 texels fits a 64 block, up to 64 a 128 one */
@@ -585,8 +589,21 @@ static int clip_poly(const PV *in, int n, PV *out, int axis, float bound, int ke
    is the device's scissor; what the CPU must cut is what a PICA200 cannot be given: a vertex outside the target */
 #define CLIP_X2 1023.4f
 #define CLIP_Y2 511.4f
+/* pica_gpu_clips: the sides of the target past which the device's GPU clips a triangle itself (bit 0 left, 1 top,
+   2 right, 3 bottom), as the 3DS device's start-up probe found by drawing across each and reading back.  Nothing is
+   cut on the CPU there, and such a primitive takes the short path like one inside the target: the clipper and the
+   general path cost several times the short one on an Old 3DS, and a scrolling scene always has a column and a row of
+   primitives across the left and upper edges.  kx1..ky2: the bounds a vertex must be inside for the short path. */
+int pica_gpu_clips;
+unsigned long long pica_cnt[8];   /* (logged) [0] quads and [1] triangles by the short path, [2] triangles by the general one, [3] rectangles, [4] line pixels, [5] texture look-ups past the memo */
+static int kx1 = 0, ky1 = 0, kx2 = 1023, ky2 = 511;
+static void clip_sides(void) {
+    kx1 = pica_gpu_clips & 1 ? -30000 : 0; ky1 = pica_gpu_clips & 2 ? -30000 : 0;
+    kx2 = pica_gpu_clips & 4 ? 30000 : 1023; ky2 = pica_gpu_clips & 8 ? 30000 : 511;
+}
 static int clip_tris(const PV *v, int n, PV *out) {
-    const float X1 = 0.0f, Y1 = 0.0f, X2 = CLIP_X2, Y2 = CLIP_Y2;
+    const float X1 = pica_gpu_clips & 1 ? -1e9f : 0.0f, Y1 = pica_gpu_clips & 2 ? -1e9f : 0.0f;
+    const float X2 = pica_gpu_clips & 4 ? 1e9f : CLIP_X2, Y2 = pica_gpu_clips & 8 ? 1e9f : CLIP_Y2;
     int m = 0;
     for (int t = 0; t + 2 < n; t += 3) {
         const PV *q = &v[t];
@@ -715,8 +732,9 @@ static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shad
         put(&v[i], p[i]->x, p[i]->y, q->r, q->g, q->b, p[i]->u, p[i]->v);
     }
     {   /* (inside the target: clip_tris would pass it whole) */
-        if ((unsigned)a->x <= 1023u && (unsigned)b->x <= 1023u && (unsigned)c->x <= 1023u
-            && (unsigned)a->y <= 511u && (unsigned)b->y <= 511u && (unsigned)c->y <= 511u && bulk_in()) {
+        if (a->x >= kx1 && b->x >= kx1 && c->x >= kx1 && a->x <= kx2 && b->x <= kx2 && c->x <= kx2
+            && a->y >= ky1 && b->y >= ky1 && c->y >= ky1 && a->y <= ky2 && b->y <= ky2 && c->y <= ky2 && bulk_in()) {
+            pica_cnt[1]++;
             int u0 = a->u, u1 = u0, w0 = a->v, w1 = w0;
             if (b->u < u0) u0 = b->u; if (b->u > u1) u1 = b->u; if (c->u < u0) u0 = c->u; if (c->u > u1) u1 = c->u;
             if (b->v < w0) w0 = b->v; if (b->v > w1) w1 = b->v; if (c->v < w0) w0 = c->v; if (c->v > w1) w1 = c->v;
@@ -724,6 +742,7 @@ static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shad
             return;
         }
     }
+    pica_cnt[2]++;
     tri_drawn(v);
     emit(v, 3, tex, semi, raw);
 }
@@ -745,7 +764,9 @@ static inline void quad_put(PV *d, const GpuVtx *g, int shade, int du, int dv) {
 }
 static int pica_quad(const GpuVtx *g, int shade, const GpuTex *tex, int semi, int raw) {
     if (pica_dry == 1) return 1;
-    if ((unsigned)(g[0].x | g[1].x | g[2].x | g[3].x) > 1023u || (unsigned)(g[0].y | g[1].y | g[2].y | g[3].y) > 511u || !bulk_in()) return 0;
+    for (int i = 0; i < 4; i++) if (g[i].x < kx1 || g[i].x > kx2 || g[i].y < ky1 || g[i].y > ky2) return 0;
+    if (!bulk_in()) return 0;
+    pica_cnt[0]++;
     PState s = base_state();
     if (!tex) { s.blend = semi ? gs->abr : -1; quad_put(batch(&s, 6), g, shade, 0, 0); return 1; }
     int u0 = g[0].u, u1 = u0, w0 = g[0].v, w1 = w0, bx, by, ax, ay;
@@ -776,7 +797,8 @@ static void pica_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, in
     PV v[6];
     put(&v[0], x, y, r, g, b, u0, v0); put(&v[1], x + w, y, r, g, b, u0 + w, v0); put(&v[2], x, y + h, r, g, b, u0, v0 + h);
     v[3] = v[1]; put(&v[4], x + w, y + h, r, g, b, u0 + w, v0 + h); v[5] = v[2];
-    {   if (w >= 0 && h >= 0 && x >= 0 && y >= 0 && x + w <= 1023 && y + h <= 511 && bulk_in()) {
+    pica_cnt[w == 1 && h == 1 && !tex ? 4 : 3]++;
+    {   if (w >= 0 && h >= 0 && x >= kx1 && y >= ky1 && x + w <= kx2 && y + h <= ky2 && bulk_in()) {
             emit_in(v, 6, tex, semi, raw, u0, v0, u0 + w, v0 + h);
             return;
         }
@@ -854,6 +876,7 @@ static int pica_start(void) {
     if (!stage) stage = malloc(1024 * 512 * 4);
     if (!dec) dec = malloc(256 * 256 * 4);
     if (!stage || !dec || dev->start()) return -1;
+    clip_sides();
     pica_vram_written(0, 0, 1024, 512);
     return 0;
 }
