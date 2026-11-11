@@ -26,14 +26,14 @@ void func_8001A108(void)
         case 1:
             displayDebugScreen();
             return;
-        case 2:
+        case 3:
             func_80020FAC();
             (*(Task**)(&SCRATCHPAD+0x1D4))->step.value++;
             initObjectPools();
             *(u_char*)&(*(u_long**)0x1F8001CF) = 0;
             (CURRENT_TASK)->unk5E = 0x78U;
             return;
-        case 3:
+        case 4:
             drawDebugText(96, 96, 0, D_80010184);
             (CURRENT_TASK)->unk5E--;
             if (((CURRENT_TASK)->unk5E << 0x10) == 0) {
@@ -56,7 +56,7 @@ void func_8001A108(void)
                 (CURRENT_TASK)->step.value++;
             }
             break;
-        case 4:
+        case 2:
         case 5:
             displayLoadingScreen();
             break;

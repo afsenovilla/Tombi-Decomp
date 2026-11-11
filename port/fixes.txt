@@ -929,6 +929,14 @@ src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0xD0; | m.x = port_title_
 src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x64; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x0 - 8 - (unsigned char)TITLE_FONT[*(short *)TITLE_ARROW_LEFT_STRING * 5 + 2] : 0x64;
 src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x70; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x0 - 8 - (unsigned char)TITLE_FONT[*(short *)TITLE_ARROW_LEFT_STRING * 5 + 2] : 0x70;
 @version all
+#
+# =====================================================================================================================
+# JP (SLPS-01144) spellings of the PAL fixes above (docs/PORT_VERSIONS_PLAN.md J1): the JP branches that spell a PAL
+# function under its JP name.
+@version jp
+# --skip-intro: the JP boot logo state is func_80018BE0 (its JP branch of src/bootLogoState.c)
+src/bootLogoState.c | void func_80018BE0(void) | extern int port_skip_movies; void func_80018BE0(void)
+@version all
 # --wings-glide (runtime/wings.c): the Japanese demo's cut top-down Charity Wings glide. The wings item use in a
 # top-down area runs topdownPlayerDropExitStep (substep 0; overheadPlayerDropExitStep / tunnelPlayerDropExitStep in I0NFO / I0NFO3); the port swaps the player's frame tables there and draws
 # the feather after the player's parts (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide")

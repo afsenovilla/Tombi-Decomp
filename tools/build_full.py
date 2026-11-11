@@ -425,6 +425,15 @@ def compile_version(units, jobs, inc):
     symbol / VERSION line size). Plus the version's own data files (src/data/<ver>/<prog>/*.c, tools/version_data.py)."""
     import units as U, version_data as VD
     vunits = U.version_units(VER)
+    # plus the `// VERSION <SERIAL> <prog> <addr> <size>` files of functions the symbol files list without a
+    # `type:func size:` line (JP: 514 of them; the port builds them from that C, so the link must resolve their
+    # names too: port/tools/portver.py version_units adds them the same way)
+    vlines = U.version_lines(SERIAL)
+    for p in PROGS:
+        have = {vu.addr for vu in vunits.get(p, [])}
+        extra = [U.Unit(p, a, size, "func_%08X" % a, path, False, False, None)
+                 for (q, a), (path, size) in vlines.items() if q == p and a not in have]
+        if extra: vunits[p] = sorted(vunits.get(p, []) + extra, key=lambda u: u.addr)
     for p in PROGS:
         for vu in vunits.get(p, []):
             if not vu.file: continue

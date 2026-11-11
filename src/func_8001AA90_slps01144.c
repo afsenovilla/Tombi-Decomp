@@ -76,7 +76,7 @@ void func_8001AA90(void)
         LOAD_COMPLETE_SYM = 0;
         switch (D_800A6132) {
         case 0: case 1: case 2: case 6: n = 3; break;
-        case 4: n = 4; break;
+        case 4: case 5: n = 4; break;
         case 7: n = 6; break;
         case 3: n = 7; break;
         default: goto next;
