@@ -17,10 +17,17 @@
 #define PICA_N256 8
 #define PICA_N128 32
 #define PICA_N64 256
-#define PICA_SLOTS (PICA_N256 + PICA_N128 + PICA_N64)
-static inline int pica_slot_size(int slot) { return slot < PICA_N256 ? 256 : slot < PICA_N256 + PICA_N128 ? 128 : 64; }
-static inline int pica_slot_atlas(int slot) { return slot < PICA_N256 || slot >= PICA_N256 + PICA_N128 + 128; }
+/* atlas 2 (1024 x 1024), when the device has the memory for it (pica_n128x: 64 or 0): 64 more slots of 128 x 128,
+   numbered after all the others (a scene of the first area asked for more than 32: 385 blocks decoded again in 120
+   frames on an Old 3DS) */
+#define PICA_N128X 64
+#define PICA_X128 (PICA_N256 + PICA_N128 + PICA_N64)   /* the first of them */
+#define PICA_SLOTS (PICA_X128 + PICA_N128X)
+extern int pica_n128x;
+static inline int pica_slot_size(int slot) { return slot < PICA_N256 ? 256 : slot < PICA_N256 + PICA_N128 || slot >= PICA_X128 ? 128 : 64; }
+static inline int pica_slot_atlas(int slot) { return slot >= PICA_X128 ? 2 : slot < PICA_N256 || slot >= PICA_N256 + PICA_N128 + 128; }
 static inline void pica_slot_pos(int slot, int *x, int *y) {   /* its corner in its atlas */
+    if (slot >= PICA_X128) { slot -= PICA_X128; *x = (slot & 7) * 128; *y = (slot >> 3) * 128; return; }
     if (slot < PICA_N256) { *x = (slot & 3) * 256; *y = (slot >> 2) * 256; return; }
     slot -= PICA_N256;
     if (slot < PICA_N128) { *x = (slot & 7) * 128; *y = (slot >> 3) * 128; return; }
@@ -29,7 +36,7 @@ static inline void pica_slot_pos(int slot, int *x, int *y) {   /* its corner in 
 }
 enum { AT_OFF, AT_NOTZERO, AT_OPAQUE, AT_SEMI };   /* alpha test: off, alpha != 0, == PICA_A_OPAQUE, == PICA_A_SEMI */
 typedef struct { float x, y, u, v; unsigned char r, g, b, a; } PV;   /* u, v: texels of the atlas */
-/* tex: the atlas (0, 1) or -1; mod: texture x colour x 2 (else the texture, raw); blend: -1 or the PS1 mode 0..3;
+/* tex: the atlas (0, 1, 2) or -1; mod: texture x colour x 2 (else the texture, raw); blend: -1 or the PS1 mode 0..3;
    x1..y2: the drawing area (inclusive) */
 typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2; } PState;
 typedef struct {

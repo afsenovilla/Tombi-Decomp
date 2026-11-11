@@ -22,7 +22,7 @@
 #include "gpu_pica.h"
 #include "pica_vsh_shbin.h"
 
-static C3D_Tex vram_tex, atlas_tex[2];   /* the texture cache: two of 1024 x 1024 (shims/gpu_pica.h) */
+static C3D_Tex vram_tex, atlas_tex[3];   /* the texture cache: 1024 x 1024 each, the third if there is memory (shims/gpu_pica.h) */
 static C3D_RenderTarget *vram_rt, *top_rt, *bot_rt;
 static C3D_Tex panel_tex;                 /* the bottom screen's panel (runtime/panel.c), 512 x 256, its canvas in the corner */
 static int panel_w, panel_h;
@@ -536,6 +536,15 @@ static int c3d_start(void) {
     AttrInfo_AddLoader(ai, 2, GPU_UNSIGNED_BYTE, 4);   /* v2 colour */
     vb = linearAlloc(VB_MAX * sizeof *vb);
     if (!vb) { port_printf("[3ds] pica: no vertex buffer\n"); return -1; }
+    /* the third atlas, last and only with room to spare in the linear heap (the SDL screens, the staging arena and
+       the read-back buffer come first) */
+    if (linearSpaceFree() > (6u << 20) && C3D_TexInit(&atlas_tex[2], PICA_ATLAS, PICA_ATLAS, GPU_RGBA8)) {
+        C3D_TexSetFilter(&atlas_tex[2], GPU_NEAREST, GPU_NEAREST);
+        C3D_TexSetWrap(&atlas_tex[2], GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
+        memset(atlas_tex[2].data, 0, (size_t)PICA_ATLAS * PICA_ATLAS * 4);
+        pica_n128x = PICA_N128X;
+    }
+    port_printf("[3ds] pica: %d slots of 128 x 128, %u KB of linear memory left\n", PICA_N128 + pica_n128x, (unsigned)(linearSpaceFree() >> 10));
     C3D_BufInfo *bi = C3D_GetBufInfo();
     BufInfo_Init(bi);
     BufInfo_Add(bi, vb, sizeof *vb, 3, 0x210);

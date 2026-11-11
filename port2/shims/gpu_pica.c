@@ -34,7 +34,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 
 /* ================================================================== the reference device (CPU) */
 static u32 (*rt)[1024];                  /* the render target, 512 rows (allocated by pica_start: the image stays small) */
-static u32 (*atlas[2])[PICA_ATLAS];      /* the texture atlases (both PICA_ATLAS squared here) */
+static u32 (*atlas[3])[PICA_ATLAS];      /* the texture atlases (both PICA_ATLAS squared here) */
 static void ref_tex_upload(int slot, const u32 *rgba, int busy) {
     int z = pica_slot_size(slot), ax, ay; pica_slot_pos(slot, &ax, &ay); (void)busy;
     for (int j = 0; j < z; j++) memcpy(&atlas[pica_slot_atlas(slot)][ay + j][ax], rgba + j * z, (size_t)z * 4);
@@ -116,7 +116,8 @@ static void ref_write(int x, int y, int w, int h, const u32 *s, int stride) {
 }
 static int ref_start(void) {
     if (!rt) rt = calloc(512, sizeof *rt);
-    for (int i = 0; i < 2; i++) if (!atlas[i]) atlas[i] = calloc(PICA_ATLAS, sizeof *atlas[i]);
+    for (int i = 0; i < 3; i++) if (!atlas[i]) atlas[i] = calloc(PICA_ATLAS, sizeof *atlas[i]);
+    pica_n128x = getenv("PICA_NO128X") ? 0 : PICA_N128X;   /* (PICA_NO128X: a device without the third atlas) */
     return rt && atlas[0] && atlas[1] ? 0 : -1;
 }
 static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0, 0 };
@@ -408,10 +409,29 @@ static int prim_kinds(int slot, int u0, int v0, int u1, int v1, int bx, int by) 
     for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) k |= kc[j * 8 + i];
     return k;
 }
+/* The slot for a new block of a size whose slots are in two atlases (a, n: the first one's; b, m: the other's): a
+   change of atlas ends a batch, so the first atlas is filled first, and a block in it that no frame has used for a
+   while (a second or so of presents) leaves before a slot of the other atlas is opened; with both full, the least
+   recently used of all.  (Slots never empty: without this a scene that fits one atlas ended up spread over both.) */
+static unsigned long long clock_hist[64];   /* use_clock at the last 64 presents */
+static int slot_pick(int a, int n, int b, int m) {
+    int i = a;
+    for (int k = a; k < a + n; k++) {
+        if (!slots[k].live) return k;
+        if (slots[k].used < slots[i].used) i = k;
+    }
+    if (!m || slots[i].used < clock_hist[(present_no + 1) & 63]) return i;
+    for (int k = b; k < b + m; k++) {
+        if (!slots[k].live) return k;
+        if (slots[k].used < slots[i].used) i = k;
+    }
+    return i;
+}
 /* why blocks were decoded (logged): [0] their texels were written, [1] their CLUT changed, [2..4] a block of another
    texture left its slot for them (256, 128, 64), [5..7] the same, the block that left drawn with in this very frame
    (more textures in a frame than slots of the size), [8] into a free slot */
 unsigned long long pica_dec_why[9];
+int pica_n128x;
 static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, int *oby) {
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
     if (memo.ok && memo.ver == ver_clock && memo.epoch == drawn_epoch && memo.tx == t->tx && memo.ty == t->ty && memo.depth == t->depth
@@ -472,13 +492,9 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
         { int x3, y3, w3, h3; tex_rect(t, tw, bx, by, z, &x3, &y3, &w3, &h3); pica_dec_why[blocks_ver(x3, y3, w3, h3) <= s->tver ? 1 : 0]++; }
         was = s->used;   /* (stale: decoded again in its slot) */
     } else {
-        int a = z == 256 ? 0 : z == 128 ? PICA_N256 : PICA_N256 + PICA_N128;
-        int n = z == 256 ? PICA_N256 : z == 128 ? PICA_N128 : PICA_N64;
-        i = a;
-        for (int k = a; k < a + n; k++) {
-            if (!slots[k].live) { i = k; break; }
-            if (slots[k].used < slots[i].used) i = k;
-        }
+        if (z == 256) i = slot_pick(0, PICA_N256, 0, 0);
+        else if (z == 128) i = slot_pick(PICA_N256, PICA_N128, PICA_X128, pica_n128x);
+        else i = slot_pick(PICA_N256 + PICA_N128, 128, PICA_N256 + PICA_N128 + 128, PICA_N64 - 128);
         if (memo.slot == i) memo.ok = 0;
         if (slots[i].live) {   /* out of its chain */
             Slot *o = &slots[i];
@@ -616,8 +632,8 @@ static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
         PA(3, px);
         if (semi) skinds = prim_kinds(slot, u0, w0, u1, w1, bx, by);
         pica_slot_pos(slot, &ax, &ay);
-        s.tex = pica_slot_atlas(slot); s.mod = !raw;
-        for (int i = 0; i < n; i++) { vv[i] = v0[i]; vv[i].u += (float)(ax - bx); vv[i].v += (float)(ay - by); }
+        s.tex = pica_slot_atlas(slot); s.mod = 1;
+        for (int i = 0; i < n; i++) { vv[i] = v0[i]; vv[i].u += (float)(ax - bx); vv[i].v += (float)(ay - by); if (raw) vv[i].r = vv[i].g = vv[i].b = 128; }
         v = vv;
     }
     if (!tex) { s.blend = semi ? gs->abr : -1; memcpy(batch(&s, n), v, n * sizeof *v); PA(1, pt); return; }
@@ -635,7 +651,8 @@ static void emit_in(PV *v, int n, const GpuTex *tex, int semi, int raw, int u0, 
     if (u1 > 255 && u0 < 256) u1 = 255; if (w1 > 255 && w0 < 256) w1 = 255;
     int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by);
     pica_slot_pos(slot, &ax, &ay);
-    s.tex = pica_slot_atlas(slot); s.mod = !raw;
+    s.tex = pica_slot_atlas(slot); s.mod = 1;
+    if (raw) for (int i = 0; i < n; i++) v[i].r = v[i].g = v[i].b = 128;   /* (see pica_quad) */
     float du = (float)(ax - bx), dv = (float)(ay - by);
     for (int i = 0; i < n; i++) { v[i].u += du; v[i].v += dv; }
     const int kinds = semi ? prim_kinds(slot, u0, w0, u1, w1, bx, by) : 1;
@@ -741,7 +758,11 @@ static int pica_quad(const GpuVtx *g, int shade, const GpuTex *tex, int semi, in
     }
     int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by);
     pica_slot_pos(slot, &ax, &ay);
-    s.tex = pica_slot_atlas(slot); s.mod = !raw;
+    /* a raw texture is the modulated one with the colour that leaves it as it is (texel x 128 / 128): one state for
+       both, where raw and shaded primitives one after the other ended a batch each time */
+    s.tex = pica_slot_atlas(slot); s.mod = 1;
+    GpuVtx g128[4];
+    if (raw) { for (int i = 0; i < 4; i++) { g128[i] = g[i]; g128[i].r = g128[i].g = g128[i].b = 128; } g = g128; }
     const int kinds = semi ? prim_kinds(slot, u0, w0, u1, w1, bx, by) : 1;
     if (!semi || !(kinds & 2)) { s.atest = AT_NOTZERO; quad_put(batch(&s, 6), g, shade, ax - bx, ay - by); return 1; }
     if (!(kinds & 1)) { s.atest = AT_SEMI; s.blend = gs->abr; quad_put(batch(&s, 6), g, shade, ax - bx, ay - by); return 1; }
@@ -847,6 +868,7 @@ static void pica_stop(void) {
 static int pica_present(int dx, int dy, int dw, int dh, int masked) {
     flush();
     frame_clock = use_clock; present_no++;
+    clock_hist[present_no & 63] = use_clock;
     return dev->present ? dev->present(dx, dy, dw, dh, masked) : 0;
 }
 const GpuBackend port_gpu_pica = { "pica (3DS model, CPU reference)", pica_start, pica_stop, pica_tri, pica_rect, pica_line, pica_fill,
