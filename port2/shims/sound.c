@@ -88,7 +88,7 @@ static void decode_block(Voice *v) {
 }
 
 /* one envelope step for a phase: exp / decreasing / shift / step per the SPU's rate rules */
-static void env_tick(Voice *v, int exp, int dec, int shift, int step) {
+static inline __attribute__((always_inline)) void env_tick(Voice *v, int exp, int dec, int shift, int step) {
     if (v->env_wait > 0) { v->env_wait--; return; }
     int s = dec ? -8 + step : 7 - step;
     int wait = 1 << (shift > 11 ? shift - 11 : 0);
@@ -100,7 +100,7 @@ static void env_tick(Voice *v, int exp, int dec, int shift, int step) {
     if (v->env_level > 0x7FFF) v->env_level = 0x7FFF;
     if (v->env_level < 0) v->env_level = 0;
 }
-static void env_step(Voice *v) {
+static inline void env_step(Voice *v) {
     u16 a1 = v->adsr1, a2 = v->adsr2;
     switch (v->env_phase) {
     case ENV_ATTACK:
@@ -347,7 +347,15 @@ static void mix_voices(s16 *out, int n) {
                    the voice is read or written but the counter (the same sums as the general step below, which
                    takes over at the block's last sample or when the envelope is due) */
                 const int per = 1 + half, lev = v->env_level, last = (28 << 12) - step;
-                int run = v->env_wait / per, done = 0;
+                /* (a sustain that has reached its end, full level going up or nothing going down, steps for ever
+                   without changing the level: only its wait counter turns, P steps a turn, and is set once after
+                   the run) */
+                int steady = 0, P = 1;
+                if (v->env_phase == ENV_SUSTAIN) {
+                    const int a2 = v->adsr2, dec = (a2 >> 14) & 1, sh = (a2 >> 8) & 31;
+                    if (dec ? lev == 0 : lev == 0x7FFF) { steady = 1; P = 1 << (sh > 11 ? sh - 11 : 0); if ((a2 >> 15) && !dec) P <<= 2; }
+                }
+                int run = steady ? n - i : v->env_wait / per, done = 0;
                 if (run > n - i) run = n - i;
                 while (done < run && counter < last && counter >= 1 << 12) {
                     const int idx = counter >> 12, fr = counter & 0xFFF;
@@ -357,7 +365,8 @@ static void mix_voices(s16 *out, int n) {
                     accl[i] += (s * vl) >> 14; accr[i] += (s * vr) >> 14;
                     counter += step; i++; done++;
                 }
-                v->env_wait -= done * per;
+                if (steady) { const int k = done * per, w = v->env_wait; v->env_wait = w >= k ? w - k : (P - 1) - ((k - w - 1) & (P - 1)); }
+                else v->env_wait -= done * per;
                 if (i >= n) break;
             }
             int idx = counter >> 12, fr = counter & 0xFFF;

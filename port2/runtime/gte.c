@@ -58,7 +58,7 @@ static inline s32 sum3_12(s32 a, s32 b, s32 c) {
 }
 /* (the rotation's products are 16 x 16 bits: 32-bit multiplies, and the translation, a multiple of 4096 once shifted,
    is added after the sum's own shift: the same values as the 64-bit sums, a third of the game's time on an Old 3DS) */
-static void rtp(int n, int last) {
+static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (in line: RTPT's three share the matrix and the screen registers they load) */
     s32 x = VX(n), y = VY(n), z = VZ(n);
     s64 m1 = (s64)C[5] + sum3_12(M16LO(0) * x, M16HI(0) * y, M16LO(1) * z);
     s64 m2 = (s64)C[6] + sum3_12(M16HI(1) * x, M16LO(2) * y, M16HI(2) * z);
