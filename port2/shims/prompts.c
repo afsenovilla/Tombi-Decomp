@@ -308,6 +308,32 @@ static int bold_disc(u8 *p, int stride, int w, int h, int cx2, int cy2, int src,
     letter_fx(p, stride, w, h, 7, 7, soft_c);
     return 1 + ROW_CUSTOM + src;
 }
+/* --prompt-big 4 (the 3DS's default): the button as large as its cell allows, a black rounded box (bx0, by0, bw x bh)
+   with no lighter rim, and the same white letter (7 x 8) in its middle: black all round the letter */
+static int black_box(u8 *p, int stride, int w, int h, int bx0, int by0, int bw, int bh, int src) {
+    static int rows_set;
+    if (!rows_set) { rows_set = 1; for (int i = 0; i < 4; i++) custom_row(i, 0x000000, 0xFFFFFF); }
+    const char ch = "BAYX"[src];
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) p[y * stride + x] = 0;
+    for (int y = 0; y < bh; y++) for (int x = 0; x < bw; x++) {
+        int ex = x < bw - 1 - x ? x : bw - 1 - x, ey = y < bh - 1 - y ? y : bh - 1 - y;   /* distance to the box's edges */
+        int xx = bx0 + x, yy = by0 + y;
+        if (ex + ey < 2 || xx < 0 || xx >= w || yy < 0 || yy >= h) continue;               /* (the corners rounded) */
+        p[yy * stride + xx] = 7;
+    }
+    int lx = bx0 + (bw - 7) / 2, ly = by0 + (bh - 8) / 2;
+    for (unsigned i = 0; i < sizeof font6 / sizeof font6[0]; i++) if (font6[i].ch == ch)
+        for (int y = 0; y < 8; y++) {
+            unsigned r = font6[i].rows[y]; r = r << 1 | r;
+            for (int x = 0; x < 7; x++) {
+                int xx = lx + x, yy = ly + y;
+                if ((r >> (6 - x) & 1) && xx >= 0 && xx < w && yy >= 0 && yy < h) p[yy * stride + xx] = 15 | 0x80;
+            }
+        }
+    static const u8 soft_c[16] = { [15] = 9 };
+    letter_fx(p, stride, w, h, 7, 7, soft_c);
+    return 1 + ROW_CUSTOM + src;
+}
 static void letter6(char ch, int x0, int y0, int c) {
     for (unsigned i = 0; i < sizeof font6 / sizeof font6[0]; i++) if (font6[i].ch == ch)
         for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if (font6[i].rows[y] >> (5 - x) & 1) put(x0 + x, y0 + y, c);
@@ -372,6 +398,7 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
         return 1 + ROW_NINTENDO;
     }
     if (port_prompt_big == 1 && style != PROMPT_PS) return big_letter(&img[0][0], GW, GW, GH, 12, 16, src);   /* (the disc's centre: rows 2..13) */
+    if (port_prompt_big == 4 && style != PROMPT_PS) return black_box(&img[0][0], GW, GW, GH, 0, 1, 12, 14, src);
     if (port_prompt_big >= 2 && style != PROMPT_PS) return bold_disc(&img[0][0], GW, GW, GH, 12, 16, src, port_prompt_big == 3);
     switch (style) {
     case PROMPT_PS: ps_symbol(src); break;   /* SRC_SOUTH..NORTH are in PS_CROSS..TRIANGLE order */
@@ -520,6 +547,11 @@ static int mi_draw(int i, int w, int h) {
     static const char *xb_sh[] = { "LB", "RB", "LT", "RT" }, *nt_sh[] = { "L", "R", "ZL", "ZR" }, *ps_sh[] = { "L1", "R1", "L2", "R2" };
     if (src == SRC_NONE) return 1;   /* the empty disc (row 0) */
     if (port_prompt_big == 1 && src < 4 && st != PROMPT_PS) return big_letter(&mimg[0][0], MW, w, h, cx2, cy2, src);
+    if (port_prompt_big == 4 && src < 4 && st != PROMPT_PS) {   /* (the icon's whole box, at most 14 x 14 round the original's middle) */
+        int bw = w < 14 ? w : 14, bh = h < 14 ? h : 14, bx = cx2 / 2 - bw / 2, by = cy2 / 2 - bh / 2;
+        if (bx < 0) bx = 0; if (by < 0) by = 0; if (bx + bw > w) bx = w - bw; if (by + bh > h) by = h - bh;
+        return black_box(&mimg[0][0], MW, w, h, bx, by, bw, bh, src);
+    }
     if (port_prompt_big >= 2 && src < 4 && st != PROMPT_PS) return bold_disc(&mimg[0][0], MW, w, h, cx2, cy2, src, port_prompt_big == 3 && y1 - y0 + 1 >= 14);
     if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || THORISH(st) || st == PROMPT_CUSTOM ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
     else if (st == PROMPT_XBOX) { one[0] = "ABXY"[src]; t = one; col = xb_col[src]; }
