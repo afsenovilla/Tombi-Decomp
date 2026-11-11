@@ -29,6 +29,7 @@ static int panel_w, panel_h;
 static shaderProgram_s prog;
 static DVLB_s *vsh;
 static int u_proj, u_tsc, in_frame, scr_fmt;
+static int atlas2_h = PICA_ATLAS;           /* the third atlas's height (half when memory is short) */
 static int c3d_up;                        /* citro3d is running (port_n3ds_gpu_fini) */
 static int vb_n, last_ok;                 /* (the vertex buffer's fill and the state cache, below) */
 static unsigned frame_no;
@@ -191,7 +192,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
         if (all || s->blend != l->blend) set_blend(s->blend);
         if (s->tex >= 0 && (all || s->tex != l->tex)) {
             C3D_TexBind(0, &atlas_tex[s->tex]);
-            set_tscale(1.0f / (float)PICA_ATLAS, 1.0f / (float)PICA_ATLAS);
+            set_tscale(1.0f / (float)PICA_ATLAS, 1.0f / (float)(s->tex == 2 ? atlas2_h : PICA_ATLAS));
         }
         last_st = *s; last_ok = 1;
     }
@@ -538,11 +539,16 @@ static int c3d_start(void) {
     if (!vb) { port_printf("[3ds] pica: no vertex buffer\n"); return -1; }
     /* the third atlas, last and only with room to spare in the linear heap (the SDL screens, the staging arena and
        the read-back buffer come first) */
-    if (linearSpaceFree() > (6u << 20) && C3D_TexInit(&atlas_tex[2], PICA_ATLAS, PICA_ATLAS, GPU_RGBA8)) {
-        C3D_TexSetFilter(&atlas_tex[2], GPU_NEAREST, GPU_NEAREST);
-        C3D_TexSetWrap(&atlas_tex[2], GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
-        memset(atlas_tex[2].data, 0, (size_t)PICA_ATLAS * PICA_ATLAS * 4);
-        pica_n128x = PICA_N128X;
+    {   /* (whole, 64 slots, with 6 MB free; an Old 3DS had 5.9 MB left: half of it there, 32 slots in 2 MB) */
+        u32 free = linearSpaceFree();
+        int h = free > (6u << 20) ? PICA_ATLAS : free > (7u << 19) ? PICA_ATLAS / 2 : 0;
+        if (h && C3D_TexInit(&atlas_tex[2], PICA_ATLAS, (u16)h, GPU_RGBA8)) {
+            C3D_TexSetFilter(&atlas_tex[2], GPU_NEAREST, GPU_NEAREST);
+            C3D_TexSetWrap(&atlas_tex[2], GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
+            memset(atlas_tex[2].data, 0, (size_t)PICA_ATLAS * h * 4);
+            atlas2_h = h;
+            pica_n128x = h == PICA_ATLAS ? PICA_N128X : PICA_N128X / 2;
+        }
     }
     port_printf("[3ds] pica: %d slots of 128 x 128, %u KB of linear memory left\n", PICA_N128 + pica_n128x, (unsigned)(linearSpaceFree() >> 10));
     C3D_BufInfo *bi = C3D_GetBufInfo();
