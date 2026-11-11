@@ -241,9 +241,9 @@ static void cbind_defaults(void) {
     for (unsigned i = 0; i < sizeof d / sizeof d[0]; i++) {
         unsigned short m = d[i].m;
 #ifdef __3DS__
-        /* SDL's A / B / X / Y are the 3DS's own letters, and Nintendo's sit where the other pair does on a PlayStation
-           pad: bound by place (B, the lower one, is cross; A circle; Y square; X triangle) */
-        m = m == P_CROSS ? P_CIRCLE : m == P_CIRCLE ? P_CROSS : m == P_SQUARE ? P_TRI : m == P_TRI ? P_SQUARE : m;
+        /* (the four face buttons are read from the console itself, ctrl_state: SDL's names for them were one way in
+           an emulator on a handheld and the other on a console) */
+        if (m == P_CROSS || m == P_CIRCLE || m == P_SQUARE || m == P_TRI) continue;
 #endif
         cbind_add(CB_BUTTON, d[i].b, 0, m);
     }
@@ -298,6 +298,14 @@ static void cbind_apply_map(void) {
 static unsigned short ctrl_state(void) {
     unsigned short m = 0;
     SDL_Joystick *j = ctrl ? SDL_GameControllerGetJoystick(ctrl) : NULL;
+#ifdef __3DS__
+    {   /* the face buttons by place, as a PlayStation pad's: B (the lower one) cross, A circle, Y square, X triangle */
+        extern unsigned port_n3ds_face_buttons(void);
+        unsigned f = port_n3ds_face_buttons();
+        if (f & 1) m |= P_CROSS; if (f & 2) m |= P_CIRCLE; if (f & 4) m |= P_SQUARE; if (f & 8) m |= P_TRI;
+    }
+    if (!ctrl) return m;
+#endif
     if (!ctrl) return 0;
     for (int k = 0; k < ncbind; k++) {
         const CtrlBind *b = &cbind[k]; int on = 0, v;

@@ -21,6 +21,11 @@ u32 __stacksize__ = 1024 * 1024;   /* the main thread runs the game's main loop 
 int port_main(int argc, char **argv);
 
 /* the port's clock (runtime/main.c on the other systems): the ARM11 system tick, 268 MHz */
+/* the face buttons held (runtime/sdl.c: SDL scans the pad every frame): 1 B, 2 A, 4 Y, 8 X */
+unsigned port_n3ds_face_buttons(void) {
+    u32 k = hidKeysHeld();
+    return (k & KEY_B ? 1u : 0) | (k & KEY_A ? 2u : 0) | (k & KEY_Y ? 4u : 0) | (k & KEY_X ? 8u : 0);
+}
 unsigned long long port_time_us(void) { return svcGetSystemTick() / (SYSCLOCK_ARM11 / 1000000); }
 void port_sleep_us(unsigned long long us) { svcSleepThread((s64)us * 1000); }
 
