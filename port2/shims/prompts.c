@@ -321,7 +321,7 @@ static int black_box(u8 *p, int stride, int w, int h, int bx0, int by0, int bw, 
             r[10] = bgr_of(0xA8A8A8); r[11] = bgr_of(0x686868); r[12] = bgr_of(0x383838);
         }
     }
-    const char ch = "BAYX"[src];
+    const char ch = "BAYXLR"[src];   /* (SRC_L1, SRC_R1 follow the four face buttons) */
     for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) p[y * stride + x] = 0;
     for (int y = 0; y < bh; y++) for (int x = 0; x < bw; x++) {
         int dx = 2 * x + 1 - bw, dy = 2 * y + 1 - bh, d = bw < bh ? bw : bh;   /* in half pixels, from the middle */
@@ -347,6 +347,8 @@ static int black_box(u8 *p, int stride, int w, int h, int bx0, int by0, int bw, 
         { 'B', { 0x3E, 0x33, 0x33, 0x3E, 0x33, 0x33, 0x33, 0x3E } },
         { 'X', { 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x1E, 0x33, 0x33 } },
         { 'Y', { 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C } },
+        { 'L', { 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x3F, 0x3F } },
+        { 'R', { 0x3E, 0x33, 0x33, 0x3E, 0x3C, 0x36, 0x33, 0x33 } },
     };
     int lx = bx0 + (bw - 6) / 2, ly = by0 + (bh - 8) / 2;
     for (unsigned i = 0; i < sizeof bold6 / sizeof bold6[0]; i++) if (bold6[i].ch == ch)
@@ -357,7 +359,7 @@ static int black_box(u8 *p, int stride, int w, int h, int bx0, int by0, int bw, 
             }
     static const u8 soft_c[16] = { [15] = 9 };
     letter_fx(p, stride, w, h, 7, 7, soft_c);
-    return 1 + ROW_CUSTOM + src;
+    return 1 + ROW_CUSTOM + (src & 3);   /* (the four rows are the same here) */
 }
 static void letter6(char ch, int x0, int y0, int c) {
     for (unsigned i = 0; i < sizeof font6 / sizeof font6[0]; i++) if (font6[i].ch == ch)
@@ -415,6 +417,7 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };   /* port CLUT */
     draw_disc();
     if (src == SRC_NONE) return 0;
+    if (port_prompt_big >= 4 && style != PROMPT_PS && (src == SRC_L1 || src == SRC_R1)) return black_box(&img[0][0], GW, GW, GH, 0, 2, 12, 12, src);
     if (src >= SRC_L1) {
         const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || THORISH(style) || style == PROMPT_CUSTOM ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
         if (style == PROMPT_PS || style == PROMPT_GENERIC) { label(t, C_CREAM); return 0; }
@@ -572,7 +575,7 @@ static int mi_draw(int i, int w, int h) {
     static const char *xb_sh[] = { "LB", "RB", "LT", "RT" }, *nt_sh[] = { "L", "R", "ZL", "ZR" }, *ps_sh[] = { "L1", "R1", "L2", "R2" };
     if (src == SRC_NONE) return 1;   /* the empty disc (row 0) */
     if (port_prompt_big == 1 && src < 4 && st != PROMPT_PS) return big_letter(&mimg[0][0], MW, w, h, cx2, cy2, src);
-    if (port_prompt_big >= 4 && src < 4 && st != PROMPT_PS) {   /* (the icon's whole box, at most 14 x 14 round the original's middle) */
+    if (port_prompt_big >= 4 && src <= SRC_R1 && st != PROMPT_PS) {   /* (the icon's whole box, at most 14 x 14 round the original's middle) */
         int bw = d + 2 < w ? d + 2 : w, bh, bx, by;   /* (two pixels wider than the original's disc, inside the icon) */
         if (bw > h) bw = h; bh = bw; bx = cx2 / 2 - bw / 2; by = cy2 / 2 - bh / 2;
         if (bx < 0) bx = 0; if (by < 0) by = 0; if (bx + bw > w) bx = w - bw; if (by + bh > h) by = h - bh;
