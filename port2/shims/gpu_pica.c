@@ -165,12 +165,29 @@ static unsigned blocks_ver(int x, int y, int w, int h) {   /* the newest version
     return v;
 }
 static unsigned drawn_epoch;             /* moves when a cell or an area is newly marked drawn */
+/* per page, a count that moves when something is newly marked drawn in it (a cell, or a noted area over it): a cached
+   block is looked at again (sync_pages) only when a page its texels or its CLUT are in has moved.  One count for the
+   whole of VRAM sent every block through sync_pages once a frame in a scene that draws over a palette each frame,
+   200 look-ups a frame each scanning a page's cells: 6 ms of a drawn frame on an Old 3DS. */
+static unsigned page_gen[2][16];
 static void pages_drawn(int x1, int y1, int x2, int y2) {   /* (inclusive pixel bounds) */
     if (x1 < 0) x1 = 0; if (y1 < 0) y1 = 0; if (x2 > 1023) x2 = 1023; if (y2 > 511) y2 = 511;
     if (x1 > x2 || y1 > y2) return;
     drawn_epoch++;
     for (int j = y1 >> CSH; j <= y2 >> CSH; j++) memset(&cell_drawn[j][x1 >> 4], 1, (size_t)((x2 >> 4) - (x1 >> 4) + 1));
-    for (int j = y1 >> 8; j <= y2 >> 8; j++) for (int i = x1 >> 6; i <= x2 >> 6; i++) page_drawn[j][i] = 1;
+    for (int j = y1 >> 8; j <= y2 >> 8; j++) for (int i = x1 >> 6; i <= x2 >> 6; i++) { page_drawn[j][i] = 1; page_gen[j][i]++; }
+}
+static void gens_bump(int x1, int y1, int x2, int y2) {   /* (an area newly noted, bulk_area: no cells yet) */
+    if (x1 < 0) x1 = 0; if (y1 < 0) y1 = 0; if (x2 > 1023) x2 = 1023; if (y2 > 511) y2 = 511;
+    for (int j = y1 >> 8; j <= y2 >> 8; j++) for (int i = x1 >> 6; i <= x2 >> 6; i++) page_gen[j][i]++;
+}
+/* the sum of the counts of a rectangle's pages (they only go up: the same sum, nothing moved) */
+static unsigned gens_of(int x, int y, int w, int h) {
+    x &= 1023; y &= 511;
+    if (x + w > 1024) w = 1024 - x; if (y + h > 512) h = 512 - y;
+    unsigned g = 0;
+    for (int j = y >> 8; j <= (y + h - 1) >> 8; j++) for (int i = x >> 6; i <= (x + w - 1) >> 6; i++) g += page_gen[j][i];
+    return g;
 }
 
 /* Primitives drawn with a screen-sized drawing area (nearly all of them) only note that area: finding the cells each
@@ -196,6 +213,7 @@ static int bulk_area(void) {   /* 1: the drawing area is noted, the primitive ne
     for (int i = 0; i < nbulk; i++) if (bulk[i].x1 == gs->x1 && bulk[i].y1 == gs->y1 && bulk[i].x2 == gs->x2 && bulk[i].y2 == gs->y2) goto noted;
     if (nbulk == 4) { pages_drawn(bulk[0].x1, bulk[0].y1, bulk[0].x2, bulk[0].y2); memmove(&bulk[0], &bulk[1], 3 * sizeof bulk[0]); nbulk = 3; }
     drawn_epoch++;
+    gens_bump(gs->x1, gs->y1, gs->x2, gs->y2);
     bulk[nbulk].x1 = gs->x1; bulk[nbulk].y1 = gs->y1; bulk[nbulk].x2 = gs->x2; bulk[nbulk].y2 = gs->y2; nbulk++;
 noted:
     bulk_memo.x1 = gs->x1; bulk_memo.y1 = gs->y1; bulk_memo.x2 = gs->x2; bulk_memo.y2 = gs->y2; bulk_memo.ok = 1;
@@ -266,14 +284,9 @@ static void sync_pages(int x, int y, int w, int h) {
     clip_rect(&x, &y, &w, &h);
     if (w <= 0 || h <= 0) return;
     if (nbulk) bulk_resolve(x, y, w, h);
-    int any = 0;   /* (most textures: no page of theirs drawn into, nothing to scan) */
-    for (int pj = y >> 8; pj <= (y + h - 1) >> 8; pj++) for (int pi = x >> 6; pi <= (x + w - 1) >> 6; pi++) {
-        if (!page_drawn[pj][pi]) continue;
-        /* a flag can outlive its cells (a fill cleaned them): look at the whole page once and drop it then */
-        int left = 0;
-        for (int j = pj * 256; j < pj * 256 + 256 && !left; j++) left = cell_drawn[j][pi * 4] | cell_drawn[j][pi * 4 + 1] | cell_drawn[j][pi * 4 + 2] | cell_drawn[j][pi * 4 + 3];
-        if (left) any = 1; else page_drawn[pj][pi] = 0;
-    }
+    int any = 0;   /* (most textures: no page of theirs drawn into, nothing to scan; a flag can outlive its cells, and
+                      then only the rectangle's own cells are looked at below, not the page's) */
+    for (int pj = y >> 8; pj <= (y + h - 1) >> 8; pj++) for (int pi = x >> 6; pi <= (x + w - 1) >> 6; pi++) any |= page_drawn[pj][pi];
     if (!any) return;
     for (int j = y >> CSH; j <= (y + h - 1) >> CSH; j++)
         for (int i = x >> 4; i <= (x + w - 1) >> 4; i++) {
@@ -468,10 +481,14 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     }
     /* found valid, and nothing was written to vram[] or newly drawn since: nothing to read back or to compare
        (primitives that alternate between two textures miss the memo every time) */
-    if (i >= 0 && slots[i].checked == ver_clock + 1 && slots[i].synced == drawn_epoch + 1) { slots[i].used = ++use_clock; goto found; }
     int x, y, w, h; tex_rect(t, tw, bx, by, z, &x, &y, &w, &h);
+    const int has_clut = t->depth < 2 && t->cy != PORT_CLUT_Y;
+    unsigned gsum = gens_of(x, y, w, h) + (has_clut ? gens_of(t->cx, t->cy, t->depth ? 256 : 16, 1) : 0);
+    if (i >= 0 && slots[i].checked == ver_clock + 1 && slots[i].synced == gsum + 1) { slots[i].used = ++use_clock; goto found; }
+    pica_cnt[6]++;
     sync_pages(x, y, w, h);
-    if (t->depth < 2 && t->cy != PORT_CLUT_Y) sync_pages(t->cx, t->cy, t->depth ? 256 : 16, 1);
+    if (has_clut) sync_pages(t->cx, t->cy, t->depth ? 256 : 16, 1);
+    gsum = gens_of(x, y, w, h) + (has_clut ? gens_of(t->cx, t->cy, t->depth ? 256 : 16, 1) : 0);   /* (a noted area made cells moves them) */
     unsigned v;
     unsigned long long was = 0;   /* the slot's last use, by this block or the one it replaces */
     if (i >= 0) {
@@ -535,7 +552,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     slots[i].ver = v; slots[i].checked = ver_clock + 1; slots[i].used = ++use_clock;
     slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t); slots[i].updated = present_no;
 found:
-    slots[i].synced = drawn_epoch + 1;
+    slots[i].synced = gsum + 1;
     memo.ok = 1; memo.tx = t->tx; memo.ty = t->ty; memo.depth = t->depth; memo.cx = t->cx; memo.cy = t->cy; memo.tw = tw;
     memo.bx = bx; memo.by = by; memo.z = z; memo.slot = i; memo.ver = ver_clock; memo.epoch = drawn_epoch;
     return i;
@@ -698,7 +715,7 @@ static void tri_drawn(const PV *v) {
     if (bulk_area()) return;
     int x[3], y[3];
     for (int i = 0; i < 3; i++) { x[i] = (int)v[i].x; y[i] = (int)v[i].y; }
-    long long area = (long long)(x[1] - x[0]) * (y[2] - y[0]) - (long long)(x[2] - x[0]) * (y[1] - y[0]);
+    int area = (x[1] - x[0]) * (y[2] - y[0]) - (x[2] - x[0]) * (y[1] - y[0]);   /* (coordinates are 12 bits: every product here fits 32, and a 64-bit division is a long library call on the 3DS) */
     if (!area) return;
     if (area < 0) { int t = x[1]; x[1] = x[2]; x[2] = t; t = y[1]; y[1] = y[2]; y[2] = t; }
     int x1 = x[0], x2 = x[0], y1 = y[0], y2 = y[0];
@@ -710,18 +727,18 @@ static void tri_drawn(const PV *v) {
        a cell [16 ci, 16 ci + 15] is outside an edge when both its corners are, so the cells kept are
        ci >= floor(L / 16) and ci <= floor(R / 16) over the three edges; the same cells as testing every corner */
     for (int cy = y1; cy <= y2; cy++) {
-        long long lo = x1 >> 4, hi = x2 >> 4;
+        int lo = x1 >> 4, hi = x2 >> 4;
         for (int k = 0; k < 3 && lo <= hi; k++) {   /* inside: (q1 - q0) x (p - q0) >= 0 */
-            int k1 = (k + 1) % 3; long long ex = x[k1] - x[k], ey = y[k1] - y[k], n = ex * (cy - y[k]);
+            int k1 = (k + 1) % 3; int ex = x[k1] - x[k], ey = y[k1] - y[k], n = ex * (cy - y[k]);
             if (!ey) { if (n < 0) lo = hi + 1; continue; }
             /* ey > 0: px - x0 <= n / ey (floor); ey < 0: px - x0 >= n / ey (ceil) */
-            if (ey > 0) { long long q = n >= 0 ? n / ey : -((-n + ey - 1) / ey); long long c = (x[k] + q) >> 4; if (c < hi) hi = c; }
-            else { long long d = -ey, m = -n; long long q = m >= 0 ? (m + d - 1) / d : -((-m) / d); long long c = (x[k] + q) >> 4; if (c > lo) lo = c; }
+            if (ey > 0) { int q = n >= 0 ? n / ey : -((-n + ey - 1) / ey); int c = (x[k] + q) >> 4; if (c < hi) hi = c; }
+            else { int d = -ey, m = -n; int q = m >= 0 ? (m + d - 1) / d : -((-m) / d); int c = (x[k] + q) >> 4; if (c > lo) lo = c; }
         }
         if (lo > hi) continue;
         drawn_epoch++;
         memset(&cell_drawn[cy][lo], 1, (size_t)(hi - lo + 1));
-        for (long long pi = lo >> 2; pi <= hi >> 2; pi++) page_drawn[cy >> 8][pi] = 1;
+        for (int pi = lo >> 2; pi <= hi >> 2; pi++) { page_drawn[cy >> 8][pi] = 1; page_gen[cy >> 8][pi]++; }
     }
 }
 static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade, const GpuTex *tex, int semi, int raw) {

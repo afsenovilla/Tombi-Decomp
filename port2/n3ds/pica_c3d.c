@@ -353,8 +353,8 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
             {   extern unsigned long long pica_cnt[8], pica_ot[4];
                 static unsigned long long lastc[8]; unsigned long long d[8], nt = pica_ot[2] ? pica_ot[2] : 1;
                 for (int i = 0; i < 8; i++) { d[i] = pica_cnt[i] - lastc[i]; lastc[i] = pica_cnt[i]; }
-                port_printf("[3ds] pica: a drawn table: %llu quads and %llu triangles by the short path, %llu triangles by the general one, %llu rectangles, %llu line pixels, %llu texture look-ups past the memo\n",
-                            d[0] / nt, d[1] / nt, d[2] / nt, d[3] / nt, d[4] / nt, d[5] / nt);
+                port_printf("[3ds] pica: a drawn table: %llu quads and %llu triangles by the short path, %llu triangles by the general one, %llu rectangles, %llu line pixels, %llu texture look-ups past the memo (%llu looked at the drawn cells)\n",
+                            d[0] / nt, d[1] / nt, d[2] / nt, d[3] / nt, d[4] / nt, d[5] / nt, d[6] / nt);
             }
             if (pica_prof_n) {
                 double k = 1000.0 / SYSCLOCK_ARM11 / pica_prof_n;
