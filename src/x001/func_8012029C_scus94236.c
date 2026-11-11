@@ -6,9 +6,9 @@
 #include "TOBJ.H"
 
 #define S176 (*(short *)0x1F800176)
-extern int D_8013BDC8_scus94236[];
+extern int D_8013D90C[];
 extern void updateBackdropSpritePos(TObj *);
-extern void func_80017F08_scus94236(TObj *);
+extern void func_800188D0(TObj *);
 
 void func_8012029C_scus94236(TObj *o)
 {
@@ -19,7 +19,7 @@ void func_8012029C_scus94236(TObj *o)
     case 0:
         o->w1e = 10;
         o->b0d = 0;
-        o->anim = (void *)D_8013BDC8_scus94236[o->b0c];
+        o->anim = (void *)D_8013D90C[o->b0c];
         o->d3c = SPAD.i2d4;
         o->b0f = 0;
         if (o->subtype == 0) {
@@ -53,7 +53,7 @@ void func_8012029C_scus94236(TObj *o)
         o->b04++;
         break;
     case 3:
-        func_80017F08_scus94236(o);
+        func_800188D0(o);
         break;
     }
 }

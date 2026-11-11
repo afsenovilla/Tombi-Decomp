@@ -25,23 +25,23 @@
 
 #include <stdint.h>
 
-/* ---- D0SPSUB3 addresses (the PAL overlay this decomp matches; checked against the file before use) */
-#define S3_ORDER   0x800F68E8u   /* u8[4][5] category order per sort mode */
-#define S3_PAIRS   0x800F67C8u   /* {category, item} x 0x8F */
-#define S3_CONDIDX 0x800F584Cu   /* u8[item] condition script of the item */
-#define S3_CONDS   0x800F665Cu   /* Cond *[] */
-#define S3_FNS     0x800F6714u   /* the 18 condition ops */
-#define S3_DEST    0x800F67A0u   /* u8 *[9]: {area, section} per region bit */
-#define S3_MSG0    0x801008ECu   /* items answering message 0 (-1 ended s16) */
-#define S3_MSG1    0x801008FCu   /* message 1 */
-#define S3_MSG3    0x80100914u   /* message 3 (2 once D_8009D0E6 >= 5) */
-#define S3_NCLUT   0x8010065Cu   /* u8[item] name clut, 0x80 = counted ("x NN") */
-#define S3_END     0x80100B88u
+/* ---- D0SPSUB3 / USA DSPSUB3 addresses (panel_addrs.h; checked against the file before use) */
+#define S3_ORDER   PV_S3_ORDER     /* u8[4][5] category order per sort mode */
+#define S3_PAIRS   PV_S3_PAIRS     /* {category, item} x 0x8F */
+#define S3_CONDIDX PV_S3_CONDIDX   /* u8[item] condition script of the item */
+#define S3_CONDS   PV_S3_CONDS     /* Cond *[] */
+#define S3_FNS     PV_S3_FNS       /* the 18 condition ops */
+#define S3_DEST    PV_S3_DEST      /* u8 *[9]: {area, section} per region bit */
+#define S3_MSG0    PV_S3_MSG0      /* items answering message 0 (-1 ended s16) */
+#define S3_MSG1    PV_S3_MSG1      /* message 1 */
+#define S3_MSG3    PV_S3_MSG3      /* message 3 (2 once D_8009D0E6 >= 5) */
+#define S3_NCLUT   PV_S3_NCLUT     /* u8[item] name clut, 0x80 = counted ("x NN") */
+#define S3_END     PV_S3_END
 
-#define G_INV_ITEM(i) G8(0x8009D1A4u + (i))
-#define G_INV_COUNT   G16(0x8009D2A4u)
-#define G_INV_MODE    G16(0x8009D2A6u)
-#define G_QTY(i)      G8(0x8009D0A4u + (i))
+#define G_INV_ITEM(i) G8(PV_GAME_INV_ITEM + (i))
+#define G_INV_COUNT   G16(PV_GAME_INV_COUNT)
+#define G_INV_MODE    G16(PV_GAME_INV_MODE)
+#define G_QTY(i)      G8(PV_GAME_QTY + (i))
 
 typedef struct { s16 next; u8 fn, a; s16 b, c; } ItCond;
 static u8 *it_ovl, *it_bank; static unsigned it_ovl_n, it_bank_n;
@@ -52,11 +52,16 @@ static char it_reason_txt[4][96];
 static const u8 *s3(u32 a) { return it_ovl + (a - OVL_BASE); }
 static void it_load(void) {
     it_state = -1;
-    it_ovl = port_cd_read_named("SYSTEM/D0SPSUB3.BIN", &it_ovl_n);
-    if (!it_ovl || it_ovl_n < S3_END - OVL_BASE) { port_printf("[panel] items: SYSTEM/D0SPSUB3.BIN not readable\n"); return; }
+    it_ovl = port_cd_read_named(PA_F_SUB3, &it_ovl_n);
+    if (!it_ovl || it_ovl_n < S3_END - OVL_BASE) { port_printf("[panel] items: %s not readable\n", PA_F_SUB3); return; }
+#if PORT_VERSION_USA
+    static const u32 fns[18] = { 0x800ED2D4, 0x800ED2DC, 0x800ED2E4, 0x800ED3EC, 0x800ED4F0, 0x800ED5F8, 0x800ED6FC, 0x800ED800, 0x800ED818,
+                                 0x800ED830, 0x800ED8F8, 0x800ED9C0, 0x800ED9E0, 0x800EDAF4, 0x800EDB04, 0x800EDB70, 0x800EDB88, 0x800EDB98 };
+#else
     static const u32 fns[18] = { 0x800EE12C, 0x800EE134, 0x800EE13C, 0x800EE244, 0x800EE348, 0x800EE450, 0x800EE554, 0x800EE658, 0x800EE670,
                                  0x800EE688, 0x800EE750, 0x800EE818, 0x800EE838, 0x800EE94C, 0x800EE95C, 0x800EE9C8, 0x800EE9E0, 0x800EE9F0 };
-    for (int i = 0; i < 18; i++) if (rd32(s3(S3_FNS), 4 * i) != fns[i]) { port_printf("[panel] items: D0SPSUB3 is not the overlay this build knows (op %d)\n", i); return; }
+#endif
+    for (int i = 0; i < 18; i++) if (rd32(s3(S3_FNS), 4 * i) != fns[i]) { port_printf("[panel] items: %s is not the overlay this build knows (op %d)\n", PA_F_SUB3, i); return; }
     memset(it_cat, 0xFF, sizeof it_cat);
     for (int i = 0; i < 0x11E; i += 2) if (it_cat[s3(S3_PAIRS)[i + 1]] == 0xFF) it_cat[s3(S3_PAIRS)[i + 1]] = s3(S3_PAIRS)[i];
     /* the messages: the language's sub-screen overlay carries its own bank */
@@ -88,14 +93,23 @@ static const char *it_open_reason(void) {
     if (!in_gameplay() || !w || w[0] != 1 || w[1] != 1) return T("Not in a game", "Fuera de la partida");
     if (!(w[2] == 1 || w[2] == 2 || w[2] == 4 || w[2] == 5) || w[3] != 1) return T("Not now (menu, loading or scene)", "Ahora no (men\xFA, carga o escena)");
     if (SPAD8(0x3CE) | SPAD8(0x1CC) || SPAD16(0x1C6)) return T("The game is paused", "El juego est\xE1 en pausa");
-    if (G8(0x8009C975u) != 0 && G8(0x8009C975u) != 0x10) return T("The screen is fading", "La pantalla est\xE1 en transici\xF3n");
-    if (G8(0x8009CDA2u)) return T("Not available in this scene", "No disponible en esta escena");
-    if (!G8(0x8009C93Au)) return T("Tombi must be on the ground", "Tombi tiene que estar en el suelo");
-    if (G8(0x8009D2B0u) != 1 || G8(0x8009C93Fu)) return T("Tombi must stand still", "Tombi tiene que estar quieto");
-    if (G8(0x800A5462u) != G8(0x8009D2B0u) && (G8(0x800A603Cu) != G8(0x8009D2B0u) || G8(0x800A603Du) >= 0x20)) return T("Tombi must stand still", "Tombi tiene que estar quieto");
+    if (G8(PV_GAME_FADE) != 0 && G8(PV_GAME_FADE) != 0x10) return T("The screen is fading", "La pantalla est\xE1 en transici\xF3n");
+    if (G8(PV_GCD_NO_MENU)) return T("Not available in this scene", "No disponible en esta escena");
+    if (!G8(PV_GVARS_LANDED)) return T(PANEL_HERO " must be on the ground", "Tombi tiene que estar en el suelo");
+    if (G8(PV_GAME_PLAYER_MODE) != 1 || G8(PV_GVARS_C93F)) return T(PANEL_HERO " must stand still", "Tombi tiene que estar quieto");
+    if (G8(PV_OBJ_5462) != G8(PV_GAME_PLAYER_MODE) && (G8(PV_PLAYER_STATE) != G8(PV_GAME_PLAYER_MODE) || G8(PV_PLAYER_SUBSTATE) >= 0x20)) return T(PANEL_HERO " must stand still", "Tombi tiene que estar quieto");
     if (SPAD8(0x1B8)) return T("Not available right now", "No disponible ahora");
     return NULL;
 }
+/* the native ops: USA builds some of them from another op's template (port/tools/gen_port.py: name__ADDR) */
+#if PORT_VERSION_USA
+#define D0SPSUB3_subScreenCondFalse D0SPSUB3_stubReturnZero8004F344
+#define D0SPSUB3_subScreenCondPlayerD D0SPSUB3_subScreenCondPlayerH__800ED4F0
+#define D0SPSUB3_subScreenCondArea D0SPSUB3_subScreenCondPlayerY__800ED5F8
+#define D0SPSUB3_subScreenCondSection D0SPSUB3_subScreenCondPlayerY__800ED6FC
+#define D0SPSUB3_subScreenCondFlag544 D0SPSUB3_subScreenCondEventFlag__800ED8F8
+#define D0SPSUB3_func_800E8950 D0SPSUB3_func_800E89F8   /* the item use handler (USA DSPSUB3 0x800E7CB0) */
+#endif
 extern int D0SPSUB3_subScreenCondFalse(void), D0SPSUB3_subScreenCondTrue(void), D0SPSUB3_subScreenCondPlayerH(unsigned char, short),
     D0SPSUB3_subScreenCondPlayerY(int, short), D0SPSUB3_subScreenCondPlayerD(unsigned char, short), D0SPSUB3_subScreenCondArea(int, short),
     D0SPSUB3_subScreenCondSection(int, short), D0SPSUB3_subScreenCondUnk6Is1(void), D0SPSUB3_subScreenCondFlag100(void),
@@ -143,7 +157,7 @@ static int in_list(u32 a, int item) { for (const u8 *q = s3(a); rd16(q, 0) != -1
 static int it_fail_msg(int item) {    /* which message box the menu opens when the script fails */
     if (in_list(S3_MSG0, item)) return 0;
     if (in_list(S3_MSG1, item)) return 1;
-    if (in_list(S3_MSG3, item)) return G8(0x8009D0E6u) < 5 ? 3 : 2;
+    if (in_list(S3_MSG3, item)) return G8(PV_GAME_D0E6) < 5 ? 3 : 2;
     return 2;
 }
 static const char *it_reason(int item) {   /* NULL: confirming it now does what the menu does */
@@ -157,11 +171,11 @@ static const char *it_reason(int item) {   /* NULL: confirming it now does what 
 }
 /* the in-use mark of subScreenDrawItemGrid */
 static int it_in_use(int item) {
-    int suit = G8(0x8009C990u), pants_ok = G8(0x8009D090u) == 0xFF, weap_ok = (unsigned)(suit - 1) >= 2, wp = G8(0x8009D2B2u), pn = G8(0x8009D2B3u);
+    int suit = G8(PV_GAME_SUIT), pants_ok = G8(PV_GAME_PANTS_OK) == 0xFF, weap_ok = (unsigned)(suit - 1) >= 2, wp = G8(PV_GAME_WEAPON), pn = G8(PV_GAME_PANTS);
     switch (item) {
-    case 10: return G8(0x8009CEF7u) == 1;
-    case 12: return G8(0x8009CFF8u) == 1;
-    case 20: return G8(0x8009CEF8u) == 1;
+    case 10: return G8(PV_GAME_CEF7) == 1;
+    case 12: return G8(PV_GAME_CFF8) == 1;
+    case 20: return G8(PV_GAME_CEF8) == 1;
     case 24: return pants_ok && pn == 2;
     case 28: return pants_ok && pn == 3;
     case 29: return pants_ok && pn == 1;
@@ -169,8 +183,8 @@ static int it_in_use(int item) {
     case 98: return suit == 1;
     case 99: return suit == 2;
     case 100: return suit == 3;
-    case 96: return G8(0x8009D006u) != 0;
-    case 132: return G8(0x8009CFFBu) != 0;
+    case 96: return G8(PV_GAME_D006) != 0;
+    case 132: return G8(PV_GAME_CFFB) != 0;
     case 27: return weap_ok && wp == 0;
     case 33: return weap_ok && wp == 8;
     case 34: return weap_ok && wp == 9;
@@ -271,16 +285,16 @@ void port_panel_tick(void) {
     if (rq == RQ_WARP) {   /* state 3 sub 2 */
         int area, sec;
         if ((item != 7 && item != 14) || !dest_of(dest >> 8, dest & 0xFF, &area, &sec)) return;
-        G16(0x8009CD94u) = (u16)area;
-        G8(0x800A603Du) = 0x30;
-        G16(0x8009CDA0u) = 0;
-        G8(0x8009D2B0u) = 3;
-        G8(0x800A603Cu) = 1;
-        G8(0x800A603Eu) = 0;
-        G8(0x800A6038u) = 3;
-        G8(0x8009C940u) = 1;
-        G8(0x8009C941u) = (u8)item;
-        G16(0x8009CD96u) = (u16)sec;
+        G16(PV_GCD_WARP_AREA) = (u16)area;
+        G8(PV_PLAYER_SUBSTATE) = 0x30;
+        G16(PV_GCD_CDA0) = 0;
+        G8(PV_GAME_PLAYER_MODE) = 3;
+        G8(PV_PLAYER_STATE) = 1;
+        G8(PV_PLAYER_STEP) = 0;
+        G8(PV_PLAYER) = 3;
+        G8(PV_GVARS_USE_ITEM) = 1;
+        G8(PV_GVARS_USE_ITEM_ID) = (u8)item;
+        G16(PV_GCD_WARP_SECTION) = (u16)sec;
         if (item == 14) {
             u8 *o = (u8 *)(uintptr_t)allocObjectLayer2();
             if (o) { o[0] = 1; o[2] = 0x54; o[3] = 1; }
@@ -305,7 +319,7 @@ void port_panel_tick(void) {
     case 5: printInfoMessage(0x20, 2); break;
     }
     { char t[96]; snprintf(t, sizeof t, T("Completed: %s", "Completado: %s"), it_name(item, b, sizeof b)); it_say(0, t); }
-    port_printf("[panel] frame %d: item %d used (handler result %d): weapon %d pants %d\n", port_frame, item, r, G8(0x8009D2B2u), G8(0x8009D2B3u));
+    port_printf("[panel] frame %d: item %d used (handler result %d): weapon %d pants %d\n", port_frame, item, r, G8(PV_GAME_WEAPON), G8(PV_GAME_PANTS));
 }
 
 /* ---- drawing */

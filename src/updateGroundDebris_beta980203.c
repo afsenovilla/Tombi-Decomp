@@ -1,0 +1,177 @@
+// VERSION BETA_980203 x00 800EFFE8 1388
+#if defined(VERSION_BETA_980203)
+// Beta version: the JP branch of updateGroundDebris.c as is (one function; splat had cut it in three).
+#include "TOBJ.H"
+extern unsigned short GAME;
+extern unsigned short TICK_COUNT;
+extern int UPDATE_OBJECT_INDEX;
+extern int DAT_1f8002d4[];
+extern char D_8013B700[];
+extern char D_8013B708[];
+extern char D_8013B710[];
+extern char D_8013B718[];
+static void *DAT_8013b1a4[4] = {
+    D_8013B700, D_8013B708, D_8013B710, D_8013B718,
+};
+extern void *GROUND_DEBRIS_ANIMS_AREA1_7[];
+extern void *GROUND_DEBRIS_ANIMS_AREA9[];
+extern short GROUND_DEBRIS_RAND_VEL_H[];
+extern short GROUND_DEBRIS_RAND_VEL_V[];
+extern TObj *FUN_80018448(void);
+extern unsigned FUN_8001f9e0(void);
+extern int FUN_800202b4(TObj *);
+extern void FUN_800187e4(TObj *);
+
+void updateGroundDebris(TObj *o)
+{
+    TObj *c;
+    short v;
+    int t;
+
+    switch (o->b04) {
+    case 0:
+        switch (o->subtype) {
+        case 0:
+            if (--o->w22 == -1) {
+                o->w22 = FUN_8001f9e0() & 0xf;
+                c = FUN_80018448();
+                if (c) {
+                    c->active = 1;
+                    c->type = 0xc;
+                    c->subtype = 1;
+                    c->wac = (TICK_COUNT + UPDATE_OBJECT_INDEX) & 1;
+                    c->b0c = FUN_8001f9e0() & 7;
+                    *c->h = *o->h;
+                    c->h->p.whole += o->timer * 2 - 8;
+                    c->y = o->y;
+                    *c->d = *o->d;
+                }
+                if (--o->timer == 0) {
+                    o->subtype = 1;
+                    o->wac = 0;
+                    o->b0c = FUN_8001f9e0() & 7;
+                }
+            }
+            break;
+        case 1:
+            o->b04++;
+            if ((TICK_COUNT + UPDATE_OBJECT_INDEX) & 1) o->timer = 0x32; else o->timer = 0x1e;
+            o->b0d = 0;
+            *(signed char *)&o->b0f = -12;
+            if (GAME == 0) {
+                o->w1e = 9;
+                o->anim = DAT_8013b1a4[o->wac];
+            } else if (GAME == 1 || GAME == 7) {
+                o->w1e = 8;
+                o->anim = GROUND_DEBRIS_ANIMS_AREA1_7[o->wac];
+            } else if (GAME == 9) {
+                o->w1e = 9;
+                o->anim = GROUND_DEBRIS_ANIMS_AREA9[o->wac];
+            }
+            o->d3c = DAT_1f8002d4[0];
+            switch (o->b0c) {
+            case 0:
+            case 1:
+                o->velV = -0x180;
+                o->b0a = 0;
+                o->velY = 0x10;
+                break;
+            case 2:
+            case 7:
+                o->b0a = 2;
+                o->velV = -0x180;
+                o->velY = 0xc;
+                o->d8c = -0x10;
+                o->d84 = 4;
+                break;
+            case 3:
+                o->b0a = 2;
+                o->velV = -0x200;
+                o->velY = 0x10;
+                o->d8c = -0x18;
+                o->d84 = 6;
+                break;
+            case 4:
+                o->b0a = 2;
+                o->velV = -0x80;
+                o->d8c = -0x10;
+                o->d84 = 4;
+                break;
+            case 5:
+                o->b0a = 2;
+                o->velV = -0x80;
+                o->velH = -0x80;
+                o->d8c = 0;
+                break;
+            case 6:
+                o->b0a = 2;
+                o->velV = -0x80;
+                o->velH = 0x80;
+                o->d8c = 0;
+                break;
+            }
+            break;
+        }
+        break;
+    case 1:
+        if (FUN_800202b4(o) == 0)
+            goto set3;
+        switch (o->b0c) {
+        case 0:
+            o->velV += o->velY;
+            o->y.raw += o->velV << 8;
+            o->d->p.whole -= 2;
+            break;
+        case 1:
+            o->velV += o->velY;
+            o->y.raw += o->velV << 8;
+            o->d->p.whole += 2;
+            break;
+        case 2:
+        case 7:
+            o->velV += o->velY;
+            o->y.raw += o->velV << 8;
+            o->d8c += o->d84;
+            if (!((unsigned)(o->d8c + 0xf) < 0x1f))
+                o->d84 = -o->d84;
+            break;
+        case 3:
+            o->velV += o->velY;
+            o->y.raw += o->velV << 8;
+            o->d8c += o->d84;
+            if (!((unsigned)(o->d8c + 0xf) < 0x1f))
+                o->d84 = -o->d84;
+            break;
+        case 4:
+            o->y.raw += o->velV << 8;
+            t = o->d8c + o->d84;
+            o->d8c = t;
+            if ((unsigned)(t + 0xf) >= 0x1f)
+                o->d84 = -o->d84;
+            break;
+        case 5:
+            o->y.raw += o->velV << 8;
+            o->h->raw += o->velH << 8;
+            o->d8c += 4;
+            break;
+        case 6:
+            o->y.raw += o->velV << 8;
+            o->h->raw += o->velH << 8;
+            o->d8c -= 4;
+            break;
+            break;
+        }
+    dec:
+        if (--o->timer == 0) {
+        set3:
+            o->b04 = 3;
+        }
+        break;
+    case 2:
+        break;
+    case 3:
+        FUN_800187e4(o);
+        break;
+    }
+}
+#endif

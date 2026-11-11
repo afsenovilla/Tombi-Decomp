@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""Launcher of the native-pointer port (tombi-port.exe, docs/PORT.md "M3 phase 3" / "Mods"): a window where the
-player picks their own disc image (.bin/.cue/.iso/.chd of Tombi! PAL SCES-01331), a save folder, the window options and
+"""Launcher of the native-pointer port (tombi-port.exe, docs/PORT.md "M3 phase 3" / "Mods" / "Game library"): a window
+with a library of the player's own disc images (.bin/.cue/.iso/.chd of Tombi! PAL SCES-01331 / SCES-01330 or Tomba!
+USA SCUS-94236; tools/game_library.py identifies them and runs each with the port binary of its version), a save
+folder, the window options and
 the mods, and a Play button that runs tombi-pc.exe --window with those options.  Qt (PySide6) like the save editor
 (tools/tombi_save_editor.py, opened from it with Edit save...), the tools/i18n.py catalogs of tombi-gfx / tombi-text.  No game data is bundled: the disc is checked (MAIN0.EXE extracted next to
 tombi-port.json, the saved settings, and compared by sha1) before the first run, and the disc is then extracted
@@ -15,11 +17,11 @@ import hashlib, re, json, os, shutil, struct, subprocess, sys, threading
 try:
     from PySide6.QtCore import Qt, QTimer, QObject, Signal, QEvent, QSize, QRectF, QPointF
     from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QFont, QFontMetricsF, QFontDatabase, QPainterPath, \
-        QPalette, QGuiApplication, QImage
-    from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QLabel, QPushButton, QToolButton, \
+        QPalette, QGuiApplication, QImage, QLinearGradient
+    from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QLabel, QPushButton, QToolButton, QAbstractButton, \
         QHBoxLayout, QVBoxLayout, QGridLayout, QLineEdit, QComboBox, QCheckBox, QRadioButton, QButtonGroup, QSpinBox, \
         QAbstractSpinBox, QProgressBar, QPlainTextEdit, QScrollArea, QStackedWidget, QFileDialog, QMessageBox, \
-        QInputDialog, QDialog, QColorDialog, QSizePolicy, QStyleFactory
+        QInputDialog, QDialog, QColorDialog, QSizePolicy, QStyleFactory, QLayout
 except ImportError as _e:       # running from source without Qt
     sys.exit("tombi-port launcher: PySide6 is needed (pip install PySide6-Essentials): %s" % _e)
 
@@ -32,6 +34,8 @@ import port_mods as M
 import prompt_custom as PC
 import extract_data as X
 import data_patch as DP
+import game_library as GL
+import disc_archive as DA
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 / SCES-01330 Rev 1 (August 1998; .github/workflows/report.yml)
 REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec"      # EXE/MAIN0.EXE of SCES-01331 / SCES-01330 Rev 0 (July 1998 build: other overlays, not supported)
@@ -47,7 +51,7 @@ i18n.add({
     "es": {
         "l.lang": "Idioma del juego:",
         "title": "Tombi! - port nativo", "tab.play": "Jugar", "tab.mods": "Mods", "tab.controls": "Controles",
-        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:", "b.saveimp": "Importar partida…", "b.saveexp": "Exportar partida…", "s.saverun": "Cierra el juego antes de importar o exportar partidas.", "s.saveimpok": "Partida importada", "s.saveexpok": "Tarjeta exportada a {}", "s.saveerr": "No se pudo importar/exportar: {}", "s.saveask": "¿Importar este archivo en la tarjeta del port ({})?\nUna tarjeta completa sustituye a la actual (se guarda una copia en backup/).\nSi ya hay una partida con el mismo nombre, se pregunta si reemplazarla.", "s.saveexpq": "¿Exportar solo una partida como .mcs? (No = tarjeta completa .mcd)",
+        "l.disc": "Imagen del disco (.bin / .cue / .iso / .chd / .zip / .7z; se extrae una vez a la carpeta data/):", "b.browse": "Elegir...", "l.savedir": "Carpeta de partidas guardadas:", "b.saveimp": "Importar partida…", "b.saveexp": "Exportar partida…", "s.saverun": "Cierra el juego antes de importar o exportar partidas.", "s.saveimpok": "Partida importada", "s.saveexpok": "Tarjeta exportada a {}", "s.saveerr": "No se pudo importar/exportar: {}", "s.saveask": "¿Importar este archivo en la tarjeta del port ({})?\nUna tarjeta completa sustituye a la actual (se guarda una copia en backup/).\nSi ya hay una partida con el mismo nombre, se pregunta si reemplazarla.", "s.saveexpq": "¿Exportar solo una partida como .mcs? (No = tarjeta completa .mcd)",
         "l.scale": "Tamaño de la ventana:", "l.fullscreen": "Pantalla completa (F11 en el juego)", "l.hz": "Velocidad:",
         "l.ires": "Resolución interna (solo OpenGL):", "r.ires1": "1x (original)",
         "l.renderer": "Dibujado:", "r.gl": "OpenGL (tarjeta gráfica)", "r.soft": "Software (CPU, más lento)", "l.aspect": "Imagen:", "a.tv": "4:3 (como en la tele)", "a.sq": "Píxeles cuadrados", "a.w16": "16:9 panorámica (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (llena la pantalla, experimental)",
@@ -81,7 +85,7 @@ i18n.add({
     "en": {
         "l.lang": "Game language:",
         "title": "Tombi! - native port", "tab.play": "Play", "tab.mods": "Mods", "tab.controls": "Controls",
-        "l.disc": "Disc image (.bin / .cue / .iso / .chd; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):", "b.saveimp": "Import save…", "b.saveexp": "Export save…", "s.saverun": "Close the game before importing or exporting saves.", "s.saveimpok": "Save imported", "s.saveexpok": "Card exported to {}", "s.saveerr": "Import/export failed: {}", "s.saveask": "Import this file into the port's memory card ({})?\nA whole card replaces the current one (a copy is kept in backup/).\nIf a save with the same name is there, you are asked whether to replace it.", "s.saveexpq": "Export a single save as .mcs? (No = whole card .mcd)",
+        "l.disc": "Disc image (.bin / .cue / .iso / .chd / .zip / .7z; extracted once into the data/ folder):", "b.browse": "Browse...", "l.savedir": "Save folder (memory cards):", "b.saveimp": "Import save…", "b.saveexp": "Export save…", "s.saverun": "Close the game before importing or exporting saves.", "s.saveimpok": "Save imported", "s.saveexpok": "Card exported to {}", "s.saveerr": "Import/export failed: {}", "s.saveask": "Import this file into the port's memory card ({})?\nA whole card replaces the current one (a copy is kept in backup/).\nIf a save with the same name is there, you are asked whether to replace it.", "s.saveexpq": "Export a single save as .mcs? (No = whole card .mcd)",
         "l.scale": "Window size:", "l.fullscreen": "Fullscreen (F11 in game)", "l.hz": "Speed:",
         "l.ires": "Internal resolution (OpenGL only):", "r.ires1": "1x (original)",
         "l.renderer": "Renderer:", "r.gl": "OpenGL (graphics card)", "r.soft": "Software (CPU, slower)", "l.aspect": "Picture:", "a.tv": "4:3 (as on a TV)", "a.sq": "Square pixels", "a.w16": "16:9 widescreen (experimental)", "a.w21": "21:9 (experimental)", "a.w32": "32:9 (experimental)", "a.auto": "Auto (fill the display, experimental)",
@@ -130,6 +134,131 @@ i18n.add({   # Import save...: a save with the same name already on the card (sa
     "en": {"t.savedup": "Save already there", "b.savereplace": "Replace", "b.saveslot": "Save to another slot",
            "b.savecancel": "Cancel"},
 })
+i18n.add({   # a disc inside a .zip / .7z (tools/disc_archive.py), or a file that is no disc image
+    "es": {"s.unpacking": "Descomprimiendo {0}… {1} %",
+           "s.a.notimage": "«{0}» no es una imagen de disco de PlayStation. Elige la imagen de tu disco: .bin (con su .cue), .iso, .chd, o un .zip / .7z que la contenga.",
+           "s.a.rar": "«{0}» es un archivo .rar, y el lanzador no puede abrirlo. Descomprímelo antes (o usa un .zip / .7z) y elige la imagen del disco.",
+           "s.a.noimage": "«{0}» no contiene ninguna imagen de disco (.bin, .iso, .img o .chd).",
+           "s.a.nested": "«{0}» contiene otro archivo comprimido, no una imagen de disco. Descomprímelo antes y elige la imagen.",
+           "s.a.files": "«{0}» contiene los archivos sueltos del disco ({1}), no su imagen. El juego necesita la imagen completa: .bin con su .cue, .iso o .chd (también dentro de un .zip / .7z).",
+           "s.a.cue": "«{0}» contiene el .cue, pero no la pista de datos que nombra ({1}).",
+           "s.a.bad": "No se puede leer «{0}»: {1}. Descomprímelo y elige la imagen del disco.",
+           "s.a.space": "No hay espacio libre suficiente para descomprimir «{0}»: hacen falta {1} MB, hay {2} MB."},
+    "en": {"s.unpacking": "Unpacking {0}… {1} %",
+           "s.a.notimage": "“{0}” is not a PlayStation disc image. Pick the image of your disc: .bin (with its .cue), .iso, .chd, or a .zip / .7z holding one.",
+           "s.a.rar": "“{0}” is a .rar archive, which the launcher cannot open. Extract it first (or use a .zip / .7z) and pick the disc image.",
+           "s.a.noimage": "“{0}” holds no disc image (.bin, .iso, .img or .chd).",
+           "s.a.nested": "“{0}” holds another archive, not a disc image. Extract it first and pick the image.",
+           "s.a.files": "“{0}” holds the disc’s loose files ({1}), not its image. The game needs the whole image: .bin with its .cue, .iso or .chd (inside a .zip / .7z too).",
+           "s.a.cue": "“{0}” holds the .cue sheet but not the data track it names ({1}).",
+           "s.a.bad": "“{0}” cannot be read: {1}. Extract it and pick the disc image.",
+           "s.a.space": "Not enough free space to unpack “{0}”: {1} MB needed, {2} MB free."},
+    "fr": {"s.unpacking": "Décompression de {0}… {1} %",
+           "s.a.notimage": "« {0} » n'est pas une image de disque PlayStation. Choisissez l'image de votre disque : .bin (avec son .cue), .iso, .chd, ou un .zip / .7z qui la contient.",
+           "s.a.rar": "« {0} » est une archive .rar, que le lanceur ne sait pas ouvrir. Décompressez-la d'abord (ou utilisez un .zip / .7z) et choisissez l'image du disque.",
+           "s.a.noimage": "« {0} » ne contient aucune image de disque (.bin, .iso, .img ou .chd).",
+           "s.a.nested": "« {0} » contient une autre archive, pas une image de disque. Décompressez-la d'abord et choisissez l'image.",
+           "s.a.files": "« {0} » contient les fichiers du disque ({1}), pas son image. Le jeu a besoin de l'image complète : .bin avec son .cue, .iso ou .chd (aussi dans un .zip / .7z).",
+           "s.a.cue": "« {0} » contient le .cue, mais pas la piste de données qu'il désigne ({1}).",
+           "s.a.bad": "Impossible de lire « {0} » : {1}. Décompressez-le et choisissez l'image du disque.",
+           "s.a.space": "Pas assez d'espace libre pour décompresser « {0} » : {1} Mo nécessaires, {2} Mo libres."},
+    "de": {"s.unpacking": "{0} wird entpackt… {1} %",
+           "s.a.notimage": "„{0}“ ist kein PlayStation-Disc-Image. Wähle das Image deiner Disc: .bin (mit ihrer .cue), .iso, .chd oder ein .zip / .7z, das es enthält.",
+           "s.a.rar": "„{0}“ ist ein .rar-Archiv, das der Launcher nicht öffnen kann. Entpacke es zuerst (oder nimm ein .zip / .7z) und wähle das Disc-Image.",
+           "s.a.noimage": "„{0}“ enthält kein Disc-Image (.bin, .iso, .img oder .chd).",
+           "s.a.nested": "„{0}“ enthält ein weiteres Archiv, kein Disc-Image. Entpacke es zuerst und wähle das Image.",
+           "s.a.files": "„{0}“ enthält die einzelnen Dateien der Disc ({1}), nicht ihr Image. Das Spiel braucht das ganze Image: .bin mit ihrer .cue, .iso oder .chd (auch in einem .zip / .7z).",
+           "s.a.cue": "„{0}“ enthält die .cue, aber nicht den Datentrack, den sie nennt ({1}).",
+           "s.a.bad": "„{0}“ kann nicht gelesen werden: {1}. Entpacke es und wähle das Disc-Image.",
+           "s.a.space": "Nicht genug freier Speicher zum Entpacken von „{0}“: {1} MB nötig, {2} MB frei."},
+    "it": {"s.unpacking": "Decompressione di {0}… {1} %",
+           "s.a.notimage": "«{0}» non è un'immagine di disco PlayStation. Scegli l'immagine del tuo disco: .bin (con il suo .cue), .iso, .chd, oppure un .zip / .7z che la contiene.",
+           "s.a.rar": "«{0}» è un archivio .rar, che il launcher non sa aprire. Estrailo prima (o usa un .zip / .7z) e scegli l'immagine del disco.",
+           "s.a.noimage": "«{0}» non contiene nessuna immagine di disco (.bin, .iso, .img o .chd).",
+           "s.a.nested": "«{0}» contiene un altro archivio, non un'immagine di disco. Estrailo prima e scegli l'immagine.",
+           "s.a.files": "«{0}» contiene i file sciolti del disco ({1}), non la sua immagine. Il gioco ha bisogno dell'immagine completa: .bin con il suo .cue, .iso o .chd (anche dentro un .zip / .7z).",
+           "s.a.cue": "«{0}» contiene il .cue, ma non la traccia dati che indica ({1}).",
+           "s.a.bad": "Impossibile leggere «{0}»: {1}. Estrailo e scegli l'immagine del disco.",
+           "s.a.space": "Spazio libero insufficiente per decomprimere «{0}»: servono {1} MB, liberi {2} MB."},
+    "nl": {"s.unpacking": "{0} uitpakken… {1} %",
+           "s.a.notimage": "‘{0}’ is geen PlayStation-disc-image. Kies de image van je disc: .bin (met de .cue), .iso, .chd, of een .zip / .7z waarin die zit.",
+           "s.a.rar": "‘{0}’ is een .rar-archief, dat de launcher niet kan openen. Pak het eerst uit (of gebruik een .zip / .7z) en kies de disc-image.",
+           "s.a.noimage": "‘{0}’ bevat geen disc-image (.bin, .iso, .img of .chd).",
+           "s.a.nested": "‘{0}’ bevat nog een archief, geen disc-image. Pak het eerst uit en kies de image.",
+           "s.a.files": "‘{0}’ bevat de losse bestanden van de disc ({1}), niet de image. De game heeft de hele image nodig: .bin met de .cue, .iso of .chd (ook in een .zip / .7z).",
+           "s.a.cue": "‘{0}’ bevat de .cue, maar niet het datatrack dat die noemt ({1}).",
+           "s.a.bad": "‘{0}’ kan niet worden gelezen: {1}. Pak het uit en kies de disc-image.",
+           "s.a.space": "Niet genoeg vrije ruimte om ‘{0}’ uit te pakken: {1} MB nodig, {2} MB vrij."},
+    "pt": {"s.unpacking": "A descomprimir {0}… {1} %",
+           "s.a.notimage": "«{0}» não é uma imagem de disco de PlayStation. Escolhe a imagem do teu disco: .bin (com o seu .cue), .iso, .chd, ou um .zip / .7z que a contenha.",
+           "s.a.rar": "«{0}» é um arquivo .rar, que o lançador não consegue abrir. Descomprime-o primeiro (ou usa um .zip / .7z) e escolhe a imagem do disco.",
+           "s.a.noimage": "«{0}» não contém nenhuma imagem de disco (.bin, .iso, .img ou .chd).",
+           "s.a.nested": "«{0}» contém outro arquivo comprimido, não uma imagem de disco. Descomprime-o primeiro e escolhe a imagem.",
+           "s.a.files": "«{0}» contém os ficheiros soltos do disco ({1}), não a sua imagem. O jogo precisa da imagem completa: .bin com o seu .cue, .iso ou .chd (também dentro de um .zip / .7z).",
+           "s.a.cue": "«{0}» contém o .cue, mas não a pista de dados que ele indica ({1}).",
+           "s.a.bad": "Não é possível ler «{0}»: {1}. Descomprime-o e escolhe a imagem do disco.",
+           "s.a.space": "Não há espaço livre suficiente para descomprimir «{0}»: são precisos {1} MB, há {2} MB."},
+    "sv": {"s.unpacking": "Packar upp {0}… {1} %",
+           "s.a.notimage": "”{0}” är ingen PlayStation-skivavbild. Välj avbilden av din skiva: .bin (med sin .cue), .iso, .chd eller en .zip / .7z som innehåller den.",
+           "s.a.rar": "”{0}” är ett .rar-arkiv, som startprogrammet inte kan öppna. Packa upp det först (eller använd en .zip / .7z) och välj skivavbilden.",
+           "s.a.noimage": "”{0}” innehåller ingen skivavbild (.bin, .iso, .img eller .chd).",
+           "s.a.nested": "”{0}” innehåller ett annat arkiv, ingen skivavbild. Packa upp det först och välj avbilden.",
+           "s.a.files": "”{0}” innehåller skivans lösa filer ({1}), inte dess avbild. Spelet behöver hela avbilden: .bin med sin .cue, .iso eller .chd (även i en .zip / .7z).",
+           "s.a.cue": "”{0}” innehåller .cue-filen men inte dataspåret den anger ({1}).",
+           "s.a.bad": "”{0}” kan inte läsas: {1}. Packa upp den och välj skivavbilden.",
+           "s.a.space": "Inte tillräckligt med ledigt utrymme för att packa upp ”{0}”: {1} MB behövs, {2} MB ledigt."},
+    "da": {"s.unpacking": "Pakker {0} ud… {1} %",
+           "s.a.notimage": "“{0}” er ikke et PlayStation-diskaftryk. Vælg aftrykket af din disk: .bin (med dens .cue), .iso, .chd eller en .zip / .7z, der indeholder det.",
+           "s.a.rar": "“{0}” er et .rar-arkiv, som starteren ikke kan åbne. Pak det ud først (eller brug en .zip / .7z) og vælg diskaftrykket.",
+           "s.a.noimage": "“{0}” indeholder intet diskaftryk (.bin, .iso, .img eller .chd).",
+           "s.a.nested": "“{0}” indeholder et andet arkiv, ikke et diskaftryk. Pak det ud først og vælg aftrykket.",
+           "s.a.files": "“{0}” indeholder diskens løse filer ({1}), ikke dens aftryk. Spillet skal bruge hele aftrykket: .bin med dens .cue, .iso eller .chd (også i en .zip / .7z).",
+           "s.a.cue": "“{0}” indeholder .cue-filen, men ikke det datanummer, den nævner ({1}).",
+           "s.a.bad": "“{0}” kan ikke læses: {1}. Pak det ud og vælg diskaftrykket.",
+           "s.a.space": "Ikke nok ledig plads til at pakke “{0}” ud: {1} MB kræves, {2} MB ledigt."},
+})
+i18n.add({   # the game library (tools/game_library.py); the other languages: port_launcher_lang.py
+    "es": {"c.library": "Juegos", "b.addgame": "Añadir juego…",
+           "l.library": "Añade la imagen de cada disco que tengas (.bin / .cue / .iso / .chd / .zip / .7z). Se reconoce por su ejecutable de "
+                        "arranque y se extrae una vez a su propia carpeta; el logotipo sale de tu propio disco.",
+           "l.addgame": "Tombi! PAL o Tomba! USA",
+           "c.options": "Opciones del juego", "l.onlylang": "{0} (el único idioma de este disco)",
+           "l.unsupported": "{0}: disco reconocido, pero el port todavía no lo ejecuta.",
+           "l.unsupported2": "Puedes dejarlo en la biblioteca: se podrá jugar cuando el port lo admita. Las versiones que "
+                             "funcionan ahora son Tombi! PAL (SCES-01331 / SCES-01330, revisión de agosto de 1998) y Tomba! USA (SCUS-94236).",
+           "l.nopatches": "Todavía no hay traducciones ni parches de texto para la versión {0}.",
+           "l.ntscopts": "Los idiomas, la traducción mejorada, los 50 Hz, el contenido cortado y los trucos son de la versión PAL.",
+           "lib.unchecked": "Sin comprobar", "lib.unsupported": "Aún no compatible", "lib.ready": "Listo para jugar",
+           "lib.toextract": "Falta extraerlo", "lib.noimage": "No se encuentra la imagen", "lib.unknown": "no es un disco de Tombi!",
+           "rg.PAL": "PAL", "rg.USA": "USA", "rg.Japan": "Japón",
+           "s.busyextract": "Espera a que termine la extracción del disco.",
+           "s.notgame": "{0} ({1}, {2}): el port no lo reconoce. Añade un disco de Tombi! PAL o de Tomba! USA.",
+           "q.removegame": "¿Quitar {0} de la biblioteca?", "b.removegame": "Quitar de la biblioteca…",
+           "q.removedata": "¿Borrar también los archivos extraídos?\n{0}\n(Se vuelven a extraer si añades el disco otra vez.)",
+           "s.ok2": "Disco compatible: {0}, {1} verificado (sha1).", "s.pickgame": "Elige un juego de la biblioteca.",
+           "s.noimage": "No se encuentra la imagen del disco: {0}", "l.speedntsc": "60 Hz: la velocidad de este juego (NTSC).",
+           "l.nomods": "La entrada DEBUG del título solo existe en la versión PAL por ahora."},
+    "en": {"c.library": "Games", "b.addgame": "Add game…",
+           "l.library": "Add the image of each disc you own (.bin / .cue / .iso / .chd / .zip / .7z). It is recognised by its boot "
+                        "executable and extracted once into a folder of its own; the logo comes from your own disc.",
+           "l.addgame": "Tombi! PAL or Tomba! USA",
+           "c.options": "Game options", "l.onlylang": "{0} (the only language of this disc)",
+           "l.unsupported": "{0}: disc recognised, but the port does not run it yet.",
+           "l.unsupported2": "You can keep it in the library: it becomes playable once the port supports it. The versions that "
+                             "run now are Tombi! PAL (SCES-01331 / SCES-01330, August 1998 revision) and Tomba! USA (SCUS-94236).",
+           "l.nopatches": "No translations or text patches for the {0} version yet.",
+           "l.ntscopts": "The languages, the improved translation, 50 Hz, the cut content and the cheats are for the PAL version.",
+           "lib.unchecked": "Not checked yet", "lib.unsupported": "Not supported yet", "lib.ready": "Ready to play",
+           "lib.toextract": "Needs extracting", "lib.noimage": "Disc image not found", "lib.unknown": "not a Tombi! disc",
+           "rg.PAL": "PAL", "rg.USA": "USA", "rg.Japan": "Japan",
+           "s.busyextract": "Wait for the disc extraction to finish.",
+           "s.notgame": "{0} ({1}, {2}): the port does not know this disc. Add a Tombi! PAL or Tomba! USA disc.",
+           "q.removegame": "Remove {0} from the library?", "b.removegame": "Remove from the library…",
+           "q.removedata": "Delete the extracted files too?\n{0}\n(They are extracted again if you add the disc again.)",
+           "s.ok2": "Compatible disc: {0}, {1} verified (sha1).", "s.pickgame": "Pick a game of the library.",
+           "s.noimage": "Disc image not found: {0}", "l.speedntsc": "60 Hz: this game's own speed (NTSC).",
+           "l.nomods": "The title DEBUG entry is PAL-only for now."},
+})
 
 
 def app_dir():
@@ -150,13 +279,23 @@ def bin_dir():
     return os.path.join(ROOT, "build", "port2")
 
 
-def game_binary():
+def game_binary(sha1=None):
+    """The port binary of the selected game's version (game_library.VERSIONS "binary": tombi-pc for PAL, tombi-pc-usa for
+    USA; + .exe on Windows) in the bundle, else the checkout's CMake tree of that version (build/port2[-win] for PAL,
+    build/port2-scus94236[-win] for USA: tombi2)."""
+    v = GL.version_of(sha1 or current_sha1()) or GL.VERSIONS[GL.PAL_SHA1]
+    pal = v is GL.VERSIONS[GL.PAL_SHA1]
+    name = v["binary"] or "tombi-pc"
+    if not pal and not getattr(sys, "_MEIPASS", None) \
+            and not os.path.isfile(os.path.join(bin_dir(), name + (".exe" if os.name == "nt" else ""))):
+        tree = os.path.join(ROOT, "build", v["build_dir"] + ("-win" if os.name == "nt" else ""))
+        return os.path.join(tree, "tombi2.exe" if os.name == "nt" else "tombi2")
     if os.name == "nt":         # tombi-pc.exe: the game (the CMake target is still called tombi2); older bundles: tombi2.exe
-        p = os.path.join(bin_dir(), "tombi-pc.exe")
-        return p if os.path.isfile(p) else os.path.join(bin_dir(), "tombi2.exe")
-    p = os.path.join(bin_dir(), "tombi-pc")     # the Linux bundle (release asset tombi-port); the build tree: tombi2
+        p = os.path.join(bin_dir(), name + ".exe")
+        return p if os.path.isfile(p) or not pal else os.path.join(bin_dir(), "tombi2.exe")
+    p = os.path.join(bin_dir(), name)     # the Linux bundle (release asset tombi-port); the build tree: tombi2
     if not os.path.isfile(p):
-        return os.path.join(bin_dir(), "tombi2")
+        return p if not pal else os.path.join(bin_dir(), "tombi2")
     if not os.access(p, os.X_OK):               # (PyInstaller extraction may drop the exec bit)
         try:
             os.chmod(p, 0o755)
@@ -169,9 +308,39 @@ def settings_file():
     return os.path.join(app_dir(), "tombi-port.json")
 
 
+# The selected game of the library (App.select_game): its data folder (next to the launcher) and the sha1 of its game
+# executable (game_library.VERSIONS). Before any game is known: data/ and the PAL version (an older launcher's setup).
+CURRENT = {"data": "data", "sha1": ""}
+
+
+def current_sha1():
+    return CURRENT.get("sha1") or GL.PAL_SHA1
+
+
+def has(feature):
+    """The selected game's version offers this launcher option (game_library FEATURES: lang, patch, hz, cut, ...)."""
+    return GL.has(current_sha1(), feature)
+
+
 def data_dir():
-    """Where the disc is extracted once (tools/extract_data.py): data/ next to the launcher, which tombi2 reads with --data."""
-    return os.path.join(app_dir(), "data")
+    """Where the selected game's disc is extracted once (tools/extract_data.py): data/ next to the launcher for the
+    first PAL disc (as always), data-<serial>/ for the others; tombi2 reads it with --data."""
+    return os.path.join(app_dir(), CURRENT.get("data") or "data")
+
+
+def version_save_dir(savedir):
+    """The folder of the selected game's memory card: the save folder as set (empty = the port's default, next to
+    data/) for PAL; the version's own subfolder of it for another release (game_library VERSIONS "save_sub": USA
+    saves_usa/, as files/saves_usa on Android), so each game keeps its own tombi_mc0.mcd.  "" = the port's default."""
+    sub = (GL.version_of(current_sha1()) or {}).get("save_sub") or ""
+    if not sub:
+        return savedir
+    return os.path.join(savedir or app_dir(), sub)
+
+
+def art_cache(serial):
+    """The card art rebuilt from the player's own disc (game_library.make_art): library/<serial>/ next to the launcher."""
+    return os.path.join(app_dir(), "library", serial or "unknown")
 
 
 def civ_dir():
@@ -245,8 +414,9 @@ def civ_generate(log):
 
 
 def data_ready():
-    """sha1 of MAIN0.EXE of a complete extraction in data_dir(), else None."""
-    return X.manifest_sha1(data_dir())
+    """sha1 of the game executable (MAIN0.EXE for PAL, the boot exe of the others) of a complete extraction in
+    data_dir(), else None."""
+    return GL.data_complete(data_dir())
 
 
 def bundled_patch(name="es_mejorada.tombipatch.json"):
@@ -377,8 +547,10 @@ def bin_of_cue(path):
     return path
 
 
-def extract_main0(image, out):
-    """EXE/MAIN0.EXE from the ISO9660 directory of a raw (2352) or cooked (2048) image (or a .chd) -> out; returns its sha1."""
+def iso_dir(image):
+    """The ISO9660 directory of a raw (2352) or cooked (2048) image (or a .chd): (f, sec, found, serial) with
+    found = {"DIR/NAME": (lba, size)} (upper case, no ';1') and serial the boot file of SYSTEM.CNF (SCES-01331...).
+    Raises ValueError(s.notiso) when the image is no ISO; the caller closes f."""
     f = X.open_image(image)
     f.seek(16 * 2352 + 25)
     raw = f.read(5) == b"CD001"
@@ -417,15 +589,21 @@ def extract_main0(image, out):
                 found[(pre + nm.split(";")[0]).upper()] = (elba, esz)
     root = pvd[156:190]
     walk(struct.unpack("<I", root[2:6])[0], struct.unpack("<I", root[10:14])[0], "")
-    if "EXE/MAIN0.EXE" not in found:
-        f.close()
-        raise ValueError(tr("s.noexe"))
     serial = None                   # the boot file named by SYSTEM.CNF: BOOT = cdrom:\\SCES_013.31;1 -> SCES-01331
     if "SYSTEM.CNF" in found:
         lba, size = found["SYSTEM.CNF"]
         m = re.search(r"([A-Z]{4})[_-](\d{3})\.?(\d{2})", sec(lba)[:size].decode("latin-1").upper())
         if m:
             serial = "%s-%s%s" % m.groups()
+    return f, sec, found, serial
+
+
+def extract_main0(image, out):
+    """EXE/MAIN0.EXE from the ISO9660 directory of a raw (2352) or cooked (2048) image (or a .chd) -> out; returns its sha1."""
+    f, sec, found, serial = iso_dir(image)
+    if "EXE/MAIN0.EXE" not in found:
+        f.close()
+        raise ValueError(tr("s.noexe"))
     lba, size = found["EXE/MAIN0.EXE"]
     data = sec(lba, (size + 2047) // 2048)[:size]
     f.close()
@@ -434,11 +612,80 @@ def extract_main0(image, out):
     return hashlib.sha1(data).hexdigest(), serial
 
 
-# serials of the Tomba! releases (the port runs the PAL Rev 1 discs: SCES-01331 and SCES-01330 share MAIN0.EXE and every
-# game file of their revision; only SYSTEM.CNF and the boot file name differ. Rev 0 of either has other overlays.)
-KNOWN_DISCS = {"SCES-01331": "Tombi! (PAL, idiomas 2: EN DA PT ES SV)",
-               "SCES-01330": "Tombi! (PAL, idiomas 1: EN NL FR DE IT)", "SCUS-94236": "Tomba! (USA)",
-               "SLPS-01144": "Ore no Tomba (Japón)", "SCUS-94454": "Tomba! 2 (USA)", "SCES-02005": "Tombi! 2 (PAL)"}
+# ---- the demo discs of the Charity Wings glide (--cut-content --wings-glide / --wings-pre9, port2/runtime/wings.c):
+# the launcher pulls just these files out of the user's images into .wings/<key>/ and passes the folders to the port
+WINGS_DISCS = {"jpdemo": ("SLPM-80165", ["AREA08/D002.000", "AREA08/D003.GAM", "SYSTEM/A00000.GAM"]),
+               "pre9": ("PCPX-96093", ["TOMBA/A00002.GAM", "TOMBA/AREA01/A007.000", "TOMBA/AREA01/A008.GAM"])}
+
+
+def extract_disc_files(image, names, out_dir):
+    """Copies the files names (DIR/NAME) of the image into out_dir; returns (serial, missing names)."""
+    f, sec, found, serial = iso_dir(image)
+    missing = []
+    try:
+        for n in names:
+            if n.upper() not in found:
+                missing.append(n)
+                continue
+            lba, size = found[n.upper()]
+            data = sec(lba, (size + 2047) // 2048)[:size]
+            dst = os.path.join(out_dir, *n.split("/"))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            with open(dst, "wb") as o:
+                o.write(data)
+    finally:
+        f.close()
+    return serial, missing
+
+
+def extract_archive_files(path, names, out_dir):
+    """The loose disc files inside a .zip / .7z (no image): the members whose path ends with DIR/NAME are copied into
+    out_dir; returns (serial from SYSTEM.CNF when the archive holds one, missing names).  Raises DA.ArchiveError."""
+    a = DA.Archive(path)
+    try:
+        mem = [n for n, _s in a.members()]
+        pick, missing = {}, []
+        for n in names:
+            hit = [m for m in mem if m.upper().replace("\\", "/").endswith("/" + n.upper()) or m.upper() == n.upper()]
+            if hit:
+                pick[min(hit, key=len)] = n
+            else:
+                missing.append(n)
+        cnf = sorted((m for m in mem if m.upper().replace("\\", "/").split("/")[-1] == "SYSTEM.CNF"), key=lambda m: m.count("/"))[:1]
+        bufs = {m: [] for m in list(pick) + cnf}
+        if bufs:
+            a.read_members(list(bufs), lambda m, b: bufs[m].append(b))
+        for m, n in pick.items():
+            dst = os.path.join(out_dir, *n.split("/"))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            with open(dst, "wb") as o:
+                o.write(b"".join(bufs[m]))
+        serial = None
+        if cnf:
+            m = re.search(r"([A-Z]{4})[_-](\d{3})\.?(\d{2})", b"".join(bufs[cnf[0]]).decode("latin-1").upper())
+            if m:
+                serial = "%s-%s%s" % m.groups()
+        return serial, missing
+    finally:
+        a.close()
+
+
+def wings_dir(key):
+    return os.path.join(app_dir(), ".wings", key)
+
+
+def wings_dirs(s):
+    """(jpdemo folder, pre9 folder) for --wings-glide / --wings-pre9 when both images are set and their files were
+    extracted, else None."""
+    if not (s.get("wings_glide") and s.get("wings_pre9")):
+        return None
+    for k, (_serial, names) in WINGS_DISCS.items():
+        if not all(os.path.isfile(os.path.join(wings_dir(k), *n.split("/"))) for n in names):
+            return None
+    return wings_dir("jpdemo"), wings_dir("pre9")
+
+
+# (the releases the launcher knows, their names and options: tools/game_library.py VERSIONS / OTHER_DISCS)
 
 
 def build_id():
@@ -456,6 +703,20 @@ def build_id():
 BUILD_ID = build_id()
 
 
+def app_version():
+    """Release number (VERSION at the repo root, bundled next to build_id.txt by port2-exe.yml)."""
+    for d in (getattr(sys, "_MEIPASS", None), ROOT):
+        if d and os.path.isfile(os.path.join(d, "VERSION")):
+            v = open(os.path.join(d, "VERSION"), encoding="utf-8", errors="replace").read().strip()
+            if v:
+                return v
+    return ""
+
+
+APP_VERSION = app_version()
+VERSION_TAG = ("v" + APP_VERSION + " · " if APP_VERSION else "") + "build " + BUILD_ID
+
+
 def icon_file(name):
     """A file of tools/icons: bundled under icons/ by port2-exe.yml (--add-data ...;icons), else the checkout's."""
     for d in ([os.path.join(sys._MEIPASS, "icons")] if getattr(sys, "_MEIPASS", None) else []) + [os.path.join(ROOT, "tools", "icons")]:
@@ -468,7 +729,11 @@ def icon_file(name):
 # ---------------------------------------------------------------------------------------------- window
 # --cut-content (port/fixes.txt): text cut from the game, recovered from the Japanese release
 i18n.add({
-    "es": {"l.cutcontent": "Activar contenido recortado",
+    "es": {"l.cutcontent": "Contenido recortado: elige qué restaurar",
+           "l.cut.boatman": "El barquero (AREA00): sus tres frases que faltan", "l.cut.letter": "La carta de Ciudad Baco en la Montaña del Fénix (AREA03): segundo cartel junto al de guardar",
+           "l.cut.board": "El tablón de anuncios de Ciudad Baco (AREA05), legible desde el suelo, y el punto de guardado «La roca de la sirena» (AREA06)",
+           "l.cut.berries": "Bayas plateadas y doradas en lo que sueltan enemigos y cofres (2 de vida)", "l.cut.bubble": "El bocadillo grande «?» al repetir una conversación (escenas desde arriba)",
+           "l.cut.titles": "Títulos de evento que la versión PAL dejó vacíos (de la versión japonesa)",
            "i.cutcontent": "Textos que se quitaron del juego y que se han encontrado en la versión japonesa (Ore! Tomba). "
                            "Se activan cuatro:\n\n"
                            "• El barquero de la Ciudad de todo principio (AREA00): en el estanque al que llegas sobre la tortuga, "
@@ -489,14 +754,17 @@ i18n.add({
                            "La frecuencia de las bayas y el momento del «?» los hemos elegido nosotros: el juego tiene el "
                            "código y los gráficos, pero no dice cuándo debían salir.\n\n"
                            "Los textos están en español con el parche «Traducción mejorada»; en los demás idiomas, o sin el parche, "
-                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content).\n\n"
-                           "Opcional, pantalla de título temprana: si indicas la carpeta con los ficheros TOMBA del disco «PrePre Vol. 8» "
-                           "(PCPX-96084, una demo japonesa de junio de 1997; extraídos de tu propio disco con tools/prepre8.py extract), "
-                           "el paisaje del título es el de esa versión (roca-torre y río) en vez del final. Eso es arte real del juego "
-                           "de entonces; el logo, el menú y los textos siguen siendo los finales (el logo «オレっ！トンバ» de esa versión "
-                           "no se usa: no sabemos cómo se montaba). No se incluye nada de ese disco.",
-           "l.earlytitle": "Título temprano (opcional): carpeta TOMBA del disco PrePre Vol. 8 (tools/prepre8.py extract):"},
-    "en": {"l.cutcontent": "Enable cut content",
+                           "esos huecos del disco solo contienen un relleno («!!!!!!!!!!», «..........???»). En inglés (sin otro parche de texto) se aplica solo el texto inglés incluido (en_cut_content).",
+           "l.wingsglide": "Imagen de la demo japonesa SLPM-80165 (.bin / .cue / .iso / .chd / .zip / .7z; solo se extraen 3 archivos):",
+           "l.wingspre9": "Imagen del disco PrePre Vol. 9 (PCPX-96093; se extrae 1 archivo):",
+           "cut.c.wings": "Animación perdida: planeo con las Alas de la caridad", "l.wingson": "Activar el planeo de la demo japonesa",
+           "cut.wings.d": "En las zonas cenitales, al usar las Alas de la caridad, Tomba sube con la pluma girando en la mano (frames de la demo japonesa + pluma de la PrePre 9; reconstrucción, ver docs/CUT_CONTENT.md). Hacen falta las dos imágenes; se comprueban y se extraen 4 archivos la primera vez.",
+           "s.wingsok": "{0}: disco {1} comprobado, {2} archivo(s) extraídos y listos.", "s.wingsbad": "{0} no es el disco {1} (serie {2}; archivos que faltan: {3}).", "s.wingsfail": "No se pudo leer {0}: {1}", "s.wingsbusy": "Comprobando {0} y extrayendo sus archivos...", "s.wingsnofile": "No existe: {0}", "s.wingsnotyet": "Sin comprobar: elige la imagen con Elegir... o pulsa Intro en el campo."},
+    "en": {"l.cutcontent": "Cut content: pick what to restore",
+           "l.cut.boatman": "The boatman (AREA00): his three missing lines", "l.cut.letter": "The Baccus Village letter at Phoenix Mountain (AREA03): a second sign next to the save sign",
+           "l.cut.board": "The Baccus Village notice board (AREA05), readable from the ground, and the \"Mermaid's rock\" save point (AREA06)",
+           "l.cut.berries": "Silver and golden berries in enemy and chest drops (2 HP)", "l.cut.bubble": "The big \"?\" bubble when a talk repeats (top-down scenes)",
+           "l.cut.titles": "Event titles the PAL release left empty (from the Japanese release)",
            "i.cutcontent": "Text that was removed from the game and found in the Japanese release (Ore! Tomba). "
                            "Four pieces are enabled:\n\n"
                            "• The boatman in the Village of All Beginnings (AREA00): at the pond you reach on the turtle, after his "
@@ -517,13 +785,12 @@ i18n.add({
                            "How often the berries show up and when the '?' appears are our choice: the game has the code and the "
                            "graphics but never says when they were meant to appear.\n\n"
                            "The texts are in Spanish with the 'Improved translation' patch; in the other languages, or without the "
-                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied.\n\n"
-                           "Optional early title screen: if you point to the folder with the TOMBA files of the 'PrePre Vol. 8' disc "
-                           "(PCPX-96084, a Japanese demo from June 1997; extracted from your own disc with tools/prepre8.py extract), the "
-                           "title landscape is that build's (rock spire and river) instead of the final one. That is real game art of the "
-                           "time; the logo, menu and text stay the final ones (that build's 'オレっ！トンバ' logo is not used: how it was "
-                           "laid out is unknown). Nothing from that disc is included.",
-           "l.earlytitle": "Early title (optional): TOMBA folder of the PrePre Vol. 8 disc (tools/prepre8.py extract):"},
+                           "patch, those slots of the disc only hold filler ('!!!!!!!!!!', '..........???'). With the game in English (and no other text patch) the bundled English text (en_cut_content) is applied.",
+           "l.wingsglide": "Image of the Japanese demo SLPM-80165 (.bin / .cue / .iso / .chd / .zip / .7z; only 3 files are extracted):",
+           "l.wingspre9": "Image of the PrePre Vol. 9 disc (PCPX-96093; 1 file is extracted):",
+           "cut.c.wings": "Lost animation: Charity Wings glide", "l.wingson": "Enable the Japanese demo's glide",
+           "cut.wings.d": "In the top-down areas, using the Charity Wings makes Tomba rise with the feather spinning in the raised hand (frames of the Japanese demo + the feather of PrePre 9; a reconstruction, see docs/CUT_CONTENT.md). Both images are needed; they are checked and 4 files extracted the first time.",
+           "s.wingsok": "{0}: disc {1} checked, {2} file(s) extracted and ready.", "s.wingsbad": "{0} is not disc {1} (serial {2}; missing files: {3}).", "s.wingsfail": "Could not read {0}: {1}", "s.wingsbusy": "Checking {0} and extracting its files...", "s.wingsnofile": "Not found: {0}", "s.wingsnotyet": "Not checked yet: pick the image with Browse... or press Enter in the field."},
 })
 
 # the strings of the sidebar layout (the older keys above stay: status messages, options, mods)
@@ -872,6 +1139,8 @@ QFrame#card QLabel, QFrame#card QCheckBox, QFrame#card QRadioButton { background
 #cellTitle { font-weight: 600; }
 #muted { color: %(muted)s; }
 #warn { color: %(warn)s; }
+#okText { color: #1e9e4a; }
+#badText { color: #d13438; }
 #busyText { color: %(dot_busy)s; }
 #accentText { color: %(accent)s; }
 #nameSel { color: %(accent)s; font-weight: 600; }
@@ -1010,6 +1279,17 @@ def flag_pixmap(n, w=24, h=16):
         fill(0, 0, w, h, "#C8102E")
         fill(0, h / 2 - 2, w, h / 2 + 2, "white")
         fill(w * 3 / 8 - 2, 0, w * 3 / 8 + 2, h, "white")
+    elif n == 9:      # United States (simplified: the English of the USA disc)
+        for i in range(7):
+            fill(0, h * 2 * i / 13, w, h * (2 * i + 1) / 13, "#B22234")
+            if i < 6:
+                fill(0, h * (2 * i + 1) / 13, w, h * (2 * i + 2) / 13, "white")
+        fill(0, 0, w * 0.42, h * 7 / 13, "#3C3B6E")
+    elif n == 10:     # Japan (the Japanese disc)
+        fill(0, 0, w, h, "white")
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor("#BC002D"))
+        p.drawEllipse(QPointF(w / 2, h / 2), h * 0.3, h * 0.3)
     p.setPen(QPen(QColor(0, 0, 0, 60), 0.6))
     p.setBrush(Qt.NoBrush)
     p.drawRect(QRectF(0.3, 0.3, w - 0.6, h - 0.6))
@@ -1030,6 +1310,24 @@ def window_icon():
     return QIcon()
 
 
+CUT_ITEMS = ["boatman", "letter", "board", "berries", "bubble", "titles"]     # --cut-content=LIST items (port/fixes.txt, runtime/main.c)
+
+
+def cut_items(s):
+    """The cut-content items switched on: the per-item keys of the pick list; settings saved before the list had one
+    switch (cut_content), which meant every item."""
+    if any(("cut_i_" + k) in s for k in CUT_ITEMS):
+        return [k for k in CUT_ITEMS if s.get("cut_i_" + k)]
+    return list(CUT_ITEMS) if s.get("cut_content") else []
+
+
+def cut_args(s):
+    items = cut_items(s)
+    if not items:
+        return []
+    return ["--cut-content"] if len(items) == len(CUT_ITEMS) else ["--cut-content=" + ",".join(items)]
+
+
 def build_command(s, civ_play=None):
     """The tombi-pc command line for the settings s (and a rebuilt town button's civ_play, never saved); returns
     (cmd, gfx_note), gfx_note telling the log why the Spanish redraws (--patch-tex) are or are not passed."""
@@ -1045,16 +1343,21 @@ def build_command(s, civ_play=None):
     fps = s.get("fps") or ("auto" if s.get("fps60") and s.get("experimental") else "off")
     if fps != "off":                       # --fps: interpolated presents (both renderers; the old OpenGL-only 60 fps switch = auto)
         cmd += ["--fps", str(fps)]
-    if s.get("lang"):
+    lang = has("lang")         # (the USA build is English only: no --lang, no Spanish redraws, no labels)
+    if lang and s.get("lang"):
         cmd += ["--lang", str(s["lang"])]
-    if str(s.get("lang")) == "5" and (s.get("subscreen_labels") or "").strip():
+    if lang and str(s.get("lang")) == "5" and (s.get("subscreen_labels") or "").strip():
         cmd += ["--subscreen-labels", s["subscreen_labels"].strip()]   # the Select tabs / leaf buttons, in the disc's lettering
-    if s.get("cut_content"):
-        cmd += ["--cut-content"]
-        if s.get("early_title"):
-            cmd += ["--early-title", s["early_title"]]
+    if has("cut"):
+        cmd += cut_args(s)                                            # the pick list (all items = the plain switch)
+    if has("cut") and s.get("wings_on"):
+        wd = wings_dirs(s)                                            # both demo discs are needed
+        if wd:
+            cmd += ["--wings-glide", wd[0], "--wings-pre9", wd[1]]    # its own switch, not part of --cut-content
     gfx = os.path.join(data_dir(), DP.GFX_TBTX)    # the Spanish redraws the text patch generated (tools/gfx_es)
-    if str(s.get("lang")) != "5":
+    if not lang:
+        note = "no (%s: English only)" % (GL.version_of(current_sha1()) or {}).get("region", "?")
+    elif str(s.get("lang")) != "5":
         note = "no (language is not Spanish)"
     elif cmd[1] != "--data":
         note = "no (running from the disc image, not data/)"
@@ -1065,8 +1368,11 @@ def build_command(s, civ_play=None):
         note = "yes (%s)" % gfx
     if not translation_native(s):
         cmd += ["--no-translation-file"]      # tombi2 would load translation.tpatch from its cwd: only when it is the choice
-    if s.get("savedir"):
-        cmd += ["--save-dir", s["savedir"]]
+    sd = version_save_dir(s.get("savedir") or "")
+    if sd:
+        if sd != s.get("savedir"):         # (a version's own subfolder: the port does not create folders)
+            os.makedirs(sd, exist_ok=True)
+        cmd += ["--save-dir", sd]
     if s.get("texpack") and os.path.isdir(s["texpack"]) and s.get("renderer") != "soft" and s.get("experimental"):
         cmd += ["--texture-pack", s["texpack"]]
     if s.get("fullscreen"):
@@ -1084,13 +1390,15 @@ def build_command(s, civ_play=None):
     pm = pad_map_arg(s.get("pad_map"))
     if pm:
         cmd += ["--pad-map", pm]
-    if s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "generic", "custom"):
+    if has("prompts") and s.get("prompts_style", "auto") in ("playstation", "xbox", "nintendo", "generic", "custom"):
         cmd += ["--prompts", s["prompts_style"]]
-    if s.get("prompts_style") == "custom":
+    if has("prompts") and s.get("prompts_style") == "custom":
         cmd += ["--prompt-colors", s.get("prompt_colors") or PC.DEFAULT]
     # no --launcher-exit on PC: the Quit Game entries are for handhelds; here the window is simply closed
-    cmd += M.mod_args(s, app_dir())
-    cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))
+    # a version without the PAL-address mods gets the portable ones only (no --hz: an NTSC build runs at 60 by itself)
+    cmd += M.mod_args(s, app_dir(), allowed=None if has("pokes") else M.PORTABLE_MODS)
+    if has("cut"):
+        cmd += M.civ_args(s, os.path.join(civ_dir(), "maps"), os.path.join(civ_dir(), "wfm"))
     return cmd, note
 
 
@@ -1434,10 +1742,313 @@ def hbox(*widgets, spacing=8, margins=(0, 0, 0, 0), stretch_last=False):
     return w, lay
 
 
+LIBRARY_VIEW = "list"       # the library's default look (setting "library_view": grid, list or banner)
+
+
+class TileGrid(QWidget):
+    """The grid view's cards in as many columns as the width takes (laid out again when the window is resized)."""
+    GAP = 12
+
+    def __init__(self, tiles):
+        super().__init__()
+        self.tiles, self.cols = tiles, 0
+        self.g = QGridLayout(self)
+        self.g.setContentsMargins(0, 4, 0, 4)
+        self.g.setHorizontalSpacing(self.GAP)
+        self.g.setVerticalSpacing(self.GAP)
+        self.g.setSizeConstraint(QLayout.SetNoConstraint)
+        self._place(4)
+
+    def _place(self, cols):
+        cols = max(1, min(cols, len(self.tiles)))
+        if cols == self.cols:
+            return
+        self.cols = cols
+        for t in self.tiles:
+            self.g.removeWidget(t)
+        for i, t in enumerate(self.tiles):
+            self.g.addWidget(t, i // cols, i % cols, Qt.AlignLeft | Qt.AlignTop)
+        for c in range(len(self.tiles) + 1):
+            self.g.setColumnStretch(c, 1 if c == cols else 0)
+
+    def minimumSizeHint(self):        # one column is enough: the width never pushes the page wider
+        m = self.g.minimumSize()
+        return QSize(self.tiles[0].width() if self.tiles else 0, m.height())
+
+    def resizeEvent(self, e):
+        w = self.tiles[0].width() if self.tiles else 1
+        cols = self.cols
+        self._place((e.size().width() + self.GAP) // (w + self.GAP))
+        super().resizeEvent(e)
+        if cols != self.cols:
+            self.updateGeometry()
+
+
+class GameTile(QAbstractButton):
+    """A game of the library drawn as a card: its title art (the title screen rebuilt from the player's disc,
+    game_library.make_art) or its logo, the name, serial and languages, and its state (a coloured dot). Modes: "grid"
+    (cover cards), "list" (rows with the logo), "banner" (the selected game, wide) and "chip" (the small logo buttons
+    under the banner). d["add"]: the Add game tile."""
+    SIZES = {"grid": (152, 206), "list": (0, 84), "banner": (0, 232), "chip": (148, 78)}
+
+    def __init__(self, app, d, mode):
+        super().__init__()
+        self.a, self.d, self.mode = app, d, mode
+        self.setCursor(Qt.PointingHandCursor)
+        self.setAttribute(Qt.WA_Hover)
+        self.setFocusPolicy(Qt.StrongFocus)
+        w, h = self.SIZES[mode]
+        if mode == "list" and d.get("add"):
+            h = 52
+        if w:
+            self.setFixedSize(w, h)
+        else:
+            self.setFixedHeight(h)
+            self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        if mode == "banner":
+            self.setCursor(Qt.ArrowCursor)
+            self.setFocusPolicy(Qt.NoFocus)
+
+    def contextMenuEvent(self, e):
+        if self.d.get("add") or self.mode == "banner":
+            return
+        from PySide6.QtWidgets import QMenu
+        m = QMenu(self.a)
+        act = m.addAction(tr("b.removegame"))
+        if m.exec(e.globalPos()) is act:      # after the menu: removing rebuilds the window (this card too)
+            QTimer.singleShot(0, lambda s=self.d.get("serial", ""): self.a.remove_game(s))
+
+    def _font(self, pt, weight=QFont.Normal):
+        f = QFont(self.font())
+        f.setPointSizeF(pt)
+        f.setWeight(weight)
+        return f
+
+    def _cover(self, p, pm, r, radius, top_only=False, middle=False):
+        """pm scaled to fill r (cropped, centred horizontally, from the top or, middle=True, centred) inside a rounded clip."""
+        path = QPainterPath()
+        path.addRoundedRect(r, radius, radius)
+        if top_only:                          # square bottom corners: the text area continues below
+            path.addRect(QRectF(r.x(), r.y() + r.height() / 2, r.width(), r.height() / 2))
+        p.save()
+        path.setFillRule(Qt.WindingFill)
+        p.setClipPath(path.simplified())
+        s = max(r.width() / pm.width(), r.height() / pm.height())
+        w, h = pm.width() * s, pm.height() * s
+        p.setRenderHint(QPainter.SmoothPixmapTransform, True)
+        y = r.y() + ((r.height() - h) / 2 if middle else 0)
+        p.drawPixmap(QRectF(r.x() + (r.width() - w) / 2, y, w, h), pm, QRectF(pm.rect()))
+        p.restore()
+
+    def _logo(self, p, r, color):
+        """The logo fitted in r, or the game's name in large letters when there is no art."""
+        pm = self.d.get("art", {}).get("logo")
+        if pm is not None:
+            s = min(r.width() / pm.width(), r.height() / pm.height())
+            w, h = pm.width() * s, pm.height() * s
+            p.setRenderHint(QPainter.SmoothPixmapTransform, True)
+            p.drawPixmap(QRectF(r.x() + (r.width() - w) / 2, r.y() + (r.height() - h) / 2, w, h), pm, QRectF(pm.rect()))
+            return
+        p.setPen(QColor(color))
+        text = self.d.get("short") or self.d.get("title") or "?"
+        size = max(10.0, r.height() / 3.2)
+        f = self._font(size, QFont.Black)
+        width = QFontMetricsF(f).horizontalAdvance(text)
+        if width > r.width() * 0.92:          # one line, like the art: shrink a long name (オレっ！トンバ) to fit
+            f = self._font(max(6.0, size * r.width() * 0.92 / width), QFont.Black)
+        p.setFont(f)
+        p.drawText(r, Qt.AlignCenter, text)
+
+    _flag_cache = {}
+
+    def _flags(self, p, x, y, h=11):
+        """the disc's languages as small drawn flags in a row from x, centred on y; returns the right end"""
+        w = round(h * 1.5)
+        for n in self.d.get("flags") or ():
+            pm = GameTile._flag_cache.get((n, w, h))
+            if pm is None:
+                pm = GameTile._flag_cache[(n, w, h)] = flag_pixmap(n, w, h)
+            p.drawPixmap(QPointF(x, y - h / 2), pm)
+            x += w + 4
+        return x
+
+    def _status(self, p, x, y, t, color_text):
+        dot = DOT.get(self.d.get("level"), DOT["info"])
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor(dot))
+        p.drawEllipse(QRectF(x, y - 4.5, 9, 9))
+        p.setPen(QColor(color_text))
+        p.setFont(self._font(9))
+        p.drawText(QPointF(x + 15, y + 4), self.d.get("status", ""))
+
+    def paintEvent(self, _e):
+        t = self.a.t
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        r = QRectF(self.rect()).adjusted(1.5, 1.5, -1.5, -1.5)
+        sel, hover = self.d.get("selected"), self.underMouse() and self.mode != "banner"
+        radius = 12 if self.mode in ("grid", "banner") else 10
+        if self.d.get("add"):
+            pen = QPen(QColor(t["accent"] if hover else t["input_line"]), 1.6, Qt.DashLine)
+            p.setPen(pen)
+            p.setBrush(QColor(t["hover"] if hover else t["card"]))
+            p.drawRoundedRect(r, radius, radius)
+            p.setPen(QColor(t["accent"]))
+            if self.mode == "grid":
+                p.setFont(self._font(30, QFont.Light))
+                p.drawText(QRectF(r.x(), r.y() + 48, r.width(), 50), Qt.AlignCenter, "+")
+                p.setFont(self._font(10.5, QFont.DemiBold))
+                p.drawText(QRectF(r.x(), r.y() + 102, r.width(), 24), Qt.AlignCenter, self.d["title"])
+                p.setPen(QColor(t["muted"]))
+                p.setFont(self._font(8.5))
+                p.drawText(QRectF(r.x() + 12, r.y() + 128, r.width() - 24, 60), Qt.AlignHCenter | Qt.AlignTop | Qt.TextWordWrap,
+                           self.d.get("sub", ""))
+            elif self.mode == "chip":
+                p.setFont(self._font(20, QFont.Light))
+                p.drawText(QRectF(r.x(), r.y() + 4, r.width(), 40), Qt.AlignCenter, "+")
+                p.setFont(self._font(9, QFont.DemiBold))
+                p.drawText(QRectF(r.x(), r.y() + 42, r.width(), 24), Qt.AlignCenter, self.d["title"])
+            else:
+                p.setFont(self._font(10.5, QFont.DemiBold))
+                p.drawText(r, Qt.AlignCenter, "+   " + self.d["title"])
+            p.end()
+            return
+        edge = QColor(t["accent"]) if sel else QColor(t["faint"] if hover else t["line"])
+        art = self.d.get("art", {})
+        if self.mode == "grid":
+            p.setPen(Qt.NoPen)
+            p.setBrush(QColor(t["card"]))
+            p.drawRoundedRect(r, radius, radius)
+            ar = QRectF(r.x(), r.y(), r.width(), r.width() * 0.75)
+            if art.get("title") is not None:
+                self._cover(p, art["title"], ar, radius, top_only=True)
+            else:
+                self._fill_soft(p, ar, radius, t)
+                self._logo(p, ar.adjusted(18, 18, -18, -18), t["accent"])
+            y = ar.bottom() + 22
+            p.setPen(QColor(t["text"]))
+            p.setFont(self._fit(self.d["title"], 10.5, r.width() - 24, QFont.DemiBold))
+            p.drawText(QPointF(r.x() + 12, y), self.d["title"])
+            p.setPen(QColor(t["muted"]))
+            line = self.d.get("sub", "")                                           # the serial, then the disc's languages (flags)
+            p.setFont(self._fit(line, 8.5, r.width() - 24))
+            p.drawText(QPointF(r.x() + 12, y + 18), line)
+            self._flags(p, r.x() + 12, y + 29, 10)
+            self._status(p, r.x() + 12, y + 52, t, t["muted"])
+            p.setBrush(Qt.NoBrush)
+            p.setPen(QPen(edge, 2.6 if sel else 1.2))
+            p.drawRoundedRect(r, radius, radius)
+            if sel:
+                self._check(p, QPointF(r.right() - 18, r.y() + 18), t)
+        elif self.mode == "list":
+            p.setPen(QPen(edge, 2.2 if sel else 1.1))
+            p.setBrush(QColor(t["accent_soft"] if sel else t["hover"] if hover else t["card"]))
+            p.drawRoundedRect(r, radius, radius)
+            lr = QRectF(r.x() + 12, r.y() + 10, 150, r.height() - 20)
+            self._logo(p, lr, t["accent"])
+            x = lr.right() + 18
+            p.setPen(QColor(t["text"]))
+            p.setFont(self._font(11, QFont.DemiBold))
+            p.drawText(QPointF(x, r.y() + 28), self.d["title"])
+            p.setPen(QColor(t["muted"]))
+            p.setFont(self._font(9))
+            sub = self.d.get("sub", "")
+            p.drawText(QPointF(x, r.y() + 48), sub)
+            self._flags(p, x + QFontMetricsF(self._font(9)).horizontalAdvance(sub) + 10, r.y() + 44, 11)
+            self._status(p, x, r.y() + 66, t, t["muted"])
+            if sel:
+                self._check(p, QPointF(r.right() - 22, r.center().y()), t)
+        elif self.mode == "chip":
+            p.setPen(QPen(edge, 2.4 if sel else 1.1))
+            p.setBrush(QColor(t["accent_soft"] if sel else t["hover"] if hover else t["card"]))
+            p.drawRoundedRect(r, radius, radius)
+            self._logo(p, r.adjusted(12, 8, -12, -24), t["accent"])
+            p.setPen(QColor(t["muted"]))
+            p.setFont(self._font(8))
+            dot = DOT.get(self.d.get("level"), DOT["info"])
+            label = self.d.get("sub", "")
+            fm = QFontMetricsF(self._font(8))
+            w = fm.horizontalAdvance(label) + 13
+            x0 = r.center().x() - w / 2
+            p.setPen(Qt.NoPen)
+            p.setBrush(QColor(dot))
+            p.drawEllipse(QRectF(x0, r.bottom() - 15, 7, 7))
+            p.setPen(QColor(t["muted"]))
+            p.drawText(QPointF(x0 + 13, r.bottom() - 8), label)
+        else:                                  # banner: the selected game, wide
+            if art.get("scene") is not None:     # the landscape behind, the logo crisp on it (not scaled up with it)
+                self._cover(p, art["scene"], r, radius, middle=True)
+            else:
+                self._fill_soft(p, r, radius, t)
+            self._logo(p, QRectF(r.x() + 22, r.y() + 16, r.width() * 0.5, r.height() - 106), t["accent"])
+            g = QLinearGradient(r.x(), r.bottom() - 96, r.x(), r.bottom())
+            g.setColorAt(0, QColor(0, 0, 0, 0))
+            g.setColorAt(1, QColor(0, 0, 0, 170))
+            path = QPainterPath()
+            path.addRoundedRect(r, radius, radius)
+            p.save()
+            p.setClipPath(path)
+            p.fillRect(QRectF(r.x(), r.bottom() - 96, r.width(), 96), g)
+            p.restore()
+            p.setPen(QColor("#ffffff"))
+            p.setFont(self._font(15, QFont.Bold))
+            p.drawText(QPointF(r.x() + 20, r.bottom() - 40), self.d["title"])
+            p.setFont(self._font(9.5))
+            p.setPen(QColor(255, 255, 255, 220))
+            sub = self.d.get("sub", "")
+            p.drawText(QPointF(r.x() + 20, r.bottom() - 18), sub)
+            self._flags(p, r.x() + 20 + QFontMetricsF(self._font(9.5)).horizontalAdvance(sub) + 10, r.bottom() - 22, 12)
+            fm = QFontMetricsF(self._font(9))
+            sw = fm.horizontalAdvance(self.d.get("status", "")) + 34
+            pill = QRectF(r.right() - 16 - sw, r.bottom() - 40, sw, 26)
+            p.setPen(Qt.NoPen)
+            p.setBrush(QColor(0, 0, 0, 120))
+            p.drawRoundedRect(pill, 13, 13)
+            self._status(p, pill.x() + 11, pill.center().y(), t, "#ffffff")
+        if self.hasFocus() and self.mode != "banner":
+            p.setBrush(Qt.NoBrush)
+            p.setPen(QPen(QColor(t["accent"]), 1, Qt.DotLine))
+            p.drawRoundedRect(r.adjusted(3, 3, -3, -3), radius - 2, radius - 2)
+        p.end()
+
+    def _fill_soft(self, p, r, radius, t):
+        g = QLinearGradient(r.topLeft(), r.bottomRight())
+        g.setColorAt(0, QColor(t["accent_soft"]))
+        g.setColorAt(1, QColor(t["card"]))
+        path = QPainterPath()
+        path.addRoundedRect(r, radius, radius)
+        p.fillPath(path, g)
+
+    def _check(self, p, c, t):
+        p.setPen(QPen(QColor("#ffffff"), 2))
+        p.setBrush(QColor(t["accent"]))
+        p.drawEllipse(c, 11, 11)
+        pen = QPen(QColor("#ffffff"), 2.4)
+        pen.setCapStyle(Qt.RoundCap)
+        pen.setJoinStyle(Qt.RoundJoin)
+        p.setPen(pen)
+        path = QPainterPath(QPointF(c.x() - 5, c.y()))
+        path.lineTo(c.x() - 1.5, c.y() + 3.5)
+        path.lineTo(c.x() + 5, c.y() - 3.5)
+        p.setBrush(Qt.NoBrush)
+        p.drawPath(path)
+
+    def _fit(self, text, pt, width, weight=QFont.Normal):
+        """The font at pt, smaller (down to 7 pt) when text is wider than width: never cut with an ellipsis."""
+        f = self._font(pt, weight)
+        while pt > 7 and QFontMetricsF(f).horizontalAdvance(text) > width:
+            pt -= 0.5
+            f = self._font(pt, weight)
+        return f
 class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.s = load_settings()
+        if GL.migrate(self.s, app_dir()):          # an older launcher's single disc / data/ becomes the first game
+            save_settings(self.s)
+        self.extracting, self.ext_pct = False, None
+        self._art_tried = set()
+        self._apply_entry()
         self.proc = None
         self.editor = None           # the save editor window (edit_save), while open
         self.log_path = os.path.join(app_dir(), "tombi-port.log")   # the last run's log (Copy log works before a run too)
@@ -1646,18 +2257,22 @@ class App(QMainWindow):
         return b
 
     # ---- window
-    def rebuild(self):
+    def rebuild(self, check=True):
+        """The window built again (launcher language, theme, another game: its pages and options); check=False: the
+        selected game's disc is not checked again (it just was)."""
         self.collect()
         msg, lvl = self.status_msg, self._level
         old = self.centralWidget()
-        self._build()
+        self._build(check)
         if old is not None:
             old.deleteLater()
         if msg and lvl != "info":
             self.say(msg, lvl)
+        if self.extracting:
+            self._extracting(self.ext_pct)
 
-    def _build(self):
-        self.setWindowTitle(tr("title") + "  [build " + BUILD_ID + "]")
+    def _build(self, check=True):
+        self.setWindowTitle(tr("title") + "  [" + VERSION_TAG + "]")
         self.edits = {}
         root = QWidget()
         root.setObjectName("root")
@@ -1692,6 +2307,9 @@ class App(QMainWindow):
             b.clicked.connect(lambda _=False, n=n: self.show_page(n))
             sl.addWidget(b)
             self.nav[n] = b
+        self.nav["cut"].setVisible(has("cut"))      # the cut content is PAL-only (port2: --cut-content, the rebuilt towns)
+        if self.page == "cut" and not has("cut"):
+            self.page = "play"
         # wide enough for the longest page name in bold (the checked style), in any launcher language
         bf = QFont(QApplication.font())            # the style sheet's nav font: 10.5 pt, 600 when checked
         bf.setPointSizeF(10.5)
@@ -1728,7 +2346,7 @@ class App(QMainWindow):
         cb.activated.connect(chosen)
         sl.addWidget(cb)
         sl.addSpacing(10)
-        bl = QLabel("build " + BUILD_ID)
+        bl = QLabel(VERSION_TAG)
         bl.setObjectName("build")
         sl.addWidget(bl)
         grid.addWidget(side, 0, 0, 2, 1)
@@ -1749,18 +2367,26 @@ class App(QMainWindow):
         self.setCentralWidget(root)
         self.show_page(self.page)
         self.play_btn.setFocus()
-        self.say(tr("s.nodata"), "info")
+        self.say(tr("s.nodata") if not self.entries() else tr("s.pickgame"), "info")
         self._refresh()
         if self.proc and self.proc.poll() is None:
             self.play_btn.setEnabled(False)
             self.stop_btn.show()
             if self.starting:
                 self._starting(True)
-        if self.s.get("disc"):
-            self.after(200, self.check_disc)
-        elif data_ready():
+        e = self.cur_entry()
+        v = GL.version_of(current_sha1()) if e is not None and e.get("sha1") else None
+        if e is not None and e.get("sha1") and not (v and v["supported"]):
+            self.say(tr("l.unsupported", self.game_name(e)), "bad")
+            self.play_btn.setEnabled(False)
+        elif data_ready() and (not check or not os.path.isfile(bin_of_cue(self.s.get("disc") or ""))):
             man = X.read_manifest(data_dir())
             self.say(tr("s.dataok", data_dir(), len(man["files"]) if man else 0), "ok")
+        elif check and self.s.get("disc"):
+            if os.path.isfile(bin_of_cue(self.s["disc"])):
+                self.after(200, self.check_disc)
+            else:
+                self.say(tr("s.noimage", self.s["disc"]), "bad")
 
     def _build_bar(self):
         """Bottom bar under every page: the options summary, Copy log, Close the game (while running) and Play."""
@@ -1808,7 +2434,7 @@ class App(QMainWindow):
             parts.append(tr("sum.ires", s.get("internal_res")))
         a = s.get("aspect")
         parts.append({"square": "1:1 px", "16:9": "16:9", "21:9": "21:9", "32:9": "32:9", "auto": "auto"}.get(a, "4:3"))
-        parts.append("60 Hz" if s.get("hz60") else "50 Hz")
+        parts.append("60 Hz" if s.get("hz60") or not has("hz") else "50 Hz")
         try:
             self.summary.setText("  ·  ".join(parts))
             for b in getattr(self, "ires_btns", []):
@@ -1819,12 +2445,12 @@ class App(QMainWindow):
             pass
 
     def _build_play(self, f):
-        c = self.card(f, spacing=6)
-        t = QLabel(tr("c.disc"))
+        c = self.card(f, spacing=8)
+        t = QLabel(tr("c.library"))          # (Add game... is the last card of the library)
         t.setObjectName("cardTitle")
         c.addWidget(t)
-        c.addWidget(wrap_label(tr("l.disc"), "muted"))
-        c.addWidget(self.browse_row("disc", self.pick_disc))
+        c.addWidget(wrap_label(tr("l.library"), "muted"))
+        c.addWidget(self._library_view())
         self.dot = QLabel()
         self.dot.setFixedSize(10, 10)
         self.status_lbl = wrap_label("", sel=True)
@@ -1848,20 +2474,19 @@ class App(QMainWindow):
         el.addWidget(self.ext_bar)
         self.ext_box.hide()
         c.addWidget(self.ext_box)
-        c.addSpacing(12)
-        t = QLabel(tr("c.saves"))
-        t.setObjectName("cardTitle")
-        c.addWidget(t)
-        c.addWidget(wrap_label(tr("l.savedir"), "muted"))
-        c.addWidget(self.browse_row("savedir", self.pick_savedir))
-        bi, be, bed = QPushButton(tr("b.saveimp")), QPushButton(tr("b.saveexp")), QPushButton(tr("b.saveedit"))
-        bi.clicked.connect(self.import_save)
-        be.clicked.connect(self.export_save)
-        bed.clicked.connect(self.edit_save)
-        row, _ = hbox(bi, be, bed, None, margins=(0, 4, 0, 0))
-        c.addWidget(row)
 
-        c = self.card(f)
+        e = self.cur_entry()
+        v = GL.version_of(current_sha1()) if e is None or e.get("sha1") else None
+        if e is not None and e.get("sha1") and not (v and v["supported"]):
+            # recognised, but the port does not run it (JP retail, PAL Rev 0): what it is, no options
+            c = self.card(f, tr("c.options"))
+            c.addWidget(wrap_label(tr("l.unsupported", self.game_name(e)), "warn"))
+            c.addWidget(wrap_label(tr("l.unsupported2"), "muted"))
+            self._build_saves(f)
+            f.addStretch(1)
+            return
+
+        c = self.card(f, tr("c.options") if not has("lang") else None)
         g = QGridLayout()
         g.setHorizontalSpacing(28)
         g.setVerticalSpacing(18)
@@ -1879,18 +2504,25 @@ class App(QMainWindow):
             lay.addWidget(t)
             g.addWidget(box, row, col, Qt.AlignTop)
             return lay
-        # game language (the boot menu's MAINn.EXE): a combobox with the flags
         lay = cell(0, 0, tr("c.game"))
-        default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)     # the launcher's language, English otherwise
-        cur = self.v("lang", int, default_lang)
-        ids = [n for n, _name in GAME_LANGS]
-        self.lang_cb = QComboBox()
-        self.lang_cb.setIconSize(QSize(24, 16))
-        for n, name in GAME_LANGS:
-            self.lang_cb.addItem(QIcon(flag_pixmap(n)), name)
-        self.lang_cb.setCurrentIndex(ids.index(cur) if cur in ids else 0)
-        self.lang_cb.activated.connect(lambda i: (self.setv("lang", ids[i]), self._sync_patch_choice()))
-        lay.addWidget(self.lang_cb)
+        if not has("lang"):
+            # one language on the disc (USA: English): nothing to choose
+            lb = QLabel()
+            lb.setPixmap(flag_pixmap(9 if (v or {}).get("key") == "usa" else 0))
+            row, rl = hbox(lb, QLabel(tr("l.onlylang", "English")), None, spacing=8)
+            lay.addWidget(row)
+        else:
+            # game language (the boot menu's MAINn.EXE): a combobox with the flags
+            default_lang = UI_TO_GAME_LANG.get(i18n.current(), 0)     # the launcher's language, English otherwise
+            cur = self.v("lang", int, default_lang)
+            ids = [n for n, _name in GAME_LANGS]
+            self.lang_cb = QComboBox()
+            self.lang_cb.setIconSize(QSize(24, 16))
+            for n, name in GAME_LANGS:
+                self.lang_cb.addItem(QIcon(flag_pixmap(n)), name)
+            self.lang_cb.setCurrentIndex(ids.index(cur) if cur in ids else 0)
+            self.lang_cb.activated.connect(lambda i: (self.setv("lang", ids[i]), self._sync_patch_choice()))
+            lay.addWidget(self.lang_cb)
         # quick options under the language, in the same column (the text patch card on the right is taller)
         lay.addSpacing(14)
         t = QLabel(tr("c.quick"))
@@ -1898,20 +2530,365 @@ class App(QMainWindow):
         lay.addWidget(t)
         lay.addWidget(self.check("skipintro", tr("l.skipintro"), True))
         lay.addWidget(self.check("autostart", tr("l.autostart2"), False))
-        # the Select sub-screen's labels (--subscreen-labels, Spanish only): item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..
-        t = QLabel(tr("l.sublabels"))
-        t.setToolTip(tr("l.sublabelshint"))
-        lay.addWidget(t)
-        e = QLineEdit(self.v("subscreen_labels", str, ""))
-        e.setPlaceholderText("item=Objetos,use=Usar|objeto")
-        e.setToolTip(tr("l.sublabelshint"))
-        e.textChanged.connect(lambda t: self.setv("subscreen_labels", t.strip()))
-        self.edits["subscreen_labels"] = e
-        lay.addWidget(e)
-        # text patch: none / the bundled one / another file (keys patch_on + patch; no path shown unless "other")
-        self._patch_widget(cell(0, 1, tr("c.patch")))
+        if has("lang"):
+            # the Select sub-screen's labels (--subscreen-labels, Spanish only): item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..
+            t = QLabel(tr("l.sublabels"))
+            t.setToolTip(tr("l.sublabelshint"))
+            lay.addWidget(t)
+            e = QLineEdit(self.v("subscreen_labels", str, ""))
+            e.setPlaceholderText("item=Objetos,use=Usar|objeto")
+            e.setToolTip(tr("l.sublabelshint"))
+            e.textChanged.connect(lambda t: self.setv("subscreen_labels", t.strip()))
+            self.edits["subscreen_labels"] = e
+            lay.addWidget(e)
+        if has("patch"):
+            # text patch: none / the bundled one / another file (keys patch_on + patch; no path shown unless "other")
+            self._patch_widget(cell(0, 1, tr("c.patch")))
+        else:
+            # the hook for per-version retranslations (game_library.VERSIONS "text_patches"): none for this version yet
+            lay = cell(0, 1, tr("c.patch"))
+            lay.addWidget(wrap_label(tr("l.nopatches", (v or {}).get("region", "")), "muted"))
+            lay.addWidget(wrap_label(tr("l.ntscopts"), "muted"))
+        self._build_saves(f)
         # (the speed, 50 / 60 Hz, is on the Graphics and performance page, next to the frame rate)
         f.addStretch(1)
+
+
+    def _build_saves(self, f):
+        c = self.card(f, tr("c.saves"), spacing=6)
+        c.addWidget(wrap_label(tr("l.savedir"), "muted"))
+        c.addWidget(self.browse_row("savedir", self.pick_savedir))
+        bi, be, bed = QPushButton(tr("b.saveimp")), QPushButton(tr("b.saveexp")), QPushButton(tr("b.saveedit"))
+        bi.clicked.connect(self.import_save)
+        be.clicked.connect(self.export_save)
+        bed.clicked.connect(self.edit_save)
+        row, _ = hbox(bi, be, bed, None, margins=(0, 4, 0, 0))
+        c.addWidget(row)
+
+    # ---- the game library (tools/game_library.py)
+    def entries(self):
+        g = self.s.get("games")
+        if not isinstance(g, list):
+            g = self.s["games"] = []
+        return g
+
+    def cur_entry(self):
+        es = self.entries()
+        for e in es:
+            if e.get("serial") == self.s.get("game"):
+                return e
+        return es[0] if es else None
+
+    def _apply_entry(self):
+        """CURRENT (data folder, version) and the "disc" setting from the selected entry."""
+        e = self.cur_entry()
+        if e is None:                         # an empty library (Add game... to start)
+            CURRENT.update(data="data", sha1="")
+            self.s["disc"] = ""
+            return
+        self.s["game"] = e.get("serial", "")
+        CURRENT.update(data=e.get("data") or "data", sha1=e.get("sha1") or "")
+        self.s["disc"] = e.get("image") or ""
+
+    def game_name(self, e):
+        """"Tombi! (PAL)", "Tomba! (USA)", "Ore! Tomba (Japan)": the card's title."""
+        v = GL.version_of(e.get("sha1"))
+        if not v:
+            return os.path.basename(bin_of_cue(e.get("image") or "")) or "?"
+        return "%s (%s)" % (v["title"], tr("rg." + v["region"]))
+
+    def game_sub(self, e):
+        """"SCES-01331": the serial (the disc's languages are drawn as flags beside it: game_flags)."""
+        return e.get("serial") or tr("lib.unchecked")
+
+    def game_flags(self, e):
+        """the flag_pixmap indices of the disc's languages (game_library.DISC_FLAGS)"""
+        return GL.DISC_FLAGS.get(e.get("serial"), [])
+
+    def game_status(self, e):
+        """(text, level) of a library entry: ready / to extract / image missing / not supported yet."""
+        v = GL.version_of(e.get("sha1"))
+        img = bin_of_cue(e.get("image") or "")
+        if not e.get("sha1"):
+            return tr("lib.unchecked"), "busy"
+        if not (v and v["supported"]):
+            return tr("lib.unsupported"), "bad"
+        if GL.data_complete(os.path.join(app_dir(), e.get("data") or "data")) == e["sha1"]:
+            return tr("lib.ready"), "ok"
+        if img and os.path.isfile(img):
+            return tr("lib.toextract"), "info"
+        return tr("lib.noimage"), "bad"
+
+    def game_art(self, e):
+        """{"logo": QPixmap, "title": QPixmap} rebuilt from the player's disc the first time (library/<serial>/), {}
+        when there is nothing to build it from: the card then shows the name."""
+        serial, sha = e.get("serial"), e.get("sha1")
+        if not serial or not GL.version_of(sha):
+            return {}
+        d = art_cache(serial)
+        files = {k: os.path.join(d, k + ".png") for k in GL.ART}
+        if not all(os.path.isfile(p) for p in files.values()) and (serial, sha) not in self._art_tried:
+            self._art_tried.add((serial, sha))
+            data = os.path.join(app_dir(), e.get("data") or "data")
+            img = bin_of_cue(e.get("image") or "")
+            src = None
+            try:
+                if GL.data_complete(data) == sha:
+                    src = GL.DirSource(data)
+                elif img and os.path.isfile(img) and not DA.is_archive(img):
+                    src = GL.ImageSource(img)
+                if src is not None:
+                    GL.make_art(src, sha, d)
+            except (OSError, ValueError, KeyError, struct.error):
+                pass
+            finally:
+                if isinstance(src, GL.ImageSource):
+                    src.close()
+        out = {}
+        for k, p in files.items():
+            if os.path.isfile(p):
+                pm = QPixmap(p)
+                if not pm.isNull():
+                    out[k] = pm
+        return out
+
+    def _tile_data(self, e):
+        text, level = self.game_status(e)
+        return dict(serial=e.get("serial", ""), title=self.game_name(e), short=(GL.version_of(e.get("sha1")) or {}).get("title") or self.game_name(e),
+                    sub=self.game_sub(e), flags=self.game_flags(e), status=text, level=level, art=self.game_art(e),
+                    selected=e is self.cur_entry())
+
+    def _library_view(self):
+        """The game cards in the chosen look (setting "library_view": grid, list or banner; TOMBI_LIBRARY_VIEW forces one)."""
+        mode = os.environ.get("TOMBI_LIBRARY_VIEW") or self.s.get("library_view") or LIBRARY_VIEW
+        if mode not in ("grid", "list", "banner"):
+            mode = LIBRARY_VIEW
+        es = sorted(self.entries(), key=GL.sort_key)
+        self.tiles = []
+        box = QWidget()
+        if mode == "list":
+            lay = QVBoxLayout(box)
+            lay.setContentsMargins(0, 4, 0, 4)
+            lay.setSpacing(8)
+            for e in es:
+                lay.addWidget(self._tile(e, "list"))
+            lay.addWidget(self._add_tile("list"))
+            return box
+        if mode == "banner":
+            lay = QVBoxLayout(box)
+            lay.setContentsMargins(0, 4, 0, 4)
+            lay.setSpacing(10)
+            cur = self.cur_entry()
+            if cur is not None:
+                b = GameTile(self, self._tile_data(cur), "banner")
+                lay.addWidget(b)
+            row, rl = hbox(spacing=10)
+            for e in es:
+                rl.addWidget(self._tile(e, "chip"))
+            rl.addWidget(self._add_tile("chip"))
+            rl.addStretch(1)
+            lay.addWidget(row)
+            return box
+        return TileGrid([self._tile(e, "grid") for e in es] + [self._add_tile("grid")])
+
+    def _tile(self, e, mode):
+        t = GameTile(self, self._tile_data(e), mode)
+        t.clicked.connect(lambda _=False, s=e.get("serial", ""): self.select_game(s))
+        t.setToolTip("%s\n%s\n%s" % (self.game_name(e), e.get("image") or "", os.path.join(app_dir(), e.get("data") or "data")))
+        self.tiles.append(t)
+        return t
+
+    def _add_tile(self, mode):
+        t = GameTile(self, dict(add=True, title=tr("b.addgame"), sub=tr("l.addgame")), mode)
+        t.clicked.connect(self.add_game)
+        return t
+
+    def select_game(self, serial):
+        if serial == self.s.get("game") and self.cur_entry() is not None and self.cur_entry().get("serial") == serial:
+            return
+        if self.extracting:
+            self.warning(tr("s.busyextract"))
+            return
+        self.collect()
+        self.s["game"] = serial
+        self._apply_entry()
+        save_settings(self.s)
+        self.rebuild()
+
+    def add_game(self):
+        p = self._open_file(tr("b.addgame"), "Disc image (*.bin *.cue *.iso *.img *.chd *.zip *.7z);;All (*)")
+        if p:
+            self.add_image(p)
+
+    def add_image(self, p, wait=False):
+        """Identifies the image (a thread; wait=True: here, for the tests), adds it to the library, selects it and
+        extracts it (check_disc)."""
+        if self.extracting:
+            self.warning(tr("s.busyextract"))
+            return
+        self.say(tr("s.checking"), "busy")
+
+        def work():
+            try:
+                img = self.disc_image(p)
+                info = GL.identify_image(img)
+            except DA.ArchiveError as e:
+                self.drop_unpacked(p)
+                self.later(self.archive_error, p, e)
+                return
+            except (OSError, ValueError, struct.error) as e:
+                self.drop_unpacked(p)
+                self.later(self.say, tr("s.notiso", "%s (%s)" % (os.path.basename(p), e)), "bad")
+                return
+            if info["version"] and img != p:
+                # a disc from a .zip / .7z: cut the card art now, while the unpacked image exists (a game that is not
+                # extracted, such as the Japanese one, has nothing else to cut it from later)
+                src = None
+                try:
+                    src = GL.ImageSource(img)
+                    GL.make_art(src, info["game_sha1"], art_cache(info["serial"]))
+                except (OSError, ValueError, KeyError, struct.error):
+                    pass
+                finally:
+                    if src is not None:
+                        src.close()
+            if not (info["version"] and info["version"]["supported"]):
+                self.drop_unpacked(p)        # (nothing to extract: the temporary image goes now)
+            self.later(self._added, p, info)
+        if wait:
+            work()
+            self.app_events()
+        else:
+            threading.Thread(target=work, daemon=True).start()
+
+    def app_events(self):
+        QApplication.processEvents()
+
+    # ---- a disc inside a .zip / .7z (tools/disc_archive.py): unpacked once next to the launcher (.unpack/), used by
+    # the identification and the extraction that follows, then deleted
+    def disc_image(self, p, progress=True):
+        """The image to read for the picked file p: p itself (a .cue: its .bin), or for an archive the image inside it,
+        unpacked into .unpack/ (once: kept until drop_unpacked). Raises DA.ArchiveError (a .rar, a file that is no disc
+        image, an archive without one ...)."""
+        k = DA.kind(p)
+        if k == "notimage":
+            raise DA.ArchiveError("notimage", "%s is not a disc image" % os.path.basename(p))
+        if k not in ("zip", "7z", "rar"):
+            return bin_of_cue(p)
+        if not hasattr(self, "_unpacked"):
+            self._unpacked = {}
+        t = self._unpacked.get(p)
+        if t and os.path.isfile(t):
+            return t
+        last = [-1]
+
+        def prog(done, total):
+            pct = done * 100 // max(1, total)
+            if progress and pct != last[0]:
+                last[0] = pct
+                self.later(self.say, tr("s.unpacking", os.path.basename(p), pct), "busy")
+        t = DA.extract_image(p, os.path.join(app_dir(), ".unpack"), prog)
+        self._unpacked[p] = t
+        return t
+
+    def drop_unpacked(self, p):
+        """deletes the image disc_image unpacked from the archive p (and .unpack/ when empty)"""
+        t = getattr(self, "_unpacked", {}).pop(p, None)
+        if t:
+            try:
+                os.remove(t)
+            except OSError:
+                pass
+        try:
+            os.rmdir(os.path.join(app_dir(), ".unpack"))
+        except OSError:
+            pass
+
+    def archive_error(self, p, e):
+        """the message of a DA.ArchiveError, in the launcher's language"""
+        nm = os.path.basename(p)
+        if e.code == "files":
+            lo = getattr(e, "loose", None) or {}
+            v = GL.version_of(lo.get("sha1"))
+            what = ("%s (%s)" % (v["title"], tr("rg." + v["region"]))) if v else (lo.get("serial") or "?")
+            msg = tr("s.a.files", nm, what)
+        elif e.code == "cue":
+            msg = tr("s.a.cue", nm, getattr(e, "track", "?"))
+        elif e.code == "space":
+            msg = tr("s.a.space", nm, getattr(e, "need", 0) >> 20, getattr(e, "free", 0) >> 20)
+        elif e.code == "bad":
+            msg = tr("s.a.bad", nm, str(e))
+        elif e.code in ("notimage", "rar", "noimage", "nested"):
+            msg = tr("s.a." + e.code, nm)
+        else:
+            msg = str(e)
+        self.say(msg, "bad")
+        if e.code != "cancelled":
+            self.error(msg)
+
+    def _added(self, p, info):
+        if not info["version"]:
+            msg = tr("s.notgame", os.path.basename(p), info["serial"] or "?", info["name"] or tr("lib.unknown"))
+            self.say(msg, "bad")
+            self.error(msg)
+            return
+        self.collect()
+        for e in list(self.entries()):          # an older launcher's disc that was never identified: this one replaces it
+            if not e.get("serial") and bin_of_cue(e.get("image") or "") == bin_of_cue(p):
+                self.entries().remove(e)
+        e = GL.add_entry(self.entries(), info, p)
+        self.s["games"] = sorted(self.entries(), key=GL.sort_key)
+        if not self.s.get("savedir"):
+            self.s["savedir"] = os.path.dirname(os.path.abspath(p))
+        self.s["game"] = e["serial"]
+        self._apply_entry()
+        save_settings(self.s)
+        self.rebuild()               # checks the disc and extracts it (_build -> check_disc)
+
+    def remove_game(self, serial=None):
+        """Remove from the library... (a card's menu; serial None: the selected game), and its data folder if asked."""
+        e = self.cur_entry() if serial is None else next((o for o in self.entries() if o.get("serial") == serial), None)
+        if e is None:
+            return
+        if self.extracting or (self.proc and self.proc.poll() is None):
+            self.warning(tr("s.busyextract") if self.extracting else tr("s.running"))
+            return
+        was_current = e is self.cur_entry()
+        d = os.path.join(app_dir(), e.get("data") or "data")
+        if not self.ask(tr("q.removegame", self.game_name(e))):
+            return
+        self.collect()
+        if os.path.isdir(d) and self.ask(tr("q.removedata", d)):
+            shutil.rmtree(d, ignore_errors=True)
+        shutil.rmtree(art_cache(e.get("serial")), ignore_errors=True)
+        self.entries().remove(e)
+        if was_current:
+            self.s["game"] = self.entries()[0].get("serial", "") if self.entries() else ""
+        self._apply_entry()
+        save_settings(self.s)
+        self.rebuild()
+
+    def _identified(self, e, info):
+        """check_disc found what the selected entry's image is: the entry follows (serial, version, data folder)."""
+        if e not in self.entries() or not info["version"]:
+            return
+        es = self.entries()
+        for o in es:
+            if o is not e and o.get("serial") == info["serial"]:
+                es.remove(e)                   # the same disc twice: keep the older entry
+                o["image"] = e.get("image") or o.get("image", "")
+                e = o
+                break
+        changed = (e.get("serial"), e.get("sha1")) != (info["serial"], info["game_sha1"])
+        e["serial"], e["sha1"] = info["serial"], info["game_sha1"]
+        want = GL.data_name(info["serial"], [o for o in es if o is not e])
+        if e.get("data") != want and not GL.data_complete(os.path.join(app_dir(), e.get("data") or "data")):
+            e["data"] = want
+            changed = True
+        if changed:
+            self.s["game"] = e["serial"]
+            self._apply_entry()
+            save_settings(self.s)
 
     def _patch_mode(self):
         """none / bundled / translation / custom from the saved patch_on + patch (an old saved path to the bundled file ->
@@ -2177,8 +3154,11 @@ class App(QMainWindow):
         c = self.card(None, tr("c.perf"))
         g.addWidget(c.frame, 2, 0, 1, 2)
         t = QLabel(tr("c.speed")); t.setObjectName("cellTitle"); c.addWidget(t)
-        c.addWidget(self.segmented("hz60", bool, True, [("50 Hz (PAL)", False), ("60 Hz", True)], min_w=110))
-        c.addWidget(wrap_label(tr("l.speedhint"), "muted"))
+        if has("hz"):
+            c.addWidget(self.segmented("hz60", bool, True, [("50 Hz (PAL)", False), ("60 Hz", True)], min_w=110))
+            c.addWidget(wrap_label(tr("l.speedhint"), "muted"))
+        else:                                   # an NTSC game: always 60 Hz
+            c.addWidget(wrap_label(tr("l.speedntsc"), "muted"))
         c.addSpacing(10)
         t = QLabel(tr("c.fps")); t.setObjectName("cellTitle"); c.addWidget(t)
         default = "auto" if self.s.get("fps60") and self.experimental else "off"
@@ -2207,6 +3187,7 @@ class App(QMainWindow):
         row, _ = hbox(self.prompt_cb, self.cust_btn, None)
         c.addWidget(row)
         self._prompts_sync()
+        c.frame.setVisible(has("prompts"))      # the icons are redrawn in the PAL fonts (port2/shims/prompts.c)
 
         # ---- keyboard
         c = self.card(f, tr("c.keyboard"))
@@ -2410,10 +3391,11 @@ class App(QMainWindow):
         return PAD_SHORT.get(k, k) or tr("pad.nokey")
 
     def _build_mods(self, f):
-        c = self.card(f, tr("c.patch"))
-        self._patch_widget(c)
-        bp = bundled_patch()
-        c.addWidget(wrap_label(tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), "muted"))
+        if has("patch"):
+            c = self.card(f, tr("c.patch"))
+            self._patch_widget(c)
+            bp = bundled_patch()
+            c.addWidget(wrap_label(tr("l.patchhelp", os.path.basename(bp) if bp else tr("l.patchnone")), "muted"))
         if self.experimental:
             c = self.card(f, tr("c.texpack"))                 # --texture-pack / --dump-textures (port2/shims/texpack.c)
             c.addWidget(wrap_label(tr("l.texpack"), "muted"))
@@ -2433,11 +3415,14 @@ class App(QMainWindow):
             self.dumpall_msg.hide()                           # shown with the first progress / result message
             c.addWidget(self.dumpall_msg)
             c.addWidget(wrap_label(tr("l.texpack.d"), "muted"))
+            row.setVisible(has("texdump"))                    # (tools/dump_all_textures.py reads the PAL disc's layout)
         c = self.card(f, tr("c.mods"))
         c.addWidget(wrap_label(tr("l.modshelp"), "muted"))
         c.addSpacing(4)
+        if not has("pokes"):                                  # only port_mods.PORTABLE_MODS in this version
+            c.addWidget(wrap_label(tr("l.nomods"), "muted"))
         for mid, lk, dk, kind, _fn in M.MODS:
-            if mid in ("keys_on", "skipintro", "hz60"):
+            if mid in ("keys_on", "skipintro", "hz60") or not (has("pokes") or mid in M.PORTABLE_MODS):
                 continue      # on the Controls / Play pages
             box = QWidget()
             bl = QVBoxLayout(box)
@@ -2504,17 +3489,32 @@ class App(QMainWindow):
         f.addStretch(1)
 
     def _build_cut(self, f):
-        """The "Cut content" page: the --cut-content switch, the early title and the rebuilt towns (one button each)."""
+        """The "Cut content" page: the --cut-content switch, the wings glide and the rebuilt towns (one button each)."""
         c = self.card(f, tr("cut.c.text"))
-        row, _ = hbox(self.check("cut_content", tr("l.cutcontent"), False),          # --cut-content (port/fixes.txt)
-                      self.info_button(tr("l.cutcontent"), tr("i.cutcontent")), None, spacing=4)
+        row, _ = hbox(QLabel(tr("l.cutcontent")), self.info_button(tr("l.cutcontent"), tr("i.cutcontent")), None, spacing=4)
         c.addWidget(row)
-        d = wrap_label(tr("cut.text.d"), "muted")
+        c.addWidget(wrap_label(tr("cut.text.d"), "muted"))
+        c.addSpacing(4)
+        on = set(cut_items(self.s))                               # one switch per item (--cut-content=LIST, port/fixes.txt)
+        for k in CUT_ITEMS:
+            self.s.setdefault("cut_i_" + k, k in on)
+            c.addWidget(self.check("cut_i_" + k, tr("l.cut." + k), k in on))
+        c = self.card(f, tr("cut.c.wings"))                   # the lost Charity Wings glide (docs/CUT_CONTENT.md), its own switch
+        c.addWidget(self.check("wings_on", tr("l.wingson"), False))
+        d = wrap_label(tr("cut.wings.d"), "muted")
         d.setContentsMargins(28, 0, 0, 0)
         c.addWidget(d)
-        c.addSpacing(8)
-        c.addWidget(wrap_label(tr("l.earlytitle"), "muted"))
-        c.addWidget(self.browse_row("early_title", self.pick_early_title))           # --early-title (port2/runtime/titlebg.c)
+        c.addSpacing(6)
+        self.wings_lbl = {}
+        for key, disc, text in (("wings_glide", "jpdemo", "l.wingsglide"), ("wings_pre9", "pre9", "l.wingspre9")):
+            c.addWidget(wrap_label(tr(text), "muted"))
+            c.addWidget(self.browse_row(key, lambda key=key, disc=disc: self.pick_wings(key, disc)))   # --wings-glide / --wings-pre9 (port2/runtime/wings.c)
+            self.edits[key].editingFinished.connect(lambda key=key, disc=disc: self.wings_check(key, disc, extract=True))
+            lb = wrap_label("", "muted")
+            lb.setContentsMargins(28, 0, 0, 0)
+            c.addWidget(lb)
+            self.wings_lbl[key] = lb
+            self.wings_check(key, disc)
         c = self.card(f, tr("cut.c.towns"))                  # docs/CIVILIZATION.md "Playable towns"
         d = wrap_label(tr("cut.towns.d"), "muted")
         row, rl = hbox(d, self.info_button(tr("cut.c.towns"), tr("cut.towns.i")), spacing=4)
@@ -2593,12 +3593,8 @@ class App(QMainWindow):
         return QFileDialog.getExistingDirectory(self)
 
     def pick_disc(self):
-        p = self._open_file(tr("c.disc"), "Disc image (*.bin *.cue *.iso *.img *.chd);;All (*)")
-        if p:
-            self.set_edit("disc", p)
-            if not self.s.get("savedir"):
-                self.set_edit("savedir", os.path.dirname(p))
-            self.check_disc()
+        """(the single disc field of older launchers is the library's Add game... now)"""
+        self.add_game()
 
     def pick_patch(self):
         p = self._open_file(tr("c.patch"), "Text patch (*.tombipatch.json);;JSON (*.json);;All (*)")
@@ -2632,7 +3628,7 @@ class App(QMainWindow):
             want = ""        # only the compiled translation.tpatch: data/ stays original and tombi2 applies it in memory
         if want and str(s.get("lang")) != "5" and self._patch_mode() == "bundled":
             want = ""        # the bundled translation is for the Spanish game only: other languages play the original data
-        if not want and s.get("cut_content") and str(s.get("lang") or 0) == "0":
+        if not want and set(cut_items(s)) & {"boatman", "letter", "board"} and str(s.get("lang") or 0) == "0":
             # --cut-content in English: the English text of the cut lines (data/ holds one patch at a time; with another
             # text patch chosen that one wins and the cut lines show the disc's filler)
             want = bundled_patch("en_cut_content.tombipatch.json") or ""
@@ -2674,10 +3670,67 @@ class App(QMainWindow):
             self.error(tr("s.patchfail", e))
             return False
 
-    def pick_early_title(self):
-        p = self._pick_dir()
+
+    def pick_wings(self, key, disc):
+        """A demo disc image of the wings glide: the files WINGS_DISCS[disc] are pulled out of it into .wings/<disc>/
+        (an archive is unpacked first, like the game's), after checking the disc's serial."""
+        p = self._open_file(tr("l." + key.replace("_", "")), "Disc image (*.bin *.cue *.iso *.img *.chd *.zip *.7z);;All (*)")
         if p:
-            self.set_edit("early_title", p)
+            self.set_edit(key, p)
+            self.wings_check(key, disc, extract=True)
+
+    def wings_check(self, key, disc, extract=False):
+        """The line under a wings field: extracted and ready, or why not; extract=True pulls the files out of the image
+        in the field first (Browse..., or a path typed in)."""
+        serial, names = WINGS_DISCS[disc]
+        p = (self.s.get(key) or "").strip()
+        lb = self.wings_lbl.get(key)
+        ready = all(os.path.isfile(os.path.join(wings_dir(disc), *n.split("/"))) for n in names)
+        msg, level = "", "muted"
+        if not ready and not extract and p and os.path.isfile(p):
+            extract = True          # the image is still there but a file is missing (a newer build needs more): redo it
+        if extract and p and os.path.isfile(p):
+            self.say(tr("s.wingsbusy", os.path.basename(p)), "busy")
+            self.app_events()
+            try:
+                try:
+                    try:
+                        image = self.disc_image(p)
+                    except DA.ArchiveError as e:
+                        if e.code != "files":
+                            raise
+                        image = None            # the archive holds the disc's loose files: take them as they are
+                    if image:
+                        got, missing = extract_disc_files(image, names, wings_dir(disc))
+                    else:
+                        got, missing = extract_archive_files(p, names, wings_dir(disc))
+                finally:
+                    self.drop_unpacked(p)
+                if got != serial or missing:
+                    shutil.rmtree(wings_dir(disc), ignore_errors=True)
+                    msg = tr("s.wingsbad", os.path.basename(p), serial, got or "?", ", ".join(missing) or "-")
+                    level = "bad"
+                else:
+                    ready = True
+            except DA.ArchiveError as e:
+                self.archive_error(p, e)
+                msg, level = self.status_msg, "bad"
+            except (OSError, ValueError) as e:
+                msg, level = tr("s.wingsfail", os.path.basename(p), e), "bad"
+        if not msg:
+            if ready and p:
+                msg, level = tr("s.wingsok", os.path.basename(p), serial, len(names)), "ok"
+            elif p and not os.path.isfile(p):
+                msg, level = tr("s.wingsnofile", p), "bad"
+            elif p:
+                msg, level = tr("s.wingsnotyet"), "bad"
+        if level != "muted":
+            self.say(msg, level)
+        if lb is not None:
+            lb.setText(("✓ " if level == "ok" else "✗ " if level == "bad" else "") + msg)
+            lb.setObjectName({"ok": "okText", "bad": "badText"}.get(level, "muted"))
+            lb.style().unpolish(lb)
+            lb.style().polish(lb)
 
     def texture_dump_dir(self):
         return os.path.join(os.path.dirname(os.path.abspath(data_dir())), "texture_dump")
@@ -2732,8 +3785,9 @@ class App(QMainWindow):
     def card_file(self):
         """the card the port uses (port2/shims/card.c: --save-dir, else next to the disc image / the data/ folder)"""
         self.collect()
-        d = self.s.get("savedir") or (os.path.dirname(data_dir()) if data_ready()
-                                      else os.path.dirname(bin_of_cue(self.s["disc"])) if self.s.get("disc") else app_dir())
+        d = version_save_dir(self.s.get("savedir") or "") or (
+            os.path.dirname(data_dir()) if data_ready()
+            else os.path.dirname(bin_of_cue(self.s["disc"])) if self.s.get("disc") else app_dir())
         return os.path.join(d, "tombi_mc0.mcd")
 
     def _save_busy(self):
@@ -2855,54 +3909,122 @@ class App(QMainWindow):
             self.editor = None
             self.error(tr("s.saveerr", e))
 
-    def check_disc(self):
+    def check_disc(self, wait=False):
+        """The selected game's disc image: what it is (game_library.identify_image: SYSTEM.CNF boot file + sha1), then
+        the one-time extraction into its data folder when that is not complete. A thread (wait=True: here, the tests)."""
         self.collect()
-        image = bin_of_cue(self.s["disc"])
+        e = self.cur_entry()
+        picked = (e or {}).get("image") or self.s.get("disc") or ""
+        image = bin_of_cue(picked)
+        if not image or self.extracting:
+            return
+        archive = DA.is_archive(picked)
+        if archive and GL.data_complete(data_dir()) and GL.data_complete(data_dir()) == (e or {}).get("sha1"):
+            return                               # extracted already: the archive is not unpacked again
         self.say(tr("s.checking"), "busy")
 
         def work():
+            img = image
             try:
-                sha, serial = extract_main0(image, os.path.join(app_dir(), "MAIN0.EXE"))
-                name = "%s %s" % (serial or "?", KNOWN_DISCS.get(serial, ""))
-                msg = tr("s.ok", name.strip()) if sha == MAIN0_SHA1 else tr("s.rev0", name.strip()) if sha == REV0_SHA1 else tr("s.badsha", name.strip(), sha[:8])
-            except (OSError, ValueError, struct.error) as e:
-                self.later(self.say, str(e), "bad")
+                if archive:
+                    img = self.disc_image(picked)
+                info = GL.identify_image(img)
+                if info["game_sha1"] in (MAIN0_SHA1, REV0_SHA1):     # tombi2 --disc (PAL) checks MAIN0.EXE next to the launcher
+                    extract_main0(img, os.path.join(app_dir(), "MAIN0.EXE"))
+            except DA.ArchiveError as ex:
+                self.drop_unpacked(picked)
+                self.later(self.archive_error, picked, ex)
                 return
-            self.later(self.say, msg, "ok" if sha == MAIN0_SHA1 else "bad")
-            # the one-time extraction into data/ (again when data/ was made from another disc: a different MAIN0)
-            if data_ready() != sha:
-                self.later(self._extracting, 0)
-                try:
-                    DP.restore(data_dir())       # a text patch in an old data/: originals back before (re)extracting
-                except OSError:
-                    pass
-                last = [-1]
+            except (OSError, ValueError, struct.error) as ex:
+                self.drop_unpacked(picked)
+                self.later(self.say, str(ex), "bad")
+                return
+            self.later(self._checked, e, img, info, picked if archive else None)
+        if wait:
+            work()
+            QApplication.processEvents()
+        else:
+            threading.Thread(target=work, daemon=True).start()
 
-                def progress(done, total, path):
-                    pct = done * 100 // max(1, total)
-                    if pct != last[0]:
-                        last[0] = pct
-                        self.later(self.say, tr("s.extracting", data_dir(), pct, path), "busy")
-                        self.later(self._extracting, pct)
-                try:
-                    man = X.extract(image, data_dir(), progress)
-                    self.later(self.say, tr("s.dataok", data_dir(), len(man["files"])), "ok")
-                except (OSError, ValueError, struct.error) as e:
-                    self.later(self.say, tr("s.extractfail", e), "bad")
-                self.later(self._extracting, None)
+    def _checked(self, e, image, info, archive=None):
+        """check_disc's answer, on the GUI thread: the message, the entry updated, the extraction started (archive: the
+        .zip / .7z the image was unpacked from; that copy is deleted when the extraction ends or is not needed)."""
+        sha, v = info["game_sha1"], info["version"]
+        name = ("%s %s" % (info["serial"] or "?", info["name"])).strip()
+        if sha == MAIN0_SHA1:
+            msg, lvl = tr("s.ok", name), "ok"
+        elif sha == REV0_SHA1:
+            msg, lvl = tr("s.rev0", name), "bad"
+        elif v and v["supported"]:
+            msg, lvl = tr("s.ok2", name, info["boot"]), "ok"
+        elif v:
+            msg, lvl = tr("l.unsupported", name), "bad"
+        else:
+            msg, lvl = tr("s.notgame", os.path.basename(archive or image), info["serial"] or "?", info["name"] or tr("lib.unknown")), "bad"
+        if e is not None and e in self.entries() and v:
+            before = (e.get("serial"), e.get("sha1"), e.get("data"))
+            self._identified(e, info)
+            if (e.get("serial"), e.get("sha1"), e.get("data")) != before and e in self.entries():
+                self.rebuild(check=False)
+        self.say(msg, lvl)
+        if not (v and v["supported"]) or self.extracting:
+            if archive:
+                self.drop_unpacked(archive)
+            return
+        ddir = data_dir()
+        if GL.data_complete(ddir) == sha:
+            if archive:
+                self.drop_unpacked(archive)
+            return
+        # the one-time extraction into the data folder (again when it was made from another disc)
+        self.extracting = True
+        self._extracting(0)
+
+        def work():
+            try:
+                DP.restore(ddir)       # a text patch in an old data/: originals back before (re)extracting
+            except OSError:
+                pass
+            last = [-1]
+
+            def progress(done, total, path):
+                pct = done * 100 // max(1, total)
+                if pct != last[0]:
+                    last[0] = pct
+                    self.later(self.say, tr("s.extracting", ddir, pct, path), "busy")
+                    self.later(self._extracting, pct)
+            try:
+                man = X.extract(image, ddir, progress)
+                self.later(self.say, tr("s.dataok", ddir, len(man["files"])), "ok")
+            except (OSError, ValueError, struct.error) as ex:
+                self.later(self.say, tr("s.extractfail", ex), "bad")
+            finally:
+                if archive:
+                    self.drop_unpacked(archive)
+            self.later(self._extracting, None)
         threading.Thread(target=work, daemon=True).start()
 
     def _extracting(self, pct):
-        """pct 0..100 while data/ is being extracted (Play disabled, bar and message shown); None when it ends."""
-        if pct is None:
-            self.ext_box.hide()
-            self.play_btn.setText(tr("b.play"))
-            self.play_btn.setEnabled(True)
-            return
-        self.ext_box.show()
-        self.play_btn.setEnabled(False)
-        self.play_btn.setText(tr("b.extracting", pct))
-        self.ext_bar.setValue(pct)
+        """pct 0..100 while data/ is being extracted (Play disabled, bar and message shown); None when it ends (the
+        cards are drawn again: the game is ready)."""
+        self.ext_pct = pct
+        try:
+            if pct is None:
+                self.extracting = False
+                self.ext_box.hide()
+                self.play_btn.setText(tr("b.play"))
+                self.play_btn.setEnabled(True)
+                msg, lvl = self.status_msg, self._level
+                self._art_tried.clear()
+                self.rebuild(check=False)
+                self.say(msg, lvl)
+                return
+            self.ext_box.show()
+            self.play_btn.setEnabled(False)
+            self.play_btn.setText(tr("b.extracting", pct))
+            self.ext_bar.setValue(pct)
+        except RuntimeError:
+            pass
 
     def command(self):
         self.collect()
@@ -2919,27 +4041,37 @@ class App(QMainWindow):
             self.editor.raise_()
             self.editor.activateWindow()
             return
+        e = self.cur_entry()
+        v = GL.version_of(current_sha1())
+        if e is not None and e.get("sha1") and not (v and v["supported"]):
+            self.error(tr("l.unsupported", self.game_name(e)))
+            return
+        if self.extracting:
+            self.warning(tr("s.busyextract"))
+            return
         cmd = self.command()
         self._show_cmd(cmd)
         if not os.path.isfile(cmd[0]):
             self.error(tr("s.nobin", cmd[0]))
             return
-        if cmd[1] == "--disc" and (not os.path.isfile(cmd[2]) or not os.path.isfile(os.path.join(app_dir(), "MAIN0.EXE"))
+        pal = current_sha1() == MAIN0_SHA1
+        if cmd[1] == "--disc" and (not pal or not os.path.isfile(cmd[2]) or not os.path.isfile(os.path.join(app_dir(), "MAIN0.EXE"))
                                    or X.chd.is_chd(cmd[2])):     # tombi2 reads .bin/.iso only: a .chd always goes through data/
+            # (the other versions always run from their data folder)
             if os.path.isfile(cmd[2]):
                 self.check_disc()      # extracts data/ as well; Play again when it says the data is ready
             self.error(tr("s.nodata"))
             return
         if self.proc and self.proc.poll() is None:
             return
-        if cmd[1] == "--data":
+        if cmd[1] == "--data" and has("patch"):
             if not self.sync_patch():
                 return
             cmd = self.command()     # sync_patch may just have (re)built the redraws: --patch-tex must see them
             self._show_cmd(cmd)
-        elif self.s.get("patch_on"):
+        elif self.s.get("patch_on") and has("patch"):
             self.say(tr("s.patchnodata"), "busy")
-        if M.civ_wanted(self.cmd_s):
+        if has("cut") and M.civ_wanted(self.cmd_s):
             if cmd[1] != "--data":
                 self.error(tr("s.civnodata"))
                 return
@@ -2949,6 +4081,7 @@ class App(QMainWindow):
         self.log_path = os.path.join(app_dir(), "tombi-port.log")
         log = open(self.log_path, "w", encoding="utf-8", errors="replace")
         log.write("[launcher] build %s\n" % BUILD_ID)
+        log.write("[launcher] game: %s %s (%s)\n" % ((e or {}).get("serial") or "?", (v or {}).get("region", "PAL"), data_dir()))
         log.write("[launcher] Spanish graphics (--patch-tex): %s\n" % getattr(self, "gfx_note", "?"))
         log.write("[launcher] command: %s\n" % " ".join(cmd))      # the exe then prints its own id: [port2] build <sha> <date>
         log.flush()

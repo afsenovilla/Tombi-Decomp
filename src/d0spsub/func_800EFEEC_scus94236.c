@@ -5,7 +5,7 @@ typedef struct { char p[0x10]; short w10; } Menu;
 typedef struct { short x, y, w; unsigned short attr; int img, pC, str; void *p14; } Text;
 extern unsigned short GAME, GAME_SELECTED_SECTION;
 extern int MAP_AREA14_AREA_NAMES[], MAP_AREA_NAMES[];
-extern int D_80108BCC, D_80108BE0;
+extern int D_80107D8C, D_80107DA0;
 extern char SUBSCREEN_FONT[];
 extern int SUBSCREEN_MAP_LINK;
 extern Text SUBSCREEN_DRAW_PARAMS;
@@ -21,10 +21,10 @@ void subScreenMapDrawAreaName(Menu *m, int i)
     case 0x26:
     case 0x27:
     case 0x2E:
-        SUBSCREEN_DRAW_PARAMS.str = D_80108BCC;
+        SUBSCREEN_DRAW_PARAMS.str = D_80107D8C;
         break;
     case 0xC:
-        SUBSCREEN_DRAW_PARAMS.str = D_80108BE0;
+        SUBSCREEN_DRAW_PARAMS.str = D_80107DA0;
         break;
     }
     SUBSCREEN_DRAW_PARAMS.w = m->w10;

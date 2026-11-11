@@ -3,7 +3,7 @@
 // USA version of PAL cameraModeHandler6.c (src/cameraModeHandler6.c): 0x5c);=>0x54);; o->d30, 0x90)=>o->d30, 0x88).
 #include "TOBJ.H"
 /* PLAYER+0: a separate symbol on purpose (sharing PLAYER's lui changes the register allocation) */
-extern unsigned char DAT_800a6038;
+extern unsigned char D_800A5398;
 extern unsigned char PLAYER[];
 extern short *PLAYER_H;
 extern int GAME;
@@ -17,7 +17,7 @@ void cameraModeHandler6(TObj *o)
     cameraFollowPlayerX(o);
     cameraFollowPlayerY(o);
     g = PLAYER;
-    if (DAT_800a6038 < 4 || DAT_800a6038 == 7) {
+    if (D_800A5398 < 4 || D_800A5398 == 7) {
         b = *(short *)(o->d34 + 2);
         if (PLAYER_H[1] < (a = b - 0x90)) PLAYER_H[1] = a;
         else if ((a = b + 0x90) < PLAYER_H[1]) PLAYER_H[1] = a;

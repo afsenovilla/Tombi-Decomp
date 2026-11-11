@@ -467,6 +467,51 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   (phases *Copiando / Comprobando / Extrayendo*, files done / total, Cancel with B; a truncated image or an unreadable
   sector fails with the reason). *Borrar datos…* (in-page confirmation) deletes `files/data`, the patches and caches,
   the saves only when ticked.
+  **Archives** (`DiscArchive.java`, `port2/android/un7z.c`): the picked file is recognised by its first bytes. A `.zip`
+  is streamed (`ZipInputStream`, any provider) and a `.7z` read in place (or copied to the cache first) by the LZMA
+  SDK's 7z reader (`port2/third_party/lzma-7z`, public domain) with a streamed LZMA/LZMA2 decode of the block holding
+  the image; the image inside (any folder; the `.cue`'s data track, else the largest `.bin`/`.img`/`.iso`/`.chd`) goes
+  to `cache/import` after a free-space check (twice its size: it, then its files), phase *Descomprimiendo*, then is
+  identified and extracted as a picked image and deleted. An archive of the disc's loose files (`SYSTEM.CNF`, no
+  image: the game reads by sector number) is identified and refused naming the game; `.rar`, a file that is no disc
+  image, an archive without an image or a `.cue` without its track each get their own message. The add flow has its
+  own Disc screen (*Añadir juego* + the file name), so an error belongs to the file, not to the selected game.
+- **Game library** (stage U2, `Library.java`). The launcher's home is *Tus juegos*: one card per disc added (logo,
+  name, region, serial, status), *Añadir juego*, then *¡A jugar!* / *Opciones* / *Salir*; the focused card is the
+  selected game (D-pad moves between cards and buttons by their position on screen; Start plays). Three looks,
+  *Opciones > Juego > Estilo de la biblioteca*: *Carrusel* (cards in a row, buttons beneath), *Lista* (default: rows on
+  the left, the selected game large on the right), *Portada* (the selected game's logo as the title, a tab per game).
+  A picked image is identified by its boot executable (`disccheck.c` `nativeIdentify`: SYSTEM.CNF `BOOT`, its SHA-1;
+  on the PAL discs `EXE/MAIN0.EXE`, which the boot exe loads): PAL SCES-01331 / SCES-01330 `bec8dc5f…` →
+  `libtombi.so`, USA SCUS-94236 `81cbc79f…` → `libtombi_usa.so`; Japan SLPS-01144 `07d57769…` is listed as recognised
+  but *Aún no compatible* (nothing extracted); an unknown disc or the PAL Rev 0 is refused with the reason. Each game
+  is extracted into its own `files/games/<serial>/data` (the manifest also carries `serial` / `boot` / `boot_sha1`, as
+  `tools/extract_data.py`, which `psyq.c` checks), its saves go to `files/saves` (PAL, as before) or
+  `files/saves_usa`; the loader takes `--game-lib` / `--save-sub` from the launcher (`loader.c`; the armeabi-v7a low
+  reservation is sized for the largest `libtombi*.so` of the APK). The card's logo is cut at run time from the
+  player's own disc as the PC launcher does (`tools/game_library.py` `logo_sprites`, `Library.cutLogo`): the title
+  overlay's sprite list `TITLE_LOGO_SPRITE_RECS` (the records with the CLUT at 128,510, up to x = -1) drawn from the
+  8 bpp logo page with its CLUT (`SYSTEM/A00202.000` + `A00203.000` + `O0PTSUB0.BIN` PAL, `A00012.000` + `A00013.000`
+  + `OPTSUB00.BIN` USA and Japan), saved as `files/games/<id>/logo.png`; without it the name in the title font. The
+  Japanese disc is not extracted, so its three files are read straight from the image when it is added
+  (`disccheck.c` `nativeReadFiles`: .bin / .iso / .chd, also the temp image of a .zip / .7z before it is deleted);
+  a Japanese card added by an older version shows the name until the disc is added again. Options per version: the
+  USA game gets no game language, translations, NTSC switch, second-screen panel, cut content or button icons (all
+  PAL-only in the port, docs/USA.md); `--aspect`, `--renderer`, `--fps`, `--skip-intro`, DualShock, vibration, the
+  debug menu, infinite lives / vitality (`--poke-every 50:GAME+20:63:1`, `1:GAME+10:4:1`: named fields, the same for
+  both builds) and save import / export (on `files/saves_usa/tombi_mc0.mcd`) stay. An install from before the library (`files/data`, or an image copied
+  by an older version) becomes the PAL entry on the first start (a rename). *Disco y datos* shows the selected game
+  (*Quitar este juego* removes its data and card, the saves stay). Build: the APK always has the PAL game; with the
+  `GAME_FILES_URL_USA` secret `android-apk.yml` also runs `tools/build_full.py --version usa` and
+  `port2/android/game_libs.py --version usa` (armeabi-v7a: port2/CMakeLists.txt `-DPORT_VERSION=usa`; arm64-v8a:
+  `port2/wasm/build.py --version usa --until w2c` + the CMake arm64 branch) into `app/src/main/jniLibs/<abi>/libtombi_usa.so`
+  (git-ignored); without the secret the step is skipped and a USA disc shows *No incluido en esta versión de la app*.
+  **Renders on a PC**: `python3 port2/android/render/render.py OUT [--pal FS] [--usa FS] [--jp IMAGE] [--uilang 1]` draws the
+  real `LauncherActivity` with Robolectric's native graphics (Android's Skia) at 1920x1080 (the library in its three
+  looks, empty and with PAL / USA / Japan cards, the options per version, the disc screen, the dialog) and prints the
+  checks of `RenderTest` (migration, key / touch navigation, arguments per version); aapt2, android-all and Robolectric
+  come from Maven into `build/android-render` (~700 MB), no SDK install; `FS` = the `SYSTEM/` files of the player's
+  own disc for the logos, `IMAGE` = the Japanese disc image (its logo read from it by the PC build of `disccheck.c`).
 - **Launcher language.** *Opciones > Juego > Idioma del launcher*: Auto (the system's) / English / Español / Français /
   Deutsch / Italiano / Nederlands / Português / Svenska / Dansk (`res/values-xx/strings.xml`), saved as `uilang`,
   independent of the game language. Applied at once, without a restart: `LauncherActivity.getResources()` returns
@@ -684,6 +729,9 @@ Done:
 - **Sound, first step**: `shims/sound.c` software SPU (ADPCM, ADSR, pitch, 24 voices) + high-level libsnd (VAB from
   SsVabFakeHead, SEQ sequencer, SsUtKeyOnV effects); `--dump-audio out.wav`. Title music matches tools/audio.py in pitch.
 - `--poke FRAME:ADDR:VALUE[:SIZE]` (debug area select: `--poke 900:1F8001B4:1`), `-v` prints area/section/player x,y.
+  port2 also takes `ADDR` as `NAME[+HEXOFF]` (`GAME+C`, `GAME+20`, `SCRIPT_FLAGS`, `PLAYER+98`, `GVARS`,
+  `IS_DEBUG_MODE_ENABLED`: `port_addr_of_name` in `shims/psyq.c`), resolved to the release the build runs
+  (`gen/version/port_version.h`); the launchers' mods use these, so they work in the USA build too.
 - The BIOS kernel area (KUSEG 0..0xFFFF) is mapped to the RAM object (page 0 needs root / mmap_min_addr 0), so NULL
   reads see zeros as on a PS1 (fixes area 0 section 3).
 
@@ -1040,6 +1088,42 @@ report) and the exact command line. *Mods* and
 `build/port-win/tombi.exe` (Windows) or `build/port/tombi` (Linux); the PyInstaller exe carries `tombi.exe`,
 `tombi-view.exe` and `SDL2.dll` and unpacks them to its temporary folder on each run (PyInstaller onefile).
 
+**Game library** (docs/PORT_VERSIONS_PLAN.md stage U2, `tools/game_library.py`): the *Play* page starts with a card
+per disc the player added (*Añadir juego… / Add game…*, the last card; right click on a card: *Remove from the
+library…*, which offers to delete its extracted folder too). A disc is identified by its boot executable: the
+`BOOT` line of `SYSTEM.CNF` and that file's sha1 (the PAL discs boot SCES_013.31 / SCES_013.30, a loader of
+`EXE/MAIN0.EXE`: their sha1 is MAIN0's `bec8dc5f…`; USA `SCUS_942.36` `81cbc79f…`; JP `SLPS_011.44` `07d57769…`
+shows as recognised, "not supported yet", Play off; PAL Rev 0 likewise; another disc, e.g. Tomba! 2, is refused by
+name). Each game is extracted once into its own folder next to the launcher: the first PAL disc keeps `data/` (an
+older launcher's `data/` and disc path become the first entry, nothing is extracted again), the others
+`data-<serial>/` (`data-scus94236/`, `data-sces01330/`). Settings: `games` (`serial`, `sha1`, `image`, `data`) and
+`game` (the selected serial) in `tombi-port.json`; the other settings are shared. The card art is rebuilt from the
+player's own disc the first time (`library/<serial>/logo.png`, `title.png`, `scene.png`, never in the repo): the logo
+page and CLUT of the title list (PAL `SYSTEM/A00202.000` + `A00203.000`, USA/JP `A00012.000` + `A00013.000`) drawn
+with the title overlay's own sprite list (`TITLE_LOGO_SPRITE_RECS` of O0PTSUB0 / OPTSUB00: 16-byte records with the
+CLUT at 128,510, the list `titleLogoDraw` passes to `titleDrawSpriteRecs`), on the title landscape (A00200.GAM /
+A00010.GAM); a disc without them shows its name. Looks: `library_view` = `grid` (cards with the title
+screen, in as many columns as fit), `list` (default: rows with the logo) or `banner` (the selected game wide over the
+landscape, small logo cards under it); `TOMBI_LIBRARY_VIEW` forces one. The disc's languages are drawn as small flags
+beside the serial (`game_library.DISC_FLAGS`, `flag_pixmap`; Android `Library.flagsOf`). *Add game…* also takes a `.zip`
+or `.7z` (`tools/disc_archive.py`: zipfile, and a small 7z reader on the standard library's `lzma`/`zlib`/`bz2`): the
+image inside is unpacked once into `.unpack/` next to the launcher, identified, extracted and deleted; the same
+messages as Android for loose files, `.rar` and the rest. `tools/extract_data.py` and `tools/game_library.py` take an
+archive on the command line too.
+
+Per version (`game_library.VERSIONS` `features`): PAL has everything; USA runs `tombi-pc-usa(.exe)` (checkout:
+`build/port2-scus94236[-win]/tombi2`) and has no game language (English only), no text patch / improved translation
+(the hook is `VERSIONS[...]["text_patches"]`, empty for USA/JP: a future retranslation goes there), no 50/60 Hz switch
+(60 Hz, no `--hz`), no *Cut content* page, no title DEBUG entry (its carousel hook is PAL-only), no button-icon styles
+(`--prompts` redraws the PAL fonts) and no texture dump (PAL layout); skip intro, autostart, keys, controller,
+renderer, window, aspect, fps, texture packs and the mods of `port_mods.PORTABLE_MODS` stay: area select, start AP /
+lives, infinite lives / vitality, unlock all events, debug menu (their `--poke`s name the field, `GAME+C`,
+`IS_DEBUG_MODE_ENABLED`..., and the port resolves it to its release; U3). The other versions always run from their data
+folder (no `--disc`). Each release has its own card (U3, as on Android): PAL `tombi_mc0.mcd` in the save folder (or the
+port's default, next to `data/`), USA `saves_usa/tombi_mc0.mcd` under the save folder (or next to the launcher),
+passed as `--save-dir` (`game_library.VERSIONS` `save_sub`; the launcher's save import / export / editor use the same
+card). The USA save layout is docs/SAVE_FORMAT.md "USA saves".
+
 *Graphics* tab: renderer, window scale, fullscreen, aspect, internal resolution, and *Mostrar FPS / Show FPS*
 (default off: `--show-fps`, the on-screen counter; `--log-fps 2` is always passed so the rate goes to the log).
 
@@ -1066,7 +1150,8 @@ re-enables Play and raises its window when the game exits).
 
 **Save import / export ("cross save").** *Importar partida… / Exportar partida…* in both launchers (PC: buttons under
 the save folder; Android: right column of *Opciones*). They work on the card the game uses, `tombi_mc0.mcd` (PC: the
-save folder, else next to the disc image / `data/`; Android: `files/saves/`), a raw 128 KB image identical on both
+save folder, else next to the disc image / `data/`, USA: its `saves_usa/` subfolder; Android: `files/saves/`, USA
+`files/saves_usa/`), a raw 128 KB image identical on both
 platforms and readable by DuckStation/ePSXe (raw `.mcd`/`.mcr`). Import accepts whole cards (raw
 `.mcd/.mcr/.mc/.srm/.ddf/.ps/.bin` starting with `MC`, DexDrive `.gme`, `.vgs/.mem`), which replace the card, and
 single saves (`.mcs/.ps1/.mcb`, PS3 `.psv`), inserted into free blocks with new directory frames (link chain, XOR
@@ -2417,6 +2502,18 @@ clean, 87 entered; the build before that: "69 ok", not comparable, 52 of those r
   `updateLightsOutDarkness` and the middle of `motocrossBikeJumpStepB` in X006). Found with gdb watchpoints on
   `PLAYER.anim` and the pool's type bytes. A word of a data run is now data, never a thunk or a native function
   (`gen2.py` `emit_data`); `audit_pointers.py` `walk_main0` applies the same rule.
+- **The data-naming round of 145442a (61 of 96 rooms faulted; v0.2.0 96 clean).** Two generator gaps the D_<addr>
+  names had hidden, since gen_port read the address from the name. (1) `area_syms` never read
+  `notes/data_names_x0nn.csv`, so the 111 newly named area globals (`TREASURE_CHEST_GUARD_DEFS`, `SPEAR_PIG_ANIMS`,
+  ...) and their bare-letter aliases (`MOTOCROSS_COURSE_PATH_E`, the old `D_8011F3F8e`) were unknown and gen2
+  stubbed them as functions: the area code read stub code bytes as tables (`initTreasureChestGuard` in AREA03,
+  the X009 / X011 / X017 / X018 NPC setups, X014's handler tables). (2) `volatile_aliases` grouped only `D_`
+  names, so `LIST_COUNTER` / `LIST_COUNTER_S` (one scratchpad word, two types) lost their `volatile` and
+  `playerTryTalkToNpc` looped past its list on Square (40 rooms, frame 2490). Now the area csv is read, the
+  aliases are taken from the matching build's PROVIDEs, and `volatile_aliases` groups every extern by the
+  address the generator resolves for it (`port/tools/gen_port.py`). A stubbed `*_DEFS` / `*_ANIMS` name in
+  `build/port2/gen/stubs.c` is the sign of this class of bug: the psyq/bios stub list must hold only library
+  names (27 at v0.2.0).
 
 What the 32 rooms with findings had, and the root cause of each (all fixed in the generator or the runtime,
 never in generated output):
@@ -2966,6 +3063,68 @@ MDEC movies are not textures here (the intro landscape is a movie). A replacemen
 blended. Changing a texture's pixels by a sub-upload keeps the larger upload's key for boxes outside the changed part.
 Debug: `TEXPACK_LOG=1` prints uploads, invalidations and unkeyed boxes.
 
+### `--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR`: the Japanese demo's top-down Charity Wings glide (2026-11-10)
+
+Lost content restored as a reconstruction (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide"), its own
+switch (it does not need `--cut-content`): using the
+Charity Wings in a top-down area runs I0NFO2 `topdownPlayerDropExitStep` (Tomba rises 20 ticks, fade, room left).
+With the option, `port2/runtime/wings.c` swaps the player's sprite tables for that step: copies of the area's own
+retail tables (`WPP_DATA[2]` and the player's `d3c`) with the three demo frames appended after the last entry (frames
+77-79 of the demo's overhead Tomba, arm raised; WPP data from `JPDEMO_DIR/AREA08/D002.000` +0x3FA28, SPR parts from
+`AREA08/D003.GAM` unpacked with the game's own `lzDecompress`), so every other object drawn from WPP slot 2 (Baron
+riding along, the player's own other indexes) keeps its frames, with a port script (our frames 0 1 2 1, 8 ticks each), uploads the feather texels of the PrePre Vol. 9 resident item page
+(`PRE9_DIR/TOMBA/A00002.GAM`, 4 bpp 256 px wide, frames at (224,104) 24x24, (200,80) 24x16, (216,64) 16x16; checked
+byte for byte against the JP demo's copy `SYSTEM/A00000.GAM`, 512 px wide) over retail's at the same place of tpage
+0x14 (VRAM 256,256), and draws them through retail's resident item table (frames 159-161, CLUT 0x7AD6) as one more
+POLY_FT4 after the player's parts, one ordering-table slot nearer, turning like a
+rotor (8 phases, 2 ticks each, the mirrored phases by swapping u). The quill end sits 1 px above the hand's top pixel
+(hand at (22,2)/(22,1)/(22,1) of the frames, quill ends (2,22)/(2,14)/(7,14)). Hooks: `port_wings_begin` at
+`topdownPlayerDropExitStep` state 0 (substep 0 = the wings), `port_wings_land` at `topdownPlayerLandStep` state 0 (the
+drop from the sky into the destination area, the same glide down until the feet touch the ground; that step is the
+arrival from above in every overhead area, which the wings flight is), `port_wings_draw` at the end of
+`topdownDrawRotatedSprite`; the same three hooks in the other two overhead engines, I0NFO (AREA02 s0, the Dwarf
+Village: `overheadPlayer*Step`, `overheadDrawRotatedSprite`) and I0NFO3 (the tunnels: `tunnelPlayer*Step`,
+`tunnelDrawRotatedSprite`) (port/fixes.txt). The tables are restored once the player leaves the step they were set in.
+**Side view** (2026-11-10): the same for the side-view player, with PrePre 9's orphan script 0x800124A8 (frames 282-284
+of `PRE9_DIR/TOMBA/AREA01/A007.000`, parts of `TOMBA/AREA01/A008.GAM` +0x14A0: kneeling with the fist raised overhead,
+10 ticks per frame, 282 283 284 283; the user's pick among the 20 orphan scripts): `port_wings_side_begin` at
+`playerEventStepRiseFadeOut` state 0 (substep 0 = the wings), `port_wings_side_land` at `playerEventStepDropIn` state 0,
+the retail air spin (`playerAirSpinToFall`) and the per-frame `PlayerSetAnimIfChanged(o, 4)` (the jump anim, which
+put retail's jump frames back under the feather) skipped while it runs, `port_wings_draw` at the end of
+`drawPlayerSpriteDefault` (WPP slot 0; the facing bit of the frame index mirrors the hand like the drawer does; fist top
+at (20,7) / (21,7) / (13,7)). `wings.c` keeps the two sets in one table (`SETS[]`). Tables are restored when the step ends; after a room load (which
+replaces both) nothing is written back. Launcher: *Cut content* page, own card with its checkbox and two disc-image
+fields (JP demo, PrePre 9;
+.bin/.cue/.iso/.chd, or inside a .zip/.7z like the game's); picking one checks the serial (SLPM-80165 / PCPX-96093)
+and pulls just the files above (JP demo: `AREA08/D002.000`, `AREA08/D003.GAM`, `SYSTEM/A00000.GAM`; PrePre 9:
+`TOMBA/A00002.GAM`, `TOMBA/AREA01/A007.000`, `TOMBA/AREA01/A008.GAM`) out of the image into `.wings/jpdemo/` and
+`.wings/pre9/` next to the launcher (a file missing from an older extraction is pulled again at start when the image is still there)
+(`extract_disc_files`, the same ISO walk as `extract_main0`; a .zip/.7z of the disc's loose files works too, its
+members are taken as they are by `extract_archive_files`), with a status line under each field (checked and ready, or
+why not; a path typed in is checked on Enter); the folders are passed only when the checkbox is on and both are there.
+Android launcher: Options reorganised into six categories by topic (2026-11-10: *Game* with language, translation,
+intro and the cheats; *Cut content*; *Picture and screen* = graphics + second screen; *Controls*; *Disc and saves*;
+*Launcher and debug* with the launcher language, library style, debug menu and log; `LauncherView.optCats` /
+`optGroups` / `group`, one method per row group). *Cut content* (one tick per cut-content item, the glide switch and the two
+image rows; picking an image reads the files it needs through disccheck.c `nativeReadFiles`, or a .zip of loose files
+through `DiscArchive.members`, into files/wings/<disc>/ after the serial check; the APK's arm64 game is the same
+runtime/wings.c through wasm2c). The
+files are the user's own discs, nothing is shipped; without them the step is the retail one. The early-title folder field was removed from the launcher (the
+`--early-title` option stays in the port). Checked
+headless in AREA08 section 0 and AREA02 section 0 (debug select 8:0 / 2:0, the dialogue dismissed, the item use started
+with the pokes the panel's warp path uses: PLAYER+4..6 = 1, 0x30, 0 and GVARS_USE_ITEM_PENDING/ID = 1, 7): Tomba rises
+with the feather spinning in the raised hand through the fade, and drops into the next room the same way. Not tested on the device (PC headless only); Android launcher not wired.
+
+### `--cut-content[=LIST]`: one switch per item (2026-11-10)
+
+`port_cut_content` is a bit mask: `--cut-content=boatman,letter,board,berries,bubble,titles` picks items (1 boatman's
+extra lines, 2 the AREA03 letter sign, 4 the AREA05 notice board + extra save points, 8 silver / golden berries, 16 the
+big "?" bubble, 32 the event titles PAL left empty); `--cut-content` alone is every item (0xFF), `all` too. Each hook
+in port/fixes.txt and runtime/main.c tests its own bit; the debug menu toggle sets 0 / 0xFF. The PC launcher's *Cut
+content* page shows one checkbox per item (`cut_i_<name>` settings; a settings file saved with the old single switch
+on means every item) and passes the plain switch when all are on. The early title (`--early-title`) and the wings glide
+(`--wings-glide`) no longer need `--cut-content`.
+
 ### `--cut-content`: signs (notice board, extra save point) and the sign box fix
 
 `--cut-content` (launcher: *Cut content* page) now also makes the AREA05 notice board readable and adds the AREA06
@@ -3038,17 +3197,17 @@ buttons held when it closes are kept from the game until released.
 | Line | What it does |
 |---|---|
 | Noclip (walls) | the player's wall push is skipped (`port/fixes.txt` wraps `pushOutOfWallSegments`); floors and gravity stay, section scroll limits stay |
-| Fly | `GVARS.b3e` (0x8009C93E, `updatePlayer` returns at once) is held; with the menu closed the d-pad moves Tomba in H / Y, L1/R1 in depth, Cross held = 4x; the camera follows; no collision |
-| Infinite vitality / Max AP / Infinite lives | memory writes every vblank (`GAME.playerHealth` = max, `PLAYER+0x98`; AP 99999999; lives 99) |
+| Fly | `GVARS.b3e` (PAL 0x8009C93E, `updatePlayer` returns at once) is held; with the menu closed the d-pad moves Tomba in H / Y, L1/R1 in depth, Cross held = 4x; the camera follows; no collision |
+| Infinite vitality / Max AP / Infinite lives | memory writes every vblank (`GAME.playerHealth` = max, `PLAYER+0x98` = `PLAYER_HEALTH` in gameplay only; AP 99999999; lives 99) |
 | Max vitality 16 | `GAME.playerMaxHealth` and health = 16 |
 | Give item N | `addItemToInventory(N, 1, 1)` from the game loop |
 | Equip weapon N | `GAME.playerEquips.weapon` = N |
-| Event N | X / Square / Circle: the progress byte `0x8009CDA4 + N` = 1 / 0xFF / 0 (any room). L1 / R1: the game's `setEventStarted` / `setEventComplete` (banner, AP, jingle) — **only events of the current area**: another area's title crashes in `acquireSpriteSlot`, exactly as `--title N:start` does |
+| Event N | X / Square / Circle: the progress byte `SCRIPT_FLAGS + N` (PAL 0x8009CDA4) = 1 / 0xFF / 0 (any room). L1 / R1: the game's `setEventStarted` / `setEventComplete` (banner, AP, jingle) — **only events of the current area**: another area's title crashes in `acquireSpriteSlot`, exactly as `--title N:start` does |
 | Complete all events | the 0x82 flag bytes = 0xFF (the launcher's "Unlock all events", live) |
-| Warp area / section / spawn, Warp now | `GAME.nextArea/nextSection/nextSpawnPoint` (0x8009CD94/96/A0) and the main task's mode 7 (area transition), as `raceOfferRematch` does; every `ROOM_COUNTS` room, the cut towns (AREA11/16/17) included; the `DOOR_ROOMS` (empty load lists) are refused |
+| Warp area / section / spawn, Warp now | `GAME.nextArea/nextSection/nextSpawnPoint` (GAME +0x434/+0x436/+0x440) and the main task's mode 7 (area transition), as `raceOfferRematch` does; every `ROOM_COUNTS` room, the cut towns (AREA11/16/17) included; the `DOOR_ROOMS` (empty load lists) are refused |
 | Info overlay | frame, measured vblank rate, area-section, player H/Y/depth, vitality, active cheats, and the player's wall hits (`WALL HIT r AT h,y`, the collision readout) |
 | Speed | normal / slow (each vblank ~2 periods: psyq.c re-anchors its schedule) / fast (`port_realtime` off: as fast as the host runs) |
-| Cut content | `port_cut_content` toggled live; it applies from the next room load |
+| Cut content | `port_cut_content` toggled live; it applies from the next room load (PAL build only: the line is not there in the USA build) |
 
 Launcher modifiers that are safe live, and are in the menu: infinite vitality, infinite lives, AP, all events,
 `--cut-content` (next room). Not live (boot-time only): `--skip-intro`, `--hz`, the area select / title DEBUG
@@ -3069,6 +3228,19 @@ Verified headless (soft renderer; the overlay also on OpenGL under xvfb and with
 - warp: AREA00 -> AREA01 section 0 and, with `--cut-content`, AREA11 section 1 (the cut town);
 - infinite vitality (a `--poke` of the health to 1 shows 4/4), give item 5, event flag set, event 3 started with
   its "Take Me Home" banner and +1000 AP; slow 300 frames 10.3 s (normal 6 s for the same part), fast 500 frames 2.8 s (10 s).
+
+**Every release (2026-11-09, stage U3).** The menu reads the retail data by name: `GAME`, `GVARS`, `PLAYER`,
+`SCRIPT_FLAGS` (plus field offsets, the same in every release) are `PORT_A_*` constants of the build's
+`gen/version/port_version.h`, which `port/tools/portver.py` takes from the version's full link (PAL GAME 0x8009C960 /
+PLAYER 0x800A6038, USA 0x8009BCC8 / 0x800A5398). The scratchpad (task pointer 0x1F8001D4, debug-select flag
+0x1F8001B4) has the same layout in both. The hooks it needs (`gameMainTask`, `pushOutOfWallSegments`,
+`displayDebugScreen`) apply to the USA files too. So the USA build runs it (Cut content line left out). Checked
+headless in the USA build: noclip, infinite vitality (a poke of the health to 1 shows 4/4), max AP, give item 5, warp
+AREA00 -> AREA01, fly (y -52 -> -252), complete all events, the info overlay. The player-object health write is now
+made in gameplay only: during a room load the USA game keeps load data where the player object is (PLAYER+0x98 read
+2992 / -21242 there), and writing it every vblank broke AREA01's effects (crash in `updateOneShotSpriteEffect`). PAL:
+the standard run, the same with `--debug-menu` unused, and a menu session (noclip, vitality, AP, item, warp) are
+byte-identical to the build before (apart from the overlay's fps figure).
 
 ### Second screen: `--second-screen`, `--dump-panel DIR` (port only, opt-in)
 
@@ -3093,6 +3265,8 @@ canvas pixels per picture pixel (or the mean of whole n x n blocks when zoomed o
   not) is drawn opaque; map markers get a 1 px dark outline, Tomba's face drops its green box (CLUT 482 indices 2 3 5 6
   flooded from the border). Text pairs meet WCAG 4.5:1 (16 px) / 7:1 (8 px): dark text on cream, light text over
   wood / the side map with the game's 1 px dark outline (table in panel.c next to the colours).
+- Versions: the addresses come from `runtime/panel_addrs.h` (`port2/tools/gen_panel_addrs.py`, PAL and USA columns); the USA
+  build's files, text encoding and fonts are in docs/USA.md "Second-screen panel".
 - Text: the game's WFM fonts (`AREA00/MFNT000L.WFM`, `MFNT001L`, `AREAnn/MFNTnn0L` until the alphabet is complete: 8 / 16 px;
   `CFNT999L.WFM`: the 24 px event-title letters; L = the `--lang` letter B F G I H S P W D). A WFM glyph is a bitmap with no
   character code: each is named by the SHA-1 of its image through `runtime/panel_charmap.h` (hashes only, generated from
@@ -3346,6 +3520,8 @@ Gen 3 and newer, the AYN Odin 2 ...); armeabi-v7a stays the native 32-bit build,
     python3 port2/wasm/build.py --from native --headless-host --cc CC --native-flags "-O2 -static" --exe tombi2w-a64
                                               # the same host without SDL/GL (headless_stubs.py), e.g. for qemu-aarch64
     build/wasm/tombi2w --headless --frames 1500 --dump-frames out --pad-script 1000:start
+    python3 port2/wasm/build.py --version usa --out build/wasm-usa   # the USA release (PORT_VERSION, docs/USA.md; needs
+                                              # tools/build_full.py --version usa): its VERSION_ macro, inc26, port_version.h
 
 Pipeline (`build.py`): `gen2.py sources` with `PORT2_ARCH=wasm` (the clang K&R fix-ups of the Android build) -> every
 game/runtime file (and libchdr) to LLVM bitcode -> `gen2.py link` (llvm-nm; C dispatch thunks `gen/thunks.c` instead of

@@ -68,6 +68,8 @@ in version branches.
 
 ## Stage U0: decomp prerequisites for USA (link proof and data symbols)
 
+**Done 2026-11-09** (docs/USA.md "Full link"): all 26 files sha1 OK, `units(ver)`, `jp_globals --version`, name audit.
+
 - **Goal**: `build/scus94236/full/` with byte-identical `SCUS_942.36`, `X00..X19.BIN` and the eight SYSTEM files
   (sha1-checked) plus `.full.ld` PROVIDE tables: the symbol source gen_port needs, and proof of every relocation.
 - **Changes**: `tools/jp_globals.py --version` (USA data names into `config/scus94236/`); `tools/units.py`
@@ -79,6 +81,14 @@ in version branches.
 - **Verify**: every sha1 OK; the PAL full link unchanged. **Effort**: 3-6 sessions.
 
 ## Stage U1: generator per version ("boots and reaches gameplay headless")
+
+**Done 2026-11-09** (docs/USA.md "Native port"): `build/port2-scus94236/tombi2` runs the USA disc headless through the
+logos, the title, a new game and AREA00 gameplay (dialogue, event title, HUD, walking, enemies); report: 0 unresolved
+literals, 45 stubs (PAL 148). The PAL build generates the same files and the same frames. Open: the 27 fixes.txt lines
+that only reach PAL branches (widescreen culling, HUD, NTSC-picture emulation; the generator lists them) need USA
+spellings (U3); the runtime features with PAL addresses (panel, debug menu, lang, animlog) are off in the USA build.
+As built: `port/tools/portver.py` maps the version's files onto the PAL program names instead of a `pal_prog` rename
+of every table; `gen_port.sources_version` is the version path (the PAL `sources()` is untouched).
 
 - **Goal**: `build/port2-scus94236/tombi2` boots `data/` extracted from the USA disc through logos, title, new game
   and AREA00 headless (`--skip-movies`).
@@ -101,6 +111,15 @@ in version branches.
 
 ## Stage U2: launchers, CI, distribution
 
+**PC side and CI done 2026-11-09** (docs/PORT.md "Game library"): one launcher with a game library
+(`tools/game_library.py`: boot exe + sha1 identification, `data-<serial>/` per game, the old `data/` migrated as the
+first PAL entry, card art rebuilt from the player's disc through the title overlay's own logo sprite list, per-version
+options, `tombi-pc-usa` for USA, JP recognised but not supported, `text_patches` hook per version);
+`port2-exe.yml` builds `tombi-pc-usa(.exe)` next to the PAL game when `GAME_FILES_URL_USA` is set (disc-cache,
+`build_full.py --version usa`, `PORT_VERSION=usa`) and the launchers bundle it; `versions.txt` in the bin-*-port
+artifacts tells release.yml's notes which games a bundle runs. Open: Android (below), the USA exe only boots from
+the launcher's data folder (the same as U1 headless; no `--disc`).
+
 - **PC launcher** (`tools/port_launcher.py`): boot exe from `SYSTEM.CNF`, `{sha1: (serial, binary)}` table (PAL
   bec8dc5f…, USA 81cbc79f…, JP 07d57769…), `check_disc`/`data_ready` on `boot_sha1`, per-version binary; hide
   `--lang`, `--text-patch`, `--picture`, the 60 Hz switch for USA/JP.
@@ -115,14 +134,18 @@ in version branches.
 | Area | Work | Verify |
 |---|---|---|
 | Movies / XA | same shims; check `100US` / `END_US.STR` | intro frame dumps, `--dump-audio` |
-| Saves | `card.c:164` accepts `BASCUS-94236`; save editor / `tombi_save.py` / `save_import.py` assume 1/50 s play time: per-product time base; check the USA layout ("assumed the same" in SAVE_FORMAT.md) | headless save/load round trip; a real USA save if available |
+| Saves | **done 2026-11-09**: USA layout verified (1/60 s time, icon byte 0x13, title digits 2 bytes earlier; docs/SAVE_FORMAT.md "USA saves"), per-product time base in `tombi_save.py` / editor / `save_import.py` / `SaveImport.java`, USA card in `saves_usa/` on PC too | headless save/load round trip done; a real USA save not tried |
 | All rooms | `sweep_areas.py` / `audit_pointers.py` with a USA room table | 96-room sweep, no findings beyond `DOOR_ROOMS` |
 | fps, widescreen, HD, GL, texture packs | fixes from the U1 audit; texture-pack keys may differ | render comparisons with PAL |
-| Debug menu, cut content, noclip | symbol names instead of addresses | per-flag smoke runs |
-| Second-screen panel | `panel.c:153` reads `D0SPSUB.BIN` at PAL offsets; `panel_items.inc` / `panel_status.inc` / `panel_hud.c` / `panel_assets.c` use PAL addresses: per-version offset table from the USA symbols and xmatch | `--second-screen --dump-panel` |
+| Debug menu, cut content, noclip | **done 2026-11-09** for the debug menu, noclip, area select and the launcher cheats (`port_version.h` names, `--poke NAME+OFF`; docs/USA.md "U3 saves, debug menu, mods"); `--title-debug` and cut content stay PAL-only | per-flag smoke runs (done headless) |
+| Second-screen panel | **done 2026-11-09** (docs/USA.md "Second-screen panel"): `runtime/panel_addrs.h` from `port2/tools/gen_panel_addrs.py` (symbol + offset per version), USA files / text encoding / embedded WFM3 banks, `tools/wfm_charmap_usa.json` | `--second-screen --dump-panel`: all tabs AREA00 / AREA01, PAL PNGs identical |
 | Text features | `lang.c`, `tpatch.c`, `subscreen_es.c`, `gfx_es.c`, `prompts.c`, `--subscreen-labels` are PAL-only: off for USA | — |
 
 **Risk**: the panel is the largest item. **Effort**: 4-8 sessions (about half the panel).
+
+Done 2026-11-09 (docs/USA.md "Feature parity"): fixes.txt `@version` sections and the USA spellings (widescreen, HUD,
+title extras; `--launcher-exit` stays PAL-only), the USA room sweep 95/96 clean after six generator fixes, movies
+(100US / END_US) and audio, widescreen / GL / `--fps` render checks. Saves, debug menu and the panel: other work items.
 
 ## Stage J1: JP retail
 

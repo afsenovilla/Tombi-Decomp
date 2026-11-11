@@ -89,7 +89,9 @@ def build(src, flags, d, inc):
                     LOCAL_J.append(int(m.group(1), 16))
                 RELS.append((int(m.group(1), 16), m.group(2), m.group(3)))
         return open(d + "/t.bin", "rb").read(), rel
-    mas = subprocess.run([sys.executable, MASPSX, "--aspsx-version=" + ASPSX_VER, "--expand-div"] + (["-G" + G] if G != "0" else []),
+    # `// ASPSX 2.34`: an older assembler (`li` of a small constant as ori, not addiu: the PrePre 8 game code)
+    av = re.search(r"^//\s*ASPSX\s+([0-9.]+)", open(src, errors="replace").read(600), re.M)
+    mas = subprocess.run([sys.executable, MASPSX, "--aspsx-version=" + (av.group(1) if av else ASPSX_VER), "--expand-div"] + (["-G" + G] if G != "0" else []),
                          input=open(d + "/a.s").read(), check=True, capture_output=True, text=True).stdout
     open(d + "/b.s", "w").write(with_extra_as(mas))
     subprocess.run(["mipsel-linux-gnu-as", "-EL", "-march=r3000", "-mtune=r3000", "-no-pad-sections", "-O1", "-G0",

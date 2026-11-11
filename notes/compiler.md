@@ -1,5 +1,11 @@
 # Compiler (matching)
 
+> **UPDATE 2026-11-09: the prototypes use the same CC1PSX as retail.** PrePre 8 (1997-06), the JP demo and the 1998-02-03 beta
+> rebuilt with old-gcc 2.6.0 and the CC1PSX of Psy-Q 3.6 (2.7.2.SN.1) and 4.1 (cygnus-2.7.2-970404), PrePre 8 also with Psy-Q 3.5 (GCC 2.6.0) and
+> old-gcc 2.6.3: all lose functions and gain none; only gcc 2.7.2 (= Psy-Q 4.0 CC1PSX) reproduces them. PrePre 8 differs in the
+> assembler only (ASPSX 2.34, `// ASPSX.PCPX_96084 2.34`). Figures in docs/PREPRE8.md "Matching target". The mkst/esa
+> archive also has psyq3.3 (GCC 2.6.0 + ASPSX 2.21), psyq3.5 (GCC 2.6.0 + ASPSX 2.34) and psyq4.5 (ASPSX 2.81).
+
 > **UPDATE 2026-11-08: `bash tools/setup_psyq.sh` installs the reference toolchain in a fresh container** (wine32,
 > dosbox, and the Psy-Q binaries from the public archive decomp.me uses, github.com/mkst/esa, into /opt/psyq; never
 > committed). The CC1PSX that reproduces the game is the **Psy-Q 4.0** one of that archive (`/opt/psyq/cc40`,

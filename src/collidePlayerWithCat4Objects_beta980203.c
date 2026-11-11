@@ -1,0 +1,158 @@
+// VERSION BETA_980203 beta980203 80053834 1728
+#if defined(VERSION_BETA_980203)
+// Beta version: the JP branch of collidePlayerWithCat4Objects.c plus a case 0x12 (func_801275BC); the list counter is the scratchpad word DAT_1f80019e.
+#include "spad.h"
+#include "TOBJ.H"
+extern void func_8004E654_slps01144(TObj *, TObj *);
+#include "gamestate.h"
+
+extern short LIST_COUNTER;
+extern void func_801275BC(TObj *, TObj *);
+#define LIST_COUNTER DAT_1f80019e
+extern short DAT_1f80019e;
+void playerPushOutOfObjectBox(TObj *o, TObj *e);
+void playerContactCat4Type01(TObj *o, TObj *e);
+void playerContactCat4Type02(TObj *o, TObj *e);
+void playerContactCat4Kind3(TObj *o, TObj *e);
+void playerContactCat4Type04(TObj *o, TObj *e);
+void func_8011FE08(TObj *o, TObj *e);
+void func_80125044(TObj *o, TObj *e);
+void playerContactCat4Type06(TObj *o, TObj *e);
+void func_8011FBB8(TObj *o, TObj *e);
+void func_801249E0(TObj *o, TObj *e);
+void func_8011EEC0(TObj *o, TObj *e);
+void func_8012030C(TObj *o, TObj *e);
+void playerContactCat4Type09(TObj *o, TObj *e);
+void playerContactCat4Type0A(TObj *o, TObj *e);
+void playerContactCat4Type0B(TObj *o, TObj *e);
+void func_80125074(TObj *o, TObj *e);
+void func_80124BA8(TObj *o, TObj *e);
+void func_801250A4(TObj *o, TObj *e);
+void func_801251B0(TObj *o, TObj *e);
+void func_8012538C(TObj *o, TObj *e);
+void playerContactCat4Type17(TObj *o, TObj *e);
+void playerContactCat4Type18(TObj *o, TObj *e);
+void func_80124058(TObj *o, TObj *e);
+void func_8012047C(TObj *o, TObj *e);
+void func_8011DF1C(TObj *o, TObj *e);
+void func_80126CC4(TObj *o, TObj *e);
+void func_8011F644(TObj *o, TObj *e);
+void func_8011F5B8(TObj *o, TObj *e);
+void func_8011F4DC(TObj *o, TObj *e);
+void func_8011F310(TObj *o, TObj *e);
+void func_8011F3F8(TObj *o, TObj *e);
+void func_80120C88(TObj *o, TObj *e);
+void func_8011E8E4(TObj *o, TObj *e);
+void func_8011DEE8(TObj *o, TObj *e);
+void func_801210E4(TObj *o, TObj *e);
+void func_8011D370(TObj *o, TObj *e);
+void func_8011C99C(TObj *o, TObj *e);
+short pushObjectOutOfObjectBoxA(TObj *o, TObj *e);
+void landObjectOnObjectBox(TObj *o, TObj *e);
+void func_80043C74(TObj *o, TObj *e);
+void func_8011F3CC(TObj *o, TObj *e);
+
+static __inline__ short hit(TObj *o, TObj *e)
+{
+    if ((unsigned short)(o->d->p.whole - e->d->p.whole + 0x2d) >= 0x5b)
+        return 0;
+    if ((unsigned short)(o->h->p.whole - e->h->p.whole + (o->box0 + e->box0)) > o->box1 + e->box1)
+        return 0;
+    if ((unsigned short)(o->y.p.whole - e->y.p.whole + (o->box2 + e->box2)) > o->box3 + e->box3)
+        return 0;
+    return 1;
+}
+
+void func_80051F44(TObj *o)
+{
+    TObj **pp;
+    TObj *e;
+
+    pp = (*(TObj ***)&SPAD.p224);
+    for (LIST_COUNTER = SPAD.s24c; LIST_COUNTER != 0; ) {
+        e = *pp++;
+        LIST_COUNTER--;
+        if (!(e->active & 1))
+            continue;
+        switch (e->type) {
+        case 0: playerPushOutOfObjectBox(o, e); break;
+        case 1: playerContactCat4Type01(o, e); break;
+        case 2: playerContactCat4Type02(o, e); break;
+        case 3: playerContactCat4Kind3(o, e); break;
+        case 4:
+            if (GAME.selectedArea == 0)
+                playerContactCat4Type04(o, e);
+            else
+                func_8011FE08(o, e);
+            break;
+        case 5: func_80125044(o, e); break;
+        case 6: playerContactCat4Type06(o, e); break;
+        case 7:
+            switch (GAME.selectedArea) {
+            case 0: func_801249E0(o, e); break;
+            case 3: func_8011FBB8(o, e); break;
+            case 4: func_8011EEC0(o, e); break;
+            case 9: func_8012030C(o, e); break;
+            }
+            break;
+        case 9: playerContactCat4Type09(o, e); break;
+        case 10: playerContactCat4Type0A(o, e); break;
+        case 0xb: playerContactCat4Type0B(o, e); break;
+        case 0xc: func_80125074(o, e); break;
+        case 0x14: func_80124BA8(o, e); break;
+        case 0x15: func_801250A4(o, e); break;
+        case 0xe: func_801251B0(o, e); break;
+        case 0xf: func_8012538C(o, e); break;
+        case 0x17: playerContactCat4Type17(o, e); break;
+        case 0x18: playerContactCat4Type18(o, e); break;
+        case 0x12: func_801275BC(o, e); break;
+        case 0x1a:
+            e->b69 = 0;
+            if (hit(o, e)) {
+                if (e->type != 0x26)
+                    *(unsigned char *)&o->da0 = 4;
+                e->b69 = 1;
+            }
+            break;
+        case 0x1c: func_8012047C(o, e); break;
+        case 0x1d: func_8011DF1C(o, e); break;
+        case 0x23: func_80126CC4(o, e); break;
+        case 0x28: func_8011F644(o, e); break;
+        case 0x25: func_8011F5B8(o, e); break;
+        case 0x26:
+            e->b69 = 0;
+            if (hit(o, e)) {
+                if (e->type != 0x26)
+                    *(unsigned char *)&o->da0 = 4;
+                e->b69 = 1;
+            }
+            break;
+        case 0x1f: func_8011F4DC(o, e); break;
+        case 0x38:
+            e->b69 = 0;
+            if (hit(o, e)) {
+                *(unsigned char *)&o->wa8 = 3;
+                *(unsigned char *)&o->da0 = 1;
+                e->b69 = 1;
+            }
+            break;
+        case 0x24: func_8011F310(o, e); break;
+        case 0x22: func_8011F3F8(o, e); break;
+        case 0x33: func_80120C88(o, e); break;
+        case 0x34: func_8011E8E4(o, e); break;
+        case 0x3b: func_8011DEE8(o, e); break;
+        case 0x31: func_801210E4(o, e); break;
+        case 0x42: func_8011D370(o, e); break;
+        case 0x43: func_8011C99C(o, e); break;
+        case 0x32:
+        case 0x44:
+            e->b69 = 0;
+            if (pushObjectOutOfObjectBoxA(o, e) == 1)
+                o->h->raw += e->velH << 8;
+            break;
+        case 0x45: func_8004E654_slps01144(o, e); break;
+        case 0x1e: func_8011F3CC(o, e); break;
+        }
+    }
+}
+#endif

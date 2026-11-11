@@ -20,6 +20,10 @@ import os, shutil, struct, sys, time
 
 CARD_SIZE, BLOCK, FRAME = 0x20000, 0x2000, 0x80
 TOMBI_PRODUCTS = ("BESCES-01330", "BESCES-01331", "BASCUS-94236", "BISLPS-01144")
+# per release (tools/tombi_save.py LAYOUTS, docs/SAVE_FORMAT.md): play-time vblanks per second and the title offset of
+# the slot number (None: not known, JP); the same table in SaveImport.java
+PRODUCT_HZ = {"BESCES-01330": 50, "BESCES-01331": 50, "BASCUS-94236": 60, "BISLPS-01144": 60, "BISCPS-99999": 60}
+PRODUCT_SLOT_OFS = {"BESCES-01330": 0x16, "BESCES-01331": 0x16, "BASCUS-94236": 0x14}
 BACKUP_KEEP = 5
 
 # The place of a save as the game's Map screen and the second screen name it (port2/runtime/panel.c room_names: the
@@ -170,7 +174,8 @@ def save_info(name, data, es=True):
     if slot and bytes(data[:2]) == b"SC" and len(g) == 0xA00 and xor(g[:-1]) == g[-1]:
         area, sec, t = struct.unpack_from("<HH", g, 0) + struct.unpack_from("<I", g, 8)
         a = area_name(area, sec, es)
-        parts = [head] + ([a] if a else []) + ["%d:%02d h" % (t // 180000, t // 3000 % 60)]
+        hz = PRODUCT_HZ.get(name[:12], 50)
+        parts = [head] + ([a] if a else []) + ["%d:%02d h" % (t // (3600 * hz), t // (60 * hz) % 60)]
         return " · ".join(parts)
     t = title(data)
     return head + ("  " + t if t else "")
@@ -279,15 +284,17 @@ def free_slot(card, name, need=1):
 
 def renumber(frame, data, nn):
     """the save as slot nn ("NN"): the file name's last two digits and, when they are fullwidth digits (Shift-JIS
-    0x824F + n), the slot number in the title (save +0x16, 2 characters; not covered by the checksum)"""
+    0x824F + n), the slot number in the title (save +0x16 PAL, +0x14 USA: PRODUCT_SLOT_OFS; 2 characters; not covered
+    by the checksum)"""
     f, d = bytearray(frame), bytearray(data)
     name = save_name(f)
     nb = (name[:-2] + nn).encode("ascii")
     f[10:30] = nb + bytes(20 - len(nb))
     f[0x7F] = xor(f[:0x7F])
-    if all(d[0x16 + 2 * i] == 0x82 and 0x4F <= d[0x17 + 2 * i] <= 0x58 for i in range(2)):
+    o = PRODUCT_SLOT_OFS.get(name[:12])
+    if o and all(d[o + 2 * i] == 0x82 and 0x4F <= d[o + 1 + 2 * i] <= 0x58 for i in range(2)):
         for i in range(2):
-            d[0x17 + 2 * i] = 0x4F + int(nn[i])
+            d[o + 1 + 2 * i] = 0x4F + int(nn[i])
     return bytes(f), bytes(d)
 
 

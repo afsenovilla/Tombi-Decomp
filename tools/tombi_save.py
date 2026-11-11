@@ -29,14 +29,45 @@ GAME_COPY = 0x988         # bytes of GAME the game copies (the rest of the 0xA00
 
 # product codes of the save file names ("BESCES-01331TOMBA-00": region + code + "TOMBA-" + slot 00..14)
 PRODUCTS = {"BESCES-01331": "PAL (SCES-01331) Tombi!", "BASCUS-94236": "USA (SCUS-94236) Tomba!",
-            "BISLPS-01144": "JP (SLPS-01144) Ore no Tomba"}
+            "BISLPS-01144": "JP (SLPS-01144) Ore! Tomba",
+            # development product code: the JP retail lists and loads these too (never writes them), docs/SAVE_FORMAT.md
+            "BISCPS-99999": "JP development code (SCPS-99999, loaded by SLPS-01144)"}
+
+# What differs between the releases' saves (docs/SAVE_FORMAT.md "USA saves"): the GAME block (0x200..0xBFF), its
+# checksum and the list fields are the same in every release; the play time counts vblanks at the release's own rate,
+# and the title's digits sit at other offsets (each save builder writes them: PAL D0SPSUB2 func_800E999C, USA
+# DSPSUB2 func_800E954C).
+#   hz      vblanks per second of GAME.totalTimePlayed (PAL 50; USA divides by 216000 / 3600: 60; the JP play-time
+#           draw func_800ED850_slps01144 too)
+#   digits  title offsets of the slot number (2 digits), the play time hhh:mm (5), lives (2) and level (2);
+#           None = not known (the JP save builder is not decompiled): the title is left as it is
+#   icon    byte 2 of the header (0x11: a 1-frame icon, PAL; 0x13: the 3-frame animated icon, USA)
+LAYOUTS = {
+    "pal": dict(hz=50, icon=0x11, digits=dict(slot=(0x16, 0x18), time=(0x1E, 0x20, 0x22, 0x26, 0x28),
+                                              lives=(0x30, 0x32), level=(0x40, 0x42))),
+    "usa": dict(hz=60, icon=0x13, digits=dict(slot=(0x14, 0x16), time=(0x1C, 0x1E, 0x20, 0x24, 0x26),
+                                              lives=(0x2E, 0x30), level=(0x3E, 0x40))),
+    "jp": dict(hz=60, icon=None, digits=None),
+}
+PRODUCT_LAYOUT = {"BESCES-01331": "pal", "BESCES-01330": "pal", "BASCUS-94236": "usa", "BISLPS-01144": "jp",
+                  "BISCPS-99999": "jp"}
+
+
+def layout(product):
+    """the LAYOUTS entry of a save file name (its first 12 characters, the product code); PAL for an unknown one"""
+    return LAYOUTS[PRODUCT_LAYOUT.get((product or "")[:12], "pal")]
+
+
+def time_max(hz):
+    """the largest play time the save title shows (999:59), in vblanks at hz per second"""
+    return 999 * 3600 * hz + 59 * 60 * hz
 
 # ---- GAME fields (include/gamestate.h: offsets into GAME = save + 0x200) ------------------------------------------
 # name: (offset, struct fmt, min, max, description)
 FIELDS = {
     "area":            (0x000, "<H", 0, 19, "GAME.selectedArea (area the Continue loads)"),
     "section":         (0x002, "<H", 0, 31, "GAME.selectedSection"),
-    "time":            (0x008, "<I", 0, 999 * 180000 + 59 * 3000, "GAME.totalTimePlayed (vblanks, 50 per second)"),
+    "time":            (0x008, "<I", 0, time_max(50), "GAME.totalTimePlayed (vblanks: 50 per second PAL, 60 USA / JP)"),
     "ap":              (0x00C, "<I", 0, 9999999, "GAME.playerAP (adventure points)"),
     "health":          (0x010, "B", 0, 16, "GAME.playerHealth (set to max health on load)"),
     "max_health":      (0x011, "B", 1, 16, "GAME.playerMaxHealth (vitality: 8, 16 with the golden bowl bonus)"),
@@ -168,6 +199,8 @@ class Save:
         self.base = block * BLOCK
         self.product = name[:12]
         self.region = PRODUCTS.get(self.product, "?")
+        self.layout = layout(self.product)
+        self.hz = self.layout["hz"]           # play time vblanks per second (50 PAL, 60 USA / JP)
         try:
             self.slot = int(name[-2:])
         except ValueError:
@@ -205,6 +238,8 @@ class Save:
 
     def set(self, name, value, check=True):
         o, fmt, lo, hi, _ = FIELDS[name]
+        if name == "time":
+            hi = time_max(self.hz)
         value = int(value)
         if check and not lo <= value <= hi:
             raise SaveError("%s = %d out of range %d..%d" % (name, value, lo, hi))
@@ -252,25 +287,37 @@ class Save:
         struct.pack_into("<H", d, self.game_ofs(INV_COUNTER), len(inv))
         self.fix_checksum()
 
+    def hms(self):
+        """the play time as (hours, minutes, seconds) at the release's rate"""
+        s = self.get("time") // self.hz
+        return s // 3600, s // 60 % 60, s % 60
+
     def update_title(self):
-        """Rewrites the digits of the Shift-JIS title (play time hhh:mm, P=lives, Level) like func_800E999C;
-        positions that are not fullwidth digits (another title layout) are left alone."""
+        """Rewrites the digits of the Shift-JIS title (play time hhh:mm, P=lives, Level) like the release's save builder
+        (PAL func_800E999C, USA func_800E954C: LAYOUTS digits); positions that are not fullwidth digits (another title
+        layout) are left alone, and a release whose layout is not known (JP) keeps its title."""
         d, b = self.card.data, self.base
+        pos = self.layout["digits"]
+        if not pos:
+            return
         t = self.get("time")
-        hh = t // 180000
-        m = t // 3000 - hh * 60
-        digits = {0x1E: hh // 100 % 10, 0x20: hh // 10 % 10, 0x22: hh % 10, 0x26: m // 10 % 10, 0x28: m % 10,
-                  0x30: self.get("lives") // 10 % 10, 0x32: self.get("lives") % 10,
-                  0x40: self.get("level") // 10 % 10, 0x42: self.get("level") % 10}
+        hh = t // (3600 * self.hz)
+        m = t // (60 * self.hz) - hh * 60
+        vals = dict(time=(hh // 100 % 10, hh // 10 % 10, hh % 10, m // 10 % 10, m % 10),
+                    lives=(self.get("lives") // 10 % 10, self.get("lives") % 10),
+                    level=(self.get("level") // 10 % 10, self.get("level") % 10))
+        digits = {}
+        for k, vs in vals.items():
+            digits.update(zip(pos[k], vs))
         for o, v in digits.items():
             cur = struct.unpack_from(">H", d, b + o)[0]
             if FW_DIGIT0 <= cur <= FW_DIGIT0 + 9:
                 struct.pack_into(">H", d, b + o, FW_DIGIT0 + v)
 
     def summary(self):
-        t = self.get("time")
+        h, m, _ = self.hms()
         return "%s slot %02d  %s  %d:%02d  AP %d  HP %d/%d  lives %d  area %d/%d  checksum %s" % (
-            self.region, self.slot, self.title(), t // 180000, t // 3000 % 60, self.get("ap"), self.get("health"),
+            self.region, self.slot, self.title(), h, m, self.get("ap"), self.get("health"),
             self.get("max_health"), self.get("lives"), self.get("area"), self.get("section"),
             "ok" if self.checksum_ok() else "BAD")
 

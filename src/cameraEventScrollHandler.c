@@ -14,7 +14,7 @@ extern short VIEW_CAMERA_ROT_Y;
 extern TObj PLAYER;
 extern void updateCameraFollow(void);
 extern int cameraEventScrollStep(TObj *);
-extern void FUN_8001f110(int);
+extern void func_80020C00(int);
 
 void cameraEventScrollHandler(TObj *o)
 {
@@ -102,7 +102,7 @@ void cameraEventScrollHandler(TObj *o)
         GAME.nextSection = ((unsigned char *)(*(int*)&o->b68))[6];
         GAME.nextSpawnPoint = ((unsigned char *)(*(int*)&o->b68))[7];
         if (c != GAME.selectedArea)
-            FUN_8001f110(1);
+            func_80020C00(1);
         switch (GAME.selectedArea) {
         case 1:
             switch (GAME.selectedSection) {

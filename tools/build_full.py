@@ -33,10 +33,19 @@ How it works (all output under build/full/, ignored by git):
 Also links the area overlays AREAnn/X0nn.BIN (src/x0nn/*.c + splat) and the SYSTEM code overlays of tools/sysovl.py
 (src/<prog>/*.c + splat), each checked by its sha1 (the overlays are skipped when their retail file is missing).
 
-Usage: python3 tools/build_full.py [--no-split] [-j N] [--asm-only] [--keep-going] [--only prog,prog]
+Other versions (--version scus94236, tools/versions.py; output build/<ver>/full/): every program of config/<ver>/*.yaml,
+each function at its version address from the src file tools/units.py version_sources gives it (PAL pairing, reuse.txt,
+`// VERSION` lines; built with -DVERSION_<SERIAL>), plus the version's own data files (src/data/<ver>/<prog>/*.c). An
+area overlay links only its area part; the X00 prefix it repeats comes from the X00 linked first. After each program a
+name audit (build/<ver>/full/<prog>.names.txt, see name_audit) lists the relocation names whose meaning disagrees with
+the address the retail bytes give them.
+
+Usage: python3 tools/build_full.py [--version V] [--no-split] [-j N] [--asm-only] [--keep-going] [--only prog,prog]
   --no-split   reuse the previous splat output in build/full/asm
   --asm-only   ignore src/ (pure splat assembly: checks the asm path alone)
-Requirements: the same as tools/ncheck.py (tools/setup_native.sh) and splat 0.35.2 (tools/requirements.txt).
+Requirements: the same as tools/ncheck.py (tools/setup_native.sh, including include/tomba/psyq: refused without it)
+and splat 0.35.2 (tools/requirements.txt). The C files that did not compile (linked from asm) are listed in
+<out>/compile_failures.txt; port/tools/gen_port.py refuses a link with any.
 """
 import hashlib, os, re, shutil, struct, subprocess, sys, tempfile
 from multiprocessing import Pool
@@ -71,6 +80,36 @@ for _n in (1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19):
 if "--only" in ARGS:  # --only g0over,i0nfo: build just these programs (quick iteration)
     _keep = ARGS[ARGS.index("--only") + 1].lower().split(",")
     PROGS = {k: v for k, v in PROGS.items() if k in _keep}
+# Another version (--version, tools/versions.py; set by setup_version from main): None = PAL (the reference).
+VER = SERIAL = VEXE = None  # VEXE: the version's boot exe program (first in tools/versions.py)
+PREFIX_PROG = "x00"  # the program whose first bytes every area overlay of a version repeats (its `[0x0, bin, xNN_shared]`)
+ALLDEFS = {}         # version: {prog: {name: address}} of the globals the linked C defines (name audit)
+
+
+def setup_version(ver):
+    """--version <ver>: the programs of config/<ver>/<prog>.yaml (tools/versions.py order), output build/<ver>/full.
+    Each program is linked from its code segment on (`type: code` start/vram); before it comes the PS-X EXE header
+    (header segment, from splat) or, for an area overlay, the X00 prefix: the first bytes of the X00 linked here."""
+    global OUT, PROGS, VER, SERIAL, VEXE
+    from versions import VERSIONS
+    import units as U
+    VER, SERIAL, VEXE = ver, VERSIONS[ver]["serial"], U.version_progs(ver)[0]
+    OUT = os.path.join(ROOT, "build", ver, "full")
+    PROGS = {}
+    for p in U.version_progs(ver):
+        y = open(os.path.join(ROOT, "config", ver, p + ".yaml")).read()
+        game = re.search(r"target_path:\s*(\S+)", y).group(1)
+        m = re.search(r"type:\s*code\s*\n\s*start:\s*(0x[0-9A-Fa-f]+)\s*\n\s*vram:\s*(0x[0-9A-Fa-f]+)", y)
+        start, vram = int(m.group(1), 16), int(m.group(2), 16)
+        f = os.path.join(ROOT, game)
+        PROGS[p] = dict(name=p.upper(), game=game, vram=vram, size=os.path.getsize(f) - start if os.path.exists(f) else 0,
+                        header=start, head="asm" if re.search(r"type:\s*header", y) else ("prefix" if start else None),
+                        sha1=re.search(r"^sha1:\s*(\w+)", y, re.M).group(1), out=os.path.basename(game))
+    if "--only" in ARGS:
+        keep = ARGS[ARGS.index("--only") + 1].lower().split(",")
+        PROGS = {k: v for k, v in PROGS.items() if k in keep}
+
+
 DATA_SECS = (".rodata", ".data", ".bss", ".sdata", ".sbss", ".rdata")
 
 
@@ -152,21 +191,31 @@ def W(b, o):
 
 # --------------------------------------------------------------------------------------------- splat
 def split():
-    run([sys.executable, os.path.join(ROOT, "tools", "gen_symbols.py")], cwd=ROOT)
+    if VER is None: run([sys.executable, os.path.join(ROOT, "tools", "gen_symbols.py")], cwd=ROOT)
     os.makedirs(OUT, exist_ok=True)
-    for p in PROGS:  # a C name like func_80045D0C at another address would hide splat's own func_80045D0C
-        with open(os.path.join(OUT, "symbol_addrs_%s.txt" % p), "w") as f:
-            for l in open(os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % p)):
+    cdir = os.path.join(ROOT, "config", *([VER] if VER else []))
+    # a version's splat configs also read symbol_addrs_manual.txt (and any other file of its config dir)
+    sfiles = (["symbol_addrs_%s.txt" % p for p in PROGS] if VER is None else
+              sorted(f for f in os.listdir(cdir) if f.startswith("symbol_addrs_") and f.endswith(".txt")))
+    for fn in sfiles:  # a C name like func_80045D0C at another address would hide splat's own func_80045D0C
+        with open(os.path.join(OUT, fn), "w") as f:
+            for l in open(os.path.join(cdir, fn)):
                 m = re.match(r"((?:func|FUN|D)_([0-9A-Fa-f]{8})) = 0x([0-9A-Fa-f]+);", l)
                 if m and int(m.group(2), 16) != int(m.group(3), 16):
                     l = l.replace(m.group(1), "%s__%s" % (m.group(1), m.group(3).upper()), 1)
                 f.write(l)
+    rel = os.path.relpath(OUT, ROOT)
     for p in PROGS:
-        y = open(os.path.join(ROOT, "config", p + ".yaml")).read()
-        y = y.replace("base_path: ..", "base_path: ../..")
-        y = re.sub(r"(asm_path|src_path|build_path|ld_script_path|undefined_funcs_auto_path|undefined_syms_auto_path): (asm|build)/?",
-                   lambda m: "%s: build/full/%s" % (m.group(1), "asm/" if m.group(2) == "asm" else ""), y)
-        y = y.replace("config/symbol_addrs_", "build/full/symbol_addrs_")
+        y = open(os.path.join(cdir, p + ".yaml")).read()
+        y = re.sub(r"base_path: [./]+", "base_path: " + "/".join([".."] * len(rel.split("/"))), y)
+        y = re.sub(r"(asm_path|src_path|build_path|ld_script_path|undefined_funcs_auto_path|undefined_syms_auto_path|asset_path): (asm|build)/%s"
+                   % ((VER + "/?") if VER else "?"),
+                   lambda m: "%s: %s/%s" % (m.group(1), rel, "asm/" if m.group(2) == "asm" else ""), y)
+        y = y.replace("config/%ssymbol_addrs_" % (VER + "/" if VER else ""), rel + "/symbol_addrs_")
+        if VER:  # header / trailing data blobs of the SYSTEM overlays as data lines (the link needs every byte as a
+            # splat line); the X00 prefix of an area overlay stays a blob (it comes from the X00 linked here)
+            y = re.sub(r"\[(0x[0-9A-Fa-f]+), bin, (\w+)\]",
+                       lambda m: m.group(0) if m.group(2).endswith("_shared") else "[%s, data, %s]" % (m.group(1), m.group(2)), y)
         open(os.path.join(OUT, p + ".yaml"), "w").write(y)
         shutil.rmtree(os.path.join(OUT, "asm", p), ignore_errors=True)
         shutil.rmtree(os.path.join(OUT, "splat_src", p), ignore_errors=True)
@@ -251,8 +300,8 @@ def symbol_names(prog):
     key = prog.lower()
     if key not in _NAMES:
         names = {}
-        for p in ("main0", key):
-            f = os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % p)
+        for p in (VEXE, "manual", key) if VER else ("main0", key):
+            f = os.path.join(ROOT, "config", *([VER] if VER else []), "symbol_addrs_%s.txt" % p)
             if not os.path.exists(f): continue
             for l in open(f):
                 m = re.match(r"\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+);", l)
@@ -279,6 +328,16 @@ def _compile(job):
     if not NC: _init_nc()
     d = tempfile.mkdtemp(dir=os.path.join(OUT, "tmp"))
     try:
+        if SERIAL:  # another version: its #if branch (-DVERSION_<SERIAL>), INCLUDE_ASM branches compile to nothing
+            import units as U
+            NC["EXTRA_CPP"] = ["-DVERSION_" + SERIAL, "-DSKIP_ASM"]
+            NC["EXTRA_AS"] = ""
+            if flags is None:  # a function: `// FLAGS.<SERIAL>` etc. directives, scratchpad symbols as constants
+                path = U.version_source(path, SERIAL, d)
+                t = open(path, errors="replace").read()
+                NC["EXTRA_AS"] = U.spad_set(t, SERIAL)
+                fm = re.search(r"//\s*FLAGS\s+(.*)", t)
+                flags = fm.group(1).strip() if fm else "-O2 -G0"
         NC["build"](path, flags, d, inc)
         shutil.copy(d + "/a.o", out)
         return None
@@ -298,6 +357,7 @@ def compile_all():
         for nm in {f, f.upper(), f.lower()}: shutil.copy(s, os.path.join(inc, nm))
     os.makedirs(os.path.join(OUT, "obj"), exist_ok=True); os.makedirs(os.path.join(OUT, "tmp"), exist_ok=True)
     units, jobs = [], []
+    if VER: return compile_version(units, jobs, inc)
     files = [("src", f) for f in sorted(os.listdir(os.path.join(ROOT, "src")))]
     for P in PROGS.values():
         if P.get("src") and os.path.isdir(os.path.join(ROOT, P["src"])):
@@ -319,14 +379,51 @@ def compile_all():
             units.append(dict(name="data/%s/%s" % (p, stem), src=os.path.relpath(path, ROOT), addr=addr, size=size,
                               prog=p, obj=obj, data=True))
             jobs.append((path, "-O2 -G0", obj, inc))
+    return compile_jobs(units, jobs)
+
+
+def compile_jobs(units, jobs):
     with Pool(JOBS) as pool:
         res = pool.map(_compile, jobs)
     ok = []
     for u, r in zip(units, res):
         ok.append(u)
         if r is not None:
-            u["failed"] = True
+            u["failed"] = u["compile_error"] = True
             print("WARN %s does not compile, kept as asm: %s" % (u["src"], r.strip().splitlines()[-1] if r.strip() else "?"))
+    return ok
+
+
+def compile_version(units, jobs, inc):
+    """The C units of a version: every function tools/units.py version_sources gives a src file (the shared file built
+    with -DVERSION_<SERIAL>), at its version address; its size is what the object's .text gives (checked against the
+    symbol / VERSION line size). Plus the version's own data files (src/data/<ver>/<prog>/*.c, tools/version_data.py)."""
+    import units as U, version_data as VD
+    vunits = U.version_units(VER)
+    for p in PROGS:
+        for vu in vunits.get(p, []):
+            if not vu.file: continue
+            obj = os.path.join(OUT, "obj", "%s__%08X.o" % (p, vu.addr))
+            units.append(dict(name="%s__%08X" % (p, vu.addr), src="%s [%s %08X]" % (os.path.relpath(vu.file, ROOT), p, vu.addr),
+                              addr=vu.addr, size=vu.size, prog=p, obj=obj, vname=vu.name))
+            jobs.append((vu.file, None, obj, inc))
+        for path, stem, addr, size in VD.version_files(VER, p):
+            obj = os.path.join(OUT, "obj", "data_%s_%s.o" % (p, stem))
+            units.append(dict(name="data/%s/%s" % (p, stem), src=os.path.relpath(path, ROOT), addr=addr, size=size,
+                              prog=p, obj=obj, data=True))
+            jobs.append((path, "-O2 -G0", obj, inc))
+    ok = compile_jobs(units, jobs)
+    vl = U.version_lines(SERIAL)
+    for u in ok:
+        if u.get("failed") or u.get("data"): continue
+        n = Elf(u["obj"]).size(".text")
+        want = vl.get((u["prog"], u["addr"]), (None, u["size"]))[1]
+        if n == 0:
+            u["failed"] = True
+            print("WARN %s: no C for this version (INCLUDE_ASM branch), kept as asm" % u["src"])
+        elif n != want:
+            print("NOTE %s: .text is %d bytes, the symbol says %d" % (u["src"], n, want))
+        u["size"] = n
     return ok
 
 
@@ -338,7 +435,9 @@ def analyse(u, game, vram, hdr):
     for k in ("gplaced", "grefs", "bases", "drop"): u.pop(k, None)
     e = Elf(u["obj"])
     u["elf"] = e
-    gb = lambda a, n: game[hdr + a - vram: hdr + a - vram + n]
+    lim = vram + len(game) - hdr
+    # retail bytes; past the end of the file (the bss) they are zeros
+    gb = lambda a, n: (game[hdr + a - vram: hdr + a - vram + n] + bytes(max(0, a + n - max(a, lim))))[:n]
     if u.get("data"): return analyse_data(u, e, gb, vram, len(game) - hdr)
     if e.size(".text") != u["size"]:
         print("WARN %s: .text is %d bytes, FUNC says %d: kept as asm" % (u["src"], e.size(".text"), u["size"])); return False
@@ -374,6 +473,14 @@ def analyse(u, game, vram, hdr):
                 b = (val - add - (sym["value"] if sym["type"] != 3 else 0)) & 0xFFFFFFFF
                 u.setdefault("bases", {}).setdefault(tsec, set()).add(b)
 
+    def fits(sec, b):
+        """The section is inside the program; a data section may run past the end of the file when its bytes there are
+        zeros without relocations (an initialized table the retail exe ends inside of: the rest is in the bss)."""
+        n = e.size(sec)
+        if vram <= b and b + n <= lim: return True
+        return (sec != ".text" and vram <= b < lim and e.sh[e.idx[sec]][1] != 8 and not any(e.data(sec)[lim - b:])
+                and not any(off + 4 > lim - b for off, _, _ in e.relocs(sec)))
+
     def masked_equal(sec, b):
         ours, ret = bytearray(e.data(sec)), bytearray(gb(b, e.size(sec)))
         for off, ty, _ in e.relocs(sec):
@@ -389,7 +496,7 @@ def analyse(u, game, vram, hdr):
         bs = {(a - s["value"]) & 0xFFFFFFFF for s, a in u.get("grefs", []) if s["shndx"] == e.idx[sec]}
         if len(bs) != 1: return False
         b = next(iter(bs))
-        if not (vram <= b and b + e.size(sec) <= vram + len(game) - hdr) or not masked_equal(sec, b): return False
+        if not fits(sec, b) or not masked_equal(sec, b): return False
         keep = (len(problems), {k: set(v) for k, v in u["syms"].items()}, list(u.get("grefs", [])),
                 {k: set(v) for k, v in u.get("bases", {}).items()})
         infer(sec, b, gb(b, e.size(sec)))
@@ -412,7 +519,7 @@ def analyse(u, game, vram, hdr):
             if len(bases[sec]) != 1:
                 problems.append("%s has several bases %s" % (sec, sorted(map(hex, bases[sec])))); continue
             b = next(iter(bases[sec]))
-            if not (vram <= b and b + e.size(sec) <= vram + len(game) - hdr):
+            if not fits(sec, b):
                 problems.append("%s would be at %08x, outside the program" % (sec, b)); continue
             u["place"][sec] = b
             if e.sh[e.idx[sec]][1] == 8:
@@ -449,7 +556,7 @@ def analyse(u, game, vram, hdr):
                 struct.pack_into("<I", buf, off, W(buf, off) & ~m & 0xFFFFFFFF)
         if ours != ret:
             k = next(i for i in range(len(ours)) if ours[i] != ret[i])
-            problems.append("%s bytes differ from the game at %08x" % (sec, b + k))
+            problems.append("%s (at %08x, %d bytes) bytes differ from the game at %08x" % (sec, b, len(ours), b + k))
     if problems:
         print("WARN %s: kept as asm: %s" % (u["src"], "; ".join(problems[:4]))); return False
     return True
@@ -503,7 +610,7 @@ def place_ranges(u, addrs, end, game, vram, hdr, bisect):
         b = a + u["elf"].size(s)
         nxt = addrs[bisect.bisect_left(addrs, b)] if bisect.bisect_left(addrs, b) < len(addrs) else end
         # data ending inside a splat line (unaligned strings): zero padding up to the next line
-        pad = nxt - b if (s != ".text" and nxt - b < 8 and not any(game[hdr + b - vram:hdr + nxt - vram])) else 0
+        pad = nxt - b if (s != ".text" and 0 <= nxt - b < 8 and not any(game[hdr + b - vram:hdr + nxt - vram])) else 0
         ranges.append((a, b + pad, s, pad))
     return ranges
 
@@ -512,10 +619,10 @@ def place_bad(u, addrs, end, items, game, vram, hdr, bisect):
     """Why a unit's placed sections cannot be linked (None: they can)."""
     bad = None
     for a, b, s, _ in place_ranges(u, addrs, end, game, vram, hdr, bisect):
-        if not (vram <= a and b <= end): bad = "%s outside the program" % s
+        if not (vram <= a and (b <= end or (s != ".text" and a < end))): bad = "%s outside the program" % s
         elif bisect.bisect_left(addrs, a) == len(addrs) or addrs[bisect.bisect_left(addrs, a)] != a:
             bad = "%s starts at %08x, inside a splat line" % (s, a)
-        elif b != end and (bisect.bisect_left(addrs, b) == len(addrs) or addrs[bisect.bisect_left(addrs, b)] != b):
+        elif b < end and (bisect.bisect_left(addrs, b) == len(addrs) or addrs[bisect.bisect_left(addrs, b)] != b):
             bad = "%s ends at %08x, inside a splat line" % (s, b)
         for it in items:
             if a < it[1] and it[0] < b: bad = "%s overlaps %s" % (s, it[3][0]["src"])
@@ -546,13 +653,20 @@ def build_prog(p, units):
     used = {it[3][0]["name"]: it[3][0] for it in items}
     # global symbols the C objects define
     cdefs = {}
-    for u in used.values():
+    dupren = {}   # a version can build two functions from one shared file: the later definition is renamed name__ADDR
+    for u in sorted(used.values(), key=lambda u: u["addr"]):
         e = u["elf"]
         for s in e.syms:
             if s["shndx"] not in (0, 0xFFF1, 0xFFF2) and s["bind"] in (1, 2) and s["shndx"] < len(e.names):
                 sec = e.names[s["shndx"]]
                 if sec in u["place"]:
-                    cdefs[s["name"]] = u["place"][sec] + s["value"]
+                    a = u["place"][sec] + s["value"]
+                    if s["name"] in cdefs and cdefs[s["name"]] != a:
+                        nn = "%s__%08X" % (s["name"], a)
+                        dupren.setdefault(u["name"], []).append("--redefine-sym=%s=%s" % (s["name"], nn))
+                        cdefs[nn] = a
+                    else:
+                        cdefs[s["name"]] = a
     # splat labels
     known = {}
     for a, labels, _ in chunks:
@@ -594,7 +708,7 @@ def build_prog(p, units):
         else: provide.setdefault(l, a)
     # undefined symbols of the C objects: inferred addresses, renamed when the name means something else
     for u in used.values():
-        ren = []
+        ren = list(dupren.get(u["name"], []))
         for n, v in sorted(u["syms"].items()):
             a = next(iter(v))
             have = cdefs.get(n, known.get(n, None))
@@ -611,6 +725,7 @@ def build_prog(p, units):
         e.save(fixed)
         if ren: run([BIN + "objcopy"] + ren + [fixed])
         u["link"] = fixed
+    ALLDEFS[p] = (cdefs, used)
     asm = os.path.join(OUT, p + "_splat.s")
     open(asm, "w").write("\n".join(lines) + "\n")
     aobj = os.path.join(OUT, p + "_splat.o")
@@ -638,14 +753,20 @@ def build_prog(p, units):
     raw = os.path.join(OUT, p + ".raw")
     run([BIN + "objcopy", "-O", "binary", "-j", "." + p, elf, raw])
     body = open(raw, "rb").read()
-    if P["header"]:
+    if any(it[1] > end for it in order): body = body[:P["size"]]  # data run past the end of the file (zeros: bss)
+    head = P.get("head", "asm" if P["header"] else None)
+    if head == "asm":
         hs = os.path.join(OUT, "asm", p, "header.s")
         run(AS + [hs, "-o", os.path.join(OUT, "header.o")])
         run([BIN + "objcopy", "-O", "binary", "-j", ".data", os.path.join(OUT, "header.o"), os.path.join(OUT, "header.bin")])
         body = open(os.path.join(OUT, "header.bin"), "rb").read() + body
+    elif head == "prefix":  # area overlay of a version: the X00 code linked here comes first
+        pre = os.path.join(OUT, PREFIX_PROG.upper() + ".BIN")
+        if not os.path.exists(pre): sys.exit("%s needs %s linked first (build %s too)" % (P["out"], pre, PREFIX_PROG))
+        body = open(pre, "rb").read()[:P["header"]] + body
     out = os.path.join(OUT, P["out"])
     open(out, "wb").write(body)
-    shutil.copy(out, os.path.join(ROOT, "build", P["out"]))
+    if VER is None: shutil.copy(out, os.path.join(ROOT, "build", P["out"]))
     ncfun = sum(1 for it in order if it[2] == "c" and it[3][1] == ".text")
     ndata = sum(1 for it in order if it[2] == "c" and it[3][0].get("data"))
     return out, game, order, (ncfun, ndata), sum(1 for u in units if not u.get("data"))
@@ -676,18 +797,102 @@ def report(p, out, game, order, ncfun, nunits):
     return False
 
 
+_VNAMES = {}
+
+
+def version_names(prog):
+    """{name: {addresses}} a C extern of a version program may stand for: config/<ver>/symbol_addrs of the boot exe
+    (+ manual), of X00 for an area overlay (it runs with the X00 prefix), and of the program itself; plus the globals
+    the C linked into those programs defines."""
+    if prog in _VNAMES: return _VNAMES[prog]
+    scope = [VEXE, "manual"] + ([PREFIX_PROG] if PROGS.get(prog, {}).get("head") == "prefix" else []) + [prog]
+    names = {}
+    for p in scope:
+        f = os.path.join(ROOT, "config", VER, "symbol_addrs_%s.txt" % p)
+        for l in open(f) if os.path.exists(f) else ():
+            m = re.match(r"\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+);", l)
+            if m: names.setdefault(m.group(1), set()).add(int(m.group(2), 16))
+        for n, a in ALLDEFS.get(p, ({}, {}))[0].items():
+            names.setdefault(n, set()).add(a)
+    _VNAMES[prog] = names
+    return names
+
+
+def name_audit(p):
+    """Version link: every relocation of the C linked into program p was resolved from the retail bytes (the link uses
+    the retail address whatever the name says); this checks what the names say, in build/<ver>/full/<prog>.names.txt:
+      - named: a name the version's symbols (or the C linked into the exe / X00 / this program) give another address;
+      - raw (version C): a D_/func_<addr> name of a version-only file or branch that is not that address;
+      - raw (shared C): the same in shared PAL code (PAL addresses: the version's address comes from the link);
+      - unknown: names the version has no symbol for (PAL names: the link gives them their version address).
+    The first two are naming bugs of the version C; tools/build_full.py PROVIDEs the real address under a renamed
+    symbol (name__ADDR) whenever two uses of one name disagree, so the port never mixes them up."""
+    names = version_names(p)
+    out = {"named": [], "raw (version C)": [], "raw (shared C)": [], "unknown": []}
+    ok = 0
+    vfiles = {path for (prog, a), (path, _) in _vlines().items() if prog == p}
+    for u in sorted(ALLDEFS[p][1].values(), key=lambda u: u["addr"]):
+        if u.get("data"): continue
+        path = os.path.join(ROOT, u["src"].split(" [")[0])
+        own = path in vfiles or "_" + VER in os.path.basename(path)
+        for n, v in sorted(u["syms"].items()):
+            a = next(iter(v))
+            m = re.match(r"(?:D|func|FUN|DAT|LAB|jtbl|data)_([0-9A-Fa-f]{8})(?:_%s)?$" % VER, n)
+            if m:
+                if int(m.group(1), 16) == a: ok += 1
+                else: out["raw (version C)" if own else "raw (shared C)"].append("%s -> %08X  %s" % (n, a, u["src"]))
+            elif n in names:
+                if a in names[n]: ok += 1
+                else: out["named"].append("%s -> %08X (symbols say %s)  %s"
+                                          % (n, a, " ".join("%08X" % x for x in sorted(names[n])), u["src"]))
+            else: out["unknown"].append("%s -> %08X  %s" % (n, a, u["src"]))
+    with open(os.path.join(OUT, p + ".names.txt"), "w") as f:
+        for k, ls in out.items():
+            f.write("# %s (%d)\n" % (k, len(ls)) + "".join(l + "\n" for l in ls))
+    print("   names: %d agree; %s (%s.names.txt)" % (ok, ", ".join("%d %s" % (len(v), k) for k, v in out.items()), p))
+    for l in (out["named"] + out["raw (version C)"])[:8]: print("     " + l)
+    return not out["named"] and not out["raw (version C)"]
+
+
+def _vlines():
+    import units as U
+    if "v" not in _vlines.__dict__: _vlines.v = U.version_lines(SERIAL)
+    return _vlines.v
+
+
 def main():
     os.chdir(ROOT)
+    if "--version" in ARGS:
+        from versions import canon, REFERENCE
+        v = canon(ARGS[ARGS.index("--version") + 1])
+        if v != REFERENCE: setup_version(v)
     for p, P in list(PROGS.items()):
         if not os.path.exists(P["game"]):
-            if p in ("main0", "x000"): sys.exit("missing %s (put your own game files in game/)" % P["game"])
+            if p in ("main0", "x000") or VER: sys.exit("missing %s (put your own game files in game/)" % P["game"])
             print("skip %s: missing %s (extracted disc tree game/disc/fs)" % (P["out"], P["game"])); del PROGS[p]
+    # the psx_tomba headers (`// HEADERS tomba24` / `tomba26` files include tomba/psyq/...) are not in the repo:
+    # without them every such file fails to compile and stays asm, the link still matches by sha1, and a native port
+    # generated from this link silently lacks those functions (USA: 611 files, 126 stubs, a crash at frame 0)
+    if "--asm-only" not in ARGS and not os.path.isdir(os.path.join(ROOT, "include", "tomba", "psyq")):
+        sys.exit("build_full: include/tomba/psyq is missing (the PSY-Q headers the psx_tomba files include): run "
+                 "sudo tools/setup_native.sh first (in a worktree: copy include/tomba/psyq from the main checkout)")
     if "--no-split" not in ARGS: split()
     units = [] if "--asm-only" in ARGS else compile_all()
+    # the C files that did not compile (kept as asm): port/tools/gen_port.py refuses a link that has any, since their
+    # functions would be missing from the port
+    failed = sorted(u["src"] for u in units if u.get("compile_error"))
+    os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, "compile_failures.txt"), "w") as f:
+        f.write("".join(s + "\n" for s in failed))
     allok = True
     for p in PROGS:
         out, game, order, ncfun, n = build_prog(p, [u for u in units if u["prog"] == p])
         allok &= report(p, out, game, order, ncfun, n)
+        if VER: name_audit(p)
+    if failed:
+        print("WARNING: %d C files did not compile and were linked from asm (%s/compile_failures.txt): the bytes "
+              "match, but the native port refuses this link (it would lack their functions)"
+              % (len(failed), os.path.relpath(OUT, ROOT)))
     print("OK" if allok else "FAIL")
     sys.exit(0 if allok else 1)
 

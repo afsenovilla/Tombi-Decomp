@@ -6,7 +6,9 @@ name: Native port (Windows exe)
 # data image from the player's own game files like report.yml (GAME_FILES_URL secret, the whole disc image), so NO
 # game data ends up in the artifact: only our code, SDL2.dll (zlib licence, THIRD_PARTY_NOTICES.md) and the launcher
 # (the image's MAIN0/X000 bytes are compiled into tombi-pc.exe: it is built from the player's own copy, and the exe
-# published here is the one the repository owner built from theirs).
+# published here is the one the repository owner built from theirs).  With the GAME_FILES_URL_USA secret the same jobs
+# also build the USA game (tombi-pc-usa[.exe], PORT_VERSION=usa after tools/build_full.py --version usa) and the
+# launcher bundles both (its game library runs the binary of the disc's version); without it they build PAL only.
 on:
   push:
     branches: [master]
@@ -26,6 +28,9 @@ on:
       - tools/save_import.py
       - tools/test_save_import.py
       - tools/extract_data.py
+      - tools/game_library.py
+      - tools/disc_archive.py
+      - tools/versions.py
       - tools/chd.py
       - tools/data_patch.py
       - tools/text_patch.py
@@ -72,14 +77,20 @@ jobs:
     outputs:
       game: ${{ steps.key.outputs.game }}
       full: ${{ steps.key.outputs.full }}
+      fullusa: ${{ steps.key.outputs.fullusa }}
     steps:
       - uses: actions/checkout@v4
       - name: Cache keys
         id: key
+        env:
+          HAVE_USA: ${{ secrets.GAME_FILES_URL_USA != '' }}   # (only whether it is set: the built-game cache holds the USA binary or not)
         run: |
-          # full: inputs of tools/build_full.py; game: those plus the port generator/runtime and the toolchain setup
+          # full: inputs of tools/build_full.py; fullusa: the same for --version usa (build/scus94236/full); game: those
+          # plus the port generator/runtime and the toolchain setup, and whether the USA disc secret is there
           echo "full=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
-          echo "game=v1-${{ env.SDL2_VERSION }}-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/areas.py', 'tools/units.py', 'tools/requirements.txt', 'tools/setup_native.sh', 'port2/**', 'port/**', 'tools/extract_data.py', 'THIRD_PARTY_NOTICES.md') }}" >> "$GITHUB_OUTPUT"
+          echo "fullusa=v1-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/units.py', 'tools/versions.py', 'tools/version_data.py', 'tools/requirements.txt', 'tools/setup_native.sh') }}" >> "$GITHUB_OUTPUT"
+          USA=pal; [ "$HAVE_USA" = true ] && USA=pal-usa
+          echo "game=v2-$USA-${{ env.SDL2_VERSION }}-${{ hashFiles('src/**', 'include/**', 'asm/**', 'config/**', 'tools/build_full.py', 'tools/ncheck.py', 'tools/sysovl.py', 'tools/areas.py', 'tools/units.py', 'tools/versions.py', 'tools/version_data.py', 'tools/requirements.txt', 'tools/setup_native.sh', 'port2/**', 'port/**', 'tools/extract_data.py', 'THIRD_PARTY_NOTICES.md') }}" >> "$GITHUB_OUTPUT"
 
   game-win:
     needs: plan
@@ -103,13 +114,26 @@ jobs:
         with:
           python-version: "3.12"
 
+      # apt downloads kept across runs (the Azure Ubuntu mirror is at times very slow: the i386 SDL / LLVM set alone
+      # took 30 min on 2026-11-10); apt skips a .deb already in the cache directory
+      - name: Cache apt downloads
+        if: steps.bin.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/apt-cache
+          key: apt-game-win-${{ runner.os }}-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+          restore-keys: apt-game-win-${{ runner.os }}-v1-
+
       - name: Install toolchain
         if: steps.bin.outputs.cache-hit != 'true'
         run: |
+          mkdir -p "$RUNNER_TEMP/apt-cache/partial"
+          export APT_CACHE="-o Dir::Cache::archives=$RUNNER_TEMP/apt-cache"
           sudo apt-get update
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake ccache gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
+          sudo apt-get $APT_CACHE install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake ccache gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
+          sudo chown -R "$USER" "$RUNNER_TEMP/apt-cache"
           python3 -m pip install -r tools/requirements.txt
           python3 -m pip install --no-deps splat64==0.35.2
           python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
@@ -245,6 +269,69 @@ jobs:
           cp "$RUNNER_TEMP/sdl/SDL2-${SDL2_VERSION}/i686-w64-mingw32/share/licenses/SDL2/LICENSE.txt" build/win-bin/SDL2-LICENSE.txt || true
           ls -l build/win-bin
 
+      # USA (SCUS-94236, docs/USA.md "Native port"): a second game binary, tombi-pc-usa.exe, generated from the USA disc of
+      # the GAME_FILES_URL_USA secret (the same rule as PAL: built from the owner's own copy, no game data in the
+      # artifact beyond what the exe is compiled from). Without the secret the PAL game is built alone.
+      - uses: ./.github/actions/disc-cache     # the USA download stays in the Actions cache
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_USA }}
+          scope: usa
+
+      - name: Fetch the USA disc
+        id: usa
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        env:
+          GAME_FILES_URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
+        run: |
+          if [ -z "$GAME_FILES_URL_USA" ]; then
+            echo "::notice::GAME_FILES_URL_USA secret not set; building the PAL game only."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_USA" | tr -d '\r\n"'"'"' ')"
+          bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/usa.dl" 100000000
+          bash tools/disc_unpack.sh "$RUNNER_TEMP/usa.dl" game_usa/fs
+          rm -f "$RUNNER_TEMP/usa.dl" game_usa/fs.img
+          echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Restore USA matching build
+        id: fullusa
+        if: steps.usa.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/scus94236/full
+            !build/scus94236/full/tmp
+          key: fullusa-${{ needs.plan.outputs.fullusa }}
+
+      - name: USA matching build (the generator's symbols, build/scus94236/full)
+        if: steps.usa.outputs.ok == 'true' && steps.fullusa.outputs.cache-hit != 'true'
+        run: python3 tools/build_full.py --version usa -j "$(nproc)"
+
+      - name: Touch restored USA matching build
+        if: steps.usa.outputs.ok == 'true' && steps.fullusa.outputs.cache-hit == 'true'
+        run: find build/scus94236/full -type f -exec touch {} +
+
+      - name: Save USA matching build
+        if: steps.usa.outputs.ok == 'true' && steps.fullusa.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/scus94236/full
+            !build/scus94236/full/tmp
+          key: fullusa-${{ needs.plan.outputs.fullusa }}
+
+      - name: Build tombi-pc-usa.exe (the USA game, PORT_VERSION=usa)
+        if: steps.usa.outputs.ok == 'true'
+        run: |
+          cmake -S port2 -B build/port2-scus94236-win -G Ninja -DPORT_VERSION=usa -DCMAKE_TOOLCHAIN_FILE="$PWD/port2/cmake/mingw-i686.cmake" \
+                -DPORT_SDL2_MINGW="$RUNNER_TEMP/sdl/SDL2-${SDL2_VERSION}/i686-w64-mingw32"
+          ninja -C build/port2-scus94236-win -j "$(nproc)"
+          head -12 build/port2-scus94236-win/gen/report.txt || true
+          cp build/port2-scus94236-win/tombi2.exe build/win-bin/tombi-pc-usa.exe
+          ls -l build/win-bin
+
       - name: Save ccache
         if: always() && steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
         uses: actions/cache/save@v4
@@ -296,13 +383,26 @@ jobs:
         with:
           python-version: "3.12"
 
+      # apt downloads kept across runs (the Azure Ubuntu mirror is at times very slow: the i386 SDL / LLVM set alone
+      # took 30 min on 2026-11-10); apt skips a .deb already in the cache directory
+      - name: Cache apt downloads
+        if: steps.bin.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/apt-cache
+          key: apt-game-linux-${{ runner.os }}-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+          restore-keys: apt-game-linux-${{ runner.os }}-v1-
+
       - name: Install toolchain
         if: steps.bin.outputs.cache-hit != 'true'
         run: |
+          mkdir -p "$RUNNER_TEMP/apt-cache/partial"
+          export APT_CACHE="-o Dir::Cache::archives=$RUNNER_TEMP/apt-cache"
           sudo apt-get update
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake ccache gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
+          sudo apt-get $APT_CACHE install -y binutils-mipsel-linux-gnu libyaml-dev gcc-mingw-w64-i686 ninja-build cmake ccache gcc-multilib libsdl2-dev libsdl2-2.0-0:i386 patchelf
+          sudo chown -R "$USER" "$RUNNER_TEMP/apt-cache"
           python3 -m pip install -r tools/requirements.txt
           python3 -m pip install --no-deps splat64==0.35.2
           python3 -c "import site,os; open(os.path.join(site.getsitepackages()[0],'pylibyaml.py'),'w').write('# optional accelerator stub\n')"
@@ -442,6 +542,70 @@ jobs:
           cp THIRD_PARTY_NOTICES.md build/linux-bin/
           ls -l build/linux-bin
 
+      # USA (SCUS-94236, docs/USA.md "Native port"): a second game binary, tombi-pc-usa, generated from the USA disc of
+      # the GAME_FILES_URL_USA secret (the same rule as PAL: built from the owner's own copy, no game data in the
+      # artifact beyond what the exe is compiled from). Without the secret the PAL game is built alone.
+      - uses: ./.github/actions/disc-cache     # the USA download stays in the Actions cache
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        with:
+          urls: ${{ secrets.GAME_FILES_URL_USA }}
+          scope: usa
+
+      - name: Fetch the USA disc
+        id: usa
+        if: steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
+        env:
+          GAME_FILES_URL_USA: ${{ secrets.GAME_FILES_URL_USA }}
+        run: |
+          if [ -z "$GAME_FILES_URL_USA" ]; then
+            echo "::notice::GAME_FILES_URL_USA secret not set; building the PAL game only."
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          URL="$(printf '%s' "$GAME_FILES_URL_USA" | tr -d '\r\n"'"'"' ')"
+          bash tools/ci_download.sh "$URL" "$RUNNER_TEMP/usa.dl" 100000000
+          bash tools/disc_unpack.sh "$RUNNER_TEMP/usa.dl" game_usa/fs
+          rm -f "$RUNNER_TEMP/usa.dl" game_usa/fs.img
+          echo "81cbc79f0230aeb4252e058039f47ac95a777f5a  game_usa/fs/SCUS_942.36" | sha1sum -c -
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Restore USA matching build
+        id: fullusa
+        if: steps.usa.outputs.ok == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            build/scus94236/full
+            !build/scus94236/full/tmp
+          key: fullusa-${{ needs.plan.outputs.fullusa }}
+
+      - name: USA matching build (the generator's symbols, build/scus94236/full)
+        if: steps.usa.outputs.ok == 'true' && steps.fullusa.outputs.cache-hit != 'true'
+        run: python3 tools/build_full.py --version usa -j "$(nproc)"
+
+      - name: Touch restored USA matching build
+        if: steps.usa.outputs.ok == 'true' && steps.fullusa.outputs.cache-hit == 'true'
+        run: find build/scus94236/full -type f -exec touch {} +
+
+      - name: Save USA matching build
+        if: steps.usa.outputs.ok == 'true' && steps.fullusa.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            build/scus94236/full
+            !build/scus94236/full/tmp
+          key: fullusa-${{ needs.plan.outputs.fullusa }}
+
+      - name: Build tombi-pc-usa (the USA game, PORT_VERSION=usa)
+        if: steps.usa.outputs.ok == 'true'
+        run: |
+          cmake -S port2 -B build/port2-scus94236 -G Ninja -DPORT_VERSION=usa
+          ninja -C build/port2-scus94236 -j "$(nproc)"
+          head -12 build/port2-scus94236/gen/report.txt || true
+          cp build/port2-scus94236/tombi2 build/linux-bin/tombi-pc-usa
+          patchelf --set-rpath '$ORIGIN' build/linux-bin/tombi-pc-usa
+          build/linux-bin/tombi-pc-usa --headless --test-null
+          ls -l build/linux-bin
+
       - name: Save ccache
         if: always() && steps.bin.outputs.cache-hit != 'true' && steps.fetch.outputs.ok == 'true'
         uses: actions/cache/save@v4
@@ -491,6 +655,7 @@ jobs:
         shell: bash
         run: |
           build/win-bin/tombi-pc.exe --headless --test-null
+          if [ -f build/win-bin/tombi-pc-usa.exe ]; then build/win-bin/tombi-pc-usa.exe --headless --test-null; fi
           build/win-bin/tombi-pc.exe --headless --frames 200 --disc nonexistent.bin 2>&1 | head -5 || true
           # the data/ path: a manifest with MAIN0 and the PVD blob only (every other read is zeros, logged), and a
           # missing folder (must say so and exit, not crash)
@@ -501,23 +666,41 @@ jobs:
           # which must fall back to the software rasteriser, not fail)
           build/win-bin/tombi-pc.exe --headless --renderer gl --frames 100 --disc nonexistent.bin 2>&1 | grep -i 'renderer\|opengl' || true
 
+      # the Python environment (PyInstaller with its bootloader built from source, PySide6, numpy) kept across runs:
+      # installing it was most of this job's time
+      - name: Cache the Python environment
+        id: venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-launcher-win-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+
       - name: Build tombi-port.exe
         shell: bash
         run: |
+          python -m venv .venv
+          source .venv/Scripts/activate
           # PyInstaller's prebuilt Windows bootloader is what antivirus / browser scanners flag (false positives that
           # come and go with each release): build the bootloader here from source (MSVC on the runner), pinned version
           # PySide6-Essentials: the launcher is Qt, and the save editor (tools/tombi_save_editor.py) opens inside it (Edit save...)
-          PYINSTALLER_COMPILE_BOOTLOADER=1 python -m pip install --no-binary pyinstaller "pyinstaller==6.11.1" pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
+          if [ "${{ steps.venv.outputs.cache-hit }}" != "true" ]; then
+            PYINSTALLER_COMPILE_BOOTLOADER=1 python -m pip install --no-binary pyinstaller "pyinstaller==6.11.1" pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
+          fi
           QT_QPA_PLATFORM=offscreen python tools/test_tombi_save_editor.py
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
           python tools/test_save_import.py
           echo "${GITHUB_SHA::7}" > build_id.txt
-          pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
+          # the USA game (tombi-pc-usa[.exe]) next to the PAL one when the game job built it (GAME_FILES_URL_USA set)
+          SEP=":"; if [ "$RUNNER_OS" = Windows ]; then SEP=";"; fi
+          USA=(); for f in build/win-bin/tombi-pc-usa.exe build/linux-bin/tombi-pc-usa; do
+            if [ -f "$f" ]; then USA=(--add-binary "$f$SEP."); fi; done
+          pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . "${USA[@]}" \
+            --hidden-import game_library --hidden-import disc_archive \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --collect-all numpy --paths tools \
             --hidden-import save_import --hidden-import tombi_save --hidden-import tombi_save_editor --hidden-import tombi_save_editor_lang --add-data "tools/save_editor_assets;save_editor_assets" \
             --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf \
             --exclude-module tkinter --exclude-module _tkinter \
-            --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "tools/icons/ps1_pad.png;icons" --add-data "build_id.txt;." \
+            --icon tools/icons/launcher.ico --add-data "tools/icons/launcher.ico;icons" --add-data "tools/icons/launcher.png;icons" --add-data "tools/icons/ps1_pad.png;icons" --add-data "build_id.txt;." --add-data "VERSION;." \
             --add-data "port/assets/prompts/manifest.json;port/assets/prompts" \
             --add-data "tools/wfm_charmap.json;." --add-data "tools/civ_rebuild_layout.json;." --add-data "patches/es_mejorada.tombipatch.json;patches" --add-data "patches/en_cut_content.tombipatch.json;patches" \
             --add-binary "build/win-bin/tombi-pc.exe;." --add-binary "build/win-bin/SDL2.dll;." \
@@ -526,6 +709,9 @@ jobs:
           cp build/exe/tombi-port.exe dist/windows/tombi-port.exe
           cp build/exe/tombi-port.exe build/win-bin/tombi-pc.exe build/win-bin/SDL2.dll build/out/
           cp THIRD_PARTY_NOTICES.md build/out/
+          # which games the bundle runs (release.yml reads it for the notes)
+          echo pal > dist/windows/versions.txt
+          if [ -f build/win-bin/tombi-pc-usa.exe ]; then cp build/win-bin/tombi-pc-usa.exe build/out/; echo usa >> dist/windows/versions.txt; fi
 
       - uses: actions/upload-artifact@v4
         with:
@@ -535,7 +721,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: bin-windows-port
-          path: dist/windows/tombi-port.exe
+          path: |
+            dist/windows/tombi-port.exe
+            dist/windows/versions.txt
           retention-days: 90
 
   launcher-linux:
@@ -554,26 +742,53 @@ jobs:
           name: tombi-port-game-linux
           path: build/linux-bin
 
+      - name: Cache apt downloads
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/apt-cache
+          key: apt-launcher-linux-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+          restore-keys: apt-launcher-linux-v1-
+
+      - name: Cache the Python environment
+        id: venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-launcher-linux-v1-${{ hashFiles('.github/workflows/port2-exe.yml') }}
+
       - name: Build tombi-port (Linux)
         run: |
+          mkdir -p "$RUNNER_TEMP/apt-cache/partial"
+          APT_CACHE="-o Dir::Cache::archives=$RUNNER_TEMP/apt-cache"
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y libc6:i386 libsdl2-2.0-0:i386   # (Ubuntu's libSDL2 links ALSA/Pulse/X11 directly: the user needs this too, README)
+          sudo apt-get $APT_CACHE install -y libc6:i386 libsdl2-2.0-0:i386   # (Ubuntu's libSDL2 links ALSA/Pulse/X11 directly: the user needs this too, README)
           chmod +x build/linux-bin/tombi-pc
           build/linux-bin/tombi-pc --headless --test-null
+          if [ -f build/linux-bin/tombi-pc-usa ]; then chmod +x build/linux-bin/tombi-pc-usa; build/linux-bin/tombi-pc-usa --headless --test-null; fi
           # the launcher is Qt (PySide6-Essentials, as on Windows; its xcb platform plugin needs libxcb-cursor0 on the
           # player's system, README); the offscreen tests need EGL / xkbcommon
-          sudo apt-get install -y libegl1 libxkbcommon0 libfontconfig1
-          python -m pip install pyinstaller pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
+          sudo apt-get $APT_CACHE install -y libegl1 libxkbcommon0 libfontconfig1
+          sudo chown -R "$USER" "$RUNNER_TEMP/apt-cache"
+          python -m venv .venv
+          source .venv/bin/activate
+          if [ "${{ steps.venv.outputs.cache-hit }}" != "true" ]; then
+            python -m pip install pyinstaller pyinstaller-hooks-contrib pillow "numpy<2.3" "PySide6-Essentials==6.8.1"
+          fi
           QT_QPA_PLATFORM=offscreen python tools/test_port_launcher.py
           python tools/test_save_import.py
           echo "${GITHUB_SHA::7}" > build_id.txt
-          pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . \
+          # the USA game (tombi-pc-usa[.exe]) next to the PAL one when the game job built it (GAME_FILES_URL_USA set)
+          SEP=":"; if [ "$RUNNER_OS" = Windows ]; then SEP=";"; fi
+          USA=(); for f in build/win-bin/tombi-pc-usa.exe build/linux-bin/tombi-pc-usa; do
+            if [ -f "$f" ]; then USA=(--add-binary "$f$SEP."); fi; done
+          pyinstaller --onefile --windowed --name tombi-port --distpath build/exe --workpath build/pyi --specpath . "${USA[@]}" \
+            --hidden-import game_library --hidden-import disc_archive \
             --hidden-import i18n --hidden-import port_mods --hidden-import extract_data --hidden-import chd --hidden-import data_patch --hidden-import text_patch --hidden-import text_core --hidden-import text_strings --hidden-import wfm_py --hidden-import title_layout --hidden-import verb_order --hidden-import cdfiles --hidden-import prompt_glyphs --hidden-import gfx_es --hidden-import gfx_es.tryagain --hidden-import gfx_es.cargar_guardar --hidden-import gfx_es.cargando --hidden-import area000 --hidden-import dump_all_textures --hidden-import vram --hidden-import wpp --hidden-import PIL.ImageDraw --hidden-import PIL.ImageFilter --hidden-import PIL.ImageFont --hidden-import civ_rebuild --hidden-import civ_test_data --hidden-import topdown --hidden-import str --hidden-import audio --hidden-import load_lists --hidden-import menu_text --hidden-import memcard_text --hidden-import subscreen_text --hidden-import text_preview --hidden-import numpy --collect-all numpy --paths tools \
             --hidden-import save_import --hidden-import tombi_save --hidden-import tombi_save_editor --hidden-import tombi_save_editor_lang --add-data "tools/save_editor_assets:save_editor_assets" \
             --exclude-module PySide6.QtNetwork --exclude-module PySide6.QtQml --exclude-module PySide6.QtQuick --exclude-module PySide6.QtOpenGL --exclude-module PySide6.QtPdf \
             --exclude-module tkinter --exclude-module _tkinter \
-            --add-data "tools/icons/launcher.ico:icons" --add-data "tools/icons/launcher.png:icons" --add-data "tools/icons/ps1_pad.png:icons" --add-data "build_id.txt:." \
+            --add-data "tools/icons/launcher.ico:icons" --add-data "tools/icons/launcher.png:icons" --add-data "tools/icons/ps1_pad.png:icons" --add-data "build_id.txt:." --add-data "VERSION:." \
             --add-data "port/assets/prompts/manifest.json:port/assets/prompts" \
             --add-data "tools/wfm_charmap.json:." --add-data "tools/civ_rebuild_layout.json:." --add-data "patches/es_mejorada.tombipatch.json:patches" --add-data "patches/en_cut_content.tombipatch.json:patches" \
             --add-binary "build/linux-bin/tombi-pc:." --add-binary "build/linux-bin/libSDL2-2.0.so.0:." \
@@ -581,9 +796,13 @@ jobs:
           mkdir -p dist/linux
           cp build/exe/tombi-port dist/linux/tombi-port
           chmod +x dist/linux/tombi-port
+          echo pal > dist/linux/versions.txt          # which games the bundle runs (release.yml reads it for the notes)
+          if [ -f build/linux-bin/tombi-pc-usa ]; then echo usa >> dist/linux/versions.txt; fi
 
       - uses: actions/upload-artifact@v4
         with:
           name: bin-linux-port
-          path: dist/linux/tombi-port
+          path: |
+            dist/linux/tombi-port
+            dist/linux/versions.txt
           retention-days: 90

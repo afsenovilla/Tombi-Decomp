@@ -257,6 +257,10 @@ extern int GAME_AREA00_EVENT_CONTROL;
 extern unsigned char DAT_8009d00dA[];
 extern unsigned char *PLAYER_EXT;
 extern void *NPC_CHARLES_ANIMS, *PTR_8013ac18, *PTR_8013ac20, *PTR_8013ac24, *PTR_8013ac2c;
+#if defined(VERSION_SCUS_94236)  /* USA: other contents; the retail table at its USA address */
+extern char D_80138A0E[];
+#define DAT_801396ca D_80138A0E
+#else
 static char DAT_801396ca[98] = {
     8, 3, 0, 0x12, 0, 0, -0x7d, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     0, 1, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1, 0, 0, 0, 0,
@@ -264,6 +268,7 @@ static char DAT_801396ca[98] = {
     0, 0, 0, 1, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1,
     0, 1, 0x68, 0, 0x68, 0, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -1, 0x7f,
 };
+#endif
 extern char PLAYER_IDLE_ANIM[];
 extern int showMessageBox(int, int, int, int);
 extern void AnimLoadDuration(TObj *);

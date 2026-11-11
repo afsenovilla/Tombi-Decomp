@@ -71,6 +71,7 @@ if(ANDROID AND (ANDROID_ABI STREQUAL "arm64-v8a" OR CMAKE_ANDROID_ARCH_ABI STREQ
   target_compile_definitions(port2chd PRIVATE ZSTD_DISABLE_ASM)
   target_compile_options(port2chd PRIVATE -fPIC -O2 -w)
   add_library(tombidisc SHARED ${CMAKE_CURRENT_SOURCE_DIR}/android/disccheck.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/cd_chd.c
+              ${CMAKE_CURRENT_SOURCE_DIR}/third_party/lzma-7z/lzma7z.c
               $<TARGET_OBJECTS:port2chd>)
   target_include_directories(tombidisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHDR_DIR}/include)
   target_compile_definitions(tombidisc PRIVATE PORT_HAVE_CHD)
@@ -93,6 +94,28 @@ elseif(NINTENDO_3DS)
       PORT2_LIBC=$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libc.a:$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libsysbase.a:$ENV{DEVKITARM}/arm-none-eabi/lib/armv6k/fpu/libm.a:$ENV{DEVKITPRO}/libctru/lib/libctru.a:$ENV{DEVKITPRO}/libctru/lib/libcitro3d.a:$ENV{DEVKITPRO}/portlibs/3ds/lib/libSDL2.a)
 endif()
 
+# the game version (docs/PORT_VERSIONS_PLAN.md U1, port/tools/portver.py): empty = PAL SCES-01331 (the default build),
+# usa = SCUS-94236 (needs python3 tools/build_full.py --version usa first, and the USA disc's files in game_usa/fs at
+# build time); one binary per version: cmake -S port2 -B build/port2-scus94236 -DPORT_VERSION=usa
+set(PORT_VERSION "" CACHE STRING "game version the port is generated for: empty (PAL SCES-01331) or usa (SCUS-94236)")
+if(PORT_VERSION)
+  if(PORT2_GEN_ENV)
+    list(APPEND PORT2_GEN_ENV PORT_VERSION=${PORT_VERSION})
+  else()
+    set(PORT2_GEN_ENV ${CMAKE_COMMAND} -E env PORT_VERSION=${PORT_VERSION})
+  endif()
+  string(TOLOWER "${PORT_VERSION}" _pv)
+  if(_pv STREQUAL "usa" OR _pv STREQUAL "scus94236")
+    set(PORT2_FULL_DIR ${ROOT}/build/scus94236/full)
+    set(PORT2_FULL_EXE scus94236)
+  else()
+    message(FATAL_ERROR "PORT_VERSION=${PORT_VERSION}: not supported (empty for PAL, or usa)")
+  endif()
+else()
+  set(PORT2_FULL_DIR ${ROOT}/build/full)
+  set(PORT2_FULL_EXE main0)
+endif()
+
 # 1. filtered sources + address resolution (re-run on every configure)
 set(PORT2_PROGS MAIN0 X000 X001 X002 X003 X004 X005 X006 X008 X009 X010 X011 X013 X014 X016 X017 X018 X019
     O0PTSUB0 D0SPSUB D0SPSUB2 D0SPSUB3 G0OVER I0NFO I0NFO2 I0NFO3 CACHE STRING "programs whose C is compiled into port2")
@@ -103,8 +126,8 @@ if(gen_rc)
 endif()
 include(${GEN}/sources.cmake)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-             ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py ${ROOT}/port/tools/gen_port.py ${ROOT}/port/fixes.txt
-             ${ROOT}/build/full/main0.full.ld)
+             ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py ${ROOT}/port/tools/gen_port.py ${ROOT}/port/tools/portver.py ${ROOT}/port/fixes.txt
+             ${PORT2_FULL_DIR}/${PORT2_FULL_EXE}.full.ld)
 
 # 2. phase 1 is a 32-bit build with the normal libc (the game's structs hold 32-bit pointers); the image is linked
 #    below 16 MB so the 24-bit ordering-table links are exact (port_prelude.h).  No freestanding tricks.
@@ -143,13 +166,27 @@ elseif(NINTENDO_3DS)   # (gcc 14 and later make them errors too; -fpermissive tu
   list(APPEND PORT2_GAME_FLAGS -fpermissive)
 endif()
 
+# (another version: its macro, VERSION_<SERIAL>, picks the version's #if branches of the shared C; sources.cmake)
+foreach(d ${PORT_VERSION_DEFS})
+  list(APPEND PORT2_GAME_FLAGS -D${d})
+endforeach()
 add_library(game2 OBJECT ${PORT_GAME_SOURCES})
 target_include_directories(game2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${GEN} ${GEN}/inc ${GEN}/inc/tomba)
 target_compile_options(game2 PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_GAME_FLAGS})
+set(PORT2_GAME_OBJS $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24>)
+set(PORT2_GAME_TARGETS game2 game2_24)
 
 add_library(game2_24 OBJECT ${PORT_GAME_SOURCES_T24})
 target_include_directories(game2_24 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${GEN} ${GEN}/inc24 ${GEN}/inc24/tomba)
 target_compile_options(game2_24 PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_GAME_FLAGS})
+# the psx_tomba header set (`// HEADERS tomba26`: the USA ports); a PAL build has no such file
+if(PORT_GAME_SOURCES_T26)
+  add_library(game2_26 OBJECT ${PORT_GAME_SOURCES_T26})
+  target_include_directories(game2_26 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${GEN} ${GEN}/inc26 ${GEN}/inc26/tomba)
+  target_compile_options(game2_26 PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_GAME_FLAGS})
+  list(APPEND PORT2_GAME_OBJS $<TARGET_OBJECTS:game2_26>)
+  list(APPEND PORT2_GAME_TARGETS game2_26)
+endif()
 
 # the runtime, the shims and the tables gen_port wrote at configure time (funcmap.c: retail address -> native
 # function, the overlay set, the areas and their signature words)
@@ -180,6 +217,7 @@ if(NINTENDO_3DS)
   target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/.dkp-generated/pica_vsh_bin ${CMAKE_CURRENT_SOURCE_DIR}/shims)
 endif()
 target_include_directories(port2rt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(port2rt PRIVATE ${GEN}/version)      # port_version.h (gen2.py: the version's layout)
 target_include_directories(port2rt PRIVATE ${CHDR_DIR}/include)
 target_compile_definitions(port2rt PRIVATE PORT_HAVE_CHD)
 target_compile_options(port2rt PRIVATE ${PORT2_ARCH_FLAGS} ${PORT2_RT_FLAGS} -O2 -Wall -Wno-unused-function -ffp-contract=off)
@@ -265,15 +303,15 @@ endif()
 # 3. resolve the rest against the retail symbol table: data image (from the user's MAIN0.EXE/X000.BIN), aliases,
 #    stubs.  All three are generated into the build dir; data.c is game data and never leaves it.
 file(GENERATE OUTPUT ${GEN}/objects.txt
-     CONTENT "$<JOIN:$<TARGET_OBJECTS:game2>,\n>\n$<JOIN:$<TARGET_OBJECTS:game2_24>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2rt>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2chd>,\n>\n$<$<BOOL:${NINTENDO_3DS}>:$<JOIN:$<TARGET_OBJECTS:pica_vsh_bin>,\n>\n>")
+     CONTENT "$<JOIN:${PORT2_GAME_OBJS},\n>\n$<JOIN:$<TARGET_OBJECTS:port2rt>,\n>\n$<JOIN:$<TARGET_OBJECTS:port2chd>,\n>\n$<$<BOOL:${NINTENDO_3DS}>:$<JOIN:$<TARGET_OBJECTS:pica_vsh_bin>,\n>\n>")
 add_custom_command(OUTPUT ${GEN}/syms.ld ${GEN}/stubs.c ${GEN}/data.c ${GEN}/thunks.S ${GEN}/addrmap.c ${GEN}/report.txt
                    COMMAND ${PORT2_GEN_ENV} ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py link ${GEN} ${CMAKE_NM} ${GEN}/objects.txt
-                   DEPENDS game2 game2_24 port2rt port2chd $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt>
+                   DEPENDS ${PORT2_GAME_TARGETS} port2rt port2chd $<TARGET_OBJECTS:port2chd> ${PORT2_GAME_OBJS} $<TARGET_OBJECTS:port2rt>
                            ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen2.py
                    COMMENT "Resolving game symbols: data image, aliases, dispatch thunks, stubs")
 add_library(port2gen OBJECT ${GEN}/stubs.c ${GEN}/data.c ${GEN}/thunks.S ${GEN}/addrmap.c)
 set_source_files_properties(${GEN}/stubs.c ${GEN}/data.c ${GEN}/thunks.S ${GEN}/addrmap.c PROPERTIES GENERATED TRUE)
-target_include_directories(port2gen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${GEN})
+target_include_directories(port2gen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${GEN} ${GEN}/version)
 # (-fno-zero-initialized-in-bss: the zero regions of the image, port_scratch and port_io, stay in .data right after
 #  port_ram, below the runtime's large .bss buffers, so the whole image sits below 16 MB on Windows too)
 target_compile_options(port2gen PRIVATE ${PORT2_ARCH_FLAGS} -O0 -w -fno-zero-initialized-in-bss)
@@ -282,7 +320,7 @@ if(ANDROID)
   # libtombi.so (the game; entry port_main) and libmain.so (SDL_main: reserves the low range, loads libtombi.so into
   # it).  -Bsymbolic: the game's own definitions (its Psy-Q `write`/`open` stubs, the printf shim) win inside the
   # library, as they do in the PC executables, over bionic's that the dynamic linker would otherwise pick first.
-  add_library(tombi2 SHARED $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:port2gen>)
+  add_library(tombi2 SHARED ${PORT2_GAME_OBJS} $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:port2gen>)
   set_target_properties(tombi2 PROPERTIES OUTPUT_NAME tombi LINKER_LANGUAGE C LINK_DEPENDS ${GEN}/syms.ld)
   target_link_options(tombi2 PRIVATE -Wl,-Bsymbolic -Wl,-z,noexecstack ${GEN}/syms.ld)
   target_link_libraries(tombi2 PRIVATE ${PORT2_SDL2})
@@ -302,13 +340,14 @@ if(ANDROID)
   add_dependencies(main tombi2)
   # libtombidisc.so: the launcher's disc check (MAIN0.EXE sha1 of a .bin/.iso/.chd), loaded in the launcher process
   add_library(tombidisc SHARED ${CMAKE_CURRENT_SOURCE_DIR}/android/disccheck.c ${CMAKE_CURRENT_SOURCE_DIR}/shims/cd_chd.c
+              ${CMAKE_CURRENT_SOURCE_DIR}/third_party/lzma-7z/lzma7z.c
               $<TARGET_OBJECTS:port2chd>)
   target_include_directories(tombidisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CHDR_DIR}/include)
   target_compile_definitions(tombidisc PRIVATE PORT_HAVE_CHD)
   target_compile_options(tombidisc PRIVATE -O2 -fPIC)
   return()
 endif()
-add_executable(tombi2 $<TARGET_OBJECTS:game2> $<TARGET_OBJECTS:game2_24> $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:port2gen>)
+add_executable(tombi2 ${PORT2_GAME_OBJS} $<TARGET_OBJECTS:port2rt> $<TARGET_OBJECTS:port2chd> $<TARGET_OBJECTS:port2gen>)
 set_target_properties(tombi2 PROPERTIES LINKER_LANGUAGE C LINK_DEPENDS ${GEN}/syms.ld)
 if(WIN32)
   enable_language(RC)                               # the exe's icon (tools/icons/port.ico)

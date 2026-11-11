@@ -2,7 +2,7 @@
 """One-time extraction of the player's own Tombi! disc into a `data/` folder the native port (port2/, tombi2) reads
 at runtime instead of the disc image (docs/PORT.md "Running without the disc image: data/").
 
-  python3 tools/extract_data.py <disc.bin|.cue|.iso|.chd> <data_dir> [--quiet]
+  python3 tools/extract_data.py <disc.bin|.cue|.iso|.chd|.zip|.7z> <data_dir> [--quiet]   (an archive: tools/disc_archive.py)
   python3 tools/extract_data.py --check <data_dir>            # verifies the manifest against the files (exit 1 if not)
 
 The game never reads the ISO9660 directory: it seeks to (LBA, size) pairs from its own file table (tools/cdfiles.py),
@@ -25,13 +25,16 @@ Manifest (text, one entry per line, sorted by LBA; `#` comments):
 
 Importable: extract(image, out_dir, progress=None) -> manifest dict; manifest_sha1(out_dir) -> sha1 or None.
 """
-import hashlib, os, struct, sys
+import hashlib, os, shutil, struct, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # `python3 -I` (CI) leaves the script's folder out
 import chd
 
 MAIN0_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"     # EXE/MAIN0.EXE of SCES-01331 / SCES-01330 Rev 1 (the port's build)
 REV0_SHA1 = "118459cef9b3747f57b13a498c475ffb8ab512ec"      # the July 1998 Rev 0 of both serials: other overlays, the port does not run it
+# the game executables of the other releases (the boot exe of SYSTEM.CNF): {sha1: (serial, release)}
+VERSION_OF = {"81cbc79f0230aeb4252e058039f47ac95a777f5a": ("SCUS-94236", "Tomba! (USA)"),
+              "07d577698ad31ec1a69b9d7b80a7c3f90b650888": ("SLPS-01144", "Ore! Tomba (Japan)")}
 MANIFEST = "manifest.txt"
 BLOB_DIR = "_disc"
 
@@ -192,11 +195,39 @@ def extract(image, out_dir, progress=None, force=False):
             if progress:
                 progress(done, total, path)
         sha = hashlib.sha1(img.user(main0[0], (main0[1] + 2047) // 2048)[:main0[1]]).hexdigest() if main0 else ""
-        man = {"sectors": img.sectors, "main0_sha1": sha, "source": os.path.basename(img.path), "files": entries}
+        # the boot executable SYSTEM.CNF names (SCES_013.31 on the PAL discs, which loads EXE/MAIN0.EXE; SCUS_942.36 on
+        # the USA one): its sha1 tells the port which version the folder holds (port2/shims/psyq.c checks it)
+        boot, boot_sha = boot_exe(img, files)
+        if main0 and boot and boot.upper().startswith("SCES_"): boot_sha = sha   # (PAL: the game executable is MAIN0)
+        man = {"sectors": img.sectors, "main0_sha1": sha, "source": os.path.basename(img.path), "files": entries,
+               "serial": VERSION_OF.get(boot_sha, ("", ""))[0] or serial_of(boot), "boot": "EXE/MAIN0.EXE" if main0 else boot,
+               "boot_sha1": boot_sha}
         write_manifest(out_dir, man)
         return man
     finally:
         img.close()
+
+
+def serial_of(boot):
+    """SCUS-94236 from SCUS_942.36"""
+    b = (boot or "").upper().replace(".", "")
+    return b[:4] + "-" + b[5:] if len(b) == 10 and b[4] == "_" else ""
+
+
+def boot_exe(img, files):
+    """(path, sha1) of the boot executable named by SYSTEM.CNF (`BOOT = cdrom:\\SCUS_942.36;1`), or ("", "")"""
+    byname = {p.upper(): (lba, size) for p, lba, size in files}
+    cnf = byname.get("SYSTEM.CNF")
+    if not cnf: return "", ""
+    text = img.user(cnf[0], (cnf[1] + 2047) // 2048)[:cnf[1]].decode("ascii", "replace")
+    for line in text.splitlines():
+        k, _, v = line.partition("=")
+        if k.strip().upper() == "BOOT":
+            path = v.strip().split(":", 1)[-1].lstrip("\\").split(";")[0].replace("\\", "/")
+            ent = byname.get(path.upper())
+            if not ent: return path, ""
+            return path, hashlib.sha1(img.user(ent[0], (ent[1] + 2047) // 2048)[:ent[1]]).hexdigest()
+    return "", ""
 
 
 def write_manifest(out_dir, man):
@@ -204,6 +235,8 @@ def write_manifest(out_dir, man):
     with open(tmp, "w", encoding="ascii", newline="\n") as o:
         o.write("tombi-data 1\n# one-time extraction of the player's own disc for the native port (tools/extract_data.py)\n")
         o.write("sectors %d\nmain0_sha1 %s\nsource %s\n" % (man["sectors"], man["main0_sha1"], man["source"]))
+        if man.get("boot_sha1"):      # (the game version: serial, game executable and its sha1)
+            o.write("serial %s\nboot %s\nboot_sha1 %s\n" % (man.get("serial") or "?", man.get("boot") or "?", man["boot_sha1"]))
         o.write("# file <lba> <sectors> <stored sector bytes> <file bytes> <path>\n")
         for lba, n, stored, nbytes, path in man["files"]:
             o.write("file %d %d %d %d %s\n" % (lba, n, stored, nbytes, path))
@@ -229,6 +262,8 @@ def read_manifest(data_dir):
             man["main0_sha1"] = w[1] if len(w) > 1 else ""
         elif w[0] == "source":
             man["source"] = line[7:].strip()
+        elif w[0] in ("serial", "boot", "boot_sha1") and len(w) > 1:
+            man[w[0]] = w[1]
         elif w[0] == "file" and len(w) >= 6:
             man["files"].append((int(w[1]), int(w[2]), int(w[3]), int(w[4]), " ".join(w[5:])))
     return man
@@ -261,8 +296,17 @@ def check(data_dir):
     covered = sum(n for _, n, _, _, _ in man["files"])
     print("%s: %d files, %d of %d sectors covered, MAIN0 sha1 %s%s" % (
         data_dir, len(man["files"]), covered, man["sectors"], man["main0_sha1"][:8],
-        " (PAL Rev 1)" if man["main0_sha1"] == MAIN0_SHA1 else " (PAL Rev 0: NOT supported, the port needs Rev 1)" if man["main0_sha1"] == REV0_SHA1 else " (NOT the PAL release)"))
+        describe(man)))
     return 1 if bad or covered != man["sectors"] else 0
+
+
+def describe(man):
+    """what the extraction holds, for the messages: " (PAL Rev 1)", " (SCUS-94236 Tomba! (USA): the USA build of the port)", ..."""
+    if man["main0_sha1"] == MAIN0_SHA1: return " (PAL Rev 1)"
+    if man["main0_sha1"] == REV0_SHA1: return " (PAL Rev 0: NOT supported, the port needs Rev 1)"
+    v = VERSION_OF.get(man.get("boot_sha1", ""))
+    if v: return " (%s %s, boot %s sha1 %s: needs the port build of that version)" % (v[0], v[1], man.get("boot", "?"), man["boot_sha1"][:8])
+    return " (NOT the PAL release)"
 
 
 def main(argv):
@@ -281,11 +325,27 @@ def main(argv):
             last[0] = pct
             sys.stdout.write("\r%3d%%  %s%s" % (pct, path, " " * 30))
             sys.stdout.flush()
-    man = extract(argv[1], argv[2], progress)
+    image, tmp = argv[1], None
+    import disc_archive as DA
+    if DA.kind(image) in ("zip", "7z", "rar"):     # the image inside a .zip / .7z, unpacked beside out_dir, then deleted
+        tmp = os.path.join(os.path.dirname(os.path.abspath(argv[2])) or ".", ".unpack-" + os.path.basename(os.path.abspath(argv[2])))
+        try:
+            image = DA.extract_image(image, tmp, None if quiet else lambda d, t: progress(d, t, "unpacking " + os.path.basename(argv[1])))
+        except DA.ArchiveError as e:
+            shutil.rmtree(tmp, ignore_errors=True)
+            print("\n%s" % e)
+            return 1
+        if not quiet:
+            sys.stdout.write("\n")
+    try:
+        man = extract(image, argv[2], progress)
+    finally:
+        if tmp:
+            shutil.rmtree(tmp, ignore_errors=True)
     if not quiet:
         sys.stdout.write("\n")
     print("%s: %d files, %d sectors, MAIN0 sha1 %s%s" % (argv[2], len(man["files"]), man["sectors"], man["main0_sha1"][:8],
-                                                        "" if man["main0_sha1"] == MAIN0_SHA1 else " (PAL Rev 0: NOT supported, the port needs Rev 1)" if man["main0_sha1"] == REV0_SHA1 else " (NOT the PAL Rev 1 release)"))
+                                                        "" if man["main0_sha1"] == MAIN0_SHA1 else describe(man)))
     return 0
 
 

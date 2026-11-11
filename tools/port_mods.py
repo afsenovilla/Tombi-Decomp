@@ -3,10 +3,12 @@
 (--poke / --poke-every / --hz / --keys ...), so the launcher (tools/port_launcher.py) only assembles a command
 line.  Every mod has an id, an i18n label/description key and a function settings -> list of arguments.
 
-Addresses (PAL SCES-01331, include/tomba/game.h `gameConfig GAME` at 0x8009C960):
-  GAME.selectedArea 0x8009C960 (u16), selectedSection 0x8009C962 (u16), playerAP 0x8009C96C (u32),
-  playerHealth 0x8009C970 (u8, 4 = full), playerHealthDisplayed 0x8009C971, playerLives 0x8009C980 (u8),
-  debug-select flag 0x1F8001B4 (scratchpad), event flag bytes 0x8009CDA4 + id (0xFF = completed; notes/names.md).
+Addresses: the --poke NAME[+OFF] forms (port2/shims/psyq.c port_addr_of_name), which the port resolves to the
+release it runs (gen/version/port_version.h: PAL GAME 0x8009C960, USA 0x8009BCC8), so the same mods work in every build
+(include/gamestate.h GAME: the field offsets are the same in every release):
+  GAME+0 selectedArea (u16), GAME+2 selectedSection (u16), GAME+C playerAP (u32), GAME+10 playerHealth (u8, 4 = full),
+  GAME+11 playerMaxHealth, GAME+20 playerLives (u8), IS_DEBUG_MODE_ENABLED the debug-select flag (scratchpad
+  0x1F8001B4), SCRIPT_FLAGS + id the event flag bytes (0xFF = completed; notes/names.md).
 """
 import os
 
@@ -151,8 +153,8 @@ def args_areasel(s):
     if not s.get("areasel") or civ_town(s):
         return []
     area, section = int(s.get("area", 0)), int(s.get("section", 0))
-    return ["--poke", "900:1F8001B4:1", "--poke", "%d:8009C960:%X:2" % (F_SELECT, area),
-            "--poke", "%d:8009C962:%X:2" % (F_SELECT, section), "--pad-script", "%d:start,%d:circle:3" % (F_START, F_CIRCLE)]
+    return ["--poke", "900:IS_DEBUG_MODE_ENABLED:1", "--poke", "%d:GAME:%X:2" % (F_SELECT, area),
+            "--poke", "%d:GAME+2:%X:2" % (F_SELECT, section), "--pad-script", "%d:start,%d:circle:3" % (F_START, F_CIRCLE)]
 
 
 def args_titledebug(s):
@@ -161,20 +163,20 @@ def args_titledebug(s):
 
 def args_ap(s):
     v = int(s.get("ap", 0))
-    return ["--poke", "g1:8009C96C:%X:4" % v] if s.get("ap_on") and v > 0 else []
+    return ["--poke", "g1:GAME+C:%X:4" % v] if s.get("ap_on") and v > 0 else []
 
 
 def args_lives(s):
     v = int(s.get("lives", 3))
-    return ["--poke", "g1:8009C980:%X:1" % v] if s.get("lives_on") else []
+    return ["--poke", "g1:GAME+20:%X:1" % v] if s.get("lives_on") else []
 
 
 def args_inflives(s):
-    return ["--poke-every", "50:8009C980:63:1"] if s.get("inflives") else []
+    return ["--poke-every", "50:GAME+20:63:1"] if s.get("inflives") else []
 
 
 def args_infhealth(s):
-    return ["--poke-every", "1:8009C970:4:1"] if s.get("infhealth") else []
+    return ["--poke-every", "1:GAME+10:4:1"] if s.get("infhealth") else []
 
 
 def args_debugmenu(s):
@@ -182,7 +184,7 @@ def args_debugmenu(s):
 
 
 def args_events(s):
-    return ["--poke", "g1:8009CDA4:FF:1x%d" % EVENT_COUNT] if s.get("events") else []
+    return ["--poke", "g1:SCRIPT_FLAGS:FF:1x%d" % EVENT_COUNT] if s.get("events") else []
 
 
 PROMPT_SETS = ["playstation", "xbox", "keyboard"]
@@ -230,11 +232,21 @@ MODS = [
 ]
 
 
-def mod_args(settings, out_dir=None):
-    """All the port arguments of the enabled mods (a new-game pad script is added when no mod gives one)."""
+# the mods every release's build runs (a version without the "pokes" feature of tools/game_library.py, i.e. USA, gets
+# only these): the --poke ones name the field (GAME+C...) and the port resolves it to its release; the debug menu reads
+# the same names (port_version.h).  Not portable: --title-debug (its title-carousel hook, port/fixes.txt
+# titleDrawMenuCarousel, is PAL-only: the USA carousel is its own file) and the 50 / 60 Hz switch (NTSC: always 60).
+PORTABLE_MODS = frozenset(("skipintro", "keys_on", "areasel", "ap_on", "lives_on", "inflives", "infhealth", "events",
+                           "debugmenu"))
+
+
+def mod_args(settings, out_dir=None, allowed=None):
+    """All the port arguments of the enabled mods (a new-game pad script is added when no mod gives one); allowed: the
+    mod ids to consider (None: all)."""
     out = []
     for _id, _l, _d, _k, fn in MODS:
-        out += fn(settings)
+        if allowed is None or _id in allowed:
+            out += fn(settings)
     if "--pad-script" not in out and settings.get("autostart", False):
         out += ["--pad-script", "%d:start" % F_START]
     return out

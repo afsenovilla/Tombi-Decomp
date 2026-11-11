@@ -143,6 +143,7 @@ extern u16 D_8009F7F2;           /* pad 2 buttons (active low): debug screen off
 extern u8 D_800A2528[];
 extern void *D_8009D540;
 
+#if PORT_VERSION_PAL     /* PAL: main() (0x800163F4) is asm in the decomp; another version runs its matched C main */
 static void game_main(void) {
     u8 param[8];
     u16 *dispx, *dispy;
@@ -227,6 +228,8 @@ static void game_main(void) {
         }
     }
 }
+
+#endif
 
 /* ------------------------------------------------------------------ command line */
 const char *port_disc_path = 0;         /* --disc: the disc image (default game/disc/Tombi.bin when there is no data/) */
@@ -328,7 +331,7 @@ static int port_ws_resolve(void) {
 
 static int usage(const char *argv0) {
     port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--crawler-patrol] [--log-anim [FILE]] [--log-anim-force CAT:TYPE,...] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
-                "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--picture ntsc|pal] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--subscreen-labels item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR]\n"
+                "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--picture ntsc|pal] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--subscreen-labels item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR] [--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
                 "       [--dump-audio PATH] [--skip-movies] [--skip-intro] [--logo-only] [--audio-half] [--frameskip] [--title-debug] [--launcher-exit] [--debug-menu] [--log-events] [--second-screen] [--hud-bottom] [--dump-panel DIR] [--panel-size WxH] [--panel-input FRAME:ACTION,...] [--trace-cd] [--save-dir DIR] [-v]\n"
@@ -579,6 +582,8 @@ static const char *port_civ_maps_dir;
    area select instead of the story) and, with --civ-maps, --civ-test so sections 0 of AREA11/16/17 load the rebuilt
    towns; the launcher entry opens a Yes / No box (port_lx_title_open). */
 int port_title_debug, port_title_extra; unsigned char port_title_angles[2];
+/* the title font's glyph of an ASCII letter c is c - BASE: PAL 'A' = 33, USA 'A' = 32 (its TITLE_MENU_GLYPHS: NEW = 45 36 54) */
+#define PORT_TITLE_GLYPH_BASE (PORT_VERSION_PAL ? 32 : 33)
 extern int port_launcher_exit;
 static int port_title_quit_index = -1;   /* b69 of the QUIT entry, -1: none */
 /* the title font is ASCII: a letter with a diaeresis (Ä Ö Ü of a label) is its base letter, marked here, and
@@ -610,7 +615,7 @@ void port_title_debug_list(short **ps, unsigned char **ppal) {
         for (int j = 0; j < nw; j++) {
             w = last + 1; if (w > 0x37) w = 0x37;
             for (; k < w + 6; k++) list[k] = 0;
-            for (int i = 0; words[j][i]; i++) { int um, c = title_base((unsigned char)words[j][i], &um); last = k; title_umlaut[k] = (unsigned char)um; list[k++] = (short)(c - 32); pal[nz++] = 2; }
+            for (int i = 0; words[j][i]; i++) { int um, c = title_base((unsigned char)words[j][i], &um); last = k; title_umlaut[k] = (unsigned char)um; list[k++] = (short)(c - PORT_TITLE_GLYPH_BASE); pal[nz++] = 2; }
             {   /* the carousel draws its front 16 cells flat (titleDrawMenuCarousel: angle 0xE0..0x1F), the rest in perspective:
                    the word starts 6 cells in as OPTIONS does, or earlier for a long word so it ends inside (2 cells kept
                    for the left arrow) */
@@ -837,15 +842,31 @@ int port_civ_list(void) {
     return (int)(long)port_civ_buf;
 }
 int port_noclip;          /* --noclip: research only; I0NFO3 tunnels (AREA02 s3): no walls, gates, pushes, slide zones, triggers, exits */
-int port_cut_content;     /* --cut-content: opt-in cut text recovered from the Japanese release (port/fixes.txt) */
+int port_cut_content;     /* --cut-content[=LIST]: opt-in cut content (port/fixes.txt), a bit per item: 1 boatman (AREA00 extra lines),
+                             2 letter (AREA03 sign), 4 board (AREA05 notice board + extra save points), 8 berries (silver / golden),
+                             16 bubble (big "?"), 32 titles (event titles PAL left empty); --cut-content alone = all (0xFF) */
+int port_cut_content_parse(const char *list) {
+    static const struct { const char *name; int bit; } items[] = {{"boatman", 1}, {"letter", 2}, {"board", 4}, {"berries", 8}, {"bubble", 16}, {"titles", 32}, {"all", 0xFF}};
+    int mask = 0; const char *p = list;
+    while (*p) {
+        const char *e = p; size_t i, n; int hit = 0;
+        while (*e && *e != ',') e++;
+        n = (size_t)(e - p);
+        for (i = 0; i < sizeof items / sizeof items[0]; i++)
+            if (n == strlen(items[i].name) && !strncmp(p, items[i].name, n)) { mask |= items[i].bit; hit = 1; }
+        if (!hit && n) port_printf("[port] --cut-content: unknown item '%.*s' (boatman, letter, board, berries, bubble, titles, all)\n", (int)n, p);
+        p = *e ? e + 1 : e;
+    }
+    return mask;
+}
 int port_cc_boatman = 3;  /* AREA00 boatman: extra lines (7,3..5) still to show */
 /* --cut-content berries: objects spawnItemFromEntry made (table drops) that initItemObject has not set up yet */
 static void *port_cc_drops[16];
 static unsigned port_cc_drop_n, port_cc_rng = 0x7a3b1c9u;
-void port_cc_drop_mark(void *o) { if (port_cut_content) port_cc_drops[port_cc_drop_n++ & 15] = o; }
+void port_cc_drop_mark(void *o) { if (port_cut_content & 8) port_cc_drops[port_cc_drop_n++ & 15] = o; }
 int port_cc_drop_take(void *o) {
     int i;
-    for (i = 0; i < 16; i++) if (port_cc_drops[i] == o) { port_cc_drops[i] = 0; return port_cut_content; }
+    for (i = 0; i < 16; i++) if (port_cc_drops[i] == o) { port_cc_drops[i] = 0; return port_cut_content & 8; }
     return 0;
 }
 /* fruit drop colour: 1/32 gold (b0c 3), 4/32 = 1/8 silver (b0c 2), else plain (0); own LCG, game RNG untouched */
@@ -898,7 +919,7 @@ void port_cc_sign(void *obj, int area, int section) {
 }
 void port_cc_sign_text(void *obj, int area, int bceed, int ev49, unsigned short *text, unsigned short *opt) {
     unsigned char *o = obj;
-    if (!port_cut_content) return;
+    if (!(port_cut_content & 4)) return;
     if (o[3] >= 0x40) { *text = port_cc_saves[o[3] - 0x40].k; *opt = port_cc_saves[o[3] - 0x40].line; return; }
     if (area == 5 && o[3] == 20 && bceed == 2 && ev49 == 0) {
         /* the baby mouse is back and the pump notice was never read: CONGRATULATIONS (1,6) first, then (1,7) */
@@ -908,7 +929,7 @@ void port_cc_sign_text(void *obj, int area, int bceed, int ev49, unsigned short 
 }
 void *port_cc_sign_next(void *obj) {
     extern void *showMessageBox(short, short, int, int);
-    if (!port_cut_content || obj != port_cc_chain_obj) return 0;
+    if (!(port_cut_content & 4) || obj != port_cc_chain_obj) return 0;
     port_cc_chain_obj = 0;
     { void *m = showMessageBox(port_cc_chain_k, port_cc_chain_l, 0xa0, 0x8c);
       if (port_verbose) port_printf("[port] --cut-content: notice board continues with (%d,%d) box %p\n", port_cc_chain_k, port_cc_chain_l, m);
@@ -936,7 +957,8 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--no-translation-file")) port_no_translation_file = 1;
         else if (!strcmp(a, "--text-patch") && v) { if (port_text_patch_n < 8) port_text_patches[port_text_patch_n++] = argv[i + 1]; i++; }
         else if (!strcmp(a, "--patch-dir") && v) port_patch_dir = argv[++i];
-        else if (!strcmp(a, "--cut-content")) port_cut_content = 1;
+        else if (!strcmp(a, "--cut-content")) port_cut_content = 0xFF;
+        else if (!strncmp(a, "--cut-content=", 14)) port_cut_content = port_cut_content_parse(a + 14);   /* a comma list of items */
         else if (!strcmp(a, "--noclip")) port_noclip = 1;
         else if (!strcmp(a, "--civ-test")) port_civ_test = 1;
         else if (!strcmp(a, "--log-anim")) {   /* runtime/animlog.c: animation-script pointers and drawn frames, optional summary FILE */
@@ -1038,7 +1060,9 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--show-fps")) { extern int port_fps_on_screen; port_fps_on_screen = 1; port_show_fps = port_show_fps ? port_show_fps : 1; if (v && (*v == '1' || *v == '2') && !v[1]) port_show_fps = atoi(argv[++i]); }
         else if (!strcmp(a, "--log-fps")) { port_show_fps = 1; if (v && (*v == '1' || *v == '2') && !v[1]) port_show_fps = atoi(argv[++i]); }   /* the log lines only, no counter on screen */
         else if (!strcmp(a, "--patch-tex") && v) { extern const char *port_patch_tex_path, *port_patch_tex_paths[]; extern int port_patch_tex_count; port_patch_tex_path = argv[++i]; if (port_patch_tex_count < 4) port_patch_tex_paths[port_patch_tex_count++] = port_patch_tex_path; }
-        else if (!strcmp(a, "--early-title") && v) { extern const char *port_early_title_dir; port_early_title_dir = argv[++i]; }   /* --cut-content: PrePre Vol. 8 title landscape (runtime/titlebg.c) */
+        else if (!strcmp(a, "--early-title") && v) { extern const char *port_early_title_dir; port_early_title_dir = argv[++i]; }
+        else if (!strcmp(a, "--wings-glide") && v) { extern const char *port_wings_dir; port_wings_dir = argv[++i]; }   /* --cut-content: the JP demo's top-down Charity Wings glide (runtime/wings.c) */
+        else if (!strcmp(a, "--wings-pre9") && v) { extern const char *port_wings_pre9_dir; port_wings_pre9_dir = argv[++i]; }   /* its feather page, from the PrePre Vol. 9 extraction */
         else if (!strcmp(a, "--title-bg") && v) { extern const char *port_title_bg_path; port_title_bg_path = argv[++i]; }   /* widescreen: wide title background (runtime/titlebg.c) */
         else if (!strcmp(a, "--test-null")) test_null = 1;
         else if (!strcmp(a, "--hz") && v) { port_hz = atoi(argv[++i]); if (port_hz != 50 && port_hz != 60) return usage(argv[0]); }
@@ -1097,6 +1121,19 @@ int main(int argc, char **argv) {
         else return usage(argv[0]);
     }
     if (headless) port_window = 0;
+#if !PORT_VERSION_PAL
+    /* another version (gen/version/port_version.h): the PAL-only features (the language overlays, the text patches,
+       the PAL->NTSC picture, the cut-content and Civilization rebuilds) read PAL addresses and the PAL disc's files:
+       off, said once.  The second-screen panel reads the version's own addresses (runtime/panel_addrs.h) and files */
+    if (port_lang || port_text_patch_n || picture > 0 || port_cut_content || port_civ_test) {
+        extern int port_panel_on;
+        port_printf("[port2] %s build: --lang, --text-patch, --picture ntsc, --cut-content and --civ-test are PAL-only (ignored)\n", PORT_VERSION_SERIAL);
+        port_lang = 0; port_text_patch_n = 0; picture = 0; port_cut_content = 0; port_civ_test = 0; (void)port_panel_on;
+    }
+    /* the back-to-launcher entries draw their words with the PAL disc's pause / title glyphs (runtime/launcher_exit.c) */
+    { extern int port_launcher_exit; if (port_launcher_exit) { port_printf("[port2] %s build: --launcher-exit is PAL-only for now (off)\n", PORT_VERSION_SERIAL); port_launcher_exit = 0; } }
+    port_no_translation_file = 1;
+#endif
     port_ntsc = picture > 0;     /* opt-in (--picture ntsc): the PAL picture is the default at 50 and 60 Hz */
     if (port_ntsc) port_printf("[port2] NTSC picture: the US build's 320x224 screen (--picture pal for the PAL 320x256 one)\n");
     if (port_ws_auto) { extern int port_widescreen; port_widescreen = port_ws_resolve(); }
@@ -1129,6 +1166,7 @@ int main(int argc, char **argv) {
     /* --lang 5: the Spanish graphic redraws (CARGANDO, CARGAR / GUARDAR, VUELVE A INTENTARLO) built from the disc data
        (shims/gfx_es.c, the twin of tools/gfx_es) and loaded as --patch-tex rects; --no-gfx-es keeps the English sprites */
     if (port_lang == 5 && port_gfx_es) port_gfx_es_load();
+#if PORT_VERSION_PAL
     /* what the boot executable (SCES_013.31) leaves in the scratchpad before LoadExec (notes/cdfiles.md) */
     SPAD16(0x3D8) = 1;
     SPAD16(0x3DA) = 7;
@@ -1136,6 +1174,16 @@ int main(int argc, char **argv) {
     { extern int port_panel_on; extern void port_panel_init(void); if (port_panel_on) port_panel_init(); }   /* --second-screen: names and map graph from the disc */
     port_watchdog_start();     /* after SDL_Init: a slow driver start must not count as a hang */
     game_main();
+#else
+    { extern int port_panel_on; extern void port_panel_init(void); if (port_panel_on) port_panel_init(); }   /* --second-screen: names and map graph from the disc */
+    port_watchdog_start();
+    {   /* the version's own main() (src/main_<serial>.c, matched C), renamed port_game_main by the generator; its
+           frame wait calls port_vblank (port/fixes.txt) */
+        extern void port_game_main(void);
+        port_printf("[port2] %s: entering the game's main()\n", PORT_VERSION_SERIAL);
+        port_game_main();
+    }
+#endif
     return 0;
 }
 

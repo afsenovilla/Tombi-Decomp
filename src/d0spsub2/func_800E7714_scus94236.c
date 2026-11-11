@@ -14,7 +14,7 @@ typedef struct { short icon, a, b, c; int d, e; short p10, f; } Info;
 typedef struct { unsigned short a, b; char p4[4]; int e, d; char p10[3]; unsigned char c; char p14[0xC]; unsigned char f; } Hdr;
 extern Info MEMCARD_FILE_INFOS[][15];
 extern char *MEMCARD_PORT_PREFIXES[];
-extern char D_800E741C[];
+extern char D_800E7420[];
 extern char *MEMCARD_SLOT_SUFFIXES[];
 extern char MEMCARD_DIR_PATH[];
 extern char MEMCARD_DIR_WILDCARD[];
@@ -46,7 +46,7 @@ int memCardReadDirectory(Card *c, int card)
     strcat(MEMCARD_DIR_PATH, MEMCARD_DIR_WILDCARD);
     if (psyq_8005ba74(MEMCARD_DIR_PATH, &d) == &d) {
         do {
-            if (strstr(d.name, D_800E741C)) {
+            if (strstr(d.name, D_800E7420)) {
                 strcpy(MEMCARD_DIR_PATH, MEMCARD_PORT_PREFIXES[card]);
                 strncat(MEMCARD_DIR_PATH, d.name, 20);
                 c->slot[n] = 1;

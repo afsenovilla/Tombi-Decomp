@@ -4,9 +4,8 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.2.0 (build of d124ae0, 2026-11-09): the three retail releases are 100 % matched; the port builds the matched
-D0SPSUB 800EFD6C (the old draft cleared 3 bytes past the HUD state) and X010 collidePlayerWithTiltedBar (the port
-dispatched that address to its static sabs() helper). Previous: v0.1.3 (47c4a28).
+v0.3.1 (build of 66a8281, 2026-11-10): .zip / .7z disc images in both launchers, language flags on the cards, Disco and
+home layout fixes, the Japanese card title オレっ！トンバ, release number in the PC launcher. Previous: v0.3.0 (5da1fc8).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
@@ -18,14 +17,53 @@ default of release.yml; bump it before each release (it used to show 0.1.<CI run
 | PAL SCES-01331 | 100 % of game code; Psy-Q library 100 % | all | nothing |
 | USA SCUS-94236 | 100 % | 3681 / 3681 | nothing |
 | JP SLPS-01144 | 100 % | 3528 / 3528 | nothing |
+| JP demo SLPM-80165 | 55.13 % | 1381 / 1717 | hand passes (docs/JPDEMO.md) |
+| Beta 980203 | 92.35 % | 1800 / 1837 | hand passes (docs/BETA_980203.md) |
+| PrePre 8 PCPX-96084 | 32.34 % | 997 / 1425 | hand passes (docs/PREPRE8.md); same compiler as retail, ASPSX 2.34 |
+
+Demo work 2026-11-10: tools/demo_pair.py (fuzzy twins over every version's C) + demo_sweep --fix in CI, then three
+rounds of hand passes per demo. Checked at the end: PAL full link (26 sha1 OK), reports PAL/JP/USA 100 %, PAL port
+sweep 96/96 clean, Python tests, CI exe + APK green.
 
 Details: docs/REMAINING.md. The last PAL function (D0SPSUB 800EFD6C) replaced a wip draft that the port built: that
 draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game clears +0x64..0x66.
 
 ## In progress / open
 
+0. **Wings glide in the port (2026-11-10)**: `--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR` (its own switch, no `--cut-content` needed; PC launcher: Cut content page, own card with checkbox and the two demo disc images, the needed files are extracted into .wings/; the early-title field was removed from the launcher). `--cut-content` is now a pick list: `--cut-content=boatman,letter,board,berries,bubble,titles` (bits 1..32 in `port_cut_content`), the plain switch = all; the launcher shows one checkbox per item
+   plays the JP demo's cut top-down Charity Wings animation (frames 77-79 + the feather item sprite spinning) in the
+   wings exit and the landing of the three overhead engines (I0NFO2 Baccus Village / the pier, I0NFO Dwarf Village, I0NFO3 tunnels) (`port2/runtime/wings.c`, hooks in port/fixes.txt, docs/PORT.md). Checked headless in
+   AREA08 s0 and AREA02 s0; Android launcher wired (Options > Cut content). Confirmed by the user on Windows and on the AYN Thor (2026-11-10); the Baron fix (5a750ccd2: the swapped tables are the area's own tables plus the three frames) confirmed by the user with Baron riding along (no duplicate Tomba). Side view too (e3ff5fefd): PrePre 9's orphan script (frames 282-284, fist raised) with the feather on the rise (playerEventStepRiseFadeOut) and the drop-in (playerEventStepDropIn), through `--wings-pre9`; checked headless in AREA00 / AREA02 s1. The user saw nothing in the side view with 0.4.0: both launchers extracted only `TOMBA/A00002.GAM` from the PrePre 9 image, not the `TOMBA/AREA01/A007.000` + `A008.GAM` the side set reads (fixed: the three files; the PC launcher re-extracts at start when a file is missing and the image is still set, Android asks for the image again). The rise then still showed retail's jump frames under the feather: `PlayerSetAnimIfChanged(o, 4)` runs every frame of the rise and reset the anim (guarded like the air spin, 0.4.2). Confirmed by the user on PC with 0.4.2: rise and drop-in in the side view, glide and landing in the overhead areas, Baron riding along. The full link (`tools/build_full.py`) had to be
+   rebuilt first: a stale build/full made the port crash at frame 0 (initGlobalState).
+
+0. **PrePre Vol.9 Tombi animations (2026-11-10)**: the demo's player frame table (TOMBA/AREA01/A007.000 = AREA02/D105.000,
+   379 frames) holds 106 frames retail (AREA00/A004.000, 358) never got: 173 identical, 100 retouched, 106 new. Its player
+   animation table (TOMBA/X01.BIN +0x380) has 56 ids against retail's 90, the same id is the same move in both (41 equal,
+   5 retouched, 5 replaced: id 49 somersault -> roll land, id 33 dive-to-crouch -> crouch walk, id 37, idle/crouch
+   single-frame -> animated). **20 orphan scripts** survive in TOMBA.EXE data (0x80011A50..0x800125E8, same region as the
+   player scripts, nothing points at them): lift (112-114 / 115-120 / 121-124, three chained scripts), pull (255-258),
+   punches (195-203), carry-walk (269-276, 277-281), 264-268, 238-240, 241-245, 298-300, 304-306, 317-320 + 321-326 loop,
+   339-340, all `hold` ends with real tick counts. The lifted / pulled object is not in the demo: every AREA01/AREA02
+   placement record of Pre9 has a retail twin at the same position (types renumbered, e.g. Pre9 L4 13 = retail L4 7), the
+   texture pages differ from retail's only by retouches, and the log of A002 (4 rotation frames) is in retail AREA01 too.
+   Pre8's PLAYER.WPP (313 frames, older art, palette in TOMBA.EXE +0x989A8) shares no frame with Pre9 or retail and has no
+   script table (NPC tables only). Scratch scripts of the session were not kept; tools/anim.py got the CLUT row 16/17 fix.
+
+
 0. **Port for the USA and JP discs**: staged plan in [docs/PORT_VERSIONS_PLAN.md](PORT_VERSIONS_PLAN.md) (U0 USA full
    link proof → U1 USA boots headless → U2 launchers/CI → U3 parity → J1 JP → demos). Open questions for the user there.
+   **U0 done** (2026-11-09): `tools/build_full.py --version usa` links all 26 USA files byte-identical, name audit per
+   program, 14 relocation/data bugs of the USA C fixed (docs/USA.md "Full link"). **U1 done** (2026-11-09):
+   `cmake -S port2 -B build/port2-scus94236 -DPORT_VERSION=usa` builds a USA tombi2 that runs the USA disc headless
+   through the title, a new game and AREA00 gameplay (docs/USA.md "Native port"); the PAL build is unchanged
+   (generated files and frames identical). A USA full link made without `include/tomba/psyq` silently kept 611
+   files as asm (port: 126 stubs, crash at frame 0); build_full now refuses that and gen_port refuses any link with
+   C that fell back to asm (docs/USA.md "Native port"). **U2 done** (2026-11-09): PC and Android launchers are a game
+   library (docs/PORT.md "Game library", `tools/game_library.py`, `Library.java`; `list` look by default, the user's
+   pick), USA runs `tombi-pc-usa` / `libtombi_usa.so`, port2-exe.yml and android-apk.yml build them when
+   `GAME_FILES_URL_USA` is set. **U3 in progress** (2026-11-09): the second-screen panel (docs/USA.md "Second-screen
+   panel": `runtime/panel_addrs.h` per version; PAL panel PNGs identical), saves, debug menu, area select and the launcher
+   cheats (docs/USA.md "U3 saves, debug menu, mods") work in the USA build; next: fixes.txt USA spellings, top-down rooms.
 
 0. **Data bar of JP / USA** (2026-11-09): 0.94 % -> 83.74 % (JP), 0.97 % -> 90.88 % (USA); docs/JP.md "Data
    measure". Fixed the overlay base of the version data claims, the X00 prefix of the area overlays counted once,
@@ -76,6 +114,11 @@ for overlay data and callees); three such lines (8001AA90, 8010D854, 801275C8) s
 use a copy of the target objects (copy them before starting the build).
 
 ### JP sweep workflow
+
+2026-11-09: `tools/demo_pair.py` (fuzzy twins from every version's C: opcode skeleton, callees, call graph) feeds
+`tools/demo_sweep.py`; `--fix` adds scratchpad renames and runs in CI with `--budget 20`; PrePre 8 game code needs
+`// ASPSX 2.34` (older assembler, `li` as `ori`). Demo figures and the residual-diff classes: docs/JPDEMO.md "Fuzzy
+twins + fix pass". Open: the sweep checker hides `$at` store offsets (3 false matches removed by hand).
 
 `.github/workflows/jp-sweep.yml`: on demand (workflow_dispatch) or when a push to master touches `src/**_slps01144.c`
 or the JP/demo configs. Fetches the five discs, builds the reports, runs `tools/jp_autofix.py --install` on SLPS-01144

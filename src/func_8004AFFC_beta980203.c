@@ -1,0 +1,244 @@
+// VERSION BETA_980203 beta980203 8004AFFC 2608
+#if defined(VERSION_BETA_980203)
+// Beta version: JP C of src/func_800498AC_slps01144.c with the tile colour (0xf8, 0xe8, 0xd8) (JP (0xd8, 0xe0, 0xa0)).
+typedef struct {
+    unsigned long tag;
+    unsigned char r0, g0, b0, code;
+    short x0, y0;
+    unsigned char u0, v0; unsigned short clut;
+    short w, h;
+} SPRT;
+typedef struct {
+    unsigned long tag;
+    unsigned char r0, g0, b0, code;
+    short x0, y0;
+    unsigned char u0, v0; unsigned short clut;
+    short x1, y1;
+    unsigned char u1, v1; unsigned short tpage;
+    short x2, y2;
+    unsigned char u2, v2; unsigned short pad1;
+    short x3, y3;
+    unsigned char u3, v3; unsigned short pad2;
+} POLY_FT4;
+typedef struct {
+    unsigned long tag;
+    unsigned char r0, g0, b0, code;
+    short x0, y0, w, h;
+} TILE;
+typedef struct { char pad[8]; short x, y, w, h, f; } R;
+typedef struct { short u, v; unsigned char w, pw; short h; } UVT;
+typedef struct { unsigned char u, v; } UV2;
+typedef struct { unsigned char u0, v0, u1, v1, u2, v2, u3, v3; } UV8;
+
+extern char *NEXT_PRIM;
+extern int CURRENT_OT;
+extern UVT BALLOON_TAIL_SPRITES[];
+extern UV2 D_800801f0[];
+extern UV8 BALLOON_FRAME_UVS[];
+extern void SetSprt(SPRT *);
+extern unsigned short GetClut(int, int);
+extern void AddPrim(void *, void *);
+extern void SetDrawMode(void *, int, int, int, void *);
+
+#define setlen(p, n) (((unsigned char *)(p))[3] = (n))
+
+void func_8004AFFC(R *o_, short c, short tp)
+{
+    register R *o asm("$17") = o_;
+    SPRT *sp;
+    POLY_FT4 *ft;
+    TILE *ti;
+    char pad[96];
+    short pos[4][8];
+    int k;
+    short x;
+    short y;
+    register short w asm("$9");
+    short h;
+    int i;
+    void *p;
+    register int r asm("$5");
+    register int f asm("$4");
+    r = (unsigned short)o->f; f = r << 16;
+    sp = (SPRT *)0x1f800000; ft = (POLY_FT4 *)0x1f800014; ti = (TILE *)0x1f80003c;
+    if ((f>>16) != -1) { k = f >> 28; asm(""::"r"(r),"r"(k));
+        setlen(ft, 9);
+        ft->code = 0x2c;
+        ft->r0 = 0x80;
+        ft->g0 = 0x80;
+        ft->b0 = 0x80;
+        switch (k) {
+        case 0:
+            w = 8; h = 16;
+            x = o->x + o->w / 2 - 4;
+            y = o->y + o->h - 6;
+            break;
+        case 1:
+            w = 16; h = 16;
+            x = o->x + 8;
+            y = o->y + o->h - 8;
+            break;
+        case 2:
+            w = 16; h = 8;
+            x = o->x - 9;
+            y = o->y + o->h / 2 - 6;
+            break;
+        case 3:
+            w = 16; h = 16;
+            x = o->x + 8;
+            y = o->y - 9;
+            break;
+        case 4:
+            w = 8; h = 16;
+            x = o->x + o->w / 2 - 4;
+            y = o->y - 10;
+            break;
+        case 5:
+            w = 16; h = 16;
+            x = o->x + o->w - 24;
+            y = o->y - 9;
+            break;
+        case 6:
+            w = 16; h = 8;
+            x = o->x + o->w - 4;
+            y = o->y + o->h / 2 - 6;
+            break;
+        case 7:
+            w = 16; h = 16;
+            x = o->x + o->w - 24;
+            y = o->y + o->h - 8;
+            break;
+        }
+        { register short t asm("$2") = x + w; ft->x3 = ft->x1 = t; } asm("");
+        ft->x2 = ft->x0 = x;
+        ft->y1 = ft->y0 = y;
+        ft->y3 = ft->y2 = y + h;
+        ft->u0 = BALLOON_TAIL_SPRITES[k].u;
+        ft->v0 = BALLOON_TAIL_SPRITES[k].v;
+        { int w2;
+        h = BALLOON_TAIL_SPRITES[k].h;
+        w2 = BALLOON_TAIL_SPRITES[k].w;
+        ft->u2 = ft->u0;
+        ft->u1 = ft->u0 + w2;
+        ft->v1 = ft->v0;
+        ft->v2 = h + ft->v0;
+        ft->v3 = ft->v2;
+        ft->u3 = ft->u1; }
+        ft->clut = GetClut(0x160, c + 0x1e3);
+        ft->tpage = tp;
+        { void *p = NEXT_PRIM;
+        *(POLY_FT4 *)p = *ft;
+        AddPrim((void *)(CURRENT_OT + 8), p); }
+        NEXT_PRIM += 0x28;
+    }
+skip:
+    pos[0][0] = o->x;
+    pos[0][1] = o->y;
+    pos[1][0] = o->x + o->w - 8;
+    pos[1][1] = o->y;
+    pos[2][0] = o->x;
+    pos[2][1] = o->y + o->h - 8;
+    pos[3][0] = o->x + o->w - 8;
+    pos[3][1] = o->y + o->h - 8;
+    for (i = 0; i < 4; i++) {
+        SetSprt(sp);
+        sp->r0 = 0x80;
+        sp->g0 = 0x80;
+        sp->b0 = 0x80;
+        sp->x0 = pos[i][0];
+        sp->y0 = pos[i][1];
+        sp->u0 = D_800801f0[i].u;
+        sp->v0 = D_800801f0[i].v;
+        sp->w = 8;
+        sp->h = 8;
+        sp->clut = GetClut(0x160, c + 0x1e3);
+        { void *p = NEXT_PRIM;
+        *(SPRT *)p = *sp;
+        AddPrim((void *)(CURRENT_OT + 8), p); }
+        NEXT_PRIM += 0x14;
+    }
+    pos[0][0] = o->x + 8;
+    pos[0][1] = o->y;
+    pos[0][2] = o->x + o->w - 8;
+    pos[0][3] = o->y;
+    pos[0][4] = o->x + 8;
+    pos[0][5] = o->y + 8;
+    pos[0][6] = o->x + o->w - 8;
+    pos[0][7] = o->y + 8;
+    pos[1][0] = o->x + 8;
+    pos[1][1] = o->y + o->h - 8;
+    pos[1][2] = o->x + o->w - 8;
+    pos[1][3] = o->y + o->h - 8;
+    pos[1][4] = o->x + 8;
+    pos[1][5] = o->y + o->h;
+    pos[1][6] = o->x + o->w - 8;
+    pos[1][7] = o->y + o->h;
+    pos[2][0] = o->x;
+    pos[2][1] = o->y + 8;
+    pos[2][2] = o->x + 8;
+    pos[2][3] = o->y + 8;
+    pos[2][4] = o->x;
+    pos[2][5] = o->y + o->h - 8;
+    pos[2][6] = o->x + 8;
+    pos[2][7] = o->y + o->h - 8;
+    pos[3][0] = o->x + o->w - 8;
+    pos[3][1] = o->y + 8;
+    pos[3][2] = o->x + o->w;
+    pos[3][3] = o->y + 8;
+    pos[3][4] = o->x + o->w - 8;
+    pos[3][5] = o->y + o->h - 8;
+    pos[3][6] = o->x + o->w;
+    pos[3][7] = o->y + o->h - 8;
+    for (i = 0; i < 4; i++) {
+        setlen(ft, 9);
+        ft->code = 0x2c;
+        ft->r0 = 0x80;
+        ft->g0 = 0x80;
+        ft->b0 = 0x80;
+        ft->x0 = pos[i][0];
+        ft->y0 = pos[i][1];
+        ft->x1 = pos[i][2];
+        ft->y1 = pos[i][3];
+        ft->x2 = pos[i][4];
+        ft->y2 = pos[i][5];
+        ft->x3 = pos[i][6];
+        ft->y3 = pos[i][7];
+        ft->u0 = BALLOON_FRAME_UVS[i].u0;
+        ft->v0 = BALLOON_FRAME_UVS[i].v0;
+        ft->u1 = BALLOON_FRAME_UVS[i].u1;
+        ft->v1 = BALLOON_FRAME_UVS[i].v1;
+        ft->u2 = BALLOON_FRAME_UVS[i].u2;
+        ft->v2 = BALLOON_FRAME_UVS[i].v2;
+        ft->u3 = BALLOON_FRAME_UVS[i].u3;
+        ft->v3 = BALLOON_FRAME_UVS[i].v3;
+        ft->clut = GetClut(0x160, c + 0x1e3);
+        ft->tpage = tp;
+        { void *p = NEXT_PRIM;
+        *(POLY_FT4 *)p = *ft;
+        AddPrim((void *)(CURRENT_OT + 8), p); }
+        NEXT_PRIM += 0x28;
+    }
+    setlen(ti, 3);
+    ti->code = 0x60;
+    if (c) {
+        ti->r0 = 0;
+        ti->g0 = 0x50;
+        ti->b0 = 0;
+    } else {
+        ti->r0 = 0xf8;
+        ti->g0 = 0xe8;
+        ti->b0 = 0xd8;
+    }
+    ti->x0 = o->x + 8;
+    ti->y0 = o->y + 8;
+    ti->w = o->w - 16;
+    ti->h = o->h - 16;
+    { void *p = NEXT_PRIM;
+    *(TILE *)p = *ti;
+    AddPrim((void *)(CURRENT_OT + 8), p); }
+    p = NEXT_PRIM = NEXT_PRIM + 0x10;
+    SetDrawMode(p, 0, 0, tp, 0);
+    AddPrim((void *)(CURRENT_OT + 8), p);
+    NEXT_PRIM += 0xc;
+}
+#endif

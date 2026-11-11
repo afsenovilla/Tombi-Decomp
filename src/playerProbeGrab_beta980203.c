@@ -1,0 +1,148 @@
+// VERSION BETA_980203 beta980203 800585B0 1060
+#if defined(VERSION_BETA_980203)
+// Beta version of src/playerProbeGrab.c (playerProbeGrab, PAL body): the fields 0xe8/0xea are at 0xdc/0xde.
+#define LIST_COUNTER D_1F80019E
+#define TOUCHED_OBJECT D_1F8003C0
+#include "spad.h"
+#include "gamestate.h"
+typedef struct { char p0[2]; unsigned short s2; } H;
+typedef struct { char p0[4]; unsigned short s4; } A;
+typedef struct {
+    char p0[0x16]; unsigned short s16;
+    char p1[0x24 - 0x18]; A *anim;
+    char p2[0x2e - 0x28]; unsigned short s2e;
+    char p3[0x40 - 0x30]; H *h40;
+    char p4[0x9e - 0x44]; unsigned char b9e;
+    char p5[0xa9 - 0x9f]; unsigned char ba9;
+    char p6[0xdc - 0xaa]; unsigned short se8; short sea;
+} TO;
+extern int TOUCHED_OBJECT;
+extern short LIST_COUNTER;
+extern short probeCollisionAtDepthC(TO *, short, short);
+extern void playerGrabCat4Type01(TO *, unsigned char *), probeGrabObjectBoxOffset(TO *, unsigned char *), playerGrabCat4Type02(TO *, unsigned char *), func_8011FE38(TO *, unsigned char *);
+extern void func_80126FE4(TO *, unsigned char *), playerGrabCat4Type06(TO *, unsigned char *), func_80126D2C(TO *, unsigned char *), func_80126E8C(TO *, unsigned char *), func_801212C4(TO *, unsigned char *);
+extern void func_8011DF8C(TO *, unsigned char *), func_8012767C(TO *, unsigned char *), func_8011EF98(TO *, unsigned char *), probeGrabObjectBox(TO *, unsigned char *);
+extern void func_8011F5D8(TO *, unsigned char *), func_8011F474(TO *, unsigned char *), func_801212D4(TO *, unsigned char *), func_8011D3F8(TO *, unsigned char *), func_8011F38C(TO *, unsigned char *);
+extern void func_80126F64(TO *, unsigned char *), func_80121254(TO *, unsigned char *);
+
+int playerProbeGrab(TO *o, unsigned char f)
+{
+    short r;
+    int d;
+    short n;
+    unsigned char **q;
+    unsigned char *e;
+
+    if (o->b9e != 0) return 0;
+    TOUCHED_OBJECT = 0;
+    if (f) o->sea = o->s16 - 2;
+    else o->sea = o->s16 - 8;
+    d = 0x10;
+    if (o->s2e & 1) d = -0x10;
+    r = probeCollisionAtDepthC(o, o->h40->s2 + d, o->sea);
+    if (r != 0) {
+        o->b9e = (r == 2) ? 5 : 6;
+        if (o->s2e & 1) o->h40->s2 -= 0xc;
+        else o->h40->s2 += 0xc;
+        TOUCHED_OBJECT++;
+        return TOUCHED_OBJECT;
+    }
+    switch (o->anim->s4) {
+    case 0: n = 9; break;
+    case 1: n = 10; break;
+    case 2: n = 0xc; break;
+    default: n = 0x18; break;
+    }
+    if (o->ba9) n = 0xc;
+    d = -n;
+    if (!(o->s2e & 1)) d = n;
+    q = (*(unsigned char ***)&SPAD.p268);
+    LIST_COUNTER = SPAD.s254;
+    o->se8 = o->h40->s2 + d;
+    while (LIST_COUNTER != 0) {
+        e = *q;
+        LIST_COUNTER--;
+        q++;
+        if (*e & 1) {
+            switch (e[2]) {
+            case 1:
+                playerGrabCat4Type01(o, e);
+                break;
+            case 3:
+                probeGrabObjectBoxOffset(o, e);
+                break;
+            case 4:
+                if (GAME.selectedArea == 0) {
+            case 2:
+                    playerGrabCat4Type02(o, e);
+                } else {
+                    func_8011FE38(o, e);
+                }
+                break;
+            case 5:
+                func_80126FE4(o, e);
+                break;
+            case 6:
+                playerGrabCat4Type06(o, e);
+                break;
+            case 0x15:
+                func_80126D2C(o, e);
+                break;
+            case 0xe:
+                func_80126E8C(o, e);
+                break;
+            case 0x1c:
+                func_801212C4(o, e);
+                break;
+            case 0x1d:
+                func_8011DF8C(o, e);
+                break;
+            case 0x14:
+                func_8012767C(o, e);
+                break;
+            case 0x34:
+                func_8011EF98(o, e);
+                break;
+            case 0x10: case 0x11: case 0x19: case 0x35: case 0x37: case 0x3d: case 0x3e:
+                probeGrabObjectBox(o, e);
+                break;
+            case 0x1f:
+                func_8011F5D8(o, e);
+                break;
+            case 0x22:
+                func_8011F474(o, e);
+                break;
+            case 0x31:
+                func_801212D4(o, e);
+                break;
+            case 0x42:
+                func_8011D3F8(o, e);
+                break;
+            case 0x24:
+                func_8011F38C(o, e);
+                break;
+            }
+        }
+    }
+    if (TOUCHED_OBJECT == 0) {
+        q = (*(unsigned char ***)&SPAD.p260);
+        LIST_COUNTER = SPAD.s250;
+        while (LIST_COUNTER != 0) {
+            e = *q;
+            LIST_COUNTER--;
+            q++;
+            if (*e & 1) {
+                switch (e[2]) {
+                case 0xb:
+                    func_80126F64(o, e);
+                    break;
+                case 0x21:
+                    func_80121254(o, e);
+                    break;
+                }
+            }
+        }
+    }
+    return TOUCHED_OBJECT;
+}
+#endif

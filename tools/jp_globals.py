@@ -9,6 +9,7 @@ JP address gets >= 80 % of its votes. Global blocks (GAME, GVARS, ...) vote by b
 
   python3 tools/jp_globals.py            report only
   python3 tools/jp_globals.py --write    rewrite the `// BEGIN jp_globals` blocks of config/slps01144/symbol_addrs_<prog>.txt
+  python3 tools/jp_globals.py --version scus94236 [--write]   the same for another version (USA: config/scus94236/)
 
 The PAL name is then also the JP name, so shared PAL C compiles for JP (relocation names agree). Scratchpad (0x1F80xxxx)
 is not mapped (same address in both). JP addresses that existing JP C refers to by their raw D_/func_ name are skipped."""
@@ -17,6 +18,8 @@ import collections, difflib, glob, os, re, struct, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT + "/tools")
 from xmatch import mask
+from versions import version_arg
+VER = version_arg(sys.argv, default="slps01144")  # --version scus94236: the USA retail (config/scus94236/)
 
 MEMOPS = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x28, 0x29, 0x2a, 0x2b, 0x2e, 0x32, 0x3a}
 BEGIN, END = "// BEGIN jp_globals (tools/jp_globals.py)", "// END jp_globals"
@@ -43,7 +46,7 @@ def yaml_img(ver_dir, prog):
     y = open("%s/config/%s/%s.yaml" % (ROOT, ver_dir, prog)).read()
     tp = re.search(r"target_path:\s*(\S+)", y).group(1)
     vram = int(re.search(r"vram:\s*(0x[0-9A-Fa-f]+)", y).group(1), 16)
-    return Image(tp, vram, 0x800 if prog == "slps01144" else 0)
+    return Image(tp, vram, 0x800 if prog == VER else 0)
 
 
 def sx(v): return v - 0x10000 if v & 0x8000 else v
@@ -100,7 +103,7 @@ def load_pal_funcs():
 
 
 def jp_symbol_files():
-    return {os.path.basename(p)[13:-4]: p for p in sorted(glob.glob(ROOT + "/config/slps01144/symbol_addrs_*.txt"))
+    return {os.path.basename(p)[13:-4]: p for p in sorted(glob.glob(ROOT + "/config/%s/" % VER + "symbol_addrs_*.txt"))
             if not p.endswith("manual.txt")}
 
 
@@ -113,7 +116,7 @@ def jp_pairs():
             m = re.match(r"\s*\w+\s*=\s*0x([0-9A-Fa-f]+);.*size:0x([0-9A-Fa-f]+)\s+PAL (\w+) 0x([0-9A-Fa-f]+)", l)
             if m: pr.append((prog, int(m.group(1), 16), int(m.group(2), 16), m.group(3), int(m.group(4), 16)))
     size = {(p, a): s for p, a, s, _, _ in pr}
-    for l in open(ROOT + "/config/slps01144/reuse.txt"):
+    for l in open(ROOT + "/config/%s/" % VER + "reuse.txt"):
         m = re.match(r"(\w+) ([0-9A-Fa-f]{8}) (\w+) ([0-9A-Fa-f]{8})", l)
         if m:
             k = (m.group(1), int(m.group(2), 16))
@@ -158,7 +161,7 @@ def main():
             pal_img[m] = Image(tp, int(re.search(r"vram:\s*(0x[0-9A-Fa-f]+)", y).group(1), 16), 0)
     jp_img = {}
     for prog in jp_symbol_files():
-        try: jp_img[prog] = yaml_img("slps01144", prog)
+        try: jp_img[prog] = yaml_img(VER, prog)
         except Exception: pass
     # votes
     dvote = collections.defaultdict(collections.Counter)   # pal base -> Counter(jp base)
@@ -218,7 +221,7 @@ def main():
     raw = set()
     for f in glob.glob(ROOT + "/src/**/*.c", recursive=True):
         t = open(f, errors="replace").read()
-        if f.endswith("_slps01144.c"):
+        if f.endswith("_%s.c" % VER):
             raw |= {int(x, 16) for x in re.findall(r"\bD_([0-9A-F]{8})\b", t)} | {int(x, 16) for x in re.findall(r"\bfunc_([0-9A-F]{8})\b", t)}
     # resolve JP-address clashes: one PAL name per JP address (most votes)
     owner = {}
@@ -226,7 +229,7 @@ def main():
         owner.setdefault(jb, c)
     gdata = {c: v for c, v in gdata.items() if owner[v[0]] == c}
     auto = collections.defaultdict(set)   # functions splat already found (build/slps01144/undefined_funcs_auto.<prog>.txt)
-    for f in glob.glob(ROOT + "/build/slps01144/undefined_funcs_auto.*.txt"):
+    for f in glob.glob(ROOT + "/build/%s/" % VER + "undefined_funcs_auto.*.txt"):
         pg = os.path.basename(f).split(".")[1]
         for l in open(f):
             m = re.match(r"\w+ = 0x([0-9A-Fa-f]+)", l)
@@ -243,7 +246,7 @@ def main():
     for name, (jb, s, c) in outd.items():
         for r in raw:
             if jb <= r < jb + max(s, 1) and r not in jpaddr and r >= 0x80000000 and not (r == jb): pins.add(r)
-    pins = {r for r in pins if re.search(r"\bD_%08X\b" % r, "".join(open(f, errors="replace").read() for f in glob.glob(ROOT + "/src/**/*_slps01144.c", recursive=True)))}
+    pins = {r for r in pins if re.search(r"\bD_%08X\b" % r, "".join(open(f, errors="replace").read() for f in glob.glob(ROOT + "/src/**/*_%s.c" % VER, recursive=True)))}
     print("pinned raw D_ names: %d" % len(pins))
     fown = {}
     for (pg, c), (jb, n, tot) in sorted(gfunc.items(), key=lambda kv: -kv[1][1]):
@@ -270,9 +273,9 @@ def main():
     for prog, p in jp_symbol_files().items():
         lines = []
         for r in sorted(pins):
-            lines.append("D_%08X = 0x%08X; // pin raw name used by JP C" % (r, r)) if prog == "slps01144" else None
+            lines.append("D_%08X = 0x%08X; // pin raw name used by JP C" % (r, r)) if prog == VER else None
         for n, (jb, s, c) in sorted(outd.items(), key=lambda kv: kv[1][0]):
-            if prog == "slps01144" or prog in dprog[c]:
+            if prog == VER or prog in dprog[c]:
                 lines.append("%s = 0x%08X; // %sPAL 0x%08X" % (n, jb, ("size:0x%X " % s) if s else "", c))
         for (pg, n), (jb, c) in sorted(outf.items(), key=lambda kv: kv[1][0]):
             if prog == pg: lines.append("%s = 0x%08X; // type:func PAL 0x%08X" % (n, jb, c))

@@ -6,7 +6,7 @@
 typedef struct { unsigned char state, sub, b2, b3; short timer; short x6; char p8[0x10]; short card; short x1A; short x1C; } Menu;
 typedef struct { char p0[0x140]; short status, prev, p144, type; char p148[0x12]; } Card;
 extern Menu MENU_STATE;
-extern unsigned char D_800A45D9;
+extern unsigned char D_800A3941;
 extern Card MEMCARD_CARDS[];
 extern short MEMCARD_FILE_COUNT[];
 extern int MEMCARD_SLOT_PRESENT[2];
@@ -24,7 +24,7 @@ int memCardScreenStep(void)
     Menu *m = &MENU_STATE;
     Card *c;
     int i;
-    switch (D_800A45D9) {
+    switch (D_800A3941) {
     case 0:
         m->card = 0;
         for (i = 0; i < 2; i++) {

@@ -682,3 +682,7 @@ hasta 10 y una baldosa "=", el diseño más coherente es una ecuación o una sec
 de las rocas (o sumados/combinados; los cinco conocidos suman 223) dan las baldosas que hay que pisar, o el número de
 cada roca elige uno de los diez símbolos. Los valores conocidos 2, 5, 18, 59, 139 no forman una serie evidente y, con
 una roca perdida, la respuesta buscada no se puede recuperar.
+
+## PrePre Vol. 9: animaciones de Tombi que retail no tiene (2026-11-10)
+
+Ver la sección "PrePre Vol. 9 (PCPX-96093): Tombi animations and art retail does not have" de [CUT_CONTENT.md](CUT_CONTENT.md) (la documentación nueva se escribe en inglés).

@@ -1,6 +1,8 @@
 // FUNC 8004c170 64 MAIN0
 // MATCHING 8004c170 64
+// VERSION PCPX_96084 tomba 80082B28 64
 // Ported from psx_tomba (objpool.c, spawnUnlayeredObjectAndInit); MIT licence of the original project.
+// ASPSX.PCPX_96084 2.34
 #define SKIP_ASM
 #include "common.h"
 #include "game.h"

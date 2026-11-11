@@ -1,5 +1,7 @@
 // FUNC 8001fec0 228 MAIN0
 // MATCHING 8001fec0 228
+// VERSION PCPX_96084 tomba 800180D8 228
+// ASPSX.PCPX_96084 2.34
 typedef struct AE { char p0[6]; unsigned short v; } AE;
 typedef struct { char p0[0x24]; AE *a; char p1[4]; unsigned short t; } TA;
 

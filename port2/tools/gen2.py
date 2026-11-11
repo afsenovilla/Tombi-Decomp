@@ -32,13 +32,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 sys.path.insert(0, os.path.join(ROOT, "port", "tools"))
 import gen_port as GP
+import portver as PV
 
 # ---------------------------------------------------------------------------------------------------------------
 # memory regions of the native build: each becomes one relocatable array in OUTDIR/data.c
 # (name, start, end, source file, file offset of `start`)
-MAIN0_EXE = os.path.join(ROOT, "game", "MAIN0.EXE")
-X000_BIN = os.path.join(ROOT, "game", "AREA00", "X000.BIN")
-MAIN0_LOAD, X000_LOAD = 0x80010000, 0x800E8028
+# (the version's boot exe and X00 for another PORT_VERSION: port/tools/portver.py)
+MAIN0_EXE = PV.MAIN_EXE
+X000_BIN = PV.X000_BIN
+MAIN0_LOAD, X000_LOAD = PV.MAIN_LOAD, PV.OVL_BASE
 
 
 def regions():
@@ -49,7 +51,7 @@ def regions():
         ("port_main0_image", MAIN0_LOAD, MAIN0_LOAD + m0, MAIN0_EXE, 0x800),
         ("port_main0_bss", MAIN0_LOAD + m0, X000_LOAD, None, 0),
         ("port_x000_image", X000_LOAD, X000_LOAD + x0, X000_BIN, 0),
-        ("port_x000_bss", X000_LOAD + x0, 0x80140000, None, 0),
+        ("port_x000_bss", X000_LOAD + x0, PV.OVL_END, None, 0),
         ("port_heap", 0x80140000, 0x801FD800, None, 0),                # load buffers above the overlay
         ("port_hiram", 0x801FD800, 0x80200000, None, 0),               # top of RAM (the game's E-table)
         ("port_scratch", 0x1F800000, 0x1F800400, None, 0),             # scratchpad
@@ -79,7 +81,7 @@ class AddrMap:
             if m: self.native[int(m.group(1), 16)] = m.group(2)
         # MAIN0 functions translated by hand in port2/runtime (asm-only in the decomp, inside coarse units)
         rt = os.path.join(ROOT, "port2", "runtime")
-        for fn in sorted(os.listdir(rt)):
+        for fn in sorted(os.listdir(rt)) if PV.PAL else ():      # (PAL code, bound by PAL address)
             if not fn.endswith(".c"): continue
             for m in re.finditer(r"^\w[\w \t\*]*?\b((?:func|FUN)_([0-9A-Fa-f]{8}))\s*\([^;]*$", open(os.path.join(rt, fn)).read(), re.M):
                 self.native.setdefault(int(m.group(2), 16), m.group(1))
@@ -263,6 +265,26 @@ def materialise(d):
         dirs[:] = [n for n in dirs]
 
 
+# the header sets rewritten (OUTDIR/inc26, the psx_tomba headers of the USA ports, is compiled by another version only)
+INC_SETS = ("inc", "inc24") if PV.PAL else ("inc", "inc24", "inc26")
+
+
+def gte_header(txt):
+    """every `#define gte_X(...) __asm__(...)` (continuation lines joined) through gen_port's translate_gte_define"""
+    out, pend = [], None
+    for line in txt.split("\n"):
+        if pend is not None:
+            pend += "\n" + line.rstrip().rstrip("\\")
+            if not line.rstrip().endswith("\\"): out.append(GP.translate_gte_define(pend)); pend = None
+            continue
+        if re.match(r"\s*#\s*define\s+gte_\w+", line):
+            if line.rstrip().endswith("\\"): pend = line.rstrip().rstrip("\\")
+            else: out.append(GP.translate_gte_define(line))
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
 def rewrite_tree(d, res, relroot):
     for root, dirs, files in os.walk(d):
         for f in files:
@@ -271,12 +293,19 @@ def rewrite_tree(d, res, relroot):
             try: txt = open(p, errors="replace").read()
             except OSError: continue
             rel = os.path.relpath(os.path.realpath(p), ROOT) if os.path.islink(p) else os.path.relpath(p, relroot)
+            # another version: a header's branches for the other versions go first (their retail literals are not
+            # this version's addresses)
+            orig = txt
+            if not PV.PAL and os.path.islink(p) and "VERSION_" in txt: txt = GP.strip_versions(txt, PV.MACRO)
+            # (and a header's own GTE macros, inline MIPS COP2 asm, go to the software GTE as the sources' do: the
+            # psx_tomba set's game/gte.h)
+            if not PV.PAL and os.path.islink(p) and re.search(r"^\s*#\s*define\s+gte_\w+", txt, re.M): txt = gte_header(txt)
             new = res.text(txt, rel)
             # a header's asm-named declaration (camera.h: `extern ViewCamera VIEW_CAMERA asm("VIEW_CAMERA");`) needs
             # the target's label prefix as the sources' do (Win32: _VIEW_CAMERA), or the Windows link fails
             if f.lower().endswith(".h"): new = ASMNAME_RE.sub(r" PORT2_ASM(\1)", new)
             if os.environ.get("PORT2_ARCH") in ("arm", "wasm"): new = KR_DECL_RE.sub(kr_decl, new)   # (clang: see sources())
-            if new != txt:
+            if new != orig:
                 if os.path.islink(p): os.remove(p)
                 open(p, "w").write(new)
 
@@ -388,7 +417,7 @@ def port_only_sources(outdir, progs):
 def sources(outdir, progs):
     import shutil, sysovl
     port_only_sources(outdir, progs)
-    for name in ("inc", "inc24"):          # materialised header copies of the previous run
+    for name in ("inc", "inc24", "inc26"):          # materialised header copies of the previous run
         shutil.rmtree(os.path.join(outdir, name), ignore_errors=True)
     isarea = lambda p: re.match(r"X0\d\d$", p) and p != "X000"
     base = [p for p in progs if p not in sysovl.SYSOVL and not isarea(p)]
@@ -411,18 +440,21 @@ def sources(outdir, progs):
             if new != txt: open(pth, "w").write(new)
     amap = AddrMap(outdir)
     res = Resolver(amap)
-    for name in ("inc", "inc24"):
+    for name in INC_SETS:
         materialise(os.path.join(outdir, name))
         rewrite_tree(os.path.join(outdir, name), res, outdir)
     rewrite_tree(os.path.join(outdir, "src"), res, outdir)
     # a file that defines a second (originally static) copy of a function another file defines: file-local name
     for stem, names in DUP_DEFS.items():
         for prog in progs:
-            p = os.path.join(outdir, "src", prog.lower(), stem + ".c")
-            if not os.path.exists(p): continue
-            txt = open(p).read()
-            defs = "".join("#define %s %s__%s\n" % (n, stem, n) for n in names)
-            if defs not in txt: open(p, "w").write(txt.replace("\n", "\n" + defs, 1))
+            d = os.path.join(outdir, "src", prog.lower())
+            # (another version compiles a file once per unit it builds: stem__ADDR.c, each with its own copy)
+            for fn in sorted(os.listdir(d)) if os.path.isdir(d) else ():
+                if fn != stem + ".c" and not (not PV.PAL and re.match(re.escape(stem) + r"__[0-9A-F]{8}\.c$", fn)): continue
+                p = os.path.join(d, fn)
+                txt = open(p).read()
+                defs = "".join("#define %s %s__%s\n" % (n, fn[:-2], n) for n in names)
+                if defs not in txt: open(p, "w").write(txt.replace("\n", "\n" + defs, 1))
     for rel, names in WEAK_DEFS.items():
         p = os.path.join(outdir, "src", rel)
         if not os.path.exists(p): continue
@@ -449,6 +481,11 @@ def sources(outdir, progs):
         for p, l, lit in res.constant_list: f.write("%s:%d: %s (constant)\n" % (p, l, lit))
     with open(os.path.join(outdir, "literals_resolved.txt"), "w") as f:
         for s, n in sorted(res.by_sym.items(), key=lambda e: -e[1]): f.write("%6d %s\n" % (n, s))
+    # the runtime's per-version layout constants and retail addresses (port2/include/port_runtime.h includes it)
+    hdr = PV.header_h()
+    hp = os.path.join(outdir, "version", "port_version.h")
+    os.makedirs(os.path.dirname(hp), exist_ok=True)
+    if not os.path.exists(hp) or open(hp).read() != hdr: open(hp, "w").write(hdr)
     print("gen2: %d address literals resolved (%d of them labels inside native functions), %d unresolved, "
           "%d constants skipped (%s/literals.txt), %d symbols declared"
           % (res.resolved, len(res.labels), len(res.unresolved), res.constants, outdir, len(res.used)))
@@ -745,7 +782,7 @@ def full_symbol_kinds():
     reference) or defined in a data section, and code nowhere, is data."""
     from build_full import Elf
     funcs, data = set(), set()
-    full = os.path.join(ROOT, "build", "full")
+    full = PV.FULL
     for fn in sorted(os.listdir(full)) if os.path.isdir(full) else []:
         if not fn.endswith(".elf"): continue
         e = Elf(os.path.join(full, fn))
@@ -801,6 +838,9 @@ def link(outdir, nm, objlist):
     # bare name (`adv` is PROVIDEd as data in every elf, so adv__80127214 was aliased into the data image and
     # komaPigSubtype09Step jumped to the retail bytes of AnimAdvanceWithBox: AREA00 section 4 crashed)
     all_starts = set(u.addr for us in amap.U.values() for u in us)
+    # another version: function or data per name, from the program that gave it (gen_port sources_version)
+    skp = os.path.join(outdir, "symkind.txt")
+    symkind = dict(l.split() for l in open(skp) if l.strip()) if not PV.PAL and os.path.exists(skp) else {}
     data_csv_names = set()
     for fn in os.listdir(os.path.join(ROOT, "notes")):
         if fn.startswith("data_names_") and fn.endswith(".csv"):
@@ -837,15 +877,18 @@ def link(outdir, nm, objlist):
         is_data_name = re.match(r"(?:D|DAT|PTR|PTR_DAT|jtbl|P)_[0-9A-Fa-f]{8}", n) or (
             a is not None and (base in elf_data or n in elf_data) and base not in elf_funcs and base not in unit_names.get(a, ())
             and not ovl_re.match(n) and not re.match(r"(?:FUN|func|thunk_FUN)_[0-9A-Fa-f]{8}", base) and not renamed_fn)
+        if n in symkind and a is not None: is_data_name = symkind[n] == "D"     # (another version: gen_port knows)
         if a is not None and not is_data_name and not (f and f in defined and f != n and a not in amap.vary):
             th = amap.thunk(a)
             if th is None and ovl_re.match(n) and GP.OVL_BASE <= a < GP.OVL_END and a in amap.ovl_starts:
                 th = "port_thunk_%08X" % a
             if th:        # a function of the overlay region: the resident overlay decides at call time
                 ld.append("%s = %s;" % (n, th)); thunk_aliases += 1; continue
-        if f and (f in defined or f in libc) and f != n:    # (libc: func_8005BD88 is MAIN0's memcpy, the host's serves)
-            if f not in defined and os.environ.get("PORT2_ARCH") == "arm":
-                libc_tramps.append((n, f)); continue      # (lld cannot alias a shared library's symbol: thunks.S branches)
+        if f and (f in defined or f in libc) and f != n and not (n in symkind and is_data_name):    # (libc: func_8005BD88 is MAIN0's memcpy, the host's serves)
+            if f not in defined and (os.environ.get("PORT2_ARCH") == "arm" or (not PV.PAL and not os.environ.get("PORT2_ARCH"))):
+                # (lld cannot alias a shared library's symbol: thunks.S branches; nor can ld when the game calls the
+                # alias directly, as USA's func_8005B7E0 = memcpy is: a jump to the PLT)
+                libc_tramps.append((n, f)); continue
             ld.append("%s = %s;" % (n, f)); continue
         if a is not None and (not amap.is_code(a) or is_data_name):
             # (a data name inside an X000 code unit: another overlay's data, or a table a coarse unit covers)
@@ -891,6 +934,9 @@ def link(outdir, nm, objlist):
             thunks_x86 = []
         else:
             thunks_x86 = thunks
+            for name, target in libc_tramps:
+                f.write((".globl %s%s\n" + ("" if pfx else ".type %s,@function\n") + "%s%s:\n  jmp %s%s\n")
+                        % ((pfx, name, name, pfx, name, pfx, target) if not pfx else (pfx, name, pfx, name, pfx, target)))
         for a in thunks_x86:
             f.write((".globl %sport_thunk_%08X\n" + ("" if pfx else ".type port_thunk_%08X,@function\n") + "%sport_thunk_%08X:\n"
                     "  pushl $0x%08X\n  call %sport_resolve_call\n  addl $4, %%esp\n  jmp *%%eax\n")

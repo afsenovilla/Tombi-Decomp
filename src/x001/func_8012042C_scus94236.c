@@ -6,9 +6,9 @@
 #include "TOBJ.H"
 
 
-extern void *D_8013BEE4_scus94236[];
-void func_80018378_scus94236(TObj *o);
-void func_80017F08_scus94236(TObj *o);
+extern void *D_8013DA28[];
+void func_80018D40(TObj *o);
+void func_800188D0(TObj *o);
 
 void func_8012042C_scus94236(TObj *o)
 {
@@ -17,7 +17,7 @@ void func_8012042C_scus94236(TObj *o)
         int x, d;
         o->w1e = 11;
         o->b0d = 0;
-        o->anim = D_8013BEE4_scus94236[o->b0c];
+        o->anim = D_8013DA28[o->b0c];
         x = o->a.p.whole;
         d = ((int*)&SPAD.i2d4)[0];
         o->b0f = 0;
@@ -33,7 +33,7 @@ void func_8012042C_scus94236(TObj *o)
         switch (o->subtype) {
         case 0:
             o->visible = 1;
-            func_80018378_scus94236(o);
+            func_80018D40(o);
             break;
         case 1: {
             short t; unsigned int u;
@@ -49,7 +49,7 @@ void func_8012042C_scus94236(TObj *o)
                 if ((short)t < o->d38) t = o->d38;
                 t = (t & 0xfff) >> 4; o->y.p.whole = t;
                 o->visible = 1;
-                func_80018378_scus94236(o);
+                func_80018D40(o);
             }
             break;
         }
@@ -59,7 +59,7 @@ void func_8012042C_scus94236(TObj *o)
         o->b04++;
         break;
     case 3:
-        func_80017F08_scus94236(o);
+        func_800188D0(o);
         break;
     }
 }

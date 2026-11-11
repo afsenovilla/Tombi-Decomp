@@ -1,0 +1,88 @@
+// VERSION BETA_980203 beta980203 80031C18 480
+#if defined(VERSION_BETA_980203)
+// Beta version: PAL playerEffect4EStepA.c without the pad vibration.
+#include "TOBJ.H"
+extern void AnimLoadDuration(TObj *);
+extern int AnimAdvance(TObj *);
+extern void startPadVibration(int, int, int, int);
+extern char D_80012228[];
+extern char D_80012240[];
+extern char D_80012260[];
+static char *PTR_80079d58[7] = {
+    (char *)D_80012228, (char *)19, (char *)4, (char *)D_80012240,
+    (char *)19, (char *)4, (char *)D_80012260,
+};
+extern unsigned short TICK_COUNT;
+extern unsigned char PLAYER_VISIBLE, PLAYER_DRAW_DEPTH;
+extern char PLAYER, DAT_800a6104;
+extern short DAT_800a6118;
+extern unsigned short PLAYER_ANIM_FRAME;
+extern short *PLAYER_H;
+extern short *PLAYER_D;
+extern short PLAYER_Y;
+
+void playerEffect4EStepA(TObj *o)
+{
+    unsigned char b;
+    int s;
+    Fix16 *f;
+    short t;
+    unsigned char v;
+    switch (o->state) {
+    case 0:
+        o->anim = *(void **)(PTR_80079d58[o->subtype * 3] + o->b0c * 4);
+        AnimLoadDuration(o);
+        o->timer = 0xb4;
+        o->state = o->state + 1;
+    case 1:
+        break;
+    default:
+        return;
+    }
+    AnimAdvance(o);
+    o->timer = o->timer - 1;
+    o->visible = PLAYER_VISIBLE;
+    if (o->timer >= 0x3d) {
+        if (o->b6b < 0x7f)
+            b = o->b6b + 8;
+        else
+            b = o->b6b;
+    } else {
+        if (o->timer < 0) {
+            if (DAT_800a6118 > 0)
+                PLAYER = 3;
+            else
+                PLAYER = 1;
+            DAT_800a6104 = 3;
+            o->b6b = 0;
+            o->b04 = 2;
+            goto L;
+        }
+        if (o->b6b != 0)
+            b = o->b6b - 2;
+        else
+            b = 0;
+    }
+    o->b6b = b;
+L:
+    s = PLAYER_H[1];
+    f = o->h;
+    if (PLAYER_ANIM_FRAME & 1)
+        f->p.whole = s + 4;
+    else
+        f->p.whole = s - 4;
+    o->y.p.whole = PLAYER_Y - 8;
+    o->d->p.whole = PLAYER_D[1];
+    switch (o->b0c) {
+    case 0:
+        b = PLAYER_DRAW_DEPTH + 1;
+        break;
+    case 1:
+        b = PLAYER_DRAW_DEPTH - 1;
+        break;
+    default:
+        return;
+    }
+    o->b0f = b;
+}
+#endif

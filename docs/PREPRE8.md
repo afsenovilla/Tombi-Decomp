@@ -313,6 +313,73 @@ program `tomba` = TOMBA.EXE, game dir `game_prepre8/`, git-ignored). It is set u
   the PAL category 7 list, 0xE4-byte layer-1 objects, `setObjectSpeedPolar2` fields at +0x7C, `startAreaBgm(1)`).
   `closeTask` and `startTask` stay at 99.6 %: the only difference is the operand order of the `addu` that the
   assembler emits for a symbol+register load, which C cannot change.
+- **Older assembler (2026-11-09).** The PrePre 8 game code (0x80016D40..~0x80087000) loads every small constant with
+  `ori rX,$zero,N`, never `addiu` (thousands of `ori`, zero `addiu`; the Psy-Q library after it has `addiu`): the
+  `li` expansion of ASPSX before 2.50. `tools/ncheck.py` honours a `// ASPSX <version>` header line (maspsx
+  `--aspsx-version`), and `// ASPSX.PCPX_96084 2.34` sets it for this build only; `tools/demo_sweep.py` adds it to
+  every candidate whose target has `ori` loads and no `addiu` ones. With it, plain PAL C matched 40 functions at once
+  (`compactOrderingTable`, `AnimAdvance`, `spawnImpactEffect`, ...) and the scratchpad renames of `--fix` 35 more.
+- **Same compiler as retail (2026-11-09).** Only the assembler is older; the C compiler is the retail one (native
+  old-gcc 2.7.2 = Psy-Q 4.0 CC1PSX). Test: the whole PrePre 8 report rebuilt with each compiler in place of cc1
+  (`OLDGCC=<dir>`; DOS CC1PSX through DOSBox, Win32 ones through Wine, wrapped as an old-gcc `cc1`; ASPSX 2.34
+  behaviour kept through maspsx):
+
+  | cc1 | matched code | functions |
+  |---|---|---|
+  | old-gcc 2.7.2 / Psy-Q 4.0 CC1PSX (Wine) | 20.29 % | 617 |
+  | Psy-Q 3.5 CC1PSX (DOS, GCC 2.6.0, ships ASPSX 2.34) / old-gcc 2.6.0 | 10.82 % | 476 |
+  | old-gcc 2.6.3 | 10.90 % | 477 |
+  | Psy-Q 3.6 CC1PSX (DOS, 2.7.2.SN.1, ships ASPSX 2.34) | 6.48 % | 406 |
+  | Psy-Q 4.1 CC1PSX (cygnus-2.7.2-970404) | 3.28 % | 283 |
+
+  No other compiler matches a single function that 2.7.2 does not (0 gained, 140-334 lost). Unbiased check on the
+  511 unmatched functions with candidates (`demo_sweep --dry-run --show` with each cc1): no new match, and the best
+  candidate's diff is larger with 2.6.0 for 182 functions (smaller for 17) and with the 3.6 CC1PSX for 193 (smaller
+  for 47). The near misses with 2.7.2 are source changes, not codegen: a struct field at another offset
+  (`updateChainedPartsObj` 0xA5 -> 0xA1, `pushObjectOutOfObjectX` 0x9D -> 0x69, `updateAnimProp` scratchpad 0x2D4 ->
+  0x15C), a byte field that is a halfword here (`spawnMushroomClusterDebris` +10), an unsigned char compare
+  (`testCollisionSegment`). The low score is the early source, not the toolchain. The 1998-02-03 beta answers the same:
+  2.7.2 69.56 % (1602 functions), 2.6.0 28.98 %, 3.6 CC1PSX 17.25 %, 4.1 CC1PSX 5.25 %.
+  The JP demo SLPM-80165 too: 2.7.2 42.84 % (1160), 2.6.0 20.85 %, 3.6 CC1PSX 12.88 %, 4.1 CC1PSX 5.58 % (0 gained
+  each time).
+- **Hand pass (2026-11-10): 617 -> 787 functions, 20.29 -> 23.13 %.** What it took:
+  - the 43 BIOS A0/B0/C0 trampolines (0x8008744C.., 0x800881CC.., 0x80094214..) had no symbol, so splat cut them
+    with the alignment `nop` (16 bytes) and nothing matched; named with their PAL names and 12-byte sizes (PAL pairs)
+    they match the PAL `// AS gnu` files. Same fix for `GetGp`, `SetGeomScreen`, `FGO_04/05_OBJ_64`;
+  - the task table (0x801FC000) is addressed with literal constants: `D_801FC000..D_801FC010` are `ignore:True` in
+    `symbol_addrs_manual.txt` (the old assembler expands `lw r, CONST(reg)` as `lui at; addu at,reg,at`, which a
+    symbol cannot give), which brought `closeTask`/`startTask` from 99.6 % to 100 % and matched `ThreadCreate`;
+  - the current task pointer is the RAM global `D_800DE0B0` (PAL `TASK_C` at 0x1F8001D4);
+  - object fields after +0x98 sit lower than in PAL (PAL +0x9C/+0xA6/+0xB0/+0xBE -> +0x98/+0xA2/+0xA8/+0xB6), the
+    axis swap flag is the whole halfword at 0x1F800128, the pools and allocators keep their counters/free lists at
+    0x1F8002C4.. / 0x1F8002E4..;
+  - an 8-byte stack frame with nothing saved (the allocators, a byte copy) comes from an unused local array:
+    `char pad[0];` reproduces it;
+  - scratchpad words written through `$at`: check with `jpcheck` without `--norm` (or the report), `--norm` hides
+    the offset of `sw rX,N(at)`.
+- **Hand pass round 3, second part (2026-11-10): 982 -> 997 functions, 31.62 -> 32.34 %.** Near misses of round 2
+  and closest twins (`tools/demo_pair.py`). What fixed the last diffs:
+  - a plain scalar global stored after stores through `ptr[i]` is moved above them by sched (gcc 2.7 assumes a
+    fixed scalar and a varying "in struct" address never alias); a one-field struct global keeps the retail order
+    (`func_800996B4`, the `_svm_cur` voice of the voice reset). When splat named every field address of a table
+    (`D_800DDB96`, `D_800DDB98`, ...), declare one array of 0x34-byte structs per field symbol;
+  - `if (p == d) { T *q = p; ...}` with `q` block-scoped keeps the `move s0,v0` copy; reusing `d` lets cse apply the
+    jump equivalence and drop it (`func_80022128`);
+  - a `goto` loop has no loop notes, so loop.c does not hoist a constant that retail reloads each pass (`0x900`
+    pad test, `func_8001FBC0`); the hoisted `1` then has to be an explicit variable, compared through `if`/`goto`
+    (a `switch` case label is a constant);
+  - `{ int m = y * cols; m += x; x = m; }` gives `addu x,prod,x` where `x += y * cols` gives `addu x,x,prod`;
+  - an `unsigned char` first parameter moves its `move s4,a0` copy after the other three in the prologue;
+  - a constant that retail keeps in `v1` from the switch dispatch delay slot: `register int k asm("$3") = 6;` plus a
+    barrier (`func_80079B68`, the chick handler);
+  - reorg steals `li v0,1` from the common tail into delay slots unless the tail starts with the loads: read the
+    operands into locals before `o->visible = 1` (`func_80040E24`);
+  - an asm barrier on a copy right after its assignment (`dx = d; asm(... dx)`) swaps the two registers; at the
+    branch target it would also leave a `nop` (`func_800182F4`);
+  - `return 0` written as `break` to a shared `return 0` when retail ends in one `move v0,zero`.
+  Still open (diff lines): `func_8006BA14` 29 (sum register of the second box test), `func_8003E360` 35 (the
+  constant 8 in v1), `func_800360C0` 69 (store/reload order of +0xA0/+0xA6), `func_8007D4B0` 38, `func_8006EFB4`
+  58 (different tail), `func_80031914` 66.
 - CI job `report-prepre8` (`.github/workflows/report.yml`) downloads the disc image from the
   **`GAME_FILES_URL_PREPRE8`** secret (raw data track .bin or a zip with TOMBA.EXE; Drive links handled like the
   demo job), extracts only `/TOMBA` with `tools/prepre8.py extract`, checks the TOMBA.EXE sha1

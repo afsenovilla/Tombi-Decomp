@@ -123,3 +123,6 @@ deepJunglePigShotPickHop = 0x80123D14; // type:func size:0x100  PAL x014 0x80124
 deepJunglePigShotHop = 0x80123E14; // type:func size:0x458  PAL x014 0x80124AD0
 deepJunglePigShotSubtype2Step = 0x8012426C; // type:func size:0x28C  PAL x014 0x80124F28
 updateDeepJunglePigShot = 0x801244F8; // type:func size:0x430  PAL x014 0x801251B4
+// BEGIN jp_globals (tools/jp_globals.py)
+GVARS_PLAYER_LANDED = 0x8009BCA2; // size:0x1 PAL 0x8009C93A
+// END jp_globals

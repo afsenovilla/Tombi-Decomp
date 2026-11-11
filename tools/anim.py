@@ -145,7 +145,12 @@ class Sprites:
         parts = vram.parse_spr(spr)
         blob = A.read_resource(A.find_clut(TOMBI_WPP)["name"])
         def pal_of(r):
-            return [(0, 0, 0, 0)] + [tuple(A.rgb555(v)) + (255,) for v in struct.unpack_from("<15H", blob, (r * 256 + 1) * 2)]
+            p = [(0, 0, 0, 0)] + [tuple(A.rgb555(v)) + (255,) for v in struct.unpack_from("<15H", blob, (r * 256 + 1) * 2)]
+            # 21 frames (roll land, victory pose...) point at rows 16/17, empty in the disc's CLUT file (the game fills them at
+            # run time from rows 0/1): draw them with the rows they copy, instead of black
+            if r >= 16 and all(c[:3] == (0, 0, 0) for c in p[1:]):
+                return pal_of(r - 16)
+            return p
         pals = {}
         self.n = len(frames)
         self.img, self.off = [], []

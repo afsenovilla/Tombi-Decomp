@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include "port_runtime.h"
 #include "panel_assets.h"
+#include "panel_addrs.h"
 #ifdef __ANDROID__
 #include <jni.h>
 #include <pthread.h>
@@ -47,20 +48,20 @@ static u32 *pix;                           /* malloc'd: the scaled frame (PC win
 #define G8(a)  (*(u8 *)PORT_M0(a))
 #define G16(a) (*(u16 *)PORT_M0(a))
 #define G32(a) (*(u32 *)PORT_M0(a))
-#define G_AREA      G16(0x8009C960u)
-#define G_SECTION   G16(0x8009C962u)
-#define G_TIME      G32(0x8009C968u)
-#define G_AP        G32(0x8009C96Cu)
-#define G_HEALTH    G8(0x8009C970u)
-#define G_MAXHEALTH G8(0x8009C971u)
-#define G_LEVEL     G8(0x8009C973u)
-#define G_LIVES     G8(0x8009C980u)
-#define G_EXPLEV(i) G8(0x8009CD98u + (i))
-#define G_EXPBAR(i) G8(0x8009CD9Bu + (i))
-#define G_EVENT(i)  G8(0x8009CDA4u + (i))
-#define G_WEAPON    G8(0x8009D2B2u)
-#define G_PANTS     G8(0x8009D2B3u)
-#define G_MAPREG(i) G16(0x8009D2C4u + 2 * (i))
+#define G_AREA      G16(PV_GAME_AREA)
+#define G_SECTION   G16(PV_GAME_SECTION)
+#define G_TIME      G32(PV_GAME_TIME)
+#define G_AP        G32(PV_GAME_AP)
+#define G_HEALTH    G8(PV_GAME_HEALTH)
+#define G_MAXHEALTH G8(PV_GAME_MAXHEALTH)
+#define G_LEVEL     G8(PV_GAME_LEVEL)
+#define G_LIVES     G8(PV_GAME_LIVES)
+#define G_EXPLEV(i) G8(PV_GCD_EXPLEV + (i))
+#define G_EXPBAR(i) G8(PV_GCD_EXPBAR + (i))
+#define G_EVENT(i)  G8(PV_SCRIPT_FLAGS + (i))
+#define G_WEAPON    G8(PV_GAME_WEAPON)
+#define G_PANTS     G8(PV_GAME_PANTS)
+#define G_MAPREG(i) G16(PV_GAME_MAPREG + 2 * (i))
 /* event ids: the pause menu's Events list (subScreenDrawEventList) shows SCRIPT_FLAGS[order[i] - 1] for the ids of
    SUBSCREEN_EVENT_ORDER (D0SPSUB 0x801086F0, 256 bytes, 0xFF = none), which go up to 0xBF, past the 130 of the save
    docs: the titles table EVENT_NAME_STRINGS has 195 entries and the event icons 192 */
@@ -71,7 +72,7 @@ static u32 *pix;                           /* malloc'd: the scaled frame (PC win
 static int in_gameplay(void) { return G_TIME != 0; }
 
 /* ---------------------------------------------------------------- disc tables */
-#define OVL_BASE 0x800E8028u
+#define OVL_BASE PORT_OVL_BASE
 static const struct { u8 area, n; } rooms[] = {{0, 6}, {1, 5}, {2, 6}, {3, 6}, {4, 20}, {5, 4}, {6, 3}, {8, 4}, {9, 7},
     {10, 9}, {11, 5}, {13, 2}, {14, 8}, {16, 7}, {17, 11}, {18, 3}, {19, 3}};
 static int nsections(int a) { for (unsigned i = 0; i < sizeof rooms / sizeof rooms[0]; i++) if (rooms[i].area == a) return rooms[i].n; return 0; }
@@ -107,10 +108,16 @@ static char *ovl_string(const Ovl *o, u32 a) {
         int g = rd16(o->d, p), c;
         if (g == -1) break;
         if (g == -3) { if (k && b[k - 1] != ' ') b[k++] = ' '; continue; }
+#if PORT_VERSION_USA
+        /* USA: ASCII - 32 up to '?' (0 = space), ASCII - 33 from 'A' (no '@'): English only */
+        if (g < 0) continue;
+        c = g < 32 ? g + 32 : g + 33;
+#else
         if (g <= 0) continue;
         /* Latin-1 + 140 below 0x7F, + 74 from 267 = A-acute (not DEL: "Area Cerdiablo uno", "Arbol del Saber" lost their A); the
            opening marks and the ordinal a sit past the Latin-1 range (tools/subscreen_text.py) */
         c = g == 332 ? 0xA1 : g == 333 ? 0xAA : g == 337 ? 0xBF : g < 267 ? g - 140 : g - 74;
+#endif
         if (c >= 32 && c < 256) b[k++] = (char)c;
     }
     while (k && b[k - 1] == ' ') k--;
@@ -150,8 +157,8 @@ void port_panel_init(void) {
 static void load_tables(void) {
     char name[32]; unsigned n0, nn = 0; u8 *d0, *dn = NULL;
     loaded = -1;
-    d0 = port_cd_read_named("SYSTEM/D0SPSUB.BIN", &n0);
-    if (!d0 || n0 < 0x22200) { port_printf("[panel] SYSTEM/D0SPSUB.BIN not readable (%p, %u bytes): no names, no map\n", (void *)d0, n0); free(d0); return; }
+    d0 = port_cd_read_named(PA_F_SUB, &n0);
+    if (!d0 || n0 < 0x22200) { port_printf("[panel] %s not readable (%p, %u bytes): no names, no map\n", PA_F_SUB, (void *)d0, n0); free(d0); return; }
     if (port_lang > 0 && port_lang < 9) {
         snprintf(name, sizeof name, "SYSTEM/D%dSPSUB.BIN", port_lang);
         dn = port_cd_read_named(name, &nn);
@@ -160,10 +167,10 @@ static void load_tables(void) {
     if (dn && nn > 8) { on.d = dn; on.n = nn; on.base = OVL_BASE + rd32(dn, 4) - rd32(d0, 4); }
 #define A0(a) ((a) - OVL_BASE)
     /* the map graph (MAIN0 layout) */
-    for (int i = 0; i < NNODES; i++) { nodes[i].x = rd16(d0, A0(0x800FD418u) + 8 * i); nodes[i].y = rd16(d0, A0(0x800FD41Au) + 8 * i); nodes[i].z = rd16(d0, A0(0x800FD41Cu) + 8 * i); }
-    memcpy(links, d0 + A0(0x800FDAB4u), sizeof links);
+    for (int i = 0; i < NNODES; i++) { nodes[i].x = rd16(d0, A0(PV_MAP_NODES) + 8 * i); nodes[i].y = rd16(d0, A0(PV_MAP_NODES) + 8 * i + 2); nodes[i].z = rd16(d0, A0(PV_MAP_NODES) + 8 * i + 4); }
+    memcpy(links, d0 + A0(PV_MAP_LINKS), sizeof links);
     for (int r = 0; r < 12; r++) {
-        u32 e = rd32(d0, A0(0x800FDA70u) + 4 * r);
+        u32 e = rd32(d0, A0(PV_MAP_AREA_ROUTES) + 4 * r);
         nroutes[r] = 0;
         if (!in_ovl(&o0, e)) continue;
         for (unsigned p = e - OVL_BASE; p + 8 <= n0 && rd16(d0, p) != -1 && nroutes[r] < 32; p += 8) {
@@ -172,7 +179,7 @@ static void load_tables(void) {
         }
     }
     for (int a = 0; a < 20; a++) {
-        u32 p = rd32(d0, A0(0x800FE064u) + 4 * a); int ns = nsections(a);
+        u32 p = rd32(d0, A0(PV_MAP_ROOM_LINK) + 4 * a); int ns = nsections(a);
         for (int s = 0; s < 24; s++) roomlink[a][s] = -1;
         if (!in_ovl(&o0, p)) continue;
         for (int s = 0; s < ns && s < 24; s++) { int l = rd16(d0, p - OVL_BASE + 2 * s); roomlink[a][s] = l >= 0 && l < NLINKS ? l : -1; }
@@ -190,7 +197,7 @@ static void load_tables(void) {
     ev_norder = 0;
     {   static u8 seen[EVENTS];
         for (int i = 0; i < 256; i++) {
-            int v = d0[A0(0x801086F0u) + i];
+            int v = d0[A0(PV_EVENT_ORDER) + i];
             if (v == 0xFF || v == 0 || v - 1 >= EVENTS || seen[v - 1]) continue;
             seen[v - 1] = 1; ev_order[ev_norder++] = (u8)(v - 1);
         }
@@ -198,11 +205,11 @@ static void load_tables(void) {
     /* the names (the language's file) */
     u32 t;
 #define RD(a) rd32(on.d, (a) - on.base)
-    if ((t = map_table(&o0, &on, 0x801093C4u))) for (int e = 0; e < EVENTS; e++) ev_name[e] = ovl_string(&on, RD(t + 4 * e));
-    if ((t = map_table(&o0, &on, 0x80108BE4u))) for (int i = 0; i < 12; i++) area_name[i] = ovl_string(&on, RD(t + 4 * i));
-    if ((t = map_table(&o0, &on, 0x80108B78u))) for (int i = 0; i < 24; i++) if (in_ovl(&on, RD(t + 4 * i))) a14_area[i] = ovl_string(&on, RD(t + 4 * i));
-    if ((t = map_table(&o0, &on, 0x80108DDCu))) for (int i = 0; i < 24; i++) if (in_ovl(&on, RD(t + 4 * i))) a14_room[i] = ovl_string(&on, RD(t + 4 * i));
-    if ((t = map_table(&o0, &on, 0x80108F8Cu))) for (int i = 0; i < 12; i++) {
+    if ((t = map_table(&o0, &on, PV_EVENT_NAMES))) for (int e = 0; e < EVENTS; e++) ev_name[e] = ovl_string(&on, RD(t + 4 * e));
+    if ((t = map_table(&o0, &on, PV_AREA_NAMES))) for (int i = 0; i < 12; i++) area_name[i] = ovl_string(&on, RD(t + 4 * i));
+    if ((t = map_table(&o0, &on, PV_A14_AREA_NAMES))) for (int i = 0; i < 24; i++) if (in_ovl(&on, RD(t + 4 * i))) a14_area[i] = ovl_string(&on, RD(t + 4 * i));
+    if ((t = map_table(&o0, &on, PV_A14_ROOM_NAMES))) for (int i = 0; i < 24; i++) if (in_ovl(&on, RD(t + 4 * i))) a14_room[i] = ovl_string(&on, RD(t + 4 * i));
+    if ((t = map_table(&o0, &on, PV_ROOM_NAMES))) for (int i = 0; i < 12; i++) {
         u32 r = RD(t + 4 * i);
         for (int j = 0; j < 24 && in_ovl(&on, r) && in_ovl(&on, r + 4 * j + 3); j++) {
             u32 sp = RD(r + 4 * j);
@@ -210,13 +217,13 @@ static void load_tables(void) {
             room_name[i][j] = ovl_string(&on, sp);
         }
     }
-    if ((t = map_table(&o0, &on, 0x8010979Cu))) {
-        u32 idx = t - (0x8010979Cu - 0x801096D4u);   /* ITEM_NAME_INDEX (u8[item]) right before the table */
+    if ((t = map_table(&o0, &on, PV_ITEM_NAMES))) {
+        u32 idx = t - (PV_ITEM_NAMES - PV_ITEM_NAME_INDEX);   /* ITEM_NAME_INDEX (u8[item]) right before the table */
         if (in_ovl(&on, idx) && in_ovl(&on, idx + 199))
             for (int i = 0; i < 200; i++) item_name[i] = ovl_string(&on, RD(t + 4 * on.d[idx - on.base + i]));
     }
     es_improved = ev_name[16] && !strcmp(ev_name[16], "La caja AP");
-    port_printf("[panel] tables read (%s%s): %d map nodes, event 3 \"%s\", area 0 \"%s\"\n", dn ? name : "SYSTEM/D0SPSUB.BIN",
+    port_printf("[panel] tables read (%s%s): %d map nodes, event 3 \"%s\", area 0 \"%s\"\n", dn ? name : PA_F_SUB,
                 es_improved ? ", improved Spanish translation" : "", NNODES, ev_name[3] ? ev_name[3] : "?", area_name[0] ? area_name[0] : "?");
     free(d0); free(dn);
     loaded = 1;
@@ -312,6 +319,11 @@ static const char *map_tab_name(void);   /* panel_side.inc: "Mapa" / "Cenital" b
 /* ---------------------------------------------------------------- the panel */
 static int es(void) { return port_lang == 5; }
 #define T(en, sp) (es() ? sp : en)
+#if PORT_VERSION_USA
+#define PANEL_HERO "Tomba"   /* the English chrome names him as the version does */
+#else
+#define PANEL_HERO "Tombi"
+#endif
 enum { PAGE_MAP, PAGE_EVENTS, PAGE_SIDE, PAGE_ITEMS, NPAGES };
 static int page;
 static const char *page_name(int p) {
@@ -811,5 +823,5 @@ int port_log_events;
 void port_event_log(const char *what, int e, int before) {
     if (!port_log_events || e < 0 || e > 255) return;
     port_printf("[event] frame %d: %s %d (0x%02X) %d -> %d at area %d section %d, x %d y %d\n", port_frame, what, e, e, before,
-                G_EVENT(e), G_AREA, G_SECTION, (s16)G16(0x800A604Au), (s16)G16(0x800A604Eu));
+                G_EVENT(e), G_AREA, G_SECTION, (s16)G16(PV_PLAYER_X), (s16)G16(PV_PLAYER_Y));
 }

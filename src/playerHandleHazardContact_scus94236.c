@@ -16,11 +16,11 @@ extern unsigned char GAME_PLAYER_HEALTH[];
 extern void playerUpdateWaterLevel(TObj *);
 extern short getHazardDamage();
 extern void decreaseObjectTimer(TObj *, unsigned char);
-extern void FUN_8001e5f4(int, int);
+extern void func_800200EC(int, int);
 extern void startPadVibration(int, int, int, int);
-extern void FUN_8001f110(int);
+extern void func_80020C00(int);
 extern int playJingle(int);
-extern void FUN_8001fe94(TObj *, int);
+extern void func_80022A24(TObj *, int);
 
 static __inline__ short calc(void)
 {
@@ -196,7 +196,7 @@ void playerHandleHazardContact(TObj *o, int arg)
         GVARS.driftH = 0;
         GVARS.driftY = -0x40;
         (*(unsigned char*)((char*)&o->da0 + 1)) = 0;
-        FUN_8001e5f4(0xe, 0x7f);
+        func_800200EC(0xe, 0x7f);
         return;
     }
     if (o->active == 1 && arg != 0) {
@@ -208,7 +208,7 @@ void playerHandleHazardContact(TObj *o, int arg)
             if (o->w98 <= 0) {
                 GVARS.b42 = 1;
                 GVARS.hurtState = 1;
-                FUN_8001f110(0);
+                func_80020C00(0);
                 playJingle(3);
             }
         }
@@ -228,7 +228,7 @@ void playerHandleHazardContact(TObj *o, int arg)
         PLAYER_EXT->w2c = 0x2f;
         t = PLAYER_ANIM_TABLE;
         o->anim = t.p[PLAYER_EXT->w2c];
-        FUN_8001fe94(o, 1);
+        func_80022A24(o, 1);
         o->state = 2;
     }
 }

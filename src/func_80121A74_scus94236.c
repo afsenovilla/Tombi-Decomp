@@ -6,7 +6,7 @@ extern void *A00_FAR_BACKDROP_EAST_ANIMS[];
 extern int DAT_1f8002d4[];
 extern short SCREEN_ORIGIN_X;
 extern unsigned short SCREEN_ORIGIN_Y;
-extern void FUN_80018da4(TObj *, int);
+extern void func_80018D40(TObj *, int);
 extern void freeObjectLayer7(TObj *);
 
 void func_80121A74_scus94236(TObj *o)
@@ -43,7 +43,7 @@ void func_80121A74_scus94236(TObj *o)
             o->a.p.whole = v;
             o->y.p.whole = ((unsigned)(o->d34 - SCREEN_ORIGIN_Y) & 0xfff) >> 4;
             *(volatile short *)&o->b.p.whole = 0;
-            { int one = 1; *(volatile unsigned char *)&o->visible = one; FUN_80018da4(o, one); }
+            { int one = 1; *(volatile unsigned char *)&o->visible = one; func_80018D40(o, one); }
         }
         break;
     case 2:

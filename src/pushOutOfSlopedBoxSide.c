@@ -1,5 +1,7 @@
 // FUNC 80124bbc 340 X000
 // MATCHING 80124bbc 340
+// VERSION PCPX_96084 tomba 80069270 340
+// ASPSX.PCPX_96084 2.34
 #include "TOBJ.H"
 
 int pushOutOfSlopedBoxSide(TObj *o, TObj *p)

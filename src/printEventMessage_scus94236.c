@@ -4,7 +4,7 @@
 #include "TOBJ.H"
 extern TObj *ObjAlloc(void);
 typedef struct { short a, b; } Pair;
-extern Pair D_80080704[];
+extern Pair D_80077720[];
 
 void printEventMessage(int k, int b)
 {
@@ -58,8 +58,8 @@ void printEventMessage(int k, int b)
             o->y.raw = 0x900000;
             o->category |= 0x80;
             o->b.raw = 0;
-            o->wb4 = D_80080704[b].a;
-            o->wb6 = D_80080704[b].b;
+            o->wb4 = D_80077720[b].a;
+            o->wb6 = D_80077720[b].b;
         }
     }
 }

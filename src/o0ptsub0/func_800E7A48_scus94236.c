@@ -6,9 +6,9 @@ extern S *TASK_C;
 extern unsigned short JOYPAD_STATE;
 extern short SCREEN_OFFSET_X, SCREEN_OFFSET_Y;
 extern volatile unsigned short PAD_PRESSED;
-extern unsigned short D_8009F7F2;
-extern short D_8009E350, D_8009E352, D_8009E354, D_8009E356;
-extern short D_8009F060, D_8009F062, D_8009F064, D_8009F066;
+extern unsigned short D_8009EB5A;
+extern short D_8009D6B8, D_8009D6BA, D_8009D6BC, D_8009D6BE;
+extern short D_8009E3C8, D_8009E3CA, D_8009E3CC, D_8009E3CE;
 extern int SCREEN_ADJUST_PAD_LAST, SCREEN_ADJUST_PAD_REPEAT_TIMER;
 extern short SCREEN_ADJUST_SAVED_X, SCREEN_ADJUST_SAVED_Y;
 extern void playSFX(int id);
@@ -39,7 +39,7 @@ int screenAdjustMenuStep(void)
             else if (*pad & 0x80) dir = 3;
             else if (*pad & 0x20) dir = 4;
         }
-        held = ~D_8009F7F2 & 0xF0;
+        held = ~D_8009EB5A & 0xF0;
         if (held != SCREEN_ADJUST_PAD_LAST) {
             SCREEN_ADJUST_PAD_LAST = held;
             SCREEN_ADJUST_PAD_REPEAT_TIMER = 0x10;
@@ -79,14 +79,14 @@ int screenAdjustMenuStep(void)
             TASK_C->w4e = 0;
             TASK_C->w4c = 1;
         }
-        D_8009E354 = 0x100;
-        D_8009E356 = 0xE0;
-        D_8009F064 = 0x100;
-        D_8009F066 = 0xE0;
-        D_8009E350 = SCREEN_OFFSET_X;
-        D_8009E352 = SCREEN_OFFSET_Y;
-        D_8009F060 = SCREEN_OFFSET_X;
-        D_8009F062 = SCREEN_OFFSET_Y;
+        D_8009D6BC = 0x100;
+        D_8009D6BE = 0xE0;
+        D_8009E3CC = 0x100;
+        D_8009E3CE = 0xE0;
+        D_8009D6B8 = SCREEN_OFFSET_X;
+        D_8009D6BA = SCREEN_OFFSET_Y;
+        D_8009E3C8 = SCREEN_OFFSET_X;
+        D_8009E3CA = SCREEN_OFFSET_Y;
         updateSound();
         break;
     }

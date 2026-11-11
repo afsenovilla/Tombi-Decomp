@@ -8,9 +8,9 @@
 
 extern unsigned short TICK_COUNT;
 extern int UPDATE_OBJECT_INDEX;
-extern void *D_8012EA38[];
-extern void *D_8012EA3C[];
-extern void *D_8012E9F8[];
+extern void *D_8012DDE4[];
+extern void *D_8012DDE8[];
+extern void *D_8012DDA4[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern int ObjCullRegister(TObj *);
@@ -31,7 +31,7 @@ void redFlowerBud(TObj *o)
         o->velV = 0;
         o->wac = 0x10;
         o->state++;
-        o->anim = D_8012EA38[0];
+        o->anim = D_8012DDE4[0];
         AnimLoadDuration(o);
         if (isObjectInView(o)) {
             playSFX(0x98);
@@ -64,7 +64,7 @@ void redFlowerBud(TObj *o)
         if (o->w22 == 0) {
             o->wac = 0x11;
             o->state++;
-            o->anim = D_8012EA3C[0];
+            o->anim = D_8012DDE8[0];
             AnimLoadDuration(o);
         }
         if (((TICK_COUNT + UPDATE_OBJECT_INDEX) & 0xf) == 0 && CAMERA_SCROLL.maxY + 0x98 < o->y.p.whole) {
@@ -79,7 +79,7 @@ void redFlowerBud(TObj *o)
             o->state = 0;
             o->wac = 0;
             o->step++;
-            o->anim = D_8012E9F8[0];
+            o->anim = D_8012DDA4[0];
             AnimLoadDuration(o);
         }
         if ((TICK_COUNT + UPDATE_OBJECT_INDEX) & 3) {

@@ -48,7 +48,8 @@ android {
             useLegacyPackaging true   // extracted: android_dlopen_ext opens libtombi.so by name
             // unstripped symbol table (its DWARF is already gone, port2/CMakeLists.txt): the crash handler of
             // loader.c names static runtime functions too, not only the exported / game ones
-            keepDebugSymbols += ['**/libtombi.so']
+            // (libtombi_usa.so ...: the other versions' game libraries, port2/android/game_libs.py, in src/main/jniLibs)
+            keepDebugSymbols += ['**/libtombi.so', '**/libtombi_*.so']
         }
     }
     compileOptions {

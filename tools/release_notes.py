@@ -15,7 +15,7 @@ cut off), and a commit that hides / removes something a later commit of the same
 """
 import re, subprocess, sys
 
-SHIPS = re.compile(r"^(src/|port/|patches/|port2/|tools/(port_launcher|save_import|prompt_custom|i18n|port_mods)\.py)")
+SHIPS = re.compile(r"^(src/|port/|patches/|port2/|tools/(port_launcher|save_import|prompt_custom|i18n|port_mods|game_library)\.py)")
 
 
 def git(*a):

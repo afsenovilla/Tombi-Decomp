@@ -1,0 +1,178 @@
+// VERSION BETA_980203 beta980203 8001B5D4 1028
+#if defined(VERSION_BETA_980203)
+// Beta version: no cache flush, one-argument queueSystemLoadList, case 7 keeps the background colour
+#include "spad.h"
+#include "gv6.h"
+#include "gamestate.h"
+typedef struct { short x, y, w, h; } RECT;
+typedef struct {
+    RECT clip; short ofs[2]; RECT tw; unsigned short tpage;
+    unsigned char dtd, dfe, isbg, r0, g0, b0;
+    unsigned long dr_env[16];
+} DRAWENV;
+typedef struct {
+    char p0[0x48];
+    short w48, w4a, w4c;
+    unsigned short w4e;
+    char p50[0x68 - 0x50];
+    unsigned char b68, b69, b6a;
+} G;
+extern G *TASK_C;
+extern unsigned char D_1F8001CE[];
+#define LOAD_COMPLETE_SYM D_1F8001CE[0]
+extern unsigned short D_1F8003BA;
+extern unsigned char DISPLAY_BUFFER_0_BG_R[], DISPLAY_BUFFER_0_BG_G[], DISPLAY_BUFFER_0_BG_B[], DISPLAY_BUFFER_1_BG_R[], DISPLAY_BUFFER_1_BG_G[], DISPLAY_BUFFER_1_BG_B[];
+extern unsigned char INVENTORY_SAVED_BG_R, INVENTORY_SAVED_BG_G, INVENTORY_SAVED_BG_B;
+extern short D_800A45EA;
+extern unsigned short D_800A45EAu;
+extern unsigned short AREA_VARIANT;
+extern char D_80077968[];
+extern char D_80077974[];
+extern char D_80077980[];
+extern char D_8007798C[];
+extern char D_80077998[];
+extern char D_800779C4[];
+extern char D_800779CC[];
+extern char D_800779D4[];
+extern char D_800779E0[];
+extern char D_800779E8[];
+extern char D_800779F4[];
+extern char D_80077A08[];
+extern char D_80077A14[];
+extern char D_80077A40[];
+extern char D_80077A44[];
+extern char D_80077A54[];
+extern char D_80077A64[];
+extern char D_80077A7C[];
+extern char D_80077A84[];
+static short *D_80077A8C[20] = {
+    (short *)D_80077968, (short *)D_80077974, (short *)D_80077980, (short *)D_8007798C,
+    (short *)D_80077998, (short *)D_800779C4, (short *)D_800779CC, (short *)D_800779D4,
+    (short *)D_800779E0, (short *)D_800779E8, (short *)D_800779F4, (short *)D_80077A08,
+    (short *)D_80077A14, (short *)D_80077A40, (short *)D_80077A44, (short *)D_80077968,
+    (short *)D_80077A54, (short *)D_80077A64, (short *)D_80077A7C, (short *)D_80077A84,
+};
+extern void SetDispMask(int);
+extern int StoreImage(RECT *, unsigned long *);
+extern int LoadImage(RECT *, unsigned long *);
+extern DRAWENV *GetDrawEnv(DRAWENV *);
+extern void EnterCriticalSection(void);
+extern void FlushCache(void);
+extern void ExitCriticalSection(void);
+extern void clearMenuParams(void);
+extern void inventoryScreenTick(void);
+extern void queueSystemLoadList(int);
+extern void stopBgm(int);
+
+void inventoryScreenHandler(void)
+{
+    DRAWENV env;
+    RECT r;
+    int n;
+    unsigned short s;
+    volatile unsigned short *k;
+
+    switch (TASK_C->w4e) {
+    case 0:
+        SPAD.b1cf = 1;
+        TASK_C->b6a = 0;
+        SetDispMask(0);
+        r.x = 0x120;
+        r.y = 0x1e0;
+        r.w = 0x30;
+        r.h = 0x1f;
+        StoreImage(&r, (unsigned long *)0x801FB000);
+        r.x = 0x80;
+        r.y = 0x1ff;
+        r.w = 0x100;
+        r.h = 1;
+        StoreImage(&r, (unsigned long *)0x801FBBA0);
+        GetDrawEnv(&env);
+        DISPLAY_BUFFER_0_BG_R[0] = 0xf8;
+        DISPLAY_BUFFER_0_BG_G[0] = 200;
+        DISPLAY_BUFFER_0_BG_B[0] = 0xc0;
+        DISPLAY_BUFFER_1_BG_B[0] = 0xc0;
+        DISPLAY_BUFFER_1_BG_G[0] = 200;
+        INVENTORY_SAVED_BG_R = env.r0;
+        INVENTORY_SAVED_BG_G = env.g0;
+        INVENTORY_SAVED_BG_B = env.b0;
+        DISPLAY_BUFFER_1_BG_R[0] = 0xf8;
+        TASK_C->w4e++;
+        break;
+    case 1:
+        LOAD_COMPLETE_SYM = 0;
+        switch (D_800A45EA) {
+        case 0: case 1: case 2: case 6: n = 3; break;
+        case 4: n = 4; break;
+        case 5: n = 5; break;
+        case 7: n = 6; break;
+        case 3: n = 7; break;
+        default: goto next;
+        }
+        goto play;
+    case 2:
+        if (LOAD_COMPLETE_SYM == 0) break;
+        {
+            unsigned short *q = &D_800A45EAu;
+            s = *q;
+            clearMenuParams();
+            *q = s;
+        }
+        SetDispMask(1);
+        goto next;
+    case 3:
+        inventoryScreenTick();
+        if (SPAD.b1c2 != 0) {
+            k = &GV6.s70;
+            if ((*k & 8) && (*k & 0x800)) TASK_C->w4e = 6;
+        }
+        break;
+    case 4:
+        SetDispMask(0);
+        r.x = 0x120;
+        r.y = 0x1e0;
+        r.w = 0x30;
+        r.h = 0x1f;
+        LoadImage(&r, (unsigned long *)0x801FB000);
+        r.x = 0x80;
+        r.y = 0x1ff;
+        r.w = 0x100;
+        r.h = 1;
+        LoadImage(&r, (unsigned long *)0x801FBBA0);
+        DISPLAY_BUFFER_0_BG_R[0] = INVENTORY_SAVED_BG_R;
+        DISPLAY_BUFFER_1_BG_R[0] = INVENTORY_SAVED_BG_R;
+        DISPLAY_BUFFER_0_BG_G[0] = INVENTORY_SAVED_BG_G;
+        DISPLAY_BUFFER_0_BG_B[0] = INVENTORY_SAVED_BG_B;
+        DISPLAY_BUFFER_1_BG_G[0] = INVENTORY_SAVED_BG_G;
+        DISPLAY_BUFFER_1_BG_B[0] = INVENTORY_SAVED_BG_B;
+        n = D_80077A8C[GAME.selectedArea + AREA_VARIANT][GAME.selectedSection];
+        LOAD_COMPLETE_SYM = 0;
+    play:
+        queueSystemLoadList(n);
+    next:
+        TASK_C->w4e++;
+        break;
+    case 5:
+        if (LOAD_COMPLETE_SYM != 0) {
+            SetDispMask(1);
+            SPAD.s1c6 = 0;
+            TASK_C->w4c = SPAD.s3b8;
+            TASK_C->w4e = D_1F8003BA;
+        }
+        break;
+    case 6:
+        TASK_C->w4c = 8;
+        TASK_C->w4e = 0;
+        break;
+    case 7:
+        GAME.areaTransition = 0;
+        GAME.keepBgm = 0;
+        stopBgm(0);
+        TASK_C->w48 = 1;
+        TASK_C->w4a = 1;
+        TASK_C->w4c = 0;
+        TASK_C->w4e = 0;
+        break;
+    }
+}
+#endif

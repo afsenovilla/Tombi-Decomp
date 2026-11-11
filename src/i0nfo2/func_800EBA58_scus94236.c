@@ -18,7 +18,7 @@ extern void SetDrawMode(DR_MODE *, int, int, int, void *);
 typedef struct {
     unsigned short tp0, clut0, tp1, clut1, tp2, clut2;
 } TexInfo;
-extern TexInfo D_800A4668;
+extern TexInfo D_800A39D0;
 typedef struct { u16 x, y, u, v, w, h; } Ent8D0;
 extern Ent8D0 OVERHEAD_MAP_LAYER_RECTS[];
 
@@ -53,11 +53,11 @@ void overheadDrawMapLayers(TObj *o)
             p->w = e->w;
             p->h = e->h;
             if (i == 0) {
-                p->clut = D_800A4668.clut0;
-                SetDrawMode(dm, 0, 0, D_800A4668.tp0, 0);
+                p->clut = D_800A39D0.clut0;
+                SetDrawMode(dm, 0, 0, D_800A39D0.tp0, 0);
             } else {
-                p->clut = D_800A4668.clut1;
-                SetDrawMode(dm, 0, 0, D_800A4668.tp1, 0);
+                p->clut = D_800A39D0.clut1;
+                SetDrawMode(dm, 0, 0, D_800A39D0.tp1, 0);
             }
             c = o->b6b << 7;
             p->r0 = c;

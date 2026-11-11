@@ -32,3 +32,7 @@ func_8011B944_scus94236 = 0x8011B944; // type:func size:0xC  PAL x000 0x80136A8C
 updatePigGateScene = 0x8011B950; // type:func size:0xA8  PAL x002 0x8011C628
 func_8011B9F8_scus94236 = 0x8011B9F8; // type:func size:0x8  PAL main0 0x80022154
 func_80118D6C_scus94236 = 0x80118D6C; // type:func size:0x4FC  PAL x002 0x80119A1C
+// BEGIN jp_globals (tools/jp_globals.py)
+GVARS_PLAYER_LANDED = 0x8009BCA2; // size:0x1 PAL 0x8009C93A
+GV2 = 0x8009C608; // size:0x40 PAL 0x8009D2A0
+// END jp_globals

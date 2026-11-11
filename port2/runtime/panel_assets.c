@@ -24,6 +24,7 @@
 #include "port_runtime.h"
 #include "panel_assets.h"
 #include "panel_charmap.h"
+#include "panel_addrs.h"
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16;
 
@@ -80,11 +81,13 @@ static int icons_ok;
 static void load_icons(void) {
     static const struct { u8 e; u16 c; } force[] = { {0x56, 0x7D12}, {0x57, 0x7D52}, {0x58, 0x7D92}, {0x74, 0x7DD2},
         {0x97, 0x7A93}, {0x9D, 0x7AD3}, {0x9F, 0x7B13}, {0xA4, 0x7B53} };
-    unsigned nd, nb; u8 *d = pa_read("SYSTEM/D0SPSUB.BIN", &nd), *b = pa_read("AREA19/A103.GAM", &nb);
-    if (d && b && nd > 0x21C60 + 200 && nb > 16) {
+    unsigned nd, nb; u8 *d = pa_read(PA_F_SUB, &nd), *b0 = pa_read(PA_F_SPRITES, &nb), *b = b0;
+    const unsigned icons = PV_EVENT_ICONS - PORT_OVL_BASE, cluts = PV_ITEM_ICON_CLUTS - PORT_OVL_BASE;
+    if (b && nb > PA_SPRITES_OFF + 16) { b += PA_SPRITES_OFF; nb -= PA_SPRITES_OFF; } else nb = 0;
+    if (d && b && nd > cluts + 200 && nb > 16) {
         int nf = (int)(rd16(b, 2) / 4), good = 0;
         for (int k = 0; k < NEV_ICONS; k++) {
-            unsigned p = rd32(d, 0x1694C + 4 * k) - 0x800E8028u;
+            unsigned p = rd32(d, icons + 4 * k) - PORT_OVL_BASE;
             if (p + 2 > nd) continue;
             int f = (int)rd16(d, p);
             if (f >= nf) continue;
@@ -95,11 +98,11 @@ static void load_icons(void) {
             good++;
         }
         for (unsigned i = 0; i < sizeof force / sizeof force[0]; i++) ev_icon[force[i].e].clut = force[i].c;
-        memcpy(item_clut, d + 0x21C60, sizeof item_clut);
+        memcpy(item_clut, d + cluts, sizeof item_clut);
         icons_ok = good > 100;
     }
-    if (!icons_ok) port_printf("[panel] event icon tables not found (D0SPSUB %u bytes, A103 %u bytes)\n", d ? nd : 0, b ? nb : 0);
-    free(d); free(b);
+    if (!icons_ok) port_printf("[panel] event icon tables not found (%s %u bytes, %s %u bytes)\n", PA_F_SUB, d ? nd : 0, PA_F_SPRITES, b ? nb : 0);
+    free(d); free(b0);
 }
 
 /* ---------------------------------------------------------------- canvas (game pixels) */
@@ -290,10 +293,8 @@ static int glyph_char(int h, int w, const u8 *img, u8 **norm) {
     if (c >= 0 && norm) *norm = pk; else free(pk);
     return c;
 }
-static void load_wfm(const char *name) {
-    unsigned n; u8 *d = port_cd_read_named(name, &n);
-    if (!d) return;
-    if (n < 144 || memcmp(d, "WFM3", 4) || nblobs >= 48) { free(d); return; }
+/* the glyphs of the WFM3 bank at d (n bytes); returns how many were new */
+static unsigned load_wfm_bank(u8 *d, unsigned n) {
     unsigned ng = rd16(d, 14), used = 0;
     for (unsigned i = 0; i < ng && 144 + 2 * i + 2 <= n; i++) {
         unsigned p = rd16(d, 144 + 2 * i);
@@ -305,10 +306,38 @@ static void load_wfm(const char *name) {
         if (ch >= 0 && !glyphs[k][ch].img) { glyphs[k][ch].w = (u8)w; glyphs[k][ch].h = (u8)h; glyphs[k][ch].img = norm ? norm : d + p + 8; used++; }
         else free(norm);
     }
+    return used;
+}
+static void load_wfm(const char *name) {
+    unsigned n, used = 0; u8 *d;
+#if PORT_VERSION_USA
+    /* USA: no WFM files; the dialogue banks (8 / 16 px) and the event title bank (24 px) are inside the area's GAM files */
+    d = pa_read(name, &n);
+    if (!d) return;
+    if (nblobs >= 48) { free(d); return; }
+    for (unsigned o = 0; o + 144 <= n; o += 4) if (!memcmp(d + o, "WFM3", 4)) used += load_wfm_bank(d + o, n - o);
+#else
+    d = port_cd_read_named(name, &n);
+    if (!d) return;
+    if (n < 144 || memcmp(d, "WFM3", 4) || nblobs >= 48) { free(d); return; }
+    used = load_wfm_bank(d, n);
+#endif
     if (used) font_blobs[nblobs++] = d; else free(d);
 }
 static void load_fonts(void) {
-    static const char L[9] = { 'B', 'F', 'G', 'I', 'H', 'S', 'P', 'W', 'D' };
+#if PORT_VERSION_USA
+    {   /* the banks of AREA01 (dialogue + titles), AREA02, AREA00, then the other areas until the letters are there */
+        static const char *const usa[] = { "AREA01/A008.GAM", "AREA02/A003.GAM", "AREA00/D003.GAM", "AREA03/A005.GAM", "AREA04/A007.GAM",
+            "AREA05/A003.GAM", "AREA06/A002.GAM", "AREA08/A003.GAM", "AREA09/A003.GAM", "AREA10/A003.GAM", "AREA11/A002.GAM" };
+        for (unsigned i = 0; i < sizeof usa / sizeof usa[0]; i++) {
+            int have = 0;
+            for (const char *s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; *s; s++) have += glyphs[0][(u8)*s].img && glyphs[1][(u8)*s].img;
+            if (i >= 2 && have >= 62) break;
+            load_wfm(usa[i]);
+        }
+    }
+#else
+    {   static const char L[9] = { 'B', 'F', 'G', 'I', 'H', 'S', 'P', 'W', 'D' };
     char l = port_lang >= 0 && port_lang < 9 ? L[port_lang] : 'B', name[40];
     snprintf(name, sizeof name, "AREA00/CFNT999%c.WFM", l); load_wfm(name);
     snprintf(name, sizeof name, "AREA00/MFNT000%c.WFM", l); load_wfm(name);
@@ -319,6 +348,8 @@ static void load_fonts(void) {
         if (have >= 68) break;
         snprintf(name, sizeof name, "AREA%02d/MFNT%02d0%c.WFM", a, a, l); load_wfm(name);
     }
+    }
+#endif
     /* the fonts that lack the Spanish opening marks: draw them as the ? / ! glyph turned 180 degrees */
     for (int k = 0; k < 3; k++) for (int m = 0; m < 2; m++) {
         int inv = m ? 0xA1 : 0xBF, src = m ? '!' : '?';
@@ -518,9 +549,15 @@ void pa_init(void) {
     done = 1;
     vram = calloc(1024 * 512, 2);
     if (!vram) return;
+#if PORT_VERSION_USA
+    /* USA: one page at (64, 0) holds PAL's A10301 + A00300 (its sub-screen font differs; the item / event icons are the same) */
+    pa_ok = load_rect("SYSTEM/A00014.000", 64, 0, 256, 0, 256) && load_rect("SYSTEM/A00003.GAM", 256, 256, 64, 0, 224) &&
+#else
     pa_ok = load_rect("SYSTEM/A10301.000", 64, 0, 64, 0, 256) && load_rect("SYSTEM/A00300.000", 128, 0, 192, 0, 256) &&
-            load_rect("SYSTEM/A10003.GAM", 256, 256, 64, 0, 224) && load_rect("SYSTEM/A00000.GAM", 320, 256, 64, 0, 224) &&
-            load_rect("AREA00/CLUT01.GAM", 128, 480, 256, 0, 32) && load_rect("SYSTEM/D0SPSUB.BIN", 288, 480, 48, 0x98B8, 31);
+            load_rect("SYSTEM/A10003.GAM", 256, 256, 64, 0, 224) &&
+#endif
+            load_rect("SYSTEM/A00000.GAM", 320, 256, 64, 0, 224) && load_rect("AREA00/CLUT01.GAM", 128, 480, 256, 0, 32) &&
+            load_rect(PA_F_SUB, 288, 480, 48, PV_SUBSCREEN_CLUT_IMAGE - PORT_OVL_BASE, 31);
     if (pa_ok) load_icons();
     load_fonts();
     port_printf("[panel] game graphics %s, icons %s\n", pa_ok ? "read" : "missing", icons_ok ? "read" : "missing");

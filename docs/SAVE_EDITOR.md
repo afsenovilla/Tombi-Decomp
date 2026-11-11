@@ -74,4 +74,8 @@ python3 tools/tombi_save.py roundtrip CARD.mcd      # unchanged write-back is by
 - In the native port (headless, PAL disc): a save edited to AP 123456 / lives 7 / time 5:33 is listed with those
   values on the LOAD screen, and after loading it the Status screen shows AP 123456; another with AP 777777 and max
   HP 7 shows AP 777777 and vitality 7 in game.
-- Only PAL saves were checked; USA / JP saves are recognised by their product code and assumed to share the layout.
+- USA saves (2026-11-09, docs/SAVE_FORMAT.md "USA saves"): the same GAME block, but the play time counts 1/60 s and
+  the title digits sit 2 bytes earlier; the editor reads both per product code (`tombi_save.LAYOUTS`: PAL 50 Hz, USA /
+  JP 60 Hz). A save written by the port's USA build, edited to AP 12345 / lives 7 / level 4 / 1:23:05, is listed with
+  those values on the USA LOAD screen and loads with them. JP saves: 60 Hz time, title left as it is (its layout is
+  not known). Item / event names still come from a PAL disc (the USA one has other glyph numberings).

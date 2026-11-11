@@ -1,5 +1,7 @@
 // FUNC 800371c0 660 MAIN0
 // MATCHING 800371c0 660
+// VERSION PCPX_96084 tomba 80057ED0 660
+// ASPSX.PCPX_96084 2.34
 extern unsigned char *FUN_80037454(int, unsigned char *, int);
 
 void unpackSpriteFrame(int a, int b, unsigned char *dst, int d)

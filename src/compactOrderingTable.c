@@ -1,7 +1,9 @@
 // FUNC 80016fc0 124 MAIN0
 // MATCHING 80016fc0 124
 // VERSION SLPM_80165 slpm80165 80015C18 124
+// VERSION PCPX_96084 tomba 800175DC 124
 // Portado de psx_tomba (task.c, compactOrderingTable); licencia MIT del proyecto original.
+// ASPSX.PCPX_96084 2.34
 #if defined(VERSION_SLPM_80165)
 // Demo version of PAL main0 80016FC0 (compactOrderingTable.c): ordering table length 0x807 (PAL 0x327).
 // Portado de psx_tomba (task.c, compactOrderingTable); licencia MIT del proyecto original.

@@ -1,0 +1,14 @@
+# splat 'functions' that are data (tools/jp_data_units.py): <prog> <addr> <size>; skipped as code units
+x00 800EDAA8 7336 180
+x00 801182B4 5212 0
+x00 80119710 96 0
+x00 80119770 820 0
+x00 80119AA4 64 0
+x00 80119AE4 32 0
+x00 80119B04 696 0
+x00 80119DBC 384 0
+x00 80119F3C 20 0
+x00 80119F50 84 0
+x00 8013BB60 6728 0
+x00 8013D5A8 1928 0
+x00 8013DD30 6696 0

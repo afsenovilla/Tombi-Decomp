@@ -14,7 +14,7 @@ extern S PLAYER;
 extern P *PLAYER_H;
 extern P *PLAYER_D;
 extern unsigned short D_8009C960h;
-extern unsigned char D_800A60D6;
+extern unsigned char D_800A5436;
 extern void cameraFollowPlayerX(O *);
 extern void cameraFollowPlayerY(O *);
 extern void cameraFollowRampStep(O *);
@@ -50,7 +50,7 @@ void updateCameraFollow(O *o)
     S *s = &PLAYER;
     int t;
     if (GVARS.b39 == 0) {
-        switch (D_800A60D6) {
+        switch (D_800A5436) {
         case 4:
             if (D_8009C960h != 10 && s->ba9 == 0)
                 goto c4;

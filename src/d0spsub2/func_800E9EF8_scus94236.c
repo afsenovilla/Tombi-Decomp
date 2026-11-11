@@ -7,8 +7,8 @@ typedef struct { short icon, a, b, c; int d, e; short p10, f; } Info;
 typedef struct { short x, y, w, attr; int img, pC, str; void *p14; } Text;
 typedef struct { short x, y; } Pos;
 extern Menu MENU_STATE;
-extern unsigned char D_800A45D9;
-extern short D_800A45F4;
+extern unsigned char D_800A3941;
+extern short D_800A395C;
 extern Card MEMCARD_CARDS[];
 extern short MEMCARD_FILE_COUNT[];
 extern short MEMCARD_FILE_ORDER[][16];
@@ -17,7 +17,7 @@ extern Pos MEMCARD_FILE_ROW_POSITIONS[];
 extern Text MEMCARD_DRAW_PARAMS;
 extern short MEMCARD_CURSOR_Y, MEMCARD_LIST_SCROLL;
 extern int MEMCARD_FILE_ICON_FRAME;
-extern int MEMCARD_SLOT_PRESENT, D_800F7150, MEMCARD_SELECTED_SLOT, MEMCARD_PROBED;
+extern int MEMCARD_SLOT_PRESENT, D_800F5DC0, MEMCARD_SELECTED_SLOT, MEMCARD_PROBED;
 extern void memCardDrawBackground(Menu *m, int a);
 extern void memCardDrawModeTitle(int no, int pri, short x, short y);
 extern void memCardDrawMessage(int n);
@@ -38,9 +38,9 @@ void memCardScreenDraw(void)
     int k, n, sel;
     memCardDrawBackground(m, 0);
     MEMCARD_DRAW_PARAMS.w = 1;
-    memCardDrawModeTitle(D_800A45F4, 2, 0x10, 0x10);
+    memCardDrawModeTitle(D_800A395C, 2, 0x10, 0x10);
     m = &MENU_STATE;
-    switch (D_800A45D9) {
+    switch (D_800A3941) {
     case 0:
         break;
     case 1:
@@ -48,7 +48,7 @@ void memCardScreenDraw(void)
         else if (MEMCARD_SELECTED_SLOT == 0) n = 2;
         else n = 0x11;
         memCardDrawMessage(n);
-        memCardDrawSlotSelect(MEMCARD_SLOT_PRESENT, D_800F7150, MEMCARD_SELECTED_SLOT);
+        memCardDrawSlotSelect(MEMCARD_SLOT_PRESENT, D_800F5DC0, MEMCARD_SELECTED_SLOT);
         break;
     case 2:
     case 3:

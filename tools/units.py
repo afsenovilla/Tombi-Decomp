@@ -11,8 +11,15 @@ Each unit knows its program, address, size, name, the src file (if any), whether
 overlays, whether it is a twin (a copy of code counted in MAIN0, X000 or an earlier overlay).  The headline
 figure of the project is: game bytes = sum of non-library, non-twin units; matched = those with a file.
 
-Usage: python tools/units.py            prints the totals per program
+Other versions (tools/versions.py): units(ver) gives one unit per function of config/<ver>/symbol_addrs_<prog>.txt
+(`type:func size:`; the splat 'functions' of config/<ver>/data_units.txt are data, left out), with the src file that
+builds it (version_sources: PAL pairing comments, config/<ver>/reuse.txt, `// VERSION` lines); prog = the version
+program ("scus94236", "x00", "x01", "dspsub", ...). tools/build_report.py --version and tools/build_full.py --version
+use the same resolution.
+
+Usage: python tools/units.py [--version V]   prints the totals per program
        from units import units          -> {prog: [Unit]}  (prog = "MAIN0", "X000", "X001", ...)
+       units("scus94236")               -> {prog: [Unit]}  (prog = "scus94236", "x00", ...)
 """
 import bisect
 import csv
@@ -178,9 +185,12 @@ def lib_rows(prog):
 _CACHE = {}
 
 
-def units():
+def units(ver=None):
     """{prog: [Unit]} sorted by address; every byte of every csv row (inside the code range) and every src file
-    range belongs to exactly one unit."""
+    range belongs to exactly one unit. ver: another version (tools/versions.py), see version_units."""
+    if ver is not None:
+        from versions import canon, REFERENCE
+        if canon(ver) != REFERENCE: return version_units(canon(ver))
     if _CACHE: return _CACHE
     files = src_files()
     for prog in PROGS:
@@ -247,15 +257,144 @@ def units():
     return _CACHE
 
 
+# ------------------------------------------------------------------------------------------------- other versions
+def version_lines(serial):
+    """{(prog, addr): (src path, size)} of the `// VERSION <SERIAL> <prog> <addr> <size>` lines of the shared src tree:
+    the file whose `#if defined(VERSION_<SERIAL>)` branch (or whole guarded body) builds that version function."""
+    out = {}
+    rx = re.compile(r"^//\s*VERSION\s+" + serial + r"\s+(\w+)\s+([0-9A-Fa-f]{8})\s+(\d+)", re.M)
+    for dp, dirs, fs in os.walk(N("src")):
+        dirs[:] = [d for d in dirs if d != "wip"]
+        for fn in sorted(fs):
+            if not fn.endswith(".c"): continue
+            path = os.path.join(dp, fn)
+            t = open(path, errors="replace").read()
+            if "VERSION" not in t: continue
+            for m in rx.finditer(t):
+                out[(m.group(1), int(m.group(2), 16))] = (path, int(m.group(3)))
+    return out
+
+
+def version_sources(progs, ver="slpm80165"):
+    """{(prog, version addr): (src path, version name)}: the C that builds each function of a version.
+
+    By default a version function reuses the PAL file that matches the PAL function tools/xmatch.py paired it with: the
+    `PAL <module> <address>` comment of config/<ver>/symbol_addrs_<prog>.txt is looked up by address among the src
+    files (units()), so PAL renames do not break it; the file must cover exactly the version function's size.
+    config/<ver>/reuse.txt overrides or adds pairs, one per line: `<prog> <addr> <PAL module> <PAL addr>` or
+    `<prog> <addr> -` (no C). A function that differs from PAL is built from the shared file that carries a
+    `// VERSION <SERIAL> <prog> <addr> <size>` line (its `#if defined(VERSION_<SERIAL>)` branch: version C, or
+    INCLUDE_ASM, which compiles to nothing with -DSKIP_ASM; see tools/version_share.py).
+    """
+    from versions import VERSIONS
+    pal = {}
+    for p, us in units().items():
+        for u in us:
+            if u.file: pal[(p.lower(), u.addr)] = u
+    out, names = {}, {}
+    for prog in progs:
+        for l in open(N("config", ver, "symbol_addrs_%s.txt" % prog)):
+            m = re.match(r"(\w+) = 0x([0-9A-Fa-f]+); // type:func size:0x([0-9A-Fa-f]+)\s+PAL (\w+) 0x([0-9A-Fa-f]+)", l)
+            if not m: continue
+            a = int(m.group(2), 16)
+            names[(prog, a)] = (m.group(1), int(m.group(3), 16))
+            u = pal.get((m.group(4), int(m.group(5), 16)))
+            if u and u.size == int(m.group(3), 16): out[(prog, a)] = (u.file, m.group(1))
+    rp = N("config", ver, "reuse.txt")
+    if os.path.exists(rp):
+        for l in open(rp):
+            f = l.split("#")[0].split()
+            if not f: continue
+            prog, a = f[0], int(f[1], 16)
+            nm = names.get((prog, a), ("func_%08X" % a, 0))[0]
+            if len(f) == 4:
+                u = pal.get((f[2].lower(), int(f[3], 16)))
+                if u: out[(prog, a)] = (u.file, nm)
+                else: print("reuse.txt: no PAL src at", f[2], f[3])
+            elif f[2] == "-": out.pop((prog, a), None)
+    for (prog, a), (path, _) in version_lines(VERSIONS[ver]["serial"]).items():
+        if prog in progs: out[(prog, a)] = (path, names.get((prog, a), ("func_%08X" % a, 0))[0])
+    return out
+
+
+def version_source(src, serial, tmpdir):
+    """Copy of a shared src file for building version <serial>: a `// D.<SERIAL> value` directive (D = FLAGS, CC,
+    HEADERS, AS) replaces the file's `// D` line (value `default`: no such line), so a version branch can use other
+    compiler options than the PAL code of the same file."""
+    t = open(src, errors="replace").read()
+    for d in ("FLAGS", "CC", "HEADERS", "AS", "ASPSX"):
+        m = re.search(r"^//\s*%s\.%s\s+(.*)$" % (d, serial), t, re.M)
+        if not m: continue
+        t = re.sub(r"(?m)^//\s*%s\s.*\n?" % d, "", t)
+        val = m.group(1).strip()
+        t = re.sub(r"(?m)^//\s*%s\.%s\s.*$" % (d, serial), "" if val == "default" else "// %s %s" % (d, val), t)
+    out = os.path.join(tmpdir, os.path.basename(src))
+    open(out, "w").write(t)
+    return out
+
+
+def spad_set(text, serial=None):
+    """`.set` lines that make PAL scratchpad symbols (config/slpm80165/spad.txt) constants, since the version targets
+    keep every scratchpad address literal. Version C may also name any scratchpad address D_1F80xxxx."""
+    from versions import VERSIONS
+    S = spad_set.__dict__
+    if "tab" not in S:
+        p = N("config", "slpm80165", "spad.txt")
+        S["tab"] = [l.split()[:2] for l in open(p) if l.strip() and not l.startswith("#")] if os.path.exists(p) else []
+    tab = dict(S["tab"])
+    # config/<ver>/spad_remap.txt (`<PAL addr> <version addr>` per line): that version keeps the variable elsewhere in
+    # the scratchpad, so every PAL symbol at that address is assembled at the version's address instead.
+    ver = next((v for v, c in VERSIONS.items() if c.get("serial") == serial), None) if serial else None
+    rp = N("config", ver or "-", "spad_remap.txt")
+    if os.path.exists(rp):
+        rm = dict(l.split()[:2] for l in open(rp) if l.strip() and not l.startswith("#"))
+        tab = {n: rm.get(a.upper(), a) for n, a in tab.items()}
+    tab.update((n, n[2:]) for n in re.findall(r"\bD_1F80[0-9A-F]{4}\b", text))
+    return "".join("\t.set\t%s,0x%s\n" % (n, a) for n, a in sorted(tab.items()))
+
+
+def version_progs(ver):
+    """The programs of a version that have a splat config (config/<ver>/<prog>.yaml), in tools/versions.py order."""
+    from versions import VERSIONS
+    return [p for p in VERSIONS[ver]["progs"] if os.path.exists(N("config", ver, p + ".yaml"))]
+
+
+_VCACHE = {}
+
+
+def version_units(ver):
+    """{prog: [Unit]} of a version: one unit per `type:func size:` line of config/<ver>/symbol_addrs_<prog>.txt that is
+    not a data unit (config/<ver>/data_units.txt), with its src file from version_sources (None: no C)."""
+    if ver in _VCACHE: return _VCACHE[ver]
+    progs = version_progs(ver)
+    srcs = version_sources(progs, ver)
+    dfile = N("config", ver, "data_units.txt")
+    dunits = {(l.split()[0], int(l.split()[1], 16)) for l in (open(dfile) if os.path.exists(dfile) else ())
+              if l.strip() and not l.startswith("#")}
+    out = {}
+    for prog in progs:
+        us, seen = [], set()
+        for l in open(N("config", ver, "symbol_addrs_%s.txt" % prog)):
+            m = re.match(r"\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+);.*type:func.*size:0x([0-9A-Fa-f]+)", l)
+            if not m: continue
+            a = int(m.group(2), 16)
+            if (prog, a) in dunits or a in seen: continue
+            seen.add(a)
+            us.append(Unit(prog, a, int(m.group(3), 16), m.group(1), srcs.get((prog, a), (None,))[0], False, False, None))
+        out[prog] = sorted(us, key=lambda u: u.addr)
+    _VCACHE[ver] = out
+    return out
+
+
 def counted(u):
     """A unit enters the headline figure when it is game code counted for the first time."""
     return not u.lib and not u.twin
 
 
-def totals():
+def totals(ver=None):
     """{prog: (game bytes, matched bytes, n units, n matched)} of the counted units."""
     t = {}
-    for prog, us in units().items():
+    for prog, us in units(ver).items():
         g = m = n = nm = 0
         for u in us:
             if not counted(u): continue
@@ -266,7 +405,7 @@ def totals():
 
 
 if __name__ == "__main__":
-    T = totals()
+    T = totals(sys.argv[sys.argv.index("--version") + 1] if "--version" in sys.argv else None)
     G = M = 0
     for prog, (g, m, n, nm) in T.items():
         print("%-6s %8d B  matched %8d B  %5.1f %%  (%d/%d units)" % (prog, g, m, 100.0 * m / g if g else 0, nm, n))

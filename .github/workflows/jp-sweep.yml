@@ -129,7 +129,7 @@ jobs:
           if [ -s build/slps01144/report.json ]; then
             python3 tools/jp_autofix.py --install 2>&1 | tail -15
           fi
-          python3 tools/demo_sweep.py --jobs 4 2>&1 | tail -30
+          python3 tools/demo_sweep.py --jobs 4 --fix --budget 20 2>&1 | grep -v "^WARN" | tail -60
           git status --short -- src config | head -40
           echo "changed=$(git status --short -- src config | wc -l)" >> "$GITHUB_ENV"
 

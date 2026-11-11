@@ -1258,3 +1258,55 @@ on PAL I0NFO2 / the matched C and on the JP disc; where they hold, the sections 
 | No Yan dialogue in Lumberjack Town | **consistent** | The only ヤン in the AREA11 bank is the item-use line ヤンの弁当をつかった. We never claimed one. |
 | Community civ_towns sheet: 82 of 108 palettes match JP; JP and PAL BUNMEI2 differ | **not checked** | The sheet was not re-read here. |
 | TombaEdit helper palettes, editor sync | **n/a** | Editor features, not disc evidence. |
+
+## JP retail vs PAL: new Civilization evidence (2026-11-09)
+
+The JP top-down engine (INFO2.BIN) holds the same town records as PAL I0NFO2 for all four towns (residents, props,
+patrol boxes, behaviours, dialogue cases, defs, anim tables, warps), and the town rooms' placements match. What is
+new is in the JP **text**, the JP **per-area event-title tables**, and one stale event id in the town code.
+
+1. **Lumberjack (Wood) village "placeholder" lines are real dialogue in JP.** PAL MFNT110 group 4 dx 8/9/12-15/17
+   ("···??" in PAL, reached by no code; `topdownA11ActorOpenDialogue` uses dx 0-7, 10, 11, 16) are written in JP
+   (AREA11 A002 block 0, JP # = PAL # - 17). In English: dx 8 "That was close..." (after dx 7's old, dangerous
+   signboard: a falling-sign beat); dx 9 "See that big rock there? It's really in the way..." (event 95, JP title
+   "The Wood Village's Big Rock": the rock was in the Wood village, not the Factory); dx 12 "the owner of this weird
+   vehicle, where did he go?"; dx 13 "once the Evil Pig's magic is broken, this country too has to be reborn"; dx 14
+   "The clock tower moved, but inside the town it's still no good..."; dx 15 "The raft craftsman in that hut... is he
+   doing well?"; dx 17 "Maybe I'll get myself a Stone People wife... they're cute, right?". The village had more
+   progress-phase lines than its code has phases.
+2. **Iron Town's bomb-making chain is complete in JP.** PAL MFNT170 group 3 dx 4/6/7/9/10 (JP #244-#250, PAL # = JP #
+   + 17). `topdownA17ActorDialogueBank3` (I0NFO2 0x800F3F80) reads `D_8009D11A` = item 118, the **Coconut**. Intended
+   order: (3,3) "the door won't open, use a bomb" starts event 105; empty step 5: (3,4) "How to make a bomb? ...
+   alright, let's try! Gather some things", (3,5) the electric eel and the Black Water, (3,6) "Catch an eel bare-handed?
+   Take this" (Rubber Gloves); hand-in with no code: (3,7) "Both are here. I'll take the materials" (where events
+   76/74 would complete; nothing completes 76); (3,8) "fetch me a coconut from the jungle"; empty step 6
+   (`D_8009CFAB`, set while holding a Coconut): (3,9)/(3,10) the bomb mixture stuffed into the coconut shell; (3,0xB)
+   "More bombs? Bring coconuts." Empty step 7 (`D_8009CFA6`) fits (3,1) "a boy like you fixed the clock tower...".
+3. **The retail Factory chief's bomb is Gantetsu's cut quest rewritten.** JP AREA17 #244 (Gantetsu) and JP AREA11 #205
+   (Factory chief, PAL #222, `factoryBossIronCastleDoorTalk` (2,0xD..0xF)) open with the same sentence ("How to make a
+   bomb? Hahaha... you took me seriously?"); retail then has a pre-made bomb hidden in the tallest jungle tree, and PAL
+   #223 still says "it looks like a coconut".
+4. **The town scenes use event 7's state byte.** `D_8009CDAB` (`SCRIPT_FLAGS` + 7, "Hide and Go Seek": started in
+   AREA00 `a00DarkCloakedFigureScene`, completed in AREA19) is used as a scene counter by `npcSet0ESceneStep1` (starts
+   97), `npcSet0FSceneStep1` (76), `npcSet0FSceneStep2` (99) (`++` each) and `npcSet0FPickStep` (Iron Town H4 scene only
+   while it is 0): in retail that scene could never play after Hide and Go Seek starts, and each `++` corrupts event
+   7. Same code in JP INFO2. Likely written against an older event numbering (inference).
+5. **JP per-area event-title tables place the cut events in towns** (AREA18 table in the exe at 0x80075F08 via the
+   area table 0x80071CE4; titles in A003.GAM block 1): AREA11: 94, 65, 95 "Wood Village's Big Rock", "The Unfinished
+   Bridge", 100, 150 "Let's Build a Raft!", 79, 104, 103, 89, ..., 76, 105 "How to Make a Bomb"; AREA16: 94, 62, 6 "A Big
+   Puddle?", 76, 67, 97, 98, 73, 103; AREA17: 24, 76, 99, 73, 102, 105, 74, 118, 150, 77 "The Civilization Machine";
+   AREA18: the AREA11 list plus 6, 76, 67, 97, 98, 73, 99, 102, 105, 74, 118, 96, 77. This verifies that the Wood village
+   owned 94/95/96/100/89. In the X11/AREA18 tables event 178 points at title slot 5, now "The Unfinished Bridge", and JP
+   hint 95 says "stopped by a broken bridge": event ids were reshuffled around 95/96 (inference).
+6. **The AREA00 boatman's cut lines name the Iron Men** (JP #156-158 = PAL MFNT000 #162-164 = (7,3..5), "!!!!!!!!!!" in
+   PAL): "...there's a lock here" / "looks like a lock made by the Iron Men of the Land of Civilization" / "I'll be on my
+   boat at the beach near the Mushroom Forest". Ties the Ol' Pond gate lock to the Iron Men (the retail AREA17 Iron Man
+   hands over the Ol' Pond key, PAL #246).
+7. Minor: JP `topdownA18ActorHandler` (INFO2 0x800F6804) uses pad bit 0x10 where PAL uses 0x1000; JP item 61 (Iron)
+   reads "a lump of iron that looks like it could make sturdy tools"; AREA16 JP #219 "once I tried to go into the river
+   and got zapped" foreshadows the electric eel.
+
+Checked, nothing new: JP INFO2 vs PAL I0NFO2 civ tables (identical; PAL has ~9 KB of data JP lacks, not the reverse);
+town placements (only clouds, backdrop sprites, moved chests); JP-only `AREA18/B100.000` (a copy of PAL B101 textures);
+JP X11/16/17/18 code (rewrites with the same message/event/item calls); AREA15 scripts; JP exe strings. Open: which
+vehicle dx 12 means; whether A11 scenery slots 16-23 animate the falling sign; the H4 scene's pool wording vs event 76.

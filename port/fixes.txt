@@ -435,15 +435,16 @@ src/showMessageBoxDirect.c |     openMessageBox(a, b, c, 1, -1); |     return op
 src/showMessageBoxDirectTimed.c | extern void openMessageBox(int a, int b, int c, int d, int e); | extern void *openMessageBox(int a, int b, int c, int d, int e);
 src/showMessageBoxDirectTimed.c | void showMessageBoxDirectTimed(int a, int b, int c, short d) | void *showMessageBoxDirectTimed(int a, int b, int c, short d)
 src/showMessageBoxDirectTimed.c |     openMessageBox(a, b, c, 1, d); |     return openMessageBox(a, b, c, 1, d);
-# --cut-content (port_cut_content, opt-in; console build unchanged): text cut from the game that the Japanese release
+# --cut-content[=boatman,letter,board,berries,bubble,titles] (port_cut_content, a bit per item: 1 2 4 8 16 32, --cut-content alone = all;
+# opt-in; console build unchanged): text cut from the game that the Japanese release
 # still has (tools/jp_text.py). 1) AREA00 boatman scene: after his third line (7,2) a00Variant0EventScene
 # ends the scene; with the flag it first shows the three unused lines (7,3), (7,4), (7,5) (MFNT000 #162-164).
-src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if (port_cut_content && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
+src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if ((port_cut_content & 1) && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
 src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc_boatman; port_cc_boatman = 0; }
 # 2) AREA03 letter (MFNT030 #208 = sign text (1,1), no sign shows it): next to the save-point sign of Phoenix Mountain
 # (subtype 25, AREA03 sections 0/4, x 440) spawn a sign of subtype 27 (D_80079EBC[27] = (1,1)) 40 px to its left (read with Up there, like the post).
 src/updateL4Type1AObject.c | void updateL4Type1AObject(O *o) | extern char *allocObjectLayer4(void); static void port_cc_letter(O *o) { extern int port_verbose; extern void port_printf(const char *, ...); char *n = allocObjectLayer4(); int i; if (!n) return; for (i = 0; i < 0x20; i++) n[i] = ((char *)o)[i]; n[3] = 27; n[4] = 0; n[0x2e] = ((char *)o)[0x2e]; n[0x6b] = ((char *)o)[0x6b]; *(int *)(n + 0xa0) = *(int *)((char *)o + 0xa0); n[0xa4] = ((char *)o)[0xa4]; *(int *)(n + 0x10) -= 40 << 16; if (port_verbose) port_printf("[port] --cut-content: AREA03 letter sign spawned at x %d\n", *(short *)(n + 0x12)); } void updateL4Type1AObject(O *o)
-src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; extern void port_cc_sign(void *, int, int); if (port_cut_content && o->subtype == 25 && GAME[0] == 3) port_cc_letter(o); if (port_cut_content) port_cc_sign(o, GAME[0], GAME[1]); } o->box0 = 4;
+src/updateL4Type1AObject.c | o->box0 = 4; | { extern int port_cut_content; extern void port_cc_sign(void *, int, int); if ((port_cut_content & 2) && o->subtype == 25 && GAME[0] == 3) port_cc_letter(o); if (port_cut_content & 4) port_cc_sign(o, GAME[0], GAME[1]); } o->box0 = 4;
 # 2b) AREA05 notice board (MFNT050 (1,5) MISSING MOUSE, (1,7) ADVENTURER WANTED, (1,6) CONGRATULATIONS): spawnNpcSet09 (X005,
 # table D_80117AC8[GCD.bceed]) does place the board's sign in section 1, subtype 19 (-> 20 once the baby mouse is back,
 # -> 35 after event 50), at (28,-144) depth 90 next to the townsfolk who mentions it, but nothing Tombi can stand on is
@@ -464,7 +465,7 @@ src/initItemObject.c | switch (d->b6) { | { extern int port_cc_drop_take(void *)
 # (spawnItemPickupObject is only ever called with 0, the "!" of a new event). Trigger: in the I0NFO2 top-down actors,
 # the repeat line (2,3) shown when Tombi talks to someone again who has nothing new to say gets the "?" over his head.
 # Purely cosmetic (the icon object only rises, waits and frees itself; it is skipped while another icon is up).
-src/i0nfo2/topdownActorOpenDialogue.c | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); { extern int port_cut_content; extern void spawnItemPickupObject(int); if (port_cut_content) spawnItemPickupObject(1); }
+src/i0nfo2/topdownActorOpenDialogue.c | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); | S32(o, 0x90) = (int)showMessageBoxDirect(2, 3, &v); { extern int port_cut_content; extern void spawnItemPickupObject(int); if (port_cut_content & 16) spawnItemPickupObject(1); }
 # 5) --civ-test (dev, port only): the cut top-down town AREA11 section 0 (docs/CIVILIZATION.md) has an empty load list.
 # Queue a stand-in list instead (AREA08 s0's records: its picture, cell map, sprite tables, APD and I0NFO2), so the
 # town's own code (topdownSectionStepC, NPC set 0D, topdownA11Actor*) runs over the Baccus Lake map.
@@ -558,7 +559,7 @@ src/spawnEventTitle.c | done = 0; | done = 0; { extern int port_civ_on(int, int)
 # --lang spill (outside RAM), so only NULL is refused.  Events with no title link (0xFF) get a rebuilt one
 # With --cut-content also everywhere: 0x53 -> text 126 and 22 titles translated from JP (tools/port_event_titles.py).
 # (port_civ_title in port2/shims/psyq.c: 0x4C = CFNT999 text 90 "The Black Water", others the dummy text sized right).
-src/spawnEventTitle.c | p = tbl[event_id]; | p = tbl[event_id]; { extern int port_civ_on(int, int); extern s8 *port_civ_title(int, u8 **, s8 *); extern int port_cut_content, port_civ_title_civ; port_civ_title_civ = port_civ_on(GAME.selectedArea, GAME.selectedSection); if ((port_civ_title_civ || port_cut_content) && !(p = port_civ_title(event_id, &src, p))) return; }
+src/spawnEventTitle.c | p = tbl[event_id]; | p = tbl[event_id]; { extern int port_civ_on(int, int); extern s8 *port_civ_title(int, u8 **, s8 *); extern int port_cut_content, port_civ_title_civ; port_civ_title_civ = port_civ_on(GAME.selectedArea, GAME.selectedSection); if ((port_civ_title_civ || (port_cut_content & 32)) && !(p = port_civ_title(event_id, &src, p))) return; }
 #
 # Item 64 (Pipe / "Valvula") inventory icon: ITEM_ICON_CLUTS[64] = 1, the all-grey sub-screen row (retail PAL and JP
 # alike, so the grey wheel is the original's), while the pickup in AREA08 is the brown wooden wheel (SPR_DATA[3] frame 2,
@@ -865,3 +866,86 @@ src/d0spsub/subScreenEventListStep.c | pages * 10 | pages * PORT_NTSC(10, 8)
 # (the footer's 216 - 32), the arrows above it
 src/d0spsub/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.y = 232; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(232, 168);
 src/d0spsub3/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.y = 232; | SUBSCREEN_DRAW_PARAMS.y = PORT_NTSC(232, 168);
+#
+# USA (SCUS-94236, PORT_VERSION=usa): the matched main() is the port's main loop (port_game_main); its frame wait spins on
+# the vblank counter, which only port_vblank advances on the PC
+src/main_scus94236.c | while (((Task*)0x1F8001D4)->unk14 < targetFrame) { | while (((Task*)0x1F8001D4)->unk14 < targetFrame) { extern void port_vblank(void); port_vblank();
+# loopTitleScreen's USA branch: the declarations of the title-menu fixes above (their other edits reach the shared lines)
+src/loopTitleScreen.c | extern unsigned short D_80076E80[]; | extern unsigned short D_80076E80[]; extern int port_title_debug, port_title_extra; extern unsigned char port_title_angles[]; extern void port_title_debug_go(void); extern int port_title_quit_go(int), port_lx_title_tick(void); extern unsigned char DAT_1f8001b4;
+# the USA message box (0x8002FA24, a psx_tomba port that only the report checks: no symbol line, so no full-link object
+# names its callees): two psx_tomba names for the functions its jal targets are
+src/func_8002FA24_scus94236.c | pushEffectDrawList(o); | { extern void ObjListPush_1F800220(void *); ObjListPush_1F800220(o); }
+src/func_8002FA24_scus94236.c | freeEffectObject(o); | { extern void ObjFree(void *); ObjFree(o); }
+#
+# =====================================================================================================================
+# USA (SCUS-94236) spellings of the PAL fixes above (docs/PORT_VERSIONS_PLAN.md U3).  `@version usa` limits the fixes
+# after it to the USA build (port/tools/gen_port.py load_fixes; `@version all` ends the section).  The generator's branch
+# audit lists 27 PAL fixes that only reach an inactive #if branch of the USA build; none needs a USA spelling: the
+# PORT_NTSC(...) picture fixes (initGraphics, drawLoadingSprites, computeCameraMatrix, ObjCheckHeadCollision,
+# drawObjectModelCameraFixed, drawScreenFade, drawHud 0xf0, loopTitleScreen 0xd0 / 0xa0, buttonConfigDrawCursor 0x4C,
+# x006 setupCameraMatrixFromObj / drawRaceHud, x009 scrollFollowRotatingPlane) are what USA draws natively, the button
+# config width is --lang 5's, the `< 0x141` culls of isQuadOnScreen / drawObjectSpriteQuad are the JP / demo branches
+# (the USA branch spells `< 0x140`, which the PAL fixes reach), and the PAL lines of drawHud / loopTitleScreen get their
+# USA spelling here.  The rest of this section: the fixes of the PAL functions that USA builds from another file (a
+# `_scus94236.c` port or a JP twin, invisible to the audit), found by grepping the generated USA sources for the PAL
+# fixes' old text.
+@version usa
+# --widescreen HUD: the lives counter at the wide frame's left edge (the USA branch draws it at y 208)
+src/drawHud.c | drawHudLives(o, 0x18, 0xd0); | drawHudLives(o, 0x18 - port_ws_cull, 0xd0);
+# --widescreen culls: drawObjectSpriteRotScaled (USA 0x80049994, psx_tomba port)
+src/func_80049994_scus94236.c | p->x0 < 0x140 | PORT_WSX(p->x0) < PORT_WSW(0x140)
+src/func_80049994_scus94236.c | p->x1 < 0x140 | PORT_WSX(p->x1) < PORT_WSW(0x140)
+src/func_80049994_scus94236.c | p->x2 < 0x140 | PORT_WSX(p->x2) < PORT_WSW(0x140)
+src/func_80049994_scus94236.c | p->x3 < 0x140 | PORT_WSX(p->x3) < PORT_WSW(0x140)
+# --widescreen parallax backdrops: AREA01 / AREA09 updateParallaxBackdropSprite (the wrapping strip, port_ws_backdrop_period)
+# and AREA06 / AREA10 (the sprite's x cull widened)
+src/x001/func_8012042C_scus94236.c | if ((short)t < 0x160) { | if (((short)t < 0x160 || port_ws_cull) && (!port_ws_cull || port_ws_backdrop_period(o, 512))) {
+src/x009/func_8011C4CC_scus94236.c | if ((short)t < 0x160) { | if (((short)t < 0x160 || port_ws_cull) && (!port_ws_cull || port_ws_backdrop_period(o, 512))) {
+src/x006/func_8011ABF4_scus94236.c | if (x - 0x40 < 0x141 && x + 0x40 >= 0) { | if (x - 0x40 < 0x141 + port_ws_cull && x + 0x40 + port_ws_cull >= 0) {
+src/x010/func_8011A328_scus94236.c | if (o->a.p.whole - 0x40 < 0x141 && o->a.p.whole + 0x40 >= 0) { | if (o->a.p.whole - 0x40 < 0x141 + port_ws_cull && o->a.p.whole + 0x40 + port_ws_cull >= 0) {
+# --widescreen Select screen: the popup menu is kept a 4:3 block (the PAL subScreenDrawPopupMenu's port_ws_mark)
+src/d0spsub/subScreenDrawPopupMenu_scus94236.c | TILE *T = (TILE *)0x1F800014; | TILE *T = (TILE *)0x1F800014; char *port_p0 = (char *)NEXT_PRIM; extern void port_ws_mark(const void *, const void *, int);
+src/d0spsub/subScreenDrawPopupMenu_scus94236.c | drawBalloonFrame(lp, 0, 0x14); | drawBalloonFrame(lp, 0, 0x14); port_ws_mark(port_p0, NEXT_PRIM, 0);
+# --widescreen event titles (the PAL spawnEventTitle / l8Type01MoveStep `#ifdef PORT2` blocks): the tiles start past the
+# wide frame's right edge and leave once past it
+src/spawnEventTitle_scus94236.c | *(int*)(obj + 0x38) = 0; | *(int*)(obj + 0x38) = 0; { int d = port_ws_cull ? port_ws_cull + 160 : 0; *(int*)(obj + 0x10) += d << 16; *(int*)(obj + 0x30) += d << 16; }
+src/func_8002DEC4_scus94236.c | if (o->posX.raw > 0x1400000) { | if (o->posX.raw > 0x1400000 + (port_ws_cull << 16)) {
+# --title-bg: the title marks its ordering-table node for the wide background picture (the PAL titleLogoDraw's mark; USA
+# draws no black band: runtime/titlebg.c places the landscape at row 0)
+src/o0ptsub0/func_800E7DDC_scus94236.c | titleDrawSpriteRecs(TITLE_LOGO_SPRITE_RECS, 0, -TITLE_LOGO_BOUNCE_OFFSET, 0); | { extern unsigned long *CURRENT_OT; extern void port_title_bg_mark(void *); port_title_bg_mark(CURRENT_OT + 1); } titleDrawSpriteRecs(TITLE_LOGO_SPRITE_RECS, 0, -TITLE_LOGO_BOUNCE_OFFSET, 0);
+# --title-debug: the DEBUG carousel entry right of OPTIONS (the PAL titleDrawMenuCarousel / loopTitleScreen fixes;
+# runtime/main.c port_title_debug_list writes the word in the USA glyph numbering, 'A' = 32)
+src/loopTitleScreen.c | D_80076E80[TASK_C->b69] | (TASK_C->b69 >= 3 ? port_title_angles[TASK_C->b69 - 3] : D_80076E80[TASK_C->b69])
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | void titleDrawMenuCarousel(int angle, int sel) | extern int MulNegSin(int a, int b); static int port_es_x0, port_es_x1; static void port_es_carousel_span(int c, int idx) { int w = (unsigned char)TITLE_FONT[c * 5 + 2], x = w * idx - MulNegSin(0xE0, 0x5A) + 0xA0; if (x < port_es_x0) port_es_x0 = x; if (x + w > port_es_x1) port_es_x1 = x + w; } extern int port_title_debug, port_title_extra; extern void port_title_debug_list(short **, unsigned char **); void titleDrawMenuCarousel(int angle, int sel)
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | idx = -1; | idx = -1; port_es_x0 = 0x7FFF; port_es_x1 = 0;
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | pal = TITLE_MENU_GLYPH_PALETTES; | pal = TITLE_MENU_GLYPH_PALETTES; if (port_title_debug) port_title_debug_list(&s, &pal);
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | while (*s != -3) { | while (*s != -3) { if (port_title_extra && ((short)ang < 0x40 || (short)ang > 0x1C0)) { if (*s) pal++; s++; ang += 4; continue; }
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | titleDrawCarouselGlyph(*s, idx, -1, *pal++); | { if (port_title_extra) port_es_carousel_span(*s, idx); titleDrawCarouselGlyph(*s, idx, -1, *pal++); }
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | switch (sel) { | switch (port_title_extra && sel >= 2 ? (sel >= 2 + port_title_extra ? 2 : 1) : sel) {
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0xCC; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x1 + 8 : 0xCC;
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0xD0; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x1 + 8 : 0xD0;
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x64; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x0 - 8 - (unsigned char)TITLE_FONT[*(short *)TITLE_ARROW_LEFT_STRING * 5 + 2] : 0x64;
+src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x70; | m.x = port_title_extra && sel >= 2 && port_es_x1 ? port_es_x0 - 8 - (unsigned char)TITLE_FONT[*(short *)TITLE_ARROW_LEFT_STRING * 5 + 2] : 0x70;
+@version all
+# --wings-glide (runtime/wings.c): the Japanese demo's cut top-down Charity Wings glide. The wings item use in a
+# top-down area runs topdownPlayerDropExitStep (substep 0; overheadPlayerDropExitStep / tunnelPlayerDropExitStep in I0NFO / I0NFO3); the port swaps the player's frame tables there and draws
+# the feather after the player's parts (docs/CUT_CONTENT.md "Lost: the top-down Charity Wings glide")
+src/i0nfo2/topdownPlayerDropExitStep.c |         o->timer = 0x14; |         o->timer = 0x14; { extern void port_wings_begin(void *); port_wings_begin(o); }
+src/i0nfo2/topdownDrawRotatedSprite.c |     } while (--*n); |     } while (--*n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, *x, *y, otz); }
+# the same step and drawer in the other two overhead engines: I0NFO (AREA02 s0, the Dwarf Village) and I0NFO3 (the tunnels)
+src/i0nfo/overheadPlayerDropExitStep.c |         o->timer = 0x1E; |         o->timer = 0x1E; { extern void port_wings_begin(void *); port_wings_begin(o); }
+src/i0nfo/overheadDrawRotatedSprite.c |     } while (--*n); |     } while (--*n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, *x, *y, otz); }
+src/i0nfo3/tunnelPlayerDropExitStep.c |         o->timer = 0x1E; |         o->timer = 0x1E; { extern void port_wings_begin(void *); port_wings_begin(o); }
+src/i0nfo3/tunnelDrawRotatedSprite.c |     } while (--*n); |     } while (--*n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, *x, *y, otz); }
+# and the landing in the destination area (the player drops from the sky, *PlayerLandStep state 0): the same glide down
+src/i0nfo2/topdownPlayerLandStep.c |         topdownPlayerSetMoveAnim(o); |         topdownPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }
+src/i0nfo/overheadPlayerLandStep.c |         overheadPlayerSetMoveAnim(o); |         overheadPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }
+src/i0nfo3/tunnelPlayerLandStep.c |         tunnelPlayerSetMoveAnim(o); |         tunnelPlayerSetMoveAnim(o); { extern void port_wings_land(void *); port_wings_land(o); }
+# the side view (PrePre 9 frames 282-284, the orphan script 0x800124A8: kneeling, fist raised overhead): the wings use
+# runs playerEventStepRiseFadeOut (substep 0), the arrival playerEventStepDropIn; the retail air spin and the per-frame
+# PlayerSetAnimIfChanged(o, 4) (FUN_800eeb5c: the jump anim) must not set the anim meanwhile; the feather is drawn after the player's parts in drawPlayerSpriteDefault
+src/playerEventStepRiseFadeOut.c |         o->timer = 0x1e; |         o->timer = 0x1e; { extern void port_wings_side_begin(void *); port_wings_side_begin(o); }
+src/playerEventStepRiseFadeOut.c |         FUN_800eeb5c(o, 4); |         { extern int port_wings_side_active(void *); if (!port_wings_side_active(o)) FUN_800eeb5c(o, 4); }
+src/playerEventStepRiseFadeOut.c |         playerAirSpinToFall(o); |         { extern int port_wings_side_active(void *); if (!port_wings_side_active(o)) playerAirSpinToFall(o); }
+src/playerEventStepDropIn.c |         o->anim = PLAYER_FALL_ANIM; |         o->anim = PLAYER_FALL_ANIM; { extern void port_wings_side_land(void *); port_wings_side_land(o); }
+src/drawPlayerSpriteDefault.c |     } while (--n); |     } while (--n); { extern void port_wings_draw(void *, int, int, int); port_wings_draw(o, x, y, SPAD.i74); }

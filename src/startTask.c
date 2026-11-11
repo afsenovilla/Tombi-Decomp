@@ -8,16 +8,9 @@ extern void FUN_800171b8(int, int);
 #else
 #define TASK_ENTRY 0x801fd80c
 #endif
-#if defined(VERSION_PCPX_96084)
-extern int D_801FC00C[];
-#endif
 void startTask(int i)
 {
     int k = i * 0x70;
     setTaskEntry((void *)(k + TASK_ENTRY));
-#if defined(VERSION_PCPX_96084) /* PrePre 8: splat symbolizes the entry field */
-    FUN_800171b8(i, D_801FC00C[i * 0x1c]);
-#else
     FUN_800171b8(i, *(int *)(k + TASK_ENTRY));
-#endif
 }

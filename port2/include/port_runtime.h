@@ -35,10 +35,33 @@ extern const int port_ovlcode_count;
 extern unsigned int port_ram[0x80000];     /* the 2 MB of RAM in the retail layout; the regions are offsets into it */
 extern unsigned int port_bios[], port_main0_image[], port_main0_bss[], port_x000_image[], port_x000_bss[], port_heap[],
     port_hiram[], port_scratch[], port_io[];
+/* the game version's layout (gen/version/port_version.h of the build dir, written by port2/tools/gen2.py from
+   port/tools/portver.py; a build without it is the PAL one) */
+#if defined(__has_include)
+#if __has_include("port_version.h")
+#include "port_version.h"
+#endif
+#endif
+#ifndef PORT_VERSION_H
+#define PORT_VERSION_KEY "sces01331"
+#define PORT_VERSION_SERIAL "SCES-01331"
+#define PORT_VERSION_PAL 1
+#define PORT_VERSION_USA 0
+#define PORT_BOOT_FILE "EXE/MAIN0.EXE"
+#define PORT_BOOT_SHA1 "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"
+#define PORT_DEFAULT_HZ 50
 #define PORT_MAIN0_LOAD 0x80010000u
 #define PORT_OVL_BASE 0x800E8028u
 #define PORT_OVL_END 0x80140000u
 #define PORT_AREA_OWN_CODE 0x80115EA4u   /* X0nn: first per-area function (the code before it is shared with X000) */
+#define PORT_A_GAME 0x8009C960u
+#define PORT_A_GVARS 0x8009C930u
+#define PORT_A_PLAYER 0x800A6038u
+#define PORT_A_SCRIPT_FLAGS 0x8009CDA4u
+#define PORT_A_IS_DEBUG_MODE_ENABLED 0x1F8001B4u
+#endif
+/* the retail address of a name of the table above ("GAME", "PLAYER", ...; shims/psyq.c), 0 if unknown */
+unsigned int port_addr_of_name(const char *name, int len);
 /* native pointer for a retail RAM / scratchpad address (runtime and debugging aids only; the game never does this) */
 void *port_ram_ptr(u32p addr);
 int port_is_ram_ptr(const void *p);

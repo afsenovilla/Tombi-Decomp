@@ -48,6 +48,7 @@ logo.
 | PrePre8 grey bird enemy | TIM000 (~16 poses); candidate type 15, `func_8003D40C` in TOMBA.EXE. | No PAL AI matched; decoration or gallery only. Hard for gameplay. |
 | PrePre8 15 sound samples | JOCHU 1, 5, 11, 12, 19-21, 23-25, 27; S_AREA01 0, 25, 28, 29. | Easy to bank; no evidence of where they played. |
 | PrePre8 OPTION MODE / enemy viewer | 0x800854B4 (`OPTION MODE`, music/sound/CD/memory-card tests), 0x80083D88 (`enemy=%01d`), dead code in that build. | Port-only re-implementation; PAL has no such code. |
+| PrePre9 Tombi animations retail dropped (lift, pull, punches, somersault, carry-walk...) | PCPX-96093 `TOMBA/AREA01/A007.000` (379 frames, 106 not in retail) + 20 orphan scripts in `TOMBA/TOMBA.EXE` 0x80011A50..0x800125E8 with their tick counts (section "PrePre Vol. 9" below). | Gallery / port-only: the frames and SPR parts are on the demo disc (read at run time like the Pre8 title), the scripts give the timing, but no state code and no object they act on survive in Pre9 (placements, pages and code checked: nothing demo-only), so a mechanic cannot be rebuilt. |
 | GoGoCart cacti / sign (AREA06) | VRAM of `A001.GAM` (577,256), (516,256), (581,348); no SPR part nor model polygon; D004.000 has 60 models and `a06AddModelsBySection` uses all 60. | New sprite parts and placement: ours. |
 | AREA17 B201 page (backpack man, strap-shirt big man, bald old man, helmet walker; side view) | **Not a cut-content finding: withdrawn.** The user reports the backpack man in the final game. The same 192 x 256 page is loaded, byte-identical, by AREA10 s0 (B002, VRAM x 384) and s4 (B403, x 640), AREA16 s5/s6 (B501, B601), AREA17 s2/s5 (B201, B501) and AREA18 s1 (B101). Our static checks find no reference to its figures: no SPR table frame of any area list whose parts bound one of them, no WPP bank holding their pixels, no 16-byte part record pointing at them. These checks miss code-built primitives and other drawing paths, so "no static reference" here does not mean unused. The retail section, SPR id and address are not known yet. The B201 page renders with a real palette: AREA11/CLUT02 row 36 (same row in AREA17/CLUT03, AREA17/CLUT06, AREA18/CLUT02; the Male Lumberjack Town Resident's row) colours its side-view man with a backpack exactly like TCRF's colour sprite (all 14 colours in that row; silhouette close, not pixel-exact, TCRF's frame differs). Our identification. | Find the drawing path (dynamic capture in AREA10 s0/s4 or AREA17 s2) before calling any frame unused. |
 | AREA19's own overlay `X019.BIN` (and `X119`..`X819`) | On the disc (`SYSTEM/` and `AREA19/`, 190,180 B, sha1 `94060c10...`) but **never loaded**: none of the nine file tables lists it (notes/cdfiles.md), and AREA19's load lists name `AREA19/X002.BIN`, byte-identical to AREA02's `X002.BIN` (sha1 `646aa8b5...`). JP does the same: AREA19 ships `X02.BIN` and `X19.BIN`, its lists name only `X02`. So the purified village runs AREA02's code; X019 is a separate, dead AREA19 build. | Study what X019 does differently from X002 (its area part, from 0x80115EA4); a port switch to run it would be ours. Unknown cost. |
@@ -57,6 +58,7 @@ logo.
 
 | Find | Why |
 |---|---|
+| **Top-down Charity Wings glide** (JP demo SLPM-80165 / PrePre 9): Tomba frames 77-79 with the arm raised + the feather item sprite | No script of the demo plays it; rebuilt as a reconstruction (section "Lost: the top-down Charity Wings glide" below, `tools/wings_glide.py`; in the port `--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR` (its own switch; the side-view wings use plays PrePre 9's orphan script 0x800124A8, frames 282-284, with the feather in the raised fist: a second reconstruction), the Tomba frames from the JP demo and the feather from PrePre 9, docs/PORT.md): the spin order and timing are ours, the pixels and positions are the disc's. |
 | Civilization towns (AREA11/16/17/18 top-down sections) | Owned by docs/CIVILIZATION.md (`--civ-test`): code in I0NFO2 is complete, but the sections' load lists are empty and their map / SPR / palette files are on no disc. 63 lines (class B*). |
 | Growing golden flower frames (AREA02 SPR 0x3B f27-32) | The rectangles they point at are empty in PAL VRAM: the art is not on the disc. |
 | Tunnel glyph sheet: Maya-style numerals 1-9 (dots and bars), shell/eye 0, "=" 10, ten boxed 24x24 symbols (sun, bird, moon, framed star, bow, crossed arrows, gear, ring of small rings, grid, mound) | `AREA02/B301.000` (GRPX 256x256 words at VRAM (768,0), AREA02 section 3 = top-down tunnels), 4 bpp at (832,72) 240x72 (page 13, u 0..239, v 72..143), CLUT `AREA02/CLUT04` row 22 col 7 = (240,502), word 0x7D8F. Same pixels in US and PAL (identical file) and JP (different file, same block); not in any `SYSTEM/` reload copy, not in the PrePre8 data, beta disc not checked (not local). No static reference found: the CLUT word occurs nowhere in AREA02 code/data, and no part of the tunnel SPR banks (D305) samples v 72..143. **Checked in the port: never drawn.** `--dump-draws` over 13 headless runs from the debug select into AREA02 section 3 (walks covering player x 982..1677, y -80..-729 of the tunnel network, the exit into AREA01 section 3, and `D_800A60A3` poked to 1/3/4 to force the alternative backdrop sets of `tunnelSelectBackdropPieces`): 5508 distinct textured primitives in section 3, none sample page 13 at v 72..143 (page-13 use there is only v 0..56 and 146..158) and none use CLUT (240,502). `tunnelSelectBackdropPieces` (I0NFO3) only picks backdrop piece pointers (table entries 0..20 by camera x, or entry 0x5C/0x60 for `D_800A60A3`), so it cannot reach the block by itself. **Full sweep with `--noclip`** (port debug flag, docs/PORT.md): five headless serpentine walks over the whole section (player x 90..1750, the clamp of the section, i.e. past the x<0x99 exits; y -157..-1567, past the map's -0x540 and the lowest exit at -0x4FE; rows 118 px apart, camera x 199..1400+ so all 21 backdrop strips, camera y down from its top clamp -52), one per backdrop value `D_800A60A3` = 0..4 forced inside `tunnelSelectBackdropPieces` (a `--poke-every` of 0x800A60A3 does not stick: the hook read 0 every frame, so the earlier 1/3/4 runs most likely drew the default set): 2318 distinct textured primitives with the default set (0 and 4), 202 with 1/2 (entry 0x5C), 212 with 3 (entry 0x60); page 13 again only at v 0..55 and 146..157, no CLUT (240,502). With `--noclip` the trigger tiles and exits are off, so tunnel event scenes are not part of this sweep (the earlier 13 runs covered the reachable ones). **Backdrop data decoded:** the RAM block `tunnelSelectBackdropPieces` reads (0x1DC40 bytes, header of 24 piece offsets 0x64..0x1DC40) is a list of textured polys (CLUT word, tpage word, colour+GP0 code 0x24/0x2C, then x,y,z,u,v per vertex): 882 polys, tpages 0x0C/0x0D/0x0E/0x4D, 16 CLUTs (0x784E..0x7DCF), none 0x7D8F; page 13 only at v 0..31 and 144..159. **Static re-check:** 0x7D8F as a 16-bit word is absent from MAIN0 and every overlay except one false hit (X010 0x37608 is `j 0x8011F63C`); the tpage-13 4 bpp + UV pattern (hi 0x000D/2D/4D/6D, v 72..143, u<240) and GP0 0xE1 page-13 words hit only MIPS instructions in MAIN0/X001/X006; the AREA02 file hits (B001/B101/B200 GRPX pixels, D004/D304 compressed streams) are not references. No reference found. Unused art of a cut symbol/number puzzle; layout, code and the Japanese hint text (a cut "graffiti floor" contraption with dot-and-bar base-20 numerals): see "Tunnel glyph sheet (AREA02/B301): layout, code and text" below. |
@@ -217,7 +219,7 @@ is cut content.** Nothing in this sweep is restorable as a feature.
 
 ### 2. Object handler slots no room places
 `tools/objects.py list --all-slots` (6533 records) against the MAIN0 handler tables. Unplaced slots that nothing spawns either (grep of
-`allocObjectLayerN` + `->type =`): layer 4 type 8 (`updateL4Type08Object`, empty), layer 8 type 7 (empty), layer 2 type 0x30 (`updateL2Type30Object`: per-area dispatcher to the I0NFO2 town scenery of areas 5/8/11/16/17/19; those rooms are the cut towns), layer 5 types 9/0xA (`updateL5Type09Item`, `updateL5Type0AItem`: item objects; spawned through `ObjSpawn` with a variable type, so not provably unused), layer 7 types 5/10/13 and layer 2/4 types 0x19, 0x2D, 0x2E, 0x45, 0x4C, 0x41 (`overheadActorHandler`, `topdownItemSpotHandler`, `topdownTalkSpotHandler`, `tunnelActorHandler`, `tunnelTalkSpotHandler`, `tunnelStaticObjHandler`: the AREA02 top-down / tunnel sections of I0NFO / I0NFO3, placed by those overlays' own section objects). **No unplaced handler with real content.** Layer 8 has no placement record at all (its two live handlers are spawned by code).
+`allocObjectLayerN` + `->type =`): layer 4 type 8 (`updateL4Type08Object`, empty), layer 8 type 7 (empty), layer 2 type 0x30 (`updateL2Type30Object`: per-area dispatcher to the I0NFO2 town scenery of areas 5/8/11/16/17/19; those rooms are the cut towns), layer 5 types 9/0xA (`updateL5Type09Item`, `updateL5Type0AItem`: item objects; spawned through `ObjSpawn` with a variable type, so not provably unused), layer 7 types 5/10/13 and layer 2/4 types 0x19, 0x2D, 0x2E, 0x45, 0x4C, 0x41 (`overheadActorHandler`, `topdownItemSpotHandler`, `topdownTalkSpotHandler`, `tunnelActorHandler`, `tunnelTalkSpotHandler`, `tunnelStaticObjHandler`: the AREA02 top-down / tunnel sections of I0NFO / I0NFO3; correction 2026-11-09: in retail only the JP disc places type 0x41, see "Placement records across PAL / USA / JP"). **No unplaced handler with real content.** Layer 8 has no placement record at all (its two live handlers are spawned by code).
 
 ### 3. Event ids
 Nothing to add to "Events with no PAL title (0xFF)" and "Unused events": the 19 unreferenced and the 6 Civilization-linked ids stand as listed.
@@ -667,3 +669,261 @@ tiles where the player had to step on or set the right ones. With digit tiles on
 consistent design is an equation or a sequence: e.g. the six numbers in rock order (or summed/combined, the five
 known sum to 223) give the tiles to step on, or each rock's number picks one of the ten symbols. The known values 2, 5,
 18, 59, 139 do not form an obvious series, and with one rock missing the intended answer cannot be recovered.
+
+## Placement records across PAL / USA / JP (2026-11-09)
+
+Every room's object placement records (APD blocks) compared between the three retail discs. Checked statically on
+the disc data (not seen in-game yet).
+
+- **AREA02 section 3 (top-down tunnels): 26 log props only in JP.** JP `AREA02/D307.GAM` (unpacked; model table
+  0x23224, placement block 0x23ECC, 48 records) places 26 layer 4 type 0x41 records (`tunnelStaticObjHandler`), all
+  model 6 at height 54: groups of three 24-28 px apart at (398-446,-1046), (471-527,-506), (612-660,-637) + (636,-668),
+  (1323-1379,-569), (1527-1575,-828), a row of six at y -722 (x 998-1118) and one at y -686 (x 1020-1076). Model 6 is
+  a half log (24 x 56). USA/PAL: the same block has 22 records and no type 0x41, but model 6 is still in the table
+  (USA `D307.GAM` 0x1E5C0, PAL `D306.GAM` 0x1E5E0): model and handler survive with nothing placing them. The
+  collision map is walkable at every log cell, so they were decoration (log floors); a link with the graffiti-floor
+  puzzle is a guess.
+  The section layout is the same in JP and PAL/USA (PAL and USA files byte-identical): same 240x168 collision grid
+  (136 of 40,320 cells differ, local wall edits; every log cell walkable in both), ~97 % of the backdrop polygons
+  shared, the 22 shared records (20 gates, 2 type 0x3F) at the same positions, the same five exits and eleven actors
+  (JP has a 12th at (495,-409)). Decisive: the floor mesh has a 24x20 / 28x20 tile cut exactly at each of the 25
+  distinct log positions (two JP records share (1076,-686)) **in both versions**, and PAL has no tile of that size
+  anywhere else: the PAL floor keeps the outlines of the removed logs. In JP each tile also carries a shadow quad
+  (octagon blob, page 14, UV 136..159 x 40..63, CLUT 0x79CF) that PAL dropped; the blob texture is still in PAL VRAM.
+  So the JP coordinates injected into PAL are the original positions (the shadows are missing).
+- **AREA00: five static solid blocks only in JP.** JP layer 4 type 0x08 is a static solid-model handler (X00
+  0x8011D824, near-twin of `updateStaticSolid`); in USA/PAL the slot is the empty stub (`updateL4Type08Object`, PAL
+  0x80030404, USA 0x80033858). JP records: a rising staircase of three in section 0 at (1021,-120), (1117,-197),
+  (1198,-251), models 0x2E/0x2F/0x30, and two in section 1 at (2546,-476), (2612,-370), models 0x35/0x36. The models
+  are gone from USA/PAL (JP `AREA00/D003.GAM` model table 0x2F6DC: 85 entries, USA 79 at 0x2D914). They are
+  grass/hay-topped blocks. A sixth JP-only model is not accounted for yet.
+- **AREA00 section 2: a fourth swaying stone tower.** JP places a layer 4 type 0x01 chain, subtype 3, at
+  (2792,-298), 8 stone-block parts (models 3..10 like subtypes 0/1). PAL `updateA00L4Type01` still handles subtype 3
+  (child layer 2 type 2 subtype 7) and X000 `D_80138814[3]` = (2792,-377) is that tower's child spawn point, but PAL
+  places only subtypes 0-2: dead code and data in PAL.
+- **AREA04 sections 0/1: a PAL-only placement edit** (not cut content). USA and JP are identical; PAL (`D002`/`D102`
+  vs USA/JP `D004`/`D104`) swaps counted collectibles 9 and 10, unlinks the decoration at depth 1260 (subtype 21 → 0)
+  and adds a 3-part biting plant at (1077,-356,1260).
+- **JP memory card code accepts a development product code**: JP DSPSUB2 `memCardReadDirectory` (0x800EA490) takes
+  save names starting `BISLPS-01144` or `BISCPS-99999`; USA and PAL only their own (details and implications: docs/SAVE_FORMAT.md).
+- Still to explain (JP vs USA placements): a JP-only spring pad in AREA03 sections 1/5 at (3264,-1538), backdrop
+  sprite sets in AREA16 section 3, an extra scenery sprite in AREA09, extra pool objects / moved positions in
+  AREA00/01, 22 objects USA added in AREA03 section 2, and JP's AREA12 copy differing a lot from USA's.
+- Checked, nothing new: USA/JP-only code (rewrites of existing features), event ids, files outside the file tables
+  (the same 31 on all three discs), event menu order and icons, debug strings.
+
+## PrePre Vol. 9 (PCPX-96093): Tombi animations and art retail does not have (2026-11-10)
+
+Everything below was recomputed from the two discs (PrePre 9 extracted with `tools/disc_fetch.sh PREPRE9`, PAL in
+`game/disc/fs`); the scratch scripts were not committed, the method is described so it can be redone with tools/anim.py,
+tools/wpp.py, tools/vram.py and tools/area000.py.
+
+### Frames
+
+- Pre9 player frame table: `TOMBA/AREA01/A007.000` (byte-identical to `TOMBA/AREA02/D105.000`), WPP table of **379**
+  frames, SPR parts in `AREA01/A008.GAM` (unpacked +0x14A0, 379 frames), palette rows 0/1 of `AREA01/CLUT01.GAM`.
+  Retail: `AREA00/A004.000`, 358 frames.
+- Compared by md5 of the decoded frame, then by silhouette overlap (bounding-box aligned, >= 0.90 = retouched):
+  **173 identical, 100 retouched, 106 new** (not in retail at all; also checked against all 41 WPP tables of every
+  retail area, 13,017 frames: no match).
+- New frames, runs: 72, 98, 109, 112-124, 138-140, 177-179, 195-203, 219-228, 237-242, 245, 255-258, 264-292,
+  298-300, 304-306, 317-326, 331, 334-340, 375.
+- Retail frames 265-357 (idle breathing, roll land, victory pose, the later additions) do not exist in Pre9.
+
+### Player animation table, paired by id
+
+Pre9's table is in `TOMBA/X01.BIN` +0x380: **56 ids** (retail: 90 in X0nn +0x3DC). The same id is the same move in both
+builds (the state code selects ids), so pairing by id is exact. Mean silhouette overlap of the two sequences aligned in time:
+
+| id | retail name | Pre9 | retail | verdict |
+|---:|---|---|---|---|
+| 0, 19 | idle | one held frame (0) | 10 frames: 0 for 360 ticks, then 269-275 look-around loop | retail animated it |
+| 5 | crouch | 6 frames | 8 frames | changed |
+| 33 | crouch walk | dive to crouch 331-338 (6 new frames) | different move | **replaced** |
+| 37 | anim_37 | shrug 177-179 (new) | different pose | **replaced** |
+| 49 | roll land | somersault 219-228 (10 new frames) | roll land 169-178 | **replaced** |
+| 1, 15, 48, 54, 55 | walk, jump alt, get up, 54, get up slow | | | retouched (0.85-0.97) |
+| the other 41 | | | | same (>= 0.97) |
+
+Ids 56-89 exist only in retail.
+
+### Orphan player scripts in TOMBA.EXE
+
+Brute scan of the exe data for 8-byte animation entries (tools/anim.py format) that use the new frames. **20 scripts** sit in
+the player-script region (0x80011928..0x8001271C, between the 56 referenced ones); nothing points at them: no data word in
+TOMBA.EXE, X01.BIN, X02.BIN, DSPSUB*.BIN or INFO.BIN, no lui/addiu pair. They were dropped from the table before Pre9
+(1997-11) and the data stayed. Ticks are game ticks (40 ms); every one ends in `hold` (last frame kept, caller signalled),
+the shape of retail's multi-stage actions.
+
+| script (vram) | frames / ticks | end | reading of the pose |
+|---|---|---|---|
+| 0x80011A50 | 112/12 113/8 114/16 | hold | lift, part 1: crouch and grab (long holds) |
+| 0x80011ECC | 115/7 116/9 117/10 118/7 119/9 120/10 | hold | lift, part 2: raise to the chest / overhead |
+| 0x80011EFC | 121/6 122/5 123/4 124/5 | hold | lift, part 3: lower / put down |
+| 0x800123B8 | 255/10 256/6 257/10 258/14 | hold | pull something with both hands, held on the last tug |
+| 0x80012178 / 0x80012198 / 0x800121B8 | 195-197, 198-200, 201-203 (6 ticks each, ping-pong) | hold | three punch / strike poses with the leg raised |
+| 0x80012400 | 264/2 265/2 266/3 267/4 268/60 | hold | fast wind-up, 60-tick hold |
+| 0x80012428 | 269-276, 10-12 ticks each | hold | slow heavy walk (carrying?) |
+| 0x80012468 | 277-281 ping-pong, 7-11 ticks | hold | strain / rock back and forth |
+| 0x800124A8 | 282/10 283/10 284/10 283/10 | hold | |
+| 0x800124C8 | 285-292, 5-8 ticks | hold | flip with kicks |
+| 0x80012308 | 238/32 239/8 240/24 239/10 | hold | lying down, two long holds |
+| 0x80012328 | 241/6 242/1 243/2 244/3 245/4 244/1 243/1 242/1 | hold | scream / shiver |
+| 0x80011FAC | 138/10 139/8 140/10 139/8 | hold | arms up, seen from behind |
+| 0x80012530 | 298/10 299/10 300/10 299/10 | hold | |
+| 0x80012550 | 304/20 305/8 306/14 305/8 | hold | guard pose |
+| 0x800125C8 | 317/3 318/4 319/5 320/6 | hold | crouched with dotted effect boxes (charge?) |
+| 0x800125E8 | 321/14 322/10 323/9 324/14 325/10 326/8 | loop | hunched walk, follows 317-320 |
+| 0x80011B80 | 339/32 340/60 | hold | |
+
+The 84 frames these scripts use are exactly the new frames no table reaches; the demo cannot play them.
+
+### What was checked for the object they act on (nothing demo-only found)
+
+- **Placement records** (APD 16-byte records, PAL format, `AREA01/D004.GAM` = `D104.GAM`, 315 records / 164 world
+  positions; `AREA02/D008.GAM` + `D106.GAM`, 9): matched to retail AREA01 / AREA02 by position. Types are renumbered
+  between the builds (Pre9 L4 type 13 at (2876,-300,-45) is retail L4 type 7 `updateAreaMechanisms` at the same spot),
+  so the match is by coordinates: 8 Pre9 records have no retail object within 24 units, all known objects moved a few
+  units (two scenery sprites, three items, one chest) plus one L2 type 13 at (4187,-378,618) whose handler
+  (X01.BIN +0x2E8F8, overlay base 0x800ED548) is a four-state stub that only calls two exe functions. AREA02 is
+  identical record for record.
+- **Texture pages**: `AREA01/A002.GAM` (objects: chests, barrels, pots, arrow sign, a rolling log in 4 views at page
+  x 768-880, y 220-240) differs from retail's `AREA01/A002.GAM` in 21 regions, all retouches; the log is in retail
+  AREA01 and AREA07 too. `AREA01/B000.GAM` 3 retouches (the slanted two-pronged trident at (208,192) / (208,216) is the
+  Koma pig's); `AREA02/B001.000` identical, `B003.000` 140 texels. `A001` / `A003` of Pre9 are 4x the retail size
+  (retail reorganised them) and `AREA01/A005`, `AREA02/A003` have no retail counterpart: not comparable 1:1.
+- **Pre8** (PCPX-96084) `TOMBA/AREA00/PLAYER.WPP`: 313 frames of older, smaller art (24-32 px wide, one palette at
+  TOMBA.EXE +0x989A8, uploaded to VRAM (0,480)); no frame identical to Pre9 or retail (21 / 19 similar by silhouette);
+  its script tables in the exe only cover NPC frames (<= 87), Tombi is animated by code. Pre8 has back-flips, a
+  head-first fall and a spinning kick (frames 96-111, 115-125, 208-223) that neither Pre9 nor retail keep.
+
+- **JP demo SLPM-80165** (`GAME_FILES_URL_JP_DEMO`, checked 2026-11-10): `AREA00/A005.000` = Pre9's 379-frame table
+  byte for byte, followed by a second table of 83 frames that is already identical to retail's second table of
+  `AREA00/A004.000`; the player table (`AREA00/X00.BIN` +0x3A8) has the same 56 ids with the same scripts, and the same
+  20 orphan scripts sit in `SLPM_801.65` (0x800109A4..0x8001153C), still unreferenced. So nothing changed for Tombi
+  between PrePre 9 and that demo; the new retail frames and ids came later.
+
+### Top-down Tomba (the overhead sprite set), demo vs retail
+
+- Demo table: `AREA08/D002.000` +0x3FA28 in SLPM-80165 (= PrePre 9 `AREA02/D005.000`, byte-identical), **106** frames,
+  SPR in `AREA08/D003.GAM`, CLUT rows 0/1. Retail: 127 frames (`AREA19/D204.000`, `AREA02/D004.000`, `AREA05/D005.000`,
+  `AREA08/D103.000`; the sets differ per area). By md5 / silhouette against every retail table: 67 identical, 17
+  retouched, **22 in no retail table**: 25-29, 31-35, 77-85, 89, 96-97. Retail frames 106-126 (item held overhead,
+  crouch, throw / raise in three directions, scream) are later additions.
+- Demo player animation block, `SLPM_801.65` 0x80010800 (retail: MAIN0 `MAP_PLAYER_*` 0x800106B4, 37 pointers): **21
+  pointers** = idle 5 (one held frame each, 101-105: the demo idle does not animate), walk 5 (frames 0-24, identical
+  scripts to retail), button-A walk 5 (demo frames 37-76 by 8; retail renumbered them to 25-64), then only **two action
+  sets of three directions**: 25/26, 27/28, 29/30 (6 ticks then a 60-tick hold: raise the arms and keep them up, the
+  demo's item pick-up) and 31/32, 33/34, 35/36 (16/16, hold). Retail has eight action sets after the walks (item raise
+  126/65, 70/67, 71/69; 72-74; 75-83 in pairs; 84-86 holds; the two look-around idles 87-104; 105-110; 111-125).
+  So the demo frames 25-35 are the **first drawing of the item pick-up**, redrawn in retail as 65-74 / 126; they were
+  used in the demo, not orphaned.
+- Demo frames 77-85, 89 and 96-97 are in no player script of the demo (the exe block above is the only player table;
+  the script tables inside the AREA08 overlay `INFO.BIN` belong to the area's NPCs and index their own sprite sets, so
+  they say nothing about Tomba's frames). They are unused top-down art, like the side-view orphans, with no script.
+
+### Lost: the top-down Charity Wings glide (JP demo), rebuilt (2026-11-10)
+
+How it was put together, step by step, so it can be redone (`tools/wings_glide.py` does all of it from the demo disc):
+
+1. **The Tomba frames.** The demo's overhead set (`AREA08/D002.000` +0x3FA28, 106 frames; SPR parts `AREA08/D003.GAM`
+   table at +0; palette rows 0/1 of `AREA08/CLUT01.GAM`) has frames 77, 78, 79 with the right arm raised overhead: in
+   no table and in no player script of the demo, and not in retail (retail's 127-frame set redrew the item moves as
+   65-74 and 126). Rendered with each part's own CLUT row like the side view (two parts per frame, torso and legs).
+2. **The feather.** Retail draws the Charity Wings item from the resident item table (`SPR_DATA[4]`, kind 0x34, PAL
+   `SYS/LD0SYS.BIN` record of AREA00 list 0): item descriptor 7 (`tools/sprclut.py items`) -> anim set 0x80012214 ->
+   scripts 0x80012834 (frame 159, static, 24x24) and 0x8001283C (frames 160, 161, 162, the flap, 1 tick each), CLUT
+   word 0x7AD6 = VRAM (352,491), i.e. row 11 of the item palette block (`SYSTEM/A10004.000` at (352,480)). The texels
+   were cut from the retail VRAM (`vram.cut_part` with tpage base 0x14), packed back to 4 bpp rows and searched byte for
+   byte in every demo file at every page width: found in the JP demo's `SYSTEM/A00000.GAM` (unpacked, 512 px wide
+   page) and in PrePre 9's `TOMBA/A00002.GAM` (256 px wide; = `AREA01/A005.GAM`, `AREA02/A001.GAM`) at the same page
+   coordinates: 159 at (224,104), 160 at (200,80), 161 at (216,64). Retail's 162 (24x16) is not in either demo. The
+   palette row 11 is byte-identical in retail, the JP demo (`SYSTEM/A00002.000`) and PrePre 9 (`TOMBA/A00003.000`):
+   white, five light blues, three quill browns, a blue-grey.
+3. **Pinning the feather to the hand.** Measured from the pixels: the raised hand's topmost opaque pixel (right third
+   of the sprite) is at (22,2) in frame 77 and (22,1) in 78 and 79; the feather's quill end is the lowest opaque pixel
+   of each feather frame ((2,22) in 159, (2,14) in 160, (7,14) in 161). The quill end goes 1 px above the hand's top
+   pixel (the user's call, after trying 2 px inside and 0).
+4. **The rotor.** The three feather frames read as phases of one turn: 159 flat, 160 angled, 161 edge-on; mirroring
+   160 and 159 gives the other half (retail's missing 162 is exactly the mirrored 160). Cycle of 8 phases at 70 ms;
+   Tomba cycles 77-78-79-78 at half that rate; the figure floats +-2 px (sine over 32 steps). The spin order, the
+   timings and the float are ours: the demo leaves no script for this sequence.
+
+What is from the disc: every pixel, the hand and quill positions, the palette. What is a reconstruction: the spin
+order, the speeds, the float. Output of the tool: `wings_glide_x5.gif`, `wings_glide_1x.gif`, `wings_glide_steps.png`
+and the three feather PNGs (never committed).
+
+### The other sprite tables of the JP demo (enemies, NPCs, HUD)
+
+`tools/find_unused_gfx.py OUT --jp game_jp_demo/disc.bin --areas 0,8 --skip-vram` pairs every SPR table of the demo
+with a PAL table by shape and compares the 16-byte part records frame by frame. Demo tables: AREA00/A006.GAM (379 Tomba,
+10, 194, 267, 83, 11 frames), AREA00/D503.GAM (18), AREA08/A003.GAM (168, 153), AREA08/D003.GAM (106 top-down Tomba,
+431 top-down NPCs, 17, 8). Result: the 431-frame top-down NPC table is PAL's AR02 SPR 3B minus its last 6 frames, the
+194-frame table (PAL SPR 32) differs in 3 frames, the 267-frame one (PAL SPR 33, 290) in 6, the 163/153-frame ones
+(PAL SPR 39, 267) in 52/43 and AREA08's 168-frame one (PAL SPR 34, 289) in 28; but rendered from the demo's own VRAM
+(area pages placed as PAL does, SYSTEM atlases tried at (64,0) with `vram.infer_base`) every one of those frames is an
+empty rectangle, i.e. placeholder frames, and the tool's own "new images" of them are flat blocks. The 83-frame table
+has no PAL twin: the localized HUD / text strip. So apart from Tomba (side view and top-down, above) the demo's sprite
+tables hold no art that retail lacks; the differences are retail's additions (PAL-only frames listed in the tool's
+INDICE.txt: e.g. SPR 34 frames 192-252, SPR 3A 70-126).
+
+### Items and placed objects of the JP demo that retail does not have (2026-11-10)
+
+Items (`tools/item_icons_find.py game_jp_demo/fs`, `tools/jpdemo_text.py game_jp_demo/disc.bin OUT --jp
+game_jp/disc/tomba_jp.bin`, retail JP text from `tools/jp_text.py`):
+
+- Icon page `SYSTEM/A00012.000` (1536 px wide, grid from x 512): 64 slots, 58 retail icons found. Slots **34, 36, 44,
+  45, 52, 61** carry icons retail never used (the corkscrew / curly key / bottle / powder / rocks set already seen in
+  Dengeki D5 and PrePre 9) while their description entries are the placeholders アイテム０３４.., and slot **24** is a
+  grey pod icon described as 魔ブタを封じこめる たいせつな ふくろ ("the precious bag that seals an Evil Pig"): one generic
+  bag before the seven coloured ones (37-43, present too). Description bank `SYSTEM/A00013.000` (201 entries, retail id
+  order): 11 entries reworded against retail JP (ids 0, 6, 9-14, 24, 26, 27).
+- Item names in the demo's "used X" messages that appear nowhere in the retail JP text: はやさレベル＋１ (Speed Level +1),
+  ケガをしたコイヌ (Injured Puppy: the early Baron), みえないカガミ (Invisible Mirror), バンクの実 (Bunk Fruit; retail: Bunk
+  Flower), ワライダケ / ナキダケ (laughing / weeping mushroom under other names), ライフゲージかくだい (Life gauge expand;
+  retail keeps only ぞうか). グルドカ / グルピン / ドカピン / ケモノダッシュ / アルコール / エサねんりょう exist in retail JP.
+- No feather object: the only feather is the Charity Wings item (icon 7, めぐみの羽根), used in the demo as in retail.
+
+Placed objects: the demo keeps its APD records inside the room containers (`AREA00/D003.GAM` +0x481CC.., `D302.GAM`,
+`D402.GAM`, `D503.GAM`; 403 distinct records) like the retail JP disc (`AREA00/D003.GAM` etc., 426). Compared record by
+record with retail JP (same layer, type, subtype, x, y, z) the demo-only ones are:
+
+| where | record | note |
+|---|---|---|
+| section 2 (3020,-512) | layer 5 type 4 subtype 14 = **Baron lying in the world as a pick-up** (flag 44) | retail gives Baron through the event; no retail disc places item 14 |
+| section 5 (2642,-300,168) | layer 2 type 39, sprite set 5, flag 47 | no retail disc places an L2 type 39 in AREA00; in PAL the L2 slot 39 is not a handler |
+| room 3 (120,-56) | layer 3 type 21 | PAL slot 21 of layer 3 is not a handler |
+| room 5 (2670 / 2600,-395,907) | layer 4 type 7 subtype 8, models 1 / 2 | area-mechanism variant 8, unplaced in retail |
+| section 0 (1200,-36,204) | five layer 4 type 27 records, models 0x4C..0x50 at one point | a five-model sequence (`updateL4Type1BObject` in PAL) retail does not place |
+| section 0 / 1 | 12 layer 2 type 1 objects in rows (x 230-558, 2014-2038), L4 type 26 subtype 3 (800,-40), L4 type 0 subtypes 5-6 (room 1), Chick at (2023,-345) | small enemies / fixtures / an item retail moved or removed |
+
+Caveat: type numbers are the demo's; its handler tables were not matched against retail's, so a "type not placed in
+retail" can also be a renumbered type (as with PrePre 9's L4 13 = retail L4 7). The static solid blocks (L4 type 8) and
+the fourth stone tower (L4 type 1 subtype 3) the demo places are also in retail JP (see "Placement records across
+PAL / USA / JP") and are not listed here. Not rendered: `tools/model_view.py obj` needs the PAL load lists; the demo's
+model table is at `D003.GAM` unpacked +0x30A78 (87 entries).
+
+Conclusion: the lift / pull mechanic was programmed with its timing and then removed before PrePre 9; the object it
+used is in none of the demo's data. Only the frames and these scripts remain.
+
+### VRAM sweep of the two demo discs: texture pages, retail filtered out (2026-11-10)
+
+Every texture page of the JP demo (25 pages, load records at `SLPM_801.65` +0x5C258) and of PrePre 9 (38 pages,
+`TOMBA.EXE` +0x64A5C) was placed in VRAM from the demo's own load lists, hashed in 8x8 / 16x16 texel blocks against
+every retail PAL page (and retail JP and the other demo as extra references), and the texels no SPR part (every table
+found by shape, every tpage base) and no model polygon samples were kept. Code-drawn primitives with fixed UVs (HUD,
+sub-screen, title, text) are not modelled, so on those pages "unsampled" alone proves nothing. Throw-away scripts, not
+committed. What came out as art retail does not have:
+
+| Disc, page | Find | Palette | Status |
+|---|---|---|---|
+| PrePre 9 `TOMBA/AREA02/B000.GAM` (0,0)-(512,170); byte-identical copies in the sub-screen pages `A00061`/`A00064`/`A00067`/`A00069` | **An unused dwarf sprite sheet**: about 24 poses of the forest dwarf (idle, walk, kick, knocked back), six 36x40 robed, bearded elders (front / side / back), five pennants on poles, two small dark silhouettes. 0 % sampled by any Pre9 part or polygon; 5-25 % block matches with PAL/JP (noise level). | The retail forest dwarfs (AREA01 list 1, SPR 0x32) use CLUT 0x7C13 / 0x7C53 / 0x7C93 / 0x7CD3 = `CLUT01` rows 16-19 col 11 (pink, tan, light tan, green); the same four rows are in Pre9 `TOMBA/AREA01/CLUT01.GAM` and colour the sheet exactly like the retail dwarfs. | Cut art: an SPR-page version of the dwarfs retail only keeps as WPP / the AREA01 table. |
+| JP demo `SYSTEM/A00012.000` (10,67) 28x36 | A small full-body Tomba (pink hair, green shorts) on the sub-screen page, next to the マップ label. Not in PAL, JP retail or Pre9 (3-4 % block matches). Probably the extra-life icon of the demo's sub-screen, drawn by DSPSUB code (not modelled); the user notes retail's extra-life icon differs. | `SYSTEM/DSPCLUT.TIM` row 9 col 0. | Demo-only sub-screen art. |
+| JP demo `SYSTEM/A00007.000` (8 bpp, 64x256 words at (0,256), CLUT `A00006.000`) | Eight strips of Japanese text: the demo's start-up disclaimer ("this software is under development, unexpected bugs may occur... the disc cannot be exchanged"). | `A00006.000` | Demo-only. |
+
+Not new, after checking: the Pre9 scarf runner in `TOMBA/AREA01/B001.GAM` (255,118), two 35x43 frames of a running
+figure with a red cap, goggles and a brown scarf (`CLUT01` row 0 col 11) is the thief who is in the retail game (user
+identification; the frames are retouched / on another page there, so the block match is low); the demo-only item icons
+(slots 34, 36, 44, 45, 52, 61, listed above); the Japanese title logo, faces, kanji font and sub-screen labels (all in
+retail JP); the feather, the Evil Pig trident and the logs (sampled, or in retail JP). JP AREA00/AREA08 room pages, the
+Pre9 AREA01 object atlases and AREA02 room pages hold no other unreferenced art. USA and SCES-01330 discs not checked.

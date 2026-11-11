@@ -22,6 +22,11 @@ import os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# the game version (PORT_VERSION, port/tools/portver.py): PAL unless set; another version points tools/units.py,
+# tools/sysovl.py and tools/areas.py at its own files under the PAL program names
+import portver as PV
+PV.install()
 
 # Psy-Q files compiled as they are: pure data-structure helpers (no GPU/GTE/SPU/CD register access).
 LIB_KEEP = set("""
@@ -241,12 +246,12 @@ def filter_src(text, dropped=None, retail=()):
 
 
 def make_includes(outdir):
-    """OUTDIR/inc: include/ with upper-case aliases (the game was built on DOS); OUTDIR/inc24: the same with the
-    `// HEADERS tomba24` set overlaid onto tomba/ (as tools/ncheck.py does).  Symlinks only."""
+    """OUTDIR/inc: include/ with upper-case aliases (the game was built on DOS); OUTDIR/inc24 / inc26: the same with
+    the `// HEADERS tomba24` / `tomba26` set overlaid onto tomba/ (as tools/ncheck.py does).  Symlinks only."""
     def link(src, dst):
         if os.path.lexists(dst): os.remove(dst)
         os.symlink(src, dst)
-    for name, overlay in (("inc", None), ("inc24", "tomba24")):
+    for name, overlay in (("inc", None), ("inc24", "tomba24"), ("inc26", "tomba26")):
         d = os.path.join(outdir, name)
         os.makedirs(os.path.join(d, "tomba"), exist_ok=True)
         inc = os.path.join(ROOT, "include")
@@ -271,10 +276,31 @@ def check_full_fresh():
     global _FULL_CHECKED
     if _FULL_CHECKED: return
     _FULL_CHECKED = True
-    full = os.path.join(ROOT, "build", "full")
+    full = PV.FULL
     lds = [os.path.join(full, f) for f in os.listdir(full)] if os.path.isdir(full) else []
     lds = [f for f in lds if f.endswith(".full.ld")]
-    if not lds: sys.exit("gen_port: build/full has no *.full.ld: run python3 tools/build_full.py -j 4 first")
+    if not lds: sys.exit("gen_port: %s has no *.full.ld: run python3 tools/build_full.py%s -j 4 first"
+                         % (os.path.relpath(full, ROOT), "" if PV.PAL else " --version " + PV.VER))
+    # a matching build whose C partly fell back to asm (tools/build_full.py compile_failures.txt: most often the
+    # psx_tomba headers include/tomba/psyq were missing) still matches by sha1, but the port would lose those
+    # functions (USA: 126 stubs, dispatchTasks / openTask / initObjectPools among them, a crash at frame 0)
+    rel = os.path.relpath(full, ROOT)
+    if not os.path.isdir(os.path.join(ROOT, "include", "tomba", "psyq")):
+        sys.exit("gen_port: include/tomba/psyq is missing (the PSY-Q headers of the psx_tomba files): run sudo "
+                 "tools/setup_native.sh, then python3 tools/build_full.py%s -j 4 again"
+                 % ("" if PV.PAL else " --version " + PV.VER))
+    cf = os.path.join(full, "compile_failures.txt")
+    if not os.path.exists(cf):
+        print("WARNING: gen_port: %s has no compile_failures.txt (made by an older tools/build_full.py): cannot "
+              "check that all its C compiled; rebuild it if the port has unexpected stubs" % rel, file=sys.stderr)
+    else:
+        bad = [l.strip() for l in open(cf) if l.strip()]
+        if bad and os.environ.get("PORT_ALLOW_ASM_FALLBACK") != "1":
+            sys.exit("gen_port: %d C files of %s did not compile and were linked from asm (%s, first: %s); the port "
+                     "would lack their functions.  Fix the toolchain (sudo tools/setup_native.sh: old-gcc, maspsx, "
+                     "include/tomba/psyq) and run python3 tools/build_full.py%s -j 4 again "
+                     "(or PORT_ALLOW_ASM_FALLBACK=1 to build anyway)"
+                     % (len(bad), rel, os.path.relpath(cf, ROOT), bad[0], "" if PV.PAL else " --version " + PV.VER))
     built = min(os.path.getmtime(f) for f in lds)
     newest, newest_path = 0, None
     for d, exts in (("src", (".c", ".h", ".s")), ("include", (".h", ".inc")), ("notes", (".csv",)), ("config", (".yaml",))):
@@ -300,7 +326,7 @@ def check_full_fresh():
 def provides(prog):
     """{name: address} of the PROVIDE lines tools/build_full.py wrote for one program."""
     check_full_fresh()
-    p = os.path.join(ROOT, "build", "full", prog.lower() + ".full.ld")
+    p = os.path.join(PV.FULL, PV.vprog(prog) + ".full.ld")
     if not os.path.exists(p): sys.exit("gen_port: %s missing: run python3 tools/build_full.py first" % p)
     return {m.group(1): int(m.group(2), 16) for m in re.finditer(r"PROVIDE\((\w+) = 0x([0-9A-Fa-f]+)\);", open(p).read())}
 
@@ -323,11 +349,22 @@ def object_refs(stems):
     return out
 
 
-def load_fixes():
-    out = {}
+def load_fixes(ver=None):
+    """{src path: [(old, new)]} of port/fixes.txt for the version the port is generated for.  A line
+    `@version usa` (or several, `@version pal usa`; any tools/versions.py name or alias) makes the fixes after it
+    apply only to those versions, `@version all` ends the section; fixes outside a section apply to every version."""
+    import versions as V
+    ver = ver or PV.VER
+    out, only = {}, None
     for l in open(os.environ.get("PORT_FIXES_TXT") or os.path.join(ROOT, "port", "fixes.txt")):
         if not l.strip() or l.lstrip().startswith("#"): continue
+        if l.startswith("@version"):
+            names = l.split()[1:]
+            if not names: sys.exit("gen_port: port/fixes.txt: %r names no version" % l.strip())
+            only = None if names == ["all"] else {V.canon(n) for n in names}
+            continue
         f, old, new = [x.strip() for x in l.rstrip("\n").split(" | ")]
+        if only is not None and ver not in only: continue
         out.setdefault(f, []).append((old, new))
     return out
 
@@ -336,7 +373,7 @@ FIXES = {}
 ASM_ALIASES = {}
 
 
-OVL_BASE, OVL_END = 0x800E8028, 0x80140000
+OVL_BASE, OVL_END = PV.OVL_BASE, PV.OVL_END
 
 
 def symbol_addrs(prog):
@@ -350,17 +387,29 @@ def symbol_addrs(prog):
     return out
 
 
+def data_names(prog):
+    """{name: address} of notes/data_names_<prog>.csv (the globals the data-naming rounds named; address,name,...)."""
+    p = os.path.join(ROOT, "notes", "data_names_%s.csv" % prog.lower())
+    out = {}
+    for l in (open(p) if os.path.exists(p) else ()):
+        m = re.match(r"([0-9a-fA-F]{8}),(\w+)", l)
+        if m: out.setdefault(m.group(2), int(m.group(1), 16))
+    return out
+
+
 def area_syms(prog):
     """{name: address} of an area overlay X0nn, as tools/ncheck.py resolves the names of src/x0nn/*.c: MAIN0's
     symbol files plus the overlay's own (config/symbol_addrs_x0nn.txt, notes/names_x0nn.csv, the names of
-    notes/functions_x0nn.csv and the functions src/x0nn/ defines)."""
+    notes/functions_x0nn.csv and notes/data_names_x0nn.csv, and the functions src/x0nn/ defines)."""
     syms, names = {}, {}
     for f in ("main0", prog.lower()):
         p = os.path.join(ROOT, "config", "symbol_addrs_%s.txt" % f)
         for l in (open(p) if os.path.exists(p) else ()):
             m = re.match(r"\s*(\w+)\s*=\s*0x([0-9a-fA-F]+)", l)
             if m: syms[m.group(1)] = int(m.group(2), 16)
-        for csvf in ("names_%s.csv" % f,) + (("functions_%s.csv" % f,) if f != "main0" else ()):
+        # (data_names_x0nn.csv: the area's named globals, TREASURE_CHEST_GUARD_DEFS; without them the names were
+        # unknown here and gen2 stubbed them as functions: X003's initTreasureChestGuard read code bytes)
+        for csvf in ("names_%s.csv" % f,) + (("functions_%s.csv" % f, "data_names_%s.csv" % f) if f != "main0" else ()):
             p = os.path.join(ROOT, "notes", csvf)
             for l in (open(p) if os.path.exists(p) else ()):
                 m = re.match(r"([0-9a-fA-F]{8}),(?:\d+,)?(\w+)", l)
@@ -374,6 +423,12 @@ def area_syms(prog):
         if m: syms[f[:-2]] = int(m.group(1), 16)
     for k, a in names.items():
         if a is not None: syms.setdefault(k, a)
+    # a bare-letter alias of a named global (MOTOCROSS_COURSE_PATH_E, CEILING_DRIP_DROP_ANIMS_S: the D_8011F3F8e of
+    # before the data names, whose address the name gave): the matching build PROVIDEs it at the global's address
+    known = dict(data_names("main0")); known.update(syms)
+    for n, a in provides(prog).items():
+        m = re.match(r"(\w+)_[A-Za-z]$", n)
+        if m and n not in syms and known.get(m.group(1)) == a: syms[n] = a
     # X000's name for a function the area shares byte for byte at the same address: the area csv names such
     # a function after its first masked twin, which can be another function (X009's 0x800F4E9C is X000's
     # playerSetAnimPairB, named playerSetAnimPairA like 0x800F4E68 next to it, so neither name resolved and
@@ -402,7 +457,7 @@ def area_signatures(progs):
         # only words inside the area's own functions: the game never writes its code, while its data moves
         # (0x80115EA4, the first unshared word, is a variable: AREA09 rewrote it at frame 1508, the resident area
         # read as (none) and every dispatch of the treasure-chest handlers failed)
-        code = sorted((u.addr - OVL_BASE, u.addr - OVL_BASE + u.size) for u in UN.units()[p] if u.addr >= 0x80115EA4)
+        code = sorted((u.addr - OVL_BASE, u.addr - OVL_BASE + u.size) for u in UN.units()[p] if u.addr >= PV.AREA_OWN)
         offs = [o for s, e in code for o in range(s, min(e, len(d[p]) - 3), 4)]
         for o in offs:
             w = d[p][o:o + 4]
@@ -464,11 +519,19 @@ def area_plan(U, areas, ovls=()):
                 # thunk itself, and the dispatch would loop forever
                 nm = UN.defined_name(u.file, os.path.basename(u.file)[:-2])
                 compiled.append((p, u)); amap.append((p, u.addr, p + "_" + nm))
+        if not PV.PAL:
+            # another version's area units start at its own code (AREA_OWN; the X00 prefix is X000's, tools/units.py):
+            # a varying X000 function of the prefix (one a SYSTEM overlay also starts at: USA playerAirSpinToFall
+            # 0x800EDFA0, I0NFO2's topdownActorPatrolHStep) runs X000's code while this area is resident
+            have = set(a for q, a, n in amap if q == p)
+            for a, u in x0.items():
+                if a in vary and a < PV.AREA_OWN and a not in have and same(p, a, u.size): amap.append((p, a, None))
     return vary, compiled, amap
 
 
 
 def sources(outdir, progs, ovls=(), areas=()):
+    if not PV.PAL: return sources_version(outdir, progs, ovls, areas)
     FIXES.update(load_fixes())
     from units import units, defined_name
     U = units()
@@ -538,6 +601,7 @@ def sources(outdir, progs, ovls=(), areas=()):
         check_retail_rewrites(txt, u.file)
         for old, new in FIXES.get(os.path.relpath(u.file, ROOT), []):
             if old not in txt: sys.exit("gen_port: port/fixes.txt: %r not found in %s" % (old, u.file))
+            fix_audit(src, old, u.file)
             txt = txt.replace(old, new)
         if name in dropped:
             print("gen_port: %s is MIPS asm only: needs a port shim" % name)
@@ -598,7 +662,12 @@ def sources(outdir, progs, ovls=(), areas=()):
         if ovl:
             defs += "".join("#define %s %s_%s\n" % (n, prog, n) for n in sorted(ovl_names[prog])
                             if re.search(r"\b%s\b" % re.escape(n), src))
-        txt = volatile_aliases(txt, lambda n, _p=prog: asyms.get(_p, {}).get(n) or canon.get(n))
+        def addr_of(n, ren=ren, area=area, prog=prog):
+            a = ren.get(n)
+            if a is None and area: a = asyms[prog].get(n)
+            if a is None: a = prov.get(prog, {}).get(n)
+            return canon.get(n) if a is None else a
+        txt = volatile_aliases(txt, addr_of)
         txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (defs, os.path.relpath(u.file, ROOT)) + txt
         hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:600], re.M)
         if hm and hm.group(1) != "tomba24": sys.exit("gen_port: unknown header set " + hm.group(1))
@@ -759,22 +828,500 @@ def sources(outdir, progs, ovls=(), areas=()):
               % (len(vary), len(area_units), len(areamap)))
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# version branches (`#if defined(VERSION_SCUS_94236)` ...): the port of one version keeps that version's branch only
+_VDEF = re.compile(r"(!?)\s*defined\s*\(?\s*(VERSION_\w+)\s*\)?")
+
+
+def _version_cond(expr, macro):
+    """True/False for a condition made only of [!]defined(VERSION_X) joined by || or && (no mixing), else None"""
+    e = re.sub(r"/\*.*?\*/|//.*$", "", expr).strip()
+    if not e or "VERSION_" not in e: return None
+    while e.startswith("(") and e.endswith(")") and e.count("(") == 1: e = e[1:-1].strip()
+    if "||" in e and "&&" in e: return None
+    parts = re.split(r"\|\||&&", e)
+    vals = []
+    for prt in parts:
+        prt = prt.strip()
+        while prt.startswith("(") and prt.endswith(")") and prt.count("(") == 1: prt = prt[1:-1].strip()
+        m = _VDEF.fullmatch(prt)
+        if not m: return None
+        v = m.group(2) == macro
+        vals.append(not v if m.group(1) else v)
+    return any(vals) if "||" in e else all(vals)
+
+
+def strip_versions(text, macro):
+    """text with the branches of `#if/#ifdef/#ifndef/#elif/#else` on VERSION_ macros that are not taken for `macro`
+    (None: PAL, no version macro) blanked, and the directives of those decided conditionals blanked too; lines are
+    kept (line numbers stay); conditionals on anything else are left as they are."""
+    out = []
+    stack = []      # per #if: [decided?, any branch taken, this branch active, parent active]
+    active = True
+    for line in text.split("\n"):
+        d = line.strip()
+        m = re.match(r"#\s*(if|ifdef|ifndef|elif|else|endif)\b(.*)$", d)
+        if m:
+            kw, rest = m.group(1), m.group(2)
+            if kw in ("if", "ifdef", "ifndef"):
+                if kw == "if": c = _version_cond(rest, macro)
+                else:
+                    nm = rest.strip().split()[0] if rest.strip() else ""
+                    c = (nm == macro if kw == "ifdef" else nm != macro) if nm.startswith("VERSION_") else None
+                if c is None:
+                    stack.append([False, False, True, active]); out.append(line if active else ""); continue
+                stack.append([True, c, c, active]); active = active and c; out.append(""); continue
+            if not stack: out.append(line); continue
+            top = stack[-1]
+            if kw == "elif":
+                if not top[0]: out.append(line if top[3] else ""); continue
+                c = _version_cond(rest, macro)
+                if c is None: sys.exit("gen_port: strip_versions: a version #if chain continued by another condition: %s" % d)
+                top[2] = c and not top[1]; top[1] = top[1] or c
+                active = top[3] and top[2]; out.append(""); continue
+            if kw == "else":
+                if not top[0]: out.append(line if top[3] else ""); continue
+                top[2] = not top[1]; top[1] = True
+                active = top[3] and top[2]; out.append(""); continue
+            if kw == "endif":
+                stack.pop(); out.append("" if top[0] or not top[3] else line)
+                active = top[3]; continue
+        out.append(line if active else "")
+    return "\n".join(out)
+
+
+_AUDITED = set()
+
+
+def fix_audit(src, old, path, macro=None):
+    """port/fixes.txt branch audit: warn when a fix's text is found only in branches the build does not compile
+    (a fix written against the PAL branch of a file whose version branch spells the code differently lands
+    nowhere).  True when the text is in compiled code."""
+    if "VERSION_" not in src: return True
+    live = strip_versions(src, macro)
+    if old in filter_src(live) or old in live: return True
+    if (path, old) not in _AUDITED:
+        _AUDITED.add((path, old))
+        print("gen_port: WARNING port/fixes.txt: %r of %s is only in an inactive #if VERSION_ branch (%s build): no effect"
+              % (old[:60], os.path.relpath(path, ROOT), macro or "PAL"))
+    return False
+
+
+def version_text(src):
+    """the `// D.<SERIAL> value` directives of tools/units.py version_source applied (FLAGS/CC/HEADERS/AS)"""
+    t = src
+    for d in ("FLAGS", "CC", "HEADERS", "AS"):
+        m = re.search(r"^//\s*%s\.%s\s+(.*)$" % (d, PV.SERIAL), t, re.M)
+        if not m: continue
+        t = re.sub(r"(?m)^//\s*%s\s.*$" % d, "", t)
+        val = m.group(1).strip()
+        t = re.sub(r"(?m)^//\s*%s\.%s\s.*$" % (d, PV.SERIAL), "" if val == "default" else "// %s %s" % (d, val), t)
+    return t
+
+
+def vdefined_name(path, stem, macro):
+    """tools/units.py defined_name over the version's code only (a file whose version branch defines another
+    name: src/updateA00FarBackdropWest.c builds the USA function as FUN_8012236c)"""
+    t = strip_versions(version_text(open(path, errors="replace").read()), macro)
+    if re.search(r"\b%s\s*\(" % re.escape(stem), t): return stem
+    m = re.search(r"\.globl\s+(\w+)", t)
+    if m: return m.group(1)
+    names = re.findall(r"^([A-Za-z_][\w \t*]*?\b(\w+)\s*\([^;]*\)\s*(?:\n\s*)?\{)", t, re.M)
+    names = [n for head, n in names if not head.startswith("static")] or [n for head, n in names]
+    return names[0] if names else stem
+
+
+def _nm(paths, nm="mipsel-linux-gnu-nm"):
+    out = ""
+    for i in range(0, len(paths), 400):
+        out += subprocess.run([nm, "-A"] + paths[i:i + 400], capture_output=True, text=True).stdout
+    return out
+
+
+def version_objects():
+    """{(version prog, addr): {"U": {name}, "D": {name: (type, value)}, "A": {name: value}}} of the linked objects
+    of the version's full link (build/<ver>/full/obj/<prog>__<ADDR>.link.o): the names the object leaves undefined
+    (`name__ADDR` when tools/build_full.py renamed one to the address it means in this object), the names it
+    defines (renamed `name__ADDR` when another unit defines the same name) and its absolute symbols (scratchpad)"""
+    d = os.path.join(PV.FULL, "obj")
+    files = sorted(f for f in os.listdir(d) if f.endswith(".link.o") and not f.startswith("data_"))
+    out = {}
+    for l in _nm([os.path.join(d, f) for f in files]).split("\n"):
+        m = re.match(r"(.*?\.link\.o):(?:([0-9a-f]{8})\s+(\w)|\s+(U))\s+(\S+)$", l)
+        if not m: continue
+        k = re.match(r"(\w+?)__([0-9A-F]{8})\.link\.o$", os.path.basename(m.group(1)))
+        if not k: continue
+        e = out.setdefault((k.group(1), int(k.group(2), 16)), {"U": set(), "D": {}, "A": {}, "L": set()})
+        n = m.group(5)
+        if m.group(4): e["U"].add(n); continue
+        v, t = int(m.group(2), 16), m.group(3)
+        if t in "aA": e["A"][n] = v
+        elif t.isupper(): e["D"][n] = (t, v)
+        elif RETAIL_NAME.match(n): e["L"].add(n)      # (a static table of the file: its address is the ELF's)
+    return out
+
+
+def prog_symbols(prog):
+    """{name: address} of a version program: the PROVIDEs of its full link, then the globals its ELF defines"""
+    out = dict(provides(prog))
+    elf = os.path.join(PV.FULL, PV.vprog(prog) + ".elf")
+    if os.path.exists(elf):
+        for l in subprocess.run(["mipsel-linux-gnu-nm", elf], capture_output=True, text=True).stdout.split("\n"):
+            w = l.split()
+            if len(w) == 3 and w[1].isupper() and w[1] in "TDBRGSAW": out.setdefault(w[2], int(w[0], 16))
+            elif len(w) == 3 and RETAIL_NAME.match(w[2]): out.setdefault(" local", {}).setdefault(w[2], set()).add(int(w[0], 16))
+    return out
+
+
+def sources_version(outdir, progs, ovls=(), areas=()):
+    """sources() for a version other than PAL (port/tools/portver.py): every version unit with C is one native
+    function.  A shared PAL file can build several units of a version (template reuse: one PAL file whose code has
+    the same shape calls other targets per unit); it is compiled once per unit, each copy with the names its linked
+    object resolved (tools/build_full.py renames `name__ADDR` per object): a name whose address is not the one the
+    port links that name to is renamed `name__ADDR` in that copy, and a second definition of a name is renamed
+    `name__ADDR` (the unit's address).  Inactive version branches are blanked before anything else (so the fixes
+    and the address resolver only see the code the version compiles)."""
+    FIXES.update(load_fixes())
+    from units import units, defined_name
+    U = units()
+    make_includes(outdir)
+    macro = PV.MACRO
+    objs = version_objects()
+    allp = list(progs) + [p for p in ovls if p not in progs] + [p for p in areas if p not in progs]
+    psyms = {p: prog_symbols(p) for p in allp}
+    canon = {}
+    canon_prog = {}                    # name -> the program whose full link gave it (function or data: symkind.txt)
+    for p in list(progs) + [p for p in ovls if p not in progs]:
+        for n, a in psyms[p].items():
+            if n != " local" and n not in canon: canon[n] = a; canon_prog[n] = p
+    vary, area_units, areamap = area_plan(U, areas, ovls) if areas else ({}, [], [])
+    # the units compiled, in order: base programs, SYSTEM overlays, areas
+    picked = []
+    for prog in progs:
+        for u in U[prog]:
+            if not u.file or not u.file.endswith(".c"): continue
+            stem = os.path.basename(u.file)[:-2]
+            if u.lib and stem not in LIB_KEEP and u.name not in LIB_KEEP: continue
+            if GAME_SKIP_RE.match(stem) or GAME_SKIP_RE.match(u.name): continue
+            name = vdefined_name(u.file, stem, macro)
+            # a template file built for a function the port's runtime / shims define (USA SsInitHot from StopCARD.c,
+            # CdSync from playerPushOutOfObjectBoxThunk.c): theirs
+            if prog == "MAIN0" and u.lib is False and u.name != name and u.name in native_defs() and u.addr >= PV.LIB_FROM: continue
+            picked.append((prog, u, stem, name, "base"))
+    for prog in ovls:
+        for u in U[prog]:
+            if u.file and u.file.endswith(".c"):
+                stem = os.path.basename(u.file)[:-2]
+                picked.append((prog, u, stem, vdefined_name(u.file, stem, macro), "ovl"))
+    for prog, u in area_units:
+        stem = os.path.basename(u.file)[:-2]
+        picked.append((prog, u, stem, vdefined_name(u.file, stem, macro), "area"))
+    # native names: one per unit
+    nuse0 = {}
+    for prog, u, stem, name, kind in picked: nuse0[u.file] = nuse0.get(u.file, 0) + 1
+    used, native, own = {}, {}, {}
+    native_addr = {}                       # native name of a base program -> its address
+    for prog, u, stem, name, kind in picked:
+        base = name
+        if kind != "base": base = prog + "_" + name
+        elif prog == "X000" and u.addr in vary: base = "X000_" + name
+        elif name == "main": base = "port_game_main"     # the version's main(): runtime/main.c calls it
+        elif u.name != name and not re.match(r"(?:func|FUN)_[0-9A-Fa-f]{8}", u.name) and nuse0[u.file] > 1 and u.name not in native_defs():
+            base = u.name                                 # a template file's copy: the version function's own name
+        nm = base if used.get(base, u.addr) == u.addr else "%s__%08X" % (base, u.addr)
+        used[nm] = u.addr; native[(prog, u.addr)] = nm
+        if kind != "base": own.setdefault(prog, {})[u.addr] = nm
+        else: native_addr[nm] = u.addr
+    nuse = {}
+    for prog, u, stem, name, kind in picked: nuse[u.file] = nuse.get(u.file, 0) + 1
+    # the function that starts at an address of MAIN0 / the shared X000 code: its native name (or, without C, the
+    # unit's name: a Psy-Q shim, a stub); a name the object resolved to such an address is defined to it directly
+    func_at = {}
+    for prog in ("MAIN0", "X000"):
+        for u in U.get(prog, []): func_at.setdefault(u.addr, u.name)
+    for (prog, a), nm in native.items():
+        if prog in ("MAIN0", "X000"): func_at[a] = nm
+    for a in vary: func_at.pop(a, None)                 # (per area: the dispatch thunk of the address)
+    # the scratchpad names (`.set` in every object, config/<ver>/spad_remap.txt applied): one table for the version
+    spad = {}
+    for ob in objs.values():
+        for n, v in ob["A"].items():
+            if 0x1F800000 <= v < 0x1F800400: spad.setdefault(n, v)
+    addr_named = re.compile(r"(?:D|DAT|func|FUN|jtbl|PTR|LAB|PTR_DAT)_([0-9A-Fa-f]{8})$")
+    def effective(n):
+        """the address the port links the plain name n to"""
+        a = native_addr.get(n)
+        if a is None: a = canon.get(n)
+        if a is None: a = spad.get(n)
+        if a is None and addr_named.match(n): a = int(addr_named.match(n).group(1), 16)   # (gen2: by its number)
+        return a
+    files, files24, files26, fmap, ovlmap = [], [], [], [], []
+    out_texts, area_texts, ovl_texts = {}, {}, {}
+    renamed = {}
+    x000_native = {}
+    stems_seen = set()
+    for prog, u, stem, name, kind in picked:
+        key = (prog.lower(), stem)
+        dst = os.path.join(outdir, "src", prog.lower(), (stem if key not in stems_seen else "%s__%08X" % (stem, u.addr)) + ".c")
+        stems_seen.add(key)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        dropped = []
+        raw = open(u.file, errors="replace").read()
+        src = strip_versions(version_text(raw), macro)
+        txt = filter_src(src, dropped, canon)
+        check_retail_rewrites(txt, u.file)
+        whole = filter_src(raw) if FIXES.get(os.path.relpath(u.file, ROOT)) else ""
+        for old, new in FIXES.get(os.path.relpath(u.file, ROOT), []):
+            if old not in txt:          # only in another version's branch (also after the fixes before it): audit
+                if old in whole:
+                    fix_audit(raw, old, u.file, macro); whole = whole.replace(old, new); continue
+                sys.exit("gen_port: port/fixes.txt: %r not found in %s" % (old, u.file))
+            txt = txt.replace(old, new); whole = whole.replace(old, new)
+        if name in dropped: print("gen_port: %s is MIPS asm only: needs a port shim" % name)
+        nat = native[(prog, u.addr)]
+        ob = objs.get((PV.vprog(prog), u.addr))
+        psy = psyms[prog]
+        if ob is None:
+            # no linked object (the full link kept the unit as asm: X001/X010 playerStepClingRotating): the names it
+            # calls are the program's own symbols (its playerClingJumpRelease was a stub, not X001_playerClingJumpRelease)
+            ob = {"U": set(), "D": {}, "A": {}, "L": set()}
+            if kind != "base":
+                body = re.sub(r"/\*.*?\*/|//[^\n]*", "", txt, flags=re.S)
+                ob["U"] = {n for n in set(re.findall(r"\b([A-Za-z_]\w*)\s*\(", body))
+                           if n != name and n in psy and psy[n] in own.get(prog, {})}
+        defs = {}
+        if nat != name: defs[name] = nat
+        if prog == "X000" and u.addr in vary: x000_native[u.addr] = nat
+        # the other globals the object defines (helpers of a multi-function file, data)
+        for n, (t, v) in ob["D"].items():
+            mm = re.match(r"(\w+?)__([0-9A-F]{8})$", n)
+            bn = mm.group(1) if mm else n
+            if bn == name or bn in defs: continue
+            if t == "T":
+                a = u.addr + v
+                if kind != "base": defs[bn] = "%s_%s__%08X" % (prog, bn, a)
+                elif nuse[u.file] > 1 or mm or (bn in native_addr and native_addr[bn] != a): defs[bn] = "%s__%08X" % (bn, a)
+                tgt = defs.get(bn, bn)
+                if kind == "base":
+                    fmap.append((a, tgt)); native_addr.setdefault(tgt, a)
+                elif kind == "ovl": ovlmap.append((prog, a, tgt))
+            elif nuse[u.file] > 1 and bn not in canon and not RETAIL_NAME.match(bn):
+                defs[bn] = "%s__%08X" % (bn, u.addr)        # file data of a copy: its own
+        # the names it refers to, at the addresses the matching link gave them
+        refs = {}
+        for n in ob["U"]:
+            mm = re.match(r"(\w+?)__([0-9A-F]{8})$", n)
+            if mm: refs[mm.group(1)] = int(mm.group(2), 16)
+            elif n in psy: refs[n] = psy[n]
+            elif n in canon: refs[n] = canon[n]
+        for n in ob["L"]:                          # its static tables: where the ELF placed that name (when unique)
+            ls = psy.get(" local", {}).get(n, ())
+            if len(ls) == 1: refs[n] = next(iter(ls))
+        for n, v in ob["A"].items():               # scratchpad names (`.set`): only the ones the file declares
+            if re.match(r"D_1F80[0-9A-Fa-f]{4}$", n) or re.search(r"extern[^;]*\b%s\b" % re.escape(n), src):
+                refs.setdefault(n, v)
+        for n, a in sorted(refs.items()):
+            if n in defs or n == name: continue
+            tgt = own.get(prog, {}).get(a)
+            if tgt:
+                if tgt != n: defs[n] = "%s /* @%08X */" % (tgt, a)    # (the annotation: PORT_ARG forwarding by address)
+                continue
+            eff = effective(n)
+            if eff == a: continue
+            if eff is None:
+                canon[n] = a; canon_prog[n] = prog      # a name only this object knows: its address
+                continue
+            if a in func_at and func_at[a] != n and (kind == "base" or not (OVL_BASE <= a < OVL_END)):
+                defs[n] = "%s /* @%08X */" % (func_at[a], a); continue         # a function of MAIN0 / shared X000: by its own name
+            defs[n] = "%s__%08X" % (n, a); renamed[defs[n]] = a; canon_prog[defs[n]] = prog
+        dtxt = "".join("#define %s %s\n" % (n, t) for n, t in sorted(defs.items()))
+        # the names this copy links (its renames, its object's references, then the version's tables): two names of
+        # one address (LIST_COUNTER / LIST_COUNTER_S) become volatile, or playerTryTalkToNpc loops past its list
+        def addr_of(n, defs=defs, refs=refs, psy=psy):
+            if n in defs:
+                m = re.search(r"__([0-9A-F]{8})$|@([0-9A-F]{8})", defs[n])
+                if m: return int(m.group(1) or m.group(2), 16)
+            if n in refs: return refs[n]
+            a = psy.get(n) if n != " local" else None
+            return effective(n) if a is None else a
+        txt = volatile_aliases(txt, addr_of)
+        txt = '#include "port_prelude.h"\n%s#line 1 "%s"\n' % (dtxt, os.path.relpath(u.file, ROOT)) + txt
+        hm = re.search(r"^//\s*HEADERS\s+(\S+)", src[:800], re.M)
+        hs = hm.group(1) if hm else None
+        if hs not in (None, "tomba24", "tomba26"): sys.exit("gen_port: unknown header set " + hs)
+        {None: files, "tomba24": files24, "tomba26": files26}[hs].append(dst)
+        if name not in dropped:
+            if kind == "ovl": ovlmap.append((prog, u.addr, nat))
+            elif kind == "base" and not (prog == "X000" and u.addr in vary): fmap.append((u.addr, nat))
+        if kind == "area": area_texts.setdefault(prog, {})[dst] = txt
+        elif kind == "ovl": ovl_texts.setdefault(prog, {})[dst] = txt
+        else: out_texts[dst] = txt
+    # area dispatch: the area units' native names (deduplicated) replace area_plan's
+    areamap = [(p, a, (own.get(p, {}).get(a) if n else None)) for p, a, n in areamap]
+    # short calls (PORT_ARG): base programs together, each SYSTEM overlay and each area as its own group
+    arity_addr = {}
+    def native_arity(texts, rev):
+        """{address: parameters} of the definitions of texts: a file defines the name it spells (overheadPlayerHandler)
+        and its header #defines it to the native name (I0NFO2_overheadPlayerHandler), whose address rev knows"""
+        out = {}
+        for f, t in texts.items():
+            hdr = t[:max(0, t.find("#line 1 "))]
+            ren = dict(re.findall(r"^#define (\w+) (\w+)", hdr, re.M))
+            for n, k in _global_defs({f: t}).items():
+                a = rev.get(ren.get(n, n))
+                if a is None: a = rev.get(n)
+                if a is not None and k > 0: out[a] = max(out.get(a, 0), k)
+        return out
+    for prog, t in area_texts.items():
+        for a, k in native_arity(t, {v: a for a, v in own.get(prog, {}).items()}).items():
+            arity_addr[a] = max(arity_addr.get(a, 0), k)
+    ovl_arity = {}
+    for prog, t in ovl_texts.items():
+        ovl_arity[prog] = native_arity(t, {v: a for a, v in own.get(prog, {}).items()})
+        for a, k in ovl_arity[prog].items(): arity_addr[a] = max(arity_addr.get(a, 0), k)
+    for n, k in _global_defs(out_texts).items():
+        a = native_addr.get(n, canon.get(n))
+        if a is not None and k > 0: arity_addr[a] = max(arity_addr.get(a, 0), k)
+    # a template copy defines its file's name under the unit's native one (`#define probeGrabPointInBoxA
+    # probeGrabPointInBoxB`): its arity belongs to that address too (playerGrabCat4Type01 passed nothing)
+    for a, k in native_arity(out_texts, {n: a for n, a in native_addr.items()}).items():
+        arity_addr[a] = max(arity_addr.get(a, 0), k)
+    def fallback_for(table, arity=arity_addr):
+        def fb(n):
+            a = table.get(n)
+            if a is None:
+                m = re.match(r"(?:func|FUN)_([0-9A-Fa-f]{8})$", n) or re.match(r"\w+?__([0-9A-F]{8})$", n)
+                a = int(m.group(1), 16) if m else None
+            return arity.get(a, 0)
+        return fb
+    allnames = dict(canon); allnames.update(native_addr)
+    nfwd, gdefs = forward_short_calls(out_texts, None, fallback_for(allnames))
+    for prog, t in ovl_texts.items():
+        ovl_arity[prog].update({a: k for a, k in arity_addr.items() if not (OVL_BASE <= a < OVL_END)})
+        names = dict(allnames); names.update({v: a for a, v in own.get(prog, {}).items()})
+        nfwd += forward_short_calls(t, gdefs, fallback_for(names, ovl_arity[prog]), prog + "_")[0]
+        out_texts.update(t)
+    for prog, t in area_texts.items():
+        names = dict(allnames); names.update({v: a for a, v in own.get(prog, {}).items()})
+        nfwd += forward_short_calls(t, gdefs, fallback_for(names))[0]
+        out_texts.update(t)
+    for dst, txt in out_texts.items():
+        if not os.path.exists(dst) or open(dst, errors="replace").read() != txt:
+            open(dst, "w").write(txt)
+    print("gen_port: %d short calls get the caller's incoming arguments (PORT_ARG)" % nfwd)
+    for n, v in spad.items(): canon.setdefault(n, v)    # (symaddr.txt: gen2's link aliases them into port_scratch)
+    # function or data, by what the program that gave the name has at its address (gen2's link otherwise guesses from
+    # the overlay function starts: TITLE_MENU_GLYPHS, O0PTSUB0 data at 0x800E95E4, is X000's updateEggShellPiece)
+    starts = {p: set(u.addr for u in U.get(p, [])) for p in allp}
+    # an area shares X00's prefix only: the X00 functions from AREA_OWN on are AREA00's own (a00TornadoStep at
+    # 0x80118CD8 made X017's WATERFALL_HINT_NPC_DEFS a function, linked to its dispatch thunk)
+    for p in areas: starts[p] |= set(a for a in starts.get("X000", set()) if a < PV.AREA_OWN)
+    # X00's link names the area functions its code calls by address (playerInitMode's FUN_801212a0 = X01's
+    # playerInitAreaHook 0x801205D8): a function, reached through its dispatch thunk, not X000 image data
+    area_starts = set(u.addr for p in areas for u in U.get(p, []) if u.addr >= PV.AREA_OWN)
+    with open(os.path.join(outdir, "symkind.txt"), "w") as f:
+        for n, a in sorted(list(canon.items()) + list(renamed.items())):
+            p = canon_prog.get(n)
+            if p is None or (p == "MAIN0" and OVL_BASE <= a < OVL_END): continue
+            fn = a in starts.get(p, ()) or (p != "MAIN0" and a in starts["MAIN0"]) or (p == "X000" and a in area_starts)
+            f.write("%s %s\n" % (n, "F" if fn else "D"))
+    write_tables(outdir, progs, ovls, areas, U, files, files24, files26, fmap, ovlmap, areamap, x000_native, vary,
+                 canon, renamed, area_units)
+
+
+def write_tables(outdir, progs, ovls, areas, U, files, files24, files26, fmap, ovlmap, areamap, x000_native, vary,
+                 canon, renamed, area_units):
+    """the generated tables of sources_version() (the same files sources() writes)"""
+    import sysovl
+    fm, fs = {}, set()
+    for a, n in fmap:
+        if a not in fm and n not in fs: fm[a] = n; fs.add(n)
+    fmap = sorted(fm.items())
+    om, seen = [], set()
+    for e in ovlmap:
+        if (e[0], e[1]) not in seen and e[2] not in seen: om.append(e); seen.add((e[0], e[1])); seen.add(e[2])
+    ovlmap = om
+    with open(os.path.join(outdir, "sources.cmake"), "w") as f:
+        f.write("set(PORT_GAME_SOURCES\n%s)\n" % "".join("  %s\n" % p for p in files))
+        f.write("set(PORT_GAME_SOURCES_T24\n%s)\n" % "".join("  %s\n" % p for p in files24))
+        f.write("set(PORT_GAME_SOURCES_T26\n%s)\n" % "".join("  %s\n" % p for p in files26))
+        f.write("set(PORT_VERSION_DEFS %s)\n" % PV.MACRO)
+    with open(os.path.join(outdir, "funcmap.c"), "w") as f:
+        f.write("/* generated by port/tools/gen_port.py */\n#include \"port_runtime.h\"\n")
+        for a, n in fmap: f.write("extern void %s(void);\n" % n)
+        f.write("const PortFunc port_funcmap[] = {\n")
+        for a, n in fmap: f.write("  {0x%08X, (void *)%s, \"%s\"},\n" % (a, n, n))
+        f.write("};\nconst int port_funcmap_count = %d;\n" % len(fmap))
+        ids = {}
+        for prog in ovls:
+            fn = os.path.join(ROOT, "game", sysovl.SYSOVL[prog][0])
+            ids[prog] = int.from_bytes(open(fn, "rb").read(4), "little") if os.path.exists(fn) else 0
+        for _, _, n in ovlmap: f.write("extern void %s(void);\n" % n)
+        f.write("const PortOvlFunc port_ovlmap[] = {\n")
+        for prog, a, n in sorted(ovlmap, key=lambda e: (ids[e[0]], e[1])):
+            f.write("  {0x%02X, 0x%08X, (void *)%s, \"%s\"},\n" % (ids[prog], a, n, n))
+        f.write("  {0, 0, 0, 0}\n};\nconst int port_ovlmap_count = %d;\n" % len(ovlmap))
+        f.write("const PortOvl port_ovls[] = {\n%s  {0, 0}\n};\n" % "".join(
+            "  {0x%02X, \"%s\"},\n" % (ids[p], p) for p in ovls))
+        alist = ["X000"] + list(areas) if areas else []
+        ents = sorted(set((alist.index(p), a, n or x000_native.get(a)) for p, a, n in areamap
+                          if (n or x000_native.get(a))))
+        for n in sorted(set(e[2] for e in ents)): f.write("extern void %s(void);\n" % n)
+        f.write("const PortAreaFunc port_areamap[] = {\n%s  {0, 0, 0}\n};\nconst int port_areamap_count = %d;\n" % (
+            "".join("  {%d, 0x%08X, (void *)%s},\n" % e for e in ents), len(ents)))
+        sigs = area_signatures(alist) if alist else {}
+        f.write("const PortArea port_areas[] = {\n%s  {0, 0, {{0, 0}}}\n};\nconst int port_areas_count = %d;\n" % (
+            "".join("  {%d, \"%s\", {%s}},\n" % (i, p, ", ".join("{0x%08X, 0x%08X}" % w for w in sigs[p]))
+                    for i, p in enumerate(alist)), len(alist)))
+        va = sorted(vary) + sorted(set(a for p, a, n in areamap))
+        f.write("const unsigned int port_vary_addrs[] = {\n%s  0};\nconst int port_vary_count = %d;\n" % (
+            "".join("  0x%08X,\n" % a for a in sorted(set(va))), len(set(va))))
+    with open(os.path.join(outdir, "vary.txt"), "w") as f:
+        for a in sorted(set(vary) | set(a for p, a, n in areamap)): f.write("%08X\n" % a)
+    with open(os.path.join(outdir, "symaddr.txt"), "w") as f:
+        for n, a in sorted(canon.items()): f.write("%s %08X\n" % (n, a))
+        for n, a in sorted(renamed.items()): f.write("%s %08X\n" % (n, a))
+        for prog in list(ovls) + list(areas):
+            for u in U[prog]: f.write("%s_%s %08X\n" % (prog, u.name, u.addr))
+    with open(os.path.join(outdir, "asm_aliases.txt"), "w") as f:
+        for n, e in sorted(ASM_ALIASES.items()): f.write("%s %s\n" % (n, e))
+    with open(os.path.join(outdir, "unitnames.txt"), "w") as f:
+        for prog in progs:
+            for u in U[prog]: f.write("%08X %s\n" % (u.addr, u.name))
+    with open(os.path.join(outdir, "libaddrs.txt"), "w") as f:
+        for prog in progs:
+            for u in U[prog]:
+                if u.lib: f.write("%08X\n" % u.addr)
+    with open(os.path.join(outdir, "ovl_funcnames.txt"), "w") as f:
+        for prog in list(ovls) + list(areas):
+            for u in U[prog]: f.write("%s\n" % u.name)
+    with open(os.path.join(outdir, "code_ranges.txt"), "w") as f:
+        for a, e in sorted((u.addr, u.addr + u.size) for prog in ("MAIN0", "X000") for u in U[prog]):
+            f.write("%08X %08X\n" % (a, e))
+    print("gen_port: %d sources (%s; version %s), %d mapped functions, %d overlay-set functions, %d per-file renames"
+          % (len(files) + len(files24) + len(files26), " ".join(list(progs) + list(ovls) + list(areas)), PV.VER,
+             len(fmap), len(ovlmap), len(renamed)))
+    if areas:
+        print("gen_port: areas: %d varying X000 functions, %d area functions compiled, %d area dispatch entries"
+              % (len(vary), len(area_units), len(areamap)))
+
+
 def volatile_aliases(txt, addr_of=None):
-    """One address under two data names in a file (D_1F80019E and its typed alias D_1F80019Es; since the globals were
-    named, LIST_COUNTER and LIST_COUNTER_S): gcc assumes distinct globals never alias, so a loop that decrements one
-    and tests the other keeps the test in a register forever (playerTryTalkToNpc).  Every extern declaration of such
-    names becomes volatile (both names, so the accesses keep their order).  addr_of: a name's address or None (the
-    names with no address in them)."""
+    """One address under two data names in a file (D_1F80019E and its typed alias D_1F80019Es): gcc assumes distinct
+    globals never alias, so a loop that decrements one and tests the other keeps the test in a register forever
+    (playerTryTalkToNpc).  Every extern declaration of such names becomes volatile (both names, so the accesses keep
+    their order).  Named globals are grouped by the address addr_of(name) gives them (tools/rename_data.py made
+    D_1F80019E / D_1F80019Es LIST_COUNTER / LIST_COUNTER_S, or renamed only one of a pair): without it the data
+    names made playerTryTalkToNpc loop past its list again (signal 11 on Square in 40 rooms of the sweep)."""
     groups = {}
     for full, addr in re.findall(r"\b((?:D|DAT)_([0-9A-Fa-f]{8})\w*)\b", txt):
         if "__" in full: continue
         groups.setdefault(addr.upper(), set()).add(full)
     if addr_of:
-        for decl in re.findall(r"^[ \t]*extern\b[^;{(]*;", txt, flags=re.M):
-            for n in set(re.findall(r"\b[A-Za-z_]\w*\b", decl)):
-                if "__" in n or re.match(r"(?:D|DAT)_[0-9A-Fa-f]{8}", n): continue
-                ad = addr_of(n)
-                if ad is not None: groups.setdefault("%08X" % ad, set()).add(n)
+        for n in set(re.findall(r"\b[A-Za-z_]\w*\b", " ".join(re.findall(r"^[ \t]*extern\b[^;{(]*;", txt, re.M)))):
+            if "__" in n or re.match(r"(?:D|DAT)_[0-9A-Fa-f]{8}", n): continue
+            a = addr_of(n)
+            if a is not None: groups.setdefault("%08X" % a, set()).add(n)
     names = set(n for g in groups.values() if len(g) > 1 for n in g)
     if not names: return txt
     def fix(m):
@@ -884,6 +1431,9 @@ def forward_short_calls(texts, base_defs=None, fallback=None, prefix=None):
         # per-file address renames (`#define fa fa__8013839C`): the arity of what that address is
         by_addr = dict((m.group(1), int(m.group(2), 16)) for m in
                        re.finditer(r"^#define (\w+) \1__([0-9A-F]{8})$", t[:max(0, t.find("#line 1 "))], re.M))
+        # (another version: `#define n native /* @ADDR */`, a name its linked object resolved to that function)
+        by_addr.update((m.group(1), int(m.group(2), 16)) for m in
+                       re.finditer(r"^#define (\w+) \w+ /\* @([0-9A-F]{8}) \*/$", t[:max(0, t.find("#line 1 "))], re.M))
         for m in re.finditer(r"(?<![\w.>])(\w+)\s*\(", t):
             n = m.group(1)
             if fallback and n not in ldefs[f] and n not in macros:

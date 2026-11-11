@@ -70,7 +70,7 @@ void port_pacing_report(void) {
     }
 }
 int port_realtime = 0;               /* 0 = run as fast as possible (headless), 1 = paced at port_hz */
-int port_hz = 50; extern int port_hfr_fps;                     /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60) */
+int port_hz = PORT_DEFAULT_HZ; extern int port_hfr_fps;        /* vblanks per second when paced: 50 (PAL, default) or 60 (--hz 60; the NTSC versions' default) */
 /* The 60 Hz mode (docs/PORT.md "60 Hz mode"): the PAL game logic is the NTSC logic frame for frame, so --hz 60 plays at the
  * US/JP speed; the one PAL change for 50 Hz is the play-time clock (GAME.totalTimePlayed counts gameplay frames and the
  * PAL builds divide it by 50 * 60 / 50 * 3600: memCardDrawPlayTime, D0SPSUB2 0x800E999C, the ending's x013
@@ -80,7 +80,7 @@ int port_hz = 50; extern int port_hfr_fps;                     /* vblanks per se
 int port_play_time_tick(void)
 {
     static int n;
-    if (port_hz != 60) return 1;
+    if (port_hz != 60 || !PORT_VERSION_PAL) return 1;      /* (an NTSC version counts 1/60 s natively) */
     if (++n < 6) return 1;
     n = 0;
     return 0;
@@ -89,7 +89,8 @@ int port_play_time_tick(void)
 static void call_psx(void *fn) { ((void (*)(void))fn)(); }
 
 /* --poke FRAME:ADDR:VALUE[:SIZE]: write RAM at the start of vblank FRAME (test setups, e.g. the debug area select
-   flag 0x1F8001B4); ADDR and VALUE in hex, SIZE 1, 2 or 4 bytes (default 1).
+   flag 0x1F8001B4); ADDR and VALUE in hex, SIZE 1, 2 or 4 bytes (default 1).  ADDR may also be NAME[+OFF]
+   (GAME+C, SCRIPT_FLAGS, IS_DEBUG_MODE_ENABLED: port_addr_of_name), the field's address in this build's release.
    --poke-every INTERVAL:ADDR:VALUE[:SIZE]: the same every INTERVAL vblanks (mods: infinite lives / vitality);
    stored as a negative frame.  A FRAME of gN counts from the first vblank of gameplay (the first area overlay load,
    after the new game's initGameConfig): the launcher's start-of-game mods, whenever the player starts. */
@@ -104,15 +105,41 @@ static u32 hexval(const char **p) {
         v = v * 16 + (*h <= '9' ? *h - '0' : (*h | 32) - 'a' + 10);
     *p = h; return v;
 }
+/* the retail data names the --poke forms NAME[+OFF] accept: their address in the version this build runs
+   (gen/version/port_version.h, port/tools/portver.py), so a launcher's mods write the same field in every release */
+unsigned int port_addr_of_name(const char *n, int len) {
+    static const struct { const char *name; u32 addr; } names[] = {
+        {"GAME", PORT_A_GAME}, {"GVARS", PORT_A_GVARS}, {"PLAYER", PORT_A_PLAYER}, {"SCRIPT_FLAGS", PORT_A_SCRIPT_FLAGS},
+        {"IS_DEBUG_MODE_ENABLED", PORT_A_IS_DEBUG_MODE_ENABLED}};
+    for (unsigned i = 0; i < sizeof names / sizeof names[0]; i++)
+        if ((int)strlen(names[i].name) == len && !memcmp(names[i].name, n, len)) return names[i].addr;
+    return 0;
+}
+/* ADDR of a --poke: hex (8009C960), or NAME[+HEXOFF] (GAME+C) for a name of port_addr_of_name; *ok = 0 if unknown */
+static u32 poke_addr(const char **p, int *ok) {
+    const char *s = *p, *e = s; int named = 0;
+    while ((*e >= '0' && *e <= '9') || ((*e | 32) >= 'a' && (*e | 32) <= 'z') || *e == '_') {
+        if (((*e | 32) >= 'g' && (*e | 32) <= 'z' && !(e == s + 1 && *s == '0' && (*e | 32) == 'x')) || *e == '_') named = 1;
+        e++;
+    }
+    *ok = 1;
+    if (!named) return hexval(p);
+    u32 a = port_addr_of_name(s, (int)(e - s));
+    if (!a) { port_printf("[port] --poke: unknown name %.*s (ignored)\n", (int)(e - s), s); *ok = 0; }
+    if (*e == '+') { e++; a += hexval(&e); }
+    *p = e;
+    return a;
+}
 void port_poke_add_every(const char *s, int every) {
     if (n_pokes == 32) return;
-    int f = 0;
+    int f = 0, ok;
     pokes[n_pokes].ingame = !every && *s == 'g';
     if (pokes[n_pokes].ingame) s++;
     while (*s >= '0' && *s <= '9') f = f * 10 + *s++ - '0';
     if (*s++ != ':') return;
     pokes[n_pokes].frame = every ? -(f > 0 ? f : 1) : f;
-    pokes[n_pokes].addr = hexval(&s);
+    pokes[n_pokes].addr = poke_addr(&s, &ok);
+    if (!ok) return;
     if (*s++ != ':') return;
     pokes[n_pokes].value = hexval(&s);
     pokes[n_pokes].size = *s == ':' ? s[1] - '0' : 1;
@@ -902,11 +929,14 @@ int port_cd_open_data(const char *dir) {
     if (!fgets(line, sizeof line, f) || strncmp(line, "tombi-data ", 11)) {
         port_printf("[port] data: %s is not a tombi-data manifest\n", port_data_fullpath("manifest.txt")); fclose(f); return -1;
     }
-    int cap = 0; char sha[48] = "";
+    int cap = 0; char sha[48] = "", boot_sha[48] = "", serial[32] = "", boot[64] = "";
     cd_nranges = 0;
     while (fgets(line, sizeof line, f)) {
         if (!strncmp(line, "sectors ", 8)) cd_sector_count = atoi(line + 8);
         else if (!strncmp(line, "main0_sha1 ", 11)) { sscanf(line + 11, "%47s", sha); }
+        else if (!strncmp(line, "boot_sha1 ", 10)) { sscanf(line + 10, "%47s", boot_sha); }
+        else if (!strncmp(line, "serial ", 7)) { sscanf(line + 7, "%31s", serial); }
+        else if (!strncmp(line, "boot ", 5)) { sscanf(line + 5, "%63s", boot); }
         else if (!strncmp(line, "file ", 5)) {
             int lba, n, stored; unsigned bytes; char path[1024];
             if (sscanf(line + 5, "%d %d %d %u %1023[^\r\n]", &lba, &n, &stored, &bytes, path) != 5) continue;
@@ -926,10 +956,26 @@ int port_cd_open_data(const char *dir) {
     cd_data = 1; cd_raw = 1; cd_image_path = cd_data_dir;
     if (!cd_sector_count) cd_sector_count = cd_ranges[cd_nranges - 1].lba + cd_ranges[cd_nranges - 1].sectors;
     cd_image_size = (long long)cd_sector_count * 2352;
-    port_printf("[port] data: %s (%d files, from manifest; %d sectors, MAIN0 sha1 %.8s%s)\n", cd_data_dir, cd_nranges, cd_sector_count, sha,
-                !strcmp(sha, "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc") ? "" : " NOT the PAL release SCES-01331");
-    /* self-check: EXE/MAIN0.EXE must be there (the port's own image was built from it) */
-    { FILE *m = fopen(port_data_fullpath("EXE/MAIN0.EXE"), "rb"); if (!m) port_printf("[port] warning: %s has no EXE/MAIN0.EXE\n", cd_data_dir); else fclose(m); }
+    /* the game version of the folder: the boot executable's sha1 (tools/extract_data.py; an older manifest has
+       MAIN0's only).  This binary is one version's (its data image and every address come from that version's
+       executable): a folder of another known version is refused, an unknown one is only warned about, as before */
+    if (!boot_sha[0]) snprintf(boot_sha, sizeof boot_sha, "%s", sha);
+    {   static const struct { const char *sha1, *serial, *name; } known[] = {
+            {"bec8dc5f4116f5e497f2337eef8c523ff6dee8fc", "SCES-01331", "Tombi! (PAL)"},
+            {"81cbc79f0230aeb4252e058039f47ac95a777f5a", "SCUS-94236", "Tomba! (USA)"},
+            {"07d577698ad31ec1a69b9d7b80a7c3f90b650888", "SLPS-01144", "Ore! Tomba (Japan)"}};
+        for (int i = 0; i < (int)(sizeof known / sizeof known[0]); i++)
+            if (!strcmp(boot_sha, known[i].sha1) && strcmp(known[i].sha1, PORT_BOOT_SHA1))
+                port_fatal("%s holds the disc %s %s, but this build of the port runs %s only (its executable %s): use the "
+                           "port's %s build, or extract a %s disc (tools/extract_data.py)", cd_data_dir, known[i].serial,
+                           known[i].name, PORT_VERSION_SERIAL, PORT_BOOT_FILE, known[i].serial, PORT_VERSION_SERIAL);
+    }
+    port_printf("[port] data: %s (%d files, from manifest; %d sectors, %s sha1 %.8s%s%s)\n", cd_data_dir, cd_nranges, cd_sector_count,
+                PORT_VERSION_PAL ? "MAIN0" : boot[0] ? boot : "boot", boot_sha, serial[0] ? ", " : "", serial);
+    if (strcmp(boot_sha, PORT_BOOT_SHA1))
+        port_printf("[port] warning: NOT the release this build runs (%s, %s sha1 %.8s)\n", PORT_VERSION_SERIAL, PORT_BOOT_FILE, PORT_BOOT_SHA1);
+    /* self-check: the game executable must be there (the port's own image was built from it) */
+    { FILE *m = fopen(port_data_fullpath(PORT_BOOT_FILE), "rb"); if (!m) port_printf("[port] warning: %s has no %s\n", cd_data_dir, PORT_BOOT_FILE); else fclose(m); }
     return 0;
 }
 static int cd_data_read_sector(int lba, u8 *d, int bytes) {
@@ -1173,7 +1219,7 @@ int CdRead(int sectors, u32 *buf, int mode) {
     {   /* a load list (SYS/LD0SYS.BIN, SYS/LD0ARnn.BIN: FILE_LINKS ids 0..19, read into MAIN0's data) and an
            overlay (an area X0nn or a SYSTEM file into the overlay region) carry retail pointers: they become
            native.  Everything else (assets, compressed files in the load buffers) is left as it is. */
-        u8 *lo = (u8 *)port_ram, *hi = lo + (0x80140000u - 0x80000000u);
+        u8 *lo = (u8 *)port_ram, *hi = lo + (PORT_OVL_END - 0x80000000u);
         u8 *olo = (u8 *)port_x000_image;
         if (((u8 *)buf >= lo && (u8 *)buf < hi) && (cd_last_id >= 0 && cd_last_id < 20 || (u8 *)buf >= olo)) {
             int n = sectors * bytes; if ((u8 *)buf + n > hi) n = hi - (u8 *)buf;

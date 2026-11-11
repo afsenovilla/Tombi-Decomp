@@ -5,9 +5,9 @@
 #include "spad.h"
 #include "TOBJ.H"
 
-extern void *D_8012BC00_scus94236[], *D_8012BC10_scus94236[], *D_8012BBFC_scus94236[];
-extern char D_800716F4_scus94236[], D_800716E8_scus94236[];
-extern short D_80077150_scus94236[];
+extern void *D_8012E230[], *D_8012E240[], *D_8012E22C[];
+extern char D_8007722C[], D_80077220[];
+extern short D_8007DB88[];
 extern void AnimLoadDuration(TObj *);
 extern int AnimAdvance(TObj *);
 extern void applyAnimVelocityX(TObj *, unsigned short);
@@ -41,12 +41,12 @@ void func_8012477C_scus94236(TObj *o)
 
     switch (o->state) {
     case 0:
-        o->movetab = D_800716F4_scus94236;
+        o->movetab = D_8007722C;
         o->velV = 0x180;
         o->velY = -0x18;
         o->wac = 0;
         o->state++;
-        o->anim = D_8012BC00_scus94236[0];
+        o->anim = D_8012E230[0];
         AnimLoadDuration(o);
         o->d30 = PAR(o)->h->p.whole;
         o->d34 = PAR(o)->y.p.whole;
@@ -73,9 +73,9 @@ void func_8012477C_scus94236(TObj *o)
         } else {
             o->wac = 4;
             o->state++;
-            o->anim = D_8012BC10_scus94236[0];
+            o->anim = D_8012E240[0];
             AnimLoadDuration(o);
-            o->movetab = D_800716E8_scus94236;
+            o->movetab = D_80077220;
         }
         break;
     case 3:
@@ -88,7 +88,7 @@ void func_8012477C_scus94236(TObj *o)
     case 4:
         o->state++;
         o->wac = 0;
-        o->anim = D_8012BBFC_scus94236[0];
+        o->anim = D_8012E22C[0];
         AnimLoadDuration(o);
         o->velV = 0x100;
         o->d88 = 0;
@@ -97,7 +97,7 @@ void func_8012477C_scus94236(TObj *o)
         break;
     case 5:
         AnimAdvance(o);
-        o->y.raw += (D_80077150_scus94236[o->d88] * o->velV) >> 4;
+        o->y.raw += (D_8007DB88[o->d88] * o->velV) >> 4;
         TileCollideAt(o, o->h->p.whole, o->y.p.whole + 0x30);
         o->d88 = (o->d88 + 2) & 0xff;
         break;

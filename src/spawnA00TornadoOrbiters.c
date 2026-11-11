@@ -15,9 +15,14 @@ typedef struct P {
     unsigned short ba, bc, be, c0, c2, c4, c6, c8, ca, cc;
 } P;
 extern P *FUN_80018448(void);
+#if defined(VERSION_SCUS_94236)  /* USA: the PAL pointers are other addresses; the retail table at its USA address */
+extern int D_8013A504[];
+#define DAT_8013b1bc D_8013A504
+#else
 static int DAT_8013b1bc[4] = {
     -2146191672, -2146191664, -2146191656, -2146191648,
 };
+#endif
 
 void spawnA00TornadoOrbiters(P *s, unsigned char t)
 {

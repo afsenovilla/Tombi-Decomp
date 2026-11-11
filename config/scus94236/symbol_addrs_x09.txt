@@ -143,3 +143,10 @@ aspiringActorGuardTalk = 0x80129240; // type:func size:0x7E8  PAL x009 0x80129EF
 DecDCTout = 0x80129A28; // type:func size:0x20  PAL main0 0x8005D778
 func_80129A48_scus94236 = 0x80129A48; // type:func size:0xC  PAL x000 0x80136A8C
 updatePigGateScene = 0x80129A54; // type:func size:0xA8  PAL x002 0x8011C628
+// BEGIN jp_globals (tools/jp_globals.py)
+PLAYER_HURT_ANIM = 0x80010DB0; // PAL 0x80010C50
+MOVE_TABLE_0 = 0x800771FC; // size:0x18 PAL 0x80077CDC
+GCD = 0x8009C068; // size:0x400 PAL 0x8009CD00
+PLAYER_H = 0x800A53D8; // size:0x4 PAL 0x800A6078
+PLAYER_D = 0x800A53DC; // size:0x4 PAL 0x800A607C
+// END jp_globals

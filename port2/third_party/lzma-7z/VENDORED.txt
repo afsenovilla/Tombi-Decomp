@@ -1,0 +1,8 @@
+LZMA SDK (C sources), vendored for the Android launcher's .7z support (port2/android/un7z.c).
+
+  upstream: https://www.7-zip.org/sdk.html (the C/ folder of 7-Zip 26.02, https://github.com/ip7z/7zip tag 26.02)
+  license:  public domain (Igor Pavlov; see the header of each file)
+  files:    the 7z container reader and its decoders (LZMA, LZMA2, BCJ, BCJ2, ARM/PPC/SPARC/IA64 branch filters, Delta),
+            unchanged except CRLF -> LF; lzma7z.c (ours) builds them as one translation unit.
+  not here: PPMd, AES (an encrypted or PPMd archive gets a clear error), the encoders, 7zFile / 7zAlloc (un7z.c has
+            its own stdio stream and allocator).
