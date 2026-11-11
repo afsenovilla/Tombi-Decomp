@@ -245,6 +245,40 @@ static const struct { char ch; u8 rows[5]; } font3[] = {
     { 'L', { 4, 4, 4, 4, 7 } }, { 'R', { 6, 5, 6, 5, 5 } }, { 'B', { 6, 5, 6, 5, 6 } }, { 'T', { 7, 2, 2, 2, 2 } },
     { 'Z', { 7, 1, 2, 4, 7 } }, { '1', { 2, 6, 2, 2, 7 } }, { '2', { 6, 1, 2, 4, 7 } },
 };
+/* --prompt-big (the 3DS's default: its screen shows the game's 320 columns one to one, and a 6 x 8 letter on a
+   disc could not be told from another): the letter alone, bold, 8 x 10, coloured and outlined (big_letter) */
+int port_prompt_big;
+static const struct { char ch; u8 rows[10]; } font8[] = {
+    { 'A', { 0x3C, 0x7E, 0xE7, 0xC3, 0xC3, 0xFF, 0xFF, 0xC3, 0xC3, 0xC3 } },
+    { 'B', { 0xFE, 0xFF, 0xC3, 0xC3, 0xFE, 0xFF, 0xC3, 0xC3, 0xFF, 0xFE } },
+    { 'X', { 0xC3, 0xC3, 0x66, 0x3C, 0x18, 0x18, 0x3C, 0x66, 0xC3, 0xC3 } },
+    { 'Y', { 0xC3, 0xC3, 0x66, 0x3C, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18 } },
+    { 'L', { 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xFF, 0xFF } },
+    { 'R', { 0xFE, 0xFF, 0xC3, 0xC3, 0xFF, 0xFE, 0xCC, 0xC6, 0xC3, 0xC3 } },
+};
+/* the letter alone, 8 x 10, in its button's colour with a black outline, centred on (cx2 / 2, cy2 / 2), into an index
+   image of w x h (stride given): index 15 the letter, 7 the outline (the rows of custom_row); 1 + the port CLUT row */
+static int big_letter(u8 *p, int stride, int w, int h, int cx2, int cy2, int src) {
+    static const u32 colour[4] = { 0xFFD800, 0xF03040, 0x40C850, 0x4088FF };   /* B yellow, A red, Y green, X blue: the SNES's, the New 3DS's */
+    static int rows_set;
+    if (!rows_set) { rows_set = 1; for (int i = 0; i < 4; i++) custom_row(i, 0x000000, colour[i]); }
+    const char ch = "BAYX"[src]; int x0 = cx2 / 2 - 4, y0 = cy2 / 2 - 5;
+    if (x0 < 1) x0 = 1; if (y0 < 1) y0 = 1; if (y0 + 11 > h) y0 = h - 11; if (y0 < 0) y0 = 0;
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) p[y * stride + x] = 0;
+    for (unsigned i = 0; i < sizeof font8 / sizeof font8[0]; i++) if (font8[i].ch == ch)
+        for (int y = 0; y < 10; y++) for (int x = 0; x < 8; x++)
+            if ((font8[i].rows[y] >> (7 - x) & 1) && x0 + x < w && y0 + y < h) p[(y0 + y) * stride + x0 + x] = 15;
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
+        if (p[y * stride + x]) continue;
+        int near = 0;
+        for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) {
+            int xx = x + dx, yy = y + dy;
+            if (xx >= 0 && xx < w && yy >= 0 && yy < h && p[yy * stride + xx] == 15) near = 1;
+        }
+        if (near) p[y * stride + x] = 7;
+    }
+    return 1 + ROW_CUSTOM + src;
+}
 static void letter6(char ch, int x0, int y0, int c) {
     for (unsigned i = 0; i < sizeof font6 / sizeof font6[0]; i++) if (font6[i].ch == ch)
         for (int y = 0; y < 8; y++) for (int x = 0; x < 6; x++) if (font6[i].rows[y] >> (5 - x) & 1) put(x0 + x, y0 + y, c);
@@ -308,6 +342,7 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
         letter_fx(&img[0][0], GW, GW, GH, C_DISC, 7, soft_cream);
         return 1 + ROW_NINTENDO;
     }
+    if (port_prompt_big && style != PROMPT_PS) return big_letter(&img[0][0], GW, GW, GH, 12, 16, src);   /* (the disc's centre: rows 2..13) */
     switch (style) {
     case PROMPT_PS: ps_symbol(src); break;   /* SRC_SOUTH..NORTH are in PS_CROSS..TRIANGLE order */
     case PROMPT_XBOX: {
@@ -414,7 +449,7 @@ static u8 mi_pclut[NMI];       /* ... drawn with port CLUT row mi_pclut - 1 (0: 
 static int mi_gen[NMI];
 int port_prompt_icons_on;      /* any mi_on: gpu.c's fast path */
 static void (*mi_write)(int, int, int, int, const unsigned short *);
-static int prompt_gen(void) { return port_prompt_style * 4096 + port_prompt_src[0] * 512 + port_prompt_src[1] * 64 + port_prompt_src[2] * 8 + port_prompt_src[3]; }
+static int prompt_gen(void) { return port_prompt_big * 65536 + port_prompt_style * 4096 + port_prompt_src[0] * 512 + port_prompt_src[1] * 64 + port_prompt_src[2] * 8 + port_prompt_src[3]; }
 
 #define MW 16
 static u8 mimg[16][MW];
@@ -454,6 +489,7 @@ static int mi_draw(int i, int w, int h) {
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };
     static const char *xb_sh[] = { "LB", "RB", "LT", "RT" }, *nt_sh[] = { "L", "R", "ZL", "ZR" }, *ps_sh[] = { "L1", "R1", "L2", "R2" };
     if (src == SRC_NONE) return 1;   /* the empty disc (row 0) */
+    if (port_prompt_big && src < 4 && st != PROMPT_PS) return big_letter(&mimg[0][0], MW, w, h, cx2, cy2, src);
     if (src >= SRC_L1) t = st == PROMPT_XBOX ? xb_sh[src - SRC_L1] : st == PROMPT_NINTENDO || THORISH(st) || st == PROMPT_CUSTOM ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
     else if (st == PROMPT_XBOX) { one[0] = "ABXY"[src]; t = one; col = xb_col[src]; }
     else if (st == PROMPT_CUSTOM && custom_sym != SYM_PS) { one[0] = (custom_sym == SYM_XBOX ? "ABXY" : "BAYX")[src]; t = one; col = P_WHITE; }

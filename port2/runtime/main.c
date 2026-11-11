@@ -978,6 +978,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--panel-input") && v) { extern void port_panel_input_script(const char *); port_panel_input_script(argv[++i]); }
         else if (!strcmp(a, "--panel-size") && v) { extern void port_panel_size(int, int); int w = 0, h = 0; sscanf(argv[++i], "%dx%d", &w, &h); port_panel_size(w, h); }
         else if (!strcmp(a, "--title-debug")) port_title_debug = 1;   /* title carousel DEBUG entry: the area select */
+        else if (!strcmp(a, "--prompt-big")) { extern int port_prompt_big; port_prompt_big = 1; }   /* bold 8 x 10 letters on the button prompts (shims/prompts.c) */
         else if (!strcmp(a, "--launcher-exit")) port_launcher_exit = 1;   /* QUIT entries (title, pause menu): back to the launcher */
         else if (!strcmp(a, "--civ-route")) {
             /* opt-in cut route (port only): the Civilization Town hub (AREA18 s1) exits 0/1/2 lead into the cut
