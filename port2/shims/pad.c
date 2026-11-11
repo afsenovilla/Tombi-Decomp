@@ -112,6 +112,14 @@ void port_pad_vblank(void) {
     }
 }
 
+/* The JP game (SLPS-01144) drives the pads with the older libetc (PadInit / PadRead over the BIOS InitPAD buffers), not
+   libpad: its vblank handler reads PadRead(1) (port/fixes.txt, @version jp).  PadRead's word is pad 1 in the low half,
+   pad 2 in the high half, each the two BIOS bytes big-endian and inverted (pressed = 1): select 0x0100, start 0x0800,
+   up/right/down/left 0x1000..0x8000, L2 R2 L1 R1 0x01..0x08, triangle circle cross square 0x10..0x80. */
+int port_pad_read_libetc(void) {
+    u16 b = port_pad_buttons[0];
+    return ((b & 0xFF) << 8) | (b >> 8);
+}
 void PadInitDirect(u8 *a, u8 *b) {
     if (port_verbose) port_printf("[port] PadInitDirect(%p, %p) frame %d\n", a, b, port_frame);
     buf[0] = a; buf[1] = b; if (a) a[0] = 0xFF; if (b) b[0] = 0xFF;

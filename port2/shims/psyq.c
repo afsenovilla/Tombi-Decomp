@@ -1166,6 +1166,7 @@ int CdMode(void) { return cd_mode; }
    beyond the image means a garbage record (on Linux the game never asks past lba 178339), so say where the
    parameter lives. */
 extern u8 FILE_LINKS[];
+static void cd_readn(void);
 static int cd_bad_locs, cd_last_id = -1;       /* the FILE_LINKS id of the last Setloc (-1: not from the table) */
 static void cd_check_loc(const u8 *param, int lba) {
     unsigned off = (unsigned)(param - FILE_LINKS);
@@ -1188,6 +1189,7 @@ int CdControl(u8 com, u8 *param, u8 *result) {
     if (com == 0x0C /* Demute */) port_sound_cd_mute(0);
     if (com == 9 /* Pause */ || com == 8 /* Stop */) { extern void port_st_stop(void); port_st_stop(); }
     if (result) result[0] = 0x02;
+    if ((com == 6 /* ReadN */ || com == 0x1B /* ReadS */) && cd_ready_cb) cd_readn();
     return 1;
 }
 int CdControlF(u8 com, u8 *param) { return CdControl(com, param, 0); }
@@ -1198,6 +1200,21 @@ void *CdSyncCallback(void *f) { void *o = cd_sync_cb; cd_sync_cb = f; return o; 
 void *CdReadyCallback(void *f) { void *o = cd_ready_cb; cd_ready_cb = f; return o; }
 void *CdReadCallback(void *f) { void *o = cd_read_cb; cd_read_cb = f; return o; }
 static int cd_reads, cd_sectors;
+/* A load list (SYS/LD0SYS.BIN, SYS/LD0ARnn.BIN: FILE_LINKS ids 0..19, read into MAIN0's data) and an overlay (an
+   area X0nn or a SYSTEM file into the overlay region) carry retail pointers: they become native.  Everything else
+   (assets, compressed files in the load buffers) is left as it is. */
+static void cd_after_read(u8 *buf, int n) {
+    u8 *lo = (u8 *)port_ram, *hi = lo + (PORT_OVL_END - 0x80000000u);
+    u8 *olo = (u8 *)port_x000_image;
+    if ((buf >= lo && buf < hi) && (cd_last_id >= 0 && cd_last_id < 20 || buf >= olo)) {
+        if (buf + n > hi) n = hi - buf;
+        if (port_lang && buf >= olo) {          /* the language's overlay over its MAIN0 twin, which may be longer than the read */
+            int c = port_lang_overlay_loaded(buf, n, cd_last_id);
+            if (c > n) n = c;
+        }
+        port_relocate_overlay(buf, n);
+    }
+}
 int CdRead(int sectors, u32 *buf, int mode) {
     int bytes = (mode & 0x20) ? 2340 : 2048;
     port_trace("CdRead", sectors);
@@ -1205,21 +1222,38 @@ int CdRead(int sectors, u32 *buf, int mode) {
     if ((u8 *)buf == (u8 *)0x80000000u || !buf) buf = (u32 *)port_x000_image;   /* G?OVER's record: addr 0 = the overlay buffer */
     if (port_cd_read_sectors(cd_pos, sectors, buf, bytes)) { port_printf("[port] CdRead failed at lba %d (frame %d)\n", cd_pos, port_frame); return 0; }
     cd_pos += sectors; cd_reads++; cd_sectors += sectors;
-    {   /* a load list (SYS/LD0SYS.BIN, SYS/LD0ARnn.BIN: FILE_LINKS ids 0..19, read into MAIN0's data) and an
-           overlay (an area X0nn or a SYSTEM file into the overlay region) carry retail pointers: they become
-           native.  Everything else (assets, compressed files in the load buffers) is left as it is. */
-        u8 *lo = (u8 *)port_ram, *hi = lo + (PORT_OVL_END - 0x80000000u);
-        u8 *olo = (u8 *)port_x000_image;
-        if (((u8 *)buf >= lo && (u8 *)buf < hi) && (cd_last_id >= 0 && cd_last_id < 20 || (u8 *)buf >= olo)) {
-            int n = sectors * bytes; if ((u8 *)buf + n > hi) n = hi - (u8 *)buf;
-            if (port_lang && (u8 *)buf >= olo) {          /* the language's overlay over its MAIN0 twin, which may be longer than the read */
-                int c = port_lang_overlay_loaded(buf, n, cd_last_id);
-                if (c > n) n = c;
-            }
-            port_relocate_overlay(buf, n);
-        }
-    }
+    cd_after_read((u8 *)buf, sectors * bytes);
     return 1;
+}
+/* The older libcd's reader (the JP game's cdLoadTask, src/cdLoadTask.c JP branch): CdControlF(CdlReadN) after
+   CdReadyCallback(cb); the library calls cb(CdlDataReady) once per sector and cb copies it out with CdGetSector; cb
+   ends the read with CdReadyCallback(0) + CdControlF(CdlPause).  The port delivers the whole file at once, inside the
+   ReadN command. */
+static u8 cd_sector_buf[2340];
+static u8 *cd_gs_first; static int cd_gs_bytes;
+int CdGetSector(void *madr, int size) {
+    if (size < 0 || size > (int)sizeof cd_sector_buf / 4) size = sizeof cd_sector_buf / 4;
+    memcpy(madr, cd_sector_buf, (size_t)size * 4);
+    if (!cd_gs_first) cd_gs_first = madr;
+    cd_gs_bytes += size * 4;
+    return 1;
+}
+static void cd_readn(void) {
+    int n = 0, bytes = (cd_mode & 0x20) ? 2340 : 2048;
+    void (*cb)(unsigned char);
+    cd_gs_first = 0; cd_gs_bytes = 0;
+    if (port_verbose || port_trace_cd) port_printf("[port] CdlReadN lba %d (frame %d)\n", cd_pos, port_frame);
+    while ((cb = (void (*)(unsigned char))cd_ready_cb) != 0 && n < 0x10000) {
+        if (port_cd_read_sectors(cd_pos, 1, cd_sector_buf, bytes)) {
+            port_printf("[port] CdlReadN failed at lba %d (frame %d)\n", cd_pos, port_frame);
+            cb(5 /* CdlDiskError */);
+            break;
+        }
+        cd_pos++; n++;
+        cb(1 /* CdlDataReady */);
+    }
+    cd_reads++; cd_sectors += n;
+    if (cd_gs_first) cd_after_read(cd_gs_first, cd_gs_bytes);
 }
 int CdReadSync(int mode, u8 *result) { return 0; }
 int CdReadBreak(void) { return 0; }

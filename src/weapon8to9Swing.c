@@ -308,7 +308,7 @@ void func_80036544(TObj *o)
                 D_800A7C15 = 0;
                 o->ba5 = 0;
                 if (!(*(volatile unsigned short *)&GV6.s70 & *(unsigned short *)0x1F8003C8) || D_800A7B7C != 1 || D_800A7C1C || D_800A7C24 >= 2 || GVARS.b3f) {
-                    AnimAdvance(&G);
+                    { extern int playerSelectGroundAnim(TObj *); playerSelectGroundAnim(&G); }   /* (JP: the retail jal, PAL calls AnimAdvance) */
                     PLAYER_EXT->b0 = 0;
                     o->b04 = 2;
                     o->step = 0;

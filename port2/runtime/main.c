@@ -1117,6 +1117,13 @@ int main(int argc, char **argv) {
         port_printf("[port2] %s build: --lang, --text-patch, --picture ntsc, --cut-content and --civ-test are PAL-only (ignored)\n", PORT_VERSION_SERIAL);
         port_lang = 0; port_text_patch_n = 0; picture = 0; port_cut_content = 0; port_civ_test = 0; (void)port_panel_on;
     }
+#if PORT_VERSION_JP
+    {   /* the panel's address table (runtime/panel_addrs.h) has no JP column yet (docs/PORT_VERSIONS_PLAN.md J1) */
+        extern int port_panel_on, port_panel_window; extern const char *port_panel_dump_dir;
+        if (port_panel_on) port_printf("[port2] %s build: --second-screen / --dump-panel are not available yet (ignored)\n", PORT_VERSION_SERIAL);
+        port_panel_on = port_panel_window = 0; port_panel_dump_dir = 0;
+    }
+#endif
     /* the back-to-launcher entries draw their words with the PAL disc's pause / title glyphs (runtime/launcher_exit.c) */
     { extern int port_launcher_exit; if (port_launcher_exit) { port_printf("[port2] %s build: --launcher-exit is PAL-only for now (off)\n", PORT_VERSION_SERIAL); port_launcher_exit = 0; } }
     port_no_translation_file = 1;

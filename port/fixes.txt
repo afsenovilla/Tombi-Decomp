@@ -872,6 +872,10 @@ src/d0spsub3/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.y = 232; | SUBSCR
 src/main_scus94236.c | while (((Task*)0x1F8001D4)->unk14 < targetFrame) { | while (((Task*)0x1F8001D4)->unk14 < targetFrame) { extern void port_vblank(void); port_vblank();
 # JP (SLPS-01144, PORT_VERSION=jp): the same for its matched main() (src/func_80015D1C_slps01144.c)
 src/func_80015D1C_slps01144.c |         while (SP_1E8 < target); |         while (SP_1E8 < target) { extern void port_vblank(void); port_vblank(); }
+# the JP main() also programs root counter 3 for its vblank (SetRCnt / StartRCnt, which PAL's main does not do): the
+# native copies write the interrupt-mask register through a raw I/O pointer; the port paces frames itself
+src/func_80015D1C_slps01144.c |     SetRCnt(0xF2000003, 1, 0x1000); |     /* SetRCnt(0xF2000003, 1, 0x1000): the port's vblank */
+src/func_80015D1C_slps01144.c |     func_80058660(0xF2000003); |     /* func_80058660(0xF2000003) = StartRCnt: the port's vblank */
 # loopTitleScreen's USA branch: the declarations of the title-menu fixes above (their other edits reach the shared lines)
 src/loopTitleScreen.c | extern unsigned short D_80076E80[]; | extern unsigned short D_80076E80[]; extern int port_title_debug, port_title_extra; extern unsigned char port_title_angles[]; extern void port_title_debug_go(void); extern int port_title_quit_go(int), port_lx_title_tick(void); extern unsigned char DAT_1f8001b4;
 # the USA message box (0x8002FA24, a psx_tomba port that only the report checks: no symbol line, so no full-link object
@@ -939,6 +943,9 @@ src/bootLogoState.c | void func_80018BE0(void) | extern int port_skip_movies; vo
 # --cut-content is PAL-only (off in this build): the AREA03 letter sign fix above reaches the JP branch's `o->box0 = 4;`
 # line too, so its helper exists as a no-op here (the PAL spelling defines it on the PAL function's prologue)
 src/updateL4Type1AObject.c | void func_80031688(O *o) | static void port_cc_letter(O *o) { (void)o; } void func_80031688(O *o)
+# The JP game has no libpad: its vblank handler polls the pad with the older libetc PadRead (func_80064B74, PadInit =
+# func_80064B24: BIOS InitPAD / StartPAD buffers).  The port hands it the host pad in PadRead's bit order (shims/pad.c)
+src/vblankHandler_slps01144.c | D_800A1380[0] = func_80064B74(1); | { extern int port_pad_read_libetc(void); D_800A1380[0] = port_pad_read_libetc(); }
 @version all
 # --wings-glide (runtime/wings.c): the Japanese demo's cut top-down Charity Wings glide. The wings item use in a
 # top-down area runs topdownPlayerDropExitStep (substep 0; overheadPlayerDropExitStep / tunnelPlayerDropExitStep in I0NFO / I0NFO3); the port swaps the player's frame tables there and draws

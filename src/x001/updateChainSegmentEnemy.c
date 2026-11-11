@@ -2,6 +2,8 @@
 // MATCHING 8012f448 1312
 // VERSION SLPS_01144 x01 8012DD24 1304
 #if defined(VERSION_SLPS_01144)
+extern char D_8013AF38[];   /* JP: other contents, the retail table at its JP address */
+#define D_8013C94A D_8013AF38
 #include "gvars.h"
 #include "player.h"
 #include "TOBJ.H"
@@ -9,12 +11,6 @@ typedef struct { unsigned short b0, b1, b2, b3, w1e, wac; int idx; void **anims;
 typedef struct { Fix16 a, y, b; } FV;
 extern E20 CHAIN_SEGMENT_ENEMY_DEFS[];
 extern int SPR_DATA[];
-static char D_8013C94A[50] = {
-    0, 0, -0x24, -0x1b, 0x13, -0x80, 1, 1, 0, 0x10, 0, 0, 1, 1, 0, 0x10,
-    0, 0, 1, 1, 0, 0x11, 0, 0, 1, 1, 0, 0x12, 0, 0, 1, 1,
-    0, 0x13, 0, 0, 1, 1, 0, 0x14, 0, 0, 1, 1, 0, 0x15, 0, 0,
-    -0x7d,
-};
 extern char MOVE_TABLE_2[];
 extern void AnimLoadDuration(TObj *);
 extern int FUN_800202b4(TObj *);

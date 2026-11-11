@@ -3,7 +3,10 @@
 #include "gcd.h"
 #include "TOBJ.H"
 
-#if defined(VERSION_SCUS_94236)  /* USA: the PAL pointers are other addresses; the retail table at its USA address */
+#if defined(VERSION_SLPS_01144)  /* JP: other contents, the retail table at its JP address */
+extern short D_80134F8A[];
+#define D_80135D8E D_80134F8A
+#elif defined(VERSION_SCUS_94236)  /* USA: the PAL pointers are other addresses; the retail table at its USA address */
 extern short D_801350DE[];
 #define D_80135D8E D_801350DE
 #else

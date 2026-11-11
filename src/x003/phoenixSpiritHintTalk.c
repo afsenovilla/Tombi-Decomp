@@ -28,7 +28,7 @@ void func_80128474(TObj *o)
             o->d90 = showMessageBoxDirect(2, 0xf, &b);
             o->anim = PHOENIX_SPIRIT_HINT_NPC_DEFS_ANIMS[o->subtype].anims[9];
             FUN_8001fe94(o, 0);
-            PLAYER.obj.wb2 = 0;
+            *(short *)((char *)&PLAYER + 0x2e) = 0;   /* (JP: the retail store is PLAYER + 0x2E here, PAL clears wb2) */
             PLAYER.obj.b04 = 5;
             PLAYER.obj.step = 0;
             PLAYER.obj.state = 0;

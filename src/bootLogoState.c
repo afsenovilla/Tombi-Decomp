@@ -8,12 +8,12 @@ extern G *TASK_C;
 extern unsigned char LOAD_COMPLETE_SYM, MOVIE_PLAY_STATE, MOVIE_ID;
 extern short FRAME_BUFFER_INDEX;
 extern int NEXT_PRIM;
-extern void func_8001D6A4();
+extern void func_8001D5E0_slps01144(void);   /* JP movie player thread (PAL moviePlayerTask func_8001D6A4) */
 extern void SetDispMask(int);
 extern void loadSoundSet(int);
 extern void queueSystemLoadList(int, int);
-extern void func_800E8A14(void);
-extern void func_800E8A2C(void);
+extern void func_800EA048(void);   /* JP O0PTSUB0 bootLogoSetSpriteBase (PAL func_800E8A14) */
+extern void func_800EA060(void);   /* JP O0PTSUB0 bootLogoDraw (PAL func_800E8A2C) */
 extern void initDisplay(int, int, int);
 extern void func_80016244(char, char, char);
 extern void initWideDisplayEnv(int, int, int, int);
@@ -35,20 +35,20 @@ void func_80018BE0(void)
             if (LOAD_COMPLETE_SYM != 0) {
                 TASK_C->w4a = 2;
                 TASK_C->w4c = 0;
-                func_800E8A14();
+                func_800EA048();
             }
             break;
         }
         break;
     case 1:
         SetDispMask(0);
-        func_800E8A14();
+        func_800EA048();
         goto next;
     case 2:
         MOVIE_PLAY_STATE = 1;
         MOVIE_ID = 0x15;
         TASK_C->w4a++;
-        ThreadCreate(1, func_8001D6A4);
+        ThreadCreate(1, func_8001D5E0_slps01144);
         break;
     case 3:
         if (MOVIE_PLAY_STATE != 0) break;
@@ -58,13 +58,13 @@ void func_80018BE0(void)
         initDisplay(0xf0, 0xf0, 0xf0);
         SetDispMask(1);
         NEXT_PRIM = (int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
-        func_800E8A2C();
+        func_800EA060();
         TASK_C->w58 = 0x78;
         TASK_C->w4a++;
         break;
     case 5:
         NEXT_PRIM = (int)(LOAD_BUFFER_ALT + FRAME_BUFFER_INDEX * 0xc000) & 0xffffff;
-        func_800E8A2C();
+        func_800EA060();
         if (--TASK_C->w58 > 0) break;
         stopBgm(0);
         SetDispMask(0);

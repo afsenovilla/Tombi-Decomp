@@ -2,6 +2,9 @@
 // VERSION SLPS_01144 x04 80129CE4 2704
 // FLAGS -O2 -G0 -fno-strength-reduce
 #if defined(VERSION_SLPS_01144)
+extern char D_8012F7B0[]; extern short *D_8012F7E4[];   /* the retail tables (the file's copies held PAL pointers) */
+#define D_8013133C D_8012F7B0
+#define D_80131370 D_8012F7E4
 #include "gcd.h"
 #include "TOBJ.H"
 #include "gamestate.h"
@@ -28,16 +31,6 @@ extern char D_80131230[];
 extern char D_8013124C[];
 extern char D_801312B4[];
 extern char D_801312CC[];
-static char D_8013133C[52] = {
-    4, 0, 0, 0, 0x11, 0, 0, 0, 5, 0, 9, 0, 7, 0, 0, 0,
-    0x17, 0, 0, 0, 0x19, 0, 0, 0, 0x12, 0, 0, 0, 4, 0, 0, 0,
-    0x11, 0, 0, 0, 5, 0, 8, 0, 7, 0, 0, 0, 0x1a, 0, 0, 0,
-    0x18,
-};
-static short *D_80131370[6] = {
-    (short *)D_801311E0, (short *)D_80131230, (short *)D_8013124C, (short *)D_801312B4,
-    (short *)D_801312CC, (short *)D_8013133C,
-};
 extern Fix16 *PLAYER_H;
 extern unsigned short BUTTON_MASK_A, JOYPAD_STATE;
 extern TObj PLAYER;
