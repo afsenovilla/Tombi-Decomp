@@ -149,6 +149,11 @@ title extras; `--launcher-exit` stays PAL-only), the USA room sweep 95/96 clean 
 
 ## Stage J1: JP retail
 
+**Done (2026-11-11, docs/JP.md "Native port")**: full link (25 programs byte-identical), generator, the JP port boots
+and plays AREA00 headless; launchers, CI (`GAME_FILES_URL_JP`) and docs. Left from the list below: the panel (no JP
+address column), the psxemu JP map (no JP HLE verification), saves not checked, the Windows / Android JP builds only
+built by CI.
+
 - Same pipeline with `slps01144` (data symbols already exist): full link, gen2, runtime header.
 - JP specifics: overlay base 0x800E9AF8, shared prefix 0x2B680; no GOVER (check where game over runs); OPTSUB00 and
   DSPSUB2 have no entry table → `runtime/ovl.c` needs another identification (signature words, as for the areas);

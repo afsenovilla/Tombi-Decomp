@@ -69,7 +69,8 @@ extern int AnimAdvance(TObj *);
 extern void ObjApplyVelocity(TObj *);
 extern void weaponSetPlayerAnimA(TObj *);
 extern void weaponSetPlayerAnimB(TObj *);
-extern void weaponSetPlayerAnimC(TObj *);
+extern void func_800323A8(TObj *);   /* the JP weaponSetPlayerAnimC (between B 8003229C and A 800324B4, as PAL's 800313C8 sits between 800312E8 and 800314A8) */
+#define weaponSetPlayerAnimC func_800323A8
 extern short probeCollisionAtDepthB(TObj *, int, int);
 extern void spawnImpactEffect(int, int, int, int);
 extern void spawnWeaponHitDebris(int, int, int, int);

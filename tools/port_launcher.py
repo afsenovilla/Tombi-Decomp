@@ -2506,10 +2506,11 @@ class App(QMainWindow):
             return lay
         lay = cell(0, 0, tr("c.game"))
         if not has("lang"):
-            # one language on the disc (USA: English): nothing to choose
+            # one language on the disc (USA: English, JP: Japanese): nothing to choose
+            key = (v or {}).get("key")
             lb = QLabel()
-            lb.setPixmap(flag_pixmap(9 if (v or {}).get("key") == "usa" else 0))
-            row, rl = hbox(lb, QLabel(tr("l.onlylang", "English")), None, spacing=8)
+            lb.setPixmap(flag_pixmap(10 if key == "jp" else 9 if key == "usa" else 0))
+            row, rl = hbox(lb, QLabel(tr("l.onlylang", "日本語" if key == "jp" else "English")), None, spacing=8)
             lay.addWidget(row)
         else:
             # game language (the boot menu's MAINn.EXE): a combobox with the flags

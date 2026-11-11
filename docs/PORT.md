@@ -483,21 +483,21 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   the left, the selected game large on the right), *Portada* (the selected game's logo as the title, a tab per game).
   A picked image is identified by its boot executable (`disccheck.c` `nativeIdentify`: SYSTEM.CNF `BOOT`, its SHA-1;
   on the PAL discs `EXE/MAIN0.EXE`, which the boot exe loads): PAL SCES-01331 / SCES-01330 `bec8dc5f…` →
-  `libtombi.so`, USA SCUS-94236 `81cbc79f…` → `libtombi_usa.so`; Japan SLPS-01144 `07d57769…` is listed as recognised
-  but *Aún no compatible* (nothing extracted); an unknown disc or the PAL Rev 0 is refused with the reason. Each game
+  `libtombi.so`, USA SCUS-94236 `81cbc79f…` → `libtombi_usa.so`, Japan SLPS-01144 `07d57769…` → `libtombi_jp.so`
+  (docs/JP.md "Native port"; an APK built without that disc lists the game as recognised but without its library);
+  an unknown disc or the PAL Rev 0 is refused with the reason. Each game
   is extracted into its own `files/games/<serial>/data` (the manifest also carries `serial` / `boot` / `boot_sha1`, as
   `tools/extract_data.py`, which `psyq.c` checks), its saves go to `files/saves` (PAL, as before) or
-  `files/saves_usa`; the loader takes `--game-lib` / `--save-sub` from the launcher (`loader.c`; the armeabi-v7a low
+  `files/saves_usa` / `files/saves_jp`; the loader takes `--game-lib` / `--save-sub` from the launcher (`loader.c`; the armeabi-v7a low
   reservation is sized for the largest `libtombi*.so` of the APK). The card's logo is cut at run time from the
   player's own disc as the PC launcher does (`tools/game_library.py` `logo_sprites`, `Library.cutLogo`): the title
   overlay's sprite list `TITLE_LOGO_SPRITE_RECS` (the records with the CLUT at 128,510, up to x = -1) drawn from the
   8 bpp logo page with its CLUT (`SYSTEM/A00202.000` + `A00203.000` + `O0PTSUB0.BIN` PAL, `A00012.000` + `A00013.000`
-  + `OPTSUB00.BIN` USA and Japan), saved as `files/games/<id>/logo.png`; without it the name in the title font. The
-  Japanese disc is not extracted, so its three files are read straight from the image when it is added
-  (`disccheck.c` `nativeReadFiles`: .bin / .iso / .chd, also the temp image of a .zip / .7z before it is deleted);
-  a Japanese card added by an older version shows the name until the disc is added again. Options per version: the
-  USA game gets no game language, translations, NTSC switch, second-screen panel, cut content or button icons (all
-  PAL-only in the port, docs/USA.md); `--aspect`, `--renderer`, `--fps`, `--skip-intro`, DualShock, vibration, the
+  + `OPTSUB00.BIN` USA and Japan), saved as `files/games/<id>/logo.png`; without it the name in the title font. (A
+  recognised disc the launcher does not extract reads its three files straight from the image when it is added:
+  `disccheck.c` `nativeReadFiles`, .bin / .iso / .chd, also the temp image of a .zip / .7z before it is deleted.)
+  Options per version: the USA and JP games get no game language, translations, NTSC switch, second-screen panel,
+  cut content or button icons (all PAL-only in the port, docs/USA.md, docs/JP.md); `--aspect`, `--renderer`, `--fps`, `--skip-intro`, DualShock, vibration, the
   debug menu, infinite lives / vitality (`--poke-every 50:GAME+20:63:1`, `1:GAME+10:4:1`: named fields, the same for
   both builds) and save import / export (on `files/saves_usa/tombi_mc0.mcd`) stay. An install from before the library (`files/data`, or an image copied
   by an older version) becomes the PAL entry on the first start (a rename). *Disco y datos* shows the selected game
@@ -1112,7 +1112,8 @@ messages as Android for loose files, `.rar` and the rest. `tools/extract_data.py
 archive on the command line too.
 
 Per version (`game_library.VERSIONS` `features`): PAL has everything; USA runs `tombi-pc-usa(.exe)` (checkout:
-`build/port2-scus94236[-win]/tombi2`) and has no game language (English only), no text patch / improved translation
+`build/port2-scus94236[-win]/tombi2`), JP `tombi-pc-jp(.exe)` (`build/port2-slps01144[-win]/tombi2`, the same
+option set as USA, card folder `saves_jp`), and USA has no game language (English only), no text patch / improved translation
 (the hook is `VERSIONS[...]["text_patches"]`, empty for USA/JP: a future retranslation goes there), no 50/60 Hz switch
 (60 Hz, no `--hz`), no *Cut content* page, no title DEBUG entry (its carousel hook is PAL-only), no button-icon styles
 (`--prompts` redraws the PAL fonts) and no texture dump (PAL layout); skip intro, autostart, keys, controller,

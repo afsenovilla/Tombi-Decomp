@@ -38,10 +38,13 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    reader (`CdlReadN` + `CdReadyCallback` + `CdGetSector`, shims/psyq.c `cd_readn`), the older libetc pad
    (`func_80064B74` = PadRead polled by the vblank handler, fed by shims/pad.c `port_pad_read_libetc` through a
    `@version jp` fix), the JP overlay names in the JP branch of bootLogoState (`func_800EA048/60`, movie thread
-   `func_8001D5E0_slps01144`), `SetRCnt/StartRCnt` removed in the JP frame wait. Open: 3 X000 object functions (fog
-   cloud, yellow chick, pool type 04) are called through data pointers the relocator did not turn into thunks (the
-   fault-handler path: slow, ~30 calls per frame); the second-screen panel has no JP address column (`--second-screen`
-   is refused in the JP build); the 7 `.rodata overlaps` data units of the JP link; launchers / CI / docs (next).
+   `func_8001D5E0_slps01144`), `SetRCnt/StartRCnt` removed in the JP frame wait; gen2: `asm("SYM+N")` externs as macros
+   (clang / wasm2c), a native X000 function counts as a function start in a MAIN0 pointer table (the JP object table
+   went data and trapped on wasm2c). Launchers (PC: supported, `tombi-pc-jp`, `saves_jp`; Android `libtombi_jp.so`),
+   CI (`GAME_FILES_URL_JP` in port2-exe.yml / android-apk.yml, caches `fulljp-*` / `jplibs-*`), docs/JP.md "Native
+   port". Open: the second-screen panel has no JP address column (`--second-screen` is refused in the JP build); the 7
+   `.rodata overlaps` data units of the JP link; the Windows / Android JP builds are only built by CI (not run on a
+   device yet).
 0. **Wings glide in the port (2026-11-10)**: `--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR` (its own switch, no `--cut-content` needed; PC launcher: Cut content page, own card with checkbox and the two demo disc images, the needed files are extracted into .wings/; the early-title field was removed from the launcher). `--cut-content` is now a pick list: `--cut-content=boatman,letter,board,berries,bubble,titles` (bits 1..32 in `port_cut_content`), the plain switch = all; the launcher shows one checkbox per item
    plays the JP demo's cut top-down Charity Wings animation (frames 77-79 + the feather item sprite spinning) in the
    wings exit and the landing of the three overhead engines (I0NFO2 Baccus Village / the pier, I0NFO Dwarf Village, I0NFO3 tunnels) (`port2/runtime/wings.c`, hooks in port/fixes.txt, docs/PORT.md). Checked headless in

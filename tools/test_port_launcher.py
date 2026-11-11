@@ -277,11 +277,12 @@ class TestLauncher(unittest.TestCase):
         return dd
 
     def library(self, name, game, extra=None):
-        """A launcher whose library holds PAL (data/), USA (data-scus94236/) and JP (no data), game selected."""
+        """A launcher whose library holds PAL (data/), USA (data-scus94236/) and JP (data-slps01144/), game selected."""
         d = os.path.join(self.tmp, name)
         os.makedirs(d)
         self.fake_data(d, "data", L.MAIN0_SHA1)
         self.fake_data(d, "data-scus94236", L.GL.USA_SHA1, "SCUS_942.36", "SCUS-94236")
+        self.fake_data(d, "data-slps01144", L.GL.JP_SHA1, "SLPS_011.44", "SLPS-01144")
         games = [dict(serial="SCES-01331", sha1=L.MAIN0_SHA1, image="", data="data"),
                  dict(serial="SCUS-94236", sha1=L.GL.USA_SHA1, image="", data="data-scus94236"),
                  dict(serial="SLPS-01144", sha1=L.GL.JP_SHA1, image="", data="data-slps01144")]
@@ -346,8 +347,35 @@ class TestLauncher(unittest.TestCase):
         self.assertFalse(self.w.nav["cut"].isHidden())
         self.assertEqual(json.load(open(os.path.join(d, "tombi-port.json")))["game"], "SCES-01331")
 
+    def test_jp_game_gets_its_own_options(self):
+        """JP (SLPS-01144): its own data folder, binary (tombi-pc-jp) and card folder (saves_jp), the PAL-only options
+        off as for USA, the portable ones (area select, debug menu, cheats) on."""
+        d = self.library("jp", "SLPS-01144")
+        a = self.args()
+        self.assertEqual(a[:2], ["--data", os.path.join(d, "data-slps01144")])
+        for flag in ("--lang", "--hz", "--cut-content", "--title-debug", "--prompts", "--subscreen-labels", "--patch-tex"):
+            self.assertNotIn(flag, a)
+        self.assertIn("--skip-intro", a)
+        self.assertIn("--debug-menu", a)
+        self.assertEqual(a[a.index("--poke") + 1], "900:IS_DEBUG_MODE_ENABLED:1")
+        self.assertFalse([x for x in a if x[:1].isdigit() and ":800" in x])   # no raw PAL address
+        self.assertEqual(a[a.index("--save-dir") + 1], os.path.join(d, "saves_jp"))
+        self.assertEqual(self.w.card_file(), os.path.join(d, "saves_jp", "tombi_mc0.mcd"))
+        exe = self.w.command()[0].replace("\\", "/")
+        self.assertTrue(exe.endswith(("port2-slps01144/tombi2", "port2-slps01144-win/tombi2.exe", "tombi-pc-jp", "tombi-pc-jp.exe")), exe)
+        self.assertFalse(hasattr(self.w, "lang_cb"))
+        self.assertTrue(self.w.nav["cut"].isHidden())
+        self.assertEqual([t.d["selected"] for t in self.w.tiles], [False, False, True])
+        self.assertIn("60 Hz", self.w.summary.text())
+
     def test_unsupported_game(self):
-        """JP: recognised (a card with its name), but Play is off and says why."""
+        """A recognised version without a port (here JP with its support switched off): a card with its name, but
+        Play is off and says why."""
+        import unittest.mock
+        with unittest.mock.patch.dict(L.GL.VERSIONS, {L.GL.JP_SHA1: dict(L.GL.VERSIONS[L.GL.JP_SHA1], supported=False)}):
+            self._unsupported_game()
+
+    def _unsupported_game(self):
         self.library("jp", "SLPS-01144")
         self.assertFalse(self.w.play_btn.isEnabled())
         self.assertIn("オレっ！トンバ", self.w.status_msg)
@@ -549,7 +577,8 @@ class TestGameLibrary(unittest.TestCase):
         usa = GL.describe("SCUS_942.36", GL.USA_SHA1)
         self.assertEqual((usa["serial"], usa["version"]["binary"], usa["name"]), ("SCUS-94236", "tombi-pc-usa", "Tomba! (USA)"))
         jp = GL.describe("SLPS_011.44", GL.JP_SHA1)
-        self.assertFalse(jp["version"]["supported"])
+        self.assertTrue(jp["version"]["supported"])
+        self.assertEqual((jp["serial"], jp["version"]["binary"]), ("SLPS-01144", "tombi-pc-jp"))
         self.assertIsNone(GL.describe("SCUS_944.54", "3" * 40)["version"])
         self.assertTrue(GL.has(GL.PAL_SHA1, "lang") and not GL.has(GL.USA_SHA1, "lang"))
         self.assertEqual(GL.text_patches(GL.PAL_SHA1), ("es_mejorada.tombipatch.json",))
