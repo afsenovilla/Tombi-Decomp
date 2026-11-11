@@ -1140,9 +1140,12 @@ def sources_version(outdir, progs, ovls=(), areas=()):
             if eff == a:
                 # the address is right but the function there carries another native name (JP: the symbol file names
                 # PAL's gameMainTask func_80019608_slps01144, and the shared C calls it by the PAL name)
-                # (an address-named reference only when the native there is a shim: JP's func_80064B74 is CdMix)
+                # Only when the native there is address-named (func_80019608_slps01144) or a shim: a native with a
+                # proper name of its own is aliased by gen2's link (USA: `#define freeEffectObject ObjFree` reached
+                # functions.h's `void freeEffectObject(s32*)` and clashed with the file's own ObjFree prototype)
                 if a in func_at and func_at[a] != n and n not in native_defs() \
-                        and (not re.match(r"(?:func|FUN)_[0-9A-Fa-f]{8}", n) or func_at[a] in native_defs()) \
+                        and (func_at[a] in native_defs() or not re.match(r"(?:func|FUN)_[0-9A-Fa-f]{8}", n)
+                             and re.match(r"(?:func|FUN)_[0-9A-Fa-f]{8}", func_at[a])) \
                         and (kind == "base" or not (OVL_BASE <= a < OVL_END)):
                     defs[n] = "%s /* @%08X */" % (func_at[a], a)
                 continue
