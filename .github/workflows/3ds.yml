@@ -260,6 +260,7 @@ jobs:
         run: |
           SD="$HOME/.local/share/azahar-emu/sdmc"
           mkdir -p "$SD/3ds/tombi" shots
+          echo 0 > "$SD/3ds/tombi/lang.txt"   # (the language chooser of the first start waits for a button)
           cp "$RUNNER_TEMP/disccache/game.bin" "$SD/3ds/tombi/tombi.bin"
           # frame and VRAM dumps (runtime/main.c --dump-frames / --dump-vram) of what the 3DS renderer holds
           # gameplay measured too: the debug area select into AREA 1, then walking right (as in CLAUDE.md's cheatsheet)

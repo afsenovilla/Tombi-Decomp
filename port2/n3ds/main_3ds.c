@@ -3,6 +3,7 @@
  *   sdmc:/3ds/tombi/            the folder (made if missing; the current directory: saves and settings go here)
  *   sdmc:/3ds/tombi/data/       a folder of tools/extract_data.py, if present; otherwise
  *   sdmc:/3ds/tombi/<image>     the first .chd / .bin / .iso in the folder (the player's own disc image)
+ *   sdmc:/3ds/tombi/lang.txt    the game's language, 0..8 (the chooser at the first start writes it; L held: again)
  *   sdmc:/3ds/tombi/args.txt    optional extra flags, separated by spaces or lines (e.g. --lang 5, --renderer soft)
  *   sdmc:/3ds/tombi/log.txt     the log (stderr), rewritten on every start
  *   sdmc:/3ds/tombi/disc.txt    the image chosen in the chooser, anywhere on the card
@@ -112,6 +113,35 @@ static int choose_image(char *out, size_t cap) {
     return ok;
 }
 
+/* The game's language: the disc's own boot menu (a program of its own, which the port does not run) offers five of
+   the nine languages every PAL disc carries; this one offers them all.  Shown the first time and when L is held at
+   start; the choice is kept in lang.txt.  Returns 0..8 (--lang), -1: START (leave). */
+static int choose_lang(int sel) {
+    static const char *name[9] = { "English", "Francais", "Deutsch", "Italiano", "Nederlands", "Espanol", "Portugues", "Svenska", "Dansk" };
+    int redraw = 1, ok = 0;
+    gfxInitDefault();
+    consoleInit(GFX_TOP, NULL);
+    while (aptMainLoop()) {
+        hidScanInput();
+        u32 k = hidKeysDown() | (hidKeysDownRepeat() & (KEY_UP | KEY_DOWN));
+        if (k & KEY_START) break;
+        if ((k & KEY_DOWN) && sel < 8) { sel++; redraw = 1; }
+        if ((k & KEY_UP) && sel > 0) { sel--; redraw = 1; }
+        if (k & KEY_A) { ok = 1; break; }
+        if (redraw) {
+            fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - language\n\n");
+            for (int i = 0; i < 9; i++) fprintf(stdout, "%c %s\n", i == sel ? '>' : ' ', name[i]);
+            fprintf(stdout, "\n(hold L while the game starts to choose again)\n");
+            fprintf(stdout, "\x1b[28;1HA: choose   START: exit");
+            fflush(stdout);
+            redraw = 0;
+        }
+        gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank();
+    }
+    gfxExit();
+    return ok ? sel : -1;
+}
+
 /* Sound in an emulator: libctru's ndsp (SDL's audio) loads the DSP firmware from sdmc:/3ds/dspfirm.cdc, a file a console
    that runs homebrew has and an emulator's SD folder does not.  Azahar / Citra emulate the DSP themselves (HLE) and do
    not run the firmware: there, without the file, ndsp is given an empty component (a DSP1 header with no segments).
@@ -159,6 +189,22 @@ int main(int argc, char **argv) {
             if (df) { fprintf(df, "%s\n", image); fclose(df); }
         }
         args[n++] = "--disc"; args[n++] = image;
+    }
+    {   /* the language: lang.txt, asked the first time and with L held (an args.txt "--lang N" comes later and wins) */
+        static char langarg[4];
+        int lang = -1, ask, given = 0;
+        svcSleepThread(50000000); hidScanInput(); ask = (hidKeysHeld() & KEY_L) != 0;
+        FILE *lf = fopen(DIR_ "/args.txt", "r");   /* (a language given there: nothing to ask) */
+        if (lf) { static char t[2048]; size_t len = fread(t, 1, sizeof t - 1, lf); t[len] = 0; fclose(lf); given = strstr(t, "--lang") != 0; }
+        lf = given ? 0 : fopen(DIR_ "/lang.txt", "r");
+        if (lf) { if (fscanf(lf, "%d", &lang) != 1 || lang < 0 || lang > 8) lang = -1; fclose(lf); }
+        if (!given && (lang < 0 || ask)) {
+            lang = choose_lang(lang < 0 ? 0 : lang);
+            if (lang < 0) return 0;
+            lf = fopen(DIR_ "/lang.txt", "w");
+            if (lf) { fprintf(lf, "%d\n", lang); fclose(lf); }
+        }
+        if (lang > 0) { snprintf(langarg, sizeof langarg, "%d", lang); args[n++] = "--lang"; args[n++] = langarg; }
     }
     args[n++] = "--renderer"; args[n++] = "pica";   /* the GPU (n3ds/pica_c3d.c); args.txt "--renderer soft": the CPU */
     { bool n3 = false; APT_CheckNew3DS(&n3);   /* (an Old 3DS decodes a movie at 3 frames a second: none there) */
