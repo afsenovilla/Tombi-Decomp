@@ -1137,7 +1137,13 @@ def sources_version(outdir, progs, ovls=(), areas=()):
                 if tgt != n: defs[n] = "%s /* @%08X */" % (tgt, a)    # (the annotation: PORT_ARG forwarding by address)
                 continue
             eff = effective(n)
-            if eff == a: continue
+            if eff == a:
+                # the address is right but the function there carries another native name (JP: the symbol file names
+                # PAL's gameMainTask func_80019608_slps01144, and the shared C calls it by the PAL name)
+                if a in func_at and func_at[a] != n and n not in native_defs() and not re.match(r"(?:func|FUN)_[0-9A-Fa-f]{8}", n) \
+                        and (kind == "base" or not (OVL_BASE <= a < OVL_END)):
+                    defs[n] = "%s /* @%08X */" % (func_at[a], a)
+                continue
             if eff is None:
                 canon[n] = a; canon_prog[n] = prog      # a name only this object knows: its address
                 continue

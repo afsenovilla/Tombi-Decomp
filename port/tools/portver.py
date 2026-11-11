@@ -43,8 +43,9 @@ else:
     # overlays (tools/versions.py), the boot exe's sha1 (tools/extract_data.py VERSION_OF), where its Psy-Q part starts
     _VER = {"scus94236": ("SCUS_942.36", V.USA_OVL, V.USA_SHARED, V.USA_SYSOVL,
                           "81cbc79f0230aeb4252e058039f47ac95a777f5a", 0x8005B38C),
+            # (JP's libraries start with libapi's _bu_init at 0x8005844C: FlushCache comes after the C library there)
             "slps01144": ("SLPS_011.44", V.JP_OVL, V.JP_SHARED, V.JP_SYSOVL,
-                          "07d577698ad31ec1a69b9d7b80a7c3f90b650888", 0x80059E4C)}[VER]
+                          "07d577698ad31ec1a69b9d7b80a7c3f90b650888", 0x8005844C)}[VER]
     GAME = os.path.join(ROOT, V.VERSIONS[VER]["game"])
     MAIN_EXE = os.path.join(GAME, _VER[0])
     X000_BIN = os.path.join(GAME, "SYSTEM", "X00.BIN")
@@ -132,6 +133,10 @@ def version_units():
             # SsSetAutoKeyOffMode)
             if p == "MAIN0" and u.addr >= LIB_FROM and pair.get((vp, u.addr)) and re.match(r"(?:func|FUN)_[0-9A-Fa-f]{8}", nm):
                 nm = pair[(vp, u.addr)]
+            # a psx_tomba library name the JP symbols carry with the version suffix (GetVideoMode_slps01144): the
+            # shims define the plain name, which the shared C calls
+            if p == "MAIN0" and u.addr >= LIB_FROM and nm.endswith("_" + VER) and not re.match(r"(?:func|FUN)_", nm):
+                nm = nm[:-len(VER) - 1]
             lst.append(u._replace(prog=p, lib=lib, name=nm))
         out[p] = lst
     _UNITS = out
