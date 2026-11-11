@@ -343,6 +343,23 @@ static void mix_voices(s16 *out, int n) {
         int counter = v->counter, prev = v->prev;
         const s16 *buf = v->buf;
         for (int i = 0; i < n; i++) {
+            {   /* a run of samples inside the block, the envelope waiting: its level does not change and nothing of
+                   the voice is read or written but the counter (the same sums as the general step below, which
+                   takes over at the block's last sample or when the envelope is due) */
+                const int per = 1 + half, lev = v->env_level, last = (28 << 12) - step;
+                int run = v->env_wait / per, done = 0;
+                if (run > n - i) run = n - i;
+                while (done < run && counter < last && counter >= 1 << 12) {
+                    const int idx = counter >> 12, fr = counter & 0xFFF;
+                    const int a = buf[idx - 1], b = buf[idx];
+                    int s = a + (((b - a) * fr) >> 12);
+                    s = (s * lev) >> 15;
+                    accl[i] += (s * vl) >> 14; accr[i] += (s * vr) >> 14;
+                    counter += step; i++; done++;
+                }
+                v->env_wait -= done * per;
+                if (i >= n) break;
+            }
             int idx = counter >> 12, fr = counter & 0xFFF;
             int a = idx == 0 ? prev : buf[idx - 1], b = buf[idx];
             int s = a + (((b - a) * fr) >> 12);
