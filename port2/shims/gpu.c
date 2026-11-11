@@ -973,6 +973,28 @@ void DrawOTag(u32 *ot) {
     { static unsigned drawn; pica_prof_on = !skip && (++drawn % 29) == 0; }   /* (a drawn table in seven: the skips come in runs of three, a count of all tables only caught the light ones) */
     unsigned long long prof_t0 = port_ticks();
 #endif
+#ifdef __3DS__
+    if (pica_prof_on) {   /* the two dry passes over the table's polygons, lines and sprites (shims/gpu_pica.c pica_dry) */
+        extern int pica_dry;
+        const GpuState sgs = gs; const int stx = tpg.tx, sty = tpg.ty, stp = tpg.tp;
+        for (int pass = 1; pass <= 2; pass++) {
+            unsigned long long d0 = port_ticks();
+            const u32 *q = ot; int m = 0;
+            pica_dry = pass;
+            while (m++ < 200000) {
+                u32 tag = *q, next = tag & 0xFFFFFF, len = tag >> 24;
+                if (len && (q[1] >> 24) >= 0x20 && (q[1] >> 24) < 0x80) packet(q + 1, len);
+                if (next == 0xFFFFFF) break;
+                q = (const u32 *)next;
+            }
+            be->list_end();
+            pica_prof[pass] += port_ticks() - d0;
+            gs = sgs; tpg.tx = stx; tpg.ty = sty; tpg.tp = stp;
+        }
+        pica_dry = 0;
+        prof_t0 = port_ticks();
+    }
+#endif
     if (port_frameskip) { fs_mark(gs.x1, gs.y1, skip); port_frames_skipped += (unsigned)skip; }
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;

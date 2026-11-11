@@ -216,6 +216,7 @@ static void bulk_resolve(int x, int y, int w, int h) {   /* the noted areas this
 
 /* ---- the batch: triangles with one state */
 #define MAX_PV 6144
+extern int pica_dry;
 static unsigned long long use_clock, batch_clock, frame_clock;   /* slot uses: now, at the last flush, at the last present */
 static PV bv_own[MAX_PV], *bv = bv_own;   /* (or the device's memory: PicaDev.vbuf) */
 static int nbv, bv_room = MAX_PV;
@@ -223,6 +224,7 @@ static PState bst;
 static unsigned long long st_batches, st_tris, st_decodes, st_readbacks, st_rb_tex, st_rb_host, st_rb_px;
 static void flush(void) {
     if (!nbv) return;
+    if (pica_dry) { nbv = 0; batch_clock = use_clock; return; }
     dev->tris(&bst, bv, nbv);
     st_batches++; st_tris += nbv / 3;
     nbv = 0; batch_clock = use_clock;
@@ -554,15 +556,12 @@ static int clip_on = -1;
 /* profiling on the 3DS (n3ds/pica_c3d.c logs it): one ordering table in sixteen is timed, in system ticks:
    [0] its packets, [1] emit(), [2] the clipping, [3] the texture look-up, [4] the device's triangles */
 int pica_prof_on; unsigned long long pica_prof[6]; unsigned pica_prof_n;
+/* pica_dry (shims/gpu.c DrawOTag, a profiled table): the table's polygons are run through twice before they are
+   drawn, with whole-pass timers and none per primitive (a timer read is a system call on the 3DS, several times a
+   primitive's own cost): 1 the decoder alone (the backend's entry points return at once), 2 the backend as well, its
+   batches dropped where the device would get them */
+int pica_dry;
 unsigned long long pica_ot[4];   /* (shims/gpu.c DrawOTag: ticks in drawn / skipped tables, and how many of each) */
-#ifdef __3DS__
-extern unsigned long long port_ticks(void);
-#define PT() (pica_prof_on ? port_ticks() : 0)
-#define PA(i, t) do { if (pica_prof_on) pica_prof[i] += port_ticks() - (t); } while (0)
-#else
-#define PT() 0
-#define PA(i, t) do { (void)(t); } while (0)
-#endif
 static int clip_poly(const PV *in, int n, PV *out, int axis, float bound, int keep_less) {
     int m = 0;
     for (int i = 0; i < n; i++) {
@@ -615,8 +614,7 @@ static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
 #endif
     }
     const PV *orig = v0; int norig = n;
-    unsigned long long pt = PT(), pc = pt;
-    if (clip_on) { n = clip_tris(v0, n, cl); PA(2, pc); if (!n) { PA(1, pt); return; } v0 = cl; }
+    if (clip_on) { n = clip_tris(v0, n, cl); if (!n) return; v0 = cl; }
     v = v0;
     if (tex) {
         /* the texels the primitive reads: its vertices' bounds */
@@ -627,20 +625,17 @@ static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
         }
         /* (the far edge kept when it is in the page: a magnified sprite's last pixels can sample it) */
         if (u1 > 255 && u0 < 256) u1 = 255; if (w1 > 255 && w0 < 256) w1 = 255;
-        unsigned long long px = PT();
         int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by), ax, ay;
-        PA(3, px);
         if (semi) skinds = prim_kinds(slot, u0, w0, u1, w1, bx, by);
         pica_slot_pos(slot, &ax, &ay);
         s.tex = pica_slot_atlas(slot); s.mod = 1;
         for (int i = 0; i < n; i++) { vv[i] = v0[i]; vv[i].u += (float)(ax - bx); vv[i].v += (float)(ay - by); if (raw) vv[i].r = vv[i].g = vv[i].b = 128; }
         v = vv;
     }
-    if (!tex) { s.blend = semi ? gs->abr : -1; memcpy(batch(&s, n), v, n * sizeof *v); PA(1, pt); return; }
-    if (!semi || !(skinds & 2)) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); PA(1, pt); return; }
+    if (!tex) { s.blend = semi ? gs->abr : -1; memcpy(batch(&s, n), v, n * sizeof *v); return; }
+    if (!semi || !(skinds & 2)) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); return; }
     if (skinds & 1) { s.atest = AT_OPAQUE; memcpy(batch(&s, n), v, n * sizeof *v); }
     s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, n), v, n * sizeof *v);
-    PA(1, pt);
 }
 /* the common primitive: wholly inside the drawing area, so nothing to clip, and its vertices go to the batch once
    (the same triangles as emit() makes of it).  v is changed.  u0..w1: the texels it reads (its vertices' bounds) */
@@ -713,6 +708,7 @@ static void tri_drawn(const PV *v) {
     }
 }
 static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shade, const GpuTex *tex, int semi, int raw) {
+    if (pica_dry == 1) return;
     PV v[3]; const GpuVtx *p[3] = { a, b, c };
     for (int i = 0; i < 3; i++) {
         const GpuVtx *q = shade ? p[i] : a;
@@ -748,6 +744,7 @@ static inline void quad_put(PV *d, const GpuVtx *g, int shade, int du, int dv) {
     }
 }
 static int pica_quad(const GpuVtx *g, int shade, const GpuTex *tex, int semi, int raw) {
+    if (pica_dry == 1) return 1;
     if ((unsigned)(g[0].x | g[1].x | g[2].x | g[3].x) > 1023u || (unsigned)(g[0].y | g[1].y | g[2].y | g[3].y) > 511u || !bulk_in()) return 0;
     PState s = base_state();
     if (!tex) { s.blend = semi ? gs->abr : -1; quad_put(batch(&s, 6), g, shade, 0, 0); return 1; }
@@ -774,6 +771,7 @@ static int pica_quad(const GpuVtx *g, int shade, const GpuTex *tex, int semi, in
     return 1;
 }
 static void pica_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, int u0, int v0, int semi, int raw) {
+    if (pica_dry == 1) return;
     int r = col & 255, g = (col >> 8) & 255, b = (col >> 16) & 255;
     PV v[6];
     put(&v[0], x, y, r, g, b, u0, v0); put(&v[1], x + w, y, r, g, b, u0 + w, v0); put(&v[2], x, y + h, r, g, b, u0, v0 + h);

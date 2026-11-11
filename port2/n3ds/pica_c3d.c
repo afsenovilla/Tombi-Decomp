@@ -352,8 +352,9 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
             extern unsigned long long pica_prof[6]; extern unsigned pica_prof_n;
             if (pica_prof_n) {
                 double k = 1000.0 / SYSCLOCK_ARM11 / pica_prof_n;
-                port_printf("[3ds] profile of %u ordering tables, ms each: packets %.2f (of which emit %.2f: clip %.2f, texture %.2f, device %.2f)\n",
-                            pica_prof_n, pica_prof[0] * k, pica_prof[1] * k, pica_prof[2] * k, pica_prof[3] * k, pica_prof[4] * k);
+                /* (the decoder alone and with the backend are dry passes over the table's primitives before it is drawn) */
+                port_printf("[3ds] profile of %u ordering tables, ms each: drawn %.2f (the device's part %.2f); its primitives through the decoder alone %.2f, the decoder and the backend %.2f\n",
+                            pica_prof_n, pica_prof[0] * k, pica_prof[4] * k, pica_prof[1] * k, pica_prof[2] * k);
             }
             { extern unsigned long long pica_ot[4]; double q = 1000.0 / SYSCLOCK_ARM11;
               port_printf("[3ds] ordering tables: %llu drawn, %.2f ms each; %llu skipped, %.2f ms each\n", pica_ot[2], pica_ot[2] ? pica_ot[0] * q / pica_ot[2] : 0.0,
