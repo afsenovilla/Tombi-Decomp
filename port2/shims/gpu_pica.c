@@ -408,6 +408,10 @@ static int prim_kinds(int slot, int u0, int v0, int u1, int v1, int bx, int by) 
     for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) k |= kc[j * 8 + i];
     return k;
 }
+/* why blocks were decoded (logged): [0] their texels were written, [1] their CLUT changed, [2..4] a block of another
+   texture left its slot for them (256, 128, 64), [5..7] the same, the block that left drawn with in this very frame
+   (more textures in a frame than slots of the size), [8] into a free slot */
+unsigned long long pica_dec_why[9];
 static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, int *oby) {
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
     if (memo.ok && memo.ver == ver_clock && memo.epoch == drawn_epoch && memo.tx == t->tx && memo.ty == t->ty && memo.depth == t->depth
@@ -465,6 +469,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
                   done++;
               }
           } }
+        { int x3, y3, w3, h3; tex_rect(t, tw, bx, by, z, &x3, &y3, &w3, &h3); pica_dec_why[blocks_ver(x3, y3, w3, h3) <= s->tver ? 1 : 0]++; }
         was = s->used;   /* (stale: decoded again in its slot) */
     } else {
         int a = z == 256 ? 0 : z == 128 ? PICA_N256 : PICA_N256 + PICA_N128;
@@ -486,6 +491,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
         }
         v = tex_ver(t, tw, bx, by, z);
         was = slots[i].live ? slots[i].used : 0;
+        { int zi = z == 256 ? 0 : z == 128 ? 1 : 2; pica_dec_why[!slots[i].live ? 8 : was > frame_clock ? 5 + zi : 2 + zi]++; }
         slots[i] = (Slot){ .tx = t->tx, .ty = t->ty, .depth = t->depth, .cx = cx, .cy = cy, .tw = tw, .bx = bx, .by = by, .live = 1, .next = hhead[hk] };
         hhead[hk] = (short)i;
     }
@@ -833,6 +839,8 @@ static int pica_start(void) {
     return 0;
 }
 static void pica_stop(void) {
+    port_printf("[gpu] pica: decodes: %llu texels written, %llu CLUT changed, %llu/%llu/%llu took a slot (256/128/64), %llu/%llu/%llu took one used in the frame, %llu free\n",
+                pica_dec_why[0], pica_dec_why[1], pica_dec_why[2], pica_dec_why[3], pica_dec_why[4], pica_dec_why[5], pica_dec_why[6], pica_dec_why[7], pica_dec_why[8]);
     port_printf("[gpu] pica: %llu batches, %llu triangles, %llu texture decodes, %llu read-backs (%llu for textures, %llu for the host: %llu pixels)\n",
                 st_batches, st_tris, st_decodes, st_readbacks, st_rb_tex, st_rb_host, st_rb_px);
 }

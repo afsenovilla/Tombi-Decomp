@@ -9,21 +9,23 @@
 /* texture cache slots: square blocks of a texture page + CLUT, in three sizes (a sprite's primitives rarely need more
    than a 64 x 64 block of their page, and an area uses many more page + CLUT pairs than whole pages fit in memory),
    in two atlases, so a change of texture seldom ends a batch of triangles:
-   atlas 0 (1024 x 1024): N128 slots of 128 x 128 in its upper half, N64 of 64 x 64 in its lower half;
-   atlas 1 (1024 x 512): N256 slots of 256 x 256.  Slots are numbered 256s first, then 128s, then 64s. */
-#define PICA_ATLAS 1024                    /* (both atlases' width; atlas 1 is half as tall) */
+   atlas 0 (1024 x 1024): N128 slots of 128 x 128 in its upper half, the first 128 of 64 x 64 in its lower half;
+   atlas 1 (1024 x 1024): N256 slots of 256 x 256 in its upper half, the other 128 of 64 x 64 in its lower half (the
+   first area draws with more than 128 small blocks in a frame in places: each took the slot of one in use, 63
+   decodes and uploads a frame on an Old 3DS).  Slots are numbered 256s first, then 128s, then 64s. */
+#define PICA_ATLAS 1024                    /* (both atlases are this square) */
 #define PICA_N256 8
 #define PICA_N128 32
-#define PICA_N64 128
+#define PICA_N64 256
 #define PICA_SLOTS (PICA_N256 + PICA_N128 + PICA_N64)
 static inline int pica_slot_size(int slot) { return slot < PICA_N256 ? 256 : slot < PICA_N256 + PICA_N128 ? 128 : 64; }
-static inline int pica_slot_atlas(int slot) { return slot < PICA_N256; }
+static inline int pica_slot_atlas(int slot) { return slot < PICA_N256 || slot >= PICA_N256 + PICA_N128 + 128; }
 static inline void pica_slot_pos(int slot, int *x, int *y) {   /* its corner in its atlas */
     if (slot < PICA_N256) { *x = (slot & 3) * 256; *y = (slot >> 2) * 256; return; }
     slot -= PICA_N256;
     if (slot < PICA_N128) { *x = (slot & 7) * 128; *y = (slot >> 3) * 128; return; }
     slot -= PICA_N128;
-    *x = (slot & 15) * 64; *y = 512 + (slot >> 4) * 64;
+    *x = (slot & 15) * 64; *y = 512 + ((slot >> 4) & 7) * 64;
 }
 enum { AT_OFF, AT_NOTZERO, AT_OPAQUE, AT_SEMI };   /* alpha test: off, alpha != 0, == PICA_A_OPAQUE, == PICA_A_SEMI */
 typedef struct { float x, y, u, v; unsigned char r, g, b, a; } PV;   /* u, v: texels of the atlas */

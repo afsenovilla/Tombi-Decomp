@@ -22,7 +22,7 @@
 #include "gpu_pica.h"
 #include "pica_vsh_shbin.h"
 
-static C3D_Tex vram_tex, atlas_tex[2];   /* the texture cache: 1024 x 1024 and 1024 x 512 (shims/gpu_pica.h) */
+static C3D_Tex vram_tex, atlas_tex[2];   /* the texture cache: two of 1024 x 1024 (shims/gpu_pica.h) */
 static C3D_RenderTarget *vram_rt, *top_rt, *bot_rt;
 static C3D_Tex panel_tex;                 /* the bottom screen's panel (runtime/panel.c), 512 x 256, its canvas in the corner */
 static int panel_w, panel_h;
@@ -191,7 +191,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
         if (all || s->blend != l->blend) set_blend(s->blend);
         if (s->tex >= 0 && (all || s->tex != l->tex)) {
             C3D_TexBind(0, &atlas_tex[s->tex]);
-            set_tscale(1.0f / (float)PICA_ATLAS, s->tex == 1 ? 2.0f / (float)PICA_ATLAS : 1.0f / (float)PICA_ATLAS);
+            set_tscale(1.0f / (float)PICA_ATLAS, 1.0f / (float)PICA_ATLAS);
         }
         last_st = *s; last_ok = 1;
     }
@@ -336,6 +336,12 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     if (st_frames % TK_N == 0) {
         port_printf("[3ds] pica: per frame %.2f texture uploads (%.2f waited for the GPU; decoding %.2f ms), %.2f read-backs\n",
                     (double)n_up / TK_N, (double)n_wait / TK_N, pica_decode_us / 1000.0 / TK_N, (double)n_rd / TK_N);
+        {   extern unsigned long long pica_dec_why[9]; extern int port_current_area(void);
+            static unsigned long long last[9]; unsigned long long d[9];
+            for (int i = 0; i < 9; i++) { d[i] = pica_dec_why[i] - last[i]; last[i] = pica_dec_why[i]; }
+            port_printf("[3ds] pica: area %d; decodes in these %d presents: %llu texels written, %llu CLUT changed, %llu/%llu/%llu took a slot (256/128/64), %llu/%llu/%llu took one used in the frame, %llu free\n",
+                        port_current_area(), TK_N, d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7], d[8]);
+        }
         for (unsigned i = 0; i < 4 && i < n_rd; i++) port_printf("[3ds] pica: read-back %d,%d %dx%d\n", rd_log[i][0], rd_log[i][1], rd_log[i][2], rd_log[i][3]);
         { extern unsigned long long port_sound_underruns(void); unsigned long long u = port_sound_underruns();
           if (u) port_printf("[3ds] sound: the mixer thread was %llu samples short in these %d presents\n", u, TK_N); }
@@ -500,7 +506,7 @@ static int c3d_start(void) {
                               GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(scr_fmt) |
                               GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
     for (int i = 0; i < 2; i++) {
-        int h = i ? PICA_ATLAS / 2 : PICA_ATLAS;
+        int h = PICA_ATLAS;
         if (!C3D_TexInit(&atlas_tex[i], PICA_ATLAS, (u16)h, GPU_RGBA8)) { port_printf("[3ds] pica: texture atlas %d failed\n", i); return -1; }
         C3D_TexSetFilter(&atlas_tex[i], GPU_NEAREST, GPU_NEAREST);
         C3D_TexSetWrap(&atlas_tex[i], GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
