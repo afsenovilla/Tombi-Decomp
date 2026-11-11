@@ -61,6 +61,13 @@ final class Library {
         if ("SLPS-01144".equals(serial)) return new int[]{10};
         return new int[0];
     }
+    /** the languages the port adds to a PAL disc from the other PAL disc's set (the two discs share every game file;
+     *  the port runs all nine from either: tools/game_library.py PORT_EXTRA_FLAGS), drawn after a "+" */
+    static int[] extraFlagsOf(String serial) {
+        if ("SCES-01331".equals(serial)) return new int[]{1, 2, 3, 4};
+        if ("SCES-01330".equals(serial)) return new int[]{5, 6, 7, 8};
+        return new int[0];
+    }
     static Version bySha1(String s) { for (Version v : VERSIONS) if (v.sha1.equalsIgnoreCase(s)) return v; return null; }
     static Version byKey(String k) { for (Version v : VERSIONS) if (v.key.equals(k)) return v; return null; }
 

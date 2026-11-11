@@ -1912,11 +1912,20 @@ public class LauncherActivity extends Activity {
         }
         /** the disc's languages as flags in a row from x, centred on cy; returns the right end (x when none) */
         float flags(Library.Game g, float x, float cy, float h) {
-            int[] f = Library.flagsOf(g.serial);
+            int[] f = Library.flagsOf(g.serial), e = Library.extraFlagsOf(g.serial);
             for (int n : f) { drawFlag(n, x, cy - h / 2, h); x += h * 1.5f + 5; }
+            if (e.length > 0) {   // "+" and the languages the port adds (same size)
+                text(nunito, h * 0.95f, SUB); p.setTextAlign(Paint.Align.CENTER);
+                canvas.drawText("+", x + h * 0.45f, cy + h * 0.34f, p);
+                x += h * 0.9f + 6;
+                for (int n : e) { drawFlag(n, x, cy - h / 2, h); x += h * 1.5f + 5; }
+            }
             return f.length > 0 ? x - 5 : x;
         }
-        float flagsWidth(Library.Game g, float h) { int n = Library.flagsOf(g.serial).length; return n == 0 ? 0 : n * (h * 1.5f + 5) - 5; }
+        float flagsWidth(Library.Game g, float h) {
+            int n = Library.flagsOf(g.serial).length, e = Library.extraFlagsOf(g.serial).length;
+            return n == 0 ? 0 : n * (h * 1.5f + 5) - 5 + (e == 0 ? 0 : h * 0.9f + 6 + e * (h * 1.5f + 5));
+        }
 
         float tag(String t, float x, float cy, int bg, int fg) {
             text(nunito, 14, fg); p.setTextAlign(Paint.Align.LEFT);
