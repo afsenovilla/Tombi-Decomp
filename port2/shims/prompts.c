@@ -326,7 +326,11 @@ static int black_box(u8 *p, int stride, int w, int h, int bx0, int by0, int bw, 
     for (int y = 0; y < bh; y++) for (int x = 0; x < bw; x++) {
         int dx = 2 * x + 1 - bw, dy = 2 * y + 1 - bh, d = bw < bh ? bw : bh;   /* in half pixels, from the middle */
         int xx = bx0 + x, yy = by0 + y;
-        if (dx * dx + dy * dy > d * d + d / 2 || xx < 0 || xx >= w || yy < 0 || yy >= h) continue;
+        if (xx < 0 || xx >= w || yy < 0 || yy >= h) continue;
+        if (src >= SRC_L1) {   /* L, R: a shoulder button, wider than tall, its corners rounded */
+            int ex = x < bw - 1 - x ? x : bw - 1 - x, ey = y < bh - 1 - y ? y : bh - 1 - y;
+            if (ex + ey < 2) continue;
+        } else if (dx * dx + dy * dy > d * d + d / 2) continue;
         p[yy * stride + xx] = 7;
     }
     if (port_prompt_big >= 5) {   /* the rim: 5 a grey ring, 6 lit from the upper left (light there, dark opposite) */
@@ -347,12 +351,13 @@ static int black_box(u8 *p, int stride, int w, int h, int bx0, int by0, int bw, 
         { 'B', { 0x3E, 0x33, 0x33, 0x3E, 0x33, 0x33, 0x33, 0x3E } },
         { 'X', { 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x1E, 0x33, 0x33 } },
         { 'Y', { 0x33, 0x33, 0x1E, 0x0C, 0x0C, 0x0C, 0x0C, 0x0C } },
-        { 'L', { 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x3F, 0x3F } },
-        { 'R', { 0x3E, 0x33, 0x33, 0x3E, 0x3C, 0x36, 0x33, 0x33 } },
+        { 'L', { 0x30, 0x30, 0x30, 0x30, 0x3F, 0x3F, 0, 0 } },   /* (L, R: six rows, black above and below them in the shoulder button) */
+        { 'R', { 0x3E, 0x33, 0x3E, 0x3C, 0x36, 0x33, 0, 0 } },
     };
-    int lx = bx0 + (bw - 6) / 2, ly = by0 + (bh - 8) / 2;
+    const int lh = src >= SRC_L1 ? 6 : 8;
+    int lx = bx0 + (bw - 6) / 2, ly = by0 + (bh - lh) / 2;
     for (unsigned i = 0; i < sizeof bold6 / sizeof bold6[0]; i++) if (bold6[i].ch == ch)
-        for (int y = 0; y < 8; y++)
+        for (int y = 0; y < lh; y++)
             for (int x = 0; x < 6; x++) {
                 int xx = lx + x, yy = ly + y;
                 if ((bold6[i].rows[y] >> (5 - x) & 1) && xx >= 0 && xx < w && yy >= 0 && yy < h) p[yy * stride + xx] = 15 | 0x80;
@@ -417,7 +422,7 @@ static int draw(int ps, int src, int style) {   /* returns 1 + the port CLUT row
     static const int xb_col[4] = { P_XGREEN, P_XRED, P_XBLUE, P_XYELLOW };   /* port CLUT */
     draw_disc();
     if (src == SRC_NONE) return 0;
-    if (port_prompt_big >= 4 && style != PROMPT_PS && (src == SRC_L1 || src == SRC_R1)) return black_box(&img[0][0], GW, GW, GH, 0, 2, 12, 12, src);
+    if (port_prompt_big >= 4 && style != PROMPT_PS && (src == SRC_L1 || src == SRC_R1)) return black_box(&img[0][0], GW, GW, GH, 0, 3, 12, 10, src);
     if (src >= SRC_L1) {
         const char *t = style == PROMPT_XBOX ? xb_sh[src - SRC_L1] : style == PROMPT_NINTENDO || THORISH(style) || style == PROMPT_CUSTOM ? nt_sh[src - SRC_L1] : ps_sh[src - SRC_L1];
         if (style == PROMPT_PS || style == PROMPT_GENERIC) { label(t, C_CREAM); return 0; }
@@ -577,7 +582,7 @@ static int mi_draw(int i, int w, int h) {
     if (port_prompt_big == 1 && src < 4 && st != PROMPT_PS) return big_letter(&mimg[0][0], MW, w, h, cx2, cy2, src);
     if (port_prompt_big >= 4 && src <= SRC_R1 && st != PROMPT_PS) {   /* (the icon's whole box, at most 14 x 14 round the original's middle) */
         int bw = d + 2 < w ? d + 2 : w, bh, bx, by;   /* (two pixels wider than the original's disc, inside the icon) */
-        if (bw > h) bw = h; bh = bw; bx = cx2 / 2 - bw / 2; by = cy2 / 2 - bh / 2;
+        if (bw > h) bw = h; bh = src >= SRC_L1 && bw > 10 ? 10 : bw; bx = cx2 / 2 - bw / 2; by = cy2 / 2 - bh / 2;
         if (bx < 0) bx = 0; if (by < 0) by = 0; if (bx + bw > w) bx = w - bw; if (by + bh > h) by = h - bh;
         return black_box(&mimg[0][0], MW, w, h, bx, by, bw, bh, src);
     }
