@@ -55,17 +55,18 @@ void func_800EB714(O *o)
 
 void func_800EB7C8(void)
 {
+    /* per area (GAME.selectedArea); the retail jump table at the overlay start has the default for areas 2, 5, 8
+       and 11 (the first link of the JP programs found the cases numbered 0..8) */
     switch (GAME) {
     case 0: func_80116E08_slps01144(); break;
     case 1: func_80116F70(); break;
-    case 2: func_80117764(); break;
-    case 3: func_80118EE4(); break;
-    case 4: func_80115C70(); break;
-    case 5: func_80115198(); break;
-    case 6: func_8011735C(); break;
-    case 7: func_801165C0(); break;
-    case 8: func_801151F8(); break;
-    case 12: break;
+    case 3: func_80117764(); break;
+    case 4: func_80118EE4(); break;
+    case 6: func_80115C70(); break;
+    case 7: func_80115198(); break;
+    case 9: func_8011735C(); break;
+    case 10: func_801165C0(); break;
+    case 12: func_801151F8(); break;
     }
 }
 #endif

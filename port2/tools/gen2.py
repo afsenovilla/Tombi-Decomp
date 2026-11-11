@@ -420,6 +420,8 @@ def sources(outdir, progs):
     for name in ("inc", "inc24", "inc26"):          # materialised header copies of the previous run
         shutil.rmtree(os.path.join(outdir, name), ignore_errors=True)
     isarea = lambda p: re.match(r"X0\d\d$", p) and p != "X000"
+    # a SYSTEM overlay the version lacks (JP: no G0OVER) is not built
+    progs = [p for p in progs if p in sysovl.SYSOVL or isarea(p) or p in ("MAIN0", "X000") or PV.PAL]
     base = [p for p in progs if p not in sysovl.SYSOVL and not isarea(p)]
     GP.sources(outdir, base, [p for p in progs if p in sysovl.SYSOVL], [p for p in progs if isarea(p)])
     # the BIOS memory-card file system (open/read/write/... on "bu00:") must not shadow the host libc's calls

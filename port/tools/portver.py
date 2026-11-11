@@ -3,7 +3,7 @@
 
 `PORT_VERSION` (environment; port2/CMakeLists.txt passes its cache variable of the same name) picks the disc:
 unset, `pal` or `sces01331` is the PAL reference (everything as before); `usa` / `scus94236` is the USA retail
-(SCUS-94236).  port/tools/gen_port.py and port2/tools/gen2.py import this module first; for a version other than
+(SCUS-94236); `jp` / `slps01144` the Japanese retail (SLPS-01144, the same layout as USA without GOVER).  port/tools/gen_port.py and port2/tools/gen2.py import this module first; for a version other than
 PAL, install() makes the PAL-shaped tables of tools/units.py, tools/sysovl.py and tools/areas.py describe that
 version's files, so the generator keeps the PAL program names (MAIN0, X000, X0nn, D0SPSUB, ...) that the runtime,
 the fixes and the reports use:
@@ -22,7 +22,7 @@ import versions as V
 
 VER = V.canon(os.environ.get("PORT_VERSION") or V.REFERENCE)
 PAL = VER == V.REFERENCE
-SUPPORTED = (V.REFERENCE, "scus94236")
+SUPPORTED = (V.REFERENCE, "scus94236", "slps01144")
 if VER not in SUPPORTED:
     sys.exit("portver: PORT_VERSION=%s is not supported by the port yet (supported: %s)" % (VER, ", ".join(SUPPORTED)))
 SERIAL = "SCES_01331" if PAL else V.VERSIONS[VER]["serial"]
@@ -39,13 +39,20 @@ if PAL:
     BOOT_SHA1 = "bec8dc5f4116f5e497f2337eef8c523ff6dee8fc"
     HZ = 50
 else:
+    # per version: the boot exe, the overlay base and the X00 prefix every area overlay repeats, the SYSTEM code
+    # overlays (tools/versions.py), the boot exe's sha1 (tools/extract_data.py VERSION_OF), where its Psy-Q part starts
+    _VER = {"scus94236": ("SCUS_942.36", V.USA_OVL, V.USA_SHARED, V.USA_SYSOVL,
+                          "81cbc79f0230aeb4252e058039f47ac95a777f5a", 0x8005B38C),
+            "slps01144": ("SLPS_011.44", V.JP_OVL, V.JP_SHARED, V.JP_SYSOVL,
+                          "07d577698ad31ec1a69b9d7b80a7c3f90b650888", 0x80059E4C)}[VER]
     GAME = os.path.join(ROOT, V.VERSIONS[VER]["game"])
-    MAIN_EXE = os.path.join(GAME, "SCUS_942.36")
+    MAIN_EXE = os.path.join(GAME, _VER[0])
     X000_BIN = os.path.join(GAME, "SYSTEM", "X00.BIN")
-    OVL_BASE = V.USA_OVL
-    AREA_OWN = V.USA_OVL + V.USA_SHARED
-    BOOT = "SCUS_942.36"
-    BOOT_SHA1 = "81cbc79f0230aeb4252e058039f47ac95a777f5a"
+    OVL_BASE = _VER[1]
+    AREA_OWN = _VER[1] + _VER[2]
+    SYSOVL = _VER[3]
+    BOOT = _VER[0]
+    BOOT_SHA1 = _VER[4]
     HZ = 60
 OVL_END = 0x80140000                  # the load buffers above the overlay region (both versions)
 MAIN_LOAD = 0x80010000
@@ -57,7 +64,7 @@ if PAL:
 else:
     PROG = {"MAIN0": VER, "X000": "x00"}
     PROG.update(("X%03d" % n, "x%02d" % n) for n in AREAS)
-    PROG.update((pal.upper(), usa) for usa, pal in V.USA_SYSOVL.items())
+    PROG.update((pal.upper(), usa) for usa, pal in SYSOVL.items())
 VPROG = {v: k for k, v in PROG.items()}
 
 
@@ -75,15 +82,16 @@ def bins():
     """{PAL prog: (path relative to ROOT, load address)} of the version's files (tools/units.py BINS shape)"""
     if PAL: return None
     g = os.path.relpath(GAME, ROOT)
-    out = {"MAIN0": (os.path.join(g, "SCUS_942.36"), MAIN_LOAD - 0x800),
+    out = {"MAIN0": (os.path.join(g, BOOT), MAIN_LOAD - 0x800),
            "X000": (os.path.join(g, "SYSTEM", "X00.BIN"), OVL_BASE)}
     for n in AREAS: out["X%03d" % n] = (os.path.join(g, "SYSTEM", "X%02d.BIN" % n), OVL_BASE)
-    for usa, pal in V.USA_SYSOVL.items(): out[pal.upper()] = (os.path.join(g, "SYSTEM", usa.upper() + ".BIN"), OVL_BASE)
+    for usa, pal in SYSOVL.items(): out[pal.upper()] = (os.path.join(g, "SYSTEM", usa.upper() + ".BIN"), OVL_BASE)
     return out
 
 
 _UNITS = None
-LIB_FROM = 0x8005B38C     # USA: the Psy-Q libraries start here in the boot exe (FlushCache, the first BIOS call)
+# the Psy-Q libraries start here in the boot exe (FlushCache, the first BIOS call; USA 0x8005B38C, JP 0x80059E4C)
+LIB_FROM = 0x8005B38C if PAL else _VER[5]
 
 
 def version_units():
@@ -148,7 +156,12 @@ def install():
         lo = OVL_BASE if p != "MAIN0" else 0x80010000
         UM.RANGES[p] = (lo, 0x80200000)
     SO.BASE = OVL_BASE
-    for usa, pal in V.USA_SYSOVL.items():
+    # a PAL SYSTEM overlay the version does not have (JP: no GOVER) leaves the generator's tables
+    for p in [p for p in SO.SYSOVL if p.lower() not in SYSOVL.values()]:
+        del SO.SYSOVL[p]
+    SO.PROGS[:] = list(SO.SYSOVL)
+    SO.PROG_RE = "|".join(sorted(SO.PROGS, key=len, reverse=True))
+    for usa, pal in SYSOVL.items():
         path = os.path.join(GAME, "SYSTEM", usa.upper() + ".BIN")
         us = version_units().get(pal.upper(), [])
         first = min((u.addr for u in us), default=OVL_BASE)
@@ -176,7 +189,9 @@ def header_h():
     syms = full_syms()
     def a(n, pal):
         if PAL: return pal
-        if n not in syms: sys.exit("portver: %s has no address in %s" % (n, FULL))
+        if n not in syms:
+            if 0x1F800000 <= pal < 0x1F800400: return pal      # the scratchpad: the same layout in every release
+            sys.exit("portver: %s has no address in %s" % (n, FULL))
         return syms[n]
     # the retail data the runtime's debug features read or poke (runtime/debugmenu.c, the --poke NAME[+OFF] forms of
     # shims/psyq.c, the launchers' mods): GAME (its field offsets are the same in every release), GVARS before it, the
@@ -188,6 +203,7 @@ def header_h():
              "#ifndef PORT_VERSION_H", "#define PORT_VERSION_H",
              '#define PORT_VERSION_KEY "%s"' % VER, '#define PORT_VERSION_SERIAL "%s"' % SERIAL.replace("_", "-"),
              "#define PORT_VERSION_PAL %d" % PAL, "#define PORT_VERSION_USA %d" % (VER == "scus94236"),
+             "#define PORT_VERSION_JP %d" % (VER == "slps01144"),
              '#define PORT_BOOT_FILE "%s"' % BOOT, '#define PORT_BOOT_SHA1 "%s"' % BOOT_SHA1,
              "#define PORT_DEFAULT_HZ %d" % HZ,
              "#define PORT_MAIN0_LOAD 0x%08Xu" % MAIN_LOAD, "#define PORT_OVL_BASE 0x%08Xu" % OVL_BASE,

@@ -870,6 +870,8 @@ src/d0spsub3/subScreenDrawPageNumber.c | SUBSCREEN_DRAW_PARAMS.y = 232; | SUBSCR
 # USA (SCUS-94236, PORT_VERSION=usa): the matched main() is the port's main loop (port_game_main); its frame wait spins on
 # the vblank counter, which only port_vblank advances on the PC
 src/main_scus94236.c | while (((Task*)0x1F8001D4)->unk14 < targetFrame) { | while (((Task*)0x1F8001D4)->unk14 < targetFrame) { extern void port_vblank(void); port_vblank();
+# JP (SLPS-01144, PORT_VERSION=jp): the same for its matched main() (src/func_80015D1C_slps01144.c)
+src/func_80015D1C_slps01144.c |         while (SP_1E8 < target); |         while (SP_1E8 < target) { extern void port_vblank(void); port_vblank(); }
 # loopTitleScreen's USA branch: the declarations of the title-menu fixes above (their other edits reach the shared lines)
 src/loopTitleScreen.c | extern unsigned short D_80076E80[]; | extern unsigned short D_80076E80[]; extern int port_title_debug, port_title_extra; extern unsigned char port_title_angles[]; extern void port_title_debug_go(void); extern int port_title_quit_go(int), port_lx_title_tick(void); extern unsigned char DAT_1f8001b4;
 # the USA message box (0x8002FA24, a psx_tomba port that only the report checks: no symbol line, so no full-link object

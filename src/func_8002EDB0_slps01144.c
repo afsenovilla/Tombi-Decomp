@@ -170,7 +170,7 @@ O *printInfoMessage(int a, int b)
             if ((unsigned short)(k + 2) < 2) return o;
             if (flag == 0 || (short)k == -12) {
                 switch ((short)k) {
-                case -4:
+                case -3:            /* (the retail jump table: -4 is a no-op like -7 .. -1; the first JP link said -4) */
                     FCE = FBE + 8;
                     FD0 = FD0 + 13;
                     break;
@@ -216,7 +216,7 @@ O *printInfoMessage(int a, int b)
                     if ((k & 0x7000) == 0x5000 || (k & 0x7000) != 0x6000)
                         FCE += D_800A7926[g * 10];
                     break;
-                case -7: case -3: case -2: case -1:
+                case -7: case -4: case -2: case -1:
                     break;
                 }
             }

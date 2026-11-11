@@ -256,6 +256,31 @@ def load_chunks(p):
     return chunks
 
 
+def data_unit_ranges(p):
+    """[(start, end)] of the splat 'functions' of a version program that are data (config/<ver>/data_units.txt):
+    splat disassembled them as code, and a table can read as a MIPS III instruction (dsll32, sd, ddiv: JP x14's
+    placement tables) that the R3000 assembler refuses or widens; their lines are assembled as words"""
+    if not VER: return []
+    f = os.path.join(ROOT, "config", VER, "data_units.txt")
+    out = []
+    for l in (open(f) if os.path.exists(f) else ()):
+        w = l.split()
+        if len(w) >= 3 and not l.startswith("#") and w[0] == p:
+            out.append((int(w[1], 16), int(w[1], 16) + int(w[2])))
+    return out
+
+
+WORD_LINE = re.compile(r"^(\s*/\* [0-9A-F]+ [0-9A-F]{8} ([0-9A-F]{8}) \*/)\s*(.*)$")
+
+
+def as_word(text):
+    """a splat instruction line as the `.word` of its bytes (the comment holds them in file order)"""
+    m = WORD_LINE.match(text)
+    if not m or m.group(3).startswith(".word"): return text
+    h = m.group(2)
+    return "%s .word 0x%s%s%s%s" % (m.group(1), h[6:8], h[4:6], h[2:4], h[0:2])
+
+
 def read_auto_syms(p):
     out = {}
     for k in ("funcs", "syms"):
@@ -676,6 +701,7 @@ def build_prog(p, units):
     lines = ['.include "macro.inc"', ".set noat", ".set noreorder"]
     order = []   # (start, end, 'asm', section name) / c items
     pos, ci, nsec = vram, 0, 0
+    dranges = data_unit_ranges(p)
     removed = {}
     citems = items + [(end, end, "end", None)]
     k = 0
@@ -690,7 +716,7 @@ def build_prog(p, units):
                 for l in labels:
                     if not l.startswith(".L") and l not in cdefs: lines.append(".global %s" % l)
                     lines.append("%s:" % l)
-                lines.append(text)
+                lines.append(as_word(text) if any(lo <= a < hi for lo, hi in dranges) else text)
                 k += 1
             lines.append(".org 0x%x" % (it[0] - pos))
             order.append((pos, it[0], "asm", sec))
