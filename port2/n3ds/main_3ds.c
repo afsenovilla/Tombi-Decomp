@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
     /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
        NOW LOADING until gameplay, then status / events / map / items, by touch */
     args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240";
-    args[n++] = "--log-fps"; args[n++] = "--prompt-big";   /* (the button prompts: the letter alone, bold: shims/prompts.c) */                        /* a line a second in log.txt: where a frame's time goes on this console */
+    args[n++] = "--log-fps"; args[n++] = "--prompt-big"; args[n++] = "2";   /* (the button prompts: a black disc, the letter white and bold: shims/prompts.c) */                        /* a line a second in log.txt: where a frame's time goes on this console */
     { extern int port_panel_canvas_out; port_panel_canvas_out = 1; }
     FILE *f = fopen(DIR_ "/args.txt", "r");
     if (f) {
