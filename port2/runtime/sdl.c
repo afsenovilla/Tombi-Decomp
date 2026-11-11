@@ -325,6 +325,14 @@ static unsigned short ctrl_state(void) {
 extern int port_prompt_option, port_prompt_style, port_prompt_src[4], port_prompt_map_fixed;
 static void prompts_update(void) {
     static const unsigned short face[4] = { P_CROSS, P_CIRCLE, P_SQUARE, P_TRI };
+#ifdef __3DS__
+    /* the console's own buttons, by place (ctrl_state): B, A, Y, X as Nintendo letters; a prompt was a blank disc */
+    if (!port_prompt_map_fixed) for (int f = 0; f < 4; f++) port_prompt_src[f] = f;
+    if (port_prompt_option == -1) port_prompt_style = 2;
+    (void)face;
+    port_printf("[port2] button prompts: nintendo, by place\n");
+    return;
+#endif
     if (!port_prompt_map_fixed)
         for (int f = 0; f < 4; f++) {
             int src = 8;                                       /* none */
