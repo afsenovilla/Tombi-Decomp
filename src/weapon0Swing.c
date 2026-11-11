@@ -453,7 +453,7 @@ void func_800327F8(TObj *o)
     }
     if (PLAYER.bac >= 2) {
         char pad[16];
-        BITTEN_OBJECT = PLAYER.de4;
+        { extern unsigned char *D_800A7C4C; BITTEN_OBJECT = D_800A7C4C; }   /* JP: PLX.p611c, PLAYER + 0xD4 */
         PLAYER_EXT->b8 = 0;
         PLAYER.step = 14;
         PLAYER.ba5 = 0;

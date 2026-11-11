@@ -130,6 +130,10 @@ void freeObjectByLayer(s32* self)
 const char BUILD_DATE[] asm("D_80010000") = "98/3/22";
 
 const char BUILD_TIME[] asm("D_80010008") = "21:11";
+#elif defined(VERSION_SLPS_01144)  /* the JP build stamp */
+const char BUILD_DATE[] asm("D_80010000") = "97/12/2";
+
+const char BUILD_TIME[] asm("D_80010008") = "10:25";
 #else
 const char BUILD_DATE[] asm("D_80010000") = "98/8/26";
 

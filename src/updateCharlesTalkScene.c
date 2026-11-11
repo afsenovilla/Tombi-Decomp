@@ -13,13 +13,8 @@ extern short D_800A7B8A[], PLAYER_Y[], PLAYER_Z[];
 extern unsigned char DAT_8009d00dA[];
 extern unsigned char *PLAYER_EXT;
 extern void *NPC_CHARLES_ANIMS, *PTR_8013ac18, *PTR_8013ac20, *PTR_8013ac24, *PTR_8013ac2c;
-static char DAT_801396ca[98] = {
-    8, 3, 0, 0x12, 0, 0, -0x7d, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 1, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1, 0, 0, 0, 0,
-    0x68, 0, 0, 1, -0x80, 0, -1, 1, 0, 0, -0x79, 0, 0, 0, 0, 1,
-    0, 0, 0, 1, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -0x7b, 0, 0, 1,
-    0, 1, 0x68, 0, 0x68, 0, -0x78, 0, -0x80, 0, -1, 1, 0, 0, -1, 0x7f,
-};
+extern char D_80137BA6[];   /* JP: other contents; the retail table at its JP address */
+#define DAT_801396ca D_80137BA6
 extern char PLAYER_IDLE_ANIM[];
 extern int showMessageBox(int, int, int, int);
 extern void AnimLoadDuration(TObj *);

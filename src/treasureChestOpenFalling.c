@@ -1,9 +1,14 @@
 // FUNC 801125e8 636 X000
 // MATCHING 801125e8 636
 #include "TOBJ.H"
+#if defined(VERSION_SLPS_01144)  /* JP: other contents; the retail table at its JP address */
+extern char D_80114F90[];
+#define DAT_80115d28 D_80114F90
+#else
 static char DAT_80115d28[20] = {
     3, 7, -0x80, 4, 0, 0, 3, 7, -0x80, 5, 0, 0, -1,
 };
+#endif
 extern void **TREASURE_CHEST_A3S9_ANIM_SETS[];
 extern void **TREASURE_CHEST_ANIM_SETS[];
 extern int DAT_8009c960[];

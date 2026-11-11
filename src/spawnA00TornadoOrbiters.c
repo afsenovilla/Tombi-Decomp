@@ -18,6 +18,9 @@ extern P *FUN_80018448(void);
 #if defined(VERSION_SCUS_94236)  /* USA: the PAL pointers are other addresses; the retail table at its USA address */
 extern int D_8013A504[];
 #define DAT_8013b1bc D_8013A504
+#elif defined(VERSION_SLPS_01144)  /* JP: the same */
+extern int D_80138E2C[];
+#define DAT_8013b1bc D_80138E2C
 #else
 static int DAT_8013b1bc[4] = {
     -2146191672, -2146191664, -2146191656, -2146191648,

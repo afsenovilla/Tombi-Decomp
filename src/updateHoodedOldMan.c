@@ -417,7 +417,7 @@ void func_80133618(TObj *o)
             o->wb6++;
             break;
         case 26:
-            GCD.bcdad = 0xff;
+            ((unsigned char *)&GCD)[0xa3] = 0xff;   /* (JP: GCD + 0xA3 by the retail store, PAL writes bcdad) */
             o->wb6++;
             break;
         case 27:

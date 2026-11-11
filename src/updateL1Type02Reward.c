@@ -45,6 +45,8 @@ void updateThrownObject(u8* self);
 
 void func_8003F78C(u8* self);
 
+void AnimLoadDuration(u8 *);
+int ObjCullRegister(u8 *);
 void func_8003D318(u8* self)
 {
     u8* obj;
@@ -70,15 +72,15 @@ void func_8003D318(u8* self)
             *(s16*)(self + 0x1E) = 8;
             *(int*)(self + 0x24) = D_80134D0C;
         }
-        func_80022E44(self);
+        AnimLoadDuration(self);   /* (JP: PAL's func_80022E44 is two functions here, by the retail calls) */
         break;
     case 1:
-        if (func_80022E44(self) != 0) {
+        if (ObjCullRegister(self) != 0) {
             func_8003F78C(self);
         }
         break;
     case 2:
-        if (func_80022E44(self) != 0) {
+        if (ObjCullRegister(self) != 0) {
             if (GAME.selectedArea == 4) {
                 D_8009CEFB++;
                 func_80126760(self[3]);

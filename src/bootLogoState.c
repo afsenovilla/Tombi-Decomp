@@ -15,6 +15,7 @@ extern void queueSystemLoadList(int, int);
 extern void func_800E8A14(void);
 extern void func_800E8A2C(void);
 extern void initDisplay(int, int, int);
+extern void func_80016244(char, char, char);
 extern void initWideDisplayEnv(int, int, int, int);
 extern void ThreadCreate(int, void *);
 extern void stopBgm(int);
@@ -67,7 +68,7 @@ void func_80018BE0(void)
         if (--TASK_C->w58 > 0) break;
         stopBgm(0);
         SetDispMask(0);
-        initDisplay(0, 0, 0);
+        func_80016244(0, 0, 0);   /* (JP: the 320x224 twin of initDisplay, by the retail jal) */
         LOAD_COMPLETE_SYM = 0;
         loadSoundSet(2);
     next:

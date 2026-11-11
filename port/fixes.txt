@@ -936,6 +936,9 @@ src/o0ptsub0/titleDrawMenuCarousel_scus94236.c | m.x = 0x70; | m.x = port_title_
 @version jp
 # --skip-intro: the JP boot logo state is func_80018BE0 (its JP branch of src/bootLogoState.c)
 src/bootLogoState.c | void func_80018BE0(void) | extern int port_skip_movies; void func_80018BE0(void)
+# --cut-content is PAL-only (off in this build): the AREA03 letter sign fix above reaches the JP branch's `o->box0 = 4;`
+# line too, so its helper exists as a no-op here (the PAL spelling defines it on the PAL function's prologue)
+src/updateL4Type1AObject.c | void func_80031688(O *o) | static void port_cc_letter(O *o) { (void)o; } void func_80031688(O *o)
 @version all
 # --wings-glide (runtime/wings.c): the Japanese demo's cut top-down Charity Wings glide. The wings item use in a
 # top-down area runs topdownPlayerDropExitStep (substep 0; overheadPlayerDropExitStep / tunnelPlayerDropExitStep in I0NFO / I0NFO3); the port swaps the player's frame tables there and draws

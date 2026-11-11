@@ -63,7 +63,7 @@ void func_80030620(TObj *o)
             else
                 v = o->b6b;
         } else if (o->timer < 0) {
-            if (PLX.s6118 > 0) PLAYER.active = 3; else PLAYER.active = 1;
+            { extern short D_800A7C48; if (D_800A7C48 > 0) PLAYER.active = 3; else PLAYER.active = 1; }   /* JP: PLX.s6118 at PLX + 0x10 */
             PLX.b6104 = 3;
             o->b6b = 0;
             o->b04 = 2;
