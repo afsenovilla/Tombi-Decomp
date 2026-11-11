@@ -178,4 +178,12 @@
     <string name="disc_zip_bad">Impossibile leggere «%1$s» (archivio danneggiato, o compresso con un metodo che l\'app non conosce: %2$s). Estrailo e scegli l\'immagine del disco.</string>
     <string-array name="lib_styles"><item>Carosello</item><item>Elenco</item><item>Copertina</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Giappone</item></string-array>
+    <!-- the launcher's rail (LauncherView.drawRail): one page each -->
+    <string name="rail_play">Gioca</string>
+    <string name="rail_image">Immagine</string>
+    <string name="rail_pad">Controlli</string>
+    <string name="rail_extras">Extra</string>
+    <string name="rail_disc">Disco</string>
+    <string name="rail_app">App</string>
+    <string name="page_extras">Extra</string>
 </resources>

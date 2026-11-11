@@ -456,7 +456,12 @@ from the owner's disc (`GAME_FILES_URL`); the APK holds no game data files.
   changed rows, `r1=k103,l2=a17+`: `kN` an Android key code, `aN+` / `aN-` an axis) and handed to `TombiActivity`
   as the intent extra `io.github.tombi.port.PADMAP`.
 - **Launcher.** `LauncherActivity` (plain Canvas, "Selva" design, 1280x720 virtual space scaled to the panel) is the
-  app's entry: *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
+  app's entry. Layout (2026-11-11 overhaul): a rail of icons down the left edge (*Jugar*, *Imagen*, *Mando*, *Extras*
+  (PAL only), *Disco*, *App*; L1 / R1 or the d-pad move between them) and one flat page each, never deeper than one
+  level: *Jugar* is the library (the cards on the left, the selected game with *¡A jugar!* and the essentials on the
+  right: language, improved translation, aspect, skip intro); the other pages are rows drawn as switches, segments
+  (aspect, renderer) or "◀ value ▶" (`LauncherView.row`). The Disc screen, the pad mapping, the custom buttons and the
+  log open from a page and B returns to it; B on *Jugar* quits. *¡A jugar!* starts `TombiActivity` (SDLActivity subclass, own `:game` process, exits with the game)
   with the chosen flags as `argv[1..]`, which `loader.c` puts after its defaults and before `files/args.txt` (still
   read, so it overrides). *Opciones* (SharedPreferences): `--lang` 0/5/6/7/8, `--aspect auto|4:3|16:9|21:9`,
   `--cut-content`, `--debug-menu`, `--renderer soft|gl`, `--skip-intro`, `--hz 60`, `--fps off|auto|60|90|120|144|unlimited` (*Gráficos*), `--show-fps`, infinite

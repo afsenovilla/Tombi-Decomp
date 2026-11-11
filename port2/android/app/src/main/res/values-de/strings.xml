@@ -178,4 +178,12 @@
     <string name="disc_zip_bad">„%1$s“ kann nicht gelesen werden (beschädigtes Archiv oder eine Kompressionsmethode, die die App nicht kennt: %2$s). Entpacke es und wähle das Disc-Image.</string>
     <string-array name="lib_styles"><item>Karussell</item><item>Liste</item><item>Cover</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>USA</item><item>Japan</item></string-array>
+    <!-- the launcher's rail (LauncherView.drawRail): one page each -->
+    <string name="rail_play">Spielen</string>
+    <string name="rail_image">Bild</string>
+    <string name="rail_pad">Steuerung</string>
+    <string name="rail_extras">Extras</string>
+    <string name="rail_disc">Disc</string>
+    <string name="rail_app">App</string>
+    <string name="page_extras">Extras</string>
 </resources>

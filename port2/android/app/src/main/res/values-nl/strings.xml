@@ -178,4 +178,12 @@
     <string name="disc_zip_bad">‘%1$s’ kan niet worden gelezen (beschadigd archief, of een compressiemethode die de app niet kent: %2$s). Pak het uit en kies de disc-image.</string>
     <string-array name="lib_styles"><item>Carrousel</item><item>Lijst</item><item>Omslag</item></string-array>
     <string-array name="lib_regions"><item>Europa</item><item>VS</item><item>Japan</item></string-array>
+    <!-- the launcher's rail (LauncherView.drawRail): one page each -->
+    <string name="rail_play">Spelen</string>
+    <string name="rail_image">Beeld</string>
+    <string name="rail_pad">Besturing</string>
+    <string name="rail_extras">Extra\'s</string>
+    <string name="rail_disc">Schijf</string>
+    <string name="rail_app">App</string>
+    <string name="page_extras">Extra\'s</string>
 </resources>

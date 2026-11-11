@@ -188,4 +188,12 @@
     <string name="disc_zip_bad">“%1$s” cannot be read (a damaged archive, or a compression method the app does not know: %2$s). Extract it and pick the disc image.</string>
     <string-array name="lib_styles"><item>Carousel</item><item>List</item><item>Cover</item></string-array>
     <string-array name="lib_regions"><item>Europe</item><item>USA</item><item>Japan</item></string-array>
+    <!-- the launcher's rail (LauncherView.drawRail): one page each -->
+    <string name="rail_play">Play</string>
+    <string name="rail_image">Picture</string>
+    <string name="rail_pad">Controls</string>
+    <string name="rail_extras">Extras</string>
+    <string name="rail_disc">Disc</string>
+    <string name="rail_app">App</string>
+    <string name="page_extras">Extras</string>
 </resources>
