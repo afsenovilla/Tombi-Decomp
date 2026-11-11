@@ -182,7 +182,11 @@ static int build(int ch, GLY *g) {
 /* library index of Latin-1 letter ch, -1: none */
 static int glyph(int ch) {
     for (int i = 0; i < nlib; i++) if (lib[i].ch == ch) return i;
-    if (nlib >= 64 || !build(ch, &lib[nlib])) { port_printf("[port] --launcher-exit: no glyph for %c\n", ch); return -1; }
+    if (nlib >= 64 || !build(ch, &lib[nlib])) {
+        static unsigned char said[256];   /* (once a letter: asked every frame the menu is open, and a log line is a write to the SD card on a 3DS) */
+        if (!said[ch & 255]) { said[ch & 255] = 1; port_printf("[port] --launcher-exit: no glyph for %c\n", ch); }
+        return -1;
+    }
     lib[nlib].ch = (unsigned char)ch;
     return nlib++;
 }

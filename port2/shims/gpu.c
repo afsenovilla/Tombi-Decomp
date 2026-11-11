@@ -485,9 +485,45 @@ static void ws_layout_clip(int on, int c0, int c1, int *save) {
     else { gs.x1 = save[0]; gs.x2 = save[1]; }
 }
 static int unknown_cmds;
+/* A polygon with nothing of the port's extras in play (poly_lean: set per ordering table by DrawOTag; no widescreen,
+   no --fps recording, no texture pack / dump, no prompt icons) and wholly inside VRAM: decoded once and handed to
+   the backend.  The general decoder below spends four times the instructions on it, and an Old 3DS a third of a
+   drawn frame.  Returns the words used, 0: not taken (the general decoder then does it, the same way). */
+static int poly_lean;
+static int poly_fast(const u32 *p, int n, u32 cmd) {
+    const int shade = cmd & 0x10, quad = cmd & 8, tex = cmd & 4, semi = cmd & 2, raw = cmd & 1;
+    const int nv = quad ? 4 : 3, need = 1 + nv * (1 + (tex ? 1 : 0) + (shade ? 1 : 0)) - (shade ? 1 : 0);
+    if (n < need) return 0;
+    Vtx v[4]; GpuTex t; int k = 1; u32 c = p[0], clut = 0, tpage = 0, ox = 0, oy = 0;
+    for (int i = 0; i < nv; i++) {
+        if (shade && i) c = p[k++];
+        v[i].r = c & 255; v[i].g = (c >> 8) & 255; v[i].b = (c >> 16) & 255;
+        u32 w = p[k++];
+        v[i].x = sx11(w) + gs.ox; v[i].y = sx11(w >> 16) + gs.oy;
+        ox |= (u32)v[i].x; oy |= (u32)v[i].y;
+        if (tex) {
+            u32 uv = p[k++];
+            v[i].u = uv & 255; v[i].v = (uv >> 8) & 255;
+            if (i == 0) clut = uv >> 16;
+            if (i == 1) tpage = uv >> 16;
+        } else v[i].u = v[i].v = 0;
+    }
+    if (ox > 1023u || oy > 511u) return 0;   /* (inside VRAM: not over the GPU's size limit either) */
+    if (tex) {
+        if (PORT_CLUT_IS(clut)) return 0;
+        set_texpage16(tpage);
+        t.tx = tpg.tx; t.ty = tpg.ty; t.depth = tpg.tp; t.cx = (clut & 0x3F) * 16; t.cy = (clut >> 6) & 511; t.rep = 0;
+    }
+    const int sh = tex && raw ? 0 : shade;
+    if (quad && be->quad && be->quad(v, sh, tex ? &t : 0, semi, raw)) return need;
+    be->tri(&v[0], &v[1], &v[2], sh, tex ? &t : 0, semi, raw);
+    if (quad) be->tri(&v[1], &v[2], &v[3], sh, tex ? &t : 0, semi, raw);
+    return need;
+}
 /* executes one command; returns the number of words it used (0 = ignore the rest of the packet) */
 static int gp0(const u32 *p, int n) {
     u32 cmd = p[0] >> 24;
+    if (poly_lean && cmd >= 0x20 && cmd < 0x40) { int r = poly_fast(p, n, cmd); if (r) return r; }
     if (cmd >= 0x20 && cmd < 0x40) {                         /* polygon */
         int shade = cmd & 0x10, quad = cmd & 8, tex = cmd & 4, semi = cmd & 2, raw = cmd & 1;
         int nv = quad ? 4 : 3, per = 1 + (tex ? 1 : 0) + (shade ? 1 : 0);
@@ -931,6 +967,7 @@ void DrawOTag(u32 *ot) {
     tex_patch_idle();
     gpu_lists++;
     const int skip = port_frameskip && port_skip_draw;
+    poly_lean = !port_widescreen && !hfr_rec && !port_texpack_on && !port_drawdump_path && !port_prompt_icons_on && !hfr_test_cut_dx;
 #ifdef __3DS__
     extern int pica_prof_on; extern unsigned long long pica_prof[6], port_ticks(void); extern unsigned pica_prof_n;
     { static unsigned drawn; pica_prof_on = !skip && (++drawn % 29) == 0; }   /* (a drawn table in seven: the skips come in runs of three, a count of all tables only caught the light ones) */
@@ -968,6 +1005,7 @@ void DrawOTag(u32 *ot) {
         if (pica_prof_on) { pica_prof[0] += dt; pica_prof_n++; pica_prof_on = 0; }
     }
 #endif
+    poly_lean = 0;
     gpu_prims += n;
     ws_sync_down();
     port_ot_signature = h * 31u + (unsigned)n;

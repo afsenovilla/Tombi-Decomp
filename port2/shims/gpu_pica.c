@@ -395,6 +395,19 @@ unsigned long long pica_decode_us;   /* (time in decode(): n3ds/pica_c3d.c logs 
 static struct { int ok, tx, ty, depth, cx, cy, tw, bx, by, z, slot; unsigned ver, epoch; } memo;
 int pica_lazy_clut;
 static unsigned present_no;
+/* A semi-transparent textured primitive is drawn in a pass for each class of texel it has, opaque then blended, and
+   so ends the batch twice.  Most have one class only (an area's fog was 220 translucent triangles a frame, two
+   batches each): the classes are kept for the 64 parts of each block, and a primitive looks at the parts its texels
+   are in (all of them with a texture window, which maps texels elsewhere). */
+static unsigned char slot_kinds[SLOTS][64];
+static int prim_kinds(int slot, int u0, int v0, int u1, int v1, int bx, int by) {
+    const unsigned char *kc = slot_kinds[slot];
+    const int z = pica_slot_size(slot), sh = z == 64 ? 3 : z == 128 ? 4 : 5;
+    int a = (u0 - bx) >> sh, b = (v0 - by) >> sh, c = (u1 - bx) >> sh, d = (v1 - by) >> sh, k = 0;
+    if (memo.tw || a < 0 || b < 0 || c > 7 || d > 7 || a > c || b > d) { a = b = 0; c = d = 7; }
+    for (int j = b; j <= d; j++) for (int i = a; i <= c; i++) k |= kc[j * 8 + i];
+    return k;
+}
 static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, int *oby) {
     int tw = gs->twmx | gs->twmy << 5 | gs->twox << 10 | gs->twoy << 15;
     if (memo.ok && memo.ver == ver_clock && memo.epoch == drawn_epoch && memo.tx == t->tx && memo.ty == t->ty && memo.depth == t->depth
@@ -480,6 +493,14 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     if (port_verbose > 1) port_printf("[gpu] DEC %s z%d tex %d,%d d%d clut %d,%d b %d,%d tw %x (frame %d)\n", slots[i].ver ? "stale" : "new", z, t->tx, t->ty, t->depth, t->cx, t->cy, bx, by, tw, port_frame);
     unsigned long long t0 = port_time_us();
     decode(t, tw, bx, by, z);
+    {   /* the texel classes (1: opaque, 2: semi-transparent) of the block's 8 x 8 parts: see prim_kinds */
+        unsigned char *kc = slot_kinds[i]; const int sh = z == 64 ? 3 : z == 128 ? 4 : 5;
+        memset(kc, 0, 64);
+        for (int yy = 0; yy < z; yy++) {
+            const u32 *q = dec + yy * z; unsigned char *row = kc + (yy >> sh) * 8;
+            for (int xx = 0; xx < z; xx++) { u32 a = q[xx] >> 24; if (a) row[xx >> sh] |= a == A_SEMI ? 2 : 1; }
+        }
+    }
     pica_decode_us += port_time_us() - t0;
     dev->tex_upload(i, dec, was > frame_clock);
     st_decodes++;
@@ -563,7 +584,7 @@ static int clip_tris(const PV *v, int n, PV *out) {
 }
 static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
     PState s = base_state();
-    PV cl[30], vv[30]; const PV *v;
+    PV cl[30], vv[30]; const PV *v; int skinds = 3;
     if (clip_on < 0) {
 #ifdef __3DS__
         clip_on = 1;
@@ -587,14 +608,15 @@ static void emit(const PV *v0, int n, const GpuTex *tex, int semi, int raw) {
         unsigned long long px = PT();
         int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by), ax, ay;
         PA(3, px);
+        if (semi) skinds = prim_kinds(slot, u0, w0, u1, w1, bx, by);
         pica_slot_pos(slot, &ax, &ay);
         s.tex = pica_slot_atlas(slot); s.mod = !raw;
         for (int i = 0; i < n; i++) { vv[i] = v0[i]; vv[i].u += (float)(ax - bx); vv[i].v += (float)(ay - by); }
         v = vv;
     }
     if (!tex) { s.blend = semi ? gs->abr : -1; memcpy(batch(&s, n), v, n * sizeof *v); PA(1, pt); return; }
-    if (!semi) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); PA(1, pt); return; }
-    s.atest = AT_OPAQUE; memcpy(batch(&s, n), v, n * sizeof *v);
+    if (!semi || !(skinds & 2)) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); PA(1, pt); return; }
+    if (skinds & 1) { s.atest = AT_OPAQUE; memcpy(batch(&s, n), v, n * sizeof *v); }
     s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, n), v, n * sizeof *v);
     PA(1, pt);
 }
@@ -610,7 +632,9 @@ static void emit_in(PV *v, int n, const GpuTex *tex, int semi, int raw, int u0, 
     s.tex = pica_slot_atlas(slot); s.mod = !raw;
     float du = (float)(ax - bx), dv = (float)(ay - by);
     for (int i = 0; i < n; i++) { v[i].u += du; v[i].v += dv; }
-    if (!semi) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); return; }
+    const int kinds = semi ? prim_kinds(slot, u0, w0, u1, w1, bx, by) : 1;
+    if (!semi || !(kinds & 2)) { s.atest = AT_NOTZERO; memcpy(batch(&s, n), v, n * sizeof *v); return; }
+    if (!(kinds & 1)) { s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, n), v, n * sizeof *v); return; }
     if (n == 6 && v[3].x == v[1].x && v[3].y == v[1].y && v[4].x == v[2].x && v[4].y == v[2].y) {
         /* a quad's two triangles in the PS1's order, each whole before the next (a folded quad's overlap) */
         for (int i = 0; i < 6; i += 3) {
@@ -684,27 +708,42 @@ static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shad
     tri_drawn(v);
     emit(v, 3, tex, semi, raw);
 }
-/* a quad inside the target, its drawing area noted: one texture look-up and one batch entry for its two triangles */
+/* a quad inside the target, its drawing area noted: one texture look-up, and its two triangles written once, where
+   the batch has them (the PS1's order: (0, 1, 2), (1, 2, 3); a flat triangle has its first vertex's colour, as
+   pica_tri; du, dv: the block's place in its atlas) */
+static inline void quad_put(PV *d, const GpuVtx *g, int shade, int du, int dv) {
+    float x[4], y[4], u[4], v[4]; u32 c[4];
+    for (int i = 0; i < 4; i++) {
+        x[i] = (float)g[i].x; y[i] = (float)g[i].y; u[i] = (float)(g[i].u + du); v[i] = (float)(g[i].v + dv);
+        c[i] = (u32)g[i].r | ((u32)g[i].g << 8) | ((u32)g[i].b << 16);   /* (alpha 0: an untextured pixel's, bit 15 clear) */
+    }
+    static const u8 order[6] = { 0, 1, 2, 1, 2, 3 };
+    for (int k = 0; k < 6; k++) {
+        int i = order[k]; u32 col = shade ? c[i] : c[k < 3 ? 0 : 1];
+        d[k].x = x[i]; d[k].y = y[i]; d[k].u = u[i]; d[k].v = v[i];
+        memcpy(&d[k].r, &col, 4);
+    }
+}
 static int pica_quad(const GpuVtx *g, int shade, const GpuTex *tex, int semi, int raw) {
     if ((unsigned)(g[0].x | g[1].x | g[2].x | g[3].x) > 1023u || (unsigned)(g[0].y | g[1].y | g[2].y | g[3].y) > 511u || !bulk_in()) return 0;
-    PV v[6];
-    put(&v[0], g[0].x, g[0].y, g[0].r, g[0].g, g[0].b, g[0].u, g[0].v);
-    put(&v[1], g[1].x, g[1].y, g[1].r, g[1].g, g[1].b, g[1].u, g[1].v);
-    put(&v[2], g[2].x, g[2].y, g[2].r, g[2].g, g[2].b, g[2].u, g[2].v);
-    put(&v[4], g[3].x, g[3].y, g[3].r, g[3].g, g[3].b, g[3].u, g[3].v);
-    if (!shade) {   /* (a flat triangle has its first vertex's colour: as pica_tri) */
-        v[2].r = v[0].r; v[2].g = v[0].g; v[2].b = v[0].b;
-        v[3] = v[1]; v[5] = v[2];
-        v[1].r = v[0].r; v[1].g = v[0].g; v[1].b = v[0].b;
-        v[4].r = v[3].r; v[4].g = v[3].g; v[4].b = v[3].b; v[5].r = v[3].r; v[5].g = v[3].g; v[5].b = v[3].b;
-        { PV t = v[4]; v[4] = v[5]; v[5] = t; }   /* -> (1, 2, 3) */
-    } else { v[3] = v[1]; v[5] = v[4]; v[4] = v[2]; }
-    int u0 = g[0].u, u1 = u0, w0 = g[0].v, w1 = w0;
+    PState s = base_state();
+    if (!tex) { s.blend = semi ? gs->abr : -1; quad_put(batch(&s, 6), g, shade, 0, 0); return 1; }
+    int u0 = g[0].u, u1 = u0, w0 = g[0].v, w1 = w0, bx, by, ax, ay;
     for (int i = 1; i < 4; i++) {
         if (g[i].u < u0) u0 = g[i].u; if (g[i].u > u1) u1 = g[i].u;
         if (g[i].v < w0) w0 = g[i].v; if (g[i].v > w1) w1 = g[i].v;
     }
-    emit_in(v, 6, tex, semi, raw, u0, w0, u1, w1);
+    int slot = tex_slot(tex, u0, w0, u1, w1, &bx, &by);
+    pica_slot_pos(slot, &ax, &ay);
+    s.tex = pica_slot_atlas(slot); s.mod = !raw;
+    const int kinds = semi ? prim_kinds(slot, u0, w0, u1, w1, bx, by) : 1;
+    if (!semi || !(kinds & 2)) { s.atest = AT_NOTZERO; quad_put(batch(&s, 6), g, shade, ax - bx, ay - by); return 1; }
+    if (!(kinds & 1)) { s.atest = AT_SEMI; s.blend = gs->abr; quad_put(batch(&s, 6), g, shade, ax - bx, ay - by); return 1; }
+    PV v[6]; quad_put(v, g, shade, ax - bx, ay - by);
+    for (int i = 0; i < 6; i += 3) {   /* each triangle whole before the next (a folded quad's overlap) */
+        s.atest = AT_OPAQUE; s.blend = -1; memcpy(batch(&s, 3), v + i, 3 * sizeof *v);
+        s.atest = AT_SEMI; s.blend = gs->abr; memcpy(batch(&s, 3), v + i, 3 * sizeof *v);
+    }
     return 1;
 }
 static void pica_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, int u0, int v0, int semi, int raw) {
