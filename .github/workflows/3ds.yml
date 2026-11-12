@@ -343,6 +343,18 @@ jobs:
           grep "\[port\] fps" "$SD/3ds/tombi/log.txt" 2>/dev/null | tail -3
           grep "st: stream" "$SD/3ds/tombi/log.txt" 2>/dev/null | head -4
           convert shots/cci_060.png -trim +repage -quality 75 small_cci.jpg && { echo "=====BEGIN shot_cci====="; base64 -w 100 small_cci.jpg; echo "=====END shot_cci====="; }
+          # --widescreen 5:3 (experimental: the frame 400 columns wide on the pica backend's second target): gameplay
+          # in AREA 1 through the debug area select, a screenshot and the log's lines
+          rm -f "$SD/3ds/tombi/log.txt"
+          echo "--log-fps --skip-movies --widescreen 5:3 --poke 900:1F8001B4:1 --poke 1250:8009C960:1:2 --poke 1250:8009C962:0:2 --pad-script 1000:start,1300:circle:3,2000:right:3000" > "$SD/3ds/tombi/args.txt"
+          ./squashfs-root/AppRun "$PWD/app/tombi.cci" > azahar_wide.log 2>&1 &
+          EMU=$!
+          sleep 50; import -window root shots/wide_050.png || true
+          sleep 25; import -window root shots/wide_075.png || true
+          kill "$EMU" 2>/dev/null || true; sleep 2
+          echo "== log.txt of the widescreen run"; grep -a "wide\|port_main" "$SD/3ds/tombi/log.txt" 2>/dev/null | head -8
+          grep "\[port\] fps" "$SD/3ds/tombi/log.txt" 2>/dev/null | tail -3
+          for f in wide_050 wide_075; do convert shots/$f.png -trim +repage -quality 80 small_$f.jpg && { echo "=====BEGIN shot_$f====="; base64 -w 100 small_$f.jpg; echo "=====END shot_$f====="; }; done
 
       # (small JPEGs of three screenshots in the job log, base64 between markers: readable without the artifact API)
       - name: Screenshots in the log
