@@ -37,6 +37,10 @@ extern unsigned long long pica_cnt[8];
 extern int pica_gpu_clips;
 static u32 (*rt)[1024];                  /* the render target, 512 rows (allocated by pica_start: the image stays small) */
 static u32 (*wrt)[1024];                 /* the wide plane (--widescreen) */
+/* (the changes of target a 3DS would make, by what made them: 0 triangles, 1 a fill, 2 a write, 3 a wide fill, 4 a
+   wide write, 5 the copy down; logged at the end) */
+static int ref_cur; static unsigned long long ref_sw[6];
+#define REF_T(w, why) do { if (ref_cur != (w)) { ref_cur = (w); ref_sw[why]++; } } while (0)
 static u32 (*atlas[3])[PICA_ATLAS];      /* the texture atlases (both PICA_ATLAS squared here) */
 static void ref_tex_upload(int slot, const u32 *rgba, int busy) {
     int z = pica_slot_size(slot), ax, ay; pica_slot_pos(slot, &ax, &ay); (void)busy;
@@ -107,14 +111,16 @@ static void ref_tri(const PState *s, const PV *a, const PV *b, const PV *c) {
         }
     }
 }
-static void ref_tris(const PState *s, const PV *v, int n) { for (int i = 0; i + 2 < n; i += 3) ref_tri(s, &v[i], &v[i + 1], &v[i + 2]); }
+static void ref_tris(const PState *s, const PV *v, int n) { REF_T(s->wide, 0); for (int i = 0; i + 2 < n; i += 3) ref_tri(s, &v[i], &v[i + 1], &v[i + 2]); }
 static void ref_fill(int x, int y, int w, int h, u32 c) {
+    REF_T(0, 1);
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) rt[(y + j) & 511][(x + i) & 1023] = c;
 }
 static void ref_read(int x, int y, int w, int h, u32 *d, int stride) {
     for (int j = 0; j < h; j++) memcpy(d + (size_t)j * stride, &rt[y + j][x], (size_t)w * 4);
 }
 static void ref_write(int x, int y, int w, int h, const u32 *s, int stride) {
+    REF_T(0, 2);
     for (int j = 0; j < h; j++) memcpy(&rt[y + j][x], s + (size_t)j * stride, (size_t)w * 4);
 }
 static int ref_start(void) {
@@ -126,11 +132,12 @@ static int ref_start(void) {
 }
 static u32 c15to32_(u16 c);
 static int ref_wide_start(void) { if (!wrt) wrt = calloc(512, sizeof *wrt); return wrt ? 0 : -1; }
-static void ref_wide_fill(int x, int y, int w, int h, u32 c) { for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) wrt[(y + j) & 511][(x + i) & 1023] = c; }
+static void ref_wide_fill(int x, int y, int w, int h, u32 c) { REF_T(1, 3); for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) wrt[(y + j) & 511][(x + i) & 1023] = c; }
 static void ref_wide_write(int x, int y, int w, int h, const u16 *s, int stride) {
+    REF_T(1, 4);
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) wrt[y + j][x + i] = c15to32_(s[j * stride + i]);
 }
-static void ref_wide_down(int wx, int wy, int x, int y, int w, int h) { for (int j = 0; j < h; j++) memcpy(&rt[y + j][x], &wrt[wy + j][wx], (size_t)w * 4); }
+static void ref_wide_down(int wx, int wy, int x, int y, int w, int h) { REF_T(0, 5); for (int j = 0; j < h; j++) memcpy(&rt[y + j][x], &wrt[wy + j][wx], (size_t)w * 4); }
 static void ref_wide_read(int x, int y, int w, int h, u32 *d, int stride) { for (int j = 0; j < h; j++) memcpy(d + (size_t)j * stride, &wrt[y + j][x], (size_t)w * 4); }
 static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0, 0, 0,
                                 ref_wide_start, ref_wide_fill, ref_wide_write, ref_wide_down, 0, ref_wide_read };
@@ -281,12 +288,14 @@ static int npend;
    and waits like a host write: it goes when the target's rectangle is read, drawn into, written or shown.  A frame is
    then drawn and shown on the wide plane alone; the copy each time was a change of target and back in every frame,
    which a 3DS's GPU pays for (5 to 11 ms a frame waited for it, measured). */
-static struct { int wx, wy, x, y, w, h; } wd[4];
+static struct { int wx, wy, x, y, w, h, fill; u32 col; } wd[4];   /* (fill: a clear of the buffer waits instead, pica_fill) */
 static int nwd;
+static struct { int x, y, w, h; } wdbuf[4]; static int nwdbuf;    /* the buffers that have had a copy: the frame's */
 static void wd_resolve(int x, int y, int w, int h) {   /* those this rectangle touches (no batch is open here) */
     for (int i = 0; i < nwd; i++)
         if (x < wd[i].x + wd[i].w && x + w > wd[i].x && y < wd[i].y + wd[i].h && y + h > wd[i].y) {
-            dev->wide_down(wd[i].wx, wd[i].wy, wd[i].x, wd[i].y, wd[i].w, wd[i].h);
+            if (wd[i].fill) dev->fill(wd[i].x, wd[i].y, wd[i].w, wd[i].h, wd[i].col);
+            else dev->wide_down(wd[i].wx, wd[i].wy, wd[i].x, wd[i].y, wd[i].w, wd[i].h);
             wd[i] = wd[--nwd]; i--;
         }
 }
@@ -964,6 +973,17 @@ static void pica_fill(int x, int y, int w, int h, u16 c) {
             if (wd[i].x >= x && wd[i].y >= y && wd[i].x + wd[i].w <= x + w && wd[i].y + wd[i].h <= y + h) { wd[i] = wd[--nwd]; i--; }
         wd_resolve(x, y, w, h);
     }
+    /* --widescreen: the frame's clear of a buffer whose picture is the wide plane's (the plane gets its own, gpu.c
+       ws_fill): it waits as the copy does, and the copy after the frame replaces it.  (Sent, it was a change of
+       target and back in every ordering table, drawn or skipped.) */
+    for (int i = 0; i < nwdbuf; i++)
+        if (wdbuf[i].x == x && wdbuf[i].y == y && wdbuf[i].w == w && wdbuf[i].h == h) {
+            for (int k = 0; k < nbulk; k++)
+                if (x >= bulk[k].x1 && y >= bulk[k].y1 && x + w - 1 <= bulk[k].x2 && y + h - 1 <= bulk[k].y2 && nwd < 4) {
+                    wd[nwd].x = x; wd[nwd].y = y; wd[nwd].w = w; wd[nwd].h = h; wd[nwd].fill = 1; wd[nwd].col = c15to32(c); nwd++;
+                    return;
+                }
+        }
     /* a fill inside a noted drawing area (the frame's clear): vram[] is stale there anyway and stays marked so, the
        device alone fills (82000 words a frame otherwise, for nothing) */
     for (int i = 0; i < nbulk; i++)
@@ -1008,7 +1028,9 @@ static void pica_ws_copy_down(int wx, int wy, int vx, int vy, int w, int h) {
         int i;
         for (i = 0; i < nwd; i++) if (wd[i].x == vx && wd[i].y == vy && wd[i].w == w && wd[i].h == h) break;
         if (i == nwd) { if (nwd == 4) wd_resolve(wd[0].x, wd[0].y, wd[0].w, wd[0].h); i = nwd++; }
-        wd[i].wx = wx; wd[i].wy = wy; wd[i].x = vx; wd[i].y = vy; wd[i].w = w; wd[i].h = h;
+        wd[i].wx = wx; wd[i].wy = wy; wd[i].x = vx; wd[i].y = vy; wd[i].w = w; wd[i].h = h; wd[i].fill = 0;
+        for (i = 0; i < nwdbuf; i++) if (wdbuf[i].x == vx && wdbuf[i].y == vy && wdbuf[i].w == w && wdbuf[i].h == h) break;
+        if (i == nwdbuf && nwdbuf < 4) { wdbuf[i].x = vx; wdbuf[i].y = vy; wdbuf[i].w = w; wdbuf[i].h = h; nwdbuf++; }
     }
     /* the buffer in VRAM was drawn: vram[] is stale there, as after its primitives */
     if (!bulk_note(vx, vy, vx + w - 1, vy + h - 1)) pages_drawn(vx, vy, vx + w - 1, vy + h - 1);
@@ -1044,6 +1066,8 @@ static int pica_start(void) {
 static void pica_stop(void) {
     port_printf("[gpu] pica: decodes: %llu texels written, %llu CLUT changed, %llu/%llu/%llu took a slot (256/128/64), %llu/%llu/%llu took one used in the frame, %llu free\n",
                 pica_dec_why[0], pica_dec_why[1], pica_dec_why[2], pica_dec_why[3], pica_dec_why[4], pica_dec_why[5], pica_dec_why[6], pica_dec_why[7], pica_dec_why[8]);
+    if (ref_sw[0] | ref_sw[3]) port_printf("[gpu] pica: changes of target: %llu by triangles, %llu fills, %llu writes, %llu wide fills, %llu wide writes, %llu copies down\n",
+                                           ref_sw[0], ref_sw[1], ref_sw[2], ref_sw[3], ref_sw[4], ref_sw[5]);
     port_printf("[gpu] pica: %llu batches, %llu triangles, %llu texture decodes, %llu read-backs (%llu for textures, %llu for the host: %llu pixels)\n",
                 st_batches, st_tris, st_decodes, st_readbacks, st_rb_tex, st_rb_host, st_rb_px);
 }

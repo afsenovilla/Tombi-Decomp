@@ -107,6 +107,7 @@ static u16 (*wvram)[WS_STRIDE] = wvram_store;
 static u16 *tgt = &vram_store[0][0];
 static int tgt_stride = 1024;
 static void ws_fill(int x, int y, int w, int h, u16 c);
+extern int port_frameskip, port_skip_draw;
 static void ws_mirror_write(int x, int y, int w, int h);
 static inline void plot(int x, int y, u16 c, int semi) {
     u16 *d = tgt + y * tgt_stride + x;
@@ -720,7 +721,9 @@ void *PutDrawEnv(void *env) {
     {   u16 bg = rgb24to15((u32)e[25] | ((u32)e[26] << 8) | ((u32)e[27] << 16));
         be->fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg);
         if (hfr_rec) hfr_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg, 0);
-        ws_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg); }
+        /* (a frame that will not be drawn: the wide plane keeps what it shows; the clear was a change of target in
+           every skipped table on a 3DS) */
+        if (!(port_frameskip && port_skip_draw)) ws_fill(gs.x1, gs.y1, gs.x2 - gs.x1 + 1, gs.y2 - gs.y1 + 1, bg); }
     return env;
 }
 void *GetDrawEnv(void *env) { memcpy(env, cur_drawenv, sizeof cur_drawenv); return env; }
@@ -973,7 +976,13 @@ void DrawOTag(u32 *ot) {
     unsigned long long t0 = port_time_us();
     tex_patch_idle();
     gpu_lists++;
+#ifdef __3DS__
     const int skip = port_frameskip && port_skip_draw;
+#else   /* (PORT_FORCE_SKIP=N: N tables in every N + 1 skipped, to see on a PC what a 3DS behind its clock does) */
+    static int fskip = -1, fskip_n; if (fskip < 0) fskip = getenv("PORT_FORCE_SKIP") ? atoi(getenv("PORT_FORCE_SKIP")) : 0;
+    const int skip = port_frameskip && port_skip_draw;
+    if (fskip) { port_frameskip = 1; port_skip_draw = (++fskip_n % (fskip + 1)) != 0; }   /* (the next table's: its PutDrawEnv comes first) */
+#endif
     poly_lean = !hfr_rec && !port_texpack_on && !port_drawdump_path && !port_prompt_icons_on && !hfr_test_cut_dx;
 #ifdef __3DS__
     extern int pica_prof_on; extern unsigned long long pica_prof[6], port_ticks(void); extern unsigned pica_prof_n;
