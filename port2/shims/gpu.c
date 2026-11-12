@@ -496,12 +496,17 @@ static int poly_fast(const u32 *p, int n, u32 cmd) {
     const int shade = cmd & 0x10, quad = cmd & 8, tex = cmd & 4, semi = cmd & 2, raw = cmd & 1;
     const int nv = quad ? 4 : 3, need = 1 + nv * (1 + (tex ? 1 : 0) + (shade ? 1 : 0)) - (shade ? 1 : 0);
     if (n < need) return 0;
+    /* (--widescreen: the wide plane's shift is all a polygon needs, but for the flat quads that are stretched to the
+       frame's full width and a sub-screen's pieces laid out again: those stay the general decoder's.  A 3DS drew a
+       wide frame in twice a 4:3 one's time with every polygon there) */
+    const int wdx = ws_on ? ws_dx : 0;
+    if (ws_on && ((!tex && quad) || ws_layout_active())) return 0;
     Vtx v[4]; GpuTex t; int k = 1; u32 c = p[0], clut = 0, tpage = 0, ox = 0, oy = 0;
     for (int i = 0; i < nv; i++) {
         if (shade && i) c = p[k++];
         v[i].r = c & 255; v[i].g = (c >> 8) & 255; v[i].b = (c >> 16) & 255;
         u32 w = p[k++];
-        v[i].x = sx11(w) + gs.ox; v[i].y = sx11(w >> 16) + gs.oy;
+        v[i].x = sx11(w) + gs.ox + wdx; v[i].y = sx11(w >> 16) + gs.oy;
         ox |= (u32)v[i].x; oy |= (u32)v[i].y;
         if (tex) {
             u32 uv = p[k++];
@@ -969,7 +974,7 @@ void DrawOTag(u32 *ot) {
     tex_patch_idle();
     gpu_lists++;
     const int skip = port_frameskip && port_skip_draw;
-    poly_lean = !port_widescreen && !hfr_rec && !port_texpack_on && !port_drawdump_path && !port_prompt_icons_on && !hfr_test_cut_dx;
+    poly_lean = !hfr_rec && !port_texpack_on && !port_drawdump_path && !port_prompt_icons_on && !hfr_test_cut_dx;
 #ifdef __3DS__
     extern int pica_prof_on; extern unsigned long long pica_prof[6], port_ticks(void); extern unsigned pica_prof_n;
     { static unsigned drawn; pica_prof_on = !skip && (++drawn % 29) == 0; }   /* (a drawn table in seven: the skips come in runs of three, a count of all tables only caught the light ones) */
