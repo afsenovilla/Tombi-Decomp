@@ -522,6 +522,13 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
             if (ox + c > 256) ox = 256 - c; if (oy + c > 256) oy = 256 - c;
             if (u1 < ox + c && v1 < oy + c) { z = c; bx = ox; by = oy; break; }
         }
+        /* up to 128 texels but across that grid's lines: a 128 block from where the primitive's texels start (to 8
+           texels), not a whole page.  (The save screen's background is a picture 97 texels wide from u 56 drawn
+           with 15 CLUTs, a page each where there are 8 such slots: 15 pages decoded every frame) */
+        if (z == 256 && u1 - (u0 & ~7) < 128 && v1 - (v0 & ~7) < 128) {
+            z = 128; bx = u0 & ~7; by = v0 & ~7;
+            if (bx + 128 > 256) bx = 128; if (by + 128 > 256) by = 128;
+        }
     }
     *obx = bx; *oby = by;
     int cx = t->depth == 2 ? 0 : t->cx, cy = t->depth == 2 ? 0 : t->cy;
