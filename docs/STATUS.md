@@ -35,6 +35,8 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    and make the unused area behind it walkable (collision for the ground strip; Tombi could climb the wooden stand in
    the middle and jump on the drums); add a Funga Chief walking around (he has walk and talk animations) and some
    Funga guys.  The owner's screenshot shows the area: palm cards, torches, drums, the straw stand, a river in front.
+   The door is the palisade gate with the round Funga emblem (second screenshot): check the model's pivot (vertex
+   extents relative to its origin) to see whether it swings on a hinge like the other doors or slides / lifts.
    A port mod (runtime data patch / spawned objects), never shipped game data.
 
 0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
