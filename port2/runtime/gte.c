@@ -90,6 +90,7 @@ static inline __attribute__((always_inline)) void rtp(int n, int last) {   /* (i
     s32 SX = clampf(sx, -0x400, 0x3FF, 1u << 14), SY = clampf(sy, -0x400, 0x3FF, 1u << 13);
     D[14] = (SX & 0xFFFF) | ((u32)SY << 16);
     D[15] = D[14];
+    { extern int port_stereo_on; extern void port_stereo_note(int, int, unsigned); if (port_stereo_on) port_stereo_note(SX, SY, sz); }
     if (last) {
         s64 m0 = (s64)(s16)C[27] * q + C[28];
         MAC0 = (s32)m0;

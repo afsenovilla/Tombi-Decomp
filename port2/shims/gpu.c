@@ -395,7 +395,44 @@ static void ws_fill(int x, int y, int w, int h, u16 c) {
         if (be->ws_fill) be->ws_fill(ws_base(ax), y, 320 + 2 * port_widescreen, h, c); else
         for (int j = 0; j < h; j++) for (int i = 0; i < 320 + 2 * port_widescreen; i++) wvram[(y + j) & 511][ws_base(ax) + i] = c; }
 }
-static void vertex(Vtx *o, u32 w) { o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; }
+/* --stereo prototype (PC only for now: PORT_STEREO=eye,strength,focus,zfocus, eye -1 left / 1 right): each eye's
+   picture drawn with things shifted by their depth.  A polygon's vertices by the GTE's SZ (below); a sprite or a
+   rectangle, which the GTE did not project, by its place in the drawing order (far first) */
+static int st_dx;   /* this packet's shift by its place in the drawing order (DrawOTag) */
+/* the depth of a projected vertex: the GTE notes each one's screen point and SZ (runtime/gte.c), the decoder looks a
+   polygon's vertices up: a mesh's shared vertices then get the same shift, so its polygons stay joined.  Two tables,
+   by the parity of the frame that built them (a table is drawn the frame after) */
+int port_stereo_on; static int st_eye; static float st_s, st_zf;
+#define STH 8192
+static struct { short x, y; unsigned short z, ok; } sth[2][STH];
+static unsigned sth_hash(int x, int y) { return ((unsigned)(x & 0x7FF) * 73856093u ^ (unsigned)(y & 0x7FF) * 19349663u) & (STH - 1); }
+void port_stereo_note(int x, int y, unsigned z) {
+    unsigned h = sth_hash(x, y); int p = port_frame & 1;
+    for (int k = 0; k < 4; k++, h = (h + 1) & (STH - 1))
+        if (sth[p][h].ok != (unsigned short)(port_frame | 1) || (sth[p][h].x == x && sth[p][h].y == y)) {
+            sth[p][h].x = (short)x; sth[p][h].y = (short)y; sth[p][h].z = (unsigned short)z; sth[p][h].ok = (unsigned short)(port_frame | 1); return;
+        }
+}
+static int st_lookup(int x, int y) {   /* the shift of a vertex at this screen point, or -9999 */
+    for (int q = 0; q < 2; q++) {
+        int p = (port_frame - 1 + q) & 1; unsigned h = sth_hash(x, y);
+        for (int k = 0; k < 4; k++, h = (h + 1) & (STH - 1)) {
+            int age = (unsigned short)(port_frame | 1) - sth[p][h].ok;
+            if (sth[p][h].ok && age >= -2 && age <= 4 && sth[p][h].x == x && sth[p][h].y == y) {
+                float z = sth[p][h].z ? sth[p][h].z : 1;
+                float disp = st_s * (1.0f - st_zf / z);
+                if (disp < -st_s * 0.5f) disp = -st_s * 0.5f;
+                float v = st_eye * disp * 0.5f;
+                return (int)(v + (v >= 0 ? 0.5f : -0.5f));
+            }
+        }
+    }
+    return -9999;
+}
+static void vertex(Vtx *o, u32 w) {
+    o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx;
+    if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) o->x += s - st_dx; }
+}
 static void color(Vtx *o, u32 c) { o->r = c & 255; o->g = (c >> 8) & 255; o->b = (c >> 16) & 255; }
 
 /* --widescreen: an untextured tile or quad that covers the whole 4:3 width (pause dimming, fades to black/white,
@@ -508,6 +545,7 @@ static int poly_fast(const u32 *p, int n, u32 cmd) {
         v[i].r = c & 255; v[i].g = (c >> 8) & 255; v[i].b = (c >> 16) & 255;
         u32 w = p[k++];
         v[i].x = sx11(w) + gs.ox + wdx; v[i].y = sx11(w >> 16) + gs.oy;
+        if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) v[i].x += s - st_dx; }
         ox |= (u32)v[i].x; oy |= (u32)v[i].y;
         if (tex) {
             u32 uv = p[k++];
@@ -689,7 +727,9 @@ static int gp0(const u32 *p, int n) {
 static void packet(const u32 *p, int n) {
     while (n > 0) {
         ws_begin();
+        gs.ox += st_dx;
         int used = gp0(p, n);
+        if ((p[0] >> 24) != 0xE5) gs.ox -= st_dx;
         ws_end();
         if (used <= 0) break;
         p += used; n -= used;
@@ -1013,9 +1053,20 @@ void DrawOTag(u32 *ot) {
     }
 #endif
     if (port_frameskip) { fs_mark(gs.x1, gs.y1, skip); port_frames_skipped += (unsigned)skip; }
+    /* (the game compacts its ordering tables: the slots' nodes are gone, so a packet's depth is its place in the
+       drawing order, far first: its count over the table's count the time before) */
+    static int st_init; static float st_focus; static int st_prev, st_cnt;
+    if (!st_init) { const char *e = getenv("PORT_STEREO"); st_init = 1; if (e) { st_s = 10; st_focus = 0.5f; st_zf = 1000; sscanf(e, "%d,%f,%f,%f", &st_eye, &st_s, &st_focus, &st_zf); port_stereo_on = st_eye != 0; } }
+    st_cnt = 0; st_dx = 0;
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
         n++;
+        if (st_eye && len && st_prev > 0) {
+            float d = 1.0f - (float)st_cnt / (float)st_prev; if (d < 0) d = 0;   /* 1 farthest .. 0 nearest */
+            float disp = d > st_focus ? st_s * (d - st_focus) / (1.0f - st_focus) : 0.0f;
+            st_dx = (int)(st_eye * disp * 0.5f + (st_eye > 0 ? 0.5f : -0.5f));
+        }
+        if (len) st_cnt++;
         if (sky) {   /* sky = 1 + far packets seen; an ordering table node at slot >= 100 ends the far layer */
             if (p <= ot && p > ot - 808) { if (ot - p >= 100) { if (sky > 1) sky_grab(); sky = 0; } }
             else if (len) sky++;
@@ -1046,6 +1097,7 @@ void DrawOTag(u32 *ot) {
         if (pica_prof_on) { pica_prof[0] += dt; pica_prof_n++; pica_prof_on = 0; }
     }
 #endif
+    st_dx = 0; if (st_cnt > 50) st_prev = st_cnt;
     poly_lean = 0;
     gpu_prims += n;
     if (skip) ws_drew = 0;   /* (a table not drawn changed nothing of the wide plane: no copy of it to VRAM) */
