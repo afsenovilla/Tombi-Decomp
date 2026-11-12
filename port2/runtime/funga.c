@@ -45,6 +45,7 @@ void port_funga_room(const u8 *tbl, int area, int section)
 }
 
 static void spawn_npcs(void);
+static void hold_fungas(void);
 /* the gate object, every update (after ObjCullRegister): opens once Tombi is past x 1088 (200 units before it) */
 void port_funga_gate(u8 *o, int player_x)
 {
@@ -53,7 +54,8 @@ void port_funga_gate(u8 *o, int player_x)
     s16 *x = (s16 *)(o + 0x12), *z = (s16 *)(o + 0x1A);
     s32 *rot = (s32 *)(o + 0x88);
     if (bx == 0x7fff || (*rot == 0 && (*x != bx || *z != bz))) { bx = *x; bz = *z; }   /* (a new spawn: its own place) */
-    if (!o[0x91]) { o[0x91] = 1; spawn_npcs(); }   /* once per gate object = once per section load (objects start zeroed) */
+    if (!o[0x91]) { o[0x91] = 1; spawn_npcs(); }
+    hold_fungas();   /* once per gate object = once per section load (objects start zeroed) */
     if (o[0x0A] == 0x10) o[0x0A] = 0x11;           /* the model drawer that applies the rotation (+0x84/+0x88/+0x8C) */
     if (*rot < 0x400 && (*rot || player_x > 1088)) *rot += 0x20;
     if (*rot > 0x400) *rot = 0x400;
@@ -129,6 +131,7 @@ static int load_chief(void)
 }
 
 /* the spawns, once per section load (from the gate's first update) */
+static u8 *fungas[3];
 static void spawn_npcs(void)
 {
     static u8 rec[16];
@@ -142,14 +145,27 @@ static void spawn_npcs(void)
        SPR table 0x37 = SPR_DATA[7]; section 2 leaves that slot empty, so it points at the table read above */
     extern char *SPR_DATA[];
     SPR_DATA[7] = (char *)chief_tbl;
-    static const s16 FX[3] = {1400, 1540, 1700};
+    static const s16 FX[3] = {1401, 1501, 1690}, FZ[3] = {271, 286, 281};   /* on three back-row drums */
     static const u8 FST[3] = {0, 1, 0};
     for (int i = 0; i < 3; i++) {
         memset(rec, 0, sizeof rec);
         rec[0] = 2; rec[1] = 2; rec[2] = 0x3A; rec[4] = FST[i];
-        s16 q[3] = {FX[i], -140, 180};
+        s16 q[3] = {FX[i], -200, FZ[i]};
         memcpy(rec + 6, q, 6);
         spawnObjectFromRecord(rec, -1);
+        { extern u8 *SPAWN_RECORD_OBJECT; fungas[i] = SPAWN_RECORD_OBJECT; }
+    }
+}
+/* each frame (from the gate's update): every Funga stays on its drum, x fixed and never below the drum's top, so its
+   jumps go up from the drum and come back down onto it */
+static void hold_fungas(void)
+{
+    static const s16 FX[3] = {1401, 1501, 1690};
+    for (int i = 0; i < 3; i++) {
+        u8 *o = fungas[i];
+        if (!o || o[0] == 0 || o[2] != 0x3A) { fungas[i] = 0; continue; }
+        *(s16 *)(o + 0x12) = FX[i];
+        if (*(s16 *)(o + 0x16) > -186) { *(s16 *)(o + 0x16) = -186; *(u16 *)(o + 0x14) = 0; }
     }
 }
 
