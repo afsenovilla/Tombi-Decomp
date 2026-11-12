@@ -113,6 +113,7 @@ int port_tpatch_load(const char *arg) {
             if (!tp_store) { port_printf("[tpatch] cannot write %s: the patch is kept in memory\n", store); store = 0; }
             else { memset(head, 0, sizeof head); memcpy(head, "TPC0", 4); fwrite(head, 1, STORE_HEAD, tp_store); }
         }
+        if (!made && store && port_tpatch_progress) port_tpatch_progress(0, (int)ne);   /* (the screen says so from the start) */
         port_printf("[tpatch] store %s: %s\n", port_tpatch_store ? port_tpatch_store : "(TOMBI_TPATCH_STORE)", made ? "found" : store ? "being made (the first start with this patch)" : "not used");
     }
     tp_busy = 1;

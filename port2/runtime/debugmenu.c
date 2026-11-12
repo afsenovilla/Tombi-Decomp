@@ -241,6 +241,11 @@ static const u8 font[64][7] = {   /* ASCII 32..95, 5x7, bit 4 = left column */
     {31,4,4,4,4,4,4}, {17,17,17,17,17,17,14}, {17,17,17,17,17,10,4}, {17,17,17,21,21,21,10}, {17,17,10,4,10,17,17},
     {17,17,17,10,4,4,4}, {31,1,2,4,8,16,31}, {14,8,8,8,8,8,14}, {0,16,8,4,2,1,0}, {14,2,2,2,2,2,14}, {4,10,17,0,0,0,0},
     {0,0,0,0,0,0,31}};
+/* (the same letters for the 3DS's progress screen, n3ds/pica_c3d.c: the 7 rows of a character, lower case as capitals) */
+const unsigned char *port_font5x7(int c) {
+    if (c >= 'a' && c <= 'z') c -= 32;
+    return font[c >= 32 && c <= 95 ? c - 32 : 0];
+}
 extern int port_gpu_overlay_fill(int x, int y, int w, int h, u16 c);   /* shims/gpu.c: display-relative; 0 = no frame */
 extern void port_gpu_overlay_end(void);
 static void text(int x, int y, const char *s, u16 col) {

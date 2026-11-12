@@ -648,8 +648,8 @@ static void c3d_progress(int done, int total) {
     static int last = -1;
     if (!c3d_up || total <= 0) return;
     int w = 240 * done / total;
-    if (w == last) return;
-    last = w;
+    if (done == last) return;
+    last = done;
     end_and_wait();
     C3D_FrameBegin(0);
     C3D_RenderTargetClear(top_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
@@ -664,6 +664,30 @@ static void c3d_progress(int done, int total) {
         QUAD_BEGIN();
         vtx(X0, Y0, 0, 0, c, c, c, 1); vtx(X1, Y0, 0, 0, c, c, c, 1); vtx(X0, Y1, 0, 0, c, c, c, 1);
         vtx(X1, Y0, 0, 0, c, c, c, 1); vtx(X1, Y1, 0, 0, c, c, c, 1); vtx(X0, Y1, 0, 0, c, c, c, 1);
+        QUAD_END();
+    }
+    {   /* what it is doing, in words (the debug menu's 5 x 7 letters, a quad a run of lit pixels; capitals, no accents) */
+        extern const unsigned char *port_font5x7(int c);
+        char count[40]; snprintf(count, sizeof count, "ARCHIVO %d DE %d", done, total);
+        const struct { const char *t; int y, sc; float c; } line[4] = {
+            { "PREPARANDO LA TRADUCCION", 62, 2, 1.0f }, { "SOLO PASA LA PRIMERA VEZ. PUEDE TARDAR UNOS MINUTOS.", 90, 1, 0.8f },
+            { count, 138, 1, 0.8f }, { "NO APAGUES LA CONSOLA", 156, 1, 0.6f } };
+        QUAD_BEGIN();
+        for (int l = 0; l < 4; l++) {
+            const int sc = line[l].sc, len = (int)strlen(line[l].t); const float c = line[l].c;
+            int x = 200 - len * 6 * sc / 2;
+            for (const char *t = line[l].t; *t; t++, x += 6 * sc) {
+                const unsigned char *g = port_font5x7(*t);
+                for (int r = 0; r < 7; r++) for (int b = 0; b < 5; b++) {
+                    if (!(g[r] >> (4 - b) & 1)) continue;
+                    int e = b; while (e + 1 < 5 && (g[r] >> (4 - (e + 1)) & 1)) e++;
+                    float X0 = x + b * sc, X1 = x + (e + 1) * sc, Y0 = line[l].y + r * sc, Y1 = Y0 + sc;
+                    vtx(X0, Y0, 0, 0, c, c, c, 1); vtx(X1, Y0, 0, 0, c, c, c, 1); vtx(X0, Y1, 0, 0, c, c, c, 1);
+                    vtx(X1, Y0, 0, 0, c, c, c, 1); vtx(X1, Y1, 0, 0, c, c, c, 1); vtx(X0, Y1, 0, 0, c, c, c, 1);
+                    b = e;
+                }
+            }
+        }
         QUAD_END();
     }
     vb_flush();
