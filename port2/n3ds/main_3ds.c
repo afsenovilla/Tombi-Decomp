@@ -249,9 +249,9 @@ int main(int argc, char **argv) {
       args[n++] = "--frameskip"; }                  /* (behind its clock, the port draws fewer frames, the game keeps its speed) */   /* (New 3DS: the developer's logo plays, a 6.7 s movie, the others are skipped) */
     /* 60 Hz: the 3DS's screens refresh at ~60 Hz (50 on them repeats every fifth frame), and it is the US / NTSC game
        speed (the PAL build kept the US logic, docs/PORT.md "60 Hz mode"); args.txt "--hz 50" for the PAL speed */
-    /* (an Old 3DS: 50 Hz, the PAL disc's own speed: its 268 MHz cannot run 60 game frames a second, and at 50 the
-       frame's 20 ms hold the game, the sound and a drawn frame in four) */
-    { bool n3 = false; APT_CheckNew3DS(&n3); args[n++] = "--hz"; args[n++] = n3 ? "60" : "50"; }
+    /* (60 on both now: with the sound mixed on the second core and the frames it cannot draw skipped, an Old 3DS kept
+       50 with time to spare; args.txt "--hz 50" for the PAL disc's own speed) */
+    args[n++] = "--hz"; args[n++] = "60";
     /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
        NOW LOADING until gameplay, then status / events / map / items, by touch */
     args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240";
