@@ -9,7 +9,7 @@
  * that the hinge stays put.  The camera bound that kept the stage out of reach: port/fixes.txt (initSectionCamera).
  */
 #include <string.h>
-typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32;
+typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32; typedef signed char s8;
 
 extern int port_cut_content;
 extern int rsin(int), rcos(int);
@@ -80,6 +80,29 @@ extern void spawnObjectFromRecord(void *, int);
 #define TBL_LEN 0x17FCu
 static u8 chief_tbl[TBL_LEN + 16];
 static int chief_state;          /* 0 not tried, 1 loaded, -1 failed */
+/* The game's rectangles for these never-used frames cut the drawings or take in pieces of their neighbours, so the
+   sprites are drawn from our own table: one part per drawing, its rectangle around the whole drawing on the page
+   (page coordinates measured on the pages; page 3 = VRAM 192,0 the chief, page 1 = VRAM 64,0 the Fungas). */
+static const struct { u8 page, u, v, w, h; } OWN[] = {
+    /* chief walk (bent forward), in order */
+    {3,   2, 70, 49, 58}, {3,  58, 71, 43, 56}, {3, 108, 70, 35, 58}, {3, 149, 70, 33, 57}, {3, 188, 75, 51, 52}, {3, 170, 5, 52, 58},
+    /* chief talk */
+    {3,   4,  4, 48, 60}, {3, 113,  4, 49, 60},
+};
+#define NOWN (int)(sizeof OWN / sizeof OWN[0])
+static u8 own_tbl[NOWN * 4 + NOWN * 16];
+static void build_own(void)
+{
+    for (int f = 0; f < NOWN; f++) {
+        u16 cnt = 1, off = (u16)(NOWN * 4 + f * 16);
+        memcpy(own_tbl + 4 * f, &cnt, 2); memcpy(own_tbl + 4 * f + 2, &off, 2);
+        u8 *q = own_tbl + off; u16 clut = 0x780A, tp = OWN[f].page;
+        int u0 = OWN[f].u, v0 = OWN[f].v, u1 = u0 + OWN[f].w - 1, v1 = v0 + OWN[f].h - 1;
+        q[0] = u0; q[1] = v0; memcpy(q + 2, &clut, 2); q[4] = u1; q[5] = v0; memcpy(q + 6, &tp, 2);
+        q[8] = u0; q[9] = v1; q[10] = OWN[f].w; q[11] = OWN[f].h; q[12] = u1; q[13] = v1;
+        q[14] = (u8)(s8)(-(OWN[f].w / 2)); q[15] = (u8)(s8)(8 - OWN[f].h);
+    }
+}
 static int load_chief(void)
 {
     if (chief_state) return chief_state > 0;
@@ -100,13 +123,7 @@ static int load_chief(void)
     free(pg);
     u16 first; memcpy(&first, chief_tbl + 2, 2);
     if (first != 0x27C) { port_printf("funga: table 0x37 not where expected (first offset %x)\n", first); return 0; }
-    /* frames 29..58 end with two shadow parts (CLUT 0xF90A, 48 x 8) meant for a shadow page; drawn from the sprite page
-       they come out as scraps beside the figure: keep the figure's own parts only */
-    for (int f = 29; f <= 58; f++) { u16 c; memcpy(&c, chief_tbl + 4 * f, 2); if (c >= 3) { c -= 2; memcpy(chief_tbl + 4 * f, &c, 2); } }
-    /* frames whose rectangle cuts the drawing on the page (never used by the game, never corrected): 52 (walk) loses
-       the back of the cape and the trailing foot, 57 the cape: widen them to the whole drawing */
-    { static const struct { int f, w; } FIX[] = {{52, 54}, {57, 62}};
-      for (unsigned i = 0; i < sizeof FIX / sizeof FIX[0]; i++) { u16 o; memcpy(&o, chief_tbl + 4 * FIX[i].f + 2, 2); chief_tbl[o + 10] = (u8)FIX[i].w; } }
+    build_own();
     chief_state = 1;
     return 1;
 }
@@ -121,17 +138,12 @@ static void spawn_npcs(void)
     s16 pos[3] = {1580, -160, 180};
     memcpy(rec + 6, pos, 6);
     spawnObjectFromRecord(rec, -1);
-    static const s16 FX[3] = {1380, 1530, 1700};
-    for (int i = 0; i < 3; i++) {                  /* the Fungas: marker 0x5B */
-        rec[3] = 0x5B; rec[4] = i; pos[0] = FX[i]; memcpy(rec + 6, pos, 6);
-        spawnObjectFromRecord(rec, -1);
-    }
 }
 
 /* the chief: walks between x 1420 and 1720 (frames 50 51 52 51, 8 ticks each, 1 unit a tick), turns, and every second
    lap stops for about two seconds talking (47 49).  The frames face left: bit 0 of +2E set = as drawn. */
-static const u16 WALK[] = {50, 51, 52, 51}, TALK[] = {47, 49};
-static u8 script[6][8];
+static const u16 WALK[] = {0, 1, 2, 3}, TALK[] = {6, 7};
+static u8 script[8][8];
 static void show(u8 *o, int k, u16 frame)
 {
     u16 c = 0x8000 | 60;
@@ -141,36 +153,12 @@ static void show(u8 *o, int k, u16 frame)
         AnimLoadDuration(o);
     }
 }
-/* the Fungas (frames 32..46: the tailed villager, page 3 like the chief; their parts name CLUT 0x7809, pale blue in
-   section 2, so they take the chief's 0x780A through the object's CLUT override): walk 32 33 (36..38 carry scraps of the next atlas cell), facing left
-   as drawn, each to and fro over 80 units around its spot */
-static const u16 FWALK[] = {32, 33};
-static u8 fscript[2][8];
-static int funga_step(u8 *o)
-{
-    s32 *t = (s32 *)(o + 0x90), *dir = (s32 *)(o + 0x94), home = *(s32 *)(o + 0x98);
-    s16 *x = (s16 *)(o + 0x12);
-    (*t)++;
-    if (*t % 2 == 0) *x += *dir;
-    if ((*dir > 0 && *x > home + 40) || (*dir < 0 && *x < home - 40)) *dir = -*dir;
-    if (*dir < 0) o[0x2E] |= 1; else o[0x2E] &= ~1;
-    int k = *t / 10 % 2; u16 c = 0x8000 | 60;
-    memset(fscript[k], 0, 8); memcpy(fscript[k], &FWALK[k], 2); memcpy(fscript[k] + 6, &c, 2);
-    if (*(u32 *)(o + 0x24) != (u32)(unsigned long)fscript[k]) { *(u32 *)(o + 0x24) = (u32)(unsigned long)fscript[k]; AnimLoadDuration(o); }
-    return 1;
-}
 void port_funga_npc_init(u8 *o)
 {
-    if ((port_cut_content & 64) && o[0x0C] == 0x5B && chief_state > 0) {
-        *(s16 *)(o + 0x1E) = 1; o[0x0D] = 1; *(u16 *)(o + 0x08) = 0x780A; o[0x0F] = 0;
-        *(u32 *)(o + 0x3C) = (u32)(unsigned long)chief_tbl;
-        *(s32 *)(o + 0x90) = o[3] * 11; *(s32 *)(o + 0x94) = (o[3] & 1) ? -1 : 1; *(s32 *)(o + 0x98) = *(s16 *)(o + 0x12);
-        return;
-    }
     if (!(port_cut_content & 64) || o[0x0C] != 0x5A || chief_state <= 0) return;
-    *(s16 *)(o + 0x1E) = 1;                 /* page offset: the parts say page 2, the chief is on page 3 (VRAM 192,0) */
+    *(s16 *)(o + 0x1E) = 0;                 /* our parts hold the absolute page */
     o[0x0D] = 0;                            /* opaque */
-    *(u32 *)(o + 0x3C) = (u32)(unsigned long)chief_tbl;
+    *(u32 *)(o + 0x3C) = (u32)(unsigned long)own_tbl;
     o[0x0F] = 0;
     *(s32 *)(o + 0x90) = 0;                 /* tick */
     *(s32 *)(o + 0x94) = 1;                 /* direction */
@@ -181,14 +169,13 @@ void port_funga_npc_init(u8 *o)
 }
 int port_funga_npc_step(u8 *o)
 {
-    if ((port_cut_content & 64) && o[0x0C] == 0x5B && chief_state > 0) return funga_step(o);
     if (!(port_cut_content & 64) || o[0x0C] != 0x5A || chief_state <= 0) return 0;
     s32 *t = (s32 *)(o + 0x90), *dir = (s32 *)(o + 0x94), *talk = (s32 *)(o + 0x98), *laps = (s32 *)(o + 0x9C);
     s16 *x = (s16 *)(o + 0x12);
     (*t)++;
     if (*talk > 0) {
         (*talk)--;
-        show(o, 4 + (*t / 16 & 1), TALK[*t / 16 & 1]);
+        show(o, 6 + (*t / 16 & 1), TALK[*t / 16 & 1]);
         return 1;
     }
     *x += *dir;
