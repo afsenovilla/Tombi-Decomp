@@ -808,7 +808,7 @@ void port_panel_vblank(void) {
               if (port_panel_window) port_panel_window_frame((const unsigned char *)pa_cv, pa_cw, pa_ch);
               unsigned long long us = port_time_us() - t1;
               sum += us; wsum += t1 - t0; if (us > mx) mx = us;
-              if (++n >= 10) { if (port_show_fps) port_printf("[panel] touches: %d answered at once, %llu.%llu ms each (the longest %llu), %llu.%llu ms waiting for the worker\n", n, sum / n / 1000, sum / n / 100 % 10, mx / 1000, wsum / n / 1000, wsum / n / 100 % 10); sum = mx = wsum = 0; n = 0; }
+              if (++n >= 2) { if (port_show_fps) port_printf("[panel] touches: %d answered at once, %llu.%llu ms each (the longest %llu), %llu.%llu ms waiting for the worker\n", n, sum / n / 1000, sum / n / 100 % 10, mx / 1000, wsum / n / 1000, wsum / n / 100 % 10); sum = mx = wsum = 0; n = 0; }
               return;
           }
           int due = inq_n > 0 || scr_busy() || ++idle >= (port_sound_half ? 25 : 4);
