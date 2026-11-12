@@ -1,6 +1,7 @@
 """The PlayStation around the CPU: MAIN0.EXE + disc + HLE of the BIOS and of the Psy-Q libraries the game links.
 
-HLE is by function address (notes/names_main0.csv + notes/functions_main0.csv):
+HLE is by function address (notes/names_main0.csv + notes/functions_main0.csv for retail PAL MAIN0; the other builds of builds.py
+(USA, JP, beta, demos) use the address table libsig.py found by byte signature, tools/psxemu/syms/<build>.csv):
   * BIOS (A0/B0/C0): threads (OpenTh/ChangeTh/CloseTh, the game's task system runs on them), events (VBlank root counter event =
     the game's vblankHandler), the rest returns 0;
   * libgpu: ResetGraph/DrawSync/LoadImage/StoreImage/MoveImage/ClearImage/PutDrawEnv/PutDispEnv/DrawOTag/DrawOTagEnv/DrawPrim/
@@ -14,6 +15,7 @@ import os
 import struct
 import sys
 
+from . import builds as _builds
 from . import cpu as _cpu
 from . import gpu as _gpu
 
@@ -57,6 +59,12 @@ STUB_NAMES = {
     "FUN_80069390", "FUN_800693c8", "FUN_80069410",     # libpad actuator calls through a pointer libpad's (HLE'd) init sets
 }
 KEEP = {"StartTask", "StoreImage", "SetDefDrawEnv", "SetDefDispEnv"}
+# the library functions install_hle() replaces by name (besides the stubs above)
+HLE_NAMES = {
+    "ResetGraph", "SetDispMask", "DrawSync", "LoadImage", "StoreImage", "MoveImage", "ClearImage", "ClearImage2", "PutDrawEnv",
+    "PutDispEnv", "DrawOTag", "DrawOTagEnv", "DrawPrim", "ClearOTag", "ClearOTagR", "VSync", "VSyncCallback", "CdInit", "CdControl",
+    "CdControlF", "CdControlB", "CdSync", "CdReady", "CdRead", "CdReadSync", "CdStatus", "CdReset", "CdMode", "printf", "firstfile",
+    "_card_info", "_card_load", "_card_clear", "_card_write", "_card_read", "_new_card", "PadInitDirect"}
 
 
 class _Card:
@@ -139,10 +147,18 @@ class _Card:
 
 
 class Machine:
-    def __init__(self, exe=None, disc=None, names=None, card=None, boot=None):
+    def __init__(self, exe=None, disc=None, names=None, card=None, boot=None, build=None):
+        """build: a builds.PROFILES key (None / "pal" = retail PAL MAIN0, exactly as before profiles existed)."""
         self.cpu = c = _cpu.CPU()
         self.card = _Card(card) if card else None   # memory card image (.mcd, 128 KB raw): read by the BIOS file calls on bu00:
         self.gpu = _gpu.GPU()
+        self.profile = prof = _builds.get(build)
+        self.build = prof.name
+        if self.build != "pal":
+            exe = exe or prof.path("exe")
+            disc = disc or prof.path("disc")
+            if names is None:
+                names = _builds.load_syms(prof)
         self.names = names or load_names()
         self.addr = {}
         for n, al in self.names.items():
@@ -170,7 +186,12 @@ class Machine:
         self.on_draw = None
         self.opened = []
         c.bios = self.bios
-        self.pad_buf = PAD_BUF
+        self.pad_buf = prof.pad_buf          # PAL: PAD_BUF; None = set by the game's PadInitDirect / BIOS PAD_init call
+        self.pad_word = None                 # BIOS PAD_init / InitPAD buffer (old libetc PadRead: the word is ~(PadRead bits))
+        self.cd_ready_cb = None              # CdReadyCallback reads (profile cd_irq): CdlReadN/ReadS deliver sectors from vblank()
+        self.cd_reading = False
+        self.cd_sector = b""
+        self.cd_pos = 0
         self.boot_path = None
         if boot is not None:            # boot the disc: SYSTEM.CNF -> SCES_013.31 menu entry `boot` -> MAINn.EXE through the ISO directory
             self.boot_path, _, _, exe = self.boot_menu_exe(boot)
@@ -370,11 +391,27 @@ class Machine:
             for n in ("_card_info", "_card_load", "_card_clear", "_card_write", "_card_read", "_new_card"):
                 for a in self.names.get(n, []):
                     h[a] = card_op(n)
-        # FMV player task (0x8001D6A4, MDEC + streaming): the movie "ends" at once: MOVIE_PLAY_STATE (0x1F8001CC) = idle, exitTask
-        def movie(c):
-            c.w8(0x1F8001CC, 0)
-            c.pc_override = self.fn("exitTask")
-        h[MOVIE_TASK] = movie
+        if self.profile.cd_irq:             # the demos' loader: CdReadyCallback(cb) + CdControlF(CdlReadN), cb(CdlDataReady) -> CdGetSector
+            for n, f in (("CdReadyCallback", self.h_cd_ready_callback), ("CdGetSector", self.h_cd_get_sector)):
+                for a in self.names.get(n, []):
+                    h[a] = f
+        if self.pad_buf is None:            # libpad: PadInitDirect(buf1, buf2) tells where the pad data goes
+            def pad_init_direct(c):
+                self.pad_buf = c.R[4]
+                if self.pad is not None:
+                    self.set_pad(self.pad)
+                c.R[2] = 1
+            for a in self.names.get("PadInitDirect", []):
+                h[a] = pad_init_direct
+        # FMV player task (PAL 0x8001D6A4, MDEC + streaming): the movie "ends" at once: MOVIE_PLAY_STATE (0x1F8001CC) = idle, exitTask
+        prof = self.profile
+        mt = prof.movie_task or (self.names.get("moviePlayerTask") or [None])[0]
+        if mt:
+            def movie(c):
+                if prof.movie_state:
+                    c.w8(prof.movie_state, 0)
+                c.pc_override = self.fn("exitTask")
+            h[mt] = movie
 
     # ------------------------------------------------------------------ BIOS
     def bios(self, c, table, num):
@@ -429,6 +466,14 @@ class Machine:
             self.card.pending = 4       # asynchronous reads/writes (mode 0x8000) end with EvSpIOE: at once
             if self.verbose:
                 print("card B0:%02X %08X %08X %08X -> %d" % (num, a0, a1, a2, R[2]))
+        elif k in ((0xB0, 0x12), (0xB0, 0x15)) and self.pad_buf is None:     # InitPAD(buf1, n1, buf2, n2) / PAD_init(type, buf)
+            self.pad_word = a0 if num == 0x12 else a1
+            if self.pad is not None:
+                self.set_pad(self.pad)
+            R[2] = 1
+        elif k == (0xB0, 0x16) and self.pad_buf is None:     # PAD_dr(): the pad state word (libetc PadRead returns its complement)
+            self.set_pad(self.pad or 0)
+            R[2] = c.r32(self.pad_word) if self.pad_word else 0xFFFFFFFF
         elif k == (0xA0, 0x3F) or k == (0xA0, 0x3E):
             R[2] = 0
         elif k == (0xB0, 0x56) or k == (0xB0, 0x57):
@@ -445,13 +490,26 @@ class Machine:
         buffer at PAD_BUF (status 0, id 0x41 = digital pad, buttons active low)."""
         self.pad = buttons
         c = self.cpu
-        c.w8(self.pad_buf, 0)
-        c.w8(self.pad_buf + 1, 0x41)
-        c.w16(self.pad_buf + 2, ~buttons & 0xFFFF)
+        if self.pad_buf:
+            c.w8(self.pad_buf, 0)
+            c.w8(self.pad_buf + 1, 0x41)
+            c.w16(self.pad_buf + 2, ~buttons & 0xFFFF)
+        if self.pad_word:           # BIOS PAD_dr word: libetc PadRead = ~word, the pad bytes swapped (pad 2 released)
+            c.w32(self.pad_word, ~(((buttons & 0xFF) << 8) | (buttons >> 8 & 0xFF)) & 0xFFFFFFFF)
+
+    CD_SECTORS_PER_VBLANK = 8
 
     def vblank(self):
         self.vblanks += 1
         c = self.cpu
+        if self.cd_reading and self.cd_ready_cb:
+            for _ in range(self.CD_SECTORS_PER_VBLANK):
+                if not (self.cd_reading and self.cd_ready_cb):
+                    break
+                self.cd_sector = self.read_sectors(self.loc, 1)
+                self.cd_pos = 0
+                self.loc += 1
+                c.call(self.cd_ready_cb, 1, 0, max_instr=200000)     # (CdlDataReady, result)
         for f in self.vblank_funcs:
             c.call(f, max_instr=200000)
         if self.vsync_cb:
@@ -630,6 +688,22 @@ class Machine:
         if com in (0x02, 0x15, 0x16) and param:
             m, s, f = c.read(param, 3)
             self.loc = (bcd(m) * 60 + bcd(s)) * 75 + bcd(f) - 150
+        if self.profile.cd_irq:
+            if com in (0x06, 0x1B):         # CdlReadN / CdlReadS: sectors arrive through the ready callback
+                self.cd_reading = True
+            elif com in (0x08, 0x09, 0x0A, 0x02):      # Stop / Pause / Init / Setloc
+                self.cd_reading = False
+        c.R[2] = 1
+
+    def h_cd_ready_callback(self, c):
+        old = self.cd_ready_cb or 0
+        self.cd_ready_cb = c.R[4] or None
+        c.R[2] = old
+
+    def h_cd_get_sector(self, c):
+        n = 4 * c.R[5]
+        c.write(c.R[4], self.cd_sector[self.cd_pos:self.cd_pos + n])
+        self.cd_pos += n
         c.R[2] = 1
 
     def h_cd_read(self, c):
@@ -648,7 +722,7 @@ class Machine:
 
     # ------------------------------------------------------------------ save states
     STATE_KEYS = ("loc", "threads", "cur_th", "next_th", "events", "next_ev", "vblank_funcs", "vsync_cb", "vblanks", "frame_count",
-                  "drawenv", "dispenv", "opened", "pad")
+                  "drawenv", "dispenv", "opened", "pad", "pad_buf", "pad_word", "cd_ready_cb", "cd_reading", "cd_sector", "cd_pos")
 
     def save_state(self, path):
         import pickle
@@ -677,7 +751,8 @@ class Machine:
         g.tpage, g.tw, g.clip, g.ofs, g.set_mask = st["gpu"]
         c.blocks.clear()
         for k in self.STATE_KEYS:
-            setattr(self, k, st[k])
+            if k in st:             # pad_buf / pad_word: not in states saved before the build profiles
+                setattr(self, k, st[k])
         if self.pad is not None:
             self.set_pad(self.pad)
         if self.card:
