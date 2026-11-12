@@ -275,8 +275,7 @@ static void back_lane(void)
     u16 po[4] = {(u16)(o0 + 2), (u16)(o1 + 2), (u16)(o2 + 2), (u16)((end + 2 + 1) & ~1u)};
     memcpy(d + 8, po, 8);
     u8 *p2 = d + po[2], *p3 = d + po[3];
-    /* the front: Up+Cross into the back lane in front of the stand (the one stretch of the back row without drums:
-       landing on a drum's side would push Tombi out sideways, into the Fungas) */
+    /* the front: Up+Cross in front of the stand (the one stretch of the back row without drums) -> port_funga_up_lane */
     for (int c = STAND_X0 / 8; c < STAND_X1 / 8; c++) {
         u16 co, n; memcpy(&co, p2 + 2 * c, 2); memcpy(&n, p2 + co, 2);
         for (int k = 0; k < n; k++) {
@@ -314,4 +313,20 @@ static void back_lane(void)
     }
     WHM_DATA[0] = (char *)d;
     port_printf("funga: back lane WHM installed (%u bytes)\n", po[3] + q);
+}
+
+/* Up+Cross on the front floors in front of the stand (bit 0x2000, which would start step 0x11, a walk-level shift):
+   instead the lane jump (step 0x12, velY -0x570, 2.5 depth a tick) with its depth direction turned to +90, so the arc
+   goes up and back and lands on the stand's top (y -232) in the back plane */
+int port_funga_lane_flip;
+int port_funga_up_lane(void *po)
+{
+    extern char *WHM_DATA[];
+    u8 *o = po;
+    port_funga_lane_flip = 0;
+    if (!(port_cut_content & 64) || WHM_DATA[0] != (char *)port_funga_whm) return 0;
+    s16 px = (*(s16 **)(o + 0x40))[1], pz = (*(s16 **)(o + 0x44))[1];
+    if (px < STAND_X0 || px >= STAND_X1 || pz != 180) return 0;
+    port_funga_lane_flip = 1;
+    return 1;
 }

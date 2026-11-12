@@ -479,6 +479,15 @@ src/x010/updateAreaMechanisms.c |         ObjCullRegister(o); |         ObjCullR
 # and a back lane along the drums' row (runtime/funga.c back_lane: a copy of the WHM with a fourth plane, put in slot 0):
 # the plane cap of the section (2) is lifted to 3 for that copy only
 src/getCollisionPlaneAt.c |     { unsigned char *q = D_8007B55C[M960]; lim = q[GAME.selectedSection]; } |     { unsigned char *q = D_8007B55C[M960]; lim = q[GAME.selectedSection]; } { extern unsigned char port_funga_whm[]; if (b == (char *)port_funga_whm) lim = 3; }
+# and Up+Cross in front of the straw stand is a lane jump (step 0x12) into the background onto the stand's top: the depth
+# direction of that one jump is turned (port_funga_lane_flip, set by port_funga_up_lane, cleared when the step ends)
+src/playerStepIdle.c |             o->step = 0x11; |             o->step = 0x11; { extern int port_funga_up_lane(void *); if (port_funga_up_lane(o)) o->step = 0x12; }
+src/playerStepLaneJump.c | *(unsigned short *)0x1F8001C8 & 1 | (*(unsigned short *)0x1F8001C8 ^ port_funga_lane_flip) & 1
+src/playerStepLaneJump.c | void playerStepLaneJump(PO *o) | extern int port_funga_lane_flip; void playerStepLaneJump(PO *o)
+src/playerStepLaneJump.c | o->t.velY = -0x570; | o->t.velY = port_funga_lane_flip ? -0x7A0 : -0x570;
+src/playerStepLaneJump.c | ObjAddVelY7E(o); | ObjAddVelY7E(o); if (port_funga_lane_flip && o->t.state == 1) o->t.y.p.whole -= 1;
+src/playerStepLaneJump.c |             o->t.step = 0xe; |             o->t.step = 0xe; port_funga_lane_flip = 0;
+src/playerStepLaneJump.c |             o->t.step = 0; |             o->t.step = 0; port_funga_lane_flip = 0;
 src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if ((port_cut_content & 1) && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
 src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc_boatman; port_cc_boatman = 0; }
 # 2) AREA03 letter (MFNT030 #208 = sign text (1,1), no sign shows it): next to the save-point sign of Phoenix Mountain
