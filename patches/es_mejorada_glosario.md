@@ -111,8 +111,9 @@ cadenas de la lista), así que las pistas nuevas deben ocupar más o menos lo mi
 Un nombre que no cabe en su hueco ya no se recorta: `tools/memcard_text.py` reempaqueta todo el bloque de nombres de
 lugar (los repetidos, como los diez "Castillo de Hierro", se comparten, y eso deja sitio) y reescribe las tablas.
 Corregidos: *Cuevas de lava* (antes "Cueva de lava" por falta de sitio), *Nido del Fénix*, *Plaza de la caridad*,
-*Cámara del Anciano de 1.000.000 años* (antes "Cámara Anciano 1 millón años"; cabe en la fila como el de los 10.000
-años), *Cámara del Anciano milenario*, *Cámara del ladrón uno / dos / tres* (antes "Una cámara del ladrón", "Dos / Tres
+*Cámara del millón de años* (antes "Cámara Anciano 1 millón años"), *Cámara del Anciano milenario*, *Cámara del ladrón uno / dos / tres* (antes "Una cámara del ladrón", "Dos / Tres
 cámaras de ladrones": error de traducción de *Thief's Room One/Two/Three*), *Cámara de la cerradura*, *Cámara del
-escondite*, *Cámara de la risa*, *Cámara de los trucos*, *Cámara de la sombra*, *Cámara del llanto*, *Muros exteriores
-de la Isla de Cerdos* (antes "Muros externos de Isla Cerdos").
+escondite*, *Cámara de la risa*, *Cámara de los trucos*, *Cámara de la sombra*, *Cámara del llanto*, *Muros de la Isla
+de Cerdos* (antes "Muros externos de Isla Cerdos"), *Cabaña del sabio centenario*, *Cámara de los 10.000 años*.
+La fila de la lista de guardado dibuja el nombre en una sola línea, 8 px por letra: caben 28 letras como máximo
+(`tools/check_text_patch.py` lo comprueba).

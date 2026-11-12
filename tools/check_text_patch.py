@@ -238,6 +238,22 @@ def pause_boxes(proj, exe="EXE/MAIN5.EXE"):
     return out
 
 
+MEMCARD_LOCATION_MAX = 28   # the save/load list row: 8-px monospaced cells from x 64 to the frame's inner edge (x 293)
+
+
+def memcard_locations(patch):
+    """The save/load list draws a place name on one line (memCardDrawString mode 0 skips the "\\n"), 8 px a letter from
+    rowX+0x20: at most 28 letters fit inside the row frame (29 draw over its border, longer ones run off the screen)."""
+    out = []
+    for path, m in sorted((patch.get("menus") or {}).items()):
+        for k, s in sorted(((m or {}).get("locations") or {}).items(), key=lambda kv: int(kv[0])):
+            n = len(s.replace("\n", ""))
+            if n > MEMCARD_LOCATION_MAX:
+                out.append("%s location %s: %d letters on one line, the save list row holds %d (%r)" % (
+                    path, k, n, MEMCARD_LOCATION_MAX, s.replace("\n", "")))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("disc"); ap.add_argument("patch"); ap.add_argument("-v", "--verbose", action="store_true")
@@ -279,6 +295,9 @@ def main():
         bad += 1
     for msg in pause_boxes(proj):
         print("PAUSE: %s" % msg)
+        bad += 1
+    for msg in memcard_locations(patch):
+        print("MEMCARD: %s" % msg)
         bad += 1
     for note in NOTES:
         print("note:", note)
