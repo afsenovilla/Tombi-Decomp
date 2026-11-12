@@ -469,6 +469,9 @@ src/showMessageBoxDirectTimed.c |     openMessageBox(a, b, c, 1, d); |     retur
 src/initSectionCamera.c |     D_800A457E = *p++; |     D_800A457E = *p++; { extern int port_cut_content; if ((port_cut_content & 64) && GAME[0] == 10 && GAME_SELECTED_SECTION == 2) D_800A457E = 1680; }
 # and the gate (updateAreaMechanisms subtype 2, a block the game never moves, with a copy in the room model) swings open on a
 # hinge as Tombi comes near (port2/runtime/funga.c)
+# and its drums (updateSolidScenery subtypes 13..21, which the game gives no box: not solid) become subtype 0, the springy
+# drum (its box, and solidSceneryPlayerCollision bounces Tombi off its top)
+src/x010/updateSolidScenery.c |         o->d8c = o->animFrame << 4; |         o->d8c = o->animFrame << 4; { extern int port_cut_content; if ((port_cut_content & 64) && o->subtype >= 13 && o->subtype <= 21) o->subtype = 0; }
 src/x010/updateAreaMechanisms.c |         ObjCullRegister(o); |         ObjCullRegister(o); { extern void port_funga_gate(void *, int); extern TObj PLAYER; port_funga_gate(o, PLAYER.h->p.whole); }
 src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if ((port_cut_content & 1) && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
 src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc_boatman; port_cc_boatman = 0; }
