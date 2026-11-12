@@ -308,6 +308,11 @@ static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
     if (n_rd < 4) { rd_log[n_rd][0] = (short)x; rd_log[n_rd][1] = (short)y; rd_log[n_rd][2] = (short)w; rd_log[n_rd][3] = (short)h; }
     n_rd++;
     end_and_wait();
+    /* Twice: the wait inside is for "a transfer has ended", and one of an earlier frame's transfers to the screens
+       can have ended unseen, so the first wait may return before this transfer has run (a console's start-up probe
+       read a pixel as not drawn and, a moment later, its neighbour as drawn).  The second call's wait cannot end
+       before the first transfer has. */
+    for (int k = 0; k < 2; k++)
     C3D_SyncDisplayTransfer((u32 *)vram_tex.data, GX_BUFFER_DIM(1024, 512), (u32 *)lin, GX_BUFFER_DIM(1024, 512),
                             GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) |
                             GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) |
