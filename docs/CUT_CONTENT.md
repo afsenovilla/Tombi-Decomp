@@ -37,7 +37,7 @@ logo.
 |---|---|---|
 | "DIRT MOTOCROSS RACE  Let's challenge it!!" sign | MFNT000 #165 = (8,0); no call with k=8 in X000/MAIN0 (PAL or JP). PrePre8's event-title strip has モトクロスコース. | A sign that maps to (8,0) (a port-side subtype; `D_80079EBC` has none) and a place for it: **no evidence where it stood**, so placement would be ours. Cheap (same pattern as the letter). |
 | AREA00 hint signs per button config | MFNT000 k1 dx 8,10,14,15,21,22 and 24..29: variants of hints PAL already shows; `D_80079E8C..EB0[BUTTON_CONFIG_INDEX]` never selects them. | Nothing new to show: the same advice exists. Not worth it. |
-| Dwarf woodcutter lines (AREA02/19) | MFNT020 (2,54..56) "Dwarves... good at cutting trees", "you want a tree cut down?"; no WSS literal/variable reaches dx 54-56. Unused event 18 "The Dwarves' Help" ("Ask the lumberjack dwarf for some wood"). | A WSS script change (AREA15/02xx.WSS op 0x85) and a dwarf actor that offers it; medium. |
+| Dwarf woodcutter lines (AREA02/19) | MFNT020 (2,54..56) "Dwarves... good at cutting trees", "you want a tree cut down?" (JP text; PAL has `!!!!!!!!!!` placeholders). 0200.WSS stages (2,54) in register r11 for villager 16, whose talk case is missing (section "WSS event scripts across builds"); nothing reaches dx 55-56. Unused event 18 "The Dwarves' Help" ("Ask the lumberjack dwarf for some wood"). | A WSS script change (AREA15/02xx.WSS op 0x85) and a dwarf actor that offers it; medium. |
 | AREA02 group 3/4/6 lines ("We're being pushed back!", "Big brother... hurry!") | MFNT020 (3,5..6), (4,0..2), (6,16); X002 calls only k 2, 3 (dx 0-4), 7, 9. | No scene to hang them on: medium-hard. |
 | Unused items (47; 21 with a JP description) | `scratchpad`-built list `unused_items_jp.txt`: e.g. Rain Essence (52), Torn Map halves (57/58), Rubber Gloves (59), Iron (61), Letter (90), Wood (91), Shovel (97), Electric Eel (108), Black Water (109), five Candies (110-114), Funga Leather/Tree/Sap (119/122/123), Small Drum (137), Chief's Spear (140), Coal (147). Name = D0SPSUB `ITEM_NAME_STRINGS[id]` (MFNT id+3 only for ids < 10), description = D0SPSUB block 0 id+4 (PAL English "···???"). | Giving them is one `addItemToInventory`, but nothing uses them; most belong to the cut Civilization / Masakari chains. Only a viewer would be honest. The JP descriptions could go into a text patch. |
 | Unused events (68; 26 with JP info) | `unused_events_jp.txt`: e.g. 6 "A Big Puddle?" (PrePre8's strip has あれま大きな水たまり: the same idea, now confirmed in two builds), 18 Dwarves' Help, 45 AP Slot Machine, 52 "Now I Can't Cross...", 59-61 Masakari chain, 74 Catch the Electric Eel, 76 Black Water, 77 Civilization Machine, 83 Iron Car. No `setEventStarted/Complete` with those ids anywhere. | Each needs its own trigger and goal; none has code. Medium-hard each; only the titles/descriptions are cheap (text patch). |
@@ -933,3 +933,89 @@ identification; the frames are retouched / on another page there, so the block m
 (slots 34, 36, 44, 45, 52, 61, listed above); the Japanese title logo, faces, kanji font and sub-screen labels (all in
 retail JP); the feather, the Evil Pig trident and the logs (sampled, or in retail JP). JP AREA00/AREA08 room pages, the
 Pre9 AREA01 object atlases and AREA02 room pages hold no other unreferenced art. USA and SCES-01330 discs not checked.
+
+## WSS event scripts across builds: orphan entries, dead branches, build-only reward changes (2026-11-12)
+
+Tool: `tools/wss.py` (disassembler, reachability walk, census `sem` / `semdiff` of events, items, dialogue, flags and
+spawns; `--ops N` for a pre-release op table). Facts checked in the binaries [V] unless marked [I].
+
+**How a script runs.** The loader (`initAreaScripts`, the only caller of `scriptStart`: one `jal` in MAIN0..8, no data
+word) starts **entry 0** only; every other entry of the 64-slot table is reached by `CALL e` (op 0x12, immediate
+entry byte). So an entry that no reached code CALLs can never run. Game op 0x85 is a generic object command (cmd 2
+walk, 4/8 dialogue with `k, dx` = WFM group and index, ...), not only the message box. The game-op tables differ per
+build (exe dispatchers, `op - 0x80` + `sltiu N`): retail PAL/USA/JP and beta 980203 44 ops (Yield 0xAB), JP demo and
+Dengeki D5 40 (Yield 0xA7), PrePre 9 39 (Yield 0xA6; its 0xA2 GiveItem has no `-1` = max-health branch), Hyper 12 32
+(Yield 0x9F: no GiveItem, no Fade). The ops below the Yield keep the retail numbers (handlers compared by their calls).
+Pre-release dialogue: `k + dx` indexes the WFM1 block of the area (no group table), e.g. PrePre 9 0200 `k = 59`
+-> `TOMBA/AREA02/A003.GAM` block 0 (`tools/jpdemo_text.py` dump); the `dx` values are the retail MFNT020 group-2 ones.
+
+**Hashes.** USA = PAL for all 9 files (byte-identical). Beta 980203 and JP share 0120 and SCR0100; 0130 is the same in all
+three; beta 0140 = PAL 0140, JP 0140 differs. JP demo 0000 = Dengeki 0000 (byte-identical). PrePre 9 (`TOMBA/AREA01`, 7 files, no 0201 /
+0220) and Hyper 12 (`TOMBA/AREA15`, 8 files, no 0201) share no file. Apart from the 0201 rewards below, the retail versions differ only in staging
+(`WriteGlobal(363, ...)` = `TALK_POSE` 0x8009D00F, Tombi's reaction pose, 25 writes added in PAL/USA, none in JP / beta;
+extra NPC placements in 0200/0201 depending on events 80 / 168; one tutorial-line order in X000 sequence 7).
+
+### Retail (PAL = USA; JP and beta have the same orphans)
+| file / entry | what it is | text |
+|---|---|---|
+| 0130 e4 | empty (`RET`) | none |
+| 0140 e23, e24, e25 | turn-and-walk helpers for objects 0, 2, 3 (flip frame, anim 24, `ObjCmd 2` walk 120 ticks at x +-80); the live 0140 code drives these objects with other entries | none |
+| 0200 e15 | same helper for object 3 (anim 20 + facing, walk 180 ticks, speed 100) | none |
+| 0200 e50, e51 | generic helpers taking registers (`obj, frame, speed, ticks` / `obj, anim, ticks`) | none |
+| 0210 e2, e3 | turn-and-walk helpers for objects 0, 2 (same code as 0140 e23/e24) | none |
+| 0220 e6 | fade-in loop (8 steps of `Fade(0, 16 - 2n)`) | none |
+No retail file has a dead branch inside a reached entry (only the `Yield; JMP` after a loop). So the orphan WSS code of
+the retail discs is movement/fade boilerplate: **no cut dialogue, event or item in a retail WSS** [V].
+
+**The woodcutter line is staged by the scripts.** `0200.WSS` (PAL, USA, JP, beta) sets `r11 = 54` in its five
+post-rescue dialogue-stage entries (e8-e12, PAL 0x1E6B..0x2039): every villager `n` talks with register `r(n+1)`
+(`ObjCmd n, 4, 2, r(n+1)`), and `r11` belongs to villager **16**, but the talk switch has no case for object 16
+(15 -> r10, then 17 -> r12) and nothing else reads `r11`. Object 16 is spawned (class 9, at 8,154, anim 56, only
+while event 80 is started and 168 is not). So MFNT020 (2,54) "ドワーフ、木を切るのとくい... わしらの なかまにたのむといい"
+("Dwarves are good at cutting trees... ask one of us if you are in trouble"; PAL has `!!!!!!!!!!` placeholders at
+2,54-56 in every language) was wired to a villager whose talk case was removed. PrePre 9 has the same `r11 = 54`
+(dialogue 59+54 = 113, same JP text) and no talk case either; Hyper 12's 0200 has neither. The follow-ups (2,55)
+"you want a tree cut?" / (2,56) "this tree is fine, step back" stay unreferenced in every build (the 0x55/0x56 lines
+belong to the cut event 18, table "Possible" above) [V for the registers, I for the purpose].
+
+### JP retail and beta 980203 vs PAL (meaningful script changes)
+| file | JP / beta | PAL / USA |
+|---|---|---|
+| 0201 e15 (the village script loaded instead of 0200 while event 20 "Stop the Fight!" is in progress, `SCRIPT_FLAGS[20] == 1`) | completing 177 "Something's Cookin'?" (the gassy dwarf, (2,12)/(2,13)) gives `GiveItem(17, 2, 1)` = **2 Torches** (JP 0x1E3A) | gives `GiveItem(-1)` = max health +1 (0x1FBA), the same reward as 0200 |
+| 0201 e16 | completing 113 "Baron's Strength" sets global 101 = 2 and returns: **Baron (item 14) is not given back** (JP 0x2290) | `GiveItem(14, 1, 1)` after it (0x241D), as 0200 does |
+| 0201 | dialogue (2, r05) twice | one of them fixed to (2,71) |
+JP and beta 0200 give -1 / 14 correctly, so in the two 1997-98 Japanese builds the outcome of these two quests
+depended on which of the two village scripts was loaded; PAL/USA (and only they) fixed 0201 [V]. Seen in game only
+if 177 or 113 is finished while event 20 is in progress [I].
+
+### PrePre Vol. 9 (PCPX-96093, `TOMBA/AREA01/*.WSS`, 39 ops)
+| file / place | what | text (PrePre 9 bank `AREA02/A003` block 0) |
+|---|---|---|
+| 0200 e0 0x06FF..0x0828 (dead: after the unconditional `JMP` at 0x06FC, talker 14 always says dialogue 69) | the gassy dwarf's 177 quest as a talk branch: flag 177 == 4 -> dialogue 71, flag := 255, **AwardEvent(177, complete)**, wait 300 frames, **GiveItem(7) = Charity Wings**; other states dialogue 69 / 70 | 71 "おやっ！これ、くれるのかい？... かわりに これをもらっとくれ" ("oh, you're giving me this? ... take this in exchange"); 69 "4 dwarves suddenly vanished... the Koma Pigs hid them" |
+| 0200 e26 (live, flag 177 == 5) | the version that runs: `GiveItem(26, 1, 1)` (Broken Vase), dialogue 71, then 72 (the gas speech + "take this, it's something rare"), no event award | 72 "・・・ふうーーーっ・・・じつは、おなかの中にガスがたまってて..." |
+| 0200 e0 0x00EF..0x0140 (dead) and **orphan entries e4, e9, e10, e11, e12** | the dialogue-stage tables of the later village (event 20 "Stop the Fight!" in progress / done, rescue counts): entry 0 jumps over the event-20 test, so these tables never load | e9-e11 hand out 187 "a strange butterfly in the dead leaves", 130 (the doctor), 185 "the Elder has the Forest seal bag", 186, 193, 194, 74/73 (the torch keeper), **113 (the woodcutter line, register r11)**; e4: 175 "our friends vanished!", 176, 169/170, 171 "the right entrance leads to the Elder's house", 174, 181; e12 all 255 |
+| 0210 e0 0x031F..0x03AC (dead, after `JMP` 0x031C) | right after 17 "Save the Dwarves" completes: dialogue 99 and **AwardEvent(14, start)** "A Lost Child" | 99 "the seven friends are back, but one child is still lost in the forest" |
+| 0210 e0 0x0A84..0x0BF7 (dead) | talker 4 (dialogue 192/193, by flag 12) and talker 5: when 179 is not started, dialogue 116/117 then **AwardEvent(20, start)** "Stop the Fight!", the dwarf walks off and is disabled | 116 "two dwarves started fighting at the village gate... could you stop them?"; 117 "if the Elder were here..."; 192 "I'm a lookout... for what? can't tell"; 193 "have you met the Elder?" |
+| 0130 | starts 181 "Ready, Set, Go!" (retail starts it in SCR0100) | - |
+| 0140 e17, e18, e19 | the same turn-and-walk helpers as retail 0140 e23-e25 (orphans) | none |
+So the 1997 demo had all of the village chain (14, 20, 177) in its scripts and cut the demo short by inserting
+`JMP`s over the triggers; the earlier notes list 14, 20 and 177 among PrePre 9's WSS awards: they are all in dead
+code [V]. The gassy dwarf's quest had two rewards in the same file, **Charity Wings** (the talk branch, cut) and the
+Broken Vase (live); retail gives max health. Charity Wings later come from other givers (X003 hollow, I0NFO2
+`npcSet07SceneStep1`) [V].
+
+### Hyper Re-mix 12 (SLPM-80167, 32 ops) and the area-0 demos
+- Hyper 0200 orphan **e11** is an all-255 stage table (no lines); 0200 starts 168 (already listed in notes/secrets.md)
+  and completes 177 with no reward (the op table has no GiveItem at all). 0220 e0 0x01FF..0x0251 is dead
+  (player-x 130..158 trigger, `ObjCmd 0, 4, 65, 82`, wait 240). Hyper ships only the AREA00 text (`TOMBA/AREA00/
+  DATA000`, 64 + 16 entries), so the dialogue of its 0100..0220 scripts is not on the disc and they cannot run.
+- JP demo / Dengeki D5 / Hyper `0000.WSS`: no orphan entry, no dead branch; the area-0 opening plays 4 lines
+  (`k` 24 in the JP demo / Dengeki, 22 in Hyper; dx 0..3) where retail plays 9 (MFNT000 group 3, dx 0..8) plus `ReadGlobal(120)`; award 1 only.
+
+### Other "scripts" checked
+- Scene-sequence step tables (`tools/objects.py` SEQ_TABLES, X000/X002/X004/X006/X013), looked up by content: USA = PAL
+  for all; JP/beta differ in X000 sequence 7 (the weapon-workout tutorial: PAL shows (1,17) and (1,15), JP (1,16),
+  beta (1,15): button-layout variants of the same text), X002 sequence 2 and the X004 sequences (step reordering, no
+  new event id: the event census of notes/secrets.md "Pre-release builds" stands). The pre-release X00/A00 sequence
+  tables share no 3-step run with PAL (other op numbering); their event ops were already censused. Nothing new.
+- Not done: message-box control codes in the dialogue banks, I0NFO/I0NFO2 town-scene step tables across builds.

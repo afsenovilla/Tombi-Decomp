@@ -276,6 +276,10 @@ Stop after about 90 minutes on one function: write what was tried under "tried" 
 - [ ] x04 func_80115FD0 (6472 B), x00 func_800F4CDC (5464 B), x10 func_8011DCC8 (3872 B): no PAL twin, from scratch.
 
 ## Recently done (context)
+- WSS scripts across all builds (2026-11-12, `tools/wss.py`, docs/CUT_CONTENT.md "WSS event scripts across builds"):
+  retail orphan entries are movement/fade helpers only; 0200.WSS stages the woodcutter line (2,54) for villager 16,
+  whose talk case is missing (every build); JP/beta 0201 give 2 Torches for event 177 and no Baron after 113 (PAL
+  fixed); PrePre 9 keeps the 14 / 20 / 177 triggers as dead code, the 177 branch rewarding Charity Wings.
 - PAL X000 at 100 % (2026-11-08): the A00_WOODEN_BRANCH_HANDLERS subtype 1/2 handlers func_80132BB8 / func_80132DD0
   (only port2/runtime/x000_handwritten.c had C for them), matched with the JP-round tricks (a `static __inline__`
   for the bend body moved the last register). Checked with tools/ncheck.py (no dosbox for matchcheck here). The

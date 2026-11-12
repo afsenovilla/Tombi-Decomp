@@ -158,6 +158,11 @@ with operands: variable = 1 byte (40+ = argument/result registers r0..), number 
 | 2C | WAIT frames (1 byte) |
 | 80-AB | game calls (dispatcher 8003AFB4), no operands, arguments in r0..; e.g. 80 CreateObject, 81 SetObjAnim |
 
+Opcode numbers in the table are hex (the C switch in `execCoreOpcode` is decimal). 85 is a generic object command
+(cmd 2 walk, 4/8 dialogue `k, dx`, ...). Only entry 0 is started (`initAreaScripts`); other entries run through CALL.
+The game-op count differs per build (Yield is always the last op): 44 retail/beta, 40 JP demo/Dengeki, 39 PrePre 9,
+32 Hyper 12. `tools/wss.py` disassembles, walks and compares them.
+
 Scripts exist for areas 0 (`0000.WSS`), 1/7 (`SCR0100`, `0120`-`0140`), 2/19 (`0200`/`0201`, `0210`, `0220`), chosen by
 routine 80039338. CreateObject classes 2/10 make layer 2 type 18 (a record of box, page base, SPR slot and animation list by
 subtype in the area overlay), class 9 type 19, class 3 layer 3 type 2E, class 4 layer 4 type 1E.
