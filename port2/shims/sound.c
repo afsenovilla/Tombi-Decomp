@@ -962,11 +962,13 @@ static volatile unsigned ring_w, ring_r;
 static volatile int mixer_thread;
 static unsigned long long ring_under;               /* frames the callback found missing */
 unsigned long long port_sound_underruns(void) { unsigned long long n = ring_under; ring_under = 0; return n; }
-void port_sound_mixer_run(void) {                   /* (never returns) */
+volatile int port_sound_mixer_quit;                 /* the way out: the thread ends (n3ds/pica_c3d.c port_n3ds_threads_stop) */
+void port_sound_mixer_run(void) {                   /* (returns when the program closes) */
     extern void port_sleep_us(unsigned long long);
     static s16 piece[2 * 64];
     mixer_thread = 1;
     for (;;) {
+        if (port_sound_mixer_quit) { mixer_thread = 0; return; }
         if (!mixer_thread) { port_sleep_us(200000); continue; }           /* (given up: the callback mixes, port_sound_pull) */
         if (ring_w - ring_r > 1536u) { port_sleep_us(2000); continue; }   /* (~70 ms ahead at 22050 Hz) */
         /* (short pieces: the lock is the game thread's too, and this core gives the program a share of its time,

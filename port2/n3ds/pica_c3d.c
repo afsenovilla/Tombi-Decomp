@@ -842,7 +842,8 @@ const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read
    the Old 3DS's second core with the time the system grants), else under the main thread, in the time it sleeps */
 static LightEvent wk_go;
 static void (*wk_job)(void);
-static void wk_main(void *arg) { (void)arg; for (;;) { LightEvent_Wait(&wk_go); wk_job(); } }
+static volatile int wk_quit; static Thread wk_thread, c1_thread;
+static void wk_main(void *arg) { (void)arg; for (;;) { LightEvent_Wait(&wk_go); if (wk_quit) return; wk_job(); } }
 int port_n3ds_worker_start(void (*job)(void)) {
     LightEvent_Init(&wk_go, RESET_ONESHOT);
     wk_job = job;
@@ -857,6 +858,7 @@ int port_n3ds_worker_start(void (*job)(void)) {
     static const int cores[] = { 2, -1, 1, -2 };
     Thread t = 0; int c = n3 ? 0 : 1, used = 0;
     for (; c < 4 && !t; c++) { if (n3 && cores[c] == -1) continue; t = threadCreate(wk_main, 0, 256 * 1024, prio + 1, cores[c], false); used = cores[c]; }
+    wk_thread = t;
     port_printf("[3ds] panel render thread: %s (core %d)\n", t ? "started" : "none", used);
     return t != 0;
 }
@@ -886,6 +888,17 @@ int port_n3ds_thread_core1(void (*fn)(void)) {
     APT_SetAppCpuTimeLimit(30);   /* (the share the panel's worker has run with; 80 starved the system's services) */
     c1_fn = fn;
     Thread t = threadCreate(c1_main, 0, 64 * 1024, prio, 1, false);
+    c1_thread = t;
     port_printf("[3ds] sound mixer thread on core 1: %s\n", t ? "started" : "none (the callback mixes)");
     return t != 0;
+}
+/* the way out (runtime/sdl.c, first of all): the two threads end and are waited for, two seconds each at most.  (A
+   console crashed at every exit with them left running: one is on the system's core, which the system takes back
+   when the program leaves, and both use what the steps after this one close.) */
+void port_n3ds_threads_stop(void) {
+    extern volatile int port_sound_mixer_quit;
+    port_sound_mixer_quit = 1; wk_quit = 1;
+    if (wk_thread) LightEvent_Signal(&wk_go);
+    if (c1_thread) { Result r = threadJoin(c1_thread, 2000000000ULL); port_printf("[3ds] quit: mixer thread %s\n", R_SUCCEEDED(r) ? "ended" : "did not end"); if (R_SUCCEEDED(r)) threadFree(c1_thread); c1_thread = 0; }
+    if (wk_thread) { Result r = threadJoin(wk_thread, 2000000000ULL); port_printf("[3ds] quit: panel thread %s\n", R_SUCCEEDED(r) ? "ended" : "did not end"); if (R_SUCCEEDED(r)) threadFree(wk_thread); wk_thread = 0; }
 }

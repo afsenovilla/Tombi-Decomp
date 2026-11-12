@@ -157,7 +157,8 @@ static void window_stop_h(void *u) {
 #ifdef __3DS__
     /* (a console froze after "window closed", power button and all: each step of the way out is logged, and citro3d,
        its command queue and interrupt handlers, is closed before SDL takes the screens away under it) */
-    { extern void port_n3ds_gpu_fini(void); extern void port_flush_log(void);
+    { extern void port_n3ds_gpu_fini(void); extern void port_flush_log(void); extern void port_n3ds_threads_stop(void);
+      port_printf("[3ds] quit: threads\n"); port_flush_log(); port_n3ds_threads_stop();
       port_printf("[3ds] quit: renderer\n"); port_flush_log(); port_n3ds_gpu_fini();
       port_printf("[3ds] quit: renderer closed\n"); port_flush_log();
       port_printf("[3ds] quit: audio\n"); port_flush_log();
