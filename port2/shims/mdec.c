@@ -367,6 +367,27 @@ static int decode_mb(u8 *out) {
     /* (the chroma terms once per chroma sample, which four pixels share: the same sums) */
     s32 rc[64], gc[64], bc[64];
     for (int c = 0; c < 64; c++) { rc[c] = (1436 * cr[c]) >> 10; gc[c] = (352 * cb[c] + 731 * cr[c]) >> 10; bc[c] = (1815 * cb[c]) >> 10; }
+    if (in_depth != 2 && !in_signed) {
+        /* the usual output, 15-bit words of unsigned samples: a luma block at a time, the clamp and the cut to five
+           bits from a table (the same words as the general loop below, a quarter of its instructions) */
+        static u8 t5[768];
+        if (!t5[767]) for (int v = -384; v < 384; v++) { int c = v + 128; t5[v + 384] = (u8)((c < 0 ? 0 : c > 255 ? 255 : c) >> 3); }
+        const u16 top = (u16)(in_bit15 << 15);
+        for (int b4 = 0; b4 < 4; b4++) {
+            const int bx = (b4 & 1) * 8, by = (b4 >> 1) * 8;
+            const s32 *Y = y[b4];
+            for (int py = 0; py < 8; py++) {
+                u8 *q = out + ((by + py) * 16 + bx) * 2;
+                const int ci = ((by + py) >> 1) * 8 + (bx >> 1);
+                for (int px = 0; px < 8; px++) {
+                    const int c = ci + (px >> 1), Yv = Y[py * 8 + px] + 384;
+                    const u16 p = (u16)(t5[Yv + rc[c]] | t5[Yv - gc[c]] << 5 | t5[Yv + bc[c]] << 10 | top);
+                    q[px * 2] = (u8)p; q[px * 2 + 1] = (u8)(p >> 8);
+                }
+            }
+        }
+        return 128;
+    }
     for (int py = 0; py < 16; py++)
         for (int px = 0; px < 16; px++) {
             int Y = y[(py >> 3) * 2 + (px >> 3)][(py & 7) * 8 + (px & 7)];
