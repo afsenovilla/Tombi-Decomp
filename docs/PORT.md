@@ -1204,6 +1204,7 @@ confirmed with Circle at 1300 (the values of the room sweep). Addresses: `GAME` 
 | Infinite lives | `--poke-every 50:8009C980:63:1` | new option: `--poke-every INTERVAL:ADDR:VALUE[:SIZE]` writes every INTERVAL vblanks |
 | Infinite vitality | `--poke-every 1:8009C970:4:1` | `GAME.playerHealth`, 4 = full (initGameConfig) |
 | Saving does not refill vitality (default off) | `--no-save-heal` | a loaded save keeps its saved vitality; see below |
+| Proportional place names on the save list (experiment, default off) | `--memcard-prop [GAP[,SPACE]]` | see below; GAP 1, SPACE 4 by default |
 | Unlock all events | `--poke 1100:8009CDA4:FF:1x130` | new `SIZExCOUNT` suffix of `--poke`: COUNT consecutive values; event flag bytes 0x8009CDA4 + id (notes/names.md "Event links"), 0xFF = completed |
 | Custom keys | `--keys up=Up,cross=X,...` | *Controls* tab, Keyboard card: only the keys changed from the defaults |
 | Button prompts (PlayStation / Xbox / Keyboard) | `--patch-tex prompts-SET.tbtx` | see below |
@@ -1226,6 +1227,23 @@ maximum (an edited card). Launchers: PC Mods page ("Saving does not refill vital
 in `PORTABLE_MODS`), Android Extras page (`nosaveheal`, passed for every version by `cheatArgs`). Checked (PAL i386,
 headless): without the flag the loaded save has vitality 4, with it 1 (GAME and PLAYER+0x98), and a standard run
 without the flag gives frames byte-identical to the build without the change. USA and JP builds not run.
+
+**Proportional place names on the save list (`--memcard-prop [GAP[,SPACE]]`, experiment).** The retail
+`memCardDrawString` advances every glyph of `MEMCARD_FONT` by its 8-px cell, and the save-list place name
+(`memCardDrawFileLocation`, mode 0, from x 64; the row frame's inner edge is x 293, so 229 px of ink) is monospaced.
+In the 8x8 cells a wide letter fills columns 1-7 (ink + shadow), a narrow one sits in the middle ('i' 3-4, 'l' 2-4),
+the space is empty. With the option, each glyph of a place name is drawn from its first opaque column and advances
+by its opaque width + GAP; an empty glyph (space) advances SPACE. The spans are read from the font as it is in VRAM
+(`runtime/mcprop.c`, `port_gpu_vram`, cached per glyph), so the port holds no glyph data. Hooks: port/fixes.txt on
+`memCardDrawFileLocation` (turns it on around its call) and `memCardDrawString` (advance, x offset; a flag glyph keeps
+its place relative to the glyph before it). Only the place names change: the messages, the footer and the empty-slot
+label (`memCardDrawFileIcon`, the other mode-0 caller) keep the 8-px cells. GAP 1 leaves the wide letters at 8 px
+(as retail) and only narrows the narrow ones (i, l, r, 1, punctuation) and the space; GAP 0 makes the shadow touch the next letter.
+Measured (PAL, Spanish improved translation): "Cabaña del sabio centenario" 216 px mono, 189 gap 1, 212 gap 2;
+the previous long names "Cámara del Anciano de 1.000.000 años" / "Cámara del Anciano de los 10.000 años" /
+"Muros exteriores de la Isla de Cerdos" 288 / 296 / 296 mono, 247 / 251 / 251 gap 1 (do not fit), 217 / 221 / 221
+gap 0 (fit). Default off: frames byte-identical to the build without the change. No launcher switch yet; PAL only
+(the USA / JP twins of the function are not hooked).
 
 **Button prompts.** `tools/prompt_glyphs.py` draws our own glyph sets with Pillow (no third-party icon pack):
 `port/assets/prompts/{playstation,xbox,keyboard}/<button>.png`, 16x16, 4 palette indices (0 transparent, 1 outline,

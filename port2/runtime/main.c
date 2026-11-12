@@ -326,7 +326,7 @@ static int port_ws_resolve(void) {
 }
 
 static int usage(const char *argv0) {
-    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--crawler-patrol] [--no-save-heal] [--log-anim [FILE]] [--log-anim-force CAT:TYPE,...] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
+    port_printf("usage: %s [--data DIR | --disc Tombi.bin|.cue|.iso] [--lang N] [--cut-content] [--crawler-patrol] [--no-save-heal] [--memcard-prop [GAP[,SPACE]]] [--log-anim [FILE]] [--log-anim-force CAT:TYPE,...] [--noclip] [--frames N] [--headless] [--window [--scale N] [--fit] [--aspect 4:3|square|16:9|21:9|32:9|auto] [--widescreen [16:9|21:9|32:9|auto]] [--display-size WxH] [--fullscreen] [--keys up=Up,cross=X,...] [--pad-map r1=rightshoulder,l2=lefttrigger,...]]\n"
                 "       [--renderer gl|soft] [--internal-res 1..4] [--fps N|auto|unlimited] [--dump-presents DIR[:FROM:TO]] [--realtime] [--hz 50|60] [--picture ntsc|pal] [--show-fps [1|2]] [--log-fps [1|2]] [--patch-tex FILE]... [--no-gfx-es] [--subscreen-labels item=..,event=..,status=..,exit=..,map=..,use=..|..,view=..,sort=..] [--text-patch FILE.tpatch|.tombipatch.json]... [--no-translation-file] [--patch-dir DIR] [--title-bg FILE] [--early-title PREPRE8_DIR] [--wings-glide JPDEMO_DIR --wings-pre9 PRE9_DIR]\n"
                 "       [--dump-frames DIR [--dump-every N] [--dump-vram]] [--dump-draws FILE] [--dump-textures DIR] [--texture-pack DIR] [--pad-script FRAME:BUTTONS[:LEN[xCOUNT/PERIOD]],...]\n"
                 "       [--poke FRAME:ADDR:VALUE[:SIZE[xCOUNT]]] [--poke-every INTERVAL:ADDR:VALUE[:SIZE]] [--menu FRAME:N] [--title FRAME:ID[:start]] [--movie FRAME:ID]\n"
@@ -966,6 +966,10 @@ int main(int argc, char **argv) {
         }
         else if (!strcmp(a, "--crawler-patrol")) port_crawler_patrol = 1; /* port/fixes.txt: the unused segmentedCrawlerWander route */
         else if (!strcmp(a, "--no-save-heal")) port_no_save_heal = 1;    /* port/fixes.txt: no vitality refill when a save is loaded */
+        else if (!strcmp(a, "--memcard-prop")) {   /* runtime/mcprop.c: proportional place names on the save list [GAP[,SPACE]] */
+            extern int port_mc_prop, port_mc_prop_gap, port_mc_prop_space;
+            port_mc_prop = 1; if (v && *v >= '0' && *v <= '9') sscanf(argv[++i], "%d,%d", &port_mc_prop_gap, &port_mc_prop_space);
+        }
         else if (!strcmp(a, "--log-events")) { extern int port_log_events; port_log_events = 1; }   /* runtime/panel.c */
         else if (!strcmp(a, "--debug-menu")) { extern int port_debug_menu; port_debug_menu = 1; }   /* runtime/debugmenu.c */
         else if (!strcmp(a, "--hud-bottom")) { extern int port_hud_bottom; port_hud_bottom = 1; }   /* runtime/panel_hud.c */
