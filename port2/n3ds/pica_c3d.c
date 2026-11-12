@@ -28,7 +28,7 @@ static C3D_Tex panel_tex;                 /* the bottom screen's panel (runtime/
 static int panel_w, panel_h;
 static shaderProgram_s prog;
 static DVLB_s *vsh;
-static int u_proj, u_tsc, in_frame, scr_fmt;
+static int u_proj, u_tsc, u_eye, in_frame, scr_fmt;
 static int atlas2_h = PICA_ATLAS;           /* the third atlas's height (half when memory is short) */
 static int c3d_up;                        /* citro3d is running (port_n3ds_gpu_fini) */
 static void c3d_progress(int done, int total);   /* (below: the translation's progress bar) */
@@ -40,7 +40,7 @@ static unsigned char *arena; static unsigned arena_off;
 static unsigned long long st_syncs, st_writes, st_frames;
 /* where a frame's time goes (system ticks; the log line every 600 frames gives milliseconds per frame) */
 static unsigned long long tk_last, tk_frame, tk_upload, tk_write, tk_read, tk_panel, tk_present, tk_draw;
-static unsigned long long tk_begin; static unsigned st_switch;   /* the wait at a frame's start (the GPU still on the frame before), the changes of target */
+static unsigned long long tk_begin, tk_eye; static unsigned st_switch;   /* the wait at a frame's start (the GPU still on the frame before), the changes of target */
 static double gpu_ms_sum, gpu_ms_max; static unsigned gpu_ms_n;   /* the GPU's own time for each submitted frame (C3D_GetDrawingTime) */
 #define TK_N 120   /* frames per log line */
 #define TK_MS(t) ((double)(t) * 1000.0 / SYSCLOCK_ARM11 / TK_N)
@@ -78,7 +78,9 @@ static void on_target(int wide) {   /* (in a frame) */
     cur_wide = wide; st_switch++;
 }
 static void vb_flush(void);
+static void replay(void);
 static void end_and_wait(void) {   /* run what was recorded and wait for it: memory may be reused afterwards */
+    if (in_frame && !replaying) replay();
     if (in_frame) { vb_flush(); C3D_FrameEnd(GX_CMDLIST_FLUSH); in_frame = 0; }
     C3D_FrameBegin(0); C3D_FrameEnd(GX_CMDLIST_FLUSH);   /* (C3D_FrameBegin waits for the queue of the frame before) */
     arena_off = 0; frame_no++; st_syncs++; vb_n = 0; last_ok = 0;
@@ -162,6 +164,7 @@ static void vtx(float x, float y, float s, float t, float r, float g, float b, f
     PV *d = vb + vb_n++;
     d->x = x - POS_OFF; d->y = y - POS_OFF; d->u = s - TEX_EPS; d->v = (1.0f - t) - TEX_EPS;   /* (the shader adds TEX_EPS to both) */
     d->r = (u8)(r * 255.0f + 0.5f); d->g = (u8)(g * 255.0f + 0.5f); d->b = (u8)(b * 255.0f + 0.5f); d->a = (u8)(a * 255.0f + 0.5f);
+    d->sh = 0;
 }
 #define EDGE_X 1023.9f   /* (past the last pixel's centre, short of the target's edge) */
 #define EDGE_Y 511.9f
@@ -206,27 +209,40 @@ static void c3d_tex_upload(int slot, const unsigned *rgba, int busy) {
    console drew torn sprites, some vertices still the frame before's; an emulator has no cache to show it) */
 static void vb_flush(void) { if (vb_n) dcache_flush(vb, (u32)vb_n * sizeof *vb); }
 static PState last_st;                       /* (last_ok 0: something else set state since) */
+/* only what differs from the last batch's state is set (a semi-transparent textured primitive is two batches that
+   differ in the alpha test and the blend alone); dx: the scissor moved left (the right eye's target, EYE_DX) */
+static int last_dx;
+static void apply_state(const PState *s, int dx) {
+    const int all = !last_ok || dx != last_dx;
+    const PState *l = &last_st;
+    /* the scissor counts rows from the other edge than the projection (the self test: an area of y 256..511 drew nothing) */
+    if (all || s->x1 != l->x1 || s->y1 != l->y1 || s->x2 != l->x2 || s->y2 != l->y2) {
+        int x1 = s->x1 - dx, x2 = s->x2 - dx; if (x1 < 0) x1 = 0; if (x2 < 0) x2 = 0;
+        C3D_SetScissor(GPU_SCISSOR_NORMAL, x1, 511 - s->y2, x2 + 1, 512 - s->y1);
+    }
+    if (all || (s->tex >= 0) != (l->tex >= 0) || s->mod != l->mod) set_env(s->tex >= 0, s->mod);
+    if (all || s->atest != l->atest) set_atest(s->atest);
+    if (all || s->blend != l->blend) set_blend(s->blend);
+    if (s->tex >= 0 && (all || s->tex != l->tex)) {
+        C3D_TexBind(0, &atlas_tex[s->tex]);
+        set_tscale(1.0f / (float)PICA_ATLAS, 1.0f / (float)(s->tex == 2 ? atlas2_h : PICA_ATLAS));
+    }
+    last_st = *s; last_ok = 1; last_dx = dx;
+}
+/* --stereo: the batches of a frame drawn for the left eye (into VRAM's target) are drawn again, at the end, into the
+   right eye's target, where the shader moves each vertex by 2 sh and the whole picture EYE_DX to the left (so nothing
+   crosses the target's right edge: a console draws nothing of such a triangle).  Only a screen's drawing area's. */
+#define EYE_DX 64
+#define NREC 4096
+static struct { PState s; int first, n; } rec[NREC];
+static int nrec, replaying;
+static void replay(void);
 static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
     begin();
     cmd_room();
     if (vb_n + n > VB_MAX - 256) { end_and_wait(); begin(); }
-    {   /* only what differs from the last batch's state is set (a semi-transparent textured primitive is two batches
-           that differ in the alpha test and the blend alone) */
-        const int all = !last_ok;
-        const PState *l = &last_st;
-        /* the scissor counts rows from the other edge than the projection (the self test: an area of y 256..511 drew nothing) */
-        if (all || s->x1 != l->x1 || s->y1 != l->y1 || s->x2 != l->x2 || s->y2 != l->y2)
-            C3D_SetScissor(GPU_SCISSOR_NORMAL, s->x1, 511 - s->y2, s->x2 + 1, 512 - s->y1);
-        if (all || (s->tex >= 0) != (l->tex >= 0) || s->mod != l->mod) set_env(s->tex >= 0, s->mod);
-        if (all || s->atest != l->atest) set_atest(s->atest);
-        if (all || s->blend != l->blend) set_blend(s->blend);
-        if (s->tex >= 0 && (all || s->tex != l->tex)) {
-            C3D_TexBind(0, &atlas_tex[s->tex]);
-            set_tscale(1.0f / (float)PICA_ATLAS, 1.0f / (float)(s->tex == 2 ? atlas2_h : PICA_ATLAS));
-        }
-        last_st = *s; last_ok = 1;
-    }
+    apply_state(s, 0);
     /* the vertices are in the buffer already when the backend built the batch there (c3d_vbuf) and the frame was not
        ended since.  The position's + 0.5 (the PICA samples pixel centres, the PS1 integer positions), a hair less in
        both axes (an edge exactly on the centres takes the row below, and a console left a column undrawn between two
@@ -234,9 +250,39 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
     if (v != vb + vb_n) memmove(vb + vb_n, v, (size_t)n * sizeof *v);
     on_target(s->wide);
     C3D_DrawArrays(GPU_TRIANGLES, vb_n, n);
+    {   extern int pica_stereo_frame;
+        if (pica_stereo_frame && eye_rt && !s->wide && s->x2 - s->x1 >= 255 && s->y2 - s->y1 >= 199) {
+            if (nrec && rec[nrec - 1].first + rec[nrec - 1].n == vb_n && !memcmp(&rec[nrec - 1].s, s, sizeof *s)) rec[nrec - 1].n += n;
+            else { if (nrec == NREC) replay(); rec[nrec].s = *s; rec[nrec].first = vb_n; rec[nrec].n = n; nrec++; }
+        }
+    }
     vb_n += n;
     { extern int pica_prof_on; extern unsigned long long pica_prof[6]; if (pica_prof_on) pica_prof[4] += svcGetSystemTick() - t0; }
     tk_draw += svcGetSystemTick() - t0;
+}
+static void replay(void) {
+    if (!nrec || !in_frame || replaying) { nrec = 0; return; }
+    u64 t0 = svcGetSystemTick();
+    replaying = 1;
+    on_target(2);
+    C3D_FVUnifSet(GPU_VERTEX_SHADER, u_eye, 2.0f, -(float)EYE_DX, 0.0f, 0.0f);
+    last_ok = 0;
+    for (int i = 0; i < nrec; i++) {
+        u32 *buf, size, off; GPUCMD_GetBuffer(&buf, &size, &off);
+        if (off + 4096 > size) {   /* (the command buffer nearly full: what is recorded is run and waited for; the
+                                      vertices stay where they are, nothing is written to the buffer meanwhile) */
+            vb_flush(); C3D_FrameEnd(GX_CMDLIST_FLUSH); in_frame = 0;
+            C3D_FrameBegin(0); C3D_FrameEnd(GX_CMDLIST_FLUSH);
+            C3D_FrameBegin(0); C3D_FrameDrawOn(eye_rt); in_frame = 1; cur_wide = 2; proj_vram();
+            C3D_FVUnifSet(GPU_VERTEX_SHADER, u_eye, 2.0f, -(float)EYE_DX, 0.0f, 0.0f);
+            last_ok = 0; st_cmd_splits++;
+        }
+        apply_state(&rec[i].s, EYE_DX);
+        C3D_DrawArrays(GPU_TRIANGLES, rec[i].first, rec[i].n);
+    }
+    C3D_FVUnifSet(GPU_VERTEX_SHADER, u_eye, 0.0f, 0.0f, 0.0f, 0.0f);
+    last_ok = 0; nrec = 0; replaying = 0;
+    tk_eye += svcGetSystemTick() - t0;
 }
 /* where the backend builds its next batch: the free end of the vertex buffer (at least 2048 vertices of it) */
 static PV *c3d_vbuf(int *room) {
@@ -361,7 +407,11 @@ static void c3d_fill(int x, int y, int w, int h, unsigned c) { fill_on(0, x, y, 
 static void c3d_wide_fill(int x, int y, int w, int h, unsigned c) { fill_on(1, x, y, w, h, c); }
 /* the wide plane's rectangle into VRAM's target, texel for pixel (the frame's 4:3 middle, after every ordering table:
    what the game reads back, copies or uses as a texture is there) */
-static void c3d_eye_fill(int x, int y, int w, int h, unsigned c) { fill_on(2, x, y, w, h, c); }
+static void c3d_eye_fill(int x, int y, int w, int h, unsigned c) {
+    begin(); replay();   /* (after the batches before it) */
+    x -= EYE_DX; if (x < 0) { w += x; x = 0; }
+    if (w > 0) fill_on(2, x, y, w, h, c);
+}
 static int c3d_eye_start(void) {
     if (eye_rt) return 0;
     if (!C3D_TexInitVRAM(&eye_tex, 1024, 512, GPU_RGBA8)) { port_printf("[3ds] pica: no VRAM for the right eye (%u KB free)\n", (unsigned)(vramSpaceFree() >> 10)); return -1; }
@@ -451,6 +501,7 @@ static C3D_Tex *pres_tex = &vram_tex; static int pres_w = 320;   /* what a prese
 static int c3d_present(int x, int y, int w, int h, int masked) {
     u64 t0 = svcGetSystemTick();
     begin();
+    replay();
     C3D_RenderTargetClear(top_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
     C3D_FrameDrawOn(top_rt);
     C3D_Mtx m; Mtx_OrthoTilt(&m, 0.0f, 400.0f, 240.0f, 0.0f, 1.0f, -1.0f, true);
@@ -471,14 +522,16 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
         extern float port_stereo_k;
         port_stereo_k = osGet3DSliderState();
         extern int port_stereo_flat;
-        C3D_Tex *rt = port_stereo_k > 0.01f && !port_stereo_flat ? &eye_tex : pres_tex;
+        const int eye = port_stereo_k > 0.01f && !port_stereo_flat;
+        C3D_Tex *rt = eye ? &eye_tex : pres_tex;
+        const int ex = eye ? EYE_DX : 0;
         C3D_RenderTargetClear(top_r, C3D_CLEAR_ALL, 0x000000FF, 0);
         C3D_FrameDrawOn(top_r);
         if (!masked && w > 0 && h > 0) {
             C3D_TexSetFilter(rt, GPU_LINEAR, GPU_LINEAR);
             C3D_TexBind(0, rt);
             float X0 = 200 - pres_w / 2, X1 = 200 + pres_w / 2, Y0 = 0, Y1 = 240;
-            float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = 1.0f - y / 512.0f, T1 = 1.0f - (y + h) / 512.0f;
+            float S0 = (x - ex) / 1024.0f, S1 = (x - ex + w) / 1024.0f, T0 = 1.0f - y / 512.0f, T1 = 1.0f - (y + h) / 512.0f;
             QUAD_BEGIN();
             vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
             vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
@@ -552,8 +605,9 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
                     "%.2f host writes, %.2f read-backs, %.2f panel, %.2f present (the rest: the game, the core, sound)\n",
                     st_frames, st_syncs, st_writes, TK_MS(tk_frame), TK_MS(tk_draw), TK_MS(tk_upload), TK_MS(tk_write), TK_MS(tk_read),
                     TK_MS(tk_panel), TK_MS(tk_present));
-        port_printf("[3ds] pica: per frame %.2f ms waiting for the GPU to end the frame before, %.2f changes of target; the GPU's own time a frame %.2f ms (the longest %.2f)\n",
-                    TK_MS(tk_begin), (double)st_switch / TK_N, gpu_ms_n ? gpu_ms_sum / gpu_ms_n : 0.0, gpu_ms_max);
+        port_printf("[3ds] pica: per frame %.2f ms waiting for the GPU to end the frame before, %.2f changes of target; the GPU's own time a frame %.2f ms (the longest %.2f); %.2f ms recording the right eye\n",
+                    TK_MS(tk_begin), (double)st_switch / TK_N, gpu_ms_n ? gpu_ms_sum / gpu_ms_n : 0.0, gpu_ms_max, TK_MS(tk_eye));
+        tk_eye = 0;
         gpu_ms_sum = gpu_ms_max = 0; gpu_ms_n = 0;
         tk_begin = 0; st_switch = 0;
         tk_frame = tk_draw = tk_upload = tk_write = tk_read = tk_panel = tk_present = 0;
@@ -565,6 +619,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
    begin() has waited for it, and every writer of them begins first */
 static void c3d_submit(void) {
     if (!in_frame) return;
+    replay();
     vb_flush();
     { double g = C3D_GetDrawingTime(); gpu_ms_sum += g; gpu_ms_n++; if (g > gpu_ms_max) gpu_ms_max = g; }
     C3D_FrameEnd(GX_CMDLIST_FLUSH);
@@ -784,11 +839,14 @@ static int c3d_start(void) {
     C3D_BindProgram(&prog);
     u_proj = shaderInstanceGetUniformLocation(prog.vertexShader, "projection");
     u_tsc = shaderInstanceGetUniformLocation(prog.vertexShader, "tscale");
+    u_eye = shaderInstanceGetUniformLocation(prog.vertexShader, "eye");
+    C3D_FVUnifSet(GPU_VERTEX_SHADER, u_eye, 0.0f, 0.0f, 0.0f, 0.0f);
     C3D_AttrInfo *ai = C3D_GetAttrInfo();
     AttrInfo_Init(ai);
     AttrInfo_AddLoader(ai, 0, GPU_FLOAT, 2);           /* v0 position (PV x, y) */
     AttrInfo_AddLoader(ai, 1, GPU_FLOAT, 2);           /* v1 texels (u, v) */
     AttrInfo_AddLoader(ai, 2, GPU_UNSIGNED_BYTE, 4);   /* v2 colour */
+    AttrInfo_AddLoader(ai, 3, GPU_FLOAT, 1);           /* v3 sh (--stereo) */
     vb = linearAlloc(VB_MAX * sizeof *vb);
     if (!vb) { port_printf("[3ds] pica: no vertex buffer\n"); return -1; }
     /* the third atlas, last and only with room to spare in the linear heap (the SDL screens, the staging arena and
@@ -807,7 +865,7 @@ static int c3d_start(void) {
     port_printf("[3ds] pica: %d slots of 128 x 128, %u KB of linear memory left\n", PICA_N128 + pica_n128x, (unsigned)(linearSpaceFree() >> 10));
     C3D_BufInfo *bi = C3D_GetBufInfo();
     BufInfo_Init(bi);
-    BufInfo_Add(bi, vb, sizeof *vb, 3, 0x210);
+    BufInfo_Add(bi, vb, sizeof *vb, 4, 0x3210);
     C3D_DepthTest(false, GPU_ALWAYS, GPU_WRITE_COLOR);
     C3D_CullFace(GPU_CULL_NONE);
     proj_vram();

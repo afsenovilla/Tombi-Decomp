@@ -113,7 +113,13 @@ static void ref_tri(const PState *s, const PV *a, const PV *b, const PV *c) {
         }
     }
 }
-static void ref_tris(const PState *s, const PV *v, int n) { REF_T(s->wide, 0); for (int i = 0; i + 2 < n; i += 3) ref_tri(s, &v[i], &v[i + 1], &v[i + 2]); }
+int pica_stereo_frame;   /* --stereo: this table's batches are drawn again for the right eye (x + 2 sh), gpu.c sets it */
+static void ref_tris(const PState *s, const PV *v, int n) {
+    if (pica_stereo_frame && ert && !s->wide && s->x2 - s->x1 >= 255 && s->y2 - s->y1 >= 199) {   /* (the device: a replay at the frame's end) */
+        PState e = *s; e.wide = 2; PV t[3];
+        for (int i = 0; i + 2 < n; i += 3) { for (int k = 0; k < 3; k++) { t[k] = v[i + k]; t[k].x += 2 * t[k].sh; } ref_tri(&e, &t[0], &t[1], &t[2]); }
+    }
+    REF_T(s->wide, 0); for (int i = 0; i + 2 < n; i += 3) ref_tri(s, &v[i], &v[i + 1], &v[i + 2]); }
 static void ref_fill(int x, int y, int w, int h, u32 c) {
     REF_T(0, 1);
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) rt[(y + j) & 511][(x + i) & 1023] = c;
@@ -695,7 +701,7 @@ static PState base_state(void) {
     return s;
 }
 static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
-    p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 0;   /* (a: what an untextured pixel's alpha is, bit 15 clear) */
+    p->x = (float)x; p->y = (float)y; p->u = (float)u; p->v = (float)v; p->r = (u8)r; p->g = (u8)g; p->b = (u8)b; p->a = 0; p->sh = 0;   /* (a: what an untextured pixel's alpha is, bit 15 clear) */
 }
 /* emit n vertices (a triangle or two) with the state the primitive needs: textured semi-transparent ones twice */
 /* Clipping, here: a PICA200 does not clip in x / y, and a console draws nothing of a triangle with a vertex on or
@@ -727,7 +733,7 @@ static int clip_poly(const PV *in, int n, PV *out, int axis, float bound, int ke
             o->x = a->x + (b->x - a->x) * t; o->y = a->y + (b->y - a->y) * t;
             o->u = a->u + (b->u - a->u) * t; o->v = a->v + (b->v - a->v) * t;
             o->r = (u8)(a->r + (b->r - a->r) * t + 0.5f); o->g = (u8)(a->g + (b->g - a->g) * t + 0.5f);
-            o->b = (u8)(a->b + (b->b - a->b) * t + 0.5f); o->a = a->a;
+            o->b = (u8)(a->b + (b->b - a->b) * t + 0.5f); o->a = a->a; o->sh = a->sh + (b->sh - a->sh) * t;
             if (axis) o->y = bound; else o->x = bound;
         }
     }
@@ -878,6 +884,7 @@ static void pica_tri(const GpuVtx *a, const GpuVtx *b, const GpuVtx *c, int shad
     for (int i = 0; i < 3; i++) {
         const GpuVtx *q = shade ? p[i] : a;
         put(&v[i], p[i]->x, p[i]->y, q->r, q->g, q->b, p[i]->u, p[i]->v);
+        if (pica_stereo_frame) v[i].sh = (float)p[i]->sh;
     }
     {   /* (inside the target: clip_tris would pass it whole) */
         if (a->x >= kx1 && b->x >= kx1 && c->x >= kx1 && a->x <= kx2 && b->x <= kx2 && c->x <= kx2
@@ -906,7 +913,7 @@ static inline void quad_put(PV *d, const GpuVtx *g, int shade, int du, int dv) {
     static const u8 order[6] = { 0, 1, 2, 1, 2, 3 };
     for (int k = 0; k < 6; k++) {
         int i = order[k]; u32 col = shade ? c[i] : c[k < 3 ? 0 : 1];
-        d[k].x = x[i]; d[k].y = y[i]; d[k].u = u[i]; d[k].v = v[i];
+        d[k].x = x[i]; d[k].y = y[i]; d[k].u = u[i]; d[k].v = v[i]; d[k].sh = pica_stereo_frame ? (float)g[i].sh : 0.0f;
         memcpy(&d[k].r, &col, 4);
     }
 }
@@ -944,7 +951,9 @@ static void pica_rect(int x, int y, int w, int h, u32 col, const GpuTex *tex, in
     int r = col & 255, g = (col >> 8) & 255, b = (col >> 16) & 255;
     PV v[6];
     put(&v[0], x, y, r, g, b, u0, v0); put(&v[1], x + w, y, r, g, b, u0 + w, v0); put(&v[2], x, y + h, r, g, b, u0, v0 + h);
-    v[3] = v[1]; put(&v[4], x + w, y + h, r, g, b, u0 + w, v0 + h); v[5] = v[2];
+    put(&v[4], x + w, y + h, r, g, b, u0 + w, v0 + h);
+    if (pica_stereo_frame) { extern int port_stereo_sh; v[0].sh = v[1].sh = v[2].sh = v[4].sh = (float)port_stereo_sh; }
+    v[3] = v[1]; v[5] = v[2];
     pica_cnt[w == 1 && h == 1 && !tex ? 4 : 3]++;
     {   if (w >= 0 && h >= 0 && x >= kx1 && y >= ky1 && x + w <= kx2 && y + h <= ky2 && bulk_in()) {
             emit_in(v, 6, tex, semi, raw, u0, v0, u0 + w, v0 + h);

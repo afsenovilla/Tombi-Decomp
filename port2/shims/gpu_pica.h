@@ -35,7 +35,7 @@ static inline void pica_slot_pos(int slot, int *x, int *y) {   /* its corner in 
     *x = (slot & 15) * 64; *y = 512 + ((slot >> 4) & 7) * 64;
 }
 enum { AT_OFF, AT_NOTZERO, AT_OPAQUE, AT_SEMI };   /* alpha test: off, alpha != 0, == PICA_A_OPAQUE, == PICA_A_SEMI */
-typedef struct { float x, y, u, v; unsigned char r, g, b, a; } PV;   /* u, v: texels of the atlas */
+typedef struct { float x, y, u, v; unsigned char r, g, b, a; float sh; } PV;   /* u, v: texels of the atlas; sh: --stereo, the right eye's x is x + 2 sh */
 /* tex: the atlas (0, 1, 2) or -1; mod: texture x colour x 2 (else the texture, raw); blend: -1 or the PS1 mode 0..3;
    x1..y2: the drawing area (inclusive) */
 typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2, wide; } PState;   /* wide: the target, 0 VRAM's, 1 the wide plane (--widescreen), 2 the right eye's (--stereo) */

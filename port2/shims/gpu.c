@@ -400,6 +400,7 @@ static void ws_fill(int x, int y, int w, int h, u16 c) {
    depth.  A polygon's vertices by the GTE's SZ (below); a sprite or a rectangle, which the GTE did not project, by its
    place in the drawing order (far first).  port_stereo_k scales it (the 3DS's 3D slider; 0: one pass, as without) */
 static int st_dx;   /* this packet's shift by its place in the drawing order (DrawOTag) */
+int port_stereo_sh; /* the same as the backend's sh of a rectangle or a line (-st_dx) */
 /* a run of sprites, rectangles and fills keeps the shift of its first: a tile map, a menu's pieces, a top-down room's
    picture are runs of them side by side, which shifts by their places apart opened one-pixel gaps between */
 static int st_run;
@@ -437,7 +438,7 @@ static int st_lookup(int x, int y) {   /* the shift of a vertex at this screen p
             if (sth[p][h].ok && age >= -2 && age <= 4 && sth[p][h].x == x && sth[p][h].y == y) {
                 float z = sth[p][h].z ? sth[p][h].z : 1;
                 float S = st_s * port_stereo_k, disp = S * (1.0f - st_zf / z);
-                if (disp < -S * 0.5f) disp = -S * 0.5f;
+                if (disp < 0) disp = 0;   /* (nothing in front of the screen: the right eye's things move right only, see gpu_pica.c) */
                 float v = st_eye * disp * 0.5f;
                 return (int)(v + (v >= 0 ? 0.5f : -0.5f));
             }
@@ -446,8 +447,8 @@ static int st_lookup(int x, int y) {   /* the shift of a vertex at this screen p
     return -9999;
 }
 static void vertex(Vtx *o, u32 w) {
-    o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx;
-    if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) o->x += s - st_dx; }
+    o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; o->sh = -st_dx;
+    if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) { o->x += s - st_dx; o->sh = -s; } }
 }
 static void color(Vtx *o, u32 c) { o->r = c & 255; o->g = (c >> 8) & 255; o->b = (c >> 16) & 255; }
 
@@ -560,8 +561,8 @@ static int poly_fast(const u32 *p, int n, u32 cmd) {
         if (shade && i) c = p[k++];
         v[i].r = c & 255; v[i].g = (c >> 8) & 255; v[i].b = (c >> 16) & 255;
         u32 w = p[k++];
-        v[i].x = sx11(w) + gs.ox + wdx; v[i].y = sx11(w >> 16) + gs.oy;
-        if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) v[i].x += s - st_dx; }
+        v[i].x = sx11(w) + gs.ox + wdx; v[i].y = sx11(w >> 16) + gs.oy; v[i].sh = -st_dx;
+        if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) { v[i].x += s - st_dx; v[i].sh = -s; } }
         ox |= (u32)v[i].x; oy |= (u32)v[i].y;
         if (tex) {
             u32 uv = p[k++];
@@ -1080,7 +1081,8 @@ void DrawOTag(u32 *ot) {
     const int stereo = port_stereo_on && pica_eye_ok && port_stereo_k > 0.01f && !skip && !st_flat && be == &port_gpu_pica;
     const GpuState st_gs0 = gs; const int st_tx0 = tpg.tx, st_ty0 = tpg.ty, st_tp0 = tpg.tp;   /* (the right eye's pass starts from here) */
     st_eye = stereo ? -1 : 0;
-    st_cnt = 0; st_dx = 0; st_run = 0;
+    { extern int pica_stereo_frame; pica_stereo_frame = stereo; }   /* (the backend draws the right eye from the left one's batches) */
+    st_cnt = 0; st_dx = 0; st_run = 0; port_stereo_sh = 0;
     while (n < 200000) {
         u32 tag = *p, next = tag & 0xFFFFFF, len = tag >> 24;
         n++;
@@ -1088,6 +1090,7 @@ void DrawOTag(u32 *ot) {
             float d = 1.0f - (float)st_cnt / (float)st_prev; if (d < 0) d = 0;   /* 1 farthest .. 0 nearest */
             float disp = d > st_focus ? st_s * port_stereo_k * (d - st_focus) / (1.0f - st_focus) : 0.0f;
             st_dx = (int)(st_eye * disp * 0.5f + (st_eye > 0 ? 0.5f : -0.5f));
+            port_stereo_sh = -st_dx;
         }
         if (len) st_cnt++;
         if (sky) {   /* sky = 1 + far packets seen; an ordering table node at slot >= 100 ends the far layer */
@@ -1120,33 +1123,7 @@ void DrawOTag(u32 *ot) {
         if (pica_prof_on) { pica_prof[0] += dt; pica_prof_n++; pica_prof_on = 0; }
     }
 #endif
-    if (stereo) {   /* the right eye: the same table again into its own target, its drawing alone (no loads, copies) */
-        const GpuState st_gs1 = gs; const int st_tx1 = tpg.tx, st_ty1 = tpg.ty, st_tp1 = tpg.tp;
-        gs = st_gs0; tpg.tx = st_tx0; tpg.ty = st_ty0; tpg.tp = st_tp0;
-        st_eye = 1; st_cnt = 0; st_dx = 0; st_run = 0;
-        const u32 *q = ot; int m = 0;
-        while (m++ < 200000) {
-            u32 tag = *q, next = tag & 0xFFFFFF, len = tag >> 24;
-            if (len && st_prev > 0 && st_new_depth(q[1] >> 24)) {
-                float d = 1.0f - (float)st_cnt / (float)st_prev; if (d < 0) d = 0;
-                float disp = d > st_focus ? st_s * port_stereo_k * (d - st_focus) / (1.0f - st_focus) : 0.0f;
-                st_dx = (int)(disp * 0.5f + 0.5f);
-            }
-            if (len) {
-                st_cnt++;
-                u32 c = q[1] >> 24;
-                /* (the frame's drawing only: a fill, a primitive or the environment, into a screen-sized area) */
-                if ((c == 0x02 || (c >= 0x20 && c < 0x80) || c >= 0xE0) && (c >= 0xE0 || (gs.x2 - gs.x1 >= 255 && gs.y2 - gs.y1 >= 199))) {
-                    gs.wide = 2; packet(q + 1, len); gs.wide = 0;
-                }
-            }
-            if (next == 0xFFFFFF) break;
-            q = (const u32 *)next;
-        }
-        be->list_end();
-        gs = st_gs1; tpg.tx = st_tx1; tpg.ty = st_ty1; tpg.tp = st_tp1;
-    }
-    st_eye = 0; st_dx = 0; if (st_cnt > 50) st_prev = st_cnt;
+    st_eye = 0; st_dx = 0; port_stereo_sh = 0; if (st_cnt > 50) st_prev = st_cnt;
     poly_lean = 0;
     gpu_prims += n;
     if (skip) ws_drew = 0;   /* (a table not drawn changed nothing of the wide plane: no copy of it to VRAM) */
