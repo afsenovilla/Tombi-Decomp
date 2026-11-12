@@ -30,7 +30,7 @@
 	add r0.xy, r0.xy, inpos.xy
 	mul r4.x, eye.x, insh.x
 	add r0.x, r0.x, r4.x
-	add r0.x, r0.x, eye.y
+	add r0.x, eye.y, r0.x
 	dp4 outpos.x, projection[0], r0
 	dp4 outpos.y, projection[1], r0
 	dp4 outpos.z, projection[2], r0
