@@ -330,6 +330,8 @@ static void ws_note_disp(int x) {
    wider (32:9, 854 columns) Tombi's two buffers (x 384 and 704) would overlap, so each gets its own 1024-column half
    of the 2048-wide plane instead (by x: below 512 the left half) */
 static int ws_base(int ax) {
+    /* (the pica backend's wide plane is a 1024-column target: a half each, so 96 columns a side at most) */
+    if (be == &port_gpu_pica) return ax < 512 ? 0 : 512;
     if (2 * port_widescreen <= 320) return 2 * ax;
     return ax < 512 ? 0 : 1024;
 }

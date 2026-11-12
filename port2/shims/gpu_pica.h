@@ -38,7 +38,7 @@ enum { AT_OFF, AT_NOTZERO, AT_OPAQUE, AT_SEMI };   /* alpha test: off, alpha != 
 typedef struct { float x, y, u, v; unsigned char r, g, b, a; } PV;   /* u, v: texels of the atlas */
 /* tex: the atlas (0, 1, 2) or -1; mod: texture x colour x 2 (else the texture, raw); blend: -1 or the PS1 mode 0..3;
    x1..y2: the drawing area (inclusive) */
-typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2; } PState;
+typedef struct { int tex, mod, atest, blend, x1, y1, x2, y2, wide; } PState;   /* wide: the wide plane is the target (--widescreen) */
 typedef struct {
     int (*start)(void);                                                    /* 0 = ready */
     /* a slot's texels (pica_slot_size(slot) squared); busy: triangles since the last present sample this slot */
@@ -53,5 +53,14 @@ typedef struct {
     PV *(*vbuf)(int *room);
     /* optional: write() from the PS1's own words (VRAM's rows, stride words apart): no pass to RGBA8 before it */
     void (*write15)(int x, int y, int w, int h, const unsigned short *src, int stride);
+    /* optional, --widescreen: a second target of 1024 x 512, where the frame is drawn wider (PState.wide), 0 = ready;
+       a fill of it, a write from the PS1's words, its rectangle copied into the first target (the 4:3 middle, after
+       every ordering table), shown (0 = not handled), read (the reference device: the frame dumps) */
+    int (*wide_start)(void);
+    void (*wide_fill)(int x, int y, int w, int h, unsigned rgba);
+    void (*wide_write)(int x, int y, int w, int h, const unsigned short *src, int stride);
+    void (*wide_down)(int wx, int wy, int x, int y, int w, int h);
+    int (*wide_present)(int x, int y, int w, int h);
+    void (*wide_read)(int x, int y, int w, int h, unsigned *dst, int stride);
 } PicaDev;
 #endif

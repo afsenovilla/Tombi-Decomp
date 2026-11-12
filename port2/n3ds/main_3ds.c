@@ -132,25 +132,26 @@ static int choose_image(char *out, size_t cap) {
    start; the choice is kept in lang.txt.  Returns 0..8 (--lang) or 9, Spanish with the improved translation (the
    patch the program carries: port_es_tpatch), -1: START (leave). */
 #define NLANG 10
-/* the options beside the language, kept in opts.txt ("movies hz"): the movies played or skipped, the game at 60 Hz (the
-   3DS's screens, the US game's speed) or 50 (the PAL disc's own) */
-static int opt_movies = 1, opt_hz = 60;
+/* the options beside the language, kept in opts.txt ("movies hz wide"): the movies played or skipped, the game at 60 Hz
+   (the 3DS's screens, the US game's speed) or 50 (the PAL disc's own), the picture 400 columns wide, the whole top
+   screen (experimental: --widescreen 5:3, shims/gpu_pica.c) */
+static int opt_movies = 1, opt_hz = 60, opt_wide = 0;
 static void opts_load(void) {
-    FILE *f = fopen(DIR_ "/opts.txt", "r"); int m, h;
+    FILE *f = fopen(DIR_ "/opts.txt", "r"); int m, h, w = 0;
     if (!f) return;
-    if (fscanf(f, "%d %d", &m, &h) == 2) { opt_movies = m != 0; opt_hz = h == 50 ? 50 : 60; }
+    if (fscanf(f, "%d %d %d", &m, &h, &w) >= 2) { opt_movies = m != 0; opt_hz = h == 50 ? 50 : 60; opt_wide = w != 0; }
     fclose(f);
 }
 static void opts_save(void) {
     FILE *f = fopen(DIR_ "/opts.txt", "w");
-    if (f) { fprintf(f, "%d %d\n", opt_movies, opt_hz); fclose(f); }
+    if (f) { fprintf(f, "%d %d %d\n", opt_movies, opt_hz, opt_wide); fclose(f); }
 }
 static int choose_lang(int code) {
     /* (the console's font is the PC's code page 437: its codes for the accented letters) */
     static const char *name[NLANG] = { "English", "Fran\x87" "ais", "Deutsch", "Italiano", "Nederlands", "Espa\xA4ol (traducci\xA2n mejorada)",
                                        "Espa\xA4ol (original)", "Portugues", "Svenska", "Dansk" };
     static const int codes[NLANG] = { 0, 1, 2, 3, 4, 9, 5, 6, 7, 8 };
-    enum { ROWS = 3 };
+    enum { ROWS = 4 };
     int redraw = 1, ok = 0, lang = 0, row = 0;
     for (int i = 0; i < NLANG; i++) if (codes[i] == code) lang = i;
     gfxInitDefault();
@@ -165,7 +166,8 @@ static int choose_lang(int code) {
             const int d = (k & KEY_RIGHT) ? 1 : -1;
             if (row == 0) lang = (lang + d + NLANG) % NLANG;
             else if (row == 1) opt_movies = !opt_movies;
-            else opt_hz = opt_hz == 60 ? 50 : 60;
+            else if (row == 2) opt_hz = opt_hz == 60 ? 50 : 60;
+            else opt_wide = !opt_wide;
             redraw = 1;
         }
         if (k & KEY_A) { ok = 1; break; }
@@ -173,7 +175,8 @@ static int choose_lang(int code) {
             fprintf(stdout, "\x1b[2J\x1b[1;1HTombi! port - options\n\n");
             fprintf(stdout, "%c Language  < %s >\n\n", row == 0 ? '>' : ' ', name[lang]);
             fprintf(stdout, "%c Movies    < %s >\n\n", row == 1 ? '>' : ' ', opt_movies ? "play" : "skip");
-            fprintf(stdout, "%c Speed     < %s >\n", row == 2 ? '>' : ' ', opt_hz == 60 ? "60 Hz" : "50 Hz (the PAL disc's)");
+            fprintf(stdout, "%c Speed     < %s >\n\n", row == 2 ? '>' : ' ', opt_hz == 60 ? "60 Hz" : "50 Hz (the PAL disc's)");
+            fprintf(stdout, "%c Picture   < %s >\n", row == 3 ? '>' : ' ', opt_wide ? "wide, the whole screen (experimental)" : "4:3");
             fprintf(stdout, "\n\nUp / Down: option    Left / Right: change\n");
             fprintf(stdout, "\n(hold L while the game starts to come back here)\n");
             if (codes[lang] == 9) fprintf(stdout, "\nLa traducci\xA2n mejorada se prepara la primera vez:\nunos minutos, con una barra de progreso.\n");
@@ -279,6 +282,7 @@ int main(int argc, char **argv) {
        50 with time to spare; args.txt "--hz 50" for the PAL disc's own speed) */
     args[n++] = "--hz"; args[n++] = opt_hz == 50 ? "50" : "60";   /* (the options screen: choose_lang) */
     if (!opt_movies) args[n++] = "--skip-movies";
+    if (opt_wide) { args[n++] = "--widescreen"; args[n++] = "5:3"; }
     /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
        NOW LOADING until gameplay, then status / events / map / items, by touch */
     args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240";

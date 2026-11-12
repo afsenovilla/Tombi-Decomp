@@ -36,6 +36,7 @@ typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32;
 extern unsigned long long pica_cnt[8];
 extern int pica_gpu_clips;
 static u32 (*rt)[1024];                  /* the render target, 512 rows (allocated by pica_start: the image stays small) */
+static u32 (*wrt)[1024];                 /* the wide plane (--widescreen) */
 static u32 (*atlas[3])[PICA_ATLAS];      /* the texture atlases (both PICA_ATLAS squared here) */
 static void ref_tex_upload(int slot, const u32 *rgba, int busy) {
     int z = pica_slot_size(slot), ax, ay; pica_slot_pos(slot, &ax, &ay); (void)busy;
@@ -54,7 +55,7 @@ static inline void ref_frag(const PState *s, int x, int y, int r, int g, int b, 
         if (s->mod) { tr = sat(tr * r / 128); tg = sat(tg * g / 128); tb = sat(tb * b / 128); }
         c = (u32)tr | ((u32)tg << 8) | ((u32)tb << 16) | ((u32)a << 24);
     } else c &= 0x00FFFFFFu;
-    u32 *d = &rt[y][x];
+    u32 *d = s->wide ? &wrt[y][x] : &rt[y][x];
     if (s->blend >= 0) {
         int dr = *d & 255, dg = (*d >> 8) & 255, db = (*d >> 16) & 255, fr = c & 255, fg = (c >> 8) & 255, fb = (c >> 16) & 255;
         switch (s->blend) {
@@ -123,7 +124,16 @@ static int ref_start(void) {
     pica_n128x = getenv("PICA_NO128X") ? 0 : PICA_N128X;   /* (PICA_NO128X: a device without the third atlas) */
     return rt && atlas[0] && atlas[1] ? 0 : -1;
 }
-static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0, 0 };
+static u32 c15to32_(u16 c);
+static int ref_wide_start(void) { if (!wrt) wrt = calloc(512, sizeof *wrt); return wrt ? 0 : -1; }
+static void ref_wide_fill(int x, int y, int w, int h, u32 c) { for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) wrt[(y + j) & 511][(x + i) & 1023] = c; }
+static void ref_wide_write(int x, int y, int w, int h, const u16 *s, int stride) {
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) wrt[y + j][x + i] = c15to32_(s[j * stride + i]);
+}
+static void ref_wide_down(int wx, int wy, int x, int y, int w, int h) { for (int j = 0; j < h; j++) memcpy(&rt[y + j][x], &wrt[wy + j][wx], (size_t)w * 4); }
+static void ref_wide_read(int x, int y, int w, int h, u32 *d, int stride) { for (int j = 0; j < h; j++) memcpy(d + (size_t)j * stride, &wrt[y + j][x], (size_t)w * 4); }
+static const PicaDev pd_ref = { ref_start, ref_tex_upload, ref_tris, ref_fill, ref_read, ref_write, 0, 0, 0,
+                                ref_wide_start, ref_wide_fill, ref_wide_write, ref_wide_down, 0, ref_wide_read };
 #ifdef __3DS__
 extern const PicaDev pd_c3d;              /* port2/n3ds/pica_c3d.c */
 static const PicaDev *dev = &pd_c3d;
@@ -137,6 +147,7 @@ static inline u32 c15to32(u16 c) {   /* 5-bit channels to 8 (k * 255 / 31, as th
     u32 r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31;
     return ((r << 3) | (r >> 2)) | (((g << 3) | (g >> 2)) << 8) | (((b << 3) | (b >> 2)) << 16) | (c & 0x8000 ? 0xFF000000u : 0);
 }
+static u32 c15to32_(u16 c) { return c15to32(c); }
 static inline u16 c32to15(u32 c) {
     return (u16)((((c & 255) * 31 + 127) / 255) | ((((c >> 8) & 255) * 31 + 127) / 255) << 5 | ((((c >> 16) & 255) * 31 + 127) / 255) << 10
                  | ((c >> 24) > A_OPAQUE ? 0x8000 : 0));   /* bit 15: A_SEMI (or a host word with it); A_OPAQUE texels clear it */
@@ -201,23 +212,29 @@ static int nbulk;
 static struct { int x1, y1, x2, y2, until; } hot[4];
 static int nhot;
 static struct { int x1, y1, x2, y2, ok; } bulk_memo;   /* the last area bulk_area() found noted (bulk_in) */
-static int bulk_area(void) {   /* 1: the drawing area is noted, the primitive needs no cells */
+static int bulk_note(int ax1, int ay1, int ax2, int ay2) {   /* the same of any area: 1 = noted */
     bulk_memo.ok = 0;
-    int w = gs->x2 - gs->x1 + 1, h = gs->y2 - gs->y1 + 1;
+    int w = ax2 - ax1 + 1, h = ay2 - ay1 + 1;
     if (w < 256 || w > 640 || h < 200 || h > 256) return 0;
     for (int i = 0; i < nhot; i++)
-        if (hot[i].x1 == gs->x1 && hot[i].y1 == gs->y1 && hot[i].x2 == gs->x2 && hot[i].y2 == gs->y2) {
+        if (hot[i].x1 == ax1 && hot[i].y1 == ay1 && hot[i].x2 == ax2 && hot[i].y2 == ay2) {
             if (port_frame < hot[i].until) return 0;
             hot[i] = hot[--nhot]; break;
         }
-    for (int i = 0; i < nbulk; i++) if (bulk[i].x1 == gs->x1 && bulk[i].y1 == gs->y1 && bulk[i].x2 == gs->x2 && bulk[i].y2 == gs->y2) goto noted;
+    for (int i = 0; i < nbulk; i++) if (bulk[i].x1 == ax1 && bulk[i].y1 == ay1 && bulk[i].x2 == ax2 && bulk[i].y2 == ay2) goto noted;
     if (nbulk == 4) { pages_drawn(bulk[0].x1, bulk[0].y1, bulk[0].x2, bulk[0].y2); memmove(&bulk[0], &bulk[1], 3 * sizeof bulk[0]); nbulk = 3; }
     drawn_epoch++;
-    gens_bump(gs->x1, gs->y1, gs->x2, gs->y2);
-    bulk[nbulk].x1 = gs->x1; bulk[nbulk].y1 = gs->y1; bulk[nbulk].x2 = gs->x2; bulk[nbulk].y2 = gs->y2; nbulk++;
+    gens_bump(ax1, ay1, ax2, ay2);
+    bulk[nbulk].x1 = ax1; bulk[nbulk].y1 = ay1; bulk[nbulk].x2 = ax2; bulk[nbulk].y2 = ay2; nbulk++;
 noted:
-    bulk_memo.x1 = gs->x1; bulk_memo.y1 = gs->y1; bulk_memo.x2 = gs->x2; bulk_memo.y2 = gs->y2; bulk_memo.ok = 1;
+    bulk_memo.x1 = ax1; bulk_memo.y1 = ay1; bulk_memo.x2 = ax2; bulk_memo.y2 = ay2; bulk_memo.ok = 1;
     return 1;
+}
+static int bulk_area(void) {   /* 1: the drawing area is noted, the primitive needs no cells */
+    /* (--widescreen: the wide plane is drawn, not VRAM: nothing of VRAM goes stale until its 4:3 middle is copied
+       down, pica_ws_copy_down) */
+    if (gs->wide) { bulk_memo.ok = 0; return 1; }
+    return bulk_note(gs->x1, gs->y1, gs->x2, gs->y2);
 }
 /* (the same answer without the search while the drawing area is the one last found noted) */
 static inline int bulk_in(void) {
@@ -294,8 +311,8 @@ static void pend_add(int x, int y, int w, int h) {
 }
 static PV *batch(const PState *s, int n) {
     if (nbv && (nbv + n > bv_room || s->tex != bst.tex || s->mod != bst.mod || s->atest != bst.atest || s->blend != bst.blend
-                || s->x1 != bst.x1 || s->y1 != bst.y1 || s->x2 != bst.x2 || s->y2 != bst.y2)) flush();
-    if (!nbv && npend && !pica_dry) pend_flush(s->x1, s->y1, s->x2 - s->x1 + 1, s->y2 - s->y1 + 1);
+                || s->x1 != bst.x1 || s->y1 != bst.y1 || s->x2 != bst.x2 || s->y2 != bst.y2 || s->wide != bst.wide)) flush();
+    if (!nbv && npend && !pica_dry && !s->wide) pend_flush(s->x1, s->y1, s->x2 - s->x1 + 1, s->y2 - s->y1 + 1);
     if (!nbv && dev->vbuf) bv = dev->vbuf(&bv_room);
     bst = *s;
     PV *p = bv + nbv; nbv += n;
@@ -625,7 +642,7 @@ found:
 
 /* ---- primitives */
 static PState base_state(void) {
-    PState s = { -1, 0, AT_OFF, -1, gs->x1, gs->y1, gs->x2, gs->y2 };
+    PState s = { -1, 0, AT_OFF, -1, gs->x1, gs->y1, gs->x2, gs->y2, gs->wide };
     return s;
 }
 static void put(PV *p, int x, int y, int r, int g, int b, int u, int v) {
@@ -959,10 +976,41 @@ static void pica_copy(int sx, int sy, int dx, int dy, int w, int h) {
     put_rect(dx, dy, w, h);
 }
 static void pica_list_end(void) { flush(); }
+/* ---- --widescreen (gpu.c "widescreen"): the wide plane is the device's second target; a displayed buffer's wide copy
+   is in its left or right half (gpu.c ws_base) at the buffer's own rows */
+static void pica_ws_fill(int x, int y, int w, int h, u16 c) { flush(); dev->wide_fill(x, y, w, h, c15to32(c)); }
+static void pica_ws_upload(int wx, int wy, int w, int h, const u16 *src, int stride) { flush(); dev->wide_write(wx, wy, w, h, src, stride); }
+static void pica_ws_copy_down(int wx, int wy, int vx, int vy, int w, int h) {
+    flush();
+    if (npend) pend_flush(vx, vy, w, h);   /* (a host write waiting for this rectangle goes first, as before a primitive) */
+    dev->wide_down(wx, wy, vx, vy, w, h);
+    /* the buffer in VRAM was drawn: vram[] is stale there, as after its primitives */
+    if (!bulk_note(vx, vy, vx + w - 1, vy + h - 1)) pages_drawn(vx, vy, vx + w - 1, vy + h - 1);
+    bulk_memo.ok = 0;
+}
+static void pica_ws_read(int wx, int wy, int w, int h, u16 *dst, int stride) {
+    flush();
+    if (!dev->wide_read) return;
+    dev->wide_read(wx, wy, w, h, stage, w);
+    for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) dst[j * stride + i] = c32to15(stage[j * w + i]);
+}
+static int pica_ws_present(int wx, int wy, int w, int h) {
+    flush();
+    frame_clock = use_clock; present_no++;
+    clock_hist[present_no & 63] = use_clock;
+    return dev->wide_present ? dev->wide_present(wx, wy, w, h) : 0;
+}
 static int pica_start(void) {
     if (!stage) stage = malloc(1024 * 512 * 4);
     if (!dec) dec = malloc(256 * 256 * 4);
     if (!stage || !dec || dev->start()) return -1;
+    {   extern int port_widescreen, port_ws_cull;
+        if (port_widescreen > 96) port_widescreen = port_ws_cull = 96;
+        if (port_widescreen && (!dev->wide_start || dev->wide_start())) {
+            port_printf("[gpu] pica: no wide plane on this device: --widescreen off\n");
+            port_widescreen = port_ws_cull = 0;
+        }
+    }
     clip_sides();
     pend_now = 1; pica_vram_written(0, 0, 1024, 512); pend_now = getenv("PICA_WRITE_NOW") != 0;   /* (PICA_WRITE_NOW: no waiting, to compare) */
     return 0;
@@ -981,4 +1029,6 @@ static int pica_present(int dx, int dy, int dw, int dh, int masked) {
     return dev->present ? dev->present(dx, dy, dw, dh, masked) : 0;
 }
 const GpuBackend port_gpu_pica = { "pica (3DS model, CPU reference)", pica_start, pica_stop, pica_tri, pica_rect, pica_line, pica_fill,
-                                   pica_copy, pica_vram_written, pica_vram_read, pica_list_end, pica_present, .quad = pica_quad };
+                                   pica_copy, pica_vram_written, pica_vram_read, pica_list_end, pica_present, .quad = pica_quad,
+                                   .ws_fill = pica_ws_fill, .ws_copy_down = pica_ws_copy_down, .ws_upload = pica_ws_upload,
+                                   .ws_read = pica_ws_read, .ws_present = pica_ws_present };

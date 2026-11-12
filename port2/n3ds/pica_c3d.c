@@ -53,13 +53,22 @@ extern unsigned long long pica_decode_us;
 static void dcache_flush(const void *p, u32 size) { GSPGPU_FlushDataCache(p, size); }
 
 /* ---- the frame */
+/* --widescreen: the wide plane, a second target of the first one's size (shims/gpu_pica.h PicaDev.wide_start) */
+static C3D_Tex wide_tex; static C3D_RenderTarget *wide_rt;
+static int cur_wide;                      /* the target a draw goes to now: 0 VRAM's, 1 the wide plane */
 static int lin_fresh;                     /* lin[] holds the target as it is (c3d_read): nothing drawn since */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
     if (in_frame) return;
     if (!C3D_FrameBegin(0)) { static int said; if (!said++) port_printf("[3ds] pica: C3D_FrameBegin refused a frame\n"); }
     C3D_FrameDrawOn(vram_rt);
+    cur_wide = 0;
     in_frame = 1;
     lin_fresh = 0;   /* (something may be drawn: the copy of the target c3d_read holds is old) */
+}
+static void on_target(int wide) {   /* (in a frame) */
+    if (cur_wide == wide) return;
+    C3D_FrameDrawOn(wide ? wide_rt : vram_rt);
+    cur_wide = wide;
 }
 static void vb_flush(void);
 static void end_and_wait(void) {   /* run what was recorded and wait for it: memory may be reused afterwards */
@@ -216,6 +225,7 @@ static void c3d_tris(const PState *s, const PV *v, int n) {
        both axes (an edge exactly on the centres takes the row below, and a console left a column undrawn between two
        sprites side by side), is the shader's; an untextured vertex's alpha is 0 (bit 15 clear on a read-back) */
     if (v != vb + vb_n) memmove(vb + vb_n, v, (size_t)n * sizeof *v);
+    on_target(s->wide);
     C3D_DrawArrays(GPU_TRIANGLES, vb_n, n);
     vb_n += n;
     { extern int pica_prof_on; extern unsigned long long pica_prof[6]; if (pica_prof_on) pica_prof[4] += svcGetSystemTick() - t0; }
@@ -275,7 +285,7 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
             }
             dcache_flush(d, (unsigned)t.width * t.height * 4);
             if (vb_n + 6 > VB_MAX - 64) end_and_wait();
-            begin();
+            begin(); on_target(0);
             C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
             set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
             C3D_TexBind(0, tp);
@@ -294,7 +304,7 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
 }
 /* the same from the PS1's words (bit 15, blue, green, red: 5 bits each), staged as RGBA5551 texels: one pass, half the
    bytes.  The PICA widens 5 bits to 8 as the backend does (the high bits repeated below), bit 15 is the alpha. */
-static void c3d_write15(int x, int y, int w, int h, const unsigned short *src, int stride) {
+static void write15_on(int wide, int x, int y, int w, int h, const unsigned short *src, int stride) {
     u64 t0 = svcGetSystemTick();
     static unsigned char mo[64];
     if (!mo[1]) for (int k = 0; k < 64; k++) mo[k] = (unsigned char)morton(k & 7, k >> 3);
@@ -321,7 +331,7 @@ static void c3d_write15(int x, int y, int w, int h, const unsigned short *src, i
             }
             dcache_flush(d, (unsigned)t.width * t.height * 2);
             if (vb_n + 6 > VB_MAX - 64) end_and_wait();
-            begin();
+            begin(); on_target(wide);
             C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
             set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
             C3D_TexBind(0, tp);
@@ -336,9 +346,43 @@ static void c3d_write15(int x, int y, int w, int h, const unsigned short *src, i
         }
     tk_write += svcGetSystemTick() - t0;
 }
-static void c3d_fill(int x, int y, int w, int h, unsigned c) {
+static void c3d_write15(int x, int y, int w, int h, const unsigned short *src, int stride) { write15_on(0, x, y, w, h, src, stride); }
+static void c3d_wide_write(int x, int y, int w, int h, const unsigned short *src, int stride) { write15_on(1, x, y, w, h, src, stride); }
+static void fill_on(int wide, int x, int y, int w, int h, unsigned c);
+static void c3d_fill(int x, int y, int w, int h, unsigned c) { fill_on(0, x, y, w, h, c); }
+static void c3d_wide_fill(int x, int y, int w, int h, unsigned c) { fill_on(1, x, y, w, h, c); }
+/* the wide plane's rectangle into VRAM's target, texel for pixel (the frame's 4:3 middle, after every ordering table:
+   what the game reads back, copies or uses as a texture is there) */
+static void c3d_wide_down(int wx, int wy, int x, int y, int w, int h) {
+    begin(); cmd_room();
+    if (vb_n + 6 > VB_MAX - 64) { end_and_wait(); begin(); }
+    on_target(0);
+    C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
+    set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
+    C3D_TexBind(0, &wide_tex);
+    float X0 = x, Y0 = y, X1 = x + w, Y1 = y + h;
+    float S0 = wx / 1024.0f, S1 = (wx + w) / 1024.0f, T0 = 1.0f - wy / 512.0f, T1 = 1.0f - (wy + h) / 512.0f;
+    if (X1 > EDGE_X) { S1 = S0 + (S1 - S0) * (EDGE_X - X0) / (X1 - X0); X1 = EDGE_X; }
+    if (Y1 > EDGE_Y) { T1 = T0 + (T1 - T0) * (EDGE_Y - Y0) / (Y1 - Y0); Y1 = EDGE_Y; }
+    QUAD_BEGIN();
+    vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
+    vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X1, Y1, S1, T1, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
+    QUAD_END();
+}
+static int c3d_wide_start(void) {
+    if (wide_rt) return 0;
+    if (!C3D_TexInitVRAM(&wide_tex, 1024, 512, GPU_RGBA8)) { port_printf("[3ds] pica: no VRAM for the wide plane (%u KB free)\n", (unsigned)(vramSpaceFree() >> 10)); return -1; }
+    C3D_TexSetFilter(&wide_tex, GPU_NEAREST, GPU_NEAREST);
+    wide_rt = C3D_RenderTargetCreateFromTex(&wide_tex, GPU_TEXFACE_2D, 0, -1);
+    if (!wide_rt) { port_printf("[3ds] pica: no render target for the wide plane\n"); return -1; }
+    C3D_RenderTargetClear(wide_rt, C3D_CLEAR_ALL, 0x000000FF, 0);
+    port_printf("[3ds] pica: widescreen: the wide plane is ready (%u KB of VRAM left)\n", (unsigned)(vramSpaceFree() >> 10));
+    return 0;
+}
+static void fill_on(int wide, int x, int y, int w, int h, unsigned c) {
     begin();
     cmd_room();
+    on_target(wide);
     C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
     set_env(0, 0); set_atest(AT_OFF); set_blend(-1);
     float r = (c & 255) / 255.0f, g = ((c >> 8) & 255) / 255.0f, b = ((c >> 16) & 255) / 255.0f, a = (c >> 24) / 255.0f;
@@ -378,6 +422,7 @@ static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
 }
 
 /* ---- the top screen: the display area, 4:3 at the screen's height, centred */
+static C3D_Tex *pres_tex = &vram_tex; static int pres_w = 320;   /* what a present shows, and how wide on the screen */
 static int c3d_present(int x, int y, int w, int h, int masked) {
     u64 t0 = svcGetSystemTick();
     begin();
@@ -388,9 +433,9 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
     if (!masked && w > 0 && h > 0) {
         set_env(1, 0); set_atest(AT_OFF); set_blend(-1);
-        C3D_TexSetFilter(&vram_tex, GPU_LINEAR, GPU_LINEAR);
-        C3D_TexBind(0, &vram_tex);
-        float X0 = 40, X1 = 360, Y0 = 0, Y1 = 240;   /* 320 x 240 */
+        C3D_TexSetFilter(pres_tex, GPU_LINEAR, GPU_LINEAR);
+        C3D_TexBind(0, pres_tex);
+        float X0 = 200 - pres_w / 2, X1 = 200 + pres_w / 2, Y0 = 0, Y1 = 240;   /* 320 x 240 (the wide plane's frame: 400) */
         float S0 = x / 1024.0f, S1 = (x + w) / 1024.0f, T0 = 1.0f - y / 512.0f, T1 = 1.0f - (y + h) / 512.0f;
         QUAD_BEGIN();
         vtx(X0, Y0, S0, T0, 1, 1, 1, 1); vtx(X1, Y0, S1, T0, 1, 1, 1, 1); vtx(X0, Y1, S0, T1, 1, 1, 1, 1);
@@ -413,7 +458,7 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     vb_flush();
     C3D_FrameEnd(GX_CMDLIST_FLUSH);
     in_frame = 0;
-    C3D_TexSetFilter(&vram_tex, GPU_NEAREST, GPU_NEAREST);
+    C3D_TexSetFilter(pres_tex, GPU_NEAREST, GPU_NEAREST);
     proj_vram();
     frame_no++; st_frames++;
     arena_off = 0; vb_n = 0; last_ok = 0;   /* (the next C3D_FrameBegin waits for this frame: the arena is free then) */
@@ -465,6 +510,12 @@ static int c3d_present(int x, int y, int w, int h, int masked) {
     return 1;
 }
 
+static int c3d_wide_present(int x, int y, int w, int h) {
+    pres_tex = &wide_tex; pres_w = w > 400 ? 400 : w;
+    int r = c3d_present(x, y, w, h, 0);
+    pres_tex = &vram_tex; pres_w = 320;
+    return r;
+}
 /* ---- the bottom screen: the panel's canvas (runtime/sdl.c port_panel_window_frame) and its touches */
 void port_n3ds_panel(const unsigned char *rgba, int w, int h) {
     if (!bot_rt || w <= 0 || h <= 0) return;
@@ -783,7 +834,8 @@ void port_n3ds_gpu_fini(void) {
     in_frame = 0;
     C3D_Fini();
 }
-const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf, c3d_write15 };
+const PicaDev pd_c3d = { c3d_start, c3d_tex_upload, c3d_tris, c3d_fill, c3d_read, c3d_write, c3d_present, c3d_vbuf, c3d_write15,
+                         c3d_wide_start, c3d_wide_fill, c3d_wide_write, c3d_wide_down, c3d_wide_present, 0 };
 #endif
 
 /* ---- a worker thread for the panel's renders (runtime/panel.c): on another core where there is one (New 3DS: core 2;

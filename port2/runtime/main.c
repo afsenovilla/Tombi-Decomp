@@ -1065,7 +1065,7 @@ int main(int argc, char **argv) {
         }
         else if (!strcmp(a, "--widescreen")) {      /* experimental (docs/PORT.md "Widescreen"): 16:9, 21:9, 32:9 or auto */
             extern int port_widescreen; port_widescreen = 53; port_ws_auto = 0;
-            if (v && (!strcmp(v, "16:9") || !strcmp(v, "21:9") || !strcmp(v, "32:9") || !strcmp(v, "auto"))) { const char *ws = argv[++i]; if (!strcmp(ws, "21:9")) port_widescreen = 120; else if (!strcmp(ws, "32:9")) port_widescreen = 267; else if (!strcmp(ws, "auto")) port_ws_auto = 1; }
+            if (v && (!strcmp(v, "16:9") || !strcmp(v, "21:9") || !strcmp(v, "32:9") || !strcmp(v, "auto") || !strcmp(v, "5:3"))) { const char *ws = argv[++i]; if (!strcmp(ws, "21:9")) port_widescreen = 120; else if (!strcmp(ws, "5:3")) port_widescreen = 40;   /* (400 columns: the 3DS's top screen) */ else if (!strcmp(ws, "32:9")) port_widescreen = 267; else if (!strcmp(ws, "auto")) port_ws_auto = 1; }
         }
         else if (!strcmp(a, "--display-size") && v) {   /* testing --widescreen auto: pretend the display is W x H */
             if (sscanf(argv[++i], "%dx%d", &port_ws_disp_w, &port_ws_disp_h) != 2) return usage(argv[0]);
