@@ -2662,6 +2662,24 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select
   (areas 0, 1, 2, 3, 7; the others also animate palettes or keep counters) it is run again with the camera X moved
   2*pad+40 each way and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+- **Room ends** (`runtime/ws_edge.c`, called from `port_ws_area_model_link`; `--ws-edge off|on|all`): a room's
+  model stops where the 4:3 camera stops, so past its first / last sector a wide frame showed the clear colour (the
+  ground and the tree line of the first room ended in mid-air on the left).  Once per room model and end, one extra
+  sector is built in the model's own format (FT4 / GT4 packets) and added to the draw list while one of the end's four
+  outermost sectors is listed (those four are then all listed: the game's own selection leaves the outermost out), so
+  the game's drawer, GTE and culls draw it.  It carries the model on: every free edge of the end's silhouette that
+  faces outwards is extruded along X in pieces of at most 80 units, keeping the edge's height, depth, colours and
+  texture rows; along X the texture goes on at the polygon's texel density and wraps inside the tile that material
+  uses in the room (the union of the U ranges of the polygons of the same page, palette and rows that share a texel
+  column: 58 texels per 64 units of grass, 64 per leaf card).  Nothing is mirrored or stretched.  Extruded: an edge
+  with nothing of the model further out at its depth and height, of a polygon that does not face sideways and is a
+  surface that goes on (ground-like, |n.y| >= 0.5, starting a chain of three or more polygons joined edge to edge; or
+  a polygon whose texture rectangle another polygon uses too: a tile).  The outermost ground edges give the end's
+  line per depth; cards and risers count only at or past it (16 units of margin), so a house, a roof or a tree that
+  stands inside the 4:3 picture keeps its outline.  Reach: 3 * pad + 96 units.  Enabled per (area, section, end)
+  after a look at the result (`ROOMS`): AREA00 section 0, left end (17 edges, 143 quads at 21:9; the 4:3 centre of
+  the frame stays pixel-identical, 4:3 runs untouched; software and OpenGL).  `--ws-edge all` turns it on for every
+  room of the block-list areas (0, 1, 2, 3, 7), for checking the next rooms; `-v -v` lists the edges.
 - **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
   `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
   in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into

@@ -620,6 +620,10 @@ void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int
             if (k == cnt) { ((u32 *)list)[1 + cnt] = tmp[1 + i]; list[3] = cnt + 1; }
         }
     }
+    {   /* the room's ends carried on past the first / last sector (runtime/ws_edge.c) */
+        extern void port_ws_edge_blocks(char *, const u8 *, int, int);
+        port_ws_edge_blocks(list, (const u8 *)(unsigned long)(u32)wmd, game, sec);
+    }
 }
 
 /* --widescreen: the wrapping parallax backdrop of AREA01 / AREA09 (updateParallaxBackdropSprite subtype 1: 64-wide

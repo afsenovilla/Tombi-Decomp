@@ -30,6 +30,12 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
+   outward edges of the ground strips, risers and tree cards extruded along X with the room's own tiling; docs/PORT.md
+   "Widescreen", "Room ends").  On: AREA00 section 0, left end (the sky strip left of the first hill at 16:9 / 21:9 /
+   32:9).  Next: look at the other rooms with `--ws-edge all` (both ends; the right end of the first room is the way on
+   to section 4 and was not reached headless without a room change) and add them to `ROOMS`; not built on wasm2c /
+   the device yet.
 0. **Widescreen top-down maps drawn whole (2026-11-12)**: in the overhead rooms (I0NFO Dwarf Village AREA02/19 s0,
    I0NFO2 AREA05/08 s0/s2, AREA19 s2) the side strips past 4:3 filled in 32-px pieces as the camera moved (the user on
    the AYN Thor, `--widescreen auto`). Cause: the background is a 384x288 window of the map picture uploaded to fixed
