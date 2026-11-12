@@ -138,6 +138,19 @@ static void spawn_npcs(void)
     s16 pos[3] = {1580, -160, 180};
     memcpy(rec + 6, pos, 6);
     spawnObjectFromRecord(rec, -1);
+    /* the jungle's Fungas: the spear tribesmen of section 0 (layer 2 type 0x3A, updateSpearPig), whose sprites are
+       SPR table 0x37 = SPR_DATA[7]; section 2 leaves that slot empty, so it points at the table read above */
+    extern char *SPR_DATA[];
+    SPR_DATA[7] = (char *)chief_tbl;
+    static const s16 FX[3] = {1400, 1540, 1700};
+    static const u8 FST[3] = {0, 1, 0};
+    for (int i = 0; i < 3; i++) {
+        memset(rec, 0, sizeof rec);
+        rec[0] = 2; rec[1] = 2; rec[2] = 0x3A; rec[4] = FST[i];
+        s16 q[3] = {FX[i], -140, 180};
+        memcpy(rec + 6, q, 6);
+        spawnObjectFromRecord(rec, -1);
+    }
 }
 
 /* the chief: walks between x 1420 and 1720 (frames 50 51 52 51, 8 ticks each, 1 unit a tick), turns, and every second
