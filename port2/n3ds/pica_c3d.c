@@ -53,11 +53,13 @@ extern unsigned long long pica_decode_us;
 static void dcache_flush(const void *p, u32 size) { GSPGPU_FlushDataCache(p, size); }
 
 /* ---- the frame */
+static int lin_fresh;                     /* lin[] holds the target as it is (c3d_read): nothing drawn since */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
     if (in_frame) return;
     if (!C3D_FrameBegin(0)) { static int said; if (!said++) port_printf("[3ds] pica: C3D_FrameBegin refused a frame\n"); }
     C3D_FrameDrawOn(vram_rt);
     in_frame = 1;
+    lin_fresh = 0;   /* (something may be drawn: the copy of the target c3d_read holds is old) */
 }
 static void vb_flush(void);
 static void end_and_wait(void) {   /* run what was recorded and wait for it: memory may be reused afterwards */
@@ -308,6 +310,13 @@ static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
     u64 t0 = svcGetSystemTick();
     if (n_rd < 4) { rd_log[n_rd][0] = (short)x; rd_log[n_rd][1] = (short)y; rd_log[n_rd][2] = (short)w; rd_log[n_rd][3] = (short)h; }
     n_rd++;
+    /* (nothing drawn since the last read: its copy of the target serves.  A texture's drawn cells are read back a row
+       at a time, four whole-target transfers where one does: the logos at the start read 1.8 times a frame, 12 ms) */
+    if (!in_frame && lin_fresh) {
+        for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) dst[j * stride + i] = pix(lin[(y + j) * 1024 + x + i]);
+        tk_read += svcGetSystemTick() - t0;
+        return;
+    }
     end_and_wait();
     /* Twice: the wait inside is for "a transfer has ended", and one of an earlier frame's transfers to the screens
        can have ended unseen, so the first wait may return before this transfer has run (a console's start-up probe
@@ -319,6 +328,7 @@ static void c3d_read(int x, int y, int w, int h, unsigned *dst, int stride) {
                             GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) |
                             GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO));
     GSPGPU_InvalidateDataCache(lin, 1024 * 512 * 4);
+    lin_fresh = 1;
     for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) dst[j * stride + i] = pix(lin[(y + j) * 1024 + x + i]);
     tk_read += svcGetSystemTick() - t0;
 }
