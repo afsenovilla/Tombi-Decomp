@@ -43,7 +43,7 @@ typedef struct {
 
 #define MAXP 12000
 #define REACH 480                         /* how far in from the end a polygon may start and still be looked at */
-#define PIECE 80                          /* longest piece (the GTE drops a polygon whose screen X overflows) */
+#define PIECE 40                          /* longest piece (the GTE drops a polygon whose screen X overflows) */
 #define MAXQ 1400                         /* quads per end */
 
 static const u8 RING3[3] = {0, 1, 2}, RING4[4] = {0, 1, 3, 2};
@@ -175,9 +175,26 @@ static const struct { u8 area, section, end; s16 x0, x1, y1, z0, z1; u16 tp[2], 
 static int cur_area, cur_section;
 typedef struct { u8 *blk; int size, nq; } Block;
 
-static void put_v(u8 *d, int s, float x, const Vx *e, float u)
+/* the ground carried on rises and falls gently like the rest of the room instead of running flat: a height offset
+   (negative = up) of the distance d an extruded vertex lies past the edge vertex it comes from.  A vertex shared by two
+   edges gets the same offset from both, so neighbouring strips still meet; d = 0 starts flat (no crease at the edge). */
+static float hump(float d, float period)                            /* 0 at d = 0, 1 at period / 2, smooth */
+{
+    float t = d / period; t -= (int)t; t = t < 0.5f ? 2 * t : 2 - 2 * t;
+    return t * t * (3 - 2 * t);
+}
+static float wave(float d, float z)
+{
+    if (d <= 0) return 0;
+    float zz = z < 0 ? 0 : z > 500 ? 2.0f : z / 250.0f;
+    float k = (0.85f + 0.15f * hump(z, 360.0f)) * (1.0f + zz);       /* far hills higher */
+    return -(14.0f * hump(d, 300.0f) + 5.0f * hump(d, 170.0f)) * k;
+}
+static int wave_ex(const void *cs, int nc, int z);
+static void put_v(u8 *d, int s, float x, const Vx *e, float u, float ex)
 {
     Vx v = *e;
+    { float w = wave(ex - x, v.z); v.y = (s16)(v.y + (int)(w < 0 ? w - 0.5f : w + 0.5f)); }
     int xi = (int)(x < 0 ? x - 0.5f : x + 0.5f), ui = (int)(u + 0.5f);
     v.x = (s16)(s * xi); v.u = (u8)(ui < 0 ? 0 : ui > 255 ? 255 : ui);
     memcpy(d, &v, 8);
@@ -186,6 +203,17 @@ static void put_v(u8 *d, int s, float x, const Vx *e, float u)
 typedef struct { int poly, e, x0, x1, z0, z1, ground; } Cand;
 #define MAXC 600
 
+/* the end line at depth z: the x of the ground edge there (0 if none) */
+static int wave_ex(const void *v, int nc, int z)
+{
+    const Cand *cs = v; int best = 1 << 30, ex = 0;
+    for (int i = 0; i < nc; i++) {
+        if (cs[i].ground != 1) continue;
+        int d = z < cs[i].z0 ? cs[i].z0 - z : z > cs[i].z1 ? z - cs[i].z1 : 0;
+        if (d < best) { best = d; ex = cs[i].x0; }
+    }
+    return ex;
+}
 static void build(const u8 *tbl, int s, Block *out, int reach)
 {
     Cand *cs = malloc(sizeof(Cand) * MAXC); int nc = 0;
@@ -309,7 +337,7 @@ static void build(const u8 *tbl, int s, Block *out, int reach)
                 memcpy(d, &p->clut, 2); memcpy(d + 2, &p->tpage, 2); memcpy(d + 4, &w0, 4);
                 vp = d + 8;
                 if (p->gour) { memcpy(d + 8, &ca, 4); memcpy(d + 12, &cb, 4); memcpy(d + 16, &ca, 4); vp = d + 20; ng++; } else nf++;
-                put_v(vp, s, xb, b, ub); put_v(vp + 8, s, xa, a, ua); put_v(vp + 16, s, nxt, b, ub2); put_v(vp + 24, s, nxt, a, ua2);
+                put_v(vp, s, xb, b, ub, b->x); put_v(vp + 8, s, xa, a, ua, a->x); put_v(vp + 16, s, nxt, b, ub2, b->x); put_v(vp + 24, s, nxt, a, ua2, a->x);
                 xa = xb = nxt; ua = ua2; ub = ub2;
                 if (rho != 0 && nxt <= wrap + 0.01f) ua = ub = rho > 0 ? t1 : t0;
             }
@@ -336,12 +364,15 @@ pack:
             if (p->gour) for (int j = 1; j < p->nv; j++) { memcpy(d, &p->col[ord[j]], 4); d += 4; }
             for (int j = 0; j < p->nv; j++) {
                 Vx v = p->v[ord[j]];
+                float px = PROPS[pi].tz ? PROPS[pi].dx : PROPS[pi].dx + (PROPS[pi].x0 + PROPS[pi].x1) / 2;
+                int pz = PROPS[pi].dz + (PROPS[pi].z0 + PROPS[pi].z1) / 2;
+                float lift = wave(wave_ex(cs, nc, pz) - px, pz);
                 if (PROPS[pi].tz) {
                     int along = s * v.x - PROPS[pi].x0;
                     v.x = (s16)(PROPS[pi].dx + along * PROPS[pi].tx / 256); v.z = (s16)(PROPS[pi].dz + along * PROPS[pi].tz / 256);
-                    v.y = (s16)(v.y + PROPS[pi].dy + along * PROPS[pi].slope / 256);
+                    v.y = (s16)(v.y + (int)lift + PROPS[pi].dy + along * PROPS[pi].slope / 256);
                 } else {
-                    v.x = (s16)(s * v.x + PROPS[pi].dx); v.y = (s16)(v.y + PROPS[pi].dy); v.z = (s16)(v.z + PROPS[pi].dz);
+                    v.x = (s16)(s * v.x + PROPS[pi].dx); v.y = (s16)(v.y + (int)lift + PROPS[pi].dy); v.z = (s16)(v.z + PROPS[pi].dz);
                 }
                 memcpy(d, &v, 8); d += 8;
             }
