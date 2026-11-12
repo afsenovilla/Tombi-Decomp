@@ -52,7 +52,8 @@ PROFILES = {
     "jpdemo": Profile(name="jpdemo", title="Ore! Tomba JP demo (SLPM-80165)", exe="game_jp_demo/fs/SLPM_801.65",
                       disc="game_jp_demo/disc.bin", syms="jpdemo", cd_irq=True),
     "prepre9": Profile(name="prepre9", title="PlayStation Club PrePre Vol. 9 (PCPX-96093) TOMBA/TOMBA.EXE",
-                       exe="game_prepre9/fs/TOMBA/TOMBA.EXE", disc="game_prepre9/disc.bin", syms="prepre9", cd_irq=True),
+                       exe="game_prepre9/fs/TOMBA/TOMBA.EXE", disc="game_prepre9/disc.bin", syms="prepre9", cd_irq=True,
+                       movie_task=0x8002060C, movie_state=0x1F8001CC),     # StartTask(1, 0x8002060C) after 0x1F8001CC = 1 (0x8001C800)
     "prepre8": Profile(name="prepre8", title="PlayStation Club PrePre Vol. 8 (PCPX-96084) TOMBA/TOMBA.EXE",
                        exe="game_prepre8/fs/TOMBA/TOMBA.EXE", disc="game_prepre8/disc.bin", syms="prepre8", cd_irq=True),
     "dengeki": Profile(name="dengeki", title="Dengeki PlayStation D5 (SLPM-80186) Tomba demo", exe="game_dengeki_d5/fs/TOMBA/TOMBA.EXE",
