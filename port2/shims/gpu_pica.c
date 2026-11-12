@@ -113,11 +113,11 @@ static void ref_tri(const PState *s, const PV *a, const PV *b, const PV *c) {
         }
     }
 }
-int pica_stereo_frame;   /* --stereo: this table's batches are drawn again for the right eye (x + 2 sh), gpu.c sets it */
+int pica_stereo_frame;   /* --stereo: this table's batches are drawn again for the right eye (x + sh), gpu.c sets it */
 static void ref_tris(const PState *s, const PV *v, int n) {
     if (pica_stereo_frame && ert && !s->wide && s->x2 - s->x1 >= 255 && s->y2 - s->y1 >= 199) {   /* (the device: a replay at the frame's end) */
         PState e = *s; e.wide = 2; PV t[3];
-        for (int i = 0; i + 2 < n; i += 3) { for (int k = 0; k < 3; k++) { t[k] = v[i + k]; t[k].x += 2 * t[k].sh; } ref_tri(&e, &t[0], &t[1], &t[2]); }
+        for (int i = 0; i + 2 < n; i += 3) { for (int k = 0; k < 3; k++) { t[k] = v[i + k]; t[k].x += t[k].sh; } ref_tri(&e, &t[0], &t[1], &t[2]); }
     }
     REF_T(s->wide, 0); for (int i = 0; i + 2 < n; i += 3) ref_tri(s, &v[i], &v[i + 1], &v[i + 2]); }
 static void ref_fill(int x, int y, int w, int h, u32 c) {

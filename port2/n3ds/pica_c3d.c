@@ -235,9 +235,10 @@ static void apply_state(const PState *s, int dx) {
     }
     last_st = *s; last_ok = 1; last_dx = dx;
 }
-/* --stereo: the batches of a frame drawn for the left eye (into VRAM's target) are drawn again, at the end, into the
-   right eye's target, where the shader moves each vertex by 2 sh and the whole picture EYE_DX to the left (so nothing
-   crosses the target's right edge: a console draws nothing of such a triangle).  Only a screen's drawing area's. */
+/* --stereo: the batches of a frame drawn for the left eye (into VRAM's target: the game's own picture, unshifted) are
+   drawn again, at the end, into the right eye's target, where the shader moves each vertex by sh (+ behind the
+   screen, - in front) and the whole picture EYE_DX to the left, so nothing crosses the target's edges (a console draws
+   nothing of a triangle across its right edge).  Only a screen's drawing area's. */
 static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
     begin();
@@ -266,7 +267,7 @@ static void replay(void) {
     u64 t0 = svcGetSystemTick();
     replaying = 1;
     on_target(2);
-    C3D_FVUnifSet(GPU_VERTEX_SHADER, u_eye, 2.0f, -(float)EYE_DX, 0.0f, 0.0f);
+    C3D_FVUnifSet(GPU_VERTEX_SHADER, u_eye, 1.0f, -(float)EYE_DX, 0.0f, 0.0f);
     last_ok = 0;
     for (int i = 0; i < nrec; i++) {
         u32 *buf, size, off; GPUCMD_GetBuffer(&buf, &size, &off);
@@ -275,7 +276,7 @@ static void replay(void) {
             vb_flush(); C3D_FrameEnd(GX_CMDLIST_FLUSH); in_frame = 0;
             C3D_FrameBegin(0); C3D_FrameEnd(GX_CMDLIST_FLUSH);
             C3D_FrameBegin(0); C3D_FrameDrawOn(eye_rt); in_frame = 1; cur_wide = 2; proj_vram();
-            C3D_FVUnifSet(GPU_VERTEX_SHADER, u_eye, 2.0f, -(float)EYE_DX, 0.0f, 0.0f);
+            C3D_FVUnifSet(GPU_VERTEX_SHADER, u_eye, 1.0f, -(float)EYE_DX, 0.0f, 0.0f);
             last_ok = 0; st_cmd_splits++;
         }
         apply_state(&rec[i].s, EYE_DX);

@@ -12,7 +12,7 @@
 ;   colour: bytes * tscale.z (rgb), * tscale.w (alpha)
 .fvec projection[4]
 .fvec tscale
-.fvec eye                ; --stereo: x + eye.x * sh + eye.y (the right eye's replay: 2, -64; else 0, 0)
+.fvec eye                ; --stereo: x + eye.x * sh + eye.y (the right eye's replay: 1, -64; else 0, 0)
 .constf consts(0.484375, 0.5, 1.0, 0.0)
 .constf texeps(0.03125, 0.03125, 0.0, 0.0)
 

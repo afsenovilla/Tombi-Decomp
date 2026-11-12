@@ -399,8 +399,8 @@ static void ws_fill(int x, int y, int w, int h, u16 c) {
    as always and the right eye's into a target of its own (gpu_pica.c, PState.wide 2), things shifted apart by their
    depth.  A polygon's vertices by the GTE's SZ (below); a sprite or a rectangle, which the GTE did not project, by its
    place in the drawing order (far first).  port_stereo_k scales it (the 3DS's 3D slider; 0: one pass, as without) */
-static int st_dx;   /* this packet's shift by its place in the drawing order (DrawOTag) */
-int port_stereo_sh; /* the same as the backend's sh of a rectangle or a line (-st_dx) */
+static int st_dx;   /* this packet's right eye shift by its place in the drawing order (DrawOTag) */
+int port_stereo_sh; /* the same as the backend's sh of a rectangle or a line (st_dx) */
 /* a run of sprites, rectangles and fills keeps the shift of its first: a tile map, a menu's pieces, a top-down room's
    picture are runs of them side by side, which shifts by their places apart opened one-pixel gaps between */
 static int st_run;
@@ -415,7 +415,7 @@ static int st_new_depth(unsigned c) {
    polygon's vertices up: a mesh's shared vertices then get the same shift, so its polygons stay joined.  Two tables,
    by the parity of the frame that built them (a table is drawn the frame after) */
 int port_stereo_on; float port_stereo_k = 1.0f;
-static int st_eye;                                  /* the pass being drawn: 0 none, -1 the left eye, 1 the right */
+static int st_eye;                                  /* 1: this table is drawn for both eyes (the shifts are noted) */
 static float st_s = 16.0f, st_zf = 550.0f;          /* the widest shift between the eyes (pixels, k = 1); the SZ at the screen's plane */
 #define STH 8192
 static struct { short x, y; unsigned short z, ok; } sth[2][STH];
@@ -437,18 +437,18 @@ static int st_lookup(int x, int y) {   /* the shift of a vertex at this screen p
             int age = (unsigned short)(port_frame | 1) - sth[p][h].ok;
             if (sth[p][h].ok && age >= -2 && age <= 4 && sth[p][h].x == x && sth[p][h].y == y) {
                 float z = sth[p][h].z ? sth[p][h].z : 1;
+                /* the right eye's shift (the left eye's picture is the game's own): + behind the screen, - in front */
                 float S = st_s * port_stereo_k, disp = S * (1.0f - st_zf / z);
-                if (disp < 0) disp = 0;   /* (nothing in front of the screen: the right eye's things move right only, see gpu_pica.c) */
-                float v = st_eye * disp * 0.5f;
-                return (int)(v + (v >= 0 ? 0.5f : -0.5f));
+                if (disp < -S * 0.5f) disp = -S * 0.5f;
+                return (int)(disp + (disp >= 0 ? 0.5f : -0.5f));
             }
         }
     }
     return -9999;
 }
 static void vertex(Vtx *o, u32 w) {
-    o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; o->sh = -st_dx;
-    if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) { o->x += s - st_dx; o->sh = -s; } }
+    o->x = sx11(w) + gs.ox; o->y = sx11(w >> 16) + gs.oy; if (ws_on) o->x += ws_dx; o->sh = st_dx;
+    if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) o->sh = s; }
 }
 static void color(Vtx *o, u32 c) { o->r = c & 255; o->g = (c >> 8) & 255; o->b = (c >> 16) & 255; }
 
@@ -561,8 +561,8 @@ static int poly_fast(const u32 *p, int n, u32 cmd) {
         if (shade && i) c = p[k++];
         v[i].r = c & 255; v[i].g = (c >> 8) & 255; v[i].b = (c >> 16) & 255;
         u32 w = p[k++];
-        v[i].x = sx11(w) + gs.ox + wdx; v[i].y = sx11(w >> 16) + gs.oy; v[i].sh = -st_dx;
-        if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) { v[i].x += s - st_dx; v[i].sh = -s; } }
+        v[i].x = sx11(w) + gs.ox + wdx; v[i].y = sx11(w >> 16) + gs.oy; v[i].sh = st_dx;
+        if (st_eye) { int s = st_lookup(sx11(w), sx11(w >> 16)); if (s != -9999) v[i].sh = s; }
         ox |= (u32)v[i].x; oy |= (u32)v[i].y;
         if (tex) {
             u32 uv = p[k++];
@@ -744,9 +744,7 @@ static int gp0(const u32 *p, int n) {
 static void packet(const u32 *p, int n) {
     while (n > 0) {
         ws_begin();
-        gs.ox += st_dx;
         int used = gp0(p, n);
-        if ((p[0] >> 24) != 0xE5) gs.ox -= st_dx;
         ws_end();
         if (used <= 0) break;
         p += used; n -= used;
@@ -1080,7 +1078,7 @@ void DrawOTag(u32 *ot) {
     if (!skip) port_stereo_flat = st_flat;
     const int stereo = port_stereo_on && pica_eye_ok && port_stereo_k > 0.01f && !skip && !st_flat && be == &port_gpu_pica;
     const GpuState st_gs0 = gs; const int st_tx0 = tpg.tx, st_ty0 = tpg.ty, st_tp0 = tpg.tp;   /* (the right eye's pass starts from here) */
-    st_eye = stereo ? -1 : 0;
+    st_eye = stereo;
     { extern int pica_stereo_frame; pica_stereo_frame = stereo; }   /* (the backend draws the right eye from the left one's batches) */
     st_cnt = 0; st_dx = 0; st_run = 0; port_stereo_sh = 0;
     while (n < 200000) {
@@ -1088,9 +1086,11 @@ void DrawOTag(u32 *ot) {
         n++;
         if (st_eye && len && st_prev > 0 && st_new_depth(p[1] >> 24)) {
             float d = 1.0f - (float)st_cnt / (float)st_prev; if (d < 0) d = 0;   /* 1 farthest .. 0 nearest */
-            float disp = d > st_focus ? st_s * port_stereo_k * (d - st_focus) / (1.0f - st_focus) : 0.0f;
-            st_dx = (int)(st_eye * disp * 0.5f + (st_eye > 0 ? 0.5f : -0.5f));
-            port_stereo_sh = -st_dx;
+            /* (behind the screen past the focus, up to the widest shift; in front of it before, up to 0.35 of it) */
+            const float S = st_s * port_stereo_k;
+            float disp = d > st_focus ? S * (d - st_focus) / (1.0f - st_focus) : -0.35f * S * (st_focus - d) / st_focus;
+            st_dx = (int)(disp + (disp >= 0 ? 0.5f : -0.5f));
+            port_stereo_sh = st_dx;
         }
         if (len) st_cnt++;
         if (sky) {   /* sky = 1 + far packets seen; an ordering table node at slot >= 100 ends the far layer */
