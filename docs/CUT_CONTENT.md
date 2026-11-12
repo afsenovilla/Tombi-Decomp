@@ -1075,6 +1075,15 @@ Nobody else is placed outside the walkable area.
 So the talk and the start of 18 are cheap (one WSS case plus a reach fix), but a faithful completion of 18 is not
 recoverable from the data.
 
+**What the wood was probably for: the cut raft quest** [I, suggested in the community discussion, 2026-11-12]. Event
+18's hint is "ask the lumberjack dwarf for some wood", and the only wood the cut content asks for is the raft's: the
+AREA11 raft craftsman (JP #220-#224, docs/CIVILIZATION.md) agrees to build a raft, tells Tombi to bring wood, and hands
+it over to be used "at the riverside of the Old Tree hill"; JP-only item description DSPSUB#0 #95 is "just the wood
+to make a raft", and the AREA11 event table has "Let's Build a Raft!". The raft craftsman says the wood he uses falls
+under the Wise Old Tree, not that a dwarf cuts it, so the chain woodcutter -> wood -> raft -> crossing the river
+(where the bridge of events 52 / 95 / 96 is broken or unfinished, docs/CIVILIZATION.md point 8) is an inference
+from the hints, not from code: no build links event 18 to the raft events or to item 95.
+
 Evidence renders (local, not committed): overlay of the cell map, the woodcutter, the contact window and the
 villagers. Port frames, 168 poked to 255: debug select AREA02 s0 and AREA19 s0, both with him in place.
 
