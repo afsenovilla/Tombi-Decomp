@@ -21,6 +21,7 @@
  * runs (--renderer pica) can be compared with the software rasteriser frame by frame. */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include "port_runtime.h"
 #include "gpu_backend.h"
@@ -427,7 +428,7 @@ static void pica_vram_read(int x, int y, int w, int h) {
 /* ---- the texture cache */
 /* a slot: the block (bx, by, size z, texels of the page) of a page + CLUT + texture window.
    checked: ver_clock + 1 when it was last found valid */
-typedef struct { int tx, ty, depth, cx, cy, tw, bx, by; unsigned ver, checked, tver, chash, updated, synced; unsigned long long used; short live, next; } Slot;
+typedef struct { int tx, ty, depth, cx, cy, tw, bx, by; unsigned ver, checked, tver, chash, updated, synced, srch; unsigned long long used; short live, next; } Slot;
 static Slot slots[SLOTS];
 static short hhead[256];                 /* slots by key (chains through Slot.next), -1 ends */
 static int hinit;
@@ -449,6 +450,18 @@ static unsigned tex_ver(const GpuTex *t, int tw, int bx, int by, int z) {   /* t
 }
 /* a CLUT rewritten every frame with the same colours (the game uploads its palettes whole) must not cost a decode
    of every texture that uses it: a slot also keeps the version of its texels alone and a hash of its CLUT */
+static unsigned long long st_same;   /* blocks whose words were written again, the same: not decoded */
+static unsigned src_hash(int x, int y, int w, int h) {   /* a block's words in vram[] */
+    const u16 *vram = port_vram(); unsigned hsh = 2166136261u;
+    for (int j = 0; j < h; j++) {
+        const u16 *row = &vram[((y + j) & 511) * 1024], *r = row + (x & 1023);
+        int i = 0;
+        if (x + w > 1024) { for (; i < w; i++) hsh = (hsh ^ row[(x + i) & 1023]) * 16777619u; continue; }
+        if (!((uintptr_t)r & 3)) for (; i + 2 <= w; i += 2) hsh = (hsh ^ *(const u32 *)(r + i)) * 16777619u;
+        for (; i < w; i++) hsh = (hsh ^ r[i]) * 16777619u;
+    }
+    return hsh;
+}
 static unsigned clut_hash(const GpuTex *t) {
     if (t->depth == 2 || t->cy == PORT_CLUT_Y) return 0;
     const u16 *vram = port_vram();
@@ -619,7 +632,15 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
                   done++;
               }
           } }
-        { int x3, y3, w3, h3; tex_rect(t, tw, bx, by, z, &x3, &y3, &w3, &h3); pica_dec_why[blocks_ver(x3, y3, w3, h3) <= s->tver ? 1 : 0]++; }
+        {   /* its words written again but the same (a top-down room uploads its map window every frame, moved or not:
+               four 256 x 256 blocks decoded and uploaded each time, 25 ms a drawn frame on an Old 3DS): kept */
+            int x3, y3, w3, h3; tex_rect(t, tw, bx, by, z, &x3, &y3, &w3, &h3);
+            if (s->srch == src_hash(x3, y3, w3, h3) && clut_hash(t) == s->chash) {
+                s->ver = v; s->tver = blocks_ver(x3, y3, w3, h3); s->checked = ver_clock + 1; s->used = ++use_clock; st_same++;
+                goto found;
+            }
+            pica_dec_why[blocks_ver(x3, y3, w3, h3) <= s->tver ? 1 : 0]++;
+        }
         was = s->used;   /* (stale: decoded again in its slot) */
     } else {
         if (z == 256) i = slot_pick(0, PICA_N256, 0, 0);
@@ -657,7 +678,7 @@ static int tex_slot(const GpuTex *t, int u0, int v0, int u1, int v1, int *obx, i
     dev->tex_upload(i, dec, was > frame_clock);
     st_decodes++;
     slots[i].ver = v; slots[i].checked = ver_clock + 1; slots[i].used = ++use_clock;
-    slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t); slots[i].updated = present_no;
+    slots[i].tver = blocks_ver(x, y, w, h); slots[i].chash = clut_hash(t); slots[i].updated = present_no; slots[i].srch = src_hash(x, y, w, h);
 found:
     slots[i].synced = gsum + 1;
     memo.ok = 1; memo.tx = t->tx; memo.ty = t->ty; memo.depth = t->depth; memo.cx = t->cx; memo.cy = t->cy; memo.tw = tw;
@@ -1068,6 +1089,7 @@ static void pica_stop(void) {
                 pica_dec_why[0], pica_dec_why[1], pica_dec_why[2], pica_dec_why[3], pica_dec_why[4], pica_dec_why[5], pica_dec_why[6], pica_dec_why[7], pica_dec_why[8]);
     if (ref_sw[0] | ref_sw[3]) port_printf("[gpu] pica: changes of target: %llu by triangles, %llu fills, %llu writes, %llu wide fills, %llu wide writes, %llu copies down\n",
                                            ref_sw[0], ref_sw[1], ref_sw[2], ref_sw[3], ref_sw[4], ref_sw[5]);
+    port_printf("[gpu] pica: %llu blocks written again the same, not decoded\n", st_same);
     port_printf("[gpu] pica: %llu batches, %llu triangles, %llu texture decodes, %llu read-backs (%llu for textures, %llu for the host: %llu pixels)\n",
                 st_batches, st_tris, st_decodes, st_readbacks, st_rb_tex, st_rb_host, st_rb_px);
 }
