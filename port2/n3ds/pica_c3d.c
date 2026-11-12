@@ -31,6 +31,7 @@ static DVLB_s *vsh;
 static int u_proj, u_tsc, in_frame, scr_fmt;
 static int atlas2_h = PICA_ATLAS;           /* the third atlas's height (half when memory is short) */
 static int c3d_up;                        /* citro3d is running (port_n3ds_gpu_fini) */
+static void c3d_progress(int done, int total);   /* (below: the translation's progress bar) */
 static int vb_n, last_ok;                 /* (the vertex buffer's fill and the state cache, below) */
 static unsigned frame_no;
 static unsigned *lin;                     /* 1024 x 512 linear words: read-backs */
