@@ -324,7 +324,7 @@ static void ev_plank(int x, int y, int w, int h, const char *s, int mode, int id
 /* "Where" in (x, y, w, h); h 0: only measures.  Returns the height it needs. */
 static int ev_where(int x, int y, int w, int h, int e) {
     const PanelEventLoc *L = ev_loc(e);
-    int tw = w - 16, cy = y + 24, map = map_shows_event(e), plate = dist_name(ev_dist(e)) != NULL;
+    int tw = w - 16, cy = y + 24, map = !port_panel_no_map && map_shows_event(e), plate = dist_name(ev_dist(e)) != NULL;
     if (h) pa_text(x + 8, y + 5, 16, T("Where", "D\xF3nde"), C_RED, C_REDE);
     if (plate) { if (h) dist_plate(x + 8, cy, e); cy += 16; }
     const char *ar = L ? place_area(L->area, L->sec) : NULL, *rm = L && L->area != 254 ? place_room(L->area, L->sec) : NULL;
@@ -414,8 +414,8 @@ static void page_events(int play) {
 /* ---------------------------------------------------------------- input */
 enum { IN_UP = 1, IN_DOWN, IN_LEFT, IN_RIGHT, IN_OK, IN_BACK, IN_TAB_L, IN_TAB_R, IN_ZOOM_OUT, IN_ZOOM_IN, IN_HIDE, IN_SHOW_HIDDEN, IN_PIN };
 static void panel_action(int a) {
-    if (a == IN_TAB_L) { page = (page + NPAGES - 1) % NPAGES; return; }
-    if (a == IN_TAB_R) { page = (page + 1) % NPAGES; return; }
+    if (a == IN_TAB_L) { do page = (page + NPAGES - 1) % NPAGES; while (port_panel_no_map && page == PAGE_SIDE); return; }
+    if (a == IN_TAB_R) { do page = (page + 1) % NPAGES; while (port_panel_no_map && page == PAGE_SIDE); return; }
     if (page == PAGE_SIDE) { map_action(a); return; }
     if (page == PAGE_ITEMS) { void items_action_(int); items_action_(a); return; }
     if (page != PAGE_EVENTS && page != PAGE_MAP) return;
@@ -442,7 +442,7 @@ static void panel_hit(int id) {
         if (k == 8) { panel_action(IN_HIDE); break; }
         if (k == 9) { panel_action(IN_SHOW_HIDDEN); break; }
         if (k == 10) { if (ev_detail >= 0) ev_pin_toggle(ev_detail); break; }
-        if (k == 11) { if (ev_detail >= 0) { map_focus(ev_detail); page = PAGE_SIDE; } break; }
+        if (k == 11) { if (ev_detail >= 0 && !port_panel_no_map) { map_focus(ev_detail); page = PAGE_SIDE; } break; }
         ev_filter = k; ev_reset(); ev_detail = -1; break;
     case HS_ROW: {   /* a tap opens the event, a long press (0.6 s) pins / unpins it */
         int ids[EVENTS], n = ev_list(ids);

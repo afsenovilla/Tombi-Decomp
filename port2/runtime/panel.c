@@ -326,6 +326,9 @@ static int es(void) { return port_lang == 5; }
 #endif
 enum { PAGE_MAP, PAGE_EVENTS, PAGE_SIDE, PAGE_ITEMS, NPAGES };
 static int page;
+/* --panel-no-map (an Old 3DS's default: the area map's tiles are more than it has time for): no map tab, and no
+   "show on the map" under an event; the status, events and items tabs stay */
+int port_panel_no_map;
 static const char *page_name(int p) {
     return p == PAGE_MAP ? T("Status", "Estado") : p == PAGE_EVENTS ? T("Events", "Eventos") : p == PAGE_ITEMS ? T("Items", "Objetos") : map_tab_name();
 }
@@ -430,9 +433,10 @@ static void header_draw(const char *title) {
     pa_outline = C_DARK;
     pa_text_fit(W / 2 - pa_text_w(16, title) / 2 < 30 ? 30 : W / 2 - pa_text_w(16, title) / 2, 4, 16, W - 60, title, C_WHITE, C_WOODE);
     pa_outline = 0;
-    int n = NPAGES, tw = (W - 16 * (n + 1)) / n;
-    for (int i = 0; i < n; i++) {
-        int x = 16 + i * (tw + 16);
+    int n = NPAGES - (port_panel_no_map ? 1 : 0), tw = (W - 16 * (n + 1)) / n;
+    for (int i = 0, c = 0; i < NPAGES; i++) {
+        if (port_panel_no_map && i == PAGE_SIDE) continue;
+        int x = 16 + c++ * (tw + 16);
         plank(x, 26, tw); hot(x, 26, tw, 24, HS_PAGE + i);
         plank_text(x + tw / 2, 30, page_name(i), i == page);
     }

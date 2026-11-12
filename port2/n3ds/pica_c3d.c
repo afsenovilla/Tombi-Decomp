@@ -54,7 +54,7 @@ static void dcache_flush(const void *p, u32 size) { GSPGPU_FlushDataCache(p, siz
 /* ---- the frame */
 static void begin(void) {   /* (C3D_FrameBegin waits for the frame submitted before: its memory is free then) */
     if (in_frame) return;
-    C3D_FrameBegin(0);
+    if (!C3D_FrameBegin(0)) { static int said; if (!said++) port_printf("[3ds] pica: C3D_FrameBegin refused a frame\n"); }
     C3D_FrameDrawOn(vram_rt);
     in_frame = 1;
 }
@@ -63,6 +63,16 @@ static void end_and_wait(void) {   /* run what was recorded and wait for it: mem
     if (in_frame) { vb_flush(); C3D_FrameEnd(GX_CMDLIST_FLUSH); in_frame = 0; }
     C3D_FrameBegin(0); C3D_FrameEnd(GX_CMDLIST_FLUSH);   /* (C3D_FrameBegin waits for the queue of the frame before) */
     arena_off = 0; frame_no++; st_syncs++; vb_n = 0; last_ok = 0;
+}
+
+/* The GPU's command buffer is one frame's, and libctru stops the program (svcBreak) when a command does not fit: a
+   console ended that way in play.  Before anything is recorded, a frame that has filled most of it is run and waited
+   for, as when the vertex buffer or the staging arena fills. */
+static unsigned st_cmd_splits;
+static void cmd_room(void) {
+    u32 *buf, size, off;
+    GPUCMD_GetBuffer(&buf, &size, &off);
+    if (in_frame && off + 4096 > size) { end_and_wait(); begin(); st_cmd_splits++; port_printf("[3ds] pica: the command buffer was nearly full (%u of %u words): the frame was split\n", (unsigned)off, (unsigned)size); }
 }
 
 /* ---- state */
@@ -180,6 +190,7 @@ static PState last_st;                       /* (last_ok 0: something else set s
 static void c3d_tris(const PState *s, const PV *v, int n) {
     u64 t0 = svcGetSystemTick();
     begin();
+    cmd_room();
     if (vb_n + n > VB_MAX - 256) { end_and_wait(); begin(); }
     {   /* only what differs from the last batch's state is set (a semi-transparent textured primitive is two batches
            that differ in the alpha test and the blend alone) */
@@ -241,6 +252,7 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
         for (int i0 = 0; i0 < w; i0 += 256) {
             int pw = w - i0 < 256 ? w - i0 : 256, ph = h - j0 < 256 ? h - j0 : 256;
             C3D_Tex *tp = &stg;
+            begin(); cmd_room();   /* (before the piece is staged: a split frees the arena) */
             if (stage_tex(tp, pw, ph)) continue;
             C3D_Tex t = *tp;
             unsigned *d = t.data;
@@ -266,6 +278,7 @@ static void c3d_write(int x, int y, int w, int h, const unsigned *src, int strid
 }
 static void c3d_fill(int x, int y, int w, int h, unsigned c) {
     begin();
+    cmd_room();
     C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
     set_env(0, 0); set_atest(AT_OFF); set_blend(-1);
     float r = (c & 255) / 255.0f, g = ((c >> 8) & 255) / 255.0f, b = ((c >> 16) & 255) / 255.0f, a = (c >> 24) / 255.0f;

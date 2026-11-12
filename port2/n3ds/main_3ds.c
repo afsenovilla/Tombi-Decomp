@@ -232,9 +232,9 @@ int main(int argc, char **argv) {
     { bool n3 = false; APT_CheckNew3DS(&n3); args[n++] = "--hz"; args[n++] = n3 ? "60" : "50"; }
     /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
        NOW LOADING until gameplay, then status / events / map / items, by touch */
-    /* (a New 3DS only: an Old 3DS has no time to spare for it, and its bottom screen stays black; args.txt
-       "--second-screen --panel-size 320x240" brings it back there) */
-    { bool n3 = false; APT_CheckNew3DS(&n3); if (n3) { args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240"; } }
+    args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240";
+    /* (an Old 3DS: without the map tab, whose tiles are more than it has time for; the other tabs stay) */
+    { bool n3 = false; APT_CheckNew3DS(&n3); if (!n3) args[n++] = "--panel-no-map"; }
     args[n++] = "--log-fps"; args[n++] = "--prompt-big"; args[n++] = "6";   /* (the button prompts: a round black button lit from the upper left, the letter white: shims/prompts.c) */                        /* a line a second in log.txt: where a frame's time goes on this console */
     { extern int port_panel_canvas_out; port_panel_canvas_out = 1; }
     FILE *f = fopen(DIR_ "/args.txt", "r");
