@@ -4,8 +4,8 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.3.1 (build of 66a8281, 2026-11-10): .zip / .7z disc images in both launchers, language flags on the cards, Disco and
-home layout fixes, the Japanese card title オレっ！トンバ, release number in the PC launcher. Previous: v0.3.0 (5da1fc8).
+v0.5.4 (build of f7973c4, 2026-11-12): widescreen top-down maps fill the side strips; the first room's left end (wavy
+ground, fence, far hills strip); update check at start in both launchers. Earlier: v0.5.3, v0.5.2, ... v0.3.1 (66a8281).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
@@ -29,6 +29,13 @@ Details: docs/REMAINING.md. The last PAL function (D0SPSUB 800EFD6C) replaced a 
 draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game clears +0x64..0x66.
 
 ## In progress / open
+
+-1. **Later (owner's request, no hurry): AREA10 section 2 (Old Tree Hill) unused Funga area.**  Open the door object
+   4:07 / 02 (82FF #026 "Door", WMD bank 1 model 7, position (1288, -187, 180), APD offset 0x01A0, SYS/LDAR10.BIN group 3)
+   and make the unused area behind it walkable (collision for the ground strip; Tombi could climb the wooden stand in
+   the middle and jump on the drums); add a Funga Chief walking around (he has walk and talk animations) and some
+   Funga guys.  The owner's screenshot shows the area: palm cards, torches, drums, the straw stand, a river in front.
+   A port mod (runtime data patch / spawned objects), never shipped game data.
 
 0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
    outward edges of the ground strips, risers and tree cards extruded along X with the room's own tiling; docs/PORT.md
