@@ -4,8 +4,8 @@ Update this file whenever something lands or a task is decided. Newest first.
 
 ## Last release
 
-v0.3.1 (build of 66a8281, 2026-11-10): .zip / .7z disc images in both launchers, language flags on the cards, Disco and
-home layout fixes, the Japanese card title オレっ！トンバ, release number in the PC launcher. Previous: v0.3.0 (5da1fc8).
+v0.5.4 (build of f7973c4, 2026-11-12): widescreen top-down maps fill the side strips; the first room's left end (wavy
+ground, fence, far hills strip); update check at start in both launchers. Earlier: v0.5.3, v0.5.2, ... v0.3.1 (66a8281).
 
 Release number: `VERSION` (repo root) is the version the Android launcher shows (build.gradle versionName) and the
 default of release.yml; bump it before each release (it used to show 0.1.<CI run number>).
@@ -29,6 +29,37 @@ Details: docs/REMAINING.md. The last PAL function (D0SPSUB 800EFD6C) replaced a 
 draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game clears +0x64..0x66.
 
 ## In progress / open
+
+-1. **In progress: AREA10 section 2 (Old Tree Hill) unused Funga area (`--cut-content=funga`, bit 64).**  Done: the
+   camera's right bound (SECTION_CAMERA_BOUNDS 220..1038, read by initSectionCamera) goes to 1680, so Tombi walks past
+   the gate to x 1904 (the WHM ground already runs to 1920; the drums are updateSolidScenery objects already placed);
+   the gate (updateAreaMechanisms subtype 2) swings open (+0x88 to 0x400, hinge at its edge) once Tombi passes x 1080.
+   Gate: the game's door block (16 x 97 x 50, x -8..7 z -25..25) swings a quarter turn on its back edge once Tombi
+   passes x 1180 (runtime/funga.c; its room copy flattened).  NOT the room's 21 polygons at x 1268..1296 z 155..205:
+   those are the lintel over the gap (swinging them broke the top, reverted).  Drums: updateSolidScenery subtypes
+   13..21 get no box (not solid) -> subtype 0, the springy drum; only the front one (x 1808) is on the path, the rest
+   and the straw stand stand in the back row (z 258..286), off the single walking line (WHM plane 2 only).
+   Back lane (runtime/funga.c back_lane): a copy of the WHM with a 4th plane (z 270..359, the plane cap lifted to 3 for
+   the copy only in getCollisionPlaneAt) replaces WHM slot 0 on each load: ground from x 1336 (wall at its left end),
+   the stand's top (x 1528..1615, y -232) as a one-way floor.  The game's own lane moves: floor bit 0x2000 = Up+Cross
+   -> step 0x11 (+90 depth, into the background here), 0x1000 = Down+Cross -> step 0x12 (-90, to the front); the
+   section's pier at x 352..384 uses both.  Front floors in front of the stand carry 0x2000, every back-lane floor
+   0x1000.  Drum boxes take |dz| < 45: solid in the back lane only.  Fungas moved to drums 1353/1741/1788 (the middle
+   drums and the stand are the back lane's path).  Verified headless: into the back lane at x 1563, jump onto the
+   stand top, walk off onto drum 1643 / 1501 and bounce back up, Down+Cross back to the front; normal game unchanged.
+   Next: the Funga Chief and Fungas.  Their sprites are SPR table 0x37 (SPR_DATA[7], frames 31, 47-58 chief, 59+ Fungas,
+   docs/CONTENIDO_RECORTADO.md "Jungla"), loaded only by AREA10 lists 1 and 5 (sections 0/4: the 0x37 piece of the
+   LD0SYS stream after D005.GAM); section 2 (list 3) has slot 7 empty, so the table has to be loaded there too; no
+   animation scripts and no palette in use (the community rip shows a blue chief): a new object with its own frame
+   cycle.  Also: the black past the model's right end at wide ratios.
+   Original request:  Open the door object
+   4:07 / 02 (82FF #026 "Door", WMD bank 1 model 7, position (1288, -187, 180), APD offset 0x01A0, SYS/LDAR10.BIN group 3)
+   and make the unused area behind it walkable (collision for the ground strip; Tombi could climb the wooden stand in
+   the middle and jump on the drums); add a Funga Chief walking around (he has walk and talk animations) and some
+   Funga guys.  The owner's screenshot shows the area: palm cards, torches, drums, the straw stand, a river in front.
+   The door is the palisade gate with the round Funga emblem (second screenshot): check the model's pivot (vertex
+   extents relative to its origin) to see whether it swings on a hinge like the other doors or slides / lifts.
+   A port mod (runtime data patch / spawned objects), never shipped game data.
 
 0. **Widescreen room ends (2026-11-12)**: `runtime/ws_edge.c` carries a room's model on past its end (the free
    outward edges of the ground strips, risers and tree cards extruded along X with the room's own tiling; docs/PORT.md

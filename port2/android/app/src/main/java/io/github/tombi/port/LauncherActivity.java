@@ -117,6 +117,49 @@ public class LauncherActivity extends Activity {
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
         view.requestFocus();
+        if (prefs.getBoolean("checkupdates", true)) checkUpdate();
+    }
+
+    // ---- the update check at start (one request to GitHub's releases API; silent offline or on any error) ----
+    volatile String updateVer, updateUrl;
+    static int[] verTuple(String v) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("^v?(\\d+)\\.(\\d+)\\.(\\d+)$").matcher(v == null ? "" : v.trim());
+        return m.matches() ? new int[]{Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3))} : null;
+    }
+    static boolean newer(int[] a, int[] b) {
+        for (int i = 0; i < 3; i++) if (a[i] != b[i]) return a[i] > b[i];
+        return false;
+    }
+    void checkUpdate() {
+        final String cur = version().substring(1);
+        new Thread(new Runnable() { public void run() {
+            try {
+                int[] c = verTuple(cur);
+                if (c == null) return;
+                java.net.HttpURLConnection h = (java.net.HttpURLConnection) new java.net.URL("https://api.github.com/repos/afsenovilla/Tombi-Decomp/releases/latest").openConnection();
+                h.setConnectTimeout(6000); h.setReadTimeout(6000);
+                h.setRequestProperty("Accept", "application/vnd.github+json");
+                h.setRequestProperty("User-Agent", "tombi-port-launcher");
+                if (h.getResponseCode() != 200) return;
+                java.io.InputStream in = h.getInputStream();
+                java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
+                byte[] buf = new byte[8192]; int n;
+                while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
+                in.close(); h.disconnect();
+                org.json.JSONObject j = new org.json.JSONObject(bo.toString("UTF-8"));
+                int[] t = verTuple(j.optString("tag_name"));
+                if (t == null || !newer(t, c) || j.optBoolean("draft") || j.optBoolean("prerelease")) return;
+                final String v = t[0] + "." + t[1] + "." + t[2], url = j.optString("html_url", "https://github.com/afsenovilla/Tombi-Decomp/releases/latest");
+                runOnUiThread(new Runnable() { public void run() {
+                    updateVer = v; updateUrl = url;
+                    if (view != null) { view.build(); view.invalidate(); }
+                } });
+            } catch (Throwable ignored) { }
+        } }, "tombi-update").start();
+    }
+    void openUpdate() {
+        try { startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(updateUrl))); }
+        catch (Throwable t) { status(updateUrl); }
     }
 
     @Override
@@ -305,8 +348,8 @@ public class LauncherActivity extends Activity {
     boolean flag(String k, boolean def) { return prefs.getBoolean(k, "hz60".equals(k) || def); }
 
     // ---- cut content: one switch per item (port/fixes.txt, --cut-content=LIST; the PC launcher's CUT_ITEMS) ----
-    static final String[] CUT_ITEMS = {"boatman", "letter", "board", "berries", "bubble", "titles"};
-    static final int[] CUT_LABELS = {R.string.cut_boatman, R.string.cut_letter, R.string.cut_board, R.string.cut_berries, R.string.cut_bubble, R.string.cut_titles};
+    static final String[] CUT_ITEMS = {"boatman", "letter", "board", "berries", "bubble", "titles", "funga"};
+    static final int[] CUT_LABELS = {R.string.cut_boatman, R.string.cut_letter, R.string.cut_board, R.string.cut_berries, R.string.cut_bubble, R.string.cut_titles, R.string.cut_funga};
     /** the items switched on; settings saved with the old single switch ("cut") meant every item */
     List<String> cutItems() {
         if (prefs.contains("cut") && !prefs.contains("cut_boatman")) {
@@ -1429,6 +1472,7 @@ public class LauncherActivity extends Activity {
                 Item a = new Item(getString(R.string.play), new Runnable() { public void run() { play(); } });
                 a.primary = true; a.dim = !ready(); items.add(a);
                 if (!mainFocusSet) { mainFocusSet = true; focus = items.size() - 1; }   // first time: on Play
+                if (updateVer != null) items.add(new Item(getString(R.string.upd_new, updateVer), new Runnable() { public void run() { openUpdate(); } }));
                 if (pal) {
                     items.add(valueRow(R.string.opt_lang, LANG_NAME[langIdx()], new Adjust() { public void by(int d) {
                         prefs.edit().putInt("lang", (langIdx() + d + LANG_N.length) % LANG_N.length).apply(); } }));
@@ -1498,6 +1542,10 @@ public class LauncherActivity extends Activity {
                     prefs.edit().putInt("uilang", (uiLangIdx() + d + UI_LANGS.length) % UI_LANGS.length).apply();
                     applyUiLang(); } }));
                 items.add(toggle(R.string.opt_debug, "debugmenu"));
+                Item cu = new Item(getString(R.string.opt_checkupd), null);
+                cu.check = prefs.getBoolean("checkupdates", true) ? 1 : 0;
+                cu.adj = new Adjust() { public void by(int d) { prefs.edit().putBoolean("checkupdates", !prefs.getBoolean("checkupdates", true)).apply(); } };
+                items.add(cu);
                 items.add(new Item(getString(R.string.opt_viewlog), new Runnable() { public void run() { setScreen(LOG); } }));
                 items.add(new Item(getString(R.string.quit), new Runnable() { public void run() { finish(); } }));
             }

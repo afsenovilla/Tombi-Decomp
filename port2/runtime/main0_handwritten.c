@@ -599,6 +599,10 @@ extern int port_ws_cull;
 void port_ws_area_model_link(void (*hook)(char *, int), char *list, int wmd, int game, u16 *origin_x)
 {
     hook(list, wmd);
+    {   /* --cut-content=funga: the room's copy of the AREA10 s2 gate block (runtime/funga.c) */
+        extern void port_funga_room(const u8 *, int, int);
+        port_funga_room((const u8 *)(unsigned long)(u32)wmd, game, *(volatile u16 *)port_ram_ptr(PORT_A_GAME + 2));
+    }
     if (!port_ws_cull || !(game == 0 || game == 1 || game == 2 || game == 3 || game == 7)) return;
     static u32 tmp[0x5b + 4];
     int d = 2 * port_ws_cull + 40;
@@ -651,6 +655,9 @@ void port_ws_cat7(void *o, void (*draw)(void *))
     for (int k = 0; k < 32; k++) {
         if (ws_rep[k].o != o || port_frame - ws_rep[k].frame > 8) continue;
         s16 x = S16(o, 0x12);
+        if (ws_rep[k].period < 0) {                       /* carried on to the left only, as far as the strip shows */
+            for (int nx = x + ws_rep[k].period; nx + 256 >= -port_ws_cull; nx += ws_rep[k].period) { S16(o, 0x12) = nx; draw(o); }
+        } else
         for (int c = -1; c <= 1; c += 2) {
             int nx = x + c * ws_rep[k].period;
             if (nx + 128 < -port_ws_cull || nx - 128 >= 320 + port_ws_cull) continue;   /* (parts sit within +-128) */
