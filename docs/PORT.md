@@ -2662,6 +2662,21 @@ culls, not in the GTE: the projection keeps its scale, so nothing is stretched; 
   hook picks the blocks around the camera X each frame (nothing streams from CD).  For the hooks that only select
   (areas 0, 1, 2, 3, 7; the others also animate palettes or keep counters) it is run again with the camera X moved
   2*pad+40 each way and the extra blocks are merged into the list (cap 88), so the edges no longer pop in.  Drawing only.
+- **Top-down map** (`runtime/ws_topdown.c`, fixes.txt hooks at the end of `topdownDrawMapLayers` /
+  `overheadDrawMapLayers` and their USA / JP versions): the overhead background is the room's map picture (8 bpp TIM
+  in RAM, scratch 0x1F800394) of which the game uploads a 384x288 window (12x9 tiles of 32 px, USA / JP 384x256) into
+  fixed VRAM every frame and draws it as 5 SPRTs (2 in USA / JP): at most 32 px past 4:3 on each side, so the strips
+  filled in 32-px pieces as the camera moved.  VRAM has no room for a wider window, so the same rects are reused
+  within the frame: `port_ws_overhead_map` links into the map's ordering-table bucket, ahead of the game's packets,
+  for the window one width left and one right (each clipped to the wide frame and the picture) a marker packet
+  (len 2: GP0 no-ops 0x00575354, id) and copies of the game's DR_MODE + SPRT pairs moved by 384 px; `DrawOTag`
+  (`shims/gpu.c`, `port_ot_mark_fn`) calls back at a marker, which uploads that window's picture pixels with
+  `LoadImage` (both renderers, `--fps` and the texture tools see an ordinary upload); the last marker puts back what
+  the game had uploaded.  The geometry is read from the game's own packets and checked against VRAM (the window's
+  first row must equal the picture; else off, logged once).  The game's window is also cut at the picture's right /
+  bottom edge (past it, it showed the wrapped next row: invisible on 4:3).  Past the picture's edge stays black (the
+  map ends there; Dwarf Village is 448 px wide, AREA19 s2 barely wider than the screen).  The tunnels (I0NFO3) are 3D
+  blocks and were already covered by the block hook above.
 - **Event titles** (`spawnEventTitle`, `l8Type01MoveStep`, `#ifdef PORT2`): the title tiles start at screen x 340
   (just past 4:3, inside the wide frame, where they popped into view) and left at x 480 (inside 21:9 / 32:9).  They
   now start `pad + 160` further right (the tiles sit up to ~150 either side of the title's x) and leave once past `320 + pad`; the fly-in speed is derived from the distance over

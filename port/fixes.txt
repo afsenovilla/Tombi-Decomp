@@ -407,6 +407,16 @@ src/d0spsub2/memCardDrawModeTitle.c | s->w = 0x28; | { extern int port_lang; ext
 # just outside the 4:3 window (port2/runtime/main0_handwritten.c port_ws_area_model_link; identity when off)
 src/callAreaModelLinkHook.c | PTR_DAT_80079b3c[GAME](AREA_MODEL_DRAW_LIST, WMD_DATA); | { extern unsigned short SCREEN_ORIGIN_X; extern void port_ws_area_model_link(void (*)(char *, int), char *, int, int, unsigned short *); port_ws_area_model_link(PTR_DAT_80079b3c[GAME], AREA_MODEL_DRAW_LIST, WMD_DATA, GAME, &SCREEN_ORIGIN_X); }
 #
+# --widescreen: the top-down map (I0NFO / I0NFO2 and their USA / JP builds) is a 384-px window of the room's map
+# picture; the windows left and right of it are drawn through the same VRAM, uploaded at marker packets
+# (port2/runtime/ws_topdown.c port_ws_overhead_map: n map SPRTs, picture row of tile row 0; nothing when off)
+src/i0nfo2/topdownDrawMapLayers.c | } while (i < 5); | } while (i < 5); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 5, -24); }
+src/i0nfo/overheadDrawMapLayers.c | } while (i < 5); | } while (i < 5); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 5, -24); }
+src/i0nfo/func_800EA3A4_scus94236.c | } while (i < 2); | } while (i < 2); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 2, 0); }
+src/i0nfo2/func_800EBA58_scus94236.c | } while (i < 2); | } while (i < 2); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 2, 0); }
+src/i0nfo/func_800EC658_slps01144.c | } while (i < 2); | } while (i < 2); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 2, 0); }
+src/i0nfo2/func_800EDDE0_slps01144.c | } while (i < 2); | } while (i < 2); { extern void port_ws_overhead_map(void *, int, int); port_ws_overhead_map(o, 2, 0); }
+#
 # --widescreen: the wrapping parallax backdrop columns of AREA01 / AREA09 repeat one period (512 columns) left and right
 # (port2/runtime/main0_handwritten.c port_ws_backdrop_period / port_ws_cat7; identity when off)
 src/drawCategory7Objects.c | drawObjectSprtWithMode(o); | { extern void port_ws_cat7(TObj *, void (*)(TObj *)); port_ws_cat7(o, drawObjectSprtWithMode); }

@@ -30,6 +30,17 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+0. **Widescreen top-down maps drawn whole (2026-11-12)**: in the overhead rooms (I0NFO Dwarf Village AREA02/19 s0,
+   I0NFO2 AREA05/08 s0/s2, AREA19 s2) the side strips past 4:3 filled in 32-px pieces as the camera moved (the user on
+   the AYN Thor, `--widescreen auto`). Cause: the background is a 384x288 window of the map picture uploaded to fixed
+   VRAM every frame, at most 32 px wider than 4:3 per side. Fix `runtime/ws_topdown.c` (fixes.txt hooks on the six
+   map draw functions, PAL/USA/JP): the windows left / right are uploaded into the same VRAM at marker packets inside
+   the ordering table (`shims/gpu.c` DrawOTag -> `port_ot_mark_fn`) and drawn, then the game's window put back; the
+   game's window is cut at the picture's edge (it showed the wrapped next row). Checked headless, soft renderer: all
+   seven sections at 16:9 and 21:9 (4:3 middle byte-identical to before in every frame, strips filled up to the
+   picture's edge, which stays black: the world ends there), AREA05 on GL (xvfb); no widescreen: frames identical.
+   Tunnels (I0NFO3 AREA02 s3) were already full width (3D blocks). Not checked: the device, USA/JP discs, `--fps`
+   visually (runs).
 0. **Proportional place names on the save list (default on, 2026-11-12)**: `runtime/mcprop.c` + port/fixes.txt hooks
    on `memCardDrawFileLocation` / `memCardDrawString` (PAL only): each glyph advances by its opaque width read from the
    font in VRAM + 1 px, the space 4 px (retail: 8-px cells). `--memcard-mono` restores the retail spacing,

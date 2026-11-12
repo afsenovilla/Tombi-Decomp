@@ -902,6 +902,7 @@ static void sky_grab(void) {
     be->vram_read(gs.x1, gs.y1, w, h);
     port_panel_sky_take(&vram[0][0], gs.x1, gs.y1, w, h);
 }
+void (*port_ot_mark_fn)(u32);       /* set by runtime/ws_topdown.c while --widescreen is on; 0 = no marker test */
 void DrawOTag(u32 *ot) {
     { extern const char *port_title_bg_path; if (port_title_bg_path && port_widescreen) ws_title_bg(ot); }
     u32 *p = ot; int n = 0, sky = port_panel_sky_req ? 1 : 0;
@@ -917,6 +918,8 @@ void DrawOTag(u32 *ot) {
             else if (len) sky++;
         }
         if (len) {
+            /* --widescreen top-down map (runtime/ws_topdown.c): a two-no-op marker packet runs its VRAM uploads here */
+            if (len == 2 && port_ot_mark_fn && p[1] == 0x00575354u) port_ot_mark_fn(p[2]);
             if (port_dump_packets && port_frame == port_dump_packets) {
                 port_printf("PK@%p", (void *)p);
                 for (u32 k = 1; k <= len; k++) port_printf(" %08x", p[k]);
