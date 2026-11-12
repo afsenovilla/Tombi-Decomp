@@ -296,6 +296,7 @@ int main(int argc, char **argv) {
     /* the bottom screen: the panel (runtime/panel.c) at the screen's own size, drawn by n3ds/pica_c3d.c; the game's
        NOW LOADING until gameplay, then status / events / map / items, by touch */
     args[n++] = "--second-screen"; args[n++] = "--panel-size"; args[n++] = "320x240";
+    args[n++] = "--hud-bottom";   /* (the game's HUD is the panel's status page: the top screen without it, as on a dual-screen Android) */
     /* (an Old 3DS: without the map tab, whose tiles are more than it has time for; the other tabs stay) */
     { bool n3 = false; APT_CheckNew3DS(&n3); if (!n3) args[n++] = "--panel-no-map"; }
     args[n++] = "--log-fps"; args[n++] = "--prompt-big"; args[n++] = "6";   /* (the button prompts: a round black button lit from the upper left, the letter white: shims/prompts.c) */                        /* a line a second in log.txt: where a frame's time goes on this console */
