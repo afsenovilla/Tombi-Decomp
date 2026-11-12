@@ -1402,6 +1402,13 @@ void port_st_stop(void) {
     if (st_active)
         port_printf("[port] st: stream stopped at frame %d: %d frames handed out in %d vblanks (%d sectors read, ring full on %d vblanks, mode %02x, %d/s)\n",
                     port_frame, st_handed, port_frame - st_start_vblank, st_lba - st_start_lba, st_full, cd_mode, (cd_mode & 0x80) ? 150 : 75);
+    if (st_active) {
+        extern unsigned long long port_mdec_us[2]; extern unsigned port_mdec_n[2];
+        const unsigned nf = port_mdec_n[0] ? port_mdec_n[0] : 1;
+        port_printf("[port] st: decoding: %u frames, ms each: %llu.%llu the codes (DecDCTvlc), %llu.%llu the pictures (%u words)\n", port_mdec_n[0],
+                    port_mdec_us[0] / nf / 1000, port_mdec_us[0] / nf / 100 % 10, port_mdec_us[1] / nf / 1000, port_mdec_us[1] / nf / 100 % 10, port_mdec_n[1] / nf);
+        port_mdec_us[0] = port_mdec_us[1] = 0; port_mdec_n[0] = port_mdec_n[1] = 0;
+    }
     st_active = 0; port_sound_xa_end();
 }
 static void st_stop(void) { port_st_stop(); }

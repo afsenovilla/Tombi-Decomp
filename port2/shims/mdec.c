@@ -211,7 +211,16 @@ static int vlc_block(BR *b, int ver, int chroma, int *dc_pred, int q, u16 **out,
     *o++ = 0xFE00; *out = o;
     return 1;
 }
+/* (a movie's time by stage, logged when its stream stops: psyq.c) */
+unsigned long long port_mdec_us[2]; unsigned port_mdec_n[2];   /* [0] DecDCTvlc, [1] the macroblocks of DecDCTout */
+extern unsigned long long port_time_us(void);
+static void vlc_run(u32 *bs, u32 *buf);
 void DecDCTvlc(u32 *bs, u32 *buf) {
+    unsigned long long t0 = port_time_us();
+    vlc_run(bs, buf);
+    port_mdec_us[0] += port_time_us() - t0; port_mdec_n[0]++;
+}
+static void vlc_run(u32 *bs, u32 *buf) {
     tables_init();
     const u16 *h = (const u16 *)bs;
     int nwords = h[0], q = h[2] & 0x3F, ver = h[3];
@@ -426,7 +435,7 @@ static void decode_words(u32 *buf, int n) {
 void DecDCTout(u32 *buf, int n) {
     if (in_cb) { pending_buf = buf; pending_n = n; have_pending = 1; return; }
     for (;;) {
-        decode_words(buf, n);
+        { unsigned long long t0 = port_time_us(); decode_words(buf, n); port_mdec_us[1] += port_time_us() - t0; port_mdec_n[1] += (unsigned)n; }
         if (!out_cb) return;
         in_cb = 1; have_pending = 0;
         out_cb();
