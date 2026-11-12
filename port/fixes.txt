@@ -476,6 +476,9 @@ src/x010/updateSolidScenery.c |         o->d8c = o->animFrame << 4; |         o-
 src/x010/updateAnimDecorSprite.c |         *(signed char *)&o->b0f = 4; |         *(signed char *)&o->b0f = 4; { extern void port_funga_npc_init(void *); port_funga_npc_init(o); }
 src/x010/updateAnimDecorSprite.c |             AnimAdvance(o); |             { extern int port_funga_npc_step(void *); if (!port_funga_npc_step(o)) AnimAdvance(o); }
 src/x010/updateAreaMechanisms.c |         ObjCullRegister(o); |         ObjCullRegister(o); { extern void port_funga_gate(void *, int); extern TObj PLAYER; port_funga_gate(o, PLAYER.h->p.whole); }
+# and a back lane along the drums' row (runtime/funga.c back_lane: a copy of the WHM with a fourth plane, put in slot 0):
+# the plane cap of the section (2) is lifted to 3 for that copy only
+src/getCollisionPlaneAt.c |     { unsigned char *q = D_8007B55C[M960]; lim = q[GAME.selectedSection]; } |     { unsigned char *q = D_8007B55C[M960]; lim = q[GAME.selectedSection]; } { extern unsigned char port_funga_whm[]; if (b == (char *)port_funga_whm) lim = 3; }
 src/a00Variant0EventScene.c | GAME_AREA00_EVENT_CONTROL |= 0x28; | { extern int port_cut_content, port_cc_boatman; if ((port_cut_content & 1) && port_cc_boatman < 3) { PLAYER_MESSAGE_BOX->b04 = 3; PLAYER_MESSAGE_BOX = showMessageBox(7, 3 + port_cc_boatman++, 0x120, 0x6c); break; } } GAME_AREA00_EVENT_CONTROL |= 0x28;
 src/a00Variant0EventScene.c | o->w08 = 100; | o->w08 = 100; { extern int port_cc_boatman; port_cc_boatman = 0; }
 # 2) AREA03 letter (MFNT030 #208 = sign text (1,1), no sign shows it): next to the save-point sign of Phoenix Mountain

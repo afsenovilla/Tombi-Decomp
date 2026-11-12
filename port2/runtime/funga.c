@@ -12,6 +12,7 @@
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned int u32; typedef short s16; typedef int s32; typedef signed char s8;
 
 extern int port_cut_content;
+extern int port_printf(const char *, ...);
 extern int rsin(int), rcos(int);
 
 /* the room's copy of the gate block (WMD in end space = world here: no mirroring) */
@@ -46,6 +47,7 @@ void port_funga_room(const u8 *tbl, int area, int section)
 
 static void spawn_npcs(void);
 static void hold_fungas(void);
+static void back_lane(void);
 /* the gate object, every update (after ObjCullRegister): opens once Tombi is past x 1088 (200 units before it) */
 void port_funga_gate(u8 *o, int player_x)
 {
@@ -55,6 +57,7 @@ void port_funga_gate(u8 *o, int player_x)
     s32 *rot = (s32 *)(o + 0x88);
     if (bx == 0x7fff || (*rot == 0 && (*x != bx || *z != bz))) { bx = *x; bz = *z; }   /* (a new spawn: its own place) */
     if (!o[0x91]) { o[0x91] = 1; spawn_npcs(); }
+    back_lane();
     hold_fungas();   /* once per gate object = once per section load (objects start zeroed) */
     if (o[0x0A] == 0x10) o[0x0A] = 0x11;           /* the model drawer that applies the rotation (+0x84/+0x88/+0x8C) */
     if (*rot < 0x400 && (*rot || player_x > 1088)) *rot += 0x20;
@@ -74,7 +77,6 @@ void port_funga_gate(u8 *o, int player_x)
 #include <stdio.h>
 #include <stdlib.h>
 extern const char *port_data_dir;
-extern int port_printf(const char *, ...);
 extern void lzDecompress(unsigned char *, unsigned char *);
 extern void AnimLoadDuration(void *);
 extern void spawnObjectFromRecord(void *, int);
@@ -146,7 +148,7 @@ static void spawn_npcs(void)
        SPR table 0x37 = SPR_DATA[7]; section 2 leaves that slot empty, so it points at the table read above */
     extern char *SPR_DATA[];
     SPR_DATA[7] = (char *)chief_tbl;
-    static const s16 FX[3] = {1401, 1501, 1690}, FZ[3] = {271, 286, 281};   /* on three back-row drums */
+    static const s16 FX[3] = {1353, 1741, 1788}, FZ[3] = {258, 271, 258};   /* on the outer back-row drums (the middle ones and the stand are the back lane's path) */
     static const u8 FST[3] = {0, 1, 0};
     for (int i = 0; i < 3; i++) {
         memset(rec, 0, sizeof rec);
@@ -161,7 +163,7 @@ static void spawn_npcs(void)
    70 frames, the three out of step (their own jump only comes when they attack) */
 static void hold_fungas(void)
 {
-    static const s16 FX[3] = {1401, 1501, 1690};
+    static const s16 FX[3] = {1353, 1741, 1788};
     for (int i = 0; i < 3; i++) {
         u8 *o = fungas[i];
         if (!o || o[0] == 0 || o[2] != 0x3A) { fungas[i] = 0; continue; }
@@ -228,4 +230,88 @@ int port_funga_npc_step(u8 *o)
     int k = *t / 8 % 4;
     show(o, k, WALK[k]);
     return 1;
+}
+
+/* ---- the back lane: the drums' row (z 258..286) and the straw-roofed stand (x 1526..1618, top y -232, z 212..298).
+   The section's WHM (AREA10 load list 3, D204.GAM) has 3 planes; Tombi walks on plane 2 (z 180; plane = z / 90, origin 0,
+   capped at 2 for this section, so anything deeper reads plane 2 too).  The game's own lane moves work off the floor's
+   surface bits (applyCollisionTileResponse -> +A0): 0x2000 lets Up+Cross start playerStepLaneShiftFall (step 0x11,
+   +90 depth while 1F8001C8 bit 0 is clear, as here: into the background), 0x1000 lets Down+Cross start
+   playerStepLaneJump (step 0x12, -90: towards the camera); the section's own pier at x 352..384 uses both.  Here a copy
+   of the WHM gets a fourth plane (z 270..359): the ground of plane 2 from the palisade (x 1336) on, a wall at its left
+   end and the stand's top; its floors carry 0x1000 (back to the front with Down+Cross); the front floors in front of the
+   stand (x 1528..1615) carry 0x2000.  The copy replaces WHM slot 0 (1F800308) whenever the slot holds this section's WHM (each load), and
+   getCollisionPlaneAt lifts the plane cap to 3 only for this copy (port/fixes.txt).  The drums' solid box takes
+   |dz| < 45, so the back-row drums are solid in the back lane only. */
+u8 port_funga_whm[40000];
+#define BACK_X0 1336
+#define STAND_X0 1528
+#define STAND_X1 1616
+#define STAND_Y (-232)
+static void back_lane(void)
+{
+    extern char *WHM_DATA[];
+    const u8 *s = (const u8 *)WHM_DATA[0];
+    u8 *d = port_funga_whm;
+    if (!s || s == d) return;
+    u16 w, o0, o1, o2;
+    memcpy(&w, s + 4, 2); memcpy(&o0, s + 8, 2); memcpy(&o1, s + 10, 2); memcpy(&o2, s + 12, 2);
+    if (s[0] != 0x11 || s[1] != 3 || w != 6400 || o0 != 14) return;
+    /* size of the original: the end of the last list of plane 2 (the highest offset reached) */
+    u32 end = 0;
+    for (int pl = 0; pl < 3; pl++) {
+        u16 po; memcpy(&po, s + 8 + 2 * pl, 2);
+        for (int c = 0; c < w / 8; c++) {
+            u16 co, n; memcpy(&co, s + po + 2 * c, 2); memcpy(&n, s + po + co, 2);
+            u32 e = (u32)po + co + 2 + 8u * n;
+            if (e > end) end = e;
+        }
+    }
+    if (end + 2 + (w / 8) * 4u > sizeof port_funga_whm) { port_printf("funga: WHM copy too small\n"); return; }
+    /* header with 4 plane offsets, planes 0..2 moved up by 2 bytes (their own offsets are relative to the plane) */
+    memcpy(d, s, 8);
+    d[1] = 4;
+    memcpy(d + 16, s + 14, end - 14);
+    u16 po[4] = {(u16)(o0 + 2), (u16)(o1 + 2), (u16)(o2 + 2), (u16)((end + 2 + 1) & ~1u)};
+    memcpy(d + 8, po, 8);
+    u8 *p2 = d + po[2], *p3 = d + po[3];
+    /* the front: Up+Cross into the back lane in front of the stand (the one stretch of the back row without drums:
+       landing on a drum's side would push Tombi out sideways, into the Fungas) */
+    for (int c = STAND_X0 / 8; c < STAND_X1 / 8; c++) {
+        u16 co, n; memcpy(&co, p2 + 2 * c, 2); memcpy(&n, p2 + co, 2);
+        for (int k = 0; k < n; k++) {
+            u8 *r = p2 + co + 2 + 8 * k;
+            u16 a; memcpy(&a, r, 2);
+            if (a == 1) { a = 0x2001; memcpy(r, &a, 2); }
+        }
+    }
+    /* the back plane: column offsets, then one list per column */
+    u32 q = (w / 8) * 2u;
+    for (int c = 0; c < w / 8; c++) {
+        u16 qq = (u16)q, n = 0;
+        memcpy(p3 + 2 * c, &qq, 2);
+        u8 *l = p3 + q + 2;
+        if (c * 8 >= BACK_X0 - 8) {
+            u16 co, m; memcpy(&co, p2 + 2 * c, 2); memcpy(&m, p2 + co, 2);
+            if (l + 8 * (m + 3) > port_funga_whm + sizeof port_funga_whm) { port_printf("funga: WHM copy too small\n"); return; }
+            if (c * 8 == BACK_X0 - 8) {   /* a wall that pushes right at x BACK_X0 - 1 */
+                static const s16 wall[4] = {0x0008, -100, -300, 0x0007};
+                memcpy(l + 8 * n++, wall, 8);
+            }
+            for (int k = 0; k < m; k++) {
+                u8 *r = l + 8 * n++;
+                memcpy(r, p2 + co + 2 + 8 * k, 8);
+                u16 a; memcpy(&a, r, 2);
+                if (a == 0x2001 || a == 1) { a = 0x1001; memcpy(r, &a, 2); }
+            }
+            if (c * 8 >= STAND_X0 && c * 8 < STAND_X1) {
+                static const s16 top[4] = {0x1001, STAND_Y, 0, 0x0080};
+                memcpy(l + 8 * n++, top, 8);
+            }
+        }
+        memcpy(p3 + q, &n, 2);
+        q += 2 + 8u * n;
+    }
+    WHM_DATA[0] = (char *)d;
+    port_printf("funga: back lane WHM installed (%u bytes)\n", po[3] + q);
 }

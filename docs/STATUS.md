@@ -39,6 +39,14 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
    those are the lintel over the gap (swinging them broke the top, reverted).  Drums: updateSolidScenery subtypes
    13..21 get no box (not solid) -> subtype 0, the springy drum; only the front one (x 1808) is on the path, the rest
    and the straw stand stand in the back row (z 258..286), off the single walking line (WHM plane 2 only).
+   Back lane (runtime/funga.c back_lane): a copy of the WHM with a 4th plane (z 270..359, the plane cap lifted to 3 for
+   the copy only in getCollisionPlaneAt) replaces WHM slot 0 on each load: ground from x 1336 (wall at its left end),
+   the stand's top (x 1528..1615, y -232) as a one-way floor.  The game's own lane moves: floor bit 0x2000 = Up+Cross
+   -> step 0x11 (+90 depth, into the background here), 0x1000 = Down+Cross -> step 0x12 (-90, to the front); the
+   section's pier at x 352..384 uses both.  Front floors in front of the stand carry 0x2000, every back-lane floor
+   0x1000.  Drum boxes take |dz| < 45: solid in the back lane only.  Fungas moved to drums 1353/1741/1788 (the middle
+   drums and the stand are the back lane's path).  Verified headless: into the back lane at x 1563, jump onto the
+   stand top, walk off onto drum 1643 / 1501 and bounce back up, Down+Cross back to the front; normal game unchanged.
    Next: the Funga Chief and Fungas.  Their sprites are SPR table 0x37 (SPR_DATA[7], frames 31, 47-58 chief, 59+ Fungas,
    docs/CONTENIDO_RECORTADO.md "Jungla"), loaded only by AREA10 lists 1 and 5 (sections 0/4: the 0x37 piece of the
    LD0SYS stream after D005.GAM); section 2 (list 3) has slot 7 empty, so the table has to be loaded there too; no
