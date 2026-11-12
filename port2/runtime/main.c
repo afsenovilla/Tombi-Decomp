@@ -49,6 +49,7 @@ void port_printf(const char *fmt, ...) {
     } else { vfprintf(stderr, fmt, ap); fflush(stderr); }
     va_end(ap);
 }
+int port_audio_main;   /* --audio-main (3DS): the sound is mixed in the device's callback, on the game's core, not by a thread on the second (runtime/sdl.c) */
 int port_exit_status = -1;   /* what port_fatal / port_quit exit with (android/loader.c reads it in its atexit handler) */
 static void exit_h(void *u) { (void)u; exit(1); }
 void port_fatal(const char *fmt, ...) {
@@ -979,6 +980,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(a, "--panel-size") && v) { extern void port_panel_size(int, int); int w = 0, h = 0; sscanf(argv[++i], "%dx%d", &w, &h); port_panel_size(w, h); }
         else if (!strcmp(a, "--title-debug")) port_title_debug = 1;   /* title carousel DEBUG entry: the area select */
         else if (!strcmp(a, "--prompt-big")) { extern int port_prompt_big; port_prompt_big = i + 1 < argc && argv[i + 1][0] >= '1' && argv[i + 1][0] <= '6' && !argv[i + 1][1] ? atoi(argv[++i]) : 1; }   /* bold 8 x 10 letters on the button prompts (shims/prompts.c) */
+        else if (!strcmp(a, "--audio-main")) port_audio_main = 1;   /* 3DS: no mixer thread on the second core (runtime/sdl.c) */
         else if (!strcmp(a, "--panel-no-map")) { extern int port_panel_no_map; port_panel_no_map = 1; }   /* the second-screen panel without its map tab (runtime/panel.c) */
         else if (!strcmp(a, "--launcher-exit")) port_launcher_exit = 1;   /* QUIT entries (title, pause menu): back to the launcher */
         else if (!strcmp(a, "--civ-route")) {

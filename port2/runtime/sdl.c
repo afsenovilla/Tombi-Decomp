@@ -129,9 +129,12 @@ void port_window_start(void) {
 #ifdef __3DS__
     {   /* an Old 3DS (--audio-half): the mixer on its own thread on the second core (shims/sound.c, n3ds/pica_c3d.c) */
         extern int port_sound_half; extern void port_sound_mixer_run(void); extern int port_n3ds_thread_core1(void (*)(void));
-        /* (not started: with the second core's share raised for it the system's own services there, the SD card and
-           the GPU's, starved: loads took seconds.  The callback mixes, on the game's core, with the cheaper mixer.) */
-        if (0 && dev && port_sound_half) port_n3ds_thread_core1(port_sound_mixer_run);
+        /* (with the second core's share raised to 80 % for it the system's own services there, the SD card and the
+           GPU's, starved: loads took seconds.  At 30 %, the share the panel's worker runs with, the mixer's 3.5 ms
+           of every 20 fit, and they are a sixth of what the game's core has; if the thread falls behind, the
+           callback takes the mixing back (shims/sound.c).  --audio-main: no thread.) */
+        extern int port_audio_main;
+        if (dev && port_sound_half && !port_audio_main) port_n3ds_thread_core1(port_sound_mixer_run);
     }
 #endif
     if (dev) { port_sound_pulled(1); SDL_PauseAudioDevice(dev, 0); }

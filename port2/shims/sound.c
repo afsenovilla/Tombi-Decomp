@@ -958,17 +958,20 @@ static unsigned long long ring_under;               /* frames the callback found
 unsigned long long port_sound_underruns(void) { unsigned long long n = ring_under; ring_under = 0; return n; }
 void port_sound_mixer_run(void) {                   /* (never returns) */
     extern void port_sleep_us(unsigned long long);
-    static s16 piece[2 * 128];
+    static s16 piece[2 * 64];
     mixer_thread = 1;
     for (;;) {
-        if (ring_w - ring_r > 1024u) { port_sleep_us(2000); continue; }   /* (~46 ms ahead at 22050 Hz) */
+        if (!mixer_thread) { port_sleep_us(200000); continue; }           /* (given up: the callback mixes, port_sound_pull) */
+        if (ring_w - ring_r > 1536u) { port_sleep_us(2000); continue; }   /* (~70 ms ahead at 22050 Hz) */
+        /* (short pieces: the lock is the game thread's too, and this core gives the program a share of its time,
+           so a piece's hold can last several times its own work) */
         LOCK();
-        render(piece, 128);
+        if (mixer_thread) render(piece, 64);
+        { extern void port_audio_yield(void); port_audio_yield(); }   /* (the game thread first, if it waits for the lock: the lock is held here, as in the callback) */
         UNLOCK();
         unsigned w = ring_w;
-        for (int i = 0; i < 128; i++) { ring[2 * ((w + i) & (RING - 1))] = piece[2 * i]; ring[2 * ((w + i) & (RING - 1)) + 1] = piece[2 * i + 1]; }
-        ring_w = w + 128;
-        port_sleep_us(100);                         /* (the game thread may be waiting for the lock) */
+        for (int i = 0; i < 64; i++) { ring[2 * ((w + i) & (RING - 1))] = piece[2 * i]; ring[2 * ((w + i) & (RING - 1)) + 1] = piece[2 * i + 1]; }
+        ring_w = w + 64;
     }
 }
 int port_sound_pull(short *dst, int frames) {       /* the audio device's callback (holds the device lock) */
@@ -980,6 +983,16 @@ int port_sound_pull(short *dst, int frames) {       /* the audio device's callba
         for (unsigned i = 0; i < n; i++) { dst[2 * i] = ring[2 * ((r + i) & (RING - 1))]; dst[2 * i + 1] = ring[2 * ((r + i) & (RING - 1)) + 1]; }
         ring_r = r + n;
         if (n < (unsigned)frames) { memset(dst + 2 * n, 0, (size_t)(frames - (int)n) * 4); ring_under += (unsigned)frames - n; }
+        {   /* the thread cannot keep up (its core's share is the system's to give): after three seconds in a row with
+               more than a twentieth of the samples missing the callback mixes again, as without the thread */
+            static unsigned asked, missing, bad;
+            asked += (unsigned)frames; missing += (unsigned)frames - n;
+            if (asked >= 22050u) {
+                bad = missing * 20u > asked && ring_w > 44100u ? bad + 1 : 0;   /* (not while the ring first fills) */
+                asked = missing = 0;
+                if (bad >= 3) { mixer_thread = 0; port_printf("[port] sound: the mixer thread fell behind: the device's callback mixes again\n"); }
+            }
+        }
         port_prof_sound_us += port_time_us() - t0;
         return frames;
     }

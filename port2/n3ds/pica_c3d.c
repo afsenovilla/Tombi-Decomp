@@ -677,7 +677,7 @@ static void (*c1_fn)(void);
 static void c1_main(void *arg) { (void)arg; c1_fn(); }
 int port_n3ds_thread_core1(void (*fn)(void)) {
     s32 prio = 0x30; svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
-    APT_SetAppCpuTimeLimit(80);
+    APT_SetAppCpuTimeLimit(30);   /* (the share the panel's worker has run with; 80 starved the system's services) */
     c1_fn = fn;
     Thread t = threadCreate(c1_main, 0, 64 * 1024, prio, 1, false);
     port_printf("[3ds] sound mixer thread on core 1: %s\n", t ? "started" : "none (the callback mixes)");
