@@ -30,6 +30,19 @@ draft cleared HUD_STATE+0x74..0x76 (past the 0x68-byte HUD state) where the game
 
 ## In progress / open
 
+-2. **WIP (owner's request): restore the Funga Chief's cut event** on the Funga stage (`--cut-content=funga`, AREA10 s2,
+   chief already walking there: runtime/funga.c).  What survives (docs/CUT_CONTENT.md "Jungle (AREA10)", "Funga Chief"):
+   the judgement dialogue MFNT100S group 2 dx 11-18 (PAL #222-#229: "It's you! Our friend!...", "If I had a **Funga
+   drum** I would dance", "You may go!", "You hurt my friends!... I'll look into your fate... Fungaaa! Hongaaa!",
+   "You were good, I forgive you", "You were wicked! You'll pay!"; dx 14 / 18 are the same speeches in Masakari
+   gibberish, shown before Tombi understands the language), no code calls them; JP X10 event titles 59 (the chief's
+   request), 60 (soak up words II), 61 (Masakari secret), 184 ("Am I a bad kid?": the fate check), 186 (Masakari
+   village?); unused items Funga Leather / Tree / Sap (119/122/123, "drum material"), Small Drum (137), Funga Drum
+   (125), Chief's Spear (140); the chief's sprite (talk / point / sit / stand frames on page 3).  To design: talking
+   to the chief (playerTryTalkToNpc), which speech (friend vs. "you hurt my friends" by whether Tombi hit the spear
+   Fungas, then the fate check by event 184 or AP), the drum request (bring materials -> Funga drum -> he dances),
+   the event start/complete with titles 59/184, the reward.  Not started.
+
 -1. **In progress: AREA10 section 2 (Old Tree Hill) unused Funga area (`--cut-content=funga`, bit 64).**  Done: the
    camera's right bound (SECTION_CAMERA_BOUNDS 220..1038, read by initSectionCamera) goes to 1680, so Tombi walks past
    the gate to x 1904 (the WHM ground already runs to 1920; the drums are updateSolidScenery objects already placed);
